@@ -1,0 +1,32 @@
+BnfFile:BrokenAttr.bnf
+  BNF_ATTRS
+    PsiElement({)('{')
+    PsiWhiteSpace('\n    ')
+    BNF_ATTR:a
+      PsiElement(id)('a')
+      PsiElement(=)('=')
+      BNF_ATTR_VALUE
+        BNF_STRING_LITERAL_EXPRESSION
+          PsiElement(string)('"111"')
+    PsiWhiteSpace('\n    ')
+    BNF_ATTR:b
+      PsiElement(id)('b')
+      PsiElement(=)('=')
+      BNF_ATTR_VALUE
+        BNF_STRING_LITERAL_EXPRESSION
+          PsiElement(string)('"222"')
+    PsiWhiteSpace('\n    ')
+    BNF_ATTR:miss
+      PsiElement(id)('miss')
+      PsiElement(=)('=')
+    PsiErrorElement:'id' expected, got 'next'
+      <empty list>
+    PsiWhiteSpace('\n    ')
+    BNF_ATTR:next
+      PsiElement(id)('next')
+      PsiElement(=)('=')
+      BNF_ATTR_VALUE
+        BNF_STRING_LITERAL_EXPRESSION
+          PsiElement(string)('"111"')
+    PsiWhiteSpace('\n')
+    PsiElement(})('}')

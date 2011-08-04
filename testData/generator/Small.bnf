@@ -1,0 +1,12 @@
+{
+  maxRecursionLevel=100
+  parserClass="Small"
+  generatePsi=false
+  stubParserClass="org.intellij.grammar.parser.GeneratedParserUtilBase"
+}
+
+external wrapped root ::= parseRoot statement
+statement ::= token | someRule | otherRule | privateRule
+someRule::= token
+otherRule::= ( token )
+private privateRule::= token

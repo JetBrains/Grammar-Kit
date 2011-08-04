@@ -1,0 +1,21 @@
+{
+  maxRecursionLevel=100
+  parserClass="Autopin"
+  generatePsi=false
+  stubParserClass="org.intellij.grammar.parser.GeneratedParserUtilBase"
+
+  extends(".*_statement")="statement"
+  pin("create_.*_statement")=".*_ref"
+  pin("drop_.*_statement")=".*_ref"
+}
+
+root ::= statement *
+
+external table_ref ::= parseReference
+
+statement ::= create_statement | drop_statement
+create_statement ::= create_table_statement
+create_table_statement ::= CREATE TEMP? (GLOBAL|LOCAL) TABLE table_ref '(' ')'
+
+drop_statement ::= drop_table_statement
+drop_table_statement ::= DROP TABLE table_ref

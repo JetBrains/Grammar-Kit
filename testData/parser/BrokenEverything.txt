@@ -1,0 +1,34 @@
+BnfFile:BrokenEverything.bnf
+  BNF_ATTRS
+    PsiElement({)('{')
+    PsiWhiteSpace('\n')
+    BNF_ATTR:a
+      PsiElement(id)('a')
+      PsiWhiteSpace(' ')
+      PsiElement(=)('=')
+      PsiWhiteSpace(' ')
+      PsiErrorElement:'id', 'string' or 'number' expected, got '='
+        PsiElement(=)('=')
+    PsiWhiteSpace('\n')
+    BNF_ATTR:a
+      PsiElement(id)('a')
+      PsiWhiteSpace(' ')
+      PsiElement(=)('=')
+    PsiErrorElement:'id' expected, got 'a'
+      <empty list>
+    PsiWhiteSpace('\n\n')
+    BNF_ATTR:a
+      PsiElement(id)('a')
+      PsiWhiteSpace(' ')
+      PsiElement(=)('=')
+      PsiWhiteSpace(' ')
+      BNF_ATTR_VALUE
+        BNF_REFERENCE_OR_TOKEN
+          PsiElement(id)('sdfdss')
+    PsiWhiteSpace('\n')
+    PsiElement(})('}')
+  PsiWhiteSpace('\n\n')
+  PsiElement(id)('a')
+  PsiWhiteSpace(' ')
+  PsiElement(BAD_CHARACTER)(':')
+  PsiElement(BAD_CHARACTER)(':')

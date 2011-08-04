@@ -1,0 +1,10 @@
+Grammar-Kit plugin
+
+1.0
+Adds to IntelliJ IDEA Platform support for our custom variant of BNF grammar files such as:
+- Highlighting
+- Completion
+- Navigation
+
+including:
+- PsiBuilder-based PEG parser and PSI hierarchy generation

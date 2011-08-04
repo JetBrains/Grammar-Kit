@@ -1,0 +1,123 @@
+/*
+ * Copyright 2000-2011 Gregory Shrago
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.intellij.grammar.psi;
+
+import com.intellij.lang.ASTNode;
+import com.intellij.psi.PsiElement;
+import com.intellij.psi.tree.IElementType;
+import org.intellij.grammar.psi.impl.*;
+
+public interface BnfTypes {
+
+  IElementType BNF_ATTR = new BnfCompositeElementType("BNF_ATTR");
+  IElementType BNF_ATTR_PATTERN = new BnfCompositeElementType("BNF_ATTR_PATTERN");
+  IElementType BNF_ATTR_VALUE = new BnfCompositeElementType("BNF_ATTR_VALUE");
+  IElementType BNF_ATTRS = new BnfCompositeElementType("BNF_ATTRS");
+  IElementType BNF_CHOICE = new BnfCompositeElementType("BNF_CHOICE");
+  IElementType BNF_EXPRESSION = new BnfCompositeElementType("BNF_EXPRESSION");
+  IElementType BNF_LITERAL_EXPRESSION = new BnfCompositeElementType("BNF_LITERAL_EXPRESSION");
+  IElementType BNF_MODIFIER = new BnfCompositeElementType("BNF_MODIFIER");
+  IElementType BNF_PAREN_CHOICE_EXPRESSION = new BnfCompositeElementType("BNF_PAREN_CHOICE_EXPRESSION");
+  IElementType BNF_PAREN_EXPRESSION = new BnfCompositeElementType("BNF_PAREN_EXPRESSION");
+  IElementType BNF_PREDICATE = new BnfCompositeElementType("BNF_PREDICATE");
+  IElementType BNF_PREDICATE_SIGN = new BnfCompositeElementType("BNF_PREDICATE_SIGN");
+  IElementType BNF_QUANTIFIED = new BnfCompositeElementType("BNF_QUANTIFIED");
+  IElementType BNF_QUANTIFIER = new BnfCompositeElementType("BNF_QUANTIFIER");
+  IElementType BNF_REFERENCE_OR_TOKEN = new BnfCompositeElementType("BNF_REFERENCE_OR_TOKEN");
+  IElementType BNF_RULE = new BnfCompositeElementType("BNF_RULE");
+  IElementType BNF_SEQUENCE = new BnfCompositeElementType("BNF_SEQUENCE");
+  IElementType BNF_STRING_LITERAL_EXPRESSION = new BnfCompositeElementType("BNF_STRING_LITERAL_EXPRESSION");
+
+  IElementType BNF_LEFT_BRACE = new BnfTokenType("{");
+  IElementType BNF_LEFT_BRACKET = new BnfTokenType("[");
+  IElementType BNF_LEFT_PAREN = new BnfTokenType("(");
+  IElementType BNF_OP_AND = new BnfTokenType("&");
+  IElementType BNF_OP_EQ = new BnfTokenType("=");
+  IElementType BNF_OP_IS = new BnfTokenType("::=");
+  IElementType BNF_OP_NOT = new BnfTokenType("!");
+  IElementType BNF_OP_ONEMORE = new BnfTokenType("+");
+  IElementType BNF_OP_OPT = new BnfTokenType("?");
+  IElementType BNF_OP_OR = new BnfTokenType("|");
+  IElementType BNF_OP_ZEROMORE = new BnfTokenType("*");
+  IElementType BNF_RIGHT_BRACE = new BnfTokenType("}");
+  IElementType BNF_RIGHT_BRACKET = new BnfTokenType("]");
+  IElementType BNF_RIGHT_PAREN = new BnfTokenType(")");
+  IElementType BNF_SEMICOLON = new BnfTokenType(";");
+  IElementType BNF_ID = new BnfTokenType("id");
+  IElementType BNF_NUMBER = new BnfTokenType("number");
+  IElementType BNF_STRING = new BnfTokenType("string");
+
+  class Factory {
+    public static PsiElement createElement(ASTNode node) {
+      IElementType type = node.getElementType();
+       if (type == BNF_ATTR) {
+        return new BnfAttrImpl(node);
+      }
+      else  if (type == BNF_ATTR_PATTERN) {
+        return new BnfAttrPatternImpl(node);
+      }
+      else  if (type == BNF_ATTR_VALUE) {
+        return new BnfAttrValueImpl(node);
+      }
+      else  if (type == BNF_ATTRS) {
+        return new BnfAttrsImpl(node);
+      }
+      else  if (type == BNF_CHOICE) {
+        return new BnfChoiceImpl(node);
+      }
+      else  if (type == BNF_EXPRESSION) {
+        return new BnfExpressionImpl(node);
+      }
+      else  if (type == BNF_LITERAL_EXPRESSION) {
+        return new BnfLiteralExpressionImpl(node);
+      }
+      else  if (type == BNF_MODIFIER) {
+        return new BnfModifierImpl(node);
+      }
+      else  if (type == BNF_PAREN_CHOICE_EXPRESSION) {
+        return new BnfParenChoiceExpressionImpl(node);
+      }
+      else  if (type == BNF_PAREN_EXPRESSION) {
+        return new BnfParenExpressionImpl(node);
+      }
+      else  if (type == BNF_PREDICATE) {
+        return new BnfPredicateImpl(node);
+      }
+      else  if (type == BNF_PREDICATE_SIGN) {
+        return new BnfPredicateSignImpl(node);
+      }
+      else  if (type == BNF_QUANTIFIED) {
+        return new BnfQuantifiedImpl(node);
+      }
+      else  if (type == BNF_QUANTIFIER) {
+        return new BnfQuantifierImpl(node);
+      }
+      else  if (type == BNF_REFERENCE_OR_TOKEN) {
+        return new BnfReferenceOrTokenImpl(node);
+      }
+      else  if (type == BNF_RULE) {
+        return new BnfRuleImpl(node);
+      }
+      else  if (type == BNF_SEQUENCE) {
+        return new BnfSequenceImpl(node);
+      }
+      else  if (type == BNF_STRING_LITERAL_EXPRESSION) {
+        return new BnfStringLiteralExpressionImpl(node);
+      }
+      throw new AssertionError("Unknown element type: " + type);
+    }
+  }
+}

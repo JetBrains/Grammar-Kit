@@ -1,0 +1,47 @@
+<idea-plugin url="https://github.com/gregsh/Grammar-Kit" version="2">
+  <id>org.jetbrains.idea.grammar</id>
+  <version>1.0</version>
+  <vendor email="gregory.shrago@jetbrains.com" logo="">Gregory Shrago</vendor>
+
+  <name>Grammar-Kit</name>
+  <description>Edit, manipulate and analyze BNF grammars and generate parser/PSI code</description>
+  <change-notes>
+    <![CDATA[
+    <p>1.0:</p>
+    <ul>
+        <li>Simple unused rules highlighting</li>
+        <li>Rename refactoring, rules & attributes find usages, quick structure view</li>
+        <li>PsiBuilder-based PEG parser & PSI class hierarchy generation</li>
+        <li>BNF files editing, highlighting, navigation and rule name completion</li>
+    </ul>
+    ]]>
+  </change-notes>
+
+  <extensions defaultExtensionNs="com.intellij">
+    <errorHandler implementation="com.intellij.diagnostic.ITNReporter"/>
+
+    <fileTypeFactory implementation="org.intellij.grammar.BnfFileTypeFactory"/>
+    <lang.parserDefinition language="BNF" implementationClass="org.intellij.grammar.BnfParserDefinition"/>
+    <annotator language="BNF" implementationClass="org.intellij.grammar.BnfAnnotator"/>
+    <lang.syntaxHighlighterFactory key="BNF" implementationClass="org.intellij.grammar.BnfSyntaxHighlighterFactory"/>
+    <elementDescriptionProvider implementation="org.intellij.grammar.BnfDescriptionProvider"/>
+    <lang.findUsagesProvider language="BNF" implementationClass="org.intellij.grammar.BnfFindUsagesProvider"/>
+    <lang.braceMatcher language="BNF" implementationClass="org.intellij.grammar.BnfBraceMatcher"/>
+    <lang.psiStructureViewFactory language="BNF" implementationClass="org.intellij.grammar.BnfStructureViewFactory"/>
+    <lang.commenter language="BNF" implementationClass="org.intellij.grammar.BnfCommenter"/>
+  </extensions>
+  <project-components>
+    <component>
+      <implementation-class>org.intellij.grammar.BnfUnusedRulePassFactory</implementation-class>
+      <skipForDefaultProject/>
+    </component>
+  </project-components>
+  <actions>
+    <action id="grammar.Generate" class="org.intellij.grammar.actions.GenerateAction" text="Generate Parser Code">
+      <add-to-group group-id="ToolsMenu" anchor="before" relative-to-action="com.intellij.tools.ExternalToolsGroup"/>
+      <add-to-group group-id="EditorPopupMenu" anchor="last"/>
+      <add-to-group group-id="ProjectViewPopupMenu" anchor="last"/>
+      <keyboard-shortcut keymap="$default" first-keystroke="control shift G"/>
+    </action>
+  </actions>
+</idea-plugin>

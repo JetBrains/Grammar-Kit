@@ -157,11 +157,15 @@ public class GeneratedParserUtilBase {
             ((PsiBuilder.Marker)latestDoneMarker).drop();
           }
           try {
-            PsiBuilder.Marker mark = builder_.mark();
             String tokenText = builder_.getTokenText();
             String expectedText = state.getExpectedText(builder_);
-            builder_.advanceLexer();
-            mark.error(expectedText + "got '" + tokenText + "'");
+            PsiBuilder.Marker mark = builder_.mark();
+            try {
+              builder_.advanceLexer();
+            }
+            finally {
+              mark.error(expectedText + "got '" + tokenText + "'");
+            }
             parseAsTree(builder_, BnfParserDefinition.BNF_DUMMY_BLOCK, true, TOKEN_ADVANCER, eatMore);
           }
           finally {

@@ -152,8 +152,7 @@ public class BnfUnusedRulePassFactory extends AbstractProjectComponent implement
 
     @Override
     public void doApplyInformationToEditor() {
-      UpdateHighlightersUtil
-        .setHighlightersToEditor(myProject, myDocument, 0, myFile.getTextLength(), myHighlights, getColorsScheme(), Pass.POST_UPDATE_ALL);
+      UpdateHighlightersUtil.setHighlightersToEditor(myProject, myDocument, 0, myFile.getTextLength(), myHighlights, getColorsScheme(), getId());
     }
   }
 }

@@ -11,8 +11,8 @@ BnfFile:AlternativeSyntax.bnf
     PsiWhiteSpace('\n')
     PsiElement(})('}')
   PsiWhiteSpace('\n\n')
-  BNF_RULE:declare_cursor_statement
-    PsiElement(id)('declare_cursor_statement')
+  BNF_RULE:<declare-cursor statement>
+    PsiElement(id)('<declare-cursor statement>')
     PsiWhiteSpace(' ')
     PsiElement(::=)('::=')
     PsiWhiteSpace(' ')

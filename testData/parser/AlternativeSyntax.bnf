@@ -2,4 +2,4 @@
     mainAttr="11"
 }
 
-declare_cursor_statement ::= [ FOR { READ ONLY | UPDATE [ OF <column name list> ] } ] { pin=1}
+<declare-cursor statement> ::= [ FOR { READ ONLY | UPDATE [ OF <column name list> ] } ] { pin=1}

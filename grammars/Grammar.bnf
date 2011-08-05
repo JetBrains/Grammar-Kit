@@ -1,5 +1,6 @@
 {
   maxRecursionLevel=100
+  classHeader="header.txt"
   parserClass="org.intellij.grammar.parser.GrammarParser"
   stubParserClass="org.intellij.grammar.parser.GrammarParserUtil"
 
@@ -39,11 +40,11 @@
 }
 
 external wrapped grammar ::= parseGrammar grammar_element
-private grammar_element ::= attrs | rule
+private grammar_element ::= attrs | rule {recoverUntil="grammar_element_recover_until"}
+private grammar_element_recover_until::=!('{'|rule_start)
 
-rule ::= rule_start expression attrs? ';'? {pin=1 recoverUntil="rule_recover_until" extends=namedImpl implements=named}
+rule ::= rule_start expression attrs? ';'? {pin=1 extends=namedImpl implements=named}
 private rule_start ::=modifier* id '::='
-private rule_recover_until::=!('{'|rule_start)
 
 expression ::= choice?
 

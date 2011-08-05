@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2011 Gregory Shrago
+ * Copyright 2011-2011 Gregory Shrago
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -141,7 +141,7 @@ public class BnfUnusedRulePassFactory extends AbstractProjectComponent implement
                            "elementTypeClass", "tokenTypeClass",
                            "parserClass", "stubParserClass", "elementTypeHolderClass",
                            "elementTypePrefix", "elementTypeFactory", "tokenClassType", "tokenTypeFactory", "parserImports",
-                           "extends", "implements", "methodRenames", "pin", "mixin", "recoverUntil", "memoization").contains(name)) {
+                           "extends", "implements", "methodRenames", "pin", "mixin", "recoverUntil", "memoization", "classHeader").contains(name)) {
           final TextRange textRange = ((BnfAttr)child).getId().getTextRange();
           myHighlights.add(
             new HighlightInfo(HighlightInfoType.WARNING, textRange.getStartOffset(), textRange.getEndOffset(), "Unused attribute",

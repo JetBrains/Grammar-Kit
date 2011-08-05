@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2011 Gregory Shrago
+ * Copyright 2011-2011 Gregory Shrago
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +39,11 @@ public class ParserGeneratorUtil {
   private static final Object NULL = new Object();
 
   public static <T> T getRootAttribute(BnfFileImpl treeRoot, String attrName, @Nullable T def) {
-    return getAttributeInner(GrammarUtil.findDummyAwareChildOfType(treeRoot, BnfAttrs.class), attrName, def, null);
+    return getRootAttribute(treeRoot, attrName, def, null);
+  }
+
+  public static <T> T getRootAttribute(BnfFileImpl treeRoot, String attrName, @Nullable T def, @Nullable String match) {
+    return getAttributeInner(GrammarUtil.findDummyAwareChildOfType(treeRoot, BnfAttrs.class), attrName, def, match);
   }
 
   public static <T> T getAttribute(BnfRule rule, String attrName, @Nullable T def) {

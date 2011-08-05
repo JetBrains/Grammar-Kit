@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2011 Gregory Shrago
+ * Copyright 2011-2011 Gregory Shrago
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,10 @@
 package org.intellij.grammar.generator;
 
 import com.intellij.openapi.diagnostic.Logger;
+import com.intellij.openapi.util.io.FileUtil;
 import com.intellij.openapi.util.text.StringHash;
 import com.intellij.openapi.util.text.StringUtil;
+import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.tree.IElementType;
 import com.intellij.util.containers.MultiMap;
@@ -58,12 +60,12 @@ recoverUntil (rule)
  * todo ?? include grammars support grammar PSI inheritance (SQL hierarchy)
  * todo improve error reporting: investigate { atttr= attr=value } case
  */
-public class
-  ParserGenerator {
+public class ParserGenerator {
   public static final Logger LOG = Logger.getInstance("ParserGenerator");
 
   public static final String IELEMENTTYPE_CLASS = "com.intellij.psi.tree.IElementType";
   public static final String PSI_ELEMENT_CLASS = "com.intellij.psi.PsiElement";
+  private static final String DEFAULT_FILE_HEADER = "// This is a generated file. Not intended for manual editing.";
 
   private final Map<String, BnfRule> ruleMap = new TreeMap<String, BnfRule>();
   private final Map<String, String> ruleParserClasses = new TreeMap<String, String>();
@@ -352,9 +354,11 @@ public class
     }
   }
 
-  private void generateClassHeader(String parserClass, String imports, String annos, boolean intf, String... supers) {
-    final String packageName = StringUtil.getPackageName(parserClass);
+  private void generateClassHeader(String className, String imports, String annos, boolean intf, String... supers) {
+    final String classHeader = getStringOrFile(getRootAttribute(treeRoot, "classHeader", DEFAULT_FILE_HEADER, className));
+    final String packageName = StringUtil.getPackageName(className);
     offset = 0;
+    out(classHeader);
     out("package " + packageName + ";");
     newLine();
     for (String s : imports.split(";")) {
@@ -382,8 +386,19 @@ public class
     if (StringUtil.isNotEmpty(annos)) {
       out(annos);
     }
-    out("public " + (intf ? "interface " : "class ") + StringUtil.getShortName(parserClass) + sb.toString() + " {");
+    out("public " + (intf ? "interface " : "class ") + StringUtil.getShortName(className) + sb.toString() + " {");
     newLine();
+  }
+
+  private String getStringOrFile(String classHeader) {
+    final File file = new File(VfsUtil.virtualToIoFile(treeRoot.getVirtualFile()).getParentFile(), classHeader);
+    try {
+      return file.exists()? FileUtil.loadFile(file) : classHeader;
+    }
+    catch (IOException ex) {
+      LOG.error(ex);
+    }
+    return classHeader;
   }
 
   private void generateNode(BnfRule rule, BnfExpression node, boolean shouldBePrivate, String funcName, Set<BnfExpression> visited) {

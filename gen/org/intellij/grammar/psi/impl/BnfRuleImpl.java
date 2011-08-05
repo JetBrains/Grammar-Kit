@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2011 Gregory Shrago
+ * Copyright 2011-2011 Gregory Shrago
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,19 +15,13 @@
  */
 package org.intellij.grammar.psi.impl;
 
+import java.util.List;
+import org.jetbrains.annotations.*;
 import com.intellij.lang.ASTNode;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.util.PsiTreeUtil;
-import org.intellij.grammar.psi.BnfAttrs;
-import org.intellij.grammar.psi.BnfExpression;
-import org.intellij.grammar.psi.BnfModifier;
-import org.intellij.grammar.psi.BnfRule;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-
-import java.util.List;
-
-import static org.intellij.grammar.psi.BnfTypes.BNF_ID;
+import static org.intellij.grammar.psi.BnfTypes.*;
+import org.intellij.grammar.psi.*;
 
 public class BnfRuleImpl extends BnfNamedElementImpl implements BnfRule {
 

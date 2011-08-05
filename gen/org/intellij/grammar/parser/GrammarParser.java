@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2011 Gregory Shrago
+ * Copyright 2011-2011 Gregory Shrago
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,18 +15,17 @@
  */
 package org.intellij.grammar.parser;
 
-import com.intellij.lang.ASTNode;
+import org.jetbrains.annotations.*;
 import com.intellij.lang.LighterASTNode;
 import com.intellij.lang.PsiBuilder;
 import com.intellij.lang.PsiBuilder.Marker;
-import com.intellij.lang.PsiParser;
 import com.intellij.openapi.diagnostic.Logger;
-import com.intellij.psi.tree.IElementType;
-import com.intellij.psi.tree.TokenSet;
-import org.jetbrains.annotations.NotNull;
-
-import static org.intellij.grammar.parser.GrammarParserUtil.*;
 import static org.intellij.grammar.psi.BnfTypes.*;
+import static org.intellij.grammar.parser.GrammarParserUtil.*;
+import com.intellij.psi.tree.IElementType;
+import com.intellij.lang.ASTNode;
+import com.intellij.psi.tree.TokenSet;
+import com.intellij.lang.PsiParser;
 
 @SuppressWarnings({"SimplifiableIfStatement", "UnusedAssignment"})
 public class GrammarParser implements PsiParser {
@@ -543,8 +542,68 @@ public class GrammarParser implements PsiParser {
     boolean result_ = false;
     final Marker marker_ = builder_.mark();
     try {
+      enterErrorRecordingSection(builder_, level_, _SECTION_RECOVER_);
       result_ = attrs(builder_, level_ + 1);
       if (!result_) result_ = rule(builder_, level_ + 1);
+    }
+    finally {
+      if (!result_) {
+        marker_.rollbackTo();
+      }
+      else {
+        marker_.drop();
+      }
+      result_ = exitErrorRecordingSection(builder_, result_, level_, false, _SECTION_RECOVER_, 
+        new Parser() { public boolean parse(PsiBuilder builder_) { return grammar_element_recover_until(builder_, level_ + 1); }});
+    }
+    return result_;
+  }
+
+
+  /* ********************************************************** */
+  // !('{'|rule_start)
+  static boolean grammar_element_recover_until(PsiBuilder builder_, final int level_) {
+    if (!recursion_guard_(builder_, level_, "grammar_element_recover_until")) return false;
+    boolean result_ = false;
+    final Marker marker_ = builder_.mark();
+    try {
+      enterErrorRecordingSection(builder_, level_, _SECTION_NOT_);
+      result_ = !grammar_element_recover_until_0(builder_, level_ + 1);
+    }
+    finally {
+      marker_.rollbackTo();
+      result_ = exitErrorRecordingSection(builder_, result_, level_, false, _SECTION_NOT_, null);
+    }
+    return result_;
+  }
+
+  // ('{'|rule_start)
+  private static boolean grammar_element_recover_until_0(PsiBuilder builder_, final int level_) {
+    if (!recursion_guard_(builder_, level_, "grammar_element_recover_until_0")) return false;
+    boolean result_ = false;
+    final Marker marker_ = builder_.mark();
+    try {
+      result_ = grammar_element_recover_until_0_0(builder_, level_ + 1);
+    }
+    finally {
+      if (!result_) {
+        marker_.rollbackTo();
+      }
+      else {
+        marker_.drop();
+      }
+    }
+    return result_;
+  }
+
+  // '{'|rule_start
+  private static boolean grammar_element_recover_until_0_0(PsiBuilder builder_, final int level_) {
+    if (!recursion_guard_(builder_, level_, "grammar_element_recover_until_0_0")) return false;
+    boolean result_ = false;
+    final Marker marker_ = builder_.mark();
+    try {
+      result_ = consumeToken(builder_, BNF_LEFT_BRACE);
+      if (!result_) result_ = rule_start(builder_, level_ + 1);
     }
     finally {
       if (!result_) {
@@ -924,7 +983,7 @@ public class GrammarParser implements PsiParser {
     boolean pinned_ = false;
     final Marker marker_ = builder_.mark();
     try {
-      enterErrorRecordingSection(builder_, level_, _SECTION_RECOVER_);
+      enterErrorRecordingSection(builder_, level_, _SECTION_GENERAL_);
       result_ = rule_start(builder_, level_ + 1);
       pinned_ = result_; // pin = 1
       result_ = result_ && expression(builder_, level_ + 1);
@@ -938,8 +997,7 @@ public class GrammarParser implements PsiParser {
       else {
         marker_.rollbackTo();
       }
-      result_ = exitErrorRecordingSection(builder_, result_, level_, pinned_, _SECTION_RECOVER_, 
-        new Parser() { public boolean parse(PsiBuilder builder_) { return rule_recover_until(builder_, level_ + 1); }});
+      result_ = exitErrorRecordingSection(builder_, result_, level_, pinned_, _SECTION_GENERAL_, null);
     }
     return result_ || pinned_;
   }
@@ -968,63 +1026,6 @@ public class GrammarParser implements PsiParser {
     }
     finally {
       marker_.drop();
-    }
-    return result_;
-  }
-
-
-  /* ********************************************************** */
-  // !('{'|rule_start)
-  static boolean rule_recover_until(PsiBuilder builder_, final int level_) {
-    if (!recursion_guard_(builder_, level_, "rule_recover_until")) return false;
-    boolean result_ = false;
-    final Marker marker_ = builder_.mark();
-    try {
-      enterErrorRecordingSection(builder_, level_, _SECTION_NOT_);
-      result_ = !rule_recover_until_0(builder_, level_ + 1);
-    }
-    finally {
-      marker_.rollbackTo();
-      result_ = exitErrorRecordingSection(builder_, result_, level_, false, _SECTION_NOT_, null);
-    }
-    return result_;
-  }
-
-  // ('{'|rule_start)
-  private static boolean rule_recover_until_0(PsiBuilder builder_, final int level_) {
-    if (!recursion_guard_(builder_, level_, "rule_recover_until_0")) return false;
-    boolean result_ = false;
-    final Marker marker_ = builder_.mark();
-    try {
-      result_ = rule_recover_until_0_0(builder_, level_ + 1);
-    }
-    finally {
-      if (!result_) {
-        marker_.rollbackTo();
-      }
-      else {
-        marker_.drop();
-      }
-    }
-    return result_;
-  }
-
-  // '{'|rule_start
-  private static boolean rule_recover_until_0_0(PsiBuilder builder_, final int level_) {
-    if (!recursion_guard_(builder_, level_, "rule_recover_until_0_0")) return false;
-    boolean result_ = false;
-    final Marker marker_ = builder_.mark();
-    try {
-      result_ = consumeToken(builder_, BNF_LEFT_BRACE);
-      if (!result_) result_ = rule_start(builder_, level_ + 1);
-    }
-    finally {
-      if (!result_) {
-        marker_.rollbackTo();
-      }
-      else {
-        marker_.drop();
-      }
     }
     return result_;
   }

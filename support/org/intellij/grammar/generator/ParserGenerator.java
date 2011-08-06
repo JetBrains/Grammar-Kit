@@ -454,9 +454,9 @@ public class ParserGenerator {
       out("if (memoizedFalseBranch(builder_, " + funcId + "L) return false;");
     }
 
-    final Object pinValue = firstNonTrivial && type == BNF_SEQUENCE ? getAttribute(rule, "pin", null) : null;
+    final Object pinValue = type == BNF_SEQUENCE ? getAttribute(rule, "pin", null, firstNonTrivial? Rule.name(rule) : funcName) : null;
     final int pinIndex = pinValue instanceof Integer ? (Integer)pinValue : -1;
-    final Pattern pinPattern = pinValue instanceof String ? Pattern.compile((String)pinValue) : null;
+    final Pattern pinPattern = pinValue instanceof String ? Pattern.compile(StringUtil.unescapeStringCharacters((String)pinValue)) : null;
     boolean pinApplied = false;
 
     out("boolean result_ = " + (type == BNF_OP_ZEROMORE || type == BNF_OP_OPT) + ";");

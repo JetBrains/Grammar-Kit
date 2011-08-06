@@ -50,7 +50,7 @@ public class ParserGeneratorUtil {
     return getAttribute(rule, attrName, def, Rule.name(rule));
   }
 
-  public static <T> T getAttribute(BnfRule rule, String attrName, T def, String match) {
+  public static <T> T getAttribute(BnfRule rule, String attrName, @Nullable T def, String match) {
     return getAttributeInner(rule, attrName, def, match);
   }
 
@@ -144,12 +144,15 @@ public class ParserGeneratorUtil {
   }
 
   public static boolean isTrivialNode(PsiElement node) {
+    PsiElement child = null;
+    if (node instanceof BnfParenExpression) {
+      child = ((BnfParenExpression)node).getExpression();
+    }
     if (node.getFirstChild() == node.getLastChild() &&
         (node instanceof BnfChoice || node instanceof BnfSequence || node instanceof BnfExpression)) {
-      PsiElement child = node.getFirstChild();
-      return child instanceof BnfExpression && !(child instanceof BnfLiteralExpression || child instanceof BnfReferenceOrToken);
+      child = node.getFirstChild();
     }
-    return false;
+    return child instanceof BnfExpression && !(child instanceof BnfLiteralExpression || child instanceof BnfReferenceOrToken);
   }
 
   public static IElementType getEffectiveType(PsiElement tree) {

@@ -36,8 +36,8 @@ ID={ALPHA} ({ID_BODY}) * | "<" ({ID_BODY} | "-" | {LINE_WS})+ ">"
 HEX={DIGIT} | [aAbBcCdDeEfF]
 NUMBER={DIGIT}+ | "0x" {HEX}+
 
-ESC="\\" ( [nrtbf\'\"\\\>] | "u" {HEX}{HEX}{HEX}{HEX} )
-CHAR={ESC} | [^\r\n\\'\"]
+ESC="\\" ( [^] | "u" {HEX}{HEX}{HEX}{HEX} )
+CHAR={ESC} | [^\r\n\'\"\\]
 STRING_BAD1=\" ({CHAR} | \') *
 STRING_BAD2=\' {CHAR} *
 STRING={STRING_BAD1} \" | {STRING_BAD2} \'

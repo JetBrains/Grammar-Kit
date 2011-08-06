@@ -232,20 +232,7 @@ public class Self implements PsiParser {
   // (reference_or_token | literal_expression)
   private static boolean attr_value_0(PsiBuilder builder_, final int level_) {
     if (!recursion_guard_(builder_, level_, "attr_value_0")) return false;
-    boolean result_ = false;
-    final Marker marker_ = builder_.mark();
-    try {
-      result_ = attr_value_0_0(builder_, level_ + 1);
-    }
-    finally {
-      if (!result_) {
-        marker_.rollbackTo();
-      }
-      else {
-        marker_.drop();
-      }
-    }
-    return result_;
+    return attr_value_0_0(builder_, level_ + 1);
   }
 
   // reference_or_token | literal_expression
@@ -407,20 +394,7 @@ public class Self implements PsiParser {
   // ('|' sequence)
   private static boolean choice_0_2_0(PsiBuilder builder_, final int level_) {
     if (!recursion_guard_(builder_, level_, "choice_0_2_0")) return false;
-    boolean result_ = false;
-    final Marker marker_ = builder_.mark();
-    try {
-      result_ = choice_0_2_0_0(builder_, level_ + 1);
-    }
-    finally {
-      if (!result_) {
-        marker_.rollbackTo();
-      }
-      else {
-        marker_.drop();
-      }
-    }
-    return result_;
+    return choice_0_2_0_0(builder_, level_ + 1);
   }
 
   // '|' sequence
@@ -564,20 +538,7 @@ public class Self implements PsiParser {
   // (attrs | rule)
   private static boolean grammar_0(PsiBuilder builder_, final int level_) {
     if (!recursion_guard_(builder_, level_, "grammar_0")) return false;
-    boolean result_ = false;
-    final Marker marker_ = builder_.mark();
-    try {
-      result_ = grammar_0_0(builder_, level_ + 1);
-    }
-    finally {
-      if (!result_) {
-        marker_.rollbackTo();
-      }
-      else {
-        marker_.drop();
-      }
-    }
-    return result_;
+    return grammar_0_0(builder_, level_ + 1);
   }
 
   // attrs | rule
@@ -736,20 +697,7 @@ public class Self implements PsiParser {
   // ('&' | '!')
   public static boolean predicate_sign(PsiBuilder builder_, final int level_) {
     if (!recursion_guard_(builder_, level_, "predicate_sign")) return false;
-    boolean result_ = false;
-    final Marker marker_ = builder_.mark();
-    try {
-      result_ = predicate_sign_0(builder_, level_ + 1);
-    }
-    finally {
-      if (result_) {
-        marker_.done(BNF_PREDICATE_SIGN);
-      }
-      else {
-        marker_.rollbackTo();
-      }
-    }
-    return result_;
+    return predicate_sign_0(builder_, level_ + 1);
   }
 
   // '&' | '!'
@@ -762,11 +710,11 @@ public class Self implements PsiParser {
       if (!result_) result_ = consumeToken(builder_, BNF_OP_NOT);
     }
     finally {
-      if (!result_) {
-        marker_.rollbackTo();
+      if (result_) {
+        marker_.done(BNF_PREDICATE_SIGN);
       }
       else {
-        marker_.drop();
+        marker_.rollbackTo();
       }
     }
     return result_;
@@ -1099,20 +1047,7 @@ public class Self implements PsiParser {
   // (modifier* id '::=' )
   private static boolean simple_0_0_0(PsiBuilder builder_, final int level_) {
     if (!recursion_guard_(builder_, level_, "simple_0_0_0")) return false;
-    boolean result_ = false;
-    final Marker marker_ = builder_.mark();
-    try {
-      result_ = simple_0_0_0_0(builder_, level_ + 1);
-    }
-    finally {
-      if (!result_) {
-        marker_.rollbackTo();
-      }
-      else {
-        marker_.drop();
-      }
-    }
-    return result_;
+    return simple_0_0_0_0(builder_, level_ + 1);
   }
 
   // modifier* id '::='

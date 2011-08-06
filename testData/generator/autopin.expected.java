@@ -149,20 +149,7 @@ public class Autopin implements PsiParser {
   // (GLOBAL|LOCAL)
   private static boolean create_table_statement_2(PsiBuilder builder_, final int level_) {
     if (!recursion_guard_(builder_, level_, "create_table_statement_2")) return false;
-    boolean result_ = false;
-    final Marker marker_ = builder_.mark();
-    try {
-      result_ = create_table_statement_2_0(builder_, level_ + 1);
-    }
-    finally {
-      if (!result_) {
-        marker_.rollbackTo();
-      }
-      else {
-        marker_.drop();
-      }
-    }
-    return result_;
+    return create_table_statement_2_0(builder_, level_ + 1);
   }
 
   // GLOBAL|LOCAL

@@ -312,7 +312,7 @@ public class GeneratedParserUtilBase {
     int totalCount = 0;
     try {
       int tokenCount = 0;
-      while (eatMoreCondition.parse(builder)) {
+      while (true) {
         final IElementType tokenType = builder.getTokenType();
         if (checkParens && (tokenType == BnfTypes.BNF_LEFT_PAREN || tokenType == BnfTypes.BNF_RIGHT_PAREN && !parenList.isEmpty())) {
           if (marker != null) {
@@ -342,7 +342,7 @@ public class GeneratedParserUtilBase {
           if (marker == null) {
             marker = builder.mark();
           }
-          final boolean result = parser.parse(builder);
+          final boolean result = eatMoreCondition.parse(builder) && parser.parse(builder);
           if (result) {
             tokenCount++;
             totalCount++;

@@ -19,8 +19,8 @@ BnfFile:BrokenAttr.bnf
     BNF_ATTR:miss
       PsiElement(id)('miss')
       PsiElement(=)('=')
-    PsiErrorElement:'id' expected, got 'next'
-      <empty list>
+      PsiErrorElement:'id' expected, got 'next'
+        <empty list>
     PsiWhiteSpace('\n    ')
     BNF_ATTR:next
       PsiElement(id)('next')

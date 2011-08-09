@@ -23,6 +23,7 @@ import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.tree.IElementType;
 import com.intellij.util.containers.MultiMap;
+import gnu.trove.THashSet;
 import org.intellij.grammar.psi.*;
 import org.intellij.grammar.psi.impl.BnfFileImpl;
 import org.jetbrains.annotations.NotNull;
@@ -328,12 +329,15 @@ public class ParserGenerator {
   }
 
   private void computeInheritance() {
+    final Set<String> publicRules = new THashSet<String>();
     for (String ruleName : ruleMap.keySet()) {
       BnfRule rule = ruleMap.get(ruleName);
       if (Rule.isPrivate(rule) || Rule.isExternal(rule)) continue;
       BnfRule superRule = ruleMap.get(getAttribute(rule, "extends", ""));
+      String elementType = getElementType(rule);
+      publicRules.add(elementType);
       if (superRule == null) continue;
-      rulesExtendsMap.putValue(getElementType(superRule), getElementType(rule));
+      rulesExtendsMap.putValue(getElementType(superRule), elementType);
 
       rulesWithIheritance.add(rule);
       rulesWithIheritance.add(superRule);
@@ -350,6 +354,7 @@ public class ParserGenerator {
       if (!changed) break;
     }
     for (String ruleName : rulesExtendsMap.keySet()) {
+      if (!publicRules.contains(ruleName)) continue;
       rulesExtendsMap.putValue(ruleName, ruleName); // add super to itself
     }
   }

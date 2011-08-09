@@ -7,7 +7,7 @@ BnfFile:BrokenEverything.bnf
       PsiWhiteSpace(' ')
       PsiElement(=)('=')
       PsiWhiteSpace(' ')
-      PsiErrorElement:'id' expected, got '='
+      PsiErrorElement:'id', 'number' or 'string' expected, got '='
         PsiElement(=)('=')
     PsiWhiteSpace('\n')
     BNF_ATTR:a

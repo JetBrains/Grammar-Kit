@@ -193,13 +193,10 @@ public class GeneratedParserUtilBase {
         }
         state.suppressErrors = false;
       }
-      if (result) {
-        state.variantsMax = 0;
-        for (Variant v : state.variants) {
-          state.VARIANTS.recycle(v);
-        }
-        state.variants.clear();
+      for (Variant v : state.variants) {
+        state.VARIANTS.recycle(v);
       }
+      state.variants.clear();
     }
     else if (!result && pinned) {
       String expectedText = state.getExpectedText(builder_);
@@ -216,7 +213,6 @@ public class GeneratedParserUtilBase {
     int predicateCount;
     boolean predicateSign = true;
     boolean suppressErrors;
-    int variantsMax;
     final LinkedList<Frame> levelCheck = new LinkedList<Frame>();
 
     TreeSet<Variant> variants = new TreeSet<Variant>();
@@ -323,7 +319,10 @@ public class GeneratedParserUtilBase {
 
     @Override
     public int compareTo(Variant o) {
-      return offset - o.offset;
+      int diff = offset - o.offset;
+      if (diff == 0) diff = text.compareTo(o.text);
+      if (diff == 0) diff = (expected?1:0) - (o.expected?1:0);
+      return diff;
     }
   }
 

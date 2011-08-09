@@ -24,6 +24,7 @@ import com.intellij.usageView.UsageViewNodeTextLocation;
 import com.intellij.usageView.UsageViewShortNameLocation;
 import com.intellij.usageView.UsageViewTypeLocation;
 import org.intellij.grammar.psi.BnfAttr;
+import org.intellij.grammar.psi.BnfNamedElement;
 import org.intellij.grammar.psi.BnfRule;
 import org.jetbrains.annotations.NotNull;
 
@@ -34,7 +35,7 @@ import org.jetbrains.annotations.NotNull;
 public class BnfDescriptionProvider implements ElementDescriptionProvider {
   @Override
   public String getElementDescription(@NotNull PsiElement psiElement, @NotNull ElementDescriptionLocation location) {
-    if (location == UsageViewNodeTextLocation.INSTANCE) {
+    if (location == UsageViewNodeTextLocation.INSTANCE && psiElement instanceof BnfNamedElement) {
       return getElementDescription(psiElement, UsageViewTypeLocation.INSTANCE) + " " +
              "'" + getElementDescription(psiElement, UsageViewShortNameLocation.INSTANCE) + "'";
     }

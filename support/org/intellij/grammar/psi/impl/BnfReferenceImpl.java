@@ -17,12 +17,10 @@ package org.intellij.grammar.psi.impl;
 
 import com.intellij.codeInsight.lookup.LookupElement;
 import com.intellij.codeInsight.lookup.LookupElementBuilder;
-import com.intellij.openapi.util.Ref;
 import com.intellij.openapi.util.TextRange;
-import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiFile;
-import com.intellij.psi.PsiNamedElement;
-import com.intellij.psi.PsiReferenceBase;
+import com.intellij.psi.*;
+import com.intellij.psi.impl.PsiManagerEx;
+import com.intellij.psi.impl.source.resolve.ResolveCache;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.util.PlatformIcons;
 import com.intellij.util.Processor;
@@ -38,28 +36,40 @@ import java.util.ArrayList;
 /**
  * @author gregsh
  */
-public class BnfReferenceImpl<T extends PsiElement> extends PsiReferenceBase<T> {
+public class BnfReferenceImpl<T extends PsiElement> extends PsiPolyVariantReferenceBase<T> {
+  private static final ResolveCache.PolyVariantResolver<BnfReferenceImpl> MY_RESOLVER =
+    new ResolveCache.PolyVariantResolver<BnfReferenceImpl>() {
+      public ResolveResult[] resolve(final BnfReferenceImpl expression, final boolean incompleteCode) {
+        return expression.resolveInner();
+      }
+    };
+
   public BnfReferenceImpl(@NotNull T element, TextRange range) {
     super(element, range);
   }
 
-  @Override
-  public PsiElement resolve() {
-    final Ref<PsiElement> ref = Ref.create(null);
+  @NotNull
+  public ResolveResult[] multiResolve(final boolean incompleteCode) {
+    return ((PsiManagerEx)myElement.getManager()).getResolveCache().resolveWithCaching(this, MY_RESOLVER, true, incompleteCode);
+  }
+
+
+  private ResolveResult[] resolveInner() {
+    final ArrayList<ResolveResult> result = new ArrayList<ResolveResult>(1);
     final String text = getRangeInElement().substring(myElement.getText());
     processResolveVariants(new Processor<PsiElement>() {
       @Override
       public boolean process(PsiElement psiElement) {
         if (psiElement instanceof PsiNamedElement) {
           if (text.equals(((PsiNamedElement)psiElement).getName())) {
-            ref.set(psiElement);
+            result.add(new PsiElementResolveResult(psiElement, true));
             return false;
           }
         }
         return true;
       }
     });
-    return ref.get();
+    return result.toArray(new ResolveResult[result.size()]);
   }
 
   @NotNull
@@ -107,4 +117,5 @@ public class BnfReferenceImpl<T extends PsiElement> extends PsiReferenceBase<T> 
       GrammarUtil.processChildrenDummyAware(file, processor);
     }
   }
+
 }

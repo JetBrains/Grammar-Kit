@@ -31,11 +31,14 @@ import com.intellij.openapi.util.Key;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
+import com.intellij.psi.PsiRecursiveElementWalkingVisitor;
+import com.intellij.psi.PsiReference;
+import com.intellij.psi.util.CachedValue;
+import com.intellij.psi.util.CachedValueProvider;
+import com.intellij.psi.util.PsiModificationTracker;
 import com.intellij.util.Processor;
 import gnu.trove.THashSet;
-import org.intellij.grammar.psi.BnfAttr;
-import org.intellij.grammar.psi.BnfAttrs;
-import org.intellij.grammar.psi.BnfRule;
+import org.intellij.grammar.psi.*;
 import org.intellij.grammar.psi.impl.BnfFileImpl;
 import org.intellij.grammar.psi.impl.GrammarUtil;
 import org.jetbrains.annotations.NonNls;
@@ -48,7 +51,7 @@ import java.util.*;
  * @author gregsh
  */
 public class BnfUnusedRulePassFactory extends AbstractProjectComponent implements TextEditorHighlightingPassFactory {
-  public static Key<Set<PsiElement>> USED_RULES_KEY = Key.create("USED_RULES_KEY");
+  public static Key<CachedValue<Set<PsiElement>>> USED_RULES_KEY = Key.create("USED_RULES_KEY");
 
   public BnfUnusedRulePassFactory(Project project, TextEditorHighlightingPassRegistrar highlightingPassRegistrar) {
     super(project);
@@ -66,26 +69,31 @@ public class BnfUnusedRulePassFactory extends AbstractProjectComponent implement
     return file instanceof BnfFileImpl ? new MyPass(myProject, file, editor, editor.getDocument()) : null;
   }
 
-  public static void markElementUsed(PsiElement element) {
-    final PsiFile file = element.getContainingFile();
-    Set<PsiElement> userData = file.getUserData(USED_RULES_KEY);
-    if (userData == null) {
-      file.putUserData(USED_RULES_KEY, userData = new THashSet<PsiElement>());
-    }
-    else {
-      for (Iterator<PsiElement> it = userData.iterator(); it.hasNext(); ) {
-        PsiElement psiElement = it.next();
-        if (!psiElement.isValid()) {
-          it.remove();
+  private static Set<PsiElement> getUsedElements(final PsiFile file) {
+    CachedValue<Set<PsiElement>> value = file.getUserData(USED_RULES_KEY);
+    if (value == null) {
+      file.putUserData(USED_RULES_KEY, value = file.getManager().getCachedValuesManager().createCachedValue(new CachedValueProvider<Set<PsiElement>>() {
+        @Override
+        public Result<Set<PsiElement>> compute() {
+          final THashSet<PsiElement> psiElements = new THashSet<PsiElement>();
+          file.acceptChildren(new PsiRecursiveElementWalkingVisitor() {
+            @Override
+            public void visitElement(PsiElement element) {
+              if (element instanceof BnfReferenceOrToken || element instanceof BnfStringLiteralExpression) {
+                PsiReference reference = element.getReference();
+                PsiElement target = reference != null? reference.resolve() : null;
+                if (target instanceof BnfNamedElement) {
+                  psiElements.add(target);
+                }
+              }
+              super.visitElement(element);
+            }
+          });
+          return new Result<Set<PsiElement>>(psiElements, PsiModificationTracker.MODIFICATION_COUNT);
         }
-      }
+      }, false));
     }
-    userData.add(element);
-  }
-
-  private static Set<PsiElement> getUsedElements(PsiFile file) {
-    final Set<PsiElement> userData = file.getUserData(USED_RULES_KEY);
-    return userData == null ? Collections.<PsiElement>emptySet() : userData;
+    return value.getValue();
   }
 
 
@@ -152,7 +160,8 @@ public class BnfUnusedRulePassFactory extends AbstractProjectComponent implement
 
     @Override
     public void doApplyInformationToEditor() {
-      UpdateHighlightersUtil.setHighlightersToEditor(myProject, myDocument, 0, myFile.getTextLength(), myHighlights, getColorsScheme(), getId());
+      UpdateHighlightersUtil.setHighlightersToEditor(myProject, myDocument, 0, myFile.getTextLength(), myHighlights, getColorsScheme(),
+                                                     getId());
     }
   }
 }

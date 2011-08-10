@@ -51,11 +51,9 @@ public class BnfAnnotator implements Annotator {
       PsiReference reference = psiElement.getReference();
       Object resolve = reference == null ? null : reference.resolve();
       if (resolve instanceof BnfRule) {
-        BnfUnusedRulePassFactory.markElementUsed((BnfRule)resolve);
         annotationHolder.createInfoAnnotation(psiElement, null).setTextAttributes(SyntaxHighlighterColors.KEYWORD);
       }
       else if (resolve instanceof BnfAttr) {
-        BnfUnusedRulePassFactory.markElementUsed((BnfAttr)resolve);
         annotationHolder.createInfoAnnotation(psiElement, null).setTextAttributes(SyntaxHighlighterColors.LINE_COMMENT);
       }
       else if (resolve == null && psiElement.getParent() instanceof BnfAttrValue) {
@@ -75,7 +73,6 @@ public class BnfAnnotator implements Annotator {
         PsiReference reference = psiElement.getReference();
         Object resolve = reference == null ? null : reference.resolve();
         if (resolve instanceof BnfRule) {
-          BnfUnusedRulePassFactory.markElementUsed((BnfRule)resolve);
           annotationHolder.createInfoAnnotation(reference.getRangeInElement().shiftRight(psiElement.getTextRange().getStartOffset()), null)
             .setTextAttributes(SyntaxHighlighterColors.KEYWORD);
         }

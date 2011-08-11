@@ -16,6 +16,7 @@
 package org.intellij.grammar;
 
 import com.intellij.openapi.util.IconLoader;
+import com.intellij.util.PlatformIcons;
 
 import javax.swing.*;
 
@@ -25,4 +26,8 @@ import javax.swing.*;
  */
 public interface BnfIcons {
   Icon FILE = IconLoader.getIcon("/resources/file.png");
+
+  Icon RULE = PlatformIcons.METHOD_ICON;
+  Icon EXTERNAL_RULE = PlatformIcons.ABSTRACT_METHOD_ICON;
+  Icon ATTRIBUTE = PlatformIcons.FIELD_ICON;
 }

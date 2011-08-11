@@ -29,6 +29,8 @@
     <lang.braceMatcher language="BNF" implementationClass="org.intellij.grammar.BnfBraceMatcher"/>
     <lang.psiStructureViewFactory language="BNF" implementationClass="org.intellij.grammar.BnfStructureViewFactory"/>
     <lang.commenter language="BNF" implementationClass="org.intellij.grammar.BnfCommenter"/>
+
+    <completion.contributor language="BNF" implementationClass="org.intellij.grammar.BnfCompletionContributor" order="before javaClassName"/>
   </extensions>
   <project-components>
     <component>

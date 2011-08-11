@@ -61,7 +61,7 @@ public class BnfAnnotator implements Annotator {
       }
       else if (resolve == null && !(psiElement.getParent() instanceof BnfModifier)) {
         annotationHolder.createInfoAnnotation(psiElement, null).setTextAttributes(SyntaxHighlighterColors.STRING);
-        if (text.contains("_") && text.equals(text.toLowerCase())) {
+        if (isTokenTextSuspicious(text)) {
           annotationHolder.createWarningAnnotation(psiElement, "Suspicious lowercase token");
         }
       }
@@ -81,5 +81,9 @@ public class BnfAnnotator implements Annotator {
         }
       }
     }
+  }
+
+  public static boolean isTokenTextSuspicious(String text) {
+    return text.contains("_") && text.equals(text.toLowerCase());
   }
 }

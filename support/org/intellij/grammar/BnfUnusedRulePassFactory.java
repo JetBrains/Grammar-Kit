@@ -145,11 +145,7 @@ public class BnfUnusedRulePassFactory extends AbstractProjectComponent implement
         if (!(child instanceof BnfAttr)) continue;
         final String name = ((BnfAttr)child).getName();
         if (name != null && !usedElements.contains(child) && !name.toUpperCase().equals(name) &&
-            !Arrays.asList("maxRecursionLevel", "generatePsi", "psiClassPrefix", "psiImplClassSuffix", "psiPackage", "psiImplPackage",
-                           "elementTypeClass", "tokenTypeClass",
-                           "parserClass", "stubParserClass", "elementTypeHolderClass",
-                           "elementTypePrefix", "elementTypeFactory", "tokenClassType", "tokenTypeFactory", "parserImports",
-                           "extends", "implements", "methodRenames", "pin", "mixin", "recoverUntil", "memoization", "classHeader").contains(name)) {
+            !BnfCompletionContributor.KNOWN_ATTRIBUTES.contains(name)) {
           final TextRange textRange = ((BnfAttr)child).getId().getTextRange();
           myHighlights.add(
             new HighlightInfo(HighlightInfoType.WARNING, textRange.getStartOffset(), textRange.getEndOffset(), "Unused attribute",

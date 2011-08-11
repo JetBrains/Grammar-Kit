@@ -66,8 +66,9 @@ public class BnfCompletionContributor extends CompletionContributor {
                                     @NotNull final CompletionResultSet result) {
         PsiElement position = parameters.getPosition();
         PsiElement parent = position.getParent();
-        BnfRule rule = parent instanceof BnfReferenceOrToken? PsiTreeUtil.getParentOfType(parent, BnfRule.class) : null;
-        if (rule != null && PsiTreeUtil.getDeepestLast(rule) == position || parent instanceof BnfDummyElementImpl) {
+        BnfExpression expression = parent instanceof BnfReferenceOrToken? PsiTreeUtil.getParentOfType(parent, BnfExpression.class) : null;
+        BnfAttrValue attrValue = parent instanceof BnfStringLiteralExpression? PsiTreeUtil.getParentOfType(parent, BnfAttrValue.class) : null;
+        if (expression != null || attrValue != null || parent instanceof BnfDummyElementImpl) {
           parameters.getOriginalFile().acceptChildren(new PsiRecursiveElementWalkingVisitor() {
             @Override
             public void visitElement(PsiElement element) {

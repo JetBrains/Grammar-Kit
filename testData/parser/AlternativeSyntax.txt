@@ -16,40 +16,41 @@ BnfFile:AlternativeSyntax.bnf
     PsiWhiteSpace(' ')
     PsiElement(::=)('::=')
     PsiWhiteSpace(' ')
-    BNF_QUANTIFIED
+    BNF_PAREN_OPT_EXPRESSION
       PsiElement([)('[')
       PsiWhiteSpace(' ')
       BNF_SEQUENCE
         BNF_REFERENCE_OR_TOKEN
           PsiElement(id)('FOR')
         PsiWhiteSpace(' ')
-        BNF_PAREN_CHOICE_EXPRESSION
+        BNF_PAREN_EXPRESSION
           PsiElement({)('{')
           PsiWhiteSpace(' ')
-          BNF_SEQUENCE
-            BNF_REFERENCE_OR_TOKEN
-              PsiElement(id)('READ')
-            PsiWhiteSpace(' ')
-            BNF_REFERENCE_OR_TOKEN
-              PsiElement(id)('ONLY')
-          PsiWhiteSpace(' ')
-          PsiElement(|)('|')
-          PsiWhiteSpace(' ')
-          BNF_SEQUENCE
-            BNF_REFERENCE_OR_TOKEN
-              PsiElement(id)('UPDATE')
-            PsiWhiteSpace(' ')
-            BNF_QUANTIFIED
-              PsiElement([)('[')
+          BNF_CHOICE
+            BNF_SEQUENCE
+              BNF_REFERENCE_OR_TOKEN
+                PsiElement(id)('READ')
               PsiWhiteSpace(' ')
-              BNF_SEQUENCE
-                BNF_REFERENCE_OR_TOKEN
-                  PsiElement(id)('OF')
+              BNF_REFERENCE_OR_TOKEN
+                PsiElement(id)('ONLY')
+            PsiWhiteSpace(' ')
+            PsiElement(|)('|')
+            PsiWhiteSpace(' ')
+            BNF_SEQUENCE
+              BNF_REFERENCE_OR_TOKEN
+                PsiElement(id)('UPDATE')
+              PsiWhiteSpace(' ')
+              BNF_PAREN_OPT_EXPRESSION
+                PsiElement([)('[')
                 PsiWhiteSpace(' ')
-                BNF_REFERENCE_OR_TOKEN
-                  PsiElement(id)('<column name list>')
-              PsiWhiteSpace(' ')
-              PsiElement(])(']')
+                BNF_SEQUENCE
+                  BNF_REFERENCE_OR_TOKEN
+                    PsiElement(id)('OF')
+                  PsiWhiteSpace(' ')
+                  BNF_REFERENCE_OR_TOKEN
+                    PsiElement(id)('<column name list>')
+                PsiWhiteSpace(' ')
+                PsiElement(])(']')
           PsiWhiteSpace(' ')
           PsiElement(})('}')
       PsiWhiteSpace(' ')

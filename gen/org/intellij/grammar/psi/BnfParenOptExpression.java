@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2011 Gregory Shrago
+ * Copyright 2011-2011 Gregory Shrago
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,16 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.intellij.grammar.psi;
 
-package org.intellij.grammar.psi.impl;
+import java.util.List;
+import org.jetbrains.annotations.*;
+import com.intellij.psi.PsiElement;
 
-import com.intellij.lang.ASTNode;
-import org.intellij.grammar.psi.BnfOptBracket;
+public interface BnfParenOptExpression extends BnfQuantified, BnfParenthesized {
 
-public class BnfOptBracketImpl extends BnfQuantifierImpl implements BnfOptBracket {
-
-  public BnfOptBracketImpl(ASTNode node) {
-    super(node);
-  }
+  @NotNull
+  public BnfExpression getExpression();
 
 }

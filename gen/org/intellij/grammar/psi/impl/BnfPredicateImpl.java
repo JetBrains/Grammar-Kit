@@ -30,13 +30,7 @@ public class BnfPredicateImpl extends BnfExpressionImpl implements BnfPredicate 
   }
 
   @Override
-  @Nullable
-  public BnfChoice getChoice() {
-    return PsiTreeUtil.getChildOfType(this, BnfChoice.class);
-  }
-
-  @Override
-  @Nullable
+  @NotNull
   public BnfExpression getExpression() {
     return PsiTreeUtil.getChildOfType(this, BnfExpression.class);
   }

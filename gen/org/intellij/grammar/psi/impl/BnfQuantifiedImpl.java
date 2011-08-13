@@ -31,12 +31,6 @@ public class BnfQuantifiedImpl extends BnfExpressionImpl implements BnfQuantifie
 
   @Override
   @Nullable
-  public BnfChoice getChoice() {
-    return PsiTreeUtil.getChildOfType(this, BnfChoice.class);
-  }
-
-  @Override
-  @Nullable
   public BnfExpression getExpression() {
     return PsiTreeUtil.getChildOfType(this, BnfExpression.class);
   }

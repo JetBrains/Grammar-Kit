@@ -156,10 +156,13 @@ public class ParserGeneratorUtil {
   }
 
   public static IElementType getEffectiveType(PsiElement tree) {
-    if (tree instanceof BnfQuantified) {
+    if (tree instanceof BnfParenOptExpression) {
+      return BnfTypes.BNF_OP_OPT;
+    }
+    else if (tree instanceof BnfQuantified) {
       final BnfQuantifier quantifier = ((BnfQuantified)tree).getQuantifier();
       final IElementType elementType = PsiTreeUtil.getDeepestFirst(quantifier == null ? tree : quantifier).getNode().getElementType();
-      return elementType == BnfTypes.BNF_LEFT_BRACKET ? BnfTypes.BNF_OP_OPT : elementType;
+      return elementType;
     }
     else if (tree instanceof BnfPredicate) {
       return ((BnfPredicate)tree).getPredicateSign().getFirstChild().getNode().getElementType();
@@ -169,9 +172,6 @@ public class ParserGeneratorUtil {
     }
     else if (tree instanceof BnfParenExpression) {
       return BnfTypes.BNF_SEQUENCE;
-    }
-    else if (tree instanceof BnfParenChoiceExpression) {
-      return BnfTypes.BNF_CHOICE;
     }
     else if (tree instanceof BnfStringLiteralExpression) {
       return BnfTypes.BNF_STRING;

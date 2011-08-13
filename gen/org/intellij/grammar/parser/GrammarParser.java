@@ -60,11 +60,11 @@ public class GrammarParser implements PsiParser {
     else if (root_ == BNF_MODIFIER) {
       result_ = modifier(builder_, level_ + 1);
     }
-    else if (root_ == BNF_PAREN_CHOICE_EXPRESSION) {
-      result_ = paren_choice_expression(builder_, level_ + 1);
-    }
     else if (root_ == BNF_PAREN_EXPRESSION) {
       result_ = paren_expression(builder_, level_ + 1);
+    }
+    else if (root_ == BNF_PAREN_OPT_EXPRESSION) {
+      result_ = paren_opt_expression(builder_, level_ + 1);
     }
     else if (root_ == BNF_PREDICATE) {
       result_ = predicate(builder_, level_ + 1);
@@ -115,11 +115,11 @@ public class GrammarParser implements PsiParser {
   }
 
   private static final TokenSet[] EXTENDS_SETS_ = new TokenSet[] {
-    TokenSet.create(BNF_PAREN_CHOICE_EXPRESSION, BNF_CHOICE),
+    TokenSet.create(BNF_PAREN_OPT_EXPRESSION, BNF_QUANTIFIED),
     TokenSet.create(BNF_STRING_LITERAL_EXPRESSION, BNF_LITERAL_EXPRESSION),
     TokenSet.create(BNF_CHOICE, BNF_LITERAL_EXPRESSION, BNF_PAREN_EXPRESSION, BNF_PREDICATE,
-      BNF_QUANTIFIED, BNF_REFERENCE_OR_TOKEN, BNF_SEQUENCE, BNF_PAREN_CHOICE_EXPRESSION,
-      BNF_STRING_LITERAL_EXPRESSION, BNF_EXPRESSION),
+      BNF_QUANTIFIED, BNF_REFERENCE_OR_TOKEN, BNF_SEQUENCE, BNF_STRING_LITERAL_EXPRESSION,
+      BNF_PAREN_OPT_EXPRESSION, BNF_EXPRESSION),
   };
   public static boolean type_extends_(IElementType child_, IElementType parent_) {
     for (TokenSet set : EXTENDS_SETS_) {
@@ -127,6 +127,50 @@ public class GrammarParser implements PsiParser {
     }
     return false;
   }
+
+  /* ********************************************************** */
+  // '{' !attr_start expression '}'
+  static boolean alt_choice_expression(PsiBuilder builder_, final int level_) {
+    if (!recursion_guard_(builder_, level_, "alt_choice_expression")) return false;
+    boolean result_ = false;
+    boolean pinned_ = false;
+    final Marker marker_ = builder_.mark();
+    try {
+      enterErrorRecordingSection(builder_, level_, _SECTION_GENERAL_);
+      result_ = consumeToken(builder_, BNF_LEFT_BRACE);
+      result_ = result_ && alt_choice_expression_1(builder_, level_ + 1);
+      pinned_ = result_; // pin = 2
+      result_ = result_ && expression(builder_, level_ + 1);
+      result_ = result_ && consumeToken(builder_, BNF_RIGHT_BRACE);
+    }
+    finally {
+      if (!result_ && !pinned_) {
+        marker_.rollbackTo();
+      }
+      else {
+        marker_.drop();
+      }
+      result_ = exitErrorRecordingSection(builder_, result_, level_, pinned_, _SECTION_GENERAL_, null);
+    }
+    return result_ || pinned_;
+  }
+
+  // !attr_start
+  private static boolean alt_choice_expression_1(PsiBuilder builder_, final int level_) {
+    if (!recursion_guard_(builder_, level_, "alt_choice_expression_1")) return false;
+    boolean result_ = false;
+    final Marker marker_ = builder_.mark();
+    try {
+      enterErrorRecordingSection(builder_, level_, _SECTION_NOT_);
+      result_ = !attr_start(builder_, level_ + 1);
+    }
+    finally {
+      marker_.rollbackTo();
+      result_ = exitErrorRecordingSection(builder_, result_, level_, false, _SECTION_NOT_, null);
+    }
+    return result_;
+  }
+
 
   /* ********************************************************** */
   // attr_start attr_value ';'?
@@ -651,92 +695,39 @@ public class GrammarParser implements PsiParser {
 
 
   /* ********************************************************** */
-  // '{' !attr_start choice_body '}'
-  public static boolean paren_choice_expression(PsiBuilder builder_, final int level_) {
-    if (!recursion_guard_(builder_, level_, "paren_choice_expression")) return false;
-    boolean result_ = false;
-    boolean pinned_ = false;
-    final int start_ = builder_.getCurrentOffset();
-    final Marker marker_ = builder_.mark();
-    try {
-      enterErrorRecordingSection(builder_, level_, _SECTION_GENERAL_);
-      result_ = consumeToken(builder_, BNF_LEFT_BRACE);
-      result_ = result_ && paren_choice_expression_1(builder_, level_ + 1);
-      pinned_ = result_; // pin = 2
-      result_ = result_ && choice_body(builder_, level_ + 1);
-      result_ = result_ && consumeToken(builder_, BNF_RIGHT_BRACE);
-    }
-    finally {
-      LighterASTNode last_ = result_? builder_.getLatestDoneMarker() : null;
-      if (last_ != null && last_.getStartOffset() == start_ && type_extends_(last_.getTokenType(), BNF_PAREN_CHOICE_EXPRESSION)) {
-        marker_.drop();
-      }
-      else if (result_ || pinned_) {
-        marker_.done(BNF_PAREN_CHOICE_EXPRESSION);
-      }
-      else {
-        marker_.rollbackTo();
-      }
-      result_ = exitErrorRecordingSection(builder_, result_, level_, pinned_, _SECTION_GENERAL_, null);
-    }
-    return result_ || pinned_;
-  }
-
-  // !attr_start
-  private static boolean paren_choice_expression_1(PsiBuilder builder_, final int level_) {
-    if (!recursion_guard_(builder_, level_, "paren_choice_expression_1")) return false;
-    boolean result_ = false;
-    final Marker marker_ = builder_.mark();
-    try {
-      enterErrorRecordingSection(builder_, level_, _SECTION_NOT_);
-      result_ = !attr_start(builder_, level_ + 1);
-    }
-    finally {
-      marker_.rollbackTo();
-      result_ = exitErrorRecordingSection(builder_, result_, level_, false, _SECTION_NOT_, null);
-    }
-    return result_;
-  }
-
-
-  /* ********************************************************** */
-  // '(' expression ')'
+  // simple_paren_expression | alt_choice_expression
   public static boolean paren_expression(PsiBuilder builder_, final int level_) {
     if (!recursion_guard_(builder_, level_, "paren_expression")) return false;
     boolean result_ = false;
-    boolean pinned_ = false;
     final int start_ = builder_.getCurrentOffset();
     final Marker marker_ = builder_.mark();
     try {
-      enterErrorRecordingSection(builder_, level_, _SECTION_GENERAL_);
-      result_ = consumeToken(builder_, BNF_LEFT_PAREN);
-      pinned_ = result_; // pin = 1
-      result_ = result_ && expression(builder_, level_ + 1);
-      result_ = result_ && consumeToken(builder_, BNF_RIGHT_PAREN);
+      result_ = simple_paren_expression(builder_, level_ + 1);
+      if (!result_) result_ = alt_choice_expression(builder_, level_ + 1);
     }
     finally {
       LighterASTNode last_ = result_? builder_.getLatestDoneMarker() : null;
       if (last_ != null && last_.getStartOffset() == start_ && type_extends_(last_.getTokenType(), BNF_PAREN_EXPRESSION)) {
         marker_.drop();
       }
-      else if (result_ || pinned_) {
+      else if (result_) {
         marker_.done(BNF_PAREN_EXPRESSION);
       }
       else {
         marker_.rollbackTo();
       }
-      result_ = exitErrorRecordingSection(builder_, result_, level_, pinned_, _SECTION_GENERAL_, null);
     }
-    return result_ || pinned_;
+    return result_;
   }
 
 
   /* ********************************************************** */
   // '[' expression ']'
-  static boolean paren_opt_expression(PsiBuilder builder_, final int level_) {
+  public static boolean paren_opt_expression(PsiBuilder builder_, final int level_) {
     if (!recursion_guard_(builder_, level_, "paren_opt_expression")) return false;
     boolean result_ = false;
     boolean pinned_ = false;
+    final int start_ = builder_.getCurrentOffset();
     final Marker marker_ = builder_.mark();
     try {
       enterErrorRecordingSection(builder_, level_, _SECTION_GENERAL_);
@@ -746,11 +737,15 @@ public class GrammarParser implements PsiParser {
       result_ = result_ && consumeToken(builder_, BNF_RIGHT_BRACKET);
     }
     finally {
-      if (!result_ && !pinned_) {
-        marker_.rollbackTo();
+      LighterASTNode last_ = result_? builder_.getLatestDoneMarker() : null;
+      if (last_ != null && last_.getStartOffset() == start_ && type_extends_(last_.getTokenType(), BNF_PAREN_OPT_EXPRESSION)) {
+        marker_.drop();
+      }
+      else if (result_ || pinned_) {
+        marker_.done(BNF_PAREN_OPT_EXPRESSION);
       }
       else {
-        marker_.drop();
+        marker_.rollbackTo();
       }
       result_ = exitErrorRecordingSection(builder_, result_, level_, pinned_, _SECTION_GENERAL_, null);
     }
@@ -1060,7 +1055,7 @@ public class GrammarParser implements PsiParser {
 
 
   /* ********************************************************** */
-  // !(modifier* id '::=' ) reference_or_token | literal_expression | paren_expression | paren_choice_expression
+  // !(modifier* id '::=' ) reference_or_token | literal_expression | paren_expression
   static boolean simple(PsiBuilder builder_, final int level_) {
     if (!recursion_guard_(builder_, level_, "simple")) return false;
     boolean result_ = false;
@@ -1069,7 +1064,6 @@ public class GrammarParser implements PsiParser {
       result_ = simple_0(builder_, level_ + 1);
       if (!result_) result_ = literal_expression(builder_, level_ + 1);
       if (!result_) result_ = paren_expression(builder_, level_ + 1);
-      if (!result_) result_ = paren_choice_expression(builder_, level_ + 1);
     }
     finally {
       if (!result_) {
@@ -1165,6 +1159,33 @@ public class GrammarParser implements PsiParser {
       marker_.drop();
     }
     return result_;
+  }
+
+
+  /* ********************************************************** */
+  // '(' expression ')'
+  static boolean simple_paren_expression(PsiBuilder builder_, final int level_) {
+    if (!recursion_guard_(builder_, level_, "simple_paren_expression")) return false;
+    boolean result_ = false;
+    boolean pinned_ = false;
+    final Marker marker_ = builder_.mark();
+    try {
+      enterErrorRecordingSection(builder_, level_, _SECTION_GENERAL_);
+      result_ = consumeToken(builder_, BNF_LEFT_PAREN);
+      pinned_ = result_; // pin = 1
+      result_ = result_ && expression(builder_, level_ + 1);
+      result_ = result_ && consumeToken(builder_, BNF_RIGHT_PAREN);
+    }
+    finally {
+      if (!result_ && !pinned_) {
+        marker_.rollbackTo();
+      }
+      else {
+        marker_.drop();
+      }
+      result_ = exitErrorRecordingSection(builder_, result_, level_, pinned_, _SECTION_GENERAL_, null);
+    }
+    return result_ || pinned_;
   }
 
 

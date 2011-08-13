@@ -22,9 +22,6 @@ import com.intellij.psi.PsiElement;
 public interface BnfQuantified extends BnfExpression {
 
   @Nullable
-  public BnfChoice getChoice();
-
-  @Nullable
   public BnfExpression getExpression();
 
   @Nullable

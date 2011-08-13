@@ -13,15 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.intellij.grammar.psi;
 
-import java.util.List;
-import org.jetbrains.annotations.*;
-import com.intellij.psi.PsiElement;
-
-public interface BnfParenChoiceExpression extends BnfChoice {
-
-  @NotNull
-  public List<BnfExpression> getExpressionList();
-
+/**
+ * @author gregsh
+ */
+public interface BnfParenthesized extends BnfExpression {
 }

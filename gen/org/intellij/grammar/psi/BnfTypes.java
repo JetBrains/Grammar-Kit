@@ -30,8 +30,8 @@ public interface BnfTypes {
   IElementType BNF_EXPRESSION = new BnfCompositeElementType("BNF_EXPRESSION");
   IElementType BNF_LITERAL_EXPRESSION = new BnfCompositeElementType("BNF_LITERAL_EXPRESSION");
   IElementType BNF_MODIFIER = new BnfCompositeElementType("BNF_MODIFIER");
-  IElementType BNF_PAREN_CHOICE_EXPRESSION = new BnfCompositeElementType("BNF_PAREN_CHOICE_EXPRESSION");
   IElementType BNF_PAREN_EXPRESSION = new BnfCompositeElementType("BNF_PAREN_EXPRESSION");
+  IElementType BNF_PAREN_OPT_EXPRESSION = new BnfCompositeElementType("BNF_PAREN_OPT_EXPRESSION");
   IElementType BNF_PREDICATE = new BnfCompositeElementType("BNF_PREDICATE");
   IElementType BNF_PREDICATE_SIGN = new BnfCompositeElementType("BNF_PREDICATE_SIGN");
   IElementType BNF_QUANTIFIED = new BnfCompositeElementType("BNF_QUANTIFIED");
@@ -87,11 +87,11 @@ public interface BnfTypes {
       else  if (type == BNF_MODIFIER) {
         return new BnfModifierImpl(node);
       }
-      else  if (type == BNF_PAREN_CHOICE_EXPRESSION) {
-        return new BnfParenChoiceExpressionImpl(node);
-      }
       else  if (type == BNF_PAREN_EXPRESSION) {
         return new BnfParenExpressionImpl(node);
+      }
+      else  if (type == BNF_PAREN_OPT_EXPRESSION) {
+        return new BnfParenOptExpressionImpl(node);
       }
       else  if (type == BNF_PREDICATE) {
         return new BnfPredicateImpl(node);

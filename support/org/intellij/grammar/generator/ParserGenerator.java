@@ -22,6 +22,7 @@ import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.tree.IElementType;
+import com.intellij.util.ArrayUtil;
 import com.intellij.util.containers.MultiMap;
 import gnu.trove.THashSet;
 import org.intellij.grammar.psi.*;
@@ -152,7 +153,7 @@ public class ParserGenerator {
         psiFile.getParentFile().mkdirs();
         out = new PrintWriter(new FileOutputStream(psiFile));
         try {
-          generatePsiIntf(rule, psiClass, getSuperClassName(rule, true, psiPackage, ""), graphHelper);
+          generatePsiIntf(graphHelper, rule, psiClass, getSuperInterfaceNames(rule, psiPackage));
         }
         finally {
           out.close();
@@ -168,7 +169,7 @@ public class ParserGenerator {
         psiFile.getParentFile().mkdirs();
         out = new PrintWriter(new FileOutputStream(psiFile));
         try {
-          generatePsiImpl(rule, psiClass, infClasses.get(ruleName), getSuperClassName(rule, false, psiPackage, suffix), graphHelper);
+          generatePsiImpl(graphHelper, rule, psiClass, infClasses.get(ruleName), getSuperClassName(rule, psiPackage, suffix));
         }
         finally {
           out.close();
@@ -198,11 +199,36 @@ public class ParserGenerator {
   }
 
   @NotNull
-  private String getSuperClassName(BnfRule rule, boolean intf, String psiPackage, String suffix) {
+  private String getSuperClassName(BnfRule rule, String psiPackage, String suffix) {
     String superRuleName = getAttribute(rule, "extends", "generated.CompositeElementImpl");
     BnfRule superRule = superRuleName == null ? null : ruleMap.get(superRuleName);
-    if (superRule == null) return intf ? getAttribute(rule, "implements", "generated.CompositeElement") : superRuleName;
+    if (superRule == null) return superRuleName;
     return psiPackage + "." + getRulePsiClassName(superRule, Rule.name(superRule), true) + suffix;
+  }
+
+  @NotNull
+  private String[] getSuperInterfaceNames(BnfRule rule, String psiPackage) {
+    ArrayList<String> strings = new ArrayList<String>();
+    String superRuleImplements = "";
+    {
+      String superRuleName = getAttribute(rule, "extends", null);
+      BnfRule superRule = superRuleName == null ? null : ruleMap.get(superRuleName);
+      if (superRule != null) {
+        superRuleImplements = getAttribute(superRule, "implements", "generated.CompositeElement");
+        strings.add(psiPackage + "." + getRulePsiClassName(superRule, Rule.name(superRule), true));
+      }
+    }
+    String[] superIntfNames = getAttribute(rule, "implements", "generated.CompositeElement").split(",");
+    for (String superIntfName : superIntfNames) {
+      BnfRule superIntfRule = ruleMap.get(superIntfName);
+      if (superIntfRule != null) {
+        strings.add(psiPackage + "." + getRulePsiClassName(superIntfRule, Rule.name(superIntfRule), true));
+      }
+      else if (!superRuleImplements.contains(superIntfName)) {
+        strings.add(superIntfName);
+      }
+    }
+    return strings.toArray(new String[strings.size()]);
   }
 
   private static String getRulePsiClassName(BnfRule rule, String ruleName, boolean withPrefix) {
@@ -378,10 +404,13 @@ public class ParserGenerator {
     for (int i = 0, supersLength = supers.length; i < supersLength; i++) {
       String aSuper = supers[i];
       if (StringUtil.isEmpty(aSuper)) continue;
+      if (imports.contains(aSuper + ";")) {
+        aSuper = StringUtil.getShortName(aSuper);
+      }
       if (i == 0) {
         sb.append(" extends ").append(aSuper);
       }
-      else if (i == 1) {
+      else if (!intf && i == 1) {
         sb.append(" implements ").append(aSuper);
       }
       else {
@@ -746,16 +775,16 @@ public class ParserGenerator {
 
 
   /*PSI******************************************************************/
-  private void generatePsiIntf(BnfRule rule, String psiClass, String psiSuper, RuleGraphHelper helper) {
+  private void generatePsiIntf(RuleGraphHelper helper, BnfRule rule, String psiClass, String... psiSupers) {
     Map<PsiElement, RuleGraphHelper.Cardinality> accessors = helper.getFor(rule);
     final Collection<BnfRule> sortedPublicRules = getSortedPublicRules(accessors.keySet());
 
     generateClassHeader(psiClass, "java.util.List;" +
                                   "org.jetbrains.annotations.*;" +
                                   "com.intellij.psi.PsiElement;" +
-                                  psiSuper + ";" +
+                                  StringUtil.join(psiSupers, ";") + ";" +
                                   StringUtil.join(getRuleAccessorClasses(rule, sortedPublicRules), ";"),
-                        "", true, StringUtil.getShortName(psiSuper));
+                        "", true, psiSupers);
     for (PsiElement tree : sortedPublicRules) {
       generatePsiAccessor(rule, tree, accessors.get(tree), true);
     }
@@ -765,7 +794,11 @@ public class ParserGenerator {
     out("}");
   }
 
-  private void generatePsiImpl(BnfRule rule, String psiClass, String superInterface, String superRuleClass, RuleGraphHelper helper) {
+  private void generatePsiImpl(RuleGraphHelper helper,
+                               BnfRule rule,
+                               String psiClass,
+                               String superInterface,
+                               String superRuleClass) {
     String typeHolderClass = getRootAttribute(treeRoot, "elementTypeHolderClass", "generated.ParserTypes");
     // mixin attribute overrides "extends":
     String implSuper = getAttribute(rule, "mixin", superRuleClass);

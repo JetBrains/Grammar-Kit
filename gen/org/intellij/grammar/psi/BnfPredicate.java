@@ -21,10 +21,7 @@ import com.intellij.psi.PsiElement;
 
 public interface BnfPredicate extends BnfExpression {
 
-  @Nullable
-  public BnfChoice getChoice();
-
-  @Nullable
+  @NotNull
   public BnfExpression getExpression();
 
   @NotNull

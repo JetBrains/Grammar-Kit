@@ -22,9 +22,9 @@ import com.intellij.psi.*;
 import com.intellij.psi.impl.PsiManagerEx;
 import com.intellij.psi.impl.source.resolve.ResolveCache;
 import com.intellij.psi.util.PsiTreeUtil;
-import com.intellij.util.PlatformIcons;
 import com.intellij.util.Processor;
 import com.intellij.util.containers.ContainerUtil;
+import org.intellij.grammar.BnfIcons;
 import org.intellij.grammar.psi.BnfAttr;
 import org.intellij.grammar.psi.BnfAttrs;
 import org.intellij.grammar.psi.BnfRule;
@@ -81,11 +81,11 @@ public class BnfReferenceImpl<T extends PsiElement> extends PsiPolyVariantRefere
       public boolean process(PsiElement psiElement) {
         if (psiElement instanceof BnfRule) {
           list.add(LookupElementBuilder.create(((BnfRule)psiElement).getId().getText()).
-            setIcon(PlatformIcons.METHOD_ICON).setBold());
+            setIcon(BnfIcons.RULE).setBold());
         }
         else if (psiElement instanceof BnfAttr) {
           list.add(LookupElementBuilder.create(((BnfAttr)psiElement).getId().getText()).
-            setIcon(PlatformIcons.FIELD_ICON));
+            setIcon(BnfIcons.ATTRIBUTE));
         }
         return true;
       }

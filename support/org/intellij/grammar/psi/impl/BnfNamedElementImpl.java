@@ -17,6 +17,8 @@ package org.intellij.grammar.psi.impl;
 
 import com.intellij.lang.ASTNode;
 import com.intellij.psi.PsiElement;
+import com.intellij.psi.search.LocalSearchScope;
+import com.intellij.psi.search.SearchScope;
 import com.intellij.ui.RowIcon;
 import com.intellij.util.IncorrectOperationException;
 import com.intellij.util.PlatformIcons;
@@ -52,6 +54,12 @@ public abstract class BnfNamedElementImpl extends BnfCompositeElementImpl implem
   @Override
   public int getTextOffset() {
     return getId().getTextOffset();
+  }
+
+  @NotNull
+  @Override
+  public SearchScope getUseScope() {
+    return new LocalSearchScope(getContainingFile());
   }
 
   @Override

@@ -12,6 +12,7 @@ public class BnfTestSuite extends TestCase {
     final TestSuite testSuite = new TestSuite();
     testSuite.addTestSuite(BnfParserTest.class);
     testSuite.addTestSuite(BnfGeneratorTest.class);
+    testSuite.addTestSuite(BnfInlineRuleTest.class);
     return testSuite;
   }
 }

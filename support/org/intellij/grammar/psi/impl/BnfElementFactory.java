@@ -21,6 +21,8 @@ import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiFileFactory;
 import com.intellij.psi.util.PsiTreeUtil;
 import org.intellij.grammar.BnfLanguage;
+import org.intellij.grammar.psi.BnfExpression;
+import org.intellij.grammar.psi.BnfRule;
 
 /**
  * @author gregsh
@@ -29,5 +31,10 @@ public class BnfElementFactory {
   public static PsiElement createLeafFromText(Project project, String text) {
     PsiFile fileFromText = PsiFileFactory.getInstance(project).createFileFromText("a.bnf", BnfLanguage.INSTANCE, text);
     return PsiTreeUtil.getDeepestFirst(fileFromText);
+  }
+
+  public static BnfExpression createExpressionFromText(Project project, String text) {
+    PsiFile fromText = PsiFileFactory.getInstance(project).createFileFromText("a.bnf", "a ::= " + text);
+    return ((BnfRule)fromText.getFirstChild()).getExpression();
   }
 }

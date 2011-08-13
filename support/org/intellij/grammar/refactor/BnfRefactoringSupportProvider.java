@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2011 Gregory Shrago
+ * Copyright 2011-2011 Gregory Shrago
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,18 +14,22 @@
  * limitations under the License.
  */
 
-package org.intellij.grammar.psi;
+package org.intellij.grammar.refactor;
 
+import com.intellij.lang.refactoring.RefactoringSupportProvider;
+import com.intellij.psi.PsiElement;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.List;
-
-public interface BnfGrammar extends BnfCompositeElement {
-
-  @NotNull
-  public List<BnfAttrs> getAttrsList();
-
-  @NotNull
-  public List<BnfRule> getRuleList();
-
+/**
+ * Created by IntelliJ IDEA.
+ * Date: 8/11/11
+ * Time: 7:34 PM
+ *
+ * @author Vadim Romansky
+ */
+public class BnfRefactoringSupportProvider extends RefactoringSupportProvider {
+    @Override
+    public boolean isAvailable(@NotNull PsiElement context) {
+        return super.isAvailable(context);
+    }
 }

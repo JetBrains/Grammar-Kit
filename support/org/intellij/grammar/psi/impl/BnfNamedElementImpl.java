@@ -65,7 +65,7 @@ public abstract class BnfNamedElementImpl extends BnfCompositeElementImpl implem
   @Override
   public Icon getIcon(int flags) {
     if (this instanceof BnfRule) {
-      final Icon base = hasModifier((BnfRule)this, "external") ? BnfIcons.RULE : BnfIcons.EXTERNAL_RULE;
+      final Icon base = hasModifier((BnfRule)this, "external") ? BnfIcons.EXTERNAL_RULE : BnfIcons.RULE;
       final Icon visibility = hasModifier((BnfRule)this, "private") ? PlatformIcons.PRIVATE_ICON : PlatformIcons.PUBLIC_ICON;
       final RowIcon row = new RowIcon(2);
       row.setIcon(base, 0);

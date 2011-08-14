@@ -113,6 +113,7 @@ public class BnfStructureViewFactory implements PsiStructureViewFactory {
 
     @Override
     public TreeElement[] getChildren() {
+      if (myElement instanceof BnfRule || myElement instanceof BnfAttr) return EMPTY_ARRAY;
       final ArrayList<TreeElement> result = new ArrayList<TreeElement>();
       GrammarUtil.processChildrenDummyAware(myElement, new Processor<PsiElement>() {
         @Override
@@ -148,7 +149,7 @@ public class BnfStructureViewFactory implements PsiStructureViewFactory {
     private String getAttrDisplayName(BnfAttr attr) {
       final BnfAttrPattern attrPattern = attr.getAttrPattern();
       final BnfAttrValue attrValue = attr.getAttrValue();
-      return attr.getName() + (attrPattern == null ? "" : attrPattern.getText()) + " = " + attrValue;
+      return attr.getName() + (attrPattern == null ? "" : attrPattern.getText()) + " = " + attrValue.getText();
     }
 
     @Override

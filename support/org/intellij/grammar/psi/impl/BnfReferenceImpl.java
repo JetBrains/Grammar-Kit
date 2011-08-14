@@ -17,6 +17,7 @@ package org.intellij.grammar.psi.impl;
 
 import com.intellij.codeInsight.lookup.LookupElement;
 import com.intellij.codeInsight.lookup.LookupElementBuilder;
+import com.intellij.openapi.util.Iconable;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.psi.*;
 import com.intellij.psi.impl.PsiManagerEx;
@@ -24,9 +25,8 @@ import com.intellij.psi.impl.source.resolve.ResolveCache;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.util.Processor;
 import com.intellij.util.containers.ContainerUtil;
-import org.intellij.grammar.BnfIcons;
-import org.intellij.grammar.psi.BnfAttr;
 import org.intellij.grammar.psi.BnfAttrs;
+import org.intellij.grammar.psi.BnfNamedElement;
 import org.intellij.grammar.psi.BnfRule;
 import org.intellij.grammar.psi.BnfStringLiteralExpression;
 import org.jetbrains.annotations.NotNull;
@@ -79,13 +79,10 @@ public class BnfReferenceImpl<T extends PsiElement> extends PsiPolyVariantRefere
     processResolveVariants(new Processor<PsiElement>() {
       @Override
       public boolean process(PsiElement psiElement) {
-        if (psiElement instanceof BnfRule) {
-          list.add(LookupElementBuilder.create(((BnfRule)psiElement).getId().getText()).
-            setIcon(BnfIcons.RULE).setBold());
-        }
-        else if (psiElement instanceof BnfAttr) {
-          list.add(LookupElementBuilder.create(((BnfAttr)psiElement).getId().getText()).
-            setIcon(BnfIcons.ATTRIBUTE));
+        if (psiElement instanceof BnfNamedElement) {
+          LookupElementBuilder builder = LookupElementBuilder.create((PsiNamedElement) psiElement).
+                  setIcon(psiElement.getIcon(Iconable.ICON_FLAG_OPEN));
+          list.add(psiElement instanceof BnfRule? builder.setBold() : builder);
         }
         return true;
       }

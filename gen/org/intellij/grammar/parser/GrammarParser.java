@@ -15,17 +15,18 @@
  */
 package org.intellij.grammar.parser;
 
-import org.jetbrains.annotations.*;
+import com.intellij.lang.ASTNode;
 import com.intellij.lang.LighterASTNode;
 import com.intellij.lang.PsiBuilder;
 import com.intellij.lang.PsiBuilder.Marker;
-import com.intellij.openapi.diagnostic.Logger;
-import static org.intellij.grammar.psi.BnfTypes.*;
-import static org.intellij.grammar.parser.GrammarParserUtil.*;
-import com.intellij.psi.tree.IElementType;
-import com.intellij.lang.ASTNode;
-import com.intellij.psi.tree.TokenSet;
 import com.intellij.lang.PsiParser;
+import com.intellij.openapi.diagnostic.Logger;
+import com.intellij.psi.tree.IElementType;
+import com.intellij.psi.tree.TokenSet;
+import org.jetbrains.annotations.NotNull;
+
+import static org.intellij.grammar.parser.GrammarParserUtil.*;
+import static org.intellij.grammar.psi.BnfTypes.*;
 
 @SuppressWarnings({"SimplifiableIfStatement", "UnusedAssignment"})
 public class GrammarParser implements PsiParser {
@@ -572,7 +573,7 @@ public class GrammarParser implements PsiParser {
         marker_.drop();
       }
       result_ = exitErrorRecordingSection(builder_, result_, level_, false, _SECTION_RECOVER_, 
-        new Parser() { public boolean parse(PsiBuilder builder_) { return grammar_element_recover_until(builder_, level_ + 1); }});
+        new Parser() { public boolean parse(PsiBuilder builder_) { return grammar_element_recover(builder_, level_ + 1); }});
     }
     return result_;
   }
@@ -580,13 +581,13 @@ public class GrammarParser implements PsiParser {
 
   /* ********************************************************** */
   // !('{'|rule_start)
-  static boolean grammar_element_recover_until(PsiBuilder builder_, final int level_) {
-    if (!recursion_guard_(builder_, level_, "grammar_element_recover_until")) return false;
+  static boolean grammar_element_recover(PsiBuilder builder_, final int level_) {
+    if (!recursion_guard_(builder_, level_, "grammar_element_recover")) return false;
     boolean result_ = false;
     final Marker marker_ = builder_.mark();
     try {
       enterErrorRecordingSection(builder_, level_, _SECTION_NOT_);
-      result_ = !grammar_element_recover_until_0(builder_, level_ + 1);
+      result_ = !grammar_element_recover_0(builder_, level_ + 1);
     }
     finally {
       marker_.rollbackTo();
@@ -596,14 +597,14 @@ public class GrammarParser implements PsiParser {
   }
 
   // ('{'|rule_start)
-  private static boolean grammar_element_recover_until_0(PsiBuilder builder_, final int level_) {
-    if (!recursion_guard_(builder_, level_, "grammar_element_recover_until_0")) return false;
-    return grammar_element_recover_until_0_0(builder_, level_ + 1);
+  private static boolean grammar_element_recover_0(PsiBuilder builder_, final int level_) {
+    if (!recursion_guard_(builder_, level_, "grammar_element_recover_0")) return false;
+    return grammar_element_recover_0_0(builder_, level_ + 1);
   }
 
   // '{'|rule_start
-  private static boolean grammar_element_recover_until_0_0(PsiBuilder builder_, final int level_) {
-    if (!recursion_guard_(builder_, level_, "grammar_element_recover_until_0_0")) return false;
+  private static boolean grammar_element_recover_0_0(PsiBuilder builder_, final int level_) {
+    if (!recursion_guard_(builder_, level_, "grammar_element_recover_0_0")) return false;
     boolean result_ = false;
     final Marker marker_ = builder_.mark();
     try {
@@ -1027,6 +1028,7 @@ public class GrammarParser implements PsiParser {
     final int start_ = builder_.getCurrentOffset();
     final Marker marker_ = builder_.mark();
     try {
+      enterErrorRecordingSection(builder_, level_, _SECTION_RECOVER_);
       result_ = option(builder_, level_ + 1);
       int offset_ = builder_.getCurrentOffset();
       while (!builder_.eof()) {
@@ -1048,6 +1050,78 @@ public class GrammarParser implements PsiParser {
       }
       else {
         marker_.rollbackTo();
+      }
+      result_ = exitErrorRecordingSection(builder_, result_, level_, false, _SECTION_RECOVER_, 
+        new Parser() { public boolean parse(PsiBuilder builder_) { return sequence_recover(builder_, level_ + 1); }});
+    }
+    return result_;
+  }
+
+
+  /* ********************************************************** */
+  // !(';'|'|'|'('|')'|'['|']'|'{'|'}') grammar_element_recover
+  static boolean sequence_recover(PsiBuilder builder_, final int level_) {
+    if (!recursion_guard_(builder_, level_, "sequence_recover")) return false;
+    boolean result_ = false;
+    final Marker marker_ = builder_.mark();
+    try {
+      result_ = sequence_recover_0(builder_, level_ + 1);
+      result_ = result_ && grammar_element_recover(builder_, level_ + 1);
+    }
+    finally {
+      if (!result_) {
+        marker_.rollbackTo();
+      }
+      else {
+        marker_.drop();
+      }
+    }
+    return result_;
+  }
+
+  // !(';'|'|'|'('|')'|'['|']'|'{'|'}')
+  private static boolean sequence_recover_0(PsiBuilder builder_, final int level_) {
+    if (!recursion_guard_(builder_, level_, "sequence_recover_0")) return false;
+    boolean result_ = false;
+    final Marker marker_ = builder_.mark();
+    try {
+      enterErrorRecordingSection(builder_, level_, _SECTION_NOT_);
+      result_ = !sequence_recover_0_0(builder_, level_ + 1);
+    }
+    finally {
+      marker_.rollbackTo();
+      result_ = exitErrorRecordingSection(builder_, result_, level_, false, _SECTION_NOT_, null);
+    }
+    return result_;
+  }
+
+  // (';'|'|'|'('|')'|'['|']'|'{'|'}')
+  private static boolean sequence_recover_0_0(PsiBuilder builder_, final int level_) {
+    if (!recursion_guard_(builder_, level_, "sequence_recover_0_0")) return false;
+    return sequence_recover_0_0_0(builder_, level_ + 1);
+  }
+
+  // ';'|'|'|'('|')'|'['|']'|'{'|'}'
+  private static boolean sequence_recover_0_0_0(PsiBuilder builder_, final int level_) {
+    if (!recursion_guard_(builder_, level_, "sequence_recover_0_0_0")) return false;
+    boolean result_ = false;
+    final Marker marker_ = builder_.mark();
+    try {
+      result_ = consumeToken(builder_, BNF_SEMICOLON);
+      if (!result_) result_ = consumeToken(builder_, BNF_OP_OR);
+      if (!result_) result_ = consumeToken(builder_, BNF_LEFT_PAREN);
+      if (!result_) result_ = consumeToken(builder_, BNF_RIGHT_PAREN);
+      if (!result_) result_ = consumeToken(builder_, BNF_LEFT_BRACKET);
+      if (!result_) result_ = consumeToken(builder_, BNF_RIGHT_BRACKET);
+      if (!result_) result_ = consumeToken(builder_, BNF_LEFT_BRACE);
+      if (!result_) result_ = consumeToken(builder_, BNF_RIGHT_BRACE);
+    }
+    finally {
+      if (!result_) {
+        marker_.rollbackTo();
+      }
+      else {
+        marker_.drop();
       }
     }
     return result_;

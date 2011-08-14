@@ -22,7 +22,6 @@ import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.tree.IElementType;
-import com.intellij.util.ArrayUtil;
 import com.intellij.util.containers.MultiMap;
 import gnu.trove.THashSet;
 import org.intellij.grammar.psi.*;
@@ -708,7 +707,8 @@ public class ParserGenerator {
   }
 
   private static String getElementType(BnfRule rule) {
-    return getAttribute(rule, "elementTypePrefix", "") + Rule.name(rule).toUpperCase();
+    String elementType = Rule.attribute(rule, "elementType", Rule.name(rule));
+    return getAttribute(rule, "elementTypePrefix", "") + elementType.toUpperCase();
   }
 
   private String getElementType(String token) {

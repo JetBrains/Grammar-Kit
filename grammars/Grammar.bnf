@@ -40,8 +40,8 @@
 }
 
 external wrapped grammar ::= parseGrammar grammar_element
-private grammar_element ::= attrs | rule {recoverUntil="grammar_element_recover_until"}
-private grammar_element_recover_until::=!('{'|rule_start)
+private grammar_element ::= attrs | rule {recoverUntil="grammar_element_recover"}
+private grammar_element_recover::=!('{'|rule_start)
 
 rule ::= rule_start expression attrs? ';'? {pin=1 extends=namedImpl implements=named}
 private rule_start ::=modifier* id '::='
@@ -62,7 +62,8 @@ choice ::= choice_body { extends="expression" }
 private choice_body ::= sequence choice_tail*
 private choice_tail ::= '|' sequence {pin=1}
 
-sequence ::= option + { extends="expression" }
+sequence ::= option + { extends="expression" recoverUntil="sequence_recover"}
+private sequence_recover ::= !(';'|'|'|'('|')'|'['|']'|'{'|'}') grammar_element_recover
 
 private option ::= quantified | predicate;
 predicate ::=  predicate_sign  simple { extends="expression" }
@@ -78,6 +79,3 @@ string_literal_expression ::= string { extends="literal_expression" mixin="org.i
 paren_expression ::= simple_paren_expression | alt_choice_expression { extends="expression" implements=parenthesized}
 private simple_paren_expression ::= '(' expression ')' {pin=1}
 private alt_choice_expression::= '{' !attr_start expression '}' {pin=2}
-
-
-

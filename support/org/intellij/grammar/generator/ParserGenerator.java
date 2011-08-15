@@ -538,7 +538,7 @@ public class ParserGenerator {
           nodeCall = generateNodeCall(rule, child, getNextName(funcName, i));
         }
         out("int offset_ = builder_.getCurrentOffset();");
-        out("while (!builder_.eof()) {");
+        out("while (result_ && !builder_.eof()) {");
         out("if (!" + nodeCall + ") break;");
         out("if (offset_ == builder_.getCurrentOffset()) {");
         out("builder_.error(\"Empty element parsed in " + debugFuncName + "\");");

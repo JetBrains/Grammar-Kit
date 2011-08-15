@@ -305,7 +305,7 @@ public class Self implements PsiParser {
     final Marker marker_ = builder_.mark();
     try {
       int offset_ = builder_.getCurrentOffset();
-      while (!builder_.eof()) {
+      while (result_ && !builder_.eof()) {
         if (!attr(builder_, level_ + 1)) break;
         if (offset_ == builder_.getCurrentOffset()) {
           builder_.error("Empty element parsed in attrs_1");
@@ -376,7 +376,7 @@ public class Self implements PsiParser {
     final Marker marker_ = builder_.mark();
     try {
       int offset_ = builder_.getCurrentOffset();
-      while (!builder_.eof()) {
+      while (result_ && !builder_.eof()) {
         if (!choice_0_2_0(builder_, level_ + 1)) break;
         if (offset_ == builder_.getCurrentOffset()) {
           builder_.error("Empty element parsed in choice_0_2");
@@ -444,7 +444,7 @@ public class Self implements PsiParser {
     final Marker marker_ = builder_.mark();
     try {
       int offset_ = builder_.getCurrentOffset();
-      while (!builder_.eof()) {
+      while (result_ && !builder_.eof()) {
         if (!choice_tail(builder_, level_ + 1)) break;
         if (offset_ == builder_.getCurrentOffset()) {
           builder_.error("Empty element parsed in choice_1_1");
@@ -520,7 +520,7 @@ public class Self implements PsiParser {
     final Marker marker_ = builder_.mark();
     try {
       int offset_ = builder_.getCurrentOffset();
-      while (!builder_.eof()) {
+      while (result_ && !builder_.eof()) {
         if (!grammar_0(builder_, level_ + 1)) break;
         if (offset_ == builder_.getCurrentOffset()) {
           builder_.error("Empty element parsed in grammar");
@@ -889,7 +889,7 @@ public class Self implements PsiParser {
     final Marker marker_ = builder_.mark();
     try {
       int offset_ = builder_.getCurrentOffset();
-      while (!builder_.eof()) {
+      while (result_ && !builder_.eof()) {
         if (!modifier(builder_, level_ + 1)) break;
         if (offset_ == builder_.getCurrentOffset()) {
           builder_.error("Empty element parsed in rule_0");
@@ -961,7 +961,7 @@ public class Self implements PsiParser {
     try {
       result_ = option(builder_, level_ + 1);
       int offset_ = builder_.getCurrentOffset();
-      while (!builder_.eof()) {
+      while (result_ && !builder_.eof()) {
         if (!option(builder_, level_ + 1)) break;
         if (offset_ == builder_.getCurrentOffset()) {
           builder_.error("Empty element parsed in sequence");
@@ -1078,7 +1078,7 @@ public class Self implements PsiParser {
     final Marker marker_ = builder_.mark();
     try {
       int offset_ = builder_.getCurrentOffset();
-      while (!builder_.eof()) {
+      while (result_ && !builder_.eof()) {
         if (!modifier(builder_, level_ + 1)) break;
         if (offset_ == builder_.getCurrentOffset()) {
           builder_.error("Empty element parsed in simple_0_0_0_0_0");

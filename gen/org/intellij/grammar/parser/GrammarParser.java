@@ -416,7 +416,7 @@ public class GrammarParser implements PsiParser {
     final Marker marker_ = builder_.mark();
     try {
       int offset_ = builder_.getCurrentOffset();
-      while (!builder_.eof()) {
+      while (result_ && !builder_.eof()) {
         if (!attr(builder_, level_ + 1)) break;
         if (offset_ == builder_.getCurrentOffset()) {
           builder_.error("Empty element parsed in attrs_1");
@@ -486,7 +486,7 @@ public class GrammarParser implements PsiParser {
     final Marker marker_ = builder_.mark();
     try {
       int offset_ = builder_.getCurrentOffset();
-      while (!builder_.eof()) {
+      while (result_ && !builder_.eof()) {
         if (!choice_tail(builder_, level_ + 1)) break;
         if (offset_ == builder_.getCurrentOffset()) {
           builder_.error("Empty element parsed in choice_body_1");
@@ -1004,7 +1004,7 @@ public class GrammarParser implements PsiParser {
     final Marker marker_ = builder_.mark();
     try {
       int offset_ = builder_.getCurrentOffset();
-      while (!builder_.eof()) {
+      while (result_ && !builder_.eof()) {
         if (!modifier(builder_, level_ + 1)) break;
         if (offset_ == builder_.getCurrentOffset()) {
           builder_.error("Empty element parsed in rule_start_0");
@@ -1031,7 +1031,7 @@ public class GrammarParser implements PsiParser {
       enterErrorRecordingSection(builder_, level_, _SECTION_RECOVER_);
       result_ = option(builder_, level_ + 1);
       int offset_ = builder_.getCurrentOffset();
-      while (!builder_.eof()) {
+      while (result_ && !builder_.eof()) {
         if (!option(builder_, level_ + 1)) break;
         if (offset_ == builder_.getCurrentOffset()) {
           builder_.error("Empty element parsed in sequence");
@@ -1220,7 +1220,7 @@ public class GrammarParser implements PsiParser {
     final Marker marker_ = builder_.mark();
     try {
       int offset_ = builder_.getCurrentOffset();
-      while (!builder_.eof()) {
+      while (result_ && !builder_.eof()) {
         if (!modifier(builder_, level_ + 1)) break;
         if (offset_ == builder_.getCurrentOffset()) {
           builder_.error("Empty element parsed in simple_0_0_0_0_0");

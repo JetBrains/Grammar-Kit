@@ -239,7 +239,7 @@ public class Autopin implements PsiParser {
     final Marker marker_ = builder_.mark();
     try {
       int offset_ = builder_.getCurrentOffset();
-      while (!builder_.eof()) {
+      while (result_ && !builder_.eof()) {
         if (!statement(builder_, level_ + 1)) break;
         if (offset_ == builder_.getCurrentOffset()) {
           builder_.error("Empty element parsed in root");

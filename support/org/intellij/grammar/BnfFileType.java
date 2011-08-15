@@ -56,4 +56,9 @@ public class BnfFileType extends LanguageFileType {
   public Icon getIcon() {
     return BnfIcons.FILE;
   }
+
+  @Override
+  public boolean isJVMDebuggingSupported() {
+    return true;
+  }
 }

@@ -18,6 +18,7 @@
     ]]>
   </change-notes>
 
+  <depends optional="true" config-file="plugin-java.xml">com.intellij.modules.java</depends>
   <extensions defaultExtensionNs="com.intellij">
     <errorHandler implementation="com.intellij.diagnostic.ITNReporter"/>
 

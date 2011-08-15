@@ -732,12 +732,14 @@ public class ParserGenerator {
                         tokenTypeClass + ";" +
                         (tokenTypeFactory == null ? "" : "static " + tokenTypeFactory + ";") +
                         (generatePsi ? implPackage + ".*;" : ""), "", true);
+    final Set<String> visited = new THashSet<String>();
     String elementCreateCall =
       elementTypeFactory == null ? "new " + StringUtil.getShortName(elementTypeClass) : StringUtil.getShortName(elementTypeFactory);
     for (String ruleName : ruleMap.keySet()) {
       final BnfRule rule = ruleMap.get(ruleName);
       if (Rule.isPrivate(rule) || Rule.isExternal(rule) || grammarRoot.equals(ruleName)) continue;
       final String elementType = getElementType(rule);
+      if (!visited.add(elementType)) continue;
       out("IElementType " + elementType + " = "
           + elementCreateCall + "(\"" + elementType + "\");");
     }
@@ -755,12 +757,15 @@ public class ParserGenerator {
       out("public static PsiElement createElement(ASTNode node) {");
       out("IElementType type = node.getElementType();");
       String suffix = getRootAttribute(treeRoot, "psiImplClassSuffix", "Impl");
+      visited.clear();
       boolean first = true;
       for (String ruleName : ruleMap.keySet()) {
         final BnfRule rule = ruleMap.get(ruleName);
         if (Rule.isPrivate(rule) || Rule.isExternal(rule) || grammarRoot.equals(ruleName)) continue;
         String psiClass = getRulePsiClassName(rule, ruleName, true) + suffix;
-        out((!first ? "else " : "") + " if (type == " + getElementType(rule) + ") {");
+        String elementType = getElementType(rule);
+        if (!visited.add(elementType)) continue;
+        out((!first ? "else " : "") + " if (type == " + elementType + ") {");
         out("return new " + psiClass + "(node);");
         first = false;
         out("}");

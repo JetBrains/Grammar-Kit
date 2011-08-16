@@ -84,6 +84,11 @@ public abstract class BnfNamedElementImpl extends BnfCompositeElementImpl implem
     return child == null ? null : child.getPsi();
   }
 
+  @Override
+  public PsiElement getNameIdentifier() {
+    return getId();
+  }
+
   public static boolean hasModifier(BnfRule rule, String modifier) {
     for (BnfModifier o : rule.getModifierList()) {
       if (modifier.equals(o.getText())) return true;

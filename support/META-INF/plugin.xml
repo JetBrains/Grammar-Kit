@@ -30,6 +30,7 @@
     <lang.findUsagesProvider language="BNF" implementationClass="org.intellij.grammar.BnfFindUsagesProvider"/>
     <lang.braceMatcher language="BNF" implementationClass="org.intellij.grammar.BnfBraceMatcher"/>
     <lang.psiStructureViewFactory language="BNF" implementationClass="org.intellij.grammar.BnfStructureViewFactory"/>
+    <codeInsight.lineMarkerProvider language="BNF" implementationClass="org.intellij.grammar.BnfRuleLineMarkerProvider"/>
     <lang.commenter language="BNF" implementationClass="org.intellij.grammar.BnfCommenter"/>
     <completion.contributor language="BNF" implementationClass="org.intellij.grammar.BnfCompletionContributor" order="before javaClassName"/>
 

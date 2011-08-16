@@ -30,4 +30,6 @@ public interface BnfIcons {
   Icon RULE = PlatformIcons.METHOD_ICON;
   Icon EXTERNAL_RULE = PlatformIcons.ABSTRACT_METHOD_ICON;
   Icon ATTRIBUTE = PlatformIcons.FIELD_ICON;
+
+  Icon RELATED_METHOD = IconLoader.getIcon("/gutter/implementedMethod.png");
 }

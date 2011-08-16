@@ -15,12 +15,12 @@
  */
 package org.intellij.grammar.psi;
 
-import com.intellij.psi.PsiNamedElement;
+import com.intellij.psi.PsiNameIdentifierOwner;
 
 /**
  * User: gregory
  * Date: 13.07.11
  * Time: 19:02
  */
-public interface BnfNamedElement extends BnfCompositeElement, PsiNamedElement {
+public interface BnfNamedElement extends BnfCompositeElement, PsiNameIdentifierOwner {
 }

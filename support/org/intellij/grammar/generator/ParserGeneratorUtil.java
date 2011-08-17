@@ -185,6 +185,10 @@ public class ParserGeneratorUtil {
     return PsiTreeUtil.getChildrenOfTypeAsList(node, BnfExpression.class);
   }
 
+  public static String getNextName(String funcName, int i) {
+    return funcName + "_" + i;
+  }
+
 
   public static class Rule {
     public static boolean is(PsiElement node) {

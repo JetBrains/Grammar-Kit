@@ -23,21 +23,22 @@ import com.intellij.debugger.engine.DebugProcess;
 import com.intellij.debugger.requests.ClassPrepareRequestor;
 import com.intellij.openapi.application.AccessToken;
 import com.intellij.openapi.application.ReadAction;
+import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.util.Ref;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.psi.*;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.search.PsiNonJavaFileReferenceProcessor;
 import com.intellij.psi.util.PsiTreeUtil;
+import com.intellij.util.PairProcessor;
 import com.intellij.util.containers.FactoryMap;
 import com.sun.jdi.AbsentInformationException;
 import com.sun.jdi.Location;
 import com.sun.jdi.ReferenceType;
 import com.sun.jdi.request.ClassPrepareRequest;
+import org.intellij.grammar.BnfRuleLineMarkerProvider;
 import org.intellij.grammar.generator.ParserGeneratorUtil;
-import org.intellij.grammar.psi.BnfAttr;
-import org.intellij.grammar.psi.BnfExpression;
-import org.intellij.grammar.psi.BnfRule;
+import org.intellij.grammar.psi.*;
 import org.intellij.grammar.psi.impl.BnfDummyElementImpl;
 import org.intellij.grammar.psi.impl.BnfFileImpl;
 import org.jetbrains.annotations.NotNull;
@@ -81,29 +82,33 @@ public class BnfPositionManager implements PositionManager {
     final ReferenceType refType = location.declaringType();
     if (refType == null) throw new NoDataException();
 
-    final String qname = refType.name();
-    if (qname.contains("$")) throw new NoDataException();
+    int dollar = refType.name().indexOf("$");
+    String qname = dollar == -1? refType.name() : refType.name().substring(0, dollar);
 
     final String name = location.method().name();
-    final int line = location.lineNumber() - 1;
+    int lineNumber = location.lineNumber() - 1;
 
     for (PsiFile file : myGrammars.get(qname)) {
-      BnfExpression expression = findExpressionByName(file, name);
-      if (expression != null &&
-          qname.equals(ParserGeneratorUtil.getAttribute(PsiTreeUtil.getParentOfType(expression, BnfRule.class), "parserClass", ""))) {
-        SourcePosition position = SourcePosition.createFromElement(expression);
-        int lineNumber = getLineNumber(expression, qname);
-        if (lineNumber == line) {
-          return position;
+      BnfExpression expression = findExpression(file, name);
+      BnfRule rule = PsiTreeUtil.getParentOfType(expression, BnfRule.class);
+      if (expression != null && qname.equals(ParserGeneratorUtil.getAttribute(rule, "parserClass", ""))) {
+        for (BnfExpression expr : ParserGeneratorUtil.getChildExpressions(expression)) {
+          int line = getLineNumber(expr, qname, lineNumber);
+          if (line == lineNumber) {
+            return SourcePosition.createFromElement(expr);
+          }
         }
-        break;
+        if (lineNumber == getLineNumber(expression, qname, lineNumber)) {
+          return SourcePosition.createFromElement(expression);
+        }
+        return SourcePosition.createFromElement(rule);
       }
     }
     throw new NoDataException();
   }
 
   @Nullable
-  private BnfExpression findExpressionByName(PsiFile file, final String name) {
+  private BnfExpression findExpression(PsiFile file, final String name) {
     final Ref<BnfExpression> result = Ref.create(null);
     file.acceptChildren(new PsiRecursiveElementWalkingVisitor() {
       @Override
@@ -111,8 +116,22 @@ public class BnfPositionManager implements PositionManager {
         if (element instanceof BnfRule) {
           String ruleName = ((BnfRule)element).getName();
           if (ruleName != null && name.startsWith(ruleName)) {
-            if (name.equals(ruleName) || !name.substring(ruleName.length()).matches("(?:_:digit:+)+")) {
+            if (name.equals(ruleName)) {
               result.set(((BnfRule)element).getExpression());
+              stopWalking();
+            }
+            else if (name.substring(ruleName.length()).matches("(?:_\\d+)+")) {
+              BnfRuleLineMarkerProvider
+                .processExpressionNames(ruleName, ((BnfRule)element).getExpression(), new PairProcessor<BnfExpression, String>() {
+                  @Override
+                  public boolean process(BnfExpression expression, String s) {
+                    if (name.equals(s)) {
+                      result.set(expression);
+                      return false;
+                    }
+                    return true;
+                  }
+                });
               stopWalking();
             }
           }
@@ -141,7 +160,7 @@ public class BnfPositionManager implements PositionManager {
   @Override
   public List<Location> locationsOfLine(ReferenceType type, SourcePosition position) throws NoDataException {
     String parserClass = getParserClass(position);
-    int line = getLineNumber(position.getElementAt(), parserClass);
+    int line = getLineNumber(position.getElementAt(), parserClass, 0);
     try {
       return type.locationsOfLine(line + 1);
     }
@@ -151,27 +170,56 @@ public class BnfPositionManager implements PositionManager {
     throw new NoDataException();
   }
 
-  private int getLineNumber(PsiElement element, String parserClass) {
+  private int getLineNumber(PsiElement element, String parserClass, int currentLine) {
     int line = 0;
     AccessToken token = ReadAction.start();
     try {
-      PsiClass aClass = JavaPsiFacade.getInstance(myProcess.getProject()).findClass(parserClass, myProcess.getSearchScope());
       BnfRule rule = PsiTreeUtil.getParentOfType(element, BnfRule.class);
-      if (rule != null) {
-        String name = rule.getName();
-        PsiMethod[] methods = aClass.findMethodsByName(name, false);
-        PsiStatement[] statements = methods.length == 1? methods[0].getBody().getStatements() : PsiStatement.EMPTY_ARRAY;
-        // skip recursion guard, and get the next statement
-        if (statements.length > 1) {
-          int startOffset = statements[1].getTextRange().getStartOffset();
-          line = PsiDocumentManager.getInstance(myProcess.getProject()).getDocument(aClass.getContainingFile()).getLineNumber(startOffset);
-        }
+      PsiClass aClass = JavaPsiFacade.getInstance(myProcess.getProject()).findClass(parserClass, myProcess.getSearchScope());
+      Document document = aClass != null? PsiDocumentManager.getInstance(myProcess.getProject()).getDocument(aClass.getContainingFile()) : null;
+      if (rule != null && document != null) {
+        return getLineNumber(aClass, document, currentLine, rule, element);
       }
     }
     finally {
       token.finish();
     }
     return line;
+  }
+
+  private int getLineNumber(PsiClass aClass, Document document, int currentLine, BnfRule rule, PsiElement element) {
+    String methodName = BnfRuleLineMarkerProvider.getMethodName(rule, element);
+    PsiMethod[] methods = aClass.findMethodsByName(methodName, false);
+    PsiCodeBlock body = methods.length == 1? methods[0].getBody() : null;
+    PsiStatement[] statements = body != null ? body.getStatements() : PsiStatement.EMPTY_ARRAY;
+
+    BnfExpression expr = PsiTreeUtil.getParentOfType(element, BnfExpression.class, false);
+    PsiElement parent = expr != null? expr.getParent() : null;
+    if (parent instanceof BnfExpression) {
+      int index = ParserGeneratorUtil.getChildExpressions((BnfExpression)parent).indexOf(expr);
+      PsiTryStatement statement = PsiTreeUtil.getChildOfType(body, PsiTryStatement.class);
+      if (statement != null) {
+        if (parent instanceof BnfSequence || parent instanceof BnfChoice) {
+          PsiStatement[] tryStatements = statement.getTryBlock().getStatements();
+          for (int i = 0, len = tryStatements.length, j = 0; i < len; i++) {
+            PsiStatement cur = tryStatements[i];
+            String text = cur.getText();
+            boolean misc = text.startsWith("pinned_") || !text.contains("result_");
+            if (currentLine > 0 && currentLine == document.getLineNumber(cur.getTextRange().getStartOffset())) {
+              if (misc && index == j ) return currentLine;
+            }
+            if (misc) continue;
+            if (j ++ == index) {
+              return document.getLineNumber(cur.getTextRange().getStartOffset());
+            }
+          }
+        }
+      }
+    }
+    if (statements.length > 0) {
+      return document.getLineNumber(statements[0].getTextRange().getStartOffset());
+    }
+    return 0;
   }
 
   @Override
@@ -181,10 +229,16 @@ public class BnfPositionManager implements PositionManager {
 
   @NotNull
   private String getParserClass(SourcePosition classPosition) throws NoDataException {
-    BnfRule rule = getRuleAt(classPosition);
-    String parserClass = ParserGeneratorUtil.getAttribute(rule, "parserClass", "");
-    if (StringUtil.isEmpty(parserClass)) throw new NoDataException();
-    return parserClass;
+    AccessToken token = ReadAction.start();
+    try {
+      BnfRule rule = getRuleAt(classPosition);
+      String parserClass = ParserGeneratorUtil.getAttribute(rule, "parserClass", "");
+      if (StringUtil.isEmpty(parserClass)) throw new NoDataException();
+      return parserClass;
+    }
+    finally {
+      token.finish();
+    }
   }
 
   @NotNull

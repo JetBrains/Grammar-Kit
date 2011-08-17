@@ -702,10 +702,6 @@ public class ParserGenerator {
     return "consumeToken(builder_, " + getElementType(tokenName) + ")";
   }
 
-  private static String getNextName(String funcName, int i) {
-    return funcName + "_" + i;
-  }
-
   private static String getElementType(BnfRule rule) {
     String elementType = Rule.attribute(rule, "elementType", Rule.name(rule));
     return getAttribute(rule, "elementTypePrefix", "") + elementType.toUpperCase();

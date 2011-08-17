@@ -43,7 +43,10 @@ external wrapped grammar ::= parseGrammar grammar_element
 private grammar_element ::= attrs | rule {recoverUntil="grammar_element_recover"}
 private grammar_element_recover::=!('{'|rule_start)
 
-rule ::= rule_start expression attrs? ';'? {pin=1 extends=namedImpl implements=named}
+rule ::=
+    rule_start
+    expression
+    attrs? ';'? {pin=1 extends=namedImpl implements=named}
 private rule_start ::=modifier* id '::='
 
 expression ::= choice?
@@ -59,7 +62,7 @@ attr_value ::= (reference_or_token | literal_expression) !'=';
 attr_pattern ::= '(' string ')'
 
 choice ::= choice_body { extends="expression" }
-private choice_body ::= sequence choice_tail*
+private choice_body ::= sequence choice_tail* kjdfnkn_fdg
 private choice_tail ::= '|' sequence {pin=1}
 
 sequence ::= option + { extends="expression" recoverUntil="sequence_recover"}
@@ -72,7 +75,8 @@ quantified ::= paren_opt_expression | simple quantifier? {extends="expression" }
 paren_opt_expression ::='[' expression ']' {pin=1 extends="quantified" implements=parenthesized}
 quantifier ::= '?' | '+' | '*'
 
-private simple ::= !(modifier* id '::=' ) reference_or_token | literal_expression | paren_expression
+private simple ::= !(
+modifier* id '::=' ) reference_or_token | literal_expression | paren_expression
 reference_or_token ::= id  { extends="expression" mixin="org.intellij.grammar.psi.impl.BnfRefOrTokenImpl"}
 literal_expression ::= string_literal_expression | number { extends="expression" }
 string_literal_expression ::= string { extends="literal_expression" mixin="org.intellij.grammar.psi.impl.BnfStringImpl"}

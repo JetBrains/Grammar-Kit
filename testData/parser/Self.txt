@@ -3,13 +3,6 @@ BnfFile:Self.bnf
     BNF_ATTRS
       PsiElement({)('{')
       PsiWhiteSpace('\n  ')
-      BNF_ATTR:maxRecursionLevel
-        PsiElement(id)('maxRecursionLevel')
-        PsiElement(=)('=')
-        BNF_ATTR_VALUE
-          BNF_LITERAL_EXPRESSION
-            PsiElement(number)('100')
-      PsiWhiteSpace('\n  ')
       BNF_ATTR:parserClass
         PsiElement(id)('parserClass')
         PsiElement(=)('=')

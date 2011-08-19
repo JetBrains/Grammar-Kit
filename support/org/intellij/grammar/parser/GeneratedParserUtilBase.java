@@ -29,7 +29,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.ListIterator;
 import java.util.TreeSet;
 
 /**
@@ -58,6 +57,14 @@ public class GeneratedParserUtilBase {
       return true;
     }
   };
+
+  public static boolean recursion_guard_(PsiBuilder builder_, int level_, String funcName_) {
+    if (level_ > 100) {
+      builder_.error("Maximum recursion level (" + 100 + ") reached in" + funcName_);
+      return false;
+    }
+    return true;
+  }
 
   public static boolean consumeToken(PsiBuilder builder, IElementType token) {
     ErrorState state = ErrorState.get(builder);

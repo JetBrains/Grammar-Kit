@@ -39,7 +39,7 @@ import static com.intellij.patterns.PlatformPatterns.psiElement;
  */
 public class BnfCompletionContributor extends CompletionContributor {
   public static final List<String> KNOWN_ATTRIBUTES =
-    Arrays.asList("maxRecursionLevel", "generatePsi", "psiClassPrefix", "psiImplClassSuffix", "psiPackage", "psiImplPackage",
+    Arrays.asList("generatePsi", "psiClassPrefix", "psiImplClassSuffix", "psiPackage", "psiImplPackage",
                   "elementTypeClass", "tokenTypeClass",
                   "parserClass", "stubParserClass", "elementTypeHolderClass",
                   "elementTypePrefix", "elementTypeFactory", "tokenClassType", "tokenTypeFactory", "parserImports",

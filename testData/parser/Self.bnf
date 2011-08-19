@@ -1,5 +1,4 @@
 {
-  maxRecursionLevel=100
   parserClass="org.intellij.grammar.parser.GrammarParser"
   stubParserClass="org.intellij.grammar.parser.GeneratedParserUtilBase"
 

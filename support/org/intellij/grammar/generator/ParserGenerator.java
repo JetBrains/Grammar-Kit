@@ -317,15 +317,6 @@ public class ParserGenerator {
     out("return builder_.getTreeBuilt();");
     out("}");
     newLine();
-    int maxRecursionLevel = getRootAttribute(treeRoot, "maxRecursionLevel", 100);
-    out("public static boolean recursion_guard_(PsiBuilder builder_, int level_, String funcName_) {");
-    out("if (level_ > " + maxRecursionLevel + ") {");
-    out("builder_.error(\"Maximum recursion level (\"+" + maxRecursionLevel + "+\") reached in\"+funcName_);");
-    out("return false;");
-    out("}");
-    out("return true;");
-    out("}");
-    newLine();
     if (!rulesExtendsMap.isEmpty()) {
       out("private static final TokenSet[] EXTENDS_SETS_ = new TokenSet[] {");
       for (String ruleName : rulesExtendsMap.keySet()) {

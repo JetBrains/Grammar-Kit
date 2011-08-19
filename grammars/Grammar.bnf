@@ -62,7 +62,7 @@ attr_value ::= (reference_or_token | literal_expression) !'=';
 attr_pattern ::= '(' string ')'
 
 choice ::= choice_body { extends="expression" }
-private choice_body ::= sequence choice_tail* kjdfnkn_fdg
+private choice_body ::= sequence choice_tail*
 private choice_tail ::= '|' sequence {pin=1}
 
 sequence ::= option + { extends="expression" recoverUntil="sequence_recover"}

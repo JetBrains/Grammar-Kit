@@ -88,14 +88,6 @@ public class Self implements PsiParser {
     return builder_.getTreeBuilt();
   }
 
-  public static boolean recursion_guard_(PsiBuilder builder_, int level_, String funcName_) {
-    if (level_ > 100) {
-      builder_.error("Maximum recursion level ("+100+") reached in"+funcName_);
-      return false;
-    }
-    return true;
-  }
-
   private static final TokenSet[] EXTENDS_SETS_ = new TokenSet[] {
     TokenSet.create(BNF_STRING_LITERAL_EXPRESSION, BNF_LITERAL_EXPRESSION),
     TokenSet.create(BNF_CHOICE, BNF_LITERAL_EXPRESSION, BNF_PAREN_EXPRESSION, BNF_PREDICATE,

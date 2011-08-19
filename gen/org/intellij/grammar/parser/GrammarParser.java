@@ -107,14 +107,6 @@ public class GrammarParser implements PsiParser {
     return builder_.getTreeBuilt();
   }
 
-  public static boolean recursion_guard_(PsiBuilder builder_, int level_, String funcName_) {
-    if (level_ > 100) {
-      builder_.error("Maximum recursion level ("+100+") reached in"+funcName_);
-      return false;
-    }
-    return true;
-  }
-
   private static final TokenSet[] EXTENDS_SETS_ = new TokenSet[] {
     TokenSet.create(BNF_PAREN_OPT_EXPRESSION, BNF_QUANTIFIED),
     TokenSet.create(BNF_STRING_LITERAL_EXPRESSION, BNF_LITERAL_EXPRESSION),
@@ -920,7 +912,9 @@ public class GrammarParser implements PsiParser {
 
 
   /* ********************************************************** */
-  // rule_start expression attrs? ';'?
+  // rule_start
+  //     expression
+  //     attrs? ';'?
   public static boolean rule(PsiBuilder builder_, final int level_) {
     if (!recursion_guard_(builder_, level_, "rule")) return false;
     boolean result_ = false;
@@ -1129,7 +1123,8 @@ public class GrammarParser implements PsiParser {
 
 
   /* ********************************************************** */
-  // !(modifier* id '::=' ) reference_or_token | literal_expression | paren_expression
+  // !(
+  // modifier* id '::=' ) reference_or_token | literal_expression | paren_expression
   static boolean simple(PsiBuilder builder_, final int level_) {
     if (!recursion_guard_(builder_, level_, "simple")) return false;
     boolean result_ = false;
@@ -1150,7 +1145,8 @@ public class GrammarParser implements PsiParser {
     return result_;
   }
 
-  // !(modifier* id '::=' ) reference_or_token
+  // !(
+  // modifier* id '::=' ) reference_or_token
   private static boolean simple_0(PsiBuilder builder_, final int level_) {
     if (!recursion_guard_(builder_, level_, "simple_0")) return false;
     boolean result_ = false;
@@ -1170,7 +1166,8 @@ public class GrammarParser implements PsiParser {
     return result_;
   }
 
-  // !(modifier* id '::=' )
+  // !(
+  // modifier* id '::=' )
   private static boolean simple_0_0(PsiBuilder builder_, final int level_) {
     if (!recursion_guard_(builder_, level_, "simple_0_0")) return false;
     boolean result_ = false;
@@ -1186,7 +1183,8 @@ public class GrammarParser implements PsiParser {
     return result_;
   }
 
-  // (modifier* id '::=' )
+  // (
+  // modifier* id '::=' )
   private static boolean simple_0_0_0(PsiBuilder builder_, final int level_) {
     if (!recursion_guard_(builder_, level_, "simple_0_0_0")) return false;
     return simple_0_0_0_0(builder_, level_ + 1);

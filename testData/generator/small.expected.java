@@ -47,14 +47,6 @@ public class Small implements PsiParser {
     return builder_.getTreeBuilt();
   }
 
-  public static boolean recursion_guard_(PsiBuilder builder_, int level_, String funcName_) {
-    if (level_ > 100) {
-      builder_.error("Maximum recursion level ("+100+") reached in"+funcName_);
-      return false;
-    }
-    return true;
-  }
-
   /* ********************************************************** */
   // ( token )
   public static boolean otherRule(PsiBuilder builder_, final int level_) {

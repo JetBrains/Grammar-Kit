@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <idea-plugin version="2">
   <extensions defaultExtensionNs="com.intellij">
-    <debugger.positionManagerFactory implementation="org.intellij.grammar.debugger.BnfPositionManagerFactory"/>
+    <!--<debugger.positionManagerFactory implementation="org.intellij.grammar.debugger.BnfPositionManagerFactory"/>-->
   </extensions>
 </idea-plugin>

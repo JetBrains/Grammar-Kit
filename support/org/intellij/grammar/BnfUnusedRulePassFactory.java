@@ -35,6 +35,7 @@ import com.intellij.psi.PsiRecursiveElementWalkingVisitor;
 import com.intellij.psi.PsiReference;
 import com.intellij.psi.util.CachedValue;
 import com.intellij.psi.util.CachedValueProvider;
+import com.intellij.psi.util.CachedValuesManager;
 import com.intellij.psi.util.PsiModificationTracker;
 import com.intellij.util.Processor;
 import gnu.trove.THashSet;
@@ -45,7 +46,9 @@ import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 
 /**
  * @author gregsh
@@ -72,7 +75,7 @@ public class BnfUnusedRulePassFactory extends AbstractProjectComponent implement
   private static Set<PsiElement> getUsedElements(final PsiFile file) {
     CachedValue<Set<PsiElement>> value = file.getUserData(USED_RULES_KEY);
     if (value == null) {
-      file.putUserData(USED_RULES_KEY, value = file.getManager().getCachedValuesManager().createCachedValue(new CachedValueProvider<Set<PsiElement>>() {
+      file.putUserData(USED_RULES_KEY, value = CachedValuesManager.getManager(file.getProject()).createCachedValue(new CachedValueProvider<Set<PsiElement>>() {
         @Override
         public Result<Set<PsiElement>> compute() {
           final THashSet<PsiElement> psiElements = new THashSet<PsiElement>();

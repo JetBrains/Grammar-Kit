@@ -19,7 +19,6 @@ import com.intellij.ide.structureView.*;
 import com.intellij.ide.util.treeView.smartTree.TreeElement;
 import com.intellij.lang.PsiStructureViewFactory;
 import com.intellij.navigation.ItemPresentation;
-import com.intellij.openapi.editor.colors.TextAttributesKey;
 import com.intellij.pom.Navigatable;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
@@ -160,11 +159,6 @@ public class BnfStructureViewFactory implements PsiStructureViewFactory {
     @Override
     public Icon getIcon(boolean open) {
       return myElement instanceof BnfAttrs ? PlatformIcons.PACKAGE_ICON : myElement.getIcon(0);
-    }
-
-    @Override
-    public TextAttributesKey getTextAttributesKey() {
-      return null;
     }
   }
 }

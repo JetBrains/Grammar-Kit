@@ -17,7 +17,10 @@ package org.intellij.grammar.psi.impl;
 
 import com.intellij.openapi.util.Ref;
 import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiFile;
+import com.intellij.psi.PsiRecursiveElementWalkingVisitor;
 import com.intellij.util.Processor;
+import org.intellij.grammar.psi.BnfRule;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -63,6 +66,23 @@ public class GrammarUtil {
           return false;
         }
         return true;
+      }
+    });
+    return result.get();
+  }
+
+  public static BnfRule findRuleByName(PsiFile file, final String name) {
+    final Ref<BnfRule> result = Ref.create(null);
+    file.accept(new PsiRecursiveElementWalkingVisitor() {
+      @Override
+      public void visitElement(PsiElement element) {
+        if (element instanceof BnfRule) {
+          if (name.equals(((BnfRule)element).getName())) {
+            result.set((BnfRule)element);
+            stopWalking();
+          }
+        }
+        super.visitElement(element);
       }
     });
     return result.get();

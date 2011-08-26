@@ -1,6 +1,5 @@
 package org.intellij.grammar;
 
-import com.intellij.openapi.application.PathManager;
 import com.intellij.testFramework.ParsingTestCase;
 import org.intellij.grammar.generator.ParserGenerator;
 import org.intellij.grammar.psi.impl.BnfFileImpl;

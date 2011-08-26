@@ -50,5 +50,10 @@
       <add-to-group group-id="ProjectViewPopupMenu" anchor="last"/>
       <keyboard-shortcut keymap="$default" first-keystroke="control shift G"/>
     </action>
+    <action id="Grammars.IntroduceRule" class="org.intellij.grammar.refactor.BnfIntroduceRuleAction" text="Introduce Rule"
+            description="Introduce Rule">
+      <add-to-group group-id="RefactoringMenu" anchor="first"/>
+      <keyboard-shortcut keymap="$default" first-keystroke="control alt R"/>
+    </action>
   </actions>
 </idea-plugin>

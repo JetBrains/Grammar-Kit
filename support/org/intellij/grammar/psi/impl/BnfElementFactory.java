@@ -28,6 +28,7 @@ import org.intellij.grammar.psi.BnfRule;
  * @author gregsh
  */
 public class BnfElementFactory {
+
   public static PsiElement createLeafFromText(Project project, String text) {
     PsiFile fileFromText = PsiFileFactory.getInstance(project).createFileFromText("a.bnf", BnfLanguage.INSTANCE, text);
     return PsiTreeUtil.getDeepestFirst(fileFromText);
@@ -35,6 +36,15 @@ public class BnfElementFactory {
 
   public static BnfExpression createExpressionFromText(Project project, String text) {
     PsiFile fromText = PsiFileFactory.getInstance(project).createFileFromText("a.bnf", "a ::= " + text);
-    return ((BnfRule)fromText.getFirstChild()).getExpression();
+    if ((fromText.getFirstChild()) != null) {
+      return ((BnfRule)fromText.getFirstChild()).getExpression();
+    }
+    return null;
   }
+
+  public static BnfRule createRuleFromText(Project project, String text) {
+      PsiFile fromText = PsiFileFactory.getInstance(project).createFileFromText("a.bnf", text);
+      return (BnfRule)fromText.getFirstChild();
+  }
+
 }

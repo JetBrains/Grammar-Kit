@@ -22,6 +22,7 @@ import com.intellij.notification.Notifications;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.LangDataKeys;
+import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.roots.ProjectRootManager;
 import com.intellij.openapi.vfs.VfsUtil;
@@ -40,6 +41,8 @@ import java.io.File;
  *         Date: 15.07.11 17:12
  */
 public class GenerateAction extends AnAction {
+  
+  private static Logger LOG = Logger.getInstance("org.intellij.grammar.actions.GenerateAction");
 
   @Override
   public void update(AnActionEvent e) {
@@ -70,6 +73,7 @@ public class GenerateAction extends AnAction {
                                                 file.getName() + " parser generation failed",
                                                 ExceptionUtil.getUserStackTrace(ex, ParserGenerator.LOG),
                                                 NotificationType.ERROR), file.getProject());
+      LOG.error(ex);
     }
     finally {
       // refresh everything

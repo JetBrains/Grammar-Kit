@@ -61,9 +61,6 @@ public class BnfAnnotator implements Annotator {
       }
       else if (resolve == null && !(psiElement.getParent() instanceof BnfModifier)) {
         annotationHolder.createInfoAnnotation(psiElement, null).setTextAttributes(SyntaxHighlighterColors.STRING);
-        if (isTokenTextSuspicious(text)) {
-          annotationHolder.createWarningAnnotation(psiElement, "Suspicious lowercase token");
-        }
       }
     }
     else if (psiElement instanceof BnfStringLiteralExpression && psiElement.getParent() instanceof BnfAttrValue) {

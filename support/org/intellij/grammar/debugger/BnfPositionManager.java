@@ -24,11 +24,13 @@ import com.intellij.debugger.requests.ClassPrepareRequestor;
 import com.intellij.openapi.application.AccessToken;
 import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.editor.Document;
+import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Ref;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.psi.*;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.search.PsiNonJavaFileReferenceProcessor;
+import com.intellij.psi.search.PsiSearchHelper;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.util.PairProcessor;
 import com.intellij.util.containers.FactoryMap;
@@ -54,19 +56,19 @@ public class BnfPositionManager implements PositionManager {
   private final Map<String, Collection<PsiFile>> myGrammars = new FactoryMap<String, Collection<PsiFile>>() {
     @Override
     protected Collection<PsiFile> create(String key) {
-      PsiManager manager = PsiManager.getInstance(myProcess.getProject());
+      final Project project = myProcess.getProject();
       final Ref<Collection<PsiFile>> result = Ref.create(null);
-      manager.getSearchHelper().processUsagesInNonJavaFiles(key, new PsiNonJavaFileReferenceProcessor() {
+      PsiSearchHelper.SERVICE.getInstance(project).processUsagesInNonJavaFiles(key, new PsiNonJavaFileReferenceProcessor() {
         @Override
         public boolean process(PsiFile file, int startOffset, int endOffset) {
           if (!(file instanceof BnfFileImpl)) return true;
           BnfAttr attr = PsiTreeUtil.getParentOfType(file.findElementAt(startOffset), BnfAttr.class);
           if (attr == null || !"parserClass".equals(attr.getName())) return true;
           if (result.isNull()) result.set(new LinkedHashSet<PsiFile>(1));
-          result.get().add(file); 
+          result.get().add(file);
           return true;
         }
-      }, GlobalSearchScope.allScope(manager.getProject()));
+      }, GlobalSearchScope.allScope(project));
       return result.isNull()? Collections.<PsiFile>emptyList() : result.get();
     }
   };
@@ -77,6 +79,7 @@ public class BnfPositionManager implements PositionManager {
 
   @Override
   public SourcePosition getSourcePosition(@Nullable Location location) throws NoDataException {
+    if (true) throw new NoDataException();
     if (location == null) throw new NoDataException();
 
     final ReferenceType refType = location.declaringType();
@@ -199,7 +202,7 @@ public class BnfPositionManager implements PositionManager {
       int index = ParserGeneratorUtil.getChildExpressions((BnfExpression)parent).indexOf(expr);
       PsiTryStatement statement = PsiTreeUtil.getChildOfType(body, PsiTryStatement.class);
       if (statement != null) {
-        if (parent instanceof BnfSequence || parent instanceof BnfChoice) {
+        if (parent instanceof BnfSequence || parent instanceof BnfChoice) { // todo add quantified support
           PsiStatement[] tryStatements = statement.getTryBlock().getStatements();
           for (int i = 0, len = tryStatements.length, j = 0; i < len; i++) {
             PsiStatement cur = tryStatements[i];

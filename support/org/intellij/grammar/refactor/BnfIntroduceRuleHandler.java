@@ -23,10 +23,7 @@ import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.SelectionModel;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.TextRange;
-import com.intellij.psi.PsiDocumentManager;
-import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiFile;
-import com.intellij.psi.PsiRecursiveElementWalkingVisitor;
+import com.intellij.psi.*;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.refactoring.RefactoringActionHandler;
 import gnu.trove.THashSet;
@@ -140,19 +137,25 @@ public class BnfIntroduceRuleHandler implements RefactoringActionHandler {
   private static TextRange calcFixedRange(BnfExpression expression, int startOffset, int endOffset) {
     if (expression == null) return null;
     boolean expressionFound = false;
+    int fixedStart = 0;
+    int fixedEnd = 0;
     for (PsiElement child = expression.getFirstChild(); child != null; child = child.getNextSibling()) {
+      if (child instanceof PsiWhiteSpace) continue;
       final TextRange textRange = child.getTextRange();
       if (!expressionFound && (child instanceof BnfExpression)) expressionFound = true;
-      if (textRange.containsOffset(startOffset)) {
-        startOffset = textRange.getStartOffset();
+      if (fixedStart == 0 && textRange.getEndOffset() >= startOffset) {
+        fixedStart = textRange.getStartOffset();
       }
-      if (textRange.containsOffset(endOffset)) {
-        endOffset = textRange.getEndOffset();
+      if (textRange.getStartOffset() <= endOffset) {
+        fixedEnd = textRange.getEndOffset();
+      }
+      else {
         break;
       }
     }
     if (!expressionFound) return expression.getTextRange();
-    return new TextRange(startOffset, endOffset);
+    assert fixedStart < fixedEnd;
+    return new TextRange(fixedStart, fixedEnd);
   }
 
   @Nullable

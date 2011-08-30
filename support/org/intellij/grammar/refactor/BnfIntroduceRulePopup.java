@@ -16,7 +16,9 @@
 
 package org.intellij.grammar.refactor;
 
+import com.intellij.openapi.application.AccessToken;
 import com.intellij.openapi.application.Result;
+import com.intellij.openapi.application.WriteAction;
 import com.intellij.openapi.command.WriteCommandAction;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.editor.Editor;
@@ -66,26 +68,33 @@ public class BnfIntroduceRulePopup extends InplaceVariableIntroducer<BnfExpressi
   @Override
   protected void moveOffsetAfter(boolean success) {
     RangeMarker exprMarker = getExprMarker();
-    if (success) {
-      if (exprMarker != null && exprMarker.isValid()) {
-        myEditor.getCaretModel().moveToOffset(exprMarker.getEndOffset());
-        myEditor.getScrollingModel().scrollToCaret(ScrollType.MAKE_VISIBLE);
-        exprMarker.dispose();
+    final AccessToken accessToken = WriteAction.start();
+    try {
+      if (success) {
+        if (exprMarker != null && exprMarker.isValid()) {
+          myEditor.getCaretModel().moveToOffset(exprMarker.getEndOffset());
+          myEditor.getScrollingModel().scrollToCaret(ScrollType.MAKE_VISIBLE);
+          exprMarker.dispose();
+        }
+        BnfRule rule = getVariable();
+        if (rule == null) return;
+        Document document = myEditor.getDocument();
+        final TextRange textRange = rule.getId().getTextRange();
+        // todo greedy-to-left range markers workaround ??
+        document.deleteString(textRange.getStartOffset() - 1, textRange.getStartOffset());
+        PsiDocumentManager.getInstance(myProject).commitDocument(document);
       }
-      BnfRule rule = getVariable();
-      if (rule == null) return;
-      Document document = myEditor.getDocument();
-      final TextRange textRange = rule.getId().getTextRange();
-      document.deleteString(textRange.getStartOffset() - 1, textRange.getStartOffset());
-      PsiDocumentManager.getInstance(myProject).commitDocument(document);
+      else {
+        if (exprMarker != null && exprMarker.isValid()) {
+          myEditor.getCaretModel().moveToOffset(exprMarker.getStartOffset());
+          myEditor.getScrollingModel().scrollToCaret(ScrollType.MAKE_VISIBLE);
+          exprMarker.dispose();
+        }
+        // todo restore original expression
+      }
     }
-    else {
-      if (exprMarker != null && exprMarker.isValid()) {
-        myEditor.getCaretModel().moveToOffset(exprMarker.getStartOffset());
-        myEditor.getScrollingModel().scrollToCaret(ScrollType.MAKE_VISIBLE);
-        exprMarker.dispose();
-      }
-      // todo restore original expression
+    finally {
+      accessToken.finish();
     }
   }
 

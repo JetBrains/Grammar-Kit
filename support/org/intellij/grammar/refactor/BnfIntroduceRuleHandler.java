@@ -143,8 +143,13 @@ public class BnfIntroduceRuleHandler implements RefactoringActionHandler {
     for (PsiElement child = expression.getFirstChild(); child != null; child = child.getNextSibling()) {
       final TextRange textRange = child.getTextRange();
       if (!expressionFound && (child instanceof BnfExpression)) expressionFound = true;
-      if (textRange.containsOffset(startOffset)) startOffset = textRange.getStartOffset();
-      if (textRange.containsOffset(endOffset)) endOffset = textRange.getEndOffset();
+      if (textRange.containsOffset(startOffset)) {
+        startOffset = textRange.getStartOffset();
+      }
+      if (textRange.containsOffset(endOffset)) {
+        endOffset = textRange.getEndOffset();
+        break;
+      }
     }
     if (!expressionFound) return expression.getTextRange();
     return new TextRange(startOffset, endOffset);

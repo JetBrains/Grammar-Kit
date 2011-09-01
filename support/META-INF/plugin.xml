@@ -13,7 +13,8 @@
         <li>Rename refactoring, rules & attributes find usages, quick structure view</li>
         <li>PsiBuilder-based PEG parser & PSI class hierarchy generation</li>
         <li>BNF files editing, highlighting, navigation and rule name completion</li>
-        <li>Refactorings: inline rule</li>
+        <li>Refactorings: inline rule, introduce rule</li>
+        <li>Intentions: flip choice arguments</li>
     </ul>
     ]]>
   </change-notes>
@@ -37,6 +38,10 @@
     <lang.refactoringSupport language="BNF" implementationClass="org.intellij.grammar.refactor.BnfRefactoringSupportProvider"/>
     <inlineActionHandler implementation="org.intellij.grammar.refactor.BnfInlineRuleActionHandler"/>
     <inspectionToolProvider implementation="org.intellij.grammar.inspection.BnfInspectionToolProvider"/>
+    <intentionAction>
+      <className>org.intellij.grammar.intention.BnfFlipChoiceIntention</className>
+      <category>Grammar</category>
+    </intentionAction>
   </extensions>
   <project-components>
     <component>

@@ -7,7 +7,8 @@ Adds to IntelliJ IDEA Platform support for our custom variant of BNF grammar fil
 - Highlighting
 - Completion
 - Navigation
-- Refactorings: inline rule
+- Refactorings: inline rule, introduce rule
+- Intentions: flip choice arguments
 
 including:
 - PsiBuilder-based PEG parser and PSI hierarchy generation

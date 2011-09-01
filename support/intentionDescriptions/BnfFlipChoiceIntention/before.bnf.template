@@ -1,0 +1,1 @@
+some_rule ::= <spot>option_one | option_two</spot>

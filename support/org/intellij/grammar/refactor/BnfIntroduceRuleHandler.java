@@ -17,26 +17,26 @@
 package org.intellij.grammar.refactor;
 
 import com.intellij.openapi.actionSystem.DataContext;
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.command.WriteCommandAction;
-import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.SelectionModel;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.util.Pass;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.psi.*;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.refactoring.RefactoringActionHandler;
+import com.intellij.refactoring.introduce.inplace.OccurrencesChooser;
 import gnu.trove.THashSet;
-import org.intellij.grammar.psi.BnfAttrs;
-import org.intellij.grammar.psi.BnfExpression;
-import org.intellij.grammar.psi.BnfReferenceOrToken;
-import org.intellij.grammar.psi.BnfRule;
+import org.intellij.grammar.generator.ParserGeneratorUtil;
+import org.intellij.grammar.psi.*;
 import org.intellij.grammar.psi.impl.BnfElementFactory;
 import org.intellij.grammar.psi.impl.BnfFileImpl;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Set;
+import java.util.*;
 
 /**
  * Created by IntelliJ IDEA.
@@ -50,7 +50,12 @@ public class BnfIntroduceRuleHandler implements RefactoringActionHandler {
   public static final String REFACTORING_NAME = "Extract Rule";
 
   @Override
-  public void invoke(@NotNull final Project project, final Editor editor, PsiFile file, @Nullable DataContext dataContext) {
+  public void invoke(final @NotNull Project project, @NotNull PsiElement[] elements, DataContext dataContext) {
+    // do not support this case
+  }
+
+  @Override
+  public void invoke(@NotNull final Project project, final Editor editor, final PsiFile file, @Nullable DataContext dataContext) {
     if (!(file instanceof BnfFileImpl)) return;
 
     final BnfFileImpl bnfFile = (BnfFileImpl)file;
@@ -60,63 +65,134 @@ public class BnfIntroduceRuleHandler implements RefactoringActionHandler {
     final BnfRule currentRule = PsiTreeUtil.getParentOfType(file.findElementAt(startOffset), BnfRule.class);
     if (currentRule == null) return;
     final BnfExpression parentExpression = findParentExpression(bnfFile, startOffset, endOffset - 1);
-    final TextRange fixedRange = calcFixedRange(parentExpression, startOffset, endOffset);
+    final TextRange fixedRange = calcFixedRange(parentExpression, startOffset, endOffset-1);
     if (fixedRange == null) return;
     final BnfRule ruleFromText = BnfElementFactory.createRuleFromText(file.getProject(), "a ::= " + fixedRange.substring(file.getText()));
     BnfExpressionOptimizer.optimize(ruleFromText.getExpression());
+    final BnfExpression[] selectedExpression = findSelectedExpressionsInRange(parentExpression, fixedRange);
 
-    new WriteCommandAction.Simple(project, REFACTORING_NAME, file) {
+    final LinkedHashMap<OccurrencesChooser.ReplaceChoice, List<BnfExpression[]>> occurrencesMap =
+      new LinkedHashMap<OccurrencesChooser.ReplaceChoice, List<BnfExpression[]>>();
+    occurrencesMap.put(OccurrencesChooser.ReplaceChoice.NO, Collections.singletonList(selectedExpression));
+    file.acceptChildren(new PsiRecursiveElementWalkingVisitor() {
       @Override
-      public void run() {
-        rewriteFile(project, editor, currentRule, ruleFromText.getExpression(), fixedRange);
+      public void visitElement(PsiElement element) {
+        if (element instanceof BnfExpression) {
+          findOccurrences((BnfExpression)element, selectedExpression, occurrencesMap);
+        }
+        else if (element instanceof BnfAttrs) {
+          return;
+        }
+        super.visitElement(element);
       }
-    }.execute();
+    });
+    
+    final Pass<OccurrencesChooser.ReplaceChoice> callback = new Pass<OccurrencesChooser.ReplaceChoice>() {
+      @Override
+      public void pass(final OccurrencesChooser.ReplaceChoice choice) {
+        new WriteCommandAction.Simple(project, REFACTORING_NAME, file) {
+          @Override
+          public void run() {
+            final PsiFile containingFile = currentRule.getContainingFile();
+            String newRuleName = choseRuleName(containingFile);
+            String newRuleText = "private  " + newRuleName + " ::= " + ruleFromText.getExpression().getText();
+            BnfRule newRule = BnfElementFactory.createRuleFromText(project, newRuleText);
+            BnfRule addedRule = (BnfRule)currentRule.getParent().addAfter(newRule, currentRule);
+            currentRule.getParent().addAfter(BnfElementFactory.createLeafFromText(project, "\n"), currentRule);
+            if (choice == OccurrencesChooser.ReplaceChoice.ALL) {
+              List<BnfExpression[]> exprToReplace = occurrencesMap.get(OccurrencesChooser.ReplaceChoice.ALL);
+              replaceUsages(project, exprToReplace, addedRule.getId());
+            }
+            else {
+              List<BnfExpression[]> exprToReplace = occurrencesMap.get(OccurrencesChooser.ReplaceChoice.NO);
+              replaceUsages(project, exprToReplace, addedRule.getId());
+            }
+            final BnfIntroduceRulePopup popup = new BnfIntroduceRulePopup(project, editor, addedRule, addedRule.getExpression());
+
+            editor.getCaretModel().moveToOffset(addedRule.getTextOffset());
+            PsiDocumentManager.getInstance(project).doPostponedOperationsAndUnblockDocument(editor.getDocument());
+            popup.performInplaceRename();
+          }
+        }.execute();
+      }
+    };
+    if(ApplicationManager.getApplication().isUnitTestMode()){
+      callback.pass(OccurrencesChooser.ReplaceChoice.ALL);
+    } else {
+      new OccurrencesChooser<BnfExpression[]>(editor){
+        @Override
+        protected TextRange getOccurrenceRange(BnfExpression[] occurrence) {
+          return new TextRange(occurrence[0].getTextRange().getStartOffset(), occurrence[occurrence.length-1].getTextRange().getEndOffset());
+        }
+      }.showChooser(callback, occurrencesMap);
+    }
   }
 
-  @Override
-  public void invoke(final @NotNull Project project, @NotNull PsiElement[] elements, DataContext dataContext) {
-    // do not support this case
+  private static BnfExpression[] findSelectedExpressionsInRange(BnfExpression parentExpression, TextRange range) {
+    if (parentExpression.getTextRange().equals(range)) return new BnfExpression[]{parentExpression};
+    LinkedList<BnfExpression> list = new LinkedList<BnfExpression>();
+    for (PsiElement c = parentExpression.getFirstChild(); c != null; c = c.getNextSibling()) {
+      if (c instanceof BnfExpression && c.getTextRange().intersects(range)) {
+        list.add((BnfExpression)c);
+      }
+    }
+    assert !list.isEmpty();
+    return list.toArray(new BnfExpression[list.size()]);
   }
 
-
-  private void rewriteFile(final Project project,
-                           Editor editor,
-                           @NotNull BnfRule currentRule,
-                           BnfExpression expr,
-                           TextRange fixedRange) {
-    final PsiFile containingFile = currentRule.getContainingFile();
-    String newRuleName = choseRuleName(containingFile);
-    String newRuleText = "private  " + newRuleName + " ::= " + expr.getText();
-
-    PsiDocumentManager psiDocumentManager = PsiDocumentManager.getInstance(project);
-    Document document = editor.getDocument();
-    psiDocumentManager.doPostponedOperationsAndUnblockDocument(document);
-    int newRuleOffset = document.getLineEndOffset(document.getLineNumber(currentRule.getTextRange().getEndOffset()));
-    document.insertString(newRuleOffset, "\n" + newRuleText);
-    document.replaceString(fixedRange.getStartOffset(), fixedRange.getEndOffset(), newRuleName);
-    newRuleOffset += newRuleName.length() - fixedRange.getLength();
-    psiDocumentManager.commitDocument(document);
-
-    BnfRule addedRule = PsiTreeUtil.getParentOfType(containingFile.findElementAt(newRuleOffset + 2), BnfRule.class, false);
-    BnfExpression expression = PsiTreeUtil.getParentOfType(containingFile.findElementAt(fixedRange.getStartOffset()), BnfExpression.class, false);
-
-    final BnfExpression parentExpression =
-      PsiTreeUtil.getParentOfType(containingFile.findElementAt(fixedRange.getStartOffset()), BnfExpression.class);
-    BnfExpressionOptimizer.optimize(parentExpression);
-
-    psiDocumentManager.doPostponedOperationsAndUnblockDocument(document);
-    final BnfIntroduceRulePopup popup = new BnfIntroduceRulePopup(project, editor, addedRule, expression);
-
-    editor.getCaretModel().moveToOffset(addedRule.getTextOffset());
-    popup.performInplaceRename();
+  private static void replaceUsages(Project project, List<BnfExpression[]> exprToReplace, PsiElement id) {
+    for (BnfExpression[] expression : exprToReplace) {
+      replaceExpression(project, expression, id);
+    }
   }
 
-  private String choseRuleName(PsiFile containingFile) {
+  private static void replaceExpression(Project project, BnfExpression[] oldExpression, PsiElement id) {
+    PsiElement parent = oldExpression[0].getParent();
+    parent.addBefore(BnfElementFactory.createRuleFromText(project, "a::="+id.getText()).getExpression(), oldExpression[0]);
+    parent.deleteChildRange(oldExpression[0], oldExpression[oldExpression.length - 1]);
+    //BnfExpressionOptimizer.optimize(parent);
+  }
+
+  private static void findOccurrences(BnfExpression expression,
+                                      BnfExpression[] selectedExpressions,
+                                      Map<OccurrencesChooser.ReplaceChoice, List<BnfExpression[]>> occurrencesMap) {
+    if (selectedExpressions.length == 1) {
+      if (equalsElement(expression, selectedExpressions[0])) {
+        addOccurrence(OccurrencesChooser.ReplaceChoice.ALL, occurrencesMap, expression);
+      }
+    }
+    else if (!isOneTokenExpression(expression)) {
+      final PsiElement selectedParent = selectedExpressions[0].getParent();
+      if (ParserGeneratorUtil.getEffectiveType(expression) != ParserGeneratorUtil.getEffectiveType(selectedParent)) return; 
+      int pos = 0;
+      BnfExpression[] result = new BnfExpression[selectedExpressions.length];
+      for (PsiElement c = expression.getFirstChild(); c != null; c = c.getNextSibling()) {
+        if (!(c instanceof BnfExpression)) continue;
+        if (equalsElement((BnfExpression)c, selectedExpressions[pos])) {
+          result[pos] = (BnfExpression)c;
+          if (++ pos == selectedExpressions.length) {
+            addOccurrence(OccurrencesChooser.ReplaceChoice.ALL, occurrencesMap, result.clone());
+            pos = 0;
+          }
+        }
+      }
+    }
+  }
+
+  private static void addOccurrence(OccurrencesChooser.ReplaceChoice choice,
+                                    Map<OccurrencesChooser.ReplaceChoice, List<BnfExpression[]>> occurrencesMap,
+                                    BnfExpression... expressions) {
+    List<BnfExpression[]> list = occurrencesMap.get(choice);
+    if (list == null) occurrencesMap.put(choice, list = new LinkedList<BnfExpression[]>());
+    list.add(expressions);
+  }
+
+  private static String choseRuleName(PsiFile containingFile) {
     final Set<String> existingNames = new THashSet<String>();
     containingFile.accept(new PsiRecursiveElementWalkingVisitor() {
       @Override
       public void visitElement(PsiElement element) {
-        if (element instanceof BnfAttrs) return; 
+        if (element instanceof BnfAttrs) return;
         if (element instanceof BnfReferenceOrToken) {
           existingNames.add(((BnfReferenceOrToken)element).getId().getText());
         }
@@ -126,9 +202,9 @@ public class BnfIntroduceRuleHandler implements RefactoringActionHandler {
         super.visitElement(element);
       }
     });
-    String name = "newRule";
+    String name = "rule";
     for (int i = 1; existingNames.contains(name); i++) {
-      name = "newRule" + i;
+      name = "rule" + i;
     }
     return name;
   }
@@ -159,11 +235,35 @@ public class BnfIntroduceRuleHandler implements RefactoringActionHandler {
   }
 
   @Nullable
-  private static BnfExpression findParentExpression(BnfFileImpl file, int startOffset, int endOffset) {
+  private static BnfExpression findParentExpression(PsiFile file, int startOffset, int endOffset) {
     final PsiElement startElement = file.findElementAt(startOffset);
     final PsiElement endElement = file.findElementAt(endOffset);
     if (startElement == null || endElement == null) return null;
     final PsiElement commonParent = PsiTreeUtil.findCommonParent(startElement, endElement);
     return PsiTreeUtil.getParentOfType(commonParent, BnfExpression.class, false);
+  }
+
+
+  private static boolean equalsElement(BnfExpression e1, BnfExpression e2) {
+    if (e1 == null) return e2 == null;
+    else if (e2 == null) return false;
+    if (ParserGeneratorUtil.getEffectiveType(e1) != ParserGeneratorUtil.getEffectiveType(e2)) return false;
+    if (isOneTokenExpression(e1)) {
+      return e1.getText().equals(e2.getText());
+    }
+    else {
+      for (PsiElement c1 = e1.getFirstChild(), c2 = e2.getFirstChild(); ;) {
+        if (c1 == null || c2 == null) return c1 == c2;
+        boolean f1 = c1 instanceof BnfExpression;
+        boolean f2 = c2 instanceof BnfExpression;
+        if (f1 && f2 && !equalsElement((BnfExpression)c1, (BnfExpression)c2)) return false;
+        if (f1 && f2 || !f1) c1 = c1.getNextSibling();
+        if (f1 && f2 || !f2) c2 = c2.getNextSibling();
+      }
+    }
+  }
+
+  private static boolean isOneTokenExpression(BnfExpression e1) {
+    return e1 instanceof BnfLiteralExpression || e1 instanceof BnfReferenceOrToken;
   }
 }

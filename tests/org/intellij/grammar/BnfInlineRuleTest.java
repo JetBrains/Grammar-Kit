@@ -84,7 +84,7 @@ public class BnfInlineRuleTest extends LightCodeInsightTestCase {
   public void testParenOptionalChoice() throws Exception { doTest("inline ::= (tok en)?; rule ::= (x | inline) [x | inline] {x | inline}", "rule ::= (x | (tok en)?) [x | (tok en)?] {x | (tok en)?}"); }
 
 
-  private void doTest(/*@Language("BNF")*/ String text, /*@Language("BNF")*/ String expected) {
+  private static void doTest(/*@Language("BNF")*/ String text, /*@Language("BNF")*/ String expected) {
     PsiFile file = createFile("a.bnf", text);
     BnfRule rule = PsiTreeUtil.getChildOfType(file, BnfRule.class);
     assertNotNull(rule);

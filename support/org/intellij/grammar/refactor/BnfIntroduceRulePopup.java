@@ -16,6 +16,8 @@
 
 package org.intellij.grammar.refactor;
 
+import com.intellij.codeInsight.lookup.LookupManager;
+import com.intellij.codeInsight.lookup.impl.LookupImpl;
 import com.intellij.openapi.application.AccessToken;
 import com.intellij.openapi.application.Result;
 import com.intellij.openapi.application.WriteAction;
@@ -25,9 +27,7 @@ import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.RangeMarker;
 import com.intellij.openapi.editor.ScrollType;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.util.TextRange;
 import com.intellij.psi.PsiDocumentManager;
-import com.intellij.psi.PsiNamedElement;
 import com.intellij.refactoring.introduce.inplace.InplaceVariableIntroducer;
 import com.intellij.ui.NonFocusableCheckBox;
 import org.intellij.grammar.psi.BnfExpression;
@@ -43,26 +43,20 @@ import java.awt.event.ActionListener;
  * @author gregsh
  */
 public class BnfIntroduceRulePopup extends InplaceVariableIntroducer<BnfExpression> {
+  private static final String PRIVATE = "private ";
 
   private final JPanel myPanel = new JPanel(new GridBagLayout());
   private final JCheckBox myCheckBox = new NonFocusableCheckBox("Declare private");
 
-
-  public BnfIntroduceRulePopup(Project project, Editor editor, PsiNamedElement elementToRename, BnfExpression expr) {
-    super(elementToRename, editor, project, "Introduce Rule", new BnfExpression[0], expr);
+  public BnfIntroduceRulePopup(Project project, Editor editor, BnfRule rule, BnfExpression expr) {
+    super(rule, editor, project, "Introduce Rule", new BnfExpression[0], expr);
 
     myCheckBox.setSelected(true);
     myCheckBox.setMnemonic('p');
 
     myPanel.setBorder(null);
     myPanel.add(myCheckBox, new GridBagConstraints(0, 1, 1, 1, 1, 0, GridBagConstraints.NORTHWEST, GridBagConstraints.HORIZONTAL, new Insets(5, 5, 5, 5), 0, 0));
-
     myPanel.add(Box.createVerticalBox(), new GridBagConstraints(0, 2, 1, 1, 1, 1, GridBagConstraints.NORTHWEST, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
-  }
-
-  @Override
-  protected BnfRule getVariable() {
-    return (BnfRule)super.getVariable();
   }
 
   @Override
@@ -70,27 +64,25 @@ public class BnfIntroduceRulePopup extends InplaceVariableIntroducer<BnfExpressi
     RangeMarker exprMarker = getExprMarker();
     final AccessToken accessToken = WriteAction.start();
     try {
+      Document document = myEditor.getDocument();
       if (success) {
-        if (exprMarker != null && exprMarker.isValid()) {
-          myEditor.getCaretModel().moveToOffset(exprMarker.getEndOffset());
-          myEditor.getScrollingModel().scrollToCaret(ScrollType.MAKE_VISIBLE);
-          exprMarker.dispose();
-        }
-        BnfRule rule = getVariable();
-        if (rule == null) return;
-        Document document = myEditor.getDocument();
-        final TextRange textRange = rule.getId().getTextRange();
+        int exprOffset = myExprMarker.getStartOffset();
+        int lineOffset = getLineOffset(document, exprOffset);
         // todo greedy-to-left range markers workaround ??
-        document.deleteString(textRange.getStartOffset() - 1, textRange.getStartOffset());
-        PsiDocumentManager.getInstance(myProject).commitDocument(document);
+        int idx = document.getText().indexOf(PRIVATE, lineOffset);
+        idx = idx > -1 && idx < exprOffset? idx + PRIVATE.length() : document.getText().indexOf(" ", lineOffset);
+        if (idx > -1 && idx < exprOffset) {
+          document.deleteString(idx, idx + 1);
+        }
       }
       else {
-        if (exprMarker != null && exprMarker.isValid()) {
-          myEditor.getCaretModel().moveToOffset(exprMarker.getStartOffset());
-          myEditor.getScrollingModel().scrollToCaret(ScrollType.MAKE_VISIBLE);
-          exprMarker.dispose();
-        }
         // todo restore original expression
+      }
+      PsiDocumentManager.getInstance(myProject).commitDocument(document);
+      if (exprMarker != null && exprMarker.isValid()) {
+        myEditor.getCaretModel().moveToOffset(exprMarker.getStartOffset());
+        myEditor.getScrollingModel().scrollToCaret(ScrollType.MAKE_VISIBLE);
+        exprMarker.dispose();
       }
     }
     finally {
@@ -101,20 +93,49 @@ public class BnfIntroduceRulePopup extends InplaceVariableIntroducer<BnfExpressi
   @Override
   protected JComponent getComponent() {
     myCheckBox.addActionListener(new ActionListener() {
-      final BnfPrivateListener privateListener = new BnfPrivateListener(myEditor);
 
       @Override
       public void actionPerformed(ActionEvent e) {
         new WriteCommandAction(myProject, BnfIntroduceRuleHandler.REFACTORING_NAME, BnfIntroduceRuleHandler.REFACTORING_NAME) {
           @Override
           protected void run(Result result) throws Throwable {
-            final BnfRule variable = getVariable();
-            assert variable != null;
-            privateListener.perform(myCheckBox.isSelected(), variable);
+            perform(myCheckBox.isSelected());
           }
         }.execute();
       }
     });
     return myPanel;
+  }
+
+  public void perform(final boolean generatePrivate) {
+    final Runnable runnable = new Runnable() {
+      public void run() {
+        final Document document = myEditor.getDocument();
+
+        int exprOffset = myExprMarker.getStartOffset();
+        final int lineOffset = getLineOffset(document, exprOffset);
+        if (generatePrivate) {
+          document.insertString(lineOffset, PRIVATE);
+        }
+        else {
+          int idx = document.getText().indexOf(PRIVATE, lineOffset);
+          if (idx > -1 && idx < exprOffset) {
+            document.deleteString(idx, idx + PRIVATE.length());
+          }
+        }
+        PsiDocumentManager.getInstance(myProject).commitDocument(document);
+      }
+    };
+    final LookupImpl lookup = (LookupImpl)LookupManager.getActiveLookup(myEditor);
+    if (lookup != null) {
+      lookup.performGuardedChange(runnable);
+    }
+    else {
+      runnable.run();
+    }
+  }
+
+  private int getLineOffset(Document document, final int offset) {
+    return document.getLineStartOffset(document.getLineNumber(offset));
   }
 }

@@ -29,6 +29,9 @@ import org.intellij.grammar.psi.BnfRule;
  */
 public class BnfElementFactory {
 
+  private BnfElementFactory() {
+  }
+
   public static PsiElement createLeafFromText(Project project, String text) {
     PsiFile fileFromText = PsiFileFactory.getInstance(project).createFileFromText("a.bnf", BnfLanguage.INSTANCE, text);
     return PsiTreeUtil.getDeepestFirst(fileFromText);

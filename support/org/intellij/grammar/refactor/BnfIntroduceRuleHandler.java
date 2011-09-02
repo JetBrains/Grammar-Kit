@@ -30,9 +30,13 @@ import com.intellij.refactoring.RefactoringActionHandler;
 import com.intellij.refactoring.introduce.inplace.OccurrencesChooser;
 import gnu.trove.THashSet;
 import org.intellij.grammar.generator.ParserGeneratorUtil;
-import org.intellij.grammar.psi.*;
+import org.intellij.grammar.psi.BnfAttrs;
+import org.intellij.grammar.psi.BnfExpression;
+import org.intellij.grammar.psi.BnfReferenceOrToken;
+import org.intellij.grammar.psi.BnfRule;
 import org.intellij.grammar.psi.impl.BnfElementFactory;
 import org.intellij.grammar.psi.impl.BnfFileImpl;
+import org.intellij.grammar.psi.impl.GrammarUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -157,18 +161,18 @@ public class BnfIntroduceRuleHandler implements RefactoringActionHandler {
                                       BnfExpression[] selectedExpressions,
                                       Map<OccurrencesChooser.ReplaceChoice, List<BnfExpression[]>> occurrencesMap) {
     if (selectedExpressions.length == 1) {
-      if (equalsElement(expression, selectedExpressions[0])) {
+      if (GrammarUtil.equalsElement(expression, selectedExpressions[0])) {
         addOccurrence(OccurrencesChooser.ReplaceChoice.ALL, occurrencesMap, expression);
       }
     }
-    else if (!isOneTokenExpression(expression)) {
+    else if (!GrammarUtil.isOneTokenExpression(expression)) {
       final PsiElement selectedParent = selectedExpressions[0].getParent();
       if (ParserGeneratorUtil.getEffectiveType(expression) != ParserGeneratorUtil.getEffectiveType(selectedParent)) return; 
       int pos = 0;
       BnfExpression[] result = new BnfExpression[selectedExpressions.length];
       for (PsiElement c = expression.getFirstChild(); c != null; c = c.getNextSibling()) {
         if (!(c instanceof BnfExpression)) continue;
-        if (equalsElement((BnfExpression)c, selectedExpressions[pos])) {
+        if (GrammarUtil.equalsElement((BnfExpression)c, selectedExpressions[pos])) {
           result[pos] = (BnfExpression)c;
           if (++ pos == selectedExpressions.length) {
             addOccurrence(OccurrencesChooser.ReplaceChoice.ALL, occurrencesMap, result.clone());
@@ -241,29 +245,5 @@ public class BnfIntroduceRuleHandler implements RefactoringActionHandler {
     if (startElement == null || endElement == null) return null;
     final PsiElement commonParent = PsiTreeUtil.findCommonParent(startElement, endElement);
     return PsiTreeUtil.getParentOfType(commonParent, BnfExpression.class, false);
-  }
-
-
-  private static boolean equalsElement(BnfExpression e1, BnfExpression e2) {
-    if (e1 == null) return e2 == null;
-    else if (e2 == null) return false;
-    if (ParserGeneratorUtil.getEffectiveType(e1) != ParserGeneratorUtil.getEffectiveType(e2)) return false;
-    if (isOneTokenExpression(e1)) {
-      return e1.getText().equals(e2.getText());
-    }
-    else {
-      for (PsiElement c1 = e1.getFirstChild(), c2 = e2.getFirstChild(); ;) {
-        if (c1 == null || c2 == null) return c1 == c2;
-        boolean f1 = c1 instanceof BnfExpression;
-        boolean f2 = c2 instanceof BnfExpression;
-        if (f1 && f2 && !equalsElement((BnfExpression)c1, (BnfExpression)c2)) return false;
-        if (f1 && f2 || !f1) c1 = c1.getNextSibling();
-        if (f1 && f2 || !f2) c2 = c2.getNextSibling();
-      }
-    }
-  }
-
-  private static boolean isOneTokenExpression(BnfExpression e1) {
-    return e1 instanceof BnfLiteralExpression || e1 instanceof BnfReferenceOrToken;
   }
 }

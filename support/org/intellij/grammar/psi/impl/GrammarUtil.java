@@ -20,6 +20,10 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiRecursiveElementWalkingVisitor;
 import com.intellij.util.Processor;
+import org.intellij.grammar.generator.ParserGeneratorUtil;
+import org.intellij.grammar.psi.BnfExpression;
+import org.intellij.grammar.psi.BnfLiteralExpression;
+import org.intellij.grammar.psi.BnfReferenceOrToken;
 import org.intellij.grammar.psi.BnfRule;
 import org.jetbrains.annotations.Nullable;
 
@@ -86,5 +90,28 @@ public class GrammarUtil {
       }
     });
     return result.get();
+  }
+
+  public static boolean equalsElement(BnfExpression e1, BnfExpression e2) {
+    if (e1 == null) return e2 == null;
+    if (e2 == null) return false;
+    if (ParserGeneratorUtil.getEffectiveType(e1) != ParserGeneratorUtil.getEffectiveType(e2)) return false;
+    if (isOneTokenExpression(e1)) {
+      return e1.getText().equals(e2.getText());
+    }
+    else {
+      for (PsiElement c1 = e1.getFirstChild(), c2 = e2.getFirstChild(); ;) {
+        if (c1 == null || c2 == null) return c1 == c2;
+        boolean f1 = c1 instanceof BnfExpression;
+        boolean f2 = c2 instanceof BnfExpression;
+        if (f1 && f2 && !equalsElement((BnfExpression)c1, (BnfExpression)c2)) return false;
+        if (f1 && f2 || !f1) c1 = c1.getNextSibling();
+        if (f1 && f2 || !f2) c2 = c2.getNextSibling();
+      }
+    }
+  }
+
+  public static boolean isOneTokenExpression(BnfExpression e1) {
+    return e1 instanceof BnfLiteralExpression || e1 instanceof BnfReferenceOrToken;
   }
 }

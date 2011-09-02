@@ -29,7 +29,8 @@ public class BnfInspectionToolProvider implements InspectionToolProvider {
   public Class[] getInspectionClasses() {
     return new Class[]{
       BnfSuspiciousTokenInspection.class,
-      BnfDuplicateRuleInspection.class
+      BnfDuplicateRuleInspection.class,
+      BnfIdenticalChoiceBranchesInspection.class
     };
   }
 }

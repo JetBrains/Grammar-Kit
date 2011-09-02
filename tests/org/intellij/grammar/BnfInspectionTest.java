@@ -16,14 +16,20 @@ public class BnfInspectionTest extends JavaCodeInsightFixtureTestCase {
     return  "testData/inspection";
   }
   public void testDuplicateDefinition(){
-    doTest();
+    doTest("<warning>rule</warning>::= blablabla rule1" +"\n" + "<warning>rule</warning> ::=aaaaaaaaa");
   }
   public void testSuspiciousToken(){
-    doTest();
+    doTest("rule ::= <warning>suspicious_token</warning>");
+  }
+  public void testIdenticalBranchInChoice(){
+    doTest("grammar ::= <warning>token</warning>|<warning>token</warning>");
+  }
+  public void testComplexIdenticalBranchInChoice(){
+    doTest("grammar ::= a b (c | <warning>(d e*)</warning>|<warning>(d /* */ e*)</warning>)");
   }
 
-  private void doTest() {
-    myFixture.configureByFile(getTestName(false)+".bnf");
+  private void doTest(String text) {
+    myFixture.configureByText("a.bnf", text);
     myFixture.enableInspections(new BnfInspectionToolProvider());
     myFixture.checkHighlighting(true, false, false);
   }

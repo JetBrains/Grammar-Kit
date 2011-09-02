@@ -17,9 +17,11 @@ public class BnfFlipChoiceIntentionTest extends LightCodeInsightTestCase {
   public void testCaretAtSeparator() throws Exception {doTest("rule ::= a <caret>| b","rule ::= b | a");}
   public void testCaretBeforeSeparator() throws Exception {doTest("rule ::= a<caret> | b","rule ::= b | a");}
   public void testCaretAfterSeparator() throws Exception {doTest("rule ::= a | <caret>b","rule ::= b | a");}
+  public void testCaretInComment() throws Exception {doTest("rule ::= a | /* <caret>*/ b","rule ::= b | /* */ a");}
   public void testMultipleChoice() throws Exception {doTest("rule ::= a | b | c <caret>| d","rule ::= a | b | d | c");}
   public void testComplexCase() throws Exception {doTest("rule ::= a | b | c c c <caret>| d [d d]","rule ::= a | b | d [d d] | c c c");}
-  private void doTest(/*@Language("BNF")*/ String text, /*@Language("BNF")*/ String expected) throws IOException {
+
+  private static void doTest(/*@Language("BNF")*/ String text, /*@Language("BNF")*/ String expected) throws IOException {
     configureFromFileText("a.bnf", text);
     IntentionAction action = new BnfFlipChoiceIntention();
     assertTrue("intention not available", action.isAvailable(getProject(), myEditor, myFile));

@@ -24,7 +24,6 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiRecursiveElementWalkingVisitor;
 import com.intellij.psi.PsiReference;
-import org.intellij.grammar.BnfAnnotator;
 import org.intellij.grammar.psi.impl.BnfFileImpl;
 import org.intellij.grammar.psi.impl.BnfRefOrTokenImpl;
 import org.jetbrains.annotations.Nls;
@@ -78,12 +77,18 @@ public class BnfSuspiciousTokenInspection extends LocalInspectionTool {
           PsiReference reference = element.getReference();
           Object resolve = reference == null ? null : reference.resolve();
           final String text = element.getText();
-          if (resolve == null && BnfAnnotator.isTokenTextSuspicious(text)) {
+          if (resolve == null && isTokenTextSuspicious(text)) {
             problemsHolder.registerProblem(element, "'"+text+"' token looks like a reference to a missing rule", new CreateRuleFromTokenFix(text));
           }
         }
         super.visitElement(element);
       }
     });
+  }
+
+  public static boolean isTokenTextSuspicious(String text) {
+    boolean isLowecase = text.equals(text.toLowerCase());
+    boolean isUppercase = !isLowecase && text.equals(text.toUpperCase());
+    return !isLowecase && !isUppercase || isLowecase && text.contains("_");
   }
 }

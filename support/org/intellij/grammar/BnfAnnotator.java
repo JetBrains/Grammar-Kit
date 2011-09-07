@@ -79,8 +79,4 @@ public class BnfAnnotator implements Annotator {
       }
     }
   }
-
-  public static boolean isTokenTextSuspicious(String text) {
-    return text.contains("_") && text.equals(text.toLowerCase());
-  }
 }

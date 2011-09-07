@@ -1,6 +1,6 @@
 package org.intellij.grammar;
 
-import com.intellij.testFramework.fixtures.JavaCodeInsightFixtureTestCase;
+import com.intellij.testFramework.fixtures.LightCodeInsightFixtureTestCase;
 import org.intellij.grammar.inspection.BnfInspectionToolProvider;
 
 /**
@@ -10,9 +10,9 @@ import org.intellij.grammar.inspection.BnfInspectionToolProvider;
  *
  * @author Vadim Romansky
  */
-public class BnfInspectionTest extends JavaCodeInsightFixtureTestCase {
+public class BnfInspectionTest extends LightCodeInsightFixtureTestCase {
   @Override
-  public String getTestDataPath() {
+  public String getBasePath() {
     return  "testData/inspection";
   }
   public void testDuplicateDefinition(){

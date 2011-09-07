@@ -2,14 +2,14 @@ package org.intellij.grammar;
 
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.util.PsiTreeUtil;
-import com.intellij.testFramework.LightCodeInsightTestCase;
+import com.intellij.testFramework.fixtures.LightCodeInsightFixtureTestCase;
 import org.intellij.grammar.psi.BnfRule;
 import org.intellij.grammar.refactor.BnfInlineRuleProcessor;
 
 /**
  * @author gregsh
  */
-public class BnfInlineRuleTest extends LightCodeInsightTestCase {
+public class BnfInlineRuleTest extends LightCodeInsightFixtureTestCase {
 
   public void testTokenSimple() throws Exception { doTest("inline ::= token; rule ::= inline", "rule ::= token"); }
   public void testTokenQuantified() throws Exception { doTest("inline ::= token; rule ::= inline? inline+ inline*", "rule ::= token? token+ token*"); }
@@ -84,8 +84,8 @@ public class BnfInlineRuleTest extends LightCodeInsightTestCase {
   public void testParenOptionalChoice() throws Exception { doTest("inline ::= (tok en)?; rule ::= (x | inline) [x | inline] {x | inline}", "rule ::= (x | (tok en)?) [x | (tok en)?] {x | (tok en)?}"); }
 
 
-  private static void doTest(/*@Language("BNF")*/ String text, /*@Language("BNF")*/ String expected) {
-    PsiFile file = createFile("a.bnf", text);
+  private void doTest(/*@Language("BNF")*/ String text, /*@Language("BNF")*/ String expected) {
+    PsiFile file = myFixture.configureByText("a.bnf", text);
     BnfRule rule = PsiTreeUtil.getChildOfType(file, BnfRule.class);
     assertNotNull(rule);
     new BnfInlineRuleProcessor(rule, getProject(), null, false).run();

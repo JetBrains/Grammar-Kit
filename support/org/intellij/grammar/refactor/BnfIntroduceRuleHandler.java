@@ -30,10 +30,7 @@ import com.intellij.refactoring.RefactoringActionHandler;
 import com.intellij.refactoring.introduce.inplace.OccurrencesChooser;
 import gnu.trove.THashSet;
 import org.intellij.grammar.generator.ParserGeneratorUtil;
-import org.intellij.grammar.psi.BnfAttrs;
-import org.intellij.grammar.psi.BnfExpression;
-import org.intellij.grammar.psi.BnfReferenceOrToken;
-import org.intellij.grammar.psi.BnfRule;
+import org.intellij.grammar.psi.*;
 import org.intellij.grammar.psi.impl.BnfElementFactory;
 import org.intellij.grammar.psi.impl.BnfFileImpl;
 import org.intellij.grammar.psi.impl.GrammarUtil;
@@ -73,11 +70,12 @@ public class BnfIntroduceRuleHandler implements RefactoringActionHandler {
     if (fixedRange == null) return;
     final BnfRule ruleFromText = BnfElementFactory.createRuleFromText(file.getProject(), "a ::= " + fixedRange.substring(file.getText()));
     BnfExpressionOptimizer.optimize(ruleFromText.getExpression());
-    final BnfExpression[] selectedExpression = findSelectedExpressionsInRange(parentExpression, fixedRange);
+    final List<BnfExpression> selectedExpression = findSelectedExpressionsInRange(parentExpression, fixedRange);
 
     final LinkedHashMap<OccurrencesChooser.ReplaceChoice, List<BnfExpression[]>> occurrencesMap =
       new LinkedHashMap<OccurrencesChooser.ReplaceChoice, List<BnfExpression[]>>();
-    occurrencesMap.put(OccurrencesChooser.ReplaceChoice.NO, Collections.singletonList(selectedExpression));
+    occurrencesMap.put(OccurrencesChooser.ReplaceChoice.NO, Collections.singletonList(selectedExpression.toArray(new BnfExpression[selectedExpression.size()])));
+    occurrencesMap.put(OccurrencesChooser.ReplaceChoice.ALL, new ArrayList<BnfExpression[]>());
     file.acceptChildren(new PsiRecursiveElementWalkingVisitor() {
       @Override
       public void visitElement(PsiElement element) {
@@ -90,6 +88,9 @@ public class BnfIntroduceRuleHandler implements RefactoringActionHandler {
         super.visitElement(element);
       }
     });
+    if (occurrencesMap.get(OccurrencesChooser.ReplaceChoice.ALL).size() <= 1 && !ApplicationManager.getApplication().isUnitTestMode()) {
+      occurrencesMap.remove(OccurrencesChooser.ReplaceChoice.ALL);
+    }
     
     final Pass<OccurrencesChooser.ReplaceChoice> callback = new Pass<OccurrencesChooser.ReplaceChoice>() {
       @Override
@@ -132,8 +133,12 @@ public class BnfIntroduceRuleHandler implements RefactoringActionHandler {
     }
   }
 
-  private static BnfExpression[] findSelectedExpressionsInRange(BnfExpression parentExpression, TextRange range) {
-    if (parentExpression.getTextRange().equals(range)) return new BnfExpression[]{parentExpression};
+  private static List<BnfExpression> findSelectedExpressionsInRange(BnfExpression parentExpression, TextRange range) {
+    if (parentExpression.getTextRange().equals(range)) {
+      if (parentExpression instanceof BnfSequence) return ((BnfSequence)parentExpression).getExpressionList();
+      if (parentExpression instanceof BnfChoice) return ((BnfChoice)parentExpression).getExpressionList();
+      return Collections.singletonList(parentExpression);
+    }
     LinkedList<BnfExpression> list = new LinkedList<BnfExpression>();
     for (PsiElement c = parentExpression.getFirstChild(); c != null; c = c.getNextSibling()) {
       if (c instanceof BnfExpression && c.getTextRange().intersects(range)) {
@@ -141,7 +146,7 @@ public class BnfIntroduceRuleHandler implements RefactoringActionHandler {
       }
     }
     assert !list.isEmpty();
-    return list.toArray(new BnfExpression[list.size()]);
+    return list;
   }
 
   private static void replaceUsages(Project project, List<BnfExpression[]> exprToReplace, PsiElement id) {
@@ -158,26 +163,32 @@ public class BnfIntroduceRuleHandler implements RefactoringActionHandler {
   }
 
   private static void findOccurrences(BnfExpression expression,
-                                      BnfExpression[] selectedExpressions,
+                                      List<BnfExpression> selectedExpressions,
                                       Map<OccurrencesChooser.ReplaceChoice, List<BnfExpression[]>> occurrencesMap) {
-    if (selectedExpressions.length == 1) {
-      if (GrammarUtil.equalsElement(expression, selectedExpressions[0])) {
+    if (selectedExpressions.size() == 1) {
+      if (GrammarUtil.equalsElement(expression, selectedExpressions.get(0))) {
         addOccurrence(OccurrencesChooser.ReplaceChoice.ALL, occurrencesMap, expression);
       }
     }
     else if (!GrammarUtil.isOneTokenExpression(expression)) {
-      final PsiElement selectedParent = selectedExpressions[0].getParent();
+      final PsiElement selectedParent = selectedExpressions.get(0).getParent();
       if (ParserGeneratorUtil.getEffectiveType(expression) != ParserGeneratorUtil.getEffectiveType(selectedParent)) return; 
       int pos = 0;
-      BnfExpression[] result = new BnfExpression[selectedExpressions.length];
-      for (PsiElement c = expression.getFirstChild(); c != null; c = c.getNextSibling()) {
+      BnfExpression[] result = new BnfExpression[selectedExpressions.size()];
+      for (PsiElement c = expression.getFirstChild(), s = null; c != null; c = c.getNextSibling()) {
         if (!(c instanceof BnfExpression)) continue;
-        if (GrammarUtil.equalsElement((BnfExpression)c, selectedExpressions[pos])) {
+        if (GrammarUtil.equalsElement((BnfExpression)c, selectedExpressions.get(pos))) {
+          if (pos == 0) s = c;
           result[pos] = (BnfExpression)c;
-          if (++ pos == selectedExpressions.length) {
+          if (++ pos == result.length) {
             addOccurrence(OccurrencesChooser.ReplaceChoice.ALL, occurrencesMap, result.clone());
             pos = 0;
           }
+        }
+        else if (s != null) {
+          c = s;
+          pos = 0;
+          s = null;
         }
       }
     }

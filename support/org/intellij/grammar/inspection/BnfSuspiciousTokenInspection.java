@@ -24,6 +24,8 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiRecursiveElementWalkingVisitor;
 import com.intellij.psi.PsiReference;
+import org.intellij.grammar.generator.ParserGeneratorUtil;
+import org.intellij.grammar.psi.BnfRule;
 import org.intellij.grammar.psi.impl.BnfFileImpl;
 import org.intellij.grammar.psi.impl.BnfRefOrTokenImpl;
 import org.jetbrains.annotations.Nls;
@@ -73,7 +75,11 @@ public class BnfSuspiciousTokenInspection extends LocalInspectionTool {
     file.accept(new PsiRecursiveElementWalkingVisitor() {
       @Override
       public void visitElement(PsiElement element) {
-        if (element instanceof BnfRefOrTokenImpl) {
+        if (element instanceof BnfRule) {
+          // do not check external rules
+          if (ParserGeneratorUtil.Rule.isExternal((BnfRule)element)) return;
+        }
+        else if (element instanceof BnfRefOrTokenImpl) {
           PsiReference reference = element.getReference();
           Object resolve = reference == null ? null : reference.resolve();
           final String text = element.getText();

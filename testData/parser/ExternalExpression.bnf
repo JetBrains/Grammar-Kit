@@ -1,1 +1,10 @@
-rule ::= start <<externalCall params 10 'string'>> finish
+root ::= <<listOf statement>>
+
+statement ::= simple_case | complex_case | complex_case_brackets | complex_case_braces | multi_complex_case
+simple_case ::= DO <<uniqueListOf 'zero' one two 10 some>> END
+complex_case ::= DO <<uniqueListOf (one | two | 10 | some)>> END
+complex_case_brackets ::= DO <<uniqueListOf [one | two | 10 | some]>> END
+complex_case_braces ::= DO <<uniqueListOf {one | two | 10 | some}>> END
+multi_complex_case ::= DO <<uniqueListOf {one | two} [10 | some]>> END
+one ::= some value
+two ::= some other value

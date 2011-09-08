@@ -549,7 +549,7 @@ public class GrammarParser implements PsiParser {
 
 
   /* ********************************************************** */
-  // '<<' reference_or_token (reference_or_token | literal_expression) * '>>'
+  // '<<' reference_or_token option + '>>'
   public static boolean external_expression(PsiBuilder builder_, final int level_) {
     if (!recursion_guard_(builder_, level_, "external_expression")) return false;
     boolean result_ = false;
@@ -580,42 +580,22 @@ public class GrammarParser implements PsiParser {
     return result_ || pinned_;
   }
 
-  // (reference_or_token | literal_expression) *
+  // option +
   private static boolean external_expression_2(PsiBuilder builder_, final int level_) {
     if (!recursion_guard_(builder_, level_, "external_expression_2")) return false;
-    boolean result_ = true;
+    boolean result_ = false;
     final Marker marker_ = builder_.mark();
     try {
+      result_ = option(builder_, level_ + 1);
       int offset_ = builder_.getCurrentOffset();
       while (result_ && !builder_.eof()) {
-        if (!external_expression_2_0(builder_, level_ + 1)) break;
+        if (!option(builder_, level_ + 1)) break;
         if (offset_ == builder_.getCurrentOffset()) {
           builder_.error("Empty element parsed in external_expression_2");
           break;
         }
         offset_ = builder_.getCurrentOffset();
       }
-    }
-    finally {
-      marker_.drop();
-    }
-    return result_;
-  }
-
-  // (reference_or_token | literal_expression)
-  private static boolean external_expression_2_0(PsiBuilder builder_, final int level_) {
-    if (!recursion_guard_(builder_, level_, "external_expression_2_0")) return false;
-    return external_expression_2_0_0(builder_, level_ + 1);
-  }
-
-  // reference_or_token | literal_expression
-  private static boolean external_expression_2_0_0(PsiBuilder builder_, final int level_) {
-    if (!recursion_guard_(builder_, level_, "external_expression_2_0_0")) return false;
-    boolean result_ = false;
-    final Marker marker_ = builder_.mark();
-    try {
-      result_ = reference_or_token(builder_, level_ + 1);
-      if (!result_) result_ = literal_expression(builder_, level_ + 1);
     }
     finally {
       if (!result_) {

@@ -6,7 +6,11 @@
 
 root ::= <<listOf statement>>
 
-statement ::= create_table_statement
-create_table_statement ::= CREATE <<uniqueListOf 'zero' one two 10 some>> TABLE table_ref '(' ')'
+statement ::= simple_case | complex_case | complex_case_brackets | complex_case_braces | multi_complex_case
+simple_case ::= DO <<uniqueListOf 'zero' one two 10 some>> END
+complex_case ::= DO <<uniqueListOf (one | two | 10 | some)>> END
+complex_case_brackets ::= DO <<uniqueListOf [one | two | 10 | some]>> END
+complex_case_braces ::= DO <<uniqueListOf {one | two | 10 | some}>> END
+multi_complex_case ::= DO <<uniqueListOf {one | two} [10 | some]>> (option) END
 one ::= some value
 two ::= some other value

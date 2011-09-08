@@ -77,7 +77,7 @@ paren_opt_expression ::='[' expression ']' {pin=1 extends="quantified" implement
 quantifier ::= '?' | '+' | '*'
 
 private simple ::= !(modifier* id '::=' ) reference_or_token | literal_expression | external_expression | paren_expression
-external_expression ::= '<<' reference_or_token (reference_or_token | literal_expression) * '>>' {pin=2 extends="expression"}
+external_expression ::= '<<' reference_or_token option + '>>' {pin=2 extends="expression"}
 reference_or_token ::= id  { extends="expression" mixin="org.intellij.grammar.psi.impl.BnfRefOrTokenImpl"}
 literal_expression ::= string_literal_expression | number { extends="expression" }
 string_literal_expression ::= string { extends="literal_expression" mixin="org.intellij.grammar.psi.impl.BnfStringImpl"}

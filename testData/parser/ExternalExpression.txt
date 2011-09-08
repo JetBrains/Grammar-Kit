@@ -1,27 +1,265 @@
 BnfFile:ExternalExpression.bnf
-  BNF_RULE:rule
-    PsiElement(id)('rule')
+  BNF_RULE:root
+    PsiElement(id)('root')
+    PsiWhiteSpace(' ')
+    PsiElement(::=)('::=')
+    PsiWhiteSpace(' ')
+    BNF_EXTERNAL_EXPRESSION
+      PsiElement(<<)('<<')
+      BNF_REFERENCE_OR_TOKEN
+        PsiElement(id)('listOf')
+      PsiWhiteSpace(' ')
+      BNF_REFERENCE_OR_TOKEN
+        PsiElement(id)('statement')
+      PsiElement(>>)('>>')
+  PsiWhiteSpace('\n\n')
+  BNF_RULE:statement
+    PsiElement(id)('statement')
+    PsiWhiteSpace(' ')
+    PsiElement(::=)('::=')
+    PsiWhiteSpace(' ')
+    BNF_CHOICE
+      BNF_REFERENCE_OR_TOKEN
+        PsiElement(id)('simple_case')
+      PsiWhiteSpace(' ')
+      PsiElement(|)('|')
+      PsiWhiteSpace(' ')
+      BNF_REFERENCE_OR_TOKEN
+        PsiElement(id)('complex_case')
+      PsiWhiteSpace(' ')
+      PsiElement(|)('|')
+      PsiWhiteSpace(' ')
+      BNF_REFERENCE_OR_TOKEN
+        PsiElement(id)('complex_case_brackets')
+      PsiWhiteSpace(' ')
+      PsiElement(|)('|')
+      PsiWhiteSpace(' ')
+      BNF_REFERENCE_OR_TOKEN
+        PsiElement(id)('complex_case_braces')
+      PsiWhiteSpace(' ')
+      PsiElement(|)('|')
+      PsiWhiteSpace(' ')
+      BNF_REFERENCE_OR_TOKEN
+        PsiElement(id)('multi_complex_case')
+  PsiWhiteSpace('\n')
+  BNF_RULE:simple_case
+    PsiElement(id)('simple_case')
     PsiWhiteSpace(' ')
     PsiElement(::=)('::=')
     PsiWhiteSpace(' ')
     BNF_SEQUENCE
       BNF_REFERENCE_OR_TOKEN
-        PsiElement(id)('start')
+        PsiElement(id)('DO')
       PsiWhiteSpace(' ')
       BNF_EXTERNAL_EXPRESSION
         PsiElement(<<)('<<')
         BNF_REFERENCE_OR_TOKEN
-          PsiElement(id)('externalCall')
+          PsiElement(id)('uniqueListOf')
+        PsiWhiteSpace(' ')
+        BNF_STRING_LITERAL_EXPRESSION
+          PsiElement(string)(''zero'')
         PsiWhiteSpace(' ')
         BNF_REFERENCE_OR_TOKEN
-          PsiElement(id)('params')
+          PsiElement(id)('one')
+        PsiWhiteSpace(' ')
+        BNF_REFERENCE_OR_TOKEN
+          PsiElement(id)('two')
         PsiWhiteSpace(' ')
         BNF_LITERAL_EXPRESSION
           PsiElement(number)('10')
         PsiWhiteSpace(' ')
-        BNF_STRING_LITERAL_EXPRESSION
-          PsiElement(string)(''string'')
+        BNF_REFERENCE_OR_TOKEN
+          PsiElement(id)('some')
         PsiElement(>>)('>>')
       PsiWhiteSpace(' ')
       BNF_REFERENCE_OR_TOKEN
-        PsiElement(id)('finish')
+        PsiElement(id)('END')
+  PsiWhiteSpace('\n')
+  BNF_RULE:complex_case
+    PsiElement(id)('complex_case')
+    PsiWhiteSpace(' ')
+    PsiElement(::=)('::=')
+    PsiWhiteSpace(' ')
+    BNF_SEQUENCE
+      BNF_REFERENCE_OR_TOKEN
+        PsiElement(id)('DO')
+      PsiWhiteSpace(' ')
+      BNF_EXTERNAL_EXPRESSION
+        PsiElement(<<)('<<')
+        BNF_REFERENCE_OR_TOKEN
+          PsiElement(id)('uniqueListOf')
+        PsiWhiteSpace(' ')
+        BNF_PAREN_EXPRESSION
+          PsiElement(()('(')
+          BNF_CHOICE
+            BNF_REFERENCE_OR_TOKEN
+              PsiElement(id)('one')
+            PsiWhiteSpace(' ')
+            PsiElement(|)('|')
+            PsiWhiteSpace(' ')
+            BNF_REFERENCE_OR_TOKEN
+              PsiElement(id)('two')
+            PsiWhiteSpace(' ')
+            PsiElement(|)('|')
+            PsiWhiteSpace(' ')
+            BNF_LITERAL_EXPRESSION
+              PsiElement(number)('10')
+            PsiWhiteSpace(' ')
+            PsiElement(|)('|')
+            PsiWhiteSpace(' ')
+            BNF_REFERENCE_OR_TOKEN
+              PsiElement(id)('some')
+          PsiElement())(')')
+        PsiElement(>>)('>>')
+      PsiWhiteSpace(' ')
+      BNF_REFERENCE_OR_TOKEN
+        PsiElement(id)('END')
+  PsiWhiteSpace('\n')
+  BNF_RULE:complex_case_brackets
+    PsiElement(id)('complex_case_brackets')
+    PsiWhiteSpace(' ')
+    PsiElement(::=)('::=')
+    PsiWhiteSpace(' ')
+    BNF_SEQUENCE
+      BNF_REFERENCE_OR_TOKEN
+        PsiElement(id)('DO')
+      PsiWhiteSpace(' ')
+      BNF_EXTERNAL_EXPRESSION
+        PsiElement(<<)('<<')
+        BNF_REFERENCE_OR_TOKEN
+          PsiElement(id)('uniqueListOf')
+        PsiWhiteSpace(' ')
+        BNF_PAREN_OPT_EXPRESSION
+          PsiElement([)('[')
+          BNF_CHOICE
+            BNF_REFERENCE_OR_TOKEN
+              PsiElement(id)('one')
+            PsiWhiteSpace(' ')
+            PsiElement(|)('|')
+            PsiWhiteSpace(' ')
+            BNF_REFERENCE_OR_TOKEN
+              PsiElement(id)('two')
+            PsiWhiteSpace(' ')
+            PsiElement(|)('|')
+            PsiWhiteSpace(' ')
+            BNF_LITERAL_EXPRESSION
+              PsiElement(number)('10')
+            PsiWhiteSpace(' ')
+            PsiElement(|)('|')
+            PsiWhiteSpace(' ')
+            BNF_REFERENCE_OR_TOKEN
+              PsiElement(id)('some')
+          PsiElement(])(']')
+        PsiElement(>>)('>>')
+      PsiWhiteSpace(' ')
+      BNF_REFERENCE_OR_TOKEN
+        PsiElement(id)('END')
+  PsiWhiteSpace('\n')
+  BNF_RULE:complex_case_braces
+    PsiElement(id)('complex_case_braces')
+    PsiWhiteSpace(' ')
+    PsiElement(::=)('::=')
+    PsiWhiteSpace(' ')
+    BNF_SEQUENCE
+      BNF_REFERENCE_OR_TOKEN
+        PsiElement(id)('DO')
+      PsiWhiteSpace(' ')
+      BNF_EXTERNAL_EXPRESSION
+        PsiElement(<<)('<<')
+        BNF_REFERENCE_OR_TOKEN
+          PsiElement(id)('uniqueListOf')
+        PsiWhiteSpace(' ')
+        BNF_PAREN_EXPRESSION
+          PsiElement({)('{')
+          BNF_CHOICE
+            BNF_REFERENCE_OR_TOKEN
+              PsiElement(id)('one')
+            PsiWhiteSpace(' ')
+            PsiElement(|)('|')
+            PsiWhiteSpace(' ')
+            BNF_REFERENCE_OR_TOKEN
+              PsiElement(id)('two')
+            PsiWhiteSpace(' ')
+            PsiElement(|)('|')
+            PsiWhiteSpace(' ')
+            BNF_LITERAL_EXPRESSION
+              PsiElement(number)('10')
+            PsiWhiteSpace(' ')
+            PsiElement(|)('|')
+            PsiWhiteSpace(' ')
+            BNF_REFERENCE_OR_TOKEN
+              PsiElement(id)('some')
+          PsiElement(})('}')
+        PsiElement(>>)('>>')
+      PsiWhiteSpace(' ')
+      BNF_REFERENCE_OR_TOKEN
+        PsiElement(id)('END')
+  PsiWhiteSpace('\n')
+  BNF_RULE:multi_complex_case
+    PsiElement(id)('multi_complex_case')
+    PsiWhiteSpace(' ')
+    PsiElement(::=)('::=')
+    PsiWhiteSpace(' ')
+    BNF_SEQUENCE
+      BNF_REFERENCE_OR_TOKEN
+        PsiElement(id)('DO')
+      PsiWhiteSpace(' ')
+      BNF_EXTERNAL_EXPRESSION
+        PsiElement(<<)('<<')
+        BNF_REFERENCE_OR_TOKEN
+          PsiElement(id)('uniqueListOf')
+        PsiWhiteSpace(' ')
+        BNF_PAREN_EXPRESSION
+          PsiElement({)('{')
+          BNF_CHOICE
+            BNF_REFERENCE_OR_TOKEN
+              PsiElement(id)('one')
+            PsiWhiteSpace(' ')
+            PsiElement(|)('|')
+            PsiWhiteSpace(' ')
+            BNF_REFERENCE_OR_TOKEN
+              PsiElement(id)('two')
+          PsiElement(})('}')
+        PsiWhiteSpace(' ')
+        BNF_PAREN_OPT_EXPRESSION
+          PsiElement([)('[')
+          BNF_CHOICE
+            BNF_LITERAL_EXPRESSION
+              PsiElement(number)('10')
+            PsiWhiteSpace(' ')
+            PsiElement(|)('|')
+            PsiWhiteSpace(' ')
+            BNF_REFERENCE_OR_TOKEN
+              PsiElement(id)('some')
+          PsiElement(])(']')
+        PsiElement(>>)('>>')
+      PsiWhiteSpace(' ')
+      BNF_REFERENCE_OR_TOKEN
+        PsiElement(id)('END')
+  PsiWhiteSpace('\n')
+  BNF_RULE:one
+    PsiElement(id)('one')
+    PsiWhiteSpace(' ')
+    PsiElement(::=)('::=')
+    PsiWhiteSpace(' ')
+    BNF_SEQUENCE
+      BNF_REFERENCE_OR_TOKEN
+        PsiElement(id)('some')
+      PsiWhiteSpace(' ')
+      BNF_REFERENCE_OR_TOKEN
+        PsiElement(id)('value')
+  PsiWhiteSpace('\n')
+  BNF_RULE:two
+    PsiElement(id)('two')
+    PsiWhiteSpace(' ')
+    PsiElement(::=)('::=')
+    PsiWhiteSpace(' ')
+    BNF_SEQUENCE
+      BNF_REFERENCE_OR_TOKEN
+        PsiElement(id)('some')
+      PsiWhiteSpace(' ')
+      BNF_REFERENCE_OR_TOKEN
+        PsiElement(id)('other')
+      PsiWhiteSpace(' ')
+      BNF_REFERENCE_OR_TOKEN
+        PsiElement(id)('value')

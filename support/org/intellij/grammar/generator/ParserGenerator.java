@@ -21,6 +21,7 @@ import com.intellij.openapi.util.text.StringHash;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiRecursiveElementWalkingVisitor;
 import com.intellij.psi.tree.IElementType;
 import com.intellij.util.containers.MultiMap;
 import gnu.trove.THashSet;
@@ -453,7 +454,8 @@ public class ParserGenerator {
     final boolean canCollapse = firstNonTrivial && rulesWithIheritance.contains(rule);
 
     List<BnfExpression> children = getChildExpressions(node);
-    out((!isRule ? "private " : isPrivate ? "" : "public ") + "static boolean " + funcName + "(PsiBuilder builder_, final int level_) {");
+    out((!isRule ? "private " : isPrivate ? "" : "public ") + "static boolean " + funcName + "(PsiBuilder builder_, final int level_"
+        + collectExtraArguments(rule, true) + ") {");
     if (node instanceof BnfReferenceOrToken) {
       if (isPrivate) {
         String nodeCall = generateNodeCall(rule, node, getNextName(funcName, 0));
@@ -635,6 +637,28 @@ public class ParserGenerator {
     }
   }
 
+  private String collectExtraArguments(BnfRule rule, final boolean declaration) {
+    if (!Rule.isMeta(rule)) return "";
+    final StringBuilder sb = new StringBuilder();
+    final Set<String> visited = new THashSet<String>();
+    rule.getExpression().acceptChildren(new PsiRecursiveElementWalkingVisitor() {
+      @Override
+      public void visitElement(PsiElement element) {
+        if (element instanceof BnfExternalExpression) {
+          List<BnfExpression> list = ((BnfExternalExpression)element).getExpressionList();
+          if (list.size() == 1) {
+            String text = list.get(0).getText();
+            if (visited.add(text)) {
+              sb.append(", "+ (declaration? "Parser " : "") + text);
+            }
+          }
+        }
+        super.visitElement(element);
+      }
+    });
+    return sb.toString();
+  }
+
   private String generateNodeCall(BnfRule rule, @Nullable BnfExpression node, String nextName) {
     IElementType type = node == null ? BNF_REFERENCE_OR_TOKEN : getEffectiveType(node);
     String text = node == null ? nextName : node.getText();
@@ -667,19 +691,24 @@ public class ParserGenerator {
           if (!parserClass.equals(ruleParserClasses.get(Rule.name(rule)))) {
             method = StringUtil.getShortName(parserClass) + "." + method;
           }
-          return method + "(builder_, level_ + 1)";
+          return method + "(builder_, level_ + 1"+collectExtraArguments(rule, false)+")";
         }
       }
       return generateConsumeToken(text);
     }
     else if (type == BNF_EXTERNAL_EXPRESSION) {
       List<BnfExpression> expressions = ((BnfExternalExpression)node).getExpressionList();
-      StringBuilder clause = new StringBuilder();
-      String method = generateExternalCall(rule, clause, expressions, nextName);
-      return method + "(builder_, level_ + 1" + clause.toString() + ")";
+      if (expressions.size() == 1 && Rule.isMeta(rule)) {
+        return expressions.get(0).getText() + ".parse(builder_)";
+      }
+      else {
+        StringBuilder clause = new StringBuilder();
+        String method = generateExternalCall(rule, clause, expressions, nextName);
+        return method + "(builder_, level_ + 1" + clause.toString() + ")";
+      }
     }
     else {
-      return nextName + "(builder_, level_ + 1)";
+      return nextName + "(builder_, level_ + 1"+ collectExtraArguments(rule, false)+")";
     }
   }
 

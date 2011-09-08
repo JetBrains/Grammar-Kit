@@ -549,7 +549,7 @@ public class GrammarParser implements PsiParser {
 
 
   /* ********************************************************** */
-  // '<<' reference_or_token option + '>>'
+  // '<<' reference_or_token option * '>>'
   public static boolean external_expression(PsiBuilder builder_, final int level_) {
     if (!recursion_guard_(builder_, level_, "external_expression")) return false;
     boolean result_ = false;
@@ -580,13 +580,12 @@ public class GrammarParser implements PsiParser {
     return result_ || pinned_;
   }
 
-  // option +
+  // option *
   private static boolean external_expression_2(PsiBuilder builder_, final int level_) {
     if (!recursion_guard_(builder_, level_, "external_expression_2")) return false;
-    boolean result_ = false;
+    boolean result_ = true;
     final Marker marker_ = builder_.mark();
     try {
-      result_ = option(builder_, level_ + 1);
       int offset_ = builder_.getCurrentOffset();
       while (result_ && !builder_.eof()) {
         if (!option(builder_, level_ + 1)) break;
@@ -598,12 +597,7 @@ public class GrammarParser implements PsiParser {
       }
     }
     finally {
-      if (!result_) {
-        marker_.rollbackTo();
-      }
-      else {
-        marker_.drop();
-      }
+      marker_.drop();
     }
     return result_;
   }
@@ -706,7 +700,7 @@ public class GrammarParser implements PsiParser {
 
 
   /* ********************************************************** */
-  // 'private' | 'external'
+  // 'private' | 'external' | 'meta'
   public static boolean modifier(PsiBuilder builder_, final int level_) {
     if (!recursion_guard_(builder_, level_, "modifier")) return false;
     boolean result_ = false;
@@ -714,6 +708,7 @@ public class GrammarParser implements PsiParser {
     try {
       result_ = consumeToken(builder_, "private");
       if (!result_) result_ = consumeToken(builder_, "external");
+      if (!result_) result_ = consumeToken(builder_, "meta");
     }
     finally {
       if (result_) {

@@ -37,6 +37,12 @@ public class ExternalRules implements PsiParser {
     else if (root_ == ONE) {
       result_ = one(builder_, level_ + 1);
     }
+    else if (root_ == ONE_LIST) {
+      result_ = one_list(builder_, level_ + 1);
+    }
+    else if (root_ == ONE_LIST_WITH) {
+      result_ = one_list_with(builder_, level_ + 1);
+    }
     else if (root_ == SIMPLE_CASE) {
       result_ = simple_case(builder_, level_ + 1);
     }
@@ -60,6 +66,147 @@ public class ExternalRules implements PsiParser {
     }
     return builder_.getTreeBuilt();
   }
+
+  /* ********************************************************** */
+  // <<param>> (',' <<param>>) *
+  static boolean comma_list(PsiBuilder builder_, final int level_, Parser param) {
+    if (!recursion_guard_(builder_, level_, "comma_list")) return false;
+    boolean result_ = false;
+    final Marker marker_ = builder_.mark();
+    try {
+      result_ = param.parse(builder_);
+      result_ = result_ && comma_list_1(builder_, level_ + 1, param);
+    }
+    finally {
+      if (!result_) {
+        marker_.rollbackTo();
+      }
+      else {
+        marker_.drop();
+      }
+    }
+    return result_;
+  }
+
+  // (',' <<param>>) *
+  private static boolean comma_list_1(PsiBuilder builder_, final int level_, Parser param) {
+    if (!recursion_guard_(builder_, level_, "comma_list_1")) return false;
+    boolean result_ = true;
+    final Marker marker_ = builder_.mark();
+    try {
+      int offset_ = builder_.getCurrentOffset();
+      while (result_ && !builder_.eof()) {
+        if (!comma_list_1_0(builder_, level_ + 1, param)) break;
+        if (offset_ == builder_.getCurrentOffset()) {
+          builder_.error("Empty element parsed in comma_list_1");
+          break;
+        }
+        offset_ = builder_.getCurrentOffset();
+      }
+    }
+    finally {
+      marker_.drop();
+    }
+    return result_;
+  }
+
+  // (',' <<param>>)
+  private static boolean comma_list_1_0(PsiBuilder builder_, final int level_, Parser param) {
+    if (!recursion_guard_(builder_, level_, "comma_list_1_0")) return false;
+    return comma_list_1_0_0(builder_, level_ + 1, param);
+  }
+
+  // ',' <<param>>
+  private static boolean comma_list_1_0_0(PsiBuilder builder_, final int level_, Parser param) {
+    if (!recursion_guard_(builder_, level_, "comma_list_1_0_0")) return false;
+    boolean result_ = false;
+    final Marker marker_ = builder_.mark();
+    try {
+      result_ = consumeToken(builder_, ",");
+      result_ = result_ && param.parse(builder_);
+    }
+    finally {
+      if (!result_) {
+        marker_.rollbackTo();
+      }
+      else {
+        marker_.drop();
+      }
+    }
+    return result_;
+  }
+
+
+  /* ********************************************************** */
+  // <<head>> <<param>> (',' <<param>>) *
+  static boolean comma_list_with_head(PsiBuilder builder_, final int level_, Parser head, Parser param) {
+    if (!recursion_guard_(builder_, level_, "comma_list_with_head")) return false;
+    boolean result_ = false;
+    final Marker marker_ = builder_.mark();
+    try {
+      result_ = head.parse(builder_);
+      result_ = result_ && param.parse(builder_);
+      result_ = result_ && comma_list_with_head_2(builder_, level_ + 1, head, param);
+    }
+    finally {
+      if (!result_) {
+        marker_.rollbackTo();
+      }
+      else {
+        marker_.drop();
+      }
+    }
+    return result_;
+  }
+
+  // (',' <<param>>) *
+  private static boolean comma_list_with_head_2(PsiBuilder builder_, final int level_, Parser head, Parser param) {
+    if (!recursion_guard_(builder_, level_, "comma_list_with_head_2")) return false;
+    boolean result_ = true;
+    final Marker marker_ = builder_.mark();
+    try {
+      int offset_ = builder_.getCurrentOffset();
+      while (result_ && !builder_.eof()) {
+        if (!comma_list_with_head_2_0(builder_, level_ + 1, head, param)) break;
+        if (offset_ == builder_.getCurrentOffset()) {
+          builder_.error("Empty element parsed in comma_list_with_head_2");
+          break;
+        }
+        offset_ = builder_.getCurrentOffset();
+      }
+    }
+    finally {
+      marker_.drop();
+    }
+    return result_;
+  }
+
+  // (',' <<param>>)
+  private static boolean comma_list_with_head_2_0(PsiBuilder builder_, final int level_, Parser head, Parser param) {
+    if (!recursion_guard_(builder_, level_, "comma_list_with_head_2_0")) return false;
+    return comma_list_with_head_2_0_0(builder_, level_ + 1, head, param);
+  }
+
+  // ',' <<param>>
+  private static boolean comma_list_with_head_2_0_0(PsiBuilder builder_, final int level_, Parser head, Parser param) {
+    if (!recursion_guard_(builder_, level_, "comma_list_with_head_2_0_0")) return false;
+    boolean result_ = false;
+    final Marker marker_ = builder_.mark();
+    try {
+      result_ = consumeToken(builder_, ",");
+      result_ = result_ && param.parse(builder_);
+    }
+    finally {
+      if (!result_) {
+        marker_.rollbackTo();
+      }
+      else {
+        marker_.drop();
+      }
+    }
+    return result_;
+  }
+
 
   /* ********************************************************** */
   // DO <<uniqueListOf (one | two | 10 | some)>> END
@@ -346,6 +493,29 @@ public class ExternalRules implements PsiParser {
       }
       else {
         marker_.rollbackTo();
+      }
+    }
+    return result_;
+  }
+
+
+  /* ********************************************************** */
+
+  /* ********************************************************** */
+  // (WITH)
+  private static boolean one_list_with_0(PsiBuilder builder_, final int level_) {
+    if (!recursion_guard_(builder_, level_, "one_list_with_0")) return false;
+    boolean result_ = false;
+    final Marker marker_ = builder_.mark();
+    try {
+      result_ = consumeToken(builder_, WITH);
+    }
+    finally {
+      if (!result_) {
+        marker_.rollbackTo();
+      }
+      else {
+        marker_.drop();
       }
     }
     return result_;

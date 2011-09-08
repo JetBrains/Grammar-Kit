@@ -219,6 +219,10 @@ public class ParserGeneratorUtil {
       return hasModifier(node, "external");
     }
 
+    public static boolean isMeta(BnfRule node) {
+      return hasModifier(node, "meta");
+    }
+
     private static boolean hasModifier(BnfRule node, String s) {
       for (BnfModifier modifier : node.getModifierList()) {
         if (s.equals(modifier.getText())) return true;

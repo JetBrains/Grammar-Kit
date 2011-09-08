@@ -51,12 +51,6 @@ public class BnfAnnotator implements Annotator {
           return;
         }
       }
-      else if (parent instanceof BnfExternalExpression) {
-        if (((BnfExternalExpression)parent).getExpressionList().get(0) == psiElement) {
-          annotationHolder.createInfoAnnotation(psiElement, null).setTextAttributes(SyntaxHighlighterColors.LINE_COMMENT);
-          return;
-        }
-      }
       PsiReference reference = psiElement.getReference();
       Object resolve = reference == null ? null : reference.resolve();
       if (resolve instanceof BnfRule) {
@@ -69,7 +63,12 @@ public class BnfAnnotator implements Annotator {
         annotationHolder.createErrorAnnotation(psiElement, "Unresolved reference");
       }
       else if (resolve == null && !(parent instanceof BnfModifier)) {
-        annotationHolder.createInfoAnnotation(psiElement, null).setTextAttributes(SyntaxHighlighterColors.STRING);
+        if (parent instanceof BnfExternalExpression && ((BnfExternalExpression)parent).getExpressionList().get(0) == psiElement) {
+          annotationHolder.createInfoAnnotation(psiElement, null).setTextAttributes(SyntaxHighlighterColors.LINE_COMMENT);
+        }
+        else {
+          annotationHolder.createInfoAnnotation(psiElement, null).setTextAttributes(SyntaxHighlighterColors.STRING);
+        }
       }
     }
     else if (psiElement instanceof BnfStringLiteralExpression && parent instanceof BnfAttrValue) {

@@ -14,3 +14,7 @@ complex_case_braces ::= DO <<uniqueListOf {one | two | 10 | some}>> END
 multi_complex_case ::= DO <<uniqueListOf {one | two} [10 | some]>> (option) END
 one ::= some value
 two ::= some other value
+one_list ::= <<comma_list one>>
+one_list_with ::= <<comma_list_with_head (WITH) one>>
+private meta comma_list ::= <<param>> (',' <<param>>) *
+private meta comma_list_with_head ::= <<head>> <<param>> (',' <<param>>) *

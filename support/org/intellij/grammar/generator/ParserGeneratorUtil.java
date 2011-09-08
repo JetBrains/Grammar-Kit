@@ -219,10 +219,6 @@ public class ParserGeneratorUtil {
       return hasModifier(node, "external");
     }
 
-    public static boolean isWrapped(BnfRule node) {
-      return hasModifier(node, "wrapped");
-    }
-
     private static boolean hasModifier(BnfRule node, String s) {
       for (BnfModifier modifier : node.getModifierList()) {
         if (s.equals(modifier.getText())) return true;

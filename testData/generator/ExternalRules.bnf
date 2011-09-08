@@ -1,0 +1,12 @@
+{
+  parserClass="ExternalRules"
+  generatePsi=false
+  stubParserClass="org.intellij.grammar.parser.GeneratedParserUtilBase"
+}
+
+root ::= <<listOf statement>>
+
+statement ::= create_table_statement
+create_table_statement ::= CREATE <<uniqueListOf 'zero' one two 10 some>> TABLE table_ref '(' ')'
+one ::= some value
+two ::= some other value

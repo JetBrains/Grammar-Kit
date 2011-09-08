@@ -25,6 +25,7 @@ import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiRecursiveElementWalkingVisitor;
 import com.intellij.psi.PsiReference;
 import org.intellij.grammar.generator.ParserGeneratorUtil;
+import org.intellij.grammar.psi.BnfExternalExpression;
 import org.intellij.grammar.psi.BnfRule;
 import org.intellij.grammar.psi.impl.BnfFileImpl;
 import org.intellij.grammar.psi.impl.BnfRefOrTokenImpl;
@@ -60,17 +61,19 @@ public class BnfSuspiciousTokenInspection extends LocalInspectionTool {
     return "BnfSuspiciousTokenInspection";
   }
 
+  @Override
   public boolean isEnabledByDefault() {
     return true;
   }
 
+  @Override
   public ProblemDescriptor[] checkFile(@NotNull PsiFile file, @NotNull InspectionManager manager, boolean isOnTheFly) {
     ProblemsHolder problemsHolder = new ProblemsHolder(manager, file, isOnTheFly);
     checkFile(file, problemsHolder);
     return problemsHolder.getResultsArray();
   }
 
-  private void checkFile(final PsiFile file, final ProblemsHolder problemsHolder) {
+  private static void checkFile(final PsiFile file, final ProblemsHolder problemsHolder) {
     if (!(file instanceof BnfFileImpl)) return;
     file.accept(new PsiRecursiveElementWalkingVisitor() {
       @Override
@@ -78,6 +81,10 @@ public class BnfSuspiciousTokenInspection extends LocalInspectionTool {
         if (element instanceof BnfRule) {
           // do not check external rules
           if (ParserGeneratorUtil.Rule.isExternal((BnfRule)element)) return;
+        }
+        else if (element instanceof BnfExternalExpression) {
+          // do not check external expressions
+          return;
         }
         else if (element instanceof BnfRefOrTokenImpl) {
           PsiReference reference = element.getReference();

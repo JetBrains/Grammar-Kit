@@ -33,6 +33,10 @@ public class BnfGeneratorTest extends ParsingTestCase {
     doTest();
   }
 
+  public void testExternalRules() throws Exception {
+    doTest();
+  }
+
   public void doTest() throws Exception {
     final String name = getTestName(true);
     String text = loadFile(name + "." + myFileExt);

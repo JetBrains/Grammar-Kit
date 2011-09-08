@@ -36,17 +36,26 @@ import java.util.Arrays;
 public class BnfAnnotator implements Annotator {
   @Override
   public void annotate(@NotNull PsiElement psiElement, @NotNull AnnotationHolder annotationHolder) {
-    if (psiElement.getParent() instanceof BnfRule && ((BnfRule)psiElement.getParent()).getId() == psiElement) {
+    PsiElement parent = psiElement.getParent();
+    if (parent instanceof BnfRule && ((BnfRule)parent).getId() == psiElement) {
       annotationHolder.createInfoAnnotation(psiElement, null).setTextAttributes(SyntaxHighlighterColors.KEYWORD);
     }
-    if (psiElement.getParent() instanceof BnfAttr && ((BnfAttr)psiElement.getParent()).getId() == psiElement) {
+    if (parent instanceof BnfAttr && ((BnfAttr)parent).getId() == psiElement) {
       annotationHolder.createInfoAnnotation(psiElement, null).setTextAttributes(SyntaxHighlighterColors.LINE_COMMENT);
     }
     if (psiElement instanceof BnfRefOrTokenImpl) {
-      String text = psiElement.getText();
-      if (text.equals("true") || text.equals("false")) {
-        annotationHolder.createInfoAnnotation(psiElement, null).setTextAttributes(SyntaxHighlighterColors.KEYWORD);
-        return;
+      if (parent instanceof BnfAttrValue) {
+        String text = psiElement.getText();
+        if (text.equals("true") || text.equals("false")) {
+          annotationHolder.createInfoAnnotation(psiElement, null).setTextAttributes(SyntaxHighlighterColors.KEYWORD);
+          return;
+        }
+      }
+      else if (parent instanceof BnfExternalExpression) {
+        if (((BnfExternalExpression)parent).getExpressionList().get(0) == psiElement) {
+          annotationHolder.createInfoAnnotation(psiElement, null).setTextAttributes(SyntaxHighlighterColors.LINE_COMMENT);
+          return;
+        }
       }
       PsiReference reference = psiElement.getReference();
       Object resolve = reference == null ? null : reference.resolve();
@@ -56,15 +65,15 @@ public class BnfAnnotator implements Annotator {
       else if (resolve instanceof BnfAttr) {
         annotationHolder.createInfoAnnotation(psiElement, null).setTextAttributes(SyntaxHighlighterColors.LINE_COMMENT);
       }
-      else if (resolve == null && psiElement.getParent() instanceof BnfAttrValue) {
+      else if (resolve == null && parent instanceof BnfAttrValue) {
         annotationHolder.createErrorAnnotation(psiElement, "Unresolved reference");
       }
-      else if (resolve == null && !(psiElement.getParent() instanceof BnfModifier)) {
+      else if (resolve == null && !(parent instanceof BnfModifier)) {
         annotationHolder.createInfoAnnotation(psiElement, null).setTextAttributes(SyntaxHighlighterColors.STRING);
       }
     }
-    else if (psiElement instanceof BnfStringLiteralExpression && psiElement.getParent() instanceof BnfAttrValue) {
-      final String attrName = ((PsiNamedElement)psiElement.getParent().getParent()).getName();
+    else if (psiElement instanceof BnfStringLiteralExpression && parent instanceof BnfAttrValue) {
+      final String attrName = ((PsiNamedElement)parent.getParent()).getName();
       if (Arrays.asList("extends", "implements", "recoverUntil").contains(attrName)
           && !psiElement.getText().contains(".")) {
         PsiReference reference = psiElement.getReference();

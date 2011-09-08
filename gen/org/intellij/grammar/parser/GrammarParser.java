@@ -15,18 +15,17 @@
  */
 package org.intellij.grammar.parser;
 
-import com.intellij.lang.ASTNode;
+import org.jetbrains.annotations.*;
 import com.intellij.lang.LighterASTNode;
 import com.intellij.lang.PsiBuilder;
 import com.intellij.lang.PsiBuilder.Marker;
-import com.intellij.lang.PsiParser;
 import com.intellij.openapi.diagnostic.Logger;
-import com.intellij.psi.tree.IElementType;
-import com.intellij.psi.tree.TokenSet;
-import org.jetbrains.annotations.NotNull;
-
-import static org.intellij.grammar.parser.GrammarParserUtil.*;
 import static org.intellij.grammar.psi.BnfTypes.*;
+import static org.intellij.grammar.parser.GrammarParserUtil.*;
+import com.intellij.psi.tree.IElementType;
+import com.intellij.lang.ASTNode;
+import com.intellij.psi.tree.TokenSet;
+import com.intellij.lang.PsiParser;
 
 @SuppressWarnings({"SimplifiableIfStatement", "UnusedAssignment"})
 public class GrammarParser implements PsiParser {
@@ -54,6 +53,9 @@ public class GrammarParser implements PsiParser {
     }
     else if (root_ == BNF_EXPRESSION) {
       result_ = expression(builder_, level_ + 1);
+    }
+    else if (root_ == BNF_EXTERNAL_EXPRESSION) {
+      result_ = external_expression(builder_, level_ + 1);
     }
     else if (root_ == BNF_LITERAL_EXPRESSION) {
       result_ = literal_expression(builder_, level_ + 1);
@@ -110,9 +112,9 @@ public class GrammarParser implements PsiParser {
   private static final TokenSet[] EXTENDS_SETS_ = new TokenSet[] {
     TokenSet.create(BNF_PAREN_OPT_EXPRESSION, BNF_QUANTIFIED),
     TokenSet.create(BNF_STRING_LITERAL_EXPRESSION, BNF_LITERAL_EXPRESSION),
-    TokenSet.create(BNF_CHOICE, BNF_LITERAL_EXPRESSION, BNF_PAREN_EXPRESSION, BNF_PREDICATE,
-      BNF_QUANTIFIED, BNF_REFERENCE_OR_TOKEN, BNF_SEQUENCE, BNF_STRING_LITERAL_EXPRESSION,
-      BNF_PAREN_OPT_EXPRESSION, BNF_EXPRESSION),
+    TokenSet.create(BNF_CHOICE, BNF_EXTERNAL_EXPRESSION, BNF_LITERAL_EXPRESSION, BNF_PAREN_EXPRESSION,
+      BNF_PREDICATE, BNF_QUANTIFIED, BNF_REFERENCE_OR_TOKEN, BNF_SEQUENCE,
+      BNF_STRING_LITERAL_EXPRESSION, BNF_PAREN_OPT_EXPRESSION, BNF_EXPRESSION),
   };
   public static boolean type_extends_(IElementType child_, IElementType parent_) {
     for (TokenSet set : EXTENDS_SETS_) {
@@ -547,6 +549,87 @@ public class GrammarParser implements PsiParser {
 
 
   /* ********************************************************** */
+  // '<<' reference_or_token (reference_or_token | literal_expression) * '>>'
+  public static boolean external_expression(PsiBuilder builder_, final int level_) {
+    if (!recursion_guard_(builder_, level_, "external_expression")) return false;
+    boolean result_ = false;
+    boolean pinned_ = false;
+    final int start_ = builder_.getCurrentOffset();
+    final Marker marker_ = builder_.mark();
+    try {
+      enterErrorRecordingSection(builder_, level_, _SECTION_GENERAL_);
+      result_ = consumeToken(builder_, BNF_EXTERNAL_START);
+      result_ = result_ && reference_or_token(builder_, level_ + 1);
+      pinned_ = result_; // pin = 2
+      result_ = result_ && external_expression_2(builder_, level_ + 1);
+      result_ = result_ && consumeToken(builder_, BNF_EXTERNAL_END);
+    }
+    finally {
+      LighterASTNode last_ = result_? builder_.getLatestDoneMarker() : null;
+      if (last_ != null && last_.getStartOffset() == start_ && type_extends_(last_.getTokenType(), BNF_EXTERNAL_EXPRESSION)) {
+        marker_.drop();
+      }
+      else if (result_ || pinned_) {
+        marker_.done(BNF_EXTERNAL_EXPRESSION);
+      }
+      else {
+        marker_.rollbackTo();
+      }
+      result_ = exitErrorRecordingSection(builder_, result_, level_, pinned_, _SECTION_GENERAL_, null);
+    }
+    return result_ || pinned_;
+  }
+
+  // (reference_or_token | literal_expression) *
+  private static boolean external_expression_2(PsiBuilder builder_, final int level_) {
+    if (!recursion_guard_(builder_, level_, "external_expression_2")) return false;
+    boolean result_ = true;
+    final Marker marker_ = builder_.mark();
+    try {
+      int offset_ = builder_.getCurrentOffset();
+      while (result_ && !builder_.eof()) {
+        if (!external_expression_2_0(builder_, level_ + 1)) break;
+        if (offset_ == builder_.getCurrentOffset()) {
+          builder_.error("Empty element parsed in external_expression_2");
+          break;
+        }
+        offset_ = builder_.getCurrentOffset();
+      }
+    }
+    finally {
+      marker_.drop();
+    }
+    return result_;
+  }
+
+  // (reference_or_token | literal_expression)
+  private static boolean external_expression_2_0(PsiBuilder builder_, final int level_) {
+    if (!recursion_guard_(builder_, level_, "external_expression_2_0")) return false;
+    return external_expression_2_0_0(builder_, level_ + 1);
+  }
+
+  // reference_or_token | literal_expression
+  private static boolean external_expression_2_0_0(PsiBuilder builder_, final int level_) {
+    if (!recursion_guard_(builder_, level_, "external_expression_2_0_0")) return false;
+    boolean result_ = false;
+    final Marker marker_ = builder_.mark();
+    try {
+      result_ = reference_or_token(builder_, level_ + 1);
+      if (!result_) result_ = literal_expression(builder_, level_ + 1);
+    }
+    finally {
+      if (!result_) {
+        marker_.rollbackTo();
+      }
+      else {
+        marker_.drop();
+      }
+    }
+    return result_;
+  }
+
+
+  /* ********************************************************** */
   // attrs | rule
   static boolean grammar_element(PsiBuilder builder_, final int level_) {
     if (!recursion_guard_(builder_, level_, "grammar_element")) return false;
@@ -643,7 +726,7 @@ public class GrammarParser implements PsiParser {
 
 
   /* ********************************************************** */
-  // 'private' | 'external' | 'wrapped'
+  // 'private' | 'external'
   public static boolean modifier(PsiBuilder builder_, final int level_) {
     if (!recursion_guard_(builder_, level_, "modifier")) return false;
     boolean result_ = false;
@@ -651,7 +734,6 @@ public class GrammarParser implements PsiParser {
     try {
       result_ = consumeToken(builder_, "private");
       if (!result_) result_ = consumeToken(builder_, "external");
-      if (!result_) result_ = consumeToken(builder_, "wrapped");
     }
     finally {
       if (result_) {
@@ -1123,8 +1205,7 @@ public class GrammarParser implements PsiParser {
 
 
   /* ********************************************************** */
-  // !(
-  // modifier* id '::=' ) reference_or_token | literal_expression | paren_expression
+  // !(modifier* id '::=' ) reference_or_token | literal_expression | external_expression | paren_expression
   static boolean simple(PsiBuilder builder_, final int level_) {
     if (!recursion_guard_(builder_, level_, "simple")) return false;
     boolean result_ = false;
@@ -1132,6 +1213,7 @@ public class GrammarParser implements PsiParser {
     try {
       result_ = simple_0(builder_, level_ + 1);
       if (!result_) result_ = literal_expression(builder_, level_ + 1);
+      if (!result_) result_ = external_expression(builder_, level_ + 1);
       if (!result_) result_ = paren_expression(builder_, level_ + 1);
     }
     finally {
@@ -1145,8 +1227,7 @@ public class GrammarParser implements PsiParser {
     return result_;
   }
 
-  // !(
-  // modifier* id '::=' ) reference_or_token
+  // !(modifier* id '::=' ) reference_or_token
   private static boolean simple_0(PsiBuilder builder_, final int level_) {
     if (!recursion_guard_(builder_, level_, "simple_0")) return false;
     boolean result_ = false;
@@ -1166,8 +1247,7 @@ public class GrammarParser implements PsiParser {
     return result_;
   }
 
-  // !(
-  // modifier* id '::=' )
+  // !(modifier* id '::=' )
   private static boolean simple_0_0(PsiBuilder builder_, final int level_) {
     if (!recursion_guard_(builder_, level_, "simple_0_0")) return false;
     boolean result_ = false;
@@ -1183,8 +1263,7 @@ public class GrammarParser implements PsiParser {
     return result_;
   }
 
-  // (
-  // modifier* id '::=' )
+  // (modifier* id '::=' )
   private static boolean simple_0_0_0(PsiBuilder builder_, final int level_) {
     if (!recursion_guard_(builder_, level_, "simple_0_0_0")) return false;
     return simple_0_0_0_0(builder_, level_ + 1);

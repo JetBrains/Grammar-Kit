@@ -1,0 +1,27 @@
+BnfFile:ExternalExpression.bnf
+  BNF_RULE:rule
+    PsiElement(id)('rule')
+    PsiWhiteSpace(' ')
+    PsiElement(::=)('::=')
+    PsiWhiteSpace(' ')
+    BNF_SEQUENCE
+      BNF_REFERENCE_OR_TOKEN
+        PsiElement(id)('start')
+      PsiWhiteSpace(' ')
+      BNF_EXTERNAL_EXPRESSION
+        PsiElement(<<)('<<')
+        BNF_REFERENCE_OR_TOKEN
+          PsiElement(id)('externalCall')
+        PsiWhiteSpace(' ')
+        BNF_REFERENCE_OR_TOKEN
+          PsiElement(id)('params')
+        PsiWhiteSpace(' ')
+        BNF_LITERAL_EXPRESSION
+          PsiElement(number)('10')
+        PsiWhiteSpace(' ')
+        BNF_STRING_LITERAL_EXPRESSION
+          PsiElement(string)(''string'')
+        PsiElement(>>)('>>')
+      PsiWhiteSpace(' ')
+      BNF_REFERENCE_OR_TOKEN
+        PsiElement(id)('finish')

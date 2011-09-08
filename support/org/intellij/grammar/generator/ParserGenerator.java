@@ -429,6 +429,7 @@ public class ParserGenerator {
     IElementType type = getEffectiveType(node);
     if (node instanceof BnfLiteralExpression ||
         node instanceof BnfReferenceOrToken && node != rule.getExpression() ||
+        node instanceof BnfExternalExpression ||
         !visited.add(node)) {
       return;
     }
@@ -643,26 +644,13 @@ public class ParserGenerator {
       BnfRule subRule = ruleMap.get(text);
       if (subRule != null) {
         String method;
-        StringBuilder clause = null;
         if (Rule.isExternal(subRule)) {
+          StringBuilder clause = new StringBuilder();
           BnfExpression expression = subRule.getExpression();
           List<BnfExpression> expressions =
             expression instanceof BnfSequence ? ((BnfSequence)expression).getExpressionList() : Collections.singletonList(expression);
-          method = expressions.size() > 0 ? expressions.get(0).getText() : null;
-          if (expressions.size() > 1) {
-            boolean wrapped = Rule.isWrapped(subRule);
-            clause = new StringBuilder();
-            for (int i = 1, len = expressions.size(); i < len; i++) {
-              clause.append(", ");
-              BnfExpression nested = expressions.get(i);
-              if (wrapped && i == len - 1) {
-                clause.append(generateWrappedNodeCall(rule, nested, nested.getText()));
-              }
-              else {
-                clause.append(nested.getText());
-              }
-            }
-          }
+          method = generateExternalCall(rule, clause, expressions);
+          return method + "(builder_, level_ + 1" + (clause == null ? "" : clause.toString()) + ")";
         }
         else {
           method = Rule.name(subRule);
@@ -670,14 +658,45 @@ public class ParserGenerator {
           if (!parserClass.equals(ruleParserClasses.get(Rule.name(rule)))) {
             method = StringUtil.getShortName(parserClass) + "." + method;
           }
+          return method + "(builder_, level_ + 1)";
         }
-        return method + "(builder_, level_ + 1" + (clause == null ? "" : clause.toString()) + ")";
       }
       return generateConsumeToken(text);
+    }
+    else if (type == BNF_EXTERNAL_EXPRESSION) {
+      List<BnfExpression> expressions = ((BnfExternalExpression)node).getExpressionList();
+      StringBuilder clause = new StringBuilder();
+      String method = generateExternalCall(rule, clause, expressions);
+      return method + "(builder_, level_ + 1" + clause.toString() + ")";
     }
     else {
       return nextName + "(builder_, level_ + 1)";
     }
+  }
+
+  private String generateExternalCall(BnfRule rule, StringBuilder clause, List<BnfExpression> expressions) {
+    String method;
+    method = expressions.size() > 0 ? expressions.get(0).getText() : null;
+    if (expressions.size() > 1) {
+      for (int i = 1, len = expressions.size(); i < len; i++) {
+        clause.append(", ");
+        BnfExpression nested = expressions.get(i);
+        String argument = nested.getText();
+        if (nested instanceof BnfReferenceOrToken) {
+          if (ruleMap.containsKey(argument)) {
+            clause.append(generateWrappedNodeCall(rule, nested, argument));
+          }
+          else {
+            //clause.append(getElementType(argument));
+            clause.append(argument);
+          }
+        }
+        else {
+          clause.append(argument);
+        }
+      }
+    }
+    return method;
   }
 
   private String generateWrappedNodeCall(BnfRule rule, @Nullable BnfExpression nested, final String text) {

@@ -65,6 +65,8 @@ BAD_TOKENS={STRING_BAD1} | {STRING_BAD2}
   "}" {yybegin(YYINITIAL); return BnfTypes.BNF_RIGHT_BRACE; }
   "[" {yybegin(YYINITIAL); return BnfTypes.BNF_LEFT_BRACKET; }
   "]" {yybegin(YYINITIAL); return BnfTypes.BNF_RIGHT_BRACKET; }
+  "<<" {yybegin(YYINITIAL); return BnfTypes.BNF_EXTERNAL_START; }
+  ">>" {yybegin(YYINITIAL); return BnfTypes.BNF_EXTERNAL_END; }
 
   "::=" {yybegin(YYINITIAL); return BnfTypes.BNF_OP_IS; }
   "=" {yybegin(YYINITIAL); return BnfTypes.BNF_OP_EQ; }

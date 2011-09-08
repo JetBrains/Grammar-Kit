@@ -32,13 +32,15 @@
   RIGHT_BRACKET="]"
   LEFT_PAREN="("
   RIGHT_PAREN=")"
+  EXTERNAL_START="<<"
+  EXTERNAL_END=">>"
 
   named="org.intellij.grammar.psi.BnfNamedElement"
   namedImpl="org.intellij.grammar.psi.impl.BnfNamedElementImpl"
   parenthesized="org.intellij.grammar.psi.BnfParenthesized"
 }
 
-external wrapped grammar ::= parseGrammar grammar_element
+external grammar ::= parseGrammar grammar_element
 private grammar_element ::= attrs | rule {recoverUntil="grammar_element_recover"}
 private grammar_element_recover::=!('{'|rule_start)
 
@@ -50,7 +52,7 @@ private rule_start ::=modifier* id '::='
 
 expression ::= choice?
 
-modifier ::= 'private' | 'external' | 'wrapped';
+modifier ::= 'private' | 'external';
 
 attrs ::= '{' attr* '}' {pin=1}
 
@@ -74,8 +76,8 @@ quantified ::= paren_opt_expression | simple quantifier? {extends="expression" }
 paren_opt_expression ::='[' expression ']' {pin=1 extends="quantified" implements=parenthesized}
 quantifier ::= '?' | '+' | '*'
 
-private simple ::= !(
-modifier* id '::=' ) reference_or_token | literal_expression | paren_expression
+private simple ::= !(modifier* id '::=' ) reference_or_token | literal_expression | external_expression | paren_expression
+external_expression ::= '<<' reference_or_token (reference_or_token | literal_expression) * '>>' {pin=2 extends="expression"}
 reference_or_token ::= id  { extends="expression" mixin="org.intellij.grammar.psi.impl.BnfRefOrTokenImpl"}
 literal_expression ::= string_literal_expression | number { extends="expression" }
 string_literal_expression ::= string { extends="literal_expression" mixin="org.intellij.grammar.psi.impl.BnfStringImpl"}

@@ -28,6 +28,7 @@ public interface BnfTypes {
   IElementType BNF_ATTRS = new BnfCompositeElementType("BNF_ATTRS");
   IElementType BNF_CHOICE = new BnfCompositeElementType("BNF_CHOICE");
   IElementType BNF_EXPRESSION = new BnfCompositeElementType("BNF_EXPRESSION");
+  IElementType BNF_EXTERNAL_EXPRESSION = new BnfCompositeElementType("BNF_EXTERNAL_EXPRESSION");
   IElementType BNF_LITERAL_EXPRESSION = new BnfCompositeElementType("BNF_LITERAL_EXPRESSION");
   IElementType BNF_MODIFIER = new BnfCompositeElementType("BNF_MODIFIER");
   IElementType BNF_PAREN_EXPRESSION = new BnfCompositeElementType("BNF_PAREN_EXPRESSION");
@@ -41,6 +42,8 @@ public interface BnfTypes {
   IElementType BNF_SEQUENCE = new BnfCompositeElementType("BNF_SEQUENCE");
   IElementType BNF_STRING_LITERAL_EXPRESSION = new BnfCompositeElementType("BNF_STRING_LITERAL_EXPRESSION");
 
+  IElementType BNF_EXTERNAL_END = new BnfTokenType(">>");
+  IElementType BNF_EXTERNAL_START = new BnfTokenType("<<");
   IElementType BNF_LEFT_BRACE = new BnfTokenType("{");
   IElementType BNF_LEFT_BRACKET = new BnfTokenType("[");
   IElementType BNF_LEFT_PAREN = new BnfTokenType("(");
@@ -80,6 +83,9 @@ public interface BnfTypes {
       }
       else  if (type == BNF_EXPRESSION) {
         return new BnfExpressionImpl(node);
+      }
+      else  if (type == BNF_EXTERNAL_EXPRESSION) {
+        return new BnfExternalExpressionImpl(node);
       }
       else  if (type == BNF_LITERAL_EXPRESSION) {
         return new BnfLiteralExpressionImpl(node);

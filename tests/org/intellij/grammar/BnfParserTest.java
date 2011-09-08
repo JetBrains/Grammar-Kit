@@ -1,6 +1,5 @@
 package org.intellij.grammar;
 
-import com.intellij.openapi.application.PathManager;
 import com.intellij.testFramework.ParsingTestCase;
 
 /**
@@ -29,6 +28,10 @@ public class BnfParserTest extends ParsingTestCase {
   }
 
   public void testAlternativeSyntax() {
+    doTest(true);
+  }
+
+  public void testExternalExpression() {
     doTest(true);
   }
 }

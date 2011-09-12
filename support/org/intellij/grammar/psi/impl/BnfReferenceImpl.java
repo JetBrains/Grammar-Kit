@@ -20,7 +20,6 @@ import com.intellij.codeInsight.lookup.LookupElementBuilder;
 import com.intellij.openapi.util.Iconable;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.psi.*;
-import com.intellij.psi.impl.PsiManagerEx;
 import com.intellij.psi.impl.source.resolve.ResolveCache;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.util.Processor;
@@ -50,7 +49,7 @@ public class BnfReferenceImpl<T extends PsiElement> extends PsiPolyVariantRefere
 
   @NotNull
   public ResolveResult[] multiResolve(final boolean incompleteCode) {
-    return ((PsiManagerEx)myElement.getManager()).getResolveCache().resolveWithCaching(this, MY_RESOLVER, true, incompleteCode);
+    return ResolveCache.getInstance(myElement.getProject()).resolveWithCaching(this, MY_RESOLVER, true, incompleteCode);
   }
 
 

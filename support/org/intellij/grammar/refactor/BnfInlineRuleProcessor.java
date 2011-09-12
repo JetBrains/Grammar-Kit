@@ -18,17 +18,26 @@ package org.intellij.grammar.refactor;
 
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.util.Pair;
 import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiRecursiveElementWalkingVisitor;
 import com.intellij.psi.PsiReference;
 import com.intellij.psi.search.searches.ReferencesSearch;
 import com.intellij.refactoring.BaseRefactoringProcessor;
 import com.intellij.usageView.UsageInfo;
 import com.intellij.usageView.UsageViewDescriptor;
 import com.intellij.util.IncorrectOperationException;
+import gnu.trove.TObjectIntHashMap;
+import org.intellij.grammar.generator.ParserGeneratorUtil;
 import org.intellij.grammar.psi.BnfExpression;
+import org.intellij.grammar.psi.BnfExternalExpression;
 import org.intellij.grammar.psi.BnfRule;
 import org.intellij.grammar.psi.impl.BnfElementFactory;
+import org.intellij.grammar.psi.impl.GrammarUtil;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * Created by IntelliJ IDEA.
@@ -55,6 +64,10 @@ public class BnfInlineRuleProcessor extends BaseRefactoringProcessor {
     return new BnfInlineViewDescriptor(myRule);
   }
 
+  protected String getCommandName() {
+    return "Inline rule '"+myRule.getName()+"'";
+  }
+
   @NotNull
   protected UsageInfo[] findUsages() {
     if (myInlineThisOnly) return new UsageInfo[]{new UsageInfo(myReference.getElement())};
@@ -75,12 +88,19 @@ public class BnfInlineRuleProcessor extends BaseRefactoringProcessor {
 
   protected void performRefactoring(UsageInfo[] usages) {
     BnfExpression expression = myRule.getExpression();
+    boolean meta = ParserGeneratorUtil.Rule.isMeta(myRule);
     LOG.assertTrue(expression != null);    
 
     for (UsageInfo info : usages) {
-      final PsiElement element = info.getElement();
       try {
-        inlineExpressionUsage((BnfExpression)element, expression);
+        final BnfExpression element = (BnfExpression)info.getElement();
+        boolean metaRuleRef = GrammarUtil.isExternalReference(element);
+        if (meta && metaRuleRef) {
+          inlineMetaRuleUsage(element, expression);
+        }
+        else if (!meta && !metaRuleRef) {
+          inlineExpressionUsage(element, expression);
+        }
       }
       catch (IncorrectOperationException e) {
         LOG.error(e);
@@ -97,13 +117,44 @@ public class BnfInlineRuleProcessor extends BaseRefactoringProcessor {
     }
   }
 
-  private void inlineExpressionUsage(BnfExpression place, BnfExpression ruleExpr) throws IncorrectOperationException {
-    BnfExpressionOptimizer.optimize(
-      place.replace(BnfElementFactory.createExpressionFromText(ruleExpr.getProject(), '(' + ruleExpr.getText() + ')')));
+  private static void inlineExpressionUsage(BnfExpression place, BnfExpression ruleExpr) throws IncorrectOperationException {
+    BnfExpression replacement = BnfElementFactory.createExpressionFromText(ruleExpr.getProject(), '(' + ruleExpr.getText() + ')');
+    BnfExpressionOptimizer.optimize(place.replace(replacement));
   }
 
 
-  protected String getCommandName() {
-    return "Inline rule '"+myRule.getName()+"'";
+  private static void inlineMetaRuleUsage(BnfExpression place, BnfExpression expression) {
+    PsiElement parent = place.getParent();
+    if (parent instanceof BnfExternalExpression) {
+      final List<BnfExpression> expressionList = ((BnfExternalExpression)parent).getExpressionList();
+      final TObjectIntHashMap<String> visited = new TObjectIntHashMap<String>();
+      final LinkedList<Pair<PsiElement, PsiElement>> work = new LinkedList<Pair<PsiElement, PsiElement>>();
+        (expression = (BnfExpression)expression.copy()).acceptChildren(new PsiRecursiveElementWalkingVisitor() {
+          @Override
+          public void visitElement(PsiElement element) {
+            if (element instanceof BnfExternalExpression) {
+              List<BnfExpression> list = ((BnfExternalExpression)element).getExpressionList();
+              if (list.size() == 1) {
+                String text = list.get(0).getText();
+                int idx = visited.get(text);
+                if (idx == 0) visited.put(text, idx = visited.size() + 1);
+                if (idx < expressionList.size()) {
+                  work.addFirst(Pair.create(element, (PsiElement)expressionList.get(idx)));
+                }
+              }
+            }
+            else {
+              super.visitElement(element);
+            }
+          }
+        });
+      for (Pair<PsiElement, PsiElement> pair : work) {
+        pair.first.replace(pair.second);
+      }
+      inlineExpressionUsage((BnfExpression)parent, expression);
+    }
+    else {
+      // todo
+    }
   }
 }

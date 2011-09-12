@@ -23,6 +23,7 @@ import com.intellij.psi.PsiNamedElement;
 import com.intellij.psi.PsiReference;
 import org.intellij.grammar.psi.*;
 import org.intellij.grammar.psi.impl.BnfRefOrTokenImpl;
+import org.intellij.grammar.psi.impl.GrammarUtil;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
@@ -63,7 +64,7 @@ public class BnfAnnotator implements Annotator {
         annotationHolder.createErrorAnnotation(psiElement, "Unresolved reference");
       }
       else if (resolve == null && !(parent instanceof BnfModifier)) {
-        if (parent instanceof BnfExternalExpression && ((BnfExternalExpression)parent).getExpressionList().get(0) == psiElement) {
+        if (GrammarUtil.isExternalReference(psiElement)) {
           annotationHolder.createInfoAnnotation(psiElement, null).setTextAttributes(SyntaxHighlighterColors.LINE_COMMENT);
         }
         else {

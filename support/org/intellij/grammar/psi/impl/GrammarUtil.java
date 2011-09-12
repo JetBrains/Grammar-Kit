@@ -19,13 +19,13 @@ import com.intellij.openapi.util.Ref;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiRecursiveElementWalkingVisitor;
+import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.util.Processor;
 import org.intellij.grammar.generator.ParserGeneratorUtil;
-import org.intellij.grammar.psi.BnfExpression;
-import org.intellij.grammar.psi.BnfLiteralExpression;
-import org.intellij.grammar.psi.BnfReferenceOrToken;
-import org.intellij.grammar.psi.BnfRule;
+import org.intellij.grammar.psi.*;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.List;
 
 /**
  * @author gregsh
@@ -113,5 +113,28 @@ public class GrammarUtil {
 
   public static boolean isOneTokenExpression(BnfExpression e1) {
     return e1 instanceof BnfLiteralExpression || e1 instanceof BnfReferenceOrToken;
+  }
+
+  public static boolean isExternalReference(PsiElement psiElement) {
+    PsiElement parent = psiElement.getParent();
+    if (parent instanceof BnfExternalExpression && ((BnfExternalExpression)parent).getExpressionList().get(0) == psiElement) return true;
+    BnfRule rule = PsiTreeUtil.getParentOfType(psiElement, BnfRule.class);
+    return psiElement == getExternalMethodExpression(rule);
+  }
+
+  @Nullable
+  public static BnfExpression getExternalMethodExpression(BnfRule rule) {
+    if (!ParserGeneratorUtil.Rule.isExternal(rule)) return null;
+    final BnfExpression expression = rule.getExpression();
+    final BnfExpression result;
+    if (expression instanceof BnfReferenceOrToken) {
+      result = expression;
+    }
+    else if (expression instanceof BnfSequence) {
+      List<BnfExpression> list = ((BnfSequence)expression).getExpressionList();
+      result = list.isEmpty() ? null : list.get(0);
+    }
+    else result = null;
+    return result;
   }
 }

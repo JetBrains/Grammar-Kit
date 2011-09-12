@@ -94,6 +94,7 @@ public class BnfInlineRuleProcessor extends BaseRefactoringProcessor {
     for (UsageInfo info : usages) {
       try {
         final BnfExpression element = (BnfExpression)info.getElement();
+        if (element == null) continue;
         boolean metaRuleRef = GrammarUtil.isExternalReference(element);
         if (meta && metaRuleRef) {
           inlineMetaRuleUsage(element, expression);

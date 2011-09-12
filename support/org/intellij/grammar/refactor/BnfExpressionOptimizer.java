@@ -19,7 +19,6 @@ package org.intellij.grammar.refactor;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiWhiteSpace;
 import com.intellij.psi.tree.IElementType;
-import com.intellij.psi.util.PsiTreeUtil;
 import org.intellij.grammar.generator.ParserGeneratorUtil;
 import org.intellij.grammar.psi.*;
 import org.intellij.grammar.psi.impl.BnfElementFactory;
@@ -38,7 +37,7 @@ public class BnfExpressionOptimizer {
       PsiElement cur = list.removeLast();
       PsiElement parent = cur.getParent();
       if (isTrivial(cur)) {
-        list.add(cur.replace(PsiTreeUtil.getChildOfType(cur, BnfExpression.class)));
+        mergeChildrenTo(parent, cur, list);
       }
       else if (cur instanceof BnfParenOptExpression && isTrivialOrSingular(((BnfParenOptExpression)cur).getExpression())) {
         // currently <expr> + ? expressions are not supported, thus:
@@ -61,9 +60,6 @@ public class BnfExpressionOptimizer {
                (parent instanceof BnfSequence || parent instanceof BnfQuantified)) {
         String replacement = "(" + cur.getText() + ")";
         cur.replace(BnfElementFactory.createExpressionFromText(element.getProject(), replacement));
-      }
-      else if (canBeMergedInto(cur, parent)) {
-        mergeChildrenTo(parent, cur, list);
       }
       else if (cur instanceof BnfQuantified && ((BnfQuantified)cur).getExpression() instanceof BnfQuantified) {
         BnfQuantified child = (BnfQuantified)((BnfQuantified)cur).getExpression();
@@ -91,10 +87,16 @@ public class BnfExpressionOptimizer {
   }
 
   private static void mergeChildrenTo(PsiElement parent, PsiElement cur, LinkedList<PsiElement> list) {
+    boolean skipParens = cur instanceof BnfParenthesized;
     PsiElement last = cur.getLastChild();
-    cur = unwrap(parent, cur.getFirstChild(), last, cur);
+    PsiElement first = cur.getFirstChild();
+    if (skipParens) {
+      last = last.getPrevSibling();
+      first = first.getNextSibling();
+    }
+    cur = unwrap(parent, first, last, cur);
     while (cur != null) {
-      list.add(cur);
+      if (cur instanceof BnfExpression) list.add(cur);
       if (cur == last) break;
       cur = cur.getNextSibling();
     }
@@ -115,11 +117,12 @@ public class BnfExpressionOptimizer {
   }
 
   private static boolean isTrivial(PsiElement element) {
-    return element instanceof BnfParenthesized && element.getParent() instanceof BnfRule && !(element instanceof BnfQuantified || element instanceof BnfChoice) ||
-           element instanceof BnfParenExpression && (canBeMergedInto(((BnfParenExpression)element).getExpression(), element.getParent()) ||
-                                                     element.getParent() instanceof BnfParenthesized || isTrivialOrSingular(((BnfParenExpression)element).getExpression())) ||
-           element instanceof BnfSequence && ( ((BnfSequence)element).getExpressionList().size() == 1) ||
-           element instanceof BnfChoice && ( ((BnfChoice)element).getExpressionList().size() == 1)
+    PsiElement parent = element.getParent();
+    return element instanceof BnfParenthesized && parent instanceof BnfRule && !(element instanceof BnfQuantified || element instanceof BnfChoice) ||
+           element instanceof BnfParenExpression && (canBeMergedInto(((BnfParenExpression)element).getExpression(), parent) ||
+                                                     parent instanceof BnfParenthesized || isTrivialOrSingular(((BnfParenExpression)element).getExpression())) ||
+           element instanceof BnfSequence && ( ((BnfSequence)element).getExpressionList().size() == 1 || parent instanceof BnfSequence) ||
+           element instanceof BnfChoice && ( ((BnfChoice)element).getExpressionList().size() == 1 || parent instanceof BnfChoice)
       ;
   }
 

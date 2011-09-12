@@ -83,6 +83,8 @@ public class BnfInlineRuleTest extends LightCodeInsightFixtureTestCase {
   public void testParenOptionalParenTrivial() throws Exception { doTest("inline ::= (tok en)?; rule ::= (inline) [inline] {inline}", "rule ::= (tok en)? (tok en)? (tok en)?"); }
   public void testParenOptionalChoice() throws Exception { doTest("inline ::= (tok en)?; rule ::= (x | inline) [x | inline] {x | inline}", "rule ::= (x | (tok en)?) [x | (tok en)?] {x | (tok en)?}"); }
 
+  public void testChoiceInChoice() throws Exception { doTest("inline ::= (tok|en) x; rule ::= (x | inline) [x | inline] {x | inline}", "rule ::= (x | (tok|en) x) [x | (tok|en) x] {x | (tok|en) x}"); }
+
 
   private void doTest(/*@Language("BNF")*/ String text, /*@Language("BNF")*/ String expected) {
     PsiFile file = myFixture.configureByText("a.bnf", text);

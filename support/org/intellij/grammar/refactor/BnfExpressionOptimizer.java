@@ -22,6 +22,7 @@ import com.intellij.psi.tree.IElementType;
 import org.intellij.grammar.generator.ParserGeneratorUtil;
 import org.intellij.grammar.psi.*;
 import org.intellij.grammar.psi.impl.BnfElementFactory;
+import org.intellij.grammar.psi.impl.GrammarUtil;
 
 import java.util.LinkedList;
 
@@ -81,7 +82,9 @@ public class BnfExpressionOptimizer {
   }
 
   private static boolean canBeMergedInto(PsiElement cur, PsiElement parent) {
-    if (cur instanceof BnfSequence && (parent instanceof BnfSequence || parent instanceof BnfChoice)) return true;
+    if (cur instanceof BnfSequence && (
+      parent instanceof BnfChoice ||
+      parent instanceof BnfSequence && !(GrammarUtil.isExternalReference(((BnfSequence)parent).getExpressionList().get(0))))) return true;
     if (cur instanceof BnfChoice && parent instanceof BnfChoice) return true;
     return false;
   }
@@ -118,12 +121,22 @@ public class BnfExpressionOptimizer {
 
   private static boolean isTrivial(PsiElement element) {
     PsiElement parent = element.getParent();
-    return element instanceof BnfParenthesized && parent instanceof BnfRule && !(element instanceof BnfQuantified || element instanceof BnfChoice) ||
-           element instanceof BnfParenExpression && (canBeMergedInto(((BnfParenExpression)element).getExpression(), parent) ||
-                                                     parent instanceof BnfParenthesized || isTrivialOrSingular(((BnfParenExpression)element).getExpression())) ||
-           element instanceof BnfSequence && ( ((BnfSequence)element).getExpressionList().size() == 1 || parent instanceof BnfSequence) ||
-           element instanceof BnfChoice && ( ((BnfChoice)element).getExpressionList().size() == 1 || parent instanceof BnfChoice)
-      ;
+    if (element instanceof BnfParenthesized && parent instanceof BnfRule && !(element instanceof BnfQuantified || element instanceof BnfChoice)) {
+      return true;
+    }
+    else if (element instanceof BnfParenExpression &&
+             (canBeMergedInto(((BnfParenExpression)element).getExpression(), parent) ||
+              parent instanceof BnfParenthesized ||
+              isTrivialOrSingular(((BnfParenExpression)element).getExpression()))) {
+      return true;
+    }
+    else if (element instanceof BnfSequence && (((BnfSequence)element).getExpressionList().size() == 1 || parent instanceof BnfSequence)) {
+      return true;
+    }
+    else if (element instanceof BnfChoice && (((BnfChoice)element).getExpressionList().size() == 1 || parent instanceof BnfChoice)) {
+      return true;
+    }
+    return false;
   }
 
   private static boolean isTrivialOrSingular(PsiElement element) {

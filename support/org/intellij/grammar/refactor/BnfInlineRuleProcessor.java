@@ -23,19 +23,20 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiRecursiveElementWalkingVisitor;
 import com.intellij.psi.PsiReference;
 import com.intellij.psi.search.searches.ReferencesSearch;
+import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.refactoring.BaseRefactoringProcessor;
+import com.intellij.refactoring.util.RefactoringUtil;
 import com.intellij.usageView.UsageInfo;
 import com.intellij.usageView.UsageViewDescriptor;
 import com.intellij.util.IncorrectOperationException;
 import gnu.trove.TObjectIntHashMap;
 import org.intellij.grammar.generator.ParserGeneratorUtil;
-import org.intellij.grammar.psi.BnfExpression;
-import org.intellij.grammar.psi.BnfExternalExpression;
-import org.intellij.grammar.psi.BnfRule;
+import org.intellij.grammar.psi.*;
 import org.intellij.grammar.psi.impl.BnfElementFactory;
 import org.intellij.grammar.psi.impl.GrammarUtil;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -75,8 +76,7 @@ public class BnfInlineRuleProcessor extends BaseRefactoringProcessor {
     PsiReference[] refs = ReferencesSearch.search(myRule, myRule.getUseScope(), false).toArray(new PsiReference[0]);
     UsageInfo[] infos = new UsageInfo[refs.length];
     for (int i = 0, len = refs.length; i < len; i++) {
-      PsiElement element = refs[len - i - 1].getElement();
-      infos[i] = new UsageInfo(element);
+      infos[i] = new UsageInfo(refs[i].getElement());
     }
     return infos;
   }
@@ -89,12 +89,12 @@ public class BnfInlineRuleProcessor extends BaseRefactoringProcessor {
   protected void performRefactoring(UsageInfo[] usages) {
     BnfExpression expression = myRule.getExpression();
     boolean meta = ParserGeneratorUtil.Rule.isMeta(myRule);
-    LOG.assertTrue(expression != null);    
+    LOG.assertTrue(expression != null);
 
+    RefactoringUtil.sortDepthFirstRightLeftOrder(usages);
     for (UsageInfo info : usages) {
       try {
         final BnfExpression element = (BnfExpression)info.getElement();
-        if (element == null) continue;
         boolean metaRuleRef = GrammarUtil.isExternalReference(element);
         if (meta && metaRuleRef) {
           inlineMetaRuleUsage(element, expression);
@@ -125,37 +125,55 @@ public class BnfInlineRuleProcessor extends BaseRefactoringProcessor {
 
 
   private static void inlineMetaRuleUsage(BnfExpression place, BnfExpression expression) {
+    BnfRule rule = PsiTreeUtil.getParentOfType(place, BnfRule.class);
     PsiElement parent = place.getParent();
+    final List<BnfExpression> expressionList;
     if (parent instanceof BnfExternalExpression) {
-      final List<BnfExpression> expressionList = ((BnfExternalExpression)parent).getExpressionList();
-      final TObjectIntHashMap<String> visited = new TObjectIntHashMap<String>();
-      final LinkedList<Pair<PsiElement, PsiElement>> work = new LinkedList<Pair<PsiElement, PsiElement>>();
-        (expression = (BnfExpression)expression.copy()).acceptChildren(new PsiRecursiveElementWalkingVisitor() {
-          @Override
-          public void visitElement(PsiElement element) {
-            if (element instanceof BnfExternalExpression) {
-              List<BnfExpression> list = ((BnfExternalExpression)element).getExpressionList();
-              if (list.size() == 1) {
-                String text = list.get(0).getText();
-                int idx = visited.get(text);
-                if (idx == 0) visited.put(text, idx = visited.size() + 1);
-                if (idx < expressionList.size()) {
-                  work.addFirst(Pair.create(element, (PsiElement)expressionList.get(idx)));
-                }
-              }
-            }
-            else {
-              super.visitElement(element);
-            }
-          }
-        });
-      for (Pair<PsiElement, PsiElement> pair : work) {
-        pair.first.replace(pair.second);
-      }
-      inlineExpressionUsage((BnfExpression)parent, expression);
+      expressionList = ((BnfExternalExpression)parent).getExpressionList();
+    }
+    else if (parent instanceof BnfSequence) {
+      expressionList = ((BnfSequence)parent).getExpressionList();
+    }
+    else if (parent instanceof BnfRule) {
+      expressionList = Collections.emptyList();
     }
     else {
-      // todo
+      LOG.error(parent);
+      return;
+    }
+    final TObjectIntHashMap<String> visited = new TObjectIntHashMap<String>();
+    final LinkedList<Pair<PsiElement, PsiElement>> work = new LinkedList<Pair<PsiElement, PsiElement>>();
+    (expression = (BnfExpression)expression.copy()).acceptChildren(new PsiRecursiveElementWalkingVisitor() {
+      @Override
+      public void visitElement(PsiElement element) {
+        if (element instanceof BnfExternalExpression) {
+          List<BnfExpression> list = ((BnfExternalExpression)element).getExpressionList();
+          if (list.size() == 1) {
+            String text = list.get(0).getText();
+            int idx = visited.get(text);
+            if (idx == 0) visited.put(text, idx = visited.size() + 1);
+            if (idx < expressionList.size()) {
+              work.addFirst(Pair.create(element, (PsiElement)expressionList.get(idx)));
+            }
+          }
+        }
+        else {
+          super.visitElement(element);
+        }
+      }
+    });
+    for (Pair<PsiElement, PsiElement> pair : work) {
+      BnfExpressionOptimizer.optimize(pair.first.replace(pair.second));
+    }
+    inlineExpressionUsage((BnfExpression)parent, expression);
+    if (!(parent instanceof BnfExternalExpression)) {
+      for (BnfModifier modifier : rule.getModifierList()) {
+        if (modifier.getText().equals("external")) {
+          modifier.getNextSibling().delete(); // whitespace
+          modifier.delete();
+          break;
+        }
+      }
     }
   }
 }

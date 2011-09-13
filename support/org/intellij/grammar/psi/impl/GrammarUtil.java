@@ -119,7 +119,7 @@ public class GrammarUtil {
     PsiElement parent = psiElement.getParent();
     if (parent instanceof BnfExternalExpression && ((BnfExternalExpression)parent).getExpressionList().get(0) == psiElement) return true;
     BnfRule rule = PsiTreeUtil.getParentOfType(psiElement, BnfRule.class);
-    return psiElement == getExternalMethodExpression(rule);
+    return rule != null && psiElement == getExternalMethodExpression(rule);
   }
 
   @Nullable

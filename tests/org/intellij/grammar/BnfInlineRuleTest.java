@@ -86,6 +86,8 @@ public class BnfInlineRuleTest extends LightCodeInsightFixtureTestCase {
   public void testChoiceInChoice() throws Exception { doTest("inline ::= (tok|en) x; rule ::= (x | inline) [x | inline] {x | inline}", "rule ::= (x | (tok|en) x) [x | (tok|en) x] {x | (tok|en) x}"); }
 
   public void testSimpleMetaRule() throws Exception { doTest("meta inline ::= <<p>> (x <<p>>) *; rule ::= <<inline y>>", "rule ::= y (x y) *"); }
+  public void testComplexMetaRule() throws Exception { doTest("meta inline ::= <<p>> (x <<p>>) *; rule ::= <<inline <<inline y>>>>", "rule ::= y (x y) * (x y (x y) *) *"); }
+  public void testComplexExternalMetaRule() throws Exception { doTest("meta inline ::= <<p>> (x <<p>>) *; external rule ::= inline <<inline y>>", "rule ::= y (x y) * (x y (x y) *) *"); }
 
 
   private void doTest(/*@Language("BNF")*/ String text, /*@Language("BNF")*/ String expected) {

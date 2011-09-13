@@ -101,9 +101,7 @@ public class BnfIntroduceRuleHandler implements RefactoringActionHandler {
             final PsiFile containingFile = currentRule.getContainingFile();
             String newRuleName = choseRuleName(containingFile);
             String newRuleText = "private  " + newRuleName + " ::= " + ruleFromText.getExpression().getText();
-            BnfRule newRule = BnfElementFactory.createRuleFromText(project, newRuleText);
-            BnfRule addedRule = (BnfRule)currentRule.getParent().addAfter(newRule, currentRule);
-            currentRule.getParent().addAfter(BnfElementFactory.createLeafFromText(project, "\n"), currentRule);
+            BnfRule addedRule = addNextRule(project, currentRule, newRuleText);
             if (choice == OccurrencesChooser.ReplaceChoice.ALL) {
               List<BnfExpression[]> exprToReplace = occurrencesMap.get(OccurrencesChooser.ReplaceChoice.ALL);
               replaceUsages(project, exprToReplace, addedRule.getId());
@@ -116,7 +114,7 @@ public class BnfIntroduceRuleHandler implements RefactoringActionHandler {
 
             editor.getCaretModel().moveToOffset(addedRule.getTextOffset());
             PsiDocumentManager.getInstance(project).doPostponedOperationsAndUnblockDocument(editor.getDocument());
-            popup.performInplaceRename();
+            popup.performInplaceRename(false, null);
           }
         }.execute();
       }
@@ -131,6 +129,22 @@ public class BnfIntroduceRuleHandler implements RefactoringActionHandler {
         }
       }.showChooser(callback, occurrencesMap);
     }
+  }
+
+  public static BnfRule addNextRule(Project project, BnfRule currentRule, String newRuleText) {
+    BnfRule addedRule = (BnfRule)currentRule.getParent().addAfter(BnfElementFactory.createRuleFromText(project, newRuleText), currentRule);
+    currentRule.getParent().addBefore(BnfElementFactory.createLeafFromText(project, "\n"), addedRule);
+    if (endsWithSemicolon(currentRule)) {
+      addedRule.addBefore(BnfElementFactory.createLeafFromText(project, ";"), null);
+      if (currentRule.getNextSibling() instanceof PsiWhiteSpace) {
+        currentRule.getParent().addAfter(BnfElementFactory.createLeafFromText(project, "\n"), addedRule);
+      }
+    }
+    return addedRule;
+  }
+
+  public static boolean endsWithSemicolon(BnfRule rule) {
+    return rule.getLastChild().getNode().getElementType() == BnfTypes.BNF_SEMICOLON;
   }
 
   private static List<BnfExpression> findSelectedExpressionsInRange(BnfExpression parentExpression, TextRange range) {

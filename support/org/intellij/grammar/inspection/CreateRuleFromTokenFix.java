@@ -20,18 +20,16 @@ import com.intellij.codeInspection.LocalQuickFix;
 import com.intellij.codeInspection.ProblemDescriptor;
 import com.intellij.openapi.application.AccessToken;
 import com.intellij.openapi.application.WriteAction;
-import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.ScrollType;
 import com.intellij.openapi.fileEditor.FileEditor;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.fileEditor.TextEditor;
 import com.intellij.openapi.project.Project;
-import com.intellij.psi.PsiDocumentManager;
 import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiFile;
 import com.intellij.psi.util.PsiTreeUtil;
 import org.intellij.grammar.psi.BnfRule;
+import org.intellij.grammar.refactor.BnfIntroduceRuleHandler;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -69,19 +67,11 @@ public class CreateRuleFromTokenFix implements LocalQuickFix {
       final BnfRule rule = PsiTreeUtil.getParentOfType(element, BnfRule.class);
       if (rule == null) return;
 
-      final PsiDocumentManager documentManager = PsiDocumentManager.getInstance(project);
-      final PsiFile containingFile = rule.getContainingFile();
-      final Document document = documentManager.getDocument(containingFile);
-      if (document == null) return;
-      documentManager.doPostponedOperationsAndUnblockDocument(document);
-      int newRuleOffset = document.getLineEndOffset(document.getLineNumber(rule.getTextRange().getEndOffset()));
-      final String newRuleText = "\n" + myName + " ::= ";
-      document.insertString(newRuleOffset, newRuleText);
-
-      final FileEditor selectedEditor = FileEditorManager.getInstance(project).getSelectedEditor(containingFile.getVirtualFile());
+      final BnfRule addedRule = BnfIntroduceRuleHandler.addNextRule(project, rule, "private " + myName + " ::= ");
+      final FileEditor selectedEditor = FileEditorManager.getInstance(project).getSelectedEditor(rule.getContainingFile().getVirtualFile());
       if (selectedEditor instanceof TextEditor) {
         final Editor editor = ((TextEditor)selectedEditor).getEditor();
-        editor.getCaretModel().moveToOffset(newRuleOffset + newRuleText.length());
+        editor.getCaretModel().moveToOffset(addedRule.getTextRange().getEndOffset() - (BnfIntroduceRuleHandler.endsWithSemicolon(addedRule)? 1 : 0));
         editor.getScrollingModel().scrollToCaret(ScrollType.MAKE_VISIBLE);
       }
     }

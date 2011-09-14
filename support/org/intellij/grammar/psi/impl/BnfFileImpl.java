@@ -86,7 +86,7 @@ public class BnfFileImpl extends PsiFileBase implements BnfFile {
 
   private List<BnfRule> calcRules() {
     final List<BnfRule> result = new ArrayList<BnfRule>();
-    GrammarUtil.processChildrenDummyAware(this, new Processor<PsiElement>() {
+    processChildrenDummyAware(this, new Processor<PsiElement>() {
       @Override
       public boolean process(PsiElement psiElement) {
         if (psiElement instanceof BnfRule) {
@@ -100,7 +100,7 @@ public class BnfFileImpl extends PsiFileBase implements BnfFile {
 
   private List<BnfAttrs> calcAttributes() {
     final List<BnfAttrs> result = new ArrayList<BnfAttrs>();
-    GrammarUtil.processChildrenDummyAware(this, new Processor<PsiElement>() {
+    processChildrenDummyAware(this, new Processor<PsiElement>() {
       @Override
       public boolean process(PsiElement psiElement) {
         if (psiElement instanceof BnfAttrs) result.add((BnfAttrs)psiElement);
@@ -108,5 +108,20 @@ public class BnfFileImpl extends PsiFileBase implements BnfFile {
       }
     });
     return result;
+  }
+
+  private static boolean processChildrenDummyAware(PsiElement element, final Processor<PsiElement> processor) {
+    return new Processor<PsiElement>() {
+      @Override
+      public boolean process(PsiElement psiElement) {
+        for (PsiElement child = psiElement.getFirstChild(); child != null; child = child.getNextSibling()) {
+          if (child instanceof BnfDummyElementImpl) {
+            if (!process(child)) return false;
+          }
+          else if (!processor.process(child)) return false;
+        }
+        return true;
+      }
+    }.process(element);
   }
 }

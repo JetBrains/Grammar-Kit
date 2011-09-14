@@ -16,12 +16,14 @@
 
 package org.intellij.grammar.psi;
 
+import com.intellij.psi.PsiFile;
+
 import java.util.List;
 
 /**
  * @author gregsh
  */
-public interface BnfFile {
+public interface BnfFile extends PsiFile {
   List<BnfRule> getRules();
 
   List<BnfAttrs> getAttributes();

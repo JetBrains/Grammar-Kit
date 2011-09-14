@@ -17,17 +17,13 @@ package org.intellij.grammar.generator;
 
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.tree.IElementType;
 import com.intellij.psi.util.PsiTreeUtil;
+import com.intellij.util.containers.ContainerUtil;
 import org.intellij.grammar.psi.*;
-import org.intellij.grammar.psi.impl.BnfDummyElementImpl;
-import org.intellij.grammar.psi.impl.BnfFileImpl;
 import org.intellij.grammar.psi.impl.GrammarUtil;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -38,16 +34,16 @@ import java.util.regex.Pattern;
 public class ParserGeneratorUtil {
   private static final Object NULL = new Object();
 
-  public static <T> T getRootAttribute(BnfFileImpl treeRoot, String attrName, @Nullable T def) {
+  public static <T> T getRootAttribute(BnfFile treeRoot, String attrName, @Nullable T def) {
     return getRootAttribute(treeRoot, attrName, def, null);
   }
 
-  public static <T> T getRootAttribute(BnfFileImpl treeRoot, String attrName, @Nullable T def, @Nullable String match) {
-    return getAttributeInner(GrammarUtil.findDummyAwareChildOfType(treeRoot, BnfAttrs.class), attrName, def, match);
+  public static <T> T getRootAttribute(BnfFile treeRoot, String attrName, @Nullable T def, @Nullable String match) {
+    return getAttributeInner(ContainerUtil.getFirstItem(treeRoot.getAttributes()), attrName, def, match);
   }
 
   public static <T> T getAttribute(BnfRule rule, String attrName, @Nullable T def) {
-    return getAttribute(rule, attrName, def, Rule.name(rule));
+    return getAttribute(rule, attrName, def, rule.getName());
   }
 
   public static <T> T getAttribute(BnfRule rule, String attrName, @Nullable T def, String match) {
@@ -190,25 +186,6 @@ public class ParserGeneratorUtil {
 
 
   public static class Rule {
-    public static boolean is(PsiElement node) {
-      return node instanceof BnfRule;
-    }
-
-    public static List<BnfRule> list(BnfFileImpl parent) {
-      final ArrayList<BnfRule> rules = new ArrayList<BnfRule>();
-      parent.acceptChildren(new PsiElementVisitor() {
-        @Override
-        public void visitElement(PsiElement element) {
-          if (element instanceof BnfDummyElementImpl) {
-            element.acceptChildren(this);
-          }
-          else if (element instanceof BnfRule) {
-            rules.add((BnfRule)element);
-          }
-        }
-      });
-      return rules;
-    }
 
     public static boolean isPrivate(BnfRule node) {
       return hasModifier(node, "private");
@@ -227,14 +204,6 @@ public class ParserGeneratorUtil {
         if (s.equals(modifier.getText())) return true;
       }
       return false;
-    }
-
-    public static String name(@NotNull BnfRule node) {
-      return node.getId().getText();
-    }
-
-    public static BnfExpression body(BnfRule rule) {
-      return rule.getExpression();
     }
 
     public static PsiElement firstNotTrivial(BnfRule rule) {

@@ -99,7 +99,7 @@ public class RuleGraphHelper {
 
 
   public Map<PsiElement, Cardinality> getFor(BnfRule rule) {
-    BnfExpression body = Rule.body(rule);
+    BnfExpression body = rule.getExpression();
     Map<PsiElement, Cardinality> map = collectMembers(body, new HashSet<PsiElement>());
     if (map.size() == 1 && map.containsKey(rule)) {
       return Collections.emptyMap();
@@ -117,7 +117,7 @@ public class RuleGraphHelper {
       BnfRule targetRule = resolveRule(tree.getText());
       if (targetRule != null) {
         if (Rule.isPrivate(targetRule)) {
-          BnfExpression body = Rule.body(targetRule);
+          BnfExpression body = targetRule.getExpression();
           Map<PsiElement, Cardinality> map = collectMembers(body, visited);
           return map.containsKey(body) ? joinMaps(tree, BnfTypes.BNF_CHOICE, Arrays.asList(map, map)) : map;
         }

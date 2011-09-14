@@ -37,11 +37,8 @@ import com.intellij.psi.util.CachedValue;
 import com.intellij.psi.util.CachedValueProvider;
 import com.intellij.psi.util.CachedValuesManager;
 import com.intellij.psi.util.PsiModificationTracker;
-import com.intellij.util.Processor;
 import gnu.trove.THashSet;
 import org.intellij.grammar.psi.*;
-import org.intellij.grammar.psi.impl.BnfFileImpl;
-import org.intellij.grammar.psi.impl.GrammarUtil;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -69,7 +66,7 @@ public class BnfUnusedRulePassFactory extends AbstractProjectComponent implement
 
   @Nullable
   public TextEditorHighlightingPass createHighlightingPass(@NotNull PsiFile file, @NotNull final Editor editor) {
-    return file instanceof BnfFileImpl ? new MyPass(myProject, file, editor, editor.getDocument()) : null;
+    return file instanceof BnfFile? new MyPass(myProject, (BnfFile)file, editor, editor.getDocument()) : null;
   }
 
   private static Set<PsiElement> getUsedElements(final PsiFile file) {
@@ -102,10 +99,10 @@ public class BnfUnusedRulePassFactory extends AbstractProjectComponent implement
 
   static class MyPass extends TextEditorHighlightingPass {
 
-    private final PsiFile myFile;
+    private final BnfFile myFile;
     private final List<HighlightInfo> myHighlights = new ArrayList<HighlightInfo>();
 
-    public MyPass(Project myProject, PsiFile file, Editor editor, Document document) {
+    MyPass(Project myProject, BnfFile file, Editor editor, Document document) {
       super(myProject, document, true);
       myFile = file;
     }
@@ -113,33 +110,23 @@ public class BnfUnusedRulePassFactory extends AbstractProjectComponent implement
     @Override
     public void doCollectInformation(ProgressIndicator progress) {
       final Set<PsiElement> usedElements = getUsedElements(myFile);
-
-      GrammarUtil.processChildrenDummyAware(myFile, new Processor<PsiElement>() {
-        boolean first = true;
-
-        @Override
-        public boolean process(PsiElement child) {
-          if (child instanceof BnfAttrs) {
-            visitAttrs((BnfAttrs)child, usedElements);
-          }
-          else if (child instanceof BnfRule) {
-            if (first) {
-              // grammar root
-              first = false;
-            }
-            else if (!usedElements.contains(child)) {
-              final TextRange textRange = ((BnfRule)child).getId().getTextRange();
-              myHighlights.add(
-                new HighlightInfo(HighlightInfoType.WARNING, textRange.getStartOffset(), textRange.getEndOffset(), "Unused rule",
-                                  "Unused rule"));
-            }
-            else {
-              visitAttrs(((BnfRule)child).getAttrs(), usedElements);
-            }
-          }
-          return true;
+      boolean first = true;
+      for (BnfRule o : myFile.getRules()) {
+        if (first) {
+          first = false;
+          continue;
         }
-      });
+        if (!usedElements.contains(o)) {
+          final TextRange textRange = o.getId().getTextRange();
+          myHighlights.add(new HighlightInfo(HighlightInfoType.WARNING, textRange.getStartOffset(), textRange.getEndOffset(), "Unused rule", "Unused rule"));
+        }
+        else {
+          visitAttrs(o.getAttrs(), usedElements);
+        }
+      }
+      for (BnfAttrs o : myFile.getAttributes()) {
+        visitAttrs(o, usedElements);
+      }
     }
 
     private void visitAttrs(BnfAttrs attrs, Set<PsiElement> usedElements) {

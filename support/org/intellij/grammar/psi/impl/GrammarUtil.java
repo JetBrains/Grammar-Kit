@@ -15,12 +15,8 @@
  */
 package org.intellij.grammar.psi.impl;
 
-import com.intellij.openapi.util.Ref;
 import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiFile;
-import com.intellij.psi.PsiRecursiveElementWalkingVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
-import com.intellij.util.Processor;
 import org.intellij.grammar.generator.ParserGeneratorUtil;
 import org.intellij.grammar.psi.*;
 import org.jetbrains.annotations.Nullable;
@@ -31,20 +27,6 @@ import java.util.List;
  * @author gregsh
  */
 public class GrammarUtil {
-  public static boolean processChildrenDummyAware(PsiElement element, final Processor<PsiElement> processor) {
-    return new Processor<PsiElement>() {
-      @Override
-      public boolean process(PsiElement psiElement) {
-        for (PsiElement child = psiElement.getFirstChild(); child != null; child = child.getNextSibling()) {
-          if (child instanceof BnfDummyElementImpl) {
-            if (!process(child)) return false;
-          }
-          else if (!processor.process(child)) return false;
-        }
-        return true;
-      }
-    }.process(element);
-  }
 
   public static PsiElement getDummyAwarePrevSibling(PsiElement child) {
     PsiElement prevSibling = child.getPrevSibling();
@@ -57,39 +39,6 @@ public class GrammarUtil {
       parent = parent.getParent();
     }
     return parent == null? null : parent.getPrevSibling();
-  }
-
-  @Nullable
-  public static <T extends PsiElement> T findDummyAwareChildOfType(PsiElement element, final Class<T> aClass) {
-    final Ref<T> result = Ref.create(null);
-    processChildrenDummyAware(element, new Processor<PsiElement>() {
-      @Override
-      public boolean process(PsiElement psiElement) {
-        if (aClass.isInstance(psiElement)) {
-          result.set((T)psiElement);
-          return false;
-        }
-        return true;
-      }
-    });
-    return result.get();
-  }
-
-  public static BnfRule findRuleByName(PsiFile file, final String name) {
-    final Ref<BnfRule> result = Ref.create(null);
-    file.accept(new PsiRecursiveElementWalkingVisitor() {
-      @Override
-      public void visitElement(PsiElement element) {
-        if (element instanceof BnfRule) {
-          if (name.equals(((BnfRule)element).getName())) {
-            result.set((BnfRule)element);
-            stopWalking();
-          }
-        }
-        super.visitElement(element);
-      }
-    });
-    return result.get();
   }
 
   public static boolean equalsElement(BnfExpression e1, BnfExpression e2) {

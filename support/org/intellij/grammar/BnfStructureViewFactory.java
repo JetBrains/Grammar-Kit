@@ -24,11 +24,9 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiNamedElement;
 import com.intellij.util.PlatformIcons;
-import com.intellij.util.Processor;
 import com.intellij.util.containers.ContainerUtil;
 import org.intellij.grammar.psi.*;
 import org.intellij.grammar.psi.impl.BnfFileImpl;
-import org.intellij.grammar.psi.impl.GrammarUtil;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
@@ -114,15 +112,19 @@ public class BnfStructureViewFactory implements PsiStructureViewFactory {
     public TreeElement[] getChildren() {
       if (myElement instanceof BnfRule || myElement instanceof BnfAttr) return EMPTY_ARRAY;
       final ArrayList<TreeElement> result = new ArrayList<TreeElement>();
-      GrammarUtil.processChildrenDummyAware(myElement, new Processor<PsiElement>() {
-        @Override
-        public boolean process(PsiElement child) {
-          if (child instanceof BnfRule || child instanceof BnfAttrs || child instanceof BnfAttr) {
-            result.add(new Element(child));
-          }
-          return true;
+      if (myElement instanceof BnfFile) {
+        for (BnfRule o : ((BnfFile)myElement).getRules()) {
+          result.add(new Element(o));
         }
-      });
+        for (BnfAttrs o : ((BnfFile)myElement).getAttributes()) {
+          result.add(new Element(o));
+        }
+      }
+      else if (myElement instanceof BnfAttrs) {
+        for (BnfAttr o : ((BnfAttrs)myElement).getAttrList()) {
+          result.add(new Element(o));
+        }
+      }
       return result.toArray(new TreeElement[result.size()]);
     }
 

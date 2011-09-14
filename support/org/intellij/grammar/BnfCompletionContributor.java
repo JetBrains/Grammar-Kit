@@ -17,20 +17,24 @@
 package org.intellij.grammar;
 
 import com.intellij.codeInsight.completion.*;
+import com.intellij.codeInsight.lookup.LookupElement;
 import com.intellij.codeInsight.lookup.LookupElementBuilder;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.patterns.PlatformPatterns;
 import com.intellij.psi.*;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.util.ProcessingContext;
+import gnu.trove.THashSet;
 import org.intellij.grammar.parser.BnfLexer;
 import org.intellij.grammar.psi.*;
 import org.intellij.grammar.psi.impl.BnfDummyElementImpl;
 import org.intellij.grammar.psi.impl.BnfFileImpl;
+import org.intellij.grammar.psi.impl.BnfReferenceImpl;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 
 import static com.intellij.patterns.PlatformPatterns.psiElement;
 
@@ -70,20 +74,32 @@ public class BnfCompletionContributor extends CompletionContributor {
         PsiElement parent = PsiTreeUtil.getParentOfType(position, BnfExpression.class, BnfAttrValue.class, BnfRule.class, BnfDummyElementImpl.class);
         if (parent != null && !(parent instanceof BnfStringLiteralExpression && !(parent.getParent() instanceof BnfAttrValue))) {
           final BnfLexer lexer = new BnfLexer();
+          PsiReference referenceAt = parameters.getPosition().getContainingFile().findReferenceAt(parameters.getOffset());
+          final Set<String> existing;
+          if (referenceAt instanceof BnfReferenceImpl) {
+            existing = new THashSet<String>();
+            for (Object o : referenceAt.getVariants()) {
+              existing.add(((LookupElement)o).getLookupString());
+            }
+          }
+          else existing = null;
           parameters.getOriginalFile().acceptChildren(new PsiRecursiveElementWalkingVisitor() {
             @Override
             public void visitElement(PsiElement element) {
               if (element instanceof BnfReferenceOrToken || element instanceof BnfStringLiteralExpression) {
-                PsiReference reference = element.getTextRange().containsOffset(offset)? null : element.getReference();
-                if (reference != null && reference .resolve() == null) {
+                PsiReference reference = element.getTextRange().containsOffset(offset) ? null : element.getReference();
+                if (reference != null) {
                   String text = StringUtil.unquoteString(element.getText());
+                  if (existing != null && existing.contains(text)) return;
                   lexer.start(text);
                   if (lexer.getTokenType() == BnfTypes.BNF_ID && lexer.getTokenEnd() == text.length()) {
                     result.addElement(LookupElementBuilder.create(text));
                   }
                 }
               }
-              super.visitElement(element);
+              else {
+                super.visitElement(element);
+              }
             }
           });
         }

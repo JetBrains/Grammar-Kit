@@ -161,20 +161,19 @@ public class ParserGeneratorUtil {
     }
     else if (tree instanceof BnfQuantified) {
       final BnfQuantifier quantifier = ((BnfQuantified)tree).getQuantifier();
-      final IElementType elementType = PsiTreeUtil.getDeepestFirst(quantifier == null ? tree : quantifier).getNode().getElementType();
-      return elementType;
+      return PsiTreeUtil.getDeepestFirst(quantifier == null ? tree : quantifier).getNode().getElementType();
     }
     else if (tree instanceof BnfPredicate) {
       return ((BnfPredicate)tree).getPredicateSign().getFirstChild().getNode().getElementType();
+    }
+    else if (tree instanceof BnfStringLiteralExpression) {
+      return BnfTypes.BNF_STRING;
     }
     else if (tree instanceof BnfLiteralExpression) {
       return tree.getFirstChild().getNode().getElementType();
     }
     else if (tree instanceof BnfParenExpression) {
       return BnfTypes.BNF_SEQUENCE;
-    }
-    else if (tree instanceof BnfStringLiteralExpression) {
-      return BnfTypes.BNF_STRING;
     }
     else {
       return tree.getNode().getElementType();

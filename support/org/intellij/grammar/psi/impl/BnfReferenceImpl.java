@@ -18,16 +18,14 @@ package org.intellij.grammar.psi.impl;
 import com.intellij.codeInsight.lookup.LookupElement;
 import com.intellij.codeInsight.lookup.LookupElementBuilder;
 import com.intellij.openapi.util.Iconable;
+import com.intellij.openapi.util.Ref;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.psi.*;
 import com.intellij.psi.impl.source.resolve.ResolveCache;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.util.Processor;
 import com.intellij.util.containers.ContainerUtil;
-import org.intellij.grammar.psi.BnfAttrs;
-import org.intellij.grammar.psi.BnfNamedElement;
-import org.intellij.grammar.psi.BnfRule;
-import org.intellij.grammar.psi.BnfStringLiteralExpression;
+import org.intellij.grammar.psi.*;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -35,11 +33,12 @@ import java.util.ArrayList;
 /**
  * @author gregsh
  */
-public class BnfReferenceImpl<T extends PsiElement> extends PsiPolyVariantReferenceBase<T> {
-  private static final ResolveCache.PolyVariantResolver<BnfReferenceImpl> MY_RESOLVER =
-    new ResolveCache.PolyVariantResolver<BnfReferenceImpl>() {
-      public ResolveResult[] resolve(final BnfReferenceImpl expression, final boolean incompleteCode) {
-        return expression.resolveInner();
+public class BnfReferenceImpl<T extends PsiElement> extends PsiReferenceBase<T> {
+  private static final ResolveCache.Resolver MY_RESOLVER =
+    new ResolveCache.Resolver() {
+      @Override
+      public PsiElement resolve(PsiReference psiReference, boolean incompleteCode) {
+        return ((BnfReferenceImpl)psiReference).resolveInner();
       }
     };
 
@@ -47,28 +46,27 @@ public class BnfReferenceImpl<T extends PsiElement> extends PsiPolyVariantRefere
     super(element, range);
   }
 
-  @NotNull
-  public ResolveResult[] multiResolve(final boolean incompleteCode) {
-    return ResolveCache.getInstance(myElement.getProject()).resolveWithCaching(this, MY_RESOLVER, true, incompleteCode);
+  @Override
+  public PsiElement resolve() {
+    return ResolveCache.getInstance(myElement.getProject()).resolveWithCaching(this, MY_RESOLVER, true, false);
   }
 
-
-  private ResolveResult[] resolveInner() {
-    final ArrayList<ResolveResult> result = new ArrayList<ResolveResult>(1);
+  private PsiElement resolveInner() {
+    final Ref<PsiElement> result = Ref.create(null);
     final String text = getRangeInElement().substring(myElement.getText());
     processResolveVariants(new Processor<PsiElement>() {
       @Override
       public boolean process(PsiElement psiElement) {
         if (psiElement instanceof PsiNamedElement) {
           if (text.equals(((PsiNamedElement)psiElement).getName())) {
-            result.add(new PsiElementResolveResult(psiElement, true));
+            result.set(psiElement);
             return false;
           }
         }
         return true;
       }
     });
-    return result.toArray(new ResolveResult[result.size()]);
+    return result.get();
   }
 
   @NotNull
@@ -91,26 +89,22 @@ public class BnfReferenceImpl<T extends PsiElement> extends PsiPolyVariantRefere
 
   private void processResolveVariants(final Processor<PsiElement> processor) {
     PsiFile file = myElement.getContainingFile();
-    if (!(file instanceof BnfFileImpl)) return;
+    if (!(file instanceof BnfFile)) return;
     final boolean ruleMode = myElement instanceof BnfStringLiteralExpression;
 
     BnfAttrs attrs = PsiTreeUtil.getParentOfType(myElement, BnfAttrs.class);
     if (attrs != null && !ruleMode) {
       if (!ContainerUtil.process(attrs.getChildren(), processor)) return;
       final int textOffset = myElement.getTextOffset();
-      GrammarUtil.processChildrenDummyAware(file, new Processor<PsiElement>() {
+      ContainerUtil.process(((BnfFile)file).getAttributes(), new Processor<BnfAttrs>() {
         @Override
-        public boolean process(PsiElement psiElement) {
-          if (psiElement.getTextOffset() > textOffset) {
-            return false;
-          }
-          return !(psiElement instanceof BnfAttrs) ||
-                 ContainerUtil.process(((BnfAttrs)psiElement).getAttrList(), processor);
+        public boolean process(BnfAttrs attrs) {
+          return attrs.getTextOffset() <= textOffset && ContainerUtil.process(attrs.getAttrList(), processor);
         }
       });
     }
     else {
-      GrammarUtil.processChildrenDummyAware(file, processor);
+      ContainerUtil.process(((BnfFile)file).getRules(), processor);
     }
   }
 

@@ -36,13 +36,25 @@ import javax.swing.*;
  * Time: 20:04
  */
 public abstract class BnfNamedElementImpl extends BnfCompositeElementImpl implements BnfNamedElement {
+  
+  private volatile String myCachedName;
+  
   public BnfNamedElementImpl(ASTNode node) {
     super(node);
   }
 
   @Override
+  public void subtreeChanged() {
+    super.subtreeChanged();
+    myCachedName = null;
+  }
+
+  @Override
   public String getName() {
-    return getId().getText();
+    if (myCachedName == null) {
+      myCachedName = getId().getText();
+    }
+    return myCachedName;
   }
 
   @Override

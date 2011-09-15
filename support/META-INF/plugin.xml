@@ -38,6 +38,8 @@
     <lang.refactoringSupport language="BNF" implementationClass="org.intellij.grammar.refactor.BnfRefactoringSupportProvider"/>
     <inlineActionHandler implementation="org.intellij.grammar.refactor.BnfInlineRuleActionHandler"/>
     <inspectionToolProvider implementation="org.intellij.grammar.inspection.BnfInspectionToolProvider"/>
+
+    <lang.unwrapDescriptor language="BNF" implementationClass="org.intellij.grammar.refactor.BnfUnwrapDescriptor"/>
     <intentionAction>
       <className>org.intellij.grammar.intention.BnfFlipChoiceIntention</className>
       <category>Grammar</category>

@@ -28,6 +28,9 @@ public class Small implements PsiParser {
     else if (root_ == SOMERULE) {
       result_ = someRule(builder_, level_ + 1);
     }
+    else if (root_ == SOMESTRING) {
+      result_ = someString(builder_, level_ + 1);
+    }
     else if (root_ == STATEMENT) {
       result_ = statement(builder_, level_ + 1);
     }
@@ -75,6 +78,12 @@ public class Small implements PsiParser {
   }
 
   /* ********************************************************** */
+  // 'token'
+  static boolean privateString(PsiBuilder builder_, final int level_) {
+    return consumeToken(builder_, "token");
+  }
+
+  /* ********************************************************** */
   // token
   public static boolean someRule(PsiBuilder builder_, final int level_) {
     if (!recursion_guard_(builder_, level_, "someRule")) return false;
@@ -96,7 +105,28 @@ public class Small implements PsiParser {
 
 
   /* ********************************************************** */
-  // token | someRule | otherRule | privateRule
+  // 'token'
+  public static boolean someString(PsiBuilder builder_, final int level_) {
+    if (!recursion_guard_(builder_, level_, "someString")) return false;
+    boolean result_ = false;
+    final Marker marker_ = builder_.mark();
+    try {
+      result_ = consumeToken(builder_, "token");
+    }
+    finally {
+      if (result_) {
+        marker_.done(SOMESTRING);
+      }
+      else {
+        marker_.rollbackTo();
+      }
+    }
+    return result_;
+  }
+
+
+  /* ********************************************************** */
+  // token | someRule | someString | otherRule | privateRule | privateString
   public static boolean statement(PsiBuilder builder_, final int level_) {
     if (!recursion_guard_(builder_, level_, "statement")) return false;
     boolean result_ = false;
@@ -104,8 +134,10 @@ public class Small implements PsiParser {
     try {
       result_ = consumeToken(builder_, TOKEN);
       if (!result_) result_ = someRule(builder_, level_ + 1);
+      if (!result_) result_ = someString(builder_, level_ + 1);
       if (!result_) result_ = otherRule(builder_, level_ + 1);
       if (!result_) result_ = privateRule(builder_, level_ + 1);
+      if (!result_) result_ = privateString(builder_, level_ + 1);
     }
     finally {
       if (result_) {

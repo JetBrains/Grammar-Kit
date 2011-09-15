@@ -5,7 +5,9 @@
 }
 
 external root ::= parseRoot statement
-statement ::= token | someRule | otherRule | privateRule
+statement ::= token | someRule | someString | otherRule | privateRule | privateString
 someRule::= token
+someString::= 'token'
 otherRule::= ( token )
 private privateRule::= token
+private privateString ::= 'token'

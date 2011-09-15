@@ -427,50 +427,43 @@ public class ParserGenerator {
 
   private void generateNode(BnfRule rule, BnfExpression node, boolean shouldBePrivate, String funcName, Set<BnfExpression> visited) {
     IElementType type = getEffectiveType(node);
-    if (node instanceof BnfLiteralExpression ||
-        node instanceof BnfReferenceOrToken && node != rule.getExpression() ||
-        !visited.add(node)) {
-      return;
-    }
-    if (node instanceof BnfExternalExpression) {
-      List<BnfExpression> expressions = ((BnfExternalExpression)node).getExpressionList();
-      for (int i = 1, expressionsSize = expressions.size(); i < expressionsSize; i++) {
-        BnfExpression expression = expressions.get(i);
-        if (expression instanceof BnfParenthesized) {
-          generateNode(rule, expression, true, getNextName(funcName, i - 1), visited);
-        }
-      }
-      return;
-    }
 
-    boolean isPrivate = shouldBePrivate || grammarRoot.equals(rule.getName());
     for (String s : StringUtil.split(node.getText(), "\n")) {
       out("// " + s);
     }
     boolean isRule = node.getParent() == rule;
+    boolean isPrivate = shouldBePrivate || grammarRoot.equals(rule.getName());
+    boolean isLeft = isRule && Rule.isLeft(rule);
     boolean firstNonTrivial = node == Rule.firstNotTrivial(rule);
     final String recoverRoot = firstNonTrivial ? Rule.attribute(rule, "recoverUntil", (String)null) : null;
-    final boolean canCollapse = firstNonTrivial && rulesWithIheritance.contains(rule);
+    final boolean canCollapse = !isLeft && firstNonTrivial && rulesWithIheritance.contains(rule);
 
-    List<BnfExpression> children = getChildExpressions(node);
+    final List<BnfExpression> children;
     out((!isRule ? "private " : isPrivate ? "" : "public ") + "static boolean " + funcName + "(PsiBuilder builder_, final int level_"
         + collectExtraArguments(rule, true) + ") {");
-    if (node instanceof BnfReferenceOrToken) {
+    if (node instanceof BnfReferenceOrToken || node instanceof BnfLiteralExpression || node instanceof BnfExternalExpression) {
+      children = Collections.singletonList(node);
       if (isPrivate) {
         String nodeCall = generateNodeCall(rule, node, getNextName(funcName, 0));
         out("return " + nodeCall + ";");
         out("}");
+        if (node instanceof BnfExternalExpression && ((BnfExternalExpression)node).getExpressionList().size() > 1) {
+          newLine();
+          generateNodeChildren(rule, funcName, children, visited);
+        }
         return;
       }
       else {
-        children = Collections.singletonList(node);
         type = BNF_SEQUENCE;
       }
     }
-    if (children.isEmpty()) {
-      out("return true;");
-      out("}");
-      return;
+    else {
+      children = getChildExpressions(node);
+      if (children.isEmpty()) {
+        out("return true;");
+        out("}");
+        return;
+      }
     }
 
     String debugFuncName = funcName; // + ":" + node.toStringTree();
@@ -501,6 +494,9 @@ public class ParserGenerator {
     }
     if (!isPrivate && canCollapse) {
       out("final int start_ = builder_.getCurrentOffset();");
+    }
+    if (!isPrivate && isLeft) {
+      out("final Marker left_marker_ = ((Marker)builder_.getLatestDoneMarker()).precede();");
     }
     out("final Marker marker_ = builder_.mark();");
     out("try {");
@@ -577,10 +573,19 @@ public class ParserGenerator {
       else {
         out("if (result_" + (pinned ? " || pinned_" : "") + ") {");
       }
-      out("marker_.done(" + elementType + ");");
+      if (!isLeft) {
+        out("marker_.done(" + elementType + ");");
+      }
+      else {
+        out("marker_.drop();");
+        out("left_marker_.done(" + elementType + ");");
+      }
       out("}");
       out("else {");
       out("marker_.rollbackTo();");
+      if (isLeft) {
+        out("left_marker_.drop();");
+      }
       out("}");
     }
     else {
@@ -631,8 +636,28 @@ public class ParserGenerator {
     out("return result_" + (pinned ? " || pinned_" : "") + ";");
     out("}");
     newLine();
+    generateNodeChildren(rule, funcName, children, visited);
+  }
+
+  private void generateNodeChildren(BnfRule rule, String funcName, List<BnfExpression> children, Set<BnfExpression> visited) {
     for (int i = 0, len = children.size(); i < len; i++) {
-      generateNode(rule, children.get(i), true, getNextName(funcName, i), visited);
+      BnfExpression child = children.get(i);
+      if (child instanceof BnfLiteralExpression || child instanceof BnfReferenceOrToken) {
+        // do not generate
+      }
+      else if (child instanceof BnfExternalExpression) {
+        // generate parameters
+        List<BnfExpression> expressions = ((BnfExternalExpression)child).getExpressionList();
+        for (int j = 1, expressionsSize = expressions.size(); j < expressionsSize; j++) {
+          BnfExpression expression = expressions.get(j);
+          if (expression instanceof BnfParenthesized) {
+            generateNode(rule, expression, true, getNextName(getNextName(funcName, i), j - 1), visited);
+          }
+        }
+      }
+      else {
+        generateNode(rule, child, true, getNextName(funcName, i), visited);
+      }
     }
   }
 

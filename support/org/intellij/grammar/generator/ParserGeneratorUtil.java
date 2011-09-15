@@ -199,6 +199,10 @@ public class ParserGeneratorUtil {
       return hasModifier(node, "meta");
     }
 
+    public static boolean isLeft(BnfRule node) {
+      return hasModifier(node, "left");
+    }
+
     private static boolean hasModifier(BnfRule node, String s) {
       for (BnfModifier modifier : node.getModifierList()) {
         if (s.equals(modifier.getText())) return true;

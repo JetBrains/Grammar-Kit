@@ -40,9 +40,6 @@ public class ExternalRules implements PsiParser {
     else if (root_ == ONE_LIST) {
       result_ = one_list(builder_, level_ + 1);
     }
-    else if (root_ == ONE_LIST_WITH) {
-      result_ = one_list_with(builder_, level_ + 1);
-    }
     else if (root_ == SIMPLE_CASE) {
       result_ = simple_case(builder_, level_ + 1);
     }
@@ -500,11 +497,38 @@ public class ExternalRules implements PsiParser {
 
 
   /* ********************************************************** */
+  // <<comma_list one>>
+  public static boolean one_list(PsiBuilder builder_, final int level_) {
+    if (!recursion_guard_(builder_, level_, "one_list")) return false;
+    boolean result_ = false;
+    final Marker marker_ = builder_.mark();
+    try {
+      result_ = comma_list(builder_, level_ + 1, 
+        new Parser() { public boolean parse(PsiBuilder builder_) { return one(builder_, level_ + 1); }});
+    }
+    finally {
+      if (result_) {
+        marker_.done(ONE_LIST);
+      }
+      else {
+        marker_.rollbackTo();
+      }
+    }
+    return result_;
+  }
+
 
   /* ********************************************************** */
+  // <<comma_list_with_head (WITH) one>>
+  static boolean one_list_with(PsiBuilder builder_, final int level_) {
+    return comma_list_with_head(builder_, level_ + 1, 
+      new Parser() { public boolean parse(PsiBuilder builder_) { return one_list_with_0_0(builder_, level_ + 1); }}, 
+      new Parser() { public boolean parse(PsiBuilder builder_) { return one(builder_, level_ + 1); }});
+  }
+
   // (WITH)
-  private static boolean one_list_with_0(PsiBuilder builder_, final int level_) {
-    if (!recursion_guard_(builder_, level_, "one_list_with_0")) return false;
+  private static boolean one_list_with_0_0(PsiBuilder builder_, final int level_) {
+    if (!recursion_guard_(builder_, level_, "one_list_with_0_0")) return false;
     boolean result_ = false;
     final Marker marker_ = builder_.mark();
     try {
@@ -523,6 +547,12 @@ public class ExternalRules implements PsiParser {
 
 
   /* ********************************************************** */
+  // <<listOf statement>>
+  static boolean root(PsiBuilder builder_, final int level_) {
+    return listOf(builder_, level_ + 1, 
+      new Parser() { public boolean parse(PsiBuilder builder_) { return statement(builder_, level_ + 1); }});
+  }
+
 
   /* ********************************************************** */
   // DO <<uniqueListOf 'zero' one two 10 some>> END

@@ -1,0 +1,8 @@
+{
+  parserClass="LeftAssociative"
+  generatePsi=false
+  stubParserClass="org.intellij.grammar.parser.GeneratedParserUtilBase"
+}
+
+from ::= reference alias_definition?
+left alias_definition ::= AS? id

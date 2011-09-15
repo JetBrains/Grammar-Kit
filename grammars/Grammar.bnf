@@ -52,7 +52,7 @@ private rule_start ::=modifier* id '::='
 
 expression ::= choice?
 
-modifier ::= 'private' | 'external' | 'meta';
+modifier ::= 'private' | 'external' | 'meta' | 'left';
 
 attrs ::= '{' attr* '}' {pin=1}
 

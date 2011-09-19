@@ -32,7 +32,7 @@ ALPHA=[:letter:]
 DIGIT=[:digit:]
 
 ID_BODY={ALPHA} | {DIGIT} | "_"
-ID={ALPHA} ({ID_BODY}) * | "<" ({ID_BODY} | "-" | {LINE_WS})+ ">"
+ID={ALPHA} ({ID_BODY}) * | "<" ([^<>])+ ">"
 HEX={DIGIT} | [aAbBcCdDeEfF]
 NUMBER={DIGIT}+ | "0x" {HEX}+
 

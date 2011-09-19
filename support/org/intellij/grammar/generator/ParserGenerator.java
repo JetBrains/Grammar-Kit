@@ -105,15 +105,16 @@ public class ParserGenerator {
       out.println();
       return;
     }
+    boolean isComment = s.startsWith("//");
     for (int start = 0, end; start < length; start = end + 1) {
       end = StringUtil.indexOf(s, '\n', start, length);
       if (end == -1) end = length;
       String substring = s.substring(start, end);
-      if (substring.startsWith("}")) offset--;
+      if (!isComment && substring.startsWith("}")) offset--;
       if (offset > 0) {
         out.print(StringUtil.repeat("  ", start == 0 ? offset : offset + 1));
       }
-      if (substring.endsWith("{")) offset++;
+      if (!isComment && substring.endsWith("{")) offset++;
       out.println(substring);
     }
   }

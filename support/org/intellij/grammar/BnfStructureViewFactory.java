@@ -31,6 +31,7 @@ import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author gregsh
@@ -71,7 +72,12 @@ public class BnfStructureViewFactory implements PsiStructureViewFactory {
 
     @Override
     public boolean shouldEnterElement(Object element) {
-      return element instanceof BnfAttrs;
+      return false;
+    }
+
+    @Override
+    protected boolean isSuitable(PsiElement element) {
+      return element instanceof BnfAttrs || element instanceof BnfRule;
     }
   }
 
@@ -110,13 +116,16 @@ public class BnfStructureViewFactory implements PsiStructureViewFactory {
 
     @Override
     public TreeElement[] getChildren() {
-      if (myElement instanceof BnfRule || myElement instanceof BnfAttr) return EMPTY_ARRAY;
+      if (myElement instanceof BnfRule
+          || myElement instanceof BnfAttr) {
+        return EMPTY_ARRAY;
+      }
       final ArrayList<TreeElement> result = new ArrayList<TreeElement>();
       if (myElement instanceof BnfFile) {
-        for (BnfRule o : ((BnfFile)myElement).getRules()) {
+        for (BnfAttrs o : ((BnfFile)myElement).getAttributes()) {
           result.add(new Element(o));
         }
-        for (BnfAttrs o : ((BnfFile)myElement).getAttributes()) {
+        for (BnfRule o : ((BnfFile)myElement).getRules()) {
           result.add(new Element(o));
         }
       }
@@ -137,9 +146,11 @@ public class BnfStructureViewFactory implements PsiStructureViewFactory {
         return getAttrDisplayName((BnfAttr)myElement);
       }
       else if (myElement instanceof BnfAttrs) {
-        final BnfAttr firstAttr = ContainerUtil.getFirstItem(((BnfAttrs)myElement).getAttrList());
+        List<BnfAttr> attrList = ((BnfAttrs)myElement).getAttrList();
+        final BnfAttr firstAttr = ContainerUtil.getFirstItem(attrList);
         if (firstAttr == null) return "Attributes { <empty> }";
-        return "Attributes { " + getAttrDisplayName(firstAttr) + "... }"; // todo truncate
+        String suffix = attrList.size() > 1? " & " + attrList.size()+" more..." : " ";
+        return "Attributes { " + getAttrDisplayName(firstAttr) + suffix+ "}";
       }
       else if (myElement instanceof BnfFileImpl) {
         return ((BnfFileImpl)myElement).getName();

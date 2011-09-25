@@ -92,6 +92,8 @@ public class BnfIntroduceRuleTest extends LightCodeInsightFixtureTestCase {
   public void testFalseStartSequences() throws Exception {doTest("root ::= tok tok rule en tok rule\nsome ::=rule\nprivate rule ::= tok en","root ::= tok tok tok en en tok tok en\nsome ::=<selection>tok en</selection>");}
   public void testAttrsAfterRule() throws Exception {doTest("root ::= tok rule;\nprivate rule ::= tok en;\n{pin=1}","root ::= tok <selection>tok en</selection>;{pin=1}");}
 
+  public void testSpaces() throws Exception { doTest("some ::= (x rule) [x rule] {x rule}\nprivate rule ::= [tok? en]", "some ::= (x [  tok  ? en  ]) [x [tok  ?  en]] {x [<selection>tok? en]</selection>}"); }
+
   private void doTest(/*@Language("BNF")*/ String expected, /*@Language("BNF")*/ String text) throws IOException {
     myFixture.configureByText("a.bnf", text);
     new BnfIntroduceRuleHandler().invoke(getProject(), myFixture.getEditor(), myFixture.getFile(), null);

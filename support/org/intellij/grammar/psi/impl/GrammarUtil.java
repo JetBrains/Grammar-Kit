@@ -50,12 +50,12 @@ public class GrammarUtil {
     }
     else {
       for (PsiElement c1 = e1.getFirstChild(), c2 = e2.getFirstChild(); ;) {
-        if (c1 == null || c2 == null) return c1 == c2;
-        boolean f1 = c1 instanceof BnfExpression;
-        boolean f2 = c2 instanceof BnfExpression;
+        boolean f1 = c1 == null || c1 instanceof BnfExpression;
+        boolean f2 = c2 == null || c2 instanceof BnfExpression;
         if (f1 && f2 && !equalsElement((BnfExpression)c1, (BnfExpression)c2)) return false;
-        if (f1 && f2 || !f1) c1 = c1.getNextSibling();
-        if (f1 && f2 || !f2) c2 = c2.getNextSibling();
+        if (f1 && f2 || !f1) c1 = c1 == null? null : c1.getNextSibling();
+        if (f1 && f2 || !f2) c2 = c2 == null? null : c2.getNextSibling();
+        if (c1 == null && c2 == null) return true;
       }
     }
   }

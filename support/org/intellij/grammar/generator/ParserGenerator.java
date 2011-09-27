@@ -434,8 +434,8 @@ public class ParserGenerator {
     }
     boolean isRule = node.getParent() == rule;
     boolean isPrivate = shouldBePrivate || grammarRoot.equals(rule.getName());
-    boolean isLeft = isRule && Rule.isLeft(rule);
     boolean firstNonTrivial = node == Rule.firstNotTrivial(rule);
+    boolean isLeft = firstNonTrivial && Rule.isLeft(rule);
     final String recoverRoot = firstNonTrivial ? Rule.attribute(rule, "recoverUntil", (String)null) : null;
     final boolean canCollapse = !isLeft && firstNonTrivial && rulesWithIheritance.contains(rule);
 

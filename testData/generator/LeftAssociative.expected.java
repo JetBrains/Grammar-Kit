@@ -25,6 +25,9 @@ public class LeftAssociative implements PsiParser {
     if (root_ == ALIAS_DEFINITION) {
       result_ = alias_definition(builder_, level_ + 1);
     }
+    else if (root_ == ALIAS_DEFINITION2) {
+      result_ = alias_definition2(builder_, level_ + 1);
+    }
     else {
       Marker marker_ = builder_.mark();
       try {
@@ -80,7 +83,52 @@ public class LeftAssociative implements PsiParser {
 
 
   /* ********************************************************** */
-  // reference alias_definition?
+  // (AS? id)
+  public static boolean alias_definition2(PsiBuilder builder_, final int level_) {
+    if (!recursion_guard_(builder_, level_, "alias_definition2")) return false;
+    return alias_definition2_0(builder_, level_ + 1);
+  }
+
+  // AS? id
+  private static boolean alias_definition2_0(PsiBuilder builder_, final int level_) {
+    if (!recursion_guard_(builder_, level_, "alias_definition2_0")) return false;
+    boolean result_ = false;
+    final Marker left_marker_ = ((Marker)builder_.getLatestDoneMarker()).precede();
+    final Marker marker_ = builder_.mark();
+    try {
+      result_ = alias_definition2_0_0(builder_, level_ + 1);
+      result_ = result_ && consumeToken(builder_, ID);
+    }
+    finally {
+      if (result_) {
+        marker_.drop();
+        left_marker_.done(ALIAS_DEFINITION2);
+      }
+      else {
+        marker_.rollbackTo();
+        left_marker_.drop();
+      }
+    }
+    return result_;
+  }
+
+  // AS?
+  private static boolean alias_definition2_0_0(PsiBuilder builder_, final int level_) {
+    if (!recursion_guard_(builder_, level_, "alias_definition2_0_0")) return false;
+    boolean result_ = true;
+    final Marker marker_ = builder_.mark();
+    try {
+      consumeToken(builder_, AS);
+    }
+    finally {
+      marker_.drop();
+    }
+    return result_;
+  }
+
+
+  /* ********************************************************** */
+  // reference alias_definition? alias_definition2?
   static boolean from(PsiBuilder builder_, final int level_) {
     if (!recursion_guard_(builder_, level_, "from")) return false;
     boolean result_ = false;
@@ -88,6 +136,7 @@ public class LeftAssociative implements PsiParser {
     try {
       result_ = consumeToken(builder_, REFERENCE);
       result_ = result_ && from_1(builder_, level_ + 1);
+      result_ = result_ && from_2(builder_, level_ + 1);
     }
     finally {
       if (!result_) {
@@ -107,6 +156,20 @@ public class LeftAssociative implements PsiParser {
     final Marker marker_ = builder_.mark();
     try {
       alias_definition(builder_, level_ + 1);
+    }
+    finally {
+      marker_.drop();
+    }
+    return result_;
+  }
+
+  // alias_definition2?
+  private static boolean from_2(PsiBuilder builder_, final int level_) {
+    if (!recursion_guard_(builder_, level_, "from_2")) return false;
+    boolean result_ = true;
+    final Marker marker_ = builder_.mark();
+    try {
+      alias_definition2(builder_, level_ + 1);
     }
     finally {
       marker_.drop();

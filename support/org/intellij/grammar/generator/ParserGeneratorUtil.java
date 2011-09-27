@@ -211,7 +211,7 @@ public class ParserGeneratorUtil {
     }
 
     public static PsiElement firstNotTrivial(BnfRule rule) {
-      for (PsiElement tree = rule.getExpression(); tree != null; tree = tree.getFirstChild()) {
+      for (PsiElement tree = rule.getExpression(); tree != null; tree = PsiTreeUtil.getChildOfType(tree, BnfExpression.class)) {
         if (!isTrivialNode(tree)) return tree;
       }
       return null;

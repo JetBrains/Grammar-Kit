@@ -1,7 +1,9 @@
 package org.intellij.grammar;
 
 import com.intellij.testFramework.fixtures.LightCodeInsightFixtureTestCase;
-import org.intellij.grammar.inspection.BnfInspectionToolProvider;
+import org.intellij.grammar.inspection.BnfDuplicateRuleInspection;
+import org.intellij.grammar.inspection.BnfIdenticalChoiceBranchesInspection;
+import org.intellij.grammar.inspection.BnfSuspiciousTokenInspection;
 
 /**
  * Created by IntelliJ IDEA.
@@ -30,7 +32,9 @@ public class BnfInspectionTest extends LightCodeInsightFixtureTestCase {
 
   private void doTest(String text) {
     myFixture.configureByText("a.bnf", text);
-    myFixture.enableInspections(new BnfInspectionToolProvider());
+    myFixture.enableInspections(BnfSuspiciousTokenInspection.class,
+                                BnfDuplicateRuleInspection.class,
+                                BnfIdenticalChoiceBranchesInspection.class);
     myFixture.checkHighlighting(true, false, false);
   }
 }

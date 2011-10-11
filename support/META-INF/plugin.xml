@@ -37,9 +37,17 @@
 
     <lang.refactoringSupport language="BNF" implementationClass="org.intellij.grammar.refactor.BnfRefactoringSupportProvider"/>
     <inlineActionHandler implementation="org.intellij.grammar.refactor.BnfInlineRuleActionHandler"/>
-    <inspectionToolProvider implementation="org.intellij.grammar.inspection.BnfInspectionToolProvider"/>
 
     <lang.unwrapDescriptor language="BNF" implementationClass="org.intellij.grammar.refactor.BnfUnwrapDescriptor"/>
+
+    <localInspection shortName="BnfSuspiciousTokenInspection" displayName="Suspicious token" groupName="Grammar Inspections"
+                     enabledByDefault="true" level="WARNING" implementationClass="org.intellij.grammar.inspection.BnfSuspiciousTokenInspection"/>
+    <localInspection shortName="BnfDuplicateRuleInspection" displayName="Duplicate rule" groupName="Grammar Inspections"
+                     enabledByDefault="true" level="WARNING" implementationClass="org.intellij.grammar.inspection.BnfDuplicateRuleInspection"/>
+    <localInspection shortName="BnfIdenticalChoiceBranchesInspection" displayName="Identical choice branches"
+                     groupName="Grammar Inspections" enabledByDefault="true" level="WARNING"
+                     implementationClass="org.intellij.grammar.inspection.BnfIdenticalChoiceBranchesInspection"/>
+
     <intentionAction>
       <className>org.intellij.grammar.intention.BnfFlipChoiceIntention</className>
       <category>Grammar</category>

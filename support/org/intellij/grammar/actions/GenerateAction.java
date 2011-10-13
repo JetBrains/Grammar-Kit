@@ -58,6 +58,8 @@ public class GenerateAction extends AnAction {
     if (virtualFile == null) return;
 
     PsiDocumentManager.getInstance(file.getProject()).commitAllDocuments();
+    FileDocumentManager.getInstance().saveAllDocuments();
+
     VirtualFile content = ProjectRootManager.getInstance(file.getProject()).getFileIndex().getContentRootForFile(virtualFile);
     VirtualFile parentDir = content == null ? virtualFile.getParent() : content;
     String toDir = new File(VfsUtil.virtualToIoFile(parentDir), "gen").getAbsolutePath();
@@ -76,11 +78,8 @@ public class GenerateAction extends AnAction {
       LOG.error(ex);
     }
     finally {
-      // refresh everything
-      FileDocumentManager.getInstance().saveAllDocuments();
-
       SaveAndSyncHandler.refreshOpenFiles();
-      VirtualFileManager.getInstance().refreshWithoutFileWatcher(true);
+      VirtualFileManager.getInstance().refresh(true);
     }
   }
 }

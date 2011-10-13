@@ -304,15 +304,15 @@ public class ParserGenerator {
       String nodeCall = generateNodeCall(rootRule, null, rootRule.getName());
       if (!first) out("else {");
       out("Marker marker_ = builder_.mark();");
-      out("try {");
+      //out("try {");
       out("result_ = " + nodeCall + ";");
       out("while (builder_.getTokenType() != null) {");
       out("builder_.advanceLexer();");
       out("}");
-      out("}");
-      out("finally {");
+      //out("}");
+      //out("finally {");
       out("marker_.done(root_);");
-      out("}");
+      //out("}");
       if (!first) out("}");
     }
     out("return builder_.getTreeBuilt();");
@@ -500,7 +500,7 @@ public class ParserGenerator {
       out("final Marker left_marker_ = ((Marker)builder_.getLatestDoneMarker()).precede();");
     }
     out("final Marker marker_ = builder_.mark();");
-    out("try {");
+    //out("try {");
 
     String sectionType =
       recoverRoot != null ? "_SECTION_RECOVER_" : type == BNF_OP_AND ? "_SECTION_AND_" : type == BNF_OP_NOT ? "_SECTION_NOT_" :
@@ -537,7 +537,8 @@ public class ParserGenerator {
           nodeCall = generateNodeCall(rule, child, getNextName(funcName, i));
         }
         out("int offset_ = builder_.getCurrentOffset();");
-        out("while (result_ && !builder_.eof()) {");
+        //out("while (result_ && !builder_.eof()) {");
+        out("while (result_) {");
         out("if (!" + nodeCall + ") break;");
         out("if (offset_ == builder_.getCurrentOffset()) {");
         out("builder_.error(\"Empty element parsed in " + debugFuncName + "\");");
@@ -556,8 +557,8 @@ public class ParserGenerator {
         throw new AssertionError("unexpected: " + type);
       }
     }
-    out("}");
-    out("finally {");
+    //out("}");
+    //out("finally {");
 
     if (type == BNF_OP_AND || type == BNF_OP_NOT) {
       out("marker_.rollbackTo();");
@@ -629,7 +630,7 @@ public class ParserGenerator {
       }
     }
 
-    out("}");
+    //out("}");
 
     if (generateMemoizationCode) {
       out("if (!result_" + (pinned ? " && !pinned_" : "") + ") memoizeFalseBranch(builder_, " + funcId + ")");

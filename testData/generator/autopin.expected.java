@@ -39,15 +39,11 @@ public class Autopin implements PsiParser {
     }
     else {
       Marker marker_ = builder_.mark();
-      try {
-        result_ = root(builder_, level_ + 1);
-        while (builder_.getTokenType() != null) {
-          builder_.advanceLexer();
-        }
+      result_ = root(builder_, level_ + 1);
+      while (builder_.getTokenType() != null) {
+        builder_.advanceLexer();
       }
-      finally {
-        marker_.done(root_);
-      }
+      marker_.done(root_);
     }
     return builder_.getTreeBuilt();
   }
@@ -70,20 +66,16 @@ public class Autopin implements PsiParser {
     boolean result_ = false;
     final int start_ = builder_.getCurrentOffset();
     final Marker marker_ = builder_.mark();
-    try {
-      result_ = create_table_statement(builder_, level_ + 1);
+    result_ = create_table_statement(builder_, level_ + 1);
+    LighterASTNode last_ = result_? builder_.getLatestDoneMarker() : null;
+    if (last_ != null && last_.getStartOffset() == start_ && type_extends_(last_.getTokenType(), CREATE_STATEMENT)) {
+      marker_.drop();
     }
-    finally {
-      LighterASTNode last_ = result_? builder_.getLatestDoneMarker() : null;
-      if (last_ != null && last_.getStartOffset() == start_ && type_extends_(last_.getTokenType(), CREATE_STATEMENT)) {
-        marker_.drop();
-      }
-      else if (result_) {
-        marker_.done(CREATE_STATEMENT);
-      }
-      else {
-        marker_.rollbackTo();
-      }
+    else if (result_) {
+      marker_.done(CREATE_STATEMENT);
+    }
+    else {
+      marker_.rollbackTo();
     }
     return result_;
   }
@@ -97,30 +89,26 @@ public class Autopin implements PsiParser {
     boolean pinned_ = false;
     final int start_ = builder_.getCurrentOffset();
     final Marker marker_ = builder_.mark();
-    try {
-      enterErrorRecordingSection(builder_, level_, _SECTION_GENERAL_);
-      result_ = consumeToken(builder_, CREATE);
-      result_ = result_ && create_table_statement_1(builder_, level_ + 1);
-      result_ = result_ && create_table_statement_2(builder_, level_ + 1);
-      result_ = result_ && consumeToken(builder_, TABLE);
-      result_ = result_ && parseReference(builder_, level_ + 1);
-      pinned_ = result_; // pin = .*_ref
-      result_ = result_ && consumeToken(builder_, "(");
-      result_ = result_ && consumeToken(builder_, ")");
+    enterErrorRecordingSection(builder_, level_, _SECTION_GENERAL_);
+    result_ = consumeToken(builder_, CREATE);
+    result_ = result_ && create_table_statement_1(builder_, level_ + 1);
+    result_ = result_ && create_table_statement_2(builder_, level_ + 1);
+    result_ = result_ && consumeToken(builder_, TABLE);
+    result_ = result_ && parseReference(builder_, level_ + 1);
+    pinned_ = result_; // pin = .*_ref
+    result_ = result_ && consumeToken(builder_, "(");
+    result_ = result_ && consumeToken(builder_, ")");
+    LighterASTNode last_ = result_? builder_.getLatestDoneMarker() : null;
+    if (last_ != null && last_.getStartOffset() == start_ && type_extends_(last_.getTokenType(), CREATE_TABLE_STATEMENT)) {
+      marker_.drop();
     }
-    finally {
-      LighterASTNode last_ = result_? builder_.getLatestDoneMarker() : null;
-      if (last_ != null && last_.getStartOffset() == start_ && type_extends_(last_.getTokenType(), CREATE_TABLE_STATEMENT)) {
-        marker_.drop();
-      }
-      else if (result_ || pinned_) {
-        marker_.done(CREATE_TABLE_STATEMENT);
-      }
-      else {
-        marker_.rollbackTo();
-      }
-      result_ = exitErrorRecordingSection(builder_, result_, level_, pinned_, _SECTION_GENERAL_, null);
+    else if (result_ || pinned_) {
+      marker_.done(CREATE_TABLE_STATEMENT);
     }
+    else {
+      marker_.rollbackTo();
+    }
+    result_ = exitErrorRecordingSection(builder_, result_, level_, pinned_, _SECTION_GENERAL_, null);
     return result_ || pinned_;
   }
 
@@ -129,12 +117,8 @@ public class Autopin implements PsiParser {
     if (!recursion_guard_(builder_, level_, "create_table_statement_1")) return false;
     boolean result_ = true;
     final Marker marker_ = builder_.mark();
-    try {
-      consumeToken(builder_, TEMP);
-    }
-    finally {
-      marker_.drop();
-    }
+    consumeToken(builder_, TEMP);
+    marker_.drop();
     return result_;
   }
 
@@ -149,17 +133,13 @@ public class Autopin implements PsiParser {
     if (!recursion_guard_(builder_, level_, "create_table_statement_2_0")) return false;
     boolean result_ = false;
     final Marker marker_ = builder_.mark();
-    try {
-      result_ = consumeToken(builder_, GLOBAL);
-      if (!result_) result_ = consumeToken(builder_, LOCAL);
+    result_ = consumeToken(builder_, GLOBAL);
+    if (!result_) result_ = consumeToken(builder_, LOCAL);
+    if (!result_) {
+      marker_.rollbackTo();
     }
-    finally {
-      if (!result_) {
-        marker_.rollbackTo();
-      }
-      else {
-        marker_.drop();
-      }
+    else {
+      marker_.drop();
     }
     return result_;
   }
@@ -172,20 +152,16 @@ public class Autopin implements PsiParser {
     boolean result_ = false;
     final int start_ = builder_.getCurrentOffset();
     final Marker marker_ = builder_.mark();
-    try {
-      result_ = drop_table_statement(builder_, level_ + 1);
+    result_ = drop_table_statement(builder_, level_ + 1);
+    LighterASTNode last_ = result_? builder_.getLatestDoneMarker() : null;
+    if (last_ != null && last_.getStartOffset() == start_ && type_extends_(last_.getTokenType(), DROP_STATEMENT)) {
+      marker_.drop();
     }
-    finally {
-      LighterASTNode last_ = result_? builder_.getLatestDoneMarker() : null;
-      if (last_ != null && last_.getStartOffset() == start_ && type_extends_(last_.getTokenType(), DROP_STATEMENT)) {
-        marker_.drop();
-      }
-      else if (result_) {
-        marker_.done(DROP_STATEMENT);
-      }
-      else {
-        marker_.rollbackTo();
-      }
+    else if (result_) {
+      marker_.done(DROP_STATEMENT);
+    }
+    else {
+      marker_.rollbackTo();
     }
     return result_;
   }
@@ -199,26 +175,22 @@ public class Autopin implements PsiParser {
     boolean pinned_ = false;
     final int start_ = builder_.getCurrentOffset();
     final Marker marker_ = builder_.mark();
-    try {
-      enterErrorRecordingSection(builder_, level_, _SECTION_GENERAL_);
-      result_ = consumeToken(builder_, DROP);
-      result_ = result_ && consumeToken(builder_, TABLE);
-      result_ = result_ && parseReference(builder_, level_ + 1);
-      pinned_ = result_; // pin = .*_ref
+    enterErrorRecordingSection(builder_, level_, _SECTION_GENERAL_);
+    result_ = consumeToken(builder_, DROP);
+    result_ = result_ && consumeToken(builder_, TABLE);
+    result_ = result_ && parseReference(builder_, level_ + 1);
+    pinned_ = result_; // pin = .*_ref
+    LighterASTNode last_ = result_? builder_.getLatestDoneMarker() : null;
+    if (last_ != null && last_.getStartOffset() == start_ && type_extends_(last_.getTokenType(), DROP_TABLE_STATEMENT)) {
+      marker_.drop();
     }
-    finally {
-      LighterASTNode last_ = result_? builder_.getLatestDoneMarker() : null;
-      if (last_ != null && last_.getStartOffset() == start_ && type_extends_(last_.getTokenType(), DROP_TABLE_STATEMENT)) {
-        marker_.drop();
-      }
-      else if (result_ || pinned_) {
-        marker_.done(DROP_TABLE_STATEMENT);
-      }
-      else {
-        marker_.rollbackTo();
-      }
-      result_ = exitErrorRecordingSection(builder_, result_, level_, pinned_, _SECTION_GENERAL_, null);
+    else if (result_ || pinned_) {
+      marker_.done(DROP_TABLE_STATEMENT);
     }
+    else {
+      marker_.rollbackTo();
+    }
+    result_ = exitErrorRecordingSection(builder_, result_, level_, pinned_, _SECTION_GENERAL_, null);
     return result_ || pinned_;
   }
 
@@ -229,20 +201,16 @@ public class Autopin implements PsiParser {
     if (!recursion_guard_(builder_, level_, "root")) return false;
     boolean result_ = true;
     final Marker marker_ = builder_.mark();
-    try {
-      int offset_ = builder_.getCurrentOffset();
-      while (result_ && !builder_.eof()) {
-        if (!statement(builder_, level_ + 1)) break;
-        if (offset_ == builder_.getCurrentOffset()) {
-          builder_.error("Empty element parsed in root");
-          break;
-        }
-        offset_ = builder_.getCurrentOffset();
+    int offset_ = builder_.getCurrentOffset();
+    while (result_) {
+      if (!statement(builder_, level_ + 1)) break;
+      if (offset_ == builder_.getCurrentOffset()) {
+        builder_.error("Empty element parsed in root");
+        break;
       }
+      offset_ = builder_.getCurrentOffset();
     }
-    finally {
-      marker_.drop();
-    }
+    marker_.drop();
     return result_;
   }
 
@@ -254,21 +222,17 @@ public class Autopin implements PsiParser {
     boolean result_ = false;
     final int start_ = builder_.getCurrentOffset();
     final Marker marker_ = builder_.mark();
-    try {
-      result_ = create_statement(builder_, level_ + 1);
-      if (!result_) result_ = drop_statement(builder_, level_ + 1);
+    result_ = create_statement(builder_, level_ + 1);
+    if (!result_) result_ = drop_statement(builder_, level_ + 1);
+    LighterASTNode last_ = result_? builder_.getLatestDoneMarker() : null;
+    if (last_ != null && last_.getStartOffset() == start_ && type_extends_(last_.getTokenType(), STATEMENT)) {
+      marker_.drop();
     }
-    finally {
-      LighterASTNode last_ = result_? builder_.getLatestDoneMarker() : null;
-      if (last_ != null && last_.getStartOffset() == start_ && type_extends_(last_.getTokenType(), STATEMENT)) {
-        marker_.drop();
-      }
-      else if (result_) {
-        marker_.done(STATEMENT);
-      }
-      else {
-        marker_.rollbackTo();
-      }
+    else if (result_) {
+      marker_.done(STATEMENT);
+    }
+    else {
+      marker_.rollbackTo();
     }
     return result_;
   }

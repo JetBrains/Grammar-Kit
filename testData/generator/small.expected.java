@@ -36,16 +36,12 @@ public class Small implements PsiParser {
     }
     else {
       Marker marker_ = builder_.mark();
-      try {
-        result_ = parseRoot(builder_, level_ + 1, 
-          new Parser() { public boolean parse(PsiBuilder builder_) { return statement(builder_, level_ + 1); }});
-        while (builder_.getTokenType() != null) {
-          builder_.advanceLexer();
-        }
+      result_ = parseRoot(builder_, level_ + 1, 
+        new Parser() { public boolean parse(PsiBuilder builder_) { return statement(builder_, level_ + 1); }});
+      while (builder_.getTokenType() != null) {
+        builder_.advanceLexer();
       }
-      finally {
-        marker_.done(root_);
-      }
+      marker_.done(root_);
     }
     return builder_.getTreeBuilt();
   }
@@ -56,16 +52,12 @@ public class Small implements PsiParser {
     if (!recursion_guard_(builder_, level_, "otherRule")) return false;
     boolean result_ = false;
     final Marker marker_ = builder_.mark();
-    try {
-      result_ = consumeToken(builder_, TOKEN);
+    result_ = consumeToken(builder_, TOKEN);
+    if (result_) {
+      marker_.done(OTHERRULE);
     }
-    finally {
-      if (result_) {
-        marker_.done(OTHERRULE);
-      }
-      else {
-        marker_.rollbackTo();
-      }
+    else {
+      marker_.rollbackTo();
     }
     return result_;
   }
@@ -89,16 +81,12 @@ public class Small implements PsiParser {
     if (!recursion_guard_(builder_, level_, "someRule")) return false;
     boolean result_ = false;
     final Marker marker_ = builder_.mark();
-    try {
-      result_ = consumeToken(builder_, TOKEN);
+    result_ = consumeToken(builder_, TOKEN);
+    if (result_) {
+      marker_.done(SOMERULE);
     }
-    finally {
-      if (result_) {
-        marker_.done(SOMERULE);
-      }
-      else {
-        marker_.rollbackTo();
-      }
+    else {
+      marker_.rollbackTo();
     }
     return result_;
   }
@@ -110,16 +98,12 @@ public class Small implements PsiParser {
     if (!recursion_guard_(builder_, level_, "someString")) return false;
     boolean result_ = false;
     final Marker marker_ = builder_.mark();
-    try {
-      result_ = consumeToken(builder_, "token");
+    result_ = consumeToken(builder_, "token");
+    if (result_) {
+      marker_.done(SOMESTRING);
     }
-    finally {
-      if (result_) {
-        marker_.done(SOMESTRING);
-      }
-      else {
-        marker_.rollbackTo();
-      }
+    else {
+      marker_.rollbackTo();
     }
     return result_;
   }
@@ -131,21 +115,17 @@ public class Small implements PsiParser {
     if (!recursion_guard_(builder_, level_, "statement")) return false;
     boolean result_ = false;
     final Marker marker_ = builder_.mark();
-    try {
-      result_ = consumeToken(builder_, TOKEN);
-      if (!result_) result_ = someRule(builder_, level_ + 1);
-      if (!result_) result_ = someString(builder_, level_ + 1);
-      if (!result_) result_ = otherRule(builder_, level_ + 1);
-      if (!result_) result_ = privateRule(builder_, level_ + 1);
-      if (!result_) result_ = privateString(builder_, level_ + 1);
+    result_ = consumeToken(builder_, TOKEN);
+    if (!result_) result_ = someRule(builder_, level_ + 1);
+    if (!result_) result_ = someString(builder_, level_ + 1);
+    if (!result_) result_ = otherRule(builder_, level_ + 1);
+    if (!result_) result_ = privateRule(builder_, level_ + 1);
+    if (!result_) result_ = privateString(builder_, level_ + 1);
+    if (result_) {
+      marker_.done(STATEMENT);
     }
-    finally {
-      if (result_) {
-        marker_.done(STATEMENT);
-      }
-      else {
-        marker_.rollbackTo();
-      }
+    else {
+      marker_.rollbackTo();
     }
     return result_;
   }

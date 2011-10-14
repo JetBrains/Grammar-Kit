@@ -115,11 +115,8 @@ public class Autopin implements PsiParser {
   // TEMP?
   private static boolean create_table_statement_1(PsiBuilder builder_, final int level_) {
     if (!recursion_guard_(builder_, level_, "create_table_statement_1")) return false;
-    boolean result_ = true;
-    final Marker marker_ = builder_.mark();
     consumeToken(builder_, TEMP);
-    marker_.drop();
-    return result_;
+    return true;
   }
 
   // (GLOBAL|LOCAL)
@@ -199,10 +196,8 @@ public class Autopin implements PsiParser {
   // statement *
   static boolean root(PsiBuilder builder_, final int level_) {
     if (!recursion_guard_(builder_, level_, "root")) return false;
-    boolean result_ = true;
-    final Marker marker_ = builder_.mark();
     int offset_ = builder_.getCurrentOffset();
-    while (result_) {
+    while (true) {
       if (!statement(builder_, level_ + 1)) break;
       if (offset_ == builder_.getCurrentOffset()) {
         builder_.error("Empty element parsed in root");
@@ -210,8 +205,7 @@ public class Autopin implements PsiParser {
       }
       offset_ = builder_.getCurrentOffset();
     }
-    marker_.drop();
-    return result_;
+    return true;
   }
 
 

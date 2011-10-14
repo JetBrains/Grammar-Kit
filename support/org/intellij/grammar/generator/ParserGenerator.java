@@ -487,8 +487,10 @@ public class ParserGenerator {
     final int pinIndex = pinValue instanceof Integer ? (Integer)pinValue : -1;
     final Pattern pinPattern = pinValue instanceof String ? Pattern.compile(StringUtil.unescapeStringCharacters((String)pinValue)) : null;
     boolean pinApplied = false;
-
-    out("boolean result_ = " + (type == BNF_OP_ZEROMORE || type == BNF_OP_OPT) + ";");
+    final boolean alwaysTrue = type == BNF_OP_OPT || type == BNF_OP_ZEROMORE;
+    if (!alwaysTrue) {
+      out("boolean result_ = " + (type == BNF_OP_ZEROMORE || type == BNF_OP_OPT) + ";");
+    }
     boolean pinned = pinIndex > -1 || pinPattern != null;
     if (pinned) {
       out("boolean pinned_ = false;");
@@ -499,12 +501,15 @@ public class ParserGenerator {
     if (!isPrivate && isLeft) {
       out("final Marker left_marker_ = ((Marker)builder_.getLatestDoneMarker()).precede();");
     }
-    out("final Marker marker_ = builder_.mark();");
+    if (!alwaysTrue || !isPrivate) {
+      out("final Marker marker_ = builder_.mark();");
+    }
     //out("try {");
 
-    String sectionType =
-      recoverRoot != null ? "_SECTION_RECOVER_" : type == BNF_OP_AND ? "_SECTION_AND_" : type == BNF_OP_NOT ? "_SECTION_NOT_" :
-                                                                                         pinned ? "_SECTION_GENERAL_" : null;
+    String sectionType = recoverRoot != null ? "_SECTION_RECOVER_" :
+                         type == BNF_OP_AND ? "_SECTION_AND_" :
+                         type == BNF_OP_NOT ? "_SECTION_NOT_" :
+                         pinned ? "_SECTION_GENERAL_" : null;
     if (sectionType != null) {
       out("enterErrorRecordingSection(builder_, level_, " + sectionType + ");");
     }
@@ -538,7 +543,7 @@ public class ParserGenerator {
         }
         out("int offset_ = builder_.getCurrentOffset();");
         //out("while (result_ && !builder_.eof()) {");
-        out("while (result_) {");
+        out("while ("+ (alwaysTrue? "true" : "result_") +") {");
         out("if (!" + nodeCall + ") break;");
         out("if (offset_ == builder_.getCurrentOffset()) {");
         out("builder_.error(\"Empty element parsed in " + debugFuncName + "\");");
@@ -566,14 +571,13 @@ public class ParserGenerator {
     else if (!isPrivate) {
       String elementType = getElementType(rule);
       if (canCollapse) {
-        out("LighterASTNode last_ = result_? builder_.getLatestDoneMarker() : null;");
+        out("LighterASTNode last_ = "+(alwaysTrue? "builder_.getLatestDoneMarker();" : "result_? builder_.getLatestDoneMarker() : null;"));
         out("if (last_ != null && last_.getStartOffset() == start_ && type_extends_(last_.getTokenType(), " + elementType + ")) {");
         out("marker_.drop();");
         out("}");
-        out("else if (result_" + (pinned ? " || pinned_" : "") + ") {");
       }
-      else {
-        out("if (result_" + (pinned ? " || pinned_" : "") + ") {");
+      if (!alwaysTrue || canCollapse) {
+        out((canCollapse? "else " : "") + (alwaysTrue? "{" : "if (result_" + (pinned ? " || pinned_" : "") + ") {"));
       }
       if (!isLeft) {
         out("marker_.done(" + elementType + ");");
@@ -582,26 +586,25 @@ public class ParserGenerator {
         out("marker_.drop();");
         out("left_marker_.done(" + elementType + ");");
       }
+      if (!alwaysTrue || canCollapse) {
+        out("}");
+      }
+      if (!alwaysTrue) {
+        out("else {");
+        out("marker_.rollbackTo();");
+        if (isLeft) {
+          out("left_marker_.drop();");
+        }
+        out("}");
+      }
+    }
+    else if (!alwaysTrue) {
+      out("if (!result_" + (pinned ? " && !pinned_" : "") + ") {");
+      out("marker_.rollbackTo();");
       out("}");
       out("else {");
-      out("marker_.rollbackTo();");
-      if (isLeft) {
-        out("left_marker_.drop();");
-      }
+      out("marker_.drop();");
       out("}");
-    }
-    else {
-      if (type == BNF_OP_OPT || type == BNF_OP_ZEROMORE) {
-        out("marker_.drop();");
-      }
-      else {
-        out("if (!result_" + (pinned ? " && !pinned_" : "") + ") {");
-        out("marker_.rollbackTo();");
-        out("}");
-        out("else {");
-        out("marker_.drop();");
-        out("}");
-      }
     }
     if (sectionType != null) {
       final String untilCall;
@@ -612,30 +615,22 @@ public class ParserGenerator {
       else {
         untilCall = null;
       }
-      if (untilCall != null) {
-        out("result_ = exitErrorRecordingSection(builder_, result_, level_, " +
-            (pinned ? "pinned_" : "false") +
-            ", " +
-            sectionType +
-            ", " +
-            untilCall +
-            ");");
-      }
-      else {
-        out("result_ = exitErrorRecordingSection(builder_, result_, level_, " +
-            (pinned ? "pinned_" : "false") +
-            ", " +
-            sectionType +
-            ", null);");
-      }
+      final String resultEq = alwaysTrue? "" : "result_ = ";
+      final String resultRef = alwaysTrue? "true" : "result_";
+      out(resultEq + "exitErrorRecordingSection(builder_, "+resultRef+", level_, " +
+          (pinned ? "pinned_" : "false") +
+          ", " +
+          sectionType +
+          ", " +
+          untilCall +
+          ");");
     }
 
     //out("}");
-
-    if (generateMemoizationCode) {
+    if (!alwaysTrue && generateMemoizationCode) {
       out("if (!result_" + (pinned ? " && !pinned_" : "") + ") memoizeFalseBranch(builder_, " + funcId + ")");
     }
-    out("return result_" + (pinned ? " || pinned_" : "") + ";");
+    out("return " + (alwaysTrue? "true": "result_" + (pinned ? " || pinned_" : "")) + ";");
     out("}");
     newLine();
     generateNodeChildren(rule, funcName, children, visited);

@@ -80,10 +80,8 @@ public class ExternalRules implements PsiParser {
   // (',' <<param>>) *
   private static boolean comma_list_1(PsiBuilder builder_, final int level_, Parser param) {
     if (!recursion_guard_(builder_, level_, "comma_list_1")) return false;
-    boolean result_ = true;
-    final Marker marker_ = builder_.mark();
     int offset_ = builder_.getCurrentOffset();
-    while (result_) {
+    while (true) {
       if (!comma_list_1_0(builder_, level_ + 1, param)) break;
       if (offset_ == builder_.getCurrentOffset()) {
         builder_.error("Empty element parsed in comma_list_1");
@@ -91,8 +89,7 @@ public class ExternalRules implements PsiParser {
       }
       offset_ = builder_.getCurrentOffset();
     }
-    marker_.drop();
-    return result_;
+    return true;
   }
 
   // (',' <<param>>)
@@ -139,10 +136,8 @@ public class ExternalRules implements PsiParser {
   // (',' <<param>>) *
   private static boolean comma_list_with_head_2(PsiBuilder builder_, final int level_, Parser head, Parser param) {
     if (!recursion_guard_(builder_, level_, "comma_list_with_head_2")) return false;
-    boolean result_ = true;
-    final Marker marker_ = builder_.mark();
     int offset_ = builder_.getCurrentOffset();
-    while (result_) {
+    while (true) {
       if (!comma_list_with_head_2_0(builder_, level_ + 1, head, param)) break;
       if (offset_ == builder_.getCurrentOffset()) {
         builder_.error("Empty element parsed in comma_list_with_head_2");
@@ -150,8 +145,7 @@ public class ExternalRules implements PsiParser {
       }
       offset_ = builder_.getCurrentOffset();
     }
-    marker_.drop();
-    return result_;
+    return true;
   }
 
   // (',' <<param>>)
@@ -287,11 +281,8 @@ public class ExternalRules implements PsiParser {
   // [one | two | 10 | some]
   private static boolean complex_case_brackets_1_0(PsiBuilder builder_, final int level_) {
     if (!recursion_guard_(builder_, level_, "complex_case_brackets_1_0")) return false;
-    boolean result_ = true;
-    final Marker marker_ = builder_.mark();
     complex_case_brackets_1_0_0(builder_, level_ + 1);
-    marker_.drop();
-    return result_;
+    return true;
   }
 
   // one | two | 10 | some
@@ -359,11 +350,8 @@ public class ExternalRules implements PsiParser {
   // [10 | some]
   private static boolean multi_complex_case_1_1(PsiBuilder builder_, final int level_) {
     if (!recursion_guard_(builder_, level_, "multi_complex_case_1_1")) return false;
-    boolean result_ = true;
-    final Marker marker_ = builder_.mark();
     multi_complex_case_1_1_0(builder_, level_ + 1);
-    marker_.drop();
-    return result_;
+    return true;
   }
 
   // 10 | some

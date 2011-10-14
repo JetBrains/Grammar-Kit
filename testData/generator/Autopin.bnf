@@ -18,3 +18,4 @@ create_table_statement ::= CREATE TEMP? (GLOBAL|LOCAL) TABLE table_ref '(' ')'
 
 drop_statement ::= drop_table_statement
 drop_table_statement ::= DROP TABLE table_ref
+nested_sequence ::= a b (c d e) {pin=1}

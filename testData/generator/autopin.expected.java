@@ -34,6 +34,9 @@ public class Autopin implements PsiParser {
     else if (root_ == DROP_TABLE_STATEMENT) {
       result_ = drop_table_statement(builder_, level_ + 1);
     }
+    else if (root_ == NESTED_SEQUENCE) {
+      result_ = nested_sequence(builder_, level_ + 1);
+    }
     else if (root_ == STATEMENT) {
       result_ = statement(builder_, level_ + 1);
     }
@@ -189,6 +192,52 @@ public class Autopin implements PsiParser {
     }
     result_ = exitErrorRecordingSection(builder_, result_, level_, pinned_, _SECTION_GENERAL_, null);
     return result_ || pinned_;
+  }
+
+
+  /* ********************************************************** */
+  // a b (c d e)
+  public static boolean nested_sequence(PsiBuilder builder_, final int level_) {
+    if (!recursion_guard_(builder_, level_, "nested_sequence")) return false;
+    boolean result_ = false;
+    boolean pinned_ = false;
+    final Marker marker_ = builder_.mark();
+    enterErrorRecordingSection(builder_, level_, _SECTION_GENERAL_);
+    result_ = consumeToken(builder_, A);
+    pinned_ = result_; // pin = 1
+    result_ = result_ && consumeToken(builder_, B);
+    result_ = result_ && nested_sequence_2(builder_, level_ + 1);
+    if (result_ || pinned_) {
+      marker_.done(NESTED_SEQUENCE);
+    }
+    else {
+      marker_.rollbackTo();
+    }
+    result_ = exitErrorRecordingSection(builder_, result_, level_, pinned_, _SECTION_GENERAL_, null);
+    return result_ || pinned_;
+  }
+
+  // (c d e)
+  private static boolean nested_sequence_2(PsiBuilder builder_, final int level_) {
+    if (!recursion_guard_(builder_, level_, "nested_sequence_2")) return false;
+    return nested_sequence_2_0(builder_, level_ + 1);
+  }
+
+  // c d e
+  private static boolean nested_sequence_2_0(PsiBuilder builder_, final int level_) {
+    if (!recursion_guard_(builder_, level_, "nested_sequence_2_0")) return false;
+    boolean result_ = false;
+    final Marker marker_ = builder_.mark();
+    result_ = consumeToken(builder_, C);
+    result_ = result_ && consumeToken(builder_, D);
+    result_ = result_ && consumeToken(builder_, E);
+    if (!result_) {
+      marker_.rollbackTo();
+    }
+    else {
+      marker_.drop();
+    }
+    return result_;
   }
 
 

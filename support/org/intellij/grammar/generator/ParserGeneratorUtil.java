@@ -106,7 +106,8 @@ public class ParserGeneratorUtil {
         }
       }
     }
-    return noPattern;
+    // do not pin nested sequences
+    return ruleName != null && Pattern.matches(".*(_\\d+)+", ruleName)? null : noPattern;
   }
 
   @Nullable

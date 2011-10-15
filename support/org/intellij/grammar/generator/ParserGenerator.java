@@ -686,7 +686,7 @@ public class ParserGenerator {
     if (type == BNF_STRING) {
       String value = StringUtil.stripQuotesAroundValue(text);
       String attributeName = getAttributeName(rule, value);
-      if (attributeName != null) {
+      if (attributeName != null && text.charAt(0) != '\"') {
         return generateConsumeToken(attributeName);
       }
       return generateConsumeTextToken(value);

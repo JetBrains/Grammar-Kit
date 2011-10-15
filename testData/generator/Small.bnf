@@ -2,6 +2,7 @@
   parserClass="Small"
   generatePsi=false
   stubParserClass="org.intellij.grammar.parser.GeneratedParserUtilBase"
+  OP_EQ="="
 }
 
 external root ::= parseRoot statement
@@ -12,3 +13,4 @@ someString::= 'token'
 otherRule::= ( token )
 private privateRule::= token
 private privateString ::= 'token'
+private tokenRule ::= '=' "="

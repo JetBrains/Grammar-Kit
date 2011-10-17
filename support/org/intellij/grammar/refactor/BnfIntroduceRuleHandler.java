@@ -61,19 +61,22 @@ public class BnfIntroduceRuleHandler implements RefactoringActionHandler {
 
     final BnfFileImpl bnfFile = (BnfFileImpl)file;
     final SelectionModel selectionModel = editor.getSelectionModel();
-    int startOffset = selectionModel.getSelectionStart();
-    int endOffset = selectionModel.getSelectionEnd();
+    int[] starts = selectionModel.getBlockSelectionStarts();
+    int[] ends = selectionModel.getBlockSelectionEnds();
+    if (starts.length == 0) return;
+
+    int startOffset = starts[0];
+    int endOffset = ends[ends.length-1];
     final BnfRule currentRule = PsiTreeUtil.getParentOfType(file.findElementAt(startOffset), BnfRule.class);
     if (currentRule == null) return;
-    final BnfExpression parentExpression = findParentExpression(bnfFile, startOffset, endOffset - 1);
-    final TextRange fixedRange = calcFixedRange(parentExpression, startOffset, endOffset-1);
-    if (fixedRange == null) return;
+    final BnfExpression parentExpression = findParentExpression(bnfFile, startOffset, endOffset-1);
+    final List<BnfExpression> selectedExpression = findSelectedExpressionsInRange(parentExpression, new TextRange(startOffset, endOffset));
+    if (selectedExpression.isEmpty()) return;
+    final TextRange fixedRange = new TextRange(selectedExpression.get(0).getTextRange().getStartOffset(), selectedExpression.get(selectedExpression.size()-1).getTextRange().getEndOffset());
     final BnfRule ruleFromText = BnfElementFactory.createRuleFromText(file.getProject(), "a ::= " + fixedRange.substring(file.getText()));
     BnfExpressionOptimizer.optimize(ruleFromText.getExpression());
-    final List<BnfExpression> selectedExpression = findSelectedExpressionsInRange(parentExpression, fixedRange);
 
-    final LinkedHashMap<OccurrencesChooser.ReplaceChoice, List<BnfExpression[]>> occurrencesMap =
-      new LinkedHashMap<OccurrencesChooser.ReplaceChoice, List<BnfExpression[]>>();
+    final LinkedHashMap<OccurrencesChooser.ReplaceChoice, List<BnfExpression[]>> occurrencesMap = new LinkedHashMap<OccurrencesChooser.ReplaceChoice, List<BnfExpression[]>>();
     occurrencesMap.put(OccurrencesChooser.ReplaceChoice.NO, Collections.singletonList(selectedExpression.toArray(new BnfExpression[selectedExpression.size()])));
     occurrencesMap.put(OccurrencesChooser.ReplaceChoice.ALL, new ArrayList<BnfExpression[]>());
     file.acceptChildren(new PsiRecursiveElementWalkingVisitor() {
@@ -155,11 +158,16 @@ public class BnfIntroduceRuleHandler implements RefactoringActionHandler {
     }
     LinkedList<BnfExpression> list = new LinkedList<BnfExpression>();
     for (PsiElement c = parentExpression.getFirstChild(); c != null; c = c.getNextSibling()) {
-      if (c instanceof BnfExpression && c.getTextRange().intersects(range)) {
-        list.add((BnfExpression)c);
+      if (c instanceof PsiWhiteSpace) continue;
+      if (c.getTextRange().intersectsStrict(range)) {
+        if (c instanceof BnfExpression) {
+          list.add((BnfExpression)c);
+        }
+        else if (c == parentExpression.getFirstChild() || c == parentExpression.getLastChild()) {
+          return Collections.singletonList(parentExpression);
+        }
       }
     }
-    assert !list.isEmpty();
     return list;
   }
 
@@ -236,31 +244,6 @@ public class BnfIntroduceRuleHandler implements RefactoringActionHandler {
       name = "rule" + i;
     }
     return name;
-  }
-
-  @Nullable
-  private static TextRange calcFixedRange(BnfExpression expression, int startOffset, int endOffset) {
-    if (expression == null) return null;
-    boolean expressionFound = false;
-    int fixedStart = 0;
-    int fixedEnd = 0;
-    for (PsiElement child = expression.getFirstChild(); child != null; child = child.getNextSibling()) {
-      if (child instanceof PsiWhiteSpace) continue;
-      final TextRange textRange = child.getTextRange();
-      if (!expressionFound && (child instanceof BnfExpression)) expressionFound = true;
-      if (fixedStart == 0 && textRange.getEndOffset() >= startOffset) {
-        fixedStart = textRange.getStartOffset();
-      }
-      if (textRange.getStartOffset() <= endOffset) {
-        fixedEnd = textRange.getEndOffset();
-      }
-      else {
-        break;
-      }
-    }
-    if (!expressionFound) return expression.getTextRange();
-    assert fixedStart < fixedEnd;
-    return new TextRange(fixedStart, fixedEnd);
   }
 
   @Nullable

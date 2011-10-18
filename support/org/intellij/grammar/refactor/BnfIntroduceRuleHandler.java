@@ -70,6 +70,7 @@ public class BnfIntroduceRuleHandler implements RefactoringActionHandler {
     final BnfRule currentRule = PsiTreeUtil.getParentOfType(file.findElementAt(startOffset), BnfRule.class);
     if (currentRule == null) return;
     final BnfExpression parentExpression = findParentExpression(bnfFile, startOffset, endOffset-1);
+    if (parentExpression == null) return;
     final List<BnfExpression> selectedExpression = findSelectedExpressionsInRange(parentExpression, new TextRange(startOffset, endOffset));
     if (selectedExpression.isEmpty()) return;
     final TextRange fixedRange = new TextRange(selectedExpression.get(0).getTextRange().getStartOffset(), selectedExpression.get(selectedExpression.size()-1).getTextRange().getEndOffset());

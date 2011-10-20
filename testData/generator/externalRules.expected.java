@@ -62,7 +62,7 @@ public class ExternalRules implements PsiParser {
 
   /* ********************************************************** */
   // <<param>> (',' <<param>>) *
-  static boolean comma_list(PsiBuilder builder_, final int level_, Parser param) {
+  static boolean comma_list(PsiBuilder builder_, final int level_, final Parser param) {
     if (!recursion_guard_(builder_, level_, "comma_list")) return false;
     boolean result_ = false;
     final Marker marker_ = builder_.mark();
@@ -78,7 +78,7 @@ public class ExternalRules implements PsiParser {
   }
 
   // (',' <<param>>) *
-  private static boolean comma_list_1(PsiBuilder builder_, final int level_, Parser param) {
+  private static boolean comma_list_1(PsiBuilder builder_, final int level_, final Parser param) {
     if (!recursion_guard_(builder_, level_, "comma_list_1")) return false;
     int offset_ = builder_.getCurrentOffset();
     while (true) {
@@ -93,13 +93,13 @@ public class ExternalRules implements PsiParser {
   }
 
   // (',' <<param>>)
-  private static boolean comma_list_1_0(PsiBuilder builder_, final int level_, Parser param) {
+  private static boolean comma_list_1_0(PsiBuilder builder_, final int level_, final Parser param) {
     if (!recursion_guard_(builder_, level_, "comma_list_1_0")) return false;
     return comma_list_1_0_0(builder_, level_ + 1, param);
   }
 
   // ',' <<param>>
-  private static boolean comma_list_1_0_0(PsiBuilder builder_, final int level_, Parser param) {
+  private static boolean comma_list_1_0_0(PsiBuilder builder_, final int level_, final Parser param) {
     if (!recursion_guard_(builder_, level_, "comma_list_1_0_0")) return false;
     boolean result_ = false;
     final Marker marker_ = builder_.mark();
@@ -117,7 +117,7 @@ public class ExternalRules implements PsiParser {
 
   /* ********************************************************** */
   // <<head>> <<param>> (',' <<param>>) *
-  static boolean comma_list_with_head(PsiBuilder builder_, final int level_, Parser head, Parser param) {
+  static boolean comma_list_with_head(PsiBuilder builder_, final int level_, final Parser head, final Parser param) {
     if (!recursion_guard_(builder_, level_, "comma_list_with_head")) return false;
     boolean result_ = false;
     final Marker marker_ = builder_.mark();
@@ -134,7 +134,7 @@ public class ExternalRules implements PsiParser {
   }
 
   // (',' <<param>>) *
-  private static boolean comma_list_with_head_2(PsiBuilder builder_, final int level_, Parser head, Parser param) {
+  private static boolean comma_list_with_head_2(PsiBuilder builder_, final int level_, final Parser head, final Parser param) {
     if (!recursion_guard_(builder_, level_, "comma_list_with_head_2")) return false;
     int offset_ = builder_.getCurrentOffset();
     while (true) {
@@ -149,13 +149,13 @@ public class ExternalRules implements PsiParser {
   }
 
   // (',' <<param>>)
-  private static boolean comma_list_with_head_2_0(PsiBuilder builder_, final int level_, Parser head, Parser param) {
+  private static boolean comma_list_with_head_2_0(PsiBuilder builder_, final int level_, final Parser head, final Parser param) {
     if (!recursion_guard_(builder_, level_, "comma_list_with_head_2_0")) return false;
     return comma_list_with_head_2_0_0(builder_, level_ + 1, head, param);
   }
 
   // ',' <<param>>
-  private static boolean comma_list_with_head_2_0_0(PsiBuilder builder_, final int level_, Parser head, Parser param) {
+  private static boolean comma_list_with_head_2_0_0(PsiBuilder builder_, final int level_, final Parser head, final Parser param) {
     if (!recursion_guard_(builder_, level_, "comma_list_with_head_2_0_0")) return false;
     boolean result_ = false;
     final Marker marker_ = builder_.mark();
@@ -301,6 +301,21 @@ public class ExternalRules implements PsiParser {
       marker_.drop();
     }
     return result_;
+  }
+
+
+  /* ********************************************************** */
+  // <<listOf "int" 'int' <<param>>>>
+  static boolean meta_root(PsiBuilder builder_, final int level_, final Parser param) {
+    return listOf(builder_, level_ + 1, "int", int, param);
+  }
+
+
+  /* ********************************************************** */
+  // <<meta_root statement>>
+  static boolean meta_root_usage(PsiBuilder builder_, final int level_) {
+    return meta_root(builder_, level_ + 1, 
+      new Parser() { public boolean parse(PsiBuilder builder_) { return statement(builder_, level_ + 1); }});
   }
 
 
@@ -455,13 +470,13 @@ public class ExternalRules implements PsiParser {
 
 
   /* ********************************************************** */
-  // DO <<uniqueListOf 'zero' one two 10 some>> END
+  // DO <<uniqueListOf "zero" one two 10 some>> END
   public static boolean simple_case(PsiBuilder builder_, final int level_) {
     if (!recursion_guard_(builder_, level_, "simple_case")) return false;
     boolean result_ = false;
     final Marker marker_ = builder_.mark();
     result_ = consumeToken(builder_, DO);
-    result_ = result_ && uniqueListOf(builder_, level_ + 1, 'zero', 
+    result_ = result_ && uniqueListOf(builder_, level_ + 1, "zero", 
       new Parser() { public boolean parse(PsiBuilder builder_) { return one(builder_, level_ + 1); }}, 
       new Parser() { public boolean parse(PsiBuilder builder_) { return two(builder_, level_ + 1); }}, 10, some);
     result_ = result_ && consumeToken(builder_, END);

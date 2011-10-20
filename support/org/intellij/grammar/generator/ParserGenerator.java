@@ -670,7 +670,7 @@ public class ParserGenerator {
           if (list.size() == 1) {
             String text = list.get(0).getText();
             if (visited.add(text)) {
-              sb.append(", "+ (declaration? "Parser " : "") + text);
+              sb.append(", "+ (declaration? "final Parser " : "") + text);
             }
           }
         }
@@ -753,6 +753,19 @@ public class ParserGenerator {
         else if (nested instanceof BnfParenthesized) {
           clause.append(generateWrappedNodeCall(rule, nested, getNextName(nextName, i - 1)));
         }
+        else if (nested instanceof BnfStringLiteralExpression && argument.startsWith("\'")) {
+          clause.append(StringUtil.unquoteString(argument));
+        }
+        else if (nested instanceof BnfExternalExpression && Rule.isMeta(rule)) {
+          List<BnfExpression> expressionList = ((BnfExternalExpression)nested).getExpressionList();
+          if (expressionList.size() == 1) {
+            clause.append(expressionList.get(0).getText());
+          }
+          else {
+            clause.append(generateNodeCall(rule, nested, getNextName(nextName, i - 1)));
+          }
+        }
+          
         else {
           clause.append(argument);
         }

@@ -7,7 +7,7 @@
 root ::= <<listOf statement>>
 
 statement ::= simple_case | complex_case | complex_case_brackets | complex_case_braces | multi_complex_case
-simple_case ::= DO <<uniqueListOf 'zero' one two 10 some>> END
+simple_case ::= DO <<uniqueListOf "zero" one two 10 some>> END
 complex_case ::= DO <<uniqueListOf (one | two | 10 | some)>> END
 complex_case_brackets ::= DO <<uniqueListOf [one | two | 10 | some]>> END
 complex_case_braces ::= DO <<uniqueListOf {one | two | 10 | some}>> END
@@ -18,3 +18,6 @@ one_list ::= <<comma_list one>>
 private one_list_with ::= <<comma_list_with_head (WITH) one>>
 private meta comma_list ::= <<param>> (',' <<param>>) *
 private meta comma_list_with_head ::= <<head>> <<param>> (',' <<param>>) *
+
+private meta meta_root ::= <<listOf "int" 'int' <<param>>>>
+private meta_root_usage ::= <<meta_root statement>>

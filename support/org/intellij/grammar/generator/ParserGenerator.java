@@ -801,6 +801,7 @@ public class ParserGenerator {
   private void generateElementTypesHolder(String className, boolean generatePsi) {
     String implPackage = getRootAttribute(treeRoot, "psiImplPackage", "generated.psi.impl");
     final String elementTypeClass = getRootAttribute(treeRoot, "elementTypeClass", IELEMENTTYPE_CLASS);
+    final boolean generateTokens = getRootAttribute(treeRoot, "generateTokens", true);
     final String elementTypeFactory = getRootAttribute(treeRoot, "elementTypeFactory", null);
     final String tokenTypeClass = getRootAttribute(treeRoot, "tokenTypeClass", IELEMENTTYPE_CLASS);
     final String tokenTypeFactory = getRootAttribute(treeRoot, "tokenTypeFactory", null);
@@ -824,16 +825,18 @@ public class ParserGenerator {
       out("IElementType " + elementType + " = "
           + elementCreateCall + "(\"" + elementType + "\");");
     }
-    newLine();
-    String tokenCreateCall =
-      tokenTypeFactory == null ? "new " + StringUtil.getShortName(tokenTypeClass) : StringUtil.getShortName(tokenTypeFactory);
-    for (String token : simpleTokens) {
-      String name = getRootAttribute(treeRoot, token, token);
-      out("IElementType " + getElementType(token) + " = "
-          + tokenCreateCall + "(\"" + name + "\");");
+    if (generateTokens) {
+      newLine();
+      String tokenCreateCall =
+        tokenTypeFactory == null ? "new " + StringUtil.getShortName(tokenTypeClass) : StringUtil.getShortName(tokenTypeFactory);
+      for (String token : simpleTokens) {
+        String name = getRootAttribute(treeRoot, token, token);
+        out("IElementType " + getElementType(token) + " = "
+            + tokenCreateCall + "(\"" + name + "\");");
+      }
     }
-    newLine();
     if (generatePsi) {
+      newLine();
       out("class Factory {");
       out("public static PsiElement createElement(ASTNode node) {");
       out("IElementType type = node.getElementType();");

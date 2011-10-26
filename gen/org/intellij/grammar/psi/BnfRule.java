@@ -24,7 +24,7 @@ public interface BnfRule extends BnfNamedElement {
   @Nullable
   public BnfAttrs getAttrs();
 
-  @Nullable
+  @NotNull
   public BnfExpression getExpression();
 
   @NotNull

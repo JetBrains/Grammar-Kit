@@ -811,8 +811,8 @@ public class GrammarParser implements PsiParser {
     final Marker marker_ = builder_.mark();
     enterErrorRecordingSection(builder_, level_, _SECTION_GENERAL_);
     result_ = rule_start(builder_, level_ + 1);
-    pinned_ = result_; // pin = 1
     result_ = result_ && expression(builder_, level_ + 1);
+    pinned_ = result_; // pin = 2
     result_ = result_ && rule_2(builder_, level_ + 1);
     result_ = result_ && rule_3(builder_, level_ + 1);
     if (result_ || pinned_) {

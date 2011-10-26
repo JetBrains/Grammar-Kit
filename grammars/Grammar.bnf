@@ -47,8 +47,8 @@ private grammar_element_recover::=!('{'|rule_start)
 rule ::=
     rule_start
     expression
-    attrs? ';'? {pin=1 extends=namedImpl implements=named}
-private rule_start ::=modifier* id '::='
+    attrs? ';'? {pin=2 extends=namedImpl implements=named}
+private rule_start ::= modifier* id '::='
 
 expression ::= choice?
 

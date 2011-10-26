@@ -36,7 +36,7 @@ public class BnfRuleImpl extends BnfNamedElementImpl implements BnfRule {
   }
 
   @Override
-  @Nullable
+  @NotNull
   public BnfExpression getExpression() {
     return PsiTreeUtil.getChildOfType(this, BnfExpression.class);
   }

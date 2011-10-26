@@ -24,7 +24,7 @@ public interface BnfAttr extends BnfNamedElement {
   @Nullable
   public BnfAttrPattern getAttrPattern();
 
-  @NotNull
+  @Nullable
   public BnfAttrValue getAttrValue();
 
   @NotNull

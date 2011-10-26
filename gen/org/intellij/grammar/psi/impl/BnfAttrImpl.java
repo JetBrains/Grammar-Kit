@@ -36,7 +36,7 @@ public class BnfAttrImpl extends BnfNamedElementImpl implements BnfAttr {
   }
 
   @Override
-  @NotNull
+  @Nullable
   public BnfAttrValue getAttrValue() {
     return PsiTreeUtil.getChildOfType(this, BnfAttrValue.class);
   }

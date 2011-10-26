@@ -30,7 +30,7 @@ public class BnfParenOptExpressionImpl extends BnfQuantifiedImpl implements BnfP
   }
 
   @Override
-  @NotNull
+  @Nullable
   public BnfExpression getExpression() {
     return PsiTreeUtil.getChildOfType(this, BnfExpression.class);
   }

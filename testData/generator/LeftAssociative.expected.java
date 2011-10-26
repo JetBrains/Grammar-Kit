@@ -28,6 +28,9 @@ public class LeftAssociative implements PsiParser {
     else if (root_ == ALIAS_DEFINITION2) {
       result_ = alias_definition2(builder_, level_ + 1);
     }
+    else if (root_ == LEECH) {
+      result_ = leech(builder_, level_ + 1);
+    }
     else {
       Marker marker_ = builder_.mark();
       result_ = from(builder_, level_ + 1);
@@ -102,7 +105,7 @@ public class LeftAssociative implements PsiParser {
 
 
   /* ********************************************************** */
-  // reference alias_definition? alias_definition2?
+  // reference alias_definition? alias_definition2? leech? leech2?
   static boolean from(PsiBuilder builder_, final int level_) {
     if (!recursion_guard_(builder_, level_, "from")) return false;
     boolean result_ = false;
@@ -110,6 +113,8 @@ public class LeftAssociative implements PsiParser {
     result_ = consumeToken(builder_, REFERENCE);
     result_ = result_ && from_1(builder_, level_ + 1);
     result_ = result_ && from_2(builder_, level_ + 1);
+    result_ = result_ && from_3(builder_, level_ + 1);
+    result_ = result_ && from_4(builder_, level_ + 1);
     if (!result_) {
       marker_.rollbackTo();
     }
@@ -131,6 +136,60 @@ public class LeftAssociative implements PsiParser {
     if (!recursion_guard_(builder_, level_, "from_2")) return false;
     alias_definition2(builder_, level_ + 1);
     return true;
+  }
+
+  // leech?
+  private static boolean from_3(PsiBuilder builder_, final int level_) {
+    if (!recursion_guard_(builder_, level_, "from_3")) return false;
+    leech(builder_, level_ + 1);
+    return true;
+  }
+
+  // leech2?
+  private static boolean from_4(PsiBuilder builder_, final int level_) {
+    if (!recursion_guard_(builder_, level_, "from_4")) return false;
+    leech2(builder_, level_ + 1);
+    return true;
+  }
+
+
+  /* ********************************************************** */
+  // id
+  public static boolean leech(PsiBuilder builder_, final int level_) {
+    if (!recursion_guard_(builder_, level_, "leech")) return false;
+    boolean result_ = false;
+    final Marker left_marker_ = (Marker)builder_.getLatestDoneMarker();
+    final Marker marker_ = builder_.mark();
+    result_ = consumeToken(builder_, ID);
+    if (result_) {
+      marker_.done(LEECH);
+      left_marker_.precede().done(((LighterASTNode)left_marker_).getTokenType());
+      left_marker_.drop();
+    }
+    else {
+      marker_.rollbackTo();
+    }
+    return result_;
+  }
+
+
+  /* ********************************************************** */
+  // id
+  static boolean leech2(PsiBuilder builder_, final int level_) {
+    if (!recursion_guard_(builder_, level_, "leech2")) return false;
+    boolean result_ = false;
+    final Marker left_marker_ = (Marker)builder_.getLatestDoneMarker();
+    final Marker marker_ = builder_.mark();
+    result_ = consumeToken(builder_, ID);
+    if (!result_) {
+      marker_.rollbackTo();
+    }
+    else {
+      marker_.drop();
+      left_marker_.precede().done(((LighterASTNode)left_marker_).getTokenType());
+      left_marker_.drop();
+    }
+    return result_;
   }
 
 

@@ -436,15 +436,16 @@ public class ParserGenerator {
     boolean isPrivate = shouldBePrivate || grammarRoot.equals(rule.getName());
     boolean firstNonTrivial = node == Rule.firstNotTrivial(rule);
     boolean isLeft = firstNonTrivial && Rule.isLeft(rule);
+    boolean isLeftInner = isLeft && (isPrivate || Rule.isInner(rule));
     final String recoverRoot = firstNonTrivial ? Rule.attribute(rule, "recoverUntil", (String)null) : null;
-    final boolean canCollapse = !isLeft && firstNonTrivial && rulesWithIheritance.contains(rule);
+    final boolean canCollapse = (!isLeft || isLeftInner) && firstNonTrivial && rulesWithIheritance.contains(rule);
 
     final List<BnfExpression> children;
     out((!isRule ? "private " : isPrivate ? "" : "public ") + "static boolean " + funcName + "(PsiBuilder builder_, final int level_"
         + collectExtraArguments(rule, true) + ") {");
     if (node instanceof BnfReferenceOrToken || node instanceof BnfLiteralExpression || node instanceof BnfExternalExpression) {
       children = Collections.singletonList(node);
-      if (isPrivate) {
+      if (isPrivate && !isLeftInner) {
         String nodeCall = generateNodeCall(rule, node, getNextName(funcName, 0));
         out("return " + nodeCall + ";");
         out("}");
@@ -498,7 +499,10 @@ public class ParserGenerator {
     if (!isPrivate && canCollapse) {
       out("final int start_ = builder_.getCurrentOffset();");
     }
-    if (!isPrivate && isLeft) {
+    if (isLeftInner) {
+      out("final Marker left_marker_ = (Marker)builder_.getLatestDoneMarker();");
+    }
+    else if (isLeft) {
       out("final Marker left_marker_ = ((Marker)builder_.getLatestDoneMarker()).precede();");
     }
     if (!alwaysTrue || !isPrivate) {
@@ -579,12 +583,16 @@ public class ParserGenerator {
       if (!alwaysTrue || canCollapse) {
         out((canCollapse? "else " : "") + (alwaysTrue? "{" : "if (result_" + (pinned ? " || pinned_" : "") + ") {"));
       }
-      if (!isLeft) {
+      if (isLeftInner) {
         out("marker_.done(" + elementType + ");");
-      }
-      else {
+        out("left_marker_.precede().done(((LighterASTNode)left_marker_).getTokenType());");
+        out("left_marker_.drop();");
+      } else if (isLeft) {
         out("marker_.drop();");
         out("left_marker_.done(" + elementType + ");");
+      }
+      else {
+        out("marker_.done(" + elementType + ");");
       }
       if (!alwaysTrue || canCollapse) {
         out("}");
@@ -592,7 +600,7 @@ public class ParserGenerator {
       if (!alwaysTrue) {
         out("else {");
         out("marker_.rollbackTo();");
-        if (isLeft) {
+        if (isLeft && !isLeftInner) {
           out("left_marker_.drop();");
         }
         out("}");
@@ -604,6 +612,10 @@ public class ParserGenerator {
       out("}");
       out("else {");
       out("marker_.drop();");
+      if (isLeftInner) {
+        out("left_marker_.precede().done(((LighterASTNode)left_marker_).getTokenType());");
+        out("left_marker_.drop();");
+      }
       out("}");
     }
     if (sectionType != null) {

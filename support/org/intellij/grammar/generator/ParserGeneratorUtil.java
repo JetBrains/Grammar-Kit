@@ -204,6 +204,10 @@ public class ParserGeneratorUtil {
       return hasModifier(node, "left");
     }
 
+    public static boolean isInner(BnfRule node) {
+      return hasModifier(node, "inner");
+    }
+
     private static boolean hasModifier(BnfRule node, String s) {
       for (BnfModifier modifier : node.getModifierList()) {
         if (s.equals(modifier.getText())) return true;

@@ -577,7 +577,7 @@ public class GrammarParser implements PsiParser {
 
 
   /* ********************************************************** */
-  // 'private' | 'external' | 'meta' | 'left'
+  // 'private' | 'external' | 'meta' | 'inner' | 'left'
   public static boolean modifier(PsiBuilder builder_, final int level_) {
     if (!recursion_guard_(builder_, level_, "modifier")) return false;
     boolean result_ = false;
@@ -585,6 +585,7 @@ public class GrammarParser implements PsiParser {
     result_ = consumeToken(builder_, "private");
     if (!result_) result_ = consumeToken(builder_, "external");
     if (!result_) result_ = consumeToken(builder_, "meta");
+    if (!result_) result_ = consumeToken(builder_, "inner");
     if (!result_) result_ = consumeToken(builder_, "left");
     if (result_) {
       marker_.done(BNF_MODIFIER);

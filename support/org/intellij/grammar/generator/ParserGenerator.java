@@ -800,7 +800,7 @@ public class ParserGenerator {
   }
 
   private static String getElementType(BnfRule rule) {
-    String elementType = Rule.attribute(rule, "elementType", rule.getName());
+    String elementType = getAttribute(rule, "elementType", rule.getName());
     return getAttribute(rule, "elementTypePrefix", "") + elementType.toUpperCase();
   }
 

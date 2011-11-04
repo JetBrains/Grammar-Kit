@@ -1,5 +1,5 @@
 BnfFile:Self.bnf
-  BNF_DUMMY_BLOCK
+  PsiElement(DUMMY_BLOCK)
     BNF_ATTRS
       PsiElement({)('{')
       PsiWhiteSpace('\n  ')
@@ -461,7 +461,7 @@ BnfFile:Self.bnf
             PsiElement(string)(''='')
       PsiElement(;)(';')
   PsiWhiteSpace('\n')
-  BNF_DUMMY_BLOCK
+  PsiElement(DUMMY_BLOCK)
     BNF_RULE:attr_pattern
       PsiElement(id)('attr_pattern')
       PsiWhiteSpace(' ')

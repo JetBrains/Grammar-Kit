@@ -40,8 +40,8 @@ import com.sun.jdi.ReferenceType;
 import com.sun.jdi.request.ClassPrepareRequest;
 import org.intellij.grammar.BnfRuleLineMarkerProvider;
 import org.intellij.grammar.generator.ParserGeneratorUtil;
+import org.intellij.grammar.parser.GeneratedParserUtilBase;
 import org.intellij.grammar.psi.*;
-import org.intellij.grammar.psi.impl.BnfDummyElementImpl;
 import org.intellij.grammar.psi.impl.BnfFileImpl;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -139,7 +139,7 @@ public class BnfPositionManager implements PositionManager {
             }
           }
         }
-        else if (element instanceof BnfDummyElementImpl) {
+        else if (element instanceof GeneratedParserUtilBase.DummyBlock) {
           super.visitElement(element);
         }
       }

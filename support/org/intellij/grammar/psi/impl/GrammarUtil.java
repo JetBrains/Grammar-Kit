@@ -18,6 +18,7 @@ package org.intellij.grammar.psi.impl;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.util.PsiTreeUtil;
 import org.intellij.grammar.generator.ParserGeneratorUtil;
+import org.intellij.grammar.parser.GeneratedParserUtilBase;
 import org.intellij.grammar.psi.*;
 import org.jetbrains.annotations.Nullable;
 
@@ -30,12 +31,12 @@ public class GrammarUtil {
 
   public static PsiElement getDummyAwarePrevSibling(PsiElement child) {
     PsiElement prevSibling = child.getPrevSibling();
-    while (prevSibling instanceof BnfDummyElementImpl) {
+    while (prevSibling instanceof GeneratedParserUtilBase.DummyBlock) {
       prevSibling = prevSibling.getLastChild();
     }
     if (prevSibling != null) return prevSibling;
     PsiElement parent = child.getParent();
-    while (parent instanceof BnfDummyElementImpl && parent.getPrevSibling() == null) {
+    while (parent instanceof GeneratedParserUtilBase.DummyBlock && parent.getPrevSibling() == null) {
       parent = parent.getParent();
     }
     return parent == null? null : parent.getPrevSibling();

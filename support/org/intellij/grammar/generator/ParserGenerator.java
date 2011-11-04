@@ -16,15 +16,19 @@
 package org.intellij.grammar.generator;
 
 import com.intellij.openapi.diagnostic.Logger;
+import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.io.FileUtil;
 import com.intellij.openapi.util.text.StringHash;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.openapi.vfs.VfsUtil;
+import com.intellij.psi.JavaPsiFacade;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiRecursiveElementWalkingVisitor;
+import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.tree.IElementType;
 import com.intellij.util.containers.MultiMap;
 import gnu.trove.THashSet;
+import org.intellij.grammar.parser.GeneratedParserUtilBase;
 import org.intellij.grammar.psi.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -176,7 +180,46 @@ public class ParserGenerator {
         }
       }
     }
+    boolean generateUtil = getRootAttribute(treeRoot, "generateStubParser", true);
+    if (generateUtil) {
+      generateParserUtil();
+    }
+    
   }
+
+  private void generateParserUtil() throws IOException {
+    final String stubParser = getRootAttribute(treeRoot, "stubParserClass", "generated.ParserUtil");
+    final String stubPackage = StringUtil.getPackageName(stubParser);
+    String baseClassName = GeneratedParserUtilBase.class.getSimpleName();
+    String baseFileName = baseClassName + ".java";
+    InputStream baseUtilText = GeneratedParserUtilBase.class.getResourceAsStream(baseFileName);
+    if (baseUtilText == null) return;
+
+    Project project = treeRoot.getProject();
+    if (JavaPsiFacade.getInstance(project).findClass(stubParser, GlobalSearchScope.allScope(project)) != null) return;
+    File baseFile = new File(rootPath + File.separatorChar + stubPackage.replace('.', File.separatorChar) + "/" + baseFileName);
+    out = new PrintWriter(new FileOutputStream(baseFile));
+    try {
+      String text = FileUtil.loadTextAndClose(baseUtilText);
+      text = text.replace("package " + StringUtil.getPackageName(GeneratedParserUtilBase.class.getName())+";", "package "+stubPackage+";");
+      generateFileHeader(baseClassName);
+      out.write(text);
+    }
+    finally {
+      out.close();
+    }
+    File utilFile = new File(rootPath + File.separatorChar + stubParser.replace('.', File.separatorChar) + ".java");
+    out = new PrintWriter(new FileOutputStream(utilFile));
+    try {
+      generateClassHeader(stubParser, "", "", false, baseClassName);
+      newLine();
+      out("}");
+    }
+    finally {
+      out.close();
+    }
+  }
+
 
   public void generateParser() throws FileNotFoundException {
     for (String className : new TreeSet<String>(ruleParserClasses.values())) {
@@ -377,10 +420,8 @@ public class ParserGenerator {
   }
 
   private void generateClassHeader(String className, String imports, String annos, boolean intf, String... supers) {
-    final String classHeader = getStringOrFile(getRootAttribute(treeRoot, "classHeader", DEFAULT_FILE_HEADER, className));
+    generateFileHeader(className);
     final String packageName = StringUtil.getPackageName(className);
-    offset = 0;
-    out(classHeader);
     out("package " + packageName + ";");
     newLine();
     for (String s : imports.split(";")) {
@@ -413,6 +454,12 @@ public class ParserGenerator {
     }
     out("public " + (intf ? "interface " : "class ") + StringUtil.getShortName(className) + sb.toString() + " {");
     newLine();
+  }
+
+  private void generateFileHeader(String className) {
+    final String classHeader = getStringOrFile(getRootAttribute(treeRoot, "classHeader", DEFAULT_FILE_HEADER, className));
+    out(classHeader);
+    offset = 0;
   }
 
   private String getStringOrFile(String classHeader) {

@@ -29,10 +29,8 @@ import com.intellij.psi.tree.IFileElementType;
 import com.intellij.psi.tree.TokenSet;
 import org.intellij.grammar.parser.BnfLexer;
 import org.intellij.grammar.parser.GrammarParser;
-import org.intellij.grammar.psi.BnfCompositeElementType;
 import org.intellij.grammar.psi.BnfTokenType;
 import org.intellij.grammar.psi.BnfTypes;
-import org.intellij.grammar.psi.impl.BnfDummyElementImpl;
 import org.intellij.grammar.psi.impl.BnfFileImpl;
 import org.jetbrains.annotations.NotNull;
 
@@ -47,7 +45,6 @@ public class BnfParserDefinition implements ParserDefinition {
   public static final TokenSet WS = TokenSet.create(TokenType.WHITE_SPACE);
   public static final IElementType BNF_LINE_COMMENT = new BnfTokenType("BNF_LINE_COMMENT");
   public static final IElementType BNF_BLOCK_COMMENT = new BnfTokenType("BNF_BLOCK_COMMENT");
-  public static final IElementType BNF_DUMMY_BLOCK = new BnfCompositeElementType("BNF_DUMMY_BLOCK");
   public static final TokenSet COMMENTS = TokenSet.create(BNF_LINE_COMMENT, BNF_BLOCK_COMMENT);
   public static final TokenSet LITERALS = TokenSet.create(BnfTypes.BNF_STRING);
 
@@ -88,9 +85,6 @@ public class BnfParserDefinition implements ParserDefinition {
   @NotNull
   @Override
   public PsiElement createElement(ASTNode astNode) {
-    if (astNode.getElementType() == BNF_DUMMY_BLOCK) {
-      return new BnfDummyElementImpl(astNode);
-    }
     return BnfTypes.Factory.createElement(astNode);
   }
 

@@ -26,8 +26,8 @@ import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.util.ProcessingContext;
 import gnu.trove.THashSet;
 import org.intellij.grammar.parser.BnfLexer;
+import org.intellij.grammar.parser.GeneratedParserUtilBase;
 import org.intellij.grammar.psi.*;
-import org.intellij.grammar.psi.impl.BnfDummyElementImpl;
 import org.intellij.grammar.psi.impl.BnfFileImpl;
 import org.intellij.grammar.psi.impl.BnfReferenceImpl;
 import org.jetbrains.annotations.NotNull;
@@ -43,7 +43,7 @@ import static com.intellij.patterns.PlatformPatterns.psiElement;
  */
 public class BnfCompletionContributor extends CompletionContributor {
   public static final List<String> KNOWN_ATTRIBUTES =
-    Arrays.asList("generatePsi", "generateTokens", "psiClassPrefix", "psiImplClassSuffix", "psiPackage", "psiImplPackage",
+    Arrays.asList("generatePsi", "generateTokens", "generateStubParser", "psiClassPrefix", "psiImplClassSuffix", "psiPackage", "psiImplPackage",
                   "elementTypeClass", "tokenTypeClass",
                   "parserClass", "stubParserClass", "elementTypeHolderClass",
                   "elementTypePrefix", "elementTypeFactory", "tokenClassType", "tokenTypeFactory", "parserImports",
@@ -71,7 +71,7 @@ public class BnfCompletionContributor extends CompletionContributor {
                                     @NotNull final CompletionResultSet result) {
         final int offset = parameters.getOffset();
         PsiElement position = parameters.getPosition();
-        PsiElement parent = PsiTreeUtil.getParentOfType(position, BnfExpression.class, BnfAttrValue.class, BnfRule.class, BnfDummyElementImpl.class);
+        PsiElement parent = PsiTreeUtil.getParentOfType(position, BnfExpression.class, BnfAttrValue.class, BnfRule.class, GeneratedParserUtilBase.DummyBlock.class);
         if (parent != null && !(parent instanceof BnfStringLiteralExpression && !(parent.getParent() instanceof BnfAttrValue))) {
           final BnfLexer lexer = new BnfLexer();
           PsiReference referenceAt = parameters.getPosition().getContainingFile().findReferenceAt(parameters.getOffset());
@@ -115,8 +115,8 @@ public class BnfCompletionContributor extends CompletionContributor {
   }
 
   private static boolean isLastInRuleOrFree(PsiElement element) {
-    BnfCompositeElement parent = PsiTreeUtil.getParentOfType(element, BnfRule.class, BnfDummyElementImpl.class);
-    if (parent instanceof BnfDummyElementImpl) return true;
+    PsiElement parent = PsiTreeUtil.getParentOfType(element, BnfRule.class, GeneratedParserUtilBase.DummyBlock.class);
+    if (parent instanceof GeneratedParserUtilBase.DummyBlock) return true;
     if (!(parent instanceof BnfRule)) return false;
     for (PsiElement cur = element, next = cur.getNextSibling();
          next == null || next instanceof PsiComment || next instanceof PsiWhiteSpace;

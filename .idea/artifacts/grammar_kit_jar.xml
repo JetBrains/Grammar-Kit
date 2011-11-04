@@ -3,6 +3,9 @@
     <output-path>$PROJECT_DIR$/out/artifacts/</output-path>
     <root id="archive" name="grammar-kit.jar">
       <element id="module-output" name="grammar-kit" />
+      <element id="directory" name="templates">
+        <element id="file-copy" path="$PROJECT_DIR$/support/org/intellij/grammar/parser/GeneratedParserUtilBase.java" />
+      </element>
     </root>
   </artifact>
 </component>

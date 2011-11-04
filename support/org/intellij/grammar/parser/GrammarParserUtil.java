@@ -16,13 +16,13 @@
 package org.intellij.grammar.parser;
 
 import com.intellij.lang.PsiBuilder;
-import org.intellij.grammar.BnfParserDefinition;
 
 /**
  * @author gregsh
  */
 public class GrammarParserUtil extends GeneratedParserUtilBase {
   public static boolean parseGrammar(PsiBuilder builder_, int i, Parser parser) {
-    return parseAsTree(builder_, BnfParserDefinition.BNF_DUMMY_BLOCK, true, parser, TRUE_CONDITION);
+    ErrorState state = ErrorState.get(builder_);
+    return parseAsTree(state, builder_, DUMMY_BLOCK, true, parser, TRUE_CONDITION);
   }
 }

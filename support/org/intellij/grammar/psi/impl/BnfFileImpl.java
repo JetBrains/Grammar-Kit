@@ -25,6 +25,7 @@ import com.intellij.psi.util.CachedValuesManager;
 import com.intellij.util.Processor;
 import org.intellij.grammar.BnfFileType;
 import org.intellij.grammar.BnfLanguage;
+import org.intellij.grammar.parser.GeneratedParserUtilBase;
 import org.intellij.grammar.psi.BnfAttrs;
 import org.intellij.grammar.psi.BnfFile;
 import org.intellij.grammar.psi.BnfRule;
@@ -115,7 +116,7 @@ public class BnfFileImpl extends PsiFileBase implements BnfFile {
       @Override
       public boolean process(PsiElement psiElement) {
         for (PsiElement child = psiElement.getFirstChild(); child != null; child = child.getNextSibling()) {
-          if (child instanceof BnfDummyElementImpl) {
+          if (child instanceof GeneratedParserUtilBase.DummyBlock) {
             if (!process(child)) return false;
           }
           else if (!processor.process(child)) return false;

@@ -59,6 +59,7 @@ public class BnfFileType extends LanguageFileType {
 
   @Override
   public boolean isJVMDebuggingSupported() {
-    return true;
+    // turn off for now
+    return false;
   }
 }

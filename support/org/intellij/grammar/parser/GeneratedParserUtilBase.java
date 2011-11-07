@@ -49,12 +49,12 @@ public class GeneratedParserUtilBase {
   public static final IElementType DUMMY_BLOCK = new DummyBlockElementType();
 
   public interface Parser {
-    boolean parse(PsiBuilder builder);
+    boolean parse(PsiBuilder builder, int level);
   }
 
   public static final Parser TOKEN_ADVANCER = new Parser() {
     @Override
-    public boolean parse(PsiBuilder builder) {
+    public boolean parse(PsiBuilder builder, int level) {
       if (builder.eof()) return false;
       builder.advanceLexer();
       return true;
@@ -63,7 +63,7 @@ public class GeneratedParserUtilBase {
 
   public static final Parser TRUE_CONDITION = new Parser() {
     @Override
-    public boolean parse(PsiBuilder builder) {
+    public boolean parse(PsiBuilder builder, int level) {
       return true;
     }
   };
@@ -74,6 +74,10 @@ public class GeneratedParserUtilBase {
       return false;
     }
     return true;
+  }
+
+  public static void empty_element_parsed_guard_(PsiBuilder builder_, int offset_, String funcName_) {
+    builder_.error("Empty element parsed in " + funcName_ +" at offset " + offset_);
   }
 
   public static boolean consumeToken(PsiBuilder builder, IElementType token) {
@@ -236,7 +240,7 @@ public class GeneratedParserUtilBase {
           ((PsiBuilder.Marker)latestDoneMarker).drop();
         }
         final boolean eatMoreFlagOnce =
-          !builder_.eof() && (eatMore.parse(builder_) || state.braces != null && builder_.rawLookup(-1) == state.braces[0].getLeftBraceType()
+          !builder_.eof() && (eatMore.parse(builder_, frame.level + 1) || state.braces != null && builder_.rawLookup(-1) == state.braces[0].getLeftBraceType()
                                                          && builder_.getTokenType() == state.braces[0] .getRightBraceType());
         final int lastErrorPos = state.variants.isEmpty()? builder_.getCurrentOffset() : state.variants.last().offset;
         boolean eatMoreFlag = eatMoreFlagOnce || frame.offset == builder_.getCurrentOffset() && lastErrorPos > frame.offset;
@@ -249,7 +253,7 @@ public class GeneratedParserUtilBase {
             else if (builder_.getTokenType() == state.braces[0].getRightBraceType()) parenCount --;
           }
           builder_.advanceLexer();
-          eatMoreFlag = parenCount != 0 || eatMore.parse(builder_);
+          eatMoreFlag = parenCount != 0 || eatMore.parse(builder_, frame.level + 1);
         }
         if (eatMoreFlag) {
           String tokenText = builder_.getTokenText();
@@ -262,7 +266,7 @@ public class GeneratedParserUtilBase {
           finally {
             mark.error(expectedText + "got '" + tokenText + "'");
           }
-          parseAsTree(state, builder_, DUMMY_BLOCK, true, TOKEN_ADVANCER, eatMore);
+          parseAsTree(state, frame.level + 1, builder_, DUMMY_BLOCK, true, TOKEN_ADVANCER, eatMore);
         }
         else if ((!result || eatMoreFlagOnce) && frame.offset != builder_.getCurrentOffset()) {
           reportError(state, builder_, true);
@@ -464,7 +468,7 @@ public class GeneratedParserUtilBase {
 
 
   private static final int MAX_CHILDREN_IN_TREE = 10;
-  public static boolean parseAsTree(ErrorState state, final PsiBuilder builder, final IElementType chunkType,
+  public static boolean parseAsTree(ErrorState state, int level, final PsiBuilder builder, final IElementType chunkType,
                                     boolean checkBraces, final Parser parser, final Parser eatMoreCondition) {
     final LinkedList<Pair<PsiBuilder.Marker, PsiBuilder.Marker>> parenList = new LinkedList<Pair<PsiBuilder.Marker, PsiBuilder.Marker>>();
     final LinkedList<Pair<PsiBuilder.Marker, Integer>> siblingList = new LinkedList<Pair<PsiBuilder.Marker, Integer>>();
@@ -533,7 +537,7 @@ public class GeneratedParserUtilBase {
           if (marker == null) {
             marker = builder.mark();
           }
-          final boolean result = eatMoreCondition.parse(builder) && parser.parse(builder);
+          final boolean result = eatMoreCondition.parse(builder, level + 1) && parser.parse(builder, level + 1);
           if (result) {
             tokenCount++;
             totalCount++;

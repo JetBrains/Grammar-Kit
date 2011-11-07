@@ -20,7 +20,7 @@ public class Autopin implements PsiParser {
 
   @NotNull
   public ASTNode parse(final IElementType root_, final PsiBuilder builder_) {
-    final int level_ = 0;
+    int level_ = 0;
     boolean result_;
     if (root_ == CREATE_STATEMENT) {
       result_ = create_statement(builder_, level_ + 1);
@@ -64,7 +64,7 @@ public class Autopin implements PsiParser {
 
   /* ********************************************************** */
   // create_table_statement
-  public static boolean create_statement(PsiBuilder builder_, final int level_) {
+  public static boolean create_statement(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "create_statement")) return false;
     boolean result_ = false;
     final int start_ = builder_.getCurrentOffset();
@@ -86,7 +86,7 @@ public class Autopin implements PsiParser {
 
   /* ********************************************************** */
   // CREATE TEMP? (GLOBAL|LOCAL) TABLE table_ref '(' ')'
-  public static boolean create_table_statement(PsiBuilder builder_, final int level_) {
+  public static boolean create_table_statement(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "create_table_statement")) return false;
     boolean result_ = false;
     boolean pinned_ = false;
@@ -116,20 +116,20 @@ public class Autopin implements PsiParser {
   }
 
   // TEMP?
-  private static boolean create_table_statement_1(PsiBuilder builder_, final int level_) {
+  private static boolean create_table_statement_1(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "create_table_statement_1")) return false;
     consumeToken(builder_, TEMP);
     return true;
   }
 
   // (GLOBAL|LOCAL)
-  private static boolean create_table_statement_2(PsiBuilder builder_, final int level_) {
+  private static boolean create_table_statement_2(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "create_table_statement_2")) return false;
     return create_table_statement_2_0(builder_, level_ + 1);
   }
 
   // GLOBAL|LOCAL
-  private static boolean create_table_statement_2_0(PsiBuilder builder_, final int level_) {
+  private static boolean create_table_statement_2_0(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "create_table_statement_2_0")) return false;
     boolean result_ = false;
     final Marker marker_ = builder_.mark();
@@ -147,7 +147,7 @@ public class Autopin implements PsiParser {
 
   /* ********************************************************** */
   // drop_table_statement
-  public static boolean drop_statement(PsiBuilder builder_, final int level_) {
+  public static boolean drop_statement(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "drop_statement")) return false;
     boolean result_ = false;
     final int start_ = builder_.getCurrentOffset();
@@ -169,7 +169,7 @@ public class Autopin implements PsiParser {
 
   /* ********************************************************** */
   // DROP TABLE table_ref
-  public static boolean drop_table_statement(PsiBuilder builder_, final int level_) {
+  public static boolean drop_table_statement(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "drop_table_statement")) return false;
     boolean result_ = false;
     boolean pinned_ = false;
@@ -197,7 +197,7 @@ public class Autopin implements PsiParser {
 
   /* ********************************************************** */
   // a b (c d e)
-  public static boolean nested_sequence(PsiBuilder builder_, final int level_) {
+  public static boolean nested_sequence(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "nested_sequence")) return false;
     boolean result_ = false;
     boolean pinned_ = false;
@@ -218,13 +218,13 @@ public class Autopin implements PsiParser {
   }
 
   // (c d e)
-  private static boolean nested_sequence_2(PsiBuilder builder_, final int level_) {
+  private static boolean nested_sequence_2(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "nested_sequence_2")) return false;
     return nested_sequence_2_0(builder_, level_ + 1);
   }
 
   // c d e
-  private static boolean nested_sequence_2_0(PsiBuilder builder_, final int level_) {
+  private static boolean nested_sequence_2_0(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "nested_sequence_2_0")) return false;
     boolean result_ = false;
     final Marker marker_ = builder_.mark();
@@ -243,16 +243,17 @@ public class Autopin implements PsiParser {
 
   /* ********************************************************** */
   // statement *
-  static boolean root(PsiBuilder builder_, final int level_) {
+  static boolean root(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "root")) return false;
     int offset_ = builder_.getCurrentOffset();
     while (true) {
       if (!statement(builder_, level_ + 1)) break;
-      if (offset_ == builder_.getCurrentOffset()) {
-        builder_.error("Empty element parsed in root");
+      int next_offset_ = builder_.getCurrentOffset();
+      if (offset_ == next_offset_) {
+        empty_element_parsed_guard_(builder_, offset_, "root");
         break;
       }
-      offset_ = builder_.getCurrentOffset();
+      offset_ = next_offset_;
     }
     return true;
   }
@@ -260,7 +261,7 @@ public class Autopin implements PsiParser {
 
   /* ********************************************************** */
   // create_statement | drop_statement
-  public static boolean statement(PsiBuilder builder_, final int level_) {
+  public static boolean statement(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "statement")) return false;
     boolean result_ = false;
     final int start_ = builder_.getCurrentOffset();

@@ -45,25 +45,8 @@ import static org.intellij.grammar.psi.BnfTypes.*;
 /**
  * @author gregory
  *         Date: 16.07.11 10:41
- */
-/*
-Known attributes:
-parserClass - inheritable, with splitting support
-
-<token> = <token-text>
-extends
-implements
-
-mixin (rule)
-pin (rule)
-recoverUntil (rule)
-
- */
-
-/*
- * todo ?? Grammar preprocessing: Left recursion -> suffix
- * todo ?? include grammars support grammar PSI inheritance (SQL hierarchy)
- * todo improve error reporting: investigate { atttr= attr=value } case
+ *
+ * todo improve error reporting: investigate { atttr= attr=value } case *
  */
 public class ParserGenerator {
   public static final Logger LOG = Logger.getInstance("ParserGenerator");
@@ -74,6 +57,7 @@ public class ParserGenerator {
 
   private final Map<String, BnfRule> ruleMap = new TreeMap<String, BnfRule>();
   private final Map<String, String> ruleParserClasses = new TreeMap<String, String>();
+  private final Map<String, String> parserLambdas = new TreeMap<String, String>();
   private final Set<String> simpleTokens = new TreeSet<String>();
   private final Set<BnfRule> rulesWithIheritance = new HashSet<BnfRule>();
   private final MultiMap<String, String> rulesExtendsMap = new MultiMap<String, String>() {
@@ -322,14 +306,22 @@ public class ParserGenerator {
       generateNode(rule, rule.getExpression(), Rule.isPrivate(rule), ruleName, new HashSet<BnfExpression>());
       newLine();
     }
-
+    for (Map.Entry<String, String> e : parserLambdas.entrySet()) {
+      String body = e.getValue();
+      if (body.startsWith("#")) {
+        String value = "new Parser() {\npublic boolean parse(PsiBuilder builder_, int level_) {\nreturn " + body.substring(1) + ";\n}\n}";
+        String name = e.getKey();
+        out("final static Parser " + name + " = " + value + ";");
+        e.setValue(StringUtil.getShortName(parserClass)+"."+ name);
+      }
+    }
     out("}");
   }
 
   private void generateRootParserContent(Set<String> ownRuleNames) {
     out("@NotNull");
     out("public ASTNode parse(final IElementType root_, final PsiBuilder builder_) {");
-    out("final int level_ = 0;");
+    out("int level_ = 0;");
     out("boolean result_;");
     boolean first = true;
     for (String ruleName : ownRuleNames) {
@@ -488,7 +480,7 @@ public class ParserGenerator {
     final boolean canCollapse = (!isLeft || isLeftInner) && firstNonTrivial && rulesWithIheritance.contains(rule);
 
     final List<BnfExpression> children;
-    out((!isRule ? "private " : isPrivate ? "" : "public ") + "static boolean " + funcName + "(PsiBuilder builder_, final int level_"
+    out((!isRule ? "private " : isPrivate ? "" : "public ") + "static boolean " + funcName + "(PsiBuilder builder_, int level_"
         + collectExtraArguments(rule, true) + ") {");
     if (node instanceof BnfReferenceOrToken || node instanceof BnfLiteralExpression || node instanceof BnfExternalExpression) {
       children = Collections.singletonList(node);
@@ -593,14 +585,14 @@ public class ParserGenerator {
           nodeCall = generateNodeCall(rule, child, getNextName(funcName, i));
         }
         out("int offset_ = builder_.getCurrentOffset();");
-        //out("while (result_ && !builder_.eof()) {");
         out("while ("+ (alwaysTrue? "true" : "result_") +") {");
         out("if (!" + nodeCall + ") break;");
-        out("if (offset_ == builder_.getCurrentOffset()) {");
-        out("builder_.error(\"Empty element parsed in " + debugFuncName + "\");");
+        out("int next_offset_ = builder_.getCurrentOffset();");
+        out("if (offset_ == next_offset_) {");
+        out("empty_element_parsed_guard_(builder_, offset_, \"" + debugFuncName + "\");");
         out("break;");
         out("}");
-        out("offset_ = builder_.getCurrentOffset();");
+        out("offset_ = next_offset_;");
         out("}");
       }
       else if (type == BNF_OP_AND) {
@@ -779,7 +771,7 @@ public class ParserGenerator {
     else if (type == BNF_EXTERNAL_EXPRESSION) {
       List<BnfExpression> expressions = ((BnfExternalExpression)node).getExpressionList();
       if (expressions.size() == 1 && Rule.isMeta(rule)) {
-        return expressions.get(0).getText() + ".parse(builder_)";
+        return expressions.get(0).getText() + ".parse(builder_, level_)";
       }
       else {
         StringBuilder clause = new StringBuilder();
@@ -833,8 +825,19 @@ public class ParserGenerator {
     return method;
   }
 
-  private String generateWrappedNodeCall(BnfRule rule, @Nullable BnfExpression nested, final String text) {
-    return "\nnew Parser() { public boolean parse(PsiBuilder builder_) { return " + generateNodeCall(rule, nested, text) + "; }}";
+  private String generateWrappedNodeCall(BnfRule rule, @Nullable BnfExpression nested, final String nextName) {
+    String constantName = nextName + "_parser_";
+    String current = parserLambdas.get(constantName);
+    if (current == null) {
+      parserLambdas.put(constantName, "#"+generateNodeCall(rule, nested, nextName));
+      return constantName;
+    }
+    else if (current.startsWith("#")) {
+      return constantName;
+    }
+    else {
+      return current;
+    }
   }
 
   private static String generateConsumeTextToken(String tokenText) {

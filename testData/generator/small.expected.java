@@ -20,7 +20,7 @@ public class Small implements PsiParser {
 
   @NotNull
   public ASTNode parse(final IElementType root_, final PsiBuilder builder_) {
-    final int level_ = 0;
+    int level_ = 0;
     boolean result_;
     if (root_ == OTHERRULE) {
       result_ = otherRule(builder_, level_ + 1);
@@ -39,8 +39,7 @@ public class Small implements PsiParser {
     }
     else {
       Marker marker_ = builder_.mark();
-      result_ = parseRoot(builder_, level_ + 1, 
-        new Parser() { public boolean parse(PsiBuilder builder_) { return statement(builder_, level_ + 1); }});
+      result_ = parseRoot(builder_, level_ + 1, statement_parser_);
       while (builder_.getTokenType() != null) {
         builder_.advanceLexer();
       }
@@ -51,7 +50,7 @@ public class Small implements PsiParser {
 
   /* ********************************************************** */
   // ( token )
-  public static boolean otherRule(PsiBuilder builder_, final int level_) {
+  public static boolean otherRule(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "otherRule")) return false;
     boolean result_ = false;
     final Marker marker_ = builder_.mark();
@@ -68,19 +67,19 @@ public class Small implements PsiParser {
 
   /* ********************************************************** */
   // token
-  static boolean privateRule(PsiBuilder builder_, final int level_) {
+  static boolean privateRule(PsiBuilder builder_, int level_) {
     return consumeToken(builder_, TOKEN);
   }
 
   /* ********************************************************** */
   // 'token'
-  static boolean privateString(PsiBuilder builder_, final int level_) {
+  static boolean privateString(PsiBuilder builder_, int level_) {
     return consumeToken(builder_, "token");
   }
 
   /* ********************************************************** */
   // token
-  public static boolean someRule(PsiBuilder builder_, final int level_) {
+  public static boolean someRule(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "someRule")) return false;
     boolean result_ = false;
     final Marker marker_ = builder_.mark();
@@ -97,7 +96,7 @@ public class Small implements PsiParser {
 
   /* ********************************************************** */
   // token?
-  public static boolean someRule2(PsiBuilder builder_, final int level_) {
+  public static boolean someRule2(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "someRule2")) return false;
     final Marker marker_ = builder_.mark();
     consumeToken(builder_, TOKEN);
@@ -108,7 +107,7 @@ public class Small implements PsiParser {
 
   /* ********************************************************** */
   // 'token'
-  public static boolean someString(PsiBuilder builder_, final int level_) {
+  public static boolean someString(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "someString")) return false;
     boolean result_ = false;
     final Marker marker_ = builder_.mark();
@@ -125,7 +124,7 @@ public class Small implements PsiParser {
 
   /* ********************************************************** */
   // token | someRule | someString
-  public static boolean statement(PsiBuilder builder_, final int level_) {
+  public static boolean statement(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "statement")) return false;
     boolean result_ = false;
     final Marker marker_ = builder_.mark();
@@ -144,7 +143,7 @@ public class Small implements PsiParser {
 
   /* ********************************************************** */
   // '=' "="
-  static boolean tokenRule(PsiBuilder builder_, final int level_) {
+  static boolean tokenRule(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "tokenRule")) return false;
     boolean result_ = false;
     final Marker marker_ = builder_.mark();
@@ -160,4 +159,9 @@ public class Small implements PsiParser {
   }
 
 
+  final static Parser statement_parser_ = new Parser() {
+      public boolean parse(PsiBuilder builder_, int level_) {
+        return statement(builder_, level_ + 1);
+      }
+    };
 }

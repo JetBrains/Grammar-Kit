@@ -22,17 +22,25 @@ import com.intellij.notification.Notifications;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.LangDataKeys;
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.fileEditor.FileDocumentManager;
+import com.intellij.openapi.progress.ProgressIndicator;
+import com.intellij.openapi.progress.ProgressManager;
+import com.intellij.openapi.progress.Task;
+import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.ProjectRootManager;
+import com.intellij.openapi.vcs.changes.BackgroundFromStartOption;
 import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.vfs.VirtualFileManager;
 import com.intellij.psi.PsiDocumentManager;
 import com.intellij.psi.PsiFile;
+import com.intellij.psi.PsiManager;
 import com.intellij.util.ExceptionUtil;
 import org.intellij.grammar.generator.ParserGenerator;
-import org.intellij.grammar.psi.impl.BnfFileImpl;
+import org.intellij.grammar.psi.BnfFile;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 
@@ -46,40 +54,76 @@ public class GenerateAction extends AnAction {
 
   @Override
   public void update(AnActionEvent e) {
-    PsiFile file = LangDataKeys.PSI_FILE.getData(e.getDataContext());
-    e.getPresentation().setEnabled(file instanceof BnfFileImpl);
-    e.getPresentation().setVisible(file instanceof BnfFileImpl);
+    Project project = getEventProject(e);
+    VirtualFile[] files = LangDataKeys.VIRTUAL_FILE_ARRAY.getData(e.getDataContext());
+    boolean grammarFound = false;
+    if (project != null && files != null) {
+      PsiManager manager = PsiManager.getInstance(project);
+      for (VirtualFile virtualFile : files) {
+        PsiFile psiFile = manager.findFile(virtualFile);
+        grammarFound = psiFile instanceof BnfFile;
+        if (grammarFound) break;
+      }
+    }
+    e.getPresentation().setEnabled(grammarFound);
+    e.getPresentation().setVisible(grammarFound);
   }
 
   @Override
-  public void actionPerformed(AnActionEvent e) {
-    PsiFile file = LangDataKeys.PSI_FILE.getData(e.getDataContext());
-    VirtualFile virtualFile = file instanceof BnfFileImpl ? file.getVirtualFile() : null;
-    if (virtualFile == null) return;
-
-    PsiDocumentManager.getInstance(file.getProject()).commitAllDocuments();
+  public void actionPerformed(final AnActionEvent e) {
+    final Project project = getEventProject(e);
+    final VirtualFile[] files = LangDataKeys.VIRTUAL_FILE_ARRAY.getData(e.getDataContext());
+    if (project == null || files == null) return;
+    PsiDocumentManager.getInstance(project).commitAllDocuments();
     FileDocumentManager.getInstance().saveAllDocuments();
 
-    VirtualFile content = ProjectRootManager.getInstance(file.getProject()).getFileIndex().getContentRootForFile(virtualFile);
-    VirtualFile parentDir = content == null ? virtualFile.getParent() : content;
-    String toDir = new File(VfsUtil.virtualToIoFile(parentDir), "gen").getAbsolutePath();
-    try {
+    ProgressManager.getInstance().run(new Task.Backgroundable(getEventProject(e), "Parser Generation", true, new BackgroundFromStartOption()) {
+      @Override
+      public void onSuccess() {
+        refreshFiles();
+      }
 
-      new ParserGenerator((BnfFileImpl)file, toDir).generate();
-      Notifications.Bus.notify(new Notification(e.getPresentation().getText(),
-                                                file.getName() + " parser generated", "to " + toDir, NotificationType.INFORMATION),
-                               file.getProject());
-    }
-    catch (Exception ex) {
-      Notifications.Bus.notify(new Notification(e.getPresentation().getText(),
-                                                file.getName() + " parser generation failed",
-                                                ExceptionUtil.getUserStackTrace(ex, ParserGenerator.LOG),
-                                                NotificationType.ERROR), file.getProject());
-      LOG.error(ex);
-    }
-    finally {
-      SaveAndSyncHandler.refreshOpenFiles();
-      VirtualFileManager.getInstance().refresh(true);
-    }
+      @Override
+      public void onCancel() {
+        refreshFiles();
+      }
+
+      @Override
+      public void run(@NotNull ProgressIndicator indicator) {
+        indicator.setIndeterminate(true);
+        ApplicationManager.getApplication().runReadAction(new Runnable() {
+          @Override
+          public void run() {
+            PsiManager psiManager = PsiManager.getInstance(project);
+            for (VirtualFile file : files) {
+              PsiFile bnfFile = psiManager.findFile(file);
+              if (!(bnfFile instanceof BnfFile)) continue;
+              VirtualFile content = ProjectRootManager.getInstance(project).getFileIndex().getContentRootForFile(file);
+              VirtualFile parentDir = content == null ? file.getParent() : content;
+              final String toDir = new File(VfsUtil.virtualToIoFile(parentDir), "gen").getAbsolutePath();
+
+              try {
+                new ParserGenerator((BnfFile)bnfFile, toDir).generate();
+                Notifications.Bus.notify(new Notification(e.getPresentation().getText(),
+                                                          file.getName() + " parser generated", "to " + toDir,
+                                                          NotificationType.INFORMATION), project);
+              }
+              catch (Exception ex) {
+                Notifications.Bus.notify(new Notification(e.getPresentation().getText(),
+                                                          file.getName() + " parser generation failed",
+                                                          ExceptionUtil.getUserStackTrace(ex, ParserGenerator.LOG),
+                                                          NotificationType.ERROR), project);
+                LOG.error(ex);
+              }
+            }
+          }
+        });
+      }
+    });
+  }
+
+  private static void refreshFiles() {
+    SaveAndSyncHandler.refreshOpenFiles();
+    VirtualFileManager.getInstance().refresh(false);
   }
 }

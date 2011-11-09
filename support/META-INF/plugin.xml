@@ -40,6 +40,8 @@
 
     <lang.unwrapDescriptor language="BNF" implementationClass="org.intellij.grammar.refactor.BnfUnwrapDescriptor"/>
 
+    <documentationProvider implementation="org.intellij.grammar.BnfDocumentationProvider"/>
+
     <localInspection shortName="BnfSuspiciousTokenInspection" displayName="Suspicious token" groupName="Grammar Inspections"
                      enabledByDefault="true" level="WARNING" implementationClass="org.intellij.grammar.inspection.BnfSuspiciousTokenInspection"/>
     <localInspection shortName="BnfDuplicateRuleInspection" displayName="Duplicate rule" groupName="Grammar Inspections"
@@ -66,7 +68,7 @@
       <add-to-group group-id="ProjectViewPopupMenu" anchor="last"/>
       <keyboard-shortcut keymap="$default" first-keystroke="control shift G"/>
     </action>
-    <action id="Grammars.IntroduceRule" class="org.intellij.grammar.refactor.BnfIntroduceRuleAction" text="Introduce Rule"
+    <action id="grammars.IntroduceRule" class="org.intellij.grammar.refactor.BnfIntroduceRuleAction" text="Introduce Rule"
             description="Introduce Rule">
       <add-to-group group-id="RefactoringMenu" anchor="first"/>
       <keyboard-shortcut keymap="$default" first-keystroke="control alt R"/>

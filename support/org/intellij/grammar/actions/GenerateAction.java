@@ -124,6 +124,6 @@ public class GenerateAction extends AnAction {
 
   private static void refreshFiles() {
     SaveAndSyncHandler.refreshOpenFiles();
-    VirtualFileManager.getInstance().refresh(false);
+    VirtualFileManager.getInstance().refresh(true);
   }
 }

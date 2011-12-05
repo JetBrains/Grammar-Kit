@@ -23,7 +23,7 @@ General usage instructions
 You've just build a custom language plugin (Approx. 1 day)
 
 
-Quick Documentaion:
+Quick documentation:
 
 See http://en.wikipedia.org/wiki/Parsing_expression_grammar for basic syntax.
 Use ::= for ← symbol.

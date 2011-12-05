@@ -15,7 +15,6 @@
       <entry name="?*.tld" />
       <entry name="?*.ftl" />
       <entry name="?*.template" />
-      <entry name="/**/GeneratedParserUtilBase.java" />
     </wildcardResourcePatterns>
     <annotationProcessing enabled="false" useClasspath="true" />
   </component>

@@ -44,10 +44,11 @@ Rule modifiers:
 3. left: left-associativity support. PSI node for this rule will enclose the one to the left.
 4. inner: left-injection. PSI node for this rule will be injected into the one to the left.
 5. meta: meta grammar support. Meta rules work in conjunction with external expressions.
-You can combine the modifiers. Note that "private left" = "private left inner".
+You can combine modifiers. "inner" should only be used together with "left".
+Note that "private left" = "private left inner".
 
 Meta rules & external expressions:
-External expression << ... >> is simply an inlined external rule reference.
+External expression << ... >> is simply an inline variant of external rule.
 They can also be used to include meta rule with arguments.
 For example:
   meta comma_separated_list ::= <<param>> ( ',' <<param>> ) *

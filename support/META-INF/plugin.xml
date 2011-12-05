@@ -1,4 +1,4 @@
-<idea-plugin url="https://github.com/gregsh/Grammar-Kit" version="2">
+<idea-plugin url="https://github.com/JetBrains/Grammar-Kit" version="2">
   <id>org.jetbrains.idea.grammar</id>
   <version>1.0</version>
   <vendor email="gregory.shrago@jetbrains.com" logo="">Gregory Shrago</vendor>

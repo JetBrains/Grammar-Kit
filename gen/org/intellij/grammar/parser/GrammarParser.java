@@ -801,9 +801,7 @@ public class GrammarParser implements PsiParser {
 
 
   /* ********************************************************** */
-  // rule_start
-  //     expression
-  //     attrs? ';'?
+  // rule_start expression attrs? ';'?
   public static boolean rule(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "rule")) return false;
     boolean result_ = false;

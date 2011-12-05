@@ -30,6 +30,8 @@ Use ::= for ← symbol.
 You can also use [ .. ] for optional sequences and { | | } for choices as these
 variants are popular in real-world grammars.
 Note that Grammar-Kit source code is the main example of Grammar-Kit application.
+The grammar for BNF parser and PSI generation can be found here:
+https://github.com/JetBrains/Grammar-Kit/blob/master/grammars/Grammar.bnf
 
 Basic syntax is extended with global and rule attributes that control code generation.
 Attributes are specified by the list of name=value pairs enclosed in { .. }.

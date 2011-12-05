@@ -44,10 +44,7 @@ external grammar ::= parseGrammar grammar_element
 private grammar_element ::= attrs | rule {recoverUntil="grammar_element_recover"}
 private grammar_element_recover::=!('{'|rule_start)
 
-rule ::=
-    rule_start
-    expression
-    attrs? ';'? {pin=2 extends=namedImpl implements=named}
+rule ::= rule_start expression attrs? ';'? {pin=2 extends=namedImpl implements=named}
 private rule_start ::= modifier* id '::='
 
 expression ::= choice?

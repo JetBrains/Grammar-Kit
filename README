@@ -46,25 +46,27 @@ You can combine the modifiers. Note that "private left" = "private left inner".
 
 Meta rules & external expressions:
 External expression << ... >> is simply an inlined external rule reference.
-They can also be used to include meta rule with arguments. For example:
-meta comma_separated_list ::= <<param>> ( ',' <<param>> ) *
-option_list ::= <<comma_separated_list (OPTION1 | OPTION2 | OPTION3)>>
+They can also be used to include meta rule with arguments.
+For example:
+  meta comma_separated_list ::= <<param>> ( ',' <<param>> ) *
+  option_list ::= <<comma_separated_list (OPTION1 | OPTION2 | OPTION3)>>
 External rule expression syntax is the same as a body of external expression:
-external manually_parsed_rule ::= methodName param1 param2 ...
+  external manually_parsed_rule ::= methodName param1 param2 ...
 Rule references in parameter list are implemented as GeneratedParserUtilBase.Parser instances.
 
 Tokens:
 Tokens should appear in grammar file as is. All conflicts can be resolved by quotation.
 If there is an attribute with the same value as single-quoted or double-quoted token
-then the corresponding IElementType constant will be generated and matched against otherwise
-the token will be matched by text.
+then the corresponding IElementType constant will be generated and matched against
+otherwise the token will be matched by text.
 Text-matched tokens can span more than one real token returned by lexer.
-External expressions and external rules interprets double- and single-quoted strings differently.
-Generally anything that appears in an external call is treated as parameter and is passed as is
-except single-quoted strings. They are unquoted by parser generator.
+External expressions and external rules interpret double- and single-quoted strings differently.
+Generally anything that appears in an external expression after rule or method name is treated
+as parameter and passed "as is" except single-quoted strings. They are unquoted first.
+This helps passing qualified enum constants, java expressions, etc.
 
 Error recovery:
-1. "pin" attribute (value: number or pattern) makes partially matched rule match
+1. "pin" attribute (value: number or pattern string) makes partially matched rule match
 if the specified prefix is matched. This attribute tunes the parser to handle incomplete rules.
 2. "recoverUntil" attribute (value: predicate rule) matches any number of tokens after the rule
 matching completes with any result. This attribute helps parser recover when unmatched token

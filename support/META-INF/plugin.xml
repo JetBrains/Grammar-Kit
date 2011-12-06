@@ -5,7 +5,7 @@
   <idea-version since-build="111.14" until-build=""/>
 
   <name>Grammar-Kit</name>
-  <description>Edit, manipulate, analyze BNF grammars and generate parser/PSI code</description>
+  <description>Edit, manipulate, analyze BNF grammars and generate readable parser/PSI code</description>
   <change-notes>
     <![CDATA[
     <p>1.0:</p>
@@ -16,7 +16,7 @@
         <li>BNF files editing, highlighting, navigation and completion</li>
         <li>Quick structure view, go to related file action</li>
         <li>Refactorings: inline rule, introduce rule</li>
-        <li>Intentions: flip choice arguments</li>
+        <li>Intentions: flip choice branches</li>
         <li>FIRST and NEXT token sets calculation (avail. in Quick Documentation)</li>
     </ul>
     ]]>

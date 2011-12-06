@@ -2,19 +2,22 @@
   <id>org.jetbrains.idea.grammar</id>
   <version>1.0</version>
   <vendor email="gregory.shrago@jetbrains.com" logo="">Gregory Shrago</vendor>
+  <idea-version since-build="111.14" until-build=""/>
 
   <name>Grammar-Kit</name>
-  <description>Edit, manipulate and analyze BNF grammars and generate parser/PSI code</description>
+  <description>Edit, manipulate, analyze BNF grammars and generate parser/PSI code</description>
   <change-notes>
     <![CDATA[
     <p>1.0:</p>
     <ul>
         <li>Simple unused rules highlighting</li>
-        <li>Rename refactoring, rules & attributes find usages, quick structure view</li>
+        <li>Rename refactoring, find usages of rules & attributes</li>
         <li>PsiBuilder-based PEG parser & PSI class hierarchy generation</li>
-        <li>BNF files editing, highlighting, navigation and rule name completion</li>
+        <li>BNF files editing, highlighting, navigation and completion</li>
+        <li>Quick structure view, go to related file action</li>
         <li>Refactorings: inline rule, introduce rule</li>
         <li>Intentions: flip choice arguments</li>
+        <li>FIRST and NEXT token sets calculation (avail. in Quick Documentation)</li>
     </ul>
     ]]>
   </change-notes>

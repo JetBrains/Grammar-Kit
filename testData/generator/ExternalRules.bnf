@@ -16,8 +16,8 @@ one ::= some value
 two ::= some other value
 one_list ::= <<comma_list one>>
 private one_list_with ::= <<comma_list_with_head (WITH) one>>
-private meta comma_list ::= <<param>> (',' <<param>>) *
-private meta comma_list_with_head ::= <<head>> <<param>> (',' <<param>>) *
+meta comma_list ::= <<param>> (',' <<param>>) *
+meta comma_list_with_head ::= <<head>> <<param>> (',' <<param>>) *
 
 private meta meta_root ::= <<listOf "int" 'int' <<param>>>>
 private meta_root_usage ::= <<meta_root statement>>

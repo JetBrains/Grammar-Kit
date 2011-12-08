@@ -326,7 +326,7 @@ public class ParserGenerator {
     boolean first = true;
     for (String ruleName : ownRuleNames) {
       BnfRule rule = ruleMap.get(ruleName);
-      if (Rule.isPrivate(rule) || Rule.isExternal(rule) || grammarRoot.equals(ruleName)) continue;
+      if (Rule.isPrivate(rule) || Rule.isExternal(rule) || Rule.isMeta(rule) || grammarRoot.equals(ruleName)) continue;
       String elementType = getElementType(rule);
       out((first ? "" : "else ") + "if (root_ == " + elementType + ") {");
       String nodeCall = generateNodeCall(rule, null, ruleName);

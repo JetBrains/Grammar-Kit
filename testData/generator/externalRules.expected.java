@@ -62,17 +62,17 @@ public class ExternalRules implements PsiParser {
 
   /* ********************************************************** */
   // <<param>> (',' <<param>>) *
-  static boolean comma_list(PsiBuilder builder_, int level_, final Parser param) {
+  public static boolean comma_list(PsiBuilder builder_, int level_, final Parser param) {
     if (!recursion_guard_(builder_, level_, "comma_list")) return false;
     boolean result_ = false;
     final Marker marker_ = builder_.mark();
     result_ = param.parse(builder_, level_);
     result_ = result_ && comma_list_1(builder_, level_ + 1, param);
-    if (!result_) {
-      marker_.rollbackTo();
+    if (result_) {
+      marker_.done(COMMA_LIST);
     }
     else {
-      marker_.drop();
+      marker_.rollbackTo();
     }
     return result_;
   }
@@ -118,18 +118,18 @@ public class ExternalRules implements PsiParser {
 
   /* ********************************************************** */
   // <<head>> <<param>> (',' <<param>>) *
-  static boolean comma_list_with_head(PsiBuilder builder_, int level_, final Parser head, final Parser param) {
+  public static boolean comma_list_with_head(PsiBuilder builder_, int level_, final Parser head, final Parser param) {
     if (!recursion_guard_(builder_, level_, "comma_list_with_head")) return false;
     boolean result_ = false;
     final Marker marker_ = builder_.mark();
     result_ = head.parse(builder_, level_);
     result_ = result_ && param.parse(builder_, level_);
     result_ = result_ && comma_list_with_head_2(builder_, level_ + 1, head, param);
-    if (!result_) {
-      marker_.rollbackTo();
+    if (result_) {
+      marker_.done(COMMA_LIST_WITH_HEAD);
     }
     else {
-      marker_.drop();
+      marker_.rollbackTo();
     }
     return result_;
   }

@@ -455,6 +455,25 @@ public class ExternalRules implements PsiParser {
 
 
   /* ********************************************************** */
+  // <<comma_list (<<comma_list one>>)>>
+  static boolean recursive_meta_rule_usage(PsiBuilder builder_, int level_) {
+    return comma_list(builder_, level_ + 1, recursive_meta_rule_usage_0_0_parser_);
+  }
+
+  // (<<comma_list one>>)
+  private static boolean recursive_meta_rule_usage_0_0(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "recursive_meta_rule_usage_0_0")) return false;
+    return comma_list(builder_, level_ + 1, one_parser_);
+  }
+
+  /* ********************************************************** */
+  // <<comma_list <<comma_list one>>>>
+  static boolean recursive_meta_rule_usage_no_parens(PsiBuilder builder_, int level_) {
+    return comma_list(builder_, level_ + 1, comma_list(builder_, level_ + 1, one_parser_));
+  }
+
+
+  /* ********************************************************** */
   // <<listOf statement>>
   static boolean root(PsiBuilder builder_, int level_) {
     return listOf(builder_, level_ + 1, statement_parser_);
@@ -553,6 +572,11 @@ public class ExternalRules implements PsiParser {
   final static Parser one_parser_ = new Parser() {
       public boolean parse(PsiBuilder builder_, int level_) {
         return one(builder_, level_ + 1);
+      }
+    };
+  final static Parser recursive_meta_rule_usage_0_0_parser_ = new Parser() {
+      public boolean parse(PsiBuilder builder_, int level_) {
+        return recursive_meta_rule_usage_0_0(builder_, level_ + 1);
       }
     };
   final static Parser statement_parser_ = new Parser() {

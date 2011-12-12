@@ -514,8 +514,10 @@ public class ParserGenerator {
       BnfExpression child = children.get(0);
       out("return " + generateNodeCall(rule, child, getNextName(funcName, 0)) + ";");
       out("}");
-      newLine();
-      generateNode(rule, child, shouldBePrivate, getNextName(funcName, 0), visited);
+      if (!(child instanceof BnfExternalExpression)) {
+        newLine();
+        generateNode(rule, child, shouldBePrivate, getNextName(funcName, 0), visited);
+      }
       return;
     }
     final long funcId = StringHash.calc(funcName);
@@ -807,9 +809,10 @@ public class ParserGenerator {
         else if (nested instanceof BnfStringLiteralExpression && argument.startsWith("\'")) {
           clause.append(StringUtil.unquoteString(argument));
         }
-        else if (nested instanceof BnfExternalExpression && Rule.isMeta(rule)) {
+        else if (nested instanceof BnfExternalExpression) {
           List<BnfExpression> expressionList = ((BnfExternalExpression)nested).getExpressionList();
-          if (expressionList.size() == 1) {
+          if (Rule.isMeta(rule) && expressionList.size() == 1) {
+            // parameter
             clause.append(expressionList.get(0).getText());
           }
           else {

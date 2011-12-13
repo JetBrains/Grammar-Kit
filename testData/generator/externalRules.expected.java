@@ -304,9 +304,9 @@ public class ExternalRules implements PsiParser {
 
 
   /* ********************************************************** */
-  // <<listOf "int" 'int' <<param>>>>
+  // <<listOf "1+2" '1+2' <<param>>>>
   static boolean meta_root(PsiBuilder builder_, int level_, final Parser param) {
-    return listOf(builder_, level_ + 1, "int", int, param);
+    return listOf(builder_, level_ + 1, "1+2", 1+2, param);
   }
 
 
@@ -469,7 +469,14 @@ public class ExternalRules implements PsiParser {
   /* ********************************************************** */
   // <<comma_list <<comma_list one>>>>
   static boolean recursive_meta_rule_usage_no_parens(PsiBuilder builder_, int level_) {
-    return comma_list(builder_, level_ + 1, comma_list(builder_, level_ + 1, one_parser_));
+    return comma_list(builder_, level_ + 1, recursive_meta_rule_usage_no_parens_0_0_parser_);
+  }
+
+
+  /* ********************************************************** */
+  // <<comma_list <<comma_list <<comma_list one>>>>>>
+  static boolean recursive_meta_rule_usage_no_parens2(PsiBuilder builder_, int level_) {
+    return comma_list(builder_, level_ + 1, recursive_meta_rule_usage_no_parens2_0_0_parser_);
   }
 
 
@@ -579,6 +586,17 @@ public class ExternalRules implements PsiParser {
         return recursive_meta_rule_usage_0_0(builder_, level_ + 1);
       }
     };
+  final static Parser recursive_meta_rule_usage_no_parens2_0_0_0_parser_ = new Parser() {
+      public boolean parse(PsiBuilder builder_, int level_) {
+        return comma_list(builder_, level_ + 1, one_parser_);
+      }
+    };
+  final static Parser recursive_meta_rule_usage_no_parens2_0_0_parser_ = new Parser() {
+      public boolean parse(PsiBuilder builder_, int level_) {
+        return comma_list(builder_, level_ + 1, recursive_meta_rule_usage_no_parens2_0_0_0_parser_);
+      }
+    };
+  final static Parser recursive_meta_rule_usage_no_parens_0_0_parser_ = recursive_meta_rule_usage_no_parens2_0_0_0_parser_;
   final static Parser statement_parser_ = new Parser() {
       public boolean parse(PsiBuilder builder_, int level_) {
         return statement(builder_, level_ + 1);

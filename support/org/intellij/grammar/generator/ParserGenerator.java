@@ -27,6 +27,7 @@ import com.intellij.psi.PsiRecursiveElementWalkingVisitor;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.tree.IElementType;
 import com.intellij.util.containers.MultiMap;
+import gnu.trove.THashMap;
 import gnu.trove.THashSet;
 import org.intellij.grammar.parser.GeneratedParserUtilBase;
 import org.intellij.grammar.psi.*;
@@ -306,11 +307,16 @@ public class ParserGenerator {
       generateNode(rule, rule.getExpression(), Rule.isPrivate(rule), ruleName, new HashSet<BnfExpression>());
       newLine();
     }
+    Map<String, String> reversedLambdas = new THashMap<String, String>(); 
     for (Map.Entry<String, String> e : parserLambdas.entrySet()) {
       String body = e.getValue();
       if (body.startsWith("#")) {
-        String value = "new Parser() {\npublic boolean parse(PsiBuilder builder_, int level_) {\nreturn " + body.substring(1) + ";\n}\n}";
         String name = e.getKey();
+        String value = reversedLambdas.get(body);
+        if (value == null) {
+          value = "new Parser() {\npublic boolean parse(PsiBuilder builder_, int level_) {\nreturn " + body.substring(1) + ";\n}\n}";
+          reversedLambdas.put(body, name);
+        }
         out("final static Parser " + name + " = " + value + ";");
         e.setValue(StringUtil.getShortName(parserClass)+"."+ name);
       }
@@ -811,12 +817,13 @@ public class ParserGenerator {
         }
         else if (nested instanceof BnfExternalExpression) {
           List<BnfExpression> expressionList = ((BnfExternalExpression)nested).getExpressionList();
-          if (Rule.isMeta(rule) && expressionList.size() == 1) {
+          boolean metaRule = Rule.isMeta(rule);
+          if (metaRule && expressionList.size() == 1) {
             // parameter
             clause.append(expressionList.get(0).getText());
           }
           else {
-            clause.append(generateNodeCall(rule, nested, getNextName(nextName, i - 1)));
+            clause.append(generateWrappedNodeCall(rule, nested, getNextName(nextName, i - 1)));
           }
         }
           

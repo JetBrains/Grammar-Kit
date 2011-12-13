@@ -19,7 +19,8 @@ private one_list_with ::= <<comma_list_with_head (WITH) one>>
 meta comma_list ::= <<param>> (',' <<param>>) *
 meta comma_list_with_head ::= <<head>> <<param>> (',' <<param>>) *
 
-private meta meta_root ::= <<listOf "int" 'int' <<param>>>>
+private meta meta_root ::= <<listOf "1+2" '1+2' <<param>>>>
 private meta_root_usage ::= <<meta_root statement>>
 private recursive_meta_rule_usage ::= <<comma_list (<<comma_list one>>)>>
 private recursive_meta_rule_usage_no_parens ::= <<comma_list <<comma_list one>>>>
+private recursive_meta_rule_usage_no_parens2 ::= <<comma_list <<comma_list <<comma_list one>>>>>>

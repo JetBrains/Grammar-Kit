@@ -314,7 +314,7 @@ public class ParserGenerator {
         String name = e.getKey();
         String value = reversedLambdas.get(body);
         if (value == null) {
-          value = "new Parser() {\npublic boolean parse(PsiBuilder builder_, int level_) {\nreturn " + body.substring(1) + ";\n}\n}";
+          value = wrapCall(body.substring(1));
           reversedLambdas.put(body, name);
         }
         out("final static Parser " + name + " = " + value + ";");
@@ -487,7 +487,7 @@ public class ParserGenerator {
 
     final List<BnfExpression> children;
     out((!isRule ? "private " : isPrivate ? "" : "public ") + "static boolean " + funcName + "(PsiBuilder builder_, int level_"
-        + collectExtraArguments(rule, true) + ") {");
+        + collectExtraArguments(rule, node, true) + ") {");
     if (node instanceof BnfReferenceOrToken || node instanceof BnfLiteralExpression || node instanceof BnfExternalExpression) {
       children = Collections.singletonList(node);
       if (isPrivate && !isLeftInner) {
@@ -709,6 +709,9 @@ public class ParserGenerator {
           if (expression instanceof BnfParenthesized) {
             generateNode(rule, expression, true, getNextName(getNextName(funcName, i), j - 1), visited);
           }
+          else if (expression instanceof BnfExternalExpression) {
+            generateNodeChildren(rule, getNextName(funcName, j - 1), Collections.singletonList(expression), visited);
+          }
         }
       }
       else {
@@ -717,11 +720,11 @@ public class ParserGenerator {
     }
   }
 
-  private String collectExtraArguments(BnfRule rule, final boolean declaration) {
+  private String collectExtraArguments(BnfRule rule, BnfExpression expression, final boolean declaration) {
     if (!Rule.isMeta(rule)) return "";
     final StringBuilder sb = new StringBuilder();
     final Set<String> visited = new THashSet<String>();
-    rule.getExpression().acceptChildren(new PsiRecursiveElementWalkingVisitor() {
+    expression.acceptChildren(new PsiRecursiveElementWalkingVisitor() {
       @Override
       public void visitElement(PsiElement element) {
         if (element instanceof BnfExternalExpression) {
@@ -729,7 +732,7 @@ public class ParserGenerator {
           if (list.size() == 1) {
             String text = list.get(0).getText();
             if (visited.add(text)) {
-              sb.append(", "+ (declaration? "final Parser " : "") + text);
+              sb.append(", " + (declaration ? "final Parser " : "") + text);
             }
           }
         }
@@ -771,7 +774,7 @@ public class ParserGenerator {
           if (!parserClass.equals(ruleParserClasses.get(rule.getName()))) {
             method = StringUtil.getShortName(parserClass) + "." + method;
           }
-          return method + "(builder_, level_ + 1"+collectExtraArguments(rule, false)+")";
+          return method + "(builder_, level_ + 1)";
         }
       }
       return generateConsumeToken(text);
@@ -788,7 +791,7 @@ public class ParserGenerator {
       }
     }
     else {
-      return nextName + "(builder_, level_ + 1"+ collectExtraArguments(rule, false)+")";
+      return nextName + "(builder_, level_ + 1"+ collectExtraArguments(rule, node, false)+")";
     }
   }
 
@@ -836,6 +839,9 @@ public class ParserGenerator {
   }
 
   private String generateWrappedNodeCall(BnfRule rule, @Nullable BnfExpression nested, final String nextName) {
+    if (!collectExtraArguments(rule, nested, false).isEmpty()) {
+      return wrapCall(generateNodeCall(rule, nested, nextName));
+    }
     String constantName = nextName + "_parser_";
     String current = parserLambdas.get(constantName);
     if (current == null) {
@@ -848,6 +854,10 @@ public class ParserGenerator {
     else {
       return current;
     }
+  }
+
+  private static String wrapCall(String nodeCall) {
+    return "new Parser() {\npublic boolean parse(PsiBuilder builder_, int level_) {\nreturn " + nodeCall + ";\n}\n}";
   }
 
   private static String generateConsumeTextToken(String tokenText) {

@@ -4,23 +4,35 @@
   stubParserClass="org.intellij.grammar.parser.GeneratedParserUtilBase"
 }
 
+// external parsing
 root ::= <<listOf statement>>
 
-statement ::= simple_case | complex_case | complex_case_brackets | complex_case_braces | multi_complex_case
-simple_case ::= DO <<uniqueListOf "zero" one two 10 some>> END
-complex_case ::= DO <<uniqueListOf (one | two | 10 | some)>> END
-complex_case_brackets ::= DO <<uniqueListOf [one | two | 10 | some]>> END
-complex_case_braces ::= DO <<uniqueListOf {one | two | 10 | some}>> END
-multi_complex_case ::= DO <<uniqueListOf {one | two} [10 | some]>> (option) END
-one ::= some value
-two ::= some other value
-one_list ::= <<comma_list one>>
-private one_list_with ::= <<comma_list_with_head (WITH) one>>
-meta comma_list ::= <<param>> (',' <<param>>) *
-meta comma_list_with_head ::= <<head>> <<param>> (',' <<param>>) *
+one ::= 'one'
+two ::= 'two'
+statement ::= one | two
 
-private meta meta_root ::= <<listOf "1+2" '1+2' <<param>>>>
-private meta_root_usage ::= <<meta_root statement>>
-private recursive_meta_rule_usage ::= <<comma_list (<<comma_list one>>)>>
-private recursive_meta_rule_usage_no_parens ::= <<comma_list <<comma_list one>>>>
-private recursive_meta_rule_usage_no_parens2 ::= <<comma_list <<comma_list <<comma_list one>>>>>>
+private param_seq ::= '{' <<uniqueListOf "1+1" '1+1' one two 10 some>> '}'
+private param_choice ::= '{' <<uniqueListOf (one | two | 10 | some)>> '}'
+private param_opt ::= '{' <<uniqueListOf [one | two | 10 | some]>> '}'
+private param_choice_alt ::= '{' <<uniqueListOf {one | two | 10 | some}>> '}'
+private param_seq_alt ::= '{' <<uniqueListOf {one | two} [10 | some]>> '}'
+
+// meta rules
+meta comma_list ::= <<param>> (',' <<param>>) *
+meta comma_list_pinned ::= <<head>> <<param>> (<<comma_list_tail <<param>>>>) *
+meta comma_list_tail ::= ',' <<param>> {pin=1}
+meta list_of_lists ::= <<head>> <<comma_list <<param>>>> (<<comma_list_tail <<comma_list <<param>>>>>>) *
+meta meta_multi_level ::= <<comma_list <<comma_list <<comma_list <<comma_list <<comma_list <<param>>>>>>>>>>>>
+meta meta_multi_level_pinned ::= <<comma_list <<comma_list_pinned <<head>> <<comma_list <<comma_list <<comma_list <<param>>>>>>>>>>>>
+meta meta_multi_level_pinned_paren ::= <<comma_list <<comma_list_pinned <<head>> (<<comma_list <<comma_list <<comma_list <<param>>>>>>>>)>>>>
+
+private meta_simple ::= <<comma_list one>>
+private meta_seq ::= <<comma_list_pinned one (one | two)>>
+private meta_seq_of_lists ::= <<list_of_lists one (one | two)>>
+private multi_level ::= <<meta_multi_level one>>
+
+// mixed
+private meta meta_mixed ::= <<listOf "1+2" '1+2' <<param>>>>
+private meta_mixed_simple ::= <<meta_mixed statement>>
+private meta_mixed_list ::= <<meta_mixed <<comma_list one>>>>
+private meta_mixed_list_paren ::= <<meta_mixed (<<comma_list one>>)>>

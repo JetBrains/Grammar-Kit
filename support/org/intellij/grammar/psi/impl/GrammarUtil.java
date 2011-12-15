@@ -15,14 +15,20 @@
  */
 package org.intellij.grammar.psi.impl;
 
+import com.intellij.openapi.util.Ref;
 import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiRecursiveElementWalkingVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
+import gnu.trove.THashSet;
 import org.intellij.grammar.generator.ParserGeneratorUtil;
 import org.intellij.grammar.parser.GeneratedParserUtilBase;
 import org.intellij.grammar.psi.*;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author gregsh
@@ -86,5 +92,29 @@ public class GrammarUtil {
     }
     else result = null;
     return result;
+  }
+
+  public static List<BnfExternalExpression> collectExtraArguments(BnfRule rule, BnfExpression expression) {
+    if (!ParserGeneratorUtil.Rule.isMeta(rule)) return Collections.emptyList();
+    final Ref<List<BnfExternalExpression>> ref = Ref.create(null);
+    final Set<String> visited = new THashSet<String>();
+    expression.acceptChildren(new PsiRecursiveElementWalkingVisitor() {
+      @Override
+      public void visitElement(PsiElement element) {
+        if (element instanceof BnfExternalExpression) {
+          BnfExternalExpression expr = (BnfExternalExpression)element;
+          List<BnfExpression> list = expr.getExpressionList();
+          if (list.size() == 1) {
+            String text = list.get(0).getText();
+            if (visited.add(text)) {
+              if (ref.isNull()) ref.set(new ArrayList<BnfExternalExpression>(3));
+              ref.get().add(expr);
+            }
+          }
+        }
+        super.visitElement(element);
+      }
+    });
+    return ref.isNull()? Collections.<BnfExternalExpression>emptyList() : ref.get();
   }
 }

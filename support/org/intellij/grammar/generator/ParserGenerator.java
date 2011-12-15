@@ -23,7 +23,6 @@ import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.psi.JavaPsiFacade;
 import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiRecursiveElementWalkingVisitor;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.tree.IElementType;
 import com.intellij.util.containers.MultiMap;
@@ -31,6 +30,7 @@ import gnu.trove.THashMap;
 import gnu.trove.THashSet;
 import org.intellij.grammar.parser.GeneratedParserUtilBase;
 import org.intellij.grammar.psi.*;
+import org.intellij.grammar.psi.impl.GrammarUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -720,25 +720,13 @@ public class ParserGenerator {
     }
   }
 
-  private String collectExtraArguments(BnfRule rule, BnfExpression expression, final boolean declaration) {
-    if (!Rule.isMeta(rule)) return "";
+  private static String collectExtraArguments(BnfRule rule, BnfExpression expression, final boolean declaration) {
+    List<BnfExternalExpression> params = GrammarUtil.collectExtraArguments(rule, expression);
+    if (params.isEmpty()) return "";
     final StringBuilder sb = new StringBuilder();
-    final Set<String> visited = new THashSet<String>();
-    expression.acceptChildren(new PsiRecursiveElementWalkingVisitor() {
-      @Override
-      public void visitElement(PsiElement element) {
-        if (element instanceof BnfExternalExpression) {
-          List<BnfExpression> list = ((BnfExternalExpression)element).getExpressionList();
-          if (list.size() == 1) {
-            String text = list.get(0).getText();
-            if (visited.add(text)) {
-              sb.append(", " + (declaration ? "final Parser " : "") + text);
-            }
-          }
-        }
-        super.visitElement(element);
-      }
-    });
+    for (BnfExternalExpression param : params) {
+      sb.append(", " + (declaration ? "final Parser " : "") + param.getExpressionList().get(0).getText());
+    }
     return sb.toString();
   }
 

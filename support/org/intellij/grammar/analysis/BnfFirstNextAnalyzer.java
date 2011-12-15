@@ -23,7 +23,9 @@ import com.intellij.psi.tree.IElementType;
 import gnu.trove.THashSet;
 import org.intellij.grammar.generator.ParserGeneratorUtil;
 import org.intellij.grammar.psi.*;
+import org.intellij.grammar.psi.impl.GrammarUtil;
 
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -35,17 +37,19 @@ public class BnfFirstNextAnalyzer {
   
   public static final String EMPTY_STRING = "";
 
-  public static Set<String> calcFirst(BnfExpression expression) {
-    return calcFirstInner(expression, new THashSet<String>(), new LinkedList<BnfRule>());
+  public static Set<String> calcFirst(BnfRule rule) {
+    LinkedList<BnfRule> visited = new LinkedList<BnfRule>();
+    visited.add(rule);
+    return calcFirstInner(rule.getExpression(), new THashSet<String>(), visited);
   }
 
-  public static Set<String> calcNext(BnfExpression expression) {
+  public static Set<String> calcNext(BnfRule targetRule) {
     THashSet<String> totalResult = new THashSet<String>();
     LinkedList<BnfExpression> stack = new LinkedList<BnfExpression>();
     THashSet<BnfRule> totalVisited = new THashSet<BnfRule>();
     LinkedList<BnfRule> visited = new LinkedList<BnfRule>();
     THashSet<String> result = new THashSet<String>();
-    stack.add(expression);
+    stack.add(targetRule.getExpression());
     main: while (!stack.isEmpty()) {
       result.clear();
       visited.clear();
@@ -114,7 +118,7 @@ public class BnfFirstNextAnalyzer {
     }
     else if (expression instanceof BnfChoice) {
       for (BnfExpression child : ((BnfChoice)expression).getExpressionList()) {
-        result.addAll(calcFirstInner(child, new THashSet<String>(), visited));
+        calcFirstInner(child, result, visited);
       }
     }
     else if (expression instanceof BnfSequence) {
@@ -128,7 +132,29 @@ public class BnfFirstNextAnalyzer {
       }
     }
     else if (expression instanceof BnfExternalExpression) {
-      // todo
+      List<BnfExpression> expressionList = ((BnfExternalExpression)expression).getExpressionList();
+      if (expressionList.size() == 1 && ParserGeneratorUtil.Rule.isMeta(ParserGeneratorUtil.Rule.of(expression))) {
+        result.add(expression.getText());
+      }
+      else {
+        BnfExpression ruleRef = expressionList.get(0);
+        Set<String> metaResults = calcFirstInner(ruleRef, new LinkedHashSet<String>(), visited);
+        List<BnfExternalExpression> params = null;
+        for (String str : metaResults) {
+          if (!str.startsWith("<<")) result.add(str);
+          if (params == null) {
+            BnfRule metaRule = (BnfRule)ruleRef.getReference().resolve();
+            assert metaRule != null;
+            params = GrammarUtil.collectExtraArguments(metaRule, metaRule.getExpression());
+          }
+          for (int i = 0, paramsSize = params.size(); i < paramsSize; i++) {
+            BnfExternalExpression param = params.get(i);
+            if (str.equals(param.getText())) {
+              calcFirstInner(expressionList.get(i + 1), result, visited);
+            }
+          }
+        }
+      }
     }
     else if (expression instanceof BnfPredicate) {
       result.add(EMPTY_STRING);

@@ -45,11 +45,13 @@
 
     <documentationProvider implementation="org.intellij.grammar.BnfDocumentationProvider"/>
 
-    <localInspection shortName="BnfSuspiciousTokenInspection" displayName="Suspicious token" groupName="Grammar Inspections"
+    <localInspection language="BNF" shortName="BnfSuspiciousTokenInspection" displayName="Suspicious token" groupName="Grammar Inspections"
                      enabledByDefault="true" level="WARNING" implementationClass="org.intellij.grammar.inspection.BnfSuspiciousTokenInspection"/>
-    <localInspection shortName="BnfDuplicateRuleInspection" displayName="Duplicate rule" groupName="Grammar Inspections"
+    <localInspection language="BNF" shortName="BnfLeftRecursionInspection" displayName="Left recursion" groupName="Grammar Inspections"
+                     enabledByDefault="true" level="WARNING" implementationClass="org.intellij.grammar.inspection.BnfLeftRecursionInspection"/>
+    <localInspection language="BNF" shortName="BnfDuplicateRuleInspection" displayName="Duplicate rule" groupName="Grammar Inspections"
                      enabledByDefault="true" level="WARNING" implementationClass="org.intellij.grammar.inspection.BnfDuplicateRuleInspection"/>
-    <localInspection shortName="BnfIdenticalChoiceBranchesInspection" displayName="Identical choice branches"
+    <localInspection language="BNF" shortName="BnfIdenticalChoiceBranchesInspection" displayName="Identical choice branches"
                      groupName="Grammar Inspections" enabledByDefault="true" level="WARNING"
                      implementationClass="org.intellij.grammar.inspection.BnfIdenticalChoiceBranchesInspection"/>
 

@@ -228,5 +228,9 @@ public class ParserGeneratorUtil {
       if (attrVal != null) return attr == NULL ? def : (T)attrVal;
       return def;
     }
+    
+    public static BnfRule of(BnfExpression expr) {
+      return PsiTreeUtil.getParentOfType(expr, BnfRule.class);
+    }
   }
 }

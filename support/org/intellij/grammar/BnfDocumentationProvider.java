@@ -21,7 +21,6 @@ import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiManager;
 import org.intellij.grammar.analysis.BnfFirstNextAnalyzer;
-import org.intellij.grammar.psi.BnfExpression;
 import org.intellij.grammar.psi.BnfRule;
 import org.jetbrains.annotations.Nullable;
 
@@ -47,10 +46,9 @@ public class BnfDocumentationProvider implements DocumentationProvider {
   @Nullable
   public String generateDoc(final PsiElement element, final PsiElement originalElement) {
     if (element instanceof BnfRule) {
-      BnfExpression expression = ((BnfRule)element).getExpression();
-
-      Set<String> first = BnfFirstNextAnalyzer.calcFirst(expression);
-      Set<String> next = BnfFirstNextAnalyzer.calcNext(expression);
+      BnfRule rule = (BnfRule)element;
+      Set<String> first = BnfFirstNextAnalyzer.calcFirst(rule);
+      Set<String> next = BnfFirstNextAnalyzer.calcNext(rule);
 
       boolean hasNull = first.remove(BnfFirstNextAnalyzer.EMPTY_STRING);
       if (hasNull) first.add("<eof>");

@@ -44,7 +44,7 @@ public class BnfDuplicateRuleInspection extends LocalInspectionTool {
   @NotNull
   @Override
   public String getGroupDisplayName() {
-    return "Grammar Inspections";
+    return "Grammar/BNF";
   }
 
   @Nls

@@ -60,7 +60,7 @@ public class BnfFirstNextAnalyzer {
         if (parent instanceof BnfSequence) {
           List<BnfExpression> children = ((BnfSequence)parent).getExpressionList();
           int idx = children.indexOf(cur);
-          result.addAll(calcSequenceFirstInner(children.subList(idx + 1, children.size()), result, visited));
+          calcSequenceFirstInner(children.subList(idx + 1, children.size()), result, visited);
           boolean skipResolve = !result.remove(EMPTY_STRING);
           totalResult.addAll(result);
           if (skipResolve) continue main;
@@ -82,11 +82,13 @@ public class BnfFirstNextAnalyzer {
   }
 
   private static Set<String> calcSequenceFirstInner(List<BnfExpression> expressions, final Set<String> result, final LinkedList<BnfRule> visited) {
-    result.add(EMPTY_STRING);
+    boolean noEmpty = result.add(EMPTY_STRING);
     for (BnfExpression expression : expressions) {
       if (!result.remove(EMPTY_STRING)) break;
       calcFirstInner(expression, result, visited);
     }
+    // add empty back if was there before
+    if (!noEmpty) result.add(EMPTY_STRING);
     return result;
   }
 
@@ -122,7 +124,7 @@ public class BnfFirstNextAnalyzer {
       }
     }
     else if (expression instanceof BnfSequence) {
-      result.addAll(calcSequenceFirstInner(((BnfSequence)expression).getExpressionList(), new THashSet<String>(), visited));
+      calcSequenceFirstInner(((BnfSequence)expression).getExpressionList(), result, visited);
     }
     else if (expression instanceof BnfQuantified) {
       calcFirstInner(((BnfQuantified)expression).getExpression(), result, visited);

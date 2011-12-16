@@ -98,7 +98,7 @@ public class GrammarUtil {
     if (!ParserGeneratorUtil.Rule.isMeta(rule)) return Collections.emptyList();
     final Ref<List<BnfExternalExpression>> ref = Ref.create(null);
     final Set<String> visited = new THashSet<String>();
-    expression.acceptChildren(new PsiRecursiveElementWalkingVisitor() {
+    expression.accept(new PsiRecursiveElementWalkingVisitor() {
       @Override
       public void visitElement(PsiElement element) {
         if (element instanceof BnfExternalExpression) {

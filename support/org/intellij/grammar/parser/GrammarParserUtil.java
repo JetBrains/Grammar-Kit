@@ -23,6 +23,6 @@ import com.intellij.lang.PsiBuilder;
 public class GrammarParserUtil extends GeneratedParserUtilBase {
   public static boolean parseGrammar(PsiBuilder builder_, int level, Parser parser) {
     ErrorState state = ErrorState.get(builder_);
-    return parseAsTree(state, level, builder_, DUMMY_BLOCK, true, parser, TRUE_CONDITION);
+    return parseAsTree(state, builder_, level, DUMMY_BLOCK, true, parser, TRUE_CONDITION);
   }
 }

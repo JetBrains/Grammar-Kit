@@ -120,13 +120,17 @@ public class GeneratedParserUtilBase {
 
   public static boolean consumeToken(PsiBuilder builder, String text) {
     ErrorState state = ErrorState.get(builder);
+    if (!state.suppressErrors) {
+      addVariant(state, builder, text);
+    }
+    return consumeTokenInner(builder, text);
+  }
+
+  public static boolean consumeTokenInner(PsiBuilder builder, String text) {
     final CharSequence sequence = builder.getOriginalText();
     final int offset = builder.getCurrentOffset();
     final int endOffset = offset + text.length();
     CharSequence tokenText = sequence.subSequence(offset, Math.min(endOffset, sequence.length()));
-    if (!state.suppressErrors) {
-      addVariant(state, builder, text);
-    }
     if (text.equals(tokenText)) {
       int count = 0;
       while (true) {
@@ -233,50 +237,47 @@ public class GeneratedParserUtilBase {
       final LighterASTNode latestDoneMarker = result || pinned ? builder_.getLatestDoneMarker() : null;
       PsiBuilder.Marker extensionMarker = null;
       IElementType extensionTokenType = null;
-      try {
-        if (latestDoneMarker instanceof PsiBuilder.Marker) {
-          extensionMarker = ((PsiBuilder.Marker)latestDoneMarker).precede();
-          extensionTokenType = latestDoneMarker.getTokenType();
-          ((PsiBuilder.Marker)latestDoneMarker).drop();
-        }
-        final boolean eatMoreFlagOnce =
-          !builder_.eof() && (eatMore.parse(builder_, frame.level + 1) || state.braces != null && builder_.rawLookup(-1) == state.braces[0].getLeftBraceType()
-                                                         && builder_.getTokenType() == state.braces[0] .getRightBraceType());
-        final int lastErrorPos = state.variants.isEmpty()? builder_.getCurrentOffset() : state.variants.last().offset;
-        boolean eatMoreFlag = eatMoreFlagOnce || frame.offset == builder_.getCurrentOffset() && lastErrorPos > frame.offset;
-        // advance to the last error pos
-        // skip tokens until lastErrorPos. parseAsTree might look better here...
-        int parenCount = 0;
-        while (eatMoreFlag && builder_.getCurrentOffset() < lastErrorPos) {
-          if (state.braces != null) {
-            if (builder_.getTokenType() == state.braces[0].getLeftBraceType()) parenCount ++;
-            else if (builder_.getTokenType() == state.braces[0].getRightBraceType()) parenCount --;
-          }
-          builder_.advanceLexer();
-          eatMoreFlag = parenCount != 0 || eatMore.parse(builder_, frame.level + 1);
-        }
-        if (eatMoreFlag) {
-          String tokenText = builder_.getTokenText();
-          String expectedText = state.getExpectedText(builder_);
-          // todo we could have already reported the error, can we try to drop it and recreate here?
-          PsiBuilder.Marker mark = builder_.mark();
-          try {
-            builder_.advanceLexer();
-          }
-          finally {
-            mark.error(expectedText + "got '" + tokenText + "'");
-          }
-          parseAsTree(state, frame.level + 1, builder_, DUMMY_BLOCK, true, TOKEN_ADVANCER, eatMore);
-        }
-        else if ((!result || eatMoreFlagOnce) && frame.offset != builder_.getCurrentOffset()) {
-          reportError(state, builder_, true);
-        }
+      if (latestDoneMarker instanceof PsiBuilder.Marker) {
+        extensionMarker = ((PsiBuilder.Marker)latestDoneMarker).precede();
+        extensionTokenType = latestDoneMarker.getTokenType();
+        ((PsiBuilder.Marker)latestDoneMarker).drop();
       }
-      finally {
-        if (extensionMarker != null) {
-          extensionMarker.done(extensionTokenType);
+      final boolean eatMoreFlagOnce =
+        !builder_.eof() && (eatMore.parse(builder_, frame.level + 1) || state.braces != null && builder_.rawLookup(-1) == state.braces[0].getLeftBraceType()
+                                                       && builder_.getTokenType() == state.braces[0] .getRightBraceType());
+      final int lastErrorPos = state.variants.isEmpty()? builder_.getCurrentOffset() : state.variants.last().offset;
+      boolean eatMoreFlag = eatMoreFlagOnce || frame.offset == builder_.getCurrentOffset() && lastErrorPos > frame.offset;
+      // advance to the last error pos
+      // skip tokens until lastErrorPos. parseAsTree might look better here...
+      int parenCount = 0;
+      while (eatMoreFlag && builder_.getCurrentOffset() < lastErrorPos) {
+        if (state.braces != null) {
+          if (builder_.getTokenType() == state.braces[0].getLeftBraceType()) parenCount ++;
+          else if (builder_.getTokenType() == state.braces[0].getRightBraceType()) parenCount --;
         }
-        state.suppressErrors = false;
+        builder_.advanceLexer();
+        eatMoreFlag = parenCount != 0 || eatMore.parse(builder_, frame.level + 1);
+      }
+      boolean errorReported = false;
+      if (eatMoreFlag) {
+        String tokenText = builder_.getTokenText();
+        String expectedText = state.getExpectedText(builder_);
+        // todo we could have already reported the error, can we try to drop it and recreate here?
+        PsiBuilder.Marker mark = builder_.mark();
+        builder_.advanceLexer();
+        mark.error(expectedText + "got '" + tokenText + "'");
+        parseAsTree(state, builder_, frame.level + 1, DUMMY_BLOCK, true, TOKEN_ADVANCER, eatMore);
+        errorReported = true;
+      }
+      else if (eatMoreFlagOnce || (!result && frame.offset != builder_.getCurrentOffset())) {
+        reportError(state, builder_, true);
+        errorReported = true;
+      }
+      if (extensionMarker != null) {
+        extensionMarker.done(extensionTokenType);
+      }
+      state.suppressErrors = false;
+      if (errorReported || result) {
         state.clearExpectedVariants();
       }
     }
@@ -468,7 +469,7 @@ public class GeneratedParserUtilBase {
 
 
   private static final int MAX_CHILDREN_IN_TREE = 10;
-  public static boolean parseAsTree(ErrorState state, int level, final PsiBuilder builder, final IElementType chunkType,
+  public static boolean parseAsTree(ErrorState state, final PsiBuilder builder, int level, final IElementType chunkType,
                                     boolean checkBraces, final Parser parser, final Parser eatMoreCondition) {
     final LinkedList<Pair<PsiBuilder.Marker, PsiBuilder.Marker>> parenList = new LinkedList<Pair<PsiBuilder.Marker, PsiBuilder.Marker>>();
     final LinkedList<Pair<PsiBuilder.Marker, Integer>> siblingList = new LinkedList<Pair<PsiBuilder.Marker, Integer>>();
@@ -499,69 +500,66 @@ public class GeneratedParserUtilBase {
     };
     boolean checkParens = state.braces != null && checkBraces;
     int totalCount = 0;
-    try {
-      int tokenCount = 0;
-      if (checkParens && builder.rawLookup(-1) == state.braces[0].getLeftBraceType()) {
-        LighterASTNode doneMarker = builder.getLatestDoneMarker();
-        if (doneMarker != null && doneMarker.getStartOffset() == builder.rawTokenTypeStart(-1) && doneMarker.getTokenType() == TokenType.ERROR_ELEMENT) {
-          parenList.add(Pair.create(((PsiBuilder.Marker)doneMarker).precede(), (PsiBuilder.Marker)null));
-        }
+    int tokenCount = 0;
+    if (checkParens && builder.rawLookup(-1) == state.braces[0].getLeftBraceType()) {
+      LighterASTNode doneMarker = builder.getLatestDoneMarker();
+      if (doneMarker != null && doneMarker.getStartOffset() == builder.rawTokenTypeStart(-1) && doneMarker.getTokenType() == TokenType.ERROR_ELEMENT) {
+        parenList.add(Pair.create(((PsiBuilder.Marker)doneMarker).precede(), (PsiBuilder.Marker)null));
       }
-      while (true) {
-        final IElementType tokenType = builder.getTokenType();
-        if (checkParens && (tokenType == state.braces[0].getLeftBraceType() || tokenType == state.braces[0].getRightBraceType() && !parenList.isEmpty())) {
-          if (marker != null) {
-            marker.done(chunkType);
-            siblingList.addFirst(Pair.create(marker, 1));
-            marker = null;
-            tokenCount = 0;
-          }
-          if (tokenType == state.braces[0].getLeftBraceType()) {
-            final Pair<PsiBuilder.Marker, Integer> prev = siblingList.peek();
-            parenList.addFirst(Pair.create(builder.mark(), prev == null ? null : prev.first));
-          }
-          checkSiblingsRunnable.run();
-          builder.advanceLexer();
-          if (tokenType == state.braces[0].getRightBraceType()) {
-            final Pair<PsiBuilder.Marker, PsiBuilder.Marker> pair = parenList.removeFirst();
-            pair.first.done(chunkType);
-            // drop all markers inside parens
-            while (!siblingList.isEmpty() && siblingList.getFirst().first != pair.second) {
-              siblingList.removeFirst();
-            }
-            siblingList.addFirst(Pair.create(pair.first, 1));
-            checkSiblingsRunnable.run();
-          }
-        }
-        else if (tokenType != null) {
-          if (marker == null) {
-            marker = builder.mark();
-          }
-          final boolean result = eatMoreCondition.parse(builder, level + 1) && parser.parse(builder, level + 1);
-          if (result) {
-            tokenCount++;
-            totalCount++;
-          }
-          else break;
-        }
-        else break;
-
-        if (tokenCount >= MAX_CHILDREN_IN_TREE) {
+    }
+    while (true) {
+      final IElementType tokenType = builder.getTokenType();
+      if (checkParens && (tokenType == state.braces[0].getLeftBraceType() || tokenType == state.braces[0].getRightBraceType() && !parenList.isEmpty())) {
+        if (marker != null) {
           marker.done(chunkType);
           siblingList.addFirst(Pair.create(marker, 1));
-          checkSiblingsRunnable.run();
           marker = null;
           tokenCount = 0;
         }
+        if (tokenType == state.braces[0].getLeftBraceType()) {
+          final Pair<PsiBuilder.Marker, Integer> prev = siblingList.peek();
+          parenList.addFirst(Pair.create(builder.mark(), prev == null ? null : prev.first));
+        }
+        checkSiblingsRunnable.run();
+        builder.advanceLexer();
+        if (tokenType == state.braces[0].getRightBraceType()) {
+          final Pair<PsiBuilder.Marker, PsiBuilder.Marker> pair = parenList.removeFirst();
+          pair.first.done(chunkType);
+          // drop all markers inside parens
+          while (!siblingList.isEmpty() && siblingList.getFirst().first != pair.second) {
+            siblingList.removeFirst();
+          }
+          siblingList.addFirst(Pair.create(pair.first, 1));
+          checkSiblingsRunnable.run();
+        }
+      }
+      else {
+        if (marker == null) {
+          marker = builder.mark();
+        }
+        final boolean result = eatMoreCondition.parse(builder, level + 1) && parser.parse(builder, level + 1);
+        if (result) {
+          tokenCount++;
+          totalCount++;
+        }
+        if (!result || builder.eof()) {
+          break;
+        }
+      }
+
+      if (tokenCount >= MAX_CHILDREN_IN_TREE && marker != null) {
+        marker.done(chunkType);
+        siblingList.addFirst(Pair.create(marker, 1));
+        checkSiblingsRunnable.run();
+        marker = null;
+        tokenCount = 0;
       }
     }
-    finally {
-      if (marker != null) {
-        marker.drop();
-      }
-      for (Pair<PsiBuilder.Marker, PsiBuilder.Marker> pair : parenList) {
-        pair.first.drop();
-      }
+    if (marker != null) {
+      marker.drop();
+    }
+    for (Pair<PsiBuilder.Marker, PsiBuilder.Marker> pair : parenList) {
+      pair.first.drop();
     }
     return totalCount != 0;
   }

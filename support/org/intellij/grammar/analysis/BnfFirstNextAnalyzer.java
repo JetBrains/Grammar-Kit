@@ -16,6 +16,7 @@
 
 package org.intellij.grammar.analysis;
 
+import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiReference;
 import com.intellij.psi.search.searches.ReferencesSearch;
@@ -34,6 +35,8 @@ import java.util.Set;
  * @author gregsh
  */
 public class BnfFirstNextAnalyzer {
+  
+  private static final Logger LOG = Logger.getInstance("org.intellij.grammar.analysis.BnfFirstNextAnalyzer"); 
   
   public static final String EMPTY_STRING = "";
 
@@ -108,7 +111,7 @@ public class BnfFirstNextAnalyzer {
           visited.addLast(rule);
           calcFirstInner(rule.getExpression(), result, visited);
           BnfRule removed = visited.removeLast();
-          assert removed == rule: "path corruption detected";
+          LOG.assertTrue(removed == rule, "path corruption detected");
         }
       }
       else {
@@ -143,16 +146,23 @@ public class BnfFirstNextAnalyzer {
         Set<String> metaResults = calcFirstInner(ruleRef, new LinkedHashSet<String>(), visited);
         List<BnfExternalExpression> params = null;
         for (String str : metaResults) {
-          if (!str.startsWith("<<")) result.add(str);
-          if (params == null) {
-            BnfRule metaRule = (BnfRule)ruleRef.getReference().resolve();
-            assert metaRule != null;
-            params = GrammarUtil.collectExtraArguments(metaRule, metaRule.getExpression());
+          if (!str.startsWith("<<")) {
+            result.add(str);
           }
-          for (int i = 0, paramsSize = params.size(); i < paramsSize; i++) {
-            BnfExternalExpression param = params.get(i);
-            if (str.equals(param.getText())) {
-              calcFirstInner(expressionList.get(i + 1), result, visited);
+          else {
+            if (params == null) {
+              BnfRule metaRule = (BnfRule)ruleRef.getReference().resolve();
+              if (metaRule == null) {
+                LOG.error("ruleRef:" + ruleRef.getText() +", metaResult:" + metaResults);
+                continue;
+              }
+              params = GrammarUtil.collectExtraArguments(metaRule, metaRule.getExpression());
+            }
+            for (int i = 0, paramsSize = params.size(); i < paramsSize; i++) {
+              BnfExternalExpression param = params.get(i);
+              if (str.equals(param.getText())) {
+                calcFirstInner(expressionList.get(i + 1), result, visited);
+              }
             }
           }
         }

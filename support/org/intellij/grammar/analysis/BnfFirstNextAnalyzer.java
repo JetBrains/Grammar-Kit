@@ -21,6 +21,7 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiReference;
 import com.intellij.psi.search.searches.ReferencesSearch;
 import com.intellij.psi.tree.IElementType;
+import com.intellij.psi.util.PsiTreeUtil;
 import gnu.trove.THashSet;
 import org.intellij.grammar.generator.ParserGeneratorUtil;
 import org.intellij.grammar.psi.*;
@@ -64,9 +65,15 @@ public class BnfFirstNextAnalyzer {
           List<BnfExpression> children = ((BnfSequence)parent).getExpressionList();
           int idx = children.indexOf(cur);
           calcSequenceFirstInner(children.subList(idx + 1, children.size()), result, visited);
-          boolean skipResolve = !result.remove(EMPTY_STRING);
+          boolean skipResolve = !result.contains(EMPTY_STRING);
           totalResult.addAll(result);
           if (skipResolve) continue main;
+        }
+        else if (parent instanceof BnfQuantified) {
+          IElementType effectiveType = ParserGeneratorUtil.getEffectiveType(parent);
+          if (effectiveType == BnfTypes.BNF_OP_ZEROMORE || effectiveType == BnfTypes.BNF_OP_ONEMORE) {
+            calcFirstInner((BnfExpression)parent, totalResult, visited);
+          }
         }
         cur = parent;
         parent = parent.getParent();
@@ -75,7 +82,7 @@ public class BnfFirstNextAnalyzer {
         BnfRule rule = (BnfRule)parent;
         for (PsiReference reference : ReferencesSearch.search(rule, rule.getUseScope()).findAll()) {
           PsiElement element = reference.getElement();
-          if (element instanceof BnfExpression) {
+          if (element instanceof BnfExpression && PsiTreeUtil.getParentOfType(element, BnfPredicate.class) == null) {
             stack.add((BnfExpression)element);
           }
         }

@@ -34,4 +34,8 @@ public class BnfParserTest extends ParsingTestCase {
   public void testExternalExpression() {
     doTest(true);
   }
+
+  public void testFixes() {
+    doTest(true);
+  }
 }

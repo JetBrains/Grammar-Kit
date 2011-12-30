@@ -83,7 +83,7 @@ public class GeneratedParserUtilBase {
   public static boolean consumeToken(PsiBuilder builder, IElementType token) {
     ErrorState state = ErrorState.get(builder);
     IElementType tokenType = builder.getTokenType();
-    if (!state.suppressErrors) {
+    if (!state.suppressErrors && state.predicateCount < 2) {
       addVariant(state, builder, getTokenDescription(token));
     }
     if (token == tokenType) {
@@ -120,7 +120,7 @@ public class GeneratedParserUtilBase {
 
   public static boolean consumeToken(PsiBuilder builder, String text) {
     ErrorState state = ErrorState.get(builder);
-    if (!state.suppressErrors) {
+    if (!state.suppressErrors && state.predicateCount < 2) {
       addVariant(state, builder, text);
     }
     return consumeTokenInner(builder, text);
@@ -245,7 +245,7 @@ public class GeneratedParserUtilBase {
       final boolean eatMoreFlagOnce =
         !builder_.eof() && (eatMore.parse(builder_, frame.level + 1) || state.braces != null && builder_.rawLookup(-1) == state.braces[0].getLeftBraceType()
                                                        && builder_.getTokenType() == state.braces[0] .getRightBraceType());
-      final int lastErrorPos = state.variants.isEmpty()? builder_.getCurrentOffset() : state.variants.last().offset;
+      final int lastErrorPos = getLastExpectedVariantOffset(state, builder_.getCurrentOffset());
       boolean eatMoreFlag = eatMoreFlagOnce || frame.offset == builder_.getCurrentOffset() && lastErrorPos > frame.offset;
       // advance to the last error pos
       // skip tokens until lastErrorPos. parseAsTree might look better here...
@@ -283,12 +283,35 @@ public class GeneratedParserUtilBase {
     }
     else if (!result && pinned) {
       // do not report if there're errors after current offset
-      if (state.variants.isEmpty() || state.variants.last().offset <= builder_.getCurrentOffset()) {
+      if (state.variants.isEmpty() || getLastExpectedVariantOffset(state, builder_.getCurrentOffset()) <= builder_.getCurrentOffset()) {
         // do not force, inner recoverRoot might have skipped some tokens
         reportError(state, builder_, false);
       }
     }
     return result;
+  }
+
+  private static int getLastExpectedVariantOffset(ErrorState state, int defValue) {
+    if (state.variants.isEmpty()) {
+      return defValue;
+    }
+    else {
+      Variant last = state.variants.last();
+      if (last.expected) {
+        return last.offset;
+      }
+      else {
+        Iterator<Variant> iterator = state.variants.descendingIterator();
+        iterator.next();
+        while (iterator.hasNext()) {
+          last = iterator.next();
+          if (last.expected) {
+            return last.offset;
+          }
+        }
+      }
+      return defValue;
+    }
   }
 
   private static void reportError(ErrorState state, PsiBuilder builder_, boolean force) {

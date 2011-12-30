@@ -1,0 +1,14 @@
+BnfFile:Fixes.bnf
+  BNF_RULE:empty
+    PsiElement(id)('empty')
+    PsiWhiteSpace(' ')
+    PsiElement(::=)('::=')
+    PsiWhiteSpace('\n')
+    BNF_SEQUENCE
+      <empty list>
+  BNF_RULE:after_empty
+    PsiElement(id)('after_empty')
+    PsiWhiteSpace(' ')
+    PsiElement(::=)('::=')
+    BNF_SEQUENCE
+      <empty list>

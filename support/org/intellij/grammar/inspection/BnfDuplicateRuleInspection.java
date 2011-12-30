@@ -20,11 +20,9 @@ import com.intellij.codeInspection.InspectionManager;
 import com.intellij.codeInspection.LocalInspectionTool;
 import com.intellij.codeInspection.ProblemDescriptor;
 import com.intellij.codeInspection.ProblemsHolder;
-import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
-import com.intellij.psi.PsiRecursiveElementWalkingVisitor;
 import com.intellij.util.containers.MultiMap;
-import org.intellij.grammar.psi.BnfAttrs;
+import org.intellij.grammar.psi.BnfFile;
 import org.intellij.grammar.psi.BnfRule;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NotNull;
@@ -70,30 +68,18 @@ public class BnfDuplicateRuleInspection extends LocalInspectionTool {
     return problemsHolder.getResultsArray();
   }
   
-  private void checkFile(final PsiFile file, final ProblemsHolder problemsHolder) {
-    final MultiMap<String, BnfRule> map = new MultiMap<String, BnfRule>();
-    
-    file.accept(new PsiRecursiveElementWalkingVisitor() {
-      @Override
-      public void visitElement(PsiElement element) {
-        if(element instanceof BnfRule){
-          BnfRule rule = (BnfRule)element;
-          final String name = rule.getName();
-          
-          map.putValue(name, rule);
-        }
-        else if (element instanceof BnfAttrs) {
-          return;
-        }
-        super.visitElement(element);
+  private static void checkFile(final PsiFile file, final ProblemsHolder problemsHolder) {
+    if (file instanceof BnfFile) {
+      final MultiMap<String, BnfRule> map = new MultiMap<String, BnfRule>();
+      for (BnfRule rule : ((BnfFile)file).getRules()) {
+        map.putValue(rule.getName(), rule);
       }
-    });
-    
-    for (String name : map.keySet()) {
-      final Collection<BnfRule> rules = map.get(name);
-      if (rules.size() > 1) {
-        for (BnfRule rule : rules) {
-          problemsHolder.registerProblem(rule.getId(), "'" +name+ "' rule is defined more than once");
+      for (String name : map.keySet()) {
+        final Collection<BnfRule> rules = map.get(name);
+        if (rules.size() > 1) {
+          for (BnfRule rule : rules) {
+            problemsHolder.registerProblem(rule.getId(), "'" + name + "' rule is defined more than once");
+          }
         }
       }
     }

@@ -1,10 +1,7 @@
 package org.intellij.grammar;
 
 import com.intellij.testFramework.fixtures.LightCodeInsightFixtureTestCase;
-import org.intellij.grammar.inspection.BnfDuplicateRuleInspection;
-import org.intellij.grammar.inspection.BnfIdenticalChoiceBranchesInspection;
-import org.intellij.grammar.inspection.BnfLeftRecursionInspection;
-import org.intellij.grammar.inspection.BnfSuspiciousTokenInspection;
+import org.intellij.grammar.inspection.*;
 
 /**
  * Created by IntelliJ IDEA.
@@ -51,12 +48,17 @@ public class BnfInspectionTest extends LightCodeInsightFixtureTestCase {
     doTest("meta m ::= (<<p1>> | <<p2>>) <warning>r</warning> ::= <<m x r>>");
   }
 
+  public void testUnreachableBranch1() {
+    doTest("m ::= r | <warning>B | C</warning> r ::= A?");
+  }
+
   private void doTest(String text) {
     myFixture.configureByText("a.bnf", text);
     myFixture.enableInspections(BnfSuspiciousTokenInspection.class,
                                 BnfDuplicateRuleInspection.class,
                                 BnfIdenticalChoiceBranchesInspection.class,
-                                BnfLeftRecursionInspection.class);
+                                BnfLeftRecursionInspection.class,
+                                BnfUnreachableChoiceBranchInspection.class);
     myFixture.checkHighlighting(true, false, false);
   }
 }

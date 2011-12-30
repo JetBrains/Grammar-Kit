@@ -20,27 +20,26 @@ import com.intellij.codeInspection.InspectionManager;
 import com.intellij.codeInspection.LocalInspectionTool;
 import com.intellij.codeInspection.ProblemDescriptor;
 import com.intellij.codeInspection.ProblemsHolder;
+import com.intellij.openapi.util.TextRange;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiRecursiveElementWalkingVisitor;
 import gnu.trove.THashSet;
+import org.intellij.grammar.analysis.BnfFirstNextAnalyzer;
 import org.intellij.grammar.psi.BnfChoice;
 import org.intellij.grammar.psi.BnfExpression;
-import org.intellij.grammar.psi.impl.GrammarUtil;
+import org.intellij.grammar.psi.BnfRule;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 
 /**
- * Created by IntelliJ IDEA.
- * Date: 9/2/11
- * Time: 7:20 PM
- *
- * @author Vadim Romansky
+ * @author gregsh
  */
-public class BnfIdenticalChoiceBranchesInspection extends LocalInspectionTool {
+public class BnfUnreachableChoiceBranchInspection extends LocalInspectionTool {
+
   @Nls
   @NotNull
   @Override
@@ -52,16 +51,15 @@ public class BnfIdenticalChoiceBranchesInspection extends LocalInspectionTool {
   @NotNull
   @Override
   public String getDisplayName() {
-    return "Identical choice branches";
+    return "Unreachable choice branch";
   }
 
   @NotNull
   @Override
   public String getShortName() {
-    return "BnfIdenticalChoiceBranchesInspection";
+    return "BnfUnreachableChoiceBranchInspection";
   }
 
-  @Override
   public boolean isEnabledByDefault() {
     return true;
   }
@@ -74,15 +72,11 @@ public class BnfIdenticalChoiceBranchesInspection extends LocalInspectionTool {
   }
 
   private static void checkFile(PsiFile file, final ProblemsHolder problemsHolder) {
-    final THashSet<PsiElement> set = new THashSet<PsiElement>();
     file.accept(new PsiRecursiveElementWalkingVisitor() {
       @Override
       public void visitElement(PsiElement element) {
         if (element instanceof BnfChoice) {
-          checkChoice((BnfChoice)element, set);
-          for (PsiElement e : set) {
-            problemsHolder.registerProblem(e, "Duplicate choice branch", new BnfRemoveExpressionFix());
-          }
+          checkChoice((BnfChoice)element, problemsHolder);
         }
         else {
           super.visitElement(element);
@@ -91,15 +85,21 @@ public class BnfIdenticalChoiceBranchesInspection extends LocalInspectionTool {
     });
   }
 
-  private static void checkChoice(BnfChoice choice, Set<PsiElement> set) {
+  private static void checkChoice(BnfChoice choice, ProblemsHolder problemsHolder) {
+    LinkedList<BnfRule> visited = new LinkedList<BnfRule>();
+    THashSet<String> first = new THashSet<String>();
     List<BnfExpression> list = choice.getExpressionList();
-    for (BnfExpression e1 : list) {
-      for (BnfExpression e2 : list) {
-        if (e1 != e2 && GrammarUtil.equalsElement(e1, e2)) {
-          set.add(e1);
-          set.add(e2);
-        }
+    for (int i = 0, listSize = list.size() - 1; i < listSize; i++) {
+      BnfExpression child = list.get(i);
+      if (BnfFirstNextAnalyzer.calcFirstInner(child, first, visited).contains(BnfFirstNextAnalyzer.EMPTY_STRING)) {
+        TextRange textRange = choice.getTextRange();
+        TextRange nextRange = list.get(i + 1).getTextRange();
+        TextRange problemRange = new TextRange(nextRange.getStartOffset() - textRange.getStartOffset(), textRange.getLength());
+        problemsHolder.registerProblem(choice, problemRange, "Unreachable choice branches");
       }
+      first.clear();
+      visited.clear();
     }
   }
+  
 }

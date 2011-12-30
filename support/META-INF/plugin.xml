@@ -59,6 +59,9 @@
     <localInspection language="BNF" shortName="BnfIdenticalChoiceBranchesInspection" displayName="Identical choice branches"
                      groupName="Grammar Inspections" enabledByDefault="true" level="WARNING"
                      implementationClass="org.intellij.grammar.inspection.BnfIdenticalChoiceBranchesInspection"/>
+    <localInspection language="BNF" shortName="BnfUnreachableChoiceBranchInspection" displayName="Unreachable choice branch"
+                     groupName="Grammar Inspections" enabledByDefault="true" level="WARNING"
+                     implementationClass="org.intellij.grammar.inspection.BnfUnreachableChoiceBranchInspection"/>
 
     <colorSettingsPage implementation="org.intellij.grammar.editor.BnfColorSettingsPage"/>
     <quoteHandler fileType="Grammar" className="org.intellij.grammar.editor.BnfQuoteHandler"/>

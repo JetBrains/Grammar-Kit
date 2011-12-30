@@ -919,7 +919,7 @@ public class ParserGenerator {
         String psiClass = getRulePsiClassName(rule, ruleName, true) + suffix;
         String elementType = getElementType(rule);
         if (!visited.add(elementType)) continue;
-        out((!first ? "else " : "") + " if (type == " + elementType + ") {");
+        out((!first ? "else" : "") + " if (type == " + elementType + ") {");
         out("return new " + psiClass + "(node);");
         first = false;
         out("}");

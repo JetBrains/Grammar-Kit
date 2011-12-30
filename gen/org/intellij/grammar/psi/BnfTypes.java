@@ -69,58 +69,58 @@ public interface BnfTypes {
        if (type == BNF_ATTR) {
         return new BnfAttrImpl(node);
       }
-      else  if (type == BNF_ATTR_PATTERN) {
+      else if (type == BNF_ATTR_PATTERN) {
         return new BnfAttrPatternImpl(node);
       }
-      else  if (type == BNF_ATTR_VALUE) {
+      else if (type == BNF_ATTR_VALUE) {
         return new BnfAttrValueImpl(node);
       }
-      else  if (type == BNF_ATTRS) {
+      else if (type == BNF_ATTRS) {
         return new BnfAttrsImpl(node);
       }
-      else  if (type == BNF_CHOICE) {
+      else if (type == BNF_CHOICE) {
         return new BnfChoiceImpl(node);
       }
-      else  if (type == BNF_EXPRESSION) {
+      else if (type == BNF_EXPRESSION) {
         return new BnfExpressionImpl(node);
       }
-      else  if (type == BNF_EXTERNAL_EXPRESSION) {
+      else if (type == BNF_EXTERNAL_EXPRESSION) {
         return new BnfExternalExpressionImpl(node);
       }
-      else  if (type == BNF_LITERAL_EXPRESSION) {
+      else if (type == BNF_LITERAL_EXPRESSION) {
         return new BnfLiteralExpressionImpl(node);
       }
-      else  if (type == BNF_MODIFIER) {
+      else if (type == BNF_MODIFIER) {
         return new BnfModifierImpl(node);
       }
-      else  if (type == BNF_PAREN_EXPRESSION) {
+      else if (type == BNF_PAREN_EXPRESSION) {
         return new BnfParenExpressionImpl(node);
       }
-      else  if (type == BNF_PAREN_OPT_EXPRESSION) {
+      else if (type == BNF_PAREN_OPT_EXPRESSION) {
         return new BnfParenOptExpressionImpl(node);
       }
-      else  if (type == BNF_PREDICATE) {
+      else if (type == BNF_PREDICATE) {
         return new BnfPredicateImpl(node);
       }
-      else  if (type == BNF_PREDICATE_SIGN) {
+      else if (type == BNF_PREDICATE_SIGN) {
         return new BnfPredicateSignImpl(node);
       }
-      else  if (type == BNF_QUANTIFIED) {
+      else if (type == BNF_QUANTIFIED) {
         return new BnfQuantifiedImpl(node);
       }
-      else  if (type == BNF_QUANTIFIER) {
+      else if (type == BNF_QUANTIFIER) {
         return new BnfQuantifierImpl(node);
       }
-      else  if (type == BNF_REFERENCE_OR_TOKEN) {
+      else if (type == BNF_REFERENCE_OR_TOKEN) {
         return new BnfReferenceOrTokenImpl(node);
       }
-      else  if (type == BNF_RULE) {
+      else if (type == BNF_RULE) {
         return new BnfRuleImpl(node);
       }
-      else  if (type == BNF_SEQUENCE) {
+      else if (type == BNF_SEQUENCE) {
         return new BnfSequenceImpl(node);
       }
-      else  if (type == BNF_STRING_LITERAL_EXPRESSION) {
+      else if (type == BNF_STRING_LITERAL_EXPRESSION) {
         return new BnfStringLiteralExpressionImpl(node);
       }
       throw new AssertionError("Unknown element type: " + type);

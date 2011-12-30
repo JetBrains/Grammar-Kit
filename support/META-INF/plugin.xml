@@ -33,8 +33,8 @@
 
     <fileTypeFactory implementation="org.intellij.grammar.BnfFileTypeFactory"/>
     <lang.parserDefinition language="BNF" implementationClass="org.intellij.grammar.BnfParserDefinition"/>
-    <annotator language="BNF" implementationClass="org.intellij.grammar.BnfAnnotator"/>
-    <lang.syntaxHighlighterFactory key="BNF" implementationClass="org.intellij.grammar.BnfSyntaxHighlighterFactory"/>
+    <annotator language="BNF" implementationClass="org.intellij.grammar.editor.BnfAnnotator"/>
+    <lang.syntaxHighlighterFactory key="BNF" implementationClass="org.intellij.grammar.editor.BnfSyntaxHighlighterFactory"/>
     <elementDescriptionProvider implementation="org.intellij.grammar.BnfDescriptionProvider"/>
     <lang.findUsagesProvider language="BNF" implementationClass="org.intellij.grammar.BnfFindUsagesProvider"/>
     <lang.braceMatcher language="BNF" implementationClass="org.intellij.grammar.BnfBraceMatcher"/>
@@ -59,6 +59,9 @@
     <localInspection language="BNF" shortName="BnfIdenticalChoiceBranchesInspection" displayName="Identical choice branches"
                      groupName="Grammar Inspections" enabledByDefault="true" level="WARNING"
                      implementationClass="org.intellij.grammar.inspection.BnfIdenticalChoiceBranchesInspection"/>
+
+    <colorSettingsPage implementation="org.intellij.grammar.editor.BnfColorSettingsPage"/>
+    <quoteHandler fileType="Grammar" className="org.intellij.grammar.editor.BnfQuoteHandler"/>
 
     <intentionAction>
       <className>org.intellij.grammar.intention.BnfFlipChoiceIntention</className>

@@ -13,11 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.intellij.grammar;
+package org.intellij.grammar.editor;
 
 import com.intellij.lang.annotation.AnnotationHolder;
 import com.intellij.lang.annotation.Annotator;
-import com.intellij.openapi.editor.SyntaxHighlighterColors;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiNamedElement;
 import com.intellij.psi.PsiReference;
@@ -29,46 +28,46 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Arrays;
 
 /**
- * Created by IntelliJ IDEA.
- * User: gregory
- * Date: 13.07.11
- * Time: 23:05
+ * @author gregsh
  */
 public class BnfAnnotator implements Annotator {
   @Override
   public void annotate(@NotNull PsiElement psiElement, @NotNull AnnotationHolder annotationHolder) {
     PsiElement parent = psiElement.getParent();
     if (parent instanceof BnfRule && ((BnfRule)parent).getId() == psiElement) {
-      annotationHolder.createInfoAnnotation(psiElement, null).setTextAttributes(SyntaxHighlighterColors.KEYWORD);
+      annotationHolder.createInfoAnnotation(psiElement, null).setTextAttributes(BnfSyntaxHighlighter.RULE);
     }
-    if (parent instanceof BnfAttr && ((BnfAttr)parent).getId() == psiElement) {
-      annotationHolder.createInfoAnnotation(psiElement, null).setTextAttributes(SyntaxHighlighterColors.LINE_COMMENT);
+    else if (parent instanceof BnfAttr && ((BnfAttr)parent).getId() == psiElement) {
+      annotationHolder.createInfoAnnotation(psiElement, null).setTextAttributes(BnfSyntaxHighlighter.ATTRIBUTE);
     }
-    if (psiElement instanceof BnfRefOrTokenImpl) {
+    else if (parent instanceof BnfModifier) {
+      annotationHolder.createInfoAnnotation(psiElement, null).setTextAttributes(BnfSyntaxHighlighter.KEYWORD);
+    }
+    else if (psiElement instanceof BnfRefOrTokenImpl) {
       if (parent instanceof BnfAttrValue) {
         String text = psiElement.getText();
         if (text.equals("true") || text.equals("false")) {
-          annotationHolder.createInfoAnnotation(psiElement, null).setTextAttributes(SyntaxHighlighterColors.KEYWORD);
+          annotationHolder.createInfoAnnotation(psiElement, null).setTextAttributes(BnfSyntaxHighlighter.KEYWORD);
           return;
         }
       }
       PsiReference reference = psiElement.getReference();
       Object resolve = reference == null ? null : reference.resolve();
       if (resolve instanceof BnfRule) {
-        annotationHolder.createInfoAnnotation(psiElement, null).setTextAttributes(SyntaxHighlighterColors.KEYWORD);
+        annotationHolder.createInfoAnnotation(psiElement, null).setTextAttributes(BnfSyntaxHighlighter.RULE);
       }
       else if (resolve instanceof BnfAttr) {
-        annotationHolder.createInfoAnnotation(psiElement, null).setTextAttributes(SyntaxHighlighterColors.LINE_COMMENT);
+        annotationHolder.createInfoAnnotation(psiElement, null).setTextAttributes(BnfSyntaxHighlighter.ATTRIBUTE);
       }
       else if (resolve == null && parent instanceof BnfAttrValue) {
         annotationHolder.createErrorAnnotation(psiElement, "Unresolved reference");
       }
       else if (resolve == null && !(parent instanceof BnfModifier)) {
         if (GrammarUtil.isExternalReference(psiElement)) {
-          annotationHolder.createInfoAnnotation(psiElement, null).setTextAttributes(SyntaxHighlighterColors.LINE_COMMENT);
+          annotationHolder.createInfoAnnotation(psiElement, null).setTextAttributes(BnfSyntaxHighlighter.EXTERNAL);
         }
         else {
-          annotationHolder.createInfoAnnotation(psiElement, null).setTextAttributes(SyntaxHighlighterColors.STRING);
+          annotationHolder.createInfoAnnotation(psiElement, null).setTextAttributes(BnfSyntaxHighlighter.TOKEN);
         }
       }
     }
@@ -80,7 +79,7 @@ public class BnfAnnotator implements Annotator {
         Object resolve = reference == null ? null : reference.resolve();
         if (resolve instanceof BnfRule) {
           annotationHolder.createInfoAnnotation(reference.getRangeInElement().shiftRight(psiElement.getTextRange().getStartOffset()), null)
-            .setTextAttributes(SyntaxHighlighterColors.KEYWORD);
+            .setTextAttributes(BnfSyntaxHighlighter.RULE);
         }
         else if (resolve == null) {
           annotationHolder.createErrorAnnotation(psiElement, "Unresolved reference");

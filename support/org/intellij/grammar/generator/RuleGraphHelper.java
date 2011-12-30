@@ -17,6 +17,8 @@ package org.intellij.grammar.generator;
 
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiReference;
+import com.intellij.psi.search.searches.ReferencesSearch;
 import com.intellij.psi.tree.IElementType;
 import org.intellij.grammar.psi.*;
 import org.jetbrains.annotations.Nullable;
@@ -124,36 +126,62 @@ public class RuleGraphHelper {
     final Pattern pinPattern = pinValue instanceof String ? Pattern.compile(StringUtil.unescapeStringCharacters((String)pinValue)) : null;
     boolean pinApplied = false;
 
-
+    Map<PsiElement, Cardinality> result;
     if (tree instanceof BnfReferenceOrToken) {
       BnfRule targetRule = resolveRule(tree.getText());
       if (targetRule != null) {
         if (Rule.isPrivate(targetRule)) {
           BnfExpression body = targetRule.getExpression();
           Map<PsiElement, Cardinality> map = collectMembers(targetRule, targetRule.getName(), body, visited);
-          return map.containsKey(body) ? joinMaps(tree, BnfTypes.BNF_CHOICE, Arrays.asList(map, map)) : map;
+          result = map.containsKey(body) ? joinMaps(tree, BnfTypes.BNF_CHOICE, Arrays.asList(map, map)) : map;
         }
         else {
-          return psiMap(targetRule, REQUIRED);
+          result = psiMap(targetRule, REQUIRED);
         }
       }
-      return psiMap(tree, REQUIRED);
+      else {
+        result = psiMap(tree, REQUIRED);
+      }
     }
+    else {
+      List<Map<PsiElement, Cardinality>> list = new ArrayList<Map<PsiElement, Cardinality>>();
+      List<BnfExpression> childExpressions = getChildExpressions(tree);
+      for (int i = 0, childExpressionsSize = childExpressions.size(); i < childExpressionsSize; i++) {
+        BnfExpression child = childExpressions.get(i);
+        Map<PsiElement, Cardinality> nextMap = collectMembers(rule, getNextName(funcName, i), child, visited);
+        if (pinApplied) {
+          nextMap = joinMaps(tree, BnfTypes.BNF_OP_OPT, Collections.singletonList(nextMap));
+        }
+        list.add(nextMap);
+        if (type == BNF_SEQUENCE && !pinApplied && (i == pinIndex - 1 || pinPattern != null && pinPattern.matcher(child.getText()).matches())) {
+          pinApplied = true;
+        }
+      }
+      result = joinMaps(tree, type, list);
+    }
+    if (rule.getExpression() == tree && Rule.isLeft(rule) && !Rule.isInner(rule)) {
+      List<Map<PsiElement, Cardinality>> list = new ArrayList<Map<PsiElement, Cardinality>>();
+      for (PsiReference reference : ReferencesSearch.search(rule, rule.getUseScope()).findAll()) {
+        PsiElement element = reference.getElement();
+        if (!(element instanceof BnfExpression)) continue;
+        for (PsiElement e = prevOrParent(element); e != null; e = prevOrParent(e)) {
+          BnfRule leftRule = e instanceof BnfReferenceOrToken ? resolveRule(e.getText()) : null;
+          if (leftRule != null) {
+            list.add(collectMembers(leftRule, leftRule.getName(), leftRule.getExpression(), visited));
+            break;
+          }
+        }
+      }
+      result = joinMaps(null, BnfTypes.BNF_SEQUENCE, Arrays.asList(result, joinMaps(tree, BnfTypes.BNF_CHOICE, list)));
+    }
+    return result;
+  }
 
-    List<Map<PsiElement, Cardinality>> list = new ArrayList<Map<PsiElement, Cardinality>>();
-    List<BnfExpression> childExpressions = getChildExpressions(tree);
-    for (int i = 0, childExpressionsSize = childExpressions.size(); i < childExpressionsSize; i++) {
-      BnfExpression child = childExpressions.get(i);
-      Map<PsiElement, Cardinality> nextMap = collectMembers(rule, getNextName(funcName, i), child, visited);
-      if (pinApplied) {
-        nextMap = joinMaps(tree, BnfTypes.BNF_OP_OPT, Collections.singletonList(nextMap));
-      }
-      list.add(nextMap);
-      if (type == BNF_SEQUENCE && !pinApplied && (i == pinIndex - 1 || pinPattern != null && pinPattern.matcher(child.getText()).matches())) {
-        pinApplied = true;
-      }
-    }
-    return joinMaps(tree, type, list);
+  private static PsiElement prevOrParent(PsiElement e) {
+    PsiElement prev = e.getPrevSibling();
+    if (prev != null) return prev;
+    PsiElement parent = e.getParent();
+    return parent instanceof BnfNamedElement ? null : parent;
   }
 
   private Map<PsiElement, Cardinality> joinMaps(BnfExpression tree, IElementType type, List<Map<PsiElement, Cardinality>> list) {
@@ -167,7 +195,7 @@ public class RuleGraphHelper {
       }
       return map;
     }
-    else if (type == BnfTypes.BNF_SEQUENCE || type == BnfTypes.BNF_EXPRESSION) {
+    else if (type == BnfTypes.BNF_SEQUENCE || type == BnfTypes.BNF_EXPRESSION || type == BnfTypes.BNF_REFERENCE_OR_TOKEN) {
       if (list.size() == 1) return list.get(0);
       Map<PsiElement, Cardinality> map = new HashMap<PsiElement, Cardinality>();
       for (Map<PsiElement, Cardinality> m : list) {

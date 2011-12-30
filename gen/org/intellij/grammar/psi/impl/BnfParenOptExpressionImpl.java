@@ -23,7 +23,7 @@ import com.intellij.psi.util.PsiTreeUtil;
 import static org.intellij.grammar.psi.BnfTypes.*;
 import org.intellij.grammar.psi.*;
 
-public class BnfParenOptExpressionImpl extends BnfQuantifiedImpl implements BnfParenOptExpression {
+public class BnfParenOptExpressionImpl extends BnfExpressionImpl implements BnfParenOptExpression {
 
   public BnfParenOptExpressionImpl(ASTNode node) {
     super(node);

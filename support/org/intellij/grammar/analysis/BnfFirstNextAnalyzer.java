@@ -125,8 +125,11 @@ public class BnfFirstNextAnalyzer {
         result.add(expression.getText());
       }
     }
-    else if (expression instanceof BnfParenExpression) {
-      calcFirstInner(((BnfParenExpression)expression).getExpression(), result, visited);
+    else if (expression instanceof BnfParenthesized) {
+      calcFirstInner(((BnfParenthesized)expression).getExpression(), result, visited);
+      if (expression instanceof BnfParenOptExpression) {
+        result.add(EMPTY_STRING);
+      }
     }
     else if (expression instanceof BnfChoice) {
       for (BnfExpression child : ((BnfChoice)expression).getExpressionList()) {

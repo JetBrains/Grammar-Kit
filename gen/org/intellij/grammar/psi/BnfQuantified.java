@@ -21,10 +21,10 @@ import com.intellij.psi.PsiElement;
 
 public interface BnfQuantified extends BnfExpression {
 
-  @Nullable
+  @NotNull
   public BnfExpression getExpression();
 
-  @Nullable
+  @NotNull
   public BnfQuantifier getQuantifier();
 
 }

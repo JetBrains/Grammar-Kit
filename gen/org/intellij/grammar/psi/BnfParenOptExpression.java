@@ -19,7 +19,7 @@ import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
-public interface BnfParenOptExpression extends BnfQuantified, BnfParenthesized {
+public interface BnfParenOptExpression extends BnfExpression, BnfParenthesized {
 
   @Nullable
   public BnfExpression getExpression();

@@ -16,8 +16,12 @@
 
 package org.intellij.grammar.psi;
 
+import org.jetbrains.annotations.Nullable;
+
 /**
  * @author gregsh
  */
 public interface BnfParenthesized extends BnfExpression {
+  @Nullable
+  public BnfExpression getExpression();
 }

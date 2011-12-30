@@ -158,7 +158,7 @@ public class ParserGeneratorUtil {
     }
     else if (tree instanceof BnfQuantified) {
       final BnfQuantifier quantifier = ((BnfQuantified)tree).getQuantifier();
-      return PsiTreeUtil.getDeepestFirst(quantifier == null ? tree : quantifier).getNode().getElementType();
+      return PsiTreeUtil.getDeepestFirst(quantifier).getNode().getElementType();
     }
     else if (tree instanceof BnfPredicate) {
       return ((BnfPredicate)tree).getPredicateSign().getFirstChild().getNode().getElementType();

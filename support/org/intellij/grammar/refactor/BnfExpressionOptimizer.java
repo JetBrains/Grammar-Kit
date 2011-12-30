@@ -19,12 +19,15 @@ package org.intellij.grammar.refactor;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiWhiteSpace;
 import com.intellij.psi.tree.IElementType;
+import com.intellij.psi.util.PsiTreeUtil;
+import com.intellij.testFramework.PsiTestUtil;
 import org.intellij.grammar.generator.ParserGeneratorUtil;
 import org.intellij.grammar.psi.*;
 import org.intellij.grammar.psi.impl.BnfElementFactory;
 import org.intellij.grammar.psi.impl.GrammarUtil;
 
 import java.util.LinkedList;
+import java.util.List;
 
 /**
  * @author gregsh
@@ -62,8 +65,8 @@ public class BnfExpressionOptimizer {
         String replacement = "(" + cur.getText() + ")";
         cur.replace(BnfElementFactory.createExpressionFromText(element.getProject(), replacement));
       }
-      else if (cur instanceof BnfQuantified && ((BnfQuantified)cur).getExpression() instanceof BnfQuantified) {
-        BnfQuantified child = (BnfQuantified)((BnfQuantified)cur).getExpression();
+      else if (isOptMany(cur) && isOptMany(PsiTreeUtil.getChildOfType(cur, BnfExpression.class))) {
+        BnfExpression child = PsiTreeUtil.getChildOfType(cur, BnfExpression.class);
         IElementType type1 = ParserGeneratorUtil.getEffectiveType(cur);
         IElementType type2 = ParserGeneratorUtil.getEffectiveType(child);
         if (type1 == type2) {
@@ -73,7 +76,8 @@ public class BnfExpressionOptimizer {
                  type2 == BnfTypes.BNF_OP_OPT && type1 == BnfTypes.BNF_OP_ONEMORE ||
                  type1 == BnfTypes.BNF_OP_ZEROMORE || type2 == BnfTypes.BNF_OP_ZEROMORE
           ) {
-          String childText = child.getExpression().getText();
+          BnfExpression childOfChild = PsiTreeUtil.getChildOfType(child, BnfExpression.class);
+          String childText = childOfChild == null? "" : childOfChild.getText();
           String replacement = (child instanceof BnfParenthesized? "(" + childText + ")" : childText) + "*";
           cur.replace(BnfElementFactory.createExpressionFromText(element.getProject(), replacement));
         }
@@ -81,10 +85,18 @@ public class BnfExpressionOptimizer {
     }
   }
 
+  private static boolean isOptMany(PsiElement cur) {
+    return cur instanceof BnfQuantified || cur instanceof BnfParenOptExpression;
+  }
+
   private static boolean canBeMergedInto(PsiElement cur, PsiElement parent) {
-    if (cur instanceof BnfSequence && (
-      parent instanceof BnfChoice ||
-      parent instanceof BnfSequence && !(GrammarUtil.isExternalReference(((BnfSequence)parent).getExpressionList().get(0))))) return true;
+    if (cur instanceof BnfSequence) {
+      if (parent instanceof BnfChoice) return true;
+      if (parent instanceof BnfSequence) {
+        List<BnfExpression> list = ((BnfSequence)parent).getExpressionList();
+        return list.isEmpty() || !GrammarUtil.isExternalReference(list.get(0));
+      }
+    }
     if (cur instanceof BnfChoice && parent instanceof BnfChoice) return true;
     return false;
   }
@@ -121,7 +133,7 @@ public class BnfExpressionOptimizer {
 
   private static boolean isTrivial(PsiElement element) {
     PsiElement parent = element.getParent();
-    if (element instanceof BnfParenthesized && parent instanceof BnfRule && !(element instanceof BnfQuantified || element instanceof BnfChoice)) {
+    if (element instanceof BnfParenthesized && parent instanceof BnfRule && !(isOptMany(element) || element instanceof BnfChoice)) {
       return true;
     }
     else if (element instanceof BnfParenExpression &&

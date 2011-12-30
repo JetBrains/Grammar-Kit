@@ -35,49 +35,46 @@
   EXTERNAL_START="<<"
   EXTERNAL_END=">>"
 
-  named="org.intellij.grammar.psi.BnfNamedElement"
-  namedImpl="org.intellij.grammar.psi.impl.BnfNamedElementImpl"
-  parenthesized="org.intellij.grammar.psi.BnfParenthesized"
+  implements("rule|attr")="org.intellij.grammar.psi.BnfNamedElement"
+  extends("rule|attr")="org.intellij.grammar.psi.impl.BnfNamedElementImpl"
+  mixin("reference_or_token")="org.intellij.grammar.psi.impl.BnfRefOrTokenImpl"
+  mixin("string_literal_expression")="org.intellij.grammar.psi.impl.BnfStringImpl"
+  implements("paren_.*expression")="org.intellij.grammar.psi.BnfParenthesized"
 }
 
 external grammar ::= parseGrammar grammar_element
 private grammar_element ::= attrs | rule {recoverUntil="grammar_element_recover"}
 private grammar_element_recover::=!('{'|rule_start)
 
-rule ::= rule_start expression attrs? ';'? {pin=2 extends=namedImpl implements=named}
+rule ::= rule_start expression attrs? ';'? {pin=2}
 private rule_start ::= modifier* id '::='
+modifier ::= 'private' | 'external' | 'meta' | 'inner' | 'left'
 
-expression ::= choice?
-
-modifier ::= 'private' | 'external' | 'meta' | 'inner' | 'left';
-
-attrs ::= '{' attr* '}' {pin=1}
-
-attr ::= attr_start attr_value ';'? {pin=1 recoverUntil="attr_recover_until" extends=namedImpl implements=named}
+attrs ::= '{' attr * '}' {pin=1}
+attr ::= attr_start attr_value ';'? {pin=1 recoverUntil="attr_recover_until"}
 private attr_start::=id attr_pattern? '='
 private attr_recover_until::=!('}'|attr_start)
-attr_value ::= (reference_or_token | literal_expression) !'=';
+attr_value ::= (reference_or_token | literal_expression) !'='
 attr_pattern ::= '(' string ')'
 
-choice ::= choice_body { extends="expression" }
-private choice_body ::= sequence choice_tail*
-private choice_tail ::= '|' sequence {pin=1}
-
-sequence ::= option + { extends="expression" recoverUntil="sequence_recover"}
+expression ::= sequence choice?
+sequence ::= option * { extends="expression" recoverUntil="sequence_recover"}
 private sequence_recover ::= !(';'|'|'|'('|')'|'['|']'|'{'|'}') grammar_element_recover
+private option ::= predicate | paren_opt_expression | simple quantified?
 
-private option ::= quantified | predicate;
-predicate ::=  predicate_sign  simple { extends="expression" }
-predicate_sign ::= ('&' | '!')
-quantified ::= paren_opt_expression | simple quantifier? {extends="expression" }
-paren_opt_expression ::='[' expression ']' {pin=1 extends="quantified" implements=parenthesized}
+left choice ::= ( '|' sequence ) + { pin(".*")=1 extends="expression" }
+left quantified ::= quantifier {extends="expression" }
 quantifier ::= '?' | '+' | '*'
+
+predicate ::= predicate_sign simple { extends="expression" }
+predicate_sign ::= '&' | '!'
 
 private simple ::= !(modifier* id '::=' ) reference_or_token | literal_expression | external_expression | paren_expression
 external_expression ::= '<<' reference_or_token option * '>>' {pin=2 extends="expression"}
-reference_or_token ::= id  { extends="expression" mixin="org.intellij.grammar.psi.impl.BnfRefOrTokenImpl"}
+reference_or_token ::= id  { extends="expression" }
 literal_expression ::= string_literal_expression | number { extends="expression" }
-string_literal_expression ::= string { extends="literal_expression" mixin="org.intellij.grammar.psi.impl.BnfStringImpl"}
-paren_expression ::= simple_paren_expression | alt_choice_expression { extends="expression" implements=parenthesized}
+string_literal_expression ::= string { extends="literal_expression"}
+paren_expression ::= simple_paren_expression | alt_choice_expression { extends="expression" }
+paren_opt_expression ::='[' expression ']' {pin=1 extends="expression"}
 private simple_paren_expression ::= '(' expression ')' {pin=1}
 private alt_choice_expression::= '{' !attr_start expression '}' {pin=2}

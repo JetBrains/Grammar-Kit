@@ -19,6 +19,8 @@ package org.intellij.grammar.editor;
 import com.intellij.lexer.Lexer;
 import com.intellij.openapi.editor.SyntaxHighlighterColors;
 import com.intellij.openapi.editor.colors.TextAttributesKey;
+import com.intellij.openapi.editor.markup.EffectType;
+import com.intellij.openapi.editor.markup.TextAttributes;
 import com.intellij.openapi.fileTypes.SyntaxHighlighterBase;
 import com.intellij.psi.TokenType;
 import com.intellij.psi.tree.IElementType;
@@ -47,6 +49,7 @@ class BnfSyntaxHighlighter extends SyntaxHighlighterBase {
   public static final TextAttributesKey BRACKETS = createTextAttributesKey("BNF_BRACKETS", SyntaxHighlighterColors.BRACKETS.getDefaultAttributes());
   public static final TextAttributesKey ANGLES = createTextAttributesKey("BNF_ANGLES", SyntaxHighlighterColors.PARENTHS.getDefaultAttributes());
   public static final TextAttributesKey OP_SIGN = createTextAttributesKey("BNF_OP_SIGN", SyntaxHighlighterColors.OPERATION_SIGN.getDefaultAttributes());
+  public static final TextAttributesKey PIN = createTextAttributesKey("BNF_PIN", new TextAttributes(null, null, SyntaxHighlighterColors.LINE_COMMENT.getDefaultAttributes().getForegroundColor(),EffectType.BOLD_DOTTED_LINE, 0));
 
   @NotNull
   @Override

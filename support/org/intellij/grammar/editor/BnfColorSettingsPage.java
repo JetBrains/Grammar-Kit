@@ -53,7 +53,7 @@ public class BnfColorSettingsPage implements ColorSettingsPage {
         new AttributesDescriptor("brackets", BRACKETS),
         new AttributesDescriptor("angles", ANGLES),
         new AttributesDescriptor("operation sign", OP_SIGN),
-      
+        new AttributesDescriptor("pin marker", PIN),
     };
   }
 
@@ -100,7 +100,7 @@ public class BnfColorSettingsPage implements ColorSettingsPage {
            "<r>header</r> ::= <t>declare</t> <r>reference</r>\n" +
            "<k>external</k> <r>reference</r> ::= <e>parseReference</e>\n" +
            "<k>private</k> <k>meta</k> <r>comma_list</r> ::= '(' <<<e>p</e>>> (',' <<<e>p</e>>>) * ')'\n" +
-           "<k>private</k> <r>content</r> ::= <t>as</t> <<<r>comma_list</r> <r>element</r>>> {<a>pin</a>=1}\n" +
+           "<k>private</k> <r>content</r> ::= <p><t>as</t></p> <<<r>comma_list</r> <r>element</r>>> {<a>pin</a>=1}\n" +
            "<r>element</r> ::= <r>reference</r> [ {'+' | '-'} <r>reference</r> <t>only</t>?] {<a>recoverUntil</a>=\"<r>element_recover</r>\"}\n" +
            "<k>private</k> <r>element_recover</r> ::= !(',' | ')')\n" +
            "\n";
@@ -114,6 +114,7 @@ public class BnfColorSettingsPage implements ColorSettingsPage {
     map.put("t", TOKEN);
     map.put("k", KEYWORD);
     map.put("e", EXTERNAL);
+    map.put("p", PIN);
     return map;
   }
 

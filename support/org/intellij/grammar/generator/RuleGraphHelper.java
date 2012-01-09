@@ -105,7 +105,7 @@ public class RuleGraphHelper {
 
   public Map<PsiElement, Cardinality> getFor(BnfRule rule) {
     BnfExpression body = rule.getExpression();
-    Map<PsiElement, Cardinality> map = collectMembers(rule, rule.getName(), body, new HashSet<PsiElement>());
+    Map<PsiElement, Cardinality> map = collectMembers(rule, body, rule.getName(), new HashSet<PsiElement>());
     if (map.size() == 1 && map.containsKey(rule)) {
       return Collections.emptyMap();
     }
@@ -113,18 +113,12 @@ public class RuleGraphHelper {
   }
 
 
-  private Map<PsiElement, Cardinality> collectMembers(BnfRule rule, String funcName, BnfExpression tree, Set<PsiElement> visited) {
+  private Map<PsiElement, Cardinality> collectMembers(BnfRule rule, BnfExpression tree, String funcName, Set<PsiElement> visited) {
     if (tree instanceof BnfPredicate) return Collections.emptyMap();
     if (tree instanceof BnfLiteralExpression) return psiMap(tree, REQUIRED);
 
     if (!visited.add(tree)) return psiMap(tree, REQUIRED);
 
-    IElementType type = getEffectiveType(tree);
-    boolean firstNonTrivial = tree == Rule.firstNotTrivial(rule);
-    final Object pinValue = type == BNF_SEQUENCE ? getAttribute(rule, "pin", null, firstNonTrivial ? rule.getName() : funcName) : null;
-    final int pinIndex = pinValue instanceof Integer ? (Integer)pinValue : -1;
-    final Pattern pinPattern = pinValue instanceof String ? Pattern.compile(StringUtil.unescapeStringCharacters((String)pinValue)) : null;
-    boolean pinApplied = false;
 
     Map<PsiElement, Cardinality> result;
     if (tree instanceof BnfReferenceOrToken) {
@@ -132,7 +126,7 @@ public class RuleGraphHelper {
       if (targetRule != null) {
         if (Rule.isPrivate(targetRule)) {
           BnfExpression body = targetRule.getExpression();
-          Map<PsiElement, Cardinality> map = collectMembers(targetRule, targetRule.getName(), body, visited);
+          Map<PsiElement, Cardinality> map = collectMembers(targetRule, body, targetRule.getName(), visited);
           result = map.containsKey(body) ? joinMaps(tree, BnfTypes.BNF_CHOICE, Arrays.asList(map, map)) : map;
         }
         else {
@@ -144,11 +138,18 @@ public class RuleGraphHelper {
       }
     }
     else {
+      IElementType type = getEffectiveType(tree);
+      boolean firstNonTrivial = tree == Rule.firstNotTrivial(rule);
+      final Object pinValue = type == BNF_SEQUENCE ? getAttribute(rule, "pin", null, firstNonTrivial ? rule.getName() : funcName) : null;
+      final int pinIndex = pinValue instanceof Integer ? (Integer)pinValue : -1;
+      final Pattern pinPattern = pinValue instanceof String ? Pattern.compile(StringUtil.unescapeStringCharacters((String)pinValue)) : null;
+      boolean pinApplied = false;
+
       List<Map<PsiElement, Cardinality>> list = new ArrayList<Map<PsiElement, Cardinality>>();
       List<BnfExpression> childExpressions = getChildExpressions(tree);
       for (int i = 0, childExpressionsSize = childExpressions.size(); i < childExpressionsSize; i++) {
         BnfExpression child = childExpressions.get(i);
-        Map<PsiElement, Cardinality> nextMap = collectMembers(rule, getNextName(funcName, i), child, visited);
+        Map<PsiElement, Cardinality> nextMap = collectMembers(rule, child, getNextName(funcName, i), visited);
         if (pinApplied) {
           nextMap = joinMaps(tree, BnfTypes.BNF_OP_OPT, Collections.singletonList(nextMap));
         }
@@ -167,7 +168,7 @@ public class RuleGraphHelper {
         for (PsiElement e = prevOrParent(element); e != null; e = prevOrParent(e)) {
           BnfRule leftRule = e instanceof BnfReferenceOrToken ? resolveRule(e.getText()) : null;
           if (leftRule != null) {
-            list.add(collectMembers(leftRule, leftRule.getName(), leftRule.getExpression(), visited));
+            list.add(collectMembers(leftRule, leftRule.getExpression(), leftRule.getName(), visited));
             break;
           }
         }

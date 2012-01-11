@@ -43,6 +43,8 @@
     <codeInsight.lineMarkerProvider language="BNF" implementationClass="org.intellij.grammar.BnfRuleLineMarkerProvider"/>
     <lang.commenter language="BNF" implementationClass="org.intellij.grammar.BnfCommenter"/>
     <completion.contributor language="BNF" implementationClass="org.intellij.grammar.BnfCompletionContributor" order="before javaClassName"/>
+    <lang.elementManipulator forClass="org.intellij.grammar.psi.impl.BnfStringLiteralExpressionImpl"
+                             implementationClass="org.intellij.grammar.psi.impl.BnfStringManipulator"/>
 
     <lang.refactoringSupport language="BNF" implementationClass="org.intellij.grammar.refactor.BnfRefactoringSupportProvider"/>
     <inlineActionHandler implementation="org.intellij.grammar.refactor.BnfInlineRuleActionHandler"/>

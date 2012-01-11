@@ -17,19 +17,20 @@ package org.intellij.grammar.psi.impl;
 
 import com.intellij.lang.ASTNode;
 import com.intellij.openapi.util.TextRange;
+import com.intellij.psi.LiteralTextEscaper;
 import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiLanguageInjectionHost;
 import com.intellij.psi.PsiReference;
 import com.intellij.util.IncorrectOperationException;
 import org.intellij.grammar.psi.BnfAttrValue;
+import org.intellij.grammar.psi.BnfExpression;
 import org.intellij.grammar.psi.BnfStringLiteralExpression;
+import org.jetbrains.annotations.NotNull;
 
 /**
- * Created by IntelliJ IDEA.
- * User: gregory
- * Date: 14.07.11
- * Time: 19:17
+ * @author gregsh
  */
-public abstract class BnfStringImpl extends BnfExpressionImpl implements BnfStringLiteralExpression {
+public abstract class BnfStringImpl extends BnfExpressionImpl implements BnfStringLiteralExpression, PsiLanguageInjectionHost {
   public BnfStringImpl(ASTNode node) {
     super(node);
   }
@@ -48,5 +49,23 @@ public abstract class BnfStringImpl extends BnfExpressionImpl implements BnfStri
         return getString().replace(BnfElementFactory.createLeafFromText(getProject(), '\"' + newElementName + '\"'));
       }
     };
+  }
+
+  @Override
+  public boolean isValidHost() {
+    return true;
+  }
+
+  @Override
+  public BnfStringImpl updateText(@NotNull final String text) {
+    final BnfExpression expression = BnfElementFactory.createExpressionFromText(getProject(), text);
+    assert expression instanceof BnfStringImpl : text + "-->" + expression;
+    return (BnfStringImpl)this.replace(expression);
+  }
+
+  @NotNull
+  @Override
+  public LiteralTextEscaper<? extends PsiLanguageInjectionHost> createLiteralTextEscaper() {
+    return new BnfStringLiteralEscaper(this);
   }
 }

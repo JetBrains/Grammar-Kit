@@ -44,13 +44,16 @@ public class BnfPinMarkerAnnotator implements Annotator {
   }
 
   private static boolean annotateExpression(BnfRule rule, BnfExpression tree, String funcName, AnnotationHolder annotationHolder) {
+    if (isAtomicExpression(tree)) return false;
+    final List<BnfExpression> children = getChildExpressions(tree);
+    if (isTrivialNode(tree)) return annotateExpression(rule, children.get(0), funcName, annotationHolder);
+
     IElementType type = getEffectiveType(tree);
     boolean firstNonTrivial = tree == ParserGeneratorUtil.Rule.firstNotTrivial(rule);
     final Object pinValue = type == BNF_SEQUENCE ? getAttribute(rule, "pin", null, firstNonTrivial ? rule.getName() : funcName) : null;
     final int pinIndex = pinValue instanceof Integer ? (Integer)pinValue : -1;
     final Pattern pinPattern = pinValue instanceof String ? Pattern.compile(StringUtil.unescapeStringCharacters((String) pinValue)) : null;
     boolean pinApplied = false;
-    final List<BnfExpression> children = isAtomicExpression(tree) ? Collections.singletonList(tree) : getChildExpressions(tree);
     for (int i = 0, childExpressionsSize = children.size(); i < childExpressionsSize; i++) {
       BnfExpression child = children.get(i);
       boolean isAtomic = isAtomicExpression(child);

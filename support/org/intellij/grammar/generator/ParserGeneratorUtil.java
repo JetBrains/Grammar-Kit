@@ -17,6 +17,8 @@ package org.intellij.grammar.generator;
 
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.psi.PsiElement;
+import com.intellij.psi.TokenType;
+import com.intellij.psi.impl.source.tree.LeafPsiElement;
 import com.intellij.psi.tree.IElementType;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.util.containers.ContainerUtil;
@@ -33,6 +35,7 @@ import java.util.regex.Pattern;
  */
 public class ParserGeneratorUtil {
   private static final Object NULL = new Object();
+  private static final PsiElement NULL_ATTR = new LeafPsiElement(TokenType.ERROR_ELEMENT, "");
 
   public static <T> T getRootAttribute(BnfFile treeRoot, String attrName, @Nullable T def) {
     return getRootAttribute(treeRoot, attrName, def, null);
@@ -52,7 +55,7 @@ public class ParserGeneratorUtil {
 
   private static <T> T getAttributeInner(PsiElement node, String attrName, @Nullable T def, @Nullable String match) {
     BnfCompositeElement parent = PsiTreeUtil.getNonStrictParentOfType(node, BnfRule.class, BnfAttrs.class);
-    BnfAttrValue attrValue =
+    PsiElement attrValue =
       findAttributeValueNode(parent instanceof BnfRule ? ((BnfRule)parent).getAttrs() : (BnfAttrs)parent, attrName, match);
 
     Object attrVal = getLiteralValue(attrValue);
@@ -88,7 +91,7 @@ public class ParserGeneratorUtil {
   }
 
   @Nullable
-  public static BnfAttrValue findAttributeValueNode(BnfAttrs attrs, String attrName, String ruleName) {
+  public static PsiElement findAttributeValueNode(BnfAttrs attrs, String attrName, String ruleName) {
     if (attrs == null) return null;
     BnfAttrValue noPattern = null;
     for (BnfAttr tree : attrs.getAttrList()) {
@@ -107,7 +110,7 @@ public class ParserGeneratorUtil {
       }
     }
     // do not pin nested sequences
-    return ruleName != null && Pattern.matches(".*(_\\d+)+", ruleName)? null : noPattern;
+    return ruleName != null && Pattern.matches(".*(_\\d+)+", ruleName)? noPattern != null ? NULL_ATTR : null : noPattern;
   }
 
   @Nullable
@@ -121,8 +124,9 @@ public class ParserGeneratorUtil {
     return null;
   }
 
-  public static Object getLiteralValue(BnfAttrValue child) {
+  public static Object getLiteralValue(PsiElement child) {
     if (child == null) return null;
+    if (child == NULL_ATTR) return NULL;
     PsiElement literal = PsiTreeUtil.getDeepestFirst(child);
     String text = child.getText();
     IElementType elementType = literal.getNode().getElementType();
@@ -223,7 +227,7 @@ public class ParserGeneratorUtil {
     }
 
     public static <T> T attribute(BnfRule rule, String attrName, @Nullable T def) {
-      BnfAttrValue attr = findAttributeValueNode(rule.getAttrs(), attrName, null);
+      PsiElement attr = findAttributeValueNode(rule.getAttrs(), attrName, null);
       Object attrVal = getLiteralValue(attr);
       if (attrVal != null) return attr == NULL ? def : (T)attrVal;
       return def;

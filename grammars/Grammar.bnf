@@ -55,26 +55,26 @@ attr ::= attr_start attr_value ';'? {pin=1 recoverUntil="attr_recover_until"}
 private attr_start::=id attr_pattern? '='
 private attr_recover_until::=!('}'|attr_start)
 attr_value ::= (reference_or_token | literal_expression) !'='
-attr_pattern ::= '(' string ')'
+attr_pattern ::= '(' string_literal_expression ')'
 
 expression ::= sequence choice?
-sequence ::= option * { extends="expression" recoverUntil="sequence_recover"}
+sequence ::= option * {extends="expression" recoverUntil="sequence_recover"}
 private sequence_recover ::= !(';'|'|'|'('|')'|'['|']'|'{'|'}') grammar_element_recover
 private option ::= predicate | paren_opt_expression | simple quantified?
 
-left choice ::= ( '|' sequence ) + { pin(".*")=1 extends="expression" }
+left choice ::= ( '|' sequence ) + {pin(".*")=1 extends="expression"}
 left quantified ::= quantifier {extends="expression" }
 quantifier ::= '?' | '+' | '*'
 
-predicate ::= predicate_sign simple { extends="expression" }
+predicate ::= predicate_sign simple {extends="expression"}
 predicate_sign ::= '&' | '!'
 
 private simple ::= !(modifier* id '::=' ) reference_or_token | literal_expression | external_expression | paren_expression
 external_expression ::= '<<' reference_or_token option * '>>' {pin=2 extends="expression"}
-reference_or_token ::= id  { extends="expression" }
-literal_expression ::= string_literal_expression | number { extends="expression" }
-string_literal_expression ::= string { extends="literal_expression"}
-paren_expression ::= simple_paren_expression | alt_choice_expression { extends="expression" }
+reference_or_token ::= id  {extends="expression" }
+literal_expression ::= string_literal_expression | number {extends="expression" }
+string_literal_expression ::= string {extends="literal_expression"}
+paren_expression ::= simple_paren_expression | alt_choice_expression {extends="expression"}
 paren_opt_expression ::='[' expression ']' {pin=1 extends="expression"}
 private simple_paren_expression ::= '(' expression ')' {pin=1}
 private alt_choice_expression::= '{' !attr_start expression '}' {pin=2}

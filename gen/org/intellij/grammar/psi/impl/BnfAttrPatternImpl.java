@@ -31,9 +31,8 @@ public class BnfAttrPatternImpl extends BnfCompositeElementImpl implements BnfAt
 
   @Override
   @NotNull
-  public PsiElement getString() {
-    ASTNode child = getNode().findChildByType(BNF_STRING);
-    return child == null? null : child.getPsi();
+  public BnfLiteralExpression getLiteralExpression() {
+    return PsiTreeUtil.getChildOfType(this, BnfLiteralExpression.class);
   }
 
 }

@@ -22,6 +22,6 @@ import com.intellij.psi.PsiElement;
 public interface BnfAttrPattern extends BnfCompositeElement {
 
   @NotNull
-  public PsiElement getString();
+  public BnfLiteralExpression getLiteralExpression();
 
 }

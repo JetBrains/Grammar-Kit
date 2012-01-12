@@ -17,6 +17,7 @@ package org.intellij.grammar.generator;
 
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiReference;
 import com.intellij.psi.TokenType;
 import com.intellij.psi.impl.source.tree.LeafPsiElement;
 import com.intellij.psi.tree.IElementType;
@@ -27,6 +28,7 @@ import org.intellij.grammar.psi.impl.GrammarUtil;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 /**
@@ -103,7 +105,7 @@ public class ParserGeneratorUtil {
           if (ruleName == null) break;
         }
         else if (ruleName != null) {
-          if (Pattern.matches(StringUtil.stripQuotesAroundValue(attrPattern.getString().getText()), ruleName)) {
+          if (Pattern.matches(StringUtil.stripQuotesAroundValue(attrPattern.getLiteralExpression().getText()), ruleName)) {
             return attrValue;
           }
         }
@@ -156,6 +158,14 @@ public class ParserGeneratorUtil {
     return child instanceof BnfExpression && !(child instanceof BnfLiteralExpression || child instanceof BnfReferenceOrToken);
   }
 
+  public static BnfExpression getEffectiveExpression(BnfExpression tree, Map<String, BnfRule> ruleMap) {
+    if (tree instanceof BnfReferenceOrToken) {
+      BnfRule rule = ruleMap.get(tree.getText());
+      if (rule != null) return rule.getExpression();
+    }
+    return tree;
+  }
+  
   public static IElementType getEffectiveType(PsiElement tree) {
     if (tree instanceof BnfParenOptExpression) {
       return BnfTypes.BNF_OP_OPT;

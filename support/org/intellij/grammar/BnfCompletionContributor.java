@@ -19,9 +19,12 @@ package org.intellij.grammar;
 import com.intellij.codeInsight.completion.*;
 import com.intellij.codeInsight.lookup.LookupElement;
 import com.intellij.codeInsight.lookup.LookupElementBuilder;
+import com.intellij.lang.ASTNode;
+import com.intellij.openapi.util.TextRange;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.patterns.PlatformPatterns;
 import com.intellij.psi.*;
+import com.intellij.psi.impl.source.tree.TreeUtil;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.util.ProcessingContext;
 import gnu.trove.THashSet;
@@ -30,11 +33,10 @@ import org.intellij.grammar.parser.GeneratedParserUtilBase;
 import org.intellij.grammar.psi.*;
 import org.intellij.grammar.psi.impl.BnfFileImpl;
 import org.intellij.grammar.psi.impl.BnfReferenceImpl;
+import org.intellij.grammar.psi.impl.GrammarUtil;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import static com.intellij.patterns.PlatformPatterns.psiElement;
 
@@ -57,10 +59,20 @@ public class BnfCompletionContributor extends CompletionContributor {
                                     ProcessingContext context,
                                     @NotNull CompletionResultSet result) {
         PsiElement position = parameters.getPosition();
-        PsiElement attrs = PsiTreeUtil.getParentOfType(position, BnfAttrs.class, BnfAttrValue.class, BnfParenExpression.class);
-        if (attrs instanceof BnfAttrs || isPossibleEmptyAttrs(attrs)) {
-          for (String attribute : KNOWN_ATTRIBUTES) {
-            result.addElement(LookupElementBuilder.create(attribute).setIcon(BnfIcons.ATTRIBUTE));
+        BnfCompositeElement attrs = PsiTreeUtil.getParentOfType(position, BnfAttrs.class, BnfAttrValue.class, BnfParenExpression.class);
+        boolean attrCompletion = false;
+        if ((attrs instanceof BnfAttrs || isPossibleEmptyAttrs(attrs))) {
+          ASTNode closingBrace = TreeUtil.findSiblingBackward(attrs.getNode().getLastChildNode(), BnfTypes.BNF_RIGHT_BRACE);
+          if (closingBrace == null || position.getTextOffset() <= closingBrace.getStartOffset()) {
+            attrCompletion = true;
+            for (String attribute : KNOWN_ATTRIBUTES) {
+              result.addElement(LookupElementBuilder.create(attribute).setIcon(BnfIcons.ATTRIBUTE));
+            }
+          }
+        }
+        if (!attrCompletion && parameters.getInvocationCount() < 2) {
+          for (String keywords : suggestKeywords(parameters.getPosition())) {
+            result.addElement(LookupElementBuilder.create(keywords));
           }
         }
       }
@@ -128,10 +140,38 @@ public class BnfCompletionContributor extends CompletionContributor {
           next = curParent.getNextSibling();
           curParent = curParent.getParent();
         }
-        if (curParent == parent || next == null) return true;
+        if (curParent == parent) return true;
         next = PsiTreeUtil.getDeepestFirst(next);
       }
     }
     return false;
+  }
+
+  private static Collection<String> suggestKeywords(PsiElement position) {
+    TextRange posRange = position.getTextRange();
+    BnfFile posFile = (BnfFile)position.getContainingFile();
+    BnfRule statement = PsiTreeUtil.getTopmostParentOfType(position, BnfRule.class);
+    final TextRange range;
+    if (statement != null) {
+      range = new TextRange(statement.getTextRange().getStartOffset(), posRange.getStartOffset());
+    }
+    else {
+      int offset = posRange.getStartOffset();
+      for (PsiElement cur = GrammarUtil.getDummyAwarePrevSibling(position); cur != null; cur = GrammarUtil.getDummyAwarePrevSibling(cur)) {
+        if (cur instanceof BnfAttrs) offset = cur.getTextRange().getEndOffset();
+        else if (cur instanceof BnfRule) offset = cur.getTextRange().getStartOffset();
+        else continue;
+        break;
+      }
+      range = new TextRange(offset, posRange.getStartOffset());
+    }
+    final String text = range.isEmpty() ? CompletionInitializationContext.DUMMY_IDENTIFIER : range.substring(posFile.getText());
+
+    PsiFile file = PsiFileFactory.getInstance(posFile.getProject()).createFileFromText("a.bnf", BnfLanguage.INSTANCE, text, true, false);
+    GeneratedParserUtilBase.CompletionState state =
+      new GeneratedParserUtilBase.CompletionState(posRange.getStartOffset() - range.getStartOffset());
+    file.putUserData(GeneratedParserUtilBase.COMPLETION_STATE_KEY, state);
+    TreeUtil.ensureParsed(file.getNode());
+    return state.items;
   }
 }

@@ -167,7 +167,7 @@ public class GeneratedParserUtilBase {
         if (state.whitespaceTokens.contains(type) || state.commentTokens.contains(type)) {
           diff = completionState.offset - tokenStart;
         }
-        else if (/*type == ID && */ tokenStart < completionState.offset) {
+        else if (type != null && tokenStart < completionState.offset) {
           CharSequence fragment = builder_.getOriginalText().subSequence(tokenStart, completionState.offset);
           if (StringUtil.startsWithIgnoreCase(StringUtil.unquoteString(text), fragment.toString())) {
             diff = completionState.offset - tokenStart;
@@ -593,7 +593,7 @@ public class GeneratedParserUtilBase {
           tokenCount++;
           totalCount++;
         }
-        if (!result || builder_.eof()) {
+        if (!result) {
           break;
         }
       }
@@ -616,7 +616,7 @@ public class GeneratedParserUtilBase {
   }
 
   private static class DummyBlockElementType extends IElementType implements ICompositeElementType{
-    public DummyBlockElementType() {
+    DummyBlockElementType() {
       super("DUMMY_BLOCK", Language.ANY);
     }
 
@@ -628,7 +628,7 @@ public class GeneratedParserUtilBase {
   }
 
   public static class DummyBlock extends CompositePsiElement {
-    public DummyBlock() {
+    DummyBlock() {
       super(DUMMY_BLOCK);
     }
 

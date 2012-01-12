@@ -10,5 +10,22 @@ BnfFile:Fixes.bnf
     PsiElement(id)('after_empty')
     PsiWhiteSpace(' ')
     PsiElement(::=)('::=')
+    PsiWhiteSpace('\n\n')
     BNF_SEQUENCE
       <empty list>
+  BNF_RULE:empty_parser
+    PsiElement(id)('empty_parser')
+    PsiWhiteSpace(' ')
+    PsiElement(::=)('::=')
+    PsiWhiteSpace(' ')
+    BNF_EXTERNAL_EXPRESSION
+      PsiElement(<<)('<<')
+      BNF_REFERENCE_OR_TOKEN
+        PsiElement(id)('some_meta')
+      PsiWhiteSpace(' ')
+      BNF_PAREN_EXPRESSION
+        PsiElement(()('(')
+        BNF_SEQUENCE
+          <empty list>
+        PsiElement())(')')
+      PsiElement(>>)('>>')

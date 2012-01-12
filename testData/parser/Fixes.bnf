@@ -1,2 +1,4 @@
 empty ::=
 after_empty ::=
+
+empty_parser ::= <<some_meta ()>>

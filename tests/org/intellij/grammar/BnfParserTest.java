@@ -1,5 +1,7 @@
 package org.intellij.grammar;
 
+import com.intellij.lang.LanguageBraceMatching;
+import com.intellij.lang.LanguageParserDefinitions;
 import com.intellij.testFramework.ParsingTestCase;
 
 /**
@@ -11,11 +13,21 @@ public class BnfParserTest extends ParsingTestCase {
   }
 
   @Override
+  protected void setUp() throws Exception {
+    super.setUp();
+    addExplicitExtension(LanguageBraceMatching.INSTANCE, myLanguage, new BnfBraceMatcher());
+  }
+
+  @Override
   protected String getTestDataPath() {
     return "testData";
   }
 
   public void testSelf() {
+    doTest(true);
+  }
+
+  public void testSelf2() {
     doTest(true);
   }
 

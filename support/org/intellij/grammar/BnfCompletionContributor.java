@@ -43,11 +43,12 @@ import static com.intellij.patterns.PlatformPatterns.psiElement;
  */
 public class BnfCompletionContributor extends CompletionContributor {
   public static final List<String> KNOWN_ATTRIBUTES =
-    Arrays.asList("generatePsi", "generateTokens", "generateStubParser", "psiClassPrefix", "psiImplClassSuffix", "psiPackage", "psiImplPackage",
+    Arrays.asList("generatePsi", "generateTokens", "generateStubParser", "memoization", "extendedPin",
+                  "psiClassPrefix", "psiImplClassSuffix", "psiPackage", "psiImplPackage",
                   "elementTypeClass", "tokenTypeClass",
                   "parserClass", "stubParserClass", "elementTypeHolderClass",
                   "elementTypePrefix", "elementTypeFactory", "tokenClassType", "tokenTypeFactory", "parserImports",
-                  "extends", "implements", "elementType", "methodRenames", "pin", "mixin", "recoverUntil", "memoization", "classHeader");
+                  "extends", "implements", "elementType", "methodRenames", "pin", "mixin", "recoverUntil", "classHeader");
 
   public BnfCompletionContributor() {
     extend(CompletionType.BASIC, psiElement().inFile(PlatformPatterns.instanceOf(BnfFileImpl.class)), new CompletionProvider<CompletionParameters>() {

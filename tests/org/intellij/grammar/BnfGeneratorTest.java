@@ -25,6 +25,10 @@ public class BnfGeneratorTest extends ParsingTestCase {
     doTest();
   }
 
+  public void testSelf2() throws Exception {
+    doTest();
+  }
+
   public void testSmall() throws Exception {
     doTest();
   }
@@ -42,15 +46,15 @@ public class BnfGeneratorTest extends ParsingTestCase {
   }
 
   public void doTest() throws Exception {
-    final String name = getTestName(true);
+    final String name = getTestName(false);
     String text = loadFile(name + "." + myFileExt);
-    myFile = createPsiFile(name, text);
+    myFile = createPsiFile(name, text.replaceAll("parserClass=\"[^\"]*\"", "parserClass=\""+name+"\" generatePsi=false"));
     final File file = new File(myFullDataPath + File.separator + name + ".java");
     if (file.exists()) {
       assertTrue(file.delete());
     }
     new ParserGenerator((BnfFileImpl)myFile, myFullDataPath).generateParser();
-    assertTrue(file.exists());
+    assertTrue("Generated file not found: "+file, file.exists());
     final String expectedName = name + ".expected.java";
     String result = loadFile(name + ".java");
     try {

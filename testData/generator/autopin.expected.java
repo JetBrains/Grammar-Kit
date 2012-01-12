@@ -34,8 +34,8 @@ public class Autopin implements PsiParser {
     else if (root_ == DROP_TABLE_STATEMENT) {
       result_ = drop_table_statement(builder_, level_ + 1);
     }
-    else if (root_ == NESTED_SEQUENCE) {
-      result_ = nested_sequence(builder_, level_ + 1);
+    else if (root_ == OVERRIDE_NESTED_SEQUENCE) {
+      result_ = override_nested_sequence(builder_, level_ + 1);
     }
     else if (root_ == STATEMENT) {
       result_ = statement(builder_, level_ + 1);
@@ -99,8 +99,8 @@ public class Autopin implements PsiParser {
     result_ = result_ && consumeToken(builder_, TABLE);
     result_ = result_ && parseReference(builder_, level_ + 1);
     pinned_ = result_; // pin = .*_ref
-    result_ = result_ && consumeToken(builder_, "(");
-    result_ = result_ && consumeToken(builder_, ")");
+    result_ = result_ && report_error_(builder_, consumeToken(builder_, "("));
+    result_ = pinned_ && consumeToken(builder_, ")") && result_;
     LighterASTNode last_ = result_? builder_.getLatestDoneMarker() : null;
     if (last_ != null && last_.getStartOffset() == start_ && type_extends_(last_.getTokenType(), CREATE_TABLE_STATEMENT)) {
       marker_.drop();
@@ -197,18 +197,18 @@ public class Autopin implements PsiParser {
 
   /* ********************************************************** */
   // a b (c d e)
-  public static boolean nested_sequence(PsiBuilder builder_, int level_) {
-    if (!recursion_guard_(builder_, level_, "nested_sequence")) return false;
+  public static boolean override_nested_sequence(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "override_nested_sequence")) return false;
     boolean result_ = false;
     boolean pinned_ = false;
     final Marker marker_ = builder_.mark();
     enterErrorRecordingSection(builder_, level_, _SECTION_GENERAL_);
     result_ = consumeToken(builder_, A);
     pinned_ = result_; // pin = 1
-    result_ = result_ && consumeToken(builder_, B);
-    result_ = result_ && nested_sequence_2(builder_, level_ + 1);
+    result_ = result_ && report_error_(builder_, consumeToken(builder_, B));
+    result_ = pinned_ && override_nested_sequence_2(builder_, level_ + 1) && result_;
     if (result_ || pinned_) {
-      marker_.done(NESTED_SEQUENCE);
+      marker_.done(OVERRIDE_NESTED_SEQUENCE);
     }
     else {
       marker_.rollbackTo();
@@ -218,14 +218,14 @@ public class Autopin implements PsiParser {
   }
 
   // (c d e)
-  private static boolean nested_sequence_2(PsiBuilder builder_, int level_) {
-    if (!recursion_guard_(builder_, level_, "nested_sequence_2")) return false;
-    return nested_sequence_2_0(builder_, level_ + 1);
+  private static boolean override_nested_sequence_2(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "override_nested_sequence_2")) return false;
+    return override_nested_sequence_2_0(builder_, level_ + 1);
   }
 
   // c d e
-  private static boolean nested_sequence_2_0(PsiBuilder builder_, int level_) {
-    if (!recursion_guard_(builder_, level_, "nested_sequence_2_0")) return false;
+  private static boolean override_nested_sequence_2_0(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "override_nested_sequence_2_0")) return false;
     boolean result_ = false;
     final Marker marker_ = builder_.mark();
     result_ = consumeToken(builder_, C);

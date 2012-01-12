@@ -1,6 +1,6 @@
 {
   parserClass="Self"
-  generatePsi=false
+  extendedPin=false
   stubParserClass="org.intellij.grammar.parser.GeneratedParserUtilBase"
 
   implements="org.intellij.grammar.psi.BnfCompositeElement"

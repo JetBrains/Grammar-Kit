@@ -1,19 +1,5 @@
-/*
- * Copyright 2011-2011 Gregory Shrago
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-package org.intellij.grammar.parser;
+header.txt
+package ;
 
 import org.jetbrains.annotations.*;
 import com.intellij.lang.LighterASTNode;
@@ -28,9 +14,9 @@ import com.intellij.psi.tree.TokenSet;
 import com.intellij.lang.PsiParser;
 
 @SuppressWarnings({"SimplifiableIfStatement", "UnusedAssignment"})
-public class GrammarParser implements PsiParser {
+public class Self2 implements PsiParser {
 
-  public static Logger LOG_ = Logger.getInstance("org.intellij.grammar.parser.GrammarParser");
+  public static Logger LOG_ = Logger.getInstance("Self2");
 
   @NotNull
   public ASTNode parse(final IElementType root_, final PsiBuilder builder_) {
@@ -184,13 +170,13 @@ public class GrammarParser implements PsiParser {
 
 
   /* ********************************************************** */
-  // '(' string_literal_expression ')'
+  // '(' string ')'
   public static boolean attr_pattern(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "attr_pattern")) return false;
     boolean result_ = false;
     final Marker marker_ = builder_.mark();
     result_ = consumeToken(builder_, BNF_LEFT_PAREN);
-    result_ = result_ && string_literal_expression(builder_, level_ + 1);
+    result_ = result_ && consumeToken(builder_, BNF_STRING);
     result_ = result_ && consumeToken(builder_, BNF_RIGHT_PAREN);
     if (result_) {
       marker_.done(BNF_ATTR_PATTERN);

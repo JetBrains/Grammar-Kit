@@ -71,6 +71,7 @@ public class ParserGenerator {
   private String rootPath;
   private final String grammarRoot;
   private final boolean generateMemoizationCode;
+  private final boolean generateExtendedPin;
 
   private int offset;
   private PrintWriter out;
@@ -85,6 +86,7 @@ public class ParserGenerator {
       ruleParserClasses.put(r.getName(), getAttribute(r, "parserClass", "generated.Parser"));
     }
     generateMemoizationCode = getRootAttribute(treeRoot, "memoization", false);
+    generateExtendedPin = getRootAttribute(treeRoot, "extendedPin", true);
     computeInheritance();
   }
 
@@ -546,16 +548,15 @@ public class ParserGenerator {
     if (!isPrivate && canCollapse) {
       out("final int start_ = builder_.getCurrentOffset();");
     }
-    if (isLeftInner) {
+    if (isLeft) {
       out("final Marker left_marker_ = (Marker)builder_.getLatestDoneMarker();");
-    }
-    else if (isLeft) {
-      out("final Marker left_marker_ = ((Marker)builder_.getLatestDoneMarker()).precede();");
+      if (generateExtendedPin) {
+        out("if (!invalid_left_marker_guard_(builder_, left_marker_, \"" + debugFuncName + "\")) return false;");
+      }
     }
     if (!alwaysTrue || !isPrivate) {
       out("final Marker marker_ = builder_.mark();");
     }
-    //out("try {");
 
     String sectionType = recoverRoot != null ? "_SECTION_RECOVER_" :
                          type == BNF_OP_AND ? "_SECTION_AND_" :
@@ -565,7 +566,8 @@ public class ParserGenerator {
       out("enterErrorRecordingSection(builder_, level_, " + sectionType + ");");
     }
 
-    for (int i = 0, childrenSize = children.size(); i < childrenSize; i++) {
+    boolean predicateEncountered = false;
+    for (int i = 0, p = 0, childrenSize = children.size(); i < childrenSize; i++) {
       BnfExpression child = children.get(i);
 
       String nodeCall = generateNodeCall(rule, child, getNextName(funcName, i));
@@ -573,14 +575,34 @@ public class ParserGenerator {
         out((i > 0 ? "if (!result_) " : "") + "result_ = " + nodeCall + ";");
       }
       else if (type == BNF_SEQUENCE) {
+        predicateEncountered |= pinApplied && ParserGeneratorUtil.getEffectiveExpression(child, ruleMap) instanceof BnfPredicate;
         if (i > 0) {
-          out("result_ = result_ && " + nodeCall + ";");
+          if (pinApplied && generateExtendedPin && !predicateEncountered) {
+            if (i == childrenSize - 1) {
+              if (i == p + 1) {
+                out("result_ = result_ && " + nodeCall + ";");
+              }
+              else {
+                out("result_ = pinned_ && " + nodeCall + " && result_;");
+              }
+            }
+            else if (i == p + 1) {
+              out("result_ = result_ && report_error_(builder_, " + nodeCall + ");");
+            }
+            else {
+              out("result_ = pinned_ && report_error_(builder_, " + nodeCall + ") && result_;");
+            }
+          }
+          else {
+            out("result_ = result_ && " + nodeCall + ";");
+          }
         }
         else {
           out("result_ = " + nodeCall + ";");
         }
         if (!pinApplied && (i == pinIndex - 1 || pinPattern != null && pinPattern.matcher(child.getText()).matches())) {
           pinApplied = true;
+          p = i;
           out("pinned_ = result_; // pin = " + pinValue);
         }
       }
@@ -613,8 +635,6 @@ public class ParserGenerator {
         throw new AssertionError("unexpected: " + type);
       }
     }
-    //out("}");
-    //out("finally {");
 
     if (type == BNF_OP_AND || type == BNF_OP_NOT) {
       out("marker_.rollbackTo();");
@@ -634,9 +654,10 @@ public class ParserGenerator {
         out("marker_.done(" + elementType + ");");
         out("left_marker_.precede().done(((LighterASTNode)left_marker_).getTokenType());");
         out("left_marker_.drop();");
-      } else if (isLeft) {
+      }
+      else if (isLeft) {
         out("marker_.drop();");
-        out("left_marker_.done(" + elementType + ");");
+        out("left_marker_.precede().done(" + elementType + ");");
       }
       else {
         out("marker_.done(" + elementType + ");");
@@ -647,9 +668,6 @@ public class ParserGenerator {
       if (!alwaysTrue) {
         out("else {");
         out("marker_.rollbackTo();");
-        if (isLeft && !isLeftInner) {
-          out("left_marker_.drop();");
-        }
         out("}");
       }
     }
@@ -677,15 +695,9 @@ public class ParserGenerator {
       final String resultEq = alwaysTrue? "" : "result_ = ";
       final String resultRef = alwaysTrue? "true" : "result_";
       out(resultEq + "exitErrorRecordingSection(builder_, "+resultRef+", level_, " +
-          (pinned ? "pinned_" : "false") +
-          ", " +
-          sectionType +
-          ", " +
-          untilCall +
-          ");");
+          (pinned ? "pinned_" : "false") + ", " + sectionType + ", " + untilCall + ");");
     }
 
-    //out("}");
     if (!alwaysTrue && generateMemoizationCode) {
       out("if (!result_" + (pinned ? " && !pinned_" : "") + ") memoizeFalseBranch(builder_, " + funcId + ")");
     }

@@ -74,8 +74,8 @@ public class GrammarUtil {
   public static boolean isExternalReference(PsiElement psiElement) {
     PsiElement parent = psiElement.getParent();
     if (parent instanceof BnfExternalExpression && ((BnfExternalExpression)parent).getExpressionList().get(0) == psiElement) return true;
-    BnfRule rule = PsiTreeUtil.getParentOfType(psiElement, BnfRule.class);
-    return rule != null && psiElement == getExternalMethodExpression(rule);
+    if (parent instanceof BnfSequence) parent = parent.getParent();
+    return parent instanceof BnfRule && ParserGeneratorUtil.Rule.isExternal((BnfRule)parent);
   }
 
   @Nullable

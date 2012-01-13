@@ -50,10 +50,6 @@ public class BnfDocumentationProvider implements DocumentationProvider {
       Set<String> first = BnfFirstNextAnalyzer.calcFirst(rule);
       Set<String> next = BnfFirstNextAnalyzer.calcNext(rule);
 
-      boolean hasNull = first.remove(BnfFirstNextAnalyzer.EMPTY_STRING);
-      if (hasNull) first.add("<eof>");
-      boolean hasNull2 = next.remove(BnfFirstNextAnalyzer.EMPTY_STRING);
-      if (hasNull2) next.add("<eof>");
       String[] firstS = first.toArray(new String[first.size()]);
       Arrays.sort(firstS);
       String[] nextS = next.toArray(new String[next.size()]);

@@ -32,8 +32,8 @@ import org.intellij.grammar.psi.BnfRule;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author gregsh
@@ -86,16 +86,21 @@ public class BnfUnreachableChoiceBranchInspection extends LocalInspectionTool {
   }
 
   private static void checkChoice(BnfChoice choice, ProblemsHolder problemsHolder) {
-    LinkedList<BnfRule> visited = new LinkedList<BnfRule>();
+    Set<BnfRule> visited = new THashSet<BnfRule>();
     THashSet<String> first = new THashSet<String>();
     List<BnfExpression> list = choice.getExpressionList();
     for (int i = 0, listSize = list.size() - 1; i < listSize; i++) {
       BnfExpression child = list.get(i);
-      if (BnfFirstNextAnalyzer.calcFirstInner(child, first, visited).contains(BnfFirstNextAnalyzer.EMPTY_STRING)) {
-        TextRange textRange = choice.getTextRange();
-        TextRange nextRange = list.get(i + 1).getTextRange();
-        TextRange problemRange = new TextRange(nextRange.getStartOffset() - textRange.getStartOffset(), textRange.getLength());
-        problemsHolder.registerProblem(choice, problemRange, "Unreachable choice branches");
+      Set<String> firstSet = BnfFirstNextAnalyzer.calcFirstInner(child, first, visited);
+      if (firstSet.contains(BnfFirstNextAnalyzer.MATCHES_NOTHING)) {
+        problemsHolder.registerProblem(child, "Branch is unable to match anything due to & or ! conditions");
+      }
+      else if (firstSet.contains(BnfFirstNextAnalyzer.MATCHES_EOF)) {
+        problemsHolder.registerProblem(child, "Branch matches empty input making the rest branches unreachable");
+//        TextRange textRange = choice.getTextRange();
+//        TextRange nextRange = list.get(i + 1).getTextRange();
+//        TextRange problemRange = new TextRange(nextRange.getStartOffset() - textRange.getStartOffset(), textRange.getLength());
+//        problemsHolder.registerProblem(choice, problemRange, "Unreachable choice branches");
       }
       first.clear();
       visited.clear();

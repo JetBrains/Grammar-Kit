@@ -17,6 +17,7 @@
 package org.intellij.grammar.analysis;
 
 import com.intellij.openapi.diagnostic.Logger;
+import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiReference;
 import com.intellij.psi.search.searches.ReferencesSearch;
@@ -26,6 +27,7 @@ import gnu.trove.THashSet;
 import org.intellij.grammar.generator.ParserGeneratorUtil;
 import org.intellij.grammar.psi.*;
 import org.intellij.grammar.psi.impl.GrammarUtil;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
@@ -39,24 +41,26 @@ public class BnfFirstNextAnalyzer {
   
   private static final Logger LOG = Logger.getInstance("org.intellij.grammar.analysis.BnfFirstNextAnalyzer"); 
   
-  public static final String EMPTY_STRING = "";
+  public static final String MATCHES_EOF = "-eof-";
+  public static final String MATCHES_NOTHING = "-never-matches-";
 
-  public static Set<String> calcFirst(BnfRule rule) {
-    LinkedList<BnfRule> visited = new LinkedList<BnfRule>();
+  public static Set<String> calcFirst(@NotNull BnfRule rule) {
+    Set<BnfRule> visited = new THashSet<BnfRule>();
     visited.add(rule);
     return calcFirstInner(rule.getExpression(), new THashSet<String>(), visited);
   }
 
-  public static Set<String> calcNext(BnfRule targetRule) {
-    THashSet<String> totalResult = new THashSet<String>();
+  public static Set<String> calcNext(@NotNull BnfRule targetRule) {
+    return calcNextInner(targetRule.getExpression(), new THashSet<String>(), new THashSet<BnfRule>());
+  }
+  
+  public static Set<String> calcNextInner(@NotNull BnfExpression targetExpression, Set<String> result, Set<BnfRule> visited) {
     LinkedList<BnfExpression> stack = new LinkedList<BnfExpression>();
     THashSet<BnfRule> totalVisited = new THashSet<BnfRule>();
-    LinkedList<BnfRule> visited = new LinkedList<BnfRule>();
-    THashSet<String> result = new THashSet<String>();
-    stack.add(targetRule.getExpression());
+    Set<String> curResult = new THashSet<String>();
+    stack.add(targetExpression);
     main: while (!stack.isEmpty()) {
-      result.clear();
-      visited.clear();
+      curResult.clear();
 
       PsiElement cur = stack.removeLast();
       PsiElement parent = cur.getParent();
@@ -64,15 +68,15 @@ public class BnfFirstNextAnalyzer {
         if (parent instanceof BnfSequence) {
           List<BnfExpression> children = ((BnfSequence)parent).getExpressionList();
           int idx = children.indexOf(cur);
-          calcSequenceFirstInner(children.subList(idx + 1, children.size()), result, visited);
-          boolean skipResolve = !result.contains(EMPTY_STRING);
-          totalResult.addAll(result);
+          calcSequenceFirstInner(children.subList(idx + 1, children.size()), curResult, visited);
+          boolean skipResolve = !curResult.contains(MATCHES_EOF);
+          result.addAll(curResult);
           if (skipResolve) continue main;
         }
         else if (parent instanceof BnfQuantified) {
           IElementType effectiveType = ParserGeneratorUtil.getEffectiveType(parent);
           if (effectiveType == BnfTypes.BNF_OP_ZEROMORE || effectiveType == BnfTypes.BNF_OP_ONEMORE) {
-            calcFirstInner((BnfExpression)parent, totalResult, visited);
+            calcFirstInner((BnfExpression)parent, result, visited);
           }
         }
         cur = parent;
@@ -88,21 +92,22 @@ public class BnfFirstNextAnalyzer {
         }
       }
     }
-    return totalResult;
-  }
-
-  private static Set<String> calcSequenceFirstInner(List<BnfExpression> expressions, final Set<String> result, final LinkedList<BnfRule> visited) {
-    boolean noEmpty = result.add(EMPTY_STRING);
-    for (BnfExpression expression : expressions) {
-      if (!result.remove(EMPTY_STRING)) break;
-      calcFirstInner(expression, result, visited);
-    }
-    // add empty back if was there before
-    if (!noEmpty) result.add(EMPTY_STRING);
+    if (result.isEmpty()) result.add(MATCHES_EOF);
     return result;
   }
 
-  public static Set<String> calcFirstInner(BnfExpression expression, Set<String> result, LinkedList<BnfRule> visited) {
+  private static Set<String> calcSequenceFirstInner(List<BnfExpression> expressions, final Set<String> result, final Set<BnfRule> visited) {
+    boolean matchesEof = !result.add(MATCHES_EOF);
+    for (BnfExpression expression : expressions) {
+      if (!result.remove(MATCHES_EOF)) break;
+      calcFirstInner(expression, result, visited);
+    }
+    // add empty back if was there before
+    if (matchesEof) result.add(MATCHES_EOF);
+    return result;
+  }
+
+  public static Set<String> calcFirstInner(BnfExpression expression, Set<String> result, Set<BnfRule> visited) {
     if (expression instanceof BnfLiteralExpression) {
       result.add(expression.getText());
     }
@@ -111,15 +116,17 @@ public class BnfFirstNextAnalyzer {
       PsiElement resolve = reference == null? null : reference.resolve();
       if (resolve instanceof BnfRule) {
         BnfRule rule = (BnfRule)resolve;
-        if (visited.contains(rule)) {
+        if (!visited.add(rule)) {
           result.add(rule.getName()); // cyclic dependency
         }
         else {
-          visited.addLast(rule);
           calcFirstInner(rule.getExpression(), result, visited);
-          BnfRule removed = visited.removeLast();
-          LOG.assertTrue(removed == rule, "path corruption detected");
+          boolean removed = visited.remove(rule);
+          LOG.assertTrue(removed, "path corruption detected");
         }
+      }
+      else if (GrammarUtil.isExternalReference(expression)) {
+        result.add("#" + expression.getText());
       }
       else {
         result.add(expression.getText());
@@ -128,13 +135,17 @@ public class BnfFirstNextAnalyzer {
     else if (expression instanceof BnfParenthesized) {
       calcFirstInner(((BnfParenthesized)expression).getExpression(), result, visited);
       if (expression instanceof BnfParenOptExpression) {
-        result.add(EMPTY_STRING);
+        result.add(MATCHES_EOF);
       }
     }
     else if (expression instanceof BnfChoice) {
+      boolean matchesNothing = result.remove(MATCHES_NOTHING);
+      boolean matchesSomething = false;
       for (BnfExpression child : ((BnfChoice)expression).getExpressionList()) {
         calcFirstInner(child, result, visited);
+        matchesSomething |= !result.remove(MATCHES_NOTHING);
       }
+      if (!matchesSomething || matchesNothing) result.add(MATCHES_NOTHING);
     }
     else if (expression instanceof BnfSequence) {
       calcSequenceFirstInner(((BnfSequence)expression).getExpressionList(), result, visited);
@@ -143,7 +154,7 @@ public class BnfFirstNextAnalyzer {
       calcFirstInner(((BnfQuantified)expression).getExpression(), result, visited);
       IElementType effectiveType = ParserGeneratorUtil.getEffectiveType(expression);
       if (effectiveType == BnfTypes.BNF_OP_OPT || effectiveType == BnfTypes.BNF_OP_ZEROMORE) {
-        result.add(EMPTY_STRING);
+        result.add(MATCHES_EOF);
       }
     }
     else if (expression instanceof BnfExternalExpression) {
@@ -179,9 +190,42 @@ public class BnfFirstNextAnalyzer {
       }
     }
     else if (expression instanceof BnfPredicate) {
-      result.add(EMPTY_STRING);
-      // todo
-      //IElementType elementType = ((BnfPredicate)expression).getPredicateSign().getNode().getElementType();
+      IElementType elementType = ((BnfPredicate)expression).getPredicateSign().getFirstChild().getNode().getElementType();
+      BnfExpression predicateExpression = ((BnfPredicate)expression).getExpression();
+      // take only one token into account which is not exactly correct but better than nothing
+      Set<String> conditions = calcFirstInner(predicateExpression, new THashSet<String>(), visited);
+      Set<String> next = calcNextInner(expression, new THashSet<String>(), visited);
+      if (predicateExpression instanceof BnfParenExpression) predicateExpression = ((BnfParenExpression)predicateExpression).getExpression();
+      boolean skip = predicateExpression instanceof BnfSequence && ((BnfSequence)predicateExpression).getExpressionList().size() > 1; // todo calc min length ?
+      if (!skip) {
+        // skip text-matching
+        for (String condition : conditions) {
+          if (StringUtil.isQuotedString(condition)) { skip = true; break; }
+        }
+      }
+      if (!skip) {
+        // skip external methods
+        for (String s : next) {
+          if (s.startsWith("#")) { skip = true; break; }
+        }
+      }
+      if (skip) {
+        next.remove(MATCHES_EOF);
+      }
+      else if (elementType == BnfTypes.BNF_OP_AND) {
+        if (!conditions.contains(MATCHES_EOF)) {
+          next.retainAll(conditions);
+          if (next.isEmpty()) next.add(MATCHES_NOTHING);
+        }
+      }
+      else {
+        if (!conditions.contains(MATCHES_EOF)) {
+          next.removeAll(conditions);
+          if (next.isEmpty()) next.add(MATCHES_NOTHING);
+        }
+        else { next.clear(); next.add(MATCHES_NOTHING); }
+      }
+      result.addAll(next);
     }
 
     return result;

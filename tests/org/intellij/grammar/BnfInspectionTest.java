@@ -49,7 +49,11 @@ public class BnfInspectionTest extends LightCodeInsightFixtureTestCase {
   }
 
   public void testUnreachableBranch1() {
-    doTest("m ::= r | <warning>B | C</warning> r ::= A?");
+    doTest("m ::= <warning>r</warning> | B | C r ::= A?");
+  }
+
+  public void testNeverMatchingBranch1() {
+    doTest("m ::= <warning>! A r</warning> | B | C r ::= A");
   }
 
   private void doTest(String text) {

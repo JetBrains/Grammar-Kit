@@ -152,7 +152,6 @@ public class GrammarParser implements PsiParser {
     return result_;
   }
 
-
   /* ********************************************************** */
   // attr_start attr_value ';'?
   public static boolean attr(PsiBuilder builder_, int level_) {
@@ -182,7 +181,6 @@ public class GrammarParser implements PsiParser {
     return true;
   }
 
-
   /* ********************************************************** */
   // '(' string_literal_expression ')'
   public static boolean attr_pattern(PsiBuilder builder_, int level_) {
@@ -200,7 +198,6 @@ public class GrammarParser implements PsiParser {
     }
     return result_;
   }
-
 
   /* ********************************************************** */
   // !('}'|attr_start)
@@ -237,7 +234,6 @@ public class GrammarParser implements PsiParser {
     return result_;
   }
 
-
   /* ********************************************************** */
   // id attr_pattern? '='
   static boolean attr_start(PsiBuilder builder_, int level_) {
@@ -262,7 +258,6 @@ public class GrammarParser implements PsiParser {
     attr_pattern(builder_, level_ + 1);
     return true;
   }
-
 
   /* ********************************************************** */
   // (reference_or_token | literal_expression) !'='
@@ -315,7 +310,6 @@ public class GrammarParser implements PsiParser {
     return result_;
   }
 
-
   /* ********************************************************** */
   // '{' attr * '}'
   public static boolean attrs(PsiBuilder builder_, int level_) {
@@ -353,7 +347,6 @@ public class GrammarParser implements PsiParser {
     }
     return true;
   }
-
 
   /* ********************************************************** */
   // ( '|' sequence ) +
@@ -410,7 +403,6 @@ public class GrammarParser implements PsiParser {
     return result_ || pinned_;
   }
 
-
   /* ********************************************************** */
   // sequence choice?
   public static boolean expression(PsiBuilder builder_, int level_) {
@@ -439,7 +431,6 @@ public class GrammarParser implements PsiParser {
     choice(builder_, level_ + 1);
     return true;
   }
-
 
   /* ********************************************************** */
   // '<<' reference_or_token option * '>>'
@@ -485,7 +476,6 @@ public class GrammarParser implements PsiParser {
     return true;
   }
 
-
   /* ********************************************************** */
   // attrs | rule
   static boolean grammar_element(PsiBuilder builder_, int level_) {
@@ -504,7 +494,6 @@ public class GrammarParser implements PsiParser {
     result_ = exitErrorRecordingSection(builder_, result_, level_, false, _SECTION_RECOVER_, grammar_element_recover_parser_);
     return result_;
   }
-
 
   /* ********************************************************** */
   // !('{'|rule_start)
@@ -541,7 +530,6 @@ public class GrammarParser implements PsiParser {
     return result_;
   }
 
-
   /* ********************************************************** */
   // string_literal_expression | number
   public static boolean literal_expression(PsiBuilder builder_, int level_) {
@@ -564,7 +552,6 @@ public class GrammarParser implements PsiParser {
     return result_;
   }
 
-
   /* ********************************************************** */
   // 'private' | 'external' | 'meta' | 'inner' | 'left'
   public static boolean modifier(PsiBuilder builder_, int level_) {
@@ -584,7 +571,6 @@ public class GrammarParser implements PsiParser {
     }
     return result_;
   }
-
 
   /* ********************************************************** */
   // predicate | paren_opt_expression | simple quantified?
@@ -627,7 +613,6 @@ public class GrammarParser implements PsiParser {
     return true;
   }
 
-
   /* ********************************************************** */
   // simple_paren_expression | alt_choice_expression
   public static boolean paren_expression(PsiBuilder builder_, int level_) {
@@ -649,7 +634,6 @@ public class GrammarParser implements PsiParser {
     }
     return result_;
   }
-
 
   /* ********************************************************** */
   // '[' expression ']'
@@ -678,7 +662,6 @@ public class GrammarParser implements PsiParser {
     return result_ || pinned_;
   }
 
-
   /* ********************************************************** */
   // predicate_sign simple
   public static boolean predicate(PsiBuilder builder_, int level_) {
@@ -701,7 +684,6 @@ public class GrammarParser implements PsiParser {
     return result_;
   }
 
-
   /* ********************************************************** */
   // '&' | '!'
   public static boolean predicate_sign(PsiBuilder builder_, int level_) {
@@ -718,7 +700,6 @@ public class GrammarParser implements PsiParser {
     }
     return result_;
   }
-
 
   /* ********************************************************** */
   // quantifier
@@ -739,7 +720,6 @@ public class GrammarParser implements PsiParser {
     return result_;
   }
 
-
   /* ********************************************************** */
   // '?' | '+' | '*'
   public static boolean quantifier(PsiBuilder builder_, int level_) {
@@ -757,7 +737,6 @@ public class GrammarParser implements PsiParser {
     }
     return result_;
   }
-
 
   /* ********************************************************** */
   // id
@@ -779,7 +758,6 @@ public class GrammarParser implements PsiParser {
     }
     return result_;
   }
-
 
   /* ********************************************************** */
   // rule_start expression attrs? ';'?
@@ -818,7 +796,6 @@ public class GrammarParser implements PsiParser {
     return true;
   }
 
-
   /* ********************************************************** */
   // modifier* id '::='
   static boolean rule_start(PsiBuilder builder_, int level_) {
@@ -853,7 +830,6 @@ public class GrammarParser implements PsiParser {
     return true;
   }
 
-
   /* ********************************************************** */
   // option *
   public static boolean sequence(PsiBuilder builder_, int level_) {
@@ -881,7 +857,6 @@ public class GrammarParser implements PsiParser {
     exitErrorRecordingSection(builder_, true, level_, false, _SECTION_RECOVER_, sequence_recover_parser_);
     return true;
   }
-
 
   /* ********************************************************** */
   // !(';'|'|'|'('|')'|'['|']'|'{'|'}') grammar_element_recover
@@ -939,7 +914,6 @@ public class GrammarParser implements PsiParser {
     }
     return result_;
   }
-
 
   /* ********************************************************** */
   // !(modifier* id '::=' ) reference_or_token | literal_expression | external_expression | paren_expression
@@ -1027,7 +1001,6 @@ public class GrammarParser implements PsiParser {
     return true;
   }
 
-
   /* ********************************************************** */
   // '(' expression ')'
   static boolean simple_paren_expression(PsiBuilder builder_, int level_) {
@@ -1050,7 +1023,6 @@ public class GrammarParser implements PsiParser {
     return result_ || pinned_;
   }
 
-
   /* ********************************************************** */
   // string
   public static boolean string_literal_expression(PsiBuilder builder_, int level_) {
@@ -1071,7 +1043,6 @@ public class GrammarParser implements PsiParser {
     }
     return result_;
   }
-
 
   final static Parser attr_recover_until_parser_ = new Parser() {
       public boolean parse(PsiBuilder builder_, int level_) {

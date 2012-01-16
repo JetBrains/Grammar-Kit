@@ -69,7 +69,6 @@ public class LeftAssociative implements PsiParser {
     return true;
   }
 
-
   /* ********************************************************** */
   // (AS? id)
   public static boolean alias_definition2(PsiBuilder builder_, int level_) {
@@ -102,7 +101,6 @@ public class LeftAssociative implements PsiParser {
     consumeToken(builder_, AS);
     return true;
   }
-
 
   /* ********************************************************** */
   // reference alias_definition? alias_definition2? leech? leech2?
@@ -152,7 +150,6 @@ public class LeftAssociative implements PsiParser {
     return true;
   }
 
-
   /* ********************************************************** */
   // id
   public static boolean leech(PsiBuilder builder_, int level_) {
@@ -173,7 +170,6 @@ public class LeftAssociative implements PsiParser {
     return result_;
   }
 
-
   /* ********************************************************** */
   // id
   static boolean leech2(PsiBuilder builder_, int level_) {
@@ -193,6 +189,5 @@ public class LeftAssociative implements PsiParser {
     }
     return result_;
   }
-
 
 }

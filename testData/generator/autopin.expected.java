@@ -83,7 +83,6 @@ public class Autopin implements PsiParser {
     return result_;
   }
 
-
   /* ********************************************************** */
   // CREATE TEMP? (GLOBAL|LOCAL) TABLE table_ref '(' ')'
   public static boolean create_table_statement(PsiBuilder builder_, int level_) {
@@ -144,7 +143,6 @@ public class Autopin implements PsiParser {
     return result_;
   }
 
-
   /* ********************************************************** */
   // drop_table_statement
   public static boolean drop_statement(PsiBuilder builder_, int level_) {
@@ -165,7 +163,6 @@ public class Autopin implements PsiParser {
     }
     return result_;
   }
-
 
   /* ********************************************************** */
   // DROP TABLE table_ref
@@ -193,7 +190,6 @@ public class Autopin implements PsiParser {
     result_ = exitErrorRecordingSection(builder_, result_, level_, pinned_, _SECTION_GENERAL_, null);
     return result_ || pinned_;
   }
-
 
   /* ********************************************************** */
   // a b (c d e)
@@ -240,7 +236,6 @@ public class Autopin implements PsiParser {
     return result_;
   }
 
-
   /* ********************************************************** */
   // statement *
   static boolean root(PsiBuilder builder_, int level_) {
@@ -257,7 +252,6 @@ public class Autopin implements PsiParser {
     }
     return true;
   }
-
 
   /* ********************************************************** */
   // create_statement | drop_statement
@@ -280,6 +274,5 @@ public class Autopin implements PsiParser {
     }
     return result_;
   }
-
 
 }

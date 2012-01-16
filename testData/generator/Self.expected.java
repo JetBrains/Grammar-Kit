@@ -135,7 +135,6 @@ public class Self implements PsiParser {
     return true;
   }
 
-
   /* ********************************************************** */
   // '(' string ')'
   public static boolean attr_pattern(PsiBuilder builder_, int level_) {
@@ -154,7 +153,6 @@ public class Self implements PsiParser {
     return result_;
   }
 
-
   /* ********************************************************** */
   // !'}'
   static boolean attr_recover_until(PsiBuilder builder_, int level_) {
@@ -167,7 +165,6 @@ public class Self implements PsiParser {
     result_ = exitErrorRecordingSection(builder_, result_, level_, false, _SECTION_NOT_, null);
     return result_;
   }
-
 
   /* ********************************************************** */
   // (reference_or_token | literal_expression) !'='
@@ -220,7 +217,6 @@ public class Self implements PsiParser {
     return result_;
   }
 
-
   /* ********************************************************** */
   // '{' attr* '}'
   public static boolean attrs(PsiBuilder builder_, int level_) {
@@ -258,7 +254,6 @@ public class Self implements PsiParser {
     }
     return true;
   }
-
 
   /* ********************************************************** */
   // '{' sequence ('|' sequence)* '}' | sequence choice_tail*
@@ -370,7 +365,6 @@ public class Self implements PsiParser {
     return true;
   }
 
-
   /* ********************************************************** */
   // '|' sequence
   static boolean choice_tail(PsiBuilder builder_, int level_) {
@@ -392,7 +386,6 @@ public class Self implements PsiParser {
     return result_ || pinned_;
   }
 
-
   /* ********************************************************** */
   // choice?
   public static boolean expression(PsiBuilder builder_, int level_) {
@@ -409,7 +402,6 @@ public class Self implements PsiParser {
     }
     return true;
   }
-
 
   /* ********************************************************** */
   // (attrs | rule) *
@@ -450,7 +442,6 @@ public class Self implements PsiParser {
     return result_;
   }
 
-
   /* ********************************************************** */
   // string_literal_expression | number
   public static boolean literal_expression(PsiBuilder builder_, int level_) {
@@ -473,7 +464,6 @@ public class Self implements PsiParser {
     return result_;
   }
 
-
   /* ********************************************************** */
   // 'private' | 'external' | 'wrapped'
   public static boolean modifier(PsiBuilder builder_, int level_) {
@@ -492,7 +482,6 @@ public class Self implements PsiParser {
     return result_;
   }
 
-
   /* ********************************************************** */
   // quantified | predicate
   static boolean option(PsiBuilder builder_, int level_) {
@@ -509,7 +498,6 @@ public class Self implements PsiParser {
     }
     return result_;
   }
-
 
   /* ********************************************************** */
   // '(' expression ')'
@@ -538,7 +526,6 @@ public class Self implements PsiParser {
     return result_ || pinned_;
   }
 
-
   /* ********************************************************** */
   // predicate_sign  simple
   public static boolean predicate(PsiBuilder builder_, int level_) {
@@ -560,7 +547,6 @@ public class Self implements PsiParser {
     }
     return result_;
   }
-
 
   /* ********************************************************** */
   // ('&' | '!')
@@ -584,7 +570,6 @@ public class Self implements PsiParser {
     }
     return result_;
   }
-
 
   /* ********************************************************** */
   // '[' expression ']' | simple quantifier?
@@ -648,7 +633,6 @@ public class Self implements PsiParser {
     return true;
   }
 
-
   /* ********************************************************** */
   // '?' | '+' | '*'
   public static boolean quantifier(PsiBuilder builder_, int level_) {
@@ -666,7 +650,6 @@ public class Self implements PsiParser {
     }
     return result_;
   }
-
 
   /* ********************************************************** */
   // id
@@ -688,7 +671,6 @@ public class Self implements PsiParser {
     }
     return result_;
   }
-
 
   /* ********************************************************** */
   // modifier* id '::=' expression attrs? ';'?
@@ -745,7 +727,6 @@ public class Self implements PsiParser {
     return true;
   }
 
-
   /* ********************************************************** */
   // !'{'
   static boolean rule_recover_until(PsiBuilder builder_, int level_) {
@@ -758,7 +739,6 @@ public class Self implements PsiParser {
     result_ = exitErrorRecordingSection(builder_, result_, level_, false, _SECTION_NOT_, null);
     return result_;
   }
-
 
   /* ********************************************************** */
   // option +
@@ -790,7 +770,6 @@ public class Self implements PsiParser {
     }
     return result_;
   }
-
 
   /* ********************************************************** */
   // !(modifier* id '::=' ) reference_or_token | literal_expression | paren_expression
@@ -877,7 +856,6 @@ public class Self implements PsiParser {
     return true;
   }
 
-
   /* ********************************************************** */
   // string
   public static boolean string_literal_expression(PsiBuilder builder_, int level_) {
@@ -898,7 +876,6 @@ public class Self implements PsiParser {
     }
     return result_;
   }
-
 
   final static Parser attr_recover_until_parser_ = new Parser() {
       public boolean parse(PsiBuilder builder_, int level_) {

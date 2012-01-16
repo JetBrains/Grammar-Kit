@@ -97,7 +97,6 @@ public class ExternalRules implements PsiParser {
     return result_;
   }
 
-
   /* ********************************************************** */
   // <<head>> <<param>> (<<comma_list_tail <<param>>>>) *
   public static boolean comma_list_pinned(PsiBuilder builder_, int level_, final Parser head, final Parser param) {
@@ -159,7 +158,6 @@ public class ExternalRules implements PsiParser {
     return result_ || pinned_;
   }
 
-
   /* ********************************************************** */
   // <<head>> <<comma_list <<param>>>> (<<comma_list_tail <<comma_list <<param>>>>>>) *
   public static boolean list_of_lists(PsiBuilder builder_, int level_, final Parser head, final Parser param) {
@@ -210,13 +208,11 @@ public class ExternalRules implements PsiParser {
     return listOf(builder_, level_ + 1, "1+2", 1+2, param);
   }
 
-
   /* ********************************************************** */
   // <<meta_mixed <<comma_list one>>>>
   static boolean meta_mixed_list(PsiBuilder builder_, int level_) {
     return meta_mixed(builder_, level_ + 1, meta_mixed_list_0_0_parser_);
   }
-
 
   /* ********************************************************** */
   // <<meta_mixed (<<comma_list one>>)>>
@@ -235,7 +231,6 @@ public class ExternalRules implements PsiParser {
   static boolean meta_mixed_simple(PsiBuilder builder_, int level_) {
     return meta_mixed(builder_, level_ + 1, statement_parser_);
   }
-
 
   /* ********************************************************** */
   // <<comma_list <<comma_list <<comma_list <<comma_list <<comma_list <<param>>>>>>>>>>>>
@@ -269,7 +264,6 @@ public class ExternalRules implements PsiParser {
     return result_;
   }
 
-
   /* ********************************************************** */
   // <<comma_list <<comma_list_pinned <<head>> <<comma_list <<comma_list <<comma_list <<param>>>>>>>>>>>>
   public static boolean meta_multi_level_pinned(PsiBuilder builder_, int level_, final Parser head, final Parser param) {
@@ -301,7 +295,6 @@ public class ExternalRules implements PsiParser {
     }
     return result_;
   }
-
 
   /* ********************************************************** */
   // <<comma_list <<comma_list_pinned <<head>> (<<comma_list <<comma_list <<comma_list <<param>>>>>>>>)>>>>
@@ -369,7 +362,6 @@ public class ExternalRules implements PsiParser {
     return result_;
   }
 
-
   /* ********************************************************** */
   // <<list_of_lists one (one | two)>>
   static boolean meta_seq_of_lists(PsiBuilder builder_, int level_) {
@@ -398,6 +390,41 @@ public class ExternalRules implements PsiParser {
     return result_;
   }
 
+  /* ********************************************************** */
+  // (<<list_of_lists one (one | two)>>)?
+  static boolean meta_seq_of_lists_opt(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "meta_seq_of_lists_opt")) return false;
+    meta_seq_of_lists_opt_0(builder_, level_ + 1);
+    return true;
+  }
+
+  // (<<list_of_lists one (one | two)>>)
+  private static boolean meta_seq_of_lists_opt_0(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "meta_seq_of_lists_opt_0")) return false;
+    return list_of_lists(builder_, level_ + 1, one_parser_, meta_seq_of_lists_opt_0_0_1_parser_);
+  }
+
+  // (one | two)
+  private static boolean meta_seq_of_lists_opt_0_0_1(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "meta_seq_of_lists_opt_0_0_1")) return false;
+    return meta_seq_of_lists_opt_0_0_1_0(builder_, level_ + 1);
+  }
+
+  // one | two
+  private static boolean meta_seq_of_lists_opt_0_0_1_0(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "meta_seq_of_lists_opt_0_0_1_0")) return false;
+    boolean result_ = false;
+    final Marker marker_ = builder_.mark();
+    result_ = one(builder_, level_ + 1);
+    if (!result_) result_ = two(builder_, level_ + 1);
+    if (!result_) {
+      marker_.rollbackTo();
+    }
+    else {
+      marker_.drop();
+    }
+    return result_;
+  }
 
   /* ********************************************************** */
   // <<comma_list one>>
@@ -405,13 +432,11 @@ public class ExternalRules implements PsiParser {
     return comma_list(builder_, level_ + 1, one_parser_);
   }
 
-
   /* ********************************************************** */
   // <<meta_multi_level one>>
   static boolean multi_level(PsiBuilder builder_, int level_) {
     return meta_multi_level(builder_, level_ + 1, one_parser_);
   }
-
 
   /* ********************************************************** */
   // 'one'
@@ -428,7 +453,6 @@ public class ExternalRules implements PsiParser {
     }
     return result_;
   }
-
 
   /* ********************************************************** */
   // '{' <<uniqueListOf (one | two | 10 | some)>> '}'
@@ -472,7 +496,6 @@ public class ExternalRules implements PsiParser {
     return result_;
   }
 
-
   /* ********************************************************** */
   // '{' <<uniqueListOf {one | two | 10 | some}>> '}'
   static boolean param_choice_alt(PsiBuilder builder_, int level_) {
@@ -514,7 +537,6 @@ public class ExternalRules implements PsiParser {
     }
     return result_;
   }
-
 
   /* ********************************************************** */
   // '{' <<uniqueListOf [one | two | 10 | some]>> '}'
@@ -559,7 +581,6 @@ public class ExternalRules implements PsiParser {
     return result_;
   }
 
-
   /* ********************************************************** */
   // '{' <<uniqueListOf "1+1" '1+1' one two 10 some>> '}'
   static boolean param_seq(PsiBuilder builder_, int level_) {
@@ -577,7 +598,6 @@ public class ExternalRules implements PsiParser {
     }
     return result_;
   }
-
 
   /* ********************************************************** */
   // '{' <<uniqueListOf {one | two} [10 | some]>> '}'
@@ -642,13 +662,11 @@ public class ExternalRules implements PsiParser {
     return result_;
   }
 
-
   /* ********************************************************** */
   // <<listOf statement>>
   static boolean root(PsiBuilder builder_, int level_) {
     return listOf(builder_, level_ + 1, statement_parser_);
   }
-
 
   /* ********************************************************** */
   // one | two
@@ -667,7 +685,6 @@ public class ExternalRules implements PsiParser {
     return result_;
   }
 
-
   /* ********************************************************** */
   // 'two'
   public static boolean two(PsiBuilder builder_, int level_) {
@@ -683,7 +700,6 @@ public class ExternalRules implements PsiParser {
     }
     return result_;
   }
-
 
   final static Parser meta_mixed_list_0_0_parser_ = new Parser() {
       public boolean parse(PsiBuilder builder_, int level_) {
@@ -703,6 +719,11 @@ public class ExternalRules implements PsiParser {
   final static Parser meta_seq_of_lists_0_1_parser_ = new Parser() {
       public boolean parse(PsiBuilder builder_, int level_) {
         return meta_seq_of_lists_0_1(builder_, level_ + 1);
+      }
+    };
+  final static Parser meta_seq_of_lists_opt_0_0_1_parser_ = new Parser() {
+      public boolean parse(PsiBuilder builder_, int level_) {
+        return meta_seq_of_lists_opt_0_0_1(builder_, level_ + 1);
       }
     };
   final static Parser one_parser_ = new Parser() {

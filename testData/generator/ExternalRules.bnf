@@ -30,6 +30,7 @@ private meta_simple ::= <<comma_list one>>
 private meta_seq ::= <<comma_list_pinned one (one | two)>>
 private meta_seq_of_lists ::= <<list_of_lists one (one | two)>>
 private multi_level ::= <<meta_multi_level one>>
+private meta_seq_of_lists_opt ::= (<<list_of_lists one (one | two)>>)?
 
 // mixed
 private meta meta_mixed ::= <<listOf "1+2" '1+2' <<param>>>>

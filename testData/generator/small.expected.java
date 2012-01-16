@@ -64,7 +64,6 @@ public class Small implements PsiParser {
     return result_;
   }
 
-
   /* ********************************************************** */
   // token
   static boolean privateRule(PsiBuilder builder_, int level_) {
@@ -93,7 +92,6 @@ public class Small implements PsiParser {
     return result_;
   }
 
-
   /* ********************************************************** */
   // token?
   public static boolean someRule2(PsiBuilder builder_, int level_) {
@@ -103,7 +101,6 @@ public class Small implements PsiParser {
     marker_.done(SOMERULE2);
     return true;
   }
-
 
   /* ********************************************************** */
   // 'token'
@@ -120,7 +117,6 @@ public class Small implements PsiParser {
     }
     return result_;
   }
-
 
   /* ********************************************************** */
   // token | someRule | someString
@@ -140,7 +136,6 @@ public class Small implements PsiParser {
     return result_;
   }
 
-
   /* ********************************************************** */
   // '=' "="
   static boolean tokenRule(PsiBuilder builder_, int level_) {
@@ -157,7 +152,6 @@ public class Small implements PsiParser {
     }
     return result_;
   }
-
 
   final static Parser statement_parser_ = new Parser() {
       public boolean parse(PsiBuilder builder_, int level_) {

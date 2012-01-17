@@ -74,15 +74,17 @@ public class BnfIdenticalChoiceBranchesInspection extends LocalInspectionTool {
   }
 
   private static void checkFile(PsiFile file, final ProblemsHolder problemsHolder) {
-    final THashSet<PsiElement> set = new THashSet<PsiElement>();
+    final THashSet<BnfExpression> set = new THashSet<BnfExpression>();
     file.accept(new PsiRecursiveElementWalkingVisitor() {
       @Override
       public void visitElement(PsiElement element) {
         if (element instanceof BnfChoice) {
-          checkChoice((BnfChoice)element, set);
-          for (PsiElement e : set) {
-            problemsHolder.registerProblem(e, "Duplicate choice branch", new BnfRemoveExpressionFix());
+          BnfChoice choice = (BnfChoice)element;
+          checkChoice(choice, set);
+          for (BnfExpression e : set) {
+            BnfUnreachableChoiceBranchInspection.registerProblem(choice, e, "Duplicate choice branch", problemsHolder, new BnfRemoveExpressionFix());
           }
+          set.clear();
         }
         else {
           super.visitElement(element);
@@ -91,7 +93,7 @@ public class BnfIdenticalChoiceBranchesInspection extends LocalInspectionTool {
     });
   }
 
-  private static void checkChoice(BnfChoice choice, Set<PsiElement> set) {
+  private static void checkChoice(BnfChoice choice, Set<BnfExpression> set) {
     List<BnfExpression> list = choice.getExpressionList();
     for (BnfExpression e1 : list) {
       for (BnfExpression e2 : list) {

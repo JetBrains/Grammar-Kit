@@ -16,19 +16,19 @@
 
 package org.intellij.grammar.inspection;
 
-import com.intellij.codeInspection.InspectionManager;
-import com.intellij.codeInspection.LocalInspectionTool;
-import com.intellij.codeInspection.ProblemDescriptor;
-import com.intellij.codeInspection.ProblemsHolder;
+import com.intellij.codeInspection.*;
+import com.intellij.lang.ASTNode;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiRecursiveElementWalkingVisitor;
+import com.intellij.psi.impl.source.tree.TreeUtil;
 import gnu.trove.THashSet;
 import org.intellij.grammar.analysis.BnfFirstNextAnalyzer;
 import org.intellij.grammar.psi.BnfChoice;
 import org.intellij.grammar.psi.BnfExpression;
 import org.intellij.grammar.psi.BnfRule;
+import org.intellij.grammar.psi.BnfTypes;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NotNull;
 
@@ -93,18 +93,30 @@ public class BnfUnreachableChoiceBranchInspection extends LocalInspectionTool {
       BnfExpression child = list.get(i);
       Set<String> firstSet = BnfFirstNextAnalyzer.calcFirstInner(child, first, visited);
       if (firstSet.contains(BnfFirstNextAnalyzer.MATCHES_NOTHING)) {
-        problemsHolder.registerProblem(child, "Branch is unable to match anything due to & or ! conditions");
+        registerProblem(choice, child, "Branch is unable to match anything due to & or ! conditions", problemsHolder);
       }
       else if (firstSet.contains(BnfFirstNextAnalyzer.MATCHES_EOF)) {
-        problemsHolder.registerProblem(child, "Branch matches empty input making the rest branches unreachable");
-//        TextRange textRange = choice.getTextRange();
-//        TextRange nextRange = list.get(i + 1).getTextRange();
-//        TextRange problemRange = new TextRange(nextRange.getStartOffset() - textRange.getStartOffset(), textRange.getLength());
-//        problemsHolder.registerProblem(choice, problemRange, "Unreachable choice branches");
+        registerProblem(choice, child, "Branch matches empty input making the rest branches unreachable", problemsHolder);
+        break;
       }
       first.clear();
       visited.clear();
     }
   }
-  
+
+  static void registerProblem(BnfExpression choice, BnfExpression branch, String message, ProblemsHolder problemsHolder, LocalQuickFix... fixes) {
+    TextRange textRange = branch.getTextRange();
+    if (textRange.isEmpty()) {
+      ASTNode nextOr = TreeUtil.findSibling(branch.getNode(), BnfTypes.BNF_OP_OR);
+      ASTNode prevOr = TreeUtil.findSiblingBackward(branch.getNode(), BnfTypes.BNF_OP_OR);
+
+      int shift = choice.getTextRange().getStartOffset();
+      int startOffset = prevOr != null ? prevOr.getStartOffset() - shift : 0;
+      TextRange range = new TextRange(startOffset, nextOr != null? nextOr.getStartOffset() + 1 - shift : Math.min(startOffset + 2, choice.getTextLength()));
+      problemsHolder.registerProblem(choice, range, message, fixes);
+    }
+    else {
+      problemsHolder.registerProblem(branch, message, fixes);
+    }
+  }
 }

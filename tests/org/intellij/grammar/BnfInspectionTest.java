@@ -52,6 +52,14 @@ public class BnfInspectionTest extends LightCodeInsightFixtureTestCase {
     doTest("m ::= <warning>r</warning> | B | C r ::= A?");
   }
 
+  public void testUnreachableBranch2() {
+    doTest("m ::= A<warning>||</warning> B | C");
+  }
+
+  public void testUnreachableBranch3() {
+    doTest("m ::=<warning>|</warning> B <warning>|</warning>");
+  }
+
   public void testNeverMatchingBranch1() {
     doTest("m ::= <warning>! A r</warning> | B | C r ::= A");
   }

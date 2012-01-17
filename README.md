@@ -7,26 +7,9 @@ Grammar-Kit plugin
 
 Adds support for a custom variant of BNF grammar files.
 
-1.0.2
-- Error recovery: extended *pinning*
-- Pin marker annotator
-- Configurable colors (Settings/Editor/Colors and Fonts/Grammar)
-- Parser-based context-aware keyword completion (sample)
-- Language injection in string literals (sample)
-- Performance improvement & other fixes
-1.0.1
-- Inspection: Left-recursion detection
-1.0
-- Highlighting
-- Completion
-- Navigation
-- Refactorings: inline rule, introduce rule
-- Intentions: flip choice branches
-- PsiBuilder-based PEG parser and PSI hierarchy generation
-
 General usage instructions
 --------------------------
-1. Create grammar *.bnf file, see Grammar.bnf in the plugin code.
+1. Create grammar *.bnf file, see [Grammar.bnf](https://github.com/JetBrains/Grammar-Kit/blob/master/grammars/Grammar.bnf) in the plugin code.
 2. Generate parser/ElementTypes/PSI classes (Ctrl-Shift-G)
 3. Add lexer, parser definition & plugin.xml
 4. Mix-in resolve and other non-trivial functionality to PSI
@@ -34,18 +17,44 @@ General usage instructions
 
 You've just build a custom language plugin (approx. 1 day)
 
+Change log
+----------
+1.0.2
+
+* Error recovery: extended *pinning*
+* Pin marker annotator
+* Configurable colors (Settings/Editor/Colors and Fonts/Grammar)
+* Parser-based context-aware keyword completion (sample)
+* Language injection in string literals (sample)
+* Performance improvement & other fixes
+
+1.0.1
+
+* Inspection: Left-recursion detection
+
+1.0
+
+* Highlighting
+* Completion
+* Navigation
+* Refactorings: inline rule, introduce rule
+* Intentions: flip choice branches
+* PsiBuilder-based PEG parser and PSI hierarchy generation
+
+
 Quick documentation:
 ====================
 See [Parsing Expression Grammar](http://en.wikipedia.org/wiki/Parsing_expression_grammar) for basic syntax. Use ::=* for ← symbol. You can also use [ .. ] for optional sequences and { | | } for choices as these variants are popular in real-world grammars. Grammar-Kit source code is the main example of Grammar-Kit application. The grammar for BNF parser and PSI generation can be found [here](https://github.com/JetBrains/Grammar-Kit/blob/master/grammars/Grammar.bnf).
 
-Basic syntax is extended with global and rule attributes that control code generation.
-Attributes are specified by the list of name=value pairs enclosed in { .. }.
-Rule attributes are placed right after its definition, they override global ones.
-Global attributes can specify a rule name (generated method name) pattern to apply to:
+Basic syntax is extended with global and attributes that control code generation.
+Attributes are specified by the list of *name=value* pairs enclosed in { .. }.
+Rule attributes are placed right after the rule definition.
+Global attributes are placed on top or separated from a rule definition with a semicolon.
+Rule name or generated method name pattern can specify expression an attribute applies to:
 
 ````
 {
-  attribute("pattern")=value
+  pin(".*_list(?:_\d.*)?")=1
 }
 ````
 

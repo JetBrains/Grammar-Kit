@@ -1,6 +1,6 @@
 <idea-plugin url="https://github.com/JetBrains/Grammar-Kit" version="2">
   <id>org.jetbrains.idea.grammar</id>
-  <version>1.0.1</version>
+  <version>1.0.2</version>
   <vendor email="gregory.shrago@jetbrains.com" logo="">Gregory Shrago</vendor>
   <idea-version since-build="111.14" until-build=""/>
 
@@ -8,6 +8,15 @@
   <description>Edit, manipulate, analyze BNF grammars and generate readable parser/PSI code</description>
   <change-notes>
     <![CDATA[
+    <p>1.0.2</p>
+    <ul>
+        <li>Error recovery: extended "pinning" (see documentation)</li>
+        <li>Pin marker annotator</li>
+        <li>Configurable colors (Settings/Editor/Colors and Fonts/Grammar)</li>
+        <li>Parser-based context-aware keyword completion (sample)</li>
+        <li>Language injection in string literals (sample)</li>
+        <li>Performance improvement & other fixes</li>
+    </ul>
     <p>1.0.1</p>
     <ul>
         <li>Left-recursion detection</li>

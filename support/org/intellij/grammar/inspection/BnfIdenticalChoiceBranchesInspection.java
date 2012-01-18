@@ -86,9 +86,7 @@ public class BnfIdenticalChoiceBranchesInspection extends LocalInspectionTool {
           }
           set.clear();
         }
-        else {
-          super.visitElement(element);
-        }
+        super.visitElement(element);
       }
     });
   }

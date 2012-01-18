@@ -78,9 +78,7 @@ public class BnfUnreachableChoiceBranchInspection extends LocalInspectionTool {
         if (element instanceof BnfChoice) {
           checkChoice((BnfChoice)element, problemsHolder);
         }
-        else {
-          super.visitElement(element);
-        }
+        super.visitElement(element);
       }
     });
   }

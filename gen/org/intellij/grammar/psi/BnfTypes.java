@@ -44,9 +44,11 @@ public interface BnfTypes {
 
   IElementType BNF_EXTERNAL_END = new BnfTokenType(">>");
   IElementType BNF_EXTERNAL_START = new BnfTokenType("<<");
+  IElementType BNF_ID = new BnfTokenType("id");
   IElementType BNF_LEFT_BRACE = new BnfTokenType("{");
   IElementType BNF_LEFT_BRACKET = new BnfTokenType("[");
   IElementType BNF_LEFT_PAREN = new BnfTokenType("(");
+  IElementType BNF_NUMBER = new BnfTokenType("number");
   IElementType BNF_OP_AND = new BnfTokenType("&");
   IElementType BNF_OP_EQ = new BnfTokenType("=");
   IElementType BNF_OP_IS = new BnfTokenType("::=");
@@ -59,8 +61,6 @@ public interface BnfTypes {
   IElementType BNF_RIGHT_BRACKET = new BnfTokenType("]");
   IElementType BNF_RIGHT_PAREN = new BnfTokenType(")");
   IElementType BNF_SEMICOLON = new BnfTokenType(";");
-  IElementType BNF_ID = new BnfTokenType("id");
-  IElementType BNF_NUMBER = new BnfTokenType("number");
   IElementType BNF_STRING = new BnfTokenType("string");
 
   class Factory {

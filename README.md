@@ -39,7 +39,7 @@ Change log
 * Navigation
 * Refactorings: inline rule, introduce rule
 * Intentions: flip choice branches
-* PsiBuilder-based PEG parser and PSI hierarchy generation
+* Readable PsiBuilder-based recursive descent parser and PSI hierarchy generation
 
 
 Quick documentation:

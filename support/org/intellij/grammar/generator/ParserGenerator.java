@@ -45,9 +45,7 @@ import static org.intellij.grammar.psi.BnfTypes.*;
 
 /**
  * @author gregory
- *         Date: 16.07.11 10:41
- *
- * todo improve error reporting: investigate { atttr= attr=value } case *
+ * Date 16.07.11 10:41
  */
 public class ParserGenerator {
   public static final Logger LOG = Logger.getInstance("ParserGenerator");
@@ -59,7 +57,7 @@ public class ParserGenerator {
   private final Map<String, BnfRule> ruleMap = new TreeMap<String, BnfRule>();
   private final Map<String, String> ruleParserClasses = new TreeMap<String, String>();
   private final Map<String, String> parserLambdas = new TreeMap<String, String>();
-  private final Set<String> simpleTokens = new TreeSet<String>();
+  private final Set<String> simpleTokens = new THashSet<String>();
   private final Set<BnfRule> rulesWithIheritance = new HashSet<BnfRule>();
   private final MultiMap<String, String> rulesExtendsMap = new MultiMap<String, String>() {
     @Override
@@ -231,7 +229,7 @@ public class ParserGenerator {
   @NotNull
   private String getSuperClassName(BnfRule rule, String psiPackage, String suffix) {
     String superRuleName = getAttribute(rule, "extends", "generated.CompositeElementImpl");
-    BnfRule superRule = superRuleName == null ? null : ruleMap.get(superRuleName);
+    BnfRule superRule = ruleMap.get(superRuleName);
     if (superRule == null) return superRuleName;
     return psiPackage + "." + getRulePsiClassName(superRule, superRule.getName(), true) + suffix;
   }
@@ -347,15 +345,11 @@ public class ParserGenerator {
       String nodeCall = generateNodeCall(rootRule, null, rootRule.getName());
       if (!first) out("else {");
       out("Marker marker_ = builder_.mark();");
-      //out("try {");
       out("result_ = " + nodeCall + ";");
       out("while (builder_.getTokenType() != null) {");
       out("builder_.advanceLexer();");
       out("}");
-      //out("}");
-      //out("finally {");
       out("marker_.done(root_);");
-      //out("}");
       if (!first) out("}");
     }
     out("return builder_.getTreeBuilt();");
@@ -514,6 +508,7 @@ public class ParserGenerator {
       }
     }
 
+    @SuppressWarnings("UnnecessaryLocalVariable")
     String debugFuncName = funcName; // + ":" + node.toStringTree();
     out("if (!recursion_guard_(builder_, level_, \"" + debugFuncName + "\")) return false;");
 
@@ -894,8 +889,7 @@ public class ParserGenerator {
                         (tokenTypeFactory == null ? "" : "static " + tokenTypeFactory + ";") +
                         (generatePsi ? implPackage + ".*;" : ""), "", true);
     final Set<String> visited = new THashSet<String>();
-    String elementCreateCall =
-      elementTypeFactory == null ? "new " + StringUtil.getShortName(elementTypeClass) : StringUtil.getShortName(elementTypeFactory);
+    String elementCreateCall = elementTypeFactory == null ? "new " + StringUtil.getShortName(elementTypeClass) : StringUtil.getShortName(elementTypeFactory);
     for (String ruleName : ruleMap.keySet()) {
       final BnfRule rule = ruleMap.get(ruleName);
       if (Rule.isPrivate(rule) || Rule.isExternal(rule) || grammarRoot.equals(ruleName)) continue;
@@ -906,12 +900,14 @@ public class ParserGenerator {
     }
     if (generateTokens) {
       newLine();
-      String tokenCreateCall =
-        tokenTypeFactory == null ? "new " + StringUtil.getShortName(tokenTypeClass) : StringUtil.getShortName(tokenTypeFactory);
+      Map<String, String> sortedTokens = new TreeMap<String, String>();
+      String tokenCreateCall = tokenTypeFactory == null ? "new " + StringUtil.getShortName(tokenTypeClass) : StringUtil.getShortName(tokenTypeFactory);
       for (String token : simpleTokens) {
         String name = getRootAttribute(treeRoot, token, token);
-        out("IElementType " + getElementType(token) + " = "
-            + tokenCreateCall + "(\"" + name + "\");");
+        sortedTokens.put(getElementType(token), name);
+      }
+      for (String tokenType : sortedTokens.keySet()) {
+        out("IElementType " + tokenType + " = " + tokenCreateCall + "(\"" + sortedTokens.get(tokenType) + "\");");
       }
     }
     if (generatePsi) {

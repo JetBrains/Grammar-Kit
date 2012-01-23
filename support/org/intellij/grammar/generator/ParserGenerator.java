@@ -15,6 +15,7 @@
  */
 package org.intellij.grammar.generator;
 
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.io.FileUtil;
@@ -88,6 +89,21 @@ public class ParserGenerator {
     computeInheritance();
   }
 
+  private void openOutput(File file) throws FileNotFoundException {
+    boolean unitTestMode = ApplicationManager.getApplication().isUnitTestMode();
+    if (unitTestMode && !FileUtil.getNameWithoutExtension(file).equals(FileUtil.getNameWithoutExtension(treeRoot.getName()))) {
+      out = new PrintWriter(new FileOutputStream(new File(rootPath, FileUtil.getNameWithoutExtension(treeRoot.getName())+".PSI.java"), true));
+      out("// ---- "+ file.getName()+ " -----------------");
+    }
+    else {
+      out = new PrintWriter(new FileOutputStream(file));
+    }
+  }
+
+  private void closeOutput() {
+    out.close();
+  }
+
   public void out(String s) {
     int length = s.length();
     if (length == 0) {
@@ -121,12 +137,12 @@ public class ParserGenerator {
       String className = getRootAttribute(treeRoot, "elementTypeHolderClass", "generated.ParserTypes");
       File parserFile = new File(rootPath + File.separatorChar + className.replace('.', File.separatorChar) + ".java");
       parserFile.getParentFile().mkdirs();
-      out = new PrintWriter(new FileOutputStream(parserFile));
+      openOutput(parserFile);
       try {
         generateElementTypesHolder(className, generatePsi);
       }
       finally {
-        out.close();
+        closeOutput();
       }
     }
     if (generatePsi) {
@@ -140,12 +156,12 @@ public class ParserGenerator {
         infClasses.put(ruleName, psiClass);
         File psiFile = new File(rootPath + File.separatorChar + psiClass.replace('.', File.separatorChar) + ".java");
         psiFile.getParentFile().mkdirs();
-        out = new PrintWriter(new FileOutputStream(psiFile));
+        openOutput(psiFile);
         try {
           generatePsiIntf(graphHelper, rule, psiClass, getSuperInterfaceNames(rule, psiPackage));
         }
         finally {
-          out.close();
+          closeOutput();
         }
       }
       for (String ruleName : ruleMap.keySet()) {
@@ -156,12 +172,12 @@ public class ParserGenerator {
         String psiClass = psiPackage + "." + getRulePsiClassName(rule, ruleName, true) + suffix;
         File psiFile = new File(rootPath + File.separatorChar + psiClass.replace('.', File.separatorChar) + ".java");
         psiFile.getParentFile().mkdirs();
-        out = new PrintWriter(new FileOutputStream(psiFile));
+        openOutput(psiFile);
         try {
           generatePsiImpl(graphHelper, rule, psiClass, infClasses.get(ruleName), getSuperClassName(rule, psiPackage, suffix));
         }
         finally {
-          out.close();
+          closeOutput();
         }
       }
     }
@@ -183,7 +199,7 @@ public class ParserGenerator {
     Project project = treeRoot.getProject();
     if (JavaPsiFacade.getInstance(project).findClass(stubParser, GlobalSearchScope.allScope(project)) != null) return;
     File baseFile = new File(rootPath + File.separatorChar + stubPackage.replace('.', File.separatorChar) + "/" + baseFileName);
-    out = new PrintWriter(new FileOutputStream(baseFile));
+    openOutput(baseFile);
     try {
       String text = FileUtil.loadTextAndClose(baseUtilText);
       text = text.replace("package " + StringUtil.getPackageName(GeneratedParserUtilBase.class.getName())+";", "package "+stubPackage+";");
@@ -191,17 +207,17 @@ public class ParserGenerator {
       out.write(text);
     }
     finally {
-      out.close();
+      closeOutput();
     }
     File utilFile = new File(rootPath + File.separatorChar + stubParser.replace('.', File.separatorChar) + ".java");
-    out = new PrintWriter(new FileOutputStream(utilFile));
+    openOutput(utilFile);
     try {
       generateClassHeader(stubParser, "", "", false, baseClassName);
       newLine();
       out("}");
     }
     finally {
-      out.close();
+      closeOutput();
     }
   }
 
@@ -216,12 +232,12 @@ public class ParserGenerator {
       }
       File parserFile = new File(rootPath + File.separatorChar + className.replace('.', File.separatorChar) + ".java");
       parserFile.getParentFile().mkdirs();
-      out = new PrintWriter(new FileOutputStream(parserFile));
+      openOutput(parserFile);
       try {
         generateParser(className, map);
       }
       finally {
-        out.close();
+        closeOutput();
       }
     }
   }
@@ -1036,15 +1052,14 @@ public class ParserGenerator {
     out("public " + (many ? "List<" : "") + className + (many ? "> " : " ") + getterName + tail);
     if (!intf) {
       if (treeRule == null) {
-        out("ASTNode child = getNode().findChildByType(" + getElementType(ruleName) + ");");
-        out("return child == null? null : child.getPsi();");
+        out("return "+(type == REQUIRED?"findNotNullChildByType":"findChildByType")+"(" + getElementType(ruleName) + ");");
       }
       else {
         if (many) {
           out("return PsiTreeUtil.getChildrenOfTypeAsList(this, " + className + ".class);");
         }
         else {
-          out("return PsiTreeUtil.getChildOfType(this, " + className + ".class);");
+          out("return " + (type == REQUIRED ? "findNotNullChildByClass" : "findChildByClass") + "(" + className + ".class);");
         }
       }
       out("}");

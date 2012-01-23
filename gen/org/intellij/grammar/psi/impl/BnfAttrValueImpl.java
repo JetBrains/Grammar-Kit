@@ -32,7 +32,7 @@ public class BnfAttrValueImpl extends BnfCompositeElementImpl implements BnfAttr
   @Override
   @NotNull
   public BnfExpression getExpression() {
-    return PsiTreeUtil.getChildOfType(this, BnfExpression.class);
+    return findNotNullChildByClass(BnfExpression.class);
   }
 
 }

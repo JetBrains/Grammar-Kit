@@ -32,8 +32,7 @@ public class BnfReferenceOrTokenImpl extends BnfRefOrTokenImpl implements BnfRef
   @Override
   @NotNull
   public PsiElement getId() {
-    ASTNode child = getNode().findChildByType(BNF_ID);
-    return child == null? null : child.getPsi();
+    return findNotNullChildByType(BNF_ID);
   }
 
 }

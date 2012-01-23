@@ -32,8 +32,7 @@ public class BnfStringLiteralExpressionImpl extends BnfStringImpl implements Bnf
   @Override
   @NotNull
   public PsiElement getString() {
-    ASTNode child = getNode().findChildByType(BNF_STRING);
-    return child == null? null : child.getPsi();
+    return findNotNullChildByType(BNF_STRING);
   }
 
 }

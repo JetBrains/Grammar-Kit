@@ -32,13 +32,13 @@ public class BnfRuleImpl extends BnfNamedElementImpl implements BnfRule {
   @Override
   @Nullable
   public BnfAttrs getAttrs() {
-    return PsiTreeUtil.getChildOfType(this, BnfAttrs.class);
+    return findChildByClass(BnfAttrs.class);
   }
 
   @Override
   @NotNull
   public BnfExpression getExpression() {
-    return PsiTreeUtil.getChildOfType(this, BnfExpression.class);
+    return findNotNullChildByClass(BnfExpression.class);
   }
 
   @Override
@@ -50,8 +50,7 @@ public class BnfRuleImpl extends BnfNamedElementImpl implements BnfRule {
   @Override
   @NotNull
   public PsiElement getId() {
-    ASTNode child = getNode().findChildByType(BNF_ID);
-    return child == null? null : child.getPsi();
+    return findNotNullChildByType(BNF_ID);
   }
 
 }

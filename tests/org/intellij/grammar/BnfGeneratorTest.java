@@ -21,29 +21,12 @@ public class BnfGeneratorTest extends ParsingTestCase {
     return "testData";
   }
 
-  public void testSelf() throws Exception {
-    doTest();
-  }
-
-  public void testSelf2() throws Exception {
-    doTest();
-  }
-
-  public void testSmall() throws Exception {
-    doTest();
-  }
-
-  public void testAutopin() throws Exception {
-    doTest();
-  }
-
-  public void testExternalRules() throws Exception {
-    doTest();
-  }
-
-  public void testLeftAssociative() throws Exception {
-    doTest();
-  }
+  public void testSelf() throws Exception { doTest(); }
+  public void testSelf2() throws Exception { doTest(); }
+  public void testSmall() throws Exception { doTest(); }
+  public void testAutopin() throws Exception { doTest(); }
+  public void testExternalRules() throws Exception { doTest(); }
+  public void testLeftAssociative() throws Exception { doTest(); }
 
   public void doTest() throws Exception {
     final String name = getTestName(false);

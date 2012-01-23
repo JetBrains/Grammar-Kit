@@ -32,20 +32,19 @@ public class BnfAttrImpl extends BnfNamedElementImpl implements BnfAttr {
   @Override
   @Nullable
   public BnfAttrPattern getAttrPattern() {
-    return PsiTreeUtil.getChildOfType(this, BnfAttrPattern.class);
+    return findChildByClass(BnfAttrPattern.class);
   }
 
   @Override
   @Nullable
   public BnfAttrValue getAttrValue() {
-    return PsiTreeUtil.getChildOfType(this, BnfAttrValue.class);
+    return findChildByClass(BnfAttrValue.class);
   }
 
   @Override
   @NotNull
   public PsiElement getId() {
-    ASTNode child = getNode().findChildByType(BNF_ID);
-    return child == null? null : child.getPsi();
+    return findNotNullChildByType(BNF_ID);
   }
 
 }

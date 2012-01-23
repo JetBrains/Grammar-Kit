@@ -32,7 +32,7 @@ public class BnfParenOptExpressionImpl extends BnfExpressionImpl implements BnfP
   @Override
   @Nullable
   public BnfExpression getExpression() {
-    return PsiTreeUtil.getChildOfType(this, BnfExpression.class);
+    return findChildByClass(BnfExpression.class);
   }
 
 }

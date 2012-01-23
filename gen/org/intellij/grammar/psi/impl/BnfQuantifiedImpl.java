@@ -32,13 +32,13 @@ public class BnfQuantifiedImpl extends BnfExpressionImpl implements BnfQuantifie
   @Override
   @NotNull
   public BnfExpression getExpression() {
-    return PsiTreeUtil.getChildOfType(this, BnfExpression.class);
+    return findNotNullChildByClass(BnfExpression.class);
   }
 
   @Override
   @NotNull
   public BnfQuantifier getQuantifier() {
-    return PsiTreeUtil.getChildOfType(this, BnfQuantifier.class);
+    return findNotNullChildByClass(BnfQuantifier.class);
   }
 
 }

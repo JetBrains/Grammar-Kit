@@ -32,13 +32,13 @@ public class BnfPredicateImpl extends BnfExpressionImpl implements BnfPredicate 
   @Override
   @NotNull
   public BnfExpression getExpression() {
-    return PsiTreeUtil.getChildOfType(this, BnfExpression.class);
+    return findNotNullChildByClass(BnfExpression.class);
   }
 
   @Override
   @NotNull
   public BnfPredicateSign getPredicateSign() {
-    return PsiTreeUtil.getChildOfType(this, BnfPredicateSign.class);
+    return findNotNullChildByClass(BnfPredicateSign.class);
   }
 
 }

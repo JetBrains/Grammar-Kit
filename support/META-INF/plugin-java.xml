@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <idea-plugin version="2">
   <extensions defaultExtensionNs="com.intellij">
+    <projectService serviceInterface="org.intellij.grammar.java.JavaHelper" serviceImplementation="org.intellij.grammar.java.JavaHelper$Impl"/>
     <!--<debugger.positionManagerFactory implementation="org.intellij.grammar.debugger.BnfPositionManagerFactory"/>-->
   </extensions>
 </idea-plugin>

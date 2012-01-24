@@ -22,13 +22,12 @@ import com.intellij.openapi.util.io.FileUtil;
 import com.intellij.openapi.util.text.StringHash;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.openapi.vfs.VfsUtil;
-import com.intellij.psi.JavaPsiFacade;
 import com.intellij.psi.PsiElement;
-import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.tree.IElementType;
 import com.intellij.util.containers.MultiMap;
 import gnu.trove.THashMap;
 import gnu.trove.THashSet;
+import org.intellij.grammar.java.JavaHelper;
 import org.intellij.grammar.parser.GeneratedParserUtilBase;
 import org.intellij.grammar.psi.*;
 import org.intellij.grammar.psi.impl.GrammarUtil;
@@ -197,7 +196,7 @@ public class ParserGenerator {
     if (baseUtilText == null) return;
 
     Project project = treeRoot.getProject();
-    if (JavaPsiFacade.getInstance(project).findClass(stubParser, GlobalSearchScope.allScope(project)) != null) return;
+    if (JavaHelper.getJavaHelper(project).findClass(stubParser) != null) return;
     File baseFile = new File(rootPath + File.separatorChar + stubPackage.replace('.', File.separatorChar) + "/" + baseFileName);
     openOutput(baseFile);
     try {

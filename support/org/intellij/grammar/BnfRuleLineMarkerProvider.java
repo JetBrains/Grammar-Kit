@@ -25,15 +25,13 @@ import com.intellij.openapi.editor.markup.GutterIconRenderer;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Ref;
 import com.intellij.openapi.util.text.StringUtil;
-import com.intellij.psi.JavaPsiFacade;
-import com.intellij.psi.PsiClass;
+import com.intellij.psi.NavigatablePsiElement;
 import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiMethod;
-import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.util.PairProcessor;
 import gnu.trove.THashSet;
 import org.intellij.grammar.generator.ParserGeneratorUtil;
+import org.intellij.grammar.java.JavaHelper;
 import org.intellij.grammar.psi.BnfExpression;
 import org.intellij.grammar.psi.BnfLiteralExpression;
 import org.intellij.grammar.psi.BnfReferenceOrToken;
@@ -60,7 +58,7 @@ public class BnfRuleLineMarkerProvider extends RelatedItemLineMarkerProvider {
       PsiElement parent = element.getParent();
       if (parent instanceof BnfRule && (forNavigation || element == ((BnfRule)parent).getId()) ||
           forNavigation && element instanceof BnfExpression) {
-        PsiMethod method = getMethod(element);
+        NavigatablePsiElement method = getMethod(element);
         if (method != null && (!forNavigation || visited.add(method))) {
           GotoRelatedItem item = new GotoRelatedItem(method);
           result.add(new RelatedItemLineMarkerInfo<PsiElement>(
@@ -72,21 +70,13 @@ public class BnfRuleLineMarkerProvider extends RelatedItemLineMarkerProvider {
   }
 
   @Nullable
-  private static PsiMethod getMethod(PsiElement element) {
+  private static NavigatablePsiElement getMethod(PsiElement element) {
     BnfRule rule = PsiTreeUtil.getParentOfType(element, BnfRule.class);
     if (rule == null) return null;
     Project project = element.getProject();
     String parserClass = ParserGeneratorUtil.getAttribute(rule, "parserClass", "");
-    PsiClass aClass = StringUtil.isEmpty(parserClass)? null : JavaPsiFacade
-      .getInstance(project).findClass(parserClass, GlobalSearchScope.allScope(project));
-    if (aClass != null) {
-      String name = getMethodName(rule, element);
-      PsiMethod[] methods = aClass.findMethodsByName(name, false);
-      if (methods.length == 1) {
-        return methods[0];
-      }
-    }
-    return null;
+    if (StringUtil.isEmpty(parserClass)) return null;
+    return JavaHelper.getJavaHelper(project).findClassMethod(parserClass, getMethodName(rule, element));
   }
 
   public static String getMethodName(BnfRule rule, PsiElement element) {
@@ -126,7 +116,7 @@ public class BnfRuleLineMarkerProvider extends RelatedItemLineMarkerProvider {
   private static class MyNavHandler implements GutterIconNavigationHandler<PsiElement> {
     @Override
     public void navigate(MouseEvent e, PsiElement elt) {
-      PsiMethod method = getMethod(elt);
+      NavigatablePsiElement method = getMethod(elt);
       if (method != null) {
         method.navigate(true);
       }

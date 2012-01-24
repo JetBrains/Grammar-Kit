@@ -20,11 +20,14 @@ import com.intellij.codeInsight.lookup.LookupElementBuilder;
 import com.intellij.openapi.util.Iconable;
 import com.intellij.openapi.util.Ref;
 import com.intellij.openapi.util.TextRange;
+import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.psi.*;
 import com.intellij.psi.impl.source.resolve.ResolveCache;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.util.Processor;
 import com.intellij.util.containers.ContainerUtil;
+import org.intellij.grammar.generator.ParserGeneratorUtil;
+import org.intellij.grammar.java.JavaHelper;
 import org.intellij.grammar.psi.*;
 import org.jetbrains.annotations.NotNull;
 
@@ -66,6 +69,13 @@ public class BnfReferenceImpl<T extends PsiElement> extends PsiReferenceBase<T> 
         return true;
       }
     });
+    if (result.isNull() && GrammarUtil.isExternalReference(myElement)) {
+      BnfRule rule = PsiTreeUtil.getParentOfType(myElement, BnfRule.class);
+      String parserClass = ParserGeneratorUtil.getAttribute(rule, "stubParserClass", "");
+      if (StringUtil.isNotEmpty(parserClass)) {
+        result.set(JavaHelper.getJavaHelper(myElement.getProject()).findClassMethod(parserClass, myElement.getText()));
+      }
+    }
     return result.get();
   }
 

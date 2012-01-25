@@ -17,7 +17,6 @@ package org.intellij.grammar.generator;
 
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiReference;
 import com.intellij.psi.TokenType;
 import com.intellij.psi.impl.source.tree.LeafPsiElement;
 import com.intellij.psi.tree.IElementType;
@@ -30,6 +29,8 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
+
+import static org.intellij.grammar.psi.BnfTypes.BNF_SEQUENCE;
 
 /**
  * @author gregory
@@ -245,6 +246,25 @@ public class ParserGeneratorUtil {
     
     public static BnfRule of(BnfExpression expr) {
       return PsiTreeUtil.getParentOfType(expr, BnfRule.class);
+    }
+  }
+  
+  public static class PinMatcher {
+
+    public final Object pinValue;
+    private final int pinIndex;
+    private final Pattern pinPattern;
+
+    public PinMatcher(BnfRule rule, IElementType type, String funcName) {
+      pinValue = type == BNF_SEQUENCE ? getAttribute(rule, "pin", null, funcName) : null;
+      pinIndex = pinValue instanceof Integer ? (Integer)pinValue : -1;
+      pinPattern = pinValue instanceof String? Pattern.compile(StringUtil.unescapeStringCharacters((String)pinValue)) : null;
+    }
+
+    boolean active() { return pinIndex > -1 || pinPattern != null; }
+
+    public boolean matches(int i, BnfExpression child) {
+      return  i == pinIndex - 1 || pinPattern != null && pinPattern.matcher(child.getText()).matches();
     }
   }
 }

@@ -15,7 +15,6 @@
  */
 package org.intellij.grammar.generator;
 
-import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiReference;
 import com.intellij.psi.search.searches.ReferencesSearch;
@@ -24,7 +23,6 @@ import org.intellij.grammar.psi.*;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
-import java.util.regex.Pattern;
 
 import static org.intellij.grammar.generator.ParserGeneratorUtil.*;
 import static org.intellij.grammar.generator.RuleGraphHelper.Cardinality.*;
@@ -140,9 +138,7 @@ public class RuleGraphHelper {
     else {
       IElementType type = getEffectiveType(tree);
       boolean firstNonTrivial = tree == Rule.firstNotTrivial(rule);
-      final Object pinValue = type == BNF_SEQUENCE ? getAttribute(rule, "pin", null, firstNonTrivial ? rule.getName() : funcName) : null;
-      final int pinIndex = pinValue instanceof Integer ? (Integer)pinValue : -1;
-      final Pattern pinPattern = pinValue instanceof String ? Pattern.compile(StringUtil.unescapeStringCharacters((String)pinValue)) : null;
+      PinMatcher pinMatcher = new PinMatcher(rule, type, firstNonTrivial ? rule.getName() : funcName);
       boolean pinApplied = false;
 
       List<Map<PsiElement, Cardinality>> list = new ArrayList<Map<PsiElement, Cardinality>>();
@@ -154,7 +150,7 @@ public class RuleGraphHelper {
           nextMap = joinMaps(tree, BnfTypes.BNF_OP_OPT, Collections.singletonList(nextMap));
         }
         list.add(nextMap);
-        if (type == BNF_SEQUENCE && !pinApplied && (i == pinIndex - 1 || pinPattern != null && pinPattern.matcher(child.getText()).matches())) {
+        if (type == BNF_SEQUENCE && !pinApplied && pinMatcher.matches(i, child)) {
           pinApplied = true;
         }
       }

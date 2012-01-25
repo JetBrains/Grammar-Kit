@@ -50,7 +50,7 @@ import java.io.File;
  */
 public class GenerateAction extends AnAction {
   
-  private static Logger LOG = Logger.getInstance("org.intellij.grammar.actions.GenerateAction");
+  private static final Logger LOG = Logger.getInstance("org.intellij.grammar.actions.GenerateAction");
 
   @Override
   public void update(AnActionEvent e) {
@@ -113,7 +113,7 @@ public class GenerateAction extends AnAction {
                                                           file.getName() + " parser generation failed",
                                                           ExceptionUtil.getUserStackTrace(ex, ParserGenerator.LOG),
                                                           NotificationType.ERROR), project);
-                LOG.error(ex);
+                LOG.warn(ex);
               }
             }
           }

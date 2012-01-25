@@ -36,7 +36,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.*;
 import java.util.*;
-import java.util.regex.Pattern;
 
 import static org.intellij.grammar.generator.ParserGeneratorUtil.*;
 import static org.intellij.grammar.generator.RuleGraphHelper.Cardinality.*;
@@ -538,16 +537,13 @@ public class ParserGenerator {
     if (generateMemoizationCode) {
       out("if (memoizedFalseBranch(builder_, " + funcId + "L) return false;");
     }
-
-    final Object pinValue = type == BNF_SEQUENCE ? getAttribute(rule, "pin", null, firstNonTrivial? rule.getName() : funcName) : null;
-    final int pinIndex = pinValue instanceof Integer ? (Integer)pinValue : -1;
-    final Pattern pinPattern = pinValue instanceof String ? Pattern.compile(StringUtil.unescapeStringCharacters((String)pinValue)) : null;
+    PinMatcher pinMatcher = new PinMatcher(rule, type, firstNonTrivial ? rule.getName() : funcName);
     boolean pinApplied = false;
     final boolean alwaysTrue = type == BNF_OP_OPT || type == BNF_OP_ZEROMORE;
     if (!alwaysTrue) {
       out("boolean result_ = " + (type == BNF_OP_ZEROMORE || type == BNF_OP_OPT) + ";");
     }
-    boolean pinned = pinIndex > -1 || pinPattern != null;
+    boolean pinned = pinMatcher.active();
     if (pinned) {
       out("boolean pinned_ = false;");
     }
@@ -606,10 +602,10 @@ public class ParserGenerator {
         else {
           out("result_ = " + nodeCall + ";");
         }
-        if (!pinApplied && (i == pinIndex - 1 || pinPattern != null && pinPattern.matcher(child.getText()).matches())) {
+        if (!pinApplied && pinMatcher.matches(i, child)) {
           pinApplied = true;
           p = i;
-          out("pinned_ = result_; // pin = " + pinValue);
+          out("pinned_ = result_; // pin = " + pinMatcher.pinValue);
         }
       }
       else if (type == BNF_OP_OPT) {

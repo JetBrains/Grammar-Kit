@@ -18,16 +18,13 @@ package org.intellij.grammar.editor;
 import com.intellij.lang.annotation.AnnotationHolder;
 import com.intellij.lang.annotation.Annotator;
 import com.intellij.openapi.util.TextRange;
-import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.tree.IElementType;
 import org.intellij.grammar.generator.ParserGeneratorUtil;
 import org.intellij.grammar.psi.*;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Collections;
 import java.util.List;
-import java.util.regex.Pattern;
 
 import static org.intellij.grammar.generator.ParserGeneratorUtil.*;
 import static org.intellij.grammar.psi.BnfTypes.BNF_SEQUENCE;
@@ -50,15 +47,13 @@ public class BnfPinMarkerAnnotator implements Annotator {
 
     IElementType type = getEffectiveType(tree);
     boolean firstNonTrivial = tree == ParserGeneratorUtil.Rule.firstNotTrivial(rule);
-    final Object pinValue = type == BNF_SEQUENCE ? getAttribute(rule, "pin", null, firstNonTrivial ? rule.getName() : funcName) : null;
-    final int pinIndex = pinValue instanceof Integer ? (Integer)pinValue : -1;
-    final Pattern pinPattern = pinValue instanceof String ? Pattern.compile(StringUtil.unescapeStringCharacters((String) pinValue)) : null;
+    PinMatcher pinMatcher = new PinMatcher(rule, type, firstNonTrivial ? rule.getName() : funcName);
     boolean pinApplied = false;
     for (int i = 0, childExpressionsSize = children.size(); i < childExpressionsSize; i++) {
       BnfExpression child = children.get(i);
       boolean isAtomic = isAtomicExpression(child);
       boolean fullRange = isAtomic || !annotateExpression(rule, child, getNextName(funcName, i), annotationHolder);
-      if (type == BNF_SEQUENCE && !pinApplied && (i == pinIndex - 1 || pinPattern != null && pinPattern.matcher(child.getText()).matches())) {
+      if (type == BNF_SEQUENCE && !pinApplied && pinMatcher.matches(i, child)) {
         pinApplied = true;
         TextRange textRange = child.getTextRange();
         TextRange infoRange = fullRange? textRange : new TextRange(Math.max(textRange.getStartOffset(), textRange.getEndOffset() - 5), textRange.getEndOffset());

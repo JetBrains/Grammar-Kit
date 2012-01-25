@@ -20,6 +20,7 @@ import com.intellij.psi.PsiReference;
 import com.intellij.psi.search.searches.ReferencesSearch;
 import com.intellij.psi.tree.IElementType;
 import org.intellij.grammar.psi.*;
+import org.intellij.grammar.psi.impl.GrammarUtil;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -95,7 +96,7 @@ public class RuleGraphHelper {
     BnfRule rule = ruleMap.get(text);
     if (rule == null) return null;
     String superRuleName = getAttribute(rule, "extends", null);
-    if (superRuleName == null) return null;
+    if (superRuleName == null) return rule;
     BnfRule superRule = ruleMap.get(superRuleName);
     return superRule == null ? rule : superRule;
   }
@@ -122,7 +123,10 @@ public class RuleGraphHelper {
     if (tree instanceof BnfReferenceOrToken) {
       BnfRule targetRule = resolveRule(tree.getText());
       if (targetRule != null) {
-        if (Rule.isPrivate(targetRule)) {
+        if (Rule.isExternal(targetRule)) {
+          result = Collections.emptyMap();
+        }
+        else if (Rule.isPrivate(targetRule)) {
           BnfExpression body = targetRule.getExpression();
           Map<PsiElement, Cardinality> map = collectMembers(targetRule, body, targetRule.getName(), visited);
           result = map.containsKey(body) ? joinMaps(tree, BnfTypes.BNF_CHOICE, Arrays.asList(map, map)) : map;
@@ -133,6 +137,47 @@ public class RuleGraphHelper {
       }
       else {
         result = psiMap(tree, REQUIRED);
+      }
+    }
+    else if (tree instanceof BnfExternalExpression) {
+      List<BnfExpression> expressionList = ((BnfExternalExpression)tree).getExpressionList();
+      if (expressionList.size() == 1 && Rule.isMeta(rule)) {
+        result = psiMap(tree, REQUIRED);
+      }
+      else {
+        BnfExpression ruleRef = expressionList.get(0);
+        BnfRule metaRule = resolveRule(ruleRef.getText());
+        if (metaRule == null) {
+          result = Collections.emptyMap();
+        }
+        else if (Rule.isPrivate(metaRule)) {
+          result = new HashMap<PsiElement, Cardinality>();
+          Map<PsiElement, Cardinality> metaResults = collectMembers(rule, ruleRef, funcName, new HashSet<PsiElement>());
+          List<BnfExternalExpression> params = null;
+          for (PsiElement member : metaResults.keySet()) {
+            Cardinality cardinality = metaResults.get(member);
+            if (!(member instanceof BnfExternalExpression)) {
+              result.put(member, cardinality);
+            }
+            else {
+              if (params == null) {
+                params = GrammarUtil.collectExtraArguments(metaRule, metaRule.getExpression());
+              }
+              for (int i = 0, paramsSize = params.size(); i < paramsSize; i++) {
+                BnfExternalExpression param = params.get(i);
+                if (member == param) {
+                  Map<PsiElement, Cardinality> argMap = collectMembers(rule, expressionList.get(i + 1), getNextName(funcName, i), visited);
+                  for (PsiElement element : argMap.keySet()) {
+                    result.put(element, cardinality.and(argMap.get(element)));
+                  }
+                }
+              }
+            }
+          }
+        }
+        else {
+          result = psiMap(metaRule, REQUIRED);
+        }
       }
     }
     else {

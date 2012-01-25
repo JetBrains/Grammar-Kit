@@ -280,7 +280,7 @@ public class ParserGenerator {
     }
     for (String s : ruleName.split("_")) {
       if (s.length() == 0) continue;
-      sb.append(Character.toUpperCase(s.charAt(0))).append(s.substring(1).toLowerCase());
+      sb.append(Character.toUpperCase(s.charAt(0))).append(s.substring(1));
     }
     return sb.toString();
   }

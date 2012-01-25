@@ -1,0 +1,22 @@
+{
+  classHeader="//header.txt"
+  parserClass="PsiGen"
+  stubParserClass="PsiGenUtil"
+  extends(".*expr")="expr"
+  extends("root_.")="root"
+}
+root ::= root_a | root_b | root_c | root_d
+external root_a ::= parseGrammar grammar_element
+root_b ::= <<parseGrammar grammar_element>>
+root_c ::= <<blockOf grammar_element>>
+root_d ::= <<listOf grammar_element>>
+
+meta blockOf ::= <<p>> +
+private meta listOf ::= <<p>> +
+grammar_element ::= expr
+expr ::= a_expr
+a_expr ::= b_expr plus_expr *
+left plus_expr ::= '+' expr
+b_expr ::= id_expr mul_expr *
+left mul_expr ::= '*' expr
+id_expr ::= id

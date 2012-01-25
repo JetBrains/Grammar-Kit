@@ -22,6 +22,7 @@ public class BnfPsiGeneratorTest extends LightCodeInsightFixtureTestCase {
 
   public void testSelf() throws Exception { generate(true); }
   public void testSelf2() throws Exception { generate(true); }
+  public void testPsiGen() throws Exception { generate(true); }
 
 
   public void generate(final boolean generatePsi) throws Exception {

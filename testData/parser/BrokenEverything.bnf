@@ -1,8 +1,11 @@
+dfg
 {
 a = =
 a =
 
 a = sdfdss
+a("")
 }
 
 a ::
+a ::= {x}

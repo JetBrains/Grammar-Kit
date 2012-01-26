@@ -165,7 +165,7 @@ public class BnfFirstNextAnalyzer {
       else {
         BnfExpression ruleRef = expressionList.get(0);
         Set<String> metaResults = calcFirstInner(ruleRef, new LinkedHashSet<String>(), visited);
-        List<BnfExternalExpression> params = null;
+        List<String> params = null;
         for (String str : metaResults) {
           if (!str.startsWith("<<")) {
             result.add(str);
@@ -179,11 +179,9 @@ public class BnfFirstNextAnalyzer {
               }
               params = GrammarUtil.collectExtraArguments(metaRule, metaRule.getExpression());
             }
-            for (int i = 0, paramsSize = params.size(); i < paramsSize; i++) {
-              BnfExternalExpression param = params.get(i);
-              if (str.equals(param.getText())) {
-                calcFirstInner(expressionList.get(i + 1), result, visited);
-              }
+            int idx = params.indexOf(str);
+            if (idx > -1 && idx + 1 < expressionList.size()) {
+              calcFirstInner(expressionList.get(idx + 1), result, visited);
             }
           }
         }

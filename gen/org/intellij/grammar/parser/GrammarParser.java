@@ -118,7 +118,7 @@ public class GrammarParser implements PsiParser {
   }
 
   /* ********************************************************** */
-  // '{' !attr_start expression '}'
+  // '{' !attr_start_simple expression '}'
   static boolean alt_choice_expression(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "alt_choice_expression")) return false;
     boolean result_ = false;
@@ -140,13 +140,13 @@ public class GrammarParser implements PsiParser {
     return result_ || pinned_;
   }
 
-  // !attr_start
+  // !attr_start_simple
   private static boolean alt_choice_expression_1(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "alt_choice_expression_1")) return false;
     boolean result_ = false;
     final Marker marker_ = builder_.mark();
     enterErrorRecordingSection(builder_, level_, _SECTION_NOT_);
-    result_ = !attr_start(builder_, level_ + 1);
+    result_ = !attr_start_simple(builder_, level_ + 1);
     marker_.rollbackTo();
     result_ = exitErrorRecordingSection(builder_, result_, level_, false, _SECTION_NOT_, null);
     return result_;
@@ -186,21 +186,25 @@ public class GrammarParser implements PsiParser {
   public static boolean attr_pattern(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "attr_pattern")) return false;
     boolean result_ = false;
+    boolean pinned_ = false;
     final Marker marker_ = builder_.mark();
+    enterErrorRecordingSection(builder_, level_, _SECTION_GENERAL_);
     result_ = consumeToken(builder_, BNF_LEFT_PAREN);
-    result_ = result_ && string_literal_expression(builder_, level_ + 1);
-    result_ = result_ && consumeToken(builder_, BNF_RIGHT_PAREN);
-    if (result_) {
+    pinned_ = result_; // pin = 1
+    result_ = result_ && report_error_(builder_, string_literal_expression(builder_, level_ + 1));
+    result_ = pinned_ && consumeToken(builder_, BNF_RIGHT_PAREN) && result_;
+    if (result_ || pinned_) {
       marker_.done(BNF_ATTR_PATTERN);
     }
     else {
       marker_.rollbackTo();
     }
-    return result_;
+    result_ = exitErrorRecordingSection(builder_, result_, level_, pinned_, _SECTION_GENERAL_, null);
+    return result_ || pinned_;
   }
 
   /* ********************************************************** */
-  // !('}'|attr_start)
+  // !('}' | attr_start)
   static boolean attr_recover_until(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "attr_recover_until")) return false;
     boolean result_ = false;
@@ -212,13 +216,13 @@ public class GrammarParser implements PsiParser {
     return result_;
   }
 
-  // ('}'|attr_start)
+  // ('}' | attr_start)
   private static boolean attr_recover_until_0(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "attr_recover_until_0")) return false;
     return attr_recover_until_0_0(builder_, level_ + 1);
   }
 
-  // '}'|attr_start
+  // '}' | attr_start
   private static boolean attr_recover_until_0_0(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "attr_recover_until_0_0")) return false;
     boolean result_ = false;
@@ -235,13 +239,75 @@ public class GrammarParser implements PsiParser {
   }
 
   /* ********************************************************** */
-  // id attr_pattern? '='
+  // id (attr_pattern '=' | '=')
   static boolean attr_start(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "attr_start")) return false;
     boolean result_ = false;
+    boolean pinned_ = false;
     final Marker marker_ = builder_.mark();
+    enterErrorRecordingSection(builder_, level_, _SECTION_GENERAL_);
     result_ = consumeToken(builder_, BNF_ID);
     result_ = result_ && attr_start_1(builder_, level_ + 1);
+    if (!result_ && !pinned_) {
+      marker_.rollbackTo();
+    }
+    else {
+      marker_.drop();
+    }
+    result_ = exitErrorRecordingSection(builder_, result_, level_, pinned_, _SECTION_GENERAL_, null);
+    return result_ || pinned_;
+  }
+
+  // (attr_pattern '=' | '=')
+  private static boolean attr_start_1(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "attr_start_1")) return false;
+    return attr_start_1_0(builder_, level_ + 1);
+  }
+
+  // attr_pattern '=' | '='
+  private static boolean attr_start_1_0(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "attr_start_1_0")) return false;
+    boolean result_ = false;
+    final Marker marker_ = builder_.mark();
+    result_ = attr_start_1_0_0(builder_, level_ + 1);
+    if (!result_) result_ = consumeToken(builder_, BNF_OP_EQ);
+    if (!result_) {
+      marker_.rollbackTo();
+    }
+    else {
+      marker_.drop();
+    }
+    return result_;
+  }
+
+  // attr_pattern '='
+  private static boolean attr_start_1_0_0(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "attr_start_1_0_0")) return false;
+    boolean result_ = false;
+    boolean pinned_ = false;
+    final Marker marker_ = builder_.mark();
+    enterErrorRecordingSection(builder_, level_, _SECTION_GENERAL_);
+    result_ = attr_pattern(builder_, level_ + 1);
+    pinned_ = result_; // pin = attr_pattern
+    result_ = result_ && consumeToken(builder_, BNF_OP_EQ);
+    if (!result_ && !pinned_) {
+      marker_.rollbackTo();
+    }
+    else {
+      marker_.drop();
+    }
+    result_ = exitErrorRecordingSection(builder_, result_, level_, pinned_, _SECTION_GENERAL_, null);
+    return result_ || pinned_;
+  }
+
+  /* ********************************************************** */
+  // id attr_pattern? '='
+  static boolean attr_start_simple(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "attr_start_simple")) return false;
+    boolean result_ = false;
+    final Marker marker_ = builder_.mark();
+    result_ = consumeToken(builder_, BNF_ID);
+    result_ = result_ && attr_start_simple_1(builder_, level_ + 1);
     result_ = result_ && consumeToken(builder_, BNF_OP_EQ);
     if (!result_) {
       marker_.rollbackTo();
@@ -253,8 +319,8 @@ public class GrammarParser implements PsiParser {
   }
 
   // attr_pattern?
-  private static boolean attr_start_1(PsiBuilder builder_, int level_) {
-    if (!recursion_guard_(builder_, level_, "attr_start_1")) return false;
+  private static boolean attr_start_simple_1(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "attr_start_simple_1")) return false;
     attr_pattern(builder_, level_ + 1);
     return true;
   }

@@ -19,6 +19,7 @@ import com.intellij.openapi.util.Ref;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiRecursiveElementWalkingVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
+import com.intellij.util.SmartList;
 import gnu.trove.THashSet;
 import org.intellij.grammar.generator.ParserGeneratorUtil;
 import org.intellij.grammar.parser.GeneratedParserUtilBase;
@@ -94,10 +95,9 @@ public class GrammarUtil {
     return result;
   }
 
-  public static List<BnfExternalExpression> collectExtraArguments(BnfRule rule, BnfExpression expression) {
+  public static List<String> collectExtraArguments(BnfRule rule, BnfExpression expression) {
     if (!ParserGeneratorUtil.Rule.isMeta(rule)) return Collections.emptyList();
-    final Ref<List<BnfExternalExpression>> ref = Ref.create(null);
-    final Set<String> visited = new THashSet<String>();
+    final SmartList<String> result = new SmartList<String>();
     expression.accept(new PsiRecursiveElementWalkingVisitor() {
       @Override
       public void visitElement(PsiElement element) {
@@ -105,16 +105,15 @@ public class GrammarUtil {
           BnfExternalExpression expr = (BnfExternalExpression)element;
           List<BnfExpression> list = expr.getExpressionList();
           if (list.size() == 1) {
-            String text = list.get(0).getText();
-            if (visited.add(text)) {
-              if (ref.isNull()) ref.set(new ArrayList<BnfExternalExpression>(3));
-              ref.get().add(expr);
+            String text = "<<"+list.get(0).getText() +">>";
+            if (!result.contains(text)) {
+              result.add(text);
             }
           }
         }
         super.visitElement(element);
       }
     });
-    return ref.isNull()? Collections.<BnfExternalExpression>emptyList() : ref.get();
+    return result;
   }
 }

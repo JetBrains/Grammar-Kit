@@ -30,9 +30,9 @@ public class BnfAttrPatternImpl extends BnfCompositeElementImpl implements BnfAt
   }
 
   @Override
-  @NotNull
+  @Nullable
   public BnfLiteralExpression getLiteralExpression() {
-    return findNotNullChildByClass(BnfLiteralExpression.class);
+    return findChildByClass(BnfLiteralExpression.class);
   }
 
 }

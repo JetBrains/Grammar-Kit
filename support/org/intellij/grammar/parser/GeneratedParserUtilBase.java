@@ -232,7 +232,11 @@ public class GeneratedParserUtilBase {
     }
     if (sectionType == _SECTION_RECOVER_ && !state.suppressErrors && eatMore != null) {
       state.suppressErrors = true;
-      final LighterASTNode latestDoneMarker = result || pinned ? builder_.getLatestDoneMarker() : null;
+      final boolean eatMoreFlagOnce = !builder_.eof() && eatMore.parse(builder_, frame.level + 1);
+      final int lastErrorPos = getLastVariantOffset(state, true, initialOffset);
+      boolean eatMoreFlag = eatMoreFlagOnce || frame.offset == initialOffset && lastErrorPos > frame.offset;
+
+      final LighterASTNode latestDoneMarker = (result || pinned) && eatMoreFlagOnce ? builder_.getLatestDoneMarker() : null;
       PsiBuilder.Marker extensionMarker = null;
       IElementType extensionTokenType = null;
       if (latestDoneMarker instanceof PsiBuilder.Marker) {
@@ -240,9 +244,6 @@ public class GeneratedParserUtilBase {
         extensionTokenType = latestDoneMarker.getTokenType();
         ((PsiBuilder.Marker)latestDoneMarker).drop();
       }
-      final boolean eatMoreFlagOnce = !builder_.eof() && eatMore.parse(builder_, frame.level + 1);
-      final int lastErrorPos = getLastVariantOffset(state, true, initialOffset);
-      boolean eatMoreFlag = eatMoreFlagOnce || frame.offset == initialOffset && lastErrorPos > frame.offset;
       // advance to the last error pos
       // skip tokens until lastErrorPos. parseAsTree might look better here...
       int parenCount = 0;
@@ -281,6 +282,7 @@ public class GeneratedParserUtilBase {
       if (errorReported || result) {
         state.clearExpectedVariants();
       }
+      if (!result && eatMoreFlagOnce && frame.offset != builder_.getCurrentOffset()) result = true;
     }
     else if (!result && pinned && frame.errorReportedAt < 0) {
       // do not report if there're errors after current offset

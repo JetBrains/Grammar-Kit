@@ -736,11 +736,11 @@ public class ParserGenerator {
   }
 
   private static String collectExtraArguments(BnfRule rule, BnfExpression expression, final boolean declaration) {
-    List<BnfExternalExpression> params = GrammarUtil.collectExtraArguments(rule, expression);
+    List<String> params = GrammarUtil.collectExtraArguments(rule, expression);
     if (params.isEmpty()) return "";
     final StringBuilder sb = new StringBuilder();
-    for (BnfExternalExpression param : params) {
-      sb.append(", " + (declaration ? "final Parser " : "") + param.getExpressionList().get(0).getText());
+    for (String param : params) {
+      sb.append(", " + (declaration ? "final Parser " : "") + param.substring(2, param.length()-2));
     }
     return sb.toString();
   }

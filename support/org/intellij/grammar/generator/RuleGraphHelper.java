@@ -153,7 +153,7 @@ public class RuleGraphHelper {
         else if (Rule.isPrivate(metaRule)) {
           result = new HashMap<PsiElement, Cardinality>();
           Map<PsiElement, Cardinality> metaResults = collectMembers(rule, ruleRef, funcName, new HashSet<PsiElement>());
-          List<BnfExternalExpression> params = null;
+          List<String> params = null;
           for (PsiElement member : metaResults.keySet()) {
             Cardinality cardinality = metaResults.get(member);
             if (!(member instanceof BnfExternalExpression)) {
@@ -163,13 +163,11 @@ public class RuleGraphHelper {
               if (params == null) {
                 params = GrammarUtil.collectExtraArguments(metaRule, metaRule.getExpression());
               }
-              for (int i = 0, paramsSize = params.size(); i < paramsSize; i++) {
-                BnfExternalExpression param = params.get(i);
-                if (member == param) {
-                  Map<PsiElement, Cardinality> argMap = collectMembers(rule, expressionList.get(i + 1), getNextName(funcName, i), visited);
-                  for (PsiElement element : argMap.keySet()) {
-                    result.put(element, cardinality.and(argMap.get(element)));
-                  }
+              int idx = params.indexOf(member.getText());
+              if (idx > -1 && idx + 1 < expressionList.size()) {
+                Map<PsiElement, Cardinality> argMap = collectMembers(rule, expressionList.get(idx + 1), getNextName(funcName, idx), visited);
+                for (PsiElement element : argMap.keySet()) {
+                  result.put(element, cardinality.and(argMap.get(element)));
                 }
               }
             }

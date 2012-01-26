@@ -106,7 +106,8 @@ public class ParserGeneratorUtil {
           if (ruleName == null) break;
         }
         else if (ruleName != null) {
-          if (Pattern.matches(StringUtil.stripQuotesAroundValue(attrPattern.getLiteralExpression().getText()), ruleName)) {
+          BnfLiteralExpression pattern = attrPattern.getLiteralExpression();
+          if (pattern != null && Pattern.matches(StringUtil.stripQuotesAroundValue(pattern.getText()), ruleName)) {
             return attrValue;
           }
         }

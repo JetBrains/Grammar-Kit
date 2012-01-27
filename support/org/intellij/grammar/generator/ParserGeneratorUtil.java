@@ -29,6 +29,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
 import static org.intellij.grammar.psi.BnfTypes.BNF_SEQUENCE;
 
@@ -107,8 +108,13 @@ public class ParserGeneratorUtil {
         }
         else if (ruleName != null) {
           BnfLiteralExpression pattern = attrPattern.getLiteralExpression();
-          if (pattern != null && Pattern.matches(StringUtil.stripQuotesAroundValue(pattern.getText()), ruleName)) {
-            return attrValue;
+          try {
+            if (pattern != null && Pattern.matches(StringUtil.stripQuotesAroundValue(pattern.getText()), ruleName)) {
+              return attrValue;
+            }
+          }
+          catch (PatternSyntaxException e) {
+            // do nothing
           }
         }
       }

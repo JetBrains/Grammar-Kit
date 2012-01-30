@@ -139,6 +139,7 @@ public class Self implements PsiParser {
   // '(' string ')'
   public static boolean attr_pattern(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "attr_pattern")) return false;
+    if (!nextTokenIs(builder_, BNF_LEFT_PAREN)) return false;
     boolean result_ = false;
     final Marker marker_ = builder_.mark();
     result_ = consumeToken(builder_, BNF_LEFT_PAREN);
@@ -221,6 +222,7 @@ public class Self implements PsiParser {
   // '{' attr* '}'
   public static boolean attrs(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "attrs")) return false;
+    if (!nextTokenIs(builder_, BNF_LEFT_BRACE)) return false;
     boolean result_ = false;
     boolean pinned_ = false;
     final Marker marker_ = builder_.mark();
@@ -369,6 +371,7 @@ public class Self implements PsiParser {
   // '|' sequence
   static boolean choice_tail(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "choice_tail")) return false;
+    if (!nextTokenIs(builder_, BNF_OP_OR)) return false;
     boolean result_ = false;
     boolean pinned_ = false;
     final Marker marker_ = builder_.mark();
@@ -503,6 +506,7 @@ public class Self implements PsiParser {
   // '(' expression ')'
   public static boolean paren_expression(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "paren_expression")) return false;
+    if (!nextTokenIs(builder_, BNF_LEFT_PAREN)) return false;
     boolean result_ = false;
     boolean pinned_ = false;
     final int start_ = builder_.getCurrentOffset();
@@ -655,6 +659,7 @@ public class Self implements PsiParser {
   // id
   public static boolean reference_or_token(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "reference_or_token")) return false;
+    if (!nextTokenIs(builder_, BNF_ID)) return false;
     boolean result_ = false;
     final int start_ = builder_.getCurrentOffset();
     final Marker marker_ = builder_.mark();
@@ -860,6 +865,7 @@ public class Self implements PsiParser {
   // string
   public static boolean string_literal_expression(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "string_literal_expression")) return false;
+    if (!nextTokenIs(builder_, BNF_STRING)) return false;
     boolean result_ = false;
     final int start_ = builder_.getCurrentOffset();
     final Marker marker_ = builder_.mark();

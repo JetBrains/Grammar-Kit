@@ -121,6 +121,7 @@ public class GrammarParser implements PsiParser {
   // '{' !attr_start_simple expression '}'
   static boolean alt_choice_expression(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "alt_choice_expression")) return false;
+    if (!nextTokenIs(builder_, BNF_LEFT_BRACE)) return false;
     boolean result_ = false;
     boolean pinned_ = false;
     final Marker marker_ = builder_.mark();
@@ -185,6 +186,7 @@ public class GrammarParser implements PsiParser {
   // '(' string_literal_expression ')'
   public static boolean attr_pattern(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "attr_pattern")) return false;
+    if (!nextTokenIs(builder_, BNF_LEFT_PAREN)) return false;
     boolean result_ = false;
     boolean pinned_ = false;
     final Marker marker_ = builder_.mark();
@@ -242,6 +244,7 @@ public class GrammarParser implements PsiParser {
   // id (attr_pattern '=' | '=')
   static boolean attr_start(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "attr_start")) return false;
+    if (!nextTokenIs(builder_, BNF_ID)) return false;
     boolean result_ = false;
     boolean pinned_ = false;
     final Marker marker_ = builder_.mark();
@@ -304,6 +307,7 @@ public class GrammarParser implements PsiParser {
   // id attr_pattern? '='
   static boolean attr_start_simple(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "attr_start_simple")) return false;
+    if (!nextTokenIs(builder_, BNF_ID)) return false;
     boolean result_ = false;
     final Marker marker_ = builder_.mark();
     result_ = consumeToken(builder_, BNF_ID);
@@ -380,6 +384,7 @@ public class GrammarParser implements PsiParser {
   // '{' attr * '}'
   public static boolean attrs(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "attrs")) return false;
+    if (!nextTokenIs(builder_, BNF_LEFT_BRACE)) return false;
     boolean result_ = false;
     boolean pinned_ = false;
     final Marker marker_ = builder_.mark();
@@ -418,6 +423,7 @@ public class GrammarParser implements PsiParser {
   // ( '|' sequence ) +
   public static boolean choice(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "choice")) return false;
+    if (!nextTokenIs(builder_, BNF_OP_OR)) return false;
     boolean result_ = false;
     final Marker left_marker_ = (Marker)builder_.getLatestDoneMarker();
     if (!invalid_left_marker_guard_(builder_, left_marker_, "choice")) return false;
@@ -502,6 +508,7 @@ public class GrammarParser implements PsiParser {
   // '<<' reference_or_token option * '>>'
   public static boolean external_expression(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "external_expression")) return false;
+    if (!nextTokenIs(builder_, BNF_EXTERNAL_START)) return false;
     boolean result_ = false;
     boolean pinned_ = false;
     final int start_ = builder_.getCurrentOffset();
@@ -705,6 +712,7 @@ public class GrammarParser implements PsiParser {
   // '[' expression ']'
   public static boolean paren_opt_expression(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "paren_opt_expression")) return false;
+    if (!nextTokenIs(builder_, BNF_LEFT_BRACKET)) return false;
     boolean result_ = false;
     boolean pinned_ = false;
     final int start_ = builder_.getCurrentOffset();
@@ -808,6 +816,7 @@ public class GrammarParser implements PsiParser {
   // id
   public static boolean reference_or_token(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "reference_or_token")) return false;
+    if (!nextTokenIs(builder_, BNF_ID)) return false;
     boolean result_ = false;
     final int start_ = builder_.getCurrentOffset();
     final Marker marker_ = builder_.mark();
@@ -1071,6 +1080,7 @@ public class GrammarParser implements PsiParser {
   // '(' expression ')'
   static boolean simple_paren_expression(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "simple_paren_expression")) return false;
+    if (!nextTokenIs(builder_, BNF_LEFT_PAREN)) return false;
     boolean result_ = false;
     boolean pinned_ = false;
     final Marker marker_ = builder_.mark();
@@ -1093,6 +1103,7 @@ public class GrammarParser implements PsiParser {
   // string
   public static boolean string_literal_expression(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "string_literal_expression")) return false;
+    if (!nextTokenIs(builder_, BNF_STRING)) return false;
     boolean result_ = false;
     final int start_ = builder_.getCurrentOffset();
     final Marker marker_ = builder_.mark();

@@ -79,16 +79,25 @@ public class GeneratedParserUtilBase {
   }
 
   public static boolean consumeToken(PsiBuilder builder_, IElementType token) {
-    ErrorState state = ErrorState.get(builder_);
-    IElementType tokenType = builder_.getTokenType();
-    if (!state.suppressErrors && state.predicateCount < 2) {
-      addVariant(state, builder_, getTokenDescription(token));
-    }
-    if (token == tokenType) {
+    if (nextTokenIsInner(builder_, token, true)) {
       builder_.advanceLexer();
       return true;
     }
     return false;
+  }
+
+  public static boolean nextTokenIs(PsiBuilder builder_, IElementType token) {
+    return nextTokenIsInner(builder_, token, false);
+  }
+
+  public static boolean nextTokenIsInner(PsiBuilder builder_, IElementType token, boolean force) {
+    ErrorState state = ErrorState.get(builder_);
+    if (state.completionState != null && !force) return true;
+    IElementType tokenType = builder_.getTokenType();
+    if (!state.suppressErrors && state.predicateCount < 2) {
+      addVariant(state, builder_, getTokenDescription(token));
+    }
+    return token == tokenType;
   }
 
   private static String getTokenDescription(IElementType token) {

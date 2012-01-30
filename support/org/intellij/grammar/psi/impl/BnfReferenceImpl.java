@@ -17,12 +17,9 @@ package org.intellij.grammar.psi.impl;
 
 import com.intellij.codeInsight.lookup.LookupElement;
 import com.intellij.codeInsight.lookup.LookupElementBuilder;
-import com.intellij.openapi.util.Iconable;
-import com.intellij.openapi.util.Ref;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.psi.*;
-import com.intellij.psi.impl.source.resolve.ResolveCache;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.util.Processor;
 import com.intellij.util.containers.ContainerUtil;
@@ -32,18 +29,13 @@ import org.intellij.grammar.psi.*;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * @author gregsh
  */
-public class BnfReferenceImpl<T extends PsiElement> extends PsiReferenceBase<T> {
-  private static final ResolveCache.Resolver MY_RESOLVER =
-    new ResolveCache.Resolver() {
-      @Override
-      public PsiElement resolve(PsiReference psiReference, boolean incompleteCode) {
-        return ((BnfReferenceImpl)psiReference).resolveInner();
-      }
-    };
+public class BnfReferenceImpl<T extends BnfCompositeElement> extends PsiReferenceBase<T> {
 
   public BnfReferenceImpl(@NotNull T element, TextRange range) {
     super(element, range);
@@ -51,71 +43,39 @@ public class BnfReferenceImpl<T extends PsiElement> extends PsiReferenceBase<T> 
 
   @Override
   public PsiElement resolve() {
-    return ResolveCache.getInstance(myElement.getProject()).resolveWithCaching(this, MY_RESOLVER, true, false);
-  }
-
-  private PsiElement resolveInner() {
-    final Ref<PsiElement> result = Ref.create(null);
-    final String text = getRangeInElement().substring(myElement.getText());
-    processResolveVariants(new Processor<PsiElement>() {
-      @Override
-      public boolean process(PsiElement psiElement) {
-        if (psiElement instanceof PsiNamedElement) {
-          if (text.equals(((PsiNamedElement)psiElement).getName())) {
-            result.set(psiElement);
-            return false;
-          }
-        }
-        return true;
-      }
-    });
-    if (result.isNull() && GrammarUtil.isExternalReference(myElement)) {
+    PsiFile containingFile = myElement.getContainingFile();
+    String referenceName = getRangeInElement().substring(myElement.getText());
+    PsiElement result = containingFile instanceof BnfFile? ((BnfFile)containingFile).getRule(referenceName) : null;
+    if (result == null && GrammarUtil.isExternalReference(myElement)) {
       BnfRule rule = PsiTreeUtil.getParentOfType(myElement, BnfRule.class);
       String parserClass = ParserGeneratorUtil.getAttribute(rule, "stubParserClass", "");
       if (StringUtil.isNotEmpty(parserClass)) {
-        result.set(JavaHelper.getJavaHelper(myElement.getProject()).findClassMethod(parserClass, myElement.getText()));
+        result = JavaHelper.getJavaHelper(myElement.getProject()).findClassMethod(parserClass, myElement.getText());
       }
     }
-    return result.get();
+    return result;
   }
+
 
   @NotNull
   @Override
   public Object[] getVariants() {
     final ArrayList<LookupElement> list = new ArrayList<LookupElement>();
-    processResolveVariants(new Processor<PsiElement>() {
-      @Override
-      public boolean process(PsiElement psiElement) {
-        if (psiElement instanceof BnfNamedElement) {
-          LookupElementBuilder builder = LookupElementBuilder.create((PsiNamedElement) psiElement).
-                  setIcon(psiElement.getIcon(Iconable.ICON_FLAG_OPEN));
-          list.add(psiElement instanceof BnfRule? builder.setBold() : builder);
+    PsiFile containingFile = myElement.getContainingFile();
+    List<BnfRule> rules = containingFile instanceof BnfFile ? ((BnfFile)containingFile).getRules() : Collections.<BnfRule>emptyList();
+    for (BnfRule rule : rules) {
+      list.add(LookupElementBuilder.create(rule).setBold());
+    }
+    if (GrammarUtil.isExternalReference(myElement)) {
+      BnfRule rule = PsiTreeUtil.getParentOfType(myElement, BnfRule.class);
+      String parserClass = ParserGeneratorUtil.getAttribute(rule, "stubParserClass", "");
+      if (StringUtil.isNotEmpty(parserClass)) {
+        for (NavigatablePsiElement element : JavaHelper.getJavaHelper(myElement.getProject()).getClassMethods(parserClass)) {
+          list.add(LookupElementBuilder.create((PsiNamedElement)element).setIcon(element.getIcon(0)));
         }
-        return true;
       }
-    });
+    }
     return list.toArray(new Object[list.size()]);
-  }
-
-  private void processResolveVariants(final Processor<PsiElement> processor) {
-    PsiFile file = myElement.getContainingFile();
-    if (!(file instanceof BnfFile)) return;
-    final boolean ruleMode = myElement instanceof BnfStringLiteralExpression;
-
-    BnfAttrs attrs = PsiTreeUtil.getParentOfType(myElement, BnfAttrs.class);
-    if (attrs != null && !ruleMode) {
-      if (!ContainerUtil.process(attrs.getChildren(), processor)) return;
-      final int textOffset = myElement.getTextOffset();
-      ContainerUtil.process(((BnfFile)file).getAttributes(), new Processor<BnfAttrs>() {
-        @Override
-        public boolean process(BnfAttrs attrs) {
-          return attrs.getTextOffset() <= textOffset && ContainerUtil.process(attrs.getAttrList(), processor);
-        }
-      });
-    }
-    else {
-      ContainerUtil.process(((BnfFile)file).getRules(), processor);
-    }
   }
 
 }

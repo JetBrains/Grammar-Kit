@@ -66,6 +66,7 @@ public class Autopin implements PsiParser {
   // create_table_statement
   public static boolean create_statement(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "create_statement")) return false;
+    if (!nextTokenIs(builder_, CREATE)) return false;
     boolean result_ = false;
     final int start_ = builder_.getCurrentOffset();
     final Marker marker_ = builder_.mark();
@@ -87,6 +88,7 @@ public class Autopin implements PsiParser {
   // CREATE TEMP? (GLOBAL|LOCAL) TABLE table_ref '(' ')'
   public static boolean create_table_statement(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "create_table_statement")) return false;
+    if (!nextTokenIs(builder_, CREATE)) return false;
     boolean result_ = false;
     boolean pinned_ = false;
     final int start_ = builder_.getCurrentOffset();
@@ -147,6 +149,7 @@ public class Autopin implements PsiParser {
   // drop_table_statement
   public static boolean drop_statement(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "drop_statement")) return false;
+    if (!nextTokenIs(builder_, DROP)) return false;
     boolean result_ = false;
     final int start_ = builder_.getCurrentOffset();
     final Marker marker_ = builder_.mark();
@@ -168,6 +171,7 @@ public class Autopin implements PsiParser {
   // DROP TABLE table_ref
   public static boolean drop_table_statement(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "drop_table_statement")) return false;
+    if (!nextTokenIs(builder_, DROP)) return false;
     boolean result_ = false;
     boolean pinned_ = false;
     final int start_ = builder_.getCurrentOffset();
@@ -195,6 +199,7 @@ public class Autopin implements PsiParser {
   // a b (c d e)
   public static boolean override_nested_sequence(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "override_nested_sequence")) return false;
+    if (!nextTokenIs(builder_, A)) return false;
     boolean result_ = false;
     boolean pinned_ = false;
     final Marker marker_ = builder_.mark();

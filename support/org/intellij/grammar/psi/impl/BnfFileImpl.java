@@ -23,6 +23,7 @@ import com.intellij.psi.util.CachedValue;
 import com.intellij.psi.util.CachedValueProvider;
 import com.intellij.psi.util.CachedValuesManager;
 import com.intellij.util.Processor;
+import gnu.trove.THashMap;
 import org.intellij.grammar.BnfFileType;
 import org.intellij.grammar.BnfLanguage;
 import org.intellij.grammar.parser.GeneratedParserUtilBase;
@@ -30,9 +31,11 @@ import org.intellij.grammar.psi.BnfAttrs;
 import org.intellij.grammar.psi.BnfFile;
 import org.intellij.grammar.psi.BnfRule;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * User: gregory
@@ -42,6 +45,7 @@ import java.util.List;
 public class BnfFileImpl extends PsiFileBase implements BnfFile {
   
   private CachedValue<List<BnfRule>> myRulesValue;
+  private CachedValue<Map<String, BnfRule>> myNamesMap;
   private CachedValue<List<BnfAttrs>> myAttributesValue;
 
   public BnfFileImpl(FileViewProvider fileViewProvider) {
@@ -59,6 +63,24 @@ public class BnfFileImpl extends PsiFileBase implements BnfFile {
       }, false);
     }
     return myRulesValue.getValue();
+  }
+
+  @Nullable
+  @Override
+  public BnfRule getRule(String ruleName) {
+    if (myNamesMap == null) {
+      myNamesMap = CachedValuesManager.getManager(getProject()).createCachedValue(new CachedValueProvider<Map<String, BnfRule>>() {
+        @Override
+        public Result<Map<String, BnfRule>> compute() {
+          Map<String, BnfRule> map = new THashMap<String, BnfRule>();
+          for (BnfRule rule : getRules()) {
+            map.put(rule.getName(), rule);
+          }
+          return Result.create(map, BnfFileImpl.this);
+        }
+      }, false);
+    }
+    return myNamesMap.getValue().get(ruleName);
   }
 
   @Override

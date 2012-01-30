@@ -52,6 +52,7 @@ public class Small implements PsiParser {
   // ( token )
   public static boolean otherRule(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "otherRule")) return false;
+    if (!nextTokenIs(builder_, TOKEN)) return false;
     boolean result_ = false;
     final Marker marker_ = builder_.mark();
     result_ = consumeToken(builder_, TOKEN);
@@ -80,6 +81,7 @@ public class Small implements PsiParser {
   // token
   public static boolean someRule(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "someRule")) return false;
+    if (!nextTokenIs(builder_, TOKEN)) return false;
     boolean result_ = false;
     final Marker marker_ = builder_.mark();
     result_ = consumeToken(builder_, TOKEN);
@@ -140,6 +142,7 @@ public class Small implements PsiParser {
   // '=' "="
   static boolean tokenRule(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "tokenRule")) return false;
+    if (!nextTokenIs(builder_, OP_EQ)) return false;
     boolean result_ = false;
     final Marker marker_ = builder_.mark();
     result_ = consumeToken(builder_, OP_EQ);

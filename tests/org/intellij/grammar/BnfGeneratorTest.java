@@ -1,5 +1,19 @@
 package org.intellij.grammar;
 
+import com.intellij.lang.injection.InjectedLanguageManager;
+import com.intellij.openapi.Disposable;
+import com.intellij.openapi.extensions.Extensions;
+import com.intellij.openapi.project.DumbService;
+import com.intellij.openapi.project.DumbServiceImpl;
+import com.intellij.openapi.util.Disposer;
+import com.intellij.openapi.util.io.FileUtil;
+import com.intellij.psi.PsiReferenceService;
+import com.intellij.psi.PsiReferenceServiceImpl;
+import com.intellij.psi.impl.search.CachesBasedRefSearcher;
+import com.intellij.psi.impl.search.PsiSearchHelperImpl;
+import com.intellij.psi.impl.source.tree.injected.InjectedLanguageManagerImpl;
+import com.intellij.psi.search.PsiSearchHelper;
+import com.intellij.psi.search.searches.ReferencesSearch;
 import com.intellij.testFramework.ParsingTestCase;
 import org.intellij.grammar.generator.ParserGenerator;
 import org.intellij.grammar.psi.impl.BnfFileImpl;
@@ -7,6 +21,8 @@ import org.intellij.grammar.psi.impl.BnfFileImpl;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author gregsh
@@ -21,42 +37,74 @@ public class BnfGeneratorTest extends ParsingTestCase {
     return "testData";
   }
 
-  public void testSelf() throws Exception { doTest(); }
-  public void testSelf2() throws Exception { doTest(); }
-  public void testSmall() throws Exception { doTest(); }
-  public void testAutopin() throws Exception { doTest(); }
-  public void testExternalRules() throws Exception { doTest(); }
-  public void testLeftAssociative() throws Exception { doTest(); }
+  @Override
+  protected void setUp() throws Exception {
+    super.setUp();
+    Extensions.getRootArea().registerExtensionPoint("com.intellij.referencesSearch", "com.intellij.util.QueryExecutor");
+    Extensions.getRootArea().registerExtensionPoint("com.intellij.useScopeEnlarger", "com.intellij.psi.search.UseScopeEnlarger");
+    Extensions.getRootArea().registerExtensionPoint("com.intellij.languageInjector", "com.intellij.psi.LanguageInjector");
+    Extensions.getArea(getProject()).registerExtensionPoint("com.intellij.multiHostInjector", "com.intellij.lang.injection.MultiHostInjector");
+    Extensions.getRootArea().getExtensionPoint("com.intellij.referencesSearch").registerExtension(new CachesBasedRefSearcher());
+    registerApplicationService(PsiReferenceService.class, new PsiReferenceServiceImpl());
+    getProject().registerService(PsiSearchHelper.class, new PsiSearchHelperImpl(getPsiManager()));
+    getProject().registerService(DumbService.class, new DumbServiceImpl(getProject(), getProject().getMessageBus()));
+    InjectedLanguageManagerImpl languageManager = new InjectedLanguageManagerImpl(getProject(), DumbService.getInstance(getProject()));
+    Disposer.register(getProject(), languageManager);
+    getProject().registerService(InjectedLanguageManager.class, languageManager);
+  }
 
-  public void doTest() throws Exception {
+  public void testSelf() throws Exception { doGenTest(true); }
+  public void testSelf2() throws Exception { doGenTest(true); }
+  public void testSmall() throws Exception { doGenTest(false); }
+  public void testAutopin() throws Exception { doGenTest(false); }
+  public void testExternalRules() throws Exception { doGenTest(false); }
+  public void testLeftAssociative() throws Exception { doGenTest(false); }
+  public void testPsiGen() throws Exception { doGenTest(true); }
+
+  public void doGenTest(final boolean generatePsi) throws Exception {
     final String name = getTestName(false);
     String text = loadFile(name + "." + myFileExt);
-    myFile = createPsiFile(name, text.replaceAll("parserClass=\"[^\"]*\"", "parserClass=\""+name+"\" generatePsi=false"));
-    final File file = new File(myFullDataPath + File.separator + name + ".java");
-    if (file.exists()) {
-      assertTrue(file.delete());
+    myFile = createPsiFile(name, text.replaceAll("parserClass=\"[^\"]*\"", "parserClass=\"" + name + "\" generatePsi=" + generatePsi));
+    List<File> filesToCheck = new ArrayList<File>();
+    filesToCheck.add(new File(myFullDataPath, name + ".java"));
+    if (generatePsi) {
+      filesToCheck.add(new File(myFullDataPath, name + ".PSI.java"));
     }
-    new ParserGenerator((BnfFileImpl)myFile, myFullDataPath).generateParser();
-    assertTrue("Generated file not found: "+file, file.exists());
-    final String expectedName = name + ".expected.java";
-    String result = loadFile(name + ".java");
+    for (File file : filesToCheck) {
+      if (file.exists()) {
+        assertTrue(file.delete());
+      }
+    }
+
+    ParserGenerator parserGenerator = new ParserGenerator((BnfFileImpl)myFile, myFullDataPath);
+    if (generatePsi) parserGenerator.generate();
+    else parserGenerator.generateParser();
+
     try {
-      String expectedText = loadFile(expectedName);
-      assertEquals(expectedName, expectedText, result);
-    }
-    catch (FileNotFoundException e) {
-      String fullName = myFullDataPath + File.separatorChar + expectedName;
-      FileWriter writer = new FileWriter(fullName);
-      try {
-        writer.write(result);
+      for (File file : filesToCheck) {
+        assertTrue("Generated file not found: "+file, file.exists());
+        final String expectedName = FileUtil.getNameWithoutExtension(file) + ".expected.java";
+        String result = loadFile(file.getName());
+        try {
+          String expectedText = loadFile(expectedName);
+          assertEquals(expectedName, expectedText, result);
+        }
+        catch (FileNotFoundException e) {
+          FileWriter writer = new FileWriter(new File(myFullDataPath, expectedName));
+          try {
+            writer.write(result);
+          }
+          finally {
+            writer.close();
+          }
+          fail("No output text found. File " + expectedName + " created.");
+        }
       }
-      finally {
-        writer.close();
-      }
-      fail("No output text found. File " + fullName + " created.");
     }
     finally {
-      file.delete();
+      for (File file : filesToCheck) {
+        file.delete();
+      }
     }
   }
 }

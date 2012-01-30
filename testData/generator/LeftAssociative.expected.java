@@ -106,6 +106,7 @@ public class LeftAssociative implements PsiParser {
   // reference alias_definition? alias_definition2? leech? leech2?
   static boolean from(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "from")) return false;
+    if (!nextTokenIs(builder_, REFERENCE)) return false;
     boolean result_ = false;
     final Marker marker_ = builder_.mark();
     result_ = consumeToken(builder_, REFERENCE);
@@ -154,6 +155,7 @@ public class LeftAssociative implements PsiParser {
   // id
   public static boolean leech(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "leech")) return false;
+    if (!nextTokenIs(builder_, ID)) return false;
     boolean result_ = false;
     final Marker left_marker_ = (Marker)builder_.getLatestDoneMarker();
     if (!invalid_left_marker_guard_(builder_, left_marker_, "leech")) return false;
@@ -174,6 +176,7 @@ public class LeftAssociative implements PsiParser {
   // id
   static boolean leech2(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "leech2")) return false;
+    if (!nextTokenIs(builder_, ID)) return false;
     boolean result_ = false;
     final Marker left_marker_ = (Marker)builder_.getLatestDoneMarker();
     if (!invalid_left_marker_guard_(builder_, left_marker_, "leech2")) return false;

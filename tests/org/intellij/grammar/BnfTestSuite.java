@@ -12,7 +12,6 @@ public class BnfTestSuite extends TestCase {
     final TestSuite testSuite = new TestSuite();
     testSuite.addTestSuite(BnfParserTest.class);
     testSuite.addTestSuite(BnfGeneratorTest.class);
-    testSuite.addTestSuite(BnfPsiGeneratorTest.class);
     testSuite.addTestSuite(BnfFirstNextTest.class);
     testSuite.addTestSuite(BnfCompletionTest.class);
     testSuite.addTestSuite(BnfInspectionTest.class);

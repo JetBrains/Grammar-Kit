@@ -27,4 +27,6 @@ public interface BnfFile extends PsiFile {
   List<BnfRule> getRules();
 
   List<BnfAttrs> getAttributes();
+
+  BnfRule getRule(String ruleName);
 }

@@ -27,6 +27,7 @@ import com.intellij.psi.tree.IElementType;
 import com.intellij.util.containers.MultiMap;
 import gnu.trove.THashMap;
 import gnu.trove.THashSet;
+import org.intellij.grammar.analysis.BnfFirstNextAnalyzer;
 import org.intellij.grammar.java.JavaHelper;
 import org.intellij.grammar.parser.GeneratedParserUtilBase;
 import org.intellij.grammar.psi.*;
@@ -69,6 +70,7 @@ public class ParserGenerator {
   private final String grammarRoot;
   private final boolean generateMemoizationCode;
   private final boolean generateExtendedPin;
+  private final int generateFirstCheck;
 
   private int offset;
   private PrintWriter out;
@@ -84,6 +86,7 @@ public class ParserGenerator {
     }
     generateMemoizationCode = getRootAttribute(treeRoot, "memoization", false);
     generateExtendedPin = getRootAttribute(treeRoot, "extendedPin", true);
+    generateFirstCheck = getRootAttribute(treeRoot, "generateFirstCheck", 2);
     computeInheritance();
   }
 
@@ -145,7 +148,7 @@ public class ParserGenerator {
     }
     if (generatePsi) {
       Map<String, String> infClasses = new HashMap<String, String>();
-      RuleGraphHelper graphHelper = new RuleGraphHelper(ruleMap);
+      RuleGraphHelper graphHelper = new RuleGraphHelper(treeRoot);
       for (String ruleName : ruleMap.keySet()) {
         BnfRule rule = ruleMap.get(ruleName);
         if (Rule.isPrivate(rule) || Rule.isExternal(rule)) continue;
@@ -481,7 +484,7 @@ public class ParserGenerator {
     return classHeader;
   }
 
-  private void generateNode(BnfRule rule, BnfExpression node, String funcName, Set<BnfExpression> visited) {
+  private void generateNode(final BnfRule rule, BnfExpression node, String funcName, Set<BnfExpression> visited) {
     IElementType type = getEffectiveType(node);
 
     for (String s : StringUtil.split(node.getText(), "\n")) {
@@ -533,6 +536,33 @@ public class ParserGenerator {
       generateNodeChildren(rule, funcName, children, visited);
       return;
     }
+
+    if (generateFirstCheck > 0 && recoverRoot == null && (isRule || firstNonTrivial)) {
+      Set<String> first = BnfFirstNextAnalyzer.calcFirstInner(node, new THashSet<String>(), new THashSet<BnfRule>());
+      if (!first.contains(BnfFirstNextAnalyzer.MATCHES_EOF)) {
+        List<String> elementTypes = new ArrayList<String>(first.size());
+        for (String s : first) {
+          String elementType = firstToElementType(rule, s);
+          if (elementType != null) {
+            elementTypes.add(elementType);
+          }
+          else {
+            elementTypes.clear();
+            break;
+          }
+        }
+        if (!elementTypes.isEmpty() && elementTypes.size() < generateFirstCheck) {
+          StringBuilder sb = new StringBuilder("if (");
+          for (int count = 0, elementTypesSize = elementTypes.size(); count < elementTypesSize; count++) {
+            if (count > 0) sb.append(count % 2 == 0 ? "\n  && " : " && ");
+            sb.append("!nextTokenIs(builder_, ").append(elementTypes.get(count)).append(")");
+          }
+          sb.append(") return false;");
+          out(sb.toString());
+        }
+      }
+    }
+
     final long funcId = StringHash.calc(funcName);
     if (generateMemoizationCode) {
       out("if (memoizedFalseBranch(builder_, " + funcId + "L) return false;");
@@ -744,6 +774,20 @@ public class ParserGenerator {
     }
     return sb.toString();
   }
+
+  @Nullable
+  private String firstToElementType(BnfRule rule, String first) {
+    if (first.startsWith("#") || first.startsWith("-") || first.startsWith("<<")) return null;
+    String value = StringUtil.stripQuotesAroundValue(first);
+    if (first != value) {
+      String attributeName = getAttributeName(rule, value);
+      if (attributeName != null && !first.startsWith("\"")) {
+        return getElementType(attributeName);
+      }
+      return null;
+    }
+    return getElementType(first);
+  } 
 
   private String generateNodeCall(BnfRule rule, @Nullable BnfExpression node, String nextName) {
     IElementType type = node == null ? BNF_REFERENCE_OR_TOKEN : getEffectiveType(node);

@@ -15,8 +15,12 @@ meta blockOf ::= <<p>> +
 private meta listOf ::= <<p>> +
 grammar_element ::= expr
 expr ::= a_expr
-a_expr ::= b_expr plus_expr *
-left plus_expr ::= '+' expr
-b_expr ::= id_expr mul_expr *
-left mul_expr ::= '*' expr
-id_expr ::= id
+private a_expr ::= b_expr plus_expr *
+left plus_expr ::= '+' expr {extends="expr"}
+private b_expr ::= id_expr mul_expr *
+left mul_expr ::= '*' expr {extends="expr"}
+private id_expr ::= ref_expression
+
+private ref_expression ::= ref_expr qref_expr *
+ref_expr ::= id  {extends="expr"}
+left qref_expr ::= '.' id {extends="ref_expr"}

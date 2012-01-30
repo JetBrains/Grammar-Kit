@@ -19,6 +19,8 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiReference;
 import com.intellij.psi.search.searches.ReferencesSearch;
 import com.intellij.psi.tree.IElementType;
+import gnu.trove.THashMap;
+import gnu.trove.THashSet;
 import org.intellij.grammar.psi.*;
 import org.intellij.grammar.psi.impl.GrammarUtil;
 import org.jetbrains.annotations.Nullable;
@@ -34,6 +36,10 @@ import static org.intellij.grammar.psi.BnfTypes.BNF_SEQUENCE;
  *         Date: 16.07.11 10:41
  */
 public class RuleGraphHelper {
+  private final BnfFile myFile;
+  private final Map<BnfRule, Map<PsiElement, Cardinality>> myMap;
+  
+
   public enum Cardinality {
     NONE, OPTIONAL, REQUIRED, AT_LEAST_ONE, ANY_NUMBER;
 
@@ -85,30 +91,20 @@ public class RuleGraphHelper {
     }
   }
 
-  private Map<String, BnfRule> ruleMap;
-
-  public RuleGraphHelper(Map<String, BnfRule> ruleMap) {
-    this.ruleMap = ruleMap;
+  public RuleGraphHelper(BnfFile file) {
+    myFile = file;
+    myMap = new THashMap<BnfRule, Map<PsiElement, Cardinality>>();
+    THashSet<PsiElement> visited = new THashSet<PsiElement>();
+    for (BnfRule rule : myFile.getRules()) {
+      if (Rule.isPrivate(rule) || Rule.isExternal(rule)) continue;
+      Map<PsiElement, Cardinality> map = collectMembers(rule, rule.getExpression(), rule.getName(), visited);
+      myMap.put(rule, map.size() == 1 && map.containsKey(rule) ? Collections.<PsiElement, Cardinality>emptyMap() : map);
+      visited.clear();
+    }
   }
-
-  @Nullable
-  private BnfRule resolveRule(String text) {
-    BnfRule rule = ruleMap.get(text);
-    if (rule == null) return null;
-    String superRuleName = getAttribute(rule, "extends", null);
-    if (superRuleName == null) return rule;
-    BnfRule superRule = ruleMap.get(superRuleName);
-    return superRule == null ? rule : superRule;
-  }
-
 
   public Map<PsiElement, Cardinality> getFor(BnfRule rule) {
-    BnfExpression body = rule.getExpression();
-    Map<PsiElement, Cardinality> map = collectMembers(rule, body, rule.getName(), new HashSet<PsiElement>());
-    if (map.size() == 1 && map.containsKey(rule)) {
-      return Collections.emptyMap();
-    }
-    return map;
+    return myMap.get(rule);
   }
 
 
@@ -118,12 +114,11 @@ public class RuleGraphHelper {
 
     if (!visited.add(tree)) return psiMap(tree, REQUIRED);
 
-
     Map<PsiElement, Cardinality> result;
     if (tree instanceof BnfReferenceOrToken) {
-      BnfRule targetRule = resolveRule(tree.getText());
+      BnfRule targetRule = myFile.getRule(tree.getText());
       if (targetRule != null) {
-        if (Rule.isExternal(targetRule)) {
+        if (Rule.isExternal(targetRule) || Rule.isLeft(targetRule)) {
           result = Collections.emptyMap();
         }
         else if (Rule.isPrivate(targetRule)) {
@@ -132,7 +127,9 @@ public class RuleGraphHelper {
           result = map.containsKey(body) ? joinMaps(tree, BnfTypes.BNF_CHOICE, Arrays.asList(map, map)) : map;
         }
         else {
-          result = psiMap(targetRule, REQUIRED);
+          String superRuleName = getAttribute(targetRule, "extends", null);
+          BnfRule superRule = superRuleName == null? null : myFile.getRule(superRuleName);
+          result = psiMap(superRule != null ? superRule : targetRule, REQUIRED);
         }
       }
       else {
@@ -146,7 +143,7 @@ public class RuleGraphHelper {
       }
       else {
         BnfExpression ruleRef = expressionList.get(0);
-        BnfRule metaRule = resolveRule(ruleRef.getText());
+        BnfRule metaRule = myFile.getRule(ruleRef.getText());
         if (metaRule == null) {
           result = Collections.emptyMap();
         }
@@ -204,10 +201,11 @@ public class RuleGraphHelper {
       for (PsiReference reference : ReferencesSearch.search(rule, rule.getUseScope()).findAll()) {
         PsiElement element = reference.getElement();
         if (!(element instanceof BnfExpression)) continue;
+        BnfRule hostRule = Rule.of((BnfExpression)element);
         for (PsiElement e = prevOrParent(element); e != null; e = prevOrParent(e)) {
-          BnfRule leftRule = e instanceof BnfReferenceOrToken ? resolveRule(e.getText()) : null;
+          BnfRule leftRule = e instanceof BnfReferenceOrToken ? myFile.getRule(e.getText()) : null;
           if (leftRule != null) {
-            list.add(collectMembers(leftRule, leftRule.getExpression(), leftRule.getName(), visited));
+            list.add(collectMembers(hostRule, (BnfExpression)e, "doesn't matter", visited));
             break;
           }
         }
@@ -224,7 +222,7 @@ public class RuleGraphHelper {
     return parent instanceof BnfNamedElement ? null : parent;
   }
 
-  private Map<PsiElement, Cardinality> joinMaps(BnfExpression tree, IElementType type, List<Map<PsiElement, Cardinality>> list) {
+  private static Map<PsiElement, Cardinality> joinMaps(@Nullable BnfExpression tree, IElementType type, List<Map<PsiElement, Cardinality>> list) {
     if (list.isEmpty()) return Collections.emptyMap();
     if (type == BnfTypes.BNF_OP_OPT || type == BnfTypes.BNF_OP_ZEROMORE || type == BnfTypes.BNF_OP_ONEMORE) {
       Map<PsiElement, Cardinality> map = new HashMap<PsiElement, Cardinality>();

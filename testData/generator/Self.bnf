@@ -33,14 +33,14 @@
   LEFT_PAREN="("
   RIGHT_PAREN=")"
 
-  named="org.intellij.grammar.psi.BnfNamedElement"
-  namedImpl="org.intellij.grammar.psi.impl.BnfNamedElementImpl"
+  implements("rule|attr")="org.intellij.grammar.psi.BnfNamedElement"
+  extends("rule|attr")="org.intellij.grammar.psi.impl.BnfNamedElementImpl"
 
 }
 
 grammar ::= (attrs | rule) *
 
-rule ::= modifier* id '::=' expression attrs? ';'? {pin=3 recoverUntil="rule_recover_until" extends=namedImpl implements=named}
+rule ::= modifier* id '::=' expression attrs? ';'? {pin=3 recoverUntil="rule_recover_until"}
 private rule_recover_until::=!'{'
 
 expression ::= choice?
@@ -49,7 +49,7 @@ modifier ::= 'private' | 'external' | 'wrapped';
 
 attrs ::= '{' attr* '}' {pin=1}
 
-attr ::= id attr_pattern? '=' attr_value ';'? {pin=1 recoverUntil="attr_recover_until" extends=namedImpl implements=named}
+attr ::= id attr_pattern? '=' attr_value ';'? {pin=1 recoverUntil="attr_recover_until"}
 private attr_recover_until::=!'}'
 attr_value ::= (reference_or_token | literal_expression) !'=';
 attr_pattern ::= '(' string ')'

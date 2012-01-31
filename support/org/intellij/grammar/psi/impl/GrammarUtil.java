@@ -15,26 +15,31 @@
  */
 package org.intellij.grammar.psi.impl;
 
-import com.intellij.openapi.util.Ref;
+import com.intellij.openapi.util.Comparing;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiRecursiveElementWalkingVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.util.SmartList;
-import gnu.trove.THashSet;
 import org.intellij.grammar.generator.ParserGeneratorUtil;
 import org.intellij.grammar.parser.GeneratedParserUtilBase;
 import org.intellij.grammar.psi.*;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
-import java.util.Set;
 
 /**
  * @author gregsh
  */
 public class GrammarUtil {
+
+  public final static Comparator<BnfRule> RULE_COMPARATOR = new Comparator<BnfRule>() {
+    @Override
+    public int compare(BnfRule o1, BnfRule o2) {
+      return Comparing.compare(o1.getName(), o2.getName());
+    }
+  };
 
   public static PsiElement getDummyAwarePrevSibling(PsiElement child) {
     PsiElement prevSibling = child.getPrevSibling();
@@ -115,5 +120,21 @@ public class GrammarUtil {
       }
     });
     return result;
+  }
+
+  public static PsiElement prevOrParent(PsiElement e, PsiElement scope) {
+    if (e == null) return null;
+    PsiElement prev = e.getPrevSibling();
+    if (prev != null) return PsiTreeUtil.getDeepestLast(prev);
+    PsiElement parent = e.getParent();
+    return parent == scope ? null : parent;
+  }
+
+  public static PsiElement nextOrParent(PsiElement e, PsiElement scope) {
+    if (e == null) return null;
+    PsiElement next = e.getNextSibling();
+    if (next != null) return PsiTreeUtil.getDeepestFirst(next);
+    PsiElement parent = e.getParent();
+    return parent == scope? null : parent;
   }
 }

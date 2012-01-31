@@ -14,15 +14,20 @@ public interface ParserTypes {
   IElementType BLOCKOF = new IElementType("BLOCKOF");
   IElementType EXPR = new IElementType("EXPR");
   IElementType GRAMMAR_ELEMENT = new IElementType("GRAMMAR_ELEMENT");
+  IElementType LITERAL = new IElementType("LITERAL");
   IElementType MUL_EXPR = new IElementType("MUL_EXPR");
   IElementType PLUS_EXPR = new IElementType("PLUS_EXPR");
   IElementType QREF_EXPR = new IElementType("QREF_EXPR");
   IElementType REF_EXPR = new IElementType("REF_EXPR");
+  IElementType REF_EXPRESSION = new IElementType("REF_EXPRESSION");
   IElementType ROOT_B = new IElementType("ROOT_B");
   IElementType ROOT_C = new IElementType("ROOT_C");
   IElementType ROOT_D = new IElementType("ROOT_D");
+  IElementType SPECIAL_REF = new IElementType("SPECIAL_REF");
 
   IElementType ID = new IElementType("id");
+  IElementType NUMBER = new IElementType("number");
+  IElementType OF = new IElementType("OF");
 
   class Factory {
     public static PsiElement createElement(ASTNode node) {
@@ -36,6 +41,9 @@ public interface ParserTypes {
       else if (type == GRAMMAR_ELEMENT) {
         return new GrammarElementImpl(node);
       }
+      else if (type == LITERAL) {
+        return new LiteralImpl(node);
+      }
       else if (type == MUL_EXPR) {
         return new MulExprImpl(node);
       }
@@ -48,6 +56,9 @@ public interface ParserTypes {
       else if (type == REF_EXPR) {
         return new RefExprImpl(node);
       }
+      else if (type == REF_EXPRESSION) {
+        return new RefExpressionImpl(node);
+      }
       else if (type == ROOT_B) {
         return new RootBImpl(node);
       }
@@ -56,6 +67,9 @@ public interface ParserTypes {
       }
       else if (type == ROOT_D) {
         return new RootDImpl(node);
+      }
+      else if (type == SPECIAL_REF) {
+        return new SpecialRefImpl(node);
       }
       throw new AssertionError("Unknown element type: " + type);
     }
@@ -97,6 +111,20 @@ public interface GrammarElement extends CompositeElement {
 
   @NotNull
   public Expr getExpr();
+
+}
+// ---- Literal.java -----------------
+//header.txt
+package generated.psi;
+
+import java.util.List;
+import org.jetbrains.annotations.*;
+import com.intellij.psi.PsiElement;
+
+public interface Literal extends Expr {
+
+  @NotNull
+  public PsiElement getNumber();
 
 }
 // ---- MulExpr.java -----------------
@@ -158,6 +186,17 @@ public interface RefExpr extends Expr {
   public PsiElement getId();
 
 }
+// ---- RefExpression.java -----------------
+//header.txt
+package generated.psi;
+
+import java.util.List;
+import org.jetbrains.annotations.*;
+import com.intellij.psi.PsiElement;
+
+public interface RefExpression extends Expr {
+
+}
 // ---- Root.java -----------------
 //header.txt
 package generated.psi;
@@ -207,6 +246,23 @@ public interface RootD extends Root {
 
   @NotNull
   public List<GrammarElement> getGrammarElementList();
+
+}
+// ---- SpecialRef.java -----------------
+//header.txt
+package generated.psi;
+
+import java.util.List;
+import org.jetbrains.annotations.*;
+import com.intellij.psi.PsiElement;
+
+public interface SpecialRef extends QrefExpr {
+
+  @NotNull
+  public Expr getExpr();
+
+  @NotNull
+  public PsiElement getId();
 
 }
 // ---- BlockOfImpl.java -----------------
@@ -271,6 +327,31 @@ public class GrammarElementImpl extends CompositeElementImpl implements GrammarE
   @NotNull
   public Expr getExpr() {
     return findNotNullChildByClass(Expr.class);
+  }
+
+}
+// ---- LiteralImpl.java -----------------
+//header.txt
+package generated.psi.impl;
+
+import java.util.List;
+import org.jetbrains.annotations.*;
+import com.intellij.lang.ASTNode;
+import com.intellij.psi.PsiElement;
+import com.intellij.psi.util.PsiTreeUtil;
+import static generated.ParserTypes.*;
+import generated.psi.*;
+
+public class LiteralImpl extends ExprImpl implements Literal {
+
+  public LiteralImpl(ASTNode node) {
+    super(node);
+  }
+
+  @Override
+  @NotNull
+  public PsiElement getNumber() {
+    return findNotNullChildByType(NUMBER);
   }
 
 }
@@ -380,6 +461,25 @@ public class RefExprImpl extends ExprImpl implements RefExpr {
   }
 
 }
+// ---- RefExpressionImpl.java -----------------
+//header.txt
+package generated.psi.impl;
+
+import java.util.List;
+import org.jetbrains.annotations.*;
+import com.intellij.lang.ASTNode;
+import com.intellij.psi.PsiElement;
+import com.intellij.psi.util.PsiTreeUtil;
+import static generated.ParserTypes.*;
+import generated.psi.*;
+
+public class RefExpressionImpl extends ExprImpl implements RefExpression {
+
+  public RefExpressionImpl(ASTNode node) {
+    super(node);
+  }
+
+}
 // ---- RootImpl.java -----------------
 //header.txt
 package generated.psi.impl;
@@ -466,6 +566,37 @@ public class RootDImpl extends RootImpl implements RootD {
   @NotNull
   public List<GrammarElement> getGrammarElementList() {
     return PsiTreeUtil.getChildrenOfTypeAsList(this, GrammarElement.class);
+  }
+
+}
+// ---- SpecialRefImpl.java -----------------
+//header.txt
+package generated.psi.impl;
+
+import java.util.List;
+import org.jetbrains.annotations.*;
+import com.intellij.lang.ASTNode;
+import com.intellij.psi.PsiElement;
+import com.intellij.psi.util.PsiTreeUtil;
+import static generated.ParserTypes.*;
+import generated.psi.*;
+
+public class SpecialRefImpl extends QrefExprImpl implements SpecialRef {
+
+  public SpecialRefImpl(ASTNode node) {
+    super(node);
+  }
+
+  @Override
+  @NotNull
+  public Expr getExpr() {
+    return findNotNullChildByClass(Expr.class);
+  }
+
+  @Override
+  @NotNull
+  public PsiElement getId() {
+    return findNotNullChildByType(ID);
   }
 
 }

@@ -144,8 +144,8 @@ import com.intellij.psi.PsiElement;
 
 public interface BnfAttrPattern extends BnfCompositeElement {
 
-  @NotNull
-  public PsiElement getString();
+  @Nullable
+  public BnfLiteralExpression getLiteralExpression();
 
 }
 // ---- BnfAttrValue.java -----------------
@@ -445,9 +445,9 @@ public class BnfAttrPatternImpl extends BnfCompositeElementImpl implements BnfAt
   }
 
   @Override
-  @NotNull
-  public PsiElement getString() {
-    return findNotNullChildByType(BNF_STRING);
+  @Nullable
+  public BnfLiteralExpression getLiteralExpression() {
+    return findChildByClass(BnfLiteralExpression.class);
   }
 
 }

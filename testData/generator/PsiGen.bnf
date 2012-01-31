@@ -19,8 +19,11 @@ private a_expr ::= b_expr plus_expr *
 left plus_expr ::= '+' expr {extends="expr"}
 private b_expr ::= id_expr mul_expr *
 left mul_expr ::= '*' expr {extends="expr"}
-private id_expr ::= ref_expression
+private id_expr ::= special_ref | ref_expression | literal
 
-private ref_expression ::= ref_expr qref_expr *
+ref_expression ::= ref_expr qref_expr * {extends="expr"}
 ref_expr ::= id  {extends="expr"}
 left qref_expr ::= '.' id {extends="ref_expr"}
+
+literal ::= number {extends="expr"}
+special_ref ::= id OF ref_expression {extends="qref_expr"}

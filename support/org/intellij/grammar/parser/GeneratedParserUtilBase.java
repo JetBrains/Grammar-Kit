@@ -53,8 +53,8 @@ public class GeneratedParserUtilBase {
   };
 
   public static boolean recursion_guard_(PsiBuilder builder_, int level_, String funcName_) {
-    if (level_ > 100) {
-      builder_.error("Maximum recursion level (" + 100 + ") reached in" + funcName_);
+    if (level_ > 500) {
+      builder_.error("Maximum recursion level (" + 500 + ") reached in " + funcName_);
       return false;
     }
     return true;

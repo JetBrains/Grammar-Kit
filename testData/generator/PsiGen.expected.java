@@ -55,8 +55,8 @@ public class PsiGen implements PsiParser {
     else if (root_ == ROOT_D) {
       result_ = root_d(builder_, level_ + 1);
     }
-    else if (root_ == SPECIAL_REF) {
-      result_ = special_ref(builder_, level_ + 1);
+    else if (root_ == SPECIALREF) {
+      result_ = specialRef(builder_, level_ + 1);
     }
     else {
       Marker marker_ = builder_.mark();
@@ -71,9 +71,9 @@ public class PsiGen implements PsiParser {
 
   private static final TokenSet[] EXTENDS_SETS_ = new TokenSet[] {
     TokenSet.create(EXPR, LITERAL, MUL_EXPR, PLUS_EXPR,
-      QREF_EXPR, REF_EXPR, REF_EXPRESSION, SPECIAL_REF),
-    TokenSet.create(QREF_EXPR, SPECIAL_REF),
-    TokenSet.create(QREF_EXPR, REF_EXPR, SPECIAL_REF),
+      QREF_EXPR, REF_EXPR, REF_EXPRESSION, SPECIALREF),
+    TokenSet.create(QREF_EXPR, SPECIALREF),
+    TokenSet.create(QREF_EXPR, REF_EXPR, SPECIALREF),
     TokenSet.create(ROOT, ROOT_B, ROOT_C, ROOT_D),
   };
   public static boolean type_extends_(IElementType child_, IElementType parent_) {
@@ -213,12 +213,12 @@ public class PsiGen implements PsiParser {
   }
 
   /* ********************************************************** */
-  // special_ref | ref_expression | literal
+  // specialRef | ref_expression | literal
   static boolean id_expr(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "id_expr")) return false;
     boolean result_ = false;
     final Marker marker_ = builder_.mark();
-    result_ = special_ref(builder_, level_ + 1);
+    result_ = specialRef(builder_, level_ + 1);
     if (!result_) result_ = ref_expression(builder_, level_ + 1);
     if (!result_) result_ = literal(builder_, level_ + 1);
     if (!result_) {
@@ -483,8 +483,8 @@ public class PsiGen implements PsiParser {
 
   /* ********************************************************** */
   // id OF ref_expression
-  public static boolean special_ref(PsiBuilder builder_, int level_) {
-    if (!recursion_guard_(builder_, level_, "special_ref")) return false;
+  public static boolean specialRef(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "specialRef")) return false;
     if (!nextTokenIs(builder_, ID)) return false;
     boolean result_ = false;
     final int start_ = builder_.getCurrentOffset();
@@ -493,11 +493,11 @@ public class PsiGen implements PsiParser {
     result_ = result_ && consumeToken(builder_, OF);
     result_ = result_ && ref_expression(builder_, level_ + 1);
     LighterASTNode last_ = result_? builder_.getLatestDoneMarker() : null;
-    if (last_ != null && last_.getStartOffset() == start_ && type_extends_(last_.getTokenType(), SPECIAL_REF)) {
+    if (last_ != null && last_.getStartOffset() == start_ && type_extends_(last_.getTokenType(), SPECIALREF)) {
       marker_.drop();
     }
     else if (result_) {
-      marker_.done(SPECIAL_REF);
+      marker_.done(SPECIALREF);
     }
     else {
       marker_.rollbackTo();

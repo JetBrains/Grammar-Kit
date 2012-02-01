@@ -131,7 +131,7 @@ public class ParserGenerator {
     boolean generatePsi = getRootAttribute(myFile, "generatePsi", true);
     {
       String className = getRootAttribute(myFile, "elementTypeHolderClass", "generated.ParserTypes");
-      File parserFile = new File(myRootPath + File.separatorChar + className.replace('.', File.separatorChar) + ".java");
+      File parserFile = new File(myRootPath, className.replace('.', File.separatorChar) + ".java");
       parserFile.getParentFile().mkdirs();
       openOutput(parserFile);
       try {
@@ -150,7 +150,7 @@ public class ParserGenerator {
         String psiPackage = getRootAttribute(myFile, "psiPackage", "generated.psi");
         String psiClass = psiPackage + "." + getRulePsiClassName(rule, ruleName, true);
         infClasses.put(ruleName, psiClass);
-        File psiFile = new File(myRootPath + File.separatorChar + psiClass.replace('.', File.separatorChar) + ".java");
+        File psiFile = new File(myRootPath, psiClass.replace('.', File.separatorChar) + ".java");
         psiFile.getParentFile().mkdirs();
         openOutput(psiFile);
         try {
@@ -166,7 +166,7 @@ public class ParserGenerator {
         String psiPackage = getRootAttribute(myFile, "psiImplPackage", "generated.psi.impl");
         String suffix = getRootAttribute(myFile, "psiImplClassSuffix", "Impl");
         String psiClass = psiPackage + "." + getRulePsiClassName(rule, ruleName, true) + suffix;
-        File psiFile = new File(myRootPath + File.separatorChar + psiClass.replace('.', File.separatorChar) + ".java");
+        File psiFile = new File(myRootPath, psiClass.replace('.', File.separatorChar) + ".java");
         psiFile.getParentFile().mkdirs();
         openOutput(psiFile);
         try {
@@ -194,7 +194,7 @@ public class ParserGenerator {
 
     Project project = myFile.getProject();
     if (JavaHelper.getJavaHelper(project).findClass(stubParser) != null) return;
-    File baseFile = new File(myRootPath + File.separatorChar + stubPackage.replace('.', File.separatorChar) + "/" + baseFileName);
+    File baseFile = new File(myRootPath, stubPackage.replace('.', File.separatorChar) + "/" + baseFileName);
     openOutput(baseFile);
     try {
       String text = FileUtil.loadTextAndClose(baseUtilText);
@@ -205,7 +205,7 @@ public class ParserGenerator {
     finally {
       closeOutput();
     }
-    File utilFile = new File(myRootPath + File.separatorChar + stubParser.replace('.', File.separatorChar) + ".java");
+    File utilFile = new File(myRootPath, stubParser.replace('.', File.separatorChar) + ".java");
     openOutput(utilFile);
     try {
       generateClassHeader(stubParser, "", "", false, baseClassName);

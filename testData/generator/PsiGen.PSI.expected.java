@@ -23,7 +23,7 @@ public interface ParserTypes {
   IElementType ROOT_B = new IElementType("ROOT_B");
   IElementType ROOT_C = new IElementType("ROOT_C");
   IElementType ROOT_D = new IElementType("ROOT_D");
-  IElementType SPECIAL_REF = new IElementType("SPECIAL_REF");
+  IElementType SPECIALREF = new IElementType("SPECIALREF");
 
   IElementType ID = new IElementType("id");
   IElementType NUMBER = new IElementType("number");
@@ -68,7 +68,7 @@ public interface ParserTypes {
       else if (type == ROOT_D) {
         return new RootDImpl(node);
       }
-      else if (type == SPECIAL_REF) {
+      else if (type == SPECIALREF) {
         return new SpecialRefImpl(node);
       }
       throw new AssertionError("Unknown element type: " + type);

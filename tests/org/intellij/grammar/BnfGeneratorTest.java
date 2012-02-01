@@ -1,7 +1,6 @@
 package org.intellij.grammar;
 
 import com.intellij.lang.injection.InjectedLanguageManager;
-import com.intellij.openapi.Disposable;
 import com.intellij.openapi.extensions.Extensions;
 import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.DumbServiceImpl;
@@ -13,7 +12,6 @@ import com.intellij.psi.impl.search.CachesBasedRefSearcher;
 import com.intellij.psi.impl.search.PsiSearchHelperImpl;
 import com.intellij.psi.impl.source.tree.injected.InjectedLanguageManagerImpl;
 import com.intellij.psi.search.PsiSearchHelper;
-import com.intellij.psi.search.searches.ReferencesSearch;
 import com.intellij.testFramework.ParsingTestCase;
 import org.intellij.grammar.generator.ParserGenerator;
 import org.intellij.grammar.psi.impl.BnfFileImpl;
@@ -64,7 +62,7 @@ public class BnfGeneratorTest extends ParsingTestCase {
   public void doGenTest(final boolean generatePsi) throws Exception {
     final String name = getTestName(false);
     String text = loadFile(name + "." + myFileExt);
-    myFile = createPsiFile(name, text.replaceAll("parserClass=\"[^\"]*\"", "parserClass=\"" + name + "\" generatePsi=" + generatePsi));
+    myFile = createPsiFile(name, text.replaceAll("generatePsi=\"[^\"]*\"", "\0 generatePsi=" + generatePsi));
     List<File> filesToCheck = new ArrayList<File>();
     filesToCheck.add(new File(myFullDataPath, name + ".java"));
     if (generatePsi) {

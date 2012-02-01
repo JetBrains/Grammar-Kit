@@ -27,7 +27,6 @@ import org.intellij.grammar.psi.impl.GrammarUtil;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
-import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
@@ -166,9 +165,9 @@ public class ParserGeneratorUtil {
     return child instanceof BnfExpression && !(child instanceof BnfLiteralExpression || child instanceof BnfReferenceOrToken);
   }
 
-  public static BnfExpression getEffectiveExpression(BnfExpression tree, Map<String, BnfRule> ruleMap) {
+  public static BnfExpression getEffectiveExpression(BnfFile file, BnfExpression tree) {
     if (tree instanceof BnfReferenceOrToken) {
-      BnfRule rule = ruleMap.get(tree.getText());
+      BnfRule rule = file.getRule(tree.getText());
       if (rule != null) return rule.getExpression();
     }
     return tree;

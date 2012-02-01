@@ -55,7 +55,6 @@ public class ParserGenerator {
   public static final String PSI_ELEMENT_CLASS = "com.intellij.psi.PsiElement";
   private static final String DEFAULT_FILE_HEADER = "// This is a generated file. Not intended for manual editing.";
 
-  private final Map<String, BnfRule> ruleMap = new TreeMap<String, BnfRule>();
   private final Map<String, String> myRuleParserClasses = new TreeMap<String, String>();
   private final Map<String, String> myParserLambdas = new TreeMap<String, String>();
   private final Set<String> mySimpleTokens = new THashSet<String>();
@@ -76,7 +75,6 @@ public class ParserGenerator {
     final List<BnfRule> rules = tree.getRules();
     myGrammarRoot = rules.isEmpty() ? null : rules.get(0).getName();
     for (BnfRule r : rules) {
-      ruleMap.put(r.getName(), r);
       myRuleParserClasses.put(r.getName(), getAttribute(r, "parserClass", "generated.Parser"));
     }
     generateMemoizationCode = getRootAttribute(myFile, "memoization", false);
@@ -87,8 +85,11 @@ public class ParserGenerator {
 
   private void openOutput(File file) throws FileNotFoundException {
     boolean unitTestMode = ApplicationManager.getApplication().isUnitTestMode();
-    if (unitTestMode && !FileUtil.getNameWithoutExtension(file).equals(FileUtil.getNameWithoutExtension(myFile.getName()))) {
-      myOut = new PrintWriter(new FileOutputStream(new File(myRootPath, FileUtil.getNameWithoutExtension(myFile.getName())+".PSI.java"), true));
+    String grammarName = FileUtil.getNameWithoutExtension(myFile.getName());
+    String fileName = FileUtil.getNameWithoutExtension(file);
+    if (unitTestMode) {
+      String name = grammarName + (fileName.startsWith(grammarName) || fileName.endsWith("Parser")? "" : ".PSI") + ".java";
+      myOut = new PrintWriter(new FileOutputStream(new File(myRootPath, name), true));
       out("// ---- "+ file.getName()+ " -----------------");
     }
     else {
@@ -144,11 +145,11 @@ public class ParserGenerator {
     if (generatePsi) {
       Map<String, String> infClasses = new HashMap<String, String>();
       RuleGraphHelper graphHelper = new RuleGraphHelper(myFile, myRuleExtendsMap);
-      for (String ruleName : ruleMap.keySet()) {
-        BnfRule rule = ruleMap.get(ruleName);
-        if (Rule.isPrivate(rule) || Rule.isExternal(rule)) continue;
+      for (String ruleName : myRuleParserClasses.keySet()) {
+        BnfRule rule = myFile.getRule(ruleName);
+        if (!shouldGeneratePsi(rule)) continue;
         String psiPackage = getRootAttribute(myFile, "psiPackage", "generated.psi");
-        String psiClass = psiPackage + "." + getRulePsiClassName(rule, ruleName, true);
+        String psiClass = psiPackage + "." + getRulePsiClassName(rule, true);
         infClasses.put(ruleName, psiClass);
         File psiFile = new File(myRootPath, psiClass.replace('.', File.separatorChar) + ".java");
         psiFile.getParentFile().mkdirs();
@@ -160,12 +161,12 @@ public class ParserGenerator {
           closeOutput();
         }
       }
-      for (String ruleName : ruleMap.keySet()) {
-        BnfRule rule = ruleMap.get(ruleName);
-        if (Rule.isPrivate(rule) || Rule.isExternal(rule)) continue;
+      for (String ruleName : myRuleParserClasses.keySet()) {
+        BnfRule rule = myFile.getRule(ruleName);
+        if (!shouldGeneratePsi(rule)) continue;
         String psiPackage = getRootAttribute(myFile, "psiImplPackage", "generated.psi.impl");
         String suffix = getRootAttribute(myFile, "psiImplClassSuffix", "Impl");
-        String psiClass = psiPackage + "." + getRulePsiClassName(rule, ruleName, true) + suffix;
+        String psiClass = psiPackage + "." + getRulePsiClassName(rule, true) + suffix;
         File psiFile = new File(myRootPath, psiClass.replace('.', File.separatorChar) + ".java");
         psiFile.getParentFile().mkdirs();
         openOutput(psiFile);
@@ -182,6 +183,11 @@ public class ParserGenerator {
       generateParserUtil();
     }
     
+  }
+
+  private static boolean shouldGeneratePsi(BnfRule rule) {
+    String ruleName = rule.getName();
+    return !Rule.isPrivate(rule) && !Rule.isExternal(rule) && getAttribute(rule, "elementType", ruleName).equals(ruleName);
   }
 
   private void generateParserUtil() throws IOException {
@@ -221,16 +227,16 @@ public class ParserGenerator {
   public void generateParser() throws FileNotFoundException {
     for (String className : new TreeSet<String>(myRuleParserClasses.values())) {
       Map<String, BnfRule> map = new TreeMap<String, BnfRule>();
-      for (String ruleName : ruleMap.keySet()) {
+      for (String ruleName : myRuleParserClasses.keySet()) {
         if (className.equals(myRuleParserClasses.get(ruleName))) {
-          map.put(ruleName, ruleMap.get(ruleName));
+          map.put(ruleName, myFile.getRule(ruleName));
         }
       }
       File parserFile = new File(myRootPath + File.separatorChar + className.replace('.', File.separatorChar) + ".java");
       parserFile.getParentFile().mkdirs();
       openOutput(parserFile);
       try {
-        generateParser(className, map);
+        generateParser(className, map.keySet());
       }
       finally {
         closeOutput();
@@ -240,10 +246,26 @@ public class ParserGenerator {
 
   @NotNull
   private String getSuperClassName(BnfRule rule, String psiPackage, String suffix) {
-    String superRuleName = getAttribute(rule, "extends", "generated.CompositeElementImpl");
-    BnfRule superRule = ruleMap.get(superRuleName);
-    if (superRule == null) return superRuleName;
-    return psiPackage + "." + getRulePsiClassName(superRule, superRule.getName(), true) + suffix;
+    BnfRule topSuper = getTopSuperRule(rule);
+    return topSuper == null ? getRootAttribute(myFile, "extends", "generated.CompositeElementImpl") :
+      topSuper == rule? getAttribute(rule, "extends", "generated.CompositeElementImpl") :
+      psiPackage + "." + getRulePsiClassName(topSuper, true) + suffix;
+  }
+
+  private BnfRule getTopSuperRule(BnfRule rule) {
+    THashSet<BnfRule> visited = new THashSet<BnfRule>();
+    BnfRule cur = rule;
+    for (BnfRule next = rule; next != null; cur = !visited.add(next) ? null : next) {
+      if (cur == null) break;
+      String attr = getAttribute(cur, "elementType", null);
+      next = attr != null ? myFile.getRule(attr) : null;
+      if (next != null) continue;
+      if (cur != rule) break;
+      attr = getAttribute(cur, "extends", null);
+      next = attr != null ? myFile.getRule(attr) : null;
+      if (next == null && attr != null) break;
+    }
+    return cur;
   }
 
   @NotNull
@@ -251,18 +273,17 @@ public class ParserGenerator {
     ArrayList<String> strings = new ArrayList<String>();
     String superRuleImplements = "";
     {
-      String superRuleName = getAttribute(rule, "extends", null);
-      BnfRule superRule = superRuleName == null ? null : ruleMap.get(superRuleName);
-      if (superRule != null) {
-        superRuleImplements = getAttribute(superRule, "implements", "generated.CompositeElement");
-        strings.add(psiPackage + "." + getRulePsiClassName(superRule, superRule.getName(), true));
+      BnfRule topSuper = getTopSuperRule(rule);
+      if (topSuper != null && topSuper != rule) {
+        superRuleImplements = getAttribute(topSuper, "implements", "generated.CompositeElement");
+        strings.add(psiPackage + "." + getRulePsiClassName(topSuper, true));
       }
     }
     String[] superIntfNames = getAttribute(rule, "implements", "generated.CompositeElement").split(",");
     for (String superIntfName : superIntfNames) {
-      BnfRule superIntfRule = ruleMap.get(superIntfName);
+      BnfRule superIntfRule = myFile.getRule(superIntfName);
       if (superIntfRule != null) {
-        strings.add(psiPackage + "." + getRulePsiClassName(superIntfRule, superIntfRule.getName(), true));
+        strings.add(psiPackage + "." + getRulePsiClassName(superIntfRule, true));
       }
       else if (!superRuleImplements.contains(superIntfName)) {
         strings.add(superIntfName);
@@ -271,19 +292,21 @@ public class ParserGenerator {
     return strings.toArray(new String[strings.size()]);
   }
 
-  private static String getRulePsiClassName(BnfRule rule, String ruleName, boolean withPrefix) {
-    StringBuilder sb = new StringBuilder();
-    if (withPrefix) {
-      sb.append(getAttribute(rule, "psiClassPrefix", ""));
-    }
-    for (String s : ruleName.split("_")) {
+  @NotNull
+  private static String getRulePsiClassName(BnfRule rule, boolean withPrefix) {
+    return toIdentifier(rule.getName(), withPrefix ? getAttribute(rule, "psiClassPrefix", "") : "");
+  }
+
+  private static String toIdentifier(String text, String prefix) {
+    StringBuilder sb = new StringBuilder(prefix);
+    for (String s : text.split("_")) {
       if (s.length() == 0) continue;
       sb.append(Character.toUpperCase(s.charAt(0))).append(s.substring(1));
     }
     return sb.toString();
   }
 
-  public void generateParser(String parserClass, Map<String, BnfRule> ruleMap) {
+  public void generateParser(String parserClass, final Set<String> ownRuleNames) {
     final String elementTypeHolderClass = getRootAttribute(myFile, "elementTypeHolderClass", "generated.ParserTypes");
     final String stubParser = getRootAttribute(myFile, "stubParserClass", "generated.ParserUtil");
     final String parserImports = getRootAttribute(myFile, "parserImports", "");
@@ -310,13 +333,13 @@ public class ParserGenerator {
     newLine();
 
     if (rootParser) {
-      generateRootParserContent(ruleMap.keySet());
+      generateRootParserContent(ownRuleNames);
     }
-    for (String ruleName : ruleMap.keySet()) {
-      BnfRule rule = ruleMap.get(ruleName);
+    for (String ruleName : ownRuleNames) {
+      BnfRule rule = myFile.getRule(ruleName);
       if (Rule.isExternal(rule)) continue;
       out("/* ********************************************************** */");
-      generateNode(rule, rule.getExpression(), ruleName, new HashSet<BnfExpression>());
+      generateNode(rule, rule.getExpression(), ruleName, new THashSet<BnfExpression>());
       newLine();
     }
     Map<String, String> reversedLambdas = new THashMap<String, String>(); 
@@ -343,7 +366,7 @@ public class ParserGenerator {
     out("boolean result_;");
     boolean first = true;
     for (String ruleName : ownRuleNames) {
-      BnfRule rule = ruleMap.get(ruleName);
+      BnfRule rule = myFile.getRule(ruleName);
       if (Rule.isPrivate(rule) || Rule.isExternal(rule) || Rule.isMeta(rule) || myGrammarRoot.equals(ruleName)) continue;
       String elementType = getElementType(rule);
       out((first ? "" : "else ") + "if (root_ == " + elementType + ") {");
@@ -353,7 +376,7 @@ public class ParserGenerator {
       if (first) first = false;
     }
     {
-      BnfRule rootRule = ruleMap.get(myGrammarRoot);
+      BnfRule rootRule = myFile.getRule(myGrammarRoot);
       String nodeCall = generateNodeCall(rootRule, null, rootRule.getName());
       if (!first) out("else {");
       out("Marker marker_ = builder_.mark();");
@@ -395,10 +418,10 @@ public class ParserGenerator {
   }
 
   private void computeInheritance() {
-    for (String ruleName : ruleMap.keySet()) {
-      BnfRule rule = ruleMap.get(ruleName);
+    for (String ruleName : myRuleParserClasses.keySet()) {
+      BnfRule rule = myFile.getRule(ruleName);
       if (Rule.isPrivate(rule) || Rule.isExternal(rule)) continue;
-      BnfRule superRule = ruleMap.get(getAttribute(rule, "extends", ""));
+      BnfRule superRule = myFile.getRule(getAttribute(rule, "extends", ""));
       if (superRule == null) continue;
       myRuleExtendsMap.putValue(superRule, rule);
     }
@@ -594,7 +617,7 @@ public class ParserGenerator {
         out((i > 0 ? "if (!result_) " : "") + "result_ = " + nodeCall + ";");
       }
       else if (type == BNF_SEQUENCE) {
-        predicateEncountered |= pinApplied && ParserGeneratorUtil.getEffectiveExpression(child, ruleMap) instanceof BnfPredicate;
+        predicateEncountered |= pinApplied && ParserGeneratorUtil.getEffectiveExpression(myFile, child) instanceof BnfPredicate;
         if (i > 0) {
           if (pinApplied && generateExtendedPin && !predicateEncountered) {
             if (i == childrenSize - 1) {
@@ -705,7 +728,7 @@ public class ParserGenerator {
     if (sectionType != null) {
       final String untilCall;
       if (recoverRoot != null) {
-        BnfRule untilRule = ruleMap.get(recoverRoot);
+        BnfRule untilRule = myFile.getRule(recoverRoot);
         untilCall = untilRule == null ? null : generateWrappedNodeCall(rule, null, untilRule.getName());
       }
       else {
@@ -791,7 +814,7 @@ public class ParserGenerator {
       return generateConsumeTextToken(text);
     }
     else if (type == BNF_REFERENCE_OR_TOKEN) {
-      BnfRule subRule = ruleMap.get(text);
+      BnfRule subRule = myFile.getRule(text);
       if (subRule != null) {
         String method;
         if (Rule.isExternal(subRule)) {
@@ -838,7 +861,7 @@ public class ParserGenerator {
         BnfExpression nested = expressions.get(i);
         String argument = nested.getText();
         if (nested instanceof BnfReferenceOrToken) {
-          if (ruleMap.containsKey(argument)) {
+          if (myFile.getRule(argument) != null) {
             clause.append(generateWrappedNodeCall(rule, nested, argument));
           }
           else {
@@ -930,13 +953,11 @@ public class ParserGenerator {
                         tokenTypeClass + ";" +
                         (tokenTypeFactory == null ? "" : "static " + tokenTypeFactory + ";") +
                         (generatePsi ? implPackage + ".*;" : ""), "", true);
-    final Set<String> visited = new THashSet<String>();
     String elementCreateCall = elementTypeFactory == null ? "new " + StringUtil.getShortName(elementTypeClass) : StringUtil.getShortName(elementTypeFactory);
-    for (String ruleName : ruleMap.keySet()) {
-      final BnfRule rule = ruleMap.get(ruleName);
-      if (Rule.isPrivate(rule) || Rule.isExternal(rule) || myGrammarRoot.equals(ruleName)) continue;
+    for (String ruleName : myRuleParserClasses.keySet()) {
+      final BnfRule rule = myFile.getRule(ruleName);
+      if (!shouldGeneratePsi(rule) || myGrammarRoot.equals(ruleName)) continue;
       final String elementType = getElementType(rule);
-      if (!visited.add(elementType)) continue;
       out("IElementType " + elementType + " = "
           + elementCreateCall + "(\"" + elementType + "\");");
     }
@@ -958,14 +979,12 @@ public class ParserGenerator {
       out("public static PsiElement createElement(ASTNode node) {");
       out("IElementType type = node.getElementType();");
       String suffix = getRootAttribute(myFile, "psiImplClassSuffix", "Impl");
-      visited.clear();
       boolean first = true;
-      for (String ruleName : ruleMap.keySet()) {
-        final BnfRule rule = ruleMap.get(ruleName);
-        if (Rule.isPrivate(rule) || Rule.isExternal(rule) || myGrammarRoot.equals(ruleName)) continue;
-        String psiClass = getRulePsiClassName(rule, ruleName, true) + suffix;
+      for (String ruleName : myRuleParserClasses.keySet()) {
+        final BnfRule rule = myFile.getRule(ruleName);
+        if (!shouldGeneratePsi(rule) || myGrammarRoot.equals(ruleName)) continue;
+        String psiClass = getRulePsiClassName(rule, true) + suffix;
         String elementType = getElementType(rule);
-        if (!visited.add(elementType)) continue;
         out((!first ? "else" : "") + " if (type == " + elementType + ") {");
         out("return new " + psiClass + "(node);");
         first = false;
@@ -1061,7 +1080,7 @@ public class ParserGenerator {
       ruleName = treeRule.getName();
     }
     if (ruleName == null) return;
-    String getterNameBody = getAttribute(rule, "methodRenames", "get" + getRulePsiClassName(rule, ruleName, false), ruleName);
+    String getterNameBody = getAttribute(rule, "methodRenames", "get" + toIdentifier(ruleName, ""), ruleName);
     String getterName = getterNameBody + (many ? "List" : "");
     if (!intf) out("@Override");
     if (type == REQUIRED) {
@@ -1073,7 +1092,7 @@ public class ParserGenerator {
     else {
       out("@NotNull");
     }
-    String className = StringUtil.getShortName(getAccessorType(rule, tree));
+    String className = StringUtil.getShortName(getAccessorType(treeRule != null? treeRule : rule, tree));
     String tail = intf ? "();" : "() {";
     out("public " + (many ? "List<" : "") + className + (many ? "> " : " ") + getterName + tail);
     if (!intf) {
@@ -1097,7 +1116,7 @@ public class ParserGenerator {
     BnfRule treeRule = tree instanceof BnfRule ? (BnfRule)tree : null;
     return treeRule == null ? PSI_ELEMENT_CLASS :
            Rule.isExternal(treeRule) ? getAttribute(treeRule, "implements", PSI_ELEMENT_CLASS) :
-           getRulePsiClassName(rule, treeRule.getName(), true);
+           getRulePsiClassName(rule, true);
   }
 
   private static Collection<BnfRule> getSortedPublicRules(Set<PsiElement> accessors) {

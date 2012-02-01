@@ -1,5 +1,6 @@
+// ---- GrammarParser.java -----------------
 header.txt
-package ;
+package org.intellij.grammar.parser;
 
 import org.jetbrains.annotations.*;
 import com.intellij.lang.LighterASTNode;
@@ -14,9 +15,9 @@ import com.intellij.psi.tree.TokenSet;
 import com.intellij.lang.PsiParser;
 
 @SuppressWarnings({"SimplifiableIfStatement", "UnusedAssignment"})
-public class Self2 implements PsiParser {
+public class GrammarParser implements PsiParser {
 
-  public static Logger LOG_ = Logger.getInstance("Self2");
+  public static Logger LOG_ = Logger.getInstance("org.intellij.grammar.parser.GrammarParser");
 
   @NotNull
   public ASTNode parse(final IElementType root_, final PsiBuilder builder_) {

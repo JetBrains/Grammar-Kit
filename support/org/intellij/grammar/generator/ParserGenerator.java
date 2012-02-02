@@ -393,15 +393,18 @@ public class ParserGenerator {
     if (!myRuleExtendsMap.isEmpty()) {
       out("private static final TokenSet[] EXTENDS_SETS_ = new TokenSet[] {");
       StringBuilder sb = new StringBuilder();
-      BnfRule[] sortedKeys = myRuleExtendsMap.keySet().toArray(new BnfRule[myRuleExtendsMap.size()]);
-      Arrays.sort(sortedKeys, GrammarUtil.RULE_COMPARATOR);
-      for (BnfRule rule : sortedKeys) {
-        Collection<BnfRule> rules = myRuleExtendsMap.get(rule);
-        BnfRule[] sortedValues = rules.toArray(new BnfRule[rules.size()]);
-        Arrays.sort(sortedValues, GrammarUtil.RULE_COMPARATOR);
-        for (int i = 0, sortedValuesLength = sortedValues.length; i < sortedValuesLength; i++) {
+      for (String ruleName : myRuleParserClasses.keySet()) {
+        Collection<BnfRule> rules = myRuleExtendsMap.get(myFile.getRule(ruleName));
+        Set<String> elementTypes = new TreeSet<String>();
+        if (rules.isEmpty()) continue;
+        for (BnfRule rule : rules) {
+          elementTypes.add(getElementType(rule));
+        }
+        int i = 0;
+        for (String elementType : elementTypes) {
           if (i > 0) sb.append(i % 4 == 0 ? ",\n" : ", ");
-          sb.append(getElementType(sortedValues[i]));
+          sb.append(elementType);
+          i++;
         }
         out("TokenSet.create(" + sb.toString() + "),");
         sb.setLength(0);

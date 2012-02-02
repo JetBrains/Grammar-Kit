@@ -57,9 +57,9 @@ public class PsiGen implements PsiParser {
 
   private static final TokenSet[] EXTENDS_SETS_ = new TokenSet[] {
     TokenSet.create(EXPR, LITERAL, MUL_EXPR, PLUS_EXPR,
-      REF_EXPR, REF_EXPR, SPECIALREF),
+      REF_EXPR, SPECIALREF),
     TokenSet.create(REF_EXPR, SPECIALREF),
-    TokenSet.create(REF_EXPR, REF_EXPR, SPECIALREF),
+    TokenSet.create(REF_EXPR, SPECIALREF),
     TokenSet.create(ROOT, ROOT_B, ROOT_C, ROOT_D),
   };
   public static boolean type_extends_(IElementType child_, IElementType parent_) {

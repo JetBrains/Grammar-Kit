@@ -120,7 +120,7 @@ Currently JFlex-based or any other lexer must be provided separately, you can us
   // make expressions stable enough
   pin(".*expression")=1
 
-  // tokens beyond id, number and string:
+  // tokens beyond id, number and string
   ADD='+'
   MUL='*'
   DOT='.'
@@ -148,7 +148,7 @@ Change log
 ==========
 1.0.3
 
-* Improved PSI generation ("extends" and "elementType" attributes handling)
+* Improved PSI generation (*extends* and *elementType* attributes handling)
 * Configurable FIRST-based parser optimization
 
 1.0.2

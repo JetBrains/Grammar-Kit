@@ -15,7 +15,9 @@ public interface ParserTypes {
   IElementType EXPR = new IElementType("EXPR");
   IElementType GRAMMAR_ELEMENT = new IElementType("GRAMMAR_ELEMENT");
   IElementType IDENTIFIER = new IElementType("IDENTIFIER");
+  IElementType ID_EXPR = new IElementType("ID_EXPR");
   IElementType LITERAL = new IElementType("LITERAL");
+  IElementType MISSING_EXTERNAL_TYPE = new IElementType("MISSING_EXTERNAL_TYPE");
   IElementType MUL_EXPR = new IElementType("MUL_EXPR");
   IElementType PLUS_EXPR = new IElementType("PLUS_EXPR");
   IElementType REF_EXPR = new IElementType("REF_EXPR");
@@ -179,18 +181,6 @@ public interface RefExpr extends Expr {
 
   @NotNull
   public Identifier getIdentifier();
-
-}
-// ---- Root.java -----------------
-//header.txt
-package generated.psi;
-
-import java.util.List;
-import org.jetbrains.annotations.*;
-import com.intellij.psi.PsiElement;
-import generated.CompositeElement;
-
-public interface Root extends CompositeElement {
 
 }
 // ---- RootB.java -----------------
@@ -438,26 +428,6 @@ public class RefExprImpl extends MyRefImpl implements RefExpr {
   @NotNull
   public Identifier getIdentifier() {
     return findNotNullChildByClass(Identifier.class);
-  }
-
-}
-// ---- RootImpl.java -----------------
-//header.txt
-package generated.psi.impl;
-
-import java.util.List;
-import org.jetbrains.annotations.*;
-import com.intellij.lang.ASTNode;
-import com.intellij.psi.PsiElement;
-import com.intellij.psi.util.PsiTreeUtil;
-import static generated.ParserTypes.*;
-import generated.CompositeElementImpl;
-import generated.psi.*;
-
-public class RootImpl extends CompositeElementImpl implements Root {
-
-  public RootImpl(ASTNode node) {
-    super(node);
   }
 
 }

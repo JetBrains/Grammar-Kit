@@ -10,9 +10,9 @@ import org.intellij.grammar.psi.impl.*;
 public interface BnfTypes {
 
   IElementType BNF_ATTR = new BnfCompositeElementType("BNF_ATTR");
+  IElementType BNF_ATTRS = new BnfCompositeElementType("BNF_ATTRS");
   IElementType BNF_ATTR_PATTERN = new BnfCompositeElementType("BNF_ATTR_PATTERN");
   IElementType BNF_ATTR_VALUE = new BnfCompositeElementType("BNF_ATTR_VALUE");
-  IElementType BNF_ATTRS = new BnfCompositeElementType("BNF_ATTRS");
   IElementType BNF_CHOICE = new BnfCompositeElementType("BNF_CHOICE");
   IElementType BNF_EXPRESSION = new BnfCompositeElementType("BNF_EXPRESSION");
   IElementType BNF_EXTERNAL_EXPRESSION = new BnfCompositeElementType("BNF_EXTERNAL_EXPRESSION");

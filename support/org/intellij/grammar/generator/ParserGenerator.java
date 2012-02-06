@@ -185,9 +185,21 @@ public class ParserGenerator {
     
   }
 
-  private static boolean shouldGeneratePsi(BnfRule rule) {
+  private boolean shouldGeneratePsi(BnfRule rule) {
     String ruleName = rule.getName();
-    return !Rule.isPrivate(rule) && !Rule.isExternal(rule) && getAttribute(rule, "elementType", ruleName).equals(ruleName);
+    if (myGrammarRoot.equals(ruleName)) return false;
+    if (Rule.isPrivate(rule) || Rule.isExternal(rule)) return false;
+    return getAttribute(rule, "elementType", ruleName).equals(ruleName);
+  }
+
+  private boolean shouldGenerateElementType(BnfRule rule) {
+    String ruleName = rule.getName();
+    if (myGrammarRoot.equals(ruleName)) return false;
+    if (Rule.isPrivate(rule) || Rule.isExternal(rule)) return false;
+    String elementType = getAttribute(rule, "elementType", ruleName);
+    if (elementType.equals(ruleName)) return true;
+    BnfRule thatRule = myFile.getRule(elementType);
+    return thatRule == null || (Rule.isPrivate(thatRule) || Rule.isExternal(thatRule));
   }
 
   private void generateParserUtil() throws IOException {
@@ -260,7 +272,7 @@ public class ParserGenerator {
       String attr = getAttribute(cur, "elementType", null);
       next = attr != null ? myFile.getRule(attr) : null;
       if (next != null) continue;
-      if (cur != rule) break;
+      if (cur != rule) break; // do not search for elementType any further
       attr = getAttribute(cur, "extends", null);
       next = attr != null ? myFile.getRule(attr) : null;
       if (next == null && attr != null) break;
@@ -957,12 +969,14 @@ public class ParserGenerator {
                         (tokenTypeFactory == null ? "" : "static " + tokenTypeFactory + ";") +
                         (generatePsi ? implPackage + ".*;" : ""), "", true);
     String elementCreateCall = elementTypeFactory == null ? "new " + StringUtil.getShortName(elementTypeClass) : StringUtil.getShortName(elementTypeFactory);
+    Set<String> sortedCompositeTypes = new TreeSet<String>();
     for (String ruleName : myRuleParserClasses.keySet()) {
       final BnfRule rule = myFile.getRule(ruleName);
-      if (!shouldGeneratePsi(rule) || myGrammarRoot.equals(ruleName)) continue;
-      final String elementType = getElementType(rule);
-      out("IElementType " + elementType + " = "
-          + elementCreateCall + "(\"" + elementType + "\");");
+      if (!shouldGenerateElementType(rule)) continue;
+      sortedCompositeTypes.add(getElementType(rule));
+    }
+    for (String elementType : sortedCompositeTypes) {
+      out("IElementType " + elementType + " = " + elementCreateCall + "(\"" + elementType + "\");");
     }
     if (generateTokens) {
       newLine();
@@ -985,7 +999,7 @@ public class ParserGenerator {
       boolean first = true;
       for (String ruleName : myRuleParserClasses.keySet()) {
         final BnfRule rule = myFile.getRule(ruleName);
-        if (!shouldGeneratePsi(rule) || myGrammarRoot.equals(ruleName)) continue;
+        if (!shouldGeneratePsi(rule)) continue;
         String psiClass = getRulePsiClassName(rule, true) + suffix;
         String elementType = getElementType(rule);
         out((!first ? "else" : "") + " if (type == " + elementType + ") {");

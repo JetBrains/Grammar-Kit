@@ -10,9 +10,9 @@ import org.intellij.grammar.psi.impl.*;
 public interface BnfTypes {
 
   IElementType BNF_ATTR = new BnfCompositeElementType("BNF_ATTR");
+  IElementType BNF_ATTRS = new BnfCompositeElementType("BNF_ATTRS");
   IElementType BNF_ATTR_PATTERN = new BnfCompositeElementType("BNF_ATTR_PATTERN");
   IElementType BNF_ATTR_VALUE = new BnfCompositeElementType("BNF_ATTR_VALUE");
-  IElementType BNF_ATTRS = new BnfCompositeElementType("BNF_ATTRS");
   IElementType BNF_CHOICE = new BnfCompositeElementType("BNF_CHOICE");
   IElementType BNF_EXPRESSION = new BnfCompositeElementType("BNF_EXPRESSION");
   IElementType BNF_LITERAL_EXPRESSION = new BnfCompositeElementType("BNF_LITERAL_EXPRESSION");
@@ -189,23 +189,6 @@ import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
 public interface BnfExpression extends BnfCompositeElement {
-
-}
-// ---- BnfGrammar.java -----------------
-// This is a generated file. Not intended for manual editing.
-package org.intellij.grammar.psi;
-
-import java.util.List;
-import org.jetbrains.annotations.*;
-import com.intellij.psi.PsiElement;
-
-public interface BnfGrammar extends BnfCompositeElement {
-
-  @NotNull
-  public List<BnfAttrs> getAttrsList();
-
-  @NotNull
-  public List<BnfRule> getRuleList();
 
 }
 // ---- BnfLiteralExpression.java -----------------
@@ -521,37 +504,6 @@ public class BnfExpressionImpl extends BnfCompositeElementImpl implements BnfExp
 
   public BnfExpressionImpl(ASTNode node) {
     super(node);
-  }
-
-}
-// ---- BnfGrammarImpl.java -----------------
-// This is a generated file. Not intended for manual editing.
-package org.intellij.grammar.psi.impl;
-
-import java.util.List;
-import org.jetbrains.annotations.*;
-import com.intellij.lang.ASTNode;
-import com.intellij.psi.PsiElement;
-import com.intellij.psi.util.PsiTreeUtil;
-import static org.intellij.grammar.psi.BnfTypes.*;
-import org.intellij.grammar.psi.*;
-
-public class BnfGrammarImpl extends BnfCompositeElementImpl implements BnfGrammar {
-
-  public BnfGrammarImpl(ASTNode node) {
-    super(node);
-  }
-
-  @Override
-  @NotNull
-  public List<BnfAttrs> getAttrsList() {
-    return PsiTreeUtil.getChildrenOfTypeAsList(this, BnfAttrs.class);
-  }
-
-  @Override
-  @NotNull
-  public List<BnfRule> getRuleList() {
-    return PsiTreeUtil.getChildrenOfTypeAsList(this, BnfRule.class);
   }
 
 }

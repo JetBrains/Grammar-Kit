@@ -26,6 +26,12 @@ public class PsiGen implements PsiParser {
     if (root_ == EXPR) {
       result_ = expr(builder_, level_ + 1);
     }
+    else if (root_ == MISSING_EXTERNAL_TYPE) {
+      result_ = external_type(builder_, level_ + 1);
+    }
+    else if (root_ == ID_EXPR) {
+      result_ = external_type2(builder_, level_ + 1);
+    }
     else if (root_ == GRAMMAR_ELEMENT) {
       result_ = grammar_element(builder_, level_ + 1);
     }
@@ -56,8 +62,8 @@ public class PsiGen implements PsiParser {
   }
 
   private static final TokenSet[] EXTENDS_SETS_ = new TokenSet[] {
-    TokenSet.create(EXPR, LITERAL, MUL_EXPR, PLUS_EXPR,
-      REF_EXPR, SPECIALREF),
+    TokenSet.create(EXPR, ID_EXPR, LITERAL, MISSING_EXTERNAL_TYPE,
+      MUL_EXPR, PLUS_EXPR, REF_EXPR, SPECIALREF),
     TokenSet.create(REF_EXPR, SPECIALREF),
     TokenSet.create(REF_EXPR, SPECIALREF),
     TokenSet.create(ROOT, ROOT_B, ROOT_C, ROOT_D),
@@ -183,6 +189,50 @@ public class PsiGen implements PsiParser {
   }
 
   /* ********************************************************** */
+  // number
+  public static boolean external_type(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "external_type")) return false;
+    if (!nextTokenIs(builder_, NUMBER)) return false;
+    boolean result_ = false;
+    final int start_ = builder_.getCurrentOffset();
+    final Marker marker_ = builder_.mark();
+    result_ = consumeToken(builder_, NUMBER);
+    LighterASTNode last_ = result_? builder_.getLatestDoneMarker() : null;
+    if (last_ != null && last_.getStartOffset() == start_ && type_extends_(last_.getTokenType(), MISSING_EXTERNAL_TYPE)) {
+      marker_.drop();
+    }
+    else if (result_) {
+      marker_.done(MISSING_EXTERNAL_TYPE);
+    }
+    else {
+      marker_.rollbackTo();
+    }
+    return result_;
+  }
+
+  /* ********************************************************** */
+  // id
+  public static boolean external_type2(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "external_type2")) return false;
+    if (!nextTokenIs(builder_, ID)) return false;
+    boolean result_ = false;
+    final int start_ = builder_.getCurrentOffset();
+    final Marker marker_ = builder_.mark();
+    result_ = consumeToken(builder_, ID);
+    LighterASTNode last_ = result_? builder_.getLatestDoneMarker() : null;
+    if (last_ != null && last_.getStartOffset() == start_ && type_extends_(last_.getTokenType(), ID_EXPR)) {
+      marker_.drop();
+    }
+    else if (result_) {
+      marker_.done(ID_EXPR);
+    }
+    else {
+      marker_.rollbackTo();
+    }
+    return result_;
+  }
+
+  /* ********************************************************** */
   // expr
   public static boolean grammar_element(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "grammar_element")) return false;
@@ -199,7 +249,7 @@ public class PsiGen implements PsiParser {
   }
 
   /* ********************************************************** */
-  // specialRef | reference | literal
+  // specialRef | reference | literal | external_type | external_type2
   static boolean id_expr(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "id_expr")) return false;
     boolean result_ = false;
@@ -207,6 +257,8 @@ public class PsiGen implements PsiParser {
     result_ = PsiGen2.specialRef(builder_, level_ + 1);
     if (!result_) result_ = PsiGen2.reference(builder_, level_ + 1);
     if (!result_) result_ = PsiGen2.literal(builder_, level_ + 1);
+    if (!result_) result_ = external_type(builder_, level_ + 1);
+    if (!result_) result_ = external_type2(builder_, level_ + 1);
     if (!result_) {
       marker_.rollbackTo();
     }

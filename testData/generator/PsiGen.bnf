@@ -19,13 +19,15 @@ private a_expr ::= b_expr plus_expr *
 left plus_expr ::= '+' expr {extends="expr"}
 private b_expr ::= id_expr mul_expr *
 left mul_expr ::= '*' expr {extends="expr"}
-private id_expr ::= specialRef | reference | literal
+private id_expr ::= specialRef | reference | literal | external_type | external_type2
+external_type ::= number {elementType="missing_external_type" extends="expr"}
+external_type2 ::= id {elementType="id_expr" extends="expr"}
 
 ;{
   parserClass="PsiGen2"
 }
 
-private  reference ::= ref_expr qref_expr *
+private reference ::= ref_expr qref_expr *
 ref_expr ::= identifier  {extends="expr" mixin="MyRefImpl"}
 left qref_expr ::= '.' identifier {extends="ref_expr" elementType="ref_expr"}
 identifier ::= id

@@ -13,7 +13,7 @@ root_d ::= <<listOf grammar_element>>
 
 meta blockOf ::= <<p>> +
 private meta listOf ::= <<p>> +
-grammar_element ::= expr
+grammar_element ::= expr | external_type3
 expr ::= a_expr
 private a_expr ::= b_expr plus_expr *
 left plus_expr ::= '+' expr {extends="expr"}
@@ -22,6 +22,7 @@ left mul_expr ::= '*' expr {extends="expr"}
 private id_expr ::= specialRef | reference | literal | external_type | external_type2
 external_type ::= number {elementType="missing_external_type" extends="expr"}
 external_type2 ::= id {elementType="id_expr" extends="expr"}
+external_type3 ::= id {elementType="expr"} // do not generate anything
 
 ;{
   parserClass="PsiGen2"

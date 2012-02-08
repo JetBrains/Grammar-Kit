@@ -147,7 +147,7 @@ public class ParserGenerator {
       RuleGraphHelper graphHelper = new RuleGraphHelper(myFile, myRuleExtendsMap);
       for (String ruleName : myRuleParserClasses.keySet()) {
         BnfRule rule = myFile.getRule(ruleName);
-        if (!shouldGeneratePsi(rule)) continue;
+        if (!RuleGraphHelper.shouldGeneratePsi(rule, false)) continue;
         String psiPackage = getRootAttribute(myFile, "psiPackage", "generated.psi");
         String psiClass = psiPackage + "." + getRulePsiClassName(rule, true);
         infClasses.put(ruleName, psiClass);
@@ -163,7 +163,7 @@ public class ParserGenerator {
       }
       for (String ruleName : myRuleParserClasses.keySet()) {
         BnfRule rule = myFile.getRule(ruleName);
-        if (!shouldGeneratePsi(rule)) continue;
+        if (!RuleGraphHelper.shouldGeneratePsi(rule, false)) continue;
         String psiPackage = getRootAttribute(myFile, "psiImplPackage", "generated.psi.impl");
         String suffix = getRootAttribute(myFile, "psiImplClassSuffix", "Impl");
         String psiClass = psiPackage + "." + getRulePsiClassName(rule, true) + suffix;
@@ -183,23 +183,6 @@ public class ParserGenerator {
       generateParserUtil();
     }
     
-  }
-
-  private boolean shouldGeneratePsi(BnfRule rule) {
-    String ruleName = rule.getName();
-    if (myGrammarRoot.equals(ruleName)) return false;
-    if (Rule.isPrivate(rule) || Rule.isExternal(rule)) return false;
-    return getAttribute(rule, "elementType", ruleName).equals(ruleName);
-  }
-
-  private boolean shouldGenerateElementType(BnfRule rule) {
-    String ruleName = rule.getName();
-    if (myGrammarRoot.equals(ruleName)) return false;
-    if (Rule.isPrivate(rule) || Rule.isExternal(rule)) return false;
-    String elementType = getAttribute(rule, "elementType", ruleName);
-    if (elementType.equals(ruleName)) return true;
-    BnfRule thatRule = myFile.getRule(elementType);
-    return thatRule == null || (Rule.isPrivate(thatRule) || Rule.isExternal(thatRule));
   }
 
   private void generateParserUtil() throws IOException {
@@ -269,11 +252,10 @@ public class ParserGenerator {
     BnfRule cur = rule;
     for (BnfRule next = rule; next != null; cur = !visited.add(next) ? null : next) {
       if (cur == null) break;
-      String attr = getAttribute(cur, "elementType", null);
-      next = attr != null ? myFile.getRule(attr) : null;
-      if (next != null) continue;
+      next = RuleGraphHelper.getRealRule(cur);
+      if (next != cur) continue;
       if (cur != rule) break; // do not search for elementType any further
-      attr = getAttribute(cur, "extends", null);
+      String attr = getAttribute(cur, "extends", null);
       next = attr != null ? myFile.getRule(attr) : null;
       if (next == null && attr != null) break;
     }
@@ -379,7 +361,7 @@ public class ParserGenerator {
     boolean first = true;
     for (String ruleName : ownRuleNames) {
       BnfRule rule = myFile.getRule(ruleName);
-      if (Rule.isPrivate(rule) || Rule.isExternal(rule) || Rule.isMeta(rule) || myGrammarRoot.equals(ruleName)) continue;
+      if (!RuleGraphHelper.shouldGeneratePsi(rule, true) || Rule.isMeta(rule)) continue;
       String elementType = getElementType(rule);
       out((first ? "" : "else ") + "if (root_ == " + elementType + ") {");
       String nodeCall = generateNodeCall(rule, null, ruleName);
@@ -972,7 +954,7 @@ public class ParserGenerator {
     Set<String> sortedCompositeTypes = new TreeSet<String>();
     for (String ruleName : myRuleParserClasses.keySet()) {
       final BnfRule rule = myFile.getRule(ruleName);
-      if (!shouldGenerateElementType(rule)) continue;
+      if (!RuleGraphHelper.shouldGeneratePsi(rule, true)) continue;
       sortedCompositeTypes.add(getElementType(rule));
     }
     for (String elementType : sortedCompositeTypes) {
@@ -999,7 +981,7 @@ public class ParserGenerator {
       boolean first = true;
       for (String ruleName : myRuleParserClasses.keySet()) {
         final BnfRule rule = myFile.getRule(ruleName);
-        if (!shouldGeneratePsi(rule)) continue;
+        if (!RuleGraphHelper.shouldGeneratePsi(rule, false)) continue;
         String psiClass = getRulePsiClassName(rule, true) + suffix;
         String elementType = getElementType(rule);
         out((!first ? "else" : "") + " if (type == " + elementType + ") {");

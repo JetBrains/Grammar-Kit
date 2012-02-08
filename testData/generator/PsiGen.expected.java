@@ -233,12 +233,30 @@ public class PsiGen implements PsiParser {
   }
 
   /* ********************************************************** */
-  // expr
+  // id
+  public static boolean external_type3(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "external_type3")) return false;
+    if (!nextTokenIs(builder_, ID)) return false;
+    boolean result_ = false;
+    final Marker marker_ = builder_.mark();
+    result_ = consumeToken(builder_, ID);
+    if (result_) {
+      marker_.done(EXPR);
+    }
+    else {
+      marker_.rollbackTo();
+    }
+    return result_;
+  }
+
+  /* ********************************************************** */
+  // expr | external_type3
   public static boolean grammar_element(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "grammar_element")) return false;
     boolean result_ = false;
     final Marker marker_ = builder_.mark();
     result_ = expr(builder_, level_ + 1);
+    if (!result_) result_ = external_type3(builder_, level_ + 1);
     if (result_) {
       marker_.done(GRAMMAR_ELEMENT);
     }

@@ -20,6 +20,7 @@ import com.intellij.psi.PsiReference;
 import com.intellij.psi.search.searches.ReferencesSearch;
 import com.intellij.psi.tree.IElementType;
 import com.intellij.psi.util.PsiTreeUtil;
+import com.intellij.util.ObjectUtils;
 import com.intellij.util.containers.MultiMap;
 import com.intellij.util.containers.MultiMapBasedOnSet;
 import gnu.trove.THashMap;
@@ -149,7 +150,7 @@ public class RuleGraphHelper {
           result = map.containsKey(body) ? joinMaps(null, BnfTypes.BNF_CHOICE, Arrays.asList(map, map)) : map;
         }
         else {
-          result = psiMap(targetRule, REQUIRED);
+          result = psiMap(getRealRule(targetRule), REQUIRED);
         }
       }
       else {
@@ -221,9 +222,9 @@ public class RuleGraphHelper {
       Map<BnfRule, Cardinality> rulesToTheLeft = getRulesToTheLeft(rule);
       for (BnfRule r : rulesToTheLeft.keySet()) {
         Cardinality cardinality = rulesToTheLeft.get(r);
-        Map<PsiElement, Cardinality> leftMap = psiMap(r, REQUIRED);
+        Map<PsiElement, Cardinality> leftMap = psiMap(getRealRule(r), REQUIRED);
         if (cardinality.many()) {
-          list.add(joinMaps(null, BnfTypes.BNF_CHOICE, Arrays.asList(leftMap, psiMap(rule, REQUIRED))));
+          list.add(joinMaps(null, BnfTypes.BNF_CHOICE, Arrays.asList(leftMap, psiMap(getRealRule(rule), REQUIRED))));
         }
         else {
           list.add(leftMap);
@@ -446,4 +447,25 @@ public class RuleGraphHelper {
     }
     return sorted;
   }
+
+  public static BnfRule getRealRule(BnfRule rule) {
+    String attr = getAttribute(rule, "elementType", null);
+    if (attr != null) {
+      BnfRule realRule = ((BnfFile)rule.getContainingFile()).getRule(attr);
+      if (realRule != null && shouldGeneratePsi(realRule, false)) return realRule;
+    }
+    return rule;
+  }
+
+  public static boolean shouldGeneratePsi(BnfRule rule, boolean elementTypeConstant) {
+    BnfFile containingFile = (BnfFile)rule.getContainingFile();
+    if (containingFile.getRules().get(0) == rule) return false;
+    if (Rule.isPrivate(rule) || Rule.isExternal(rule)) return false;
+    String elementType = getAttribute(rule, "elementType", null);
+    if (!elementTypeConstant) return elementType == null;
+    BnfRule thatRule = containingFile.getRule(elementType);
+    return thatRule == null || (Rule.isPrivate(thatRule) || Rule.isExternal(thatRule));
+  }
+
+
 }

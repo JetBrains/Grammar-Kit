@@ -17,6 +17,7 @@ package org.intellij.grammar.editor;
 
 import com.intellij.lang.annotation.AnnotationHolder;
 import com.intellij.lang.annotation.Annotator;
+import com.intellij.openapi.project.DumbAware;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiNamedElement;
 import com.intellij.psi.PsiReference;
@@ -30,7 +31,7 @@ import java.util.Arrays;
 /**
  * @author gregsh
  */
-public class BnfAnnotator implements Annotator {
+public class BnfAnnotator implements Annotator, DumbAware {
   @Override
   public void annotate(@NotNull PsiElement psiElement, @NotNull AnnotationHolder annotationHolder) {
     PsiElement parent = psiElement.getParent();

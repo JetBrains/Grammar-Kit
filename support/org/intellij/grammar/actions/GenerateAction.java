@@ -28,6 +28,7 @@ import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.progress.Task;
+import com.intellij.openapi.project.DumbAware;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.ProjectRootManager;
 import com.intellij.openapi.vcs.changes.BackgroundFromStartOption;
@@ -48,7 +49,7 @@ import java.io.File;
  * @author gregory
  *         Date: 15.07.11 17:12
  */
-public class GenerateAction extends AnAction {
+public class GenerateAction extends AnAction implements DumbAware {
   
   private static final Logger LOG = Logger.getInstance("org.intellij.grammar.actions.GenerateAction");
 

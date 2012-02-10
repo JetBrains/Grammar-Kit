@@ -15,6 +15,7 @@
  */
 package org.intellij.grammar.psi.impl;
 
+import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
@@ -29,6 +30,8 @@ import org.intellij.grammar.psi.BnfRule;
  */
 public class BnfElementFactory {
 
+  private static final Logger LOG = Logger.getInstance("org.intellij.grammar.psi.impl.BnfElementFactory");
+
   private BnfElementFactory() {
   }
 
@@ -38,16 +41,14 @@ public class BnfElementFactory {
   }
 
   public static BnfExpression createExpressionFromText(Project project, String text) {
-    PsiFile fromText = PsiFileFactory.getInstance(project).createFileFromText("a.bnf", "a ::= " + text);
-    if ((fromText.getFirstChild()) != null) {
-      return ((BnfRule)fromText.getFirstChild()).getExpression();
-    }
-    return null;
+    return createRuleFromText(project, "a ::= " + text).getExpression();
   }
 
   public static BnfRule createRuleFromText(Project project, String text) {
-      PsiFile fromText = PsiFileFactory.getInstance(project).createFileFromText("a.bnf", text);
-      return (BnfRule)fromText.getFirstChild();
+    PsiFile fromText = PsiFileFactory.getInstance(project).createFileFromText("a.bnf", text);
+    PsiElement firstChild = fromText.getFirstChild();
+    LOG.assertTrue(firstChild instanceof BnfRule, text);
+    return (BnfRule)firstChild;
   }
 
 }

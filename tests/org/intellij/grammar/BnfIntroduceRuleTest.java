@@ -1,6 +1,6 @@
 package org.intellij.grammar;
 
-import com.intellij.testFramework.fixtures.LightCodeInsightFixtureTestCase;
+import com.intellij.testFramework.fixtures.LightPlatformCodeInsightFixtureTestCase;
 import org.intellij.grammar.refactor.BnfIntroduceRuleHandler;
 
 import java.io.IOException;
@@ -12,7 +12,7 @@ import java.io.IOException;
  *
  * @author Vadim Romansky
  */
-public class BnfIntroduceRuleTest extends LightCodeInsightFixtureTestCase {
+public class BnfIntroduceRuleTest extends LightPlatformCodeInsightFixtureTestCase {
 
   public void testTokenSimple() throws Exception { doTest("some ::= rule\nprivate rule ::= token", "some ::= <selection>token</selection>"); }
   public void testTokenQuantified() throws Exception { doTest("some ::= rule? rule+ rule*\nprivate rule ::= token", "some ::= token? token+ <selection>token</selection>*"); }

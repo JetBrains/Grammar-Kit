@@ -1,6 +1,6 @@
 package org.intellij.grammar;
 
-import com.intellij.testFramework.fixtures.LightCodeInsightFixtureTestCase;
+import com.intellij.testFramework.fixtures.LightPlatformCodeInsightFixtureTestCase;
 import com.intellij.util.ArrayUtil;
 import org.intellij.grammar.psi.BnfFile;
 import org.intellij.grammar.psi.BnfRule;
@@ -14,7 +14,7 @@ import static org.intellij.grammar.analysis.BnfFirstNextAnalyzer.*;
 /**
  * @author gregsh
  */
-public class BnfFirstNextTest extends LightCodeInsightFixtureTestCase {
+public class BnfFirstNextTest extends LightPlatformCodeInsightFixtureTestCase {
 
   public void testSeq() { doFirstTest("r ::= A B", "A"); }
   public void testChoice() { doFirstTest("r ::= A | B", "A", "B"); }

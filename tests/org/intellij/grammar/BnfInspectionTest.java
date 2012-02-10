@@ -1,6 +1,6 @@
 package org.intellij.grammar;
 
-import com.intellij.testFramework.fixtures.LightCodeInsightFixtureTestCase;
+import com.intellij.testFramework.fixtures.LightPlatformCodeInsightFixtureTestCase;
 import org.intellij.grammar.inspection.*;
 
 /**
@@ -10,9 +10,9 @@ import org.intellij.grammar.inspection.*;
  *
  * @author Vadim Romansky
  */
-public class BnfInspectionTest extends LightCodeInsightFixtureTestCase {
+public class BnfInspectionTest extends LightPlatformCodeInsightFixtureTestCase {
   @Override
-  public String getBasePath() {
+  protected String getTestDataPath() {
     return "testData/inspection";
   }
 
@@ -29,9 +29,19 @@ public class BnfInspectionTest extends LightCodeInsightFixtureTestCase {
   public void testUnreachableBranch3() { doTest("m ::=<warning>|</warning> B <warning>|</warning>"); }
   public void testUnreachableBranch4() { doTest("m ::=(A | (<warning>|</warning> B<warning>|</warning>))"); }
   public void testNeverMatchingBranch1() { doTest("m ::= <warning>! A r</warning> | B | C r ::= A"); }
+  public void testSelf2() { doFileTest(); }
+
+  private void doFileTest() {
+    myFixture.configureByFile(getTestName(false)+".bnf");
+    doTest();
+  }
 
   private void doTest(String text) {
     myFixture.configureByText("a.bnf", text);
+    doTest();
+  }
+
+  private void doTest() {
     myFixture.enableInspections(BnfSuspiciousTokenInspection.class,
                                 BnfDuplicateRuleInspection.class,
                                 BnfIdenticalChoiceBranchesInspection.class,
@@ -39,4 +49,10 @@ public class BnfInspectionTest extends LightCodeInsightFixtureTestCase {
                                 BnfUnreachableChoiceBranchInspection.class);
     myFixture.checkHighlighting(true, false, false);
   }
+
+  @Override
+  protected boolean isWriteActionRequired() {
+    return false;
+  }
+
 }

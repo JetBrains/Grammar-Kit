@@ -12,8 +12,8 @@ BnfFile:BrokenEverything.bnf
       PsiElement(=)('=')
       PsiErrorElement:id, number or string expected, got '='
         <empty list>
-      PsiWhiteSpace(' ')
-      PsiElement(=)('=')
+    PsiWhiteSpace(' ')
+    PsiElement(=)('=')
     PsiWhiteSpace('\n')
     BNF_ATTR:a
       PsiElement(id)('a')
@@ -42,12 +42,12 @@ BnfFile:BrokenEverything.bnf
         <empty list>
     PsiWhiteSpace('\n')
     PsiElement(})('}')
-    PsiWhiteSpace('\n\n')
-    PsiErrorElement:got 'a'
-      PsiElement(id)('a')
-    PsiWhiteSpace(' ')
-    PsiElement(BAD_CHARACTER)(':')
-    PsiElement(BAD_CHARACTER)(':')
+  PsiWhiteSpace('\n\n')
+  PsiErrorElement:got 'a'
+    PsiElement(id)('a')
+  PsiWhiteSpace(' ')
+  PsiElement(BAD_CHARACTER)(':')
+  PsiElement(BAD_CHARACTER)(':')
   PsiWhiteSpace('\n')
   BNF_RULE:a
     PsiElement(id)('a')

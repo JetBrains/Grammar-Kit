@@ -245,7 +245,8 @@ public class GeneratedParserUtilBase {
       final int lastErrorPos = getLastVariantOffset(state, true, initialOffset);
       boolean eatMoreFlag = eatMoreFlagOnce || frame.offset == initialOffset && lastErrorPos > frame.offset;
 
-      final LighterASTNode latestDoneMarker = (result || pinned) && eatMoreFlagOnce ? builder_.getLatestDoneMarker() : null;
+      final LighterASTNode latestDoneMarker =
+        (pinned || result) && lastErrorPos > initialOffset && eatMoreFlagOnce ? builder_.getLatestDoneMarker() : null;
       PsiBuilder.Marker extensionMarker = null;
       IElementType extensionTokenType = null;
       if (latestDoneMarker instanceof PsiBuilder.Marker) {

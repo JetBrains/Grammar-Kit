@@ -101,7 +101,7 @@ public class GrammarUtil {
   }
 
   public static List<String> collectExtraArguments(BnfRule rule, BnfExpression expression) {
-    if (!ParserGeneratorUtil.Rule.isMeta(rule)) return Collections.emptyList();
+    if (!ParserGeneratorUtil.Rule.isMeta(rule) && !ParserGeneratorUtil.Rule.isExternal(rule)) return Collections.emptyList();
     final SmartList<String> result = new SmartList<String>();
     expression.accept(new PsiRecursiveElementWalkingVisitor() {
       @Override

@@ -664,6 +664,42 @@ public class ExternalRules implements PsiParser {
   }
 
   /* ********************************************************** */
+  // '{' <<unique_list_of one two>> '}'
+  static boolean param_seq_alt_ext(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "param_seq_alt_ext")) return false;
+    boolean result_ = false;
+    final Marker marker_ = builder_.mark();
+    result_ = consumeToken(builder_, "{");
+    result_ = result_ && uniqueListOf(builder_, level_ + 1, one_parser_, two_parser_);
+    result_ = result_ && consumeToken(builder_, "}");
+    if (!result_) {
+      marker_.rollbackTo();
+    }
+    else {
+      marker_.drop();
+    }
+    return result_;
+  }
+
+  /* ********************************************************** */
+  // '{' <<unique_list_of_params one two>> '}'
+  static boolean param_seq_alt_params_ext(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "param_seq_alt_params_ext")) return false;
+    boolean result_ = false;
+    final Marker marker_ = builder_.mark();
+    result_ = consumeToken(builder_, "{");
+    result_ = result_ && uniqueListOf(builder_, level_ + 1, one_parser_, "1+1", two_parser_, 1+1);
+    result_ = result_ && consumeToken(builder_, "}");
+    if (!result_) {
+      marker_.rollbackTo();
+    }
+    else {
+      marker_.drop();
+    }
+    return result_;
+  }
+
+  /* ********************************************************** */
   // <<listOf statement>>
   static boolean root(PsiBuilder builder_, int level_) {
     return listOf(builder_, level_ + 1, statement_parser_);

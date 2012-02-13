@@ -24,6 +24,7 @@ import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.tree.IElementType;
+import com.intellij.util.containers.ContainerUtil;
 import com.intellij.util.containers.MultiMap;
 import com.intellij.util.containers.MultiMapBasedOnSet;
 import gnu.trove.THashMap;
@@ -816,10 +817,7 @@ public class ParserGenerator {
         String method;
         if (Rule.isExternal(subRule)) {
           StringBuilder clause = new StringBuilder();
-          BnfExpression expression = subRule.getExpression();
-          List<BnfExpression> expressions =
-            expression instanceof BnfSequence ? ((BnfSequence)expression).getExpressionList() : Collections.singletonList(expression);
-          method = generateExternalCall(rule, clause, expressions, nextName);
+          method = generateExternalCall(rule, clause, getExternalRuleExpressions(subRule), nextName);
           return method + "(builder_, level_ + 1" + clause.toString() + ")";
         }
         else {
@@ -849,20 +847,42 @@ public class ParserGenerator {
     }
   }
 
+  private List<BnfExpression> getExternalRuleExpressions(BnfRule subRule) {
+    BnfExpression expression = subRule.getExpression();
+    return expression instanceof BnfSequence ? ((BnfSequence)expression).getExpressionList() : Collections.singletonList(expression);
+  }
+
   private String generateExternalCall(BnfRule rule, StringBuilder clause, List<BnfExpression> expressions, String nextName) {
-    String method;
-    method = expressions.size() > 0 ? expressions.get(0).getText() : null;
-    if (expressions.size() > 1) {
-      for (int i = 1, len = expressions.size(); i < len; i++) {
+    List<BnfExpression> callParameters = expressions;
+    List<BnfExpression> metaParameters = Collections.emptyList();
+    List<String> metaParameterNames = Collections.emptyList();
+    String method  = expressions.size() > 0 ? expressions.get(0).getText() : null;
+    BnfRule targetRule = method == null? null : myFile.getRule(method);
+    // handle external rule call: substitute and merge arguments from external expression and rule definition
+    if (targetRule != null && Rule.isExternal(targetRule)) {
+      metaParameterNames = GrammarUtil.collectExtraArguments(targetRule, targetRule.getExpression());
+      callParameters = getExternalRuleExpressions(targetRule);
+      metaParameters = expressions;
+      method = callParameters.get(0).getText();
+      if (metaParameterNames.size() < expressions.size() - 1) {
+        callParameters = ContainerUtil.concat(callParameters, expressions.subList(metaParameterNames.size() + 1, expressions.size()));
+      }
+    }
+    if (callParameters.size() > 1) {
+      for (int i = 1, len = callParameters.size(); i < len; i++) {
         clause.append(", ");
-        BnfExpression nested = expressions.get(i);
+        BnfExpression nested = callParameters.get(i);
         String argument = nested.getText();
+        int metaIdx;
+        if (argument.startsWith("<<") && (metaIdx = metaParameterNames.indexOf(argument)) > -1) {
+          nested = metaParameters.get(metaIdx + 1);
+          argument = nested.getText();
+        }
         if (nested instanceof BnfReferenceOrToken) {
           if (myFile.getRule(argument) != null) {
             clause.append(generateWrappedNodeCall(rule, nested, argument));
           }
           else {
-            //clause.append(getElementType(argument));
             clause.append(argument);
           }
         }

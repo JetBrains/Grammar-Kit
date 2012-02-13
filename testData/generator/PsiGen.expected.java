@@ -26,12 +26,6 @@ public class PsiGen implements PsiParser {
     if (root_ == EXPR) {
       result_ = expr(builder_, level_ + 1);
     }
-    else if (root_ == MISSING_EXTERNAL_TYPE) {
-      result_ = external_type(builder_, level_ + 1);
-    }
-    else if (root_ == ID_EXPR) {
-      result_ = external_type2(builder_, level_ + 1);
-    }
     else if (root_ == GRAMMAR_ELEMENT) {
       result_ = grammar_element(builder_, level_ + 1);
     }

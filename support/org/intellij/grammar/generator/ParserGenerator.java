@@ -757,12 +757,13 @@ public class ParserGenerator {
         List<BnfExpression> expressions = ((BnfExternalExpression)child).getExpressionList();
         for (int j = 1, expressionsSize = expressions.size(); j < expressionsSize; j++) {
           BnfExpression expression = expressions.get(j);
-          if (expression instanceof BnfParenthesized) {
+          if (expression instanceof BnfLiteralExpression || expression instanceof BnfReferenceOrToken) continue;
+          if (expression instanceof BnfExternalExpression) {
+            generateNodeChildren(rule, getNextName(funcName, j - 1), Collections.singletonList(expression), visited);
+          }
+          else {
             newLine();
             generateNode(rule, expression, getNextName(getNextName(funcName, i), j - 1), visited);
-          }
-          else if (expression instanceof BnfExternalExpression) {
-            generateNodeChildren(rule, getNextName(funcName, j - 1), Collections.singletonList(expression), visited);
           }
         }
       }
@@ -817,7 +818,7 @@ public class ParserGenerator {
         String method;
         if (Rule.isExternal(subRule)) {
           StringBuilder clause = new StringBuilder();
-          method = generateExternalCall(rule, clause, getExternalRuleExpressions(subRule), nextName);
+          method = generateExternalCall(rule, clause, GrammarUtil.getExternalRuleExpressions(subRule), nextName);
           return method + "(builder_, level_ + 1" + clause.toString() + ")";
         }
         else {
@@ -847,11 +848,6 @@ public class ParserGenerator {
     }
   }
 
-  private List<BnfExpression> getExternalRuleExpressions(BnfRule subRule) {
-    BnfExpression expression = subRule.getExpression();
-    return expression instanceof BnfSequence ? ((BnfSequence)expression).getExpressionList() : Collections.singletonList(expression);
-  }
-
   private String generateExternalCall(BnfRule rule, StringBuilder clause, List<BnfExpression> expressions, String nextName) {
     List<BnfExpression> callParameters = expressions;
     List<BnfExpression> metaParameters = Collections.emptyList();
@@ -861,7 +857,7 @@ public class ParserGenerator {
     // handle external rule call: substitute and merge arguments from external expression and rule definition
     if (targetRule != null && Rule.isExternal(targetRule)) {
       metaParameterNames = GrammarUtil.collectExtraArguments(targetRule, targetRule.getExpression());
-      callParameters = getExternalRuleExpressions(targetRule);
+      callParameters = GrammarUtil.getExternalRuleExpressions(targetRule);
       metaParameters = expressions;
       method = callParameters.get(0).getText();
       if (metaParameterNames.size() < expressions.size() - 1) {
@@ -873,10 +869,15 @@ public class ParserGenerator {
         clause.append(", ");
         BnfExpression nested = callParameters.get(i);
         String argument = nested.getText();
+        String argNextName;
         int metaIdx;
         if (argument.startsWith("<<") && (metaIdx = metaParameterNames.indexOf(argument)) > -1) {
           nested = metaParameters.get(metaIdx + 1);
           argument = nested.getText();
+          argNextName = getNextName(nextName, metaIdx);
+        }
+        else {
+          argNextName = getNextName(nextName, i - 1);
         }
         if (nested instanceof BnfReferenceOrToken) {
           if (myFile.getRule(argument) != null) {
@@ -886,11 +887,13 @@ public class ParserGenerator {
             clause.append(argument);
           }
         }
-        else if (nested instanceof BnfParenthesized) {
-          clause.append(generateWrappedNodeCall(rule, nested, getNextName(nextName, i - 1)));
-        }
-        else if (nested instanceof BnfStringLiteralExpression && argument.startsWith("\'")) {
-          clause.append(StringUtil.unquoteString(argument));
+        else if (nested instanceof BnfLiteralExpression) {
+          if (argument.startsWith("\'")) {
+            clause.append(StringUtil.unquoteString(argument));
+          }
+          else {
+            clause.append(argument);
+          }
         }
         else if (nested instanceof BnfExternalExpression) {
           List<BnfExpression> expressionList = ((BnfExternalExpression)nested).getExpressionList();
@@ -900,12 +903,11 @@ public class ParserGenerator {
             clause.append(expressionList.get(0).getText());
           }
           else {
-            clause.append(generateWrappedNodeCall(rule, nested, getNextName(nextName, i - 1)));
+            clause.append(generateWrappedNodeCall(rule, nested, argNextName));
           }
         }
-          
         else {
-          clause.append(argument);
+          clause.append(generateWrappedNodeCall(rule, nested, argNextName));
         }
       }
     }

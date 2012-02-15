@@ -17,6 +17,7 @@ package org.intellij.grammar.psi.impl;
 
 import com.intellij.openapi.util.Comparing;
 import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiRecursiveElementWalkingVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.util.SmartList;
@@ -84,6 +85,11 @@ public class GrammarUtil {
     return parent instanceof BnfRule && ParserGeneratorUtil.Rule.isExternal((BnfRule)parent);
   }
 
+  public static List<BnfExpression> getExternalRuleExpressions(BnfRule subRule) {
+    BnfExpression expression = subRule.getExpression();
+    return expression instanceof BnfSequence ? ((BnfSequence)expression).getExpressionList() : Collections.singletonList(expression);
+  }
+
   @Nullable
   public static BnfExpression getExternalMethodExpression(BnfRule rule) {
     if (!ParserGeneratorUtil.Rule.isExternal(rule)) return null;
@@ -123,18 +129,18 @@ public class GrammarUtil {
   }
 
   public static PsiElement prevOrParent(PsiElement e, PsiElement scope) {
-    if (e == null) return null;
+    if (e == null || e == scope) return null;
     PsiElement prev = e.getPrevSibling();
     if (prev != null) return PsiTreeUtil.getDeepestLast(prev);
     PsiElement parent = e.getParent();
-    return parent == scope ? null : parent;
+    return parent == scope || parent instanceof PsiFile ? null : parent;
   }
 
   public static PsiElement nextOrParent(PsiElement e, PsiElement scope) {
-    if (e == null) return null;
+    if (e == null || e == scope) return null;
     PsiElement next = e.getNextSibling();
     if (next != null) return PsiTreeUtil.getDeepestFirst(next);
     PsiElement parent = e.getParent();
-    return parent == scope? null : parent;
+    return parent == scope || parent instanceof PsiFile? null : parent;
   }
 }

@@ -682,13 +682,13 @@ public class ExternalRules implements PsiParser {
   }
 
   /* ********************************************************** */
-  // '{' <<unique_list_of_params one two>> '}'
+  // '{' <<unique_list_of_params one !two>> '}'
   static boolean param_seq_alt_params_ext(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "param_seq_alt_params_ext")) return false;
     boolean result_ = false;
     final Marker marker_ = builder_.mark();
     result_ = consumeToken(builder_, "{");
-    result_ = result_ && uniqueListOf(builder_, level_ + 1, one_parser_, "1+1", two_parser_, 1+1);
+    result_ = result_ && uniqueListOf(builder_, level_ + 1, one_parser_, "1+1", param_seq_alt_params_ext_1_1_parser_, 1+1);
     result_ = result_ && consumeToken(builder_, "}");
     if (!result_) {
       marker_.rollbackTo();
@@ -696,6 +696,18 @@ public class ExternalRules implements PsiParser {
     else {
       marker_.drop();
     }
+    return result_;
+  }
+
+  // !two
+  private static boolean param_seq_alt_params_ext_1_1(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "param_seq_alt_params_ext_1_1")) return false;
+    boolean result_ = false;
+    final Marker marker_ = builder_.mark();
+    enterErrorRecordingSection(builder_, level_, _SECTION_NOT_);
+    result_ = !two(builder_, level_ + 1);
+    marker_.rollbackTo();
+    result_ = exitErrorRecordingSection(builder_, result_, level_, false, _SECTION_NOT_, null);
     return result_;
   }
 
@@ -791,6 +803,11 @@ public class ExternalRules implements PsiParser {
   final static Parser param_seq_alt_1_1_parser_ = new Parser() {
       public boolean parse(PsiBuilder builder_, int level_) {
         return param_seq_alt_1_1(builder_, level_ + 1);
+      }
+    };
+  final static Parser param_seq_alt_params_ext_1_1_parser_ = new Parser() {
+      public boolean parse(PsiBuilder builder_, int level_) {
+        return param_seq_alt_params_ext_1_1(builder_, level_ + 1);
       }
     };
   final static Parser statement_parser_ = new Parser() {

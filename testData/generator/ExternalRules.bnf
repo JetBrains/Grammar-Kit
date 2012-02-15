@@ -19,7 +19,7 @@ private param_opt ::= '{' <<uniqueListOf [one | two | 10 | some]>> '}'
 private param_choice_alt ::= '{' <<uniqueListOf {one | two | 10 | some}>> '}'
 private param_seq_alt ::= '{' <<uniqueListOf {one | two} [10 | some]>> '}'
 private param_seq_alt_ext ::= '{' <<unique_list_of one two>> '}'
-private param_seq_alt_params_ext ::= '{' <<unique_list_of_params one two>> '}'
+private param_seq_alt_params_ext ::= '{' <<unique_list_of_params one !two>> '}'
 
 // meta rules
 meta comma_list ::= <<param>> (',' <<param>>) *

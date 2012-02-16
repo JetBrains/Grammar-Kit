@@ -45,7 +45,7 @@ import static com.intellij.patterns.PlatformPatterns.psiElement;
  */
 public class BnfCompletionContributor extends CompletionContributor {
   public static final List<String> KNOWN_ATTRIBUTES =
-    Arrays.asList("generatePsi", "generateTokens", "generateStubParser", "memoization", "extendedPin",
+    Arrays.asList("generatePsi", "generateTokens", "generateStubParser", "memoization", "extendedPin", "generateFirstCheck",
                   "psiClassPrefix", "psiImplClassSuffix", "psiPackage", "psiImplPackage",
                   "elementTypeClass", "tokenTypeClass",
                   "parserClass", "stubParserClass", "elementTypeHolderClass",

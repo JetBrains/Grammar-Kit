@@ -73,6 +73,7 @@ public class PsiGen implements PsiParser {
   // b_expr plus_expr *
   static boolean a_expr(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "a_expr")) return false;
+    if (!nextTokenIs(builder_, NUMBER) && !nextTokenIs(builder_, ID)) return false;
     boolean result_ = false;
     final Marker marker_ = builder_.mark();
     result_ = b_expr(builder_, level_ + 1);
@@ -106,6 +107,7 @@ public class PsiGen implements PsiParser {
   // id_expr mul_expr *
   static boolean b_expr(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "b_expr")) return false;
+    if (!nextTokenIs(builder_, NUMBER) && !nextTokenIs(builder_, ID)) return false;
     boolean result_ = false;
     final Marker marker_ = builder_.mark();
     result_ = id_expr(builder_, level_ + 1);
@@ -165,6 +167,7 @@ public class PsiGen implements PsiParser {
   // a_expr
   public static boolean expr(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "expr")) return false;
+    if (!nextTokenIs(builder_, NUMBER) && !nextTokenIs(builder_, ID)) return false;
     boolean result_ = false;
     final int start_ = builder_.getCurrentOffset();
     final Marker marker_ = builder_.mark();
@@ -247,6 +250,7 @@ public class PsiGen implements PsiParser {
   // expr | external_type3
   public static boolean grammar_element(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "grammar_element")) return false;
+    if (!nextTokenIs(builder_, NUMBER) && !nextTokenIs(builder_, ID)) return false;
     boolean result_ = false;
     final Marker marker_ = builder_.mark();
     result_ = expr(builder_, level_ + 1);
@@ -264,6 +268,7 @@ public class PsiGen implements PsiParser {
   // specialRef | reference | literal | external_type | external_type2
   static boolean id_expr(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "id_expr")) return false;
+    if (!nextTokenIs(builder_, NUMBER) && !nextTokenIs(builder_, ID)) return false;
     boolean result_ = false;
     final Marker marker_ = builder_.mark();
     result_ = PsiGen2.specialRef(builder_, level_ + 1);
@@ -390,6 +395,7 @@ public class PsiGen implements PsiParser {
   // <<blockOf grammar_element>>
   public static boolean root_c(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "root_c")) return false;
+    if (!nextTokenIs(builder_, NUMBER) && !nextTokenIs(builder_, ID)) return false;
     boolean result_ = false;
     final int start_ = builder_.getCurrentOffset();
     final Marker marker_ = builder_.mark();
@@ -411,6 +417,7 @@ public class PsiGen implements PsiParser {
   // <<listOf grammar_element>>
   public static boolean root_d(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "root_d")) return false;
+    if (!nextTokenIs(builder_, NUMBER) && !nextTokenIs(builder_, ID)) return false;
     boolean result_ = false;
     final int start_ = builder_.getCurrentOffset();
     final Marker marker_ = builder_.mark();

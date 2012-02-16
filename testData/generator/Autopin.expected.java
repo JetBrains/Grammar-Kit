@@ -263,6 +263,7 @@ public class Autopin implements PsiParser {
   // create_statement | drop_statement
   public static boolean statement(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "statement")) return false;
+    if (!nextTokenIs(builder_, CREATE) && !nextTokenIs(builder_, DROP)) return false;
     boolean result_ = false;
     final int start_ = builder_.getCurrentOffset();
     final Marker marker_ = builder_.mark();

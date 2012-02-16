@@ -47,6 +47,7 @@ public class LeftAssociative implements PsiParser {
   // AS? id
   public static boolean alias_definition(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "alias_definition")) return false;
+    if (!nextTokenIs(builder_, AS) && !nextTokenIs(builder_, ID)) return false;
     boolean result_ = false;
     final Marker left_marker_ = (Marker)builder_.getLatestDoneMarker();
     if (!invalid_left_marker_guard_(builder_, left_marker_, "alias_definition")) return false;
@@ -80,6 +81,7 @@ public class LeftAssociative implements PsiParser {
   // AS? id
   private static boolean alias_definition2_0(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "alias_definition2_0")) return false;
+    if (!nextTokenIs(builder_, AS) && !nextTokenIs(builder_, ID)) return false;
     boolean result_ = false;
     final Marker left_marker_ = (Marker)builder_.getLatestDoneMarker();
     if (!invalid_left_marker_guard_(builder_, left_marker_, "alias_definition2_0")) return false;

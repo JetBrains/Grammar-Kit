@@ -44,6 +44,10 @@ public class BnfFirstNextTest extends LightPlatformCodeInsightFixtureTestCase {
   public void testNextMore() { doNextTest("r ::= X s ::= (r * [A | B])", MATCHES_EOF, "A", "B", "X"); }
   public void testNextPredicate() { doNextTest("r ::= X s ::= r &(r * [A | B]) X", "X"); }
 
+  public void testFirstStrings() { doFirstTest("r ::= &(','|')') s ::= r ','", "','"); }
+  public void testFirstAndExternal() { doFirstTest("r ::= &(','|')') external s ::= ss r", "')'", "','"); }
+  public void testFirstRecover() { doNextTest("r ::= !(','|')') s ::= X {recoverUntil=\"r\"}", MATCHES_ANY); }
+
   private void doFirstTest(String text, String... expected) { doTest(text, true, expected); }
   private void doNextTest(String text, String... expected) { doTest(text, false, expected); }
 

@@ -594,6 +594,7 @@ public class GrammarParser implements PsiParser {
   // string_literal_expression | number
   public static boolean literal_expression(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "literal_expression")) return false;
+    if (!nextTokenIs(builder_, BNF_STRING) && !nextTokenIs(builder_, BNF_NUMBER)) return false;
     boolean result_ = false;
     final int start_ = builder_.getCurrentOffset();
     final Marker marker_ = builder_.mark();
@@ -677,6 +678,7 @@ public class GrammarParser implements PsiParser {
   // simple_paren_expression | alt_choice_expression
   public static boolean paren_expression(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "paren_expression")) return false;
+    if (!nextTokenIs(builder_, BNF_LEFT_PAREN) && !nextTokenIs(builder_, BNF_LEFT_BRACE)) return false;
     boolean result_ = false;
     final int start_ = builder_.getCurrentOffset();
     final Marker marker_ = builder_.mark();
@@ -727,6 +729,7 @@ public class GrammarParser implements PsiParser {
   // predicate_sign simple
   public static boolean predicate(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "predicate")) return false;
+    if (!nextTokenIs(builder_, BNF_OP_NOT) && !nextTokenIs(builder_, BNF_OP_AND)) return false;
     boolean result_ = false;
     final int start_ = builder_.getCurrentOffset();
     final Marker marker_ = builder_.mark();
@@ -749,6 +752,7 @@ public class GrammarParser implements PsiParser {
   // '&' | '!'
   public static boolean predicate_sign(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "predicate_sign")) return false;
+    if (!nextTokenIs(builder_, BNF_OP_NOT) && !nextTokenIs(builder_, BNF_OP_AND)) return false;
     boolean result_ = false;
     final Marker marker_ = builder_.mark();
     result_ = consumeToken(builder_, BNF_OP_AND);

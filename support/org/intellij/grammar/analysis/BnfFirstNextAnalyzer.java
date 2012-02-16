@@ -43,6 +43,7 @@ public class BnfFirstNextAnalyzer {
   
   public static final String MATCHES_EOF = "-eof-";
   public static final String MATCHES_NOTHING = "-never-matches-";
+  public static final String MATCHES_ANY = "-any-";
 
   public static Set<String> calcFirst(@NotNull BnfRule rule) {
     Set<BnfRule> visited = new THashSet<BnfRule>();
@@ -65,7 +66,13 @@ public class BnfFirstNextAnalyzer {
       PsiElement cur = stack.removeLast();
       PsiElement parent = cur.getParent();
       while (parent instanceof BnfExpression) {
-        if (parent instanceof BnfSequence) {
+        PsiElement grandPa = parent.getParent();
+        if (grandPa instanceof BnfRule && ParserGeneratorUtil.Rule.isExternal((BnfRule)grandPa) ||
+            grandPa instanceof BnfExternalExpression /*todo support meta rules*/) {
+          result.add(MATCHES_ANY);
+          break;
+        }
+        else if (parent instanceof BnfSequence) {
           List<BnfExpression> children = ((BnfSequence)parent).getExpressionList();
           int idx = children.indexOf(cur);
           calcSequenceFirstInner(children.subList(idx + 1, children.size()), curResult, visited);
@@ -80,14 +87,22 @@ public class BnfFirstNextAnalyzer {
           }
         }
         cur = parent;
-        parent = parent.getParent();
+        parent = grandPa;
       }
       if (parent instanceof BnfRule && totalVisited.add((BnfRule)parent)) {
         BnfRule rule = (BnfRule)parent;
         for (PsiReference reference : ReferencesSearch.search(rule, rule.getUseScope()).findAll()) {
           PsiElement element = reference.getElement();
           if (element instanceof BnfExpression && PsiTreeUtil.getParentOfType(element, BnfPredicate.class) == null) {
-            stack.add((BnfExpression)element);
+            BnfAttr attr = PsiTreeUtil.getParentOfType(element, BnfAttr.class);
+            if (attr != null) {
+              if ("recoverUntil".equals(attr.getName())) {
+                result.add(MATCHES_ANY);
+              }
+            }
+            else {
+              stack.add((BnfExpression)element);
+            }
           }
         }
       }
@@ -109,7 +124,8 @@ public class BnfFirstNextAnalyzer {
 
   public static Set<String> calcFirstInner(BnfExpression expression, Set<String> result, Set<BnfRule> visited) {
     if (expression instanceof BnfLiteralExpression) {
-      result.add(expression.getText());
+      String text = expression.getText();
+      result.add(StringUtil.isQuotedString(text)? '\''+StringUtil.unquoteString(text) +'\'' : text);
     }
     else if (expression instanceof BnfReferenceOrToken) {
       PsiReference reference = expression.getReference();
@@ -196,12 +212,6 @@ public class BnfFirstNextAnalyzer {
       if (predicateExpression instanceof BnfParenExpression) predicateExpression = ((BnfParenExpression)predicateExpression).getExpression();
       boolean skip = predicateExpression instanceof BnfSequence && ((BnfSequence)predicateExpression).getExpressionList().size() > 1; // todo calc min length ?
       if (!skip) {
-        // skip text-matching
-        for (String condition : conditions) {
-          if (StringUtil.isQuotedString(condition)) { skip = true; break; }
-        }
-      }
-      if (!skip) {
         // skip external methods
         for (String s : next) {
           if (s.startsWith("#")) { skip = true; break; }
@@ -212,16 +222,29 @@ public class BnfFirstNextAnalyzer {
       }
       else if (elementType == BnfTypes.BNF_OP_AND) {
         if (!conditions.contains(MATCHES_EOF)) {
-          next.retainAll(conditions);
-          if (next.isEmpty()) next.add(MATCHES_NOTHING);
+          if (next.contains(MATCHES_ANY)) {
+            next.clear();
+            next.addAll(conditions);
+          }
+          else {
+            next.retainAll(conditions);
+            if (next.isEmpty()) {
+              next.add(MATCHES_NOTHING);
+            }
+          }
         }
       }
       else {
         if (!conditions.contains(MATCHES_EOF)) {
           next.removeAll(conditions);
-          if (next.isEmpty()) next.add(MATCHES_NOTHING);
+          if (next.isEmpty()) {
+            next.add(MATCHES_NOTHING);
+          }
         }
-        else { next.clear(); next.add(MATCHES_NOTHING); }
+        else {
+          next.clear();
+          next.add(MATCHES_NOTHING);
+        }
       }
       result.addAll(next);
     }

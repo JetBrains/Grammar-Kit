@@ -74,7 +74,10 @@ public class BnfFileImpl extends PsiFileBase implements BnfFile {
         public Result<Map<String, BnfRule>> compute() {
           Map<String, BnfRule> map = new THashMap<String, BnfRule>();
           for (BnfRule rule : getRules()) {
-            map.put(rule.getName(), rule);
+            String name = rule.getName();
+            if (!map.containsKey(name)) {
+              map.put(name, rule);
+            }
           }
           return Result.create(map, BnfFileImpl.this);
         }

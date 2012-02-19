@@ -511,7 +511,7 @@ public class ParserGenerator {
         + collectExtraArguments(rule, node, true) + ") {");
     if (node instanceof BnfReferenceOrToken || node instanceof BnfLiteralExpression || node instanceof BnfExternalExpression) {
       children = Collections.singletonList(node);
-      if (isPrivate && !isLeftInner) {
+      if (isPrivate && !isLeftInner && recoverRoot == null) {
         String nodeCall = generateNodeCall(rule, node, getNextName(funcName, 0));
         out("return " + nodeCall + ";");
         out("}");

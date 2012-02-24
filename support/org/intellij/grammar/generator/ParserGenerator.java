@@ -973,13 +973,14 @@ public class ParserGenerator {
                         (tokenTypeFactory == null ? "" : "static " + tokenTypeFactory + ";") +
                         (generatePsi ? implPackage + ".*;" : ""), "", true);
     String elementCreateCall = elementTypeFactory == null ? "new " + StringUtil.getShortName(elementTypeClass) : StringUtil.getShortName(elementTypeFactory);
-    Set<String> sortedCompositeTypes = new TreeSet<String>();
-    for (String ruleName : myRuleParserClasses.keySet()) {
-      final BnfRule rule = myFile.getRule(ruleName);
+    Map<String, BnfRule> sortedCompositeTypes = new TreeMap<String, BnfRule>();
+    for (BnfRule rule : myFile.getRules()) {
       if (!RuleGraphHelper.shouldGeneratePsi(rule, true)) continue;
-      sortedCompositeTypes.add(getElementType(rule));
+      String elementType = getElementType(rule);
+      if (sortedCompositeTypes.containsKey(elementType)) continue;
+      sortedCompositeTypes.put(elementType, rule);
     }
-    for (String elementType : sortedCompositeTypes) {
+    for (String elementType : sortedCompositeTypes.keySet()) {
       out("IElementType " + elementType + " = " + elementCreateCall + "(\"" + elementType + "\");");
     }
     if (generateTokens) {
@@ -1001,11 +1002,9 @@ public class ParserGenerator {
       out("IElementType type = node.getElementType();");
       String suffix = getRootAttribute(myFile, "psiImplClassSuffix", "Impl");
       boolean first = true;
-      for (String ruleName : myRuleParserClasses.keySet()) {
-        final BnfRule rule = myFile.getRule(ruleName);
-        if (!RuleGraphHelper.shouldGeneratePsi(rule, false)) continue;
+      for (String elementType : sortedCompositeTypes.keySet()) {
+        final BnfRule rule = sortedCompositeTypes.get(elementType);
         String psiClass = getRulePsiClassName(rule, true) + suffix;
-        String elementType = getElementType(rule);
         out((!first ? "else" : "") + " if (type == " + elementType + ") {");
         out("return new " + psiClass + "(node);");
         first = false;

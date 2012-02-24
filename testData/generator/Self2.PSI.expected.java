@@ -56,14 +56,14 @@ public interface BnfTypes {
        if (type == BNF_ATTR) {
         return new BnfAttrImpl(node);
       }
+      else if (type == BNF_ATTRS) {
+        return new BnfAttrsImpl(node);
+      }
       else if (type == BNF_ATTR_PATTERN) {
         return new BnfAttrPatternImpl(node);
       }
       else if (type == BNF_ATTR_VALUE) {
         return new BnfAttrValueImpl(node);
-      }
-      else if (type == BNF_ATTRS) {
-        return new BnfAttrsImpl(node);
       }
       else if (type == BNF_CHOICE) {
         return new BnfChoiceImpl(node);

@@ -45,8 +45,14 @@ public interface ParserTypes {
       else if (type == IDENTIFIER) {
         return new IdentifierImpl(node);
       }
+      else if (type == ID_EXPR) {
+        return new ExternalType2Impl(node);
+      }
       else if (type == LITERAL) {
         return new LiteralImpl(node);
+      }
+      else if (type == MISSING_EXTERNAL_TYPE) {
+        return new ExternalTypeImpl(node);
       }
       else if (type == MUL_EXPR) {
         return new MulExprImpl(node);

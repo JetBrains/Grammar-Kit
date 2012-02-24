@@ -22,6 +22,6 @@ import com.intellij.psi.PsiElement;
 public interface BnfChoice extends BnfExpression {
 
   @NotNull
-  public List<BnfExpression> getExpressionList();
+  List<BnfExpression> getExpressionList();
 
 }

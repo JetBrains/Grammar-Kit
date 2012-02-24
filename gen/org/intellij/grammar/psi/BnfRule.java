@@ -22,15 +22,15 @@ import com.intellij.psi.PsiElement;
 public interface BnfRule extends BnfNamedElement {
 
   @Nullable
-  public BnfAttrs getAttrs();
+  BnfAttrs getAttrs();
 
   @NotNull
-  public BnfExpression getExpression();
+  BnfExpression getExpression();
 
   @NotNull
-  public List<BnfModifier> getModifierList();
+  List<BnfModifier> getModifierList();
 
   @NotNull
-  public PsiElement getId();
+  PsiElement getId();
 
 }

@@ -109,7 +109,7 @@ import generated.CompositeElement;
 public interface GrammarElement extends CompositeElement {
 
   @NotNull
-  public Expr getExpr();
+  Expr getExpr();
 
 }
 // ---- Identifier.java -----------------
@@ -124,7 +124,7 @@ import generated.CompositeElement;
 public interface Identifier extends CompositeElement {
 
   @NotNull
-  public PsiElement getId();
+  PsiElement getId();
 
 }
 // ---- Literal.java -----------------
@@ -138,7 +138,7 @@ import com.intellij.psi.PsiElement;
 public interface Literal extends Expr {
 
   @NotNull
-  public PsiElement getNumber();
+  PsiElement getNumber();
 
 }
 // ---- MulExpr.java -----------------
@@ -152,7 +152,7 @@ import com.intellij.psi.PsiElement;
 public interface MulExpr extends Expr {
 
   @NotNull
-  public List<Expr> getExprList();
+  List<Expr> getExprList();
 
 }
 // ---- PlusExpr.java -----------------
@@ -166,7 +166,7 @@ import com.intellij.psi.PsiElement;
 public interface PlusExpr extends Expr {
 
   @NotNull
-  public List<Expr> getExprList();
+  List<Expr> getExprList();
 
 }
 // ---- RefExpr.java -----------------
@@ -180,7 +180,7 @@ import com.intellij.psi.PsiElement;
 public interface RefExpr extends Expr {
 
   @NotNull
-  public Identifier getIdentifier();
+  Identifier getIdentifier();
 
 }
 // ---- RootB.java -----------------
@@ -205,7 +205,7 @@ import com.intellij.psi.PsiElement;
 public interface RootC extends Root {
 
   @NotNull
-  public BlockOf getBlockOf();
+  BlockOf getBlockOf();
 
 }
 // ---- RootD.java -----------------
@@ -219,7 +219,7 @@ import com.intellij.psi.PsiElement;
 public interface RootD extends Root {
 
   @NotNull
-  public List<GrammarElement> getGrammarElementList();
+  List<GrammarElement> getGrammarElementList();
 
 }
 // ---- SpecialRef.java -----------------
@@ -233,10 +233,10 @@ import com.intellij.psi.PsiElement;
 public interface SpecialRef extends RefExpr {
 
   @NotNull
-  public Identifier getIdentifier();
+  Identifier getIdentifier();
 
   @NotNull
-  public RefExpr getRefExpr();
+  RefExpr getRefExpr();
 
 }
 // ---- BlockOfImpl.java -----------------

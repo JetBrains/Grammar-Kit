@@ -22,6 +22,6 @@ import com.intellij.psi.PsiElement;
 public interface BnfLiteralExpression extends BnfExpression {
 
   @Nullable
-  public PsiElement getNumber();
+  PsiElement getNumber();
 
 }

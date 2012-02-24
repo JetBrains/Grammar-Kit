@@ -22,6 +22,6 @@ import com.intellij.psi.PsiElement;
 public interface BnfReferenceOrToken extends BnfExpression {
 
   @NotNull
-  public PsiElement getId();
+  PsiElement getId();
 
 }

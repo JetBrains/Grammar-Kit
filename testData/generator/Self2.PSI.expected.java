@@ -125,13 +125,13 @@ import com.intellij.psi.PsiElement;
 public interface BnfAttr extends BnfNamedElement {
 
   @Nullable
-  public BnfAttrPattern getAttrPattern();
+  BnfAttrPattern getAttrPattern();
 
   @Nullable
-  public BnfAttrValue getAttrValue();
+  BnfAttrValue getAttrValue();
 
   @NotNull
-  public PsiElement getId();
+  PsiElement getId();
 
 }
 // ---- BnfAttrPattern.java -----------------
@@ -145,7 +145,7 @@ import com.intellij.psi.PsiElement;
 public interface BnfAttrPattern extends BnfCompositeElement {
 
   @Nullable
-  public BnfLiteralExpression getLiteralExpression();
+  BnfLiteralExpression getLiteralExpression();
 
 }
 // ---- BnfAttrValue.java -----------------
@@ -159,7 +159,7 @@ import com.intellij.psi.PsiElement;
 public interface BnfAttrValue extends BnfCompositeElement {
 
   @NotNull
-  public BnfExpression getExpression();
+  BnfExpression getExpression();
 
 }
 // ---- BnfAttrs.java -----------------
@@ -173,7 +173,7 @@ import com.intellij.psi.PsiElement;
 public interface BnfAttrs extends BnfCompositeElement {
 
   @NotNull
-  public List<BnfAttr> getAttrList();
+  List<BnfAttr> getAttrList();
 
 }
 // ---- BnfChoice.java -----------------
@@ -187,7 +187,7 @@ import com.intellij.psi.PsiElement;
 public interface BnfChoice extends BnfExpression {
 
   @NotNull
-  public List<BnfExpression> getExpressionList();
+  List<BnfExpression> getExpressionList();
 
 }
 // ---- BnfExpression.java -----------------
@@ -212,7 +212,7 @@ import com.intellij.psi.PsiElement;
 public interface BnfExternalExpression extends BnfExpression {
 
   @NotNull
-  public List<BnfExpression> getExpressionList();
+  List<BnfExpression> getExpressionList();
 
 }
 // ---- BnfLiteralExpression.java -----------------
@@ -226,7 +226,7 @@ import com.intellij.psi.PsiElement;
 public interface BnfLiteralExpression extends BnfExpression {
 
   @Nullable
-  public PsiElement getNumber();
+  PsiElement getNumber();
 
 }
 // ---- BnfModifier.java -----------------
@@ -251,7 +251,7 @@ import com.intellij.psi.PsiElement;
 public interface BnfParenExpression extends BnfExpression, BnfParenthesized {
 
   @Nullable
-  public BnfExpression getExpression();
+  BnfExpression getExpression();
 
 }
 // ---- BnfParenOptExpression.java -----------------
@@ -265,7 +265,7 @@ import com.intellij.psi.PsiElement;
 public interface BnfParenOptExpression extends BnfExpression, BnfParenthesized {
 
   @Nullable
-  public BnfExpression getExpression();
+  BnfExpression getExpression();
 
 }
 // ---- BnfPredicate.java -----------------
@@ -279,10 +279,10 @@ import com.intellij.psi.PsiElement;
 public interface BnfPredicate extends BnfExpression {
 
   @NotNull
-  public BnfExpression getExpression();
+  BnfExpression getExpression();
 
   @NotNull
-  public BnfPredicateSign getPredicateSign();
+  BnfPredicateSign getPredicateSign();
 
 }
 // ---- BnfPredicateSign.java -----------------
@@ -307,10 +307,10 @@ import com.intellij.psi.PsiElement;
 public interface BnfQuantified extends BnfExpression {
 
   @NotNull
-  public BnfExpression getExpression();
+  BnfExpression getExpression();
 
   @NotNull
-  public BnfQuantifier getQuantifier();
+  BnfQuantifier getQuantifier();
 
 }
 // ---- BnfQuantifier.java -----------------
@@ -335,7 +335,7 @@ import com.intellij.psi.PsiElement;
 public interface BnfReferenceOrToken extends BnfExpression {
 
   @NotNull
-  public PsiElement getId();
+  PsiElement getId();
 
 }
 // ---- BnfRule.java -----------------
@@ -349,16 +349,16 @@ import com.intellij.psi.PsiElement;
 public interface BnfRule extends BnfNamedElement {
 
   @Nullable
-  public BnfAttrs getAttrs();
+  BnfAttrs getAttrs();
 
   @NotNull
-  public BnfExpression getExpression();
+  BnfExpression getExpression();
 
   @NotNull
-  public List<BnfModifier> getModifierList();
+  List<BnfModifier> getModifierList();
 
   @NotNull
-  public PsiElement getId();
+  PsiElement getId();
 
 }
 // ---- BnfSequence.java -----------------
@@ -372,7 +372,7 @@ import com.intellij.psi.PsiElement;
 public interface BnfSequence extends BnfExpression {
 
   @NotNull
-  public List<BnfExpression> getExpressionList();
+  List<BnfExpression> getExpressionList();
 
 }
 // ---- BnfStringLiteralExpression.java -----------------
@@ -386,7 +386,7 @@ import com.intellij.psi.PsiElement;
 public interface BnfStringLiteralExpression extends BnfLiteralExpression {
 
   @NotNull
-  public PsiElement getString();
+  PsiElement getString();
 
 }
 // ---- BnfAttrImpl.java -----------------

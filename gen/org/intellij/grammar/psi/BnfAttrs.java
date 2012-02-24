@@ -22,6 +22,6 @@ import com.intellij.psi.PsiElement;
 public interface BnfAttrs extends BnfCompositeElement {
 
   @NotNull
-  public List<BnfAttr> getAttrList();
+  List<BnfAttr> getAttrList();
 
 }

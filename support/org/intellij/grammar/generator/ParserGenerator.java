@@ -1115,7 +1115,7 @@ public class ParserGenerator {
     }
     String className = StringUtil.getShortName(getAccessorType(treeRule != null? treeRule : rule, tree));
     String tail = intf ? "();" : "() {";
-    out("public " + (many ? "List<" : "") + className + (many ? "> " : " ") + getterName + tail);
+    out((intf? "":"public ") + (many ? "List<" : "") + className + (many ? "> " : " ") + getterName + tail);
     if (!intf) {
       if (treeRule == null) {
         out("return "+(type == REQUIRED?"findNotNullChildByType":"findChildByType")+"(" + getElementType(ruleName) + ");");

@@ -22,6 +22,6 @@ import com.intellij.psi.PsiElement;
 public interface BnfParenExpression extends BnfExpression, BnfParenthesized {
 
   @Nullable
-  public BnfExpression getExpression();
+  BnfExpression getExpression();
 
 }

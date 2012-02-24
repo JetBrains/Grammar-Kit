@@ -22,9 +22,9 @@ import com.intellij.psi.PsiElement;
 public interface BnfPredicate extends BnfExpression {
 
   @NotNull
-  public BnfExpression getExpression();
+  BnfExpression getExpression();
 
   @NotNull
-  public BnfPredicateSign getPredicateSign();
+  BnfPredicateSign getPredicateSign();
 
 }

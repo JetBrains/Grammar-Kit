@@ -22,12 +22,12 @@ import com.intellij.psi.PsiElement;
 public interface BnfAttr extends BnfNamedElement {
 
   @Nullable
-  public BnfAttrPattern getAttrPattern();
+  BnfAttrPattern getAttrPattern();
 
   @Nullable
-  public BnfAttrValue getAttrValue();
+  BnfAttrValue getAttrValue();
 
   @NotNull
-  public PsiElement getId();
+  PsiElement getId();
 
 }

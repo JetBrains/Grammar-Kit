@@ -22,9 +22,9 @@ import com.intellij.psi.PsiElement;
 public interface BnfQuantified extends BnfExpression {
 
   @NotNull
-  public BnfExpression getExpression();
+  BnfExpression getExpression();
 
   @NotNull
-  public BnfQuantifier getQuantifier();
+  BnfQuantifier getQuantifier();
 
 }

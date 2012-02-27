@@ -186,6 +186,28 @@ public class PsiGen implements PsiParser {
   }
 
   /* ********************************************************** */
+  // id
+  public static boolean external_same_as_type2(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "external_same_as_type2")) return false;
+    if (!nextTokenIs(builder_, ID)) return false;
+    boolean result_ = false;
+    final int start_ = builder_.getCurrentOffset();
+    final Marker marker_ = builder_.mark();
+    result_ = consumeToken(builder_, ID);
+    LighterASTNode last_ = result_? builder_.getLatestDoneMarker() : null;
+    if (last_ != null && last_.getStartOffset() == start_ && type_extends_(last_.getTokenType(), ID_EXPR)) {
+      marker_.drop();
+    }
+    else if (result_) {
+      marker_.done(ID_EXPR);
+    }
+    else {
+      marker_.rollbackTo();
+    }
+    return result_;
+  }
+
+  /* ********************************************************** */
   // number
   public static boolean external_type(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "external_type")) return false;

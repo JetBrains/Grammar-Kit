@@ -103,6 +103,34 @@ import generated.CompositeElement;
 public interface Expr extends CompositeElement {
 
 }
+// ---- ExternalType.java -----------------
+//header.txt
+package generated.psi;
+
+import java.util.List;
+import org.jetbrains.annotations.*;
+import com.intellij.psi.PsiElement;
+
+public interface ExternalType extends Expr {
+
+  @NotNull
+  PsiElement getNumber();
+
+}
+// ---- ExternalType2.java -----------------
+//header.txt
+package generated.psi;
+
+import java.util.List;
+import org.jetbrains.annotations.*;
+import com.intellij.psi.PsiElement;
+
+public interface ExternalType2 extends Expr {
+
+  @NotNull
+  PsiElement getId();
+
+}
 // ---- GrammarElement.java -----------------
 //header.txt
 package generated.psi;
@@ -282,6 +310,56 @@ public class ExprImpl extends CompositeElementImpl implements Expr {
 
   public ExprImpl(ASTNode node) {
     super(node);
+  }
+
+}
+// ---- ExternalTypeImpl.java -----------------
+//header.txt
+package generated.psi.impl;
+
+import java.util.List;
+import org.jetbrains.annotations.*;
+import com.intellij.lang.ASTNode;
+import com.intellij.psi.PsiElement;
+import com.intellij.psi.util.PsiTreeUtil;
+import static generated.ParserTypes.*;
+import generated.psi.*;
+
+public class ExternalTypeImpl extends ExprImpl implements ExternalType {
+
+  public ExternalTypeImpl(ASTNode node) {
+    super(node);
+  }
+
+  @Override
+  @NotNull
+  public PsiElement getNumber() {
+    return findNotNullChildByType(NUMBER);
+  }
+
+}
+// ---- ExternalType2Impl.java -----------------
+//header.txt
+package generated.psi.impl;
+
+import java.util.List;
+import org.jetbrains.annotations.*;
+import com.intellij.lang.ASTNode;
+import com.intellij.psi.PsiElement;
+import com.intellij.psi.util.PsiTreeUtil;
+import static generated.ParserTypes.*;
+import generated.psi.*;
+
+public class ExternalType2Impl extends ExprImpl implements ExternalType2 {
+
+  public ExternalType2Impl(ASTNode node) {
+    super(node);
+  }
+
+  @Override
+  @NotNull
+  public PsiElement getId() {
+    return findNotNullChildByType(ID);
   }
 
 }

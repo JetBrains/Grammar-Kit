@@ -22,6 +22,7 @@ left mul_expr ::= '*' expr {extends="expr"}
 private id_expr ::= specialRef | reference | literal | external_type | external_type2
 external_type ::= number {elementType="missing_external_type" extends="expr"}
 external_type2 ::= id {elementType="id_expr" extends="expr"}
+external_same_as_type2 ::= id {elementType="id_expr" extends="expr"}
 external_type3 ::= id {elementType="expr"} // do not generate anything
 
 ;{

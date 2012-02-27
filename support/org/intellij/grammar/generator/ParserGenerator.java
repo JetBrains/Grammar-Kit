@@ -131,13 +131,22 @@ public class ParserGenerator {
       generateParser();
     }
     boolean generatePsi = getRootAttribute(myFile, "generatePsi", true);
+    Map<String, BnfRule> sortedCompositeTypes = new TreeMap<String, BnfRule>();
+    Map<String, BnfRule> sortedPsiRules = new TreeMap<String, BnfRule>();
+    for (BnfRule rule : myFile.getRules()) {
+      if (!RuleGraphHelper.shouldGeneratePsi(rule, true)) continue;
+      String elementType = getElementType(rule);
+      if (sortedCompositeTypes.containsKey(elementType)) continue;
+      sortedCompositeTypes.put(elementType, rule);
+      sortedPsiRules.put(rule.getName(), rule);
+    }
     {
       String className = getRootAttribute(myFile, "elementTypeHolderClass", "generated.ParserTypes");
       File parserFile = new File(myRootPath, className.replace('.', File.separatorChar) + ".java");
       parserFile.getParentFile().mkdirs();
       openOutput(parserFile);
       try {
-        generateElementTypesHolder(className, generatePsi);
+        generateElementTypesHolder(className, sortedCompositeTypes, generatePsi);
       }
       finally {
         closeOutput();
@@ -146,9 +155,8 @@ public class ParserGenerator {
     if (generatePsi) {
       Map<String, String> infClasses = new HashMap<String, String>();
       RuleGraphHelper graphHelper = new RuleGraphHelper(myFile, myRuleExtendsMap);
-      for (String ruleName : myRuleParserClasses.keySet()) {
+      for (String ruleName : sortedPsiRules.keySet()) {
         BnfRule rule = myFile.getRule(ruleName);
-        if (!RuleGraphHelper.shouldGeneratePsi(rule, false)) continue;
         String psiPackage = getRootAttribute(myFile, "psiPackage", "generated.psi");
         String psiClass = psiPackage + "." + getRulePsiClassName(rule, true);
         infClasses.put(ruleName, psiClass);
@@ -162,9 +170,8 @@ public class ParserGenerator {
           closeOutput();
         }
       }
-      for (String ruleName : myRuleParserClasses.keySet()) {
+      for (String ruleName : sortedPsiRules.keySet()) {
         BnfRule rule = myFile.getRule(ruleName);
-        if (!RuleGraphHelper.shouldGeneratePsi(rule, false)) continue;
         String psiPackage = getRootAttribute(myFile, "psiImplPackage", "generated.psi.impl");
         String suffix = getRootAttribute(myFile, "psiImplClassSuffix", "Impl");
         String psiClass = psiPackage + "." + getRulePsiClassName(rule, true) + suffix;
@@ -956,7 +963,7 @@ public class ParserGenerator {
 
   /*ElementTypes******************************************************************/
 
-  private void generateElementTypesHolder(String className, boolean generatePsi) {
+  private void generateElementTypesHolder(String className, Map<String, BnfRule> sortedCompositeTypes, boolean generatePsi) {
     String implPackage = getRootAttribute(myFile, "psiImplPackage", "generated.psi.impl");
     final String elementTypeClass = getRootAttribute(myFile, "elementTypeClass", IELEMENTTYPE_CLASS);
     final boolean generateTokens = getRootAttribute(myFile, "generateTokens", true);
@@ -973,13 +980,6 @@ public class ParserGenerator {
                         (tokenTypeFactory == null ? "" : "static " + tokenTypeFactory + ";") +
                         (generatePsi ? implPackage + ".*;" : ""), "", true);
     String elementCreateCall = elementTypeFactory == null ? "new " + StringUtil.getShortName(elementTypeClass) : StringUtil.getShortName(elementTypeFactory);
-    Map<String, BnfRule> sortedCompositeTypes = new TreeMap<String, BnfRule>();
-    for (BnfRule rule : myFile.getRules()) {
-      if (!RuleGraphHelper.shouldGeneratePsi(rule, true)) continue;
-      String elementType = getElementType(rule);
-      if (sortedCompositeTypes.containsKey(elementType)) continue;
-      sortedCompositeTypes.put(elementType, rule);
-    }
     for (String elementType : sortedCompositeTypes.keySet()) {
       out("IElementType " + elementType + " = " + elementCreateCall + "(\"" + elementType + "\");");
     }

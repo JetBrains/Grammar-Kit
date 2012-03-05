@@ -718,17 +718,21 @@ public class ParserGenerator {
         out("}");
       }
     }
-    else if (!alwaysTrue) {
-      out("if (!result_" + (pinned ? " && !pinned_" : "") + ") {");
-      out("marker_.rollbackTo();");
-      out("}");
-      out("else {");
-      out("marker_.drop();");
+    else {
+      if (!alwaysTrue) {
+        out("if (!result_" + (pinned ? " && !pinned_" : "") + ") {");
+        out("marker_.rollbackTo();");
+        out("}");
+        out("else {");
+        out("marker_.drop();");
+      }
       if (isLeftInner) {
         out("left_marker_.precede().done(((LighterASTNode)left_marker_).getTokenType());");
         out("left_marker_.drop();");
       }
-      out("}");
+      if (!alwaysTrue) {
+        out("}");
+      }
     }
     if (sectionType != null) {
       final String untilCall;

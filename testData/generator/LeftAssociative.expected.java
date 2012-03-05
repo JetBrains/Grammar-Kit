@@ -196,4 +196,16 @@ public class LeftAssociative implements PsiParser {
     return result_;
   }
 
+  /* ********************************************************** */
+  // id?
+  static boolean leech3(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "leech3")) return false;
+    final Marker left_marker_ = (Marker)builder_.getLatestDoneMarker();
+    if (!invalid_left_marker_guard_(builder_, left_marker_, "leech3")) return false;
+    consumeToken(builder_, ID);
+    left_marker_.precede().done(((LighterASTNode)left_marker_).getTokenType());
+    left_marker_.drop();
+    return true;
+  }
+
 }

@@ -71,7 +71,7 @@ public class GeneratedParserUtilBase {
     ErrorState state = ErrorState.get(builder_);
 
     Frame frame = state.levelCheck.isEmpty() ? null : state.levelCheck.getLast();
-    return frame == null || frame.errorReportedAt < builder_.getCurrentOffset();
+    return frame == null || frame.errorReportedAt <= builder_.getCurrentOffset();
   }
 
   public static boolean consumeToken(PsiBuilder builder_, IElementType token) {

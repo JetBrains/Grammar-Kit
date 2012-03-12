@@ -102,6 +102,9 @@ import generated.CompositeElement;
 
 public interface Expr extends CompositeElement {
 
+  @NotNull
+  List<Expr> getExprList();
+
 }
 // ---- ExternalType.java -----------------
 //header.txt
@@ -310,6 +313,12 @@ public class ExprImpl extends CompositeElementImpl implements Expr {
 
   public ExprImpl(ASTNode node) {
     super(node);
+  }
+
+  @Override
+  @NotNull
+  public List<Expr> getExprList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, Expr.class);
   }
 
 }

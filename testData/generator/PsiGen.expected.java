@@ -164,7 +164,7 @@ public class PsiGen implements PsiParser {
   }
 
   /* ********************************************************** */
-  // a_expr
+  // a_expr (',' a_expr) *
   public static boolean expr(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "expr")) return false;
     if (!nextTokenIs(builder_, NUMBER) && !nextTokenIs(builder_, ID)) return false;
@@ -172,6 +172,7 @@ public class PsiGen implements PsiParser {
     final int start_ = builder_.getCurrentOffset();
     final Marker marker_ = builder_.mark();
     result_ = a_expr(builder_, level_ + 1);
+    result_ = result_ && expr_1(builder_, level_ + 1);
     LighterASTNode last_ = result_? builder_.getLatestDoneMarker() : null;
     if (last_ != null && last_.getStartOffset() == start_ && type_extends_(last_.getTokenType(), EXPR)) {
       marker_.drop();
@@ -181,6 +182,44 @@ public class PsiGen implements PsiParser {
     }
     else {
       marker_.rollbackTo();
+    }
+    return result_;
+  }
+
+  // (',' a_expr) *
+  private static boolean expr_1(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "expr_1")) return false;
+    int offset_ = builder_.getCurrentOffset();
+    while (true) {
+      if (!expr_1_0(builder_, level_ + 1)) break;
+      int next_offset_ = builder_.getCurrentOffset();
+      if (offset_ == next_offset_) {
+        empty_element_parsed_guard_(builder_, offset_, "expr_1");
+        break;
+      }
+      offset_ = next_offset_;
+    }
+    return true;
+  }
+
+  // (',' a_expr)
+  private static boolean expr_1_0(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "expr_1_0")) return false;
+    return expr_1_0_0(builder_, level_ + 1);
+  }
+
+  // ',' a_expr
+  private static boolean expr_1_0_0(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "expr_1_0_0")) return false;
+    boolean result_ = false;
+    final Marker marker_ = builder_.mark();
+    result_ = consumeToken(builder_, ",");
+    result_ = result_ && a_expr(builder_, level_ + 1);
+    if (!result_) {
+      marker_.rollbackTo();
+    }
+    else {
+      marker_.drop();
     }
     return result_;
   }

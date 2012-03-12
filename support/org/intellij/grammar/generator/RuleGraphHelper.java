@@ -20,7 +20,6 @@ import com.intellij.psi.PsiReference;
 import com.intellij.psi.search.searches.ReferencesSearch;
 import com.intellij.psi.tree.IElementType;
 import com.intellij.psi.util.PsiTreeUtil;
-import com.intellij.util.ObjectUtils;
 import com.intellij.util.containers.MultiMap;
 import com.intellij.util.containers.MultiMapBasedOnSet;
 import gnu.trove.THashMap;
@@ -122,7 +121,7 @@ public class RuleGraphHelper {
     for (BnfRule rule : myFile.getRules()) {
       Map<PsiElement, Cardinality> map = collectMembers(rule, rule.getExpression(), rule.getName(), visited);
       myMap.put(rule, map.size() == 1 && map.containsKey(rule) ? Collections.<PsiElement, Cardinality>emptyMap() : map);
-      visited.clear();
+      ParserGenerator.LOG.assertTrue(visited.isEmpty());
     }
   }
 
@@ -232,6 +231,7 @@ public class RuleGraphHelper {
       }
       result = joinMaps(null, BnfTypes.BNF_SEQUENCE, Arrays.asList(result, joinMaps(null, BnfTypes.BNF_CHOICE, list)));
     }
+    visited.remove(tree);
     return result;
   }
 

@@ -14,7 +14,7 @@ root_d ::= <<listOf grammar_element>>
 meta blockOf ::= <<p>> +
 private meta listOf ::= <<p>> +
 grammar_element ::= expr | external_type3
-expr ::= a_expr
+expr ::= a_expr (',' a_expr) *
 private a_expr ::= b_expr plus_expr *
 left plus_expr ::= '+' expr {extends="expr"}
 private b_expr ::= id_expr mul_expr *

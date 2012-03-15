@@ -2,12 +2,16 @@
   <id>org.jetbrains.idea.grammar</id>
   <version>1.0.3</version>
   <vendor email="gregory.shrago@jetbrains.com" logo="">Gregory Shrago</vendor>
-  <idea-version since-build="111.222" until-build=""/>
+  <idea-version since-build="116.108" until-build=""/>
 
   <name>Grammar-Kit</name>
   <description>Edit, manipulate, analyze BNF grammars and generate readable parser/PSI code</description>
   <change-notes>
     <![CDATA[
+    <p>1.0.4</p>
+    <ul>
+        <li>Bug fixes and performance</li>
+    </ul>
     <p>1.0.3</p>
     <ul>
         <li>Improved PSI generation ("extends" and "elementType" attributes handling)</li>
@@ -106,5 +110,12 @@
       <add-to-group group-id="RefactoringMenu" anchor="first"/>
       <keyboard-shortcut keymap="$default" first-keystroke="control alt R"/>
     </action>
+    <!--<action id="Grammars.ConvertFromRailRoad" class="org.intellij.grammar.actions.BnfConvertFromRailRoadAction" text="Convert From Railroad Diagram"-->
+            <!--description="Convert From Railroad Diagram">-->
+      <!--<add-to-group group-id="ToolsMenu" anchor="before" relative-to-action="com.intellij.tools.ExternalToolsGroup"/>-->
+      <!--<add-to-group group-id="EditorPopupMenu" anchor="last"/>-->
+      <!--<add-to-group group-id="ProjectViewPopupMenu" anchor="last"/>-->
+      <!--<keyboard-shortcut keymap="$default" first-keystroke="control shift D"/>-->
+    <!--</action>-->
   </actions>
 </idea-plugin>

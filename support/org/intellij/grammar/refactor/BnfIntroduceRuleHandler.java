@@ -118,7 +118,7 @@ public class BnfIntroduceRuleHandler implements RefactoringActionHandler {
 
             editor.getCaretModel().moveToOffset(addedRule.getTextOffset());
             PsiDocumentManager.getInstance(project).doPostponedOperationsAndUnblockDocument(editor.getDocument());
-            popup.performInplaceRename();
+            popup.performInplaceRefactoring(null);
           }
         }.execute();
       }

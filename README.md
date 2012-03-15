@@ -19,10 +19,9 @@ You've just build a custom language plugin (approx. 1 day)
 
 Recent changes
 --------------
-1.0.3
+1.0.4
 
-* Improved PSI generation (*extends* and *elementType* attributes handling)
-* Configurable FIRST-based parser optimization
+* Bug fixes and performance
 
 
 Quick documentation:
@@ -146,6 +145,10 @@ Just add *mypackage.MyReferenceExpressionImpl* class with proper *getReference()
 
 Change log
 ==========
+1.0.4
+
+* Bug fixes and performance
+
 1.0.3
 
 * Improved PSI generation (*extends* and *elementType* attributes handling)

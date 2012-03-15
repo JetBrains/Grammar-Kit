@@ -4,6 +4,7 @@ import com.intellij.lang.*;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.util.Key;
 import com.intellij.openapi.util.Pair;
+import com.intellij.openapi.util.text.StringHash;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiReference;
@@ -18,6 +19,7 @@ import gnu.trove.THashSet;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedList;
@@ -91,32 +93,27 @@ public class GeneratedParserUtilBase {
     if (state.completionState != null && !force) return true;
     IElementType tokenType = builder_.getTokenType();
     if (!state.suppressErrors && state.predicateCount < 2) {
-      addVariant(state, builder_, getTokenDescription(token));
+      addVariant(state, builder_, token);
     }
     return token == tokenType;
-  }
-
-  private static String getTokenDescription(IElementType token) {
-    String tokenName = token.toString();
-    return StringUtil.isJavaIdentifierStart(tokenName.charAt(0))? tokenName :  '\'' + tokenName +'\'';
   }
 
   public static void addVariant(PsiBuilder builder_, String text) {
     addVariant(ErrorState.get(builder_), builder_, text);
   }
 
-  private static void addVariant(ErrorState state, PsiBuilder builder_, String text) {
+  private static void addVariant(ErrorState state, PsiBuilder builder_, Object o) {
     final int offset = builder_.getCurrentOffset();
     Variant variant = state.VARIANTS.alloc();
-    variant.init(offset, text, state.predicateSign);
-    if (!state.variants.add(variant)) {
-      state.VARIANTS.recycle(variant);
-      return;
+    variant.init(offset, o, state.predicateSign);
+    state.variants.add(variant);
+    if (variant.expected && state.lastExpectedVariantOffset < variant.offset) {
+      state.lastExpectedVariantOffset = variant.offset;
     }
 
     CompletionState completionState = state.completionState;
     if (completionState != null && state.predicateSign) {
-      addCompletionVariant(state, completionState, builder_, text, offset);
+      addCompletionVariant(state, completionState, builder_, o, offset);
     }
   }
 
@@ -153,17 +150,18 @@ public class GeneratedParserUtilBase {
   private static void addCompletionVariant(ErrorState state,
                                            CompletionState completionState,
                                            PsiBuilder builder_,
-                                           String text,
+                                           Object o,
                                            int offset) {
     boolean add = false;
     int diff = completionState.offset - offset;
+    String text = o.toString();
     int length = text.length();
     if (diff == 0) {
       add = true;
     }
     else if (diff > 0 && diff <= length) {
       CharSequence fragment = builder_.getOriginalText().subSequence(offset, completionState.offset);
-      add = StringUtil.startsWithIgnoreCase(StringUtil.unquoteString(text), fragment.toString());
+      add = StringUtil.startsWithIgnoreCase(text, fragment.toString());
     }
     else if (diff < 0) {
       for (int i=-1; ; i--) {
@@ -174,7 +172,7 @@ public class GeneratedParserUtilBase {
         }
         else if (type != null && tokenStart < completionState.offset) {
           CharSequence fragment = builder_.getOriginalText().subSequence(tokenStart, completionState.offset);
-          if (StringUtil.startsWithIgnoreCase(StringUtil.unquoteString(text), fragment.toString())) {
+          if (StringUtil.startsWithIgnoreCase(text, fragment.toString())) {
             diff = completionState.offset - tokenStart;
           }
           break;
@@ -186,7 +184,7 @@ public class GeneratedParserUtilBase {
     add = add && length > 1 && !(text.charAt(0) == '<' && text.charAt(length - 1) == '>') &&
           !(text.charAt(0) == '\'' && text.charAt(length - 1) == '\'' && length < 5);
     if (add) {
-      completionState.items.add(StringUtil.unquoteString(text));
+      completionState.items.add(text);
     }
   }
 
@@ -238,7 +236,7 @@ public class GeneratedParserUtilBase {
     if (sectionType == _SECTION_RECOVER_ && !state.suppressErrors && eatMore != null) {
       state.suppressErrors = true;
       final boolean eatMoreFlagOnce = !builder_.eof() && eatMore.parse(builder_, frame.level + 1);
-      final int lastErrorPos = getLastVariantOffset(state, true, initialOffset);
+      final int lastErrorPos = getLastVariantOffset(state, initialOffset);
       boolean eatMoreFlag = eatMoreFlagOnce || frame.offset == initialOffset && lastErrorPos > frame.offset;
 
       final LighterASTNode latestDoneMarker =
@@ -292,7 +290,7 @@ public class GeneratedParserUtilBase {
     }
     else if (!result && pinned && frame.errorReportedAt < 0) {
       // do not report if there're errors after current offset
-      if (getLastVariantOffset(state, true, initialOffset) == initialOffset) {
+      if (getLastVariantOffset(state, initialOffset) == initialOffset) {
         // do not force, inner recoverRoot might have skipped some tokens
         if (reportError(state, builder_, false)) {
           frame.errorReportedAt = initialOffset;
@@ -319,24 +317,15 @@ public class GeneratedParserUtilBase {
       return;
     }
     int offset = builder_.getCurrentOffset();
-    if (frame.errorReportedAt < offset && getLastVariantOffset(state, true, builder_.getCurrentOffset()) <= offset) {
+    if (frame.errorReportedAt < offset && getLastVariantOffset(state, builder_.getCurrentOffset()) <= offset) {
       if (reportError(state, builder_, true)) {
         frame.errorReportedAt = offset;
       }
     }
   }
 
-  private static int getLastVariantOffset(ErrorState state, boolean expectedOnly, int defValue) {
-    if (state.variants.isEmpty()) {
-      return defValue;
-    }
-    else {
-      int result = -1;
-      for (Variant v : state.variants) {
-        if ((!expectedOnly || v.expected) && result < v.offset) result = v.offset;
-      }
-      return result > -1? result : defValue;
-    }
+  private static int getLastVariantOffset(ErrorState state, int defValue) {
+    return state.lastExpectedVariantOffset < 0? defValue : state.lastExpectedVariantOffset;
   }
 
   private static boolean reportError(ErrorState state, PsiBuilder builder_, boolean force) {
@@ -376,14 +365,14 @@ public class GeneratedParserUtilBase {
     private TokenSet whitespaceTokens = TokenSet.EMPTY;
     private TokenSet commentTokens = TokenSet.EMPTY;
 
-    THashSet<Variant> variants = new THashSet<Variant>();
-    final LimitedPool<Variant> VARIANTS = new LimitedPool<Variant>(2000, new LimitedPool.ObjectFactory<Variant>() {
+    private int lastExpectedVariantOffset = -1;
+    ArrayList<Variant> variants = new ArrayList<Variant>();
+    final LimitedPool<Variant> VARIANTS = new LimitedPool<Variant>(5000, new LimitedPool.ObjectFactory<Variant>() {
       public Variant create() {
         return new Variant();
       }
 
       public void cleanup(final Variant v) {
-        v.init(0, null, false);
       }
     });
 
@@ -419,24 +408,43 @@ public class GeneratedParserUtilBase {
       return sb.toString();
     }
 
+    private static final int MAX_VARIANTS_TO_DISPLAY = Integer.MAX_VALUE;
     private boolean addExpected(StringBuilder sb, int offset, boolean expected) {
       String[] strings = new String[variants.size()];
+      long[] hashes = new long[strings.length];
       Arrays.fill(strings, "");
       int count = 0;
-      for (Variant variant : variants) {
+      loop: for (Variant variant : variants) {
         if (offset == variant.offset) {
           if (variant.expected != expected) continue;
-          strings[count++] = variant.text;
+          String text = variant.object.toString();
+          long hash = StringHash.calc(text);
+          for (int i=0; i<count; i++) {
+            if (hashes[i] == hash) continue loop;
+          }
+          hashes[count] = hash;
+          strings[count] = text;
+          count++;
         }
       }
       Arrays.sort(strings);
       count = 0;
       for (String s : strings) {
         if (s == "") continue;
-        if (count++ > 0) sb.append(", ");
-        sb.append(s);
+        if (count++ > 0) {
+          if (count > MAX_VARIANTS_TO_DISPLAY) {
+            sb.append(" and ...");
+            break;
+          }
+          else {
+            sb.append(", ");
+          }
+        }
+        char c = s.charAt(0);
+        String displayText = c == '<' || StringUtil.isJavaIdentifierStart(c) ? s : '\'' + s + '\'';
+        sb.append(displayText);
       }
-      if (count > 1) {
+      if (count > 1 && count < MAX_VARIANTS_TO_DISPLAY) {
         int idx = sb.lastIndexOf(", ");
         sb.replace(idx, idx + 1, " or");
       }
@@ -444,6 +452,7 @@ public class GeneratedParserUtilBase {
     }
 
     void clearExpectedVariants() {
+      lastExpectedVariantOffset = -1;
       for (Variant v : variants) {
         VARIANTS.recycle(v);
       }
@@ -470,20 +479,20 @@ public class GeneratedParserUtilBase {
   }
 
 
-  public static class Variant implements Comparable<Variant>{
+  public static class Variant {
     int offset;
-    String text;
+    Object object;
     boolean expected;
 
-    public void init(int offset, String text, boolean expected) {
+    public void init(int offset, Object text, boolean expected) {
       this.offset = offset;
-      this.text = text;
+      this.object = text;
       this.expected = expected;
     }
 
     @Override
     public String toString() {
-      return "<" + offset + ", " + expected + ", " + text + ">";
+      return "<" + offset + ", " + expected + ", " + object + ">";
     }
 
     @Override
@@ -495,7 +504,7 @@ public class GeneratedParserUtilBase {
 
       if (expected != variant.expected) return false;
       if (offset != variant.offset) return false;
-      if (!text.equals(variant.text)) return false;
+      if (!this.object.equals(variant.object)) return false;
 
       return true;
     }
@@ -503,17 +512,9 @@ public class GeneratedParserUtilBase {
     @Override
     public int hashCode() {
       int result = offset;
-      result = 31 * result + text.hashCode();
+      result = 31 * result + object.hashCode();
       result = 31 * result + (expected ? 1 : 0);
       return result;
-    }
-
-    @Override
-    public int compareTo(Variant o) {
-      int diff = offset - o.offset;
-      if (diff == 0) diff = text.compareTo(o.text);
-      if (diff == 0) diff = (expected?1:0) - (o.expected?1:0);
-      return diff;
     }
   }
 

@@ -228,6 +228,7 @@ public class ParserGenerator {
       boolean first = true;
       for (String top : getSuperInterfaceNames(rule, "")) {
         all.add(top);
+        if (!first && top.equals(superIntf)) continue;
         if (top.startsWith(myRuleClassPrefix)) {
           top = top.substring(myRuleClassPrefix.length());
         }
@@ -243,8 +244,13 @@ public class ParserGenerator {
     for (String top : ContainerUtil.concat(all, Arrays.asList(superIntf))) {
       String methodName = top.startsWith(myRuleClassPrefix)? top.substring(myRuleClassPrefix.length()) : top;
       if (visited.contains(methodName)) continue;
-      out("public void visit" + methodName + "(" + top + " o) {");
-      out("visitElement(o);");
+      out("public void visit" + methodName + "(@NotNull " + top + " o) {");
+      if (!methodName.equals(top) && !top.equals(superIntf)) {
+        out("visit"+(superIntf.startsWith(myRuleClassPrefix)? superIntf.substring(myRuleClassPrefix.length()): superIntf)+"(o);");
+      }
+      else {
+        out("visitElement(o);");
+      }
       out("}");
       newLine();
     }
@@ -332,25 +338,28 @@ public class ParserGenerator {
   @NotNull
   private String[] getSuperInterfaceNames(BnfRule rule, String psiPackage) {
     ArrayList<String> strings = new ArrayList<String>();
-    String superRuleImplements = "";
-    String superRuleInterface = "";
+    String topRuleImplements = "";
+    String topRuleClass = null;
     BnfRule topSuper = getTopSuperRule(rule);
     boolean simpleMode = psiPackage.isEmpty();
     if (topSuper != null && topSuper != rule) {
-      superRuleImplements = getAttribute(topSuper, "implements", "generated.CompositeElement");
-      superRuleInterface = (simpleMode ? "" : psiPackage + ".") + getRulePsiClassName(topSuper, myRuleClassPrefix);
+      topRuleImplements = getAttribute(topSuper, "implements", "generated.CompositeElement");
+      topRuleClass = StringUtil.nullize((simpleMode ? "" : psiPackage + ".") + getRulePsiClassName(topSuper, myRuleClassPrefix));
+      if (!StringUtil.isEmpty(topRuleClass)) strings.add(topRuleClass);
     }
-    String[] superIntfNames = getAttribute(rule, "implements", "generated.CompositeElement").split(",");
-    for (String superIntfName : superIntfNames) {
-      BnfRule superIntfRule = myFile.getRule(superIntfName);
+    String rootImplements = getRootAttribute(myFile, "implements", "generated.CompositeElement");
+    String[] ruleImplements = getAttribute(rule, "implements", "generated.CompositeElement").split(",");
+    for (String className : ruleImplements) {
+      BnfRule superIntfRule = myFile.getRule(className);
       if (superIntfRule != null) {
         strings.add((simpleMode ? "" : psiPackage + ".") + getRulePsiClassName(superIntfRule, myRuleClassPrefix));
       }
-      else if (!superRuleImplements.contains(superIntfName)) {
-        strings.add(simpleMode ? StringUtil.getShortName(superIntfName) : superIntfName);
+      else if (!topRuleImplements.contains(className) && (topRuleClass == null || !rootImplements.contains(className))) {
+        String name = simpleMode ? StringUtil.getShortName(className) : className;
+        if (className != null && strings.size() == 1) strings.add(0, name);
+        else strings.add(name);
       }
     }
-    if (!StringUtil.isEmpty(superRuleInterface)) strings.add(superRuleInterface);
     return strings.toArray(new String[strings.size()]);
   }
 

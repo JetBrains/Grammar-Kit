@@ -32,7 +32,7 @@ external_type3 ::= id {elementType="expr"} // do not generate anything
 }
 
 private reference ::= ref_expr qref_expr *
-ref_expr ::= identifier  {extends="expr" mixin="MyRefImpl"}
+ref_expr ::= identifier  {extends="expr" mixin="MyRefImpl" implements="MyRef"}
 left qref_expr ::= '.' identifier {extends="ref_expr" elementType="ref_expr"}
 identifier ::= id
 

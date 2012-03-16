@@ -100,11 +100,11 @@ public class BnfVisitor extends PsiElementVisitor {
     visitLiteralExpression(o);
   }
 
-  public void visitNamedElement(BnfNamedElement o) {
-    visitElement(o);
+  public void visitNamedElement(@NotNull BnfNamedElement o) {
+    visitCompositeElement(o);
   }
 
-  public void visitCompositeElement(BnfCompositeElement o) {
+  public void visitCompositeElement(@NotNull BnfCompositeElement o) {
     visitElement(o);
   }
 

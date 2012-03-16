@@ -248,7 +248,7 @@ import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
-public interface BnfParenExpression extends BnfParenthesized, BnfExpression {
+public interface BnfParenExpression extends BnfParenthesized {
 
   @Nullable
   BnfExpression getExpression();
@@ -262,7 +262,7 @@ import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
-public interface BnfParenOptExpression extends BnfParenthesized, BnfExpression {
+public interface BnfParenOptExpression extends BnfParenthesized {
 
   @Nullable
   BnfExpression getExpression();
@@ -695,7 +695,7 @@ import com.intellij.psi.util.PsiTreeUtil;
 import static org.intellij.grammar.psi.BnfTypes.*;
 import org.intellij.grammar.psi.*;
 
-public class BnfParenExpressionImpl extends BnfExpressionImpl implements BnfParenExpression {
+public class BnfParenExpressionImpl extends BnfParenthesizedImpl implements BnfParenExpression {
 
   public BnfParenExpressionImpl(ASTNode node) {
     super(node);
@@ -726,7 +726,7 @@ import com.intellij.psi.util.PsiTreeUtil;
 import static org.intellij.grammar.psi.BnfTypes.*;
 import org.intellij.grammar.psi.*;
 
-public class BnfParenOptExpressionImpl extends BnfExpressionImpl implements BnfParenOptExpression {
+public class BnfParenOptExpressionImpl extends BnfParenthesizedImpl implements BnfParenOptExpression {
 
   public BnfParenOptExpressionImpl(ASTNode node) {
     super(node);
@@ -1088,12 +1088,10 @@ public class BnfVisitor extends PsiElementVisitor {
 
   public void visitParenExpression(@NotNull BnfParenExpression o) {
     visitParenthesized(o);
-    // visitExpression(o);
   }
 
   public void visitParenOptExpression(@NotNull BnfParenOptExpression o) {
     visitParenthesized(o);
-    // visitExpression(o);
   }
 
   public void visitParenthesized(@NotNull BnfParenthesized o) {

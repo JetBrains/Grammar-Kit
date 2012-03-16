@@ -24,7 +24,7 @@ import com.intellij.psi.util.PsiTreeUtil;
 import static org.intellij.grammar.psi.BnfTypes.*;
 import org.intellij.grammar.psi.*;
 
-public class BnfParenExpressionImpl extends BnfExpressionImpl implements BnfParenExpression {
+public class BnfParenExpressionImpl extends BnfParenthesizedImpl implements BnfParenExpression {
 
   public BnfParenExpressionImpl(ASTNode node) {
     super(node);

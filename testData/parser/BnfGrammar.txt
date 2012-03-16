@@ -1,4 +1,4 @@
-BnfFile:Self2.bnf
+BnfFile:BnfGrammar.bnf
   PsiElement(DUMMY_BLOCK)
     BNF_ATTRS
       PsiElement({)('{')
@@ -263,8 +263,8 @@ BnfFile:Self2.bnf
           BNF_STRING_LITERAL_EXPRESSION
             PsiElement(string)('"org.intellij.grammar.psi.impl.BnfStringImpl"')
       PsiWhiteSpace('\n  ')
-      BNF_ATTR:implements
-        PsiElement(id)('implements')
+      BNF_ATTR:extends
+        PsiElement(id)('extends')
         BNF_ATTR_PATTERN
           PsiElement(()('(')
           BNF_STRING_LITERAL_EXPRESSION
@@ -876,18 +876,8 @@ BnfFile:Self2.bnf
       PsiWhiteSpace(' ')
       PsiElement(::=)('::=')
       PsiWhiteSpace(' ')
-      BNF_SEQUENCE
-        BNF_STRING_LITERAL_EXPRESSION
-          PsiElement(string)(''('')
-        PsiWhiteSpace(' ')
-        BNF_QUANTIFIED
-          BNF_REFERENCE_OR_TOKEN
-            PsiElement(id)('expression')
-          BNF_QUANTIFIER
-            PsiElement(?)('?')
-        PsiWhiteSpace(' ')
-        BNF_STRING_LITERAL_EXPRESSION
-          PsiElement(string)('')'')
+      BNF_REFERENCE_OR_TOKEN
+        PsiElement(id)('simple_paren_expression')
       PsiWhiteSpace(' ')
       BNF_ATTRS
         PsiElement({)('{')
@@ -1061,16 +1051,6 @@ BnfFile:Self2.bnf
         PsiWhiteSpace(' ')
         BNF_REFERENCE_OR_TOKEN
           PsiElement(id)('alt_choice_expression')
-      PsiWhiteSpace(' ')
-      BNF_ATTRS
-        PsiElement({)('{')
-        BNF_ATTR:extends
-          PsiElement(id)('extends')
-          PsiElement(=)('=')
-          BNF_ATTR_VALUE
-            BNF_STRING_LITERAL_EXPRESSION
-              PsiElement(string)('"expression"')
-        PsiElement(})('}')
   PsiWhiteSpace('\n')
   BNF_RULE:paren_opt_expression
     PsiElement(id)('paren_opt_expression')
@@ -1095,13 +1075,6 @@ BnfFile:Self2.bnf
         BNF_ATTR_VALUE
           BNF_LITERAL_EXPRESSION
             PsiElement(number)('1')
-      PsiWhiteSpace(' ')
-      BNF_ATTR:extends
-        PsiElement(id)('extends')
-        PsiElement(=)('=')
-        BNF_ATTR_VALUE
-          BNF_STRING_LITERAL_EXPRESSION
-            PsiElement(string)('"expression"')
       PsiElement(})('}')
   PsiWhiteSpace('\n')
   BNF_RULE:simple_paren_expression

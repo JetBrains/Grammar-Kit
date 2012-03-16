@@ -15,10 +15,12 @@ import com.intellij.psi.search.PsiSearchHelper;
 import com.intellij.testFramework.ParsingTestCase;
 import org.intellij.grammar.generator.ParserGenerator;
 import org.intellij.grammar.psi.impl.BnfFileImpl;
+import org.jetbrains.annotations.NonNls;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -51,13 +53,19 @@ public class BnfGeneratorTest extends ParsingTestCase {
     getProject().registerService(InjectedLanguageManager.class, languageManager);
   }
 
+  public void testBnfGrammar() throws Exception { doGenTest(true); }
   public void testSelf() throws Exception { doGenTest(true); }
-  public void testSelf2() throws Exception { doGenTest(true); }
   public void testSmall() throws Exception { doGenTest(false); }
   public void testAutopin() throws Exception { doGenTest(false); }
   public void testExternalRules() throws Exception { doGenTest(false); }
   public void testLeftAssociative() throws Exception { doGenTest(false); }
   public void testPsiGen() throws Exception { doGenTest(true); }
+
+  @Override
+  protected String loadFile(@NonNls String name) throws IOException {
+    if (name.equals("BnfGrammar.bnf")) return super.loadFile("../../grammars/Grammar.bnf");
+    return super.loadFile(name);
+  }
 
   public void doGenTest(final boolean generatePsi) throws Exception {
     final String name = getTestName(false);

@@ -58,12 +58,10 @@ public class BnfVisitor extends PsiElementVisitor {
 
   public void visitParenExpression(@NotNull BnfParenExpression o) {
     visitParenthesized(o);
-    // visitExpression(o);
   }
 
   public void visitParenOptExpression(@NotNull BnfParenOptExpression o) {
     visitParenthesized(o);
-    // visitExpression(o);
   }
 
   public void visitParenthesized(@NotNull BnfParenthesized o) {

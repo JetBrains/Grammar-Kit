@@ -458,7 +458,9 @@ public class ParserGenerator {
       StringBuilder sb = new StringBuilder();
       Set<String> elementTypes = new TreeSet<String>();
       for (String ruleName : myRuleParserClasses.keySet()) {
-        Collection<BnfRule> rules = myRuleExtendsMap.get(myFile.getRule(ruleName));
+        BnfRule baseRule = myFile.getRule(ruleName);
+        if (Rule.isFake(baseRule)) continue;
+        Collection<BnfRule> rules = myRuleExtendsMap.get(baseRule);
         if (rules.isEmpty()) continue;
         for (BnfRule rule : rules) {
           if (Rule.isFake(rule)) continue;

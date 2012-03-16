@@ -39,7 +39,7 @@
   extends("rule|attr")="org.intellij.grammar.psi.impl.BnfNamedElementImpl"
   mixin("reference_or_token")="org.intellij.grammar.psi.impl.BnfRefOrTokenImpl"
   mixin("string_literal_expression")="org.intellij.grammar.psi.impl.BnfStringImpl"
-  implements("paren_.*expression")="parenthesized"
+  extends("paren_.*expression")="parenthesized"
 }
 
 external grammar ::= parseGrammar grammar_element
@@ -70,13 +70,13 @@ quantifier ::= '?' | '+' | '*'
 predicate ::= predicate_sign simple {extends="expression"}
 predicate_sign ::= '&' | '!'
 
-fake parenthesized ::= '(' expression? ')' {extends="expression"}
+fake parenthesized ::= simple_paren_expression {extends="expression"}
 private simple ::= !(modifier* id '::=' ) reference_or_token | literal_expression | external_expression | paren_expression
 external_expression ::= '<<' reference_or_token option * '>>' {pin=2 extends="expression"}
 reference_or_token ::= id  {extends="expression" }
 literal_expression ::= string_literal_expression | number {extends="expression" }
 string_literal_expression ::= string {extends="literal_expression"}
-paren_expression ::= simple_paren_expression | alt_choice_expression {extends="expression"}
-paren_opt_expression ::= '[' expression ']' {pin=1 extends="expression"}
+paren_expression ::= simple_paren_expression | alt_choice_expression
+paren_opt_expression ::= '[' expression ']' {pin=1}
 private simple_paren_expression ::= '(' expression ')' {pin=1}
 private alt_choice_expression ::= '{' !attr_start_simple expression '}' {pin=2}

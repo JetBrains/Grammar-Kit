@@ -24,6 +24,7 @@ import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.util.containers.ContainerUtil;
 import org.intellij.grammar.psi.*;
 import org.intellij.grammar.psi.impl.GrammarUtil;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -204,6 +205,42 @@ public class ParserGeneratorUtil {
 
   public static String getNextName(String funcName, int i) {
     return funcName + "_" + i;
+  }
+
+  public static String toIdentifier(String text, String prefix) {
+    StringBuilder sb = new StringBuilder(prefix);
+    for (String s : text.split("_")) {
+      if (s.length() == 0) continue;
+      sb.append(Character.toUpperCase(s.charAt(0))).append(s.substring(1));
+    }
+    return sb.toString();
+  }
+
+  public static String getPsiPackage(final BnfFile file) {
+    return getRootAttribute(file, "psiPackage", "generated.psi");
+  }
+
+  public static String getPsiImplPackage(final BnfFile file) {
+    return getRootAttribute(file, "psiImplPackage", "generated.psi.impl");
+  }
+
+  public static String getPsiImplSuffix(final BnfFile file) {
+    return getRootAttribute(file, "psiImplClassSuffix", "Impl");
+  }
+
+  @NotNull
+  public static String getRulePsiClassName(BnfRule rule, final String prefix) {
+    return toIdentifier(rule.getName(), prefix);
+  }
+
+  public static String getPsiClassPrefix(final BnfFile file) {
+    return getRootAttribute(file, "psiClassPrefix", "");
+  }
+
+  public static String getQualifiedRuleClassName(BnfRule rule, boolean impl) {
+    BnfFile file = (BnfFile)rule.getContainingFile();
+    String packageName = impl ? getPsiImplPackage(file) : getPsiPackage(file);
+    return packageName + "." + getRulePsiClassName(rule, getPsiClassPrefix(file)) + (impl? getPsiImplSuffix(file): "");
   }
 
 

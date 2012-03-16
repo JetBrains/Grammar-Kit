@@ -16,12 +16,9 @@
 
 package org.intellij.grammar;
 
-import com.intellij.codeHighlighting.Pass;
-import com.intellij.codeInsight.daemon.GutterIconNavigationHandler;
 import com.intellij.codeInsight.daemon.RelatedItemLineMarkerInfo;
 import com.intellij.codeInsight.daemon.RelatedItemLineMarkerProvider;
-import com.intellij.navigation.GotoRelatedItem;
-import com.intellij.openapi.editor.markup.GutterIconRenderer;
+import com.intellij.codeInsight.navigation.NavigationGutterIconBuilder;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Ref;
 import com.intellij.openapi.util.text.StringUtil;
@@ -31,6 +28,7 @@ import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.util.PairProcessor;
 import gnu.trove.THashSet;
 import org.intellij.grammar.generator.ParserGeneratorUtil;
+import org.intellij.grammar.generator.RuleGraphHelper;
 import org.intellij.grammar.java.JavaHelper;
 import org.intellij.grammar.psi.BnfExpression;
 import org.intellij.grammar.psi.BnfLiteralExpression;
@@ -38,9 +36,8 @@ import org.intellij.grammar.psi.BnfReferenceOrToken;
 import org.intellij.grammar.psi.BnfRule;
 import org.jetbrains.annotations.Nullable;
 
-import java.awt.event.MouseEvent;
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -56,15 +53,30 @@ public class BnfRuleLineMarkerProvider extends RelatedItemLineMarkerProvider {
     Set<PsiElement> visited = forNavigation? new THashSet<PsiElement>() : null;
     for (PsiElement element : elements) {
       PsiElement parent = element.getParent();
-      if (parent instanceof BnfRule && (forNavigation || element == ((BnfRule)parent).getId()) ||
-          forNavigation && element instanceof BnfExpression) {
-        NavigatablePsiElement method = getMethod(element);
-        if (method != null && (!forNavigation || visited.add(method))) {
-          GotoRelatedItem item = new GotoRelatedItem(method);
-          result.add(new RelatedItemLineMarkerInfo<PsiElement>(
-            element, element.getTextRange(), BnfIcons.RELATED_METHOD, Pass.UPDATE_OVERRIDEN_MARKERS, null, new MyNavHandler(),
-            GutterIconRenderer.Alignment.RIGHT, Collections.singletonList(item)));
+      boolean isRuleId = parent instanceof BnfRule && (forNavigation || element == ((BnfRule)parent).getId());
+      if (!(isRuleId || forNavigation && element instanceof BnfExpression)) continue;
+      List<PsiElement> items = new ArrayList<PsiElement>();
+      NavigatablePsiElement method = getMethod(element);
+      if (method != null && (!forNavigation || visited.add(method))) {
+        items.add(method);
+      }
+      if (isRuleId) {
+        BnfRule rule = RuleGraphHelper.getRealRule((BnfRule)parent);
+        if (RuleGraphHelper.shouldGeneratePsi(rule, false)) {
+          JavaHelper javaHelper = JavaHelper.getJavaHelper(rule.getProject());
+          for (String className : new String[]{ParserGeneratorUtil.getQualifiedRuleClassName(rule, false),
+            ParserGeneratorUtil.getQualifiedRuleClassName(rule, true)}) {
+            NavigatablePsiElement aClass = javaHelper.findClass(className);
+            if (aClass != null && (!forNavigation || visited.add(aClass))) {
+              items.add(aClass);
+            }
+          }
         }
+      }
+      if (!items.isEmpty()) {
+        final NavigationGutterIconBuilder<PsiElement> builder = NavigationGutterIconBuilder.create(BnfIcons.RELATED_METHOD).
+          setTargets(items).setTooltipText("Related files");
+        result.add(builder.createLineMarkerInfo(element));
       }
     }
   }
@@ -111,15 +123,5 @@ public class BnfRuleLineMarkerProvider extends RelatedItemLineMarkerProvider {
       i ++;
     }
     return true;
-  }
-
-  private static class MyNavHandler implements GutterIconNavigationHandler<PsiElement> {
-    @Override
-    public void navigate(MouseEvent e, PsiElement elt) {
-      NavigatablePsiElement method = getMethod(elt);
-      if (method != null) {
-        method.navigate(true);
-      }
-    }
   }
 }

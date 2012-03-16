@@ -1,6 +1,8 @@
 {
   classHeader="//header.txt"
   parserClass="PsiGen"
+  psiClassPrefix="X"
+  implements="XComposite"
   stubParserClass="PsiGenUtil"
   extends(".*expr")="expr"
   extends("root_.")="root"

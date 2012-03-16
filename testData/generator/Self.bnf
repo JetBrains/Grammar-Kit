@@ -10,6 +10,7 @@
   psiImplClassSuffix="Impl"
   psiPackage="org.intellij.grammar.psi"
   psiImplPackage="org.intellij.grammar.psi.impl"
+  psiVisitorClass=""
 
   elementTypeHolderClass="org.intellij.grammar.psi.BnfTypes"
   elementTypePrefix="BNF_"

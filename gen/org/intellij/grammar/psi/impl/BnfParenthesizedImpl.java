@@ -24,26 +24,20 @@ import com.intellij.psi.util.PsiTreeUtil;
 import static org.intellij.grammar.psi.BnfTypes.*;
 import org.intellij.grammar.psi.*;
 
-public class BnfQuantifiedImpl extends BnfExpressionImpl implements BnfQuantified {
+public class BnfParenthesizedImpl extends BnfExpressionImpl implements BnfParenthesized {
 
-  public BnfQuantifiedImpl(ASTNode node) {
+  public BnfParenthesizedImpl(ASTNode node) {
     super(node);
   }
 
   @Override
-  @NotNull
+  @Nullable
   public BnfExpression getExpression() {
-    return findNotNullChildByClass(BnfExpression.class);
-  }
-
-  @Override
-  @NotNull
-  public BnfQuantifier getQuantifier() {
-    return findNotNullChildByClass(BnfQuantifier.class);
+    return findChildByClass(BnfExpression.class);
   }
 
   public void accept(@NotNull PsiElementVisitor visitor) {
-    if (visitor instanceof BnfVisitor) ((BnfVisitor)visitor).visitQuantified(this);
+    if (visitor instanceof BnfVisitor) ((BnfVisitor)visitor).visitParenthesized(this);
     else super.accept(visitor);
   }
 

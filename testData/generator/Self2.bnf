@@ -39,7 +39,7 @@
   extends("rule|attr")="org.intellij.grammar.psi.impl.BnfNamedElementImpl"
   mixin("reference_or_token")="org.intellij.grammar.psi.impl.BnfRefOrTokenImpl"
   mixin("string_literal_expression")="org.intellij.grammar.psi.impl.BnfStringImpl"
-  implements("paren_.*expression")="org.intellij.grammar.psi.BnfParenthesized"
+  implements("paren_.*expression")="parenthesized"
 }
 
 external grammar ::= parseGrammar grammar_element
@@ -48,7 +48,7 @@ private grammar_element_recover::=!('{'|rule_start)
 
 rule ::= rule_start expression attrs? ';'? {pin=2}
 private rule_start ::= modifier* id '::='
-modifier ::= 'private' | 'external' | 'meta' | 'inner' | 'left'
+modifier ::= 'private' | 'external' | 'meta' | 'inner' | 'left' | 'fake'
 
 attrs ::= '{' attr * '}' {pin=1}
 attr ::= attr_start attr_value ';'? {pin=1 recoverUntil="attr_recover_until"}
@@ -70,6 +70,7 @@ quantifier ::= '?' | '+' | '*'
 predicate ::= predicate_sign simple {extends="expression"}
 predicate_sign ::= '&' | '!'
 
+fake parenthesized ::= '(' expression? ')' {extends="expression"}
 private simple ::= !(modifier* id '::=' ) reference_or_token | literal_expression | external_expression | paren_expression
 external_expression ::= '<<' reference_or_token option * '>>' {pin=2 extends="expression"}
 reference_or_token ::= id  {extends="expression" }

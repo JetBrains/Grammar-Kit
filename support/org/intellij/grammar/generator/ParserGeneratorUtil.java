@@ -229,6 +229,10 @@ public class ParserGeneratorUtil {
       return hasModifier(node, "inner");
     }
 
+    public static boolean isFake(BnfRule node) {
+      return hasModifier(node, "fake");
+    }
+
     private static boolean hasModifier(BnfRule node, String s) {
       for (BnfModifier modifier : node.getModifierList()) {
         if (s.equals(modifier.getText())) return true;

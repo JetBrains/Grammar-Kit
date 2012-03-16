@@ -19,6 +19,7 @@ import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.lang.ASTNode;
 import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static org.intellij.grammar.psi.BnfTypes.*;
 import org.intellij.grammar.psi.*;
@@ -33,6 +34,11 @@ public class BnfAttrPatternImpl extends BnfCompositeElementImpl implements BnfAt
   @Nullable
   public BnfLiteralExpression getLiteralExpression() {
     return findChildByClass(BnfLiteralExpression.class);
+  }
+
+  public void accept(@NotNull PsiElementVisitor visitor) {
+    if (visitor instanceof BnfVisitor) ((BnfVisitor)visitor).visitAttrPattern(this);
+    else super.accept(visitor);
   }
 
 }

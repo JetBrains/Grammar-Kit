@@ -457,13 +457,13 @@ public class RuleGraphHelper {
     return rule;
   }
 
-  public static boolean shouldGeneratePsi(BnfRule rule, boolean elementTypeConstant) {
+  public static boolean shouldGeneratePsi(BnfRule rule, boolean psiClasses) {
     BnfFile containingFile = (BnfFile)rule.getContainingFile();
     BnfRule grammarRoot = containingFile.getRules().get(0);
     if (grammarRoot == rule) return false;
     if (Rule.isPrivate(rule) || Rule.isExternal(rule)) return false;
     String elementType = getAttribute(rule, "elementType", null);
-    if (!elementTypeConstant) return elementType == null;
+    if (!psiClasses) return elementType == null;
     BnfRule thatRule = containingFile.getRule(elementType);
     return thatRule == null || thatRule == grammarRoot || Rule.isPrivate(thatRule) || Rule.isExternal(thatRule);
   }

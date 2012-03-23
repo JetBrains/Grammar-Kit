@@ -40,13 +40,17 @@ public class Small implements PsiParser {
     }
     else {
       Marker marker_ = builder_.mark();
-      result_ = parseRoot(builder_, level_ + 1, statement_parser_);
+      result_ = parseRoot(root_, builder_, level_);
       while (builder_.getTokenType() != null) {
         builder_.advanceLexer();
       }
       marker_.done(root_);
     }
     return builder_.getTreeBuilt();
+  }
+
+  protected boolean parseRoot(final IElementType root_, final PsiBuilder builder_, final int level_) {
+    return parseRoot(builder_, level_ + 1, statement_parser_);
   }
 
   /* ********************************************************** */

@@ -434,11 +434,9 @@ public class ParserGenerator {
       if (first) first = false;
     }
     {
-      BnfRule rootRule = myFile.getRule(myGrammarRoot);
-      String nodeCall = generateNodeCall(rootRule, null, rootRule.getName());
       if (!first) out("else {");
       out("Marker marker_ = builder_.mark();");
-      out("result_ = " + nodeCall + ";");
+      out("result_ = parseRoot(root_, builder_, level_);");
       out("while (builder_.getTokenType() != null) {");
       out("builder_.advanceLexer();");
       out("}");
@@ -448,6 +446,14 @@ public class ParserGenerator {
     out("return builder_.getTreeBuilt();");
     out("}");
     newLine();
+    {
+      BnfRule rootRule = myFile.getRule(myGrammarRoot);
+      String nodeCall = generateNodeCall(rootRule, null, rootRule.getName());
+      out("protected boolean parseRoot(final IElementType root_, final PsiBuilder builder_, final int level_) {");
+      out("return "+nodeCall+";");
+      out("}");
+      newLine();
+    }
     if (!myRuleExtendsMap.isEmpty()) {
       out("private static final TokenSet[] EXTENDS_SETS_ = new TokenSet[] {");
       StringBuilder sb = new StringBuilder();

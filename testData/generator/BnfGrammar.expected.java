@@ -82,13 +82,17 @@ public class GrammarParser implements PsiParser {
     }
     else {
       Marker marker_ = builder_.mark();
-      result_ = parseGrammar(builder_, level_ + 1, grammar_element_parser_);
+      result_ = parseRoot(root_, builder_, level_);
       while (builder_.getTokenType() != null) {
         builder_.advanceLexer();
       }
       marker_.done(root_);
     }
     return builder_.getTreeBuilt();
+  }
+
+  protected boolean parseRoot(final IElementType root_, final PsiBuilder builder_, final int level_) {
+    return parseGrammar(builder_, level_ + 1, grammar_element_parser_);
   }
 
   private static final TokenSet[] EXTENDS_SETS_ = new TokenSet[] {

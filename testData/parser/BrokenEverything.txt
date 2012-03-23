@@ -43,7 +43,7 @@ BnfFile:BrokenEverything.bnf
     PsiWhiteSpace('\n')
     PsiElement(})('}')
   PsiWhiteSpace('\n\n')
-  PsiErrorElement:got 'a'
+  PsiErrorElement:'a' unexpected
     PsiElement(id)('a')
   PsiWhiteSpace(' ')
   PsiElement(BAD_CHARACTER)(':')

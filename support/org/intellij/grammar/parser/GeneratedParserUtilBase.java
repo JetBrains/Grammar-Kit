@@ -271,7 +271,8 @@ public class GeneratedParserUtilBase {
         String expectedText = state.getExpectedText(builder_);
         PsiBuilder.Marker mark = builder_.mark();
         builder_.advanceLexer();
-        mark.error(expectedText + "got '" + tokenText + "'");
+        final String gotText = !expectedText.isEmpty() ? "got '" + tokenText + "'" : "'" + tokenText + "' unexpected";
+        mark.error(expectedText + gotText);
         parseAsTree(state, builder_, frame.level + 1, DUMMY_BLOCK, true, TOKEN_ADVANCER, eatMore);
         errorReported = true;
       }

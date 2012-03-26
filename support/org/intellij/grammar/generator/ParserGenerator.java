@@ -1179,7 +1179,8 @@ public class ParserGenerator {
       ruleName = treeRule.getName();
     }
     if (ruleName == null) return;
-    String getterNameBody = getAttribute(rule, "methodRenames", "get" + toIdentifier(ruleName, ""), ruleName);
+    String defaultGetterName = "get" + toIdentifier(ruleName, "");
+    String getterNameBody = getAttribute(rule, "methodRenames", defaultGetterName, defaultGetterName);
     String getterName = getterNameBody + (many ? "List" : "");
     if (!intf) out("@Override");
     if (type == REQUIRED) {

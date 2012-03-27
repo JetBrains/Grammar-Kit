@@ -168,8 +168,14 @@ public class BnfCompletionContributor extends CompletionContributor {
     final String text = range.isEmpty() ? CompletionInitializationContext.DUMMY_IDENTIFIER : range.substring(posFile.getText());
 
     PsiFile file = PsiFileFactory.getInstance(posFile.getProject()).createFileFromText("a.bnf", BnfLanguage.INSTANCE, text, true, false);
-    GeneratedParserUtilBase.CompletionState state =
-      new GeneratedParserUtilBase.CompletionState(posRange.getStartOffset() - range.getStartOffset());
+    int completionOffset = posRange.getStartOffset() - range.getStartOffset();
+    GeneratedParserUtilBase.CompletionState state = new GeneratedParserUtilBase.CompletionState(completionOffset) {
+      @Override
+      public String convertItem(Object o) {
+        // we do not have other keywords
+        return o instanceof String? (String)o : null;
+      }
+    };
     file.putUserData(GeneratedParserUtilBase.COMPLETION_STATE_KEY, state);
     TreeUtil.ensureParsed(file.getNode());
     return state.items;

@@ -2,6 +2,7 @@ package org.intellij.grammar.parser;
 
 import com.intellij.lang.*;
 import com.intellij.openapi.diagnostic.Logger;
+import com.intellij.openapi.util.Comparing;
 import com.intellij.openapi.util.Key;
 import com.intellij.openapi.util.Pair;
 import com.intellij.openapi.util.text.StringHash;
@@ -55,8 +56,8 @@ public class GeneratedParserUtilBase {
   };
 
   public static boolean recursion_guard_(PsiBuilder builder_, int level_, String funcName_) {
-    if (level_ > 500) {
-      builder_.error("Maximum recursion level (" + 500 + ") reached in " + funcName_);
+    if (level_ > 1000) {
+      builder_.error("Maximum recursion level (" + 1000 + ") reached in " + funcName_);
       return false;
     }
     return true;
@@ -122,15 +123,16 @@ public class GeneratedParserUtilBase {
     if (!state.suppressErrors && state.predicateCount < 2) {
       addVariant(state, builder_, text);
     }
-    return consumeTokenInner(builder_, text);
+    return consumeTokenInner(builder_, text, state.caseSensitive);
   }
 
-  public static boolean consumeTokenInner(PsiBuilder builder_, String text) {
+  public static boolean consumeTokenInner(PsiBuilder builder_, String text, boolean caseSensitive) {
     final CharSequence sequence = builder_.getOriginalText();
     final int offset = builder_.getCurrentOffset();
     final int endOffset = offset + text.length();
     CharSequence tokenText = sequence.subSequence(offset, Math.min(endOffset, sequence.length()));
-    if (text.equals(tokenText)) {
+
+    if (Comparing.equal(text, tokenText, caseSensitive)) {
       int count = 0;
       while (true) {
         final int nextOffset = builder_.rawTokenTypeStart(++ count);
@@ -154,8 +156,9 @@ public class GeneratedParserUtilBase {
                                            int offset) {
     boolean add = false;
     int diff = completionState.offset - offset;
-    String text = o.toString();
-    int length = text.length();
+    String text = completionState.convertItem(o);
+    int length = text == null? 0 : text.length();
+    if (length == 0) return;
     if (diff == 0) {
       add = true;
     }
@@ -353,6 +356,11 @@ public class GeneratedParserUtilBase {
     public CompletionState(int offset) {
       this.offset = offset;
     }
+
+    @Nullable
+    public String convertItem(Object o) {
+      return o.toString();
+    }
   }
 
   public static class ErrorState {
@@ -362,6 +370,7 @@ public class GeneratedParserUtilBase {
     final LinkedList<Frame> levelCheck = new LinkedList<Frame>();
     CompletionState completionState;
 
+    private boolean caseSensitive;
     private BracePair[] braces;
     private TokenSet whitespaceTokens = TokenSet.EMPTY;
     private TokenSet commentTokens = TokenSet.EMPTY;
@@ -386,6 +395,7 @@ public class GeneratedParserUtilBase {
         state.completionState = file == null? null: file.getUserData(COMPLETION_STATE_KEY);
         if (file != null) {
           Language language = file.getLanguage();
+          state.caseSensitive = language.isCaseSensitive();
           PairedBraceMatcher matcher = LanguageBraceMatching.INSTANCE.forLanguage(language);
           state.braces = matcher == null? null : matcher.getPairs();
           if (state.braces != null && state.braces.length == 0) state.braces = null;
@@ -655,6 +665,12 @@ public class GeneratedParserUtilBase {
     @Override
     public boolean canNavigate() {
       return false;
+    }
+
+    @NotNull
+    @Override
+    public Language getLanguage() {
+      return getParent().getLanguage();
     }
   }
 }

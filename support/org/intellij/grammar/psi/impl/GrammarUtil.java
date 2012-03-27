@@ -90,22 +90,6 @@ public class GrammarUtil {
     return expression instanceof BnfSequence ? ((BnfSequence)expression).getExpressionList() : Collections.singletonList(expression);
   }
 
-  @Nullable
-  public static BnfExpression getExternalMethodExpression(BnfRule rule) {
-    if (!ParserGeneratorUtil.Rule.isExternal(rule)) return null;
-    final BnfExpression expression = rule.getExpression();
-    final BnfExpression result;
-    if (expression instanceof BnfReferenceOrToken) {
-      result = expression;
-    }
-    else if (expression instanceof BnfSequence) {
-      List<BnfExpression> list = ((BnfSequence)expression).getExpressionList();
-      result = list.isEmpty() ? null : list.get(0);
-    }
-    else result = null;
-    return result;
-  }
-
   public static List<String> collectExtraArguments(BnfRule rule, BnfExpression expression) {
     if (!ParserGeneratorUtil.Rule.isMeta(rule) && !ParserGeneratorUtil.Rule.isExternal(rule)) return Collections.emptyList();
     final SmartList<String> result = new SmartList<String>();

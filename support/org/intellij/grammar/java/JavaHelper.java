@@ -40,7 +40,7 @@ public class JavaHelper {
   @Nullable
   public NavigatablePsiElement findClass(String className) { return null; }
   @Nullable
-  public NavigatablePsiElement findClassMethod(String className, String methodName) { return null; }
+  public NavigatablePsiElement findClassMethod(String className, String methodName, int paramCount) { return null; }
   @NotNull
   public List<NavigatablePsiElement> getClassMethods(String className) { return Collections.emptyList(); }
 
@@ -57,10 +57,15 @@ public class JavaHelper {
     }
 
     @Override
-    public PsiMethod findClassMethod(String className, String methodName) {
+    public PsiMethod findClassMethod(String className, String methodName, int paramCount) {
       PsiClass aClass = findClass(className);
       PsiMethod[] methods = aClass == null? PsiMethod.EMPTY_ARRAY : aClass.findMethodsByName(methodName, true);
-      return methods.length == 1 ? methods[0] : null;
+      for (PsiMethod method : methods) {
+        if (paramCount < 0 || paramCount + 2 == method.getParameterList().getParametersCount()) {
+          return method;
+        }
+      }
+      return methods.length > 0 ? methods[0] : null;
     }
 
     @NotNull

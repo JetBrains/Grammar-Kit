@@ -92,6 +92,7 @@ public class BnfGeneratorTest extends ParsingTestCase {
         final String expectedName = FileUtil.getNameWithoutExtension(file) + ".expected.java";
         String result = loadFile(file.getName());
         try {
+          if (OVERWRITE_TESTDATA) throw new FileNotFoundException();
           String expectedText = loadFile(expectedName);
           assertEquals(expectedName, expectedText, result);
         }

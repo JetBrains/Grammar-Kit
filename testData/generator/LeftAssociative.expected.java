@@ -34,7 +34,7 @@ public class LeftAssociative implements PsiParser {
     }
     else {
       Marker marker_ = builder_.mark();
-      result_ = parseRoot(root_, builder_, level_);
+      result_ = parse_root_(root_, builder_, level_);
       while (builder_.getTokenType() != null) {
         builder_.advanceLexer();
       }
@@ -43,7 +43,7 @@ public class LeftAssociative implements PsiParser {
     return builder_.getTreeBuilt();
   }
 
-  protected boolean parseRoot(final IElementType root_, final PsiBuilder builder_, final int level_) {
+  protected boolean parse_root_(final IElementType root_, final PsiBuilder builder_, final int level_) {
     return from(builder_, level_ + 1);
   }
 

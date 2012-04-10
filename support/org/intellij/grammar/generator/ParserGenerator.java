@@ -436,7 +436,7 @@ public class ParserGenerator {
     {
       if (!first) out("else {");
       out("Marker marker_ = builder_.mark();");
-      out("result_ = parseRoot(root_, builder_, level_);");
+      out("result_ = parse_root_(root_, builder_, level_);");
       out("while (builder_.getTokenType() != null) {");
       out("builder_.advanceLexer();");
       out("}");
@@ -449,7 +449,7 @@ public class ParserGenerator {
     {
       BnfRule rootRule = myFile.getRule(myGrammarRoot);
       String nodeCall = generateNodeCall(rootRule, null, rootRule.getName());
-      out("protected boolean parseRoot(final IElementType root_, final PsiBuilder builder_, final int level_) {");
+      out("protected boolean parse_root_(final IElementType root_, final PsiBuilder builder_, final int level_) {");
       out("return "+nodeCall+";");
       out("}");
       newLine();

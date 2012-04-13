@@ -238,7 +238,8 @@ public class RuleGraphHelper {
           list.add(leftMap);
         }
       }
-      result = joinMaps(null, BnfTypes.BNF_SEQUENCE, Arrays.asList(result, joinMaps(null, BnfTypes.BNF_CHOICE, list)));
+      Map<PsiElement, Cardinality> combinedLeftMap = joinMaps(null, BnfTypes.BNF_CHOICE, list);
+      result = joinMaps(null, BnfTypes.BNF_SEQUENCE, Arrays.asList(result, combinedLeftMap));
     }
     visited.remove(tree);
     return result;
@@ -250,6 +251,7 @@ public class RuleGraphHelper {
       PsiElement element = reference.getElement();
       if (!(element instanceof BnfExpression)) continue;
       if (PsiTreeUtil.getParentOfType(element, BnfPredicate.class) != null) continue;
+      if (PsiTreeUtil.getParentOfType(element, BnfAttr.class) != null) continue;
       BnfRule hostRule = Rule.of((BnfExpression)element);
       Cardinality cardinality = REQUIRED;
       for (PsiElement e = prevOrParent(element, hostRule); e != null; e = prevOrParent(e, hostRule)) {

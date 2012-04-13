@@ -68,4 +68,9 @@ public abstract class BnfStringImpl extends BnfExpressionImpl implements BnfStri
   public LiteralTextEscaper<? extends PsiLanguageInjectionHost> createLiteralTextEscaper() {
     return new BnfStringLiteralEscaper(this);
   }
+
+  @Override
+  public String toString() {
+    return getText();
+  }
 }

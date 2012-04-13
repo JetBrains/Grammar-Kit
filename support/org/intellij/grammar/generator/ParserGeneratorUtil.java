@@ -27,6 +27,7 @@ import org.intellij.grammar.psi.impl.GrammarUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
@@ -64,6 +65,8 @@ public class ParserGeneratorUtil {
 
     Object attrVal = getLiteralValue(attrValue);
     if (attrVal != null) return attrVal == NULL ? def : (T)attrVal;
+    Object mapValue = getMapValue(attrValue);
+    if (mapValue != null) return mapValue  == NULL ? def : (T) mapValue;
     if (parent == null) return def;
     if (parent instanceof BnfAttrs && parent.getParent() instanceof BnfRule) parent = (BnfRule)parent.getParent();
     for (PsiElement child = GrammarUtil.getDummyAwarePrevSibling(parent);
@@ -150,6 +153,21 @@ public class ParserGeneratorUtil {
         // todo look for rule
       }
       return attribute;
+    }
+    return null;
+  }
+
+  @Nullable
+  private static Object getMapValue(@Nullable PsiElement value) {
+    if (value == null) return null;
+    if (value == NULL_ATTR) return NULL;
+    BnfExpression expression = value instanceof BnfAttrValue ? ((BnfAttrValue)value).getExpression() : null;
+    if (expression instanceof BnfMap) {
+      HashMap<String, String> result = new HashMap<String, String>();
+      for (BnfMapEntry entry : ((BnfMap)expression).getMapEntryList()) {
+        result.put(entry.getId().getText(), (String) getLiteralValue(entry.getLiteralExpression()));
+      }
+      return result;
     }
     return null;
   }

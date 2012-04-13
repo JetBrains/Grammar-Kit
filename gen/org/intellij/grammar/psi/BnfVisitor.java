@@ -52,6 +52,14 @@ public class BnfVisitor extends PsiElementVisitor {
     visitExpression(o);
   }
 
+  public void visitMap(@NotNull BnfMap o) {
+    visitExpression(o);
+  }
+
+  public void visitMapEntry(@NotNull BnfMapEntry o) {
+    visitCompositeElement(o);
+  }
+
   public void visitModifier(@NotNull BnfModifier o) {
     visitCompositeElement(o);
   }

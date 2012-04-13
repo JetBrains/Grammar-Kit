@@ -17,6 +17,8 @@ public interface BnfTypes {
   IElementType BNF_EXPRESSION = new BnfCompositeElementType("BNF_EXPRESSION");
   IElementType BNF_EXTERNAL_EXPRESSION = new BnfCompositeElementType("BNF_EXTERNAL_EXPRESSION");
   IElementType BNF_LITERAL_EXPRESSION = new BnfCompositeElementType("BNF_LITERAL_EXPRESSION");
+  IElementType BNF_MAP = new BnfCompositeElementType("BNF_MAP");
+  IElementType BNF_MAP_ENTRY = new BnfCompositeElementType("BNF_MAP_ENTRY");
   IElementType BNF_MODIFIER = new BnfCompositeElementType("BNF_MODIFIER");
   IElementType BNF_PAREN_EXPRESSION = new BnfCompositeElementType("BNF_PAREN_EXPRESSION");
   IElementType BNF_PAREN_OPT_EXPRESSION = new BnfCompositeElementType("BNF_PAREN_OPT_EXPRESSION");
@@ -76,6 +78,12 @@ public interface BnfTypes {
       }
       else if (type == BNF_LITERAL_EXPRESSION) {
         return new BnfLiteralExpressionImpl(node);
+      }
+      else if (type == BNF_MAP) {
+        return new BnfMapImpl(node);
+      }
+      else if (type == BNF_MAP_ENTRY) {
+        return new BnfMapEntryImpl(node);
       }
       else if (type == BNF_MODIFIER) {
         return new BnfModifierImpl(node);
@@ -227,6 +235,37 @@ public interface BnfLiteralExpression extends BnfExpression {
 
   @Nullable
   PsiElement getNumber();
+
+}
+// ---- BnfMap.java -----------------
+header.txt
+package org.intellij.grammar.psi;
+
+import java.util.List;
+import org.jetbrains.annotations.*;
+import com.intellij.psi.PsiElement;
+
+public interface BnfMap extends BnfExpression {
+
+  @NotNull
+  List<BnfMapEntry> getMapEntryList();
+
+}
+// ---- BnfMapEntry.java -----------------
+header.txt
+package org.intellij.grammar.psi;
+
+import java.util.List;
+import org.jetbrains.annotations.*;
+import com.intellij.psi.PsiElement;
+
+public interface BnfMapEntry extends BnfCompositeElement {
+
+  @Nullable
+  BnfLiteralExpression getLiteralExpression();
+
+  @NotNull
+  PsiElement getId();
 
 }
 // ---- BnfModifier.java -----------------
@@ -657,6 +696,74 @@ public class BnfLiteralExpressionImpl extends BnfExpressionImpl implements BnfLi
   }
 
 }
+// ---- BnfMapImpl.java -----------------
+header.txt
+package org.intellij.grammar.psi.impl;
+
+import java.util.List;
+import org.jetbrains.annotations.*;
+import com.intellij.lang.ASTNode;
+import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiElementVisitor;
+import com.intellij.psi.util.PsiTreeUtil;
+import static org.intellij.grammar.psi.BnfTypes.*;
+import org.intellij.grammar.psi.*;
+
+public class BnfMapImpl extends BnfExpressionImpl implements BnfMap {
+
+  public BnfMapImpl(ASTNode node) {
+    super(node);
+  }
+
+  @Override
+  @NotNull
+  public List<BnfMapEntry> getMapEntryList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, BnfMapEntry.class);
+  }
+
+  public void accept(@NotNull PsiElementVisitor visitor) {
+    if (visitor instanceof BnfVisitor) ((BnfVisitor)visitor).visitMap(this);
+    else super.accept(visitor);
+  }
+
+}
+// ---- BnfMapEntryImpl.java -----------------
+header.txt
+package org.intellij.grammar.psi.impl;
+
+import java.util.List;
+import org.jetbrains.annotations.*;
+import com.intellij.lang.ASTNode;
+import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiElementVisitor;
+import com.intellij.psi.util.PsiTreeUtil;
+import static org.intellij.grammar.psi.BnfTypes.*;
+import org.intellij.grammar.psi.*;
+
+public class BnfMapEntryImpl extends BnfCompositeElementImpl implements BnfMapEntry {
+
+  public BnfMapEntryImpl(ASTNode node) {
+    super(node);
+  }
+
+  @Override
+  @Nullable
+  public BnfLiteralExpression getLiteralExpression() {
+    return findChildByClass(BnfLiteralExpression.class);
+  }
+
+  @Override
+  @NotNull
+  public PsiElement getId() {
+    return findNotNullChildByType(BNF_ID);
+  }
+
+  public void accept(@NotNull PsiElementVisitor visitor) {
+    if (visitor instanceof BnfVisitor) ((BnfVisitor)visitor).visitMapEntry(this);
+    else super.accept(visitor);
+  }
+
+}
 // ---- BnfModifierImpl.java -----------------
 header.txt
 package org.intellij.grammar.psi.impl;
@@ -1080,6 +1187,14 @@ public class BnfVisitor extends PsiElementVisitor {
 
   public void visitLiteralExpression(@NotNull BnfLiteralExpression o) {
     visitExpression(o);
+  }
+
+  public void visitMap(@NotNull BnfMap o) {
+    visitExpression(o);
+  }
+
+  public void visitMapEntry(@NotNull BnfMapEntry o) {
+    visitCompositeElement(o);
   }
 
   public void visitModifier(@NotNull BnfModifier o) {

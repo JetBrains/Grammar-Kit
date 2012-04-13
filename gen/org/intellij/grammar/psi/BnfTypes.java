@@ -30,6 +30,8 @@ public interface BnfTypes {
   IElementType BNF_EXPRESSION = new BnfCompositeElementType("BNF_EXPRESSION");
   IElementType BNF_EXTERNAL_EXPRESSION = new BnfCompositeElementType("BNF_EXTERNAL_EXPRESSION");
   IElementType BNF_LITERAL_EXPRESSION = new BnfCompositeElementType("BNF_LITERAL_EXPRESSION");
+  IElementType BNF_MAP = new BnfCompositeElementType("BNF_MAP");
+  IElementType BNF_MAP_ENTRY = new BnfCompositeElementType("BNF_MAP_ENTRY");
   IElementType BNF_MODIFIER = new BnfCompositeElementType("BNF_MODIFIER");
   IElementType BNF_PAREN_EXPRESSION = new BnfCompositeElementType("BNF_PAREN_EXPRESSION");
   IElementType BNF_PAREN_OPT_EXPRESSION = new BnfCompositeElementType("BNF_PAREN_OPT_EXPRESSION");
@@ -89,6 +91,12 @@ public interface BnfTypes {
       }
       else if (type == BNF_LITERAL_EXPRESSION) {
         return new BnfLiteralExpressionImpl(node);
+      }
+      else if (type == BNF_MAP) {
+        return new BnfMapImpl(node);
+      }
+      else if (type == BNF_MAP_ENTRY) {
+        return new BnfMapEntryImpl(node);
       }
       else if (type == BNF_MODIFIER) {
         return new BnfModifierImpl(node);

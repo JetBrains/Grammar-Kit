@@ -55,8 +55,12 @@ attr ::= attr_start attr_value ';'? {pin=1 recoverUntil="attr_recover_until"}
 private attr_start ::= id (attr_pattern '=' | '=') {pin(".*")="attr_pattern"}
 private attr_start_simple ::= id attr_pattern? '='
 private attr_recover_until ::= !('}' | attr_start)
-attr_value ::= (reference_or_token | literal_expression) !'='
+attr_value ::= (reference_or_token | literal_expression | map) !'='
 attr_pattern ::= '(' string_literal_expression ')' {pin=1}
+
+map ::= '[' map_entry * ']' {pin=1 extends="expression"}
+map_entry ::= id '=' string_literal_expression ';'? {pin=2 recoverUntil="map_entry_recover_until"}
+private map_entry_recover_until ::= !(']' | '}' | id '=')
 
 expression ::= sequence choice?
 sequence ::= option * {extends="expression" recoverUntil="sequence_recover"}

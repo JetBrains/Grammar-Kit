@@ -60,6 +60,12 @@ public class GrammarParser implements PsiParser {
     else if (root_ == BNF_LITERAL_EXPRESSION) {
       result_ = literal_expression(builder_, level_ + 1);
     }
+    else if (root_ == BNF_MAP) {
+      result_ = map(builder_, level_ + 1);
+    }
+    else if (root_ == BNF_MAP_ENTRY) {
+      result_ = map_entry(builder_, level_ + 1);
+    }
     else if (root_ == BNF_MODIFIER) {
       result_ = modifier(builder_, level_ + 1);
     }
@@ -95,7 +101,7 @@ public class GrammarParser implements PsiParser {
     }
     else {
       Marker marker_ = builder_.mark();
-      result_ = parseRoot(root_, builder_, level_);
+      result_ = parse_root_(root_, builder_, level_);
       while (builder_.getTokenType() != null) {
         builder_.advanceLexer();
       }
@@ -104,14 +110,14 @@ public class GrammarParser implements PsiParser {
     return builder_.getTreeBuilt();
   }
 
-  protected boolean parseRoot(final IElementType root_, final PsiBuilder builder_, final int level_) {
+  protected boolean parse_root_(final IElementType root_, final PsiBuilder builder_, final int level_) {
     return parseGrammar(builder_, level_ + 1, grammar_element_parser_);
   }
 
   private static final TokenSet[] EXTENDS_SETS_ = new TokenSet[] {
     TokenSet.create(BNF_CHOICE, BNF_EXPRESSION, BNF_EXTERNAL_EXPRESSION, BNF_LITERAL_EXPRESSION,
-      BNF_PAREN_EXPRESSION, BNF_PAREN_OPT_EXPRESSION, BNF_PREDICATE, BNF_QUANTIFIED,
-      BNF_REFERENCE_OR_TOKEN, BNF_SEQUENCE, BNF_STRING_LITERAL_EXPRESSION),
+      BNF_MAP, BNF_PAREN_EXPRESSION, BNF_PAREN_OPT_EXPRESSION, BNF_PREDICATE,
+      BNF_QUANTIFIED, BNF_REFERENCE_OR_TOKEN, BNF_SEQUENCE, BNF_STRING_LITERAL_EXPRESSION),
     TokenSet.create(BNF_LITERAL_EXPRESSION, BNF_STRING_LITERAL_EXPRESSION),
   };
   public static boolean type_extends_(IElementType child_, IElementType parent_) {
@@ -334,7 +340,7 @@ public class GrammarParser implements PsiParser {
   }
 
   /* ********************************************************** */
-  // (reference_or_token | literal_expression) !'='
+  // (reference_or_token | literal_expression | map) !'='
   public static boolean attr_value(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "attr_value")) return false;
     boolean result_ = false;
@@ -350,19 +356,20 @@ public class GrammarParser implements PsiParser {
     return result_;
   }
 
-  // (reference_or_token | literal_expression)
+  // (reference_or_token | literal_expression | map)
   private static boolean attr_value_0(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "attr_value_0")) return false;
     return attr_value_0_0(builder_, level_ + 1);
   }
 
-  // reference_or_token | literal_expression
+  // reference_or_token | literal_expression | map
   private static boolean attr_value_0_0(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "attr_value_0_0")) return false;
     boolean result_ = false;
     final Marker marker_ = builder_.mark();
     result_ = reference_or_token(builder_, level_ + 1);
     if (!result_) result_ = literal_expression(builder_, level_ + 1);
+    if (!result_) result_ = map(builder_, level_ + 1);
     if (!result_) {
       marker_.rollbackTo();
     }
@@ -626,6 +633,132 @@ public class GrammarParser implements PsiParser {
     }
     else {
       marker_.rollbackTo();
+    }
+    return result_;
+  }
+
+  /* ********************************************************** */
+  // '[' map_entry * ']'
+  public static boolean map(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "map")) return false;
+    if (!nextTokenIs(builder_, BNF_LEFT_BRACKET)) return false;
+    boolean result_ = false;
+    boolean pinned_ = false;
+    final int start_ = builder_.getCurrentOffset();
+    final Marker marker_ = builder_.mark();
+    enterErrorRecordingSection(builder_, level_, _SECTION_GENERAL_);
+    result_ = consumeToken(builder_, BNF_LEFT_BRACKET);
+    pinned_ = result_; // pin = 1
+    result_ = result_ && report_error_(builder_, map_1(builder_, level_ + 1));
+    result_ = pinned_ && consumeToken(builder_, BNF_RIGHT_BRACKET) && result_;
+    LighterASTNode last_ = result_? builder_.getLatestDoneMarker() : null;
+    if (last_ != null && last_.getStartOffset() == start_ && type_extends_(last_.getTokenType(), BNF_MAP)) {
+      marker_.drop();
+    }
+    else if (result_ || pinned_) {
+      marker_.done(BNF_MAP);
+    }
+    else {
+      marker_.rollbackTo();
+    }
+    result_ = exitErrorRecordingSection(builder_, result_, level_, pinned_, _SECTION_GENERAL_, null);
+    return result_ || pinned_;
+  }
+
+  // map_entry *
+  private static boolean map_1(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "map_1")) return false;
+    int offset_ = builder_.getCurrentOffset();
+    while (true) {
+      if (!map_entry(builder_, level_ + 1)) break;
+      int next_offset_ = builder_.getCurrentOffset();
+      if (offset_ == next_offset_) {
+        empty_element_parsed_guard_(builder_, offset_, "map_1");
+        break;
+      }
+      offset_ = next_offset_;
+    }
+    return true;
+  }
+
+  /* ********************************************************** */
+  // id '=' string_literal_expression ';'?
+  public static boolean map_entry(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "map_entry")) return false;
+    boolean result_ = false;
+    boolean pinned_ = false;
+    final Marker marker_ = builder_.mark();
+    enterErrorRecordingSection(builder_, level_, _SECTION_RECOVER_);
+    result_ = consumeToken(builder_, BNF_ID);
+    result_ = result_ && consumeToken(builder_, BNF_OP_EQ);
+    pinned_ = result_; // pin = 2
+    result_ = result_ && report_error_(builder_, string_literal_expression(builder_, level_ + 1));
+    result_ = pinned_ && map_entry_3(builder_, level_ + 1) && result_;
+    if (result_ || pinned_) {
+      marker_.done(BNF_MAP_ENTRY);
+    }
+    else {
+      marker_.rollbackTo();
+    }
+    result_ = exitErrorRecordingSection(builder_, result_, level_, pinned_, _SECTION_RECOVER_, map_entry_recover_until_parser_);
+    return result_ || pinned_;
+  }
+
+  // ';'?
+  private static boolean map_entry_3(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "map_entry_3")) return false;
+    consumeToken(builder_, BNF_SEMICOLON);
+    return true;
+  }
+
+  /* ********************************************************** */
+  // !(']' | '}' | id '=')
+  static boolean map_entry_recover_until(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "map_entry_recover_until")) return false;
+    boolean result_ = false;
+    final Marker marker_ = builder_.mark();
+    enterErrorRecordingSection(builder_, level_, _SECTION_NOT_);
+    result_ = !map_entry_recover_until_0(builder_, level_ + 1);
+    marker_.rollbackTo();
+    result_ = exitErrorRecordingSection(builder_, result_, level_, false, _SECTION_NOT_, null);
+    return result_;
+  }
+
+  // (']' | '}' | id '=')
+  private static boolean map_entry_recover_until_0(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "map_entry_recover_until_0")) return false;
+    return map_entry_recover_until_0_0(builder_, level_ + 1);
+  }
+
+  // ']' | '}' | id '='
+  private static boolean map_entry_recover_until_0_0(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "map_entry_recover_until_0_0")) return false;
+    boolean result_ = false;
+    final Marker marker_ = builder_.mark();
+    result_ = consumeToken(builder_, BNF_RIGHT_BRACKET);
+    if (!result_) result_ = consumeToken(builder_, BNF_RIGHT_BRACE);
+    if (!result_) result_ = map_entry_recover_until_0_0_2(builder_, level_ + 1);
+    if (!result_) {
+      marker_.rollbackTo();
+    }
+    else {
+      marker_.drop();
+    }
+    return result_;
+  }
+
+  // id '='
+  private static boolean map_entry_recover_until_0_0_2(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "map_entry_recover_until_0_0_2")) return false;
+    boolean result_ = false;
+    final Marker marker_ = builder_.mark();
+    result_ = consumeToken(builder_, BNF_ID);
+    result_ = result_ && consumeToken(builder_, BNF_OP_EQ);
+    if (!result_) {
+      marker_.rollbackTo();
+    }
+    else {
+      marker_.drop();
     }
     return result_;
   }
@@ -1143,6 +1276,11 @@ public class GrammarParser implements PsiParser {
   final static Parser grammar_element_recover_parser_ = new Parser() {
       public boolean parse(PsiBuilder builder_, int level_) {
         return grammar_element_recover(builder_, level_ + 1);
+      }
+    };
+  final static Parser map_entry_recover_until_parser_ = new Parser() {
+      public boolean parse(PsiBuilder builder_, int level_) {
+        return map_entry_recover_until(builder_, level_ + 1);
       }
     };
   final static Parser sequence_recover_parser_ = new Parser() {

@@ -21,8 +21,7 @@ import com.intellij.openapi.util.TextRange;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.psi.*;
 import com.intellij.psi.util.PsiTreeUtil;
-import com.intellij.util.Processor;
-import com.intellij.util.containers.ContainerUtil;
+import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.generator.ParserGeneratorUtil;
 import org.intellij.grammar.java.JavaHelper;
 import org.intellij.grammar.psi.*;
@@ -51,7 +50,7 @@ public class BnfReferenceImpl<T extends BnfCompositeElement> extends PsiReferenc
       int paramCount = parent instanceof BnfSequence ? ((BnfSequence)parent).getExpressionList().size() - 1 :
         parent instanceof BnfExternalExpression? ((BnfExternalExpression)parent).getExpressionList().size() - 1 : 0;
       BnfRule rule = PsiTreeUtil.getParentOfType(myElement, BnfRule.class);
-      String parserClass = ParserGeneratorUtil.getAttribute(rule, "stubParserClass", "");
+      String parserClass = ParserGeneratorUtil.getAttribute(rule, KnownAttribute.PARSER_UTIL_CLASS);
       if (StringUtil.isNotEmpty(parserClass)) {
         result = JavaHelper.getJavaHelper(myElement.getProject()).findClassMethod(parserClass, myElement.getText(), paramCount);
       }
@@ -71,7 +70,7 @@ public class BnfReferenceImpl<T extends BnfCompositeElement> extends PsiReferenc
     }
     if (GrammarUtil.isExternalReference(myElement)) {
       BnfRule rule = PsiTreeUtil.getParentOfType(myElement, BnfRule.class);
-      String parserClass = ParserGeneratorUtil.getAttribute(rule, "stubParserClass", "");
+      String parserClass = ParserGeneratorUtil.getAttribute(rule, KnownAttribute.PARSER_UTIL_CLASS);
       if (StringUtil.isNotEmpty(parserClass)) {
         for (NavigatablePsiElement element : JavaHelper.getJavaHelper(myElement.getProject()).getClassMethods(parserClass)) {
           list.add(LookupElementBuilder.create((PsiNamedElement)element).setIcon(element.getIcon(0)));

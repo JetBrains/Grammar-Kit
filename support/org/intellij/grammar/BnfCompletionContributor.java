@@ -44,13 +44,6 @@ import static com.intellij.patterns.PlatformPatterns.psiElement;
  * @author gregsh
  */
 public class BnfCompletionContributor extends CompletionContributor {
-  public static final List<String> KNOWN_ATTRIBUTES =
-    Arrays.asList("generatePsi", "generateTokens", "generateStubParser", "memoization", "extendedPin", "generateFirstCheck",
-                  "psiClassPrefix", "psiImplClassSuffix", "psiPackage", "psiImplPackage", "psiVisitorClass",
-                  "elementTypeClass", "tokenTypeClass",
-                  "parserClass", "stubParserClass", "elementTypeHolderClass",
-                  "elementTypePrefix", "elementTypeFactory", "tokenClassType", "tokenTypeFactory", "parserImports",
-                  "extends", "implements", "elementType", "methodRenames", "pin", "mixin", "recoverUntil", "classHeader");
 
   public BnfCompletionContributor() {
     extend(CompletionType.BASIC, psiElement().inFile(PlatformPatterns.instanceOf(BnfFileImpl.class)), new CompletionProvider<CompletionParameters>() {
@@ -62,11 +55,13 @@ public class BnfCompletionContributor extends CompletionContributor {
         BnfCompositeElement attrs = PsiTreeUtil.getParentOfType(position, BnfAttrs.class, BnfAttrValue.class, BnfParenExpression.class);
         boolean attrCompletion = false;
         if ((attrs instanceof BnfAttrs || isPossibleEmptyAttrs(attrs))) {
+          boolean inRule = PsiTreeUtil.getParentOfType(attrs, BnfRule.class) != null;
           ASTNode closingBrace = TreeUtil.findSiblingBackward(attrs.getNode().getLastChildNode(), BnfTypes.BNF_RIGHT_BRACE);
           if (closingBrace == null || position.getTextOffset() <= closingBrace.getStartOffset()) {
             attrCompletion = true;
-            for (String attribute : KNOWN_ATTRIBUTES) {
-              result.addElement(LookupElementBuilder.create(attribute).setIcon(BnfIcons.ATTRIBUTE));
+            for (KnownAttribute attribute : KnownAttribute.getAttributes()) {
+              if (inRule && attribute.isGlobal()) continue;
+              result.addElement(LookupElementBuilder.create(attribute.getName()).setIcon(BnfIcons.ATTRIBUTE));
             }
           }
         }

@@ -24,6 +24,7 @@ import com.intellij.util.containers.MultiMap;
 import com.intellij.util.containers.MultiMapBasedOnSet;
 import gnu.trove.THashMap;
 import gnu.trove.THashSet;
+import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.psi.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -140,8 +141,16 @@ public class RuleGraphHelper {
     if (tree instanceof BnfReferenceOrToken) {
       BnfRule targetRule = myFile.getRule(tree.getText());
       if (targetRule != null) {
-        if (Rule.isExternal(targetRule) || Rule.isLeft(targetRule)) {
+        if (Rule.isExternal(targetRule)) {
           result = Collections.emptyMap();
+        }
+        else if (Rule.isLeft(targetRule)) {
+          //if (!Rule.isInner(targetRule) && !Rule.isPrivate(targetRule)) {
+          //  result = psiMap(getRealRule(targetRule), REQUIRED);
+          //}
+          //else {
+            result = Collections.emptyMap();
+          //}
         }
         else if (Rule.isPrivate(targetRule)) {
           BnfExpression body = targetRule.getExpression();
@@ -449,7 +458,7 @@ public class RuleGraphHelper {
   }
 
   public static BnfRule getRealRule(BnfRule rule) {
-    String attr = getAttribute(rule, "elementType", null);
+    String attr = getAttribute(rule, KnownAttribute.ELEMENT_TYPE);
     if (attr != null) {
       BnfRule realRule = ((BnfFile)rule.getContainingFile()).getRule(attr);
       if (realRule != null && shouldGeneratePsi(realRule, false)) return realRule;
@@ -462,7 +471,7 @@ public class RuleGraphHelper {
     BnfRule grammarRoot = containingFile.getRules().get(0);
     if (grammarRoot == rule) return false;
     if (Rule.isPrivate(rule) || Rule.isExternal(rule)) return false;
-    String elementType = getAttribute(rule, "elementType", null);
+    String elementType = getAttribute(rule, KnownAttribute.ELEMENT_TYPE);
     if (!psiClasses) return elementType == null;
     BnfRule thatRule = containingFile.getRule(elementType);
     return thatRule == null || thatRule == grammarRoot || Rule.isPrivate(thatRule) || Rule.isExternal(thatRule);

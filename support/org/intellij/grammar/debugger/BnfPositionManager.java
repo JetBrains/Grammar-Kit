@@ -39,6 +39,7 @@ import com.sun.jdi.Location;
 import com.sun.jdi.ReferenceType;
 import com.sun.jdi.request.ClassPrepareRequest;
 import org.intellij.grammar.BnfRuleLineMarkerProvider;
+import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.generator.ParserGeneratorUtil;
 import org.intellij.grammar.parser.GeneratedParserUtilBase;
 import org.intellij.grammar.psi.*;
@@ -94,7 +95,7 @@ public class BnfPositionManager implements PositionManager {
     for (PsiFile file : myGrammars.get(qname)) {
       BnfExpression expression = findExpression(file, name);
       BnfRule rule = PsiTreeUtil.getParentOfType(expression, BnfRule.class);
-      if (expression != null && qname.equals(ParserGeneratorUtil.getAttribute(rule, "parserClass", ""))) {
+      if (expression != null && qname.equals(ParserGeneratorUtil.getAttribute(rule, KnownAttribute.PARSER_CLASS))) {
         for (BnfExpression expr : ParserGeneratorUtil.getChildExpressions(expression)) {
           int line = getLineNumber(expr, qname, lineNumber);
           if (line == lineNumber) {
@@ -235,7 +236,7 @@ public class BnfPositionManager implements PositionManager {
     AccessToken token = ReadAction.start();
     try {
       BnfRule rule = getRuleAt(classPosition);
-      String parserClass = ParserGeneratorUtil.getAttribute(rule, "parserClass", "");
+      String parserClass = ParserGeneratorUtil.getAttribute(rule, KnownAttribute.PARSER_CLASS);
       if (StringUtil.isEmpty(parserClass)) throw new NoDataException();
       return parserClass;
     }

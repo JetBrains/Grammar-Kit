@@ -86,7 +86,7 @@ public class BnfRuleLineMarkerProvider extends RelatedItemLineMarkerProvider {
     BnfRule rule = PsiTreeUtil.getParentOfType(element, BnfRule.class);
     if (rule == null) return null;
     Project project = element.getProject();
-    String parserClass = ParserGeneratorUtil.getAttribute(rule, "parserClass", "");
+    String parserClass = ParserGeneratorUtil.getAttribute(rule, KnownAttribute.PARSER_CLASS);
     if (StringUtil.isEmpty(parserClass)) return null;
     return JavaHelper.getJavaHelper(project).findClassMethod(parserClass, getMethodName(rule, element), -1);
   }

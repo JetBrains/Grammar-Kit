@@ -1,6 +1,6 @@
 <idea-plugin url="https://github.com/JetBrains/Grammar-Kit" version="2">
   <id>org.jetbrains.idea.grammar</id>
-  <version>1.0.4</version>
+  <version>1.0.5</version>
   <vendor email="gregory.shrago@jetbrains.com" logo="">Gregory Shrago</vendor>
   <idea-version since-build="116.108" until-build=""/>
 
@@ -8,6 +8,10 @@
   <description>Edit, manipulate, analyze BNF grammars and generate readable parser/PSI code</description>
   <change-notes>
     <![CDATA[
+    <p>1.0.5</p>
+    <ul>
+        <li>Custom PSI methods & PSI visitor generation</li>
+    </ul>
     <p>1.0.4</p>
     <ul>
         <li>Bug fixes and performance</li>

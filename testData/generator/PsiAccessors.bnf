@@ -1,0 +1,28 @@
+{
+  classHeader="//header.txt"
+  parserClass="PsiAccessors"
+  psiClassPrefix="X"
+  implements="XComposite"
+  stubParserClass="PsiGenUtil"
+}
+root ::= binary
+
+binary ::= expression operator expression {
+    methods = [
+        alias = "/expression"
+        left = "/expression[0]"
+        right = "/expression[1]"
+        op = "/operator"
+        left_left = "/expression[0]/value[0]"
+        right_right = "/expression[1]/value[1]"
+        last = "/expression[last]"
+        first = "/expression[first]"
+    ]
+    pin = "operator"
+}
+
+operator ::= '+' | '-'
+
+expression ::= value '*' value
+value ::= id
+re ::= id

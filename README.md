@@ -19,9 +19,9 @@ You've just build a custom language plugin (approx. 1 day)
 
 Recent changes
 --------------
-1.0.4
+1.0.5
 
-* Bug fixes and performance
+* Custom PSI methods & PSI visitor generation
 
 
 Quick documentation:
@@ -145,6 +145,10 @@ Just add *mypackage.MyReferenceExpressionImpl* class with proper *getReference()
 
 Change log
 ==========
+1.0.5
+
+* Custom PSI methods & PSI visitor generation
+
 1.0.4
 
 * Bug fixes and performance

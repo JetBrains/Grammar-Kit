@@ -60,6 +60,7 @@ public class BnfGeneratorTest extends ParsingTestCase {
   public void testExternalRules() throws Exception { doGenTest(false); }
   public void testLeftAssociative() throws Exception { doGenTest(false); }
   public void testPsiGen() throws Exception { doGenTest(true); }
+  public void testPsiAccessors() throws Exception { doGenTest(true); }
 
   @Override
   protected String loadFile(@NonNls String name) throws IOException {

@@ -18,15 +18,12 @@ package org.intellij.grammar.generator;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.util.Condition;
-import com.intellij.openapi.util.Pair;
 import com.intellij.openapi.util.io.FileUtil;
 import com.intellij.openapi.util.text.StringHash;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.tree.IElementType;
-import com.intellij.util.Function;
 import com.intellij.util.containers.ContainerUtil;
 import com.intellij.util.containers.MultiMap;
 import com.intellij.util.containers.MultiMapBasedOnSet;
@@ -43,8 +40,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.*;
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import static org.intellij.grammar.generator.ParserGeneratorUtil.*;
 import static org.intellij.grammar.generator.RuleGraphHelper.Cardinality.*;
@@ -58,7 +53,6 @@ import static org.intellij.grammar.psi.BnfTypes.*;
 public class ParserGenerator {
   public static final Logger LOG = Logger.getInstance("ParserGenerator");
 
-  private static final Pattern USER_ACCESSOR_PATTERN = Pattern.compile("(\\w+)(\\[(\\d+)\\]|)");
   private final Map<String, String> myRuleParserClasses = new TreeMap<String, String>();
   private final Map<String, String> myParserLambdas = new TreeMap<String, String>();
   private final Set<String> mySimpleTokens = new THashSet<String>();
@@ -119,16 +113,18 @@ public class ParserGenerator {
       return;
     }
     boolean isComment = s.startsWith("//");
+    boolean prevSemi = false;
     for (int start = 0, end; start < length; start = end + 1) {
       end = StringUtil.indexOf(s, '\n', start, length);
       if (end == -1) end = length;
       String substring = s.substring(start, end);
       if (!isComment && substring.startsWith("}")) myOffset--;
       if (myOffset > 0) {
-        myOut.print(StringUtil.repeat("  ", start == 0 ? myOffset : myOffset + 1));
+        myOut.print(StringUtil.repeat("  ", start == 0 || prevSemi && !substring.equals("}") ? myOffset : myOffset + 1));
       }
       if (!isComment && substring.endsWith("{")) myOffset++;
       myOut.println(substring);
+      prevSemi = substring.endsWith(";");
     }
   }
 
@@ -1113,7 +1109,7 @@ public class ParserGenerator {
     }
     Map<String, String> methods = getAttribute(rule, KnownAttribute.PSI_ACCESSORS);
     for (Map.Entry<String, String> entry : methods.entrySet()) {
-      generateUserPsiAccessors(helper, entry, accessors, true);
+      generateUserPsiAccessors(rule, helper, entry.getKey(), entry.getValue(), true);
     }
     out("}");
   }
@@ -1160,7 +1156,7 @@ public class ParserGenerator {
     }
     Map<String, String> methods = getAttribute(rule, KnownAttribute.PSI_ACCESSORS);
     for (Map.Entry<String, String> entry : methods.entrySet()) {
-      generateUserPsiAccessors(helper, entry, accessors, false);
+      generateUserPsiAccessors(rule, helper, entry.getKey(), entry.getValue(), false);
     }
     out("}");
   }
@@ -1270,123 +1266,105 @@ public class ParserGenerator {
     return result;
   }
 
-  private void generateUserPsiAccessors(@NotNull RuleGraphHelper helper,
-                                        @NotNull Map.Entry<String, String> entry,
-                                        @NotNull Map<PsiElement, RuleGraphHelper.Cardinality> accessors,
+  private void generateUserPsiAccessors(BnfRule startRule,
+                                        RuleGraphHelper helper,
+                                        String methodName, String pathString,
                                         boolean intf) {
-    if (true) return; // skip for now
-    if (entry.getKey() == null || entry.getValue() == null) return;
-    final String alias = entry.getKey();
-    String[] path = entry.getValue().split("/");
+    if (pathString == null) return;
 
-    if (path.length == 0) return;
+    StringBuilder sb = new StringBuilder();
+    BnfRule targetRule = startRule;
+    RuleGraphHelper.Cardinality cardinality = REQUIRED;
+    String context = "";
+    String[] splittedPath = pathString.split("/");
+    for (int i = 0, count = 1; i < splittedPath.length; i++) {
+      String pathElement = splittedPath[i];
+      boolean last = i == splittedPath.length - 1;
+      int indexStart = pathElement.indexOf('[');
+      int indexEnd = indexStart > 0? pathElement.lastIndexOf(']') : -1;
 
-    Matcher m = USER_ACCESSOR_PATTERN.matcher(path[path.length - 1]);
+      String item = indexEnd > -1? pathElement.substring(0, indexStart).trim() : pathElement.trim();
+      String index = indexEnd > -1? pathElement.substring(indexStart+1, indexEnd).trim() : null;
+      if ("first".equals(index)) index = "0";
 
-    if (!m.find() || m.groupCount() != 3) return;
+      if (item.isEmpty()) continue;
+      BnfRule rule = myFile.getRule(item);
+      if (rule == null) return;  // wrong rule
+      RuleGraphHelper.Cardinality card = helper.getFor(targetRule).get(rule);
+      if (card == null) return; // not in list
+      if (index != null && !card.many()) return; // list expected
 
-    boolean many = !m.group(2).isEmpty();
-
-    List<String> ruleNames = ContainerUtil.map(path, new Function<String, String>() {
-      @Override
-      public String fun(String s) {
-        return chainToRuleName(s);
+      boolean many = card.many();
+      String className = StringUtil.getShortName(getAccessorType(rule, startRule));
+      String donorMethodName = "get" + toIdentifier(item, "") + (card.many() ? "List" : "") + "()";
+      String type = (many ? "List<" : "") + className + (many ? "> " : " ");
+      String curId = "p" + (count++);
+      if (!context.isEmpty()) {
+        if (cardinality.optional()) {
+          sb.append("if (").append(context).append(" == null) return null;\n");
+        }
+        context += ".";
       }
-    });
+      if (last && index == null) {
+        sb.append("return ");
+      }
+      else {
+        sb.append(type).append(curId).append(" = ");
+      }
+      sb.append(context).append(donorMethodName).append(";\n");
 
-    final String lastName = m.group(1);
-    HashMap<PsiElement, RuleGraphHelper.Cardinality> allAccessors = new HashMap<PsiElement, RuleGraphHelper.Cardinality>(accessors);
-    for (String ruleName : ruleNames) {
-      BnfRule rule = findRule(ruleName, allAccessors.keySet());
-      if (rule != null) {
-        Map<PsiElement, RuleGraphHelper.Cardinality> map = helper.getFor(rule);
-        allAccessors.putAll(map);
+      context = curId;
+
+      cardinality = card;
+      targetRule = rule; // next accessors
+
+      // list item
+      if (index != null) {
+        context += ".";
+        boolean isLast = index.equals("last");
+        if (isLast) index = context+"size() - 1";
+        curId = "p" + (count++);
+        if (last) {
+          sb.append("return ");
+        }
+        else {
+          sb.append(className).append(" ").append(curId).append(" = ");
+        }
+        if (card != AT_LEAST_ONE || !index.equals("0")) { // range check
+          if (isLast) {
+            sb.append(context).append("isEmpty()? null : ");
+          }
+          else {
+            sb.append(context).append("size() - 1 < ").append(index).append("? null : ");
+          }
+        }
+        sb.append(context).append("get(").append(index).append(");\n");
+
+        context = curId;
+        cardinality = card == AT_LEAST_ONE && index.equals("0") ? REQUIRED : OPTIONAL;
       }
     }
-    BnfRule targetRule = findRule(lastName, allAccessors.keySet());
-    RuleGraphHelper.Cardinality cardinality = allAccessors.get(targetRule);
 
     if (!intf) out("@Override");
 
-    if (!many && cardinality == REQUIRED) {
+    if (!cardinality.many() && cardinality == REQUIRED) {
       out("@NotNull");
     }
     else {
       out("@Nullable");
     }
 
-    final String className = StringUtil.getShortName(getAccessorType(targetRule, targetRule));
-    final String getterName = "get" + toIdentifier(alias, "");
-
-    out((intf ? "" : "public ") + className + " " + getterName + (intf ? "();" : "() {")); // TODO: support List<T> as return type
+    boolean many = cardinality.many();
+    String className = StringUtil.getShortName(getAccessorType(targetRule, startRule));
+    final String getterName = "get" + toIdentifier(methodName, "");
+    String tail = intf ? "();" : "() {";
+    out((intf ? "" : "public ") + (many ? "List<" : "") + className + (many ? "> " : " ") + getterName + tail);
 
     if (!intf) {
-      final List<String> conditions = new ArrayList<String>();
-      final List<String> getters = new ArrayList<String>();
-      for (String s : path) {
-        Pair<String, String> pair = chainToConditionAndGetter(s);
-        if (pair != null) {
-          conditions.add(pair.getFirst());
-          getters.add(pair.getSecond());
-        }
-      }
-
-      assert conditions.size() == getters.size();
-
-      final List<String> foldedConditions = new ArrayList<String>();
-      for (int i = 0; i < conditions.size(); i++) {
-        List<String> subList = new ArrayList<String>(getters.subList(0, i));
-        subList.add(conditions.get(i));
-        foldedConditions.add(StringUtil.join(subList, "."));
-      }
-
-      final List<String> filteredConditions = ContainerUtil.filter(foldedConditions, new Condition<String>() {
-        @Override
-        public boolean value(String s) {
-          return !s.isEmpty();
-        }
-      });
-
-      if (!filteredConditions.isEmpty()) {
-        out("return " + StringUtil.join(filteredConditions, " && ") + " ? " + StringUtil.join(getters, ".") + " : null;");
-      }
-      else {
-        out("return " + StringUtil.join(getters, ".") + ";");
-      }
+      out(sb.toString());
       out("}");
     }
     newLine();
   }
 
-  @Nullable
-  private static BnfRule findRule(@NotNull final String name, @NotNull Iterable<PsiElement> psiElements) {
-    return (BnfRule)ContainerUtil.find(psiElements, new Condition<PsiElement>() {
-      @Override
-      public boolean value(@Nullable PsiElement psiElement) {
-        return psiElement instanceof BnfRule && name.equals(((BnfRule)psiElement).getName());
-      }
-    });
-  }
-
-  @Nullable
-  private static Pair<String, String> chainToConditionAndGetter(String chain) {
-    Matcher m = USER_ACCESSOR_PATTERN.matcher(chain);
-    if (!m.find() || m.groupCount() != 3) return null;
-
-    boolean many = !m.group(2).isEmpty();
-    final int id = many ? Integer.valueOf(m.group(2).replaceAll("\\[", "").replaceAll("\\]", "")) : -1;
-    final String lastName = m.group(1);
-    String donorMethodName = "get" + toIdentifier(lastName, "") + (many ? "List" : "") + "()";
-
-    return many ?
-           new Pair<String, String>(donorMethodName + ".size() >= " + id, donorMethodName + ".get(" + id + ")") :
-           new Pair<String, String>("", donorMethodName);
-  }
-
-  @Nullable
-  private static String chainToRuleName(String chain) {
-    Matcher m = USER_ACCESSOR_PATTERN.matcher(chain);
-    if (!m.find() || m.groupCount() != 3) return "";
-    return m.group(1);
-  }
 }

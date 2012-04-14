@@ -20,7 +20,7 @@ BnfFile:Fixes.bnf
     PsiWhiteSpace(' ')
     BNF_EXTERNAL_EXPRESSION
       PsiElement(<<)('<<')
-      BNF_REFERENCE_OR_TOKEN
+      BNF_REFERENCE_OR_TOKEN: some_meta
         PsiElement(id)('some_meta')
       PsiWhiteSpace(' ')
       BNF_PAREN_EXPRESSION

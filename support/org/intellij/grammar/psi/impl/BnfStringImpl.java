@@ -71,6 +71,6 @@ public abstract class BnfStringImpl extends BnfExpressionImpl implements BnfStri
 
   @Override
   public String toString() {
-    return getText();
+    return super.toString() + ": " + getText();
   }
 }

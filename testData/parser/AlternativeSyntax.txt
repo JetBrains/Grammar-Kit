@@ -6,7 +6,7 @@ BnfFile:AlternativeSyntax.bnf
       PsiElement(id)('mainAttr')
       PsiElement(=)('=')
       BNF_ATTR_VALUE
-        BNF_STRING_LITERAL_EXPRESSION
+        BNF_STRING_LITERAL_EXPRESSION: "11"
           PsiElement(string)('"11"')
     PsiWhiteSpace('\n')
     PsiElement(})('}')
@@ -20,7 +20,7 @@ BnfFile:AlternativeSyntax.bnf
       PsiElement([)('[')
       PsiWhiteSpace(' ')
       BNF_SEQUENCE
-        BNF_REFERENCE_OR_TOKEN
+        BNF_REFERENCE_OR_TOKEN: FOR
           PsiElement(id)('FOR')
         PsiWhiteSpace(' ')
         BNF_PAREN_EXPRESSION
@@ -28,26 +28,26 @@ BnfFile:AlternativeSyntax.bnf
           PsiWhiteSpace(' ')
           BNF_CHOICE
             BNF_SEQUENCE
-              BNF_REFERENCE_OR_TOKEN
+              BNF_REFERENCE_OR_TOKEN: READ
                 PsiElement(id)('READ')
               PsiWhiteSpace(' ')
-              BNF_REFERENCE_OR_TOKEN
+              BNF_REFERENCE_OR_TOKEN: ONLY
                 PsiElement(id)('ONLY')
             PsiWhiteSpace(' ')
             PsiElement(|)('|')
             PsiWhiteSpace(' ')
             BNF_SEQUENCE
-              BNF_REFERENCE_OR_TOKEN
+              BNF_REFERENCE_OR_TOKEN: UPDATE
                 PsiElement(id)('UPDATE')
               PsiWhiteSpace(' ')
               BNF_PAREN_OPT_EXPRESSION
                 PsiElement([)('[')
                 PsiWhiteSpace(' ')
                 BNF_SEQUENCE
-                  BNF_REFERENCE_OR_TOKEN
+                  BNF_REFERENCE_OR_TOKEN: OF
                     PsiElement(id)('OF')
                   PsiWhiteSpace(' ')
-                  BNF_REFERENCE_OR_TOKEN
+                  BNF_REFERENCE_OR_TOKEN: <column name list>
                     PsiElement(id)('<column name list>')
                 PsiWhiteSpace(' ')
                 PsiElement(])(']')

@@ -28,14 +28,14 @@ BnfFile:BrokenEverything.bnf
       PsiElement(=)('=')
       PsiWhiteSpace(' ')
       BNF_ATTR_VALUE
-        BNF_REFERENCE_OR_TOKEN
+        BNF_REFERENCE_OR_TOKEN: sdfdss
           PsiElement(id)('sdfdss')
     PsiWhiteSpace('\n')
     BNF_ATTR:a
       PsiElement(id)('a')
       BNF_ATTR_PATTERN
         PsiElement(()('(')
-        BNF_STRING_LITERAL_EXPRESSION
+        BNF_STRING_LITERAL_EXPRESSION: ""
           PsiElement(string)('""')
         PsiElement())(')')
       PsiErrorElement:'=' expected, got '}'
@@ -56,6 +56,6 @@ BnfFile:BrokenEverything.bnf
     PsiWhiteSpace(' ')
     BNF_PAREN_EXPRESSION
       PsiElement({)('{')
-      BNF_REFERENCE_OR_TOKEN
+      BNF_REFERENCE_OR_TOKEN: x
         PsiElement(id)('x')
       PsiElement(})('}')

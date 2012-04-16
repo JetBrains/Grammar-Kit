@@ -61,6 +61,9 @@ public interface XBinary extends XComposite {
   XValue getLeftLeft();
 
   @Nullable
+  XValue getRightLeft();
+
+  @Nullable
   XExpression getLast();
 
   @NotNull
@@ -70,10 +73,16 @@ public interface XBinary extends XComposite {
   List<XExpression> getAlias();
 
   @Nullable
+  XValue getBadIndex();
+
+  @Nullable
   XValue getRightRight();
 
   @NotNull
   XExpression getLeft();
+
+  @Nullable
+  XValue getLeftRight();
 
   @NotNull
   XExpression getFirst();
@@ -183,6 +192,16 @@ public class XBinaryImpl extends CompositeElementImpl implements XBinary {
 
   @Override
   @Nullable
+  public XValue getRightLeft() {
+    List<XExpression> p1 = getExpressionList();
+    XExpression p2 = p1.size() < 2 ? null : p1.get(1);
+    if (p2 == null) return null;
+    List<XValue> p3 = p2.getValueList();
+    return p3.get(0);
+  }
+
+  @Override
+  @Nullable
   public XExpression getLast() {
     List<XExpression> p1 = getExpressionList();
     return p1.isEmpty()? null : p1.get(p1.size() - 1);
@@ -202,12 +221,22 @@ public class XBinaryImpl extends CompositeElementImpl implements XBinary {
 
   @Override
   @Nullable
-  public XValue getRightRight() {
+  public XValue getBadIndex() {
     List<XExpression> p1 = getExpressionList();
-    XExpression p2 = p1.size() - 1 < 1? null : p1.get(1);
+    XExpression p2 = p1.size() - 1 < bad_index ? null : p1.get(bad_index);
     if (p2 == null) return null;
     List<XValue> p3 = p2.getValueList();
-    return p3.size() - 1 < 1? null : p3.get(1);
+    return p3.size() - 1 < wrong_turn ? null : p3.get(wrong_turn);
+  }
+
+  @Override
+  @Nullable
+  public XValue getRightRight() {
+    List<XExpression> p1 = getExpressionList();
+    XExpression p2 = p1.size() < 2 ? null : p1.get(1);
+    if (p2 == null) return null;
+    List<XValue> p3 = p2.getValueList();
+    return p3.size() < 2 ? null : p3.get(1);
   }
 
   @Override
@@ -215,6 +244,15 @@ public class XBinaryImpl extends CompositeElementImpl implements XBinary {
   public XExpression getLeft() {
     List<XExpression> p1 = getExpressionList();
     return p1.get(0);
+  }
+
+  @Override
+  @Nullable
+  public XValue getLeftRight() {
+    List<XExpression> p1 = getExpressionList();
+    XExpression p2 = p1.get(0);
+    List<XValue> p3 = p2.getValueList();
+    return p3.size() < 2 ? null : p3.get(1);
   }
 
   @Override
@@ -228,7 +266,7 @@ public class XBinaryImpl extends CompositeElementImpl implements XBinary {
   @Nullable
   public XExpression getRight() {
     List<XExpression> p1 = getExpressionList();
-    return p1.size() - 1 < 1? null : p1.get(1);
+    return p1.size() < 2 ? null : p1.get(1);
   }
 
 }

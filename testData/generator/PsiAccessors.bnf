@@ -17,6 +17,9 @@ binary ::= expression operator expression {
         right_right = "/expression[1]/value[1]"
         last = "/expression[last]"
         first = "/expression[first]"
+        right_left = "/expression[1]/value[0]" // total nullable test
+        left_right = "/expression[0]/value[1]"
+        bad_index = "/expression[bad_index]/value[wrong_turn]"
     ]
     pin = "operator"
 }

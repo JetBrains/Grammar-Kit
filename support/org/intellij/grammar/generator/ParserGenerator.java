@@ -1277,6 +1277,7 @@ public class ParserGenerator {
     RuleGraphHelper.Cardinality cardinality = REQUIRED;
     String context = "";
     String[] splittedPath = pathString.split("/");
+    boolean totalNullable = false;
     for (int i = 0, count = 1; i < splittedPath.length; i++) {
       String pathElement = splittedPath[i];
       boolean last = i == splittedPath.length - 1;
@@ -1315,8 +1316,9 @@ public class ParserGenerator {
 
       context = curId;
 
-      cardinality = card;
       targetRule = rule; // next accessors
+      cardinality = card;
+      totalNullable |= cardinality.optional();
 
       // list item
       if (index != null) {
@@ -1335,19 +1337,21 @@ public class ParserGenerator {
             sb.append(context).append("isEmpty()? null : ");
           }
           else {
-            sb.append(context).append("size() - 1 < ").append(index).append("? null : ");
+            int val = StringUtil.parseInt(index, Integer.MAX_VALUE);
+            sb.append(context).append("size()").append(val == Integer.MAX_VALUE ? " - 1 < " + index : " < " + (val + 1)).append(" ? null : ");
           }
         }
         sb.append(context).append("get(").append(index).append(");\n");
 
         context = curId;
         cardinality = card == AT_LEAST_ONE && index.equals("0") ? REQUIRED : OPTIONAL;
+        totalNullable |= cardinality.optional();
       }
     }
 
     if (!intf) out("@Override");
 
-    if (!cardinality.many() && cardinality == REQUIRED) {
+    if (!cardinality.many() && cardinality == REQUIRED && !totalNullable) {
       out("@NotNull");
     }
     else {

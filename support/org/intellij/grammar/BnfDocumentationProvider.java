@@ -47,8 +47,9 @@ public class BnfDocumentationProvider implements DocumentationProvider {
   public String generateDoc(final PsiElement element, final PsiElement originalElement) {
     if (element instanceof BnfRule) {
       BnfRule rule = (BnfRule)element;
-      Set<String> first = BnfFirstNextAnalyzer.calcFirst(rule);
-      Set<String> next = BnfFirstNextAnalyzer.calcNext(rule);
+      BnfFirstNextAnalyzer analyzer = new BnfFirstNextAnalyzer();
+      Set<String> first = analyzer.asStrings(analyzer.calcFirst(rule));
+      Set<String> next = analyzer.asStrings(analyzer.calcNext(rule).keySet());
 
       String[] firstS = first.toArray(new String[first.size()]);
       Arrays.sort(firstS);

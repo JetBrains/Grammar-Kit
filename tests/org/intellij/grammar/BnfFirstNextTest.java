@@ -2,6 +2,7 @@ package org.intellij.grammar;
 
 import com.intellij.testFramework.fixtures.LightPlatformCodeInsightFixtureTestCase;
 import com.intellij.util.ArrayUtil;
+import org.intellij.grammar.analysis.BnfFirstNextAnalyzer;
 import org.intellij.grammar.psi.BnfFile;
 import org.intellij.grammar.psi.BnfRule;
 
@@ -55,7 +56,8 @@ public class BnfFirstNextTest extends LightPlatformCodeInsightFixtureTestCase {
     BnfFile f = (BnfFile)myFixture.configureByText("a.bnf", text);
     List<BnfRule> rules = f.getRules();
     assertFalse(rules.isEmpty());
-    Set<String> strings = first? calcFirst(rules.get(0)) : calcNext(rules.get(0));
+    BnfFirstNextAnalyzer analyzer = new BnfFirstNextAnalyzer();
+    Set<String> strings = analyzer.asStrings(first? analyzer.calcFirst(rules.get(0)) : analyzer.calcNext(rules.get(0)).keySet());
     String[] result = ArrayUtil.toStringArray(strings);
     Arrays.sort(result);
     assertOrderedEquals(result, expected);

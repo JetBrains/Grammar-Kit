@@ -38,3 +38,8 @@ identifier ::= id
 
 literal ::= number {extends="expr"}
 specialRef ::= identifier OF reference {extends="qref_expr"} // test this kind of 'casing'
+
+some_expr ::= (a_expr | specialRef b_expr | some_expr_private) (cast_expr) (item_expr) *
+private some_expr_private ::= specialRef b_expr
+left cast_expr ::= '::' id
+left item_expr ::= '[' number ']'

@@ -16,15 +16,17 @@
 package org.intellij.grammar.generator;
 
 import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiReference;
-import com.intellij.psi.search.searches.ReferencesSearch;
+import com.intellij.psi.TokenType;
+import com.intellij.psi.impl.source.tree.LeafPsiElement;
 import com.intellij.psi.tree.IElementType;
 import com.intellij.psi.util.PsiTreeUtil;
+import com.intellij.util.containers.ContainerUtil;
 import com.intellij.util.containers.MultiMap;
 import com.intellij.util.containers.MultiMapBasedOnSet;
 import gnu.trove.THashMap;
 import gnu.trove.THashSet;
 import org.intellij.grammar.KnownAttribute;
+import org.intellij.grammar.analysis.BnfFirstNextAnalyzer;
 import org.intellij.grammar.psi.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -34,7 +36,8 @@ import java.util.*;
 import static org.intellij.grammar.generator.ParserGeneratorUtil.*;
 import static org.intellij.grammar.generator.RuleGraphHelper.Cardinality.*;
 import static org.intellij.grammar.psi.BnfTypes.BNF_SEQUENCE;
-import static org.intellij.grammar.psi.impl.GrammarUtil.*;
+import static org.intellij.grammar.psi.impl.GrammarUtil.collectExtraArguments;
+import static org.intellij.grammar.psi.impl.GrammarUtil.nextOrParent;
 
 /**
  * @author gregory
@@ -46,6 +49,8 @@ public class RuleGraphHelper {
   private final Map<BnfRule, Map<PsiElement, Cardinality>> myMap;
   private final MultiMap<BnfRule,BnfRule> myRulesGraph;
 
+  private static final LeafPsiElement LEFT_MARKER = new LeafPsiElement(TokenType.WHITE_SPACE, "LEFT_MARKER");
+
   public enum Cardinality {
     NONE, OPTIONAL, REQUIRED, AT_LEAST_ONE, ANY_NUMBER;
 
@@ -55,6 +60,10 @@ public class RuleGraphHelper {
 
     boolean many() {
       return this == AT_LEAST_ONE || this == ANY_NUMBER;
+    }
+
+    Cardinality single() {
+      return this == AT_LEAST_ONE? REQUIRED : this == ANY_NUMBER? OPTIONAL : this;
     }
 
     public static Cardinality fromNodeType(IElementType type) {
@@ -79,6 +88,7 @@ public class RuleGraphHelper {
     }
 
     public Cardinality and(Cardinality c) {
+      if (c == null) return this;
       if (this == NONE || c == NONE) return NONE;
       if (optional() || c.optional()) {
         return many() || c.many() ? ANY_NUMBER : OPTIONAL;
@@ -105,8 +115,9 @@ public class RuleGraphHelper {
     myRulesGraph = new MultiMapBasedOnSet<BnfRule, BnfRule>();
     for (BnfRule rule : myFile.getRules()) {
       BnfExpression expression = rule.getExpression();
-      for (PsiElement cur = nextOrParent(expression.getPrevSibling(), expression); cur != null; cur =
-        nextOrParent(cur, expression) ) {
+      for (PsiElement cur = nextOrParent(expression.getPrevSibling(), expression);
+           cur != null;
+           cur = nextOrParent(cur, expression) ) {
         BnfRule r = cur instanceof BnfReferenceOrToken && PsiTreeUtil.getParentOfType(cur, BnfPredicate.class) == null? myFile.getRule(cur.getText()) : null;
         if (r != null) myRulesGraph.putValue(rule, r);
       }
@@ -121,7 +132,19 @@ public class RuleGraphHelper {
     THashSet<PsiElement> visited = new THashSet<PsiElement>();
     for (BnfRule rule : myFile.getRules()) {
       Map<PsiElement, Cardinality> map = collectMembers(rule, rule.getExpression(), rule.getName(), visited);
-      myMap.put(rule, map.size() == 1 && map.containsKey(rule) ? Collections.<PsiElement, Cardinality>emptyMap() : map);
+      if (map.size() == 1 && ContainerUtil.getFirstItem(map.values()) == REQUIRED) {
+        PsiElement r = ContainerUtil.getFirstItem(map.keySet());
+        if (r == rule || r instanceof BnfRule && ruleExtendsMap.get((BnfRule)r).contains(rule)) {
+          myMap.put(rule, Collections.<PsiElement, Cardinality>emptyMap());
+        }
+        else {
+          myMap.put(rule, map);
+        }
+      }
+      else {
+        myMap.put(rule, map);
+      }
+
       ParserGenerator.LOG.assertTrue(visited.isEmpty());
     }
   }
@@ -145,12 +168,14 @@ public class RuleGraphHelper {
           result = Collections.emptyMap();
         }
         else if (Rule.isLeft(targetRule)) {
-          //if (!Rule.isInner(targetRule) && !Rule.isPrivate(targetRule)) {
-          //  result = psiMap(getRealRule(targetRule), REQUIRED);
-          //}
-          //else {
+          if (!Rule.isInner(targetRule) && !Rule.isPrivate(targetRule)) {
+            result = new HashMap<PsiElement, Cardinality>();
+            result.put(getRealRule(targetRule), REQUIRED);
+            result.put(LEFT_MARKER, REQUIRED);
+          }
+          else {
             result = Collections.emptyMap();
-          //}
+          }
         }
         else if (Rule.isPrivate(targetRule)) {
           BnfExpression body = targetRule.getExpression();
@@ -245,39 +270,25 @@ public class RuleGraphHelper {
     return result;
   }
 
-  private Map<BnfRule, Cardinality> getRulesToTheLeft(BnfRule rule) {
+  private static Map<BnfRule, Cardinality> getRulesToTheLeft(BnfRule rule) {
     Map<BnfRule, Cardinality> result = new HashMap<BnfRule, Cardinality>();
-    for (PsiReference reference : ReferencesSearch.search(rule, rule.getUseScope()).findAll()) {
-      PsiElement element = reference.getElement();
-      if (!(element instanceof BnfExpression)) continue;
-      if (PsiTreeUtil.getParentOfType(element, BnfPredicate.class) != null) continue;
-      if (PsiTreeUtil.getParentOfType(element, BnfAttr.class) != null) continue;
-      BnfRule hostRule = Rule.of((BnfExpression)element);
+    Map<BnfExpression, BnfExpression> nextMap = new BnfFirstNextAnalyzer().setBackward(true).setPublicRuleOpaque(true).calcNext(rule);
+    BnfFile containingFile = (BnfFile)rule.getContainingFile();
+    for (BnfExpression e : nextMap.keySet()) {
+      if (!(e instanceof BnfReferenceOrToken)) continue;
+      BnfRule r = containingFile.getRule(e.getText());
+      if (r == null || ParserGeneratorUtil.Rule.isPrivate(r)) continue;
+      BnfExpression context = nextMap.get(e);
       Cardinality cardinality = REQUIRED;
-      for (PsiElement e = prevOrParent(element, hostRule); e != null; e = prevOrParent(e, hostRule)) {
-        if (PsiTreeUtil.isAncestor(e, element, true)) {
-          IElementType curType = getEffectiveType(e);
-          if (curType == BnfTypes.BNF_OP_OPT || curType == BnfTypes.BNF_OP_ONEMORE || curType == BnfTypes.BNF_OP_ZEROMORE) {
-            cardinality = cardinality.and(Cardinality.fromNodeType(curType));
-          }
+      for (PsiElement cur = context; !(cur instanceof BnfRule); cur = cur.getParent()) {
+        if (PsiTreeUtil.isAncestor(cur, e, true)) break;
+        IElementType curType = getEffectiveType(cur);
+        if (curType == BnfTypes.BNF_OP_OPT || curType == BnfTypes.BNF_OP_ONEMORE || curType == BnfTypes.BNF_OP_ZEROMORE) {
+          cardinality = cardinality.and(Cardinality.fromNodeType(curType));
         }
-        BnfRule leftRule = e instanceof BnfReferenceOrToken ? myFile.getRule(e.getText()) : null;
-        if (leftRule == null || Rule.isInner(leftRule) || (Rule.isPrivate(leftRule) && Rule.isLeft(leftRule))) continue;
-        if (PsiTreeUtil.getParentOfType(e, BnfPredicate.class) != null) continue;
-        boolean found = false;
-        if (!Rule.isPrivate(leftRule)) {
-          result.put(leftRule, cardinality);
-          found = true;
-        }
-        else {
-          for (BnfRule r : myRulesGraph.get(leftRule)) {
-            if (Rule.isInner(r) || (Rule.isPrivate(r) && Rule.isLeft(r))) continue;
-            result.put(r, cardinality);
-            found = true;
-          }
-        }
-        if (found) break;
       }
+      Cardinality prev = result.get(r);
+      result.put(r, prev == null? cardinality : cardinality.or(prev));
     }
     return result;
   }
@@ -293,8 +304,13 @@ public class RuleGraphHelper {
         return Collections.emptyMap();
       }
       Map<PsiElement, Cardinality> map = new HashMap<PsiElement, Cardinality>();
+      boolean leftMarker = m.containsKey(LEFT_MARKER);
       for (PsiElement t : m.keySet()) {
-        map.put(t, fromNodeType(type).and(m.get(t)));
+        Cardinality joinedCard = fromNodeType(type).and(m.get(t));
+        if (leftMarker) {
+          joinedCard = joinedCard.single();
+        }
+        map.put(t, joinedCard);
       }
       return map;
     }
@@ -312,8 +328,16 @@ public class RuleGraphHelper {
       }
       Map<PsiElement, Cardinality> map = new HashMap<PsiElement, Cardinality>();
       for (Map<PsiElement, Cardinality> m : list) {
+        Cardinality leftMarker = m.get(LEFT_MARKER);
+        if (leftMarker == REQUIRED) {
+          map.clear();
+          leftMarker = null;
+        }
         for (PsiElement t : m.keySet()) {
-          map.put(t, m.get(t).or(map.get(t)));
+          if (t == LEFT_MARKER && m != list.get(0)) continue;
+          Cardinality joinedCard = m.get(t).or(map.get(t));
+          if (leftMarker == OPTIONAL) joinedCard = joinedCard.single();
+          map.put(t, joinedCard);
         }
       }
       return map;

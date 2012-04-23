@@ -85,11 +85,12 @@ public class BnfUnreachableChoiceBranchInspection extends LocalInspectionTool {
 
   private static void checkChoice(BnfChoice choice, ProblemsHolder problemsHolder) {
     Set<BnfRule> visited = new THashSet<BnfRule>();
-    THashSet<String> first = new THashSet<String>();
+    THashSet<BnfExpression> first = new THashSet<BnfExpression>();
+    BnfFirstNextAnalyzer analyzer = new BnfFirstNextAnalyzer();
     List<BnfExpression> list = choice.getExpressionList();
     for (int i = 0, listSize = list.size() - 1; i < listSize; i++) {
       BnfExpression child = list.get(i);
-      Set<String> firstSet = BnfFirstNextAnalyzer.calcFirstInner(child, first, visited);
+      Set<String> firstSet = analyzer.asStrings(analyzer.calcFirstInner(child, first, visited));
       if (firstSet.contains(BnfFirstNextAnalyzer.MATCHES_NOTHING)) {
         registerProblem(choice, child, "Branch is unable to match anything due to & or ! conditions", problemsHolder);
       }

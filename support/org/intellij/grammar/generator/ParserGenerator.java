@@ -620,7 +620,8 @@ public class ParserGenerator {
     }
 
     if (generateFirstCheck > 0 && recoverRoot == null && (isRule || firstNonTrivial)) {
-      Set<String> first = BnfFirstNextAnalyzer.calcFirstInner(node, new THashSet<String>(), new THashSet<BnfRule>());
+      BnfFirstNextAnalyzer analyzer = new BnfFirstNextAnalyzer();
+      Set<String> first = analyzer.asStrings(analyzer.calcFirstInner(node, new THashSet<BnfExpression>(), new THashSet<BnfRule>()));
       if (!first.contains(BnfFirstNextAnalyzer.MATCHES_EOF) && !first.contains(BnfFirstNextAnalyzer.MATCHES_ANY)) {
         List<String> elementTypes = new ArrayList<String>(first.size());
         for (String s : first) {

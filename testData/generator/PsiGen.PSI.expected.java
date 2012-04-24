@@ -5,8 +5,6 @@ package generated;
 import com.intellij.psi.tree.IElementType;
 import com.intellij.psi.PsiElement;
 import com.intellij.lang.ASTNode;
-import com.intellij.psi.tree.IElementType;
-import com.intellij.psi.tree.IElementType;
 import generated.psi.impl.*;
 
 public interface ParserTypes {

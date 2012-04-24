@@ -51,6 +51,7 @@ public class KnownAttribute<T> {
   public static final KnownAttribute<String> PSI_PACKAGE                = create(true, String.class, "psiPackage", "generated.psi");
   public static final KnownAttribute<String> PSI_IMPL_PACKAGE           = create(true, String.class, "psiImplPackage", "generated.psi.impl");
   public static final KnownAttribute<String> PSI_VISITOR_CLASS          = create(true, String.class, "psiVisitorClass", "Visitor");
+  public static final KnownAttribute<String> PSI_IMPL_UTIL_CLASS        = create(true, String.class, "psiImplUtilClass", null);
   public static final KnownAttribute<String> ELEMENT_TYPE_CLASS         = create(true, String.class, "elementTypeClass", BnfConstants.IELEMENTTYPE_CLASS);
   public static final KnownAttribute<String> TOKEN_TYPE_CLASS           = create(true, String.class, "tokenTypeClass", BnfConstants.IELEMENTTYPE_CLASS);
   public static final KnownAttribute<String> PARSER_CLASS               = create(true, String.class, "parserClass", "generated.Parser");

@@ -43,6 +43,10 @@ public class JavaHelper {
   public NavigatablePsiElement findClassMethod(String className, String methodName, int paramCount) { return null; }
   @NotNull
   public List<NavigatablePsiElement> getClassMethods(String className) { return Collections.emptyList(); }
+  @NotNull
+  public List<String> getMethodTypes(NavigatablePsiElement method) { return Collections.singletonList("void"); }
+  @NotNull
+  public List<String> getAnnotations(NavigatablePsiElement element) { return Collections.emptyList(); }
 
   private static class Impl extends JavaHelper {
     private final JavaPsiFacade myFacade;
@@ -85,6 +89,33 @@ public class JavaHelper {
         }
       }
       return result;
+    }
+
+    @NotNull
+    @Override
+    public List<String> getMethodTypes(NavigatablePsiElement method) {
+      PsiMethod psiMethod = (PsiMethod)method;
+      PsiType returnType = psiMethod.getReturnType();
+      List<String> strings = new ArrayList<String>();
+      strings.add(returnType == null? "void" : returnType.getCanonicalText());
+      for (PsiParameter parameter : psiMethod.getParameterList().getParameters()) {
+        strings.add(parameter.getType().getCanonicalText());
+        strings.add(parameter.getName());
+      }
+      return strings;
+    }
+
+    @NotNull
+    @Override
+    public List<String> getAnnotations(NavigatablePsiElement element) {
+      PsiModifierList modifierList = ((PsiModifierListOwner)element).getModifierList();
+      if (modifierList == null) return super.getAnnotations(element);
+      List<String> strings = new ArrayList<String>();
+      for (PsiAnnotation annotation  : modifierList.getAnnotations()) {
+        if (annotation.getParameterList().getAttributes().length > 0) continue;
+        strings.add(annotation.getQualifiedName());
+      }
+      return strings;
     }
   }
 }

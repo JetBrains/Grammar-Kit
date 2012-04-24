@@ -454,7 +454,7 @@ public class Self implements PsiParser {
   // string_literal_expression | number
   public static boolean literal_expression(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "literal_expression")) return false;
-    if (!nextTokenIs(builder_, BNF_STRING) && !nextTokenIs(builder_, BNF_NUMBER)) return false;
+    if (!nextTokenIs(builder_, BNF_NUMBER) && !nextTokenIs(builder_, BNF_STRING)) return false;
     boolean result_ = false;
     final int start_ = builder_.getCurrentOffset();
     final Marker marker_ = builder_.mark();

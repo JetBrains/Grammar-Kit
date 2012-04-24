@@ -66,8 +66,6 @@ public class ParserGeneratorUtil {
 
     Object attrVal = getLiteralValue(attrValue);
     if (attrVal != null) return attrVal == NULL ? attribute.getDefaultValue() : (T)attrVal;
-    Object mapValue = getMapValue(attrValue);
-    if (mapValue != null) return mapValue  == NULL ? attribute.getDefaultValue() : (T) mapValue;
     if (parent == null) return attribute.getDefaultValue();
     if (parent instanceof BnfAttrs && parent.getParent() instanceof BnfRule) parent = (BnfRule)parent.getParent();
     for (PsiElement child = GrammarUtil.getDummyAwarePrevSibling(parent);
@@ -149,8 +147,9 @@ public class ParserGeneratorUtil {
     if (elementType == BnfTypes.BNF_ID) {
       if (text.equals("true") || text.equals("false")) return Boolean.parseBoolean(text);
       if (text.equals("null")) return NULL;
+      return text;
     }
-    return null;
+    return getMapValue(child);
   }
 
   @Nullable

@@ -297,7 +297,7 @@ public class BnfFirstNextAnalyzer {
   }
 
   public Set<String> asStrings(Set<BnfExpression> expressions) {
-    Set<String> result = new THashSet<String>();
+    Set<String> result = new TreeSet<String>();
     for (BnfExpression expression : expressions) {
       if (expression instanceof BnfLiteralExpression) {
         String text = expression.getText();

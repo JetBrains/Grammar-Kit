@@ -272,8 +272,8 @@ BnfFile:BnfGrammar.bnf
           PsiElement())(')')
         PsiElement(=)('=')
         BNF_ATTR_VALUE
-          BNF_STRING_LITERAL_EXPRESSION: "parenthesized"
-            PsiElement(string)('"parenthesized"')
+          BNF_REFERENCE_OR_TOKEN: parenthesized
+            PsiElement(id)('parenthesized')
       PsiWhiteSpace('\n')
       PsiElement(})('}')
     PsiWhiteSpace('\n\n')
@@ -315,8 +315,8 @@ BnfFile:BnfGrammar.bnf
           PsiElement(id)('recoverUntil')
           PsiElement(=)('=')
           BNF_ATTR_VALUE
-            BNF_STRING_LITERAL_EXPRESSION: "grammar_element_recover"
-              PsiElement(string)('"grammar_element_recover"')
+            BNF_REFERENCE_OR_TOKEN: grammar_element_recover
+              PsiElement(id)('grammar_element_recover')
         PsiElement(})('}')
     PsiWhiteSpace('\n')
     BNF_RULE:grammar_element_recover
@@ -487,8 +487,8 @@ BnfFile:BnfGrammar.bnf
           PsiElement(id)('recoverUntil')
           PsiElement(=)('=')
           BNF_ATTR_VALUE
-            BNF_STRING_LITERAL_EXPRESSION: "attr_recover_until"
-              PsiElement(string)('"attr_recover_until"')
+            BNF_REFERENCE_OR_TOKEN: attr_recover_until
+              PsiElement(id)('attr_recover_until')
         PsiElement(})('}')
     PsiWhiteSpace('\n')
     BNF_RULE:attr_start
@@ -665,8 +665,8 @@ BnfFile:BnfGrammar.bnf
           PsiElement(id)('extends')
           PsiElement(=)('=')
           BNF_ATTR_VALUE
-            BNF_STRING_LITERAL_EXPRESSION: "expression"
-              PsiElement(string)('"expression"')
+            BNF_REFERENCE_OR_TOKEN: expression
+              PsiElement(id)('expression')
         PsiElement(})('}')
     PsiWhiteSpace('\n')
     BNF_RULE:map_entry
@@ -703,8 +703,8 @@ BnfFile:BnfGrammar.bnf
           PsiElement(id)('recoverUntil')
           PsiElement(=)('=')
           BNF_ATTR_VALUE
-            BNF_STRING_LITERAL_EXPRESSION: "map_entry_recover_until"
-              PsiElement(string)('"map_entry_recover_until"')
+            BNF_REFERENCE_OR_TOKEN: map_entry_recover_until
+              PsiElement(id)('map_entry_recover_until')
         PsiElement(})('}')
     PsiWhiteSpace('\n')
     BNF_RULE:map_entry_recover_until
@@ -772,15 +772,15 @@ BnfFile:BnfGrammar.bnf
           PsiElement(id)('extends')
           PsiElement(=)('=')
           BNF_ATTR_VALUE
-            BNF_STRING_LITERAL_EXPRESSION: "expression"
-              PsiElement(string)('"expression"')
+            BNF_REFERENCE_OR_TOKEN: expression
+              PsiElement(id)('expression')
         PsiWhiteSpace(' ')
         BNF_ATTR:recoverUntil
           PsiElement(id)('recoverUntil')
           PsiElement(=)('=')
           BNF_ATTR_VALUE
-            BNF_STRING_LITERAL_EXPRESSION: "sequence_recover"
-              PsiElement(string)('"sequence_recover"')
+            BNF_REFERENCE_OR_TOKEN: sequence_recover
+              PsiElement(id)('sequence_recover')
         PsiElement(})('}')
     PsiWhiteSpace('\n')
     BNF_RULE:sequence_recover
@@ -898,8 +898,8 @@ BnfFile:BnfGrammar.bnf
           PsiElement(id)('extends')
           PsiElement(=)('=')
           BNF_ATTR_VALUE
-            BNF_STRING_LITERAL_EXPRESSION: "expression"
-              PsiElement(string)('"expression"')
+            BNF_REFERENCE_OR_TOKEN: expression
+              PsiElement(id)('expression')
         PsiElement(})('}')
     PsiWhiteSpace('\n')
     BNF_RULE:quantified
@@ -919,8 +919,8 @@ BnfFile:BnfGrammar.bnf
           PsiElement(id)('extends')
           PsiElement(=)('=')
           BNF_ATTR_VALUE
-            BNF_STRING_LITERAL_EXPRESSION: "expression"
-              PsiElement(string)('"expression"')
+            BNF_REFERENCE_OR_TOKEN: expression
+              PsiElement(id)('expression')
         PsiWhiteSpace(' ')
         PsiElement(})('}')
     PsiWhiteSpace('\n')
@@ -961,8 +961,8 @@ BnfFile:BnfGrammar.bnf
           PsiElement(id)('extends')
           PsiElement(=)('=')
           BNF_ATTR_VALUE
-            BNF_STRING_LITERAL_EXPRESSION: "expression"
-              PsiElement(string)('"expression"')
+            BNF_REFERENCE_OR_TOKEN: expression
+              PsiElement(id)('expression')
         PsiElement(})('}')
     PsiWhiteSpace('\n')
     BNF_RULE:predicate_sign
@@ -996,8 +996,8 @@ BnfFile:BnfGrammar.bnf
           PsiElement(id)('extends')
           PsiElement(=)('=')
           BNF_ATTR_VALUE
-            BNF_STRING_LITERAL_EXPRESSION: "expression"
-              PsiElement(string)('"expression"')
+            BNF_REFERENCE_OR_TOKEN: expression
+              PsiElement(id)('expression')
         PsiElement(})('}')
     PsiWhiteSpace('\n')
     BNF_RULE:simple
@@ -1083,8 +1083,8 @@ BnfFile:BnfGrammar.bnf
           PsiElement(id)('extends')
           PsiElement(=)('=')
           BNF_ATTR_VALUE
-            BNF_STRING_LITERAL_EXPRESSION: "expression"
-              PsiElement(string)('"expression"')
+            BNF_REFERENCE_OR_TOKEN: expression
+              PsiElement(id)('expression')
         PsiElement(})('}')
     PsiWhiteSpace('\n')
     BNF_RULE:reference_or_token
@@ -1101,8 +1101,8 @@ BnfFile:BnfGrammar.bnf
           PsiElement(id)('extends')
           PsiElement(=)('=')
           BNF_ATTR_VALUE
-            BNF_STRING_LITERAL_EXPRESSION: "expression"
-              PsiElement(string)('"expression"')
+            BNF_REFERENCE_OR_TOKEN: expression
+              PsiElement(id)('expression')
         PsiWhiteSpace(' ')
         PsiElement(})('}')
   PsiWhiteSpace('\n')
@@ -1126,8 +1126,8 @@ BnfFile:BnfGrammar.bnf
         PsiElement(id)('extends')
         PsiElement(=)('=')
         BNF_ATTR_VALUE
-          BNF_STRING_LITERAL_EXPRESSION: "expression"
-            PsiElement(string)('"expression"')
+          BNF_REFERENCE_OR_TOKEN: expression
+            PsiElement(id)('expression')
       PsiWhiteSpace(' ')
       PsiElement(})('}')
   PsiWhiteSpace('\n')
@@ -1145,8 +1145,8 @@ BnfFile:BnfGrammar.bnf
         PsiElement(id)('extends')
         PsiElement(=)('=')
         BNF_ATTR_VALUE
-          BNF_STRING_LITERAL_EXPRESSION: "literal_expression"
-            PsiElement(string)('"literal_expression"')
+          BNF_REFERENCE_OR_TOKEN: literal_expression
+            PsiElement(id)('literal_expression')
       PsiElement(})('}')
   PsiWhiteSpace('\n')
   BNF_RULE:paren_expression

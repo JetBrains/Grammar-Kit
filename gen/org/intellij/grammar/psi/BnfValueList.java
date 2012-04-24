@@ -19,9 +19,9 @@ import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
-public interface BnfAttrValue extends BnfCompositeElement {
+public interface BnfValueList extends BnfExpression {
 
   @NotNull
-  BnfExpression getExpression();
+  List<BnfListEntry> getListEntryList();
 
 }

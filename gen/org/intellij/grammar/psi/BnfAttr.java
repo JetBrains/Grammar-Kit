@@ -25,7 +25,7 @@ public interface BnfAttr extends BnfNamedElement {
   BnfAttrPattern getAttrPattern();
 
   @Nullable
-  BnfAttrValue getAttrValue();
+  BnfExpression getExpression();
 
   @NotNull
   PsiElement getId();

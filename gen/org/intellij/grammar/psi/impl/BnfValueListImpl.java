@@ -24,20 +24,20 @@ import com.intellij.psi.util.PsiTreeUtil;
 import static org.intellij.grammar.psi.BnfTypes.*;
 import org.intellij.grammar.psi.*;
 
-public class BnfMapImpl extends BnfExpressionImpl implements BnfMap {
+public class BnfValueListImpl extends BnfExpressionImpl implements BnfValueList {
 
-  public BnfMapImpl(ASTNode node) {
+  public BnfValueListImpl(ASTNode node) {
     super(node);
   }
 
   @Override
   @NotNull
-  public List<BnfMapEntry> getMapEntryList() {
-    return PsiTreeUtil.getChildrenOfTypeAsList(this, BnfMapEntry.class);
+  public List<BnfListEntry> getListEntryList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, BnfListEntry.class);
   }
 
   public void accept(@NotNull PsiElementVisitor visitor) {
-    if (visitor instanceof BnfVisitor) ((BnfVisitor)visitor).visitMap(this);
+    if (visitor instanceof BnfVisitor) ((BnfVisitor)visitor).visitValueList(this);
     else super.accept(visitor);
   }
 

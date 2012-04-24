@@ -45,7 +45,7 @@ public class BnfAnnotator implements Annotator, DumbAware {
       annotationHolder.createInfoAnnotation(psiElement, null).setTextAttributes(BnfSyntaxHighlighter.KEYWORD);
     }
     else if (psiElement instanceof BnfRefOrTokenImpl) {
-      if (parent instanceof BnfAttrValue) {
+      if (parent instanceof BnfAttr) {
         String text = psiElement.getText();
         if (text.equals("true") || text.equals("false")) {
           annotationHolder.createInfoAnnotation(psiElement, null).setTextAttributes(BnfSyntaxHighlighter.KEYWORD);
@@ -60,7 +60,7 @@ public class BnfAnnotator implements Annotator, DumbAware {
       else if (resolve instanceof BnfAttr) {
         annotationHolder.createInfoAnnotation(psiElement, null).setTextAttributes(BnfSyntaxHighlighter.ATTRIBUTE);
       }
-      else if (resolve == null && parent instanceof BnfAttrValue) {
+      else if (resolve == null && parent instanceof BnfAttr) {
         annotationHolder.createErrorAnnotation(psiElement, "Unresolved reference");
       }
       else if (resolve == null && !(parent instanceof BnfModifier)) {
@@ -72,8 +72,8 @@ public class BnfAnnotator implements Annotator, DumbAware {
         }
       }
     }
-    else if (psiElement instanceof BnfStringLiteralExpression && parent instanceof BnfAttrValue) {
-      final String attrName = ((PsiNamedElement)parent.getParent()).getName();
+    else if (psiElement instanceof BnfStringLiteralExpression && parent instanceof BnfAttr) {
+      final String attrName = ((PsiNamedElement)parent).getName();
       if (Arrays.asList("extends", "implements", "recoverUntil").contains(attrName)
           && !psiElement.getText().contains(".")) {
         PsiReference reference = psiElement.getReference();

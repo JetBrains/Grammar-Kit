@@ -25,13 +25,11 @@ public interface BnfTypes {
   IElementType BNF_ATTR = new BnfCompositeElementType("BNF_ATTR");
   IElementType BNF_ATTRS = new BnfCompositeElementType("BNF_ATTRS");
   IElementType BNF_ATTR_PATTERN = new BnfCompositeElementType("BNF_ATTR_PATTERN");
-  IElementType BNF_ATTR_VALUE = new BnfCompositeElementType("BNF_ATTR_VALUE");
   IElementType BNF_CHOICE = new BnfCompositeElementType("BNF_CHOICE");
   IElementType BNF_EXPRESSION = new BnfCompositeElementType("BNF_EXPRESSION");
   IElementType BNF_EXTERNAL_EXPRESSION = new BnfCompositeElementType("BNF_EXTERNAL_EXPRESSION");
+  IElementType BNF_LIST_ENTRY = new BnfCompositeElementType("BNF_LIST_ENTRY");
   IElementType BNF_LITERAL_EXPRESSION = new BnfCompositeElementType("BNF_LITERAL_EXPRESSION");
-  IElementType BNF_MAP = new BnfCompositeElementType("BNF_MAP");
-  IElementType BNF_MAP_ENTRY = new BnfCompositeElementType("BNF_MAP_ENTRY");
   IElementType BNF_MODIFIER = new BnfCompositeElementType("BNF_MODIFIER");
   IElementType BNF_PAREN_EXPRESSION = new BnfCompositeElementType("BNF_PAREN_EXPRESSION");
   IElementType BNF_PAREN_OPT_EXPRESSION = new BnfCompositeElementType("BNF_PAREN_OPT_EXPRESSION");
@@ -43,6 +41,7 @@ public interface BnfTypes {
   IElementType BNF_RULE = new BnfCompositeElementType("BNF_RULE");
   IElementType BNF_SEQUENCE = new BnfCompositeElementType("BNF_SEQUENCE");
   IElementType BNF_STRING_LITERAL_EXPRESSION = new BnfCompositeElementType("BNF_STRING_LITERAL_EXPRESSION");
+  IElementType BNF_VALUE_LIST = new BnfCompositeElementType("BNF_VALUE_LIST");
 
   IElementType BNF_EXTERNAL_END = new BnfTokenType(">>");
   IElementType BNF_EXTERNAL_START = new BnfTokenType("<<");
@@ -77,9 +76,6 @@ public interface BnfTypes {
       else if (type == BNF_ATTR_PATTERN) {
         return new BnfAttrPatternImpl(node);
       }
-      else if (type == BNF_ATTR_VALUE) {
-        return new BnfAttrValueImpl(node);
-      }
       else if (type == BNF_CHOICE) {
         return new BnfChoiceImpl(node);
       }
@@ -89,14 +85,11 @@ public interface BnfTypes {
       else if (type == BNF_EXTERNAL_EXPRESSION) {
         return new BnfExternalExpressionImpl(node);
       }
+      else if (type == BNF_LIST_ENTRY) {
+        return new BnfListEntryImpl(node);
+      }
       else if (type == BNF_LITERAL_EXPRESSION) {
         return new BnfLiteralExpressionImpl(node);
-      }
-      else if (type == BNF_MAP) {
-        return new BnfMapImpl(node);
-      }
-      else if (type == BNF_MAP_ENTRY) {
-        return new BnfMapEntryImpl(node);
       }
       else if (type == BNF_MODIFIER) {
         return new BnfModifierImpl(node);
@@ -130,6 +123,9 @@ public interface BnfTypes {
       }
       else if (type == BNF_STRING_LITERAL_EXPRESSION) {
         return new BnfStringLiteralExpressionImpl(node);
+      }
+      else if (type == BNF_VALUE_LIST) {
+        return new BnfValueListImpl(node);
       }
       throw new AssertionError("Unknown element type: " + type);
     }

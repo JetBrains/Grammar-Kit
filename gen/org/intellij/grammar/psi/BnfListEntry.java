@@ -19,9 +19,12 @@ import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
-public interface BnfMap extends BnfExpression {
+public interface BnfListEntry extends BnfCompositeElement {
 
-  @NotNull
-  List<BnfMapEntry> getMapEntryList();
+  @Nullable
+  BnfLiteralExpression getLiteralExpression();
+
+  @Nullable
+  PsiElement getId();
 
 }

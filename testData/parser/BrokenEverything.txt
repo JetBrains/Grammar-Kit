@@ -27,9 +27,8 @@ BnfFile:BrokenEverything.bnf
       PsiWhiteSpace(' ')
       PsiElement(=)('=')
       PsiWhiteSpace(' ')
-      BNF_ATTR_VALUE
-        BNF_REFERENCE_OR_TOKEN: sdfdss
-          PsiElement(id)('sdfdss')
+      BNF_REFERENCE_OR_TOKEN: sdfdss
+        PsiElement(id)('sdfdss')
     PsiWhiteSpace('\n')
     BNF_ATTR:a
       PsiElement(id)('a')

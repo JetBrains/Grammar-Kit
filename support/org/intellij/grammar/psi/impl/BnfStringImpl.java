@@ -22,7 +22,7 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiLanguageInjectionHost;
 import com.intellij.psi.PsiReference;
 import com.intellij.util.IncorrectOperationException;
-import org.intellij.grammar.psi.BnfAttrValue;
+import org.intellij.grammar.psi.BnfAttr;
 import org.intellij.grammar.psi.BnfExpression;
 import org.intellij.grammar.psi.BnfStringLiteralExpression;
 import org.jetbrains.annotations.NotNull;
@@ -42,7 +42,7 @@ public abstract class BnfStringImpl extends BnfExpressionImpl implements BnfStri
 
   @Override
   public PsiReference getReference() {
-    if (!(getParent() instanceof BnfAttrValue)) return null;
+    if (!(getParent() instanceof BnfAttr)) return null;
     return new BnfReferenceImpl<BnfStringLiteralExpression>(this, TextRange.from(1, getTextLength() - 2)) {
       @Override
       public PsiElement handleElementRename(String newElementName) throws IncorrectOperationException {

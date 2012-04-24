@@ -24,9 +24,9 @@ import com.intellij.psi.util.PsiTreeUtil;
 import static org.intellij.grammar.psi.BnfTypes.*;
 import org.intellij.grammar.psi.*;
 
-public class BnfMapEntryImpl extends BnfCompositeElementImpl implements BnfMapEntry {
+public class BnfListEntryImpl extends BnfCompositeElementImpl implements BnfListEntry {
 
-  public BnfMapEntryImpl(ASTNode node) {
+  public BnfListEntryImpl(ASTNode node) {
     super(node);
   }
 
@@ -37,13 +37,13 @@ public class BnfMapEntryImpl extends BnfCompositeElementImpl implements BnfMapEn
   }
 
   @Override
-  @NotNull
+  @Nullable
   public PsiElement getId() {
-    return findNotNullChildByType(BNF_ID);
+    return findChildByType(BNF_ID);
   }
 
   public void accept(@NotNull PsiElementVisitor visitor) {
-    if (visitor instanceof BnfVisitor) ((BnfVisitor)visitor).visitMapEntry(this);
+    if (visitor instanceof BnfVisitor) ((BnfVisitor)visitor).visitListEntry(this);
     else super.accept(visitor);
   }
 

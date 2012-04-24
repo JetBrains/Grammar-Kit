@@ -57,38 +57,38 @@ public interface XBinary extends XComposite {
   @NotNull
   XOperator getOperator();
 
-  @NotNull
-  XValue getLeftLeft();
-
-  @Nullable
-  XValue getRightLeft();
-
-  @Nullable
-  XExpression getLast();
-
-  @NotNull
-  XOperator getOp();
-
   @Nullable
   List<XExpression> getAlias();
-
-  @Nullable
-  XValue getBadIndex();
-
-  @Nullable
-  XValue getRightRight();
 
   @NotNull
   XExpression getLeft();
 
   @Nullable
-  XValue getLeftRight();
+  XExpression getRight();
+
+  @NotNull
+  XOperator getOp();
+
+  @NotNull
+  XValue getLeftLeft();
+
+  @Nullable
+  XValue getRightRight();
+
+  @Nullable
+  XExpression getLast();
 
   @NotNull
   XExpression getFirst();
 
   @Nullable
-  XExpression getRight();
+  XValue getRightLeft();
+
+  @Nullable
+  XValue getLeftRight();
+
+  @Nullable
+  XValue getBadIndex();
 
 }
 // ---- XExpression.java -----------------
@@ -182,12 +182,62 @@ public class XBinaryImpl extends CompositeElementImpl implements XBinary {
   }
 
   @Override
+  @Nullable
+  public List<XExpression> getAlias() {
+    return getExpressionList();
+  }
+
+  @Override
+  @NotNull
+  public XExpression getLeft() {
+    List<XExpression> p1 = getExpressionList();
+    return p1.get(0);
+  }
+
+  @Override
+  @Nullable
+  public XExpression getRight() {
+    List<XExpression> p1 = getExpressionList();
+    return p1.size() < 2 ? null : p1.get(1);
+  }
+
+  @Override
+  @NotNull
+  public XOperator getOp() {
+    return getOperator();
+  }
+
+  @Override
   @NotNull
   public XValue getLeftLeft() {
     List<XExpression> p1 = getExpressionList();
     XExpression p2 = p1.get(0);
     List<XValue> p3 = p2.getValueList();
     return p3.get(0);
+  }
+
+  @Override
+  @Nullable
+  public XValue getRightRight() {
+    List<XExpression> p1 = getExpressionList();
+    XExpression p2 = p1.size() < 2 ? null : p1.get(1);
+    if (p2 == null) return null;
+    List<XValue> p3 = p2.getValueList();
+    return p3.size() < 2 ? null : p3.get(1);
+  }
+
+  @Override
+  @Nullable
+  public XExpression getLast() {
+    List<XExpression> p1 = getExpressionList();
+    return p1.isEmpty()? null : p1.get(p1.size() - 1);
+  }
+
+  @Override
+  @NotNull
+  public XExpression getFirst() {
+    List<XExpression> p1 = getExpressionList();
+    return p1.get(0);
   }
 
   @Override
@@ -202,21 +252,11 @@ public class XBinaryImpl extends CompositeElementImpl implements XBinary {
 
   @Override
   @Nullable
-  public XExpression getLast() {
+  public XValue getLeftRight() {
     List<XExpression> p1 = getExpressionList();
-    return p1.isEmpty()? null : p1.get(p1.size() - 1);
-  }
-
-  @Override
-  @NotNull
-  public XOperator getOp() {
-    return getOperator();
-  }
-
-  @Override
-  @Nullable
-  public List<XExpression> getAlias() {
-    return getExpressionList();
+    XExpression p2 = p1.get(0);
+    List<XValue> p3 = p2.getValueList();
+    return p3.size() < 2 ? null : p3.get(1);
   }
 
   @Override
@@ -227,46 +267,6 @@ public class XBinaryImpl extends CompositeElementImpl implements XBinary {
     if (p2 == null) return null;
     List<XValue> p3 = p2.getValueList();
     return p3.size() - 1 < wrong_turn ? null : p3.get(wrong_turn);
-  }
-
-  @Override
-  @Nullable
-  public XValue getRightRight() {
-    List<XExpression> p1 = getExpressionList();
-    XExpression p2 = p1.size() < 2 ? null : p1.get(1);
-    if (p2 == null) return null;
-    List<XValue> p3 = p2.getValueList();
-    return p3.size() < 2 ? null : p3.get(1);
-  }
-
-  @Override
-  @NotNull
-  public XExpression getLeft() {
-    List<XExpression> p1 = getExpressionList();
-    return p1.get(0);
-  }
-
-  @Override
-  @Nullable
-  public XValue getLeftRight() {
-    List<XExpression> p1 = getExpressionList();
-    XExpression p2 = p1.get(0);
-    List<XValue> p3 = p2.getValueList();
-    return p3.size() < 2 ? null : p3.get(1);
-  }
-
-  @Override
-  @NotNull
-  public XExpression getFirst() {
-    List<XExpression> p1 = getExpressionList();
-    return p1.get(0);
-  }
-
-  @Override
-  @Nullable
-  public XExpression getRight() {
-    List<XExpression> p1 = getExpressionList();
-    return p1.size() < 2 ? null : p1.get(1);
   }
 
 }

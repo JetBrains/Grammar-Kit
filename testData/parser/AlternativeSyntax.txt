@@ -5,9 +5,8 @@ BnfFile:AlternativeSyntax.bnf
     BNF_ATTR:mainAttr
       PsiElement(id)('mainAttr')
       PsiElement(=)('=')
-      BNF_ATTR_VALUE
-        BNF_STRING_LITERAL_EXPRESSION: "11"
-          PsiElement(string)('"11"')
+      BNF_STRING_LITERAL_EXPRESSION: "11"
+        PsiElement(string)('"11"')
     PsiWhiteSpace('\n')
     PsiElement(})('}')
   PsiWhiteSpace('\n\n')
@@ -62,7 +61,6 @@ BnfFile:AlternativeSyntax.bnf
       BNF_ATTR:pin
         PsiElement(id)('pin')
         PsiElement(=)('=')
-        BNF_ATTR_VALUE
-          BNF_LITERAL_EXPRESSION
-            PsiElement(number)('1')
+        BNF_LITERAL_EXPRESSION
+          PsiElement(number)('1')
       PsiElement(})('}')

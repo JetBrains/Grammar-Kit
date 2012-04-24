@@ -6,207 +6,178 @@ BnfFile:Self.bnf
       BNF_ATTR:parserClass
         PsiElement(id)('parserClass')
         PsiElement(=)('=')
-        BNF_ATTR_VALUE
-          BNF_STRING_LITERAL_EXPRESSION: "org.intellij.grammar.parser.GrammarParser"
-            PsiElement(string)('"org.intellij.grammar.parser.GrammarParser"')
+        BNF_STRING_LITERAL_EXPRESSION: "org.intellij.grammar.parser.GrammarParser"
+          PsiElement(string)('"org.intellij.grammar.parser.GrammarParser"')
       PsiWhiteSpace('\n  ')
       BNF_ATTR:stubParserClass
         PsiElement(id)('stubParserClass')
         PsiElement(=)('=')
-        BNF_ATTR_VALUE
-          BNF_STRING_LITERAL_EXPRESSION: "org.intellij.grammar.parser.GeneratedParserUtilBase"
-            PsiElement(string)('"org.intellij.grammar.parser.GeneratedParserUtilBase"')
+        BNF_STRING_LITERAL_EXPRESSION: "org.intellij.grammar.parser.GeneratedParserUtilBase"
+          PsiElement(string)('"org.intellij.grammar.parser.GeneratedParserUtilBase"')
       PsiWhiteSpace('\n\n  ')
       BNF_ATTR:implements
         PsiElement(id)('implements')
         PsiElement(=)('=')
-        BNF_ATTR_VALUE
-          BNF_STRING_LITERAL_EXPRESSION: "org.intellij.grammar.psi.BnfCompositeElement"
-            PsiElement(string)('"org.intellij.grammar.psi.BnfCompositeElement"')
+        BNF_STRING_LITERAL_EXPRESSION: "org.intellij.grammar.psi.BnfCompositeElement"
+          PsiElement(string)('"org.intellij.grammar.psi.BnfCompositeElement"')
       PsiWhiteSpace('\n  ')
       BNF_ATTR:extends
         PsiElement(id)('extends')
         PsiElement(=)('=')
-        BNF_ATTR_VALUE
-          BNF_STRING_LITERAL_EXPRESSION: "org.intellij.grammar.psi.impl.BnfCompositeElementImpl"
-            PsiElement(string)('"org.intellij.grammar.psi.impl.BnfCompositeElementImpl"')
+        BNF_STRING_LITERAL_EXPRESSION: "org.intellij.grammar.psi.impl.BnfCompositeElementImpl"
+          PsiElement(string)('"org.intellij.grammar.psi.impl.BnfCompositeElementImpl"')
       PsiWhiteSpace('\n\n  ')
       BNF_ATTR:psiClassPrefix
         PsiElement(id)('psiClassPrefix')
         PsiElement(=)('=')
-        BNF_ATTR_VALUE
-          BNF_STRING_LITERAL_EXPRESSION: "Bnf"
-            PsiElement(string)('"Bnf"')
+        BNF_STRING_LITERAL_EXPRESSION: "Bnf"
+          PsiElement(string)('"Bnf"')
       PsiWhiteSpace('\n  ')
       BNF_ATTR:psiImplClassSuffix
         PsiElement(id)('psiImplClassSuffix')
         PsiElement(=)('=')
-        BNF_ATTR_VALUE
-          BNF_STRING_LITERAL_EXPRESSION: "Impl"
-            PsiElement(string)('"Impl"')
+        BNF_STRING_LITERAL_EXPRESSION: "Impl"
+          PsiElement(string)('"Impl"')
       PsiWhiteSpace('\n  ')
       BNF_ATTR:psiPackage
         PsiElement(id)('psiPackage')
         PsiElement(=)('=')
-        BNF_ATTR_VALUE
-          BNF_STRING_LITERAL_EXPRESSION: "org.intellij.grammar.psi"
-            PsiElement(string)('"org.intellij.grammar.psi"')
+        BNF_STRING_LITERAL_EXPRESSION: "org.intellij.grammar.psi"
+          PsiElement(string)('"org.intellij.grammar.psi"')
       PsiWhiteSpace('\n  ')
       BNF_ATTR:psiImplPackage
         PsiElement(id)('psiImplPackage')
         PsiElement(=)('=')
-        BNF_ATTR_VALUE
-          BNF_STRING_LITERAL_EXPRESSION: "org.intellij.grammar.psi.impl"
-            PsiElement(string)('"org.intellij.grammar.psi.impl"')
+        BNF_STRING_LITERAL_EXPRESSION: "org.intellij.grammar.psi.impl"
+          PsiElement(string)('"org.intellij.grammar.psi.impl"')
       PsiWhiteSpace('\n\n  ')
       BNF_ATTR:elementTypeHolderClass
         PsiElement(id)('elementTypeHolderClass')
         PsiElement(=)('=')
-        BNF_ATTR_VALUE
-          BNF_STRING_LITERAL_EXPRESSION: "org.intellij.grammar.psi.BnfTypes"
-            PsiElement(string)('"org.intellij.grammar.psi.BnfTypes"')
+        BNF_STRING_LITERAL_EXPRESSION: "org.intellij.grammar.psi.BnfTypes"
+          PsiElement(string)('"org.intellij.grammar.psi.BnfTypes"')
       PsiWhiteSpace('\n  ')
       BNF_ATTR:elementTypePrefix
         PsiElement(id)('elementTypePrefix')
         PsiElement(=)('=')
-        BNF_ATTR_VALUE
-          BNF_STRING_LITERAL_EXPRESSION: "BNF_"
-            PsiElement(string)('"BNF_"')
+        BNF_STRING_LITERAL_EXPRESSION: "BNF_"
+          PsiElement(string)('"BNF_"')
       PsiWhiteSpace('\n  ')
       BNF_ATTR:elementTypeClass
         PsiElement(id)('elementTypeClass')
         PsiElement(=)('=')
-        BNF_ATTR_VALUE
-          BNF_STRING_LITERAL_EXPRESSION: "org.intellij.grammar.psi.BnfCompositeElementType"
-            PsiElement(string)('"org.intellij.grammar.psi.BnfCompositeElementType"')
+        BNF_STRING_LITERAL_EXPRESSION: "org.intellij.grammar.psi.BnfCompositeElementType"
+          PsiElement(string)('"org.intellij.grammar.psi.BnfCompositeElementType"')
       PsiWhiteSpace('\n  ')
       BNF_ATTR:tokenTypeClass
         PsiElement(id)('tokenTypeClass')
         PsiElement(=)('=')
-        BNF_ATTR_VALUE
-          BNF_STRING_LITERAL_EXPRESSION: "org.intellij.grammar.psi.BnfTokenType"
-            PsiElement(string)('"org.intellij.grammar.psi.BnfTokenType"')
+        BNF_STRING_LITERAL_EXPRESSION: "org.intellij.grammar.psi.BnfTokenType"
+          PsiElement(string)('"org.intellij.grammar.psi.BnfTokenType"')
       PsiWhiteSpace('\n  \n  ')
       PsiComment(BNF_LINE_COMMENT)('// tokens')
       PsiWhiteSpace('\n  ')
       BNF_ATTR:OP_EQ
         PsiElement(id)('OP_EQ')
         PsiElement(=)('=')
-        BNF_ATTR_VALUE
-          BNF_STRING_LITERAL_EXPRESSION: "="
-            PsiElement(string)('"="')
+        BNF_STRING_LITERAL_EXPRESSION: "="
+          PsiElement(string)('"="')
       PsiWhiteSpace('\n  ')
       BNF_ATTR:OP_IS
         PsiElement(id)('OP_IS')
         PsiElement(=)('=')
-        BNF_ATTR_VALUE
-          BNF_STRING_LITERAL_EXPRESSION: "::="
-            PsiElement(string)('"::="')
+        BNF_STRING_LITERAL_EXPRESSION: "::="
+          PsiElement(string)('"::="')
       PsiWhiteSpace('\n  ')
       BNF_ATTR:OP_OR
         PsiElement(id)('OP_OR')
         PsiElement(=)('=')
-        BNF_ATTR_VALUE
-          BNF_STRING_LITERAL_EXPRESSION: "|"
-            PsiElement(string)('"|"')
+        BNF_STRING_LITERAL_EXPRESSION: "|"
+          PsiElement(string)('"|"')
       PsiWhiteSpace('\n  ')
       BNF_ATTR:OP_OPT
         PsiElement(id)('OP_OPT')
         PsiElement(=)('=')
-        BNF_ATTR_VALUE
-          BNF_STRING_LITERAL_EXPRESSION: "?"
-            PsiElement(string)('"?"')
+        BNF_STRING_LITERAL_EXPRESSION: "?"
+          PsiElement(string)('"?"')
       PsiWhiteSpace('\n  ')
       BNF_ATTR:OP_ONEMORE
         PsiElement(id)('OP_ONEMORE')
         PsiElement(=)('=')
-        BNF_ATTR_VALUE
-          BNF_STRING_LITERAL_EXPRESSION: "+"
-            PsiElement(string)('"+"')
+        BNF_STRING_LITERAL_EXPRESSION: "+"
+          PsiElement(string)('"+"')
       PsiWhiteSpace('\n  ')
       BNF_ATTR:OP_ZEROMORE
         PsiElement(id)('OP_ZEROMORE')
         PsiElement(=)('=')
-        BNF_ATTR_VALUE
-          BNF_STRING_LITERAL_EXPRESSION: "*"
-            PsiElement(string)('"*"')
+        BNF_STRING_LITERAL_EXPRESSION: "*"
+          PsiElement(string)('"*"')
       PsiWhiteSpace('\n  ')
       BNF_ATTR:OP_AND
         PsiElement(id)('OP_AND')
         PsiElement(=)('=')
-        BNF_ATTR_VALUE
-          BNF_STRING_LITERAL_EXPRESSION: "&"
-            PsiElement(string)('"&"')
+        BNF_STRING_LITERAL_EXPRESSION: "&"
+          PsiElement(string)('"&"')
       PsiWhiteSpace('\n  ')
       BNF_ATTR:OP_NOT
         PsiElement(id)('OP_NOT')
         PsiElement(=)('=')
-        BNF_ATTR_VALUE
-          BNF_STRING_LITERAL_EXPRESSION: "!"
-            PsiElement(string)('"!"')
+        BNF_STRING_LITERAL_EXPRESSION: "!"
+          PsiElement(string)('"!"')
       PsiWhiteSpace('\n  ')
       BNF_ATTR:SEMICOLON
         PsiElement(id)('SEMICOLON')
         PsiElement(=)('=')
-        BNF_ATTR_VALUE
-          BNF_STRING_LITERAL_EXPRESSION: ";"
-            PsiElement(string)('";"')
+        BNF_STRING_LITERAL_EXPRESSION: ";"
+          PsiElement(string)('";"')
       PsiWhiteSpace('\n  ')
       BNF_ATTR:LEFT_BRACE
         PsiElement(id)('LEFT_BRACE')
         PsiElement(=)('=')
-        BNF_ATTR_VALUE
-          BNF_STRING_LITERAL_EXPRESSION: "{"
-            PsiElement(string)('"{"')
+        BNF_STRING_LITERAL_EXPRESSION: "{"
+          PsiElement(string)('"{"')
       PsiWhiteSpace('\n  ')
       BNF_ATTR:RIGHT_BRACE
         PsiElement(id)('RIGHT_BRACE')
         PsiElement(=)('=')
-        BNF_ATTR_VALUE
-          BNF_STRING_LITERAL_EXPRESSION: "}"
-            PsiElement(string)('"}"')
+        BNF_STRING_LITERAL_EXPRESSION: "}"
+          PsiElement(string)('"}"')
       PsiWhiteSpace('\n  ')
       BNF_ATTR:LEFT_BRACKET
         PsiElement(id)('LEFT_BRACKET')
         PsiElement(=)('=')
-        BNF_ATTR_VALUE
-          BNF_STRING_LITERAL_EXPRESSION: "["
-            PsiElement(string)('"["')
+        BNF_STRING_LITERAL_EXPRESSION: "["
+          PsiElement(string)('"["')
       PsiWhiteSpace('\n  ')
       BNF_ATTR:RIGHT_BRACKET
         PsiElement(id)('RIGHT_BRACKET')
         PsiElement(=)('=')
-        BNF_ATTR_VALUE
-          BNF_STRING_LITERAL_EXPRESSION: "]"
-            PsiElement(string)('"]"')
+        BNF_STRING_LITERAL_EXPRESSION: "]"
+          PsiElement(string)('"]"')
       PsiWhiteSpace('\n  ')
       BNF_ATTR:LEFT_PAREN
         PsiElement(id)('LEFT_PAREN')
         PsiElement(=)('=')
-        BNF_ATTR_VALUE
-          BNF_STRING_LITERAL_EXPRESSION: "("
-            PsiElement(string)('"("')
+        BNF_STRING_LITERAL_EXPRESSION: "("
+          PsiElement(string)('"("')
       PsiWhiteSpace('\n  ')
       BNF_ATTR:RIGHT_PAREN
         PsiElement(id)('RIGHT_PAREN')
         PsiElement(=)('=')
-        BNF_ATTR_VALUE
-          BNF_STRING_LITERAL_EXPRESSION: ")"
-            PsiElement(string)('")"')
+        BNF_STRING_LITERAL_EXPRESSION: ")"
+          PsiElement(string)('")"')
       PsiWhiteSpace('\n\n  ')
       BNF_ATTR:named
         PsiElement(id)('named')
         PsiElement(=)('=')
-        BNF_ATTR_VALUE
-          BNF_STRING_LITERAL_EXPRESSION: "org.intellij.grammar.psi.BnfNamedElement"
-            PsiElement(string)('"org.intellij.grammar.psi.BnfNamedElement"')
+        BNF_STRING_LITERAL_EXPRESSION: "org.intellij.grammar.psi.BnfNamedElement"
+          PsiElement(string)('"org.intellij.grammar.psi.BnfNamedElement"')
       PsiWhiteSpace('\n  ')
       BNF_ATTR:namedImpl
         PsiElement(id)('namedImpl')
         PsiElement(=)('=')
-        BNF_ATTR_VALUE
-          BNF_STRING_LITERAL_EXPRESSION: "org.intellij.grammar.psi.impl.BnfNamedElementImpl"
-            PsiElement(string)('"org.intellij.grammar.psi.impl.BnfNamedElementImpl"')
+        BNF_STRING_LITERAL_EXPRESSION: "org.intellij.grammar.psi.impl.BnfNamedElementImpl"
+          PsiElement(string)('"org.intellij.grammar.psi.impl.BnfNamedElementImpl"')
       PsiWhiteSpace('\n\n')
       PsiElement(})('}')
     PsiWhiteSpace('\n\n')
@@ -269,30 +240,26 @@ BnfFile:Self.bnf
         BNF_ATTR:pin
           PsiElement(id)('pin')
           PsiElement(=)('=')
-          BNF_ATTR_VALUE
-            BNF_LITERAL_EXPRESSION
-              PsiElement(number)('3')
+          BNF_LITERAL_EXPRESSION
+            PsiElement(number)('3')
         PsiWhiteSpace(' ')
         BNF_ATTR:recoverUntil
           PsiElement(id)('recoverUntil')
           PsiElement(=)('=')
-          BNF_ATTR_VALUE
-            BNF_STRING_LITERAL_EXPRESSION: "rule_recover_until"
-              PsiElement(string)('"rule_recover_until"')
+          BNF_STRING_LITERAL_EXPRESSION: "rule_recover_until"
+            PsiElement(string)('"rule_recover_until"')
         PsiWhiteSpace(' ')
         BNF_ATTR:extends
           PsiElement(id)('extends')
           PsiElement(=)('=')
-          BNF_ATTR_VALUE
-            BNF_REFERENCE_OR_TOKEN: namedImpl
-              PsiElement(id)('namedImpl')
+          BNF_REFERENCE_OR_TOKEN: namedImpl
+            PsiElement(id)('namedImpl')
         PsiWhiteSpace(' ')
         BNF_ATTR:implements
           PsiElement(id)('implements')
           PsiElement(=)('=')
-          BNF_ATTR_VALUE
-            BNF_REFERENCE_OR_TOKEN: named
-              PsiElement(id)('named')
+          BNF_REFERENCE_OR_TOKEN: named
+            PsiElement(id)('named')
         PsiElement(})('}')
     PsiWhiteSpace('\n')
     BNF_RULE:rule_recover_until
@@ -361,9 +328,8 @@ BnfFile:Self.bnf
         BNF_ATTR:pin
           PsiElement(id)('pin')
           PsiElement(=)('=')
-          BNF_ATTR_VALUE
-            BNF_LITERAL_EXPRESSION
-              PsiElement(number)('1')
+          BNF_LITERAL_EXPRESSION
+            PsiElement(number)('1')
         PsiElement(})('}')
     PsiWhiteSpace('\n\n')
     BNF_RULE:attr
@@ -398,30 +364,26 @@ BnfFile:Self.bnf
         BNF_ATTR:pin
           PsiElement(id)('pin')
           PsiElement(=)('=')
-          BNF_ATTR_VALUE
-            BNF_LITERAL_EXPRESSION
-              PsiElement(number)('1')
+          BNF_LITERAL_EXPRESSION
+            PsiElement(number)('1')
         PsiWhiteSpace(' ')
         BNF_ATTR:recoverUntil
           PsiElement(id)('recoverUntil')
           PsiElement(=)('=')
-          BNF_ATTR_VALUE
-            BNF_STRING_LITERAL_EXPRESSION: "attr_recover_until"
-              PsiElement(string)('"attr_recover_until"')
+          BNF_STRING_LITERAL_EXPRESSION: "attr_recover_until"
+            PsiElement(string)('"attr_recover_until"')
         PsiWhiteSpace(' ')
         BNF_ATTR:extends
           PsiElement(id)('extends')
           PsiElement(=)('=')
-          BNF_ATTR_VALUE
-            BNF_REFERENCE_OR_TOKEN: namedImpl
-              PsiElement(id)('namedImpl')
+          BNF_REFERENCE_OR_TOKEN: namedImpl
+            PsiElement(id)('namedImpl')
         PsiWhiteSpace(' ')
         BNF_ATTR:implements
           PsiElement(id)('implements')
           PsiElement(=)('=')
-          BNF_ATTR_VALUE
-            BNF_REFERENCE_OR_TOKEN: named
-              PsiElement(id)('named')
+          BNF_REFERENCE_OR_TOKEN: named
+            PsiElement(id)('named')
         PsiElement(})('}')
     PsiWhiteSpace('\n')
     BNF_RULE:attr_recover_until
@@ -524,9 +486,8 @@ BnfFile:Self.bnf
         BNF_ATTR:extends
           PsiElement(id)('extends')
           PsiElement(=)('=')
-          BNF_ATTR_VALUE
-            BNF_STRING_LITERAL_EXPRESSION: "expression"
-              PsiElement(string)('"expression"')
+          BNF_STRING_LITERAL_EXPRESSION: "expression"
+            PsiElement(string)('"expression"')
         PsiWhiteSpace(' ')
         PsiElement(})('}')
     PsiWhiteSpace('\n')
@@ -550,9 +511,8 @@ BnfFile:Self.bnf
         BNF_ATTR:pin
           PsiElement(id)('pin')
           PsiElement(=)('=')
-          BNF_ATTR_VALUE
-            BNF_LITERAL_EXPRESSION
-              PsiElement(number)('1')
+          BNF_LITERAL_EXPRESSION
+            PsiElement(number)('1')
         PsiElement(})('}')
     PsiWhiteSpace('\n\n')
     BNF_RULE:sequence
@@ -573,9 +533,8 @@ BnfFile:Self.bnf
         BNF_ATTR:extends
           PsiElement(id)('extends')
           PsiElement(=)('=')
-          BNF_ATTR_VALUE
-            BNF_STRING_LITERAL_EXPRESSION: "expression"
-              PsiElement(string)('"expression"')
+          BNF_STRING_LITERAL_EXPRESSION: "expression"
+            PsiElement(string)('"expression"')
         PsiWhiteSpace(' ')
         PsiElement(})('}')
     PsiWhiteSpace('\n\n')
@@ -615,9 +574,8 @@ BnfFile:Self.bnf
         BNF_ATTR:extends
           PsiElement(id)('extends')
           PsiElement(=)('=')
-          BNF_ATTR_VALUE
-            BNF_STRING_LITERAL_EXPRESSION: "expression"
-              PsiElement(string)('"expression"')
+          BNF_STRING_LITERAL_EXPRESSION: "expression"
+            PsiElement(string)('"expression"')
         PsiWhiteSpace(' ')
         PsiElement(})('}')
     PsiWhiteSpace('\n')
@@ -672,9 +630,8 @@ BnfFile:Self.bnf
         BNF_ATTR:extends
           PsiElement(id)('extends')
           PsiElement(=)('=')
-          BNF_ATTR_VALUE
-            BNF_STRING_LITERAL_EXPRESSION: "expression"
-              PsiElement(string)('"expression"')
+          BNF_STRING_LITERAL_EXPRESSION: "expression"
+            PsiElement(string)('"expression"')
         PsiWhiteSpace(' ')
         PsiElement(})('}')
     PsiWhiteSpace('\n')
@@ -755,16 +712,14 @@ BnfFile:Self.bnf
       BNF_ATTR:extends
         PsiElement(id)('extends')
         PsiElement(=)('=')
-        BNF_ATTR_VALUE
-          BNF_STRING_LITERAL_EXPRESSION: "expression"
-            PsiElement(string)('"expression"')
+        BNF_STRING_LITERAL_EXPRESSION: "expression"
+          PsiElement(string)('"expression"')
       PsiWhiteSpace(' ')
       BNF_ATTR:mixin
         PsiElement(id)('mixin')
         PsiElement(=)('=')
-        BNF_ATTR_VALUE
-          BNF_STRING_LITERAL_EXPRESSION: "org.intellij.grammar.psi.impl.BnfRefOrTokenImpl"
-            PsiElement(string)('"org.intellij.grammar.psi.impl.BnfRefOrTokenImpl"')
+        BNF_STRING_LITERAL_EXPRESSION: "org.intellij.grammar.psi.impl.BnfRefOrTokenImpl"
+          PsiElement(string)('"org.intellij.grammar.psi.impl.BnfRefOrTokenImpl"')
       PsiElement(})('}')
   PsiWhiteSpace('\n')
   BNF_RULE:literal_expression
@@ -787,9 +742,8 @@ BnfFile:Self.bnf
       BNF_ATTR:extends
         PsiElement(id)('extends')
         PsiElement(=)('=')
-        BNF_ATTR_VALUE
-          BNF_STRING_LITERAL_EXPRESSION: "expression"
-            PsiElement(string)('"expression"')
+        BNF_STRING_LITERAL_EXPRESSION: "expression"
+          PsiElement(string)('"expression"')
       PsiWhiteSpace(' ')
       PsiElement(})('}')
   PsiWhiteSpace('\n')
@@ -807,16 +761,14 @@ BnfFile:Self.bnf
       BNF_ATTR:extends
         PsiElement(id)('extends')
         PsiElement(=)('=')
-        BNF_ATTR_VALUE
-          BNF_STRING_LITERAL_EXPRESSION: "literal_expression"
-            PsiElement(string)('"literal_expression"')
+        BNF_STRING_LITERAL_EXPRESSION: "literal_expression"
+          PsiElement(string)('"literal_expression"')
       PsiWhiteSpace(' ')
       BNF_ATTR:mixin
         PsiElement(id)('mixin')
         PsiElement(=)('=')
-        BNF_ATTR_VALUE
-          BNF_STRING_LITERAL_EXPRESSION: "org.intellij.grammar.psi.impl.BnfStringImpl"
-            PsiElement(string)('"org.intellij.grammar.psi.impl.BnfStringImpl"')
+        BNF_STRING_LITERAL_EXPRESSION: "org.intellij.grammar.psi.impl.BnfStringImpl"
+          PsiElement(string)('"org.intellij.grammar.psi.impl.BnfStringImpl"')
       PsiElement(})('}')
   PsiWhiteSpace('\n')
   BNF_RULE:paren_expression
@@ -840,15 +792,13 @@ BnfFile:Self.bnf
       BNF_ATTR:pin
         PsiElement(id)('pin')
         PsiElement(=)('=')
-        BNF_ATTR_VALUE
-          BNF_LITERAL_EXPRESSION
-            PsiElement(number)('1')
+        BNF_LITERAL_EXPRESSION
+          PsiElement(number)('1')
       PsiWhiteSpace(' ')
       BNF_ATTR:extends
         PsiElement(id)('extends')
         PsiElement(=)('=')
-        BNF_ATTR_VALUE
-          BNF_STRING_LITERAL_EXPRESSION: "expression"
-            PsiElement(string)('"expression"')
+        BNF_STRING_LITERAL_EXPRESSION: "expression"
+          PsiElement(string)('"expression"')
       PsiWhiteSpace(' ')
       PsiElement(})('}')

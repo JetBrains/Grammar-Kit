@@ -15,12 +15,13 @@
  */
 package org.intellij.grammar.generator;
 
+import com.intellij.openapi.util.Pair;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.psi.PsiElement;
-import com.intellij.psi.TokenType;
-import com.intellij.psi.impl.source.tree.LeafPsiElement;
+import com.intellij.psi.impl.FakePsiElement;
 import com.intellij.psi.tree.IElementType;
 import com.intellij.psi.util.PsiTreeUtil;
+import com.intellij.util.SmartList;
 import com.intellij.util.containers.ContainerUtil;
 import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.psi.*;
@@ -28,7 +29,6 @@ import org.intellij.grammar.psi.impl.GrammarUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
@@ -41,7 +41,7 @@ import static org.intellij.grammar.psi.BnfTypes.BNF_SEQUENCE;
  */
 public class ParserGeneratorUtil {
   private static final Object NULL = new Object();
-  private static final PsiElement NULL_ATTR = new LeafPsiElement(TokenType.ERROR_ELEMENT, "");
+  private static final BnfExpression NULL_ATTR = createFake("NULL");
 
   public static <T> T getRootAttribute(BnfFile treeRoot, KnownAttribute<T> attribute) {
     return getRootAttribute(treeRoot, attribute, null);
@@ -62,10 +62,10 @@ public class ParserGeneratorUtil {
   private static <T> T getAttributeInner(PsiElement node, KnownAttribute<T> attribute, @Nullable String match) {
     BnfCompositeElement parent = PsiTreeUtil.getNonStrictParentOfType(node, BnfRule.class, BnfAttrs.class);
     BnfAttrs attrs = parent instanceof BnfRule ? ((BnfRule)parent).getAttrs() : (BnfAttrs)parent;
-    PsiElement attrValue = findAttributeValueNode(attrs, attribute.getName(), match);
+    BnfExpression attrValue = findAttributeValueNode(attrs, attribute.getName(), match);
 
-    Object attrVal = getLiteralValue(attrValue);
-    if (attrVal != null) return attrVal == NULL ? attribute.getDefaultValue() : (T)attrVal;
+    Object attrVal = getAttributeValue(attrValue);
+    if (attrVal != null) return attrVal == NULL ? attribute.getDefaultValue() : attribute.ensureValue(attrVal);
     if (parent == null) return attribute.getDefaultValue();
     if (parent instanceof BnfAttrs && parent.getParent() instanceof BnfRule) parent = (BnfRule)parent.getParent();
     for (PsiElement child = GrammarUtil.getDummyAwarePrevSibling(parent);
@@ -74,8 +74,8 @@ public class ParserGeneratorUtil {
       if (!(child instanceof BnfAttrs)) continue;
       attrValue = findAttributeValueNode((BnfAttrs)child, attribute.getName(), match);
 
-      attrVal = getLiteralValue(attrValue);
-      if (attrVal != null) return attrVal == NULL ? attribute.getDefaultValue() : (T)attrVal;
+      attrVal = getAttributeValue(attrValue);
+      if (attrVal != null) return attrVal == NULL ? attribute.getDefaultValue() : attribute.ensureValue(attrVal);
     }
     return attribute.getDefaultValue();
   }
@@ -97,13 +97,13 @@ public class ParserGeneratorUtil {
   }
 
   @Nullable
-  public static PsiElement findAttributeValueNode(BnfAttrs attrs, String attrName, String ruleName) {
+  public static BnfExpression findAttributeValueNode(BnfAttrs attrs, String attrName, String ruleName) {
     if (attrs == null) return null;
-    BnfAttrValue noPattern = null;
+    BnfExpression noPattern = null;
     for (BnfAttr tree : attrs.getAttrList()) {
       if (attrName.equals(tree.getId().getText())) {
         BnfAttrPattern attrPattern = tree.getAttrPattern();
-        BnfAttrValue attrValue = tree.getAttrValue();
+        BnfExpression attrValue = tree.getExpression();
         if (attrPattern == null) {
           noPattern = attrValue;
           if (ruleName == null) break;
@@ -129,42 +129,48 @@ public class ParserGeneratorUtil {
   public static BnfAttr findAttributeByValue(PsiElement attrs, String value) {
     if (!(attrs instanceof BnfAttrs)) return null;
     for (BnfAttr tree : ((BnfAttrs)attrs).getAttrList()) {
-      if (value.equals(getLiteralValue(tree.getAttrValue()))) {
+      if (value.equals(getAttributeValue(tree.getExpression()))) {
         return tree;
       }
     }
     return null;
   }
 
-  public static Object getLiteralValue(PsiElement child) {
+  public static Object getAttributeValue(BnfExpression value) {
+    if (value == null) return null;
+    if (value == NULL_ATTR) return NULL;
+    if (value instanceof BnfReferenceOrToken) {
+      return getTokenValue((BnfReferenceOrToken)value);
+    }
+    else if (value instanceof BnfLiteralExpression) {
+      return getLiteralValue((BnfLiteralExpression)value);
+    }
+    else if (value instanceof BnfValueList) {
+      List<Pair<String, String>> pairs = new SmartList<Pair<String, String>>();
+      for (BnfListEntry o : ((BnfValueList)value).getListEntryList()) {
+        PsiElement id = o.getId();
+        pairs.add(Pair.create(id == null? null : id.getText(), (String)getLiteralValue(o.getLiteralExpression())));
+      }
+      return pairs;
+    }
+    return null;
+  }
+
+  private static Object getLiteralValue(BnfLiteralExpression child) {
     if (child == null) return null;
-    if (child == NULL_ATTR) return NULL;
     PsiElement literal = PsiTreeUtil.getDeepestFirst(child);
     String text = child.getText();
     IElementType elementType = literal.getNode().getElementType();
     if (elementType == BnfTypes.BNF_STRING) return StringUtil.stripQuotesAroundValue(text);
     if (elementType == BnfTypes.BNF_NUMBER) return Integer.parseInt(text);
-    if (elementType == BnfTypes.BNF_ID) {
-      if (text.equals("true") || text.equals("false")) return Boolean.parseBoolean(text);
-      if (text.equals("null")) return NULL;
-      return text;
-    }
-    return getMapValue(child);
+    return null;
   }
 
-  @Nullable
-  private static Object getMapValue(@Nullable PsiElement value) {
-    if (value == null) return null;
-    if (value == NULL_ATTR) return NULL;
-    BnfExpression expression = value instanceof BnfAttrValue ? ((BnfAttrValue)value).getExpression() : null;
-    if (expression instanceof BnfMap) {
-      HashMap<String, String> result = new HashMap<String, String>();
-      for (BnfMapEntry entry : ((BnfMap)expression).getMapEntryList()) {
-        result.put(entry.getId().getText(), (String) getLiteralValue(entry.getLiteralExpression()));
-      }
-      return result;
-    }
-    return null;
+  private static Object getTokenValue(BnfReferenceOrToken child) {
+    String text = child.getText();
+    if (text.equals("true") || text.equals("false")) return Boolean.parseBoolean(text);
+    if (text.equals("null")) return NULL;
+    return text;
   }
 
   public static boolean isTrivialNode(PsiElement node) {
@@ -256,6 +262,9 @@ public class ParserGeneratorUtil {
     return packageName + "." + getRulePsiClassName(rule, getPsiClassPrefix(file)) + (impl? getPsiImplSuffix(file): "");
   }
 
+  public static BnfExpression createFake(final String text) {
+    return new MyFakeExpression(text);
+  }
 
   public static class Rule {
 
@@ -298,8 +307,8 @@ public class ParserGeneratorUtil {
     }
 
     public static <T> T attribute(BnfRule rule, KnownAttribute<T> attribute) {
-      PsiElement attr = findAttributeValueNode(rule.getAttrs(), attribute.getName(), null);
-      Object attrVal = getLiteralValue(attr);
+      BnfExpression attr = findAttributeValueNode(rule.getAttrs(), attribute.getName(), null);
+      Object attrVal = getAttributeValue(attr);
       if (attrVal != null) return attr == NULL ? attribute.getDefaultValue() : (T)attrVal;
       return attribute.getDefaultValue();
     }
@@ -332,6 +341,29 @@ public class ParserGeneratorUtil {
 
     public boolean matches(int i, BnfExpression child) {
       return  i == pinIndex - 1 || pinPattern != null && pinPattern.matcher(child.getText()).matches();
+    }
+  }
+
+  private static class MyFakeExpression extends FakePsiElement implements BnfExpression{
+    private final String myText;
+
+    MyFakeExpression(String text) {
+      myText = text;
+    }
+
+    @Override
+    public PsiElement getParent() {
+      return null;
+    }
+
+    @Override
+    public String getText() {
+      return myText;
+    }
+
+    @Override
+    public String toString() {
+      return getText();
     }
   }
 }

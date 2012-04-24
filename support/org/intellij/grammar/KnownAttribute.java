@@ -16,6 +16,9 @@
 
 package org.intellij.grammar;
 
+import com.intellij.openapi.util.Pair;
+import com.intellij.util.SmartList;
+import com.intellij.util.containers.ContainerUtil;
 import org.intellij.grammar.generator.BnfConstants;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -32,59 +35,71 @@ public class KnownAttribute<T> {
   public static Collection<KnownAttribute> getAttributes() { return Collections.unmodifiableCollection(ourAttributes.values()); }
   public static KnownAttribute getAttribute(String name) { return ourAttributes.get(name); }
 
-  public static final KnownAttribute<String> CLASS_HEADER               = create(true, "classHeader", BnfConstants.CLASS_HEADER_DEF);
-  public static final KnownAttribute<Boolean> GENERATE_PSI              = create(true, "generatePsi", true);
-  public static final KnownAttribute<Boolean> GENERATE_TOKENS           = create(true, "generateTokens", true);
-  public static final KnownAttribute<Boolean> GENERATE_PARSER_UTIL      = create(true, "generateStubParser", true);
-  public static final KnownAttribute<Boolean> GENERATE_MEMOIZATION      = create(true, "memoization", false);
-  public static final KnownAttribute<Integer> GENERATE_FIRST_CHECK      = create(true, "generateFirstCheck", 2);
-  public static final KnownAttribute<Boolean> EXTENDED_PIN              = create(true, "extendedPin", true);
-  public static final KnownAttribute<String> PSI_CLASS_PREFIX           = create(true, "psiClassPrefix", "");
-  public static final KnownAttribute<String> PSI_IMPL_CLASS_SUFFIX      = create(true, "psiImplClassSuffix", "Impl");
-  public static final KnownAttribute<String> PSI_PACKAGE                = create(true, "psiPackage", "generated.psi");
-  public static final KnownAttribute<String> PSI_IMPL_PACKAGE           = create(true, "psiImplPackage", "generated.psi.impl");
-  public static final KnownAttribute<String> PSI_VISITOR_CLASS          = create(true, "psiVisitorClass", "Visitor");
-  public static final KnownAttribute<String> ELEMENT_TYPE_CLASS         = create(true, "elementTypeClass", BnfConstants.IELEMENTTYPE_CLASS);
-  public static final KnownAttribute<String> TOKEN_TYPE_CLASS           = create(true, "tokenTypeClass", BnfConstants.IELEMENTTYPE_CLASS);
-  public static final KnownAttribute<String> PARSER_CLASS               = create(true, "parserClass", "generated.Parser");
-  public static final KnownAttribute<String> PARSER_UTIL_CLASS          = create(true, "stubParserClass", "generated.ParserUtil");
-  public static final KnownAttribute<String> ELEMENT_TYPE_HOLDER_CLASS  = create(true, "elementTypeHolderClass", "generated.ParserTypes");
-  public static final KnownAttribute<String> ELEMENT_TYPE_PREFIX        = create(true, "elementTypePrefix", "");
-  public static final KnownAttribute<String> ELEMENT_TYPE_FACTORY       = create(true, "elementTypeFactory", null);
-  public static final KnownAttribute<String> TOKEN_TYPE_FACTORY         = create(true, "tokenTypeFactory", null);
-  public static final KnownAttribute<String> PARSER_IMPORTS             = create(true, "parserImports", "");
+  private static final Class<List<Pair<String, String>>> PAIR_LIST_CLAZZ = cast(ArrayList.class); // that's funny I know
+  private static final Class<List<String>> STRING_LIST_CLAZZ = cast(LinkedList.class);
 
-  public static final KnownAttribute<String> EXTENDS                    = create(false, "extends", "generated.CompositeElementImpl");
-  public static final KnownAttribute<String> IMPLEMENTS                 = create(false, "implements", "generated.CompositeElement");
-  public static final KnownAttribute<String> ELEMENT_TYPE               = create(false, "elementType", null);
-  public static final KnownAttribute<String> METHOD_RENAMES             = create(false, "methodRenames", null);
-  public static final KnownAttribute<Object> PIN                        = create(false, "pin", (Object)(-1));
-  public static final KnownAttribute<String> MIXIN                      = create(false, "mixin", null);
-  public static final KnownAttribute<String> RECOVER_UNTIL              = create(false, "recoverUntil", null);
-  public static final KnownAttribute<Map<String, String>> PSI_ACCESSORS = create(false, "methods", Collections.<String, String>emptyMap());
+  public static final KnownAttribute<String> CLASS_HEADER               = create(true, String.class, "classHeader", BnfConstants.CLASS_HEADER_DEF);
+  public static final KnownAttribute<Boolean> GENERATE_PSI              = create(true, Boolean.class, "generatePsi", true);
+  public static final KnownAttribute<Boolean> GENERATE_TOKENS           = create(true, Boolean.class, "generateTokens", true);
+  public static final KnownAttribute<Boolean> GENERATE_PARSER_UTIL      = create(true, Boolean.class, "generateStubParser", true);
+  public static final KnownAttribute<Boolean> GENERATE_MEMOIZATION      = create(true, Boolean.class, "memoization", false);
+  public static final KnownAttribute<Integer> GENERATE_FIRST_CHECK      = create(true, Integer.class, "generateFirstCheck", 2);
+  public static final KnownAttribute<Boolean> EXTENDED_PIN              = create(true, Boolean.class, "extendedPin", true);
+  public static final KnownAttribute<List<String>> PARSER_IMPORTS       = create(true, STRING_LIST_CLAZZ, "parserImports", Collections.<String>emptyList());
+  public static final KnownAttribute<String> PSI_CLASS_PREFIX           = create(true, String.class, "psiClassPrefix", "");
+  public static final KnownAttribute<String> PSI_IMPL_CLASS_SUFFIX      = create(true, String.class, "psiImplClassSuffix", "Impl");
+  public static final KnownAttribute<String> PSI_PACKAGE                = create(true, String.class, "psiPackage", "generated.psi");
+  public static final KnownAttribute<String> PSI_IMPL_PACKAGE           = create(true, String.class, "psiImplPackage", "generated.psi.impl");
+  public static final KnownAttribute<String> PSI_VISITOR_CLASS          = create(true, String.class, "psiVisitorClass", "Visitor");
+  public static final KnownAttribute<String> ELEMENT_TYPE_CLASS         = create(true, String.class, "elementTypeClass", BnfConstants.IELEMENTTYPE_CLASS);
+  public static final KnownAttribute<String> TOKEN_TYPE_CLASS           = create(true, String.class, "tokenTypeClass", BnfConstants.IELEMENTTYPE_CLASS);
+  public static final KnownAttribute<String> PARSER_CLASS               = create(true, String.class, "parserClass", "generated.Parser");
+  public static final KnownAttribute<String> PARSER_UTIL_CLASS          = create(true, String.class, "stubParserClass", "generated.ParserUtil");
+  public static final KnownAttribute<String> ELEMENT_TYPE_HOLDER_CLASS  = create(true, String.class, "elementTypeHolderClass", "generated.ParserTypes");
+  public static final KnownAttribute<String> ELEMENT_TYPE_PREFIX        = create(true, String.class, "elementTypePrefix", "");
+  public static final KnownAttribute<String> ELEMENT_TYPE_FACTORY       = create(true, String.class, "elementTypeFactory", null);
+  public static final KnownAttribute<String> TOKEN_TYPE_FACTORY         = create(true, String.class, "tokenTypeFactory", null);
+
+  public static final KnownAttribute<String> EXTENDS                    = create(false, String.class, "extends", "generated.CompositeElementImpl");
+  public static final KnownAttribute<List<String>> IMPLEMENTS           = create(false, STRING_LIST_CLAZZ, "implements", Collections.singletonList("generated.CompositeElement"));
+  public static final KnownAttribute<String> ELEMENT_TYPE               = create(false, String.class, "elementType", null);
+  public static final KnownAttribute<String> METHOD_RENAMES             = create(false, String.class, "methodRenames", null);
+  public static final KnownAttribute<Object> PIN                        = create(false, Object.class, "pin", (Object)(-1));
+  public static final KnownAttribute<String> MIXIN                      = create(false, String.class, "mixin", null);
+  public static final KnownAttribute<String> RECOVER_UNTIL              = create(false, String.class, "recoverUntil", null);
+
+  public static final KnownAttribute<List<Pair<String, String>>> METHODS = create(false, PAIR_LIST_CLAZZ, "methods", Collections.<Pair<String, String>>emptyList());
 
   private final boolean myGlobal;
   private final String myName;
+  private final Class<T> myClazz;
   private final T myDefaultValue;
   private final String myDocumentation;
 
-  public static <T> KnownAttribute<T> create(String name, @Nullable T defaultValue) {
-    return new KnownAttribute<T>(name, defaultValue);
+  @SuppressWarnings("unchecked")
+  public static <T> Class<T> cast(Class<?> aClass) {
+    return (Class<T>)aClass;
   }
 
-  private static <T> KnownAttribute<T> create(boolean global, String name, @Nullable T defaultValue) {
-    return new KnownAttribute<T>(global, name, defaultValue);
+  public static <T> KnownAttribute<T> create(Class<T> clazz, String name, @Nullable T defaultValue) {
+    return new KnownAttribute<T>(name, clazz, defaultValue);
   }
 
-  private KnownAttribute(String name, T defaultValue) {
+  private static <T> KnownAttribute<T> create(boolean global, Class<T> clazz, String name, @Nullable T defaultValue) {
+    return new KnownAttribute<T>(global, name, clazz, defaultValue);
+  }
+
+  private KnownAttribute(String name, Class<T> clazz, T defaultValue) {
     myName = name;
+    myClazz = clazz;
     myDefaultValue = defaultValue;
     myDocumentation = name;
     myGlobal = false;
   }
 
-  private KnownAttribute(boolean global, String name, T defaultValue) {
+  private KnownAttribute(boolean global, String name, Class<T> clazz, T defaultValue) {
     myName = name;
+    myClazz = clazz;
     myDefaultValue = defaultValue;
     myDocumentation = name;
     myGlobal = global;
@@ -107,6 +122,26 @@ public class KnownAttribute<T> {
 
   public T getDefaultValue() {
     return myDefaultValue;
+  }
+
+  public T ensureValue(Object o) {
+    if (o == null) return getDefaultValue();
+    if (myClazz == STRING_LIST_CLAZZ) {
+      if (o instanceof String) return (T)Collections.singletonList((String)o);
+      if (o instanceof List && ContainerUtil.getFirstItem((List)o) instanceof Pair) {
+        SmartList<String> result = new SmartList<String>();
+        for (Pair<String, String> s : (List<Pair<String, String>>)o) {
+          if (s.first != null) result.add(s.first);
+          else if (s.second != null) result.add(s.second);
+        }
+        return (T)result;
+      }
+    }
+    else if (myClazz == PAIR_LIST_CLAZZ && o instanceof List) {
+      return (T)o;
+    }
+    if (myClazz.isInstance(o)) return (T)o;
+    return getDefaultValue();
   }
 
   @Override

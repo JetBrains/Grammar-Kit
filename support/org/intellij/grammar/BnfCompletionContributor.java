@@ -52,7 +52,7 @@ public class BnfCompletionContributor extends CompletionContributor {
                                     ProcessingContext context,
                                     @NotNull CompletionResultSet result) {
         PsiElement position = parameters.getPosition();
-        BnfCompositeElement attrs = PsiTreeUtil.getParentOfType(position, BnfAttrs.class, BnfAttrValue.class, BnfParenExpression.class);
+        BnfCompositeElement attrs = PsiTreeUtil.getParentOfType(position, BnfAttrs.class, BnfAttr.class, BnfParenExpression.class);
         boolean attrCompletion = false;
         if ((attrs instanceof BnfAttrs || isPossibleEmptyAttrs(attrs))) {
           boolean inRule = PsiTreeUtil.getParentOfType(attrs, BnfRule.class) != null;
@@ -79,8 +79,8 @@ public class BnfCompletionContributor extends CompletionContributor {
                                     @NotNull final CompletionResultSet result) {
         final int offset = parameters.getOffset();
         PsiElement position = parameters.getPosition();
-        PsiElement parent = PsiTreeUtil.getParentOfType(position, BnfExpression.class, BnfAttrValue.class, BnfRule.class, GeneratedParserUtilBase.DummyBlock.class);
-        if (parent != null && !(parent instanceof BnfStringLiteralExpression && !(parent.getParent() instanceof BnfAttrValue))) {
+        PsiElement parent = PsiTreeUtil.getParentOfType(position, BnfExpression.class, BnfAttr.class, BnfRule.class, GeneratedParserUtilBase.DummyBlock.class);
+        if (parent != null && !(parent instanceof BnfStringLiteralExpression && !(parent.getParent() instanceof BnfAttr))) {
           final BnfLexer lexer = new BnfLexer();
           PsiReference referenceAt = parameters.getPosition().getContainingFile().findReferenceAt(parameters.getOffset());
           final Set<String> existing;

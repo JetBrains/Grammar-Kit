@@ -28,10 +28,6 @@ public class BnfVisitor extends PsiElementVisitor {
     visitCompositeElement(o);
   }
 
-  public void visitAttrValue(@NotNull BnfAttrValue o) {
-    visitCompositeElement(o);
-  }
-
   public void visitAttrs(@NotNull BnfAttrs o) {
     visitCompositeElement(o);
   }
@@ -48,16 +44,12 @@ public class BnfVisitor extends PsiElementVisitor {
     visitExpression(o);
   }
 
+  public void visitListEntry(@NotNull BnfListEntry o) {
+    visitCompositeElement(o);
+  }
+
   public void visitLiteralExpression(@NotNull BnfLiteralExpression o) {
     visitExpression(o);
-  }
-
-  public void visitMap(@NotNull BnfMap o) {
-    visitExpression(o);
-  }
-
-  public void visitMapEntry(@NotNull BnfMapEntry o) {
-    visitCompositeElement(o);
   }
 
   public void visitModifier(@NotNull BnfModifier o) {
@@ -106,6 +98,10 @@ public class BnfVisitor extends PsiElementVisitor {
 
   public void visitStringLiteralExpression(@NotNull BnfStringLiteralExpression o) {
     visitLiteralExpression(o);
+  }
+
+  public void visitValueList(@NotNull BnfValueList o) {
+    visitExpression(o);
   }
 
   public void visitNamedElement(@NotNull BnfNamedElement o) {

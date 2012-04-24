@@ -38,8 +38,8 @@ public class BnfAttrImpl extends BnfNamedElementImpl implements BnfAttr {
 
   @Override
   @Nullable
-  public BnfAttrValue getAttrValue() {
-    return findChildByClass(BnfAttrValue.class);
+  public BnfExpression getExpression() {
+    return findChildByClass(BnfExpression.class);
   }
 
   @Override

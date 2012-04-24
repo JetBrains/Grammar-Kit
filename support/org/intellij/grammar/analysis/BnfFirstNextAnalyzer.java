@@ -21,7 +21,6 @@ import com.intellij.openapi.util.Comparing;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiReference;
-import com.intellij.psi.impl.FakePsiElement;
 import com.intellij.psi.search.searches.ReferencesSearch;
 import com.intellij.psi.tree.IElementType;
 import com.intellij.psi.util.PsiTreeUtil;
@@ -47,9 +46,9 @@ public class BnfFirstNextAnalyzer {
   public static final String MATCHES_NOTHING = "-never-matches-";
   public static final String MATCHES_ANY = "-any-";
 
-  public static final BnfExpression BNF_MATCHES_EOF     = createFake(MATCHES_EOF);
-  public static final BnfExpression BNF_MATCHES_NOTHING = createFake(MATCHES_NOTHING);
-  public static final BnfExpression BNF_MATCHES_ANY     = createFake(MATCHES_ANY);
+  public static final BnfExpression BNF_MATCHES_EOF     = ParserGeneratorUtil.createFake(MATCHES_EOF);
+  public static final BnfExpression BNF_MATCHES_NOTHING = ParserGeneratorUtil.createFake(MATCHES_NOTHING);
+  public static final BnfExpression BNF_MATCHES_ANY     = ParserGeneratorUtil.createFake(MATCHES_ANY);
 
   private boolean myBackward;
   private boolean myPublicRuleOpaque;
@@ -311,33 +310,6 @@ public class BnfFirstNextAnalyzer {
       }
     }
     return result;
-  }
-
-  private static BnfExpression createFake(final String text) {
-    return new MyFakeExpression(text);
-  }
-
-  private static class MyFakeExpression extends FakePsiElement implements BnfExpression{
-    private final String myText;
-
-    MyFakeExpression(String text) {
-      myText = text;
-    }
-
-    @Override
-    public PsiElement getParent() {
-      return null;
-    }
-
-    @Override
-    public String getText() {
-      return myText;
-    }
-
-    @Override
-    public String toString() {
-      return getText();
-    }
   }
 
   private static class TextStrategy implements TObjectHashingStrategy<BnfExpression> {

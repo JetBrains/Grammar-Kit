@@ -27,7 +27,7 @@ import com.intellij.psi.search.searches.ReferencesSearch;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.refactoring.util.CommonRefactoringUtil;
 import org.intellij.grammar.BnfLanguage;
-import org.intellij.grammar.psi.BnfAttrValue;
+import org.intellij.grammar.psi.BnfAttr;
 import org.intellij.grammar.psi.BnfAttrs;
 import org.intellij.grammar.psi.BnfRule;
 
@@ -72,7 +72,7 @@ public class BnfInlineRuleActionHandler extends InlineActionHandler {
     }
 
     for (PsiReference psiReference : allReferences) {
-      if (psiReference.getElement().getParent() instanceof BnfAttrValue) {
+      if (psiReference.getElement().getParent() instanceof BnfAttr) {
         CommonRefactoringUtil.showErrorHint(project, editor, "Rule is referenced in attributes", "Inline Rule", null);
         return;
       }

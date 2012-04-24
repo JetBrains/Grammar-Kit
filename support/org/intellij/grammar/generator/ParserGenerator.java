@@ -18,6 +18,7 @@ package org.intellij.grammar.generator;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.util.Pair;
 import com.intellij.openapi.util.io.FileUtil;
 import com.intellij.openapi.util.text.StringHash;
 import com.intellij.openapi.util.text.StringUtil;
@@ -217,7 +218,8 @@ public class ParserGenerator {
   private void generateVisitor(String psiClass, Map<String, BnfRule> sortedRules) {
     generateClassHeader(psiClass, "org.jetbrains.annotations.*;com.intellij.psi.PsiElementVisitor;",
                         "", false, "PsiElementVisitor");
-    String superIntf = StringUtil.getShortName(getRootAttribute(myFile, KnownAttribute.IMPLEMENTS).split(",")[0]);
+    String firstImplements = ContainerUtil.getFirstItem(getRootAttribute(myFile, KnownAttribute.IMPLEMENTS));
+    String superIntf = firstImplements == null? "" : StringUtil.getShortName(firstImplements);
     Set<String> visited = new HashSet<String>();
     Set<String> all = new TreeSet<String>();
     for (String ruleName : sortedRules.keySet()) {
@@ -339,7 +341,7 @@ public class ParserGenerator {
   @NotNull
   private String[] getSuperInterfaceNames(BnfRule rule, String psiPackage) {
     ArrayList<String> strings = new ArrayList<String>();
-    String topRuleImplements = "";
+    List<String> topRuleImplements = Collections.emptyList();
     String topRuleClass = null;
     BnfRule topSuper = getTopSuperRule(rule);
     boolean simpleMode = psiPackage.isEmpty();
@@ -348,8 +350,8 @@ public class ParserGenerator {
       topRuleClass = StringUtil.nullize((simpleMode ? "" : psiPackage + ".") + getRulePsiClassName(topSuper, myRuleClassPrefix));
       if (!StringUtil.isEmpty(topRuleClass)) strings.add(topRuleClass);
     }
-    String rootImplements = getRootAttribute(myFile, KnownAttribute.IMPLEMENTS);
-    String[] ruleImplements = getAttribute(rule, KnownAttribute.IMPLEMENTS).split(",");
+    List<String> rootImplements = getRootAttribute(myFile, KnownAttribute.IMPLEMENTS);
+    List<String> ruleImplements = getAttribute(rule, KnownAttribute.IMPLEMENTS);
     for (String className : ruleImplements) {
       BnfRule superIntfRule = myFile.getRule(className);
       if (superIntfRule != null) {
@@ -365,9 +367,9 @@ public class ParserGenerator {
   }
 
   public void generateParser(String parserClass, final Set<String> ownRuleNames) {
-    final String elementTypeHolderClass = getRootAttribute(myFile, KnownAttribute.ELEMENT_TYPE_HOLDER_CLASS);
-    final String stubParser = getRootAttribute(myFile, KnownAttribute.PARSER_UTIL_CLASS);
-    final String parserImports = getRootAttribute(myFile, KnownAttribute.PARSER_IMPORTS);
+    String elementTypeHolderClass = getRootAttribute(myFile, KnownAttribute.ELEMENT_TYPE_HOLDER_CLASS);
+    String stubParser = getRootAttribute(myFile, KnownAttribute.PARSER_UTIL_CLASS);
+    List<String> parserImports = getRootAttribute(myFile, KnownAttribute.PARSER_IMPORTS);
     String rootParserClass = myRuleParserClasses.get(myGrammarRoot);
     boolean rootParser = parserClass.equals(rootParserClass);
     generateClassHeader(parserClass,
@@ -383,7 +385,7 @@ public class ParserGenerator {
                          "com.intellij.lang.ASTNode;" +
                          "com.intellij.psi.tree.TokenSet;" +
                          "com.intellij.lang.PsiParser;") +
-                        parserImports
+                        StringUtil.join(parserImports, ";")
       , "@SuppressWarnings({\"SimplifiableIfStatement\", \"UnusedAssignment\"})",
                         false, "", rootParser ? "PsiParser" : "");
 
@@ -1060,7 +1062,7 @@ public class ParserGenerator {
       Map<String, String> sortedTokens = new TreeMap<String, String>();
       String tokenCreateCall = tokenTypeFactory == null ? "new " + StringUtil.getShortName(tokenTypeClass) : StringUtil.getShortName(tokenTypeFactory);
       for (String token : mySimpleTokens) {
-        String name = getRootAttribute(myFile, KnownAttribute.create(token, token));
+        String name = getRootAttribute(myFile, KnownAttribute.create(String.class, token, token));
         sortedTokens.put(getElementType(token), name);
       }
       for (String tokenType : sortedTokens.keySet()) {
@@ -1108,9 +1110,9 @@ public class ParserGenerator {
     for (BnfReferenceOrToken tree : getSortedSimpleTokens(accessors.keySet())) {
       generatePsiAccessor(rule, tree, accessors.get(tree), true);
     }
-    Map<String, String> methods = getAttribute(rule, KnownAttribute.PSI_ACCESSORS);
-    for (Map.Entry<String, String> entry : methods.entrySet()) {
-      generateUserPsiAccessors(rule, helper, entry.getKey(), entry.getValue(), true);
+    List<Pair<String, String>> methods = getAttribute(rule, KnownAttribute.METHODS);
+    for (Pair<String, String> entry : methods) {
+      generateUserPsiAccessors(rule, helper, entry.first, entry.second, true);
     }
     out("}");
   }
@@ -1155,9 +1157,9 @@ public class ParserGenerator {
       out("}");
       newLine();
     }
-    Map<String, String> methods = getAttribute(rule, KnownAttribute.PSI_ACCESSORS);
-    for (Map.Entry<String, String> entry : methods.entrySet()) {
-      generateUserPsiAccessors(rule, helper, entry.getKey(), entry.getValue(), false);
+    List<Pair<String, String>> methods = getAttribute(rule, KnownAttribute.METHODS);
+    for (Pair<String, String> entry : methods) {
+      generateUserPsiAccessors(rule, helper, entry.first, entry.second, false);
     }
     out("}");
   }
@@ -1228,9 +1230,9 @@ public class ParserGenerator {
       return BnfConstants.PSI_ELEMENT_CLASS;
     }
     else if (Rule.isExternal(treeRule)) {
-      String attribute = getAttribute(treeRule, KnownAttribute.IMPLEMENTS);
+      String attribute = ContainerUtil.getFirstItem(getAttribute(treeRule, KnownAttribute.IMPLEMENTS));
       //noinspection StringEquality
-      return attribute == KnownAttribute.IMPLEMENTS.getDefaultValue()? BnfConstants.PSI_ELEMENT_CLASS : attribute;
+      return attribute == KnownAttribute.IMPLEMENTS.getDefaultValue().get(0)? BnfConstants.PSI_ELEMENT_CLASS : attribute;
     }
     else {
       return getRulePsiClassName(rule, myRuleClassPrefix);

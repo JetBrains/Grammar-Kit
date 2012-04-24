@@ -5,16 +5,14 @@ BnfFile:BrokenAttr.bnf
     BNF_ATTR:a
       PsiElement(id)('a')
       PsiElement(=)('=')
-      BNF_ATTR_VALUE
-        BNF_STRING_LITERAL_EXPRESSION: "111"
-          PsiElement(string)('"111"')
+      BNF_STRING_LITERAL_EXPRESSION: "111"
+        PsiElement(string)('"111"')
     PsiWhiteSpace('\n    ')
     BNF_ATTR:b
       PsiElement(id)('b')
       PsiElement(=)('=')
-      BNF_ATTR_VALUE
-        BNF_STRING_LITERAL_EXPRESSION: "222"
-          PsiElement(string)('"222"')
+      BNF_STRING_LITERAL_EXPRESSION: "222"
+        PsiElement(string)('"222"')
     PsiWhiteSpace('\n    ')
     BNF_ATTR:miss
       PsiElement(id)('miss')
@@ -25,8 +23,7 @@ BnfFile:BrokenAttr.bnf
     BNF_ATTR:next
       PsiElement(id)('next')
       PsiElement(=)('=')
-      BNF_ATTR_VALUE
-        BNF_STRING_LITERAL_EXPRESSION: "111"
-          PsiElement(string)('"111"')
+      BNF_STRING_LITERAL_EXPRESSION: "111"
+        PsiElement(string)('"111"')
     PsiWhiteSpace('\n')
     PsiElement(})('}')

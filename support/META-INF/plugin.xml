@@ -10,7 +10,11 @@
     <![CDATA[
     <p>1.0.5</p>
     <ul>
-        <li>Custom PSI methods & PSI visitor generation</li>
+        <li>Generator: PSI visitor generation</li>
+        <li>PSI: better children discovery (esp. for left rules)</li>
+        <li>PSI: user methods and method mixins</li>
+        <li>PSI: <b>fake</b> rules</li>
+        <li>Performance: adapted PsiBuilder</li>
     </ul>
     <p>1.0.4</p>
     <ul>

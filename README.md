@@ -21,7 +21,11 @@ Recent changes
 --------------
 1.0.5
 
-* Custom PSI methods & PSI visitor generation
+* PSI visitor generation
+* Improved PSI generation
+* * better children discovery (esp. for left rules)
+* * user methods and method mixins
+* * *fake* rules to generate better hierarchy
 
 
 Quick documentation:
@@ -48,6 +52,7 @@ This way you can keep grammar clean.
 3. *left*:  left-associativity support. PSI node for this rule will enclose the one to the left.
 4. *inner*:  left-injection. PSI node for this rule will be injected into the one to the left.
 5. *meta*:  meta grammar support. Meta rules work in conjunction with external expressions.
+6. *fake*:  no parser code will be generated for PSI hierarchy generation only.
 
 Modifiers can be combined, *inner* should only be used together with *left*, *private left* is equivalent to *private left inner*.
 
@@ -147,7 +152,11 @@ Change log
 ==========
 1.0.5
 
-* Custom PSI methods & PSI visitor generation
+* PSI visitor generation
+* Improved PSI generation
+* * better children discovery (esp. for left rules)
+* * user methods and method mixins
+* * *fake* rules to generate better hierarchy
 
 1.0.4
 

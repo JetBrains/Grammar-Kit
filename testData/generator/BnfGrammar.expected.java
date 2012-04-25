@@ -20,9 +20,10 @@ public class GrammarParser implements PsiParser {
   public static Logger LOG_ = Logger.getInstance("org.intellij.grammar.parser.GrammarParser");
 
   @NotNull
-  public ASTNode parse(final IElementType root_, final PsiBuilder builder_) {
+  public ASTNode parse(IElementType root_, PsiBuilder builder_) {
     int level_ = 0;
     boolean result_;
+    builder_ = adapt_builder_(root_, builder_, this);
     if (root_ == BNF_ATTR) {
       result_ = attr(builder_, level_ + 1);
     }
@@ -613,7 +614,7 @@ public class GrammarParser implements PsiParser {
     else {
       marker_.rollbackTo();
     }
-    result_ = exitErrorRecordingSection(builder_, result_, level_, false, _SECTION_RECOVER_, map_entry_recover_until_parser_);
+    result_ = exitErrorRecordingSection(builder_, result_, level_, false, _SECTION_RECOVER_, list_entry_recover_until_parser_);
     return result_;
   }
 
@@ -670,6 +671,43 @@ public class GrammarParser implements PsiParser {
   }
 
   /* ********************************************************** */
+  // !(']' | '}' | id | string)
+  static boolean list_entry_recover_until(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "list_entry_recover_until")) return false;
+    boolean result_ = false;
+    final Marker marker_ = builder_.mark();
+    enterErrorRecordingSection(builder_, level_, _SECTION_NOT_);
+    result_ = !list_entry_recover_until_0(builder_, level_ + 1);
+    marker_.rollbackTo();
+    result_ = exitErrorRecordingSection(builder_, result_, level_, false, _SECTION_NOT_, null);
+    return result_;
+  }
+
+  // (']' | '}' | id | string)
+  private static boolean list_entry_recover_until_0(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "list_entry_recover_until_0")) return false;
+    return list_entry_recover_until_0_0(builder_, level_ + 1);
+  }
+
+  // ']' | '}' | id | string
+  private static boolean list_entry_recover_until_0_0(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "list_entry_recover_until_0_0")) return false;
+    boolean result_ = false;
+    final Marker marker_ = builder_.mark();
+    result_ = consumeToken(builder_, BNF_RIGHT_BRACKET);
+    if (!result_) result_ = consumeToken(builder_, BNF_RIGHT_BRACE);
+    if (!result_) result_ = consumeToken(builder_, BNF_ID);
+    if (!result_) result_ = consumeToken(builder_, BNF_STRING);
+    if (!result_) {
+      marker_.rollbackTo();
+    }
+    else {
+      marker_.drop();
+    }
+    return result_;
+  }
+
+  /* ********************************************************** */
   // '=' string_literal_expression
   static boolean list_entry_tail(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "list_entry_tail")) return false;
@@ -710,42 +748,6 @@ public class GrammarParser implements PsiParser {
     }
     else {
       marker_.rollbackTo();
-    }
-    return result_;
-  }
-
-  /* ********************************************************** */
-  // !(']' | '}' | id)
-  static boolean map_entry_recover_until(PsiBuilder builder_, int level_) {
-    if (!recursion_guard_(builder_, level_, "map_entry_recover_until")) return false;
-    boolean result_ = false;
-    final Marker marker_ = builder_.mark();
-    enterErrorRecordingSection(builder_, level_, _SECTION_NOT_);
-    result_ = !map_entry_recover_until_0(builder_, level_ + 1);
-    marker_.rollbackTo();
-    result_ = exitErrorRecordingSection(builder_, result_, level_, false, _SECTION_NOT_, null);
-    return result_;
-  }
-
-  // (']' | '}' | id)
-  private static boolean map_entry_recover_until_0(PsiBuilder builder_, int level_) {
-    if (!recursion_guard_(builder_, level_, "map_entry_recover_until_0")) return false;
-    return map_entry_recover_until_0_0(builder_, level_ + 1);
-  }
-
-  // ']' | '}' | id
-  private static boolean map_entry_recover_until_0_0(PsiBuilder builder_, int level_) {
-    if (!recursion_guard_(builder_, level_, "map_entry_recover_until_0_0")) return false;
-    boolean result_ = false;
-    final Marker marker_ = builder_.mark();
-    result_ = consumeToken(builder_, BNF_RIGHT_BRACKET);
-    if (!result_) result_ = consumeToken(builder_, BNF_RIGHT_BRACE);
-    if (!result_) result_ = consumeToken(builder_, BNF_ID);
-    if (!result_) {
-      marker_.rollbackTo();
-    }
-    else {
-      marker_.drop();
     }
     return result_;
   }
@@ -1309,9 +1311,9 @@ public class GrammarParser implements PsiParser {
         return grammar_element_recover(builder_, level_ + 1);
       }
     };
-  final static Parser map_entry_recover_until_parser_ = new Parser() {
+  final static Parser list_entry_recover_until_parser_ = new Parser() {
       public boolean parse(PsiBuilder builder_, int level_) {
-        return map_entry_recover_until(builder_, level_ + 1);
+        return list_entry_recover_until(builder_, level_ + 1);
       }
     };
   final static Parser sequence_recover_parser_ = new Parser() {

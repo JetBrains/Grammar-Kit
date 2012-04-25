@@ -430,9 +430,10 @@ public class ParserGenerator {
 
   private void generateRootParserContent(Set<String> ownRuleNames) {
     out("@NotNull");
-    out("public ASTNode parse(final IElementType root_, final PsiBuilder builder_) {");
+    out("public ASTNode parse(IElementType root_, PsiBuilder builder_) {");
     out("int level_ = 0;");
     out("boolean result_;");
+    out("builder_ = adapt_builder_(root_, builder_, this);");
     boolean first = true;
     for (String ruleName : ownRuleNames) {
       BnfRule rule = myFile.getRule(ruleName);

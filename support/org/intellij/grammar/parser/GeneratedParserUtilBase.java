@@ -1,6 +1,9 @@
 package org.intellij.grammar.parser;
 
 import com.intellij.lang.*;
+import com.intellij.lang.impl.PsiBuilderAdapter;
+import com.intellij.lang.impl.PsiBuilderImpl;
+import com.intellij.lexer.Lexer;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.util.Comparing;
 import com.intellij.openapi.util.Key;
@@ -243,7 +246,8 @@ public class GeneratedParserUtilBase {
       boolean eatMoreFlag = eatMoreFlagOnce || frame.offset == initialOffset && lastErrorPos > frame.offset;
 
       final LighterASTNode latestDoneMarker =
-        (pinned || result) && lastErrorPos > initialOffset && eatMoreFlagOnce ? builder_.getLatestDoneMarker() : null;
+        (pinned || result) && (state.altMode || lastErrorPos > initialOffset) &&
+        eatMoreFlagOnce ? builder_.getLatestDoneMarker() : null;
       PsiBuilder.Marker extensionMarker = null;
       IElementType extensionTokenType = null;
       if (latestDoneMarker instanceof PsiBuilder.Marker) {
@@ -346,7 +350,6 @@ public class GeneratedParserUtilBase {
   }
 
 
-  private static final Key<ErrorState> ERROR_STATE_KEY = Key.create("ERROR_STATE_KEY");
   public static final Key<CompletionState> COMPLETION_STATE_KEY = Key.create("COMPLETION_STATE_KEY");
 
   public static class CompletionState {
@@ -363,6 +366,27 @@ public class GeneratedParserUtilBase {
     }
   }
 
+  public static class Builder extends PsiBuilderAdapter {
+    final ErrorState state;
+    final PsiParser parser;
+
+    public Builder(PsiBuilder builder, ErrorState state, PsiParser parser) {
+      super(builder);
+      this.state = state;
+      this.parser = parser;
+    }
+
+    public Lexer getLexer() {
+      return ((PsiBuilderImpl)myDelegate).getLexer();
+    }
+  }
+
+  public static PsiBuilder adapt_builder_(IElementType root, PsiBuilder builder, PsiParser parser) {
+    ErrorState state = new ErrorState();
+    ErrorState.initState(root, builder, state);
+    return new Builder(builder, state, parser);
+  }
+
   public static class ErrorState {
     int predicateCount;
     boolean predicateSign = true;
@@ -371,9 +395,10 @@ public class GeneratedParserUtilBase {
     CompletionState completionState;
 
     private boolean caseSensitive;
-    private BracePair[] braces;
     private TokenSet whitespaceTokens = TokenSet.EMPTY;
     private TokenSet commentTokens = TokenSet.EMPTY;
+    public BracePair[] braces;
+    public boolean altMode;
 
     private int lastExpectedVariantOffset = -1;
     ArrayList<Variant> variants = new ArrayList<Variant>();
@@ -388,25 +413,22 @@ public class GeneratedParserUtilBase {
 
 
     public static ErrorState get(PsiBuilder builder) {
-      ErrorState state = builder.getUserDataUnprotected(ERROR_STATE_KEY);
-      if (state == null) {
-        builder.putUserDataUnprotected(ERROR_STATE_KEY, state = new ErrorState());
-        PsiFile file = builder.getUserDataUnprotected(FileContextUtil.CONTAINING_FILE_KEY);
-        state.completionState = file == null? null: file.getUserData(COMPLETION_STATE_KEY);
-        if (file != null) {
-          Language language = file.getLanguage();
-          state.caseSensitive = language.isCaseSensitive();
-          PairedBraceMatcher matcher = LanguageBraceMatching.INSTANCE.forLanguage(language);
-          state.braces = matcher == null? null : matcher.getPairs();
-          if (state.braces != null && state.braces.length == 0) state.braces = null;
-          ParserDefinition parserDefinition = LanguageParserDefinitions.INSTANCE.forLanguage(language);
-          if (parserDefinition != null) {
-            state.commentTokens = parserDefinition.getCommentTokens();
-            state.whitespaceTokens = parserDefinition.getWhitespaceTokens();
-          }
-        }
+      return ((Builder)builder).state;
+    }
+
+    private static void initState(IElementType root, PsiBuilder builder, ErrorState state) {
+      PsiFile file = builder.getUserDataUnprotected(FileContextUtil.CONTAINING_FILE_KEY);
+      state.completionState = file == null? null: file.getUserData(COMPLETION_STATE_KEY);
+      Language language = file == null? root.getLanguage() : file.getLanguage();
+      state.caseSensitive = language.isCaseSensitive();
+      ParserDefinition parserDefinition = LanguageParserDefinitions.INSTANCE.forLanguage(language);
+      if (parserDefinition != null) {
+        state.commentTokens = parserDefinition.getCommentTokens();
+        state.whitespaceTokens = parserDefinition.getWhitespaceTokens();
       }
-      return state;
+      PairedBraceMatcher matcher = LanguageBraceMatching.INSTANCE.forLanguage(language);
+      state.braces = matcher == null ? null : matcher.getPairs();
+      if (state.braces != null && state.braces.length == 0) state.braces = null;
     }
 
     public String getExpectedText(PsiBuilder builder_) {
@@ -608,7 +630,7 @@ public class GeneratedParserUtilBase {
         if (marker == null) {
           marker = builder_.mark();
         }
-        final boolean result = eatMoreCondition.parse(builder_, level + 1) && parser.parse(builder_, level + 1);
+        final boolean result = (state.altMode && !parenList.isEmpty() || eatMoreCondition.parse(builder_, level + 1)) && parser.parse(builder_, level + 1);
         if (result) {
           tokenCount++;
           totalCount++;

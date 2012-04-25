@@ -13,6 +13,8 @@ import com.intellij.psi.tree.IElementType;
 import com.intellij.lang.ASTNode;
 import com.intellij.psi.tree.TokenSet;
 import com.intellij.lang.PsiParser;
+import java.util.List;
+import java.util.Map;
 
 @SuppressWarnings({"SimplifiableIfStatement", "UnusedAssignment"})
 public class Small implements PsiParser {
@@ -20,9 +22,10 @@ public class Small implements PsiParser {
   public static Logger LOG_ = Logger.getInstance("Small");
 
   @NotNull
-  public ASTNode parse(final IElementType root_, final PsiBuilder builder_) {
+  public ASTNode parse(IElementType root_, PsiBuilder builder_) {
     int level_ = 0;
     boolean result_;
+    builder_ = adapt_builder_(root_, builder_, this);
     if (root_ == OTHERRULE) {
       result_ = otherRule(builder_, level_ + 1);
     }

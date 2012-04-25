@@ -59,9 +59,9 @@ private attr_value ::= (reference_or_token | literal_expression | value_list) !'
 attr_pattern ::= '(' string_literal_expression ')' {pin=1}
 
 value_list ::= '[' list_entry * ']' {pin=1 extends=expression}
-list_entry ::= (id list_entry_tail? | string_literal_expression) ';'? {recoverUntil=map_entry_recover_until}
+list_entry ::= (id list_entry_tail? | string_literal_expression) ';'? {recoverUntil=list_entry_recover_until}
 private list_entry_tail ::= '=' string_literal_expression {pin=1}
-private map_entry_recover_until ::= !(']' | '}' | id)
+private list_entry_recover_until ::= !(']' | '}' | id | string)
 
 expression ::= sequence choice?
 sequence ::= option * {extends=expression recoverUntil=sequence_recover}

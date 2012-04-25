@@ -20,9 +20,10 @@ public class PsiAccessors implements PsiParser {
   public static Logger LOG_ = Logger.getInstance("PsiAccessors");
 
   @NotNull
-  public ASTNode parse(final IElementType root_, final PsiBuilder builder_) {
+  public ASTNode parse(IElementType root_, PsiBuilder builder_) {
     int level_ = 0;
     boolean result_;
+    builder_ = adapt_builder_(root_, builder_, this);
     if (root_ == BINARY) {
       result_ = binary(builder_, level_ + 1);
     }

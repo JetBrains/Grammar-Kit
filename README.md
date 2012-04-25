@@ -23,9 +23,9 @@ Recent changes
 
 * PSI visitor generation
 * Improved PSI generation
-* * better children discovery (esp. for left rules)
-* * user methods and method mixins
-* * *fake* rules to generate better hierarchy
+  * better children discovery (esp. for left rules)
+  * user methods and method mixins
+  * *fake* rules to generate better hierarchy
 
 
 Quick documentation:
@@ -52,7 +52,7 @@ This way you can keep grammar clean.
 3. *left*:  left-associativity support. PSI node for this rule will enclose the one to the left.
 4. *inner*:  left-injection. PSI node for this rule will be injected into the one to the left.
 5. *meta*:  meta grammar support. Meta rules work in conjunction with external expressions.
-6. *fake*:  no parser code will be generated for PSI hierarchy generation only.
+6. *fake*:  no parser code will be generated. For PSI hierarchy generation only.
 
 Modifiers can be combined, *inner* should only be used together with *left*, *private left* is equivalent to *private left inner*.
 
@@ -90,8 +90,7 @@ This helps passing qualified enum constants, java expressions, etc.
 ### Error recovery:
 * _pin_ attribute (value: number or pattern string) makes partially matched rule match
 if the specified prefix is matched. This attribute tunes the parser to handle incomplete rules.
-
-* * _extendedPin_ global attribute (_true_ by default) extends the notion of pinning. In this mode the
+  * _extendedPin_ global attribute (_true_ by default) extends the notion of pinning. In this mode the
 generated parser tries to match the rest part of an already pinned rule even if some parts are missed. This allows parser to match the closing brace if the opening brace is pinned for example.
 
 * _recoverUntil_ attribute (value: predicate rule) matches any number of tokens after the rule
@@ -154,9 +153,9 @@ Change log
 
 * PSI visitor generation
 * Improved PSI generation
-* * better children discovery (esp. for left rules)
-* * user methods and method mixins
-* * *fake* rules to generate better hierarchy
+  * better children discovery (esp. for left rules)
+  * user methods and method mixins
+  * *fake* rules to generate better hierarchy
 
 1.0.4
 

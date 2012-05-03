@@ -57,6 +57,7 @@ public class JavaHelper {
 
     @Override
     public PsiClass findClass(String className) {
+      if (className == null) return null;
       return myFacade.findClass(className, GlobalSearchScope.allScope(myFacade.getProject()));
     }
 
@@ -94,6 +95,7 @@ public class JavaHelper {
     @NotNull
     @Override
     public List<String> getMethodTypes(NavigatablePsiElement method) {
+      if (method == null) return Collections.emptyList();
       PsiMethod psiMethod = (PsiMethod)method;
       PsiType returnType = psiMethod.getReturnType();
       List<String> strings = new ArrayList<String>();
@@ -108,6 +110,7 @@ public class JavaHelper {
     @NotNull
     @Override
     public List<String> getAnnotations(NavigatablePsiElement element) {
+      if (element == null) return Collections.emptyList();
       PsiModifierList modifierList = ((PsiModifierListOwner)element).getModifierList();
       if (modifierList == null) return super.getAnnotations(element);
       List<String> strings = new ArrayList<String>();

@@ -55,7 +55,7 @@ import static org.intellij.grammar.psi.BnfTypes.*;
  */
 public class ParserGenerator {
   public static final Logger LOG = Logger.getInstance("ParserGenerator");
-  private static final String GENERIC_SEPARATORS = "<>,";
+  private static final String TYPE_TEXT_SEPARATORS = "<>,[]";
 
   private final Map<String, String> myRuleParserClasses = new TreeMap<String, String>();
   private final Map<String, String> myParserLambdas = new TreeMap<String, String>();
@@ -536,9 +536,9 @@ public class ParserGenerator {
       public String fun(String s) {
         boolean changed = false;
         StringBuilder sb = new StringBuilder();
-        for (String part : StringUtil.tokenize(new StringTokenizer(s, GENERIC_SEPARATORS, true))) {
+        for (String part : StringUtil.tokenize(new StringTokenizer(s, TYPE_TEXT_SEPARATORS, true))) {
           String pkg;
-          if (GENERIC_SEPARATORS.contains(part)) {
+          if (TYPE_TEXT_SEPARATORS.contains(part)) {
             sb.append(part);
             if (part.equals(",")) sb.append(" ");
           }
@@ -556,7 +556,7 @@ public class ParserGenerator {
       }
     };
     for (String item : imports) {
-      for (String s : StringUtil.tokenize(item, GENERIC_SEPARATORS)) {
+      for (String s : StringUtil.tokenize(item, TYPE_TEXT_SEPARATORS)) {
         if (!s.contains(".") || !s.equals(shortener.fun(s))) continue;
         realImports.add(s);
         out("import " + s + ";");

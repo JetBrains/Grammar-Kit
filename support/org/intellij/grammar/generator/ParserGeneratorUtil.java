@@ -18,6 +18,7 @@ package org.intellij.grammar.generator;
 import com.intellij.openapi.util.Pair;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiFile;
 import com.intellij.psi.impl.FakePsiElement;
 import com.intellij.psi.tree.IElementType;
 import com.intellij.psi.util.PsiTreeUtil;
@@ -43,12 +44,14 @@ public class ParserGeneratorUtil {
   private static final Object NULL = new Object();
   private static final BnfExpression NULL_ATTR = createFake("NULL");
 
-  public static <T> T getRootAttribute(BnfFile treeRoot, KnownAttribute<T> attribute) {
-    return getRootAttribute(treeRoot, attribute, null);
+  public static <T> T getRootAttribute(PsiElement node, KnownAttribute<T> attribute) {
+    return getRootAttribute(node, attribute, null);
   }
 
-  public static <T> T getRootAttribute(BnfFile treeRoot, KnownAttribute<T> attribute, @Nullable String match) {
-    return getAttributeInner(ContainerUtil.getFirstItem(treeRoot.getAttributes()), attribute, match);
+  public static <T> T getRootAttribute(PsiElement node, KnownAttribute<T> attribute, @Nullable String match) {
+    PsiFile file = node.getContainingFile();
+    PsiElement firstItem = file instanceof BnfFile? ContainerUtil.getFirstItem(((BnfFile)file).getAttributes()) : null;
+    return getAttributeInner(firstItem, attribute, match);
   }
 
   public static <T> T getAttribute(BnfRule rule, KnownAttribute<T> attribute) {

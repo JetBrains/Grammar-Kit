@@ -71,6 +71,7 @@
     <completion.contributor language="BNF" implementationClass="org.intellij.grammar.BnfCompletionContributor" order="before javaClassName"/>
     <lang.elementManipulator forClass="org.intellij.grammar.psi.impl.BnfStringLiteralExpressionImpl"
                              implementationClass="org.intellij.grammar.psi.impl.BnfStringManipulator"/>
+    <extendWordSelectionHandler implementation="org.intellij.grammar.editor.BnfWordSelectioner"/>
 
     <lang.refactoringSupport language="BNF" implementationClass="org.intellij.grammar.refactor.BnfRefactoringSupportProvider"/>
     <inlineActionHandler implementation="org.intellij.grammar.refactor.BnfInlineRuleActionHandler"/>

@@ -16,9 +16,11 @@
 
 package org.intellij.grammar.java;
 
+import com.intellij.navigation.NavigationItem;
 import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.*;
+import com.intellij.psi.impl.source.resolve.reference.impl.providers.JavaClassReferenceProvider;
 import com.intellij.psi.search.GlobalSearchScope;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -31,18 +33,21 @@ import java.util.List;
  * @author gregsh
  */
 public class JavaHelper {
-  
   public static JavaHelper getJavaHelper(Project project) {
     JavaHelper service = ServiceManager.getService(project, JavaHelper.class);
     return service == null? new JavaHelper() : service;
   }
 
   @Nullable
+  public PsiReferenceProvider getClassReferenceProvider() { return null; }
+  @Nullable
   public NavigatablePsiElement findClass(String className) { return null; }
+  @Nullable
+  public NavigationItem findPackage(String packageName) { return null; }
   @Nullable
   public NavigatablePsiElement findClassMethod(String className, String methodName, int paramCount) { return null; }
   @NotNull
-  public List<NavigatablePsiElement> getClassMethods(String className) { return Collections.emptyList(); }
+  public List<NavigatablePsiElement> getClassMethods(String className, boolean staticMethods) { return Collections.emptyList(); }
   @NotNull
   public List<String> getMethodTypes(NavigatablePsiElement method) { return Collections.singletonList("void"); }
   @NotNull
@@ -56,9 +61,21 @@ public class JavaHelper {
     }
 
     @Override
+    public PsiReferenceProvider getClassReferenceProvider() {
+      JavaClassReferenceProvider provider = new JavaClassReferenceProvider();
+      provider.setSoft(false);
+      return provider;
+    }
+
+    @Override
     public PsiClass findClass(String className) {
       if (className == null) return null;
       return myFacade.findClass(className, GlobalSearchScope.allScope(myFacade.getProject()));
+    }
+
+    @Override
+    public NavigationItem findPackage(String packageName) {
+      return myFacade.findPackage(packageName);
     }
 
     @Override
@@ -75,17 +92,14 @@ public class JavaHelper {
 
     @NotNull
     @Override
-    public List<NavigatablePsiElement> getClassMethods(String className) {
+    public List<NavigatablePsiElement> getClassMethods(String className, boolean staticMethods) {
       PsiClass aClass = findClass(className);
       if (aClass == null) return Collections.emptyList();
       final ArrayList<NavigatablePsiElement> result = new ArrayList<NavigatablePsiElement>();
       for (PsiMethod method : aClass.getAllMethods()) {
         PsiModifierList modifierList = method.getModifierList();
-        PsiParameterList parameterList = method.getParameterList();
         if (modifierList.hasExplicitModifier(PsiModifier.PUBLIC) &&
-            modifierList.hasExplicitModifier(PsiModifier.STATIC) &&
-            parameterList.getParametersCount() >= 2 &&
-            parameterList.getParameters()[0].getType().getCanonicalText().equals("com.intellij.lang.PsiBuilder")) {
+            staticMethods == modifierList.hasExplicitModifier(PsiModifier.STATIC)) {
           result.add(method);
         }
       }

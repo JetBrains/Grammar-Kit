@@ -85,7 +85,7 @@ public class ParserGenerator {
     generateExtendedPin = getRootAttribute(myFile, KnownAttribute.EXTENDED_PIN);
     generateFirstCheck = getRootAttribute(myFile, KnownAttribute.GENERATE_FIRST_CHECK);
     myRuleClassPrefix = getPsiClassPrefix(myFile);
-    String tmpVisitorClass = getRootAttribute(myFile, KnownAttribute.PSI_VISITOR_CLASS);
+    String tmpVisitorClass = getRootAttribute(myFile, KnownAttribute.PSI_VISITOR_NAME);
     visitorClassName = StringUtil.isEmpty(tmpVisitorClass)?
                        null : tmpVisitorClass.startsWith(myRuleClassPrefix)?
                               tmpVisitorClass : myRuleClassPrefix + tmpVisitorClass;

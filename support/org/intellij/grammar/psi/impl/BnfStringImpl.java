@@ -17,15 +17,21 @@ package org.intellij.grammar.psi.impl;
 
 import com.intellij.lang.ASTNode;
 import com.intellij.openapi.util.TextRange;
-import com.intellij.psi.LiteralTextEscaper;
-import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiLanguageInjectionHost;
-import com.intellij.psi.PsiReference;
+import com.intellij.psi.*;
+import com.intellij.psi.impl.source.resolve.reference.impl.PsiMultiReference;
+import com.intellij.util.ArrayUtil;
 import com.intellij.util.IncorrectOperationException;
+import com.intellij.util.ProcessingContext;
+import org.intellij.grammar.KnownAttribute;
+import org.intellij.grammar.java.JavaHelper;
 import org.intellij.grammar.psi.BnfAttr;
 import org.intellij.grammar.psi.BnfExpression;
 import org.intellij.grammar.psi.BnfStringLiteralExpression;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * @author gregsh
@@ -42,13 +48,35 @@ public abstract class BnfStringImpl extends BnfExpressionImpl implements BnfStri
 
   @Override
   public PsiReference getReference() {
-    if (!(getParent() instanceof BnfAttr)) return null;
-    return new BnfReferenceImpl<BnfStringLiteralExpression>(this, TextRange.from(1, getTextLength() - 2)) {
-      @Override
-      public PsiElement handleElementRename(String newElementName) throws IncorrectOperationException {
-        return getString().replace(BnfElementFactory.createLeafFromText(getProject(), '\"' + newElementName + '\"'));
-      }
-    };
+    PsiElement parent = getParent();
+    if (!(parent instanceof BnfAttr)) return null;
+    KnownAttribute attribute = KnownAttribute.getAttribute(((BnfAttr)parent).getName());
+    if (attribute == null) return null;
+    boolean addJavaRefs = attribute.getName().endsWith("Class") || attribute.getName().endsWith("Package") ||
+                       (attribute == KnownAttribute.EXTENDS || attribute == KnownAttribute.IMPLEMENTS);
+    boolean addBnfRef = attribute == KnownAttribute.EXTENDS || attribute == KnownAttribute.IMPLEMENTS || attribute == KnownAttribute.RECOVER_UNTIL;
+
+    BnfReferenceImpl<BnfStringLiteralExpression> bnfReference = null;
+    if (addBnfRef) {
+      TextRange range = TextRange.from(1, getTextLength() - 2);
+      bnfReference = new BnfReferenceImpl<BnfStringLiteralExpression>(this, range) {
+        @Override
+        public PsiElement handleElementRename(String newElementName) throws IncorrectOperationException {
+          PsiElement string = getString();
+          char quote = string.getText().charAt(0);
+          return string.replace(BnfElementFactory.createLeafFromText(getProject(), quote + newElementName + quote));
+        }
+      };
+    }
+    if (addJavaRefs) {
+      PsiReferenceProvider provider = JavaHelper.getJavaHelper(getProject()).getClassReferenceProvider();
+      PsiReference[] javaRefs = provider == null ? PsiReference.EMPTY_ARRAY : provider.getReferencesByElement(this, new ProcessingContext());
+      return new MyMultiReference(addBnfRef? ArrayUtil.mergeArrays(new PsiReference[]{bnfReference}, javaRefs, PsiReference.ARRAY_FACTORY) : javaRefs, this);
+    }
+    else if (addBnfRef) {
+      return bnfReference;
+    }
+    return null;
   }
 
   @Override
@@ -72,5 +100,21 @@ public abstract class BnfStringImpl extends BnfExpressionImpl implements BnfStri
   @Override
   public String toString() {
     return super.toString() + ": " + getText();
+  }
+
+  private static class MyMultiReference extends PsiMultiReference {
+    MyMultiReference(PsiReference[] psiReferences, BnfStringLiteralExpression element) {
+      super(psiReferences, element);
+    }
+
+    @Override
+    public TextRange getRangeInElement() {
+      PsiReference[] references = getReferences();
+      TextRange result = references[0].getRangeInElement();
+      for (PsiReference reference : references) {
+        result.union(reference.getRangeInElement());
+      }
+      return result;
+    }
   }
 }

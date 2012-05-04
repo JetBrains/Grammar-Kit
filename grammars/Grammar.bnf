@@ -10,6 +10,7 @@
   psiImplClassSuffix="Impl"
   psiPackage="org.intellij.grammar.psi"
   psiImplPackage="org.intellij.grammar.psi.impl"
+  psiImplUtilClass="org.intellij.grammar.psi.impl.GrammarPsiImplUtil"
 
   elementTypeHolderClass="org.intellij.grammar.psi.BnfTypes"
   elementTypePrefix="BNF_"
@@ -59,7 +60,10 @@ private attr_value ::= (reference_or_token | literal_expression | value_list) !'
 attr_pattern ::= '(' string_literal_expression ')' {pin=1}
 
 value_list ::= '[' list_entry * ']' {pin=1 extends=expression}
-list_entry ::= (id list_entry_tail? | string_literal_expression) ';'? {recoverUntil=list_entry_recover_until}
+list_entry ::= (id list_entry_tail? | string_literal_expression) ';'? {
+  recoverUntil=list_entry_recover_until
+  methods=[getReferences]
+}
 private list_entry_tail ::= '=' string_literal_expression {pin=1}
 private list_entry_recover_until ::= !(']' | '}' | id | string)
 

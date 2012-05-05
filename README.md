@@ -15,7 +15,9 @@ General usage instructions
 4. Mix-in resolve and other non-trivial functionality to PSI
 5. Tune the grammar, regenerate code, repeat if needed.
 
-You've just build a custom language plugin (approx. 1 day)
+You've just build a custom language plugin (approx. 1 day).
+
+See [HOWTO](https://github.com/JetBrains/Grammar-Kit/blob/master/HOWTO.md) page for different tips and tricks.
 
 Recent changes
 --------------
@@ -30,7 +32,7 @@ Recent changes
 
 Quick documentation:
 ====================
-See [Parsing Expression Grammar](http://en.wikipedia.org/wiki/Parsing_expression_grammar) for basic syntax. Use ::=* for ← symbol. You can also use [ .. ] for optional sequences and { | | } for choices as these variants are popular in real-world grammars. Grammar-Kit source code is the main example of Grammar-Kit application. The grammar for BNF parser and PSI generation can be found [here](https://github.com/JetBrains/Grammar-Kit/blob/master/grammars/Grammar.bnf).
+See [Parsing Expression Grammar](http://en.wikipedia.org/wiki/Parsing_expression_grammar) for basic syntax. Use ::= for ← symbol. You can also use [ .. ] for optional sequences and { | | } for choices as these variants are popular in real-world grammars. Grammar-Kit source code is the main example of Grammar-Kit application. The grammar for BNF parser and PSI generation can be found [here](https://github.com/JetBrains/Grammar-Kit/blob/master/grammars/Grammar.bnf).
 
 Basic syntax is extended with global and attributes that control code generation.
 Attributes are specified by the list of *name=value* pairs enclosed in { .. }.

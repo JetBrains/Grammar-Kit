@@ -112,7 +112,7 @@ public abstract class BnfStringImpl extends BnfExpressionImpl implements BnfStri
       PsiReference[] references = getReferences();
       TextRange result = references[0].getRangeInElement();
       for (PsiReference reference : references) {
-        result.union(reference.getRangeInElement());
+        result = result.union(reference.getRangeInElement());
       }
       return result;
     }

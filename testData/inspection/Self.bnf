@@ -1,19 +1,19 @@
 {
-  parserClass="org.intellij.grammar.parser.GrammarParser"
-  stubParserClass="org.intellij.grammar.parser.GeneratedParserUtilBase"
+  parserClass="<warning>org.intellij.grammar.parser.GrammarParser</warning>"
+  stubParserClass="<warning>org.intellij.grammar.parser.GeneratedParserUtilBase</warning>"
 
-  implements="org.intellij.grammar.psi.BnfCompositeElement"
-  extends="org.intellij.grammar.psi.impl.BnfCompositeElementImpl"
+  implements="<warning>org.intellij.grammar.psi.BnfCompositeElement</warning>"
+  extends="<warning>org.intellij.grammar.psi.impl.BnfCompositeElementImpl</warning>"
 
   psiClassPrefix="Bnf"
   psiImplClassSuffix="Impl"
-  psiPackage="org.intellij.grammar.psi"
-  psiImplPackage="org.intellij.grammar.psi.impl"
+  psiPackage="<warning>org.intellij.grammar.psi</warning>"
+  psiImplPackage="<warning>org.intellij.grammar.psi.impl</warning>"
 
-  elementTypeHolderClass="org.intellij.grammar.psi.BnfTypes"
+  elementTypeHolderClass="<warning>org.intellij.grammar.psi.BnfTypes</warning>"
   elementTypePrefix="BNF_"
-  elementTypeClass="org.intellij.grammar.psi.BnfCompositeElementType"
-  tokenTypeClass="org.intellij.grammar.psi.BnfTokenType"
+  elementTypeClass="<warning>org.intellij.grammar.psi.BnfCompositeElementType</warning>"
+  tokenTypeClass="<warning>org.intellij.grammar.psi.BnfTokenType</warning>"
 
   // tokens
   OP_EQ="="
@@ -39,7 +39,7 @@
 
 grammar ::= (attrs | rule) *
 
-rule ::= modifier* id '::=' expression attrs? ';'? {pin=3 recoverUntil="rule_recover_until" extends=<error><warning>namedImpl</warning></error> implements=<error>named</error>}
+rule ::= modifier* id '::=' expression attrs? ';'? {pin=3 recoverUntil="rule_recover_until" extends=<warning>namedImpl</warning> implements=<warning>named</warning>}
 private rule_recover_until::=!'{'
 
 expression ::= choice?
@@ -48,7 +48,7 @@ modifier ::= 'private' | 'external' | 'wrapped';
 
 attrs ::= '{' attr* '}' {pin=1}
 
-attr ::= id attr_pattern? '=' attr_value ';'? {pin=1 recoverUntil="attr_recover_until" extends=<error><warning>namedImpl</warning></error> implements=<error>named</error>}
+attr ::= id attr_pattern? '=' attr_value ';'? {pin=1 recoverUntil="attr_recover_until" extends=<warning>namedImpl</warning> implements=<warning>named</warning>}
 private attr_recover_until::=!'}'
 attr_value ::= (reference_or_token | literal_expression) !'=';
 attr_pattern ::= '(' string ')'

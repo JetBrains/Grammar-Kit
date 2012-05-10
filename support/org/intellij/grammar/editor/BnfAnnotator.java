@@ -64,7 +64,7 @@ public class BnfAnnotator implements Annotator, DumbAware {
         annotationHolder.createInfoAnnotation(psiElement, null).setTextAttributes(BnfSyntaxHighlighter.ATTRIBUTE);
       }
       else if (resolve == null && parent instanceof BnfAttr) {
-        annotationHolder.createErrorAnnotation(psiElement, "Unresolved rule reference");
+        annotationHolder.createWarningAnnotation(psiElement, "Unresolved rule reference");
       }
       else if (resolve == null) {
         if (GrammarUtil.isExternalReference(psiElement)) {
@@ -111,7 +111,7 @@ public class BnfAnnotator implements Annotator, DumbAware {
           annotationHolder.createInfoAnnotation(range, null).setTextAttributes(BnfSyntaxHighlighter.RULE);
         }
         else if (resolve == null) {
-          annotationHolder.createErrorAnnotation(range, "Unresolved "+refType+"reference");
+          annotationHolder.createWarningAnnotation(range, "Unresolved "+refType+"reference");
         }
       }
     }

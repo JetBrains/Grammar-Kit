@@ -1,9 +1,18 @@
 package org.intellij.grammar;
 
-import com.intellij.openapi.application.ex.PathManagerEx;
-import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.openapi.application.AccessToken;
+import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.module.Module;
+import com.intellij.openapi.roots.ContentEntry;
+import com.intellij.openapi.roots.ModifiableRootModel;
+import com.intellij.openapi.roots.ModuleRootManager;
+import com.intellij.openapi.util.io.FileUtil;
+import com.intellij.openapi.vfs.VfsUtil;
+import com.intellij.psi.JavaPsiFacade;
 import com.intellij.testFramework.fixtures.LightPlatformCodeInsightFixtureTestCase;
 import org.intellij.grammar.inspection.*;
+
+import java.io.File;
 
 /**
  * Created by IntelliJ IDEA.
@@ -18,11 +27,49 @@ public class BnfInspectionTest extends LightPlatformCodeInsightFixtureTestCase {
     return "testData/inspection";
   }
 
-  public void testBnfGrammar() {
+  public void testBnfGrammar() throws Exception {
     myFixture.copyFileToProject("../../grammars/Grammar.bnf", "Grammar.bnf");
     myFixture.configureByFile("Grammar.bnf");
-    doTest();
+    toggleGrammarKitSrc(myModule, getTestDataPath());
+    try {
+      doTest();
+    }
+    finally {
+      toggleGrammarKitSrc(myModule, getTestDataPath());
+    }
   }
+
+  private static void toggleGrammarKitSrc(Module module, String testDataPath) throws Exception {
+    JavaPsiFacade facade = JavaPsiFacade.getInstance(module.getProject());
+    boolean add = facade.findPackage("org.intellij.grammar.psi") == null;
+    AccessToken accessToken = ApplicationManager.getApplication().acquireWriteActionLock(null);
+    try {
+      ModifiableRootModel model = ModuleRootManager.getInstance(module).getModifiableModel();
+      String supportUrl = getUrl(testDataPath + "/../../support");
+      String genUrl = getUrl(testDataPath + "/../../gen");
+      if (add) {
+        model.addContentEntry(supportUrl).addSourceFolder(supportUrl, false);
+        model.addContentEntry(genUrl).addSourceFolder(genUrl, false);
+      }
+      else {
+        for (ContentEntry entry : model.getContentEntries()) {
+          if (supportUrl.equals(entry.getUrl()) || genUrl.equals(entry.getUrl())) {
+            model.removeContentEntry(entry);
+          }
+        }
+      }
+      model.commit();
+    }
+    finally {
+      accessToken.finish();
+    }
+    assertTrue("GrammarKit src problem", add == (null != facade.findPackage("org.intellij.grammar.psi")));
+  }
+
+  private static String getUrl(final String path) throws Exception {
+    return VfsUtil.pathToUrl(FileUtil.toSystemIndependentName(new File(path).getCanonicalPath()));
+  }
+
   public void testSelf() { doFileTest(); }
   public void testDuplicateDefinition() { doTest("<warning>rule</warning>::= blablabla rule1" + "\n" + "<warning>rule</warning> ::=aaaaaaaaa"); }
   public void testSuspiciousToken() { doTest("rule ::= <warning>suspicious_token</warning>"); }

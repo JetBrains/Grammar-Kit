@@ -56,6 +56,12 @@ BnfFile:BnfGrammar.bnf
         PsiElement(=)('=')
         BNF_STRING_LITERAL_EXPRESSION: "org.intellij.grammar.psi.impl"
           PsiElement(string)('"org.intellij.grammar.psi.impl"')
+      PsiWhiteSpace('\n  ')
+      BNF_ATTR:psiImplUtilClass
+        PsiElement(id)('psiImplUtilClass')
+        PsiElement(=)('=')
+        BNF_STRING_LITERAL_EXPRESSION: "org.intellij.grammar.psi.impl.GrammarPsiImplUtil"
+          PsiElement(string)('"org.intellij.grammar.psi.impl.GrammarPsiImplUtil"')
       PsiWhiteSpace('\n\n  ')
       BNF_ATTR:elementTypeHolderClass
         PsiElement(id)('elementTypeHolderClass')
@@ -661,11 +667,22 @@ BnfFile:BnfGrammar.bnf
       PsiWhiteSpace(' ')
       BNF_ATTRS
         PsiElement({)('{')
+        PsiWhiteSpace('\n  ')
         BNF_ATTR:recoverUntil
           PsiElement(id)('recoverUntil')
           PsiElement(=)('=')
           BNF_REFERENCE_OR_TOKEN: list_entry_recover_until
             PsiElement(id)('list_entry_recover_until')
+        PsiWhiteSpace('\n  ')
+        BNF_ATTR:methods
+          PsiElement(id)('methods')
+          PsiElement(=)('=')
+          BNF_VALUE_LIST
+            PsiElement([)('[')
+            BNF_LIST_ENTRY
+              PsiElement(id)('getReferences')
+            PsiElement(])(']')
+        PsiWhiteSpace('\n')
         PsiElement(})('}')
     PsiWhiteSpace('\n')
     BNF_RULE:list_entry_tail

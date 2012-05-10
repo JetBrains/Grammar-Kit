@@ -221,6 +221,8 @@ public interface BnfListEntry extends BnfCompositeElement {
   @Nullable
   PsiElement getId();
 
+  void getReferences();
+
 }
 // ---- BnfLiteralExpression.java -----------------
 header.txt
@@ -650,6 +652,10 @@ public class BnfListEntryImpl extends BnfCompositeElementImpl implements BnfList
   public void accept(@NotNull PsiElementVisitor visitor) {
     if (visitor instanceof BnfVisitor) ((BnfVisitor)visitor).visitListEntry(this);
     else super.accept(visitor);
+  }
+
+  public void getReferences() {
+    GrammarPsiImplUtil.getReferences(this);
   }
 
 }

@@ -23,6 +23,7 @@ import com.intellij.psi.ElementManipulators;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiNamedElement;
 import com.intellij.psi.PsiReference;
+import com.intellij.util.ObjectUtils;
 import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.generator.ParserGeneratorUtil;
 import org.intellij.grammar.java.JavaHelper;
@@ -98,6 +99,10 @@ public class BnfAnnotator implements Annotator, DumbAware {
           resolve = value.contains(".")? javaHelper.findClass(value) :
                     ((BnfFile)parent.getContainingFile()).getRule(value);
           refType = "rule or class ";
+        }
+        else if (attribute == KnownAttribute.ELEMENT_TYPE) {
+          resolve = ObjectUtils.chooseNotNull(((BnfFile)parent.getContainingFile()).getRule(value), Boolean.TRUE);
+          refType = "rule or constant ";
         }
         else if (attribute == KnownAttribute.RECOVER_UNTIL) {
           resolve = ((BnfFile)parent.getContainingFile()).getRule(value);

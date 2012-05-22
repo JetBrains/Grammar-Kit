@@ -15,7 +15,6 @@
  */
 package org.intellij.grammar.actions;
 
-import com.intellij.ide.SaveAndSyncHandler;
 import com.intellij.notification.Notification;
 import com.intellij.notification.NotificationType;
 import com.intellij.notification.Notifications;
@@ -32,9 +31,9 @@ import com.intellij.openapi.project.DumbAware;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.ProjectRootManager;
 import com.intellij.openapi.vcs.changes.BackgroundFromStartOption;
+import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VirtualFile;
-import com.intellij.openapi.vfs.VirtualFileManager;
 import com.intellij.psi.PsiDocumentManager;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiManager;
@@ -44,6 +43,8 @@ import org.intellij.grammar.psi.BnfFile;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * @author gregory
@@ -78,15 +79,16 @@ public class GenerateAction extends AnAction implements DumbAware {
     PsiDocumentManager.getInstance(project).commitAllDocuments();
     FileDocumentManager.getInstance().saveAllDocuments();
 
+    final Set<File> pathsToRefresh = new HashSet<File>();
     ProgressManager.getInstance().run(new Task.Backgroundable(getEventProject(e), "Parser Generation", true, new BackgroundFromStartOption()) {
       @Override
       public void onSuccess() {
-        refreshFiles();
+        refreshFiles(pathsToRefresh);
       }
 
       @Override
       public void onCancel() {
-        refreshFiles();
+        refreshFiles(pathsToRefresh);
       }
 
       @Override
@@ -101,8 +103,8 @@ public class GenerateAction extends AnAction implements DumbAware {
               if (!(bnfFile instanceof BnfFile)) continue;
               VirtualFile content = ProjectRootManager.getInstance(project).getFileIndex().getContentRootForFile(file);
               VirtualFile parentDir = content == null ? file.getParent() : content;
-              final String toDir = new File(VfsUtil.virtualToIoFile(parentDir), "gen").getAbsolutePath();
-
+              String toDir = new File(VfsUtil.virtualToIoFile(parentDir), "gen").getAbsolutePath();
+              pathsToRefresh.add(new File(toDir));
               try {
                 new ParserGenerator((BnfFile)bnfFile, toDir).generate();
                 Notifications.Bus.notify(new Notification(e.getPresentation().getText(),
@@ -123,8 +125,7 @@ public class GenerateAction extends AnAction implements DumbAware {
     });
   }
 
-  private static void refreshFiles() {
-    SaveAndSyncHandler.refreshOpenFiles();
-    VirtualFileManager.getInstance().refresh(true);
+  private static void refreshFiles(Set<File> pathsToRefresh) {
+    LocalFileSystem.getInstance().refreshIoFiles(pathsToRefresh, true, true, null);
   }
 }

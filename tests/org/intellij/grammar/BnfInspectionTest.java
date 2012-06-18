@@ -8,7 +8,9 @@ import com.intellij.openapi.roots.ModifiableRootModel;
 import com.intellij.openapi.roots.ModuleRootManager;
 import com.intellij.openapi.util.io.FileUtil;
 import com.intellij.openapi.vfs.VfsUtil;
+import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.JavaPsiFacade;
+import com.intellij.psi.PsiFile;
 import com.intellij.testFramework.fixtures.LightPlatformCodeInsightFixtureTestCase;
 import org.intellij.grammar.inspection.*;
 
@@ -28,8 +30,8 @@ public class BnfInspectionTest extends LightPlatformCodeInsightFixtureTestCase {
   }
 
   public void testBnfGrammar() throws Exception {
-    myFixture.copyFileToProject("../../grammars/Grammar.bnf", "Grammar.bnf");
-    myFixture.configureByFile("Grammar.bnf");
+    VirtualFile virtualFile = myFixture.copyFileToProject("../../grammars/Grammar.bnf", "Grammar.bnf");
+    PsiFile psiFile = myFixture.configureByFile("Grammar.bnf");
     toggleGrammarKitSrc(myModule, getTestDataPath());
     try {
       doTest();

@@ -126,9 +126,11 @@ Currently JFlex-based or any other lexer must be provided separately, you can us
   pin(".*expression")=1
 
   // tokens beyond id, number and string
-  ADD='+'
-  MUL='*'
-  DOT='.'
+  tokens = [
+    ADD='+'
+    MUL='*'
+    DOT='.'
+  ]
 }
 root ::= expression *
 private recover ::= !(number | string | id)

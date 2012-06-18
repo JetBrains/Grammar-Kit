@@ -21,6 +21,7 @@ import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiManager;
 import org.intellij.grammar.analysis.BnfFirstNextAnalyzer;
+import org.intellij.grammar.psi.BnfAttr;
 import org.intellij.grammar.psi.BnfRule;
 import org.jetbrains.annotations.Nullable;
 
@@ -57,6 +58,10 @@ public class BnfDocumentationProvider implements DocumentationProvider {
       Arrays.sort(nextS);
       return "<h1>Starts with:</h1>" + StringUtil.escapeXml(StringUtil.join(firstS, " | "))
         + "<br><h1>Followed by:</h1>" + StringUtil.escapeXml(StringUtil.join(nextS, " | "));
+    }
+    else if (element instanceof BnfAttr) {
+      KnownAttribute attribute = KnownAttribute.getAttribute(((BnfAttr)element).getName());
+      if (attribute != null) return attribute.getDescription();
     }
     return null;
   }

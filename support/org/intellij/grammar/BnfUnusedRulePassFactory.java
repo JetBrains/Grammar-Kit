@@ -134,12 +134,10 @@ public class BnfUnusedRulePassFactory extends AbstractProjectComponent implement
       for (PsiElement child = attrs.getFirstChild(); child != null; child = child.getNextSibling()) {
         if (!(child instanceof BnfAttr)) continue;
         final String name = ((BnfAttr)child).getName();
-        if (name != null && !usedElements.contains(child) && !name.toUpperCase().equals(name) &&
-            KnownAttribute.getAttribute(name) == null) {
+        if (!usedElements.contains(child) && !name.toUpperCase().equals(name) && KnownAttribute.getAttribute(name) == null) {
           final TextRange textRange = ((BnfAttr)child).getId().getTextRange();
           myHighlights.add(
-            new HighlightInfo(HighlightInfoType.WARNING, textRange.getStartOffset(), textRange.getEndOffset(), "Unused attribute",
-                              "Unused attribute"));
+            new HighlightInfo(HighlightInfoType.WARNING, textRange.getStartOffset(), textRange.getEndOffset(), "Unused attribute", "Unused attribute"));
         }
       }
     }

@@ -87,109 +87,117 @@ BnfFile:BnfGrammar.bnf
         BNF_STRING_LITERAL_EXPRESSION: "org.intellij.grammar.psi.BnfTokenType"
           PsiElement(string)('"org.intellij.grammar.psi.BnfTokenType"')
       PsiWhiteSpace('\n  \n  ')
-      PsiComment(BNF_LINE_COMMENT)('// tokens')
-      PsiWhiteSpace('\n  ')
-      BNF_ATTR:OP_EQ
-        PsiElement(id)('OP_EQ')
+      BNF_ATTR:tokens
+        PsiElement(id)('tokens')
+        PsiWhiteSpace(' ')
         PsiElement(=)('=')
-        BNF_STRING_LITERAL_EXPRESSION: "="
-          PsiElement(string)('"="')
-      PsiWhiteSpace('\n  ')
-      BNF_ATTR:OP_IS
-        PsiElement(id)('OP_IS')
-        PsiElement(=)('=')
-        BNF_STRING_LITERAL_EXPRESSION: "::="
-          PsiElement(string)('"::="')
-      PsiWhiteSpace('\n  ')
-      BNF_ATTR:OP_OR
-        PsiElement(id)('OP_OR')
-        PsiElement(=)('=')
-        BNF_STRING_LITERAL_EXPRESSION: "|"
-          PsiElement(string)('"|"')
-      PsiWhiteSpace('\n  ')
-      BNF_ATTR:OP_OPT
-        PsiElement(id)('OP_OPT')
-        PsiElement(=)('=')
-        BNF_STRING_LITERAL_EXPRESSION: "?"
-          PsiElement(string)('"?"')
-      PsiWhiteSpace('\n  ')
-      BNF_ATTR:OP_ONEMORE
-        PsiElement(id)('OP_ONEMORE')
-        PsiElement(=)('=')
-        BNF_STRING_LITERAL_EXPRESSION: "+"
-          PsiElement(string)('"+"')
-      PsiWhiteSpace('\n  ')
-      BNF_ATTR:OP_ZEROMORE
-        PsiElement(id)('OP_ZEROMORE')
-        PsiElement(=)('=')
-        BNF_STRING_LITERAL_EXPRESSION: "*"
-          PsiElement(string)('"*"')
-      PsiWhiteSpace('\n  ')
-      BNF_ATTR:OP_AND
-        PsiElement(id)('OP_AND')
-        PsiElement(=)('=')
-        BNF_STRING_LITERAL_EXPRESSION: "&"
-          PsiElement(string)('"&"')
-      PsiWhiteSpace('\n  ')
-      BNF_ATTR:OP_NOT
-        PsiElement(id)('OP_NOT')
-        PsiElement(=)('=')
-        BNF_STRING_LITERAL_EXPRESSION: "!"
-          PsiElement(string)('"!"')
-      PsiWhiteSpace('\n  ')
-      BNF_ATTR:SEMICOLON
-        PsiElement(id)('SEMICOLON')
-        PsiElement(=)('=')
-        BNF_STRING_LITERAL_EXPRESSION: ";"
-          PsiElement(string)('";"')
-      PsiWhiteSpace('\n  ')
-      BNF_ATTR:LEFT_BRACE
-        PsiElement(id)('LEFT_BRACE')
-        PsiElement(=)('=')
-        BNF_STRING_LITERAL_EXPRESSION: "{"
-          PsiElement(string)('"{"')
-      PsiWhiteSpace('\n  ')
-      BNF_ATTR:RIGHT_BRACE
-        PsiElement(id)('RIGHT_BRACE')
-        PsiElement(=)('=')
-        BNF_STRING_LITERAL_EXPRESSION: "}"
-          PsiElement(string)('"}"')
-      PsiWhiteSpace('\n  ')
-      BNF_ATTR:LEFT_BRACKET
-        PsiElement(id)('LEFT_BRACKET')
-        PsiElement(=)('=')
-        BNF_STRING_LITERAL_EXPRESSION: "["
-          PsiElement(string)('"["')
-      PsiWhiteSpace('\n  ')
-      BNF_ATTR:RIGHT_BRACKET
-        PsiElement(id)('RIGHT_BRACKET')
-        PsiElement(=)('=')
-        BNF_STRING_LITERAL_EXPRESSION: "]"
-          PsiElement(string)('"]"')
-      PsiWhiteSpace('\n  ')
-      BNF_ATTR:LEFT_PAREN
-        PsiElement(id)('LEFT_PAREN')
-        PsiElement(=)('=')
-        BNF_STRING_LITERAL_EXPRESSION: "("
-          PsiElement(string)('"("')
-      PsiWhiteSpace('\n  ')
-      BNF_ATTR:RIGHT_PAREN
-        PsiElement(id)('RIGHT_PAREN')
-        PsiElement(=)('=')
-        BNF_STRING_LITERAL_EXPRESSION: ")"
-          PsiElement(string)('")"')
-      PsiWhiteSpace('\n  ')
-      BNF_ATTR:EXTERNAL_START
-        PsiElement(id)('EXTERNAL_START')
-        PsiElement(=)('=')
-        BNF_STRING_LITERAL_EXPRESSION: "<<"
-          PsiElement(string)('"<<"')
-      PsiWhiteSpace('\n  ')
-      BNF_ATTR:EXTERNAL_END
-        PsiElement(id)('EXTERNAL_END')
-        PsiElement(=)('=')
-        BNF_STRING_LITERAL_EXPRESSION: ">>"
-          PsiElement(string)('">>"')
+        PsiWhiteSpace(' ')
+        BNF_VALUE_LIST
+          PsiElement([)('[')
+          PsiWhiteSpace('\n    ')
+          BNF_LIST_ENTRY
+            PsiElement(id)('OP_EQ')
+            PsiElement(=)('=')
+            BNF_STRING_LITERAL_EXPRESSION: "="
+              PsiElement(string)('"="')
+          PsiWhiteSpace('\n    ')
+          BNF_LIST_ENTRY
+            PsiElement(id)('OP_IS')
+            PsiElement(=)('=')
+            BNF_STRING_LITERAL_EXPRESSION: "::="
+              PsiElement(string)('"::="')
+          PsiWhiteSpace('\n    ')
+          BNF_LIST_ENTRY
+            PsiElement(id)('OP_OR')
+            PsiElement(=)('=')
+            BNF_STRING_LITERAL_EXPRESSION: "|"
+              PsiElement(string)('"|"')
+          PsiWhiteSpace('\n    ')
+          BNF_LIST_ENTRY
+            PsiElement(id)('OP_OPT')
+            PsiElement(=)('=')
+            BNF_STRING_LITERAL_EXPRESSION: "?"
+              PsiElement(string)('"?"')
+          PsiWhiteSpace('\n    ')
+          BNF_LIST_ENTRY
+            PsiElement(id)('OP_ONEMORE')
+            PsiElement(=)('=')
+            BNF_STRING_LITERAL_EXPRESSION: "+"
+              PsiElement(string)('"+"')
+          PsiWhiteSpace('\n    ')
+          BNF_LIST_ENTRY
+            PsiElement(id)('OP_ZEROMORE')
+            PsiElement(=)('=')
+            BNF_STRING_LITERAL_EXPRESSION: "*"
+              PsiElement(string)('"*"')
+          PsiWhiteSpace('\n    ')
+          BNF_LIST_ENTRY
+            PsiElement(id)('OP_AND')
+            PsiElement(=)('=')
+            BNF_STRING_LITERAL_EXPRESSION: "&"
+              PsiElement(string)('"&"')
+          PsiWhiteSpace('\n    ')
+          BNF_LIST_ENTRY
+            PsiElement(id)('OP_NOT')
+            PsiElement(=)('=')
+            BNF_STRING_LITERAL_EXPRESSION: "!"
+              PsiElement(string)('"!"')
+          PsiWhiteSpace('\n    ')
+          BNF_LIST_ENTRY
+            PsiElement(id)('SEMICOLON')
+            PsiElement(=)('=')
+            BNF_STRING_LITERAL_EXPRESSION: ";"
+              PsiElement(string)('";"')
+          PsiWhiteSpace('\n    ')
+          BNF_LIST_ENTRY
+            PsiElement(id)('LEFT_BRACE')
+            PsiElement(=)('=')
+            BNF_STRING_LITERAL_EXPRESSION: "{"
+              PsiElement(string)('"{"')
+          PsiWhiteSpace('\n    ')
+          BNF_LIST_ENTRY
+            PsiElement(id)('RIGHT_BRACE')
+            PsiElement(=)('=')
+            BNF_STRING_LITERAL_EXPRESSION: "}"
+              PsiElement(string)('"}"')
+          PsiWhiteSpace('\n    ')
+          BNF_LIST_ENTRY
+            PsiElement(id)('LEFT_BRACKET')
+            PsiElement(=)('=')
+            BNF_STRING_LITERAL_EXPRESSION: "["
+              PsiElement(string)('"["')
+          PsiWhiteSpace('\n    ')
+          BNF_LIST_ENTRY
+            PsiElement(id)('RIGHT_BRACKET')
+            PsiElement(=)('=')
+            BNF_STRING_LITERAL_EXPRESSION: "]"
+              PsiElement(string)('"]"')
+          PsiWhiteSpace('\n    ')
+          BNF_LIST_ENTRY
+            PsiElement(id)('LEFT_PAREN')
+            PsiElement(=)('=')
+            BNF_STRING_LITERAL_EXPRESSION: "("
+              PsiElement(string)('"("')
+          PsiWhiteSpace('\n    ')
+          BNF_LIST_ENTRY
+            PsiElement(id)('RIGHT_PAREN')
+            PsiElement(=)('=')
+            BNF_STRING_LITERAL_EXPRESSION: ")"
+              PsiElement(string)('")"')
+          PsiWhiteSpace('\n    ')
+          BNF_LIST_ENTRY
+            PsiElement(id)('EXTERNAL_START')
+            PsiElement(=)('=')
+            BNF_STRING_LITERAL_EXPRESSION: "<<"
+              PsiElement(string)('"<<"')
+          PsiWhiteSpace('\n    ')
+          BNF_LIST_ENTRY
+            PsiElement(id)('EXTERNAL_END')
+            PsiElement(=)('=')
+            BNF_STRING_LITERAL_EXPRESSION: ">>"
+              PsiElement(string)('">>"')
+          PsiWhiteSpace('\n  ')
+          PsiElement(])(']')
       PsiWhiteSpace('\n\n  ')
       BNF_ATTR:implements
         PsiElement(id)('implements')

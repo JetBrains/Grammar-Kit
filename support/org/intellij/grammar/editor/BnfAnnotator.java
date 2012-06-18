@@ -84,7 +84,7 @@ public class BnfAnnotator implements Annotator, DumbAware {
         Object resolve;
         String refType = "";
         JavaHelper javaHelper = JavaHelper.getJavaHelper(psiElement.getProject());
-        if (attribute.getName().endsWith("Class")) {
+        if (attribute.getName().endsWith("Class") || attribute == KnownAttribute.MIXIN) {
           resolve = javaHelper.findClass(value);
           refType = "class ";
         }

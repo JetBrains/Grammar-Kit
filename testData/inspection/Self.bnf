@@ -65,9 +65,9 @@ quantified ::= '[' expression ']' | simple quantifier? { extends="expression" }
 quantifier ::= '?' | '+' | '*'
 
 private simple ::= !(modifier* id '::=' ) reference_or_token | literal_expression | paren_expression;
-reference_or_token ::= id  { extends="expression" mixin="org.intellij.grammar.psi.impl.BnfRefOrTokenImpl"}
+reference_or_token ::= id  { extends="expression" mixin="<warning>org.intellij.grammar.psi.impl.BnfRefOrTokenImpl</warning>"}
 literal_expression ::= string_literal_expression | number { extends="expression" }
-string_literal_expression ::= string { extends="literal_expression" mixin="org.intellij.grammar.psi.impl.BnfStringImpl"}
+string_literal_expression ::= string { extends="literal_expression" mixin="<warning>org.intellij.grammar.psi.impl.BnfStringImpl</warning>"}
 paren_expression ::= '(' expression ')' { pin=1 extends="expression" }
 
 

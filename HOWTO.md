@@ -15,8 +15,8 @@ But once you've mastered some basics the rest is as easy as combining different 
 II. HOWTO: Generated Parser
 ==========================
 
-Parser Basics
--------------
+2.1 Parser Basics
+-----------------
 
 Each rule is either matched or not so every BNF expression is a boolean expression.
 **True** means some part of an input sequence is matched, **false** *always* means nothing is matched even if some part of the input was matched.
@@ -70,8 +70,8 @@ As you can see the generated code can be easily debugged as any handwritten code
 Attributes like *pin* and *recoverUntil*, rule modifiers add some lines to this general structure.
 
 
-Making *recoverUntil* actually work
------------------------------------
+2.2 Making *recoverUntil* actually work
+---------------------------------------
 
 1. This attribute in most cases should be specified on a rule that is inside a loop.
 2. That rule should always have *pin* attribute somewhere as well.
@@ -85,8 +85,8 @@ select_statement ::= SELECT ... {pin=1}  // something has to be pinned!
                                          // pin="SELECT" is a valid alternative
 ````
 
-When nothing helps: *external* rules
-------------------------------------
+2.3 When nothing helps: *external* rules
+----------------------------------------
 
 1. Sometimes it's easier to do something right in code.
 2. Sometimes there's no way around some external dependency.
@@ -116,8 +116,8 @@ public class SampleParserUtil {
 III. HOWTO: Generated PSI Classes Hierarchy
 ========================================
 
-PSI Basics
-----------
+3.1 PSI Basics
+--------------
 
 1. Specify *private* attribute on any rule if you don't want it to be present in AST as early as possible. The first rule is implicitly *private*.
 2. Make use of *extends* attribute to achieve two goals at once: make PSI hierarchy look nice and make AST shallow.
@@ -126,9 +126,10 @@ PSI Basics
 {
   extends(".*_expr")=expr               // make AST for literal one level deep: FileNode/LiteralExpr
                                         //   otherwise it will look like: FileNode/Expr/LiteralExpr
-  // tokens
-  PLUS='+'
-  MINUS='-'
+  tokens = [
+    PLUS='+'
+    MINUS='-'
+  ]
   ...
 }
 expr ::= factor add_expr *
@@ -139,8 +140,8 @@ left mul_expr ::= ('*'|'/') primary     //    then the AST without "extends" wil
 literal_expr ::= ...                    //    FileNode/Expr/AddExpr/MulExpr/LiteralExpr
 ````
 
-Organize PSI using *fake* rules and user methods
-------------------------------------------------
+3.2 Organize PSI using *fake* rules and user methods
+----------------------------------------------------
 ````
 {
   extends("(add|mul)_expr")=binary_expr // this attributes can be placed directly after rule
@@ -190,8 +191,8 @@ public class Visitor extends PsiElementVisitor {
 ````
 
 
-Implement interface via implementation *mixin*
----------------------------------------------
+3.3 Implement interface via implementation *mixin*
+--------------------------------------------------
 ````
 {
   mixin("my_named")="com.sample.psi.impl.MyNamedImplMixin"
@@ -209,8 +210,8 @@ public class MyNamedImplMixin extends MyNamed implements PsiNamedElement {
 }
 ````
 
-Implement interface via method injection
-----------------------------------------
+3.4 Implement interface via method injection
+--------------------------------------------
 ````
 {
   psiImplUtilClass="com.sample.SamplePsiImplUtil"

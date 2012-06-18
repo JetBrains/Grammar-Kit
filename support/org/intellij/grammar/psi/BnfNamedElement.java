@@ -15,7 +15,9 @@
  */
 package org.intellij.grammar.psi;
 
+import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiNameIdentifierOwner;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * User: gregory
@@ -23,4 +25,9 @@ import com.intellij.psi.PsiNameIdentifierOwner;
  * Time: 19:02
  */
 public interface BnfNamedElement extends BnfCompositeElement, PsiNameIdentifierOwner {
+  @NotNull
+  String getName();
+
+  @NotNull
+  PsiElement getId();
 }

@@ -23,10 +23,12 @@ import com.intellij.openapi.util.io.FileUtil;
 import com.intellij.openapi.util.text.StringHash;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.openapi.vfs.VfsUtil;
+import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.NavigatablePsiElement;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.tree.IElementType;
 import com.intellij.util.Function;
+import com.intellij.util.ObjectUtils;
 import com.intellij.util.containers.ContainerUtil;
 import com.intellij.util.containers.MultiMap;
 import com.intellij.util.containers.MultiMapBasedOnSet;
@@ -59,7 +61,7 @@ public class ParserGenerator {
 
   private final Map<String, String> myRuleParserClasses = new TreeMap<String, String>();
   private final Map<String, String> myParserLambdas = new TreeMap<String, String>();
-  private final Set<String> mySimpleTokens = new THashSet<String>();
+  private final Map<String, String> mySimpleTokens = new THashMap<String, String>();
   private final MultiMap<BnfRule, BnfRule> myRuleExtendsMap = new MultiMapBasedOnSet<BnfRule, BnfRule>();
   private final BnfFile myFile;
   private final String myRootPath;
@@ -89,6 +91,9 @@ public class ParserGenerator {
     visitorClassName = StringUtil.isEmpty(tmpVisitorClass)?
                        null : tmpVisitorClass.startsWith(myRuleClassPrefix)?
                               tmpVisitorClass : myRuleClassPrefix + tmpVisitorClass;
+    for (Pair<String, String> pair : getRootAttribute(myFile, KnownAttribute.TOKENS)) {
+      mySimpleTokens.put(pair.second, pair.first); // string value to constant name
+    }
     computeInheritance();
   }
 
@@ -595,7 +600,9 @@ public class ParserGenerator {
   }
 
   private String getStringOrFile(String classHeader) {
-    final File file = new File(VfsUtil.virtualToIoFile(myFile.getVirtualFile()).getParentFile(), classHeader);
+    VirtualFile virtualFile = myFile.getVirtualFile();
+    if (virtualFile == null) return classHeader;
+    File file = new File(VfsUtil.virtualToIoFile(virtualFile).getParentFile(), classHeader);
     try {
       return file.exists()? FileUtil.loadFile(file) : classHeader;
     }
@@ -664,7 +671,7 @@ public class ParserGenerator {
       if (!first.contains(BnfFirstNextAnalyzer.MATCHES_EOF) && !first.contains(BnfFirstNextAnalyzer.MATCHES_ANY)) {
         List<String> elementTypes = new ArrayList<String>(first.size());
         for (String s : first) {
-          String elementType = firstToElementType(rule, s);
+          String elementType = firstToElementType(s);
           if (elementType != null) {
             elementTypes.add(elementType);
           }
@@ -903,26 +910,39 @@ public class ParserGenerator {
   }
 
   @Nullable
-  private String firstToElementType(BnfRule rule, String first) {
+  private String firstToElementType(String first) {
     if (first.startsWith("#") || first.startsWith("-") || first.startsWith("<<")) return null;
     String value = StringUtil.stripQuotesAroundValue(first);
+    //noinspection StringEquality
     if (first != value) {
-      String attributeName = getAttributeName(rule, value);
+      String attributeName = getTokenName(value);
       if (attributeName != null && !first.startsWith("\"")) {
         return getElementType(attributeName);
       }
       return null;
     }
     return getElementType(first);
-  } 
+  }
+
+  private String getTokenName(String value) {
+    String existing = mySimpleTokens.get(value);
+    if (existing == null) {
+      String attributeName = getAttributeName(ContainerUtil.getFirstItem(myFile.getAttributes()), value);
+      if (attributeName != null) {
+        mySimpleTokens.put(value, attributeName);
+        return attributeName;
+      }
+    }
+    return existing;
+  }
 
   private String generateNodeCall(BnfRule rule, @Nullable BnfExpression node, String nextName) {
     IElementType type = node == null ? BNF_REFERENCE_OR_TOKEN : getEffectiveType(node);
     String text = node == null ? nextName : node.getText();
     if (type == BNF_STRING) {
       String value = StringUtil.stripQuotesAroundValue(text);
-      String attributeName = getAttributeName(rule, value);
-      if (attributeName != null && text.charAt(0) != '\"') {
+      String attributeName;
+      if (text.charAt(0) != '\"' && (attributeName = getTokenName(value)) != null) {
         return generateConsumeToken(attributeName);
       }
       return generateConsumeTextToken(value);
@@ -948,6 +968,7 @@ public class ParserGenerator {
           return method + "(builder_, level_ + 1)";
         }
       }
+      mySimpleTokens.put(text, null);
       return generateConsumeToken(text);
     }
     else if (type == BNF_EXTERNAL_EXPRESSION) {
@@ -1059,7 +1080,6 @@ public class ParserGenerator {
   }
 
   private String generateConsumeToken(String tokenName) {
-    mySimpleTokens.add(tokenName);
     return "consumeToken(builder_, " + getElementType(tokenName) + ")";
   }
 
@@ -1099,9 +1119,9 @@ public class ParserGenerator {
       newLine();
       Map<String, String> sortedTokens = new TreeMap<String, String>();
       String tokenCreateCall = tokenTypeFactory == null ? "new " + StringUtil.getShortName(tokenTypeClass) : StringUtil.getShortName(tokenTypeFactory);
-      for (String token : mySimpleTokens) {
-        String name = getRootAttribute(myFile, KnownAttribute.create(String.class, token, token));
-        sortedTokens.put(getElementType(token), name);
+      for (String tokenText : mySimpleTokens.keySet()) {
+        String tokenName = ObjectUtils.chooseNotNull(mySimpleTokens.get(tokenText), tokenText);
+        sortedTokens.put(getElementType(tokenName), tokenText);
       }
       for (String tokenType : sortedTokens.keySet()) {
         out("IElementType " + tokenType + " = " + tokenCreateCall + "(\"" + sortedTokens.get(tokenType) + "\");");
@@ -1327,7 +1347,7 @@ public class ParserGenerator {
     TreeMap<String, BnfReferenceOrToken> result = new TreeMap<String, BnfReferenceOrToken>();
     for (PsiElement tree : accessors) {
       if (!(tree instanceof BnfReferenceOrToken)) continue;
-      if (mySimpleTokens.contains(tree.getText()) /*|| type == STRING || type == NUMBER*/) {
+      if (mySimpleTokens.containsKey(tree.getText()) /*|| type == STRING || type == NUMBER*/) {
         result.put(tree.getText(), (BnfReferenceOrToken)tree);
       }
     }

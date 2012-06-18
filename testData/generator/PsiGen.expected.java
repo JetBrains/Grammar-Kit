@@ -382,11 +382,12 @@ public class PsiGen implements PsiParser {
   // '*' expr
   public static boolean mul_expr(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "mul_expr")) return false;
+    if (!nextTokenIs(builder_, OP_MUL)) return false;
     boolean result_ = false;
     final Marker left_marker_ = (Marker)builder_.getLatestDoneMarker();
     if (!invalid_left_marker_guard_(builder_, left_marker_, "mul_expr")) return false;
     final Marker marker_ = builder_.mark();
-    result_ = consumeToken(builder_, "*");
+    result_ = consumeToken(builder_, OP_MUL);
     result_ = result_ && expr(builder_, level_ + 1);
     if (result_) {
       marker_.drop();

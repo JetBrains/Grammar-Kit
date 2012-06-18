@@ -30,6 +30,8 @@ public interface ParserTypes {
   IElementType ID = new IElementType("id");
   IElementType NUMBER = new IElementType("number");
   IElementType OF = new IElementType("OF");
+  IElementType OP_DIV = new IElementType("/");
+  IElementType OP_MUL = new IElementType("*");
 
   class Factory {
     public static PsiElement createElement(ASTNode node) {

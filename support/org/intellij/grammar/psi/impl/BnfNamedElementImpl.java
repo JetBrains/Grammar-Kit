@@ -49,6 +49,7 @@ public abstract class BnfNamedElementImpl extends BnfCompositeElementImpl implem
     myCachedName = null;
   }
 
+  @NotNull
   @Override
   public String getName() {
     if (myCachedName == null) {
@@ -88,12 +89,6 @@ public abstract class BnfNamedElementImpl extends BnfCompositeElementImpl implem
       return BnfIcons.ATTRIBUTE;
     }
     return super.getIcon(flags);
-  }
-
-  @NotNull
-  public PsiElement getId() {
-    ASTNode child = getNode().findChildByType(BnfTypes.BNF_ID);
-    return child == null ? null : child.getPsi();
   }
 
   @Override

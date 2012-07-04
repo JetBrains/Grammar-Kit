@@ -21,13 +21,10 @@ See [HOWTO](https://github.com/JetBrains/Grammar-Kit/blob/master/HOWTO.md) page 
 
 Recent changes
 --------------
-1.0.5
+1.0.6
 
-* PSI visitor generation
-* Improved PSI generation
-  * better children discovery (esp. for left rules)
-  * user methods and method mixins
-  * *fake* rules to generate better hierarchy
+* Grammar diagram
+* Dedicated "tokens" attribute
 
 
 Quick documentation:
@@ -153,6 +150,12 @@ Just add *mypackage.MyReferenceExpressionImpl* class with proper *getReference()
 
 Change log
 ==========
+1.0.6
+
+* Grammar diagram (UML support plugin required)
+* Dedicated "tokens" attribute
+* Minor fixes
+
 1.0.5
 
 * PSI visitor generation

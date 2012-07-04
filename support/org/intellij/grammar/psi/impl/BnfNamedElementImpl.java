@@ -29,6 +29,8 @@ import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 
+import static org.intellij.grammar.psi.BnfTypes.BNF_ID;
+
 /**
  * Created by IntelliJ IDEA.
  * User: gregory
@@ -105,6 +107,8 @@ public abstract class BnfNamedElementImpl extends BnfCompositeElementImpl implem
 
   @Override
   public String toString() {
-    return super.toString() + ":" + getName();
+    // AE fix in LOG.toString in inconsistent state
+    PsiElement nullableId = findChildByType(BNF_ID);
+    return super.toString() + ":" + (nullableId == null? null : nullableId.getText());
   }
 }

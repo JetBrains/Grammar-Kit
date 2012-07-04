@@ -1,16 +1,21 @@
 package org.intellij.grammar;
 
+import com.intellij.concurrency.JobLauncher;
+import com.intellij.concurrency.JobLauncherImpl;
 import com.intellij.lang.injection.InjectedLanguageManager;
 import com.intellij.openapi.extensions.Extensions;
+import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.DumbServiceImpl;
 import com.intellij.openapi.util.Disposer;
 import com.intellij.openapi.util.io.FileUtil;
 import com.intellij.psi.PsiReferenceService;
 import com.intellij.psi.PsiReferenceServiceImpl;
+import com.intellij.psi.impl.InjectedLanguageFacade;
 import com.intellij.psi.impl.search.CachesBasedRefSearcher;
 import com.intellij.psi.impl.search.PsiSearchHelperImpl;
 import com.intellij.psi.impl.source.tree.injected.InjectedLanguageManagerImpl;
+import com.intellij.psi.impl.source.tree.injected.InjectedLanguageUtil;
 import com.intellij.psi.search.PsiSearchHelper;
 import com.intellij.testFramework.ParsingTestCase;
 import org.intellij.grammar.generator.ParserGenerator;
@@ -46,11 +51,14 @@ public class BnfGeneratorTest extends ParsingTestCase {
     Extensions.getArea(getProject()).registerExtensionPoint("com.intellij.multiHostInjector", "com.intellij.lang.injection.MultiHostInjector");
     Extensions.getRootArea().getExtensionPoint("com.intellij.referencesSearch").registerExtension(new CachesBasedRefSearcher());
     registerApplicationService(PsiReferenceService.class, new PsiReferenceServiceImpl());
+    registerApplicationService(JobLauncher.class, new JobLauncherImpl());
+    registerApplicationService(InjectedLanguageFacade.class, new InjectedLanguageUtil());
     getProject().registerService(PsiSearchHelper.class, new PsiSearchHelperImpl(getPsiManager()));
     getProject().registerService(DumbService.class, new DumbServiceImpl(getProject(), getProject().getMessageBus()));
     InjectedLanguageManagerImpl languageManager = new InjectedLanguageManagerImpl(getProject(), DumbService.getInstance(getProject()));
     Disposer.register(getProject(), languageManager);
     getProject().registerService(InjectedLanguageManager.class, languageManager);
+    ProgressManager.getInstance();
   }
 
   public void testBnfGrammar() throws Exception { doGenTest(true); }

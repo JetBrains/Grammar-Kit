@@ -105,6 +105,35 @@ public class RuleGraphHelper {
       if (c == NONE) return this;
       return optional() && c.optional() ? ANY_NUMBER : AT_LEAST_ONE;
     }
+
+  }
+
+  public static MultiMap<BnfRule, BnfRule> computeInheritance(BnfFile file) {
+    final MultiMap<BnfRule, BnfRule> ruleExtendsMap = new MultiMapBasedOnSet<BnfRule, BnfRule>();
+    for (BnfRule rule : file.getRules()) {
+      if (Rule.isPrivate(rule) || Rule.isExternal(rule)) continue;
+      BnfRule superRule = file.getRule(getAttribute(rule, KnownAttribute.EXTENDS));
+      if (superRule == null) continue;
+      ruleExtendsMap.putValue(superRule, rule);
+    }
+    for (int i = 0, len = ruleExtendsMap.size(); i < len; i++) {
+      boolean changed = false;
+      for (BnfRule superRule : ruleExtendsMap.keySet()) {
+        final Collection<BnfRule> rules = ruleExtendsMap.get(superRule);
+        for (BnfRule rule : new ArrayList<BnfRule>(rules)) {
+          changed |= rules.addAll(ruleExtendsMap.get(rule));
+        }
+      }
+      if (!changed) break;
+    }
+    for (BnfRule rule : ruleExtendsMap.keySet()) {
+      ruleExtendsMap.putValue(rule, rule); // add super to itself
+    }
+    return ruleExtendsMap;
+  }
+
+  public RuleGraphHelper(BnfFile file) {
+    this(file, computeInheritance(file));
   }
 
   public RuleGraphHelper(BnfFile file, MultiMap<BnfRule, BnfRule> ruleExtendsMap) {

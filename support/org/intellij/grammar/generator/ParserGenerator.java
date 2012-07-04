@@ -31,7 +31,6 @@ import com.intellij.util.Function;
 import com.intellij.util.ObjectUtils;
 import com.intellij.util.containers.ContainerUtil;
 import com.intellij.util.containers.MultiMap;
-import com.intellij.util.containers.MultiMapBasedOnSet;
 import gnu.trove.THashMap;
 import gnu.trove.THashSet;
 import org.intellij.grammar.KnownAttribute;
@@ -62,7 +61,7 @@ public class ParserGenerator {
   private final Map<String, String> myRuleParserClasses = new TreeMap<String, String>();
   private final Map<String, String> myParserLambdas = new TreeMap<String, String>();
   private final Map<String, String> mySimpleTokens = new THashMap<String, String>();
-  private final MultiMap<BnfRule, BnfRule> myRuleExtendsMap = new MultiMapBasedOnSet<BnfRule, BnfRule>();
+  private final MultiMap<BnfRule, BnfRule> myRuleExtendsMap;
   private final BnfFile myFile;
   private final String myRootPath;
   private final String myGrammarRoot;
@@ -94,7 +93,7 @@ public class ParserGenerator {
     for (Pair<String, String> pair : getRootAttribute(myFile, KnownAttribute.TOKENS)) {
       mySimpleTokens.put(pair.second, pair.first); // string value to constant name
     }
-    computeInheritance();
+    myRuleExtendsMap = RuleGraphHelper.computeInheritance(myFile);
   }
 
   private void openOutput(File file) throws FileNotFoundException {
@@ -503,29 +502,6 @@ public class ParserGenerator {
       out("return false;");
       out("}");
       newLine();
-    }
-  }
-
-  private void computeInheritance() {
-    for (String ruleName : myRuleParserClasses.keySet()) {
-      BnfRule rule = myFile.getRule(ruleName);
-      if (Rule.isPrivate(rule) || Rule.isExternal(rule)) continue;
-      BnfRule superRule = myFile.getRule(getAttribute(rule, KnownAttribute.EXTENDS));
-      if (superRule == null) continue;
-      myRuleExtendsMap.putValue(superRule, rule);
-    }
-    for (int i = 0, len = myRuleExtendsMap.size(); i < len; i++) {
-      boolean changed = false;
-      for (BnfRule superRule : myRuleExtendsMap.keySet()) {
-        final Collection<BnfRule> rules = myRuleExtendsMap.get(superRule);
-        for (BnfRule rule : new ArrayList<BnfRule>(rules)) {
-          changed |= rules.addAll(myRuleExtendsMap.get(rule));
-        }
-      }
-      if (!changed) break;
-    }
-    for (BnfRule rule : myRuleExtendsMap.keySet()) {
-      myRuleExtendsMap.putValue(rule, rule); // add super to itself
     }
   }
 

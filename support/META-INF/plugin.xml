@@ -1,13 +1,23 @@
 <idea-plugin url="https://github.com/JetBrains/Grammar-Kit" version="2">
   <id>org.jetbrains.idea.grammar</id>
-  <version>1.0.5</version>
+  <version>1.0.6</version>
   <vendor email="gregory.shrago@jetbrains.com" logo="">Gregory Shrago</vendor>
   <idea-version since-build="116.108" until-build=""/>
 
   <name>Grammar-Kit</name>
   <description>Edit, manipulate, analyze BNF grammars and generate readable parser/PSI code</description>
+
+  <depends optional="true" config-file="plugin-java.xml">com.intellij.modules.java</depends>
+  <depends optional="true" config-file="plugin-uml.xml">com.intellij.diagram</depends>
+
   <change-notes>
     <![CDATA[
+    <p>1.0.6</p>
+    <ul>
+        <li>Grammar diagram (UML support plugin required)</li>
+        <li>Dedicated "tokens" attribute</li>
+        <li>Minor fixes</li>
+    </ul>
     <p>1.0.5</p>
     <ul>
         <li>Generator: PSI visitor generation</li>
@@ -53,7 +63,6 @@
     ]]>
   </change-notes>
 
-  <depends optional="true" config-file="plugin-java.xml">com.intellij.modules.java</depends>
   <extensions defaultExtensionNs="com.intellij">
     <errorHandler implementation="com.intellij.diagnostic.ITNReporter"/>
 

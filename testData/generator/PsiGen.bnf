@@ -44,3 +44,10 @@ some_expr ::= (a_expr | specialRef b_expr | some_expr_private) (cast_expr) (item
 private some_expr_private ::= specialRef b_expr
 left cast_expr ::= '::' id
 left item_expr ::= '[' number ']'
+
+;{
+  parserClass="PsiGenFixes"
+}
+
+LeftShadowTest ::= identifier LeftShadow *
+left LeftShadow ::= ',' identifier

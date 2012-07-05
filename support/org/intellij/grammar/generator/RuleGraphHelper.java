@@ -15,8 +15,8 @@
  */
 package org.intellij.grammar.generator;
 
+import com.intellij.lang.Language;
 import com.intellij.psi.PsiElement;
-import com.intellij.psi.TokenType;
 import com.intellij.psi.impl.source.tree.LeafPsiElement;
 import com.intellij.psi.tree.IElementType;
 import com.intellij.psi.util.PsiTreeUtil;
@@ -35,6 +35,7 @@ import java.util.*;
 
 import static org.intellij.grammar.generator.ParserGeneratorUtil.*;
 import static org.intellij.grammar.generator.RuleGraphHelper.Cardinality.*;
+import static org.intellij.grammar.psi.BnfTypes.BNF_OP_ZEROMORE;
 import static org.intellij.grammar.psi.BnfTypes.BNF_SEQUENCE;
 import static org.intellij.grammar.psi.impl.GrammarUtil.collectExtraArguments;
 import static org.intellij.grammar.psi.impl.GrammarUtil.nextOrParent;
@@ -49,7 +50,7 @@ public class RuleGraphHelper {
   private final Map<BnfRule, Map<PsiElement, Cardinality>> myMap;
   private final MultiMap<BnfRule,BnfRule> myRulesGraph;
 
-  private static final LeafPsiElement LEFT_MARKER = new LeafPsiElement(TokenType.WHITE_SPACE, "LEFT_MARKER");
+  private static final LeafPsiElement LEFT_MARKER = new LeafPsiElement(new IElementType("LEFT_MARKER", Language.ANY, false) {}, "LEFT_MARKER");
 
   public enum Cardinality {
     NONE, OPTIONAL, REQUIRED, AT_LEAST_ONE, ANY_NUMBER;
@@ -348,13 +349,6 @@ public class RuleGraphHelper {
       for (Iterator<Map<PsiElement, Cardinality>> it = list.iterator(); it.hasNext(); ) {
         if (it.next().isEmpty()) it.remove();
       }
-      if (list.size() == 1) {
-        Map<PsiElement, Cardinality> m = list.get(0);
-        if (checkInheritance && m.size() == 1 && collapseNode(rule, m.keySet().iterator().next())) {
-          return Collections.emptyMap();
-        }
-        return m;
-      }
       Map<PsiElement, Cardinality> map = new HashMap<PsiElement, Cardinality>();
       for (Map<PsiElement, Cardinality> m : list) {
         Cardinality leftMarker = m.get(LEFT_MARKER);
@@ -362,12 +356,36 @@ public class RuleGraphHelper {
           map.clear();
           leftMarker = null;
         }
+        else if (leftMarker == OPTIONAL) {
+          for (PsiElement t : map.keySet()) {
+            if (!m.containsKey(t)) {
+              map.put(t, map.get(t).and(Cardinality.OPTIONAL));
+            }
+          }
+        }
         for (PsiElement t : m.keySet()) {
           if (t == LEFT_MARKER && m != list.get(0)) continue;
-          Cardinality joinedCard = m.get(t).or(map.get(t));
-          if (leftMarker == OPTIONAL) joinedCard = joinedCard.single();
+          Cardinality c1 = map.get(t);
+          Cardinality c2 = m.get(t);
+          Cardinality joinedCard;
+          if (leftMarker == null) {
+            joinedCard = c2.or(c1);
+
+          }
+          // handle left semantic in a choice-like way
+          else if (c1 == null) {
+            joinedCard = c2;
+          }
+          else {
+            if (c1 == REQUIRED) joinedCard = c2.many()? AT_LEAST_ONE : REQUIRED;
+            else if (c1 == AT_LEAST_ONE) joinedCard = ANY_NUMBER;
+            else joinedCard = c1;
+          }
           map.put(t, joinedCard);
         }
+      }
+      if (checkInheritance && map.size() == 1 && collapseNode(rule, map.keySet().iterator().next())) {
+        return Collections.emptyMap();
       }
       return map;
     }

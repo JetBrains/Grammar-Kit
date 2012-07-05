@@ -835,3 +835,76 @@ public class PsiGen2 {
   }
 
 }
+// ---- PsiGenFixes.java -----------------
+//header.txt
+package ;
+
+import org.jetbrains.annotations.*;
+import com.intellij.lang.LighterASTNode;
+import com.intellij.lang.PsiBuilder;
+import com.intellij.lang.PsiBuilder.Marker;
+import com.intellij.openapi.diagnostic.Logger;
+import static generated.ParserTypes.*;
+import static PsiGenUtil.*;
+import static PsiGen.*;
+
+@SuppressWarnings({"SimplifiableIfStatement", "UnusedAssignment"})
+public class PsiGenFixes {
+
+  public static Logger LOG_ = Logger.getInstance("PsiGenFixes");
+
+  /* ********************************************************** */
+  // ',' identifier
+  public static boolean LeftShadow(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "LeftShadow")) return false;
+    boolean result_ = false;
+    final Marker left_marker_ = (Marker)builder_.getLatestDoneMarker();
+    if (!invalid_left_marker_guard_(builder_, left_marker_, "LeftShadow")) return false;
+    final Marker marker_ = builder_.mark();
+    result_ = consumeToken(builder_, ",");
+    result_ = result_ && PsiGen2.identifier(builder_, level_ + 1);
+    if (result_) {
+      marker_.drop();
+      left_marker_.precede().done(LEFTSHADOW);
+    }
+    else {
+      marker_.rollbackTo();
+    }
+    return result_;
+  }
+
+  /* ********************************************************** */
+  // identifier LeftShadow *
+  public static boolean LeftShadowTest(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "LeftShadowTest")) return false;
+    if (!nextTokenIs(builder_, ID)) return false;
+    boolean result_ = false;
+    final Marker marker_ = builder_.mark();
+    result_ = PsiGen2.identifier(builder_, level_ + 1);
+    result_ = result_ && LeftShadowTest_1(builder_, level_ + 1);
+    if (result_) {
+      marker_.done(LEFTSHADOWTEST);
+    }
+    else {
+      marker_.rollbackTo();
+    }
+    return result_;
+  }
+
+  // LeftShadow *
+  private static boolean LeftShadowTest_1(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "LeftShadowTest_1")) return false;
+    int offset_ = builder_.getCurrentOffset();
+    while (true) {
+      if (!LeftShadow(builder_, level_ + 1)) break;
+      int next_offset_ = builder_.getCurrentOffset();
+      if (offset_ == next_offset_) {
+        empty_element_parsed_guard_(builder_, offset_, "LeftShadowTest_1");
+        break;
+      }
+      offset_ = next_offset_;
+    }
+    return true;
+  }
+
+}

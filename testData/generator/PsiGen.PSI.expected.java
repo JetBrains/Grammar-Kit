@@ -16,6 +16,8 @@ public interface ParserTypes {
   IElementType IDENTIFIER = new IElementType("IDENTIFIER");
   IElementType ID_EXPR = new IElementType("ID_EXPR");
   IElementType ITEM_EXPR = new IElementType("ITEM_EXPR");
+  IElementType LEFTSHADOW = new IElementType("LEFTSHADOW");
+  IElementType LEFTSHADOWTEST = new IElementType("LEFTSHADOWTEST");
   IElementType LITERAL = new IElementType("LITERAL");
   IElementType MISSING_EXTERNAL_TYPE = new IElementType("MISSING_EXTERNAL_TYPE");
   IElementType MUL_EXPR = new IElementType("MUL_EXPR");
@@ -57,6 +59,12 @@ public interface ParserTypes {
       else if (type == ITEM_EXPR) {
         return new XItemExprImpl(node);
       }
+      else if (type == LEFTSHADOW) {
+        return new XLeftShadowImpl(node);
+      }
+      else if (type == LEFTSHADOWTEST) {
+        return new XLeftShadowTestImpl(node);
+      }
       else if (type == LITERAL) {
         return new XLiteralImpl(node);
       }
@@ -90,6 +98,40 @@ public interface ParserTypes {
       throw new AssertionError("Unknown element type: " + type);
     }
   }
+}
+// ---- XLeftShadow.java -----------------
+//header.txt
+package generated.psi;
+
+import java.util.List;
+import org.jetbrains.annotations.*;
+import com.intellij.psi.PsiElement;
+
+public interface XLeftShadow extends XComposite {
+
+  @Nullable
+  XLeftShadow getLeftShadow();
+
+  @NotNull
+  List<XIdentifier> getIdentifierList();
+
+}
+// ---- XLeftShadowTest.java -----------------
+//header.txt
+package generated.psi;
+
+import java.util.List;
+import org.jetbrains.annotations.*;
+import com.intellij.psi.PsiElement;
+
+public interface XLeftShadowTest extends XComposite {
+
+  @Nullable
+  XLeftShadow getLeftShadow();
+
+  @Nullable
+  XIdentifier getIdentifier();
+
 }
 // ---- XBlockOf.java -----------------
 //header.txt
@@ -327,6 +369,82 @@ public interface XSpecialRef extends XRefExpr {
 
   @NotNull
   XRefExpr getRefExpr();
+
+}
+// ---- XLeftShadowImpl.java -----------------
+//header.txt
+package generated.psi.impl;
+
+import java.util.List;
+import org.jetbrains.annotations.*;
+import com.intellij.lang.ASTNode;
+import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiElementVisitor;
+import com.intellij.psi.util.PsiTreeUtil;
+import static generated.ParserTypes.*;
+import generated.CompositeElementImpl;
+import generated.psi.*;
+
+public class XLeftShadowImpl extends CompositeElementImpl implements XLeftShadow {
+
+  public XLeftShadowImpl(ASTNode node) {
+    super(node);
+  }
+
+  @Override
+  @Nullable
+  public XLeftShadow getLeftShadow() {
+    return findChildByClass(XLeftShadow.class);
+  }
+
+  @Override
+  @NotNull
+  public List<XIdentifier> getIdentifierList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, XIdentifier.class);
+  }
+
+  public void accept(@NotNull PsiElementVisitor visitor) {
+    if (visitor instanceof XVisitor) ((XVisitor)visitor).visitLeftShadow(this);
+    else super.accept(visitor);
+  }
+
+}
+// ---- XLeftShadowTestImpl.java -----------------
+//header.txt
+package generated.psi.impl;
+
+import java.util.List;
+import org.jetbrains.annotations.*;
+import com.intellij.lang.ASTNode;
+import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiElementVisitor;
+import com.intellij.psi.util.PsiTreeUtil;
+import static generated.ParserTypes.*;
+import generated.CompositeElementImpl;
+import generated.psi.*;
+
+public class XLeftShadowTestImpl extends CompositeElementImpl implements XLeftShadowTest {
+
+  public XLeftShadowTestImpl(ASTNode node) {
+    super(node);
+  }
+
+  @Override
+  @Nullable
+  public XLeftShadow getLeftShadow() {
+    return findChildByClass(XLeftShadow.class);
+  }
+
+  @Override
+  @Nullable
+  public XIdentifier getIdentifier() {
+    return findChildByClass(XIdentifier.class);
+  }
+
+  public void accept(@NotNull PsiElementVisitor visitor) {
+    if (visitor instanceof XVisitor) ((XVisitor)visitor).visitLeftShadowTest(this);
+    else super.accept(visitor);
+  }
 
 }
 // ---- XBlockOfImpl.java -----------------
@@ -868,6 +986,14 @@ import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElementVisitor;
 
 public class XVisitor extends PsiElementVisitor {
+
+  public void visitLeftShadow(@NotNull XLeftShadow o) {
+    visitComposite(o);
+  }
+
+  public void visitLeftShadowTest(@NotNull XLeftShadowTest o) {
+    visitComposite(o);
+  }
 
   public void visitBlockOf(@NotNull XBlockOf o) {
     visitComposite(o);

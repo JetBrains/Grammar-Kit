@@ -23,6 +23,8 @@ import com.intellij.diagram.presentation.DiagramState;
 import com.intellij.openapi.actionSystem.DataContext;
 import com.intellij.openapi.actionSystem.LangDataKeys;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.util.Comparing;
+import com.intellij.openapi.util.Condition;
 import com.intellij.openapi.util.ModificationTracker;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.openapi.vfs.VirtualFile;
@@ -32,9 +34,9 @@ import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiManager;
 import com.intellij.psi.PsiNamedElement;
 import com.intellij.ui.SimpleColoredText;
+import com.intellij.ui.SimpleTextAttributes;
 import com.intellij.util.PlatformIcons;
 import com.intellij.util.containers.ContainerUtil;
-import com.intellij.util.containers.FilteringIterator;
 import gnu.trove.THashMap;
 import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.generator.RuleGraphHelper;
@@ -44,11 +46,10 @@ import org.intellij.lang.annotations.Pattern;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import javax.swing.*;
 import java.awt.*;
-import java.util.Collection;
-import java.util.HashSet;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
 
 import static org.intellij.grammar.generator.ParserGeneratorUtil.getAttribute;
 
@@ -91,6 +92,7 @@ public class BnfDiagramProvider extends DiagramProvider<PsiNamedElement> {
 
     @Override
     public SimpleColoredText getPresentableName(Object o, DiagramState diagramState) {
+      if (o instanceof Map.Entry) o = ((Map.Entry)o).getKey();
       if (o instanceof PsiNamedElement) {
         return new SimpleColoredText(StringUtil.notNullize(((PsiNamedElement)o).getName()), DEFAULT_TITLE_ATTR);
       }
@@ -101,9 +103,48 @@ public class BnfDiagramProvider extends DiagramProvider<PsiNamedElement> {
     public Object[] getNodeElements(PsiNamedElement parent) {
       if (parent instanceof BnfRule) {
         Map<PsiElement, RuleGraphHelper.Cardinality> map = myGraphHelper.getFor((BnfRule)parent);
-        return ContainerUtil.findAll(map.keySet(), new FilteringIterator.InstanceOf(BnfRule.class)).toArray();
+        Object[] objects = ContainerUtil.findAll(map.entrySet(), new Condition<Map.Entry<PsiElement, RuleGraphHelper.Cardinality>>() {
+          @Override
+          public boolean value(Map.Entry<PsiElement, RuleGraphHelper.Cardinality> p) {
+            return p.getKey() instanceof BnfRule;
+          }
+        }).toArray();
+        Arrays.sort(objects, new Comparator<Object>() {
+          @Override
+          public int compare(Object o, Object o1) {
+            return Comparing.compare(((Map.Entry<BnfRule, ?>)o).getKey().getName(), ((Map.Entry<BnfRule, ?>)o1).getKey().getName());
+          }
+        });
+        return objects;
       }
       return super.getNodeElements(parent);
+    }
+
+    @Override
+    public SimpleColoredText getPresentableType(Object element) {
+      if (element instanceof Map.Entry) {
+        RuleGraphHelper.Cardinality cardinality = (RuleGraphHelper.Cardinality)((Map.Entry)element).getValue();
+        String text = null;
+        if (cardinality == RuleGraphHelper.Cardinality.AT_LEAST_ONE) {
+          text = " + ";
+        }
+        else if (cardinality == RuleGraphHelper.Cardinality.ANY_NUMBER) {
+          text = " * ";
+        }
+        else if (cardinality == RuleGraphHelper.Cardinality.OPTIONAL) {
+          text = " ? ";
+        }
+        if (text != null) {
+          return new SimpleColoredText(text, SimpleTextAttributes.GRAY_ITALIC_ATTRIBUTES);
+        }
+      }
+      return super.getPresentableType(element);
+    }
+
+    @Override
+    public Icon getNodeElementIcon(Object element, DiagramState presentation) {
+      if (element instanceof Map.Entry) element = ((Map.Entry)element).getKey();
+      return super.getNodeElementIcon(element, presentation);
     }
 
     @Override

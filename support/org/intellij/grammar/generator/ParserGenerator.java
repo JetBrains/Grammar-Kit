@@ -704,6 +704,7 @@ public class ParserGenerator {
     }
 
     boolean predicateEncountered = false;
+    int[] skip = {0};
     for (int i = 0, p = 0, childrenSize = children.size(); i < childrenSize; i++) {
       BnfExpression child = children.get(i);
 
@@ -713,29 +714,37 @@ public class ParserGenerator {
       }
       else if (type == BNF_SEQUENCE) {
         predicateEncountered |= pinApplied && ParserGeneratorUtil.getEffectiveExpression(myFile, child) instanceof BnfPredicate;
-        if (i > 0) {
-          if (pinApplied && generateExtendedPin && !predicateEncountered) {
-            if (i == childrenSize - 1) {
-              if (i == p + 1) {
-                out("result_ = result_ && " + nodeCall + ";");
-              }
-              else {
-                out("result_ = pinned_ && " + nodeCall + " && result_;");
-              }
-            }
-            else if (i == p + 1) {
-              out("result_ = result_ && report_error_(builder_, " + nodeCall + ");");
-            }
-            else {
-              out("result_ = pinned_ && report_error_(builder_, " + nodeCall + ") && result_;");
-            }
+        if (skip[0] == 0) {
+          nodeCall = generateTokenSequenceCall(children, i, pinMatcher, pinApplied, skip, nodeCall);
+          if (i == 0) {
+            out("result_ = " + nodeCall + ";");
           }
           else {
-            out("result_ = result_ && " + nodeCall + ";");
+            if (pinApplied && generateExtendedPin && !predicateEncountered) {
+              if (i == childrenSize - 1) {
+                // do not report error for last child
+                if (i == p + 1) {
+                  out("result_ = result_ && " + nodeCall + ";");
+                }
+                else {
+                  out("result_ = pinned_ && " + nodeCall + " && result_;");
+                }
+              }
+              else if (i == p + 1) {
+                out("result_ = result_ && report_error_(builder_, " + nodeCall + ");");
+              }
+              else {
+                out("result_ = pinned_ && report_error_(builder_, " + nodeCall + ") && result_;");
+              }
+            }
+            else {
+              out("result_ = result_ && " + nodeCall + ";");
+            }
           }
         }
         else {
-          out("result_ = " + nodeCall + ";");
+          skip[0] --; // we are inside already generated token sequence
+          if (pinApplied && i == p + 1) p ++; // shift pinned index as we skip
         }
         if (!pinApplied && pinMatcher.matches(i, child)) {
           pinApplied = true;
@@ -749,7 +758,6 @@ public class ParserGenerator {
       else if (type == BNF_OP_ONEMORE || type == BNF_OP_ZEROMORE) {
         if (type == BNF_OP_ONEMORE) {
           out("result_ = " + nodeCall + ";");
-          nodeCall = generateNodeCall(rule, child, getNextName(funcName, i));
         }
         out("int offset_ = builder_.getCurrentOffset();");
         out("while ("+ (alwaysTrue? "true" : "result_") +") {");
@@ -910,6 +918,37 @@ public class ParserGenerator {
       }
     }
     return existing;
+  }
+
+  private String generateTokenSequenceCall(List<BnfExpression> children,
+                                           int startIndex,
+                                           PinMatcher pinMatcher,
+                                           boolean pinApplied,
+                                           int[] skip,
+                                           String nodeCall) {
+    if (startIndex == children.size() - 1 || !nodeCall.startsWith("consumeToken(builder_, ")) return nodeCall;
+    ArrayList<String> list = new ArrayList<String>();
+    int pin = pinApplied? -1 : 0;
+    for (int i = startIndex, len = children.size(); i < len; i++) {
+      BnfExpression child = children.get(i);
+      IElementType type = child.getNode().getElementType();
+      String text = child.getText();
+      String tokenName;
+      if (type == BNF_STRING && text.charAt(0) != '\"') {
+        tokenName = getTokenName(StringUtil.stripQuotesAroundValue(text));
+      }
+      else if (type == BNF_REFERENCE_OR_TOKEN && myFile.getRule(text) == null) {
+        tokenName = text;
+      }
+      else break;
+      list.add(getElementType(tokenName));
+      if (!pinApplied && pinMatcher.matches(i, child)) {
+        pin = i - startIndex + 1;
+      }
+    }
+    if (list.size() < 2) return nodeCall;
+    skip[0] = list.size() - 1;
+    return "consumeTokens(builder_, "+pin+", " + StringUtil.join(list, ", ")+")";
   }
 
   private String generateNodeCall(BnfRule rule, @Nullable BnfExpression node, String nextName) {

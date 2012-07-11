@@ -183,8 +183,7 @@ public class Autopin implements PsiParser {
     final int start_ = builder_.getCurrentOffset();
     final Marker marker_ = builder_.mark();
     enterErrorRecordingSection(builder_, level_, _SECTION_GENERAL_);
-    result_ = consumeToken(builder_, DROP);
-    result_ = result_ && consumeToken(builder_, TABLE);
+    result_ = consumeTokens(builder_, 0, DROP, TABLE);
     result_ = result_ && parseReference(builder_, level_ + 1);
     pinned_ = result_; // pin = .*_ref
     LighterASTNode last_ = result_? builder_.getLatestDoneMarker() : null;
@@ -210,10 +209,9 @@ public class Autopin implements PsiParser {
     boolean pinned_ = false;
     final Marker marker_ = builder_.mark();
     enterErrorRecordingSection(builder_, level_, _SECTION_GENERAL_);
-    result_ = consumeToken(builder_, A);
+    result_ = consumeTokens(builder_, 1, A, B);
     pinned_ = result_; // pin = 1
-    result_ = result_ && report_error_(builder_, consumeToken(builder_, B));
-    result_ = pinned_ && override_nested_sequence_2(builder_, level_ + 1) && result_;
+    result_ = result_ && override_nested_sequence_2(builder_, level_ + 1);
     if (result_ || pinned_) {
       marker_.done(OVERRIDE_NESTED_SEQUENCE);
     }
@@ -235,9 +233,7 @@ public class Autopin implements PsiParser {
     if (!recursion_guard_(builder_, level_, "override_nested_sequence_2_0")) return false;
     boolean result_ = false;
     final Marker marker_ = builder_.mark();
-    result_ = consumeToken(builder_, C);
-    result_ = result_ && consumeToken(builder_, D);
-    result_ = result_ && consumeToken(builder_, E);
+    result_ = consumeTokens(builder_, 0, C, D, E);
     if (!result_) {
       marker_.rollbackTo();
     }
@@ -285,6 +281,74 @@ public class Autopin implements PsiParser {
       marker_.rollbackTo();
     }
     return result_;
+  }
+
+  /* ********************************************************** */
+  // a b c d table_ref
+  static boolean token_sequence1(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "token_sequence1")) return false;
+    if (!nextTokenIs(builder_, A)) return false;
+    boolean result_ = false;
+    boolean pinned_ = false;
+    final Marker marker_ = builder_.mark();
+    enterErrorRecordingSection(builder_, level_, _SECTION_GENERAL_);
+    result_ = consumeTokens(builder_, 3, A, B, C, D);
+    pinned_ = result_; // pin = 3
+    result_ = result_ && parseReference(builder_, level_ + 1);
+    if (!result_ && !pinned_) {
+      marker_.rollbackTo();
+    }
+    else {
+      marker_.drop();
+    }
+    result_ = exitErrorRecordingSection(builder_, result_, level_, pinned_, _SECTION_GENERAL_, null);
+    return result_ || pinned_;
+  }
+
+  /* ********************************************************** */
+  // a b table_ref c d e
+  static boolean token_sequence2(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "token_sequence2")) return false;
+    if (!nextTokenIs(builder_, A)) return false;
+    boolean result_ = false;
+    boolean pinned_ = false;
+    final Marker marker_ = builder_.mark();
+    enterErrorRecordingSection(builder_, level_, _SECTION_GENERAL_);
+    result_ = consumeTokens(builder_, 0, A, B);
+    result_ = result_ && parseReference(builder_, level_ + 1);
+    result_ = result_ && consumeTokens(builder_, 2, C, D, E);
+    pinned_ = result_; // pin = 5
+    if (!result_ && !pinned_) {
+      marker_.rollbackTo();
+    }
+    else {
+      marker_.drop();
+    }
+    result_ = exitErrorRecordingSection(builder_, result_, level_, pinned_, _SECTION_GENERAL_, null);
+    return result_ || pinned_;
+  }
+
+  /* ********************************************************** */
+  // table_ref a b table_ref c d e
+  static boolean token_sequence3(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "token_sequence3")) return false;
+    boolean result_ = false;
+    boolean pinned_ = false;
+    final Marker marker_ = builder_.mark();
+    enterErrorRecordingSection(builder_, level_, _SECTION_GENERAL_);
+    result_ = parseReference(builder_, level_ + 1);
+    pinned_ = result_; // pin = 1
+    result_ = result_ && report_error_(builder_, consumeTokens(builder_, -1, A, B));
+    result_ = pinned_ && report_error_(builder_, parseReference(builder_, level_ + 1)) && result_;
+    result_ = pinned_ && report_error_(builder_, consumeTokens(builder_, -1, C, D, E)) && result_;
+    if (!result_ && !pinned_) {
+      marker_.rollbackTo();
+    }
+    else {
+      marker_.drop();
+    }
+    result_ = exitErrorRecordingSection(builder_, result_, level_, pinned_, _SECTION_GENERAL_, null);
+    return result_ || pinned_;
   }
 
 }

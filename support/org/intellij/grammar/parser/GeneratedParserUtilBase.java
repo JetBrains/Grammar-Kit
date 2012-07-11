@@ -18,6 +18,7 @@ import com.intellij.psi.impl.source.tree.CompositePsiElement;
 import com.intellij.psi.tree.ICompositeElementType;
 import com.intellij.psi.tree.IElementType;
 import com.intellij.psi.tree.TokenSet;
+import com.intellij.util.Function;
 import com.intellij.util.containers.LimitedPool;
 import gnu.trove.THashSet;
 import org.jetbrains.annotations.NotNull;
@@ -78,6 +79,23 @@ public class GeneratedParserUtilBase {
 
     Frame frame = state.levelCheck.isEmpty() ? null : state.levelCheck.getLast();
     return frame == null || frame.errorReportedAt <= builder_.getCurrentOffset();
+  }
+
+  public static boolean consumeTokens(PsiBuilder builder_, int pin_, IElementType... tokens_) {
+    ErrorState state = ErrorState.get(builder_);
+    if (state.completionState != null && state.predicateSign) {
+      addCompletionVariant(state, state.completionState, builder_, tokens_, builder_.getCurrentOffset());
+    }
+    boolean result_ = true;
+    boolean pinned_ = false;
+    for (int i = 0, tokensLength = tokens_.length; i < tokensLength; i++) {
+      if (pin_ > 0 && i == pin_) pinned_ = result_;
+      if ((result_ || pinned_) && !consumeToken(builder_, tokens_[i])) {
+        result_ = false;
+        if (pin_ < 0 || pinned_) report_error_(builder_);
+      }
+    }
+    return pinned_ || result_;
   }
 
   public static boolean consumeToken(PsiBuilder builder_, IElementType token) {
@@ -352,7 +370,7 @@ public class GeneratedParserUtilBase {
 
   public static final Key<CompletionState> COMPLETION_STATE_KEY = Key.create("COMPLETION_STATE_KEY");
 
-  public static class CompletionState {
+  public static class CompletionState implements Function<Object, String> {
     public final int offset;
     public final Collection<String> items = new THashSet<String>();
 
@@ -362,6 +380,11 @@ public class GeneratedParserUtilBase {
 
     @Nullable
     public String convertItem(Object o) {
+      return o instanceof Object[] ? StringUtil.join((Object[]) o, this, " ") : o.toString();
+    }
+
+    @Override
+    public String fun(Object o) {
       return o.toString();
     }
   }

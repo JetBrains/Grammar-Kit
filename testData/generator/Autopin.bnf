@@ -20,3 +20,6 @@ create_table_statement ::= CREATE TEMP? (GLOBAL|LOCAL) TABLE table_ref '(' ')'
 drop_statement ::= drop_table_statement
 drop_table_statement ::= DROP TABLE table_ref
 override_nested_sequence ::= a b (c d e) {pin=1}
+private token_sequence1 ::= a b c d table_ref {pin=3}
+private token_sequence2 ::= a b table_ref c d e {pin=5}
+private token_sequence3 ::= table_ref a b table_ref c d e {pin=1}

@@ -6,6 +6,9 @@
       <element id="directory" name="templates">
         <element id="file-copy" path="$PROJECT_DIR$/support/org/intellij/grammar/parser/GeneratedParserUtilBase.java" />
       </element>
+      <element id="directory" name="META-INF">
+        <element id="file-copy" path="$PROJECT_DIR$/support/META-INF/MANIFEST.MF" />
+      </element>
     </root>
   </artifact>
 </component>

@@ -74,6 +74,8 @@ public class ParserGenerator {
   private int myOffset;
   private PrintWriter myOut;
 
+  private boolean myUnitTestMode;
+
   public ParserGenerator(BnfFile tree, String path) {
     myFile = tree;
     myRootPath = path;
@@ -96,11 +98,14 @@ public class ParserGenerator {
     myRuleExtendsMap = RuleGraphHelper.computeInheritance(myFile);
   }
 
+  public void setUnitTestMode(boolean unitTestMode) {
+    myUnitTestMode = unitTestMode;
+  }
+
   private void openOutput(File file) throws FileNotFoundException {
-    boolean unitTestMode = ApplicationManager.getApplication().isUnitTestMode();
     String grammarName = FileUtil.getNameWithoutExtension(myFile.getName());
     String fileName = FileUtil.getNameWithoutExtension(file);
-    if (unitTestMode) {
+    if (myUnitTestMode) {
       String name = grammarName + (fileName.startsWith(grammarName) || fileName.endsWith("Parser")? "" : ".PSI") + ".java";
       myOut = new PrintWriter(new FileOutputStream(new File(myRootPath, name), true));
       out("// ---- "+ file.getName()+ " -----------------");

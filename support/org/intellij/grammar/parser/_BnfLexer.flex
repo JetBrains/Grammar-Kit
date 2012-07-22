@@ -39,7 +39,7 @@ NUMBER={DIGIT}+ | "0x" {HEX}+
 ESC="\\" ( [^] | "u" {HEX}{HEX}{HEX}{HEX} )
 CHAR={ESC} | [^\r\n\'\"\\]
 STRING_BAD1=\" ({CHAR} | \') *
-STRING_BAD2=\' {CHAR} *
+STRING_BAD2=\' ({CHAR} | \") *
 STRING={STRING_BAD1} \" | {STRING_BAD2} \'
 
 BAD_TOKENS={STRING_BAD1} | {STRING_BAD2}

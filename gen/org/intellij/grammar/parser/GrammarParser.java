@@ -133,7 +133,7 @@ public class GrammarParser implements PsiParser {
     boolean result_ = false;
     boolean pinned_ = false;
     final Marker marker_ = builder_.mark();
-    enterErrorRecordingSection(builder_, level_, _SECTION_GENERAL_);
+    enterErrorRecordingSection(builder_, level_, _SECTION_GENERAL_, null);
     result_ = consumeToken(builder_, BNF_LEFT_BRACE);
     result_ = result_ && alt_choice_expression_1(builder_, level_ + 1);
     pinned_ = result_; // pin = 2
@@ -145,7 +145,7 @@ public class GrammarParser implements PsiParser {
     else {
       marker_.drop();
     }
-    result_ = exitErrorRecordingSection(builder_, result_, level_, pinned_, _SECTION_GENERAL_, null);
+    result_ = exitErrorRecordingSection(builder_, level_, result_, pinned_, _SECTION_GENERAL_, null);
     return result_ || pinned_;
   }
 
@@ -154,10 +154,10 @@ public class GrammarParser implements PsiParser {
     if (!recursion_guard_(builder_, level_, "alt_choice_expression_1")) return false;
     boolean result_ = false;
     final Marker marker_ = builder_.mark();
-    enterErrorRecordingSection(builder_, level_, _SECTION_NOT_);
+    enterErrorRecordingSection(builder_, level_, _SECTION_NOT_, null);
     result_ = !attr_start_simple(builder_, level_ + 1);
     marker_.rollbackTo();
-    result_ = exitErrorRecordingSection(builder_, result_, level_, false, _SECTION_NOT_, null);
+    result_ = exitErrorRecordingSection(builder_, level_, result_, false, _SECTION_NOT_, null);
     return result_;
   }
 
@@ -168,7 +168,7 @@ public class GrammarParser implements PsiParser {
     boolean result_ = false;
     boolean pinned_ = false;
     final Marker marker_ = builder_.mark();
-    enterErrorRecordingSection(builder_, level_, _SECTION_RECOVER_);
+    enterErrorRecordingSection(builder_, level_, _SECTION_RECOVER_, "<attr>");
     result_ = attr_start(builder_, level_ + 1);
     pinned_ = result_; // pin = 1
     result_ = result_ && report_error_(builder_, attr_value(builder_, level_ + 1));
@@ -179,7 +179,7 @@ public class GrammarParser implements PsiParser {
     else {
       marker_.rollbackTo();
     }
-    result_ = exitErrorRecordingSection(builder_, result_, level_, pinned_, _SECTION_RECOVER_, attr_recover_until_parser_);
+    result_ = exitErrorRecordingSection(builder_, level_, result_, pinned_, _SECTION_RECOVER_, attr_recover_until_parser_);
     return result_ || pinned_;
   }
 
@@ -198,7 +198,7 @@ public class GrammarParser implements PsiParser {
     boolean result_ = false;
     boolean pinned_ = false;
     final Marker marker_ = builder_.mark();
-    enterErrorRecordingSection(builder_, level_, _SECTION_GENERAL_);
+    enterErrorRecordingSection(builder_, level_, _SECTION_GENERAL_, null);
     result_ = consumeToken(builder_, BNF_LEFT_PAREN);
     pinned_ = result_; // pin = 1
     result_ = result_ && report_error_(builder_, string_literal_expression(builder_, level_ + 1));
@@ -209,7 +209,7 @@ public class GrammarParser implements PsiParser {
     else {
       marker_.rollbackTo();
     }
-    result_ = exitErrorRecordingSection(builder_, result_, level_, pinned_, _SECTION_GENERAL_, null);
+    result_ = exitErrorRecordingSection(builder_, level_, result_, pinned_, _SECTION_GENERAL_, null);
     return result_ || pinned_;
   }
 
@@ -219,10 +219,10 @@ public class GrammarParser implements PsiParser {
     if (!recursion_guard_(builder_, level_, "attr_recover_until")) return false;
     boolean result_ = false;
     final Marker marker_ = builder_.mark();
-    enterErrorRecordingSection(builder_, level_, _SECTION_NOT_);
+    enterErrorRecordingSection(builder_, level_, _SECTION_NOT_, null);
     result_ = !attr_recover_until_0(builder_, level_ + 1);
     marker_.rollbackTo();
-    result_ = exitErrorRecordingSection(builder_, result_, level_, false, _SECTION_NOT_, null);
+    result_ = exitErrorRecordingSection(builder_, level_, result_, false, _SECTION_NOT_, null);
     return result_;
   }
 
@@ -256,7 +256,7 @@ public class GrammarParser implements PsiParser {
     boolean result_ = false;
     boolean pinned_ = false;
     final Marker marker_ = builder_.mark();
-    enterErrorRecordingSection(builder_, level_, _SECTION_GENERAL_);
+    enterErrorRecordingSection(builder_, level_, _SECTION_GENERAL_, null);
     result_ = consumeToken(builder_, BNF_ID);
     result_ = result_ && attr_start_1(builder_, level_ + 1);
     if (!result_ && !pinned_) {
@@ -265,7 +265,7 @@ public class GrammarParser implements PsiParser {
     else {
       marker_.drop();
     }
-    result_ = exitErrorRecordingSection(builder_, result_, level_, pinned_, _SECTION_GENERAL_, null);
+    result_ = exitErrorRecordingSection(builder_, level_, result_, pinned_, _SECTION_GENERAL_, null);
     return result_ || pinned_;
   }
 
@@ -297,7 +297,7 @@ public class GrammarParser implements PsiParser {
     boolean result_ = false;
     boolean pinned_ = false;
     final Marker marker_ = builder_.mark();
-    enterErrorRecordingSection(builder_, level_, _SECTION_GENERAL_);
+    enterErrorRecordingSection(builder_, level_, _SECTION_GENERAL_, null);
     result_ = attr_pattern(builder_, level_ + 1);
     pinned_ = result_; // pin = attr_pattern
     result_ = result_ && consumeToken(builder_, BNF_OP_EQ);
@@ -307,7 +307,7 @@ public class GrammarParser implements PsiParser {
     else {
       marker_.drop();
     }
-    result_ = exitErrorRecordingSection(builder_, result_, level_, pinned_, _SECTION_GENERAL_, null);
+    result_ = exitErrorRecordingSection(builder_, level_, result_, pinned_, _SECTION_GENERAL_, null);
     return result_ || pinned_;
   }
 
@@ -382,10 +382,10 @@ public class GrammarParser implements PsiParser {
     if (!recursion_guard_(builder_, level_, "attr_value_1")) return false;
     boolean result_ = false;
     final Marker marker_ = builder_.mark();
-    enterErrorRecordingSection(builder_, level_, _SECTION_NOT_);
+    enterErrorRecordingSection(builder_, level_, _SECTION_NOT_, null);
     result_ = !consumeToken(builder_, BNF_OP_EQ);
     marker_.rollbackTo();
-    result_ = exitErrorRecordingSection(builder_, result_, level_, false, _SECTION_NOT_, null);
+    result_ = exitErrorRecordingSection(builder_, level_, result_, false, _SECTION_NOT_, null);
     return result_;
   }
 
@@ -397,7 +397,7 @@ public class GrammarParser implements PsiParser {
     boolean result_ = false;
     boolean pinned_ = false;
     final Marker marker_ = builder_.mark();
-    enterErrorRecordingSection(builder_, level_, _SECTION_GENERAL_);
+    enterErrorRecordingSection(builder_, level_, _SECTION_GENERAL_, null);
     result_ = consumeToken(builder_, BNF_LEFT_BRACE);
     pinned_ = result_; // pin = 1
     result_ = result_ && report_error_(builder_, attrs_1(builder_, level_ + 1));
@@ -408,7 +408,7 @@ public class GrammarParser implements PsiParser {
     else {
       marker_.rollbackTo();
     }
-    result_ = exitErrorRecordingSection(builder_, result_, level_, pinned_, _SECTION_GENERAL_, null);
+    result_ = exitErrorRecordingSection(builder_, level_, result_, pinned_, _SECTION_GENERAL_, null);
     return result_ || pinned_;
   }
 
@@ -470,7 +470,7 @@ public class GrammarParser implements PsiParser {
     boolean result_ = false;
     boolean pinned_ = false;
     final Marker marker_ = builder_.mark();
-    enterErrorRecordingSection(builder_, level_, _SECTION_GENERAL_);
+    enterErrorRecordingSection(builder_, level_, _SECTION_GENERAL_, null);
     result_ = consumeToken(builder_, BNF_OP_OR);
     pinned_ = result_; // pin = 1
     result_ = result_ && sequence(builder_, level_ + 1);
@@ -480,7 +480,7 @@ public class GrammarParser implements PsiParser {
     else {
       marker_.drop();
     }
-    result_ = exitErrorRecordingSection(builder_, result_, level_, pinned_, _SECTION_GENERAL_, null);
+    result_ = exitErrorRecordingSection(builder_, level_, result_, pinned_, _SECTION_GENERAL_, null);
     return result_ || pinned_;
   }
 
@@ -491,6 +491,7 @@ public class GrammarParser implements PsiParser {
     boolean result_ = false;
     final int start_ = builder_.getCurrentOffset();
     final Marker marker_ = builder_.mark();
+    enterErrorRecordingSection(builder_, level_, _SECTION_GENERAL_, "<expression>");
     result_ = sequence(builder_, level_ + 1);
     result_ = result_ && expression_1(builder_, level_ + 1);
     LighterASTNode last_ = result_? builder_.getLatestDoneMarker() : null;
@@ -503,6 +504,7 @@ public class GrammarParser implements PsiParser {
     else {
       marker_.rollbackTo();
     }
+    result_ = exitErrorRecordingSection(builder_, level_, result_, false, _SECTION_GENERAL_, null);
     return result_;
   }
 
@@ -522,7 +524,7 @@ public class GrammarParser implements PsiParser {
     boolean pinned_ = false;
     final int start_ = builder_.getCurrentOffset();
     final Marker marker_ = builder_.mark();
-    enterErrorRecordingSection(builder_, level_, _SECTION_GENERAL_);
+    enterErrorRecordingSection(builder_, level_, _SECTION_GENERAL_, null);
     result_ = consumeToken(builder_, BNF_EXTERNAL_START);
     result_ = result_ && reference_or_token(builder_, level_ + 1);
     pinned_ = result_; // pin = 2
@@ -538,7 +540,7 @@ public class GrammarParser implements PsiParser {
     else {
       marker_.rollbackTo();
     }
-    result_ = exitErrorRecordingSection(builder_, result_, level_, pinned_, _SECTION_GENERAL_, null);
+    result_ = exitErrorRecordingSection(builder_, level_, result_, pinned_, _SECTION_GENERAL_, null);
     return result_ || pinned_;
   }
 
@@ -564,7 +566,7 @@ public class GrammarParser implements PsiParser {
     if (!recursion_guard_(builder_, level_, "grammar_element")) return false;
     boolean result_ = false;
     final Marker marker_ = builder_.mark();
-    enterErrorRecordingSection(builder_, level_, _SECTION_RECOVER_);
+    enterErrorRecordingSection(builder_, level_, _SECTION_RECOVER_, null);
     result_ = attrs(builder_, level_ + 1);
     if (!result_) result_ = rule(builder_, level_ + 1);
     if (!result_) {
@@ -573,7 +575,7 @@ public class GrammarParser implements PsiParser {
     else {
       marker_.drop();
     }
-    result_ = exitErrorRecordingSection(builder_, result_, level_, false, _SECTION_RECOVER_, grammar_element_recover_parser_);
+    result_ = exitErrorRecordingSection(builder_, level_, result_, false, _SECTION_RECOVER_, grammar_element_recover_parser_);
     return result_;
   }
 
@@ -583,10 +585,10 @@ public class GrammarParser implements PsiParser {
     if (!recursion_guard_(builder_, level_, "grammar_element_recover")) return false;
     boolean result_ = false;
     final Marker marker_ = builder_.mark();
-    enterErrorRecordingSection(builder_, level_, _SECTION_NOT_);
+    enterErrorRecordingSection(builder_, level_, _SECTION_NOT_, null);
     result_ = !grammar_element_recover_0(builder_, level_ + 1);
     marker_.rollbackTo();
-    result_ = exitErrorRecordingSection(builder_, result_, level_, false, _SECTION_NOT_, null);
+    result_ = exitErrorRecordingSection(builder_, level_, result_, false, _SECTION_NOT_, null);
     return result_;
   }
 
@@ -618,7 +620,7 @@ public class GrammarParser implements PsiParser {
     if (!recursion_guard_(builder_, level_, "list_entry")) return false;
     boolean result_ = false;
     final Marker marker_ = builder_.mark();
-    enterErrorRecordingSection(builder_, level_, _SECTION_RECOVER_);
+    enterErrorRecordingSection(builder_, level_, _SECTION_RECOVER_, "<list entry>");
     result_ = list_entry_0(builder_, level_ + 1);
     result_ = result_ && list_entry_1(builder_, level_ + 1);
     if (result_) {
@@ -627,7 +629,7 @@ public class GrammarParser implements PsiParser {
     else {
       marker_.rollbackTo();
     }
-    result_ = exitErrorRecordingSection(builder_, result_, level_, false, _SECTION_RECOVER_, list_entry_recover_until_parser_);
+    result_ = exitErrorRecordingSection(builder_, level_, result_, false, _SECTION_RECOVER_, list_entry_recover_until_parser_);
     return result_;
   }
 
@@ -689,10 +691,10 @@ public class GrammarParser implements PsiParser {
     if (!recursion_guard_(builder_, level_, "list_entry_recover_until")) return false;
     boolean result_ = false;
     final Marker marker_ = builder_.mark();
-    enterErrorRecordingSection(builder_, level_, _SECTION_NOT_);
+    enterErrorRecordingSection(builder_, level_, _SECTION_NOT_, null);
     result_ = !list_entry_recover_until_0(builder_, level_ + 1);
     marker_.rollbackTo();
-    result_ = exitErrorRecordingSection(builder_, result_, level_, false, _SECTION_NOT_, null);
+    result_ = exitErrorRecordingSection(builder_, level_, result_, false, _SECTION_NOT_, null);
     return result_;
   }
 
@@ -728,7 +730,7 @@ public class GrammarParser implements PsiParser {
     boolean result_ = false;
     boolean pinned_ = false;
     final Marker marker_ = builder_.mark();
-    enterErrorRecordingSection(builder_, level_, _SECTION_GENERAL_);
+    enterErrorRecordingSection(builder_, level_, _SECTION_GENERAL_, null);
     result_ = consumeToken(builder_, BNF_OP_EQ);
     pinned_ = result_; // pin = 1
     result_ = result_ && string_literal_expression(builder_, level_ + 1);
@@ -738,7 +740,7 @@ public class GrammarParser implements PsiParser {
     else {
       marker_.drop();
     }
-    result_ = exitErrorRecordingSection(builder_, result_, level_, pinned_, _SECTION_GENERAL_, null);
+    result_ = exitErrorRecordingSection(builder_, level_, result_, pinned_, _SECTION_GENERAL_, null);
     return result_ || pinned_;
   }
 
@@ -750,6 +752,7 @@ public class GrammarParser implements PsiParser {
     boolean result_ = false;
     final int start_ = builder_.getCurrentOffset();
     final Marker marker_ = builder_.mark();
+    enterErrorRecordingSection(builder_, level_, _SECTION_GENERAL_, "<literal expression>");
     result_ = string_literal_expression(builder_, level_ + 1);
     if (!result_) result_ = consumeToken(builder_, BNF_NUMBER);
     LighterASTNode last_ = result_? builder_.getLatestDoneMarker() : null;
@@ -762,6 +765,7 @@ public class GrammarParser implements PsiParser {
     else {
       marker_.rollbackTo();
     }
+    result_ = exitErrorRecordingSection(builder_, level_, result_, false, _SECTION_GENERAL_, null);
     return result_;
   }
 
@@ -771,6 +775,7 @@ public class GrammarParser implements PsiParser {
     if (!recursion_guard_(builder_, level_, "modifier")) return false;
     boolean result_ = false;
     final Marker marker_ = builder_.mark();
+    enterErrorRecordingSection(builder_, level_, _SECTION_GENERAL_, "<modifier>");
     result_ = consumeToken(builder_, "private");
     if (!result_) result_ = consumeToken(builder_, "external");
     if (!result_) result_ = consumeToken(builder_, "meta");
@@ -783,6 +788,7 @@ public class GrammarParser implements PsiParser {
     else {
       marker_.rollbackTo();
     }
+    result_ = exitErrorRecordingSection(builder_, level_, result_, false, _SECTION_GENERAL_, null);
     return result_;
   }
 
@@ -835,6 +841,7 @@ public class GrammarParser implements PsiParser {
     boolean result_ = false;
     final int start_ = builder_.getCurrentOffset();
     final Marker marker_ = builder_.mark();
+    enterErrorRecordingSection(builder_, level_, _SECTION_GENERAL_, "<paren expression>");
     result_ = simple_paren_expression(builder_, level_ + 1);
     if (!result_) result_ = alt_choice_expression(builder_, level_ + 1);
     LighterASTNode last_ = result_? builder_.getLatestDoneMarker() : null;
@@ -847,6 +854,7 @@ public class GrammarParser implements PsiParser {
     else {
       marker_.rollbackTo();
     }
+    result_ = exitErrorRecordingSection(builder_, level_, result_, false, _SECTION_GENERAL_, null);
     return result_;
   }
 
@@ -859,7 +867,7 @@ public class GrammarParser implements PsiParser {
     boolean pinned_ = false;
     final int start_ = builder_.getCurrentOffset();
     final Marker marker_ = builder_.mark();
-    enterErrorRecordingSection(builder_, level_, _SECTION_GENERAL_);
+    enterErrorRecordingSection(builder_, level_, _SECTION_GENERAL_, null);
     result_ = consumeToken(builder_, BNF_LEFT_BRACKET);
     pinned_ = result_; // pin = 1
     result_ = result_ && report_error_(builder_, expression(builder_, level_ + 1));
@@ -874,7 +882,7 @@ public class GrammarParser implements PsiParser {
     else {
       marker_.rollbackTo();
     }
-    result_ = exitErrorRecordingSection(builder_, result_, level_, pinned_, _SECTION_GENERAL_, null);
+    result_ = exitErrorRecordingSection(builder_, level_, result_, pinned_, _SECTION_GENERAL_, null);
     return result_ || pinned_;
   }
 
@@ -886,6 +894,7 @@ public class GrammarParser implements PsiParser {
     boolean result_ = false;
     final int start_ = builder_.getCurrentOffset();
     final Marker marker_ = builder_.mark();
+    enterErrorRecordingSection(builder_, level_, _SECTION_GENERAL_, "<predicate>");
     result_ = predicate_sign(builder_, level_ + 1);
     result_ = result_ && simple(builder_, level_ + 1);
     LighterASTNode last_ = result_? builder_.getLatestDoneMarker() : null;
@@ -898,6 +907,7 @@ public class GrammarParser implements PsiParser {
     else {
       marker_.rollbackTo();
     }
+    result_ = exitErrorRecordingSection(builder_, level_, result_, false, _SECTION_GENERAL_, null);
     return result_;
   }
 
@@ -908,6 +918,7 @@ public class GrammarParser implements PsiParser {
     if (!nextTokenIs(builder_, BNF_OP_NOT) && !nextTokenIs(builder_, BNF_OP_AND)) return false;
     boolean result_ = false;
     final Marker marker_ = builder_.mark();
+    enterErrorRecordingSection(builder_, level_, _SECTION_GENERAL_, "<predicate sign>");
     result_ = consumeToken(builder_, BNF_OP_AND);
     if (!result_) result_ = consumeToken(builder_, BNF_OP_NOT);
     if (result_) {
@@ -916,6 +927,7 @@ public class GrammarParser implements PsiParser {
     else {
       marker_.rollbackTo();
     }
+    result_ = exitErrorRecordingSection(builder_, level_, result_, false, _SECTION_GENERAL_, null);
     return result_;
   }
 
@@ -927,6 +939,7 @@ public class GrammarParser implements PsiParser {
     final Marker left_marker_ = (Marker)builder_.getLatestDoneMarker();
     if (!invalid_left_marker_guard_(builder_, left_marker_, "quantified")) return false;
     final Marker marker_ = builder_.mark();
+    enterErrorRecordingSection(builder_, level_, _SECTION_GENERAL_, "<quantified>");
     result_ = quantifier(builder_, level_ + 1);
     if (result_) {
       marker_.drop();
@@ -935,6 +948,7 @@ public class GrammarParser implements PsiParser {
     else {
       marker_.rollbackTo();
     }
+    result_ = exitErrorRecordingSection(builder_, level_, result_, false, _SECTION_GENERAL_, null);
     return result_;
   }
 
@@ -944,6 +958,7 @@ public class GrammarParser implements PsiParser {
     if (!recursion_guard_(builder_, level_, "quantifier")) return false;
     boolean result_ = false;
     final Marker marker_ = builder_.mark();
+    enterErrorRecordingSection(builder_, level_, _SECTION_GENERAL_, "<quantifier>");
     result_ = consumeToken(builder_, BNF_OP_OPT);
     if (!result_) result_ = consumeToken(builder_, BNF_OP_ONEMORE);
     if (!result_) result_ = consumeToken(builder_, BNF_OP_ZEROMORE);
@@ -953,6 +968,7 @@ public class GrammarParser implements PsiParser {
     else {
       marker_.rollbackTo();
     }
+    result_ = exitErrorRecordingSection(builder_, level_, result_, false, _SECTION_GENERAL_, null);
     return result_;
   }
 
@@ -985,7 +1001,7 @@ public class GrammarParser implements PsiParser {
     boolean result_ = false;
     boolean pinned_ = false;
     final Marker marker_ = builder_.mark();
-    enterErrorRecordingSection(builder_, level_, _SECTION_GENERAL_);
+    enterErrorRecordingSection(builder_, level_, _SECTION_GENERAL_, "<rule>");
     result_ = rule_start(builder_, level_ + 1);
     result_ = result_ && expression(builder_, level_ + 1);
     pinned_ = result_; // pin = 2
@@ -997,7 +1013,7 @@ public class GrammarParser implements PsiParser {
     else {
       marker_.rollbackTo();
     }
-    result_ = exitErrorRecordingSection(builder_, result_, level_, pinned_, _SECTION_GENERAL_, null);
+    result_ = exitErrorRecordingSection(builder_, level_, result_, pinned_, _SECTION_GENERAL_, null);
     return result_ || pinned_;
   }
 
@@ -1055,7 +1071,7 @@ public class GrammarParser implements PsiParser {
     if (!recursion_guard_(builder_, level_, "sequence")) return false;
     final int start_ = builder_.getCurrentOffset();
     final Marker marker_ = builder_.mark();
-    enterErrorRecordingSection(builder_, level_, _SECTION_RECOVER_);
+    enterErrorRecordingSection(builder_, level_, _SECTION_RECOVER_, "<sequence>");
     int offset_ = builder_.getCurrentOffset();
     while (true) {
       if (!option(builder_, level_ + 1)) break;
@@ -1073,7 +1089,7 @@ public class GrammarParser implements PsiParser {
     else {
       marker_.done(BNF_SEQUENCE);
     }
-    exitErrorRecordingSection(builder_, true, level_, false, _SECTION_RECOVER_, sequence_recover_parser_);
+    exitErrorRecordingSection(builder_, level_, true, false, _SECTION_RECOVER_, sequence_recover_parser_);
     return true;
   }
 
@@ -1099,10 +1115,10 @@ public class GrammarParser implements PsiParser {
     if (!recursion_guard_(builder_, level_, "sequence_recover_0")) return false;
     boolean result_ = false;
     final Marker marker_ = builder_.mark();
-    enterErrorRecordingSection(builder_, level_, _SECTION_NOT_);
+    enterErrorRecordingSection(builder_, level_, _SECTION_NOT_, null);
     result_ = !sequence_recover_0_0(builder_, level_ + 1);
     marker_.rollbackTo();
-    result_ = exitErrorRecordingSection(builder_, result_, level_, false, _SECTION_NOT_, null);
+    result_ = exitErrorRecordingSection(builder_, level_, result_, false, _SECTION_NOT_, null);
     return result_;
   }
 
@@ -1174,10 +1190,10 @@ public class GrammarParser implements PsiParser {
     if (!recursion_guard_(builder_, level_, "simple_0_0")) return false;
     boolean result_ = false;
     final Marker marker_ = builder_.mark();
-    enterErrorRecordingSection(builder_, level_, _SECTION_NOT_);
+    enterErrorRecordingSection(builder_, level_, _SECTION_NOT_, null);
     result_ = !simple_0_0_0(builder_, level_ + 1);
     marker_.rollbackTo();
-    result_ = exitErrorRecordingSection(builder_, result_, level_, false, _SECTION_NOT_, null);
+    result_ = exitErrorRecordingSection(builder_, level_, result_, false, _SECTION_NOT_, null);
     return result_;
   }
 
@@ -1228,7 +1244,7 @@ public class GrammarParser implements PsiParser {
     boolean result_ = false;
     boolean pinned_ = false;
     final Marker marker_ = builder_.mark();
-    enterErrorRecordingSection(builder_, level_, _SECTION_GENERAL_);
+    enterErrorRecordingSection(builder_, level_, _SECTION_GENERAL_, null);
     result_ = consumeToken(builder_, BNF_LEFT_PAREN);
     pinned_ = result_; // pin = 1
     result_ = result_ && report_error_(builder_, expression(builder_, level_ + 1));
@@ -1239,7 +1255,7 @@ public class GrammarParser implements PsiParser {
     else {
       marker_.drop();
     }
-    result_ = exitErrorRecordingSection(builder_, result_, level_, pinned_, _SECTION_GENERAL_, null);
+    result_ = exitErrorRecordingSection(builder_, level_, result_, pinned_, _SECTION_GENERAL_, null);
     return result_ || pinned_;
   }
 
@@ -1274,7 +1290,7 @@ public class GrammarParser implements PsiParser {
     boolean pinned_ = false;
     final int start_ = builder_.getCurrentOffset();
     final Marker marker_ = builder_.mark();
-    enterErrorRecordingSection(builder_, level_, _SECTION_GENERAL_);
+    enterErrorRecordingSection(builder_, level_, _SECTION_GENERAL_, null);
     result_ = consumeToken(builder_, BNF_LEFT_BRACKET);
     pinned_ = result_; // pin = 1
     result_ = result_ && report_error_(builder_, value_list_1(builder_, level_ + 1));
@@ -1289,7 +1305,7 @@ public class GrammarParser implements PsiParser {
     else {
       marker_.rollbackTo();
     }
-    result_ = exitErrorRecordingSection(builder_, result_, level_, pinned_, _SECTION_GENERAL_, null);
+    result_ = exitErrorRecordingSection(builder_, level_, result_, pinned_, _SECTION_GENERAL_, null);
     return result_ || pinned_;
   }
 

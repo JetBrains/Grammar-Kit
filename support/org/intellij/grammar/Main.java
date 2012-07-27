@@ -41,7 +41,7 @@ import java.io.File;
 import java.util.regex.Pattern;
 
 /**
- * Generates
+ * Command-line interface to parser generator.
  * Required community jars on classpath:
  * jdom.jar, trove4j.jar, extensions.jar, picocontainer.jar, junit.jar, idea.jar, openapi.jar, util.jar.
  * @author gregsh
@@ -74,7 +74,7 @@ public class Main {
         if (file.isDirectory() || !grammarPattern.matcher(file.getName()).matches()) continue;
         PsiFile bnfFile = parsingTestCase.parse(file);
         if (!(bnfFile instanceof BnfFile)) continue;
-        new ParserGenerator((BnfFile)bnfFile, output.getAbsolutePath()).generate();
+        new ParserGenerator((BnfFile)bnfFile, grammarDir.getAbsolutePath(), output.getAbsolutePath()).generate();
         System.out.println(file.getName() + " parser generated to " + output.getCanonicalPath());
       }
     }

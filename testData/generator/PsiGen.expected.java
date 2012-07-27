@@ -177,6 +177,7 @@ public class PsiGen implements PsiParser {
     boolean result_ = false;
     final int start_ = builder_.getCurrentOffset();
     final Marker marker_ = builder_.mark();
+    enterErrorRecordingSection(builder_, level_, _SECTION_GENERAL_, "<expr>");
     result_ = a_expr(builder_, level_ + 1);
     result_ = result_ && expr_1(builder_, level_ + 1);
     LighterASTNode last_ = result_? builder_.getLatestDoneMarker() : null;
@@ -189,6 +190,7 @@ public class PsiGen implements PsiParser {
     else {
       marker_.rollbackTo();
     }
+    result_ = exitErrorRecordingSection(builder_, level_, result_, false, _SECTION_GENERAL_, null);
     return result_;
   }
 
@@ -320,6 +322,7 @@ public class PsiGen implements PsiParser {
     if (!nextTokenIs(builder_, ID) && !nextTokenIs(builder_, NUMBER)) return false;
     boolean result_ = false;
     final Marker marker_ = builder_.mark();
+    enterErrorRecordingSection(builder_, level_, _SECTION_GENERAL_, "<grammar element>");
     result_ = expr(builder_, level_ + 1);
     if (!result_) result_ = external_type3(builder_, level_ + 1);
     if (result_) {
@@ -328,6 +331,7 @@ public class PsiGen implements PsiParser {
     else {
       marker_.rollbackTo();
     }
+    result_ = exitErrorRecordingSection(builder_, level_, result_, false, _SECTION_GENERAL_, null);
     return result_;
   }
 
@@ -407,6 +411,7 @@ public class PsiGen implements PsiParser {
     final Marker left_marker_ = (Marker)builder_.getLatestDoneMarker();
     if (!invalid_left_marker_guard_(builder_, left_marker_, "plus_expr")) return false;
     final Marker marker_ = builder_.mark();
+    enterErrorRecordingSection(builder_, level_, _SECTION_GENERAL_, "<plus expr>");
     result_ = consumeToken(builder_, "+");
     result_ = result_ && expr(builder_, level_ + 1);
     if (result_) {
@@ -416,6 +421,7 @@ public class PsiGen implements PsiParser {
     else {
       marker_.rollbackTo();
     }
+    result_ = exitErrorRecordingSection(builder_, level_, result_, false, _SECTION_GENERAL_, null);
     return result_;
   }
 
@@ -445,6 +451,7 @@ public class PsiGen implements PsiParser {
     boolean result_ = false;
     final int start_ = builder_.getCurrentOffset();
     final Marker marker_ = builder_.mark();
+    enterErrorRecordingSection(builder_, level_, _SECTION_GENERAL_, "<root b>");
     result_ = parseGrammar(builder_, level_ + 1, grammar_element_parser_);
     LighterASTNode last_ = result_? builder_.getLatestDoneMarker() : null;
     if (last_ != null && last_.getStartOffset() == start_ && type_extends_(last_.getTokenType(), ROOT_B)) {
@@ -456,6 +463,7 @@ public class PsiGen implements PsiParser {
     else {
       marker_.rollbackTo();
     }
+    result_ = exitErrorRecordingSection(builder_, level_, result_, false, _SECTION_GENERAL_, null);
     return result_;
   }
 
@@ -467,6 +475,7 @@ public class PsiGen implements PsiParser {
     boolean result_ = false;
     final int start_ = builder_.getCurrentOffset();
     final Marker marker_ = builder_.mark();
+    enterErrorRecordingSection(builder_, level_, _SECTION_GENERAL_, "<root c>");
     result_ = blockOf(builder_, level_ + 1, grammar_element_parser_);
     LighterASTNode last_ = result_? builder_.getLatestDoneMarker() : null;
     if (last_ != null && last_.getStartOffset() == start_ && type_extends_(last_.getTokenType(), ROOT_C)) {
@@ -478,6 +487,7 @@ public class PsiGen implements PsiParser {
     else {
       marker_.rollbackTo();
     }
+    result_ = exitErrorRecordingSection(builder_, level_, result_, false, _SECTION_GENERAL_, null);
     return result_;
   }
 
@@ -489,6 +499,7 @@ public class PsiGen implements PsiParser {
     boolean result_ = false;
     final int start_ = builder_.getCurrentOffset();
     final Marker marker_ = builder_.mark();
+    enterErrorRecordingSection(builder_, level_, _SECTION_GENERAL_, "<root d>");
     result_ = listOf(builder_, level_ + 1, grammar_element_parser_);
     LighterASTNode last_ = result_? builder_.getLatestDoneMarker() : null;
     if (last_ != null && last_.getStartOffset() == start_ && type_extends_(last_.getTokenType(), ROOT_D)) {
@@ -500,6 +511,7 @@ public class PsiGen implements PsiParser {
     else {
       marker_.rollbackTo();
     }
+    result_ = exitErrorRecordingSection(builder_, level_, result_, false, _SECTION_GENERAL_, null);
     return result_;
   }
 
@@ -535,6 +547,7 @@ public class PsiGen2 {
     final Marker left_marker_ = (Marker)builder_.getLatestDoneMarker();
     if (!invalid_left_marker_guard_(builder_, left_marker_, "cast_expr")) return false;
     final Marker marker_ = builder_.mark();
+    enterErrorRecordingSection(builder_, level_, _SECTION_GENERAL_, "<cast expr>");
     result_ = consumeToken(builder_, "::");
     result_ = result_ && consumeToken(builder_, ID);
     if (result_) {
@@ -544,6 +557,7 @@ public class PsiGen2 {
     else {
       marker_.rollbackTo();
     }
+    result_ = exitErrorRecordingSection(builder_, level_, result_, false, _SECTION_GENERAL_, null);
     return result_;
   }
 
@@ -572,6 +586,7 @@ public class PsiGen2 {
     final Marker left_marker_ = (Marker)builder_.getLatestDoneMarker();
     if (!invalid_left_marker_guard_(builder_, left_marker_, "item_expr")) return false;
     final Marker marker_ = builder_.mark();
+    enterErrorRecordingSection(builder_, level_, _SECTION_GENERAL_, "<item expr>");
     result_ = consumeToken(builder_, "[");
     result_ = result_ && consumeToken(builder_, NUMBER);
     result_ = result_ && consumeToken(builder_, "]");
@@ -582,6 +597,7 @@ public class PsiGen2 {
     else {
       marker_.rollbackTo();
     }
+    result_ = exitErrorRecordingSection(builder_, level_, result_, false, _SECTION_GENERAL_, null);
     return result_;
   }
 
@@ -615,6 +631,7 @@ public class PsiGen2 {
     final Marker left_marker_ = (Marker)builder_.getLatestDoneMarker();
     if (!invalid_left_marker_guard_(builder_, left_marker_, "qref_expr")) return false;
     final Marker marker_ = builder_.mark();
+    enterErrorRecordingSection(builder_, level_, _SECTION_GENERAL_, "<ref expr>");
     result_ = consumeToken(builder_, ".");
     result_ = result_ && identifier(builder_, level_ + 1);
     if (result_) {
@@ -624,6 +641,7 @@ public class PsiGen2 {
     else {
       marker_.rollbackTo();
     }
+    result_ = exitErrorRecordingSection(builder_, level_, result_, false, _SECTION_GENERAL_, null);
     return result_;
   }
 
@@ -691,6 +709,7 @@ public class PsiGen2 {
     boolean result_ = false;
     final int start_ = builder_.getCurrentOffset();
     final Marker marker_ = builder_.mark();
+    enterErrorRecordingSection(builder_, level_, _SECTION_GENERAL_, "<some expr>");
     result_ = some_expr_0(builder_, level_ + 1);
     result_ = result_ && some_expr_1(builder_, level_ + 1);
     result_ = result_ && some_expr_2(builder_, level_ + 1);
@@ -704,6 +723,7 @@ public class PsiGen2 {
     else {
       marker_.rollbackTo();
     }
+    result_ = exitErrorRecordingSection(builder_, level_, result_, false, _SECTION_GENERAL_, null);
     return result_;
   }
 
@@ -861,6 +881,7 @@ public class PsiGenFixes {
     final Marker left_marker_ = (Marker)builder_.getLatestDoneMarker();
     if (!invalid_left_marker_guard_(builder_, left_marker_, "LeftShadow")) return false;
     final Marker marker_ = builder_.mark();
+    enterErrorRecordingSection(builder_, level_, _SECTION_GENERAL_, "<leftshadow>");
     result_ = consumeToken(builder_, ",");
     result_ = result_ && PsiGen2.identifier(builder_, level_ + 1);
     if (result_) {
@@ -870,6 +891,7 @@ public class PsiGenFixes {
     else {
       marker_.rollbackTo();
     }
+    result_ = exitErrorRecordingSection(builder_, level_, result_, false, _SECTION_GENERAL_, null);
     return result_;
   }
 

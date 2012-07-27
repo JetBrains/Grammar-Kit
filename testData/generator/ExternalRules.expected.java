@@ -150,7 +150,7 @@ public class ExternalRules implements PsiParser {
     boolean result_ = false;
     boolean pinned_ = false;
     final Marker marker_ = builder_.mark();
-    enterErrorRecordingSection(builder_, level_, _SECTION_GENERAL_);
+    enterErrorRecordingSection(builder_, level_, _SECTION_GENERAL_, null);
     result_ = consumeToken(builder_, ",");
     pinned_ = result_; // pin = 1
     result_ = result_ && param.parse(builder_, level_);
@@ -160,7 +160,7 @@ public class ExternalRules implements PsiParser {
     else {
       marker_.rollbackTo();
     }
-    result_ = exitErrorRecordingSection(builder_, result_, level_, pinned_, _SECTION_GENERAL_, null);
+    result_ = exitErrorRecordingSection(builder_, level_, result_, pinned_, _SECTION_GENERAL_, null);
     return result_ || pinned_;
   }
 
@@ -450,6 +450,7 @@ public class ExternalRules implements PsiParser {
     if (!recursion_guard_(builder_, level_, "one")) return false;
     boolean result_ = false;
     final Marker marker_ = builder_.mark();
+    enterErrorRecordingSection(builder_, level_, _SECTION_GENERAL_, "<one>");
     result_ = consumeToken(builder_, "one");
     if (result_) {
       marker_.done(ONE);
@@ -457,6 +458,7 @@ public class ExternalRules implements PsiParser {
     else {
       marker_.rollbackTo();
     }
+    result_ = exitErrorRecordingSection(builder_, level_, result_, false, _SECTION_GENERAL_, null);
     return result_;
   }
 
@@ -709,10 +711,10 @@ public class ExternalRules implements PsiParser {
     if (!recursion_guard_(builder_, level_, "param_seq_alt_params_ext_1_1")) return false;
     boolean result_ = false;
     final Marker marker_ = builder_.mark();
-    enterErrorRecordingSection(builder_, level_, _SECTION_NOT_);
+    enterErrorRecordingSection(builder_, level_, _SECTION_NOT_, null);
     result_ = !two(builder_, level_ + 1);
     marker_.rollbackTo();
-    result_ = exitErrorRecordingSection(builder_, result_, level_, false, _SECTION_NOT_, null);
+    result_ = exitErrorRecordingSection(builder_, level_, result_, false, _SECTION_NOT_, null);
     return result_;
   }
 
@@ -728,6 +730,7 @@ public class ExternalRules implements PsiParser {
     if (!recursion_guard_(builder_, level_, "statement")) return false;
     boolean result_ = false;
     final Marker marker_ = builder_.mark();
+    enterErrorRecordingSection(builder_, level_, _SECTION_GENERAL_, "<statement>");
     result_ = one(builder_, level_ + 1);
     if (!result_) result_ = two(builder_, level_ + 1);
     if (result_) {
@@ -736,6 +739,7 @@ public class ExternalRules implements PsiParser {
     else {
       marker_.rollbackTo();
     }
+    result_ = exitErrorRecordingSection(builder_, level_, result_, false, _SECTION_GENERAL_, null);
     return result_;
   }
 
@@ -745,6 +749,7 @@ public class ExternalRules implements PsiParser {
     if (!recursion_guard_(builder_, level_, "two")) return false;
     boolean result_ = false;
     final Marker marker_ = builder_.mark();
+    enterErrorRecordingSection(builder_, level_, _SECTION_GENERAL_, "<two>");
     result_ = consumeToken(builder_, "two");
     if (result_) {
       marker_.done(TWO);
@@ -752,6 +757,7 @@ public class ExternalRules implements PsiParser {
     else {
       marker_.rollbackTo();
     }
+    result_ = exitErrorRecordingSection(builder_, level_, result_, false, _SECTION_GENERAL_, null);
     return result_;
   }
 

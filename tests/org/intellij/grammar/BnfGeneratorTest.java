@@ -88,7 +88,7 @@ public class BnfGeneratorTest extends ParsingTestCase {
       }
     }
 
-    ParserGenerator parserGenerator = new ParserGenerator((BnfFileImpl)myFile, myFullDataPath);
+    ParserGenerator parserGenerator = new ParserGenerator((BnfFileImpl)myFile, "", myFullDataPath);
     parserGenerator.setUnitTestMode(true);
     if (generatePsi) parserGenerator.generate();
     else parserGenerator.generateParser();

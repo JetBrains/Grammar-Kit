@@ -101,14 +101,17 @@ public class GenerateAction extends AnAction implements DumbAware {
             for (VirtualFile file : files) {
               PsiFile bnfFile = psiManager.findFile(file);
               if (!(bnfFile instanceof BnfFile)) continue;
+              VirtualFile virtualFile = bnfFile.getVirtualFile();
+              String sourcePath = virtualFile == null? "" : VfsUtil.virtualToIoFile(virtualFile).getParentFile().getAbsolutePath();
+
               VirtualFile content = ProjectRootManager.getInstance(project).getFileIndex().getContentRootForFile(file);
               VirtualFile parentDir = content == null ? file.getParent() : content;
-              String toDir = new File(VfsUtil.virtualToIoFile(parentDir), "gen").getAbsolutePath();
-              pathsToRefresh.add(new File(toDir));
+              String outputPath = new File(VfsUtil.virtualToIoFile(parentDir), "gen").getAbsolutePath();
+              pathsToRefresh.add(new File(outputPath));
               try {
-                new ParserGenerator((BnfFile)bnfFile, toDir).generate();
+                new ParserGenerator((BnfFile)bnfFile, sourcePath, outputPath).generate();
                 Notifications.Bus.notify(new Notification(e.getPresentation().getText(),
-                                                          file.getName() + " parser generated", "to " + toDir,
+                                                          file.getName() + " parser generated", "to " + outputPath,
                                                           NotificationType.INFORMATION), project);
               }
               catch (Exception ex) {

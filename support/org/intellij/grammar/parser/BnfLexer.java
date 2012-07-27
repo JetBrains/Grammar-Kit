@@ -16,10 +16,6 @@
 package org.intellij.grammar.parser;
 
 import com.intellij.lexer.FlexAdapter;
-import com.intellij.lexer.Lexer;
-import com.intellij.lexer.LookAheadLexer;
-import com.intellij.lexer.MergingLexerAdapter;
-import org.intellij.grammar.BnfParserDefinition;
 
 /**
  * Created by IntelliJ IDEA.
@@ -27,14 +23,10 @@ import org.intellij.grammar.BnfParserDefinition;
  * Date: 13.07.11
  * Time: 22:50
  */
-public class BnfLexer extends LookAheadLexer {
+public class BnfLexer extends FlexAdapter {
 
   public BnfLexer() {
-    super(new MergingLexerAdapter(new FlexAdapter(new _BnfLexer()), BnfParserDefinition.COMMENTS));
+    super(new _BnfLexer());
   }
 
-  @Override
-  protected void lookAhead(Lexer baseLexer) {
-    super.lookAhead(baseLexer);
-  }
 }

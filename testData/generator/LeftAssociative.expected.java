@@ -57,6 +57,7 @@ public class LeftAssociative implements PsiParser {
     final Marker left_marker_ = (Marker)builder_.getLatestDoneMarker();
     if (!invalid_left_marker_guard_(builder_, left_marker_, "alias_definition")) return false;
     final Marker marker_ = builder_.mark();
+    enterErrorRecordingSection(builder_, level_, _SECTION_GENERAL_, "<alias definition>");
     result_ = alias_definition_0(builder_, level_ + 1);
     result_ = result_ && consumeToken(builder_, ID);
     if (result_) {
@@ -66,6 +67,7 @@ public class LeftAssociative implements PsiParser {
     else {
       marker_.rollbackTo();
     }
+    result_ = exitErrorRecordingSection(builder_, level_, result_, false, _SECTION_GENERAL_, null);
     return result_;
   }
 
@@ -91,6 +93,7 @@ public class LeftAssociative implements PsiParser {
     final Marker left_marker_ = (Marker)builder_.getLatestDoneMarker();
     if (!invalid_left_marker_guard_(builder_, left_marker_, "alias_definition2_0")) return false;
     final Marker marker_ = builder_.mark();
+    enterErrorRecordingSection(builder_, level_, _SECTION_GENERAL_, "<alias definition 2>");
     result_ = alias_definition2_0_0(builder_, level_ + 1);
     result_ = result_ && consumeToken(builder_, ID);
     if (result_) {
@@ -100,6 +103,7 @@ public class LeftAssociative implements PsiParser {
     else {
       marker_.rollbackTo();
     }
+    result_ = exitErrorRecordingSection(builder_, level_, result_, false, _SECTION_GENERAL_, null);
     return result_;
   }
 

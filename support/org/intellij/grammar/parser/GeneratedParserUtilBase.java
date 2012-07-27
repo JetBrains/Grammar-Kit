@@ -125,17 +125,25 @@ public class GeneratedParserUtilBase {
   }
 
   private static void addVariant(ErrorState state, PsiBuilder builder_, Object o) {
-    final int offset = builder_.getCurrentOffset();
-    Variant variant = state.VARIANTS.alloc();
-    variant.init(offset, o, state.predicateSign);
-    state.variants.add(variant);
-    if (variant.expected && state.lastExpectedVariantOffset < variant.offset) {
-      state.lastExpectedVariantOffset = variant.offset;
-    }
+    int offset = builder_.getCurrentOffset();
+    addVariantInner(state, offset, o);
 
     CompletionState completionState = state.completionState;
     if (completionState != null && state.predicateSign) {
       addCompletionVariant(state, completionState, builder_, o, offset);
+    }
+  }
+
+  private static void addVariantInner(ErrorState state, int offset, Object o) {
+    Variant variant = state.VARIANTS.alloc().init(offset, o);
+    if (state.predicateSign) {
+      state.variants.add(variant);
+      if (state.lastExpectedVariantOffset < variant.offset) {
+        state.lastExpectedVariantOffset = variant.offset;
+      }
+    }
+    else {
+      state.unexpected.add(variant);
     }
   }
 
@@ -218,9 +226,10 @@ public class GeneratedParserUtilBase {
   public static final String _SECTION_RECOVER_ = "_SECTION_RECOVER_";
   public static final String _SECTION_GENERAL_ = "_SECTION_GENERAL_";
 
-  public static void enterErrorRecordingSection(PsiBuilder builder_, int key, @NotNull String sectionType) {
+  public static void enterErrorRecordingSection(PsiBuilder builder_, int level, @NotNull String sectionType, @Nullable String frameName) {
     ErrorState state = ErrorState.get(builder_);
-    state.levelCheck.add(new Frame(builder_.getCurrentOffset(), key, sectionType));
+    Frame frame = state.FRAMES.alloc().init(builder_.getCurrentOffset(), level, sectionType, frameName, state.variants.size());
+    state.levelCheck.add(frame);
     if (sectionType == _SECTION_AND_) {
       if (state.predicateCount == 0 && !state.predicateSign) {
         throw new AssertionError("Incorrect false predicate sign");
@@ -239,23 +248,30 @@ public class GeneratedParserUtilBase {
   }
 
   public static boolean exitErrorRecordingSection(PsiBuilder builder_,
+                                                  int level,
                                                   boolean result,
-                                                  int key,
                                                   boolean pinned,
                                                   @NotNull String sectionType,
                                                   @Nullable Parser eatMore) {
     ErrorState state = ErrorState.get(builder_);
 
-    Frame frame = null;
+    Frame frame = state.levelCheck.pollLast();
     int initialOffset = builder_.getCurrentOffset();
-    if (state.levelCheck.isEmpty() || key != (frame = state.levelCheck.removeLast()).level || !sectionType.equals(frame.section)) {
-      LOG.error("Unbalanced error section: got " + new Frame(initialOffset, key, sectionType) + ", expected " + frame);
+    if (frame == null || level != frame.level || !sectionType.equals(frame.section)) {
+      LOG.error("Unbalanced error section: got " + new Frame().init(initialOffset, level, sectionType, "", 0) + ", expected " + frame);
+      if (frame != null) state.FRAMES.recycle(frame);
       return result;
     }
     if (sectionType == _SECTION_AND_ || sectionType == _SECTION_NOT_) {
       state.predicateCount--;
       if (sectionType == _SECTION_NOT_) state.predicateSign = !state.predicateSign;
+      state.FRAMES.recycle(frame);
       return result;
+    }
+    if (!result && !pinned && initialOffset == frame.offset && state.lastExpectedVariantOffset == frame.offset &&
+        frame.name != null && state.variants.size() - frame.variantCount > 1) {
+      state.clearVariants(true, frame.variantCount);
+      addVariantInner(state, initialOffset, frame.name);
     }
     if (sectionType == _SECTION_RECOVER_ && !state.suppressErrors && eatMore != null) {
       state.suppressErrors = true;
@@ -310,7 +326,9 @@ public class GeneratedParserUtilBase {
       }
       state.suppressErrors = false;
       if (errorReported || result) {
-        state.clearExpectedVariants();
+        state.clearVariants(true, 0);
+        state.clearVariants(false, 0);
+        state.lastExpectedVariantOffset = -1;
       }
       if (!result && eatMoreFlagOnce && frame.offset != builder_.getCurrentOffset()) result = true;
     }
@@ -326,6 +344,7 @@ public class GeneratedParserUtilBase {
     // propagate errorReportedAt up the stack to avoid duplicate reporting
     Frame prevFrame = state.levelCheck.isEmpty() ? null : state.levelCheck.getLast();
     if (prevFrame != null && prevFrame.errorReportedAt < frame.errorReportedAt) prevFrame.errorReportedAt = frame.errorReportedAt;
+    state.FRAMES.recycle(frame);
     return result;
   }
 
@@ -425,15 +444,23 @@ public class GeneratedParserUtilBase {
 
     private int lastExpectedVariantOffset = -1;
     ArrayList<Variant> variants = new ArrayList<Variant>();
+    ArrayList<Variant> unexpected = new ArrayList<Variant>();
     final LimitedPool<Variant> VARIANTS = new LimitedPool<Variant>(5000, new LimitedPool.ObjectFactory<Variant>() {
       public Variant create() {
         return new Variant();
       }
 
-      public void cleanup(final Variant v) {
+      public void cleanup(final Variant o) {
       }
     });
+    final LimitedPool<Frame> FRAMES = new LimitedPool<Frame>(100, new LimitedPool.ObjectFactory<Frame>() {
+      public Frame create() {
+        return new Frame();
+      }
 
+      public void cleanup(final Frame o) {
+      }
+    });
 
     public static ErrorState get(PsiBuilder builder) {
       return ((Builder)builder).state;
@@ -470,9 +497,8 @@ public class GeneratedParserUtilBase {
       long[] hashes = new long[strings.length];
       Arrays.fill(strings, "");
       int count = 0;
-      loop: for (Variant variant : variants) {
+      loop: for (Variant variant : expected? variants : unexpected) {
         if (offset == variant.offset) {
-          if (variant.expected != expected) continue;
           String text = variant.object.toString();
           long hash = StringHash.calc(text);
           for (int i=0; i<count; i++) {
@@ -507,12 +533,12 @@ public class GeneratedParserUtilBase {
       return count > 0;
     }
 
-    void clearExpectedVariants() {
-      lastExpectedVariantOffset = -1;
-      for (Variant v : variants) {
-        VARIANTS.recycle(v);
+    void clearVariants(boolean expected, int start) {
+      ArrayList<Variant> list = expected? variants : unexpected;
+      for (int i = start, len = list.size(); i < len; i ++) {
+        VARIANTS.recycle(list.get(i));
       }
-      variants.clear();
+      list.subList(start, list.size()).clear();
     }
   }
 
@@ -520,12 +546,21 @@ public class GeneratedParserUtilBase {
     int offset;
     int level;
     String section;
-    int errorReportedAt = -1;
+    String name;
+    int variantCount;
+    int errorReportedAt;
 
-    public Frame(int offset, int level, String section) {
+    public Frame() {
+    }
+
+    public Frame init(int offset, int level, String section, String name, int variantCount) {
       this.offset = offset;
       this.level = level;
       this.section = section;
+      this.name = name;
+      this.variantCount = variantCount;
+      this.errorReportedAt = -1;
+      return this;
     }
 
     @Override
@@ -538,17 +573,16 @@ public class GeneratedParserUtilBase {
   public static class Variant {
     int offset;
     Object object;
-    boolean expected;
 
-    public void init(int offset, Object text, boolean expected) {
+    public Variant init(int offset, Object text) {
       this.offset = offset;
       this.object = text;
-      this.expected = expected;
+      return this;
     }
 
     @Override
     public String toString() {
-      return "<" + offset + ", " + expected + ", " + object + ">";
+      return "<" + offset + ", " + object + ">";
     }
 
     @Override
@@ -558,7 +592,6 @@ public class GeneratedParserUtilBase {
 
       Variant variant = (Variant)o;
 
-      if (expected != variant.expected) return false;
       if (offset != variant.offset) return false;
       if (!this.object.equals(variant.object)) return false;
 
@@ -569,7 +602,6 @@ public class GeneratedParserUtilBase {
     public int hashCode() {
       int result = offset;
       result = 31 * result + object.hashCode();
-      result = 31 * result + (expected ? 1 : 0);
       return result;
     }
   }

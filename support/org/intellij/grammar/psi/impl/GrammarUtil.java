@@ -20,15 +20,17 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiRecursiveElementWalkingVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
+import com.intellij.util.PairProcessor;
 import com.intellij.util.SmartList;
 import org.intellij.grammar.generator.ParserGeneratorUtil;
 import org.intellij.grammar.parser.GeneratedParserUtilBase;
 import org.intellij.grammar.psi.*;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+
+import static org.intellij.grammar.generator.ParserGeneratorUtil.*;
 
 /**
  * @author gregsh
@@ -127,4 +129,22 @@ public class GrammarUtil {
     PsiElement parent = e.getParent();
     return parent == scope || parent instanceof PsiFile? null : parent;
   }
+
+  public static boolean processExpressionNames(String funcName, BnfExpression expression, PairProcessor<String, BnfExpression> processor) {
+    if (isAtomicExpression(expression)) return true;
+
+    final List<BnfExpression> children = getChildExpressions(expression);
+    for (int i = 0, childExpressionsSize = children.size(); i < childExpressionsSize; i++) {
+      BnfExpression child = children.get(i);
+      if (isAtomicExpression(child)) continue;
+      if (!processExpressionNames(getNextName(funcName, i), child, processor)) return false;
+    }
+    return processor.process(funcName, expression);
+  }
+
+  public static boolean isAtomicExpression(BnfExpression tree) {
+    return tree instanceof BnfReferenceOrToken || tree instanceof BnfLiteralExpression || tree instanceof BnfExternalExpression;
+  }
+
+
 }

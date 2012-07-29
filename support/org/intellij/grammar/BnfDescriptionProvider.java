@@ -15,16 +15,18 @@
  */
 package org.intellij.grammar;
 
+import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.psi.ElementDescriptionLocation;
 import com.intellij.psi.ElementDescriptionProvider;
 import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiNamedElement;
 import com.intellij.psi.util.PsiTreeUtil;
-import com.intellij.usageView.UsageViewLongNameLocation;
 import com.intellij.usageView.UsageViewNodeTextLocation;
 import com.intellij.usageView.UsageViewShortNameLocation;
 import com.intellij.usageView.UsageViewTypeLocation;
+import org.apache.xmlbeans.impl.common.NameUtil;
 import org.intellij.grammar.psi.BnfAttr;
-import org.intellij.grammar.psi.BnfNamedElement;
+import org.intellij.grammar.psi.BnfCompositeElement;
 import org.intellij.grammar.psi.BnfRule;
 import org.jetbrains.annotations.NotNull;
 
@@ -35,7 +37,7 @@ import org.jetbrains.annotations.NotNull;
 public class BnfDescriptionProvider implements ElementDescriptionProvider {
   @Override
   public String getElementDescription(@NotNull PsiElement psiElement, @NotNull ElementDescriptionLocation location) {
-    if (location == UsageViewNodeTextLocation.INSTANCE && psiElement instanceof BnfNamedElement) {
+    if (location == UsageViewNodeTextLocation.INSTANCE && psiElement instanceof BnfCompositeElement) {
       return getElementDescription(psiElement, UsageViewTypeLocation.INSTANCE) + " " +
              "'" + getElementDescription(psiElement, UsageViewShortNameLocation.INSTANCE) + "'";
     }
@@ -43,18 +45,20 @@ public class BnfDescriptionProvider implements ElementDescriptionProvider {
       if (location == UsageViewTypeLocation.INSTANCE) {
         return "Grammar Rule";
       }
-      if (location == UsageViewShortNameLocation.INSTANCE || location == UsageViewLongNameLocation.INSTANCE) {
-        return ((BnfRule)psiElement).getId().getText();
-      }
+      return ((BnfRule)psiElement).getId().getText();
     }
     else if (psiElement instanceof BnfAttr) {
       if (location == UsageViewTypeLocation.INSTANCE) {
-        final BnfRule rule = PsiTreeUtil.getParentOfType(psiElement, BnfRule.class);
+        BnfRule rule = PsiTreeUtil.getParentOfType(psiElement, BnfRule.class);
         return (rule == null ? "Grammar " : "Rule ") + "Attribute";
       }
-      if (location == UsageViewShortNameLocation.INSTANCE || location == UsageViewLongNameLocation.INSTANCE) {
-        return ((BnfAttr)psiElement).getId().getText();
+      return ((BnfAttr)psiElement).getId().getText();
+    }
+    else if (psiElement instanceof BnfCompositeElement) {
+      if (location == UsageViewTypeLocation.INSTANCE) {
+        return StringUtil.join(NameUtil.splitWords(psiElement.getNode().getElementType().toString(), false), " ");
       }
+      return psiElement instanceof PsiNamedElement? ((PsiNamedElement) psiElement).getName() : psiElement.getClass().getSimpleName();
     }
     return null;
   }

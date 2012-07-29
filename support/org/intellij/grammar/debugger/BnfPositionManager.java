@@ -44,6 +44,7 @@ import org.intellij.grammar.generator.ParserGeneratorUtil;
 import org.intellij.grammar.parser.GeneratedParserUtilBase;
 import org.intellij.grammar.psi.*;
 import org.intellij.grammar.psi.impl.BnfFileImpl;
+import org.intellij.grammar.psi.impl.GrammarUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -112,30 +113,29 @@ public class BnfPositionManager implements PositionManager {
   }
 
   @Nullable
-  private BnfExpression findExpression(PsiFile file, final String name) {
+  private static BnfExpression findExpression(PsiFile file, final String name) {
     final Ref<BnfExpression> result = Ref.create(null);
     file.acceptChildren(new PsiRecursiveElementWalkingVisitor() {
       @Override
       public void visitElement(PsiElement element) {
         if (element instanceof BnfRule) {
           String ruleName = ((BnfRule)element).getName();
-          if (ruleName != null && name.startsWith(ruleName)) {
+          if (name.startsWith(ruleName)) {
             if (name.equals(ruleName)) {
               result.set(((BnfRule)element).getExpression());
               stopWalking();
             }
             else if (name.substring(ruleName.length()).matches("(?:_\\d+)+")) {
-              BnfRuleLineMarkerProvider
-                .processExpressionNames(ruleName, ((BnfRule)element).getExpression(), new PairProcessor<BnfExpression, String>() {
-                  @Override
-                  public boolean process(BnfExpression expression, String s) {
-                    if (name.equals(s)) {
-                      result.set(expression);
-                      return false;
-                    }
-                    return true;
+              GrammarUtil.processExpressionNames(ruleName, ((BnfRule) element).getExpression(), new PairProcessor<String, BnfExpression>() {
+                @Override
+                public boolean process(String funcName, BnfExpression expression) {
+                  if (name.equals(funcName)) {
+                    result.set(expression);
+                    return false;
                   }
-                });
+                  return true;
+                }
+              });
               stopWalking();
             }
           }
@@ -191,7 +191,7 @@ public class BnfPositionManager implements PositionManager {
     return line;
   }
 
-  private int getLineNumber(PsiClass aClass, Document document, int currentLine, BnfRule rule, PsiElement element) {
+  private static int getLineNumber(PsiClass aClass, Document document, int currentLine, BnfRule rule, PsiElement element) {
     String methodName = BnfRuleLineMarkerProvider.getMethodName(rule, element);
     PsiMethod[] methods = aClass.findMethodsByName(methodName, false);
     PsiCodeBlock body = methods.length == 1? methods[0].getBody() : null;
@@ -201,22 +201,16 @@ public class BnfPositionManager implements PositionManager {
     PsiElement parent = expr != null? expr.getParent() : null;
     if (parent instanceof BnfExpression) {
       int index = ParserGeneratorUtil.getChildExpressions((BnfExpression)parent).indexOf(expr);
-      PsiTryStatement statement = PsiTreeUtil.getChildOfType(body, PsiTryStatement.class);
-      if (statement != null) {
-        if (parent instanceof BnfSequence || parent instanceof BnfChoice) { // todo add quantified support
-          PsiStatement[] tryStatements = statement.getTryBlock().getStatements();
-          for (int i = 0, len = tryStatements.length, j = 0; i < len; i++) {
-            PsiStatement cur = tryStatements[i];
-            String text = cur.getText();
-            boolean misc = text.startsWith("pinned_") || !text.contains("result_");
-            if (currentLine > 0 && currentLine == document.getLineNumber(cur.getTextRange().getStartOffset())) {
-              if (misc && index == j ) return currentLine;
-            }
-            if (misc) continue;
-            if (j ++ == index) {
-              return document.getLineNumber(cur.getTextRange().getStartOffset());
-            }
-          }
+      for (int i = 0, len = statements.length, j = 0; i < len; i++) {
+        PsiStatement cur = statements[i];
+        String text = cur.getText();
+        boolean misc = text.startsWith("pinned_") || !text.contains("result_");
+        if (currentLine > 0 && currentLine == document.getLineNumber(cur.getTextRange().getStartOffset())) {
+          if (misc && index == j ) return currentLine;
+        }
+        if (misc) continue;
+        if (j ++ == index) {
+          return document.getLineNumber(cur.getTextRange().getStartOffset());
         }
       }
     }

@@ -17,21 +17,24 @@ package org.intellij.grammar.psi.impl;
 
 import com.intellij.lang.ASTNode;
 import com.intellij.openapi.util.TextRange;
+import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.psi.*;
+import com.intellij.psi.impl.FakePsiElement;
+import com.intellij.psi.impl.source.resolve.ResolveCache;
 import com.intellij.psi.impl.source.resolve.reference.impl.PsiMultiReference;
-import com.intellij.util.ArrayUtil;
-import com.intellij.util.IncorrectOperationException;
-import com.intellij.util.ProcessingContext;
+import com.intellij.psi.util.PsiTreeUtil;
+import com.intellij.util.*;
+import com.intellij.util.containers.ContainerUtil;
 import org.intellij.grammar.KnownAttribute;
+import org.intellij.grammar.generator.ParserGeneratorUtil;
 import org.intellij.grammar.java.JavaHelper;
-import org.intellij.grammar.psi.BnfAttr;
-import org.intellij.grammar.psi.BnfExpression;
-import org.intellij.grammar.psi.BnfStringLiteralExpression;
+import org.intellij.grammar.psi.*;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.regex.Pattern;
 
 /**
  * @author gregsh
@@ -49,8 +52,17 @@ public abstract class BnfStringImpl extends BnfExpressionImpl implements BnfStri
   @Override
   public PsiReference getReference() {
     PsiElement parent = getParent();
-    if (!(parent instanceof BnfAttr)) return null;
-    KnownAttribute attribute = KnownAttribute.getAttribute(((BnfAttr)parent).getName());
+    if (parent instanceof BnfAttrPattern) {
+      return getAttrPatternReference();
+    }
+    else if (parent instanceof BnfAttr) {
+      return getAttrValueReference();
+    }
+    else return null;
+  }
+
+  private PsiReference getAttrValueReference() {
+    KnownAttribute attribute = KnownAttribute.getAttribute(((BnfAttr)getParent()).getName());
     if (attribute == null) return null;
     boolean addJavaRefs = attribute.getName().endsWith("Class") || attribute.getName().endsWith("Package") ||
                        (attribute == KnownAttribute.EXTENDS || attribute == KnownAttribute.IMPLEMENTS);
@@ -58,7 +70,7 @@ public abstract class BnfStringImpl extends BnfExpressionImpl implements BnfStri
 
     BnfReferenceImpl<BnfStringLiteralExpression> bnfReference = null;
     if (addBnfRef) {
-      TextRange range = TextRange.from(1, getTextLength() - 2);
+      TextRange range = BnfStringManipulator.getStringTokenRange(this);
       bnfReference = new BnfReferenceImpl<BnfStringLiteralExpression>(this, range) {
         @Override
         public PsiElement handleElementRename(String newElementName) throws IncorrectOperationException {
@@ -77,6 +89,10 @@ public abstract class BnfStringImpl extends BnfExpressionImpl implements BnfStri
       return bnfReference;
     }
     return null;
+  }
+
+  private PsiReference getAttrPatternReference() {
+    return new MyPatternReference(this);
   }
 
   @Override
@@ -115,6 +131,123 @@ public abstract class BnfStringImpl extends BnfExpressionImpl implements BnfStri
         result = result.union(reference.getRangeInElement());
       }
       return result;
+    }
+  }
+
+  private static class MyPatternReference extends PsiPolyVariantReferenceBase<BnfStringImpl> {
+    private static final ResolveCache.PolyVariantResolver<MyPatternReference> RESOLVER = new ResolveCache.PolyVariantResolver<MyPatternReference>() {
+      @NotNull
+      @Override
+      public ResolveResult[] resolve(@NotNull MyPatternReference reference, boolean b) {
+        return reference.multiResolveInner();
+      }
+    };
+
+    MyPatternReference(BnfStringImpl element) {
+      super(element, BnfStringManipulator.getStringTokenRange(element));
+    }
+
+    @NotNull
+    @Override
+    public ResolveResult[] multiResolve(boolean b) {
+      return ResolveCache.getInstance(getElement().getProject()).resolveWithCaching(this, RESOLVER, false, b);
+    }
+
+    @NotNull
+    public ResolveResult[] multiResolveInner() {
+      final Pattern pattern = ParserGeneratorUtil.compilePattern(getCanonicalText());
+      if (pattern == null) return ResolveResult.EMPTY_ARRAY;
+      final ArrayList<PsiElement> result = new ArrayList<PsiElement>();
+
+      BnfAttr thisAttr = ObjectUtils.assertNotNull(PsiTreeUtil.getParentOfType(getElement(), BnfAttr.class));
+      BnfAttrs thisAttrs = ObjectUtils.assertNotNull(PsiTreeUtil.getParentOfType(thisAttr, BnfAttrs.class));
+      BnfRule thisRule = PsiTreeUtil.getParentOfType(thisAttrs, BnfRule.class);
+
+      String thisAttrName = thisAttr.getName();
+      // collect priority patterns
+      List<Pattern> otherPatterns = new SmartList<Pattern>();
+      for (BnfAttr attr : thisAttrs.getAttrList()) {
+        if (attr == thisAttr) break;
+        if (thisAttrName.equals(attr.getName())) {
+          BnfAttrPattern attrPattern = attr.getAttrPattern();
+          BnfLiteralExpression expression = attrPattern != null ? attrPattern.getLiteralExpression() : null;
+          if (expression != null) {
+            ContainerUtil.addIfNotNull(ParserGeneratorUtil.compilePattern(StringUtil.stripQuotesAroundValue(expression.getText())), otherPatterns);
+          }
+        }
+      }
+
+      BnfFile file = (BnfFile) thisAttrs.getContainingFile();
+      int thisOffset = (thisRule != null ? thisRule : thisAttrs).getTextRange().getStartOffset();
+      List<BnfRule> rules = thisRule != null ? Collections.singletonList(thisRule) : file.getRules();
+      main:
+      for (BnfRule rule : rules) {
+        if (rule.getTextRange().getStartOffset() < thisOffset) continue;
+        String ruleName = rule.getName();
+        if (pattern.matcher(ruleName).matches()) {
+          for (Pattern otherPattern : otherPatterns) {
+            if (otherPattern.matcher(ruleName).matches()) continue main;
+          }
+          result.add(rule);
+        }
+      }
+      if (KnownAttribute.getAttribute(thisAttrName) == KnownAttribute.PIN) {
+        PairProcessor<String, BnfExpression> processor = new PairProcessor<String, BnfExpression>() {
+          @Override
+          public boolean process(String funcName, BnfExpression expression) {
+            if (!(expression instanceof BnfSequence)) return true;
+            PsiElement firstNotTrivial = ParserGeneratorUtil.Rule.firstNotTrivial(ParserGeneratorUtil.Rule.of(expression));
+            if (firstNotTrivial == expression) return true;
+            if (pattern.matcher(funcName).matches()) {
+              result.add(new MyFakePsiElement(funcName, expression));
+            }
+            return true;
+          }
+        };
+        for (Object e : result.toArray()) {
+          BnfRule rule = (BnfRule) e;
+          GrammarUtil.processExpressionNames(rule.getName(), rule.getExpression(), processor);
+        }
+      }
+      return PsiElementResolveResult.createResults(result);
+    }
+
+    @NotNull
+    @Override
+    public Object[] getVariants() {
+      return ArrayUtil.EMPTY_OBJECT_ARRAY;
+    }
+
+  }
+
+  private static class MyFakePsiElement extends FakePsiElement implements BnfCompositeElement {
+    private final String myFuncName;
+    private final BnfExpression myExpression;
+
+    MyFakePsiElement(String funcName, BnfExpression expression) {
+      myFuncName = funcName;
+      myExpression = expression;
+    }
+
+    @Override
+    public String getName() {
+      return myFuncName;
+    }
+
+    @NotNull
+    @Override
+    public PsiElement getNavigationElement() {
+      return myExpression;
+    }
+
+    @Override
+    public TextRange getTextRange() {
+      return myExpression.getTextRange();
+    }
+
+    @Override
+    public PsiElement getParent() {
+      return myExpression.getParent();
     }
   }
 }

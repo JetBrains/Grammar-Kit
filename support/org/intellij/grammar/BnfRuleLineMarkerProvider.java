@@ -31,9 +31,8 @@ import org.intellij.grammar.generator.ParserGeneratorUtil;
 import org.intellij.grammar.generator.RuleGraphHelper;
 import org.intellij.grammar.java.JavaHelper;
 import org.intellij.grammar.psi.BnfExpression;
-import org.intellij.grammar.psi.BnfLiteralExpression;
-import org.intellij.grammar.psi.BnfReferenceOrToken;
 import org.intellij.grammar.psi.BnfRule;
+import org.intellij.grammar.psi.impl.GrammarUtil;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -95,33 +94,17 @@ public class BnfRuleLineMarkerProvider extends RelatedItemLineMarkerProvider {
     final BnfExpression target = PsiTreeUtil.getParentOfType(element, BnfExpression.class, false);
     String ruleName = rule.getName();
     if (target == null) return ruleName;
-    final Ref<String> ref = Ref.create(ruleName);
-    processExpressionNames(ruleName, rule.getExpression(), new PairProcessor<BnfExpression, String>() {
+    final Ref<String> ref = Ref.create(null);
+    GrammarUtil.processExpressionNames(ruleName, rule.getExpression(), new PairProcessor<String, BnfExpression>() {
       @Override
-      public boolean process(BnfExpression expression, String s) {
+      public boolean process(String funcName, BnfExpression expression) {
         if (target == expression) {
-          ref.set(s);
+          ref.set(funcName);
           return false;
         }
         return true;
       }
     });
     return ref.get();
-  }
-
-  public static boolean processExpressionNames(String curName, BnfExpression expression, PairProcessor<BnfExpression, String> processor) {
-    int i = 0;
-    for (BnfExpression node : ParserGeneratorUtil.getChildExpressions(expression)) {
-      if (node instanceof BnfLiteralExpression || node instanceof BnfReferenceOrToken ) {
-        if (!processor.process(node, curName)) return false;
-      }
-      else {
-        if (!processor.process(node, curName)) return false;
-        String nextName = ParserGeneratorUtil.getNextName(curName, i);
-        if (!processExpressionNames(nextName, node, processor)) return false;
-      }
-      i ++;
-    }
-    return true;
   }
 }

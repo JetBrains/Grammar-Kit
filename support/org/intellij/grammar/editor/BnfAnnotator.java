@@ -19,10 +19,7 @@ import com.intellij.lang.annotation.AnnotationHolder;
 import com.intellij.lang.annotation.Annotator;
 import com.intellij.openapi.project.DumbAware;
 import com.intellij.openapi.util.TextRange;
-import com.intellij.psi.ElementManipulators;
-import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiNamedElement;
-import com.intellij.psi.PsiReference;
+import com.intellij.psi.*;
 import com.intellij.util.ObjectUtils;
 import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.generator.ParserGeneratorUtil;
@@ -74,6 +71,12 @@ public class BnfAnnotator implements Annotator, DumbAware {
         else {
           annotationHolder.createInfoAnnotation(psiElement, null).setTextAttributes(BnfSyntaxHighlighter.TOKEN);
         }
+      }
+    }
+    else if (psiElement instanceof BnfStringLiteralExpression && parent instanceof BnfAttrPattern) {
+      PsiReference reference = psiElement.getReference();
+      if (reference instanceof PsiPolyVariantReference && ((PsiPolyVariantReference) reference).multiResolve(false).length == 0) {
+        annotationHolder.createWarningAnnotation(psiElement, "Pattern doesn't match any rule");
       }
     }
     else if (psiElement instanceof BnfStringLiteralExpression && parent instanceof BnfAttr) {

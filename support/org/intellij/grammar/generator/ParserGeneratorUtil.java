@@ -320,6 +320,15 @@ public class ParserGeneratorUtil {
       return PsiTreeUtil.getParentOfType(expr, BnfRule.class);
     }
   }
+
+  @Nullable
+  public static Pattern compilePattern(String text) {
+    try {
+      return Pattern.compile(text);
+    } catch (PatternSyntaxException e) {
+      return null;
+    }
+  }
   
   public static class PinMatcher {
 
@@ -330,14 +339,7 @@ public class ParserGeneratorUtil {
     public PinMatcher(BnfRule rule, IElementType type, String funcName) {
       pinValue = type == BNF_SEQUENCE ? getAttribute(rule, KnownAttribute.PIN, funcName) : null;
       pinIndex = pinValue instanceof Integer? (Integer)pinValue : -1;
-      Pattern pattern;
-      try {
-        pattern = pinValue instanceof String ? Pattern.compile(StringUtil.unescapeStringCharacters((String)pinValue)) : null;
-      }
-      catch (PatternSyntaxException e) {
-        pattern = null;
-      }
-      pinPattern = pattern;
+      pinPattern = pinValue instanceof String ? compilePattern(StringUtil.unescapeStringCharacters((String) pinValue)) : null;
     }
 
     boolean active() { return pinIndex > -1 || pinPattern != null; }

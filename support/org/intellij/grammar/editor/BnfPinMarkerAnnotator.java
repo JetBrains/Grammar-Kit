@@ -22,6 +22,7 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.tree.IElementType;
 import org.intellij.grammar.generator.ParserGeneratorUtil;
 import org.intellij.grammar.psi.*;
+import org.intellij.grammar.psi.impl.GrammarUtil;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -41,7 +42,7 @@ public class BnfPinMarkerAnnotator implements Annotator {
   }
 
   private static boolean annotateExpression(BnfRule rule, BnfExpression tree, String funcName, AnnotationHolder annotationHolder) {
-    if (isAtomicExpression(tree)) return false;
+    if (GrammarUtil.isAtomicExpression(tree)) return false;
     final List<BnfExpression> children = getChildExpressions(tree);
     if (isTrivialNode(tree)) return annotateExpression(rule, children.get(0), funcName, annotationHolder);
 
@@ -51,7 +52,7 @@ public class BnfPinMarkerAnnotator implements Annotator {
     boolean pinApplied = false;
     for (int i = 0, childExpressionsSize = children.size(); i < childExpressionsSize; i++) {
       BnfExpression child = children.get(i);
-      boolean isAtomic = isAtomicExpression(child);
+      boolean isAtomic = GrammarUtil.isAtomicExpression(child);
       boolean fullRange = isAtomic || !annotateExpression(rule, child, getNextName(funcName, i), annotationHolder);
       if (type == BNF_SEQUENCE && !pinApplied && pinMatcher.matches(i, child)) {
         pinApplied = true;
@@ -63,7 +64,4 @@ public class BnfPinMarkerAnnotator implements Annotator {
     return pinApplied;
   }
 
-  private static boolean isAtomicExpression(BnfExpression tree) {
-    return tree instanceof BnfReferenceOrToken || tree instanceof BnfLiteralExpression || tree instanceof BnfExternalExpression;
-  }
 }

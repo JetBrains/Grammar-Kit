@@ -74,8 +74,8 @@ public class Autopin implements PsiParser {
     if (!recursion_guard_(builder_, level_, "create_statement")) return false;
     if (!nextTokenIs(builder_, CREATE)) return false;
     boolean result_ = false;
-    final int start_ = builder_.getCurrentOffset();
-    final Marker marker_ = builder_.mark();
+    int start_ = builder_.getCurrentOffset();
+    Marker marker_ = builder_.mark();
     result_ = create_table_statement(builder_, level_ + 1);
     LighterASTNode last_ = result_? builder_.getLatestDoneMarker() : null;
     if (last_ != null && last_.getStartOffset() == start_ && type_extends_(last_.getTokenType(), CREATE_STATEMENT)) {
@@ -97,8 +97,8 @@ public class Autopin implements PsiParser {
     if (!nextTokenIs(builder_, CREATE)) return false;
     boolean result_ = false;
     boolean pinned_ = false;
-    final int start_ = builder_.getCurrentOffset();
-    final Marker marker_ = builder_.mark();
+    int start_ = builder_.getCurrentOffset();
+    Marker marker_ = builder_.mark();
     enterErrorRecordingSection(builder_, level_, _SECTION_GENERAL_, null);
     result_ = consumeToken(builder_, CREATE);
     result_ = result_ && create_table_statement_1(builder_, level_ + 1);
@@ -139,7 +139,7 @@ public class Autopin implements PsiParser {
   private static boolean create_table_statement_2_0(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "create_table_statement_2_0")) return false;
     boolean result_ = false;
-    final Marker marker_ = builder_.mark();
+    Marker marker_ = builder_.mark();
     result_ = consumeToken(builder_, GLOBAL);
     if (!result_) result_ = consumeToken(builder_, LOCAL);
     if (!result_) {
@@ -157,8 +157,8 @@ public class Autopin implements PsiParser {
     if (!recursion_guard_(builder_, level_, "drop_statement")) return false;
     if (!nextTokenIs(builder_, DROP)) return false;
     boolean result_ = false;
-    final int start_ = builder_.getCurrentOffset();
-    final Marker marker_ = builder_.mark();
+    int start_ = builder_.getCurrentOffset();
+    Marker marker_ = builder_.mark();
     result_ = drop_table_statement(builder_, level_ + 1);
     LighterASTNode last_ = result_? builder_.getLatestDoneMarker() : null;
     if (last_ != null && last_.getStartOffset() == start_ && type_extends_(last_.getTokenType(), DROP_STATEMENT)) {
@@ -180,8 +180,8 @@ public class Autopin implements PsiParser {
     if (!nextTokenIs(builder_, DROP)) return false;
     boolean result_ = false;
     boolean pinned_ = false;
-    final int start_ = builder_.getCurrentOffset();
-    final Marker marker_ = builder_.mark();
+    int start_ = builder_.getCurrentOffset();
+    Marker marker_ = builder_.mark();
     enterErrorRecordingSection(builder_, level_, _SECTION_GENERAL_, null);
     result_ = consumeTokens(builder_, 0, DROP, TABLE);
     result_ = result_ && parseReference(builder_, level_ + 1);
@@ -207,7 +207,7 @@ public class Autopin implements PsiParser {
     if (!nextTokenIs(builder_, A)) return false;
     boolean result_ = false;
     boolean pinned_ = false;
-    final Marker marker_ = builder_.mark();
+    Marker marker_ = builder_.mark();
     enterErrorRecordingSection(builder_, level_, _SECTION_GENERAL_, null);
     result_ = consumeTokens(builder_, 1, A, B);
     pinned_ = result_; // pin = 1
@@ -232,7 +232,7 @@ public class Autopin implements PsiParser {
   private static boolean override_nested_sequence_2_0(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "override_nested_sequence_2_0")) return false;
     boolean result_ = false;
-    final Marker marker_ = builder_.mark();
+    Marker marker_ = builder_.mark();
     result_ = consumeTokens(builder_, 0, C, D, E);
     if (!result_) {
       marker_.rollbackTo();
@@ -264,10 +264,11 @@ public class Autopin implements PsiParser {
   // create_statement | drop_statement
   public static boolean statement(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "statement")) return false;
-    if (!nextTokenIs(builder_, CREATE) && !nextTokenIs(builder_, DROP)) return false;
+    if (!nextTokenIs(builder_, CREATE) && !nextTokenIs(builder_, DROP)
+        && replaceVariants(builder_, 2, "<statement>")) return false;
     boolean result_ = false;
-    final int start_ = builder_.getCurrentOffset();
-    final Marker marker_ = builder_.mark();
+    int start_ = builder_.getCurrentOffset();
+    Marker marker_ = builder_.mark();
     enterErrorRecordingSection(builder_, level_, _SECTION_GENERAL_, "<statement>");
     result_ = create_statement(builder_, level_ + 1);
     if (!result_) result_ = drop_statement(builder_, level_ + 1);
@@ -292,7 +293,7 @@ public class Autopin implements PsiParser {
     if (!nextTokenIs(builder_, A)) return false;
     boolean result_ = false;
     boolean pinned_ = false;
-    final Marker marker_ = builder_.mark();
+    Marker marker_ = builder_.mark();
     enterErrorRecordingSection(builder_, level_, _SECTION_GENERAL_, null);
     result_ = consumeTokens(builder_, 3, A, B, C, D);
     pinned_ = result_; // pin = 3
@@ -314,7 +315,7 @@ public class Autopin implements PsiParser {
     if (!nextTokenIs(builder_, A)) return false;
     boolean result_ = false;
     boolean pinned_ = false;
-    final Marker marker_ = builder_.mark();
+    Marker marker_ = builder_.mark();
     enterErrorRecordingSection(builder_, level_, _SECTION_GENERAL_, null);
     result_ = consumeTokens(builder_, 0, A, B);
     result_ = result_ && parseReference(builder_, level_ + 1);
@@ -336,7 +337,7 @@ public class Autopin implements PsiParser {
     if (!recursion_guard_(builder_, level_, "token_sequence3")) return false;
     boolean result_ = false;
     boolean pinned_ = false;
-    final Marker marker_ = builder_.mark();
+    Marker marker_ = builder_.mark();
     enterErrorRecordingSection(builder_, level_, _SECTION_GENERAL_, null);
     result_ = parseReference(builder_, level_ + 1);
     pinned_ = result_; // pin = 1

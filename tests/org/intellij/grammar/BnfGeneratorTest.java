@@ -67,6 +67,13 @@ public class BnfGeneratorTest extends ParsingTestCase {
   public void testPsiGen() throws Exception { doGenTest(true); }
   public void testPsiAccessors() throws Exception { doGenTest(true); }
 
+  public void testEmpty() throws Exception {
+    myFile = createPsiFile("empty.bnf", "{ }");
+    ParserGenerator parserGenerator = new ParserGenerator((BnfFileImpl)myFile, "", myFullDataPath);
+    parserGenerator.setUnitTestMode(true);
+    parserGenerator.generate();
+  }
+
   @Override
   protected String loadFile(@NonNls String name) throws IOException {
     if (name.equals("BnfGrammar.bnf")) return super.loadFile("../../grammars/Grammar.bnf");

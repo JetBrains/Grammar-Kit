@@ -61,7 +61,7 @@ public class PsiAccessors implements PsiParser {
     if (!nextTokenIs(builder_, ID)) return false;
     boolean result_ = false;
     boolean pinned_ = false;
-    final Marker marker_ = builder_.mark();
+    Marker marker_ = builder_.mark();
     enterErrorRecordingSection(builder_, level_, _SECTION_GENERAL_, null);
     result_ = expression(builder_, level_ + 1);
     result_ = result_ && operator(builder_, level_ + 1);
@@ -83,7 +83,7 @@ public class PsiAccessors implements PsiParser {
     if (!recursion_guard_(builder_, level_, "expression")) return false;
     if (!nextTokenIs(builder_, ID)) return false;
     boolean result_ = false;
-    final Marker marker_ = builder_.mark();
+    Marker marker_ = builder_.mark();
     result_ = value(builder_, level_ + 1);
     result_ = result_ && consumeToken(builder_, "*");
     result_ = result_ && value(builder_, level_ + 1);
@@ -101,7 +101,7 @@ public class PsiAccessors implements PsiParser {
   public static boolean operator(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "operator")) return false;
     boolean result_ = false;
-    final Marker marker_ = builder_.mark();
+    Marker marker_ = builder_.mark();
     enterErrorRecordingSection(builder_, level_, _SECTION_GENERAL_, "<operator>");
     result_ = consumeToken(builder_, "+");
     if (!result_) result_ = consumeToken(builder_, "-");
@@ -121,7 +121,7 @@ public class PsiAccessors implements PsiParser {
     if (!recursion_guard_(builder_, level_, "re")) return false;
     if (!nextTokenIs(builder_, ID)) return false;
     boolean result_ = false;
-    final Marker marker_ = builder_.mark();
+    Marker marker_ = builder_.mark();
     result_ = consumeToken(builder_, ID);
     if (result_) {
       marker_.done(RE);
@@ -144,7 +144,7 @@ public class PsiAccessors implements PsiParser {
     if (!recursion_guard_(builder_, level_, "value")) return false;
     if (!nextTokenIs(builder_, ID)) return false;
     boolean result_ = false;
-    final Marker marker_ = builder_.mark();
+    Marker marker_ = builder_.mark();
     result_ = consumeToken(builder_, ID);
     if (result_) {
       marker_.done(VALUE);

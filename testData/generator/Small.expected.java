@@ -62,7 +62,7 @@ public class Small implements PsiParser {
     if (!recursion_guard_(builder_, level_, "otherRule")) return false;
     if (!nextTokenIs(builder_, TOKEN)) return false;
     boolean result_ = false;
-    final Marker marker_ = builder_.mark();
+    Marker marker_ = builder_.mark();
     result_ = consumeToken(builder_, TOKEN);
     if (result_) {
       marker_.done(OTHERRULE);
@@ -91,7 +91,7 @@ public class Small implements PsiParser {
     if (!recursion_guard_(builder_, level_, "someRule")) return false;
     if (!nextTokenIs(builder_, TOKEN)) return false;
     boolean result_ = false;
-    final Marker marker_ = builder_.mark();
+    Marker marker_ = builder_.mark();
     result_ = consumeToken(builder_, TOKEN);
     if (result_) {
       marker_.done(SOMERULE);
@@ -106,8 +106,8 @@ public class Small implements PsiParser {
   // token?
   public static boolean someRule2(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "someRule2")) return false;
-    final Marker marker_ = builder_.mark();
-    enterErrorRecordingSection(builder_, level_, _SECTION_GENERAL_, "<somerule 2>");
+    Marker marker_ = builder_.mark();
+    enterErrorRecordingSection(builder_, level_, _SECTION_GENERAL_, "<some rule 2>");
     consumeToken(builder_, TOKEN);
     marker_.done(SOMERULE2);
     exitErrorRecordingSection(builder_, level_, true, false, _SECTION_GENERAL_, null);
@@ -119,8 +119,8 @@ public class Small implements PsiParser {
   public static boolean someString(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "someString")) return false;
     boolean result_ = false;
-    final Marker marker_ = builder_.mark();
-    enterErrorRecordingSection(builder_, level_, _SECTION_GENERAL_, "<somestring>");
+    Marker marker_ = builder_.mark();
+    enterErrorRecordingSection(builder_, level_, _SECTION_GENERAL_, "<some string>");
     result_ = consumeToken(builder_, "token");
     if (result_) {
       marker_.done(SOMESTRING);
@@ -137,7 +137,7 @@ public class Small implements PsiParser {
   public static boolean statement(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "statement")) return false;
     boolean result_ = false;
-    final Marker marker_ = builder_.mark();
+    Marker marker_ = builder_.mark();
     enterErrorRecordingSection(builder_, level_, _SECTION_GENERAL_, "<statement>");
     result_ = consumeToken(builder_, TOKEN);
     if (!result_) result_ = someRule(builder_, level_ + 1);
@@ -158,7 +158,7 @@ public class Small implements PsiParser {
     if (!recursion_guard_(builder_, level_, "tokenRule")) return false;
     if (!nextTokenIs(builder_, OP_EQ)) return false;
     boolean result_ = false;
-    final Marker marker_ = builder_.mark();
+    Marker marker_ = builder_.mark();
     result_ = consumeToken(builder_, OP_EQ);
     result_ = result_ && consumeToken(builder_, "=");
     if (!result_) {

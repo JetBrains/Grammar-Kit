@@ -52,11 +52,12 @@ public class LeftAssociative implements PsiParser {
   // AS? id
   public static boolean alias_definition(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "alias_definition")) return false;
-    if (!nextTokenIs(builder_, AS) && !nextTokenIs(builder_, ID)) return false;
+    if (!nextTokenIs(builder_, AS) && !nextTokenIs(builder_, ID)
+        && replaceVariants(builder_, 2, "<alias definition>")) return false;
     boolean result_ = false;
-    final Marker left_marker_ = (Marker)builder_.getLatestDoneMarker();
+    Marker left_marker_ = (Marker)builder_.getLatestDoneMarker();
     if (!invalid_left_marker_guard_(builder_, left_marker_, "alias_definition")) return false;
-    final Marker marker_ = builder_.mark();
+    Marker marker_ = builder_.mark();
     enterErrorRecordingSection(builder_, level_, _SECTION_GENERAL_, "<alias definition>");
     result_ = alias_definition_0(builder_, level_ + 1);
     result_ = result_ && consumeToken(builder_, ID);
@@ -88,11 +89,12 @@ public class LeftAssociative implements PsiParser {
   // AS? id
   private static boolean alias_definition2_0(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "alias_definition2_0")) return false;
-    if (!nextTokenIs(builder_, AS) && !nextTokenIs(builder_, ID)) return false;
+    if (!nextTokenIs(builder_, AS) && !nextTokenIs(builder_, ID)
+        && replaceVariants(builder_, 2, "<alias definition 2>")) return false;
     boolean result_ = false;
-    final Marker left_marker_ = (Marker)builder_.getLatestDoneMarker();
+    Marker left_marker_ = (Marker)builder_.getLatestDoneMarker();
     if (!invalid_left_marker_guard_(builder_, left_marker_, "alias_definition2_0")) return false;
-    final Marker marker_ = builder_.mark();
+    Marker marker_ = builder_.mark();
     enterErrorRecordingSection(builder_, level_, _SECTION_GENERAL_, "<alias definition 2>");
     result_ = alias_definition2_0_0(builder_, level_ + 1);
     result_ = result_ && consumeToken(builder_, ID);
@@ -120,7 +122,7 @@ public class LeftAssociative implements PsiParser {
     if (!recursion_guard_(builder_, level_, "from")) return false;
     if (!nextTokenIs(builder_, REFERENCE)) return false;
     boolean result_ = false;
-    final Marker marker_ = builder_.mark();
+    Marker marker_ = builder_.mark();
     result_ = consumeToken(builder_, REFERENCE);
     result_ = result_ && from_1(builder_, level_ + 1);
     result_ = result_ && from_2(builder_, level_ + 1);
@@ -169,9 +171,9 @@ public class LeftAssociative implements PsiParser {
     if (!recursion_guard_(builder_, level_, "leech")) return false;
     if (!nextTokenIs(builder_, ID)) return false;
     boolean result_ = false;
-    final Marker left_marker_ = (Marker)builder_.getLatestDoneMarker();
+    Marker left_marker_ = (Marker)builder_.getLatestDoneMarker();
     if (!invalid_left_marker_guard_(builder_, left_marker_, "leech")) return false;
-    final Marker marker_ = builder_.mark();
+    Marker marker_ = builder_.mark();
     result_ = consumeToken(builder_, ID);
     if (result_) {
       marker_.done(LEECH);
@@ -190,9 +192,9 @@ public class LeftAssociative implements PsiParser {
     if (!recursion_guard_(builder_, level_, "leech2")) return false;
     if (!nextTokenIs(builder_, ID)) return false;
     boolean result_ = false;
-    final Marker left_marker_ = (Marker)builder_.getLatestDoneMarker();
+    Marker left_marker_ = (Marker)builder_.getLatestDoneMarker();
     if (!invalid_left_marker_guard_(builder_, left_marker_, "leech2")) return false;
-    final Marker marker_ = builder_.mark();
+    Marker marker_ = builder_.mark();
     result_ = consumeToken(builder_, ID);
     if (!result_) {
       marker_.rollbackTo();
@@ -209,7 +211,7 @@ public class LeftAssociative implements PsiParser {
   // id?
   static boolean leech3(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "leech3")) return false;
-    final Marker left_marker_ = (Marker)builder_.getLatestDoneMarker();
+    Marker left_marker_ = (Marker)builder_.getLatestDoneMarker();
     if (!invalid_left_marker_guard_(builder_, left_marker_, "leech3")) return false;
     consumeToken(builder_, ID);
     left_marker_.precede().done(((LighterASTNode)left_marker_).getTokenType());

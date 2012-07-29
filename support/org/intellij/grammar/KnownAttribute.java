@@ -72,6 +72,7 @@ public class KnownAttribute<T> {
   public static final KnownAttribute<Object>       PIN                       = create(false, Object.class, "pin", (Object)(-1));
   public static final KnownAttribute<String>       MIXIN                     = create(false, String.class, "mixin", null);
   public static final KnownAttribute<String>       RECOVER_UNTIL             = create(false, String.class, "recoverUntil", null);
+  public static final KnownAttribute<String>       NAME                      = create(false, String.class, "name", null);
 
   public static final KnownAttribute<List<Pair<String, String>>> METHODS = create(false, PAIR_LIST_CLAZZ, "methods", Collections.<Pair<String, String>>emptyList());
   public static final KnownAttribute<List<Pair<String, String>>> TOKENS = create(true, PAIR_LIST_CLAZZ, "tokens", Collections.<Pair<String, String>>emptyList());

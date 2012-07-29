@@ -120,6 +120,15 @@ public class GeneratedParserUtilBase {
     return token == tokenType;
   }
 
+  public static boolean replaceVariants(PsiBuilder builder_, int variantCount, String frameName) {
+    ErrorState state = ErrorState.get(builder_);
+    if (!state.suppressErrors && state.predicateCount < 2 && state.predicateSign) {
+      state.clearVariants(true, state.variants.size() - variantCount);
+      addVariantInner(state, builder_.getCurrentOffset(), frameName);
+    }
+    return true;
+  }
+
   public static void addVariant(PsiBuilder builder_, String text) {
     addVariant(ErrorState.get(builder_), builder_, text);
   }

@@ -64,6 +64,7 @@ public class ParserGenerator {
   private final String mySourcePath;
   private final String myOutputPath;
   private final String myGrammarRoot;
+  private final String myGrammarRootParser;
   private final String myRuleClassPrefix;
   private final boolean generateMemoizationCode;
   private final boolean generateExtendedPin;
@@ -84,6 +85,7 @@ public class ParserGenerator {
     for (BnfRule r : rules) {
       myRuleParserClasses.put(r.getName(), getAttribute(r, KnownAttribute.PARSER_CLASS));
     }
+    myGrammarRootParser = myGrammarRoot == null? null : myRuleParserClasses.get(myGrammarRoot);
     generateMemoizationCode = getRootAttribute(myFile, KnownAttribute.GENERATE_MEMOIZATION);
     generateExtendedPin = getRootAttribute(myFile, KnownAttribute.EXTENDED_PIN);
     generateFirstCheck = getRootAttribute(myFile, KnownAttribute.GENERATE_FIRST_CHECK);
@@ -161,7 +163,7 @@ public class ParserGenerator {
       }
       sortedPsiRules.put(rule.getName(), rule);
     }
-    {
+    if (myGrammarRoot != null) {
       String className = getRootAttribute(myFile, KnownAttribute.ELEMENT_TYPE_HOLDER_CLASS);
       File parserFile = new File(myOutputPath, className.replace('.', File.separatorChar) + ".java");
       parserFile.getParentFile().mkdirs();
@@ -206,7 +208,7 @@ public class ParserGenerator {
           closeOutput();
         }
       }
-      if (visitorClassName != null) {
+      if (visitorClassName != null && myGrammarRoot != null) {
         String psiClass = psiPackage + "." + visitorClassName;
         File psiFile = new File(myOutputPath, psiClass.replace('.', File.separatorChar) + ".java");
         psiFile.getParentFile().mkdirs();
@@ -389,8 +391,7 @@ public class ParserGenerator {
     String elementTypeHolderClass = getRootAttribute(myFile, KnownAttribute.ELEMENT_TYPE_HOLDER_CLASS);
     String stubParser = getRootAttribute(myFile, KnownAttribute.PARSER_UTIL_CLASS);
     List<String> parserImports = getRootAttribute(myFile, KnownAttribute.PARSER_IMPORTS);
-    String rootParserClass = myRuleParserClasses.get(myGrammarRoot);
-    boolean rootParser = parserClass.equals(rootParserClass);
+    boolean rootParser = parserClass.equals(myGrammarRootParser);
     Set<String> imports = new LinkedHashSet<String>();
     imports.addAll(Arrays.asList("org.jetbrains.annotations.*",
                                  "com.intellij.lang.LighterASTNode",
@@ -400,7 +401,7 @@ public class ParserGenerator {
                                  "static " + elementTypeHolderClass + ".*",
                                  "static " + stubParser + ".*"));
     if (!rootParser) {
-      imports.add("static " + rootParserClass + ".*");
+      imports.add("static " + myGrammarRootParser + ".*");
     }
     else {
       imports.addAll(Arrays.asList(BnfConstants.IELEMENTTYPE_CLASS,
@@ -656,7 +657,7 @@ public class ParserGenerator {
     }
 
 
-    boolean frameNameRequired = !isPrivate && !Rule.isMeta(rule);
+    String frameName = firstNonTrivial && !Rule.isMeta(rule)? quote(getRuleDisplayName(rule, !isPrivate)) : null;
     if (generateFirstCheck > 0 && recoverRoot == null && (isRule || firstNonTrivial)) {
       BnfFirstNextAnalyzer analyzer = new BnfFirstNextAnalyzer();
       Set<String> firstSet = analyzer.asStrings(analyzer.calcFirstInner(node, new THashSet<BnfExpression>(), new THashSet<BnfRule>()));
@@ -674,12 +675,16 @@ public class ParserGenerator {
         }
       }
       // do not include frameName if FIRST is known and its size is 1
-      frameNameRequired = frameNameRequired && (firstElementTypes.isEmpty() || firstElementTypes.size() > 1);
+      if (!firstElementTypes.isEmpty() && firstElementTypes.size() == 1) frameName = null;
       if (!firstElementTypes.isEmpty() && firstElementTypes.size() <= generateFirstCheck) {
         StringBuilder sb = new StringBuilder("if (");
         for (int count = 0, elementTypesSize = firstElementTypes.size(); count < elementTypesSize; count++) {
           if (count > 0) sb.append(count % 2 == 0 ? "\n  && " : " && ");
           sb.append("!nextTokenIs(builder_, ").append(firstElementTypes.get(count)).append(")");
+        }
+        if (frameName != null) {
+          sb.append(firstElementTypes.size() % 2 == 0 ? "\n  && " : " && ");
+          sb.append("replaceVariants(builder_, ").append(firstElementTypes.size()).append(", ").append(frameName).append(")");
         }
         sb.append(") return false;");
         out(sb.toString());
@@ -701,19 +706,18 @@ public class ParserGenerator {
       out("boolean pinned_ = false;");
     }
     if (!isPrivate && canCollapse) {
-      out("final int start_ = builder_.getCurrentOffset();");
+      out("int start_ = builder_.getCurrentOffset();");
     }
     if (isLeft) {
-      out("final Marker left_marker_ = (Marker)builder_.getLatestDoneMarker();");
+      out("Marker left_marker_ = (Marker)builder_.getLatestDoneMarker();");
       if (generateExtendedPin) {
         out("if (!invalid_left_marker_guard_(builder_, left_marker_, \"" + debugFuncName + "\")) return false;");
       }
     }
     if (!alwaysTrue || !isPrivate) {
-      out("final Marker marker_ = builder_.mark();");
+      out("Marker marker_ = builder_.mark();");
     }
 
-    String frameName = frameNameRequired? "\"" + getRuleDisplayName(rule) +"\"" : null;
     String sectionType = recoverRoot != null ? "_SECTION_RECOVER_" :
                          type == BNF_OP_AND ? "_SECTION_AND_" :
                          type == BNF_OP_NOT ? "_SECTION_NOT_" :
@@ -875,9 +879,19 @@ public class ParserGenerator {
     generateNodeChildren(rule, funcName, children, visited);
   }
 
-  private static String getRuleDisplayName(BnfRule rule) {
-    String elementType = StringUtil.notNullize(getAttribute(rule, KnownAttribute.ELEMENT_TYPE), rule.getName()).toLowerCase();
-    String[] strings = NameUtil.splitNameIntoWords(elementType);
+  @Nullable
+  private static String getRuleDisplayName(BnfRule rule, boolean force) {
+    String name = getAttribute(rule, KnownAttribute.NAME);
+    BnfRule realRule = rule;
+    if (name != null) {
+      realRule = ((BnfFile)rule.getContainingFile()).getRule(name);
+      if (realRule != null) name = getAttribute(realRule, KnownAttribute.NAME);
+    }
+    if (name != null || (!force && realRule == rule)) {
+      return StringUtil.isEmpty(name)? null : "<" + name + ">";
+    }
+    String[] strings = NameUtil.splitNameIntoWords(realRule.getName());
+    for (int i = 0; i < strings.length; i++) strings[i] = strings[i].toLowerCase();
     return "<" + StringUtil.join(strings, " ") + ">";
   }
 
@@ -1005,7 +1019,7 @@ public class ParserGenerator {
         else {
           method = subRule.getName();
           String parserClass = myRuleParserClasses.get(method);
-          if (!parserClass.equals(myRuleParserClasses.get(rule.getName()))) {
+          if (!parserClass.equals(myGrammarRootParser) && !parserClass.equals(myRuleParserClasses.get(rule.getName()))) {
             method = StringUtil.getShortName(parserClass) + "." + method;
           }
           return method + "(builder_, level_ + 1)";

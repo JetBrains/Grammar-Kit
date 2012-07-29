@@ -322,6 +322,12 @@ public class ParserGeneratorUtil {
   }
 
   @Nullable
+  public static String quote(@Nullable String text) {
+    if (text == null) return null;
+    return "\"" + text + "\"";
+  }
+
+  @Nullable
   public static Pattern compilePattern(String text) {
     try {
       return Pattern.compile(text);

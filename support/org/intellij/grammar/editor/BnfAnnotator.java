@@ -103,7 +103,7 @@ public class BnfAnnotator implements Annotator, DumbAware {
                     ((BnfFile)parent.getContainingFile()).getRule(value);
           refType = "rule or class ";
         }
-        else if (attribute == KnownAttribute.ELEMENT_TYPE) {
+        else if (attribute == KnownAttribute.ELEMENT_TYPE || attribute == KnownAttribute.NAME) {
           resolve = ObjectUtils.chooseNotNull(((BnfFile)parent.getContainingFile()).getRule(value), Boolean.TRUE);
           refType = "rule or constant ";
         }

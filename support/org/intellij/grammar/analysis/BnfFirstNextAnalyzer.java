@@ -245,11 +245,11 @@ public class BnfFirstNextAnalyzer {
       boolean skip = predicateExpression instanceof BnfSequence && ((BnfSequence)predicateExpression).getExpressionList().size() > 1; // todo calc min length ?
       if (!skip) {
         // skip external methods
-        for (BnfExpression s : next) {
-          if (GrammarUtil.isExternalReference(s)) {
-            skip = true;
-            break;
-          }
+        for (Iterator<BnfExpression> iterator = next.iterator(); !skip && iterator.hasNext(); ) {
+          skip = GrammarUtil.isExternalReference(iterator.next());
+        }
+        for (Iterator<BnfExpression> iterator = conditions.iterator(); !skip && iterator.hasNext(); ) {
+          skip = GrammarUtil.isExternalReference(iterator.next());
         }
       }
       if (skip) {

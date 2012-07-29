@@ -6,6 +6,7 @@ Grammar-Kit plugin
 
 
 Adds support for a custom variant of BNF grammar files.
+[Download](https://github.com/JetBrains/Grammar-Kit/blob/master/binaries/GrammarKit.zip) the latest version for manual installation.
 
 General usage instructions
 --------------------------
@@ -21,10 +22,12 @@ See [HOWTO](https://github.com/JetBrains/Grammar-Kit/blob/master/HOWTO.md) page 
 
 Recent changes
 --------------
-1.0.6
+1.0.7
 
-* Grammar diagram
-* Dedicated "tokens" attribute
+* Attribute pattern navigation & inspection
+* Short error messages generation instead of long token lists
+* Token sequence completion
+* Standalone invocation (for ant integration & etc.)
 
 
 Quick documentation:
@@ -150,6 +153,13 @@ Just add *mypackage.MyReferenceExpressionImpl* class with proper *getReference()
 
 Change log
 ==========
+1.0.7
+
+* Attribute pattern navigation & inspection
+* Short error messages generation instead of long token lists
+* Token sequence completion
+* Standalone invocation (for ant integration & etc.)
+
 1.0.6
 
 * Grammar diagram (UML support plugin required)

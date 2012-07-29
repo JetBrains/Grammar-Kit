@@ -1,6 +1,6 @@
 <idea-plugin url="https://github.com/JetBrains/Grammar-Kit" version="2">
   <id>org.jetbrains.idea.grammar</id>
-  <version>1.0.6</version>
+  <version>1.0.7</version>
   <vendor email="gregory.shrago@jetbrains.com" logo="">Gregory Shrago</vendor>
   <idea-version since-build="116.108" until-build=""/>
 
@@ -12,6 +12,13 @@
 
   <change-notes>
     <![CDATA[
+    <p>1.0.7</p>
+    <ul>
+        <li>Attribute pattern navigation & inspection</li>
+        <li>Short error messages generation instead of long token lists</li>
+        <li>Token sequence completion</li>
+        <li>Standalone invocation (for ant integration & etc.)</li>
+    </ul>
     <p>1.0.6</p>
     <ul>
         <li>Grammar diagram (UML support plugin required)</li>

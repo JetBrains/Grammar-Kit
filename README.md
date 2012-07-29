@@ -7,7 +7,7 @@ Grammar-Kit plugin
 
 Adds support for a custom variant of BNF grammar files.
 
-[Download](https://github.com/JetBrains/Grammar-Kit/blob/master/binaries/GrammarKit.zip) the latest version for manual installation.
+[Download](https://github.com/JetBrains/Grammar-Kit/raw/master/binaries/GrammarKit.zip) the latest version for manual installation.
 
 General usage instructions
 --------------------------

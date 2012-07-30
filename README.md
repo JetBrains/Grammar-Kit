@@ -21,6 +21,8 @@ You've just build a custom language plugin (approx. 1 day).
 
 See [HOWTO](https://github.com/JetBrains/Grammar-Kit/blob/master/HOWTO.md) page for different tips and tricks.
 
+![Editor support](/JetBrains/Grammar-Kit/raw/master/images/editor.png)
+
 Recent changes
 --------------
 1.0.7

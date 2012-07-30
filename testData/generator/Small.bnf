@@ -14,4 +14,4 @@ someString::= 'token'
 otherRule::= ( token )
 private privateRule::= token
 private privateString ::= 'token'
-private tokenRule ::= '=' "="
+private tokenRule ::= '=' "=" '==' "=="

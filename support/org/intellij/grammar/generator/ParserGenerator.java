@@ -998,8 +998,8 @@ public class ParserGenerator {
     String text = node == null ? nextName : node.getText();
     if (type == BNF_STRING) {
       String value = StringUtil.stripQuotesAroundValue(text);
-      String attributeName;
-      if (text.charAt(0) != '\"' && (attributeName = getTokenName(value)) != null) {
+      String attributeName = getTokenName(value);
+      if (attributeName != null) {
         return generateConsumeToken(attributeName);
       }
       return generateConsumeTextToken(value);

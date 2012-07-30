@@ -153,14 +153,16 @@ public class Small implements PsiParser {
   }
 
   /* ********************************************************** */
-  // '=' "="
+  // '=' "=" '==' "=="
   static boolean tokenRule(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "tokenRule")) return false;
     if (!nextTokenIs(builder_, OP_EQ)) return false;
     boolean result_ = false;
     Marker marker_ = builder_.mark();
     result_ = consumeToken(builder_, OP_EQ);
-    result_ = result_ && consumeToken(builder_, "=");
+    result_ = result_ && consumeToken(builder_, OP_EQ);
+    result_ = result_ && consumeToken(builder_, "==");
+    result_ = result_ && consumeToken(builder_, "==");
     if (!result_) {
       marker_.rollbackTo();
     }

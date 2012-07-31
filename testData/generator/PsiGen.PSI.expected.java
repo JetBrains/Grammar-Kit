@@ -9,15 +9,15 @@ import generated.psi.impl.*;
 
 public interface ParserTypes {
 
-  IElementType BLOCKOF = new IElementType("BLOCKOF");
+  IElementType BLOCK_OF = new IElementType("BLOCK_OF");
   IElementType CAST_EXPR = new IElementType("CAST_EXPR");
   IElementType EXPR = new IElementType("EXPR");
   IElementType GRAMMAR_ELEMENT = new IElementType("GRAMMAR_ELEMENT");
   IElementType IDENTIFIER = new IElementType("IDENTIFIER");
   IElementType ID_EXPR = new IElementType("ID_EXPR");
   IElementType ITEM_EXPR = new IElementType("ITEM_EXPR");
-  IElementType LEFTSHADOW = new IElementType("LEFTSHADOW");
-  IElementType LEFTSHADOWTEST = new IElementType("LEFTSHADOWTEST");
+  IElementType LEFT_SHADOW = new IElementType("LEFT_SHADOW");
+  IElementType LEFT_SHADOW_TEST = new IElementType("LEFT_SHADOW_TEST");
   IElementType LITERAL = new IElementType("LITERAL");
   IElementType MISSING_EXTERNAL_TYPE = new IElementType("MISSING_EXTERNAL_TYPE");
   IElementType MUL_EXPR = new IElementType("MUL_EXPR");
@@ -27,7 +27,7 @@ public interface ParserTypes {
   IElementType ROOT_C = new IElementType("ROOT_C");
   IElementType ROOT_D = new IElementType("ROOT_D");
   IElementType SOME_EXPR = new IElementType("SOME_EXPR");
-  IElementType SPECIALREF = new IElementType("SPECIALREF");
+  IElementType SPECIAL_REF = new IElementType("SPECIAL_REF");
 
   IElementType ID = new IElementType("id");
   IElementType NUMBER = new IElementType("number");
@@ -38,7 +38,7 @@ public interface ParserTypes {
   class Factory {
     public static PsiElement createElement(ASTNode node) {
       IElementType type = node.getElementType();
-       if (type == BLOCKOF) {
+       if (type == BLOCK_OF) {
         return new XBlockOfImpl(node);
       }
       else if (type == CAST_EXPR) {
@@ -59,10 +59,10 @@ public interface ParserTypes {
       else if (type == ITEM_EXPR) {
         return new XItemExprImpl(node);
       }
-      else if (type == LEFTSHADOW) {
+      else if (type == LEFT_SHADOW) {
         return new XLeftShadowImpl(node);
       }
-      else if (type == LEFTSHADOWTEST) {
+      else if (type == LEFT_SHADOW_TEST) {
         return new XLeftShadowTestImpl(node);
       }
       else if (type == LITERAL) {
@@ -92,7 +92,7 @@ public interface ParserTypes {
       else if (type == SOME_EXPR) {
         return new XSomeExprImpl(node);
       }
-      else if (type == SPECIALREF) {
+      else if (type == SPECIAL_REF) {
         return new XSpecialRefImpl(node);
       }
       throw new AssertionError("Unknown element type: " + type);

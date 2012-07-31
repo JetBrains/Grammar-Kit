@@ -26,16 +26,16 @@ public class Small implements PsiParser {
     int level_ = 0;
     boolean result_;
     builder_ = adapt_builder_(root_, builder_, this);
-    if (root_ == OTHERRULE) {
+    if (root_ == OTHER_RULE) {
       result_ = otherRule(builder_, level_ + 1);
     }
-    else if (root_ == SOMERULE) {
+    else if (root_ == SOME_RULE) {
       result_ = someRule(builder_, level_ + 1);
     }
-    else if (root_ == SOMERULE2) {
+    else if (root_ == SOME_RULE_2) {
       result_ = someRule2(builder_, level_ + 1);
     }
-    else if (root_ == SOMESTRING) {
+    else if (root_ == SOME_STRING) {
       result_ = someString(builder_, level_ + 1);
     }
     else if (root_ == STATEMENT) {
@@ -65,7 +65,7 @@ public class Small implements PsiParser {
     Marker marker_ = builder_.mark();
     result_ = consumeToken(builder_, TOKEN);
     if (result_) {
-      marker_.done(OTHERRULE);
+      marker_.done(OTHER_RULE);
     }
     else {
       marker_.rollbackTo();
@@ -94,7 +94,7 @@ public class Small implements PsiParser {
     Marker marker_ = builder_.mark();
     result_ = consumeToken(builder_, TOKEN);
     if (result_) {
-      marker_.done(SOMERULE);
+      marker_.done(SOME_RULE);
     }
     else {
       marker_.rollbackTo();
@@ -109,7 +109,7 @@ public class Small implements PsiParser {
     Marker marker_ = builder_.mark();
     enterErrorRecordingSection(builder_, level_, _SECTION_GENERAL_, "<some rule 2>");
     consumeToken(builder_, TOKEN);
-    marker_.done(SOMERULE2);
+    marker_.done(SOME_RULE_2);
     exitErrorRecordingSection(builder_, level_, true, false, _SECTION_GENERAL_, null);
     return true;
   }
@@ -123,7 +123,7 @@ public class Small implements PsiParser {
     enterErrorRecordingSection(builder_, level_, _SECTION_GENERAL_, "<some string>");
     result_ = consumeToken(builder_, "token");
     if (result_) {
-      marker_.done(SOMESTRING);
+      marker_.done(SOME_STRING);
     }
     else {
       marker_.rollbackTo();

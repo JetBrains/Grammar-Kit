@@ -63,9 +63,9 @@ public class PsiGen implements PsiParser {
   private static final TokenSet[] EXTENDS_SETS_ = new TokenSet[] {
     TokenSet.create(CAST_EXPR, EXPR, ID_EXPR, ITEM_EXPR,
       LITERAL, MISSING_EXTERNAL_TYPE, MUL_EXPR, PLUS_EXPR,
-      REF_EXPR, SOME_EXPR, SPECIALREF),
-    TokenSet.create(REF_EXPR, SPECIALREF),
-    TokenSet.create(REF_EXPR, SPECIALREF),
+      REF_EXPR, SOME_EXPR, SPECIAL_REF),
+    TokenSet.create(REF_EXPR, SPECIAL_REF),
+    TokenSet.create(REF_EXPR, SPECIAL_REF),
     TokenSet.create(ROOT, ROOT_B, ROOT_C, ROOT_D),
   };
   public static boolean type_extends_(IElementType child_, IElementType parent_) {
@@ -161,7 +161,7 @@ public class PsiGen implements PsiParser {
       offset_ = next_offset_;
     }
     if (result_) {
-      marker_.done(BLOCKOF);
+      marker_.done(BLOCK_OF);
     }
     else {
       marker_.rollbackTo();
@@ -847,11 +847,11 @@ public class PsiGen2 {
     result_ = result_ && consumeToken(builder_, OF);
     result_ = result_ && reference(builder_, level_ + 1);
     LighterASTNode last_ = result_? builder_.getLatestDoneMarker() : null;
-    if (last_ != null && last_.getStartOffset() == start_ && type_extends_(last_.getTokenType(), SPECIALREF)) {
+    if (last_ != null && last_.getStartOffset() == start_ && type_extends_(last_.getTokenType(), SPECIAL_REF)) {
       marker_.drop();
     }
     else if (result_) {
-      marker_.done(SPECIALREF);
+      marker_.done(SPECIAL_REF);
     }
     else {
       marker_.rollbackTo();
@@ -891,7 +891,7 @@ public class PsiGenFixes {
     result_ = result_ && PsiGen2.identifier(builder_, level_ + 1);
     if (result_) {
       marker_.drop();
-      left_marker_.precede().done(LEFTSHADOW);
+      left_marker_.precede().done(LEFT_SHADOW);
     }
     else {
       marker_.rollbackTo();
@@ -910,7 +910,7 @@ public class PsiGenFixes {
     result_ = PsiGen2.identifier(builder_, level_ + 1);
     result_ = result_ && LeftShadowTest_1(builder_, level_ + 1);
     if (result_) {
-      marker_.done(LEFTSHADOWTEST);
+      marker_.done(LEFT_SHADOW_TEST);
     }
     else {
       marker_.rollbackTo();

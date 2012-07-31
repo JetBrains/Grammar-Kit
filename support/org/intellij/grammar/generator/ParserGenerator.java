@@ -890,9 +890,13 @@ public class ParserGenerator {
     if (name != null || (!force && realRule == rule)) {
       return StringUtil.isEmpty(name)? null : "<" + name + ">";
     }
-    String[] strings = NameUtil.splitNameIntoWords(realRule.getName());
-    for (int i = 0; i < strings.length; i++) strings[i] = strings[i].toLowerCase();
-    return "<" + StringUtil.join(strings, " ") + ">";
+    return "<" + toDisplayOrConstantName(realRule.getName(), false) + ">";
+  }
+
+  private static String toDisplayOrConstantName(String name, boolean constant) {
+    String[] strings = NameUtil.splitNameIntoWords(name);
+    for (int i = 0; i < strings.length; i++) strings[i] = constant? strings[i].toUpperCase() : strings[i].toLowerCase();
+    return StringUtil.join(strings, constant? "_" : " ");
   }
 
   private void generateNodeChildren(BnfRule rule, String funcName, List<BnfExpression> children, Set<BnfExpression> visited) {
@@ -1142,7 +1146,7 @@ public class ParserGenerator {
 
   private static String getElementType(BnfRule rule) {
     String elementType = StringUtil.notNullize(getAttribute(rule, KnownAttribute.ELEMENT_TYPE), rule.getName());
-    return getAttribute(rule, KnownAttribute.ELEMENT_TYPE_PREFIX) + elementType.toUpperCase();
+    return getAttribute(rule, KnownAttribute.ELEMENT_TYPE_PREFIX) + toDisplayOrConstantName(elementType, true);
   }
 
   private String getElementType(String token) {

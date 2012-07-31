@@ -27,7 +27,7 @@ public class LeftAssociative implements PsiParser {
     if (root_ == ALIAS_DEFINITION) {
       result_ = alias_definition(builder_, level_ + 1);
     }
-    else if (root_ == ALIAS_DEFINITION2) {
+    else if (root_ == ALIAS_DEFINITION_2) {
       result_ = alias_definition2(builder_, level_ + 1);
     }
     else if (root_ == LEECH) {
@@ -100,7 +100,7 @@ public class LeftAssociative implements PsiParser {
     result_ = result_ && consumeToken(builder_, ID);
     if (result_) {
       marker_.drop();
-      left_marker_.precede().done(ALIAS_DEFINITION2);
+      left_marker_.precede().done(ALIAS_DEFINITION_2);
     }
     else {
       marker_.rollbackTo();

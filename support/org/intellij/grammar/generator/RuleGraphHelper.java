@@ -35,7 +35,6 @@ import java.util.*;
 
 import static org.intellij.grammar.generator.ParserGeneratorUtil.*;
 import static org.intellij.grammar.generator.RuleGraphHelper.Cardinality.*;
-import static org.intellij.grammar.psi.BnfTypes.BNF_OP_ZEROMORE;
 import static org.intellij.grammar.psi.BnfTypes.BNF_SEQUENCE;
 import static org.intellij.grammar.psi.impl.GrammarUtil.collectExtraArguments;
 import static org.intellij.grammar.psi.impl.GrammarUtil.nextOrParent;
@@ -161,8 +160,9 @@ public class RuleGraphHelper {
     }
     THashSet<PsiElement> visited = new THashSet<PsiElement>();
     for (BnfRule rule : myFile.getRules()) {
+      if (myMap.containsKey(rule)) continue;
       Map<PsiElement, Cardinality> map = collectMembers(rule, rule.getExpression(), rule.getName(), visited);
-      if (map.size() == 1 && ContainerUtil.getFirstItem(map.values()) == REQUIRED) {
+      if (map.size() == 1 && ContainerUtil.getFirstItem(map.values()) == REQUIRED && !Rule.isPrivate(rule)) {
         PsiElement r = ContainerUtil.getFirstItem(map.keySet());
         if (r == rule || r instanceof BnfRule && ruleExtendsMap.get((BnfRule)r).contains(rule)) {
           myMap.put(rule, Collections.<PsiElement, Cardinality>emptyMap());
@@ -200,7 +200,7 @@ public class RuleGraphHelper {
         else if (Rule.isLeft(targetRule)) {
           if (!Rule.isInner(targetRule) && !Rule.isPrivate(targetRule)) {
             result = new HashMap<PsiElement, Cardinality>();
-            result.put(getRealRule(targetRule), REQUIRED);
+            result.put(getSynonymTargetOrSelf(targetRule), REQUIRED);
             result.put(LEFT_MARKER, REQUIRED);
           }
           else {
@@ -208,12 +208,16 @@ public class RuleGraphHelper {
           }
         }
         else if (Rule.isPrivate(targetRule)) {
-          BnfExpression body = targetRule.getExpression();
-          Map<PsiElement, Cardinality> map = collectMembers(targetRule, body, targetRule.getName(), visited);
-          result = map.containsKey(body) ? joinMaps(null, BnfTypes.BNF_CHOICE, Arrays.asList(map, map)) : map;
+          result = myMap.get(targetRule); // optimize performance
+          if (result == null) {
+            BnfExpression body = targetRule.getExpression();
+            Map<PsiElement, Cardinality> map = collectMembers(targetRule, body, targetRule.getName(), visited);
+            result = map.containsKey(body) ? joinMaps(null, BnfTypes.BNF_CHOICE, Arrays.asList(map, map)) : map;
+            myMap.put(targetRule, result);
+          }
         }
         else {
-          result = psiMap(getRealRule(targetRule), REQUIRED);
+          result = psiMap(getSynonymTargetOrSelf(targetRule), REQUIRED);
         }
       }
       else {
@@ -285,9 +289,9 @@ public class RuleGraphHelper {
       Map<BnfRule, Cardinality> rulesToTheLeft = getRulesToTheLeft(rule);
       for (BnfRule r : rulesToTheLeft.keySet()) {
         Cardinality cardinality = rulesToTheLeft.get(r);
-        Map<PsiElement, Cardinality> leftMap = psiMap(getRealRule(r), REQUIRED);
+        Map<PsiElement, Cardinality> leftMap = psiMap(getSynonymTargetOrSelf(r), REQUIRED);
         if (cardinality.many()) {
-          list.add(joinMaps(null, BnfTypes.BNF_CHOICE, Arrays.asList(leftMap, psiMap(getRealRule(rule), REQUIRED))));
+          list.add(joinMaps(null, BnfTypes.BNF_CHOICE, Arrays.asList(leftMap, psiMap(getSynonymTargetOrSelf(rule), REQUIRED))));
         }
         else {
           list.add(leftMap);
@@ -530,7 +534,7 @@ public class RuleGraphHelper {
     return sorted;
   }
 
-  public static BnfRule getRealRule(BnfRule rule) {
+  public static BnfRule getSynonymTargetOrSelf(BnfRule rule) {
     String attr = getAttribute(rule, KnownAttribute.ELEMENT_TYPE);
     if (attr != null) {
       BnfRule realRule = ((BnfFile)rule.getContainingFile()).getRule(attr);

@@ -344,7 +344,7 @@ public class ParserGenerator {
     BnfRule cur = rule;
     for (BnfRule next = rule; next != null; cur = !visited.add(next) ? null : next) {
       if (cur == null) break;
-      next = RuleGraphHelper.getRealRule(cur);
+      next = RuleGraphHelper.getSynonymTargetOrSelf(cur);
       if (next != cur) continue;
       if (cur != rule) break; // do not search for elementType any further
       String attr = getAttribute(cur, KnownAttribute.EXTENDS);

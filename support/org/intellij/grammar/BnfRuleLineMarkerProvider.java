@@ -60,7 +60,7 @@ public class BnfRuleLineMarkerProvider extends RelatedItemLineMarkerProvider {
         items.add(method);
       }
       if (isRuleId) {
-        BnfRule rule = RuleGraphHelper.getRealRule((BnfRule)parent);
+        BnfRule rule = RuleGraphHelper.getSynonymTargetOrSelf((BnfRule)parent);
         if (RuleGraphHelper.shouldGeneratePsi(rule, true)) {
           JavaHelper javaHelper = JavaHelper.getJavaHelper(rule.getProject());
           for (String className : new String[]{ParserGeneratorUtil.getQualifiedRuleClassName(rule, false),

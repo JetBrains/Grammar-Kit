@@ -5,28 +5,30 @@ package generated;
 import com.intellij.psi.tree.IElementType;
 import com.intellij.psi.PsiElement;
 import com.intellij.lang.ASTNode;
+import sample.MyTypeFactory;
+import sample.MyRootType;
 import generated.psi.impl.*;
 
 public interface ParserTypes {
 
   IElementType BLOCK_OF = new IElementType("BLOCK_OF");
-  IElementType CAST_EXPR = new IElementType("CAST_EXPR");
+  IElementType CAST_EXPR = MyTypeFactory.createExprType("CAST_EXPR");
   IElementType EXPR = new IElementType("EXPR");
   IElementType GRAMMAR_ELEMENT = new IElementType("GRAMMAR_ELEMENT");
   IElementType IDENTIFIER = new IElementType("IDENTIFIER");
   IElementType ID_EXPR = new IElementType("ID_EXPR");
-  IElementType ITEM_EXPR = new IElementType("ITEM_EXPR");
+  IElementType ITEM_EXPR = MyTypeFactory.createExprType("ITEM_EXPR");
   IElementType LEFT_SHADOW = new IElementType("LEFT_SHADOW");
   IElementType LEFT_SHADOW_TEST = new IElementType("LEFT_SHADOW_TEST");
   IElementType LITERAL = new IElementType("LITERAL");
   IElementType MISSING_EXTERNAL_TYPE = new IElementType("MISSING_EXTERNAL_TYPE");
-  IElementType MUL_EXPR = new IElementType("MUL_EXPR");
-  IElementType PLUS_EXPR = new IElementType("PLUS_EXPR");
-  IElementType REF_EXPR = new IElementType("REF_EXPR");
-  IElementType ROOT_B = new IElementType("ROOT_B");
-  IElementType ROOT_C = new IElementType("ROOT_C");
-  IElementType ROOT_D = new IElementType("ROOT_D");
-  IElementType SOME_EXPR = new IElementType("SOME_EXPR");
+  IElementType MUL_EXPR = MyTypeFactory.createExprType("MUL_EXPR");
+  IElementType PLUS_EXPR = MyTypeFactory.createExprType("PLUS_EXPR");
+  IElementType REF_EXPR = MyTypeFactory.createExprType("REF_EXPR");
+  IElementType ROOT_B = new MyRootType("ROOT_B");
+  IElementType ROOT_C = new MyRootType("ROOT_C");
+  IElementType ROOT_D = new MyRootType("ROOT_D");
+  IElementType SOME_EXPR = MyTypeFactory.createExprType("SOME_EXPR");
   IElementType SPECIAL_REF = new IElementType("SPECIAL_REF");
 
   IElementType ID = new IElementType("id");

@@ -7,6 +7,8 @@
   extends(".*expr")="expr"
   extends("root_.")="root"
   tokens=[OP_MUL="*" OP_DIV="/"]
+  elementTypeClass("root_.*")="sample.MyRootType"
+  elementTypeFactory(".*_expr")="sample.MyTypeFactory.createExprType"
 }
 root ::= root_a | root_b | root_c | root_d
 external root_a ::= parseGrammar grammar_element

@@ -113,6 +113,8 @@ public class ParserGenerator {
       out("// ---- " + file.getName() + " -----------------");
     }
     else {
+      //noinspection ResultOfMethodCallIgnored
+      file.getParentFile().mkdirs();
       myOut = new PrintWriter(new FileOutputStream(file));
     }
   }
@@ -166,7 +168,6 @@ public class ParserGenerator {
     if (myGrammarRoot != null) {
       String className = getRootAttribute(myFile, KnownAttribute.ELEMENT_TYPE_HOLDER_CLASS);
       File parserFile = new File(myOutputPath, className.replace('.', File.separatorChar) + ".java");
-      parserFile.getParentFile().mkdirs();
       openOutput(parserFile);
       try {
         generateElementTypesHolder(className, sortedCompositeTypes, generatePsi);
@@ -184,7 +185,6 @@ public class ParserGenerator {
         String psiClass = psiPackage + "." + getRulePsiClassName(rule, myRuleClassPrefix);
         infClasses.put(ruleName, psiClass);
         File psiFile = new File(myOutputPath, psiClass.replace('.', File.separatorChar) + ".java");
-        psiFile.getParentFile().mkdirs();
         openOutput(psiFile);
         try {
           generatePsiIntf(graphHelper, rule, psiClass, getSuperInterfaceNames(rule, psiPackage));
@@ -199,7 +199,6 @@ public class ParserGenerator {
         BnfRule rule = myFile.getRule(ruleName);
         String psiClass = psiImplPackage + "." + getRulePsiClassName(rule, myRuleClassPrefix) + suffix;
         File psiFile = new File(myOutputPath, psiClass.replace('.', File.separatorChar) + ".java");
-        psiFile.getParentFile().mkdirs();
         openOutput(psiFile);
         try {
           generatePsiImpl(graphHelper, rule, psiClass, infClasses.get(ruleName), getSuperClassName(rule, psiImplPackage, suffix));
@@ -211,7 +210,6 @@ public class ParserGenerator {
       if (visitorClassName != null && myGrammarRoot != null) {
         String psiClass = psiPackage + "." + visitorClassName;
         File psiFile = new File(myOutputPath, psiClass.replace('.', File.separatorChar) + ".java");
-        psiFile.getParentFile().mkdirs();
         openOutput(psiFile);
         try {
           generateVisitor(psiClass, sortedPsiRules);
@@ -320,7 +318,6 @@ public class ParserGenerator {
         }
       }
       File parserFile = new File(myOutputPath + File.separatorChar + className.replace('.', File.separatorChar) + ".java");
-      parserFile.getParentFile().mkdirs();
       openOutput(parserFile);
       try {
         generateParser(className, map.keySet());
@@ -1157,31 +1154,56 @@ public class ParserGenerator {
 
   private void generateElementTypesHolder(String className, Map<String, BnfRule> sortedCompositeTypes, boolean generatePsi) {
     String implPackage = getPsiImplPackage(myFile);
-    final String elementTypeClass = getRootAttribute(myFile, KnownAttribute.ELEMENT_TYPE_CLASS);
-    final boolean generateTokens = getRootAttribute(myFile, KnownAttribute.GENERATE_TOKENS);
-    final String elementTypeFactory = getRootAttribute(myFile, KnownAttribute.ELEMENT_TYPE_FACTORY);
-    final String tokenTypeClass = getRootAttribute(myFile, KnownAttribute.TOKEN_TYPE_CLASS);
-    final String tokenTypeFactory = getRootAttribute(myFile, KnownAttribute.TOKEN_TYPE_FACTORY);
+    boolean generateTokens = getRootAttribute(myFile, KnownAttribute.GENERATE_TOKENS);
+    String tokenTypeClass = getRootAttribute(myFile, KnownAttribute.TOKEN_TYPE_CLASS);
+    String tokenTypeFactory = getRootAttribute(myFile, KnownAttribute.TOKEN_TYPE_FACTORY);
     Set<String> imports = new LinkedHashSet<String>();
-    imports.addAll(Arrays.asList(BnfConstants.IELEMENTTYPE_CLASS,
-                                 "com.intellij.psi.PsiElement",
-                                 "com.intellij.lang.ASTNode",
-                                 elementTypeClass));
-    if (elementTypeFactory != null) imports.add("static " + elementTypeFactory);
-    imports.add(tokenTypeClass);
-    if (tokenTypeFactory != null) imports.add("static " + tokenTypeFactory);
-    if (generatePsi) imports.add(implPackage + ".*");
-    generateClassHeader(className, imports, "", true);
-    String elementCreateCall =
-      elementTypeFactory == null ? "new " + StringUtil.getShortName(elementTypeClass) : StringUtil.getShortName(elementTypeFactory);
+    imports.add(BnfConstants.IELEMENTTYPE_CLASS);
+    if (generatePsi) {
+      imports.add(BnfConstants.PSI_ELEMENT_CLASS);
+      imports.add("com.intellij.lang.ASTNode");
+    }
+    Map<String, Pair<String, String>> compositeToClassAndFactoryMap = new THashMap<String, Pair<String, String>>();
     for (String elementType : sortedCompositeTypes.keySet()) {
+      BnfRule rule = sortedCompositeTypes.get(elementType);
+      String elementTypeClass = getAttribute(rule, KnownAttribute.ELEMENT_TYPE_CLASS);
+      String elementTypeFactory = getAttribute(rule, KnownAttribute.ELEMENT_TYPE_FACTORY);
+      compositeToClassAndFactoryMap.put(elementType, Pair.create(elementTypeClass, elementTypeFactory));
+      if (elementTypeFactory != null) {
+        imports.add(StringUtil.getPackageName(elementTypeFactory));
+      }
+      else {
+        ContainerUtil.addIfNotNull(elementTypeClass, imports);
+      }
+    }
+    if (tokenTypeFactory != null) {
+      imports.add(StringUtil.getPackageName(tokenTypeFactory));
+    }
+    else {
+      ContainerUtil.addIfNotNull(tokenTypeClass, imports);
+    }
+    if (generatePsi) imports.add(implPackage + ".*");
+    Function<String, String> shortener = generateClassHeader(className, imports, "", true);
+    for (String elementType : sortedCompositeTypes.keySet()) {
+      Pair<String, String> pair = compositeToClassAndFactoryMap.get(elementType);
+      String elementCreateCall;
+      if (pair.second == null) {
+        elementCreateCall = "new " + StringUtil.getShortName(pair.first);
+      } else {
+        elementCreateCall = shortener.fun(StringUtil.getPackageName(pair.second)) + "." + StringUtil.getShortName(pair.second);
+      }
       out("IElementType " + elementType + " = " + elementCreateCall + "(\"" + elementType + "\");");
     }
     if (generateTokens) {
       newLine();
       Map<String, String> sortedTokens = new TreeMap<String, String>();
-      String tokenCreateCall =
-        tokenTypeFactory == null ? "new " + StringUtil.getShortName(tokenTypeClass) : StringUtil.getShortName(tokenTypeFactory);
+      String tokenCreateCall;
+      if (tokenTypeFactory == null) {
+        tokenCreateCall = "new " + StringUtil.getShortName(tokenTypeClass);
+      }
+      else {
+        tokenCreateCall = shortener.fun(StringUtil.getPackageName(tokenTypeFactory)) + "." + StringUtil.getShortName(tokenTypeFactory);
+      }
       for (String tokenText : mySimpleTokens.keySet()) {
         String tokenName = ObjectUtils.chooseNotNull(mySimpleTokens.get(tokenText), tokenText);
         sortedTokens.put(getElementType(tokenName), tokenText);

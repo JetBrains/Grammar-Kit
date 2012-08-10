@@ -86,6 +86,9 @@ public class GeneratedParserUtilBase {
     if (state.completionState != null && state.predicateSign) {
       addCompletionVariant(state, state.completionState, builder_, tokens_, builder_.getCurrentOffset());
     }
+    // suppress single token completion
+    CompletionState completionState = state.completionState;
+    state.completionState = null;
     boolean result_ = true;
     boolean pinned_ = false;
     for (int i = 0, tokensLength = tokens_.length; i < tokensLength; i++) {
@@ -95,6 +98,7 @@ public class GeneratedParserUtilBase {
         if (pin_ < 0 || pinned_) report_error_(builder_);
       }
     }
+    state.completionState = completionState;
     return pinned_ || result_;
   }
 

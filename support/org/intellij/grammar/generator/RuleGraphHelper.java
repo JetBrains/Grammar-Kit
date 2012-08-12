@@ -141,7 +141,13 @@ public class RuleGraphHelper {
     myRuleExtendsMap = ruleExtendsMap;
     myMap = new THashMap<BnfRule, Map<PsiElement, Cardinality>>();
 
-    myRulesGraph = new MultiMapBasedOnSet<BnfRule, BnfRule>();
+    // ordered!
+    myRulesGraph = new MultiMapBasedOnSet<BnfRule, BnfRule>() {
+      @Override
+      protected Collection<BnfRule> createCollection() {
+        return new LinkedHashSet<BnfRule>();
+      }
+    };
     for (BnfRule rule : myFile.getRules()) {
       BnfExpression expression = rule.getExpression();
       for (PsiElement cur = nextOrParent(expression.getPrevSibling(), expression);
@@ -177,6 +183,14 @@ public class RuleGraphHelper {
 
       ParserGenerator.LOG.assertTrue(visited.isEmpty());
     }
+  }
+
+  public Collection<BnfRule> getExtendsRules(BnfRule rule) {
+    return myRuleExtendsMap.get(rule);
+  }
+
+  public Collection<BnfRule> getSubRules(BnfRule rule) {
+    return myRulesGraph.get(rule);
   }
 
   @NotNull

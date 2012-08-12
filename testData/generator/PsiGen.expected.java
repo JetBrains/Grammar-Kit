@@ -520,10 +520,10 @@ public class PsiGen implements PsiParser {
   }
 
   final static Parser grammar_element_parser_ = new Parser() {
-      public boolean parse(PsiBuilder builder_, int level_) {
-        return grammar_element(builder_, level_ + 1);
-      }
-    };
+    public boolean parse(PsiBuilder builder_, int level_) {
+      return grammar_element(builder_, level_ + 1);
+    }
+  };
 }
 // ---- PsiGen2.java -----------------
 //header.txt

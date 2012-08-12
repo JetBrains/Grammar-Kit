@@ -9,8 +9,10 @@ import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.DumbServiceImpl;
 import com.intellij.openapi.util.Disposer;
 import com.intellij.openapi.util.io.FileUtil;
+import com.intellij.psi.PsiFileFactory;
 import com.intellij.psi.PsiReferenceService;
 import com.intellij.psi.PsiReferenceServiceImpl;
+import com.intellij.psi.impl.PsiFileFactoryImpl;
 import com.intellij.psi.impl.search.CachesBasedRefSearcher;
 import com.intellij.psi.impl.search.PsiSearchHelperImpl;
 import com.intellij.psi.impl.source.tree.injected.InjectedLanguageManagerImpl;
@@ -52,6 +54,7 @@ public class BnfGeneratorTest extends ParsingTestCase {
     registerApplicationService(JobLauncher.class, new JobLauncherImpl());
     getProject().registerService(PsiSearchHelper.class, new PsiSearchHelperImpl(getPsiManager()));
     getProject().registerService(DumbService.class, new DumbServiceImpl(getProject(), getProject().getMessageBus()));
+    getProject().registerService(PsiFileFactory.class, new PsiFileFactoryImpl(getPsiManager()));
     InjectedLanguageManagerImpl languageManager = new InjectedLanguageManagerImpl(getProject(), DumbService.getInstance(getProject()));
     Disposer.register(getProject(), languageManager);
     getProject().registerService(InjectedLanguageManager.class, languageManager);
@@ -66,6 +69,7 @@ public class BnfGeneratorTest extends ParsingTestCase {
   public void testLeftAssociative() throws Exception { doGenTest(false); }
   public void testPsiGen() throws Exception { doGenTest(true); }
   public void testPsiAccessors() throws Exception { doGenTest(true); }
+  public void testExprParser() throws Exception { doGenTest(false); }
 
   public void testEmpty() throws Exception {
     myFile = createPsiFile("empty.bnf", "{ }");

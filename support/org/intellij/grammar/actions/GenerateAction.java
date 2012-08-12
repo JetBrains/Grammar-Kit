@@ -16,6 +16,7 @@
 package org.intellij.grammar.actions;
 
 import com.intellij.notification.Notification;
+import com.intellij.notification.NotificationGroup;
 import com.intellij.notification.NotificationType;
 import com.intellij.notification.Notifications;
 import com.intellij.openapi.actionSystem.AnAction;
@@ -51,6 +52,8 @@ import java.util.Set;
  *         Date: 15.07.11 17:12
  */
 public class GenerateAction extends AnAction implements DumbAware {
+
+  public static final NotificationGroup LOG_GROUP = NotificationGroup.logOnlyGroup("Parser Generator Log");
   
   private static final Logger LOG = Logger.getInstance("org.intellij.grammar.actions.GenerateAction");
 

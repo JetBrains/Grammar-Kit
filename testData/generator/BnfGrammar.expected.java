@@ -1317,28 +1317,28 @@ public class GrammarParser implements PsiParser {
   }
 
   final static Parser attr_recover_until_parser_ = new Parser() {
-      public boolean parse(PsiBuilder builder_, int level_) {
-        return attr_recover_until(builder_, level_ + 1);
-      }
-    };
+    public boolean parse(PsiBuilder builder_, int level_) {
+      return attr_recover_until(builder_, level_ + 1);
+    }
+  };
   final static Parser grammar_element_parser_ = new Parser() {
-      public boolean parse(PsiBuilder builder_, int level_) {
-        return grammar_element(builder_, level_ + 1);
-      }
-    };
+    public boolean parse(PsiBuilder builder_, int level_) {
+      return grammar_element(builder_, level_ + 1);
+    }
+  };
   final static Parser grammar_element_recover_parser_ = new Parser() {
-      public boolean parse(PsiBuilder builder_, int level_) {
-        return grammar_element_recover(builder_, level_ + 1);
-      }
-    };
+    public boolean parse(PsiBuilder builder_, int level_) {
+      return grammar_element_recover(builder_, level_ + 1);
+    }
+  };
   final static Parser list_entry_recover_until_parser_ = new Parser() {
-      public boolean parse(PsiBuilder builder_, int level_) {
-        return list_entry_recover_until(builder_, level_ + 1);
-      }
-    };
+    public boolean parse(PsiBuilder builder_, int level_) {
+      return list_entry_recover_until(builder_, level_ + 1);
+    }
+  };
   final static Parser sequence_recover_parser_ = new Parser() {
-      public boolean parse(PsiBuilder builder_, int level_) {
-        return sequence_recover(builder_, level_ + 1);
-      }
-    };
+    public boolean parse(PsiBuilder builder_, int level_) {
+      return sequence_recover(builder_, level_ + 1);
+    }
+  };
 }

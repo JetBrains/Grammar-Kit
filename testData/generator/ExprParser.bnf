@@ -1,0 +1,38 @@
+{
+  generatePsi=false
+  classHeader="//header.txt"
+  parserClass="ExprParser"
+  extends(".*expr")="expr"
+}
+root ::= expr *
+
+// left recursion and empty PSI children define expression root
+expr ::= assign_expr
+  | elvis_expr
+  | add_group
+  | mul_group
+  | unary_group
+  | exp_expr
+  | factorial_expr
+  | primary_group
+private unary_group ::= unary_plus_expr | unary_min_expr
+private mul_group ::= mul_expr | div_expr
+private add_group ::= plus_expr | minus_expr
+private primary_group ::= ref_expr | paren_expr | object_expr
+
+// expressions: auto-operator detection or parens
+custom_expr ::= 'OBJECT' '(' ref_expr ')'
+object_expr ::= 'OBJECT' '(' ref_expr ')'
+ref_expr ::= identifier
+identifier ::= id
+unary_min_expr ::= '-' expr
+unary_plus_expr ::= '+' expr
+assign_expr ::= expr '=' expr { rightAssociative=true }
+div_expr ::= expr '/' expr
+mul_expr ::= expr '*' expr
+minus_expr ::= expr '-' expr
+plus_expr ::= expr '+' expr
+exp_expr ::= expr ('^' expr) + // N-ary variant
+factorial_expr ::= expr '!'
+paren_expr ::= '(' expr ')'
+elvis_expr ::= expr '?' expr ':' expr

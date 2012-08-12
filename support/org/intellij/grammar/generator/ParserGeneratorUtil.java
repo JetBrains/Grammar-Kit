@@ -19,6 +19,7 @@ import com.intellij.openapi.util.Pair;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
+import com.intellij.psi.codeStyle.NameUtil;
 import com.intellij.psi.impl.FakePsiElement;
 import com.intellij.psi.tree.IElementType;
 import com.intellij.psi.util.PsiTreeUtil;
@@ -267,6 +268,39 @@ public class ParserGeneratorUtil {
 
   public static BnfExpression createFake(final String text) {
     return new MyFakeExpression(text);
+  }
+
+  @Nullable
+  public static String getRuleDisplayName(BnfRule rule, boolean force) {
+    String name = getAttribute(rule, KnownAttribute.NAME);
+    BnfRule realRule = rule;
+    if (name != null) {
+      realRule = ((BnfFile)rule.getContainingFile()).getRule(name);
+      if (realRule != null) name = getAttribute(realRule, KnownAttribute.NAME);
+    }
+    if (name != null || (!force && realRule == rule)) {
+      return StringUtil.isEmpty(name)? null : "<" + name + ">";
+    }
+    return "<" + toDisplayOrConstantName(realRule.getName(), false) + ">";
+  }
+
+  public static String toDisplayOrConstantName(String name, boolean constant) {
+    String[] strings = NameUtil.splitNameIntoWords(name);
+    for (int i = 0; i < strings.length; i++) strings[i] = constant? strings[i].toUpperCase() : strings[i].toLowerCase();
+    return StringUtil.join(strings, constant? "_" : " ");
+  }
+
+  public static String getElementType(BnfRule rule) {
+    String elementType = StringUtil.notNullize(getAttribute(rule, KnownAttribute.ELEMENT_TYPE), rule.getName());
+    return getAttribute(rule, KnownAttribute.ELEMENT_TYPE_PREFIX) + toDisplayOrConstantName(elementType, true);
+  }
+
+  public static String wrapCallWithParserInstance(String nodeCall) {
+    return "new Parser() {\npublic boolean parse(PsiBuilder builder_, int level_) {\nreturn " + nodeCall + ";\n}\n}";
+  }
+
+  public static String generateConsumeTextToken(String tokenText) {
+    return "consumeToken(builder_, \"" + tokenText + "\")";
   }
 
   public static class Rule {

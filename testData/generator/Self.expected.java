@@ -893,13 +893,13 @@ public class Self implements PsiParser {
   }
 
   final static Parser attr_recover_until_parser_ = new Parser() {
-      public boolean parse(PsiBuilder builder_, int level_) {
-        return attr_recover_until(builder_, level_ + 1);
-      }
-    };
+    public boolean parse(PsiBuilder builder_, int level_) {
+      return attr_recover_until(builder_, level_ + 1);
+    }
+  };
   final static Parser rule_recover_until_parser_ = new Parser() {
-      public boolean parse(PsiBuilder builder_, int level_) {
-        return rule_recover_until(builder_, level_ + 1);
-      }
-    };
+    public boolean parse(PsiBuilder builder_, int level_) {
+      return rule_recover_until(builder_, level_ + 1);
+    }
+  };
 }

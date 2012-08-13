@@ -1,8 +1,11 @@
 {
   generatePsi=false
   classHeader="//header.txt"
-  parserClass="ExprParser"
-  extends(".*expr")="expr"
+  parserClass="org.intellij.grammar.expression.ExpressionParser"
+  extends(".*expr")=expr
+  elementTypeFactory="org.intellij.grammar.expression.ExpressionParserDefinition.createType"
+  elementTypeHolderClass="org.intellij.grammar.expression.ExpressionTypes"
+  stubParserClass="org.intellij.grammar.parser.GeneratedParserUtilBase"
 }
 root ::= expr *
 
@@ -18,12 +21,13 @@ expr ::= assign_expr
 private unary_group ::= unary_plus_expr | unary_min_expr
 private mul_group ::= mul_expr | div_expr
 private add_group ::= plus_expr | minus_expr
-private primary_group ::= ref_expr | paren_expr | object_expr
+private primary_group ::= object_expr | ref_expr | literal_expr | paren_expr
 
 // expressions: auto-operator detection or parens
 custom_expr ::= 'OBJECT' '(' ref_expr ')'
 object_expr ::= 'OBJECT' '(' ref_expr ')'
 ref_expr ::= identifier
+literal_expr ::= number
 identifier ::= id
 unary_min_expr ::= '-' expr
 unary_plus_expr ::= '+' expr

@@ -25,8 +25,6 @@ import com.intellij.psi.PsiElement;
 import com.intellij.util.Function;
 import com.intellij.util.SmartList;
 import com.intellij.util.containers.ContainerUtil;
-import com.intellij.util.containers.MultiMap;
-import com.intellij.util.containers.MultiMapBasedOnSet;
 import gnu.trove.THashSet;
 import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.actions.GenerateAction;
@@ -42,7 +40,7 @@ import static org.intellij.grammar.generator.ParserGeneratorUtil.*;
 /**
  * @author greg
  */
-public class ExpressionParsingHelper {
+public class ExpressionGeneratorHelper {
   public static final Function<BnfExpression, String> TO_STRING = new Function<BnfExpression, String>() {
     @Override
     public String fun(BnfExpression expression) {
@@ -55,7 +53,7 @@ public class ExpressionParsingHelper {
   private final Map<BnfRule, ExpressionInfo> myExpressionMap = new HashMap<BnfRule, ExpressionInfo>();
   private final Map<BnfRule, BnfRule> myRootRulesMap = new HashMap<BnfRule, BnfRule>();
 
-  public ExpressionParsingHelper(BnfFile file, RuleGraphHelper ruleGraph) {
+  public ExpressionGeneratorHelper(BnfFile file, RuleGraphHelper ruleGraph) {
     myFile = file;
     myRuleGraph = ruleGraph;
     buildExpressionRules();
@@ -79,6 +77,9 @@ public class ExpressionParsingHelper {
 
       ExpressionInfo expressionInfo = new ExpressionInfo(rule);
       addToPriorityMap(rule, myRuleGraph.getExtendsRules(rule), expressionInfo);
+      for (BnfRule r : expressionInfo.priorityMap.keySet()) {
+        buildOperatorMap(r, rule, expressionInfo.operatorMap);
+      }
       myRootRulesMap.put(rule, rule);
       myExpressionMap.put(rule, expressionInfo);
     }
@@ -100,20 +101,21 @@ public class ExpressionParsingHelper {
       }
 
       if (rulesCluster.contains(subRule)) {
-        if (buildExpressionContentMap(subRule, info.rootRule, info.operatorMap)) {
+        if (!myRuleGraph.getFor(subRule).isEmpty()) {
           priorityMap.put(subRule, priority == -1 ? info.nextPriority++ : priority);
         }
       }
-      else {
-        assert ParserGeneratorUtil.Rule.isPrivate(subRule) : " priority group should be private!";
+      else if (ParserGeneratorUtil.Rule.isPrivate(subRule)) {
         addToPriorityMap(subRule, rulesCluster, info);
+      }
+      else {
+        addWarning(subRule + ": priority group must be 'private'");
       }
     }
   }
 
-  private boolean buildExpressionContentMap(BnfRule rule, BnfRule rootRule, Map<BnfRule, OperatorInfo> expressionContentMap) {
+  private void buildOperatorMap(BnfRule rule, BnfRule rootRule, Map<BnfRule, OperatorInfo> operatorMap) {
     Map<PsiElement, RuleGraphHelper.Cardinality> ruleContent = myRuleGraph.getFor(rule);
-    if (ruleContent.isEmpty()) return false;
     RuleGraphHelper.Cardinality cardinality = ruleContent.get(rootRule);
     String rootRuleName = rootRule.getName();
     List<BnfExpression> childExpressions = getChildExpressions(rule.getExpression());
@@ -177,10 +179,9 @@ public class ExpressionParsingHelper {
     }
     else {
       addWarning("unexpected cardinality " + cardinality + " of " + rootRule + " in " + rule);
-      return false;
+      info = new OperatorInfo(rule, OperatorType.ATOM, rule.getExpression(), null);
     }
-    expressionContentMap.put(rule, info);
-    return true;
+    operatorMap.put(rule, info);
   }
 
   private static BnfExpression combine(List<BnfExpression> list) {
@@ -209,7 +210,7 @@ public class ExpressionParsingHelper {
   public static class ExpressionInfo {
     public final BnfRule rootRule;
     public final Map<BnfRule, Integer> priorityMap = new LinkedHashMap<BnfRule, Integer>();
-    public final Map<BnfRule, OperatorInfo> operatorMap = new HashMap<BnfRule, OperatorInfo>();
+    public final Map<BnfRule, OperatorInfo> operatorMap = new LinkedHashMap<BnfRule, OperatorInfo>();
     public int nextPriority;
 
     public ExpressionInfo(BnfRule rootRule) {
@@ -219,7 +220,7 @@ public class ExpressionParsingHelper {
     @Override
     public String toString() {
       StringBuilder sb = new StringBuilder("Expression root: " + rootRule.getName());
-      sb.append("\nOperator precedence:\n");
+      sb.append("\nOperator priority table:\n");
       for (int i = 0; i < nextPriority; i++) {
         sb.append(i).append(":");
         for (BnfRule rule : priorityMap.keySet()) {
@@ -269,12 +270,14 @@ public class ExpressionParsingHelper {
   }
 
   public void generateExpressionRoot(ExpressionInfo info, ParserGenerator g) {
-    MultiMap<String, OperatorInfo> opCalls = new MultiMapBasedOnSet<String, OperatorInfo>();
+    Map<String, List<OperatorInfo>> opCalls = new LinkedHashMap<String, List<OperatorInfo>>();
     for (OperatorInfo operator : info.operatorMap.values()) {
-      String nodeCall = g.generateNodeCall(info.rootRule, operator.operator, getNextName(operator.rule.getName(), 0));
-      opCalls.putValue(nodeCall, operator);
+      String opCall = g.generateNodeCall(info.rootRule, operator.operator, getNextName(operator.rule.getName(), 0));
+      List<OperatorInfo> list = opCalls.get(opCall);
+      if (list == null) opCalls.put(opCall, list = new ArrayList<OperatorInfo>(2));
+      list.add(operator);
     }
-    Set<String> sortedOpCalls = new TreeSet<String>(opCalls.keySet());
+    Set<String> sortedOpCalls = opCalls.keySet();
 
     for (String s : info.toString().split("\n")) {
       g.out("// " + s);
@@ -284,7 +287,7 @@ public class ExpressionParsingHelper {
     String methodName = info.rootRule.getName();
     String kernelMethodName = getNextName(methodName, 0);
     String frameName = quote(ParserGeneratorUtil.getRuleDisplayName(info.rootRule, true));
-    g.out("public static boolean " + methodName + "(PsiBuilder builder_, int level_, int precedence_) {");
+    g.out("public static boolean " + methodName + "(PsiBuilder builder_, int level_, int priority_) {");
     g.out("Marker marker_ = builder_.mark();");
     g.out("boolean result_ = false;");
     g.out("boolean pinned_ = false;");
@@ -316,7 +319,7 @@ public class ExpressionParsingHelper {
       }
       g.out("}");
     }
-    g.out("result_ = pinned_ && " + kernelMethodName + "(builder_, level_, precedence_) && result_;");
+    g.out("result_ = pinned_ && " + kernelMethodName + "(builder_, level_, priority_) && result_;");
     g.out("if (!result_ && !pinned_) {");
     g.out("marker_.rollbackTo();");
     g.out("}");
@@ -326,10 +329,9 @@ public class ExpressionParsingHelper {
     g.newLine();
 
     // kernel
-    g.out("public static boolean " + kernelMethodName + "(PsiBuilder builder_, int level_, int precedence_) {");
+    g.out("public static boolean " + kernelMethodName + "(PsiBuilder builder_, int level_, int priority_) {");
     g.out("boolean result_ = true;");
     g.out("while (true) {");
-    g.out("boolean pinned_ = false;");
     g.out("Marker left_marker_ = (Marker) builder_.getLatestDoneMarker();");
     g.out("if (!invalid_left_marker_guard_(builder_, left_marker_, \"" + kernelMethodName + "\")) return false;");
     g.out("Marker marker_ = builder_.mark();");
@@ -340,14 +342,13 @@ public class ExpressionParsingHelper {
         ContainerUtil.getFirstItem(findOperators(opCalls.get(opCall), OperatorType.BINARY, OperatorType.N_ARY, OperatorType.UNARY_POSTFIX));
       if (operator == null) continue;
       int priority = info.getPriority(operator.rule);
-      g.out((first ? "" : "else ") + "if (precedence_ < " + priority + " && " + opCall + ") {");
+      g.out((first ? "" : "else ") + "if (priority_ < " + priority + " && " + opCall + ") {");
       first = false;
       String elementType = ParserGeneratorUtil.getElementType(operator.rule);
       boolean rightAssociative =
         ParserGeneratorUtil.getAttribute(operator.rule, KnownAttribute.create(Boolean.class, "rightAssociative", false));
       String tailCall =
         operator.tail == null ? null : g.generateNodeCall(operator.rule, operator.tail, getNextName(operator.rule.getName(), 1));
-      g.out("pinned_ = true;");
       if (operator.type == OperatorType.BINARY) {
         g.out(
           "result_ = report_error_(builder_, " + methodName + "(builder_, level_, " + (rightAssociative ? priority - 1 : priority) + "));");
@@ -366,13 +367,11 @@ public class ExpressionParsingHelper {
       g.out("left_marker_.precede().done(" + elementType + ");");
       g.out("}");
     }
-    g.out("if (pinned_) {");
-    g.out("marker_.drop();");
-    g.out("}");
     g.out("else {");
     g.out("marker_.rollbackTo();");
     g.out("break;");
     g.out("}");
+    g.out("marker_.drop();");
     g.out("}");
     g.out("return result_;");
     g.out("}");

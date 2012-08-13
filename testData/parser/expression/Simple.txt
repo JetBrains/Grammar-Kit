@@ -1,0 +1,118 @@
+EXPR_FILE_TYPE
+  PLUS_EXPR
+    LITERAL_EXPR
+      PsiElement(number)('1')
+    PsiWhiteSpace(' ')
+    PsiElement(+)('+')
+    PsiWhiteSpace(' ')
+    MUL_EXPR
+      LITERAL_EXPR
+        PsiElement(number)('2')
+      PsiWhiteSpace(' ')
+      PsiElement(*)('*')
+      PsiWhiteSpace(' ')
+      LITERAL_EXPR
+        PsiElement(number)('3')
+  PsiWhiteSpace('\n\n')
+  PLUS_EXPR
+    LITERAL_EXPR
+      PsiElement(number)('1')
+    PsiWhiteSpace(' ')
+    PsiElement(+)('+')
+    PsiWhiteSpace(' ')
+    MUL_EXPR
+      LITERAL_EXPR
+        PsiElement(number)('2')
+      PsiWhiteSpace(' ')
+      PsiElement(*)('*')
+      PsiWhiteSpace(' ')
+      UNARY_PLUS_EXPR
+        PsiElement(+)('+')
+        PsiWhiteSpace(' ')
+        LITERAL_EXPR
+          PsiElement(number)('3')
+  PsiWhiteSpace('\n\n')
+  PLUS_EXPR
+    LITERAL_EXPR
+      PsiElement(number)('1')
+    PsiWhiteSpace(' ')
+    PsiElement(+)('+')
+    PsiWhiteSpace(' ')
+    MUL_EXPR
+      LITERAL_EXPR
+        PsiElement(number)('2')
+      PsiWhiteSpace(' ')
+      PsiElement(*)('*')
+      PsiWhiteSpace(' ')
+      UNARY_PLUS_EXPR
+        PsiElement(+)('+')
+        PsiWhiteSpace(' ')
+        EXP_EXPR
+          LITERAL_EXPR
+            PsiElement(number)('3')
+          PsiWhiteSpace(' ')
+          PsiElement(BAD_CHARACTER)('^')
+          PsiErrorElement:<expr> expected, got '^'
+            <empty list>
+          PsiWhiteSpace(' ')
+          PsiElement(BAD_CHARACTER)('^')
+          PsiWhiteSpace(' ')
+          LITERAL_EXPR
+            PsiElement(number)('4')
+  PsiWhiteSpace('\n\n')
+  PLUS_EXPR
+    MUL_EXPR
+      PAREN_EXPR
+        PsiElement(()('(')
+        PLUS_EXPR
+          LITERAL_EXPR
+            PsiElement(number)('1')
+          PsiWhiteSpace(' ')
+          PsiElement(+)('+')
+          PsiWhiteSpace(' ')
+          LITERAL_EXPR
+            PsiElement(number)('2')
+        PsiElement())(')')
+      PsiWhiteSpace(' ')
+      PsiElement(*)('*')
+      PsiWhiteSpace(' ')
+      LITERAL_EXPR
+        PsiElement(number)('5')
+    PsiWhiteSpace(' ')
+    PsiElement(+)('+')
+    PsiWhiteSpace(' ')
+    PAREN_EXPR
+      PsiElement(()('(')
+      PLUS_EXPR
+        LITERAL_EXPR
+          PsiElement(number)('3')
+        PsiWhiteSpace(' ')
+        PsiElement(+)('+')
+        PsiWhiteSpace(' ')
+        LITERAL_EXPR
+          PsiElement(number)('4')
+      PsiElement())(')')
+  PsiWhiteSpace('\n\n')
+  OBJECT_EXPR
+    PsiElement(id)('object')
+    PsiWhiteSpace(' ')
+    PsiElement(()('(')
+    LITERAL_EXPR
+      PsiElement(number)('1')
+    PsiElement())(')')
+  PsiWhiteSpace('\n\n')
+  PLUS_EXPR
+    OBJECT_EXPR
+      PsiElement(id)('object')
+      PsiWhiteSpace(' ')
+      PsiElement(()('(')
+      LITERAL_EXPR
+        PsiElement(number)('1')
+      PsiErrorElement:')' expected, got '+'
+        <empty list>
+    PsiWhiteSpace(' ')
+    PsiElement(+)('+')
+    PsiWhiteSpace(' ')
+    LITERAL_EXPR
+      PsiElement(number)('2')
+  PsiElement())(')')

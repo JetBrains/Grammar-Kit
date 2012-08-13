@@ -75,7 +75,7 @@ public class ParserGenerator {
 
   private boolean myUnitTestMode;
   private final RuleGraphHelper myGraphHelper;
-  private final ExpressionParsingHelper myExpressionHelper;
+  private final ExpressionGeneratorHelper myExpressionHelper;
 
   public ParserGenerator(BnfFile tree, String sourcePath, String outputPath) {
     myFile = tree;
@@ -100,7 +100,7 @@ public class ParserGenerator {
     }
     myRuleExtendsMap = RuleGraphHelper.computeInheritance(myFile);
     myGraphHelper = new RuleGraphHelper(myFile, myRuleExtendsMap);
-    myExpressionHelper = new ExpressionParsingHelper(myFile, myGraphHelper);
+    myExpressionHelper = new ExpressionGeneratorHelper(myFile, myGraphHelper);
   }
 
   public void setUnitTestMode(boolean unitTestMode) {
@@ -430,7 +430,7 @@ public class ParserGenerator {
     }
     for (String ruleName : ownRuleNames) {
       BnfRule rule = myFile.getRule(ruleName);
-      ExpressionParsingHelper.ExpressionInfo info = myExpressionHelper.getExpressionInfo(rule);
+      ExpressionGeneratorHelper.ExpressionInfo info = myExpressionHelper.getExpressionInfo(rule);
       if (info != null && info.rootRule == rule) {
         out("/* ********************************************************** */");
         myExpressionHelper.generateExpressionRoot(info, this);
@@ -1013,7 +1013,7 @@ public class ParserGenerator {
           return method + "(builder_, level_ + 1" + clause.toString() + ")";
         }
         else {
-          ExpressionParsingHelper.ExpressionInfo info = myExpressionHelper.getExpressionInfo(subRule);
+          ExpressionGeneratorHelper.ExpressionInfo info = myExpressionHelper.getExpressionInfo(subRule);
           method = info == null? subRule.getName() : info.rootRule.getName();
           String parserClass = myRuleParserClasses.get(method);
           if (!parserClass.equals(myGrammarRootParser) && !parserClass.equals(myRuleParserClasses.get(rule.getName()))) {

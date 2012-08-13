@@ -3,6 +3,7 @@ package org.intellij.grammar;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
+import org.intellij.grammar.expression.ExpressionParserTest;
 
 /**
  * @author gregsh
@@ -12,6 +13,7 @@ public class BnfTestSuite extends TestCase {
     final TestSuite testSuite = new TestSuite();
     testSuite.addTestSuite(BnfParserTest.class);
     testSuite.addTestSuite(BnfGeneratorTest.class);
+    testSuite.addTestSuite(ExpressionParserTest.class);
     testSuite.addTestSuite(BnfAttributeDescriptionTest.class);
     testSuite.addTestSuite(BnfFirstNextTest.class);
     testSuite.addTestSuite(BnfCompletionTest.class);

@@ -1,0 +1,28 @@
+package org.intellij.grammar.expression;
+
+import com.intellij.psi.tree.IElementType;
+import org.intellij.grammar.psi.BnfTypes;
+
+public interface ExpressionTypes {
+
+  IElementType ASSIGN_EXPR = ExpressionParserDefinition.createType("ASSIGN_EXPR");
+  IElementType DIV_EXPR = ExpressionParserDefinition.createType("DIV_EXPR");
+  IElementType ELVIS_EXPR = ExpressionParserDefinition.createType("ELVIS_EXPR");
+  IElementType EXPR = ExpressionParserDefinition.createType("EXPR");
+  IElementType EXP_EXPR = ExpressionParserDefinition.createType("EXP_EXPR");
+  IElementType FACTORIAL_EXPR = ExpressionParserDefinition.createType("FACTORIAL_EXPR");
+  IElementType IDENTIFIER = ExpressionParserDefinition.createType("IDENTIFIER");
+  IElementType LITERAL_EXPR = ExpressionParserDefinition.createType("LITERAL_EXPR");
+  IElementType MINUS_EXPR = ExpressionParserDefinition.createType("MINUS_EXPR");
+  IElementType MUL_EXPR = ExpressionParserDefinition.createType("MUL_EXPR");
+  IElementType PAREN_EXPR = ExpressionParserDefinition.createType("PAREN_EXPR");
+  IElementType PLUS_EXPR = ExpressionParserDefinition.createType("PLUS_EXPR");
+  IElementType REF_EXPR = ExpressionParserDefinition.createType("REF_EXPR");
+  IElementType UNARY_MIN_EXPR = ExpressionParserDefinition.createType("UNARY_MIN_EXPR");
+  IElementType UNARY_PLUS_EXPR = ExpressionParserDefinition.createType("UNARY_PLUS_EXPR");
+  IElementType CUSTOM_EXPR = ExpressionParserDefinition.createType("CUSTOM_EXPR");
+  IElementType OBJECT_EXPR = ExpressionParserDefinition.createType("OBJECT_EXPR");
+
+  IElementType ID = BnfTypes.BNF_ID;
+  IElementType NUMBER = BnfTypes.BNF_NUMBER;
+}

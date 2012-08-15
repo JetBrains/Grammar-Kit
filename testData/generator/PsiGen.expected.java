@@ -144,32 +144,6 @@ public class PsiGen implements PsiParser {
   }
 
   /* ********************************************************** */
-  // <<p>> +
-  public static boolean blockOf(PsiBuilder builder_, int level_, final Parser p) {
-    if (!recursion_guard_(builder_, level_, "blockOf")) return false;
-    boolean result_ = false;
-    Marker marker_ = builder_.mark();
-    result_ = p.parse(builder_, level_);
-    int offset_ = builder_.getCurrentOffset();
-    while (result_) {
-      if (!p.parse(builder_, level_)) break;
-      int next_offset_ = builder_.getCurrentOffset();
-      if (offset_ == next_offset_) {
-        empty_element_parsed_guard_(builder_, offset_, "blockOf");
-        break;
-      }
-      offset_ = next_offset_;
-    }
-    if (result_) {
-      marker_.done(BLOCK_OF);
-    }
-    else {
-      marker_.rollbackTo();
-    }
-    return result_;
-  }
-
-  /* ********************************************************** */
   // a_expr (',' a_expr) *
   public static boolean expr(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "expr")) return false;
@@ -479,7 +453,7 @@ public class PsiGen implements PsiParser {
     int start_ = builder_.getCurrentOffset();
     Marker marker_ = builder_.mark();
     enterErrorRecordingSection(builder_, level_, _SECTION_GENERAL_, "<root c>");
-    result_ = blockOf(builder_, level_ + 1, grammar_element_parser_);
+    result_ = PsiGen2.blockOf(builder_, level_ + 1, grammar_element_parser_);
     LighterASTNode last_ = result_? builder_.getLatestDoneMarker() : null;
     if (last_ != null && last_.getStartOffset() == start_ && type_extends_(last_.getTokenType(), ROOT_C)) {
       marker_.drop();
@@ -542,6 +516,32 @@ import static PsiGen.*;
 public class PsiGen2 {
 
   public static Logger LOG_ = Logger.getInstance("PsiGen2");
+
+  /* ********************************************************** */
+  // <<p>> +
+  public static boolean blockOf(PsiBuilder builder_, int level_, final Parser p) {
+    if (!recursion_guard_(builder_, level_, "blockOf")) return false;
+    boolean result_ = false;
+    Marker marker_ = builder_.mark();
+    result_ = p.parse(builder_, level_);
+    int offset_ = builder_.getCurrentOffset();
+    while (result_) {
+      if (!p.parse(builder_, level_)) break;
+      int next_offset_ = builder_.getCurrentOffset();
+      if (offset_ == next_offset_) {
+        empty_element_parsed_guard_(builder_, offset_, "blockOf");
+        break;
+      }
+      offset_ = next_offset_;
+    }
+    if (result_) {
+      marker_.done(BLOCK_OF);
+    }
+    else {
+      marker_.rollbackTo();
+    }
+    return result_;
+  }
 
   /* ********************************************************** */
   // '::' id
@@ -934,4 +934,15 @@ public class PsiGenFixes {
     return true;
   }
 
+  /* ********************************************************** */
+  // <<blockOf identifier>>
+  static boolean fixMetaRule(PsiBuilder builder_, int level_) {
+    return PsiGen2.blockOf(builder_, level_ + 1, identifier_parser_);
+  }
+
+  final static Parser identifier_parser_ = new Parser() {
+    public boolean parse(PsiBuilder builder_, int level_) {
+      return PsiGen2.identifier(builder_, level_ + 1);
+    }
+  };
 }

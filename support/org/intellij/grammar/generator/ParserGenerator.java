@@ -1054,13 +1054,21 @@ public class ParserGenerator {
     String method = expressions.size() > 0 ? expressions.get(0).getText() : null;
     BnfRule targetRule = method == null ? null : myFile.getRule(method);
     // handle external rule call: substitute and merge arguments from external expression and rule definition
-    if (targetRule != null && Rule.isExternal(targetRule)) {
-      metaParameterNames = GrammarUtil.collectExtraArguments(targetRule, targetRule.getExpression());
-      callParameters = GrammarUtil.getExternalRuleExpressions(targetRule);
-      metaParameters = expressions;
-      method = callParameters.get(0).getText();
-      if (metaParameterNames.size() < expressions.size() - 1) {
-        callParameters = ContainerUtil.concat(callParameters, expressions.subList(metaParameterNames.size() + 1, expressions.size()));
+    if (targetRule != null) {
+      if (Rule.isExternal(targetRule)) {
+        metaParameterNames = GrammarUtil.collectExtraArguments(targetRule, targetRule.getExpression());
+        callParameters = GrammarUtil.getExternalRuleExpressions(targetRule);
+        metaParameters = expressions;
+        method = callParameters.get(0).getText();
+        if (metaParameterNames.size() < expressions.size() - 1) {
+          callParameters = ContainerUtil.concat(callParameters, expressions.subList(metaParameterNames.size() + 1, expressions.size()));
+        }
+      }
+      else {
+        String parserClass = myRuleParserClasses.get(method);
+        if (!parserClass.equals(myGrammarRootParser) && !parserClass.equals(myRuleParserClasses.get(rule.getName()))) {
+          method = StringUtil.getShortName(parserClass) + "." + method;
+        }
       }
     }
     if (callParameters.size() > 1) {

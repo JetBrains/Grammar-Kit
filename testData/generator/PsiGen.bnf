@@ -16,7 +16,6 @@ root_b ::= <<parseGrammar grammar_element>>
 root_c ::= <<blockOf grammar_element>>
 root_d ::= <<listOf grammar_element>>
 
-meta blockOf ::= <<p>> +
 private meta listOf ::= <<p>> +
 grammar_element ::= expr | external_type3
 expr ::= a_expr (',' a_expr) *
@@ -34,6 +33,7 @@ external_type3 ::= id {elementType="expr"} // do not generate anything
   parserClass="PsiGen2"
 }
 
+meta blockOf ::= <<p>> +
 private reference ::= ref_expr qref_expr *
 ref_expr ::= identifier  {extends="expr" mixin="MyRefImpl" implements="MyRef"}
 left qref_expr ::= '.' identifier {extends="ref_expr" elementType="ref_expr"}
@@ -53,3 +53,5 @@ left item_expr ::= '[' number ']'
 
 LeftShadowTest ::= identifier LeftShadow *
 left LeftShadow ::= ',' identifier
+
+private fixMetaRule ::= <<blockOf identifier>>

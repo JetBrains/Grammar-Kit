@@ -940,6 +940,23 @@ public class PsiGenFixes {
     return PsiGen2.blockOf(builder_, level_ + 1, identifier_parser_);
   }
 
+  /* ********************************************************** */
+  // identifier
+  public static boolean publicMethodToCall(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "publicMethodToCall")) return false;
+    if (!nextTokenIs(builder_, ID)) return false;
+    boolean result_ = false;
+    Marker marker_ = builder_.mark();
+    result_ = PsiGen2.identifier(builder_, level_ + 1);
+    if (!result_) {
+      marker_.rollbackTo();
+    }
+    else {
+      marker_.drop();
+    }
+    return result_;
+  }
+
   final static Parser identifier_parser_ = new Parser() {
     public boolean parse(PsiBuilder builder_, int level_) {
       return PsiGen2.identifier(builder_, level_ + 1);

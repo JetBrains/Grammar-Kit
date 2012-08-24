@@ -55,3 +55,4 @@ LeftShadowTest ::= identifier LeftShadow *
 left LeftShadow ::= ',' identifier
 
 private fixMetaRule ::= <<blockOf identifier>>
+publicMethodToCall ::= identifier {elementType=""}

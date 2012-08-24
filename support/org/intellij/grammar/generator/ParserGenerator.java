@@ -162,6 +162,7 @@ public class ParserGenerator {
     for (BnfRule rule : myFile.getRules()) {
       if (!RuleGraphHelper.shouldGeneratePsi(rule, true)) continue;
       String elementType = getElementType(rule);
+      if (StringUtil.isEmpty(elementType)) continue;
       if (sortedCompositeTypes.containsKey(elementType)) continue;
       if (!Rule.isFake(rule)) {
         sortedCompositeTypes.put(elementType, rule);
@@ -813,11 +814,11 @@ public class ParserGenerator {
       }
     }
 
+    String elementType = getElementType(rule);
     if (type == BNF_OP_AND || type == BNF_OP_NOT) {
       out("marker_.rollbackTo();");
     }
-    else if (!isPrivate) {
-      String elementType = getElementType(rule);
+    else if (!isPrivate && StringUtil.isNotEmpty(elementType)) {
       if (canCollapse) {
         out(
           "LighterASTNode last_ = " + (alwaysTrue ? "builder_.getLatestDoneMarker();" : "result_? builder_.getLatestDoneMarker() : null;"));

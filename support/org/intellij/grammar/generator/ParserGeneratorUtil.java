@@ -292,7 +292,8 @@ public class ParserGeneratorUtil {
 
   public static String getElementType(BnfRule rule) {
     String elementType = StringUtil.notNullize(getAttribute(rule, KnownAttribute.ELEMENT_TYPE), rule.getName());
-    return getAttribute(rule, KnownAttribute.ELEMENT_TYPE_PREFIX) + toDisplayOrConstantName(elementType, true);
+    String displayName = toDisplayOrConstantName(elementType, true);
+    return StringUtil.isEmpty(displayName)? "" : getAttribute(rule, KnownAttribute.ELEMENT_TYPE_PREFIX) + displayName;
   }
 
   public static String wrapCallWithParserInstance(String nodeCall) {

@@ -16,9 +16,13 @@
 package org.intellij.grammar.generator;
 
 import com.intellij.lang.Language;
+import com.intellij.openapi.util.Key;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.impl.source.tree.LeafPsiElement;
 import com.intellij.psi.tree.IElementType;
+import com.intellij.psi.util.CachedValue;
+import com.intellij.psi.util.CachedValueProvider;
+import com.intellij.psi.util.CachedValuesManager;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.util.containers.ContainerUtil;
 import com.intellij.util.containers.MultiMap;
@@ -50,6 +54,19 @@ public class RuleGraphHelper {
   private final MultiMap<BnfRule,BnfRule> myRulesGraph;
 
   private static final LeafPsiElement LEFT_MARKER = new LeafPsiElement(new IElementType("LEFT_MARKER", Language.ANY, false) {}, "LEFT_MARKER");
+
+  public static String getCardinalityText(Cardinality cardinality) {
+    if (cardinality == AT_LEAST_ONE) {
+      return "+";
+    }
+    else if (cardinality == ANY_NUMBER) {
+      return "*";
+    }
+    else if (cardinality == OPTIONAL) {
+      return "?";
+    }
+    return "";
+  }
 
   public enum Cardinality {
     NONE, OPTIONAL, REQUIRED, AT_LEAST_ONE, ANY_NUMBER;
@@ -115,6 +132,7 @@ public class RuleGraphHelper {
       BnfRule superRule = file.getRule(getAttribute(rule, KnownAttribute.EXTENDS));
       if (superRule == null) continue;
       ruleExtendsMap.putValue(superRule, rule);
+      ruleExtendsMap.putValue(superRule, getSynonymTargetOrSelf(rule));
     }
     for (int i = 0, len = ruleExtendsMap.size(); i < len; i++) {
       boolean changed = false;
@@ -130,6 +148,21 @@ public class RuleGraphHelper {
       ruleExtendsMap.putValue(rule, rule); // add super to itself
     }
     return ruleExtendsMap;
+  }
+
+  private static final Key<CachedValue<RuleGraphHelper>> RULE_GRAPH_HELPER_KEY = Key.create("RULE_GRAPH_HELPER_KEY");
+  public static RuleGraphHelper getCached(final BnfFile file) {
+    CachedValue<RuleGraphHelper> value = file.getUserData(RULE_GRAPH_HELPER_KEY);
+    if (value == null) {
+      file.putUserData(RULE_GRAPH_HELPER_KEY, value = CachedValuesManager.getManager(file.getProject()).createCachedValue(new CachedValueProvider<RuleGraphHelper>() {
+        @Nullable
+        @Override
+        public Result<RuleGraphHelper> compute() {
+          return new Result<RuleGraphHelper>(new RuleGraphHelper(file), file);
+        }
+      }, false));
+    }
+    return value.getValue();
   }
 
   public RuleGraphHelper(BnfFile file) {
@@ -459,7 +492,7 @@ public class RuleGraphHelper {
   }
   
   private List<Map<PsiElement, Cardinality>> compactInheritors(List<Map<PsiElement, Cardinality>> mapList) {
-    Set<BnfRule> rulesToTry = new THashSet<BnfRule>();
+    Set<BnfRule> rulesToTry = new LinkedHashSet<BnfRule>();
     // collect all rules
     for (Map<PsiElement, Cardinality> map : mapList) {
       for (PsiElement psiElement : map.keySet()) {
@@ -482,21 +515,26 @@ public class RuleGraphHelper {
     List<BnfRule> sorted = topoSort(rulesToTry, myRuleExtendsMap);
 
     // drop unnecessary super rules: doesn't combine much, not present due collapse
-    int max = 0;
-    for (Iterator<BnfRule> it = sorted.iterator(); it.hasNext(); ) {
+    List<BnfRule> tmp = new ArrayList<BnfRule>(realRules);
+    main: for (Iterator<BnfRule> it = sorted.iterator(); it.hasNext(); ) {
       BnfRule superRule = it.next();
       int count = 0;
       boolean collapse = false;
+      for (Iterator<BnfRule> it2 = tmp.iterator(); it2.hasNext(); ) {
+        BnfRule r = it2.next();
+        if (r == superRule) continue main;
+        if (myRuleExtendsMap.get(superRule).contains(r)) {
+          it2.remove();
+          count ++;
+        }
+      }
       for (BnfRule r : realRules) {
-        if (myRuleExtendsMap.get(superRule).contains(r)) count++;
-        if (myRulesGraph.get(r).contains(superRule)) collapse = true;
+        if (myRulesGraph.get(r).contains(superRule)) {
+          collapse = true;
+          break;
+        }
       }
-      if (max < count) {
-        max = count;
-      }
-      else if (!collapse) {
-        it.remove();
-      }
+      if (count < 2 && !collapse) it.remove();
     }
 
     // apply changes and merge cards

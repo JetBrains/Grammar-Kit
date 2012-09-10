@@ -19,7 +19,6 @@ package org.intellij.grammar.generator;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.MessageType;
-import com.intellij.openapi.util.Ref;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.psi.PsiElement;
 import com.intellij.util.Function;
@@ -101,7 +100,7 @@ public class ExpressionGeneratorHelper {
       }
 
       if (rulesCluster.contains(subRule)) {
-        if (!myRuleGraph.getFor(subRule).isEmpty()) {
+        if (!Rule.isPrivate(subRule) || !myRuleGraph.getFor(subRule).isEmpty()) {
           priorityMap.put(subRule, priority == -1 ? info.nextPriority++ : priority);
         }
       }
@@ -117,6 +116,17 @@ public class ExpressionGeneratorHelper {
   private void buildOperatorMap(BnfRule rule, BnfRule rootRule, Map<BnfRule, OperatorInfo> operatorMap) {
     Map<PsiElement, RuleGraphHelper.Cardinality> ruleContent = myRuleGraph.getFor(rule);
     RuleGraphHelper.Cardinality cardinality = ruleContent.get(rootRule);
+    BnfRule rootRuleSubst = rootRule;
+    if (cardinality == null) {
+      Collection<BnfRule> extendsRules = myRuleGraph.getExtendsRules(rootRule);
+      for (PsiElement r : ruleContent.keySet()) {
+        if (r instanceof BnfRule && extendsRules.contains(r)) {
+          cardinality = ruleContent.get(r);
+          rootRuleSubst = (BnfRule)r;
+          break;
+        }
+      }
+    }
     String rootRuleName = rootRule.getName();
     List<BnfExpression> childExpressions = getChildExpressions(rule.getExpression());
     OperatorInfo info;
@@ -130,8 +140,7 @@ public class ExpressionGeneratorHelper {
     }
     else if (cardinality == RuleGraphHelper.Cardinality.REQUIRED) {
       // postfix or prefix unary expression
-      Ref<BnfRule> causeRef = Ref.create(null);
-      int index = indexOf(rootRule, 0, childExpressions, causeRef);
+      int index = indexOf(rootRuleSubst, 0, childExpressions);
       if (index == 0) {
         info = new OperatorInfo(rule, OperatorType.UNARY_POSTFIX, combine(childExpressions.subList(1, childExpressions.size())), null);
       }
@@ -141,18 +150,18 @@ public class ExpressionGeneratorHelper {
       }
       else {
         info = new OperatorInfo(rule, OperatorType.UNARY, combine(childExpressions.subList(0, index)),
-                                combine(childExpressions.subList(index + 1, childExpressions.size())), causeRef.get());
+                                combine(childExpressions.subList(index + 1, childExpressions.size())), rootRuleSubst == rootRule? null : rootRuleSubst);
       }
     }
     else if (cardinality == RuleGraphHelper.Cardinality.AT_LEAST_ONE) {
       // binary or n-ary expression
-      int index = indexOf(rootRule, 0, childExpressions, null);
+      int index = indexOf(rootRuleSubst, 0, childExpressions);
       if (index != 0) {
         addWarning("binary or n-ary expression must not have prefix: " + rule);
         info = new OperatorInfo(rule, OperatorType.ATOM, rule.getExpression(), null);
       }
       else {
-        int index2 = indexOf(rootRule, 1, childExpressions, null);
+        int index2 = indexOf(rootRuleSubst, 1, childExpressions);
         if (index2 == -1) {
           BnfExpression lastExpression = childExpressions.get(1);
           boolean badNAry = childExpressions.size() != 2 || !(lastExpression instanceof BnfQuantified) ||
@@ -161,7 +170,7 @@ public class ExpressionGeneratorHelper {
           List<BnfExpression> childExpressions2 = badNAry ? Collections.<BnfExpression>emptyList() :
                                                   getChildExpressions(
                                                     ((BnfParenExpression)((BnfQuantified)lastExpression).getExpression()).getExpression());
-          int index3 = indexOf(rootRule, 0, childExpressions2, null);
+          int index3 = indexOf(rootRuleSubst, 0, childExpressions2);
           if (badNAry || index3 == -1) {
             addWarning(rule + ": invalid n-ary expressions definition. '" + rootRuleName + " ( <op> " + rootRuleName + ") +' expected");
             info = new OperatorInfo(rule, OperatorType.UNARY_POSTFIX, combine(childExpressions.subList(1, childExpressions.size())), null);
@@ -178,7 +187,7 @@ public class ExpressionGeneratorHelper {
       }
     }
     else {
-      addWarning("unexpected cardinality " + cardinality + " of " + rootRule + " in " + rule);
+      addWarning("unexpected cardinality " + cardinality + " of " + rootRuleName + " in " + rule);
       info = new OperatorInfo(rule, OperatorType.ATOM, rule.getExpression(), null);
     }
     operatorMap.put(rule, info);
@@ -192,15 +201,10 @@ public class ExpressionGeneratorHelper {
     return BnfElementFactory.createExpressionFromText(project, text);
   }
 
-  private int indexOf(BnfRule rootRule, int startIndex, List<BnfExpression> childExpressions, @Nullable Ref<BnfRule> causeRef) {
-    assert childExpressions.size() > 1;
+  private int indexOf(BnfRule rootRule, int startIndex, List<BnfExpression> childExpressions) {
     for (int i = startIndex, childExpressionsSize = childExpressions.size(); i < childExpressionsSize; i++) {
       BnfRule rule = myFile.getRule(childExpressions.get(i).getText());
       if (rootRule == rule) {
-        return i;
-      }
-      else if (causeRef != null && i > 0 && myRootRulesMap.get(rule) == rootRule) {
-        causeRef.set(rule);
         return i;
       }
     }
@@ -305,7 +309,6 @@ public class ExpressionGeneratorHelper {
         operator.tail == null ? null : g.generateNodeCall(operator.rule, operator.tail, getNextName(operator.rule.getName(), 1));
       if (operator.type == OperatorType.ATOM) {
         g.out("result_ = true;");
-        g.out("marker_.done(" + elementType + ");");
       }
       else if (operator.type == OperatorType.UNARY) {
         Integer substitutorPriority = operator.substitutor == null ? null : info.getPriority(operator.substitutor);
@@ -315,7 +318,15 @@ public class ExpressionGeneratorHelper {
         if (tailCall != null) {
           g.out("result_ = report_error_(builder_, " + tailCall + ") && result_;");
         }
-        g.out("marker_.done(" + elementType + ");");
+      }
+      // finish marker for previous cases
+      if (operator.type == OperatorType.ATOM || operator.type == OperatorType.UNARY) {
+        if (StringUtil.isNotEmpty(elementType)) {
+          g.out("marker_.done(" + elementType + ");");
+        }
+        else {
+          g.out("marker_.drop();");
+        }
       }
       g.out("}");
     }

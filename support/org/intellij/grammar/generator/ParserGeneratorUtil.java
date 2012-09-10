@@ -31,7 +31,7 @@ import org.intellij.grammar.psi.impl.GrammarUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.List;
+import java.util.*;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
@@ -302,6 +302,28 @@ public class ParserGeneratorUtil {
 
   public static String generateConsumeTextToken(String tokenText) {
     return "consumeToken(builder_, \"" + tokenText + "\")";
+  }
+
+  public static Collection<BnfRule> getSortedPublicRules(Set<PsiElement> accessors) {
+    Map<String, BnfRule> result = new TreeMap<String, BnfRule>();
+    for (PsiElement tree : accessors) {
+      if (tree instanceof BnfRule) {
+        BnfRule rule = (BnfRule)tree;
+        if (!Rule.isPrivate(rule)) result.put(rule.getName(), rule);
+      }
+    }
+    return result.values();
+  }
+
+  public static Collection<BnfReferenceOrToken> getSortedSimpleTokens(Set<PsiElement> accessors, @Nullable Set<String> simpleTokens) {
+    TreeMap<String, BnfReferenceOrToken> result = new TreeMap<String, BnfReferenceOrToken>();
+    for (PsiElement tree : accessors) {
+      if (!(tree instanceof BnfReferenceOrToken)) continue;
+      if (simpleTokens == null || simpleTokens.contains(tree.getText()) /*|| type == STRING || type == NUMBER*/) {
+        result.put(tree.getText(), (BnfReferenceOrToken)tree);
+      }
+    }
+    return result.values();
   }
 
   public static class Rule {

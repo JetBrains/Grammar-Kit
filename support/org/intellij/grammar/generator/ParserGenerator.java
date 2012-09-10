@@ -333,17 +333,17 @@ public class ParserGenerator {
 
   @NotNull
   private String getSuperClassName(BnfRule rule, String psiPackage, String suffix) {
-    BnfRule topSuper = getTopSuperRule(rule);
+    BnfRule topSuper = getTopSuperRule(rule, null);
     return topSuper == null ? getRootAttribute(myFile, KnownAttribute.EXTENDS) :
            topSuper == rule ? getAttribute(rule, KnownAttribute.EXTENDS) :
            psiPackage + "." + getRulePsiClassName(topSuper, myRuleClassPrefix) + suffix;
   }
 
-  private BnfRule getTopSuperRule(BnfRule rule) {
+  private BnfRule getTopSuperRule(BnfRule rule, @Nullable BnfRule stopAt) {
     THashSet<BnfRule> visited = new THashSet<BnfRule>();
     BnfRule cur = rule;
     for (BnfRule next = rule; next != null; cur = !visited.add(next) ? null : next) {
-      if (cur == null) break;
+      if (cur == null || cur == stopAt) break;
       next = RuleGraphHelper.getSynonymTargetOrSelf(cur);
       if (next != cur) continue;
       if (cur != rule) break; // do not search for elementType any further
@@ -360,7 +360,7 @@ public class ParserGenerator {
     ArrayList<String> strings = new ArrayList<String>();
     List<String> topRuleImplements = Collections.emptyList();
     String topRuleClass = null;
-    BnfRule topSuper = getTopSuperRule(rule);
+    BnfRule topSuper = getTopSuperRule(rule, null);
     boolean simpleMode = psiPackage.isEmpty();
     if (topSuper != null && topSuper != rule) {
       topRuleImplements = getAttribute(topSuper, KnownAttribute.IMPLEMENTS);
@@ -509,6 +509,7 @@ public class ParserGenerator {
         }
         int i = 0;
         for (String elementType : elementTypes) {
+          if (StringUtil.isEmpty(elementType)) continue;
           if (i > 0) sb.append(i % 4 == 0 ? ",\n" : ", ");
           sb.append(elementType);
           i++;
@@ -1257,7 +1258,7 @@ public class ParserGenerator {
     for (PsiElement tree : sortedPublicRules) {
       generatePsiAccessor(rule, tree, accessors.get(tree), true, shortener);
     }
-    for (BnfReferenceOrToken tree : getSortedSimpleTokens(accessors.keySet())) {
+    for (BnfReferenceOrToken tree : getSortedSimpleTokens(accessors.keySet(), mySimpleTokens.keySet())) {
       generatePsiAccessor(rule, tree, accessors.get(tree), true, shortener);
     }
     for (Pair<String, String> entry : methods) {
@@ -1311,7 +1312,7 @@ public class ParserGenerator {
     for (BnfRule tree : sortedPublicRules) {
       generatePsiAccessor(rule, tree, accessors.get(tree), false, shortener);
     }
-    for (BnfReferenceOrToken tree : getSortedSimpleTokens(accessors.keySet())) {
+    for (BnfReferenceOrToken tree : getSortedSimpleTokens(accessors.keySet(), mySimpleTokens.keySet())) {
       generatePsiAccessor(rule, tree, accessors.get(tree), false, shortener);
     }
     if (visitorClassName != null) {
@@ -1378,6 +1379,8 @@ public class ParserGenerator {
       }
     }
     else {
+      // choose the top rule name in context, we do not really need to be more specific
+      treeRule = ObjectUtils.notNull(getTopSuperRule(treeRule, getTopSuperRule(rule, null)), treeRule);
       ruleName = treeRule.getName();
     }
     if (ruleName == null) return;
@@ -1427,28 +1430,6 @@ public class ParserGenerator {
     else {
       return getRulePsiClassName(rule, myRuleClassPrefix);
     }
-  }
-
-  private static Collection<BnfRule> getSortedPublicRules(Set<PsiElement> accessors) {
-    Map<String, BnfRule> result = new TreeMap<String, BnfRule>();
-    for (PsiElement tree : accessors) {
-      if (tree instanceof BnfRule) {
-        BnfRule rule = (BnfRule)tree;
-        if (!Rule.isPrivate(rule)) result.put(rule.getName(), rule);
-      }
-    }
-    return result.values();
-  }
-
-  private Collection<BnfReferenceOrToken> getSortedSimpleTokens(Set<PsiElement> accessors) {
-    TreeMap<String, BnfReferenceOrToken> result = new TreeMap<String, BnfReferenceOrToken>();
-    for (PsiElement tree : accessors) {
-      if (!(tree instanceof BnfReferenceOrToken)) continue;
-      if (mySimpleTokens.containsKey(tree.getText()) /*|| type == STRING || type == NUMBER*/) {
-        result.put(tree.getText(), (BnfReferenceOrToken)tree);
-      }
-    }
-    return result.values();
   }
 
   private Collection<String> getRuleAccessorClasses(BnfRule rule, Collection<BnfRule> bnfRules) {

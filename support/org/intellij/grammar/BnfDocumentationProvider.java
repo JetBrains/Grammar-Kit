@@ -21,13 +21,16 @@ import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiManager;
 import org.intellij.grammar.analysis.BnfFirstNextAnalyzer;
+import org.intellij.grammar.generator.ParserGenerator;
+import org.intellij.grammar.generator.ParserGeneratorUtil;
+import org.intellij.grammar.generator.RuleGraphHelper;
 import org.intellij.grammar.psi.BnfAttr;
+import org.intellij.grammar.psi.BnfFile;
+import org.intellij.grammar.psi.BnfReferenceOrToken;
 import org.intellij.grammar.psi.BnfRule;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @author gregsh
@@ -52,12 +55,39 @@ public class BnfDocumentationProvider implements DocumentationProvider {
       Set<String> first = analyzer.asStrings(analyzer.calcFirst(rule));
       Set<String> next = analyzer.asStrings(analyzer.calcNext(rule).keySet());
 
+      StringBuilder docBuilder = new StringBuilder();
       String[] firstS = first.toArray(new String[first.size()]);
       Arrays.sort(firstS);
+      docBuilder.append("<h1>Starts with:</h1>").append(StringUtil.escapeXml(StringUtil.join(firstS, " | ")));
+
       String[] nextS = next.toArray(new String[next.size()]);
       Arrays.sort(nextS);
-      return "<h1>Starts with:</h1>" + StringUtil.escapeXml(StringUtil.join(firstS, " | "))
-        + "<br><h1>Followed by:</h1>" + StringUtil.escapeXml(StringUtil.join(nextS, " | "));
+      docBuilder.append("<br><h1>Followed by:</h1>").append(StringUtil.escapeXml(StringUtil.join(nextS, " | ")));
+
+      if (rule.getModifierList().isEmpty()) {
+        Map<PsiElement,RuleGraphHelper.Cardinality> map = RuleGraphHelper.getCached((BnfFile)rule.getContainingFile()).getFor(rule);
+        Collection<BnfRule> sortedPublicRules = ParserGeneratorUtil.getSortedPublicRules(map.keySet());
+        if (sortedPublicRules.size() > 0) {
+          docBuilder.append("<br><h1>Contains nodes:</h1>");
+          for (BnfRule r : sortedPublicRules) {
+            docBuilder.append(" ").append(r.getName()).append(RuleGraphHelper.getCardinalityText(map.get(r)));
+          }
+        }
+        else {
+          docBuilder.append("<h1>Contains no nodes</h1>");
+        }
+        Collection<BnfReferenceOrToken> sortedSimpleTokens = ParserGeneratorUtil.getSortedSimpleTokens(map.keySet(), null);
+        if (sortedSimpleTokens.size() > 0) {
+          docBuilder.append("<br><h1>Contains tokens:</h1>");
+          for (BnfReferenceOrToken r : sortedSimpleTokens) {
+            docBuilder.append(" ").append(r.getText()).append(RuleGraphHelper.getCardinalityText(map.get(r)));
+          }
+        }
+        else {
+          docBuilder.append("<h1>Contains no tokens</h1>");
+        }
+      }
+      return docBuilder.toString();
     }
     else if (element instanceof BnfAttr) {
       KnownAttribute attribute = KnownAttribute.getAttribute(((BnfAttr)element).getName());
@@ -67,7 +97,7 @@ public class BnfDocumentationProvider implements DocumentationProvider {
   }
 
   @Nullable
-  public PsiElement getDocumentationElementForLookupItem(final PsiManager psiManager, final Object object, final PsiElement element) {
+  public PsiElement getDocumentationElementForLookupItem(final PsiManager psiManager, final Object obj5ect, final PsiElement element) {
     return null;
   }
 

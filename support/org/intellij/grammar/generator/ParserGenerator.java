@@ -1030,7 +1030,10 @@ public class ParserGenerator {
           }
         }
       }
-      mySimpleTokens.put(text, null);
+      // allow token usage by registered token name instead of token text
+      if (!mySimpleTokens.containsKey(text) && !mySimpleTokens.values().contains(text)) {
+        mySimpleTokens.put(text, null);
+      }
       return generateConsumeToken(text);
     }
     else if (type == BNF_EXTERNAL_EXPRESSION) {

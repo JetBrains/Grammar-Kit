@@ -315,13 +315,11 @@ public class ParserGeneratorUtil {
     return result.values();
   }
 
-  public static Collection<BnfReferenceOrToken> getSortedSimpleTokens(Set<PsiElement> accessors, @Nullable Set<String> simpleTokens) {
-    TreeMap<String, BnfReferenceOrToken> result = new TreeMap<String, BnfReferenceOrToken>();
+  public static Collection<BnfExpression> getSortedTokens(Set<PsiElement> accessors) {
+    TreeMap<String, BnfExpression> result = new TreeMap<String, BnfExpression>();
     for (PsiElement tree : accessors) {
-      if (!(tree instanceof BnfReferenceOrToken)) continue;
-      if (simpleTokens == null || simpleTokens.contains(tree.getText()) /*|| type == STRING || type == NUMBER*/) {
-        result.put(tree.getText(), (BnfReferenceOrToken)tree);
-      }
+      if (!(tree instanceof BnfExpression)) continue;
+      result.put(tree.getText(), (BnfExpression)tree);
     }
     return result.values();
   }

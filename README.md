@@ -24,12 +24,12 @@ See [HOWTO](/JetBrains/Grammar-Kit/blob/master/HOWTO.md) page for different tips
 
 Recent changes
 --------------
-1.0.7
+1.0.8
 
-* Attribute pattern navigation & inspection
-* Short error messages generation instead of long token lists
-* Token sequence completion
-* Standalone invocation (for ant integration & etc.)
+* Generator: Experimental Pratt-like expression parsing ([compact grammars and faster parsing](https://github.com/JetBrains/Grammar-Kit/blob/master/testData/generator/ExprParser.bnf))
+* Generator: Per-rule elementTypeClass/Factory attribute & empty elementType attribute support
+* Generator/PSI: camel-case rule names support and PSI classes calculation fixes
+* Editor: foldings for attribute groups and multiline comments
 
 
 Quick documentation:
@@ -155,6 +155,13 @@ Just add *mypackage.MyReferenceExpressionImpl* class with proper *getReference()
 
 Change log
 ==========
+1.0.8
+
+* Generator: Experimental Pratt-like expression parsing ([compact grammars and faster parsing](https://github.com/JetBrains/Grammar-Kit/blob/master/testData/generator/ExprParser.bnf))
+* Generator: Per-rule elementTypeClass/Factory attribute & empty elementType attribute support
+* Generator/PSI: camel-case rule names support and PSI classes calculation fixes
+* Editor: foldings for attribute groups and multiline comments
+
 1.0.7
 
 * Attribute pattern navigation & inspection

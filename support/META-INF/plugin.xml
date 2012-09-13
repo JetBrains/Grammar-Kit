@@ -1,6 +1,6 @@
 <idea-plugin url="https://github.com/JetBrains/Grammar-Kit" version="2">
   <id>org.jetbrains.idea.grammar</id>
-  <version>1.0.7</version>
+  <version>1.0.8</version>
   <vendor email="gregory.shrago@jetbrains.com" logo="">Gregory Shrago</vendor>
   <idea-version since-build="116.108" until-build=""/>
 
@@ -12,6 +12,13 @@
 
   <change-notes>
     <![CDATA[
+    <p>1.0.8</p>
+    <ul>
+        <li>Generator: Experimental Pratt-like expression parsing (compact grammars and faster parsing)</li>
+        <li>Generator: Per-rule elementTypeClass/Factory attribute & empty elementType attribute support</li>
+        <li>Generator/PSI: camel-case rule names support and PSI classes calculation fixes</li>
+        <li>Editor: foldings for attribute groups and multiline comments</li>
+    </ul>
     <p>1.0.7</p>
     <ul>
         <li>Attribute pattern navigation & inspection</li>

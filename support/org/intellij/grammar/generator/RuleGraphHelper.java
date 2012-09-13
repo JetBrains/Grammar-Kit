@@ -18,6 +18,7 @@ package org.intellij.grammar.generator;
 import com.intellij.lang.Language;
 import com.intellij.openapi.util.Condition;
 import com.intellij.openapi.util.Key;
+import com.intellij.openapi.util.Pair;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.impl.source.tree.LeafPsiElement;
 import com.intellij.psi.tree.IElementType;
@@ -150,6 +151,14 @@ public class RuleGraphHelper {
       ruleExtendsMap.putValue(rule, rule); // add super to itself
     }
     return ruleExtendsMap;
+  }
+
+  public static Map<String, String> computeTokens(BnfFile file) {
+    Map<String, String> result = new LinkedHashMap<String, String>();
+    for (Pair<String, String> pair : getRootAttribute(file, KnownAttribute.TOKENS)) {
+      result.put(pair.second, pair.first); // string value to constant name
+    }
+    return result;
   }
 
   private static final Key<CachedValue<RuleGraphHelper>> RULE_GRAPH_HELPER_KEY = Key.create("RULE_GRAPH_HELPER_KEY");

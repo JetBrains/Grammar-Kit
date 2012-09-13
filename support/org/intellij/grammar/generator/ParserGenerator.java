@@ -57,7 +57,7 @@ public class ParserGenerator {
 
   private final Map<String, String> myRuleParserClasses = new TreeMap<String, String>();
   private final Map<String, String> myParserLambdas = new TreeMap<String, String>();
-  private final Map<String, String> mySimpleTokens = new THashMap<String, String>();
+  private final Map<String, String> mySimpleTokens;
   private final MultiMap<BnfRule, BnfRule> myRuleExtendsMap;
   private final BnfFile myFile;
   private final String mySourcePath;
@@ -95,9 +95,7 @@ public class ParserGenerator {
     visitorClassName = StringUtil.isEmpty(tmpVisitorClass) ?
                        null : tmpVisitorClass.startsWith(myRuleClassPrefix) ?
                               tmpVisitorClass : myRuleClassPrefix + tmpVisitorClass;
-    for (Pair<String, String> pair : getRootAttribute(myFile, KnownAttribute.TOKENS)) {
-      mySimpleTokens.put(pair.second, pair.first); // string value to constant name
-    }
+    mySimpleTokens = RuleGraphHelper.computeTokens(myFile);
     myRuleExtendsMap = RuleGraphHelper.computeInheritance(myFile);
     myGraphHelper = new RuleGraphHelper(myFile, myRuleExtendsMap);
     myExpressionHelper = new ExpressionGeneratorHelper(myFile, myGraphHelper);
@@ -1260,7 +1258,7 @@ public class ParserGenerator {
     for (PsiElement tree : sortedPublicRules) {
       generatePsiAccessor(rule, tree, accessors.get(tree), true, shortener);
     }
-    for (BnfReferenceOrToken tree : getSortedSimpleTokens(accessors.keySet(), mySimpleTokens.keySet())) {
+    for (BnfExpression tree : getSortedTokens(accessors.keySet())) {
       generatePsiAccessor(rule, tree, accessors.get(tree), true, shortener);
     }
     for (Pair<String, String> entry : methods) {
@@ -1314,7 +1312,7 @@ public class ParserGenerator {
     for (BnfRule tree : sortedPublicRules) {
       generatePsiAccessor(rule, tree, accessors.get(tree), false, shortener);
     }
-    for (BnfReferenceOrToken tree : getSortedSimpleTokens(accessors.keySet(), mySimpleTokens.keySet())) {
+    for (BnfExpression tree : getSortedTokens(accessors.keySet())) {
       generatePsiAccessor(rule, tree, accessors.get(tree), false, shortener);
     }
     if (visitorClassName != null) {

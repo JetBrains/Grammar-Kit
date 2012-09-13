@@ -253,6 +253,17 @@ BnfFile:BnfGrammar.bnf
         PsiElement(=)('=')
         BNF_REFERENCE_OR_TOKEN: parenthesized
           PsiElement(id)('parenthesized')
+      PsiWhiteSpace('\n\n  ')
+      BNF_ATTR:methodRenames
+        PsiElement(id)('methodRenames')
+        BNF_ATTR_PATTERN
+          PsiElement(()('(')
+          BNF_STRING_LITERAL_EXPRESSION: "getStringLiteralExpression"
+            PsiElement(string)('"getStringLiteralExpression"')
+          PsiElement())(')')
+        PsiElement(=)('=')
+        BNF_STRING_LITERAL_EXPRESSION: "getLiteralExpression"
+          PsiElement(string)('"getLiteralExpression"')
       PsiWhiteSpace('\n')
       PsiElement(})('}')
     PsiWhiteSpace('\n\n')

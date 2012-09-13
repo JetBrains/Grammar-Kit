@@ -16,6 +16,7 @@
 package org.intellij.grammar.generator;
 
 import com.intellij.lang.Language;
+import com.intellij.openapi.util.Condition;
 import com.intellij.openapi.util.Key;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.impl.source.tree.LeafPsiElement;
@@ -50,8 +51,9 @@ import static org.intellij.grammar.psi.impl.GrammarUtil.nextOrParent;
 public class RuleGraphHelper {
   private final BnfFile myFile;
   private final MultiMap<BnfRule, BnfRule> myRuleExtendsMap;
-  private final Map<BnfRule, Map<PsiElement, Cardinality>> myMap;
+  private final Map<BnfRule, Map<PsiElement, Cardinality>> myRuleContentsMap;
   private final MultiMap<BnfRule,BnfRule> myRulesGraph;
+  private final Set<BnfRule> myRulesWithTokens = new THashSet<BnfRule>();
 
   private static final LeafPsiElement LEFT_MARKER = new LeafPsiElement(new IElementType("LEFT_MARKER", Language.ANY, false) {}, "LEFT_MARKER");
 
@@ -172,7 +174,7 @@ public class RuleGraphHelper {
   public RuleGraphHelper(BnfFile file, MultiMap<BnfRule, BnfRule> ruleExtendsMap) {
     myFile = file;
     myRuleExtendsMap = ruleExtendsMap;
-    myMap = new THashMap<BnfRule, Map<PsiElement, Cardinality>>();
+    myRuleContentsMap = new THashMap<BnfRule, Map<PsiElement, Cardinality>>();
 
     // ordered!
     myRulesGraph = new MultiMapBasedOnSet<BnfRule, BnfRule>() {
@@ -181,13 +183,74 @@ public class RuleGraphHelper {
         return new LinkedHashSet<BnfRule>();
       }
     };
+    buildRulesGraph();
+    buildContentsMap(ruleExtendsMap);
+  }
+
+  private void buildContentsMap(MultiMap<BnfRule, BnfRule> ruleExtendsMap) {
+    final Collection<? extends BnfRule> inheritors = new THashSet<BnfRule>(myRuleExtendsMap.values());
+    List<BnfRule> rules = topoSort(myFile.getRules(), new Topology<BnfRule>() {
+      @Override
+      public boolean contains(BnfRule t1, BnfRule t2) {
+        return myRulesGraph.get(t1).contains(t2);
+      }
+
+      @Override
+      public BnfRule forceChoose(Collection<BnfRule> col) {
+        return super.forceChooseInner(
+          col, new Condition<BnfRule>() {
+            @Override
+            public boolean value(BnfRule bnfRule) {
+              if (myRulesWithTokens.contains(bnfRule)) return false;
+              for (BnfRule r : myRulesGraph.get(bnfRule)) {
+                if (!inheritors.contains(r)) return false;
+              }
+              return true;
+            }
+          }, new Condition<BnfRule>() {
+            @Override
+            public boolean value(BnfRule bnfRule) {
+              return !myRulesWithTokens.contains(bnfRule);
+            }
+          }, Condition.TRUE
+        );
+      }
+    });
+    THashSet<PsiElement> visited = new THashSet<PsiElement>();
+    for (BnfRule rule : rules) {
+      if (myRuleContentsMap.containsKey(rule)) continue;
+      Map<PsiElement, Cardinality> map = collectMembers(rule, rule.getExpression(), rule.getName(), visited);
+      if (map.size() == 1 && ContainerUtil.getFirstItem(map.values()) == REQUIRED && !Rule.isPrivate(rule)) {
+        PsiElement r = ContainerUtil.getFirstItem(map.keySet());
+        if (r == rule || r instanceof BnfRule && ruleExtendsMap.get((BnfRule)r).contains(rule)) {
+          myRuleContentsMap.put(rule, Collections.<PsiElement, Cardinality>emptyMap());
+        }
+        else {
+          myRuleContentsMap.put(rule, map);
+        }
+      }
+      else {
+        myRuleContentsMap.put(rule, map);
+      }
+      ParserGenerator.LOG.assertTrue(visited.isEmpty());
+    }
+  }
+
+  private void buildRulesGraph() {
     for (BnfRule rule : myFile.getRules()) {
       BnfExpression expression = rule.getExpression();
       for (PsiElement cur = nextOrParent(expression.getPrevSibling(), expression);
            cur != null;
            cur = nextOrParent(cur, expression) ) {
-        BnfRule r = cur instanceof BnfReferenceOrToken && PsiTreeUtil.getParentOfType(cur, BnfPredicate.class) == null? myFile.getRule(cur.getText()) : null;
-        if (r != null) myRulesGraph.putValue(rule, r);
+        boolean checkPredicate = cur instanceof BnfReferenceOrToken || cur instanceof BnfStringLiteralExpression;
+        if (!checkPredicate || PsiTreeUtil.getParentOfType(cur, BnfPredicate.class) != null) continue;
+        BnfRule r = cur instanceof BnfReferenceOrToken? myFile.getRule(cur.getText()) : null;
+        if (r != null) {
+          myRulesGraph.putValue(rule, r);
+        }
+        else {
+          myRulesWithTokens.add(rule);
+        }
       }
     }
     for (BnfRule rule : myFile.getRules()) {
@@ -196,25 +259,6 @@ public class RuleGraphHelper {
           myRulesGraph.putValue(rule, r);
         }
       }
-    }
-    THashSet<PsiElement> visited = new THashSet<PsiElement>();
-    for (BnfRule rule : myFile.getRules()) {
-      if (myMap.containsKey(rule)) continue;
-      Map<PsiElement, Cardinality> map = collectMembers(rule, rule.getExpression(), rule.getName(), visited);
-      if (map.size() == 1 && ContainerUtil.getFirstItem(map.values()) == REQUIRED && !Rule.isPrivate(rule)) {
-        PsiElement r = ContainerUtil.getFirstItem(map.keySet());
-        if (r == rule || r instanceof BnfRule && ruleExtendsMap.get((BnfRule)r).contains(rule)) {
-          myMap.put(rule, Collections.<PsiElement, Cardinality>emptyMap());
-        }
-        else {
-          myMap.put(rule, map);
-        }
-      }
-      else {
-        myMap.put(rule, map);
-      }
-
-      ParserGenerator.LOG.assertTrue(visited.isEmpty());
     }
   }
 
@@ -228,7 +272,7 @@ public class RuleGraphHelper {
 
   @NotNull
   public Map<PsiElement, Cardinality> getFor(BnfRule rule) {
-    return myMap.get(rule);
+    return myRuleContentsMap.get(rule);
   }
 
   private Map<PsiElement, Cardinality> collectMembers(BnfRule rule, BnfExpression tree, String funcName, Set<PsiElement> visited) {
@@ -255,12 +299,12 @@ public class RuleGraphHelper {
           }
         }
         else if (Rule.isPrivate(targetRule)) {
-          result = myMap.get(targetRule); // optimize performance
+          result = myRuleContentsMap.get(targetRule); // optimize performance
           if (result == null) {
             BnfExpression body = targetRule.getExpression();
             Map<PsiElement, Cardinality> map = collectMembers(targetRule, body, targetRule.getName(), visited);
             result = map.containsKey(body) ? joinMaps(null, BnfTypes.BNF_CHOICE, Arrays.asList(map, map)) : map;
-            myMap.put(targetRule, result);
+            myRuleContentsMap.put(targetRule, result);
           }
         }
         else {
@@ -500,41 +544,73 @@ public class RuleGraphHelper {
         rulesToTry.add((BnfRule)psiElement);
       }
     }
-    // add their supers
-    List<BnfRule> realRules = new ArrayList<BnfRule>(rulesToTry);
-    for (BnfRule rule : realRules) {
+    // add their supers & collapse-caused rules
+    BnfRule[] origRulesCopy = rulesToTry.toArray(new BnfRule[rulesToTry.size()]);
+    Set<BnfRule> origRules = new LinkedHashSet<BnfRule>(rulesToTry);
+    for (BnfRule realRule : origRulesCopy) {
+      Map<PsiElement, Cardinality> availableResult = myRuleContentsMap.get(realRule);
+      Set<PsiElement> content = availableResult == null? null : availableResult.keySet();
       for (BnfRule superRule : myRuleExtendsMap.keySet()) {
-        if (superRule == rule) continue;
-        if (myRuleExtendsMap.get(superRule).contains(rule)) {
+        if (superRule == realRule) continue;
+        Collection<BnfRule> inheritors = myRuleExtendsMap.get(superRule);
+        if (inheritors.contains(realRule)) {
           rulesToTry.add(superRule);
+          if (content != null) {
+            if (content.isEmpty()) {  // will be definitely collapsed, replace with super
+              origRules.remove(realRule);
+              origRules.add(superRule);
+            }
+            else {
+              for (PsiElement element : content) {
+                if (!(element instanceof BnfRule)) continue;
+                BnfRule r = (BnfRule)element;
+                if (inheritors.contains(r)) {
+                  origRules.add(r);
+                }
+              }
+            }
+          }
         }
       }
     }
+
     if (rulesToTry.size() < 2) return mapList;
     // sort rules along with their supers
-    List<BnfRule> sorted = topoSort(rulesToTry, myRuleExtendsMap);
+    List<BnfRule> sorted = topoSort(rulesToTry, new Topology<BnfRule>() {
+      @Override
+      public boolean contains(BnfRule t1, BnfRule t2) {
+        return myRuleExtendsMap.get(t1).contains(t2);
+      }
+    });
 
     // drop unnecessary super rules: doesn't combine much, not present due collapse
-    List<BnfRule> tmp = new ArrayList<BnfRule>(realRules);
-    main: for (Iterator<BnfRule> it = sorted.iterator(); it.hasNext(); ) {
+    origRulesCopy = origRules.toArray(new BnfRule[origRules.size()]);
+    int max = 0;
+    BitSet bitSet = new BitSet(origRulesCopy.length);
+    for (Iterator<BnfRule> it = sorted.iterator(); it.hasNext(); ) {
       BnfRule superRule = it.next();
+      Collection<BnfRule> inheritors = myRuleExtendsMap.get(superRule);
       int count = 0;
-      boolean collapse = false;
-      for (Iterator<BnfRule> it2 = tmp.iterator(); it2.hasNext(); ) {
-        BnfRule r = it2.next();
-        if (r == superRule) continue main;
-        if (myRuleExtendsMap.get(superRule).contains(r)) {
-          it2.remove();
+      boolean changed = false;
+      for (int i = 0; i < origRulesCopy.length; i++) {
+        BnfRule r = origRulesCopy[i];
+        if (r == superRule || inheritors.contains(r)) {
           count ++;
+          if (!bitSet.get(i)) {
+            bitSet.set(i);
+            changed = true;
+          }
         }
       }
-      for (BnfRule r : realRules) {
-        if (myRulesGraph.get(r).contains(superRule)) {
-          collapse = true;
-          break;
-        }
+      if (changed) {
+        max = 0;
       }
-      if (count < 2 && !collapse) it.remove();
+      else if (count > 1 && max < count) {
+        max = count;
+      }
+      else if (!changed) {
+        it.remove();
+      }
     }
 
     // apply changes and merge cards
@@ -563,25 +639,53 @@ public class RuleGraphHelper {
     return result;
   }
 
-  private static List<BnfRule> topoSort(final Collection<BnfRule> collection, final MultiMap<BnfRule, BnfRule> graph) {
-    List<BnfRule> rulesToSort = new ArrayList<BnfRule>(collection);
-    if (rulesToSort.size() < 2) return new ArrayList<BnfRule>(rulesToSort);
+  private abstract class Topology<T> {
+    public abstract boolean contains(T t1, T t2);
+    public T forceChoose(Collection<T> col) {
+      // choose the first from cycle
+      return forceChooseInner(col, Condition.TRUE);
+    }
+
+    protected T forceChooseInner(Collection<T> col, Condition<T>... conditions) {
+      //for (T rule : rulesToSort) {
+      //  StringBuilder sb = new StringBuilder(rule.toString()).append(":");
+      //  for (T r : rulesToSort) {
+      //    if (rule == r) continue;
+      //    if (condition.process(rule, r)) {
+      //      sb.append(" ").append(r);
+      //    }
+      //  }
+      //  System.out.println(sb);
+      //}
+      for (Condition<T> condition : conditions) {
+        for (Iterator<T> it = col.iterator(); it.hasNext(); ) {
+          T t = it.next();
+          if (condition.value(t)) {
+            it.remove();
+            return t;
+          }
+        }
+      }
+      throw new AssertionError();
+    }
+  }
+  private static <T> List<T> topoSort(Collection<T> collection,
+                                      Topology<T> topology) {
+    List<T> rulesToSort = new ArrayList<T>(collection);
+    if (rulesToSort.size() < 2) return new ArrayList<T>(rulesToSort);
     Collections.reverse(rulesToSort);
-    List<BnfRule> sorted = new ArrayList<BnfRule>(rulesToSort.size());
+    List<T> sorted = new ArrayList<T>(rulesToSort.size());
     main: while (!rulesToSort.isEmpty()) {
-      inner: for (BnfRule rule : rulesToSort) {
-        for (BnfRule r : rulesToSort) {
+      inner: for (T rule : rulesToSort) {
+        for (T r : rulesToSort) {
           if (rule == r) continue;
-          if (graph.get(rule).contains(r)) continue inner;
+          if (topology.contains(rule, r)) continue inner;
         }
         sorted.add(rule);
         rulesToSort.remove(rule);
         continue main;
       }
-      // choose the first from cycle
-      Iterator<BnfRule> it = rulesToSort.iterator();
-      sorted.add(it.next());
-      it.remove();
+      sorted.add(topology.forceChoose(rulesToSort));
     }
     return sorted;
   }

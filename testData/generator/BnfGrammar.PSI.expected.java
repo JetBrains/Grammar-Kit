@@ -149,7 +149,7 @@ import com.intellij.psi.PsiElement;
 public interface BnfAttrPattern extends BnfCompositeElement {
 
   @Nullable
-  BnfLiteralExpression getLiteralExpression();
+  BnfStringLiteralExpression getLiteralExpression();
 
 }
 // ---- BnfAttrs.java -----------------
@@ -216,7 +216,7 @@ import com.intellij.psi.PsiElement;
 public interface BnfListEntry extends BnfCompositeElement {
 
   @Nullable
-  BnfLiteralExpression getLiteralExpression();
+  BnfStringLiteralExpression getLiteralExpression();
 
   @Nullable
   PsiElement getId();
@@ -490,8 +490,8 @@ public class BnfAttrPatternImpl extends BnfCompositeElementImpl implements BnfAt
 
   @Override
   @Nullable
-  public BnfLiteralExpression getLiteralExpression() {
-    return findChildByClass(BnfLiteralExpression.class);
+  public BnfStringLiteralExpression getLiteralExpression() {
+    return findChildByClass(BnfStringLiteralExpression.class);
   }
 
   public void accept(@NotNull PsiElementVisitor visitor) {
@@ -639,8 +639,8 @@ public class BnfListEntryImpl extends BnfCompositeElementImpl implements BnfList
 
   @Override
   @Nullable
-  public BnfLiteralExpression getLiteralExpression() {
-    return findChildByClass(BnfLiteralExpression.class);
+  public BnfStringLiteralExpression getLiteralExpression() {
+    return findChildByClass(BnfStringLiteralExpression.class);
   }
 
   @Override

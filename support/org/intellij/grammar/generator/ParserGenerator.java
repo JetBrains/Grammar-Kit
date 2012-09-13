@@ -333,17 +333,16 @@ public class ParserGenerator {
 
   @NotNull
   private String getSuperClassName(BnfRule rule, String psiPackage, String suffix) {
-    BnfRule topSuper = getTopSuperRule(rule, null);
+    BnfRule topSuper = getTopSuperRule(rule);
     return topSuper == null ? getRootAttribute(myFile, KnownAttribute.EXTENDS) :
            topSuper == rule ? getAttribute(rule, KnownAttribute.EXTENDS) :
            psiPackage + "." + getRulePsiClassName(topSuper, myRuleClassPrefix) + suffix;
   }
 
-  private BnfRule getTopSuperRule(BnfRule rule, @Nullable BnfRule stopAt) {
+  private BnfRule getTopSuperRule(BnfRule rule) {
     THashSet<BnfRule> visited = new THashSet<BnfRule>();
-    BnfRule cur = rule;
-    for (BnfRule next = rule; next != null; cur = !visited.add(next) ? null : next) {
-      if (cur == null || cur == stopAt) break;
+    BnfRule cur = rule, next = rule;
+    for (; next != null && cur != null; cur = !visited.add(next) ? null : next) {
       next = RuleGraphHelper.getSynonymTargetOrSelf(cur);
       if (next != cur) continue;
       if (cur != rule) break; // do not search for elementType any further
@@ -360,7 +359,7 @@ public class ParserGenerator {
     ArrayList<String> strings = new ArrayList<String>();
     List<String> topRuleImplements = Collections.emptyList();
     String topRuleClass = null;
-    BnfRule topSuper = getTopSuperRule(rule, null);
+    BnfRule topSuper = getTopSuperRule(rule);
     boolean simpleMode = psiPackage.isEmpty();
     if (topSuper != null && topSuper != rule) {
       topRuleImplements = getAttribute(topSuper, KnownAttribute.IMPLEMENTS);
@@ -1382,9 +1381,7 @@ public class ParserGenerator {
       }
     }
     else {
-      // choose the top rule name in context, we do not really need to be more specific
-      treeRule = ObjectUtils.notNull(getTopSuperRule(treeRule, getTopSuperRule(rule, null)), treeRule);
-      ruleName = treeRule.getName();
+      ruleName = treeRule.getName(); // use "methodRenames" attr to fix name if you'd like
     }
     if (ruleName == null) return;
     String defaultGetterName = "get" + toIdentifier(ruleName, "");

@@ -32,8 +32,8 @@ public class BnfAttrPatternImpl extends BnfCompositeElementImpl implements BnfAt
 
   @Override
   @Nullable
-  public BnfLiteralExpression getLiteralExpression() {
-    return findChildByClass(BnfLiteralExpression.class);
+  public BnfStringLiteralExpression getLiteralExpression() {
+    return findChildByClass(BnfStringLiteralExpression.class);
   }
 
   public void accept(@NotNull PsiElementVisitor visitor) {

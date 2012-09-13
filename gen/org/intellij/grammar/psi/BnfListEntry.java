@@ -23,7 +23,7 @@ import com.intellij.psi.PsiReference;
 public interface BnfListEntry extends BnfCompositeElement {
 
   @Nullable
-  BnfLiteralExpression getLiteralExpression();
+  BnfStringLiteralExpression getLiteralExpression();
 
   @Nullable
   PsiElement getId();

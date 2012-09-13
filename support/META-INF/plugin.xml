@@ -94,6 +94,8 @@
 
     <lang.unwrapDescriptor language="BNF" implementationClass="org.intellij.grammar.refactor.BnfUnwrapDescriptor"/>
 
+    <lang.foldingBuilder language="BNF" implementationClass="org.intellij.grammar.BnfFoldingBuilder"/>
+
     <documentationProvider implementation="org.intellij.grammar.BnfDocumentationProvider"/>
 
     <localInspection language="BNF" shortName="BnfSuspiciousTokenInspection" displayName="Suspicious token" groupName="Grammar Inspections"

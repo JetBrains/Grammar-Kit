@@ -14,10 +14,10 @@
     <![CDATA[
     <p>1.0.8</p>
     <ul>
-        <li>Generator: Experimental Pratt-like expression parsing (compact grammars and faster parsing)</li>
-        <li>Generator: Per-rule elementTypeClass/Factory attribute & empty elementType attribute support</li>
-        <li>Generator/PSI: camel-case rule names support and PSI classes calculation fixes</li>
-        <li>Editor: foldings for attribute groups and multiline comments</li>
+        <li>Experimental Pratt-like expression parsing (compact grammars and improved performance)</li>
+        <li>Per-rule elementTypeClass/Factory attribute & empty elementType attribute support</li>
+        <li>CamelCase rule names support and PSI classes calculation fixes</li>
+        <li>Grammar code folding for attribute groups and multiline comments</li>
     </ul>
     <p>1.0.7</p>
     <ul>

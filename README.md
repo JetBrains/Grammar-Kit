@@ -26,7 +26,7 @@ Recent changes
 --------------
 1.0.8
 
-* Experimental Pratt-like expression parsing ([compact grammars and faster parsing](https://github.com/JetBrains/Grammar-Kit/blob/master/testData/generator/ExprParser.bnf))
+* Experimental [Pratt-like](http://javascript.crockford.com/tdop/tdop.html) expression parsing ([compact grammars and improved performance](https://github.com/JetBrains/Grammar-Kit/blob/master/testData/generator/ExprParser.bnf))
 * Per-rule elementTypeClass/Factory attribute & empty elementType attribute support
 * CamelCase rule names support and PSI classes calculation fixes
 * Grammar code folding for attribute groups and multiline comments
@@ -157,7 +157,7 @@ Change log
 ==========
 1.0.8
 
-* Experimental Pratt-like expression parsing ([compact grammars and faster parsing](https://github.com/JetBrains/Grammar-Kit/blob/master/testData/generator/ExprParser.bnf))
+* Experimental [Pratt-like](http://javascript.crockford.com/tdop/tdop.html) expression parsing ([compact grammars and improved performance](https://github.com/JetBrains/Grammar-Kit/blob/master/testData/generator/ExprParser.bnf))
 * Per-rule elementTypeClass/Factory attribute & empty elementType attribute support
 * CamelCase rule names support and PSI classes calculation fixes
 * Grammar code folding for attribute groups and multiline comments

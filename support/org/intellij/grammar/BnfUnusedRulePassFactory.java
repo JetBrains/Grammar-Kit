@@ -51,7 +51,7 @@ import java.util.Set;
  * @author gregsh
  */
 public class BnfUnusedRulePassFactory extends AbstractProjectComponent implements TextEditorHighlightingPassFactory {
-  public static Key<CachedValue<Set<PsiElement>>> USED_RULES_KEY = Key.create("USED_RULES_KEY");
+  public static final Key<CachedValue<Set<PsiElement>>> USED_RULES_KEY = Key.create("USED_RULES_KEY");
 
   public BnfUnusedRulePassFactory(Project project, TextEditorHighlightingPassRegistrar highlightingPassRegistrar) {
     super(project);
@@ -66,7 +66,7 @@ public class BnfUnusedRulePassFactory extends AbstractProjectComponent implement
 
   @Nullable
   public TextEditorHighlightingPass createHighlightingPass(@NotNull PsiFile file, @NotNull final Editor editor) {
-    return file instanceof BnfFile? new MyPass(myProject, (BnfFile)file, editor, editor.getDocument()) : null;
+    return file instanceof BnfFile? new MyPass(myProject, (BnfFile)file, editor.getDocument()) : null;
   }
 
   private static Set<PsiElement> getUsedElements(final PsiFile file) {
@@ -102,13 +102,13 @@ public class BnfUnusedRulePassFactory extends AbstractProjectComponent implement
     private final BnfFile myFile;
     private final List<HighlightInfo> myHighlights = new ArrayList<HighlightInfo>();
 
-    MyPass(Project myProject, BnfFile file, Editor editor, Document document) {
+    MyPass(Project myProject, BnfFile file, Document document) {
       super(myProject, document, true);
       myFile = file;
     }
 
     @Override
-    public void doCollectInformation(ProgressIndicator progress) {
+    public void doCollectInformation(@NotNull ProgressIndicator progress) {
       final Set<PsiElement> usedElements = getUsedElements(myFile);
       boolean first = true;
       for (BnfRule o : myFile.getRules()) {

@@ -309,6 +309,11 @@ public class ExpressionGeneratorHelper {
         operator.tail == null ? null : g.generateNodeCall(operator.rule, operator.tail, getNextName(operator.rule.getName(), 1));
       if (operator.type == OperatorType.ATOM) {
         g.out("result_ = true;");
+        if (operator.operator == operator.rule.getExpression() && !Rule.isPrivate(operator.rule) &&
+            !(operator.operator instanceof BnfReferenceOrToken || operator.operator instanceof BnfLiteralExpression)) {
+          // marker will be committed in the operator parsing method
+          elementType = null;
+        }
       }
       else if (operator.type == OperatorType.UNARY) {
         Integer substitutorPriority = operator.substitutor == null ? null : info.getPriority(operator.substitutor);

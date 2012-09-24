@@ -213,14 +213,9 @@ public class PsiGen implements PsiParser {
     if (!recursion_guard_(builder_, level_, "external_same_as_type2")) return false;
     if (!nextTokenIs(builder_, ID)) return false;
     boolean result_ = false;
-    int start_ = builder_.getCurrentOffset();
     Marker marker_ = builder_.mark();
     result_ = consumeToken(builder_, ID);
-    LighterASTNode last_ = result_? builder_.getLatestDoneMarker() : null;
-    if (last_ != null && last_.getStartOffset() == start_ && type_extends_(last_.getTokenType(), ID_EXPR)) {
-      marker_.drop();
-    }
-    else if (result_) {
+    if (result_) {
       marker_.done(ID_EXPR);
     }
     else {
@@ -235,14 +230,9 @@ public class PsiGen implements PsiParser {
     if (!recursion_guard_(builder_, level_, "external_type")) return false;
     if (!nextTokenIs(builder_, NUMBER)) return false;
     boolean result_ = false;
-    int start_ = builder_.getCurrentOffset();
     Marker marker_ = builder_.mark();
     result_ = consumeToken(builder_, NUMBER);
-    LighterASTNode last_ = result_? builder_.getLatestDoneMarker() : null;
-    if (last_ != null && last_.getStartOffset() == start_ && type_extends_(last_.getTokenType(), MISSING_EXTERNAL_TYPE)) {
-      marker_.drop();
-    }
-    else if (result_) {
+    if (result_) {
       marker_.done(MISSING_EXTERNAL_TYPE);
     }
     else {
@@ -257,14 +247,9 @@ public class PsiGen implements PsiParser {
     if (!recursion_guard_(builder_, level_, "external_type2")) return false;
     if (!nextTokenIs(builder_, ID)) return false;
     boolean result_ = false;
-    int start_ = builder_.getCurrentOffset();
     Marker marker_ = builder_.mark();
     result_ = consumeToken(builder_, ID);
-    LighterASTNode last_ = result_? builder_.getLatestDoneMarker() : null;
-    if (last_ != null && last_.getStartOffset() == start_ && type_extends_(last_.getTokenType(), ID_EXPR)) {
-      marker_.drop();
-    }
-    else if (result_) {
+    if (result_) {
       marker_.done(ID_EXPR);
     }
     else {
@@ -450,15 +435,10 @@ public class PsiGen implements PsiParser {
     if (!nextTokenIs(builder_, ID) && !nextTokenIs(builder_, NUMBER)
         && replaceVariants(builder_, 2, "<root c>")) return false;
     boolean result_ = false;
-    int start_ = builder_.getCurrentOffset();
     Marker marker_ = builder_.mark();
     enterErrorRecordingSection(builder_, level_, _SECTION_GENERAL_, "<root c>");
     result_ = PsiGen2.blockOf(builder_, level_ + 1, grammar_element_parser_);
-    LighterASTNode last_ = result_? builder_.getLatestDoneMarker() : null;
-    if (last_ != null && last_.getStartOffset() == start_ && type_extends_(last_.getTokenType(), ROOT_C)) {
-      marker_.drop();
-    }
-    else if (result_) {
+    if (result_) {
       marker_.done(ROOT_C);
     }
     else {
@@ -475,15 +455,10 @@ public class PsiGen implements PsiParser {
     if (!nextTokenIs(builder_, ID) && !nextTokenIs(builder_, NUMBER)
         && replaceVariants(builder_, 2, "<root d>")) return false;
     boolean result_ = false;
-    int start_ = builder_.getCurrentOffset();
     Marker marker_ = builder_.mark();
     enterErrorRecordingSection(builder_, level_, _SECTION_GENERAL_, "<root d>");
     result_ = listOf(builder_, level_ + 1, grammar_element_parser_);
-    LighterASTNode last_ = result_? builder_.getLatestDoneMarker() : null;
-    if (last_ != null && last_.getStartOffset() == start_ && type_extends_(last_.getTokenType(), ROOT_D)) {
-      marker_.drop();
-    }
-    else if (result_) {
+    if (result_) {
       marker_.done(ROOT_D);
     }
     else {
@@ -611,14 +586,9 @@ public class PsiGen2 {
     if (!recursion_guard_(builder_, level_, "literal")) return false;
     if (!nextTokenIs(builder_, NUMBER)) return false;
     boolean result_ = false;
-    int start_ = builder_.getCurrentOffset();
     Marker marker_ = builder_.mark();
     result_ = consumeToken(builder_, NUMBER);
-    LighterASTNode last_ = result_? builder_.getLatestDoneMarker() : null;
-    if (last_ != null && last_.getStartOffset() == start_ && type_extends_(last_.getTokenType(), LITERAL)) {
-      marker_.drop();
-    }
-    else if (result_) {
+    if (result_) {
       marker_.done(LITERAL);
     }
     else {
@@ -655,14 +625,9 @@ public class PsiGen2 {
     if (!recursion_guard_(builder_, level_, "ref_expr")) return false;
     if (!nextTokenIs(builder_, ID)) return false;
     boolean result_ = false;
-    int start_ = builder_.getCurrentOffset();
     Marker marker_ = builder_.mark();
     result_ = identifier(builder_, level_ + 1);
-    LighterASTNode last_ = result_? builder_.getLatestDoneMarker() : null;
-    if (last_ != null && last_.getStartOffset() == start_ && type_extends_(last_.getTokenType(), REF_EXPR)) {
-      marker_.drop();
-    }
-    else if (result_) {
+    if (result_) {
       marker_.done(REF_EXPR);
     }
     else {
@@ -841,16 +806,11 @@ public class PsiGen2 {
     if (!recursion_guard_(builder_, level_, "specialRef")) return false;
     if (!nextTokenIs(builder_, ID)) return false;
     boolean result_ = false;
-    int start_ = builder_.getCurrentOffset();
     Marker marker_ = builder_.mark();
     result_ = identifier(builder_, level_ + 1);
     result_ = result_ && consumeToken(builder_, OF);
     result_ = result_ && reference(builder_, level_ + 1);
-    LighterASTNode last_ = result_? builder_.getLatestDoneMarker() : null;
-    if (last_ != null && last_.getStartOffset() == start_ && type_extends_(last_.getTokenType(), SPECIAL_REF)) {
-      marker_.drop();
-    }
-    else if (result_) {
+    if (result_) {
       marker_.done(SPECIAL_REF);
     }
     else {

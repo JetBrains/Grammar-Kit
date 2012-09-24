@@ -15,6 +15,7 @@
  */
 package org.intellij.grammar.generator;
 
+import com.intellij.openapi.util.Condition;
 import com.intellij.openapi.util.Pair;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.psi.PsiElement;
@@ -324,6 +325,27 @@ public class ParserGeneratorUtil {
     return result.values();
   }
 
+  public static <T> List<T> topoSort(Collection<T> collection,
+                                     Topology<T> topology) {
+    List<T> rulesToSort = new ArrayList<T>(collection);
+    if (rulesToSort.size() < 2) return new ArrayList<T>(rulesToSort);
+    Collections.reverse(rulesToSort);
+    List<T> sorted = new ArrayList<T>(rulesToSort.size());
+    main: while (!rulesToSort.isEmpty()) {
+      inner: for (T rule : rulesToSort) {
+        for (T r : rulesToSort) {
+          if (rule == r) continue;
+          if (topology.contains(rule, r)) continue inner;
+        }
+        sorted.add(rule);
+        rulesToSort.remove(rule);
+        continue main;
+      }
+      sorted.add(topology.forceChoose(rulesToSort));
+    }
+    return sorted;
+  }
+
   public static class Rule {
 
     public static boolean isPrivate(BnfRule node) {
@@ -430,6 +452,37 @@ public class ParserGeneratorUtil {
     @Override
     public String toString() {
       return getText();
+    }
+  }
+
+  public static abstract class Topology<T> {
+    public abstract boolean contains(T t1, T t2);
+    public T forceChoose(Collection<T> col) {
+      // choose the first from cycle
+      return forceChooseInner(col, Condition.TRUE);
+    }
+
+    protected T forceChooseInner(Collection<T> col, Condition<T>... conditions) {
+      //for (T rule : rulesToSort) {
+      //  StringBuilder sb = new StringBuilder(rule.toString()).append(":");
+      //  for (T r : rulesToSort) {
+      //    if (rule == r) continue;
+      //    if (condition.process(rule, r)) {
+      //      sb.append(" ").append(r);
+      //    }
+      //  }
+      //  System.out.println(sb);
+      //}
+      for (Condition<T> condition : conditions) {
+        for (Iterator<T> it = col.iterator(); it.hasNext(); ) {
+          T t = it.next();
+          if (condition.value(t)) {
+            it.remove();
+            return t;
+          }
+        }
+      }
+      throw new AssertionError();
     }
   }
 }

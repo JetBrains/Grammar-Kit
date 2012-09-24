@@ -231,7 +231,7 @@ public class RuleGraphHelper {
       Map<PsiElement, Cardinality> map = collectMembers(rule, rule.getExpression(), rule.getName(), visited);
       if (map.size() == 1 && ContainerUtil.getFirstItem(map.values()) == REQUIRED && !Rule.isPrivate(rule)) {
         PsiElement r = ContainerUtil.getFirstItem(map.keySet());
-        if (r == rule || r instanceof BnfRule && ruleExtendsMap.get((BnfRule)r).contains(rule)) {
+        if (r == rule || r instanceof BnfRule && collapseEachOther((BnfRule)r, rule)) {
           myRuleContentsMap.put(rule, Collections.<PsiElement, Cardinality>emptyMap());
         }
         else {
@@ -243,6 +243,14 @@ public class RuleGraphHelper {
       }
       ParserGenerator.LOG.assertTrue(visited.isEmpty());
     }
+  }
+
+  public boolean collapseEachOther(BnfRule r1, BnfRule r2) {
+    for (BnfRule superRule : myRuleExtendsMap.keySet()) {
+      Collection<BnfRule> set = myRuleExtendsMap.get(superRule);
+      if (set.contains(r1) && set.contains(r2)) return true;
+    }
+    return false;
   }
 
   private void buildRulesGraph() {
@@ -646,57 +654,6 @@ public class RuleGraphHelper {
       }
     }
     return result;
-  }
-
-  private abstract class Topology<T> {
-    public abstract boolean contains(T t1, T t2);
-    public T forceChoose(Collection<T> col) {
-      // choose the first from cycle
-      return forceChooseInner(col, Condition.TRUE);
-    }
-
-    protected T forceChooseInner(Collection<T> col, Condition<T>... conditions) {
-      //for (T rule : rulesToSort) {
-      //  StringBuilder sb = new StringBuilder(rule.toString()).append(":");
-      //  for (T r : rulesToSort) {
-      //    if (rule == r) continue;
-      //    if (condition.process(rule, r)) {
-      //      sb.append(" ").append(r);
-      //    }
-      //  }
-      //  System.out.println(sb);
-      //}
-      for (Condition<T> condition : conditions) {
-        for (Iterator<T> it = col.iterator(); it.hasNext(); ) {
-          T t = it.next();
-          if (condition.value(t)) {
-            it.remove();
-            return t;
-          }
-        }
-      }
-      throw new AssertionError();
-    }
-  }
-  private static <T> List<T> topoSort(Collection<T> collection,
-                                      Topology<T> topology) {
-    List<T> rulesToSort = new ArrayList<T>(collection);
-    if (rulesToSort.size() < 2) return new ArrayList<T>(rulesToSort);
-    Collections.reverse(rulesToSort);
-    List<T> sorted = new ArrayList<T>(rulesToSort.size());
-    main: while (!rulesToSort.isEmpty()) {
-      inner: for (T rule : rulesToSort) {
-        for (T r : rulesToSort) {
-          if (rule == r) continue;
-          if (topology.contains(rule, r)) continue inner;
-        }
-        sorted.add(rule);
-        rulesToSort.remove(rule);
-        continue main;
-      }
-      sorted.add(topology.forceChoose(rulesToSort));
-    }
-    return sorted;
   }
 
   public static BnfRule getSynonymTargetOrSelf(BnfRule rule) {

@@ -623,7 +623,7 @@ public class ParserGenerator {
     boolean isLeft = firstNonTrivial && Rule.isLeft(rule);
     boolean isLeftInner = isLeft && (isPrivate || Rule.isInner(rule));
     final String recoverRoot = firstNonTrivial ? Rule.attribute(rule, KnownAttribute.RECOVER_UNTIL) : null;
-    final boolean canCollapse = (!isLeft || isLeftInner) && firstNonTrivial && myRuleExtendsMap.containsScalarValue(rule);
+    final boolean canCollapse = !isPrivate && (!isLeft || isLeftInner) && firstNonTrivial && canCollapse(rule);
 
     final List<BnfExpression> children;
     out((!isRule ? "private " : isPrivate ? "" : "public ") + "static boolean " + funcName + "(PsiBuilder builder_, int level_"
@@ -887,6 +887,18 @@ public class ParserGenerator {
     generateNodeChildren(rule, funcName, children, visited);
   }
 
+  private boolean canCollapse(BnfRule rule) {
+    Map<PsiElement, RuleGraphHelper.Cardinality> map = myGraphHelper.getFor(rule);
+    for (PsiElement element : map.keySet()) {
+      if (element instanceof BnfExternalExpression) continue;
+      RuleGraphHelper.Cardinality c = map.get(element);
+      if (c.optional()) continue;
+      if (!(element instanceof BnfRule)) return false;
+      if (!myGraphHelper.collapseEachOther(rule, (BnfRule)element)) return false;
+    }
+    return myRuleExtendsMap.containsScalarValue(rule);
+  }
+
   void generateNodeChildren(BnfRule rule, String funcName, List<BnfExpression> children, Set<BnfExpression> visited) {
     for (int i = 0, len = children.size(); i < len; i++) {
       generateNodeChild(rule, children.get(i), funcName, i, visited);
@@ -1013,17 +1025,19 @@ public class ParserGenerator {
         }
         else {
           ExpressionGeneratorHelper.ExpressionInfo info = myExpressionHelper.getExpressionInfo(subRule);
-          method = info == null? subRule.getName() : info.rootRule.getName();
+          ExpressionGeneratorHelper.OperatorInfo operatorInfo = info == null? null : info.operatorMap.get(subRule);
+          boolean exprParsing = info != null && (operatorInfo == null || operatorInfo.type != ExpressionGeneratorHelper.OperatorType.ATOM &&
+                                operatorInfo.type != ExpressionGeneratorHelper.OperatorType.UNARY);
+          method = exprParsing ? info.rootRule.getName() : subRule.getName();
           String parserClass = myRuleParserClasses.get(method);
           if (!parserClass.equals(myGrammarRootParser) && !parserClass.equals(myRuleParserClasses.get(rule.getName()))) {
             method = StringUtil.getShortName(parserClass) + "." + method;
           }
-          if (info == null) {
+          if (!exprParsing) {
             return method + "(builder_, level_ + 1)";
           }
           else {
-            Integer priority = info.getPriority(subRule);
-            return method + "(builder_, level_ + 1, "+ priority +")";
+            return method + "(builder_, level_ + 1, "+ info.getPriority(subRule) +")";
           }
         }
       }

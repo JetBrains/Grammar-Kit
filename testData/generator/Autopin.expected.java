@@ -97,7 +97,6 @@ public class Autopin implements PsiParser {
     if (!nextTokenIs(builder_, CREATE)) return false;
     boolean result_ = false;
     boolean pinned_ = false;
-    int start_ = builder_.getCurrentOffset();
     Marker marker_ = builder_.mark();
     enterErrorRecordingSection(builder_, level_, _SECTION_GENERAL_, null);
     result_ = consumeToken(builder_, CREATE);
@@ -108,11 +107,7 @@ public class Autopin implements PsiParser {
     pinned_ = result_; // pin = .*_ref
     result_ = result_ && report_error_(builder_, consumeToken(builder_, "("));
     result_ = pinned_ && consumeToken(builder_, ")") && result_;
-    LighterASTNode last_ = result_? builder_.getLatestDoneMarker() : null;
-    if (last_ != null && last_.getStartOffset() == start_ && type_extends_(last_.getTokenType(), CREATE_TABLE_STATEMENT)) {
-      marker_.drop();
-    }
-    else if (result_ || pinned_) {
+    if (result_ || pinned_) {
       marker_.done(CREATE_TABLE_STATEMENT);
     }
     else {
@@ -180,17 +175,12 @@ public class Autopin implements PsiParser {
     if (!nextTokenIs(builder_, DROP)) return false;
     boolean result_ = false;
     boolean pinned_ = false;
-    int start_ = builder_.getCurrentOffset();
     Marker marker_ = builder_.mark();
     enterErrorRecordingSection(builder_, level_, _SECTION_GENERAL_, null);
     result_ = consumeTokens(builder_, 0, DROP, TABLE);
     result_ = result_ && parseReference(builder_, level_ + 1);
     pinned_ = result_; // pin = .*_ref
-    LighterASTNode last_ = result_? builder_.getLatestDoneMarker() : null;
-    if (last_ != null && last_.getStartOffset() == start_ && type_extends_(last_.getTokenType(), DROP_TABLE_STATEMENT)) {
-      marker_.drop();
-    }
-    else if (result_ || pinned_) {
+    if (result_ || pinned_) {
       marker_.done(DROP_TABLE_STATEMENT);
     }
     else {

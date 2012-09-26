@@ -65,8 +65,8 @@ public class KnownAttribute<T> {
   public static final KnownAttribute<String>       ELEMENT_TYPE_FACTORY      = create(true, String.class, "elementTypeFactory", null);
   public static final KnownAttribute<String>       TOKEN_TYPE_FACTORY        = create(true, String.class, "tokenTypeFactory", null);
 
-  public static final KnownAttribute<String>       EXTENDS                   = create(false, String.class, "extends", "generated.CompositeElementImpl");
-  public static final KnownAttribute<List<String>> IMPLEMENTS                = create(false, STRING_LIST_CLAZZ, "implements", Collections.singletonList("generated.CompositeElement"));
+  public static final KnownAttribute<String>       EXTENDS                   = create(false, String.class, "extends", BnfConstants.AST_WRAPPER_PSI_ELEMENT_CLASS);
+  public static final KnownAttribute<List<String>> IMPLEMENTS                = create(false, STRING_LIST_CLAZZ, "implements", Collections.singletonList(BnfConstants.PSI_ELEMENT_CLASS));
   public static final KnownAttribute<String>       ELEMENT_TYPE              = create(false, String.class, "elementType", null);
   public static final KnownAttribute<String>       METHOD_RENAMES            = create(false, String.class, "methodRenames", null);
   public static final KnownAttribute<Object>       PIN                       = create(false, Object.class, "pin", (Object)(-1));

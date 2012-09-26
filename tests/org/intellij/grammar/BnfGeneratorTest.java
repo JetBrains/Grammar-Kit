@@ -69,6 +69,7 @@ public class BnfGeneratorTest extends ParsingTestCase {
   public void testLeftAssociative() throws Exception { doGenTest(false); }
   public void testPsiGen() throws Exception { doGenTest(true); }
   public void testPsiAccessors() throws Exception { doGenTest(true); }
+  public void testPsiStart() throws Exception { doGenTest(true); }
   public void testExprParser() throws Exception { doGenTest(false); }
 
   public void testEmpty() throws Exception {
@@ -135,6 +136,6 @@ public class BnfGeneratorTest extends ParsingTestCase {
     for (String message : messages) {
       System.err.println(message);
     }
-    assertTrue(messages.isEmpty());
+    assertTrue(OVERWRITE_TESTDATA || messages.isEmpty());
   }
 }

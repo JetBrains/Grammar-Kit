@@ -9,11 +9,11 @@ import generated.psi.impl.*;
 
 public interface ParserTypes {
 
-  IElementType BINARY = new IElementType("BINARY");
-  IElementType EXPRESSION = new IElementType("EXPRESSION");
-  IElementType OPERATOR = new IElementType("OPERATOR");
-  IElementType RE = new IElementType("RE");
-  IElementType VALUE = new IElementType("VALUE");
+  IElementType BINARY = new IElementType("BINARY", null);
+  IElementType EXPRESSION = new IElementType("EXPRESSION", null);
+  IElementType OPERATOR = new IElementType("OPERATOR", null);
+  IElementType RE = new IElementType("RE", null);
+  IElementType VALUE = new IElementType("VALUE", null);
 
   IElementType ID = new IElementType("id");
 
@@ -153,10 +153,10 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static generated.ParserTypes.*;
-import generated.CompositeElementImpl;
+import com.intellij.extapi.psi.ASTWrapperPsiElement;
 import generated.psi.*;
 
-public class XBinaryImpl extends CompositeElementImpl implements XBinary {
+public class XBinaryImpl extends ASTWrapperPsiElement implements XBinary {
 
   public XBinaryImpl(ASTNode node) {
     super(node);
@@ -279,10 +279,10 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static generated.ParserTypes.*;
-import generated.CompositeElementImpl;
+import com.intellij.extapi.psi.ASTWrapperPsiElement;
 import generated.psi.*;
 
-public class XExpressionImpl extends CompositeElementImpl implements XExpression {
+public class XExpressionImpl extends ASTWrapperPsiElement implements XExpression {
 
   public XExpressionImpl(ASTNode node) {
     super(node);
@@ -311,10 +311,10 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static generated.ParserTypes.*;
-import generated.CompositeElementImpl;
+import com.intellij.extapi.psi.ASTWrapperPsiElement;
 import generated.psi.*;
 
-public class XOperatorImpl extends CompositeElementImpl implements XOperator {
+public class XOperatorImpl extends ASTWrapperPsiElement implements XOperator {
 
   public XOperatorImpl(ASTNode node) {
     super(node);
@@ -337,10 +337,10 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static generated.ParserTypes.*;
-import generated.CompositeElementImpl;
+import com.intellij.extapi.psi.ASTWrapperPsiElement;
 import generated.psi.*;
 
-public class XReImpl extends CompositeElementImpl implements XRe {
+public class XReImpl extends ASTWrapperPsiElement implements XRe {
 
   public XReImpl(ASTNode node) {
     super(node);
@@ -369,10 +369,10 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static generated.ParserTypes.*;
-import generated.CompositeElementImpl;
+import com.intellij.extapi.psi.ASTWrapperPsiElement;
 import generated.psi.*;
 
-public class XValueImpl extends CompositeElementImpl implements XValue {
+public class XValueImpl extends ASTWrapperPsiElement implements XValue {
 
   public XValueImpl(ASTNode node) {
     super(node);

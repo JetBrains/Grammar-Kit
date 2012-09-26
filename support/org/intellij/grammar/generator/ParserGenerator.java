@@ -21,6 +21,7 @@ import com.intellij.openapi.util.Pair;
 import com.intellij.openapi.util.io.FileUtil;
 import com.intellij.openapi.util.text.StringHash;
 import com.intellij.openapi.util.text.StringUtil;
+import com.intellij.psi.CommonClassNames;
 import com.intellij.psi.NavigatablePsiElement;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.tree.IElementType;
@@ -57,6 +58,7 @@ public class ParserGenerator {
 
   private final Map<String, String> myRuleParserClasses = new TreeMap<String, String>();
   private final Map<String, String> myParserLambdas = new TreeMap<String, String>();
+  private final Set<String> myPackageClasses = new THashSet<String>();
   private final Map<String, String> mySimpleTokens;
   private final MultiMap<BnfRule, BnfRule> myRuleExtendsMap;
   private final BnfFile myFile;
@@ -179,6 +181,9 @@ public class ParserGenerator {
       }
     }
     if (generatePsi) {
+      for (BnfRule r : sortedPsiRules.values()) {
+        myPackageClasses.add(getRulePsiClassName(r, myRuleClassPrefix));
+      }
       Map<String, String> infClasses = new HashMap<String, String>();
       String psiPackage = getPsiPackage(myFile);
       for (String ruleName : sortedPsiRules.keySet()) {
@@ -227,10 +232,12 @@ public class ParserGenerator {
   }
 
   private void generateVisitor(String psiClass, Map<String, BnfRule> sortedRules) {
-    generateClassHeader(psiClass, Arrays.asList("org.jetbrains.annotations.*", "com.intellij.psi.PsiElementVisitor"),
-                        "", false, "PsiElementVisitor");
-    String firstImplements = ContainerUtil.getFirstItem(getRootAttribute(myFile, KnownAttribute.IMPLEMENTS));
-    String superIntf = firstImplements == null ? "" : StringUtil.getShortName(firstImplements);
+    String superIntf = ObjectUtils.notNull(ContainerUtil.getFirstItem(getRootAttribute(myFile, KnownAttribute.IMPLEMENTS)),
+                                           KnownAttribute.IMPLEMENTS.getDefaultValue().get(0));
+    String shortSuperIntf = StringUtil.getShortName(superIntf);
+    Function<String, String> shortener = generateClassHeader(
+      psiClass, Arrays.asList("org.jetbrains.annotations.*", BnfConstants.PSI_ELEMENT_VISITOR_CLASS, superIntf),
+      "", false, BnfConstants.PSI_ELEMENT_VISITOR_CLASS);
     Set<String> visited = new HashSet<String>();
     Set<String> all = new TreeSet<String>();
     for (String ruleName : sortedRules.keySet()) {
@@ -257,13 +264,13 @@ public class ParserGenerator {
       out("}");
       newLine();
     }
-    all.remove(superIntf);
-    for (String top : ContainerUtil.concat(all, Arrays.asList(superIntf))) {
+    all.remove(shortSuperIntf);
+    for (String top : ContainerUtil.concat(all, Arrays.asList(shortSuperIntf))) {
       String methodName = top.startsWith(myRuleClassPrefix) ? top.substring(myRuleClassPrefix.length()) : top;
       if (visited.contains(methodName)) continue;
-      out("public void visit" + methodName + "(@NotNull " + top + " o) {");
-      if (!methodName.equals(top) && !top.equals(superIntf)) {
-        out("visit" + (superIntf.startsWith(myRuleClassPrefix) ? superIntf.substring(myRuleClassPrefix.length()) : superIntf) + "(o);");
+      out("public void visit" + methodName + "(@NotNull " + shortener.fun(top) + " o) {");
+      if (!methodName.equals(top) && !top.equals(shortSuperIntf)) {
+        out("visit" + (shortSuperIntf.startsWith(myRuleClassPrefix) ? shortSuperIntf.substring(myRuleClassPrefix.length()) : shortSuperIntf) + "(o);");
       }
       else {
         out("visitElement(o);");
@@ -276,37 +283,39 @@ public class ParserGenerator {
   }
 
   private void generateParserUtil() throws IOException {
-    final String stubParser = getRootAttribute(myFile, KnownAttribute.PARSER_UTIL_CLASS);
-    final String stubPackage = StringUtil.getPackageName(stubParser);
+    final String parserUtil = getRootAttribute(myFile, KnownAttribute.PARSER_UTIL_CLASS);
+    final String parserUtilPackage = StringUtil.getPackageName(parserUtil);
     String baseClassName = GeneratedParserUtilBase.class.getSimpleName();
     String baseFileName = baseClassName + ".java";
     InputStream baseUtilText = GeneratedParserUtilBase.class.getResourceAsStream(baseFileName);
     if (baseUtilText == null) return;
 
     Project project = myFile.getProject();
-    if (JavaHelper.getJavaHelper(project).findClass(stubParser) != null) return;
-    File baseFile = new File(myOutputPath, stubPackage.replace('.', File.separatorChar) + "/" + baseFileName);
+    if (JavaHelper.getJavaHelper(project).findClass(parserUtil) != null) return;
+    File baseFile = new File(myOutputPath, parserUtilPackage.replace('.', File.separatorChar) + "/" + baseFileName);
     openOutput(baseFile);
     try {
       String text = FileUtil.loadTextAndClose(baseUtilText);
       text =
-        text.replace("package " + StringUtil.getPackageName(GeneratedParserUtilBase.class.getName()) + ";", "package " + stubPackage + ";");
+        text.replace("package " + StringUtil.getPackageName(GeneratedParserUtilBase.class.getName()) + ";", "package " + parserUtilPackage + ";");
       generateFileHeader(baseClassName);
       myOut.write(text);
     }
     finally {
       closeOutput();
     }
-    File utilFile = new File(myOutputPath, stubParser.replace('.', File.separatorChar) + ".java");
+    File utilFile = new File(myOutputPath, parserUtil.replace('.', File.separatorChar) + ".java");
     openOutput(utilFile);
     try {
-      generateClassHeader(stubParser, Collections.<String>emptyList(), "", false, baseClassName);
+      generateClassHeader(parserUtil, Collections.<String>emptyList(), "", false, baseClassName);
       newLine();
       out("}");
     }
     finally {
       closeOutput();
     }
+    addWarning(project, "Default " + StringUtil.getShortName(parserUtil) + " and " + baseClassName +
+                        " classes are created, please move them outside of the generated classes root.");
   }
 
 
@@ -532,7 +541,8 @@ public class ParserGenerator {
                                                        boolean intf,
                                                        String... supers) {
     generateFileHeader(className);
-    final String packageName = StringUtil.getPackageName(className);
+    String packageName = StringUtil.getPackageName(className);
+    String shortClassName = StringUtil.getShortName(className);
     out("package " + packageName + ";");
     newLine();
     final Set<String> realImports = new HashSet<String>();
@@ -564,6 +574,7 @@ public class ParserGenerator {
     for (String item : imports) {
       for (String s : StringUtil.tokenize(item, TYPE_TEXT_SEPARATORS)) {
         if (!s.contains(".") || !s.equals(shortener.fun(s))) continue;
+        if (myPackageClasses.contains(StringUtil.getShortName(s))) continue;
         realImports.add(s);
         out("import " + s + ";");
       }
@@ -589,7 +600,7 @@ public class ParserGenerator {
     if (StringUtil.isNotEmpty(annos)) {
       out(annos);
     }
-    out("public " + (intf ? "interface " : "class ") + StringUtil.getShortName(className) + sb.toString() + " {");
+    out("public " + (intf ? "interface " : "class ") + shortClassName + sb.toString() + " {");
     newLine();
     return shortener;
   }
@@ -1171,7 +1182,7 @@ public class ParserGenerator {
     imports.add(BnfConstants.IELEMENTTYPE_CLASS);
     if (generatePsi) {
       imports.add(BnfConstants.PSI_ELEMENT_CLASS);
-      imports.add("com.intellij.lang.ASTNode");
+      imports.add(BnfConstants.AST_NODE_CLASS);
     }
     Map<String, Pair<String, String>> compositeToClassAndFactoryMap = new THashMap<String, Pair<String, String>>();
     for (String elementType : sortedCompositeTypes.keySet()) {
@@ -1202,7 +1213,8 @@ public class ParserGenerator {
       } else {
         elementCreateCall = shortener.fun(StringUtil.getPackageName(pair.second)) + "." + StringUtil.getShortName(pair.second);
       }
-      out("IElementType " + elementType + " = " + elementCreateCall + "(\"" + elementType + "\");");
+      String callFix = elementCreateCall.equals("new IElementType")? ", null" : "";
+      out("IElementType " + elementType + " = " + elementCreateCall + "(\"" + elementType + "\""+callFix+");");
     }
     if (generateTokens) {
       newLine();
@@ -1225,7 +1237,7 @@ public class ParserGenerator {
     if (generatePsi) {
       newLine();
       out("class Factory {");
-      out("public static PsiElement createElement(ASTNode node) {");
+      out("public static "+shortener.fun(BnfConstants.PSI_ELEMENT_CLASS)+" createElement("+shortener.fun(BnfConstants.AST_NODE_CLASS)+" node) {");
       out("IElementType type = node.getElementType();");
       String suffix = getPsiImplSuffix(myFile);
       boolean first = true;
@@ -1256,7 +1268,7 @@ public class ParserGenerator {
     Set<String> imports = new LinkedHashSet<String>();
     imports.addAll(Arrays.asList("java.util.List",
                                  "org.jetbrains.annotations.*",
-                                 "com.intellij.psi.PsiElement"));
+                                 BnfConstants.PSI_ELEMENT_CLASS));
     imports.addAll(Arrays.asList(psiSupers));
     imports.addAll(getRuleAccessorClasses(rule, sortedPublicRules));
     JavaHelper javaHelper = JavaHelper.getJavaHelper(myFile.getProject());
@@ -1296,12 +1308,12 @@ public class ParserGenerator {
     Collection<BnfRule> sortedPublicRules = getSortedPublicRules(accessors.keySet());
 
     Set<String> imports = new LinkedHashSet<String>();
-    imports.addAll(Arrays.asList("java.util.List",
+    imports.addAll(Arrays.asList(CommonClassNames.JAVA_UTIL_LIST,
                                  "org.jetbrains.annotations.*",
-                                 "com.intellij.lang.ASTNode",
-                                 "com.intellij.psi.PsiElement"));
-    if (visitorClassName != null) imports.add("com.intellij.psi.PsiElementVisitor");
-    imports.add("com.intellij.psi.util.PsiTreeUtil");
+                                 BnfConstants.AST_NODE_CLASS,
+                                 BnfConstants.PSI_ELEMENT_CLASS));
+    if (visitorClassName != null) imports.add(BnfConstants.PSI_ELEMENT_VISITOR_CLASS);
+    imports.add(BnfConstants.PSI_TREE_UTIL_CLASS);
     imports.add("static " + typeHolderClass + ".*");
     if (StringUtil.isNotEmpty(implSuper)) imports.add(implSuper);
     imports.add(StringUtil.getPackageName(superInterface) + ".*");
@@ -1313,10 +1325,9 @@ public class ParserGenerator {
       if (pair.second == null) addUtilMethodTypes(imports, pair.first, psiImplUtilClass, javaHelper);
     }
 
-    Function<String, String> shortener = generateClassHeader(psiClass, imports, "", false, StringUtil.getShortName(implSuper),
-                                                             StringUtil.getShortName(superInterface));
+    Function<String, String> shortener = generateClassHeader(psiClass, imports, "", false, implSuper, superInterface);
     String shortName = StringUtil.getShortName(psiClass);
-    out("public " + shortName + "(ASTNode node) {");
+    out("public " + shortName + "("+shortener.fun(BnfConstants.AST_NODE_CLASS)+" node) {");
     out("super(node);");
     out("}");
     newLine();
@@ -1327,7 +1338,7 @@ public class ParserGenerator {
       generatePsiAccessor(rule, tree, accessors.get(tree), false, shortener);
     }
     if (visitorClassName != null) {
-      out("public void accept(@NotNull PsiElementVisitor visitor) {");
+      out("public void accept(@NotNull "+ shortener.fun(BnfConstants.PSI_ELEMENT_VISITOR_CLASS)+" visitor) {");
       out("if (visitor instanceof " +
           visitorClassName +
           ") ((" +
@@ -1408,7 +1419,7 @@ public class ParserGenerator {
     }
     String className = shortener.fun(getAccessorType(treeRule != null ? treeRule : rule, tree));
     String tail = intf ? "();" : "() {";
-    out((intf ? "" : "public ") + (many ? "List<" : "") + className + (many ? "> " : " ") + getterName + tail);
+    out((intf ? "" : "public ") + (many ? shortener.fun(CommonClassNames.JAVA_UTIL_LIST) + "<" : "") + className + (many ? "> " : " ") + getterName + tail);
     if (!intf) {
       if (treeRule == null) {
         out("return " + (type == REQUIRED ? "findNotNullChildByType" : "findChildByType") + "(" + getTokenElementType(ruleName) + ");");
@@ -1481,7 +1492,7 @@ public class ParserGenerator {
       boolean many = card.many();
       String className = shortener.fun(getAccessorType(rule, startRule));
       String donorMethodName = "get" + toIdentifier(item, "") + (card.many() ? "List" : "") + "()";
-      String type = (many ? "List<" : "") + className + (many ? "> " : " ");
+      String type = (many ? shortener.fun(CommonClassNames.JAVA_UTIL_LIST) + "<" : "") + className + (many ? "> " : " ");
       String curId = "p" + (count++);
       if (!context.isEmpty()) {
         if (cardinality.optional()) {
@@ -1546,7 +1557,7 @@ public class ParserGenerator {
     String className = shortener.fun(getAccessorType(targetRule, startRule));
     final String getterName = "get" + toIdentifier(methodName, "");
     String tail = intf ? "();" : "() {";
-    out((intf ? "" : "public ") + (many ? "List<" : "") + className + (many ? "> " : " ") + getterName + tail);
+    out((intf ? "" : "public ") + (many ? shortener.fun(CommonClassNames.JAVA_UTIL_LIST) + "<" : "") + className + (many ? "> " : " ") + getterName + tail);
 
     if (!intf) {
       out(sb.toString());

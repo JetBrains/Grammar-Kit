@@ -75,7 +75,7 @@ public class ParserGenerator {
 
   private boolean myUnitTestMode;
   private final RuleGraphHelper myGraphHelper;
-  private final ExpressionGeneratorHelper myExpressionHelper;
+  private final ExpressionHelper myExpressionHelper;
 
   public ParserGenerator(BnfFile tree, String sourcePath, String outputPath) {
     myFile = tree;
@@ -98,7 +98,7 @@ public class ParserGenerator {
     mySimpleTokens = RuleGraphHelper.computeTokens(myFile);
     myRuleExtendsMap = RuleGraphHelper.computeInheritance(myFile);
     myGraphHelper = new RuleGraphHelper(myFile, myRuleExtendsMap);
-    myExpressionHelper = new ExpressionGeneratorHelper(myFile, myGraphHelper);
+    myExpressionHelper = new ExpressionHelper(myFile, myGraphHelper);
   }
 
   public void setUnitTestMode(boolean unitTestMode) {
@@ -428,10 +428,10 @@ public class ParserGenerator {
     }
     for (String ruleName : ownRuleNames) {
       BnfRule rule = myFile.getRule(ruleName);
-      ExpressionGeneratorHelper.ExpressionInfo info = myExpressionHelper.getExpressionInfo(rule);
+      ExpressionHelper.ExpressionInfo info = myExpressionHelper.getExpressionInfo(rule);
       if (info != null && info.rootRule == rule) {
         out("/* ********************************************************** */");
-        myExpressionHelper.generateExpressionRoot(info, this);
+        ExpressionGeneratorHelper.generateExpressionRoot(info, this);
         newLine();
       }
     }
@@ -1024,16 +1024,13 @@ public class ParserGenerator {
           return method + "(builder_, level_ + 1" + clause.toString() + ")";
         }
         else {
-          ExpressionGeneratorHelper.ExpressionInfo info = myExpressionHelper.getExpressionInfo(subRule);
-          ExpressionGeneratorHelper.OperatorInfo operatorInfo = info == null? null : info.operatorMap.get(subRule);
-          boolean exprParsing = info != null && (operatorInfo == null || operatorInfo.type != ExpressionGeneratorHelper.OperatorType.ATOM &&
-                                operatorInfo.type != ExpressionGeneratorHelper.OperatorType.UNARY);
-          method = exprParsing ? info.rootRule.getName() : subRule.getName();
+          ExpressionHelper.ExpressionInfo info = ExpressionGeneratorHelper.getInfoForExpressionParsing(myExpressionHelper, subRule);
+          method = info != null ? info.rootRule.getName() : subRule.getName();
           String parserClass = myRuleParserClasses.get(method);
           if (!parserClass.equals(myGrammarRootParser) && !parserClass.equals(myRuleParserClasses.get(rule.getName()))) {
             method = StringUtil.getShortName(parserClass) + "." + method;
           }
-          if (!exprParsing) {
+          if (info == null) {
             return method + "(builder_, level_ + 1)";
           }
           else {

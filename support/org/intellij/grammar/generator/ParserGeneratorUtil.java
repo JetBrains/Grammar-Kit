@@ -15,6 +15,9 @@
  */
 package org.intellij.grammar.generator;
 
+import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.project.Project;
+import com.intellij.openapi.ui.MessageType;
 import com.intellij.openapi.util.Condition;
 import com.intellij.openapi.util.Pair;
 import com.intellij.openapi.util.text.StringUtil;
@@ -27,6 +30,7 @@ import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.util.SmartList;
 import com.intellij.util.containers.ContainerUtil;
 import org.intellij.grammar.KnownAttribute;
+import org.intellij.grammar.actions.GenerateAction;
 import org.intellij.grammar.psi.*;
 import org.intellij.grammar.psi.impl.GrammarUtil;
 import org.jetbrains.annotations.NotNull;
@@ -344,6 +348,16 @@ public class ParserGeneratorUtil {
       sorted.add(topology.forceChoose(rulesToSort));
     }
     return sorted;
+  }
+
+  public static void addWarning(Project project, String text) {
+    if (ApplicationManager.getApplication().isUnitTestMode()) {
+      //noinspection UseOfSystemOutOrSystemErr
+      System.out.println(text);
+    }
+    else {
+      GenerateAction.LOG_GROUP.createNotification(text, MessageType.WARNING).notify(project);
+    }
   }
 
   public static class Rule {

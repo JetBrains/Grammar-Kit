@@ -318,16 +318,16 @@ public class ExpressionParser implements PsiParser {
   /* ********************************************************** */
   // Expression root: expr
   // Operator priority table:
-  // 0: BINARY('=')
-  // 1: BINARY('?' tail: ':' expr)
-  // 2: BINARY('+') BINARY('-')
-  // 3: BINARY('*') BINARY('/')
-  // 4: UNARY('+') UNARY('-')
-  // 5: N_ARY('^')
-  // 6: UNARY_POSTFIX('!')
-  // 7: UNARY_POSTFIX(arg_list)
-  // 8: UNARY_POSTFIX('.' simple_ref_expr)
-  // 9: ATOM(identifier) ATOM(number) UNARY('(' tail: ')')
+  // 0: BINARY(assign_expr)
+  // 1: BINARY(conditional_expr)
+  // 2: BINARY(plus_expr) BINARY(minus_expr)
+  // 3: BINARY(mul_expr) BINARY(div_expr)
+  // 4: PREFIX(unary_plus_expr) PREFIX(unary_min_expr)
+  // 5: N_ARY(exp_expr)
+  // 6: POSTFIX(factorial_expr)
+  // 7: POSTFIX(call_expr)
+  // 8: POSTFIX(ref_expr)
+  // 9: ATOM(simple_ref_expr) ATOM(literal_expr) PREFIX(paren_expr)
   public static boolean expr(PsiBuilder builder_, int level_, int priority_) {
     if (!recursion_guard_(builder_, level_, "expr")) return false;
     Marker marker_ = builder_.mark();

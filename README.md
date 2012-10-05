@@ -28,7 +28,7 @@ Recent changes
 --------------
 1.0.9
 
-* [Pratt-like](http://javascript.crockford.com/tdop/tdop.html) expression parsing stabilized. See [grammar sample](https://github.com/JetBrains/Grammar-Kit/blob/master/testData/generator/ExprParser.bnf) for more.
+* [Pratt-like](http://javascript.crockford.com/tdop/tdop.html) expression parsing stabilized, see [grammar sample](https://github.com/JetBrains/Grammar-Kit/blob/master/testData/generator/ExprParser.bnf) for more
 * No compile errors in generated code on cold start
 * Drop unneeded inheritance checks during parse-time
 
@@ -158,7 +158,7 @@ Change log
 ==========
 1.0.9
 
-* [Pratt-like](http://javascript.crockford.com/tdop/tdop.html) expression parsing stabilized. See [grammar sample](https://github.com/JetBrains/Grammar-Kit/blob/master/testData/generator/ExprParser.bnf) for more.
+* [Pratt-like](http://javascript.crockford.com/tdop/tdop.html) expression parsing stabilized, see [grammar sample](https://github.com/JetBrains/Grammar-Kit/blob/master/testData/generator/ExprParser.bnf) for more
 * No compile errors in generated code on cold start
 * Drop unneeded inheritance checks during parse-time
 

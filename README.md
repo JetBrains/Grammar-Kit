@@ -20,16 +20,17 @@ You've just build a custom language plugin (approx. 1 day).
 
 See [HOWTO](/JetBrains/Grammar-Kit/blob/master/HOWTO.md) page for different tips and tricks.
 
+Other open-source plugins built with Grammar-Kit: [intellij-erlang](https://github.com/ignatov/intellij-erlang).
+
 ![Editor support](/JetBrains/Grammar-Kit/raw/master/images/editor.png)
 
 Recent changes
 --------------
-1.0.8
+1.0.9
 
-* Experimental [Pratt-like](http://javascript.crockford.com/tdop/tdop.html) expression parsing ([compact grammars and improved performance](https://github.com/JetBrains/Grammar-Kit/blob/master/testData/generator/ExprParser.bnf))
-* Per-rule elementTypeClass/Factory attribute & empty elementType attribute support
-* CamelCase rule names support and PSI classes calculation fixes
-* Grammar code folding for attribute groups and multiline comments
+* [Pratt-like](http://javascript.crockford.com/tdop/tdop.html) expression parsing stabilized. See [grammar sample](https://github.com/JetBrains/Grammar-Kit/blob/master/testData/generator/ExprParser.bnf) for more.
+* No compile errors in generated code on cold start
+* Drop unneeded inheritance checks during parse-time
 
 
 Quick documentation:
@@ -155,6 +156,12 @@ Just add *mypackage.MyReferenceExpressionImpl* class with proper *getReference()
 
 Change log
 ==========
+1.0.9
+
+* [Pratt-like](http://javascript.crockford.com/tdop/tdop.html) expression parsing stabilized. See [grammar sample](https://github.com/JetBrains/Grammar-Kit/blob/master/testData/generator/ExprParser.bnf) for more.
+* No compile errors in generated code on cold start
+* Drop unneeded inheritance checks during parse-time
+
 1.0.8
 
 * Experimental [Pratt-like](http://javascript.crockford.com/tdop/tdop.html) expression parsing ([compact grammars and improved performance](https://github.com/JetBrains/Grammar-Kit/blob/master/testData/generator/ExprParser.bnf))

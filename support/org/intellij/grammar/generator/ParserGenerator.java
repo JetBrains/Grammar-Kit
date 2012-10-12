@@ -232,31 +232,11 @@ public class ParserGenerator {
   }
 
   private void generateVisitor(String psiClass, Map<String, BnfRule> sortedRules) {
-    boolean hasStubRule = false;
-
-    for (BnfRule bnfRule : sortedRules.values()) {
-      if (Rule.attribute(bnfRule, KnownAttribute.STUB) != null) {
-        hasStubRule = true;
-      }
-    }
-
-    List<String> imports = new ArrayList<String>() {{
-      add("org.jetbrains.annotations.*");
-      add("com.intellij.psi.PsiElementVisitor");
-    }};
-
-    if (hasStubRule) {
-      imports.add("com.intellij.psi.StubBasedPsiElement");
-    }
-
-    generateClassHeader(psiClass, imports,
-            "", false, "PsiElementVisitor");
-    String firstImplements = ContainerUtil.getFirstItem(getRootAttribute(myFile, KnownAttribute.IMPLEMENTS));
     String superIntf = ObjectUtils.notNull(ContainerUtil.getFirstItem(getRootAttribute(myFile, KnownAttribute.IMPLEMENTS)),
             KnownAttribute.IMPLEMENTS.getDefaultValue().get(0));
     String shortSuperIntf = StringUtil.getShortName(superIntf);
     Function<String, String> shortener = generateClassHeader(
-            psiClass, Arrays.asList("org.jetbrains.annotations.*", BnfConstants.PSI_ELEMENT_VISITOR_CLASS, superIntf),
+            psiClass, Arrays.asList("org.jetbrains.annotations.*", "com.intellij.psi.StubBasedPsiElement", BnfConstants.PSI_ELEMENT_VISITOR_CLASS, superIntf),
             "", false, BnfConstants.PSI_ELEMENT_VISITOR_CLASS);
     Set<String> visited = new HashSet<String>();
     Set<String> all = new TreeSet<String>();
@@ -1245,7 +1225,7 @@ public class ParserGenerator {
         elementCreateCall = shortener.fun(StringUtil.getPackageName(pair.second)) + "." + StringUtil.getShortName(pair.second);
       }
       String callFix = elementCreateCall.equals("new IElementType")? ", null" : "";
-      out("IElementType " + elementType + " = " + elementCreateCall + "(\"" + elementType + "\""+callFix+");");
+      out("IElementType " + elementType + " = " + elementCreateCall + "(\"" + elementType + "\"" + callFix + ");");
     }
     if (generateTokens) {
       newLine();

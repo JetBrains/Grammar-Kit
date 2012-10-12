@@ -522,7 +522,6 @@ public class GrammarParser implements PsiParser {
     if (!nextTokenIs(builder_, BNF_EXTERNAL_START)) return false;
     boolean result_ = false;
     boolean pinned_ = false;
-    int start_ = builder_.getCurrentOffset();
     Marker marker_ = builder_.mark();
     enterErrorRecordingSection(builder_, level_, _SECTION_GENERAL_, null);
     result_ = consumeToken(builder_, BNF_EXTERNAL_START);
@@ -530,11 +529,7 @@ public class GrammarParser implements PsiParser {
     pinned_ = result_; // pin = 2
     result_ = result_ && report_error_(builder_, external_expression_2(builder_, level_ + 1));
     result_ = pinned_ && consumeToken(builder_, BNF_EXTERNAL_END) && result_;
-    LighterASTNode last_ = result_? builder_.getLatestDoneMarker() : null;
-    if (last_ != null && last_.getStartOffset() == start_ && type_extends_(last_.getTokenType(), BNF_EXTERNAL_EXPRESSION)) {
-      marker_.drop();
-    }
-    else if (result_ || pinned_) {
+    if (result_ || pinned_) {
       marker_.done(BNF_EXTERNAL_EXPRESSION);
     }
     else {
@@ -867,18 +862,13 @@ public class GrammarParser implements PsiParser {
     if (!nextTokenIs(builder_, BNF_LEFT_BRACKET)) return false;
     boolean result_ = false;
     boolean pinned_ = false;
-    int start_ = builder_.getCurrentOffset();
     Marker marker_ = builder_.mark();
     enterErrorRecordingSection(builder_, level_, _SECTION_GENERAL_, null);
     result_ = consumeToken(builder_, BNF_LEFT_BRACKET);
     pinned_ = result_; // pin = 1
     result_ = result_ && report_error_(builder_, expression(builder_, level_ + 1));
     result_ = pinned_ && consumeToken(builder_, BNF_RIGHT_BRACKET) && result_;
-    LighterASTNode last_ = result_? builder_.getLatestDoneMarker() : null;
-    if (last_ != null && last_.getStartOffset() == start_ && type_extends_(last_.getTokenType(), BNF_PAREN_OPT_EXPRESSION)) {
-      marker_.drop();
-    }
-    else if (result_ || pinned_) {
+    if (result_ || pinned_) {
       marker_.done(BNF_PAREN_OPT_EXPRESSION);
     }
     else {
@@ -895,16 +885,11 @@ public class GrammarParser implements PsiParser {
     if (!nextTokenIs(builder_, BNF_OP_NOT) && !nextTokenIs(builder_, BNF_OP_AND)
         && replaceVariants(builder_, 2, "<predicate>")) return false;
     boolean result_ = false;
-    int start_ = builder_.getCurrentOffset();
     Marker marker_ = builder_.mark();
     enterErrorRecordingSection(builder_, level_, _SECTION_GENERAL_, "<predicate>");
     result_ = predicate_sign(builder_, level_ + 1);
     result_ = result_ && simple(builder_, level_ + 1);
-    LighterASTNode last_ = result_? builder_.getLatestDoneMarker() : null;
-    if (last_ != null && last_.getStartOffset() == start_ && type_extends_(last_.getTokenType(), BNF_PREDICATE)) {
-      marker_.drop();
-    }
-    else if (result_) {
+    if (result_) {
       marker_.done(BNF_PREDICATE);
     }
     else {
@@ -982,14 +967,9 @@ public class GrammarParser implements PsiParser {
     if (!recursion_guard_(builder_, level_, "reference_or_token")) return false;
     if (!nextTokenIs(builder_, BNF_ID)) return false;
     boolean result_ = false;
-    int start_ = builder_.getCurrentOffset();
     Marker marker_ = builder_.mark();
     result_ = consumeToken(builder_, BNF_ID);
-    LighterASTNode last_ = result_? builder_.getLatestDoneMarker() : null;
-    if (last_ != null && last_.getStartOffset() == start_ && type_extends_(last_.getTokenType(), BNF_REFERENCE_OR_TOKEN)) {
-      marker_.drop();
-    }
-    else if (result_) {
+    if (result_) {
       marker_.done(BNF_REFERENCE_OR_TOKEN);
     }
     else {
@@ -1269,14 +1249,9 @@ public class GrammarParser implements PsiParser {
     if (!recursion_guard_(builder_, level_, "string_literal_expression")) return false;
     if (!nextTokenIs(builder_, BNF_STRING)) return false;
     boolean result_ = false;
-    int start_ = builder_.getCurrentOffset();
     Marker marker_ = builder_.mark();
     result_ = consumeToken(builder_, BNF_STRING);
-    LighterASTNode last_ = result_? builder_.getLatestDoneMarker() : null;
-    if (last_ != null && last_.getStartOffset() == start_ && type_extends_(last_.getTokenType(), BNF_STRING_LITERAL_EXPRESSION)) {
-      marker_.drop();
-    }
-    else if (result_) {
+    if (result_) {
       marker_.done(BNF_STRING_LITERAL_EXPRESSION);
     }
     else {
@@ -1292,18 +1267,13 @@ public class GrammarParser implements PsiParser {
     if (!nextTokenIs(builder_, BNF_LEFT_BRACKET)) return false;
     boolean result_ = false;
     boolean pinned_ = false;
-    int start_ = builder_.getCurrentOffset();
     Marker marker_ = builder_.mark();
     enterErrorRecordingSection(builder_, level_, _SECTION_GENERAL_, null);
     result_ = consumeToken(builder_, BNF_LEFT_BRACKET);
     pinned_ = result_; // pin = 1
     result_ = result_ && report_error_(builder_, value_list_1(builder_, level_ + 1));
     result_ = pinned_ && consumeToken(builder_, BNF_RIGHT_BRACKET) && result_;
-    LighterASTNode last_ = result_? builder_.getLatestDoneMarker() : null;
-    if (last_ != null && last_.getStartOffset() == start_ && type_extends_(last_.getTokenType(), BNF_VALUE_LIST)) {
-      marker_.drop();
-    }
-    else if (result_ || pinned_) {
+    if (result_ || pinned_) {
       marker_.done(BNF_VALUE_LIST);
     }
     else {
@@ -1330,28 +1300,28 @@ public class GrammarParser implements PsiParser {
   }
 
   final static Parser attr_recover_until_parser_ = new Parser() {
-      public boolean parse(PsiBuilder builder_, int level_) {
-        return attr_recover_until(builder_, level_ + 1);
-      }
-    };
+    public boolean parse(PsiBuilder builder_, int level_) {
+      return attr_recover_until(builder_, level_ + 1);
+    }
+  };
   final static Parser grammar_element_parser_ = new Parser() {
-      public boolean parse(PsiBuilder builder_, int level_) {
-        return grammar_element(builder_, level_ + 1);
-      }
-    };
+    public boolean parse(PsiBuilder builder_, int level_) {
+      return grammar_element(builder_, level_ + 1);
+    }
+  };
   final static Parser grammar_element_recover_parser_ = new Parser() {
-      public boolean parse(PsiBuilder builder_, int level_) {
-        return grammar_element_recover(builder_, level_ + 1);
-      }
-    };
+    public boolean parse(PsiBuilder builder_, int level_) {
+      return grammar_element_recover(builder_, level_ + 1);
+    }
+  };
   final static Parser list_entry_recover_until_parser_ = new Parser() {
-      public boolean parse(PsiBuilder builder_, int level_) {
-        return list_entry_recover_until(builder_, level_ + 1);
-      }
-    };
+    public boolean parse(PsiBuilder builder_, int level_) {
+      return list_entry_recover_until(builder_, level_ + 1);
+    }
+  };
   final static Parser sequence_recover_parser_ = new Parser() {
-      public boolean parse(PsiBuilder builder_, int level_) {
-        return sequence_recover(builder_, level_ + 1);
-      }
-    };
+    public boolean parse(PsiBuilder builder_, int level_) {
+      return sequence_recover(builder_, level_ + 1);
+    }
+  };
 }

@@ -1,6 +1,6 @@
 <idea-plugin url="https://github.com/JetBrains/Grammar-Kit" version="2">
   <id>org.jetbrains.idea.grammar</id>
-  <version>1.0.7</version>
+  <version>1.0.9</version>
   <vendor email="gregory.shrago@jetbrains.com" logo="">Gregory Shrago</vendor>
   <idea-version since-build="116.108" until-build=""/>
 
@@ -12,60 +12,18 @@
 
   <change-notes>
     <![CDATA[
-    <p>1.0.7</p>
+    <p>1.0.9</p>
     <ul>
-        <li>Attribute pattern navigation & inspection</li>
-        <li>Short error messages generation instead of long token lists</li>
-        <li>Token sequence completion</li>
-        <li>Standalone invocation (for ant integration & etc.)</li>
+        <li>Pratt-like expression parsing stabilized</li>
+        <li>No compile errors in generated code on cold start</li>
+        <li>Drop unneeded inheritance checks during parse-time</li>
     </ul>
-    <p>1.0.6</p>
+    <p>1.0.8</p>
     <ul>
-        <li>Grammar diagram (UML support plugin required)</li>
-        <li>Dedicated "tokens" attribute</li>
-        <li>Minor fixes</li>
-    </ul>
-    <p>1.0.5</p>
-    <ul>
-        <li>Generator: PSI visitor generation</li>
-        <li>PSI: better children discovery (esp. for left rules)</li>
-        <li>PSI: user methods and method mixins</li>
-        <li>PSI: <b>fake</b> rules</li>
-        <li>Performance: adapted PsiBuilder</li>
-    </ul>
-    <p>1.0.4</p>
-    <ul>
-        <li>Bug fixes and performance</li>
-    </ul>
-    <p>1.0.3</p>
-    <ul>
-        <li>Improved PSI generation ("extends" and "elementType" attributes handling)</li>
-        <li>Configurable FIRST-based parser optimization</li>
-    </ul>
-    <p>1.0.2</p>
-    <ul>
-        <li>Error recovery: extended "pinning" (see documentation)</li>
-        <li>Pin marker annotator</li>
-        <li>Configurable colors (Settings/Editor/Colors and Fonts/Grammar)</li>
-        <li>Parser-based context-aware keyword completion (sample)</li>
-        <li>Language injection in string literals (sample)</li>
-        <li>Performance improvement & other fixes</li>
-    </ul>
-    <p>1.0.1</p>
-    <ul>
-        <li>Left-recursion detection</li>
-        <li>Recursive meta rules handling fixes</li>
-    </ul>
-    <p>1.0:</p>
-    <ul>
-        <li>Simple unused rules highlighting</li>
-        <li>Rename refactoring, find usages of rules & attributes</li>
-        <li>PsiBuilder-based PEG parser & PSI class hierarchy generation</li>
-        <li>BNF files editing, highlighting, navigation and completion</li>
-        <li>Quick structure view, go to related file action</li>
-        <li>Refactorings: inline rule, introduce rule</li>
-        <li>Intentions: flip choice branches</li>
-        <li>FIRST and NEXT token sets calculation (avail. in Quick Documentation)</li>
+        <li>Experimental Pratt-like expression parsing (compact grammars and improved performance)</li>
+        <li>Per-rule elementTypeClass/Factory attribute & empty elementType attribute support</li>
+        <li>CamelCase rule names support and PSI classes calculation fixes</li>
+        <li>Grammar code folding for attribute groups and multiline comments</li>
     </ul>
     ]]>
   </change-notes>
@@ -77,6 +35,7 @@
     <lang.parserDefinition language="BNF" implementationClass="org.intellij.grammar.BnfParserDefinition"/>
     <annotator language="BNF" implementationClass="org.intellij.grammar.editor.BnfAnnotator"/>
     <annotator language="BNF" implementationClass="org.intellij.grammar.editor.BnfPinMarkerAnnotator"/>
+    <annotator language="BNF" implementationClass="org.intellij.grammar.editor.BnfExpressionMarkerAnnotator"/>
     <lang.syntaxHighlighterFactory key="BNF" implementationClass="org.intellij.grammar.editor.BnfSyntaxHighlighterFactory"/>
     <elementDescriptionProvider implementation="org.intellij.grammar.BnfDescriptionProvider"/>
     <lang.findUsagesProvider language="BNF" implementationClass="org.intellij.grammar.BnfFindUsagesProvider"/>
@@ -93,6 +52,8 @@
     <inlineActionHandler implementation="org.intellij.grammar.refactor.BnfInlineRuleActionHandler"/>
 
     <lang.unwrapDescriptor language="BNF" implementationClass="org.intellij.grammar.refactor.BnfUnwrapDescriptor"/>
+
+    <lang.foldingBuilder language="BNF" implementationClass="org.intellij.grammar.BnfFoldingBuilder"/>
 
     <documentationProvider implementation="org.intellij.grammar.BnfDocumentationProvider"/>
 

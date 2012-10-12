@@ -17,21 +17,16 @@
 package org.intellij.grammar.inspection;
 
 import com.intellij.codeInspection.*;
-import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
-import com.intellij.psi.PsiRecursiveElementWalkingVisitor;
-import com.intellij.util.containers.MultiMap;
-import gnu.trove.THashSet;
 import org.intellij.grammar.analysis.BnfFirstNextAnalyzer;
-import org.intellij.grammar.psi.BnfAttrs;
+import org.intellij.grammar.generator.ExpressionGeneratorHelper;
+import org.intellij.grammar.generator.ExpressionHelper;
 import org.intellij.grammar.psi.BnfFile;
 import org.intellij.grammar.psi.BnfRule;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Set;
 
 /**
  * @author gregsh
@@ -64,17 +59,22 @@ public class BnfLeftRecursionInspection extends LocalInspectionTool {
 
   public ProblemDescriptor[] checkFile(@NotNull PsiFile file, @NotNull InspectionManager manager, boolean isOnTheFly) {
     if (file instanceof BnfFile) {
+      BnfFile bnfFile = (BnfFile)file;
+      ExpressionHelper expressionHelper = ExpressionHelper.getCached(bnfFile);
       BnfFirstNextAnalyzer analyzer = new BnfFirstNextAnalyzer();
       ArrayList<ProblemDescriptor> list = new ArrayList<ProblemDescriptor>();
-      for (BnfRule rule : ((BnfFile)file).getRules()) {
+      for (BnfRule rule : bnfFile.getRules()) {
         String ruleName = rule.getName();
-        if (analyzer.asStrings(analyzer.calcFirst(rule)).contains(ruleName)) {
-          list.add(manager.createProblemDescriptor(rule.getId(), "'" + ruleName + "' employs left-recursion unsupported by generator", isOnTheFly, LocalQuickFix.EMPTY_ARRAY, ProblemHighlightType.GENERIC_ERROR_OR_WARNING));
+        boolean exprParsing = ExpressionGeneratorHelper.getInfoForExpressionParsing(expressionHelper, rule) != null;
+
+        if (!exprParsing && analyzer.asStrings(analyzer.calcFirst(rule)).contains(ruleName)) {
+          list.add(manager.createProblemDescriptor(rule.getId(), "'" + ruleName + "' employs left-recursion unsupported by generator",
+                                                   isOnTheFly, LocalQuickFix.EMPTY_ARRAY, ProblemHighlightType.GENERIC_ERROR_OR_WARNING));
         }
       }
       if (!list.isEmpty()) return list.toArray(new ProblemDescriptor[list.size()]);
     }
+
     return ProblemDescriptor.EMPTY_ARRAY;
   }
-  
 }

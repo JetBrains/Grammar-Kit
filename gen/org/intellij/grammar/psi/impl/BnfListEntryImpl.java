@@ -33,8 +33,8 @@ public class BnfListEntryImpl extends BnfCompositeElementImpl implements BnfList
 
   @Override
   @Nullable
-  public BnfLiteralExpression getLiteralExpression() {
-    return findChildByClass(BnfLiteralExpression.class);
+  public BnfStringLiteralExpression getLiteralExpression() {
+    return findChildByClass(BnfStringLiteralExpression.class);
   }
 
   @Override

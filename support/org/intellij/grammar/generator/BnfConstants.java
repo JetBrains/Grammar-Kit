@@ -24,4 +24,8 @@ public interface BnfConstants {
 
   String IELEMENTTYPE_CLASS = "com.intellij.psi.tree.IElementType";
   String PSI_ELEMENT_CLASS = "com.intellij.psi.PsiElement";
+  String PSI_TREE_UTIL_CLASS = "com.intellij.psi.util.PsiTreeUtil";
+  String PSI_ELEMENT_VISITOR_CLASS = "com.intellij.psi.PsiElementVisitor";
+  String AST_NODE_CLASS = "com.intellij.lang.ASTNode";
+  String AST_WRAPPER_PSI_ELEMENT_CLASS = "com.intellij.extapi.psi.ASTWrapperPsiElement";
 }

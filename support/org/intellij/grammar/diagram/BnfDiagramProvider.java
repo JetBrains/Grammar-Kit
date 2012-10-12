@@ -124,18 +124,9 @@ public class BnfDiagramProvider extends DiagramProvider<PsiNamedElement> {
     public SimpleColoredText getPresentableType(Object element) {
       if (element instanceof Map.Entry) {
         RuleGraphHelper.Cardinality cardinality = (RuleGraphHelper.Cardinality)((Map.Entry)element).getValue();
-        String text = null;
-        if (cardinality == RuleGraphHelper.Cardinality.AT_LEAST_ONE) {
-          text = " + ";
-        }
-        else if (cardinality == RuleGraphHelper.Cardinality.ANY_NUMBER) {
-          text = " * ";
-        }
-        else if (cardinality == RuleGraphHelper.Cardinality.OPTIONAL) {
-          text = " ? ";
-        }
-        if (text != null) {
-          return new SimpleColoredText(text, SimpleTextAttributes.GRAY_ITALIC_ATTRIBUTES);
+        String text = RuleGraphHelper.getCardinalityText(cardinality);
+        if (StringUtil.isNotEmpty(text)) {
+          return new SimpleColoredText(" "+text+" ", SimpleTextAttributes.GRAY_ITALIC_ATTRIBUTES);
         }
       }
       return super.getPresentableType(element);
@@ -152,6 +143,7 @@ public class BnfDiagramProvider extends DiagramProvider<PsiNamedElement> {
       return null;
     }
   };
+
   private final DiagramVfsResolver myVfsResolver = new DiagramVfsResolver<PsiNamedElement>() {
     @Override
     public String getQualifiedName(PsiNamedElement bnfFile) {
@@ -281,7 +273,7 @@ public class BnfDiagramProvider extends DiagramProvider<PsiNamedElement> {
       myNodes.clear();
       myEdges.clear();
 
-      RuleGraphHelper ruleGraphHelper = new RuleGraphHelper(myFile);
+      RuleGraphHelper ruleGraphHelper = RuleGraphHelper.getCached(myFile);
       ((BnfDiagramProvider)getProvider()).myGraphHelper = ruleGraphHelper;
 
       Map<BnfRule, DiagramNode<PsiNamedElement>> nodeMap = new THashMap<BnfRule, DiagramNode<PsiNamedElement>>();

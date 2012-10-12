@@ -15,6 +15,10 @@
  */
 package org.intellij.grammar.generator;
 
+import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.project.Project;
+import com.intellij.openapi.ui.MessageType;
+import com.intellij.openapi.util.Condition;
 import com.intellij.openapi.util.Pair;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.psi.PsiElement;
@@ -26,12 +30,13 @@ import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.util.SmartList;
 import com.intellij.util.containers.ContainerUtil;
 import org.intellij.grammar.KnownAttribute;
+import org.intellij.grammar.actions.GenerateAction;
 import org.intellij.grammar.psi.*;
 import org.intellij.grammar.psi.impl.GrammarUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.List;
+import java.util.*;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
@@ -304,6 +309,57 @@ public class ParserGeneratorUtil {
     return "consumeToken(builder_, \"" + tokenText + "\")";
   }
 
+  public static Collection<BnfRule> getSortedPublicRules(Set<PsiElement> accessors) {
+    Map<String, BnfRule> result = new TreeMap<String, BnfRule>();
+    for (PsiElement tree : accessors) {
+      if (tree instanceof BnfRule) {
+        BnfRule rule = (BnfRule)tree;
+        if (!Rule.isPrivate(rule)) result.put(rule.getName(), rule);
+      }
+    }
+    return result.values();
+  }
+
+  public static Collection<BnfExpression> getSortedTokens(Set<PsiElement> accessors) {
+    TreeMap<String, BnfExpression> result = new TreeMap<String, BnfExpression>();
+    for (PsiElement tree : accessors) {
+      if (!(tree instanceof BnfExpression)) continue;
+      result.put(tree.getText(), (BnfExpression)tree);
+    }
+    return result.values();
+  }
+
+  public static <T> List<T> topoSort(Collection<T> collection,
+                                     Topology<T> topology) {
+    List<T> rulesToSort = new ArrayList<T>(collection);
+    if (rulesToSort.size() < 2) return new ArrayList<T>(rulesToSort);
+    Collections.reverse(rulesToSort);
+    List<T> sorted = new ArrayList<T>(rulesToSort.size());
+    main: while (!rulesToSort.isEmpty()) {
+      inner: for (T rule : rulesToSort) {
+        for (T r : rulesToSort) {
+          if (rule == r) continue;
+          if (topology.contains(rule, r)) continue inner;
+        }
+        sorted.add(rule);
+        rulesToSort.remove(rule);
+        continue main;
+      }
+      sorted.add(topology.forceChoose(rulesToSort));
+    }
+    return sorted;
+  }
+
+  public static void addWarning(Project project, String text) {
+    if (ApplicationManager.getApplication().isUnitTestMode()) {
+      //noinspection UseOfSystemOutOrSystemErr
+      System.out.println(text);
+    }
+    else {
+      GenerateAction.LOG_GROUP.createNotification(text, MessageType.WARNING).notify(project);
+    }
+  }
+
   public static class Rule {
 
     public static boolean isPrivate(BnfRule node) {
@@ -410,6 +466,37 @@ public class ParserGeneratorUtil {
     @Override
     public String toString() {
       return getText();
+    }
+  }
+
+  public static abstract class Topology<T> {
+    public abstract boolean contains(T t1, T t2);
+    public T forceChoose(Collection<T> col) {
+      // choose the first from cycle
+      return forceChooseInner(col, Condition.TRUE);
+    }
+
+    protected T forceChooseInner(Collection<T> col, Condition<T>... conditions) {
+      //for (T rule : rulesToSort) {
+      //  StringBuilder sb = new StringBuilder(rule.toString()).append(":");
+      //  for (T r : rulesToSort) {
+      //    if (rule == r) continue;
+      //    if (condition.process(rule, r)) {
+      //      sb.append(" ").append(r);
+      //    }
+      //  }
+      //  System.out.println(sb);
+      //}
+      for (Condition<T> condition : conditions) {
+        for (Iterator<T> it = col.iterator(); it.hasNext(); ) {
+          T t = it.next();
+          if (condition.value(t)) {
+            it.remove();
+            return t;
+          }
+        }
+      }
+      throw new AssertionError();
     }
   }
 }

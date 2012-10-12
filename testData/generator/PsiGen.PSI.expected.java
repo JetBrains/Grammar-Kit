@@ -11,17 +11,17 @@ import generated.psi.impl.*;
 
 public interface ParserTypes {
 
-  IElementType BLOCK_OF = new IElementType("BLOCK_OF");
+  IElementType BLOCK_OF = new IElementType("BLOCK_OF", null);
   IElementType CAST_EXPR = MyTypeFactory.createExprType("CAST_EXPR");
-  IElementType EXPR = new IElementType("EXPR");
-  IElementType GRAMMAR_ELEMENT = new IElementType("GRAMMAR_ELEMENT");
-  IElementType IDENTIFIER = new IElementType("IDENTIFIER");
-  IElementType ID_EXPR = new IElementType("ID_EXPR");
+  IElementType EXPR = new IElementType("EXPR", null);
+  IElementType GRAMMAR_ELEMENT = new IElementType("GRAMMAR_ELEMENT", null);
+  IElementType IDENTIFIER = new IElementType("IDENTIFIER", null);
+  IElementType ID_EXPR = new IElementType("ID_EXPR", null);
   IElementType ITEM_EXPR = MyTypeFactory.createExprType("ITEM_EXPR");
-  IElementType LEFT_SHADOW = new IElementType("LEFT_SHADOW");
-  IElementType LEFT_SHADOW_TEST = new IElementType("LEFT_SHADOW_TEST");
-  IElementType LITERAL = new IElementType("LITERAL");
-  IElementType MISSING_EXTERNAL_TYPE = new IElementType("MISSING_EXTERNAL_TYPE");
+  IElementType LEFT_SHADOW = new IElementType("LEFT_SHADOW", null);
+  IElementType LEFT_SHADOW_TEST = new IElementType("LEFT_SHADOW_TEST", null);
+  IElementType LITERAL = new IElementType("LITERAL", null);
+  IElementType MISSING_EXTERNAL_TYPE = new IElementType("MISSING_EXTERNAL_TYPE", null);
   IElementType MUL_EXPR = MyTypeFactory.createExprType("MUL_EXPR");
   IElementType PLUS_EXPR = MyTypeFactory.createExprType("PLUS_EXPR");
   IElementType REF_EXPR = MyTypeFactory.createExprType("REF_EXPR");
@@ -29,7 +29,7 @@ public interface ParserTypes {
   IElementType ROOT_C = new MyRootType("ROOT_C");
   IElementType ROOT_D = new MyRootType("ROOT_D");
   IElementType SOME_EXPR = MyTypeFactory.createExprType("SOME_EXPR");
-  IElementType SPECIAL_REF = new IElementType("SPECIAL_REF");
+  IElementType SPECIAL_REF = new IElementType("SPECIAL_REF", null);
 
   IElementType ID = new IElementType("id");
   IElementType NUMBER = new IElementType("number");
@@ -384,10 +384,10 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static generated.ParserTypes.*;
-import generated.CompositeElementImpl;
+import com.intellij.extapi.psi.ASTWrapperPsiElement;
 import generated.psi.*;
 
-public class XLeftShadowImpl extends CompositeElementImpl implements XLeftShadow {
+public class XLeftShadowImpl extends ASTWrapperPsiElement implements XLeftShadow {
 
   public XLeftShadowImpl(ASTNode node) {
     super(node);
@@ -422,10 +422,10 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static generated.ParserTypes.*;
-import generated.CompositeElementImpl;
+import com.intellij.extapi.psi.ASTWrapperPsiElement;
 import generated.psi.*;
 
-public class XLeftShadowTestImpl extends CompositeElementImpl implements XLeftShadowTest {
+public class XLeftShadowTestImpl extends ASTWrapperPsiElement implements XLeftShadowTest {
 
   public XLeftShadowTestImpl(ASTNode node) {
     super(node);
@@ -460,10 +460,10 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static generated.ParserTypes.*;
-import generated.CompositeElementImpl;
+import com.intellij.extapi.psi.ASTWrapperPsiElement;
 import generated.psi.*;
 
-public class XBlockOfImpl extends CompositeElementImpl implements XBlockOf {
+public class XBlockOfImpl extends ASTWrapperPsiElement implements XBlockOf {
 
   public XBlockOfImpl(ASTNode node) {
     super(node);
@@ -523,10 +523,10 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static generated.ParserTypes.*;
-import generated.CompositeElementImpl;
+import com.intellij.extapi.psi.ASTWrapperPsiElement;
 import generated.psi.*;
 
-public class XExprImpl extends CompositeElementImpl implements XExpr {
+public class XExprImpl extends ASTWrapperPsiElement implements XExpr {
 
   public XExprImpl(ASTNode node) {
     super(node);
@@ -617,10 +617,10 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static generated.ParserTypes.*;
-import generated.CompositeElementImpl;
+import com.intellij.extapi.psi.ASTWrapperPsiElement;
 import generated.psi.*;
 
-public class XGrammarElementImpl extends CompositeElementImpl implements XGrammarElement {
+public class XGrammarElementImpl extends ASTWrapperPsiElement implements XGrammarElement {
 
   public XGrammarElementImpl(ASTNode node) {
     super(node);
@@ -649,10 +649,10 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static generated.ParserTypes.*;
-import generated.CompositeElementImpl;
+import com.intellij.extapi.psi.ASTWrapperPsiElement;
 import generated.psi.*;
 
-public class XIdentifierImpl extends CompositeElementImpl implements XIdentifier {
+public class XIdentifierImpl extends ASTWrapperPsiElement implements XIdentifier {
 
   public XIdentifierImpl(ASTNode node) {
     super(node);

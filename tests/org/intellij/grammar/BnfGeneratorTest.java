@@ -69,6 +69,7 @@ public class BnfGeneratorTest extends ParsingTestCase {
   public void testLeftAssociative() throws Exception { doGenTest(false); }
   public void testPsiGen() throws Exception { doGenTest(true); }
   public void testPsiAccessors() throws Exception { doGenTest(true); }
+  public void testPsiStart() throws Exception { doGenTest(true); }
   public void testExprParser() throws Exception { doGenTest(false); }
 
   public void testEmpty() throws Exception {
@@ -104,6 +105,7 @@ public class BnfGeneratorTest extends ParsingTestCase {
     if (generatePsi) parserGenerator.generate();
     else parserGenerator.generateParser();
 
+    List<String> messages = new ArrayList<String>();
     try {
       for (File file : filesToCheck) {
         assertTrue("Generated file not found: "+file, file.exists());
@@ -122,7 +124,7 @@ public class BnfGeneratorTest extends ParsingTestCase {
           finally {
             writer.close();
           }
-          fail("No output text found. File " + expectedName + " created.");
+          messages.add("No output text found. File " + expectedName + " created.");
         }
       }
     }
@@ -131,5 +133,9 @@ public class BnfGeneratorTest extends ParsingTestCase {
         file.delete();
       }
     }
+    for (String message : messages) {
+      System.err.println(message);
+    }
+    assertTrue(OVERWRITE_TESTDATA || messages.isEmpty());
   }
 }

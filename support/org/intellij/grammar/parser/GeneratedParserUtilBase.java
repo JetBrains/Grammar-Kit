@@ -305,13 +305,13 @@ public class GeneratedParserUtilBase {
       // advance to the last error pos
       // skip tokens until lastErrorPos. parseAsTree might look better here...
       int parenCount = 0;
-      while (eatMoreFlag && builder_.getCurrentOffset() < lastErrorPos) {
+      while ((eatMoreFlag || parenCount > 0) && builder_.getCurrentOffset() < lastErrorPos) {
         if (state.braces != null) {
           if (builder_.getTokenType() == state.braces[0].getLeftBraceType()) parenCount ++;
           else if (builder_.getTokenType() == state.braces[0].getRightBraceType()) parenCount --;
         }
         builder_.advanceLexer();
-        eatMoreFlag = parenCount != 0 || eatMore.parse(builder_, frame.level + 1);
+        eatMoreFlag = eatMore.parse(builder_, frame.level + 1);
       }
       boolean errorReported = frame.errorReportedAt == initialOffset;
       if (errorReported) {

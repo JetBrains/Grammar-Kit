@@ -42,6 +42,8 @@
   mixin("reference_or_token")="org.intellij.grammar.psi.impl.BnfRefOrTokenImpl"
   mixin("string_literal_expression")="org.intellij.grammar.psi.impl.BnfStringImpl"
   extends("paren_.*expression")=parenthesized
+
+  methodRenames("getStringLiteralExpression")="getLiteralExpression"
 }
 
 external grammar ::= parseGrammar grammar_element

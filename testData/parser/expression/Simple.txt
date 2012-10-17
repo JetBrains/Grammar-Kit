@@ -232,3 +232,17 @@ EXPR_FILE_TYPE
         PsiElement(number)('2')
       PsiElement())(')')
   PsiElement(;)(';')
+  PsiWhiteSpace('\n\n')
+  MINUS_EXPR
+    REF_EXPR
+      IDENTIFIER
+        PsiElement(id)('x')
+    PsiWhiteSpace(' ')
+    PsiElement(BAD_CHARACTER)('-')
+    UNARY_MIN_EXPR
+      PsiElement(BAD_CHARACTER)('-')
+      UNARY_MIN_EXPR
+        PsiElement(BAD_CHARACTER)('-')
+      PsiErrorElement:<expr> expected, got ';'
+        <empty list>
+  PsiElement(;)(';')

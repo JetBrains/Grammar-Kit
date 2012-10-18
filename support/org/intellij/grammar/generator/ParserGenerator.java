@@ -710,6 +710,7 @@ public class ParserGenerator {
       }
     }
 
+    String elementType = getElementType(rule);
     final long funcId = StringHash.calc(funcName);
     if (generateMemoizationCode) {
       out("if (memoizedFalseBranch(builder_, " + funcId + "L) return false;");
@@ -724,7 +725,7 @@ public class ParserGenerator {
     if (pinned) {
       out("boolean pinned_ = false;");
     }
-    if (!isPrivate && canCollapse) {
+    if (!isPrivate && canCollapse && StringUtil.isNotEmpty(elementType)) {
       out("int start_ = builder_.getCurrentOffset();");
     }
     if (isLeft) {
@@ -819,11 +820,10 @@ public class ParserGenerator {
         out("result_ = !" + nodeCall + ";");
       }
       else {
-        throw new AssertionError("unexpected: " + type);
+        addWarning(myFile.getProject(), "unexpected: " + type);
       }
     }
 
-    String elementType = getElementType(rule);
     if (type == BNF_OP_AND || type == BNF_OP_NOT) {
       out("marker_.rollbackTo();");
     }

@@ -152,9 +152,10 @@ public class ExpressionGeneratorHelper {
           String operatorFuncName = operator.rule.getName();
           g.out("public static boolean " + operatorFuncName + "(PsiBuilder builder_, int level_) {");
           g.out("if (!recursion_guard_(builder_, level_, \"" + operatorFuncName + "\")) return false;");
-          g.out("Marker marker_ = builder_.mark();");
           g.out("boolean result_ = false;");
           g.out("boolean pinned_ = false;");
+          g.out("Marker marker_ = builder_.mark();");
+          g.out("enterErrorRecordingSection(builder_, level_, _SECTION_GENERAL_, null);");
 
           String elementType = ParserGeneratorUtil.getElementType(operator.rule);
           String tailCall =
@@ -181,6 +182,7 @@ public class ExpressionGeneratorHelper {
           g.out("else {");
           g.out("marker_.rollbackTo();");
           g.out("}");
+          g.out("result_ = exitErrorRecordingSection(builder_, level_, result_, pinned_, _SECTION_GENERAL_, null);");
           g.out("return result_ || pinned_;");
           g.out("}");
         }

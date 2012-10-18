@@ -438,9 +438,10 @@ public class ExpressionParser implements PsiParser {
 
   public static boolean unary_plus_expr(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "unary_plus_expr")) return false;
-    Marker marker_ = builder_.mark();
     boolean result_ = false;
     boolean pinned_ = false;
+    Marker marker_ = builder_.mark();
+    enterErrorRecordingSection(builder_, level_, _SECTION_GENERAL_, null);
     result_ = consumeToken(builder_, "+");
     pinned_ = result_;
     result_ = pinned_ && expr(builder_, level_, 4) && result_;
@@ -450,14 +451,16 @@ public class ExpressionParser implements PsiParser {
     else {
       marker_.rollbackTo();
     }
+    result_ = exitErrorRecordingSection(builder_, level_, result_, pinned_, _SECTION_GENERAL_, null);
     return result_ || pinned_;
   }
 
   public static boolean unary_min_expr(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "unary_min_expr")) return false;
-    Marker marker_ = builder_.mark();
     boolean result_ = false;
     boolean pinned_ = false;
+    Marker marker_ = builder_.mark();
+    enterErrorRecordingSection(builder_, level_, _SECTION_GENERAL_, null);
     result_ = consumeToken(builder_, "-");
     pinned_ = result_;
     result_ = pinned_ && expr(builder_, level_, 4) && result_;
@@ -467,6 +470,7 @@ public class ExpressionParser implements PsiParser {
     else {
       marker_.rollbackTo();
     }
+    result_ = exitErrorRecordingSection(builder_, level_, result_, pinned_, _SECTION_GENERAL_, null);
     return result_ || pinned_;
   }
 
@@ -520,9 +524,10 @@ public class ExpressionParser implements PsiParser {
 
   public static boolean paren_expr(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "paren_expr")) return false;
-    Marker marker_ = builder_.mark();
     boolean result_ = false;
     boolean pinned_ = false;
+    Marker marker_ = builder_.mark();
+    enterErrorRecordingSection(builder_, level_, _SECTION_GENERAL_, null);
     result_ = consumeToken(builder_, "(");
     pinned_ = result_;
     result_ = pinned_ && expr(builder_, level_, -1) && result_;
@@ -533,6 +538,7 @@ public class ExpressionParser implements PsiParser {
     else {
       marker_.rollbackTo();
     }
+    result_ = exitErrorRecordingSection(builder_, level_, result_, pinned_, _SECTION_GENERAL_, null);
     return result_ || pinned_;
   }
 

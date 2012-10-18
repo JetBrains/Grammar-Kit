@@ -124,15 +124,9 @@ public class Autopin implements PsiParser {
     return true;
   }
 
-  // (GLOBAL|LOCAL)
+  // GLOBAL|LOCAL
   private static boolean create_table_statement_2(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "create_table_statement_2")) return false;
-    return create_table_statement_2_0(builder_, level_ + 1);
-  }
-
-  // GLOBAL|LOCAL
-  private static boolean create_table_statement_2_0(PsiBuilder builder_, int level_) {
-    if (!recursion_guard_(builder_, level_, "create_table_statement_2_0")) return false;
     boolean result_ = false;
     Marker marker_ = builder_.mark();
     result_ = consumeToken(builder_, GLOBAL);
@@ -212,15 +206,9 @@ public class Autopin implements PsiParser {
     return result_ || pinned_;
   }
 
-  // (c d e)
+  // c d e
   private static boolean override_nested_sequence_2(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "override_nested_sequence_2")) return false;
-    return override_nested_sequence_2_0(builder_, level_ + 1);
-  }
-
-  // c d e
-  private static boolean override_nested_sequence_2_0(PsiBuilder builder_, int level_) {
-    if (!recursion_guard_(builder_, level_, "override_nested_sequence_2_0")) return false;
     boolean result_ = false;
     Marker marker_ = builder_.mark();
     result_ = consumeTokens(builder_, 0, C, D, E);

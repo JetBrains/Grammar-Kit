@@ -168,15 +168,9 @@ public class ExpressionParser implements PsiParser {
     return true;
   }
 
-  // (',' expr)
+  // ',' expr
   private static boolean arg_list_1_0_1_0(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "arg_list_1_0_1_0")) return false;
-    return arg_list_1_0_1_0_0(builder_, level_ + 1);
-  }
-
-  // ',' expr
-  private static boolean arg_list_1_0_1_0_0(PsiBuilder builder_, int level_) {
-    if (!recursion_guard_(builder_, level_, "arg_list_1_0_1_0_0")) return false;
     boolean result_ = false;
     boolean pinned_ = false;
     Marker marker_ = builder_.mark();
@@ -293,15 +287,9 @@ public class ExpressionParser implements PsiParser {
     return true;
   }
 
-  // (element ';')
+  // element ';'
   private static boolean root_0(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "root_0")) return false;
-    return root_0_0(builder_, level_ + 1);
-  }
-
-  // element ';'
-  private static boolean root_0_0(PsiBuilder builder_, int level_) {
-    if (!recursion_guard_(builder_, level_, "root_0_0")) return false;
     boolean result_ = false;
     Marker marker_ = builder_.mark();
     result_ = element(builder_, level_ + 1);

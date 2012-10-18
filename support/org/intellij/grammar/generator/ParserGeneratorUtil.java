@@ -182,16 +182,21 @@ public class ParserGeneratorUtil {
     return text;
   }
 
-  public static boolean isTrivialNode(PsiElement node) {
+  public static boolean isTrivialNode(PsiElement element) {
+    return getTrivialNodeChild(element) != null;
+  }
+
+  public static BnfExpression getTrivialNodeChild(PsiElement element) {
     PsiElement child = null;
-    if (node instanceof BnfParenExpression) {
-      child = ((BnfParenExpression)node).getExpression();
+    if (element instanceof BnfParenExpression) {
+      child = ((BnfParenExpression)element).getExpression();
     }
-    if (node.getFirstChild() == node.getLastChild() &&
-        (node instanceof BnfChoice || node instanceof BnfSequence || node instanceof BnfExpression)) {
-      child = node.getFirstChild();
+    else if (element.getFirstChild() == element.getLastChild() &&
+        (element instanceof BnfChoice || element instanceof BnfSequence || element instanceof BnfExpression)) {
+      child = element.getFirstChild();
     }
-    return child instanceof BnfExpression && !(child instanceof BnfLiteralExpression || child instanceof BnfReferenceOrToken);
+    return child instanceof BnfExpression && !(child instanceof BnfLiteralExpression || child instanceof BnfReferenceOrToken) ?
+        (BnfExpression) child : null;
   }
 
   public static BnfExpression getEffectiveExpression(BnfFile file, BnfExpression tree) {

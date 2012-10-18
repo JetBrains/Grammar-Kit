@@ -143,15 +143,9 @@ public class Parser implements PsiParser {
     return true;
   }
 
-  // (',' element)
+  // ',' element
   private static boolean list_2_0(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "list_2_0")) return false;
-    return list_2_0_0(builder_, level_ + 1);
-  }
-
-  // ',' element
-  private static boolean list_2_0_0(PsiBuilder builder_, int level_) {
-    if (!recursion_guard_(builder_, level_, "list_2_0_0")) return false;
     boolean result_ = false;
     Marker marker_ = builder_.mark();
     result_ = consumeToken(builder_, ",");
@@ -202,15 +196,9 @@ public class Parser implements PsiParser {
     return true;
   }
 
-  // (',' entry)
+  // ',' entry
   private static boolean map_2_0(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "map_2_0")) return false;
-    return map_2_0_0(builder_, level_ + 1);
-  }
-
-  // ',' entry
-  private static boolean map_2_0_0(PsiBuilder builder_, int level_) {
-    if (!recursion_guard_(builder_, level_, "map_2_0_0")) return false;
     boolean result_ = false;
     Marker marker_ = builder_.mark();
     result_ = consumeToken(builder_, ",");

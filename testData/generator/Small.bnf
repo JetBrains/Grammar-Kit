@@ -15,3 +15,8 @@ otherRule::= ( token )
 private privateRule::= token
 private privateString ::= 'token'
 private tokenRule ::= '=' "=" '==' "=="
+empty ::= ()
+empty2 ::= {}
+empty3 ::= []
+private empty4 ::= ()
+private empty5 ::= []

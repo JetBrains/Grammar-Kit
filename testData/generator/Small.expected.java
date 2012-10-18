@@ -26,7 +26,16 @@ public class Small implements PsiParser {
     int level_ = 0;
     boolean result_;
     builder_ = adapt_builder_(root_, builder_, this);
-    if (root_ == OTHER_RULE) {
+    if (root_ == EMPTY) {
+      result_ = empty(builder_, level_ + 1);
+    }
+    else if (root_ == EMPTY_2) {
+      result_ = empty2(builder_, level_ + 1);
+    }
+    else if (root_ == EMPTY_3) {
+      result_ = empty3(builder_, level_ + 1);
+    }
+    else if (root_ == OTHER_RULE) {
       result_ = otherRule(builder_, level_ + 1);
     }
     else if (root_ == SOME_RULE) {
@@ -54,6 +63,51 @@ public class Small implements PsiParser {
 
   protected boolean parse_root_(final IElementType root_, final PsiBuilder builder_, final int level_) {
     return parseRoot(builder_, level_ + 1, statement_parser_);
+  }
+
+  /* ********************************************************** */
+  public static boolean empty(PsiBuilder builder_, int level_) {
+    builder_.mark().done(EMPTY);
+    return true;
+  }
+
+  /* ********************************************************** */
+  public static boolean empty2(PsiBuilder builder_, int level_) {
+    builder_.mark().done(EMPTY_2);
+    return true;
+  }
+
+  /* ********************************************************** */
+  // []
+  public static boolean empty3(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "empty3")) return false;
+    Marker marker_ = builder_.mark();
+    enterErrorRecordingSection(builder_, level_, _SECTION_GENERAL_, "<empty 3>");
+    empty3_0(builder_, level_ + 1);
+    marker_.done(EMPTY_3);
+    exitErrorRecordingSection(builder_, level_, true, false, _SECTION_GENERAL_, null);
+    return true;
+  }
+
+  private static boolean empty3_0(PsiBuilder builder_, int level_) {
+    return true;
+  }
+
+  /* ********************************************************** */
+  static boolean empty4(PsiBuilder builder_, int level_) {
+    return true;
+  }
+
+  /* ********************************************************** */
+  // []
+  static boolean empty5(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "empty5")) return false;
+    empty5_0(builder_, level_ + 1);
+    return true;
+  }
+
+  private static boolean empty5_0(PsiBuilder builder_, int level_) {
+    return true;
   }
 
   /* ********************************************************** */

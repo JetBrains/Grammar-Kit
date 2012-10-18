@@ -622,19 +622,26 @@ public class ParserGenerator {
     return classHeader;
   }
 
-  void generateNode(BnfRule rule, BnfExpression node, String funcName, Set<BnfExpression> visited) {
+  void generateNode(BnfRule rule, BnfExpression initialNode, String funcName, Set<BnfExpression> visited) {
+    boolean isRule = initialNode.getParent() == rule;
+    while (isTrivialNode(initialNode)) {
+      initialNode = getTrivialNodeChild(initialNode);
+    }
+    BnfExpression node = initialNode;
+
     IElementType type = getEffectiveType(node);
 
     for (String s : StringUtil.split(node.getText(), "\n")) {
       out("// " + s);
     }
-    boolean isRule = node.getParent() == rule;
     boolean firstNonTrivial = node == Rule.firstNotTrivial(rule);
     boolean isPrivate = !(isRule || firstNonTrivial) || Rule.isPrivate(rule) || myGrammarRoot.equals(rule.getName());
     boolean isLeft = firstNonTrivial && Rule.isLeft(rule);
     boolean isLeftInner = isLeft && (isPrivate || Rule.isInner(rule));
     final String recoverRoot = firstNonTrivial ? Rule.attribute(rule, KnownAttribute.RECOVER_UNTIL) : null;
     final boolean canCollapse = !isPrivate && (!isLeft || isLeftInner) && firstNonTrivial && canCollapse(rule);
+
+    String elementType = getElementType(rule);
 
     final List<BnfExpression> children;
     out((!isRule ? "private " : isPrivate ? "" : "public ") + "static boolean " + funcName + "(PsiBuilder builder_, int level_"
@@ -657,7 +664,14 @@ public class ParserGenerator {
     else {
       children = getChildExpressions(node);
       if (children.isEmpty()) {
-        out("return true;");
+        if (isPrivate || StringUtil.isEmpty(elementType)) {
+          out("return true;");
+        }
+        else {
+          // todo handle left rules
+          out("builder_.mark().done(" + elementType + ");");
+          out("return true;");
+        }
         out("}");
         return;
       }
@@ -667,15 +681,6 @@ public class ParserGenerator {
     String debugFuncName = funcName; // + ":" + node.toStringTree();
     out("if (!recursion_guard_(builder_, level_, \"" + debugFuncName + "\")) return false;");
 
-    if (isTrivialNode(node)) {
-      BnfExpression child = children.get(0);
-      out("return " + generateNodeCall(rule, child, getNextName(funcName, 0)) + ";");
-      out("}");
-      generateNodeChildren(rule, funcName, children, visited);
-      return;
-    }
-
-
     String frameName = firstNonTrivial && !Rule.isMeta(rule)? quote(getRuleDisplayName(rule, !isPrivate)) : null;
     if (generateFirstCheck > 0 && recoverRoot == null && (isRule || firstNonTrivial)) {
       BnfFirstNextAnalyzer analyzer = new BnfFirstNextAnalyzer();
@@ -684,9 +689,9 @@ public class ParserGenerator {
       for (String s : firstSet) {
         @SuppressWarnings("StringEquality")
         boolean unknown = s == BnfFirstNextAnalyzer.MATCHES_EOF || s == BnfFirstNextAnalyzer.MATCHES_ANY;
-        String elementType = unknown? null : firstToElementType(s);
-        if (elementType != null) {
-          firstElementTypes.add(elementType);
+        String t = unknown? null : firstToElementType(s);
+        if (t != null) {
+          firstElementTypes.add(t);
         }
         else {
           firstElementTypes.clear();
@@ -710,7 +715,6 @@ public class ParserGenerator {
       }
     }
 
-    String elementType = getElementType(rule);
     final long funcId = StringHash.calc(funcName);
     if (generateMemoizationCode) {
       out("if (memoizedFalseBranch(builder_, " + funcId + "L) return false;");

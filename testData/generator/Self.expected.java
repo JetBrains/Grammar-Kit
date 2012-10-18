@@ -190,15 +190,9 @@ public class Self implements PsiParser {
     return result_;
   }
 
-  // (reference_or_token | literal_expression)
+  // reference_or_token | literal_expression
   private static boolean attr_value_0(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "attr_value_0")) return false;
-    return attr_value_0_0(builder_, level_ + 1);
-  }
-
-  // reference_or_token | literal_expression
-  private static boolean attr_value_0_0(PsiBuilder builder_, int level_) {
-    if (!recursion_guard_(builder_, level_, "attr_value_0_0")) return false;
     boolean result_ = false;
     Marker marker_ = builder_.mark();
     result_ = reference_or_token(builder_, level_ + 1);
@@ -319,15 +313,9 @@ public class Self implements PsiParser {
     return true;
   }
 
-  // ('|' sequence)
+  // '|' sequence
   private static boolean choice_0_2_0(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "choice_0_2_0")) return false;
-    return choice_0_2_0_0(builder_, level_ + 1);
-  }
-
-  // '|' sequence
-  private static boolean choice_0_2_0_0(PsiBuilder builder_, int level_) {
-    if (!recursion_guard_(builder_, level_, "choice_0_2_0_0")) return false;
     boolean result_ = false;
     Marker marker_ = builder_.mark();
     result_ = consumeToken(builder_, BNF_OP_OR);
@@ -429,15 +417,9 @@ public class Self implements PsiParser {
     return true;
   }
 
-  // (attrs | rule)
+  // attrs | rule
   private static boolean grammar_0(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "grammar_0")) return false;
-    return grammar_0_0(builder_, level_ + 1);
-  }
-
-  // attrs | rule
-  private static boolean grammar_0_0(PsiBuilder builder_, int level_) {
-    if (!recursion_guard_(builder_, level_, "grammar_0_0")) return false;
     boolean result_ = false;
     Marker marker_ = builder_.mark();
     result_ = attrs(builder_, level_ + 1);
@@ -551,15 +533,9 @@ public class Self implements PsiParser {
   }
 
   /* ********************************************************** */
-  // ('&' | '!')
+  // '&' | '!'
   public static boolean predicate_sign(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "predicate_sign")) return false;
-    return predicate_sign_0(builder_, level_ + 1);
-  }
-
-  // '&' | '!'
-  private static boolean predicate_sign_0(PsiBuilder builder_, int level_) {
-    if (!recursion_guard_(builder_, level_, "predicate_sign_0")) return false;
     if (!nextTokenIs(builder_, BNF_OP_NOT) && !nextTokenIs(builder_, BNF_OP_AND)) return false;
     boolean result_ = false;
     Marker marker_ = builder_.mark();
@@ -816,18 +792,12 @@ public class Self implements PsiParser {
     return result_;
   }
 
-  // (modifier* id '::=' )
+  // modifier* id '::='
   private static boolean simple_0_0_0(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "simple_0_0_0")) return false;
-    return simple_0_0_0_0(builder_, level_ + 1);
-  }
-
-  // modifier* id '::='
-  private static boolean simple_0_0_0_0(PsiBuilder builder_, int level_) {
-    if (!recursion_guard_(builder_, level_, "simple_0_0_0_0")) return false;
     boolean result_ = false;
     Marker marker_ = builder_.mark();
-    result_ = simple_0_0_0_0_0(builder_, level_ + 1);
+    result_ = simple_0_0_0_0(builder_, level_ + 1);
     result_ = result_ && consumeToken(builder_, BNF_ID);
     result_ = result_ && consumeToken(builder_, BNF_OP_IS);
     if (!result_) {
@@ -840,14 +810,14 @@ public class Self implements PsiParser {
   }
 
   // modifier*
-  private static boolean simple_0_0_0_0_0(PsiBuilder builder_, int level_) {
-    if (!recursion_guard_(builder_, level_, "simple_0_0_0_0_0")) return false;
+  private static boolean simple_0_0_0_0(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "simple_0_0_0_0")) return false;
     int offset_ = builder_.getCurrentOffset();
     while (true) {
       if (!modifier(builder_, level_ + 1)) break;
       int next_offset_ = builder_.getCurrentOffset();
       if (offset_ == next_offset_) {
-        empty_element_parsed_guard_(builder_, offset_, "simple_0_0_0_0_0");
+        empty_element_parsed_guard_(builder_, offset_, "simple_0_0_0_0");
         break;
       }
       offset_ = next_offset_;

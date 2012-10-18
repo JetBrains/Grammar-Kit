@@ -137,6 +137,9 @@ public class GrammarUtil {
     for (int i = 0, childExpressionsSize = children.size(); i < childExpressionsSize; i++) {
       BnfExpression child = children.get(i);
       if (isAtomicExpression(child)) continue;
+      while (isTrivialNode(child)) {
+        child = getTrivialNodeChild(child);
+      }
       if (!processExpressionNames(getNextName(funcName, i), child, processor)) return false;
     }
     return processor.process(funcName, expression);

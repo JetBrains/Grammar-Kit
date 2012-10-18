@@ -305,10 +305,6 @@ public class ParserGeneratorUtil {
     return "new Parser() {\npublic boolean parse(PsiBuilder builder_, int level_) {\nreturn " + nodeCall + ";\n}\n}";
   }
 
-  public static String generateConsumeTextToken(String tokenText) {
-    return "consumeToken(builder_, \"" + tokenText + "\")";
-  }
-
   public static Collection<BnfRule> getSortedPublicRules(Set<PsiElement> accessors) {
     Map<String, BnfRule> result = new TreeMap<String, BnfRule>();
     for (PsiElement tree : accessors) {

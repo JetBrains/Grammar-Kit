@@ -1018,12 +1018,12 @@ public class ParserGenerator {
       String value = StringUtil.stripQuotesAroundValue(text);
       String attributeName = getTokenName(value);
       if (attributeName != null) {
-        return generateConsumeToken(attributeName);
+        return generateConsumeToken(rule, attributeName);
       }
-      return generateConsumeTextToken(value);
+      return generateConsumeTextToken(rule, value);
     }
     else if (type == BNF_NUMBER) {
-      return generateConsumeTextToken(text);
+      return generateConsumeTextToken(rule, text);
     }
     else if (type == BNF_REFERENCE_OR_TOKEN) {
       BnfRule subRule = myFile.getRule(text);
@@ -1053,7 +1053,7 @@ public class ParserGenerator {
       if (!mySimpleTokens.containsKey(text) && !mySimpleTokens.values().contains(text)) {
         mySimpleTokens.put(text, null);
       }
-      return generateConsumeToken(text);
+      return generateConsumeToken(rule, text);
     }
     else if (type == BNF_EXTERNAL_EXPRESSION) {
       List<BnfExpression> expressions = ((BnfExternalExpression)node).getExpressionList();
@@ -1163,8 +1163,14 @@ public class ParserGenerator {
     }
   }
 
-  private String generateConsumeToken(String tokenName) {
-    return "consumeToken(builder_, " + getTokenElementType(tokenName) + ")";
+  private String generateConsumeToken(BnfRule rule, String tokenName) {
+    String methodName = getAttribute(rule, KnownAttribute.CONSUME_TOKEN_METHOD);
+    return methodName + "(builder_, " + getTokenElementType(tokenName) + ")";
+  }
+
+  public static String generateConsumeTextToken(BnfRule rule, String tokenText) {
+    String methodName = getAttribute(rule, KnownAttribute.CONSUME_TOKEN_METHOD);
+    return methodName + "(builder_, \"" + tokenText + "\")";
   }
 
   private String getTokenElementType(String token) {

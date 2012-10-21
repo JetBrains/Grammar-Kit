@@ -207,6 +207,27 @@ public class ExpressionParser implements PsiParser {
   }
 
   /* ********************************************************** */
+  // element ';'
+  static boolean element_and_separator(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "element_and_separator")) return false;
+    boolean result_ = false;
+    boolean pinned_ = false;
+    Marker marker_ = builder_.mark();
+    enterErrorRecordingSection(builder_, level_, _SECTION_GENERAL_, null);
+    result_ = element(builder_, level_ + 1);
+    pinned_ = result_; // pin = 1
+    result_ = result_ && consumeToken(builder_, ";");
+    if (!result_ && !pinned_) {
+      marker_.rollbackTo();
+    }
+    else {
+      marker_.drop();
+    }
+    result_ = exitErrorRecordingSection(builder_, level_, result_, pinned_, _SECTION_GENERAL_, null);
+    return result_ || pinned_;
+  }
+
+  /* ********************************************************** */
   // !';'
   static boolean element_recover(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "element_recover")) return false;
@@ -271,12 +292,12 @@ public class ExpressionParser implements PsiParser {
   }
 
   /* ********************************************************** */
-  // (element ';') *
+  // element_and_separator *
   static boolean root(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "root")) return false;
     int offset_ = builder_.getCurrentOffset();
     while (true) {
-      if (!root_0(builder_, level_ + 1)) break;
+      if (!element_and_separator(builder_, level_ + 1)) break;
       int next_offset_ = builder_.getCurrentOffset();
       if (offset_ == next_offset_) {
         empty_element_parsed_guard_(builder_, offset_, "root");
@@ -285,22 +306,6 @@ public class ExpressionParser implements PsiParser {
       offset_ = next_offset_;
     }
     return true;
-  }
-
-  // element ';'
-  private static boolean root_0(PsiBuilder builder_, int level_) {
-    if (!recursion_guard_(builder_, level_, "root_0")) return false;
-    boolean result_ = false;
-    Marker marker_ = builder_.mark();
-    result_ = element(builder_, level_ + 1);
-    result_ = result_ && consumeToken(builder_, ";");
-    if (!result_) {
-      marker_.rollbackTo();
-    }
-    else {
-      marker_.drop();
-    }
-    return result_;
   }
 
   /* ********************************************************** */

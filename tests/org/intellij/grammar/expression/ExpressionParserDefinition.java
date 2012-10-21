@@ -16,6 +16,7 @@ import com.intellij.psi.tree.IElementType;
 import com.intellij.psi.tree.IFileElementType;
 import org.intellij.grammar.BnfParserDefinition;
 import org.intellij.grammar.parser.BnfLexer;
+import org.intellij.grammar.psi.BnfTypes;
 import org.intellij.grammar.psi.impl.BnfCompositeElementImpl;
 import org.jetbrains.annotations.NotNull;
 
@@ -97,5 +98,12 @@ public class ExpressionParserDefinition extends BnfParserDefinition{
   @Override
   public PsiElement createElement(ASTNode astNode) {
     return new BnfCompositeElementImpl(astNode);
+  }
+
+  public static IElementType createTokenType(String text) {
+    for (IElementType type : new IElementType[]{BnfTypes.BNF_ID, BnfTypes.BNF_NUMBER}) {
+      if (type.toString().equals(text)) return type;
+    }
+    throw new AssertionError(text);
   }
 }

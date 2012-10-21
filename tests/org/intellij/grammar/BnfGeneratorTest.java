@@ -15,6 +15,7 @@ import com.intellij.psi.PsiReferenceServiceImpl;
 import com.intellij.psi.impl.PsiFileFactoryImpl;
 import com.intellij.psi.impl.search.CachesBasedRefSearcher;
 import com.intellij.psi.impl.search.PsiSearchHelperImpl;
+import com.intellij.psi.impl.source.resolve.ResolveCache;
 import com.intellij.psi.impl.source.tree.injected.InjectedLanguageManagerImpl;
 import com.intellij.psi.search.PsiSearchHelper;
 import com.intellij.testFramework.ParsingTestCase;
@@ -55,6 +56,7 @@ public class BnfGeneratorTest extends ParsingTestCase {
     getProject().registerService(PsiSearchHelper.class, new PsiSearchHelperImpl(getPsiManager()));
     getProject().registerService(DumbService.class, new DumbServiceImpl(getProject(), getProject().getMessageBus()));
     getProject().registerService(PsiFileFactory.class, new PsiFileFactoryImpl(getPsiManager()));
+    getProject().registerService(ResolveCache.class, new ResolveCache(getProject().getMessageBus()));
     InjectedLanguageManagerImpl languageManager = new InjectedLanguageManagerImpl(getProject(), DumbService.getInstance(getProject()));
     Disposer.register(getProject(), languageManager);
     getProject().registerService(InjectedLanguageManager.class, languageManager);

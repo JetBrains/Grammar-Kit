@@ -4,10 +4,12 @@
   parserClass="org.intellij.grammar.expression.ExpressionParser"
   extends(".*expr")=expr
   elementTypeFactory="org.intellij.grammar.expression.ExpressionParserDefinition.createType"
+  tokenTypeFactory="org.intellij.grammar.expression.ExpressionParserDefinition.createTokenType"
   elementTypeHolderClass="org.intellij.grammar.expression.ExpressionTypes"
   stubParserClass="org.intellij.grammar.parser.GeneratedParserUtilBase"
 }
-root ::= (element ';') *
+root ::= element_and_separator *
+private element_and_separator ::= element ';' {pin=1}
 private element ::= expr  {recoverUntil=element_recover}
 private element_recover ::= !';'
 

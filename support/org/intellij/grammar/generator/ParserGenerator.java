@@ -24,6 +24,7 @@ import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.psi.CommonClassNames;
 import com.intellij.psi.NavigatablePsiElement;
 import com.intellij.psi.PsiElement;
+import com.intellij.psi.impl.source.tree.LeafPsiElement;
 import com.intellij.psi.tree.IElementType;
 import com.intellij.util.Function;
 import com.intellij.util.ObjectUtils;
@@ -100,7 +101,7 @@ public class ParserGenerator {
     mySimpleTokens = RuleGraphHelper.computeTokens(myFile);
     myRuleExtendsMap = RuleGraphHelper.computeInheritance(myFile);
     myGraphHelper = new RuleGraphHelper(myFile, myRuleExtendsMap);
-    myExpressionHelper = new ExpressionHelper(myFile, myGraphHelper);
+    myExpressionHelper = new ExpressionHelper(myFile, myGraphHelper, true);
   }
 
   public void setUnitTestMode(boolean unitTestMode) {
@@ -905,7 +906,7 @@ public class ParserGenerator {
   private boolean canCollapse(BnfRule rule) {
     Map<PsiElement, RuleGraphHelper.Cardinality> map = myGraphHelper.getFor(rule);
     for (PsiElement element : map.keySet()) {
-      if (element instanceof BnfExternalExpression) continue;
+      if (element instanceof LeafPsiElement) continue;
       RuleGraphHelper.Cardinality c = map.get(element);
       if (c.optional()) continue;
       if (!(element instanceof BnfRule)) return false;

@@ -25,6 +25,7 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.codeStyle.NameUtil;
 import com.intellij.psi.impl.FakePsiElement;
+import com.intellij.psi.impl.source.tree.LeafPsiElement;
 import com.intellij.psi.tree.IElementType;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.util.SmartList;
@@ -326,6 +327,15 @@ public class ParserGeneratorUtil {
     for (PsiElement tree : accessors) {
       if (!(tree instanceof BnfExpression)) continue;
       result.put(tree.getText(), (BnfExpression)tree);
+    }
+    return result.values();
+  }
+
+  public static Collection<LeafPsiElement> getSortedExternalRules(Set<PsiElement> accessors) {
+    TreeMap<String, LeafPsiElement> result = new TreeMap<String, LeafPsiElement>();
+    for (PsiElement tree : accessors) {
+      if (!(tree instanceof LeafPsiElement)) continue;
+      result.put(tree.getText(), (LeafPsiElement) tree);
     }
     return result.values();
   }

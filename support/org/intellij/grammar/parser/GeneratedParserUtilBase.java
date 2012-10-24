@@ -123,6 +123,10 @@ public class GeneratedParserUtilBase {
     return false;
   }
 
+  public static boolean nextTokenIsFast(PsiBuilder builder_, IElementType token) {
+    return builder_.getTokenType() == token;
+  }
+
   public static boolean nextTokenIs(PsiBuilder builder_, IElementType token) {
     return nextTokenIsInner(builder_, token, false);
   }

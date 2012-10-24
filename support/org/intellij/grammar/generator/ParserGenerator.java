@@ -702,12 +702,13 @@ public class ParserGenerator {
       // do not include frameName if FIRST is known and its size is 1
       if (!firstElementTypes.isEmpty() && firstElementTypes.size() == 1) frameName = null;
       if (!firstElementTypes.isEmpty() && firstElementTypes.size() <= generateFirstCheck) {
+        boolean fast = "consumeTokenFast".equals(getAttribute(rule, KnownAttribute.CONSUME_TOKEN_METHOD));
         StringBuilder sb = new StringBuilder("if (");
         for (int count = 0, elementTypesSize = firstElementTypes.size(); count < elementTypesSize; count++) {
           if (count > 0) sb.append(count % 2 == 0 ? "\n  && " : " && ");
-          sb.append("!nextTokenIs(builder_, ").append(firstElementTypes.get(count)).append(")");
+          sb.append("!").append(fast? "nextTokenIsFast" : "nextTokenIs").append("(builder_, ").append(firstElementTypes.get(count)).append(")");
         }
-        if (frameName != null) {
+        if (frameName != null && !fast) {
           sb.append(firstElementTypes.size() % 2 == 0 ? "\n  && " : " && ");
           sb.append("replaceVariants(builder_, ").append(firstElementTypes.size()).append(", ").append(frameName).append(")");
         }

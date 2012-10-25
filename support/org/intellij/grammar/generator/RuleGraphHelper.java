@@ -154,6 +154,22 @@ public class RuleGraphHelper {
     return ruleExtendsMap;
   }
 
+  private static final Key<CachedValue<Map<String, String>>> TOKEN_MAP_KEY = Key.create("TOKEN_MAP_KEY");
+  public static Map<String, String> getTokenMap(final BnfFile file) {
+    CachedValue<Map<String, String>> value = file.getUserData(TOKEN_MAP_KEY);
+    if (value == null) {
+      file.putUserData(TOKEN_MAP_KEY, value =
+        CachedValuesManager.getManager(file.getProject()).createCachedValue(new CachedValueProvider<Map<String, String>>() {
+          @Nullable
+          @Override
+          public Result<Map<String, String>> compute() {
+            return new Result<Map<String, String>>(computeTokens(file), file);
+          }
+        }, false));
+    }
+    return value.getValue();
+  }
+
   public static Map<String, String> computeTokens(BnfFile file) {
     Map<String, String> result = new LinkedHashMap<String, String>();
     for (Pair<String, String> pair : getRootAttribute(file, KnownAttribute.TOKENS)) {

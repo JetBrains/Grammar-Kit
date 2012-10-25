@@ -18,6 +18,8 @@ package org.intellij.grammar.editor;
 
 import com.intellij.lexer.Lexer;
 import com.intellij.openapi.editor.SyntaxHighlighterColors;
+import com.intellij.openapi.editor.XmlHighlighterColors;
+import com.intellij.openapi.editor.colors.CodeInsightColors;
 import com.intellij.openapi.editor.colors.TextAttributesKey;
 import com.intellij.openapi.editor.markup.EffectType;
 import com.intellij.openapi.editor.markup.TextAttributes;
@@ -38,12 +40,13 @@ class BnfSyntaxHighlighter extends SyntaxHighlighterBase {
   public static final TextAttributesKey ILLEGAL = createTextAttributesKey("BNF_ILLEGAL", SyntaxHighlighterColors.INVALID_STRING_ESCAPE.getDefaultAttributes());
   public static final TextAttributesKey COMMENT = createTextAttributesKey("BNF_COMMENT", SyntaxHighlighterColors.LINE_COMMENT.getDefaultAttributes());
   public static final TextAttributesKey STRING = createTextAttributesKey("BNF_STRING", SyntaxHighlighterColors.STRING.getDefaultAttributes());
+  public static final TextAttributesKey PATTERN = createTextAttributesKey("BNF_PATTERN", CodeInsightColors.IMPLICIT_ANONYMOUS_CLASS_PARAMETER_ATTRIBUTES.getDefaultAttributes());
   public static final TextAttributesKey NUMBER = createTextAttributesKey("BNF_NUMBER", SyntaxHighlighterColors.NUMBER.getDefaultAttributes());
-  public static final TextAttributesKey KEYWORD = createTextAttributesKey("BNF_KEYWORD", SyntaxHighlighterColors.OPERATION_SIGN.getDefaultAttributes());
+  public static final TextAttributesKey KEYWORD = createTextAttributesKey("BNF_KEYWORD", CodeInsightColors.ANNOTATION_NAME_ATTRIBUTES.getDefaultAttributes());
   public static final TextAttributesKey TOKEN = createTextAttributesKey("BNF_TOKEN", SyntaxHighlighterColors.STRING.getDefaultAttributes());
   public static final TextAttributesKey RULE = createTextAttributesKey("BNF_RULE", SyntaxHighlighterColors.KEYWORD.getDefaultAttributes());
-  public static final TextAttributesKey ATTRIBUTE = createTextAttributesKey("BNF_ATTRIBUTE", SyntaxHighlighterColors.LINE_COMMENT.getDefaultAttributes());
-  public static final TextAttributesKey EXTERNAL = createTextAttributesKey("BNF_EXTERNAL", SyntaxHighlighterColors.LINE_COMMENT.getDefaultAttributes());
+  public static final TextAttributesKey ATTRIBUTE = createTextAttributesKey("BNF_ATTRIBUTE", CodeInsightColors.ANNOTATION_ATTRIBUTE_NAME_ATTRIBUTES.getDefaultAttributes());
+  public static final TextAttributesKey EXTERNAL = createTextAttributesKey("BNF_EXTERNAL", CodeInsightColors.STATIC_METHOD_ATTRIBUTES.getDefaultAttributes());
   public static final TextAttributesKey PARENTHS = createTextAttributesKey("BNF_PARENTHS", SyntaxHighlighterColors.PARENTHS.getDefaultAttributes());
   public static final TextAttributesKey BRACES = createTextAttributesKey("BNF_BRACES", SyntaxHighlighterColors.BRACES.getDefaultAttributes());
   public static final TextAttributesKey BRACKETS = createTextAttributesKey("BNF_BRACKETS", SyntaxHighlighterColors.BRACKETS.getDefaultAttributes());
@@ -51,7 +54,6 @@ class BnfSyntaxHighlighter extends SyntaxHighlighterBase {
   public static final TextAttributesKey OP_SIGN = createTextAttributesKey("BNF_OP_SIGN", SyntaxHighlighterColors.OPERATION_SIGN.getDefaultAttributes());
   public static final TextAttributesKey PIN = createTextAttributesKey("BNF_PIN", new TextAttributes(null, null, SyntaxHighlighterColors.LINE_COMMENT.getDefaultAttributes().getForegroundColor(),EffectType.BOLD_DOTTED_LINE, 0));
 
-  @NotNull
   @Override
   public Lexer getHighlightingLexer() {
     return new BnfLexer();

@@ -975,10 +975,17 @@ public class ParserGenerator {
   private String getTokenName(String value) {
     String existing = mySimpleTokens.get(value);
     if (existing == null) {
-      String attributeName = getAttributeName(ContainerUtil.getFirstItem(myFile.getAttributes()), value);
-      if (attributeName != null) {
-        mySimpleTokens.put(value, attributeName);
-        return attributeName;
+      BnfAttrs attrs = ContainerUtil.getFirstItem(myFile.getAttributes());
+      if (attrs != null) {
+        for (BnfAttr attr : attrs.getAttrList()) {
+          BnfExpression expression = attr.getExpression();
+          if (!(expression instanceof BnfStringLiteralExpression)) continue;
+          if (value.equals(ParserGeneratorUtil.getLiteralValue((BnfLiteralExpression)expression))) {
+            String attrName = attr.getName();
+            mySimpleTokens.put(value, attrName);
+            return attrName;
+          }
+        }
       }
     }
     return existing;

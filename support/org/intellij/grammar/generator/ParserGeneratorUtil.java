@@ -166,13 +166,13 @@ public class ParserGeneratorUtil {
     return null;
   }
 
-  private static Object getLiteralValue(BnfLiteralExpression child) {
+  public static <T> T getLiteralValue(BnfLiteralExpression child) {
     if (child == null) return null;
     PsiElement literal = PsiTreeUtil.getDeepestFirst(child);
     String text = child.getText();
     IElementType elementType = literal.getNode().getElementType();
-    if (elementType == BnfTypes.BNF_STRING) return StringUtil.stripQuotesAroundValue(text);
-    if (elementType == BnfTypes.BNF_NUMBER) return Integer.parseInt(text);
+    if (elementType == BnfTypes.BNF_STRING) return (T)StringUtil.stripQuotesAroundValue(text);
+    if (elementType == BnfTypes.BNF_NUMBER) return (T)Integer.valueOf(text);
     return null;
   }
 

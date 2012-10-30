@@ -93,7 +93,6 @@ public class ExpressionGeneratorHelper {
     g.out("while (true) {");
     g.out("Marker left_marker_ = (Marker) builder_.getLatestDoneMarker();");
     g.out("if (!invalid_left_marker_guard_(builder_, left_marker_, \"" + kernelMethodName + "\")) return false;");
-    g.out("Marker marker_ = builder_.mark();");
 
     first = true;
     for (String opCall : sortedOpCalls) {
@@ -105,6 +104,7 @@ public class ExpressionGeneratorHelper {
       if (operator.substitutor != null) {
         substCheck = " && ((LighterASTNode)left_marker_).getTokenType() == " + ParserGeneratorUtil.getElementType(operator.substitutor);
       }
+      if (first) g.out("Marker marker_ = builder_.mark();");
       g.out((first ? "" : "else ") + "if (priority_ < " + priority  + substCheck + " && " + opCall + ") {");
       first = false;
       String elementType = ParserGeneratorUtil.getElementType(operator.rule);
@@ -130,10 +130,16 @@ public class ExpressionGeneratorHelper {
       g.out("left_marker_.precede().done(" + elementType + ");");
       g.out("}");
     }
-    g.out("else {");
-    g.out("marker_.rollbackTo();");
-    g.out("break;");
-    g.out("}");
+    if (first) {
+      g.out("// no BINARY or POSTFIX operators present");
+      g.out("break;");
+    }
+    else {
+      g.out("else {");
+      g.out("marker_.rollbackTo();");
+      g.out("break;");
+      g.out("}");
+    }
     g.out("}");
     g.out("return result_;");
     g.out("}");

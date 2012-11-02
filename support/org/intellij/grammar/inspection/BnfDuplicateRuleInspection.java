@@ -20,14 +20,17 @@ import com.intellij.codeInspection.InspectionManager;
 import com.intellij.codeInspection.LocalInspectionTool;
 import com.intellij.codeInspection.ProblemDescriptor;
 import com.intellij.codeInspection.ProblemsHolder;
+import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
-import com.intellij.util.containers.MultiMap;
+import com.intellij.util.Processor;
+import gnu.trove.THashSet;
 import org.intellij.grammar.psi.BnfFile;
 import org.intellij.grammar.psi.BnfRule;
+import org.intellij.grammar.psi.impl.GrammarUtil;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Collection;
+import java.util.Set;
 
 /**
  * Created by IntelliJ IDEA.
@@ -69,19 +72,24 @@ public class BnfDuplicateRuleInspection extends LocalInspectionTool {
   }
   
   private static void checkFile(final PsiFile file, final ProblemsHolder problemsHolder) {
-    if (file instanceof BnfFile) {
-      final MultiMap<String, BnfRule> map = new MultiMap<String, BnfRule>();
-      for (BnfRule rule : ((BnfFile)file).getRules()) {
-        map.putValue(rule.getName(), rule);
-      }
-      for (String name : map.keySet()) {
-        final Collection<BnfRule> rules = map.get(name);
-        if (rules.size() > 1) {
-          for (BnfRule rule : rules) {
-            problemsHolder.registerProblem(rule.getId(), "'" + name + "' rule is defined more than once");
-          }
+    if (!(file instanceof BnfFile)) return;
+    final BnfFile bnfFile = (BnfFile)file;
+
+    final Set<BnfRule> rules = new THashSet<BnfRule>();
+    GrammarUtil.processChildrenDummyAware(file, new Processor<PsiElement>() {
+      @Override
+      public boolean process(PsiElement psiElement) {
+        String name = psiElement instanceof BnfRule ? ((BnfRule)psiElement).getName() : null;
+        BnfRule rule = name == null? null : bnfFile.getRule(name);
+        if (name != null && rule != psiElement) {
+          rules.add(rule);
+          rules.add((BnfRule)psiElement);
         }
+        return true;
       }
+    });
+    for (BnfRule rule : rules) {
+      problemsHolder.registerProblem(rule.getId(), "'" + rule.getName() + "' rule is defined more than once");
     }
   }
 }

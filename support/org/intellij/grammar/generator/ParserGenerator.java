@@ -639,7 +639,7 @@ public class ParserGenerator {
     boolean isPrivate = !(isRule || firstNonTrivial) || Rule.isPrivate(rule) || myGrammarRoot.equals(rule.getName());
     boolean isLeft = firstNonTrivial && Rule.isLeft(rule);
     boolean isLeftInner = isLeft && (isPrivate || Rule.isInner(rule));
-    final String recoverRoot = firstNonTrivial ? Rule.attribute(rule, KnownAttribute.RECOVER_UNTIL) : null;
+    final String recoverRoot = firstNonTrivial ? getAttribute(rule, KnownAttribute.RECOVER_UNTIL) : null;
     final boolean canCollapse = !isPrivate && (!isLeft || isLeftInner) && firstNonTrivial && canCollapse(rule);
 
     String elementType = getElementType(rule);

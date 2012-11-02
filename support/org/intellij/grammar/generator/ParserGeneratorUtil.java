@@ -22,18 +22,15 @@ import com.intellij.openapi.util.Condition;
 import com.intellij.openapi.util.Pair;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiFile;
 import com.intellij.psi.codeStyle.NameUtil;
 import com.intellij.psi.impl.FakePsiElement;
 import com.intellij.psi.impl.source.tree.LeafPsiElement;
 import com.intellij.psi.tree.IElementType;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.util.SmartList;
-import com.intellij.util.containers.ContainerUtil;
 import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.actions.GenerateAction;
 import org.intellij.grammar.psi.*;
-import org.intellij.grammar.psi.impl.GrammarUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -56,94 +53,15 @@ public class ParserGeneratorUtil {
   }
 
   public static <T> T getRootAttribute(PsiElement node, KnownAttribute<T> attribute, @Nullable String match) {
-    PsiFile file = node.getContainingFile();
-    PsiElement firstItem = file instanceof BnfFile? ContainerUtil.getFirstItem(((BnfFile)file).getAttributes()) : null;
-    return getAttributeInner(firstItem, attribute, match);
+    return ((BnfFile)node.getContainingFile()).findAttributeValue(null, attribute, match);
   }
 
   public static <T> T getAttribute(BnfRule rule, KnownAttribute<T> attribute) {
-    return getAttribute(rule, attribute, rule.getName());
+    return getAttribute(rule, attribute, null);
   }
 
   public static <T> T getAttribute(BnfRule rule, KnownAttribute<T> attribute, String match) {
-    return getAttributeInner(rule, attribute, match);
-  }
-
-  private static <T> T getAttributeInner(PsiElement node, KnownAttribute<T> attribute, @Nullable String match) {
-    BnfCompositeElement parent = PsiTreeUtil.getNonStrictParentOfType(node, BnfRule.class, BnfAttrs.class);
-    BnfAttrs attrs = parent instanceof BnfRule ? ((BnfRule)parent).getAttrs() : (BnfAttrs)parent;
-    BnfExpression attrValue = findAttributeValueNode(attrs, attribute.getName(), match);
-
-    Object attrVal = getAttributeValue(attrValue);
-    if (attrVal != null) return attrVal == NULL ? attribute.getDefaultValue() : attribute.ensureValue(attrVal);
-    if (parent == null) return attribute.getDefaultValue();
-    if (parent instanceof BnfAttrs && parent.getParent() instanceof BnfRule) parent = (BnfRule)parent.getParent();
-    for (PsiElement child = GrammarUtil.getDummyAwarePrevSibling(parent);
-         child != null;
-         child = GrammarUtil.getDummyAwarePrevSibling(child)) {
-      if (!(child instanceof BnfAttrs)) continue;
-      attrValue = findAttributeValueNode((BnfAttrs)child, attribute.getName(), match);
-
-      attrVal = getAttributeValue(attrValue);
-      if (attrVal != null) return attrVal == NULL ? attribute.getDefaultValue() : attribute.ensureValue(attrVal);
-    }
-    return attribute.getDefaultValue();
-  }
-
-  public static String getAttributeName(PsiElement node, String value) {
-    BnfCompositeElement parent = PsiTreeUtil.getNonStrictParentOfType(node, BnfRule.class, BnfAttrs.class);
-    BnfAttr attr = findAttributeByValue(parent instanceof BnfRule ? ((BnfRule)parent).getAttrs() : (BnfAttrs)parent, value);
-    if (attr != null) return attr.getId().getText();
-    if (parent == null) return null;
-    if (parent instanceof BnfAttrs && parent.getParent() instanceof BnfRule) parent = (BnfRule)parent.getParent();
-    for (PsiElement child = GrammarUtil.getDummyAwarePrevSibling(parent);
-         child != null;
-         child = GrammarUtil.getDummyAwarePrevSibling(child)) {
-      if (!(child instanceof BnfAttrs)) continue;
-      attr = findAttributeByValue(child, value);
-      if (attr != null) return attr.getId().getText();
-    }
-    return null;
-  }
-
-  @Nullable
-  public static BnfExpression findAttributeValueNode(BnfAttrs attrs, String attrName, String ruleName) {
-    if (attrs == null) return null;
-    BnfExpression noPattern = null;
-    for (BnfAttr tree : attrs.getAttrList()) {
-      if (attrName.equals(tree.getId().getText())) {
-        BnfAttrPattern attrPattern = tree.getAttrPattern();
-        BnfExpression attrValue = tree.getExpression();
-        if (attrPattern == null) {
-          noPattern = attrValue;
-          if (ruleName == null) break;
-        }
-        else if (ruleName != null) {
-          BnfLiteralExpression pattern = attrPattern.getLiteralExpression();
-          try {
-            if (pattern != null && Pattern.matches(StringUtil.stripQuotesAroundValue(pattern.getText()), ruleName)) {
-              return attrValue;
-            }
-          }
-          catch (PatternSyntaxException e) {
-            // do nothing
-          }
-        }
-      }
-    }
-    // do not pin nested sequences
-    return ruleName != null && Pattern.matches(".*(_\\d+)+", ruleName)? noPattern != null ? NULL_ATTR : null : noPattern;
-  }
-
-  @Nullable
-  public static BnfAttr findAttributeByValue(PsiElement attrs, String value) {
-    if (!(attrs instanceof BnfAttrs)) return null;
-    for (BnfAttr tree : ((BnfAttrs)attrs).getAttrList()) {
-      if (value.equals(getAttributeValue(tree.getExpression()))) {
-        return tree;
-      }
-    }
-    return null;
+    return ((BnfFile)rule.getContainingFile()).findAttributeValue(rule, attribute, match);
   }
 
   public static Object getAttributeValue(BnfExpression value) {
@@ -411,13 +329,6 @@ public class ParserGeneratorUtil {
       return null;
     }
 
-    public static <T> T attribute(BnfRule rule, KnownAttribute<T> attribute) {
-      BnfExpression attr = findAttributeValueNode(rule.getAttrs(), attribute.getName(), null);
-      Object attrVal = getAttributeValue(attr);
-      if (attrVal != null) return attr == NULL ? attribute.getDefaultValue() : (T)attrVal;
-      return attribute.getDefaultValue();
-    }
-    
     public static BnfRule of(BnfExpression expr) {
       return PsiTreeUtil.getParentOfType(expr, BnfRule.class);
     }

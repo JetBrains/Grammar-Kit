@@ -210,10 +210,10 @@ public class RuleGraphHelper {
       }
     };
     buildRulesGraph();
-    buildContentsMap(ruleExtendsMap);
+    buildContentsMap();
   }
 
-  private void buildContentsMap(MultiMap<BnfRule, BnfRule> ruleExtendsMap) {
+  private void buildContentsMap() {
     final Collection<? extends BnfRule> inheritors = new THashSet<BnfRule>(myRuleExtendsMap.values());
     List<BnfRule> rules = topoSort(myFile.getRules(), new Topology<BnfRule>() {
       @Override

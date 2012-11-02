@@ -28,9 +28,7 @@ import java.util.*;
 
 import static org.intellij.grammar.generator.ExpressionHelper.OperatorInfo;
 import static org.intellij.grammar.generator.ExpressionHelper.OperatorType;
-import static org.intellij.grammar.generator.ParserGeneratorUtil.addWarning;
-import static org.intellij.grammar.generator.ParserGeneratorUtil.getNextName;
-import static org.intellij.grammar.generator.ParserGeneratorUtil.quote;
+import static org.intellij.grammar.generator.ParserGeneratorUtil.*;
 
 /**
  * @author greg
@@ -42,7 +40,7 @@ public class ExpressionGeneratorHelper {
     Map<String, List<OperatorInfo>> opCalls = new LinkedHashMap<String, List<OperatorInfo>>();
     for (BnfRule rule : info.priorityMap.keySet()) {
       OperatorInfo operator = info.operatorMap.get(rule);
-      String opCall = g.generateNodeCall(info.rootRule, operator.operator, getNextName(operator.rule.getName(), 0));
+      String opCall = g.generateNodeCall(info.rootRule, operator.operator, getNextName(operator.rule.getName(), 0), false);
       List<OperatorInfo> list = opCalls.get(opCall);
       if (list == null) opCalls.put(opCall, list = new ArrayList<OperatorInfo>(2));
       list.add(operator);
@@ -59,6 +57,11 @@ public class ExpressionGeneratorHelper {
     String frameName = quote(ParserGeneratorUtil.getRuleDisplayName(info.rootRule, true));
     g.out("public static boolean " + methodName + "(PsiBuilder builder_, int level_, int priority_) {");
     g.out("if (!recursion_guard_(builder_, level_, \"" + methodName + "\")) return false;");
+    boolean fast = "consumeTokenFast".equals(getAttribute(info.rootRule, KnownAttribute.CONSUME_TOKEN_METHOD));
+    if (fast && frameName != null) {
+      g.out("addVariant(builder_, " + frameName + ");");
+    }
+    g.generateFirstCheck(info.rootRule, frameName, true);
     g.out("Marker marker_ = builder_.mark();");
     g.out("boolean result_ = false;");
     g.out("boolean pinned_ = false;");
@@ -110,7 +113,7 @@ public class ExpressionGeneratorHelper {
       String elementType = ParserGeneratorUtil.getElementType(operator.rule);
       boolean rightAssociative = ParserGeneratorUtil.getAttribute(operator.rule, KnownAttribute.RIGHT_ASSOCIATIVE);
       String tailCall =
-        operator.tail == null ? null : g.generateNodeCall(operator.rule, operator.tail, getNextName(operator.rule.getName(), 1));
+        operator.tail == null ? null : g.generateNodeCall(operator.rule, operator.tail, getNextName(operator.rule.getName(), 1), true);
       if (operator.type == OperatorType.BINARY) {
         g.out(
           "result_ = report_error_(builder_, " + methodName + "(builder_, level_, " + (rightAssociative ? priority - 1 : priority) + "));");
@@ -119,7 +122,7 @@ public class ExpressionGeneratorHelper {
       else if (operator.type == OperatorType.N_ARY) {
         g.out("while (true) {");
         g.out("result_ = report_error_(builder_, " + methodName + "(builder_, level_, " + priority + "));");
-        if (tailCall != null) g.out("result_ = " + tailCall + " && result_;");
+        if (tailCall != null) g.out("result_ = report_error_(" + tailCall + ") && result_;");
         g.out("if (!" + opCall + ") break;");
         g.out("}");
       }
@@ -158,6 +161,7 @@ public class ExpressionGeneratorHelper {
           String operatorFuncName = operator.rule.getName();
           g.out("public static boolean " + operatorFuncName + "(PsiBuilder builder_, int level_) {");
           g.out("if (!recursion_guard_(builder_, level_, \"" + operatorFuncName + "\")) return false;");
+          g.generateFirstCheck(operator.rule, frameName, false);
           g.out("boolean result_ = false;");
           g.out("boolean pinned_ = false;");
           g.out("Marker marker_ = builder_.mark();");
@@ -165,7 +169,7 @@ public class ExpressionGeneratorHelper {
 
           String elementType = ParserGeneratorUtil.getElementType(operator.rule);
           String tailCall =
-            operator.tail == null ? null : g.generateNodeCall(operator.rule, operator.tail, getNextName(operator.rule.getName(), 1));
+            operator.tail == null ? null : g.generateNodeCall(operator.rule, operator.tail, getNextName(operator.rule.getName(), 1), true);
 
           g.out("result_ = "+opCall+";");
           g.out("pinned_ = result_;");

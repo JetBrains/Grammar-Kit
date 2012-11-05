@@ -30,6 +30,7 @@ import com.intellij.openapi.wm.ToolWindowId;
 import com.intellij.openapi.wm.ToolWindowManager;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiManager;
+import com.intellij.psi.impl.source.tree.LeafPsiElement;
 import com.intellij.ui.content.Content;
 import com.intellij.ui.popup.AbstractPopup;
 import org.intellij.grammar.analysis.BnfFirstNextAnalyzer;
@@ -112,6 +113,7 @@ public class BnfDocumentationProvider implements DocumentationProvider {
     Map<PsiElement, RuleGraphHelper.Cardinality> map = RuleGraphHelper.getCached(file).getFor(rule);
     Collection<BnfRule> sortedPublicRules = ParserGeneratorUtil.getSortedPublicRules(map.keySet());
     Collection<BnfExpression> sortedTokens = ParserGeneratorUtil.getSortedTokens(map.keySet());
+    Collection<LeafPsiElement> sortedExternalRules = ParserGeneratorUtil.getSortedExternalRules(map.keySet());
     if (sortedPublicRules.isEmpty() && sortedTokens.isEmpty()) {
       docBuilder.append("<br><h1>Contains no public rules and no tokens</h1>");
     }
@@ -133,6 +135,12 @@ public class BnfDocumentationProvider implements DocumentationProvider {
       }
       else {
         docBuilder.append("<h2>Contains no tokens</h2>");
+      }
+    }
+    if (!sortedExternalRules.isEmpty()) {
+      docBuilder.append("<br><h1>Contains external rules:</h1>");
+      for (LeafPsiElement r : sortedExternalRules) {
+        docBuilder.append(" ").append(r.getText()).append(RuleGraphHelper.getCardinalityText(map.get(r)));
       }
     }
     return docBuilder.toString();

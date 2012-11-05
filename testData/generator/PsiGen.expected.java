@@ -185,15 +185,9 @@ public class PsiGen implements PsiParser {
     return true;
   }
 
-  // (',' a_expr)
+  // ',' a_expr
   private static boolean expr_1_0(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "expr_1_0")) return false;
-    return expr_1_0_0(builder_, level_ + 1);
-  }
-
-  // ',' a_expr
-  private static boolean expr_1_0_0(PsiBuilder builder_, int level_) {
-    if (!recursion_guard_(builder_, level_, "expr_1_0_0")) return false;
     boolean result_ = false;
     Marker marker_ = builder_.mark();
     result_ = consumeToken(builder_, ",");
@@ -697,19 +691,13 @@ public class PsiGen2 {
     return result_;
   }
 
-  // (a_expr | specialRef b_expr | some_expr_private)
+  // a_expr | specialRef b_expr | some_expr_private
   private static boolean some_expr_0(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "some_expr_0")) return false;
-    return some_expr_0_0(builder_, level_ + 1);
-  }
-
-  // a_expr | specialRef b_expr | some_expr_private
-  private static boolean some_expr_0_0(PsiBuilder builder_, int level_) {
-    if (!recursion_guard_(builder_, level_, "some_expr_0_0")) return false;
     boolean result_ = false;
     Marker marker_ = builder_.mark();
     result_ = a_expr(builder_, level_ + 1);
-    if (!result_) result_ = some_expr_0_0_1(builder_, level_ + 1);
+    if (!result_) result_ = some_expr_0_1(builder_, level_ + 1);
     if (!result_) result_ = some_expr_private(builder_, level_ + 1);
     if (!result_) {
       marker_.rollbackTo();
@@ -721,8 +709,8 @@ public class PsiGen2 {
   }
 
   // specialRef b_expr
-  private static boolean some_expr_0_0_1(PsiBuilder builder_, int level_) {
-    if (!recursion_guard_(builder_, level_, "some_expr_0_0_1")) return false;
+  private static boolean some_expr_0_1(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "some_expr_0_1")) return false;
     boolean result_ = false;
     Marker marker_ = builder_.mark();
     result_ = specialRef(builder_, level_ + 1);

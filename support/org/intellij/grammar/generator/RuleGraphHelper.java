@@ -57,6 +57,7 @@ public class RuleGraphHelper {
   private final Set<BnfRule> myRulesWithTokens = new THashSet<BnfRule>();
 
   private static final LeafPsiElement LEFT_MARKER = new LeafPsiElement(new IElementType("LEFT_MARKER", Language.ANY, false) {}, "LEFT_MARKER");
+  private static final IElementType EXTERNAL_TYPE = new IElementType("EXTERNAL_TYPE", Language.ANY, false) {};
 
   public static String getCardinalityText(Cardinality cardinality) {
     if (cardinality == AT_LEAST_ONE) {
@@ -153,6 +154,22 @@ public class RuleGraphHelper {
     return ruleExtendsMap;
   }
 
+  private static final Key<CachedValue<Map<String, String>>> TOKEN_MAP_KEY = Key.create("TOKEN_MAP_KEY");
+  public static Map<String, String> getTokenMap(final BnfFile file) {
+    CachedValue<Map<String, String>> value = file.getUserData(TOKEN_MAP_KEY);
+    if (value == null) {
+      file.putUserData(TOKEN_MAP_KEY, value =
+        CachedValuesManager.getManager(file.getProject()).createCachedValue(new CachedValueProvider<Map<String, String>>() {
+          @Nullable
+          @Override
+          public Result<Map<String, String>> compute() {
+            return new Result<Map<String, String>>(computeTokens(file), file);
+          }
+        }, false));
+    }
+    return value.getValue();
+  }
+
   public static Map<String, String> computeTokens(BnfFile file) {
     Map<String, String> result = new LinkedHashMap<String, String>();
     for (Pair<String, String> pair : getRootAttribute(file, KnownAttribute.TOKENS)) {
@@ -193,10 +210,10 @@ public class RuleGraphHelper {
       }
     };
     buildRulesGraph();
-    buildContentsMap(ruleExtendsMap);
+    buildContentsMap();
   }
 
-  private void buildContentsMap(MultiMap<BnfRule, BnfRule> ruleExtendsMap) {
+  private void buildContentsMap() {
     final Collection<? extends BnfRule> inheritors = new THashSet<BnfRule>(myRuleExtendsMap.values());
     List<BnfRule> rules = topoSort(myFile.getRules(), new Topology<BnfRule>() {
       @Override
@@ -303,7 +320,7 @@ public class RuleGraphHelper {
       BnfRule targetRule = myFile.getRule(tree.getText());
       if (targetRule != null) {
         if (Rule.isExternal(targetRule)) {
-          result = Collections.emptyMap();
+          result = psiMap(new LeafPsiElement(EXTERNAL_TYPE, targetRule.getName()), REQUIRED);
         }
         else if (Rule.isLeft(targetRule)) {
           if (!Rule.isInner(targetRule) && !Rule.isPrivate(targetRule)) {
@@ -341,7 +358,7 @@ public class RuleGraphHelper {
         BnfExpression ruleRef = expressionList.get(0);
         BnfRule metaRule = myFile.getRule(ruleRef.getText());
         if (metaRule == null) {
-          result = Collections.emptyMap();
+          result = psiMap(new LeafPsiElement(EXTERNAL_TYPE, "<<"+ruleRef.getText()+">>"), REQUIRED);
         }
         else if (Rule.isPrivate(metaRule)) {
           result = new HashMap<PsiElement, Cardinality>();

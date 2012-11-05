@@ -1,0 +1,19 @@
+<component name="ArtifactManager">
+  <artifact type="jar" build-on-make="true" name="expression-console-sample">
+    <output-path>$PROJECT_DIR$/binaries</output-path>
+    <root id="archive" name="expression-console-sample.jar">
+      <element id="directory" name="org">
+        <element id="directory" name="intellij">
+          <element id="directory" name="grammar">
+            <element id="directory" name="expression">
+              <element id="dir-copy" path="$PROJECT_DIR$/out/test/grammar-kit/org/intellij/grammar/expression" />
+            </element>
+          </element>
+        </element>
+      </element>
+      <element id="directory" name="META-INF">
+        <element id="file-copy" path="$PROJECT_DIR$/tests/org/intellij/grammar/expression/META-INF/MANIFEST.MF" />
+      </element>
+    </root>
+  </artifact>
+</component>

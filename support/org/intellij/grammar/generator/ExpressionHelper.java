@@ -29,6 +29,7 @@ public class ExpressionHelper {
   };
   private final BnfFile myFile;
   private final RuleGraphHelper myRuleGraph;
+  private boolean myAddWarnings;
 
   private final Map<BnfRule, ExpressionInfo> myExpressionMap = new HashMap<BnfRule, ExpressionInfo>();
   private final Map<BnfRule, BnfRule> myRootRulesMap = new HashMap<BnfRule, BnfRule>();
@@ -41,7 +42,7 @@ public class ExpressionHelper {
           @Nullable
           @Override
           public Result<ExpressionHelper> compute() {
-            return new Result<ExpressionHelper>(new ExpressionHelper(file, RuleGraphHelper.getCached(file)), file);
+            return new Result<ExpressionHelper>(new ExpressionHelper(file, RuleGraphHelper.getCached(file), false), file);
           }
         }, false));
     }
@@ -49,10 +50,16 @@ public class ExpressionHelper {
   }
 
 
-  public ExpressionHelper(BnfFile file, RuleGraphHelper ruleGraph) {
+  public ExpressionHelper(BnfFile file, RuleGraphHelper ruleGraph, boolean addWarnings) {
     myFile = file;
     myRuleGraph = ruleGraph;
+    myAddWarnings = addWarnings;
     buildExpressionRules();
+  }
+
+  public void addWarning(String text) {
+    if (!myAddWarnings) return;
+    ParserGeneratorUtil.addWarning(myFile.getProject(), text);
   }
 
   public ExpressionInfo getExpressionInfo(BnfRule rule) {
@@ -67,6 +74,7 @@ public class ExpressionHelper {
     BnfFirstNextAnalyzer analyzer = new BnfFirstNextAnalyzer();
     for (BnfRule rule : myFile.getRules()) {
       if (Rule.isPrivate(rule) || Rule.isFake(rule)) continue;
+      if (myRootRulesMap.containsKey(rule)) continue;
       Map<PsiElement, RuleGraphHelper.Cardinality> contentRules = myRuleGraph.getFor(rule);
       if (!contentRules.isEmpty()) continue;
       if (!analyzer.asStrings(analyzer.calcFirst(rule)).contains(rule.getName())) continue;
@@ -97,13 +105,13 @@ public class ExpressionHelper {
 
     for (BnfRule subRule : subRules) {
       if (priorityMap.containsKey(subRule)) {
-        addWarning(myFile.getProject(), subRule + " has duplicate appearance!");
+        addWarning(subRule + " has duplicate appearance!");
         continue;
       }
       BnfRule prev = myRootRulesMap.put(subRule, info.rootRule);
       if (prev != null) {
-        addWarning(myFile.getProject(),
-                   subRule + " must not be in several expression hierarchies: " + prev.getName() + " and " + info.rootRule.getName());
+        addWarning(
+            subRule + " must not be in several expression hierarchies: " + prev.getName() + " and " + info.rootRule.getName());
       }
 
       if (rulesCluster.contains(subRule)) {
@@ -115,7 +123,7 @@ public class ExpressionHelper {
         addToPriorityMap(subRule, rulesCluster, info);
       }
       else {
-        addWarning(myFile.getProject(), subRule + ": priority group must be 'private'");
+        addWarning(subRule + ": priority group must be 'private'");
       }
     }
   }
@@ -142,7 +150,7 @@ public class ExpressionHelper {
       info = new OperatorInfo(rule, OperatorType.ATOM, rule.getExpression(), null);
     }
     else if (childExpressions.size() < 2) {
-      addWarning(myFile.getProject(), "invalid expression definition for " + rule + ": 2 or more arguments expected");
+      addWarning("invalid expression definition for " + rule + ": 2 or more arguments expected");
       info = new OperatorInfo(rule, OperatorType.ATOM, rule.getExpression(), null);
     }
     else if (cardinality == RuleGraphHelper.Cardinality.REQUIRED) {
@@ -153,7 +161,7 @@ public class ExpressionHelper {
         info = new OperatorInfo(rule, OperatorType.POSTFIX, combine(childExpressions.subList(1, childExpressions.size())), null, substRule);
       }
       else if (index == -1) {
-        addWarning(myFile.getProject(), rule +": " + rootRuleName + " reference not found, treating as ATOM");
+        addWarning(rule +": " + rootRuleName + " reference not found, treating as ATOM");
         info = new OperatorInfo(rule, OperatorType.ATOM, rule.getExpression(), null);
       }
       else {
@@ -165,7 +173,7 @@ public class ExpressionHelper {
       // binary or n-ary expression
       int index = indexOf(rootRuleSubst, 0, childExpressions, operatorMap);
       if (index != 0) {
-        addWarning(myFile.getProject(), rule +": binary or n-ary expression cannot have prefix, treating as ATOM");
+        addWarning(rule +": binary or n-ary expression cannot have prefix, treating as ATOM");
         info = new OperatorInfo(rule, OperatorType.ATOM, rule.getExpression(), null);
       }
       else {
@@ -181,8 +189,8 @@ public class ExpressionHelper {
                                                     ((BnfParenExpression)((BnfQuantified)lastExpression).getExpression()).getExpression());
           int index3 = indexOf(rootRuleSubst, 0, childExpressions2, operatorMap);
           if (badNAry || index3 == -1) {
-            addWarning(myFile.getProject(),
-                       rule + ": '" + rootRuleName + " ( <op> " + rootRuleName + ") +' expected for N-ary operator, treating as POSTFIX"
+            addWarning(
+                rule + ": '" + rootRuleName + " ( <op> " + rootRuleName + ") +' expected for N-ary operator, treating as POSTFIX"
             );
             info = new OperatorInfo(rule, OperatorType.POSTFIX, combine(childExpressions.subList(1, childExpressions.size())), null,
                                     substRule);
@@ -199,7 +207,7 @@ public class ExpressionHelper {
       }
     }
     else {
-      addWarning(myFile.getProject(), rule +": unexpected cardinality " + cardinality + " of " + rootRuleName +", treating as ATOM");
+      addWarning(rule +": unexpected cardinality " + cardinality + " of " + rootRuleName +", treating as ATOM");
       info = new OperatorInfo(rule, OperatorType.ATOM, rule.getExpression(), null);
     }
     operatorMap.put(rule, info);

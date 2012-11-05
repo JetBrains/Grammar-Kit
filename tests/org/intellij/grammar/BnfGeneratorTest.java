@@ -7,6 +7,7 @@ import com.intellij.openapi.extensions.Extensions;
 import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.DumbServiceImpl;
+import com.intellij.openapi.util.Comparing;
 import com.intellij.openapi.util.Disposer;
 import com.intellij.openapi.util.io.FileUtil;
 import com.intellij.psi.PsiFileFactory;
@@ -15,9 +16,12 @@ import com.intellij.psi.PsiReferenceServiceImpl;
 import com.intellij.psi.impl.PsiFileFactoryImpl;
 import com.intellij.psi.impl.search.CachesBasedRefSearcher;
 import com.intellij.psi.impl.search.PsiSearchHelperImpl;
+import com.intellij.psi.impl.source.resolve.ResolveCache;
 import com.intellij.psi.impl.source.tree.injected.InjectedLanguageManagerImpl;
 import com.intellij.psi.search.PsiSearchHelper;
+import com.intellij.rt.execution.junit.FileComparisonFailure;
 import com.intellij.testFramework.ParsingTestCase;
+import com.thaiopensource.xml.dtd.test.CompareFailException;
 import org.intellij.grammar.generator.ParserGenerator;
 import org.intellij.grammar.psi.impl.BnfFileImpl;
 import org.jetbrains.annotations.NonNls;
@@ -55,6 +59,7 @@ public class BnfGeneratorTest extends ParsingTestCase {
     getProject().registerService(PsiSearchHelper.class, new PsiSearchHelperImpl(getPsiManager()));
     getProject().registerService(DumbService.class, new DumbServiceImpl(getProject(), getProject().getMessageBus()));
     getProject().registerService(PsiFileFactory.class, new PsiFileFactoryImpl(getPsiManager()));
+    getProject().registerService(ResolveCache.class, new ResolveCache(getProject().getMessageBus()));
     InjectedLanguageManagerImpl languageManager = new InjectedLanguageManagerImpl(getProject(), DumbService.getInstance(getProject()));
     Disposer.register(getProject(), languageManager);
     getProject().registerService(InjectedLanguageManager.class, languageManager);
@@ -114,7 +119,9 @@ public class BnfGeneratorTest extends ParsingTestCase {
         try {
           if (OVERWRITE_TESTDATA) throw new FileNotFoundException();
           String expectedText = loadFile(expectedName);
-          assertEquals(expectedName, expectedText, result);
+          if (!Comparing.equal(expectedText, result)) {
+            throw new FileComparisonFailure(expectedName, expectedText, result, new File(myFullDataPath + File.separator + expectedName).getAbsolutePath());
+          }
         }
         catch (FileNotFoundException e) {
           FileWriter writer = new FileWriter(new File(myFullDataPath, expectedName));

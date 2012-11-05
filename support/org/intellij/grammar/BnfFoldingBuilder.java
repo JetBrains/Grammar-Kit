@@ -5,6 +5,7 @@ import com.intellij.lang.folding.FoldingBuilderEx;
 import com.intellij.lang.folding.FoldingDescriptor;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.project.DumbAware;
+import com.intellij.openapi.util.TextRange;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.search.PsiElementProcessor;
 import com.intellij.psi.util.PsiTreeUtil;
@@ -28,7 +29,9 @@ public class BnfFoldingBuilder extends FoldingBuilderEx implements DumbAware {
 
     final ArrayList<FoldingDescriptor> result = new ArrayList<FoldingDescriptor>();
     for (BnfAttrs attrs : file.getAttributes()) {
-      result.add(new FoldingDescriptor(attrs, attrs.getTextRange()));
+      TextRange textRange = attrs.getTextRange();
+      if (textRange.getLength() <= 2) continue;
+      result.add(new FoldingDescriptor(attrs, textRange));
     }
     for (BnfRule rule : file.getRules()) {
       //result.add(new FoldingDescriptor(rule, rule.getTextRange()));

@@ -24,6 +24,7 @@ import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.psi.CommonClassNames;
 import com.intellij.psi.NavigatablePsiElement;
 import com.intellij.psi.PsiElement;
+import com.intellij.psi.impl.source.tree.LeafPsiElement;
 import com.intellij.psi.tree.IElementType;
 import com.intellij.util.Function;
 import com.intellij.util.ObjectUtils;
@@ -100,7 +101,7 @@ public class ParserGenerator {
     mySimpleTokens = RuleGraphHelper.computeTokens(myFile);
     myRuleExtendsMap = RuleGraphHelper.computeInheritance(myFile);
     myGraphHelper = new RuleGraphHelper(myFile, myRuleExtendsMap);
-    myExpressionHelper = new ExpressionHelper(myFile, myGraphHelper);
+    myExpressionHelper = new ExpressionHelper(myFile, myGraphHelper, true);
   }
 
   public void setUnitTestMode(boolean unitTestMode) {
@@ -633,19 +634,26 @@ public class ParserGenerator {
     return classHeader;
   }
 
-  void generateNode(BnfRule rule, BnfExpression node, String funcName, Set<BnfExpression> visited) {
+  void generateNode(BnfRule rule, BnfExpression initialNode, String funcName, Set<BnfExpression> visited) {
+    boolean isRule = initialNode.getParent() == rule;
+    while (isTrivialNode(initialNode)) {
+      initialNode = getTrivialNodeChild(initialNode);
+    }
+    BnfExpression node = initialNode;
+
     IElementType type = getEffectiveType(node);
 
     for (String s : StringUtil.split(node.getText(), "\n")) {
       out("// " + s);
     }
-    boolean isRule = node.getParent() == rule;
     boolean firstNonTrivial = node == Rule.firstNotTrivial(rule);
     boolean isPrivate = !(isRule || firstNonTrivial) || Rule.isPrivate(rule) || myGrammarRoot.equals(rule.getName());
     boolean isLeft = firstNonTrivial && Rule.isLeft(rule);
     boolean isLeftInner = isLeft && (isPrivate || Rule.isInner(rule));
-    final String recoverRoot = firstNonTrivial ? Rule.attribute(rule, KnownAttribute.RECOVER_UNTIL) : null;
+    final String recoverRoot = firstNonTrivial ? getAttribute(rule, KnownAttribute.RECOVER_UNTIL) : null;
     final boolean canCollapse = !isPrivate && (!isLeft || isLeftInner) && firstNonTrivial && canCollapse(rule);
+
+    String elementType = getElementType(rule);
 
     final List<BnfExpression> children;
     out((!isRule ? "private " : isPrivate ? "" : "public ") + "static boolean " + funcName + "(PsiBuilder builder_, int level_"
@@ -668,7 +676,14 @@ public class ParserGenerator {
     else {
       children = getChildExpressions(node);
       if (children.isEmpty()) {
-        out("return true;");
+        if (isPrivate || StringUtil.isEmpty(elementType)) {
+          out("return true;");
+        }
+        else {
+          // todo handle left rules
+          out("builder_.mark().done(" + elementType + ");");
+          out("return true;");
+        }
         out("}");
         return;
       }
@@ -678,47 +693,9 @@ public class ParserGenerator {
     String debugFuncName = funcName; // + ":" + node.toStringTree();
     out("if (!recursion_guard_(builder_, level_, \"" + debugFuncName + "\")) return false;");
 
-    if (isTrivialNode(node)) {
-      BnfExpression child = children.get(0);
-      out("return " + generateNodeCall(rule, child, getNextName(funcName, 0)) + ";");
-      out("}");
-      generateNodeChildren(rule, funcName, children, visited);
-      return;
-    }
-
-
     String frameName = firstNonTrivial && !Rule.isMeta(rule)? quote(getRuleDisplayName(rule, !isPrivate)) : null;
-    if (generateFirstCheck > 0 && recoverRoot == null && (isRule || firstNonTrivial)) {
-      BnfFirstNextAnalyzer analyzer = new BnfFirstNextAnalyzer();
-      Set<String> firstSet = analyzer.asStrings(analyzer.calcFirstInner(node, new THashSet<BnfExpression>(), new THashSet<BnfRule>()));
-      List<String> firstElementTypes = new ArrayList<String>(firstSet.size());
-      for (String s : firstSet) {
-        @SuppressWarnings("StringEquality")
-        boolean unknown = s == BnfFirstNextAnalyzer.MATCHES_EOF || s == BnfFirstNextAnalyzer.MATCHES_ANY;
-        String elementType = unknown? null : firstToElementType(s);
-        if (elementType != null) {
-          firstElementTypes.add(elementType);
-        }
-        else {
-          firstElementTypes.clear();
-          break;
-        }
-      }
-      // do not include frameName if FIRST is known and its size is 1
-      if (!firstElementTypes.isEmpty() && firstElementTypes.size() == 1) frameName = null;
-      if (!firstElementTypes.isEmpty() && firstElementTypes.size() <= generateFirstCheck) {
-        StringBuilder sb = new StringBuilder("if (");
-        for (int count = 0, elementTypesSize = firstElementTypes.size(); count < elementTypesSize; count++) {
-          if (count > 0) sb.append(count % 2 == 0 ? "\n  && " : " && ");
-          sb.append("!nextTokenIs(builder_, ").append(firstElementTypes.get(count)).append(")");
-        }
-        if (frameName != null) {
-          sb.append(firstElementTypes.size() % 2 == 0 ? "\n  && " : " && ");
-          sb.append("replaceVariants(builder_, ").append(firstElementTypes.size()).append(", ").append(frameName).append(")");
-        }
-        sb.append(") return false;");
-        out(sb.toString());
-      }
+    if (recoverRoot == null && (isRule || firstNonTrivial)) {
+      frameName = generateFirstCheck(rule, frameName, true);
     }
 
     final long funcId = StringHash.calc(funcName);
@@ -735,7 +712,7 @@ public class ParserGenerator {
     if (pinned) {
       out("boolean pinned_ = false;");
     }
-    if (!isPrivate && canCollapse) {
+    if (!isPrivate && canCollapse && StringUtil.isNotEmpty(elementType)) {
       out("int start_ = builder_.getCurrentOffset();");
     }
     if (isLeft) {
@@ -830,11 +807,10 @@ public class ParserGenerator {
         out("result_ = !" + nodeCall + ";");
       }
       else {
-        throw new AssertionError("unexpected: " + type);
+        addWarning(myFile.getProject(), "unexpected: " + type);
       }
     }
 
-    String elementType = getElementType(rule);
     if (type == BNF_OP_AND || type == BNF_OP_NOT) {
       out("marker_.rollbackTo();");
     }
@@ -909,10 +885,46 @@ public class ParserGenerator {
     generateNodeChildren(rule, funcName, children, visited);
   }
 
+  public String generateFirstCheck(BnfRule rule, String frameName, boolean skipIfOne) {
+    if (generateFirstCheck <= 0) return frameName;
+    BnfFirstNextAnalyzer analyzer = new BnfFirstNextAnalyzer();
+    Set<String> firstSet = analyzer.asStrings(analyzer.calcFirstInner(rule.getExpression(), new THashSet<BnfExpression>(), new THashSet<BnfRule>()));
+    List<String> firstElementTypes = new ArrayList<String>(firstSet.size());
+    for (String s : firstSet) {
+      @SuppressWarnings("StringEquality")
+      boolean unknown = s == BnfFirstNextAnalyzer.MATCHES_EOF || s == BnfFirstNextAnalyzer.MATCHES_ANY;
+      String t = unknown? null : firstToElementType(s);
+      if (t != null) {
+        firstElementTypes.add(t);
+      }
+      else {
+        firstElementTypes.clear();
+        break;
+      }
+    }
+    boolean fast = "consumeTokenFast".equals(getAttribute(rule, KnownAttribute.CONSUME_TOKEN_METHOD));
+    // do not include frameName if FIRST is known and its size is 1
+    boolean dropFrameName = skipIfOne && !firstElementTypes.isEmpty() && firstElementTypes.size() == 1;
+    if (!firstElementTypes.isEmpty() && firstElementTypes.size() <= generateFirstCheck) {
+      StringBuilder sb = new StringBuilder("if (");
+      for (int count = 0, elementTypesSize = firstElementTypes.size(); count < elementTypesSize; count++) {
+        if (count > 0) sb.append(count % 2 == 0 ? "\n  && " : " && ");
+        sb.append("!").append(fast? "nextTokenIsFast" : "nextTokenIs").append("(builder_, ").append(firstElementTypes.get(count)).append(")");
+      }
+      if (!dropFrameName && frameName != null && !fast) {
+        sb.append(firstElementTypes.size() % 2 == 0 ? "\n  && " : " && ");
+        sb.append("replaceVariants(builder_, ").append(firstElementTypes.size()).append(", ").append(frameName).append(")");
+      }
+      sb.append(") return false;");
+      out(sb.toString());
+    }
+    return dropFrameName? null : frameName;
+  }
+
   private boolean canCollapse(BnfRule rule) {
     Map<PsiElement, RuleGraphHelper.Cardinality> map = myGraphHelper.getFor(rule);
     for (PsiElement element : map.keySet()) {
-      if (element instanceof BnfExternalExpression) continue;
+      if (element instanceof LeafPsiElement) continue;
       RuleGraphHelper.Cardinality c = map.get(element);
       if (c.optional()) continue;
       if (!(element instanceof BnfRule)) return false;
@@ -980,10 +992,17 @@ public class ParserGenerator {
   private String getTokenName(String value) {
     String existing = mySimpleTokens.get(value);
     if (existing == null) {
-      String attributeName = getAttributeName(ContainerUtil.getFirstItem(myFile.getAttributes()), value);
-      if (attributeName != null) {
-        mySimpleTokens.put(value, attributeName);
-        return attributeName;
+      BnfAttrs attrs = ContainerUtil.getFirstItem(myFile.getAttributes());
+      if (attrs != null) {
+        for (BnfAttr attr : attrs.getAttrList()) {
+          BnfExpression expression = attr.getExpression();
+          if (!(expression instanceof BnfStringLiteralExpression)) continue;
+          if (value.equals(ParserGeneratorUtil.getLiteralValue((BnfLiteralExpression)expression))) {
+            String attrName = attr.getName();
+            mySimpleTokens.put(value, attrName);
+            return attrName;
+          }
+        }
       }
     }
     return existing;
@@ -1023,18 +1042,28 @@ public class ParserGenerator {
   }
 
   String generateNodeCall(BnfRule rule, @Nullable BnfExpression node, String nextName) {
+    return generateNodeCall(rule, node, nextName, null);
+  }
+
+  String generateNodeCall(BnfRule rule, @Nullable BnfExpression node, String nextName, Boolean forceDefaultConsumeToken) {
     IElementType type = node == null ? BNF_REFERENCE_OR_TOKEN : getEffectiveType(node);
     String text = node == null ? nextName : node.getText();
+    PsiElement parent = node == null? null : node.getParent();
+    String consumeMethodName =
+      Boolean.TRUE.equals(forceDefaultConsumeToken) ||
+      !Boolean.FALSE.equals(forceDefaultConsumeToken) && parent instanceof BnfSequence && parent.getFirstChild() != node ?
+      KnownAttribute.CONSUME_TOKEN_METHOD.getDefaultValue() :
+      getAttribute(rule, KnownAttribute.CONSUME_TOKEN_METHOD);
     if (type == BNF_STRING) {
       String value = StringUtil.stripQuotesAroundValue(text);
       String attributeName = getTokenName(value);
       if (attributeName != null) {
-        return generateConsumeToken(attributeName);
+        return generateConsumeToken(attributeName, consumeMethodName);
       }
-      return generateConsumeTextToken(value);
+      return generateConsumeTextToken(value, consumeMethodName);
     }
     else if (type == BNF_NUMBER) {
-      return generateConsumeTextToken(text);
+      return generateConsumeTextToken(text, consumeMethodName);
     }
     else if (type == BNF_REFERENCE_OR_TOKEN) {
       BnfRule subRule = myFile.getRule(text);
@@ -1064,7 +1093,7 @@ public class ParserGenerator {
       if (!mySimpleTokens.containsKey(text) && !mySimpleTokens.values().contains(text)) {
         mySimpleTokens.put(text, null);
       }
-      return generateConsumeToken(text);
+      return generateConsumeToken(text, consumeMethodName);
     }
     else if (type == BNF_EXTERNAL_EXPRESSION) {
       List<BnfExpression> expressions = ((BnfExternalExpression)node).getExpressionList();
@@ -1174,8 +1203,12 @@ public class ParserGenerator {
     }
   }
 
-  private String generateConsumeToken(String tokenName) {
-    return "consumeToken(builder_, " + getTokenElementType(tokenName) + ")";
+  private String generateConsumeToken(String tokenName, String consumeMethodName) {
+    return consumeMethodName + "(builder_, " + getTokenElementType(tokenName) + ")";
+  }
+
+  public static String generateConsumeTextToken(String tokenText, String consumeMethodName) {
+    return consumeMethodName + "(builder_, \"" + tokenText + "\")";
   }
 
   private String getTokenElementType(String token) {

@@ -39,21 +39,22 @@ public class BnfColorSettingsPage implements ColorSettingsPage {
 
   static {
     ATTRS = new AttributesDescriptor[]{
-        new AttributesDescriptor("illegal character", ILLEGAL),
-        new AttributesDescriptor("comment", COMMENT),
-        new AttributesDescriptor("string", STRING),
-        new AttributesDescriptor("number", NUMBER),
-        new AttributesDescriptor("keyword", KEYWORD),
-        new AttributesDescriptor("token", TOKEN),
-        new AttributesDescriptor("rule", RULE),
-        new AttributesDescriptor("attribute", ATTRIBUTE),
-        new AttributesDescriptor("external", EXTERNAL),
-        new AttributesDescriptor("parenthesis", PARENTHS),
-        new AttributesDescriptor("braces", BRACES),
-        new AttributesDescriptor("brackets", BRACKETS),
-        new AttributesDescriptor("angles", ANGLES),
-        new AttributesDescriptor("operation sign", OP_SIGN),
-        new AttributesDescriptor("pin marker", PIN),
+      new AttributesDescriptor("Illegal character", ILLEGAL),
+      new AttributesDescriptor("Comment", COMMENT),
+      new AttributesDescriptor("String", STRING),
+      new AttributesDescriptor("Number", NUMBER),
+      new AttributesDescriptor("Keyword", KEYWORD),
+      new AttributesDescriptor("Token", TOKEN),
+      new AttributesDescriptor("Rule", RULE),
+      new AttributesDescriptor("Attribute", ATTRIBUTE),
+      new AttributesDescriptor("Pattern", PATTERN),
+      new AttributesDescriptor("External", EXTERNAL),
+      new AttributesDescriptor("Parenthesis", PARENTHS),
+      new AttributesDescriptor("Braces", BRACES),
+      new AttributesDescriptor("Brackets", BRACKETS),
+      new AttributesDescriptor("Angles", ANGLES),
+      new AttributesDescriptor("Operation sign", OP_SIGN),
+      new AttributesDescriptor("Pin marker", PIN),
     };
   }
 
@@ -88,20 +89,22 @@ public class BnfColorSettingsPage implements ColorSettingsPage {
            " */\n" +
            "{\n" +
            "  <a>generatePsi</a>=<k>false</k>\n" +
-           "  <a>classHeader</a>=\"header.txt\"\n" +
-           "  <a>parserClass</a>=\"org.MyParser\"\n" +
-           "  <a>pin</a>(\".*_list(?:_\\d.*)?\")=1\n" +
-           "  <a>COMMA</a>=\",\"\n" +
-           "  <a>LEFT_PAREN</a>=\"(\"\n" +
-           "  <a>RIGHT_PAREN</a>=\")\"\n" +
+           "  <a>classHeader</a>=<pa>\"header.txt\"</pa>\n" +
+           "  <a>parserClass</a>=<pa>\"org.MyParser\"</pa>\n" +
+           "  <a>pin</a>(<pa>\".*_list(?:_\\d.*)?\"</pa>)=1\n" +
+           "  <a>tokens</a>=[\n" +
+           "    <a>COMMA</a>=<pa>\",\"</pa>\n" +
+           "    <a>LEFT_PAREN</a>=<pa>\"(\"</pa>\n" +
+           "    <a>RIGHT_PAREN</a>=<pa>\")\"</pa>\n" +
+           "  ]\n" +
            "}\n" +
            "// Grammar rules\n" +
            "<r>root</r> ::= <r>header</r> <r>content</r>\n" +
-           "<r>header</r> ::= <t>declare</t> <r>reference</r>\n" +
+           "<r>header</r> ::= <t>DECLARE</t> <r>reference</r>\n" +
            "<k>external</k> <r>reference</r> ::= <e>parseReference</e>\n" +
-           "<k>private</k> <k>meta</k> <r>comma_list</r> ::= <p>'('</p> <<<e>p</e>>> (<p>','</p> <<<e>p</e>>>) * ')'\n" +
-           "<k>private</k> <r>content</r> ::= <p><t>as</t></p> <<<r>comma_list</r> <r>element</r>>> {<a>pin</a>=1}\n" +
-           "<r>element</r> ::= <r>reference</r> [ {'+' | '-'} <r>reference</r> <t>only</t>?] {<a>recoverUntil</a>=\"<r>element_recover</r>\"}\n" +
+           "<k>private</k> <k>meta</k> <r>comma_list</r> ::= <p><s>'('</s></p> <<<e>p</e>>> (<p><s>','</s></p> <<<e>p</e>>>) * ')'\n" +
+           "<k>private</k> <r>content</r> ::= <p><t>AS</t></p> <<<r>comma_list</r> <r>element</r>>> {<a>pin</a>=1}\n" +
+           "<r>element</r> ::= <r>reference</r> [ {<pa>'+'</pa> | <pa>'-'</pa>} <r>reference</r> <t>ONLY</t>?] {<a>recoverUntil</a>=<r>element_recover</r>}\n" +
            "<k>private</k> <r>element_recover</r> ::= !(',' | ')')\n" +
            "\n";
   }
@@ -111,10 +114,12 @@ public class BnfColorSettingsPage implements ColorSettingsPage {
     final Map<String, TextAttributesKey> map = new THashMap<String, TextAttributesKey>();
     map.put("r", RULE);
     map.put("a", ATTRIBUTE);
+    map.put("pa", PATTERN);
     map.put("t", TOKEN);
     map.put("k", KEYWORD);
     map.put("e", EXTERNAL);
     map.put("p", PIN);
+    map.put("s", STRING);
     return map;
   }
 

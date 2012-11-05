@@ -24,10 +24,7 @@ import gnu.trove.THashSet;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.LinkedList;
+import java.util.*;
 
 /**
  * @author gregsh
@@ -108,6 +105,26 @@ public class GeneratedParserUtilBase {
       return true;
     }
     return false;
+  }
+
+  public static boolean consumeTokenFast(PsiBuilder builder_, IElementType token) {
+    if (builder_.getTokenType() == token) {
+      builder_.advanceLexer();
+      return true;
+    }
+    return false;
+  }
+
+  public static boolean consumeTokenFast(PsiBuilder builder_, String text) {
+    if (Comparing.strEqual(builder_.getTokenText(), text, ErrorState.get(builder_).caseSensitive)) {
+      builder_.advanceLexer();
+      return true;
+    }
+    return false;
+  }
+
+  public static boolean nextTokenIsFast(PsiBuilder builder_, IElementType token) {
+    return builder_.getTokenType() == token;
   }
 
   public static boolean nextTokenIs(PsiBuilder builder_, IElementType token) {
@@ -456,9 +473,10 @@ public class GeneratedParserUtilBase {
     public boolean altMode;
 
     private int lastExpectedVariantOffset = -1;
-    ArrayList<Variant> variants = new ArrayList<Variant>();
-    ArrayList<Variant> unexpected = new ArrayList<Variant>();
-    final LimitedPool<Variant> VARIANTS = new LimitedPool<Variant>(5000, new LimitedPool.ObjectFactory<Variant>() {
+    MyList<Variant> variants = new MyList<Variant>(500);
+    MyList<Variant> unexpected = new MyList<Variant>(10);
+
+    final LimitedPool<Variant> VARIANTS = new LimitedPool<Variant>(1000, new LimitedPool.ObjectFactory<Variant>() {
       public Variant create() {
         return new Variant();
       }
@@ -547,11 +565,11 @@ public class GeneratedParserUtilBase {
     }
 
     void clearVariants(boolean expected, int start) {
-      ArrayList<Variant> list = expected? variants : unexpected;
+      MyList<Variant> list = expected? variants : unexpected;
       for (int i = start, len = list.size(); i < len; i ++) {
         VARIANTS.recycle(list.get(i));
       }
-      list.subList(start, list.size()).clear();
+      list.setSize(start);
     }
   }
 
@@ -761,6 +779,16 @@ public class GeneratedParserUtilBase {
     @Override
     public Language getLanguage() {
       return getParent().getLanguage();
+    }
+  }
+
+  protected static class MyList<E> extends ArrayList<E> {
+    public MyList(int initialCapacity) {
+      super(initialCapacity);
+    }
+
+    protected void setSize(int fromIndex) {
+      super.removeRange(fromIndex, size());
     }
   }
 }

@@ -168,15 +168,9 @@ public class ExpressionParser implements PsiParser {
     return true;
   }
 
-  // (',' expr)
+  // ',' expr
   private static boolean arg_list_1_0_1_0(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "arg_list_1_0_1_0")) return false;
-    return arg_list_1_0_1_0_0(builder_, level_ + 1);
-  }
-
-  // ',' expr
-  private static boolean arg_list_1_0_1_0_0(PsiBuilder builder_, int level_) {
-    if (!recursion_guard_(builder_, level_, "arg_list_1_0_1_0_0")) return false;
     boolean result_ = false;
     boolean pinned_ = false;
     Marker marker_ = builder_.mark();
@@ -210,6 +204,27 @@ public class ExpressionParser implements PsiParser {
     }
     result_ = exitErrorRecordingSection(builder_, level_, result_, false, _SECTION_RECOVER_, element_recover_parser_);
     return result_;
+  }
+
+  /* ********************************************************** */
+  // element ';'
+  static boolean element_and_separator(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "element_and_separator")) return false;
+    boolean result_ = false;
+    boolean pinned_ = false;
+    Marker marker_ = builder_.mark();
+    enterErrorRecordingSection(builder_, level_, _SECTION_GENERAL_, null);
+    result_ = element(builder_, level_ + 1);
+    pinned_ = result_; // pin = 1
+    result_ = result_ && consumeToken(builder_, ";");
+    if (!result_ && !pinned_) {
+      marker_.rollbackTo();
+    }
+    else {
+      marker_.drop();
+    }
+    result_ = exitErrorRecordingSection(builder_, level_, result_, pinned_, _SECTION_GENERAL_, null);
+    return result_ || pinned_;
   }
 
   /* ********************************************************** */
@@ -277,12 +292,12 @@ public class ExpressionParser implements PsiParser {
   }
 
   /* ********************************************************** */
-  // (element ';') *
+  // element_and_separator *
   static boolean root(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "root")) return false;
     int offset_ = builder_.getCurrentOffset();
     while (true) {
-      if (!root_0(builder_, level_ + 1)) break;
+      if (!element_and_separator(builder_, level_ + 1)) break;
       int next_offset_ = builder_.getCurrentOffset();
       if (offset_ == next_offset_) {
         empty_element_parsed_guard_(builder_, offset_, "root");
@@ -291,28 +306,6 @@ public class ExpressionParser implements PsiParser {
       offset_ = next_offset_;
     }
     return true;
-  }
-
-  // (element ';')
-  private static boolean root_0(PsiBuilder builder_, int level_) {
-    if (!recursion_guard_(builder_, level_, "root_0")) return false;
-    return root_0_0(builder_, level_ + 1);
-  }
-
-  // element ';'
-  private static boolean root_0_0(PsiBuilder builder_, int level_) {
-    if (!recursion_guard_(builder_, level_, "root_0_0")) return false;
-    boolean result_ = false;
-    Marker marker_ = builder_.mark();
-    result_ = element(builder_, level_ + 1);
-    result_ = result_ && consumeToken(builder_, ";");
-    if (!result_) {
-      marker_.rollbackTo();
-    }
-    else {
-      marker_.drop();
-    }
-    return result_;
   }
 
   /* ********************************************************** */
@@ -330,6 +323,7 @@ public class ExpressionParser implements PsiParser {
   // 9: ATOM(simple_ref_expr) ATOM(literal_expr) PREFIX(paren_expr)
   public static boolean expr(PsiBuilder builder_, int level_, int priority_) {
     if (!recursion_guard_(builder_, level_, "expr")) return false;
+    addVariant(builder_, "<expr>");
     Marker marker_ = builder_.mark();
     boolean result_ = false;
     boolean pinned_ = false;
@@ -358,46 +352,46 @@ public class ExpressionParser implements PsiParser {
       Marker left_marker_ = (Marker) builder_.getLatestDoneMarker();
       if (!invalid_left_marker_guard_(builder_, left_marker_, "expr_0")) return false;
       Marker marker_ = builder_.mark();
-      if (priority_ < 0 && consumeToken(builder_, "=")) {
+      if (priority_ < 0 && consumeTokenFast(builder_, "=")) {
         result_ = report_error_(builder_, expr(builder_, level_, -1));
         marker_.drop();
         left_marker_.precede().done(ASSIGN_EXPR);
       }
-      else if (priority_ < 1 && consumeToken(builder_, "?")) {
+      else if (priority_ < 1 && consumeTokenFast(builder_, "?")) {
         result_ = report_error_(builder_, expr(builder_, level_, 1));
         result_ = conditional_expr_1(builder_, level_ + 1) && result_;
         marker_.drop();
         left_marker_.precede().done(CONDITIONAL_EXPR);
       }
-      else if (priority_ < 2 && consumeToken(builder_, "+")) {
+      else if (priority_ < 2 && consumeTokenFast(builder_, "+")) {
         result_ = report_error_(builder_, expr(builder_, level_, 2));
         marker_.drop();
         left_marker_.precede().done(PLUS_EXPR);
       }
-      else if (priority_ < 2 && consumeToken(builder_, "-")) {
+      else if (priority_ < 2 && consumeTokenFast(builder_, "-")) {
         result_ = report_error_(builder_, expr(builder_, level_, 2));
         marker_.drop();
         left_marker_.precede().done(MINUS_EXPR);
       }
-      else if (priority_ < 3 && consumeToken(builder_, "*")) {
+      else if (priority_ < 3 && consumeTokenFast(builder_, "*")) {
         result_ = report_error_(builder_, expr(builder_, level_, 3));
         marker_.drop();
         left_marker_.precede().done(MUL_EXPR);
       }
-      else if (priority_ < 3 && consumeToken(builder_, "/")) {
+      else if (priority_ < 3 && consumeTokenFast(builder_, "/")) {
         result_ = report_error_(builder_, expr(builder_, level_, 3));
         marker_.drop();
         left_marker_.precede().done(DIV_EXPR);
       }
-      else if (priority_ < 5 && consumeToken(builder_, "^")) {
+      else if (priority_ < 5 && consumeTokenFast(builder_, "^")) {
         while (true) {
           result_ = report_error_(builder_, expr(builder_, level_, 5));
-          if (!consumeToken(builder_, "^")) break;
+          if (!consumeTokenFast(builder_, "^")) break;
         }
         marker_.drop();
         left_marker_.precede().done(EXP_EXPR);
       }
-      else if (priority_ < 6 && consumeToken(builder_, "!")) {
+      else if (priority_ < 6 && consumeTokenFast(builder_, "!")) {
         result_ = true;
         marker_.drop();
         left_marker_.precede().done(FACTORIAL_EXPR);
@@ -425,7 +419,7 @@ public class ExpressionParser implements PsiParser {
     if (!recursion_guard_(builder_, level_, "conditional_expr_1")) return false;
     boolean result_ = false;
     Marker marker_ = builder_.mark();
-    result_ = consumeToken(builder_, ":");
+    result_ = consumeTokenFast(builder_, ":");
     result_ = result_ && expr(builder_, level_ + 1, -1);
     if (!result_) {
       marker_.rollbackTo();
@@ -442,7 +436,7 @@ public class ExpressionParser implements PsiParser {
     boolean pinned_ = false;
     Marker marker_ = builder_.mark();
     enterErrorRecordingSection(builder_, level_, _SECTION_GENERAL_, null);
-    result_ = consumeToken(builder_, "+");
+    result_ = consumeTokenFast(builder_, "+");
     pinned_ = result_;
     result_ = pinned_ && expr(builder_, level_, 4) && result_;
     if (result_ || pinned_) {
@@ -461,7 +455,7 @@ public class ExpressionParser implements PsiParser {
     boolean pinned_ = false;
     Marker marker_ = builder_.mark();
     enterErrorRecordingSection(builder_, level_, _SECTION_GENERAL_, null);
-    result_ = consumeToken(builder_, "-");
+    result_ = consumeTokenFast(builder_, "-");
     pinned_ = result_;
     result_ = pinned_ && expr(builder_, level_, 4) && result_;
     if (result_ || pinned_) {
@@ -474,13 +468,13 @@ public class ExpressionParser implements PsiParser {
     return result_ || pinned_;
   }
 
-  // '.' simple_ref_expr
+  // '.' identifier
   private static boolean ref_expr_0(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "ref_expr_0")) return false;
     boolean result_ = false;
     Marker marker_ = builder_.mark();
-    result_ = consumeToken(builder_, ".");
-    result_ = result_ && simple_ref_expr(builder_, level_ + 1);
+    result_ = consumeTokenFast(builder_, ".");
+    result_ = result_ && identifier(builder_, level_ + 1);
     if (!result_) {
       marker_.rollbackTo();
     }
@@ -493,7 +487,7 @@ public class ExpressionParser implements PsiParser {
   // identifier
   public static boolean simple_ref_expr(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "simple_ref_expr")) return false;
-    if (!nextTokenIs(builder_, ID)) return false;
+    if (!nextTokenIsFast(builder_, ID)) return false;
     boolean result_ = false;
     Marker marker_ = builder_.mark();
     result_ = identifier(builder_, level_ + 1);
@@ -509,10 +503,10 @@ public class ExpressionParser implements PsiParser {
   // number
   public static boolean literal_expr(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "literal_expr")) return false;
-    if (!nextTokenIs(builder_, NUMBER)) return false;
+    if (!nextTokenIsFast(builder_, NUMBER)) return false;
     boolean result_ = false;
     Marker marker_ = builder_.mark();
-    result_ = consumeToken(builder_, NUMBER);
+    result_ = consumeTokenFast(builder_, NUMBER);
     if (result_) {
       marker_.done(LITERAL_EXPR);
     }
@@ -528,7 +522,7 @@ public class ExpressionParser implements PsiParser {
     boolean pinned_ = false;
     Marker marker_ = builder_.mark();
     enterErrorRecordingSection(builder_, level_, _SECTION_GENERAL_, null);
-    result_ = consumeToken(builder_, "(");
+    result_ = consumeTokenFast(builder_, "(");
     pinned_ = result_;
     result_ = pinned_ && expr(builder_, level_, -1) && result_;
     result_ = pinned_ && report_error_(builder_, consumeToken(builder_, ")")) && result_;

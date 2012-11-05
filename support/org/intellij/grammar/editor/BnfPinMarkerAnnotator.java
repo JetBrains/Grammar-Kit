@@ -53,7 +53,16 @@ public class BnfPinMarkerAnnotator implements Annotator {
     for (int i = 0, childExpressionsSize = children.size(); i < childExpressionsSize; i++) {
       BnfExpression child = children.get(i);
       boolean isAtomic = GrammarUtil.isAtomicExpression(child);
-      boolean fullRange = isAtomic || !annotateExpression(rule, child, getNextName(funcName, i), annotationHolder);
+      boolean fullRange;
+      if (isAtomic) {
+        fullRange = true;
+      }
+      else {
+        while (isTrivialNode(child)) {
+          child = getTrivialNodeChild(child);
+        }
+        fullRange = !annotateExpression(rule, child, getNextName(funcName, i), annotationHolder);
+      }
       if (type == BNF_SEQUENCE && !pinApplied && pinMatcher.matches(i, child)) {
         pinApplied = true;
         TextRange textRange = child.getTextRange();

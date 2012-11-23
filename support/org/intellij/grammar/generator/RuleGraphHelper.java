@@ -358,7 +358,7 @@ public class RuleGraphHelper {
         BnfExpression ruleRef = expressionList.get(0);
         BnfRule metaRule = myFile.getRule(ruleRef.getText());
         if (metaRule == null) {
-          result = psiMap(new LeafPsiElement(EXTERNAL_TYPE, "<<"+ruleRef.getText()+">>"), REQUIRED);
+          result = psiMap(new LeafPsiElement(EXTERNAL_TYPE, "#"+ruleRef.getText()), REQUIRED);
         }
         else if (Rule.isPrivate(metaRule)) {
           result = new HashMap<PsiElement, Cardinality>();

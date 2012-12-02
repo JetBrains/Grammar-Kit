@@ -16,6 +16,8 @@
 
 package org.intellij.grammar;
 
+import com.intellij.concurrency.AsyncFutureFactory;
+import com.intellij.concurrency.AsyncFutureFactoryImpl;
 import com.intellij.concurrency.JobLauncher;
 import com.intellij.concurrency.JobLauncherImpl;
 import com.intellij.lang.LanguageParserDefinitions;
@@ -38,6 +40,7 @@ import com.intellij.psi.impl.source.resolve.ResolveCache;
 import com.intellij.psi.impl.source.tree.injected.InjectedLanguageManagerImpl;
 import com.intellij.psi.search.PsiSearchHelper;
 import com.intellij.testFramework.ParsingTestCase;
+import org.intellij.grammar.java.JavaHelper;
 import org.jetbrains.annotations.NonNls;
 
 import java.io.*;
@@ -112,10 +115,19 @@ public class LightPsi {
       Extensions.getRootArea().getExtensionPoint("com.intellij.referencesSearch").registerExtension(new CachesBasedRefSearcher());
       registerApplicationService(PsiReferenceService.class, new PsiReferenceServiceImpl());
       registerApplicationService(JobLauncher.class, new JobLauncherImpl());
+      registerApplicationService(AsyncFutureFactory.class, new AsyncFutureFactoryImpl());
       getProject().registerService(PsiSearchHelper.class, new PsiSearchHelperImpl(getPsiManager()));
       getProject().registerService(DumbService.class, new DumbServiceImpl(getProject(), getProject().getMessageBus()));
       getProject().registerService(ResolveCache.class, new ResolveCache(getProject().getMessageBus()));
       getProject().registerService(PsiFileFactory.class, new PsiFileFactoryImpl(getPsiManager()));
+      try {
+        getProject().registerService(JavaHelper.class, new JavaHelper.AsmHelper());
+      }
+      catch (LinkageError e) {
+        System.out.println("ASM not available, using reflection helper: " +e);
+        getProject().registerService(JavaHelper.class, new JavaHelper.ReflectionHelper());
+      }
+
       InjectedLanguageManagerImpl languageManager = new InjectedLanguageManagerImpl(getProject(), DumbService.getInstance(getProject()));
       Disposer.register(getProject(), languageManager);
       getProject().registerService(InjectedLanguageManager.class, languageManager);

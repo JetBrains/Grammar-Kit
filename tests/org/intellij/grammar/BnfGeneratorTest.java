@@ -1,5 +1,7 @@
 package org.intellij.grammar;
 
+import com.intellij.concurrency.AsyncFutureFactory;
+import com.intellij.concurrency.AsyncFutureFactoryImpl;
 import com.intellij.concurrency.JobLauncher;
 import com.intellij.concurrency.JobLauncherImpl;
 import com.intellij.lang.injection.InjectedLanguageManager;
@@ -56,6 +58,7 @@ public class BnfGeneratorTest extends ParsingTestCase {
     Extensions.getRootArea().getExtensionPoint("com.intellij.referencesSearch").registerExtension(new CachesBasedRefSearcher());
     registerApplicationService(PsiReferenceService.class, new PsiReferenceServiceImpl());
     registerApplicationService(JobLauncher.class, new JobLauncherImpl());
+    registerApplicationService(AsyncFutureFactory.class, new AsyncFutureFactoryImpl());
     getProject().registerService(PsiSearchHelper.class, new PsiSearchHelperImpl(getPsiManager()));
     getProject().registerService(DumbService.class, new DumbServiceImpl(getProject(), getProject().getMessageBus()));
     getProject().registerService(PsiFileFactory.class, new PsiFileFactoryImpl(getPsiManager()));

@@ -83,7 +83,7 @@ public class GenerateAction extends AnAction implements DumbAware {
     FileDocumentManager.getInstance().saveAllDocuments();
 
     final Set<File> pathsToRefresh = new HashSet<File>();
-    ProgressManager.getInstance().run(new Task.Backgroundable(getEventProject(e), "Parser Generation", true, new BackgroundFromStartOption()) {
+    ProgressManager.getInstance().run(new Task.Backgroundable(project, "Parser Generation", true, new BackgroundFromStartOption()) {
       @Override
       public void onSuccess() {
         refreshFiles(pathsToRefresh);

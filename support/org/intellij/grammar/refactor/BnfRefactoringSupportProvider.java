@@ -18,7 +18,7 @@ package org.intellij.grammar.refactor;
 
 import com.intellij.lang.refactoring.RefactoringSupportProvider;
 import com.intellij.psi.PsiElement;
-import org.jetbrains.annotations.NotNull;
+import org.intellij.grammar.psi.BnfNamedElement;
 
 /**
  * Created by IntelliJ IDEA.
@@ -28,8 +28,8 @@ import org.jetbrains.annotations.NotNull;
  * @author Vadim Romansky
  */
 public class BnfRefactoringSupportProvider extends RefactoringSupportProvider {
-    @Override
-    public boolean isAvailable(@NotNull PsiElement context) {
-        return super.isAvailable(context);
-    }
+  @Override
+  public boolean isMemberInplaceRenameAvailable(PsiElement element, PsiElement context) {
+    return element instanceof BnfNamedElement;
+  }
 }

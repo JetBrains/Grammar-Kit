@@ -194,7 +194,7 @@ public class ParserGenerator {
         File psiFile = new File(myOutputPath, psiClass.replace('.', File.separatorChar) + ".java");
         openOutput(psiFile);
         try {
-          generatePsiIntf(myGraphHelper, rule, psiClass, getSuperInterfaceNames(rule, psiPackage));
+          generatePsiIntf(myGraphHelper, rule, psiClass, getSuperInterfaceNames(rule, psiPackage, false));
         }
         finally {
           closeOutput();
@@ -234,11 +234,11 @@ public class ParserGenerator {
 
   private void generateVisitor(String psiClass, Map<String, BnfRule> sortedRules) {
     String superIntf = ObjectUtils.notNull(ContainerUtil.getFirstItem(getRootAttribute(myFile, KnownAttribute.IMPLEMENTS)),
-                                           KnownAttribute.IMPLEMENTS.getDefaultValue().get(0));
+            KnownAttribute.IMPLEMENTS.getDefaultValue().get(0));
     String shortSuperIntf = StringUtil.getShortName(superIntf);
     Function<String, String> shortener = generateClassHeader(
-      psiClass, Arrays.asList("org.jetbrains.annotations.*", BnfConstants.PSI_ELEMENT_VISITOR_CLASS, superIntf),
-      "", false, BnfConstants.PSI_ELEMENT_VISITOR_CLASS);
+            psiClass, Arrays.asList("org.jetbrains.annotations.*", "com.intellij.psi.StubBasedPsiElement", BnfConstants.PSI_ELEMENT_VISITOR_CLASS, superIntf),
+            "", false, BnfConstants.PSI_ELEMENT_VISITOR_CLASS);
     Set<String> visited = new HashSet<String>();
     Set<String> all = new TreeSet<String>();
     for (String ruleName : sortedRules.keySet()) {
@@ -247,7 +247,7 @@ public class ParserGenerator {
       visited.add(methodName);
       out("public void visit" + methodName + "(@NotNull " + getRulePsiClassName(rule, myRuleClassPrefix) + " o) {");
       boolean first = true;
-      for (String top : getSuperInterfaceNames(rule, "")) {
+      for (String top : getSuperInterfaceNames(rule, "", true)) {
         all.add(top);
         if (!first && top.equals(superIntf)) continue;
         if (top.startsWith(myRuleClassPrefix)) {
@@ -363,7 +363,7 @@ public class ParserGenerator {
   }
 
   @NotNull
-  private String[] getSuperInterfaceNames(BnfRule rule, String psiPackage) {
+  private String[] getSuperInterfaceNames(BnfRule rule, String psiPackage, boolean shortenParameters) {
     ArrayList<String> strings = new ArrayList<String>();
     List<String> topRuleImplements = Collections.emptyList();
     String topRuleClass = null;
@@ -391,6 +391,17 @@ public class ParserGenerator {
         }
       }
     }
+
+    String stub = getAttribute(rule, KnownAttribute.STUB);
+    if (stub != null) {
+      String name = "StubBasedPsiElement";
+
+      if (!shortenParameters) {
+        name += "<" + stub + ">";
+      }
+      strings.add(name);
+    }
+
     return strings.toArray(new String[strings.size()]);
   }
 
@@ -1247,7 +1258,7 @@ public class ParserGenerator {
         elementCreateCall = shortener.fun(StringUtil.getPackageName(pair.second)) + "." + StringUtil.getShortName(pair.second);
       }
       String callFix = elementCreateCall.equals("new IElementType")? ", null" : "";
-      out("IElementType " + elementType + " = " + elementCreateCall + "(\"" + elementType + "\""+callFix+");");
+      out("IElementType " + elementType + " = " + elementCreateCall + "(\"" + elementType + "\"" + callFix + ");");
     }
     if (generateTokens) {
       newLine();
@@ -1304,6 +1315,11 @@ public class ParserGenerator {
                                  BnfConstants.PSI_ELEMENT_CLASS));
     imports.addAll(Arrays.asList(psiSupers));
     imports.addAll(getRuleAccessorClasses(rule, sortedPublicRules));
+
+    if (getAttribute(rule, KnownAttribute.STUB) != null) {
+      imports.add("com.intellij.psi.StubBasedPsiElement");
+    }
+
     JavaHelper javaHelper = JavaHelper.getJavaHelper(myFile.getProject());
     List<Pair<String, String>> methods = getAttribute(rule, KnownAttribute.METHODS);
     for (Pair<String, String> pair : methods) {
@@ -1336,7 +1352,10 @@ public class ParserGenerator {
     String typeHolderClass = getRootAttribute(myFile, KnownAttribute.ELEMENT_TYPE_HOLDER_CLASS);
     String psiImplUtilClass = getRootAttribute(myFile, KnownAttribute.PSI_IMPL_UTIL_CLASS);
     // mixin attribute overrides "extends":
-    String implSuper = StringUtil.notNullize(getAttribute(rule, KnownAttribute.MIXIN), superRuleClass);
+    boolean isStub = getAttribute(rule, KnownAttribute.STUB) != null;
+    String stubSuperClass = isStub ? "com.intellij.extapi.psi.StubBasedPsiElementBase<" + getAttribute(rule, KnownAttribute.STUB) + ">" : null;
+
+    String implSuper = StringUtil.notNullize(getAttribute(rule, KnownAttribute.MIXIN), stubSuperClass != null ? stubSuperClass : superRuleClass);
     Map<PsiElement, RuleGraphHelper.Cardinality> accessors = helper.getFor(rule);
     Collection<BnfRule> sortedPublicRules = getSortedPublicRules(accessors.keySet());
 
@@ -1358,12 +1377,24 @@ public class ParserGenerator {
       if (pair.second == null) addUtilMethodTypes(imports, pair.first, psiImplUtilClass, javaHelper);
     }
 
-    Function<String, String> shortener = generateClassHeader(psiClass, imports, "", false, implSuper, superInterface);
+    if (isStub) {
+      imports.add("com.intellij.psi.stubs.IStubElementType");
+    }
+
+    Function<String, String> shortener = generateClassHeader(psiClass, imports, "", false, implSuper,
+            StringUtil.getShortName(superInterface));
     String shortName = StringUtil.getShortName(psiClass);
     out("public " + shortName + "("+shortener.fun(BnfConstants.AST_NODE_CLASS)+" node) {");
     out("super(node);");
     out("}");
     newLine();
+    if (isStub) {
+      String stubType = StringUtil.getShortName(implSuper.substring(implSuper.indexOf("<") + 1, implSuper.indexOf(">")));
+      out("public " + shortName + "(" + stubType + " stub, IStubElementType nodeType) {");
+      out("super(stub, nodeType);");
+      out("}");
+      newLine();
+    }
     for (BnfRule tree : sortedPublicRules) {
       generatePsiAccessor(rule, tree, accessors.get(tree), false, shortener);
     }

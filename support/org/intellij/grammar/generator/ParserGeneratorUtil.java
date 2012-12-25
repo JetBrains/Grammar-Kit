@@ -16,6 +16,7 @@
 package org.intellij.grammar.generator;
 
 import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.MessageType;
 import com.intellij.openapi.util.Condition;
@@ -264,9 +265,13 @@ public class ParserGeneratorUtil {
     if (rulesToSort.size() < 2) return new ArrayList<T>(rulesToSort);
     Collections.reverse(rulesToSort);
     List<T> sorted = new ArrayList<T>(rulesToSort.size());
+    int iterationCount = 0;
     main: while (!rulesToSort.isEmpty()) {
       inner: for (T rule : rulesToSort) {
         for (T r : rulesToSort) {
+          if ((iterationCount ++) % 100 == 0) {
+            ProgressManager.checkCanceled();
+          }
           if (rule == r) continue;
           if (topology.contains(rule, r)) continue inner;
         }

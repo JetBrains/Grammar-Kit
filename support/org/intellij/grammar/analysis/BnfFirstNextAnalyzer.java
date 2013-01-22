@@ -28,10 +28,12 @@ import com.intellij.util.containers.ContainerUtil;
 import gnu.trove.THashMap;
 import gnu.trove.THashSet;
 import gnu.trove.TObjectHashingStrategy;
+import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.generator.ParserGeneratorUtil;
 import org.intellij.grammar.psi.*;
 import org.intellij.grammar.psi.impl.GrammarUtil;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
@@ -73,7 +75,7 @@ public class BnfFirstNextAnalyzer {
     return calcNextInner(targetRule.getExpression(), new THashMap<BnfExpression, BnfExpression>(), new THashSet<BnfRule>());
   }
   
-  public Map<BnfExpression, BnfExpression> calcNextInner(@NotNull BnfExpression targetExpression, Map<BnfExpression, BnfExpression> result, Set<BnfRule> visited) {
+  private Map<BnfExpression, BnfExpression> calcNextInner(@NotNull BnfExpression targetExpression, Map<BnfExpression, BnfExpression> result, Set<BnfRule> visited) {
     LinkedList<BnfExpression> stack = new LinkedList<BnfExpression>();
     THashSet<BnfRule> totalVisited = new THashSet<BnfRule>();
     Set<BnfExpression> curResult = new THashSet<BnfExpression>();
@@ -121,7 +123,7 @@ public class BnfFirstNextAnalyzer {
           if (element instanceof BnfExpression && PsiTreeUtil.getParentOfType(element, BnfPredicate.class) == null) {
             BnfAttr attr = PsiTreeUtil.getParentOfType(element, BnfAttr.class);
             if (attr != null) {
-              if ("recoverUntil".equals(attr.getName())) {
+              if (KnownAttribute.RECOVER_UNTIL.getName().equals(attr.getName())) {
                 result.put(BNF_MATCHES_ANY, startingExpr);
               }
             }
@@ -138,9 +140,10 @@ public class BnfFirstNextAnalyzer {
 
   private Set<BnfExpression> calcSequenceFirstInner(List<BnfExpression> expressions, final Set<BnfExpression> result, final Set<BnfRule> visited) {
     boolean matchesEof = !result.add(BNF_MATCHES_EOF);
-    for (BnfExpression expression : iterate(expressions)) {
+    List<BnfExpression> list = myBackward ? ContainerUtil.reverse(expressions) : expressions;
+    for (int i = 0, size = list.size(); i < size; i++) {
       if (!result.remove(BNF_MATCHES_EOF)) break;
-      calcFirstInner(expression, result, visited);
+      calcFirstInner(list.get(i), result, visited, i < size - 1? list.subList(i + 1, size) : null);
     }
     // add empty back if was there before
     if (matchesEof) result.add(BNF_MATCHES_EOF);
@@ -148,6 +151,10 @@ public class BnfFirstNextAnalyzer {
   }
 
   public Set<BnfExpression> calcFirstInner(BnfExpression expression, Set<BnfExpression> result, Set<BnfRule> visited) {
+    return calcFirstInner(expression, result, visited, null);
+  }
+
+  public Set<BnfExpression> calcFirstInner(BnfExpression expression, Set<BnfExpression> result, Set<BnfRule> visited, @Nullable List<BnfExpression> forcedNext) {
     BnfFile file = (BnfFile)expression.getContainingFile();
     if (expression instanceof BnfLiteralExpression) {
       result.add(expression);
@@ -164,10 +171,12 @@ public class BnfFirstNextAnalyzer {
         }
         if (myPublicRuleOpaque && !ParserGeneratorUtil.Rule.isPrivate(rule) ||
             !visited.add(rule)) {
-          result.add(expression);
+          if (!(ParserGeneratorUtil.Rule.firstNotTrivial(rule) instanceof BnfPredicate)) {
+            result.add(expression);
+          }
         }
         else {
-          calcFirstInner(rule.getExpression(), result, visited);
+          calcFirstInner(rule.getExpression(), result, visited, forcedNext);
           boolean removed = visited.remove(rule);
           LOG.assertTrue(removed, "path corruption detected");
         }
@@ -177,7 +186,7 @@ public class BnfFirstNextAnalyzer {
       }
     }
     else if (expression instanceof BnfParenthesized) {
-      calcFirstInner(((BnfParenthesized)expression).getExpression(), result, visited);
+      calcFirstInner(((BnfParenthesized)expression).getExpression(), result, visited, forcedNext);
       if (expression instanceof BnfParenOptExpression) {
         result.add(BNF_MATCHES_EOF);
       }
@@ -186,7 +195,7 @@ public class BnfFirstNextAnalyzer {
       boolean matchesNothing = result.remove(BNF_MATCHES_NOTHING);
       boolean matchesSomething = false;
       for (BnfExpression child : ((BnfChoice)expression).getExpressionList()) {
-        calcFirstInner(child, result, visited);
+        calcFirstInner(child, result, visited, forcedNext);
         matchesSomething |= !result.remove(BNF_MATCHES_NOTHING);
       }
       if (!matchesSomething || matchesNothing) result.add(BNF_MATCHES_NOTHING);
@@ -195,7 +204,7 @@ public class BnfFirstNextAnalyzer {
       calcSequenceFirstInner(((BnfSequence)expression).getExpressionList(), result, visited);
     }
     else if (expression instanceof BnfQuantified) {
-      calcFirstInner(((BnfQuantified)expression).getExpression(), result, visited);
+      calcFirstInner(((BnfQuantified)expression).getExpression(), result, visited, forcedNext);
       IElementType effectiveType = ParserGeneratorUtil.getEffectiveType(expression);
       if (effectiveType == BnfTypes.BNF_OP_OPT || effectiveType == BnfTypes.BNF_OP_ZEROMORE) {
         result.add(BNF_MATCHES_EOF);
@@ -208,7 +217,7 @@ public class BnfFirstNextAnalyzer {
       }
       else {
         BnfExpression ruleRef = expressionList.get(0);
-        Set<BnfExpression> metaResults = calcFirstInner(ruleRef, new LinkedHashSet<BnfExpression>(), visited);
+        Set<BnfExpression> metaResults = calcFirstInner(ruleRef, new LinkedHashSet<BnfExpression>(), visited, forcedNext);
         List<String> params = null;
         for (BnfExpression e : metaResults) {
           if (e instanceof BnfExternalExpression) {
@@ -222,7 +231,7 @@ public class BnfFirstNextAnalyzer {
             }
             int idx = params.indexOf(e.getText());
             if (idx > -1 && idx + 1 < expressionList.size()) {
-              calcFirstInner(expressionList.get(idx + 1), result, visited);
+              calcFirstInner(expressionList.get(idx + 1), result, visited, null);
             }
           }
           else {
@@ -238,8 +247,9 @@ public class BnfFirstNextAnalyzer {
       IElementType elementType = ((BnfPredicate)expression).getPredicateSign().getFirstChild().getNode().getElementType();
       BnfExpression predicateExpression = ((BnfPredicate)expression).getExpression();
       // take only one token into account which is not exactly correct but better than nothing
-      Set<BnfExpression> conditions = calcFirstInner(predicateExpression, new THashSet<BnfExpression>(new TextStrategy()), visited);
-      Set<BnfExpression> next = calcNextInner(expression, new THashMap<BnfExpression, BnfExpression>(), visited).keySet();
+      Set<BnfExpression> conditions = calcFirstInner(predicateExpression, new THashSet<BnfExpression>(new TextStrategy()), visited, null);
+      Set<BnfExpression> next = forcedNext == null? calcNextInner(expression, new THashMap<BnfExpression, BnfExpression>(), visited).keySet() :
+        calcSequenceFirstInner(forcedNext, new THashSet<BnfExpression>(new TextStrategy()), visited);
       Set<BnfExpression> mixed = new THashSet<BnfExpression>(new TextStrategy());
       if (predicateExpression instanceof BnfParenExpression) predicateExpression = ((BnfParenExpression)predicateExpression).getExpression();
       boolean skip = predicateExpression instanceof BnfSequence && ((BnfSequence)predicateExpression).getExpressionList().size() > 1; // todo calc min length ?
@@ -289,10 +299,6 @@ public class BnfFirstNextAnalyzer {
     }
 
     return result;
-  }
-
-  public <T> Iterable<T> iterate(@NotNull final List<? extends T> list) {
-    return myBackward? ContainerUtil.iterateBackward(list) : (Iterable<T>)list;
   }
 
   public Set<String> asStrings(Set<BnfExpression> expressions) {

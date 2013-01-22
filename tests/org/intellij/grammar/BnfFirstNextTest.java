@@ -52,6 +52,8 @@ public class BnfFirstNextTest extends LightPlatformCodeInsightFixtureTestCase {
   public void testExternalPredicate1() { doFirstTest("r ::= A | B | isHql X external isHql ::= func", "#func", "A", "B"); }
   public void testExternalPredicate2() { doFirstTest("r ::= A | B | &isHql X external isHql ::= func", "A", "B", "X"); }
 
+  public void testRecursivePredicateTest() { doFirstTest("r ::= p A s ::= p r p ::= &<<A>>", "A"); }
+
   private void doFirstTest(String text, String... expected) { doTest(text, true, expected); }
   private void doNextTest(String text, String... expected) { doTest(text, false, expected); }
 

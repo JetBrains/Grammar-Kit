@@ -248,8 +248,8 @@ public class ParserGenerator {
       out("public void visit" + methodName + "(@NotNull " + getRulePsiClassName(rule, myRuleClassPrefix) + " o) {");
       boolean first = true;
       for (String top : getSuperInterfaceNames(rule, "")) {
-        all.add(top);
         if (!first && top.equals(superIntf)) continue;
+        else if (first) all.add(top);
         if (top.startsWith(myRuleClassPrefix)) {
           top = top.substring(myRuleClassPrefix.length());
         }
@@ -383,7 +383,7 @@ public class ParserGenerator {
       }
       else if (!topRuleImplements.contains(className) && (topRuleClass == null || !rootImplements.contains(className))) {
         String name = simpleMode ? StringUtil.getShortName(className) : className;
-        if (className != null && strings.size() == 1) {
+        if (className != null && strings.size() == 1 && topSuper == null) {
           strings.add(0, name);
         }
         else {

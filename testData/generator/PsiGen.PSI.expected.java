@@ -300,7 +300,7 @@ import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
-public interface XRefExpr extends MyRef, XExpr {
+public interface XRefExpr extends XExpr, MyRef {
 
   @NotNull
   XIdentifier getIdentifier();
@@ -1042,8 +1042,8 @@ public class XVisitor extends PsiElementVisitor {
   }
 
   public void visitRefExpr(@NotNull XRefExpr o) {
-    visitMyRef(o);
-    // visitExpr(o);
+    visitExpr(o);
+    // visitMyRef(o);
   }
 
   public void visitRootB(@NotNull XRootB o) {
@@ -1064,10 +1064,6 @@ public class XVisitor extends PsiElementVisitor {
 
   public void visitSpecialRef(@NotNull XSpecialRef o) {
     visitRefExpr(o);
-  }
-
-  public void visitMyRef(@NotNull MyRef o) {
-    visitElement(o);
   }
 
   public void visitRoot(@NotNull XRoot o) {

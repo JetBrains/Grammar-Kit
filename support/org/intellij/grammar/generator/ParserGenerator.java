@@ -877,9 +877,10 @@ public class ParserGenerator {
   public String generateFirstCheck(BnfRule rule, String frameName, boolean skipIfOne) {
     if (generateFirstCheck <= 0) return frameName;
     BnfFirstNextAnalyzer analyzer = new BnfFirstNextAnalyzer();
-    Set<String> firstSet = analyzer.asStrings(analyzer.calcFirstInner(rule.getExpression(), new THashSet<BnfExpression>(), new THashSet<BnfRule>()));
+    Set<String> firstSet = analyzer.asStrings(analyzer.calcFirst(rule));
     List<String> firstElementTypes = new ArrayList<String>(firstSet.size());
     for (String s : firstSet) {
+      if (myFile.getRule(s) != null) continue; // ignore left recursion
       @SuppressWarnings("StringEquality")
       boolean unknown = s == BnfFirstNextAnalyzer.MATCHES_EOF || s == BnfFirstNextAnalyzer.MATCHES_ANY;
       String t = unknown? null : firstToElementType(s);

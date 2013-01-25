@@ -26,6 +26,7 @@ import com.intellij.psi.util.CachedValue;
 import com.intellij.psi.util.CachedValueProvider;
 import com.intellij.psi.util.CachedValuesManager;
 import com.intellij.psi.util.PsiTreeUtil;
+import com.intellij.util.CommonProcessors;
 import com.intellij.util.containers.ContainerUtil;
 import com.intellij.util.containers.MultiMap;
 import com.intellij.util.containers.MultiMapBasedOnSet;
@@ -34,6 +35,7 @@ import gnu.trove.THashSet;
 import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.analysis.BnfFirstNextAnalyzer;
 import org.intellij.grammar.psi.*;
+import org.intellij.grammar.psi.impl.GrammarUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -41,7 +43,6 @@ import java.util.*;
 
 import static org.intellij.grammar.generator.ParserGeneratorUtil.*;
 import static org.intellij.grammar.generator.RuleGraphHelper.Cardinality.*;
-import static org.intellij.grammar.psi.BnfTypes.BNF_SEQUENCE;
 import static org.intellij.grammar.psi.impl.GrammarUtil.collectExtraArguments;
 import static org.intellij.grammar.psi.impl.GrammarUtil.nextOrParent;
 
@@ -245,7 +246,7 @@ public class RuleGraphHelper {
     THashSet<PsiElement> visited = new THashSet<PsiElement>();
     for (BnfRule rule : rules) {
       if (myRuleContentsMap.containsKey(rule)) continue;
-      Map<PsiElement, Cardinality> map = collectMembers(rule, rule.getExpression(), rule.getName(), visited);
+      Map<PsiElement, Cardinality> map = collectMembers(rule, rule.getExpression(), visited);
       if (map.size() == 1 && ContainerUtil.getFirstItem(map.values()) == REQUIRED && !Rule.isPrivate(rule)) {
         PsiElement r = ContainerUtil.getFirstItem(map.keySet());
         if (r == rule || r instanceof BnfRule && collapseEachOther((BnfRule)r, rule)) {
@@ -306,10 +307,11 @@ public class RuleGraphHelper {
 
   @NotNull
   public Map<PsiElement, Cardinality> getFor(BnfRule rule) {
-    return myRuleContentsMap.get(rule);
+    Map<PsiElement, Cardinality> map = myRuleContentsMap.get(rule); // null for duplicate
+    return map == null ? Collections.<PsiElement, Cardinality>emptyMap() : map;
   }
 
-  private Map<PsiElement, Cardinality> collectMembers(BnfRule rule, BnfExpression tree, String funcName, Set<PsiElement> visited) {
+  private Map<PsiElement, Cardinality> collectMembers(BnfRule rule, BnfExpression tree, Set<PsiElement> visited) {
     if (tree instanceof BnfPredicate) return Collections.emptyMap();
     if (tree instanceof BnfLiteralExpression) return psiMap(tree, REQUIRED);
 
@@ -336,7 +338,7 @@ public class RuleGraphHelper {
           result = myRuleContentsMap.get(targetRule); // optimize performance
           if (result == null) {
             BnfExpression body = targetRule.getExpression();
-            Map<PsiElement, Cardinality> map = collectMembers(targetRule, body, targetRule.getName(), visited);
+            Map<PsiElement, Cardinality> map = collectMembers(targetRule, body, visited);
             result = map.containsKey(body) ? joinMaps(null, BnfTypes.BNF_CHOICE, Arrays.asList(map, map)) : map;
             myRuleContentsMap.put(targetRule, result);
           }
@@ -362,7 +364,7 @@ public class RuleGraphHelper {
         }
         else if (Rule.isPrivate(metaRule)) {
           result = new HashMap<PsiElement, Cardinality>();
-          Map<PsiElement, Cardinality> metaResults = collectMembers(rule, ruleRef, funcName, new HashSet<PsiElement>());
+          Map<PsiElement, Cardinality> metaResults = collectMembers(rule, ruleRef, new HashSet<PsiElement>());
           List<String> params = null;
           for (PsiElement member : metaResults.keySet()) {
             Cardinality cardinality = metaResults.get(member);
@@ -375,7 +377,7 @@ public class RuleGraphHelper {
               }
               int idx = params.indexOf(member.getText());
               if (idx > -1 && idx + 1 < expressionList.size()) {
-                Map<PsiElement, Cardinality> argMap = collectMembers(rule, expressionList.get(idx + 1), getNextName(funcName, idx), visited);
+                Map<PsiElement, Cardinality> argMap = collectMembers(rule, expressionList.get(idx + 1), visited);
                 for (PsiElement element : argMap.keySet()) {
                   result.put(element, cardinality.and(argMap.get(element)));
                 }
@@ -389,21 +391,22 @@ public class RuleGraphHelper {
       }
     }
     else {
+      ArrayList<BnfExpression> pinned = new ArrayList<BnfExpression>();
+      GrammarUtil.processPinnedExpressions(rule, new CommonProcessors.CollectProcessor<BnfExpression>(pinned));
+      boolean pinApplied = false;
+
       IElementType type = getEffectiveType(tree);
       boolean firstNonTrivial = tree == Rule.firstNotTrivial(rule);
-      PinMatcher pinMatcher = new PinMatcher(rule, type, firstNonTrivial ? rule.getName() : funcName);
-      boolean pinApplied = false;
 
       List<Map<PsiElement, Cardinality>> list = new ArrayList<Map<PsiElement, Cardinality>>();
       List<BnfExpression> childExpressions = getChildExpressions(tree);
-      for (int i = 0, childExpressionsSize = childExpressions.size(); i < childExpressionsSize; i++) {
-        BnfExpression child = childExpressions.get(i);
-        Map<PsiElement, Cardinality> nextMap = collectMembers(rule, child, getNextName(funcName, i), visited);
+      for (BnfExpression child : childExpressions) {
+        Map<PsiElement, Cardinality> nextMap = collectMembers(rule, child, visited);
         if (pinApplied) {
           nextMap = joinMaps(null, BnfTypes.BNF_OP_OPT, Collections.singletonList(nextMap));
         }
         list.add(nextMap);
-        if (type == BNF_SEQUENCE && !pinApplied && pinMatcher.matches(i, child)) {
+        if (!pinApplied && pinned.contains(child)) {
           pinApplied = true;
         }
       }

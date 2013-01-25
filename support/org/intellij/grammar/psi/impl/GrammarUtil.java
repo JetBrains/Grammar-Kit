@@ -32,6 +32,7 @@ import java.util.Comparator;
 import java.util.List;
 
 import static org.intellij.grammar.generator.ParserGeneratorUtil.*;
+import static org.intellij.grammar.psi.BnfTypes.BNF_SEQUENCE;
 
 /**
  * @author gregsh
@@ -145,6 +146,28 @@ public class GrammarUtil {
     }
     return processor.process(funcName, expression);
   }
+
+  public static void processPinnedExpressions(final BnfRule rule, final Processor<BnfExpression> processor) {
+    processExpressionNames(rule.getName(), rule.getExpression(), new PairProcessor<String, BnfExpression>() {
+      @Override
+      public boolean process(String funcName, BnfExpression expression) {
+        if (!(expression instanceof BnfSequence)) return true;
+        List<BnfExpression> children = getChildExpressions(expression);
+        if (children.size() < 2) return true;
+        PinMatcher pinMatcher = new PinMatcher(rule, BNF_SEQUENCE, funcName);
+        boolean pinApplied = false;
+        for (int i = 0, childExpressionsSize = children.size(); i < childExpressionsSize; i++) {
+          BnfExpression child = children.get(i);
+          if (!pinApplied && pinMatcher.matches(i, child)) {
+            pinApplied = true;
+            if (!processor.process(child)) return false;
+          }
+        }
+        return true;
+      }
+    });
+  }
+
 
   public static boolean isAtomicExpression(BnfExpression tree) {
     return tree instanceof BnfReferenceOrToken || tree instanceof BnfLiteralExpression || tree instanceof BnfExternalExpression;

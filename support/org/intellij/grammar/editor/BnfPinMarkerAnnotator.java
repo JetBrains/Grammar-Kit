@@ -19,16 +19,14 @@ import com.intellij.lang.annotation.AnnotationHolder;
 import com.intellij.lang.annotation.Annotator;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.psi.PsiElement;
-import com.intellij.psi.tree.IElementType;
-import org.intellij.grammar.generator.ParserGeneratorUtil;
-import org.intellij.grammar.psi.*;
+import com.intellij.psi.util.PsiTreeUtil;
+import com.intellij.util.CommonProcessors;
+import org.intellij.grammar.psi.BnfExpression;
+import org.intellij.grammar.psi.BnfRule;
 import org.intellij.grammar.psi.impl.GrammarUtil;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.List;
-
-import static org.intellij.grammar.generator.ParserGeneratorUtil.*;
-import static org.intellij.grammar.psi.BnfTypes.BNF_SEQUENCE;
+import java.util.ArrayList;
 
 /**
  * @author gregsh
@@ -38,39 +36,16 @@ public class BnfPinMarkerAnnotator implements Annotator {
   public void annotate(@NotNull PsiElement psiElement, @NotNull AnnotationHolder annotationHolder) {
     if (!(psiElement instanceof BnfRule)) return;
     BnfRule rule = (BnfRule) psiElement;
-    annotateExpression(rule, rule.getExpression(), rule.getName(), annotationHolder);
-  }
-
-  private static boolean annotateExpression(BnfRule rule, BnfExpression tree, String funcName, AnnotationHolder annotationHolder) {
-    if (GrammarUtil.isAtomicExpression(tree)) return false;
-    final List<BnfExpression> children = getChildExpressions(tree);
-    if (isTrivialNode(tree)) return annotateExpression(rule, children.get(0), funcName, annotationHolder);
-
-    IElementType type = getEffectiveType(tree);
-    boolean firstNonTrivial = tree == ParserGeneratorUtil.Rule.firstNotTrivial(rule);
-    PinMatcher pinMatcher = new PinMatcher(rule, type, firstNonTrivial ? rule.getName() : funcName);
-    boolean pinApplied = false;
-    for (int i = 0, childExpressionsSize = children.size(); i < childExpressionsSize; i++) {
-      BnfExpression child = children.get(i);
-      boolean isAtomic = GrammarUtil.isAtomicExpression(child);
-      boolean fullRange;
-      if (isAtomic) {
-        fullRange = true;
-      }
-      else {
-        while (isTrivialNode(child)) {
-          child = getTrivialNodeChild(child);
-        }
-        fullRange = !annotateExpression(rule, child, getNextName(funcName, i), annotationHolder);
-      }
-      if (type == BNF_SEQUENCE && !pinApplied && pinMatcher.matches(i, child)) {
-        pinApplied = true;
-        TextRange textRange = child.getTextRange();
-        TextRange infoRange = fullRange? textRange : new TextRange(Math.max(textRange.getStartOffset(), textRange.getEndOffset() - 5), textRange.getEndOffset());
-        annotationHolder.createInfoAnnotation(infoRange, fullRange? "pinned" : "pinned again").setTextAttributes(BnfSyntaxHighlighter.PIN);
-      }
+    ArrayList<BnfExpression> pinned = new ArrayList<BnfExpression>();
+    GrammarUtil.processPinnedExpressions(rule, new CommonProcessors.CollectProcessor<BnfExpression>(pinned));
+    for (int i = 0, len = pinned.size(); i < len; i++) {
+      BnfExpression e = pinned.get(i);
+      BnfExpression prev = i == 0? null : pinned.get(i - 1);
+      boolean fullRange = prev == null || !PsiTreeUtil.isAncestor(e, prev, true);
+      TextRange textRange = e.getTextRange();
+      TextRange infoRange = fullRange ? textRange : TextRange.create(prev.getTextRange().getEndOffset() + 1, textRange.getEndOffset());
+      annotationHolder.createInfoAnnotation(infoRange, fullRange ? "pinned" : "pinned again").setTextAttributes(BnfSyntaxHighlighter.PIN);
     }
-    return pinApplied;
   }
 
 }

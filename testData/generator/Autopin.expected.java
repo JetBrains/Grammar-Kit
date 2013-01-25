@@ -222,6 +222,54 @@ public class Autopin implements PsiParser {
   }
 
   /* ********************************************************** */
+  // [] (a|b)
+  static boolean pinned_on_start(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "pinned_on_start")) return false;
+    boolean result_ = false;
+    boolean pinned_ = false;
+    Marker marker_ = builder_.mark();
+    enterErrorRecordingSection(builder_, level_, _SECTION_GENERAL_, null);
+    result_ = pinned_on_start_0(builder_, level_ + 1);
+    pinned_ = result_; // pin = 1
+    result_ = result_ && pinned_on_start_1(builder_, level_ + 1);
+    if (!result_ && !pinned_) {
+      marker_.rollbackTo();
+    }
+    else {
+      marker_.drop();
+    }
+    result_ = exitErrorRecordingSection(builder_, level_, result_, pinned_, _SECTION_GENERAL_, null);
+    return result_ || pinned_;
+  }
+
+  // []
+  private static boolean pinned_on_start_0(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "pinned_on_start_0")) return false;
+    pinned_on_start_0_0(builder_, level_ + 1);
+    return true;
+  }
+
+  private static boolean pinned_on_start_0_0(PsiBuilder builder_, int level_) {
+    return true;
+  }
+
+  // a|b
+  private static boolean pinned_on_start_1(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "pinned_on_start_1")) return false;
+    boolean result_ = false;
+    Marker marker_ = builder_.mark();
+    result_ = consumeToken(builder_, A);
+    if (!result_) result_ = consumeToken(builder_, B);
+    if (!result_) {
+      marker_.rollbackTo();
+    }
+    else {
+      marker_.drop();
+    }
+    return result_;
+  }
+
+  /* ********************************************************** */
   // statement *
   static boolean root(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "root")) return false;
@@ -330,6 +378,84 @@ public class Autopin implements PsiParser {
     }
     result_ = exitErrorRecordingSection(builder_, level_, result_, pinned_, _SECTION_GENERAL_, null);
     return result_ || pinned_;
+  }
+
+  /* ********************************************************** */
+  // [] a
+  static boolean token_sequence4(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "token_sequence4")) return false;
+    boolean result_ = false;
+    boolean pinned_ = false;
+    Marker marker_ = builder_.mark();
+    enterErrorRecordingSection(builder_, level_, _SECTION_GENERAL_, null);
+    result_ = token_sequence4_0(builder_, level_ + 1);
+    pinned_ = result_; // pin = 1
+    result_ = result_ && consumeToken(builder_, A);
+    if (!result_ && !pinned_) {
+      marker_.rollbackTo();
+    }
+    else {
+      marker_.drop();
+    }
+    result_ = exitErrorRecordingSection(builder_, level_, result_, pinned_, _SECTION_GENERAL_, null);
+    return result_ || pinned_;
+  }
+
+  // []
+  private static boolean token_sequence4_0(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "token_sequence4_0")) return false;
+    token_sequence4_0_0(builder_, level_ + 1);
+    return true;
+  }
+
+  private static boolean token_sequence4_0_0(PsiBuilder builder_, int level_) {
+    return true;
+  }
+
+  /* ********************************************************** */
+  // (a|&b) pinned_on_start
+  static boolean token_sequence5(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "token_sequence5")) return false;
+    if (!nextTokenIs(builder_, A) && !nextTokenIs(builder_, B)) return false;
+    boolean result_ = false;
+    Marker marker_ = builder_.mark();
+    result_ = token_sequence5_0(builder_, level_ + 1);
+    result_ = result_ && pinned_on_start(builder_, level_ + 1);
+    if (!result_) {
+      marker_.rollbackTo();
+    }
+    else {
+      marker_.drop();
+    }
+    return result_;
+  }
+
+  // a|&b
+  private static boolean token_sequence5_0(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "token_sequence5_0")) return false;
+    boolean result_ = false;
+    Marker marker_ = builder_.mark();
+    result_ = consumeToken(builder_, A);
+    if (!result_) result_ = token_sequence5_0_1(builder_, level_ + 1);
+    if (!result_) {
+      marker_.rollbackTo();
+    }
+    else {
+      marker_.drop();
+    }
+    return result_;
+  }
+
+  // &b
+  private static boolean token_sequence5_0_1(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "token_sequence5_0_1")) return false;
+    boolean result_ = false;
+    Marker marker_ = builder_.mark();
+    enterErrorRecordingSection(builder_, level_, _SECTION_AND_, null);
+    result_ = consumeToken(builder_, B);
+    marker_.rollbackTo();
+    result_ = exitErrorRecordingSection(builder_, level_, result_, false, _SECTION_AND_, null);
+    return result_;
   }
 
 }

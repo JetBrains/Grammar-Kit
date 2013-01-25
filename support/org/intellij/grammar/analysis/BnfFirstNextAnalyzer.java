@@ -24,6 +24,7 @@ import com.intellij.psi.PsiReference;
 import com.intellij.psi.search.searches.ReferencesSearch;
 import com.intellij.psi.tree.IElementType;
 import com.intellij.psi.util.PsiTreeUtil;
+import com.intellij.util.CommonProcessors;
 import com.intellij.util.containers.ContainerUtil;
 import gnu.trove.THashMap;
 import gnu.trove.THashSet;
@@ -140,10 +141,25 @@ public class BnfFirstNextAnalyzer {
 
   private Set<BnfExpression> calcSequenceFirstInner(List<BnfExpression> expressions, final Set<BnfExpression> result, final Set<BnfRule> visited) {
     boolean matchesEof = !result.add(BNF_MATCHES_EOF);
+
+    Set<BnfExpression> pinned;
+    if (!myBackward) {
+      BnfExpression firstItem = ContainerUtil.getFirstItem(expressions);
+      if (firstItem == null) return result;
+      BnfRule rule = ParserGeneratorUtil.Rule.of(firstItem);
+      pinned = new HashSet<BnfExpression>();
+      GrammarUtil.processPinnedExpressions(rule, new CommonProcessors.CollectProcessor<BnfExpression>(pinned));
+    }
+    else pinned = Collections.emptySet();
+
+    boolean pinApplied = false;
     List<BnfExpression> list = myBackward ? ContainerUtil.reverse(expressions) : expressions;
     for (int i = 0, size = list.size(); i < size; i++) {
       if (!result.remove(BNF_MATCHES_EOF)) break;
-      calcFirstInner(list.get(i), result, visited, i < size - 1? list.subList(i + 1, size) : null);
+      matchesEof |= pinApplied;
+      BnfExpression e = list.get(i);
+      calcFirstInner(e, result, visited, i < size - 1? list.subList(i + 1, size) : null);
+      pinApplied |= pinned.contains(e);
     }
     // add empty back if was there before
     if (matchesEof) result.add(BNF_MATCHES_EOF);

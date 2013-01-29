@@ -22,13 +22,12 @@ import com.intellij.openapi.util.Comparing;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.psi.*;
 import com.intellij.psi.util.PsiTreeUtil;
+import com.intellij.util.ArrayUtil;
 import org.intellij.grammar.KnownAttribute;
-import org.intellij.grammar.generator.ParserGeneratorUtil;
 import org.intellij.grammar.java.JavaHelper;
 import org.intellij.grammar.psi.BnfAttr;
 import org.intellij.grammar.psi.BnfListEntry;
 import org.intellij.grammar.psi.BnfLiteralExpression;
-import org.intellij.grammar.psi.BnfRule;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -64,10 +63,10 @@ public class GrammarPsiImplUtil {
           for (NavigatablePsiElement element : javaHelper.getClassMethods(psiImplUtilClass, true)) {
             List<String> methodTypes = javaHelper.getMethodTypes(element);
             if (methodTypes.size() > 1) {
-              list.add(LookupElementBuilder.create((PsiNamedElement)element).setIcon(element.getIcon(0)));
+              list.add(LookupElementBuilder.createWithIcon((PsiNamedElement)element));
             }
           }
-          return list.toArray(new Object[list.size()]);
+          return ArrayUtil.toObjectArray(list);
         }
       }
     };

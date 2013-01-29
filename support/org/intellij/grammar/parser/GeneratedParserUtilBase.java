@@ -307,7 +307,7 @@ public class GeneratedParserUtilBase {
       state.suppressErrors = true;
       final boolean eatMoreFlagOnce = !builder_.eof() && eatMore.parse(builder_, frame.level + 1);
       final int lastErrorPos = getLastVariantOffset(state, initialOffset);
-      boolean eatMoreFlag = eatMoreFlagOnce || frame.offset == initialOffset && lastErrorPos > frame.offset;
+      boolean eatMoreFlag = eatMoreFlagOnce || !result && frame.offset == initialOffset && lastErrorPos > frame.offset;
 
       final LighterASTNode latestDoneMarker =
         (pinned || result) && (state.altMode || lastErrorPos > initialOffset) &&

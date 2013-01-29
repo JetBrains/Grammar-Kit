@@ -21,6 +21,7 @@ import com.intellij.openapi.util.TextRange;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.psi.*;
 import com.intellij.psi.util.PsiTreeUtil;
+import com.intellij.util.ArrayUtil;
 import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.generator.ParserGeneratorUtil;
 import org.intellij.grammar.java.JavaHelper;
@@ -66,7 +67,9 @@ public class BnfReferenceImpl<T extends BnfCompositeElement> extends PsiReferenc
     PsiFile containingFile = myElement.getContainingFile();
     List<BnfRule> rules = containingFile instanceof BnfFile ? ((BnfFile)containingFile).getRules() : Collections.<BnfRule>emptyList();
     for (BnfRule rule : rules) {
-      list.add(LookupElementBuilder.create(rule).setBold());
+      boolean fakeRule = ParserGeneratorUtil.Rule.isFake(rule);
+      boolean privateRule = ParserGeneratorUtil.Rule.isPrivate(rule);
+      list.add(LookupElementBuilder.createWithIcon(rule).withBoldness(!privateRule).withStrikeoutness(fakeRule));
     }
     if (GrammarUtil.isExternalReference(myElement)) {
       BnfRule rule = PsiTreeUtil.getParentOfType(myElement, BnfRule.class);
@@ -78,12 +81,12 @@ public class BnfReferenceImpl<T extends BnfCompositeElement> extends PsiReferenc
           if (methodTypes.size() > 2 &&
               methodTypes.get(0).equals("boolean") &&
               methodTypes.get(1).equals("com.intellij.lang.PsiBuilder")) {
-            list.add(LookupElementBuilder.create((PsiNamedElement)element).setIcon(element.getIcon(0)));
+            list.add(LookupElementBuilder.createWithIcon((PsiNamedElement)element));
           }
         }
       }
     }
-    return list.toArray(new Object[list.size()]);
+    return ArrayUtil.toObjectArray(list);
   }
 
 }

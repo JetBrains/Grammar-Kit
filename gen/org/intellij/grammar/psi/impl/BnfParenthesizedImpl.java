@@ -31,9 +31,9 @@ public class BnfParenthesizedImpl extends BnfExpressionImpl implements BnfParent
   }
 
   @Override
-  @Nullable
+  @NotNull
   public BnfExpression getExpression() {
-    return findChildByClass(BnfExpression.class);
+    return findNotNullChildByClass(BnfExpression.class);
   }
 
   public void accept(@NotNull PsiElementVisitor visitor) {

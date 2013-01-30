@@ -227,7 +227,7 @@ public class ParserGenerator {
       }
     }
     boolean generateUtil = getRootAttribute(myFile, KnownAttribute.GENERATE_PARSER_UTIL);
-    if (generateUtil) {
+    if (generateUtil && !myUnitTestMode) {
       generateParserUtil();
     }
   }
@@ -625,14 +625,15 @@ public class ParserGenerator {
 
   void generateNode(BnfRule rule, BnfExpression initialNode, String funcName, Set<BnfExpression> visited) {
     boolean isRule = initialNode.getParent() == rule;
-    while (isTrivialNode(initialNode)) {
-      initialNode = getTrivialNodeChild(initialNode);
+    BnfExpression nonTrivialNode = initialNode;
+    for (BnfExpression e = initialNode, n = getTrivialNodeChild(e); n != null; e = n, n = getTrivialNodeChild(e)) {
+      nonTrivialNode = n;
     }
-    BnfExpression node = initialNode;
+    BnfExpression node = nonTrivialNode;
 
     IElementType type = getEffectiveType(node);
 
-    for (String s : StringUtil.split(node.getText(), "\n")) {
+    for (String s : StringUtil.split((StringUtil.isEmpty(node.getText()) ? initialNode : node).getText(), "\n")) {
       out("// " + s);
     }
     boolean firstNonTrivial = node == Rule.firstNotTrivial(rule);

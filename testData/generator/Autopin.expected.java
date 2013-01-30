@@ -244,12 +244,6 @@ public class Autopin implements PsiParser {
 
   // []
   private static boolean pinned_on_start_0(PsiBuilder builder_, int level_) {
-    if (!recursion_guard_(builder_, level_, "pinned_on_start_0")) return false;
-    pinned_on_start_0_0(builder_, level_ + 1);
-    return true;
-  }
-
-  private static boolean pinned_on_start_0_0(PsiBuilder builder_, int level_) {
     return true;
   }
 
@@ -403,12 +397,6 @@ public class Autopin implements PsiParser {
 
   // []
   private static boolean token_sequence4_0(PsiBuilder builder_, int level_) {
-    if (!recursion_guard_(builder_, level_, "token_sequence4_0")) return false;
-    token_sequence4_0_0(builder_, level_ + 1);
-    return true;
-  }
-
-  private static boolean token_sequence4_0_0(PsiBuilder builder_, int level_) {
     return true;
   }
 

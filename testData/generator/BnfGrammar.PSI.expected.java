@@ -259,7 +259,7 @@ import com.intellij.psi.PsiElement;
 
 public interface BnfParenExpression extends BnfParenthesized {
 
-  @Nullable
+  @NotNull
   BnfExpression getExpression();
 
 }
@@ -273,7 +273,7 @@ import com.intellij.psi.PsiElement;
 
 public interface BnfParenOptExpression extends BnfParenthesized {
 
-  @Nullable
+  @NotNull
   BnfExpression getExpression();
 
 }
@@ -287,7 +287,7 @@ import com.intellij.psi.PsiElement;
 
 public interface BnfParenthesized extends BnfExpression {
 
-  @Nullable
+  @NotNull
   BnfExpression getExpression();
 
 }
@@ -735,9 +735,9 @@ public class BnfParenExpressionImpl extends BnfParenthesizedImpl implements BnfP
   }
 
   @Override
-  @Nullable
+  @NotNull
   public BnfExpression getExpression() {
-    return findChildByClass(BnfExpression.class);
+    return findNotNullChildByClass(BnfExpression.class);
   }
 
   public void accept(@NotNull PsiElementVisitor visitor) {
@@ -766,9 +766,9 @@ public class BnfParenOptExpressionImpl extends BnfParenthesizedImpl implements B
   }
 
   @Override
-  @Nullable
+  @NotNull
   public BnfExpression getExpression() {
-    return findChildByClass(BnfExpression.class);
+    return findNotNullChildByClass(BnfExpression.class);
   }
 
   public void accept(@NotNull PsiElementVisitor visitor) {
@@ -797,9 +797,9 @@ public class BnfParenthesizedImpl extends BnfExpressionImpl implements BnfParent
   }
 
   @Override
-  @Nullable
+  @NotNull
   public BnfExpression getExpression() {
-    return findChildByClass(BnfExpression.class);
+    return findNotNullChildByClass(BnfExpression.class);
   }
 
   public void accept(@NotNull PsiElementVisitor visitor) {

@@ -19,6 +19,9 @@ package org.intellij.grammar;
 import com.intellij.codeInsight.daemon.RelatedItemLineMarkerInfo;
 import com.intellij.codeInsight.daemon.RelatedItemLineMarkerProvider;
 import com.intellij.codeInsight.navigation.NavigationGutterIconBuilder;
+import com.intellij.openapi.actionSystem.ActionManager;
+import com.intellij.openapi.actionSystem.AnAction;
+import com.intellij.openapi.keymap.KeymapUtil;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Ref;
 import com.intellij.openapi.util.text.StringUtil;
@@ -59,9 +62,11 @@ public class BnfRuleLineMarkerProvider extends RelatedItemLineMarkerProvider {
       if (method != null && (!forNavigation || visited.add(method))) {
         items.add(method);
       }
+      boolean hasPSI = false;
       if (isRuleId) {
         BnfRule rule = RuleGraphHelper.getSynonymTargetOrSelf((BnfRule)parent);
         if (RuleGraphHelper.shouldGeneratePsi(rule, true)) {
+          hasPSI = true;
           JavaHelper javaHelper = JavaHelper.getJavaHelper(rule.getProject());
           for (String className : new String[]{ParserGeneratorUtil.getQualifiedRuleClassName(rule, false),
             ParserGeneratorUtil.getQualifiedRuleClassName(rule, true)}) {
@@ -73,8 +78,20 @@ public class BnfRuleLineMarkerProvider extends RelatedItemLineMarkerProvider {
         }
       }
       if (!items.isEmpty()) {
-        final NavigationGutterIconBuilder<PsiElement> builder = NavigationGutterIconBuilder.create(BnfIcons.RELATED_METHOD).
-          setTargets(items).setTooltipText("Related files");
+        AnAction action = ActionManager.getInstance().getAction("GotoRelated");
+        String tooltipAd = "";
+        String popupTitleAd = "";
+        if (action != null) {
+          String shortcutText = KeymapUtil.getFirstKeyboardShortcutText(action);
+          String actionText = StringUtil.isEmpty(shortcutText) ? "'" + action.getTemplatePresentation().getText() + "' action" : shortcutText;
+          tooltipAd = "\nGo to sub-expression code via " + actionText;
+          popupTitleAd = " (for sub-expressions use " + actionText + ")";
+        }
+        String title = "parser " + (hasPSI ? "and PSI " : "") + "code";
+        NavigationGutterIconBuilder<PsiElement> builder = NavigationGutterIconBuilder.create(BnfIcons.RELATED_METHOD).
+          setTargets(items).
+          setTooltipText("Click to navigate to "+title + tooltipAd).
+          setPopupTitle(StringUtil.capitalize(title) + popupTitleAd);
         result.add(builder.createLineMarkerInfo(element));
       }
     }

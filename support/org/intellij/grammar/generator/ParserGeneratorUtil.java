@@ -108,8 +108,20 @@ public class ParserGeneratorUtil {
 
   public static BnfExpression getTrivialNodeChild(PsiElement element) {
     PsiElement child = null;
-    if (element instanceof BnfParenExpression) {
-      child = ((BnfParenExpression)element).getExpression();
+    if (element instanceof BnfParenthesized) {
+      BnfExpression e = ((BnfParenthesized)element).getExpression();
+      if (element instanceof BnfParenExpression) {
+        child = e;
+      }
+      else {
+        BnfExpression c = e;
+        while (c instanceof BnfParenthesized) {
+          c = ((BnfParenthesized)c).getExpression();
+        }
+        if (c.getFirstChild() == null) {
+          child = e;
+        }
+      }
     }
     else if (element.getFirstChild() == element.getLastChild() &&
         (element instanceof BnfChoice || element instanceof BnfSequence || element instanceof BnfExpression)) {

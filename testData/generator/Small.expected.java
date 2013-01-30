@@ -66,12 +66,14 @@ public class Small implements PsiParser {
   }
 
   /* ********************************************************** */
+  // ()
   public static boolean empty(PsiBuilder builder_, int level_) {
     builder_.mark().done(EMPTY);
     return true;
   }
 
   /* ********************************************************** */
+  // {}
   public static boolean empty2(PsiBuilder builder_, int level_) {
     builder_.mark().done(EMPTY_2);
     return true;
@@ -80,20 +82,12 @@ public class Small implements PsiParser {
   /* ********************************************************** */
   // []
   public static boolean empty3(PsiBuilder builder_, int level_) {
-    if (!recursion_guard_(builder_, level_, "empty3")) return false;
-    Marker marker_ = builder_.mark();
-    enterErrorRecordingSection(builder_, level_, _SECTION_GENERAL_, "<empty 3>");
-    empty3_0(builder_, level_ + 1);
-    marker_.done(EMPTY_3);
-    exitErrorRecordingSection(builder_, level_, true, false, _SECTION_GENERAL_, null);
-    return true;
-  }
-
-  private static boolean empty3_0(PsiBuilder builder_, int level_) {
+    builder_.mark().done(EMPTY_3);
     return true;
   }
 
   /* ********************************************************** */
+  // ()
   static boolean empty4(PsiBuilder builder_, int level_) {
     return true;
   }
@@ -101,13 +95,96 @@ public class Small implements PsiParser {
   /* ********************************************************** */
   // []
   static boolean empty5(PsiBuilder builder_, int level_) {
-    if (!recursion_guard_(builder_, level_, "empty5")) return false;
-    empty5_0(builder_, level_ + 1);
     return true;
   }
 
-  private static boolean empty5_0(PsiBuilder builder_, int level_) {
+  /* ********************************************************** */
+  // &()
+  static boolean empty6(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "empty6")) return false;
+    boolean result_ = false;
+    Marker marker_ = builder_.mark();
+    enterErrorRecordingSection(builder_, level_, _SECTION_AND_, null);
+    result_ = empty6_0(builder_, level_ + 1);
+    marker_.rollbackTo();
+    result_ = exitErrorRecordingSection(builder_, level_, result_, false, _SECTION_AND_, null);
+    return result_;
+  }
+
+  // ()
+  private static boolean empty6_0(PsiBuilder builder_, int level_) {
     return true;
+  }
+
+  /* ********************************************************** */
+  // !()
+  static boolean empty7(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "empty7")) return false;
+    boolean result_ = false;
+    Marker marker_ = builder_.mark();
+    enterErrorRecordingSection(builder_, level_, _SECTION_NOT_, null);
+    result_ = !empty7_0(builder_, level_ + 1);
+    marker_.rollbackTo();
+    result_ = exitErrorRecordingSection(builder_, level_, result_, false, _SECTION_NOT_, null);
+    return result_;
+  }
+
+  // ()
+  private static boolean empty7_0(PsiBuilder builder_, int level_) {
+    return true;
+  }
+
+  /* ********************************************************** */
+  // [({})]
+  static boolean empty8(PsiBuilder builder_, int level_) {
+    return true;
+  }
+
+  /* ********************************************************** */
+  // [({token})]
+  static boolean not_empty1(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "not_empty1")) return false;
+    not_empty1_0(builder_, level_ + 1);
+    return true;
+  }
+
+  // {token}
+  private static boolean not_empty1_0(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "not_empty1_0")) return false;
+    boolean result_ = false;
+    Marker marker_ = builder_.mark();
+    result_ = consumeToken(builder_, TOKEN);
+    if (!result_) {
+      marker_.rollbackTo();
+    }
+    else {
+      marker_.drop();
+    }
+    return result_;
+  }
+
+  /* ********************************************************** */
+  // [({token someString})]
+  static boolean not_empty2(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "not_empty2")) return false;
+    not_empty2_0(builder_, level_ + 1);
+    return true;
+  }
+
+  // token someString
+  private static boolean not_empty2_0(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "not_empty2_0")) return false;
+    boolean result_ = false;
+    Marker marker_ = builder_.mark();
+    result_ = consumeToken(builder_, TOKEN);
+    result_ = result_ && someString(builder_, level_ + 1);
+    if (!result_) {
+      marker_.rollbackTo();
+    }
+    else {
+      marker_.drop();
+    }
+    return result_;
   }
 
   /* ********************************************************** */

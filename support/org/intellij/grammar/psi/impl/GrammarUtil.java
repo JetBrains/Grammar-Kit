@@ -134,14 +134,15 @@ public class GrammarUtil {
 
   public static boolean processExpressionNames(String funcName, BnfExpression expression, PairProcessor<String, BnfExpression> processor) {
     if (isAtomicExpression(expression)) return true;
-
-    final List<BnfExpression> children = getChildExpressions(expression);
+    BnfExpression nonTrivialExpression = expression;
+    for (BnfExpression e = expression, n = getTrivialNodeChild(e); n != null; e = n, n = getTrivialNodeChild(e)) {
+      if (!processor.process(funcName, e)) return false;
+      nonTrivialExpression = n;
+    }
+    final List<BnfExpression> children = getChildExpressions(nonTrivialExpression);
     for (int i = 0, childExpressionsSize = children.size(); i < childExpressionsSize; i++) {
       BnfExpression child = children.get(i);
       if (isAtomicExpression(child)) continue;
-      while (isTrivialNode(child)) {
-        child = getTrivialNodeChild(child);
-      }
       if (!processExpressionNames(getNextName(funcName, i), child, processor)) return false;
     }
     return processor.process(funcName, expression);

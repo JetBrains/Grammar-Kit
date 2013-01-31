@@ -37,6 +37,7 @@
     <annotator language="BNF" implementationClass="org.intellij.grammar.editor.BnfPinMarkerAnnotator"/>
     <annotator language="BNF" implementationClass="org.intellij.grammar.editor.BnfExpressionMarkerAnnotator"/>
     <lang.syntaxHighlighterFactory key="BNF" implementationClass="org.intellij.grammar.editor.BnfSyntaxHighlighterFactory"/>
+    <lang.syntaxHighlighterFactory key="BNF_LP" implementationClass="org.intellij.grammar.livePreview.LivePreviewSyntaxHighlighterFactory"/>
     <elementDescriptionProvider implementation="org.intellij.grammar.BnfDescriptionProvider"/>
     <lang.findUsagesProvider language="BNF" implementationClass="org.intellij.grammar.BnfFindUsagesProvider"/>
     <lang.braceMatcher language="BNF" implementationClass="org.intellij.grammar.BnfBraceMatcher"/>
@@ -90,6 +91,12 @@
       <add-to-group group-id="EditorPopupMenu" anchor="last"/>
       <add-to-group group-id="ProjectViewPopupMenu" anchor="last"/>
       <keyboard-shortcut keymap="$default" first-keystroke="control shift G"/>
+    </action>
+    <action id="grammar.LivePreview" class="org.intellij.grammar.actions.LivePreviewAction" text="Live Preview">
+      <add-to-group group-id="ToolsMenu" anchor="after" relative-to-action="grammar.Generate"/>
+      <add-to-group group-id="EditorPopupMenu" anchor="last"/>
+      <add-to-group group-id="ProjectViewPopupMenu" anchor="last"/>
+      <keyboard-shortcut keymap="$default" first-keystroke="control alt P"/>
     </action>
     <action id="grammars.IntroduceRule" class="org.intellij.grammar.refactor.BnfIntroduceRuleAction" text="Introduce Rule"
             description="Introduce Rule">

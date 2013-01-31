@@ -378,7 +378,7 @@ public class ParserGeneratorUtil {
       pinPattern = pinValue instanceof String ? compilePattern(StringUtil.unescapeStringCharacters((String) pinValue)) : null;
     }
 
-    boolean active() { return pinIndex > -1 || pinPattern != null; }
+    public boolean active() { return pinIndex > -1 || pinPattern != null; }
 
     public boolean matches(int i, BnfExpression child) {
       return  i == pinIndex - 1 || pinPattern != null && pinPattern.matcher(child.getText()).matches();

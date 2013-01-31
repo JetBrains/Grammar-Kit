@@ -145,7 +145,7 @@ public class GrammarUtil {
       if (isAtomicExpression(child)) continue;
       if (!processExpressionNames(getNextName(funcName, i), child, processor)) return false;
     }
-    return processor.process(funcName, expression);
+    return processor.process(funcName, nonTrivialExpression);
   }
 
   public static void processPinnedExpressions(final BnfRule rule, final Processor<BnfExpression> processor) {
@@ -169,11 +169,9 @@ public class GrammarUtil {
     });
   }
 
-
   public static boolean isAtomicExpression(BnfExpression tree) {
     return tree instanceof BnfReferenceOrToken || tree instanceof BnfLiteralExpression || tree instanceof BnfExternalExpression;
   }
-
 
   public static boolean processChildrenDummyAware(PsiElement element, final Processor<PsiElement> processor) {
     return new Processor<PsiElement>() {
@@ -188,5 +186,16 @@ public class GrammarUtil {
         return true;
       }
     }.process(element);
+  }
+
+  public static void visitRecursively(PsiElement element, final boolean skipAttrs, final BnfVisitor visitor) {
+    element.acceptChildren(new PsiRecursiveElementWalkingVisitor() {
+      @Override
+      public void visitElement(PsiElement element) {
+        if (skipAttrs && element instanceof BnfAttrs) return;
+        element.accept(visitor);
+        super.visitElement(element);
+      }
+    });
   }
 }

@@ -76,15 +76,15 @@ public class RuleGraphHelper {
   public enum Cardinality {
     NONE, OPTIONAL, REQUIRED, AT_LEAST_ONE, ANY_NUMBER;
 
-    boolean optional() {
+    public boolean optional() {
       return this == OPTIONAL || this == ANY_NUMBER || this == NONE;
     }
 
-    boolean many() {
+    public boolean many() {
       return this == AT_LEAST_ONE || this == ANY_NUMBER;
     }
 
-    Cardinality single() {
+    public Cardinality single() {
       return this == AT_LEAST_ONE? REQUIRED : this == ANY_NUMBER? OPTIONAL : this;
     }
 
@@ -212,6 +212,10 @@ public class RuleGraphHelper {
     };
     buildRulesGraph();
     buildContentsMap();
+  }
+
+  public MultiMap<BnfRule, BnfRule> getRuleExtendsMap() {
+    return myRuleExtendsMap;
   }
 
   private void buildContentsMap() {

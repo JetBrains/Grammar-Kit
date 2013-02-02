@@ -160,9 +160,9 @@ public class LivePreviewLexer extends LexerBase {
 
     Token(String pattern, String id, LivePreviewLanguage language) {
       String tokenName;
-      if (pattern.length() > 3 && pattern.startsWith("/") && pattern.endsWith("/")) {
-        String patternText = pattern.substring(1, pattern.length() - 1);
-        this.pattern = ParserGeneratorUtil.compilePattern(StringUtil.unescapeStringCharacters(patternText));
+      if (pattern.startsWith("regexp:")) {
+        String patternText = pattern.substring("regexp:".length());
+        this.pattern = ParserGeneratorUtil.compilePattern(patternText);
         tokenName = id;
       }
       else {
@@ -188,6 +188,7 @@ public class LivePreviewLexer extends LexerBase {
     final Map<String, String> map = new LinkedHashMap<String, String>();
     List<Pair<String, String>> tokenAttr = file.findAttributeValue(null, KnownAttribute.TOKENS, null);
     for (Pair<String, String> pair : tokenAttr) {
+      if (pair.first == null || pair.second == null) continue;
       map.put(pair.second, pair.first);
     }
     GrammarUtil.visitRecursively(file, true, new BnfVisitor() {
@@ -210,6 +211,7 @@ public class LivePreviewLexer extends LexerBase {
       }
     });
     for (Pair<String, String> pair : tokenAttr) {
+      if (pair.first == null || pair.second == null) continue;
       map.remove(pair.second);
       map.put(pair.second, pair.first);
     }

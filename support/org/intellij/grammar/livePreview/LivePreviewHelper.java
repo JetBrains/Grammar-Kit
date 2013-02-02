@@ -14,6 +14,7 @@ import com.intellij.openapi.util.Key;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiManager;
+import com.intellij.psi.impl.PsiDocumentManagerImpl;
 import com.intellij.testFramework.LightVirtualFile;
 import com.intellij.util.FileContentUtil;
 import org.intellij.grammar.BnfFileType;
@@ -75,7 +76,8 @@ public class LivePreviewHelper {
       @Override
       public void documentChanged(DocumentEvent e) {
         Document document = e.getDocument();
-        VirtualFile file = FileDocumentManager.getInstance().getFile(document);
+        FileDocumentManager fileDocumentManager = FileDocumentManager.getInstance();
+        VirtualFile file = fileDocumentManager.getFile(document);
 
         if (file != null && file.getFileType() == BnfFileType.INSTANCE) {
           Collection<VirtualFile> list = new ArrayList<VirtualFile>();
@@ -85,6 +87,12 @@ public class LivePreviewHelper {
             list.add(virtualFile);
           }
           FileContentUtil.reparseFiles(project, list, false);
+          for (VirtualFile virtualFile : list) {
+            PsiFile psiFile = PsiManager.getInstance(project).findFile(virtualFile);
+            Document doc = fileDocumentManager.getDocument(virtualFile);
+            if (psiFile == null || doc == null) continue;
+            PsiDocumentManagerImpl.cachePsi(doc, psiFile);
+          }
         }
       }
     }, project);

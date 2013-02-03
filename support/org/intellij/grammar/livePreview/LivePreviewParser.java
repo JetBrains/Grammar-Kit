@@ -11,6 +11,7 @@ import com.intellij.psi.tree.IElementType;
 import com.intellij.util.containers.ContainerUtil;
 import com.intellij.util.containers.MultiMap;
 import gnu.trove.THashMap;
+import gnu.trove.TObjectIntHashMap;
 import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.generator.ParserGeneratorUtil;
 import org.intellij.grammar.generator.RuleGraphHelper;
@@ -18,10 +19,7 @@ import org.intellij.grammar.psi.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static org.intellij.grammar.generator.ParserGeneratorUtil.*;
 import static org.intellij.grammar.parser.GeneratedParserUtilBase.*;
@@ -41,6 +39,9 @@ public class LivePreviewParser implements PsiParser {
   private MultiMap<BnfRule, BnfRule> myRuleExtendsMap;
   private boolean generateExtendedPin;
   private String myTokenTypeText;
+
+  private final TObjectIntHashMap myRuleNumbers = new TObjectIntHashMap();
+  private BitSet[] myBitSets;
 
   public LivePreviewParser(Project project, LivePreviewLanguage language) {
     myLanguage = language;
@@ -88,12 +89,29 @@ public class LivePreviewParser implements PsiParser {
     for (BnfRule rule : myFile.getRules()) {
       String elementType = ParserGeneratorUtil.getElementType(rule);
       if (StringUtil.isEmpty(elementType)) continue;
-      myElementTypes.put(elementType, new RuleElementType(elementType, rule, LivePreviewParser.this.myLanguage));
+      myElementTypes.put(elementType, new RuleElementType(elementType, rule, myLanguage));
+    }
+    int count = 0;
+    for (BnfRule rule : myFile.getRules()) {
+      myRuleNumbers.put(rule, count ++);
+    }
+    myBitSets = new BitSet[builder.getOriginalText().length()+1];
+    for (int i = 0; i < myBitSets.length; i++) {
+      myBitSets[i] = new BitSet(count);
     }
   }
 
   private boolean rule(PsiBuilder builder, int level, BnfRule rule) {
-    return expression(builder, level, rule, rule.getExpression(), rule.getName());
+    BitSet bitSet = myBitSets[builder.getCurrentOffset()];
+    int ruleNumber = myRuleNumbers.get(rule);
+    if (bitSet.get(ruleNumber)) {
+      builder.error("Endless recursion detected for '" + rule.getName() + "'");
+      return false;
+    }
+    bitSet.set(ruleNumber);
+    boolean result = expression(builder, level, rule, rule.getExpression(), rule.getName());
+    bitSet.clear(ruleNumber);
+    return result;
   }
 
   private boolean expression(PsiBuilder builder, int level, final BnfRule rule, BnfExpression initialNode, String funcName) {

@@ -15,8 +15,13 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiManager;
 import com.intellij.psi.impl.PsiDocumentManagerImpl;
+import com.intellij.psi.impl.PsiManagerEx;
+import com.intellij.psi.impl.file.impl.FileManager;
 import com.intellij.testFramework.LightVirtualFile;
 import com.intellij.util.FileContentUtil;
+import com.intellij.util.ObjectUtils;
+import com.intellij.util.ui.update.MergingUpdateQueue;
+import com.intellij.util.ui.update.Update;
 import org.intellij.grammar.BnfFileType;
 import org.intellij.grammar.psi.BnfFile;
 import org.jetbrains.annotations.Nullable;
@@ -67,33 +72,40 @@ public class LivePreviewHelper {
     return language;
   }
 
-  private static final Key<Boolean> LIVE_PREVIEW_INITIALIZED = Key.create("LIVE_PREVIEW_INITIALIZED");
+  private static final Key<MergingUpdateQueue> LIVE_PREVIEW_INITIALIZED = Key.create("LIVE_PREVIEW_INITIALIZED");
   private static void installUpdateListener(final Project project) {
-    if (Boolean.TRUE.equals(project.getUserData(LIVE_PREVIEW_INITIALIZED))) return;
-    project.putUserData(LIVE_PREVIEW_INITIALIZED, Boolean.TRUE);
+    MergingUpdateQueue queue = project.getUserData(LIVE_PREVIEW_INITIALIZED);
+    if (queue == null) {
+      project.putUserData(LIVE_PREVIEW_INITIALIZED, queue = new MergingUpdateQueue("LIVE_PREVIEW_QUEUE", 1000, true, null, project));
+    }
     final FileEditorManager fileEditorManager = FileEditorManager.getInstance(project);
+    final MergingUpdateQueue finalQueue = queue;
     EditorFactory.getInstance().getEventMulticaster().addDocumentListener(new DocumentAdapter() {
       @Override
       public void documentChanged(DocumentEvent e) {
         Document document = e.getDocument();
-        FileDocumentManager fileDocumentManager = FileDocumentManager.getInstance();
+        final FileDocumentManager fileDocumentManager = FileDocumentManager.getInstance();
         VirtualFile file = fileDocumentManager.getFile(document);
-
-        if (file != null && file.getFileType() == BnfFileType.INSTANCE) {
-          Collection<VirtualFile> list = new ArrayList<VirtualFile>();
-          for (VirtualFile virtualFile : fileEditorManager.getOpenFiles()) {
-            Language language = virtualFile instanceof LightVirtualFile ? ((LightVirtualFile)virtualFile).getLanguage() : null;
-            if (!(language instanceof LivePreviewLanguage)) continue;
-            list.add(virtualFile);
+        if (file == null || file.getFileType() != BnfFileType.INSTANCE) return;
+        finalQueue.cancelAllUpdates();
+        finalQueue.queue(new Update(Boolean.TRUE, true) {
+          @Override
+          public void run() {
+            FileManager fileManager = ((PsiManagerEx)PsiManager.getInstance(project)).getFileManager();
+            Collection<VirtualFile> list = new ArrayList<VirtualFile>();
+            for (VirtualFile virtualFile : fileEditorManager.getOpenFiles()) {
+              Language language = virtualFile instanceof LightVirtualFile ? ((LightVirtualFile)virtualFile).getLanguage() : null;
+              if (!(language instanceof LivePreviewLanguage)) continue;
+              list.add(virtualFile);
+            }
+            FileContentUtil.reparseFiles(project, list, false);
+            for (VirtualFile virtualFile : list) {
+              Document doc = ObjectUtils.assertNotNull(fileDocumentManager.getDocument(virtualFile));
+              fileManager.setViewProvider(virtualFile, fileManager.createFileViewProvider(virtualFile, true));
+              PsiDocumentManagerImpl.cachePsi(doc, ObjectUtils.assertNotNull(PsiManager.getInstance(project).findFile(virtualFile)));
+            }
           }
-          FileContentUtil.reparseFiles(project, list, false);
-          for (VirtualFile virtualFile : list) {
-            PsiFile psiFile = PsiManager.getInstance(project).findFile(virtualFile);
-            Document doc = fileDocumentManager.getDocument(virtualFile);
-            if (psiFile == null || doc == null) continue;
-            PsiDocumentManagerImpl.cachePsi(doc, psiFile);
-          }
-        }
+        });
       }
     }, project);
 

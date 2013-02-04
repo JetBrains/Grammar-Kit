@@ -15,6 +15,7 @@ import gnu.trove.TObjectIntHashMap;
 import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.generator.ParserGeneratorUtil;
 import org.intellij.grammar.generator.RuleGraphHelper;
+import org.intellij.grammar.parser.GeneratedParserUtilBase;
 import org.intellij.grammar.psi.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -50,17 +51,18 @@ public class LivePreviewParser implements PsiParser {
 
   @NotNull
   @Override
-  public ASTNode parse(IElementType root, PsiBuilder builder) {
-    //ProgressManager.getInstance().getProgressIndicator().startNonCancelableSection(); // todo drop me
+  public ASTNode parse(IElementType root, PsiBuilder originalBuilder) {
+    //com.intellij.openapi.progress.ProgressIndicator indicator = com.intellij.openapi.progress.ProgressManager.getInstance().getProgressIndicator();
+    //if (indicator != null ) indicator.startNonCancelableSection(); // todo drop me
+    init(originalBuilder);
+    PsiBuilder builder = adapt_builder_(root, originalBuilder, this);
     PsiBuilder.Marker mark = builder.mark();
-    init(builder);
+    GeneratedParserUtilBase.enterErrorRecordingSection(builder, 1, _SECTION_RECOVER_, "");
+    boolean result = false;
     if (myGrammarRoot != null) {
-      rule(adapt_builder_(root, builder, this), 1, myGrammarRoot);
+      result = rule(builder, 1, myGrammarRoot);
     }
-
-    while (!builder.eof()) {
-      builder.advanceLexer();
-    }
+    GeneratedParserUtilBase.exitErrorRecordingSection(builder, 1, result, false, _SECTION_RECOVER_, TRUE_CONDITION);
     mark.done(root);
     return builder.getTreeBuilt();
   }
@@ -78,12 +80,7 @@ public class LivePreviewParser implements PsiParser {
     Lexer lexer = ((PsiBuilderImpl)builder).getLexer();
     if (lexer instanceof LivePreviewLexer) {
       for (LivePreviewLexer.Token type : ((LivePreviewLexer)lexer).getTokens()) {
-        String tokenName = type.tokenType.toString();
-        myElementTypes.put(tokenName, type.tokenType);
-        String tokenAlias = mySimpleTokens.get(tokenName);
-        if (tokenAlias != null && !tokenName.equals(tokenAlias)) {
-          myElementTypes.put(myTokenTypeText + tokenAlias.toUpperCase(), type.tokenType);
-        }
+        myElementTypes.put(type.constantName, type.tokenType);
       }
     }
     for (BnfRule rule : myFile.getRules()) {

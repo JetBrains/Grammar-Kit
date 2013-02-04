@@ -1,5 +1,6 @@
 package org.intellij.grammar.livePreview;
 
+import com.intellij.lang.Language;
 import com.intellij.lexer.LexerBase;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Pair;
@@ -43,16 +44,12 @@ public class LivePreviewLexer extends LexerBase {
       @Override
       public Result<Token[]> compute() {
         Map<String, String> map = collectTokenPattern2Name(bnfFile);
-        if (!map.containsKey("GENERIC_ID")) map.put("GENERIC_ID", "\\w+");
-        //    comment='///.*\n/'
-        //    number='/\\d+/'
-        //    id='/\\p{Alpha}\\w*/'
-        //    string='/(\'([^\'\\\\]|\\\\.)*\'|\"([^\"\\\\]|\\\\.)*\")/'
+        if (!map.containsKey("regexp:\\w+")) map.put("regexp:\\w+", "GENERIC_ID");
         Token[] tokens = new Token[map.size() + 1];
         int i = 0;
-        String tokenTypeText = getRootAttribute(bnfFile, KnownAttribute.ELEMENT_TYPE_PREFIX);
+        String tokenConstantPrefix = getRootAttribute(bnfFile, KnownAttribute.ELEMENT_TYPE_PREFIX);
         for (String pattern : map.keySet()) {
-          tokens[i++] = new Token(pattern, tokenTypeText + map.get(pattern).toUpperCase(), language);
+          tokens[i++] = new Token(pattern, map.get(pattern), tokenConstantPrefix, language);
         }
         tokens[i] = new Token("\\s+", TokenType.WHITE_SPACE);
         return Result.create(tokens, bnfFile);
@@ -117,7 +114,10 @@ public class LivePreviewLexer extends LexerBase {
   @Nullable
   @Override
   public IElementType getTokenType() {
-    assert myTokenType != null || myPosition == myEndOffset: "not lexed: '" + myBuffer.subSequence(myPosition, myEndOffset) + "'";
+    if (myTokenType == null && myPosition != myEndOffset) {
+      nextToken();
+      assert false : "not lexed: '" + myBuffer.subSequence(myPosition, myEndOffset) + "'";
+    }
     return myTokenType;
   }
 
@@ -155,30 +155,46 @@ public class LivePreviewLexer extends LexerBase {
 
   static class Token {
 
+    final String constantName;
     final Pattern pattern;
     final IElementType tokenType;
 
-    Token(String pattern, String id, LivePreviewLanguage language) {
+    Token(String pattern, String mappedName, String constantPrefix, LivePreviewLanguage language) {
+      constantName = constantPrefix + mappedName.toUpperCase(Locale.ENGLISH);
       String tokenName;
+      boolean keyword;
       if (pattern.startsWith("regexp:")) {
         String patternText = pattern.substring("regexp:".length());
         this.pattern = ParserGeneratorUtil.compilePattern(patternText);
-        tokenName = id;
+        tokenName = mappedName;
+        keyword = false;
       }
       else {
         this.pattern = ParserGeneratorUtil.compilePattern(StringUtil.escapeToRegexp(pattern));
         tokenName = pattern;
+        keyword = StringUtil.isJavaIdentifier(pattern);
       }
       //noinspection EmptyClass
       if (StringUtil.endsWithIgnoreCase(tokenName, "comment")) tokenType = LivePreviewParserDefinition.COMMENT;
       else if (StringUtil.endsWithIgnoreCase(tokenName, "string")) tokenType = LivePreviewParserDefinition.STRING;
       else if (StringUtil.endsWithIgnoreCase(tokenName, "number")) tokenType = LivePreviewParserDefinition.NUMBER;
+      else if (keyword) tokenType = new KeywordTokenType(tokenName, language);
       else tokenType = new IElementType(tokenName, language, false) {};
     }
 
     Token(String pattern, IElementType tokenType) {
       this.pattern = ParserGeneratorUtil.compilePattern(pattern);
       this.tokenType = tokenType;
+      this.constantName = "<no-name>";
+    }
+
+    @Override
+    public String toString() {
+      return "Token{" +
+             constantName +
+             ", pattern=" + pattern +
+             ", tokenType=" + tokenType +
+             '}';
     }
   }
 
@@ -217,5 +233,11 @@ public class LivePreviewLexer extends LexerBase {
     }
 
     return map;
+  }
+
+  static class KeywordTokenType extends IElementType {
+    KeywordTokenType(String name, Language language) {
+      super(name, language, false);
+    }
   }
 }

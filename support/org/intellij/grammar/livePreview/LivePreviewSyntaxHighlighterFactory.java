@@ -30,7 +30,14 @@ public class LivePreviewSyntaxHighlighterFactory extends SyntaxHighlighterFactor
       @NotNull
       @Override
       public Lexer getHighlightingLexer() {
-        return new LivePreviewLexer(project, (LivePreviewLanguage)language);
+        return new LivePreviewLexer(project, (LivePreviewLanguage)language) {
+          @Nullable
+          @Override
+          public IElementType getTokenType() {
+            IElementType tokenType = super.getTokenType();
+            return tokenType instanceof KeywordTokenType? LivePreviewParserDefinition.KEYWORD : tokenType;
+          }
+        };
       }
 
       @NotNull
@@ -39,6 +46,7 @@ public class LivePreviewSyntaxHighlighterFactory extends SyntaxHighlighterFactor
         if (tokenType == LivePreviewParserDefinition.COMMENT) return pack(DefaultLanguageHighlighterColors.LINE_COMMENT);
         if (tokenType == LivePreviewParserDefinition.STRING) return pack(DefaultLanguageHighlighterColors.STRING);
         if (tokenType == LivePreviewParserDefinition.NUMBER) return pack(DefaultLanguageHighlighterColors.NUMBER);
+        if (tokenType == LivePreviewParserDefinition.KEYWORD) return pack(DefaultLanguageHighlighterColors.KEYWORD);
         if (tokenType == TokenType.BAD_CHARACTER) return pack(DefaultLanguageHighlighterColors.INVALID_STRING_ESCAPE);
         return EMPTY;
       }

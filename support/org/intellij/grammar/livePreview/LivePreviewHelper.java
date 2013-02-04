@@ -1,14 +1,22 @@
 package org.intellij.grammar.livePreview;
 
+import com.intellij.ide.highlighter.HighlighterFactory;
 import com.intellij.lang.Language;
 import com.intellij.lang.LanguageParserDefinitions;
 import com.intellij.lang.LanguageStructureViewBuilder;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.editor.EditorFactory;
+import com.intellij.openapi.editor.colors.EditorColorsManager;
 import com.intellij.openapi.editor.event.DocumentAdapter;
 import com.intellij.openapi.editor.event.DocumentEvent;
+import com.intellij.openapi.editor.ex.EditorEx;
+import com.intellij.openapi.editor.ex.util.LexerEditorHighlighter;
+import com.intellij.openapi.editor.highlighter.EditorHighlighterFactory;
 import com.intellij.openapi.fileEditor.FileDocumentManager;
+import com.intellij.openapi.fileEditor.FileEditor;
 import com.intellij.openapi.fileEditor.FileEditorManager;
+import com.intellij.openapi.fileEditor.TextEditor;
+import com.intellij.openapi.fileTypes.SyntaxHighlighterFactory;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Key;
 import com.intellij.openapi.vfs.VirtualFile;
@@ -17,6 +25,7 @@ import com.intellij.psi.PsiManager;
 import com.intellij.psi.impl.PsiDocumentManagerImpl;
 import com.intellij.psi.impl.PsiManagerEx;
 import com.intellij.psi.impl.file.impl.FileManager;
+import com.intellij.psi.tree.IElementType;
 import com.intellij.testFramework.LightVirtualFile;
 import com.intellij.util.FileContentUtil;
 import com.intellij.util.ObjectUtils;
@@ -26,8 +35,7 @@ import org.intellij.grammar.BnfFileType;
 import org.intellij.grammar.psi.BnfFile;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.Collection;
+import java.util.Collections;
 
 /**
  * @author gregsh
@@ -92,17 +100,18 @@ public class LivePreviewHelper {
           @Override
           public void run() {
             FileManager fileManager = ((PsiManagerEx)PsiManager.getInstance(project)).getFileManager();
-            Collection<VirtualFile> list = new ArrayList<VirtualFile>();
-            for (VirtualFile virtualFile : fileEditorManager.getOpenFiles()) {
+            for (FileEditor fileEditor : fileEditorManager.getAllEditors()) {
+              if (!(fileEditor instanceof TextEditor)) continue;
+              EditorEx editor = (EditorEx)((TextEditor)fileEditor).getEditor();
+              Document document = editor.getDocument();
+              VirtualFile virtualFile = editor.getVirtualFile();
               Language language = virtualFile instanceof LightVirtualFile ? ((LightVirtualFile)virtualFile).getLanguage() : null;
               if (!(language instanceof LivePreviewLanguage)) continue;
-              list.add(virtualFile);
-            }
-            FileContentUtil.reparseFiles(project, list, false);
-            for (VirtualFile virtualFile : list) {
-              Document doc = ObjectUtils.assertNotNull(fileDocumentManager.getDocument(virtualFile));
+
+              FileContentUtil.reparseFiles(project, Collections.singletonList(virtualFile), false);
               fileManager.setViewProvider(virtualFile, fileManager.createFileViewProvider(virtualFile, true));
-              PsiDocumentManagerImpl.cachePsi(doc, ObjectUtils.assertNotNull(PsiManager.getInstance(project).findFile(virtualFile)));
+              PsiDocumentManagerImpl.cachePsi(document, ObjectUtils.assertNotNull(PsiManager.getInstance(project).findFile(virtualFile)));
+              editor.setHighlighter(EditorHighlighterFactory.getInstance().createEditorHighlighter(project, virtualFile));
             }
           }
         });

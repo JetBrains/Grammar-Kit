@@ -24,6 +24,7 @@ public class LivePreviewParserDefinition implements ParserDefinition {
   public static final IElementType COMMENT = new IElementType("COMMENT", LivePreviewLanguage.BASE_INSTANCE);
   public static final IElementType STRING = new IElementType("STRING", LivePreviewLanguage.BASE_INSTANCE);
   public static final IElementType NUMBER = new IElementType("NUMBER", LivePreviewLanguage.BASE_INSTANCE);
+  public static final IElementType KEYWORD = new IElementType("KEYWORD", LivePreviewLanguage.BASE_INSTANCE);
 
   private static final TokenSet ourWhiteSpaceTokens = TokenSet.create(TokenType.WHITE_SPACE);
   private static final TokenSet ourCommentTokens = TokenSet.create(COMMENT);
@@ -31,7 +32,6 @@ public class LivePreviewParserDefinition implements ParserDefinition {
 
   private final LivePreviewLanguage myLanguage;
   private final IFileElementType myFileElementType;
-  private LivePreviewLexer myLastLexer;
 
   public LivePreviewParserDefinition(LivePreviewLanguage language) {
     myLanguage = language;
@@ -41,8 +41,7 @@ public class LivePreviewParserDefinition implements ParserDefinition {
   @NotNull
   @Override
   public Lexer createLexer(Project project) {
-    myLastLexer = new LivePreviewLexer(project, myLanguage);
-    return myLastLexer;
+    return new LivePreviewLexer(project, myLanguage);
   }
 
   @Override

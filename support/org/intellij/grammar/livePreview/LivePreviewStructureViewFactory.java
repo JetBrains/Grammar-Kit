@@ -9,6 +9,7 @@ import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiErrorElement;
 import com.intellij.psi.PsiFile;
+import com.intellij.psi.PsiWhiteSpace;
 import com.intellij.psi.impl.source.tree.LeafPsiElement;
 import com.intellij.psi.tree.IElementType;
 import org.intellij.grammar.psi.BnfFile;
@@ -81,6 +82,7 @@ public class LivePreviewStructureViewFactory implements PsiStructureViewFactory 
       if (element == null || element instanceof LeafPsiElement) return Collections.emptyList();
       ArrayList<StructureViewTreeElement> result = new ArrayList<StructureViewTreeElement>();
       for (PsiElement e = element.getFirstChild(); e != null; e = e.getNextSibling()) {
+        if (e instanceof PsiWhiteSpace) continue;
         result.add(new MyElement(e));
       }
       return result;

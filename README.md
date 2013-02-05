@@ -2,40 +2,40 @@
 Grammar-Kit plugin
 ==================
 
-Adds support for a custom variant of BNF grammar files.
+Edit BNF grammars with _Live Preview_ and generate parser/PSI java code.
 
-Download latest [GrammarKit.zip](/JetBrains/Grammar-Kit/raw/master/binaries/GrammarKit.zip) and
-[GeneratedParserUtilBase.java](/JetBrains/Grammar-Kit/raw/master/support/org/intellij/grammar/parser/GeneratedParserUtilBase.java)
+Download latest [GrammarKit.zip](binaries/GrammarKit.zip) and
+[GeneratedParserUtilBase.java](support/org/intellij/grammar/parser/GeneratedParserUtilBase.java)
 for manual installation.
 
 General usage instructions
 --------------------------
-1. Create grammar *.bnf file, see [Grammar.bnf](/JetBrains/Grammar-Kit/blob/master/grammars/Grammar.bnf) in the plugin code.
-2. Generate parser/ElementTypes/PSI classes (Ctrl-Shift-G)
-3. Add lexer, parser definition & plugin.xml
-4. Mix-in resolve and other non-trivial functionality to PSI
-5. Tune the grammar, regenerate code, repeat if needed.
+1. Create grammar *.bnf file, see [Grammar.bnf](grammars/Grammar.bnf) in the plugin code.
+2. Tune the grammar using _Live Preview_ + Structure view (ctrl-alt-P / meta-alt-P)
+3. Generate parser/ElementTypes/PSI classes (ctrl-shift-G / meta-shift-G)
+4. Add lexer, parser definition & plugin.xml
+5. Mix-in resolve and other non-trivial functionality to PSI
 
 You've just build a custom language plugin (approx. 1 day).
 
-See [HOWTO](/JetBrains/Grammar-Kit/blob/master/HOWTO.md) page for different tips and tricks.
+See [Tutorial](TUTORIAL.md) page for a sample to play with *Live Preview*.
+
+See [HOWTO](HOWTO.md) page for different tips and tricks.
 
 Other open-source plugins built with Grammar-Kit: [intellij-erlang](https://github.com/ignatov/intellij-erlang).
 
-![Editor support](/JetBrains/Grammar-Kit/raw/master/images/editor.png)
+![Editor support](images/editor.png)
 
 Recent changes
 --------------
-1.0.9
+1.0.10
 
-* [Pratt-like](http://javascript.crockford.com/tdop/tdop.html) expression parsing stabilized, see [grammar sample](https://github.com/JetBrains/Grammar-Kit/blob/master/testData/generator/ExprParser.bnf) for more
-* No compile errors in generated code on cold start
-* Drop unneeded inheritance checks during parse-time
+* [Live Preview](TUTORIAL.md) mode for fast language prototyping
 
 
 Quick documentation:
 ====================
-See [Parsing Expression Grammar](http://en.wikipedia.org/wiki/Parsing_expression_grammar) for basic syntax. Use ::= for ← symbol. You can also use [ .. ] for optional sequences and { | | } for choices as these variants are popular in real-world grammars. Grammar-Kit source code is the main example of Grammar-Kit application. The grammar for BNF parser and PSI generation can be found [here](/JetBrains/Grammar-Kit/blob/master/grammars/Grammar.bnf).
+See [Parsing Expression Grammar](http://en.wikipedia.org/wiki/Parsing_expression_grammar) for basic syntax. Use ::= for ← symbol. You can also use [ .. ] for optional sequences and { | | } for choices as these variants are popular in real-world grammars. Grammar-Kit source code is the main example of Grammar-Kit application. The grammar for BNF parser and PSI generation can be found [here](grammars/Grammar.bnf).
 
 Basic syntax is extended with global and attributes that control code generation.
 Attributes are specified by the list of *name=value* pairs enclosed in { .. }.
@@ -77,7 +77,7 @@ External rule expression syntax is the same as a body of external expression:
  external manually_parsed_rule ::= methodName param1 param2 ...
 ````
 
-Rule references in parameter list are implemented as [GeneratedParserUtilBase.Parser](/JetBrains/Grammar-Kit/blob/master/support/org/intellij/grammar/parser/GeneratedParserUtilBase.java) instances.
+Rule references in parameter list are implemented as [GeneratedParserUtilBase.Parser](support/org/intellij/grammar/parser/GeneratedParserUtilBase.java) instances.
 
 ### Tokens:
 Tokens should appear in grammar file as is. All conflicts can be resolved by quotation.
@@ -92,7 +92,7 @@ Generally anything that appears in an external expression after rule or method n
 as parameter and passed "as is" except single-quoted strings. They are unquoted first.
 This helps passing qualified enum constants, java expressions, etc.
 
-### Error recovery:
+### Error recovery and reporting:
 * _pin_ attribute (value: number or pattern string) makes partially matched rule match
 if the specified prefix is matched. This attribute tunes the parser to handle incomplete rules.
   * _extendedPin_ global attribute (_true_ by default) extends the notion of pinning. In this mode the
@@ -102,13 +102,15 @@ generated parser tries to match the rest part of an already pinned rule even if 
 matching completes with any result. This attribute helps parser recover when unmatched token
 sequence is encountered.
 
+* _name_ attribute (value: string) specifies a nice name for a rule. For example *name("_.*expr")=expression* attribute creates a well recognized "&lt;expression&gt; required" error message for different expression rules instead of a long token list.
+
 ### Generated parser structure:
 For each rule and every its sub-expression in a grammar a static method is generated.
 Sub-expression methods are named *rule_name_K_L_..* where the *(K, L, .. )* number list describes the position of a sub-expression in an enclosing rule. Avoid naming your rules this way.
 
 Generator can split parser code into several classes for better support of large grammars.
 
-For simple cases parser will consists of several generated classes and a copy [GeneratedParserUtilBase](/JetBrains/Grammar-Kit/blob/master/support/org/intellij/grammar/parser/GeneratedParserUtilBase.java) the first time generator is run. It contains error recovery and reporting code as well as completion functionality for parser-based completion provider and basic token matching code. Make sure you have the latest version as it contains the latest fixes, improvements and a fresh portion of bugs.
+For simple cases parser will consists of several generated classes and a copy [GeneratedParserUtilBase](support/org/intellij/grammar/parser/GeneratedParserUtilBase.java) the first time generator is run. It contains error recovery and reporting code as well as completion functionality for parser-based completion provider and basic token matching code. Make sure you have the latest version as it contains the latest fixes, improvements and a fresh portion of bugs.
 
 Each external rule must be implemented the same way as generated i.e. by static method.
 
@@ -156,15 +158,19 @@ Just add *mypackage.MyReferenceExpressionImpl* class with proper *getReference()
 
 Change log
 ==========
+1.0.10
+
+* [Live Preview](TUTORIAL.md) mode for fast language prototyping
+
 1.0.9
 
-* [Pratt-like](http://javascript.crockford.com/tdop/tdop.html) expression parsing stabilized, see [grammar sample](https://github.com/JetBrains/Grammar-Kit/blob/master/testData/generator/ExprParser.bnf) for more
+* [Pratt-like](http://javascript.crockford.com/tdop/tdop.html) expression parsing stabilized, see [grammar sample](testData/generator/ExprParser.bnf) for more
 * No compile errors in generated code on cold start
 * Drop unneeded inheritance checks during parse-time
 
 1.0.8
 
-* Experimental [Pratt-like](http://javascript.crockford.com/tdop/tdop.html) expression parsing ([compact grammars and improved performance](https://github.com/JetBrains/Grammar-Kit/blob/master/testData/generator/ExprParser.bnf))
+* Experimental [Pratt-like](http://javascript.crockford.com/tdop/tdop.html) expression parsing ([compact grammars and improved performance](testData/generator/ExprParser.bnf))
 * Per-rule elementTypeClass/Factory attribute & empty elementType attribute support
 * CamelCase rule names support and PSI classes calculation fixes
 * Grammar code folding for attribute groups and multiline comments

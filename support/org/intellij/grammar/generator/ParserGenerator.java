@@ -1263,10 +1263,11 @@ public class ParserGenerator {
       }
       for (String tokenText : mySimpleTokens.keySet()) {
         String tokenName = ObjectUtils.chooseNotNull(mySimpleTokens.get(tokenText), tokenText);
-        sortedTokens.put(getTokenElementType(tokenName), tokenText);
+        sortedTokens.put(getTokenElementType(tokenName), ParserGeneratorUtil.isRegexpToken(tokenText) ? tokenName : tokenText);
       }
       for (String tokenType : sortedTokens.keySet()) {
-        out("IElementType " + tokenType + " = " + tokenCreateCall + "(\"" + sortedTokens.get(tokenType) + "\");");
+        String callFix = tokenCreateCall.equals("new IElementType") ? ", null" : "";
+        out("IElementType " + tokenType + " = " + tokenCreateCall + "(\"" + sortedTokens.get(tokenType) + "\""+callFix+");");
       }
     }
     if (generatePsi) {

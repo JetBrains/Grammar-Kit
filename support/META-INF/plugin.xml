@@ -12,6 +12,10 @@
 
   <change-notes>
     <![CDATA[
+    <p>1.0.10</p>
+    <ul>
+        <li>Live Preview mode for fast prototyping</li>
+    </ul>
     <p>1.0.9</p>
     <ul>
         <li>Pratt-like expression parsing stabilized</li>
@@ -103,12 +107,5 @@
       <add-to-group group-id="RefactoringMenu" anchor="first"/>
       <keyboard-shortcut keymap="$default" first-keystroke="control alt R"/>
     </action>
-    <!--<action id="Grammars.ConvertFromRailRoad" class="org.intellij.grammar.actions.BnfConvertFromRailRoadAction" text="Convert From Railroad Diagram"-->
-            <!--description="Convert From Railroad Diagram">-->
-      <!--<add-to-group group-id="ToolsMenu" anchor="before" relative-to-action="com.intellij.tools.ExternalToolsGroup"/>-->
-      <!--<add-to-group group-id="EditorPopupMenu" anchor="last"/>-->
-      <!--<add-to-group group-id="ProjectViewPopupMenu" anchor="last"/>-->
-      <!--<keyboard-shortcut keymap="$default" first-keystroke="control shift D"/>-->
-    <!--</action>-->
   </actions>
 </idea-plugin>

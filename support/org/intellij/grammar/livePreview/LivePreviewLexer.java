@@ -163,8 +163,8 @@ public class LivePreviewLexer extends LexerBase {
       constantName = constantPrefix + mappedName.toUpperCase(Locale.ENGLISH);
       String tokenName;
       boolean keyword;
-      if (pattern.startsWith("regexp:")) {
-        String patternText = pattern.substring("regexp:".length());
+      if (ParserGeneratorUtil.isRegexpToken(pattern)) {
+        String patternText = ParserGeneratorUtil.getRegexpTokenRegexp(pattern);
         this.pattern = ParserGeneratorUtil.compilePattern(patternText);
         tokenName = mappedName;
         keyword = false;

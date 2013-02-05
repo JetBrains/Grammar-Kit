@@ -161,7 +161,7 @@ public class BnfStructureViewFactory implements PsiStructureViewFactory {
     private static String getAttrDisplayName(BnfAttr attr) {
       final BnfAttrPattern attrPattern = attr.getAttrPattern();
       final BnfExpression attrValue = attr.getExpression();
-      String attrValueText = attrValue == null? "" : attrValue.getText();
+      String attrValueText = attrValue == null? "" : attrValue instanceof BnfValueList? "[ ... ]" : attrValue.getText();
       return attr.getName() + (attrPattern == null ? "" : attrPattern.getText()) + " = " + attrValueText;
     }
 

@@ -306,6 +306,14 @@ public class ParserGeneratorUtil {
     }
   }
 
+  public static boolean isRegexpToken(String tokenText) {
+    return tokenText.startsWith("regexp:");
+  }
+
+  public static String getRegexpTokenRegexp(String tokenText) {
+    return tokenText.substring("regexp:".length());
+  }
+
   public static class Rule {
 
     public static boolean isPrivate(BnfRule node) {

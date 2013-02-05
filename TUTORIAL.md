@@ -1,7 +1,7 @@
 
 Live Preview introduction:
 ====================
-(The latest 1.0.10 version of Grammar-Kit plugin is required)
+(The latest 1.0.10 version of [Grammar-Kit](binaries/GrammarKit.zip) plugin is required)
 
 Suppose we want to create a grammar for some expression language like this:
 ````

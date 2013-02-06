@@ -111,7 +111,7 @@ public class LivePreviewParser implements PsiParser {
     return result;
   }
 
-  private boolean expression(PsiBuilder builder, int level, final BnfRule rule, BnfExpression initialNode, String funcName) {
+  protected boolean expression(PsiBuilder builder, int level, final BnfRule rule, BnfExpression initialNode, String funcName) {
     boolean isRule = initialNode.getParent() == rule;
     BnfExpression nonTrivialNode = initialNode;
     for (BnfExpression e = initialNode, n = getTrivialNodeChild(e); n != null; e = n, n = getTrivialNodeChild(e)) {
@@ -330,7 +330,7 @@ public class LivePreviewParser implements PsiParser {
     return generateNodeCall(builder, level, rule, node, null);
   }
 
-  private boolean generateNodeCall(PsiBuilder builder, int level, BnfRule rule, @Nullable BnfExpression node, String nextName) {
+  protected boolean generateNodeCall(PsiBuilder builder, int level, BnfRule rule, @Nullable BnfExpression node, String nextName) {
     IElementType type = node == null ? BNF_REFERENCE_OR_TOKEN : getEffectiveType(node);
     String text = node == null ? nextName : node.getText();
     if (type == BNF_STRING) {
@@ -460,15 +460,23 @@ public class LivePreviewParser implements PsiParser {
 
   private boolean generateConsumeToken(PsiBuilder builder, String tokenName) {
     IElementType tokenType = getTokenElementType(tokenName);
-    return tokenType != null && consumeToken(builder, tokenType);
+    return tokenType != null && generateConsumeToken(builder, tokenType);
   }
 
-  private static boolean generateConsumeTextToken(PsiBuilder builder, String tokenText) {
+  protected boolean generateConsumeToken(PsiBuilder builder, IElementType tokenType) {
+    return consumeToken(builder, tokenType);
+  }
+
+  protected boolean generateConsumeTextToken(PsiBuilder builder, String tokenText) {
     return consumeToken(builder, tokenText);
   }
 
   private IElementType getTokenElementType(String token) {
     return getElementType(myTokenTypeText + token.toUpperCase());
+  }
+
+  protected boolean isTokenExpression(BnfExpression node) {
+    return node instanceof BnfLiteralExpression || node instanceof BnfReferenceOrToken && myFile.getRule(node.getText()) == null;
   }
 
   public static class RuleElementType extends IElementType {

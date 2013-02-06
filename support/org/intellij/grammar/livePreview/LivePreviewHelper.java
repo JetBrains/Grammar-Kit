@@ -1,9 +1,9 @@
 package org.intellij.grammar.livePreview;
 
-import com.intellij.lang.Language;
-import com.intellij.lang.LanguageParserDefinitions;
-import com.intellij.lang.LanguageStructureViewBuilder;
+import com.intellij.lang.*;
+import com.intellij.lexer.Lexer;
 import com.intellij.openapi.editor.Document;
+import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.EditorFactory;
 import com.intellij.openapi.editor.event.DocumentAdapter;
 import com.intellij.openapi.editor.event.DocumentEvent;
@@ -15,21 +15,25 @@ import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.fileEditor.TextEditor;
 import com.intellij.openapi.fileEditor.ex.FileEditorManagerEx;
 import com.intellij.openapi.fileEditor.impl.EditorWindow;
+import com.intellij.openapi.progress.ProcessCanceledException;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Key;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.openapi.wm.WindowManager;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiManager;
+import com.intellij.psi.TokenType;
 import com.intellij.psi.impl.PsiDocumentManagerImpl;
 import com.intellij.psi.impl.PsiManagerEx;
 import com.intellij.psi.impl.file.impl.FileManager;
 import com.intellij.testFramework.LightVirtualFile;
 import com.intellij.util.FileContentUtil;
 import com.intellij.util.ObjectUtils;
+import com.intellij.util.PairProcessor;
 import com.intellij.util.ui.update.MergingUpdateQueue;
 import com.intellij.util.ui.update.Update;
 import org.intellij.grammar.BnfFileType;
-import org.intellij.grammar.psi.BnfFile;
+import org.intellij.grammar.psi.*;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
@@ -82,11 +86,16 @@ public class LivePreviewHelper {
     return language;
   }
 
-  private static final Key<MergingUpdateQueue> LIVE_PREVIEW_INITIALIZED = Key.create("LIVE_PREVIEW_INITIALIZED");
+  public static MergingUpdateQueue getUpdateQueue(Project project) {
+    return project.getUserData(LIVE_PREVIEW_QUEUE);
+  }
+
+  private static final Key<MergingUpdateQueue> LIVE_PREVIEW_QUEUE = Key.create("LIVE_PREVIEW_QUEUE");
   private static void installUpdateListener(final Project project) {
-    MergingUpdateQueue queue = project.getUserData(LIVE_PREVIEW_INITIALIZED);
+    MergingUpdateQueue queue = project.getUserData(LIVE_PREVIEW_QUEUE);
     if (queue == null) {
-      project.putUserData(LIVE_PREVIEW_INITIALIZED, queue = new MergingUpdateQueue("LIVE_PREVIEW_QUEUE", 1000, true, null, project));
+      JComponent activationComponent = WindowManager.getInstance().getFrame(project).getRootPane();
+      project.putUserData(LIVE_PREVIEW_QUEUE, queue = new MergingUpdateQueue("LIVE_PREVIEW_QUEUE", 1000, true, null, project, activationComponent));
     }
     final FileEditorManager fileEditorManager = FileEditorManager.getInstance(project);
     final MergingUpdateQueue finalQueue = queue;
@@ -139,5 +148,43 @@ public class LivePreviewHelper {
     //    Disposer.register(fileEditor, structureView);
     //  }
     //});
+  }
+
+  public static boolean collectExpressionsAtOffset(Project project, Editor previewEditor, LivePreviewLanguage language, final PairProcessor<BnfExpression, Boolean> processor) {
+    Lexer lexer = new LivePreviewLexer(project, language);
+    final ParserDefinition parserDefinition = LanguageParserDefinitions.INSTANCE.forLanguage(language);
+    final PsiBuilder builder = PsiBuilderFactory.getInstance().createBuilder(parserDefinition, lexer, previewEditor.getDocument().getText());
+    final int caretOffset = previewEditor.getCaretModel().getOffset();
+    final PsiParser parser = new LivePreviewParser(project, language) {
+      @Override
+      protected boolean generateNodeCall(PsiBuilder builder, int level, BnfRule rule, @Nullable BnfExpression node, String nextName) {
+        int tokenStartOffset = builder.getCurrentOffset();
+        int initialOffset = builder.rawLookup(-1) == TokenType.WHITE_SPACE ? builder.rawTokenTypeStart(-1) : builder.getCurrentOffset();
+        String tokenText = builder.getTokenText();
+        int tokenEndOffset = tokenText == null? tokenStartOffset : tokenStartOffset + tokenText.length();
+        boolean result = super.generateNodeCall(builder, level, rule, node, nextName);
+        builder.getCurrentOffset(); // advance to the next token first
+        int finalOffset = builder.rawLookup(-1) == TokenType.WHITE_SPACE ? builder.rawTokenTypeStart(-1) : builder.getCurrentOffset();
+        if (node != null) {
+          if (result && initialOffset <= caretOffset && finalOffset > caretOffset ||
+              !result && initialOffset <= caretOffset && tokenEndOffset > caretOffset) {
+            boolean inWhitespace = isTokenExpression(node) &&
+                                   initialOffset <= caretOffset && tokenStartOffset > caretOffset;
+            if (!processor.process(node, result && !inWhitespace)) {
+              throw new ProcessCanceledException();
+            }
+          }
+        }
+        return result;
+      }
+
+    };
+    try {
+      parser.parse(parserDefinition.getFileNodeType(), builder);
+      return true;
+    }
+    catch (ProcessCanceledException e) {
+      return false;
+    }
   }
 }

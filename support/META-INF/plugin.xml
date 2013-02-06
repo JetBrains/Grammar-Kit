@@ -102,6 +102,11 @@
       <add-to-group group-id="ProjectViewPopupMenu" anchor="last"/>
       <keyboard-shortcut keymap="$default" first-keystroke="control alt P"/>
     </action>
+    <action id="grammar.HighlightGrammarAtCaretAction" class="org.intellij.grammar.actions.HighlightGrammarAtCaretAction"
+            text="Grammar Highlighting">
+      <add-to-group group-id="EditorPopupMenu" anchor="last"/>
+      <keyboard-shortcut keymap="$default" first-keystroke="control alt F7"/>
+    </action>
     <action id="grammars.IntroduceRule" class="org.intellij.grammar.refactor.BnfIntroduceRuleAction" text="Introduce Rule"
             description="Introduce Rule">
       <add-to-group group-id="RefactoringMenu" anchor="first"/>

@@ -178,6 +178,7 @@ public class LivePreviewLexer extends LexerBase {
       if (StringUtil.endsWithIgnoreCase(tokenName, "comment")) tokenType = LivePreviewParserDefinition.COMMENT;
       else if (StringUtil.endsWithIgnoreCase(tokenName, "string")) tokenType = LivePreviewParserDefinition.STRING;
       else if (StringUtil.endsWithIgnoreCase(tokenName, "number")) tokenType = LivePreviewParserDefinition.NUMBER;
+      else if (StringUtil.endsWithIgnoreCase(tokenName, "integer")) tokenType = LivePreviewParserDefinition.NUMBER;
       else if (keyword) tokenType = new KeywordTokenType(tokenName, language);
       else tokenType = new IElementType(tokenName, language, false) {};
     }

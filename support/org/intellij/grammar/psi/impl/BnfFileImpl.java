@@ -24,6 +24,7 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.util.CachedValue;
 import com.intellij.psi.util.CachedValueProvider;
 import com.intellij.psi.util.CachedValuesManager;
+import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.util.Processor;
 import com.intellij.util.containers.ContainerUtil;
 import gnu.trove.THashMap;
@@ -71,6 +72,7 @@ public class BnfFileImpl extends PsiFileBase implements BnfFile {
     }, false);
   }
 
+  @NotNull
   @Override
   public List<BnfRule> getRules() {
     return new ArrayList<BnfRule>(myRules.getValue().values());
@@ -82,19 +84,34 @@ public class BnfFileImpl extends PsiFileBase implements BnfFile {
     return myRules.getValue().get(ruleName);
   }
 
+  @NotNull
   @Override
   public List<BnfAttrs> getAttributes() {
     return myGlobalAttributes.getValue();
   }
 
-  private static final Pattern SUB_EXPRESSION = Pattern.compile(".*(_\\d+)+");
+  @Override
+  @Nullable
+  public BnfAttr findAttribute(@Nullable BnfRule rule, @NotNull KnownAttribute<?> knownAttribute, @Nullable String match) {
+    AttributeInfo result = findAttributeInfo(rule, knownAttribute, match);
+    if (result == null) return null;
+    return PsiTreeUtil.getParentOfType(findElementAt(result.attrOffset), BnfAttr.class);
+  }
+
   public <T> T findAttributeValue(@Nullable BnfRule rule, @NotNull KnownAttribute<T> knownAttribute, @Nullable String match) {
+    AttributeInfo result = findAttributeInfo(rule, knownAttribute, match);
+    return result == null ? knownAttribute.getDefaultValue() : knownAttribute.ensureValue(result.value);
+  }
+
+  private static final Pattern SUB_EXPRESSION = Pattern.compile(".*(_\\d+)+");
+  @Nullable
+  public <T> AttributeInfo findAttributeInfo(@Nullable BnfRule rule, @NotNull KnownAttribute<T> knownAttribute, @Nullable String match) {
     List<AttributeInfo> list = myAttributeValues.getValue().get(knownAttribute.getName());
-    if (list == null) return knownAttribute.getDefaultValue();
+    if (list == null) return null;
     BnfAttrs globalAttrs = rule == null? ContainerUtil.getFirstItem(getAttributes()) : null;
     int offset = rule == null ? globalAttrs == null? 0 : globalAttrs.getTextRange().getEndOffset() : rule.getTextRange().getEndOffset();
-    if (offset == 0) return knownAttribute.getDefaultValue();
-    AttributeInfo key = new AttributeInfo(offset, true, null, null);
+    if (offset == 0) return null;
+    AttributeInfo key = new AttributeInfo(0, offset, true, null, null);
     int index = Collections.binarySearch(list, key);
     int ruleStartOffset = rule == null? offset : rule.getTextRange().getStartOffset();
     String toMatch = match == null ? rule == null? null : rule.getName() : match;
@@ -112,7 +129,7 @@ public class BnfFileImpl extends PsiFileBase implements BnfFile {
       // do not pin nested sequences
       result = null;
     }
-    return result == null ? knownAttribute.getDefaultValue() : knownAttribute.ensureValue(result.value);
+    return result;
   }
 
   @NotNull
@@ -190,19 +207,21 @@ public class BnfFileImpl extends PsiFileBase implements BnfFile {
         Object value = ParserGeneratorUtil.getAttributeValue(attr.getExpression());
         int offset = attr.getTextRange().getStartOffset();
         int infoOffset = pattern == null? baseRange.getStartOffset() + 1: baseRange.getStartOffset() + (baseRange.getEndOffset() - offset);
-        list.add(new AttributeInfo(infoOffset, !rule, pattern, value));
+        list.add(new AttributeInfo(offset, infoOffset, !rule, pattern, value));
       }
     });
     return result;
   }
 
   private static class AttributeInfo implements Comparable<AttributeInfo> {
+    final int attrOffset;
     final int offset;
     final boolean global;
     final Pattern pattern;
     final Object value;
 
-    private AttributeInfo(int offset, boolean global, Pattern pattern, Object value) {
+    private AttributeInfo(int attrOffset, int offset, boolean global, Pattern pattern, Object value) {
+      this.attrOffset = attrOffset;
       this.offset = offset;
       this.global = global;
       this.pattern = pattern;

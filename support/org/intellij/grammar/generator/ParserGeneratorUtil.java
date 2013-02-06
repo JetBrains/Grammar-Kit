@@ -376,11 +376,15 @@ public class ParserGeneratorUtil {
   
   public static class PinMatcher {
 
+    public final BnfRule rule;
+    public final String funcName;
     public final Object pinValue;
     private final int pinIndex;
     private final Pattern pinPattern;
 
     public PinMatcher(BnfRule rule, IElementType type, String funcName) {
+      this.rule = rule;
+      this.funcName = funcName;
       pinValue = type == BNF_SEQUENCE ? getAttribute(rule, KnownAttribute.PIN, funcName) : null;
       pinIndex = pinValue instanceof Integer? (Integer)pinValue : -1;
       pinPattern = pinValue instanceof String ? compilePattern((String) pinValue) : null;

@@ -39,9 +39,9 @@ import static org.intellij.grammar.psi.BnfTypes.BNF_SEQUENCE;
  */
 public class GrammarUtil {
 
-  public final static Comparator<BnfRule> RULE_COMPARATOR = new Comparator<BnfRule>() {
+  public final static Comparator<BnfNamedElement> NAME_COMPARATOR = new Comparator<BnfNamedElement>() {
     @Override
-    public int compare(BnfRule o1, BnfRule o2) {
+    public int compare(BnfNamedElement o1, BnfNamedElement o2) {
       return Comparing.compare(o1.getName(), o2.getName());
     }
   };
@@ -148,8 +148,17 @@ public class GrammarUtil {
     return processor.process(funcName, nonTrivialExpression);
   }
 
-  public static void processPinnedExpressions(final BnfRule rule, final Processor<BnfExpression> processor) {
-    processExpressionNames(rule.getName(), rule.getExpression(), new PairProcessor<String, BnfExpression>() {
+  public static boolean processPinnedExpressions(final BnfRule rule, final Processor<BnfExpression> processor) {
+    return processPinnedExpressions(rule, new PairProcessor<BnfExpression, PinMatcher>() {
+      @Override
+      public boolean process(BnfExpression bnfExpression, PinMatcher pinMatcher) {
+        return processor.process(bnfExpression);
+      }
+    });
+  }
+
+  public static boolean processPinnedExpressions(final BnfRule rule, final PairProcessor<BnfExpression, PinMatcher> processor) {
+    return processExpressionNames(rule.getName(), rule.getExpression(), new PairProcessor<String, BnfExpression>() {
       @Override
       public boolean process(String funcName, BnfExpression expression) {
         if (!(expression instanceof BnfSequence)) return true;
@@ -161,7 +170,7 @@ public class GrammarUtil {
           BnfExpression child = children.get(i);
           if (!pinApplied && pinMatcher.matches(i, child)) {
             pinApplied = true;
-            if (!processor.process(child)) return false;
+            if (!processor.process(child, pinMatcher)) return false;
           }
         }
         return true;

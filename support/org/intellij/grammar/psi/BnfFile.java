@@ -27,11 +27,18 @@ import java.util.List;
  * @author gregsh
  */
 public interface BnfFile extends PsiFile {
+  @NotNull
   List<BnfRule> getRules();
 
+  @NotNull
   List<BnfAttrs> getAttributes();
 
+  @Nullable
   BnfRule getRule(String ruleName);
 
+  @Nullable
+  public BnfAttr findAttribute(@Nullable BnfRule rule, @NotNull KnownAttribute<?> knownAttribute, @Nullable String match);
+
+  @Nullable
   public <T> T findAttributeValue(@Nullable BnfRule rule, @NotNull KnownAttribute<T> knownAttribute, @Nullable String match);
 }

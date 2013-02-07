@@ -66,7 +66,8 @@ public abstract class BnfStringImpl extends BnfExpressionImpl implements BnfStri
     KnownAttribute attribute = KnownAttribute.getAttribute(((BnfAttr)getParent()).getName());
     if (attribute == null) return null;
     boolean addJavaRefs = attribute.getName().endsWith("Class") || attribute.getName().endsWith("Package") ||
-                       (attribute == KnownAttribute.EXTENDS || attribute == KnownAttribute.IMPLEMENTS);
+                       (attribute == KnownAttribute.EXTENDS || attribute == KnownAttribute.IMPLEMENTS ||
+                        attribute == KnownAttribute.MIXIN);
     boolean addBnfRef = attribute == KnownAttribute.EXTENDS || attribute == KnownAttribute.IMPLEMENTS ||
                         attribute == KnownAttribute.RECOVER_UNTIL || attribute == KnownAttribute.NAME;
 

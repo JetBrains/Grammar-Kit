@@ -33,11 +33,13 @@ import com.intellij.util.PairProcessor;
 import com.intellij.util.ui.update.MergingUpdateQueue;
 import com.intellij.util.ui.update.Update;
 import org.intellij.grammar.BnfFileType;
+import org.intellij.grammar.parser.GeneratedParserUtilBase;
 import org.intellij.grammar.psi.*;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 import java.util.Collections;
+import java.util.Map;
 
 /**
  * @author gregsh
@@ -157,12 +159,17 @@ public class LivePreviewHelper {
     final int caretOffset = previewEditor.getCaretModel().getOffset();
     final PsiParser parser = new LivePreviewParser(project, language) {
       @Override
-      protected boolean generateNodeCall(PsiBuilder builder, int level, BnfRule rule, @Nullable BnfExpression node, String nextName) {
+      protected boolean generateNodeCall(PsiBuilder builder,
+                                         int level,
+                                         BnfRule rule,
+                                         @Nullable BnfExpression node,
+                                         String nextName,
+                                         Map<String, GeneratedParserUtilBase.Parser> externalArguments) {
         int tokenStartOffset = builder.getCurrentOffset();
         int initialOffset = builder.rawLookup(-1) == TokenType.WHITE_SPACE ? builder.rawTokenTypeStart(-1) : builder.getCurrentOffset();
         String tokenText = builder.getTokenText();
         int tokenEndOffset = tokenText == null? tokenStartOffset : tokenStartOffset + tokenText.length();
-        boolean result = super.generateNodeCall(builder, level, rule, node, nextName);
+        boolean result = super.generateNodeCall(builder, level, rule, node, nextName, externalArguments);
         builder.getCurrentOffset(); // advance to the next token first
         int finalOffset = builder.rawLookup(-1) == TokenType.WHITE_SPACE ? builder.rawTokenTypeStart(-1) : builder.getCurrentOffset();
         if (node != null) {

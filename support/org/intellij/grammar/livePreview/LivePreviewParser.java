@@ -9,14 +9,17 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.impl.source.tree.LeafPsiElement;
 import com.intellij.psi.tree.IElementType;
 import com.intellij.util.containers.ContainerUtil;
+import com.intellij.util.containers.HashMap;
 import com.intellij.util.containers.MultiMap;
 import gnu.trove.THashMap;
 import gnu.trove.TObjectIntHashMap;
 import org.intellij.grammar.KnownAttribute;
+import org.intellij.grammar.generator.ExpressionHelper;
 import org.intellij.grammar.generator.ParserGeneratorUtil;
 import org.intellij.grammar.generator.RuleGraphHelper;
 import org.intellij.grammar.parser.GeneratedParserUtilBase;
 import org.intellij.grammar.psi.*;
+import org.intellij.grammar.psi.impl.GrammarUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -37,6 +40,7 @@ public class LivePreviewParser implements PsiParser {
   private BnfRule myGrammarRoot;
   private final Map<String, IElementType> myElementTypes = new THashMap<String, IElementType>();
   private RuleGraphHelper myGraphHelper;
+  private ExpressionHelper myExpressionHelper;
   private MultiMap<BnfRule, BnfRule> myRuleExtendsMap;
   private boolean generateExtendedPin;
   private String myTokenTypeText;
@@ -60,7 +64,7 @@ public class LivePreviewParser implements PsiParser {
     GeneratedParserUtilBase.enterErrorRecordingSection(builder, 1, _SECTION_RECOVER_, "");
     boolean result = false;
     if (myGrammarRoot != null) {
-      result = rule(builder, 1, myGrammarRoot);
+      result = rule(builder, 1, myGrammarRoot, Collections.<String, Parser>emptyMap());
     }
     GeneratedParserUtilBase.exitErrorRecordingSection(builder, 1, result, false, _SECTION_RECOVER_, TRUE_CONDITION);
     mark.done(root);
@@ -74,6 +78,7 @@ public class LivePreviewParser implements PsiParser {
     mySimpleTokens = LivePreviewLexer.collectTokenPattern2Name(myFile);
     myGraphHelper = RuleGraphHelper.getCached(myFile);
     myRuleExtendsMap = myGraphHelper.getRuleExtendsMap();
+    myExpressionHelper = new ExpressionHelper(myFile, myGraphHelper, false);
 
     myTokenTypeText = getRootAttribute(myFile, KnownAttribute.ELEMENT_TYPE_PREFIX);
 
@@ -98,7 +103,7 @@ public class LivePreviewParser implements PsiParser {
     }
   }
 
-  private boolean rule(PsiBuilder builder, int level, BnfRule rule) {
+  private boolean rule(PsiBuilder builder, int level, BnfRule rule, Map<String, Parser> externalArguments) {
     BitSet bitSet = myBitSets[builder.getCurrentOffset()];
     int ruleNumber = myRuleNumbers.get(rule);
     if (bitSet.get(ruleNumber)) {
@@ -106,12 +111,17 @@ public class LivePreviewParser implements PsiParser {
       return false;
     }
     bitSet.set(ruleNumber);
-    boolean result = expression(builder, level, rule, rule.getExpression(), rule.getName());
+    boolean result = expression(builder, level, rule, rule.getExpression(), rule.getName(), externalArguments);
     bitSet.clear(ruleNumber);
     return result;
   }
 
-  protected boolean expression(PsiBuilder builder, int level, final BnfRule rule, BnfExpression initialNode, String funcName) {
+  protected boolean expression(PsiBuilder builder,
+                               int level,
+                               final BnfRule rule,
+                               BnfExpression initialNode,
+                               String funcName,
+                               Map<String, Parser> externalArguments) {
     boolean isRule = initialNode.getParent() == rule;
     BnfExpression nonTrivialNode = initialNode;
     for (BnfExpression e = initialNode, n = getTrivialNodeChild(e); n != null; e = n, n = getTrivialNodeChild(e)) {
@@ -134,7 +144,7 @@ public class LivePreviewParser implements PsiParser {
     if (node instanceof BnfReferenceOrToken || node instanceof BnfLiteralExpression || node instanceof BnfExternalExpression) {
       children = Collections.singletonList(node);
       if (isPrivate && !isLeftInner && recoverRoot == null) {
-        return generateNodeCall(builder, level, rule, node, getNextName(funcName, 0));
+        return generateNodeCall(builder, level, rule, node, getNextName(funcName, 0), externalArguments);
       }
       else {
         type = BNF_SEQUENCE;
@@ -155,7 +165,6 @@ public class LivePreviewParser implements PsiParser {
     if (!recursion_guard_(builder, level, funcName)) return false;
 
     String frameName = firstNonTrivial && !Rule.isMeta(rule)? getRuleDisplayName(rule, !isPrivate) : null;
-    // todo
     //if (recoverRoot == null && (isRule || firstNonTrivial)) {
     //  frameName = generateFirstCheck(rule, frameName, true);
     //}
@@ -190,35 +199,35 @@ public class LivePreviewParser implements PsiParser {
       BnfExpression child = children.get(i);
 
       if (type == BNF_CHOICE) {
-        if (i == 0) result_ = generateNodeCall(builder, level, rule, child, getNextName(funcName, i));
-        else if (!result_) result_ = generateNodeCall(builder, level, rule, child, getNextName(funcName, i));
+        if (i == 0) result_ = generateNodeCall(builder, level, rule, child, getNextName(funcName, i), externalArguments);
+        else if (!result_) result_ = generateNodeCall(builder, level, rule, child, getNextName(funcName, i), externalArguments);
       }
       else if (type == BNF_SEQUENCE) {
         predicateEncountered |= pinApplied && ParserGeneratorUtil.getEffectiveExpression(myFile, child) instanceof BnfPredicate;
         if (skip[0] == 0) {
           if (i == 0) {
-            result_ = generateTokenSequenceCall(builder, level, rule, children, funcName, i, pinMatcher, pinApplied, skip);
+            result_ = generateTokenSequenceCall(builder, level, rule, children, funcName, i, pinMatcher, pinApplied, skip, externalArguments);
           }
           else {
             if (pinApplied && generateExtendedPin && !predicateEncountered) {
               if (i == childrenSize - 1) {
                 // do not report error for last child
                 if (i == p + 1) {
-                  result_ = result_ && generateTokenSequenceCall(builder, level, rule, children, funcName, i, pinMatcher, pinApplied, skip);
+                  result_ = result_ && generateTokenSequenceCall(builder, level, rule, children, funcName, i, pinMatcher, pinApplied, skip, externalArguments);
                 }
                 else {
-                  result_ = pinned_ && generateTokenSequenceCall(builder, level, rule, children, funcName, i, pinMatcher, pinApplied, skip) && result_;
+                  result_ = pinned_ && generateTokenSequenceCall(builder, level, rule, children, funcName, i, pinMatcher, pinApplied, skip, externalArguments) && result_;
                 }
               }
               else if (i == p + 1) {
-                result_ = result_ && report_error_(builder, generateTokenSequenceCall(builder, level, rule, children, funcName, i, pinMatcher, pinApplied, skip));
+                result_ = result_ && report_error_(builder, generateTokenSequenceCall(builder, level, rule, children, funcName, i, pinMatcher, pinApplied, skip, externalArguments));
               }
               else {
-                result_ = pinned_ && report_error_(builder, generateTokenSequenceCall(builder, level, rule, children, funcName, i, pinMatcher, pinApplied, skip)) && result_;
+                result_ = pinned_ && report_error_(builder, generateTokenSequenceCall(builder, level, rule, children, funcName, i, pinMatcher, pinApplied, skip, externalArguments)) && result_;
               }
             }
             else {
-              result_ = result_ && generateTokenSequenceCall(builder, level, rule, children, funcName, i, pinMatcher, pinApplied, skip);
+              result_ = result_ && generateTokenSequenceCall(builder, level, rule, children, funcName, i, pinMatcher, pinApplied, skip, externalArguments);
             }
           }
         }
@@ -233,16 +242,16 @@ public class LivePreviewParser implements PsiParser {
         }
       }
       else if (type == BNF_OP_OPT) {
-        generateNodeCall(builder, level, rule, child, getNextName(funcName, i));
+        generateNodeCall(builder, level, rule, child, getNextName(funcName, i), externalArguments);
       }
       else if (type == BNF_OP_ONEMORE || type == BNF_OP_ZEROMORE) {
         if (type == BNF_OP_ONEMORE) {
-          result_ = generateNodeCall(builder, level, rule, child, getNextName(funcName, i));
+          result_ = generateNodeCall(builder, level, rule, child, getNextName(funcName, i), externalArguments);
         }
         int offset_ = builder.getCurrentOffset();
         //noinspection LoopConditionNotUpdatedInsideLoop
         while (alwaysTrue || result_) {
-          if (!generateNodeCall(builder, level, rule, child, getNextName(funcName, i))) break;
+          if (!generateNodeCall(builder, level, rule, child, getNextName(funcName, i), externalArguments)) break;
           int next_offset_ = builder.getCurrentOffset();
           if (offset_ == next_offset_) {
             empty_element_parsed_guard_(builder, offset_, funcName);
@@ -252,10 +261,10 @@ public class LivePreviewParser implements PsiParser {
         }
       }
       else if (type == BNF_OP_AND) {
-        result_ = generateNodeCall(builder, level, rule, child, getNextName(funcName, i));
+        result_ = generateNodeCall(builder, level, rule, child, getNextName(funcName, i), externalArguments);
       }
       else if (type == BNF_OP_NOT) {
-        result_ = !generateNodeCall(builder, level, rule, child, getNextName(funcName, i));
+        result_ = !generateNodeCall(builder, level, rule, child, getNextName(funcName, i), externalArguments);
       }
       else {
         addWarning(myFile.getProject(), "unexpected: " + type);
@@ -306,7 +315,7 @@ public class LivePreviewParser implements PsiParser {
                                           sectionType, untilRule == null? null : new Parser() {
         @Override
         public boolean parse(PsiBuilder builder, int level) {
-          return rule(builder, level, untilRule);
+          return rule(builder, level, untilRule, Collections.<String, Parser>emptyMap());
         }
       });
     }
@@ -326,11 +335,7 @@ public class LivePreviewParser implements PsiParser {
   }
 
 
-  private boolean generateNodeCall(PsiBuilder builder, int level, BnfRule rule, @NotNull BnfExpression node) {
-    return generateNodeCall(builder, level, rule, node, null);
-  }
-
-  protected boolean generateNodeCall(PsiBuilder builder, int level, BnfRule rule, @Nullable BnfExpression node, String nextName) {
+  protected boolean generateNodeCall(PsiBuilder builder, int level, BnfRule rule, @Nullable BnfExpression node, String nextName, Map<String, Parser> externalArguments) {
     IElementType type = node == null ? BNF_REFERENCE_OR_TOKEN : getEffectiveType(node);
     String text = node == null ? nextName : node.getText();
     if (type == BNF_STRING) {
@@ -347,86 +352,182 @@ public class LivePreviewParser implements PsiParser {
     else if (type == BNF_REFERENCE_OR_TOKEN) {
       BnfRule subRule = myFile.getRule(text);
       if (subRule != null) {
-        String method;
+        //String method;
         if (Rule.isExternal(subRule)) {
+          // not supported
           return false;
-          // todo external rules
           //method = generateExternalCall(rule, clause, GrammarUtil.getExternalRuleExpressions(subRule), nextName);
           //return method + "(builder_, level_ + 1" + clause.toString() + ")";
         }
         else {
-          // todo expression parsing
           //ExpressionHelper.ExpressionInfo info = ExpressionGeneratorHelper.getInfoForExpressionParsing(myExpressionHelper, subRule);
           //method = info != null ? info.rootRule.getName() : subRule.getName();
           //if (info == null) {
-            return rule(builder, level + 1, subRule);
+            return rule(builder, level + 1, subRule, externalArguments);
           //}
           //else {
           //  return method + "(builder_, level_ + 1, " + info.getPriority(subRule) + ")";
           //}
         }
       }
-      // allow token usage by registered token name instead of token text
-      //if (!mySimpleTokens.containsKey(text) && !mySimpleTokens.values().contains(text)) {
-      //  mySimpleTokens.put(text, null);
-      //}
       return generateConsumeToken(builder, text);
     }
     else if (type == BNF_EXTERNAL_EXPRESSION) {
-      return false;
-      // todo
-      //List<BnfExpression> expressions = ((BnfExternalExpression)node).getExpressionList();
-      //if (expressions.size() == 1 && Rule.isMeta(rule)) {
-      //  return expressions.get(0).getText() + ".parse(builder_, level_)";
-      //}
-      //else {
-      //  StringBuilder clause = new StringBuilder();
-      //  String method = generateExternalCall(rule, clause, expressions, nextName);
-      //  return method + "(builder_, level_ + 1" + clause.toString() + ")";
-      //}
+      List<BnfExpression> expressions = ((BnfExternalExpression)node).getExpressionList();
+      if (expressions.size() == 1 && Rule.isMeta(rule)) {
+        Parser parser = externalArguments.get(node.getText());
+        return parser != null && parser.parse(builder, level);
+      }
+      else {
+        return generateExternalCall(builder, level, rule, expressions, nextName, externalArguments);
+      }
     }
     else {
-      return expression(builder, level, rule, node, nextName);
-      /// todo
-      //return nextName + "(builder_, level_ + 1" + collectExtraArguments(rule, node, false) + ")";
+      return expression(builder, level, rule, node, nextName, externalArguments);
     }
   }
 
-  private boolean generateTokenSequenceCall(PsiBuilder builder, int level,
+  private boolean generateTokenSequenceCall(PsiBuilder builder,
+                                            int level,
                                             BnfRule rule,
                                             List<BnfExpression> children,
-                                            String funcName, int startIndex,
+                                            String funcName,
+                                            int startIndex,
                                             PinMatcher pinMatcher,
                                             boolean pinApplied,
-                                            int[] skip) {
-    return generateNodeCall(builder, level, rule, children.get(startIndex));
+                                            int[] skip,
+                                            Map<String, Parser> externalArguments) {
+    BnfExpression nextChild = children.get(startIndex);
+    if (startIndex == children.size() - 1 || !isTokenExpression(nextChild)) {
+      return generateNodeCall(builder, level, rule, nextChild, funcName, externalArguments);
+    }
+    ArrayList<IElementType> list = new ArrayList<IElementType>();
+    int pin = pinApplied ? -1 : 0;
+    for (int i = startIndex, len = children.size(); i < len; i++) {
+      BnfExpression child = children.get(i);
+      IElementType type = child.getNode().getElementType();
+      String text = child.getText();
+      String tokenName;
+      if (type == BNF_STRING && text.charAt(0) != '\"') {
+        tokenName = getTokenName(StringUtil.stripQuotesAroundValue(text));
+      }
+      else if (type == BNF_REFERENCE_OR_TOKEN && myFile.getRule(text) == null) {
+        tokenName = text;
+      }
+      else {
+        break;
+      }
+      list.add(getTokenElementType(tokenName));
+      if (!pinApplied && pinMatcher.matches(i, child)) {
+        pin = i - startIndex + 1;
+      }
+    }
+    if (list.size() < 2) {
+      return generateNodeCall(builder, level, rule, nextChild, funcName, externalArguments);
+    }
+    skip[0] = list.size() - 1;
+    return consumeTokens(builder, pin, list.toArray(new IElementType[list.size()]));
+  }
 
-    // todo
-    //if (startIndex == children.size() - 1 || !nodeCall.startsWith("consumeToken(builder_, ")) return nodeCall;
-    //ArrayList<String> list = new ArrayList<String>();
-    //int pin = pinApplied ? -1 : 0;
-    //for (int i = startIndex, len = children.size(); i < len; i++) {
-    //  BnfExpression child = children.get(i);
-    //  IElementType type = child.getNode().getElementType();
-    //  String text = child.getText();
-    //  String tokenName;
-    //  if (type == BNF_STRING && text.charAt(0) != '\"') {
-    //    tokenName = getTokenName(StringUtil.stripQuotesAroundValue(text));
-    //  }
-    //  else if (type == BNF_REFERENCE_OR_TOKEN && myFile.getRule(text) == null) {
-    //    tokenName = text;
-    //  }
-    //  else {
-    //    break;
-    //  }
-    //  list.add(getTokenElementType(tokenName));
-    //  if (!pinApplied && pinMatcher.matches(i, child)) {
-    //    pin = i - startIndex + 1;
-    //  }
-    //}
-    //if (list.size() < 2) return nodeCall;
-    //skip[0] = list.size() - 1;
-    //return "consumeTokens(builder_, " + pin + ", " + StringUtil.join(list, ", ") + ")";
+  private boolean generateExternalCall(PsiBuilder builder,
+                                       int level,
+                                       final BnfRule rule,
+                                       List<BnfExpression> expressions,
+                                       String nextName,
+                                       final Map<String, Parser> externalArguments) {
+    List<BnfExpression> callParameters = expressions;
+    List<BnfExpression> metaParameters = Collections.emptyList();
+    List<String> metaParameterNames;
+    String method = expressions.size() > 0 ? expressions.get(0).getText() : null;
+    final BnfRule targetRule = method == null ? null : myFile.getRule(method);
+    // handle external rule call: substitute and merge arguments from external expression and rule definition
+    if (targetRule != null) {
+      metaParameterNames = GrammarUtil.collectExtraArguments(targetRule, targetRule.getExpression());
+      if (Rule.isExternal(targetRule)) {
+        // not supported
+        return false;
+        //callParameters = GrammarUtil.getExternalRuleExpressions(targetRule);
+        //metaParameters = expressions;
+        //method = callParameters.get(0).getText();
+        //if (metaParameterNames.size() < expressions.size() - 1) {
+        //  callParameters = ContainerUtil.concat(callParameters, expressions.subList(metaParameterNames.size() + 1, expressions.size()));
+        //}
+      }
+    }
+    else {
+      return false;
+    }
+    if (callParameters.size() <= 1) {
+      return rule(builder, level, targetRule, externalArguments);
+    }
+    Map<String, Parser> argumentMap = new HashMap<String, Parser>();
+    for (int i = 1, len = Math.min(callParameters.size(), metaParameterNames.size() + 1); i < len; i++) {
+      BnfExpression nested = callParameters.get(i);
+      String argument = nested.getText();
+      final String argNextName;
+      final String argName;
+      int metaIdx;
+      if (argument.startsWith("<<") && (metaIdx = metaParameterNames.indexOf(argument)) > -1) {
+        nested = metaParameters.get(metaIdx + 1);
+        argument = nested.getText();
+        argNextName = getNextName(nextName, metaIdx);
+        argName = argument;
+      }
+      else {
+        argNextName = getNextName(nextName, i - 1);
+        argName = metaParameterNames.get(i - 1);
+      }
+      final BnfExpression finalNested = nested;
+      if (nested instanceof BnfReferenceOrToken) {
+        final BnfRule argRule = myFile.getRule(argument);
+        if (argRule != null) {
+          argumentMap.put(argName, new Parser() {
+            @Override
+            public boolean parse(PsiBuilder builder, int level) {
+              return rule(builder, level, argRule, Collections.<String, Parser>emptyMap());
+            }
+          });
+        }
+        else {
+          // not supported
+          //clause.append(argument);
+        }
+      }
+      else if (nested instanceof BnfLiteralExpression) {
+        // not supported
+        //if (argument.startsWith("\'")) {
+        //  clause.append(StringUtil.unquoteString(argument));
+        //}
+        //else {
+        //  clause.append(argument);
+        //}
+      }
+      else if (nested instanceof BnfExternalExpression) {
+        List<BnfExpression> expressionList = ((BnfExternalExpression)nested).getExpressionList();
+        boolean metaRule = Rule.isMeta(rule);
+        if (metaRule && expressionList.size() == 1) {
+          // parameter
+          argumentMap.put(argName, externalArguments.get(expressionList.get(0).getText()));
+        }
+        else {
+          argumentMap.put(argName, new Parser() {
+            @Override
+            public boolean parse(PsiBuilder builder, int level) {
+              return generateNodeCall(builder, level, targetRule, finalNested, argNextName, externalArguments);
+            }
+          });
+        }
+      }
+      else {
+        argumentMap.put(argName, new Parser() {
+          @Override
+          public boolean parse(PsiBuilder builder, int level) {
+            return generateNodeCall(builder, level, targetRule, finalNested, argNextName, externalArguments);
+          }
+        });
+      }
+    }
+    return rule(builder, level, targetRule, argumentMap);
   }
 
 

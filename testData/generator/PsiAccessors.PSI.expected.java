@@ -15,7 +15,7 @@ public interface ParserTypes {
   IElementType RE = new IElementType("RE", null);
   IElementType VALUE = new IElementType("VALUE", null);
 
-  IElementType ID = new IElementType("id");
+  IElementType ID = new IElementType("id", null);
 
   class Factory {
     public static PsiElement createElement(ASTNode node) {

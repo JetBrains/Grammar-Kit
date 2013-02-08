@@ -31,11 +31,11 @@ public interface ParserTypes {
   IElementType SOME_EXPR = MyTypeFactory.createExprType("SOME_EXPR");
   IElementType SPECIAL_REF = new IElementType("SPECIAL_REF", null);
 
-  IElementType ID = new IElementType("id");
-  IElementType NUMBER = new IElementType("number");
-  IElementType OF = new IElementType("OF");
-  IElementType OP_DIV = new IElementType("/");
-  IElementType OP_MUL = new IElementType("*");
+  IElementType ID = new IElementType("id", null);
+  IElementType NUMBER = new IElementType("number", null);
+  IElementType OF = new IElementType("OF", null);
+  IElementType OP_DIV = new IElementType("/", null);
+  IElementType OP_MUL = new IElementType("*", null);
 
   class Factory {
     public static PsiElement createElement(ASTNode node) {

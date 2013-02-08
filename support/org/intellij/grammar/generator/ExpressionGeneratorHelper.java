@@ -122,7 +122,7 @@ public class ExpressionGeneratorHelper {
       else if (operator.type == OperatorType.N_ARY) {
         g.out("while (true) {");
         g.out("result_ = report_error_(builder_, " + methodName + "(builder_, level_, " + priority + "));");
-        if (tailCall != null) g.out("result_ = report_error_(" + tailCall + ") && result_;");
+        if (tailCall != null) g.out("result_ = report_error_(builder_, " + tailCall + ") && result_;");
         g.out("if (!" + opCall + ") break;");
         g.out("}");
       }
@@ -204,7 +204,7 @@ public class ExpressionGeneratorHelper {
     }
   }
 
-  private static List<OperatorInfo> findOperators(Collection<OperatorInfo> list, OperatorType... types) {
+  public static List<OperatorInfo> findOperators(Collection<OperatorInfo> list, OperatorType... types) {
     SmartList<OperatorInfo> result = new SmartList<OperatorInfo>();
     List<OperatorType> typeList = Arrays.asList(types);
     for (OperatorInfo o : list) {

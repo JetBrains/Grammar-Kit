@@ -100,11 +100,10 @@ public class ExpressionHelper {
 
   private void addToPriorityMap(BnfRule rule, Collection<BnfRule> rulesCluster, ExpressionInfo info) {
     Collection<BnfRule> subRules = myRuleGraph.getSubRules(rule);
-    Map<BnfRule, Integer> priorityMap = info.priorityMap;
     int priority = rulesCluster.contains(rule) ? -1 : info.nextPriority++;
 
     for (BnfRule subRule : subRules) {
-      if (priorityMap.containsKey(subRule)) {
+      if (info.priorityMap.containsKey(subRule)) {
         addWarning(subRule + " has duplicate appearance!");
         continue;
       }
@@ -116,7 +115,7 @@ public class ExpressionHelper {
 
       if (rulesCluster.contains(subRule)) {
         if (!Rule.isPrivate(subRule) || !myRuleGraph.getFor(subRule).isEmpty()) {
-          priorityMap.put(subRule, priority == -1 ? info.nextPriority++ : priority);
+          info.priorityMap.put(subRule, priority == -1 ? info.nextPriority++ : priority);
         }
       }
       else if (ParserGeneratorUtil.Rule.isPrivate(subRule)) {

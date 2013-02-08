@@ -14,6 +14,7 @@ import com.intellij.util.containers.MultiMap;
 import gnu.trove.THashMap;
 import gnu.trove.TObjectIntHashMap;
 import org.intellij.grammar.KnownAttribute;
+import org.intellij.grammar.generator.ExpressionGeneratorHelper;
 import org.intellij.grammar.generator.ExpressionHelper;
 import org.intellij.grammar.generator.ParserGeneratorUtil;
 import org.intellij.grammar.generator.RuleGraphHelper;
@@ -78,7 +79,7 @@ public class LivePreviewParser implements PsiParser {
     mySimpleTokens = LivePreviewLexer.collectTokenPattern2Name(myFile);
     myGraphHelper = RuleGraphHelper.getCached(myFile);
     myRuleExtendsMap = myGraphHelper.getRuleExtendsMap();
-    myExpressionHelper = new ExpressionHelper(myFile, myGraphHelper, false);
+    myExpressionHelper = ExpressionHelper.getCached(myFile);
 
     myTokenTypeText = getRootAttribute(myFile, KnownAttribute.ELEMENT_TYPE_PREFIX);
 
@@ -360,14 +361,13 @@ public class LivePreviewParser implements PsiParser {
           //return method + "(builder_, level_ + 1" + clause.toString() + ")";
         }
         else {
-          //ExpressionHelper.ExpressionInfo info = ExpressionGeneratorHelper.getInfoForExpressionParsing(myExpressionHelper, subRule);
-          //method = info != null ? info.rootRule.getName() : subRule.getName();
-          //if (info == null) {
+          ExpressionHelper.ExpressionInfo info = ExpressionGeneratorHelper.getInfoForExpressionParsing(myExpressionHelper, subRule);
+          if (info == null) {
             return rule(builder, level + 1, subRule, externalArguments);
-          //}
-          //else {
-          //  return method + "(builder_, level_ + 1, " + info.getPriority(subRule) + ")";
-          //}
+          }
+          else {
+            return generateExpressionRoot(builder, level, info, info.getPriority(subRule));
+          }
         }
       }
       return generateConsumeToken(builder, text);
@@ -588,5 +588,117 @@ public class LivePreviewParser implements PsiParser {
       this.rule = rule;
     }
 
+  }
+
+  // Expression Generator Helper part
+  private boolean generateExpressionRoot(PsiBuilder builder, int level, ExpressionHelper.ExpressionInfo info, int priority_) {
+    Map<String, List<ExpressionHelper.OperatorInfo>> opCalls = new LinkedHashMap<String, List<ExpressionHelper.OperatorInfo>>();
+    for (BnfRule rule : info.priorityMap.keySet()) {
+      ExpressionHelper.OperatorInfo operator = info.operatorMap.get(rule);
+      String opCall = getNextName(operator.rule.getName(), 0);
+      List<ExpressionHelper.OperatorInfo> list = opCalls.get(opCall);
+      if (list == null) opCalls.put(opCall, list = new ArrayList<ExpressionHelper.OperatorInfo>(2));
+      list.add(operator);
+    }
+    Set<String> sortedOpCalls = opCalls.keySet();
+
+    // main entry
+    String methodName = info.rootRule.getName();
+    String kernelMethodName = getNextName(methodName, 0);
+    String frameName = quote(ParserGeneratorUtil.getRuleDisplayName(info.rootRule, true));
+    if (!recursion_guard_(builder, level, methodName)) return false;
+    //g.generateFirstCheck(info.rootRule, frameName, true);
+    PsiBuilder.Marker marker_ = builder.mark();
+    boolean result_ = false;
+    boolean pinned_ = false;
+    enterErrorRecordingSection(builder, level, _SECTION_GENERAL_, frameName);
+
+    boolean first = true;
+    for (String opCall : sortedOpCalls) {
+      ExpressionHelper.OperatorInfo
+        operator = ContainerUtil
+        .getFirstItem(ExpressionGeneratorHelper.findOperators(opCalls.get(opCall), ExpressionHelper.OperatorType.ATOM,
+                                                              ExpressionHelper.OperatorType.PREFIX));
+      if (operator == null) continue;
+      if (first || !result_) {
+        result_ = generateNodeCall(builder, level, operator.rule, null, operator.rule.getName(), Collections.<String, Parser>emptyMap());
+      }
+      first = false;
+    }
+
+    pinned_ = result_;
+    result_ = result_ && generateKernelMethod(builder, level + 1, kernelMethodName, info, opCalls, priority_);
+    if (!result_ && !pinned_) {
+      marker_.rollbackTo();
+    }
+    else {
+      marker_.drop();
+    }
+    result_ = exitErrorRecordingSection(builder, level, result_, pinned_, _SECTION_GENERAL_, null);
+    return result_ || pinned_;
+  }
+
+  private boolean generateKernelMethod(PsiBuilder builder,
+                                      int level,
+                                      String methodName,
+                                      ExpressionHelper.ExpressionInfo info,
+                                      Map<String, List<ExpressionHelper.OperatorInfo>> opCalls,
+                                      int priority_) {
+    Set<String> sortedOpCalls = opCalls.keySet();
+
+    if (!recursion_guard_(builder, level, methodName)) return false;
+    PsiBuilder.Marker marker_ = null;
+    boolean result_ = true;
+    main: while (true) {
+      PsiBuilder.Marker left_marker_ = (PsiBuilder.Marker)builder.getLatestDoneMarker();
+      if (!invalid_left_marker_guard_(builder, left_marker_, methodName)) return false;
+
+      boolean first = true;
+      for (String opCall : sortedOpCalls) {
+        ExpressionHelper.OperatorInfo operator =
+          ContainerUtil.getFirstItem(
+            ExpressionGeneratorHelper.findOperators(opCalls.get(opCall), ExpressionHelper.OperatorType.BINARY,
+                                                    ExpressionHelper.OperatorType.N_ARY,
+                                                    ExpressionHelper.OperatorType.POSTFIX));
+        if (operator == null) continue;
+        int priority = info.getPriority(operator.rule);
+        if (first) marker_ = builder.mark();
+        first = false;
+
+        if (priority_ <  priority &&
+            (operator.substitutor == null || ((LighterASTNode)left_marker_).getTokenType() == getElementType(operator.substitutor)) &&
+            generateNodeCall(builder, level, info.rootRule, operator.operator, getNextName(operator.rule.getName(), 0), Collections.<String, Parser>emptyMap())) {
+
+          IElementType elementType = getElementType(operator.rule);
+          boolean rightAssociative = ParserGeneratorUtil.getAttribute(operator.rule, KnownAttribute.RIGHT_ASSOCIATIVE);
+          if (operator.type == ExpressionHelper.OperatorType.BINARY) {
+              result_ = report_error_(builder, generateExpressionRoot(builder, level, info, (rightAssociative ? priority - 1 : priority)));
+            if (operator.tail != null) result_ = generateNodeCall(builder, level, operator.rule, operator.tail, getNextName(operator.rule.getName(), 1), Collections.<String, Parser>emptyMap()) && result_;
+          }
+          else if (operator.type == ExpressionHelper.OperatorType.N_ARY) {
+            while (true) {
+              result_ = report_error_(builder, generateExpressionRoot(builder, level, info, priority));
+              if (operator.tail != null) result_ = report_error_(builder, generateNodeCall(builder, level, operator.rule, operator.tail, getNextName(operator.rule.getName(), 1), Collections.<String, Parser>emptyMap())) && result_;
+              if (!generateNodeCall(builder, level, info.rootRule, operator.operator, getNextName(operator.rule.getName(), 0), Collections.<String, Parser>emptyMap())) break;
+            }
+          }
+          else if (operator.type == ExpressionHelper.OperatorType.POSTFIX) {
+            result_ = true;
+          }
+          marker_.drop();
+          left_marker_.precede().done(elementType);
+          continue main;
+        }
+      }
+      if (first) {
+        // no BINARY or POSTFIX operators present
+        break;
+      }
+      else {
+        marker_.rollbackTo();
+        break;
+      }
+    }
+    return result_;
   }
 }

@@ -555,6 +555,7 @@ public class ParserGenerator {
         StringBuilder sb = new StringBuilder();
         for (String part : StringUtil.tokenize(new StringTokenizer(s, TYPE_TEXT_SEPARATORS, true))) {
           String pkg;
+          part = StringUtil.trimStart(StringUtil.trimStart(part, "? super "), "? extends ");
           if (TYPE_TEXT_SEPARATORS.contains(part)) {
             sb.append(part);
             if (part.equals(",")) sb.append(" ");
@@ -573,7 +574,8 @@ public class ParserGenerator {
       }
     };
     for (String item : imports) {
-      for (String s : StringUtil.tokenize(item, TYPE_TEXT_SEPARATORS)) {
+      for (String s : StringUtil.tokenize(item.replaceAll("\\s+", " "), TYPE_TEXT_SEPARATORS)) {
+        s = StringUtil.trimStart(StringUtil.trimStart(s, "? super "), "? extends ");
         if (!s.contains(".") || !s.equals(shortener.fun(s))) continue;
         if (myPackageClasses.contains(StringUtil.getShortName(s))) continue;
         realImports.add(s);

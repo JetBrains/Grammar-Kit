@@ -57,14 +57,34 @@ public abstract class BnfStringImpl extends BnfExpressionImpl implements BnfStri
       return attribute != KnownAttribute.METHOD_RENAMES ? getAttrPatternReference() : null;
     }
     else if (parent instanceof BnfAttr) {
-      return getAttrValueReference();
+      PsiReference[] refs = getAttrValueReference();
+      return refs.length < 2? ArrayUtil.getFirstElement(refs) : new MyMultiReference(refs, this);
     }
     else return null;
   }
 
-  private PsiReference getAttrValueReference() {
+  @NotNull
+  public PsiReference[] getReferences() {
+    PsiElement parent = getParent();
+    if (parent instanceof BnfAttrPattern) {
+      KnownAttribute attribute = KnownAttribute.getAttribute(((BnfAttr)parent.getParent()).getName());
+      if (attribute != KnownAttribute.METHOD_RENAMES) {
+        return new PsiReference[] { getAttrPatternReference() };
+      }
+      else {
+        return PsiReference.EMPTY_ARRAY;
+      }
+    }
+    else if (parent instanceof BnfAttr) {
+      return getAttrValueReference();
+    }
+    return PsiReference.EMPTY_ARRAY;
+  }
+
+  @NotNull
+  private PsiReference[] getAttrValueReference() {
     KnownAttribute attribute = KnownAttribute.getAttribute(((BnfAttr)getParent()).getName());
-    if (attribute == null) return null;
+    if (attribute == null) return PsiReference.EMPTY_ARRAY;
     boolean addJavaRefs = attribute.getName().endsWith("Class") || attribute.getName().endsWith("Package") ||
                        (attribute == KnownAttribute.EXTENDS || attribute == KnownAttribute.IMPLEMENTS ||
                         attribute == KnownAttribute.MIXIN);
@@ -86,12 +106,12 @@ public abstract class BnfStringImpl extends BnfExpressionImpl implements BnfStri
     if (addJavaRefs) {
       PsiReferenceProvider provider = JavaHelper.getJavaHelper(getProject()).getClassReferenceProvider();
       PsiReference[] javaRefs = provider == null ? PsiReference.EMPTY_ARRAY : provider.getReferencesByElement(this, new ProcessingContext());
-      return new MyMultiReference(addBnfRef? ArrayUtil.mergeArrays(new PsiReference[]{bnfReference}, javaRefs, PsiReference.ARRAY_FACTORY) : javaRefs, this);
+      return addBnfRef? ArrayUtil.mergeArrays(new PsiReference[]{bnfReference}, javaRefs, PsiReference.ARRAY_FACTORY) : javaRefs;
     }
     else if (addBnfRef) {
-      return bnfReference;
+      return new PsiReference[] { bnfReference };
     }
-    return null;
+    return PsiReference.EMPTY_ARRAY;
   }
 
   private PsiReference getAttrPatternReference() {

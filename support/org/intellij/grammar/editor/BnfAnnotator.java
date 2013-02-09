@@ -20,7 +20,9 @@ import com.intellij.lang.annotation.Annotator;
 import com.intellij.openapi.editor.markup.TextAttributes;
 import com.intellij.openapi.project.DumbAware;
 import com.intellij.openapi.util.TextRange;
+import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.psi.*;
+import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.util.ObjectUtils;
 import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.generator.ParserGeneratorUtil;
@@ -30,6 +32,8 @@ import org.intellij.grammar.psi.*;
 import org.intellij.grammar.psi.impl.BnfRefOrTokenImpl;
 import org.intellij.grammar.psi.impl.GrammarUtil;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.StringTokenizer;
 
 /**
  * @author gregsh
@@ -86,8 +90,8 @@ public class BnfAnnotator implements Annotator, DumbAware {
           annotationHolder.createWarningAnnotation(psiElement, "Pattern doesn't match any rule");
         }
       }
-      else if (parent instanceof BnfAttr) {
-        final String attrName = ((PsiNamedElement)parent).getName();
+      else if (parent instanceof BnfAttr || parent instanceof BnfListEntry) {
+        final String attrName = ObjectUtils.assertNotNull(PsiTreeUtil.getParentOfType(psiElement, BnfAttr.class)).getName();
         KnownAttribute attribute = KnownAttribute.getAttribute(attrName);
         if (attribute != null) {
           String value = (String)ParserGeneratorUtil.getAttributeValue((BnfExpression)psiElement);
@@ -95,7 +99,7 @@ public class BnfAnnotator implements Annotator, DumbAware {
           String refType = "";
           JavaHelper javaHelper = JavaHelper.getJavaHelper(psiElement.getProject());
           if (attribute.getName().endsWith("Class") || attribute == KnownAttribute.MIXIN) {
-            resolve = javaHelper.findClass(value);
+            resolve = checkJavaResolve(value, javaHelper);
             refType = "class ";
           }
           else if (attribute.getName().endsWith("Package")) {
@@ -106,16 +110,16 @@ public class BnfAnnotator implements Annotator, DumbAware {
             resolve = Boolean.TRUE; // todo
           }
           else if (attribute == KnownAttribute.EXTENDS || attribute == KnownAttribute.IMPLEMENTS) {
-            resolve = value.contains(".") ? javaHelper.findClass(value) :
-                      ((BnfFile)parent.getContainingFile()).getRule(value);
+            resolve = value.contains(".") ? checkJavaResolve(value, javaHelper) :
+                      ((BnfFile)psiElement.getContainingFile()).getRule(value);
             refType = "rule or class ";
           }
           else if (attribute == KnownAttribute.ELEMENT_TYPE || attribute == KnownAttribute.NAME) {
-            resolve = ObjectUtils.chooseNotNull(((BnfFile)parent.getContainingFile()).getRule(value), Boolean.TRUE);
+            resolve = ObjectUtils.chooseNotNull(((BnfFile)psiElement.getContainingFile()).getRule(value), Boolean.TRUE);
             refType = "rule or constant ";
           }
           else if (attribute == KnownAttribute.RECOVER_UNTIL) {
-            resolve = ((BnfFile)parent.getContainingFile()).getRule(value);
+            resolve = ((BnfFile)psiElement.getContainingFile()).getRule(value);
             refType = "rule ";
           }
           else {
@@ -138,5 +142,14 @@ public class BnfAnnotator implements Annotator, DumbAware {
         }
       }
     }
+  }
+
+  private static Object checkJavaResolve(String value, JavaHelper javaHelper) {
+    Object resolve = null;
+    for (String s : StringUtil.tokenize(new StringTokenizer(value, "<>,", false))) {
+      resolve = javaHelper.findClass(s.trim());
+      if (resolve == null) break;
+    }
+    return resolve;
   }
 }

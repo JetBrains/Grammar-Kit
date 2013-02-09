@@ -1362,6 +1362,10 @@ public class ParserGenerator {
     for (Pair<String, String> pair : methods) {
       if (pair.second == null) addUtilMethodTypes(imports, pair.first, psiImplUtilClass, javaHelper);
     }
+    String stubName = implSuper.indexOf("<") < implSuper.indexOf(">") &&
+                      javaHelper.findClassMethod(implSuper.substring(0, implSuper.indexOf("<")), "StubBasedPsiElementBase", 2) != null
+                      ? implSuper.substring(implSuper.indexOf("<") + 1, implSuper.indexOf(">")) : null;
+    if (stubName != null) imports.add(BnfConstants.ISTUBELEMENTTYPE_CLASS);
 
     Function<String, String> shortener = generateClassHeader(psiClass, imports, "", false, implSuper, superInterface);
     String shortName = StringUtil.getShortName(psiClass);
@@ -1369,6 +1373,12 @@ public class ParserGenerator {
     out("super(node);");
     out("}");
     newLine();
+    if (stubName != null) {
+      out("public " + shortName + "(" + shortener.fun(stubName) + " stub, " + shortener.fun(BnfConstants.ISTUBELEMENTTYPE_CLASS) + " nodeType) {");
+      out("super(stub, nodeType);");
+      out("}");
+      newLine();
+    }
     for (BnfRule tree : sortedPublicRules) {
       generatePsiAccessor(rule, tree, accessors.get(tree), false, shortener);
     }

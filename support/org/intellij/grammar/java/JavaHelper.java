@@ -129,7 +129,7 @@ public class JavaHelper {
       PsiMethod psiMethod = (PsiMethod)method;
       PsiType returnType = psiMethod.getReturnType();
       List<String> strings = new ArrayList<String>();
-      strings.add(returnType == null? "void" : returnType.getCanonicalText());
+      strings.add(returnType == null? "" : returnType.getCanonicalText());
       for (PsiParameter parameter : psiMethod.getParameterList().getParameters()) {
         strings.add(parameter.getType().getCanonicalText());
         strings.add(parameter.getName());

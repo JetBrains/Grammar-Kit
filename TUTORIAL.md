@@ -86,8 +86,11 @@ The fun part is that I even can _inject_ this language in some other files I wor
 }
 
 root ::= (property ';') * {pin(".*")=1}
-private rule_recover ::= !(';' | id '=')
-property ::= id '=' expr  {pin=2 recoverUntil=rule_recover}
+// the following would recover from errors even better:
+// root ::= (!<<eof>> property ';') * {pin(".*")=1}
+
+property ::= id '=' expr  {pin=2 recoverUntil=property_recover}
+private property_recover ::= !(';' | id '=')
 
 expr ::= factor plus_expr *
 left plus_expr ::= plus_op factor

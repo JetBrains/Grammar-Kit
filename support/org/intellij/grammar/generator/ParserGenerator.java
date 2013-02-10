@@ -26,6 +26,7 @@ import com.intellij.psi.NavigatablePsiElement;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.impl.source.tree.LeafPsiElement;
 import com.intellij.psi.tree.IElementType;
+import com.intellij.util.ArrayUtil;
 import com.intellij.util.Function;
 import com.intellij.util.ObjectUtils;
 import com.intellij.util.containers.ContainerUtil;
@@ -366,8 +367,8 @@ public class ParserGenerator {
   }
 
   @NotNull
-  private String[] getSuperInterfaceNames(BnfRule rule, String psiPackage) {
-    ArrayList<String> strings = new ArrayList<String>();
+  private List<String> getSuperInterfaceNames(BnfRule rule, String psiPackage) {
+    List<String> strings = new ArrayList<String>();
     List<String> topRuleImplements = Collections.emptyList();
     String topRuleClass = null;
     BnfRule topSuper = getTopSuperRule(rule);
@@ -394,7 +395,7 @@ public class ParserGenerator {
         }
       }
     }
-    return strings.toArray(new String[strings.size()]);
+    return strings;
   }
 
   public void generateParser(String parserClass, final Set<String> ownRuleNames) {
@@ -1299,8 +1300,13 @@ public class ParserGenerator {
 
 
   /*PSI******************************************************************/
-  private void generatePsiIntf(RuleGraphHelper helper, BnfRule rule, String psiClass, String... psiSupers) {
+  private void generatePsiIntf(RuleGraphHelper helper, BnfRule rule, String psiClass, Collection<String> psiSupers) {
     String psiImplUtilClass = getRootAttribute(myFile, KnownAttribute.PSI_IMPL_UTIL_CLASS);
+    String stubClass = getAttribute(rule, KnownAttribute.STUB_CLASS);
+    if (StringUtil.isNotEmpty(stubClass)) {
+      psiSupers = new LinkedHashSet<String>(psiSupers);
+      psiSupers.add(BnfConstants.STUB_BASED_PSI_ELEMENT + "<" + stubClass + ">");
+    }
 
     Map<PsiElement, RuleGraphHelper.Cardinality> accessors = helper.getFor(rule);
     Collection<BnfRule> sortedPublicRules = getSortedPublicRules(accessors.keySet());
@@ -1309,7 +1315,7 @@ public class ParserGenerator {
     imports.addAll(Arrays.asList("java.util.List",
                                  "org.jetbrains.annotations.*",
                                  BnfConstants.PSI_ELEMENT_CLASS));
-    imports.addAll(Arrays.asList(psiSupers));
+    imports.addAll(psiSupers);
     imports.addAll(getRuleAccessorClasses(rule, sortedPublicRules));
     JavaHelper javaHelper = JavaHelper.getJavaHelper(myFile.getProject());
     List<Pair<String, String>> methods = getAttribute(rule, KnownAttribute.METHODS);
@@ -1317,7 +1323,7 @@ public class ParserGenerator {
       if (pair.second == null) addUtilMethodTypes(imports, pair.first, psiImplUtilClass, javaHelper);
     }
 
-    Function<String, String> shortener = generateClassHeader(psiClass, imports, "", true, psiSupers);
+    Function<String, String> shortener = generateClassHeader(psiClass, imports, "", true, ArrayUtil.toStringArray(psiSupers));
     for (PsiElement tree : sortedPublicRules) {
       generatePsiAccessor(rule, tree, accessors.get(tree), true, shortener);
     }
@@ -1342,6 +1348,12 @@ public class ParserGenerator {
                                String superRuleClass) {
     String typeHolderClass = getRootAttribute(myFile, KnownAttribute.ELEMENT_TYPE_HOLDER_CLASS);
     String psiImplUtilClass = getRootAttribute(myFile, KnownAttribute.PSI_IMPL_UTIL_CLASS);
+    String stubClass = getAttribute(rule, KnownAttribute.STUB_CLASS);
+    if (StringUtil.isNotEmpty(stubClass)) {
+      if (StringUtil.equals(superRuleClass, getRootAttribute(myFile, KnownAttribute.EXTENDS))) {
+        superRuleClass = BnfConstants.STUB_BASED_PSI_ELEMENT_BASE + "<" + stubClass + ">";
+      }
+    }
     // mixin attribute overrides "extends":
     String implSuper = StringUtil.notNullize(getAttribute(rule, KnownAttribute.MIXIN), superRuleClass);
     Map<PsiElement, RuleGraphHelper.Cardinality> accessors = helper.getFor(rule);
@@ -1364,7 +1376,8 @@ public class ParserGenerator {
     for (Pair<String, String> pair : methods) {
       if (pair.second == null) addUtilMethodTypes(imports, pair.first, psiImplUtilClass, javaHelper);
     }
-    String stubName = implSuper.indexOf("<") < implSuper.indexOf(">") &&
+    String stubName = StringUtil.isNotEmpty(stubClass)? stubClass :
+                      implSuper.indexOf("<") < implSuper.indexOf(">") &&
                       javaHelper.findClassMethod(implSuper.substring(0, implSuper.indexOf("<")), "StubBasedPsiElementBase", 2) != null
                       ? implSuper.substring(implSuper.indexOf("<") + 1, implSuper.indexOf(">")) : null;
     if (stubName != null) imports.add(BnfConstants.ISTUBELEMENTTYPE_CLASS);

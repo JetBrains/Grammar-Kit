@@ -73,6 +73,10 @@ Attributes like *pin* and *recoverUntil*, rule modifiers add some lines to this 
 2.2 Making *recoverUntil* actually work
 ---------------------------------------
 
+*recoverUntil* rule attribute tells parser after matching the rule and regardless of whether this was successful or not
+to consume all tokens from the input sequence while the rule specified in *recoverUntil* value matches input.
+
+
 1. This attribute in most cases should be specified on a rule that is inside a loop.
 2. That rule should always have *pin* attribute somewhere as well.
 3. Predicate rule should look like *!( token_to_stop_at | rule_to_stop_at | ....) *
@@ -229,6 +233,46 @@ public class SamplePsiImplUtil {
   PsiElement setName(MyNamed o, @NonNls @NotNull String name) throws IncorrectOperationException { ... }
 }
 ````
+
+
+3.5 Stub indices support
+------------------------
+
+Stub indices API forces a bit different contract on PSI classes:
+* There should be a manually written so called *stub* class.
+* IElementType for a node should extend IStubElementType
+* PSI interface should extend StubBasesPsiElementBase<Stub>
+* PSI implementation class should extend StubBasedPsiElementBase<Stub>
+
+The first two points are not covered by the generator.
+IStubElementType as well as Stub itself should be carefully implemented by hand.
+IStubElementType value can be provided to the generated parser via _elementTypeFactory_ attribute.
+
+Note that the last point can break PSI inheritance implied by _extends_ attribute.
+
+The rest can be solved in two ways. Direct _implements/mixin_ approach:
+````
+property ::= id '=' expr
+  {
+    implements=["com.sample.SampleElement" "com.intellij.psi.StubBasedPsiElement<com.sample.PropertyStub>"]
+    mixin="com.sample.SampleStubElement<com.sample.PropertyStub>"
+
+    // minimum requirements are:
+    // implements=["com.intellij.psi.PsiElement" "com.intellij.psi.StubBasedPsiElement<com.sample.PropertyStub>"]
+    // mixin="com.intellij.extapi.psi.StubBasedPsiElementBase<com.sample.PropertyStub>"
+  }
+
+````
+
+_stubClass_-based approach:
+````
+property ::= id '=' expr
+  {
+    stubClass="com.sample.PropertyStub"
+  }
+
+````
+
 
 
 ... to be continued

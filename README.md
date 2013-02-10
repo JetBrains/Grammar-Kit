@@ -33,6 +33,7 @@ Recent changes
 * [Live Preview](TUTORIAL.md) mode for fast language prototyping
 * Live Preview: _Highlight Grammar_ action helps visually debug grammars
 * _stubParserClass_ attribute renamed to _parserUtilClass_ for consistency
+* StubIndex support via _stubClass_ attribute or direct _implements/mixin_ approach
 
 
 Quick documentation:
@@ -165,6 +166,7 @@ Change log
 * [Live Preview](TUTORIAL.md) mode for fast language prototyping
 * Live Preview: _Highlight Grammar_ action helps visually debug grammars
 * _stubParserClass_ attribute renamed to _parserUtilClass_ for consistency
+* StubIndex support via _stubClass_ attribute or direct _implements/mixin_ approach
 
 1.0.9
 

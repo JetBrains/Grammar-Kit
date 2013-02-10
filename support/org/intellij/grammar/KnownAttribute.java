@@ -77,6 +77,8 @@ public class KnownAttribute<T> {
   public static final KnownAttribute<Boolean>      RIGHT_ASSOCIATIVE         = create(false, Boolean.class, "rightAssociative", false);
   public static final KnownAttribute<String>       CONSUME_TOKEN_METHOD      = create(false, String.class,  "consumeTokenMethod", "consumeToken");
 
+  public static final KnownAttribute<String>       STUB_CLASS                = create(false, String.class,  "stubClass", null);
+
   public static final KnownAttribute<List<Pair<String, String>>> METHODS = create(false, PAIR_LIST_CLAZZ, "methods", Collections.<Pair<String, String>>emptyList());
   public static final KnownAttribute<List<Pair<String, String>>> TOKENS = create(true, PAIR_LIST_CLAZZ, "tokens", Collections.<Pair<String, String>>emptyList());
 

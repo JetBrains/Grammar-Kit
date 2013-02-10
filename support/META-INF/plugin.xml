@@ -17,6 +17,7 @@
         <li>Live Preview mode for fast prototyping</li>
         <li>Live Preview: <b>Highlight Grammar</b> action helps visually debug grammars</li>
         <li><b>stubParserClass</b> attribute renamed to <b>parserUtilClass</b> for consistency</li>
+        <li>StubIndex support via <b>stubClass</b> attribute or direct <b>implements/mixin</b> approach</li>
     </ul>
     <p>1.0.9</p>
     <ul>

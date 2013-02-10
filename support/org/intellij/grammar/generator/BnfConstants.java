@@ -23,10 +23,13 @@ public interface BnfConstants {
   String CLASS_HEADER_DEF = "// This is a generated file. Not intended for manual editing.";
 
   String IELEMENTTYPE_CLASS = "com.intellij.psi.tree.IElementType";
-  String ISTUBELEMENTTYPE_CLASS = "com.intellij.psi.stubs.IStubElementType";
   String PSI_ELEMENT_CLASS = "com.intellij.psi.PsiElement";
   String PSI_TREE_UTIL_CLASS = "com.intellij.psi.util.PsiTreeUtil";
   String PSI_ELEMENT_VISITOR_CLASS = "com.intellij.psi.PsiElementVisitor";
   String AST_NODE_CLASS = "com.intellij.lang.ASTNode";
   String AST_WRAPPER_PSI_ELEMENT_CLASS = "com.intellij.extapi.psi.ASTWrapperPsiElement";
+
+  String ISTUBELEMENTTYPE_CLASS = "com.intellij.psi.stubs.IStubElementType";
+  String STUB_BASED_PSI_ELEMENT = "com.intellij.psi.StubBasedPsiElement";
+  String STUB_BASED_PSI_ELEMENT_BASE = "com.intellij.extapi.psi.StubBasedPsiElementBase";
 }

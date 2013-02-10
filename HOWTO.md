@@ -239,14 +239,14 @@ public class SamplePsiImplUtil {
 ------------------------
 
 Stub indices API forces a bit different contract on PSI classes:
-* There should be a manually written so called *stub* class.
-* IElementType for a node should extend IStubElementType
-* PSI interface should extend StubBasesPsiElementBase<Stub>
-* PSI implementation class should extend StubBasedPsiElementBase<Stub>
+* There should be a manually written so-called *stub* class
+* PSI node type should extend _IStubElementType_ (comparing to usual _IElementType_)
+* PSI interface should extend _StubBasesPsiElementBase<StubClass>_
+* PSI implementation class should extend _StubBasedPsiElementBase<StubClass>_
 
 The first two points are not covered by the generator.
-IStubElementType as well as Stub itself should be carefully implemented by hand.
-IStubElementType value can be provided to the generated parser via _elementTypeFactory_ attribute.
+_IStubElementType_ as well as a _stub_ class itself should be carefully implemented by hand.
+_IStubElementType_ value can be provided to the generated parser via _elementTypeFactory_ attribute.
 
 Note that the last point can break PSI inheritance implied by _extends_ attribute.
 

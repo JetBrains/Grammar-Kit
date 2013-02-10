@@ -1,7 +1,7 @@
 {
   classHeader="header.txt"
   parserClass="org.intellij.grammar.parser.GrammarParser"
-  stubParserClass="org.intellij.grammar.parser.GrammarParserUtil"
+  parserUtilClass="org.intellij.grammar.parser.GrammarParserUtil"
 
   implements="org.intellij.grammar.psi.BnfCompositeElement"
   extends="org.intellij.grammar.psi.impl.BnfCompositeElementImpl"

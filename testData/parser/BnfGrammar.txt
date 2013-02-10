@@ -15,8 +15,8 @@ BnfFile:BnfGrammar.bnf
         BNF_STRING_LITERAL_EXPRESSION: "org.intellij.grammar.parser.GrammarParser"
           PsiElement(string)('"org.intellij.grammar.parser.GrammarParser"')
       PsiWhiteSpace('\n  ')
-      BNF_ATTR:stubParserClass
-        PsiElement(id)('stubParserClass')
+      BNF_ATTR:parserUtilClass
+        PsiElement(id)('parserUtilClass')
         PsiElement(=)('=')
         BNF_STRING_LITERAL_EXPRESSION: "org.intellij.grammar.parser.GrammarParserUtil"
           PsiElement(string)('"org.intellij.grammar.parser.GrammarParserUtil"')

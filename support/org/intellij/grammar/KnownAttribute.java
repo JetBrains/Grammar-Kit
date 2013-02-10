@@ -45,7 +45,7 @@ public class KnownAttribute<T> {
   public static final KnownAttribute<String>       CLASS_HEADER              = create(true, String.class, "classHeader", BnfConstants.CLASS_HEADER_DEF);
   public static final KnownAttribute<Boolean>      GENERATE_PSI              = create(true, Boolean.class, "generatePsi", true);
   public static final KnownAttribute<Boolean>      GENERATE_TOKENS           = create(true, Boolean.class, "generateTokens", true);
-  public static final KnownAttribute<Boolean>      GENERATE_PARSER_UTIL      = create(true, Boolean.class, "generateStubParser", true);
+  public static final KnownAttribute<Boolean>      GENERATE_PARSER_UTIL      = create(true, Boolean.class, "generateParserUtil", true);
   public static final KnownAttribute<Boolean>      GENERATE_MEMOIZATION      = create(true, Boolean.class, "memoization", false);
   public static final KnownAttribute<Integer>      GENERATE_FIRST_CHECK      = create(true, Integer.class, "generateFirstCheck", 2);
   public static final KnownAttribute<Boolean>      EXTENDED_PIN              = create(true, Boolean.class, "extendedPin", true);
@@ -59,7 +59,7 @@ public class KnownAttribute<T> {
   public static final KnownAttribute<String>       ELEMENT_TYPE_CLASS        = create(true, String.class, "elementTypeClass", BnfConstants.IELEMENTTYPE_CLASS);
   public static final KnownAttribute<String>       TOKEN_TYPE_CLASS          = create(true, String.class, "tokenTypeClass", BnfConstants.IELEMENTTYPE_CLASS);
   public static final KnownAttribute<String>       PARSER_CLASS              = create(true, String.class, "parserClass", "generated.Parser");
-  public static final KnownAttribute<String>       PARSER_UTIL_CLASS         = create(true, String.class, "stubParserClass", "generated.ParserUtil");
+  public static final KnownAttribute<String>       PARSER_UTIL_CLASS         = create(true, String.class, "parserUtilClass", "generated.ParserUtil");
   public static final KnownAttribute<String>       ELEMENT_TYPE_HOLDER_CLASS = create(true, String.class, "elementTypeHolderClass", "generated.ParserTypes");
   public static final KnownAttribute<String>       ELEMENT_TYPE_PREFIX       = create(true, String.class, "elementTypePrefix", "");
   public static final KnownAttribute<String>       ELEMENT_TYPE_FACTORY      = create(true, String.class, "elementTypeFactory", null);
@@ -160,5 +160,10 @@ public class KnownAttribute<T> {
     catch (IOException e) {
       return null;
     }
+  }
+
+  // returns a non-registered attribute for migration purposes
+  public KnownAttribute<T> alias(String deprecatedName) {
+    return new KnownAttribute<T>(deprecatedName, myClazz, null);
   }
 }

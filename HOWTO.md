@@ -94,7 +94,7 @@ select_statement ::= SELECT ... {pin=1}  // something has to be pinned!
 
 ````
 {
-  stubParserClass="com.sample.SampleParserUtil"
+  parserUtilClass="com.sample.SampleParserUtil"
 }
 external my_external_rule ::= parseMyExternalRule false 10  // we can pass some extra parameters
                                                             // .. even other rules!

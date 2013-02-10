@@ -15,6 +15,8 @@
     <p>1.0.10</p>
     <ul>
         <li>Live Preview mode for fast prototyping</li>
+        <li>Live Preview: <b>Highlight Grammar</b> action helps visually debug grammars</li>
+        <li><b>stubParserClass</b> attribute renamed to <b>parserUtilClass</b> for consistency</li>
     </ul>
     <p>1.0.9</p>
     <ul>

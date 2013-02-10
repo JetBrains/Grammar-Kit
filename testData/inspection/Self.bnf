@@ -1,6 +1,6 @@
 {
   parserClass="<warning>org.intellij.grammar.parser.GrammarParser</warning>"
-  stubParserClass="<warning>org.intellij.grammar.parser.GeneratedParserUtilBase</warning>"
+  parserUtilClass="<warning>org.intellij.grammar.parser.GeneratedParserUtilBase</warning>"
 
   implements="<warning>org.intellij.grammar.psi.BnfCompositeElement</warning>"
   extends="<warning>org.intellij.grammar.psi.impl.BnfCompositeElementImpl</warning>"

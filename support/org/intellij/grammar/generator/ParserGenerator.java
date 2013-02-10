@@ -68,6 +68,7 @@ public class ParserGenerator {
   private final String myGrammarRoot;
   private final String myGrammarRootParser;
   private final String myRuleClassPrefix;
+  private final String myParserUtilClass;
   private final boolean generateMemoizationCode;
   private final boolean generateExtendedPin;
   private final String visitorClassName;
@@ -94,6 +95,8 @@ public class ParserGenerator {
     generateExtendedPin = getRootAttribute(myFile, KnownAttribute.EXTENDED_PIN);
     generateFirstCheck = getRootAttribute(myFile, KnownAttribute.GENERATE_FIRST_CHECK);
     myRuleClassPrefix = getPsiClassPrefix(myFile);
+    myParserUtilClass = ObjectUtils.chooseNotNull(getRootAttribute(myFile, KnownAttribute.PARSER_UTIL_CLASS.alias("stubParserClass")),
+                                                  getRootAttribute(myFile, KnownAttribute.PARSER_UTIL_CLASS));
     String tmpVisitorClass = getRootAttribute(myFile, KnownAttribute.PSI_VISITOR_NAME);
     visitorClassName = StringUtil.isEmpty(tmpVisitorClass) ?
                        null : tmpVisitorClass.startsWith(myRuleClassPrefix) ?
@@ -284,8 +287,8 @@ public class ParserGenerator {
   }
 
   private void generateParserUtil() throws IOException {
-    final String parserUtil = getRootAttribute(myFile, KnownAttribute.PARSER_UTIL_CLASS);
-    final String parserUtilPackage = StringUtil.getPackageName(parserUtil);
+    String parserUtil = myParserUtilClass;
+    String parserUtilPackage = StringUtil.getPackageName(parserUtil);
     String baseClassName = GeneratedParserUtilBase.class.getSimpleName();
     String baseFileName = baseClassName + ".java";
     InputStream baseUtilText = GeneratedParserUtilBase.class.getResourceAsStream(baseFileName);
@@ -396,7 +399,6 @@ public class ParserGenerator {
 
   public void generateParser(String parserClass, final Set<String> ownRuleNames) {
     String elementTypeHolderClass = getRootAttribute(myFile, KnownAttribute.ELEMENT_TYPE_HOLDER_CLASS);
-    String stubParser = getRootAttribute(myFile, KnownAttribute.PARSER_UTIL_CLASS);
     List<String> parserImports = getRootAttribute(myFile, KnownAttribute.PARSER_IMPORTS);
     boolean rootParser = parserClass.equals(myGrammarRootParser);
     Set<String> imports = new LinkedHashSet<String>();
@@ -406,7 +408,7 @@ public class ParserGenerator {
                                  "com.intellij.lang.PsiBuilder.Marker",
                                  "com.intellij.openapi.diagnostic.Logger",
                                  "static " + elementTypeHolderClass + ".*",
-                                 "static " + stubParser + ".*"));
+                                 "static " + myParserUtilClass + ".*"));
     if (!rootParser) {
       imports.add("static " + myGrammarRootParser + ".*");
     }

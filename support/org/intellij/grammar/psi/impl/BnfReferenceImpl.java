@@ -78,9 +78,10 @@ public class BnfReferenceImpl<T extends BnfCompositeElement> extends PsiReferenc
         JavaHelper javaHelper = JavaHelper.getJavaHelper(myElement.getProject());
         for (NavigatablePsiElement element : javaHelper.getClassMethods(parserClass, true)) {
           List<String> methodTypes = javaHelper.getMethodTypes(element);
-          if (methodTypes.size() > 2 &&
+          if (methodTypes.size() > 3 &&
               methodTypes.get(0).equals("boolean") &&
-              methodTypes.get(1).equals("com.intellij.lang.PsiBuilder")) {
+              methodTypes.get(1).equals("com.intellij.lang.PsiBuilder") &&
+              methodTypes.get(3).equals("int")) {
             list.add(LookupElementBuilder.createWithIcon((PsiNamedElement)element));
           }
         }

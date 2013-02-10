@@ -455,6 +455,10 @@ public class LivePreviewParser implements PsiParser {
       }
     }
     else {
+      if ("eof".equals(method) && expressions.size() == 1) {
+        return GeneratedParserUtilBase.eof(builder, level);
+      }
+      // not supported
       return false;
     }
     if (callParameters.size() <= 1) {

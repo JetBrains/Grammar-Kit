@@ -240,9 +240,21 @@ public class ParserGenerator {
     String superIntf = ObjectUtils.notNull(ContainerUtil.getFirstItem(getRootAttribute(myFile, KnownAttribute.IMPLEMENTS)),
                                            KnownAttribute.IMPLEMENTS.getDefaultValue().get(0));
     String shortSuperIntf = StringUtil.getShortName(superIntf);
-    Function<String, String> shortener = generateClassHeader(
-      psiClass, Arrays.asList("org.jetbrains.annotations.*", BnfConstants.PSI_ELEMENT_VISITOR_CLASS, superIntf),
-      "", false, BnfConstants.PSI_ELEMENT_VISITOR_CLASS);
+
+    List<String> imports = new ArrayList<String>(
+        Arrays.asList("org.jetbrains.annotations.*", "com.intellij.psi.StubBasedPsiElement", BnfConstants.PSI_ELEMENT_VISITOR_CLASS, superIntf)
+    );
+
+    for (BnfRule rule : sortedRules.values()) {
+      List<String> ruleImplements = getAttribute(rule, KnownAttribute.IMPLEMENTS);
+      for (String ruleImplement : ruleImplements) {
+        if (!imports.contains(ruleImplement)) {
+          imports.add(ruleImplement);
+        }
+      }
+    }
+
+    Function<String, String> shortener = generateClassHeader(psiClass, imports, "", false, BnfConstants.PSI_ELEMENT_VISITOR_CLASS);
     Set<String> visited = new HashSet<String>();
     Set<String> all = new TreeSet<String>();
     for (String ruleName : sortedRules.keySet()) {

@@ -28,7 +28,7 @@ Other open-source plugins built with Grammar-Kit: [intellij-erlang](https://gith
 
 Recent changes
 --------------
-1.0.10
+1.1.0
 
 * [Live Preview](TUTORIAL.md) mode for fast language prototyping
 * Live Preview: _Highlight Grammar_ action helps visually debug grammars
@@ -161,7 +161,7 @@ Just add *mypackage.MyReferenceExpressionImpl* class with proper *getReference()
 
 Change log
 ==========
-1.0.10
+1.1.0
 
 * [Live Preview](TUTORIAL.md) mode for fast language prototyping
 * Live Preview: _Highlight Grammar_ action helps visually debug grammars

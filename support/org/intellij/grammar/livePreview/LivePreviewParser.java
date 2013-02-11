@@ -112,7 +112,7 @@ public class LivePreviewParser implements PsiParser {
       return false;
     }
     bitSet.set(ruleNumber);
-    boolean result = expression(builder, level, rule, rule.getExpression(), rule.getName(), externalArguments);
+    boolean result = generateNodeCall(builder, level, rule, rule.getExpression(), rule.getName(), externalArguments);
     bitSet.clear(ruleNumber);
     return result;
   }

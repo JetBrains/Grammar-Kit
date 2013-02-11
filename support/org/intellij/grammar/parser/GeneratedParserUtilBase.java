@@ -78,7 +78,7 @@ public class GeneratedParserUtilBase {
     if (!goodMarker) return false;
     ErrorState state = ErrorState.get(builder_);
 
-    Frame frame = state.levelCheck.isEmpty() ? null : state.levelCheck.getLast();
+    Frame frame = state.frameStack.isEmpty() ? null : state.frameStack.getLast();
     return frame == null || frame.errorReportedAt <= builder_.getCurrentOffset();
   }
 
@@ -263,7 +263,7 @@ public class GeneratedParserUtilBase {
   public static void enterErrorRecordingSection(PsiBuilder builder_, int level, @NotNull String sectionType, @Nullable String frameName) {
     ErrorState state = ErrorState.get(builder_);
     Frame frame = state.FRAMES.alloc().init(builder_.getCurrentOffset(), level, sectionType, frameName, state.variants.size());
-    state.levelCheck.add(frame);
+    state.frameStack.add(frame);
     if (sectionType == _SECTION_AND_) {
       if (state.predicateCount == 0 && !state.predicateSign) {
         throw new AssertionError("Incorrect false predicate sign");
@@ -289,7 +289,7 @@ public class GeneratedParserUtilBase {
                                                   @Nullable Parser eatMore) {
     ErrorState state = ErrorState.get(builder_);
 
-    Frame frame = state.levelCheck.pollLast();
+    Frame frame = state.frameStack.pollLast();
     int initialOffset = builder_.getCurrentOffset();
     if (frame == null || level != frame.level || !sectionType.equals(frame.section)) {
       LOG.error("Unbalanced error section: got " + new Frame().init(initialOffset, level, sectionType, "", 0) + ", expected " + frame);
@@ -357,7 +357,6 @@ public class GeneratedParserUtilBase {
         state.clearVariants(false, 0);
         state.lastExpectedVariantOffset = -1;
       }
-      if (!result && eatMoreFlagOnce && frame.offset != builder_.getCurrentOffset()) result = true;
     }
     else if (!result && pinned && frame.errorReportedAt < 0) {
       // do not report if there're errors after current offset
@@ -369,7 +368,7 @@ public class GeneratedParserUtilBase {
       }
     }
     // propagate errorReportedAt up the stack to avoid duplicate reporting
-    Frame prevFrame = state.levelCheck.isEmpty() ? null : state.levelCheck.getLast();
+    Frame prevFrame = state.frameStack.isEmpty() ? null : state.frameStack.getLast();
     if (prevFrame != null && prevFrame.errorReportedAt < frame.errorReportedAt) prevFrame.errorReportedAt = frame.errorReportedAt;
     state.FRAMES.recycle(frame);
     return result;
@@ -381,7 +380,7 @@ public class GeneratedParserUtilBase {
   }
 
   public static void report_error_(PsiBuilder builder_, ErrorState state, boolean advance) {
-    Frame frame = state.levelCheck.isEmpty()? null : state.levelCheck.getLast();
+    Frame frame = state.frameStack.isEmpty()? null : state.frameStack.getLast();
     if (frame == null) {
       LOG.error("Unbalanced error section: got null , expected " + frame);
       return;
@@ -442,8 +441,8 @@ public class GeneratedParserUtilBase {
   }
 
   public static class Builder extends PsiBuilderAdapter {
-    final ErrorState state;
-    final PsiParser parser;
+    public final ErrorState state;
+    public final PsiParser parser;
 
     public Builder(PsiBuilder builder, ErrorState state, PsiParser parser) {
       super(builder);
@@ -466,8 +465,8 @@ public class GeneratedParserUtilBase {
     int predicateCount;
     boolean predicateSign = true;
     boolean suppressErrors;
-    final LinkedList<Frame> levelCheck = new LinkedList<Frame>();
-    CompletionState completionState;
+    public final LinkedList<Frame> frameStack = new LinkedList<Frame>();
+    public CompletionState completionState;
 
     private boolean caseSensitive;
     private TokenSet whitespaceTokens = TokenSet.EMPTY;
@@ -476,8 +475,8 @@ public class GeneratedParserUtilBase {
     public boolean altMode;
 
     private int lastExpectedVariantOffset = -1;
-    MyList<Variant> variants = new MyList<Variant>(500);
-    MyList<Variant> unexpected = new MyList<Variant>(10);
+    public MyList<Variant> variants = new MyList<Variant>(500);
+    public MyList<Variant> unexpected = new MyList<Variant>(10);
 
     final LimitedPool<Variant> VARIANTS = new LimitedPool<Variant>(1000, new LimitedPool.ObjectFactory<Variant>() {
       public Variant create() {
@@ -568,7 +567,7 @@ public class GeneratedParserUtilBase {
       return count > 0;
     }
 
-    void clearVariants(boolean expected, int start) {
+    public void clearVariants(boolean expected, int start) {
       MyList<Variant> list = expected? variants : unexpected;
       for (int i = start, len = list.size(); i < len; i ++) {
         VARIANTS.recycle(list.get(i));
@@ -578,12 +577,12 @@ public class GeneratedParserUtilBase {
   }
 
   public static class Frame {
-    int offset;
-    int level;
-    String section;
-    String name;
-    int variantCount;
-    int errorReportedAt;
+    public int offset;
+    public int level;
+    public String section;
+    public String name;
+    public int variantCount;
+    public int errorReportedAt;
 
     public Frame() {
     }

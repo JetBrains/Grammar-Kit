@@ -290,17 +290,36 @@ BnfFile:BnfGrammar.bnf
       PsiWhiteSpace(' ')
       PsiElement(::=)('::=')
       PsiWhiteSpace(' ')
-      BNF_CHOICE
-        BNF_REFERENCE_OR_TOKEN: attrs
-          PsiElement(id)('attrs')
+      BNF_SEQUENCE
+        BNF_PREDICATE
+          BNF_PREDICATE_SIGN
+            PsiElement(!)('!')
+          BNF_EXTERNAL_EXPRESSION
+            PsiElement(<<)('<<')
+            BNF_REFERENCE_OR_TOKEN: eof
+              PsiElement(id)('eof')
+            PsiElement(>>)('>>')
         PsiWhiteSpace(' ')
-        PsiElement(|)('|')
-        PsiWhiteSpace(' ')
-        BNF_REFERENCE_OR_TOKEN: rule
-          PsiElement(id)('rule')
+        BNF_PAREN_EXPRESSION
+          PsiElement(()('(')
+          BNF_CHOICE
+            BNF_REFERENCE_OR_TOKEN: attrs
+              PsiElement(id)('attrs')
+            PsiWhiteSpace(' ')
+            PsiElement(|)('|')
+            PsiWhiteSpace(' ')
+            BNF_REFERENCE_OR_TOKEN: rule
+              PsiElement(id)('rule')
+          PsiElement())(')')
       PsiWhiteSpace(' ')
       BNF_ATTRS
         PsiElement({)('{')
+        BNF_ATTR:pin
+          PsiElement(id)('pin')
+          PsiElement(=)('=')
+          BNF_LITERAL_EXPRESSION
+            PsiElement(number)('1')
+        PsiWhiteSpace(' ')
         BNF_ATTR:recoverUntil
           PsiElement(id)('recoverUntil')
           PsiElement(=)('=')

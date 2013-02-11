@@ -22,6 +22,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Key;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.util.PairProcessor;
 import com.intellij.util.ui.UIUtil;
@@ -116,10 +117,16 @@ public class HighlightGrammarAtCaretAction extends AnAction {
                                                 @NotNull final Editor grammarEditor) {
     final Set<TextRange> trueRanges = new HashSet<TextRange>();
     final Set<TextRange> falseRanges = new HashSet<TextRange>();
+    final Set<BnfExpression> visited = new HashSet<BnfExpression>();
     LivePreviewHelper.collectExpressionsAtOffset(project, editor, livePreviewLanguage, new PairProcessor<BnfExpression, Boolean>() {
       @Override
       public boolean process(BnfExpression bnfExpression, Boolean result) {
-        (result ? trueRanges : falseRanges).add(bnfExpression.getTextRange());
+        for (PsiElement parent = bnfExpression.getParent(); parent instanceof BnfExpression && visited.add((BnfExpression)parent); ) {
+          parent = parent.getParent();
+        }
+        if (visited.add(bnfExpression)) {
+          (result ? trueRanges : falseRanges).add(bnfExpression.getTextRange());
+        }
         return true;
       }
     });

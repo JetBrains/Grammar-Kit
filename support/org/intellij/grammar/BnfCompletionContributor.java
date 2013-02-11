@@ -16,9 +16,11 @@
 
 package org.intellij.grammar;
 
+import com.intellij.codeInsight.TailType;
 import com.intellij.codeInsight.completion.*;
 import com.intellij.codeInsight.lookup.LookupElement;
 import com.intellij.codeInsight.lookup.LookupElementBuilder;
+import com.intellij.codeInsight.lookup.TailTypeDecorator;
 import com.intellij.lang.ASTNode;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.openapi.util.text.StringUtil;
@@ -67,7 +69,7 @@ public class BnfCompletionContributor extends CompletionContributor {
         }
         if (!attrCompletion && parameters.getInvocationCount() < 2) {
           for (String keywords : suggestKeywords(parameters.getPosition())) {
-            result.addElement(LookupElementBuilder.create(keywords));
+            result.addElement(TailTypeDecorator.withTail(LookupElementBuilder.create(keywords), TailType.SPACE));
           }
         }
       }
@@ -160,10 +162,10 @@ public class BnfCompletionContributor extends CompletionContributor {
       }
       range = new TextRange(offset, posRange.getStartOffset());
     }
-    final String text = range.isEmpty() ? CompletionInitializationContext.DUMMY_IDENTIFIER : range.substring(posFile.getText());
+    String headText = range.substring(posFile.getText());
+    int completionOffset = StringUtil.isEmptyOrSpaces(headText)? 0 : headText.length();
+    String text = completionOffset == 0 ? CompletionInitializationContext.DUMMY_IDENTIFIER : headText;
 
-    PsiFile file = PsiFileFactory.getInstance(posFile.getProject()).createFileFromText("a.bnf", BnfLanguage.INSTANCE, text, true, false);
-    int completionOffset = posRange.getStartOffset() - range.getStartOffset();
     GeneratedParserUtilBase.CompletionState state = new GeneratedParserUtilBase.CompletionState(completionOffset) {
       @Override
       public String convertItem(Object o) {
@@ -171,8 +173,19 @@ public class BnfCompletionContributor extends CompletionContributor {
         return o instanceof String? (String)o : null;
       }
     };
+    PsiFileFactory psiFileFactory = PsiFileFactory.getInstance(posFile.getProject());
+    PsiFile file = psiFileFactory.createFileFromText("a.bnf", BnfLanguage.INSTANCE, text, true, false);
     file.putUserData(GeneratedParserUtilBase.COMPLETION_STATE_KEY, state);
     TreeUtil.ensureParsed(file.getNode());
+
+    if (completionOffset != 0) {
+      TextRange altRange = TextRange.create(posRange.getEndOffset(), Math.min(posRange.getEndOffset() + 100, posFile.getTextLength()));
+      String tailText = altRange.substring(posFile.getText());
+      String text2 = text + (StringUtil.isEmptyOrSpaces(tailText)? "a ::= " : tailText);
+      PsiFile file2 = psiFileFactory.createFileFromText("a.bnf", BnfLanguage.INSTANCE, text2, true, false);
+      file2.putUserData(GeneratedParserUtilBase.COMPLETION_STATE_KEY, state);
+      TreeUtil.ensureParsed(file2.getNode());
+    }
     return state.items;
   }
 }

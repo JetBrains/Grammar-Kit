@@ -2,7 +2,7 @@ package org.intellij.grammar;
 
 import com.intellij.codeInsight.completion.CompletionType;
 import com.intellij.testFramework.UsefulTestCase;
-import com.intellij.testFramework.fixtures.JavaCodeInsightFixtureTestCase;
+import com.intellij.testFramework.fixtures.CodeInsightFixtureTestCase;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -12,7 +12,7 @@ import java.util.List;
 /**
  * @author gregsh
  */
-public class BnfCompletionTest extends JavaCodeInsightFixtureTestCase {
+public class BnfCompletionTest extends CodeInsightFixtureTestCase {
   enum CheckType { EQUALS, INCLUDES, EXCLUDES }
 
   public void testKeywords1() throws Throwable { doTestVariants("", CompletionType.BASIC, 1, CheckType.INCLUDES, "private", "meta"); }
@@ -22,6 +22,8 @@ public class BnfCompletionTest extends JavaCodeInsightFixtureTestCase {
   public void testKeywords4() throws Throwable { doTestVariants("{a=b} <caret>rule::=", CompletionType.BASIC, 1, CheckType.INCLUDES, "private", "meta"); }
   public void testKeywords5() throws Throwable { doTestVariants("{a=b} pri<caret>rule::=", CompletionType.BASIC, 1, CheckType.INCLUDES, "private"); }
   public void testKeywords6() throws Throwable { doTestVariants("rule::= pri<caret>other ::=", CompletionType.BASIC, 1, CheckType.INCLUDES, "private"); }
+  public void testKeywords7() throws Throwable { doTestVariants("pr<caret>rule::=", CompletionType.BASIC, 1, CheckType.INCLUDES, "private"); }
+  public void testKeywords8() throws Throwable { doTestVariants("rule::=\npr<caret>rule::=", CompletionType.BASIC, 1, CheckType.INCLUDES, "private"); }
   public void testAttr1() throws Throwable { doTestVariants("{<caret>}", CompletionType.BASIC, 1, CheckType.INCLUDES, "pin"); }
   public void testAttr11() throws Throwable { doTestVariants("{<caret>}", CompletionType.BASIC, 1, CheckType.EXCLUDES, "private"); }
   public void testRule1() throws Throwable { doTestVariants("rule::= <caret>", CompletionType.BASIC, 1, CheckType.INCLUDES, "rule"); }

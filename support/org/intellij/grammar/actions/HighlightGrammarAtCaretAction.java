@@ -123,7 +123,6 @@ public class HighlightGrammarAtCaretAction extends AnAction {
         return true;
       }
     });
-    if (trueRanges.isEmpty() && falseRanges.isEmpty()) return;
     UIUtil.invokeLaterIfNeeded(new Runnable() {
       @Override
       public void run() {

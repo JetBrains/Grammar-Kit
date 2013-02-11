@@ -40,6 +40,9 @@ public class BnfFirstNextTest extends LightPlatformCodeInsightFixtureTestCase {
   public void testAndEmptySeq1() { doFirstTest("r ::= &() X", "X"); }
   public void testAndEmptySeq2() { doFirstTest("r ::= &()", MATCHES_EOF); }
   public void testNotEmptySeq() { doFirstTest("r ::= !() X", MATCHES_NOTHING); }
+  public void testRepeatingPredicate1() { doFirstTest("r ::= (!A) *", MATCHES_EOF, MATCHES_NOTHING); }
+  public void testRepeatingPredicate2() { doFirstTest("r ::= (!A) * A", MATCHES_NOTHING, "A"); }
+  public void testRepeatingPredicate3() { doFirstTest("r ::= (&A) + A", "A"); }
 
   public void testNext1() { doNextTest("r ::= X s ::= (r [A | B])", MATCHES_EOF, "A", "B"); }
   public void testNextMore() { doNextTest("r ::= X s ::= (r * [A | B])", MATCHES_EOF, "A", "B", "X"); }

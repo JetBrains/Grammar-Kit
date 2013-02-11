@@ -84,7 +84,7 @@ public class BnfUnreachableChoiceBranchInspection extends LocalInspectionTool {
   }
 
   private static void checkChoice(BnfChoice choice, ProblemsHolder problemsHolder) {
-    Set<BnfRule> visited = new THashSet<BnfRule>();
+    Set<BnfExpression> visited = new THashSet<BnfExpression>();
     THashSet<BnfExpression> first = new THashSet<BnfExpression>();
     BnfFirstNextAnalyzer analyzer = new BnfFirstNextAnalyzer();
     List<BnfExpression> list = choice.getExpressionList();

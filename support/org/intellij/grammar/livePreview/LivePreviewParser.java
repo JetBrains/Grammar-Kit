@@ -124,11 +124,7 @@ public class LivePreviewParser implements PsiParser {
                                String funcName,
                                Map<String, Parser> externalArguments) {
     boolean isRule = initialNode.getParent() == rule;
-    BnfExpression nonTrivialNode = initialNode;
-    for (BnfExpression e = initialNode, n = getTrivialNodeChild(e); n != null; e = n, n = getTrivialNodeChild(e)) {
-      nonTrivialNode = n;
-    }
-    BnfExpression node = nonTrivialNode;
+    BnfExpression node = getNonTrivialNode(initialNode);
 
     IElementType type = getEffectiveType(node);
 

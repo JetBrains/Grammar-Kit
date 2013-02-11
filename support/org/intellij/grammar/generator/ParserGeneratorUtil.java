@@ -106,6 +106,14 @@ public class ParserGeneratorUtil {
     return getTrivialNodeChild(element) != null;
   }
 
+  public static BnfExpression getNonTrivialNode(BnfExpression initialNode) {
+    BnfExpression nonTrivialNode = initialNode;
+    for (BnfExpression e = initialNode, n = getTrivialNodeChild(e); n != null; e = n, n = getTrivialNodeChild(e)) {
+      nonTrivialNode = n;
+    }
+    return nonTrivialNode;
+  }
+
   public static BnfExpression getTrivialNodeChild(PsiElement element) {
     PsiElement child = null;
     if (element instanceof BnfParenthesized) {
@@ -138,7 +146,7 @@ public class ParserGeneratorUtil {
     }
     return tree;
   }
-  
+
   public static IElementType getEffectiveType(PsiElement tree) {
     if (tree instanceof BnfParenOptExpression) {
       return BnfTypes.BNF_OP_OPT;

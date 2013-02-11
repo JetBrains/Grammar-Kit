@@ -630,11 +630,7 @@ public class ParserGenerator {
 
   void generateNode(BnfRule rule, BnfExpression initialNode, String funcName, Set<BnfExpression> visited) {
     boolean isRule = initialNode.getParent() == rule;
-    BnfExpression nonTrivialNode = initialNode;
-    for (BnfExpression e = initialNode, n = getTrivialNodeChild(e); n != null; e = n, n = getTrivialNodeChild(e)) {
-      nonTrivialNode = n;
-    }
-    BnfExpression node = nonTrivialNode;
+    BnfExpression node = ParserGeneratorUtil.getNonTrivialNode(initialNode);
 
     IElementType type = getEffectiveType(node);
 

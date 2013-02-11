@@ -67,16 +67,17 @@ public class BnfFirstNextAnalyzer {
   }
 
   public Set<BnfExpression> calcFirst(@NotNull BnfRule rule) {
-    Set<BnfRule> visited = new THashSet<BnfRule>();
-    visited.add(rule);
-    return calcFirstInner(rule.getExpression(), new THashSet<BnfExpression>(), visited);
+    Set<BnfExpression> visited = new THashSet<BnfExpression>();
+    BnfExpression expression = rule.getExpression();
+    visited.add(expression);
+    return calcFirstInner(expression, new THashSet<BnfExpression>(), visited);
   }
 
   public Map<BnfExpression, BnfExpression> calcNext(@NotNull BnfRule targetRule) {
-    return calcNextInner(targetRule.getExpression(), new THashMap<BnfExpression, BnfExpression>(), new THashSet<BnfRule>());
+    return calcNextInner(targetRule.getExpression(), new THashMap<BnfExpression, BnfExpression>(), new THashSet<BnfExpression>());
   }
-  
-  private Map<BnfExpression, BnfExpression> calcNextInner(@NotNull BnfExpression targetExpression, Map<BnfExpression, BnfExpression> result, Set<BnfRule> visited) {
+
+  private Map<BnfExpression, BnfExpression> calcNextInner(@NotNull BnfExpression targetExpression, Map<BnfExpression, BnfExpression> result, Set<BnfExpression> visited) {
     LinkedList<BnfExpression> stack = new LinkedList<BnfExpression>();
     THashSet<BnfRule> totalVisited = new THashSet<BnfRule>();
     Set<BnfExpression> curResult = new THashSet<BnfExpression>();
@@ -139,7 +140,7 @@ public class BnfFirstNextAnalyzer {
     return result;
   }
 
-  private Set<BnfExpression> calcSequenceFirstInner(List<BnfExpression> expressions, final Set<BnfExpression> result, final Set<BnfRule> visited) {
+  private Set<BnfExpression> calcSequenceFirstInner(List<BnfExpression> expressions, final Set<BnfExpression> result, final Set<BnfExpression> visited) {
     boolean matchesEof = !result.add(BNF_MATCHES_EOF);
 
     Set<BnfExpression> pinned;
@@ -166,11 +167,11 @@ public class BnfFirstNextAnalyzer {
     return result;
   }
 
-  public Set<BnfExpression> calcFirstInner(BnfExpression expression, Set<BnfExpression> result, Set<BnfRule> visited) {
+  public Set<BnfExpression> calcFirstInner(BnfExpression expression, Set<BnfExpression> result, Set<BnfExpression> visited) {
     return calcFirstInner(expression, result, visited, null);
   }
 
-  public Set<BnfExpression> calcFirstInner(BnfExpression expression, Set<BnfExpression> result, Set<BnfRule> visited, @Nullable List<BnfExpression> forcedNext) {
+  public Set<BnfExpression> calcFirstInner(BnfExpression expression, Set<BnfExpression> result, Set<BnfExpression> visited, @Nullable List<BnfExpression> forcedNext) {
     BnfFile file = (BnfFile)expression.getContainingFile();
     if (expression instanceof BnfLiteralExpression) {
       result.add(expression);
@@ -185,16 +186,17 @@ public class BnfFirstNextAnalyzer {
             return result;
           }
         }
+        BnfExpression ruleExpression = rule.getExpression();
         if (myPublicRuleOpaque && !ParserGeneratorUtil.Rule.isPrivate(rule) ||
-            !visited.add(rule)) {
+            !visited.add(ruleExpression)) {
           if (!(ParserGeneratorUtil.Rule.firstNotTrivial(rule) instanceof BnfPredicate)) {
             result.add(expression);
           }
         }
         else {
-          calcFirstInner(rule.getExpression(), result, visited, forcedNext);
-          boolean removed = visited.remove(rule);
-          LOG.assertTrue(removed, "path corruption detected");
+          calcFirstInner(ruleExpression, result, visited, forcedNext);
+          boolean removed = visited.remove(ruleExpression);
+          LOG.assertTrue(removed, "path corruption detected: " + ruleExpression.getText());
         }
       }
       else {
@@ -261,23 +263,30 @@ public class BnfFirstNextAnalyzer {
     }
     else if (expression instanceof BnfPredicate) {
       IElementType elementType = ((BnfPredicate)expression).getPredicateSign().getFirstChild().getNode().getElementType();
-      BnfExpression predicateExpression = ((BnfPredicate)expression).getExpression();
+      BnfExpression predicateExpression = ParserGeneratorUtil.getNonTrivialNode(((BnfPredicate)expression).getExpression());
+      boolean skip = predicateExpression instanceof BnfSequence &&
+                     ((BnfSequence)predicateExpression).getExpressionList().size() > 1; // todo calc min length ?
       // take only one token into account which is not exactly correct but better than nothing
       Set<BnfExpression> conditions = calcFirstInner(predicateExpression, new THashSet<BnfExpression>(new TextStrategy()), visited, null);
-      Set<BnfExpression> next = forcedNext == null? calcNextInner(expression, new THashMap<BnfExpression, BnfExpression>(), visited).keySet() :
-        calcSequenceFirstInner(forcedNext, new THashSet<BnfExpression>(new TextStrategy()), visited);
-      Set<BnfExpression> mixed = new THashSet<BnfExpression>(new TextStrategy());
-      if (predicateExpression instanceof BnfParenExpression) predicateExpression = ((BnfParenExpression)predicateExpression).getExpression();
-      boolean skip = predicateExpression instanceof BnfSequence && ((BnfSequence)predicateExpression).getExpressionList().size() > 1; // todo calc min length ?
-      if (!skip) {
-        // skip external methods
-        for (Iterator<BnfExpression> iterator = next.iterator(); !skip && iterator.hasNext(); ) {
-          skip = GrammarUtil.isExternalReference(iterator.next());
+      Set<BnfExpression> next;
+      if (!visited.add(predicateExpression)) {
+        skip = true;
+        next = Collections.emptySet();
+        result.add(BNF_MATCHES_NOTHING);
+      }
+      else {
+        if (forcedNext == null) {
+          next = calcNextInner(expression, new THashMap<BnfExpression, BnfExpression>(), visited).keySet();
         }
-        for (Iterator<BnfExpression> iterator = conditions.iterator(); !skip && iterator.hasNext(); ) {
-          skip = GrammarUtil.isExternalReference(iterator.next());
+        else {
+          next = calcSequenceFirstInner(forcedNext, new THashSet<BnfExpression>(new TextStrategy()), visited);
+        }
+        visited.remove(predicateExpression);
+        if (!skip) {
+          skip = filterExternalMethods(next) || filterExternalMethods(conditions);
         }
       }
+      Set<BnfExpression> mixed = new THashSet<BnfExpression>(new TextStrategy());
       if (skip) {
         mixed.addAll(next);
         mixed.remove(BNF_MATCHES_EOF);
@@ -315,6 +324,24 @@ public class BnfFirstNextAnalyzer {
     }
 
     return result;
+  }
+
+  private static boolean filterExternalMethods(Set<BnfExpression> set) {
+    boolean skip = false;
+    boolean addEof = false;
+    for (Iterator<BnfExpression> iterator = set.iterator(); !skip && iterator.hasNext(); ) {
+      BnfExpression o = iterator.next();
+      boolean isExternal = GrammarUtil.isExternalReference(o);
+      if ("<<eof>>".equals(o.getText())) {
+        addEof = true;
+        iterator.remove();
+      }
+      else {
+        skip = isExternal;
+      }
+    }
+    if (addEof) set.add(BNF_MATCHES_EOF);
+    return skip;
   }
 
   public Set<String> asStrings(Set<BnfExpression> expressions) {

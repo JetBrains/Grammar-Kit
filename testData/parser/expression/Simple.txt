@@ -243,3 +243,81 @@ EXPR_FILE_TYPE
       PsiErrorElement:<expr> expected, got ';'
         <empty list>
   PsiElement(;)(';')
+  PsiWhiteSpace('\n\n')
+  SPECIAL_EXPR
+    PsiElement(id)('multiply')
+    PsiWhiteSpace(' ')
+    PsiElement(()('(')
+    REF_EXPR
+      IDENTIFIER
+        PsiElement(id)('x')
+    PsiElement(BAD_CHARACTER)(',')
+    PsiWhiteSpace(' ')
+    MUL_EXPR
+      MUL_EXPR
+        LITERAL_EXPR
+          PsiElement(number)('1')
+        PsiWhiteSpace(' ')
+        PsiElement(*)('*')
+        PsiWhiteSpace(' ')
+        LITERAL_EXPR
+          PsiElement(number)('2')
+      PsiWhiteSpace(' ')
+      PsiElement(*)('*')
+      PsiWhiteSpace(' ')
+      PAREN_EXPR
+        PsiElement(()('(')
+        PLUS_EXPR
+          LITERAL_EXPR
+            PsiElement(number)('1')
+          PsiWhiteSpace(' ')
+          PsiElement(+)('+')
+          PsiWhiteSpace(' ')
+          LITERAL_EXPR
+            PsiElement(number)('2')
+        PsiElement())(')')
+    PsiElement())(')')
+  PsiElement(;)(';')
+  PsiWhiteSpace('\n')
+  REF_EXPR
+    SPECIAL_EXPR
+      PsiElement(id)('multiply')
+      PsiWhiteSpace(' ')
+      PsiElement(()('(')
+      REF_EXPR
+        IDENTIFIER
+          PsiElement(id)('x')
+      PsiErrorElement:',' expected, got '.'
+        <empty list>
+    PsiElement(BAD_CHARACTER)('.')
+    IDENTIFIER
+      PsiElement(id)('y')
+  PsiErrorElement:'(' expected, got ','
+    PsiElement(BAD_CHARACTER)(',')
+  PsiWhiteSpace(' ')
+  PsiElement(number)('1')
+  PsiElement())(')')
+  PsiElement(;)(';')
+  PsiWhiteSpace('\n')
+  PLUS_EXPR
+    SPECIAL_EXPR
+      PsiElement(id)('multiply')
+      PsiWhiteSpace(' ')
+      PsiElement(()('(')
+      REF_EXPR
+        IDENTIFIER
+          PsiElement(id)('x')
+      PsiElement(BAD_CHARACTER)(',')
+      PsiWhiteSpace(' ')
+      LITERAL_EXPR
+        PsiElement(number)('1')
+    PsiErrorElement:')' expected, got '+'
+      <empty list>
+    PsiWhiteSpace(' ')
+    PsiElement(+)('+')
+    PsiWhiteSpace(' ')
+    LITERAL_EXPR
+      PsiElement(number)('2')
+  PsiErrorElement:')' unexpected
+    PsiElement())(')')
+  PsiElement(;)(';')

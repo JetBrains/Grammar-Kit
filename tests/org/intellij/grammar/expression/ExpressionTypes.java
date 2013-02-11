@@ -20,9 +20,9 @@ public interface ExpressionTypes {
   IElementType PAREN_EXPR = ExpressionParserDefinition.createType("PAREN_EXPR");
   IElementType PLUS_EXPR = ExpressionParserDefinition.createType("PLUS_EXPR");
   IElementType REF_EXPR = ExpressionParserDefinition.createType("REF_EXPR");
+  IElementType SPECIAL_EXPR = ExpressionParserDefinition.createType("SPECIAL_EXPR");
   IElementType UNARY_MIN_EXPR = ExpressionParserDefinition.createType("UNARY_MIN_EXPR");
   IElementType UNARY_PLUS_EXPR = ExpressionParserDefinition.createType("UNARY_PLUS_EXPR");
-  IElementType OBJECT_EXPR = ExpressionParserDefinition.createType("OBJECT_EXPR");
 
   IElementType ID = BnfTypes.BNF_ID;
   IElementType NUMBER = BnfTypes.BNF_NUMBER;

@@ -271,7 +271,7 @@ public class ExpressionHelper {
     }
 
     public int getPriority(BnfRule subRule) {
-      if (subRule == rootRule) return -1;
+      if (subRule == rootRule) return 0;
       Integer integer = priorityMap.get(subRule);
       return integer == null ? -1 : integer;
     }

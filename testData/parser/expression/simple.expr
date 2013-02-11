@@ -19,3 +19,7 @@ fun(x.y().z(1,) + ).r + ( -1! );
 id.(2);
 
 x ---;
+
+multiply (x, 1 * 2 * (1 + 2));
+multiply (x.y, 1);
+multiply (x, 1 + 2);

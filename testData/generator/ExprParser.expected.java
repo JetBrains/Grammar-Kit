@@ -28,25 +28,25 @@ public class ExpressionParser implements PsiParser {
       result_ = arg_list(builder_, level_ + 1);
     }
     else if (root_ == ASSIGN_EXPR) {
-      result_ = expr(builder_, level_ + 1, 0);
+      result_ = expr(builder_, level_ + 1, -1);
     }
     else if (root_ == CALL_EXPR) {
-      result_ = expr(builder_, level_ + 1, 7);
+      result_ = expr(builder_, level_ + 1, 6);
     }
     else if (root_ == CONDITIONAL_EXPR) {
-      result_ = expr(builder_, level_ + 1, 1);
+      result_ = expr(builder_, level_ + 1, 0);
     }
     else if (root_ == DIV_EXPR) {
-      result_ = expr(builder_, level_ + 1, 3);
+      result_ = expr(builder_, level_ + 1, 2);
     }
     else if (root_ == EXP_EXPR) {
-      result_ = expr(builder_, level_ + 1, 5);
+      result_ = expr(builder_, level_ + 1, 4);
     }
     else if (root_ == EXPR) {
       result_ = expr(builder_, level_ + 1, -1);
     }
     else if (root_ == FACTORIAL_EXPR) {
-      result_ = expr(builder_, level_ + 1, 6);
+      result_ = expr(builder_, level_ + 1, 5);
     }
     else if (root_ == IDENTIFIER) {
       result_ = identifier(builder_, level_ + 1);
@@ -55,19 +55,22 @@ public class ExpressionParser implements PsiParser {
       result_ = literal_expr(builder_, level_ + 1);
     }
     else if (root_ == MINUS_EXPR) {
-      result_ = expr(builder_, level_ + 1, 2);
+      result_ = expr(builder_, level_ + 1, 1);
     }
     else if (root_ == MUL_EXPR) {
-      result_ = expr(builder_, level_ + 1, 3);
+      result_ = expr(builder_, level_ + 1, 2);
     }
     else if (root_ == PAREN_EXPR) {
       result_ = paren_expr(builder_, level_ + 1);
     }
     else if (root_ == PLUS_EXPR) {
-      result_ = expr(builder_, level_ + 1, 2);
+      result_ = expr(builder_, level_ + 1, 1);
     }
     else if (root_ == REF_EXPR) {
-      result_ = expr(builder_, level_ + 1, 8);
+      result_ = expr(builder_, level_ + 1, 7);
+    }
+    else if (root_ == SPECIAL_EXPR) {
+      result_ = special_expr(builder_, level_ + 1);
     }
     else if (root_ == UNARY_MIN_EXPR) {
       result_ = unary_min_expr(builder_, level_ + 1);
@@ -94,7 +97,7 @@ public class ExpressionParser implements PsiParser {
     TokenSet.create(ASSIGN_EXPR, CALL_EXPR, CONDITIONAL_EXPR, DIV_EXPR,
       EXPR, EXP_EXPR, FACTORIAL_EXPR, LITERAL_EXPR,
       MINUS_EXPR, MUL_EXPR, PAREN_EXPR, PLUS_EXPR,
-      REF_EXPR, UNARY_MIN_EXPR, UNARY_PLUS_EXPR),
+      REF_EXPR, SPECIAL_EXPR, UNARY_MIN_EXPR, UNARY_PLUS_EXPR),
   };
   public static boolean type_extends_(IElementType child_, IElementType parent_) {
     for (TokenSet set : EXTENDS_SETS_) {
@@ -258,40 +261,6 @@ public class ExpressionParser implements PsiParser {
   }
 
   /* ********************************************************** */
-  // 'mul only' mul_expr
-  static boolean only_mul_test(PsiBuilder builder_, int level_) {
-    if (!recursion_guard_(builder_, level_, "only_mul_test")) return false;
-    boolean result_ = false;
-    Marker marker_ = builder_.mark();
-    result_ = consumeToken(builder_, "mul only");
-    result_ = result_ && expr(builder_, level_ + 1, 3);
-    if (!result_) {
-      marker_.rollbackTo();
-    }
-    else {
-      marker_.drop();
-    }
-    return result_;
-  }
-
-  /* ********************************************************** */
-  // 'simple ref only' simple_ref_expr
-  static boolean only_simple_ref_test(PsiBuilder builder_, int level_) {
-    if (!recursion_guard_(builder_, level_, "only_simple_ref_test")) return false;
-    boolean result_ = false;
-    Marker marker_ = builder_.mark();
-    result_ = consumeToken(builder_, "simple ref only");
-    result_ = result_ && simple_ref_expr(builder_, level_ + 1);
-    if (!result_) {
-      marker_.rollbackTo();
-    }
-    else {
-      marker_.drop();
-    }
-    return result_;
-  }
-
-  /* ********************************************************** */
   // element_and_separator *
   static boolean root(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "root")) return false;
@@ -320,7 +289,7 @@ public class ExpressionParser implements PsiParser {
   // 6: POSTFIX(factorial_expr)
   // 7: POSTFIX(call_expr)
   // 8: POSTFIX(ref_expr)
-  // 9: ATOM(simple_ref_expr) ATOM(literal_expr) PREFIX(paren_expr)
+  // 9: ATOM(special_expr) ATOM(simple_ref_expr) ATOM(literal_expr) PREFIX(paren_expr)
   public static boolean expr(PsiBuilder builder_, int level_, int priority_) {
     if (!recursion_guard_(builder_, level_, "expr")) return false;
     addVariant(builder_, "<expr>");
@@ -330,6 +299,7 @@ public class ExpressionParser implements PsiParser {
     enterErrorRecordingSection(builder_, level_, _SECTION_GENERAL_, "<expr>");
     result_ = unary_plus_expr(builder_, level_ + 1);
     if (!result_) result_ = unary_min_expr(builder_, level_ + 1);
+    if (!result_) result_ = special_expr(builder_, level_ + 1);
     if (!result_) result_ = simple_ref_expr(builder_, level_ + 1);
     if (!result_) result_ = literal_expr(builder_, level_ + 1);
     if (!result_) result_ = paren_expr(builder_, level_ + 1);
@@ -482,6 +452,30 @@ public class ExpressionParser implements PsiParser {
       marker_.drop();
     }
     return result_;
+  }
+
+  // 'multiply' '(' simple_ref_expr ',' mul_expr ')'
+  public static boolean special_expr(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "special_expr")) return false;
+    boolean result_ = false;
+    boolean pinned_ = false;
+    Marker marker_ = builder_.mark();
+    enterErrorRecordingSection(builder_, level_, _SECTION_GENERAL_, "<special expr>");
+    result_ = consumeTokenFast(builder_, "multiply");
+    result_ = result_ && consumeToken(builder_, "(");
+    pinned_ = result_; // pin = 2
+    result_ = result_ && report_error_(builder_, simple_ref_expr(builder_, level_ + 1));
+    result_ = pinned_ && report_error_(builder_, consumeToken(builder_, ",")) && result_;
+    result_ = pinned_ && report_error_(builder_, expr(builder_, level_ + 1, 2)) && result_;
+    result_ = pinned_ && consumeToken(builder_, ")") && result_;
+    if (result_ || pinned_) {
+      marker_.done(SPECIAL_EXPR);
+    }
+    else {
+      marker_.rollbackTo();
+    }
+    result_ = exitErrorRecordingSection(builder_, level_, result_, pinned_, _SECTION_GENERAL_, null);
+    return result_ || pinned_;
   }
 
   // identifier

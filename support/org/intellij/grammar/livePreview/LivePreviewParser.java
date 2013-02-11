@@ -366,7 +366,7 @@ public class LivePreviewParser implements PsiParser {
             return rule(builder, level + 1, subRule, externalArguments);
           }
           else {
-            return generateExpressionRoot(builder, level, info, info.getPriority(subRule));
+            return generateExpressionRoot(builder, level, info, info.getPriority(subRule) - 1);
           }
         }
       }

@@ -6,9 +6,8 @@
   elementTypeFactory="org.intellij.grammar.expression.ExpressionParserDefinition.createType"
   tokenTypeFactory="org.intellij.grammar.expression.ExpressionParserDefinition.createTokenType"
   elementTypeHolderClass="org.intellij.grammar.expression.ExpressionTypes"
-  stubParserClass="org.intellij.grammar.parser.GeneratedParserUtilBase"
+  parserUtilClass="org.intellij.grammar.parser.GeneratedParserUtilBase"
 
-  //consumeTokenMethod("simple_ref_expr")="consumeToken"
   consumeTokenMethod(".*_expr|expr")="consumeTokenFast"
 }
 root ::= element_and_separator *
@@ -30,7 +29,7 @@ expr ::= assign_expr
 private unary_group ::= unary_plus_expr | unary_min_expr
 private mul_group ::= mul_expr | div_expr
 private add_group ::= plus_expr | minus_expr
-private primary_group ::= simple_ref_expr | literal_expr | paren_expr
+private primary_group ::= special_expr | simple_ref_expr | literal_expr | paren_expr
 
 // expressions: auto-operator detection or parens
 simple_ref_expr ::= identifier {elementType=ref_expr}
@@ -52,5 +51,4 @@ paren_expr ::= '(' expr ')'
 conditional_expr ::= expr '?' expr ':' expr
 
 // test specific expressions
-private only_mul_test ::= 'mul only' mul_expr
-private only_simple_ref_test ::= 'simple ref only' simple_ref_expr
+special_expr ::= 'multiply' '(' simple_ref_expr ',' mul_expr ')' {pin=2}

@@ -1081,7 +1081,7 @@ public class ParserGenerator {
             return method + "(builder_, level_ + 1)";
           }
           else {
-            return method + "(builder_, level_ + 1, "+ info.getPriority(subRule) +")";
+            return method + "(builder_, level_ + 1, "+ (info.getPriority(subRule) - 1) + ")";
           }
         }
       }

@@ -486,10 +486,9 @@ public class ParserGenerator {
     {
       if (!first) out("else {");
       out("Marker marker_ = builder_.mark();");
+      out("enterErrorRecordingSection(builder_, level_, _SECTION_RECOVER_, null);");
       out("result_ = parse_root_(root_, builder_, level_);");
-      out("while (builder_.getTokenType() != null) {");
-      out("builder_.advanceLexer();");
-      out("}");
+      out("exitErrorRecordingSection(builder_, level_, result_, true, _SECTION_RECOVER_, TOKEN_ADVANCER);");
       out("marker_.done(root_);");
       if (!first) out("}");
     }

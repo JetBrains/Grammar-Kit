@@ -77,10 +77,9 @@ public class Self implements PsiParser {
     }
     else {
       Marker marker_ = builder_.mark();
+      enterErrorRecordingSection(builder_, level_, _SECTION_RECOVER_, null);
       result_ = parse_root_(root_, builder_, level_);
-      while (builder_.getTokenType() != null) {
-        builder_.advanceLexer();
-      }
+      exitErrorRecordingSection(builder_, level_, result_, true, _SECTION_RECOVER_, TOKEN_ADVANCER);
       marker_.done(root_);
     }
     return builder_.getTreeBuilt();

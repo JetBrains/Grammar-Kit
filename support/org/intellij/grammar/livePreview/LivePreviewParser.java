@@ -62,12 +62,10 @@ public class LivePreviewParser implements PsiParser {
     init(originalBuilder);
     PsiBuilder builder = adapt_builder_(root, originalBuilder, this);
     PsiBuilder.Marker mark = builder.mark();
-    GeneratedParserUtilBase.enterErrorRecordingSection(builder, 1, _SECTION_RECOVER_, "");
+    GeneratedParserUtilBase.enterErrorRecordingSection(builder, 0, _SECTION_RECOVER_, null);
     boolean result = false;
-    if (myGrammarRoot != null) {
-      result = rule(builder, 1, myGrammarRoot, Collections.<String, Parser>emptyMap());
-    }
-    GeneratedParserUtilBase.exitErrorRecordingSection(builder, 1, result, false, _SECTION_RECOVER_, TRUE_CONDITION);
+    result = myGrammarRoot != null && rule(builder, 1, myGrammarRoot, Collections.<String, Parser>emptyMap());
+    GeneratedParserUtilBase.exitErrorRecordingSection(builder, 0, result, true, _SECTION_RECOVER_, TRUE_CONDITION);
     mark.done(root);
     return builder.getTreeBuilt();
   }

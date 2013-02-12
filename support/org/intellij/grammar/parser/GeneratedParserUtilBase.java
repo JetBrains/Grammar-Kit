@@ -342,11 +342,11 @@ public class GeneratedParserUtilBase {
         }
       }
       else if (eatMoreFlag) {
-        errorReported = reportError(builder_, state, true, true);
+        errorReported = reportError(builder_, state, frame, true, true);
         parseAsTree(state, builder_, frame.level + 1, DUMMY_BLOCK, true, TOKEN_ADVANCER, eatMore);
       }
       else if (eatMoreFlagOnce || (!result && frame.offset != builder_.getCurrentOffset())) {
-        errorReported = reportError(builder_, state, true, false);
+        errorReported = reportError(builder_, state, frame, true, false);
       }
       if (extensionMarker != null) {
         extensionMarker.done(extensionTokenType);
@@ -362,9 +362,7 @@ public class GeneratedParserUtilBase {
       // do not report if there're errors after current offset
       if (getLastVariantOffset(state, initialOffset) == initialOffset) {
         // do not force, inner recoverRoot might have skipped some tokens
-        if (reportError(builder_, state, false, false)) {
-          frame.errorReportedAt = initialOffset;
-        }
+        reportError(builder_, state, frame, false, false);
       }
     }
     // propagate errorReportedAt up the stack to avoid duplicate reporting
@@ -387,9 +385,7 @@ public class GeneratedParserUtilBase {
     }
     int offset = builder_.getCurrentOffset();
     if (frame.errorReportedAt < offset && getLastVariantOffset(state, builder_.getCurrentOffset()) <= offset) {
-      if (reportError(builder_, state, true, advance)) {
-        frame.errorReportedAt = offset;
-      }
+      reportError(builder_, state, frame, true, advance);
     }
   }
 
@@ -397,7 +393,11 @@ public class GeneratedParserUtilBase {
     return state.lastExpectedVariantOffset < 0? defValue : state.lastExpectedVariantOffset;
   }
 
-  private static boolean reportError(PsiBuilder builder_, ErrorState state, boolean force, boolean advance) {
+  private static boolean reportError(PsiBuilder builder_,
+                                     ErrorState state,
+                                     Frame frame,
+                                     boolean force,
+                                     boolean advance) {
     String expectedText = state.getExpectedText(builder_);
     boolean notEmpty = StringUtil.isNotEmpty(expectedText);
     if (force || notEmpty || advance) {
@@ -413,6 +413,7 @@ public class GeneratedParserUtilBase {
       else {
         builder_.error(message);
       }
+      frame.errorReportedAt = builder_.getCurrentOffset();
       return true;
     }
     return false;

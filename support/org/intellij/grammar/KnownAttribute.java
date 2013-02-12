@@ -24,7 +24,6 @@ import org.intellij.grammar.generator.BnfConstants;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
@@ -59,7 +58,7 @@ public class KnownAttribute<T> {
   public static final KnownAttribute<String>       ELEMENT_TYPE_CLASS        = create(true, String.class, "elementTypeClass", BnfConstants.IELEMENTTYPE_CLASS);
   public static final KnownAttribute<String>       TOKEN_TYPE_CLASS          = create(true, String.class, "tokenTypeClass", BnfConstants.IELEMENTTYPE_CLASS);
   public static final KnownAttribute<String>       PARSER_CLASS              = create(true, String.class, "parserClass", "generated.Parser");
-  public static final KnownAttribute<String>       PARSER_UTIL_CLASS         = create(true, String.class, "parserUtilClass", "generated.ParserUtil");
+  public static final KnownAttribute<String>       PARSER_UTIL_CLASS         = create(true, String.class, "parserUtilClass", BnfConstants.GPUB_CLASS);
   public static final KnownAttribute<String>       ELEMENT_TYPE_HOLDER_CLASS = create(true, String.class, "elementTypeHolderClass", "generated.ParserTypes");
   public static final KnownAttribute<String>       ELEMENT_TYPE_PREFIX       = create(true, String.class, "elementTypePrefix", "");
   public static final KnownAttribute<String>       ELEMENT_TYPE_FACTORY      = create(true, String.class, "elementTypeFactory", null);

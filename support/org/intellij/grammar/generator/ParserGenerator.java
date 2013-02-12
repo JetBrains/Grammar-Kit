@@ -288,6 +288,8 @@ public class ParserGenerator {
   }
 
   private void generateParserUtil() throws IOException {
+    // no need to generate anything, platform GPUB will be used
+    if (BnfConstants.GPUB_CLASS.equals(myParserUtilClass)) return;
     String parserUtil = myParserUtilClass;
     String parserUtilPackage = StringUtil.getPackageName(parserUtil);
     String baseClassName = GeneratedParserUtilBase.class.getSimpleName();
@@ -528,6 +530,7 @@ public class ParserGenerator {
         elementTypes.clear();
       }
       out("};");
+      newLine();
       out("public static boolean type_extends_(IElementType child_, IElementType parent_) {");
       out("for (TokenSet set : EXTENDS_SETS_) {");
       out("if (set.contains(child_) && set.contains(parent_)) return true;");

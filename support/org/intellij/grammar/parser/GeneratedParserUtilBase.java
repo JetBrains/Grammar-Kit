@@ -233,7 +233,7 @@ public class GeneratedParserUtilBase {
       for (int i=-1; ; i--) {
         IElementType type = builder_.rawLookup(i);
         int tokenStart = builder_.rawTokenTypeStart(i);
-        if (state.whitespaceTokens.contains(type) || state.commentTokens.contains(type)) {
+        if (((PsiBuilderImpl)((Builder)builder_).getDelegate()).whitespaceOrComment(type)) {
           diff = completionState.offset - tokenStart;
         }
         else if (type != null && tokenStart < completionState.offset) {
@@ -470,8 +470,6 @@ public class GeneratedParserUtilBase {
     public CompletionState completionState;
 
     private boolean caseSensitive;
-    private TokenSet whitespaceTokens = TokenSet.EMPTY;
-    private TokenSet commentTokens = TokenSet.EMPTY;
     public BracePair[] braces;
     public boolean altMode;
 
@@ -505,11 +503,6 @@ public class GeneratedParserUtilBase {
       state.completionState = file == null? null: file.getUserData(COMPLETION_STATE_KEY);
       Language language = file == null? root.getLanguage() : file.getLanguage();
       state.caseSensitive = language.isCaseSensitive();
-      ParserDefinition parserDefinition = LanguageParserDefinitions.INSTANCE.forLanguage(language);
-      if (parserDefinition != null) {
-        state.commentTokens = parserDefinition.getCommentTokens();
-        state.whitespaceTokens = parserDefinition.getWhitespaceTokens();
-      }
       PairedBraceMatcher matcher = LanguageBraceMatching.INSTANCE.forLanguage(language);
       state.braces = matcher == null ? null : matcher.getPairs();
       if (state.braces != null && state.braces.length == 0) state.braces = null;

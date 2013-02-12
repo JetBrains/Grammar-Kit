@@ -60,6 +60,7 @@ public class Autopin implements PsiParser {
     TokenSet.create(CREATE_STATEMENT, CREATE_TABLE_STATEMENT, DROP_STATEMENT, DROP_TABLE_STATEMENT,
       STATEMENT),
   };
+
   public static boolean type_extends_(IElementType child_, IElementType parent_) {
     for (TokenSet set : EXTENDS_SETS_) {
       if (set.contains(child_) && set.contains(parent_)) return true;

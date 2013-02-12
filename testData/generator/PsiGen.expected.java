@@ -67,6 +67,7 @@ public class PsiGen implements PsiParser {
     TokenSet.create(REF_EXPR, SPECIAL_REF),
     TokenSet.create(ROOT, ROOT_B, ROOT_C, ROOT_D),
   };
+
   public static boolean type_extends_(IElementType child_, IElementType parent_) {
     for (TokenSet set : EXTENDS_SETS_) {
       if (set.contains(child_) && set.contains(parent_)) return true;

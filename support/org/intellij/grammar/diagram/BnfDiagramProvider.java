@@ -91,7 +91,7 @@ public class BnfDiagramProvider extends DiagramProvider<PsiNamedElement> {
     }
 
     @Override
-    public SimpleColoredText getPresentableName(Object o, DiagramState diagramState) {
+    public SimpleColoredText getItemName(Object o, DiagramState diagramState) {
       if (o instanceof Map.Entry) o = ((Map.Entry)o).getKey();
       if (o instanceof PsiNamedElement) {
         return new SimpleColoredText(StringUtil.notNullize(((PsiNamedElement)o).getName()), DEFAULT_TITLE_ATTR);
@@ -100,7 +100,7 @@ public class BnfDiagramProvider extends DiagramProvider<PsiNamedElement> {
     }
 
     @Override
-    public Object[] getNodeElements(PsiNamedElement parent) {
+    public Object[] getNodeItems(PsiNamedElement parent) {
       if (parent instanceof BnfRule) {
         Map<PsiElement, RuleGraphHelper.Cardinality> map = myGraphHelper.getFor((BnfRule)parent);
         Object[] objects = ContainerUtil.findAll(map.entrySet(), new Condition<Map.Entry<PsiElement, RuleGraphHelper.Cardinality>>() {
@@ -117,11 +117,11 @@ public class BnfDiagramProvider extends DiagramProvider<PsiNamedElement> {
         });
         return objects;
       }
-      return super.getNodeElements(parent);
+      return super.getNodeItems(parent);
     }
 
     @Override
-    public SimpleColoredText getPresentableType(Object element) {
+    public SimpleColoredText getItemType(Object element) {
       if (element instanceof Map.Entry) {
         RuleGraphHelper.Cardinality cardinality = (RuleGraphHelper.Cardinality)((Map.Entry)element).getValue();
         String text = RuleGraphHelper.getCardinalityText(cardinality);
@@ -129,17 +129,17 @@ public class BnfDiagramProvider extends DiagramProvider<PsiNamedElement> {
           return new SimpleColoredText(" "+text+" ", SimpleTextAttributes.GRAY_ITALIC_ATTRIBUTES);
         }
       }
-      return super.getPresentableType(element);
+      return super.getItemType(element);
     }
 
     @Override
-    public Icon getNodeElementIcon(Object element, DiagramState presentation) {
+    public Icon getItemIcon(Object element, DiagramState presentation) {
       if (element instanceof Map.Entry) element = ((Map.Entry)element).getKey();
-      return super.getNodeElementIcon(element, presentation);
+      return super.getItemIcon(element, presentation);
     }
 
     @Override
-    public String getElementDescription(PsiNamedElement bnfFile) {
+    public String getNodeTooltip(PsiNamedElement bnfFile) {
       return null;
     }
   };
@@ -260,7 +260,7 @@ public class BnfDiagramProvider extends DiagramProvider<PsiNamedElement> {
     @NotNull
     @Override
     public String getNodeName(DiagramNode<PsiNamedElement> node) {
-      return StringUtil.notNullize(node.getName());
+      return StringUtil.notNullize(node.getTooltip());
     }
 
     @Override
@@ -283,7 +283,7 @@ public class BnfDiagramProvider extends DiagramProvider<PsiNamedElement> {
         if (rule != root && !RuleGraphHelper.shouldGeneratePsi(rule, true)) continue;
         DiagramNode<PsiNamedElement> diagramNode = new PsiDiagramNode<PsiNamedElement>(rule, getProvider()) {
           @Override
-          public String getName() {
+          public String getTooltip() {
             return getIdentifyingElement().getName();
           }
         };

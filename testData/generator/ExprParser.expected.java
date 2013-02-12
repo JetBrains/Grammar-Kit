@@ -98,6 +98,7 @@ public class ExpressionParser implements PsiParser {
       MINUS_EXPR, MUL_EXPR, PAREN_EXPR, PLUS_EXPR,
       REF_EXPR, SPECIAL_EXPR, UNARY_MIN_EXPR, UNARY_PLUS_EXPR),
   };
+
   public static boolean type_extends_(IElementType child_, IElementType parent_) {
     for (TokenSet set : EXTENDS_SETS_) {
       if (set.contains(child_) && set.contains(parent_)) return true;

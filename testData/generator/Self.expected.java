@@ -95,6 +95,7 @@ public class Self implements PsiParser {
       BNF_STRING_LITERAL_EXPRESSION),
     TokenSet.create(BNF_LITERAL_EXPRESSION, BNF_STRING_LITERAL_EXPRESSION),
   };
+
   public static boolean type_extends_(IElementType child_, IElementType parent_) {
     for (TokenSet set : EXTENDS_SETS_) {
       if (set.contains(child_) && set.contains(parent_)) return true;

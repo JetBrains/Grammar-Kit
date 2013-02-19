@@ -117,8 +117,8 @@ public class BnfUnusedRulePassFactory extends AbstractProjectComponent implement
           continue;
         }
         if (!usedElements.contains(o)) {
-          final TextRange textRange = o.getId().getTextRange();
-          myHighlights.add(new HighlightInfo(HighlightInfoType.WARNING, textRange.getStartOffset(), textRange.getEndOffset(), "Unused rule", "Unused rule"));
+          myHighlights.add(HighlightInfo.newHighlightInfo(HighlightInfoType.WARNING).
+            range(o.getId()).descriptionAndTooltip("Unused rule").create());
         }
         else {
           visitAttrs(o.getAttrs(), usedElements);
@@ -135,9 +135,9 @@ public class BnfUnusedRulePassFactory extends AbstractProjectComponent implement
         if (!(child instanceof BnfAttr)) continue;
         final String name = ((BnfAttr)child).getName();
         if (!usedElements.contains(child) && !name.toUpperCase().equals(name) && KnownAttribute.getAttribute(name) == null) {
-          final TextRange textRange = ((BnfAttr)child).getId().getTextRange();
-          myHighlights.add(
-            new HighlightInfo(HighlightInfoType.WARNING, textRange.getStartOffset(), textRange.getEndOffset(), "Unused attribute", "Unused attribute"));
+          PsiElement anchor = ((BnfAttr)child).getId();
+          myHighlights.add(HighlightInfo.newHighlightInfo(HighlightInfoType.WARNING).
+            range(anchor).descriptionAndTooltip("Unused attribute").create());
         }
       }
     }

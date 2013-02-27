@@ -17,14 +17,16 @@ import com.intellij.psi.impl.source.resolve.FileContextUtil;
 import com.intellij.psi.impl.source.tree.CompositePsiElement;
 import com.intellij.psi.tree.ICompositeElementType;
 import com.intellij.psi.tree.IElementType;
-import com.intellij.psi.tree.TokenSet;
 import com.intellij.util.Function;
 import com.intellij.util.containers.LimitedPool;
 import gnu.trove.THashSet;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.LinkedList;
 
 /**
  * @author gregsh
@@ -318,7 +320,8 @@ public class GeneratedParserUtilBase {
         eatMoreFlagOnce ? builder_.getLatestDoneMarker() : null;
       PsiBuilder.Marker extensionMarker = null;
       IElementType extensionTokenType = null;
-      if (latestDoneMarker instanceof PsiBuilder.Marker && frame.offset == latestDoneMarker.getStartOffset()) {
+      // whitespace prefix makes the very first frame offset bigger than marker start offset which is always 0
+      if (latestDoneMarker instanceof PsiBuilder.Marker && frame.offset >= latestDoneMarker.getStartOffset()) {
         extensionMarker = ((PsiBuilder.Marker)latestDoneMarker).precede();
         extensionTokenType = latestDoneMarker.getTokenType();
         ((PsiBuilder.Marker)latestDoneMarker).drop();

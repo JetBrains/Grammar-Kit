@@ -28,6 +28,10 @@ Other open-source plugins built with Grammar-Kit: [intellij-erlang](https://gith
 
 Recent changes
 --------------
+1.1.1
+
+* IDEA Platform 12.1 compatibility
+
 1.1.0
 
 * [Live Preview](TUTORIAL.md) mode for fast language prototyping
@@ -161,6 +165,10 @@ Just add *mypackage.MyReferenceExpressionImpl* class with proper *getReference()
 
 Change log
 ==========
+1.1.1
+
+* IDEA Platform 12.1 compatibility
+
 1.1.0
 
 * [Live Preview](TUTORIAL.md) mode for fast language prototyping

@@ -2,7 +2,7 @@
   <id>org.jetbrains.idea.grammar</id>
   <version>1.1.1</version>
   <vendor email="gregory.shrago@jetbrains.com" logo="">Gregory Shrago</vendor>
-  <idea-version since-build="126.295" until-build=""/>
+  <idea-version since-build="129.0" until-build=""/>
 
   <name>Grammar-Kit</name>
   <description>Edit, manipulate, analyze BNF grammars and generate readable parser/PSI code</description>
@@ -14,7 +14,7 @@
     <![CDATA[
     <p>1.1.1</p>
     <ul>
-        <li>IDEA 12.1 compatibility</li>
+        <li>IDEA Platform 12.1 compatibility</li>
     </ul>
     <p>1.1.0</p>
     <ul>

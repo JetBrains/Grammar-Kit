@@ -223,6 +223,7 @@ public class JavaHelper {
       if (className == null) return null;
       try {
         InputStream is = getClass().getClassLoader().getResourceAsStream(className.replace('.', '/') + ".class");
+        if (is == null) return null;
         byte[] bytes = FileUtil.loadBytes(is);
         is.close();
         ClassInfo info = getClassInfo(className, bytes);
@@ -236,8 +237,8 @@ public class JavaHelper {
     @Nullable
     @Override
     public NavigatablePsiElement findClassMethod(String className, final String methodName, int paramCount) {
-      if (className == null) return null;
-      ClassInfo aClass = ((MyElement<ClassInfo>) findClass(className)).myDelegate;
+      MyElement<ClassInfo> classElement = className == null? null : (MyElement<ClassInfo>)findClass(className);
+      ClassInfo aClass = classElement == null? null : classElement.myDelegate;
       if (aClass == null) return null;
       for (MethodInfo method : aClass.methods) {
         if (!method.name.equals(methodName)) continue;

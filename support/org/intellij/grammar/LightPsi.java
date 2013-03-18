@@ -79,9 +79,13 @@ public class LightPsi {
    * Builds light-psi-all.jar from JVM class loader log (-verbose:class option)
    */
   public static void main(String[] args) throws Throwable {
-    File dir = new File("/Projects/grammar-kit/binaries");
-    BufferedReader reader = new BufferedReader(new FileReader(new File(dir, "loaded-classes.txt")));
-//    BufferedReader reader = new BufferedReader(new FileReader(new File(dir, "loaded.txt")));
+    if (args.length < 2) {
+      System.out.println("Usage: Main <output-dir> <classes.log.txt>");
+      return;
+    }
+
+    File dir = new File(args[0]);
+    BufferedReader reader = new BufferedReader(new FileReader(new File(args[1])));
     String s;
     Pattern pattern = Pattern.compile("\\[Loaded (.*) from (?:file:)?(.*)\\]");
 

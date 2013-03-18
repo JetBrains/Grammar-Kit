@@ -1,0 +1,24 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="LightPsi-All: package" type="Application" factoryName="Application" singleton="true">
+    <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea" />
+    <option name="MAIN_CLASS_NAME" value="org.intellij.grammar.LightPsi" />
+    <option name="VM_PARAMETERS" value="-d32 -ea" />
+    <option name="PROGRAM_PARAMETERS" value="./binaries ./build-lightpsi/classes.log.txt" />
+    <option name="WORKING_DIRECTORY" value="file://$PROJECT_DIR$" />
+    <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
+    <option name="ALTERNATIVE_JRE_PATH" value="" />
+    <option name="ENABLE_SWING_INSPECTOR" value="false" />
+    <option name="ENV_VARIABLES" />
+    <option name="PASS_PARENT_ENVS" value="true" />
+    <module name="grammar-kit" />
+    <envs />
+    <RunnerSettings RunnerId="Profile ">
+      <option name="myExternalizedOptions" value="&#10;additional-options2=onexit\=snapshot&#10;" />
+    </RunnerSettings>
+    <RunnerSettings RunnerId="Run" />
+    <ConfigurationWrapper RunnerId="Run" />
+    <method>
+      <option name="RunConfigurationTask" enabled="true" run_configuration_name="LightPsi-All: classes" run_configuration_type="Application" />
+    </method>
+  </configuration>
+</component>

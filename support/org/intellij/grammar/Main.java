@@ -64,12 +64,14 @@ public class Main {
             PsiFile bnfFile = LightPsi.parseFile(file, parserDefinition);
             if (!(bnfFile instanceof BnfFile)) continue;
 
-// for light-psi-all building:
-//            Class.forName("org.jetbrains.annotations.NotNull");
-//            Class.forName("org.jetbrains.annotations.Nullable");
-//            Class.forName("org.intellij.lang.annotations.Pattern");
-//            Class.forName("org.intellij.lang.annotations.RegExp");
-//            com.intellij.psi.impl.DebugUtil.psiToString(bnfFile, false);
+            // for light-psi-all building:
+            if (args[0].contains("lightpsi")) {
+              Class.forName("org.jetbrains.annotations.NotNull");
+              Class.forName("org.jetbrains.annotations.Nullable");
+              Class.forName("org.intellij.lang.annotations.Pattern");
+              Class.forName("org.intellij.lang.annotations.RegExp");
+              com.intellij.psi.impl.DebugUtil.psiToString(bnfFile, false);
+            }
 
             count ++;
             new ParserGenerator((BnfFile) bnfFile, grammarDir.getAbsolutePath(), output.getAbsolutePath()).generate();

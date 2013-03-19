@@ -1,4 +1,3 @@
-
 Grammar-Kit plugin
 ==================
 
@@ -21,6 +20,8 @@ You've just build a custom language plugin (approx. 1 day).
 See [Tutorial](TUTORIAL.md) page for a sample to play with *Live Preview*.
 
 See [HOWTO](HOWTO.md) page for different tips and tricks.
+
+See [Standalone usage](#Standalone) section for standalone generation and parsing.
 
 Other open-source plugins built with Grammar-Kit: [intellij-erlang](https://github.com/ignatov/intellij-erlang).
 
@@ -162,6 +163,23 @@ literal_expression ::= number | string
 ````
 
 Just add *mypackage.MyReferenceExpressionImpl* class with proper *getReference()* implementation.
+
+
+Standalone usage
+================
+
+The [light-psi-all.jar](binaries/light-psi-all.jar) library contains all the classes from IntelliJ IDEA platform that are required for the generator and standalone parsing.
+
+To generate parser/PSI use the following command (light-psi-all.jar will be picked automatically from the current folder):
+````
+java -jar grammar-kit.jar <output-dir> <grammar1> ...
+````
+
+The following command demonstrates the sample [expression parser](testData/generator/ExprParser.bnf) in action:
+````
+java -jar expression-console-sample.jar
+````
+
 
 Change log
 ==========

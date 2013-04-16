@@ -958,7 +958,8 @@ public class ParserGenerator {
     }
   }
 
-  private static String collectExtraArguments(BnfRule rule, BnfExpression expression, final boolean declaration) {
+  private static String collectExtraArguments(BnfRule rule, @Nullable BnfExpression expression, final boolean declaration) {
+    if (expression == null) return "";
     List<String> params = GrammarUtil.collectExtraArguments(rule, expression);
     if (params.isEmpty()) return "";
     final StringBuilder sb = new StringBuilder();

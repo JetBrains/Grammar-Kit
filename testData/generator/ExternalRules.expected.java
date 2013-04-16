@@ -157,6 +157,36 @@ public class ExternalRules implements PsiParser {
   }
 
   /* ********************************************************** */
+  // !(',' | ';' | ')')
+  static boolean item_recover(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "item_recover")) return false;
+    boolean result_ = false;
+    Marker marker_ = builder_.mark();
+    enterErrorRecordingSection(builder_, level_, _SECTION_NOT_, null);
+    result_ = !item_recover_0(builder_, level_ + 1);
+    marker_.rollbackTo();
+    result_ = exitErrorRecordingSection(builder_, level_, result_, false, _SECTION_NOT_, null);
+    return result_;
+  }
+
+  // ',' | ';' | ')'
+  private static boolean item_recover_0(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "item_recover_0")) return false;
+    boolean result_ = false;
+    Marker marker_ = builder_.mark();
+    result_ = consumeToken(builder_, ",");
+    if (!result_) result_ = consumeToken(builder_, ";");
+    if (!result_) result_ = consumeToken(builder_, ")");
+    if (!result_) {
+      marker_.rollbackTo();
+    }
+    else {
+      marker_.drop();
+    }
+    return result_;
+  }
+
+  /* ********************************************************** */
   // <<head>> <<comma_list <<param>>>> (<<comma_list_tail <<comma_list <<param>>>>>>) *
   public static boolean list_of_lists(PsiBuilder builder_, int level_, final Parser head, final Parser param) {
     if (!recursion_guard_(builder_, level_, "list_of_lists")) return false;
@@ -671,6 +701,24 @@ public class ExternalRules implements PsiParser {
   }
 
   /* ********************************************************** */
+  // <<param>>
+  static boolean recoverable_item(PsiBuilder builder_, int level_, final Parser param) {
+    if (!recursion_guard_(builder_, level_, "recoverable_item")) return false;
+    boolean result_ = false;
+    Marker marker_ = builder_.mark();
+    enterErrorRecordingSection(builder_, level_, _SECTION_RECOVER_, null);
+    result_ = param.parse(builder_, level_);
+    if (!result_) {
+      marker_.rollbackTo();
+    }
+    else {
+      marker_.drop();
+    }
+    result_ = exitErrorRecordingSection(builder_, level_, result_, false, _SECTION_RECOVER_, item_recover_parser_);
+    return result_;
+  }
+
+  /* ********************************************************** */
   // <<listOf statement>>
   static boolean root(PsiBuilder builder_, int level_) {
     return listOf(builder_, level_ + 1, statement_parser_);
@@ -713,6 +761,11 @@ public class ExternalRules implements PsiParser {
     return result_;
   }
 
+  final static Parser item_recover_parser_ = new Parser() {
+    public boolean parse(PsiBuilder builder_, int level_) {
+      return item_recover(builder_, level_ + 1);
+    }
+  };
   final static Parser meta_mixed_list_0_0_parser_ = new Parser() {
     public boolean parse(PsiBuilder builder_, int level_) {
       return comma_list(builder_, level_ + 1, one_parser_);

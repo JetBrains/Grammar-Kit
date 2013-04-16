@@ -41,3 +41,6 @@ private meta meta_mixed ::= <<listOf "1+2" '1+2' <<param>>>>
 private meta_mixed_simple ::= <<meta_mixed statement>>
 private meta_mixed_list ::= <<meta_mixed <<comma_list one>>>>
 private meta_mixed_list_paren ::= <<meta_mixed (<<comma_list one>>)>>
+
+private meta recoverable_item ::= <<param>> {recoverUntil="item_recover"}
+private item_recover ::= !(',' | ';' | ')')

@@ -273,6 +273,23 @@ property ::= id '=' expr
 
 ````
 
+IV. Tips and tricks
+===================
 
+4.1. Trailing commas
+--------------------
+Imagine a language which allows trailing commas in lists, e.g.
+```
+(
+  elem1,
+  elem2,
+  elem3,
+)
+```
+
+In that situation you may use such parser rule:
+```
+element_list ::= '(' element (',' (element | &')'))* ')' {pin(".*")=1}
+```
 
 ... to be continued

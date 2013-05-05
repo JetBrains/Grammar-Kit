@@ -11,5 +11,8 @@
     <action id="grammar.Generate.JFlexLexer" class="org.intellij.grammar.actions.BnfGenerateLexerAction" text="Generate JFlex Lexer">
       <add-to-group group-id="grammar.file.group" anchor="after" relative-to-action="grammar.Generate"/>
     </action>
+    <action id="grammar.Run.JFlex" class="org.intellij.grammar.actions.BnfRunJFlexAction" text="Run JFlex Generator">
+      <add-to-group group-id="grammar.file.group" anchor="first"/>
+    </action>
   </actions>
 </idea-plugin>

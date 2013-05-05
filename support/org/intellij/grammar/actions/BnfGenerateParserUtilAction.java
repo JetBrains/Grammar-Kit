@@ -19,6 +19,7 @@ import com.intellij.openapi.util.io.FileUtil;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.psi.*;
 import com.intellij.psi.search.GlobalSearchScope;
+import com.intellij.util.Consumer;
 import com.intellij.util.IncorrectOperationException;
 import com.intellij.util.containers.ContainerUtil;
 import org.intellij.grammar.KnownAttribute;
@@ -109,13 +110,21 @@ public class BnfGenerateParserUtilAction extends AnAction {
                                    @Nullable final String baseClass,
                                    @NotNull String suggestedName,
                                    @NotNull String suggestedPackage) {
-    final Project project = origin.getProject();
+    Project project = origin.getProject();
     Module module = ModuleUtilCore.findModuleForPsiElement(origin);
     CreateClassDialog dialog = new CreateClassDialog(project, title, suggestedName, suggestedPackage, CreateClassKind.CLASS, true, module);
     if (!dialog.showAndGet()) return null;
 
     final String className = dialog.getClassName();
     final PsiDirectory targetDirectory = dialog.getTargetDirectory();
+    return createClass(className, targetDirectory, baseClass, title, null);
+  }
+
+  static String createClass(final String className, final PsiDirectory targetDirectory,
+                            final String baseClass,
+                            final String title,
+                            final Consumer<PsiClass> consumer) {
+    final Project project = targetDirectory.getProject();
     final Ref<PsiClass> resultRef = Ref.create();
 
     new WriteCommandAction(project, title) {
@@ -136,6 +145,9 @@ public class BnfGenerateParserUtilAction extends AnAction {
             PsiReferenceList targetReferenceList = isInterface ? resultClass.getImplementsList() : resultClass.getExtendsList();
             assert targetReferenceList != null;
             targetReferenceList.add(ref);
+          }
+          if (consumer != null) {
+            consumer.consume(resultClass);
           }
         }
         catch (final IncorrectOperationException e) {

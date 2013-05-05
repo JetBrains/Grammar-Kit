@@ -39,6 +39,7 @@ import com.intellij.psi.PsiDocumentManager;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiManager;
 import com.intellij.util.ExceptionUtil;
+import org.intellij.grammar.generator.BnfConstants;
 import org.intellij.grammar.generator.ParserGenerator;
 import org.intellij.grammar.psi.BnfFile;
 import org.jetbrains.annotations.NotNull;
@@ -113,12 +114,12 @@ public class GenerateAction extends AnAction implements DumbAware {
               pathsToRefresh.add(new File(outputPath));
               try {
                 new ParserGenerator((BnfFile)bnfFile, sourcePath, outputPath).generate();
-                Notifications.Bus.notify(new Notification(e.getPresentation().getText(),
+                Notifications.Bus.notify(new Notification(BnfConstants.GENERATION_GROUP,
                                                           file.getName() + " parser generated", "to " + outputPath,
                                                           NotificationType.INFORMATION), project);
               }
               catch (Exception ex) {
-                Notifications.Bus.notify(new Notification(e.getPresentation().getText(),
+                Notifications.Bus.notify(new Notification(BnfConstants.GENERATION_GROUP,
                                                           file.getName() + " parser generation failed",
                                                           ExceptionUtil.getUserStackTrace(ex, ParserGenerator.LOG),
                                                           NotificationType.ERROR), project);

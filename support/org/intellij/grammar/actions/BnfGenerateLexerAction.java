@@ -24,6 +24,7 @@ import com.intellij.util.containers.ContainerUtil;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.Velocity;
 import org.intellij.grammar.KnownAttribute;
+import org.intellij.grammar.generator.BnfConstants;
 import org.intellij.grammar.generator.ParserGeneratorUtil;
 import org.intellij.grammar.generator.RuleGraphHelper;
 import org.intellij.grammar.java.JavaHelper;
@@ -66,20 +67,22 @@ public class BnfGenerateLexerAction extends AnAction {
     final VirtualFile virtualFile = fileWrapper.getVirtualFile(true);
     if (virtualFile == null) return;
 
-    final String commandName = e.getPresentation().getText();
     new WriteCommandAction.Simple(project) {
       @Override
       protected void run() throws Throwable {
         try {
           PsiDirectory psiDirectory = PsiManager.getInstance(project).findDirectory(virtualFile.getParent());
           assert psiDirectory != null;
-          String text = generateLexerText(bnfFile, JavaHelper.getJavaHelper(project).getPackageName(psiDirectory));
+          PsiPackage aPackage = JavaDirectoryService.getInstance().getPackage(psiDirectory);
+          String packageName = aPackage == null ? null : aPackage.getQualifiedName();
+
+          String text = generateLexerText(bnfFile, packageName);
           PsiFile psiFile = psiDirectory.findFile(flexFileName);
           if (psiFile == null) psiFile = psiDirectory.createFile("_" + flexFileName);
 
           FileContentUtil.setFileText(project, virtualFile, text);
 
-          Notifications.Bus.notify(new Notification(commandName,
+          Notifications.Bus.notify(new Notification(BnfConstants.GENERATION_GROUP,
               psiFile.getName() + " generated", "to " + virtualFile.getParent().getPath(),
               NotificationType.INFORMATION), project);
 

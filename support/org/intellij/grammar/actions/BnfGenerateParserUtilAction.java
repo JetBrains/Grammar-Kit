@@ -1,22 +1,33 @@
 package org.intellij.grammar.actions;
 
+import com.intellij.codeInsight.daemon.impl.quickfix.CreateClassKind;
+import com.intellij.codeInsight.intention.impl.CreateClassDialog;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.LangDataKeys;
+import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.application.Result;
 import com.intellij.openapi.command.WriteCommandAction;
 import com.intellij.openapi.editor.Document;
+import com.intellij.openapi.fileEditor.ex.IdeDocumentHistory;
+import com.intellij.openapi.module.Module;
+import com.intellij.openapi.module.ModuleUtilCore;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.ui.Messages;
+import com.intellij.openapi.util.Ref;
 import com.intellij.openapi.util.io.FileUtil;
 import com.intellij.openapi.util.text.StringUtil;
-import com.intellij.psi.PsiDocumentManager;
-import com.intellij.psi.PsiFile;
+import com.intellij.psi.*;
+import com.intellij.psi.search.GlobalSearchScope;
+import com.intellij.util.IncorrectOperationException;
 import com.intellij.util.containers.ContainerUtil;
 import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.generator.BnfConstants;
-import org.intellij.grammar.java.JavaHelper;
 import org.intellij.grammar.psi.BnfAttr;
 import org.intellij.grammar.psi.BnfAttrs;
 import org.intellij.grammar.psi.BnfFile;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * @author greg
@@ -41,7 +52,7 @@ public class BnfGenerateParserUtilAction extends AnAction {
 
     Project project = file.getProject();
     BnfFile bnfFile = (BnfFile) file;
-    final String qualifiedName = JavaHelper.getJavaHelper(project).createClass(
+    final String qualifiedName = createClass(
         bnfFile, "Create Parser Util Class", BnfConstants.GPUB_CLASS,
         getGrammarName(bnfFile) + "ParserUtil",
         getGrammarPackage(bnfFile));
@@ -91,6 +102,53 @@ public class BnfGenerateParserUtilAction extends AnAction {
       if (StringUtil.isNotEmpty(result)) return result;
     }
     return StringUtil.capitalize(FileUtil.getNameWithoutExtension(bnfFile.getName()));
+  }
+
+  public static String createClass(@NotNull PsiFile origin,
+                                   @NotNull final String title,
+                                   @Nullable final String baseClass,
+                                   @NotNull String suggestedName,
+                                   @NotNull String suggestedPackage) {
+    final Project project = origin.getProject();
+    Module module = ModuleUtilCore.findModuleForPsiElement(origin);
+    CreateClassDialog dialog = new CreateClassDialog(project, title, suggestedName, suggestedPackage, CreateClassKind.CLASS, true, module);
+    if (!dialog.showAndGet()) return null;
+
+    final String className = dialog.getClassName();
+    final PsiDirectory targetDirectory = dialog.getTargetDirectory();
+    final Ref<PsiClass> resultRef = Ref.create();
+
+    new WriteCommandAction(project, title) {
+      @Override
+      protected void run(Result result) throws Throwable {
+        IdeDocumentHistory.getInstance(project).includeCurrentPlaceAsChangePlace();
+
+        PsiElementFactory elementFactory = JavaPsiFacade.getInstance(project).getElementFactory();
+        PsiJavaCodeReferenceElement ref = baseClass == null ? null : elementFactory.createReferenceElementByFQClassName(
+            baseClass, GlobalSearchScope.allScope(project));
+
+        try {
+          PsiClass resultClass = JavaDirectoryService.getInstance().createClass(targetDirectory, className);
+          resultRef.set(resultClass);
+          if (ref != null) {
+            PsiElement baseClass = ref.resolve();
+            boolean isInterface = baseClass instanceof PsiClass && ((PsiClass) baseClass).isInterface();
+            PsiReferenceList targetReferenceList = isInterface ? resultClass.getImplementsList() : resultClass.getExtendsList();
+            assert targetReferenceList != null;
+            targetReferenceList.add(ref);
+          }
+        }
+        catch (final IncorrectOperationException e) {
+          ApplicationManager.getApplication().invokeLater(new Runnable() {
+            @Override
+            public void run() {
+              Messages.showErrorDialog(project, "Unable to create class " + className + "\n" + e.getLocalizedMessage(), title);
+            }
+          });
+        }
+      }
+    }.execute();
+    return resultRef.isNull() ? null : resultRef.get().getQualifiedName();
   }
 
 }

@@ -20,6 +20,8 @@ package org.intellij.grammar.generator;
  * @author gregsh
  */
 public interface BnfConstants {
+  String GENERATION_GROUP = "Grammar Generator";
+
   String CLASS_HEADER_DEF = "// This is a generated file. Not intended for manual editing.";
 
   String GPUB_CLASS = "com.intellij.lang.parser.GeneratedParserUtilBase";

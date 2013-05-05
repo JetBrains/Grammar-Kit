@@ -1,0 +1,45 @@
+package $packageName;
+import com.intellij.lexer.*;
+import com.intellij.psi.tree.IElementType;
+import static $typesClass.*;
+
+%%
+
+%{
+  public $lexerClass() {
+    this((java.io.Reader)null);
+  }
+%}
+
+%public
+%class $lexerClass
+%implements FlexLexer
+%function advance
+%type IElementType
+%unicode
+%eof{ return;
+%eof}
+
+EOL="\r"|"\n"|"\r\n"
+LINE_WS=[\ \t\f]
+WHITE_SPACE=({LINE_WS}|{EOL})+
+
+#foreach( $token in $regexpTokens.keySet() )
+$token=$regexpTokens.get($token)
+#end
+
+#macro(spaces $len) #set( $count = $maxTokenLength - $len ) $StringUtil.repeat(" ", $count) #end
+%%
+<YYINITIAL> {
+  {WHITE_SPACE} #spaces(11) { return com.intellij.psi.TokenType.WHITE_SPACE; }
+
+#foreach( $token in $simpleTokens )
+  "$token" #spaces($token.length()) { return ${tokenPrefix}$token; }
+#end
+
+#foreach( $token in $regexpTokens.keySet() )
+  {$token} #spaces($token.length()) { return ${tokenPrefix}$token; }
+#end
+
+  [^] { return com.intellij.psi.TokenType.BAD_CHARACTER; }
+}

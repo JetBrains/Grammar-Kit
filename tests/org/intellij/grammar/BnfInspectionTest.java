@@ -32,6 +32,7 @@ public class BnfInspectionTest extends LightPlatformCodeInsightFixtureTestCase {
   public void testBnfGrammar() throws Exception {
     VirtualFile virtualFile = myFixture.copyFileToProject("../../grammars/Grammar.bnf", "Grammar.bnf");
     PsiFile psiFile = myFixture.configureByFile("Grammar.bnf");
+    myFixture.allowTreeAccessForFile(virtualFile);
     toggleGrammarKitSrc(myModule, getTestDataPath());
     try {
       doTest();

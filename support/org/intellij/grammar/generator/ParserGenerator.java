@@ -230,10 +230,6 @@ public class ParserGenerator {
         }
       }
     }
-    boolean generateUtil = getRootAttribute(myFile, KnownAttribute.GENERATE_PARSER_UTIL);
-    if (generateUtil && !myUnitTestMode) {
-      generateParserUtil();
-    }
   }
 
   private void generateVisitor(String psiClass, Map<String, BnfRule> sortedRules) {
@@ -285,44 +281,6 @@ public class ParserGenerator {
     }
 
     out("}");
-  }
-
-  private void generateParserUtil() throws IOException {
-    // no need to generate anything, platform GPUB will be used
-    if (BnfConstants.GPUB_CLASS.equals(myParserUtilClass)) return;
-    String parserUtil = myParserUtilClass;
-    String parserUtilPackage = StringUtil.getPackageName(parserUtil);
-    String baseClassName = GeneratedParserUtilBase.class.getSimpleName();
-    String baseFileName = baseClassName + ".java";
-    InputStream baseUtilText = GeneratedParserUtilBase.class.getResourceAsStream(baseFileName);
-    if (baseUtilText == null) return;
-
-    Project project = myFile.getProject();
-    if (JavaHelper.getJavaHelper(project).findClass(parserUtil) != null) return;
-    File baseFile = new File(myOutputPath, parserUtilPackage.replace('.', File.separatorChar) + "/" + baseFileName);
-    openOutput(baseFile);
-    try {
-      String text = FileUtil.loadTextAndClose(baseUtilText);
-      text =
-        text.replace("package " + StringUtil.getPackageName(GeneratedParserUtilBase.class.getName()) + ";", "package " + parserUtilPackage + ";");
-      generateFileHeader(baseClassName);
-      myOut.write(text);
-    }
-    finally {
-      closeOutput();
-    }
-    File utilFile = new File(myOutputPath, parserUtil.replace('.', File.separatorChar) + ".java");
-    openOutput(utilFile);
-    try {
-      generateClassHeader(parserUtil, Collections.<String>emptyList(), "", false, baseClassName);
-      newLine();
-      out("}");
-    }
-    finally {
-      closeOutput();
-    }
-    addWarning(project, "Default " + StringUtil.getShortName(parserUtil) + " and " + baseClassName +
-                        " classes are created, please move them outside of the generated classes root.");
   }
 
 

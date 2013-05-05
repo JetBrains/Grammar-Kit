@@ -44,7 +44,6 @@ public class KnownAttribute<T> {
   public static final KnownAttribute<String>       CLASS_HEADER              = create(true, String.class, "classHeader", BnfConstants.CLASS_HEADER_DEF);
   public static final KnownAttribute<Boolean>      GENERATE_PSI              = create(true, Boolean.class, "generatePsi", true);
   public static final KnownAttribute<Boolean>      GENERATE_TOKENS           = create(true, Boolean.class, "generateTokens", true);
-  public static final KnownAttribute<Boolean>      GENERATE_PARSER_UTIL      = create(true, Boolean.class, "generateParserUtil", true);
   public static final KnownAttribute<Boolean>      GENERATE_MEMOIZATION      = create(true, Boolean.class, "memoization", false);
   public static final KnownAttribute<Integer>      GENERATE_FIRST_CHECK      = create(true, Integer.class, "generateFirstCheck", 2);
   public static final KnownAttribute<Boolean>      EXTENDED_PIN              = create(true, Boolean.class, "extendedPin", true);

@@ -97,18 +97,19 @@
     </component>
   </project-components>
   <actions>
-    <action id="grammar.Generate" class="org.intellij.grammar.actions.GenerateAction" text="Generate Parser Code">
+    <group id="grammar.file.group" popup="false">
+      <action id="grammar.Generate" class="org.intellij.grammar.actions.GenerateAction" text="Generate Parser Code">
+        <keyboard-shortcut keymap="$default" first-keystroke="control shift G"/>
+      </action>
+      <separator/>
+      <action id="grammar.LivePreview" class="org.intellij.grammar.actions.LivePreviewAction" text="Live Preview">
+        <keyboard-shortcut keymap="$default" first-keystroke="control alt P"/>
+      </action>
+      <separator/>
       <add-to-group group-id="ToolsMenu" anchor="before" relative-to-action="com.intellij.tools.ExternalToolsGroup"/>
       <add-to-group group-id="EditorPopupMenu" anchor="last"/>
       <add-to-group group-id="ProjectViewPopupMenu" anchor="last"/>
-      <keyboard-shortcut keymap="$default" first-keystroke="control shift G"/>
-    </action>
-    <action id="grammar.LivePreview" class="org.intellij.grammar.actions.LivePreviewAction" text="Live Preview">
-      <add-to-group group-id="ToolsMenu" anchor="after" relative-to-action="grammar.Generate"/>
-      <add-to-group group-id="EditorPopupMenu" anchor="last"/>
-      <add-to-group group-id="ProjectViewPopupMenu" anchor="last"/>
-      <keyboard-shortcut keymap="$default" first-keystroke="control alt P"/>
-    </action>
+    </group>
     <action id="grammar.HighlightGrammarAtCaretAction" class="org.intellij.grammar.actions.HighlightGrammarAtCaretAction"
             text="Grammar Highlighting">
       <add-to-group group-id="EditorPopupMenu" anchor="last"/>

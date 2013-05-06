@@ -33,8 +33,8 @@ $token=$regexpTokens.get($token)
 <YYINITIAL> {
   {WHITE_SPACE} #spaces(11) { return com.intellij.psi.TokenType.WHITE_SPACE; }
 
-#foreach( $token in $simpleTokens )
-  "$token" #spaces($token.length()) { return ${tokenPrefix}$token; }
+#foreach( $token in $simpleTokens.keySet() )
+  "$simpleTokens.get($token)" #spaces($simpleTokens.get($token).length()) { return ${tokenPrefix}$token; }
 #end
 
 #foreach( $token in $regexpTokens.keySet() )

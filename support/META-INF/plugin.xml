@@ -1,17 +1,23 @@
 <idea-plugin url="https://github.com/JetBrains/Grammar-Kit" version="2">
   <id>org.jetbrains.idea.grammar</id>
-  <version>1.1.1</version>
+  <version>1.1.2</version>
   <vendor email="gregory.shrago@jetbrains.com" logo="">Gregory Shrago</vendor>
   <idea-version since-build="129.0" until-build=""/>
 
   <name>Grammar-Kit</name>
-  <description>Edit, manipulate, analyze BNF grammars and generate readable parser/PSI code</description>
+  <description>Edit, manipulate, analyze BNF grammars and generate readable parser/PSI code and a JFlex lexer</description>
 
   <depends optional="true" config-file="plugin-java.xml">com.intellij.modules.java</depends>
   <depends optional="true" config-file="plugin-uml.xml">com.intellij.diagram</depends>
 
   <change-notes>
     <![CDATA[
+    <p>1.1.2</p>
+    <ul>
+        <li>Context menu: Generate JFlex *.flex file</li>
+        <li>Context menu: Run JFlex generator</li>
+        <li>Context menu: Create custom parser util class</li>
+    </ul>
     <p>1.1.1</p>
     <ul>
         <li>IDEA Platform 12.1 compatibility</li>

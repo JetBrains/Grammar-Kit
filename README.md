@@ -33,7 +33,6 @@ Recent changes
 1.1.2
 
 * Context menu: Generate JFlex \*.flex file.
-  See [JFlex documentation](http://jflex.de/manual.html#SECTION00053000000000000000) for supported *regexp tokens* syntax.
 * Context menu: Run JFlex generator
 * Context menu: Create custom parser util class
 
@@ -209,7 +208,6 @@ Change log
 1.1.2
 
 * Context menu: Generate JFlex \*.flex file.
-  See [JFlex documentation](http://jflex.de/manual.html#SECTION00053000000000000000) for supported *regexp tokens* syntax.
 * Context menu: Run JFlex generator
 * Context menu: Create custom parser util class
 

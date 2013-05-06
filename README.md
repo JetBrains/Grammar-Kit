@@ -32,7 +32,7 @@ Recent changes
 --------------
 1.1.2
 
-* Context menu: Generate JFlex \*.flex file.
+* Context menu: Generate JFlex \*.flex file
 * Context menu: Run JFlex generator
 * Context menu: Create custom parser util class
 
@@ -207,7 +207,7 @@ Change log
 ==========
 1.1.2
 
-* Context menu: Generate JFlex \*.flex file.
+* Context menu: Generate JFlex \*.flex file
 * Context menu: Run JFlex generator
 * Context menu: Create custom parser util class
 

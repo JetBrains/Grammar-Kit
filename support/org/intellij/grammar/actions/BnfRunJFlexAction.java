@@ -19,6 +19,7 @@ import com.intellij.notification.NotificationType;
 import com.intellij.notification.Notifications;
 import com.intellij.openapi.actionSystem.*;
 import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.projectRoots.Sdk;
 import com.intellij.openapi.projectRoots.SimpleJavaSdkType;
@@ -71,6 +72,8 @@ public class BnfRunJFlexAction extends AnAction {
     final PsiFile psiFile = LangDataKeys.PSI_FILE.getData(e.getDataContext());
     final VirtualFile virtualFile = psiFile != null ? psiFile.getVirtualFile() : null;
     if (virtualFile == null) return;
+
+    FileDocumentManager.getInstance().saveAllDocuments();
 
     final Project project = psiFile.getProject();
     final String commandName = e.getPresentation().getText();

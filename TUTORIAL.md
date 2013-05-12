@@ -25,7 +25,7 @@ Thus the notion of _recoverUntil_ helps parser to recover when input includes so
 
 Live Preview introduction
 ====================
-(The latest 1.0.10 version of [Grammar-Kit](binaries/GrammarKit.zip) plugin is required)
+(Since version 1.0.10. Get the latest [Grammar-Kit bundle](binaries/GrammarKit.zip) for manual installation.)
 
 Suppose we want to create a grammar for some expression language like this:
 ````
@@ -69,7 +69,7 @@ The fun part is that I even can _inject_ this language in some other files I wor
     LP='('
     RP=')'
 
-    comment='regexp://.*(\n|$)'
+    comment='regexp://.*'
     number='regexp:\d+(\.\d*)?'
     id='regexp:\p{Alpha}\w*'
     string="regexp:('([^'\\]|\\.)*'|\"([^\"\\]|\\.)*\")"
@@ -107,3 +107,5 @@ literal_expr ::= number | string | float
 ````
 
 Try playing with _pin_ and _recover_until_ attributes, tokens and rule modifiers to see how this all works.
+
+Note that since version 1.1.2 one can generate *.flex file and then lexer java code using context menu items.

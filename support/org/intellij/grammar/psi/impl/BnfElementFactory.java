@@ -22,8 +22,12 @@ import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiFileFactory;
 import com.intellij.psi.util.PsiTreeUtil;
 import org.intellij.grammar.BnfLanguage;
+import org.intellij.grammar.psi.BnfAttr;
+import org.intellij.grammar.psi.BnfAttrs;
 import org.intellij.grammar.psi.BnfExpression;
 import org.intellij.grammar.psi.BnfRule;
+
+import java.util.List;
 
 /**
  * @author gregsh
@@ -45,10 +49,21 @@ public class BnfElementFactory {
   }
 
   public static BnfRule createRuleFromText(Project project, String text) {
-    PsiFile fromText = PsiFileFactory.getInstance(project).createFileFromText("a.bnf", text);
+    PsiFile fromText = PsiFileFactory.getInstance(project).createFileFromText("a.bnf", BnfLanguage.INSTANCE, text);
     PsiElement firstChild = fromText.getFirstChild();
     LOG.assertTrue(firstChild instanceof BnfRule, text);
+    //noinspection ConstantConditions
     return (BnfRule)firstChild;
+  }
+
+  public static BnfAttr createAttributeFromText(Project project, String text) {
+    PsiFile fromText = PsiFileFactory.getInstance(project).createFileFromText("a.bnf", BnfLanguage.INSTANCE, "{\n  " + text + "\n}" );
+    PsiElement firstChild = fromText.getFirstChild();
+    LOG.assertTrue(firstChild instanceof BnfAttrs, text);
+    //noinspection ConstantConditions
+    List<BnfAttr> attrList = ((BnfAttrs) firstChild).getAttrList();
+    LOG.assertTrue(attrList.size() == 1, text);
+    return attrList.get(0);
   }
 
 }

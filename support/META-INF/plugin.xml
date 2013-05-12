@@ -115,10 +115,16 @@
       <add-to-group group-id="EditorPopupMenu" anchor="last"/>
       <keyboard-shortcut keymap="$default" first-keystroke="control alt F7"/>
     </action>
-    <action id="grammars.IntroduceRule" class="org.intellij.grammar.refactor.BnfIntroduceRuleAction" text="Introduce Rule"
-            description="Introduce Rule">
+    <group id="grammar.RefactoringGroup" popup="false">
       <add-to-group group-id="RefactoringMenu" anchor="first"/>
-      <keyboard-shortcut keymap="$default" first-keystroke="control alt R"/>
-    </action>
+      <action id="grammars.IntroduceRule" class="org.intellij.grammar.refactor.BnfIntroduceRuleAction" text="Introduce Rule"
+              description="Introduce Rule">
+        <keyboard-shortcut keymap="$default" first-keystroke="control alt R"/>
+      </action>
+      <action id="grammars.IntroduceToken" class="org.intellij.grammar.refactor.BnfIntroduceTokenAction" text="Introduce Token"
+              description="Introduce Token">
+        <keyboard-shortcut keymap="$default" first-keystroke="control alt C"/>
+      </action>
+    </group>
   </actions>
 </idea-plugin>

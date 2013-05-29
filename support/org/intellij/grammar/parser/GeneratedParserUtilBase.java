@@ -33,6 +33,7 @@ import com.intellij.psi.impl.source.resolve.FileContextUtil;
 import com.intellij.psi.impl.source.tree.CompositePsiElement;
 import com.intellij.psi.tree.ICompositeElementType;
 import com.intellij.psi.tree.IElementType;
+import com.intellij.psi.tree.TokenSet;
 import com.intellij.util.Function;
 import com.intellij.util.containers.LimitedPool;
 import gnu.trove.THashSet;
@@ -98,6 +99,17 @@ public class GeneratedParserUtilBase {
 
     Frame frame = state.frameStack.isEmpty() ? null : state.frameStack.getLast();
     return frame == null || frame.errorReportedAt <= builder_.getCurrentOffset();
+  }
+
+  public static TokenSet create_token_set_(IElementType... tokenTypes_) {
+    return TokenSet.create(tokenTypes_);
+  }
+
+  public static boolean type_extends_impl_(TokenSet[] extendsSet_, IElementType child_, IElementType parent_) {
+    for (TokenSet set : extendsSet_) {
+      if (set.contains(child_) && set.contains(parent_)) return true;
+    }
+    return false;
   }
 
   public static boolean consumeTokens(PsiBuilder builder_, int pin_, IElementType... tokens_) {
@@ -510,18 +522,22 @@ public class GeneratedParserUtilBase {
     public MyList<Variant> unexpected = new MyList<Variant>(10);
 
     final LimitedPool<Variant> VARIANTS = new LimitedPool<Variant>(1000, new LimitedPool.ObjectFactory<Variant>() {
+      @Override
       public Variant create() {
         return new Variant();
       }
 
+      @Override
       public void cleanup(final Variant o) {
       }
     });
     final LimitedPool<Frame> FRAMES = new LimitedPool<Frame>(100, new LimitedPool.ObjectFactory<Frame>() {
+      @Override
       public Frame create() {
         return new Frame();
       }
 
+      @Override
       public void cleanup(final Frame o) {
       }
     });
@@ -684,6 +700,7 @@ public class GeneratedParserUtilBase {
     PsiBuilder.Marker marker = null;
 
     final Runnable checkSiblingsRunnable = new Runnable() {
+      @Override
       public void run() {
         main:
         while (!siblingList.isEmpty()) {

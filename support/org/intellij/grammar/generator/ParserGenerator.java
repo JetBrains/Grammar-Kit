@@ -481,17 +481,14 @@ public class ParserGenerator {
           sb.append(elementType);
           i++;
         }
-        out("TokenSet.create(" + sb.toString() + "),");
+        out("create_token_set_(" + sb.toString() + "),");
         sb.setLength(0);
         elementTypes.clear();
       }
       out("};");
       newLine();
       out("public static boolean type_extends_(IElementType child_, IElementType parent_) {");
-      out("for (TokenSet set : EXTENDS_SETS_) {");
-      out("if (set.contains(child_) && set.contains(parent_)) return true;");
-      out("}");
-      out("return false;");
+      out("return type_extends_impl_(EXTENDS_SETS_, child_, parent_);");
       out("}");
       newLine();
     }

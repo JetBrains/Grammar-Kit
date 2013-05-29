@@ -99,10 +99,9 @@ public class GrammarParser implements PsiParser {
     }
     else {
       Marker marker_ = builder_.mark();
+      enterErrorRecordingSection(builder_, level_, _SECTION_RECOVER_, null);
       result_ = parse_root_(root_, builder_, level_);
-      while (builder_.getTokenType() != null) {
-        builder_.advanceLexer();
-      }
+      exitErrorRecordingSection(builder_, level_, result_, true, _SECTION_RECOVER_, TOKEN_ADVANCER);
       marker_.done(root_);
     }
     return builder_.getTreeBuilt();
@@ -113,16 +112,14 @@ public class GrammarParser implements PsiParser {
   }
 
   private static final TokenSet[] EXTENDS_SETS_ = new TokenSet[] {
-    TokenSet.create(BNF_CHOICE, BNF_EXPRESSION, BNF_EXTERNAL_EXPRESSION, BNF_LITERAL_EXPRESSION,
+    create_token_set_(BNF_CHOICE, BNF_EXPRESSION, BNF_EXTERNAL_EXPRESSION, BNF_LITERAL_EXPRESSION,
       BNF_PAREN_EXPRESSION, BNF_PAREN_OPT_EXPRESSION, BNF_PREDICATE, BNF_QUANTIFIED,
       BNF_REFERENCE_OR_TOKEN, BNF_SEQUENCE, BNF_STRING_LITERAL_EXPRESSION, BNF_VALUE_LIST),
-    TokenSet.create(BNF_LITERAL_EXPRESSION, BNF_STRING_LITERAL_EXPRESSION),
+    create_token_set_(BNF_LITERAL_EXPRESSION, BNF_STRING_LITERAL_EXPRESSION),
   };
+
   public static boolean type_extends_(IElementType child_, IElementType parent_) {
-    for (TokenSet set : EXTENDS_SETS_) {
-      if (set.contains(child_) && set.contains(parent_)) return true;
-    }
-    return false;
+    return type_extends_impl_(EXTENDS_SETS_, child_, parent_);
   }
 
   /* ********************************************************** */

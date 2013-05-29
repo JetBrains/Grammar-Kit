@@ -229,7 +229,7 @@ public abstract class BnfStringImpl extends BnfExpressionImpl implements BnfStri
         };
         for (Object e : result.toArray()) {
           BnfRule rule = (BnfRule) e;
-          GrammarUtil.processExpressionNames(rule.getName(), rule.getExpression(), processor);
+          GrammarUtil.processExpressionNames(rule, rule.getName(), rule.getExpression(), processor);
         }
       }
       return PsiElementResolveResult.createResults(result);

@@ -120,6 +120,18 @@ public class GeneratedParserUtilBase {
     state.completionState = completionState;
     return pinned_ || result_;
   }
+  
+  public static boolean parseTokens(PsiBuilder builder_, int pin_, IElementType... tokens_) {
+    PsiBuilder.Marker marker_ = builder_.mark();
+    boolean result_ = consumeTokens(builder_, pin_, tokens_);
+    if (!result_) {
+      marker_.rollbackTo();
+    }
+    else {
+      marker_.drop();
+    }
+    return result_;
+  }
 
   public static boolean consumeToken(PsiBuilder builder_, IElementType token) {
     if (nextTokenIsInner(builder_, token, true)) {

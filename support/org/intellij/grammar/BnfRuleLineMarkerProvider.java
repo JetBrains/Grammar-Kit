@@ -112,7 +112,7 @@ public class BnfRuleLineMarkerProvider extends RelatedItemLineMarkerProvider {
     String ruleName = rule.getName();
     if (target == null) return ruleName;
     final Ref<String> ref = Ref.create(null);
-    GrammarUtil.processExpressionNames(ruleName, rule.getExpression(), new PairProcessor<String, BnfExpression>() {
+    GrammarUtil.processExpressionNames(rule, ruleName, rule.getExpression(), new PairProcessor<String, BnfExpression>() {
       @Override
       public boolean process(String funcName, BnfExpression expression) {
         if (target == expression) {

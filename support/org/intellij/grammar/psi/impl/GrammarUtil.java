@@ -132,8 +132,8 @@ public class GrammarUtil {
     return parent == scope || parent instanceof PsiFile? null : parent;
   }
 
-  public static boolean processExpressionNames(String funcName, BnfExpression expression, PairProcessor<String, BnfExpression> processor) {
-    if (isAtomicExpression(expression)) return true;
+  public static boolean processExpressionNames(BnfRule rule, String funcName, BnfExpression expression, PairProcessor<String, BnfExpression> processor) {
+    if (isAtomicExpression(rule, expression)) return true;
     BnfExpression nonTrivialExpression = expression;
     for (BnfExpression e = expression, n = getTrivialNodeChild(e); n != null; e = n, n = getTrivialNodeChild(e)) {
       if (!processor.process(funcName, e)) return false;
@@ -142,8 +142,8 @@ public class GrammarUtil {
     final List<BnfExpression> children = getChildExpressions(nonTrivialExpression);
     for (int i = 0, childExpressionsSize = children.size(); i < childExpressionsSize; i++) {
       BnfExpression child = children.get(i);
-      if (isAtomicExpression(child)) continue;
-      if (!processExpressionNames(getNextName(funcName, i), child, processor)) return false;
+      if (isAtomicExpression(rule, child)) continue;
+      if (!processExpressionNames(rule, getNextName(funcName, i), child, processor)) return false;
     }
     return processor.process(funcName, nonTrivialExpression);
   }
@@ -158,7 +158,7 @@ public class GrammarUtil {
   }
 
   public static boolean processPinnedExpressions(final BnfRule rule, final PairProcessor<BnfExpression, PinMatcher> processor) {
-    return processExpressionNames(rule.getName(), rule.getExpression(), new PairProcessor<String, BnfExpression>() {
+    return processExpressionNames(rule, rule.getName(), rule.getExpression(), new PairProcessor<String, BnfExpression>() {
       @Override
       public boolean process(String funcName, BnfExpression expression) {
         if (!(expression instanceof BnfSequence)) return true;
@@ -178,8 +178,11 @@ public class GrammarUtil {
     });
   }
 
-  public static boolean isAtomicExpression(BnfExpression tree) {
-    return tree instanceof BnfReferenceOrToken || tree instanceof BnfLiteralExpression || tree instanceof BnfExternalExpression;
+  public static boolean isAtomicExpression(BnfRule rule, BnfExpression tree) {
+    return tree instanceof BnfReferenceOrToken ||
+            tree instanceof BnfLiteralExpression ||
+            tree instanceof BnfExternalExpression ||
+            ParserGeneratorUtil.isTokenSequence(rule, tree);
   }
 
   public static boolean processChildrenDummyAware(PsiElement element, final Processor<PsiElement> processor) {

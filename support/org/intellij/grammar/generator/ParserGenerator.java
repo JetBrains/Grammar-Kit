@@ -16,7 +16,6 @@
 package org.intellij.grammar.generator;
 
 import com.intellij.openapi.diagnostic.Logger;
-import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Pair;
 import com.intellij.openapi.util.io.FileUtil;
 import com.intellij.openapi.util.text.StringHash;
@@ -36,7 +35,6 @@ import gnu.trove.THashSet;
 import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.analysis.BnfFirstNextAnalyzer;
 import org.intellij.grammar.java.JavaHelper;
-import org.intellij.grammar.parser.GeneratedParserUtilBase;
 import org.intellij.grammar.psi.*;
 import org.intellij.grammar.psi.impl.GrammarUtil;
 import org.jetbrains.annotations.NotNull;
@@ -696,7 +694,7 @@ public class ParserGenerator {
       else if (type == BNF_SEQUENCE) {
         predicateEncountered |= pinApplied && ParserGeneratorUtil.getEffectiveExpression(myFile, child) instanceof BnfPredicate;
         if (skip[0] == 0) {
-          nodeCall = generateTokenSequenceCall(children, i, pinMatcher, pinApplied, skip, nodeCall);
+          nodeCall = generateTokenSequenceCall(children, i, pinMatcher, pinApplied, skip, nodeCall, false);
           if (i == 0) {
             out("result_ = " + nodeCall + ";");
           }
@@ -854,7 +852,7 @@ public class ParserGenerator {
         break;
       }
     }
-    boolean fast = "consumeTokenFast".equals(getAttribute(rule, KnownAttribute.CONSUME_TOKEN_METHOD));
+    boolean fast = useConsumeTokenFast(rule);
     // do not include frameName if FIRST is known and its size is 1
     boolean dropFrameName = skipIfOne && !firstElementTypes.isEmpty() && firstElementTypes.size() == 1;
     if (!firstElementTypes.isEmpty() && firstElementTypes.size() <= generateFirstCheck) {
@@ -892,10 +890,7 @@ public class ParserGenerator {
   }
 
   void generateNodeChild(BnfRule rule, BnfExpression child, String funcName, int index, Set<BnfExpression> visited) {
-    if (child instanceof BnfLiteralExpression || child instanceof BnfReferenceOrToken) {
-      // do not generate
-    }
-    else if (child instanceof BnfExternalExpression) {
+    if (child instanceof BnfExternalExpression) {
       // generate parameters
       List<BnfExpression> expressions = ((BnfExternalExpression)child).getExpressionList();
       for (int j = 1, expressionsSize = expressions.size(); j < expressionsSize; j++) {
@@ -909,6 +904,9 @@ public class ParserGenerator {
           generateNode(rule, expression, getNextName(getNextName(funcName, index), j - 1), visited);
         }
       }
+    }
+    else if (GrammarUtil.isAtomicExpression(rule, child)) {
+      // do not generate
     }
     else {
       newLine();
@@ -966,7 +964,8 @@ public class ParserGenerator {
                                            PinMatcher pinMatcher,
                                            boolean pinApplied,
                                            int[] skip,
-                                           String nodeCall) {
+                                           String nodeCall,
+                                           boolean rollbackOnFail) {
     if (startIndex == children.size() - 1 || !nodeCall.startsWith("consumeToken(builder_, ")) return nodeCall;
     ArrayList<String> list = new ArrayList<String>();
     int pin = pinApplied ? -1 : 0;
@@ -991,7 +990,7 @@ public class ParserGenerator {
     }
     if (list.size() < 2) return nodeCall;
     skip[0] = list.size() - 1;
-    return "consumeTokens(builder_, " + pin + ", " + StringUtil.join(list, ", ") + ")";
+    return (rollbackOnFail ? "parseTokens" : "consumeTokens") +"(builder_, " + pin + ", " + StringUtil.join(list, ", ") + ")";
   }
 
   String generateNodeCall(BnfRule rule, @Nullable BnfExpression node, String nextName) {
@@ -1047,6 +1046,19 @@ public class ParserGenerator {
         mySimpleTokens.put(text, null);
       }
       return generateConsumeToken(text, consumeMethodName);
+    }
+    else if (isTokenSequence(rule, node)) {
+      PinMatcher pinMatcher = new PinMatcher(rule, type, nextName);
+      List<BnfExpression> childExpressions = getChildExpressions(node);
+      PsiElement firstElement = ContainerUtil.getFirstItem(childExpressions);
+      String nodeCall = generateNodeCall(rule, (BnfExpression) firstElement, getNextName(nextName, 0));
+      for (PsiElement psiElement : childExpressions) {
+        String t = psiElement.getText();
+        if (!mySimpleTokens.containsKey(t) && !mySimpleTokens.values().contains(t)) {
+          mySimpleTokens.put(t, null);
+        } 
+      }
+      return generateTokenSequenceCall(childExpressions, 0, pinMatcher, false, new int[]{0}, nodeCall, true);
     }
     else if (type == BNF_EXTERNAL_EXPRESSION) {
       List<BnfExpression> expressions = ((BnfExternalExpression)node).getExpressionList();

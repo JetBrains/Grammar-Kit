@@ -172,7 +172,7 @@ public class ParserGeneratorUtil {
     }
   }
 
-  public static List<BnfExpression> getChildExpressions(BnfExpression node) {
+  public static List<BnfExpression> getChildExpressions(@Nullable BnfExpression node) {
     return PsiTreeUtil.getChildrenOfTypeAsList(node, BnfExpression.class);
   }
 
@@ -320,6 +320,21 @@ public class ParserGeneratorUtil {
 
   public static String getRegexpTokenRegexp(String tokenText) {
     return tokenText.substring("regexp:".length());
+  }
+
+  public static boolean isTokenSequence(@NotNull BnfRule rule, @Nullable BnfExpression node) {
+    if (node == null || useConsumeTokenFast(rule)) return false;
+    if (getEffectiveType(node) != BNF_SEQUENCE) return false;
+    BnfFile bnfFile = (BnfFile) rule.getContainingFile();
+    for (PsiElement child : getChildExpressions(node)) {
+      boolean isToken = child instanceof BnfReferenceOrToken && bnfFile.getRule(child.getText()) == null;
+      if (!isToken) return false;
+    }
+    return true;
+  }
+
+  public static boolean useConsumeTokenFast(BnfRule rule) {
+    return "consumeTokenFast".equals(getAttribute(rule, KnownAttribute.CONSUME_TOKEN_METHOD));
   }
 
   public static class Rule {

@@ -3,7 +3,7 @@ Grammar-Kit plugin
 
 Edit BNF grammars with _Live Preview_ and generate parser/PSI java code.
 
-Download latest [GrammarKit.zip](binaries/GrammarKit.zip) and
+Download latest [GrammarKit.zip](binaries/GrammarKit.zip?raw=true) and
 [GeneratedParserUtilBase.java](support/org/intellij/grammar/parser/GeneratedParserUtilBase.java)
 for manual installation.
 

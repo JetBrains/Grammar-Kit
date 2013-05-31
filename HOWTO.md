@@ -115,6 +115,104 @@ public class SampleParserUtil {
 }
 ````
 
+2.4 Compact expression parsing with priorities
+----------------------------------------------
+
+Recursive descent parsers a inefficient in terms of stack depth when it comes to expressions.
+A more natural and compact way of dealing with this is supported.
+
+1. All "expression" rules should extend "the root expression rule".
+   When done correctly this will ensure that AST will be of optimal depth and consistent even in case of errors.
+   Due to *extends* attribute semantics redundant nodes will be collapsed
+   and the root expression rule node will never appear in AST, use *Quick Documentation* (Ctrl-Q/Ctrl-J) to verify.
+2. Priority increases from top to bottom, ordered choice semantics is preserved
+3. Use left recursion for binary and postfix expressions
+4. Use *private* rules to define a group of operators with the same priority
+5. Use *rightAssociative* attribute when the default left associativity is not appropriate
+
+The following snippet demonstrates that "expression" parts of the BNF look compact and
+the described syntax doesn't break much the ordinary BNF syntax ([complete example](testData/generator/ExprParser.bnf)):
+
+````
+// to keep this sample short function calls and other expressions are omitted
+{
+  extends(".*expr")=expr
+}
+// the root expression rule
+expr ::= assign_expr
+  | add_group
+  | mul_group
+  | unary_group
+  | exp_expr
+  | ref_expr
+  | primary_group
+
+// private rules to define operators with the same priority
+private unary_group ::= unary_plus_expr | unary_min_expr
+private mul_group ::= mul_expr | div_expr
+private add_group ::= plus_expr | minus_expr
+private primary_group ::= simple_ref_expr | literal_expr | paren_expr
+
+// public rules for each expression
+assign_expr ::= expr '=' expr { rightAssociative=true }
+unary_min_expr ::= '-' expr
+unary_plus_expr ::= '+' expr
+div_expr ::= expr '/' expr
+mul_expr ::= expr '*' expr
+minus_expr ::= expr '-' expr
+plus_expr ::= expr '+' expr
+exp_expr ::= expr ('^' expr) + // N-ary variant, the "(<op> expr ) +" syntax is mandatory.
+paren_expr ::= '(' expr ')'
+
+simple_ref_expr ::= identifier {elementType=ref_expr}  // let qualified and simple references have the same type
+ref_expr ::= expr '.' identifier
+literal_expr ::= number
+identifier ::= id
+````
+
+Notes:
+
+1. *operator* part can contain any valid BNF expressions and define "tails", i.e.
+
+   ````div_expr ::= expr [div_modifier | '*'] '/' expr div_expr_tail````
+
+2. specific expression rule can be used instead of *expr* to narrow the parsing
+
+3. there can be any number of "expression roots" in a grammar as long as they do not intersect
+
+
+All operators will be present in error messages. To avoid this and also increase performance add this:
+````
+{
+   consumeTokenMethod(".*_expr|expr")="consumeTokenFast"
+}
+````
+
+The generated parser for this grammar (which is a procedural rewrite of the Pratt parsing described
+[here](http://javascript.crockford.com/tdop/tdop.html)) doesn't include methods for all expressions.
+There is only 2 methods for the root rule. The comment includes the operator priority table:
+
+````
+  /* ********************************************************** */
+  // Expression root: expr
+  // Operator priority table:
+  // 0: BINARY(assign_expr)
+  // 1: BINARY(plus_expr) BINARY(minus_expr)
+  // 2: BINARY(mul_expr) BINARY(div_expr)
+  // 3: PREFIX(unary_plus_expr) PREFIX(unary_min_expr)
+  // 4: N_ARY(exp_expr)
+  // 5: POSTFIX(ref_expr)
+  // 6: ATOM(simple_ref_expr) ATOM(literal_expr) PREFIX(paren_expr)
+  public static boolean expr(PsiBuilder builder_, int level_, int priority_) {
+     // code to parse ATOM and PREFIX operators
+     // .. and ..
+     // call expr_0()
+  }
+
+  public static boolean expr_0(PsiBuilder builder_, int level_, int priority_) {
+     // here goes priority-driven while loop for BINARY, N-ARY and POSTFIX operators
+  }
+````
 
 ----------------------------------------
 III. HOWTO: Generated PSI Classes Hierarchy

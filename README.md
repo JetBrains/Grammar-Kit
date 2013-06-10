@@ -24,7 +24,10 @@ See [HOWTO](HOWTO.md) page for different tips and tricks.
 
 See [Standalone usage](#Standalone) section for standalone generation and parsing.
 
-Other open-source plugins built with Grammar-Kit: [intellij-erlang](https://github.com/ignatov/intellij-erlang).
+Other open-source plugins built with Grammar-Kit:
+[intellij-erlang](https://github.com/ignatov/intellij-erlang),
+[Dart](https://github.com/JetBrains/intellij-plugins/tree/master/Dart),
+[Struts2](https://github.com/JetBrains/intellij-plugins/tree/master/struts2).
 
 ![Editor support](images/editor.png)
 

@@ -418,6 +418,13 @@ public class ParserGeneratorUtil {
     public boolean matches(int i, BnfExpression child) {
       return  i == pinIndex - 1 || pinPattern != null && pinPattern.matcher(child.getText()).matches();
     }
+
+    public boolean matchesAny(List<BnfExpression> children) {
+      for (int i = 0; i < children.size(); i++) {
+        if (matches(i, children.get(i))) return true;
+      }
+      return false;
+    }
   }
 
   private static class MyFakeExpression extends FakePsiElement implements BnfExpression{

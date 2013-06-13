@@ -654,7 +654,7 @@ public class ParserGenerator {
     if (!alwaysTrue) {
       out("boolean result_ = " + (type == BNF_OP_ZEROMORE || type == BNF_OP_OPT) + ";");
     }
-    boolean pinned = pinMatcher.active();
+    boolean pinned = pinMatcher.active() && pinMatcher.matchesAny(children);
     if (pinned) {
       out("boolean pinned_ = false;");
     }

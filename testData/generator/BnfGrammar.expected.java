@@ -225,19 +225,16 @@ public class GrammarParser implements PsiParser {
     if (!recursion_guard_(builder_, level_, "attr_start")) return false;
     if (!nextTokenIs(builder_, BNF_ID)) return false;
     boolean result_ = false;
-    boolean pinned_ = false;
     Marker marker_ = builder_.mark();
-    enterErrorRecordingSection(builder_, level_, _SECTION_GENERAL_, null);
     result_ = consumeToken(builder_, BNF_ID);
     result_ = result_ && attr_start_1(builder_, level_ + 1);
-    if (!result_ && !pinned_) {
+    if (!result_) {
       marker_.rollbackTo();
     }
     else {
       marker_.drop();
     }
-    result_ = exitErrorRecordingSection(builder_, level_, result_, pinned_, _SECTION_GENERAL_, null);
-    return result_ || pinned_;
+    return result_;
   }
 
   // attr_pattern '=' | '='

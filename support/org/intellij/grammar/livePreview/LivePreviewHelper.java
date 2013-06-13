@@ -97,11 +97,20 @@ public class LivePreviewHelper {
       }
     }
     // create new one
-    LivePreviewLanguage language = LivePreviewLanguage.newInstance(vFile);
+    LivePreviewLanguage language = LivePreviewLanguage.newInstance(psiFile);
+    registerLanguageExtensions(language);
+    return language;
+  }
+
+  public static void registerLanguageExtensions(LivePreviewLanguage language) {
     LanguageStructureViewBuilder.INSTANCE.addExplicitExtension(language, new LivePreviewStructureViewFactory());
     LanguageParserDefinitions.INSTANCE.addExplicitExtension(language, new LivePreviewParserDefinition(language));
     //SyntaxHighlighterFactory.LANGUAGE_FACTORY.addExplicitExtension(language, new LivePreviewSyntaxHighlighterFactory(language));
-    return language;
+  }
+
+  public static void unregisterLanguageExtensions(LivePreviewLanguage language) {
+    LanguageStructureViewBuilder.INSTANCE.removeExplicitExtension(language, LanguageStructureViewBuilder.INSTANCE.forLanguage(language));
+    LanguageParserDefinitions.INSTANCE.removeExplicitExtension(language, LanguageParserDefinitions.INSTANCE.forLanguage(language));
   }
 
   public static MergingUpdateQueue getUpdateQueue(Project project) {

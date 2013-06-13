@@ -54,6 +54,10 @@ public class LivePreviewParserDefinition implements ParserDefinition {
     myFileElementType = new IFileElementType(myLanguage); // todo do not register
   }
 
+  public LivePreviewLanguage getLanguage() {
+    return myLanguage;
+  }
+
   @NotNull
   @Override
   public Lexer createLexer(Project project) {

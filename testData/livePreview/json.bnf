@@ -1,0 +1,25 @@
+{
+  tokens = [
+    string = "regexp:\"[^\"]*\"|'[^']*'"
+    number = "regexp:(\+|\-)?\p{Digit}*"
+    id = "regexp:\p{Alpha}\w*"
+    comma = ","
+    colon = ":"
+    paren1 = "("
+    paren2 = ")"
+    brace1 = "{"
+    brace2 = "}"
+    brack1 = "["
+    brack2 = "]"
+  ]
+}
+
+json ::= array | object
+private value ::= string | number | json {name="value"}
+
+array ::= '[' [!']' item (',' item) *] ']' {pin(".*")=1}
+item ::= json {recoverUntil=recover}
+object ::= '{' [!'}' prop (',' prop) *] '}' {pin(".*")=1}
+prop ::= [] name ':' value {pin=1 recoverUntil=recover} // remove [] to make NAME mandatory
+private name ::= id | string {name="name"}
+private recover ::= !(',' | ']' | '}')

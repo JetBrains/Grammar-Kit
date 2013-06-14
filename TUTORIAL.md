@@ -1,5 +1,5 @@
 On how to read grammars
-====================
+=======================
 
 BNF grammars are pretty easy to read. Just replace the *::=* sign with *is* or *matches*.
 We can easily include error recovery attributes to this verbalisation as well:
@@ -24,8 +24,7 @@ Note that recovery rule is always a _predicate_ (a NOT predicate usually) hence 
 Thus the notion of _recoverUntil_ helps parser to recover when input includes something unexpected.
 
 Live Preview introduction
-====================
-(Since version 1.0.10. Get the latest [Grammar-Kit bundle](binaries/GrammarKit.zip) for manual installation.)
+=========================
 
 Suppose we want to create a grammar for some expression language like this:
 ````

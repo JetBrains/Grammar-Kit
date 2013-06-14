@@ -3,9 +3,7 @@ Grammar-Kit plugin
 
 Edit BNF grammars with _Live Preview_ and generate parser/PSI java code.
 
-Download latest [GrammarKit.zip](binaries/GrammarKit.zip?raw=true) and
-[GeneratedParserUtilBase.java](support/org/intellij/grammar/parser/GeneratedParserUtilBase.java)
-for manual installation.
+Download latest [GrammarKit.zip](binaries/GrammarKit.zip?raw=true) for manual installation.
 
 General usage instructions
 --------------------------
@@ -27,6 +25,7 @@ See [Standalone usage](#Standalone) section for standalone generation and parsin
 Other open-source plugins built with Grammar-Kit:
 [intellij-erlang](https://github.com/ignatov/intellij-erlang),
 [Dart](https://github.com/JetBrains/intellij-plugins/tree/master/Dart),
+[intellij-haxe](https://github.com/JetBrains/intellij-haxe),
 [Struts2](https://github.com/JetBrains/intellij-plugins/tree/master/struts2).
 
 ![Editor support](images/editor.png)
@@ -190,10 +189,34 @@ literal_expression ::= number | string
 Just add *mypackage.MyReferenceExpressionImpl* class with proper *getReference()* implementation.
 
 
+Editor facilities
+=================
+
+Quick reference of the plugin facilities:
+
+* Refactoring: extract rule (Ctrl-Alt-R/Meta-Alt-R)
+* Refactoring: introduce token (Ctrl-Alt-C/Meta-Alt-C)
+* Editing: flip _choice_ branches intention (via Alt-Enter)
+* Editing: Unwrap/remove expression (Ctrl-Shift-Del/Meta-Shift-Del)
+* Navigation: quick grammar structure popup (Ctrl-F12/Meta-F12)
+* Navigation: go to related file (parser and PSI) (Ctrl-Alt-Home/Meta-Alt-Home)
+* Navigation: navigate to matched expressions (Ctrl-B/Meta-B inside attribute pattern)
+* Highlighting: customizable colors (via Settings/Colors and Fonts)
+* Highlighting: pinned expression markers (tooltip shows pin value in charge)
+* Documentation: rule documentation popup shows FIRST/FOLLOWS/AST content (Ctrl-Q/Meta-J)
+* Documentation: attribute documentation popup (Ctrl-Q/Meta-J)
+* [Live preview](TUTORIAL.md): open language live preview editor (Ctrl-Alt-P/Meta-Alt-P)
+* [Live preview](TUTORIAL.md): start/stop grammar highlighting - a way to debug grammars without debugger (Ctrl-Alt-F7/Meta-Alt-F7 inside preview editor)
+* Generator: generate parser/PSI code (Ctrl-Shift-G/Meta-Shift-G)
+* Generator: generate custom _parserUtil_ class
+* Generator: generate \*.flex - JFlex lexer definition
+* Generator: run JFlex generator on a \*.flex file
+* Diagram: PSI tree diagram (UML plugin required)
+
 Standalone usage
 ================
 
-The [light-psi-all.jar](binaries/light-psi-all.jar) library contains all the classes from IntelliJ IDEA platform that are required for the generator and standalone parsing.
+The [light-psi-all.jar](binaries/light-psi-all.jar?raw=true) library contains all the classes from IntelliJ IDEA platform that are required for the generator and standalone parsing.
 
 To generate parser/PSI use the following command (light-psi-all.jar will be picked automatically from the current folder):
 ````

@@ -23,6 +23,8 @@ import com.intellij.openapi.util.TextRange;
 import com.intellij.psi.*;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.util.ArrayUtil;
+import com.intellij.util.IncorrectOperationException;
+import com.intellij.util.ObjectUtils;
 import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.java.JavaHelper;
 import org.intellij.grammar.psi.BnfAttr;
@@ -67,6 +69,14 @@ public class GrammarPsiImplUtil {
             }
           }
           return ArrayUtil.toObjectArray(list);
+        }
+
+        @Override
+        public PsiElement handleElementRename(String newElementName) throws IncorrectOperationException {
+          BnfListEntry element = getElement();
+          PsiElement id = ObjectUtils.assertNotNull(element.getId());
+          id.replace(BnfElementFactory.createLeafFromText(element.getProject(), newElementName));
+          return element;
         }
       }
     };

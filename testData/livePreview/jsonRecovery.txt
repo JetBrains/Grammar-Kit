@@ -125,5 +125,50 @@ FILE
       PsiErrorElement:'6' unexpected
         PsiElement(NUMBER)('6')
       PsiElement(})('}')
+    PsiErrorElement:',' expected, got '{'
+      <empty list>
+    PsiWhiteSpace('\n            ')
+    ASTWrapperPsiElement(OBJECT)
+      PsiElement({)('{')
+      ASTWrapperPsiElement(PROP)
+        PsiElement(id)('v')
+        PsiWhiteSpace(' ')
+        PsiElement(:)(':')
+        PsiWhiteSpace(' ')
+        ASTWrapperPsiElement(OBJECT)
+          PsiElement({)('{')
+          PsiWhiteSpace(' ')
+          PsiElement(})('}')
+      PsiWhiteSpace(' ')
+      PsiElement(})('}')
+    PsiElement(,)(',')
+    PsiErrorElement:<json> expected, got ','
+      <empty list>
+    PsiWhiteSpace(' ')
+    PsiElement(,)(',')
+    PsiWhiteSpace('\n            ')
+    ASTWrapperPsiElement(OBJECT)
+      PsiElement({)('{')
+      ASTWrapperPsiElement(PROP)
+        PsiElement(id)('a')
+        PsiErrorElement:':' expected, got ','
+          <empty list>
+      PsiElement(,)(',')
+      PsiWhiteSpace(' ')
+      ASTWrapperPsiElement(PROP)
+        PsiErrorElement:<name> expected, got ','
+          <empty list>
+      PsiElement(,)(',')
+      PsiWhiteSpace(' ')
+      ASTWrapperPsiElement(PROP)
+        PsiErrorElement:<name> expected, got ','
+          <empty list>
+      PsiElement(,)(',')
+      PsiWhiteSpace(' ')
+      ASTWrapperPsiElement(PROP)
+        PsiElement(id)('b')
+        PsiErrorElement:':' expected, got '}'
+          <empty list>
+      PsiElement(})('}')
     PsiWhiteSpace('\n          ')
     PsiElement(])(']')

@@ -2,8 +2,6 @@
 // This is a generated file. Not intended for manual editing.
 package generated;
 
-import org.jetbrains.annotations.*;
-import com.intellij.lang.LighterASTNode;
 import com.intellij.lang.PsiBuilder;
 import com.intellij.lang.PsiBuilder.Marker;
 import com.intellij.openapi.diagnostic.Logger;
@@ -17,13 +15,12 @@ import com.intellij.lang.PsiParser;
 @SuppressWarnings({"SimplifiableIfStatement", "UnusedAssignment"})
 public class GeneratedParser implements PsiParser {
 
-  public static Logger LOG_ = Logger.getInstance("generated.GeneratedParser");
+  public static final Logger LOG_ = Logger.getInstance("generated.GeneratedParser");
 
-  @NotNull
   public ASTNode parse(IElementType root_, PsiBuilder builder_) {
     int level_ = 0;
     boolean result_;
-    builder_ = adapt_builder_(root_, builder_, this);
+    builder_ = adapt_builder_(root_, builder_, this, null);
     if (root_ == ELEMENT) {
       result_ = element(builder_, level_ + 1);
     }
@@ -37,11 +34,9 @@ public class GeneratedParser implements PsiParser {
       result_ = map(builder_, level_ + 1);
     }
     else {
-      Marker marker_ = builder_.mark();
-      enterErrorRecordingSection(builder_, level_, _SECTION_RECOVER_, null);
+      Marker marker_ = enter_section_(builder_, level_, _NONE_, null);
       result_ = parse_root_(root_, builder_, level_);
-      exitErrorRecordingSection(builder_, level_, result_, true, _SECTION_RECOVER_, TOKEN_ADVANCER);
-      marker_.done(root_);
+      exit_section_(builder_, level_, marker_, root_, result_, true, TOKEN_ADVANCER);
     }
     return builder_.getTreeBuilt();
   }
@@ -55,16 +50,9 @@ public class GeneratedParser implements PsiParser {
   public static boolean element(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "element")) return false;
     boolean result_ = false;
-    Marker marker_ = builder_.mark();
-    enterErrorRecordingSection(builder_, level_, _SECTION_GENERAL_, "<element>");
+    Marker marker_ = enter_section_(builder_, level_, _NONE_, "<element>");
     result_ = consumeToken(builder_, "id");
-    if (result_) {
-      marker_.done(ELEMENT);
-    }
-    else {
-      marker_.rollbackTo();
-    }
-    result_ = exitErrorRecordingSection(builder_, level_, result_, false, _SECTION_GENERAL_, null);
+    result_ = exit_section_(builder_, level_, marker_, ELEMENT, result_, false, null);
     return result_;
   }
 
@@ -73,18 +61,11 @@ public class GeneratedParser implements PsiParser {
   public static boolean entry(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "entry")) return false;
     boolean result_ = false;
-    Marker marker_ = builder_.mark();
-    enterErrorRecordingSection(builder_, level_, _SECTION_GENERAL_, "<entry>");
+    Marker marker_ = enter_section_(builder_, level_, _NONE_, "<entry>");
     result_ = consumeToken(builder_, "name");
     result_ = result_ && consumeToken(builder_, "->");
     result_ = result_ && element(builder_, level_ + 1);
-    if (result_) {
-      marker_.done(ENTRY);
-    }
-    else {
-      marker_.rollbackTo();
-    }
-    result_ = exitErrorRecordingSection(builder_, level_, result_, false, _SECTION_GENERAL_, null);
+    result_ = exit_section_(builder_, level_, marker_, ENTRY, result_, false, null);
     return result_;
   }
 
@@ -93,15 +74,10 @@ public class GeneratedParser implements PsiParser {
   static boolean grammar(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "grammar")) return false;
     boolean result_ = false;
-    Marker marker_ = builder_.mark();
+    Marker marker_ = enter_section_(builder_);
     result_ = list(builder_, level_ + 1);
     if (!result_) result_ = map(builder_, level_ + 1);
-    if (!result_) {
-      marker_.rollbackTo();
-    }
-    else {
-      marker_.drop();
-    }
+    exit_section_(builder_, marker_, null, result_);
     return result_;
   }
 
@@ -110,19 +86,12 @@ public class GeneratedParser implements PsiParser {
   public static boolean list(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "list")) return false;
     boolean result_ = false;
-    Marker marker_ = builder_.mark();
-    enterErrorRecordingSection(builder_, level_, _SECTION_GENERAL_, "<list>");
+    Marker marker_ = enter_section_(builder_, level_, _NONE_, "<list>");
     result_ = consumeToken(builder_, "(");
     result_ = result_ && element(builder_, level_ + 1);
     result_ = result_ && list_2(builder_, level_ + 1);
     result_ = result_ && consumeToken(builder_, ")");
-    if (result_) {
-      marker_.done(LIST);
-    }
-    else {
-      marker_.rollbackTo();
-    }
-    result_ = exitErrorRecordingSection(builder_, level_, result_, false, _SECTION_GENERAL_, null);
+    result_ = exit_section_(builder_, level_, marker_, LIST, result_, false, null);
     return result_;
   }
 
@@ -146,15 +115,10 @@ public class GeneratedParser implements PsiParser {
   private static boolean list_2_0(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "list_2_0")) return false;
     boolean result_ = false;
-    Marker marker_ = builder_.mark();
+    Marker marker_ = enter_section_(builder_);
     result_ = consumeToken(builder_, ",");
     result_ = result_ && element(builder_, level_ + 1);
-    if (!result_) {
-      marker_.rollbackTo();
-    }
-    else {
-      marker_.drop();
-    }
+    exit_section_(builder_, marker_, null, result_);
     return result_;
   }
 
@@ -163,19 +127,12 @@ public class GeneratedParser implements PsiParser {
   public static boolean map(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "map")) return false;
     boolean result_ = false;
-    Marker marker_ = builder_.mark();
-    enterErrorRecordingSection(builder_, level_, _SECTION_GENERAL_, "<map>");
+    Marker marker_ = enter_section_(builder_, level_, _NONE_, "<map>");
     result_ = consumeToken(builder_, "(");
     result_ = result_ && entry(builder_, level_ + 1);
     result_ = result_ && map_2(builder_, level_ + 1);
     result_ = result_ && consumeToken(builder_, ")");
-    if (result_) {
-      marker_.done(MAP);
-    }
-    else {
-      marker_.rollbackTo();
-    }
-    result_ = exitErrorRecordingSection(builder_, level_, result_, false, _SECTION_GENERAL_, null);
+    result_ = exit_section_(builder_, level_, marker_, MAP, result_, false, null);
     return result_;
   }
 
@@ -199,15 +156,10 @@ public class GeneratedParser implements PsiParser {
   private static boolean map_2_0(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "map_2_0")) return false;
     boolean result_ = false;
-    Marker marker_ = builder_.mark();
+    Marker marker_ = enter_section_(builder_);
     result_ = consumeToken(builder_, ",");
     result_ = result_ && entry(builder_, level_ + 1);
-    if (!result_) {
-      marker_.rollbackTo();
-    }
-    else {
-      marker_.drop();
-    }
+    exit_section_(builder_, marker_, null, result_);
     return result_;
   }
 

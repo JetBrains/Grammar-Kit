@@ -2,8 +2,6 @@
 //header.txt
 package ;
 
-import org.jetbrains.annotations.*;
-import com.intellij.lang.LighterASTNode;
 import com.intellij.lang.PsiBuilder;
 import com.intellij.lang.PsiBuilder.Marker;
 import com.intellij.openapi.diagnostic.Logger;
@@ -17,13 +15,12 @@ import com.intellij.lang.PsiParser;
 @SuppressWarnings({"SimplifiableIfStatement", "UnusedAssignment"})
 public class PsiAccessors implements PsiParser {
 
-  public static Logger LOG_ = Logger.getInstance("PsiAccessors");
+  public static final Logger LOG_ = Logger.getInstance("PsiAccessors");
 
-  @NotNull
   public ASTNode parse(IElementType root_, PsiBuilder builder_) {
     int level_ = 0;
     boolean result_;
-    builder_ = adapt_builder_(root_, builder_, this);
+    builder_ = adapt_builder_(root_, builder_, this, null);
     if (root_ == BINARY) {
       result_ = binary(builder_, level_ + 1);
     }
@@ -40,11 +37,9 @@ public class PsiAccessors implements PsiParser {
       result_ = value(builder_, level_ + 1);
     }
     else {
-      Marker marker_ = builder_.mark();
-      enterErrorRecordingSection(builder_, level_, _SECTION_RECOVER_, null);
+      Marker marker_ = enter_section_(builder_, level_, _NONE_, null);
       result_ = parse_root_(root_, builder_, level_);
-      exitErrorRecordingSection(builder_, level_, result_, true, _SECTION_RECOVER_, TOKEN_ADVANCER);
-      marker_.done(root_);
+      exit_section_(builder_, level_, marker_, root_, result_, true, TOKEN_ADVANCER);
     }
     return builder_.getTreeBuilt();
   }
@@ -60,19 +55,12 @@ public class PsiAccessors implements PsiParser {
     if (!nextTokenIs(builder_, ID)) return false;
     boolean result_ = false;
     boolean pinned_ = false;
-    Marker marker_ = builder_.mark();
-    enterErrorRecordingSection(builder_, level_, _SECTION_GENERAL_, null);
+    Marker marker_ = enter_section_(builder_, level_, _NONE_, null);
     result_ = expression(builder_, level_ + 1);
     result_ = result_ && operator(builder_, level_ + 1);
     pinned_ = result_; // pin = operator
     result_ = result_ && expression(builder_, level_ + 1);
-    if (result_ || pinned_) {
-      marker_.done(BINARY);
-    }
-    else {
-      marker_.rollbackTo();
-    }
-    result_ = exitErrorRecordingSection(builder_, level_, result_, pinned_, _SECTION_GENERAL_, null);
+    result_ = exit_section_(builder_, level_, marker_, BINARY, result_, pinned_, null);
     return result_ || pinned_;
   }
 
@@ -82,16 +70,11 @@ public class PsiAccessors implements PsiParser {
     if (!recursion_guard_(builder_, level_, "expression")) return false;
     if (!nextTokenIs(builder_, ID)) return false;
     boolean result_ = false;
-    Marker marker_ = builder_.mark();
+    Marker marker_ = enter_section_(builder_);
     result_ = value(builder_, level_ + 1);
     result_ = result_ && consumeToken(builder_, "*");
     result_ = result_ && value(builder_, level_ + 1);
-    if (result_) {
-      marker_.done(EXPRESSION);
-    }
-    else {
-      marker_.rollbackTo();
-    }
+    exit_section_(builder_, marker_, EXPRESSION, result_);
     return result_;
   }
 
@@ -100,17 +83,10 @@ public class PsiAccessors implements PsiParser {
   public static boolean operator(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "operator")) return false;
     boolean result_ = false;
-    Marker marker_ = builder_.mark();
-    enterErrorRecordingSection(builder_, level_, _SECTION_GENERAL_, "<operator>");
+    Marker marker_ = enter_section_(builder_, level_, _NONE_, "<operator>");
     result_ = consumeToken(builder_, "+");
     if (!result_) result_ = consumeToken(builder_, "-");
-    if (result_) {
-      marker_.done(OPERATOR);
-    }
-    else {
-      marker_.rollbackTo();
-    }
-    result_ = exitErrorRecordingSection(builder_, level_, result_, false, _SECTION_GENERAL_, null);
+    result_ = exit_section_(builder_, level_, marker_, OPERATOR, result_, false, null);
     return result_;
   }
 
@@ -120,14 +96,9 @@ public class PsiAccessors implements PsiParser {
     if (!recursion_guard_(builder_, level_, "re")) return false;
     if (!nextTokenIs(builder_, ID)) return false;
     boolean result_ = false;
-    Marker marker_ = builder_.mark();
+    Marker marker_ = enter_section_(builder_);
     result_ = consumeToken(builder_, ID);
-    if (result_) {
-      marker_.done(RE);
-    }
-    else {
-      marker_.rollbackTo();
-    }
+    exit_section_(builder_, marker_, RE, result_);
     return result_;
   }
 
@@ -143,14 +114,9 @@ public class PsiAccessors implements PsiParser {
     if (!recursion_guard_(builder_, level_, "value")) return false;
     if (!nextTokenIs(builder_, ID)) return false;
     boolean result_ = false;
-    Marker marker_ = builder_.mark();
+    Marker marker_ = enter_section_(builder_);
     result_ = consumeToken(builder_, ID);
-    if (result_) {
-      marker_.done(VALUE);
-    }
-    else {
-      marker_.rollbackTo();
-    }
+    exit_section_(builder_, marker_, VALUE, result_);
     return result_;
   }
 

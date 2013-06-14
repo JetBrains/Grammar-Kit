@@ -73,6 +73,10 @@ public class ExpressionHelper {
     buildExpressionRules();
   }
 
+  public boolean hasExpressions() {
+    return !myExpressionMap.isEmpty();
+  }
+
   public void addWarning(String text) {
     if (!myAddWarnings) return;
     ParserGeneratorUtil.addWarning(myFile.getProject(), text);

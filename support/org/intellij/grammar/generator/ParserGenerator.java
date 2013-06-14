@@ -18,7 +18,6 @@ package org.intellij.grammar.generator;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.util.Pair;
 import com.intellij.openapi.util.io.FileUtil;
-import com.intellij.openapi.util.text.StringHash;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.psi.CommonClassNames;
 import com.intellij.psi.NavigatablePsiElement;
@@ -28,6 +27,7 @@ import com.intellij.psi.tree.IElementType;
 import com.intellij.util.ArrayUtil;
 import com.intellij.util.Function;
 import com.intellij.util.ObjectUtils;
+import com.intellij.util.SmartList;
 import com.intellij.util.containers.ContainerUtil;
 import com.intellij.util.containers.MultiMap;
 import gnu.trove.THashMap;
@@ -68,7 +68,6 @@ public class ParserGenerator {
   private final String myGrammarRootParser;
   private final String myRuleClassPrefix;
   private final String myParserUtilClass;
-  private final boolean generateMemoizationCode;
   private final boolean generateExtendedPin;
   private final String visitorClassName;
   private final int generateFirstCheck;
@@ -90,7 +89,6 @@ public class ParserGenerator {
       myRuleParserClasses.put(r.getName(), getAttribute(r, KnownAttribute.PARSER_CLASS));
     }
     myGrammarRootParser = myGrammarRoot == null? null : myRuleParserClasses.get(myGrammarRoot);
-    generateMemoizationCode = getRootAttribute(myFile, KnownAttribute.GENERATE_MEMOIZATION);
     generateExtendedPin = getRootAttribute(myFile, KnownAttribute.EXTENDED_PIN);
     generateFirstCheck = getRootAttribute(myFile, KnownAttribute.GENERATE_FIRST_CHECK);
     myRuleClassPrefix = getPsiClassPrefix(myFile);
@@ -361,13 +359,14 @@ public class ParserGenerator {
     List<String> parserImports = getRootAttribute(myFile, KnownAttribute.PARSER_IMPORTS);
     boolean rootParser = parserClass.equals(myGrammarRootParser);
     Set<String> imports = new LinkedHashSet<String>();
-    imports.addAll(Arrays.asList("org.jetbrains.annotations.*",
-                                 "com.intellij.lang.LighterASTNode",
-                                 "com.intellij.lang.PsiBuilder",
+    imports.addAll(Arrays.asList("com.intellij.lang.PsiBuilder",
                                  "com.intellij.lang.PsiBuilder.Marker",
                                  "com.intellij.openapi.diagnostic.Logger",
                                  "static " + elementTypeHolderClass + ".*",
                                  "static " + myParserUtilClass + ".*"));
+    if (myExpressionHelper.hasExpressions()) {
+      imports.add("com.intellij.lang.LighterASTNode");
+    }
     if (!rootParser) {
       imports.add("static " + myGrammarRootParser + ".*");
     }
@@ -383,7 +382,7 @@ public class ParserGenerator {
                         "@SuppressWarnings({\"SimplifiableIfStatement\", \"UnusedAssignment\"})",
                         false, "", rootParser ? "PsiParser" : "");
 
-    out("public static Logger LOG_ = Logger.getInstance(\"" + parserClass + "\");");
+    out("public static final Logger LOG_ = Logger.getInstance(\"" + parserClass + "\");");
     newLine();
 
     if (rootParser) {
@@ -424,11 +423,10 @@ public class ParserGenerator {
   }
 
   private void generateRootParserContent(Set<String> ownRuleNames) {
-    out("@NotNull");
     out("public ASTNode parse(IElementType root_, PsiBuilder builder_) {");
     out("int level_ = 0;");
     out("boolean result_;");
-    out("builder_ = adapt_builder_(root_, builder_, this);");
+    out("builder_ = adapt_builder_(root_, builder_, this, "+(myRuleExtendsMap.isEmpty()? null : "EXTENDS_SETS_")+");");
     boolean first = true;
     for (String ruleName : ownRuleNames) {
       BnfRule rule = myFile.getRule(ruleName);
@@ -443,11 +441,9 @@ public class ParserGenerator {
     }
     {
       if (!first) out("else {");
-      out("Marker marker_ = builder_.mark();");
-      out("enterErrorRecordingSection(builder_, level_, _SECTION_RECOVER_, null);");
+      out("Marker marker_ = enter_section_(builder_, level_, _NONE_, null);");
       out("result_ = parse_root_(root_, builder_, level_);");
-      out("exitErrorRecordingSection(builder_, level_, result_, true, _SECTION_RECOVER_, TOKEN_ADVANCER);");
-      out("marker_.done(root_);");
+      out("exit_section_(builder_, level_, marker_, root_, result_, true, TOKEN_ADVANCER);");
       if (!first) out("}");
     }
     out("return builder_.getTreeBuilt();");
@@ -462,7 +458,7 @@ public class ParserGenerator {
       newLine();
     }
     if (!myRuleExtendsMap.isEmpty()) {
-      out("private static final TokenSet[] EXTENDS_SETS_ = new TokenSet[] {");
+      out("public static final TokenSet[] EXTENDS_SETS_ = new TokenSet[] {");
       StringBuilder sb = new StringBuilder();
       Set<String> elementTypes = new TreeSet<String>();
       for (String ruleName : myRuleParserClasses.keySet()) {
@@ -486,10 +482,6 @@ public class ParserGenerator {
         elementTypes.clear();
       }
       out("};");
-      newLine();
-      out("public static boolean type_extends_(IElementType child_, IElementType parent_) {");
-      out("return type_extends_impl_(EXTENDS_SETS_, child_, parent_);");
-      out("}");
       newLine();
     }
   }
@@ -634,20 +626,13 @@ public class ParserGenerator {
         return;
       }
     }
-
-    @SuppressWarnings("UnnecessaryLocalVariable")
-    String debugFuncName = funcName; // + ":" + node.toStringTree();
-    out("if (!recursion_guard_(builder_, level_, \"" + debugFuncName + "\")) return false;");
+    out("if (!recursion_guard_(builder_, level_, \"" + funcName + "\")) return false;");
 
     String frameName = firstNonTrivial && !Rule.isMeta(rule)? quote(getRuleDisplayName(rule, !isPrivate)) : null;
     if (recoverRoot == null && (isRule || firstNonTrivial)) {
       frameName = generateFirstCheck(rule, frameName, true);
     }
 
-    final long funcId = StringHash.calc(funcName);
-    if (generateMemoizationCode) {
-      out("if (memoizedFalseBranch(builder_, " + funcId + "L) return false;");
-    }
     PinMatcher pinMatcher = new PinMatcher(rule, type, firstNonTrivial ? rule.getName() : funcName);
     boolean pinApplied = false;
     final boolean alwaysTrue = type == BNF_OP_OPT || type == BNF_OP_ZEROMORE;
@@ -658,25 +643,30 @@ public class ParserGenerator {
     if (pinned) {
       out("boolean pinned_ = false;");
     }
-    if (!isPrivate && canCollapse && StringUtil.isNotEmpty(elementType)) {
-      out("int start_ = builder_.getCurrentOffset();");
+    //if (!isPrivate && canCollapse && StringUtil.isNotEmpty(elementType)) {
+    //  out("int start_ = builder_.getCurrentOffset();");
+    //}
+    //if (isLeft) {
+    //  out("Marker left_marker_ = (Marker)builder_.getLatestDoneMarker();");
+    //  if (generateExtendedPin) {
+    //    out("if (!invalid_left_marker_guard_(builder_, left_marker_, \"" + funcName + "\")) return false;");
+    //  }
+    //}
+    SmartList<String> modifierList = new SmartList<String>();
+    if (canCollapse) modifierList.add("_COLLAPSE_");
+    if (isLeftInner) modifierList.add("_LEFT_INNER_");
+    else if (isLeft) modifierList.add("_LEFT_");
+    if (type == BNF_OP_AND) modifierList.add("_AND_");
+    else if (type == BNF_OP_NOT) modifierList.add("_NOT_");
+    if (modifierList.isEmpty() && (pinned || frameName != null)) modifierList.add("_NONE_");
+    boolean sectionRequired = !alwaysTrue || !isPrivate || isLeft || recoverRoot != null;
+    boolean sectionRequiredSimple = sectionRequired && modifierList.isEmpty() && recoverRoot == null;
+    String modifiers = modifierList.isEmpty()? "_NONE_" : StringUtil.join(modifierList, " | ");
+    if (sectionRequiredSimple) {
+      out("Marker marker_ = enter_section_(builder_);");
     }
-    if (isLeft) {
-      out("Marker left_marker_ = (Marker)builder_.getLatestDoneMarker();");
-      if (generateExtendedPin) {
-        out("if (!invalid_left_marker_guard_(builder_, left_marker_, \"" + debugFuncName + "\")) return false;");
-      }
-    }
-    if (!alwaysTrue || !isPrivate) {
-      out("Marker marker_ = builder_.mark();");
-    }
-
-    String sectionType = recoverRoot != null ? "_SECTION_RECOVER_" :
-                         type == BNF_OP_AND ? "_SECTION_AND_" :
-                         type == BNF_OP_NOT ? "_SECTION_NOT_" :
-                         pinned || frameName != null ? "_SECTION_GENERAL_" : null;
-    if (sectionType != null) {
-      out("enterErrorRecordingSection(builder_, level_, " + sectionType + ", " + frameName + ");");
+    else if (sectionRequired) {
+      out("Marker marker_ = enter_section_(builder_, level_, "+modifiers+", "+frameName+");");
     }
 
     boolean predicateEncountered = false;
@@ -740,7 +730,7 @@ public class ParserGenerator {
         out("if (!" + nodeCall + ") break;");
         out("int next_offset_ = builder_.getCurrentOffset();");
         out("if (offset_ == next_offset_) {");
-        out("empty_element_parsed_guard_(builder_, offset_, \"" + debugFuncName + "\");");
+        out("empty_element_parsed_guard_(builder_, offset_, \"" + funcName + "\");");
         out("break;");
         out("}");
         out("offset_ = next_offset_;");
@@ -757,75 +747,27 @@ public class ParserGenerator {
       }
     }
 
-    if (type == BNF_OP_AND || type == BNF_OP_NOT) {
-      out("marker_.rollbackTo();");
-    }
-    else if (!isPrivate && StringUtil.isNotEmpty(elementType)) {
-      if (canCollapse) {
-        out(
-          "LighterASTNode last_ = " + (alwaysTrue ? "builder_.getLatestDoneMarker();" : "result_? builder_.getLatestDoneMarker() : null;"));
-        out("if (last_ != null && last_.getStartOffset() == start_ && type_extends_(last_.getTokenType(), " + elementType + ")) {");
-        out("marker_.drop();");
-        out("}");
-      }
-      if (!alwaysTrue || canCollapse) {
-        out((canCollapse ? "else " : "") + (alwaysTrue ? "{" : "if (result_" + (pinned ? " || pinned_" : "") + ") {"));
-      }
-      if (isLeftInner) {
-        out("marker_.done(" + elementType + ");");
-        out("left_marker_.precede().done(((LighterASTNode)left_marker_).getTokenType());");
-        out("left_marker_.drop();");
-      }
-      else if (isLeft) {
-        out("marker_.drop();");
-        out("left_marker_.precede().done(" + elementType + ");");
+    if (sectionRequired) {
+      String elementTypeRef = !isPrivate && StringUtil.isNotEmpty(elementType)? elementType : "null";
+      String resultRef = alwaysTrue ? "true" : "result_";
+      if (sectionRequiredSimple) {
+        out("exit_section_(builder_, marker_, " + elementTypeRef+", " + resultRef + ");");
       }
       else {
-        out("marker_.done(" + elementType + ");");
+        String pinnedRef = pinned ? "pinned_" : "false";
+        String resultEq = alwaysTrue ? "" : "result_ = ";
+        String untilCall;
+        if (recoverRoot != null) {
+          BnfRule untilRule = myFile.getRule(recoverRoot);
+          untilCall = untilRule == null ? null : generateWrappedNodeCall(rule, null, untilRule.getName());
+        }
+        else {
+          untilCall = null;
+        }
+        out(resultEq + "exit_section_(builder_, level_, marker_, " + elementTypeRef +", " + resultRef + ", "+pinnedRef +", " + untilCall + ");");
       }
-      if (!alwaysTrue || canCollapse) {
-        out("}");
-      }
-      if (!alwaysTrue) {
-        out("else {");
-        out("marker_.rollbackTo();");
-        out("}");
-      }
-    }
-    else {
-      if (!alwaysTrue) {
-        out("if (!result_" + (pinned ? " && !pinned_" : "") + ") {");
-        out("marker_.rollbackTo();");
-        out("}");
-        out("else {");
-        out("marker_.drop();");
-      }
-      if (isLeftInner) {
-        out("left_marker_.precede().done(((LighterASTNode)left_marker_).getTokenType());");
-        out("left_marker_.drop();");
-      }
-      if (!alwaysTrue) {
-        out("}");
-      }
-    }
-    if (sectionType != null) {
-      final String untilCall;
-      if (recoverRoot != null) {
-        BnfRule untilRule = myFile.getRule(recoverRoot);
-        untilCall = untilRule == null ? null : generateWrappedNodeCall(rule, null, untilRule.getName());
-      }
-      else {
-        untilCall = null;
-      }
-      final String resultEq = alwaysTrue ? "" : "result_ = ";
-      final String resultRef = alwaysTrue ? "true" : "result_";
-      out(resultEq + "exitErrorRecordingSection(builder_, " + "level_, " + resultRef + ", " +
-          (pinned ? "pinned_" : "false") + ", " + sectionType + ", " + untilCall + ");");
     }
 
-    if (!alwaysTrue && generateMemoizationCode) {
-      out("if (!result_" + (pinned ? " && !pinned_" : "") + ") memoizeFalseBranch(builder_, " + funcId + ")");
-    }
     out("return " + (alwaysTrue ? "true" : "result_" + (pinned ? " || pinned_" : "")) + ";");
     out("}");
     generateNodeChildren(rule, funcName, children, visited);

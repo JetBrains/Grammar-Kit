@@ -62,10 +62,9 @@ public class ExpressionGeneratorHelper {
       g.out("addVariant(builder_, " + frameName + ");");
     }
     g.generateFirstCheck(info.rootRule, frameName, true);
-    g.out("Marker marker_ = builder_.mark();");
     g.out("boolean result_ = false;");
     g.out("boolean pinned_ = false;");
-    g.out("enterErrorRecordingSection(builder_, level_, _SECTION_GENERAL_, " + frameName + ");");
+    g.out("Marker marker_ = enter_section_(builder_, level_, _NONE_, " + frameName + ");");
 
     boolean first = true;
     for (String opCall : sortedOpCalls) {
@@ -78,13 +77,7 @@ public class ExpressionGeneratorHelper {
 
     g.out("pinned_ = result_;");
     g.out("result_ = result_ && " + kernelMethodName + "(builder_, level_ + 1, priority_);");
-    g.out("if (!result_ && !pinned_) {");
-    g.out("marker_.rollbackTo();");
-    g.out("}");
-    g.out("else {");
-    g.out("marker_.drop();");
-    g.out("}");
-    g.out("result_ = exitErrorRecordingSection(builder_, level_, result_, pinned_, _SECTION_GENERAL_, null);");
+    g.out("result_ = exit_section_(builder_, level_, marker_, null, result_, pinned_, null);");
     g.out("return result_ || pinned_;");
     g.out("}");
     g.newLine();
@@ -94,6 +87,7 @@ public class ExpressionGeneratorHelper {
     g.out("if (!recursion_guard_(builder_, level_, \"" + kernelMethodName + "\")) return false;");
     g.out("boolean result_ = true;");
     g.out("while (true) {");
+    //g.out("Marker marker_ = enter_section_(builder_, level_, _LEFT_, " + frameName + ");");
     g.out("Marker left_marker_ = (Marker) builder_.getLatestDoneMarker();");
     g.out("if (!invalid_left_marker_guard_(builder_, left_marker_, \"" + kernelMethodName + "\")) return false;");
 
@@ -139,7 +133,7 @@ public class ExpressionGeneratorHelper {
     }
     else {
       g.out("else {");
-      g.out("marker_.rollbackTo();");
+      g.out("exit_section_(builder_, marker_, null, false);");
       g.out("break;");
       g.out("}");
     }

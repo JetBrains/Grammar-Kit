@@ -24,6 +24,7 @@ import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.impl.source.tree.LeafPsiElement;
 import com.intellij.psi.tree.IElementType;
+import com.intellij.util.PairProcessor;
 import com.intellij.util.containers.ContainerUtil;
 import com.intellij.util.containers.HashMap;
 import com.intellij.util.containers.MultiMap;
@@ -77,12 +78,16 @@ public class LivePreviewParser implements PsiParser {
     //if (indicator != null ) indicator.startNonCancelableSection(); // todo drop me
     init(originalBuilder);
     PsiBuilder builder = adapt_builder_(root, originalBuilder, this);
-    PsiBuilder.Marker mark = builder.mark();
-    GeneratedParserUtilBase.enterErrorRecordingSection(builder, 0, _SECTION_RECOVER_, null);
-    boolean result = false;
-    result = myGrammarRoot != null && rule(builder, 1, myGrammarRoot, Collections.<String, Parser>emptyMap());
-    GeneratedParserUtilBase.exitErrorRecordingSection(builder, 0, result, true, _SECTION_RECOVER_, TRUE_CONDITION);
-    mark.done(root);
+    ErrorState.get(builder).altExtendsChecker = new PairProcessor<IElementType, IElementType>() {
+      @Override
+      public boolean process(IElementType elementType, IElementType elementType2) {
+        return type_extends_(elementType, elementType2);
+      }
+    };
+    int level = 0;
+    PsiBuilder.Marker mark = enter_section_(builder, level, _NONE_, null);
+    boolean result = myGrammarRoot != null && rule(builder, 1, myGrammarRoot, Collections.<String, Parser>emptyMap());
+    exit_section_(builder, level, mark, root, result, true, TRUE_CONDITION);
     return builder.getTreeBuilt();
   }
 
@@ -188,20 +193,21 @@ public class LivePreviewParser implements PsiParser {
     boolean pinned = pinMatcher.active();
     boolean pinned_ = false;
 
-    int start_ = builder.getCurrentOffset();
+    int modifiers = 0;
+    if (canCollapse) modifiers |= _COLLAPSE_;
+    if (isLeftInner) modifiers |= _LEFT_INNER_;
+    else if (isLeft) modifiers |= _LEFT_;
+    if (type == BNF_OP_AND) modifiers |= _AND_;
+    else if (type == BNF_OP_NOT) modifiers |= _NOT_;
 
-    PsiBuilder.Marker left_marker_ = isLeft? (PsiBuilder.Marker)builder.getLatestDoneMarker() : null;
-    if (isLeft && generateExtendedPin) {
-      if (!invalid_left_marker_guard_(builder, left_marker_, funcName)) return false;
+    PsiBuilder.Marker marker_ = null;
+    boolean sectionRequired = !alwaysTrue || !isPrivate || isLeft || recoverRoot != null;
+    boolean sectionRequiredSimple = sectionRequired && modifiers == _NONE_ && recoverRoot == null && !(modifiers == 0 && (pinned || frameName != null));
+    if (sectionRequiredSimple) {
+      marker_ = enter_section_(builder);
     }
-    PsiBuilder.Marker marker_ = !alwaysTrue || !isPrivate? builder.mark() : null;
-
-    String sectionType = recoverRoot != null ? "_SECTION_RECOVER_" :
-                         type == BNF_OP_AND ? "_SECTION_AND_" :
-                         type == BNF_OP_NOT ? "_SECTION_NOT_" :
-                         pinned || frameName != null ? "_SECTION_GENERAL_" : null;
-    if (sectionType != null) {
-      enterErrorRecordingSection(builder, level, sectionType, frameName);
+    else if (sectionRequired) {
+      marker_ = enter_section_(builder, level, modifiers, frameName);
     }
 
     boolean predicateEncountered = false;
@@ -282,53 +288,19 @@ public class LivePreviewParser implements PsiParser {
       }
     }
 
-    if (type == BNF_OP_AND || type == BNF_OP_NOT) {
-      marker_.rollbackTo();
+    if (sectionRequiredSimple) {
+      exit_section_(builder, marker_, isPrivate? null : elementType, alwaysTrue || result_);
     }
-    else if (!isPrivate && elementType != null) {
-      LighterASTNode last_ = canCollapse && (alwaysTrue || result_) ? builder.getLatestDoneMarker() : null;
-      if (last_ != null && last_.getStartOffset() == start_ && type_extends_(last_.getTokenType(), elementType)) {
-        marker_.drop();
-      }
-      else if (result_ || pinned_) {
-        if (isLeftInner) {
-          marker_.done(elementType);
-          left_marker_.precede().done(((LighterASTNode)left_marker_).getTokenType());
-          left_marker_.drop();
-        }
-        else if (isLeft) {
-          marker_.drop();
-          left_marker_.precede().done(elementType);
-        }
-        else {
-          marker_.done(elementType);
-        }
-      }
-      else {
-        marker_.rollbackTo();
-      }
-    }
-    else if (!alwaysTrue) {
-      if (!result_ && !pinned_) {
-        marker_.rollbackTo();
-      }
-      else {
-        marker_.drop();
-      }
-      if (isLeftInner) {
-        left_marker_.precede().done(((LighterASTNode)left_marker_).getTokenType());
-        left_marker_.drop();
-      }
-    }
-    if (sectionType != null) {
+    else if (sectionRequired) {
       final BnfRule untilRule = recoverRoot != null ? myFile.getRule(recoverRoot) : null;
-      result_ = exitErrorRecordingSection(builder, level, alwaysTrue || result_, pinned_,
-                                          sectionType, untilRule == null? null : new Parser() {
-        @Override
-        public boolean parse(PsiBuilder builder, int level) {
-          return rule(builder, level, untilRule, Collections.<String, Parser>emptyMap());
-        }
-      });
+      result_ = exit_section_(
+        builder, level, marker_, isPrivate ? null : elementType, alwaysTrue || result_, pinned_,
+        untilRule == null ? null : new Parser() {
+          @Override
+          public boolean parse(PsiBuilder builder, int level) {
+            return rule(builder, level, untilRule, Collections.<String, Parser>emptyMap());
+          }
+        });
     }
 
     return alwaysTrue || result_ || pinned_;

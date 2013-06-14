@@ -2,8 +2,6 @@
 // This is a generated file. Not intended for manual editing.
 package ;
 
-import org.jetbrains.annotations.*;
-import com.intellij.lang.LighterASTNode;
 import com.intellij.lang.PsiBuilder;
 import com.intellij.lang.PsiBuilder.Marker;
 import com.intellij.openapi.diagnostic.Logger;
@@ -19,13 +17,12 @@ import java.util.Map;
 @SuppressWarnings({"SimplifiableIfStatement", "UnusedAssignment"})
 public class Small implements PsiParser {
 
-  public static Logger LOG_ = Logger.getInstance("Small");
+  public static final Logger LOG_ = Logger.getInstance("Small");
 
-  @NotNull
   public ASTNode parse(IElementType root_, PsiBuilder builder_) {
     int level_ = 0;
     boolean result_;
-    builder_ = adapt_builder_(root_, builder_, this);
+    builder_ = adapt_builder_(root_, builder_, this, null);
     if (root_ == EMPTY) {
       result_ = empty(builder_, level_ + 1);
     }
@@ -51,11 +48,9 @@ public class Small implements PsiParser {
       result_ = statement(builder_, level_ + 1);
     }
     else {
-      Marker marker_ = builder_.mark();
-      enterErrorRecordingSection(builder_, level_, _SECTION_RECOVER_, null);
+      Marker marker_ = enter_section_(builder_, level_, _NONE_, null);
       result_ = parse_root_(root_, builder_, level_);
-      exitErrorRecordingSection(builder_, level_, result_, true, _SECTION_RECOVER_, TOKEN_ADVANCER);
-      marker_.done(root_);
+      exit_section_(builder_, level_, marker_, root_, result_, true, TOKEN_ADVANCER);
     }
     return builder_.getTreeBuilt();
   }
@@ -102,11 +97,9 @@ public class Small implements PsiParser {
   static boolean empty6(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "empty6")) return false;
     boolean result_ = false;
-    Marker marker_ = builder_.mark();
-    enterErrorRecordingSection(builder_, level_, _SECTION_AND_, null);
+    Marker marker_ = enter_section_(builder_, level_, _AND_, null);
     result_ = empty6_0(builder_, level_ + 1);
-    marker_.rollbackTo();
-    result_ = exitErrorRecordingSection(builder_, level_, result_, false, _SECTION_AND_, null);
+    result_ = exit_section_(builder_, level_, marker_, null, result_, false, null);
     return result_;
   }
 
@@ -120,11 +113,9 @@ public class Small implements PsiParser {
   static boolean empty7(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "empty7")) return false;
     boolean result_ = false;
-    Marker marker_ = builder_.mark();
-    enterErrorRecordingSection(builder_, level_, _SECTION_NOT_, null);
+    Marker marker_ = enter_section_(builder_, level_, _NOT_, null);
     result_ = !empty7_0(builder_, level_ + 1);
-    marker_.rollbackTo();
-    result_ = exitErrorRecordingSection(builder_, level_, result_, false, _SECTION_NOT_, null);
+    result_ = exit_section_(builder_, level_, marker_, null, result_, false, null);
     return result_;
   }
 
@@ -151,14 +142,9 @@ public class Small implements PsiParser {
   private static boolean not_empty1_0(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "not_empty1_0")) return false;
     boolean result_ = false;
-    Marker marker_ = builder_.mark();
+    Marker marker_ = enter_section_(builder_);
     result_ = consumeToken(builder_, TOKEN);
-    if (!result_) {
-      marker_.rollbackTo();
-    }
-    else {
-      marker_.drop();
-    }
+    exit_section_(builder_, marker_, null, result_);
     return result_;
   }
 
@@ -174,15 +160,10 @@ public class Small implements PsiParser {
   private static boolean not_empty2_0(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "not_empty2_0")) return false;
     boolean result_ = false;
-    Marker marker_ = builder_.mark();
+    Marker marker_ = enter_section_(builder_);
     result_ = consumeToken(builder_, TOKEN);
     result_ = result_ && someString(builder_, level_ + 1);
-    if (!result_) {
-      marker_.rollbackTo();
-    }
-    else {
-      marker_.drop();
-    }
+    exit_section_(builder_, marker_, null, result_);
     return result_;
   }
 
@@ -192,14 +173,9 @@ public class Small implements PsiParser {
     if (!recursion_guard_(builder_, level_, "otherRule")) return false;
     if (!nextTokenIs(builder_, TOKEN)) return false;
     boolean result_ = false;
-    Marker marker_ = builder_.mark();
+    Marker marker_ = enter_section_(builder_);
     result_ = consumeToken(builder_, TOKEN);
-    if (result_) {
-      marker_.done(OTHER_RULE);
-    }
-    else {
-      marker_.rollbackTo();
-    }
+    exit_section_(builder_, marker_, OTHER_RULE, result_);
     return result_;
   }
 
@@ -221,14 +197,9 @@ public class Small implements PsiParser {
     if (!recursion_guard_(builder_, level_, "someRule")) return false;
     if (!nextTokenIs(builder_, TOKEN)) return false;
     boolean result_ = false;
-    Marker marker_ = builder_.mark();
+    Marker marker_ = enter_section_(builder_);
     result_ = consumeToken(builder_, TOKEN);
-    if (result_) {
-      marker_.done(SOME_RULE);
-    }
-    else {
-      marker_.rollbackTo();
-    }
+    exit_section_(builder_, marker_, SOME_RULE, result_);
     return result_;
   }
 
@@ -236,11 +207,9 @@ public class Small implements PsiParser {
   // token?
   public static boolean someRule2(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "someRule2")) return false;
-    Marker marker_ = builder_.mark();
-    enterErrorRecordingSection(builder_, level_, _SECTION_GENERAL_, "<some rule 2>");
+    Marker marker_ = enter_section_(builder_, level_, _NONE_, "<some rule 2>");
     consumeToken(builder_, TOKEN);
-    marker_.done(SOME_RULE_2);
-    exitErrorRecordingSection(builder_, level_, true, false, _SECTION_GENERAL_, null);
+    exit_section_(builder_, level_, marker_, SOME_RULE_2, true, false, null);
     return true;
   }
 
@@ -249,16 +218,9 @@ public class Small implements PsiParser {
   public static boolean someString(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "someString")) return false;
     boolean result_ = false;
-    Marker marker_ = builder_.mark();
-    enterErrorRecordingSection(builder_, level_, _SECTION_GENERAL_, "<some string>");
+    Marker marker_ = enter_section_(builder_, level_, _NONE_, "<some string>");
     result_ = consumeToken(builder_, "token");
-    if (result_) {
-      marker_.done(SOME_STRING);
-    }
-    else {
-      marker_.rollbackTo();
-    }
-    result_ = exitErrorRecordingSection(builder_, level_, result_, false, _SECTION_GENERAL_, null);
+    result_ = exit_section_(builder_, level_, marker_, SOME_STRING, result_, false, null);
     return result_;
   }
 
@@ -267,18 +229,11 @@ public class Small implements PsiParser {
   public static boolean statement(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "statement")) return false;
     boolean result_ = false;
-    Marker marker_ = builder_.mark();
-    enterErrorRecordingSection(builder_, level_, _SECTION_GENERAL_, "<statement>");
+    Marker marker_ = enter_section_(builder_, level_, _NONE_, "<statement>");
     result_ = consumeToken(builder_, TOKEN);
     if (!result_) result_ = someRule(builder_, level_ + 1);
     if (!result_) result_ = someString(builder_, level_ + 1);
-    if (result_) {
-      marker_.done(STATEMENT);
-    }
-    else {
-      marker_.rollbackTo();
-    }
-    result_ = exitErrorRecordingSection(builder_, level_, result_, false, _SECTION_GENERAL_, null);
+    result_ = exit_section_(builder_, level_, marker_, STATEMENT, result_, false, null);
     return result_;
   }
 
@@ -288,17 +243,12 @@ public class Small implements PsiParser {
     if (!recursion_guard_(builder_, level_, "tokenRule")) return false;
     if (!nextTokenIs(builder_, OP_EQ)) return false;
     boolean result_ = false;
-    Marker marker_ = builder_.mark();
+    Marker marker_ = enter_section_(builder_);
     result_ = consumeToken(builder_, OP_EQ);
     result_ = result_ && consumeToken(builder_, OP_EQ);
     result_ = result_ && consumeToken(builder_, "==");
     result_ = result_ && consumeToken(builder_, "==");
-    if (!result_) {
-      marker_.rollbackTo();
-    }
-    else {
-      marker_.drop();
-    }
+    exit_section_(builder_, marker_, null, result_);
     return result_;
   }
 

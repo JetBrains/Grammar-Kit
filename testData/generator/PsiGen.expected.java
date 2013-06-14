@@ -2,8 +2,6 @@
 //header.txt
 package ;
 
-import org.jetbrains.annotations.*;
-import com.intellij.lang.LighterASTNode;
 import com.intellij.lang.PsiBuilder;
 import com.intellij.lang.PsiBuilder.Marker;
 import com.intellij.openapi.diagnostic.Logger;
@@ -17,13 +15,12 @@ import com.intellij.lang.PsiParser;
 @SuppressWarnings({"SimplifiableIfStatement", "UnusedAssignment"})
 public class PsiGen implements PsiParser {
 
-  public static Logger LOG_ = Logger.getInstance("PsiGen");
+  public static final Logger LOG_ = Logger.getInstance("PsiGen");
 
-  @NotNull
   public ASTNode parse(IElementType root_, PsiBuilder builder_) {
     int level_ = 0;
     boolean result_;
-    builder_ = adapt_builder_(root_, builder_, this);
+    builder_ = adapt_builder_(root_, builder_, this, EXTENDS_SETS_);
     if (root_ == EXPR) {
       result_ = expr(builder_, level_ + 1);
     }
@@ -46,11 +43,9 @@ public class PsiGen implements PsiParser {
       result_ = root_d(builder_, level_ + 1);
     }
     else {
-      Marker marker_ = builder_.mark();
-      enterErrorRecordingSection(builder_, level_, _SECTION_RECOVER_, null);
+      Marker marker_ = enter_section_(builder_, level_, _NONE_, null);
       result_ = parse_root_(root_, builder_, level_);
-      exitErrorRecordingSection(builder_, level_, result_, true, _SECTION_RECOVER_, TOKEN_ADVANCER);
-      marker_.done(root_);
+      exit_section_(builder_, level_, marker_, root_, result_, true, TOKEN_ADVANCER);
     }
     return builder_.getTreeBuilt();
   }
@@ -59,7 +54,7 @@ public class PsiGen implements PsiParser {
     return root(builder_, level_ + 1);
   }
 
-  private static final TokenSet[] EXTENDS_SETS_ = new TokenSet[] {
+  public static final TokenSet[] EXTENDS_SETS_ = new TokenSet[] {
     create_token_set_(CAST_EXPR, EXPR, ID_EXPR, ITEM_EXPR,
       LITERAL, MISSING_EXTERNAL_TYPE, MUL_EXPR, PLUS_EXPR,
       REF_EXPR, SOME_EXPR, SPECIAL_REF),
@@ -68,25 +63,16 @@ public class PsiGen implements PsiParser {
     create_token_set_(ROOT, ROOT_B, ROOT_C, ROOT_D),
   };
 
-  public static boolean type_extends_(IElementType child_, IElementType parent_) {
-    return type_extends_impl_(EXTENDS_SETS_, child_, parent_);
-  }
-
   /* ********************************************************** */
   // b_expr plus_expr *
   static boolean a_expr(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "a_expr")) return false;
     if (!nextTokenIs(builder_, ID) && !nextTokenIs(builder_, NUMBER)) return false;
     boolean result_ = false;
-    Marker marker_ = builder_.mark();
+    Marker marker_ = enter_section_(builder_);
     result_ = b_expr(builder_, level_ + 1);
     result_ = result_ && a_expr_1(builder_, level_ + 1);
-    if (!result_) {
-      marker_.rollbackTo();
-    }
-    else {
-      marker_.drop();
-    }
+    exit_section_(builder_, marker_, null, result_);
     return result_;
   }
 
@@ -112,15 +98,10 @@ public class PsiGen implements PsiParser {
     if (!recursion_guard_(builder_, level_, "b_expr")) return false;
     if (!nextTokenIs(builder_, ID) && !nextTokenIs(builder_, NUMBER)) return false;
     boolean result_ = false;
-    Marker marker_ = builder_.mark();
+    Marker marker_ = enter_section_(builder_);
     result_ = id_expr(builder_, level_ + 1);
     result_ = result_ && b_expr_1(builder_, level_ + 1);
-    if (!result_) {
-      marker_.rollbackTo();
-    }
-    else {
-      marker_.drop();
-    }
+    exit_section_(builder_, marker_, null, result_);
     return result_;
   }
 
@@ -147,22 +128,10 @@ public class PsiGen implements PsiParser {
     if (!nextTokenIs(builder_, ID) && !nextTokenIs(builder_, NUMBER)
         && replaceVariants(builder_, 2, "<expr>")) return false;
     boolean result_ = false;
-    int start_ = builder_.getCurrentOffset();
-    Marker marker_ = builder_.mark();
-    enterErrorRecordingSection(builder_, level_, _SECTION_GENERAL_, "<expr>");
+    Marker marker_ = enter_section_(builder_, level_, _COLLAPSE_, "<expr>");
     result_ = a_expr(builder_, level_ + 1);
     result_ = result_ && expr_1(builder_, level_ + 1);
-    LighterASTNode last_ = result_? builder_.getLatestDoneMarker() : null;
-    if (last_ != null && last_.getStartOffset() == start_ && type_extends_(last_.getTokenType(), EXPR)) {
-      marker_.drop();
-    }
-    else if (result_) {
-      marker_.done(EXPR);
-    }
-    else {
-      marker_.rollbackTo();
-    }
-    result_ = exitErrorRecordingSection(builder_, level_, result_, false, _SECTION_GENERAL_, null);
+    result_ = exit_section_(builder_, level_, marker_, EXPR, result_, false, null);
     return result_;
   }
 
@@ -186,15 +155,10 @@ public class PsiGen implements PsiParser {
   private static boolean expr_1_0(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "expr_1_0")) return false;
     boolean result_ = false;
-    Marker marker_ = builder_.mark();
+    Marker marker_ = enter_section_(builder_);
     result_ = consumeToken(builder_, ",");
     result_ = result_ && a_expr(builder_, level_ + 1);
-    if (!result_) {
-      marker_.rollbackTo();
-    }
-    else {
-      marker_.drop();
-    }
+    exit_section_(builder_, marker_, null, result_);
     return result_;
   }
 
@@ -204,14 +168,9 @@ public class PsiGen implements PsiParser {
     if (!recursion_guard_(builder_, level_, "external_same_as_type2")) return false;
     if (!nextTokenIs(builder_, ID)) return false;
     boolean result_ = false;
-    Marker marker_ = builder_.mark();
+    Marker marker_ = enter_section_(builder_);
     result_ = consumeToken(builder_, ID);
-    if (result_) {
-      marker_.done(ID_EXPR);
-    }
-    else {
-      marker_.rollbackTo();
-    }
+    exit_section_(builder_, marker_, ID_EXPR, result_);
     return result_;
   }
 
@@ -221,14 +180,9 @@ public class PsiGen implements PsiParser {
     if (!recursion_guard_(builder_, level_, "external_type")) return false;
     if (!nextTokenIs(builder_, NUMBER)) return false;
     boolean result_ = false;
-    Marker marker_ = builder_.mark();
+    Marker marker_ = enter_section_(builder_);
     result_ = consumeToken(builder_, NUMBER);
-    if (result_) {
-      marker_.done(MISSING_EXTERNAL_TYPE);
-    }
-    else {
-      marker_.rollbackTo();
-    }
+    exit_section_(builder_, marker_, MISSING_EXTERNAL_TYPE, result_);
     return result_;
   }
 
@@ -238,14 +192,9 @@ public class PsiGen implements PsiParser {
     if (!recursion_guard_(builder_, level_, "external_type2")) return false;
     if (!nextTokenIs(builder_, ID)) return false;
     boolean result_ = false;
-    Marker marker_ = builder_.mark();
+    Marker marker_ = enter_section_(builder_);
     result_ = consumeToken(builder_, ID);
-    if (result_) {
-      marker_.done(ID_EXPR);
-    }
-    else {
-      marker_.rollbackTo();
-    }
+    exit_section_(builder_, marker_, ID_EXPR, result_);
     return result_;
   }
 
@@ -255,14 +204,9 @@ public class PsiGen implements PsiParser {
     if (!recursion_guard_(builder_, level_, "external_type3")) return false;
     if (!nextTokenIs(builder_, ID)) return false;
     boolean result_ = false;
-    Marker marker_ = builder_.mark();
+    Marker marker_ = enter_section_(builder_);
     result_ = consumeToken(builder_, ID);
-    if (result_) {
-      marker_.done(EXPR);
-    }
-    else {
-      marker_.rollbackTo();
-    }
+    exit_section_(builder_, marker_, EXPR, result_);
     return result_;
   }
 
@@ -273,17 +217,10 @@ public class PsiGen implements PsiParser {
     if (!nextTokenIs(builder_, ID) && !nextTokenIs(builder_, NUMBER)
         && replaceVariants(builder_, 2, "<grammar element>")) return false;
     boolean result_ = false;
-    Marker marker_ = builder_.mark();
-    enterErrorRecordingSection(builder_, level_, _SECTION_GENERAL_, "<grammar element>");
+    Marker marker_ = enter_section_(builder_, level_, _NONE_, "<grammar element>");
     result_ = expr(builder_, level_ + 1);
     if (!result_) result_ = external_type3(builder_, level_ + 1);
-    if (result_) {
-      marker_.done(GRAMMAR_ELEMENT);
-    }
-    else {
-      marker_.rollbackTo();
-    }
-    result_ = exitErrorRecordingSection(builder_, level_, result_, false, _SECTION_GENERAL_, null);
+    result_ = exit_section_(builder_, level_, marker_, GRAMMAR_ELEMENT, result_, false, null);
     return result_;
   }
 
@@ -293,18 +230,13 @@ public class PsiGen implements PsiParser {
     if (!recursion_guard_(builder_, level_, "id_expr")) return false;
     if (!nextTokenIs(builder_, ID) && !nextTokenIs(builder_, NUMBER)) return false;
     boolean result_ = false;
-    Marker marker_ = builder_.mark();
+    Marker marker_ = enter_section_(builder_);
     result_ = PsiGen2.specialRef(builder_, level_ + 1);
     if (!result_) result_ = PsiGen2.reference(builder_, level_ + 1);
     if (!result_) result_ = PsiGen2.literal(builder_, level_ + 1);
     if (!result_) result_ = external_type(builder_, level_ + 1);
     if (!result_) result_ = external_type2(builder_, level_ + 1);
-    if (!result_) {
-      marker_.rollbackTo();
-    }
-    else {
-      marker_.drop();
-    }
+    exit_section_(builder_, marker_, null, result_);
     return result_;
   }
 
@@ -313,7 +245,7 @@ public class PsiGen implements PsiParser {
   static boolean listOf(PsiBuilder builder_, int level_, final Parser p) {
     if (!recursion_guard_(builder_, level_, "listOf")) return false;
     boolean result_ = false;
-    Marker marker_ = builder_.mark();
+    Marker marker_ = enter_section_(builder_);
     result_ = p.parse(builder_, level_);
     int offset_ = builder_.getCurrentOffset();
     while (result_) {
@@ -325,12 +257,7 @@ public class PsiGen implements PsiParser {
       }
       offset_ = next_offset_;
     }
-    if (!result_) {
-      marker_.rollbackTo();
-    }
-    else {
-      marker_.drop();
-    }
+    exit_section_(builder_, marker_, null, result_);
     return result_;
   }
 
@@ -340,18 +267,10 @@ public class PsiGen implements PsiParser {
     if (!recursion_guard_(builder_, level_, "mul_expr")) return false;
     if (!nextTokenIs(builder_, OP_MUL)) return false;
     boolean result_ = false;
-    Marker left_marker_ = (Marker)builder_.getLatestDoneMarker();
-    if (!invalid_left_marker_guard_(builder_, left_marker_, "mul_expr")) return false;
-    Marker marker_ = builder_.mark();
+    Marker marker_ = enter_section_(builder_, level_, _LEFT_, null);
     result_ = consumeToken(builder_, OP_MUL);
     result_ = result_ && expr(builder_, level_ + 1);
-    if (result_) {
-      marker_.drop();
-      left_marker_.precede().done(MUL_EXPR);
-    }
-    else {
-      marker_.rollbackTo();
-    }
+    result_ = exit_section_(builder_, level_, marker_, MUL_EXPR, result_, false, null);
     return result_;
   }
 
@@ -360,20 +279,10 @@ public class PsiGen implements PsiParser {
   public static boolean plus_expr(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "plus_expr")) return false;
     boolean result_ = false;
-    Marker left_marker_ = (Marker)builder_.getLatestDoneMarker();
-    if (!invalid_left_marker_guard_(builder_, left_marker_, "plus_expr")) return false;
-    Marker marker_ = builder_.mark();
-    enterErrorRecordingSection(builder_, level_, _SECTION_GENERAL_, "<plus expr>");
+    Marker marker_ = enter_section_(builder_, level_, _LEFT_, "<plus expr>");
     result_ = consumeToken(builder_, "+");
     result_ = result_ && expr(builder_, level_ + 1);
-    if (result_) {
-      marker_.drop();
-      left_marker_.precede().done(PLUS_EXPR);
-    }
-    else {
-      marker_.rollbackTo();
-    }
-    result_ = exitErrorRecordingSection(builder_, level_, result_, false, _SECTION_GENERAL_, null);
+    result_ = exit_section_(builder_, level_, marker_, PLUS_EXPR, result_, false, null);
     return result_;
   }
 
@@ -382,17 +291,12 @@ public class PsiGen implements PsiParser {
   static boolean root(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "root")) return false;
     boolean result_ = false;
-    Marker marker_ = builder_.mark();
+    Marker marker_ = enter_section_(builder_);
     result_ = parseGrammar(builder_, level_ + 1, grammar_element_parser_);
     if (!result_) result_ = root_b(builder_, level_ + 1);
     if (!result_) result_ = root_c(builder_, level_ + 1);
     if (!result_) result_ = root_d(builder_, level_ + 1);
-    if (!result_) {
-      marker_.rollbackTo();
-    }
-    else {
-      marker_.drop();
-    }
+    exit_section_(builder_, marker_, null, result_);
     return result_;
   }
 
@@ -401,21 +305,9 @@ public class PsiGen implements PsiParser {
   public static boolean root_b(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "root_b")) return false;
     boolean result_ = false;
-    int start_ = builder_.getCurrentOffset();
-    Marker marker_ = builder_.mark();
-    enterErrorRecordingSection(builder_, level_, _SECTION_GENERAL_, "<root b>");
+    Marker marker_ = enter_section_(builder_, level_, _COLLAPSE_, "<root b>");
     result_ = parseGrammar(builder_, level_ + 1, grammar_element_parser_);
-    LighterASTNode last_ = result_? builder_.getLatestDoneMarker() : null;
-    if (last_ != null && last_.getStartOffset() == start_ && type_extends_(last_.getTokenType(), ROOT_B)) {
-      marker_.drop();
-    }
-    else if (result_) {
-      marker_.done(ROOT_B);
-    }
-    else {
-      marker_.rollbackTo();
-    }
-    result_ = exitErrorRecordingSection(builder_, level_, result_, false, _SECTION_GENERAL_, null);
+    result_ = exit_section_(builder_, level_, marker_, ROOT_B, result_, false, null);
     return result_;
   }
 
@@ -426,16 +318,9 @@ public class PsiGen implements PsiParser {
     if (!nextTokenIs(builder_, ID) && !nextTokenIs(builder_, NUMBER)
         && replaceVariants(builder_, 2, "<root c>")) return false;
     boolean result_ = false;
-    Marker marker_ = builder_.mark();
-    enterErrorRecordingSection(builder_, level_, _SECTION_GENERAL_, "<root c>");
+    Marker marker_ = enter_section_(builder_, level_, _NONE_, "<root c>");
     result_ = PsiGen2.blockOf(builder_, level_ + 1, grammar_element_parser_);
-    if (result_) {
-      marker_.done(ROOT_C);
-    }
-    else {
-      marker_.rollbackTo();
-    }
-    result_ = exitErrorRecordingSection(builder_, level_, result_, false, _SECTION_GENERAL_, null);
+    result_ = exit_section_(builder_, level_, marker_, ROOT_C, result_, false, null);
     return result_;
   }
 
@@ -446,16 +331,9 @@ public class PsiGen implements PsiParser {
     if (!nextTokenIs(builder_, ID) && !nextTokenIs(builder_, NUMBER)
         && replaceVariants(builder_, 2, "<root d>")) return false;
     boolean result_ = false;
-    Marker marker_ = builder_.mark();
-    enterErrorRecordingSection(builder_, level_, _SECTION_GENERAL_, "<root d>");
+    Marker marker_ = enter_section_(builder_, level_, _NONE_, "<root d>");
     result_ = listOf(builder_, level_ + 1, grammar_element_parser_);
-    if (result_) {
-      marker_.done(ROOT_D);
-    }
-    else {
-      marker_.rollbackTo();
-    }
-    result_ = exitErrorRecordingSection(builder_, level_, result_, false, _SECTION_GENERAL_, null);
+    result_ = exit_section_(builder_, level_, marker_, ROOT_D, result_, false, null);
     return result_;
   }
 
@@ -469,8 +347,6 @@ public class PsiGen implements PsiParser {
 //header.txt
 package ;
 
-import org.jetbrains.annotations.*;
-import com.intellij.lang.LighterASTNode;
 import com.intellij.lang.PsiBuilder;
 import com.intellij.lang.PsiBuilder.Marker;
 import com.intellij.openapi.diagnostic.Logger;
@@ -481,14 +357,14 @@ import static PsiGen.*;
 @SuppressWarnings({"SimplifiableIfStatement", "UnusedAssignment"})
 public class PsiGen2 {
 
-  public static Logger LOG_ = Logger.getInstance("PsiGen2");
+  public static final Logger LOG_ = Logger.getInstance("PsiGen2");
 
   /* ********************************************************** */
   // <<p>> +
   public static boolean blockOf(PsiBuilder builder_, int level_, final Parser p) {
     if (!recursion_guard_(builder_, level_, "blockOf")) return false;
     boolean result_ = false;
-    Marker marker_ = builder_.mark();
+    Marker marker_ = enter_section_(builder_);
     result_ = p.parse(builder_, level_);
     int offset_ = builder_.getCurrentOffset();
     while (result_) {
@@ -500,12 +376,7 @@ public class PsiGen2 {
       }
       offset_ = next_offset_;
     }
-    if (result_) {
-      marker_.done(BLOCK_OF);
-    }
-    else {
-      marker_.rollbackTo();
-    }
+    exit_section_(builder_, marker_, BLOCK_OF, result_);
     return result_;
   }
 
@@ -514,20 +385,10 @@ public class PsiGen2 {
   public static boolean cast_expr(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "cast_expr")) return false;
     boolean result_ = false;
-    Marker left_marker_ = (Marker)builder_.getLatestDoneMarker();
-    if (!invalid_left_marker_guard_(builder_, left_marker_, "cast_expr")) return false;
-    Marker marker_ = builder_.mark();
-    enterErrorRecordingSection(builder_, level_, _SECTION_GENERAL_, "<cast expr>");
+    Marker marker_ = enter_section_(builder_, level_, _LEFT_, "<cast expr>");
     result_ = consumeToken(builder_, "::");
     result_ = result_ && consumeToken(builder_, ID);
-    if (result_) {
-      marker_.drop();
-      left_marker_.precede().done(CAST_EXPR);
-    }
-    else {
-      marker_.rollbackTo();
-    }
-    result_ = exitErrorRecordingSection(builder_, level_, result_, false, _SECTION_GENERAL_, null);
+    result_ = exit_section_(builder_, level_, marker_, CAST_EXPR, result_, false, null);
     return result_;
   }
 
@@ -537,14 +398,9 @@ public class PsiGen2 {
     if (!recursion_guard_(builder_, level_, "identifier")) return false;
     if (!nextTokenIs(builder_, ID)) return false;
     boolean result_ = false;
-    Marker marker_ = builder_.mark();
+    Marker marker_ = enter_section_(builder_);
     result_ = consumeToken(builder_, ID);
-    if (result_) {
-      marker_.done(IDENTIFIER);
-    }
-    else {
-      marker_.rollbackTo();
-    }
+    exit_section_(builder_, marker_, IDENTIFIER, result_);
     return result_;
   }
 
@@ -553,21 +409,11 @@ public class PsiGen2 {
   public static boolean item_expr(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "item_expr")) return false;
     boolean result_ = false;
-    Marker left_marker_ = (Marker)builder_.getLatestDoneMarker();
-    if (!invalid_left_marker_guard_(builder_, left_marker_, "item_expr")) return false;
-    Marker marker_ = builder_.mark();
-    enterErrorRecordingSection(builder_, level_, _SECTION_GENERAL_, "<item expr>");
+    Marker marker_ = enter_section_(builder_, level_, _LEFT_, "<item expr>");
     result_ = consumeToken(builder_, "[");
     result_ = result_ && consumeToken(builder_, NUMBER);
     result_ = result_ && consumeToken(builder_, "]");
-    if (result_) {
-      marker_.drop();
-      left_marker_.precede().done(ITEM_EXPR);
-    }
-    else {
-      marker_.rollbackTo();
-    }
-    result_ = exitErrorRecordingSection(builder_, level_, result_, false, _SECTION_GENERAL_, null);
+    result_ = exit_section_(builder_, level_, marker_, ITEM_EXPR, result_, false, null);
     return result_;
   }
 
@@ -577,14 +423,9 @@ public class PsiGen2 {
     if (!recursion_guard_(builder_, level_, "literal")) return false;
     if (!nextTokenIs(builder_, NUMBER)) return false;
     boolean result_ = false;
-    Marker marker_ = builder_.mark();
+    Marker marker_ = enter_section_(builder_);
     result_ = consumeToken(builder_, NUMBER);
-    if (result_) {
-      marker_.done(LITERAL);
-    }
-    else {
-      marker_.rollbackTo();
-    }
+    exit_section_(builder_, marker_, LITERAL, result_);
     return result_;
   }
 
@@ -593,20 +434,10 @@ public class PsiGen2 {
   public static boolean qref_expr(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "qref_expr")) return false;
     boolean result_ = false;
-    Marker left_marker_ = (Marker)builder_.getLatestDoneMarker();
-    if (!invalid_left_marker_guard_(builder_, left_marker_, "qref_expr")) return false;
-    Marker marker_ = builder_.mark();
-    enterErrorRecordingSection(builder_, level_, _SECTION_GENERAL_, "<qref expr>");
+    Marker marker_ = enter_section_(builder_, level_, _LEFT_, "<qref expr>");
     result_ = consumeToken(builder_, ".");
     result_ = result_ && identifier(builder_, level_ + 1);
-    if (result_) {
-      marker_.drop();
-      left_marker_.precede().done(REF_EXPR);
-    }
-    else {
-      marker_.rollbackTo();
-    }
-    result_ = exitErrorRecordingSection(builder_, level_, result_, false, _SECTION_GENERAL_, null);
+    result_ = exit_section_(builder_, level_, marker_, REF_EXPR, result_, false, null);
     return result_;
   }
 
@@ -616,14 +447,9 @@ public class PsiGen2 {
     if (!recursion_guard_(builder_, level_, "ref_expr")) return false;
     if (!nextTokenIs(builder_, ID)) return false;
     boolean result_ = false;
-    Marker marker_ = builder_.mark();
+    Marker marker_ = enter_section_(builder_);
     result_ = identifier(builder_, level_ + 1);
-    if (result_) {
-      marker_.done(REF_EXPR);
-    }
-    else {
-      marker_.rollbackTo();
-    }
+    exit_section_(builder_, marker_, REF_EXPR, result_);
     return result_;
   }
 
@@ -633,15 +459,10 @@ public class PsiGen2 {
     if (!recursion_guard_(builder_, level_, "reference")) return false;
     if (!nextTokenIs(builder_, ID)) return false;
     boolean result_ = false;
-    Marker marker_ = builder_.mark();
+    Marker marker_ = enter_section_(builder_);
     result_ = ref_expr(builder_, level_ + 1);
     result_ = result_ && reference_1(builder_, level_ + 1);
-    if (!result_) {
-      marker_.rollbackTo();
-    }
-    else {
-      marker_.drop();
-    }
+    exit_section_(builder_, marker_, null, result_);
     return result_;
   }
 
@@ -668,23 +489,11 @@ public class PsiGen2 {
     if (!nextTokenIs(builder_, ID) && !nextTokenIs(builder_, NUMBER)
         && replaceVariants(builder_, 2, "<some expr>")) return false;
     boolean result_ = false;
-    int start_ = builder_.getCurrentOffset();
-    Marker marker_ = builder_.mark();
-    enterErrorRecordingSection(builder_, level_, _SECTION_GENERAL_, "<some expr>");
+    Marker marker_ = enter_section_(builder_, level_, _COLLAPSE_, "<some expr>");
     result_ = some_expr_0(builder_, level_ + 1);
     result_ = result_ && some_expr_1(builder_, level_ + 1);
     result_ = result_ && some_expr_2(builder_, level_ + 1);
-    LighterASTNode last_ = result_? builder_.getLatestDoneMarker() : null;
-    if (last_ != null && last_.getStartOffset() == start_ && type_extends_(last_.getTokenType(), SOME_EXPR)) {
-      marker_.drop();
-    }
-    else if (result_) {
-      marker_.done(SOME_EXPR);
-    }
-    else {
-      marker_.rollbackTo();
-    }
-    result_ = exitErrorRecordingSection(builder_, level_, result_, false, _SECTION_GENERAL_, null);
+    result_ = exit_section_(builder_, level_, marker_, SOME_EXPR, result_, false, null);
     return result_;
   }
 
@@ -692,16 +501,11 @@ public class PsiGen2 {
   private static boolean some_expr_0(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "some_expr_0")) return false;
     boolean result_ = false;
-    Marker marker_ = builder_.mark();
+    Marker marker_ = enter_section_(builder_);
     result_ = a_expr(builder_, level_ + 1);
     if (!result_) result_ = some_expr_0_1(builder_, level_ + 1);
     if (!result_) result_ = some_expr_private(builder_, level_ + 1);
-    if (!result_) {
-      marker_.rollbackTo();
-    }
-    else {
-      marker_.drop();
-    }
+    exit_section_(builder_, marker_, null, result_);
     return result_;
   }
 
@@ -709,15 +513,10 @@ public class PsiGen2 {
   private static boolean some_expr_0_1(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "some_expr_0_1")) return false;
     boolean result_ = false;
-    Marker marker_ = builder_.mark();
+    Marker marker_ = enter_section_(builder_);
     result_ = specialRef(builder_, level_ + 1);
     result_ = result_ && b_expr(builder_, level_ + 1);
-    if (!result_) {
-      marker_.rollbackTo();
-    }
-    else {
-      marker_.drop();
-    }
+    exit_section_(builder_, marker_, null, result_);
     return result_;
   }
 
@@ -725,14 +524,9 @@ public class PsiGen2 {
   private static boolean some_expr_1(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "some_expr_1")) return false;
     boolean result_ = false;
-    Marker marker_ = builder_.mark();
+    Marker marker_ = enter_section_(builder_);
     result_ = cast_expr(builder_, level_ + 1);
-    if (!result_) {
-      marker_.rollbackTo();
-    }
-    else {
-      marker_.drop();
-    }
+    exit_section_(builder_, marker_, null, result_);
     return result_;
   }
 
@@ -756,14 +550,9 @@ public class PsiGen2 {
   private static boolean some_expr_2_0(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "some_expr_2_0")) return false;
     boolean result_ = false;
-    Marker marker_ = builder_.mark();
+    Marker marker_ = enter_section_(builder_);
     result_ = item_expr(builder_, level_ + 1);
-    if (!result_) {
-      marker_.rollbackTo();
-    }
-    else {
-      marker_.drop();
-    }
+    exit_section_(builder_, marker_, null, result_);
     return result_;
   }
 
@@ -773,15 +562,10 @@ public class PsiGen2 {
     if (!recursion_guard_(builder_, level_, "some_expr_private")) return false;
     if (!nextTokenIs(builder_, ID)) return false;
     boolean result_ = false;
-    Marker marker_ = builder_.mark();
+    Marker marker_ = enter_section_(builder_);
     result_ = specialRef(builder_, level_ + 1);
     result_ = result_ && b_expr(builder_, level_ + 1);
-    if (!result_) {
-      marker_.rollbackTo();
-    }
-    else {
-      marker_.drop();
-    }
+    exit_section_(builder_, marker_, null, result_);
     return result_;
   }
 
@@ -791,16 +575,11 @@ public class PsiGen2 {
     if (!recursion_guard_(builder_, level_, "specialRef")) return false;
     if (!nextTokenIs(builder_, ID)) return false;
     boolean result_ = false;
-    Marker marker_ = builder_.mark();
+    Marker marker_ = enter_section_(builder_);
     result_ = identifier(builder_, level_ + 1);
     result_ = result_ && consumeToken(builder_, OF);
     result_ = result_ && reference(builder_, level_ + 1);
-    if (result_) {
-      marker_.done(SPECIAL_REF);
-    }
-    else {
-      marker_.rollbackTo();
-    }
+    exit_section_(builder_, marker_, SPECIAL_REF, result_);
     return result_;
   }
 
@@ -809,8 +588,6 @@ public class PsiGen2 {
 //header.txt
 package ;
 
-import org.jetbrains.annotations.*;
-import com.intellij.lang.LighterASTNode;
 import com.intellij.lang.PsiBuilder;
 import com.intellij.lang.PsiBuilder.Marker;
 import com.intellij.openapi.diagnostic.Logger;
@@ -821,27 +598,17 @@ import static PsiGen.*;
 @SuppressWarnings({"SimplifiableIfStatement", "UnusedAssignment"})
 public class PsiGenFixes {
 
-  public static Logger LOG_ = Logger.getInstance("PsiGenFixes");
+  public static final Logger LOG_ = Logger.getInstance("PsiGenFixes");
 
   /* ********************************************************** */
   // ',' identifier
   public static boolean LeftShadow(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "LeftShadow")) return false;
     boolean result_ = false;
-    Marker left_marker_ = (Marker)builder_.getLatestDoneMarker();
-    if (!invalid_left_marker_guard_(builder_, left_marker_, "LeftShadow")) return false;
-    Marker marker_ = builder_.mark();
-    enterErrorRecordingSection(builder_, level_, _SECTION_GENERAL_, "<left shadow>");
+    Marker marker_ = enter_section_(builder_, level_, _LEFT_, "<left shadow>");
     result_ = consumeToken(builder_, ",");
     result_ = result_ && PsiGen2.identifier(builder_, level_ + 1);
-    if (result_) {
-      marker_.drop();
-      left_marker_.precede().done(LEFT_SHADOW);
-    }
-    else {
-      marker_.rollbackTo();
-    }
-    result_ = exitErrorRecordingSection(builder_, level_, result_, false, _SECTION_GENERAL_, null);
+    result_ = exit_section_(builder_, level_, marker_, LEFT_SHADOW, result_, false, null);
     return result_;
   }
 
@@ -851,15 +618,10 @@ public class PsiGenFixes {
     if (!recursion_guard_(builder_, level_, "LeftShadowTest")) return false;
     if (!nextTokenIs(builder_, ID)) return false;
     boolean result_ = false;
-    Marker marker_ = builder_.mark();
+    Marker marker_ = enter_section_(builder_);
     result_ = PsiGen2.identifier(builder_, level_ + 1);
     result_ = result_ && LeftShadowTest_1(builder_, level_ + 1);
-    if (result_) {
-      marker_.done(LEFT_SHADOW_TEST);
-    }
-    else {
-      marker_.rollbackTo();
-    }
+    exit_section_(builder_, marker_, LEFT_SHADOW_TEST, result_);
     return result_;
   }
 
@@ -891,14 +653,9 @@ public class PsiGenFixes {
     if (!recursion_guard_(builder_, level_, "publicMethodToCall")) return false;
     if (!nextTokenIs(builder_, ID)) return false;
     boolean result_ = false;
-    Marker marker_ = builder_.mark();
+    Marker marker_ = enter_section_(builder_);
     result_ = PsiGen2.identifier(builder_, level_ + 1);
-    if (!result_) {
-      marker_.rollbackTo();
-    }
-    else {
-      marker_.drop();
-    }
+    exit_section_(builder_, marker_, null, result_);
     return result_;
   }
 

@@ -14,7 +14,8 @@
   ]
 }
 
-json ::= array | object
+root ::= json
+private json ::= array | object
 private value ::= string | number | json {name="value"}
 
 array ::= '[' [!']' item (',' item) *] ']' {pin(".*")=1}

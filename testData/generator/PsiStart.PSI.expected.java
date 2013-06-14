@@ -1,4 +1,4 @@
-// ---- ParserTypes.java -----------------
+// ---- GeneratedTypes.java -----------------
 // This is a generated file. Not intended for manual editing.
 package generated;
 
@@ -7,7 +7,7 @@ import com.intellij.psi.PsiElement;
 import com.intellij.lang.ASTNode;
 import generated.psi.impl.*;
 
-public interface ParserTypes {
+public interface GeneratedTypes {
 
   IElementType ELEMENT = new IElementType("ELEMENT", null);
   IElementType ENTRY = new IElementType("ENTRY", null);
@@ -92,7 +92,7 @@ import com.intellij.lang.ASTNode;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
-import static generated.ParserTypes.*;
+import static generated.GeneratedTypes.*;
 import com.intellij.extapi.psi.ASTWrapperPsiElement;
 import generated.psi.*;
 
@@ -117,7 +117,7 @@ import com.intellij.lang.ASTNode;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
-import static generated.ParserTypes.*;
+import static generated.GeneratedTypes.*;
 import com.intellij.extapi.psi.ASTWrapperPsiElement;
 import generated.psi.*;
 
@@ -148,7 +148,7 @@ import com.intellij.lang.ASTNode;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
-import static generated.ParserTypes.*;
+import static generated.GeneratedTypes.*;
 import com.intellij.extapi.psi.ASTWrapperPsiElement;
 import generated.psi.*;
 
@@ -179,7 +179,7 @@ import com.intellij.lang.ASTNode;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
-import static generated.ParserTypes.*;
+import static generated.GeneratedTypes.*;
 import com.intellij.extapi.psi.ASTWrapperPsiElement;
 import generated.psi.*;
 

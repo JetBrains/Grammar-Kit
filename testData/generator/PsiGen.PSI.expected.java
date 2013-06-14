@@ -1,4 +1,4 @@
-// ---- ParserTypes.java -----------------
+// ---- GeneratedTypes.java -----------------
 //header.txt
 package generated;
 
@@ -9,7 +9,7 @@ import sample.MyTypeFactory;
 import sample.MyRootType;
 import generated.psi.impl.*;
 
-public interface ParserTypes {
+public interface GeneratedTypes {
 
   IElementType BLOCK_OF = new IElementType("BLOCK_OF", null);
   IElementType CAST_EXPR = MyTypeFactory.createExprType("CAST_EXPR");
@@ -383,7 +383,7 @@ import com.intellij.lang.ASTNode;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
-import static generated.ParserTypes.*;
+import static generated.GeneratedTypes.*;
 import com.intellij.extapi.psi.ASTWrapperPsiElement;
 import generated.psi.*;
 
@@ -421,7 +421,7 @@ import com.intellij.lang.ASTNode;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
-import static generated.ParserTypes.*;
+import static generated.GeneratedTypes.*;
 import com.intellij.extapi.psi.ASTWrapperPsiElement;
 import generated.psi.*;
 
@@ -459,7 +459,7 @@ import com.intellij.lang.ASTNode;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
-import static generated.ParserTypes.*;
+import static generated.GeneratedTypes.*;
 import com.intellij.extapi.psi.ASTWrapperPsiElement;
 import generated.psi.*;
 
@@ -485,7 +485,7 @@ import com.intellij.lang.ASTNode;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
-import static generated.ParserTypes.*;
+import static generated.GeneratedTypes.*;
 import generated.psi.*;
 
 public class XCastExprImpl extends XExprImpl implements XCastExpr {
@@ -522,7 +522,7 @@ import com.intellij.lang.ASTNode;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
-import static generated.ParserTypes.*;
+import static generated.GeneratedTypes.*;
 import com.intellij.extapi.psi.ASTWrapperPsiElement;
 import generated.psi.*;
 
@@ -554,7 +554,7 @@ import com.intellij.lang.ASTNode;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
-import static generated.ParserTypes.*;
+import static generated.GeneratedTypes.*;
 import generated.psi.*;
 
 public class XExternalTypeImpl extends XExprImpl implements XExternalType {
@@ -585,7 +585,7 @@ import com.intellij.lang.ASTNode;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
-import static generated.ParserTypes.*;
+import static generated.GeneratedTypes.*;
 import generated.psi.*;
 
 public class XExternalType2Impl extends XExprImpl implements XExternalType2 {
@@ -616,7 +616,7 @@ import com.intellij.lang.ASTNode;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
-import static generated.ParserTypes.*;
+import static generated.GeneratedTypes.*;
 import com.intellij.extapi.psi.ASTWrapperPsiElement;
 import generated.psi.*;
 
@@ -648,7 +648,7 @@ import com.intellij.lang.ASTNode;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
-import static generated.ParserTypes.*;
+import static generated.GeneratedTypes.*;
 import com.intellij.extapi.psi.ASTWrapperPsiElement;
 import generated.psi.*;
 
@@ -680,7 +680,7 @@ import com.intellij.lang.ASTNode;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
-import static generated.ParserTypes.*;
+import static generated.GeneratedTypes.*;
 import generated.psi.*;
 
 public class XItemExprImpl extends XExprImpl implements XItemExpr {
@@ -717,7 +717,7 @@ import com.intellij.lang.ASTNode;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
-import static generated.ParserTypes.*;
+import static generated.GeneratedTypes.*;
 import generated.psi.*;
 
 public class XLiteralImpl extends XExprImpl implements XLiteral {
@@ -748,7 +748,7 @@ import com.intellij.lang.ASTNode;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
-import static generated.ParserTypes.*;
+import static generated.GeneratedTypes.*;
 import generated.psi.*;
 
 public class XMulExprImpl extends XExprImpl implements XMulExpr {
@@ -779,7 +779,7 @@ import com.intellij.lang.ASTNode;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
-import static generated.ParserTypes.*;
+import static generated.GeneratedTypes.*;
 import generated.psi.*;
 
 public class XPlusExprImpl extends XExprImpl implements XPlusExpr {
@@ -810,7 +810,7 @@ import com.intellij.lang.ASTNode;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
-import static generated.ParserTypes.*;
+import static generated.GeneratedTypes.*;
 import generated.psi.*;
 
 public class XRefExprImpl extends MyRefImpl implements XRefExpr {
@@ -841,7 +841,7 @@ import com.intellij.lang.ASTNode;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
-import static generated.ParserTypes.*;
+import static generated.GeneratedTypes.*;
 import generated.psi.*;
 
 public class XRootBImpl extends XRootImpl implements XRootB {
@@ -866,7 +866,7 @@ import com.intellij.lang.ASTNode;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
-import static generated.ParserTypes.*;
+import static generated.GeneratedTypes.*;
 import generated.psi.*;
 
 public class XRootCImpl extends XRootImpl implements XRootC {
@@ -897,7 +897,7 @@ import com.intellij.lang.ASTNode;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
-import static generated.ParserTypes.*;
+import static generated.GeneratedTypes.*;
 import generated.psi.*;
 
 public class XRootDImpl extends XRootImpl implements XRootD {
@@ -928,7 +928,7 @@ import com.intellij.lang.ASTNode;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
-import static generated.ParserTypes.*;
+import static generated.GeneratedTypes.*;
 import generated.psi.*;
 
 public class XSomeExprImpl extends XExprImpl implements XSomeExpr {
@@ -953,7 +953,7 @@ import com.intellij.lang.ASTNode;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
-import static generated.ParserTypes.*;
+import static generated.GeneratedTypes.*;
 import generated.psi.*;
 
 public class XSpecialRefImpl extends XRefExprImpl implements XSpecialRef {

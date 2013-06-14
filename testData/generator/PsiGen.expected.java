@@ -7,7 +7,7 @@ import com.intellij.lang.LighterASTNode;
 import com.intellij.lang.PsiBuilder;
 import com.intellij.lang.PsiBuilder.Marker;
 import com.intellij.openapi.diagnostic.Logger;
-import static generated.ParserTypes.*;
+import static generated.GeneratedTypes.*;
 import static PsiGenUtil.*;
 import com.intellij.psi.tree.IElementType;
 import com.intellij.lang.ASTNode;
@@ -474,7 +474,7 @@ import com.intellij.lang.LighterASTNode;
 import com.intellij.lang.PsiBuilder;
 import com.intellij.lang.PsiBuilder.Marker;
 import com.intellij.openapi.diagnostic.Logger;
-import static generated.ParserTypes.*;
+import static generated.GeneratedTypes.*;
 import static PsiGenUtil.*;
 import static PsiGen.*;
 
@@ -814,7 +814,7 @@ import com.intellij.lang.LighterASTNode;
 import com.intellij.lang.PsiBuilder;
 import com.intellij.lang.PsiBuilder.Marker;
 import com.intellij.openapi.diagnostic.Logger;
-import static generated.ParserTypes.*;
+import static generated.GeneratedTypes.*;
 import static PsiGenUtil.*;
 import static PsiGen.*;
 

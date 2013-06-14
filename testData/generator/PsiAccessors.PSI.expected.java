@@ -1,4 +1,4 @@
-// ---- ParserTypes.java -----------------
+// ---- GeneratedTypes.java -----------------
 //header.txt
 package generated;
 
@@ -7,7 +7,7 @@ import com.intellij.psi.PsiElement;
 import com.intellij.lang.ASTNode;
 import generated.psi.impl.*;
 
-public interface ParserTypes {
+public interface GeneratedTypes {
 
   IElementType BINARY = new IElementType("BINARY", null);
   IElementType EXPRESSION = new IElementType("EXPRESSION", null);
@@ -152,7 +152,7 @@ import com.intellij.lang.ASTNode;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
-import static generated.ParserTypes.*;
+import static generated.GeneratedTypes.*;
 import com.intellij.extapi.psi.ASTWrapperPsiElement;
 import generated.psi.*;
 
@@ -278,7 +278,7 @@ import com.intellij.lang.ASTNode;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
-import static generated.ParserTypes.*;
+import static generated.GeneratedTypes.*;
 import com.intellij.extapi.psi.ASTWrapperPsiElement;
 import generated.psi.*;
 
@@ -310,7 +310,7 @@ import com.intellij.lang.ASTNode;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
-import static generated.ParserTypes.*;
+import static generated.GeneratedTypes.*;
 import com.intellij.extapi.psi.ASTWrapperPsiElement;
 import generated.psi.*;
 
@@ -336,7 +336,7 @@ import com.intellij.lang.ASTNode;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
-import static generated.ParserTypes.*;
+import static generated.GeneratedTypes.*;
 import com.intellij.extapi.psi.ASTWrapperPsiElement;
 import generated.psi.*;
 
@@ -368,7 +368,7 @@ import com.intellij.lang.ASTNode;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
-import static generated.ParserTypes.*;
+import static generated.GeneratedTypes.*;
 import com.intellij.extapi.psi.ASTWrapperPsiElement;
 import generated.psi.*;
 

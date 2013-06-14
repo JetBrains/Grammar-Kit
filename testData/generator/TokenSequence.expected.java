@@ -1,4 +1,4 @@
-// ---- Parser.java -----------------
+// ---- GeneratedParser.java -----------------
 // This is a generated file. Not intended for manual editing.
 package generated;
 
@@ -7,7 +7,7 @@ import com.intellij.lang.LighterASTNode;
 import com.intellij.lang.PsiBuilder;
 import com.intellij.lang.PsiBuilder.Marker;
 import com.intellij.openapi.diagnostic.Logger;
-import static generated.ParserTypes.*;
+import static generated.GeneratedTypes.*;
 import static com.intellij.lang.parser.GeneratedParserUtilBase.*;
 import com.intellij.psi.tree.IElementType;
 import com.intellij.lang.ASTNode;
@@ -15,9 +15,9 @@ import com.intellij.psi.tree.TokenSet;
 import com.intellij.lang.PsiParser;
 
 @SuppressWarnings({"SimplifiableIfStatement", "UnusedAssignment"})
-public class Parser implements PsiParser {
+public class GeneratedParser implements PsiParser {
 
-  public static Logger LOG_ = Logger.getInstance("generated.Parser");
+  public static Logger LOG_ = Logger.getInstance("generated.GeneratedParser");
 
   @NotNull
   public ASTNode parse(IElementType root_, PsiBuilder builder_) {

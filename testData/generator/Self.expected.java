@@ -104,7 +104,7 @@ public class Self implements PsiParser {
     result_ = result_ && consumeToken(builder_, BNF_OP_EQ);
     result_ = result_ && attr_value(builder_, level_ + 1);
     result_ = result_ && attr_4(builder_, level_ + 1);
-    result_ = exit_section_(builder_, level_, marker_, BNF_ATTR, result_, pinned_, attr_recover_until_parser_);
+    exit_section_(builder_, level_, marker_, BNF_ATTR, result_, pinned_, attr_recover_until_parser_);
     return result_ || pinned_;
   }
 
@@ -143,7 +143,7 @@ public class Self implements PsiParser {
     boolean result_ = false;
     Marker marker_ = enter_section_(builder_, level_, _NOT_, null);
     result_ = !consumeToken(builder_, BNF_RIGHT_BRACE);
-    result_ = exit_section_(builder_, level_, marker_, null, result_, false, null);
+    exit_section_(builder_, level_, marker_, null, result_, false, null);
     return result_;
   }
 
@@ -176,7 +176,7 @@ public class Self implements PsiParser {
     boolean result_ = false;
     Marker marker_ = enter_section_(builder_, level_, _NOT_, null);
     result_ = !consumeToken(builder_, BNF_OP_EQ);
-    result_ = exit_section_(builder_, level_, marker_, null, result_, false, null);
+    exit_section_(builder_, level_, marker_, null, result_, false, null);
     return result_;
   }
 
@@ -192,7 +192,7 @@ public class Self implements PsiParser {
     pinned_ = result_; // pin = 1
     result_ = result_ && attrs_1(builder_, level_ + 1);
     result_ = result_ && consumeToken(builder_, BNF_RIGHT_BRACE);
-    result_ = exit_section_(builder_, level_, marker_, BNF_ATTRS, result_, pinned_, null);
+    exit_section_(builder_, level_, marker_, BNF_ATTRS, result_, pinned_, null);
     return result_ || pinned_;
   }
 
@@ -220,7 +220,7 @@ public class Self implements PsiParser {
     Marker marker_ = enter_section_(builder_, level_, _COLLAPSE_, null);
     result_ = choice_0(builder_, level_ + 1);
     if (!result_) result_ = choice_1(builder_, level_ + 1);
-    result_ = exit_section_(builder_, level_, marker_, BNF_CHOICE, result_, false, null);
+    exit_section_(builder_, level_, marker_, BNF_CHOICE, result_, false, null);
     return result_;
   }
 
@@ -302,7 +302,7 @@ public class Self implements PsiParser {
     result_ = consumeToken(builder_, BNF_OP_OR);
     pinned_ = result_; // pin = 1
     result_ = result_ && sequence(builder_, level_ + 1);
-    result_ = exit_section_(builder_, level_, marker_, null, result_, pinned_, null);
+    exit_section_(builder_, level_, marker_, null, result_, pinned_, null);
     return result_ || pinned_;
   }
 
@@ -353,7 +353,7 @@ public class Self implements PsiParser {
     Marker marker_ = enter_section_(builder_, level_, _COLLAPSE_, null);
     result_ = string_literal_expression(builder_, level_ + 1);
     if (!result_) result_ = consumeToken(builder_, BNF_NUMBER);
-    result_ = exit_section_(builder_, level_, marker_, BNF_LITERAL_EXPRESSION, result_, false, null);
+    exit_section_(builder_, level_, marker_, BNF_LITERAL_EXPRESSION, result_, false, null);
     return result_;
   }
 
@@ -394,7 +394,7 @@ public class Self implements PsiParser {
     pinned_ = result_; // pin = 1
     result_ = result_ && expression(builder_, level_ + 1);
     result_ = result_ && consumeToken(builder_, BNF_RIGHT_PAREN);
-    result_ = exit_section_(builder_, level_, marker_, BNF_PAREN_EXPRESSION, result_, pinned_, null);
+    exit_section_(builder_, level_, marker_, BNF_PAREN_EXPRESSION, result_, pinned_, null);
     return result_ || pinned_;
   }
 
@@ -432,7 +432,7 @@ public class Self implements PsiParser {
     Marker marker_ = enter_section_(builder_, level_, _COLLAPSE_, null);
     result_ = quantified_0(builder_, level_ + 1);
     if (!result_) result_ = quantified_1(builder_, level_ + 1);
-    result_ = exit_section_(builder_, level_, marker_, BNF_QUANTIFIED, result_, false, null);
+    exit_section_(builder_, level_, marker_, BNF_QUANTIFIED, result_, false, null);
     return result_;
   }
 
@@ -505,7 +505,7 @@ public class Self implements PsiParser {
     result_ = result_ && expression(builder_, level_ + 1);
     result_ = result_ && rule_4(builder_, level_ + 1);
     result_ = result_ && rule_5(builder_, level_ + 1);
-    result_ = exit_section_(builder_, level_, marker_, BNF_RULE, result_, pinned_, rule_recover_until_parser_);
+    exit_section_(builder_, level_, marker_, BNF_RULE, result_, pinned_, rule_recover_until_parser_);
     return result_ || pinned_;
   }
 
@@ -546,7 +546,7 @@ public class Self implements PsiParser {
     boolean result_ = false;
     Marker marker_ = enter_section_(builder_, level_, _NOT_, null);
     result_ = !consumeToken(builder_, BNF_LEFT_BRACE);
-    result_ = exit_section_(builder_, level_, marker_, null, result_, false, null);
+    exit_section_(builder_, level_, marker_, null, result_, false, null);
     return result_;
   }
 
@@ -567,7 +567,7 @@ public class Self implements PsiParser {
       }
       offset_ = next_offset_;
     }
-    result_ = exit_section_(builder_, level_, marker_, BNF_SEQUENCE, result_, false, null);
+    exit_section_(builder_, level_, marker_, BNF_SEQUENCE, result_, false, null);
     return result_;
   }
 
@@ -601,7 +601,7 @@ public class Self implements PsiParser {
     boolean result_ = false;
     Marker marker_ = enter_section_(builder_, level_, _NOT_, null);
     result_ = !simple_0_0_0(builder_, level_ + 1);
-    result_ = exit_section_(builder_, level_, marker_, null, result_, false, null);
+    exit_section_(builder_, level_, marker_, null, result_, false, null);
     return result_;
   }
 

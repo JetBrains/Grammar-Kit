@@ -126,7 +126,7 @@ public class GeneratedParserUtilBase {
     state.completionState = completionState;
     return pinned_ || result_;
   }
-  
+
   public static boolean parseTokens(PsiBuilder builder_, int pin_, IElementType... tokens_) {
     PsiBuilder.Marker marker_ = builder_.mark();
     boolean result_ = consumeTokens(builder_, pin_, tokens_);
@@ -290,7 +290,7 @@ public class GeneratedParserUtilBase {
     }
   }
 
-
+  // keep the old section API for compatibility
   public static final String _SECTION_NOT_ = "_SECTION_NOT_";
   public static final String _SECTION_AND_ = "_SECTION_AND_";
   public static final String _SECTION_RECOVER_ = "_SECTION_RECOVER_";
@@ -298,8 +298,8 @@ public class GeneratedParserUtilBase {
 
   public static void enterErrorRecordingSection(PsiBuilder builder_, int level, @NotNull String sectionType, @Nullable String frameName) {
     int modifiers = sectionType == _SECTION_GENERAL_ ? _NONE_ :
-      sectionType == _SECTION_NOT_ ? _NOT_ :
-      sectionType == _SECTION_AND_ ? _AND_ : _NONE_;
+                    sectionType == _SECTION_NOT_ ? _NOT_ :
+                    sectionType == _SECTION_AND_ ? _AND_ : _NONE_;
     enter_section_impl_(builder_, level, modifiers, frameName);
   }
 
@@ -309,10 +309,11 @@ public class GeneratedParserUtilBase {
                                                   boolean pinned,
                                                   @NotNull String sectionType,
                                                   @Nullable Parser eatMore) {
-    return exit_section_(builder_, level, null, null, result, pinned, eatMore);
+    exit_section_(builder_, level, null, null, result, pinned, eatMore);
+    return result;
   }
 
-
+  // here's the new section API for compact parsers & less IntelliJ platform API exposure
   public static final int _NONE_       = 0x0;
   public static final int _COLLAPSE_   = 0x1;
   public static final int _LEFT_       = 0x2;
@@ -320,6 +321,7 @@ public class GeneratedParserUtilBase {
   public static final int _AND_        = 0x8;
   public static final int _NOT_        = 0x10;
 
+  // simple enter/exit methods pair that doesn't require frame object
   public static PsiBuilder.Marker enter_section_(PsiBuilder builder_) {
     return builder_.mark();
   }
@@ -328,9 +330,10 @@ public class GeneratedParserUtilBase {
                                    PsiBuilder.Marker marker,
                                    IElementType elementType,
                                    boolean result) {
-    exit_section_impl_(ErrorState.get(builder_).frameStack.peekLast(), marker, elementType, result);
+    close_marker_impl_(ErrorState.get(builder_).frameStack.peekLast(), marker, elementType, result);
   }
 
+  // complex enter/exit methods pair with frame object
   public static PsiBuilder.Marker enter_section_(PsiBuilder builder_, int level, int modifiers, @Nullable String frameName) {
     PsiBuilder.Marker marker = builder_.mark();
     enter_section_impl_(builder_, level, modifiers, frameName);
@@ -364,29 +367,29 @@ public class GeneratedParserUtilBase {
     }
   }
 
-  public static boolean exit_section_(PsiBuilder builder_,
-                                      int level,
-                                      PsiBuilder.Marker marker,
-                                      IElementType elementType,
-                                      boolean result,
-                                      boolean pinned,
-                                      @Nullable Parser eatMore) {
+  public static void exit_section_(PsiBuilder builder_,
+                                   int level,
+                                   PsiBuilder.Marker marker,
+                                   IElementType elementType,
+                                   boolean result,
+                                   boolean pinned,
+                                   @Nullable Parser eatMore) {
     ErrorState state = ErrorState.get(builder_);
 
     Frame frame = state.frameStack.pollLast();
     if (frame == null || level != frame.level) {
       LOG.error("Unbalanced error section: got " + frame + ", expected level " + level);
       if (frame != null) state.FRAMES.recycle(frame);
-      exit_section_impl_(frame, marker, elementType, result);
-      return result;
+      close_marker_impl_(frame, marker, elementType, result);
+      return;
     }
 
     if (((frame.modifiers & _AND_) | (frame.modifiers & _NOT_)) != 0) {
-      exit_section_impl_(frame, marker, null, false);
+      close_marker_impl_(frame, marker, null, false);
       state.predicateCount--;
       if ((frame.modifiers & _NOT_) != 0) state.predicateSign = !state.predicateSign;
       state.FRAMES.recycle(frame);
-      return result;
+      return;
     }
     exit_section_impl_(state, frame, builder_, marker, elementType, result, pinned);
 
@@ -460,7 +463,6 @@ public class GeneratedParserUtilBase {
     Frame prevFrame = willFail && eatMore == null ? null : state.frameStack.peekLast();
     if (prevFrame != null && prevFrame.errorReportedAt < frame.errorReportedAt) prevFrame.errorReportedAt = frame.errorReportedAt;
     state.FRAMES.recycle(frame);
-    return result;
   }
 
   private static void exit_section_impl_(ErrorState state,
@@ -493,7 +495,7 @@ public class GeneratedParserUtilBase {
         }
       }
       else {
-        exit_section_impl_(frame, marker, null, false);
+        close_marker_impl_(frame, marker, null, false);
       }
     }
     else if (result || pinned) {
@@ -504,11 +506,11 @@ public class GeneratedParserUtilBase {
       }
     }
     else {
-      exit_section_impl_(frame, marker, null, false);
+      close_marker_impl_(frame, marker, null, false);
     }
   }
 
-  private static void exit_section_impl_(Frame frame, PsiBuilder.Marker marker, IElementType elementType, boolean result) {
+  private static void close_marker_impl_(Frame frame, PsiBuilder.Marker marker, IElementType elementType, boolean result) {
     if (marker == null) return;
     if (result) {
       if (elementType != null) {

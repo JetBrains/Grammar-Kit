@@ -99,7 +99,7 @@ public class Small implements PsiParser {
     boolean result_ = false;
     Marker marker_ = enter_section_(builder_, level_, _AND_, null);
     result_ = empty6_0(builder_, level_ + 1);
-    result_ = exit_section_(builder_, level_, marker_, null, result_, false, null);
+    exit_section_(builder_, level_, marker_, null, result_, false, null);
     return result_;
   }
 
@@ -115,7 +115,7 @@ public class Small implements PsiParser {
     boolean result_ = false;
     Marker marker_ = enter_section_(builder_, level_, _NOT_, null);
     result_ = !empty7_0(builder_, level_ + 1);
-    result_ = exit_section_(builder_, level_, marker_, null, result_, false, null);
+    exit_section_(builder_, level_, marker_, null, result_, false, null);
     return result_;
   }
 
@@ -220,7 +220,7 @@ public class Small implements PsiParser {
     boolean result_ = false;
     Marker marker_ = enter_section_(builder_, level_, _NONE_, "<some string>");
     result_ = consumeToken(builder_, "token");
-    result_ = exit_section_(builder_, level_, marker_, SOME_STRING, result_, false, null);
+    exit_section_(builder_, level_, marker_, SOME_STRING, result_, false, null);
     return result_;
   }
 
@@ -233,7 +233,7 @@ public class Small implements PsiParser {
     result_ = consumeToken(builder_, TOKEN);
     if (!result_) result_ = someRule(builder_, level_ + 1);
     if (!result_) result_ = someString(builder_, level_ + 1);
-    result_ = exit_section_(builder_, level_, marker_, STATEMENT, result_, false, null);
+    exit_section_(builder_, level_, marker_, STATEMENT, result_, false, null);
     return result_;
   }
 

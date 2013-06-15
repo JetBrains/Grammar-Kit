@@ -133,7 +133,7 @@ public class GrammarUtil {
   }
 
   public static boolean processExpressionNames(BnfRule rule, String funcName, BnfExpression expression, PairProcessor<String, BnfExpression> processor) {
-    if (isAtomicExpression(rule, expression)) return true;
+    if (isAtomicExpression(expression)) return true;
     BnfExpression nonTrivialExpression = expression;
     for (BnfExpression e = expression, n = getTrivialNodeChild(e); n != null; e = n, n = getTrivialNodeChild(e)) {
       if (!processor.process(funcName, e)) return false;
@@ -142,8 +142,9 @@ public class GrammarUtil {
     final List<BnfExpression> children = getChildExpressions(nonTrivialExpression);
     for (int i = 0, childExpressionsSize = children.size(); i < childExpressionsSize; i++) {
       BnfExpression child = children.get(i);
-      if (isAtomicExpression(rule, child)) continue;
-      if (!processExpressionNames(rule, getNextName(funcName, i), child, processor)) return false;
+      if (isAtomicExpression(child)) continue;
+      String nextName = ParserGeneratorUtil.isTokenSequence(rule, child)? funcName : getNextName(funcName, i);
+      if (!processExpressionNames(rule, nextName, child, processor)) return false;
     }
     return processor.process(funcName, nonTrivialExpression);
   }
@@ -178,11 +179,10 @@ public class GrammarUtil {
     });
   }
 
-  public static boolean isAtomicExpression(BnfRule rule, BnfExpression tree) {
+  public static boolean isAtomicExpression(BnfExpression tree) {
     return tree instanceof BnfReferenceOrToken ||
-            tree instanceof BnfLiteralExpression ||
-            tree instanceof BnfExternalExpression ||
-            ParserGeneratorUtil.isTokenSequence(rule, tree);
+           tree instanceof BnfLiteralExpression ||
+           tree instanceof BnfExternalExpression;
   }
 
   public static boolean processChildrenDummyAware(PsiElement element, final Processor<PsiElement> processor) {

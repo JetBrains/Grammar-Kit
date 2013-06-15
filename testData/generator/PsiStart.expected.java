@@ -52,7 +52,7 @@ public class GeneratedParser implements PsiParser {
     boolean result_ = false;
     Marker marker_ = enter_section_(builder_, level_, _NONE_, "<element>");
     result_ = consumeToken(builder_, "id");
-    result_ = exit_section_(builder_, level_, marker_, ELEMENT, result_, false, null);
+    exit_section_(builder_, level_, marker_, ELEMENT, result_, false, null);
     return result_;
   }
 
@@ -65,7 +65,7 @@ public class GeneratedParser implements PsiParser {
     result_ = consumeToken(builder_, "name");
     result_ = result_ && consumeToken(builder_, "->");
     result_ = result_ && element(builder_, level_ + 1);
-    result_ = exit_section_(builder_, level_, marker_, ENTRY, result_, false, null);
+    exit_section_(builder_, level_, marker_, ENTRY, result_, false, null);
     return result_;
   }
 
@@ -91,7 +91,7 @@ public class GeneratedParser implements PsiParser {
     result_ = result_ && element(builder_, level_ + 1);
     result_ = result_ && list_2(builder_, level_ + 1);
     result_ = result_ && consumeToken(builder_, ")");
-    result_ = exit_section_(builder_, level_, marker_, LIST, result_, false, null);
+    exit_section_(builder_, level_, marker_, LIST, result_, false, null);
     return result_;
   }
 
@@ -132,7 +132,7 @@ public class GeneratedParser implements PsiParser {
     result_ = result_ && entry(builder_, level_ + 1);
     result_ = result_ && map_2(builder_, level_ + 1);
     result_ = result_ && consumeToken(builder_, ")");
-    result_ = exit_section_(builder_, level_, marker_, MAP, result_, false, null);
+    exit_section_(builder_, level_, marker_, MAP, result_, false, null);
     return result_;
   }
 

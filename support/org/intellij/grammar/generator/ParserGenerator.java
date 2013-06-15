@@ -755,7 +755,6 @@ public class ParserGenerator {
       }
       else {
         String pinnedRef = pinned ? "pinned_" : "false";
-        String resultEq = alwaysTrue ? "" : "result_ = ";
         String untilCall;
         if (recoverRoot != null) {
           BnfRule untilRule = myFile.getRule(recoverRoot);
@@ -764,7 +763,7 @@ public class ParserGenerator {
         else {
           untilCall = null;
         }
-        out(resultEq + "exit_section_(builder_, level_, marker_, " + elementTypeRef +", " + resultRef + ", "+pinnedRef +", " + untilCall + ");");
+        out("exit_section_(builder_, level_, marker_, " + elementTypeRef +", " + resultRef + ", "+pinnedRef +", " + untilCall + ");");
       }
     }
 
@@ -844,7 +843,7 @@ public class ParserGenerator {
         }
       }
     }
-    else if (GrammarUtil.isAtomicExpression(rule, child)) {
+    else if (GrammarUtil.isAtomicExpression(child) || ParserGeneratorUtil.isTokenSequence(rule, child)) {
       // do not generate
     }
     else {

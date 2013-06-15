@@ -125,7 +125,7 @@ public class ExternalRules implements PsiParser {
     result_ = consumeToken(builder_, ",");
     pinned_ = result_; // pin = 1
     result_ = result_ && param.parse(builder_, level_);
-    result_ = exit_section_(builder_, level_, marker_, COMMA_LIST_TAIL, result_, pinned_, null);
+    exit_section_(builder_, level_, marker_, COMMA_LIST_TAIL, result_, pinned_, null);
     return result_ || pinned_;
   }
 
@@ -136,7 +136,7 @@ public class ExternalRules implements PsiParser {
     boolean result_ = false;
     Marker marker_ = enter_section_(builder_, level_, _NOT_, null);
     result_ = !item_recover_0(builder_, level_ + 1);
-    result_ = exit_section_(builder_, level_, marker_, null, result_, false, null);
+    exit_section_(builder_, level_, marker_, null, result_, false, null);
     return result_;
   }
 
@@ -382,7 +382,7 @@ public class ExternalRules implements PsiParser {
     boolean result_ = false;
     Marker marker_ = enter_section_(builder_, level_, _NONE_, "<one>");
     result_ = consumeToken(builder_, "one");
-    result_ = exit_section_(builder_, level_, marker_, ONE, result_, false, null);
+    exit_section_(builder_, level_, marker_, ONE, result_, false, null);
     return result_;
   }
 
@@ -558,7 +558,7 @@ public class ExternalRules implements PsiParser {
     boolean result_ = false;
     Marker marker_ = enter_section_(builder_, level_, _NOT_, null);
     result_ = !two(builder_, level_ + 1);
-    result_ = exit_section_(builder_, level_, marker_, null, result_, false, null);
+    exit_section_(builder_, level_, marker_, null, result_, false, null);
     return result_;
   }
 
@@ -569,7 +569,7 @@ public class ExternalRules implements PsiParser {
     boolean result_ = false;
     Marker marker_ = enter_section_(builder_, level_, _NONE_, null);
     result_ = param.parse(builder_, level_);
-    result_ = exit_section_(builder_, level_, marker_, null, result_, false, item_recover_parser_);
+    exit_section_(builder_, level_, marker_, null, result_, false, item_recover_parser_);
     return result_;
   }
 
@@ -587,7 +587,7 @@ public class ExternalRules implements PsiParser {
     Marker marker_ = enter_section_(builder_, level_, _NONE_, "<statement>");
     result_ = one(builder_, level_ + 1);
     if (!result_) result_ = two(builder_, level_ + 1);
-    result_ = exit_section_(builder_, level_, marker_, STATEMENT, result_, false, null);
+    exit_section_(builder_, level_, marker_, STATEMENT, result_, false, null);
     return result_;
   }
 
@@ -598,7 +598,7 @@ public class ExternalRules implements PsiParser {
     boolean result_ = false;
     Marker marker_ = enter_section_(builder_, level_, _NONE_, "<two>");
     result_ = consumeToken(builder_, "two");
-    result_ = exit_section_(builder_, level_, marker_, TWO, result_, false, null);
+    exit_section_(builder_, level_, marker_, TWO, result_, false, null);
     return result_;
   }
 

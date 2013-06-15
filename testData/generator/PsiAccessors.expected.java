@@ -60,7 +60,7 @@ public class PsiAccessors implements PsiParser {
     result_ = result_ && operator(builder_, level_ + 1);
     pinned_ = result_; // pin = operator
     result_ = result_ && expression(builder_, level_ + 1);
-    result_ = exit_section_(builder_, level_, marker_, BINARY, result_, pinned_, null);
+    exit_section_(builder_, level_, marker_, BINARY, result_, pinned_, null);
     return result_ || pinned_;
   }
 
@@ -86,7 +86,7 @@ public class PsiAccessors implements PsiParser {
     Marker marker_ = enter_section_(builder_, level_, _NONE_, "<operator>");
     result_ = consumeToken(builder_, "+");
     if (!result_) result_ = consumeToken(builder_, "-");
-    result_ = exit_section_(builder_, level_, marker_, OPERATOR, result_, false, null);
+    exit_section_(builder_, level_, marker_, OPERATOR, result_, false, null);
     return result_;
   }
 

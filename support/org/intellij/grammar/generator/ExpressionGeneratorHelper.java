@@ -77,7 +77,7 @@ public class ExpressionGeneratorHelper {
 
     g.out("pinned_ = result_;");
     g.out("result_ = result_ && " + kernelMethodName + "(builder_, level_ + 1, priority_);");
-    g.out("result_ = exit_section_(builder_, level_, marker_, null, result_, pinned_, null);");
+    g.out("exit_section_(builder_, level_, marker_, null, result_, pinned_, null);");
     g.out("return result_ || pinned_;");
     g.out("}");
     g.newLine();

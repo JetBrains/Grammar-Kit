@@ -74,7 +74,7 @@ public class GeneratedParser implements PsiParser {
     result_ = bar(builder_, level_ + 1);
     result_ = result_ && consumeTokens(builder_, 1, D, E, F);
     pinned_ = result_; // pin = 2
-    result_ = exit_section_(builder_, level_, marker_, null, result_, pinned_, null);
+    exit_section_(builder_, level_, marker_, null, result_, pinned_, null);
     return result_ || pinned_;
   }
 

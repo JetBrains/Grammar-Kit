@@ -131,7 +131,7 @@ public class GrammarParser implements PsiParser {
     boolean result_ = false;
     Marker marker_ = enter_section_(builder_, level_, _NOT_, null);
     result_ = !attr_start_simple(builder_, level_ + 1);
-    result_ = exit_section_(builder_, level_, marker_, null, result_, false, null);
+    exit_section_(builder_, level_, marker_, null, result_, false, null);
     return result_;
   }
 
@@ -146,7 +146,7 @@ public class GrammarParser implements PsiParser {
     pinned_ = result_; // pin = 1
     result_ = result_ && report_error_(builder_, attr_value(builder_, level_ + 1));
     result_ = pinned_ && attr_2(builder_, level_ + 1) && result_;
-    result_ = exit_section_(builder_, level_, marker_, BNF_ATTR, result_, pinned_, attr_recover_until_parser_);
+    exit_section_(builder_, level_, marker_, BNF_ATTR, result_, pinned_, attr_recover_until_parser_);
     return result_ || pinned_;
   }
 
@@ -169,7 +169,7 @@ public class GrammarParser implements PsiParser {
     pinned_ = result_; // pin = 1
     result_ = result_ && report_error_(builder_, string_literal_expression(builder_, level_ + 1));
     result_ = pinned_ && consumeToken(builder_, BNF_RIGHT_PAREN) && result_;
-    result_ = exit_section_(builder_, level_, marker_, BNF_ATTR_PATTERN, result_, pinned_, null);
+    exit_section_(builder_, level_, marker_, BNF_ATTR_PATTERN, result_, pinned_, null);
     return result_ || pinned_;
   }
 
@@ -180,7 +180,7 @@ public class GrammarParser implements PsiParser {
     boolean result_ = false;
     Marker marker_ = enter_section_(builder_, level_, _NOT_, null);
     result_ = !attr_recover_until_0(builder_, level_ + 1);
-    result_ = exit_section_(builder_, level_, marker_, null, result_, false, null);
+    exit_section_(builder_, level_, marker_, null, result_, false, null);
     return result_;
   }
 
@@ -228,7 +228,7 @@ public class GrammarParser implements PsiParser {
     result_ = attr_pattern(builder_, level_ + 1);
     pinned_ = result_; // pin = attr_pattern
     result_ = result_ && consumeToken(builder_, BNF_OP_EQ);
-    result_ = exit_section_(builder_, level_, marker_, null, result_, pinned_, null);
+    exit_section_(builder_, level_, marker_, null, result_, pinned_, null);
     return result_ || pinned_;
   }
 
@@ -283,7 +283,7 @@ public class GrammarParser implements PsiParser {
     boolean result_ = false;
     Marker marker_ = enter_section_(builder_, level_, _NOT_, null);
     result_ = !consumeToken(builder_, BNF_OP_EQ);
-    result_ = exit_section_(builder_, level_, marker_, null, result_, false, null);
+    exit_section_(builder_, level_, marker_, null, result_, false, null);
     return result_;
   }
 
@@ -299,7 +299,7 @@ public class GrammarParser implements PsiParser {
     pinned_ = result_; // pin = 1
     result_ = result_ && report_error_(builder_, attrs_1(builder_, level_ + 1));
     result_ = pinned_ && consumeToken(builder_, BNF_RIGHT_BRACE) && result_;
-    result_ = exit_section_(builder_, level_, marker_, BNF_ATTRS, result_, pinned_, null);
+    exit_section_(builder_, level_, marker_, BNF_ATTRS, result_, pinned_, null);
     return result_ || pinned_;
   }
 
@@ -337,7 +337,7 @@ public class GrammarParser implements PsiParser {
       }
       offset_ = next_offset_;
     }
-    result_ = exit_section_(builder_, level_, marker_, BNF_CHOICE, result_, false, null);
+    exit_section_(builder_, level_, marker_, BNF_CHOICE, result_, false, null);
     return result_;
   }
 
@@ -350,7 +350,7 @@ public class GrammarParser implements PsiParser {
     result_ = consumeToken(builder_, BNF_OP_OR);
     pinned_ = result_; // pin = 1
     result_ = result_ && sequence(builder_, level_ + 1);
-    result_ = exit_section_(builder_, level_, marker_, null, result_, pinned_, null);
+    exit_section_(builder_, level_, marker_, null, result_, pinned_, null);
     return result_ || pinned_;
   }
 
@@ -362,7 +362,7 @@ public class GrammarParser implements PsiParser {
     Marker marker_ = enter_section_(builder_, level_, _COLLAPSE_, "<expression>");
     result_ = sequence(builder_, level_ + 1);
     result_ = result_ && expression_1(builder_, level_ + 1);
-    result_ = exit_section_(builder_, level_, marker_, BNF_EXPRESSION, result_, false, null);
+    exit_section_(builder_, level_, marker_, BNF_EXPRESSION, result_, false, null);
     return result_;
   }
 
@@ -386,7 +386,7 @@ public class GrammarParser implements PsiParser {
     pinned_ = result_; // pin = 2
     result_ = result_ && report_error_(builder_, external_expression_2(builder_, level_ + 1));
     result_ = pinned_ && consumeToken(builder_, BNF_EXTERNAL_END) && result_;
-    result_ = exit_section_(builder_, level_, marker_, BNF_EXTERNAL_EXPRESSION, result_, pinned_, null);
+    exit_section_(builder_, level_, marker_, BNF_EXTERNAL_EXPRESSION, result_, pinned_, null);
     return result_ || pinned_;
   }
 
@@ -416,7 +416,7 @@ public class GrammarParser implements PsiParser {
     result_ = grammar_element_0(builder_, level_ + 1);
     pinned_ = result_; // pin = 1
     result_ = result_ && grammar_element_1(builder_, level_ + 1);
-    result_ = exit_section_(builder_, level_, marker_, null, result_, pinned_, grammar_element_recover_parser_);
+    exit_section_(builder_, level_, marker_, null, result_, pinned_, grammar_element_recover_parser_);
     return result_ || pinned_;
   }
 
@@ -426,7 +426,7 @@ public class GrammarParser implements PsiParser {
     boolean result_ = false;
     Marker marker_ = enter_section_(builder_, level_, _NOT_, null);
     result_ = !eof(builder_, level_ + 1);
-    result_ = exit_section_(builder_, level_, marker_, null, result_, false, null);
+    exit_section_(builder_, level_, marker_, null, result_, false, null);
     return result_;
   }
 
@@ -448,7 +448,7 @@ public class GrammarParser implements PsiParser {
     boolean result_ = false;
     Marker marker_ = enter_section_(builder_, level_, _NOT_, null);
     result_ = !grammar_element_recover_0(builder_, level_ + 1);
-    result_ = exit_section_(builder_, level_, marker_, null, result_, false, null);
+    exit_section_(builder_, level_, marker_, null, result_, false, null);
     return result_;
   }
 
@@ -471,7 +471,7 @@ public class GrammarParser implements PsiParser {
     Marker marker_ = enter_section_(builder_, level_, _NONE_, "<list entry>");
     result_ = list_entry_0(builder_, level_ + 1);
     result_ = result_ && list_entry_1(builder_, level_ + 1);
-    result_ = exit_section_(builder_, level_, marker_, BNF_LIST_ENTRY, result_, false, list_entry_recover_until_parser_);
+    exit_section_(builder_, level_, marker_, BNF_LIST_ENTRY, result_, false, list_entry_recover_until_parser_);
     return result_;
   }
 
@@ -518,7 +518,7 @@ public class GrammarParser implements PsiParser {
     boolean result_ = false;
     Marker marker_ = enter_section_(builder_, level_, _NOT_, null);
     result_ = !list_entry_recover_until_0(builder_, level_ + 1);
-    result_ = exit_section_(builder_, level_, marker_, null, result_, false, null);
+    exit_section_(builder_, level_, marker_, null, result_, false, null);
     return result_;
   }
 
@@ -546,7 +546,7 @@ public class GrammarParser implements PsiParser {
     result_ = consumeToken(builder_, BNF_OP_EQ);
     pinned_ = result_; // pin = 1
     result_ = result_ && string_literal_expression(builder_, level_ + 1);
-    result_ = exit_section_(builder_, level_, marker_, null, result_, pinned_, null);
+    exit_section_(builder_, level_, marker_, null, result_, pinned_, null);
     return result_ || pinned_;
   }
 
@@ -560,7 +560,7 @@ public class GrammarParser implements PsiParser {
     Marker marker_ = enter_section_(builder_, level_, _COLLAPSE_, "<literal expression>");
     result_ = string_literal_expression(builder_, level_ + 1);
     if (!result_) result_ = consumeToken(builder_, BNF_NUMBER);
-    result_ = exit_section_(builder_, level_, marker_, BNF_LITERAL_EXPRESSION, result_, false, null);
+    exit_section_(builder_, level_, marker_, BNF_LITERAL_EXPRESSION, result_, false, null);
     return result_;
   }
 
@@ -576,7 +576,7 @@ public class GrammarParser implements PsiParser {
     if (!result_) result_ = consumeToken(builder_, "inner");
     if (!result_) result_ = consumeToken(builder_, "left");
     if (!result_) result_ = consumeToken(builder_, "fake");
-    result_ = exit_section_(builder_, level_, marker_, BNF_MODIFIER, result_, false, null);
+    exit_section_(builder_, level_, marker_, BNF_MODIFIER, result_, false, null);
     return result_;
   }
 
@@ -621,7 +621,7 @@ public class GrammarParser implements PsiParser {
     Marker marker_ = enter_section_(builder_, level_, _COLLAPSE_, "<paren expression>");
     result_ = paren_expression_0(builder_, level_ + 1);
     if (!result_) result_ = paren_expression_1(builder_, level_ + 1);
-    result_ = exit_section_(builder_, level_, marker_, BNF_PAREN_EXPRESSION, result_, false, null);
+    exit_section_(builder_, level_, marker_, BNF_PAREN_EXPRESSION, result_, false, null);
     return result_;
   }
 
@@ -635,7 +635,7 @@ public class GrammarParser implements PsiParser {
     result_ = result_ && expression(builder_, level_ + 1);
     pinned_ = result_; // pin = 2
     result_ = result_ && consumeToken(builder_, BNF_RIGHT_PAREN);
-    result_ = exit_section_(builder_, level_, marker_, null, result_, pinned_, null);
+    exit_section_(builder_, level_, marker_, null, result_, pinned_, null);
     return result_ || pinned_;
   }
 
@@ -649,7 +649,7 @@ public class GrammarParser implements PsiParser {
     result_ = result_ && alt_choice_element(builder_, level_ + 1);
     pinned_ = result_; // pin = 2
     result_ = result_ && consumeToken(builder_, BNF_RIGHT_BRACE);
-    result_ = exit_section_(builder_, level_, marker_, null, result_, pinned_, null);
+    exit_section_(builder_, level_, marker_, null, result_, pinned_, null);
     return result_ || pinned_;
   }
 
@@ -665,7 +665,7 @@ public class GrammarParser implements PsiParser {
     result_ = result_ && expression(builder_, level_ + 1);
     pinned_ = result_; // pin = 2
     result_ = result_ && consumeToken(builder_, BNF_RIGHT_BRACKET);
-    result_ = exit_section_(builder_, level_, marker_, BNF_PAREN_OPT_EXPRESSION, result_, pinned_, null);
+    exit_section_(builder_, level_, marker_, BNF_PAREN_OPT_EXPRESSION, result_, pinned_, null);
     return result_ || pinned_;
   }
 
@@ -679,7 +679,7 @@ public class GrammarParser implements PsiParser {
     Marker marker_ = enter_section_(builder_, level_, _NONE_, "<predicate>");
     result_ = predicate_sign(builder_, level_ + 1);
     result_ = result_ && simple(builder_, level_ + 1);
-    result_ = exit_section_(builder_, level_, marker_, BNF_PREDICATE, result_, false, null);
+    exit_section_(builder_, level_, marker_, BNF_PREDICATE, result_, false, null);
     return result_;
   }
 
@@ -693,7 +693,7 @@ public class GrammarParser implements PsiParser {
     Marker marker_ = enter_section_(builder_, level_, _NONE_, "<predicate sign>");
     result_ = consumeToken(builder_, BNF_OP_AND);
     if (!result_) result_ = consumeToken(builder_, BNF_OP_NOT);
-    result_ = exit_section_(builder_, level_, marker_, BNF_PREDICATE_SIGN, result_, false, null);
+    exit_section_(builder_, level_, marker_, BNF_PREDICATE_SIGN, result_, false, null);
     return result_;
   }
 
@@ -704,7 +704,7 @@ public class GrammarParser implements PsiParser {
     boolean result_ = false;
     Marker marker_ = enter_section_(builder_, level_, _LEFT_, "<quantified>");
     result_ = quantifier(builder_, level_ + 1);
-    result_ = exit_section_(builder_, level_, marker_, BNF_QUANTIFIED, result_, false, null);
+    exit_section_(builder_, level_, marker_, BNF_QUANTIFIED, result_, false, null);
     return result_;
   }
 
@@ -717,7 +717,7 @@ public class GrammarParser implements PsiParser {
     result_ = consumeToken(builder_, BNF_OP_OPT);
     if (!result_) result_ = consumeToken(builder_, BNF_OP_ONEMORE);
     if (!result_) result_ = consumeToken(builder_, BNF_OP_ZEROMORE);
-    result_ = exit_section_(builder_, level_, marker_, BNF_QUANTIFIER, result_, false, null);
+    exit_section_(builder_, level_, marker_, BNF_QUANTIFIER, result_, false, null);
     return result_;
   }
 
@@ -745,7 +745,7 @@ public class GrammarParser implements PsiParser {
     pinned_ = result_; // pin = 2
     result_ = result_ && report_error_(builder_, rule_2(builder_, level_ + 1));
     result_ = pinned_ && rule_3(builder_, level_ + 1) && result_;
-    result_ = exit_section_(builder_, level_, marker_, BNF_RULE, result_, pinned_, null);
+    exit_section_(builder_, level_, marker_, BNF_RULE, result_, pinned_, null);
     return result_ || pinned_;
   }
 
@@ -829,7 +829,7 @@ public class GrammarParser implements PsiParser {
     boolean result_ = false;
     Marker marker_ = enter_section_(builder_, level_, _NOT_, null);
     result_ = !sequence_recover_0_0(builder_, level_ + 1);
-    result_ = exit_section_(builder_, level_, marker_, null, result_, false, null);
+    exit_section_(builder_, level_, marker_, null, result_, false, null);
     return result_;
   }
 
@@ -881,7 +881,7 @@ public class GrammarParser implements PsiParser {
     boolean result_ = false;
     Marker marker_ = enter_section_(builder_, level_, _NOT_, null);
     result_ = !simple_0_0_0(builder_, level_ + 1);
-    result_ = exit_section_(builder_, level_, marker_, null, result_, false, null);
+    exit_section_(builder_, level_, marker_, null, result_, false, null);
     return result_;
   }
 
@@ -937,7 +937,7 @@ public class GrammarParser implements PsiParser {
     pinned_ = result_; // pin = 1
     result_ = result_ && report_error_(builder_, value_list_1(builder_, level_ + 1));
     result_ = pinned_ && consumeToken(builder_, BNF_RIGHT_BRACKET) && result_;
-    result_ = exit_section_(builder_, level_, marker_, BNF_VALUE_LIST, result_, pinned_, null);
+    exit_section_(builder_, level_, marker_, BNF_VALUE_LIST, result_, pinned_, null);
     return result_ || pinned_;
   }
 

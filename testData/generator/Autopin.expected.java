@@ -64,7 +64,7 @@ public class Autopin implements PsiParser {
     boolean result_ = false;
     Marker marker_ = enter_section_(builder_, level_, _COLLAPSE_, null);
     result_ = create_table_statement(builder_, level_ + 1);
-    result_ = exit_section_(builder_, level_, marker_, CREATE_STATEMENT, result_, false, null);
+    exit_section_(builder_, level_, marker_, CREATE_STATEMENT, result_, false, null);
     return result_;
   }
 
@@ -84,7 +84,7 @@ public class Autopin implements PsiParser {
     pinned_ = result_; // pin = .*_ref
     result_ = result_ && report_error_(builder_, consumeToken(builder_, "("));
     result_ = pinned_ && consumeToken(builder_, ")") && result_;
-    result_ = exit_section_(builder_, level_, marker_, CREATE_TABLE_STATEMENT, result_, pinned_, null);
+    exit_section_(builder_, level_, marker_, CREATE_TABLE_STATEMENT, result_, pinned_, null);
     return result_ || pinned_;
   }
 
@@ -114,7 +114,7 @@ public class Autopin implements PsiParser {
     boolean result_ = false;
     Marker marker_ = enter_section_(builder_, level_, _COLLAPSE_, null);
     result_ = drop_table_statement(builder_, level_ + 1);
-    result_ = exit_section_(builder_, level_, marker_, DROP_STATEMENT, result_, false, null);
+    exit_section_(builder_, level_, marker_, DROP_STATEMENT, result_, false, null);
     return result_;
   }
 
@@ -129,7 +129,7 @@ public class Autopin implements PsiParser {
     result_ = consumeTokens(builder_, 0, DROP, TABLE);
     result_ = result_ && parseReference(builder_, level_ + 1);
     pinned_ = result_; // pin = .*_ref
-    result_ = exit_section_(builder_, level_, marker_, DROP_TABLE_STATEMENT, result_, pinned_, null);
+    exit_section_(builder_, level_, marker_, DROP_TABLE_STATEMENT, result_, pinned_, null);
     return result_ || pinned_;
   }
 
@@ -144,7 +144,7 @@ public class Autopin implements PsiParser {
     result_ = consumeTokens(builder_, 1, A, B);
     pinned_ = result_; // pin = 1
     result_ = result_ && override_nested_sequence_2(builder_, level_ + 1);
-    result_ = exit_section_(builder_, level_, marker_, OVERRIDE_NESTED_SEQUENCE, result_, pinned_, null);
+    exit_section_(builder_, level_, marker_, OVERRIDE_NESTED_SEQUENCE, result_, pinned_, null);
     return result_ || pinned_;
   }
 
@@ -168,7 +168,7 @@ public class Autopin implements PsiParser {
     result_ = pinned_on_start_0(builder_, level_ + 1);
     pinned_ = result_; // pin = 1
     result_ = result_ && pinned_on_start_1(builder_, level_ + 1);
-    result_ = exit_section_(builder_, level_, marker_, null, result_, pinned_, null);
+    exit_section_(builder_, level_, marker_, null, result_, pinned_, null);
     return result_ || pinned_;
   }
 
@@ -215,7 +215,7 @@ public class Autopin implements PsiParser {
     Marker marker_ = enter_section_(builder_, level_, _COLLAPSE_, "<statement>");
     result_ = create_statement(builder_, level_ + 1);
     if (!result_) result_ = drop_statement(builder_, level_ + 1);
-    result_ = exit_section_(builder_, level_, marker_, STATEMENT, result_, false, null);
+    exit_section_(builder_, level_, marker_, STATEMENT, result_, false, null);
     return result_;
   }
 
@@ -230,7 +230,7 @@ public class Autopin implements PsiParser {
     result_ = consumeTokens(builder_, 3, A, B, C, D);
     pinned_ = result_; // pin = 3
     result_ = result_ && parseReference(builder_, level_ + 1);
-    result_ = exit_section_(builder_, level_, marker_, null, result_, pinned_, null);
+    exit_section_(builder_, level_, marker_, null, result_, pinned_, null);
     return result_ || pinned_;
   }
 
@@ -246,7 +246,7 @@ public class Autopin implements PsiParser {
     result_ = result_ && parseReference(builder_, level_ + 1);
     result_ = result_ && consumeTokens(builder_, 2, C, D, E);
     pinned_ = result_; // pin = 5
-    result_ = exit_section_(builder_, level_, marker_, null, result_, pinned_, null);
+    exit_section_(builder_, level_, marker_, null, result_, pinned_, null);
     return result_ || pinned_;
   }
 
@@ -262,7 +262,7 @@ public class Autopin implements PsiParser {
     result_ = result_ && report_error_(builder_, consumeTokens(builder_, -1, A, B));
     result_ = pinned_ && report_error_(builder_, parseReference(builder_, level_ + 1)) && result_;
     result_ = pinned_ && report_error_(builder_, consumeTokens(builder_, -1, C, D, E)) && result_;
-    result_ = exit_section_(builder_, level_, marker_, null, result_, pinned_, null);
+    exit_section_(builder_, level_, marker_, null, result_, pinned_, null);
     return result_ || pinned_;
   }
 
@@ -276,7 +276,7 @@ public class Autopin implements PsiParser {
     result_ = token_sequence4_0(builder_, level_ + 1);
     pinned_ = result_; // pin = 1
     result_ = result_ && consumeToken(builder_, A);
-    result_ = exit_section_(builder_, level_, marker_, null, result_, pinned_, null);
+    exit_section_(builder_, level_, marker_, null, result_, pinned_, null);
     return result_ || pinned_;
   }
 
@@ -315,7 +315,7 @@ public class Autopin implements PsiParser {
     boolean result_ = false;
     Marker marker_ = enter_section_(builder_, level_, _AND_, null);
     result_ = consumeToken(builder_, B);
-    result_ = exit_section_(builder_, level_, marker_, null, result_, false, null);
+    exit_section_(builder_, level_, marker_, null, result_, false, null);
     return result_;
   }
 

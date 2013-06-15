@@ -52,7 +52,7 @@ public class LeftAssociative implements PsiParser {
     Marker marker_ = enter_section_(builder_, level_, _LEFT_, "<alias definition>");
     result_ = alias_definition_0(builder_, level_ + 1);
     result_ = result_ && consumeToken(builder_, ID);
-    result_ = exit_section_(builder_, level_, marker_, ALIAS_DEFINITION, result_, false, null);
+    exit_section_(builder_, level_, marker_, ALIAS_DEFINITION, result_, false, null);
     return result_;
   }
 
@@ -73,7 +73,7 @@ public class LeftAssociative implements PsiParser {
     Marker marker_ = enter_section_(builder_, level_, _LEFT_, "<alias definition 2>");
     result_ = alias_definition2_0(builder_, level_ + 1);
     result_ = result_ && consumeToken(builder_, ID);
-    result_ = exit_section_(builder_, level_, marker_, ALIAS_DEFINITION_2, result_, false, null);
+    exit_section_(builder_, level_, marker_, ALIAS_DEFINITION_2, result_, false, null);
     return result_;
   }
 
@@ -136,7 +136,7 @@ public class LeftAssociative implements PsiParser {
     boolean result_ = false;
     Marker marker_ = enter_section_(builder_, level_, _LEFT_INNER_, null);
     result_ = consumeToken(builder_, ID);
-    result_ = exit_section_(builder_, level_, marker_, LEECH, result_, false, null);
+    exit_section_(builder_, level_, marker_, LEECH, result_, false, null);
     return result_;
   }
 
@@ -148,7 +148,7 @@ public class LeftAssociative implements PsiParser {
     boolean result_ = false;
     Marker marker_ = enter_section_(builder_, level_, _LEFT_INNER_, null);
     result_ = consumeToken(builder_, ID);
-    result_ = exit_section_(builder_, level_, marker_, null, result_, false, null);
+    exit_section_(builder_, level_, marker_, null, result_, false, null);
     return result_;
   }
 

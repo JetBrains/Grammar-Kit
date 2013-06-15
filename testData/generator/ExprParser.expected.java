@@ -106,7 +106,7 @@ public class ExpressionParser implements PsiParser {
     pinned_ = result_; // pin = 1
     result_ = result_ && report_error_(builder_, arg_list_1(builder_, level_ + 1));
     result_ = pinned_ && consumeToken(builder_, ")") && result_;
-    result_ = exit_section_(builder_, level_, marker_, ARG_LIST, result_, pinned_, null);
+    exit_section_(builder_, level_, marker_, ARG_LIST, result_, pinned_, null);
     return result_ || pinned_;
   }
 
@@ -126,7 +126,7 @@ public class ExpressionParser implements PsiParser {
     result_ = expr(builder_, level_ + 1, -1);
     pinned_ = result_; // pin = 1
     result_ = result_ && arg_list_1_0_1(builder_, level_ + 1);
-    result_ = exit_section_(builder_, level_, marker_, null, result_, pinned_, null);
+    exit_section_(builder_, level_, marker_, null, result_, pinned_, null);
     return result_ || pinned_;
   }
 
@@ -155,7 +155,7 @@ public class ExpressionParser implements PsiParser {
     result_ = consumeToken(builder_, ",");
     pinned_ = result_; // pin = 1
     result_ = result_ && expr(builder_, level_ + 1, -1);
-    result_ = exit_section_(builder_, level_, marker_, null, result_, pinned_, null);
+    exit_section_(builder_, level_, marker_, null, result_, pinned_, null);
     return result_ || pinned_;
   }
 
@@ -166,7 +166,7 @@ public class ExpressionParser implements PsiParser {
     boolean result_ = false;
     Marker marker_ = enter_section_(builder_, level_, _NONE_, null);
     result_ = expr(builder_, level_ + 1, -1);
-    result_ = exit_section_(builder_, level_, marker_, null, result_, false, element_recover_parser_);
+    exit_section_(builder_, level_, marker_, null, result_, false, element_recover_parser_);
     return result_;
   }
 
@@ -180,7 +180,7 @@ public class ExpressionParser implements PsiParser {
     result_ = element(builder_, level_ + 1);
     pinned_ = result_; // pin = 1
     result_ = result_ && consumeToken(builder_, ";");
-    result_ = exit_section_(builder_, level_, marker_, null, result_, pinned_, null);
+    exit_section_(builder_, level_, marker_, null, result_, pinned_, null);
     return result_ || pinned_;
   }
 
@@ -191,7 +191,7 @@ public class ExpressionParser implements PsiParser {
     boolean result_ = false;
     Marker marker_ = enter_section_(builder_, level_, _NOT_, null);
     result_ = !consumeToken(builder_, ";");
-    result_ = exit_section_(builder_, level_, marker_, null, result_, false, null);
+    exit_section_(builder_, level_, marker_, null, result_, false, null);
     return result_;
   }
 
@@ -251,7 +251,7 @@ public class ExpressionParser implements PsiParser {
     if (!result_) result_ = paren_expr(builder_, level_ + 1);
     pinned_ = result_;
     result_ = result_ && expr_0(builder_, level_ + 1, priority_);
-    result_ = exit_section_(builder_, level_, marker_, null, result_, pinned_, null);
+    exit_section_(builder_, level_, marker_, null, result_, pinned_, null);
     return result_ || pinned_;
   }
 
@@ -397,7 +397,7 @@ public class ExpressionParser implements PsiParser {
     result_ = pinned_ && report_error_(builder_, consumeToken(builder_, ",")) && result_;
     result_ = pinned_ && report_error_(builder_, expr(builder_, level_ + 1, 2)) && result_;
     result_ = pinned_ && consumeToken(builder_, ")") && result_;
-    result_ = exit_section_(builder_, level_, marker_, SPECIAL_EXPR, result_, pinned_, null);
+    exit_section_(builder_, level_, marker_, SPECIAL_EXPR, result_, pinned_, null);
     return result_ || pinned_;
   }
 

@@ -293,7 +293,7 @@ public class LivePreviewParser implements PsiParser {
     }
     else if (sectionRequired) {
       final BnfRule untilRule = recoverRoot != null ? myFile.getRule(recoverRoot) : null;
-      result_ = exit_section_(
+      exit_section_(
         builder, level, marker_, isPrivate ? null : elementType, alwaysTrue || result_, pinned_,
         untilRule == null ? null : new Parser() {
           @Override

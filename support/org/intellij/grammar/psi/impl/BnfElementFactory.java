@@ -39,9 +39,12 @@ public class BnfElementFactory {
   private BnfElementFactory() {
   }
 
+  private static PsiFile createFile(Project project, String text) {
+    return PsiFileFactory.getInstance(project).createFileFromText("a.bnf", BnfLanguage.INSTANCE, text, false, false);
+  }
+
   public static PsiElement createLeafFromText(Project project, String text) {
-    PsiFile fileFromText = PsiFileFactory.getInstance(project).createFileFromText("a.bnf", BnfLanguage.INSTANCE, text);
-    return PsiTreeUtil.getDeepestFirst(fileFromText);
+    return PsiTreeUtil.getDeepestFirst(createFile(project, text));
   }
 
   public static BnfExpression createExpressionFromText(Project project, String text) {
@@ -49,16 +52,14 @@ public class BnfElementFactory {
   }
 
   public static BnfRule createRuleFromText(Project project, String text) {
-    PsiFile fromText = PsiFileFactory.getInstance(project).createFileFromText("a.bnf", BnfLanguage.INSTANCE, text);
-    PsiElement firstChild = fromText.getFirstChild();
+    PsiElement firstChild = createFile(project, text).getFirstChild();
     LOG.assertTrue(firstChild instanceof BnfRule, text);
     //noinspection ConstantConditions
     return (BnfRule)firstChild;
   }
 
   public static BnfAttr createAttributeFromText(Project project, String text) {
-    PsiFile fromText = PsiFileFactory.getInstance(project).createFileFromText("a.bnf", BnfLanguage.INSTANCE, "{\n  " + text + "\n}" );
-    PsiElement firstChild = fromText.getFirstChild();
+    PsiElement firstChild = createFile(project, "{\n  " + text + "\n}").getFirstChild();
     LOG.assertTrue(firstChild instanceof BnfAttrs, text);
     //noinspection ConstantConditions
     List<BnfAttr> attrList = ((BnfAttrs) firstChild).getAttrList();

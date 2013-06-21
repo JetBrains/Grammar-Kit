@@ -42,6 +42,8 @@ import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static org.intellij.grammar.generator.ParserGeneratorUtil.getRootAttribute;
 
@@ -171,7 +173,22 @@ public class BnfGenerateLexerAction extends AnAction {
   }
 
   private static String javaRegexp2JFlex(String javaRegexp) {
+    Matcher m = Pattern.compile("\\[(?:[^]\\\\]|\\\\.)*\\]").matcher(javaRegexp);
+    int start = 0;
+    StringBuilder sb = new StringBuilder();
+    while (m.find(start)) {
+      sb.append(javaRegexp2JFlexInner(javaRegexp.substring(start, m.start())));
+      // escape only double quotes inside character class [..]
+      sb.append(javaRegexp.substring(m.start(), m.end()).replaceAll("\"", "\\\\\""));
+      start = m.end();
+    }
+    sb.append(javaRegexp2JFlexInner(javaRegexp.substring(start)));
+    return sb.toString();
+  }
+
+  private static String javaRegexp2JFlexInner(String javaRegexp) {
     return javaRegexp.
+      replaceAll("\"", "\\\\\"").
       replaceAll("(/+)", "\"$1\"").
       replaceAll("\\\\d", "[0-9]").
       replaceAll("\\\\D", "[^0-9]").

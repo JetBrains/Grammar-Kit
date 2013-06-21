@@ -84,11 +84,10 @@ The fun part is that I even can _inject_ this language in some other files I wor
   extends(".*expr")=expr
 }
 
-root ::= (property ';') * {pin(".*")=1}
-// the following would recover from errors even better:
-// root ::= (!<<eof>> property ';') * {pin(".*")=1}
+root ::= root_item *
+private root_item ::= !<<eof>> property ';' {pin=1 recoverUntil=property_recover}
 
-property ::= id '=' expr  {pin=2 recoverUntil=property_recover}
+property ::= id '=' expr  {pin=2}
 private property_recover ::= !(';' | id '=')
 
 expr ::= factor plus_expr *

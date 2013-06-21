@@ -1,0 +1,11 @@
+expr=1 * 2 + (3 - 8.3!);
+text='This is a ' + 'text';
+// line comment
+
+test_pin_results=;                        // expression expected
+some garbage to test error recovering
+
+
+
+recovered =1/2                            // missing semicolon
+recovered_again=1/2;

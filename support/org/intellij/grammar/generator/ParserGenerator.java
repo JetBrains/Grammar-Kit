@@ -613,7 +613,7 @@ public class ParserGenerator {
     }
     else {
       children = getChildExpressions(node);
-      if (children.isEmpty()) {
+      if (children.isEmpty() && recoverRoot == null) {
         if (isPrivate || StringUtil.isEmpty(elementType)) {
           out("return true;");
         }
@@ -637,7 +637,7 @@ public class ParserGenerator {
     boolean pinApplied = false;
     final boolean alwaysTrue = type == BNF_OP_OPT || type == BNF_OP_ZEROMORE;
     if (!alwaysTrue) {
-      out("boolean result_ = " + (type == BNF_OP_ZEROMORE || type == BNF_OP_OPT) + ";");
+      out("boolean result_ = " + (type == BNF_OP_ZEROMORE || type == BNF_OP_OPT || children.isEmpty()) + ";");
     }
     boolean pinned = pinMatcher.active() && pinMatcher.matchesAny(children);
     if (pinned) {

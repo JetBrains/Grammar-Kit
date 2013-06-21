@@ -25,12 +25,15 @@ import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiRecursiveElementWalkingVisitor;
 import com.intellij.psi.PsiReference;
 import org.intellij.grammar.generator.ParserGeneratorUtil;
+import org.intellij.grammar.generator.RuleGraphHelper;
 import org.intellij.grammar.psi.BnfExternalExpression;
+import org.intellij.grammar.psi.BnfFile;
 import org.intellij.grammar.psi.BnfRule;
-import org.intellij.grammar.psi.impl.BnfFileImpl;
 import org.intellij.grammar.psi.impl.BnfRefOrTokenImpl;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.HashSet;
 
 /**
  * Created by IntelliJ IDEA.
@@ -74,7 +77,8 @@ public class BnfSuspiciousTokenInspection extends LocalInspectionTool {
   }
 
   private static void checkFile(final PsiFile file, final ProblemsHolder problemsHolder) {
-    if (!(file instanceof BnfFileImpl)) return;
+    if (!(file instanceof BnfFile)) return;
+    final HashSet<String> tokens = new HashSet<String>(RuleGraphHelper.getTokenMap((BnfFile) file).values());
     file.accept(new PsiRecursiveElementWalkingVisitor() {
       @Override
       public void visitElement(PsiElement element) {
@@ -90,7 +94,7 @@ public class BnfSuspiciousTokenInspection extends LocalInspectionTool {
           PsiReference reference = element.getReference();
           Object resolve = reference == null ? null : reference.resolve();
           final String text = element.getText();
-          if (resolve == null && isTokenTextSuspicious(text)) {
+          if (resolve == null && !tokens.contains(text) && isTokenTextSuspicious(text)) {
             problemsHolder.registerProblem(element, "'"+text+"' token looks like a reference to a missing rule", new CreateRuleFromTokenFix(text));
           }
         }

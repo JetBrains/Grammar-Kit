@@ -21,6 +21,9 @@ import com.intellij.ide.structureView.impl.common.PsiTreeElementBase;
 import com.intellij.ide.util.treeView.smartTree.SortableTreeElement;
 import com.intellij.lang.ASTNode;
 import com.intellij.lang.PsiStructureViewFactory;
+import com.intellij.navigation.ColoredItemPresentation;
+import com.intellij.openapi.editor.colors.CodeInsightColors;
+import com.intellij.openapi.editor.colors.TextAttributesKey;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiErrorElement;
@@ -28,6 +31,7 @@ import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiWhiteSpace;
 import com.intellij.psi.impl.source.tree.LeafPsiElement;
 import com.intellij.psi.tree.IElementType;
+import org.intellij.grammar.BnfIcons;
 import org.intellij.grammar.psi.BnfFile;
 import org.intellij.grammar.psi.BnfRule;
 import org.jetbrains.annotations.NotNull;
@@ -86,7 +90,7 @@ public class LivePreviewStructureViewFactory implements PsiStructureViewFactory 
 
   }
 
-  private static class MyElement extends PsiTreeElementBase<PsiElement> implements SortableTreeElement {
+  private static class MyElement extends PsiTreeElementBase<PsiElement> implements SortableTreeElement, ColoredItemPresentation {
 
     MyElement(PsiElement element) {
       super(element);
@@ -116,7 +120,7 @@ public class LivePreviewStructureViewFactory implements PsiStructureViewFactory 
       ASTNode node = element != null ? element.getNode() : null;
       IElementType elementType = node != null ? node.getElementType() : null;
       if (element instanceof LeafPsiElement) {
-        return elementType + "('" + element.getText() + "')";
+        return elementType + ": '" + element.getText() + "'";
       }
       else if (element instanceof PsiErrorElement) {
         return "PsiErrorElement: '" + ((PsiErrorElement)element).getErrorDescription() + "'";
@@ -139,7 +143,25 @@ public class LivePreviewStructureViewFactory implements PsiStructureViewFactory 
     @Nullable
     @Override
     public Icon getIcon(boolean unused) {
+      PsiElement element = getElement();
+      if (element instanceof PsiErrorElement) {
+        return null; //AllIcons.General.Error;
+      }
+      else if (element instanceof LeafPsiElement) {
+        return null;
+      }
+      ASTNode node = element != null ? element.getNode() : null;
+      IElementType elementType = node != null ? node.getElementType() : null;
+      if (elementType instanceof LivePreviewParser.RuleElementType) {
+        return BnfIcons.RULE;
+      }
       return null;
+    }
+
+    @Nullable
+    @Override
+    public TextAttributesKey getTextAttributesKey() {
+      return getElement() instanceof PsiErrorElement? CodeInsightColors.ERRORS_ATTRIBUTES : null;
     }
   }
 }

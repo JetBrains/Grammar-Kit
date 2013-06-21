@@ -872,9 +872,11 @@ public class GeneratedParserUtilBase {
     boolean checkParens = state.braces != null && checkBraces;
     int totalCount = 0;
     int tokenCount = 0;
-    if (checkParens && builder_.rawLookup(-1) == state.braces[0].getLeftBraceType()) {
-      LighterASTNode doneMarker = builder_.getLatestDoneMarker();
-      if (doneMarker != null && doneMarker.getStartOffset() == builder_.rawTokenTypeStart(-1) && doneMarker.getTokenType() == TokenType.ERROR_ELEMENT) {
+    if (checkParens) {
+      int tokenIdx = -1;
+      while (builder_.rawLookup(tokenIdx) == TokenType.WHITE_SPACE) tokenIdx --;
+      LighterASTNode doneMarker = builder_.rawLookup(tokenIdx) == state.braces[0].getLeftBraceType() ? builder_.getLatestDoneMarker() : null;
+      if (doneMarker != null && doneMarker.getStartOffset() == builder_.rawTokenTypeStart(tokenIdx) && doneMarker.getTokenType() == TokenType.ERROR_ELEMENT) {
         parenList.add(Pair.create(((PsiBuilder.Marker)doneMarker).precede(), (PsiBuilder.Marker)null));
       }
     }
@@ -908,7 +910,7 @@ public class GeneratedParserUtilBase {
         if (marker == null) {
           marker = builder_.mark();
         }
-        final boolean result = (state.altMode && !parenList.isEmpty() || eatMoreCondition.parse(builder_, level + 1)) && parser.parse(builder_, level + 1);
+        final boolean result = (!parenList.isEmpty() || eatMoreCondition.parse(builder_, level + 1)) && parser.parse(builder_, level + 1);
         if (result) {
           tokenCount++;
           totalCount++;
@@ -955,16 +957,6 @@ public class GeneratedParserUtilBase {
     @Override
     public PsiReference[] getReferences() {
       return PsiReference.EMPTY_ARRAY;
-    }
-
-    @Override
-    public boolean canNavigateToSource() {
-      return false;
-    }
-
-    @Override
-    public boolean canNavigate() {
-      return false;
     }
 
     @NotNull

@@ -25,6 +25,7 @@ import com.intellij.psi.TokenType;
 import com.intellij.psi.tree.IElementType;
 import com.intellij.psi.util.CachedValueProvider;
 import com.intellij.psi.util.CachedValuesManager;
+import com.intellij.util.ObjectUtils;
 import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.generator.ParserGeneratorUtil;
 import org.intellij.grammar.psi.*;
@@ -60,7 +61,7 @@ public class LivePreviewLexer extends LexerBase {
       @Override
       public Result<Token[]> compute() {
         Map<String, String> map = collectTokenPattern2Name(bnfFile);
-        if (!map.containsKey("regexp:\\w+")) map.put("regexp:\\w+", "GENERIC_ID");
+        if (!StringUtil.join(map.keySet(), ",").contains("regexp:")) map.put("regexp:\\w+", "GENERIC_ID");
         Token[] tokens = new Token[map.size() + 1];
         int i = 0;
         String tokenConstantPrefix = getRootAttribute(bnfFile, KnownAttribute.ELEMENT_TYPE_PREFIX);
@@ -195,6 +196,7 @@ public class LivePreviewLexer extends LexerBase {
       else if (StringUtil.endsWithIgnoreCase(tokenName, "string")) tokenType = LivePreviewParserDefinition.STRING;
       else if (StringUtil.endsWithIgnoreCase(tokenName, "number")) tokenType = LivePreviewParserDefinition.NUMBER;
       else if (StringUtil.endsWithIgnoreCase(tokenName, "integer")) tokenType = LivePreviewParserDefinition.NUMBER;
+      else if (StringUtil.endsWithIgnoreCase(tokenName, "whitespace")) tokenType = TokenType.WHITE_SPACE;
       else if (keyword) tokenType = new KeywordTokenType(tokenName, language);
       else tokenType = new IElementType(tokenName, language, false) {};
     }
@@ -219,7 +221,7 @@ public class LivePreviewLexer extends LexerBase {
   public static Map<String, String> collectTokenPattern2Name(@Nullable final BnfFile file) {
     if (file == null) return Collections.emptyMap();
     final Map<String, String> map = new LinkedHashMap<String, String>();
-    List<Pair<String, String>> tokenAttr = file.findAttributeValue(null, KnownAttribute.TOKENS, null);
+    List<Pair<String, String>> tokenAttr = ObjectUtils.assertNotNull(file.findAttributeValue(null, KnownAttribute.TOKENS, null));
     for (Pair<String, String> pair : tokenAttr) {
       if (pair.first == null || pair.second == null) continue;
       map.put(pair.second, pair.first);

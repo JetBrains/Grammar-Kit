@@ -19,7 +19,7 @@ json ::= array | object
 private value ::= string | number | json {name="value"}
 
 array ::= '[' [!']' item (!']' ',' item) *] ']' {pin(".*")=1 extends=json}
-item ::= json {recoverUntil=recover}
+private item ::= json {recoverUntil=recover}
 object ::= '{' [!'}' prop (!'}' ',' prop) *] '}' {pin(".*")=1 extends=json}
 prop ::= [] name ':' value {pin=1 recoverUntil=recover} // remove [] to make NAME mandatory
 private name ::= id | string {name="name"}

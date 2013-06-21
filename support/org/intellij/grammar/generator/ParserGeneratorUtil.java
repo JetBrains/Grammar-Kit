@@ -90,8 +90,13 @@ public class ParserGeneratorUtil {
     PsiElement literal = PsiTreeUtil.getDeepestFirst(child);
     String text = child.getText();
     IElementType elementType = literal.getNode().getElementType();
-    if (elementType == BnfTypes.BNF_STRING) return (T)StringUtil.stripQuotesAroundValue(text);
     if (elementType == BnfTypes.BNF_NUMBER) return (T)Integer.valueOf(text);
+    if (elementType == BnfTypes.BNF_STRING) {
+      String unquoted = StringUtil.stripQuotesAroundValue(text);
+      // in double-quoted strings: un-escape quotes only leaving the rest \ manageable
+      String result = text.charAt(0) == '"' ? unquoted.replaceAll("\\\\(\"|')", "$1") : unquoted;
+      return (T) result;
+    }
     return null;
   }
 

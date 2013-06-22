@@ -1,0 +1,235 @@
+{
+  elementTypePrefix="FLEX_"
+  tokens = [
+    id = 'regexp:(_|\p{Alpha})\w*'
+    string = 'regexp:"([^"\\]|\\.)*"'
+    number = 'regexp:\p{Digit}+'
+    comment='regexp://.*|/\*((?<!\*/)(.|\n))*'
+    escaped_char='regexp:\\.'
+
+    perc2 = '%%'
+    star = '*'
+    paren1 = '('
+    paren2 = ')'
+    brack1 = '['
+    brack2 = ']'
+    brace1 = '{'
+    brace2 = '}'
+    question = '?'
+    dash = '-'
+    plus = '+'
+    roof = '^'
+    slash2 = '/'
+
+//    dot = '.'
+//    semi = ';'
+//    comma = ','
+//
+//    perc = '%'
+//    angle1 = '<'
+//    angle2 = '>'
+//    or = '|'
+//    slash = '\'
+//    dollar = '$'
+//    colon = ':'
+//    eq = '='
+//    not = '!'
+//    not2 = '~'
+
+    whitespace='regexp:[\n\r ]'
+    char='regexp:[^\{\}\[\]\(\)\+\*\?\\/]'
+  ]
+  recoverUntil(".*_section")=section_recover
+  pin(".*_section")=1
+
+  extends("option_.*")=option
+  elementType("option_.*")=option
+  pin("option_.*")=1
+  extends(".*_expression")=expression
+  name(".*_expression")=expression
+}
+
+flex_file ::= []
+  user_code_section
+  section_div
+  declarations_section
+  section_div
+  lexical_rules_section
+  {pin=1}
+
+private meta line ::= &new_line <<p>>
+private new_line ::= // todo
+private character ::=  escaped_char | id | char | number | '+' | '-' | '/' // todo
+
+private section_div ::= <<line '%%'>>
+private section_recover ::= !section_div
+
+java_class_header ::= package_def? java_imports * <<anything section_recover>> {pin=1}
+java_class_members ::= <<anything java_members_recover>>
+private java_members_recover ::= !('%}')
+java_class_statements ::= <<anything java_statements_recover>>
+private java_statements_recover ::= !('}' | '<' | '%init}' | '%eof}' | '%eofval}')
+
+package_def ::= package java_fqn ';' {pin=1}
+java_imports ::= import static? java_fqn ['.' '*'] ';' {pin=1}
+java_fqn ::= id ( safe_dot id ) * {pin(".*")=1}
+private safe_dot ::= '.' !'*'
+private java_fqn_list ::= java_fqn (',' java_fqn) * {pin(".*")=1}
+
+user_code_section ::= [] java_class_header
+
+// ======================================================
+declarations_section ::=  [] (declaration) *
+
+private declaration ::= macro_definition | state_declaration | option  {recoverUntil=declaration_recover}
+private declaration_recover ::= !('%' | id '=') section_recover
+option ::= option_class
+  | option_implements
+  | option_extends
+  | option_public
+  | option_final
+  | option_abstract
+  | option_api_private
+  | option_user_code
+  | option_init
+  | option_init_throw
+  | option_ctor_arg
+  | option_scan_error
+  | option_buffer_size
+  | option_include
+
+  | option_function
+  | option_integer
+  | option_intwrap
+  | option_type
+  | option_yylexthrow
+
+  | option_eof_val
+  | option_eof
+  | option_eof_throw
+  | option_eof_close
+
+  | option_debug
+  | option_standalone
+
+  | option_cup
+  | option_cup_sym
+  | option_cup_debug
+
+  | option_byacc
+
+  | option_switch
+  | option_table
+  | option_pack
+  | option_7bit
+  | option_full
+  | option_unicode
+  | option_ignore_case
+  | option_count_char
+  | option_count_line
+  | option_count_column
+
+  | option_obsolete
+
+
+option_class ::= '%class' java_fqn
+option_implements ::= '%implements' java_fqn_list
+option_extends ::= '%extends' java_fqn
+option_public ::= '%public'
+option_final ::= '%final'
+option_abstract ::= '%abstract'
+option_api_private ::= '%apiprivate'
+option_user_code ::= <<line '%{'>> java_class_members <<line '%}'>>
+option_init ::= <<line '%init{'>> java_class_statements <<line '%init}'>>
+option_init_throw ::= '%initthrow' java_fqn_list | <<line '%initthrow{'>> java_fqn_list <<line '%initthrow}'>>
+option_ctor_arg ::= '%ctorarg' java_fqn id
+option_scan_error ::= '%scanerror' java_fqn
+option_buffer_size ::= '%buffer' number
+option_include ::= '%include' string // todo
+
+option_function ::= '%function' id
+option_integer ::= '%integer' | '%int'
+option_intwrap ::= '%intwrap'
+option_type ::= '%type' java_fqn
+option_yylexthrow ::= '%yylexthrow' java_fqn_list <<line '%yylexthrow{'>> java_fqn_list <<line '%yylexthrow}'>>
+
+option_eof_val ::= <<line '%eofval{'>> java_class_statements <<line '%eofval}'>>
+option_eof ::= <<line '%eof{'>> java_class_statements <<line '%eof}'>>
+option_eof_throw ::= '%eofthrow' java_fqn_list <<line '%eofthrow{'>> java_fqn_list <<line '%eofthrow}'>>
+option_eof_close ::= '%eofclose' ['false']
+
+option_debug ::= '%debug'
+option_standalone ::= '%standalone'
+
+option_cup ::= '%cup'
+option_cup_sym ::= '%cupsym' java_fqn
+option_cup_debug ::= '%cupdebug'
+
+option_byacc ::= '%byacc'
+
+option_switch ::= '%switch'
+option_table ::= '%table'
+option_pack ::= '%pack'
+option_7bit ::= '%7bit'
+option_full ::= '%full' | '%8bit'
+option_unicode ::= '%unicode' | '%16bit'
+option_ignore_case ::= '%caseless' | '%ignorecase'
+option_count_char ::= '%char'
+option_count_line ::= '%line'
+option_count_column ::= '%column'
+
+option_obsolete ::= '%notunix' | '%yyeof'
+
+state_declaration ::= ('%state' | '%s' | '%xstate' | '%x')
+  state_definition ((','|!(id '=')) state_definition) *
+state_definition ::= id
+
+macro_definition ::= id '=' expression {pin=2}
+
+
+// ======================================================
+lexical_rules_section ::= [] rule +
+
+rule ::= state_list (rule_group | rule_tail ) | rule_tail {pin(".*")=1 recoverUntil=rule_recover}
+private rule_recover ::= !('}' | '.' | '<' | '<<EOF>>' | '^'| atom_group)
+
+private rule_tail ::= rule_tail1 | rule_tail2
+private rule_tail1 ::= '<<EOF>>' action {pin=1}
+private rule_tail2 ::= ['^'] expression look_ahead? action {pin=2}
+private rule_group ::= !('{' id '}') '{' rule + '}' {pin=2}
+
+private state_list ::= '<' state_reference (',' state_reference) * '>' {pin(".*")=1}
+state_reference ::= id
+look_ahead ::= '$' | '/' expression
+action ::= '{' java_class_statements '}' | '|' {pin(".*")=1}
+
+expression ::= choice_expression
+  | sequence_expression
+  | paren_expression
+  | not_expression
+  | quantifier_expression
+  | atom_group
+
+private atom_group ::= class_expression
+  | predefined_class_expression
+  | macro_ref_expression
+  | literal_expression
+choice_expression ::= expression ('|' expression) +
+sequence_expression ::= expression (sequence_op expression) +
+paren_expression ::= '(' expression ')' {pin=1}
+not_expression ::= ('!'|'~') expression {pin=1}
+quantifier_expression ::=  expression ( '*' | '+' | '?' | '{' number [ ',' number] '}' )
+class_expression ::= '[' ['^'] (character [ '-' character] | string | predefined_class) * ']' {pin=1}
+macro_ref_expression ::= '{' macro_reference '}'
+macro_reference ::= id
+literal_expression ::= string | character
+
+sequence_op ::= &('{' id '}') | !('/' | '{' | '|' | ')' | '+' | '*' | '?' | id '=' | '%%' | '%')
+
+predefined_class_expression ::= predefined_class | '.'
+private predefined_class ::= '[:jletter:]'
+  | '[:jletterdigit:]'
+  | '[:letter:]'
+  | '[:digit:]'
+  | '[:uppercase:]'
+  | '[:lowercase:]'

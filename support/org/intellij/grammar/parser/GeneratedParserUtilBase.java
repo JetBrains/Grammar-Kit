@@ -328,7 +328,7 @@ public class GeneratedParserUtilBase {
 
   public static void exit_section_(PsiBuilder builder_,
                                    PsiBuilder.Marker marker,
-                                   IElementType elementType,
+                                   @Nullable IElementType elementType,
                                    boolean result) {
     close_marker_impl_(ErrorState.get(builder_).frameStack.peekLast(), marker, elementType, result);
   }
@@ -370,7 +370,7 @@ public class GeneratedParserUtilBase {
   public static void exit_section_(PsiBuilder builder_,
                                    int level,
                                    PsiBuilder.Marker marker,
-                                   IElementType elementType,
+                                   @Nullable IElementType elementType,
                                    boolean result,
                                    boolean pinned,
                                    @Nullable Parser eatMore) {

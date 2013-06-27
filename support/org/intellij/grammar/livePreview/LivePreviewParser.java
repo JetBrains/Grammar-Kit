@@ -91,7 +91,7 @@ public class LivePreviewParser implements PsiParser {
     ContainerUtil.addIfNotNull(braces, tryMakeBracePair("(", ")", false));
     ContainerUtil.addIfNotNull(braces, tryMakeBracePair("[", "]", false));
     ContainerUtil.addIfNotNull(braces, tryMakeBracePair("<", ">", false));
-    ErrorState.get(builder).braces = braces.toArray(new BracePair[braces.size()]);
+    ErrorState.get(builder).braces = braces.isEmpty()? null : braces.toArray(new BracePair[braces.size()]);
     int level = 0;
     PsiBuilder.Marker mark = enter_section_(builder, level, _NONE_, null);
     boolean result = myGrammarRoot != null && rule(builder, 1, myGrammarRoot, Collections.<String, Parser>emptyMap());

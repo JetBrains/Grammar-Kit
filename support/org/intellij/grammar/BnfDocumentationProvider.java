@@ -34,6 +34,7 @@ import com.intellij.psi.impl.source.tree.LeafPsiElement;
 import com.intellij.ui.content.Content;
 import com.intellij.ui.popup.AbstractPopup;
 import org.intellij.grammar.analysis.BnfFirstNextAnalyzer;
+import org.intellij.grammar.generator.ExpressionHelper;
 import org.intellij.grammar.generator.ParserGeneratorUtil;
 import org.intellij.grammar.generator.RuleGraphHelper;
 import org.intellij.grammar.psi.*;
@@ -142,6 +143,11 @@ public class BnfDocumentationProvider implements DocumentationProvider {
       for (LeafPsiElement r : sortedExternalRules) {
         docBuilder.append(" ").append(r.getText()).append(RuleGraphHelper.getCardinalityText(map.get(r)));
       }
+    }
+    ExpressionHelper.ExpressionInfo expressionInfo = ExpressionHelper.getCached(file).getExpressionInfo(rule);
+    if (expressionInfo != null) {
+      docBuilder.append("<br><h1>Priority table:</h1>");
+      expressionInfo.dumpPriorityTable(docBuilder.append("<pre>")).append("</pre>");
     }
     return docBuilder.toString();
   }

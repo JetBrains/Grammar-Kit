@@ -277,6 +277,11 @@ public class ExpressionHelper {
     public String toString() {
       StringBuilder sb = new StringBuilder("Expression root: " + rootRule.getName());
       sb.append("\nOperator priority table:\n");
+      dumpPriorityTable(sb);
+      return sb.toString();
+    }
+
+    public StringBuilder dumpPriorityTable(StringBuilder sb) {
       for (int i = 0; i < nextPriority; i++) {
         sb.append(i).append(":");
         for (BnfRule rule : priorityMap.keySet()) {
@@ -287,7 +292,7 @@ public class ExpressionHelper {
         }
         sb.append("\n");
       }
-      return sb.toString();
+      return sb;
     }
 
     public int getPriority(BnfRule subRule) {

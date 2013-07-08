@@ -16,6 +16,7 @@
 package org.intellij.grammar.psi.impl;
 
 import com.intellij.openapi.util.Comparing;
+import com.intellij.openapi.util.Ref;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiRecursiveElementWalkingVisitor;
@@ -209,5 +210,23 @@ public class GrammarUtil {
         super.visitElement(element);
       }
     });
+  }
+
+  public static String getMethodName(BnfRule rule, PsiElement element) {
+    final BnfExpression target = PsiTreeUtil.getParentOfType(element, BnfExpression.class, false);
+    String ruleName = rule.getName();
+    if (target == null) return ruleName;
+    final Ref<String> ref = Ref.create(null);
+    processExpressionNames(rule, ruleName, rule.getExpression(), new PairProcessor<String, BnfExpression>() {
+      @Override
+      public boolean process(String funcName, BnfExpression expression) {
+        if (target == expression) {
+          ref.set(funcName);
+          return false;
+        }
+        return true;
+      }
+    });
+    return ref.get();
   }
 }

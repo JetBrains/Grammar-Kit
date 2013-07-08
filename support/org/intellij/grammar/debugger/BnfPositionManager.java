@@ -38,7 +38,6 @@ import com.sun.jdi.AbsentInformationException;
 import com.sun.jdi.Location;
 import com.sun.jdi.ReferenceType;
 import com.sun.jdi.request.ClassPrepareRequest;
-import org.intellij.grammar.BnfRuleLineMarkerProvider;
 import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.generator.ParserGeneratorUtil;
 import org.intellij.grammar.parser.GeneratedParserUtilBase;
@@ -193,7 +192,7 @@ public class BnfPositionManager implements PositionManager {
   }
 
   private static int getLineNumber(PsiClass aClass, Document document, int currentLine, BnfRule rule, PsiElement element) {
-    String methodName = BnfRuleLineMarkerProvider.getMethodName(rule, element);
+    String methodName = GrammarUtil.getMethodName(rule, element);
     PsiMethod[] methods = aClass.findMethodsByName(methodName, false);
     PsiCodeBlock body = methods.length == 1? methods[0].getBody() : null;
     PsiStatement[] statements = body != null ? body.getStatements() : PsiStatement.EMPTY_ARRAY;

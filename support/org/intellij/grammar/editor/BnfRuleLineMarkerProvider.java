@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.intellij.grammar;
+package org.intellij.grammar.editor;
 
 import com.intellij.codeInsight.daemon.RelatedItemLineMarkerInfo;
 import com.intellij.codeInsight.daemon.RelatedItemLineMarkerProvider;
@@ -23,13 +23,13 @@ import com.intellij.openapi.actionSystem.ActionManager;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.keymap.KeymapUtil;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.util.Ref;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.psi.NavigatablePsiElement;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.util.PsiTreeUtil;
-import com.intellij.util.PairProcessor;
 import gnu.trove.THashSet;
+import org.intellij.grammar.BnfIcons;
+import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.generator.ParserGeneratorUtil;
 import org.intellij.grammar.generator.RuleGraphHelper;
 import org.intellij.grammar.java.JavaHelper;
@@ -104,24 +104,6 @@ public class BnfRuleLineMarkerProvider extends RelatedItemLineMarkerProvider {
     Project project = element.getProject();
     String parserClass = ParserGeneratorUtil.getAttribute(rule, KnownAttribute.PARSER_CLASS);
     if (StringUtil.isEmpty(parserClass)) return null;
-    return JavaHelper.getJavaHelper(project).findClassMethod(parserClass, getMethodName(rule, element), -1);
-  }
-
-  public static String getMethodName(BnfRule rule, PsiElement element) {
-    final BnfExpression target = PsiTreeUtil.getParentOfType(element, BnfExpression.class, false);
-    String ruleName = rule.getName();
-    if (target == null) return ruleName;
-    final Ref<String> ref = Ref.create(null);
-    GrammarUtil.processExpressionNames(rule, ruleName, rule.getExpression(), new PairProcessor<String, BnfExpression>() {
-      @Override
-      public boolean process(String funcName, BnfExpression expression) {
-        if (target == expression) {
-          ref.set(funcName);
-          return false;
-        }
-        return true;
-      }
-    });
-    return ref.get();
+    return JavaHelper.getJavaHelper(project).findClassMethod(parserClass, GrammarUtil.getMethodName(rule, element), -1);
   }
 }

@@ -30,6 +30,7 @@ import com.intellij.openapi.wm.ToolWindowId;
 import com.intellij.openapi.wm.ToolWindowManager;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiManager;
+import com.intellij.psi.PsiNamedElement;
 import com.intellij.psi.impl.source.tree.LeafPsiElement;
 import com.intellij.ui.content.Content;
 import com.intellij.ui.popup.AbstractPopup;
@@ -120,29 +121,20 @@ public class BnfDocumentationProvider implements DocumentationProvider {
     }
     else {
       if (sortedPublicRules.size() > 0) {
-        docBuilder.append("<br><h1>Contains public rules:</h1>");
-        for (BnfRule r : sortedPublicRules) {
-          docBuilder.append(" ").append(r.getName()).append(RuleGraphHelper.getCardinalityText(map.get(r)));
-        }
+        printElements(map, sortedPublicRules, docBuilder.append("<br><h1>Contains public rules:</h1>"));
       }
       else {
         docBuilder.append("<h2>Contains no public rules</h2>");
       }
       if (sortedTokens.size() > 0) {
-        docBuilder.append("<h1>Contains tokens:</h1>");
-        for (BnfExpression r : sortedTokens) {
-          docBuilder.append(" ").append(r.getText()).append(RuleGraphHelper.getCardinalityText(map.get(r)));
-        }
+        printElements(map, sortedTokens, docBuilder.append("<h1>Contains tokens:</h1>"));
       }
       else {
         docBuilder.append("<h2>Contains no tokens</h2>");
       }
     }
     if (!sortedExternalRules.isEmpty()) {
-      docBuilder.append("<br><h1>Contains external rules:</h1>");
-      for (LeafPsiElement r : sortedExternalRules) {
-        docBuilder.append(" ").append(r.getText()).append(RuleGraphHelper.getCardinalityText(map.get(r)));
-      }
+      printElements(map, sortedExternalRules, docBuilder.append("<br><h1>Contains external rules:</h1>"));
     }
     ExpressionHelper.ExpressionInfo expressionInfo = ExpressionHelper.getCached(file).getExpressionInfo(rule);
     if (expressionInfo != null) {
@@ -150,6 +142,15 @@ public class BnfDocumentationProvider implements DocumentationProvider {
       expressionInfo.dumpPriorityTable(docBuilder.append("<pre>")).append("</pre>");
     }
     return docBuilder.toString();
+  }
+
+  public static void printElements(Map<PsiElement, RuleGraphHelper.Cardinality> map,
+                                   Collection<? extends PsiElement> collection,
+                                   StringBuilder sb) {
+    for (PsiElement r : collection) {
+      sb.append(" ").append(r instanceof PsiNamedElement? ((PsiNamedElement)r).getName() : r.getText()).
+        append(RuleGraphHelper.getCardinalityText(map.get(r)));
+    }
   }
 
   public static void updateDocPopup(final PsiElement element, final Getter<String> docGetter) {

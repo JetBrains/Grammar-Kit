@@ -17,6 +17,7 @@ public class BnfTestSuite extends TestCase {
     testSuite.addTestSuite(BnfLivePreviewParserTest.class);
     testSuite.addTestSuite(BnfAttributeDescriptionTest.class);
     testSuite.addTestSuite(BnfFirstNextTest.class);
+    testSuite.addTestSuite(BnfRuleGraphTest.class);
     testSuite.addTestSuite(BnfCompletionTest.class);
     testSuite.addTestSuite(BnfInspectionTest.class);
     testSuite.addTestSuite(BnfInlineRuleTest.class);

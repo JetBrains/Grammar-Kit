@@ -56,6 +56,7 @@ public class RuleGraphHelper {
   private final Map<BnfRule, Map<PsiElement, Cardinality>> myRuleContentsMap;
   private final MultiMap<BnfRule,BnfRule> myRulesGraph;
   private final Set<BnfRule> myRulesWithTokens = new THashSet<BnfRule>();
+  private final Map<String, PsiElement> myExternalElements = new THashMap<String, PsiElement>();
 
   private static final LeafPsiElement LEFT_MARKER = new LeafPsiElement(new IElementType("LEFT_MARKER", Language.ANY, false) {}, "LEFT_MARKER");
   private static final IElementType EXTERNAL_TYPE = new IElementType("EXTERNAL_TYPE", Language.ANY, false) {};
@@ -327,7 +328,7 @@ public class RuleGraphHelper {
       BnfRule targetRule = myFile.getRule(tree.getText());
       if (targetRule != null) {
         if (Rule.isExternal(targetRule)) {
-          result = psiMap(new LeafPsiElement(EXTERNAL_TYPE, targetRule.getName()), REQUIRED);
+          result = psiMap(newExternalPsi(targetRule.getName()), REQUIRED);
         }
         else if (Rule.isLeft(targetRule)) {
           if (!Rule.isInner(targetRule) && !Rule.isPrivate(targetRule)) {
@@ -365,9 +366,11 @@ public class RuleGraphHelper {
         BnfExpression ruleRef = expressionList.get(0);
         BnfRule metaRule = myFile.getRule(ruleRef.getText());
         if (metaRule == null) {
-          result = psiMap(new LeafPsiElement(EXTERNAL_TYPE, "#"+ruleRef.getText()), REQUIRED);
+          result = psiMap(newExternalPsi("#" + ruleRef.getText()), REQUIRED);
         }
         else if (Rule.isPrivate(metaRule)) {
+          if (visited.contains(ruleRef)) return psiMap(metaRule, REQUIRED);
+
           result = new HashMap<PsiElement, Cardinality>();
           Map<PsiElement, Cardinality> metaResults = collectMembers(rule, ruleRef, new HashSet<PsiElement>());
           List<String> params = null;
@@ -701,5 +704,12 @@ public class RuleGraphHelper {
     return thatRule == null || thatRule == grammarRoot || Rule.isPrivate(thatRule) || Rule.isExternal(thatRule);
   }
 
-
+  @NotNull
+  private PsiElement newExternalPsi(String name) {
+    PsiElement e = myExternalElements.get(name);
+    if (e == null) {
+      myExternalElements.put(name, e = new LeafPsiElement(EXTERNAL_TYPE, name));
+    }
+    return e;
+  }
 }

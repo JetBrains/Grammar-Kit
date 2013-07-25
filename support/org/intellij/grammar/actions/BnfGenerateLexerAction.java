@@ -132,7 +132,7 @@ public class BnfGenerateLexerAction extends AnAction {
         regexpTokens.put(name, javaRegexp2JFlex(ParserGeneratorUtil.getRegexpTokenRegexp(token)));
       }
       else {
-        simpleTokens.put(name, token);
+        simpleTokens.put(name, text2JFlex(token, false));
       }
       maxLen[0] = Math.max(name.length() + 2, maxLen[0]);
     }
@@ -144,7 +144,7 @@ public class BnfGenerateLexerAction extends AnAction {
         if (text != null && bnfFile.getRule(text) == null) {
           String name = text.toUpperCase(Locale.ENGLISH);
           if (!simpleTokens.containsKey(name) && !regexpTokens.containsKey(name)) {
-            simpleTokens.put(name, text);
+            simpleTokens.put(name, text2JFlex(text, false));
             maxLen[0] = Math.max(text.length(), maxLen[0]);
           }
         }
@@ -177,18 +177,18 @@ public class BnfGenerateLexerAction extends AnAction {
     int start = 0;
     StringBuilder sb = new StringBuilder();
     while (m.find(start)) {
-      sb.append(javaRegexp2JFlexInner(javaRegexp.substring(start, m.start())));
+      sb.append(text2JFlex(javaRegexp.substring(start, m.start()), true));
       // escape only double quotes inside character class [..]
       sb.append(javaRegexp.substring(m.start(), m.end()).replaceAll("\"", "\\\\\""));
       start = m.end();
     }
-    sb.append(javaRegexp2JFlexInner(javaRegexp.substring(start)));
+    sb.append(text2JFlex(javaRegexp.substring(start), true));
     return sb.toString();
   }
 
-  private static String javaRegexp2JFlexInner(String javaRegexp) {
-    return javaRegexp.
-      replaceAll("\"", "\\\\\"").
+  private static String text2JFlex(String text, boolean isRegexp) {
+    String text1 = text.replaceAll("\"", "\\\\\"");
+    return !isRegexp ? text1 : text1.
       replaceAll("(/+)", "\"$1\"").
       replaceAll("\\\\d", "[0-9]").
       replaceAll("\\\\D", "[^0-9]").

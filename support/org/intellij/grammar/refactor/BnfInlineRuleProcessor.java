@@ -25,7 +25,7 @@ import com.intellij.psi.PsiReference;
 import com.intellij.psi.search.searches.ReferencesSearch;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.refactoring.BaseRefactoringProcessor;
-import com.intellij.refactoring.util.RefactoringUtil;
+import com.intellij.refactoring.util.CommonRefactoringUtil;
 import com.intellij.usageView.UsageInfo;
 import com.intellij.usageView.UsageViewDescriptor;
 import com.intellij.util.IncorrectOperationException;
@@ -89,9 +89,8 @@ public class BnfInlineRuleProcessor extends BaseRefactoringProcessor {
   protected void performRefactoring(UsageInfo[] usages) {
     BnfExpression expression = myRule.getExpression();
     boolean meta = ParserGeneratorUtil.Rule.isMeta(myRule);
-    LOG.assertTrue(expression != null);
 
-    RefactoringUtil.sortDepthFirstRightLeftOrder(usages);
+    CommonRefactoringUtil.sortDepthFirstRightLeftOrder(usages);
     for (UsageInfo info : usages) {
       try {
         final BnfExpression element = (BnfExpression)info.getElement();

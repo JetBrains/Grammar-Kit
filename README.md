@@ -32,11 +32,9 @@ Other open-source plugins built with Grammar-Kit:
 
 Recent changes
 --------------
-1.1.2
+1.1.4
 
-* Context menu: Generate JFlex \*.flex file
-* Context menu: Run JFlex generator
-* Context menu: Create custom parser util class
+* Generator: parser size reduced (most of PsiBuilder-specific logic moved to GPUB)
 
 
 Quick documentation:
@@ -225,6 +223,11 @@ java -jar expression-console-sample.jar
 
 Change log
 ==========
+1.1.3
+
+* Extensibility: "extends" hooks in GPUB
+* Generator: compact token sequence parsing
+
 1.1.2
 
 * Context menu: Generate JFlex \*.flex file

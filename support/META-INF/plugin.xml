@@ -1,8 +1,8 @@
 <idea-plugin url="https://github.com/JetBrains/Grammar-Kit" version="2">
   <id>org.jetbrains.idea.grammar</id>
-  <version>1.1.3</version>
+  <version>1.1.4</version>
   <vendor email="gregory.shrago@jetbrains.com" logo="">Gregory Shrago</vendor>
-  <idea-version since-build="129.0" until-build=""/>
+  <idea-version since-build="130.1365" until-build=""/>
 
   <name>Grammar-Kit</name>
   <description>Edit, manipulate, analyze BNF grammars and generate readable parser/PSI code and a JFlex lexer</description>
@@ -12,6 +12,10 @@
 
   <change-notes>
     <![CDATA[
+    <p>1.1.4</p>
+    <ul>
+        <li>Generator: parser size reduced (most of PsiBuilder-specific logic moved to GPUB)</li>
+    </ul>
     <p>1.1.3</p>
     <ul>
         <li>Extensibility: "extends" hooks in GPUB</li>
@@ -22,17 +26,6 @@
         <li>Context menu: Generate JFlex *.flex file</li>
         <li>Context menu: Run JFlex generator</li>
         <li>Context menu: Create custom parser util class</li>
-    </ul>
-    <p>1.1.1</p>
-    <ul>
-        <li>IDEA Platform 12.1 compatibility</li>
-    </ul>
-    <p>1.1.0</p>
-    <ul>
-        <li>Live Preview mode for fast prototyping</li>
-        <li>Live Preview: <b>Highlight Grammar</b> action helps visually debug grammars</li>
-        <li><b>stubParserClass</b> attribute renamed to <b>parserUtilClass</b> for consistency</li>
-        <li>StubIndex support via <b>stubClass</b> attribute or direct <b>implements/mixin</b> approach</li>
     </ul>
     ]]>
   </change-notes>

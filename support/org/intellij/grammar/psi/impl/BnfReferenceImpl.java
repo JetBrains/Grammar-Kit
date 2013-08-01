@@ -53,7 +53,8 @@ public class BnfReferenceImpl<T extends BnfCompositeElement> extends PsiReferenc
       BnfRule rule = PsiTreeUtil.getParentOfType(myElement, BnfRule.class);
       String parserClass = ParserGeneratorUtil.getAttribute(rule, KnownAttribute.PARSER_UTIL_CLASS);
       if (StringUtil.isNotEmpty(parserClass)) {
-        result = JavaHelper.getJavaHelper(myElement.getProject()).findClassMethod(parserClass, myElement.getText(), paramCount);
+        // paramCount + 2 (builder and level)
+        result = JavaHelper.getJavaHelper(myElement.getProject()).findClassMethod(parserClass, myElement.getText(), paramCount + 2);
       }
     }
     return result;

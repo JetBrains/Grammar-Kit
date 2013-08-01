@@ -24,6 +24,7 @@ import com.intellij.psi.*;
 import com.intellij.psi.impl.FakePsiElement;
 import com.intellij.psi.impl.source.resolve.reference.impl.providers.JavaClassReferenceProvider;
 import com.intellij.psi.search.GlobalSearchScope;
+import com.intellij.util.ArrayUtil;
 import com.intellij.util.ObjectUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -61,7 +62,7 @@ public class JavaHelper {
   @Nullable
   public NavigationItem findPackage(@Nullable String packageName) { return null; }
   @Nullable
-  public NavigatablePsiElement findClassMethod(String className, String methodName, int paramCount) { return null; }
+  public NavigatablePsiElement findClassMethod(@Nullable String className, @Nullable String methodName, int paramCount, @NotNull String... paramTypes) { return null; }
   @NotNull
   public List<NavigatablePsiElement> getClassMethods(String className, boolean staticMethods) { return Collections.emptyList(); }
   @NotNull
@@ -95,15 +96,35 @@ public class JavaHelper {
     }
 
     @Override
-    public PsiMethod findClassMethod(String className, String methodName, int paramCount) {
-      PsiClass aClass = findClass(className);
-      PsiMethod[] methods = aClass == null? PsiMethod.EMPTY_ARRAY : aClass.findMethodsByName(methodName, true);
+    public PsiMethod findClassMethod(@Nullable String className, @Nullable String methodName, int paramCount, @NotNull String... paramTypes) {
+      PsiClass aClass = className != null ? findClass(className) : null;
+      PsiMethod[] methods = aClass == null || methodName == null? PsiMethod.EMPTY_ARRAY : aClass.findMethodsByName(methodName, true);
       for (PsiMethod method : methods) {
-        if (paramCount < 0 || paramCount + 2 == method.getParameterList().getParametersCount()) {
+        if (paramCount < 0 || paramCount == method.getParameterList().getParametersCount()) {
+          if (paramTypes.length > 0 && !isAssignable(method, paramTypes)) {
+            continue;
+          }
           return method;
         }
       }
-      return methods.length > 0 ? methods[0] : null;
+      return ArrayUtil.getFirstElement(methods);
+    }
+
+    private static boolean isAssignable(PsiMethod method, String[] paramTypes) {
+      PsiParameterList parameterList = method.getParameterList();
+      if (parameterList.getParametersCount() < paramTypes.length) return false;
+      PsiElementFactory elementFactory = JavaPsiFacade.getElementFactory(method.getProject());
+      PsiParameter[] psiParameters = parameterList.getParameters();
+      boolean result = false;
+      for (int i = 0; i < paramTypes.length; i++) {
+        String paramType = paramTypes[i];
+        PsiParameter parameter = psiParameters[i];
+        PsiType psiType = parameter.getType();
+        PsiType typeFromText = elementFactory.createTypeFromText(paramType, parameter);
+        result = psiType.isAssignableFrom(typeFromText);
+        if (!result) break;
+      }
+      return result;
     }
 
     @NotNull
@@ -168,7 +189,7 @@ public class JavaHelper {
 
     @Nullable
     @Override
-    public NavigatablePsiElement findClassMethod(String className, String methodName, int paramCount) {
+    public NavigatablePsiElement findClassMethod(@Nullable String className, @Nullable String methodName, int paramCount, @NotNull String... paramTypes) {
       if (className == null) return null;
       try {
         Class<?> aClass = Class.forName(className);
@@ -236,7 +257,7 @@ public class JavaHelper {
 
     @Nullable
     @Override
-    public NavigatablePsiElement findClassMethod(String className, final String methodName, int paramCount) {
+    public NavigatablePsiElement findClassMethod(@Nullable String className, @Nullable final String methodName, int paramCount, @NotNull String... paramTypes) {
       MyElement<ClassInfo> classElement = className == null? null : (MyElement<ClassInfo>)findClass(className);
       ClassInfo aClass = classElement == null? null : classElement.myDelegate;
       if (aClass == null) return null;
@@ -288,7 +309,7 @@ public class JavaHelper {
 
       private final ClassInfo myInfo;
 
-      public MyClassVisitor(ClassInfo info) {
+      MyClassVisitor(ClassInfo info) {
         myInfo = info;
         state = State.CLASS;
       }
@@ -368,7 +389,7 @@ public class JavaHelper {
 
       private final StringBuilder myBuilder = new StringBuilder();
 
-      public MySignatureVisitor(MethodInfo methodInfo) {
+      MySignatureVisitor(MethodInfo methodInfo) {
         myMethodInfo = methodInfo;
       }
 
@@ -473,7 +494,7 @@ public class JavaHelper {
           switch (state) {
             case PARAM:
               myMethodInfo.types.add(myBuilder.toString());
-              myMethodInfo.types.add("p"+(myMethodInfo.types.size() / 2));
+              myMethodInfo.types.add("p" + (myMethodInfo.types.size() / 2));
               myBuilder.setLength(0);
               break main;
             case RETURN:
@@ -486,6 +507,8 @@ public class JavaHelper {
             case GENERIC:
               myBuilder.append(">");
               break;
+            case CLASS:
+              break;
           }
         }
       }
@@ -496,7 +519,7 @@ public class JavaHelper {
 
     private final T myDelegate;
 
-    public MyElement(T delegate) {
+    MyElement(T delegate) {
       myDelegate = delegate;
     }
 

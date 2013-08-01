@@ -26,10 +26,9 @@ import com.intellij.util.ArrayUtil;
 import com.intellij.util.IncorrectOperationException;
 import com.intellij.util.ObjectUtils;
 import org.intellij.grammar.KnownAttribute;
+import org.intellij.grammar.generator.ParserGeneratorUtil;
 import org.intellij.grammar.java.JavaHelper;
-import org.intellij.grammar.psi.BnfAttr;
-import org.intellij.grammar.psi.BnfListEntry;
-import org.intellij.grammar.psi.BnfLiteralExpression;
+import org.intellij.grammar.psi.*;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -54,7 +53,9 @@ public class GrammarPsiImplUtil {
       new PsiReferenceBase<BnfListEntry>(o, TextRange.from(id.getStartOffsetInParent(), id.getTextLength())) {
         @Override
         public PsiElement resolve() {
-          return javaHelper.findClassMethod(psiImplUtilClass, getElement().getText(), -1);
+          BnfRule rule = PsiTreeUtil.getParentOfType(getElement(), BnfRule.class);
+          String implClass = rule == null ? null : ParserGeneratorUtil.getQualifiedRuleClassName(rule, true);
+          return javaHelper.findClassMethod(psiImplUtilClass, getElement().getText(), -1, implClass);
         }
 
         @NotNull

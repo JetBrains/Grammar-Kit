@@ -187,28 +187,31 @@ public class ParserGenerator {
       }
       Map<String, String> infClasses = new HashMap<String, String>();
       String psiPackage = getPsiPackage(myFile);
+      String suffix = getPsiImplSuffix(myFile);     
+      String psiImplPackage = getPsiImplPackage(myFile);
+      
       for (String ruleName : sortedPsiRules.keySet()) {
         BnfRule rule = myFile.getRule(ruleName);
         String psiClass = psiPackage + "." + getRulePsiClassName(rule, myRuleClassPrefix);
+        String psiImplClass = psiImplPackage + "." + getRulePsiClassName(rule, myRuleClassPrefix) + suffix;
+        
         infClasses.put(ruleName, psiClass);
         File psiFile = new File(myOutputPath, psiClass.replace('.', File.separatorChar) + ".java");
         openOutput(psiFile);
         try {
-          generatePsiIntf(myGraphHelper, rule, psiClass, getSuperInterfaceNames(rule, psiPackage));
+          generatePsiIntf(myGraphHelper, rule, psiClass, getSuperInterfaceNames(rule, psiPackage), psiImplClass);
         }
         finally {
           closeOutput();
         }
       }
-      String psiImplPackage = getPsiImplPackage(myFile);
-      String suffix = getPsiImplSuffix(myFile);
       for (String ruleName : sortedPsiRules.keySet()) {
         BnfRule rule = myFile.getRule(ruleName);
-        String psiClass = psiImplPackage + "." + getRulePsiClassName(rule, myRuleClassPrefix) + suffix;
-        File psiFile = new File(myOutputPath, psiClass.replace('.', File.separatorChar) + ".java");
+        String psiImplClass = psiImplPackage + "." + getRulePsiClassName(rule, myRuleClassPrefix) + suffix;
+        File psiFile = new File(myOutputPath, psiImplClass.replace('.', File.separatorChar) + ".java");
         openOutput(psiFile);
         try {
-          generatePsiImpl(myGraphHelper, rule, psiClass, infClasses.get(ruleName), getSuperClassName(rule, psiImplPackage, suffix));
+          generatePsiImpl(myGraphHelper, rule, psiImplClass, infClasses.get(ruleName), getSuperClassName(rule, psiImplPackage, suffix));
         }
         finally {
           closeOutput();
@@ -1207,7 +1210,11 @@ public class ParserGenerator {
 
 
   /*PSI******************************************************************/
-  private void generatePsiIntf(RuleGraphHelper helper, BnfRule rule, String psiClass, Collection<String> psiSupers) {
+  private void generatePsiIntf(RuleGraphHelper helper,
+                               BnfRule rule,
+                               String psiClass,
+                               Collection<String> psiSupers,
+                               String psiImplClass) {
     String psiImplUtilClass = getRootAttribute(myFile, KnownAttribute.PSI_IMPL_UTIL_CLASS);
     String stubClass = getAttribute(rule, KnownAttribute.STUB_CLASS);
     if (StringUtil.isNotEmpty(stubClass)) {
@@ -1239,7 +1246,7 @@ public class ParserGenerator {
     }
     for (Pair<String, String> entry : methods) {
       if (entry.second == null) {
-        generateUtilMethod(entry.first, psiImplUtilClass, true, javaHelper, shortener);
+        generateUtilMethod(entry.first, psiImplUtilClass, true, psiImplClass, javaHelper, shortener);
       }
       else {
         generateUserPsiAccessors(rule, helper, entry.first, entry.second, true, shortener);
@@ -1322,7 +1329,7 @@ public class ParserGenerator {
     }
     for (Pair<String, String> entry : methods) {
       if (entry.second == null) {
-        generateUtilMethod(entry.first, psiImplUtilClass, false, javaHelper, shortener);
+        generateUtilMethod(entry.first, psiImplUtilClass, false, psiClass, javaHelper, shortener);
       }
       else {
         generateUserPsiAccessors(rule, helper, entry.first, entry.second, false, shortener);
@@ -1539,9 +1546,10 @@ public class ParserGenerator {
   private void generateUtilMethod(String methodName,
                                   String psiImplUtilClass,
                                   boolean intf,
-                                  final JavaHelper javaHelper,
+                                  String psiImplClass,
+                                  JavaHelper javaHelper,
                                   Function<String, String> shortener) {
-    NavigatablePsiElement method = psiImplUtilClass == null ? null : javaHelper.findClassMethod(psiImplUtilClass, methodName, -1);
+    NavigatablePsiElement method = psiImplUtilClass == null ? null : javaHelper.findClassMethod(psiImplUtilClass, methodName, -1, psiImplClass);
     List<String> methodTypes = method == null ? Arrays.asList("void") : javaHelper.getMethodTypes(method);
     String returnType = shortener.fun(methodTypes.get(0));
     List<String> paramsTypes = methodTypes.subList(1, methodTypes.size());
@@ -1561,7 +1569,6 @@ public class ParserGenerator {
     }
     out((intf ? "" : "public ") + returnType + " " + methodName + "(" + sb.toString() + ")" + (intf ? ";" : " {"));
     if (!intf) {
-
       sb.setLength(0);
       count = -1;
       for (String s : paramsTypes) {

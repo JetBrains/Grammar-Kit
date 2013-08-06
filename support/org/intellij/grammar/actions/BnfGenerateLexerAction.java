@@ -169,7 +169,7 @@ public class BnfGenerateLexerAction extends AnAction {
 
     StringWriter out = new StringWriter();
     ve.evaluate(context, out, "lexer.flex.template", new InputStreamReader(getClass().getResourceAsStream("/templates/lexer.flex.template")));
-    return out.toString();
+    return StringUtil.convertLineSeparators(out.toString());
   }
 
   private static String javaRegexp2JFlex(String javaRegexp) {

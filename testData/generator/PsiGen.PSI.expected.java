@@ -279,6 +279,21 @@ public interface XMulExpr extends XExpr {
   List<XExpr> getExprList();
 
 }
+// ---- XNamedElement.java -----------------
+//header.txt
+package generated.psi;
+
+import java.util.List;
+import org.jetbrains.annotations.*;
+import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiNameIdentifierOwner;
+
+public interface XNamedElement extends PsiNameIdentifierOwner {
+
+  @NotNull
+  XIdentifier getIdentifier();
+
+}
 // ---- XPlusExpr.java -----------------
 //header.txt
 package generated.psi;
@@ -770,6 +785,38 @@ public class XMulExprImpl extends XExprImpl implements XMulExpr {
   }
 
 }
+// ---- XNamedElementImpl.java -----------------
+//header.txt
+package generated.psi.impl;
+
+import java.util.List;
+import org.jetbrains.annotations.*;
+import com.intellij.lang.ASTNode;
+import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiElementVisitor;
+import com.intellij.psi.util.PsiTreeUtil;
+import static generated.GeneratedTypes.*;
+import com.intellij.extapi.psi.ASTWrapperPsiElement;
+import generated.psi.*;
+
+public class XNamedElementImpl extends ASTWrapperPsiElement implements XNamedElement {
+
+  public XNamedElementImpl(ASTNode node) {
+    super(node);
+  }
+
+  @Override
+  @NotNull
+  public XIdentifier getIdentifier() {
+    return findNotNullChildByClass(XIdentifier.class);
+  }
+
+  public void accept(@NotNull PsiElementVisitor visitor) {
+    if (visitor instanceof XVisitor) ((XVisitor)visitor).visitNamedElement(this);
+    else super.accept(visitor);
+  }
+
+}
 // ---- XPlusExprImpl.java -----------------
 //header.txt
 package generated.psi.impl;
@@ -987,6 +1034,7 @@ package generated.psi;
 
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElementVisitor;
+import com.intellij.psi.PsiNameIdentifierOwner;
 
 public class XVisitor extends PsiElementVisitor {
 
@@ -1038,6 +1086,10 @@ public class XVisitor extends PsiElementVisitor {
     visitExpr(o);
   }
 
+  public void visitNamedElement(@NotNull XNamedElement o) {
+    visitPsiNameIdentifierOwner(o);
+  }
+
   public void visitPlusExpr(@NotNull XPlusExpr o) {
     visitExpr(o);
   }
@@ -1065,6 +1117,10 @@ public class XVisitor extends PsiElementVisitor {
 
   public void visitSpecialRef(@NotNull XSpecialRef o) {
     visitRefExpr(o);
+  }
+
+  public void visitPsiNameIdentifierOwner(@NotNull PsiNameIdentifierOwner o) {
+    visitElement(o);
   }
 
   public void visitRoot(@NotNull XRoot o) {

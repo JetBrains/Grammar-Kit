@@ -56,3 +56,5 @@ left LeftShadow ::= ',' identifier
 
 private fixMetaRule ::= <<blockOf identifier>>
 publicMethodToCall ::= identifier {elementType=""}
+
+fake namedElement ::= identifier {implements="com.intellij.psi.PsiNameIdentifierOwner"}

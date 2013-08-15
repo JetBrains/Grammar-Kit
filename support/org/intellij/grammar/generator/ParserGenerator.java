@@ -235,13 +235,14 @@ public class ParserGenerator {
     String superIntf = ObjectUtils.notNull(ContainerUtil.getFirstItem(getRootAttribute(myFile, KnownAttribute.IMPLEMENTS)),
                                            KnownAttribute.IMPLEMENTS.getDefaultValue().get(0));
     String shortSuperIntf = StringUtil.getShortName(superIntf);
-    Function<String, String> shortener = generateClassHeader(
-      psiClass, Arrays.asList("org.jetbrains.annotations.*", BnfConstants.PSI_ELEMENT_VISITOR_CLASS, superIntf),
-      "", false, BnfConstants.PSI_ELEMENT_VISITOR_CLASS);
+    List<String> imports = ContainerUtil.newArrayList("org.jetbrains.annotations.*", BnfConstants.PSI_ELEMENT_VISITOR_CLASS, superIntf);
+    for (BnfRule rule : sortedRules.values()) {
+      imports.addAll(getSuperInterfaceNames(rule, StringUtil.getPackageName(psiClass)));
+    }
+    Function<String, String> shortener = generateClassHeader(psiClass, imports, "", false, BnfConstants.PSI_ELEMENT_VISITOR_CLASS);
     Set<String> visited = new HashSet<String>();
     Set<String> all = new TreeSet<String>();
-    for (String ruleName : sortedRules.keySet()) {
-      BnfRule rule = sortedRules.get(ruleName);
+    for (BnfRule rule : sortedRules.values()) {
       String methodName = getRulePsiClassName(rule, "");
       visited.add(methodName);
       out("public void visit" + methodName + "(@NotNull " + getRulePsiClassName(rule, myRuleClassPrefix) + " o) {");

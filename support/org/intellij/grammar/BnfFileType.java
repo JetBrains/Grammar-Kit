@@ -28,7 +28,7 @@ import javax.swing.*;
  */
 public class BnfFileType extends LanguageFileType {
 
-  public static BnfFileType INSTANCE = new BnfFileType();
+  public static final BnfFileType INSTANCE = new BnfFileType();
 
   protected BnfFileType() {
     super(BnfLanguage.INSTANCE);

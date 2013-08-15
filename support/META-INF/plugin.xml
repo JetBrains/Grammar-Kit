@@ -81,6 +81,11 @@
       <className>org.intellij.grammar.intention.BnfFlipChoiceIntention</className>
       <category>Grammar</category>
     </intentionAction>
+
+
+    <fileTypeFactory implementation="org.intellij.jflex.parser.JFlexFileTypeFactory"/>
+    <lang.parserDefinition language="JFlex" implementationClass="org.intellij.jflex.parser.JFlexParserDefinition"/>
+
   </extensions>
   <project-components>
     <component>

@@ -1,10 +1,28 @@
 {
+  classHeader="header.txt"
+  parserClass="org.intellij.jflex.parser.JFlexParser"
+  parserUtilClass="org.intellij.jflex.parser.JFlexParserUtil"
+
+  implements="org.intellij.jflex.psi.JFlexCompositeElement"
+  extends="org.intellij.jflex.psi.impl.JFlexCompositeElementImpl"
+
+  psiClassPrefix="JFlex"
+  psiImplClassSuffix="Impl"
+  psiPackage="org.intellij.jflex.psi"
+  psiImplPackage="org.intellij.jflex.psi.impl"
+  psiImplUtilClass="org.intellij.jflex.psi.impl.JFlexPsiImplUtil"
+
+  elementTypeHolderClass="org.intellij.jflex.psi.JFlexTypes"
   elementTypePrefix="FLEX_"
+  elementTypeClass="org.intellij.jflex.psi.JFlexCompositeElementType"
+  tokenTypeClass="org.intellij.jflex.psi.JFlexTokenType"
+
   tokens = [
     id = 'regexp:(_|\p{Alpha})\w*'
     string = 'regexp:"([^"\\]|\\.)*"'
     number = 'regexp:\p{Digit}+'
-    comment='regexp://.*|/\*((?<!\*/)(.|\n))*'
+    line_comment='regexp://.*'
+    block_comment='regexp:/\*((?<!\*/)(.|\n))*'
     escaped_char='regexp:\\.'
 
     perc2 = '%%'
@@ -21,22 +39,91 @@
     roof = '^'
     slash2 = '/'
 
-//    dot = '.'
-//    semi = ';'
-//    comma = ','
-//
-//    perc = '%'
-//    angle1 = '<'
-//    angle2 = '>'
-//    or = '|'
-//    slash = '\'
-//    dollar = '$'
-//    colon = ':'
-//    eq = '='
-//    not = '!'
-//    not2 = '~'
+    dot = '.'
+    semi = ';'
+    comma = ','
 
-    whitespace='regexp:[\n\r ]'
+    angle1 = '<'
+    angle2 = '>'
+    or = '|'
+    slash = '\'
+    dollar = '$'
+    colon = ':'
+    eq = '='
+    not = '!'
+    not2 = '~'
+
+    eof = '<<EOF>>'
+
+    class1='[:jletter:]'
+    class2='[:jletterdigit:]'
+    class3='[:letter:]'
+    class4='[:digit:]'
+    class5='[:uppercase:]'
+    class6='[:lowercase:]'
+
+    perc_1='%class'
+    perc_2='%implements'
+    perc_3='%extends'
+    perc_4='%public'
+    perc_5='%final'
+    perc_6='%abstract'
+    perc_7='%apiprivate'
+    perc_8='%{'
+    perc_9='%}'
+    perc_10='%init{'
+    perc_11='%init}'
+    perc_12='%initthrow'
+    perc_13='%initthrow{'
+    perc_14='%initthrow}'
+    perc_15='%ctorarg'
+    perc_16='%scanerror'
+    perc_17='%buffer'
+    perc_18='%include'
+    perc_19='%function'
+    perc_20='%integer'
+    perc_21='%int'
+    perc_22='%intwrap'
+    perc_23='%type'
+    perc_24='%yylexthrow'
+    perc_25='%yylexthrow{'
+    perc_26='%yylexthrow}'
+    perc_27='%eofval{'
+    perc_28='%eofval}'
+    perc_29='%eof{'
+    perc_30='%eof}'
+    perc_31='%eofthrow'
+    perc_32='%eofthrow{'
+    perc_33='%eofthrow}'
+    perc_34='%eofclose'
+    perc_35='false'
+    perc_36='%debug'
+    perc_37='%standalone'
+    perc_38='%cup'
+    perc_39='%cupsym'
+    perc_40='%cupdebug'
+    perc_41='%byacc'
+    perc_42='%switch'
+    perc_43='%table'
+    perc_44='%pack'
+    perc_45='%7bit'
+    perc_46='%full'
+    perc_47='%8bit'
+    perc_48='%unicode'
+    perc_49='%16bit'
+    perc_50='%caseless'
+    perc_51='%ignorecase'
+    perc_52='%char'
+    perc_53='%line'
+    perc_54='%column'
+    perc_55='%notunix'
+    perc_56='%yyeof'
+    perc_57='%state'
+    perc_58='%s'
+    perc_59='%xstate'
+    perc_69='%x'
+
+    perc = '%'
     char='regexp:[^\{\}\[\]\(\)\+\*\?\\/]'
   ]
   recoverUntil(".*_section")=section_recover
@@ -47,6 +134,9 @@
   pin("option_.*")=1
   extends(".*_expression")=expression
   name(".*_expression")=expression
+
+  //consumeTokenMethod("character|macro_reference|.*_(recover|expression|op)")="consumeTokenFast"
+  //consumeTokenMethod="consumeTokenFast"
 }
 
 flex_file ::= []
@@ -59,7 +149,6 @@ flex_file ::= []
 
 private meta line ::= &new_line <<p>>
 private new_line ::= // todo
-private character ::=  escaped_char | id | char | number | '+' | '-' | '/' // todo
 
 private section_div ::= <<line '%%'>>
 private section_recover ::= !section_div
@@ -82,7 +171,7 @@ user_code_section ::= [] java_class_header
 declarations_section ::=  [] (declaration) *
 
 private declaration ::= macro_definition | state_declaration | option  {recoverUntil=declaration_recover}
-private declaration_recover ::= !('%' | id '=') section_recover
+private declaration_recover ::= !('%' | <<is_percent>> | id '=') section_recover
 option ::= option_class
   | option_implements
   | option_extends
@@ -184,7 +273,10 @@ state_declaration ::= ('%state' | '%s' | '%xstate' | '%x')
   state_definition ((','|!(id '=')) state_definition) *
 state_definition ::= id
 
-macro_definition ::= id '=' expression {pin=2}
+macro_definition ::= id '=' expression {pin=2
+  implements="com.intellij.psi.PsiNameIdentifierOwner"
+  methods=[getName setName getNameIdentifier]
+}
 
 
 // ======================================================
@@ -219,12 +311,17 @@ sequence_expression ::= expression (sequence_op expression) +
 paren_expression ::= '(' expression ')' {pin=1}
 not_expression ::= ('!'|'~') expression {pin=1}
 quantifier_expression ::=  expression ( '*' | '+' | '?' | '{' number [ ',' number] '}' )
-class_expression ::= '[' ['^'] (character [ '-' character] | string | predefined_class) * ']' {pin=1}
+class_expression ::= '[' ['^'] (string | predefined_class | class_char [ '-' class_char]) * ']' {pin(".*")=1}
+private class_char ::= char | escaped_char
 macro_ref_expression ::= '{' macro_reference '}'
-macro_reference ::= id
+macro_reference ::= id { methods=[getReference] }
 literal_expression ::= string | character
+private character ::=  escaped_char | id | char | number | '+' | '-' | '/' // todo
 
-sequence_op ::= &('{' id '}') | !('/' | '{' | '|' | ')' | '+' | '*' | '?' | id '=' | '%%' | '%')
+sequence_op ::= &( '(' | '!' | '~'
+  | '+' | '-' | '.' | '/' | '['
+  | '[:digit:]' | '[:jletter:]' | '[:jletterdigit:]' | '[:letter:]' | '[:lowercase:]' | '[:uppercase:]'
+  | '{' id '}' | char | escaped_char | id !'='| number | string)
 
 predefined_class_expression ::= predefined_class | '.'
 private predefined_class ::= '[:jletter:]'

@@ -34,6 +34,7 @@ import org.intellij.grammar.generator.ParserGeneratorUtil;
 import org.intellij.grammar.generator.RuleGraphHelper;
 import org.intellij.grammar.psi.BnfFile;
 import org.intellij.grammar.psi.BnfReferenceOrToken;
+import org.intellij.grammar.psi.impl.GrammarUtil;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.InputStreamReader;
@@ -130,16 +131,19 @@ public class BnfGenerateLexerAction extends AnAction {
       String name = tokenMap.get(token).toUpperCase(Locale.ENGLISH);
       if (ParserGeneratorUtil.isRegexpToken(token)) {
         regexpTokens.put(name, javaRegexp2JFlex(ParserGeneratorUtil.getRegexpTokenRegexp(token)));
+        maxLen[0] = Math.max(name.length() + 2, maxLen[0]);
       }
       else {
-        simpleTokens.put(name, text2JFlex(token, false));
+        String pattern = text2JFlex(token, false);
+        simpleTokens.put(name, pattern);
+        maxLen[0] = Math.max(pattern.length() + 2, maxLen[0]);
       }
-      maxLen[0] = Math.max(name.length() + 2, maxLen[0]);
     }
 
     bnfFile.acceptChildren(new PsiRecursiveElementWalkingVisitor() {
       @Override
       public void visitElement(PsiElement element) {
+        if (GrammarUtil.isExternalReference(element)) return;
         String text = element instanceof BnfReferenceOrToken? element.getText() : null;
         if (text != null && bnfFile.getRule(text) == null) {
           String name = text.toUpperCase(Locale.ENGLISH);
@@ -188,7 +192,7 @@ public class BnfGenerateLexerAction extends AnAction {
 
   private static String text2JFlex(String text, boolean isRegexp) {
     String text1 = text.replaceAll("\"", "\\\\\"");
-    return !isRegexp ? text1 : text1.
+    return !isRegexp ? text1.replaceAll("\\\\", "\\\\\\\\") : text1.
       replaceAll("(/+)", "\"$1\"").
       replaceAll("\\\\d", "[0-9]").
       replaceAll("\\\\D", "[^0-9]").
@@ -211,7 +215,7 @@ public class BnfGenerateLexerAction extends AnAction {
   }
 
   private static String getLexerName(BnfFile bnfFile) {
-    return "_" + BnfGenerateParserUtilAction.getGrammarName(bnfFile);
+    return "_" + BnfGenerateParserUtilAction.getGrammarName(bnfFile) + "Lexer";
   }
 
 }

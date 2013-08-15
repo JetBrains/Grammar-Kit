@@ -1065,7 +1065,11 @@ public class ParserGenerator {
           }
         }
         else if (nested instanceof BnfLiteralExpression) {
-          if (argument.startsWith("\'")) {
+          String attributeName = getTokenName(StringUtil.unquoteString(argument));
+          if (attributeName != null) {
+            clause.append(generateWrappedNodeCall(rule, nested, attributeName));
+          }
+          else if (argument.startsWith("\'")) {
             clause.append(StringUtil.unquoteString(argument));
           }
           else {
@@ -1114,7 +1118,7 @@ public class ParserGenerator {
   }
 
   public static String generateConsumeTextToken(String tokenText, String consumeMethodName) {
-    return consumeMethodName + "(builder_, \"" + tokenText + "\")";
+    return consumeMethodName + "(builder_, \"" + StringUtil.escapeStringCharacters(tokenText) + "\")";
   }
 
   private String getTokenElementType(String token) {
@@ -1164,7 +1168,7 @@ public class ParserGenerator {
         elementCreateCall = shortener.fun(StringUtil.getPackageName(pair.second)) + "." + StringUtil.getShortName(pair.second);
       }
       String callFix = elementCreateCall.equals("new IElementType")? ", null" : "";
-      out("IElementType " + elementType + " = " + elementCreateCall + "(\"" + elementType + "\""+callFix+");");
+      out("IElementType " + elementType + " = " + elementCreateCall + "(\"" + StringUtil.escapeStringCharacters(elementType) + "\""+callFix+");");
     }
     if (generateTokens) {
       newLine();
@@ -1182,7 +1186,7 @@ public class ParserGenerator {
       }
       for (String tokenType : sortedTokens.keySet()) {
         String callFix = tokenCreateCall.equals("new IElementType") ? ", null" : "";
-        out("IElementType " + tokenType + " = " + tokenCreateCall + "(\"" + sortedTokens.get(tokenType) + "\""+callFix+");");
+        out("IElementType " + tokenType + " = " + tokenCreateCall + "(\"" + StringUtil.escapeStringCharacters(sortedTokens.get(tokenType)) + "\""+callFix+");");
       }
     }
     if (generatePsi) {

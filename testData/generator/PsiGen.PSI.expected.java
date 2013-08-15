@@ -36,6 +36,7 @@ public interface GeneratedTypes {
   IElementType OF = new IElementType("OF", null);
   IElementType OP_DIV = new IElementType("/", null);
   IElementType OP_MUL = new IElementType("*", null);
+  IElementType SLASH = new IElementType("\\", null);
 
   class Factory {
     public static PsiElement createElement(ASTNode node) {

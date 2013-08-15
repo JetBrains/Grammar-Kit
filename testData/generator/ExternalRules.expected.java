@@ -563,6 +563,12 @@ public class ExternalRules implements PsiParser {
   }
 
   /* ********************************************************** */
+  // <<listOf '%'>>
+  static boolean perc_list(PsiBuilder builder_, int level_) {
+    return listOf(builder_, level_ + 1, perc_parser_);
+  }
+
+  /* ********************************************************** */
   // <<param>>
   static boolean recoverable_item(PsiBuilder builder_, int level_, final Parser param) {
     if (!recursion_guard_(builder_, level_, "recoverable_item")) return false;
@@ -665,6 +671,11 @@ public class ExternalRules implements PsiParser {
   final static Parser param_seq_alt_params_ext_1_1_parser_ = new Parser() {
     public boolean parse(PsiBuilder builder_, int level_) {
       return param_seq_alt_params_ext_1_1(builder_, level_ + 1);
+    }
+  };
+  final static Parser perc_parser_ = new Parser() {
+    public boolean parse(PsiBuilder builder_, int level_) {
+      return consumeToken(builder_, PERC);
     }
   };
   final static Parser statement_parser_ = new Parser() {

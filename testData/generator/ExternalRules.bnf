@@ -1,7 +1,10 @@
 {
   parserClass="ExternalRules"
   generatePsi=false
-  stubParserClass="org.intellij.grammar.parser.GeneratedParserUtilBase"
+  parserUtilClass="org.intellij.grammar.parser.GeneratedParserUtilBase"
+  tokens=[
+    perc='%'
+  ]
 }
 
 // external parsing
@@ -12,6 +15,8 @@ external unique_list_of_params ::= uniqueListOf <<p1>> "1+1" <<p2>> '1+1'
 one ::= 'one'
 two ::= 'two'
 statement ::= one | two
+
+private perc_list ::= <<listOf '%'>>
 
 private param_seq ::= '{' <<uniqueListOf "1+1" '1+1' one two 10 some>> '}'
 private param_choice ::= '{' <<uniqueListOf (one | two | 10 | some)>> '}'

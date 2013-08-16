@@ -21,10 +21,7 @@ import com.intellij.lang.annotation.Annotator;
 import com.intellij.openapi.project.DumbAware;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiReference;
-import org.intellij.jflex.psi.JFlexMacroDefinition;
-import org.intellij.jflex.psi.JFlexMacroReference;
-import org.intellij.jflex.psi.JFlexStateDefinition;
-import org.intellij.jflex.psi.JFlexStateReference;
+import org.intellij.jflex.psi.*;
 import org.intellij.jflex.psi.impl.JFlexPsiImplUtil;
 import org.jetbrains.annotations.NotNull;
 
@@ -56,6 +53,9 @@ public class JFlexAnnotator implements Annotator, DumbAware {
       if (!isYYINITIAL && resolve == null) {
         holder.createWarningAnnotation(element, "Unresolved state reference");
       }
+    }
+    else if (element instanceof JFlexClassExpression) {
+      holder.createInfoAnnotation(element, null).setTextAttributes(JFlexSyntaxHighlighterFactory.CLASS);
     }
   }
 }

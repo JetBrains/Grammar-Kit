@@ -17,19 +17,45 @@
 package org.intellij.jflex.parser;
 
 import com.intellij.lang.PsiBuilder;
+import com.intellij.lang.PsiParser;
+import com.intellij.psi.TokenType;
 import com.intellij.psi.tree.IElementType;
+import com.intellij.psi.tree.TokenSet;
 import org.intellij.grammar.parser.GeneratedParserUtilBase;
+import org.intellij.jflex.editor.JFlexBraceMatcher;
+import org.intellij.jflex.psi.JFlexTypes;
 
 /**
  * @author gregsh
  */
 public class JFlexParserUtil extends GeneratedParserUtilBase {
+  public static PsiBuilder adapt_builder_(IElementType root, PsiBuilder builder, PsiParser parser, TokenSet[] extendsSets) {
+    PsiBuilder result = GeneratedParserUtilBase.adapt_builder_(root, builder, parser, extendsSets);
+    ErrorState.get(result).braces = new JFlexBraceMatcher().getPairs();
+    return result;
+  }
+
+
   public static boolean anything(PsiBuilder builder, int level, GeneratedParserUtilBase.Parser condition) {
-    return parseAsTree(GeneratedParserUtilBase.ErrorState.get(builder), builder, level + 1, DUMMY_BLOCK, true, TOKEN_ADVANCER, condition);
+    parseAsTree(GeneratedParserUtilBase.ErrorState.get(builder), builder, level + 1, DUMMY_BLOCK, true, TOKEN_ADVANCER, condition);
+    return true;
+  }
+
+  public static boolean anything2(PsiBuilder builder, int level, GeneratedParserUtilBase.Parser condition) {
+    parseAsTree(GeneratedParserUtilBase.ErrorState.get(builder), builder, level + 1, DUMMY_BLOCK, false, TOKEN_ADVANCER, condition);
+    return true;
   }
 
   public static boolean is_percent(PsiBuilder builder, int level) {
     return !builder.eof() && builder.getOriginalText().charAt(builder.getCurrentOffset()) == '%';
+  }
+
+  public static boolean is_new_line(PsiBuilder builder, int level) {
+    for (int i=-1; ; i++) {
+      IElementType type = builder.rawLookup(i);
+      if (type == TokenType.WHITE_SPACE) continue;
+      return type == JFlexTypes.FLEX_NEWLINE;
+    }
   }
 
 

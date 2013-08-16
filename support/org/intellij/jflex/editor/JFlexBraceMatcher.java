@@ -31,8 +31,8 @@ import static org.intellij.jflex.psi.JFlexTypes.*;
 public class JFlexBraceMatcher implements PairedBraceMatcher {
 
   private static final BracePair[] PAIRS = new BracePair[]{
+    new BracePair(FLEX_BRACE1, FLEX_BRACE2, true),
     new BracePair(FLEX_PAREN1, FLEX_PAREN2, false),
-    new BracePair(FLEX_BRACE1, FLEX_BRACE2, false),
     new BracePair(FLEX_BRACK1, FLEX_BRACK2, false),
     new BracePair(FLEX_ANGLE1, FLEX_ANGLE2, false),
     new BracePair(FLEX_PERC_8, FLEX_PERC_9, false),

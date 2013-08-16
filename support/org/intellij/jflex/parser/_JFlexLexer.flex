@@ -6,6 +6,9 @@ import static org.intellij.jflex.psi.JFlexTypes.*;
 %%
 
 %{
+  private int prevState;
+  private int parenCount;
+
   public _JFlexLexer() {
     this((java.io.Reader)null);
   }
@@ -20,11 +23,15 @@ import static org.intellij.jflex.psi.JFlexTypes.*;
 %eof{ return;
 %eof}
 
+//%state USER_SECTION = YYINITIAL
+%state DECLARATIONS
+%state RULES
 %state CHAR_CLASS
+%state BLOCK
 
-EOL="\r"|"\n"|"\r\n"
-LINE_WS=[\ \t\f]
-WHITE_SPACE=({LINE_WS}|{EOL})+
+//EOL="\r"|"\n"|"\r\n"
+//LINE_WS=[\ \t\f]
+//WHITE_SPACE=({LINE_WS}|{EOL})+
 
 ID=(_|[:letter:])[a-zA-Z_0-9]*
 STRING=\"([^\"\\]|\\.)*\"
@@ -32,45 +39,64 @@ NUMBER=[:digit:]+
 LINE_COMMENT="//".*
 BLOCK_COMMENT="/*" !([^]* "*/" [^]*) ("*/")?
 ESCAPED_CHAR=\\.
-WHITESPACE=[\n\r ]+
 CHAR=[^\{\}\[\]\(\)\+\*\?\\/]
+JAVA_CHAR=\'({ESCAPED_CHAR} | [^'])\'
 
 %%
-<YYINITIAL> {
-  {WHITESPACE}            { return com.intellij.psi.TokenType.WHITE_SPACE; }
+<YYINITIAL, DECLARATIONS, RULES, BLOCK> {
+  [\r ]+                  { return com.intellij.psi.TokenType.WHITE_SPACE; }
+  "\n"+                   { return FLEX_NEWLINE; }
+  {LINE_COMMENT}          { return FLEX_LINE_COMMENT; }
+  {BLOCK_COMMENT}         { return FLEX_BLOCK_COMMENT; }
+}
 
-  "%%"                    { return FLEX_PERC2; }
-  "*"                     { return FLEX_STAR; }
-  "("                     { return FLEX_PAREN1; }
-  ")"                     { return FLEX_PAREN2; }
-  "["                     { yybegin(CHAR_CLASS); return FLEX_BRACK1; }
-  "]"                     { return FLEX_BRACK2; }
-  "{"                     { return FLEX_BRACE1; }
-  "}"                     { return FLEX_BRACE2; }
-  "?"                     { return FLEX_QUESTION; }
-  "-"                     { return FLEX_DASH; }
-  "+"                     { return FLEX_PLUS; }
-  "^"                     { return FLEX_ROOF; }
-  "/"                     { return FLEX_SLASH2; }
-  "."                     { return FLEX_DOT; }
-  ";"                     { return FLEX_SEMI; }
-  ","                     { return FLEX_COMMA; }
-  "<"                     { return FLEX_ANGLE1; }
-  ">"                     { return FLEX_ANGLE2; }
-  "|"                     { return FLEX_OR; }
-  "\\"                    { return FLEX_SLASH; }
-  "$"                     { return FLEX_DOLLAR; }
-  ":"                     { return FLEX_COLON; }
-  "="                     { return FLEX_EQ; }
-  "!"                     { return FLEX_NOT; }
-  "~"                     { return FLEX_NOT2; }
-  "<<EOF>>"               { return FLEX_EOF; }
+<DECLARATIONS, RULES, CHAR_CLASS> {
   "[:jletter:]"           { return FLEX_CLASS1; }
   "[:jletterdigit:]"      { return FLEX_CLASS2; }
   "[:letter:]"            { return FLEX_CLASS3; }
   "[:digit:]"             { return FLEX_CLASS4; }
   "[:uppercase:]"         { return FLEX_CLASS5; }
   "[:lowercase:]"         { return FLEX_CLASS6; }
+}
+
+<YYINITIAL> {
+  "%%"                    { yybegin(DECLARATIONS); return FLEX_PERC2; }
+
+  [^% \n]+                { return FLEX_JAVA; }
+  [^]                     { return com.intellij.psi.TokenType.BAD_CHARACTER; }
+}
+
+<DECLARATIONS> {
+  "="                     { return FLEX_EQ; }
+
+  "%{"                    { parenCount=1; yybegin(BLOCK); return FLEX_PERC_8; }
+  "%init{"                { parenCount=1; yybegin(BLOCK); return FLEX_PERC_10; }
+  "%initthrow{"           { parenCount=1; yybegin(BLOCK); return FLEX_PERC_13; }
+  "%yylexthrow{"          { parenCount=1; yybegin(BLOCK); return FLEX_PERC_25; }
+  "%eofval{"              { parenCount=1; yybegin(BLOCK); return FLEX_PERC_27; }
+  "%eof{"                 { parenCount=1; yybegin(BLOCK); return FLEX_PERC_29; }
+  "%eofthrow{"            { parenCount=1; yybegin(BLOCK); return FLEX_PERC_32; }
+}
+
+<BLOCK> {
+  "%}"                    { parenCount=0; yybegin(DECLARATIONS); return FLEX_PERC_9; }
+  "%init}"                { parenCount=0; yybegin(DECLARATIONS); return FLEX_PERC_11; }
+  "%initthrow}"           { parenCount=0; yybegin(DECLARATIONS); return FLEX_PERC_14; }
+  "%yylexthrow}"          { parenCount=0; yybegin(DECLARATIONS); return FLEX_PERC_26; }
+  "%eofval}"              { parenCount=0; yybegin(DECLARATIONS); return FLEX_PERC_28; }
+  "%eof}"                 { parenCount=0; yybegin(DECLARATIONS); return FLEX_PERC_30; }
+  "%eofthrow}"            { parenCount=0; yybegin(DECLARATIONS); return FLEX_PERC_33; }
+
+
+  ([^%} \n] | {JAVA_CHAR})*   { return FLEX_JAVA; }
+}
+
+<BLOCK, DECLARATIONS, RULES> {
+  "{"                     { parenCount++; return FLEX_BRACE1; }
+  "}"                     { --parenCount; return FLEX_BRACE2; }
+}
+
+<DECLARATIONS> {
   "%class"                { return FLEX_PERC_1; }
   "%implements"           { return FLEX_PERC_2; }
   "%extends"              { return FLEX_PERC_3; }
@@ -78,13 +104,7 @@ CHAR=[^\{\}\[\]\(\)\+\*\?\\/]
   "%final"                { return FLEX_PERC_5; }
   "%abstract"             { return FLEX_PERC_6; }
   "%apiprivate"           { return FLEX_PERC_7; }
-  "%{"                    { return FLEX_PERC_8; }
-  "%}"                    { return FLEX_PERC_9; }
-  "%init{"                { return FLEX_PERC_10; }
-  "%init}"                { return FLEX_PERC_11; }
   "%initthrow"            { return FLEX_PERC_12; }
-  "%initthrow{"           { return FLEX_PERC_13; }
-  "%initthrow}"           { return FLEX_PERC_14; }
   "%ctorarg"              { return FLEX_PERC_15; }
   "%scanerror"            { return FLEX_PERC_16; }
   "%buffer"               { return FLEX_PERC_17; }
@@ -95,17 +115,8 @@ CHAR=[^\{\}\[\]\(\)\+\*\?\\/]
   "%intwrap"              { return FLEX_PERC_22; }
   "%type"                 { return FLEX_PERC_23; }
   "%yylexthrow"           { return FLEX_PERC_24; }
-  "%yylexthrow{"          { return FLEX_PERC_25; }
-  "%yylexthrow}"          { return FLEX_PERC_26; }
-  "%eofval{"              { return FLEX_PERC_27; }
-  "%eofval}"              { return FLEX_PERC_28; }
-  "%eof{"                 { return FLEX_PERC_29; }
-  "%eof}"                 { return FLEX_PERC_30; }
   "%eofthrow"             { return FLEX_PERC_31; }
-  "%eofthrow{"            { return FLEX_PERC_32; }
-  "%eofthrow}"            { return FLEX_PERC_33; }
   "%eofclose"             { return FLEX_PERC_34; }
-  "false"                 { return FLEX_PERC_35; }
   "%debug"                { return FLEX_PERC_36; }
   "%standalone"           { return FLEX_PERC_37; }
   "%cup"                  { return FLEX_PERC_38; }
@@ -131,16 +142,38 @@ CHAR=[^\{\}\[\]\(\)\+\*\?\\/]
   "%xstate"               { return FLEX_PERC_59; }
   "%s"                    { return FLEX_PERC_58; }
   "%x"                    { return FLEX_PERC_69; }
-  "%"                     { return FLEX_PERC; }
-  "package"               { return FLEX_PACKAGE; }
-  "import"                { return FLEX_IMPORT; }
-  "static"                { return FLEX_STATIC; }
+}
+
+<RULES> {
+  "<"                     { return FLEX_ANGLE1; }
+  ">"                     { return FLEX_ANGLE2; }
+  {JAVA_CHAR}             { return FLEX_JAVA; }
+}
+
+<DECLARATIONS, RULES> {
+  "%%"                    { yybegin(RULES); return FLEX_PERC2; }
+  "*"                     { return FLEX_STAR; }
+  "("                     { return FLEX_PAREN1; }
+  ")"                     { return FLEX_PAREN2; }
+  "["                     { prevState = yystate(); yybegin(CHAR_CLASS); return FLEX_BRACK1; }
+  "]"                     { return FLEX_BRACK2; }
+  "?"                     { return FLEX_QUESTION; }
+  "-"                     { return FLEX_DASH; }
+  "+"                     { return FLEX_PLUS; }
+  "^"                     { return FLEX_ROOF; }
+  "/"                     { return FLEX_SLASH2; }
+  "."                     { return FLEX_DOT; }
+  ","                     { return FLEX_COMMA; }
+  "|"                     { return FLEX_OR; }
+  "\\"                    { return FLEX_SLASH; }
+  "$"                     { return FLEX_DOLLAR; }
+  "!"                     { return FLEX_NOT; }
+  "~"                     { return FLEX_NOT2; }
+  "<<EOF>>"               { return FLEX_EOF; }
 
   {ID}                    { return FLEX_ID; }
   {STRING}                { return FLEX_STRING; }
   {NUMBER}                { return FLEX_NUMBER; }
-  {LINE_COMMENT}          { return FLEX_LINE_COMMENT; }
-  {BLOCK_COMMENT}         { return FLEX_BLOCK_COMMENT; }
   {ESCAPED_CHAR}          { return FLEX_ESCAPED_CHAR; }
   {CHAR}                  { return FLEX_CHAR; }
 
@@ -148,11 +181,12 @@ CHAR=[^\{\}\[\]\(\)\+\*\?\\/]
 }
 
 <CHAR_CLASS> {
-  "]"                     { yybegin(YYINITIAL); return FLEX_BRACK2; }
+  "]"                     { yybegin(prevState); return FLEX_BRACK2; }
   "-"                     { return FLEX_DASH; }
   "^"                     { return FLEX_ROOF; }
   {ESCAPED_CHAR}          { return FLEX_ESCAPED_CHAR; }
+  {STRING}                { return FLEX_STRING; }
 
-  "\n"                    { yybegin(YYINITIAL); return com.intellij.psi.TokenType.WHITE_SPACE; }
+  "\n"                    { yybegin(prevState); return FLEX_NEWLINE; }
   [^]                     { return FLEX_CHAR; }
 }

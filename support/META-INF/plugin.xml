@@ -93,6 +93,7 @@
     <annotator language="JFlex" implementationClass="org.intellij.jflex.editor.JFlexAnnotator"/>
     <lang.syntaxHighlighterFactory key="JFlex" implementationClass="org.intellij.jflex.editor.JFlexSyntaxHighlighterFactory"/>
     <lang.braceMatcher language="JFlex" implementationClass="org.intellij.jflex.editor.JFlexBraceMatcher"/>
+    <quoteHandler fileType="Grammar" className="org.intellij.jflex.editor.JFlexQuoteHandler"/>
 
   </extensions>
   <project-components>

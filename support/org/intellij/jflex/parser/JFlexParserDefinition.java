@@ -35,14 +35,16 @@ import org.intellij.jflex.psi.JFlexTypes;
 import org.intellij.jflex.psi.impl.JFlexFileImpl;
 import org.jetbrains.annotations.NotNull;
 
+import static org.intellij.jflex.psi.JFlexTypes.*;
+
 /**
  * @author gregsh
  */
 public class JFlexParserDefinition implements ParserDefinition {
 
   public static final IFileElementType JFLEX_FILE_ELEMENT_TYPE = new IFileElementType("JFLEX_FILE", JFlexLanguage.INSTANCE);
-  public static final TokenSet WS = TokenSet.create(TokenType.WHITE_SPACE);
-  public static final TokenSet COMMENTS = TokenSet.create(JFlexTypes.FLEX_LINE_COMMENT, JFlexTypes.FLEX_BLOCK_COMMENT);
+  public static final TokenSet WS = TokenSet.create(TokenType.WHITE_SPACE, FLEX_NEWLINE);
+  public static final TokenSet COMMENTS = TokenSet.create(FLEX_LINE_COMMENT, FLEX_BLOCK_COMMENT);
   //public static final TokenSet LITERALS = TokenSet.create(JFlexTypes.JFLEX_STRING);
 
   @NotNull
@@ -83,7 +85,7 @@ public class JFlexParserDefinition implements ParserDefinition {
   @NotNull
   @Override
   public PsiElement createElement(ASTNode astNode) {
-    return JFlexTypes.Factory.createElement(astNode);
+    return Factory.createElement(astNode);
   }
 
   @Override

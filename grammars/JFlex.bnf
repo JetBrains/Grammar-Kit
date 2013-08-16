@@ -18,6 +18,8 @@
   tokenTypeClass="org.intellij.jflex.psi.JFlexTokenType"
 
   tokens = [
+    java = 'regexp:.*'
+    newline = 'regexp:\n'
     id = 'regexp:(_|\p{Alpha})\w*'
     string = 'regexp:"([^"\\]|\\.)*"'
     number = 'regexp:\p{Digit}+'
@@ -40,7 +42,6 @@
     slash2 = '/'
 
     dot = '.'
-    semi = ';'
     comma = ','
 
     angle1 = '<'
@@ -48,7 +49,6 @@
     or = '|'
     slash = '\'
     dollar = '$'
-    colon = ':'
     eq = '='
     not = '!'
     not2 = '~'
@@ -96,7 +96,6 @@
     perc_32='%eofthrow{'
     perc_33='%eofthrow}'
     perc_34='%eofclose'
-    perc_35='false'
     perc_36='%debug'
     perc_37='%standalone'
     perc_38='%cup'
@@ -123,7 +122,6 @@
     perc_59='%xstate'
     perc_69='%x'
 
-    perc = '%'
     char='regexp:[^\{\}\[\]\(\)\+\*\?\\/]'
   ]
   recoverUntil(".*_section")=section_recover
@@ -148,30 +146,23 @@ flex_file ::= []
   {pin=1}
 
 private meta line ::= &new_line <<p>>
-private new_line ::= // todo
+private new_line ::= <<is_new_line>>
 
 private section_div ::= <<line '%%'>>
 private section_recover ::= !section_div
 
-java_class_header ::= package_def? java_imports * <<anything section_recover>> {pin=1}
-java_class_members ::= <<anything java_members_recover>>
-private java_members_recover ::= !('%}')
-java_class_statements ::= <<anything java_statements_recover>>
-private java_statements_recover ::= !('}' | '<' | '%init}' | '%eof}' | '%eofval}')
+user_code_section ::= [] java_code {pin=1}
+java_code ::= <<anything2 (&java | !<<is_percent>>)>>
 
-package_def ::= package java_fqn ';' {pin=1}
-java_imports ::= import static? java_fqn ['.' '*'] ';' {pin=1}
 java_fqn ::= id ( safe_dot id ) * {pin(".*")=1}
 private safe_dot ::= '.' !'*'
 private java_fqn_list ::= java_fqn (',' java_fqn) * {pin(".*")=1}
-
-user_code_section ::= [] java_class_header
 
 // ======================================================
 declarations_section ::=  [] (declaration) *
 
 private declaration ::= macro_definition | state_declaration | option  {recoverUntil=declaration_recover}
-private declaration_recover ::= !('%' | <<is_percent>> | id '=') section_recover
+private declaration_recover ::= !(<<is_percent>> | id '=') section_recover
 option ::= option_class
   | option_implements
   | option_extends
@@ -228,8 +219,8 @@ option_public ::= '%public'
 option_final ::= '%final'
 option_abstract ::= '%abstract'
 option_api_private ::= '%apiprivate'
-option_user_code ::= <<line '%{'>> java_class_members <<line '%}'>>
-option_init ::= <<line '%init{'>> java_class_statements <<line '%init}'>>
+option_user_code ::= <<line '%{'>> java_code <<line '%}'>>
+option_init ::= <<line '%init{'>> java_code <<line '%init}'>>
 option_init_throw ::= '%initthrow' java_fqn_list | <<line '%initthrow{'>> java_fqn_list <<line '%initthrow}'>>
 option_ctor_arg ::= '%ctorarg' java_fqn id
 option_scan_error ::= '%scanerror' java_fqn
@@ -242,8 +233,8 @@ option_intwrap ::= '%intwrap'
 option_type ::= '%type' java_fqn
 option_yylexthrow ::= '%yylexthrow' java_fqn_list <<line '%yylexthrow{'>> java_fqn_list <<line '%yylexthrow}'>>
 
-option_eof_val ::= <<line '%eofval{'>> java_class_statements <<line '%eofval}'>>
-option_eof ::= <<line '%eof{'>> java_class_statements <<line '%eof}'>>
+option_eof_val ::= <<line '%eofval{'>> java_code <<line '%eofval}'>>
+option_eof ::= <<line '%eof{'>> java_code <<line '%eof}'>>
 option_eof_throw ::= '%eofthrow' java_fqn_list <<line '%eofthrow{'>> java_fqn_list <<line '%eofthrow}'>>
 option_eof_close ::= '%eofclose' ['false']
 
@@ -269,8 +260,7 @@ option_count_column ::= '%column'
 
 option_obsolete ::= '%notunix' | '%yyeof'
 
-state_declaration ::= ('%state' | '%s' | '%xstate' | '%x')
-  state_definition ((','|!(id '=')) state_definition) *
+state_declaration ::= ('%state' | '%s' | '%xstate' | '%x') state_definition ((','? !(id '=')) state_definition) * ','? {pin=1}
 state_definition ::= id {
   implements="com.intellij.psi.PsiNameIdentifierOwner"
   methods=[getName setName getNameIdentifier]
@@ -279,24 +269,27 @@ state_definition ::= id {
 macro_definition ::= id '=' expression {pin=2
   implements="com.intellij.psi.PsiNameIdentifierOwner"
   methods=[getName setName getNameIdentifier]
+  recoverUntil=macro_definition_recover
 }
+private macro_definition_recover::=!(id '=' | '%%' | <<is_percent>>)
 
 
 // ======================================================
 lexical_rules_section ::= [] rule +
 
 rule ::= state_list (rule_group | rule_tail ) | rule_tail {pin(".*")=1 recoverUntil=rule_recover}
-private rule_recover ::= !('}' | '.' | '<' | '<<EOF>>' | '^'| atom_group)
+private rule_recover ::= !('}' | '.' | '<' | '<<EOF>>' | '^'| new_line | atom_group)
 
 private rule_tail ::= rule_tail1 | rule_tail2
 private rule_tail1 ::= '<<EOF>>' action {pin=1}
 private rule_tail2 ::= ['^'] expression look_ahead? action {pin=2}
-private rule_group ::= !('{' id '}') '{' rule + '}' {pin=2}
+private rule_group ::= !('{' id '}') '{' rule + '}' {pin=2} // empty block forbidden
 
 private state_list ::= '<' state_reference (',' state_reference) * '>' {pin(".*")=1}
 state_reference ::= id { methods=[getReference] }
 look_ahead ::= '$' | '/' expression
-action ::= '{' java_class_statements '}' | '|' {pin(".*")=1}
+action ::= '{' java_class_statements '}' | '|' {pin(".*")=1 elementType=java_code}
+private java_class_statements ::= <<anything !('}' | '<' id '>')>>
 
 expression ::= choice_expression
   | sequence_expression
@@ -314,17 +307,17 @@ sequence_expression ::= expression (sequence_op expression) +
 paren_expression ::= '(' expression ')' {pin=1}
 not_expression ::= ('!'|'~') expression {pin=1}
 quantifier_expression ::=  expression ( '*' | '+' | '?' | '{' number [ ',' number] '}' )
-class_expression ::= '[' ['^'] (string | predefined_class | class_char [ '-' class_char]) * ']' {pin(".*")=1}
+class_expression ::= '[' '^'? '-'? (string | predefined_class | class_char [ '-' class_char]) * '-'? ']' {pin(".*")=1}
 private class_char ::= char | escaped_char
 macro_ref_expression ::= '{' macro_reference '}'
 macro_reference ::= id { methods=[getReference] }
-literal_expression ::= string | character
-private character ::=  escaped_char | id | char | number | '+' | '-' | '/' // todo
+literal_expression ::= string | id | allowed_chars
+private allowed_chars ::= escaped_char | char | number | '-' | '=' | '<' | '>'
+  | ']' /*| '}' -- allowed after <STATE> } { }  and in / part */
 
-sequence_op ::= &( '(' | '!' | '~'
-  | '+' | '-' | '.' | '/' | '['
-  | '[:digit:]' | '[:jletter:]' | '[:jletterdigit:]' | '[:letter:]' | '[:lowercase:]' | '[:uppercase:]'
-  | '{' id '}' | char | escaped_char | id !'='| number | string)
+sequence_op ::= &( '(' | '!' | '~' | '[' | ']'
+  | string | allowed_chars | predefined_class | '.'
+  | '{' id '}' | id !'=')
 
 predefined_class_expression ::= predefined_class | '.'
 private predefined_class ::= '[:jletter:]'

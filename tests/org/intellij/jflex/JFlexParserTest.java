@@ -46,6 +46,7 @@ public class JFlexParserTest extends ParsingTestCase {
 
   public void testSelfFlex() { doTest(true); }
   public void testSelfBnf() { doTest(true); }
+  public void testParserFixes() { doTest(true); }
 
   @Override
   protected String loadFile(@NonNls String name) throws IOException {

@@ -100,7 +100,7 @@ public class JFlexPsiImplUtil {
     return ContainerUtil.process(macros, processor);
   }
 
-  private static <T> List<T> computeDefinitions(PsiFile psiFile, final Class<T> clazz) {
+  public static <T> List<T> computeDefinitions(PsiFile psiFile, final Class<T> clazz) {
     final List<T> result = ContainerUtil.newArrayList();
     psiFile.acceptChildren(new PsiRecursiveElementWalkingVisitor() {
       @Override

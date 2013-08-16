@@ -34,6 +34,7 @@ Recent changes
 --------------
 1.1.4
 
+* JFlex language support: highlighting/navigation/completion/rename
 * Generator: parser size reduced (most of PsiBuilder-specific logic moved to GPUB)
 
 

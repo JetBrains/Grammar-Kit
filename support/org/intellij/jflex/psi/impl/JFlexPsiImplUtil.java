@@ -23,16 +23,13 @@ import com.intellij.psi.util.CachedValueProvider;
 import com.intellij.psi.util.CachedValuesManager;
 import com.intellij.util.ArrayUtil;
 import com.intellij.util.CommonProcessors;
+import com.intellij.util.IncorrectOperationException;
 import com.intellij.util.Processor;
 import com.intellij.util.containers.ContainerUtil;
-import org.intellij.jflex.psi.JFlexLexicalRulesSection;
-import org.intellij.jflex.psi.JFlexMacroDefinition;
-import org.intellij.jflex.psi.JFlexMacroReference;
-import org.intellij.jflex.psi.JFlexUserCodeSection;
+import org.intellij.jflex.psi.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -46,7 +43,7 @@ public class JFlexPsiImplUtil {
 
   @NotNull
   public static JFlexMacroDefinition setName(JFlexMacroDefinition o, String newName) {
-    // TBD
+    o.getNameIdentifier().replace(JFlexPsiElementFactory.createIdFromText(o.getProject(), newName));
     return o;
   }
 
@@ -82,6 +79,10 @@ public class JFlexPsiImplUtil {
         return ArrayUtil.toObjectArray(processor.getResults());
       }
 
+      @Override
+      public PsiElement handleElementRename(String newElementName) throws IncorrectOperationException {
+        return getElement().getId().replace(JFlexPsiElementFactory.createIdFromText(getElement().getProject(), newElementName));
+      }
     };
   }
 

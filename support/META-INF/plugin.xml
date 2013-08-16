@@ -82,9 +82,17 @@
       <category>Grammar</category>
     </intentionAction>
 
-
+    <!--JFlex Support -->
     <fileTypeFactory implementation="org.intellij.jflex.parser.JFlexFileTypeFactory"/>
     <lang.parserDefinition language="JFlex" implementationClass="org.intellij.jflex.parser.JFlexParserDefinition"/>
+    <completion.contributor language="JFlex" implementationClass="org.intellij.jflex.editor.JFlexCompletionContributor" />
+    <lang.findUsagesProvider language="JFlex" implementationClass="org.intellij.jflex.editor.JFlexFindUsagesProvider"/>
+    <elementDescriptionProvider implementation="org.intellij.jflex.editor.JFlexFindUsagesProvider"/>
+    <lang.commenter language="JFlex" implementationClass="org.intellij.jflex.editor.JFlexCommenter"/>
+    <lang.refactoringSupport language="JFlex" implementationClass="org.intellij.jflex.editor.JFlexRefactoringSupportProvider"/>
+    <annotator language="JFlex" implementationClass="org.intellij.jflex.editor.JFlexAnnotator"/>
+    <lang.syntaxHighlighterFactory key="JFlex" implementationClass="org.intellij.jflex.editor.JFlexSyntaxHighlighterFactory"/>
+    <lang.braceMatcher language="JFlex" implementationClass="org.intellij.jflex.editor.JFlexBraceMatcher"/>
 
   </extensions>
   <project-components>

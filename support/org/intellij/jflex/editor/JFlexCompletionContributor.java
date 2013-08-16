@@ -16,8 +16,10 @@
 
 package org.intellij.jflex.editor;
 
-import com.intellij.codeInsight.completion.CompletionContributor;
-import com.intellij.codeInsight.completion.CompletionInitializationContext;
+import com.intellij.codeInsight.completion.*;
+import com.intellij.patterns.StandardPatterns;
+import com.intellij.psi.PsiElement;
+import com.intellij.util.ProcessingContext;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -26,11 +28,18 @@ import org.jetbrains.annotations.NotNull;
 public class JFlexCompletionContributor extends CompletionContributor {
 
   public JFlexCompletionContributor() {
-    // various extends here
+    extend(CompletionType.BASIC, StandardPatterns.instanceOf(PsiElement.class), new CompletionProvider<CompletionParameters>() {
+      @Override
+      protected void addCompletions(@NotNull CompletionParameters parameters,
+                                    ProcessingContext context,
+                                    @NotNull CompletionResultSet result) {
+        int i=1;
+      }
+    });
   }
 
   @Override
   public void beforeCompletion(@NotNull CompletionInitializationContext context) {
-    context.setDummyIdentifier("");
+    context.setDummyIdentifier(CompletionUtil.DUMMY_IDENTIFIER_TRIMMED);
   }
 }

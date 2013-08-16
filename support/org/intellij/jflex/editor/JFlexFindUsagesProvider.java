@@ -16,6 +16,7 @@
 
 package org.intellij.jflex.editor;
 
+import com.intellij.lang.ASTNode;
 import com.intellij.lang.cacheBuilder.WordsScanner;
 import com.intellij.lang.findUsages.FindUsagesProvider;
 import com.intellij.openapi.util.text.StringUtil;
@@ -27,6 +28,7 @@ import com.intellij.usageView.UsageViewTypeLocation;
 import org.apache.xmlbeans.impl.common.NameUtil;
 import org.intellij.jflex.psi.JFlexCompositeElement;
 import org.intellij.jflex.psi.JFlexMacroDefinition;
+import org.intellij.jflex.psi.JFlexStateDefinition;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -41,7 +43,7 @@ public class JFlexFindUsagesProvider implements FindUsagesProvider, ElementDescr
 
   @Override
   public boolean canFindUsagesFor(@NotNull PsiElement psiElement) {
-    return psiElement instanceof JFlexMacroDefinition;
+    return psiElement instanceof JFlexCompositeElement && psiElement instanceof PsiNamedElement;
   }
 
   @Override
@@ -80,9 +82,16 @@ public class JFlexFindUsagesProvider implements FindUsagesProvider, ElementDescr
       }
       return ((JFlexMacroDefinition)psiElement).getName();
     }
+    else if (psiElement instanceof JFlexStateDefinition) {
+      if (location == UsageViewTypeLocation.INSTANCE) {
+        return "State Definition";
+      }
+      return ((JFlexStateDefinition)psiElement).getName();
+    }
     else if (psiElement instanceof JFlexCompositeElement) {
       if (location == UsageViewTypeLocation.INSTANCE) {
-        return StringUtil.join(NameUtil.splitWords(psiElement.getNode().getElementType().toString(), false), " ");
+        ASTNode node = psiElement.getNode();
+        return node == null? "Initial State" : StringUtil.join(NameUtil.splitWords(node.getElementType().toString(), false), " ");
       }
       return psiElement instanceof PsiNamedElement ? ((PsiNamedElement)psiElement).getName() : psiElement.getClass().getSimpleName();
     }

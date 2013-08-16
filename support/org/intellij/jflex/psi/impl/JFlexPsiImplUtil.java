@@ -17,19 +17,20 @@
 package org.intellij.jflex.psi.impl;
 
 import com.intellij.openapi.util.Comparing;
+import com.intellij.openapi.util.Key;
 import com.intellij.openapi.util.TextRange;
+import com.intellij.openapi.util.UserDataHolderEx;
 import com.intellij.psi.*;
+import com.intellij.psi.impl.RenameableFakePsiElement;
 import com.intellij.psi.util.CachedValueProvider;
 import com.intellij.psi.util.CachedValuesManager;
-import com.intellij.util.ArrayUtil;
-import com.intellij.util.CommonProcessors;
-import com.intellij.util.IncorrectOperationException;
-import com.intellij.util.Processor;
+import com.intellij.util.*;
 import com.intellij.util.containers.ContainerUtil;
 import org.intellij.jflex.psi.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import javax.swing.*;
 import java.util.List;
 
 /**
@@ -93,19 +94,19 @@ public class JFlexPsiImplUtil {
         @Nullable
         @Override
         public Result<List<JFlexMacroDefinition>> compute() {
-          return Result.create(computeMacroDefinitions(containingFile), containingFile);
+          return Result.create(computeDefinitions(containingFile, JFlexMacroDefinition.class), containingFile);
         }
       });
     return ContainerUtil.process(macros, processor);
   }
 
-  private static List<JFlexMacroDefinition> computeMacroDefinitions(PsiFile psiFile) {
-    final List<JFlexMacroDefinition> result = ContainerUtil.newArrayList();
+  private static <T> List<T> computeDefinitions(PsiFile psiFile, final Class<T> clazz) {
+    final List<T> result = ContainerUtil.newArrayList();
     psiFile.acceptChildren(new PsiRecursiveElementWalkingVisitor() {
       @Override
       public void visitElement(PsiElement element) {
-        if (element instanceof JFlexMacroDefinition) {
-          result.add((JFlexMacroDefinition)element);
+        if (clazz.isInstance(element)) {
+          result.add((T)element);
         }
         else if (!(element instanceof JFlexLexicalRulesSection) &&
                  !(element instanceof JFlexUserCodeSection)) {
@@ -114,5 +115,115 @@ public class JFlexPsiImplUtil {
       }
     });
     return result;
+  }
+
+  @NotNull
+  public static String getName(JFlexStateDefinition o) {
+    return o.getNameIdentifier().getText();
+  }
+
+  @NotNull
+  public static JFlexStateDefinition setName(JFlexStateDefinition o, String newName) {
+    o.getNameIdentifier().replace(JFlexPsiElementFactory.createIdFromText(o.getProject(), newName));
+    return o;
+  }
+
+  @NotNull
+  public static PsiElement getNameIdentifier(JFlexStateDefinition o) {
+    return o.getId();
+  }
+
+  @NotNull
+  public static PsiReference getReference(JFlexStateReference o) {
+    return new PsiReferenceBase<JFlexStateReference>(o, TextRange.from(0, o.getTextRange().getLength())) {
+      @Nullable
+      @Override
+      public PsiElement resolve() {
+        if (isYYINITIAL(getElement())) {
+          return resolveYYINITIAL(getElement());
+        }
+        final String name = getElement().getId().getText();
+        CommonProcessors.FindFirstProcessor<JFlexStateDefinition> processor =
+          new CommonProcessors.FindFirstProcessor<JFlexStateDefinition>() {
+            @Override
+            protected boolean accept(JFlexStateDefinition o) {
+              return Comparing.equal(o.getName(), name);
+            }
+          };
+        processStateVariants(getElement(), processor);
+        return processor.getFoundValue();
+      }
+
+      @NotNull
+      @Override
+      public Object[] getVariants() {
+        CommonProcessors.CollectProcessor<PsiElement> processor =
+          new CommonProcessors.CollectProcessor<PsiElement>();
+        processor.process(resolveYYINITIAL(getElement()));
+        processStateVariants(getElement(), processor);
+        return ArrayUtil.toObjectArray(processor.getResults());
+      }
+
+      @Override
+      public PsiElement handleElementRename(String newElementName) throws IncorrectOperationException {
+        return getElement().getId().replace(JFlexPsiElementFactory.createIdFromText(getElement().getProject(), newElementName));
+      }
+    };
+  }
+
+  private static boolean processStateVariants(PsiElement context, Processor<? super JFlexStateDefinition> processor) {
+    final PsiFile containingFile = context.getContainingFile();
+    List<JFlexStateDefinition> macros = CachedValuesManager.getManager(containingFile.getProject())
+      .getCachedValue(containingFile, new CachedValueProvider<List<JFlexStateDefinition>>() {
+        @Nullable
+        @Override
+        public Result<List<JFlexStateDefinition>> compute() {
+          return Result.create(computeDefinitions(containingFile, JFlexStateDefinition.class), containingFile);
+        }
+      });
+    return ContainerUtil.process(macros, processor);
+  }
+
+  public static boolean isYYINITIAL(JFlexStateReference element) {
+    return "YYINITIAL".equals(element.getText());
+  }
+
+  private static final Key<YYINITIALElement> YYINITIAL_ELEMENT = Key.create("YYINITIAL_ELEMENT");
+  private static YYINITIALElement resolveYYINITIAL(JFlexStateReference element) {
+    PsiFile containingFile = element.getContainingFile();
+    return ((UserDataHolderEx)containingFile).putUserDataIfAbsent(YYINITIAL_ELEMENT, new YYINITIALElement(containingFile));
+  }
+
+  private static class YYINITIALElement extends RenameableFakePsiElement implements JFlexCompositeElement, PsiNameIdentifierOwner {
+
+    YYINITIALElement(PsiFile containingFile) {
+      super(containingFile);
+    }
+
+    @Override
+    public String getName() {
+      return "YYINITIAL";
+    }
+
+    @Override
+    public void navigate(boolean requestFocus) {
+    }
+
+    @Override
+    public String getTypeName() {
+      return "Initial State";
+    }
+
+    @Nullable
+    @Override
+    public Icon getIcon() {
+      return null;
+    }
+
+    @Nullable
+    @Override
+    public PsiElement getNameIdentifier() {
+      return null;
+    }
   }
 }

@@ -23,6 +23,9 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiReference;
 import org.intellij.jflex.psi.JFlexMacroDefinition;
 import org.intellij.jflex.psi.JFlexMacroReference;
+import org.intellij.jflex.psi.JFlexStateDefinition;
+import org.intellij.jflex.psi.JFlexStateReference;
+import org.intellij.jflex.psi.impl.JFlexPsiImplUtil;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -40,6 +43,18 @@ public class JFlexAnnotator implements Annotator, DumbAware {
       holder.createInfoAnnotation(element.getParent(), null).setTextAttributes(JFlexSyntaxHighlighterFactory.MACRO);
       if (resolve == null) {
         holder.createWarningAnnotation(element, "Unresolved macro reference");
+      }
+    }
+    else if (element instanceof JFlexStateDefinition) {
+      holder.createInfoAnnotation(((JFlexStateDefinition)element).getNameIdentifier(), null).setTextAttributes(JFlexSyntaxHighlighterFactory.STATE);
+    }
+    else if (element instanceof JFlexStateReference) {
+      boolean isYYINITIAL = JFlexPsiImplUtil.isYYINITIAL((JFlexStateReference)element);
+      PsiReference reference = isYYINITIAL ? null : element.getReference();
+      PsiElement resolve = reference == null ? null : reference.resolve();
+      holder.createInfoAnnotation(element.getParent(), null).setTextAttributes(JFlexSyntaxHighlighterFactory.MACRO);
+      if (!isYYINITIAL && resolve == null) {
+        holder.createWarningAnnotation(element, "Unresolved state reference");
       }
     }
   }

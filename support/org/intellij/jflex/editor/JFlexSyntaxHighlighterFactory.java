@@ -38,6 +38,7 @@ public class JFlexSyntaxHighlighterFactory extends SyntaxHighlighterFactory {
   public static final TextAttributesKey PREDEFINED_CLASS = createTextAttributesKey("FLEX_PREDEFINED_CLASS", DefaultLanguageHighlighterColors.STATIC_FIELD);
   public static final TextAttributesKey CLASS = createTextAttributesKey("FLEX_CLASS", DefaultLanguageHighlighterColors.INSTANCE_FIELD);
   public static final TextAttributesKey MACRO = createTextAttributesKey("FLEX_MACRO", DefaultLanguageHighlighterColors.INSTANCE_FIELD);
+  public static final TextAttributesKey STATE = createTextAttributesKey("FLEX_MACRO", DefaultLanguageHighlighterColors.CLASS_NAME);
 
   public static final TextAttributesKey STRING = createTextAttributesKey("FLEX_STRING", DefaultLanguageHighlighterColors.STRING);
   public static final TextAttributesKey ESCAPED_CHAR = createTextAttributesKey("FLEX_ESCAPED_CHAR", DefaultLanguageHighlighterColors.NUMBER);

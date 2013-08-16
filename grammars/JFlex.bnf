@@ -271,7 +271,10 @@ option_obsolete ::= '%notunix' | '%yyeof'
 
 state_declaration ::= ('%state' | '%s' | '%xstate' | '%x')
   state_definition ((','|!(id '=')) state_definition) *
-state_definition ::= id
+state_definition ::= id {
+  implements="com.intellij.psi.PsiNameIdentifierOwner"
+  methods=[getName setName getNameIdentifier]
+}
 
 macro_definition ::= id '=' expression {pin=2
   implements="com.intellij.psi.PsiNameIdentifierOwner"
@@ -291,7 +294,7 @@ private rule_tail2 ::= ['^'] expression look_ahead? action {pin=2}
 private rule_group ::= !('{' id '}') '{' rule + '}' {pin=2}
 
 private state_list ::= '<' state_reference (',' state_reference) * '>' {pin(".*")=1}
-state_reference ::= id
+state_reference ::= id { methods=[getReference] }
 look_ahead ::= '$' | '/' expression
 action ::= '{' java_class_statements '}' | '|' {pin(".*")=1}
 

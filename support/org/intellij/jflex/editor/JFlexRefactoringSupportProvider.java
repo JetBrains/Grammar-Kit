@@ -18,12 +18,12 @@ package org.intellij.jflex.editor;
 
 import com.intellij.lang.refactoring.RefactoringSupportProvider;
 import com.intellij.psi.PsiElement;
-import org.intellij.grammar.psi.BnfNamedElement;
-import org.intellij.jflex.psi.JFlexMacroDefinition;
+import com.intellij.psi.PsiNamedElement;
+import org.intellij.jflex.psi.JFlexCompositeElement;
 
 public class JFlexRefactoringSupportProvider extends RefactoringSupportProvider {
   @Override
-  public boolean isMemberInplaceRenameAvailable(PsiElement element, PsiElement context) {
-    return element instanceof JFlexMacroDefinition;
+  public boolean isMemberInplaceRenameAvailable(PsiElement psiElement, PsiElement context) {
+    return psiElement instanceof JFlexCompositeElement && psiElement instanceof PsiNamedElement;
   }
 }

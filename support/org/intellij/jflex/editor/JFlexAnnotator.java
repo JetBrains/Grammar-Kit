@@ -49,7 +49,7 @@ public class JFlexAnnotator implements Annotator, DumbAware {
       boolean isYYINITIAL = JFlexPsiImplUtil.isYYINITIAL((JFlexStateReference)element);
       PsiReference reference = isYYINITIAL ? null : element.getReference();
       PsiElement resolve = reference == null ? null : reference.resolve();
-      holder.createInfoAnnotation(element.getParent(), null).setTextAttributes(JFlexSyntaxHighlighterFactory.MACRO);
+      holder.createInfoAnnotation(element, null).setTextAttributes(JFlexSyntaxHighlighterFactory.STATE);
       if (!isYYINITIAL && resolve == null) {
         holder.createWarningAnnotation(element, "Unresolved state reference");
       }

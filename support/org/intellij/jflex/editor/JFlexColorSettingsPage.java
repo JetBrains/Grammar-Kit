@@ -22,9 +22,7 @@ import com.intellij.openapi.options.colors.AttributesDescriptor;
 import com.intellij.openapi.options.colors.ColorDescriptor;
 import com.intellij.openapi.options.colors.ColorSettingsPage;
 import com.intellij.util.containers.ContainerUtil;
-import gnu.trove.THashMap;
 import org.intellij.jflex.parser.JFlexFileType;
-import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
@@ -52,10 +50,12 @@ public class JFlexColorSettingsPage implements ColorSettingsPage {
       new AttributesDescriptor("Escaped character", ESCAPED_CHAR),
       new AttributesDescriptor("Character", CHAR),
       new AttributesDescriptor("Number", NUMBER),
+      new AttributesDescriptor("Code", CODE),
       new AttributesDescriptor("Parenthesis", PARENTHS),
       new AttributesDescriptor("Braces", BRACES),
       new AttributesDescriptor("Brackets", BRACKETS),
       new AttributesDescriptor("Angles", ANGLES),
+      new AttributesDescriptor("Equal sign", OP_EQUAL),
       new AttributesDescriptor("Operation sign", OP_SIGN),
     };
   }
@@ -86,8 +86,8 @@ public class JFlexColorSettingsPage implements ColorSettingsPage {
 
   @NotNull
   public String getDemoText() {
-    return " /* Header comment */\n" +
-           "package sample.lexer;\n" +
+    return "/* Header comment */\n" +
+           "<j>package sample.lexer;</j>\n" +
            "\n" +
            "%%\n" +
            "%public\n" +
@@ -96,7 +96,7 @@ public class JFlexColorSettingsPage implements ColorSettingsPage {
            "%eof{ return;\n" +
            "%eof}\n" +
            "%{\n" +
-           "  private int parenCount;\n" +
+           "  <j>private int parenCount;</j>\n" +
            "%}\n" +
            "\n" +
            "// lexer states\n" +
@@ -109,20 +109,20 @@ public class JFlexColorSettingsPage implements ColorSettingsPage {
            "<m>ID</m> = [:letter:]([:letter:]|[:digit:]|_)*\n" +
            "<m>BLOCK_COMMENT</m>=\"//\".* | \"/*\" !(<c>[^]</c>* \"*/\" <c>[^]</c>*) (\"*/\")?\n" +
            "<m>NUMBER</m>=<c>[+-]</c>[:digit:]+\n" +
-           "<m>FLOAT</m>=<m>{NUMBER}</m>\\.[:digit:]+\n" +
+           "<m>FLOAT</m>=<m>{NUMBER}</m>(\\.[:digit:]){1, 3}\n" +
            "\n" +
            "%%\n" +
            "<<s>YYINITIAL</s>, <s>BLOCK</s>> {\n" +
-           "    <m>{WHITESPACE}</m>      { return WHITESPACE; }\n" +
-           "    <m>{STRING}</m>          { return STRING; }\n" +
-           "    \"(\"               { return PAREN1; }\n" +
-           "    \")\"               { return PAREN2; }\n" +
-           "    \".\"               { yybegin(QUALIFICATION); return DOT; }\n" +
-           "    <c>[^]</c>  { return BAD_CHARACER; }\n" +
+           "    <m>{WHITESPACE}</m>      <j>{ return WHITESPACE; }</j>\n" +
+           "    <m>{STRING}</m>          <j>{ return STRING; }</j>\n" +
+           "    \"(\"               <j>{ return PAREN1; }</j>\n" +
+           "    \")\"               <j>{ return PAREN2; }</j>\n" +
+           "    \".\"               <j>{ yybegin(QUALIFICATION); return DOT; }</j>\n" +
+           "    <c>[^]</c>  <j>{ return BAD_CHARACER; }</j>\n" +
            "}\n";
   }
 
   public Map<String, TextAttributesKey> getAdditionalHighlightingTagToDescriptorMap() {
-    return ContainerUtil.newHashMap(Arrays.asList("s", "m", "c"), Arrays.asList(STATE, MACRO, CLASS));
+    return ContainerUtil.newHashMap(Arrays.asList("s", "m", "c", "j"), Arrays.asList(STATE, MACRO, CLASS, CODE));
   }
 }

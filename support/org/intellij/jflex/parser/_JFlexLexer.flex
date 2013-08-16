@@ -34,12 +34,13 @@ import static org.intellij.jflex.psi.JFlexTypes.*;
 //WHITE_SPACE=({LINE_WS}|{EOL})+
 
 ID=(_|[:letter:])[a-zA-Z_0-9]*
-STRING=\"([^\"\\]|\\.)*\"
+UNCLOSED_STRING=\"([^\n\"\\]|\\.)*
+STRING={UNCLOSED_STRING}\"
 NUMBER=[:digit:]+
 LINE_COMMENT="//".*
 BLOCK_COMMENT="/*" !([^]* "*/" [^]*) ("*/")?
 ESCAPED_CHAR=\\.
-CHAR=[^\{\}\[\]\(\)\+\*\?\\/]
+CHAR=[^\"\{\}\[\]\(\)\+\*\?\\/]
 JAVA_CHAR=\'({ESCAPED_CHAR} | [^'])\'
 
 %%

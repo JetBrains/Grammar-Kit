@@ -31,13 +31,13 @@ import org.jetbrains.annotations.NotNull;
 public class JFlexAnnotator implements Annotator, DumbAware {
   @Override
   public void annotate(@NotNull PsiElement element, @NotNull AnnotationHolder holder) {
-    if (element instanceof JFlexMacroDefinition) {
-      holder.createInfoAnnotation(((JFlexMacroDefinition)element).getNameIdentifier(), null).setTextAttributes(JFlexSyntaxHighlighterFactory.MACRO);
+    PsiElement parent = element.getParent();
+    if (parent instanceof JFlexMacroDefinition && element == ((JFlexMacroDefinition)parent).getNameIdentifier()) {
+      holder.createInfoAnnotation(element, null).setTextAttributes(JFlexSyntaxHighlighterFactory.MACRO);
     }
-    else if (element instanceof JFlexMacroReference) {
-      PsiReference reference = element.getReference();
-      PsiElement resolve = reference == null ? null : reference.resolve();
-      holder.createInfoAnnotation(element.getParent(), null).setTextAttributes(JFlexSyntaxHighlighterFactory.MACRO);
+    else if (element instanceof JFlexMacroRefExpression) {
+      PsiElement resolve = ((JFlexMacroRefExpression)element).getMacroReference().getReference().resolve();
+      holder.createInfoAnnotation(element, null).setTextAttributes(JFlexSyntaxHighlighterFactory.MACRO);
       if (resolve == null) {
         holder.createWarningAnnotation(element, "Unresolved macro reference");
       }
@@ -56,6 +56,9 @@ public class JFlexAnnotator implements Annotator, DumbAware {
     }
     else if (element instanceof JFlexClassExpression) {
       holder.createInfoAnnotation(element, null).setTextAttributes(JFlexSyntaxHighlighterFactory.CLASS);
+    }
+    else if (element instanceof JFlexJavaCode || element instanceof JFlexJavaFqn) {
+      holder.createInfoAnnotation(element, null).setTextAttributes(JFlexSyntaxHighlighterFactory.CODE);
     }
   }
 }

@@ -21,7 +21,4 @@ import com.intellij.psi.PsiElement;
 
 public interface JFlexJavaFqn extends JFlexCompositeElement {
 
-  @NotNull
-  PsiElement getId();
-
 }

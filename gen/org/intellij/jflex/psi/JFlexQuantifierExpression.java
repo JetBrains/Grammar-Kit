@@ -24,7 +24,4 @@ public interface JFlexQuantifierExpression extends JFlexExpression {
   @NotNull
   JFlexExpression getExpression();
 
-  @Nullable
-  PsiElement getNumber();
-
 }

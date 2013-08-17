@@ -32,6 +32,7 @@ import com.intellij.util.containers.MultiMap;
 import com.intellij.util.containers.MultiMapBasedOnSet;
 import gnu.trove.THashMap;
 import gnu.trove.THashSet;
+import gnu.trove.TObjectHashingStrategy;
 import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.analysis.BnfFirstNextAnalyzer;
 import org.intellij.grammar.psi.*;
@@ -51,6 +52,21 @@ import static org.intellij.grammar.psi.impl.GrammarUtil.nextOrParent;
  *         Date: 16.07.11 10:41
  */
 public class RuleGraphHelper {
+  private static final TObjectHashingStrategy<PsiElement> CARDINALITY_HASHING_STRATEGY = new TObjectHashingStrategy<PsiElement>() {
+    @Override
+    public int computeHashCode(PsiElement e) {
+      if (e instanceof BnfReferenceOrToken) return e.getText().hashCode();
+      return CANONICAL.computeHashCode(e);
+    }
+
+    @Override
+    public boolean equals(PsiElement e1, PsiElement e2) {
+      if (e1 instanceof BnfReferenceOrToken && e2 instanceof BnfReferenceOrToken) {
+        return e1.getText().equals(e2.getText());
+      }
+      return CANONICAL.equals(e1, e2);
+    }
+  };
   private final BnfFile myFile;
   private final MultiMap<BnfRule, BnfRule> myRuleExtendsMap;
   private final Map<BnfRule, Map<PsiElement, Cardinality>> myRuleContentsMap;
@@ -332,7 +348,7 @@ public class RuleGraphHelper {
         }
         else if (Rule.isLeft(targetRule)) {
           if (!Rule.isInner(targetRule) && !Rule.isPrivate(targetRule)) {
-            result = new HashMap<PsiElement, Cardinality>();
+            result = psiMap();
             result.put(getSynonymTargetOrSelf(targetRule), REQUIRED);
             result.put(LEFT_MARKER, REQUIRED);
           }
@@ -371,7 +387,7 @@ public class RuleGraphHelper {
         else if (Rule.isPrivate(metaRule)) {
           if (visited.contains(ruleRef)) return psiMap(metaRule, REQUIRED);
 
-          result = new HashMap<PsiElement, Cardinality>();
+          result = psiMap();
           Map<PsiElement, Cardinality> metaResults = collectMembers(rule, ruleRef, new HashSet<PsiElement>());
           List<String> params = null;
           for (PsiElement member : metaResults.keySet()) {
@@ -473,7 +489,7 @@ public class RuleGraphHelper {
       if (type == BnfTypes.BNF_OP_OPT && checkInheritance && m.size() == 1 && collapseNode(rule, m.keySet().iterator().next())) {
         return Collections.emptyMap();
       }
-      Map<PsiElement, Cardinality> map = new HashMap<PsiElement, Cardinality>();
+      Map<PsiElement, Cardinality> map = psiMap();
       boolean leftMarker = m.containsKey(LEFT_MARKER);
       for (PsiElement t : m.keySet()) {
         Cardinality joinedCard = fromNodeType(type).and(m.get(t));
@@ -489,7 +505,7 @@ public class RuleGraphHelper {
       for (Iterator<Map<PsiElement, Cardinality>> it = list.iterator(); it.hasNext(); ) {
         if (it.next().isEmpty()) it.remove();
       }
-      Map<PsiElement, Cardinality> map = new HashMap<PsiElement, Cardinality>();
+      Map<PsiElement, Cardinality> map = psiMap();
       for (Map<PsiElement, Cardinality> m : list) {
         Cardinality leftMarker = m.get(LEFT_MARKER);
         if (leftMarker == REQUIRED) {
@@ -530,7 +546,7 @@ public class RuleGraphHelper {
       return map;
     }
     else if (type == BnfTypes.BNF_CHOICE) {
-      Map<PsiElement, Cardinality> map = new HashMap<PsiElement, Cardinality>();
+      Map<PsiElement, Cardinality> map = psiMap();
       list = compactInheritors(list);
       for (int i = 0, newListSize = list.size(); i < newListSize; i++) {
         Map<PsiElement, Cardinality> m = list.get(i);
@@ -575,11 +591,20 @@ public class RuleGraphHelper {
     return false;
   }
 
-  // damn java generics
-  public static <V> java.util.Map<PsiElement, V> psiMap(PsiElement k, V v) {
-    return Collections.singletonMap(k, v);
+  private static <V> Map<PsiElement, V> psiMap(PsiElement k, V v) {
+    Map<PsiElement, V> map = new THashMap<PsiElement, V>(1, 1, CARDINALITY_HASHING_STRATEGY);
+    map.put(k, v);
+    return map;
   }
-  
+
+  private static <V> Map<PsiElement, V> psiMap(Map<PsiElement, V> map) {
+    return new THashMap<PsiElement, V>(map, CARDINALITY_HASHING_STRATEGY);
+  }
+
+  private static <V> Map<PsiElement, V> psiMap() {
+    return new THashMap<PsiElement, V>(3, CARDINALITY_HASHING_STRATEGY);
+  }
+
   private List<Map<PsiElement, Cardinality>> compactInheritors(List<Map<PsiElement, Cardinality>> mapList) {
     Set<BnfRule> rulesToTry = new LinkedHashSet<BnfRule>();
     // collect all rules
@@ -662,7 +687,7 @@ public class RuleGraphHelper {
     Collections.reverse(sorted);
     List<Map<PsiElement, Cardinality>> result = new ArrayList<Map<PsiElement, Cardinality>>(mapList.size());
     for (Map<PsiElement, Cardinality> map : mapList) {
-      result.add(new HashMap<PsiElement, Cardinality>(map));
+      result.add(psiMap(map));
     }
     for (BnfRule superRule : sorted) {
       for (Map<PsiElement, Cardinality> newMap : result) {

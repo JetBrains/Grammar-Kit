@@ -36,12 +36,6 @@ public class JFlexQuantifierExpressionImpl extends JFlexExpressionImpl implement
     return findNotNullChildByClass(JFlexExpression.class);
   }
 
-  @Override
-  @Nullable
-  public PsiElement getNumber() {
-    return findChildByType(FLEX_NUMBER);
-  }
-
   public void accept(@NotNull PsiElementVisitor visitor) {
     if (visitor instanceof JFlexVisitor) ((JFlexVisitor)visitor).visitQuantifierExpression(this);
     else super.accept(visitor);

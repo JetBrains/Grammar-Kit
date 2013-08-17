@@ -30,15 +30,15 @@ public class BnfStringLiteralExpressionImpl extends BnfStringImpl implements Bnf
     super(node);
   }
 
+  public void accept(@NotNull PsiElementVisitor visitor) {
+    if (visitor instanceof BnfVisitor) ((BnfVisitor)visitor).visitStringLiteralExpression(this);
+    else super.accept(visitor);
+  }
+
   @Override
   @NotNull
   public PsiElement getString() {
     return findNotNullChildByType(BNF_STRING);
-  }
-
-  public void accept(@NotNull PsiElementVisitor visitor) {
-    if (visitor instanceof BnfVisitor) ((BnfVisitor)visitor).visitStringLiteralExpression(this);
-    else super.accept(visitor);
   }
 
 }

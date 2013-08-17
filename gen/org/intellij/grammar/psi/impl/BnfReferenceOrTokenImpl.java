@@ -30,15 +30,15 @@ public class BnfReferenceOrTokenImpl extends BnfRefOrTokenImpl implements BnfRef
     super(node);
   }
 
+  public void accept(@NotNull PsiElementVisitor visitor) {
+    if (visitor instanceof BnfVisitor) ((BnfVisitor)visitor).visitReferenceOrToken(this);
+    else super.accept(visitor);
+  }
+
   @Override
   @NotNull
   public PsiElement getId() {
     return findNotNullChildByType(BNF_ID);
-  }
-
-  public void accept(@NotNull PsiElementVisitor visitor) {
-    if (visitor instanceof BnfVisitor) ((BnfVisitor)visitor).visitReferenceOrToken(this);
-    else super.accept(visitor);
   }
 
 }

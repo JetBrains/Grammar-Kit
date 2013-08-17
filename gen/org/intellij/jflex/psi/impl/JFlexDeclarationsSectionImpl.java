@@ -30,6 +30,11 @@ public class JFlexDeclarationsSectionImpl extends JFlexCompositeElementImpl impl
     super(node);
   }
 
+  public void accept(@NotNull PsiElementVisitor visitor) {
+    if (visitor instanceof JFlexVisitor) ((JFlexVisitor)visitor).visitDeclarationsSection(this);
+    else super.accept(visitor);
+  }
+
   @Override
   @NotNull
   public List<JFlexMacroDefinition> getMacroDefinitionList() {
@@ -46,11 +51,6 @@ public class JFlexDeclarationsSectionImpl extends JFlexCompositeElementImpl impl
   @NotNull
   public List<JFlexStateDeclaration> getStateDeclarationList() {
     return PsiTreeUtil.getChildrenOfTypeAsList(this, JFlexStateDeclaration.class);
-  }
-
-  public void accept(@NotNull PsiElementVisitor visitor) {
-    if (visitor instanceof JFlexVisitor) ((JFlexVisitor)visitor).visitDeclarationsSection(this);
-    else super.accept(visitor);
   }
 
 }

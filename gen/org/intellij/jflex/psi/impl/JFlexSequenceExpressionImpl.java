@@ -30,15 +30,15 @@ public class JFlexSequenceExpressionImpl extends JFlexExpressionImpl implements 
     super(node);
   }
 
+  public void accept(@NotNull PsiElementVisitor visitor) {
+    if (visitor instanceof JFlexVisitor) ((JFlexVisitor)visitor).visitSequenceExpression(this);
+    else super.accept(visitor);
+  }
+
   @Override
   @NotNull
   public List<JFlexExpression> getExpressionList() {
     return PsiTreeUtil.getChildrenOfTypeAsList(this, JFlexExpression.class);
-  }
-
-  public void accept(@NotNull PsiElementVisitor visitor) {
-    if (visitor instanceof JFlexVisitor) ((JFlexVisitor)visitor).visitSequenceExpression(this);
-    else super.accept(visitor);
   }
 
 }

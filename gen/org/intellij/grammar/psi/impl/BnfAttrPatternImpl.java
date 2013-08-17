@@ -30,15 +30,15 @@ public class BnfAttrPatternImpl extends BnfCompositeElementImpl implements BnfAt
     super(node);
   }
 
+  public void accept(@NotNull PsiElementVisitor visitor) {
+    if (visitor instanceof BnfVisitor) ((BnfVisitor)visitor).visitAttrPattern(this);
+    else super.accept(visitor);
+  }
+
   @Override
   @Nullable
   public BnfStringLiteralExpression getLiteralExpression() {
     return findChildByClass(BnfStringLiteralExpression.class);
-  }
-
-  public void accept(@NotNull PsiElementVisitor visitor) {
-    if (visitor instanceof BnfVisitor) ((BnfVisitor)visitor).visitAttrPattern(this);
-    else super.accept(visitor);
   }
 
 }

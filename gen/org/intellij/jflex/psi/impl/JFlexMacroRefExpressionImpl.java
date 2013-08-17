@@ -30,15 +30,15 @@ public class JFlexMacroRefExpressionImpl extends JFlexExpressionImpl implements 
     super(node);
   }
 
+  public void accept(@NotNull PsiElementVisitor visitor) {
+    if (visitor instanceof JFlexVisitor) ((JFlexVisitor)visitor).visitMacroRefExpression(this);
+    else super.accept(visitor);
+  }
+
   @Override
   @NotNull
   public JFlexMacroReference getMacroReference() {
     return findNotNullChildByClass(JFlexMacroReference.class);
-  }
-
-  public void accept(@NotNull PsiElementVisitor visitor) {
-    if (visitor instanceof JFlexVisitor) ((JFlexVisitor)visitor).visitMacroRefExpression(this);
-    else super.accept(visitor);
   }
 
 }

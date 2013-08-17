@@ -30,15 +30,15 @@ public class BnfParenthesizedImpl extends BnfExpressionImpl implements BnfParent
     super(node);
   }
 
+  public void accept(@NotNull PsiElementVisitor visitor) {
+    if (visitor instanceof BnfVisitor) ((BnfVisitor)visitor).visitParenthesized(this);
+    else super.accept(visitor);
+  }
+
   @Override
   @NotNull
   public BnfExpression getExpression() {
     return findNotNullChildByClass(BnfExpression.class);
-  }
-
-  public void accept(@NotNull PsiElementVisitor visitor) {
-    if (visitor instanceof BnfVisitor) ((BnfVisitor)visitor).visitParenthesized(this);
-    else super.accept(visitor);
   }
 
 }

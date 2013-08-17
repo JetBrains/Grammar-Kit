@@ -30,15 +30,15 @@ public class JFlexUserCodeSectionImpl extends JFlexCompositeElementImpl implemen
     super(node);
   }
 
+  public void accept(@NotNull PsiElementVisitor visitor) {
+    if (visitor instanceof JFlexVisitor) ((JFlexVisitor)visitor).visitUserCodeSection(this);
+    else super.accept(visitor);
+  }
+
   @Override
   @Nullable
   public JFlexJavaCode getJavaCode() {
     return findChildByClass(JFlexJavaCode.class);
-  }
-
-  public void accept(@NotNull PsiElementVisitor visitor) {
-    if (visitor instanceof JFlexVisitor) ((JFlexVisitor)visitor).visitUserCodeSection(this);
-    else super.accept(visitor);
   }
 
 }

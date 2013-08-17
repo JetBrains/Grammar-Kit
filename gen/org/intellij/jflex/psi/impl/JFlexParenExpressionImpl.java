@@ -30,15 +30,15 @@ public class JFlexParenExpressionImpl extends JFlexExpressionImpl implements JFl
     super(node);
   }
 
+  public void accept(@NotNull PsiElementVisitor visitor) {
+    if (visitor instanceof JFlexVisitor) ((JFlexVisitor)visitor).visitParenExpression(this);
+    else super.accept(visitor);
+  }
+
   @Override
   @Nullable
   public JFlexExpression getExpression() {
     return findChildByClass(JFlexExpression.class);
-  }
-
-  public void accept(@NotNull PsiElementVisitor visitor) {
-    if (visitor instanceof JFlexVisitor) ((JFlexVisitor)visitor).visitParenExpression(this);
-    else super.accept(visitor);
   }
 
 }

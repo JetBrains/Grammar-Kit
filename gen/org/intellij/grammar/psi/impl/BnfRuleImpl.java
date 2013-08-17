@@ -30,6 +30,11 @@ public class BnfRuleImpl extends BnfNamedElementImpl implements BnfRule {
     super(node);
   }
 
+  public void accept(@NotNull PsiElementVisitor visitor) {
+    if (visitor instanceof BnfVisitor) ((BnfVisitor)visitor).visitRule(this);
+    else super.accept(visitor);
+  }
+
   @Override
   @Nullable
   public BnfAttrs getAttrs() {
@@ -52,11 +57,6 @@ public class BnfRuleImpl extends BnfNamedElementImpl implements BnfRule {
   @NotNull
   public PsiElement getId() {
     return findNotNullChildByType(BNF_ID);
-  }
-
-  public void accept(@NotNull PsiElementVisitor visitor) {
-    if (visitor instanceof BnfVisitor) ((BnfVisitor)visitor).visitRule(this);
-    else super.accept(visitor);
   }
 
 }

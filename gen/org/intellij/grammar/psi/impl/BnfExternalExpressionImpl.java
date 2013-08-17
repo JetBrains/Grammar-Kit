@@ -30,15 +30,15 @@ public class BnfExternalExpressionImpl extends BnfExpressionImpl implements BnfE
     super(node);
   }
 
+  public void accept(@NotNull PsiElementVisitor visitor) {
+    if (visitor instanceof BnfVisitor) ((BnfVisitor)visitor).visitExternalExpression(this);
+    else super.accept(visitor);
+  }
+
   @Override
   @NotNull
   public List<BnfExpression> getExpressionList() {
     return PsiTreeUtil.getChildrenOfTypeAsList(this, BnfExpression.class);
-  }
-
-  public void accept(@NotNull PsiElementVisitor visitor) {
-    if (visitor instanceof BnfVisitor) ((BnfVisitor)visitor).visitExternalExpression(this);
-    else super.accept(visitor);
   }
 
 }

@@ -30,6 +30,11 @@ public class JFlexLiteralExpressionImpl extends JFlexExpressionImpl implements J
     super(node);
   }
 
+  public void accept(@NotNull PsiElementVisitor visitor) {
+    if (visitor instanceof JFlexVisitor) ((JFlexVisitor)visitor).visitLiteralExpression(this);
+    else super.accept(visitor);
+  }
+
   @Override
   @Nullable
   public PsiElement getChar() {
@@ -58,11 +63,6 @@ public class JFlexLiteralExpressionImpl extends JFlexExpressionImpl implements J
   @Nullable
   public PsiElement getString() {
     return findChildByType(FLEX_STRING);
-  }
-
-  public void accept(@NotNull PsiElementVisitor visitor) {
-    if (visitor instanceof JFlexVisitor) ((JFlexVisitor)visitor).visitLiteralExpression(this);
-    else super.accept(visitor);
   }
 
 }

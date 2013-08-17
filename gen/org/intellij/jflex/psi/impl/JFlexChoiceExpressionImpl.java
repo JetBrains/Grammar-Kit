@@ -30,15 +30,15 @@ public class JFlexChoiceExpressionImpl extends JFlexExpressionImpl implements JF
     super(node);
   }
 
+  public void accept(@NotNull PsiElementVisitor visitor) {
+    if (visitor instanceof JFlexVisitor) ((JFlexVisitor)visitor).visitChoiceExpression(this);
+    else super.accept(visitor);
+  }
+
   @Override
   @NotNull
   public List<JFlexExpression> getExpressionList() {
     return PsiTreeUtil.getChildrenOfTypeAsList(this, JFlexExpression.class);
-  }
-
-  public void accept(@NotNull PsiElementVisitor visitor) {
-    if (visitor instanceof JFlexVisitor) ((JFlexVisitor)visitor).visitChoiceExpression(this);
-    else super.accept(visitor);
   }
 
 }

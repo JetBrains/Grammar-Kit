@@ -30,15 +30,15 @@ public class BnfAttrsImpl extends BnfCompositeElementImpl implements BnfAttrs {
     super(node);
   }
 
+  public void accept(@NotNull PsiElementVisitor visitor) {
+    if (visitor instanceof BnfVisitor) ((BnfVisitor)visitor).visitAttrs(this);
+    else super.accept(visitor);
+  }
+
   @Override
   @NotNull
   public List<BnfAttr> getAttrList() {
     return PsiTreeUtil.getChildrenOfTypeAsList(this, BnfAttr.class);
-  }
-
-  public void accept(@NotNull PsiElementVisitor visitor) {
-    if (visitor instanceof BnfVisitor) ((BnfVisitor)visitor).visitAttrs(this);
-    else super.accept(visitor);
   }
 
 }

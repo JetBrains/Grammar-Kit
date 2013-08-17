@@ -30,15 +30,15 @@ public class BnfChoiceImpl extends BnfExpressionImpl implements BnfChoice {
     super(node);
   }
 
+  public void accept(@NotNull PsiElementVisitor visitor) {
+    if (visitor instanceof BnfVisitor) ((BnfVisitor)visitor).visitChoice(this);
+    else super.accept(visitor);
+  }
+
   @Override
   @NotNull
   public List<BnfExpression> getExpressionList() {
     return PsiTreeUtil.getChildrenOfTypeAsList(this, BnfExpression.class);
-  }
-
-  public void accept(@NotNull PsiElementVisitor visitor) {
-    if (visitor instanceof BnfVisitor) ((BnfVisitor)visitor).visitChoice(this);
-    else super.accept(visitor);
   }
 
 }

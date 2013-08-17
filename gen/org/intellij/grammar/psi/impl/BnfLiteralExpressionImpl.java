@@ -30,15 +30,15 @@ public class BnfLiteralExpressionImpl extends BnfExpressionImpl implements BnfLi
     super(node);
   }
 
+  public void accept(@NotNull PsiElementVisitor visitor) {
+    if (visitor instanceof BnfVisitor) ((BnfVisitor)visitor).visitLiteralExpression(this);
+    else super.accept(visitor);
+  }
+
   @Override
   @Nullable
   public PsiElement getNumber() {
     return findChildByType(BNF_NUMBER);
-  }
-
-  public void accept(@NotNull PsiElementVisitor visitor) {
-    if (visitor instanceof BnfVisitor) ((BnfVisitor)visitor).visitLiteralExpression(this);
-    else super.accept(visitor);
   }
 
 }

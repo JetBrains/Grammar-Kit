@@ -30,6 +30,11 @@ public class BnfAttrImpl extends BnfNamedElementImpl implements BnfAttr {
     super(node);
   }
 
+  public void accept(@NotNull PsiElementVisitor visitor) {
+    if (visitor instanceof BnfVisitor) ((BnfVisitor)visitor).visitAttr(this);
+    else super.accept(visitor);
+  }
+
   @Override
   @Nullable
   public BnfAttrPattern getAttrPattern() {
@@ -46,11 +51,6 @@ public class BnfAttrImpl extends BnfNamedElementImpl implements BnfAttr {
   @NotNull
   public PsiElement getId() {
     return findNotNullChildByType(BNF_ID);
-  }
-
-  public void accept(@NotNull PsiElementVisitor visitor) {
-    if (visitor instanceof BnfVisitor) ((BnfVisitor)visitor).visitAttr(this);
-    else super.accept(visitor);
   }
 
 }

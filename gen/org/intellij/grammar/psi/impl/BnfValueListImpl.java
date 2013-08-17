@@ -30,15 +30,15 @@ public class BnfValueListImpl extends BnfExpressionImpl implements BnfValueList 
     super(node);
   }
 
+  public void accept(@NotNull PsiElementVisitor visitor) {
+    if (visitor instanceof BnfVisitor) ((BnfVisitor)visitor).visitValueList(this);
+    else super.accept(visitor);
+  }
+
   @Override
   @NotNull
   public List<BnfListEntry> getListEntryList() {
     return PsiTreeUtil.getChildrenOfTypeAsList(this, BnfListEntry.class);
-  }
-
-  public void accept(@NotNull PsiElementVisitor visitor) {
-    if (visitor instanceof BnfVisitor) ((BnfVisitor)visitor).visitValueList(this);
-    else super.accept(visitor);
   }
 
 }

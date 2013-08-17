@@ -30,15 +30,15 @@ public class JFlexQuantifierExpressionImpl extends JFlexExpressionImpl implement
     super(node);
   }
 
+  public void accept(@NotNull PsiElementVisitor visitor) {
+    if (visitor instanceof JFlexVisitor) ((JFlexVisitor)visitor).visitQuantifierExpression(this);
+    else super.accept(visitor);
+  }
+
   @Override
   @NotNull
   public JFlexExpression getExpression() {
     return findNotNullChildByClass(JFlexExpression.class);
-  }
-
-  public void accept(@NotNull PsiElementVisitor visitor) {
-    if (visitor instanceof JFlexVisitor) ((JFlexVisitor)visitor).visitQuantifierExpression(this);
-    else super.accept(visitor);
   }
 
 }

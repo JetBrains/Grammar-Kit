@@ -30,6 +30,11 @@ public class BnfPredicateImpl extends BnfExpressionImpl implements BnfPredicate 
     super(node);
   }
 
+  public void accept(@NotNull PsiElementVisitor visitor) {
+    if (visitor instanceof BnfVisitor) ((BnfVisitor)visitor).visitPredicate(this);
+    else super.accept(visitor);
+  }
+
   @Override
   @NotNull
   public BnfExpression getExpression() {
@@ -40,11 +45,6 @@ public class BnfPredicateImpl extends BnfExpressionImpl implements BnfPredicate 
   @NotNull
   public BnfPredicateSign getPredicateSign() {
     return findNotNullChildByClass(BnfPredicateSign.class);
-  }
-
-  public void accept(@NotNull PsiElementVisitor visitor) {
-    if (visitor instanceof BnfVisitor) ((BnfVisitor)visitor).visitPredicate(this);
-    else super.accept(visitor);
   }
 
 }

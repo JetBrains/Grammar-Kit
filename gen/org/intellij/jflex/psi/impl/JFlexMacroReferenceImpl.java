@@ -31,15 +31,15 @@ public class JFlexMacroReferenceImpl extends JFlexCompositeElementImpl implement
     super(node);
   }
 
+  public void accept(@NotNull PsiElementVisitor visitor) {
+    if (visitor instanceof JFlexVisitor) ((JFlexVisitor)visitor).visitMacroReference(this);
+    else super.accept(visitor);
+  }
+
   @Override
   @NotNull
   public PsiElement getId() {
     return findNotNullChildByType(FLEX_ID);
-  }
-
-  public void accept(@NotNull PsiElementVisitor visitor) {
-    if (visitor instanceof JFlexVisitor) ((JFlexVisitor)visitor).visitMacroReference(this);
-    else super.accept(visitor);
   }
 
   @NotNull

@@ -30,6 +30,11 @@ public class BnfQuantifiedImpl extends BnfExpressionImpl implements BnfQuantifie
     super(node);
   }
 
+  public void accept(@NotNull PsiElementVisitor visitor) {
+    if (visitor instanceof BnfVisitor) ((BnfVisitor)visitor).visitQuantified(this);
+    else super.accept(visitor);
+  }
+
   @Override
   @NotNull
   public BnfExpression getExpression() {
@@ -40,11 +45,6 @@ public class BnfQuantifiedImpl extends BnfExpressionImpl implements BnfQuantifie
   @NotNull
   public BnfQuantifier getQuantifier() {
     return findNotNullChildByClass(BnfQuantifier.class);
-  }
-
-  public void accept(@NotNull PsiElementVisitor visitor) {
-    if (visitor instanceof BnfVisitor) ((BnfVisitor)visitor).visitQuantified(this);
-    else super.accept(visitor);
   }
 
 }

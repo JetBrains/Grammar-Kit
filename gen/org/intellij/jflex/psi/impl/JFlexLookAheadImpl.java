@@ -30,15 +30,15 @@ public class JFlexLookAheadImpl extends JFlexCompositeElementImpl implements JFl
     super(node);
   }
 
+  public void accept(@NotNull PsiElementVisitor visitor) {
+    if (visitor instanceof JFlexVisitor) ((JFlexVisitor)visitor).visitLookAhead(this);
+    else super.accept(visitor);
+  }
+
   @Override
   @Nullable
   public JFlexExpression getExpression() {
     return findChildByClass(JFlexExpression.class);
-  }
-
-  public void accept(@NotNull PsiElementVisitor visitor) {
-    if (visitor instanceof JFlexVisitor) ((JFlexVisitor)visitor).visitLookAhead(this);
-    else super.accept(visitor);
   }
 
 }

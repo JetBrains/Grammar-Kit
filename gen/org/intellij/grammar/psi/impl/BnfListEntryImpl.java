@@ -31,6 +31,11 @@ public class BnfListEntryImpl extends BnfCompositeElementImpl implements BnfList
     super(node);
   }
 
+  public void accept(@NotNull PsiElementVisitor visitor) {
+    if (visitor instanceof BnfVisitor) ((BnfVisitor)visitor).visitListEntry(this);
+    else super.accept(visitor);
+  }
+
   @Override
   @Nullable
   public BnfStringLiteralExpression getLiteralExpression() {
@@ -41,11 +46,6 @@ public class BnfListEntryImpl extends BnfCompositeElementImpl implements BnfList
   @Nullable
   public PsiElement getId() {
     return findChildByType(BNF_ID);
-  }
-
-  public void accept(@NotNull PsiElementVisitor visitor) {
-    if (visitor instanceof BnfVisitor) ((BnfVisitor)visitor).visitListEntry(this);
-    else super.accept(visitor);
   }
 
   @NotNull

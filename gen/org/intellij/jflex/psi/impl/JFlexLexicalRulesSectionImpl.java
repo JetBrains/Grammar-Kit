@@ -30,15 +30,15 @@ public class JFlexLexicalRulesSectionImpl extends JFlexCompositeElementImpl impl
     super(node);
   }
 
+  public void accept(@NotNull PsiElementVisitor visitor) {
+    if (visitor instanceof JFlexVisitor) ((JFlexVisitor)visitor).visitLexicalRulesSection(this);
+    else super.accept(visitor);
+  }
+
   @Override
   @NotNull
   public List<JFlexRule> getRuleList() {
     return PsiTreeUtil.getChildrenOfTypeAsList(this, JFlexRule.class);
-  }
-
-  public void accept(@NotNull PsiElementVisitor visitor) {
-    if (visitor instanceof JFlexVisitor) ((JFlexVisitor)visitor).visitLexicalRulesSection(this);
-    else super.accept(visitor);
   }
 
 }

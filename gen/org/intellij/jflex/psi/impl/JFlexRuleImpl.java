@@ -30,6 +30,11 @@ public class JFlexRuleImpl extends JFlexCompositeElementImpl implements JFlexRul
     super(node);
   }
 
+  public void accept(@NotNull PsiElementVisitor visitor) {
+    if (visitor instanceof JFlexVisitor) ((JFlexVisitor)visitor).visitRule(this);
+    else super.accept(visitor);
+  }
+
   @Override
   @Nullable
   public JFlexExpression getExpression() {
@@ -58,11 +63,6 @@ public class JFlexRuleImpl extends JFlexCompositeElementImpl implements JFlexRul
   @NotNull
   public List<JFlexStateReference> getStateReferenceList() {
     return PsiTreeUtil.getChildrenOfTypeAsList(this, JFlexStateReference.class);
-  }
-
-  public void accept(@NotNull PsiElementVisitor visitor) {
-    if (visitor instanceof JFlexVisitor) ((JFlexVisitor)visitor).visitRule(this);
-    else super.accept(visitor);
   }
 
 }

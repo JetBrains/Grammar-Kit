@@ -30,15 +30,15 @@ public class JFlexStateDeclarationImpl extends JFlexCompositeElementImpl impleme
     super(node);
   }
 
+  public void accept(@NotNull PsiElementVisitor visitor) {
+    if (visitor instanceof JFlexVisitor) ((JFlexVisitor)visitor).visitStateDeclaration(this);
+    else super.accept(visitor);
+  }
+
   @Override
   @NotNull
   public List<JFlexStateDefinition> getStateDefinitionList() {
     return PsiTreeUtil.getChildrenOfTypeAsList(this, JFlexStateDefinition.class);
-  }
-
-  public void accept(@NotNull PsiElementVisitor visitor) {
-    if (visitor instanceof JFlexVisitor) ((JFlexVisitor)visitor).visitStateDeclaration(this);
-    else super.accept(visitor);
   }
 
 }

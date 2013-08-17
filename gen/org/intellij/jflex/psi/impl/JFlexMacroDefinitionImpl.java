@@ -30,6 +30,11 @@ public class JFlexMacroDefinitionImpl extends JFlexCompositeElementImpl implemen
     super(node);
   }
 
+  public void accept(@NotNull PsiElementVisitor visitor) {
+    if (visitor instanceof JFlexVisitor) ((JFlexVisitor)visitor).visitMacroDefinition(this);
+    else super.accept(visitor);
+  }
+
   @Override
   @Nullable
   public JFlexExpression getExpression() {
@@ -40,11 +45,6 @@ public class JFlexMacroDefinitionImpl extends JFlexCompositeElementImpl implemen
   @NotNull
   public PsiElement getId() {
     return findNotNullChildByType(FLEX_ID);
-  }
-
-  public void accept(@NotNull PsiElementVisitor visitor) {
-    if (visitor instanceof JFlexVisitor) ((JFlexVisitor)visitor).visitMacroDefinition(this);
-    else super.accept(visitor);
   }
 
   @NotNull

@@ -1928,7 +1928,7 @@ public class JFlexParser implements PsiParser {
   // 0: N_ARY(choice_expression)
   // 1: N_ARY(sequence_expression)
   // 2: ATOM(paren_expression)
-  // 3: ATOM(not_expression)
+  // 3: PREFIX(not_expression)
   // 4: POSTFIX(quantifier_expression)
   // 5: ATOM(class_expression) ATOM(predefined_class_expression) ATOM(macro_ref_expression) ATOM(literal_expression)
   public static boolean expression(PsiBuilder builder_, int level_, int priority_) {
@@ -1999,18 +1999,24 @@ public class JFlexParser implements PsiParser {
     return result_ || pinned_;
   }
 
-  // ('!'|'~') expression
   public static boolean not_expression(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "not_expression")) return false;
     if (!nextTokenIs(builder_, FLEX_NOT) && !nextTokenIs(builder_, FLEX_NOT2)
         && replaceVariants(builder_, 2, "<expression>")) return false;
     boolean result_ = false;
     boolean pinned_ = false;
-    Marker marker_ = enter_section_(builder_, level_, _COLLAPSE_, "<expression>");
+    Marker marker_ = builder_.mark();
+    enterErrorRecordingSection(builder_, level_, _SECTION_GENERAL_, null);
     result_ = not_expression_0(builder_, level_ + 1);
-    pinned_ = result_; // pin = 1
-    result_ = result_ && expression(builder_, level_ + 1, -1);
-    exit_section_(builder_, level_, marker_, FLEX_NOT_EXPRESSION, result_, pinned_, null);
+    pinned_ = result_;
+    result_ = pinned_ && expression(builder_, level_, 3) && result_;
+    if (result_ || pinned_) {
+      marker_.done(FLEX_NOT_EXPRESSION);
+    }
+    else {
+      marker_.rollbackTo();
+    }
+    result_ = exitErrorRecordingSection(builder_, level_, result_, pinned_, _SECTION_GENERAL_, null);
     return result_ || pinned_;
   }
 

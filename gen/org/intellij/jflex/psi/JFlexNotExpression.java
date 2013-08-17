@@ -21,7 +21,7 @@ import com.intellij.psi.PsiElement;
 
 public interface JFlexNotExpression extends JFlexExpression {
 
-  @Nullable
+  @NotNull
   JFlexExpression getExpression();
 
 }

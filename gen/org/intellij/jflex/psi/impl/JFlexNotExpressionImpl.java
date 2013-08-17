@@ -31,9 +31,9 @@ public class JFlexNotExpressionImpl extends JFlexExpressionImpl implements JFlex
   }
 
   @Override
-  @Nullable
+  @NotNull
   public JFlexExpression getExpression() {
-    return findChildByClass(JFlexExpression.class);
+    return findNotNullChildByClass(JFlexExpression.class);
   }
 
   public void accept(@NotNull PsiElementVisitor visitor) {

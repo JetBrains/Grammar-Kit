@@ -307,7 +307,7 @@ private atom_group ::= class_expression
 choice_expression ::= expression ('|' expression) +
 sequence_expression ::= expression (sequence_op expression) +
 paren_expression ::= '(' expression ')' {pin=1}
-not_expression ::= ('!'|'~') expression {pin=1}
+not_expression ::= ('!'|'~') expression
 quantifier_expression ::=  expression ( '*' | '+' | '?' | '{' number [ ',' number] '}' )
 class_expression ::= '[' '^'? '-'? (string | predefined_class | class_char [ '-' class_char]) * '-'? ']' {pin=1}
 private class_char ::= char | escaped_char

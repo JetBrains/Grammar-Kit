@@ -954,7 +954,7 @@ public class ParserGenerator {
       if (attributeName != null) {
         return generateConsumeToken(attributeName, consumeMethodName);
       }
-      return generateConsumeTextToken(value, consumeMethodName);
+      return generateConsumeTextToken(text.startsWith("\"") ? value : StringUtil.escapeStringCharacters(value), consumeMethodName);
     }
     else if (type == BNF_NUMBER) {
       return generateConsumeTextToken(text, consumeMethodName);
@@ -1119,7 +1119,7 @@ public class ParserGenerator {
   }
 
   public static String generateConsumeTextToken(String tokenText, String consumeMethodName) {
-    return consumeMethodName + "(builder_, \"" + StringUtil.escapeStringCharacters(tokenText) + "\")";
+    return consumeMethodName + "(builder_, \"" + tokenText + "\")";
   }
 
   private String getTokenElementType(String token) {
@@ -1169,7 +1169,7 @@ public class ParserGenerator {
         elementCreateCall = shortener.fun(StringUtil.getPackageName(pair.second)) + "." + StringUtil.getShortName(pair.second);
       }
       String callFix = elementCreateCall.equals("new IElementType")? ", null" : "";
-      out("IElementType " + elementType + " = " + elementCreateCall + "(\"" + StringUtil.escapeStringCharacters(elementType) + "\""+callFix+");");
+      out("IElementType " + elementType + " = " + elementCreateCall + "(\"" + elementType + "\""+callFix+");");
     }
     if (generateTokens) {
       newLine();
@@ -1187,7 +1187,8 @@ public class ParserGenerator {
       }
       for (String tokenType : sortedTokens.keySet()) {
         String callFix = tokenCreateCall.equals("new IElementType") ? ", null" : "";
-        out("IElementType " + tokenType + " = " + tokenCreateCall + "(\"" + StringUtil.escapeStringCharacters(sortedTokens.get(tokenType)) + "\""+callFix+");");
+        String tokenString = sortedTokens.get(tokenType);
+        out("IElementType " + tokenType + " = " + tokenCreateCall + "(\"" + StringUtil.escapeStringCharacters(tokenString) + "\""+callFix+");");
       }
     }
     if (generatePsi) {

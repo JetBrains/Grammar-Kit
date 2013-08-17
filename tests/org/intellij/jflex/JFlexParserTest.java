@@ -46,6 +46,9 @@ public class JFlexParserTest extends ParsingTestCase {
 
   public void testSelfFlex() { doTest(true); }
   public void testSelfBnf() { doTest(true); }
+  public void testEmpty1() throws Exception { doCodeTest(""); }
+  public void testEmpty2() throws Exception { doCodeTest("%%\n"); }
+  public void testEmpty3() throws Exception { doCodeTest("%%\n%%"); }
   public void testParserFixes() { doTest(true); }
 
   @Override

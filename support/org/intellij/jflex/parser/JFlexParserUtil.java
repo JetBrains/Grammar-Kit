@@ -54,7 +54,7 @@ public class JFlexParserUtil extends GeneratedParserUtilBase {
     for (int i=-1; ; i++) {
       IElementType type = builder.rawLookup(i);
       if (type == TokenType.WHITE_SPACE) continue;
-      return type == JFlexTypes.FLEX_NEWLINE;
+      return type == JFlexTypes.FLEX_NEWLINE || type == null;
     }
   }
 

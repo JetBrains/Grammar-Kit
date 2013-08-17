@@ -445,6 +445,11 @@ public class BnfAttrImpl extends BnfNamedElementImpl implements BnfAttr {
     super(node);
   }
 
+  public void accept(@NotNull PsiElementVisitor visitor) {
+    if (visitor instanceof BnfVisitor) ((BnfVisitor)visitor).visitAttr(this);
+    else super.accept(visitor);
+  }
+
   @Override
   @Nullable
   public BnfAttrPattern getAttrPattern() {
@@ -461,11 +466,6 @@ public class BnfAttrImpl extends BnfNamedElementImpl implements BnfAttr {
   @NotNull
   public PsiElement getId() {
     return findNotNullChildByType(BNF_ID);
-  }
-
-  public void accept(@NotNull PsiElementVisitor visitor) {
-    if (visitor instanceof BnfVisitor) ((BnfVisitor)visitor).visitAttr(this);
-    else super.accept(visitor);
   }
 
 }
@@ -488,15 +488,15 @@ public class BnfAttrPatternImpl extends BnfCompositeElementImpl implements BnfAt
     super(node);
   }
 
+  public void accept(@NotNull PsiElementVisitor visitor) {
+    if (visitor instanceof BnfVisitor) ((BnfVisitor)visitor).visitAttrPattern(this);
+    else super.accept(visitor);
+  }
+
   @Override
   @Nullable
   public BnfStringLiteralExpression getLiteralExpression() {
     return findChildByClass(BnfStringLiteralExpression.class);
-  }
-
-  public void accept(@NotNull PsiElementVisitor visitor) {
-    if (visitor instanceof BnfVisitor) ((BnfVisitor)visitor).visitAttrPattern(this);
-    else super.accept(visitor);
   }
 
 }
@@ -519,15 +519,15 @@ public class BnfAttrsImpl extends BnfCompositeElementImpl implements BnfAttrs {
     super(node);
   }
 
+  public void accept(@NotNull PsiElementVisitor visitor) {
+    if (visitor instanceof BnfVisitor) ((BnfVisitor)visitor).visitAttrs(this);
+    else super.accept(visitor);
+  }
+
   @Override
   @NotNull
   public List<BnfAttr> getAttrList() {
     return PsiTreeUtil.getChildrenOfTypeAsList(this, BnfAttr.class);
-  }
-
-  public void accept(@NotNull PsiElementVisitor visitor) {
-    if (visitor instanceof BnfVisitor) ((BnfVisitor)visitor).visitAttrs(this);
-    else super.accept(visitor);
   }
 
 }
@@ -550,15 +550,15 @@ public class BnfChoiceImpl extends BnfExpressionImpl implements BnfChoice {
     super(node);
   }
 
+  public void accept(@NotNull PsiElementVisitor visitor) {
+    if (visitor instanceof BnfVisitor) ((BnfVisitor)visitor).visitChoice(this);
+    else super.accept(visitor);
+  }
+
   @Override
   @NotNull
   public List<BnfExpression> getExpressionList() {
     return PsiTreeUtil.getChildrenOfTypeAsList(this, BnfExpression.class);
-  }
-
-  public void accept(@NotNull PsiElementVisitor visitor) {
-    if (visitor instanceof BnfVisitor) ((BnfVisitor)visitor).visitChoice(this);
-    else super.accept(visitor);
   }
 
 }
@@ -606,15 +606,15 @@ public class BnfExternalExpressionImpl extends BnfExpressionImpl implements BnfE
     super(node);
   }
 
+  public void accept(@NotNull PsiElementVisitor visitor) {
+    if (visitor instanceof BnfVisitor) ((BnfVisitor)visitor).visitExternalExpression(this);
+    else super.accept(visitor);
+  }
+
   @Override
   @NotNull
   public List<BnfExpression> getExpressionList() {
     return PsiTreeUtil.getChildrenOfTypeAsList(this, BnfExpression.class);
-  }
-
-  public void accept(@NotNull PsiElementVisitor visitor) {
-    if (visitor instanceof BnfVisitor) ((BnfVisitor)visitor).visitExternalExpression(this);
-    else super.accept(visitor);
   }
 
 }
@@ -637,6 +637,11 @@ public class BnfListEntryImpl extends BnfCompositeElementImpl implements BnfList
     super(node);
   }
 
+  public void accept(@NotNull PsiElementVisitor visitor) {
+    if (visitor instanceof BnfVisitor) ((BnfVisitor)visitor).visitListEntry(this);
+    else super.accept(visitor);
+  }
+
   @Override
   @Nullable
   public BnfStringLiteralExpression getLiteralExpression() {
@@ -647,11 +652,6 @@ public class BnfListEntryImpl extends BnfCompositeElementImpl implements BnfList
   @Nullable
   public PsiElement getId() {
     return findChildByType(BNF_ID);
-  }
-
-  public void accept(@NotNull PsiElementVisitor visitor) {
-    if (visitor instanceof BnfVisitor) ((BnfVisitor)visitor).visitListEntry(this);
-    else super.accept(visitor);
   }
 
   public void getReferences() {
@@ -678,15 +678,15 @@ public class BnfLiteralExpressionImpl extends BnfExpressionImpl implements BnfLi
     super(node);
   }
 
+  public void accept(@NotNull PsiElementVisitor visitor) {
+    if (visitor instanceof BnfVisitor) ((BnfVisitor)visitor).visitLiteralExpression(this);
+    else super.accept(visitor);
+  }
+
   @Override
   @Nullable
   public PsiElement getNumber() {
     return findChildByType(BNF_NUMBER);
-  }
-
-  public void accept(@NotNull PsiElementVisitor visitor) {
-    if (visitor instanceof BnfVisitor) ((BnfVisitor)visitor).visitLiteralExpression(this);
-    else super.accept(visitor);
   }
 
 }
@@ -734,15 +734,15 @@ public class BnfParenExpressionImpl extends BnfParenthesizedImpl implements BnfP
     super(node);
   }
 
+  public void accept(@NotNull PsiElementVisitor visitor) {
+    if (visitor instanceof BnfVisitor) ((BnfVisitor)visitor).visitParenExpression(this);
+    else super.accept(visitor);
+  }
+
   @Override
   @NotNull
   public BnfExpression getExpression() {
     return findNotNullChildByClass(BnfExpression.class);
-  }
-
-  public void accept(@NotNull PsiElementVisitor visitor) {
-    if (visitor instanceof BnfVisitor) ((BnfVisitor)visitor).visitParenExpression(this);
-    else super.accept(visitor);
   }
 
 }
@@ -765,15 +765,15 @@ public class BnfParenOptExpressionImpl extends BnfParenthesizedImpl implements B
     super(node);
   }
 
+  public void accept(@NotNull PsiElementVisitor visitor) {
+    if (visitor instanceof BnfVisitor) ((BnfVisitor)visitor).visitParenOptExpression(this);
+    else super.accept(visitor);
+  }
+
   @Override
   @NotNull
   public BnfExpression getExpression() {
     return findNotNullChildByClass(BnfExpression.class);
-  }
-
-  public void accept(@NotNull PsiElementVisitor visitor) {
-    if (visitor instanceof BnfVisitor) ((BnfVisitor)visitor).visitParenOptExpression(this);
-    else super.accept(visitor);
   }
 
 }
@@ -796,15 +796,15 @@ public class BnfParenthesizedImpl extends BnfExpressionImpl implements BnfParent
     super(node);
   }
 
+  public void accept(@NotNull PsiElementVisitor visitor) {
+    if (visitor instanceof BnfVisitor) ((BnfVisitor)visitor).visitParenthesized(this);
+    else super.accept(visitor);
+  }
+
   @Override
   @NotNull
   public BnfExpression getExpression() {
     return findNotNullChildByClass(BnfExpression.class);
-  }
-
-  public void accept(@NotNull PsiElementVisitor visitor) {
-    if (visitor instanceof BnfVisitor) ((BnfVisitor)visitor).visitParenthesized(this);
-    else super.accept(visitor);
   }
 
 }
@@ -827,6 +827,11 @@ public class BnfPredicateImpl extends BnfExpressionImpl implements BnfPredicate 
     super(node);
   }
 
+  public void accept(@NotNull PsiElementVisitor visitor) {
+    if (visitor instanceof BnfVisitor) ((BnfVisitor)visitor).visitPredicate(this);
+    else super.accept(visitor);
+  }
+
   @Override
   @NotNull
   public BnfExpression getExpression() {
@@ -837,11 +842,6 @@ public class BnfPredicateImpl extends BnfExpressionImpl implements BnfPredicate 
   @NotNull
   public BnfPredicateSign getPredicateSign() {
     return findNotNullChildByClass(BnfPredicateSign.class);
-  }
-
-  public void accept(@NotNull PsiElementVisitor visitor) {
-    if (visitor instanceof BnfVisitor) ((BnfVisitor)visitor).visitPredicate(this);
-    else super.accept(visitor);
   }
 
 }
@@ -889,6 +889,11 @@ public class BnfQuantifiedImpl extends BnfExpressionImpl implements BnfQuantifie
     super(node);
   }
 
+  public void accept(@NotNull PsiElementVisitor visitor) {
+    if (visitor instanceof BnfVisitor) ((BnfVisitor)visitor).visitQuantified(this);
+    else super.accept(visitor);
+  }
+
   @Override
   @NotNull
   public BnfExpression getExpression() {
@@ -899,11 +904,6 @@ public class BnfQuantifiedImpl extends BnfExpressionImpl implements BnfQuantifie
   @NotNull
   public BnfQuantifier getQuantifier() {
     return findNotNullChildByClass(BnfQuantifier.class);
-  }
-
-  public void accept(@NotNull PsiElementVisitor visitor) {
-    if (visitor instanceof BnfVisitor) ((BnfVisitor)visitor).visitQuantified(this);
-    else super.accept(visitor);
   }
 
 }
@@ -951,15 +951,15 @@ public class BnfReferenceOrTokenImpl extends BnfRefOrTokenImpl implements BnfRef
     super(node);
   }
 
+  public void accept(@NotNull PsiElementVisitor visitor) {
+    if (visitor instanceof BnfVisitor) ((BnfVisitor)visitor).visitReferenceOrToken(this);
+    else super.accept(visitor);
+  }
+
   @Override
   @NotNull
   public PsiElement getId() {
     return findNotNullChildByType(BNF_ID);
-  }
-
-  public void accept(@NotNull PsiElementVisitor visitor) {
-    if (visitor instanceof BnfVisitor) ((BnfVisitor)visitor).visitReferenceOrToken(this);
-    else super.accept(visitor);
   }
 
 }
@@ -980,6 +980,11 @@ public class BnfRuleImpl extends BnfNamedElementImpl implements BnfRule {
 
   public BnfRuleImpl(ASTNode node) {
     super(node);
+  }
+
+  public void accept(@NotNull PsiElementVisitor visitor) {
+    if (visitor instanceof BnfVisitor) ((BnfVisitor)visitor).visitRule(this);
+    else super.accept(visitor);
   }
 
   @Override
@@ -1006,11 +1011,6 @@ public class BnfRuleImpl extends BnfNamedElementImpl implements BnfRule {
     return findNotNullChildByType(BNF_ID);
   }
 
-  public void accept(@NotNull PsiElementVisitor visitor) {
-    if (visitor instanceof BnfVisitor) ((BnfVisitor)visitor).visitRule(this);
-    else super.accept(visitor);
-  }
-
 }
 // ---- BnfSequenceImpl.java -----------------
 header.txt
@@ -1031,15 +1031,15 @@ public class BnfSequenceImpl extends BnfExpressionImpl implements BnfSequence {
     super(node);
   }
 
+  public void accept(@NotNull PsiElementVisitor visitor) {
+    if (visitor instanceof BnfVisitor) ((BnfVisitor)visitor).visitSequence(this);
+    else super.accept(visitor);
+  }
+
   @Override
   @NotNull
   public List<BnfExpression> getExpressionList() {
     return PsiTreeUtil.getChildrenOfTypeAsList(this, BnfExpression.class);
-  }
-
-  public void accept(@NotNull PsiElementVisitor visitor) {
-    if (visitor instanceof BnfVisitor) ((BnfVisitor)visitor).visitSequence(this);
-    else super.accept(visitor);
   }
 
 }
@@ -1062,15 +1062,15 @@ public class BnfStringLiteralExpressionImpl extends BnfStringImpl implements Bnf
     super(node);
   }
 
+  public void accept(@NotNull PsiElementVisitor visitor) {
+    if (visitor instanceof BnfVisitor) ((BnfVisitor)visitor).visitStringLiteralExpression(this);
+    else super.accept(visitor);
+  }
+
   @Override
   @NotNull
   public PsiElement getString() {
     return findNotNullChildByType(BNF_STRING);
-  }
-
-  public void accept(@NotNull PsiElementVisitor visitor) {
-    if (visitor instanceof BnfVisitor) ((BnfVisitor)visitor).visitStringLiteralExpression(this);
-    else super.accept(visitor);
   }
 
 }
@@ -1093,15 +1093,15 @@ public class BnfValueListImpl extends BnfExpressionImpl implements BnfValueList 
     super(node);
   }
 
+  public void accept(@NotNull PsiElementVisitor visitor) {
+    if (visitor instanceof BnfVisitor) ((BnfVisitor)visitor).visitValueList(this);
+    else super.accept(visitor);
+  }
+
   @Override
   @NotNull
   public List<BnfListEntry> getListEntryList() {
     return PsiTreeUtil.getChildrenOfTypeAsList(this, BnfListEntry.class);
-  }
-
-  public void accept(@NotNull PsiElementVisitor visitor) {
-    if (visitor instanceof BnfVisitor) ((BnfVisitor)visitor).visitValueList(this);
-    else super.accept(visitor);
   }
 
 }

@@ -32,7 +32,7 @@ public class BnfGeneratorTest extends BnfGeneratorTestCase {
   public void testPsiGen() throws Exception { doGenTest(true); }
   public void testPsiAccessors() throws Exception { doGenTest(true); }
   public void testPsiStart() throws Exception { doGenTest(true); }
-  public void testExprParser() throws Exception { doGenTest(false); }
+  public void testExprParser() throws Exception { doGenTest(true); }
   public void testTokenSequence() throws Exception { doGenTest(false); }
 
   public void testEmpty() throws Exception {
@@ -51,7 +51,7 @@ public class BnfGeneratorTest extends BnfGeneratorTestCase {
   public void doGenTest(final boolean generatePsi) throws Exception {
     final String name = getTestName(false);
     String text = loadFile(name + "." + myFileExt);
-    myFile = createPsiFile(name, text.replaceAll("generatePsi=\"[^\"]*\"", "\0 generatePsi=" + generatePsi));
+    myFile = createPsiFile(name, text.replaceAll("generatePsi=[^\n]*", "generatePsi=" + generatePsi));
     List<File> filesToCheck = new ArrayList<File>();
     filesToCheck.add(new File(myFullDataPath, name + ".java"));
     if (generatePsi) {

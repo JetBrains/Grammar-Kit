@@ -162,6 +162,11 @@ public class XBinaryImpl extends ASTWrapperPsiElement implements XBinary {
     super(node);
   }
 
+  public void accept(@NotNull PsiElementVisitor visitor) {
+    if (visitor instanceof XVisitor) ((XVisitor)visitor).visitBinary(this);
+    else super.accept(visitor);
+  }
+
   @Override
   @NotNull
   public List<XExpression> getExpressionList() {
@@ -172,11 +177,6 @@ public class XBinaryImpl extends ASTWrapperPsiElement implements XBinary {
   @NotNull
   public XOperator getOperator() {
     return findNotNullChildByClass(XOperator.class);
-  }
-
-  public void accept(@NotNull PsiElementVisitor visitor) {
-    if (visitor instanceof XVisitor) ((XVisitor)visitor).visitBinary(this);
-    else super.accept(visitor);
   }
 
   @Override
@@ -288,15 +288,15 @@ public class XExpressionImpl extends ASTWrapperPsiElement implements XExpression
     super(node);
   }
 
+  public void accept(@NotNull PsiElementVisitor visitor) {
+    if (visitor instanceof XVisitor) ((XVisitor)visitor).visitExpression(this);
+    else super.accept(visitor);
+  }
+
   @Override
   @NotNull
   public List<XValue> getValueList() {
     return PsiTreeUtil.getChildrenOfTypeAsList(this, XValue.class);
-  }
-
-  public void accept(@NotNull PsiElementVisitor visitor) {
-    if (visitor instanceof XVisitor) ((XVisitor)visitor).visitExpression(this);
-    else super.accept(visitor);
   }
 
 }
@@ -346,15 +346,15 @@ public class XReImpl extends ASTWrapperPsiElement implements XRe {
     super(node);
   }
 
+  public void accept(@NotNull PsiElementVisitor visitor) {
+    if (visitor instanceof XVisitor) ((XVisitor)visitor).visitRe(this);
+    else super.accept(visitor);
+  }
+
   @Override
   @NotNull
   public PsiElement getId() {
     return findNotNullChildByType(ID);
-  }
-
-  public void accept(@NotNull PsiElementVisitor visitor) {
-    if (visitor instanceof XVisitor) ((XVisitor)visitor).visitRe(this);
-    else super.accept(visitor);
   }
 
 }
@@ -378,15 +378,15 @@ public class XValueImpl extends ASTWrapperPsiElement implements XValue {
     super(node);
   }
 
+  public void accept(@NotNull PsiElementVisitor visitor) {
+    if (visitor instanceof XVisitor) ((XVisitor)visitor).visitValue(this);
+    else super.accept(visitor);
+  }
+
   @Override
   @NotNull
   public PsiElement getId() {
     return findNotNullChildByType(ID);
-  }
-
-  public void accept(@NotNull PsiElementVisitor visitor) {
-    if (visitor instanceof XVisitor) ((XVisitor)visitor).visitValue(this);
-    else super.accept(visitor);
   }
 
 }

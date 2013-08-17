@@ -333,7 +333,7 @@ public class RuleGraphHelper {
     return map == null ? Collections.<PsiElement, Cardinality>emptyMap() : map;
   }
 
-  private Map<PsiElement, Cardinality> collectMembers(BnfRule rule, BnfExpression tree, Set<PsiElement> visited) {
+  Map<PsiElement, Cardinality> collectMembers(BnfRule rule, BnfExpression tree, Set<PsiElement> visited) {
     if (tree instanceof BnfPredicate) return Collections.emptyMap();
     if (tree instanceof BnfLiteralExpression) return psiMap(tree, REQUIRED);
 

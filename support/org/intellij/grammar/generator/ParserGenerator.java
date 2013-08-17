@@ -1243,20 +1243,7 @@ public class ParserGenerator {
     }
 
     Function<String, String> shortener = generateClassHeader(psiClass, imports, "", true, ArrayUtil.toStringArray(psiSupers));
-    for (PsiElement tree : sortedPublicRules) {
-      generatePsiAccessor(rule, tree, accessors.get(tree), true, shortener);
-    }
-    for (BnfExpression tree : getSortedTokens(accessors.keySet())) {
-      generatePsiAccessor(rule, tree, accessors.get(tree), true, shortener);
-    }
-    for (Pair<String, String> entry : methods) {
-      if (entry.second == null) {
-        generateUtilMethod(entry.first, psiImplUtilClass, true, psiImplClass, javaHelper, shortener);
-      }
-      else {
-        generateUserPsiAccessors(rule, helper, entry.first, entry.second, true, shortener);
-      }
-    }
+    generatePsiClassMethods(helper, rule, psiImplClass, psiImplUtilClass, accessors, sortedPublicRules, javaHelper, methods, shortener, true);
     out("}");
   }
 
@@ -1313,12 +1300,6 @@ public class ParserGenerator {
       out("}");
       newLine();
     }
-    for (BnfRule tree : sortedPublicRules) {
-      generatePsiAccessor(rule, tree, accessors.get(tree), false, shortener);
-    }
-    for (BnfExpression tree : getSortedTokens(accessors.keySet())) {
-      generatePsiAccessor(rule, tree, accessors.get(tree), false, shortener);
-    }
     if (visitorClassName != null) {
       out("public void accept(@NotNull "+ shortener.fun(BnfConstants.PSI_ELEMENT_VISITOR_CLASS)+" visitor) {");
       out("if (visitor instanceof " +
@@ -1332,15 +1313,32 @@ public class ParserGenerator {
       out("}");
       newLine();
     }
+    generatePsiClassMethods(helper, rule, psiClass, psiImplUtilClass, accessors, sortedPublicRules, javaHelper, methods, shortener, false);
+    out("}");
+  }
+
+  private void generatePsiClassMethods(RuleGraphHelper helper,
+                                       BnfRule rule,
+                                       String psiImplClass,
+                                       String psiImplUtilClass,
+                                       Map<PsiElement, RuleGraphHelper.Cardinality> accessors,
+                                       Collection<BnfRule> sortedPublicRules,
+                                       JavaHelper javaHelper,
+                                       List<Pair<String, String>> methods, Function<String, String> shortener, boolean intf) {
+    for (PsiElement tree : sortedPublicRules) {
+      generatePsiAccessor(rule, tree, myExpressionHelper.fixCardinality(rule, tree, accessors.get(tree)), intf, shortener);
+    }
+    for (BnfExpression tree : getSortedTokens(accessors.keySet())) {
+      generatePsiAccessor(rule, tree, myExpressionHelper.fixCardinality(rule, tree, accessors.get(tree)), intf, shortener);
+    }
     for (Pair<String, String> entry : methods) {
       if (entry.second == null) {
-        generateUtilMethod(entry.first, psiImplUtilClass, false, psiClass, javaHelper, shortener);
+        generateUtilMethod(entry.first, psiImplUtilClass, intf, psiImplClass, javaHelper, shortener);
       }
       else {
-        generateUserPsiAccessors(rule, helper, entry.first, entry.second, false, shortener);
+        generateUserPsiAccessors(rule, helper, entry.first, entry.second, intf, shortener);
       }
     }
-    out("}");
   }
 
   private static void addUtilMethodTypes(Collection<String> result, String methodName, String psiImplUtilClass, JavaHelper javaHelper) {

@@ -127,15 +127,15 @@ public class EntryImpl extends ASTWrapperPsiElement implements Entry {
     super(node);
   }
 
+  public void accept(@NotNull PsiElementVisitor visitor) {
+    if (visitor instanceof Visitor) ((Visitor)visitor).visitEntry(this);
+    else super.accept(visitor);
+  }
+
   @Override
   @NotNull
   public Element getElement() {
     return findNotNullChildByClass(Element.class);
-  }
-
-  public void accept(@NotNull PsiElementVisitor visitor) {
-    if (visitor instanceof Visitor) ((Visitor)visitor).visitEntry(this);
-    else super.accept(visitor);
   }
 
 }
@@ -158,15 +158,15 @@ public class ListImpl extends ASTWrapperPsiElement implements List {
     super(node);
   }
 
+  public void accept(@NotNull PsiElementVisitor visitor) {
+    if (visitor instanceof Visitor) ((Visitor)visitor).visitList(this);
+    else super.accept(visitor);
+  }
+
   @Override
   @NotNull
   public java.util.List<Element> getElementList() {
     return PsiTreeUtil.getChildrenOfTypeAsList(this, Element.class);
-  }
-
-  public void accept(@NotNull PsiElementVisitor visitor) {
-    if (visitor instanceof Visitor) ((Visitor)visitor).visitList(this);
-    else super.accept(visitor);
   }
 
 }
@@ -189,15 +189,15 @@ public class MapImpl extends ASTWrapperPsiElement implements Map {
     super(node);
   }
 
+  public void accept(@NotNull PsiElementVisitor visitor) {
+    if (visitor instanceof Visitor) ((Visitor)visitor).visitMap(this);
+    else super.accept(visitor);
+  }
+
   @Override
   @NotNull
   public java.util.List<Entry> getEntryList() {
     return PsiTreeUtil.getChildrenOfTypeAsList(this, Entry.class);
-  }
-
-  public void accept(@NotNull PsiElementVisitor visitor) {
-    if (visitor instanceof Visitor) ((Visitor)visitor).visitMap(this);
-    else super.accept(visitor);
   }
 
 }

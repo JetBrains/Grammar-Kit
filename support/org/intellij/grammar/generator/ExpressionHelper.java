@@ -23,15 +23,19 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.util.CachedValue;
 import com.intellij.psi.util.CachedValueProvider;
 import com.intellij.psi.util.CachedValuesManager;
+import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.util.Function;
+import gnu.trove.THashSet;
 import org.intellij.grammar.analysis.BnfFirstNextAnalyzer;
 import org.intellij.grammar.psi.*;
 import org.intellij.grammar.psi.impl.BnfElementFactory;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
 import static org.intellij.grammar.generator.ParserGeneratorUtil.*;
+import static org.intellij.grammar.generator.RuleGraphHelper.Cardinality.OPTIONAL;
 
 /**
  * @author gregsh
@@ -239,12 +243,47 @@ public class ExpressionHelper {
     return rule == rootRule? null : rule;
   }
 
+  private static final Key<List<BnfExpression>> ORIGINAL_EXPRESSIONS = Key.create("ORIGINAL_EXPRESSIONS");
   private static BnfExpression combine(List<BnfExpression> list) {
     if (list.isEmpty()) return null;
     if (list.size() == 1) return list.get(0);
     Project project = list.get(0).getProject();
     String text = StringUtil.join(list, TO_STRING, " ");
-    return BnfElementFactory.createExpressionFromText(project, text);
+    BnfExpression result = BnfElementFactory.createExpressionFromText(project, text);
+    result.putUserData(ORIGINAL_EXPRESSIONS, list);
+    return result;
+  }
+
+  @NotNull
+  public static List<BnfExpression> getOriginalExpressions(BnfExpression expression) {
+    List<BnfExpression> data = expression.getUserData(ORIGINAL_EXPRESSIONS);
+    return data == null ? Collections.singletonList(expression) : data;
+  }
+
+  @NotNull
+  public RuleGraphHelper.Cardinality fixCardinality(BnfRule rule, PsiElement tree, RuleGraphHelper.Cardinality type) {
+    if (type.optional()) return type;
+    // in Expression parsing mode REQUIRED may go OPTIONAL
+    ExpressionHelper.ExpressionInfo info = getExpressionInfo(rule);
+    ExpressionHelper.OperatorInfo operatorInfo = info == null ? null : info.operatorMap.get(rule);
+    if (operatorInfo == null || operatorInfo.type == ExpressionHelper.OperatorType.ATOM) return type;
+    // check operator.tail, which is always optional
+    if (operatorInfo.tail != null && isRealAncestor(rule, operatorInfo.tail, tree) ||
+        operatorInfo.type == OperatorType.PREFIX && !isRealAncestor(rule, operatorInfo.operator, tree)) {
+      return type.and(OPTIONAL);
+    }
+    return type;
+  }
+
+  private boolean isRealAncestor(BnfRule rule, BnfExpression expression, PsiElement target) {
+    List<BnfExpression> list = getOriginalExpressions(expression);
+    if (list.size() == 1 && PsiTreeUtil.isAncestor(list.get(0), target, false)) return true;
+    for (BnfExpression expr : list) {
+      Map<PsiElement, RuleGraphHelper.Cardinality> map =
+        myRuleGraph.collectMembers(rule, expr, new THashSet<PsiElement>());
+      if (map.containsKey(target)) return true;
+    }
+    return false;
   }
 
   private int indexOf(BnfRule rootRule,

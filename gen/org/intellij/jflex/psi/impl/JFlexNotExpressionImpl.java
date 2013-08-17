@@ -30,15 +30,15 @@ public class JFlexNotExpressionImpl extends JFlexExpressionImpl implements JFlex
     super(node);
   }
 
-  @Override
-  @NotNull
-  public JFlexExpression getExpression() {
-    return findNotNullChildByClass(JFlexExpression.class);
-  }
-
   public void accept(@NotNull PsiElementVisitor visitor) {
     if (visitor instanceof JFlexVisitor) ((JFlexVisitor)visitor).visitNotExpression(this);
     else super.accept(visitor);
+  }
+
+  @Override
+  @Nullable
+  public JFlexExpression getExpression() {
+    return findChildByClass(JFlexExpression.class);
   }
 
 }

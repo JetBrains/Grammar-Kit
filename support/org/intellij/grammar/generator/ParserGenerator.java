@@ -1384,6 +1384,7 @@ public class ParserGenerator {
     }
     else {
       ruleName = treeRule.getName(); // use "methodRenames" attr to fix name if you'd like
+      if (StringUtil.isEmpty(getElementType(treeRule))) return;
     }
     if (ruleName == null) return;
     String defaultGetterName = "get" + toIdentifier(ruleName, "");

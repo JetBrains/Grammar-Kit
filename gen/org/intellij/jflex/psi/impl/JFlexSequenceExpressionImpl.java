@@ -36,12 +36,6 @@ public class JFlexSequenceExpressionImpl extends JFlexExpressionImpl implements 
     return PsiTreeUtil.getChildrenOfTypeAsList(this, JFlexExpression.class);
   }
 
-  @Override
-  @NotNull
-  public List<JFlexSequenceOp> getSequenceOpList() {
-    return PsiTreeUtil.getChildrenOfTypeAsList(this, JFlexSequenceOp.class);
-  }
-
   public void accept(@NotNull PsiElementVisitor visitor) {
     if (visitor instanceof JFlexVisitor) ((JFlexVisitor)visitor).visitSequenceExpression(this);
     else super.accept(visitor);

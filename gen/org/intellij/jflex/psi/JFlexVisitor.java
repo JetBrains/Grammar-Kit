@@ -97,10 +97,6 @@ public class JFlexVisitor extends PsiElementVisitor {
     visitExpression(o);
   }
 
-  public void visitSequenceOp(@NotNull JFlexSequenceOp o) {
-    visitCompositeElement(o);
-  }
-
   public void visitStateDeclaration(@NotNull JFlexStateDeclaration o) {
     visitCompositeElement(o);
   }

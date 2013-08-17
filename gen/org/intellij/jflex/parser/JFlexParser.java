@@ -92,9 +92,6 @@ public class JFlexParser implements PsiParser {
     else if (root_ == FLEX_SEQUENCE_EXPRESSION) {
       result_ = expression(builder_, level_ + 1, 0);
     }
-    else if (root_ == FLEX_SEQUENCE_OP) {
-      result_ = sequence_op(builder_, level_ + 1);
-    }
     else if (root_ == FLEX_STATE_DECLARATION) {
       result_ = state_declaration(builder_, level_ + 1);
     }
@@ -1644,23 +1641,46 @@ public class JFlexParser implements PsiParser {
   }
 
   /* ********************************************************** */
-  // &( '(' | '!' | '~' | '[' | ']'
+  // !new_line &( '(' | '!' | '~' | '[' | ']'
   //   | string | allowed_chars | predefined_class | '.'
   //   | '{' id '}' | !new_line id )
   public static boolean sequence_op(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "sequence_op")) return false;
     boolean result_ = false;
-    Marker marker_ = enter_section_(builder_, level_, _AND_, "<sequence op>");
+    Marker marker_ = enter_section_(builder_, level_, _NONE_, "<sequence op>");
     result_ = sequence_op_0(builder_, level_ + 1);
-    exit_section_(builder_, level_, marker_, FLEX_SEQUENCE_OP, result_, false, null);
+    result_ = result_ && sequence_op_1(builder_, level_ + 1);
+    exit_section_(builder_, level_, marker_, null, result_, false, null);
+    return result_;
+  }
+
+  // !new_line
+  private static boolean sequence_op_0(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "sequence_op_0")) return false;
+    boolean result_ = false;
+    Marker marker_ = enter_section_(builder_, level_, _NOT_, null);
+    result_ = !new_line(builder_, level_ + 1);
+    exit_section_(builder_, level_, marker_, null, result_, false, null);
+    return result_;
+  }
+
+  // &( '(' | '!' | '~' | '[' | ']'
+  //   | string | allowed_chars | predefined_class | '.'
+  //   | '{' id '}' | !new_line id )
+  private static boolean sequence_op_1(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "sequence_op_1")) return false;
+    boolean result_ = false;
+    Marker marker_ = enter_section_(builder_, level_, _AND_, null);
+    result_ = sequence_op_1_0(builder_, level_ + 1);
+    exit_section_(builder_, level_, marker_, null, result_, false, null);
     return result_;
   }
 
   // '(' | '!' | '~' | '[' | ']'
   //   | string | allowed_chars | predefined_class | '.'
   //   | '{' id '}' | !new_line id
-  private static boolean sequence_op_0(PsiBuilder builder_, int level_) {
-    if (!recursion_guard_(builder_, level_, "sequence_op_0")) return false;
+  private static boolean sequence_op_1_0(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "sequence_op_1_0")) return false;
     boolean result_ = false;
     Marker marker_ = enter_section_(builder_);
     result_ = consumeToken(builder_, FLEX_PAREN1);
@@ -1672,15 +1692,15 @@ public class JFlexParser implements PsiParser {
     if (!result_) result_ = allowed_chars(builder_, level_ + 1);
     if (!result_) result_ = predefined_class(builder_, level_ + 1);
     if (!result_) result_ = consumeToken(builder_, FLEX_DOT);
-    if (!result_) result_ = sequence_op_0_9(builder_, level_ + 1);
-    if (!result_) result_ = sequence_op_0_10(builder_, level_ + 1);
+    if (!result_) result_ = sequence_op_1_0_9(builder_, level_ + 1);
+    if (!result_) result_ = sequence_op_1_0_10(builder_, level_ + 1);
     exit_section_(builder_, marker_, null, result_);
     return result_;
   }
 
   // '{' id '}'
-  private static boolean sequence_op_0_9(PsiBuilder builder_, int level_) {
-    if (!recursion_guard_(builder_, level_, "sequence_op_0_9")) return false;
+  private static boolean sequence_op_1_0_9(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "sequence_op_1_0_9")) return false;
     boolean result_ = false;
     Marker marker_ = enter_section_(builder_);
     result_ = consumeToken(builder_, FLEX_BRACE1);
@@ -1691,19 +1711,19 @@ public class JFlexParser implements PsiParser {
   }
 
   // !new_line id
-  private static boolean sequence_op_0_10(PsiBuilder builder_, int level_) {
-    if (!recursion_guard_(builder_, level_, "sequence_op_0_10")) return false;
+  private static boolean sequence_op_1_0_10(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "sequence_op_1_0_10")) return false;
     boolean result_ = false;
     Marker marker_ = enter_section_(builder_);
-    result_ = sequence_op_0_10_0(builder_, level_ + 1);
+    result_ = sequence_op_1_0_10_0(builder_, level_ + 1);
     result_ = result_ && consumeToken(builder_, FLEX_ID);
     exit_section_(builder_, marker_, null, result_);
     return result_;
   }
 
   // !new_line
-  private static boolean sequence_op_0_10_0(PsiBuilder builder_, int level_) {
-    if (!recursion_guard_(builder_, level_, "sequence_op_0_10_0")) return false;
+  private static boolean sequence_op_1_0_10_0(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "sequence_op_1_0_10_0")) return false;
     boolean result_ = false;
     Marker marker_ = enter_section_(builder_, level_, _NOT_, null);
     result_ = !new_line(builder_, level_ + 1);

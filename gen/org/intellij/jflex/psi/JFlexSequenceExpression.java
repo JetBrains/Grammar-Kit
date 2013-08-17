@@ -24,7 +24,4 @@ public interface JFlexSequenceExpression extends JFlexExpression {
   @NotNull
   List<JFlexExpression> getExpressionList();
 
-  @NotNull
-  List<JFlexSequenceOp> getSequenceOpList();
-
 }

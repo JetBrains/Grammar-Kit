@@ -317,9 +317,10 @@ literal_expression ::= string | id | allowed_chars
 private allowed_chars ::= escaped_char | char | number | '-' | '=' | '<' | '>'
   | ']' /*| '}' -- allowed after <STATE> } { }  and in / part */
 
-sequence_op ::= &( '(' | '!' | '~' | '[' | ']'
+sequence_op ::= !new_line &( '(' | '!' | '~' | '[' | ']'
   | string | allowed_chars | predefined_class | '.'
   | '{' id '}' | !new_line id )
+  {elementType=""}
 
 predefined_class_expression ::= predefined_class | '.'
 private predefined_class ::= '[:jletter:]'

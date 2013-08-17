@@ -41,7 +41,6 @@ public interface JFlexTypes {
   IElementType FLEX_QUANTIFIER_EXPRESSION = new JFlexCompositeElementType("FLEX_QUANTIFIER_EXPRESSION");
   IElementType FLEX_RULE = new JFlexCompositeElementType("FLEX_RULE");
   IElementType FLEX_SEQUENCE_EXPRESSION = new JFlexCompositeElementType("FLEX_SEQUENCE_EXPRESSION");
-  IElementType FLEX_SEQUENCE_OP = new JFlexCompositeElementType("FLEX_SEQUENCE_OP");
   IElementType FLEX_STATE_DECLARATION = new JFlexCompositeElementType("FLEX_STATE_DECLARATION");
   IElementType FLEX_STATE_DEFINITION = new JFlexCompositeElementType("FLEX_STATE_DEFINITION");
   IElementType FLEX_STATE_REFERENCE = new JFlexCompositeElementType("FLEX_STATE_REFERENCE");
@@ -205,9 +204,6 @@ public interface JFlexTypes {
       }
       else if (type == FLEX_SEQUENCE_EXPRESSION) {
         return new JFlexSequenceExpressionImpl(node);
-      }
-      else if (type == FLEX_SEQUENCE_OP) {
-        return new JFlexSequenceOpImpl(node);
       }
       else if (type == FLEX_STATE_DECLARATION) {
         return new JFlexStateDeclarationImpl(node);

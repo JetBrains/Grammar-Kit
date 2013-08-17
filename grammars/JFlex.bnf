@@ -131,7 +131,9 @@
   elementType("option_.*")=option
   pin("option_.*")=1
   extends(".*_expression")=expression
-  name(".*_expression")=expression
+  name(".*_expression")="expression"
+  name("option.*")="option"
+  name(".*class")="char class"
 
   //consumeTokenMethod("character|macro_reference|.*_(recover|expression|op)")="consumeTokenFast"
   //consumeTokenMethod="consumeTokenFast"
@@ -145,18 +147,18 @@ flex_file ::= []
   lexical_rules_section
   {pin=1}
 
-private meta line ::= &new_line <<p>>
-private new_line ::= <<is_new_line>>
+private meta line ::= new_line <<p>> new_line {pin=2}
+private new_line ::= &<<is_new_line>>
 
 private section_div ::= <<line '%%'>>
-private section_recover ::= !section_div
+private section_recover ::= !'%%'
 
 user_code_section ::= [] java_code {pin=1}
 java_code ::= <<anything2 (&java | !<<is_percent>>)>>
 
 java_fqn ::= id ( safe_dot id ) * {pin(".*")=1}
 private safe_dot ::= '.' !'*'
-private java_fqn_list ::= java_fqn (',' java_fqn) * {pin(".*")=1}
+private java_fqn_list ::= [java_fqn (',' java_fqn) *] {pin(".*")=1 recoverUntil=declaration_recover}
 
 // ======================================================
 declarations_section ::=  [] (declaration) *
@@ -231,11 +233,11 @@ option_function ::= '%function' id
 option_integer ::= '%integer' | '%int'
 option_intwrap ::= '%intwrap'
 option_type ::= '%type' java_fqn
-option_yylexthrow ::= '%yylexthrow' java_fqn_list <<line '%yylexthrow{'>> java_fqn_list <<line '%yylexthrow}'>>
+option_yylexthrow ::= '%yylexthrow' java_fqn_list | <<line '%yylexthrow{'>> java_fqn_list <<line '%yylexthrow}'>>
 
 option_eof_val ::= <<line '%eofval{'>> java_code <<line '%eofval}'>>
 option_eof ::= <<line '%eof{'>> java_code <<line '%eof}'>>
-option_eof_throw ::= '%eofthrow' java_fqn_list <<line '%eofthrow{'>> java_fqn_list <<line '%eofthrow}'>>
+option_eof_throw ::= '%eofthrow' java_fqn_list | <<line '%eofthrow{'>> java_fqn_list <<line '%eofthrow}'>>
 option_eof_close ::= '%eofclose' ['false']
 
 option_debug ::= '%debug'
@@ -266,12 +268,12 @@ state_definition ::= id {
   methods=[getName setName getNameIdentifier]
 }
 
-macro_definition ::= id '=' expression {pin=2
+macro_definition ::= new_line id '=' expression {pin=3
   implements="com.intellij.psi.PsiNameIdentifierOwner"
   methods=[getName setName getNameIdentifier]
   recoverUntil=macro_definition_recover
 }
-private macro_definition_recover::=!(id '=' | '%%' | <<is_percent>>)
+private macro_definition_recover::=!(new_line id '=' | '%%' | <<is_percent>>)
 
 
 // ======================================================
@@ -307,7 +309,7 @@ sequence_expression ::= expression (sequence_op expression) +
 paren_expression ::= '(' expression ')' {pin=1}
 not_expression ::= ('!'|'~') expression {pin=1}
 quantifier_expression ::=  expression ( '*' | '+' | '?' | '{' number [ ',' number] '}' )
-class_expression ::= '[' '^'? '-'? (string | predefined_class | class_char [ '-' class_char]) * '-'? ']' {pin(".*")=1}
+class_expression ::= '[' '^'? '-'? (string | predefined_class | class_char [ '-' class_char]) * '-'? ']' {pin=1}
 private class_char ::= char | escaped_char
 macro_ref_expression ::= '{' macro_reference '}'
 macro_reference ::= id { methods=[getReference] }
@@ -317,7 +319,7 @@ private allowed_chars ::= escaped_char | char | number | '-' | '=' | '<' | '>'
 
 sequence_op ::= &( '(' | '!' | '~' | '[' | ']'
   | string | allowed_chars | predefined_class | '.'
-  | '{' id '}' | id !'=')
+  | '{' id '}' | !new_line id )
 
 predefined_class_expression ::= predefined_class | '.'
 private predefined_class ::= '[:jletter:]'

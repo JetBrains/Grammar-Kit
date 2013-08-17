@@ -6,7 +6,7 @@ JFLEX_FILE
   PsiWhiteSpace('\n')
   JFlexDeclarationsSectionImpl(FLEX_DECLARATIONS_SECTION)
     <empty list>
-  PsiErrorElement:unexpected end of file
+  PsiErrorElement:'%%' expected, unexpected end of file
     <empty list>
   JFlexLexicalRulesSectionImpl(FLEX_LEXICAL_RULES_SECTION)
     <empty list>

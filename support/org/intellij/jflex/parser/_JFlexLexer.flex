@@ -20,7 +20,8 @@ import static org.intellij.jflex.psi.JFlexTypes.*;
 %function advance
 %type IElementType
 %unicode
-%eof{ return;
+%eof{
+  return;
 %eof}
 
 //%state USER_SECTION = YYINITIAL
@@ -71,22 +72,22 @@ JAVA_CHAR=\'({ESCAPED_CHAR} | [^'])\'
 
   "%{"                    { parenCount=1; yybegin(BLOCK); return FLEX_PERC_8; }
   "%init{"                { parenCount=1; yybegin(BLOCK); return FLEX_PERC_10; }
-  "%initthrow{"           { parenCount=1; yybegin(BLOCK); return FLEX_PERC_13; }
-  "%yylexthrow{"          { parenCount=1; yybegin(BLOCK); return FLEX_PERC_25; }
   "%eofval{"              { parenCount=1; yybegin(BLOCK); return FLEX_PERC_27; }
   "%eof{"                 { parenCount=1; yybegin(BLOCK); return FLEX_PERC_29; }
-  "%eofthrow{"            { parenCount=1; yybegin(BLOCK); return FLEX_PERC_32; }
+
+  "%initthrow{"           { return FLEX_PERC_13; }
+  "%yylexthrow{"          { return FLEX_PERC_25; }
+  "%eofthrow{"            { return FLEX_PERC_32; }
+  "%initthrow}"           { return FLEX_PERC_14; }
+  "%yylexthrow}"          { return FLEX_PERC_26; }
+  "%eofthrow}"            { return FLEX_PERC_33; }
 }
 
 <BLOCK> {
   "%}"                    { parenCount=0; yybegin(DECLARATIONS); return FLEX_PERC_9; }
   "%init}"                { parenCount=0; yybegin(DECLARATIONS); return FLEX_PERC_11; }
-  "%initthrow}"           { parenCount=0; yybegin(DECLARATIONS); return FLEX_PERC_14; }
-  "%yylexthrow}"          { parenCount=0; yybegin(DECLARATIONS); return FLEX_PERC_26; }
   "%eofval}"              { parenCount=0; yybegin(DECLARATIONS); return FLEX_PERC_28; }
   "%eof}"                 { parenCount=0; yybegin(DECLARATIONS); return FLEX_PERC_30; }
-  "%eofthrow}"            { parenCount=0; yybegin(DECLARATIONS); return FLEX_PERC_33; }
-
 
   ([^%} \n] | {JAVA_CHAR})*   { return FLEX_JAVA; }
 }

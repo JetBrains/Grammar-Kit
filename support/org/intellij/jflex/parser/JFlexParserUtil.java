@@ -32,6 +32,7 @@ public class JFlexParserUtil extends GeneratedParserUtilBase {
   public static PsiBuilder adapt_builder_(IElementType root, PsiBuilder builder, PsiParser parser, TokenSet[] extendsSets) {
     PsiBuilder result = GeneratedParserUtilBase.adapt_builder_(root, builder, parser, extendsSets);
     ErrorState.get(result).braces = new JFlexBraceMatcher().getPairs();
+    ErrorState.get(result).altMode = true;
     return result;
   }
 
@@ -47,36 +48,19 @@ public class JFlexParserUtil extends GeneratedParserUtilBase {
   }
 
   public static boolean is_percent(PsiBuilder builder, int level) {
-    return !builder.eof() && builder.getOriginalText().charAt(builder.getCurrentOffset()) == '%';
+    IElementType tokenType = builder.getTokenType();
+    return tokenType != null && tokenType.toString().startsWith("%");
   }
 
   public static boolean is_new_line(PsiBuilder builder, int level) {
-    for (int i=-1; ; i++) {
+    if (builder.eof()) return true;
+    addVariant(builder, "<new-line>");
+    for (int i=-1; ; i--) {
       IElementType type = builder.rawLookup(i);
       if (type == TokenType.WHITE_SPACE) continue;
+      if (type == JFlexTypes.FLEX_LINE_COMMENT || type == JFlexTypes.FLEX_BLOCK_COMMENT) continue;
       return type == JFlexTypes.FLEX_NEWLINE || type == null;
     }
   }
 
-
-  public static boolean consumeToken(PsiBuilder builder_, IElementType token) {
-    if (ErrorState.get(builder_).completionState != null) {
-      return GeneratedParserUtilBase.consumeToken(builder_, token);
-    }
-    else return GeneratedParserUtilBase.consumeTokenFast(builder_, token);
-  }
-
-  public static boolean nextTokenIs(PsiBuilder builder_, IElementType token) {
-    if (ErrorState.get(builder_).completionState != null) {
-      return GeneratedParserUtilBase.nextTokenIs(builder_, token);
-    }
-    else return GeneratedParserUtilBase.nextTokenIsFast(builder_, token);
-  }
-
-  public static boolean replaceVariants(PsiBuilder builder_, int variantCount, String frameName) {
-    if (ErrorState.get(builder_).completionState != null) {
-      return GeneratedParserUtilBase.replaceVariants(builder_, variantCount, frameName);
-    }
-    return true;
-  }
 }

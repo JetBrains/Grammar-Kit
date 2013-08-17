@@ -2,7 +2,7 @@ JFLEX_FILE
   JFlexUserCodeSectionImpl(FLEX_USER_CODE_SECTION)
     JFlexJavaCodeImpl(FLEX_JAVA_CODE)
       <empty list>
-  PsiErrorElement:unexpected end of file
+  PsiErrorElement:'%%' expected, unexpected end of file
     <empty list>
   JFlexDeclarationsSectionImpl(FLEX_DECLARATIONS_SECTION)
     <empty list>

@@ -30,6 +30,12 @@ public class JFlexJavaFqnImpl extends JFlexCompositeElementImpl implements JFlex
     super(node);
   }
 
+  @Override
+  @NotNull
+  public PsiElement getId() {
+    return findNotNullChildByType(FLEX_ID);
+  }
+
   public void accept(@NotNull PsiElementVisitor visitor) {
     if (visitor instanceof JFlexVisitor) ((JFlexVisitor)visitor).visitJavaFqn(this);
     else super.accept(visitor);

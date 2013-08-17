@@ -17,12 +17,12 @@ NOTTAGORCOMMENTBEGIN = ("<"[^c/C!] | "<c"[^fF] | "<C"[^fF] | "</"[^Cc] | "</c"[^
              "<!"[^-] | "<!-"[^-] | "<!--"[^-])
 ID_CHAR = [a-zA-Z_0-9-]
 INT_LITERAL = [-+]?[0-9]+
+EXPONENT_PART=[Ee][+-]?[0-9]+
 ZENDCOMMENT=;{COMMENTCONTENT}
 QUASI_LITERAL_CHAR=[^\\$`] | \\ {ANY_CHAR} | \$ [^`{[:jletter:]]
 NO_STATE=<TAG>
 VARIABLE = "$"(::)?{NAME}(::{NAME})*
 BOOL            = true|yes|on|false|no|off|undefined|null
-UNCLOSED_CLASS = [
 
 %%
 <YYINITIAL> {

@@ -19,7 +19,8 @@ import static org.intellij.grammar.BnfParserDefinition.BNF_BLOCK_COMMENT;
 %function advance
 %type IElementType
 %unicode
-%eof{ return;
+%eof{
+  return;
 %eof}
 
 EOL="\r"|"\n"|"\r\n"

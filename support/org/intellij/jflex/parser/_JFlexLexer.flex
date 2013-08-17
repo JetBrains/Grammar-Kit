@@ -64,7 +64,6 @@ JAVA_CHAR=\'({ESCAPED_CHAR} | [^'])\'
   "%%"                    { yybegin(DECLARATIONS); return FLEX_PERC2; }
 
   [^% \n]+                { return FLEX_JAVA; }
-  [^]                     { return com.intellij.psi.TokenType.BAD_CHARACTER; }
 }
 
 <DECLARATIONS> {
@@ -177,8 +176,6 @@ JAVA_CHAR=\'({ESCAPED_CHAR} | [^'])\'
   {NUMBER}                { return FLEX_NUMBER; }
   {ESCAPED_CHAR}          { return FLEX_ESCAPED_CHAR; }
   {CHAR}                  { return FLEX_CHAR; }
-
-  [^] { return com.intellij.psi.TokenType.BAD_CHARACTER; }
 }
 
 <CHAR_CLASS> {
@@ -189,5 +186,7 @@ JAVA_CHAR=\'({ESCAPED_CHAR} | [^'])\'
   {STRING}                { return FLEX_STRING; }
 
   "\n"                    { yybegin(prevState); return FLEX_NEWLINE; }
-  [^]                     { return FLEX_CHAR; }
+  [^\[]                   { return FLEX_CHAR; }
 }
+
+[^] { return com.intellij.psi.TokenType.BAD_CHARACTER; }

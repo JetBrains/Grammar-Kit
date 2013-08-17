@@ -50,6 +50,7 @@ public class JFlexParserTest extends ParsingTestCase {
   public void testEmpty2() throws Exception { doCodeTest("%%\n"); }
   public void testEmpty3() throws Exception { doCodeTest("%%\n%%"); }
   public void testParserFixes() { doTest(true); }
+  public void testParserFixes2() { doTest(true); }
 
   @Override
   protected String loadFile(@NonNls String name) throws IOException {

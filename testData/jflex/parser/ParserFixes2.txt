@@ -1,0 +1,20 @@
+JFLEX_FILE
+  JFlexUserCodeSectionImpl(FLEX_USER_CODE_SECTION)
+    JFlexJavaCodeImpl(FLEX_JAVA_CODE)
+      <empty list>
+  PsiElement(%%)('%%')
+  PsiWhiteSpace('\n\n')
+  JFlexDeclarationsSectionImpl(FLEX_DECLARATIONS_SECTION)
+    JFlexMacroDefinitionImpl(FLEX_MACRO_DEFINITION)
+      PsiElement(id)('NO_BRACK_IN_CLASS')
+      PsiElement(=)('=')
+      JFlexClassExpressionImpl(FLEX_CLASS_EXPRESSION)
+        PsiElement([)('[')
+        PsiElement(^)('^')
+    PsiErrorElement:'[' unexpected
+      PsiElement(BAD_CHARACTER)('[')
+    PsiElement(])(']')
+  PsiWhiteSpace('\n')
+  PsiElement(%%)('%%')
+  JFlexLexicalRulesSectionImpl(FLEX_LEXICAL_RULES_SECTION)
+    <empty list>

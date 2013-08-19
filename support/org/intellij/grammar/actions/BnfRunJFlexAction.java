@@ -19,6 +19,7 @@ import com.intellij.notification.NotificationType;
 import com.intellij.notification.Notifications;
 import com.intellij.openapi.actionSystem.*;
 import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.projectRoots.Sdk;
@@ -38,6 +39,7 @@ import com.intellij.util.SystemProperties;
 import com.intellij.util.download.DownloadableFileDescription;
 import com.intellij.util.download.DownloadableFileService;
 import org.intellij.grammar.generator.BnfConstants;
+import org.intellij.jflex.parser.JFlexFileType;
 
 import javax.swing.*;
 import java.awt.*;
@@ -61,27 +63,39 @@ public class BnfRunJFlexAction extends AnAction {
 
   @Override
   public void update(AnActionEvent e) {
-    PsiFile psiFile = LangDataKeys.PSI_FILE.getData(e.getDataContext());
-    boolean enabled = psiFile != null && !psiFile.getFileType().isBinary() &&
-        psiFile.getName().endsWith(".flex");
+    VirtualFile file = LangDataKeys.VIRTUAL_FILE.getData(e.getDataContext());
+    boolean enabled = e.getProject() != null && file != null &&
+                      (file.getFileType() == JFlexFileType.INSTANCE ||
+                       !file.getFileType().isBinary() && file.getName().endsWith(".flex"));
     e.getPresentation().setEnabledAndVisible(enabled);
   }
 
   @Override
   public void actionPerformed(final AnActionEvent e) {
-    final PsiFile psiFile = LangDataKeys.PSI_FILE.getData(e.getDataContext());
-    final VirtualFile virtualFile = psiFile != null ? psiFile.getVirtualFile() : null;
-    if (virtualFile == null) return;
+    Project project = e.getProject();
+    VirtualFile virtualFile = LangDataKeys.VIRTUAL_FILE.getData(e.getDataContext());
+    if (project == null || virtualFile == null) return;
 
-    FileDocumentManager.getInstance().saveAllDocuments();
+    PsiDocumentManager.getInstance(project).commitAllDocuments();
+    FileDocumentManager fileDocumentManager = FileDocumentManager.getInstance();
+    fileDocumentManager.saveAllDocuments();
+    Document document = fileDocumentManager.getDocument(virtualFile);
+    if (document == null) return;
 
-    final Project project = psiFile.getProject();
     final String commandName = e.getPresentation().getText();
     final PsiDirectory directory = PsiManager.getInstance(project).findDirectory(virtualFile.getParent());
     if (directory == null) return;
 
-    Matcher matcher = Pattern.compile("%class (\\w+)").matcher(psiFile.getText());
-    if (!matcher.find()) return;
+    String text = document.getText();
+    Matcher matcher = Pattern.compile("%class (\\w+)").matcher(text);
+    if (!matcher.find()) {
+      Notifications.Bus.notify(new Notification(
+        BnfConstants.GENERATION_GROUP,
+        virtualFile.getName() + " lexer generation","Lexer class name option not found, use <pre>%class LexerClassName</pre>",
+        NotificationType.ERROR), project);
+
+      return;
+    }
     final String lexerClassName = matcher.group(1);
 
     try {
@@ -126,7 +140,7 @@ public class BnfRunJFlexAction extends AnAction {
     }
   }
 
-  private void ensureLexerClassCreated(final PsiDirectory directory, final String lexerClassName, String commandName) {
+  private static void ensureLexerClassCreated(final PsiDirectory directory, final String lexerClassName, String commandName) {
     LocalFileSystem.getInstance().refreshFiles(Arrays.asList(directory.getVirtualFile()));
     final String className = lexerClassName.startsWith("_") ? lexerClassName.substring(1) : lexerClassName + "Adapter";
     if (directory.findFile(className + ".java") != null) return;
@@ -169,7 +183,7 @@ public class BnfRunJFlexAction extends AnAction {
       if (result.size() == urls.length) return result;
     }
     DownloadableFileService service = DownloadableFileService.getInstance();
-    ArrayList<DownloadableFileDescription> descriptions = new ArrayList<DownloadableFileDescription>();
+    List<DownloadableFileDescription> descriptions = new ArrayList<DownloadableFileDescription>();
     for (String url : urls) {
       descriptions.add(service.createFileDescription(url, url.substring(url.lastIndexOf("/") + 1)));
     }

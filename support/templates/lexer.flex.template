@@ -17,8 +17,6 @@ import static $typesClass.*;
 %function advance
 %type IElementType
 %unicode
-%eof{ return;
-%eof}
 
 EOL="\r"|"\n"|"\r\n"
 LINE_WS=[\ \t\f]

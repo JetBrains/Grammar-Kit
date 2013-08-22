@@ -1,11 +1,11 @@
 <idea-plugin url="https://github.com/JetBrains/Grammar-Kit" version="2">
   <id>org.jetbrains.idea.grammar</id>
   <version>1.1.4</version>
-  <vendor email="gregory.shrago@jetbrains.com" logo="">Gregory Shrago</vendor>
+  <vendor email="gregory.shrago@jetbrains.com" logo="">Greg Shrago</vendor>
   <idea-version since-build="130.1365" until-build=""/>
 
   <name>Grammar-Kit</name>
-  <description>Edit, manipulate, analyze BNF grammars and generate readable parser/PSI code and a JFlex lexer</description>
+  <description>BNF Grammars and JFlex lexers editor. Readable parser/PSI code generator.</description>
 
   <depends optional="true" config-file="plugin-java.xml">com.intellij.modules.java</depends>
   <depends optional="true" config-file="plugin-uml.xml">com.intellij.diagram</depends>

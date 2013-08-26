@@ -1,9 +1,17 @@
-Grammar-Kit plugin
+Grammar-Kit [[download]](binaries/GrammarKit.zip?raw=true)
 ==================
 
-Edit BNF grammars with _Live Preview_ and generate parser/PSI java code.
+An IntelliJ IDEA plugin for language plugin developers.
 
-Download latest [GrammarKit.zip](binaries/GrammarKit.zip?raw=true) for manual installation.
+Adds BNF Grammars and JFlex files editing support including parser/PSI code generator.
+
+Open-source plugins built with Grammar-Kit:
+[intellij-erlang](https://github.com/ignatov/intellij-erlang),
+[Dart](https://github.com/JetBrains/intellij-plugins/tree/master/Dart),
+[intellij-haxe](https://github.com/JetBrains/intellij-haxe),
+[Struts2](https://github.com/JetBrains/intellij-plugins/tree/master/struts2).
+
+Quick links: [Tutorial](TUTORIAL.md), [HOWTO](HOWTO.md), [Standalone usage](#Standalone).
 
 General usage instructions
 --------------------------
@@ -14,19 +22,6 @@ General usage instructions
 5. Implement ParserDefinition and add the corresponding registrations to the plugin.xml
 6. Mix-in resolve and other non-trivial functionality to PSI
 
-You've just build a custom language plugin (approx. 1 day).
-
-See [Tutorial](TUTORIAL.md) page for a sample to play with *Live Preview*.
-
-See [HOWTO](HOWTO.md) page for different tips and tricks.
-
-See [Standalone usage](#Standalone) section for standalone generation and parsing.
-
-Other open-source plugins built with Grammar-Kit:
-[intellij-erlang](https://github.com/ignatov/intellij-erlang),
-[Dart](https://github.com/JetBrains/intellij-plugins/tree/master/Dart),
-[intellij-haxe](https://github.com/JetBrains/intellij-haxe),
-[Struts2](https://github.com/JetBrains/intellij-plugins/tree/master/struts2).
 
 ![Editor support](images/editor.png)
 

@@ -29,6 +29,8 @@ BOOL            = true|yes|on|false|no|off|undefined|null
   "empty_braces"          { /* ignored*/ }
   "double_braces"         {{ return com.intellij.psi.TokenType.WHITE_SPACE; }}
 
+	// tab-indent
+
   "if_clause"             { if (yystate() != ANNO_PATTERN) { yybegin(PATH_ELEMENT); } return IF_CLAUSE; }
 
   (<#noparse(>)?)         { return checkStyle(ANGLE, NOPARSE_START); }

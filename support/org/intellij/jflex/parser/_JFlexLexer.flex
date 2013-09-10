@@ -46,7 +46,7 @@ JAVA_CHAR=\'({ESCAPED_CHAR} | [^'])\'
 
 %%
 <YYINITIAL, DECLARATIONS, RULES, BLOCK> {
-  [\r ]+                  { return com.intellij.psi.TokenType.WHITE_SPACE; }
+  [\t\r ]+                  { return com.intellij.psi.TokenType.WHITE_SPACE; }
   "\n"+                   { return FLEX_NEWLINE; }
   {LINE_COMMENT}          { return FLEX_LINE_COMMENT; }
   {BLOCK_COMMENT}         { return FLEX_BLOCK_COMMENT; }

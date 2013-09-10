@@ -333,6 +333,7 @@ JFLEX_FILE
         JFlexQuantifierExpressionImpl(FLEX_QUANTIFIER_EXPRESSION)
           JFlexClassExpressionImpl(FLEX_CLASS_EXPRESSION)
             PsiElement([)('[')
+            PsiElement(escaped_char)('\t')
             PsiElement(escaped_char)('\r')
             PsiElement(char)(' ')
             PsiElement(])(']')

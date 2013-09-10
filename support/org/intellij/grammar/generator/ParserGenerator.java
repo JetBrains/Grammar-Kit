@@ -1555,9 +1555,9 @@ public class ParserGenerator {
                                   JavaHelper javaHelper,
                                   Function<String, String> shortener) {
     NavigatablePsiElement method = psiImplUtilClass == null ? null : javaHelper.findClassMethod(psiImplUtilClass, methodName, -1, psiImplClass);
-    List<String> methodTypes = method == null ? Arrays.asList("void") : javaHelper.getMethodTypes(method);
-    String returnType = shortener.fun(methodTypes.get(0));
-    List<String> paramsTypes = methodTypes.subList(1, methodTypes.size());
+    List<String> methodTypes = method == null ? Collections.<String>emptyList() : javaHelper.getMethodTypes(method);
+    String returnType = methodTypes.isEmpty()? "void" : shortener.fun(methodTypes.get(0));
+    List<String> paramsTypes = methodTypes.isEmpty()? methodTypes : methodTypes.subList(1, methodTypes.size());
     StringBuilder sb = new StringBuilder();
     int count = -1;
     for (String s : paramsTypes) {

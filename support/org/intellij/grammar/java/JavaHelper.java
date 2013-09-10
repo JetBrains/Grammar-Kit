@@ -294,13 +294,18 @@ public class JavaHelper {
       return info;
     }
 
-    private static MethodInfo getMethodInfo(String name, String signature) {
+    private static MethodInfo getMethodInfo(String className, String methodName, String signature) {
       final MethodInfo methodInfo = new MethodInfo();
-      methodInfo.name = name;
+      methodInfo.name = methodName;
 
-      MySignatureVisitor visitor = new MySignatureVisitor(methodInfo);
-      new SignatureReader(signature).accept(visitor);
-      visitor.finishElement(null);
+      try {
+        MySignatureVisitor visitor = new MySignatureVisitor(methodInfo);
+        new SignatureReader(signature).accept(visitor);
+        visitor.finishElement(null);
+      }
+      catch (Exception e) {
+        System.err.println(e.getClass().getSimpleName() + " in parsing " + className+"."+methodName +"() signature: " + signature);
+      }
       return methodInfo;
     }
 
@@ -344,7 +349,7 @@ public class JavaHelper {
                                        String signature,
                                        String[] exceptions) {
         state = State.METHOD;
-        methodInfo = getMethodInfo(name, ObjectUtils.chooseNotNull(signature, desc));
+        methodInfo = getMethodInfo(myInfo.name, name, ObjectUtils.chooseNotNull(signature, desc));
         return this; // visit annotations
       }
 

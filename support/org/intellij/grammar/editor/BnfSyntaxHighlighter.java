@@ -43,14 +43,18 @@ class BnfSyntaxHighlighter extends SyntaxHighlighterBase {
   public static final TextAttributesKey KEYWORD = createTextAttributesKey("BNF_KEYWORD", DefaultLanguageHighlighterColors.MARKUP_ATTRIBUTE);
   public static final TextAttributesKey TOKEN = createTextAttributesKey("BNF_TOKEN", DefaultLanguageHighlighterColors.STRING);
   public static final TextAttributesKey RULE = createTextAttributesKey("BNF_RULE", DefaultLanguageHighlighterColors.KEYWORD);
+  public static final TextAttributesKey META_RULE = createTextAttributesKey("BNF_META_RULE", DefaultLanguageHighlighterColors.KEYWORD);
+  public static final TextAttributesKey META_PARAM = createTextAttributesKey("BNF_META_RULE_PARAM");
   public static final TextAttributesKey ATTRIBUTE = createTextAttributesKey("BNF_ATTRIBUTE", DefaultLanguageHighlighterColors.INTERFACE_NAME);
   public static final TextAttributesKey EXTERNAL = createTextAttributesKey("BNF_EXTERNAL", DefaultLanguageHighlighterColors.STATIC_METHOD);
   public static final TextAttributesKey PARENTHS = createTextAttributesKey("BNF_PARENTHS", DefaultLanguageHighlighterColors.PARENTHESES);
   public static final TextAttributesKey BRACES = createTextAttributesKey("BNF_BRACES", DefaultLanguageHighlighterColors.BRACES);
   public static final TextAttributesKey BRACKETS = createTextAttributesKey("BNF_BRACKETS", DefaultLanguageHighlighterColors.BRACKETS);
   public static final TextAttributesKey ANGLES = createTextAttributesKey("BNF_ANGLES", DefaultLanguageHighlighterColors.PARENTHESES);
+
   public static final TextAttributesKey OP_SIGN = createTextAttributesKey("BNF_OP_SIGN", DefaultLanguageHighlighterColors.OPERATION_SIGN);
-  public static final TextAttributesKey PIN = createTextAttributesKey(
+  public static final TextAttributesKey RECOVER_UNTIL_MARKER = createTextAttributesKey("BNF_RECOVER_UNTIL_MARKER");
+  public static final TextAttributesKey PIN_MARKER = createTextAttributesKey(
     "BNF_PIN", new TextAttributes(null, null, DefaultLanguageHighlighterColors.LINE_COMMENT.getDefaultAttributes().getForegroundColor(), EffectType.BOLD_DOTTED_LINE, 0));
 
   @NotNull

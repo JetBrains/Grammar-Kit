@@ -43,7 +43,7 @@ public class BnfAnnotator implements Annotator, DumbAware {
   public void annotate(@NotNull PsiElement psiElement, @NotNull AnnotationHolder annotationHolder) {
     PsiElement parent = psiElement.getParent();
     if (parent instanceof BnfRule && ((BnfRule)parent).getId() == psiElement) {
-      annotationHolder.createInfoAnnotation(psiElement, null).setTextAttributes(BnfSyntaxHighlighter.RULE);
+      addRuleHighlighting((BnfRule)parent, psiElement, annotationHolder);
     }
     else if (parent instanceof BnfAttr && ((BnfAttr)parent).getId() == psiElement) {
       annotationHolder.createInfoAnnotation(psiElement, null).setTextAttributes(BnfSyntaxHighlighter.ATTRIBUTE);
@@ -62,7 +62,7 @@ public class BnfAnnotator implements Annotator, DumbAware {
       PsiReference reference = psiElement.getReference();
       Object resolve = reference == null ? null : reference.resolve();
       if (resolve instanceof BnfRule) {
-        annotationHolder.createInfoAnnotation(psiElement, null).setTextAttributes(BnfSyntaxHighlighter.RULE);
+        addRuleHighlighting((BnfRule)resolve, psiElement, annotationHolder);
       }
       else if (resolve instanceof BnfAttr) {
         annotationHolder.createInfoAnnotation(psiElement, null).setTextAttributes(BnfSyntaxHighlighter.ATTRIBUTE);
@@ -70,13 +70,17 @@ public class BnfAnnotator implements Annotator, DumbAware {
       else if (resolve == null && parent instanceof BnfAttr) {
         annotationHolder.createWarningAnnotation(psiElement, "Unresolved rule reference");
       }
-      else if (resolve == null) {
-        if (GrammarUtil.isExternalReference(psiElement)) {
-          annotationHolder.createInfoAnnotation(psiElement, null).setTextAttributes(BnfSyntaxHighlighter.EXTERNAL);
+      else if (GrammarUtil.isExternalReference(psiElement)) {
+        if (resolve == null && parent instanceof BnfExternalExpression && ((BnfExternalExpression)parent).getExpressionList().size() == 1 &&
+            ParserGeneratorUtil.Rule.isMeta(ParserGeneratorUtil.Rule.of((BnfRefOrTokenImpl)psiElement))) {
+          annotationHolder.createInfoAnnotation(parent, null).setTextAttributes(BnfSyntaxHighlighter.META_PARAM);
         }
         else {
-          annotationHolder.createInfoAnnotation(psiElement, null).setTextAttributes(BnfSyntaxHighlighter.TOKEN);
+          annotationHolder.createInfoAnnotation(psiElement, null).setTextAttributes(BnfSyntaxHighlighter.EXTERNAL);
         }
+      }
+      else if (resolve == null) {
+        annotationHolder.createInfoAnnotation(psiElement, null).setTextAttributes(BnfSyntaxHighlighter.TOKEN);
       }
     }
     else if (psiElement instanceof BnfStringLiteralExpression) {
@@ -141,6 +145,19 @@ public class BnfAnnotator implements Annotator, DumbAware {
           annotationHolder.createInfoAnnotation(psiElement, null).setTextAttributes(BnfSyntaxHighlighter.PATTERN);
         }
       }
+    }
+  }
+
+  private static void addRuleHighlighting(BnfRule rule, PsiElement psiElement, AnnotationHolder annotationHolder) {
+    if (ParserGeneratorUtil.Rule.isMeta(rule)) {
+      annotationHolder.createInfoAnnotation(psiElement, null).setTextAttributes(BnfSyntaxHighlighter.META_RULE);
+    }
+    else {
+      annotationHolder.createInfoAnnotation(psiElement, null).setTextAttributes(BnfSyntaxHighlighter.RULE);
+    }
+    PsiFile file = rule.getContainingFile();
+    if (StringUtil.isNotEmpty(((BnfFile)file).findAttributeValue(rule, KnownAttribute.RECOVER_UNTIL, null))) {
+      annotationHolder.createInfoAnnotation(psiElement, null).setTextAttributes(BnfSyntaxHighlighter.RECOVER_UNTIL_MARKER);
     }
   }
 

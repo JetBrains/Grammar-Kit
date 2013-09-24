@@ -59,7 +59,7 @@ public class BnfPinMarkerAnnotator implements Annotator, DumbAware {
       TextRange textRange = e.getTextRange();
       TextRange infoRange = fullRange ? textRange : TextRange.create(prev.getTextRange().getEndOffset() + 1, textRange.getEndOffset());
       String message = attr == null? (fullRange ? "pinned" : "pinned again") : attr.getText();
-      annotationHolder.createInfoAnnotation(infoRange, message).setTextAttributes(BnfSyntaxHighlighter.PIN);
+      annotationHolder.createInfoAnnotation(infoRange, message).setTextAttributes(BnfSyntaxHighlighter.PIN_MARKER);
     }
   }
 

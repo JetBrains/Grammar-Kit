@@ -47,6 +47,8 @@ public class BnfColorSettingsPage implements ColorSettingsPage {
       new AttributesDescriptor("Token", TOKEN),
       new AttributesDescriptor("Rule", RULE),
       new AttributesDescriptor("Attribute", ATTRIBUTE),
+      new AttributesDescriptor("Meta rule", META_RULE),
+      new AttributesDescriptor("Meta rule parameter", META_PARAM),
       new AttributesDescriptor("Pattern", PATTERN),
       new AttributesDescriptor("External", EXTERNAL),
       new AttributesDescriptor("Parenthesis", PARENTHS),
@@ -54,7 +56,8 @@ public class BnfColorSettingsPage implements ColorSettingsPage {
       new AttributesDescriptor("Brackets", BRACKETS),
       new AttributesDescriptor("Angles", ANGLES),
       new AttributesDescriptor("Operation sign", OP_SIGN),
-      new AttributesDescriptor("Pin marker", PIN),
+      new AttributesDescriptor("Pin marker", PIN_MARKER),
+      new AttributesDescriptor("recoverUntil marker", RECOVER_UNTIL_MARKER),
     };
   }
 
@@ -102,9 +105,9 @@ public class BnfColorSettingsPage implements ColorSettingsPage {
            "<r>root</r> ::= <r>header</r> <r>content</r>\n" +
            "<r>header</r> ::= <t>DECLARE</t> <r>reference</r>\n" +
            "<k>external</k> <r>reference</r> ::= <e>parseReference</e>\n" +
-           "<k>private</k> <k>meta</k> <r>comma_list</r> ::= <p><s>'('</s></p> <<<e>p</e>>> (<p><s>','</s></p> <<<e>p</e>>>) * ')'\n" +
-           "<k>private</k> <r>content</r> ::= <p><t>AS</t></p> <<<r>comma_list</r> <r>element</r>>> {<a>pin</a>=1}\n" +
-           "<r>element</r> ::= <r>reference</r> [ {<pa>'+'</pa> | <pa>'-'</pa>} <r>reference</r> <t>ONLY</t>?] {<a>recoverUntil</a>=<r>element_recover</r>}\n" +
+           "<k>private</k> <k>meta</k> <mr>comma_list</mr> ::= <pin><s>'('</s></pin> <mp><<p>></mp> (<pin><s>','</s></pin> <mp><<p>></mp>) * ')'\n" +
+           "<k>private</k> <r>content</r> ::= <pin><t>AS</t></pin> <<<mr>comma_list</mr> <ru><r>element</r></ru>>> {<a>pin</a>=1}\n" +
+           "<ru><r>element</r></ru> ::= <r>reference</r> [ {<pa>'+'</pa> | <pa>'-'</pa>} <r>reference</r> <t>ONLY</t>?] {<a>recoverUntil</a>=<r>element_recover</r>}\n" +
            "<k>private</k> <r>element_recover</r> ::= !(',' | ')')\n" +
            "\n";
   }
@@ -113,13 +116,16 @@ public class BnfColorSettingsPage implements ColorSettingsPage {
     @NonNls
     final Map<String, TextAttributesKey> map = new THashMap<String, TextAttributesKey>();
     map.put("r", RULE);
+    map.put("mr", META_RULE);
     map.put("a", ATTRIBUTE);
     map.put("pa", PATTERN);
     map.put("t", TOKEN);
     map.put("k", KEYWORD);
     map.put("e", EXTERNAL);
-    map.put("p", PIN);
+    map.put("pin", PIN_MARKER);
     map.put("s", STRING);
+    map.put("ru", RECOVER_UNTIL_MARKER);
+    map.put("mp", META_PARAM);
     return map;
   }
 

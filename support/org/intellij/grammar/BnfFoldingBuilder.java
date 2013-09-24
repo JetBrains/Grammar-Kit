@@ -83,6 +83,7 @@ public class BnfFoldingBuilder extends FoldingBuilderEx implements DumbAware {
 
   @Override
   public boolean isCollapsedByDefault(@NotNull ASTNode node) {
-    return false;
+    PsiElement psi = node.getPsi();
+    return psi instanceof BnfAttrs && !(psi.getParent() instanceof BnfRule);
   }
 }

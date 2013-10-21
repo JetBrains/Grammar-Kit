@@ -9,7 +9,7 @@ Open-source plugins built with Grammar-Kit:
 [intellij-erlang](https://github.com/ignatov/intellij-erlang),
 [Dart](https://github.com/JetBrains/intellij-plugins/tree/master/Dart),
 [intellij-haxe](https://github.com/JetBrains/intellij-haxe),
-[Struts2](https://github.com/JetBrains/intellij-plugins/tree/master/struts2).
+[OGNL](https://github.com/JetBrains/intellij-plugins/tree/master/struts2).
 
 Quick links: [Tutorial](TUTORIAL.md), [HOWTO](HOWTO.md), [Standalone usage](#Standalone).
 

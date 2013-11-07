@@ -163,7 +163,7 @@ public class BnfAnnotator implements Annotator, DumbAware {
 
   private static Object checkJavaResolve(String value, JavaHelper javaHelper) {
     Object resolve = null;
-    for (String s : StringUtil.tokenize(new StringTokenizer(value, "<>,", false))) {
+    for (String s : StringUtil.tokenize(new StringTokenizer(value, "<>,?", false))) {
       resolve = javaHelper.findClass(s.trim());
       if (resolve == null) break;
     }

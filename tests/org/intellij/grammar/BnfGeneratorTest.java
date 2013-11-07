@@ -34,6 +34,7 @@ public class BnfGeneratorTest extends BnfGeneratorTestCase {
   public void testPsiStart() throws Exception { doGenTest(true); }
   public void testExprParser() throws Exception { doGenTest(true); }
   public void testTokenSequence() throws Exception { doGenTest(false); }
+  public void testStub() throws Exception { doGenTest(true); }
 
   public void testEmpty() throws Exception {
     myFile = createPsiFile("empty.bnf", "{ }");

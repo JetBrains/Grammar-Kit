@@ -1257,9 +1257,12 @@ public class ParserGenerator {
     String psiImplUtilClass = getRootAttribute(myFile, KnownAttribute.PSI_IMPL_UTIL_CLASS);
     String stubClass = getAttribute(rule, KnownAttribute.STUB_CLASS);
     if (StringUtil.isNotEmpty(stubClass)) {
-      if (StringUtil.equals(superRuleClass, getRootAttribute(myFile, KnownAttribute.EXTENDS))) {
-        superRuleClass = BnfConstants.STUB_BASED_PSI_ELEMENT_BASE + "<" + stubClass + ">";
-      }
+      boolean extendsBasic = StringUtil.equals(superRuleClass, getRootAttribute(myFile, KnownAttribute.EXTENDS));
+      String stubBasedPsiElement = BnfConstants.STUB_BASED_PSI_ELEMENT_BASE;
+      String extendsClass = StringUtil.notNullize(getAttribute(rule, KnownAttribute.EXTENDS));
+      String generic = "<" + stubClass + ">";
+      superRuleClass = extendsClass.endsWith("<?>") ? extendsClass.replace("<?>", generic) :
+                       extendsClass.isEmpty() || extendsBasic ? stubBasedPsiElement + generic : extendsClass;
     }
     // mixin attribute overrides "extends":
     String implSuper = StringUtil.notNullize(getAttribute(rule, KnownAttribute.MIXIN), superRuleClass);

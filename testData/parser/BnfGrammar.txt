@@ -320,8 +320,8 @@ BnfFile:BnfGrammar.bnf
           BNF_LITERAL_EXPRESSION
             PsiElement(number)('1')
         PsiWhiteSpace(' ')
-        BNF_ATTR:recoverUntil
-          PsiElement(id)('recoverUntil')
+        BNF_ATTR:recoverWhile
+          PsiElement(id)('recoverWhile')
           PsiElement(=)('=')
           BNF_REFERENCE_OR_TOKEN: grammar_element_recover
             PsiElement(id)('grammar_element_recover')
@@ -488,11 +488,11 @@ BnfFile:BnfGrammar.bnf
           BNF_LITERAL_EXPRESSION
             PsiElement(number)('1')
         PsiWhiteSpace(' ')
-        BNF_ATTR:recoverUntil
-          PsiElement(id)('recoverUntil')
+        BNF_ATTR:recoverWhile
+          PsiElement(id)('recoverWhile')
           PsiElement(=)('=')
-          BNF_REFERENCE_OR_TOKEN: attr_recover_until
-            PsiElement(id)('attr_recover_until')
+          BNF_REFERENCE_OR_TOKEN: attr_recover
+            PsiElement(id)('attr_recover')
         PsiElement(})('}')
     PsiWhiteSpace('\n')
     BNF_RULE:attr_start
@@ -559,11 +559,11 @@ BnfFile:BnfGrammar.bnf
         BNF_STRING_LITERAL_EXPRESSION: '='
           PsiElement(string)(''='')
     PsiWhiteSpace('\n')
-    BNF_RULE:attr_recover_until
+    BNF_RULE:attr_recover
       BNF_MODIFIER
         PsiElement(id)('private')
       PsiWhiteSpace(' ')
-      PsiElement(id)('attr_recover_until')
+      PsiElement(id)('attr_recover')
       PsiWhiteSpace(' ')
       PsiElement(::=)('::=')
       PsiWhiteSpace(' ')
@@ -706,11 +706,11 @@ BnfFile:BnfGrammar.bnf
       BNF_ATTRS
         PsiElement({)('{')
         PsiWhiteSpace('\n  ')
-        BNF_ATTR:recoverUntil
-          PsiElement(id)('recoverUntil')
+        BNF_ATTR:recoverWhile
+          PsiElement(id)('recoverWhile')
           PsiElement(=)('=')
-          BNF_REFERENCE_OR_TOKEN: list_entry_recover_until
-            PsiElement(id)('list_entry_recover_until')
+          BNF_REFERENCE_OR_TOKEN: list_entry_recover
+            PsiElement(id)('list_entry_recover')
         PsiWhiteSpace('\n  ')
         BNF_ATTR:methods
           PsiElement(id)('methods')
@@ -747,11 +747,11 @@ BnfFile:BnfGrammar.bnf
             PsiElement(number)('1')
         PsiElement(})('}')
     PsiWhiteSpace('\n')
-    BNF_RULE:list_entry_recover_until
+    BNF_RULE:list_entry_recover
       BNF_MODIFIER
         PsiElement(id)('private')
       PsiWhiteSpace(' ')
-      PsiElement(id)('list_entry_recover_until')
+      PsiElement(id)('list_entry_recover')
       PsiWhiteSpace(' ')
       PsiElement(::=)('::=')
       PsiWhiteSpace(' ')
@@ -815,8 +815,8 @@ BnfFile:BnfGrammar.bnf
           BNF_REFERENCE_OR_TOKEN: expression
             PsiElement(id)('expression')
         PsiWhiteSpace(' ')
-        BNF_ATTR:recoverUntil
-          PsiElement(id)('recoverUntil')
+        BNF_ATTR:recoverWhile
+          PsiElement(id)('recoverWhile')
           PsiElement(=)('=')
           BNF_REFERENCE_OR_TOKEN: sequence_recover
             PsiElement(id)('sequence_recover')

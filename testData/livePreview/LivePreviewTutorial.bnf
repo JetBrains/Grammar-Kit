@@ -22,7 +22,7 @@
 }
 
 root ::= root_item *
-private root_item ::= !<<eof>> property ';' {pin=1 recoverUntil=property_recover}
+private root_item ::= !<<eof>> property ';' {pin=1 recoverWhile=property_recover}
 
 property ::= id '=' expr  {pin=2}
 private property_recover ::= !(';' | id '=')

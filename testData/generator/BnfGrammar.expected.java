@@ -133,7 +133,7 @@ public class GrammarParser implements PsiParser {
     pinned_ = result_; // pin = 1
     result_ = result_ && report_error_(builder_, attr_value(builder_, level_ + 1));
     result_ = pinned_ && attr_2(builder_, level_ + 1) && result_;
-    exit_section_(builder_, level_, marker_, BNF_ATTR, result_, pinned_, attr_recover_until_parser_);
+    exit_section_(builder_, level_, marker_, BNF_ATTR, result_, pinned_, attr_recover_parser_);
     return result_ || pinned_;
   }
 
@@ -162,18 +162,18 @@ public class GrammarParser implements PsiParser {
 
   /* ********************************************************** */
   // !('}' | attr_start)
-  static boolean attr_recover_until(PsiBuilder builder_, int level_) {
-    if (!recursion_guard_(builder_, level_, "attr_recover_until")) return false;
+  static boolean attr_recover(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "attr_recover")) return false;
     boolean result_ = false;
     Marker marker_ = enter_section_(builder_, level_, _NOT_, null);
-    result_ = !attr_recover_until_0(builder_, level_ + 1);
+    result_ = !attr_recover_0(builder_, level_ + 1);
     exit_section_(builder_, level_, marker_, null, result_, false, null);
     return result_;
   }
 
   // '}' | attr_start
-  private static boolean attr_recover_until_0(PsiBuilder builder_, int level_) {
-    if (!recursion_guard_(builder_, level_, "attr_recover_until_0")) return false;
+  private static boolean attr_recover_0(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "attr_recover_0")) return false;
     boolean result_ = false;
     Marker marker_ = enter_section_(builder_);
     result_ = consumeToken(builder_, BNF_RIGHT_BRACE);
@@ -458,7 +458,7 @@ public class GrammarParser implements PsiParser {
     Marker marker_ = enter_section_(builder_, level_, _NONE_, "<list entry>");
     result_ = list_entry_0(builder_, level_ + 1);
     result_ = result_ && list_entry_1(builder_, level_ + 1);
-    exit_section_(builder_, level_, marker_, BNF_LIST_ENTRY, result_, false, list_entry_recover_until_parser_);
+    exit_section_(builder_, level_, marker_, BNF_LIST_ENTRY, result_, false, list_entry_recover_parser_);
     return result_;
   }
 
@@ -500,18 +500,18 @@ public class GrammarParser implements PsiParser {
 
   /* ********************************************************** */
   // !(']' | '}' | id | string)
-  static boolean list_entry_recover_until(PsiBuilder builder_, int level_) {
-    if (!recursion_guard_(builder_, level_, "list_entry_recover_until")) return false;
+  static boolean list_entry_recover(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "list_entry_recover")) return false;
     boolean result_ = false;
     Marker marker_ = enter_section_(builder_, level_, _NOT_, null);
-    result_ = !list_entry_recover_until_0(builder_, level_ + 1);
+    result_ = !list_entry_recover_0(builder_, level_ + 1);
     exit_section_(builder_, level_, marker_, null, result_, false, null);
     return result_;
   }
 
   // ']' | '}' | id | string
-  private static boolean list_entry_recover_until_0(PsiBuilder builder_, int level_) {
-    if (!recursion_guard_(builder_, level_, "list_entry_recover_until_0")) return false;
+  private static boolean list_entry_recover_0(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "list_entry_recover_0")) return false;
     boolean result_ = false;
     Marker marker_ = enter_section_(builder_);
     result_ = consumeToken(builder_, BNF_RIGHT_BRACKET);
@@ -944,9 +944,9 @@ public class GrammarParser implements PsiParser {
     return true;
   }
 
-  final static Parser attr_recover_until_parser_ = new Parser() {
+  final static Parser attr_recover_parser_ = new Parser() {
     public boolean parse(PsiBuilder builder_, int level_) {
-      return attr_recover_until(builder_, level_ + 1);
+      return attr_recover(builder_, level_ + 1);
     }
   };
   final static Parser grammar_element_parser_ = new Parser() {
@@ -959,9 +959,9 @@ public class GrammarParser implements PsiParser {
       return grammar_element_recover(builder_, level_ + 1);
     }
   };
-  final static Parser list_entry_recover_until_parser_ = new Parser() {
+  final static Parser list_entry_recover_parser_ = new Parser() {
     public boolean parse(PsiBuilder builder_, int level_) {
-      return list_entry_recover_until(builder_, level_ + 1);
+      return list_entry_recover(builder_, level_ + 1);
     }
   };
   final static Parser sequence_recover_parser_ = new Parser() {

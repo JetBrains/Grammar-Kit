@@ -83,13 +83,13 @@ public abstract class BnfStringImpl extends BnfExpressionImpl implements BnfStri
 
   @NotNull
   private PsiReference[] getAttrValueReference() {
-    KnownAttribute attribute = KnownAttribute.getAttribute(((BnfAttr)getParent()).getName());
+    KnownAttribute attribute = KnownAttribute.getCompatibleAttribute(((BnfAttr)getParent()).getName());
     if (attribute == null) return PsiReference.EMPTY_ARRAY;
     boolean addJavaRefs = attribute.getName().endsWith("Class") || attribute.getName().endsWith("Package") ||
                        (attribute == KnownAttribute.EXTENDS || attribute == KnownAttribute.IMPLEMENTS ||
                         attribute == KnownAttribute.MIXIN);
     boolean addBnfRef = attribute == KnownAttribute.EXTENDS || attribute == KnownAttribute.IMPLEMENTS ||
-                        attribute == KnownAttribute.RECOVER_UNTIL || attribute == KnownAttribute.NAME;
+                        attribute == KnownAttribute.RECOVER_WHILE || attribute == KnownAttribute.NAME;
 
     BnfReferenceImpl<BnfStringLiteralExpression> bnfReference = null;
     if (addBnfRef) {

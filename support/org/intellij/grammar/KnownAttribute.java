@@ -35,7 +35,9 @@ import java.util.*;
 public class KnownAttribute<T> {
   private static final Map<String, KnownAttribute> ourAttributes = new TreeMap<String, KnownAttribute>();
 
+  @NotNull
   public static Collection<KnownAttribute> getAttributes() { return Collections.unmodifiableCollection(ourAttributes.values()); }
+  @Nullable
   public static KnownAttribute getAttribute(String name) { return ourAttributes.get(name); }
 
   private static final Class<List<Pair<String, String>>> PAIR_LIST_CLAZZ = cast(ArrayList.class); // that's funny I know
@@ -44,7 +46,6 @@ public class KnownAttribute<T> {
   public static final KnownAttribute<String>       CLASS_HEADER              = create(true, String.class, "classHeader", BnfConstants.CLASS_HEADER_DEF);
   public static final KnownAttribute<Boolean>      GENERATE_PSI              = create(true, Boolean.class, "generatePsi", true);
   public static final KnownAttribute<Boolean>      GENERATE_TOKENS           = create(true, Boolean.class, "generateTokens", true);
-  public static final KnownAttribute<Boolean>      GENERATE_MEMOIZATION      = create(true, Boolean.class, "memoization", false);
   public static final KnownAttribute<Integer>      GENERATE_FIRST_CHECK      = create(true, Integer.class, "generateFirstCheck", 2);
   public static final KnownAttribute<Boolean>      EXTENDED_PIN              = create(true, Boolean.class, "extendedPin", true);
   public static final KnownAttribute<List<String>> PARSER_IMPORTS            = create(true, STRING_LIST_CLAZZ, "parserImports", Collections.<String>emptyList());
@@ -69,7 +70,7 @@ public class KnownAttribute<T> {
   public static final KnownAttribute<String>       METHOD_RENAMES            = create(false, String.class, "methodRenames", null);
   public static final KnownAttribute<Object>       PIN                       = create(false, Object.class, "pin", (Object)(-1));
   public static final KnownAttribute<String>       MIXIN                     = create(false, String.class, "mixin", null);
-  public static final KnownAttribute<String>       RECOVER_UNTIL             = create(false, String.class, "recoverUntil", null);
+  public static final KnownAttribute<String>       RECOVER_WHILE             = create(false, String.class, "recoverWhile", null);
   public static final KnownAttribute<String>       NAME                      = create(false, String.class, "name", null);
 
   public static final KnownAttribute<Boolean>      RIGHT_ASSOCIATIVE         = create(false, Boolean.class, "rightAssociative", false);
@@ -163,7 +164,16 @@ public class KnownAttribute<T> {
   }
 
   // returns a non-registered attribute for migration purposes
+  @NotNull
   public KnownAttribute<T> alias(String deprecatedName) {
     return new KnownAttribute<T>(deprecatedName, myClazz, null);
+  }
+
+  @Nullable
+  public static KnownAttribute getCompatibleAttribute(String name) {
+    KnownAttribute attr = getAttribute(name);
+    if (attr == null && "recoverUntil".equals(name)) return RECOVER_WHILE;
+    if (attr == null && "stubParserClass".equals(name)) return PARSER_UTIL_CLASS;
+    return attr;
   }
 }

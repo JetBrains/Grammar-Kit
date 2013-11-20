@@ -592,7 +592,10 @@ public class ParserGenerator {
     boolean isPrivate = !(isRule || firstNonTrivial) || Rule.isPrivate(rule) || myGrammarRoot.equals(rule.getName());
     boolean isLeft = firstNonTrivial && Rule.isLeft(rule);
     boolean isLeftInner = isLeft && (isPrivate || Rule.isInner(rule));
-    final String recoverRoot = firstNonTrivial ? getAttribute(rule, KnownAttribute.RECOVER_UNTIL) : null;
+    final String recoverWhile = firstNonTrivial ? ObjectUtils.chooseNotNull(
+      getAttribute(rule, KnownAttribute.RECOVER_WHILE.alias("recoverUntil")),
+      getAttribute(rule, KnownAttribute.RECOVER_WHILE)) : null;
+
     final boolean canCollapse = !isPrivate && (!isLeft || isLeftInner) && firstNonTrivial && canCollapse(rule);
 
     String elementType = getElementType(rule);
@@ -602,7 +605,7 @@ public class ParserGenerator {
         + collectExtraArguments(rule, node, true) + ") {");
     if (node instanceof BnfReferenceOrToken || node instanceof BnfLiteralExpression || node instanceof BnfExternalExpression) {
       children = Collections.singletonList(node);
-      if (isPrivate && !isLeftInner && recoverRoot == null) {
+      if (isPrivate && !isLeftInner && recoverWhile == null) {
         String nodeCall = generateNodeCall(rule, node, getNextName(funcName, 0));
         out("return " + nodeCall + ";");
         out("}");
@@ -617,7 +620,7 @@ public class ParserGenerator {
     }
     else {
       children = getChildExpressions(node);
-      if (children.isEmpty() && recoverRoot == null) {
+      if (children.isEmpty() && recoverWhile == null) {
         if (isPrivate || StringUtil.isEmpty(elementType)) {
           out("return true;");
         }
@@ -633,7 +636,7 @@ public class ParserGenerator {
     out("if (!recursion_guard_(builder_, level_, \"" + funcName + "\")) return false;");
 
     String frameName = firstNonTrivial && !Rule.isMeta(rule)? quote(getRuleDisplayName(rule, !isPrivate)) : null;
-    if (recoverRoot == null && (isRule || firstNonTrivial)) {
+    if (recoverWhile == null && (isRule || firstNonTrivial)) {
       frameName = generateFirstCheck(rule, frameName, true);
     }
 
@@ -663,8 +666,8 @@ public class ParserGenerator {
     if (type == BNF_OP_AND) modifierList.add("_AND_");
     else if (type == BNF_OP_NOT) modifierList.add("_NOT_");
     if (modifierList.isEmpty() && (pinned || frameName != null)) modifierList.add("_NONE_");
-    boolean sectionRequired = !alwaysTrue || !isPrivate || isLeft || recoverRoot != null;
-    boolean sectionRequiredSimple = sectionRequired && modifierList.isEmpty() && recoverRoot == null;
+    boolean sectionRequired = !alwaysTrue || !isPrivate || isLeft || recoverWhile != null;
+    boolean sectionRequiredSimple = sectionRequired && modifierList.isEmpty() && recoverWhile == null;
     String modifiers = modifierList.isEmpty()? "_NONE_" : StringUtil.join(modifierList, " | ");
     if (sectionRequiredSimple) {
       out("Marker marker_ = enter_section_(builder_);");
@@ -759,15 +762,15 @@ public class ParserGenerator {
       }
       else {
         String pinnedRef = pinned ? "pinned_" : "false";
-        String untilCall;
-        if (recoverRoot != null) {
-          BnfRule untilRule = myFile.getRule(recoverRoot);
-          untilCall = untilRule == null ? null : generateWrappedNodeCall(rule, null, untilRule.getName());
+        String recoverCall;
+        if (recoverWhile != null) {
+          BnfRule untilRule = myFile.getRule(recoverWhile);
+          recoverCall = untilRule == null ? null : generateWrappedNodeCall(rule, null, untilRule.getName());
         }
         else {
-          untilCall = null;
+          recoverCall = null;
         }
-        out("exit_section_(builder_, level_, marker_, " + elementTypeRef +", " + resultRef + ", "+pinnedRef +", " + untilCall + ");");
+        out("exit_section_(builder_, level_, marker_, " + elementTypeRef +", " + resultRef + ", "+pinnedRef +", " + recoverCall + ");");
       }
     }
 

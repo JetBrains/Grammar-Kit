@@ -125,7 +125,7 @@ public class BnfFirstNextAnalyzer {
           if (element instanceof BnfExpression && PsiTreeUtil.getParentOfType(element, BnfPredicate.class) == null) {
             BnfAttr attr = PsiTreeUtil.getParentOfType(element, BnfAttr.class);
             if (attr != null) {
-              if (KnownAttribute.RECOVER_UNTIL.getName().equals(attr.getName())) {
+              if (KnownAttribute.getCompatibleAttribute(attr.getName()) == KnownAttribute.RECOVER_WHILE) {
                 result.put(BNF_MATCHES_ANY, startingExpr);
               }
             }

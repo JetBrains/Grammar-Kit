@@ -28,7 +28,6 @@ import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Key;
-import com.intellij.openapi.util.TextRange;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiRecursiveElementWalkingVisitor;
@@ -135,9 +134,11 @@ public class BnfUnusedRulePassFactory extends AbstractProjectComponent implement
         if (!(child instanceof BnfAttr)) continue;
         final String name = ((BnfAttr)child).getName();
         if (!usedElements.contains(child) && !name.toUpperCase().equals(name) && KnownAttribute.getAttribute(name) == null) {
+          KnownAttribute newAttr = KnownAttribute.getCompatibleAttribute(name);
           PsiElement anchor = ((BnfAttr)child).getId();
-          myHighlights.add(HighlightInfo.newHighlightInfo(HighlightInfoType.WARNING).
-            range(anchor).descriptionAndTooltip("Unused attribute").create());
+          HighlightInfo.Builder builder = HighlightInfo.newHighlightInfo(HighlightInfoType.WARNING).range(anchor);
+          builder.descriptionAndTooltip(newAttr == null ? "Unused attribute" : "Deprecated attribute, use '" + newAttr.getName() + "' instead");
+          myHighlights.add(builder.create());
         }
       }
     }

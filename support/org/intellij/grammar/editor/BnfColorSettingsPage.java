@@ -57,7 +57,7 @@ public class BnfColorSettingsPage implements ColorSettingsPage {
       new AttributesDescriptor("Angles", ANGLES),
       new AttributesDescriptor("Operation sign", OP_SIGN),
       new AttributesDescriptor("Pin marker", PIN_MARKER),
-      new AttributesDescriptor("recoverUntil marker", RECOVER_UNTIL_MARKER),
+      new AttributesDescriptor("Recover marker", RECOVER_MARKER),
     };
   }
 
@@ -107,7 +107,7 @@ public class BnfColorSettingsPage implements ColorSettingsPage {
            "<k>external</k> <r>reference</r> ::= <e>parseReference</e>\n" +
            "<k>private</k> <k>meta</k> <mr>comma_list</mr> ::= <pin><s>'('</s></pin> <mp><<p>></mp> (<pin><s>','</s></pin> <mp><<p>></mp>) * ')'\n" +
            "<k>private</k> <r>content</r> ::= <pin><t>AS</t></pin> <<<mr>comma_list</mr> <ru><r>element</r></ru>>> {<a>pin</a>=1}\n" +
-           "<ru><r>element</r></ru> ::= <r>reference</r> [ {<pa>'+'</pa> | <pa>'-'</pa>} <r>reference</r> <t>ONLY</t>?] {<a>recoverUntil</a>=<r>element_recover</r>}\n" +
+           "<ru><r>element</r></ru> ::= <r>reference</r> [ {<pa>'+'</pa> | <pa>'-'</pa>} <r>reference</r> <t>ONLY</t>?] {<a>recoverWhile</a>=<r>element_recover</r>}\n" +
            "<k>private</k> <r>element_recover</r> ::= !(',' | ')')\n" +
            "\n";
   }
@@ -124,7 +124,7 @@ public class BnfColorSettingsPage implements ColorSettingsPage {
     map.put("e", EXTERNAL);
     map.put("pin", PIN_MARKER);
     map.put("s", STRING);
-    map.put("ru", RECOVER_UNTIL_MARKER);
+    map.put("ru", RECOVER_MARKER);
     map.put("mp", META_PARAM);
     return map;
   }

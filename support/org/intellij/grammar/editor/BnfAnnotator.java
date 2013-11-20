@@ -96,7 +96,7 @@ public class BnfAnnotator implements Annotator, DumbAware {
       }
       else if (parent instanceof BnfAttr || parent instanceof BnfListEntry) {
         final String attrName = ObjectUtils.assertNotNull(PsiTreeUtil.getParentOfType(psiElement, BnfAttr.class)).getName();
-        KnownAttribute attribute = KnownAttribute.getAttribute(attrName);
+        KnownAttribute attribute = KnownAttribute.getCompatibleAttribute(attrName);
         if (attribute != null) {
           String value = (String)ParserGeneratorUtil.getAttributeValue((BnfExpression)psiElement);
           Object resolve;
@@ -122,7 +122,7 @@ public class BnfAnnotator implements Annotator, DumbAware {
             resolve = ObjectUtils.chooseNotNull(((BnfFile)psiElement.getContainingFile()).getRule(value), Boolean.TRUE);
             refType = "rule or constant ";
           }
-          else if (attribute == KnownAttribute.RECOVER_UNTIL) {
+          else if (attribute == KnownAttribute.RECOVER_WHILE) {
             resolve = ((BnfFile)psiElement.getContainingFile()).getRule(value);
             refType = "rule ";
           }
@@ -156,8 +156,8 @@ public class BnfAnnotator implements Annotator, DumbAware {
       annotationHolder.createInfoAnnotation(psiElement, null).setTextAttributes(BnfSyntaxHighlighter.RULE);
     }
     PsiFile file = rule.getContainingFile();
-    if (StringUtil.isNotEmpty(((BnfFile)file).findAttributeValue(rule, KnownAttribute.RECOVER_UNTIL, null))) {
-      annotationHolder.createInfoAnnotation(psiElement, null).setTextAttributes(BnfSyntaxHighlighter.RECOVER_UNTIL_MARKER);
+    if (StringUtil.isNotEmpty(((BnfFile)file).findAttributeValue(rule, KnownAttribute.RECOVER_WHILE, null))) {
+      annotationHolder.createInfoAnnotation(psiElement, null).setTextAttributes(BnfSyntaxHighlighter.RECOVER_MARKER);
     }
   }
 

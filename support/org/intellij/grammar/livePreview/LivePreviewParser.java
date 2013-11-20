@@ -167,7 +167,7 @@ public class LivePreviewParser implements PsiParser {
     boolean isPrivate = !(isRule || firstNonTrivial) || ParserGeneratorUtil.Rule.isPrivate(rule) || myGrammarRoot == rule;
     boolean isLeft = firstNonTrivial && ParserGeneratorUtil.Rule.isLeft(rule);
     boolean isLeftInner = isLeft && (isPrivate || ParserGeneratorUtil.Rule.isInner(rule));
-    String recoverRoot = firstNonTrivial ? getAttribute(rule, KnownAttribute.RECOVER_UNTIL) : null;
+    String recoverWhile = firstNonTrivial ? getAttribute(rule, KnownAttribute.RECOVER_WHILE) : null;
     boolean canCollapse = !isPrivate && (!isLeft || isLeftInner) && firstNonTrivial && canCollapse(rule);
 
     IElementType elementType = getElementType(rule);
@@ -175,7 +175,7 @@ public class LivePreviewParser implements PsiParser {
     List<BnfExpression> children;
     if (node instanceof BnfReferenceOrToken || node instanceof BnfLiteralExpression || node instanceof BnfExternalExpression) {
       children = Collections.singletonList(node);
-      if (isPrivate && !isLeftInner && recoverRoot == null) {
+      if (isPrivate && !isLeftInner && recoverWhile == null) {
         return generateNodeCall(builder, level, rule, node, getNextName(funcName, 0), externalArguments);
       }
       else {
@@ -184,7 +184,7 @@ public class LivePreviewParser implements PsiParser {
     }
     else {
       children = getChildExpressions(node);
-      if (children.isEmpty() && recoverRoot == null) {
+      if (children.isEmpty() && recoverWhile == null) {
         if (isPrivate || elementType == null) {
           return true;
         }
@@ -217,8 +217,8 @@ public class LivePreviewParser implements PsiParser {
     else if (type == BNF_OP_NOT) modifiers |= _NOT_;
 
     PsiBuilder.Marker marker_ = null;
-    boolean sectionRequired = !alwaysTrue || !isPrivate || isLeft || recoverRoot != null;
-    boolean sectionRequiredSimple = sectionRequired && modifiers == _NONE_ && recoverRoot == null && !(modifiers == 0 && (pinned || frameName != null));
+    boolean sectionRequired = !alwaysTrue || !isPrivate || isLeft || recoverWhile != null;
+    boolean sectionRequiredSimple = sectionRequired && modifiers == _NONE_ && recoverWhile == null && !(modifiers == 0 && (pinned || frameName != null));
     if (sectionRequiredSimple) {
       marker_ = enter_section_(builder);
     }
@@ -308,13 +308,13 @@ public class LivePreviewParser implements PsiParser {
       exit_section_(builder, marker_, isPrivate? null : elementType, alwaysTrue || result_);
     }
     else if (sectionRequired) {
-      final BnfRule untilRule = recoverRoot != null ? myFile.getRule(recoverRoot) : null;
+      final BnfRule recoverRule = recoverWhile != null ? myFile.getRule(recoverWhile) : null;
       exit_section_(
         builder, level, marker_, isPrivate ? null : elementType, alwaysTrue || result_, pinned_,
-        untilRule == null ? null : new Parser() {
+        recoverRule == null ? null : new Parser() {
           @Override
           public boolean parse(PsiBuilder builder, int level) {
-            return rule(builder, level, untilRule, Collections.<String, Parser>emptyMap());
+            return rule(builder, level, recoverRule, Collections.<String, Parser>emptyMap());
           }
         });
     }

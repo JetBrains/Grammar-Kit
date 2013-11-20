@@ -13,7 +13,7 @@ i.e. ')' token will be matched in the case of " (  ) " input. It still stops mat
 
 Thus the notion of _pin_ helps parser to recover when input misses some parts.
 ```
-property ::= id '=' expr  {pin=2 recoverUntil=rule_recover}
+property ::= id '=' expr  {pin=2 recoverWhile=rule_recover}
 private rule_recover ::= !(';' | id '=')
 ```
 can be read like that: _property_ matches the sequence of _id_, '=' and _expr_.
@@ -21,7 +21,7 @@ The matching is considered successful if we get through '=' part.
 And **regardless** of the result skip all the tokens while _rule_recover_ matches, i.e. while the parser doesn't encounter ';' or a rule start (id and '=').
 Note that recovery rule is always a _predicate_ (a NOT predicate usually) hence it doesn't consume anything from the input.
 
-Thus the notion of _recoverUntil_ helps parser to recover when input includes something unexpected.
+Thus the notion of _recoverWhile_ helps parser to recover when input includes something unexpected.
 
 Live Preview introduction
 =========================
@@ -85,7 +85,7 @@ The fun part is that I even can _inject_ this language in some other files I wor
 }
 
 root ::= root_item *
-private root_item ::= !<<eof>> property ';' {pin=1 recoverUntil=property_recover}
+private root_item ::= !<<eof>> property ';' {pin=1 recoverWhile=property_recover}
 
 property ::= id '=' expr  {pin=2}
 private property_recover ::= !(';' | id '=')
@@ -104,6 +104,6 @@ ref_expr ::= id
 literal_expr ::= number | string | float
 ````
 
-Try playing with _pin_ and _recover_until_ attributes, tokens and rule modifiers to see how this all works.
+Try playing with _pin_ and _recoverWhile_ attributes, tokens and rule modifiers to see how this all works.
 
 Note that since version 1.1.2 one can generate *.flex file and then lexer java code using context menu items.

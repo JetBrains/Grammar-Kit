@@ -12,7 +12,7 @@
 }
 root ::= element_and_separator *
 private element_and_separator ::= element ';' {pin=1}
-private element ::= expr  {recoverUntil=element_recover}
+private element ::= expr  {recoverWhile=element_recover}
 private element_recover ::= !';'
 
 // left recursion and empty PSI children define expression root

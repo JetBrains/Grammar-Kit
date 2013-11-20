@@ -50,7 +50,7 @@ public class BnfFirstNextTest extends LightPlatformCodeInsightFixtureTestCase {
 
   public void testFirstStrings() { doFirstTest("r ::= &(','|')') s ::= r ','", "','"); }
   public void testFirstAndExternal() { doFirstTest("r ::= &(','|')') external s ::= ss r", "')'", "','"); }
-  public void testFirstRecover() { doNextTest("r ::= !(','|')') s ::= X {recoverUntil=\"r\"}", MATCHES_ANY); }
+  public void testFirstRecover() { doNextTest("r ::= !(','|')') s ::= X {recoverWhile=\"r\"}", MATCHES_ANY); }
 
   public void testExternalPredicate1() { doFirstTest("r ::= A | B | isHql X external isHql ::= func", "#func", "A", "B"); }
   public void testExternalPredicate2() { doFirstTest("r ::= A | B | &isHql X external isHql ::= func", "A", "B", "X"); }

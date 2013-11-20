@@ -67,23 +67,25 @@ public boolean rule() {
 
 *One-or-more*, *optional*, *and-predicate* and *not-predicate* constructs are implemented accordingly.
 As you can see the generated code can be easily debugged as any handwritten code.
-Attributes like *pin* and *recoverUntil*, rule modifiers add some lines to this general structure.
+Attributes like *pin* and *recoverWhile*, rule modifiers add some lines to this general structure.
 
 
-2.2 Making *recoverUntil* actually work
+2.2 Using *recoverWhile* attribute
 ---------------------------------------
 
-*recoverUntil* rule attribute tells parser after matching the rule and regardless of whether this was successful or not
-to consume all tokens from the input sequence while the rule specified in *recoverUntil* value matches input.
+1. This attribute in most cases should be specified on a rule that is inside a loop
+2. That rule should always have *pin* attribute somewhere as well
+3. Attribute value should be a predicate rule (e.g. may look like *!( token_to_stop_at | rule_to_stop_at | ....) *)
 
 
-1. This attribute in most cases should be specified on a rule that is inside a loop.
-2. That rule should always have *pin* attribute somewhere as well.
-3. Predicate rule should look like *!( token_to_stop_at | rule_to_stop_at | ....) *
+The contract is defined as follows:
+1. The attributed rule is handled as usual
+2. And regardless of the result parser will continue to consume tokens while the predicate rule matches
+
 
 ````
 script ::= statement *
-private statement ::= select_statement | delete_statement | ... {recoverUntil="statement_recover"}
+private statement ::= select_statement | delete_statement | ... {recoverWhile="statement_recover"}
 private statement_recover ::= !(';' | SELECT | DELETE | ...)
 select_statement ::= SELECT ... {pin=1}  // something has to be pinned!
                                          // pin="SELECT" is a valid alternative

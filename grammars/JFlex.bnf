@@ -124,7 +124,7 @@
 
     char='regexp:[^\{\}\[\]\(\)\+\*\?\\/]'
   ]
-  recoverUntil(".*_section")=section_recover
+  recoverWhile(".*_section")=section_recover
   pin(".*_section")=1
 
   extends("option_.*")=option
@@ -158,12 +158,12 @@ java_code ::= <<anything2 (&java | !<<is_percent>>)>>
 
 java_fqn ::= id ( safe_dot id ) * {pin(".*")=1}
 private safe_dot ::= '.' !'*'
-private java_fqn_list ::= [java_fqn (',' java_fqn) *] {pin(".*")=1 recoverUntil=declaration_recover}
+private java_fqn_list ::= [java_fqn (',' java_fqn) *] {pin(".*")=1 recoverWhile=declaration_recover}
 
 // ======================================================
 declarations_section ::=  [] (declaration) *
 
-private declaration ::= macro_definition | state_declaration | option  {recoverUntil=declaration_recover}
+private declaration ::= macro_definition | state_declaration | option  {recoverWhile=declaration_recover}
 private declaration_recover ::= !(<<is_percent>> | id '=') section_recover
 option ::= option_class
   | option_implements
@@ -271,7 +271,7 @@ state_definition ::= id {
 macro_definition ::= new_line id '=' expression {pin=3
   implements="com.intellij.psi.PsiNameIdentifierOwner"
   methods=[getName setName getNameIdentifier]
-  recoverUntil=macro_definition_recover
+  recoverWhile=macro_definition_recover
 }
 private macro_definition_recover::=!(new_line id '=' | '%%' | <<is_percent>>)
 
@@ -279,7 +279,7 @@ private macro_definition_recover::=!(new_line id '=' | '%%' | <<is_percent>>)
 // ======================================================
 lexical_rules_section ::= [] rule +
 
-rule ::= state_list (rule_group | rule_tail ) | rule_tail {pin(".*")=1 recoverUntil=rule_recover}
+rule ::= state_list (rule_group | rule_tail ) | rule_tail {pin(".*")=1 recoverWhile=rule_recover}
 private rule_recover ::= !('}' | '.' | '<' | '<<EOF>>' | '^'| new_line | atom_group)
 
 private rule_tail ::= rule_tail1 | rule_tail2

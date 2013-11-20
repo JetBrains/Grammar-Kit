@@ -1,6 +1,6 @@
 {
   parserClass="<warning>org.intellij.grammar.parser.GrammarParser</warning>"
-  parserUtilClass="<warning>org.intellij.grammar.parser.GeneratedParserUtilBase</warning>"
+  <warning>stubParserClass</warning>="<warning>org.intellij.grammar.parser.GeneratedParserUtilBase</warning>"
 
   implements="<warning>org.intellij.grammar.psi.BnfCompositeElement</warning>"
   extends="<warning>org.intellij.grammar.psi.impl.BnfCompositeElementImpl</warning>"
@@ -39,7 +39,7 @@
 
 grammar ::= (attrs | rule) *
 
-rule ::= modifier* id '::=' expression attrs? ';'? {pin=3 recoverUntil="rule_recover_until" extends=<warning>namedImpl</warning> implements=<warning>named</warning>}
+rule ::= modifier* id '::=' expression attrs? ';'? {pin=3 <warning>recoverUntil</warning>="rule_recover_until" extends=<warning>namedImpl</warning> implements=<warning>named</warning>}
 private rule_recover_until::=!'{'
 
 expression ::= choice?
@@ -48,7 +48,7 @@ modifier ::= 'private' | 'external' | 'wrapped';
 
 attrs ::= '{' attr* '}' {pin=1}
 
-attr ::= id attr_pattern? '=' attr_value ';'? {pin=1 recoverUntil="attr_recover_until" extends=<warning>namedImpl</warning> implements=<warning>named</warning>}
+attr ::= id attr_pattern? '=' attr_value ';'? {pin=1 <warning>recoverUntil</warning>="attr_recover_until" extends=<warning>namedImpl</warning> implements=<warning>named</warning>}
 private attr_recover_until::=!'}'
 attr_value ::= (reference_or_token | literal_expression) !'=';
 attr_pattern ::= '(' string ')'

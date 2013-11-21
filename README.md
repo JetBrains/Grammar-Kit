@@ -27,10 +27,10 @@ General usage instructions
 
 Recent changes
 --------------
-1.1.4
+1.1.5
 
-* JFlex language support: highlighting/navigation/completion/rename
-* Generator: parser size reduced (most of PsiBuilder-specific logic moved to GPUB)
+* Historical typo fixed: _recoverUntil_ attribute renamed to _recoverWhile_ (indeed it always meant _while_)
+* Misc: GeneratedParserUtilBase cleanup and OOM protection, recoverable rule highlighting
 
 
 Quick documentation:
@@ -219,6 +219,11 @@ java -jar expression-console-sample.jar
 
 Change log
 ==========
+1.1.4
+
+* JFlex language support: highlighting/navigation/completion/rename
+* Generator: parser size reduced (most of PsiBuilder-specific logic moved to GPUB)
+
 1.1.3
 
 * Extensibility: "extends" hooks in GPUB

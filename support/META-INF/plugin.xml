@@ -1,6 +1,6 @@
 <idea-plugin url="https://github.com/JetBrains/Grammar-Kit" version="2">
   <id>org.jetbrains.idea.grammar</id>
-  <version>1.1.4</version>
+  <version>1.1.5</version>
   <vendor email="gregory.shrago@jetbrains.com" logo="">Greg Shrago</vendor>
   <idea-version since-build="130.1365" until-build=""/>
 
@@ -12,6 +12,11 @@
 
   <change-notes>
     <![CDATA[
+    <p>1.1.5</p>
+    <ul>
+        <li>Historical typo fixed: "recoverUntil" attribute renamed to "recoverWhile" (indeed it always meant "while")</li>
+        <li>Misc: GeneratedParserUtilBase cleanup and OOM protection, recoverable rule highlighting</li>
+    </ul>
     <p>1.1.4</p>
     <ul>
         <li>JFlex language support: highlighting/navigation/completion/rename</li>

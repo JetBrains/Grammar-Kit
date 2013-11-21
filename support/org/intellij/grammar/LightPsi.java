@@ -23,16 +23,19 @@ import com.intellij.concurrency.JobLauncherImpl;
 import com.intellij.lang.LanguageParserDefinitions;
 import com.intellij.lang.ParserDefinition;
 import com.intellij.lang.injection.InjectedLanguageManager;
+import com.intellij.mock.MockApplicationEx;
+import com.intellij.mock.MockProjectEx;
+import com.intellij.mock.MockPsiManager;
+import com.intellij.openapi.Disposable;
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.extensions.Extensions;
 import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.DumbServiceImpl;
+import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Disposer;
 import com.intellij.openapi.util.io.FileUtil;
-import com.intellij.psi.PsiFile;
-import com.intellij.psi.PsiFileFactory;
-import com.intellij.psi.PsiReferenceService;
-import com.intellij.psi.PsiReferenceServiceImpl;
+import com.intellij.psi.*;
 import com.intellij.psi.impl.PsiFileFactoryImpl;
 import com.intellij.psi.impl.search.CachesBasedRefSearcher;
 import com.intellij.psi.impl.search.PsiSearchHelperImpl;
@@ -111,31 +114,7 @@ public class LightPsi {
     MyParsing() throws Exception {
       super("", "", new BnfParserDefinition());
       super.setUp();
-      Extensions.getRootArea().registerExtensionPoint("com.intellij.referencesSearch", "com.intellij.util.QueryExecutor");
-      Extensions.getRootArea().registerExtensionPoint("com.intellij.useScopeEnlarger", "com.intellij.psi.search.UseScopeEnlarger");
-      Extensions.getRootArea().registerExtensionPoint("com.intellij.languageInjector", "com.intellij.psi.LanguageInjector");
-      Extensions.getArea(getProject()).registerExtensionPoint("com.intellij.multiHostInjector",
-                                                              "com.intellij.lang.injection.MultiHostInjector");
-      Extensions.getRootArea().getExtensionPoint("com.intellij.referencesSearch").registerExtension(new CachesBasedRefSearcher());
-      registerApplicationService(PsiReferenceService.class, new PsiReferenceServiceImpl());
-      registerApplicationService(JobLauncher.class, new JobLauncherImpl());
-      registerApplicationService(AsyncFutureFactory.class, new AsyncFutureFactoryImpl());
-      getProject().registerService(PsiSearchHelper.class, new PsiSearchHelperImpl(getPsiManager()));
-      getProject().registerService(DumbService.class, new DumbServiceImpl(getProject(), getProject().getMessageBus()));
-      getProject().registerService(ResolveCache.class, new ResolveCache(getProject().getMessageBus()));
-      getProject().registerService(PsiFileFactory.class, new PsiFileFactoryImpl(getPsiManager()));
-      try {
-        getProject().registerService(JavaHelper.class, new JavaHelper.AsmHelper());
-      }
-      catch (LinkageError e) {
-        System.out.println("ASM not available, using reflection helper: " +e);
-        getProject().registerService(JavaHelper.class, new JavaHelper.ReflectionHelper());
-      }
-
-      InjectedLanguageManagerImpl languageManager = new InjectedLanguageManagerImpl(getProject(), DumbService.getInstance(getProject()));
-      Disposer.register(getProject(), languageManager);
-      getProject().registerService(InjectedLanguageManager.class, languageManager);
-      ProgressManager.getInstance();
+      Init.initExtensions(getProject(), getPsiManager());
     }
 
     @Override
@@ -147,6 +126,49 @@ public class LightPsi {
       addExplicitExtension(LanguageParserDefinitions.INSTANCE, definition.getFileNodeType().getLanguage(), definition);
       myLanguage = definition.getFileNodeType().getLanguage();
       return super.createFile(name, text);
+    }
+  }
+
+  public static class Init {
+
+    public static void initExtensions(MockProjectEx project, MockPsiManager psiManager) {
+      Extensions.getRootArea().registerExtensionPoint("com.intellij.referencesSearch", "com.intellij.util.QueryExecutor");
+      Extensions.getRootArea().registerExtensionPoint("com.intellij.useScopeEnlarger", "com.intellij.psi.search.UseScopeEnlarger");
+      Extensions.getRootArea().registerExtensionPoint("com.intellij.languageInjector", "com.intellij.psi.LanguageInjector");
+      Extensions.getArea(project).registerExtensionPoint("com.intellij.multiHostInjector", "com.intellij.lang.injection.MultiHostInjector");
+      Extensions.getRootArea().registerExtensionPoint("com.intellij.codeInsight.containerProvider",
+                                                      "com.intellij.codeInsight.ContainerProvider");
+      Extensions.getRootArea().getExtensionPoint("com.intellij.referencesSearch").registerExtension(new CachesBasedRefSearcher());
+      registerApplicationService(project, PsiReferenceService.class, new PsiReferenceServiceImpl());
+      registerApplicationService(project, JobLauncher.class, new JobLauncherImpl());
+      registerApplicationService(project, AsyncFutureFactory.class, new AsyncFutureFactoryImpl());
+      project.registerService(PsiSearchHelper.class, new PsiSearchHelperImpl(psiManager));
+      project.registerService(DumbService.class, new DumbServiceImpl(project, project.getMessageBus()));
+      project.registerService(ResolveCache.class, new ResolveCache(project.getMessageBus()));
+      project.registerService(PsiFileFactory.class, new PsiFileFactoryImpl(psiManager));
+      try {
+        project.registerService(JavaHelper.class, new JavaHelper.AsmHelper());
+      }
+      catch (LinkageError e) {
+        System.out.println("ASM not available, using reflection helper: " + e);
+        project.registerService(JavaHelper.class, new JavaHelper.ReflectionHelper());
+      }
+
+      InjectedLanguageManagerImpl languageManager = new InjectedLanguageManagerImpl(project, DumbService.getInstance(project));
+      Disposer.register(project, languageManager);
+      project.registerService(InjectedLanguageManager.class, languageManager);
+      ProgressManager.getInstance();
+    }
+
+    private static <T> void registerApplicationService(Project project, final Class<T> aClass, T object) {
+      final MockApplicationEx application = (MockApplicationEx)ApplicationManager.getApplication();
+      application.registerService(aClass, object);
+      Disposer.register(project, new Disposable() {
+        @Override
+        public void dispose() {
+          application.getPicoContainer().unregisterComponent(aClass.getName());
+        }
+      });
     }
   }
 }

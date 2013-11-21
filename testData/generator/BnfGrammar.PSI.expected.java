@@ -212,6 +212,7 @@ package org.intellij.grammar.psi;
 import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiReference;
 
 public interface BnfListEntry extends BnfCompositeElement {
 
@@ -221,7 +222,8 @@ public interface BnfListEntry extends BnfCompositeElement {
   @Nullable
   PsiElement getId();
 
-  void getReferences();
+  @NotNull
+  PsiReference[] getReferences();
 
 }
 // ---- BnfLiteralExpression.java -----------------
@@ -630,6 +632,7 @@ import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static org.intellij.grammar.psi.BnfTypes.*;
 import org.intellij.grammar.psi.*;
+import com.intellij.psi.PsiReference;
 
 public class BnfListEntryImpl extends BnfCompositeElementImpl implements BnfListEntry {
 
@@ -654,8 +657,9 @@ public class BnfListEntryImpl extends BnfCompositeElementImpl implements BnfList
     return findChildByType(BNF_ID);
   }
 
-  public void getReferences() {
-    GrammarPsiImplUtil.getReferences(this);
+  @NotNull
+  public PsiReference[] getReferences() {
+    return GrammarPsiImplUtil.getReferences(this);
   }
 
 }

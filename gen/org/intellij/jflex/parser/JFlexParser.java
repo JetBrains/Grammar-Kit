@@ -2005,18 +2005,11 @@ public class JFlexParser implements PsiParser {
         && replaceVariants(builder_, 2, "<expression>")) return false;
     boolean result_ = false;
     boolean pinned_ = false;
-    Marker marker_ = builder_.mark();
-    enterErrorRecordingSection(builder_, level_, _SECTION_GENERAL_, null);
+    Marker marker_ = enter_section_(builder_, level_, _NONE_, null);
     result_ = not_expression_0(builder_, level_ + 1);
     pinned_ = result_;
     result_ = pinned_ && expression(builder_, level_, 3) && result_;
-    if (result_ || pinned_) {
-      marker_.done(FLEX_NOT_EXPRESSION);
-    }
-    else {
-      marker_.rollbackTo();
-    }
-    result_ = exitErrorRecordingSection(builder_, level_, result_, pinned_, _SECTION_GENERAL_, null);
+    exit_section_(builder_, level_, marker_, FLEX_NOT_EXPRESSION, result_, pinned_, null);
     return result_ || pinned_;
   }
 

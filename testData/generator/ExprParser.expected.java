@@ -339,18 +339,11 @@ public class ExpressionParser implements PsiParser {
     if (!recursion_guard_(builder_, level_, "unary_plus_expr")) return false;
     boolean result_ = false;
     boolean pinned_ = false;
-    Marker marker_ = builder_.mark();
-    enterErrorRecordingSection(builder_, level_, _SECTION_GENERAL_, null);
+    Marker marker_ = enter_section_(builder_, level_, _NONE_, null);
     result_ = consumeTokenFast(builder_, "+");
     pinned_ = result_;
-    result_ = pinned_ && expr(builder_, level_, 4) && result_;
-    if (result_ || pinned_) {
-      marker_.done(UNARY_PLUS_EXPR);
-    }
-    else {
-      marker_.rollbackTo();
-    }
-    result_ = exitErrorRecordingSection(builder_, level_, result_, pinned_, _SECTION_GENERAL_, null);
+    result_ = pinned_ && expr(builder_, level_, 4);
+    exit_section_(builder_, level_, marker_, UNARY_PLUS_EXPR, result_, pinned_, null);
     return result_ || pinned_;
   }
 
@@ -358,18 +351,11 @@ public class ExpressionParser implements PsiParser {
     if (!recursion_guard_(builder_, level_, "unary_min_expr")) return false;
     boolean result_ = false;
     boolean pinned_ = false;
-    Marker marker_ = builder_.mark();
-    enterErrorRecordingSection(builder_, level_, _SECTION_GENERAL_, null);
+    Marker marker_ = enter_section_(builder_, level_, _NONE_, null);
     result_ = consumeTokenFast(builder_, "-");
     pinned_ = result_;
-    result_ = pinned_ && expr(builder_, level_, 4) && result_;
-    if (result_ || pinned_) {
-      marker_.done(UNARY_MIN_EXPR);
-    }
-    else {
-      marker_.rollbackTo();
-    }
-    result_ = exitErrorRecordingSection(builder_, level_, result_, pinned_, _SECTION_GENERAL_, null);
+    result_ = pinned_ && expr(builder_, level_, 4);
+    exit_section_(builder_, level_, marker_, UNARY_MIN_EXPR, result_, pinned_, null);
     return result_ || pinned_;
   }
 
@@ -427,19 +413,12 @@ public class ExpressionParser implements PsiParser {
     if (!recursion_guard_(builder_, level_, "paren_expr")) return false;
     boolean result_ = false;
     boolean pinned_ = false;
-    Marker marker_ = builder_.mark();
-    enterErrorRecordingSection(builder_, level_, _SECTION_GENERAL_, null);
+    Marker marker_ = enter_section_(builder_, level_, _NONE_, null);
     result_ = consumeTokenFast(builder_, "(");
     pinned_ = result_;
-    result_ = pinned_ && expr(builder_, level_, -1) && result_;
+    result_ = pinned_ && expr(builder_, level_, -1);
     result_ = pinned_ && report_error_(builder_, consumeToken(builder_, ")")) && result_;
-    if (result_ || pinned_) {
-      marker_.done(PAREN_EXPR);
-    }
-    else {
-      marker_.rollbackTo();
-    }
-    result_ = exitErrorRecordingSection(builder_, level_, result_, pinned_, _SECTION_GENERAL_, null);
+    exit_section_(builder_, level_, marker_, PAREN_EXPR, result_, pinned_, null);
     return result_ || pinned_;
   }
 

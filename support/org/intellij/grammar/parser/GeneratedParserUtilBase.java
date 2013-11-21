@@ -297,30 +297,6 @@ public class GeneratedParserUtilBase {
     }
   }
 
-  // keep the old section API for compatibility
-  public static final String _SECTION_NOT_ = "_SECTION_NOT_";
-  public static final String _SECTION_AND_ = "_SECTION_AND_";
-  public static final String _SECTION_RECOVER_ = "_SECTION_RECOVER_";
-  public static final String _SECTION_GENERAL_ = "_SECTION_GENERAL_";
-
-  @SuppressWarnings("StringEquality")
-  public static void enterErrorRecordingSection(PsiBuilder builder_, int level, @NotNull String sectionType, @Nullable String frameName) {
-    int modifiers = sectionType == _SECTION_GENERAL_ ? _NONE_ :
-                    sectionType == _SECTION_NOT_ ? _NOT_ :
-                    sectionType == _SECTION_AND_ ? _AND_ : _NONE_;
-    enter_section_impl_(builder_, level, modifiers, frameName);
-  }
-
-  public static boolean exitErrorRecordingSection(PsiBuilder builder_,
-                                                  int level,
-                                                  boolean result,
-                                                  boolean pinned,
-                                                  @NotNull String sectionType,
-                                                  @Nullable Parser eatMore) {
-    exit_section_(builder_, level, null, null, result, pinned, eatMore);
-    return result;
-  }
-
   // here's the new section API for compact parsers & less IntelliJ platform API exposure
   public static final int _NONE_       = 0x0;
   public static final int _COLLAPSE_   = 0x1;
@@ -835,15 +811,6 @@ public class GeneratedParserUtilBase {
       result = 31 * result + object.hashCode();
       return result;
     }
-  }
-
-  @Nullable
-  private static IElementType getClosingBracket(ErrorState state, IElementType type) {
-    if (state.braces == null) return null;
-    for (BracePair pair : state.braces) {
-      if (type == pair.getLeftBraceType()) return pair.getRightBraceType();
-    }
-    return null;
   }
 
 

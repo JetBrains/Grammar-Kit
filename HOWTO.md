@@ -75,10 +75,11 @@ Attributes like *pin* and *recoverWhile*, rule modifiers add some lines to this 
 
 1. This attribute in most cases should be specified on a rule that is inside a loop
 2. That rule should always have *pin* attribute somewhere as well
-3. Attribute value should be a predicate rule (e.g. may look like *!( token_to_stop_at | rule_to_stop_at | ....) *)
+3. Attribute value should be a predicate rule, i.e. leave input intact
 
 
 The contract is defined as follows:
+
 1. The attributed rule is handled as usual
 2. And regardless of the result parser will continue to consume tokens while the predicate rule matches
 

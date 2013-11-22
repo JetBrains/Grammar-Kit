@@ -1,5 +1,31 @@
 <html>
 <body>
-Name of the recovery predicate rule. See documentation for more.
+Name of the recovery predicate rule.
+
+<h2>The contract:</h2>
+
+<ol>
+  <li>The attributed rule is handled as usual</li>
+  <li>And regardless of the result parser will continue to consume tokens while the predicate rule matches</li>
+</ol>
+
+<h2>Notes:</h2>
+
+<ol>
+  <li>This attribute in most cases should be specified on a rule that is inside a loop</li>
+  <li>That rule should always have *pin* attribute somewhere as well</li>
+  <li>Attribute value should be a predicate rule, i.e. leave input intact</li>
+  <li>In most cases the predicate is ! FOLLOWS(rule) and can be copied from the rule Quick Documentation</li>
+</ol>
+
+<h2>Parenthesized list example:</h2>
+<pre><code>
+  {
+    tokens=[number="regexp:\d+" comma="," paren1="(" paren2=")"]
+  }
+  list ::= "(" [!")" item (',' item) * ] ")" {pin(".*")=1}
+  item ::= number {recoverWhile=item_recover}
+  private item_recover ::= !(")" | ",")
+</code></pre>
 </body>
 </html>

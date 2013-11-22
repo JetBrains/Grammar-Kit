@@ -305,15 +305,15 @@ public class GrammarParser implements PsiParser {
   // attr *
   private static boolean attrs_1(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "attrs_1")) return false;
-    int index_ = builder_.rawTokenIndex();
+    int pos_ = current_position_(builder_);
     while (true) {
       if (!attr(builder_, level_ + 1)) break;
-      int next_index_ = builder_.rawTokenIndex();
-      if (index_ == next_index_) {
-        empty_element_parsed_guard_(builder_, builder_.getCurrentOffset(), "attrs_1");
+      int next_pos_ = current_position_(builder_);
+      if (pos_ == next_pos_) {
+        empty_element_parsed_guard_(builder_, "attrs_1");
         break;
       }
-      index_ = next_index_;
+      pos_ = next_pos_;
     }
     return true;
   }
@@ -326,15 +326,15 @@ public class GrammarParser implements PsiParser {
     boolean result_ = false;
     Marker marker_ = enter_section_(builder_, level_, _LEFT_, null);
     result_ = choice_0(builder_, level_ + 1);
-    int index_ = builder_.rawTokenIndex();
+    int pos_ = current_position_(builder_);
     while (result_) {
       if (!choice_0(builder_, level_ + 1)) break;
-      int next_index_ = builder_.rawTokenIndex();
-      if (index_ == next_index_) {
-        empty_element_parsed_guard_(builder_, builder_.getCurrentOffset(), "choice");
+      int next_pos_ = current_position_(builder_);
+      if (pos_ == next_pos_) {
+        empty_element_parsed_guard_(builder_, "choice");
         break;
       }
-      index_ = next_index_;
+      pos_ = next_pos_;
     }
     exit_section_(builder_, level_, marker_, BNF_CHOICE, result_, false, null);
     return result_;
@@ -392,15 +392,15 @@ public class GrammarParser implements PsiParser {
   // option *
   private static boolean external_expression_2(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "external_expression_2")) return false;
-    int index_ = builder_.rawTokenIndex();
+    int pos_ = current_position_(builder_);
     while (true) {
       if (!option(builder_, level_ + 1)) break;
-      int next_index_ = builder_.rawTokenIndex();
-      if (index_ == next_index_) {
-        empty_element_parsed_guard_(builder_, builder_.getCurrentOffset(), "external_expression_2");
+      int next_pos_ = current_position_(builder_);
+      if (pos_ == next_pos_) {
+        empty_element_parsed_guard_(builder_, "external_expression_2");
         break;
       }
-      index_ = next_index_;
+      pos_ = next_pos_;
     }
     return true;
   }
@@ -778,15 +778,15 @@ public class GrammarParser implements PsiParser {
   // modifier*
   private static boolean rule_start_0(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "rule_start_0")) return false;
-    int index_ = builder_.rawTokenIndex();
+    int pos_ = current_position_(builder_);
     while (true) {
       if (!modifier(builder_, level_ + 1)) break;
-      int next_index_ = builder_.rawTokenIndex();
-      if (index_ == next_index_) {
-        empty_element_parsed_guard_(builder_, builder_.getCurrentOffset(), "rule_start_0");
+      int next_pos_ = current_position_(builder_);
+      if (pos_ == next_pos_) {
+        empty_element_parsed_guard_(builder_, "rule_start_0");
         break;
       }
-      index_ = next_index_;
+      pos_ = next_pos_;
     }
     return true;
   }
@@ -796,15 +796,15 @@ public class GrammarParser implements PsiParser {
   public static boolean sequence(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "sequence")) return false;
     Marker marker_ = enter_section_(builder_, level_, _COLLAPSE_, "<sequence>");
-    int index_ = builder_.rawTokenIndex();
+    int pos_ = current_position_(builder_);
     while (true) {
       if (!option(builder_, level_ + 1)) break;
-      int next_index_ = builder_.rawTokenIndex();
-      if (index_ == next_index_) {
-        empty_element_parsed_guard_(builder_, builder_.getCurrentOffset(), "sequence");
+      int next_pos_ = current_position_(builder_);
+      if (pos_ == next_pos_) {
+        empty_element_parsed_guard_(builder_, "sequence");
         break;
       }
-      index_ = next_index_;
+      pos_ = next_pos_;
     }
     exit_section_(builder_, level_, marker_, BNF_SEQUENCE, true, false, sequence_recover_parser_);
     return true;
@@ -899,15 +899,15 @@ public class GrammarParser implements PsiParser {
   // modifier*
   private static boolean simple_0_0_0_0(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "simple_0_0_0_0")) return false;
-    int index_ = builder_.rawTokenIndex();
+    int pos_ = current_position_(builder_);
     while (true) {
       if (!modifier(builder_, level_ + 1)) break;
-      int next_index_ = builder_.rawTokenIndex();
-      if (index_ == next_index_) {
-        empty_element_parsed_guard_(builder_, builder_.getCurrentOffset(), "simple_0_0_0_0");
+      int next_pos_ = current_position_(builder_);
+      if (pos_ == next_pos_) {
+        empty_element_parsed_guard_(builder_, "simple_0_0_0_0");
         break;
       }
-      index_ = next_index_;
+      pos_ = next_pos_;
     }
     return true;
   }
@@ -943,15 +943,15 @@ public class GrammarParser implements PsiParser {
   // list_entry *
   private static boolean value_list_1(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "value_list_1")) return false;
-    int index_ = builder_.rawTokenIndex();
+    int pos_ = current_position_(builder_);
     while (true) {
       if (!list_entry(builder_, level_ + 1)) break;
-      int next_index_ = builder_.rawTokenIndex();
-      if (index_ == next_index_) {
-        empty_element_parsed_guard_(builder_, builder_.getCurrentOffset(), "value_list_1");
+      int next_pos_ = current_position_(builder_);
+      if (pos_ == next_pos_) {
+        empty_element_parsed_guard_(builder_, "value_list_1");
         break;
       }
-      index_ = next_index_;
+      pos_ = next_pos_;
     }
     return true;
   }

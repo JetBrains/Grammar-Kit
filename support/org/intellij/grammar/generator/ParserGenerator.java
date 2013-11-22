@@ -731,15 +731,15 @@ public class ParserGenerator {
         if (type == BNF_OP_ONEMORE) {
           out("result_ = " + nodeCall + ";");
         }
-        out("int index_ = builder_.rawTokenIndex();");
+        out("int pos_ = current_position_(builder_);");
         out("while (" + (alwaysTrue ? "true" : "result_") + ") {");
         out("if (!" + nodeCall + ") break;");
-        out("int next_index_ = builder_.rawTokenIndex();");
-        out("if (index_ == next_index_) {");
-        out("empty_element_parsed_guard_(builder_, builder_.getCurrentOffset(), \"" + funcName + "\");");
+        out("int next_pos_ = current_position_(builder_);");
+        out("if (pos_ == next_pos_) {");
+        out("empty_element_parsed_guard_(builder_, \"" + funcName + "\");");
         out("break;");
         out("}");
-        out("index_ = next_index_;");
+        out("pos_ = next_pos_;");
         out("}");
       }
       else if (type == BNF_OP_AND) {

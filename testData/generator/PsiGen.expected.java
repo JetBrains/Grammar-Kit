@@ -78,15 +78,15 @@ public class PsiGen implements PsiParser {
   // plus_expr *
   private static boolean a_expr_1(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "a_expr_1")) return false;
-    int index_ = builder_.rawTokenIndex();
+    int pos_ = current_position_(builder_);
     while (true) {
       if (!plus_expr(builder_, level_ + 1)) break;
-      int next_index_ = builder_.rawTokenIndex();
-      if (index_ == next_index_) {
-        empty_element_parsed_guard_(builder_, builder_.getCurrentOffset(), "a_expr_1");
+      int next_pos_ = current_position_(builder_);
+      if (pos_ == next_pos_) {
+        empty_element_parsed_guard_(builder_, "a_expr_1");
         break;
       }
-      index_ = next_index_;
+      pos_ = next_pos_;
     }
     return true;
   }
@@ -107,15 +107,15 @@ public class PsiGen implements PsiParser {
   // mul_expr *
   private static boolean b_expr_1(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "b_expr_1")) return false;
-    int index_ = builder_.rawTokenIndex();
+    int pos_ = current_position_(builder_);
     while (true) {
       if (!mul_expr(builder_, level_ + 1)) break;
-      int next_index_ = builder_.rawTokenIndex();
-      if (index_ == next_index_) {
-        empty_element_parsed_guard_(builder_, builder_.getCurrentOffset(), "b_expr_1");
+      int next_pos_ = current_position_(builder_);
+      if (pos_ == next_pos_) {
+        empty_element_parsed_guard_(builder_, "b_expr_1");
         break;
       }
-      index_ = next_index_;
+      pos_ = next_pos_;
     }
     return true;
   }
@@ -137,15 +137,15 @@ public class PsiGen implements PsiParser {
   // (',' a_expr) *
   private static boolean expr_1(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "expr_1")) return false;
-    int index_ = builder_.rawTokenIndex();
+    int pos_ = current_position_(builder_);
     while (true) {
       if (!expr_1_0(builder_, level_ + 1)) break;
-      int next_index_ = builder_.rawTokenIndex();
-      if (index_ == next_index_) {
-        empty_element_parsed_guard_(builder_, builder_.getCurrentOffset(), "expr_1");
+      int next_pos_ = current_position_(builder_);
+      if (pos_ == next_pos_) {
+        empty_element_parsed_guard_(builder_, "expr_1");
         break;
       }
-      index_ = next_index_;
+      pos_ = next_pos_;
     }
     return true;
   }
@@ -246,15 +246,15 @@ public class PsiGen implements PsiParser {
     boolean result_ = false;
     Marker marker_ = enter_section_(builder_);
     result_ = p.parse(builder_, level_);
-    int index_ = builder_.rawTokenIndex();
+    int pos_ = current_position_(builder_);
     while (result_) {
       if (!p.parse(builder_, level_)) break;
-      int next_index_ = builder_.rawTokenIndex();
-      if (index_ == next_index_) {
-        empty_element_parsed_guard_(builder_, builder_.getCurrentOffset(), "listOf");
+      int next_pos_ = current_position_(builder_);
+      if (pos_ == next_pos_) {
+        empty_element_parsed_guard_(builder_, "listOf");
         break;
       }
-      index_ = next_index_;
+      pos_ = next_pos_;
     }
     exit_section_(builder_, marker_, null, result_);
     return result_;
@@ -365,15 +365,15 @@ public class PsiGen2 {
     boolean result_ = false;
     Marker marker_ = enter_section_(builder_);
     result_ = p.parse(builder_, level_);
-    int index_ = builder_.rawTokenIndex();
+    int pos_ = current_position_(builder_);
     while (result_) {
       if (!p.parse(builder_, level_)) break;
-      int next_index_ = builder_.rawTokenIndex();
-      if (index_ == next_index_) {
-        empty_element_parsed_guard_(builder_, builder_.getCurrentOffset(), "blockOf");
+      int next_pos_ = current_position_(builder_);
+      if (pos_ == next_pos_) {
+        empty_element_parsed_guard_(builder_, "blockOf");
         break;
       }
-      index_ = next_index_;
+      pos_ = next_pos_;
     }
     exit_section_(builder_, marker_, BLOCK_OF, result_);
     return result_;
@@ -468,15 +468,15 @@ public class PsiGen2 {
   // qref_expr *
   private static boolean reference_1(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "reference_1")) return false;
-    int index_ = builder_.rawTokenIndex();
+    int pos_ = current_position_(builder_);
     while (true) {
       if (!qref_expr(builder_, level_ + 1)) break;
-      int next_index_ = builder_.rawTokenIndex();
-      if (index_ == next_index_) {
-        empty_element_parsed_guard_(builder_, builder_.getCurrentOffset(), "reference_1");
+      int next_pos_ = current_position_(builder_);
+      if (pos_ == next_pos_) {
+        empty_element_parsed_guard_(builder_, "reference_1");
         break;
       }
-      index_ = next_index_;
+      pos_ = next_pos_;
     }
     return true;
   }
@@ -532,15 +532,15 @@ public class PsiGen2 {
   // (item_expr) *
   private static boolean some_expr_2(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "some_expr_2")) return false;
-    int index_ = builder_.rawTokenIndex();
+    int pos_ = current_position_(builder_);
     while (true) {
       if (!some_expr_2_0(builder_, level_ + 1)) break;
-      int next_index_ = builder_.rawTokenIndex();
-      if (index_ == next_index_) {
-        empty_element_parsed_guard_(builder_, builder_.getCurrentOffset(), "some_expr_2");
+      int next_pos_ = current_position_(builder_);
+      if (pos_ == next_pos_) {
+        empty_element_parsed_guard_(builder_, "some_expr_2");
         break;
       }
-      index_ = next_index_;
+      pos_ = next_pos_;
     }
     return true;
   }
@@ -627,15 +627,15 @@ public class PsiGenFixes {
   // LeftShadow *
   private static boolean LeftShadowTest_1(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "LeftShadowTest_1")) return false;
-    int index_ = builder_.rawTokenIndex();
+    int pos_ = current_position_(builder_);
     while (true) {
       if (!LeftShadow(builder_, level_ + 1)) break;
-      int next_index_ = builder_.rawTokenIndex();
-      if (index_ == next_index_) {
-        empty_element_parsed_guard_(builder_, builder_.getCurrentOffset(), "LeftShadowTest_1");
+      int next_pos_ = current_position_(builder_);
+      if (pos_ == next_pos_) {
+        empty_element_parsed_guard_(builder_, "LeftShadowTest_1");
         break;
       }
-      index_ = next_index_;
+      pos_ = next_pos_;
     }
     return true;
   }

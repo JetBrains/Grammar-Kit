@@ -261,15 +261,15 @@ public class JFlexParser implements PsiParser {
   // (declaration) *
   private static boolean declarations_section_1(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "declarations_section_1")) return false;
-    int index_ = builder_.rawTokenIndex();
+    int pos_ = current_position_(builder_);
     while (true) {
       if (!declarations_section_1_0(builder_, level_ + 1)) break;
-      int next_index_ = builder_.rawTokenIndex();
-      if (index_ == next_index_) {
-        empty_element_parsed_guard_(builder_, builder_.getCurrentOffset(), "declarations_section_1");
+      int next_pos_ = current_position_(builder_);
+      if (pos_ == next_pos_) {
+        empty_element_parsed_guard_(builder_, "declarations_section_1");
         break;
       }
-      index_ = next_index_;
+      pos_ = next_pos_;
     }
     return true;
   }
@@ -411,15 +411,15 @@ public class JFlexParser implements PsiParser {
   // ( safe_dot id ) *
   private static boolean java_fqn_1(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "java_fqn_1")) return false;
-    int index_ = builder_.rawTokenIndex();
+    int pos_ = current_position_(builder_);
     while (true) {
       if (!java_fqn_1_0(builder_, level_ + 1)) break;
-      int next_index_ = builder_.rawTokenIndex();
-      if (index_ == next_index_) {
-        empty_element_parsed_guard_(builder_, builder_.getCurrentOffset(), "java_fqn_1");
+      int next_pos_ = current_position_(builder_);
+      if (pos_ == next_pos_) {
+        empty_element_parsed_guard_(builder_, "java_fqn_1");
         break;
       }
-      index_ = next_index_;
+      pos_ = next_pos_;
     }
     return true;
   }
@@ -463,15 +463,15 @@ public class JFlexParser implements PsiParser {
   // (',' java_fqn) *
   private static boolean java_fqn_list_0_1(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "java_fqn_list_0_1")) return false;
-    int index_ = builder_.rawTokenIndex();
+    int pos_ = current_position_(builder_);
     while (true) {
       if (!java_fqn_list_0_1_0(builder_, level_ + 1)) break;
-      int next_index_ = builder_.rawTokenIndex();
-      if (index_ == next_index_) {
-        empty_element_parsed_guard_(builder_, builder_.getCurrentOffset(), "java_fqn_list_0_1");
+      int next_pos_ = current_position_(builder_);
+      if (pos_ == next_pos_) {
+        empty_element_parsed_guard_(builder_, "java_fqn_list_0_1");
         break;
       }
-      index_ = next_index_;
+      pos_ = next_pos_;
     }
     return true;
   }
@@ -514,15 +514,15 @@ public class JFlexParser implements PsiParser {
     boolean result_ = false;
     Marker marker_ = enter_section_(builder_);
     result_ = rule(builder_, level_ + 1);
-    int index_ = builder_.rawTokenIndex();
+    int pos_ = current_position_(builder_);
     while (result_) {
       if (!rule(builder_, level_ + 1)) break;
-      int next_index_ = builder_.rawTokenIndex();
-      if (index_ == next_index_) {
-        empty_element_parsed_guard_(builder_, builder_.getCurrentOffset(), "lexical_rules_section_1");
+      int next_pos_ = current_position_(builder_);
+      if (pos_ == next_pos_) {
+        empty_element_parsed_guard_(builder_, "lexical_rules_section_1");
         break;
       }
-      index_ = next_index_;
+      pos_ = next_pos_;
     }
     exit_section_(builder_, marker_, null, result_);
     return result_;
@@ -1501,15 +1501,15 @@ public class JFlexParser implements PsiParser {
     boolean result_ = false;
     Marker marker_ = enter_section_(builder_);
     result_ = rule(builder_, level_ + 1);
-    int index_ = builder_.rawTokenIndex();
+    int pos_ = current_position_(builder_);
     while (result_) {
       if (!rule(builder_, level_ + 1)) break;
-      int next_index_ = builder_.rawTokenIndex();
-      if (index_ == next_index_) {
-        empty_element_parsed_guard_(builder_, builder_.getCurrentOffset(), "rule_group_2");
+      int next_pos_ = current_position_(builder_);
+      if (pos_ == next_pos_) {
+        empty_element_parsed_guard_(builder_, "rule_group_2");
         break;
       }
-      index_ = next_index_;
+      pos_ = next_pos_;
     }
     exit_section_(builder_, marker_, null, result_);
     return result_;
@@ -1762,15 +1762,15 @@ public class JFlexParser implements PsiParser {
   // ((','? !(id '=')) state_definition) *
   private static boolean state_declaration_2(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "state_declaration_2")) return false;
-    int index_ = builder_.rawTokenIndex();
+    int pos_ = current_position_(builder_);
     while (true) {
       if (!state_declaration_2_0(builder_, level_ + 1)) break;
-      int next_index_ = builder_.rawTokenIndex();
-      if (index_ == next_index_) {
-        empty_element_parsed_guard_(builder_, builder_.getCurrentOffset(), "state_declaration_2");
+      int next_pos_ = current_position_(builder_);
+      if (pos_ == next_pos_) {
+        empty_element_parsed_guard_(builder_, "state_declaration_2");
         break;
       }
-      index_ = next_index_;
+      pos_ = next_pos_;
     }
     return true;
   }
@@ -1864,15 +1864,15 @@ public class JFlexParser implements PsiParser {
   // (',' state_reference) *
   private static boolean state_list_2(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "state_list_2")) return false;
-    int index_ = builder_.rawTokenIndex();
+    int pos_ = current_position_(builder_);
     while (true) {
       if (!state_list_2_0(builder_, level_ + 1)) break;
-      int next_index_ = builder_.rawTokenIndex();
-      if (index_ == next_index_) {
-        empty_element_parsed_guard_(builder_, builder_.getCurrentOffset(), "state_list_2");
+      int next_pos_ = current_position_(builder_);
+      if (pos_ == next_pos_) {
+        empty_element_parsed_guard_(builder_, "state_list_2");
         break;
       }
-      index_ = next_index_;
+      pos_ = next_pos_;
     }
     return true;
   }
@@ -2102,15 +2102,15 @@ public class JFlexParser implements PsiParser {
   // (string | predefined_class | class_char [ '-' class_char]) *
   private static boolean class_expression_3(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "class_expression_3")) return false;
-    int index_ = builder_.rawTokenIndex();
+    int pos_ = current_position_(builder_);
     while (true) {
       if (!class_expression_3_0(builder_, level_ + 1)) break;
-      int next_index_ = builder_.rawTokenIndex();
-      if (index_ == next_index_) {
-        empty_element_parsed_guard_(builder_, builder_.getCurrentOffset(), "class_expression_3");
+      int next_pos_ = current_position_(builder_);
+      if (pos_ == next_pos_) {
+        empty_element_parsed_guard_(builder_, "class_expression_3");
         break;
       }
-      index_ = next_index_;
+      pos_ = next_pos_;
     }
     return true;
   }

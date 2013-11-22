@@ -287,7 +287,7 @@ public class LivePreviewParser implements PsiParser {
           if (!generateNodeCall(builder, level, rule, child, getNextName(funcName, i), externalArguments)) break;
           int next_offset_ = builder.getCurrentOffset();
           if (offset_ == next_offset_) {
-            empty_element_parsed_guard_(builder, offset_, funcName);
+            empty_element_parsed_guard_(builder, funcName);
             break;
           }
           offset_ = next_offset_;
@@ -671,7 +671,7 @@ public class LivePreviewParser implements PsiParser {
           marker_ = null;
           int next_offset_ = builder.getCurrentOffset();
           if (offset_ == next_offset_) {
-            empty_element_parsed_guard_(builder, offset_, info.rootRule.getName());
+            empty_element_parsed_guard_(builder, info.rootRule.getName());
             break main;
           }
           offset_ = next_offset_;

@@ -191,15 +191,15 @@ public class Autopin implements PsiParser {
   // statement *
   static boolean root(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "root")) return false;
-    int index_ = builder_.rawTokenIndex();
+    int pos_ = current_position_(builder_);
     while (true) {
       if (!statement(builder_, level_ + 1)) break;
-      int next_index_ = builder_.rawTokenIndex();
-      if (index_ == next_index_) {
-        empty_element_parsed_guard_(builder_, builder_.getCurrentOffset(), "root");
+      int next_pos_ = current_position_(builder_);
+      if (pos_ == next_pos_) {
+        empty_element_parsed_guard_(builder_, "root");
         break;
       }
-      index_ = next_index_;
+      pos_ = next_pos_;
     }
     return true;
   }

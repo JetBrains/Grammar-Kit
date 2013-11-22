@@ -123,13 +123,11 @@ public class Autopin implements PsiParser {
     if (!recursion_guard_(builder_, level_, "drop_table_statement")) return false;
     if (!nextTokenIs(builder_, DROP)) return false;
     boolean result_ = false;
-    boolean pinned_ = false;
-    Marker marker_ = enter_section_(builder_, level_, _NONE_, null);
+    Marker marker_ = enter_section_(builder_);
     result_ = consumeTokens(builder_, 0, DROP, TABLE);
     result_ = result_ && parseReference(builder_, level_ + 1);
-    pinned_ = result_; // pin = .*_ref
-    exit_section_(builder_, level_, marker_, DROP_TABLE_STATEMENT, result_, pinned_, null);
-    return result_ || pinned_;
+    exit_section_(builder_, marker_, DROP_TABLE_STATEMENT, result_);
+    return result_;
   }
 
   /* ********************************************************** */

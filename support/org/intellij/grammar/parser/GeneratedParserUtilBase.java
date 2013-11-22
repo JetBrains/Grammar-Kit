@@ -101,7 +101,7 @@ public class GeneratedParserUtilBase {
 
   public static boolean empty_element_parsed_guard_(PsiBuilder builder_, String funcName_, int prev_position_) {
     if (prev_position_ == current_position_(builder_)) {
-      builder_.error("Empty element parsed in '" + funcName_ +"' at offset " + builder_.getCurrentOffset());
+      builder_.error("Empty element parsed in '" + funcName_ + "' at offset " + builder_.getCurrentOffset());
       return false;
     }
     return true;

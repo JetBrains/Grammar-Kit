@@ -645,7 +645,7 @@ public class ParserGenerator {
     if (!alwaysTrue) {
       out("boolean result_ = " + (type == BNF_OP_ZEROMORE || type == BNF_OP_OPT || children.isEmpty()) + ";");
     }
-    boolean pinned = pinMatcher.active() && pinMatcher.matchesAny(children);
+    boolean pinned = pinMatcher.active() && pinMatcher.shouldGenerate(children);
     if (pinned) {
       out("boolean pinned_ = false;");
     }
@@ -718,7 +718,7 @@ public class ParserGenerator {
           skip[0]--; // we are inside already generated token sequence
           if (pinApplied && i == p + 1) p++; // shift pinned index as we skip
         }
-        if (!pinApplied && pinMatcher.matches(i, child)) {
+        if (pinned && !pinApplied && pinMatcher.matches(i, child)) {
           pinApplied = true;
           p = i;
           out("pinned_ = result_; // pin = " + pinMatcher.pinValue);

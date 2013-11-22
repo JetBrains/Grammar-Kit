@@ -424,8 +424,9 @@ public class ParserGeneratorUtil {
       return  i == pinIndex - 1 || pinPattern != null && pinPattern.matcher(child.getText()).matches();
     }
 
-    public boolean matchesAny(List<BnfExpression> children) {
-      for (int i = 0; i < children.size(); i++) {
+    public boolean shouldGenerate(List<BnfExpression> children) {
+      // do not check last expression, last item pin is trivial
+      for (int i = 0, size = children.size(); i < size - 1; i++) {
         if (matches(i, children.get(i))) return true;
       }
       return false;

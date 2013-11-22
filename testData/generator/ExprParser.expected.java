@@ -135,12 +135,8 @@ public class ExpressionParser implements PsiParser {
     int pos_ = current_position_(builder_);
     while (true) {
       if (!arg_list_1_0_1_0(builder_, level_ + 1)) break;
-      int next_pos_ = current_position_(builder_);
-      if (pos_ == next_pos_) {
-        empty_element_parsed_guard_(builder_, "arg_list_1_0_1");
-        break;
-      }
-      pos_ = next_pos_;
+      if (!empty_element_parsed_guard_(builder_, "arg_list_1_0_1", pos_)) break;
+      pos_ = current_position_(builder_);
     }
     return true;
   }
@@ -213,12 +209,8 @@ public class ExpressionParser implements PsiParser {
     int pos_ = current_position_(builder_);
     while (true) {
       if (!element_and_separator(builder_, level_ + 1)) break;
-      int next_pos_ = current_position_(builder_);
-      if (pos_ == next_pos_) {
-        empty_element_parsed_guard_(builder_, "root");
-        break;
-      }
-      pos_ = next_pos_;
+      if (!empty_element_parsed_guard_(builder_, "root", pos_)) break;
+      pos_ = current_position_(builder_);
     }
     return true;
   }

@@ -194,12 +194,8 @@ public class Autopin implements PsiParser {
     int pos_ = current_position_(builder_);
     while (true) {
       if (!statement(builder_, level_ + 1)) break;
-      int next_pos_ = current_position_(builder_);
-      if (pos_ == next_pos_) {
-        empty_element_parsed_guard_(builder_, "root");
-        break;
-      }
-      pos_ = next_pos_;
+      if (!empty_element_parsed_guard_(builder_, "root", pos_)) break;
+      pos_ = current_position_(builder_);
     }
     return true;
   }

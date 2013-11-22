@@ -264,12 +264,8 @@ public class JFlexParser implements PsiParser {
     int pos_ = current_position_(builder_);
     while (true) {
       if (!declarations_section_1_0(builder_, level_ + 1)) break;
-      int next_pos_ = current_position_(builder_);
-      if (pos_ == next_pos_) {
-        empty_element_parsed_guard_(builder_, "declarations_section_1");
-        break;
-      }
-      pos_ = next_pos_;
+      if (!empty_element_parsed_guard_(builder_, "declarations_section_1", pos_)) break;
+      pos_ = current_position_(builder_);
     }
     return true;
   }
@@ -414,12 +410,8 @@ public class JFlexParser implements PsiParser {
     int pos_ = current_position_(builder_);
     while (true) {
       if (!java_fqn_1_0(builder_, level_ + 1)) break;
-      int next_pos_ = current_position_(builder_);
-      if (pos_ == next_pos_) {
-        empty_element_parsed_guard_(builder_, "java_fqn_1");
-        break;
-      }
-      pos_ = next_pos_;
+      if (!empty_element_parsed_guard_(builder_, "java_fqn_1", pos_)) break;
+      pos_ = current_position_(builder_);
     }
     return true;
   }
@@ -466,12 +458,8 @@ public class JFlexParser implements PsiParser {
     int pos_ = current_position_(builder_);
     while (true) {
       if (!java_fqn_list_0_1_0(builder_, level_ + 1)) break;
-      int next_pos_ = current_position_(builder_);
-      if (pos_ == next_pos_) {
-        empty_element_parsed_guard_(builder_, "java_fqn_list_0_1");
-        break;
-      }
-      pos_ = next_pos_;
+      if (!empty_element_parsed_guard_(builder_, "java_fqn_list_0_1", pos_)) break;
+      pos_ = current_position_(builder_);
     }
     return true;
   }
@@ -517,12 +505,8 @@ public class JFlexParser implements PsiParser {
     int pos_ = current_position_(builder_);
     while (result_) {
       if (!rule(builder_, level_ + 1)) break;
-      int next_pos_ = current_position_(builder_);
-      if (pos_ == next_pos_) {
-        empty_element_parsed_guard_(builder_, "lexical_rules_section_1");
-        break;
-      }
-      pos_ = next_pos_;
+      if (!empty_element_parsed_guard_(builder_, "lexical_rules_section_1", pos_)) break;
+      pos_ = current_position_(builder_);
     }
     exit_section_(builder_, marker_, null, result_);
     return result_;
@@ -1504,12 +1488,8 @@ public class JFlexParser implements PsiParser {
     int pos_ = current_position_(builder_);
     while (result_) {
       if (!rule(builder_, level_ + 1)) break;
-      int next_pos_ = current_position_(builder_);
-      if (pos_ == next_pos_) {
-        empty_element_parsed_guard_(builder_, "rule_group_2");
-        break;
-      }
-      pos_ = next_pos_;
+      if (!empty_element_parsed_guard_(builder_, "rule_group_2", pos_)) break;
+      pos_ = current_position_(builder_);
     }
     exit_section_(builder_, marker_, null, result_);
     return result_;
@@ -1765,12 +1745,8 @@ public class JFlexParser implements PsiParser {
     int pos_ = current_position_(builder_);
     while (true) {
       if (!state_declaration_2_0(builder_, level_ + 1)) break;
-      int next_pos_ = current_position_(builder_);
-      if (pos_ == next_pos_) {
-        empty_element_parsed_guard_(builder_, "state_declaration_2");
-        break;
-      }
-      pos_ = next_pos_;
+      if (!empty_element_parsed_guard_(builder_, "state_declaration_2", pos_)) break;
+      pos_ = current_position_(builder_);
     }
     return true;
   }
@@ -1867,12 +1843,8 @@ public class JFlexParser implements PsiParser {
     int pos_ = current_position_(builder_);
     while (true) {
       if (!state_list_2_0(builder_, level_ + 1)) break;
-      int next_pos_ = current_position_(builder_);
-      if (pos_ == next_pos_) {
-        empty_element_parsed_guard_(builder_, "state_list_2");
-        break;
-      }
-      pos_ = next_pos_;
+      if (!empty_element_parsed_guard_(builder_, "state_list_2", pos_)) break;
+      pos_ = current_position_(builder_);
     }
     return true;
   }
@@ -2105,12 +2077,8 @@ public class JFlexParser implements PsiParser {
     int pos_ = current_position_(builder_);
     while (true) {
       if (!class_expression_3_0(builder_, level_ + 1)) break;
-      int next_pos_ = current_position_(builder_);
-      if (pos_ == next_pos_) {
-        empty_element_parsed_guard_(builder_, "class_expression_3");
-        break;
-      }
-      pos_ = next_pos_;
+      if (!empty_element_parsed_guard_(builder_, "class_expression_3", pos_)) break;
+      pos_ = current_position_(builder_);
     }
     return true;
   }

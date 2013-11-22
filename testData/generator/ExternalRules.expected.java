@@ -59,12 +59,8 @@ public class ExternalRules implements PsiParser {
     int pos_ = current_position_(builder_);
     while (true) {
       if (!comma_list_1_0(builder_, level_ + 1, param)) break;
-      int next_pos_ = current_position_(builder_);
-      if (pos_ == next_pos_) {
-        empty_element_parsed_guard_(builder_, "comma_list_1");
-        break;
-      }
-      pos_ = next_pos_;
+      if (!empty_element_parsed_guard_(builder_, "comma_list_1", pos_)) break;
+      pos_ = current_position_(builder_);
     }
     return true;
   }
@@ -99,12 +95,8 @@ public class ExternalRules implements PsiParser {
     int pos_ = current_position_(builder_);
     while (true) {
       if (!comma_list_pinned_2_0(builder_, level_ + 1, param)) break;
-      int next_pos_ = current_position_(builder_);
-      if (pos_ == next_pos_) {
-        empty_element_parsed_guard_(builder_, "comma_list_pinned_2");
-        break;
-      }
-      pos_ = next_pos_;
+      if (!empty_element_parsed_guard_(builder_, "comma_list_pinned_2", pos_)) break;
+      pos_ = current_position_(builder_);
     }
     return true;
   }
@@ -170,12 +162,8 @@ public class ExternalRules implements PsiParser {
     int pos_ = current_position_(builder_);
     while (true) {
       if (!list_of_lists_2_0(builder_, level_ + 1, param)) break;
-      int next_pos_ = current_position_(builder_);
-      if (pos_ == next_pos_) {
-        empty_element_parsed_guard_(builder_, "list_of_lists_2");
-        break;
-      }
-      pos_ = next_pos_;
+      if (!empty_element_parsed_guard_(builder_, "list_of_lists_2", pos_)) break;
+      pos_ = current_position_(builder_);
     }
     return true;
   }

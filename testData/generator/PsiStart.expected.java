@@ -100,12 +100,8 @@ public class GeneratedParser implements PsiParser {
     int pos_ = current_position_(builder_);
     while (true) {
       if (!list_2_0(builder_, level_ + 1)) break;
-      int next_pos_ = current_position_(builder_);
-      if (pos_ == next_pos_) {
-        empty_element_parsed_guard_(builder_, "list_2");
-        break;
-      }
-      pos_ = next_pos_;
+      if (!empty_element_parsed_guard_(builder_, "list_2", pos_)) break;
+      pos_ = current_position_(builder_);
     }
     return true;
   }
@@ -141,12 +137,8 @@ public class GeneratedParser implements PsiParser {
     int pos_ = current_position_(builder_);
     while (true) {
       if (!map_2_0(builder_, level_ + 1)) break;
-      int next_pos_ = current_position_(builder_);
-      if (pos_ == next_pos_) {
-        empty_element_parsed_guard_(builder_, "map_2");
-        break;
-      }
-      pos_ = next_pos_;
+      if (!empty_element_parsed_guard_(builder_, "map_2", pos_)) break;
+      pos_ = current_position_(builder_);
     }
     return true;
   }

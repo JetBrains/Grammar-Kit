@@ -295,12 +295,8 @@ public class GrammarParser implements PsiParser {
     int pos_ = current_position_(builder_);
     while (true) {
       if (!attr(builder_, level_ + 1)) break;
-      int next_pos_ = current_position_(builder_);
-      if (pos_ == next_pos_) {
-        empty_element_parsed_guard_(builder_, "attrs_1");
-        break;
-      }
-      pos_ = next_pos_;
+      if (!empty_element_parsed_guard_(builder_, "attrs_1", pos_)) break;
+      pos_ = current_position_(builder_);
     }
     return true;
   }
@@ -316,12 +312,8 @@ public class GrammarParser implements PsiParser {
     int pos_ = current_position_(builder_);
     while (result_) {
       if (!choice_0(builder_, level_ + 1)) break;
-      int next_pos_ = current_position_(builder_);
-      if (pos_ == next_pos_) {
-        empty_element_parsed_guard_(builder_, "choice");
-        break;
-      }
-      pos_ = next_pos_;
+      if (!empty_element_parsed_guard_(builder_, "choice", pos_)) break;
+      pos_ = current_position_(builder_);
     }
     exit_section_(builder_, level_, marker_, BNF_CHOICE, result_, false, null);
     return result_;
@@ -382,12 +374,8 @@ public class GrammarParser implements PsiParser {
     int pos_ = current_position_(builder_);
     while (true) {
       if (!option(builder_, level_ + 1)) break;
-      int next_pos_ = current_position_(builder_);
-      if (pos_ == next_pos_) {
-        empty_element_parsed_guard_(builder_, "external_expression_2");
-        break;
-      }
-      pos_ = next_pos_;
+      if (!empty_element_parsed_guard_(builder_, "external_expression_2", pos_)) break;
+      pos_ = current_position_(builder_);
     }
     return true;
   }
@@ -768,12 +756,8 @@ public class GrammarParser implements PsiParser {
     int pos_ = current_position_(builder_);
     while (true) {
       if (!modifier(builder_, level_ + 1)) break;
-      int next_pos_ = current_position_(builder_);
-      if (pos_ == next_pos_) {
-        empty_element_parsed_guard_(builder_, "rule_start_0");
-        break;
-      }
-      pos_ = next_pos_;
+      if (!empty_element_parsed_guard_(builder_, "rule_start_0", pos_)) break;
+      pos_ = current_position_(builder_);
     }
     return true;
   }
@@ -786,12 +770,8 @@ public class GrammarParser implements PsiParser {
     int pos_ = current_position_(builder_);
     while (true) {
       if (!option(builder_, level_ + 1)) break;
-      int next_pos_ = current_position_(builder_);
-      if (pos_ == next_pos_) {
-        empty_element_parsed_guard_(builder_, "sequence");
-        break;
-      }
-      pos_ = next_pos_;
+      if (!empty_element_parsed_guard_(builder_, "sequence", pos_)) break;
+      pos_ = current_position_(builder_);
     }
     exit_section_(builder_, level_, marker_, BNF_SEQUENCE, true, false, sequence_recover_parser_);
     return true;
@@ -889,12 +869,8 @@ public class GrammarParser implements PsiParser {
     int pos_ = current_position_(builder_);
     while (true) {
       if (!modifier(builder_, level_ + 1)) break;
-      int next_pos_ = current_position_(builder_);
-      if (pos_ == next_pos_) {
-        empty_element_parsed_guard_(builder_, "simple_0_0_0_0");
-        break;
-      }
-      pos_ = next_pos_;
+      if (!empty_element_parsed_guard_(builder_, "simple_0_0_0_0", pos_)) break;
+      pos_ = current_position_(builder_);
     }
     return true;
   }
@@ -933,12 +909,8 @@ public class GrammarParser implements PsiParser {
     int pos_ = current_position_(builder_);
     while (true) {
       if (!list_entry(builder_, level_ + 1)) break;
-      int next_pos_ = current_position_(builder_);
-      if (pos_ == next_pos_) {
-        empty_element_parsed_guard_(builder_, "value_list_1");
-        break;
-      }
-      pos_ = next_pos_;
+      if (!empty_element_parsed_guard_(builder_, "value_list_1", pos_)) break;
+      pos_ = current_position_(builder_);
     }
     return true;
   }

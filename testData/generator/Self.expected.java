@@ -201,12 +201,8 @@ public class Self implements PsiParser {
     int pos_ = current_position_(builder_);
     while (true) {
       if (!attr(builder_, level_ + 1)) break;
-      int next_pos_ = current_position_(builder_);
-      if (pos_ == next_pos_) {
-        empty_element_parsed_guard_(builder_, "attrs_1");
-        break;
-      }
-      pos_ = next_pos_;
+      if (!empty_element_parsed_guard_(builder_, "attrs_1", pos_)) break;
+      pos_ = current_position_(builder_);
     }
     return true;
   }
@@ -242,12 +238,8 @@ public class Self implements PsiParser {
     int pos_ = current_position_(builder_);
     while (true) {
       if (!choice_0_2_0(builder_, level_ + 1)) break;
-      int next_pos_ = current_position_(builder_);
-      if (pos_ == next_pos_) {
-        empty_element_parsed_guard_(builder_, "choice_0_2");
-        break;
-      }
-      pos_ = next_pos_;
+      if (!empty_element_parsed_guard_(builder_, "choice_0_2", pos_)) break;
+      pos_ = current_position_(builder_);
     }
     return true;
   }
@@ -280,12 +272,8 @@ public class Self implements PsiParser {
     int pos_ = current_position_(builder_);
     while (true) {
       if (!choice_tail(builder_, level_ + 1)) break;
-      int next_pos_ = current_position_(builder_);
-      if (pos_ == next_pos_) {
-        empty_element_parsed_guard_(builder_, "choice_1_1");
-        break;
-      }
-      pos_ = next_pos_;
+      if (!empty_element_parsed_guard_(builder_, "choice_1_1", pos_)) break;
+      pos_ = current_position_(builder_);
     }
     return true;
   }
@@ -322,12 +310,8 @@ public class Self implements PsiParser {
     int pos_ = current_position_(builder_);
     while (true) {
       if (!grammar_0(builder_, level_ + 1)) break;
-      int next_pos_ = current_position_(builder_);
-      if (pos_ == next_pos_) {
-        empty_element_parsed_guard_(builder_, "grammar");
-        break;
-      }
-      pos_ = next_pos_;
+      if (!empty_element_parsed_guard_(builder_, "grammar", pos_)) break;
+      pos_ = current_position_(builder_);
     }
     return true;
   }
@@ -514,12 +498,8 @@ public class Self implements PsiParser {
     int pos_ = current_position_(builder_);
     while (true) {
       if (!modifier(builder_, level_ + 1)) break;
-      int next_pos_ = current_position_(builder_);
-      if (pos_ == next_pos_) {
-        empty_element_parsed_guard_(builder_, "rule_0");
-        break;
-      }
-      pos_ = next_pos_;
+      if (!empty_element_parsed_guard_(builder_, "rule_0", pos_)) break;
+      pos_ = current_position_(builder_);
     }
     return true;
   }
@@ -559,12 +539,8 @@ public class Self implements PsiParser {
     int pos_ = current_position_(builder_);
     while (result_) {
       if (!option(builder_, level_ + 1)) break;
-      int next_pos_ = current_position_(builder_);
-      if (pos_ == next_pos_) {
-        empty_element_parsed_guard_(builder_, "sequence");
-        break;
-      }
-      pos_ = next_pos_;
+      if (!empty_element_parsed_guard_(builder_, "sequence", pos_)) break;
+      pos_ = current_position_(builder_);
     }
     exit_section_(builder_, level_, marker_, BNF_SEQUENCE, result_, false, null);
     return result_;
@@ -622,12 +598,8 @@ public class Self implements PsiParser {
     int pos_ = current_position_(builder_);
     while (true) {
       if (!modifier(builder_, level_ + 1)) break;
-      int next_pos_ = current_position_(builder_);
-      if (pos_ == next_pos_) {
-        empty_element_parsed_guard_(builder_, "simple_0_0_0_0");
-        break;
-      }
-      pos_ = next_pos_;
+      if (!empty_element_parsed_guard_(builder_, "simple_0_0_0_0", pos_)) break;
+      pos_ = current_position_(builder_);
     }
     return true;
   }

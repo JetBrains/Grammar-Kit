@@ -281,16 +281,12 @@ public class LivePreviewParser implements PsiParser {
         if (type == BNF_OP_ONEMORE) {
           result_ = generateNodeCall(builder, level, rule, child, getNextName(funcName, i), externalArguments);
         }
-        int offset_ = builder.getCurrentOffset();
+        int pos = current_position_(builder);
         //noinspection LoopConditionNotUpdatedInsideLoop
         while (alwaysTrue || result_) {
           if (!generateNodeCall(builder, level, rule, child, getNextName(funcName, i), externalArguments)) break;
-          int next_offset_ = builder.getCurrentOffset();
-          if (offset_ == next_offset_) {
-            empty_element_parsed_guard_(builder, funcName);
-            break;
-          }
-          offset_ = next_offset_;
+          if (!empty_element_parsed_guard_(builder, funcName, pos)) break;
+          pos = current_position_(builder);
         }
       }
       else if (type == BNF_OP_AND) {
@@ -636,7 +632,7 @@ public class LivePreviewParser implements PsiParser {
     if (!recursion_guard_(builder, level, methodName)) return false;
     PsiBuilder.Marker marker_ = null;
     boolean result_ = true;
-    int offset_ = builder.getCurrentOffset();
+    int pos = current_position_(builder);
 
     main: while (true) {
       PsiBuilder.Marker left_marker_ = (PsiBuilder.Marker)builder.getLatestDoneMarker();
@@ -669,12 +665,8 @@ public class LivePreviewParser implements PsiParser {
           marker_.drop();
           left_marker_.precede().done(elementType);
           marker_ = null;
-          int next_offset_ = builder.getCurrentOffset();
-          if (offset_ == next_offset_) {
-            empty_element_parsed_guard_(builder, info.rootRule.getName());
-            break main;
-          }
-          offset_ = next_offset_;
+          if (!empty_element_parsed_guard_(builder, info.rootRule.getName(), pos)) break main;
+          pos = current_position_(builder);
           continue main;
         }
       }

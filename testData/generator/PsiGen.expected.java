@@ -81,12 +81,8 @@ public class PsiGen implements PsiParser {
     int pos_ = current_position_(builder_);
     while (true) {
       if (!plus_expr(builder_, level_ + 1)) break;
-      int next_pos_ = current_position_(builder_);
-      if (pos_ == next_pos_) {
-        empty_element_parsed_guard_(builder_, "a_expr_1");
-        break;
-      }
-      pos_ = next_pos_;
+      if (!empty_element_parsed_guard_(builder_, "a_expr_1", pos_)) break;
+      pos_ = current_position_(builder_);
     }
     return true;
   }
@@ -110,12 +106,8 @@ public class PsiGen implements PsiParser {
     int pos_ = current_position_(builder_);
     while (true) {
       if (!mul_expr(builder_, level_ + 1)) break;
-      int next_pos_ = current_position_(builder_);
-      if (pos_ == next_pos_) {
-        empty_element_parsed_guard_(builder_, "b_expr_1");
-        break;
-      }
-      pos_ = next_pos_;
+      if (!empty_element_parsed_guard_(builder_, "b_expr_1", pos_)) break;
+      pos_ = current_position_(builder_);
     }
     return true;
   }
@@ -140,12 +132,8 @@ public class PsiGen implements PsiParser {
     int pos_ = current_position_(builder_);
     while (true) {
       if (!expr_1_0(builder_, level_ + 1)) break;
-      int next_pos_ = current_position_(builder_);
-      if (pos_ == next_pos_) {
-        empty_element_parsed_guard_(builder_, "expr_1");
-        break;
-      }
-      pos_ = next_pos_;
+      if (!empty_element_parsed_guard_(builder_, "expr_1", pos_)) break;
+      pos_ = current_position_(builder_);
     }
     return true;
   }
@@ -249,12 +237,8 @@ public class PsiGen implements PsiParser {
     int pos_ = current_position_(builder_);
     while (result_) {
       if (!p.parse(builder_, level_)) break;
-      int next_pos_ = current_position_(builder_);
-      if (pos_ == next_pos_) {
-        empty_element_parsed_guard_(builder_, "listOf");
-        break;
-      }
-      pos_ = next_pos_;
+      if (!empty_element_parsed_guard_(builder_, "listOf", pos_)) break;
+      pos_ = current_position_(builder_);
     }
     exit_section_(builder_, marker_, null, result_);
     return result_;
@@ -368,12 +352,8 @@ public class PsiGen2 {
     int pos_ = current_position_(builder_);
     while (result_) {
       if (!p.parse(builder_, level_)) break;
-      int next_pos_ = current_position_(builder_);
-      if (pos_ == next_pos_) {
-        empty_element_parsed_guard_(builder_, "blockOf");
-        break;
-      }
-      pos_ = next_pos_;
+      if (!empty_element_parsed_guard_(builder_, "blockOf", pos_)) break;
+      pos_ = current_position_(builder_);
     }
     exit_section_(builder_, marker_, BLOCK_OF, result_);
     return result_;
@@ -471,12 +451,8 @@ public class PsiGen2 {
     int pos_ = current_position_(builder_);
     while (true) {
       if (!qref_expr(builder_, level_ + 1)) break;
-      int next_pos_ = current_position_(builder_);
-      if (pos_ == next_pos_) {
-        empty_element_parsed_guard_(builder_, "reference_1");
-        break;
-      }
-      pos_ = next_pos_;
+      if (!empty_element_parsed_guard_(builder_, "reference_1", pos_)) break;
+      pos_ = current_position_(builder_);
     }
     return true;
   }
@@ -535,12 +511,8 @@ public class PsiGen2 {
     int pos_ = current_position_(builder_);
     while (true) {
       if (!some_expr_2_0(builder_, level_ + 1)) break;
-      int next_pos_ = current_position_(builder_);
-      if (pos_ == next_pos_) {
-        empty_element_parsed_guard_(builder_, "some_expr_2");
-        break;
-      }
-      pos_ = next_pos_;
+      if (!empty_element_parsed_guard_(builder_, "some_expr_2", pos_)) break;
+      pos_ = current_position_(builder_);
     }
     return true;
   }
@@ -630,12 +602,8 @@ public class PsiGenFixes {
     int pos_ = current_position_(builder_);
     while (true) {
       if (!LeftShadow(builder_, level_ + 1)) break;
-      int next_pos_ = current_position_(builder_);
-      if (pos_ == next_pos_) {
-        empty_element_parsed_guard_(builder_, "LeftShadowTest_1");
-        break;
-      }
-      pos_ = next_pos_;
+      if (!empty_element_parsed_guard_(builder_, "LeftShadowTest_1", pos_)) break;
+      pos_ = current_position_(builder_);
     }
     return true;
   }

@@ -30,7 +30,9 @@ Recent changes
 1.1.5
 
 * Historical typo fixed: _recoverUntil_ attribute renamed to _recoverWhile_ (indeed it always meant _while_)
-* Misc: GeneratedParserUtilBase cleanup and OOM protection, recoverable rule highlighting
+* Editor: recoverable rule highlighting, help improved for _pin_ and _recoverWhile_
+* GPUB: cleanup and OOM protection
+* Generator: parser size reduced, fragment parsing fixed, empty tokens support (lexer-based preprocessors)
 
 
 Quick documentation:

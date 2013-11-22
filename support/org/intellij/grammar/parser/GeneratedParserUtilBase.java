@@ -462,7 +462,9 @@ public class GeneratedParserUtilBase {
       if ((frame.modifiers & _COLLAPSE_) != 0) {
         LighterASTNode last = result || pinned? builder_.getLatestDoneMarker() : null;
         if (last != null && last.getStartOffset() == frame.offset && state.typeExtends(last.getTokenType(), elementType)) {
-          marker.drop();
+          IElementType resultType = last.getTokenType();
+          ((PsiBuilder.Marker)last).drop();
+          marker.done(resultType);
           return;
         }
       }
@@ -726,14 +728,13 @@ public class GeneratedParserUtilBase {
     }
 
     boolean typeExtends(IElementType child_, IElementType parent_) {
-      if (extendsSets == null) {
-        return child_ == parent_ ||
-               altExtendsChecker != null && altExtendsChecker.process(child_, parent_);
+      if (child_ == parent_) return true;
+      if (extendsSets != null) {
+        for (TokenSet set : extendsSets) {
+          if (set.contains(child_) && set.contains(parent_)) return true;
+        }
       }
-      for (TokenSet set : extendsSets) {
-        if (set.contains(child_) && set.contains(parent_)) return true;
-      }
-      return false;
+      return altExtendsChecker != null && altExtendsChecker.process(child_, parent_);
     }
   }
 
@@ -930,6 +931,7 @@ public class GeneratedParserUtilBase {
       super(DUMMY_BLOCK);
     }
 
+    @NotNull
     @Override
     public PsiReference[] getReferences() {
       return PsiReference.EMPTY_ARRAY;
@@ -953,8 +955,9 @@ public class GeneratedParserUtilBase {
 
     @Override
     public void ensureCapacity(int minCapacity) {
-      if (minCapacity > MAX_VARIANTS_SIZE) {
-        removeRange(MAX_VARIANTS_SIZE / 4, size() - MAX_VARIANTS_SIZE / 4);
+      int size = size();
+      if (size >= MAX_VARIANTS_SIZE) {
+        removeRange(MAX_VARIANTS_SIZE / 4, size - MAX_VARIANTS_SIZE / 4);
       }
       super.ensureCapacity(minCapacity);
     }

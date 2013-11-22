@@ -19,68 +19,67 @@ public class ExpressionParser implements PsiParser {
   public static final Logger LOG_ = Logger.getInstance("org.intellij.grammar.expression.ExpressionParser");
 
   public ASTNode parse(IElementType root_, PsiBuilder builder_) {
-    int level_ = 0;
     boolean result_;
     builder_ = adapt_builder_(root_, builder_, this, EXTENDS_SETS_);
+    Marker marker_ = enter_section_(builder_, 0, _COLLAPSE_, null);
     if (root_ == ARG_LIST) {
-      result_ = arg_list(builder_, level_ + 1);
+      result_ = arg_list(builder_, 0);
     }
     else if (root_ == ASSIGN_EXPR) {
-      result_ = expr(builder_, level_ + 1, -1);
+      result_ = expr(builder_, 0, -1);
     }
     else if (root_ == CALL_EXPR) {
-      result_ = expr(builder_, level_ + 1, 6);
+      result_ = expr(builder_, 0, 6);
     }
     else if (root_ == CONDITIONAL_EXPR) {
-      result_ = expr(builder_, level_ + 1, 0);
+      result_ = expr(builder_, 0, 0);
     }
     else if (root_ == DIV_EXPR) {
-      result_ = expr(builder_, level_ + 1, 2);
+      result_ = expr(builder_, 0, 2);
     }
     else if (root_ == EXP_EXPR) {
-      result_ = expr(builder_, level_ + 1, 4);
+      result_ = expr(builder_, 0, 4);
     }
     else if (root_ == EXPR) {
-      result_ = expr(builder_, level_ + 1, -1);
+      result_ = expr(builder_, 0, -1);
     }
     else if (root_ == FACTORIAL_EXPR) {
-      result_ = expr(builder_, level_ + 1, 5);
+      result_ = expr(builder_, 0, 5);
     }
     else if (root_ == IDENTIFIER) {
-      result_ = identifier(builder_, level_ + 1);
+      result_ = identifier(builder_, 0);
     }
     else if (root_ == LITERAL_EXPR) {
-      result_ = literal_expr(builder_, level_ + 1);
+      result_ = literal_expr(builder_, 0);
     }
     else if (root_ == MINUS_EXPR) {
-      result_ = expr(builder_, level_ + 1, 1);
+      result_ = expr(builder_, 0, 1);
     }
     else if (root_ == MUL_EXPR) {
-      result_ = expr(builder_, level_ + 1, 2);
+      result_ = expr(builder_, 0, 2);
     }
     else if (root_ == PAREN_EXPR) {
-      result_ = paren_expr(builder_, level_ + 1);
+      result_ = paren_expr(builder_, 0);
     }
     else if (root_ == PLUS_EXPR) {
-      result_ = expr(builder_, level_ + 1, 1);
+      result_ = expr(builder_, 0, 1);
     }
     else if (root_ == REF_EXPR) {
-      result_ = expr(builder_, level_ + 1, 7);
+      result_ = expr(builder_, 0, 7);
     }
     else if (root_ == SPECIAL_EXPR) {
-      result_ = special_expr(builder_, level_ + 1);
+      result_ = special_expr(builder_, 0);
     }
     else if (root_ == UNARY_MIN_EXPR) {
-      result_ = unary_min_expr(builder_, level_ + 1);
+      result_ = unary_min_expr(builder_, 0);
     }
     else if (root_ == UNARY_PLUS_EXPR) {
-      result_ = unary_plus_expr(builder_, level_ + 1);
+      result_ = unary_plus_expr(builder_, 0);
     }
     else {
-      Marker marker_ = enter_section_(builder_, level_, _NONE_, null);
-      result_ = parse_root_(root_, builder_, level_);
-      exit_section_(builder_, level_, marker_, root_, result_, true, TOKEN_ADVANCER);
+      result_ = parse_root_(root_, builder_, 0);
     }
+    exit_section_(builder_, 0, marker_, root_, result_, true, TRUE_CONDITION);
     return builder_.getTreeBuilt();
   }
 
@@ -133,15 +132,15 @@ public class ExpressionParser implements PsiParser {
   // (',' expr) *
   private static boolean arg_list_1_0_1(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "arg_list_1_0_1")) return false;
-    int offset_ = builder_.getCurrentOffset();
+    int index_ = builder_.rawTokenIndex();
     while (true) {
       if (!arg_list_1_0_1_0(builder_, level_ + 1)) break;
-      int next_offset_ = builder_.getCurrentOffset();
-      if (offset_ == next_offset_) {
-        empty_element_parsed_guard_(builder_, offset_, "arg_list_1_0_1");
+      int next_index_ = builder_.rawTokenIndex();
+      if (index_ == next_index_) {
+        empty_element_parsed_guard_(builder_, builder_.getCurrentOffset(), "arg_list_1_0_1");
         break;
       }
-      offset_ = next_offset_;
+      index_ = next_index_;
     }
     return true;
   }
@@ -211,15 +210,15 @@ public class ExpressionParser implements PsiParser {
   // element_and_separator *
   static boolean root(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "root")) return false;
-    int offset_ = builder_.getCurrentOffset();
+    int index_ = builder_.rawTokenIndex();
     while (true) {
       if (!element_and_separator(builder_, level_ + 1)) break;
-      int next_offset_ = builder_.getCurrentOffset();
-      if (offset_ == next_offset_) {
-        empty_element_parsed_guard_(builder_, offset_, "root");
+      int next_index_ = builder_.rawTokenIndex();
+      if (index_ == next_index_) {
+        empty_element_parsed_guard_(builder_, builder_.getCurrentOffset(), "root");
         break;
       }
-      offset_ = next_offset_;
+      index_ = next_index_;
     }
     return true;
   }

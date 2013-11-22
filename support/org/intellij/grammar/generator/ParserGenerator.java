@@ -428,9 +428,9 @@ public class ParserGenerator {
 
   private void generateRootParserContent(Set<String> ownRuleNames) {
     out("public ASTNode parse(IElementType root_, PsiBuilder builder_) {");
-    out("int level_ = 0;");
     out("boolean result_;");
     out("builder_ = adapt_builder_(root_, builder_, this, "+(myRuleExtendsMap.isEmpty()? null : "EXTENDS_SETS_")+");");
+    out("Marker marker_ = enter_section_(builder_, 0, _COLLAPSE_, null);");
     boolean first = true;
     for (String ruleName : ownRuleNames) {
       BnfRule rule = myFile.getRule(ruleName);
@@ -439,23 +439,22 @@ public class ParserGenerator {
       String elementType = getElementType(rule);
       out((first ? "" : "else ") + "if (root_ == " + elementType + ") {");
       String nodeCall = generateNodeCall(rule, null, ruleName);
-      out("result_ = " + nodeCall + ";");
+      out("result_ = " + nodeCall.replace("level_ + 1", "0") + ";");
       out("}");
       if (first) first = false;
     }
     {
       if (!first) out("else {");
-      out("Marker marker_ = enter_section_(builder_, level_, _NONE_, null);");
-      out("result_ = parse_root_(root_, builder_, level_);");
-      out("exit_section_(builder_, level_, marker_, root_, result_, true, TOKEN_ADVANCER);");
+      out("result_ = parse_root_(root_, builder_, 0);");
       if (!first) out("}");
     }
+    out("exit_section_(builder_, 0, marker_, root_, result_, true, TRUE_CONDITION);");
     out("return builder_.getTreeBuilt();");
     out("}");
     newLine();
     {
       BnfRule rootRule = myFile.getRule(myGrammarRoot);
-      String nodeCall = generateNodeCall(rootRule, null, rootRule.getName());
+      String nodeCall = generateNodeCall(rootRule, null, myGrammarRoot);
       out("protected boolean parse_root_(final IElementType root_, final PsiBuilder builder_, final int level_) {");
       out("return " + nodeCall + ";");
       out("}");
@@ -732,15 +731,15 @@ public class ParserGenerator {
         if (type == BNF_OP_ONEMORE) {
           out("result_ = " + nodeCall + ";");
         }
-        out("int offset_ = builder_.getCurrentOffset();");
+        out("int index_ = builder_.rawTokenIndex();");
         out("while (" + (alwaysTrue ? "true" : "result_") + ") {");
         out("if (!" + nodeCall + ") break;");
-        out("int next_offset_ = builder_.getCurrentOffset();");
-        out("if (offset_ == next_offset_) {");
-        out("empty_element_parsed_guard_(builder_, offset_, \"" + funcName + "\");");
+        out("int next_index_ = builder_.rawTokenIndex();");
+        out("if (index_ == next_index_) {");
+        out("empty_element_parsed_guard_(builder_, builder_.getCurrentOffset(), \"" + funcName + "\");");
         out("break;");
         out("}");
-        out("offset_ = next_offset_;");
+        out("index_ = next_index_;");
         out("}");
       }
       else if (type == BNF_OP_AND) {

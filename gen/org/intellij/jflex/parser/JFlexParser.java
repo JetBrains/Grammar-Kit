@@ -32,83 +32,82 @@ public class JFlexParser implements PsiParser {
   public static final Logger LOG_ = Logger.getInstance("org.intellij.jflex.parser.JFlexParser");
 
   public ASTNode parse(IElementType root_, PsiBuilder builder_) {
-    int level_ = 0;
     boolean result_;
     builder_ = adapt_builder_(root_, builder_, this, EXTENDS_SETS_);
+    Marker marker_ = enter_section_(builder_, 0, _COLLAPSE_, null);
     if (root_ == FLEX_CHOICE_EXPRESSION) {
-      result_ = expression(builder_, level_ + 1, -1);
+      result_ = expression(builder_, 0, -1);
     }
     else if (root_ == FLEX_CLASS_EXPRESSION) {
-      result_ = class_expression(builder_, level_ + 1);
+      result_ = class_expression(builder_, 0);
     }
     else if (root_ == FLEX_DECLARATIONS_SECTION) {
-      result_ = declarations_section(builder_, level_ + 1);
+      result_ = declarations_section(builder_, 0);
     }
     else if (root_ == FLEX_EXPRESSION) {
-      result_ = expression(builder_, level_ + 1, -1);
+      result_ = expression(builder_, 0, -1);
     }
     else if (root_ == FLEX_JAVA_CODE) {
-      result_ = java_code(builder_, level_ + 1);
+      result_ = java_code(builder_, 0);
     }
     else if (root_ == FLEX_JAVA_FQN) {
-      result_ = java_fqn(builder_, level_ + 1);
+      result_ = java_fqn(builder_, 0);
     }
     else if (root_ == FLEX_LEXICAL_RULES_SECTION) {
-      result_ = lexical_rules_section(builder_, level_ + 1);
+      result_ = lexical_rules_section(builder_, 0);
     }
     else if (root_ == FLEX_LITERAL_EXPRESSION) {
-      result_ = literal_expression(builder_, level_ + 1);
+      result_ = literal_expression(builder_, 0);
     }
     else if (root_ == FLEX_LOOK_AHEAD) {
-      result_ = look_ahead(builder_, level_ + 1);
+      result_ = look_ahead(builder_, 0);
     }
     else if (root_ == FLEX_MACRO_DEFINITION) {
-      result_ = macro_definition(builder_, level_ + 1);
+      result_ = macro_definition(builder_, 0);
     }
     else if (root_ == FLEX_MACRO_REF_EXPRESSION) {
-      result_ = macro_ref_expression(builder_, level_ + 1);
+      result_ = macro_ref_expression(builder_, 0);
     }
     else if (root_ == FLEX_MACRO_REFERENCE) {
-      result_ = macro_reference(builder_, level_ + 1);
+      result_ = macro_reference(builder_, 0);
     }
     else if (root_ == FLEX_NOT_EXPRESSION) {
-      result_ = not_expression(builder_, level_ + 1);
+      result_ = not_expression(builder_, 0);
     }
     else if (root_ == FLEX_OPTION) {
-      result_ = option(builder_, level_ + 1);
+      result_ = option(builder_, 0);
     }
     else if (root_ == FLEX_PAREN_EXPRESSION) {
-      result_ = paren_expression(builder_, level_ + 1);
+      result_ = paren_expression(builder_, 0);
     }
     else if (root_ == FLEX_PREDEFINED_CLASS_EXPRESSION) {
-      result_ = predefined_class_expression(builder_, level_ + 1);
+      result_ = predefined_class_expression(builder_, 0);
     }
     else if (root_ == FLEX_QUANTIFIER_EXPRESSION) {
-      result_ = expression(builder_, level_ + 1, 3);
+      result_ = expression(builder_, 0, 3);
     }
     else if (root_ == FLEX_RULE) {
-      result_ = rule(builder_, level_ + 1);
+      result_ = rule(builder_, 0);
     }
     else if (root_ == FLEX_SEQUENCE_EXPRESSION) {
-      result_ = expression(builder_, level_ + 1, 0);
+      result_ = expression(builder_, 0, 0);
     }
     else if (root_ == FLEX_STATE_DECLARATION) {
-      result_ = state_declaration(builder_, level_ + 1);
+      result_ = state_declaration(builder_, 0);
     }
     else if (root_ == FLEX_STATE_DEFINITION) {
-      result_ = state_definition(builder_, level_ + 1);
+      result_ = state_definition(builder_, 0);
     }
     else if (root_ == FLEX_STATE_REFERENCE) {
-      result_ = state_reference(builder_, level_ + 1);
+      result_ = state_reference(builder_, 0);
     }
     else if (root_ == FLEX_USER_CODE_SECTION) {
-      result_ = user_code_section(builder_, level_ + 1);
+      result_ = user_code_section(builder_, 0);
     }
     else {
-      Marker marker_ = enter_section_(builder_, level_, _NONE_, null);
-      result_ = parse_root_(root_, builder_, level_);
-      exit_section_(builder_, level_, marker_, root_, result_, true, TOKEN_ADVANCER);
+      result_ = parse_root_(root_, builder_, 0);
     }
+    exit_section_(builder_, 0, marker_, root_, result_, true, TRUE_CONDITION);
     return builder_.getTreeBuilt();
   }
 
@@ -262,15 +261,15 @@ public class JFlexParser implements PsiParser {
   // (declaration) *
   private static boolean declarations_section_1(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "declarations_section_1")) return false;
-    int offset_ = builder_.getCurrentOffset();
+    int index_ = builder_.rawTokenIndex();
     while (true) {
       if (!declarations_section_1_0(builder_, level_ + 1)) break;
-      int next_offset_ = builder_.getCurrentOffset();
-      if (offset_ == next_offset_) {
-        empty_element_parsed_guard_(builder_, offset_, "declarations_section_1");
+      int next_index_ = builder_.rawTokenIndex();
+      if (index_ == next_index_) {
+        empty_element_parsed_guard_(builder_, builder_.getCurrentOffset(), "declarations_section_1");
         break;
       }
-      offset_ = next_offset_;
+      index_ = next_index_;
     }
     return true;
   }
@@ -412,15 +411,15 @@ public class JFlexParser implements PsiParser {
   // ( safe_dot id ) *
   private static boolean java_fqn_1(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "java_fqn_1")) return false;
-    int offset_ = builder_.getCurrentOffset();
+    int index_ = builder_.rawTokenIndex();
     while (true) {
       if (!java_fqn_1_0(builder_, level_ + 1)) break;
-      int next_offset_ = builder_.getCurrentOffset();
-      if (offset_ == next_offset_) {
-        empty_element_parsed_guard_(builder_, offset_, "java_fqn_1");
+      int next_index_ = builder_.rawTokenIndex();
+      if (index_ == next_index_) {
+        empty_element_parsed_guard_(builder_, builder_.getCurrentOffset(), "java_fqn_1");
         break;
       }
-      offset_ = next_offset_;
+      index_ = next_index_;
     }
     return true;
   }
@@ -464,15 +463,15 @@ public class JFlexParser implements PsiParser {
   // (',' java_fqn) *
   private static boolean java_fqn_list_0_1(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "java_fqn_list_0_1")) return false;
-    int offset_ = builder_.getCurrentOffset();
+    int index_ = builder_.rawTokenIndex();
     while (true) {
       if (!java_fqn_list_0_1_0(builder_, level_ + 1)) break;
-      int next_offset_ = builder_.getCurrentOffset();
-      if (offset_ == next_offset_) {
-        empty_element_parsed_guard_(builder_, offset_, "java_fqn_list_0_1");
+      int next_index_ = builder_.rawTokenIndex();
+      if (index_ == next_index_) {
+        empty_element_parsed_guard_(builder_, builder_.getCurrentOffset(), "java_fqn_list_0_1");
         break;
       }
-      offset_ = next_offset_;
+      index_ = next_index_;
     }
     return true;
   }
@@ -515,15 +514,15 @@ public class JFlexParser implements PsiParser {
     boolean result_ = false;
     Marker marker_ = enter_section_(builder_);
     result_ = rule(builder_, level_ + 1);
-    int offset_ = builder_.getCurrentOffset();
+    int index_ = builder_.rawTokenIndex();
     while (result_) {
       if (!rule(builder_, level_ + 1)) break;
-      int next_offset_ = builder_.getCurrentOffset();
-      if (offset_ == next_offset_) {
-        empty_element_parsed_guard_(builder_, offset_, "lexical_rules_section_1");
+      int next_index_ = builder_.rawTokenIndex();
+      if (index_ == next_index_) {
+        empty_element_parsed_guard_(builder_, builder_.getCurrentOffset(), "lexical_rules_section_1");
         break;
       }
-      offset_ = next_offset_;
+      index_ = next_index_;
     }
     exit_section_(builder_, marker_, null, result_);
     return result_;
@@ -1502,15 +1501,15 @@ public class JFlexParser implements PsiParser {
     boolean result_ = false;
     Marker marker_ = enter_section_(builder_);
     result_ = rule(builder_, level_ + 1);
-    int offset_ = builder_.getCurrentOffset();
+    int index_ = builder_.rawTokenIndex();
     while (result_) {
       if (!rule(builder_, level_ + 1)) break;
-      int next_offset_ = builder_.getCurrentOffset();
-      if (offset_ == next_offset_) {
-        empty_element_parsed_guard_(builder_, offset_, "rule_group_2");
+      int next_index_ = builder_.rawTokenIndex();
+      if (index_ == next_index_) {
+        empty_element_parsed_guard_(builder_, builder_.getCurrentOffset(), "rule_group_2");
         break;
       }
-      offset_ = next_offset_;
+      index_ = next_index_;
     }
     exit_section_(builder_, marker_, null, result_);
     return result_;
@@ -1763,15 +1762,15 @@ public class JFlexParser implements PsiParser {
   // ((','? !(id '=')) state_definition) *
   private static boolean state_declaration_2(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "state_declaration_2")) return false;
-    int offset_ = builder_.getCurrentOffset();
+    int index_ = builder_.rawTokenIndex();
     while (true) {
       if (!state_declaration_2_0(builder_, level_ + 1)) break;
-      int next_offset_ = builder_.getCurrentOffset();
-      if (offset_ == next_offset_) {
-        empty_element_parsed_guard_(builder_, offset_, "state_declaration_2");
+      int next_index_ = builder_.rawTokenIndex();
+      if (index_ == next_index_) {
+        empty_element_parsed_guard_(builder_, builder_.getCurrentOffset(), "state_declaration_2");
         break;
       }
-      offset_ = next_offset_;
+      index_ = next_index_;
     }
     return true;
   }
@@ -1865,15 +1864,15 @@ public class JFlexParser implements PsiParser {
   // (',' state_reference) *
   private static boolean state_list_2(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "state_list_2")) return false;
-    int offset_ = builder_.getCurrentOffset();
+    int index_ = builder_.rawTokenIndex();
     while (true) {
       if (!state_list_2_0(builder_, level_ + 1)) break;
-      int next_offset_ = builder_.getCurrentOffset();
-      if (offset_ == next_offset_) {
-        empty_element_parsed_guard_(builder_, offset_, "state_list_2");
+      int next_index_ = builder_.rawTokenIndex();
+      if (index_ == next_index_) {
+        empty_element_parsed_guard_(builder_, builder_.getCurrentOffset(), "state_list_2");
         break;
       }
-      offset_ = next_offset_;
+      index_ = next_index_;
     }
     return true;
   }
@@ -2008,7 +2007,7 @@ public class JFlexParser implements PsiParser {
     Marker marker_ = enter_section_(builder_, level_, _NONE_, null);
     result_ = not_expression_0(builder_, level_ + 1);
     pinned_ = result_;
-    result_ = pinned_ && expression(builder_, level_, 3) && result_;
+    result_ = pinned_ && expression(builder_, level_, 3);
     exit_section_(builder_, level_, marker_, FLEX_NOT_EXPRESSION, result_, pinned_, null);
     return result_ || pinned_;
   }
@@ -2103,15 +2102,15 @@ public class JFlexParser implements PsiParser {
   // (string | predefined_class | class_char [ '-' class_char]) *
   private static boolean class_expression_3(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "class_expression_3")) return false;
-    int offset_ = builder_.getCurrentOffset();
+    int index_ = builder_.rawTokenIndex();
     while (true) {
       if (!class_expression_3_0(builder_, level_ + 1)) break;
-      int next_offset_ = builder_.getCurrentOffset();
-      if (offset_ == next_offset_) {
-        empty_element_parsed_guard_(builder_, offset_, "class_expression_3");
+      int next_index_ = builder_.rawTokenIndex();
+      if (index_ == next_index_) {
+        empty_element_parsed_guard_(builder_, builder_.getCurrentOffset(), "class_expression_3");
         break;
       }
-      offset_ = next_offset_;
+      index_ = next_index_;
     }
     return true;
   }

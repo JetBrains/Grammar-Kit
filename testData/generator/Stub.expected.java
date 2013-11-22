@@ -18,29 +18,28 @@ public class FooParser implements PsiParser {
   public static final Logger LOG_ = Logger.getInstance("test.FooParser");
 
   public ASTNode parse(IElementType root_, PsiBuilder builder_) {
-    int level_ = 0;
     boolean result_;
     builder_ = adapt_builder_(root_, builder_, this, null);
+    Marker marker_ = enter_section_(builder_, 0, _COLLAPSE_, null);
     if (root_ == ELEMENT_1) {
-      result_ = element1(builder_, level_ + 1);
+      result_ = element1(builder_, 0);
     }
     else if (root_ == ELEMENT_2) {
-      result_ = element2(builder_, level_ + 1);
+      result_ = element2(builder_, 0);
     }
     else if (root_ == ELEMENT_3) {
-      result_ = element3(builder_, level_ + 1);
+      result_ = element3(builder_, 0);
     }
     else if (root_ == ELEMENT_4) {
-      result_ = element4(builder_, level_ + 1);
+      result_ = element4(builder_, 0);
     }
     else if (root_ == ELEMENT_5) {
-      result_ = element5(builder_, level_ + 1);
+      result_ = element5(builder_, 0);
     }
     else {
-      Marker marker_ = enter_section_(builder_, level_, _NONE_, null);
-      result_ = parse_root_(root_, builder_, level_);
-      exit_section_(builder_, level_, marker_, root_, result_, true, TOKEN_ADVANCER);
+      result_ = parse_root_(root_, builder_, 0);
     }
+    exit_section_(builder_, 0, marker_, root_, result_, true, TRUE_CONDITION);
     return builder_.getTreeBuilt();
   }
 

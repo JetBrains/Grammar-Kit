@@ -18,32 +18,31 @@ public class Autopin implements PsiParser {
   public static final Logger LOG_ = Logger.getInstance("Autopin");
 
   public ASTNode parse(IElementType root_, PsiBuilder builder_) {
-    int level_ = 0;
     boolean result_;
     builder_ = adapt_builder_(root_, builder_, this, EXTENDS_SETS_);
+    Marker marker_ = enter_section_(builder_, 0, _COLLAPSE_, null);
     if (root_ == CREATE_STATEMENT) {
-      result_ = create_statement(builder_, level_ + 1);
+      result_ = create_statement(builder_, 0);
     }
     else if (root_ == CREATE_TABLE_STATEMENT) {
-      result_ = create_table_statement(builder_, level_ + 1);
+      result_ = create_table_statement(builder_, 0);
     }
     else if (root_ == DROP_STATEMENT) {
-      result_ = drop_statement(builder_, level_ + 1);
+      result_ = drop_statement(builder_, 0);
     }
     else if (root_ == DROP_TABLE_STATEMENT) {
-      result_ = drop_table_statement(builder_, level_ + 1);
+      result_ = drop_table_statement(builder_, 0);
     }
     else if (root_ == OVERRIDE_NESTED_SEQUENCE) {
-      result_ = override_nested_sequence(builder_, level_ + 1);
+      result_ = override_nested_sequence(builder_, 0);
     }
     else if (root_ == STATEMENT) {
-      result_ = statement(builder_, level_ + 1);
+      result_ = statement(builder_, 0);
     }
     else {
-      Marker marker_ = enter_section_(builder_, level_, _NONE_, null);
-      result_ = parse_root_(root_, builder_, level_);
-      exit_section_(builder_, level_, marker_, root_, result_, true, TOKEN_ADVANCER);
+      result_ = parse_root_(root_, builder_, 0);
     }
+    exit_section_(builder_, 0, marker_, root_, result_, true, TRUE_CONDITION);
     return builder_.getTreeBuilt();
   }
 
@@ -192,15 +191,15 @@ public class Autopin implements PsiParser {
   // statement *
   static boolean root(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "root")) return false;
-    int offset_ = builder_.getCurrentOffset();
+    int index_ = builder_.rawTokenIndex();
     while (true) {
       if (!statement(builder_, level_ + 1)) break;
-      int next_offset_ = builder_.getCurrentOffset();
-      if (offset_ == next_offset_) {
-        empty_element_parsed_guard_(builder_, offset_, "root");
+      int next_index_ = builder_.rawTokenIndex();
+      if (index_ == next_index_) {
+        empty_element_parsed_guard_(builder_, builder_.getCurrentOffset(), "root");
         break;
       }
-      offset_ = next_offset_;
+      index_ = next_index_;
     }
     return true;
   }

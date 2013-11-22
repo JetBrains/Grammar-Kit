@@ -18,29 +18,28 @@ public class PsiAccessors implements PsiParser {
   public static final Logger LOG_ = Logger.getInstance("PsiAccessors");
 
   public ASTNode parse(IElementType root_, PsiBuilder builder_) {
-    int level_ = 0;
     boolean result_;
     builder_ = adapt_builder_(root_, builder_, this, null);
+    Marker marker_ = enter_section_(builder_, 0, _COLLAPSE_, null);
     if (root_ == BINARY) {
-      result_ = binary(builder_, level_ + 1);
+      result_ = binary(builder_, 0);
     }
     else if (root_ == EXPRESSION) {
-      result_ = expression(builder_, level_ + 1);
+      result_ = expression(builder_, 0);
     }
     else if (root_ == OPERATOR) {
-      result_ = operator(builder_, level_ + 1);
+      result_ = operator(builder_, 0);
     }
     else if (root_ == RE) {
-      result_ = re(builder_, level_ + 1);
+      result_ = re(builder_, 0);
     }
     else if (root_ == VALUE) {
-      result_ = value(builder_, level_ + 1);
+      result_ = value(builder_, 0);
     }
     else {
-      Marker marker_ = enter_section_(builder_, level_, _NONE_, null);
-      result_ = parse_root_(root_, builder_, level_);
-      exit_section_(builder_, level_, marker_, root_, result_, true, TOKEN_ADVANCER);
+      result_ = parse_root_(root_, builder_, 0);
     }
+    exit_section_(builder_, 0, marker_, root_, result_, true, TRUE_CONDITION);
     return builder_.getTreeBuilt();
   }
 

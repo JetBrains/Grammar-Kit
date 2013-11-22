@@ -18,65 +18,64 @@ public class Self implements PsiParser {
   public static final Logger LOG_ = Logger.getInstance("Self");
 
   public ASTNode parse(IElementType root_, PsiBuilder builder_) {
-    int level_ = 0;
     boolean result_;
     builder_ = adapt_builder_(root_, builder_, this, EXTENDS_SETS_);
+    Marker marker_ = enter_section_(builder_, 0, _COLLAPSE_, null);
     if (root_ == BNF_ATTR) {
-      result_ = attr(builder_, level_ + 1);
+      result_ = attr(builder_, 0);
     }
     else if (root_ == BNF_ATTR_PATTERN) {
-      result_ = attr_pattern(builder_, level_ + 1);
+      result_ = attr_pattern(builder_, 0);
     }
     else if (root_ == BNF_ATTR_VALUE) {
-      result_ = attr_value(builder_, level_ + 1);
+      result_ = attr_value(builder_, 0);
     }
     else if (root_ == BNF_ATTRS) {
-      result_ = attrs(builder_, level_ + 1);
+      result_ = attrs(builder_, 0);
     }
     else if (root_ == BNF_CHOICE) {
-      result_ = choice(builder_, level_ + 1);
+      result_ = choice(builder_, 0);
     }
     else if (root_ == BNF_EXPRESSION) {
-      result_ = expression(builder_, level_ + 1);
+      result_ = expression(builder_, 0);
     }
     else if (root_ == BNF_LITERAL_EXPRESSION) {
-      result_ = literal_expression(builder_, level_ + 1);
+      result_ = literal_expression(builder_, 0);
     }
     else if (root_ == BNF_MODIFIER) {
-      result_ = modifier(builder_, level_ + 1);
+      result_ = modifier(builder_, 0);
     }
     else if (root_ == BNF_PAREN_EXPRESSION) {
-      result_ = paren_expression(builder_, level_ + 1);
+      result_ = paren_expression(builder_, 0);
     }
     else if (root_ == BNF_PREDICATE) {
-      result_ = predicate(builder_, level_ + 1);
+      result_ = predicate(builder_, 0);
     }
     else if (root_ == BNF_PREDICATE_SIGN) {
-      result_ = predicate_sign(builder_, level_ + 1);
+      result_ = predicate_sign(builder_, 0);
     }
     else if (root_ == BNF_QUANTIFIED) {
-      result_ = quantified(builder_, level_ + 1);
+      result_ = quantified(builder_, 0);
     }
     else if (root_ == BNF_QUANTIFIER) {
-      result_ = quantifier(builder_, level_ + 1);
+      result_ = quantifier(builder_, 0);
     }
     else if (root_ == BNF_REFERENCE_OR_TOKEN) {
-      result_ = reference_or_token(builder_, level_ + 1);
+      result_ = reference_or_token(builder_, 0);
     }
     else if (root_ == BNF_RULE) {
-      result_ = rule(builder_, level_ + 1);
+      result_ = rule(builder_, 0);
     }
     else if (root_ == BNF_SEQUENCE) {
-      result_ = sequence(builder_, level_ + 1);
+      result_ = sequence(builder_, 0);
     }
     else if (root_ == BNF_STRING_LITERAL_EXPRESSION) {
-      result_ = string_literal_expression(builder_, level_ + 1);
+      result_ = string_literal_expression(builder_, 0);
     }
     else {
-      Marker marker_ = enter_section_(builder_, level_, _NONE_, null);
-      result_ = parse_root_(root_, builder_, level_);
-      exit_section_(builder_, level_, marker_, root_, result_, true, TOKEN_ADVANCER);
+      result_ = parse_root_(root_, builder_, 0);
     }
+    exit_section_(builder_, 0, marker_, root_, result_, true, TRUE_CONDITION);
     return builder_.getTreeBuilt();
   }
 
@@ -199,15 +198,15 @@ public class Self implements PsiParser {
   // attr*
   private static boolean attrs_1(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "attrs_1")) return false;
-    int offset_ = builder_.getCurrentOffset();
+    int index_ = builder_.rawTokenIndex();
     while (true) {
       if (!attr(builder_, level_ + 1)) break;
-      int next_offset_ = builder_.getCurrentOffset();
-      if (offset_ == next_offset_) {
-        empty_element_parsed_guard_(builder_, offset_, "attrs_1");
+      int next_index_ = builder_.rawTokenIndex();
+      if (index_ == next_index_) {
+        empty_element_parsed_guard_(builder_, builder_.getCurrentOffset(), "attrs_1");
         break;
       }
-      offset_ = next_offset_;
+      index_ = next_index_;
     }
     return true;
   }
@@ -240,15 +239,15 @@ public class Self implements PsiParser {
   // ('|' sequence)*
   private static boolean choice_0_2(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "choice_0_2")) return false;
-    int offset_ = builder_.getCurrentOffset();
+    int index_ = builder_.rawTokenIndex();
     while (true) {
       if (!choice_0_2_0(builder_, level_ + 1)) break;
-      int next_offset_ = builder_.getCurrentOffset();
-      if (offset_ == next_offset_) {
-        empty_element_parsed_guard_(builder_, offset_, "choice_0_2");
+      int next_index_ = builder_.rawTokenIndex();
+      if (index_ == next_index_) {
+        empty_element_parsed_guard_(builder_, builder_.getCurrentOffset(), "choice_0_2");
         break;
       }
-      offset_ = next_offset_;
+      index_ = next_index_;
     }
     return true;
   }
@@ -278,15 +277,15 @@ public class Self implements PsiParser {
   // choice_tail*
   private static boolean choice_1_1(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "choice_1_1")) return false;
-    int offset_ = builder_.getCurrentOffset();
+    int index_ = builder_.rawTokenIndex();
     while (true) {
       if (!choice_tail(builder_, level_ + 1)) break;
-      int next_offset_ = builder_.getCurrentOffset();
-      if (offset_ == next_offset_) {
-        empty_element_parsed_guard_(builder_, offset_, "choice_1_1");
+      int next_index_ = builder_.rawTokenIndex();
+      if (index_ == next_index_) {
+        empty_element_parsed_guard_(builder_, builder_.getCurrentOffset(), "choice_1_1");
         break;
       }
-      offset_ = next_offset_;
+      index_ = next_index_;
     }
     return true;
   }
@@ -320,15 +319,15 @@ public class Self implements PsiParser {
   // (attrs | rule) *
   static boolean grammar(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "grammar")) return false;
-    int offset_ = builder_.getCurrentOffset();
+    int index_ = builder_.rawTokenIndex();
     while (true) {
       if (!grammar_0(builder_, level_ + 1)) break;
-      int next_offset_ = builder_.getCurrentOffset();
-      if (offset_ == next_offset_) {
-        empty_element_parsed_guard_(builder_, offset_, "grammar");
+      int next_index_ = builder_.rawTokenIndex();
+      if (index_ == next_index_) {
+        empty_element_parsed_guard_(builder_, builder_.getCurrentOffset(), "grammar");
         break;
       }
-      offset_ = next_offset_;
+      index_ = next_index_;
     }
     return true;
   }
@@ -512,15 +511,15 @@ public class Self implements PsiParser {
   // modifier*
   private static boolean rule_0(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "rule_0")) return false;
-    int offset_ = builder_.getCurrentOffset();
+    int index_ = builder_.rawTokenIndex();
     while (true) {
       if (!modifier(builder_, level_ + 1)) break;
-      int next_offset_ = builder_.getCurrentOffset();
-      if (offset_ == next_offset_) {
-        empty_element_parsed_guard_(builder_, offset_, "rule_0");
+      int next_index_ = builder_.rawTokenIndex();
+      if (index_ == next_index_) {
+        empty_element_parsed_guard_(builder_, builder_.getCurrentOffset(), "rule_0");
         break;
       }
-      offset_ = next_offset_;
+      index_ = next_index_;
     }
     return true;
   }
@@ -557,15 +556,15 @@ public class Self implements PsiParser {
     boolean result_ = false;
     Marker marker_ = enter_section_(builder_, level_, _COLLAPSE_, null);
     result_ = option(builder_, level_ + 1);
-    int offset_ = builder_.getCurrentOffset();
+    int index_ = builder_.rawTokenIndex();
     while (result_) {
       if (!option(builder_, level_ + 1)) break;
-      int next_offset_ = builder_.getCurrentOffset();
-      if (offset_ == next_offset_) {
-        empty_element_parsed_guard_(builder_, offset_, "sequence");
+      int next_index_ = builder_.rawTokenIndex();
+      if (index_ == next_index_) {
+        empty_element_parsed_guard_(builder_, builder_.getCurrentOffset(), "sequence");
         break;
       }
-      offset_ = next_offset_;
+      index_ = next_index_;
     }
     exit_section_(builder_, level_, marker_, BNF_SEQUENCE, result_, false, null);
     return result_;
@@ -620,15 +619,15 @@ public class Self implements PsiParser {
   // modifier*
   private static boolean simple_0_0_0_0(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "simple_0_0_0_0")) return false;
-    int offset_ = builder_.getCurrentOffset();
+    int index_ = builder_.rawTokenIndex();
     while (true) {
       if (!modifier(builder_, level_ + 1)) break;
-      int next_offset_ = builder_.getCurrentOffset();
-      if (offset_ == next_offset_) {
-        empty_element_parsed_guard_(builder_, offset_, "simple_0_0_0_0");
+      int next_index_ = builder_.rawTokenIndex();
+      if (index_ == next_index_) {
+        empty_element_parsed_guard_(builder_, builder_.getCurrentOffset(), "simple_0_0_0_0");
         break;
       }
-      offset_ = next_offset_;
+      index_ = next_index_;
     }
     return true;
   }

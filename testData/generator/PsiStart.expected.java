@@ -18,26 +18,25 @@ public class GeneratedParser implements PsiParser {
   public static final Logger LOG_ = Logger.getInstance("generated.GeneratedParser");
 
   public ASTNode parse(IElementType root_, PsiBuilder builder_) {
-    int level_ = 0;
     boolean result_;
     builder_ = adapt_builder_(root_, builder_, this, null);
+    Marker marker_ = enter_section_(builder_, 0, _COLLAPSE_, null);
     if (root_ == ELEMENT) {
-      result_ = element(builder_, level_ + 1);
+      result_ = element(builder_, 0);
     }
     else if (root_ == ENTRY) {
-      result_ = entry(builder_, level_ + 1);
+      result_ = entry(builder_, 0);
     }
     else if (root_ == LIST) {
-      result_ = list(builder_, level_ + 1);
+      result_ = list(builder_, 0);
     }
     else if (root_ == MAP) {
-      result_ = map(builder_, level_ + 1);
+      result_ = map(builder_, 0);
     }
     else {
-      Marker marker_ = enter_section_(builder_, level_, _NONE_, null);
-      result_ = parse_root_(root_, builder_, level_);
-      exit_section_(builder_, level_, marker_, root_, result_, true, TOKEN_ADVANCER);
+      result_ = parse_root_(root_, builder_, 0);
     }
+    exit_section_(builder_, 0, marker_, root_, result_, true, TRUE_CONDITION);
     return builder_.getTreeBuilt();
   }
 
@@ -98,15 +97,15 @@ public class GeneratedParser implements PsiParser {
   // (',' element) *
   private static boolean list_2(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "list_2")) return false;
-    int offset_ = builder_.getCurrentOffset();
+    int index_ = builder_.rawTokenIndex();
     while (true) {
       if (!list_2_0(builder_, level_ + 1)) break;
-      int next_offset_ = builder_.getCurrentOffset();
-      if (offset_ == next_offset_) {
-        empty_element_parsed_guard_(builder_, offset_, "list_2");
+      int next_index_ = builder_.rawTokenIndex();
+      if (index_ == next_index_) {
+        empty_element_parsed_guard_(builder_, builder_.getCurrentOffset(), "list_2");
         break;
       }
-      offset_ = next_offset_;
+      index_ = next_index_;
     }
     return true;
   }
@@ -139,15 +138,15 @@ public class GeneratedParser implements PsiParser {
   // (',' entry) *
   private static boolean map_2(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "map_2")) return false;
-    int offset_ = builder_.getCurrentOffset();
+    int index_ = builder_.rawTokenIndex();
     while (true) {
       if (!map_2_0(builder_, level_ + 1)) break;
-      int next_offset_ = builder_.getCurrentOffset();
-      if (offset_ == next_offset_) {
-        empty_element_parsed_guard_(builder_, offset_, "map_2");
+      int next_index_ = builder_.rawTokenIndex();
+      if (index_ == next_index_) {
+        empty_element_parsed_guard_(builder_, builder_.getCurrentOffset(), "map_2");
         break;
       }
-      offset_ = next_offset_;
+      index_ = next_index_;
     }
     return true;
   }

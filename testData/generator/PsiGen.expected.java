@@ -18,35 +18,34 @@ public class PsiGen implements PsiParser {
   public static final Logger LOG_ = Logger.getInstance("PsiGen");
 
   public ASTNode parse(IElementType root_, PsiBuilder builder_) {
-    int level_ = 0;
     boolean result_;
     builder_ = adapt_builder_(root_, builder_, this, EXTENDS_SETS_);
+    Marker marker_ = enter_section_(builder_, 0, _COLLAPSE_, null);
     if (root_ == EXPR) {
-      result_ = expr(builder_, level_ + 1);
+      result_ = expr(builder_, 0);
     }
     else if (root_ == GRAMMAR_ELEMENT) {
-      result_ = grammar_element(builder_, level_ + 1);
+      result_ = grammar_element(builder_, 0);
     }
     else if (root_ == MUL_EXPR) {
-      result_ = mul_expr(builder_, level_ + 1);
+      result_ = mul_expr(builder_, 0);
     }
     else if (root_ == PLUS_EXPR) {
-      result_ = plus_expr(builder_, level_ + 1);
+      result_ = plus_expr(builder_, 0);
     }
     else if (root_ == ROOT_B) {
-      result_ = root_b(builder_, level_ + 1);
+      result_ = root_b(builder_, 0);
     }
     else if (root_ == ROOT_C) {
-      result_ = root_c(builder_, level_ + 1);
+      result_ = root_c(builder_, 0);
     }
     else if (root_ == ROOT_D) {
-      result_ = root_d(builder_, level_ + 1);
+      result_ = root_d(builder_, 0);
     }
     else {
-      Marker marker_ = enter_section_(builder_, level_, _NONE_, null);
-      result_ = parse_root_(root_, builder_, level_);
-      exit_section_(builder_, level_, marker_, root_, result_, true, TOKEN_ADVANCER);
+      result_ = parse_root_(root_, builder_, 0);
     }
+    exit_section_(builder_, 0, marker_, root_, result_, true, TRUE_CONDITION);
     return builder_.getTreeBuilt();
   }
 
@@ -79,15 +78,15 @@ public class PsiGen implements PsiParser {
   // plus_expr *
   private static boolean a_expr_1(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "a_expr_1")) return false;
-    int offset_ = builder_.getCurrentOffset();
+    int index_ = builder_.rawTokenIndex();
     while (true) {
       if (!plus_expr(builder_, level_ + 1)) break;
-      int next_offset_ = builder_.getCurrentOffset();
-      if (offset_ == next_offset_) {
-        empty_element_parsed_guard_(builder_, offset_, "a_expr_1");
+      int next_index_ = builder_.rawTokenIndex();
+      if (index_ == next_index_) {
+        empty_element_parsed_guard_(builder_, builder_.getCurrentOffset(), "a_expr_1");
         break;
       }
-      offset_ = next_offset_;
+      index_ = next_index_;
     }
     return true;
   }
@@ -108,15 +107,15 @@ public class PsiGen implements PsiParser {
   // mul_expr *
   private static boolean b_expr_1(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "b_expr_1")) return false;
-    int offset_ = builder_.getCurrentOffset();
+    int index_ = builder_.rawTokenIndex();
     while (true) {
       if (!mul_expr(builder_, level_ + 1)) break;
-      int next_offset_ = builder_.getCurrentOffset();
-      if (offset_ == next_offset_) {
-        empty_element_parsed_guard_(builder_, offset_, "b_expr_1");
+      int next_index_ = builder_.rawTokenIndex();
+      if (index_ == next_index_) {
+        empty_element_parsed_guard_(builder_, builder_.getCurrentOffset(), "b_expr_1");
         break;
       }
-      offset_ = next_offset_;
+      index_ = next_index_;
     }
     return true;
   }
@@ -138,15 +137,15 @@ public class PsiGen implements PsiParser {
   // (',' a_expr) *
   private static boolean expr_1(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "expr_1")) return false;
-    int offset_ = builder_.getCurrentOffset();
+    int index_ = builder_.rawTokenIndex();
     while (true) {
       if (!expr_1_0(builder_, level_ + 1)) break;
-      int next_offset_ = builder_.getCurrentOffset();
-      if (offset_ == next_offset_) {
-        empty_element_parsed_guard_(builder_, offset_, "expr_1");
+      int next_index_ = builder_.rawTokenIndex();
+      if (index_ == next_index_) {
+        empty_element_parsed_guard_(builder_, builder_.getCurrentOffset(), "expr_1");
         break;
       }
-      offset_ = next_offset_;
+      index_ = next_index_;
     }
     return true;
   }
@@ -247,15 +246,15 @@ public class PsiGen implements PsiParser {
     boolean result_ = false;
     Marker marker_ = enter_section_(builder_);
     result_ = p.parse(builder_, level_);
-    int offset_ = builder_.getCurrentOffset();
+    int index_ = builder_.rawTokenIndex();
     while (result_) {
       if (!p.parse(builder_, level_)) break;
-      int next_offset_ = builder_.getCurrentOffset();
-      if (offset_ == next_offset_) {
-        empty_element_parsed_guard_(builder_, offset_, "listOf");
+      int next_index_ = builder_.rawTokenIndex();
+      if (index_ == next_index_) {
+        empty_element_parsed_guard_(builder_, builder_.getCurrentOffset(), "listOf");
         break;
       }
-      offset_ = next_offset_;
+      index_ = next_index_;
     }
     exit_section_(builder_, marker_, null, result_);
     return result_;
@@ -366,15 +365,15 @@ public class PsiGen2 {
     boolean result_ = false;
     Marker marker_ = enter_section_(builder_);
     result_ = p.parse(builder_, level_);
-    int offset_ = builder_.getCurrentOffset();
+    int index_ = builder_.rawTokenIndex();
     while (result_) {
       if (!p.parse(builder_, level_)) break;
-      int next_offset_ = builder_.getCurrentOffset();
-      if (offset_ == next_offset_) {
-        empty_element_parsed_guard_(builder_, offset_, "blockOf");
+      int next_index_ = builder_.rawTokenIndex();
+      if (index_ == next_index_) {
+        empty_element_parsed_guard_(builder_, builder_.getCurrentOffset(), "blockOf");
         break;
       }
-      offset_ = next_offset_;
+      index_ = next_index_;
     }
     exit_section_(builder_, marker_, BLOCK_OF, result_);
     return result_;
@@ -469,15 +468,15 @@ public class PsiGen2 {
   // qref_expr *
   private static boolean reference_1(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "reference_1")) return false;
-    int offset_ = builder_.getCurrentOffset();
+    int index_ = builder_.rawTokenIndex();
     while (true) {
       if (!qref_expr(builder_, level_ + 1)) break;
-      int next_offset_ = builder_.getCurrentOffset();
-      if (offset_ == next_offset_) {
-        empty_element_parsed_guard_(builder_, offset_, "reference_1");
+      int next_index_ = builder_.rawTokenIndex();
+      if (index_ == next_index_) {
+        empty_element_parsed_guard_(builder_, builder_.getCurrentOffset(), "reference_1");
         break;
       }
-      offset_ = next_offset_;
+      index_ = next_index_;
     }
     return true;
   }
@@ -533,15 +532,15 @@ public class PsiGen2 {
   // (item_expr) *
   private static boolean some_expr_2(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "some_expr_2")) return false;
-    int offset_ = builder_.getCurrentOffset();
+    int index_ = builder_.rawTokenIndex();
     while (true) {
       if (!some_expr_2_0(builder_, level_ + 1)) break;
-      int next_offset_ = builder_.getCurrentOffset();
-      if (offset_ == next_offset_) {
-        empty_element_parsed_guard_(builder_, offset_, "some_expr_2");
+      int next_index_ = builder_.rawTokenIndex();
+      if (index_ == next_index_) {
+        empty_element_parsed_guard_(builder_, builder_.getCurrentOffset(), "some_expr_2");
         break;
       }
-      offset_ = next_offset_;
+      index_ = next_index_;
     }
     return true;
   }
@@ -628,15 +627,15 @@ public class PsiGenFixes {
   // LeftShadow *
   private static boolean LeftShadowTest_1(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "LeftShadowTest_1")) return false;
-    int offset_ = builder_.getCurrentOffset();
+    int index_ = builder_.rawTokenIndex();
     while (true) {
       if (!LeftShadow(builder_, level_ + 1)) break;
-      int next_offset_ = builder_.getCurrentOffset();
-      if (offset_ == next_offset_) {
-        empty_element_parsed_guard_(builder_, offset_, "LeftShadowTest_1");
+      int next_index_ = builder_.rawTokenIndex();
+      if (index_ == next_index_) {
+        empty_element_parsed_guard_(builder_, builder_.getCurrentOffset(), "LeftShadowTest_1");
         break;
       }
-      offset_ = next_offset_;
+      index_ = next_index_;
     }
     return true;
   }

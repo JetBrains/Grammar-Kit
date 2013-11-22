@@ -18,23 +18,22 @@ public class ExternalRules implements PsiParser {
   public static final Logger LOG_ = Logger.getInstance("ExternalRules");
 
   public ASTNode parse(IElementType root_, PsiBuilder builder_) {
-    int level_ = 0;
     boolean result_;
     builder_ = adapt_builder_(root_, builder_, this, null);
+    Marker marker_ = enter_section_(builder_, 0, _COLLAPSE_, null);
     if (root_ == ONE) {
-      result_ = one(builder_, level_ + 1);
+      result_ = one(builder_, 0);
     }
     else if (root_ == STATEMENT) {
-      result_ = statement(builder_, level_ + 1);
+      result_ = statement(builder_, 0);
     }
     else if (root_ == TWO) {
-      result_ = two(builder_, level_ + 1);
+      result_ = two(builder_, 0);
     }
     else {
-      Marker marker_ = enter_section_(builder_, level_, _NONE_, null);
-      result_ = parse_root_(root_, builder_, level_);
-      exit_section_(builder_, level_, marker_, root_, result_, true, TOKEN_ADVANCER);
+      result_ = parse_root_(root_, builder_, 0);
     }
+    exit_section_(builder_, 0, marker_, root_, result_, true, TRUE_CONDITION);
     return builder_.getTreeBuilt();
   }
 
@@ -57,15 +56,15 @@ public class ExternalRules implements PsiParser {
   // (',' <<param>>) *
   private static boolean comma_list_1(PsiBuilder builder_, int level_, final Parser param) {
     if (!recursion_guard_(builder_, level_, "comma_list_1")) return false;
-    int offset_ = builder_.getCurrentOffset();
+    int index_ = builder_.rawTokenIndex();
     while (true) {
       if (!comma_list_1_0(builder_, level_ + 1, param)) break;
-      int next_offset_ = builder_.getCurrentOffset();
-      if (offset_ == next_offset_) {
-        empty_element_parsed_guard_(builder_, offset_, "comma_list_1");
+      int next_index_ = builder_.rawTokenIndex();
+      if (index_ == next_index_) {
+        empty_element_parsed_guard_(builder_, builder_.getCurrentOffset(), "comma_list_1");
         break;
       }
-      offset_ = next_offset_;
+      index_ = next_index_;
     }
     return true;
   }
@@ -97,15 +96,15 @@ public class ExternalRules implements PsiParser {
   // (<<comma_list_tail <<param>>>>) *
   private static boolean comma_list_pinned_2(PsiBuilder builder_, int level_, final Parser param) {
     if (!recursion_guard_(builder_, level_, "comma_list_pinned_2")) return false;
-    int offset_ = builder_.getCurrentOffset();
+    int index_ = builder_.rawTokenIndex();
     while (true) {
       if (!comma_list_pinned_2_0(builder_, level_ + 1, param)) break;
-      int next_offset_ = builder_.getCurrentOffset();
-      if (offset_ == next_offset_) {
-        empty_element_parsed_guard_(builder_, offset_, "comma_list_pinned_2");
+      int next_index_ = builder_.rawTokenIndex();
+      if (index_ == next_index_) {
+        empty_element_parsed_guard_(builder_, builder_.getCurrentOffset(), "comma_list_pinned_2");
         break;
       }
-      offset_ = next_offset_;
+      index_ = next_index_;
     }
     return true;
   }
@@ -168,15 +167,15 @@ public class ExternalRules implements PsiParser {
   // (<<comma_list_tail <<comma_list <<param>>>>>>) *
   private static boolean list_of_lists_2(PsiBuilder builder_, int level_, final Parser param) {
     if (!recursion_guard_(builder_, level_, "list_of_lists_2")) return false;
-    int offset_ = builder_.getCurrentOffset();
+    int index_ = builder_.rawTokenIndex();
     while (true) {
       if (!list_of_lists_2_0(builder_, level_ + 1, param)) break;
-      int next_offset_ = builder_.getCurrentOffset();
-      if (offset_ == next_offset_) {
-        empty_element_parsed_guard_(builder_, offset_, "list_of_lists_2");
+      int next_index_ = builder_.rawTokenIndex();
+      if (index_ == next_index_) {
+        empty_element_parsed_guard_(builder_, builder_.getCurrentOffset(), "list_of_lists_2");
         break;
       }
-      offset_ = next_offset_;
+      index_ = next_index_;
     }
     return true;
   }

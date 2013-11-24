@@ -342,6 +342,16 @@ public class ParserGeneratorUtil {
     return "consumeTokenFast".equals(getAttribute(rule, KnownAttribute.CONSUME_TOKEN_METHOD));
   }
 
+  public static void appendTokenTypes(StringBuilder sb, List<String> tokenTypes) {
+    for (int count = 0, line = 0, size = tokenTypes.size(); count < size; count++) {
+      boolean newLine = line == 0 && count == 2 || line > 0 && (count - 2) % 6 == 0;
+      newLine &= (size - count) > 2;
+      if (count > 0) sb.append(",").append(newLine ? "\n" : " ");
+      sb.append(tokenTypes.get(count));
+      if (newLine) line ++;
+    }
+  }
+
   public static class Rule {
 
     public static boolean isPrivate(BnfRule node) {

@@ -143,6 +143,7 @@ public class BnfFirstNextAnalyzer {
   private Set<BnfExpression> calcSequenceFirstInner(List<BnfExpression> expressions, final Set<BnfExpression> result, final Set<BnfExpression> visited) {
     boolean matchesEof = !result.add(BNF_MATCHES_EOF);
 
+    boolean pinApplied = false;
     Set<BnfExpression> pinned;
     if (!myBackward) {
       BnfExpression firstItem = ContainerUtil.getFirstItem(expressions);
@@ -150,10 +151,15 @@ public class BnfFirstNextAnalyzer {
       BnfRule rule = ParserGeneratorUtil.Rule.of(firstItem);
       pinned = new HashSet<BnfExpression>();
       GrammarUtil.processPinnedExpressions(rule, new CommonProcessors.CollectProcessor<BnfExpression>(pinned));
+      if (firstItem.getParent() instanceof BnfSequence) {
+        for (BnfExpression e : ((BnfSequence)firstItem.getParent()).getExpressionList()) {
+          if (e == firstItem) break;
+          pinApplied |= pinned.contains(e);
+        }
+      }
     }
     else pinned = Collections.emptySet();
 
-    boolean pinApplied = false;
     List<BnfExpression> list = myBackward ? ContainerUtil.reverse(expressions) : expressions;
     for (int i = 0, size = list.size(); i < size; i++) {
       if (!result.remove(BNF_MATCHES_EOF)) break;

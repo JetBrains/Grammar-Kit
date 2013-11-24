@@ -25,6 +25,7 @@ import com.intellij.psi.*;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.util.ObjectUtils;
 import org.intellij.grammar.KnownAttribute;
+import org.intellij.grammar.generator.BnfConstants;
 import org.intellij.grammar.generator.ParserGeneratorUtil;
 import org.intellij.grammar.generator.RuleGraphHelper;
 import org.intellij.grammar.java.JavaHelper;
@@ -122,7 +123,7 @@ public class BnfAnnotator implements Annotator, DumbAware {
             resolve = ObjectUtils.chooseNotNull(((BnfFile)psiElement.getContainingFile()).getRule(value), Boolean.TRUE);
             refType = "rule or constant ";
           }
-          else if (attribute == KnownAttribute.RECOVER_WHILE) {
+          else if (attribute == KnownAttribute.RECOVER_WHILE && !BnfConstants.RECOVER_AUTO.equals(value)) {
             resolve = ((BnfFile)psiElement.getContainingFile()).getRule(value);
             refType = "rule ";
           }

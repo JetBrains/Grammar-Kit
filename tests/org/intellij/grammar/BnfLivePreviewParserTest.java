@@ -21,6 +21,7 @@ public class BnfLivePreviewParserTest extends BnfGeneratorTestCase {
 
   public void testJsonRecovery() throws IOException { doTest("Json.bnf"); }
   public void testLivePreviewTutorial() throws IOException { doTest("LivePreviewTutorial.bnf"); }
+  public void testAutoRecovery() throws IOException { doTest("AutoRecovery.bnf"); }
 
   @Override
   protected void doTest(String grammarFile) throws IOException {

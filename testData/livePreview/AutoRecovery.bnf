@@ -1,0 +1,6 @@
+{
+  tokens=[number="regexp:\d+" comma="," paren1="(" paren2=")" semi=';']
+}
+file ::= list (';' list ) *  {pin(".*")=1}
+list ::= "(" [!")" item (',' item) * ] ")" {pin(".*")=1}
+item ::= number {recoverWhile="#auto"}

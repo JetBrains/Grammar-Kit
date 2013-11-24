@@ -1,0 +1,169 @@
+// ---- GeneratedParser.java -----------------
+// This is a generated file. Not intended for manual editing.
+package generated;
+
+import com.intellij.lang.PsiBuilder;
+import com.intellij.lang.PsiBuilder.Marker;
+import com.intellij.openapi.diagnostic.Logger;
+import static generated.GeneratedTypes.*;
+import static com.intellij.lang.parser.GeneratedParserUtilBase.*;
+import com.intellij.psi.tree.IElementType;
+import com.intellij.lang.ASTNode;
+import com.intellij.psi.tree.TokenSet;
+import com.intellij.lang.PsiParser;
+
+@SuppressWarnings({"SimplifiableIfStatement", "UnusedAssignment"})
+public class GeneratedParser implements PsiParser {
+
+  public static final Logger LOG_ = Logger.getInstance("generated.GeneratedParser");
+
+  public ASTNode parse(IElementType root_, PsiBuilder builder_) {
+    boolean result_;
+    builder_ = adapt_builder_(root_, builder_, this, null);
+    Marker marker_ = enter_section_(builder_, 0, _COLLAPSE_, null);
+    if (root_ == ITEM) {
+      result_ = item(builder_, 0);
+    }
+    else if (root_ == LIST) {
+      result_ = list(builder_, 0);
+    }
+    else {
+      result_ = parse_root_(root_, builder_, 0);
+    }
+    exit_section_(builder_, 0, marker_, root_, result_, true, TRUE_CONDITION);
+    return builder_.getTreeBuilt();
+  }
+
+  protected boolean parse_root_(final IElementType root_, final PsiBuilder builder_, final int level_) {
+    return file(builder_, level_ + 1);
+  }
+
+  /* ********************************************************** */
+  // list (';' list ) *
+  static boolean file(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "file")) return false;
+    if (!nextTokenIs(builder_, PAREN1)) return false;
+    boolean result_ = false;
+    boolean pinned_ = false;
+    Marker marker_ = enter_section_(builder_, level_, _NONE_, null);
+    result_ = list(builder_, level_ + 1);
+    pinned_ = result_; // pin = 1
+    result_ = result_ && file_1(builder_, level_ + 1);
+    exit_section_(builder_, level_, marker_, null, result_, pinned_, null);
+    return result_ || pinned_;
+  }
+
+  // (';' list ) *
+  private static boolean file_1(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "file_1")) return false;
+    int pos_ = current_position_(builder_);
+    while (true) {
+      if (!file_1_0(builder_, level_ + 1)) break;
+      if (!empty_element_parsed_guard_(builder_, "file_1", pos_)) break;
+      pos_ = current_position_(builder_);
+    }
+    return true;
+  }
+
+  // ';' list
+  private static boolean file_1_0(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "file_1_0")) return false;
+    boolean result_ = false;
+    boolean pinned_ = false;
+    Marker marker_ = enter_section_(builder_, level_, _NONE_, null);
+    result_ = consumeToken(builder_, SEMI);
+    pinned_ = result_; // pin = 1
+    result_ = result_ && list(builder_, level_ + 1);
+    exit_section_(builder_, level_, marker_, null, result_, pinned_, null);
+    return result_ || pinned_;
+  }
+
+  /* ********************************************************** */
+  // number
+  public static boolean item(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "item")) return false;
+    boolean result_ = false;
+    Marker marker_ = enter_section_(builder_, level_, _NONE_, "<item>");
+    result_ = consumeToken(builder_, NUMBER);
+    exit_section_(builder_, level_, marker_, ITEM, result_, false, item_auto_recover_);
+    return result_;
+  }
+
+  /* ********************************************************** */
+  // "(" [!")" item (',' item) * ] ")"
+  public static boolean list(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "list")) return false;
+    if (!nextTokenIs(builder_, PAREN1)) return false;
+    boolean result_ = false;
+    boolean pinned_ = false;
+    Marker marker_ = enter_section_(builder_, level_, _NONE_, null);
+    result_ = consumeToken(builder_, PAREN1);
+    pinned_ = result_; // pin = 1
+    result_ = result_ && report_error_(builder_, list_1(builder_, level_ + 1));
+    result_ = pinned_ && consumeToken(builder_, PAREN2) && result_;
+    exit_section_(builder_, level_, marker_, LIST, result_, pinned_, null);
+    return result_ || pinned_;
+  }
+
+  // [!")" item (',' item) * ]
+  private static boolean list_1(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "list_1")) return false;
+    list_1_0(builder_, level_ + 1);
+    return true;
+  }
+
+  // !")" item (',' item) *
+  private static boolean list_1_0(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "list_1_0")) return false;
+    boolean result_ = false;
+    boolean pinned_ = false;
+    Marker marker_ = enter_section_(builder_, level_, _NONE_, null);
+    result_ = list_1_0_0(builder_, level_ + 1);
+    pinned_ = result_; // pin = 1
+    result_ = result_ && report_error_(builder_, item(builder_, level_ + 1));
+    result_ = pinned_ && list_1_0_2(builder_, level_ + 1) && result_;
+    exit_section_(builder_, level_, marker_, null, result_, pinned_, null);
+    return result_ || pinned_;
+  }
+
+  // !")"
+  private static boolean list_1_0_0(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "list_1_0_0")) return false;
+    boolean result_ = false;
+    Marker marker_ = enter_section_(builder_, level_, _NOT_, null);
+    result_ = !consumeToken(builder_, PAREN2);
+    exit_section_(builder_, level_, marker_, null, result_, false, null);
+    return result_;
+  }
+
+  // (',' item) *
+  private static boolean list_1_0_2(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "list_1_0_2")) return false;
+    int pos_ = current_position_(builder_);
+    while (true) {
+      if (!list_1_0_2_0(builder_, level_ + 1)) break;
+      if (!empty_element_parsed_guard_(builder_, "list_1_0_2", pos_)) break;
+      pos_ = current_position_(builder_);
+    }
+    return true;
+  }
+
+  // ',' item
+  private static boolean list_1_0_2_0(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "list_1_0_2_0")) return false;
+    boolean result_ = false;
+    boolean pinned_ = false;
+    Marker marker_ = enter_section_(builder_, level_, _NONE_, null);
+    result_ = consumeToken(builder_, COMMA);
+    pinned_ = result_; // pin = 1
+    result_ = result_ && item(builder_, level_ + 1);
+    exit_section_(builder_, level_, marker_, null, result_, pinned_, null);
+    return result_ || pinned_;
+  }
+
+  final static Parser item_auto_recover_ = new Parser() {
+    public boolean parse(PsiBuilder builder_, int level_) {
+      return !nextTokenIsFast(builder_, PAREN2, COMMA, SEMI);
+    }
+  };
+}

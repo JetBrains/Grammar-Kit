@@ -32,10 +32,8 @@ import com.intellij.util.containers.MultiMap;
 import gnu.trove.THashMap;
 import gnu.trove.TObjectIntHashMap;
 import org.intellij.grammar.KnownAttribute;
-import org.intellij.grammar.generator.ExpressionGeneratorHelper;
-import org.intellij.grammar.generator.ExpressionHelper;
-import org.intellij.grammar.generator.ParserGeneratorUtil;
-import org.intellij.grammar.generator.RuleGraphHelper;
+import org.intellij.grammar.analysis.BnfFirstNextAnalyzer;
+import org.intellij.grammar.generator.*;
 import org.intellij.grammar.parser.GeneratedParserUtilBase;
 import org.intellij.grammar.psi.*;
 import org.intellij.grammar.psi.impl.GrammarUtil;
@@ -304,21 +302,33 @@ public class LivePreviewParser implements PsiParser {
       exit_section_(builder, marker_, isPrivate? null : elementType, alwaysTrue || result_);
     }
     else if (sectionRequired) {
+      Parser recoverPredicate;
       final BnfRule recoverRule = recoverWhile != null ? myFile.getRule(recoverWhile) : null;
-      exit_section_(
-        builder, level, marker_, isPrivate ? null : elementType, alwaysTrue || result_, pinned_,
-        recoverRule == null ? null : new Parser() {
+      if (BnfConstants.RECOVER_AUTO.equals(recoverWhile)) {
+        final IElementType[] nextTokens = generateAutoRecoverCall(rule);
+        recoverPredicate = new Parser() {
+          @Override
+          public boolean parse(PsiBuilder builder, int level) {
+            return !GeneratedParserUtilBase.nextTokenIsFast(builder, nextTokens);
+          }
+        };
+      }
+      else {
+        recoverPredicate = recoverRule == null ? null : new Parser() {
           @Override
           public boolean parse(PsiBuilder builder, int level) {
             return rule(builder, level, recoverRule, Collections.<String, Parser>emptyMap());
           }
-        });
+        };
+      }
+      exit_section_(builder, level, marker_, isPrivate ? null : elementType, alwaysTrue || result_, pinned_, recoverPredicate);
     }
 
     return alwaysTrue || result_ || pinned_;
   }
 
   private boolean type_extends_(IElementType elementType1, IElementType elementType2) {
+    if (elementType1 == elementType2) return true;
     if (!(elementType1 instanceof RuleElementType)) return false;
     if (!(elementType2 instanceof RuleElementType)) return false;
     for (BnfRule baseRule : myRuleExtendsMap.keySet()) {
@@ -685,5 +695,31 @@ public class LivePreviewParser implements PsiParser {
         return ContainerUtil.getFirstItem(ExpressionGeneratorHelper.findOperators(opCalls.get(opCall), operatorTypes));
       }
     });
+  }
+
+  /**
+   * @noinspection StringEquality
+   */
+  private IElementType[] generateAutoRecoverCall(BnfRule rule) {
+    BnfFirstNextAnalyzer analyzer = new BnfFirstNextAnalyzer();
+    Set<BnfExpression> nextExprSet = analyzer.calcNext(rule).keySet();
+    Set<String> nextSet = analyzer.asStrings(nextExprSet);
+    List<IElementType> tokenTypes = new ArrayList<IElementType>(nextSet.size());
+
+    for (String s : nextSet) {
+      if (myFile.getRule(s) != null) continue; // ignore left recursion
+      if (s == BnfFirstNextAnalyzer.MATCHES_EOF || s == BnfFirstNextAnalyzer.MATCHES_NOTHING) continue;
+
+      boolean unknown = s == BnfFirstNextAnalyzer.MATCHES_ANY;
+      IElementType t = unknown ? null : getTokenElementType(getTokenName(StringUtil.stripQuotesAroundValue(s)));
+      if (t != null) {
+        tokenTypes.add(t);
+      }
+      else {
+        tokenTypes.clear();
+        break;
+      }
+    }
+    return tokenTypes.toArray(new IElementType[tokenTypes.size()]);
   }
 }

@@ -759,8 +759,13 @@ public class ParserGenerator {
         String pinnedRef = pinned ? "pinned_" : "false";
         String recoverCall;
         if (recoverWhile != null) {
-          BnfRule untilRule = myFile.getRule(recoverWhile);
-          recoverCall = untilRule == null ? null : generateWrappedNodeCall(rule, null, untilRule.getName());
+          BnfRule predicateRule = myFile.getRule(recoverWhile);
+          if (BnfConstants.RECOVER_AUTO.equals(recoverWhile)) {
+            recoverCall = generateAutoRecoverCall(rule);
+          }
+          else {
+            recoverCall = predicateRule == null ? null : generateWrappedNodeCall(rule, null, predicateRule.getName());
+          }
         }
         else {
           recoverCall = null;
@@ -772,6 +777,38 @@ public class ParserGenerator {
     out("return " + (alwaysTrue ? "true" : "result_" + (pinned ? " || pinned_" : "")) + ";");
     out("}");
     generateNodeChildren(rule, funcName, children, visited);
+  }
+
+  /** @noinspection StringEquality*/
+  private String generateAutoRecoverCall(BnfRule rule) {
+    BnfFirstNextAnalyzer analyzer = new BnfFirstNextAnalyzer();
+    Set<BnfExpression> nextExprSet = analyzer.calcNext(rule).keySet();
+    Set<String> nextSet = analyzer.asStrings(nextExprSet);
+    List<String> tokenTypes = new ArrayList<String>(nextSet.size());
+
+    for (String s : nextSet) {
+      if (myFile.getRule(s) != null) continue; // ignore left recursion
+      if (s == BnfFirstNextAnalyzer.MATCHES_EOF || s == BnfFirstNextAnalyzer.MATCHES_NOTHING) continue;
+
+      boolean unknown = s == BnfFirstNextAnalyzer.MATCHES_ANY;
+      String t = unknown ? null : firstToElementType(s);
+      if (t != null) {
+        tokenTypes.add(t);
+      }
+      else {
+        tokenTypes.clear();
+        addWarning(myFile.getProject(), rule.getName() + " #auto recovery generation failed: " + s);
+        break;
+      }
+    }
+    StringBuilder sb = new StringBuilder("!nextTokenIsFast(builder_, ");
+
+    appendTokenTypes(sb, tokenTypes);
+    sb.append(")");
+
+    String constantName = rule.getName() + "_auto_recover_";
+    myParserLambdas.put(constantName, "#" + sb.toString());
+    return constantName;
   }
 
   public String generateFirstCheck(BnfRule rule, String frameName, boolean skipIfOne) {
@@ -800,12 +837,7 @@ public class ParserGenerator {
       sb.append(fast ? "nextTokenIsFast" : "nextTokenIs").append("(builder_, ");
       if (!fast && !dropFrameName) sb.append(frameName != null ? frameName : "\"\"").append(", ");
 
-      for (int count = 0, line = 0, size = firstElementTypes.size(); count < size; count++) {
-        boolean newLine = line == 0 && count == 2 || line > 0 && (count - 2) % 6 == 0;
-        if (count > 0) sb.append(",").append(newLine ? "\n" : " ");
-        sb.append(firstElementTypes.get(count));
-        if (newLine) line ++;
-      }
+      appendTokenTypes(sb, firstElementTypes);
       sb.append(")) return false;");
       out(sb.toString());
     }

@@ -182,6 +182,33 @@ public class GeneratedParserUtilBase {
     return builder_.getTokenType() == token;
   }
 
+  public static boolean nextTokenIsFast(PsiBuilder builder_, IElementType... tokens) {
+    IElementType tokenType = builder_.getTokenType();
+    for (IElementType token : tokens) {
+      if (token == tokenType) return true;
+    }
+    return false;
+  }
+
+  public static boolean nextTokenIs(PsiBuilder builder_, String frameName, IElementType... tokens) {
+    ErrorState state = ErrorState.get(builder_);
+    if (state.completionState != null) return true;
+    boolean track = !state.suppressErrors && state.predicateCount < 2 && state.predicateSign;
+    if (!track) return nextTokenIsFast(builder_, tokens);
+    boolean useFrameName = StringUtil.isNotEmpty(frameName);
+    IElementType tokenType = builder_.getTokenType();
+    if (tokenType == null) return false;
+    boolean result = false;
+    for (IElementType token : tokens) {
+      if (!useFrameName) addVariant(builder_, state, token);
+      result |= tokenType == token;
+    }
+    if (useFrameName) {
+      addVariantInner(state, builder_.getCurrentOffset(), frameName);
+    }
+    return result;
+  }
+
   public static boolean nextTokenIs(PsiBuilder builder_, IElementType token) {
     return nextTokenIsInner(builder_, token, false);
   }
@@ -194,15 +221,6 @@ public class GeneratedParserUtilBase {
       addVariant(builder_, state, token);
     }
     return token == tokenType;
-  }
-
-  public static boolean replaceVariants(PsiBuilder builder_, int variantCount, String frameName) {
-    ErrorState state = ErrorState.get(builder_);
-    if (!state.suppressErrors && state.predicateCount < 2 && state.predicateSign) {
-      state.clearVariants(true, state.variants.size() - variantCount);
-      addVariantInner(state, builder_.getCurrentOffset(), frameName);
-    }
-    return true;
   }
 
   public static void addVariant(PsiBuilder builder_, String text) {

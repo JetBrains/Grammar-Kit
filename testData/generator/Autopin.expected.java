@@ -202,8 +202,7 @@ public class Autopin implements PsiParser {
   // create_statement | drop_statement
   public static boolean statement(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "statement")) return false;
-    if (!nextTokenIs(builder_, CREATE) && !nextTokenIs(builder_, DROP)
-        && replaceVariants(builder_, 2, "<statement>")) return false;
+    if (!nextTokenIs(builder_, "<statement>", CREATE, DROP)) return false;
     boolean result_ = false;
     Marker marker_ = enter_section_(builder_, level_, _COLLAPSE_, "<statement>");
     result_ = create_statement(builder_, level_ + 1);
@@ -282,7 +281,7 @@ public class Autopin implements PsiParser {
   // (a|&b) pinned_on_start
   static boolean token_sequence5(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "token_sequence5")) return false;
-    if (!nextTokenIs(builder_, A) && !nextTokenIs(builder_, B)) return false;
+    if (!nextTokenIs(builder_, "", A, B)) return false;
     boolean result_ = false;
     Marker marker_ = enter_section_(builder_);
     result_ = token_sequence5_0(builder_, level_ + 1);

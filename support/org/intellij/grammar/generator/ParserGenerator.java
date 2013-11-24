@@ -796,16 +796,17 @@ public class ParserGenerator {
     // do not include frameName if FIRST is known and its size is 1
     boolean dropFrameName = skipIfOne && !firstElementTypes.isEmpty() && firstElementTypes.size() == 1;
     if (!firstElementTypes.isEmpty() && firstElementTypes.size() <= generateFirstCheck) {
-      StringBuilder sb = new StringBuilder("if (");
-      for (int count = 0, elementTypesSize = firstElementTypes.size(); count < elementTypesSize; count++) {
-        if (count > 0) sb.append(count % 2 == 0 ? "\n  && " : " && ");
-        sb.append("!").append(fast? "nextTokenIsFast" : "nextTokenIs").append("(builder_, ").append(firstElementTypes.get(count)).append(")");
+      StringBuilder sb = new StringBuilder("if (!");
+      sb.append(fast ? "nextTokenIsFast" : "nextTokenIs").append("(builder_, ");
+      if (!fast && !dropFrameName) sb.append(frameName != null ? frameName : "\"\"").append(", ");
+
+      for (int count = 0, line = 0, size = firstElementTypes.size(); count < size; count++) {
+        boolean newLine = line == 0 && count == 2 || line > 0 && (count - 2) % 6 == 0;
+        if (count > 0) sb.append(",").append(newLine ? "\n" : " ");
+        sb.append(firstElementTypes.get(count));
+        if (newLine) line ++;
       }
-      if (!dropFrameName && frameName != null && !fast) {
-        sb.append(firstElementTypes.size() % 2 == 0 ? "\n  && " : " && ");
-        sb.append("replaceVariants(builder_, ").append(firstElementTypes.size()).append(", ").append(frameName).append(")");
-      }
-      sb.append(") return false;");
+      sb.append(")) return false;");
       out(sb.toString());
     }
     return dropFrameName? null : frameName;

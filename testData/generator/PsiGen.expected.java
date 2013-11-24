@@ -66,7 +66,7 @@ public class PsiGen implements PsiParser {
   // b_expr plus_expr *
   static boolean a_expr(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "a_expr")) return false;
-    if (!nextTokenIs(builder_, ID) && !nextTokenIs(builder_, NUMBER)) return false;
+    if (!nextTokenIs(builder_, "", ID, NUMBER)) return false;
     boolean result_ = false;
     Marker marker_ = enter_section_(builder_);
     result_ = b_expr(builder_, level_ + 1);
@@ -91,7 +91,7 @@ public class PsiGen implements PsiParser {
   // id_expr mul_expr *
   static boolean b_expr(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "b_expr")) return false;
-    if (!nextTokenIs(builder_, ID) && !nextTokenIs(builder_, NUMBER)) return false;
+    if (!nextTokenIs(builder_, "", ID, NUMBER)) return false;
     boolean result_ = false;
     Marker marker_ = enter_section_(builder_);
     result_ = id_expr(builder_, level_ + 1);
@@ -116,8 +116,7 @@ public class PsiGen implements PsiParser {
   // a_expr (',' a_expr) *
   public static boolean expr(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "expr")) return false;
-    if (!nextTokenIs(builder_, ID) && !nextTokenIs(builder_, NUMBER)
-        && replaceVariants(builder_, 2, "<expr>")) return false;
+    if (!nextTokenIs(builder_, "<expr>", ID, NUMBER)) return false;
     boolean result_ = false;
     Marker marker_ = enter_section_(builder_, level_, _COLLAPSE_, "<expr>");
     result_ = a_expr(builder_, level_ + 1);
@@ -201,8 +200,7 @@ public class PsiGen implements PsiParser {
   // expr | external_type3
   public static boolean grammar_element(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "grammar_element")) return false;
-    if (!nextTokenIs(builder_, ID) && !nextTokenIs(builder_, NUMBER)
-        && replaceVariants(builder_, 2, "<grammar element>")) return false;
+    if (!nextTokenIs(builder_, "<grammar element>", ID, NUMBER)) return false;
     boolean result_ = false;
     Marker marker_ = enter_section_(builder_, level_, _NONE_, "<grammar element>");
     result_ = expr(builder_, level_ + 1);
@@ -215,7 +213,7 @@ public class PsiGen implements PsiParser {
   // specialRef | reference | literal | external_type | external_type2
   static boolean id_expr(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "id_expr")) return false;
-    if (!nextTokenIs(builder_, ID) && !nextTokenIs(builder_, NUMBER)) return false;
+    if (!nextTokenIs(builder_, "", ID, NUMBER)) return false;
     boolean result_ = false;
     Marker marker_ = enter_section_(builder_);
     result_ = PsiGen2.specialRef(builder_, level_ + 1);
@@ -298,8 +296,7 @@ public class PsiGen implements PsiParser {
   // <<blockOf grammar_element>>
   public static boolean root_c(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "root_c")) return false;
-    if (!nextTokenIs(builder_, ID) && !nextTokenIs(builder_, NUMBER)
-        && replaceVariants(builder_, 2, "<root c>")) return false;
+    if (!nextTokenIs(builder_, "<root c>", ID, NUMBER)) return false;
     boolean result_ = false;
     Marker marker_ = enter_section_(builder_, level_, _NONE_, "<root c>");
     result_ = PsiGen2.blockOf(builder_, level_ + 1, grammar_element_parser_);
@@ -311,8 +308,7 @@ public class PsiGen implements PsiParser {
   // <<listOf grammar_element>>
   public static boolean root_d(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "root_d")) return false;
-    if (!nextTokenIs(builder_, ID) && !nextTokenIs(builder_, NUMBER)
-        && replaceVariants(builder_, 2, "<root d>")) return false;
+    if (!nextTokenIs(builder_, "<root d>", ID, NUMBER)) return false;
     boolean result_ = false;
     Marker marker_ = enter_section_(builder_, level_, _NONE_, "<root d>");
     result_ = listOf(builder_, level_ + 1, grammar_element_parser_);
@@ -461,8 +457,7 @@ public class PsiGen2 {
   // (a_expr | specialRef b_expr | some_expr_private) (cast_expr) (item_expr) *
   public static boolean some_expr(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "some_expr")) return false;
-    if (!nextTokenIs(builder_, ID) && !nextTokenIs(builder_, NUMBER)
-        && replaceVariants(builder_, 2, "<some expr>")) return false;
+    if (!nextTokenIs(builder_, "<some expr>", ID, NUMBER)) return false;
     boolean result_ = false;
     Marker marker_ = enter_section_(builder_, level_, _COLLAPSE_, "<some expr>");
     result_ = some_expr_0(builder_, level_ + 1);

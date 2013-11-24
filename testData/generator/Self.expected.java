@@ -331,7 +331,7 @@ public class Self implements PsiParser {
   // string_literal_expression | number
   public static boolean literal_expression(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "literal_expression")) return false;
-    if (!nextTokenIs(builder_, BNF_NUMBER) && !nextTokenIs(builder_, BNF_STRING)) return false;
+    if (!nextTokenIs(builder_, "", BNF_NUMBER, BNF_STRING)) return false;
     boolean result_ = false;
     Marker marker_ = enter_section_(builder_, level_, _COLLAPSE_, null);
     result_ = string_literal_expression(builder_, level_ + 1);
@@ -385,7 +385,7 @@ public class Self implements PsiParser {
   // predicate_sign  simple
   public static boolean predicate(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "predicate")) return false;
-    if (!nextTokenIs(builder_, BNF_OP_NOT) && !nextTokenIs(builder_, BNF_OP_AND)) return false;
+    if (!nextTokenIs(builder_, "", BNF_OP_NOT, BNF_OP_AND)) return false;
     boolean result_ = false;
     Marker marker_ = enter_section_(builder_);
     result_ = predicate_sign(builder_, level_ + 1);
@@ -398,7 +398,7 @@ public class Self implements PsiParser {
   // '&' | '!'
   public static boolean predicate_sign(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "predicate_sign")) return false;
-    if (!nextTokenIs(builder_, BNF_OP_NOT) && !nextTokenIs(builder_, BNF_OP_AND)) return false;
+    if (!nextTokenIs(builder_, "", BNF_OP_NOT, BNF_OP_AND)) return false;
     boolean result_ = false;
     Marker marker_ = enter_section_(builder_);
     result_ = consumeToken(builder_, BNF_OP_AND);

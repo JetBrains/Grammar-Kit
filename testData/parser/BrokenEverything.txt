@@ -53,7 +53,7 @@ BnfFile:BrokenEverything.bnf
     PsiWhiteSpace(' ')
     PsiElement(::=)('::=')
     PsiWhiteSpace(' ')
-    BNF_PAREN_EXPRESSION
+    BNF_PAREN_EXPRESSION: {x}
       PsiElement({)('{')
       BNF_REFERENCE_OR_TOKEN: x
         PsiElement(id)('x')

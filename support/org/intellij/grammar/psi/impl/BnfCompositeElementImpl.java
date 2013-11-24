@@ -17,7 +17,11 @@ package org.intellij.grammar.psi.impl;
 
 import com.intellij.extapi.psi.ASTWrapperPsiElement;
 import com.intellij.lang.ASTNode;
+import com.intellij.openapi.util.text.StringUtil;
 import org.intellij.grammar.psi.BnfCompositeElement;
+import org.intellij.grammar.psi.BnfExpression;
+import org.intellij.grammar.psi.BnfLiteralExpression;
+import org.intellij.grammar.psi.BnfValueList;
 
 /**
  * Created by IntelliJ IDEA.
@@ -30,8 +34,20 @@ public class BnfCompositeElementImpl extends ASTWrapperPsiElement implements Bnf
     super(node);
   }
 
+  /** @noinspection InstanceofThis*/
   @Override
   public String toString() {
-    return getNode().getElementType().toString();
+    String elementType = getNode().getElementType().toString();
+    boolean addText = this instanceof BnfExpression && !(this instanceof BnfValueList);
+    if (addText) {
+      String text = getText();
+      if (!(this instanceof BnfLiteralExpression) && text.length() > 50) {
+        text = text.substring(0, 30) + " ... " + text.substring(text.length() - 20, text.length());
+      }
+      return elementType + (StringUtil.isEmptyOrSpaces(text)? "" : ": " + text);
+    }
+    else {
+      return elementType;
+    }
   }
 }

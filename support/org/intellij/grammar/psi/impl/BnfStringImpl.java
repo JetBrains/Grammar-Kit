@@ -136,11 +136,6 @@ public abstract class BnfStringImpl extends BnfExpressionImpl implements BnfStri
     return new BnfStringLiteralEscaper(this);
   }
 
-  @Override
-  public String toString() {
-    return super.toString() + ": " + getText();
-  }
-
   private static class MyMultiReference extends PsiMultiReference {
     MyMultiReference(PsiReference[] psiReferences, BnfStringLiteralExpression element) {
       super(psiReferences, element);

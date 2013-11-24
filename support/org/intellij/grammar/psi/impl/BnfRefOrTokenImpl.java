@@ -44,8 +44,4 @@ public abstract class BnfRefOrTokenImpl extends BnfExpressionImpl implements Bnf
     };
   }
 
-  @Override
-  public String toString() {
-    return super.toString() + ": " + getText();
-  }
 }

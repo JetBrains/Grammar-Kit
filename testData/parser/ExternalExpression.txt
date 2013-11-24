@@ -4,7 +4,7 @@ BnfFile:ExternalExpression.bnf
     PsiWhiteSpace(' ')
     PsiElement(::=)('::=')
     PsiWhiteSpace(' ')
-    BNF_EXTERNAL_EXPRESSION
+    BNF_EXTERNAL_EXPRESSION: <<listOf statement>>
       PsiElement(<<)('<<')
       BNF_REFERENCE_OR_TOKEN: listOf
         PsiElement(id)('listOf')
@@ -18,7 +18,7 @@ BnfFile:ExternalExpression.bnf
     PsiWhiteSpace(' ')
     PsiElement(::=)('::=')
     PsiWhiteSpace(' ')
-    BNF_CHOICE
+    BNF_CHOICE: simple_case | complex_case | c ... | multi_complex_case
       BNF_REFERENCE_OR_TOKEN: simple_case
         PsiElement(id)('simple_case')
       PsiWhiteSpace(' ')
@@ -47,11 +47,11 @@ BnfFile:ExternalExpression.bnf
     PsiWhiteSpace(' ')
     PsiElement(::=)('::=')
     PsiWhiteSpace(' ')
-    BNF_SEQUENCE
+    BNF_SEQUENCE: DO <<uniqueListOf 'zero' one two 10 some>> END
       BNF_REFERENCE_OR_TOKEN: DO
         PsiElement(id)('DO')
       PsiWhiteSpace(' ')
-      BNF_EXTERNAL_EXPRESSION
+      BNF_EXTERNAL_EXPRESSION: <<uniqueListOf 'zero' one two 10 some>>
         PsiElement(<<)('<<')
         BNF_REFERENCE_OR_TOKEN: uniqueListOf
           PsiElement(id)('uniqueListOf')
@@ -65,7 +65,7 @@ BnfFile:ExternalExpression.bnf
         BNF_REFERENCE_OR_TOKEN: two
           PsiElement(id)('two')
         PsiWhiteSpace(' ')
-        BNF_LITERAL_EXPRESSION
+        BNF_LITERAL_EXPRESSION: 10
           PsiElement(number)('10')
         PsiWhiteSpace(' ')
         BNF_REFERENCE_OR_TOKEN: some
@@ -80,18 +80,18 @@ BnfFile:ExternalExpression.bnf
     PsiWhiteSpace(' ')
     PsiElement(::=)('::=')
     PsiWhiteSpace(' ')
-    BNF_SEQUENCE
+    BNF_SEQUENCE: DO <<uniqueListOf (one | two | 10 | some)>> END
       BNF_REFERENCE_OR_TOKEN: DO
         PsiElement(id)('DO')
       PsiWhiteSpace(' ')
-      BNF_EXTERNAL_EXPRESSION
+      BNF_EXTERNAL_EXPRESSION: <<uniqueListOf (one | two | 10 | some)>>
         PsiElement(<<)('<<')
         BNF_REFERENCE_OR_TOKEN: uniqueListOf
           PsiElement(id)('uniqueListOf')
         PsiWhiteSpace(' ')
-        BNF_PAREN_EXPRESSION
+        BNF_PAREN_EXPRESSION: (one | two | 10 | some)
           PsiElement(()('(')
-          BNF_CHOICE
+          BNF_CHOICE: one | two | 10 | some
             BNF_REFERENCE_OR_TOKEN: one
               PsiElement(id)('one')
             PsiWhiteSpace(' ')
@@ -102,7 +102,7 @@ BnfFile:ExternalExpression.bnf
             PsiWhiteSpace(' ')
             PsiElement(|)('|')
             PsiWhiteSpace(' ')
-            BNF_LITERAL_EXPRESSION
+            BNF_LITERAL_EXPRESSION: 10
               PsiElement(number)('10')
             PsiWhiteSpace(' ')
             PsiElement(|)('|')
@@ -120,18 +120,18 @@ BnfFile:ExternalExpression.bnf
     PsiWhiteSpace(' ')
     PsiElement(::=)('::=')
     PsiWhiteSpace(' ')
-    BNF_SEQUENCE
+    BNF_SEQUENCE: DO <<uniqueListOf [one | two | 10 | some]>> END
       BNF_REFERENCE_OR_TOKEN: DO
         PsiElement(id)('DO')
       PsiWhiteSpace(' ')
-      BNF_EXTERNAL_EXPRESSION
+      BNF_EXTERNAL_EXPRESSION: <<uniqueListOf [one | two | 10 | some]>>
         PsiElement(<<)('<<')
         BNF_REFERENCE_OR_TOKEN: uniqueListOf
           PsiElement(id)('uniqueListOf')
         PsiWhiteSpace(' ')
-        BNF_PAREN_OPT_EXPRESSION
+        BNF_PAREN_OPT_EXPRESSION: [one | two | 10 | some]
           PsiElement([)('[')
-          BNF_CHOICE
+          BNF_CHOICE: one | two | 10 | some
             BNF_REFERENCE_OR_TOKEN: one
               PsiElement(id)('one')
             PsiWhiteSpace(' ')
@@ -142,7 +142,7 @@ BnfFile:ExternalExpression.bnf
             PsiWhiteSpace(' ')
             PsiElement(|)('|')
             PsiWhiteSpace(' ')
-            BNF_LITERAL_EXPRESSION
+            BNF_LITERAL_EXPRESSION: 10
               PsiElement(number)('10')
             PsiWhiteSpace(' ')
             PsiElement(|)('|')
@@ -160,18 +160,18 @@ BnfFile:ExternalExpression.bnf
     PsiWhiteSpace(' ')
     PsiElement(::=)('::=')
     PsiWhiteSpace(' ')
-    BNF_SEQUENCE
+    BNF_SEQUENCE: DO <<uniqueListOf {one | two | 10 | some}>> END
       BNF_REFERENCE_OR_TOKEN: DO
         PsiElement(id)('DO')
       PsiWhiteSpace(' ')
-      BNF_EXTERNAL_EXPRESSION
+      BNF_EXTERNAL_EXPRESSION: <<uniqueListOf {one | two | 10 | some}>>
         PsiElement(<<)('<<')
         BNF_REFERENCE_OR_TOKEN: uniqueListOf
           PsiElement(id)('uniqueListOf')
         PsiWhiteSpace(' ')
-        BNF_PAREN_EXPRESSION
+        BNF_PAREN_EXPRESSION: {one | two | 10 | some}
           PsiElement({)('{')
-          BNF_CHOICE
+          BNF_CHOICE: one | two | 10 | some
             BNF_REFERENCE_OR_TOKEN: one
               PsiElement(id)('one')
             PsiWhiteSpace(' ')
@@ -182,7 +182,7 @@ BnfFile:ExternalExpression.bnf
             PsiWhiteSpace(' ')
             PsiElement(|)('|')
             PsiWhiteSpace(' ')
-            BNF_LITERAL_EXPRESSION
+            BNF_LITERAL_EXPRESSION: 10
               PsiElement(number)('10')
             PsiWhiteSpace(' ')
             PsiElement(|)('|')
@@ -200,18 +200,18 @@ BnfFile:ExternalExpression.bnf
     PsiWhiteSpace(' ')
     PsiElement(::=)('::=')
     PsiWhiteSpace(' ')
-    BNF_SEQUENCE
+    BNF_SEQUENCE: DO <<uniqueListOf {one | two} [10 | some]>> END
       BNF_REFERENCE_OR_TOKEN: DO
         PsiElement(id)('DO')
       PsiWhiteSpace(' ')
-      BNF_EXTERNAL_EXPRESSION
+      BNF_EXTERNAL_EXPRESSION: <<uniqueListOf {one | two} [10 | some]>>
         PsiElement(<<)('<<')
         BNF_REFERENCE_OR_TOKEN: uniqueListOf
           PsiElement(id)('uniqueListOf')
         PsiWhiteSpace(' ')
-        BNF_PAREN_EXPRESSION
+        BNF_PAREN_EXPRESSION: {one | two}
           PsiElement({)('{')
-          BNF_CHOICE
+          BNF_CHOICE: one | two
             BNF_REFERENCE_OR_TOKEN: one
               PsiElement(id)('one')
             PsiWhiteSpace(' ')
@@ -221,10 +221,10 @@ BnfFile:ExternalExpression.bnf
               PsiElement(id)('two')
           PsiElement(})('}')
         PsiWhiteSpace(' ')
-        BNF_PAREN_OPT_EXPRESSION
+        BNF_PAREN_OPT_EXPRESSION: [10 | some]
           PsiElement([)('[')
-          BNF_CHOICE
-            BNF_LITERAL_EXPRESSION
+          BNF_CHOICE: 10 | some
+            BNF_LITERAL_EXPRESSION: 10
               PsiElement(number)('10')
             PsiWhiteSpace(' ')
             PsiElement(|)('|')
@@ -242,7 +242,7 @@ BnfFile:ExternalExpression.bnf
     PsiWhiteSpace(' ')
     PsiElement(::=)('::=')
     PsiWhiteSpace(' ')
-    BNF_SEQUENCE
+    BNF_SEQUENCE: some value
       BNF_REFERENCE_OR_TOKEN: some
         PsiElement(id)('some')
       PsiWhiteSpace(' ')
@@ -254,7 +254,7 @@ BnfFile:ExternalExpression.bnf
     PsiWhiteSpace(' ')
     PsiElement(::=)('::=')
     PsiWhiteSpace(' ')
-    BNF_SEQUENCE
+    BNF_SEQUENCE: some other value
       BNF_REFERENCE_OR_TOKEN: some
         PsiElement(id)('some')
       PsiWhiteSpace(' ')

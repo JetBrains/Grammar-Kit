@@ -18,12 +18,12 @@ BnfFile:Fixes.bnf
     PsiWhiteSpace(' ')
     PsiElement(::=)('::=')
     PsiWhiteSpace(' ')
-    BNF_EXTERNAL_EXPRESSION
+    BNF_EXTERNAL_EXPRESSION: <<some_meta ()>>
       PsiElement(<<)('<<')
       BNF_REFERENCE_OR_TOKEN: some_meta
         PsiElement(id)('some_meta')
       PsiWhiteSpace(' ')
-      BNF_PAREN_EXPRESSION
+      BNF_PAREN_EXPRESSION: ()
         PsiElement(()('(')
         BNF_SEQUENCE
           <empty list>

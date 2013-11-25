@@ -35,6 +35,7 @@ import com.intellij.psi.impl.source.tree.LeafPsiElement;
 import com.intellij.ui.content.Content;
 import com.intellij.ui.popup.AbstractPopup;
 import org.intellij.grammar.analysis.BnfFirstNextAnalyzer;
+import org.intellij.grammar.generator.BnfConstants;
 import org.intellij.grammar.generator.ExpressionHelper;
 import org.intellij.grammar.generator.ParserGeneratorUtil;
 import org.intellij.grammar.generator.RuleGraphHelper;
@@ -69,11 +70,31 @@ public class BnfDocumentationProvider implements DocumentationProvider {
       StringBuilder docBuilder = new StringBuilder();
       String[] firstS = first.toArray(new String[first.size()]);
       Arrays.sort(firstS);
-      docBuilder.append("<h1>Starts with:</h1>").append(StringUtil.escapeXml(StringUtil.join(firstS, " | ")));
+      docBuilder.append("<h1>Starts with:</h1>");
+      docBuilder.append("<code>").append(StringUtil.escapeXml(StringUtil.join(firstS, " | "))).append("</code>");
 
       String[] nextS = next.toArray(new String[next.size()]);
       Arrays.sort(nextS);
-      docBuilder.append("<br><h1>Followed by:</h1>").append(StringUtil.escapeXml(StringUtil.join(nextS, " | ")));
+      docBuilder.append("<br><h1>Followed by:</h1>");
+      docBuilder.append("<code>").append(StringUtil.escapeXml(StringUtil.join(nextS, " | "))).append("</code>");
+
+      BnfFile file = (BnfFile)rule.getContainingFile();
+      String recover = file.findAttributeValue(rule, KnownAttribute.RECOVER_WHILE, null);
+      if (BnfConstants.RECOVER_AUTO.equals(recover)) {
+        docBuilder.append("<br><h1>#auto recovery predicate:</h1>");
+        docBuilder.append("<code>");
+        docBuilder.append("private ").append(rule.getName()).append("_recover ::= !(");
+        boolean f = true;
+        for (String s : nextS) {
+          if (s.startsWith("-") || s.startsWith("<")) continue;
+          if (file.getRule(s) != null) continue;
+          if (f) f = false;
+          else docBuilder.append(" | ");
+          docBuilder.append(StringUtil.escapeXml(s));
+        }
+        docBuilder.append(")");
+        docBuilder.append("</code>");
+      }
 
       final String prefix = docBuilder.toString();
       if (!ParserGeneratorUtil.Rule.isMeta(rule)) {

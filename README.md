@@ -33,6 +33,7 @@ Recent changes
 * Editor: recoverable rule highlighting, help improved for _pin_ and _recoverWhile_
 * GPUB: cleanup and OOM protection
 * Generator: parser size reduced, fragment parsing fixed, empty tokens support (lexer-based preprocessors)
+* Generator: simple #auto recovery predicate generation, i.e. _recoverWhile_ = "#auto"
 
 
 Quick documentation:

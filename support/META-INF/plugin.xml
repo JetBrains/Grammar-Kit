@@ -18,6 +18,7 @@
         <li>Editor: recoverable rule highlighting, help improved for "pin" and "recoverWhile"</li>
         <li>GPUB: cleanup and OOM protection</li>
         <li>Generator: parser size reduced, fragment parsing fixed, empty tokens support (lexer-based preprocessors)</li>
+        <li>Generator: simple #auto recovery predicate generation</li>
     </ul>
     <p>1.1.4</p>
     <ul>

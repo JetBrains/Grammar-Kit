@@ -20,33 +20,63 @@ import com.intellij.concurrency.AsyncFutureFactory;
 import com.intellij.concurrency.AsyncFutureFactoryImpl;
 import com.intellij.concurrency.JobLauncher;
 import com.intellij.concurrency.JobLauncherImpl;
-import com.intellij.lang.LanguageParserDefinitions;
-import com.intellij.lang.ParserDefinition;
+import com.intellij.ide.startup.impl.StartupManagerImpl;
+import com.intellij.lang.*;
+import com.intellij.lang.impl.PsiBuilderFactoryImpl;
 import com.intellij.lang.injection.InjectedLanguageManager;
-import com.intellij.mock.MockApplicationEx;
-import com.intellij.mock.MockProjectEx;
-import com.intellij.mock.MockPsiManager;
+import com.intellij.mock.*;
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.editor.Document;
+import com.intellij.openapi.editor.EditorFactory;
+import com.intellij.openapi.extensions.ExtensionPoint;
+import com.intellij.openapi.extensions.ExtensionPointName;
 import com.intellij.openapi.extensions.Extensions;
+import com.intellij.openapi.extensions.ExtensionsArea;
+import com.intellij.openapi.fileEditor.FileDocumentManager;
+import com.intellij.openapi.fileEditor.impl.FileDocumentManagerImpl;
+import com.intellij.openapi.fileTypes.FileTypeFactory;
+import com.intellij.openapi.fileTypes.FileTypeManager;
+import com.intellij.openapi.fileTypes.FileTypeRegistry;
+import com.intellij.openapi.fileTypes.PlainTextLanguage;
+import com.intellij.openapi.options.SchemesManagerFactory;
 import com.intellij.openapi.progress.ProgressManager;
+import com.intellij.openapi.progress.impl.ProgressManagerImpl;
 import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.DumbServiceImpl;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.startup.StartupManager;
 import com.intellij.openapi.util.Disposer;
+import com.intellij.openapi.util.Getter;
+import com.intellij.openapi.util.Trinity;
 import com.intellij.openapi.util.io.FileUtil;
+import com.intellij.openapi.vfs.encoding.EncodingManager;
+import com.intellij.openapi.vfs.encoding.EncodingManagerImpl;
+import com.intellij.openapi.vfs.encoding.EncodingRegistry;
 import com.intellij.psi.*;
+import com.intellij.psi.impl.PsiCachedValuesFactory;
 import com.intellij.psi.impl.PsiFileFactoryImpl;
 import com.intellij.psi.impl.search.CachesBasedRefSearcher;
 import com.intellij.psi.impl.search.PsiSearchHelperImpl;
 import com.intellij.psi.impl.source.resolve.ResolveCache;
+import com.intellij.psi.impl.source.resolve.reference.ReferenceProvidersRegistry;
+import com.intellij.psi.impl.source.resolve.reference.ReferenceProvidersRegistryImpl;
 import com.intellij.psi.impl.source.tree.injected.InjectedLanguageManagerImpl;
 import com.intellij.psi.search.PsiSearchHelper;
-import com.intellij.testFramework.ParsingTestCase;
+import com.intellij.psi.util.CachedValuesManager;
+import com.intellij.testFramework.LightVirtualFile;
+import com.intellij.testFramework.MockSchemesManagerFactory;
+import com.intellij.util.CachedValuesManagerImpl;
+import com.intellij.util.Function;
+import com.intellij.util.messages.MessageBus;
+import com.intellij.util.messages.MessageBusFactory;
 import org.intellij.grammar.java.JavaHelper;
 import org.jetbrains.annotations.NonNls;
+import org.picocontainer.*;
+import org.picocontainer.defaults.AbstractComponentAdapter;
 
 import java.io.*;
+import java.lang.reflect.Modifier;
 import java.util.jar.JarEntry;
 import java.util.jar.JarOutputStream;
 import java.util.regex.Matcher;
@@ -110,22 +140,23 @@ public class LightPsi {
     jarFile.close();
   }
 
-  private static class MyParsing extends ParsingTestCase {
-    MyParsing() throws Exception {
-      super("", "", new BnfParserDefinition());
-      super.setUp();
-      Init.initExtensions(getProject(), getPsiManager());
-    }
+  private static class MyParsing implements Disposable {
 
-    @Override
-    protected String getTestDataPath() {
-      return "";
+    private final Trinity<MockProjectEx,MockPsiManager,PsiFileFactoryImpl> myModel;
+
+    MyParsing() throws Exception {
+      myModel = Init.initPsiFileFactory(this);
+      Init.initExtensions(myModel.first, myModel.second);
     }
 
     protected PsiFile createFile(@NonNls String name, String text, ParserDefinition definition) {
-      addExplicitExtension(LanguageParserDefinitions.INSTANCE, definition.getFileNodeType().getLanguage(), definition);
-      myLanguage = definition.getFileNodeType().getLanguage();
-      return super.createFile(name, text);
+      Language language = definition.getFileNodeType().getLanguage();
+      Init.addExplicitExtension(myModel.first, LanguageParserDefinitions.INSTANCE, language, definition);
+      return myModel.third.trySetupPsiForFile(new LightVirtualFile(name, language, text), language, true, false);
+    }
+
+    @Override
+    public void dispose() {
     }
   }
 
@@ -167,6 +198,104 @@ public class LightPsi {
         @Override
         public void dispose() {
           application.getPicoContainer().unregisterComponent(aClass.getName());
+        }
+      });
+    }
+    
+    public static Trinity<MockProjectEx, MockPsiManager, PsiFileFactoryImpl> initPsiFileFactory(Disposable rootDisposable) {
+      final MockApplicationEx application = initApplication(rootDisposable);
+      ComponentAdapter component = application.getPicoContainer().getComponentAdapter(ProgressManager.class.getName());
+      if (component == null) {
+        application.getPicoContainer().registerComponent(new AbstractComponentAdapter(ProgressManager.class.getName(), Object.class) {
+          @Override
+          public Object getComponentInstance(PicoContainer container) throws PicoInitializationException, PicoIntrospectionException {
+            return new ProgressManagerImpl(application);
+          }
+
+          @Override
+          public void verify(PicoContainer container) throws PicoIntrospectionException {
+          }
+        });
+      }
+      Extensions.registerAreaClass("IDEA_PROJECT", null);
+      MockProjectEx project = new MockProjectEx(rootDisposable);
+      MockPsiManager psiManager = new MockPsiManager(project);
+      PsiFileFactoryImpl psiFileFactory = new PsiFileFactoryImpl(psiManager);
+      MutablePicoContainer appContainer = application.getPicoContainer();
+      registerComponentInstance(appContainer, MessageBus.class, MessageBusFactory.newMessageBus(application));
+      registerComponentInstance(appContainer, SchemesManagerFactory.class, new MockSchemesManagerFactory());
+      final MockEditorFactory editorFactory = new MockEditorFactory();
+      registerComponentInstance(appContainer, EditorFactory.class, editorFactory);
+      registerComponentInstance(
+        appContainer, FileDocumentManager.class,
+        new MockFileDocumentManagerImpl(new Function<CharSequence, Document>() {
+          @Override
+          public Document fun(CharSequence charSequence) {
+            return editorFactory.createDocument(charSequence);
+          }
+        }, FileDocumentManagerImpl.DOCUMENT_KEY)
+      );
+      registerComponentInstance(appContainer, PsiDocumentManager.class, new MockPsiDocumentManager());
+      registerComponentInstance(appContainer, FileTypeManager.class, new MockFileTypeManager(new MockLanguageFileType(PlainTextLanguage.INSTANCE, "txt")));
+      registerApplicationService(project, PsiBuilderFactory.class, new PsiBuilderFactoryImpl());
+      registerApplicationService(project, DefaultASTFactory.class, new DefaultASTFactoryImpl());
+      registerApplicationService(project, ReferenceProvidersRegistry.class, new ReferenceProvidersRegistryImpl());
+      project.registerService(CachedValuesManager.class, new CachedValuesManagerImpl(project, new PsiCachedValuesFactory(psiManager)));
+      project.registerService(PsiManager.class, psiManager);
+      project.registerService(StartupManager.class, new StartupManagerImpl(project));
+      registerExtensionPoint(FileTypeFactory.FILE_TYPE_FACTORY_EP, FileTypeFactory.class);
+      return Trinity.create(project, psiManager, psiFileFactory);
+    }
+
+    public static MockApplicationEx initApplication(Disposable rootDisposable) {
+      MockApplicationEx instance = new MockApplicationEx(rootDisposable);
+      ApplicationManager.setApplication(
+        instance,
+        new Getter<FileTypeRegistry>() {
+          @Override
+          public FileTypeRegistry get() {
+            return FileTypeManager.getInstance();
+          }
+        },
+        new Getter<EncodingRegistry>() {
+          @Override
+          public EncodingRegistry get() {
+            return EncodingManager.getInstance();
+          }
+        },
+        rootDisposable
+      );
+      instance.registerService(EncodingManager.class, EncodingManagerImpl.class);
+      return instance;
+    }
+
+    public static <T> void registerExtensionPoint(ExtensionPointName<T> extensionPointName, final Class<T> aClass) {
+      registerExtensionPoint(Extensions.getRootArea(), extensionPointName, aClass);
+    }
+
+    public static <T> void registerExtensionPoint(ExtensionsArea area, ExtensionPointName<T> extensionPointName, Class<? extends T> aClass) {
+      final String name = extensionPointName.getName();
+      if (!area.hasExtensionPoint(name)) {
+        ExtensionPoint.Kind kind = aClass.isInterface() || (aClass.getModifiers() & Modifier.ABSTRACT) != 0
+                                   ? ExtensionPoint.Kind.INTERFACE
+                                   : ExtensionPoint.Kind.BEAN_CLASS;
+        area.registerExtensionPoint(name, aClass.getName(), kind);
+      }
+    }
+
+    public static <T> T registerComponentInstance(MutablePicoContainer container, Class<T> key, T implementation) {
+      Object old = container.getComponentInstance(key);
+      container.unregisterComponent(key);
+      container.registerComponentInstance(key, implementation);
+      return (T)old;
+    }
+
+    public static <T> void addExplicitExtension(Project project, final LanguageExtension<T> instance, final Language language, final T object) {
+      instance.addExplicitExtension(language, object);
+      Disposer.register(project, new Disposable() {
+        @Override
+        public void dispose() {
+          instance.removeExplicitExtension(language, object);
         }
       });
     }

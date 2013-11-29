@@ -32,6 +32,7 @@ import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.generator.BnfConstants;
 import org.intellij.grammar.generator.ParserGeneratorUtil;
 import org.intellij.grammar.generator.RuleGraphHelper;
+import org.intellij.grammar.psi.BnfAttrs;
 import org.intellij.grammar.psi.BnfFile;
 import org.intellij.grammar.psi.BnfReferenceOrToken;
 import org.intellij.grammar.psi.impl.GrammarUtil;
@@ -143,6 +144,8 @@ public class BnfGenerateLexerAction extends AnAction {
     bnfFile.acceptChildren(new PsiRecursiveElementWalkingVisitor() {
       @Override
       public void visitElement(PsiElement element) {
+        if (element instanceof BnfAttrs) return;
+
         if (GrammarUtil.isExternalReference(element)) return;
         String text = element instanceof BnfReferenceOrToken? element.getText() : null;
         if (text != null && bnfFile.getRule(text) == null) {

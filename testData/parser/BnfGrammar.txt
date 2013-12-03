@@ -6,8 +6,8 @@ BnfFile:BnfGrammar.bnf
       BNF_ATTR:classHeader
         PsiElement(id)('classHeader')
         PsiElement(=)('=')
-        BNF_STRING_LITERAL_EXPRESSION: "header.txt"
-          PsiElement(string)('"header.txt"')
+        BNF_STRING_LITERAL_EXPRESSION: "license.txt"
+          PsiElement(string)('"license.txt"')
       PsiWhiteSpace('\n  ')
       BNF_ATTR:parserClass
         PsiElement(id)('parserClass')

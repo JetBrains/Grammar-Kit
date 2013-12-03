@@ -1,5 +1,5 @@
 {
-  classHeader="header.txt"
+  classHeader="license.txt"
   parserClass="org.intellij.grammar.parser.GrammarParser"
   parserUtilClass="org.intellij.grammar.parser.GrammarParserUtil"
 

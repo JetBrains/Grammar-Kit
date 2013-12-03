@@ -13,6 +13,7 @@ public interface GeneratedTypes {
 
   IElementType BLOCK_OF = new IElementType("BLOCK_OF", null);
   IElementType CAST_EXPR = MyTypeFactory.createExprType("CAST_EXPR");
+  IElementType CHOICE_JOINED = new IElementType("CHOICE_JOINED", null);
   IElementType EXPR = new IElementType("EXPR", null);
   IElementType GRAMMAR_ELEMENT = new IElementType("GRAMMAR_ELEMENT", null);
   IElementType IDENTIFIER = new IElementType("IDENTIFIER", null);
@@ -46,6 +47,9 @@ public interface GeneratedTypes {
       }
       else if (type == CAST_EXPR) {
         return new XCastExprImpl(node);
+      }
+      else if (type == CHOICE_JOINED) {
+        return new XChoiceJoinedImpl(node);
       }
       else if (type == EXPR) {
         return new XExprImpl(node);
@@ -159,6 +163,23 @@ public interface XCastExpr extends XExpr {
 
   @NotNull
   XExpr getExpr();
+
+  @NotNull
+  PsiElement getId();
+
+}
+// ---- XChoiceJoined.java -----------------
+//header.txt
+package generated.psi;
+
+import java.util.List;
+import org.jetbrains.annotations.*;
+import com.intellij.psi.PsiElement;
+
+public interface XChoiceJoined extends XLiteral {
+
+  @NotNull
+  XLiteral getLiteral();
 
   @NotNull
   PsiElement getId();
@@ -519,6 +540,43 @@ public class XCastExprImpl extends XExprImpl implements XCastExpr {
   @NotNull
   public XExpr getExpr() {
     return findNotNullChildByClass(XExpr.class);
+  }
+
+  @Override
+  @NotNull
+  public PsiElement getId() {
+    return findNotNullChildByType(ID);
+  }
+
+}
+// ---- XChoiceJoinedImpl.java -----------------
+//header.txt
+package generated.psi.impl;
+
+import java.util.List;
+import org.jetbrains.annotations.*;
+import com.intellij.lang.ASTNode;
+import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiElementVisitor;
+import com.intellij.psi.util.PsiTreeUtil;
+import static generated.GeneratedTypes.*;
+import generated.psi.*;
+
+public class XChoiceJoinedImpl extends XLiteralImpl implements XChoiceJoined {
+
+  public XChoiceJoinedImpl(ASTNode node) {
+    super(node);
+  }
+
+  public void accept(@NotNull PsiElementVisitor visitor) {
+    if (visitor instanceof XVisitor) ((XVisitor)visitor).visitChoiceJoined(this);
+    else super.accept(visitor);
+  }
+
+  @Override
+  @NotNull
+  public XLiteral getLiteral() {
+    return findNotNullChildByClass(XLiteral.class);
   }
 
   @Override
@@ -1052,6 +1110,10 @@ public class XVisitor extends PsiElementVisitor {
 
   public void visitCastExpr(@NotNull XCastExpr o) {
     visitExpr(o);
+  }
+
+  public void visitChoiceJoined(@NotNull XChoiceJoined o) {
+    visitLiteral(o);
   }
 
   public void visitExpr(@NotNull XExpr o) {

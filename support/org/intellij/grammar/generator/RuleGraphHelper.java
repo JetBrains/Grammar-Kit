@@ -55,13 +55,16 @@ public class RuleGraphHelper {
   private static final TObjectHashingStrategy<PsiElement> CARDINALITY_HASHING_STRATEGY = new TObjectHashingStrategy<PsiElement>() {
     @Override
     public int computeHashCode(PsiElement e) {
-      if (e instanceof BnfReferenceOrToken) return e.getText().hashCode();
+      if (e instanceof BnfReferenceOrToken || e instanceof BnfLiteralExpression) {
+        return e.getText().hashCode();
+      }
       return CANONICAL.computeHashCode(e);
     }
 
     @Override
     public boolean equals(PsiElement e1, PsiElement e2) {
-      if (e1 instanceof BnfReferenceOrToken && e2 instanceof BnfReferenceOrToken) {
+      if (e1 instanceof BnfReferenceOrToken && e2 instanceof BnfReferenceOrToken ||
+          e1 instanceof BnfLiteralExpression && e2 instanceof BnfLiteralExpression) {
         return e1.getText().equals(e2.getText());
       }
       return CANONICAL.equals(e1, e2);

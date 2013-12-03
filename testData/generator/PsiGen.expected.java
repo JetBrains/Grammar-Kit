@@ -54,9 +54,10 @@ public class PsiGen implements PsiParser {
   }
 
   public static final TokenSet[] EXTENDS_SETS_ = new TokenSet[] {
-    create_token_set_(CAST_EXPR, EXPR, ID_EXPR, ITEM_EXPR,
-      LITERAL, MISSING_EXTERNAL_TYPE, MUL_EXPR, PLUS_EXPR,
-      REF_EXPR, SOME_EXPR, SPECIAL_REF),
+    create_token_set_(CAST_EXPR, CHOICE_JOINED, EXPR, ID_EXPR,
+      ITEM_EXPR, LITERAL, MISSING_EXTERNAL_TYPE, MUL_EXPR,
+      PLUS_EXPR, REF_EXPR, SOME_EXPR, SPECIAL_REF),
+    create_token_set_(CHOICE_JOINED, LITERAL),
     create_token_set_(REF_EXPR, SPECIAL_REF),
     create_token_set_(REF_EXPR, SPECIAL_REF),
     create_token_set_(ROOT, ROOT_B, ROOT_C, ROOT_D),
@@ -601,6 +602,42 @@ public class PsiGenFixes {
       pos_ = current_position_(builder_);
     }
     return true;
+  }
+
+  /* ********************************************************** */
+  // literal id '%' | '%' id literal
+  public static boolean choice_joined(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "choice_joined")) return false;
+    boolean result_ = false;
+    Marker marker_ = enter_section_(builder_, level_, _NONE_, "<choice joined>");
+    result_ = choice_joined_0(builder_, level_ + 1);
+    if (!result_) result_ = choice_joined_1(builder_, level_ + 1);
+    exit_section_(builder_, level_, marker_, CHOICE_JOINED, result_, false, null);
+    return result_;
+  }
+
+  // literal id '%'
+  private static boolean choice_joined_0(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "choice_joined_0")) return false;
+    boolean result_ = false;
+    Marker marker_ = enter_section_(builder_);
+    result_ = PsiGen2.literal(builder_, level_ + 1);
+    result_ = result_ && consumeToken(builder_, ID);
+    result_ = result_ && consumeToken(builder_, "%");
+    exit_section_(builder_, marker_, null, result_);
+    return result_;
+  }
+
+  // '%' id literal
+  private static boolean choice_joined_1(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "choice_joined_1")) return false;
+    boolean result_ = false;
+    Marker marker_ = enter_section_(builder_);
+    result_ = consumeToken(builder_, "%");
+    result_ = result_ && consumeToken(builder_, ID);
+    result_ = result_ && PsiGen2.literal(builder_, level_ + 1);
+    exit_section_(builder_, marker_, null, result_);
+    return result_;
   }
 
   /* ********************************************************** */

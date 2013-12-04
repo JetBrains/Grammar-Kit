@@ -1,18 +1,11 @@
 package org.intellij.grammar;
 
-import com.intellij.testFramework.ParsingTestCase;
-
 /**
  * @author gregsh
  */
-public class BnfGeneratorTestCase extends ParsingTestCase {
+public class BnfGeneratorTestCase extends AbstractParsingTestCase {
   public BnfGeneratorTestCase(String testDataName) {
     super(testDataName, "bnf", new BnfParserDefinition());
-  }
-
-  @Override
-  protected String getTestDataPath() {
-    return "testData";
   }
 
   @Override

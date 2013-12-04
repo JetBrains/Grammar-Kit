@@ -19,7 +19,7 @@ package org.intellij.jflex;
 import com.intellij.openapi.util.io.FileUtil;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.openapi.vfs.CharsetToolkit;
-import com.intellij.testFramework.ParsingTestCase;
+import org.intellij.grammar.AbstractParsingTestCase;
 import org.intellij.jflex.parser.JFlexParserDefinition;
 import org.jetbrains.annotations.NonNls;
 
@@ -29,7 +29,7 @@ import java.io.IOException;
 /**
  * @author gregsh
  */
-public class JFlexParserTest extends ParsingTestCase {
+public class JFlexParserTest extends AbstractParsingTestCase {
   public JFlexParserTest() {
     super("jflex/parser", "flex", new JFlexParserDefinition());
   }
@@ -37,11 +37,6 @@ public class JFlexParserTest extends ParsingTestCase {
   @Override
   protected void setUp() throws Exception {
     super.setUp();
-  }
-
-  @Override
-  protected String getTestDataPath() {
-    return "testData";
   }
 
   public void testSelfFlex() { doTest(true); }

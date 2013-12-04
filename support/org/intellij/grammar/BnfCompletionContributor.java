@@ -36,7 +36,9 @@ import org.intellij.grammar.psi.*;
 import org.intellij.grammar.psi.impl.BnfFileImpl;
 import org.intellij.grammar.psi.impl.BnfReferenceImpl;
 import org.intellij.grammar.psi.impl.GrammarUtil;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
@@ -54,11 +56,12 @@ public class BnfCompletionContributor extends CompletionContributor {
                                     ProcessingContext context,
                                     @NotNull CompletionResultSet result) {
         PsiElement position = parameters.getPosition();
-        BnfCompositeElement attrs = PsiTreeUtil.getParentOfType(position, BnfAttrs.class, BnfAttr.class, BnfParenExpression.class);
+        BnfCompositeElement parent = PsiTreeUtil.getParentOfType(position, BnfAttrs.class, BnfAttr.class, BnfParenExpression.class);
         boolean attrCompletion = false;
-        if ((attrs instanceof BnfAttrs || isPossibleEmptyAttrs(attrs))) {
-          boolean inRule = PsiTreeUtil.getParentOfType(attrs, BnfRule.class) != null;
-          ASTNode closingBrace = TreeUtil.findSiblingBackward(attrs.getNode().getLastChildNode(), BnfTypes.BNF_RIGHT_BRACE);
+        if (parent instanceof BnfAttrs || isPossibleEmptyAttrs(parent) ||
+             parent instanceof BnfAttr && isOneAfterAnother(((BnfAttr)parent).getExpression(), position)) {
+          boolean inRule = PsiTreeUtil.getParentOfType(parent, BnfRule.class) != null;
+          ASTNode closingBrace = TreeUtil.findSiblingBackward(parent.getNode().getLastChildNode(), BnfTypes.BNF_RIGHT_BRACE);
           if (closingBrace == null || position.getTextOffset() <= closingBrace.getStartOffset()) {
             attrCompletion = true;
             for (KnownAttribute attribute : KnownAttribute.getAttributes()) {
@@ -117,11 +120,17 @@ public class BnfCompletionContributor extends CompletionContributor {
     });
   }
 
+  @Contract("null -> false")
   private static boolean isPossibleEmptyAttrs(PsiElement attrs) {
     if (!(attrs instanceof BnfParenExpression)) return false;
     if (attrs.getFirstChild().getNode().getElementType() != BnfTypes.BNF_LEFT_BRACE) return false;
     if (!(((BnfParenExpression) attrs).getExpression() instanceof BnfReferenceOrToken)) return false;
     return isLastInRuleOrFree(attrs);
+  }
+
+  private static boolean isOneAfterAnother(@Nullable PsiElement e1, @Nullable PsiElement e2) {
+    if (e1 == null || e2 == null) return false;
+    return e1.getTextRange().getEndOffset() < e2.getTextRange().getStartOffset();
   }
 
   private static boolean isLastInRuleOrFree(PsiElement element) {

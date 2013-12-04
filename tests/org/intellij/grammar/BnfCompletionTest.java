@@ -25,7 +25,8 @@ public class BnfCompletionTest extends CodeInsightFixtureTestCase {
   public void testKeywords7() throws Throwable { doTestVariants("pr<caret>rule::=", CompletionType.BASIC, 1, CheckType.INCLUDES, "private"); }
   public void testKeywords8() throws Throwable { doTestVariants("rule::=\npr<caret>rule::=", CompletionType.BASIC, 1, CheckType.INCLUDES, "private"); }
   public void testAttr1() throws Throwable { doTestVariants("{<caret>}", CompletionType.BASIC, 1, CheckType.INCLUDES, "pin"); }
-  public void testAttr11() throws Throwable { doTestVariants("{<caret>}", CompletionType.BASIC, 1, CheckType.EXCLUDES, "private"); }
+  public void testAttr2() throws Throwable { doTestVariants("{<caret>}", CompletionType.BASIC, 1, CheckType.INCLUDES, "pin"); }
+  public void testAttr3() throws Throwable { doTestVariants("{pin=1 rec<caret>overUntil=abc}", CompletionType.BASIC, 1, CheckType.INCLUDES, "recoverWhile"); }
   public void testRule1() throws Throwable { doTestVariants("rule::= <caret>", CompletionType.BASIC, 1, CheckType.INCLUDES, "rule"); }
 
   protected void doTestVariants(String txt, CompletionType type, int count, CheckType checkType, String... variants) throws Throwable {

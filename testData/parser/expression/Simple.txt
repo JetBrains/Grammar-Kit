@@ -212,22 +212,24 @@ EXPR_FILE_TYPE
   PsiWhiteSpace('\n\n')
   LITERAL_EXPR
     PsiElement(number)('1')
-  PsiElement(DUMMY_BLOCK)
-    PsiErrorElement:'(' unexpected
-      PsiElement(()('(')
+  PsiErrorElement:';' expected, got '('
+    <empty list>
+  PAREN_EXPR
+    PsiElement(()('(')
     PsiElement())(')')
   PsiElement(;)(';')
   PsiWhiteSpace('\n\n')
   REF_EXPR
     IDENTIFIER
       PsiElement(id)('id')
-    PsiElement(BAD_CHARACTER)('.')
-    PsiElement(DUMMY_BLOCK)
-      PsiErrorElement:id expected, got '('
-        PsiElement(()('(')
-      PsiElement(DUMMY_BLOCK)
-        PsiElement(number)('2')
-      PsiElement())(')')
+  PsiElement(BAD_CHARACTER)('.')
+  PsiErrorElement:id expected, got '('
+    <empty list>
+  PAREN_EXPR
+    PsiElement(()('(')
+    LITERAL_EXPR
+      PsiElement(number)('2')
+    PsiElement())(')')
   PsiElement(;)(';')
   PsiWhiteSpace('\n\n')
   MINUS_EXPR
@@ -292,11 +294,12 @@ EXPR_FILE_TYPE
     PsiElement(BAD_CHARACTER)('.')
     IDENTIFIER
       PsiElement(id)('y')
-  PsiErrorElement:'(' expected, got ','
-    PsiElement(BAD_CHARACTER)(',')
+  PsiElement(BAD_CHARACTER)(',')
   PsiWhiteSpace(' ')
-  PsiElement(number)('1')
-  PsiElement())(')')
+  LITERAL_EXPR
+    PsiElement(number)('1')
+  PsiErrorElement:';' expected, got ')'
+    PsiElement())(')')
   PsiElement(;)(';')
   PsiWhiteSpace('\n')
   PLUS_EXPR
@@ -318,6 +321,5 @@ EXPR_FILE_TYPE
     PsiWhiteSpace(' ')
     LITERAL_EXPR
       PsiElement(number)('2')
-  PsiErrorElement:')' unexpected
-    PsiElement())(')')
+  PsiElement())(')')
   PsiElement(;)(';')

@@ -12,8 +12,8 @@ BnfFile:BrokenEverything.bnf
       PsiElement(=)('=')
       PsiErrorElement:<literal expression>, '[' or id expected, got '='
         <empty list>
-    PsiWhiteSpace(' ')
-    PsiElement(=)('=')
+      PsiWhiteSpace(' ')
+      PsiElement(=)('=')
     PsiWhiteSpace('\n')
     BNF_ATTR:a
       PsiElement(id)('a')

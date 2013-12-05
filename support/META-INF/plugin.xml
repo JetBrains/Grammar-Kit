@@ -61,6 +61,8 @@
                              implementationClass="org.intellij.grammar.psi.impl.BnfStringManipulator"/>
     <extendWordSelectionHandler implementation="org.intellij.grammar.editor.BnfWordSelectioner"/>
 
+    <spellchecker.support language="BNF" implementationClass="org.intellij.grammar.editor.BnfSpellCheckingStrategy"/>
+
     <lang.refactoringSupport language="BNF" implementationClass="org.intellij.grammar.refactor.BnfRefactoringSupportProvider"/>
     <inlineActionHandler implementation="org.intellij.grammar.refactor.BnfInlineRuleActionHandler"/>
 

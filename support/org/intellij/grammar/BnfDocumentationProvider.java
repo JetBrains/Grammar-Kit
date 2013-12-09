@@ -32,8 +32,11 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiManager;
 import com.intellij.psi.PsiNamedElement;
 import com.intellij.psi.impl.source.tree.LeafPsiElement;
+import com.intellij.ui.ColorUtil;
+import com.intellij.ui.JBColor;
 import com.intellij.ui.content.Content;
 import com.intellij.ui.popup.AbstractPopup;
+import com.intellij.util.PairConsumer;
 import org.intellij.grammar.analysis.BnfFirstNextAnalyzer;
 import org.intellij.grammar.generator.BnfConstants;
 import org.intellij.grammar.generator.ExpressionHelper;
@@ -130,7 +133,7 @@ public class BnfDocumentationProvider implements DocumentationProvider {
     return null;
   }
 
-  private static String getUpdatedDocumentation(BnfRule rule, String prefix) {
+  private static String getUpdatedDocumentation(final BnfRule rule, String prefix) {
     StringBuilder docBuilder = new StringBuilder(prefix);
     BnfFile file = (BnfFile)rule.getContainingFile();
     Map<PsiElement, RuleGraphHelper.Cardinality> map = RuleGraphHelper.getCached(file).getFor(rule);
@@ -138,29 +141,42 @@ public class BnfDocumentationProvider implements DocumentationProvider {
     Collection<BnfExpression> sortedTokens = ParserGeneratorUtil.getSortedTokens(map.keySet());
     Collection<LeafPsiElement> sortedExternalRules = ParserGeneratorUtil.getSortedExternalRules(map.keySet());
     if (sortedPublicRules.isEmpty() && sortedTokens.isEmpty()) {
-      docBuilder.append("<br><h1>Contains no public rules and no tokens</h1>");
+      docBuilder.append("\n<br><h1>Contains no public rules and no tokens</h1>");
     }
     else {
       if (sortedPublicRules.size() > 0) {
-        printElements(map, sortedPublicRules, docBuilder.append("<br><h1>Contains public rules:</h1>"));
+        printElements(map, sortedPublicRules, docBuilder.append("\n<br><h1>Contains public rules:</h1>"));
       }
       else {
         docBuilder.append("<h2>Contains no public rules</h2>");
       }
       if (sortedTokens.size() > 0) {
-        printElements(map, sortedTokens, docBuilder.append("<h1>Contains tokens:</h1>"));
+        printElements(map, sortedTokens, docBuilder.append("\n<br><h1>Contains tokens:</h1>"));
       }
       else {
         docBuilder.append("<h2>Contains no tokens</h2>");
       }
     }
     if (!sortedExternalRules.isEmpty()) {
-      printElements(map, sortedExternalRules, docBuilder.append("<br><h1>Contains external rules:</h1>"));
+      printElements(map, sortedExternalRules, docBuilder.append("\n<br><h1>Contains external rules:</h1>"));
     }
     ExpressionHelper.ExpressionInfo expressionInfo = ExpressionHelper.getCached(file).getExpressionInfo(rule);
     if (expressionInfo != null) {
-      docBuilder.append("<br><h1>Priority table:</h1>");
-      expressionInfo.dumpPriorityTable(docBuilder.append("<pre>")).append("</pre>");
+      docBuilder.append("\n<br><h1>Priority table:</h1>");
+      expressionInfo.dumpPriorityTable(docBuilder.append("<code><pre>"), new PairConsumer<StringBuilder, ExpressionHelper.OperatorInfo>() {
+        @Override
+        public void consume(StringBuilder sb, ExpressionHelper.OperatorInfo operatorInfo) {
+          if (operatorInfo.rule == rule) {
+            sb.append("<font").append(" color=\"#").append(ColorUtil.toHex(JBColor.BLUE)).append("\">");
+            sb.append(operatorInfo);
+            sb.append("</font>");
+          }
+          else {
+            sb.append(operatorInfo);
+          }
+
+        }
+      }).append("</pre></code>");
     }
     return docBuilder.toString();
   }

@@ -25,6 +25,7 @@ import com.intellij.psi.util.CachedValueProvider;
 import com.intellij.psi.util.CachedValuesManager;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.util.Function;
+import com.intellij.util.PairConsumer;
 import gnu.trove.THashSet;
 import org.intellij.grammar.analysis.BnfFirstNextAnalyzer;
 import org.intellij.grammar.psi.*;
@@ -321,12 +322,21 @@ public class ExpressionHelper {
     }
 
     public StringBuilder dumpPriorityTable(StringBuilder sb) {
+      return dumpPriorityTable(sb, new PairConsumer<StringBuilder, OperatorInfo>() {
+        @Override
+        public void consume(StringBuilder sb, OperatorInfo operatorInfo) {
+          sb.append(operatorInfo);
+        }
+      });
+    }
+
+    public StringBuilder dumpPriorityTable(StringBuilder sb, PairConsumer<StringBuilder, OperatorInfo> printer) {
       for (int i = 0; i < nextPriority; i++) {
         sb.append(i).append(":");
         for (BnfRule rule : priorityMap.keySet()) {
           if (priorityMap.get(rule) == i) {
-            OperatorInfo operatorInfo = operatorMap.get(rule);
-            sb.append(" ").append(operatorInfo);
+            sb.append(" ");
+            printer.consume(sb, operatorMap.get(rule));
           }
         }
         sb.append("\n");

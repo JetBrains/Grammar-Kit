@@ -9,6 +9,15 @@
   parserUtilClass="org.intellij.grammar.parser.GeneratedParserUtilBase"
 
   consumeTokenMethod(".*_expr|expr")="consumeTokenFast"
+
+  tokens=[
+    comment='regexp://.*'
+    number='regexp:\d+(\.\d*)?'
+    id='regexp:\p{Alpha}\w*'
+    string="regexp:('([^'\\]|\\.)*'|\"([^\"\\]|\\.)*\")"
+
+    syntax='regexp:;|\+|-|\*|==|=|/|,|\(|\)|\^|\!=|\!|>=|<=|>|<'
+  ]
 }
 root ::= element *
 private element ::= expr ';' {pin=1 recoverWhile=element_recover}
@@ -16,7 +25,8 @@ private element_recover ::= !('(' | '+' | '-' | 'multiply' | id | number)
 
 // left recursion and empty PSI children define expression root
 expr ::= assign_expr
-  | conditional_expr
+  | conditional_group
+  | between_expr
   | add_group
   | mul_group
   | unary_group
@@ -25,6 +35,7 @@ expr ::= assign_expr
   | call_expr
   | ref_expr
   | primary_group
+private conditional_group ::= elvis_expr | conditional_expr
 private unary_group ::= unary_plus_expr | unary_min_expr
 private mul_group ::= mul_expr | div_expr
 private add_group ::= plus_expr | minus_expr
@@ -40,6 +51,7 @@ identifier ::= id
 unary_min_expr ::= '-' expr
 unary_plus_expr ::= '+' expr
 assign_expr ::= expr '=' expr { rightAssociative=true }
+conditional_expr ::= expr ('<' | '>' | '<=' | '>=' | '==' | '!=') expr
 div_expr ::= expr '/' expr
 mul_expr ::= expr '*' expr
 minus_expr ::= expr '-' expr
@@ -47,7 +59,8 @@ plus_expr ::= expr '+' expr
 exp_expr ::= expr ('^' expr) + // N-ary variant
 factorial_expr ::= expr '!'
 paren_expr ::= '(' expr ')'
-conditional_expr ::= expr '?' expr ':' expr
+elvis_expr ::= expr '?' expr ':' expr
+between_expr ::= expr BETWEEN add_group AND add_group
 
 // test specific expressions
 special_expr ::= 'multiply' '(' simple_ref_expr ',' mul_expr ')' {pin=2}

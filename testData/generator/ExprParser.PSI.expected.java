@@ -11,9 +11,11 @@ public interface ExpressionTypes {
 
   IElementType ARG_LIST = ExpressionParserDefinition.createType("ARG_LIST");
   IElementType ASSIGN_EXPR = ExpressionParserDefinition.createType("ASSIGN_EXPR");
+  IElementType BETWEEN_EXPR = ExpressionParserDefinition.createType("BETWEEN_EXPR");
   IElementType CALL_EXPR = ExpressionParserDefinition.createType("CALL_EXPR");
   IElementType CONDITIONAL_EXPR = ExpressionParserDefinition.createType("CONDITIONAL_EXPR");
   IElementType DIV_EXPR = ExpressionParserDefinition.createType("DIV_EXPR");
+  IElementType ELVIS_EXPR = ExpressionParserDefinition.createType("ELVIS_EXPR");
   IElementType EXPR = ExpressionParserDefinition.createType("EXPR");
   IElementType EXP_EXPR = ExpressionParserDefinition.createType("EXP_EXPR");
   IElementType FACTORIAL_EXPR = ExpressionParserDefinition.createType("FACTORIAL_EXPR");
@@ -28,8 +30,13 @@ public interface ExpressionTypes {
   IElementType UNARY_MIN_EXPR = ExpressionParserDefinition.createType("UNARY_MIN_EXPR");
   IElementType UNARY_PLUS_EXPR = ExpressionParserDefinition.createType("UNARY_PLUS_EXPR");
 
+  IElementType AND = ExpressionParserDefinition.createTokenType("AND");
+  IElementType BETWEEN = ExpressionParserDefinition.createTokenType("BETWEEN");
+  IElementType COMMENT = ExpressionParserDefinition.createTokenType("comment");
   IElementType ID = ExpressionParserDefinition.createTokenType("id");
   IElementType NUMBER = ExpressionParserDefinition.createTokenType("number");
+  IElementType STRING = ExpressionParserDefinition.createTokenType("string");
+  IElementType SYNTAX = ExpressionParserDefinition.createTokenType("syntax");
 
   class Factory {
     public static PsiElement createElement(ASTNode node) {
@@ -40,6 +47,9 @@ public interface ExpressionTypes {
       else if (type == ASSIGN_EXPR) {
         return new AssignExprImpl(node);
       }
+      else if (type == BETWEEN_EXPR) {
+        return new BetweenExprImpl(node);
+      }
       else if (type == CALL_EXPR) {
         return new CallExprImpl(node);
       }
@@ -48,6 +58,9 @@ public interface ExpressionTypes {
       }
       else if (type == DIV_EXPR) {
         return new DivExprImpl(node);
+      }
+      else if (type == ELVIS_EXPR) {
+        return new ElvisExprImpl(node);
       }
       else if (type == EXPR) {
         return new ExprImpl(node);
@@ -120,6 +133,20 @@ public interface AssignExpr extends Expr {
   List<Expr> getExprList();
 
 }
+// ---- BetweenExpr.java -----------------
+//header.txt
+package generated.psi;
+
+import java.util.List;
+import org.jetbrains.annotations.*;
+import com.intellij.psi.PsiElement;
+
+public interface BetweenExpr extends Expr {
+
+  @NotNull
+  List<Expr> getExprList();
+
+}
 // ---- CallExpr.java -----------------
 //header.txt
 package generated.psi;
@@ -160,6 +187,20 @@ import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
 public interface DivExpr extends Expr {
+
+  @NotNull
+  List<Expr> getExprList();
+
+}
+// ---- ElvisExpr.java -----------------
+//header.txt
+package generated.psi;
+
+import java.util.List;
+import org.jetbrains.annotations.*;
+import com.intellij.psi.PsiElement;
+
+public interface ElvisExpr extends Expr {
 
   @NotNull
   List<Expr> getExprList();
@@ -410,6 +451,37 @@ public class AssignExprImpl extends ExprImpl implements AssignExpr {
   }
 
 }
+// ---- BetweenExprImpl.java -----------------
+//header.txt
+package generated.psi.impl;
+
+import java.util.List;
+import org.jetbrains.annotations.*;
+import com.intellij.lang.ASTNode;
+import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiElementVisitor;
+import com.intellij.psi.util.PsiTreeUtil;
+import static org.intellij.grammar.expression.ExpressionTypes.*;
+import generated.psi.*;
+
+public class BetweenExprImpl extends ExprImpl implements BetweenExpr {
+
+  public BetweenExprImpl(ASTNode node) {
+    super(node);
+  }
+
+  public void accept(@NotNull PsiElementVisitor visitor) {
+    if (visitor instanceof Visitor) ((Visitor)visitor).visitBetweenExpr(this);
+    else super.accept(visitor);
+  }
+
+  @Override
+  @NotNull
+  public List<Expr> getExprList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, Expr.class);
+  }
+
+}
 // ---- CallExprImpl.java -----------------
 //header.txt
 package generated.psi.impl;
@@ -499,6 +571,37 @@ public class DivExprImpl extends ExprImpl implements DivExpr {
 
   public void accept(@NotNull PsiElementVisitor visitor) {
     if (visitor instanceof Visitor) ((Visitor)visitor).visitDivExpr(this);
+    else super.accept(visitor);
+  }
+
+  @Override
+  @NotNull
+  public List<Expr> getExprList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, Expr.class);
+  }
+
+}
+// ---- ElvisExprImpl.java -----------------
+//header.txt
+package generated.psi.impl;
+
+import java.util.List;
+import org.jetbrains.annotations.*;
+import com.intellij.lang.ASTNode;
+import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiElementVisitor;
+import com.intellij.psi.util.PsiTreeUtil;
+import static org.intellij.grammar.expression.ExpressionTypes.*;
+import generated.psi.*;
+
+public class ElvisExprImpl extends ExprImpl implements ElvisExpr {
+
+  public ElvisExprImpl(ASTNode node) {
+    super(node);
+  }
+
+  public void accept(@NotNull PsiElementVisitor visitor) {
+    if (visitor instanceof Visitor) ((Visitor)visitor).visitElvisExpr(this);
     else super.accept(visitor);
   }
 
@@ -932,6 +1035,10 @@ public class Visitor extends PsiElementVisitor {
     visitExpr(o);
   }
 
+  public void visitBetweenExpr(@NotNull BetweenExpr o) {
+    visitExpr(o);
+  }
+
   public void visitCallExpr(@NotNull CallExpr o) {
     visitExpr(o);
   }
@@ -941,6 +1048,10 @@ public class Visitor extends PsiElementVisitor {
   }
 
   public void visitDivExpr(@NotNull DivExpr o) {
+    visitExpr(o);
+  }
+
+  public void visitElvisExpr(@NotNull ElvisExpr o) {
     visitExpr(o);
   }
 

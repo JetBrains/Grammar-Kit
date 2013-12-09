@@ -28,23 +28,29 @@ public class ExpressionParser implements PsiParser {
     else if (root_ == ASSIGN_EXPR) {
       result_ = expr(builder_, 0, -1);
     }
+    else if (root_ == BETWEEN_EXPR) {
+      result_ = expr(builder_, 0, 1);
+    }
     else if (root_ == CALL_EXPR) {
-      result_ = expr(builder_, 0, 6);
+      result_ = expr(builder_, 0, 7);
     }
     else if (root_ == CONDITIONAL_EXPR) {
       result_ = expr(builder_, 0, 0);
     }
     else if (root_ == DIV_EXPR) {
-      result_ = expr(builder_, 0, 2);
+      result_ = expr(builder_, 0, 3);
+    }
+    else if (root_ == ELVIS_EXPR) {
+      result_ = expr(builder_, 0, 0);
     }
     else if (root_ == EXP_EXPR) {
-      result_ = expr(builder_, 0, 4);
+      result_ = expr(builder_, 0, 5);
     }
     else if (root_ == EXPR) {
       result_ = expr(builder_, 0, -1);
     }
     else if (root_ == FACTORIAL_EXPR) {
-      result_ = expr(builder_, 0, 5);
+      result_ = expr(builder_, 0, 6);
     }
     else if (root_ == IDENTIFIER) {
       result_ = identifier(builder_, 0);
@@ -53,19 +59,19 @@ public class ExpressionParser implements PsiParser {
       result_ = literal_expr(builder_, 0);
     }
     else if (root_ == MINUS_EXPR) {
-      result_ = expr(builder_, 0, 1);
+      result_ = expr(builder_, 0, 2);
     }
     else if (root_ == MUL_EXPR) {
-      result_ = expr(builder_, 0, 2);
+      result_ = expr(builder_, 0, 3);
     }
     else if (root_ == PAREN_EXPR) {
       result_ = paren_expr(builder_, 0);
     }
     else if (root_ == PLUS_EXPR) {
-      result_ = expr(builder_, 0, 1);
+      result_ = expr(builder_, 0, 2);
     }
     else if (root_ == REF_EXPR) {
-      result_ = expr(builder_, 0, 7);
+      result_ = expr(builder_, 0, 8);
     }
     else if (root_ == SPECIAL_EXPR) {
       result_ = special_expr(builder_, 0);
@@ -88,10 +94,11 @@ public class ExpressionParser implements PsiParser {
   }
 
   public static final TokenSet[] EXTENDS_SETS_ = new TokenSet[] {
-    create_token_set_(ASSIGN_EXPR, CALL_EXPR, CONDITIONAL_EXPR, DIV_EXPR,
-      EXPR, EXP_EXPR, FACTORIAL_EXPR, LITERAL_EXPR,
-      MINUS_EXPR, MUL_EXPR, PAREN_EXPR, PLUS_EXPR,
-      REF_EXPR, SPECIAL_EXPR, UNARY_MIN_EXPR, UNARY_PLUS_EXPR),
+    create_token_set_(ASSIGN_EXPR, BETWEEN_EXPR, CALL_EXPR, CONDITIONAL_EXPR,
+      DIV_EXPR, ELVIS_EXPR, EXPR, EXP_EXPR,
+      FACTORIAL_EXPR, LITERAL_EXPR, MINUS_EXPR, MUL_EXPR,
+      PAREN_EXPR, PLUS_EXPR, REF_EXPR, SPECIAL_EXPR,
+      UNARY_MIN_EXPR, UNARY_PLUS_EXPR),
   };
 
   /* ********************************************************** */
@@ -234,15 +241,16 @@ public class ExpressionParser implements PsiParser {
   // Expression root: expr
   // Operator priority table:
   // 0: BINARY(assign_expr)
-  // 1: BINARY(conditional_expr)
-  // 2: BINARY(plus_expr) BINARY(minus_expr)
-  // 3: BINARY(mul_expr) BINARY(div_expr)
-  // 4: PREFIX(unary_plus_expr) PREFIX(unary_min_expr)
-  // 5: N_ARY(exp_expr)
-  // 6: POSTFIX(factorial_expr)
-  // 7: POSTFIX(call_expr)
-  // 8: POSTFIX(ref_expr)
-  // 9: ATOM(special_expr) ATOM(simple_ref_expr) ATOM(literal_expr) PREFIX(paren_expr)
+  // 1: BINARY(elvis_expr) BINARY(conditional_expr)
+  // 2: BINARY(between_expr)
+  // 3: BINARY(plus_expr) BINARY(minus_expr)
+  // 4: BINARY(mul_expr) BINARY(div_expr)
+  // 5: PREFIX(unary_plus_expr) PREFIX(unary_min_expr)
+  // 6: N_ARY(exp_expr)
+  // 7: POSTFIX(factorial_expr)
+  // 8: POSTFIX(call_expr)
+  // 9: POSTFIX(ref_expr)
+  // 10: ATOM(special_expr) ATOM(simple_ref_expr) ATOM(literal_expr) PREFIX(paren_expr)
   public static boolean expr(PsiBuilder builder_, int level_, int priority_) {
     if (!recursion_guard_(builder_, level_, "expr")) return false;
     addVariant(builder_, "<expr>");
@@ -275,49 +283,60 @@ public class ExpressionParser implements PsiParser {
       }
       else if (priority_ < 1 && consumeTokenFast(builder_, "?")) {
         result_ = report_error_(builder_, expr(builder_, level_, 1));
-        result_ = conditional_expr_1(builder_, level_ + 1) && result_;
+        result_ = report_error_(builder_, elvis_expr_1(builder_, level_ + 1)) && result_;
+        marker_.drop();
+        left_marker_.precede().done(ELVIS_EXPR);
+      }
+      else if (priority_ < 1 && conditional_expr_0(builder_, level_ + 1)) {
+        result_ = report_error_(builder_, expr(builder_, level_, 1));
         marker_.drop();
         left_marker_.precede().done(CONDITIONAL_EXPR);
       }
-      else if (priority_ < 2 && consumeTokenFast(builder_, "+")) {
+      else if (priority_ < 2 && consumeTokenFast(builder_, BETWEEN)) {
         result_ = report_error_(builder_, expr(builder_, level_, 2));
+        result_ = report_error_(builder_, between_expr_1(builder_, level_ + 1)) && result_;
+        marker_.drop();
+        left_marker_.precede().done(BETWEEN_EXPR);
+      }
+      else if (priority_ < 3 && consumeTokenFast(builder_, "+")) {
+        result_ = report_error_(builder_, expr(builder_, level_, 3));
         marker_.drop();
         left_marker_.precede().done(PLUS_EXPR);
       }
-      else if (priority_ < 2 && consumeTokenFast(builder_, "-")) {
-        result_ = report_error_(builder_, expr(builder_, level_, 2));
+      else if (priority_ < 3 && consumeTokenFast(builder_, "-")) {
+        result_ = report_error_(builder_, expr(builder_, level_, 3));
         marker_.drop();
         left_marker_.precede().done(MINUS_EXPR);
       }
-      else if (priority_ < 3 && consumeTokenFast(builder_, "*")) {
-        result_ = report_error_(builder_, expr(builder_, level_, 3));
+      else if (priority_ < 4 && consumeTokenFast(builder_, "*")) {
+        result_ = report_error_(builder_, expr(builder_, level_, 4));
         marker_.drop();
         left_marker_.precede().done(MUL_EXPR);
       }
-      else if (priority_ < 3 && consumeTokenFast(builder_, "/")) {
-        result_ = report_error_(builder_, expr(builder_, level_, 3));
+      else if (priority_ < 4 && consumeTokenFast(builder_, "/")) {
+        result_ = report_error_(builder_, expr(builder_, level_, 4));
         marker_.drop();
         left_marker_.precede().done(DIV_EXPR);
       }
-      else if (priority_ < 5 && consumeTokenFast(builder_, "^")) {
+      else if (priority_ < 6 && consumeTokenFast(builder_, "^")) {
         while (true) {
-          result_ = report_error_(builder_, expr(builder_, level_, 5));
+          result_ = report_error_(builder_, expr(builder_, level_, 6));
           if (!consumeTokenFast(builder_, "^")) break;
         }
         marker_.drop();
         left_marker_.precede().done(EXP_EXPR);
       }
-      else if (priority_ < 6 && consumeTokenFast(builder_, "!")) {
+      else if (priority_ < 7 && consumeTokenFast(builder_, "!")) {
         result_ = true;
         marker_.drop();
         left_marker_.precede().done(FACTORIAL_EXPR);
       }
-      else if (priority_ < 7 && ((LighterASTNode)left_marker_).getTokenType() == REF_EXPR && arg_list(builder_, level_ + 1)) {
+      else if (priority_ < 8 && ((LighterASTNode)left_marker_).getTokenType() == REF_EXPR && arg_list(builder_, level_ + 1)) {
         result_ = true;
         marker_.drop();
         left_marker_.precede().done(CALL_EXPR);
       }
-      else if (priority_ < 8 && ref_expr_0(builder_, level_ + 1)) {
+      else if (priority_ < 9 && ref_expr_0(builder_, level_ + 1)) {
         result_ = true;
         marker_.drop();
         left_marker_.precede().done(REF_EXPR);
@@ -331,12 +350,38 @@ public class ExpressionParser implements PsiParser {
   }
 
   // ':' expr
-  private static boolean conditional_expr_1(PsiBuilder builder_, int level_) {
-    if (!recursion_guard_(builder_, level_, "conditional_expr_1")) return false;
+  private static boolean elvis_expr_1(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "elvis_expr_1")) return false;
     boolean result_ = false;
     Marker marker_ = enter_section_(builder_);
     result_ = consumeTokenFast(builder_, ":");
     result_ = result_ && expr(builder_, level_ + 1, -1);
+    exit_section_(builder_, marker_, null, result_);
+    return result_;
+  }
+
+  // '<' | '>' | '<=' | '>=' | '==' | '!='
+  private static boolean conditional_expr_0(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "conditional_expr_0")) return false;
+    boolean result_ = false;
+    Marker marker_ = enter_section_(builder_);
+    result_ = consumeTokenFast(builder_, "<");
+    if (!result_) result_ = consumeTokenFast(builder_, ">");
+    if (!result_) result_ = consumeTokenFast(builder_, "<=");
+    if (!result_) result_ = consumeTokenFast(builder_, ">=");
+    if (!result_) result_ = consumeTokenFast(builder_, "==");
+    if (!result_) result_ = consumeTokenFast(builder_, "!=");
+    exit_section_(builder_, marker_, null, result_);
+    return result_;
+  }
+
+  // AND add_group
+  private static boolean between_expr_1(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "between_expr_1")) return false;
+    boolean result_ = false;
+    Marker marker_ = enter_section_(builder_);
+    result_ = consumeTokenFast(builder_, AND);
+    result_ = result_ && expr(builder_, level_ + 1, -2);
     exit_section_(builder_, marker_, null, result_);
     return result_;
   }
@@ -348,7 +393,7 @@ public class ExpressionParser implements PsiParser {
     Marker marker_ = enter_section_(builder_, level_, _NONE_, null);
     result_ = consumeTokenFast(builder_, "+");
     pinned_ = result_;
-    result_ = pinned_ && expr(builder_, level_, 4);
+    result_ = pinned_ && expr(builder_, level_, 5);
     exit_section_(builder_, level_, marker_, UNARY_PLUS_EXPR, result_, pinned_, null);
     return result_ || pinned_;
   }
@@ -360,7 +405,7 @@ public class ExpressionParser implements PsiParser {
     Marker marker_ = enter_section_(builder_, level_, _NONE_, null);
     result_ = consumeTokenFast(builder_, "-");
     pinned_ = result_;
-    result_ = pinned_ && expr(builder_, level_, 4);
+    result_ = pinned_ && expr(builder_, level_, 5);
     exit_section_(builder_, level_, marker_, UNARY_MIN_EXPR, result_, pinned_, null);
     return result_ || pinned_;
   }
@@ -387,7 +432,7 @@ public class ExpressionParser implements PsiParser {
     pinned_ = result_; // pin = 2
     result_ = result_ && report_error_(builder_, simple_ref_expr(builder_, level_ + 1));
     result_ = pinned_ && report_error_(builder_, consumeToken(builder_, ",")) && result_;
-    result_ = pinned_ && report_error_(builder_, expr(builder_, level_ + 1, 2)) && result_;
+    result_ = pinned_ && report_error_(builder_, expr(builder_, level_ + 1, 3)) && result_;
     result_ = pinned_ && consumeToken(builder_, ")") && result_;
     exit_section_(builder_, level_, marker_, SPECIAL_EXPR, result_, pinned_, null);
     return result_ || pinned_;

@@ -7,9 +7,11 @@ public interface ExpressionTypes {
 
   IElementType ARG_LIST = ExpressionParserDefinition.createType("ARG_LIST");
   IElementType ASSIGN_EXPR = ExpressionParserDefinition.createType("ASSIGN_EXPR");
-  IElementType DIV_EXPR = ExpressionParserDefinition.createType("DIV_EXPR");
+  IElementType BETWEEN_EXPR = ExpressionParserDefinition.createType("BETWEEN_EXPR");
   IElementType CALL_EXPR = ExpressionParserDefinition.createType("CALL_EXPR");
   IElementType CONDITIONAL_EXPR = ExpressionParserDefinition.createType("CONDITIONAL_EXPR");
+  IElementType DIV_EXPR = ExpressionParserDefinition.createType("DIV_EXPR");
+  IElementType ELVIS_EXPR = ExpressionParserDefinition.createType("ELVIS_EXPR");
   IElementType EXPR = ExpressionParserDefinition.createType("EXPR");
   IElementType EXP_EXPR = ExpressionParserDefinition.createType("EXP_EXPR");
   IElementType FACTORIAL_EXPR = ExpressionParserDefinition.createType("FACTORIAL_EXPR");
@@ -24,6 +26,11 @@ public interface ExpressionTypes {
   IElementType UNARY_MIN_EXPR = ExpressionParserDefinition.createType("UNARY_MIN_EXPR");
   IElementType UNARY_PLUS_EXPR = ExpressionParserDefinition.createType("UNARY_PLUS_EXPR");
 
-  IElementType ID = BnfTypes.BNF_ID;
-  IElementType NUMBER = BnfTypes.BNF_NUMBER;
+  IElementType AND = ExpressionParserDefinition.createTokenType("AND");
+  IElementType BETWEEN = ExpressionParserDefinition.createTokenType("BETWEEN");
+  IElementType COMMENT = ExpressionParserDefinition.createTokenType("comment");
+  IElementType ID = ExpressionParserDefinition.createTokenType("id");
+  IElementType NUMBER = ExpressionParserDefinition.createTokenType("number");
+  IElementType STRING = ExpressionParserDefinition.createTokenType("string");
+  IElementType SYNTAX = ExpressionParserDefinition.createTokenType("syntax");
 }

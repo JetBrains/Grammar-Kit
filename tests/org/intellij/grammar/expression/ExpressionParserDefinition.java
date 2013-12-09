@@ -69,7 +69,7 @@ public class ExpressionParserDefinition extends BnfParserDefinition{
   @NotNull
   @Override
   public Lexer createLexer(Project project) {
-    return new BnfLexer();
+    return new ExpressionLexer();
   }
 
   @Override
@@ -101,9 +101,6 @@ public class ExpressionParserDefinition extends BnfParserDefinition{
   }
 
   public static IElementType createTokenType(String text) {
-    for (IElementType type : new IElementType[]{BnfTypes.BNF_ID, BnfTypes.BNF_NUMBER}) {
-      if (type.toString().equals(text)) return type;
-    }
-    throw new AssertionError(text);
+    return new IElementType(text, EXPR_LANGUAGE);
   }
 }

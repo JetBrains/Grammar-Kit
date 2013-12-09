@@ -650,21 +650,24 @@ public class LivePreviewParser implements PsiParser {
 
       for (ExpressionHelper.OperatorInfo operator : filter(opCalls, ExpressionHelper.OperatorType.BINARY, ExpressionHelper.OperatorType.N_ARY, ExpressionHelper.OperatorType.POSTFIX)) {
         int priority = info.getPriority(operator.rule);
+        int arg2Priority = operator.arg2 == null ? -1 : info.getPriority(operator.arg2);
+        int argPriority = arg2Priority == -1 ? priority : arg2Priority - 1;
+
         if (marker_ == null) marker_ = builder.mark();
 
         if (priority_ <  priority &&
-            (operator.substitutor == null || ((LighterASTNode)left_marker_).getTokenType() == getElementType(operator.substitutor)) &&
+            (operator.arg1 == null || ((LighterASTNode)left_marker_).getTokenType() == getElementType(operator.arg1)) &&
             generateNodeCall(builder, level, info.rootRule, operator.operator, getNextName(operator.rule.getName(), 0), Collections.<String, Parser>emptyMap())) {
 
           IElementType elementType = getElementType(operator.rule);
           boolean rightAssociative = ParserGeneratorUtil.getAttribute(operator.rule, KnownAttribute.RIGHT_ASSOCIATIVE);
           if (operator.type == ExpressionHelper.OperatorType.BINARY) {
-              result_ = report_error_(builder, generateExpressionRoot(builder, level, info, (rightAssociative ? priority - 1 : priority)));
-            if (operator.tail != null) result_ = generateNodeCall(builder, level, operator.rule, operator.tail, getNextName(operator.rule.getName(), 1), Collections.<String, Parser>emptyMap()) && result_;
+              result_ = report_error_(builder, generateExpressionRoot(builder, level, info, (rightAssociative ? argPriority - 1 : argPriority)));
+            if (operator.tail != null) result_ = report_error_(builder, generateNodeCall(builder, level, operator.rule, operator.tail, getNextName(operator.rule.getName(), 1), Collections.<String, Parser>emptyMap())) && result_;
           }
           else if (operator.type == ExpressionHelper.OperatorType.N_ARY) {
             while (true) {
-              result_ = report_error_(builder, generateExpressionRoot(builder, level, info, priority));
+              result_ = report_error_(builder, generateExpressionRoot(builder, level, info, argPriority));
               if (operator.tail != null) result_ = report_error_(builder, generateNodeCall(builder, level, operator.rule, operator.tail, getNextName(operator.rule.getName(), 1), Collections.<String, Parser>emptyMap())) && result_;
               if (!result_ || !generateNodeCall(builder, level, info.rootRule, operator.operator, getNextName(operator.rule.getName(), 0), Collections.<String, Parser>emptyMap())) break;
             }

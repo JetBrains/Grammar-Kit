@@ -323,3 +323,53 @@ EXPR_FILE_TYPE
       PsiElement(number)('2')
   PsiElement(syntax)(')')
   PsiElement(syntax)(';')
+  PsiWhiteSpace('\n\n')
+  PLUS_EXPR
+    LITERAL_EXPR
+      PsiElement(number)('1')
+    PsiWhiteSpace(' ')
+    PsiElement(syntax)('+')
+    PsiWhiteSpace(' ')
+    BETWEEN_EXPR
+      LITERAL_EXPR
+        PsiElement(number)('3')
+      PsiWhiteSpace(' ')
+      PsiElement(BETWEEN)('BETWEEN')
+      PsiWhiteSpace(' ')
+      LITERAL_EXPR
+        PsiElement(number)('3')
+      PsiWhiteSpace(' ')
+      PsiElement(AND)('AND')
+      PsiWhiteSpace(' ')
+      LITERAL_EXPR
+        PsiElement(number)('4')
+  PsiElement(syntax)(';')
+  PsiWhiteSpace('\n')
+  CONDITIONAL_EXPR
+    PLUS_EXPR
+      LITERAL_EXPR
+        PsiElement(number)('1')
+      PsiWhiteSpace(' ')
+      PsiElement(syntax)('+')
+      PsiWhiteSpace(' ')
+      BETWEEN_EXPR
+        LITERAL_EXPR
+          PsiElement(number)('3')
+        PsiWhiteSpace(' ')
+        PsiElement(BETWEEN)('BETWEEN')
+        PsiWhiteSpace(' ')
+        LITERAL_EXPR
+          PsiElement(number)('3')
+        PsiErrorElement:'<' unexpected
+          <empty list>
+    PsiWhiteSpace(' ')
+    PsiElement(syntax)('<')
+    PsiWhiteSpace(' ')
+    LITERAL_EXPR
+      PsiElement(number)('1')
+  PsiWhiteSpace(' ')
+  PsiElement(AND)('AND')
+  PsiWhiteSpace(' ')
+  LITERAL_EXPR
+    PsiElement(number)('4')
+  PsiElement(syntax)(';')

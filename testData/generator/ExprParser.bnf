@@ -26,8 +26,8 @@ private element_recover ::= !('(' | '+' | '-' | 'multiply' | id | number)
 // left recursion and empty PSI children define expression root
 expr ::= assign_expr
   | conditional_group
-  | between_expr
   | add_group
+  | between_expr
   | mul_group
   | unary_group
   | exp_expr

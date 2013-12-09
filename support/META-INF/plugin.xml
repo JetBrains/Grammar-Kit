@@ -1,8 +1,8 @@
 <idea-plugin url="https://github.com/JetBrains/Grammar-Kit" version="2">
   <id>org.jetbrains.idea.grammar</id>
-  <version>1.1.5</version>
-  <vendor email="gregory.shrago@jetbrains.com" logo="">Greg Shrago</vendor>
-  <idea-version since-build="133.93" until-build=""/>
+  <version>1.1.6</version>
+  <vendor email="gregory.shrago@jetbrains.com">Greg Shrago</vendor>
+  <idea-version since-build="133.333" until-build=""/>
 
   <name>Grammar-Kit</name>
   <description>BNF Grammars and JFlex lexers editor. Readable parser/PSI code generator.</description>

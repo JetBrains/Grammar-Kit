@@ -97,9 +97,12 @@ public class ExpressionGeneratorHelper {
         ContainerUtil.getFirstItem(findOperators(opCalls.get(opCall), OperatorType.BINARY, OperatorType.N_ARY, OperatorType.POSTFIX));
       if (operator == null) continue;
       int priority = info.getPriority(operator.rule);
+      int arg2Priority = operator.arg2 == null ? -1 : info.getPriority(operator.arg2);
+      int argPriority = arg2Priority == -1 ? priority : arg2Priority - 1;
+
       String substCheck = "";
-      if (operator.substitutor != null) {
-        substCheck = " && ((LighterASTNode)left_marker_).getTokenType() == " + ParserGeneratorUtil.getElementType(operator.substitutor);
+      if (operator.arg1 != null) {
+        substCheck = " && ((LighterASTNode)left_marker_).getTokenType() == " + ParserGeneratorUtil.getElementType(operator.arg1);
       }
       if (first) g.out("Marker marker_ = builder_.mark();");
       g.out((first ? "" : "else ") + "if (priority_ < " + priority  + substCheck + " && " + opCall + ") {");
@@ -110,12 +113,12 @@ public class ExpressionGeneratorHelper {
         operator.tail == null ? null : g.generateNodeCall(operator.rule, operator.tail, getNextName(operator.rule.getName(), 1), true);
       if (operator.type == OperatorType.BINARY) {
         g.out(
-          "result_ = report_error_(builder_, " + methodName + "(builder_, level_, " + (rightAssociative ? priority - 1 : priority) + "));");
-        if (tailCall != null) g.out("result_ = " + tailCall + " && result_;");
+          "result_ = report_error_(builder_, " + methodName + "(builder_, level_, " + (rightAssociative ? argPriority - 1 : argPriority) + "));");
+        if (tailCall != null) g.out("result_ = report_error_(builder_, " + tailCall + ") && result_;");
       }
       else if (operator.type == OperatorType.N_ARY) {
         g.out("while (true) {");
-        g.out("result_ = report_error_(builder_, " + methodName + "(builder_, level_, " + priority + "));");
+        g.out("result_ = report_error_(builder_, " + methodName + "(builder_, level_, " + argPriority + "));");
         if (tailCall != null) g.out("result_ = report_error_(builder_, " + tailCall + ") && result_;");
         g.out("if (!" + opCall + ") break;");
         g.out("}");
@@ -166,11 +169,10 @@ public class ExpressionGeneratorHelper {
 
           g.out("result_ = "+opCall+";");
           g.out("pinned_ = result_;");
-          Integer substitutorPriority = operator.substitutor == null ? null : info.getPriority(operator.substitutor);
-          int rulePriority = info.getPriority(operator.rule);
-          int priority =
-            substitutorPriority == null ? (rulePriority == info.nextPriority - 1 ? -1 : rulePriority) : substitutorPriority;
-          g.out("result_ = pinned_ && " + methodName + "(builder_, level_, " + priority + ");");
+          int priority = info.getPriority(operator.rule);
+          int arg1Priority = operator.arg1 == null ? -1 : info.getPriority(operator.arg1);
+          int argPriority = arg1Priority == -1 ? (priority == info.nextPriority - 1 ? -1 : priority) : arg1Priority - 1;
+          g.out("result_ = pinned_ && " + methodName + "(builder_, level_, " + argPriority + ");");
           if (tailCall != null) {
             g.out("result_ = pinned_ && report_error_(builder_, " + tailCall + ") && result_;");
           }

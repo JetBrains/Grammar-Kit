@@ -26,6 +26,7 @@ import com.intellij.psi.util.CachedValuesManager;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.util.Function;
 import com.intellij.util.PairConsumer;
+import com.intellij.util.containers.ContainerUtil;
 import gnu.trove.THashSet;
 import org.intellij.grammar.analysis.BnfFirstNextAnalyzer;
 import org.intellij.grammar.psi.*;
@@ -114,7 +115,7 @@ public class ExpressionHelper {
         }
       });
       for (BnfRule r : rules) {
-        buildOperatorMap(r, rule, expressionInfo.operatorMap);
+        buildOperatorMap(r, rule, expressionInfo);
       }
       if (!expressionInfo.priorityMap.isEmpty()) {
         myRootRulesMap.put(rule, rule);
@@ -145,6 +146,7 @@ public class ExpressionHelper {
       }
       else if (ParserGeneratorUtil.Rule.isPrivate(subRule)) {
         addToPriorityMap(subRule, rulesCluster, info);
+        info.privateGroups.add(subRule);
       }
       else {
         addWarning(subRule + ": priority group must be 'private'");
@@ -152,7 +154,7 @@ public class ExpressionHelper {
     }
   }
 
-  private void buildOperatorMap(BnfRule rule, BnfRule rootRule, Map<BnfRule, OperatorInfo> operatorMap) {
+  private void buildOperatorMap(BnfRule rule, BnfRule rootRule, ExpressionInfo expressionInfo) {
     Map<PsiElement, RuleGraphHelper.Cardinality> ruleContent = myRuleGraph.getFor(rule);
     RuleGraphHelper.Cardinality cardinality = ruleContent.get(rootRule);
     BnfRule rootRuleSubst = rootRule;
@@ -179,10 +181,10 @@ public class ExpressionHelper {
     }
     else if (cardinality == RuleGraphHelper.Cardinality.REQUIRED) {
       // postfix or prefix unary expression
-      int index = indexOf(rootRuleSubst, 0, childExpressions, operatorMap);
-      BnfRule substRule = substRule(childExpressions, index, rootRule);
+      int index = indexOf(rootRuleSubst, 0, childExpressions, expressionInfo);
+      BnfRule arg1 = substRule(childExpressions, index, rootRule);
       if (index == 0) {
-        info = new OperatorInfo(rule, OperatorType.POSTFIX, combine(childExpressions.subList(1, childExpressions.size())), null, substRule);
+        info = new OperatorInfo(rule, OperatorType.POSTFIX, combine(childExpressions.subList(1, childExpressions.size())), null, arg1, null);
       }
       else if (index == -1) {
         addWarning(rule +": " + rootRuleName + " reference not found, treating as ATOM");
@@ -190,19 +192,19 @@ public class ExpressionHelper {
       }
       else {
         info = new OperatorInfo(rule, OperatorType.PREFIX, combine(childExpressions.subList(0, index)),
-                                combine(childExpressions.subList(index + 1, childExpressions.size())), substRule);
+                                combine(childExpressions.subList(index + 1, childExpressions.size())), arg1, null);
       }
     }
     else if (cardinality == RuleGraphHelper.Cardinality.AT_LEAST_ONE) {
       // binary or n-ary expression
-      int index = indexOf(rootRuleSubst, 0, childExpressions, operatorMap);
+      int index = indexOf(rootRuleSubst, 0, childExpressions, expressionInfo);
       if (index != 0) {
         addWarning(rule +": binary or n-ary expression cannot have prefix, treating as ATOM");
         info = new OperatorInfo(rule, OperatorType.ATOM, rule.getExpression(), null);
       }
       else {
-        int index2 = indexOf(rootRuleSubst, 1, childExpressions, operatorMap);
-        BnfRule substRule = substRule(childExpressions, index, rootRule);
+        int index2 = indexOf(rootRuleSubst, 1, childExpressions, expressionInfo);
+        BnfRule arg1 = substRule(childExpressions, index, rootRule);
         if (index2 == -1) {
           BnfExpression lastExpression = childExpressions.get(1);
           boolean badNAry = childExpressions.size() != 2 || !(lastExpression instanceof BnfQuantified) ||
@@ -211,22 +213,24 @@ public class ExpressionHelper {
           List<BnfExpression> childExpressions2 = badNAry ? Collections.<BnfExpression>emptyList() :
                                                   getChildExpressions(
                                                     ((BnfParenExpression)((BnfQuantified)lastExpression).getExpression()).getExpression());
-          int index3 = indexOf(rootRuleSubst, 0, childExpressions2, operatorMap);
+          int index3 = indexOf(rootRuleSubst, 0, childExpressions2, expressionInfo);
           if (badNAry || index3 == -1) {
             addWarning(
                 rule + ": '" + rootRuleName + " ( <op> " + rootRuleName + ") +' expected for N-ary operator, treating as POSTFIX"
             );
             info = new OperatorInfo(rule, OperatorType.POSTFIX, combine(childExpressions.subList(1, childExpressions.size())), null,
-                                    substRule);
+                                    arg1, null);
           }
           else {
+            BnfRule arg2 = substRule(childExpressions, index3, rootRule);
             info = new OperatorInfo(rule, OperatorType.N_ARY, combine(childExpressions2.subList(0, index3)),
-                                    combine(childExpressions2.subList(index3 + 1, childExpressions2.size())), substRule);
+                                    combine(childExpressions2.subList(index3 + 1, childExpressions2.size())), arg1, arg2);
           }
         }
         else {
+          BnfRule arg2 = substRule(childExpressions, index2, rootRule);
           info = new OperatorInfo(rule, OperatorType.BINARY, combine(childExpressions.subList(index + 1, index2)),
-                                  combine(childExpressions.subList(index2 + 1, childExpressions.size())), substRule);
+                                  combine(childExpressions.subList(index2 + 1, childExpressions.size())), arg1, arg2);
         }
       }
     }
@@ -234,7 +238,7 @@ public class ExpressionHelper {
       addWarning(rule +": unexpected cardinality " + cardinality + " of " + rootRuleName +", treating as ATOM");
       info = new OperatorInfo(rule, OperatorType.ATOM, rule.getExpression(), null);
     }
-    operatorMap.put(rule, info);
+    expressionInfo.operatorMap.put(rule, info);
   }
 
   @Nullable
@@ -290,12 +294,12 @@ public class ExpressionHelper {
   private int indexOf(BnfRule rootRule,
                       int startIndex,
                       List<BnfExpression> childExpressions,
-                      Map<BnfRule, OperatorInfo> operatorMap) {
+                      ExpressionInfo expressionInfo) {
     Collection<BnfRule> extendsRules = myRuleGraph.getExtendsRules(rootRule);
     for (int i = startIndex, childExpressionsSize = childExpressions.size(); i < childExpressionsSize; i++) {
       BnfRule rule = myFile.getRule(childExpressions.get(i).getText());
-      if (rootRule == rule || extendsRules.contains(rule)) {
-        OperatorInfo info = operatorMap.get(rule);
+      if (rootRule == rule || extendsRules.contains(rule) || expressionInfo.privateGroups.contains(rule)) {
+        OperatorInfo info = expressionInfo.operatorMap.get(rule);
         if (info != null && info.type == OperatorType.ATOM) continue;
         return i;
       }
@@ -307,6 +311,7 @@ public class ExpressionHelper {
     public final BnfRule rootRule;
     public final Map<BnfRule, Integer> priorityMap = new LinkedHashMap<BnfRule, Integer>();
     public final Map<BnfRule, OperatorInfo> operatorMap = new LinkedHashMap<BnfRule, OperatorInfo>();
+    public final Set<BnfRule> privateGroups = ContainerUtil.newHashSet();
     public int nextPriority;
 
     public ExpressionInfo(BnfRule rootRule) {
@@ -358,19 +363,23 @@ public class ExpressionHelper {
     public final OperatorType type;
     public final BnfExpression operator;
     public final BnfExpression tail; // null for postfix
-    public final BnfRule substitutor;
+    public final BnfRule arg1;
+    public final BnfRule arg2;
 
     public OperatorInfo(BnfRule rule, OperatorType type, BnfExpression operator, BnfExpression tail) {
-      this(rule, type, operator, tail, null);
+      this(rule, type, operator, tail, null, null);
     }
 
-    public OperatorInfo(BnfRule rule, OperatorType type, BnfExpression operator, BnfExpression tail, @Nullable BnfRule substitutor) {
+    public OperatorInfo(BnfRule rule, OperatorType type, BnfExpression operator, BnfExpression tail,
+                        @Nullable BnfRule arg1,
+                        @Nullable BnfRule arg2) {
       assert operator != null : rule + ": operator must not be null";
       this.rule = rule;
       this.type = type;
       this.operator = operator;
       this.tail = tail;
-      this.substitutor = substitutor;
+      this.arg1 = arg1;
+      this.arg2 = arg2;
     }
 
     @Override

@@ -275,7 +275,7 @@ public class ExpressionParser implements PsiParser {
       }
       else if (priority_ < 1 && consumeTokenFast(builder_, "?")) {
         result_ = report_error_(builder_, expr(builder_, level_, 1));
-        result_ = conditional_expr_1(builder_, level_ + 1) && result_;
+        result_ = report_error_(builder_, conditional_expr_1(builder_, level_ + 1)) && result_;
         marker_.drop();
         left_marker_.precede().done(CONDITIONAL_EXPR);
       }

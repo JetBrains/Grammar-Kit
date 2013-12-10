@@ -314,7 +314,7 @@ private class_char ::= char | escaped_char
 macro_ref_expression ::= '{' macro_reference '}'
 macro_reference ::= id { methods=[getReference] }
 literal_expression ::= string | id | allowed_chars
-private allowed_chars ::= escaped_char | char | number | '-' | '=' | '<' | '>'
+private allowed_chars ::= escaped_char | char | number | '-' | '=' | '<' | '>' | ','
   | ']' /*| '}' -- allowed after <STATE> } { }  and in / part */
 
 sequence_op ::= !new_line &( '(' | '!' | '~' | '[' | ']'

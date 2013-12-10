@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2011 Gregory Shrago
+ * Copyright 2011-2014 Gregory Shrago
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -150,7 +150,7 @@ public class JFlexParser implements PsiParser {
   }
 
   /* ********************************************************** */
-  // escaped_char | char | number | '-' | '=' | '<' | '>'
+  // escaped_char | char | number | '-' | '=' | '<' | '>' | ','
   //   | ']'
   static boolean allowed_chars(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "allowed_chars")) return false;
@@ -163,6 +163,7 @@ public class JFlexParser implements PsiParser {
     if (!result_) result_ = consumeToken(builder_, FLEX_EQ);
     if (!result_) result_ = consumeToken(builder_, FLEX_ANGLE1);
     if (!result_) result_ = consumeToken(builder_, FLEX_ANGLE2);
+    if (!result_) result_ = consumeToken(builder_, FLEX_COMMA);
     if (!result_) result_ = consumeToken(builder_, FLEX_BRACK2);
     exit_section_(builder_, marker_, null, result_);
     return result_;

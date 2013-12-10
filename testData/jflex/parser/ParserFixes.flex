@@ -23,6 +23,7 @@ QUASI_LITERAL_CHAR=[^\\$`] | \\ {ANY_CHAR} | \$ [^`{[:jletter:]]
 NO_STATE=<TAG>
 VARIABLE = "$"(::)?{NAME}(::{NAME})*
 BOOL            = true|yes|on|false|no|off|undefined|null
+SYNTAX = ,|\.
 
 %%
 <YYINITIAL> {

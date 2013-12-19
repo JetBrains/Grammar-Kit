@@ -28,6 +28,7 @@ import com.intellij.psi.impl.FakePsiElement;
 import com.intellij.psi.impl.source.tree.LeafPsiElement;
 import com.intellij.psi.tree.IElementType;
 import com.intellij.psi.util.PsiTreeUtil;
+import com.intellij.util.containers.ContainerUtil;
 import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.actions.GenerateAction;
 import org.intellij.grammar.psi.*;
@@ -349,6 +350,21 @@ public class ParserGeneratorUtil {
       sb.append(tokenTypes.get(count));
       if (newLine) line ++;
     }
+  }
+
+  @NotNull
+  public static KnownAttribute.ListValue collectUnknownAttributes(@NotNull BnfFile file) {
+    KnownAttribute.ListValue result = new KnownAttribute.ListValue();
+    BnfAttrs attrs = ContainerUtil.getFirstItem(file.getAttributes());
+    if (attrs == null) return result;
+
+    for (BnfAttr attr : attrs.getAttrList()) {
+      if (KnownAttribute.getAttribute(attr.getName()) != null) continue;
+      BnfExpression expression = attr.getExpression();
+      if (!(expression instanceof BnfStringLiteralExpression)) continue;
+      result.add(Pair.create(attr.getName(), (String)getLiteralValue((BnfLiteralExpression)expression)));
+    }
+    return result;
   }
 
   public static class Rule {

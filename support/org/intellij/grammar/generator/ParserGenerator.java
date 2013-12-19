@@ -16,6 +16,7 @@
 package org.intellij.grammar.generator;
 
 import com.intellij.openapi.diagnostic.Logger;
+import com.intellij.openapi.util.Comparing;
 import com.intellij.openapi.util.Pair;
 import com.intellij.openapi.util.io.FileUtil;
 import com.intellij.openapi.util.text.StringUtil;
@@ -78,6 +79,7 @@ public class ParserGenerator {
   private boolean myUnitTestMode;
   private final RuleGraphHelper myGraphHelper;
   private final ExpressionHelper myExpressionHelper;
+  private final KnownAttribute.ListValue myUnknownRootAttributes;
 
   public ParserGenerator(BnfFile tree, String sourcePath, String outputPath) {
     myFile = tree;
@@ -99,6 +101,7 @@ public class ParserGenerator {
                        null : tmpVisitorClass.startsWith(myRuleClassPrefix) ?
                               tmpVisitorClass : myRuleClassPrefix + tmpVisitorClass;
     mySimpleTokens = RuleGraphHelper.computeTokens(myFile);
+    myUnknownRootAttributes = ParserGeneratorUtil.collectUnknownAttributes(myFile);
     myRuleExtendsMap = RuleGraphHelper.computeInheritance(myFile);
     myGraphHelper = new RuleGraphHelper(myFile, myRuleExtendsMap);
     myExpressionHelper = new ExpressionHelper(myFile, myGraphHelper, true);
@@ -915,17 +918,12 @@ public class ParserGenerator {
 
   private String getTokenName(String value) {
     String existing = mySimpleTokens.get(value);
-    if (existing == null) {
-      BnfAttrs attrs = ContainerUtil.getFirstItem(myFile.getAttributes());
-      if (attrs != null) {
-        for (BnfAttr attr : attrs.getAttrList()) {
-          BnfExpression expression = attr.getExpression();
-          if (!(expression instanceof BnfStringLiteralExpression)) continue;
-          if (value.equals(ParserGeneratorUtil.getLiteralValue((BnfLiteralExpression)expression))) {
-            String attrName = attr.getName();
-            mySimpleTokens.put(value, attrName);
-            return attrName;
-          }
+    if (existing != null || !myUnknownRootAttributes.isEmpty()) {
+      for (Pair<String, String> p : myUnknownRootAttributes) {
+        if (Comparing.equal(value, p.second)) {
+          String attrName = p.first;
+          mySimpleTokens.put(value, attrName);
+          return attrName;
         }
       }
     }

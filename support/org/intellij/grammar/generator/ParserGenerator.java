@@ -233,7 +233,7 @@ public class ParserGenerator {
 
   private void generateVisitor(String psiClass, Map<String, BnfRule> sortedRules) {
     String superIntf = ObjectUtils.notNull(ContainerUtil.getFirstItem(getRootAttribute(myFile, KnownAttribute.IMPLEMENTS)),
-                                           KnownAttribute.IMPLEMENTS.getDefaultValue().get(0));
+                                           KnownAttribute.IMPLEMENTS.getDefaultValue().get(0)).second;
     String shortSuperIntf = StringUtil.getShortName(superIntf);
     List<String> imports = ContainerUtil.newArrayList("org.jetbrains.annotations.*", BnfConstants.PSI_ELEMENT_VISITOR_CLASS, superIntf);
     for (BnfRule rule : sortedRules.values()) {
@@ -334,12 +334,12 @@ public class ParserGenerator {
     BnfRule topSuper = getTopSuperRule(rule);
     boolean simpleMode = psiPackage.isEmpty();
     if (topSuper != null && topSuper != rule) {
-      topRuleImplements = getAttribute(topSuper, KnownAttribute.IMPLEMENTS);
+      topRuleImplements = getAttribute(topSuper, KnownAttribute.IMPLEMENTS).asStrings();
       topRuleClass = StringUtil.nullize((simpleMode ? "" : psiPackage + ".") + getRulePsiClassName(topSuper, myRuleClassPrefix));
       if (!StringUtil.isEmpty(topRuleClass)) strings.add(topRuleClass);
     }
-    List<String> rootImplements = getRootAttribute(myFile, KnownAttribute.IMPLEMENTS);
-    List<String> ruleImplements = getAttribute(rule, KnownAttribute.IMPLEMENTS);
+    List<String> rootImplements = getRootAttribute(myFile, KnownAttribute.IMPLEMENTS).asStrings();
+    List<String> ruleImplements = getAttribute(rule, KnownAttribute.IMPLEMENTS).asStrings();
     for (String className : ruleImplements) {
       BnfRule superIntfRule = myFile.getRule(className);
       if (superIntfRule != null) {
@@ -360,7 +360,7 @@ public class ParserGenerator {
 
   public void generateParser(String parserClass, final Set<String> ownRuleNames) {
     String elementTypeHolderClass = getRootAttribute(myFile, KnownAttribute.ELEMENT_TYPE_HOLDER_CLASS);
-    List<String> parserImports = getRootAttribute(myFile, KnownAttribute.PARSER_IMPORTS);
+    List<String> parserImports = getRootAttribute(myFile, KnownAttribute.PARSER_IMPORTS).asStrings();
     boolean rootParser = parserClass.equals(myGrammarRootParser);
     Set<String> imports = new LinkedHashSet<String>();
     imports.addAll(Arrays.asList("com.intellij.lang.PsiBuilder",
@@ -1459,9 +1459,8 @@ public class ParserGenerator {
       return BnfConstants.PSI_ELEMENT_CLASS;
     }
     else if (Rule.isExternal(treeRule)) {
-      String attribute = ContainerUtil.getFirstItem(getAttribute(treeRule, KnownAttribute.IMPLEMENTS));
-      //noinspection StringEquality
-      return attribute == KnownAttribute.IMPLEMENTS.getDefaultValue().get(0) ? BnfConstants.PSI_ELEMENT_CLASS : attribute;
+      Pair<String, String> first = ContainerUtil.getFirstItem(getAttribute(treeRule, KnownAttribute.IMPLEMENTS));
+      return ObjectUtils.assertNotNull(first).second;
     }
     else {
       return getRulePsiClassName(rule, myRuleClassPrefix);

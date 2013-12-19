@@ -192,12 +192,7 @@ public class RuleGraphHelper {
   }
 
   public static Map<String, String> computeTokens(BnfFile file) {
-    Map<String, String> result = new LinkedHashMap<String, String>();
-    for (Pair<String, String> pair : getRootAttribute(file, KnownAttribute.TOKENS)) {
-      if (pair.first == null || pair.second == null) continue;
-      result.put(pair.second, pair.first); // string value to constant name
-    }
-    return result;
+    return getRootAttribute(file, KnownAttribute.TOKENS).asMap(true);
   }
 
   private static final Key<CachedValue<RuleGraphHelper>> RULE_GRAPH_HELPER_KEY = Key.create("RULE_GRAPH_HELPER_KEY");

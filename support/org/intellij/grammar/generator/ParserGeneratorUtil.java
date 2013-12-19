@@ -28,7 +28,6 @@ import com.intellij.psi.impl.FakePsiElement;
 import com.intellij.psi.impl.source.tree.LeafPsiElement;
 import com.intellij.psi.tree.IElementType;
 import com.intellij.psi.util.PsiTreeUtil;
-import com.intellij.util.SmartList;
 import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.actions.GenerateAction;
 import org.intellij.grammar.psi.*;
@@ -75,7 +74,7 @@ public class ParserGeneratorUtil {
       return getLiteralValue((BnfLiteralExpression)value);
     }
     else if (value instanceof BnfValueList) {
-      List<Pair<String, String>> pairs = new SmartList<Pair<String, String>>();
+      KnownAttribute.ListValue pairs = new KnownAttribute.ListValue();
       for (BnfListEntry o : ((BnfValueList)value).getListEntryList()) {
         PsiElement id = o.getId();
         pairs.add(Pair.create(id == null? null : id.getText(), (String)getLiteralValue(o.getLiteralExpression())));
@@ -267,7 +266,7 @@ public class ParserGeneratorUtil {
   }
 
   public static Collection<BnfExpression> getSortedTokens(Set<PsiElement> accessors) {
-    TreeMap<String, BnfExpression> result = new TreeMap<String, BnfExpression>();
+    Map<String, BnfExpression> result = new TreeMap<String, BnfExpression>();
     for (PsiElement tree : accessors) {
       if (!(tree instanceof BnfExpression)) continue;
       result.put(tree.getText(), (BnfExpression)tree);
@@ -276,7 +275,7 @@ public class ParserGeneratorUtil {
   }
 
   public static Collection<LeafPsiElement> getSortedExternalRules(Set<PsiElement> accessors) {
-    TreeMap<String, LeafPsiElement> result = new TreeMap<String, LeafPsiElement>();
+    Map<String, LeafPsiElement> result = new TreeMap<String, LeafPsiElement>();
     for (PsiElement tree : accessors) {
       if (!(tree instanceof LeafPsiElement)) continue;
       result.put(tree.getText(), (LeafPsiElement) tree);
@@ -411,7 +410,18 @@ public class ParserGeneratorUtil {
       return null;
     }
   }
-  
+
+  @Nullable
+  public static Pattern getAllTokenPattern(Map<String, String> tokens) {
+    String allRegexp = "";
+    for (String pattern : tokens.keySet()) {
+      if (!isRegexpToken(pattern)) continue;
+      if (allRegexp.length() > 0) allRegexp += "|";
+      allRegexp += getRegexpTokenRegexp(pattern);
+    }
+    return compilePattern(allRegexp);
+  }
+
   public static class PinMatcher {
 
     public final BnfRule rule;

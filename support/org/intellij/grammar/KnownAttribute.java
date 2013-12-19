@@ -18,7 +18,6 @@ package org.intellij.grammar;
 
 import com.intellij.openapi.util.Pair;
 import com.intellij.openapi.util.io.FileUtil;
-import com.intellij.util.SmartList;
 import com.intellij.util.containers.ContainerUtil;
 import org.intellij.grammar.generator.BnfConstants;
 import org.jetbrains.annotations.NotNull;
@@ -40,15 +39,14 @@ public class KnownAttribute<T> {
   @Nullable
   public static KnownAttribute getAttribute(String name) { return ourAttributes.get(name); }
 
-  private static final Class<List<Pair<String, String>>> PAIR_LIST_CLAZZ = cast(ArrayList.class); // that's funny I know
-  private static final Class<List<String>> STRING_LIST_CLAZZ = cast(LinkedList.class);
+  private static final ListValue EMPTY_LIST = new ListValue();
 
   public static final KnownAttribute<String>       CLASS_HEADER              = create(true, String.class, "classHeader", BnfConstants.CLASS_HEADER_DEF);
   public static final KnownAttribute<Boolean>      GENERATE_PSI              = create(true, Boolean.class, "generatePsi", true);
   public static final KnownAttribute<Boolean>      GENERATE_TOKENS           = create(true, Boolean.class, "generateTokens", true);
   public static final KnownAttribute<Integer>      GENERATE_FIRST_CHECK      = create(true, Integer.class, "generateFirstCheck", 2);
   public static final KnownAttribute<Boolean>      EXTENDED_PIN              = create(true, Boolean.class, "extendedPin", true);
-  public static final KnownAttribute<List<String>> PARSER_IMPORTS            = create(true, STRING_LIST_CLAZZ, "parserImports", Collections.<String>emptyList());
+  public static final KnownAttribute<ListValue>    PARSER_IMPORTS            = create(true, ListValue.class, "parserImports", EMPTY_LIST);
   public static final KnownAttribute<String>       PSI_CLASS_PREFIX          = create(true, String.class, "psiClassPrefix", "");
   public static final KnownAttribute<String>       PSI_IMPL_CLASS_SUFFIX     = create(true, String.class, "psiImplClassSuffix", "Impl");
   public static final KnownAttribute<String>       PSI_PACKAGE               = create(true, String.class, "psiPackage", "generated.psi");
@@ -65,7 +63,7 @@ public class KnownAttribute<T> {
   public static final KnownAttribute<String>       TOKEN_TYPE_FACTORY        = create(true, String.class, "tokenTypeFactory", null);
 
   public static final KnownAttribute<String>       EXTENDS                   = create(false, String.class, "extends", BnfConstants.AST_WRAPPER_PSI_ELEMENT_CLASS);
-  public static final KnownAttribute<List<String>> IMPLEMENTS                = create(false, STRING_LIST_CLAZZ, "implements", Collections.singletonList(BnfConstants.PSI_ELEMENT_CLASS));
+  public static final KnownAttribute<ListValue>    IMPLEMENTS                = create(false, ListValue.class, "implements", ListValue.singleValue( null, BnfConstants.PSI_ELEMENT_CLASS));
   public static final KnownAttribute<String>       ELEMENT_TYPE              = create(false, String.class, "elementType", null);
   public static final KnownAttribute<String>       METHOD_RENAMES            = create(false, String.class, "methodRenames", null);
   public static final KnownAttribute<Object>       PIN                       = create(false, Object.class, "pin", (Object)(-1));
@@ -78,18 +76,13 @@ public class KnownAttribute<T> {
 
   public static final KnownAttribute<String>       STUB_CLASS                = create(false, String.class,  "stubClass", null);
 
-  public static final KnownAttribute<List<Pair<String, String>>> METHODS = create(false, PAIR_LIST_CLAZZ, "methods", Collections.<Pair<String, String>>emptyList());
-  public static final KnownAttribute<List<Pair<String, String>>> TOKENS = create(true, PAIR_LIST_CLAZZ, "tokens", Collections.<Pair<String, String>>emptyList());
+  public static final KnownAttribute<ListValue>    METHODS                   = create(false, ListValue.class, "methods", EMPTY_LIST);
+  public static final KnownAttribute<ListValue>    TOKENS                    = create(true, ListValue.class, "tokens", EMPTY_LIST);
 
   private final boolean myGlobal;
   private final String myName;
   private final Class<T> myClazz;
   private final T myDefaultValue;
-
-  @SuppressWarnings("unchecked")
-  public static <T> Class<T> cast(Class<?> aClass) {
-    return (Class<T>)aClass;
-  }
 
   public static <T> KnownAttribute<T> create(Class<T> clazz, String name, @Nullable T defaultValue) {
     return new KnownAttribute<T>(name, clazz, defaultValue);
@@ -130,19 +123,8 @@ public class KnownAttribute<T> {
 
   public T ensureValue(Object o) {
     if (o == null) return getDefaultValue();
-    if (myClazz == STRING_LIST_CLAZZ) {
-      if (o instanceof String) return (T)Collections.singletonList((String)o);
-      if (o instanceof List && ContainerUtil.getFirstItem((List)o) instanceof Pair) {
-        SmartList<String> result = new SmartList<String>();
-        for (Pair<String, String> s : (List<Pair<String, String>>)o) {
-          if (s.first != null) result.add(s.first);
-          else if (s.second != null) result.add(s.second);
-        }
-        return (T)result;
-      }
-    }
-    else if (myClazz == PAIR_LIST_CLAZZ && o instanceof List) {
-      return (T)o;
+    if (myClazz == ListValue.class && o instanceof String) {
+      return (T)ListValue.singleValue(null, (String)o);
     }
     if (myClazz.isInstance(o)) return (T)o;
     return getDefaultValue();
@@ -175,5 +157,35 @@ public class KnownAttribute<T> {
     if (attr == null && "recoverUntil".equals(name)) return RECOVER_WHILE;
     if (attr == null && "stubParserClass".equals(name)) return PARSER_UTIL_CLASS;
     return attr;
+  }
+
+  public static class ListValue extends LinkedList<Pair<String, String>> {
+    @NotNull
+    public static ListValue singleValue(String s1, String s2) {
+      ListValue t = new ListValue();
+      t.add(Pair.create(s1, s2));
+      return t;
+    }
+
+    @NotNull
+    public List<String> asStrings() {
+      List<String> t = ContainerUtil.newArrayList();
+      for (Pair<String, String> pair : this) {
+        if (pair.first != null) t.add(pair.first);
+        else if (pair.second != null) t.add(pair.second);
+      }
+      return t;
+    }
+
+    @NotNull
+    public Map<String, String> asMap(boolean inverse) {
+      Map<String, String> t = ContainerUtil.newLinkedHashMap();
+      for (Pair<String, String> pair : this) {
+        String key = inverse ? pair.second : pair.first;
+        String value = inverse ? pair.first : pair.second;
+        if (key != null) t.put(key, value);
+      }
+      return t;
+    }
   }
 }

@@ -19,15 +19,15 @@ package org.intellij.grammar.livePreview;
 import com.intellij.lang.Language;
 import com.intellij.lexer.LexerBase;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.util.Pair;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.psi.TokenType;
 import com.intellij.psi.tree.IElementType;
 import com.intellij.psi.util.CachedValueProvider;
 import com.intellij.psi.util.CachedValuesManager;
-import com.intellij.util.ObjectUtils;
+import com.intellij.util.containers.ContainerUtil;
 import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.generator.ParserGeneratorUtil;
+import org.intellij.grammar.generator.RuleGraphHelper;
 import org.intellij.grammar.psi.*;
 import org.intellij.grammar.psi.impl.GrammarUtil;
 import org.jetbrains.annotations.NotNull;
@@ -56,12 +56,12 @@ public class LivePreviewLexer extends LexerBase {
   public LivePreviewLexer(Project project, final LivePreviewLanguage language) {
     final BnfFile bnfFile = language.getGrammar(project);
 
-    myTokens = bnfFile == null? new Token[0] : CachedValuesManager.getManager(project).getCachedValue(bnfFile, new CachedValueProvider<Token[]>() {
+    myTokens = bnfFile == null? new Token[0] : CachedValuesManager.getCachedValue(bnfFile, new CachedValueProvider<Token[]>() {
       @Nullable
       @Override
       public Result<Token[]> compute() {
         Map<String, String> map = collectTokenPattern2Name(bnfFile);
-        if (!StringUtil.join(map.keySet(), ",").contains("regexp:")) map.put("regexp:\\w+", "GENERIC_ID");
+        if (!StringUtil.join(map.keySet(), ",").contains("regexp:")) map.put("regexp:[\\w&&[^0-9]]\\w*", "GENERIC_ID");
         Token[] tokens = new Token[map.size() + 1];
         int i = 0;
         String tokenConstantPrefix = getRootAttribute(bnfFile, KnownAttribute.ELEMENT_TYPE_PREFIX);
@@ -156,6 +156,7 @@ public class LivePreviewLexer extends LexerBase {
     }
   }
 
+  @NotNull
   @Override
   public CharSequence getBufferSequence() {
     return myBuffer;
@@ -220,19 +221,20 @@ public class LivePreviewLexer extends LexerBase {
   @NotNull
   public static Map<String, String> collectTokenPattern2Name(@Nullable final BnfFile file) {
     if (file == null) return Collections.emptyMap();
-    final Map<String, String> map = new LinkedHashMap<String, String>();
-    List<Pair<String, String>> tokenAttr = ObjectUtils.assertNotNull(file.findAttributeValue(null, KnownAttribute.TOKENS, null));
-    for (Pair<String, String> pair : tokenAttr) {
-      if (pair.first == null || pair.second == null) continue;
-      map.put(pair.second, pair.first);
-    }
+    Map<String, String> origTokens = RuleGraphHelper.computeTokens(file);
+    final Pattern pattern = ParserGeneratorUtil.getAllTokenPattern(origTokens);
+    final Map<String, String> map = ContainerUtil.newLinkedHashMap(origTokens);
     GrammarUtil.visitRecursively(file, true, new BnfVisitor() {
+      int autoCount = 0;
       @Override
       public void visitStringLiteralExpression(@NotNull BnfStringLiteralExpression o) {
         String text = o.getText();
         String tokenText = StringUtil.stripQuotesAroundValue(text);
-        for (String name : map.keySet()) {
-          if (tokenText.equals(map.get(name))) return;
+        // add auto-XXX token for all unmatched strings to avoid BAD_CHARACTERs
+        if (!map.values().contains(tokenText) &&
+            !StringUtil.isJavaIdentifier(tokenText) &&
+            (pattern == null || !pattern.matcher(tokenText).matches())) {
+          map.put(tokenText, "_AUTO_" + (autoCount++));
         }
       }
 
@@ -245,10 +247,10 @@ public class LivePreviewLexer extends LexerBase {
         if (!map.containsValue(text)) map.put(text, text);
       }
     });
-    for (Pair<String, String> pair : tokenAttr) {
-      if (pair.first == null || pair.second == null) continue;
-      map.remove(pair.second);
-      map.put(pair.second, pair.first);
+    // fix ordering: origTokens _after_ to handle keywords correctly
+    for (String key : origTokens.keySet()) {
+      map.remove(key);
+      map.put(key, origTokens.get(key));
     }
 
     return map;

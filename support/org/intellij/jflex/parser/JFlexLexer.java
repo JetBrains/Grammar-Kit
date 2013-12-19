@@ -17,7 +17,6 @@
 package org.intellij.jflex.parser;
 
 import com.intellij.lexer.FlexAdapter;
-import com.intellij.lexer.FlexLexer;
 
 /**
  * @author gregsh

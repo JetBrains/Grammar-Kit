@@ -27,7 +27,6 @@ import gnu.trove.THashSet;
 import org.intellij.grammar.analysis.BnfFirstNextAnalyzer;
 import org.intellij.grammar.psi.BnfChoice;
 import org.intellij.grammar.psi.BnfExpression;
-import org.intellij.grammar.psi.BnfRule;
 import org.intellij.grammar.psi.BnfTypes;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NotNull;

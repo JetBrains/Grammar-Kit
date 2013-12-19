@@ -19,7 +19,6 @@ package org.intellij.jflex.editor;
 import com.intellij.lang.CodeDocumentationAwareCommenter;
 import com.intellij.psi.PsiComment;
 import com.intellij.psi.tree.IElementType;
-import org.intellij.grammar.BnfParserDefinition;
 import org.intellij.jflex.psi.JFlexTypes;
 
 /**

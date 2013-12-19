@@ -16,7 +16,6 @@
 
 package org.intellij.grammar.livePreview;
 
-import com.intellij.lang.Language;
 import com.intellij.openapi.fileTypes.FileType;
 import com.intellij.openapi.fileTypes.LanguageFileType;
 import com.intellij.openapi.vfs.VirtualFile;

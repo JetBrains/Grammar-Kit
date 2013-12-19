@@ -42,7 +42,10 @@ import org.intellij.grammar.generator.BnfConstants;
 import org.intellij.grammar.generator.ExpressionHelper;
 import org.intellij.grammar.generator.ParserGeneratorUtil;
 import org.intellij.grammar.generator.RuleGraphHelper;
-import org.intellij.grammar.psi.*;
+import org.intellij.grammar.psi.BnfAttr;
+import org.intellij.grammar.psi.BnfExpression;
+import org.intellij.grammar.psi.BnfFile;
+import org.intellij.grammar.psi.BnfRule;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;

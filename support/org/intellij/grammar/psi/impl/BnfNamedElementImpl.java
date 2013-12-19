@@ -23,7 +23,10 @@ import com.intellij.ui.RowIcon;
 import com.intellij.util.IncorrectOperationException;
 import com.intellij.util.PlatformIcons;
 import org.intellij.grammar.BnfIcons;
-import org.intellij.grammar.psi.*;
+import org.intellij.grammar.psi.BnfAttr;
+import org.intellij.grammar.psi.BnfModifier;
+import org.intellij.grammar.psi.BnfNamedElement;
+import org.intellij.grammar.psi.BnfRule;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
 

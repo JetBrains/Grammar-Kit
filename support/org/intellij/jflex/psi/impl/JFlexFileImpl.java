@@ -21,7 +21,6 @@ import com.intellij.openapi.fileTypes.FileType;
 import com.intellij.psi.FileViewProvider;
 import org.intellij.jflex.JFlexLanguage;
 import org.intellij.jflex.parser.JFlexFileType;
-import org.intellij.jflex.parser.JFlexParserDefinition;
 import org.jetbrains.annotations.NotNull;
 
 /**

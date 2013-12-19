@@ -18,7 +18,6 @@ package org.intellij.grammar.generator;
 import com.intellij.lang.Language;
 import com.intellij.openapi.util.Condition;
 import com.intellij.openapi.util.Key;
-import com.intellij.openapi.util.Pair;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.impl.source.tree.LeafPsiElement;
 import com.intellij.psi.tree.IElementType;
@@ -192,6 +191,7 @@ public class RuleGraphHelper {
   }
 
   public static Map<String, String> computeTokens(BnfFile file) {
+    // string value to constant name
     return getRootAttribute(file, KnownAttribute.TOKENS).asMap(true);
   }
 
@@ -676,7 +676,7 @@ public class RuleGraphHelper {
       else if (count > 1 && max < count) {
         max = count;
       }
-      else if (!changed) {
+      else {
         it.remove();
       }
     }

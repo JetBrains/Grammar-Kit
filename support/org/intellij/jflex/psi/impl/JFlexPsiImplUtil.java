@@ -24,7 +24,10 @@ import com.intellij.psi.*;
 import com.intellij.psi.impl.RenameableFakePsiElement;
 import com.intellij.psi.util.CachedValueProvider;
 import com.intellij.psi.util.CachedValuesManager;
-import com.intellij.util.*;
+import com.intellij.util.ArrayUtil;
+import com.intellij.util.CommonProcessors;
+import com.intellij.util.IncorrectOperationException;
+import com.intellij.util.Processor;
 import com.intellij.util.containers.ContainerUtil;
 import org.intellij.jflex.psi.*;
 import org.jetbrains.annotations.NotNull;
@@ -89,8 +92,8 @@ public class JFlexPsiImplUtil {
 
   private static boolean processMacroVariants(PsiElement context, Processor<JFlexMacroDefinition> processor) {
     final PsiFile containingFile = context.getContainingFile();
-    List<JFlexMacroDefinition> macros = CachedValuesManager.getManager(containingFile.getProject())
-      .getCachedValue(containingFile, new CachedValueProvider<List<JFlexMacroDefinition>>() {
+    List<JFlexMacroDefinition> macros = CachedValuesManager.getCachedValue(
+      containingFile, new CachedValueProvider<List<JFlexMacroDefinition>>() {
         @Nullable
         @Override
         public Result<List<JFlexMacroDefinition>> compute() {
@@ -173,8 +176,8 @@ public class JFlexPsiImplUtil {
 
   private static boolean processStateVariants(PsiElement context, Processor<? super JFlexStateDefinition> processor) {
     final PsiFile containingFile = context.getContainingFile();
-    List<JFlexStateDefinition> macros = CachedValuesManager.getManager(containingFile.getProject())
-      .getCachedValue(containingFile, new CachedValueProvider<List<JFlexStateDefinition>>() {
+    List<JFlexStateDefinition> macros = CachedValuesManager.getCachedValue(
+      containingFile, new CachedValueProvider<List<JFlexStateDefinition>>() {
         @Nullable
         @Override
         public Result<List<JFlexStateDefinition>> compute() {

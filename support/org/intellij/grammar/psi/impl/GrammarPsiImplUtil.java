@@ -28,7 +28,10 @@ import com.intellij.util.ObjectUtils;
 import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.generator.ParserGeneratorUtil;
 import org.intellij.grammar.java.JavaHelper;
-import org.intellij.grammar.psi.*;
+import org.intellij.grammar.psi.BnfAttr;
+import org.intellij.grammar.psi.BnfListEntry;
+import org.intellij.grammar.psi.BnfLiteralExpression;
+import org.intellij.grammar.psi.BnfRule;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;

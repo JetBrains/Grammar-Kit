@@ -50,7 +50,9 @@ import com.intellij.util.ui.update.MergingUpdateQueue;
 import com.intellij.util.ui.update.Update;
 import org.intellij.grammar.BnfFileType;
 import org.intellij.grammar.parser.GeneratedParserUtilBase;
-import org.intellij.grammar.psi.*;
+import org.intellij.grammar.psi.BnfExpression;
+import org.intellij.grammar.psi.BnfFile;
+import org.intellij.grammar.psi.BnfRule;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;

@@ -20,18 +20,14 @@ import com.intellij.lang.ASTNode;
 import com.intellij.lang.ParserDefinition;
 import com.intellij.lang.PsiParser;
 import com.intellij.lexer.Lexer;
-import com.intellij.openapi.fileTypes.PlainTextParserDefinition;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.FileViewProvider;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.TokenType;
-import com.intellij.psi.tree.IElementType;
 import com.intellij.psi.tree.IFileElementType;
 import com.intellij.psi.tree.TokenSet;
 import org.intellij.jflex.JFlexLanguage;
-import org.intellij.jflex.psi.JFlexTokenType;
-import org.intellij.jflex.psi.JFlexTypes;
 import org.intellij.jflex.psi.impl.JFlexFileImpl;
 import org.jetbrains.annotations.NotNull;
 
@@ -50,7 +46,6 @@ public class JFlexParserDefinition implements ParserDefinition {
   @NotNull
   @Override
   public Lexer createLexer(Project project) {
-    //return new PlainTextParserDefinition().createLexer(project);
     return new JFlexLexer();
   }
 

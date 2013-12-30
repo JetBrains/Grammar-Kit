@@ -36,6 +36,7 @@ import org.intellij.grammar.psi.BnfAttrs;
 import org.intellij.grammar.psi.BnfFile;
 import org.intellij.grammar.psi.BnfReferenceOrToken;
 import org.intellij.grammar.psi.impl.GrammarUtil;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.InputStreamReader;
@@ -72,8 +73,10 @@ public class BnfGenerateLexerAction extends AnAction {
     Collection<VirtualFile> files = FilenameIndex.getVirtualFilesByName(project, flexFileName, ProjectScope.getAllScope(project));
     VirtualFile firstItem = ContainerUtil.getFirstItem(files);
 
-    final VirtualFileWrapper fileWrapper = FileChooserFactory.getInstance().createSaveFileDialog(new FileSaverDescriptor("Save JFlex Lexer", "", "flex"), project).
-        save(firstItem != null ? firstItem.getParent() : null, firstItem != null ? firstItem.getName() : flexFileName);
+    FileSaverDescriptor descriptor = new FileSaverDescriptor("Save JFlex Lexer", "", "flex");
+    VirtualFile baseDir = firstItem != null ? firstItem.getParent() : bnfFile.getVirtualFile().getParent();
+    VirtualFileWrapper fileWrapper = FileChooserFactory.getInstance().createSaveFileDialog(descriptor, project).
+      save(baseDir, firstItem != null ? firstItem.getName() : flexFileName);
     if (fileWrapper == null) return;
     final VirtualFile virtualFile = fileWrapper.getVirtualFile(true);
     if (virtualFile == null) return;
@@ -130,15 +133,10 @@ public class BnfGenerateLexerAction extends AnAction {
     final Map<String, String> regexpTokens = new LinkedHashMap<String, String>();
     for (String token : tokenMap.keySet()) {
       String name = tokenMap.get(token).toUpperCase(Locale.ENGLISH);
-      if (ParserGeneratorUtil.isRegexpToken(token)) {
-        regexpTokens.put(name, javaRegexp2JFlex(ParserGeneratorUtil.getRegexpTokenRegexp(token)));
-        maxLen[0] = Math.max(name.length() + 2, maxLen[0]);
-      }
-      else {
-        String pattern = text2JFlex(token, false);
-        simpleTokens.put(name, pattern);
-        maxLen[0] = Math.max(pattern.length() + 2, maxLen[0]);
-      }
+      String pattern = token2JFlex(token);
+      boolean isRE = ParserGeneratorUtil.isRegexpToken(token);
+      (isRE ? regexpTokens : simpleTokens).put(name, pattern);
+      maxLen[0] = Math.max((isRE ? name : pattern).length() + 2, maxLen[0]);
     }
 
     bnfFile.acceptChildren(new PsiRecursiveElementWalkingVisitor() {
@@ -179,7 +177,17 @@ public class BnfGenerateLexerAction extends AnAction {
     return StringUtil.convertLineSeparators(out.toString());
   }
 
-  private static String javaRegexp2JFlex(String javaRegexp) {
+  @NotNull
+  public static String token2JFlex(@NotNull String tokenText) {
+    if (ParserGeneratorUtil.isRegexpToken(tokenText)) {
+      return javaPattern2JFlex(ParserGeneratorUtil.getRegexpTokenRegexp(tokenText));
+    }
+    else {
+      return text2JFlex(tokenText, false);
+    }
+  }
+
+  private static String javaPattern2JFlex(String javaRegexp) {
     Matcher m = Pattern.compile("\\[(?:[^]\\\\]|\\\\.)*\\]").matcher(javaRegexp);
     int start = 0;
     StringBuilder sb = new StringBuilder();
@@ -194,23 +202,30 @@ public class BnfGenerateLexerAction extends AnAction {
   }
 
   private static String text2JFlex(String text, boolean isRegexp) {
-    String text1 = text.replaceAll("\"", "\\\\\"");
-    return !isRegexp ? text1.replaceAll("\\\\", "\\\\\\\\") : text1.
-      replaceAll("(/+)", "\"$1\"").
-      replaceAll("\\\\d", "[0-9]").
-      replaceAll("\\\\D", "[^0-9]").
-      replaceAll("\\\\s", "[ \\t\\n\\x0B\\f\\r]").
-      replaceAll("\\\\S", "[^ \\t\\n\\x0B\\f\\r]").
-      replaceAll("\\\\w", "[a-zA-Z_0-9]").
-      replaceAll("\\\\W", "[^a-zA-Z_0-9]").
-      replaceAll("\\\\p\\{Space\\}", "[ \\t\\n\\x0B\\f\\r]").
-      replaceAll("\\\\p\\{Digit\\}", "[:digit:]").
-      replaceAll("\\\\p\\{Alpha\\}", "[:letter:]").
-      replaceAll("\\\\p\\{Lower\\}", "[:lowercase:]").
-      replaceAll("\\\\p\\{Upper\\}", "[:uppercase:]").
-      replaceAll("\\\\p\\{Alnum\\}", "([:letter:]|[:digit:])").
-      replaceAll("\\\\p\\{ASCII\\}", "[\\x00-\\x7F]")
-      ;
+    String s;
+    if (!isRegexp) {
+      s = text.replaceAll("(\"|\\\\)", "\\\\$1");
+      return s;
+    }
+    else {
+      String spaces = " \\\\t\\\\n\\\\x0B\\\\f\\\\r";
+      s = text.replaceAll("\"", "\\\\\"");
+      s = s.replaceAll("(/+)", "\"$1\"");
+      s = s.replaceAll("\\\\d", "[0-9]");
+      s = s.replaceAll("\\\\D", "[^0-9]");
+      s = s.replaceAll("\\\\s", "[" + spaces + "]");
+      s = s.replaceAll("\\\\S", "[^" + spaces + "]");
+      s = s.replaceAll("\\\\w", "[a-zA-Z_0-9]");
+      s = s.replaceAll("\\\\W", "[^a-zA-Z_0-9]");
+      s = s.replaceAll("\\\\p\\{Space\\}", "[" + spaces + "]");
+      s = s.replaceAll("\\\\p\\{Digit\\}", "[:digit:]");
+      s = s.replaceAll("\\\\p\\{Alpha\\}", "[:letter:]");
+      s = s.replaceAll("\\\\p\\{Lower\\}", "[:lowercase:]");
+      s = s.replaceAll("\\\\p\\{Upper\\}", "[:uppercase:]");
+      s = s.replaceAll("\\\\p\\{Alnum\\}", "([:letter:]|[:digit:])");
+      s = s.replaceAll("\\\\p\\{ASCII\\}", "[\\x00-\\x7F]");
+      return s;
+    }
   }
 
   static String getFlexFileName(BnfFile bnfFile) {

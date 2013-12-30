@@ -4,6 +4,7 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 import org.intellij.grammar.expression.ExpressionParserTest;
+import org.intellij.jflex.JFlexGenerationTest;
 import org.intellij.jflex.JFlexParserTest;
 
 /**
@@ -12,6 +13,7 @@ import org.intellij.jflex.JFlexParserTest;
 public class BnfTestSuite extends TestCase {
   public static Test suite() {
     final TestSuite testSuite = new TestSuite();
+    testSuite.addTestSuite(JFlexGenerationTest.class);
     testSuite.addTestSuite(JFlexParserTest.class);
     testSuite.addTestSuite(BnfParserTest.class);
     testSuite.addTestSuite(BnfGeneratorTest.class);

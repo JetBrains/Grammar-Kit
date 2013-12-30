@@ -63,6 +63,7 @@
 
     <spellchecker.support language="BNF" implementationClass="org.intellij.grammar.editor.BnfSpellCheckingStrategy"/>
 
+    <referencesSearch implementation="org.intellij.grammar.psi.BnfAttrPatternRefSearcher"/>
     <lang.refactoringSupport language="BNF" implementationClass="org.intellij.grammar.refactor.BnfRefactoringSupportProvider"/>
     <inlineActionHandler implementation="org.intellij.grammar.refactor.BnfInlineRuleActionHandler"/>
 

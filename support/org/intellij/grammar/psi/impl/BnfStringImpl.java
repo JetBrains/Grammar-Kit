@@ -31,7 +31,6 @@ import org.intellij.grammar.java.JavaHelper;
 import org.intellij.grammar.psi.*;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -175,7 +174,7 @@ public abstract class BnfStringImpl extends BnfExpressionImpl implements BnfStri
     public ResolveResult[] multiResolveInner() {
       final Pattern pattern = ParserGeneratorUtil.compilePattern(getCanonicalText());
       if (pattern == null) return ResolveResult.EMPTY_ARRAY;
-      final ArrayList<PsiElement> result = new ArrayList<PsiElement>();
+      final List<PsiElement> result = ContainerUtil.newArrayList();
 
       BnfAttr thisAttr = ObjectUtils.assertNotNull(PsiTreeUtil.getParentOfType(getElement(), BnfAttr.class));
       BnfAttrs thisAttrs = ObjectUtils.assertNotNull(PsiTreeUtil.getParentOfType(thisAttr, BnfAttrs.class));
@@ -228,6 +227,12 @@ public abstract class BnfStringImpl extends BnfExpressionImpl implements BnfStri
         }
       }
       return PsiElementResolveResult.createResults(result);
+    }
+
+    @Override
+    public PsiElement handleElementRename(String newElementName) throws IncorrectOperationException {
+      // do not rename pattern
+      return myElement;
     }
 
     @NotNull

@@ -122,7 +122,7 @@ if the specified prefix is matched. This attribute tunes the parser to handle in
   * _extendedPin_ global attribute (_true_ by default) extends the notion of pinning. In this mode the
 generated parser tries to match the rest part of an already pinned rule even if some parts are missed. This allows parser to match the closing brace if the opening brace is pinned for example.
 
-* _recoverUntil_ attribute (value: predicate rule) matches any number of tokens after the rule
+* _recoverWhile_ attribute (value: predicate rule) matches any number of tokens after the rule
 matching completes with any result. This attribute helps parser recover when unmatched token
 sequence is encountered.
 

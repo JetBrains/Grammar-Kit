@@ -124,7 +124,7 @@ generated parser tries to match the rest part of an already pinned rule even if 
 
 * _recoverWhile_ attribute (value: predicate rule) matches any number of tokens after the rule
 matching completes with any result. This attribute helps parser recover when unmatched token
-sequence is encountered.
+sequence is encountered. See [HOWTO section](HOWTO.md#22-using-recoverwhile-attribute) for more.
 
 * _name_ attribute (value: string) specifies a nice name for a rule. For example *name("_.*expr")=expression* attribute creates a well recognized "&lt;expression&gt; required" error message for different expression rules instead of a long token list.
 

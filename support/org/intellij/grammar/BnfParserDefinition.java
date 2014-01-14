@@ -43,8 +43,8 @@ public class BnfParserDefinition implements ParserDefinition {
 
   public static final IFileElementType BNF_FILE_ELEMENT_TYPE = new IFileElementType("BNF_FILE", BnfLanguage.INSTANCE);
   public static final TokenSet WS = TokenSet.create(TokenType.WHITE_SPACE);
-  public static final IElementType BNF_LINE_COMMENT = new BnfTokenType("BNF_LINE_COMMENT");
-  public static final IElementType BNF_BLOCK_COMMENT = new BnfTokenType("BNF_BLOCK_COMMENT");
+  public static final IElementType BNF_LINE_COMMENT = BnfTypes.BNF_LINE_COMMENT;
+  public static final IElementType BNF_BLOCK_COMMENT = BnfTypes.BNF_BLOCK_COMMENT;
   public static final TokenSet COMMENTS = TokenSet.create(BNF_LINE_COMMENT, BNF_BLOCK_COMMENT);
   public static final TokenSet LITERALS = TokenSet.create(BnfTypes.BNF_STRING);
 

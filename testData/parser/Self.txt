@@ -75,7 +75,7 @@ BnfFile:Self.bnf
         BNF_STRING_LITERAL_EXPRESSION: "org.intellij.grammar.psi.BnfTokenType"
           PsiElement(string)('"org.intellij.grammar.psi.BnfTokenType"')
       PsiWhiteSpace('\n  \n  ')
-      PsiComment(BNF_LINE_COMMENT)('// tokens')
+      PsiComment(line_comment)('// tokens')
       PsiWhiteSpace('\n  ')
       BNF_ATTR:OP_EQ
         PsiElement(id)('OP_EQ')

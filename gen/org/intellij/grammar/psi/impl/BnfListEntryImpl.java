@@ -38,12 +38,6 @@ public class BnfListEntryImpl extends BnfCompositeElementImpl implements BnfList
 
   @Override
   @Nullable
-  public BnfStringLiteralExpression getLiteralExpression() {
-    return findChildByClass(BnfStringLiteralExpression.class);
-  }
-
-  @Override
-  @Nullable
   public PsiElement getId() {
     return findChildByType(BNF_ID);
   }
@@ -51,6 +45,12 @@ public class BnfListEntryImpl extends BnfCompositeElementImpl implements BnfList
   @NotNull
   public PsiReference[] getReferences() {
     return GrammarPsiImplUtil.getReferences(this);
+  }
+
+  @Override
+  @Nullable
+  public BnfStringLiteralExpression getLiteralExpression() {
+    return findChildByClass(BnfStringLiteralExpression.class);
   }
 
 }

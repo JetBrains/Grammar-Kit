@@ -301,7 +301,7 @@ BnfFile:BnfGrammar.bnf
         BNF_REFERENCE_OR_TOKEN: grammar_element
           PsiElement(id)('grammar_element')
     PsiWhiteSpace('\n')
-    PsiComment(BNF_LINE_COMMENT)('//grammar ::= grammar_element * // live preview root')
+    PsiComment(line_comment)('//grammar ::= grammar_element * // live preview root')
     PsiWhiteSpace('\n\n')
     BNF_RULE:grammar_element
       BNF_MODIFIER

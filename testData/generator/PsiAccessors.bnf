@@ -4,6 +4,12 @@
   psiClassPrefix="X"
   implements="XComposite"
   stubParserClass="PsiGenUtil"
+  generateTokenAccessors("some_.*")=true
+
+  tokens=[
+    MY_SOMETHING="something"
+    id="regexp:"
+  ]
 }
 root ::= binary
 
@@ -28,4 +34,18 @@ operator ::= '+' | '-'
 
 expression ::= value '*' value
 value ::= id
-re ::= id
+
+some_root ::= some_child value {
+  methods=[
+    childSomething="some_child/MY_SOMETHING" // ok
+    childSomething2="some_child/something2" // ok
+    grandChild="some_child/some_grand_child" // ok
+    grandChildSomethin="some_child/some_grand_child/MY_SOMETHING" // ok
+    grandChildSomethin2="some_child/some_grand_child/something2" // incorrect
+    value="" // disable value accessor
+  ]
+}
+some_child ::= some_grand_child "something" something2 {
+  methods=[smth1="MY_SOMETHING" smth2="MY_SOMETHING"]
+}
+some_grand_child ::= MY_SOMETHING something2 {pin=1}

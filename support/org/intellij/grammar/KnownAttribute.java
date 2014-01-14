@@ -44,6 +44,7 @@ public class KnownAttribute<T> {
   public static final KnownAttribute<String>       CLASS_HEADER              = create(true, String.class, "classHeader", BnfConstants.CLASS_HEADER_DEF);
   public static final KnownAttribute<Boolean>      GENERATE_PSI              = create(true, Boolean.class, "generatePsi", true);
   public static final KnownAttribute<Boolean>      GENERATE_TOKENS           = create(true, Boolean.class, "generateTokens", true);
+  public static final KnownAttribute<Boolean>      GENERATE_TOKEN_ACCESSORS  = create(true, Boolean.class, "generateTokenAccessors", false);
   public static final KnownAttribute<Integer>      GENERATE_FIRST_CHECK      = create(true, Integer.class, "generateFirstCheck", 2);
   public static final KnownAttribute<Boolean>      EXTENDED_PIN              = create(true, Boolean.class, "extendedPin", true);
   public static final KnownAttribute<ListValue>    PARSER_IMPORTS            = create(true, ListValue.class, "parserImports", EMPTY_LIST);
@@ -65,7 +66,6 @@ public class KnownAttribute<T> {
   public static final KnownAttribute<String>       EXTENDS                   = create(false, String.class, "extends", BnfConstants.AST_WRAPPER_PSI_ELEMENT_CLASS);
   public static final KnownAttribute<ListValue>    IMPLEMENTS                = create(false, ListValue.class, "implements", ListValue.singleValue( null, BnfConstants.PSI_ELEMENT_CLASS));
   public static final KnownAttribute<String>       ELEMENT_TYPE              = create(false, String.class, "elementType", null);
-  public static final KnownAttribute<String>       METHOD_RENAMES            = create(false, String.class, "methodRenames", null);
   public static final KnownAttribute<Object>       PIN                       = create(false, Object.class, "pin", (Object)(-1));
   public static final KnownAttribute<String>       MIXIN                     = create(false, String.class, "mixin", null);
   public static final KnownAttribute<String>       RECOVER_WHILE             = create(false, String.class, "recoverWhile", null);

@@ -196,6 +196,36 @@ BnfFile:BnfGrammar.bnf
             PsiElement(=)('=')
             BNF_STRING_LITERAL_EXPRESSION: ">>"
               PsiElement(string)('">>"')
+          PsiWhiteSpace('\n\n    ')
+          BNF_LIST_ENTRY
+            PsiElement(id)('id')
+            PsiElement(=)('=')
+            BNF_STRING_LITERAL_EXPRESSION: "regexp:\w+"
+              PsiElement(string)('"regexp:\w+"')
+          PsiWhiteSpace('\n    ')
+          BNF_LIST_ENTRY
+            PsiElement(id)('string')
+            PsiElement(=)('=')
+            BNF_STRING_LITERAL_EXPRESSION: "regexp:('([^'\\]|\\.)*'|\"([^\"\\]|\\\"|\\\'|\\)*\")"
+              PsiElement(string)('"regexp:('([^'\\]|\\.)*'|\"([^\"\\]|\\\"|\\\'|\\)*\")"')
+          PsiWhiteSpace('\n    ')
+          BNF_LIST_ENTRY
+            PsiElement(id)('number')
+            PsiElement(=)('=')
+            BNF_STRING_LITERAL_EXPRESSION: "regexp:\d+"
+              PsiElement(string)('"regexp:\d+"')
+          PsiWhiteSpace('\n    ')
+          BNF_LIST_ENTRY
+            PsiElement(id)('line_comment')
+            PsiElement(=)('=')
+            BNF_STRING_LITERAL_EXPRESSION: "regexp://.*"
+              PsiElement(string)('"regexp://.*"')
+          PsiWhiteSpace('\n    ')
+          BNF_LIST_ENTRY
+            PsiElement(id)('block_comment')
+            PsiElement(=)('=')
+            BNF_STRING_LITERAL_EXPRESSION: "regexp:/\*(.|\n)*\*/"
+              PsiElement(string)('"regexp:/\*(.|\n)*\*/"')
           PsiWhiteSpace('\n  ')
           PsiElement(])(']')
       PsiWhiteSpace('\n\n  ')
@@ -253,17 +283,6 @@ BnfFile:BnfGrammar.bnf
         PsiElement(=)('=')
         BNF_REFERENCE_OR_TOKEN: parenthesized
           PsiElement(id)('parenthesized')
-      PsiWhiteSpace('\n\n  ')
-      BNF_ATTR:methodRenames
-        PsiElement(id)('methodRenames')
-        BNF_ATTR_PATTERN
-          PsiElement(()('(')
-          BNF_STRING_LITERAL_EXPRESSION: "getStringLiteralExpression"
-            PsiElement(string)('"getStringLiteralExpression"')
-          PsiElement())(')')
-        PsiElement(=)('=')
-        BNF_STRING_LITERAL_EXPRESSION: "getLiteralExpression"
-          PsiElement(string)('"getLiteralExpression"')
       PsiWhiteSpace('\n')
       PsiElement(})('}')
     PsiWhiteSpace('\n\n')
@@ -282,6 +301,8 @@ BnfFile:BnfGrammar.bnf
         BNF_REFERENCE_OR_TOKEN: grammar_element
           PsiElement(id)('grammar_element')
     PsiWhiteSpace('\n')
+    PsiComment(BNF_LINE_COMMENT)('//grammar ::= grammar_element * // live preview root')
+    PsiWhiteSpace('\n\n')
     BNF_RULE:grammar_element
       BNF_MODIFIER
         PsiElement(id)('private')
@@ -631,11 +652,25 @@ BnfFile:BnfGrammar.bnf
       PsiWhiteSpace(' ')
       BNF_ATTRS
         PsiElement({)('{')
+        PsiWhiteSpace('\n  ')
         BNF_ATTR:pin
           PsiElement(id)('pin')
           PsiElement(=)('=')
           BNF_LITERAL_EXPRESSION: 1
             PsiElement(number)('1')
+        PsiWhiteSpace(' ')
+        BNF_ATTR:methods
+          PsiElement(id)('methods')
+          PsiElement(=)('=')
+          BNF_VALUE_LIST
+            PsiElement([)('[')
+            BNF_LIST_ENTRY
+              PsiElement(id)('literalExpression')
+              PsiElement(=)('=')
+              BNF_STRING_LITERAL_EXPRESSION: "string_literal_expression"
+                PsiElement(string)('"string_literal_expression"')
+            PsiElement(])(']')
+        PsiWhiteSpace('\n')
         PsiElement(})('}')
     PsiWhiteSpace('\n\n')
     BNF_RULE:value_list
@@ -719,6 +754,12 @@ BnfFile:BnfGrammar.bnf
             PsiElement([)('[')
             BNF_LIST_ENTRY
               PsiElement(id)('getReferences')
+            PsiWhiteSpace(' ')
+            BNF_LIST_ENTRY
+              PsiElement(id)('literalExpression')
+              PsiElement(=)('=')
+              BNF_STRING_LITERAL_EXPRESSION: "string_literal_expression"
+                PsiElement(string)('"string_literal_expression"')
             PsiElement(])(']')
         PsiWhiteSpace('\n')
         PsiElement(})('}')

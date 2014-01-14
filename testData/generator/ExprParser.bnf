@@ -60,7 +60,9 @@ exp_expr ::= expr ('^' expr) + // N-ary variant
 factorial_expr ::= expr '!'
 paren_expr ::= '(' expr ')'
 elvis_expr ::= expr '?' expr ':' expr
-between_expr ::= expr BETWEEN add_group AND add_group
+between_expr ::= expr BETWEEN add_group AND add_group {
+  methods=[testExpr="expr[0]"]
+}
 
 // test specific expressions
 special_expr ::= 'multiply' '(' simple_ref_expr ',' mul_expr ')' {pin=2}

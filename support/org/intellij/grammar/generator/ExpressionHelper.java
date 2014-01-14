@@ -25,6 +25,7 @@ import com.intellij.psi.util.CachedValueProvider;
 import com.intellij.psi.util.CachedValuesManager;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.util.Function;
+import com.intellij.util.ObjectUtils;
 import com.intellij.util.PairConsumer;
 import com.intellij.util.containers.ContainerUtil;
 import gnu.trove.THashSet;
@@ -51,7 +52,7 @@ public class ExpressionHelper {
   };
   private final BnfFile myFile;
   private final RuleGraphHelper myRuleGraph;
-  private boolean myAddWarnings;
+  private final boolean myAddWarnings;
 
   private final Map<BnfRule, ExpressionInfo> myExpressionMap = new HashMap<BnfRule, ExpressionInfo>();
   private final Map<BnfRule, BnfRule> myRootRulesMap = new HashMap<BnfRule, BnfRule>();
@@ -272,12 +273,19 @@ public class ExpressionHelper {
     ExpressionHelper.ExpressionInfo info = getExpressionInfo(rule);
     ExpressionHelper.OperatorInfo operatorInfo = info == null ? null : info.operatorMap.get(rule);
     if (operatorInfo == null || operatorInfo.type == ExpressionHelper.OperatorType.ATOM) return type;
-    // check operator.tail, which is always optional
-    if (operatorInfo.tail != null && isRealAncestor(rule, operatorInfo.tail, tree) ||
-        operatorInfo.type == OperatorType.PREFIX && !isRealAncestor(rule, operatorInfo.operator, tree)) {
+
+    // emulate expr-parsing pin processing
+    if ((operatorInfo.type == OperatorType.BINARY ||
+         operatorInfo.type == OperatorType.N_ARY ||
+         operatorInfo.type == OperatorType.POSTFIX) &&
+        ObjectUtils.chooseNotNull(operatorInfo.arg1, info.rootRule) == tree ||
+        isRealAncestor(rule, operatorInfo.operator, tree)) {
+      // pinned! return as is
+      return type;
+    }
+    else {
       return type.and(OPTIONAL);
     }
-    return type;
   }
 
   private boolean isRealAncestor(BnfRule rule, BnfExpression expression, PsiElement target) {

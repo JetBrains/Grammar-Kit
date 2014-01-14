@@ -185,11 +185,13 @@ public class ParserGeneratorUtil {
     return funcName + "_" + i;
   }
 
-  public static String toIdentifier(String text, String prefix) {
+  public static String toIdentifier(@NotNull String text, @NotNull String prefix) {
     StringBuilder sb = new StringBuilder(prefix);
     for (String s : text.split("_")) {
       if (s.length() == 0) continue;
-      sb.append(Character.toUpperCase(s.charAt(0))).append(s.substring(1));
+      String tail = s.substring(1);
+      sb.append(StringUtil.toUpperCase(s.charAt(0)));
+      sb.append(StringUtil.toUpperCase(tail).equals(tail)? StringUtil.toLowerCase(tail) : tail);
     }
     return sb.toString();
   }
@@ -256,7 +258,7 @@ public class ParserGeneratorUtil {
   }
 
   public static Collection<BnfRule> getSortedPublicRules(Set<PsiElement> accessors) {
-    Map<String, BnfRule> result = new TreeMap<String, BnfRule>();
+    Map<String, BnfRule> result = ContainerUtil.newTreeMap();
     for (PsiElement tree : accessors) {
       if (tree instanceof BnfRule) {
         BnfRule rule = (BnfRule)tree;
@@ -267,7 +269,7 @@ public class ParserGeneratorUtil {
   }
 
   public static Collection<BnfExpression> getSortedTokens(Set<PsiElement> accessors) {
-    Map<String, BnfExpression> result = new TreeMap<String, BnfExpression>();
+    Map<String, BnfExpression> result = ContainerUtil.newTreeMap();
     for (PsiElement tree : accessors) {
       if (!(tree instanceof BnfExpression)) continue;
       result.put(tree.getText(), (BnfExpression)tree);
@@ -276,7 +278,7 @@ public class ParserGeneratorUtil {
   }
 
   public static Collection<LeafPsiElement> getSortedExternalRules(Set<PsiElement> accessors) {
-    Map<String, LeafPsiElement> result = new TreeMap<String, LeafPsiElement>();
+    Map<String, LeafPsiElement> result = ContainerUtil.newTreeMap();
     for (PsiElement tree : accessors) {
       if (!(tree instanceof LeafPsiElement)) continue;
       result.put(tree.getText(), (LeafPsiElement) tree);
@@ -284,8 +286,7 @@ public class ParserGeneratorUtil {
     return result.values();
   }
 
-  public static <T> List<T> topoSort(Collection<T> collection,
-                                     Topology<T> topology) {
+  public static <T> List<T> topoSort(Collection<T> collection, Topology<T> topology) {
     List<T> rulesToSort = new ArrayList<T>(collection);
     if (rulesToSort.size() < 2) return new ArrayList<T>(rulesToSort);
     Collections.reverse(rulesToSort);

@@ -146,6 +146,9 @@ public interface BetweenExpr extends Expr {
   @NotNull
   List<Expr> getExprList();
 
+  @NotNull
+  Expr getTestExpr();
+
 }
 // ---- CallExpr.java -----------------
 //header.txt
@@ -479,6 +482,13 @@ public class BetweenExprImpl extends ExprImpl implements BetweenExpr {
   @NotNull
   public List<Expr> getExprList() {
     return PsiTreeUtil.getChildrenOfTypeAsList(this, Expr.class);
+  }
+
+  @Override
+  @NotNull
+  public Expr getTestExpr() {
+    List<Expr> p1 = getExprList();
+    return p1.get(0);
   }
 
 }

@@ -52,8 +52,7 @@ public abstract class BnfStringImpl extends BnfExpressionImpl implements BnfStri
   public PsiReference getReference() {
     PsiElement parent = getParent();
     if (parent instanceof BnfAttrPattern) {
-      KnownAttribute attribute = KnownAttribute.getAttribute(((BnfAttr)parent.getParent()).getName());
-      return attribute != KnownAttribute.METHOD_RENAMES ? getAttrPatternReference() : null;
+      return getAttrPatternReference();
     }
     else if (parent instanceof BnfAttr) {
       PsiReference[] refs = getAttrValueReference();
@@ -66,13 +65,7 @@ public abstract class BnfStringImpl extends BnfExpressionImpl implements BnfStri
   public PsiReference[] getReferences() {
     PsiElement parent = getParent();
     if (parent instanceof BnfAttrPattern) {
-      KnownAttribute attribute = KnownAttribute.getAttribute(((BnfAttr)parent.getParent()).getName());
-      if (attribute != KnownAttribute.METHOD_RENAMES) {
-        return new PsiReference[] { getAttrPatternReference() };
-      }
-      else {
-        return PsiReference.EMPTY_ARRAY;
-      }
+      return new PsiReference[] { getAttrPatternReference() };
     }
     else if (parent instanceof BnfAttr) {
       return getAttrValueReference();

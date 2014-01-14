@@ -30,12 +30,14 @@ public interface BnfTypes {
   IElementType BNF_STRING_LITERAL_EXPRESSION = new BnfCompositeElementType("BNF_STRING_LITERAL_EXPRESSION");
   IElementType BNF_VALUE_LIST = new BnfCompositeElementType("BNF_VALUE_LIST");
 
+  IElementType BNF_BLOCK_COMMENT = new BnfTokenType("block_comment");
   IElementType BNF_EXTERNAL_END = new BnfTokenType(">>");
   IElementType BNF_EXTERNAL_START = new BnfTokenType("<<");
   IElementType BNF_ID = new BnfTokenType("id");
   IElementType BNF_LEFT_BRACE = new BnfTokenType("{");
   IElementType BNF_LEFT_BRACKET = new BnfTokenType("[");
   IElementType BNF_LEFT_PAREN = new BnfTokenType("(");
+  IElementType BNF_LINE_COMMENT = new BnfTokenType("line_comment");
   IElementType BNF_NUMBER = new BnfTokenType("number");
   IElementType BNF_OP_AND = new BnfTokenType("&");
   IElementType BNF_OP_EQ = new BnfTokenType("=");
@@ -217,13 +219,13 @@ import com.intellij.psi.PsiReference;
 public interface BnfListEntry extends BnfCompositeElement {
 
   @Nullable
-  BnfStringLiteralExpression getLiteralExpression();
-
-  @Nullable
   PsiElement getId();
 
   @NotNull
   PsiReference[] getReferences();
+
+  @Nullable
+  BnfStringLiteralExpression getLiteralExpression();
 
 }
 // ---- BnfLiteralExpression.java -----------------
@@ -647,12 +649,6 @@ public class BnfListEntryImpl extends BnfCompositeElementImpl implements BnfList
 
   @Override
   @Nullable
-  public BnfStringLiteralExpression getLiteralExpression() {
-    return findChildByClass(BnfStringLiteralExpression.class);
-  }
-
-  @Override
-  @Nullable
   public PsiElement getId() {
     return findChildByType(BNF_ID);
   }
@@ -660,6 +656,12 @@ public class BnfListEntryImpl extends BnfCompositeElementImpl implements BnfList
   @NotNull
   public PsiReference[] getReferences() {
     return GrammarPsiImplUtil.getReferences(this);
+  }
+
+  @Override
+  @Nullable
+  public BnfStringLiteralExpression getLiteralExpression() {
+    return findChildByClass(BnfStringLiteralExpression.class);
   }
 
 }

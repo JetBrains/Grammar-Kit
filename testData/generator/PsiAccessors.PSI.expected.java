@@ -12,10 +12,14 @@ public interface GeneratedTypes {
   IElementType BINARY = new IElementType("BINARY", null);
   IElementType EXPRESSION = new IElementType("EXPRESSION", null);
   IElementType OPERATOR = new IElementType("OPERATOR", null);
-  IElementType RE = new IElementType("RE", null);
+  IElementType SOME_CHILD = new IElementType("SOME_CHILD", null);
+  IElementType SOME_GRAND_CHILD = new IElementType("SOME_GRAND_CHILD", null);
+  IElementType SOME_ROOT = new IElementType("SOME_ROOT", null);
   IElementType VALUE = new IElementType("VALUE", null);
 
   IElementType ID = new IElementType("id", null);
+  IElementType MY_SOMETHING = new IElementType("something", null);
+  IElementType SOMETHING2 = new IElementType("something2", null);
 
   class Factory {
     public static PsiElement createElement(ASTNode node) {
@@ -29,8 +33,14 @@ public interface GeneratedTypes {
       else if (type == OPERATOR) {
         return new XOperatorImpl(node);
       }
-      else if (type == RE) {
-        return new XReImpl(node);
+      else if (type == SOME_CHILD) {
+        return new XSomeChildImpl(node);
+      }
+      else if (type == SOME_GRAND_CHILD) {
+        return new XSomeGrandChildImpl(node);
+      }
+      else if (type == SOME_ROOT) {
+        return new XSomeRootImpl(node);
       }
       else if (type == VALUE) {
         return new XValueImpl(node);
@@ -114,7 +124,7 @@ import com.intellij.psi.PsiElement;
 public interface XOperator extends XComposite {
 
 }
-// ---- XRe.java -----------------
+// ---- XSomeChild.java -----------------
 //header.txt
 package generated.psi;
 
@@ -122,10 +132,65 @@ import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
-public interface XRe extends XComposite {
+public interface XSomeChild extends XComposite {
 
   @NotNull
-  PsiElement getId();
+  XSomeGrandChild getSomeGrandChild();
+
+  @NotNull
+  PsiElement getSomething2();
+
+  @NotNull
+  PsiElement getSmth1();
+
+  @NotNull
+  PsiElement getSmth2();
+
+}
+// ---- XSomeGrandChild.java -----------------
+//header.txt
+package generated.psi;
+
+import java.util.List;
+import org.jetbrains.annotations.*;
+import com.intellij.psi.PsiElement;
+
+public interface XSomeGrandChild extends XComposite {
+
+  @NotNull
+  PsiElement getMySomething();
+
+  @Nullable
+  PsiElement getSomething2();
+
+}
+// ---- XSomeRoot.java -----------------
+//header.txt
+package generated.psi;
+
+import java.util.List;
+import org.jetbrains.annotations.*;
+import com.intellij.psi.PsiElement;
+
+public interface XSomeRoot extends XComposite {
+
+  @NotNull
+  XSomeChild getSomeChild();
+
+  @NotNull
+  PsiElement getChildSomething();
+
+  @NotNull
+  PsiElement getChildSomething2();
+
+  @NotNull
+  XSomeGrandChild getGrandChild();
+
+  @NotNull
+  PsiElement getGrandChildSomethin();
+
+  @Nullable
+  PsiElement getGrandChildSomethin2();
 
 }
 // ---- XValue.java -----------------
@@ -326,7 +391,7 @@ public class XOperatorImpl extends ASTWrapperPsiElement implements XOperator {
   }
 
 }
-// ---- XReImpl.java -----------------
+// ---- XSomeChildImpl.java -----------------
 //header.txt
 package generated.psi.impl;
 
@@ -340,21 +405,146 @@ import static generated.GeneratedTypes.*;
 import com.intellij.extapi.psi.ASTWrapperPsiElement;
 import generated.psi.*;
 
-public class XReImpl extends ASTWrapperPsiElement implements XRe {
+public class XSomeChildImpl extends ASTWrapperPsiElement implements XSomeChild {
 
-  public XReImpl(ASTNode node) {
+  public XSomeChildImpl(ASTNode node) {
     super(node);
   }
 
   public void accept(@NotNull PsiElementVisitor visitor) {
-    if (visitor instanceof XVisitor) ((XVisitor)visitor).visitRe(this);
+    if (visitor instanceof XVisitor) ((XVisitor)visitor).visitSomeChild(this);
     else super.accept(visitor);
   }
 
   @Override
   @NotNull
-  public PsiElement getId() {
-    return findNotNullChildByType(ID);
+  public XSomeGrandChild getSomeGrandChild() {
+    return findNotNullChildByClass(XSomeGrandChild.class);
+  }
+
+  @Override
+  @NotNull
+  public PsiElement getSomething2() {
+    return findNotNullChildByType(SOMETHING2);
+  }
+
+  @Override
+  @NotNull
+  public PsiElement getSmth1() {
+    return findNotNullChildByType(MY_SOMETHING);
+  }
+
+  @Override
+  @NotNull
+  public PsiElement getSmth2() {
+    return getMySomething();
+  }
+
+}
+// ---- XSomeGrandChildImpl.java -----------------
+//header.txt
+package generated.psi.impl;
+
+import java.util.List;
+import org.jetbrains.annotations.*;
+import com.intellij.lang.ASTNode;
+import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiElementVisitor;
+import com.intellij.psi.util.PsiTreeUtil;
+import static generated.GeneratedTypes.*;
+import com.intellij.extapi.psi.ASTWrapperPsiElement;
+import generated.psi.*;
+
+public class XSomeGrandChildImpl extends ASTWrapperPsiElement implements XSomeGrandChild {
+
+  public XSomeGrandChildImpl(ASTNode node) {
+    super(node);
+  }
+
+  public void accept(@NotNull PsiElementVisitor visitor) {
+    if (visitor instanceof XVisitor) ((XVisitor)visitor).visitSomeGrandChild(this);
+    else super.accept(visitor);
+  }
+
+  @Override
+  @NotNull
+  public PsiElement getMySomething() {
+    return findNotNullChildByType(MY_SOMETHING);
+  }
+
+  @Override
+  @Nullable
+  public PsiElement getSomething2() {
+    return findChildByType(SOMETHING2);
+  }
+
+}
+// ---- XSomeRootImpl.java -----------------
+//header.txt
+package generated.psi.impl;
+
+import java.util.List;
+import org.jetbrains.annotations.*;
+import com.intellij.lang.ASTNode;
+import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiElementVisitor;
+import com.intellij.psi.util.PsiTreeUtil;
+import static generated.GeneratedTypes.*;
+import com.intellij.extapi.psi.ASTWrapperPsiElement;
+import generated.psi.*;
+
+public class XSomeRootImpl extends ASTWrapperPsiElement implements XSomeRoot {
+
+  public XSomeRootImpl(ASTNode node) {
+    super(node);
+  }
+
+  public void accept(@NotNull PsiElementVisitor visitor) {
+    if (visitor instanceof XVisitor) ((XVisitor)visitor).visitSomeRoot(this);
+    else super.accept(visitor);
+  }
+
+  @Override
+  @NotNull
+  public XSomeChild getSomeChild() {
+    return findNotNullChildByClass(XSomeChild.class);
+  }
+
+  @Override
+  @NotNull
+  public PsiElement getChildSomething() {
+    XSomeChild p1 = getSomeChild();
+    return p1.getMySomething();
+  }
+
+  @Override
+  @NotNull
+  public PsiElement getChildSomething2() {
+    XSomeChild p1 = getSomeChild();
+    return p1.getSomething2();
+  }
+
+  @Override
+  @NotNull
+  public XSomeGrandChild getGrandChild() {
+    XSomeChild p1 = getSomeChild();
+    return p1.getSomeGrandChild();
+  }
+
+  @Override
+  @NotNull
+  public PsiElement getGrandChildSomethin() {
+    XSomeChild p1 = getSomeChild();
+    XSomeGrandChild p2 = p1.getSomeGrandChild();
+    return p2.getMySomething();
+  }
+
+  @Override
+  @Nullable
+  public PsiElement getGrandChildSomethin2() {
+    XSomeChild p1 = getSomeChild();
+    XSomeGrandChild p2 = p1.getSomeGrandChild();
+    return p2.getSomething2();
   }
 
 }
@@ -411,7 +601,15 @@ public class XVisitor extends PsiElementVisitor {
     visitComposite(o);
   }
 
-  public void visitRe(@NotNull XRe o) {
+  public void visitSomeChild(@NotNull XSomeChild o) {
+    visitComposite(o);
+  }
+
+  public void visitSomeGrandChild(@NotNull XSomeGrandChild o) {
+    visitComposite(o);
+  }
+
+  public void visitSomeRoot(@NotNull XSomeRoot o) {
     visitComposite(o);
   }
 

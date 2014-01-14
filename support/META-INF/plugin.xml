@@ -2,7 +2,7 @@
   <id>org.jetbrains.idea.grammar</id>
   <version>1.1.6</version>
   <vendor email="gregory.shrago@jetbrains.com">Greg Shrago</vendor>
-  <idea-version since-build="133.333" until-build=""/>
+  <idea-version since-build="133.609" until-build=""/>
 
   <name>Grammar-Kit</name>
   <description>BNF Grammars and JFlex lexers editor. Readable parser/PSI code generator.</description>
@@ -12,6 +12,12 @@
 
   <change-notes>
     <![CDATA[
+    <p>1.1.6</p>
+    <ul>
+        <li>PSI generator: Improve <b>methods</b> attribute semantics: rename/add new PSI tree accessors</li>
+        <li>PSI generator: Drop obsolete <b>methodRenames</b> attribute and add <b>generateTokenAccessors</b></li>
+        <li>Live Preview: Auto-generate tokens from usage (no more BAD_TOKEN)</li>
+    </ul>
     <p>1.1.5</p>
     <ul>
         <li>Historical typo fixed: "recoverUntil" attribute renamed to "recoverWhile" (indeed it always meant "while")</li>

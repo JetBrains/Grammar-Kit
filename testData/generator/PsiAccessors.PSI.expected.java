@@ -12,14 +12,12 @@ public interface GeneratedTypes {
   IElementType BINARY = new IElementType("BINARY", null);
   IElementType EXPRESSION = new IElementType("EXPRESSION", null);
   IElementType OPERATOR = new IElementType("OPERATOR", null);
-  IElementType SOME_CHILD = new IElementType("SOME_CHILD", null);
-  IElementType SOME_GRAND_CHILD = new IElementType("SOME_GRAND_CHILD", null);
-  IElementType SOME_ROOT = new IElementType("SOME_ROOT", null);
   IElementType VALUE = new IElementType("VALUE", null);
 
   IElementType ID = new IElementType("id", null);
+  IElementType LOWCASEKWD1 = new IElementType("lowcasekwd1", null);
   IElementType MY_SOMETHING = new IElementType("something", null);
-  IElementType SOMETHING2 = new IElementType("something2", null);
+  IElementType UPCASEKWD1 = new IElementType("UPCASEKWD1", null);
 
   class Factory {
     public static PsiElement createElement(ASTNode node) {
@@ -32,15 +30,6 @@ public interface GeneratedTypes {
       }
       else if (type == OPERATOR) {
         return new XOperatorImpl(node);
-      }
-      else if (type == SOME_CHILD) {
-        return new XSomeChildImpl(node);
-      }
-      else if (type == SOME_GRAND_CHILD) {
-        return new XSomeGrandChildImpl(node);
-      }
-      else if (type == SOME_ROOT) {
-        return new XSomeRootImpl(node);
       }
       else if (type == VALUE) {
         return new XValueImpl(node);
@@ -191,6 +180,23 @@ public interface XSomeRoot extends XComposite {
 
   @Nullable
   PsiElement getGrandChildSomethin2();
+
+}
+// ---- XTokenDefaults.java -----------------
+//header.txt
+package generated.psi;
+
+import java.util.List;
+import org.jetbrains.annotations.*;
+import com.intellij.psi.PsiElement;
+
+public interface XTokenDefaults extends XComposite {
+
+  @NotNull
+  PsiElement getLowcasekwd1();
+
+  @NotNull
+  PsiElement getNodef();
 
 }
 // ---- XValue.java -----------------
@@ -548,6 +554,44 @@ public class XSomeRootImpl extends ASTWrapperPsiElement implements XSomeRoot {
   }
 
 }
+// ---- XTokenDefaultsImpl.java -----------------
+//header.txt
+package generated.psi.impl;
+
+import java.util.List;
+import org.jetbrains.annotations.*;
+import com.intellij.lang.ASTNode;
+import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiElementVisitor;
+import com.intellij.psi.util.PsiTreeUtil;
+import static generated.GeneratedTypes.*;
+import com.intellij.extapi.psi.ASTWrapperPsiElement;
+import generated.psi.*;
+
+public class XTokenDefaultsImpl extends ASTWrapperPsiElement implements XTokenDefaults {
+
+  public XTokenDefaultsImpl(ASTNode node) {
+    super(node);
+  }
+
+  public void accept(@NotNull PsiElementVisitor visitor) {
+    if (visitor instanceof XVisitor) ((XVisitor)visitor).visitTokenDefaults(this);
+    else super.accept(visitor);
+  }
+
+  @Override
+  @NotNull
+  public PsiElement getLowcasekwd1() {
+    return findNotNullChildByType(LOWCASEKWD1);
+  }
+
+  @Override
+  @NotNull
+  public PsiElement getNodef() {
+    return findNotNullChildByType(NODEF);
+  }
+
+}
 // ---- XValueImpl.java -----------------
 //header.txt
 package generated.psi.impl;
@@ -610,6 +654,10 @@ public class XVisitor extends PsiElementVisitor {
   }
 
   public void visitSomeRoot(@NotNull XSomeRoot o) {
+    visitComposite(o);
+  }
+
+  public void visitTokenDefaults(@NotNull XTokenDefaults o) {
     visitComposite(o);
   }
 

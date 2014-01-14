@@ -30,7 +30,6 @@ import com.intellij.util.Function;
 import com.intellij.util.ObjectUtils;
 import com.intellij.util.SmartList;
 import com.intellij.util.containers.ContainerUtil;
-import com.intellij.util.containers.MultiMap;
 import gnu.trove.THashMap;
 import gnu.trove.THashSet;
 import org.intellij.grammar.KnownAttribute;
@@ -57,11 +56,10 @@ public class ParserGenerator {
   public static final Logger LOG = Logger.getInstance("ParserGenerator");
   private static final String TYPE_TEXT_SEPARATORS = "<>,[]";
 
-  private final Map<String, String> myRuleParserClasses = new TreeMap<String, String>();
-  private final Map<String, String> myParserLambdas = new TreeMap<String, String>();
-  private final Set<String> myPackageClasses = new THashSet<String>();
+  private final Map<String, String> myRuleParserClasses = ContainerUtil.newTreeMap();
+  private final Map<String, String> myParserLambdas = ContainerUtil.newTreeMap();
+  private final Set<String> myPackageClasses = ContainerUtil.newTreeSet();
   private final Map<String, String> mySimpleTokens;
-  private final MultiMap<BnfRule, BnfRule> myRuleExtendsMap;
   private final BnfFile myFile;
   private final String mySourcePath;
   private final String myOutputPath;
@@ -102,10 +100,9 @@ public class ParserGenerator {
     visitorClassName = StringUtil.isEmpty(tmpVisitorClass) ?
                        null : tmpVisitorClass.startsWith(myRuleClassPrefix) ?
                               tmpVisitorClass : myRuleClassPrefix + tmpVisitorClass;
-    mySimpleTokens = RuleGraphHelper.computeTokens(myFile);
+    mySimpleTokens = RuleGraphHelper.getTokenMap(myFile);
     myUnknownRootAttributes = ParserGeneratorUtil.collectUnknownAttributes(myFile);
-    myRuleExtendsMap = RuleGraphHelper.computeInheritance(myFile);
-    myGraphHelper = new RuleGraphHelper(myFile, myRuleExtendsMap);
+    myGraphHelper = RuleGraphHelper.getCached(myFile);
     myExpressionHelper = new ExpressionHelper(myFile, myGraphHelper, true);
     myRulesMethodsHelper = new RuleMethodsHelper(myGraphHelper, myExpressionHelper, mySimpleTokens);
   }
@@ -434,9 +431,10 @@ public class ParserGenerator {
   }
 
   private void generateRootParserContent(Set<String> ownRuleNames) {
+    boolean generateExtendsSets = !myGraphHelper.getRuleExtendsMap().isEmpty();
     out("public ASTNode parse(IElementType root_, PsiBuilder builder_) {");
     out("boolean result_;");
-    out("builder_ = adapt_builder_(root_, builder_, this, "+(myRuleExtendsMap.isEmpty()? null : "EXTENDS_SETS_")+");");
+    out("builder_ = adapt_builder_(root_, builder_, this, " + (generateExtendsSets ? "EXTENDS_SETS_" : null) + ");");
     out("Marker marker_ = enter_section_(builder_, 0, _COLLAPSE_, null);");
     boolean first = true;
     for (String ruleName : ownRuleNames) {
@@ -467,14 +465,14 @@ public class ParserGenerator {
       out("}");
       newLine();
     }
-    if (!myRuleExtendsMap.isEmpty()) {
+    if (generateExtendsSets) {
       out("public static final TokenSet[] EXTENDS_SETS_ = new TokenSet[] {");
       StringBuilder sb = new StringBuilder();
       Set<String> elementTypes = new TreeSet<String>();
       for (String ruleName : myRuleParserClasses.keySet()) {
         BnfRule baseRule = myFile.getRule(ruleName);
         if (Rule.isFake(baseRule)) continue;
-        Collection<BnfRule> rules = myRuleExtendsMap.get(baseRule);
+        Collection<BnfRule> rules = myGraphHelper.getRuleExtendsMap().get(baseRule);
         if (rules.isEmpty()) continue;
         for (BnfRule rule : rules) {
           if (Rule.isFake(rule)) continue;
@@ -860,7 +858,7 @@ public class ParserGenerator {
       if (!(element instanceof BnfRule)) return false;
       if (!myGraphHelper.collapseEachOther(rule, (BnfRule)element)) return false;
     }
-    return myRuleExtendsMap.containsScalarValue(rule);
+    return myGraphHelper.getRuleExtendsMap().containsScalarValue(rule);
   }
 
   void generateNodeChildren(BnfRule rule, String funcName, List<BnfExpression> children, Set<BnfExpression> visited) {

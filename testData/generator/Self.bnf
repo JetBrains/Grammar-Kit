@@ -35,6 +35,8 @@
   LEFT_PAREN="("
   RIGHT_PAREN=")"
 
+  tokens=[id string number]
+
   implements("rule|attr")="org.intellij.grammar.psi.BnfNamedElement"
   extends("rule|attr")="org.intellij.grammar.psi.impl.BnfNamedElementImpl"
 

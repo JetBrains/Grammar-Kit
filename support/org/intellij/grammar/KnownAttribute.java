@@ -178,7 +178,17 @@ public class KnownAttribute<T> {
     }
 
     @NotNull
-    public Map<String, String> asMap(boolean inverse) {
+    public Map<String, String> asMap() {
+      return asMap(false);
+    }
+
+    @NotNull
+    public Map<String, String> asInverseMap() {
+      return asMap(true);
+    }
+
+    @NotNull
+    private Map<String, String> asMap(boolean inverse) {
       Map<String, String> t = ContainerUtil.newLinkedHashMap();
       for (Pair<String, String> pair : this) {
         String key = inverse ? pair.second : pair.first;

@@ -221,7 +221,7 @@ public class LivePreviewLexer extends LexerBase {
   @NotNull
   public static Map<String, String> collectTokenPattern2Name(@Nullable final BnfFile file) {
     if (file == null) return Collections.emptyMap();
-    Map<String, String> origTokens = RuleGraphHelper.computeTokens(file);
+    Map<String, String> origTokens = RuleGraphHelper.getTokenMap(file);
     final Pattern pattern = ParserGeneratorUtil.getAllTokenPattern(origTokens);
     final Map<String, String> map = ContainerUtil.newLinkedHashMap(origTokens);
     GrammarUtil.visitRecursively(file, true, new BnfVisitor() {

@@ -30,15 +30,6 @@ public class PsiAccessors implements PsiParser {
     else if (root_ == OPERATOR) {
       result_ = operator(builder_, 0);
     }
-    else if (root_ == SOME_CHILD) {
-      result_ = some_child(builder_, 0);
-    }
-    else if (root_ == SOME_GRAND_CHILD) {
-      result_ = some_grand_child(builder_, 0);
-    }
-    else if (root_ == SOME_ROOT) {
-      result_ = some_root(builder_, 0);
-    }
     else if (root_ == VALUE) {
       result_ = value(builder_, 0);
     }
@@ -99,47 +90,6 @@ public class PsiAccessors implements PsiParser {
   // binary
   static boolean root(PsiBuilder builder_, int level_) {
     return binary(builder_, level_ + 1);
-  }
-
-  /* ********************************************************** */
-  // some_grand_child "something" something2
-  public static boolean some_child(PsiBuilder builder_, int level_) {
-    if (!recursion_guard_(builder_, level_, "some_child")) return false;
-    if (!nextTokenIs(builder_, MY_SOMETHING)) return false;
-    boolean result_ = false;
-    Marker marker_ = enter_section_(builder_);
-    result_ = some_grand_child(builder_, level_ + 1);
-    result_ = result_ && consumeToken(builder_, MY_SOMETHING);
-    result_ = result_ && consumeToken(builder_, SOMETHING2);
-    exit_section_(builder_, marker_, SOME_CHILD, result_);
-    return result_;
-  }
-
-  /* ********************************************************** */
-  // MY_SOMETHING something2
-  public static boolean some_grand_child(PsiBuilder builder_, int level_) {
-    if (!recursion_guard_(builder_, level_, "some_grand_child")) return false;
-    if (!nextTokenIs(builder_, MY_SOMETHING)) return false;
-    boolean result_ = false;
-    boolean pinned_ = false;
-    Marker marker_ = enter_section_(builder_, level_, _NONE_, null);
-    result_ = consumeTokens(builder_, 1, MY_SOMETHING, SOMETHING2);
-    pinned_ = result_; // pin = 1
-    exit_section_(builder_, level_, marker_, SOME_GRAND_CHILD, result_, pinned_, null);
-    return result_ || pinned_;
-  }
-
-  /* ********************************************************** */
-  // some_child value
-  public static boolean some_root(PsiBuilder builder_, int level_) {
-    if (!recursion_guard_(builder_, level_, "some_root")) return false;
-    if (!nextTokenIs(builder_, MY_SOMETHING)) return false;
-    boolean result_ = false;
-    Marker marker_ = enter_section_(builder_);
-    result_ = some_child(builder_, level_ + 1);
-    result_ = result_ && value(builder_, level_ + 1);
-    exit_section_(builder_, marker_, SOME_ROOT, result_);
-    return result_;
   }
 
   /* ********************************************************** */

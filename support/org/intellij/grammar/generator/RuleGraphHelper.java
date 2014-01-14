@@ -183,16 +183,16 @@ public class RuleGraphHelper {
           @Nullable
           @Override
           public Result<Map<String, String>> compute() {
-            return new Result<Map<String, String>>(computeTokens(file), file);
+            return new Result<Map<String, String>>(computeTokens(file).asInverseMap(), file);
           }
         }, false));
     }
     return value.getValue();
   }
 
-  public static Map<String, String> computeTokens(BnfFile file) {
-    // string value to constant name
-    return getRootAttribute(file, KnownAttribute.TOKENS).asMap(true);
+  // string value to constant name
+  public static KnownAttribute.ListValue computeTokens(BnfFile file) {
+    return getRootAttribute(file, KnownAttribute.TOKENS);
   }
 
   private static final Key<CachedValue<RuleGraphHelper>> RULE_GRAPH_HELPER_KEY = Key.create("RULE_GRAPH_HELPER_KEY");
@@ -232,6 +232,10 @@ public class RuleGraphHelper {
 
   public MultiMap<BnfRule, BnfRule> getRuleExtendsMap() {
     return myRuleExtendsMap;
+  }
+
+  public BnfFile getFile() {
+    return myFile;
   }
 
   private void buildContentsMap() {

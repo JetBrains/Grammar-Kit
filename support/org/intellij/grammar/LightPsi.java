@@ -23,7 +23,9 @@ import com.intellij.concurrency.JobLauncherImpl;
 import com.intellij.ide.startup.impl.StartupManagerImpl;
 import com.intellij.lang.*;
 import com.intellij.lang.impl.PsiBuilderFactoryImpl;
+import com.intellij.lang.impl.PsiBuilderImpl;
 import com.intellij.lang.injection.InjectedLanguageManager;
+import com.intellij.lexer.Lexer;
 import com.intellij.mock.*;
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.application.ApplicationManager;
@@ -58,6 +60,7 @@ import com.intellij.psi.impl.PsiCachedValuesFactory;
 import com.intellij.psi.impl.PsiFileFactoryImpl;
 import com.intellij.psi.impl.search.CachesBasedRefSearcher;
 import com.intellij.psi.impl.search.PsiSearchHelperImpl;
+import com.intellij.psi.impl.source.CharTableImpl;
 import com.intellij.psi.impl.source.resolve.ResolveCache;
 import com.intellij.psi.impl.source.resolve.reference.ReferenceProvidersRegistry;
 import com.intellij.psi.impl.source.resolve.reference.ReferenceProvidersRegistryImpl;
@@ -72,6 +75,7 @@ import com.intellij.util.messages.MessageBus;
 import com.intellij.util.messages.MessageBusFactory;
 import org.intellij.grammar.java.JavaHelper;
 import org.jetbrains.annotations.NonNls;
+import org.jetbrains.annotations.NotNull;
 import org.picocontainer.*;
 import org.picocontainer.defaults.AbstractComponentAdapter;
 
@@ -104,8 +108,12 @@ public class LightPsi {
     return parseFile(name, text, parserDefinition);
   }
 
-  public static PsiFile parseFile(String name, String text, ParserDefinition parserDefinition) {
+  public static PsiFile parseFile(String name, @NotNull String text, @NotNull ParserDefinition parserDefinition) {
     return ourParsing.createFile(name, text, parserDefinition);
+  }
+
+  public static ASTNode parseText(@NotNull String text, @NotNull ParserDefinition parserDefinition) {
+    return ourParsing.createAST(text, parserDefinition);
   }
 
   /*
@@ -146,13 +154,24 @@ public class LightPsi {
 
     MyParsing() throws Exception {
       myModel = Init.initPsiFileFactory(this);
-      Init.initExtensions(myModel.first, myModel.second);
+      Init.initExtensions(getProject(), myModel.second);
     }
 
-    protected PsiFile createFile(@NonNls String name, String text, ParserDefinition definition) {
+    protected PsiFile createFile(@NonNls String name, @NotNull String text, @NotNull ParserDefinition definition) {
       Language language = definition.getFileNodeType().getLanguage();
-      Init.addExplicitExtension(myModel.first, LanguageParserDefinitions.INSTANCE, language, definition);
+      Init.addExplicitExtension(getProject(), LanguageParserDefinitions.INSTANCE, language, definition);
       return myModel.third.trySetupPsiForFile(new LightVirtualFile(name, language, text), language, true, false);
+    }
+
+    protected ASTNode createAST(@NotNull String text, @NotNull ParserDefinition definition) {
+      PsiParser parser = definition.createParser(getProject());
+      Lexer lexer = definition.createLexer(getProject());
+      PsiBuilderImpl psiBuilder = new PsiBuilderImpl(getProject(), null, definition, lexer, new CharTableImpl(), text, null, null);
+      return parser.parse(definition.getFileNodeType(), psiBuilder);
+    }
+
+    private MockProjectEx getProject() {
+      return myModel.first;
     }
 
     @Override

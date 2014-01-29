@@ -1,5 +1,6 @@
 package org.intellij.grammar.expression;
 
+import com.intellij.lang.ASTNode;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.impl.DebugUtil;
@@ -37,9 +38,13 @@ public class Main {
   }
 
   private static void dump(String text) {
-    PsiFile psiFile = LightPsi.parseFile("a.expr", text, new ExpressionParserDefinition());
+    ExpressionParserDefinition parserDefinition = new ExpressionParserDefinition();
+    PsiFile psiFile = LightPsi.parseFile("a.expr", text, parserDefinition);
     String tree = DebugUtil.psiToString(psiFile, false);
     tree = StringUtil.replace(tree, "(BAD_CHARACTER)", "");
     System.out.println(tree);
+
+    //ASTNode astNode = LightPsi.parseText(text, parserDefinition);
+    //System.out.println("AST:\n" + DebugUtil.treeToString(astNode, true));
   }
 }

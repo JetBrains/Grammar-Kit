@@ -32,19 +32,23 @@ public class Main {
     BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
     String s;
     while((s = in.readLine()) != null) {
-      dump(s);
+      dump(s, false);
       System.out.print("> ");
     }
   }
 
-  private static void dump(String text) {
+  private static void dump(String text, boolean usePsi) {
     ExpressionParserDefinition parserDefinition = new ExpressionParserDefinition();
-    PsiFile psiFile = LightPsi.parseFile("a.expr", text, parserDefinition);
-    String tree = DebugUtil.psiToString(psiFile, false);
-    tree = StringUtil.replace(tree, "(BAD_CHARACTER)", "");
-    System.out.println(tree);
-
-    //ASTNode astNode = LightPsi.parseText(text, parserDefinition);
-    //System.out.println("AST:\n" + DebugUtil.treeToString(astNode, true));
+    String treeDump;
+    if (usePsi) {
+      PsiFile psiFile = LightPsi.parseFile("a.expr", text, parserDefinition);
+      treeDump = DebugUtil.psiToString(psiFile, false);
+    }
+    else {
+      ASTNode astNode = LightPsi.parseText(text, parserDefinition);
+      treeDump = DebugUtil.nodeTreeToString(astNode, true);
+    }
+    treeDump = StringUtil.replace(treeDump, "(BAD_CHARACTER)", "");
+    System.out.println(treeDump);
   }
 }

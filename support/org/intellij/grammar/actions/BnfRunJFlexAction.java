@@ -45,7 +45,9 @@ import com.intellij.openapi.roots.impl.libraries.ApplicationLibraryTable;
 import com.intellij.openapi.roots.libraries.Library;
 import com.intellij.openapi.roots.libraries.LibraryTable;
 import com.intellij.openapi.ui.Messages;
+import com.intellij.openapi.util.Comparing;
 import com.intellij.openapi.util.Pair;
+import com.intellij.openapi.util.SystemInfo;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VirtualFile;
@@ -189,7 +191,7 @@ public class BnfRunJFlexAction extends AnAction {
         String name = url.substring(url.lastIndexOf("/") + 1);
 
         for (VirtualFile file : library[0].getFiles(OrderRootType.CLASSES)) {
-          if (file.getName().equals(name)) {
+          if (Comparing.strEqual(name, file.getName(), SystemInfo.isFileSystemCaseSensitive)) {
             result.add(VfsUtil.virtualToIoFile(file));
             continue main;
           }
@@ -206,6 +208,16 @@ public class BnfRunJFlexAction extends AnAction {
     final List<Pair<VirtualFile,DownloadableFileDescription>> pairs = service.createDownloader(descriptions, project, null, libraryName).downloadAndReturnWithDescriptions();
     if (pairs == null) return Collections.emptyList();
 
+    // ensure the order is the same
+    for (String url : urls) {
+      for (Pair<VirtualFile, DownloadableFileDescription> pair : pairs) {
+        if (Comparing.equal(url, pair.second.getDownloadUrl())) {
+          result.add(VfsUtil.virtualToIoFile(pair.first));
+          break;
+        }
+      }
+    }
+
     ApplicationManager.getApplication().runWriteAction(new Runnable() {
       @Override
       public void run() {
@@ -214,14 +226,11 @@ public class BnfRunJFlexAction extends AnAction {
           library[0] = modifiableModel.createLibrary(libraryName);
           modifiableModel.commit();
         }
-        result.clear();
         Library.ModifiableModel modifiableModel = library[0].getModifiableModel();
         for (Pair<VirtualFile, DownloadableFileDescription> pair : pairs) {
           modifiableModel.addRoot(pair.first, OrderRootType.CLASSES);
-          result.add(VfsUtil.virtualToIoFile(pair.first));
         }
         modifiableModel.commit();
-
       }
     });
     return result;

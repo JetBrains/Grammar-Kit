@@ -185,6 +185,9 @@ public class ParserGenerator {
       }
     }
     if (generatePsi) {
+      checkClassAvailability(myFile.getProject(), getRootAttribute(myFile, KnownAttribute.PSI_IMPL_UTIL_CLASS),
+                             "PSI method signatures will not be detected");
+
       myRulesMethodsHelper.buildMaps(sortedPsiRules.values());
       for (BnfRule r : sortedPsiRules.values()) {
         myPackageClasses.add(getRulePsiClassName(r, myRuleClassPrefix));

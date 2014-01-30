@@ -31,6 +31,7 @@ import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.util.containers.ContainerUtil;
 import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.actions.GenerateAction;
+import org.intellij.grammar.java.JavaHelper;
 import org.intellij.grammar.psi.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -317,6 +318,16 @@ public class ParserGeneratorUtil {
     }
     else {
       GenerateAction.LOG_GROUP.createNotification(text, MessageType.WARNING).notify(project);
+    }
+  }
+
+  public static void checkClassAvailability(@NotNull Project project, @Nullable String className, @Nullable String description) {
+    if (StringUtil.isEmpty(className)) return;
+
+    JavaHelper javaHelper = JavaHelper.getJavaHelper(project);
+    if (javaHelper.findClass(className) == null) {
+      String tail = StringUtil.isEmpty(description) ? "" : " (" + description + ")";
+      addWarning(project, "class not found: " + className + tail);
     }
   }
 

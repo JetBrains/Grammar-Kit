@@ -116,16 +116,18 @@ public class BnfRunJFlexAction extends AnAction {
 
     try {
       List<File> jflex = getOrDownload(project, "JetBrains JFlex", JETBRAINS_JFLEX_URLS);
+      final File jflexJar = jflex.get(0);
+      final String skeletonPath = jflex.get(1).getAbsolutePath();
       if (jflex.isEmpty()) return;
 
       SimpleJavaParameters javaParameters = new SimpleJavaParameters();
       Sdk sdk = new SimpleJavaSdkType().createJdk("tmp", SystemProperties.getJavaHome());
       javaParameters.setJdk(sdk);
-      javaParameters.getClassPath().add(jflex.get(0));
+      javaParameters.getClassPath().add(jflexJar);
       javaParameters.setMainClass("JFlex.Main");
       javaParameters.getVMParametersList().add("-Xmx512m");
       javaParameters.getProgramParametersList().add("-sliceandcharat");
-      javaParameters.getProgramParametersList().add("-skel", jflex.get(1).getAbsolutePath());
+      javaParameters.getProgramParametersList().add("-skel", skeletonPath);
       javaParameters.getProgramParametersList().add("-d", VfsUtil.virtualToIoFile(virtualFile.getParent()).getAbsolutePath());
       javaParameters.getProgramParametersList().add(VfsUtil.virtualToIoFile(virtualFile).getAbsolutePath());
 
@@ -180,7 +182,7 @@ public class BnfRunJFlexAction extends AnAction {
     });
   }
 
-  private static List<File> getOrDownload(Project project, final String libraryName, String... urls) {
+  private static List<File> getOrDownload(Project project, final String libraryName, final String... urls) {
     final ArrayList<File> result = new ArrayList<File>(urls.length);
     final Library[] library = {ApplicationLibraryTable.getApplicationTable().getLibraryByName(libraryName)};
     if (library[0] != null) {
@@ -216,9 +218,30 @@ public class BnfRunJFlexAction extends AnAction {
         }
         result.clear();
         Library.ModifiableModel modifiableModel = library[0].getModifiableModel();
+        // here we inject the nulls so the .set() below will work
+        for (String ignored : urls) {
+          result.add(null);
+        }
         for (Pair<VirtualFile, DownloadableFileDescription> pair : pairs) {
           modifiableModel.addRoot(pair.first, OrderRootType.CLASSES);
-          result.add(VfsUtil.virtualToIoFile(pair.first));
+          // we have to add the results into the List in the order
+          // the caller is expecting
+          final File file = VfsUtil.virtualToIoFile(pair.first);
+          final String lcName = file.getName().toLowerCase();
+          for (int i = 0, len = urls.length; i < len; i++) {
+            final String url = urls[i];
+            if (url.toLowerCase().endsWith(lcName)) {
+              result.set(i, file);
+              break;
+            }
+          }
+        }
+        // and ensure they were all set
+        for (File f : result) {
+          if (null == f) {
+            throw new IllegalStateException(
+              "Expected to find "+urls.length+" files in "+result);
+          }
         }
         modifiableModel.commit();
 

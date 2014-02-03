@@ -1,5 +1,37 @@
 <html>
 <body>
-Base implementation class or super rule for PSI classes. Nodes produced by rules extending the same rule will be collapsed by parser.
+Base implementation class or super rule for PSI classes. AST nodes produced by rules extending the same rule will be collapsed by parser.
+
+<h2>Examples:</h2>
+<pre><code>
+  {
+    extends(".*_expr")=expr
+  }
+  // due to "extends" attribute the AST is "flat"
+  expr ::= assign_expr
+    | conditional_group
+    | add_group
+    | between_expr
+    | mul_group
+    | unary_group
+    | exp_expr
+    | factorial_expr
+    | call_expr
+    | ref_expr
+    | primary_group
+
+  // improve PSI class hierarchy with common BinaryExpr class
+  // no parsing code is generated for fake rules
+  fake binary_expr ::= expression + {
+    methods = [
+      left="expression[0]"
+      right="expression[1]"]
+  }
+  add_expr ::= expr '+' expr {extends=binary_expr}
+
+  // stubs
+  stub_element ::= {extends="com.sample.StubBase<?>" stubClass="com.sample.StubElementStub"}
+</code></pre>
+
 </body>
 </html>

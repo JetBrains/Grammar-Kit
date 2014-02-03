@@ -3,5 +3,19 @@
 The name of an element type to use instead of generated one.
 Should be used for mixing generated parser and existing PSI implementation.
 Another use case is using same element type for several public rules.
+
+<h2>Examples:</h2>
+<pre><code>
+  // makes two rules have the same node type and PSI
+  some_statement ::=
+  some_statement_alt_syntax ::= {elementType=some_statement}
+
+  // integrating with existing PSI implementation
+  {
+    elementTypeFactory="com.sample.SampleElementFactory.getCompositeType"
+  }
+  my_rule ::= {elementType="existing_type"}
+</code></pre>
+
 </body>
 </html>

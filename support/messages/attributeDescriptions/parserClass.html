@@ -1,5 +1,25 @@
 <html>
 <body>
-Parser class qualified name.
+The generated parser class qualified name.
+Can be used several times in a large grammar to split parsing code into different classes and files.
+
+<h2>Examples:</h2>
+<pre><code>
+  {
+    classHeader="license.txt"
+    parserClass="org.intellij.grammar.parser.GrammarParser"
+    parserUtilClass="org.intellij.grammar.parser.GrammarParserUtil"
+  }
+
+  ...
+
+  // parsing code for the rest of the grammar will be in a separate file
+  // (semicolon is required to make this attributes global for sure)
+  ;{
+    parserClass="org.intellij.grammar.parser.GrammarParser2"
+  }
+
+</code></pre>
+
 </body>
 </html>

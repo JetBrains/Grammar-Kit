@@ -1,5 +1,20 @@
 <html>
 <body>
-Parser util class qualified name, most likely GeneratedParserUtilBase or its heir.
+Parser util class qualified name, most likely GeneratedParserUtilBase (default) or its subclass.
+
+<h2>Examples:</h2>
+<pre><code>
+  {
+    parserUtilClass="org.intellij.grammar.parser.GrammarParserUtil"
+  }
+
+  // parseGrammar reference here resolves to
+  //   GrammarParserUtil#parseGrammar(PsiBuilder builder, int level)
+  external grammar ::= parseGrammar grammar_element
+
+  // alternative syntax using external expression
+  grammar ::= &lt;&lt;parseGrammar grammar_element&gt;&gt;
+</code></pre>
+
 </body>
 </html>

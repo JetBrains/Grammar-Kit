@@ -1,6 +1,31 @@
 <html>
 <body>
 Controls whether token accessor methods for a rule will be generated (true) or not (false: default).
-By default only regexp or lowercase tokens accessors are generated, e.g. id, string &amp; etc.
+With this attribute set to false accessors for the following tokens are still generated:
+<ul>
+  <li>regexp tokens</li>
+  <li>lower-case tokens</li>
+  <li>tokens with no pattern or value</li>
+</ul>
+
+<h2>Examples:</h2>
+<pre><code>
+  {
+    // turn on every token accessor generation in PSI
+    generateTokenAccessors=true
+
+    tokens = [
+      // accessors are generated in any mode:
+      id="regexp:\w+"    // regexp token
+      string             // no value or pattern
+      class="class"      // lowercase token
+
+      // accessors are generated only if generateTokenAccessors is true
+      PLUS_OP="+"
+      SWITCH="switch"
+    ]
+  }
+</code></pre>
+
 </body>
 </html>

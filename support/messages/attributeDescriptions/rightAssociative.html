@@ -1,5 +1,11 @@
 <html>
 <body>
 Mark operator as right-associative, i.e. a = b = c should be equal to a = (b = c) while a + b + c usually equals to (a + b) + c.
+
+<h2>Examples:</h2>
+<pre><code>
+  assign_expr ::= expr '=' expr { rightAssociative=true }
+</code></pre>
+
 </body>
 </html>

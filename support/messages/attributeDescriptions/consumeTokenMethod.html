@@ -1,5 +1,21 @@
 <html>
 <body>
 Consume token method defaults to <b>consumeToken</b>.
+Used mainly for performance reasons.
+Provided methods are <b>consumeToken</b> and <b>consumeTokenFast</b>.
+Custom consume method may be employed as well.
+
+<h2>Examples:</h2>
+<pre><code>
+  {
+    // do not record error reporting information in recover rules
+    consumeTokenMethod(".*_recover")="consumeTokenFast"
+
+    // do not record error reporting information in expression parsing,
+    // no one really needs to know that + - * / are expected at any offset
+    consumeTokenMethod(".*_expr|.*_op|value_expression")="consumeTokenFast"
+  }
+</code></pre>
+
 </body>
 </html>

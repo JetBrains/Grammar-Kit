@@ -1,6 +1,12 @@
 <html>
 <body>
-Display name of a rule as it appears in parser error messages &quot;expected &lt;rule name&gt;&quot;.
-For an empty string short error message will not be generated. A text or a rule reference.
+Display name of a rule as it will appear in a syntax error message &quot;expected &lt;rule name&gt;&quot;.
+For an empty string short error message will not be generated. Value is a text or a rule reference.
+
+<h2>Examples:</h2>
+<pre><code>
+  operator ::= '+' | '-' | '*' | '/' | "="   {name="operator"}
+</code></pre>
+
 </body>
 </html>

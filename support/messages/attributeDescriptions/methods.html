@@ -1,5 +1,27 @@
 <html>
 <body>
-Custom PSI accessors and method mix-ins. See documentation for more.
+Custom PSI accessors and method mix-ins. See documentation and HOWTO for more.
+
+<h2>Examples:</h2>
+<pre><code>
+  {
+    psiImplUtilClass="com.sample.SamplePsiImplUtil"
+    tokens=[
+      OP_PLUS='+'
+    ]
+  }
+  sum_expr ::= expr '+' expr {
+    methods=[
+      // user PSI accessors for sub-rules and tokens:
+      left="/expr[0]"    // will be @NotNull as far as we have "+" in the expression
+      right="/expr[1]"   // "expr" is the name of the auto-calculated child property (singular or list)
+      op="/OP_PLUS"      // explicit token accessor
+
+      // user implementation methods from SamplePsiImplUtil class, i.e. "method mixin"s
+      getReferences evaluate toString
+    ]
+  }
+</code></pre>
+
 </body>
 </html>

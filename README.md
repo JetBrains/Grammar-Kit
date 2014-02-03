@@ -27,13 +27,13 @@ General usage instructions
 
 Recent changes
 --------------
-1.1.5
+1.1.6 (github-only) / 1.1.7 (github+plugin repository)
 
-* Historical typo fixed: _recoverUntil_ attribute renamed to _recoverWhile_ (indeed it always meant _while_)
-* Editor: recoverable rule highlighting, help improved for _pin_ and _recoverWhile_
-* GPUB: cleanup and OOM protection
-* Generator: parser size reduced, fragment parsing fixed, empty tokens support (lexer-based preprocessors)
-* Generator: simple #auto recovery predicate generation, i.e. _recoverWhile_ = "#auto"
+* PSI generator: Improve *methods* attribute semantics: rename/add new PSI tree accessors
+* PSI generator: Drop obsolete *methodRenames* attribute and add *generateTokenAccessors*
+* Live Preview: Auto-generate tokens from usage (no more BAD_TOKEN)
+* Editor: Examples added to attributes documentation (Ctrl-Q)
+* Editor: Turn grammar spell-check
 
 
 Quick documentation:
@@ -222,6 +222,14 @@ java -jar expression-console-sample.jar
 
 Change log
 ==========
+1.1.5
+
+* Historical typo fixed: _recoverUntil_ attribute renamed to _recoverWhile_ (indeed it always meant _while_)
+* Editor: recoverable rule highlighting, help improved for _pin_ and _recoverWhile_
+* GPUB: cleanup and OOM protection
+* Generator: parser size reduced, fragment parsing fixed, empty tokens support (lexer-based preprocessors)
+* Generator: simple #auto recovery predicate generation, i.e. _recoverWhile_ = "#auto"
+
 1.1.4
 
 * JFlex language support: highlighting/navigation/completion/rename

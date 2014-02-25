@@ -224,8 +224,9 @@ public class LivePreviewLexer extends LexerBase {
     Map<String, String> origTokens = RuleGraphHelper.getTokenMap(file);
     final Pattern pattern = ParserGeneratorUtil.getAllTokenPattern(origTokens);
     final Map<String, String> map = ContainerUtil.newLinkedHashMap(origTokens);
+    final int[] autoCount = {0};
+
     GrammarUtil.visitRecursively(file, true, new BnfVisitor() {
-      int autoCount = 0;
       @Override
       public void visitStringLiteralExpression(@NotNull BnfStringLiteralExpression o) {
         String text = o.getText();
@@ -234,7 +235,7 @@ public class LivePreviewLexer extends LexerBase {
         if (!map.values().contains(tokenText) &&
             !StringUtil.isJavaIdentifier(tokenText) &&
             (pattern == null || !pattern.matcher(tokenText).matches())) {
-          map.put(tokenText, "_AUTO_" + (autoCount++));
+          map.put(tokenText, "_AUTO_" + (autoCount[0]++));
         }
       }
 
@@ -248,9 +249,10 @@ public class LivePreviewLexer extends LexerBase {
       }
     });
     // fix ordering: origTokens _after_ to handle keywords correctly
-    for (String key : origTokens.keySet()) {
-      map.remove(key);
-      map.put(key, origTokens.get(key));
+    for (String tokenText : origTokens.keySet()) {
+      String tokenName = origTokens.get(tokenText);
+      map.remove(tokenText);
+      map.put(tokenText, tokenName != null ? tokenName : "_AUTO_" + (autoCount[0]++));
     }
 
     return map;

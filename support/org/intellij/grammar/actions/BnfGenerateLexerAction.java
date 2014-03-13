@@ -148,10 +148,11 @@ public class BnfGenerateLexerAction extends AnAction {
     final Map<String, String> simpleTokens = new LinkedHashMap<String, String>();
     final Map<String, String> regexpTokens = new LinkedHashMap<String, String>();
     for (String token : tokenMap.keySet()) {
-      String name = tokenMap.get(token).toUpperCase(Locale.ENGLISH);
+      String name = tokenMap.get(token);
+      if (name == null) continue;
       String pattern = token2JFlex(token);
       boolean isRE = ParserGeneratorUtil.isRegexpToken(token);
-      (isRE ? regexpTokens : simpleTokens).put(name, pattern);
+      (isRE ? regexpTokens : simpleTokens).put(name.toUpperCase(Locale.ENGLISH), pattern);
       maxLen[0] = Math.max((isRE ? name : pattern).length() + 2, maxLen[0]);
     }
 

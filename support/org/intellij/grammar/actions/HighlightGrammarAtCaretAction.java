@@ -28,6 +28,7 @@ import com.intellij.openapi.application.ex.ApplicationManagerEx;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.colors.EditorColors;
 import com.intellij.openapi.editor.colors.EditorColorsManager;
+import com.intellij.openapi.editor.event.CaretAdapter;
 import com.intellij.openapi.editor.event.CaretEvent;
 import com.intellij.openapi.editor.event.CaretListener;
 import com.intellij.openapi.editor.markup.TextAttributes;
@@ -95,7 +96,7 @@ public class HighlightGrammarAtCaretAction extends AnAction {
     else {
       updateGrammarHighlighters(project, editor, livePreviewLanguage, grammarEditor);
 
-      caretListener = new CaretListener() {
+      caretListener = new CaretAdapter() {
         @Override
         public void caretPositionChanged(final CaretEvent e) {
           final CaretListener caretListener = this;

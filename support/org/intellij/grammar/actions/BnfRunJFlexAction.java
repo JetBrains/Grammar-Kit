@@ -37,10 +37,12 @@ import com.intellij.openapi.actionSystem.*;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.fileEditor.FileDocumentManager;
+import com.intellij.openapi.project.DumbAwareAction;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.projectRoots.Sdk;
 import com.intellij.openapi.projectRoots.SimpleJavaSdkType;
 import com.intellij.openapi.roots.OrderRootType;
+import com.intellij.openapi.roots.ProjectRootManager;
 import com.intellij.openapi.roots.impl.libraries.ApplicationLibraryTable;
 import com.intellij.openapi.roots.libraries.Library;
 import com.intellij.openapi.roots.libraries.LibraryTable;
@@ -48,16 +50,22 @@ import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.util.Comparing;
 import com.intellij.openapi.util.Pair;
 import com.intellij.openapi.util.SystemInfo;
+import com.intellij.openapi.util.io.FileUtil;
+import com.intellij.openapi.util.text.StringUtil;
+import com.intellij.openapi.vfs.JarFileSystem;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.*;
 import com.intellij.util.Consumer;
 import com.intellij.util.SystemProperties;
+import com.intellij.util.containers.ContainerUtil;
 import com.intellij.util.download.DownloadableFileDescription;
 import com.intellij.util.download.DownloadableFileService;
 import org.intellij.grammar.generator.BnfConstants;
 import org.intellij.jflex.parser.JFlexFileType;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 import java.awt.*;
@@ -72,7 +80,7 @@ import java.util.regex.Pattern;
 /**
  * @author greg
  */
-public class BnfRunJFlexAction extends AnAction {
+public class BnfRunJFlexAction extends DumbAwareAction {
 
   private static final String[] JETBRAINS_JFLEX_URLS = {
       "https://github.com/JetBrains/intellij-community/raw/master/tools/lexer/jflex-1.4/lib/JFlex.jar",
@@ -182,31 +190,14 @@ public class BnfRunJFlexAction extends AnAction {
     });
   }
 
-  private static List<File> getOrDownload(Project project, final String libraryName, String... urls) {
-    final ArrayList<File> result = new ArrayList<File>(urls.length);
-    final Library[] library = {ApplicationLibraryTable.getApplicationTable().getLibraryByName(libraryName)};
-    if (library[0] != null) {
-      main: for (int i = 0; i < urls.length; i++) {
-        String url = urls[i];
-        String name = url.substring(url.lastIndexOf("/") + 1);
+  private static List<File> getOrDownload(@NotNull Project project, @NotNull String libraryName, String... urls) {
+    ArrayList<File> result = ContainerUtil.newArrayList();
+    if (findExistingLibrary(libraryName, result, urls)) return result;
+    if (findCommunitySources(project, result, urls)) return result;
 
-        for (VirtualFile file : library[0].getFiles(OrderRootType.CLASSES)) {
-          if (Comparing.strEqual(name, file.getName(), SystemInfo.isFileSystemCaseSensitive)) {
-            result.add(VfsUtil.virtualToIoFile(file));
-            continue main;
-          }
-        }
-        if(result.size() < i) break;
-      }
-      if (result.size() == urls.length) return result;
-    }
-    DownloadableFileService service = DownloadableFileService.getInstance();
-    List<DownloadableFileDescription> descriptions = new ArrayList<DownloadableFileDescription>();
-    for (String url : urls) {
-      descriptions.add(service.createFileDescription(url, url.substring(url.lastIndexOf("/") + 1)));
-    }
-    final List<Pair<VirtualFile,DownloadableFileDescription>> pairs = service.createDownloader(descriptions, project, null, libraryName).downloadAndReturnWithDescriptions();
+    List<Pair<VirtualFile, DownloadableFileDescription>> pairs = downloadFiles(project, libraryName, urls);
     if (pairs == null) return Collections.emptyList();
+    createOrUpdateLibrary(libraryName, pairs);
 
     // ensure the order is the same
     for (String url : urls) {
@@ -218,25 +209,99 @@ public class BnfRunJFlexAction extends AnAction {
       }
     }
 
+    return result;
+  }
+
+  private static boolean findCommunitySources(@NotNull Project project, List<File> result, String... urls) {
+    String communitySrc = getCommunitySrcUrl(project);
+    if (communitySrc != null) {
+      List<String> roots = ContainerUtil.newArrayList();
+      for (String url : urls) {
+        int idx = url.indexOf("/master/");
+        if (idx > -1) {
+          roots.add(StringUtil.trimEnd(communitySrc, "/") + "/" + url.substring(idx + "/master/".length()));
+        }
+      }
+      return collectFiles(result, roots.toArray(new String[roots.size()]), urls);
+    }
+    return false;
+  }
+
+  private static boolean findExistingLibrary(@NotNull String libraryName, @NotNull List<File> result, String... urls) {
+    Library library = ApplicationLibraryTable.getApplicationTable().getLibraryByName(libraryName);
+    return library != null && collectFiles(result, library.getUrls(OrderRootType.CLASSES), urls);
+  }
+
+  private static boolean collectFiles(List<File> result, String[] roots, String... urls) {
+    main: for (int i = 0; i < urls.length; i++) {
+      String url = urls[i];
+      String name = url.substring(url.lastIndexOf("/") + 1);
+
+      for (String root : roots) {
+        root = StringUtil.trimEnd(root, JarFileSystem.JAR_SEPARATOR);
+        String rootName = root.substring(root.lastIndexOf("/") + 1);
+        if (Comparing.strEqual(name, rootName, SystemInfo.isFileSystemCaseSensitive)) {
+          File file = new File(FileUtil.toSystemDependentName(VfsUtil.urlToPath(root)));
+          if (file.exists() && file.isFile()) {
+            result.add(file);
+            continue main;
+          }
+        }
+      }
+      if(result.size() < i) break;
+    }
+    if (result.size() == urls.length) return true;
+    result.clear();
+    return false;
+  }
+
+  private static List<Pair<VirtualFile, DownloadableFileDescription>> downloadFiles(@NotNull Project project,
+                                                                                    @NotNull String libraryName,
+                                                                                    String... urls) {
+    DownloadableFileService service = DownloadableFileService.getInstance();
+    List<DownloadableFileDescription> descriptions = ContainerUtil.newArrayList();
+    for (String url : urls) {
+      descriptions.add(service.createFileDescription(url, url.substring(url.lastIndexOf("/") + 1)));
+    }
+    return service.createDownloader(descriptions, libraryName).downloadWithProgress(null, project, null);
+  }
+
+  private static void createOrUpdateLibrary(@NotNull final String libraryName,
+                                            @NotNull final List<Pair<VirtualFile, DownloadableFileDescription>> pairs) {
     ApplicationManager.getApplication().runWriteAction(new Runnable() {
       @Override
       public void run() {
-        if (library[0] == null) {
+        Library library = ApplicationLibraryTable.getApplicationTable().getLibraryByName(libraryName);
+        if (library == null) {
           LibraryTable.ModifiableModel modifiableModel = ApplicationLibraryTable.getApplicationTable().getModifiableModel();
-          library[0] = modifiableModel.createLibrary(libraryName);
+          library = modifiableModel.createLibrary(libraryName);
           modifiableModel.commit();
         }
-        Library.ModifiableModel modifiableModel = library[0].getModifiableModel();
+        Library.ModifiableModel modifiableModel = library.getModifiableModel();
         for (Pair<VirtualFile, DownloadableFileDescription> pair : pairs) {
           modifiableModel.addRoot(pair.first, OrderRootType.CLASSES);
         }
         modifiableModel.commit();
       }
     });
-    return result;
   }
 
-  public static RunContentDescriptor createConsole(Project project, final String tabTitle) {
+  @Nullable
+  private static String getCommunitySrcUrl(@NotNull Project project) {
+    Sdk projectSdk = ProjectRootManager.getInstance(project).getProjectSdk();
+    if (projectSdk != null) {
+      String[] sources = projectSdk.getRootProvider().getUrls(OrderRootType.SOURCES);
+      for (String source : sources) {
+        String communityPath = StringUtil.trimEnd(source, "platform/lang-api/src");
+        if (communityPath.length() < source.length()) {
+          return communityPath;
+        }
+      }
+    }
+    return null;
+  }
+
+  public static RunContentDescriptor createConsole(@NotNull Project project, final String tabTitle) {
     TextConsoleBuilder builder = TextConsoleBuilderFactory.getInstance().createBuilder(project);
     ConsoleView consoleView = builder.getConsole();
 

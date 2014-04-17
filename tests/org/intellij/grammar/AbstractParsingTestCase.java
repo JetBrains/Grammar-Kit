@@ -26,7 +26,7 @@ import java.io.File;
 /**
  * @author gregsh
  */
-public class AbstractParsingTestCase extends ParsingTestCase {
+abstract public class AbstractParsingTestCase extends ParsingTestCase {
   public static final String TEST_DATA_PATH = new File("testData").getAbsolutePath().replace(File.pathSeparatorChar, '/');
 
   public AbstractParsingTestCase(@NonNls @NotNull String dataPath,

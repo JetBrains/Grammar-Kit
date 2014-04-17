@@ -104,7 +104,7 @@ public class BnfIntroduceRuleHandler implements RefactoringActionHandler {
           public void run() {
             final PsiFile containingFile = currentRule.getContainingFile();
             String newRuleName = choseRuleName(containingFile);
-            String newRuleText = "private  " + newRuleName + " ::= " + ruleFromText.getExpression().getText();
+            String newRuleText = "private " + newRuleName + " ::= " + ruleFromText.getExpression().getText();
             BnfRule addedRule = addNextRule(project, currentRule, newRuleText);
             if (choice == OccurrencesChooser.ReplaceChoice.ALL) {
               List<BnfExpression[]> exprToReplace = occurrencesMap.get(OccurrencesChooser.ReplaceChoice.ALL);

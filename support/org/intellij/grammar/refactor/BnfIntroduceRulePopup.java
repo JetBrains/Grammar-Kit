@@ -26,17 +26,23 @@ import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.RangeMarker;
 import com.intellij.openapi.editor.ScrollType;
+import com.intellij.openapi.editor.ex.DocumentEx;
+import com.intellij.openapi.editor.markup.RangeHighlighter;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiDocumentManager;
 import com.intellij.refactoring.introduce.inplace.InplaceVariableIntroducer;
 import com.intellij.ui.NonFocusableCheckBox;
+import com.intellij.util.Processor;
+import com.intellij.util.containers.ContainerUtil;
 import org.intellij.grammar.psi.BnfExpression;
 import org.intellij.grammar.psi.BnfRule;
+import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Collection;
 
 /**
  * @author Vadim Romansky
@@ -65,27 +71,14 @@ public class BnfIntroduceRulePopup extends InplaceVariableIntroducer<BnfExpressi
     final AccessToken accessToken = WriteAction.start();
     try {
       Document document = myEditor.getDocument();
-      if (success) {
-        int exprOffset = myExprMarker.getStartOffset();
-        int lineOffset = getLineOffset(document, exprOffset);
-        // todo greedy-to-left range markers workaround ??
-        int idx = document.getText().indexOf(PRIVATE, lineOffset);
-        idx = idx > -1 && idx < exprOffset? idx + PRIVATE.length() : document.getText().indexOf(" ", lineOffset);
-        if (idx > -1 && idx < exprOffset) {
-          document.deleteString(idx, idx + 1);
-        }
-      }
-      else {
-        // todo restore original expression
-      }
+      // todo restore original expression if not success
       PsiDocumentManager.getInstance(myProject).commitDocument(document);
       if (exprMarker != null && exprMarker.isValid()) {
         myEditor.getCaretModel().moveToOffset(exprMarker.getStartOffset());
         myEditor.getScrollingModel().scrollToCaret(ScrollType.MAKE_VISIBLE);
         exprMarker.dispose();
       }
-    }
-    finally {
+    } finally {
       accessToken.finish();
     }
   }
@@ -98,7 +91,7 @@ public class BnfIntroduceRulePopup extends InplaceVariableIntroducer<BnfExpressi
       public void actionPerformed(ActionEvent e) {
         new WriteCommandAction(myProject, BnfIntroduceRuleHandler.REFACTORING_NAME, BnfIntroduceRuleHandler.REFACTORING_NAME) {
           @Override
-          protected void run(Result result) throws Throwable {
+          protected void run(@NotNull Result result) throws Throwable {
             perform(myCheckBox.isSelected());
           }
         }.execute();
@@ -110,14 +103,34 @@ public class BnfIntroduceRulePopup extends InplaceVariableIntroducer<BnfExpressi
   public void perform(final boolean generatePrivate) {
     final Runnable runnable = new Runnable() {
       public void run() {
-        final Document document = myEditor.getDocument();
+        final DocumentEx document = (DocumentEx) myEditor.getDocument();
 
         int exprOffset = myExprMarker.getStartOffset();
         final int lineOffset = getLineOffset(document, exprOffset);
         if (generatePrivate) {
-          document.insertString(lineOffset, PRIVATE);
-        }
-        else {
+          final Collection<RangeMarker> leftGreedyMarker = ContainerUtil.newArrayList();
+          final Collection<RangeMarker> emptyMarkers = ContainerUtil.newArrayList();
+          for (RangeHighlighter rangeHighlighter : myEditor.getMarkupModel().getAllHighlighters()) {
+            collectRangeMarker(rangeHighlighter, lineOffset, leftGreedyMarker, emptyMarkers);
+          }
+          document.processRangeMarkers(new Processor<RangeMarker>() {
+            @Override
+            public boolean process(RangeMarker rangeMarker) {
+              collectRangeMarker(rangeMarker, lineOffset, leftGreedyMarker, emptyMarkers);
+              return true;
+            }
+          });
+          setLeftGreedy(leftGreedyMarker, false);
+          setRightGreedy(emptyMarkers, true);
+
+          // workaround for shifting empty ranges to the left
+          document.insertString(lineOffset, " "); 
+          document.insertString(lineOffset, PRIVATE); 
+          document.deleteString(lineOffset + PRIVATE.length(), lineOffset + PRIVATE.length() + 1);
+          
+          setLeftGreedy(leftGreedyMarker, true);
+          setRightGreedy(emptyMarkers, false);
+        } else {
           int idx = document.getText().indexOf(PRIVATE, lineOffset);
           if (idx > -1 && idx < exprOffset) {
             document.deleteString(idx, idx + PRIVATE.length());
@@ -126,16 +139,39 @@ public class BnfIntroduceRulePopup extends InplaceVariableIntroducer<BnfExpressi
         PsiDocumentManager.getInstance(myProject).commitDocument(document);
       }
     };
-    final LookupImpl lookup = (LookupImpl)LookupManager.getActiveLookup(myEditor);
+    final LookupImpl lookup = (LookupImpl) LookupManager.getActiveLookup(myEditor);
     if (lookup != null) {
       lookup.performGuardedChange(runnable);
-    }
-    else {
+    } else {
       runnable.run();
     }
   }
 
+  private void setRightGreedy(Collection<RangeMarker> rightRestore, boolean greedyToRight) {
+    for (RangeMarker rangeMarker : rightRestore) {
+      rangeMarker.setGreedyToRight(greedyToRight);
+    }
+  }
+
+  private void setLeftGreedy(Collection<RangeMarker> leftRestore, boolean greedyToLeft) {
+    for (RangeMarker rangeMarker : leftRestore) {
+      rangeMarker.setGreedyToLeft(greedyToLeft);
+    }
+  }
+
+  private void collectRangeMarker(RangeMarker rangeMarker, int lineOffset,
+                                  Collection<RangeMarker> leftGreedyMarkers, Collection<RangeMarker> emptyMarkers) {
+    if (rangeMarker.getStartOffset() == lineOffset && rangeMarker.isGreedyToLeft()) {
+      leftGreedyMarkers.add(rangeMarker);
+    }
+    if (rangeMarker.getStartOffset() == lineOffset && rangeMarker.getEndOffset() == lineOffset && !rangeMarker.isGreedyToRight()) {
+      emptyMarkers.add(rangeMarker);
+    }
+  }
+
   private int getLineOffset(Document document, final int offset) {
-    return document.getLineStartOffset(document.getLineNumber(offset));
+    return 0 <= offset && offset < document.getTextLength()
+        ? document.getLineStartOffset(document.getLineNumber(offset))
+        : 0;
   }
 }

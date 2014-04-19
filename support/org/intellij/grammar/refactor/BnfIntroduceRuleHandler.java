@@ -73,6 +73,11 @@ public class BnfIntroduceRuleHandler implements RefactoringActionHandler {
     if (parentExpression == null) return;
     final List<BnfExpression> selectedExpression = findSelectedExpressionsInRange(parentExpression, new TextRange(startOffset, endOffset));
     if (selectedExpression.isEmpty()) return;
+
+    invokeIntroduce(project, editor, file, currentRule, selectedExpression);
+  }
+
+  private void invokeIntroduce(final Project project, final Editor editor, final PsiFile file, final BnfRule currentRule, final List<BnfExpression> selectedExpression) {
     final TextRange fixedRange = new TextRange(selectedExpression.get(0).getTextRange().getStartOffset(), selectedExpression.get(selectedExpression.size()-1).getTextRange().getEndOffset());
     final BnfRule ruleFromText = BnfElementFactory.createRuleFromText(file.getProject(), "a ::= " + fixedRange.substring(file.getText()));
     BnfExpressionOptimizer.optimize(ruleFromText.getExpression());
@@ -95,7 +100,7 @@ public class BnfIntroduceRuleHandler implements RefactoringActionHandler {
     if (occurrencesMap.get(OccurrencesChooser.ReplaceChoice.ALL).size() <= 1 && !ApplicationManager.getApplication().isUnitTestMode()) {
       occurrencesMap.remove(OccurrencesChooser.ReplaceChoice.ALL);
     }
-    
+
     final Pass<OccurrencesChooser.ReplaceChoice> callback = new Pass<OccurrencesChooser.ReplaceChoice>() {
       @Override
       public void pass(final OccurrencesChooser.ReplaceChoice choice) {

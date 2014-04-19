@@ -24,7 +24,7 @@ public class BnfGeneratorTest extends BnfGeneratorTestCase {
   }
 
   public void testBnfGrammar() throws Exception { doGenTest(true); }
-  public void testSelf() throws Exception { doGenTest(true); }
+  public void testSelf() throws Exception { doGenTest(true, true); }
   public void testSmall() throws Exception { doGenTest(false); }
   public void testAutopin() throws Exception { doGenTest(false); }
   public void testExternalRules() throws Exception { doGenTest(false); }
@@ -51,6 +51,10 @@ public class BnfGeneratorTest extends BnfGeneratorTestCase {
   }
 
   public void doGenTest(final boolean generatePsi) throws Exception {
+    doGenTest(generatePsi, false);
+  }
+
+  public void doGenTest(final boolean generatePsi, boolean generateFormatter) throws Exception {
     final String name = getTestName(false);
     String text = loadFile(name + "." + myFileExt);
     myFile = createPsiFile(name, text.replaceAll("generatePsi=[^\n]*", "generatePsi=" + generatePsi));
@@ -58,6 +62,9 @@ public class BnfGeneratorTest extends BnfGeneratorTestCase {
     filesToCheck.add(new File(myFullDataPath, name + ".java"));
     if (generatePsi) {
       filesToCheck.add(new File(myFullDataPath, name + ".PSI.java"));
+    }
+    if (generateFormatter) {
+      filesToCheck.add(new File(myFullDataPath, name + ".FORMATTER.java"));
     }
     for (File file : filesToCheck) {
       if (file.exists()) {

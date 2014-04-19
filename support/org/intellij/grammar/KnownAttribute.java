@@ -71,6 +71,18 @@ public class KnownAttribute<T> {
   public static final KnownAttribute<String>       RECOVER_WHILE             = create(false, String.class, "recoverWhile", null);
   public static final KnownAttribute<String>       NAME                      = create(false, String.class, "name", null);
 
+  public static final KnownAttribute<String>       FORMATTING_BUILDER_CLASS  = create(true, String.class, "formattingBuilderClass", null);
+
+  public static final KnownAttribute<String>       AROUND                    = create(false, String.class, "around", null);
+  public static final KnownAttribute<String>       BEFORE                    = create(false, String.class, "before", null);
+  public static final KnownAttribute<String>       AFTER                     = create(false, String.class, "after", null);
+
+  public static final KnownAttribute<String>       CONTINUATION_INDENT       = create(false, String.class, "continuationIndent", null);
+  public static final KnownAttribute<String>       NONE_INDENT               = create(false, String.class, "noneIndent", null);
+  public static final KnownAttribute<String>       NORMAL_INDENT             = create(false, String.class, "normalIndent", null);
+
+  public static final KnownAttribute<String>       ALIGNMENT                 = create(false, String.class, "alignment", null);
+
   public static final KnownAttribute<Boolean>      RIGHT_ASSOCIATIVE         = create(false, Boolean.class, "rightAssociative", false);
   public static final KnownAttribute<String>       CONSUME_TOKEN_METHOD      = create(false, String.class,  "consumeTokenMethod", "consumeToken");
 

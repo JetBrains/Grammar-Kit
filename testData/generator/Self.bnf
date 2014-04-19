@@ -3,6 +3,7 @@
   extendedPin=false
   name(".*")=""
   stubParserClass="org.intellij.grammar.parser.GeneratedParserUtilBase"
+  formattingBuilderClass="org.intellij.grammar.BnfFormattingModelBuilder"
 
   implements="org.intellij.grammar.psi.BnfCompositeElement"
   extends="org.intellij.grammar.psi.impl.BnfCompositeElementImpl"
@@ -40,6 +41,21 @@
   implements("rule|attr")="org.intellij.grammar.psi.BnfNamedElement"
   extends("rule|attr")="org.intellij.grammar.psi.impl.BnfNamedElementImpl"
 
+  around("::=|\|")="spaces(1)"
+  around("=|rule")="none()"
+  before("\*|\+|\)|\;|\}")="none()"
+  after("\(|\[|\{|predicate_sign")="none()"
+  after("quantified|attr|modifier")="spaces(1)"
+  before("quantifier")="none()"
+  before("attrs")="spaces(1)"
+  around(".*expression|reference_or_token")="spaces(1)"
+
+  normalIndent("attrs")="attr"
+  continuationIndent("paren_expression")=".*"
+  continuationIndent("choice")=".*"
+
+  alignment("choice")=".*"
+  alignment("attrs|paren_expression")="except:\{|\}"
 }
 
 grammar ::= (attrs | rule) *

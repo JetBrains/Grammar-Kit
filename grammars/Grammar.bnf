@@ -42,6 +42,23 @@
     line_comment="regexp://.*"
     block_comment="regexp:/\*(.|\n)*\*/"
   ]
+  
+  formattingBuilderClass="org.intellij.grammar.formatter.BnfFormattingModelBuilder"
+  around("::=|\|")="spaces(1)"
+  around("=|rule")="none()"
+  before("\*|\+|\)|\;|\}|>>")="none()"
+  after("\(|\[|\{|predicate_sign|<<")="none()"
+  after("quantified|attr|modifier")="spaces(1)"
+  before("quantifier")="none()"
+  before("attrs")="spaces(1)"
+  around(".*expression|reference_or_token")="spaces(1)"
+
+  normalIndent("attrs")="attr"
+  continuationIndent("paren_expression")=".*"
+  continuationIndent("choice")=".*"
+
+  alignment("choice")=".*"
+  alignment("attrs|paren_expression")="except:\{|\}"
 
   implements("rule|attr")="org.intellij.grammar.psi.BnfNamedElement"
   extends("rule|attr")="org.intellij.grammar.psi.impl.BnfNamedElementImpl"

@@ -81,6 +81,8 @@
 
     <documentationProvider implementation="org.intellij.grammar.BnfDocumentationProvider"/>
 
+    <lang.formatter language="BNF" implementationClass="org.intellij.grammar.formatter.BnfFormattingModelBuilder"/>
+    
     <localInspection language="BNF" shortName="BnfSuspiciousTokenInspection" displayName="Suspicious token" groupName="Grammar Inspections"
                      enabledByDefault="true" level="WARNING" implementationClass="org.intellij.grammar.inspection.BnfSuspiciousTokenInspection"/>
     <localInspection language="BNF" shortName="BnfLeftRecursionInspection" displayName="Left recursion" groupName="Grammar Inspections"

@@ -27,7 +27,9 @@ import com.intellij.openapi.util.TextRange;
 import com.intellij.psi.*;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.refactoring.RefactoringActionHandler;
+import com.intellij.refactoring.RefactoringBundle;
 import com.intellij.refactoring.introduce.inplace.OccurrencesChooser;
+import com.intellij.refactoring.util.CommonRefactoringUtil;
 import com.intellij.util.containers.ContainerUtil;
 import gnu.trove.THashSet;
 import org.intellij.grammar.generator.ParserGeneratorUtil;
@@ -69,9 +71,11 @@ public class BnfIntroduceRuleHandler implements RefactoringActionHandler {
     int startOffset = starts[0];
     int endOffset = ends[ends.length-1];
     final BnfRule currentRule = PsiTreeUtil.getParentOfType(file.findElementAt(startOffset), BnfRule.class);
-    if (currentRule == null) return;
-    final BnfExpression parentExpression = findParentExpression(bnfFile, startOffset, endOffset);
-    if (parentExpression == null) return;
+    final BnfExpression parentExpression = currentRule != null ? findParentExpression(bnfFile, startOffset, endOffset) : null;
+    if (parentExpression == null) {
+      CommonRefactoringUtil.showErrorHint(editor.getProject(), editor, RefactoringBundle.message("refactoring.introduce.context.error"), "Error", null);
+      return;
+    }
     final List<BnfExpression> selectedExpression = findSelectedExpressionsInRange(parentExpression, new TextRange(startOffset, endOffset));
     if (selectedExpression.isEmpty()) return;
 

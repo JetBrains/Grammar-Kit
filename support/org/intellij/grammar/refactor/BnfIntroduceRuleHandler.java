@@ -16,7 +16,6 @@
 
 package org.intellij.grammar.refactor;
 
-import com.intellij.codeInsight.unwrap.ScopeHighlighter;
 import com.intellij.openapi.actionSystem.DataContext;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.command.WriteCommandAction;
@@ -42,6 +41,7 @@ import org.intellij.grammar.psi.impl.BnfFileImpl;
 import org.intellij.grammar.psi.impl.GrammarUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.TestOnly;
 
 import java.util.*;
 
@@ -55,12 +55,24 @@ import java.util.*;
  */
 public class BnfIntroduceRuleHandler implements RefactoringActionHandler {
   public static final String REFACTORING_NAME = "Extract Rule";
-  private static final Function<BnfExpression, String> RENDER_FUNCTION = new Function<BnfExpression, String>() {
+  public static final Function<BnfExpression, String> RENDER_FUNCTION = new Function<BnfExpression, String>() {
     @Override
     public String fun(@NotNull BnfExpression bnfExpression) {
       return bnfExpression.getText().replaceAll("\\s+", " ");
     }
   };
+
+  @Nullable
+  private final Function<List<BnfExpression>, BnfExpression> myPopupVariantsHandler;
+
+  public BnfIntroduceRuleHandler() {
+    myPopupVariantsHandler = null;
+  }
+
+  @TestOnly
+  public BnfIntroduceRuleHandler(@Nullable Function<List<BnfExpression>, BnfExpression> popupVariantsHandler) {
+    this.myPopupVariantsHandler = popupVariantsHandler;
+  }
 
   @Override
   public void invoke(final @NotNull Project project, @NotNull PsiElement[] elements, DataContext dataContext) {
@@ -96,14 +108,18 @@ public class BnfIntroduceRuleHandler implements RefactoringActionHandler {
         invokeIntroduce(project, editor, file, currentRule, expressions);
       } else {
         assert !expressions.isEmpty();
-        IntroduceTargetChooser.showChooser(editor, expressions,
-            new Pass<BnfExpression>() {
-              public void pass(final BnfExpression bnfExpression) {
-                invokeIntroduce(project, editor, file, currentRule, Collections.singletonList(bnfExpression));
-              }
-            },
-            RENDER_FUNCTION, "Expressions", ScopeHighlighter.NATURAL_RANGER
-        );
+
+        if (myPopupVariantsHandler != null) {
+          invokeIntroduce(project, editor, file, currentRule, Collections.singletonList(myPopupVariantsHandler.fun(expressions)));
+        } else {
+          IntroduceTargetChooser.showChooser(editor, expressions,
+              new Pass<BnfExpression>() {
+                public void pass(final BnfExpression bnfExpression) {
+                  invokeIntroduce(project, editor, file, currentRule, Collections.singletonList(bnfExpression));
+                }
+              }, RENDER_FUNCTION, "Expressions"
+          );
+        }
       }
     } else {
       List<BnfExpression> selectedExpression = findSelectedExpressionsInRange(parentExpression, new TextRange(startOffset, endOffset));

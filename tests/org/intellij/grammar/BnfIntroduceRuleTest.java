@@ -1,9 +1,14 @@
 package org.intellij.grammar;
 
 import com.intellij.testFramework.fixtures.LightPlatformCodeInsightFixtureTestCase;
+import com.intellij.util.Function;
+import com.intellij.util.containers.ContainerUtil;
+import org.intellij.grammar.psi.BnfExpression;
 import org.intellij.grammar.refactor.BnfIntroduceRuleHandler;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
+import java.util.List;
 
 /**
  * Created by IntelliJ IDEA.
@@ -95,9 +100,25 @@ public class BnfIntroduceRuleTest extends LightPlatformCodeInsightFixtureTestCas
   public void testSpaces() throws Exception { doTest("some ::= (x rule) [x rule] {x rule}\nprivate rule ::= [tok? en]", "some ::= (x [  tok  ? en  ]) [x [tok  ?  en]] {x [<selection>tok? en]</selection>}"); }
   public void testNoWsSiblings() throws Exception { doTest("some ::= x's'rule\nprivate rule ::= tok en", "some ::= x's'<selection>tok en</selection>"); }
 
+  public void testWithoutSelectionSingleVariant() throws Exception { doTest("some ::= rule\nprivate rule ::= expr1", "some ::= exp<caret>r1"); }
+  public void testWithoutSelectionAtTheStartOfExpression() throws Exception { doTest("some ::= rule\nprivate rule ::= expr1", "some ::= <caret>expr1"); }
+  public void testWithoutSelection() throws Exception {
+    doTest("some ::= rule | expr3\nprivate rule ::= expr1    expr2+", "some ::= expr1    exp<caret>r2+ | expr3", new Function<List<BnfExpression>, BnfExpression>() {
+      @Override
+      public BnfExpression fun(List<BnfExpression> bnfExpressions) {
+        assertSameElements(ContainerUtil.map(bnfExpressions, BnfIntroduceRuleHandler.RENDER_FUNCTION), "expr2", "expr2+", "expr1 expr2+", "expr1 expr2+ | expr3");
+        return bnfExpressions.get(2);
+      }
+    });
+  }
+
   private void doTest(/*@Language("BNF")*/ String expected, /*@Language("BNF")*/ String text) throws IOException {
+    doTest(expected, text, null);
+  }
+
+  private void doTest(/*@Language("BNF")*/ String expected, /*@Language("BNF")*/ String text, @Nullable Function<List<BnfExpression>, BnfExpression> popupHandler) throws IOException {
     myFixture.configureByText("a.bnf", text);
-    new BnfIntroduceRuleHandler().invoke(getProject(), myFixture.getEditor(), myFixture.getFile(), null);
+    new BnfIntroduceRuleHandler(popupHandler).invoke(getProject(), myFixture.getEditor(), myFixture.getFile(), null);
     assertSameLines(expected, myFixture.getFile().getText());
   }
 }

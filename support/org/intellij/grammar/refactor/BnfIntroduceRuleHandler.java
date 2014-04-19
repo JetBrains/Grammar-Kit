@@ -69,7 +69,7 @@ public class BnfIntroduceRuleHandler implements RefactoringActionHandler {
     int endOffset = ends[ends.length-1];
     final BnfRule currentRule = PsiTreeUtil.getParentOfType(file.findElementAt(startOffset), BnfRule.class);
     if (currentRule == null) return;
-    final BnfExpression parentExpression = findParentExpression(bnfFile, startOffset, endOffset-1);
+    final BnfExpression parentExpression = findParentExpression(bnfFile, startOffset, endOffset);
     if (parentExpression == null) return;
     final List<BnfExpression> selectedExpression = findSelectedExpressionsInRange(parentExpression, new TextRange(startOffset, endOffset));
     if (selectedExpression.isEmpty()) return;
@@ -254,6 +254,9 @@ public class BnfIntroduceRuleHandler implements RefactoringActionHandler {
 
   @Nullable
   private static BnfExpression findParentExpression(PsiFile file, int startOffset, int endOffset) {
+    if (endOffset > startOffset) {
+      endOffset--;
+    }
     final PsiElement startElement = file.findElementAt(startOffset);
     final PsiElement endElement = file.findElementAt(endOffset);
     if (startElement == null || endElement == null) return null;

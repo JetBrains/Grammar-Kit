@@ -27,6 +27,7 @@ public class BnfParserTest extends AbstractParsingTestCase {
   public void testAlternativeSyntax() { doTest(true); }
   public void testExternalExpression() { doTest(true); }
   public void testFixes() { doTest(true); }
+  public void testBrokenAttrBeforeEOF() { doTest(true); }
 
   @Override
   protected String loadFile(@NonNls String name) throws IOException {

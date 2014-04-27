@@ -1,7 +1,7 @@
 Grammar-Kit [[download]](../../releases)
 ==================
 
-An [[IntelliJ IDEA plugin]](http://plugins.jetbrains.com/plugin/6606) for language plugin developers.
+An [IntelliJ IDEA plugin](http://plugins.jetbrains.com/plugin/6606) for language plugin developers.
 
 Adds BNF Grammars and JFlex files editing support including parser/PSI code generator.
 

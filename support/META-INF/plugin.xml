@@ -1,6 +1,6 @@
 <idea-plugin url="https://github.com/JetBrains/Grammar-Kit" version="2">
   <id>org.jetbrains.idea.grammar</id>
-  <version>1.1.7</version>
+  <version>1.1.8</version>
   <vendor email="gregory.shrago@jetbrains.com">Greg Shrago</vendor>
   <idea-version since-build="133.696" until-build=""/>
 
@@ -12,6 +12,12 @@
 
   <change-notes>
     <![CDATA[
+    <p>1.1.8</p>
+    <ul>
+        <li>Introduce rule: expression chooser</li>
+        <li>JFlex: local jar/skeleton detection</li>
+        <li>Minor fixes in LivePreview and GPUB</li>
+    </ul>
     <p>1.1.7/1.1.6</p>
     <ul>
         <li>PSI generator: Improve <b>methods</b> attribute semantics: rename/add new PSI tree accessors</li>
@@ -32,17 +38,6 @@
     <ul>
         <li>JFlex language support: highlighting/navigation/completion/rename</li>
         <li>Generator: parser size reduced (most of PsiBuilder-specific logic moved to GPUB)</li>
-    </ul>
-    <p>1.1.3</p>
-    <ul>
-        <li>Extensibility: "extends" hooks in GPUB</li>
-        <li>Generator: compact token sequence parsing</li>
-    </ul>
-    <p>1.1.2</p>
-    <ul>
-        <li>Context menu: Generate JFlex *.flex file</li>
-        <li>Context menu: Run JFlex generator</li>
-        <li>Context menu: Create custom parser util class</li>
     </ul>
     ]]>
   </change-notes>

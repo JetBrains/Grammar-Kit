@@ -9,8 +9,8 @@ import com.intellij.openapi.roots.ModuleRootManager;
 import com.intellij.openapi.util.io.FileUtil;
 import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.openapi.vfs.newvfs.impl.VirtualDirectoryImpl;
 import com.intellij.psi.JavaPsiFacade;
-import com.intellij.psi.PsiFile;
 import com.intellij.testFramework.fixtures.LightPlatformCodeInsightFixtureTestCase;
 import org.intellij.grammar.inspection.*;
 
@@ -29,22 +29,36 @@ public class BnfInspectionTest extends LightPlatformCodeInsightFixtureTestCase {
     return "testData/inspection";
   }
 
+  @Override
+  protected void setUp() throws Exception {
+    super.setUp();
+    VirtualDirectoryImpl.allowRootAccess(new File(getTestDataPath()).getAbsolutePath());
+  }
+
   public void testBnfGrammar() throws Exception {
-    VirtualFile virtualFile = myFixture.copyFileToProject("../../grammars/Grammar.bnf", "Grammar.bnf");
-    PsiFile psiFile = myFixture.configureByFile("Grammar.bnf");
-    myFixture.allowTreeAccessForFile(virtualFile);
     toggleGrammarKitSrc(myModule, getTestDataPath());
     try {
+      VirtualFile virtualFile = myFixture.copyFileToProject("../../grammars/Grammar.bnf", "Grammar.bnf");
+      myFixture.configureByFile("Grammar.bnf");
+      myFixture.allowTreeAccessForFile(virtualFile);
       doTest();
     }
     finally {
       toggleGrammarKitSrc(myModule, getTestDataPath());
+      VirtualDirectoryImpl.disallowRootAccess(new File("").getAbsolutePath());
     }
   }
 
   private static void toggleGrammarKitSrc(Module module, String testDataPath) throws Exception {
+    String absolutePath = new File("").getAbsolutePath();
     JavaPsiFacade facade = JavaPsiFacade.getInstance(module.getProject());
     boolean add = facade.findPackage("org.intellij.grammar.psi") == null;
+    if (add) {
+      VirtualDirectoryImpl.allowRootAccess(absolutePath);
+    }
+    else {
+      VirtualDirectoryImpl.disallowRootAccess(absolutePath);
+    }
     AccessToken accessToken = ApplicationManager.getApplication().acquireWriteActionLock(null);
     try {
       ModifiableRootModel model = ModuleRootManager.getInstance(module).getModifiableModel();

@@ -1,7 +1,7 @@
-Grammar-Kit [[download]](binaries/GrammarKit.zip?raw=true)
+Grammar-Kit [[download]](../../releases)
 ==================
 
-An IntelliJ IDEA plugin for language plugin developers.
+An [[IntelliJ IDEA plugin]](http://plugins.jetbrains.com/plugin/6606) for language plugin developers.
 
 Adds BNF Grammars and JFlex files editing support including parser/PSI code generator.
 
@@ -27,6 +27,13 @@ General usage instructions
 
 Recent changes
 --------------
+1.1.8
+
+* Refactoring: expression chooser for introduce rule
+* JFlex: local jar/skeleton detection
+* Minor fixes in LivePreview and GPUB
+
+
 1.1.6 (github-only) / 1.1.7 (github+plugin repository)
 
 * PSI generator: Improve *methods* attribute semantics: rename/add new PSI tree accessors

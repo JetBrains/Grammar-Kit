@@ -683,6 +683,7 @@ public class ParserGenerator {
       out("Marker marker_ = enter_section_(builder_, level_, "+modifiers+", "+frameName+");");
     }
 
+    ConsumeType consumeType = ConsumeType.forRule(rule);
     boolean predicateEncountered = false;
     int[] skip = {0};
     for (int i = 0, p = 0, childrenSize = children.size(); i < childrenSize; i++) {
@@ -695,7 +696,7 @@ public class ParserGenerator {
       else if (type == BNF_SEQUENCE) {
         predicateEncountered |= pinApplied && ParserGeneratorUtil.getEffectiveExpression(myFile, child) instanceof BnfPredicate;
         if (skip[0] == 0) {
-          nodeCall = generateTokenSequenceCall(rule, children, i, pinMatcher, pinApplied, skip, nodeCall, false);
+          nodeCall = generateTokenSequenceCall(children, i, pinMatcher, pinApplied, skip, nodeCall, false, consumeType);
           if (i == 0) {
             out("result_ = " + nodeCall + ";");
           }
@@ -837,8 +838,8 @@ public class ParserGenerator {
         break;
       }
     }
-    ConsumeMethod type = getConsumeMethod(rule);
-    boolean fast = type == ConsumeMethod.FAST || type == ConsumeMethod.SMART;
+    ConsumeType consumeType = ConsumeType.forRule(rule);
+    boolean fast = consumeType == ConsumeType.FAST || consumeType == ConsumeType.SMART;
     // do not include frameName if FIRST is known and its size is 1
     boolean dropFrameName = skipIfOne && !firstElementTypes.isEmpty() && firstElementTypes.size() == 1;
     if (!firstElementTypes.isEmpty() && firstElementTypes.size() <= generateFirstCheck) {
@@ -937,15 +938,15 @@ public class ParserGenerator {
     return existing;
   }
 
-  private String generateTokenSequenceCall(BnfRule rule,
-                                           List<BnfExpression> children,
+  private String generateTokenSequenceCall(List<BnfExpression> children,
                                            int startIndex,
                                            PinMatcher pinMatcher,
                                            boolean pinApplied,
                                            int[] skip,
                                            String nodeCall,
-                                           boolean rollbackOnFail) {
-    if (startIndex == children.size() - 1 || !startsWithConsumeToken(nodeCall)) return nodeCall;
+                                           boolean rollbackOnFail,
+                                           ConsumeType consumeType) {
+    if (startIndex == children.size() - 1 || !isConsumeTokenCall(nodeCall)) return nodeCall;
     List<String> list = ContainerUtil.newArrayList();
     int pin = pinApplied ? -1 : 0;
     for (int i = startIndex, len = children.size(); i < len; i++) {
@@ -969,12 +970,13 @@ public class ParserGenerator {
     }
     if (list.size() < 2) return nodeCall;
     skip[0] = list.size() - 1;
-    ConsumeMethod method = ParserGeneratorUtil.getConsumeMethod(rule);
-    return (rollbackOnFail ? "parseTokens" : ("consumeTokens" + (method == ConsumeMethod.SMART ? "Smart" : ""))) +"(builder_, " + pin + ", " + StringUtil.join(list, ", ") + ")";
+    return ((rollbackOnFail ? "parseTokens" : "consumeTokens") + (consumeType == ConsumeType.SMART ? consumeType.getMethodSuffix() : "")) +
+           "(builder_, " + pin + ", " + StringUtil.join(list, ", ") + ")";
   }
 
-  private static boolean startsWithConsumeToken(String nodeCall) {
-    return nodeCall.startsWith("consumeToken(builder_, ") || nodeCall.startsWith("consumeTokenFast(builder_, ") || nodeCall.startsWith("consumeTokenSmart(builder_, ");
+  private static boolean isConsumeTokenCall(String nodeCall) {
+    int idx = nodeCall.indexOf('(');
+    return idx > 0 && ConsumeType.forMethod(nodeCall.substring(0, idx)) != null;
   }
 
   String generateNodeCall(BnfRule rule, @Nullable BnfExpression node, String nextName) {
@@ -985,11 +987,12 @@ public class ParserGenerator {
     IElementType type = node == null ? BNF_REFERENCE_OR_TOKEN : getEffectiveType(node);
     String text = node == null ? nextName : node.getText();
     PsiElement parent = node == null? null : node.getParent();
+    ConsumeType consumeType = ConsumeType.forRule(rule);
     String consumeMethodName =
       Boolean.TRUE.equals(forceDefaultConsumeToken) ||
       !Boolean.FALSE.equals(forceDefaultConsumeToken) && parent instanceof BnfSequence && parent.getFirstChild() != node ?
       KnownAttribute.CONSUME_TOKEN_METHOD.getDefaultValue() :
-      getAttribute(rule, KnownAttribute.CONSUME_TOKEN_METHOD);
+      KnownAttribute.CONSUME_TOKEN_METHOD.getDefaultValue() + consumeType.getMethodSuffix();
     if (type == BNF_STRING) {
       String value = StringUtil.stripQuotesAroundValue(text);
       String attributeName = getTokenName(value);
@@ -1042,7 +1045,7 @@ public class ParserGenerator {
           mySimpleTokens.put(t, null);
         } 
       }
-      return generateTokenSequenceCall(rule, childExpressions, 0, pinMatcher, false, new int[]{0}, nodeCall, true);
+      return generateTokenSequenceCall(childExpressions, 0, pinMatcher, false, new int[]{0}, nodeCall, true, consumeType);
     }
     else if (type == BNF_EXTERNAL_EXPRESSION) {
       List<BnfExpression> expressions = ((BnfExternalExpression)node).getExpressionList();

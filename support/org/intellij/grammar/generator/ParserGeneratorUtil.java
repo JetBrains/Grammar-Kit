@@ -28,6 +28,7 @@ import com.intellij.psi.impl.FakePsiElement;
 import com.intellij.psi.impl.source.tree.LeafPsiElement;
 import com.intellij.psi.tree.IElementType;
 import com.intellij.psi.util.PsiTreeUtil;
+import com.intellij.util.ObjectUtils;
 import com.intellij.util.containers.ContainerUtil;
 import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.actions.GenerateAction;
@@ -49,6 +50,31 @@ import static org.intellij.grammar.psi.BnfTypes.BNF_SEQUENCE;
 public class ParserGeneratorUtil {
   private static final Object NULL = new Object();
   private static final BnfExpression NULL_ATTR = createFake("NULL");
+
+  enum ConsumeType {
+    DEFAULT, FAST, SMART;
+
+    public String getMethodSuffix() {
+      return this == DEFAULT ? "" : StringUtil.capitalize(name().toLowerCase());
+    }
+
+    @NotNull
+    public static ConsumeType forRule(@NotNull BnfRule rule) {
+      String value = getAttribute(rule, KnownAttribute.CONSUME_TOKEN_METHOD);
+      for (ConsumeType method : values()) {
+        if (StringUtil.equalsIgnoreCase(value, method.name())) return method;
+      }
+      return ObjectUtils.chooseNotNull(forMethod(value), DEFAULT);
+    }
+
+    @Nullable
+    public static ConsumeType forMethod(String value) {
+      if ("consumeTokenFast".equals(value)) return FAST;
+      if ("consumeTokenSmart".equals(value)) return SMART;
+      if ("consumeToken".equals(value)) return DEFAULT;
+      return null;
+    }
+  }
 
   public static <T> T getRootAttribute(PsiElement node, KnownAttribute<T> attribute) {
     return getRootAttribute(node, attribute, null);
@@ -340,7 +366,7 @@ public class ParserGeneratorUtil {
   }
 
   public static boolean isTokenSequence(@NotNull BnfRule rule, @Nullable BnfExpression node) {
-    if (node == null || getConsumeMethod(rule) != ConsumeMethod.DOESNT_MATTER) return false;
+    if (node == null || ConsumeType.forRule(rule) != ConsumeType.DEFAULT) return false;
     if (getEffectiveType(node) != BNF_SEQUENCE) return false;
     BnfFile bnfFile = (BnfFile) rule.getContainingFile();
     for (PsiElement child : getChildExpressions(node)) {
@@ -348,17 +374,6 @@ public class ParserGeneratorUtil {
       if (!isToken) return false;
     }
     return true;
-  }
-
-  enum ConsumeMethod {
-    FAST, SMART, DOESNT_MATTER
-  }
-
-  public static ConsumeMethod getConsumeMethod(@NotNull BnfRule rule) {
-    String value = getAttribute(rule, KnownAttribute.CONSUME_TOKEN_METHOD);
-    if ("consumeTokenFast".equals(value)) return ConsumeMethod.FAST;
-    if ("consumeTokenSmart".equals(value)) return ConsumeMethod.SMART;
-    return ConsumeMethod.DOESNT_MATTER;
   }
 
   public static void appendTokenTypes(StringBuilder sb, List<String> tokenTypes) {

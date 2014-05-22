@@ -695,7 +695,7 @@ public class ParserGenerator {
       else if (type == BNF_SEQUENCE) {
         predicateEncountered |= pinApplied && ParserGeneratorUtil.getEffectiveExpression(myFile, child) instanceof BnfPredicate;
         if (skip[0] == 0) {
-          nodeCall = generateTokenSequenceCall(children, i, pinMatcher, pinApplied, skip, nodeCall, false);
+          nodeCall = generateTokenSequenceCall(rule, children, i, pinMatcher, pinApplied, skip, nodeCall, false);
           if (i == 0) {
             out("result_ = " + nodeCall + ";");
           }
@@ -837,7 +837,8 @@ public class ParserGenerator {
         break;
       }
     }
-    boolean fast = useConsumeTokenFast(rule);
+    ConsumeMethod type = getConsumeMethod(rule);
+    boolean fast = type == ConsumeMethod.FAST || type == ConsumeMethod.SMART;
     // do not include frameName if FIRST is known and its size is 1
     boolean dropFrameName = skipIfOne && !firstElementTypes.isEmpty() && firstElementTypes.size() == 1;
     if (!firstElementTypes.isEmpty() && firstElementTypes.size() <= generateFirstCheck) {
@@ -936,14 +937,15 @@ public class ParserGenerator {
     return existing;
   }
 
-  private String generateTokenSequenceCall(List<BnfExpression> children,
+  private String generateTokenSequenceCall(BnfRule rule,
+                                           List<BnfExpression> children,
                                            int startIndex,
                                            PinMatcher pinMatcher,
                                            boolean pinApplied,
                                            int[] skip,
                                            String nodeCall,
                                            boolean rollbackOnFail) {
-    if (startIndex == children.size() - 1 || !nodeCall.startsWith("consumeToken(builder_, ")) return nodeCall;
+    if (startIndex == children.size() - 1 || !startsWithConsumeToken(nodeCall)) return nodeCall;
     List<String> list = ContainerUtil.newArrayList();
     int pin = pinApplied ? -1 : 0;
     for (int i = startIndex, len = children.size(); i < len; i++) {
@@ -967,7 +969,12 @@ public class ParserGenerator {
     }
     if (list.size() < 2) return nodeCall;
     skip[0] = list.size() - 1;
-    return (rollbackOnFail ? "parseTokens" : "consumeTokens") +"(builder_, " + pin + ", " + StringUtil.join(list, ", ") + ")";
+    ConsumeMethod method = ParserGeneratorUtil.getConsumeMethod(rule);
+    return (rollbackOnFail ? "parseTokens" : ("consumeTokens" + (method == ConsumeMethod.SMART ? "Smart" : ""))) +"(builder_, " + pin + ", " + StringUtil.join(list, ", ") + ")";
+  }
+
+  private static boolean startsWithConsumeToken(String nodeCall) {
+    return nodeCall.startsWith("consumeToken(builder_, ") || nodeCall.startsWith("consumeTokenFast(builder_, ") || nodeCall.startsWith("consumeTokenSmart(builder_, ");
   }
 
   String generateNodeCall(BnfRule rule, @Nullable BnfExpression node, String nextName) {
@@ -1035,7 +1042,7 @@ public class ParserGenerator {
           mySimpleTokens.put(t, null);
         } 
       }
-      return generateTokenSequenceCall(childExpressions, 0, pinMatcher, false, new int[]{0}, nodeCall, true);
+      return generateTokenSequenceCall(rule, childExpressions, 0, pinMatcher, false, new int[]{0}, nodeCall, true);
     }
     else if (type == BNF_EXTERNAL_EXPRESSION) {
       List<BnfExpression> expressions = ((BnfExternalExpression)node).getExpressionList();

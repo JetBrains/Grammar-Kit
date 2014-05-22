@@ -28,6 +28,7 @@ expr ::= assign_expr
   | conditional_group
   | add_group
   | between_expr
+  | is_not_expr
   | mul_group
   | unary_group
   | exp_expr
@@ -60,6 +61,7 @@ exp_expr ::= expr ('^' expr) + // N-ary variant
 factorial_expr ::= expr '!'
 paren_expr ::= '(' expr ')'
 elvis_expr ::= expr '?' expr ':' expr
+is_not_expr ::= expr IS NOT expr
 between_expr ::= expr BETWEEN add_group AND add_group {
   methods=[testExpr="expr[0]"]
 }

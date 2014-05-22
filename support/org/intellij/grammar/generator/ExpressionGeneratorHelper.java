@@ -57,8 +57,8 @@ public class ExpressionGeneratorHelper {
     String frameName = quote(ParserGeneratorUtil.getRuleDisplayName(info.rootRule, true));
     g.out("public static boolean " + methodName + "(PsiBuilder builder_, int level_, int priority_) {");
     g.out("if (!recursion_guard_(builder_, level_, \"" + methodName + "\")) return false;");
-    boolean fast = "consumeTokenFast".equals(getAttribute(info.rootRule, KnownAttribute.CONSUME_TOKEN_METHOD));
-    if (fast && frameName != null) {
+    ConsumeMethod method = ParserGeneratorUtil.getConsumeMethod(info.rootRule);
+    if (method != ConsumeMethod.DOESNT_MATTER && frameName != null) {
       g.out("addVariant(builder_, " + frameName + ");");
     }
     g.generateFirstCheck(info.rootRule, frameName, true);

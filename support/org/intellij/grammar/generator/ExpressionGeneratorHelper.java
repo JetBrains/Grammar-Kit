@@ -17,12 +17,15 @@
 package org.intellij.grammar.generator;
 
 import com.intellij.openapi.util.text.StringUtil;
+import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.util.SmartList;
 import com.intellij.util.containers.ContainerUtil;
 import gnu.trove.THashSet;
 import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.psi.BnfExpression;
 import org.intellij.grammar.psi.BnfRule;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
@@ -35,12 +38,13 @@ import static org.intellij.grammar.generator.ParserGeneratorUtil.*;
  */
 public class ExpressionGeneratorHelper {
 
+  private static final ConsumeType CONSUME_TYPE_OVERRIDE = ConsumeType.SMART;
 
   public static void generateExpressionRoot(ExpressionHelper.ExpressionInfo info, ParserGenerator g) {
     Map<String, List<OperatorInfo>> opCalls = new LinkedHashMap<String, List<OperatorInfo>>();
     for (BnfRule rule : info.priorityMap.keySet()) {
       OperatorInfo operator = info.operatorMap.get(rule);
-      String opCall = g.generateNodeCall(info.rootRule, operator.operator, getNextName(operator.rule.getName(), 0), false);
+      String opCall = g.generateNodeCall(info.rootRule, operator.operator, getNextName(operator.rule.getName(), 0), CONSUME_TYPE_OVERRIDE);
       List<OperatorInfo> list = opCalls.get(opCall);
       if (list == null) opCalls.put(opCall, list = new ArrayList<OperatorInfo>(2));
       list.add(operator);
@@ -57,8 +61,8 @@ public class ExpressionGeneratorHelper {
     String frameName = quote(ParserGeneratorUtil.getRuleDisplayName(info.rootRule, true));
     g.out("public static boolean " + methodName + "(PsiBuilder builder_, int level_, int priority_) {");
     g.out("if (!recursion_guard_(builder_, level_, \"" + methodName + "\")) return false;");
-    ConsumeType method = ConsumeType.forRule(info.rootRule);
-    if (method != ConsumeType.DEFAULT && frameName != null) {
+
+    if (frameName != null) {
       g.out("addVariant(builder_, " + frameName + ");");
     }
     g.generateFirstCheck(info.rootRule, frameName, true);
@@ -110,7 +114,7 @@ public class ExpressionGeneratorHelper {
       String elementType = ParserGeneratorUtil.getElementType(operator.rule);
       boolean rightAssociative = ParserGeneratorUtil.getAttribute(operator.rule, KnownAttribute.RIGHT_ASSOCIATIVE);
       String tailCall =
-        operator.tail == null ? null : g.generateNodeCall(operator.rule, operator.tail, getNextName(operator.rule.getName(), 1), true);
+        operator.tail == null ? null : g.generateNodeCall(operator.rule, operator.tail, getNextName(operator.rule.getName(), 1), ConsumeType.DEFAULT);
       if (operator.type == OperatorType.BINARY) {
         g.out(
           "result_ = report_error_(builder_, " + methodName + "(builder_, level_, " + (rightAssociative ? argPriority - 1 : argPriority) + "));");
@@ -165,7 +169,7 @@ public class ExpressionGeneratorHelper {
 
           String elementType = ParserGeneratorUtil.getElementType(operator.rule);
           String tailCall =
-            operator.tail == null ? null : g.generateNodeCall(operator.rule, operator.tail, getNextName(operator.rule.getName(), 1), true);
+            operator.tail == null ? null : g.generateNodeCall(operator.rule, operator.tail, getNextName(operator.rule.getName(), 1), ConsumeType.DEFAULT);
 
           g.out("result_ = "+opCall+";");
           g.out("pinned_ = result_;");
@@ -210,6 +214,29 @@ public class ExpressionGeneratorHelper {
     if (expressionInfo != null && (operatorInfo == null || operatorInfo.type != OperatorType.ATOM &&
                                                            operatorInfo.type != OperatorType.PREFIX)) {
       return expressionInfo;
+    }
+    return null;
+  }
+
+  @Nullable
+  public static ConsumeType fixForcedConsumeType(@NotNull ExpressionHelper expressionHelper,
+                                                 @NotNull BnfRule rule,
+                                                 @Nullable BnfExpression node,
+                                                 @Nullable ConsumeType defValue) {
+    if (defValue != null) return defValue;
+    ExpressionHelper.ExpressionInfo expressionInfo = expressionHelper.getExpressionInfo(rule);
+    ExpressionHelper.OperatorInfo operatorInfo = expressionInfo == null ? null : expressionInfo.operatorMap.get(rule);
+    if (operatorInfo != null) {
+      if (node == null) {
+        return operatorInfo.type == OperatorType.PREFIX || operatorInfo.type == OperatorType.ATOM ?
+               CONSUME_TYPE_OVERRIDE : null;
+      }
+      if (PsiTreeUtil.isAncestor(operatorInfo.operator, node, false)) return CONSUME_TYPE_OVERRIDE;
+      for (BnfExpression o : ExpressionHelper.getOriginalExpressions(operatorInfo.operator)) {
+        if (PsiTreeUtil.isAncestor(o, node, false)) {
+          return CONSUME_TYPE_OVERRIDE;
+        }
+      }
     }
     return null;
   }

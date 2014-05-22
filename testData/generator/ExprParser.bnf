@@ -8,7 +8,7 @@
   elementTypeHolderClass="org.intellij.grammar.expression.ExpressionTypes"
   parserUtilClass="org.intellij.grammar.parser.GeneratedParserUtilBase"
 
-  consumeTokenMethod(".*_expr|expr")="consumeTokenFast"
+  //consumeTokenMethod(".*_expr|expr")="consumeTokenFast"
 
   tokens=[
     comment='regexp://.*'

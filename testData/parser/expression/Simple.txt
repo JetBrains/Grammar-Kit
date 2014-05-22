@@ -360,7 +360,7 @@ EXPR_FILE_TYPE
         PsiWhiteSpace(' ')
         LITERAL_EXPR
           PsiElement(number)('3')
-        PsiErrorElement:'<' unexpected
+        PsiErrorElement:AND expected, got '<'
           <empty list>
     PsiWhiteSpace(' ')
     PsiElement(syntax)('<')

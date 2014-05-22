@@ -1,7 +1,6 @@
 package org.intellij.grammar.expression;
 
 import com.intellij.psi.tree.IElementType;
-import org.intellij.grammar.psi.BnfTypes;
 
 public interface ExpressionTypes {
 
@@ -16,6 +15,7 @@ public interface ExpressionTypes {
   IElementType EXP_EXPR = ExpressionParserDefinition.createType("EXP_EXPR");
   IElementType FACTORIAL_EXPR = ExpressionParserDefinition.createType("FACTORIAL_EXPR");
   IElementType IDENTIFIER = ExpressionParserDefinition.createType("IDENTIFIER");
+  IElementType IS_NOT_EXPR = ExpressionParserDefinition.createType("IS_NOT_EXPR");
   IElementType LITERAL_EXPR = ExpressionParserDefinition.createType("LITERAL_EXPR");
   IElementType MINUS_EXPR = ExpressionParserDefinition.createType("MINUS_EXPR");
   IElementType MUL_EXPR = ExpressionParserDefinition.createType("MUL_EXPR");
@@ -30,6 +30,8 @@ public interface ExpressionTypes {
   IElementType BETWEEN = ExpressionParserDefinition.createTokenType("BETWEEN");
   IElementType COMMENT = ExpressionParserDefinition.createTokenType("comment");
   IElementType ID = ExpressionParserDefinition.createTokenType("id");
+  IElementType IS = ExpressionParserDefinition.createTokenType("IS");
+  IElementType NOT = ExpressionParserDefinition.createTokenType("NOT");
   IElementType NUMBER = ExpressionParserDefinition.createTokenType("number");
   IElementType STRING = ExpressionParserDefinition.createTokenType("string");
   IElementType SYNTAX = ExpressionParserDefinition.createTokenType("syntax");

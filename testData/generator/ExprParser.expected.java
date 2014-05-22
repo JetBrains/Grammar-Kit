@@ -280,12 +280,12 @@ public class ExpressionParser implements PsiParser {
       Marker left_marker_ = (Marker) builder_.getLatestDoneMarker();
       if (!invalid_left_marker_guard_(builder_, left_marker_, "expr_0")) return false;
       Marker marker_ = builder_.mark();
-      if (priority_ < 0 && consumeTokenFast(builder_, "=")) {
+      if (priority_ < 0 && consumeTokenSmart(builder_, "=")) {
         result_ = report_error_(builder_, expr(builder_, level_, -1));
         marker_.drop();
         left_marker_.precede().done(ASSIGN_EXPR);
       }
-      else if (priority_ < 1 && consumeTokenFast(builder_, "?")) {
+      else if (priority_ < 1 && consumeTokenSmart(builder_, "?")) {
         result_ = report_error_(builder_, expr(builder_, level_, 1));
         result_ = report_error_(builder_, elvis_expr_1(builder_, level_ + 1)) && result_;
         marker_.drop();
@@ -296,46 +296,46 @@ public class ExpressionParser implements PsiParser {
         marker_.drop();
         left_marker_.precede().done(CONDITIONAL_EXPR);
       }
-      else if (priority_ < 2 && consumeTokenFast(builder_, "+")) {
+      else if (priority_ < 2 && consumeTokenSmart(builder_, "+")) {
         result_ = report_error_(builder_, expr(builder_, level_, 2));
         marker_.drop();
         left_marker_.precede().done(PLUS_EXPR);
       }
-      else if (priority_ < 2 && consumeTokenFast(builder_, "-")) {
+      else if (priority_ < 2 && consumeTokenSmart(builder_, "-")) {
         result_ = report_error_(builder_, expr(builder_, level_, 2));
         marker_.drop();
         left_marker_.precede().done(MINUS_EXPR);
       }
-      else if (priority_ < 3 && consumeTokenFast(builder_, BETWEEN)) {
+      else if (priority_ < 3 && consumeTokenSmart(builder_, BETWEEN)) {
         result_ = report_error_(builder_, expr(builder_, level_, 3));
         result_ = report_error_(builder_, between_expr_1(builder_, level_ + 1)) && result_;
         marker_.drop();
         left_marker_.precede().done(BETWEEN_EXPR);
       }
-      else if (priority_ < 4 && is_not_expr_0(builder_, level_ + 1)) {
+      else if (priority_ < 4 && parseTokensSmart(builder_, 0, IS, NOT)) {
         result_ = report_error_(builder_, expr(builder_, level_, 4));
         marker_.drop();
         left_marker_.precede().done(IS_NOT_EXPR);
       }
-      else if (priority_ < 5 && consumeTokenFast(builder_, "*")) {
+      else if (priority_ < 5 && consumeTokenSmart(builder_, "*")) {
         result_ = report_error_(builder_, expr(builder_, level_, 5));
         marker_.drop();
         left_marker_.precede().done(MUL_EXPR);
       }
-      else if (priority_ < 5 && consumeTokenFast(builder_, "/")) {
+      else if (priority_ < 5 && consumeTokenSmart(builder_, "/")) {
         result_ = report_error_(builder_, expr(builder_, level_, 5));
         marker_.drop();
         left_marker_.precede().done(DIV_EXPR);
       }
-      else if (priority_ < 7 && consumeTokenFast(builder_, "^")) {
+      else if (priority_ < 7 && consumeTokenSmart(builder_, "^")) {
         while (true) {
           result_ = report_error_(builder_, expr(builder_, level_, 7));
-          if (!consumeTokenFast(builder_, "^")) break;
+          if (!consumeTokenSmart(builder_, "^")) break;
         }
         marker_.drop();
         left_marker_.precede().done(EXP_EXPR);
       }
-      else if (priority_ < 8 && consumeTokenFast(builder_, "!")) {
+      else if (priority_ < 8 && consumeTokenSmart(builder_, "!")) {
         result_ = true;
         marker_.drop();
         left_marker_.precede().done(FACTORIAL_EXPR);
@@ -363,7 +363,7 @@ public class ExpressionParser implements PsiParser {
     if (!recursion_guard_(builder_, level_, "elvis_expr_1")) return false;
     boolean result_ = false;
     Marker marker_ = enter_section_(builder_);
-    result_ = consumeTokenFast(builder_, ":");
+    result_ = consumeToken(builder_, ":");
     result_ = result_ && expr(builder_, level_ + 1, -1);
     exit_section_(builder_, marker_, null, result_);
     return result_;
@@ -374,12 +374,12 @@ public class ExpressionParser implements PsiParser {
     if (!recursion_guard_(builder_, level_, "conditional_expr_0")) return false;
     boolean result_ = false;
     Marker marker_ = enter_section_(builder_);
-    result_ = consumeTokenFast(builder_, "<");
-    if (!result_) result_ = consumeTokenFast(builder_, ">");
-    if (!result_) result_ = consumeTokenFast(builder_, "<=");
-    if (!result_) result_ = consumeTokenFast(builder_, ">=");
-    if (!result_) result_ = consumeTokenFast(builder_, "==");
-    if (!result_) result_ = consumeTokenFast(builder_, "!=");
+    result_ = consumeTokenSmart(builder_, "<");
+    if (!result_) result_ = consumeTokenSmart(builder_, ">");
+    if (!result_) result_ = consumeTokenSmart(builder_, "<=");
+    if (!result_) result_ = consumeTokenSmart(builder_, ">=");
+    if (!result_) result_ = consumeTokenSmart(builder_, "==");
+    if (!result_) result_ = consumeTokenSmart(builder_, "!=");
     exit_section_(builder_, marker_, null, result_);
     return result_;
   }
@@ -389,7 +389,7 @@ public class ExpressionParser implements PsiParser {
     boolean result_ = false;
     boolean pinned_ = false;
     Marker marker_ = enter_section_(builder_, level_, _NONE_, null);
-    result_ = consumeTokenFast(builder_, "+");
+    result_ = consumeTokenSmart(builder_, "+");
     pinned_ = result_;
     result_ = pinned_ && expr(builder_, level_, 6);
     exit_section_(builder_, level_, marker_, UNARY_PLUS_EXPR, result_, pinned_, null);
@@ -401,7 +401,7 @@ public class ExpressionParser implements PsiParser {
     boolean result_ = false;
     boolean pinned_ = false;
     Marker marker_ = enter_section_(builder_, level_, _NONE_, null);
-    result_ = consumeTokenFast(builder_, "-");
+    result_ = consumeTokenSmart(builder_, "-");
     pinned_ = result_;
     result_ = pinned_ && expr(builder_, level_, 6);
     exit_section_(builder_, level_, marker_, UNARY_MIN_EXPR, result_, pinned_, null);
@@ -413,18 +413,8 @@ public class ExpressionParser implements PsiParser {
     if (!recursion_guard_(builder_, level_, "between_expr_1")) return false;
     boolean result_ = false;
     Marker marker_ = enter_section_(builder_);
-    result_ = consumeTokenFast(builder_, AND);
+    result_ = consumeToken(builder_, AND);
     result_ = result_ && expr(builder_, level_ + 1, -2);
-    exit_section_(builder_, marker_, null, result_);
-    return result_;
-  }
-
-  // IS NOT
-  private static boolean is_not_expr_0(PsiBuilder builder_, int level_) {
-    if (!recursion_guard_(builder_, level_, "is_not_expr_0")) return false;
-    boolean result_ = false;
-    Marker marker_ = enter_section_(builder_);
-    result_ = consumeTokens(builder_, 0, IS, NOT);
     exit_section_(builder_, marker_, null, result_);
     return result_;
   }
@@ -434,7 +424,7 @@ public class ExpressionParser implements PsiParser {
     if (!recursion_guard_(builder_, level_, "ref_expr_0")) return false;
     boolean result_ = false;
     Marker marker_ = enter_section_(builder_);
-    result_ = consumeTokenFast(builder_, ".");
+    result_ = consumeTokenSmart(builder_, ".");
     result_ = result_ && identifier(builder_, level_ + 1);
     exit_section_(builder_, marker_, null, result_);
     return result_;
@@ -446,7 +436,7 @@ public class ExpressionParser implements PsiParser {
     boolean result_ = false;
     boolean pinned_ = false;
     Marker marker_ = enter_section_(builder_, level_, _NONE_, "<special expr>");
-    result_ = consumeTokenFast(builder_, "multiply");
+    result_ = consumeTokenSmart(builder_, "multiply");
     result_ = result_ && consumeToken(builder_, "(");
     pinned_ = result_; // pin = 2
     result_ = result_ && report_error_(builder_, simple_ref_expr(builder_, level_ + 1));
@@ -474,7 +464,7 @@ public class ExpressionParser implements PsiParser {
     if (!nextTokenIsFast(builder_, NUMBER)) return false;
     boolean result_ = false;
     Marker marker_ = enter_section_(builder_);
-    result_ = consumeTokenFast(builder_, NUMBER);
+    result_ = consumeTokenSmart(builder_, NUMBER);
     exit_section_(builder_, marker_, LITERAL_EXPR, result_);
     return result_;
   }
@@ -484,7 +474,7 @@ public class ExpressionParser implements PsiParser {
     boolean result_ = false;
     boolean pinned_ = false;
     Marker marker_ = enter_section_(builder_, level_, _NONE_, null);
-    result_ = consumeTokenFast(builder_, "(");
+    result_ = consumeTokenSmart(builder_, "(");
     pinned_ = result_;
     result_ = pinned_ && expr(builder_, level_, -1);
     result_ = pinned_ && report_error_(builder_, consumeToken(builder_, ")")) && result_;

@@ -20,6 +20,7 @@ public interface ExpressionTypes {
   IElementType EXP_EXPR = ExpressionParserDefinition.createType("EXP_EXPR");
   IElementType FACTORIAL_EXPR = ExpressionParserDefinition.createType("FACTORIAL_EXPR");
   IElementType IDENTIFIER = ExpressionParserDefinition.createType("IDENTIFIER");
+  IElementType IS_NOT_EXPR = ExpressionParserDefinition.createType("IS_NOT_EXPR");
   IElementType LITERAL_EXPR = ExpressionParserDefinition.createType("LITERAL_EXPR");
   IElementType MINUS_EXPR = ExpressionParserDefinition.createType("MINUS_EXPR");
   IElementType MUL_EXPR = ExpressionParserDefinition.createType("MUL_EXPR");
@@ -34,6 +35,8 @@ public interface ExpressionTypes {
   IElementType BETWEEN = ExpressionParserDefinition.createTokenType("BETWEEN");
   IElementType COMMENT = ExpressionParserDefinition.createTokenType("comment");
   IElementType ID = ExpressionParserDefinition.createTokenType("id");
+  IElementType IS = ExpressionParserDefinition.createTokenType("IS");
+  IElementType NOT = ExpressionParserDefinition.createTokenType("NOT");
   IElementType NUMBER = ExpressionParserDefinition.createTokenType("number");
   IElementType STRING = ExpressionParserDefinition.createTokenType("string");
   IElementType SYNTAX = ExpressionParserDefinition.createTokenType("syntax");
@@ -73,6 +76,9 @@ public interface ExpressionTypes {
       }
       else if (type == IDENTIFIER) {
         return new IdentifierImpl(node);
+      }
+      else if (type == IS_NOT_EXPR) {
+        return new IsNotExprImpl(node);
       }
       else if (type == LITERAL_EXPR) {
         return new LiteralExprImpl(node);
@@ -260,6 +266,20 @@ public interface Identifier extends PsiElement {
 
   @NotNull
   PsiElement getId();
+
+}
+// ---- IsNotExpr.java -----------------
+//header.txt
+package generated.psi;
+
+import java.util.List;
+import org.jetbrains.annotations.*;
+import com.intellij.psi.PsiElement;
+
+public interface IsNotExpr extends Expr {
+
+  @NotNull
+  List<Expr> getExprList();
 
 }
 // ---- LiteralExpr.java -----------------
@@ -742,6 +762,37 @@ public class IdentifierImpl extends ASTWrapperPsiElement implements Identifier {
   }
 
 }
+// ---- IsNotExprImpl.java -----------------
+//header.txt
+package generated.psi.impl;
+
+import java.util.List;
+import org.jetbrains.annotations.*;
+import com.intellij.lang.ASTNode;
+import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiElementVisitor;
+import com.intellij.psi.util.PsiTreeUtil;
+import static org.intellij.grammar.expression.ExpressionTypes.*;
+import generated.psi.*;
+
+public class IsNotExprImpl extends ExprImpl implements IsNotExpr {
+
+  public IsNotExprImpl(ASTNode node) {
+    super(node);
+  }
+
+  public void accept(@NotNull PsiElementVisitor visitor) {
+    if (visitor instanceof Visitor) ((Visitor)visitor).visitIsNotExpr(this);
+    else super.accept(visitor);
+  }
+
+  @Override
+  @NotNull
+  public List<Expr> getExprList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, Expr.class);
+  }
+
+}
 // ---- LiteralExprImpl.java -----------------
 //header.txt
 package generated.psi.impl;
@@ -1079,6 +1130,10 @@ public class Visitor extends PsiElementVisitor {
 
   public void visitIdentifier(@NotNull Identifier o) {
     visitPsiElement(o);
+  }
+
+  public void visitIsNotExpr(@NotNull IsNotExpr o) {
+    visitExpr(o);
   }
 
   public void visitLiteralExpr(@NotNull LiteralExpr o) {

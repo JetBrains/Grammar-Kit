@@ -340,7 +340,7 @@ public class ParserGeneratorUtil {
   }
 
   public static boolean isTokenSequence(@NotNull BnfRule rule, @Nullable BnfExpression node) {
-    if (node == null || useConsumeTokenFast(rule)) return false;
+    if (node == null || getConsumeMethod(rule) != ConsumeMethod.DOESNT_MATTER) return false;
     if (getEffectiveType(node) != BNF_SEQUENCE) return false;
     BnfFile bnfFile = (BnfFile) rule.getContainingFile();
     for (PsiElement child : getChildExpressions(node)) {
@@ -350,8 +350,15 @@ public class ParserGeneratorUtil {
     return true;
   }
 
-  public static boolean useConsumeTokenFast(BnfRule rule) {
-    return "consumeTokenFast".equals(getAttribute(rule, KnownAttribute.CONSUME_TOKEN_METHOD));
+  enum ConsumeMethod {
+    FAST, SMART, DOESNT_MATTER
+  }
+
+  public static ConsumeMethod getConsumeMethod(@NotNull BnfRule rule) {
+    String value = getAttribute(rule, KnownAttribute.CONSUME_TOKEN_METHOD);
+    if ("consumeTokenFast".equals(value)) return ConsumeMethod.FAST;
+    if ("consumeTokenSmart".equals(value)) return ConsumeMethod.SMART;
+    return ConsumeMethod.DOESNT_MATTER;
   }
 
   public static void appendTokenTypes(StringBuilder sb, List<String> tokenTypes) {

@@ -109,7 +109,7 @@ public class ExpressionGeneratorHelper {
         substCheck = " && ((LighterASTNode)left_marker_).getTokenType() == " + ParserGeneratorUtil.getElementType(operator.arg1);
       }
       if (first) g.out("Marker marker_ = builder_.mark();");
-      g.out((first ? "" : "else ") + "if (priority_ < " + priority  + substCheck + " && " + opCall + ") {");
+      g.out((first ? "" : "else ") + "if (priority_ < " + priority + substCheck + " && " + opCall + ") {");
       first = false;
       String elementType = ParserGeneratorUtil.getElementType(operator.rule);
       boolean rightAssociative = ParserGeneratorUtil.getAttribute(operator.rule, KnownAttribute.RIGHT_ASSOCIATIVE);

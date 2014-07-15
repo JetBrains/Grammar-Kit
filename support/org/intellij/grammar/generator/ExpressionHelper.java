@@ -307,8 +307,6 @@ public class ExpressionHelper {
     for (int i = startIndex, childExpressionsSize = childExpressions.size(); i < childExpressionsSize; i++) {
       BnfRule rule = myFile.getRule(childExpressions.get(i).getText());
       if (rootRule == rule || extendsRules.contains(rule) || expressionInfo.privateGroups.contains(rule)) {
-        OperatorInfo info = expressionInfo.operatorMap.get(rule);
-        if (info != null && info.type == OperatorType.ATOM) continue;
         return i;
       }
     }

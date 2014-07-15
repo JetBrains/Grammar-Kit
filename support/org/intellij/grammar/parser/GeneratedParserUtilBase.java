@@ -351,18 +351,18 @@ public class GeneratedParserUtilBase {
     }
     else if (diff > 0 && diff <= length) {
       CharSequence fragment = builder_.getOriginalText().subSequence(offset, completionState.offset);
-      add = StringUtil.startsWithIgnoreCase(text, fragment.toString());
+      add = completionState.prefixMatches(fragment.toString(), text);
     }
     else if (diff < 0) {
       for (int i=-1; ; i--) {
         IElementType type = builder_.rawLookup(i);
         int tokenStart = builder_.rawTokenTypeStart(i);
-        if (((PsiBuilderImpl)((Builder)builder_).getDelegate()).whitespaceOrComment(type)) {
+        if (isWhitespaceOrComment(builder_, type)) {
           diff = completionState.offset - tokenStart;
         }
         else if (type != null && tokenStart < completionState.offset) {
           CharSequence fragment = builder_.getOriginalText().subSequence(tokenStart, completionState.offset);
-          if (StringUtil.startsWithIgnoreCase(text, fragment.toString())) {
+          if (completionState.prefixMatches(fragment.toString(), text)) {
             diff = completionState.offset - tokenStart;
           }
           break;
@@ -374,8 +374,12 @@ public class GeneratedParserUtilBase {
     add = add && length > 1 && !(text.charAt(0) == '<' && text.charAt(length - 1) == '>') &&
           !(text.charAt(0) == '\'' && text.charAt(length - 1) == '\'' && length < 5);
     if (add) {
-      completionState.items.add(text);
+      completionState.addItem(builder_, text);
     }
+  }
+
+  public static boolean isWhitespaceOrComment(@NotNull PsiBuilder builder_, @Nullable IElementType type) {
+    return ((PsiBuilderImpl)((Builder)builder_).getDelegate()).whitespaceOrComment(type);
   }
 
   // here's the new section API for compact parsers & less IntelliJ platform API exposure
@@ -528,7 +532,9 @@ public class GeneratedParserUtilBase {
     }
     // propagate errorReportedAt up the stack to avoid duplicate reporting
     Frame prevFrame = willFail && eatMore == null ? null : state.frameStack.peekLast();
-    if (prevFrame != null && prevFrame.errorReportedAt < frame.errorReportedAt) prevFrame.errorReportedAt = frame.errorReportedAt;
+    if (prevFrame != null && prevFrame.errorReportedAt < frame.errorReportedAt) {
+      prevFrame.errorReportedAt = frame.errorReportedAt;
+    }
     state.FRAMES.recycle(frame);
   }
 
@@ -669,6 +675,14 @@ public class GeneratedParserUtilBase {
     @Override
     public String fun(Object o) {
       return o.toString();
+    }
+
+    public void addItem(@NotNull PsiBuilder builder, @NotNull String text) {
+      items.add(text);
+    }
+
+    public boolean prefixMatches(@NotNull String prefix, @NotNull String variant) {
+      return StringUtil.startsWithIgnoreCase(variant, prefix);
     }
   }
 

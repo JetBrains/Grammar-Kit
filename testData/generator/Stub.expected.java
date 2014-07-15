@@ -51,7 +51,7 @@ public class FooParser implements PsiParser {
   // 'aa'
   public static boolean element1(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "element1")) return false;
-    boolean result_ = false;
+    boolean result_;
     Marker marker_ = enter_section_(builder_, level_, _NONE_, "<element 1>");
     result_ = consumeToken(builder_, "aa");
     exit_section_(builder_, level_, marker_, ELEMENT_1, result_, false, null);
@@ -62,7 +62,7 @@ public class FooParser implements PsiParser {
   // 'bb'
   public static boolean element2(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "element2")) return false;
-    boolean result_ = false;
+    boolean result_;
     Marker marker_ = enter_section_(builder_, level_, _NONE_, "<element 2>");
     result_ = consumeToken(builder_, "bb");
     exit_section_(builder_, level_, marker_, ELEMENT_2, result_, false, null);
@@ -73,7 +73,7 @@ public class FooParser implements PsiParser {
   // 'bb'
   public static boolean element3(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "element3")) return false;
-    boolean result_ = false;
+    boolean result_;
     Marker marker_ = enter_section_(builder_, level_, _NONE_, "<element 3>");
     result_ = consumeToken(builder_, "bb");
     exit_section_(builder_, level_, marker_, ELEMENT_3, result_, false, null);
@@ -84,7 +84,7 @@ public class FooParser implements PsiParser {
   // 'bb'
   public static boolean element4(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "element4")) return false;
-    boolean result_ = false;
+    boolean result_;
     Marker marker_ = enter_section_(builder_, level_, _NONE_, "<element 4>");
     result_ = consumeToken(builder_, "bb");
     exit_section_(builder_, level_, marker_, ELEMENT_4, result_, false, null);
@@ -95,7 +95,7 @@ public class FooParser implements PsiParser {
   // 'cc'
   public static boolean element5(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "element5")) return false;
-    boolean result_ = false;
+    boolean result_;
     Marker marker_ = enter_section_(builder_, level_, _NONE_, "<element 5>");
     result_ = consumeToken(builder_, "cc");
     exit_section_(builder_, level_, marker_, ELEMENT_5, result_, false, null);
@@ -106,7 +106,7 @@ public class FooParser implements PsiParser {
   // element1 | element2 | element3 | element4 | element5
   static boolean root(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "root")) return false;
-    boolean result_ = false;
+    boolean result_;
     Marker marker_ = enter_section_(builder_);
     result_ = element1(builder_, level_ + 1);
     if (!result_) result_ = element2(builder_, level_ + 1);

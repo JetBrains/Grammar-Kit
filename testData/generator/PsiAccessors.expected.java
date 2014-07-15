@@ -49,8 +49,8 @@ public class PsiAccessors implements PsiParser {
   public static boolean binary(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "binary")) return false;
     if (!nextTokenIs(builder_, ID)) return false;
-    boolean result_ = false;
-    boolean pinned_ = false;
+    boolean result_;
+    boolean pinned_;
     Marker marker_ = enter_section_(builder_, level_, _NONE_, null);
     result_ = expression(builder_, level_ + 1);
     result_ = result_ && operator(builder_, level_ + 1);
@@ -65,7 +65,7 @@ public class PsiAccessors implements PsiParser {
   public static boolean expression(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "expression")) return false;
     if (!nextTokenIs(builder_, ID)) return false;
-    boolean result_ = false;
+    boolean result_;
     Marker marker_ = enter_section_(builder_);
     result_ = value(builder_, level_ + 1);
     result_ = result_ && consumeToken(builder_, "*");
@@ -78,7 +78,7 @@ public class PsiAccessors implements PsiParser {
   // '+' | '-'
   public static boolean operator(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "operator")) return false;
-    boolean result_ = false;
+    boolean result_;
     Marker marker_ = enter_section_(builder_, level_, _NONE_, "<operator>");
     result_ = consumeToken(builder_, "+");
     if (!result_) result_ = consumeToken(builder_, "-");
@@ -97,7 +97,7 @@ public class PsiAccessors implements PsiParser {
   public static boolean value(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "value")) return false;
     if (!nextTokenIs(builder_, ID)) return false;
-    boolean result_ = false;
+    boolean result_;
     Marker marker_ = enter_section_(builder_);
     result_ = consumeToken(builder_, ID);
     exit_section_(builder_, marker_, VALUE, result_);

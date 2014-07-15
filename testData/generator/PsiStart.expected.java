@@ -48,7 +48,7 @@ public class GeneratedParser implements PsiParser {
   // 'id'
   public static boolean element(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "element")) return false;
-    boolean result_ = false;
+    boolean result_;
     Marker marker_ = enter_section_(builder_, level_, _NONE_, "<element>");
     result_ = consumeToken(builder_, "id");
     exit_section_(builder_, level_, marker_, ELEMENT, result_, false, null);
@@ -59,7 +59,7 @@ public class GeneratedParser implements PsiParser {
   // 'name' '->' element
   public static boolean entry(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "entry")) return false;
-    boolean result_ = false;
+    boolean result_;
     Marker marker_ = enter_section_(builder_, level_, _NONE_, "<entry>");
     result_ = consumeToken(builder_, "name");
     result_ = result_ && consumeToken(builder_, "->");
@@ -72,7 +72,7 @@ public class GeneratedParser implements PsiParser {
   // list | map
   static boolean grammar(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "grammar")) return false;
-    boolean result_ = false;
+    boolean result_;
     Marker marker_ = enter_section_(builder_);
     result_ = list(builder_, level_ + 1);
     if (!result_) result_ = map(builder_, level_ + 1);
@@ -84,7 +84,7 @@ public class GeneratedParser implements PsiParser {
   // '(' element (',' element) * ')'
   public static boolean list(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "list")) return false;
-    boolean result_ = false;
+    boolean result_;
     Marker marker_ = enter_section_(builder_, level_, _NONE_, "<list>");
     result_ = consumeToken(builder_, "(");
     result_ = result_ && element(builder_, level_ + 1);
@@ -109,7 +109,7 @@ public class GeneratedParser implements PsiParser {
   // ',' element
   private static boolean list_2_0(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "list_2_0")) return false;
-    boolean result_ = false;
+    boolean result_;
     Marker marker_ = enter_section_(builder_);
     result_ = consumeToken(builder_, ",");
     result_ = result_ && element(builder_, level_ + 1);
@@ -121,7 +121,7 @@ public class GeneratedParser implements PsiParser {
   // '(' entry (',' entry) * ')'
   public static boolean map(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "map")) return false;
-    boolean result_ = false;
+    boolean result_;
     Marker marker_ = enter_section_(builder_, level_, _NONE_, "<map>");
     result_ = consumeToken(builder_, "(");
     result_ = result_ && entry(builder_, level_ + 1);
@@ -146,7 +146,7 @@ public class GeneratedParser implements PsiParser {
   // ',' entry
   private static boolean map_2_0(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "map_2_0")) return false;
-    boolean result_ = false;
+    boolean result_;
     Marker marker_ = enter_section_(builder_);
     result_ = consumeToken(builder_, ",");
     result_ = result_ && entry(builder_, level_ + 1);

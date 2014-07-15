@@ -651,11 +651,12 @@ public class ParserGenerator {
     boolean pinApplied = false;
     final boolean alwaysTrue = type == BNF_OP_OPT || type == BNF_OP_ZEROMORE;
     if (!alwaysTrue) {
-      out("boolean result_ = " + (type == BNF_OP_ZEROMORE || type == BNF_OP_OPT || children.isEmpty()) + ";");
+      boolean value = type == BNF_OP_ZEROMORE || type == BNF_OP_OPT || children.isEmpty();
+      out("boolean result_" + (children.isEmpty() || type == BNF_OP_ZEROMORE ? " = " + value : "") + ";");
     }
     boolean pinned = pinMatcher.active() && pinMatcher.shouldGenerate(children);
     if (pinned) {
-      out("boolean pinned_ = false;");
+      out("boolean pinned_;");
     }
     //if (!isPrivate && canCollapse && StringUtil.isNotEmpty(elementType)) {
     //  out("int start_ = builder_.getCurrentOffset();");

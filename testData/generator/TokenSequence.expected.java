@@ -40,7 +40,7 @@ public class GeneratedParser implements PsiParser {
   public static boolean bar(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "bar")) return false;
     if (!nextTokenIs(builder_, A)) return false;
-    boolean result_ = false;
+    boolean result_;
     Marker marker_ = enter_section_(builder_);
     result_ = consumeToken(builder_, A);
     exit_section_(builder_, marker_, BAR, result_);
@@ -54,7 +54,7 @@ public class GeneratedParser implements PsiParser {
   //   | bar d e f
   static boolean foo(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "foo")) return false;
-    boolean result_ = false;
+    boolean result_;
     Marker marker_ = enter_section_(builder_);
     result_ = consumeToken(builder_, A);
     if (!result_) result_ = parseTokens(builder_, 2, B, C, D);
@@ -67,8 +67,8 @@ public class GeneratedParser implements PsiParser {
   // bar d e f
   private static boolean foo_3(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "foo_3")) return false;
-    boolean result_ = false;
-    boolean pinned_ = false;
+    boolean result_;
+    boolean pinned_;
     Marker marker_ = enter_section_(builder_, level_, _NONE_, null);
     result_ = bar(builder_, level_ + 1);
     result_ = result_ && consumeTokens(builder_, 1, D, E, F);

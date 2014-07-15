@@ -46,7 +46,7 @@ public class LeftAssociative implements PsiParser {
   public static boolean alias_definition(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "alias_definition")) return false;
     if (!nextTokenIs(builder_, "<alias definition>", AS, ID)) return false;
-    boolean result_ = false;
+    boolean result_;
     Marker marker_ = enter_section_(builder_, level_, _LEFT_, "<alias definition>");
     result_ = alias_definition_0(builder_, level_ + 1);
     result_ = result_ && consumeToken(builder_, ID);
@@ -66,7 +66,7 @@ public class LeftAssociative implements PsiParser {
   public static boolean alias_definition2(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "alias_definition2")) return false;
     if (!nextTokenIs(builder_, "<alias definition 2>", AS, ID)) return false;
-    boolean result_ = false;
+    boolean result_;
     Marker marker_ = enter_section_(builder_, level_, _LEFT_, "<alias definition 2>");
     result_ = alias_definition2_0(builder_, level_ + 1);
     result_ = result_ && consumeToken(builder_, ID);
@@ -86,7 +86,7 @@ public class LeftAssociative implements PsiParser {
   static boolean from(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "from")) return false;
     if (!nextTokenIs(builder_, REFERENCE)) return false;
-    boolean result_ = false;
+    boolean result_;
     Marker marker_ = enter_section_(builder_);
     result_ = consumeToken(builder_, REFERENCE);
     result_ = result_ && from_1(builder_, level_ + 1);
@@ -130,7 +130,7 @@ public class LeftAssociative implements PsiParser {
   public static boolean leech(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "leech")) return false;
     if (!nextTokenIs(builder_, ID)) return false;
-    boolean result_ = false;
+    boolean result_;
     Marker marker_ = enter_section_(builder_, level_, _LEFT_INNER_, null);
     result_ = consumeToken(builder_, ID);
     exit_section_(builder_, level_, marker_, LEECH, result_, false, null);
@@ -142,7 +142,7 @@ public class LeftAssociative implements PsiParser {
   static boolean leech2(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "leech2")) return false;
     if (!nextTokenIs(builder_, ID)) return false;
-    boolean result_ = false;
+    boolean result_;
     Marker marker_ = enter_section_(builder_, level_, _LEFT_INNER_, null);
     result_ = consumeToken(builder_, ID);
     exit_section_(builder_, level_, marker_, null, result_, false, null);

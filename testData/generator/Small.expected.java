@@ -95,7 +95,7 @@ public class Small implements PsiParser {
   // &()
   static boolean empty6(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "empty6")) return false;
-    boolean result_ = false;
+    boolean result_;
     Marker marker_ = enter_section_(builder_, level_, _AND_, null);
     result_ = empty6_0(builder_, level_ + 1);
     exit_section_(builder_, level_, marker_, null, result_, false, null);
@@ -111,7 +111,7 @@ public class Small implements PsiParser {
   // !()
   static boolean empty7(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "empty7")) return false;
-    boolean result_ = false;
+    boolean result_;
     Marker marker_ = enter_section_(builder_, level_, _NOT_, null);
     result_ = !empty7_0(builder_, level_ + 1);
     exit_section_(builder_, level_, marker_, null, result_, false, null);
@@ -140,7 +140,7 @@ public class Small implements PsiParser {
   // {token}
   private static boolean not_empty1_0(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "not_empty1_0")) return false;
-    boolean result_ = false;
+    boolean result_;
     Marker marker_ = enter_section_(builder_);
     result_ = consumeToken(builder_, TOKEN);
     exit_section_(builder_, marker_, null, result_);
@@ -158,7 +158,7 @@ public class Small implements PsiParser {
   // token someString
   private static boolean not_empty2_0(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "not_empty2_0")) return false;
-    boolean result_ = false;
+    boolean result_;
     Marker marker_ = enter_section_(builder_);
     result_ = consumeToken(builder_, TOKEN);
     result_ = result_ && someString(builder_, level_ + 1);
@@ -171,7 +171,7 @@ public class Small implements PsiParser {
   public static boolean otherRule(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "otherRule")) return false;
     if (!nextTokenIs(builder_, TOKEN)) return false;
-    boolean result_ = false;
+    boolean result_;
     Marker marker_ = enter_section_(builder_);
     result_ = consumeToken(builder_, TOKEN);
     exit_section_(builder_, marker_, OTHER_RULE, result_);
@@ -195,7 +195,7 @@ public class Small implements PsiParser {
   public static boolean someRule(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "someRule")) return false;
     if (!nextTokenIs(builder_, TOKEN)) return false;
-    boolean result_ = false;
+    boolean result_;
     Marker marker_ = enter_section_(builder_);
     result_ = consumeToken(builder_, TOKEN);
     exit_section_(builder_, marker_, SOME_RULE, result_);
@@ -216,7 +216,7 @@ public class Small implements PsiParser {
   // 'token'
   public static boolean someString(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "someString")) return false;
-    boolean result_ = false;
+    boolean result_;
     Marker marker_ = enter_section_(builder_, level_, _NONE_, "<some string>");
     result_ = consumeToken(builder_, "token");
     exit_section_(builder_, level_, marker_, SOME_STRING, result_, false, null);
@@ -227,7 +227,7 @@ public class Small implements PsiParser {
   // token | someRule | someString
   public static boolean statement(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "statement")) return false;
-    boolean result_ = false;
+    boolean result_;
     Marker marker_ = enter_section_(builder_, level_, _NONE_, "<statement>");
     result_ = consumeToken(builder_, TOKEN);
     if (!result_) result_ = someRule(builder_, level_ + 1);
@@ -241,7 +241,7 @@ public class Small implements PsiParser {
   static boolean tokenRule(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "tokenRule")) return false;
     if (!nextTokenIs(builder_, OP_EQ)) return false;
-    boolean result_ = false;
+    boolean result_;
     Marker marker_ = enter_section_(builder_);
     result_ = consumeToken(builder_, OP_EQ);
     result_ = result_ && consumeToken(builder_, OP_EQ);

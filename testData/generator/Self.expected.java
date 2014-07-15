@@ -94,8 +94,8 @@ public class Self implements PsiParser {
   // id attr_pattern? '=' attr_value ';'?
   public static boolean attr(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "attr")) return false;
-    boolean result_ = false;
-    boolean pinned_ = false;
+    boolean result_;
+    boolean pinned_;
     Marker marker_ = enter_section_(builder_, level_, _NONE_, null);
     result_ = consumeToken(builder_, BNF_ID);
     pinned_ = result_; // pin = 1
@@ -126,7 +126,7 @@ public class Self implements PsiParser {
   public static boolean attr_pattern(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "attr_pattern")) return false;
     if (!nextTokenIs(builder_, BNF_LEFT_PAREN)) return false;
-    boolean result_ = false;
+    boolean result_;
     Marker marker_ = enter_section_(builder_);
     result_ = consumeToken(builder_, BNF_LEFT_PAREN);
     result_ = result_ && consumeToken(builder_, BNF_STRING);
@@ -139,7 +139,7 @@ public class Self implements PsiParser {
   // !'}'
   static boolean attr_recover_until(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "attr_recover_until")) return false;
-    boolean result_ = false;
+    boolean result_;
     Marker marker_ = enter_section_(builder_, level_, _NOT_, null);
     result_ = !consumeToken(builder_, BNF_RIGHT_BRACE);
     exit_section_(builder_, level_, marker_, null, result_, false, null);
@@ -150,7 +150,7 @@ public class Self implements PsiParser {
   // (reference_or_token | literal_expression) !'='
   public static boolean attr_value(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "attr_value")) return false;
-    boolean result_ = false;
+    boolean result_;
     Marker marker_ = enter_section_(builder_);
     result_ = attr_value_0(builder_, level_ + 1);
     result_ = result_ && attr_value_1(builder_, level_ + 1);
@@ -161,7 +161,7 @@ public class Self implements PsiParser {
   // reference_or_token | literal_expression
   private static boolean attr_value_0(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "attr_value_0")) return false;
-    boolean result_ = false;
+    boolean result_;
     Marker marker_ = enter_section_(builder_);
     result_ = reference_or_token(builder_, level_ + 1);
     if (!result_) result_ = literal_expression(builder_, level_ + 1);
@@ -172,7 +172,7 @@ public class Self implements PsiParser {
   // !'='
   private static boolean attr_value_1(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "attr_value_1")) return false;
-    boolean result_ = false;
+    boolean result_;
     Marker marker_ = enter_section_(builder_, level_, _NOT_, null);
     result_ = !consumeToken(builder_, BNF_OP_EQ);
     exit_section_(builder_, level_, marker_, null, result_, false, null);
@@ -184,8 +184,8 @@ public class Self implements PsiParser {
   public static boolean attrs(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "attrs")) return false;
     if (!nextTokenIs(builder_, BNF_LEFT_BRACE)) return false;
-    boolean result_ = false;
-    boolean pinned_ = false;
+    boolean result_;
+    boolean pinned_;
     Marker marker_ = enter_section_(builder_, level_, _NONE_, null);
     result_ = consumeToken(builder_, BNF_LEFT_BRACE);
     pinned_ = result_; // pin = 1
@@ -211,7 +211,7 @@ public class Self implements PsiParser {
   // '{' sequence ('|' sequence)* '}' | sequence choice_tail*
   public static boolean choice(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "choice")) return false;
-    boolean result_ = false;
+    boolean result_;
     Marker marker_ = enter_section_(builder_, level_, _COLLAPSE_, null);
     result_ = choice_0(builder_, level_ + 1);
     if (!result_) result_ = choice_1(builder_, level_ + 1);
@@ -222,7 +222,7 @@ public class Self implements PsiParser {
   // '{' sequence ('|' sequence)* '}'
   private static boolean choice_0(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "choice_0")) return false;
-    boolean result_ = false;
+    boolean result_;
     Marker marker_ = enter_section_(builder_);
     result_ = consumeToken(builder_, BNF_LEFT_BRACE);
     result_ = result_ && sequence(builder_, level_ + 1);
@@ -247,7 +247,7 @@ public class Self implements PsiParser {
   // '|' sequence
   private static boolean choice_0_2_0(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "choice_0_2_0")) return false;
-    boolean result_ = false;
+    boolean result_;
     Marker marker_ = enter_section_(builder_);
     result_ = consumeToken(builder_, BNF_OP_OR);
     result_ = result_ && sequence(builder_, level_ + 1);
@@ -258,7 +258,7 @@ public class Self implements PsiParser {
   // sequence choice_tail*
   private static boolean choice_1(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "choice_1")) return false;
-    boolean result_ = false;
+    boolean result_;
     Marker marker_ = enter_section_(builder_);
     result_ = sequence(builder_, level_ + 1);
     result_ = result_ && choice_1_1(builder_, level_ + 1);
@@ -283,8 +283,8 @@ public class Self implements PsiParser {
   static boolean choice_tail(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "choice_tail")) return false;
     if (!nextTokenIs(builder_, BNF_OP_OR)) return false;
-    boolean result_ = false;
-    boolean pinned_ = false;
+    boolean result_;
+    boolean pinned_;
     Marker marker_ = enter_section_(builder_, level_, _NONE_, null);
     result_ = consumeToken(builder_, BNF_OP_OR);
     pinned_ = result_; // pin = 1
@@ -319,7 +319,7 @@ public class Self implements PsiParser {
   // attrs | rule
   private static boolean grammar_0(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "grammar_0")) return false;
-    boolean result_ = false;
+    boolean result_;
     Marker marker_ = enter_section_(builder_);
     result_ = attrs(builder_, level_ + 1);
     if (!result_) result_ = rule(builder_, level_ + 1);
@@ -332,7 +332,7 @@ public class Self implements PsiParser {
   public static boolean literal_expression(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "literal_expression")) return false;
     if (!nextTokenIs(builder_, "", BNF_NUMBER, BNF_STRING)) return false;
-    boolean result_ = false;
+    boolean result_;
     Marker marker_ = enter_section_(builder_, level_, _COLLAPSE_, null);
     result_ = string_literal_expression(builder_, level_ + 1);
     if (!result_) result_ = consumeToken(builder_, BNF_NUMBER);
@@ -344,7 +344,7 @@ public class Self implements PsiParser {
   // 'private' | 'external' | 'wrapped'
   public static boolean modifier(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "modifier")) return false;
-    boolean result_ = false;
+    boolean result_;
     Marker marker_ = enter_section_(builder_);
     result_ = consumeToken(builder_, "private");
     if (!result_) result_ = consumeToken(builder_, "external");
@@ -357,7 +357,7 @@ public class Self implements PsiParser {
   // quantified | predicate
   static boolean option(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "option")) return false;
-    boolean result_ = false;
+    boolean result_;
     Marker marker_ = enter_section_(builder_);
     result_ = quantified(builder_, level_ + 1);
     if (!result_) result_ = predicate(builder_, level_ + 1);
@@ -370,8 +370,8 @@ public class Self implements PsiParser {
   public static boolean paren_expression(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "paren_expression")) return false;
     if (!nextTokenIs(builder_, BNF_LEFT_PAREN)) return false;
-    boolean result_ = false;
-    boolean pinned_ = false;
+    boolean result_;
+    boolean pinned_;
     Marker marker_ = enter_section_(builder_, level_, _NONE_, null);
     result_ = consumeToken(builder_, BNF_LEFT_PAREN);
     pinned_ = result_; // pin = 1
@@ -386,7 +386,7 @@ public class Self implements PsiParser {
   public static boolean predicate(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "predicate")) return false;
     if (!nextTokenIs(builder_, "", BNF_OP_NOT, BNF_OP_AND)) return false;
-    boolean result_ = false;
+    boolean result_;
     Marker marker_ = enter_section_(builder_);
     result_ = predicate_sign(builder_, level_ + 1);
     result_ = result_ && simple(builder_, level_ + 1);
@@ -399,7 +399,7 @@ public class Self implements PsiParser {
   public static boolean predicate_sign(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "predicate_sign")) return false;
     if (!nextTokenIs(builder_, "", BNF_OP_NOT, BNF_OP_AND)) return false;
-    boolean result_ = false;
+    boolean result_;
     Marker marker_ = enter_section_(builder_);
     result_ = consumeToken(builder_, BNF_OP_AND);
     if (!result_) result_ = consumeToken(builder_, BNF_OP_NOT);
@@ -411,7 +411,7 @@ public class Self implements PsiParser {
   // '[' expression ']' | simple quantifier?
   public static boolean quantified(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "quantified")) return false;
-    boolean result_ = false;
+    boolean result_;
     Marker marker_ = enter_section_(builder_, level_, _COLLAPSE_, null);
     result_ = quantified_0(builder_, level_ + 1);
     if (!result_) result_ = quantified_1(builder_, level_ + 1);
@@ -422,7 +422,7 @@ public class Self implements PsiParser {
   // '[' expression ']'
   private static boolean quantified_0(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "quantified_0")) return false;
-    boolean result_ = false;
+    boolean result_;
     Marker marker_ = enter_section_(builder_);
     result_ = consumeToken(builder_, BNF_LEFT_BRACKET);
     result_ = result_ && expression(builder_, level_ + 1);
@@ -434,7 +434,7 @@ public class Self implements PsiParser {
   // simple quantifier?
   private static boolean quantified_1(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "quantified_1")) return false;
-    boolean result_ = false;
+    boolean result_;
     Marker marker_ = enter_section_(builder_);
     result_ = simple(builder_, level_ + 1);
     result_ = result_ && quantified_1_1(builder_, level_ + 1);
@@ -453,7 +453,7 @@ public class Self implements PsiParser {
   // '?' | '+' | '*'
   public static boolean quantifier(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "quantifier")) return false;
-    boolean result_ = false;
+    boolean result_;
     Marker marker_ = enter_section_(builder_);
     result_ = consumeToken(builder_, BNF_OP_OPT);
     if (!result_) result_ = consumeToken(builder_, BNF_OP_ONEMORE);
@@ -467,7 +467,7 @@ public class Self implements PsiParser {
   public static boolean reference_or_token(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "reference_or_token")) return false;
     if (!nextTokenIs(builder_, BNF_ID)) return false;
-    boolean result_ = false;
+    boolean result_;
     Marker marker_ = enter_section_(builder_);
     result_ = consumeToken(builder_, BNF_ID);
     exit_section_(builder_, marker_, BNF_REFERENCE_OR_TOKEN, result_);
@@ -478,8 +478,8 @@ public class Self implements PsiParser {
   // modifier* id '::=' expression attrs? ';'?
   public static boolean rule(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "rule")) return false;
-    boolean result_ = false;
-    boolean pinned_ = false;
+    boolean result_;
+    boolean pinned_;
     Marker marker_ = enter_section_(builder_, level_, _NONE_, null);
     result_ = rule_0(builder_, level_ + 1);
     result_ = result_ && consumeToken(builder_, BNF_ID);
@@ -522,7 +522,7 @@ public class Self implements PsiParser {
   // !'{'
   static boolean rule_recover_until(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "rule_recover_until")) return false;
-    boolean result_ = false;
+    boolean result_;
     Marker marker_ = enter_section_(builder_, level_, _NOT_, null);
     result_ = !consumeToken(builder_, BNF_LEFT_BRACE);
     exit_section_(builder_, level_, marker_, null, result_, false, null);
@@ -533,7 +533,7 @@ public class Self implements PsiParser {
   // option +
   public static boolean sequence(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "sequence")) return false;
-    boolean result_ = false;
+    boolean result_;
     Marker marker_ = enter_section_(builder_, level_, _COLLAPSE_, null);
     result_ = option(builder_, level_ + 1);
     int pos_ = current_position_(builder_);
@@ -550,7 +550,7 @@ public class Self implements PsiParser {
   // !(modifier* id '::=' ) reference_or_token | literal_expression | paren_expression
   static boolean simple(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "simple")) return false;
-    boolean result_ = false;
+    boolean result_;
     Marker marker_ = enter_section_(builder_);
     result_ = simple_0(builder_, level_ + 1);
     if (!result_) result_ = literal_expression(builder_, level_ + 1);
@@ -562,7 +562,7 @@ public class Self implements PsiParser {
   // !(modifier* id '::=' ) reference_or_token
   private static boolean simple_0(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "simple_0")) return false;
-    boolean result_ = false;
+    boolean result_;
     Marker marker_ = enter_section_(builder_);
     result_ = simple_0_0(builder_, level_ + 1);
     result_ = result_ && reference_or_token(builder_, level_ + 1);
@@ -573,7 +573,7 @@ public class Self implements PsiParser {
   // !(modifier* id '::=' )
   private static boolean simple_0_0(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "simple_0_0")) return false;
-    boolean result_ = false;
+    boolean result_;
     Marker marker_ = enter_section_(builder_, level_, _NOT_, null);
     result_ = !simple_0_0_0(builder_, level_ + 1);
     exit_section_(builder_, level_, marker_, null, result_, false, null);
@@ -583,7 +583,7 @@ public class Self implements PsiParser {
   // modifier* id '::='
   private static boolean simple_0_0_0(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "simple_0_0_0")) return false;
-    boolean result_ = false;
+    boolean result_;
     Marker marker_ = enter_section_(builder_);
     result_ = simple_0_0_0_0(builder_, level_ + 1);
     result_ = result_ && consumeToken(builder_, BNF_ID);
@@ -609,7 +609,7 @@ public class Self implements PsiParser {
   public static boolean string_literal_expression(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "string_literal_expression")) return false;
     if (!nextTokenIs(builder_, BNF_STRING)) return false;
-    boolean result_ = false;
+    boolean result_;
     Marker marker_ = enter_section_(builder_);
     result_ = consumeToken(builder_, BNF_STRING);
     exit_section_(builder_, marker_, BNF_STRING_LITERAL_EXPRESSION, result_);

@@ -9,7 +9,7 @@ import com.intellij.openapi.roots.ModuleRootManager;
 import com.intellij.openapi.util.io.FileUtil;
 import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VirtualFile;
-import com.intellij.openapi.vfs.newvfs.impl.VirtualDirectoryImpl;
+import com.intellij.openapi.vfs.newvfs.impl.VfsRootAccess;
 import com.intellij.psi.JavaPsiFacade;
 import com.intellij.testFramework.fixtures.LightPlatformCodeInsightFixtureTestCase;
 import org.intellij.grammar.inspection.*;
@@ -32,7 +32,7 @@ public class BnfInspectionTest extends LightPlatformCodeInsightFixtureTestCase {
   @Override
   protected void setUp() throws Exception {
     super.setUp();
-    VirtualDirectoryImpl.allowRootAccess(new File(getTestDataPath()).getAbsolutePath());
+    VfsRootAccess.allowRootAccess(new File(getTestDataPath()).getAbsolutePath());
   }
 
   public void testBnfGrammar() throws Exception {
@@ -45,7 +45,7 @@ public class BnfInspectionTest extends LightPlatformCodeInsightFixtureTestCase {
     }
     finally {
       toggleGrammarKitSrc(myModule, getTestDataPath());
-      VirtualDirectoryImpl.disallowRootAccess(new File("").getAbsolutePath());
+      VfsRootAccess.disallowRootAccess(new File("").getAbsolutePath());
     }
   }
 
@@ -54,10 +54,10 @@ public class BnfInspectionTest extends LightPlatformCodeInsightFixtureTestCase {
     JavaPsiFacade facade = JavaPsiFacade.getInstance(module.getProject());
     boolean add = facade.findPackage("org.intellij.grammar.psi") == null;
     if (add) {
-      VirtualDirectoryImpl.allowRootAccess(absolutePath);
+      VfsRootAccess.allowRootAccess(absolutePath);
     }
     else {
-      VirtualDirectoryImpl.disallowRootAccess(absolutePath);
+      VfsRootAccess.disallowRootAccess(absolutePath);
     }
     AccessToken accessToken = ApplicationManager.getApplication().acquireWriteActionLock(null);
     try {

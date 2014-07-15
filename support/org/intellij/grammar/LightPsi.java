@@ -193,7 +193,7 @@ public class LightPsi {
       registerApplicationService(project, JobLauncher.class, new JobLauncherImpl());
       registerApplicationService(project, AsyncFutureFactory.class, new AsyncFutureFactoryImpl());
       project.registerService(PsiSearchHelper.class, new PsiSearchHelperImpl(psiManager));
-      project.registerService(DumbService.class, new DumbServiceImpl(project, project.getMessageBus()));
+      project.registerService(DumbService.class, new DumbServiceImpl(project));
       project.registerService(ResolveCache.class, new ResolveCache(project.getMessageBus()));
       project.registerService(PsiFileFactory.class, new PsiFileFactoryImpl(psiManager));
       try {
@@ -252,7 +252,7 @@ public class LightPsi {
           public Document fun(CharSequence charSequence) {
             return editorFactory.createDocument(charSequence);
           }
-        }, FileDocumentManagerImpl.DOCUMENT_KEY)
+        }, FileDocumentManagerImpl.HARD_REF_TO_DOCUMENT_KEY)
       );
       registerComponentInstance(appContainer, PsiDocumentManager.class, new MockPsiDocumentManager());
       registerComponentInstance(appContainer, FileTypeManager.class, new MockFileTypeManager(new MockLanguageFileType(PlainTextLanguage.INSTANCE, "txt")));

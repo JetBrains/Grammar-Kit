@@ -1,8 +1,8 @@
 <idea-plugin url="https://github.com/JetBrains/Grammar-Kit" version="2">
   <id>org.jetbrains.idea.grammar</id>
-  <version>1.1.8</version>
+  <version>1.1.8.3</version>
   <vendor email="gregory.shrago@jetbrains.com">Greg Shrago</vendor>
-  <idea-version since-build="133.696" until-build=""/>
+  <idea-version since-build="138.1029" until-build=""/>
 
   <name>Grammar-Kit</name>
   <description>BNF Grammars and JFlex lexers editor. Readable parser/PSI code generator.</description>
@@ -16,7 +16,8 @@
     <ul>
         <li>Introduce rule: expression chooser</li>
         <li>JFlex: local jar/skeleton detection</li>
-        <li>Minor fixes in LivePreview and GPUB</li>
+        <li>Generator: parser-based keyword completion improvements</li>
+        <li>Generator: expression parsing improvements</li>
     </ul>
     <p>1.1.7/1.1.6</p>
     <ul>

@@ -31,16 +31,8 @@ Recent changes
 
 * Refactoring: expression chooser for introduce rule
 * JFlex: local jar/skeleton detection
-* Minor fixes in LivePreview and GPUB
-
-
-1.1.6 (github-only) / 1.1.7 (github+plugin repository)
-
-* PSI generator: Improve *methods* attribute semantics: rename/add new PSI tree accessors
-* PSI generator: Drop obsolete *methodRenames* attribute and add *generateTokenAccessors*
-* Live Preview: Auto-generate tokens from usage (no more BAD_TOKEN)
-* Editor: Examples added to attributes documentation (Ctrl-Q)
-* Editor: Turn grammar spell-check
+* Generator: parser-based keyword completion improvements
+* Generator: expression parsing improvements
 
 
 Quick documentation:
@@ -229,6 +221,14 @@ java -jar expression-console-sample.jar
 
 Change log
 ==========
+1.1.6 (github-only) / 1.1.7 (github+plugin repository)
+
+* PSI generator: Improve *methods* attribute semantics: rename/add new PSI tree accessors
+* PSI generator: Drop obsolete *methodRenames* attribute and add *generateTokenAccessors*
+* Live Preview: Auto-generate tokens from usage (no more BAD_TOKEN)
+* Editor: Examples added to attributes documentation (Ctrl-Q)
+* Editor: Turn grammar spell-check
+
 1.1.5
 
 * Historical typo fixed: _recoverUntil_ attribute renamed to _recoverWhile_ (indeed it always meant _while_)

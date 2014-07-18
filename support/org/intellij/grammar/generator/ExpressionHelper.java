@@ -198,14 +198,18 @@ public class ExpressionHelper {
     }
     else if (cardinality == RuleGraphHelper.Cardinality.AT_LEAST_ONE) {
       // binary or n-ary expression
-      int index = indexOf(rootRuleSubst, 0, childExpressions, expressionInfo);
-      if (index != 0) {
+      int index1 = indexOf(rootRuleSubst, 0, childExpressions, expressionInfo);
+      int index2 = indexOf(rootRuleSubst, 1, childExpressions, expressionInfo);
+      if (index1 != 0) {
         addWarning(rule +": binary or n-ary expression cannot have prefix, treating as ATOM");
         info = new OperatorInfo(rule, OperatorType.ATOM, rule.getExpression(), null);
       }
+      else if (index2 == 1) {
+        addWarning(rule + ": binary expression needs operator, treating as ATOM");
+        info = new OperatorInfo(rule, OperatorType.ATOM, rule.getExpression(), null);
+      }
       else {
-        int index2 = indexOf(rootRuleSubst, 1, childExpressions, expressionInfo);
-        BnfRule arg1 = substRule(childExpressions, index, rootRule);
+        BnfRule arg1 = substRule(childExpressions, index1, rootRule);
         if (index2 == -1) {
           BnfExpression lastExpression = childExpressions.get(1);
           boolean badNAry = childExpressions.size() != 2 || !(lastExpression instanceof BnfQuantified) ||
@@ -230,7 +234,7 @@ public class ExpressionHelper {
         }
         else {
           BnfRule arg2 = substRule(childExpressions, index2, rootRule);
-          info = new OperatorInfo(rule, OperatorType.BINARY, combine(childExpressions.subList(index + 1, index2)),
+          info = new OperatorInfo(rule, OperatorType.BINARY, combine(childExpressions.subList(index1 + 1, index2)),
                                   combine(childExpressions.subList(index2 + 1, childExpressions.size())), arg1, arg2);
         }
       }
@@ -379,7 +383,9 @@ public class ExpressionHelper {
     public OperatorInfo(BnfRule rule, OperatorType type, BnfExpression operator, BnfExpression tail,
                         @Nullable BnfRule arg1,
                         @Nullable BnfRule arg2) {
-      assert operator != null : rule + ": operator must not be null";
+      if (operator == null) {
+        throw new AssertionError(rule + ": operator must not be null");
+      }
       this.rule = rule;
       this.type = type;
       this.operator = operator;

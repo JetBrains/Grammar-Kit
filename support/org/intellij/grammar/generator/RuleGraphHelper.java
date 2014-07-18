@@ -542,8 +542,10 @@ public class RuleGraphHelper {
           map.put(t, joinedCard);
         }
       }
-      if (checkInheritance && map.size() == 1 && collapseNode(rule, map.keySet().iterator().next())) {
-        return Collections.emptyMap();
+      if (checkInheritance && map.size() == 1 && ContainerUtil.getFirstItem(map.values()) == REQUIRED) {
+        if (collapseNode(rule, ContainerUtil.getFirstItem(map.keySet()))) {
+          return Collections.emptyMap();
+        }
       }
       return map;
     }

@@ -58,16 +58,25 @@ public class BnfCompletionContributor extends CompletionContributor {
                                     @NotNull CompletionResultSet result) {
         PsiElement position = parameters.getPosition();
         BnfCompositeElement parent = PsiTreeUtil.getParentOfType(position, BnfAttrs.class, BnfAttr.class, BnfParenExpression.class);
-        boolean attrCompletion = false;
-        if (parent instanceof BnfAttrs || isPossibleEmptyAttrs(parent) ||
-             parent instanceof BnfAttr && isOneAfterAnother(((BnfAttr)parent).getExpression(), position)) {
+        boolean attrCompletion;
+        if (parent instanceof BnfAttrs || isPossibleEmptyAttrs(parent)) {
+          attrCompletion = true;
+        }
+        else if (parent instanceof BnfAttr) {
+          BnfAttr attr = (BnfAttr)parent;
+          attrCompletion = position == attr.getId() || isOneAfterAnother(attr.getExpression(), position);
+        }
+        else {
+          attrCompletion = false;
+        }
+        if (attrCompletion) {
           boolean inRule = PsiTreeUtil.getParentOfType(parent, BnfRule.class) != null;
           ASTNode closingBrace = TreeUtil.findSiblingBackward(parent.getNode().getLastChildNode(), BnfTypes.BNF_RIGHT_BRACE);
-          if (closingBrace == null || position.getTextOffset() <= closingBrace.getStartOffset()) {
-            attrCompletion = true;
+          attrCompletion = closingBrace == null || position.getTextOffset() <= closingBrace.getStartOffset();
+          if (attrCompletion) {
             for (KnownAttribute attribute : KnownAttribute.getAttributes()) {
               if (inRule && attribute.isGlobal()) continue;
-              result.addElement(LookupElementBuilder.create(attribute.getName()).setIcon(BnfIcons.ATTRIBUTE));
+              result.addElement(LookupElementBuilder.create(attribute.getName()).withIcon(BnfIcons.ATTRIBUTE));
             }
           }
         }

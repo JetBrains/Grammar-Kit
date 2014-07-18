@@ -14,7 +14,10 @@
     <![CDATA[
     <p>1.1.9</p>
     <ul>
-        <li>Generator: expression parsing fixes</li>
+      <li>Introduce rule: expression chooser</li>
+      <li>JFlex: local jar/skeleton detection</li>
+      <li>Generator: parser-based keyword completion improvements</li>
+      <li>Generator: expression parsing fixes</li>
     </ul>
     <a href="https://github.com/JetBrains/Grammar-Kit#change-log">Full change log...</a>
     ]]>

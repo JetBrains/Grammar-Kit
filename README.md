@@ -219,7 +219,7 @@ java -jar expression-console-sample.jar
 Change log
 ==========
 
-1.1.8
+1.1.8 / 1.1.9
 
 * Refactoring: expression chooser for introduce rule
 * JFlex: local jar/skeleton detection

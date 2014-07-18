@@ -18,12 +18,12 @@ package org.intellij.grammar.psi;
 
 import com.intellij.openapi.application.QueryExecutorBase;
 import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiRecursiveElementWalkingVisitor;
 import com.intellij.psi.PsiReference;
 import com.intellij.psi.search.LocalSearchScope;
 import com.intellij.psi.search.SearchScope;
 import com.intellij.psi.search.searches.ReferencesSearch;
 import com.intellij.util.Processor;
+import org.intellij.grammar.psi.impl.GrammarUtil;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -43,19 +43,24 @@ public class BnfAttrPatternRefSearcher extends QueryExecutorBase<PsiReference, R
     if (!(scope instanceof LocalSearchScope)) return;
 
     for (PsiElement psiElement : ((LocalSearchScope)scope).getScope()) {
-      psiElement.acceptChildren(new PsiRecursiveElementWalkingVisitor() {
+      GrammarUtil.processChildrenDummyAware(psiElement, new Processor<PsiElement>() {
         @Override
-        public void visitElement(PsiElement element) {
-          if (element instanceof BnfAttrs || element instanceof BnfAttr) {
-            super.visitElement(element);
-          }
-          else if (element instanceof BnfAttrPattern) {
-            BnfStringLiteralExpression patternExpression = ((BnfAttrPattern)element).getLiteralExpression();
+        public boolean process(PsiElement element) {
+          BnfAttrs attrs;
+          if (element instanceof BnfAttrs) attrs = (BnfAttrs)element;
+          else if (element instanceof BnfRule) attrs = ((BnfRule)element).getAttrs();
+          else attrs = null;
+          if (attrs == null) return true;
+          for (BnfAttr attr : attrs.getAttrList()) {
+            BnfAttrPattern pattern = attr.getAttrPattern();
+            if (pattern == null) continue;
+            BnfStringLiteralExpression patternExpression = pattern.getLiteralExpression();
             PsiReference ref = patternExpression != null ? patternExpression.getReference() : null;
             if (ref != null && ref.isReferenceTo(target)) {
-              if (!consumer.process(ref)) stopWalking();
+              if (!consumer.process(ref)) return false;
             }
           }
+          return true;
         }
       });
     }

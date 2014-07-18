@@ -139,6 +139,12 @@ public class BnfDocumentationProvider implements DocumentationProvider {
   private static String getUpdatedDocumentation(final BnfRule rule, String prefix) {
     StringBuilder docBuilder = new StringBuilder(prefix);
     BnfFile file = (BnfFile)rule.getContainingFile();
+    dumpPriorityTable(docBuilder, rule, file);
+    dumpContents(docBuilder, rule, file);
+    return docBuilder.toString();
+  }
+
+  private static void dumpContents(StringBuilder docBuilder, BnfRule rule, BnfFile file) {
     Map<PsiElement, RuleGraphHelper.Cardinality> map = RuleGraphHelper.getCached(file).getFor(rule);
     Collection<BnfRule> sortedPublicRules = ParserGeneratorUtil.getSortedPublicRules(map.keySet());
     Collection<BnfExpression> sortedTokens = ParserGeneratorUtil.getSortedTokens(map.keySet());
@@ -163,25 +169,36 @@ public class BnfDocumentationProvider implements DocumentationProvider {
     if (!sortedExternalRules.isEmpty()) {
       printElements(map, sortedExternalRules, docBuilder.append("\n<br><h1>Contains external rules:</h1>"));
     }
-    ExpressionHelper.ExpressionInfo expressionInfo = ExpressionHelper.getCached(file).getExpressionInfo(rule);
-    if (expressionInfo != null) {
-      docBuilder.append("\n<br><h1>Priority table:</h1>");
-      expressionInfo.dumpPriorityTable(docBuilder.append("<code><pre>"), new PairConsumer<StringBuilder, ExpressionHelper.OperatorInfo>() {
-        @Override
-        public void consume(StringBuilder sb, ExpressionHelper.OperatorInfo operatorInfo) {
-          if (operatorInfo.rule == rule) {
-            sb.append("<font").append(" color=\"#").append(ColorUtil.toHex(JBColor.BLUE)).append("\">");
-            sb.append(operatorInfo);
-            sb.append("</font>");
-          }
-          else {
-            sb.append(operatorInfo);
-          }
+  }
 
-        }
-      }).append("</pre></code>");
+  private static void dumpPriorityTable(StringBuilder docBuilder, BnfRule rule, BnfFile file) {
+    ExpressionHelper.ExpressionInfo expressionInfo = ExpressionHelper.getCached(file).getExpressionInfo(rule);
+    if (expressionInfo == null) return;
+    final ExpressionHelper.OperatorInfo ruleOperator = expressionInfo.operatorMap.get(rule);
+
+    docBuilder.append("\n<br><h1>Priority table:");
+    if (ruleOperator != null) {
+      appendColored(docBuilder, " " + ruleOperator.type + "-" + expressionInfo.getPriority(rule));
     }
-    return docBuilder.toString();
+    docBuilder.append("</h1>");
+    expressionInfo.dumpPriorityTable(docBuilder.append("<code><pre>"), new PairConsumer<StringBuilder, ExpressionHelper.OperatorInfo>() {
+      @Override
+      public void consume(StringBuilder sb, ExpressionHelper.OperatorInfo operatorInfo) {
+        if (operatorInfo == ruleOperator) {
+          appendColored(sb, operatorInfo);
+        }
+        else {
+          sb.append(operatorInfo);
+        }
+
+      }
+    }).append("</pre></code>");
+  }
+
+  private static void appendColored(StringBuilder sb, Object o) {
+    sb.append("<font").append(" color=\"#").append(ColorUtil.toHex(JBColor.BLUE)).append("\">");
+    sb.append(o);
+    sb.append("</font>");
   }
 
   public static void printElements(Map<PsiElement, RuleGraphHelper.Cardinality> map,

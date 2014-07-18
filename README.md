@@ -27,12 +27,9 @@ General usage instructions
 
 Recent changes
 --------------
-1.1.8
+1.1.9
 
-* Refactoring: expression chooser for introduce rule
-* JFlex: local jar/skeleton detection
-* Generator: parser-based keyword completion improvements
-* Generator: expression parsing improvements
+* Generator: expression parsing fixes
 
 
 Quick documentation:
@@ -221,7 +218,15 @@ java -jar expression-console-sample.jar
 
 Change log
 ==========
-1.1.6 (github-only) / 1.1.7 (github+plugin repository)
+
+1.1.8
+
+* Refactoring: expression chooser for introduce rule
+* JFlex: local jar/skeleton detection
+* Generator: parser-based keyword completion improvements
+* Generator: expression parsing improvements
+
+1.1.6 / 1.1.7
 
 * PSI generator: Improve *methods* attribute semantics: rename/add new PSI tree accessors
 * PSI generator: Drop obsolete *methodRenames* attribute and add *generateTokenAccessors*

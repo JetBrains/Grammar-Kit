@@ -7,13 +7,10 @@ JFLEX_FILE
   JFlexDeclarationsSectionImpl(FLEX_DECLARATIONS_SECTION)
     JFlexOptionImpl(FLEX_OPTION)
       PsiElement(%eof{)('%eof{')
-      PsiErrorElement:<new-line> expected, got 'return;'
-        <empty list>
-      PsiWhiteSpace(' ')
-      PsiComment(block_comment)('/*no code same line*/')
-      JFlexJavaCodeImpl(FLEX_JAVA_CODE)
-        PsiElement(java)('return;')
+      PsiComment(line_comment)(' /*no code same line*/return;')
       PsiWhiteSpace('\n')
+      JFlexJavaCodeImpl(FLEX_JAVA_CODE)
+        <empty list>
       PsiElement(%eof})('%eof}')
     PsiWhiteSpace('\n\n')
     JFlexOptionImpl(FLEX_OPTION)

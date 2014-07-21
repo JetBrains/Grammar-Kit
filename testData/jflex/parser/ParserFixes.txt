@@ -25,8 +25,7 @@ JFLEX_FILE
     PsiWhiteSpace('\n\n')
     JFlexOptionImpl(FLEX_OPTION)
       PsiElement(%{)('%{')
-      PsiWhiteSpace(' ')
-      PsiComment(line_comment)('// empty user code')
+      PsiComment(line_comment)(' // empty user code')
       PsiWhiteSpace('\n')
       JFlexJavaCodeImpl(FLEX_JAVA_CODE)
         <empty list>

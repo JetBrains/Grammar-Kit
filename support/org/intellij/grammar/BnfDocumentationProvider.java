@@ -36,6 +36,7 @@ import com.intellij.ui.ColorUtil;
 import com.intellij.ui.JBColor;
 import com.intellij.ui.content.Content;
 import com.intellij.ui.popup.AbstractPopup;
+import com.intellij.util.ObjectUtils;
 import com.intellij.util.PairConsumer;
 import org.intellij.grammar.analysis.BnfFirstNextAnalyzer;
 import org.intellij.grammar.generator.BnfConstants;
@@ -234,7 +235,7 @@ public class BnfDocumentationProvider implements DocumentationProvider {
             else {
               component = null;
             }
-            PsiElement docElement = component == null? null : component.getElement();
+            PsiElement docElement = component == null? null : ObjectUtils.chooseNotNull(component.getElement(), element);
             if (docElement == element) {
               component.setText(documentation, element, false);
             }

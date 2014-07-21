@@ -46,11 +46,10 @@ public class BnfAttrPatternRefSearcher extends QueryExecutorBase<PsiReference, R
       GrammarUtil.processChildrenDummyAware(psiElement, new Processor<PsiElement>() {
         @Override
         public boolean process(PsiElement element) {
-          BnfAttrs attrs;
-          if (element instanceof BnfAttrs) attrs = (BnfAttrs)element;
-          else if (element instanceof BnfRule) attrs = ((BnfRule)element).getAttrs();
-          else attrs = null;
-          if (attrs == null) return true;
+          // visit only global attributes
+          if (!(element instanceof BnfAttrs)) return true;
+          BnfAttrs attrs = (BnfAttrs)element;
+
           for (BnfAttr attr : attrs.getAttrList()) {
             BnfAttrPattern pattern = attr.getAttrPattern();
             if (pattern == null) continue;

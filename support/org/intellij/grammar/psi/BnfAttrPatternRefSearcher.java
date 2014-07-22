@@ -18,12 +18,13 @@ package org.intellij.grammar.psi;
 
 import com.intellij.openapi.application.QueryExecutorBase;
 import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiReference;
 import com.intellij.psi.search.LocalSearchScope;
 import com.intellij.psi.search.SearchScope;
 import com.intellij.psi.search.searches.ReferencesSearch;
 import com.intellij.util.Processor;
-import org.intellij.grammar.psi.impl.GrammarUtil;
+import org.intellij.grammar.psi.impl.BnfStringImpl;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -42,26 +43,20 @@ public class BnfAttrPatternRefSearcher extends QueryExecutorBase<PsiReference, R
     SearchScope scope = queryParameters.getEffectiveSearchScope();
     if (!(scope instanceof LocalSearchScope)) return;
 
-    for (PsiElement psiElement : ((LocalSearchScope)scope).getScope()) {
-      GrammarUtil.processChildrenDummyAware(psiElement, new Processor<PsiElement>() {
-        @Override
-        public boolean process(PsiElement element) {
-          // visit only global attributes
-          if (!(element instanceof BnfAttrs)) return true;
-          BnfAttrs attrs = (BnfAttrs)element;
+    PsiFile file = target.getContainingFile();
+    if (!(file instanceof BnfFile)) return;
 
-          for (BnfAttr attr : attrs.getAttrList()) {
-            BnfAttrPattern pattern = attr.getAttrPattern();
-            if (pattern == null) continue;
-            BnfStringLiteralExpression patternExpression = pattern.getLiteralExpression();
-            PsiReference ref = patternExpression != null ? patternExpression.getReference() : null;
-            if (ref != null && ref.isReferenceTo(target)) {
-              if (!consumer.process(ref)) return false;
-            }
-          }
-          return true;
+    for (BnfAttrs attrs : ((BnfFile)file).getAttributes()) {
+      for (BnfAttr attr : attrs.getAttrList()) {
+        BnfAttrPattern pattern = attr.getAttrPattern();
+        if (pattern == null) continue;
+        BnfStringLiteralExpression patternExpression = pattern.getLiteralExpression();
+
+        PsiReference ref = BnfStringImpl.matchesElement(patternExpression, target) ? patternExpression.getReference() : null;
+        if (ref != null && ref.isReferenceTo(target)) {
+          if (!consumer.process(ref)) return;
         }
-      });
+      }
     }
   }
 }

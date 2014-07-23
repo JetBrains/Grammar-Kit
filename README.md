@@ -27,9 +27,10 @@ General usage instructions
 
 Recent changes
 --------------
-1.1.9
+1.1.10
 
-* Generator: expression parsing fixes
+* Generator/Editor: performance fix
+* JFlex: treat "%eof{ return;" case as forced comment instead of error
 
 
 Quick documentation:
@@ -218,6 +219,11 @@ java -jar expression-console-sample.jar
 
 Change log
 ==========
+1.1.10
+
+* Generator/Editor: performance fix
+* JFlex: treat "%eof{ return;" case as forced comment instead of error
+
 
 1.1.8 / 1.1.9
 

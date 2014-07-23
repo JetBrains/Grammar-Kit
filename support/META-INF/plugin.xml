@@ -1,6 +1,6 @@
 <idea-plugin url="https://github.com/JetBrains/Grammar-Kit" version="2">
   <id>org.jetbrains.idea.grammar</id>
-  <version>1.1.9</version>
+  <version>1.1.10</version>
   <vendor email="gregory.shrago@jetbrains.com">Greg Shrago</vendor>
   <idea-version since-build="138.1029" until-build=""/>
 
@@ -12,12 +12,10 @@
 
   <change-notes>
     <![CDATA[
-    <p>1.1.9</p>
+    <p>1.1.10</p>
     <ul>
-      <li>Introduce rule: expression chooser</li>
-      <li>JFlex: local jar/skeleton detection</li>
-      <li>Generator: parser-based keyword completion improvements</li>
-      <li>Generator: expression parsing fixes</li>
+      <li>Generator/Editor: performance fix</li>
+      <li>JFlex: treat %eof{ return; case as forced comment instead of error</li>
     </ul>
     <a href="https://github.com/JetBrains/Grammar-Kit#change-log">Full change log...</a>
     ]]>

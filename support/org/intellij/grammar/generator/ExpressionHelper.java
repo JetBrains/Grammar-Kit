@@ -227,7 +227,7 @@ public class ExpressionHelper {
                                     arg1, null);
           }
           else {
-            BnfRule arg2 = substRule(childExpressions, index3, rootRule);
+            BnfRule arg2 = substRule(childExpressions2, index3, rootRule);
             info = new OperatorInfo(rule, OperatorType.N_ARY, combine(childExpressions2.subList(0, index3)),
                                     combine(childExpressions2.subList(index3 + 1, childExpressions2.size())), arg1, arg2);
           }

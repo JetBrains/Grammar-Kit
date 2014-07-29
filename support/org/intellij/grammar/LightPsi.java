@@ -141,8 +141,13 @@ public class LightPsi {
 //      if (!path.contains("light-psi-all.jar")) continue;
       String entryName = className.replace(".", "/") + ".class";
 
+      InputStream stream = LightPsi.class.getClassLoader().getResourceAsStream(entryName);
+      if (stream == null) {
+        System.err.println("Skipping missing " + entryName);
+        continue;
+      }
       jarFile.putNextEntry(new JarEntry(entryName));
-      FileUtil.copy(LightPsi.class.getClassLoader().getResourceAsStream(entryName), jarFile);
+      FileUtil.copy(stream, jarFile);
       jarFile.closeEntry();
     }
     jarFile.close();

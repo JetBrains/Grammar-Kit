@@ -113,17 +113,17 @@ Generally anything that appears in an external expression after rule or method n
 as parameter and passed "as is" except single-quoted strings. They are unquoted first.
 This helps passing qualified enum constants, java expressions, etc.
 
-### Error recovery and reporting:
-* _pin_ attribute (value: number or pattern string) makes partially matched rule match
-if the specified prefix is matched. This attribute tunes the parser to handle incomplete rules.
-  * _extendedPin_ global attribute (_true_ by default) extends the notion of pinning. In this mode the
-generated parser tries to match the rest part of an already pinned rule even if some parts are missed. This allows parser to match the closing brace if the opening brace is pinned for example.
+### Attributes for error recovery and reporting:
+* _pin_  tunes the parser to handle incomplete matches. A rule matches if the prefix of the rule up to the pinned token matches.
+Pinning an opening brace allows the parser to match the closing brace even if the tokens between them does not match the rule.
+Pin takes a position indicated by either a number *(pin=2)* or a pattern string *(pin="rule_B")*.
 
-* _recoverWhile_ attribute (value: predicate rule) matches any number of tokens after the rule
+* _recoverWhile_ (value: predicate rule) matches any number of tokens after the rule
 matching completes with any result. This attribute helps parser recover when unmatched token
 sequence is encountered. See [HOWTO section](HOWTO.md#22-using-recoverwhile-attribute) for more.
 
-* _name_ attribute (value: string) specifies a nice name for a rule. For example *name("_.*expr")=expression* attribute creates a well recognized "&lt;expression&gt; required" error message for different expression rules instead of a long token list.
+* _name_ (value: string) specifies a name for a rule to be used in error reports. For example, *name("_.*expr")=expression* changes
+expression error messages to "&lt;expression&gt; required" instead of a long list of tokens.
 
 ### Generated parser structure:
 For each rule and every its sub-expression in a grammar a static method is generated.

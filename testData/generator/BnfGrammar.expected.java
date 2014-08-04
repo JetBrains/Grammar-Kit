@@ -240,25 +240,13 @@ public class GrammarParser implements PsiParser {
   }
 
   /* ********************************************************** */
-  // (reference_or_token | literal_expression | value_list) !'='
+  // attr_value_inner !'='
   static boolean attr_value(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "attr_value")) return false;
     boolean result_;
     Marker marker_ = enter_section_(builder_);
-    result_ = attr_value_0(builder_, level_ + 1);
+    result_ = attr_value_inner(builder_, level_ + 1);
     result_ = result_ && attr_value_1(builder_, level_ + 1);
-    exit_section_(builder_, marker_, null, result_);
-    return result_;
-  }
-
-  // reference_or_token | literal_expression | value_list
-  private static boolean attr_value_0(PsiBuilder builder_, int level_) {
-    if (!recursion_guard_(builder_, level_, "attr_value_0")) return false;
-    boolean result_;
-    Marker marker_ = enter_section_(builder_);
-    result_ = reference_or_token(builder_, level_ + 1);
-    if (!result_) result_ = literal_expression(builder_, level_ + 1);
-    if (!result_) result_ = value_list(builder_, level_ + 1);
     exit_section_(builder_, marker_, null, result_);
     return result_;
   }
@@ -270,6 +258,21 @@ public class GrammarParser implements PsiParser {
     Marker marker_ = enter_section_(builder_, level_, _NOT_, null);
     result_ = !consumeToken(builder_, BNF_OP_EQ);
     exit_section_(builder_, level_, marker_, null, result_, false, null);
+    return result_;
+  }
+
+  /* ********************************************************** */
+  // reference_or_token
+  //   | literal_expression
+  //   | value_list
+  static boolean attr_value_inner(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "attr_value_inner")) return false;
+    boolean result_;
+    Marker marker_ = enter_section_(builder_);
+    result_ = reference_or_token(builder_, level_ + 1);
+    if (!result_) result_ = literal_expression(builder_, level_ + 1);
+    if (!result_) result_ = value_list(builder_, level_ + 1);
+    exit_section_(builder_, marker_, null, result_);
     return result_;
   }
 
@@ -538,7 +541,8 @@ public class GrammarParser implements PsiParser {
   }
 
   /* ********************************************************** */
-  // 'private' | 'external' | 'meta' | 'inner' | 'left' | 'fake'
+  // 'private' | 'external' | 'meta'
+  //   | 'inner' | 'left' | 'fake'
   public static boolean modifier(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "modifier")) return false;
     boolean result_;
@@ -813,7 +817,10 @@ public class GrammarParser implements PsiParser {
   }
 
   /* ********************************************************** */
-  // !(modifier* id '::=' ) reference_or_token | literal_expression | external_expression | paren_expression
+  // !(modifier* id '::=' ) reference_or_token
+  //   | literal_expression
+  //   | external_expression
+  //   | paren_expression
   static boolean simple(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "simple")) return false;
     boolean result_;

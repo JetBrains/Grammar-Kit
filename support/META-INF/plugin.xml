@@ -14,6 +14,7 @@
     <![CDATA[
     <p>1.1.10</p>
     <ul>
+      <li>GPUB: improve error reporting in some cases</li>
       <li>Generator/Editor: performance fix</li>
       <li>JFlex: treat %eof{ return; case as forced comment instead of error</li>
     </ul>

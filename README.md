@@ -29,6 +29,7 @@ Recent changes
 --------------
 1.1.10
 
+* GPUB: improve error reporting in some cases
 * Generator/Editor: performance fix
 * JFlex: treat "%eof{ return;" case as forced comment instead of error
 
@@ -221,6 +222,7 @@ Change log
 ==========
 1.1.10
 
+* GPUB: improve error reporting in some cases
 * Generator/Editor: performance fix
 * JFlex: treat "%eof{ return;" case as forced comment instead of error
 

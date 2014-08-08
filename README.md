@@ -205,7 +205,11 @@ Plugin facilities reference
 Standalone usage
 ================
 
-The [light-psi-all.jar](binaries/light-psi-all.jar?raw=true) library contains all the classes from IntelliJ IDEA platform that are required for the generator and standalone parsing.
+Put the following files next to grammar-kit.jar:
+* jdom.jar, trove4j.jar, extensions.jar, picocontainer.jar, junit.jar, idea.jar, openapi.jar, util.jar, all in a "lib" folder
+* or [light-psi-all.jar](../../releases)
+
+Note: light-psi-all.jar contains just the required subset of IntelliJ IDEA Platform classes. It can be rebuilt for one`s need at any moment via "LightPsi-All: Package" run configurations in this project.
 
 To generate parser/PSI use the following command (light-psi-all.jar will be picked automatically from the current folder):
 ````

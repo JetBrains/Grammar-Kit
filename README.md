@@ -11,7 +11,7 @@ Open-source plugins built with Grammar-Kit:
 [intellij-haxe](https://github.com/JetBrains/intellij-haxe),
 [OGNL](https://github.com/JetBrains/intellij-plugins/tree/master/struts2).
 
-Quick links: [Tutorial](TUTORIAL.md), [HOWTO](HOWTO.md), [Standalone usage](#Standalone).
+Quick links: [Tutorial](TUTORIAL.md), [HOWTO](HOWTO.md), [Standalone usage](#standalone-usage).
 
 General usage instructions
 --------------------------

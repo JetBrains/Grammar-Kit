@@ -233,7 +233,7 @@ public class LightPsi {
         application.getPicoContainer().registerComponent(new AbstractComponentAdapter(ProgressManager.class.getName(), Object.class) {
           @Override
           public Object getComponentInstance(PicoContainer container) throws PicoInitializationException, PicoIntrospectionException {
-            return new ProgressManagerImpl(application);
+            return new ProgressManagerImpl();
           }
 
           @Override

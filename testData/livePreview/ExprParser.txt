@@ -51,7 +51,7 @@ FILE
         PsiWhiteSpace(' ')
         ASTWrapperPsiElement(LITERAL_EXPR)
           PsiElement(NUMBER)('3')
-        PsiErrorElement:'!', '*', '.', '/', AND, IS or '^' expected, got '<'
+        PsiErrorElement:'!', '*', '**', '.', '/' or AND expected, got '<'
           <empty list>
     PsiWhiteSpace(' ')
     PsiElement(syntax)('<')
@@ -59,7 +59,8 @@ FILE
     ASTWrapperPsiElement(LITERAL_EXPR)
       PsiElement(NUMBER)('1')
   PsiWhiteSpace(' ')
-  PsiElement(AND)('AND')
+  PsiErrorElement:'!', '!=', '*', '**', '+', '-', '.', '/', ';', <, <=, '=', '==', '>', '>=', '?', BETWEEN, IS or '^' expected, got 'AND'
+    PsiElement(AND)('AND')
   PsiWhiteSpace(' ')
   ASTWrapperPsiElement(LITERAL_EXPR)
     PsiElement(NUMBER)('4')

@@ -24,7 +24,9 @@ public interface ExpressionTypes {
   IElementType REF_EXPR = ExpressionParserDefinition.createType("REF_EXPR");
   IElementType SPECIAL_EXPR = ExpressionParserDefinition.createType("SPECIAL_EXPR");
   IElementType UNARY_MIN_EXPR = ExpressionParserDefinition.createType("UNARY_MIN_EXPR");
+  IElementType UNARY_NOT_EXPR = ExpressionParserDefinition.createType("UNARY_NOT_EXPR");
   IElementType UNARY_PLUS_EXPR = ExpressionParserDefinition.createType("UNARY_PLUS_EXPR");
+  IElementType XOR_EXPR = ExpressionParserDefinition.createType("XOR_EXPR");
 
   IElementType AND = ExpressionParserDefinition.createTokenType("AND");
   IElementType BETWEEN = ExpressionParserDefinition.createTokenType("BETWEEN");

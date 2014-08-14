@@ -8,27 +8,24 @@
   elementTypeHolderClass="org.intellij.grammar.expression.ExpressionTypes"
   parserUtilClass="org.intellij.grammar.parser.GeneratedParserUtilBase"
 
-  //consumeTokenMethod(".*_expr|expr")="consumeTokenFast"
-
   tokens=[
     comment='regexp://.*'
     number='regexp:\d+(\.\d*)?'
     id='regexp:\p{Alpha}\w*'
     string="regexp:('([^'\\]|\\.)*'|\"([^\"\\]|\\.)*\")"
 
-    syntax='regexp:;|\+|-|\*|==|=|/|,|\(|\)|\^|\!=|\!|>=|<=|>|<'
+    syntax='regexp:;|\.|\+|-|\*\*|\*|==|=|/|,|\(|\)|\^|\!=|\!|>=|<=|>|<'
   ]
 }
 root ::= element *
-private element ::= expr ';' {pin=1 recoverWhile=element_recover}
-private element_recover ::= !('(' | '+' | '-' | 'multiply' | id | number)
+private element ::= expr ';'?  {recoverWhile=element_recover}
+private element_recover ::= !('(' | '+' | '-' | '!' | 'multiply' | id | number)
 
 // left recursion and empty PSI children define expression root
 expr ::= assign_expr
   | conditional_group
   | add_group
-  | between_expr
-  | is_not_expr
+  | boolean_group
   | mul_group
   | unary_group
   | exp_expr
@@ -36,8 +33,10 @@ expr ::= assign_expr
   | call_expr
   | ref_expr
   | primary_group
+private boolean_group ::= xor_expr | between_expr | is_not_expr
+
 private conditional_group ::= elvis_expr | conditional_expr
-private unary_group ::= unary_plus_expr | unary_min_expr
+private unary_group ::= unary_plus_expr | unary_min_expr | unary_not_expr
 private mul_group ::= mul_expr | div_expr
 private add_group ::= plus_expr | minus_expr
 private primary_group ::= special_expr | simple_ref_expr | literal_expr | paren_expr
@@ -51,13 +50,15 @@ literal_expr ::= number
 identifier ::= id
 unary_min_expr ::= '-' expr
 unary_plus_expr ::= '+' expr
+unary_not_expr ::= '!' expr
+xor_expr ::= expr '^' expr
 assign_expr ::= expr '=' expr { rightAssociative=true }
 conditional_expr ::= expr ('<' | '>' | '<=' | '>=' | '==' | '!=') expr
 div_expr ::= expr '/' expr
 mul_expr ::= expr '*' expr
 minus_expr ::= expr '-' expr
 plus_expr ::= expr '+' expr
-exp_expr ::= expr ('^' expr) + // N-ary variant
+exp_expr ::= expr ('**' expr) + // N-ary variant
 factorial_expr ::= expr '!'
 paren_expr ::= '(' expr ')'
 elvis_expr ::= expr '?' expr ':' expr

@@ -29,7 +29,9 @@ public interface ExpressionTypes {
   IElementType REF_EXPR = ExpressionParserDefinition.createType("REF_EXPR");
   IElementType SPECIAL_EXPR = ExpressionParserDefinition.createType("SPECIAL_EXPR");
   IElementType UNARY_MIN_EXPR = ExpressionParserDefinition.createType("UNARY_MIN_EXPR");
+  IElementType UNARY_NOT_EXPR = ExpressionParserDefinition.createType("UNARY_NOT_EXPR");
   IElementType UNARY_PLUS_EXPR = ExpressionParserDefinition.createType("UNARY_PLUS_EXPR");
+  IElementType XOR_EXPR = ExpressionParserDefinition.createType("XOR_EXPR");
 
   IElementType AND = ExpressionParserDefinition.createTokenType("AND");
   IElementType BETWEEN = ExpressionParserDefinition.createTokenType("BETWEEN");
@@ -104,8 +106,14 @@ public interface ExpressionTypes {
       else if (type == UNARY_MIN_EXPR) {
         return new UnaryMinExprImpl(node);
       }
+      else if (type == UNARY_NOT_EXPR) {
+        return new UnaryNotExprImpl(node);
+      }
       else if (type == UNARY_PLUS_EXPR) {
         return new UnaryPlusExprImpl(node);
+      }
+      else if (type == XOR_EXPR) {
+        return new XorExprImpl(node);
       }
       throw new AssertionError("Unknown element type: " + type);
     }
@@ -397,6 +405,20 @@ public interface UnaryMinExpr extends Expr {
   Expr getExpr();
 
 }
+// ---- UnaryNotExpr.java -----------------
+//header.txt
+package generated.psi;
+
+import java.util.List;
+import org.jetbrains.annotations.*;
+import com.intellij.psi.PsiElement;
+
+public interface UnaryNotExpr extends Expr {
+
+  @Nullable
+  Expr getExpr();
+
+}
 // ---- UnaryPlusExpr.java -----------------
 //header.txt
 package generated.psi;
@@ -409,6 +431,20 @@ public interface UnaryPlusExpr extends Expr {
 
   @Nullable
   Expr getExpr();
+
+}
+// ---- XorExpr.java -----------------
+//header.txt
+package generated.psi;
+
+import java.util.List;
+import org.jetbrains.annotations.*;
+import com.intellij.psi.PsiElement;
+
+public interface XorExpr extends Expr {
+
+  @NotNull
+  List<Expr> getExprList();
 
 }
 // ---- ArgListImpl.java -----------------
@@ -1047,6 +1083,37 @@ public class UnaryMinExprImpl extends ExprImpl implements UnaryMinExpr {
   }
 
 }
+// ---- UnaryNotExprImpl.java -----------------
+//header.txt
+package generated.psi.impl;
+
+import java.util.List;
+import org.jetbrains.annotations.*;
+import com.intellij.lang.ASTNode;
+import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiElementVisitor;
+import com.intellij.psi.util.PsiTreeUtil;
+import static org.intellij.grammar.expression.ExpressionTypes.*;
+import generated.psi.*;
+
+public class UnaryNotExprImpl extends ExprImpl implements UnaryNotExpr {
+
+  public UnaryNotExprImpl(ASTNode node) {
+    super(node);
+  }
+
+  public void accept(@NotNull PsiElementVisitor visitor) {
+    if (visitor instanceof Visitor) ((Visitor)visitor).visitUnaryNotExpr(this);
+    else super.accept(visitor);
+  }
+
+  @Override
+  @Nullable
+  public Expr getExpr() {
+    return findChildByClass(Expr.class);
+  }
+
+}
 // ---- UnaryPlusExprImpl.java -----------------
 //header.txt
 package generated.psi.impl;
@@ -1075,6 +1142,37 @@ public class UnaryPlusExprImpl extends ExprImpl implements UnaryPlusExpr {
   @Nullable
   public Expr getExpr() {
     return findChildByClass(Expr.class);
+  }
+
+}
+// ---- XorExprImpl.java -----------------
+//header.txt
+package generated.psi.impl;
+
+import java.util.List;
+import org.jetbrains.annotations.*;
+import com.intellij.lang.ASTNode;
+import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiElementVisitor;
+import com.intellij.psi.util.PsiTreeUtil;
+import static org.intellij.grammar.expression.ExpressionTypes.*;
+import generated.psi.*;
+
+public class XorExprImpl extends ExprImpl implements XorExpr {
+
+  public XorExprImpl(ASTNode node) {
+    super(node);
+  }
+
+  public void accept(@NotNull PsiElementVisitor visitor) {
+    if (visitor instanceof Visitor) ((Visitor)visitor).visitXorExpr(this);
+    else super.accept(visitor);
+  }
+
+  @Override
+  @NotNull
+  public List<Expr> getExprList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, Expr.class);
   }
 
 }
@@ -1168,7 +1266,15 @@ public class Visitor extends PsiElementVisitor {
     visitExpr(o);
   }
 
+  public void visitUnaryNotExpr(@NotNull UnaryNotExpr o) {
+    visitExpr(o);
+  }
+
   public void visitUnaryPlusExpr(@NotNull UnaryPlusExpr o) {
+    visitExpr(o);
+  }
+
+  public void visitXorExpr(@NotNull XorExpr o) {
     visitExpr(o);
   }
 

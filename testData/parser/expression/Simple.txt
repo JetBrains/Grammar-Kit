@@ -53,11 +53,11 @@ EXPR_FILE_TYPE
           LITERAL_EXPR
             PsiElement(number)('3')
           PsiWhiteSpace(' ')
-          PsiElement(syntax)('^')
-          PsiErrorElement:<expr> expected, got '^'
+          PsiElement(syntax)('**')
+          PsiErrorElement:<expr> expected, got '**'
             <empty list>
           PsiWhiteSpace(' ')
-          PsiElement(syntax)('^')
+          PsiElement(syntax)('**')
           PsiWhiteSpace(' ')
           LITERAL_EXPR
             PsiElement(number)('4')
@@ -168,13 +168,13 @@ EXPR_FILE_TYPE
                     REF_EXPR
                       IDENTIFIER
                         PsiElement(id)('x')
-                    PsiElement(BAD_CHARACTER)('.')
+                    PsiElement(syntax)('.')
                     IDENTIFIER
                       PsiElement(id)('y')
                   ARG_LIST
                     PsiElement(syntax)('(')
                     PsiElement(syntax)(')')
-                PsiElement(BAD_CHARACTER)('.')
+                PsiElement(syntax)('.')
                 IDENTIFIER
                   PsiElement(id)('z')
               ARG_LIST
@@ -191,7 +191,7 @@ EXPR_FILE_TYPE
               <empty list>
           PsiWhiteSpace(' ')
           PsiElement(syntax)(')')
-      PsiElement(BAD_CHARACTER)('.')
+      PsiElement(syntax)('.')
       IDENTIFIER
         PsiElement(id)('r')
     PsiWhiteSpace(' ')
@@ -212,8 +212,6 @@ EXPR_FILE_TYPE
   PsiWhiteSpace('\n\n')
   LITERAL_EXPR
     PsiElement(number)('1')
-  PsiErrorElement:';' expected, got '('
-    <empty list>
   PAREN_EXPR
     PsiElement(syntax)('(')
     PsiElement(syntax)(')')
@@ -222,7 +220,7 @@ EXPR_FILE_TYPE
   REF_EXPR
     IDENTIFIER
       PsiElement(id)('id')
-  PsiElement(BAD_CHARACTER)('.')
+  PsiElement(syntax)('.')
   PsiErrorElement:id expected, got '('
     <empty list>
   PAREN_EXPR
@@ -291,10 +289,11 @@ EXPR_FILE_TYPE
           PsiElement(id)('x')
       PsiErrorElement:',' expected, got '.'
         <empty list>
-    PsiElement(BAD_CHARACTER)('.')
+    PsiElement(syntax)('.')
     IDENTIFIER
       PsiElement(id)('y')
-  PsiElement(syntax)(',')
+  PsiErrorElement:'(' or ';' expected, got ','
+    PsiElement(syntax)(',')
   PsiWhiteSpace(' ')
   LITERAL_EXPR
     PsiElement(number)('1')
@@ -321,7 +320,8 @@ EXPR_FILE_TYPE
     PsiWhiteSpace(' ')
     LITERAL_EXPR
       PsiElement(number)('2')
-  PsiElement(syntax)(')')
+  PsiErrorElement:';' expected, got ')'
+    PsiElement(syntax)(')')
   PsiElement(syntax)(';')
   PsiWhiteSpace('\n\n')
   PLUS_EXPR
@@ -368,8 +368,26 @@ EXPR_FILE_TYPE
     LITERAL_EXPR
       PsiElement(number)('1')
   PsiWhiteSpace(' ')
-  PsiElement(AND)('AND')
+  PsiErrorElement:';' expected, got 'AND'
+    PsiElement(AND)('AND')
   PsiWhiteSpace(' ')
   LITERAL_EXPR
     PsiElement(number)('4')
   PsiElement(syntax)(';')
+  PsiWhiteSpace('\n\n')
+  XOR_EXPR
+    UNARY_NOT_EXPR
+      PsiElement(syntax)('!')
+      REF_EXPR
+        IDENTIFIER
+          PsiElement(id)('a')
+    PsiElement(syntax)('^')
+    EXP_EXPR
+      REF_EXPR
+        IDENTIFIER
+          PsiElement(id)('b')
+      PsiWhiteSpace(' ')
+      PsiElement(syntax)('**')
+      PsiWhiteSpace(' ')
+      LITERAL_EXPR
+        PsiElement(number)('8')

@@ -1,7 +1,6 @@
 package org.intellij.grammar.expression;
 
 import com.intellij.lang.ASTNode;
-import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.impl.DebugUtil;
 import org.intellij.grammar.LightPsi;
@@ -48,7 +47,7 @@ public class Main {
       ASTNode astNode = LightPsi.parseText(text, parserDefinition);
       treeDump = DebugUtil.nodeTreeToString(astNode, true);
     }
-    treeDump = StringUtil.replace(treeDump, "(BAD_CHARACTER)", "");
+    treeDump = treeDump.replaceAll("\\w*\\(((?:[^)]|'\\)')*)\\)", "$1 ");
     System.out.println(treeDump);
   }
 }

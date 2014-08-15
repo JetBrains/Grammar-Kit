@@ -370,7 +370,10 @@ public class LivePreviewParser implements PsiParser {
             return rule(builder, level + 1, subRule, externalArguments);
           }
           else {
-            return generateExpressionRoot(builder, level, info, info.getPriority(subRule) - 1);
+            int priority = info.getPriority(rule);
+            int arg1Priority = subRule == info.rootRule ? -1 : info.getPriority(subRule);
+            int argPriority = arg1Priority == -1 ? (priority == info.nextPriority - 1 ? -1 : priority) : arg1Priority - 1;
+            return generateExpressionRoot(builder, level, info, argPriority);
           }
         }
       }
@@ -616,7 +619,7 @@ public class LivePreviewParser implements PsiParser {
     if (!recursion_guard_(builder, level, methodName)) return false;
     //g.generateFirstCheck(info.rootRule, frameName, true);
     boolean result_ = false;
-    boolean pinned_ = false;
+    boolean pinned_;
     PsiBuilder.Marker marker_ = enter_section_(builder, level, _NONE_, frameName);
 
     boolean first = true;

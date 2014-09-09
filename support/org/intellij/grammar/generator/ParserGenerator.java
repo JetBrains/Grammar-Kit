@@ -115,7 +115,7 @@ public class ParserGenerator {
     String grammarName = FileUtil.getNameWithoutExtension(myFile.getName());
     String fileName = FileUtil.getNameWithoutExtension(file);
     if (myUnitTestMode) {
-      String name = grammarName + (fileName.startsWith(grammarName) || fileName.endsWith("Parser") ? "" : ".PSI") + ".java";
+      String name = grammarName +  (fileName.endsWith("FormattingModelBuilder") ? ".FORMATTER" : (fileName.startsWith(grammarName) || fileName.endsWith("Parser") ? "" : ".PSI")) + ".java";
       myOut = new PrintWriter(new FileOutputStream(new File(myOutputPath, name), true));
       out("// ---- " + file.getName() + " -----------------");
     }
@@ -235,6 +235,10 @@ public class ParserGenerator {
           closeOutput();
         }
       }
+    }
+    String formattingBuilderClass = getRootAttribute(myFile, KnownAttribute.FORMATTING_BUILDER_CLASS);
+    if (formattingBuilderClass != null) {
+      generateFormatter();
     }
   }
 
@@ -1263,6 +1267,236 @@ public class ParserGenerator {
     out("}");
   }
 
+  private void generateFormatter() throws IOException {
+    String formattingBuilderClass = getRootAttribute(myFile, KnownAttribute.FORMATTING_BUILDER_CLASS);
+    if (formattingBuilderClass == null) return;
+    final String formatterPackage = StringUtil.getPackageName(formattingBuilderClass);
+    String shortName = StringUtil.getShortName(formattingBuilderClass);
+    String elementTypeHolder = getRootAttribute(myFile, KnownAttribute.ELEMENT_TYPE_HOLDER_CLASS);
+    String[] split = shortName.split("(?<=[a-z])(?=[A-Z])"); // split by camel humps
+    String blockClass = (split.length > 0 ? split[0] : "My") + "FormattingBlock";
+
+    File formattingFile = new File(myOutputPath, formattingBuilderClass.replace('.', File.separatorChar) + ".java");
+    openOutput(formattingFile);
+    try {
+      List<String> imports = ContainerUtil.list(
+        "com.intellij.formatting.*",
+        "com.intellij.psi.formatter.common.AbstractBlock",
+        "com.intellij.lang.ASTNode",
+        "com.intellij.openapi.util.TextRange",
+        "com.intellij.psi.PsiElement",
+        "com.intellij.psi.PsiFile",
+        "com.intellij.psi.codeStyle.CodeStyleSettings",
+        "org.jetbrains.annotations.NotNull",
+        "org.jetbrains.annotations.Nullable",
+        "com.intellij.psi.formatter.FormatterUtil",
+        "com.intellij.psi.tree.IElementType",
+
+        "java.util.List",
+        "java.util.ArrayList"
+      );
+
+      out("package " + formatterPackage + ";");
+      newLine();
+      for (String i : imports) {
+        out("import " + i + ";");
+      }
+      out("import static " + elementTypeHolder + ".*;");
+
+      newLine();
+
+      out("public class " + shortName + " implements FormattingModelBuilder {");
+
+      out("@NotNull");
+      out("@Override");
+      out("public FormattingModel createModel(PsiElement element, CodeStyleSettings settings) {");
+      out(blockClass + " block = new " + blockClass + "(element.getNode(), null, null, settings);");
+      out("return FormattingModelProvider.createFormattingModelForPsiFile(element.getContainingFile(), block, settings);");
+      out("}");
+      newLine();
+
+      out("@Override");
+      out("public TextRange getRangeAffectingIndent(PsiFile psiFile, int i, ASTNode astNode) {");
+      out("return null;");
+      out("}");
+      newLine();
+
+      out("public static class " + blockClass + " extends AbstractBlock {");
+      out("private final CodeStyleSettings mySettings;");
+      out("public " + blockClass + "(@NotNull ASTNode node, @Nullable Wrap wrap, @Nullable Alignment alignment, CodeStyleSettings settings) {");
+      out("super(node, wrap, alignment);");
+      out("mySettings = settings;");
+      out("}");
+      newLine();
+
+      out("@Override");
+      out("protected List<Block> buildChildren() {");
+      out("if (isLeaf()) { return EMPTY; }");
+      out("ArrayList<Block> children = new ArrayList<Block>();");
+      out("Alignment baseAlignment = Alignment.createAlignment();");
+      out("for (ASTNode childNode = getNode().getFirstChildNode(); childNode != null; childNode = childNode.getTreeNext()) {");
+      out("if (FormatterUtil.containsWhiteSpacesOnly(childNode)) continue;");
+      out("Block childBlock = new " + blockClass + "(childNode, createChildWrap(childNode), createChildAlignment(baseAlignment, childNode), mySettings);");
+      out("children.add(childBlock);");
+      out("}");
+      out("return children;");
+      out("}");
+      newLine();
+
+      out("public Wrap createChildWrap(ASTNode child) {");
+      out("return null;");
+      out("}");
+      newLine();
+
+      out("public Alignment createChildAlignment(Alignment baseAlignment, ASTNode child) {");
+      out("IElementType elementType = child.getElementType();");
+      out("ASTNode parent = child.getTreeParent();");
+      out("IElementType parentType = parent != null ? parent.getElementType() : null;");
+
+      for (BnfRule rule : myFile.getRules()) {
+        if (Rule.isPrivate(rule)) continue;
+        String elementType = getElementType(rule);
+        if (elementType.isEmpty()) continue;
+
+        String value = getAttribute(rule, KnownAttribute.ALIGNMENT);
+        if (value != null) {
+          boolean all = value.equals(".*");
+          if (all) {
+            out("if (parentType == " + elementType + ") {");
+            out("return baseAlignment" + ";");
+            out("}");
+          }
+          else if (value.startsWith("except:")) {
+            value = value.replaceFirst("except:", "");
+            List<String> elementTypes = findAllElementTypes(value);
+            String join = elementTypes.size() > 0 ? (" && elementType != " + StringUtil.join(elementTypes, " && elementType != ")) : "";
+            out("if (parentType == " + elementType +  join + ") {");
+            out("return baseAlignment" + ";");
+            out("}");
+          }
+          else {
+            for (String type : findAllElementTypes(value)) {
+              out("if (parentType == " + elementType + " && elementType == " + type + ") {");
+              out("return baseAlignment" + ";");
+              out("}");
+            }
+          }
+        }
+      }
+      out("return null;");
+      out("}");
+      newLine();
+
+      out("@Override");
+      out("public Indent getIndent() {");
+      out("ASTNode node = getNode();");
+      out("IElementType elementType = node.getElementType();");
+      out("ASTNode parent = node.getTreeParent();");
+      out("IElementType parentType = parent != null ? parent.getElementType() : null;");
+
+      //noinspection unchecked
+      List<KnownAttribute<String>> indentAttributes = ContainerUtil.list(KnownAttribute.CONTINUATION_INDENT, KnownAttribute.NONE_INDENT, KnownAttribute.NORMAL_INDENT);
+
+      // todo: where is tokens?
+      for (BnfRule rule : myFile.getRules()) {
+        if (Rule.isPrivate(rule)) continue;
+        String elementType = getElementType(rule);
+        if (elementType.isEmpty()) continue;
+
+        for (KnownAttribute<String> attribute : indentAttributes) {
+          String value = getAttribute(rule, attribute);
+          if (value != null) {
+            boolean all = value.equals(".*");
+            if (all) {
+              out("if (parentType == " + elementType + ") {");
+              out("return Indent.get" + StringUtil.capitalize(attribute.getName()) + "();");
+              out("}");
+            }
+            else {
+              for (String type : findAllElementTypes(value)) {
+                out("if (parentType == " + elementType + " && elementType == " + type + ") {");
+                out("return Indent.get" + StringUtil.capitalize(attribute.getName()) + "();");
+                out("}");
+              }
+            }
+          }
+        }
+      }
+
+      out("return Indent.getNoneIndent();");
+      out("}");
+      newLine();
+
+      out("@Nullable");
+      out("@Override");
+      out("public Spacing getSpacing(@Nullable Block child1, @NotNull Block child2) {");
+      out("SpacingBuilder spacingBuilder = new SpacingBuilder(mySettings)");
+
+      //noinspection unchecked
+      List<KnownAttribute<String>> spacingAttributes = ContainerUtil.list(KnownAttribute.AROUND, KnownAttribute.BEFORE, KnownAttribute.AFTER);
+
+      for (Map.Entry<String, String> entry : mySimpleTokens.entrySet()) {
+        String entryValue = entry.getValue();
+        if (entryValue == null) {
+          continue;
+        }
+        String elementType = getRootAttribute(myFile, KnownAttribute.ELEMENT_TYPE_PREFIX) + entryValue.toUpperCase();
+        for (KnownAttribute<String> attribute : spacingAttributes) {
+          String value = getRootAttribute(myFile, attribute, entry.getKey());
+          if (value != null) {
+            out("." + attribute +"(" + elementType + ")." + value);
+          }
+        }
+      }
+      
+      for (BnfRule rule : myFile.getRules()) {
+        String elementType = getElementType(rule);
+        if (elementType.isEmpty()) continue;
+        for (KnownAttribute<String> attribute : spacingAttributes) {
+          String value = getAttribute(rule, attribute);
+          if (value != null) {
+            out("." + attribute +"(" + elementType + ")." + value);
+          }
+        }
+      }
+
+      out(";");
+      out("return spacingBuilder.getSpacing(this, child1, child2);");
+      out("}");
+      newLine();
+
+      out("@Override");
+      out("public boolean isLeaf() {");
+      out("return false;");
+      out("}");
+
+      out("}");
+      out("}");
+    }
+    finally {
+      closeOutput();
+    }
+  }
+
+  private List<String> findAllElementTypes(String value) {
+    List<String> elementTypes = new ArrayList<String>();
+    for (BnfRule childRule : myFile.getRules()) {
+      if (childRule.getName().matches(value)) {
+        String childElementType = getElementType(childRule);
+        if (childElementType == null) continue;
+        elementTypes.add(childElementType);
+      }
+    }
+    String tokenPrefix = getRootAttribute(myFile, KnownAttribute.ELEMENT_TYPE_PREFIX);
+    for (Map.Entry<String, String> entry : mySimpleTokens.entrySet()) {
+      String childElementType = entry.getValue();
+      if (entry.getKey().matches(value) && childElementType != null) {
+        childElementType = tokenPrefix + childElementType.toUpperCase();
+        elementTypes.add(childElementType);
+      }
+    }
+    return elementTypes;
+  }
 
   /*PSI******************************************************************/
   private void generatePsiIntf(BnfRule rule,

@@ -132,6 +132,7 @@ public class LightPsi {
 
     JarOutputStream jarFile = new JarOutputStream(new FileOutputStream(new File(dir, "light-psi-all.jar")));
 //    JarOutputStream jarFile = new JarOutputStream(new FileOutputStream(new File(dir, "light-psi-min.jar")));
+    addJarEntry(jarFile, "misc/registry.properties");
     while ((s = reader.readLine()) != null) {
       Matcher matcher = pattern.matcher(s);
       if (!matcher.matches()) continue;
@@ -139,18 +140,21 @@ public class LightPsi {
       String path = matcher.group(2);
       if (!path.startsWith("/Applications")) continue;
 //      if (!path.contains("light-psi-all.jar")) continue;
-      String entryName = className.replace(".", "/") + ".class";
+      addJarEntry(jarFile, className.replace(".", "/") + ".class");
+    }
+    jarFile.close();
+  }
 
-      InputStream stream = LightPsi.class.getClassLoader().getResourceAsStream(entryName);
-      if (stream == null) {
-        System.err.println("Skipping missing " + entryName);
-        continue;
-      }
-      jarFile.putNextEntry(new JarEntry(entryName));
+  private static void addJarEntry(JarOutputStream jarFile, String resourceName) throws IOException {
+    InputStream stream = LightPsi.class.getClassLoader().getResourceAsStream(resourceName);
+    if (stream == null) {
+      System.err.println("Skipping missing " + resourceName);
+    }
+    else {
+      jarFile.putNextEntry(new JarEntry(resourceName));
       FileUtil.copy(stream, jarFile);
       jarFile.closeEntry();
     }
-    jarFile.close();
   }
 
   private static class MyParsing implements Disposable {

@@ -4,7 +4,6 @@ package ;
 
 import com.intellij.lang.PsiBuilder;
 import com.intellij.lang.PsiBuilder.Marker;
-import com.intellij.openapi.diagnostic.Logger;
 import static generated.GeneratedTypes.*;
 import static PsiGenUtil.*;
 import com.intellij.psi.tree.IElementType;
@@ -15,9 +14,12 @@ import com.intellij.lang.PsiParser;
 @SuppressWarnings({"SimplifiableIfStatement", "UnusedAssignment"})
 public class PsiGen implements PsiParser {
 
-  public static final Logger LOG_ = Logger.getInstance("PsiGen");
-
   public ASTNode parse(IElementType root_, PsiBuilder builder_) {
+    parse_only_(root_, builder_);
+    return builder_.getTreeBuilt();
+  }
+
+  public void parse_only_(IElementType root_, PsiBuilder builder_) {
     boolean result_;
     builder_ = adapt_builder_(root_, builder_, this, EXTENDS_SETS_);
     Marker marker_ = enter_section_(builder_, 0, _COLLAPSE_, null);
@@ -46,10 +48,9 @@ public class PsiGen implements PsiParser {
       result_ = parse_root_(root_, builder_, 0);
     }
     exit_section_(builder_, 0, marker_, root_, result_, true, TRUE_CONDITION);
-    return builder_.getTreeBuilt();
   }
 
-  protected boolean parse_root_(final IElementType root_, final PsiBuilder builder_, final int level_) {
+  protected boolean parse_root_(IElementType root_, PsiBuilder builder_, int level_) {
     return root(builder_, level_ + 1);
   }
 
@@ -329,15 +330,12 @@ package ;
 
 import com.intellij.lang.PsiBuilder;
 import com.intellij.lang.PsiBuilder.Marker;
-import com.intellij.openapi.diagnostic.Logger;
 import static generated.GeneratedTypes.*;
 import static PsiGenUtil.*;
 import static PsiGen.*;
 
 @SuppressWarnings({"SimplifiableIfStatement", "UnusedAssignment"})
 public class PsiGen2 {
-
-  public static final Logger LOG_ = Logger.getInstance("PsiGen2");
 
   /* ********************************************************** */
   // <<p>> +
@@ -557,15 +555,12 @@ package ;
 
 import com.intellij.lang.PsiBuilder;
 import com.intellij.lang.PsiBuilder.Marker;
-import com.intellij.openapi.diagnostic.Logger;
 import static generated.GeneratedTypes.*;
 import static PsiGenUtil.*;
 import static PsiGen.*;
 
 @SuppressWarnings({"SimplifiableIfStatement", "UnusedAssignment"})
 public class PsiGenFixes {
-
-  public static final Logger LOG_ = Logger.getInstance("PsiGenFixes");
 
   /* ********************************************************** */
   // ',' identifier

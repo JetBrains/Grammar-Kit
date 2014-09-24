@@ -4,7 +4,6 @@ package ;
 
 import com.intellij.lang.PsiBuilder;
 import com.intellij.lang.PsiBuilder.Marker;
-import com.intellij.openapi.diagnostic.Logger;
 import static generated.GeneratedTypes.*;
 import static org.intellij.grammar.parser.GeneratedParserUtilBase.*;
 import com.intellij.psi.tree.IElementType;
@@ -17,9 +16,12 @@ import java.util.Map;
 @SuppressWarnings({"SimplifiableIfStatement", "UnusedAssignment"})
 public class Small implements PsiParser {
 
-  public static final Logger LOG_ = Logger.getInstance("Small");
-
   public ASTNode parse(IElementType root_, PsiBuilder builder_) {
+    parse_only_(root_, builder_);
+    return builder_.getTreeBuilt();
+  }
+
+  public void parse_only_(IElementType root_, PsiBuilder builder_) {
     boolean result_;
     builder_ = adapt_builder_(root_, builder_, this, null);
     Marker marker_ = enter_section_(builder_, 0, _COLLAPSE_, null);
@@ -51,10 +53,9 @@ public class Small implements PsiParser {
       result_ = parse_root_(root_, builder_, 0);
     }
     exit_section_(builder_, 0, marker_, root_, result_, true, TRUE_CONDITION);
-    return builder_.getTreeBuilt();
   }
 
-  protected boolean parse_root_(final IElementType root_, final PsiBuilder builder_, final int level_) {
+  protected boolean parse_root_(IElementType root_, PsiBuilder builder_, int level_) {
     return parseRoot(builder_, level_ + 1, statement_parser_);
   }
 

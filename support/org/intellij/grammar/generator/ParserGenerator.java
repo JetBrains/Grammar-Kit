@@ -372,7 +372,6 @@ public class ParserGenerator {
     Set<String> imports = new LinkedHashSet<String>();
     imports.addAll(Arrays.asList("com.intellij.lang.PsiBuilder",
                                  "com.intellij.lang.PsiBuilder.Marker",
-                                 "com.intellij.openapi.diagnostic.Logger",
                                  "static " + elementTypeHolderClass + ".*",
                                  "static " + myParserUtilClass + ".*"));
     if (myExpressionHelper.hasExpressions()) {
@@ -392,9 +391,6 @@ public class ParserGenerator {
     generateClassHeader(parserClass, imports,
                         "@SuppressWarnings({\"SimplifiableIfStatement\", \"UnusedAssignment\"})",
                         false, "", rootParser ? "PsiParser" : "");
-
-    out("public static final Logger LOG_ = Logger.getInstance(\"" + parserClass + "\");");
-    newLine();
 
     if (rootParser) {
       generateRootParserContent(ownRuleNames);
@@ -436,6 +432,11 @@ public class ParserGenerator {
   private void generateRootParserContent(Set<String> ownRuleNames) {
     boolean generateExtendsSets = !myGraphHelper.getRuleExtendsMap().isEmpty();
     out("public ASTNode parse(IElementType root_, PsiBuilder builder_) {");
+    out("parse_only_(root_, builder_);");
+    out("return builder_.getTreeBuilt();");
+    out("}");
+    newLine();
+    out("public void parse_only_(IElementType root_, PsiBuilder builder_) {");
     out("boolean result_;");
     out("builder_ = adapt_builder_(root_, builder_, this, " + (generateExtendsSets ? "EXTENDS_SETS_" : null) + ");");
     out("Marker marker_ = enter_section_(builder_, 0, _COLLAPSE_, null);");
@@ -457,13 +458,12 @@ public class ParserGenerator {
       if (!first) out("}");
     }
     out("exit_section_(builder_, 0, marker_, root_, result_, true, TRUE_CONDITION);");
-    out("return builder_.getTreeBuilt();");
     out("}");
     newLine();
     {
       BnfRule rootRule = myFile.getRule(myGrammarRoot);
       String nodeCall = generateNodeCall(rootRule, null, myGrammarRoot);
-      out("protected boolean parse_root_(final IElementType root_, final PsiBuilder builder_, final int level_) {");
+      out("protected boolean parse_root_(IElementType root_, PsiBuilder builder_, int level_) {");
       out("return " + nodeCall + ";");
       out("}");
       newLine();

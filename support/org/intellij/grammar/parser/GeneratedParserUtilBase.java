@@ -473,8 +473,18 @@ public class GeneratedParserUtilBase {
       state.FRAMES.recycle(frame);
       return;
     }
-    exit_section_impl_(state, frame, builder_, marker, elementType, result, pinned);
+    close_frame_impl_(state, frame, builder_, marker, elementType, result, pinned);
+    exit_section_impl_(state, frame, builder_, elementType, result, pinned, eatMore);
+    state.FRAMES.recycle(frame);
+  }
 
+  private static void exit_section_impl_(ErrorState state,
+                                         Frame frame,
+                                         PsiBuilder builder_,
+                                         @Nullable IElementType elementType,
+                                         boolean result,
+                                         boolean pinned,
+                                         @Nullable Parser eatMore) {
     int initialPos = builder_.rawTokenIndex();
     boolean willFail = !result && !pinned;
     if (willFail && initialPos == frame.position && state.lastExpectedVariantPos == frame.position &&
@@ -552,16 +562,15 @@ public class GeneratedParserUtilBase {
     if (prevFrame != null && prevFrame.errorReportedAt < frame.errorReportedAt) {
       prevFrame.errorReportedAt = frame.errorReportedAt;
     }
-    state.FRAMES.recycle(frame);
   }
 
-  private static void exit_section_impl_(ErrorState state,
-                                         Frame frame,
-                                         PsiBuilder builder_,
-                                         PsiBuilder.Marker marker,
-                                         IElementType elementType,
-                                         boolean result,
-                                         boolean pinned) {
+  private static void close_frame_impl_(ErrorState state,
+                                        Frame frame,
+                                        PsiBuilder builder_,
+                                        PsiBuilder.Marker marker,
+                                        IElementType elementType,
+                                        boolean result,
+                                        boolean pinned) {
     if (elementType != null && marker != null) {
       if ((frame.modifiers & _COLLAPSE_) != 0) {
         PsiBuilderImpl.ProductionMarker last = result || pinned? (PsiBuilderImpl.ProductionMarker)builder_.getLatestDoneMarker() : null;

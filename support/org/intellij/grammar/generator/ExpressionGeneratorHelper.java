@@ -92,7 +92,7 @@ public class ExpressionGeneratorHelper {
     g.out("boolean result_ = true;");
     g.out("while (true) {");
     //g.out("Marker marker_ = enter_section_(builder_, level_, _LEFT_, " + frameName + ");");
-    g.out("Marker left_marker_ = (Marker) builder_.getLatestDoneMarker();");
+    g.out("Marker left_marker_ = left_marker_(builder_);");
     g.out("if (!invalid_left_marker_guard_(builder_, left_marker_, \"" + kernelMethodName + "\")) return false;");
 
     first = true;
@@ -106,7 +106,7 @@ public class ExpressionGeneratorHelper {
 
       String substCheck = "";
       if (operator.arg1 != null) {
-        substCheck = " && ((LighterASTNode)left_marker_).getTokenType() == " + ParserGeneratorUtil.getElementType(operator.arg1);
+        substCheck = " && markerTypeIs(left_marker_, " + ParserGeneratorUtil.getElementType(operator.arg1) + ")";
       }
       if (first) g.out("Marker marker_ = builder_.mark();");
       g.out((first ? "" : "else ") + "if (priority_ < " + priority + substCheck + " && " + opCall + ") {");

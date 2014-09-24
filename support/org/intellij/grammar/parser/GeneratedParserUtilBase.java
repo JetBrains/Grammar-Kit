@@ -120,6 +120,15 @@ public class GeneratedParserUtilBase {
     return TokenSet.create(tokenTypes_);
   }
 
+  @Nullable
+  public static PsiBuilder.Marker left_marker_(PsiBuilder builder_) {
+    return (PsiBuilder.Marker)builder_.getLatestDoneMarker();
+  }
+
+  public static boolean markerTypeIs(PsiBuilder.Marker marker, IElementType type) {
+    return ((LighterASTNode)marker).getTokenType() == type;
+  }
+
   private static boolean consumeTokens(PsiBuilder builder_, boolean smart, int pin, IElementType... tokens) {
     ErrorState state = ErrorState.get(builder_);
     if (state.completionState != null && state.predicateCount == 0) {

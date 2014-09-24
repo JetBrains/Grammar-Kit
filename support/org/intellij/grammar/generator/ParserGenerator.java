@@ -374,9 +374,6 @@ public class ParserGenerator {
                                  "com.intellij.lang.PsiBuilder.Marker",
                                  "static " + elementTypeHolderClass + ".*",
                                  "static " + myParserUtilClass + ".*"));
-    if (myExpressionHelper.hasExpressions()) {
-      imports.add("com.intellij.lang.LighterASTNode");
-    }
     if (!rootParser) {
       imports.add("static " + myGrammarRootParser + ".*");
     }
@@ -658,16 +655,7 @@ public class ParserGenerator {
     if (pinned) {
       out("boolean pinned_;");
     }
-    //if (!isPrivate && canCollapse && StringUtil.isNotEmpty(elementType)) {
-    //  out("int start_ = builder_.getCurrentOffset();");
-    //}
-    //if (isLeft) {
-    //  out("Marker left_marker_ = (Marker)builder_.getLatestDoneMarker();");
-    //  if (generateExtendedPin) {
-    //    out("if (!invalid_left_marker_guard_(builder_, left_marker_, \"" + funcName + "\")) return false;");
-    //  }
-    //}
-    SmartList<String> modifierList = new SmartList<String>();
+    List<String> modifierList = ContainerUtil.newSmartList();
     if (canCollapse) modifierList.add("_COLLAPSE_");
     if (isLeftInner) modifierList.add("_LEFT_INNER_");
     else if (isLeft) modifierList.add("_LEFT_");

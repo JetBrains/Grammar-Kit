@@ -6,7 +6,6 @@ import com.intellij.lang.PsiBuilder;
 import com.intellij.lang.PsiBuilder.Marker;
 import static org.intellij.grammar.expression.ExpressionTypes.*;
 import static org.intellij.grammar.parser.GeneratedParserUtilBase.*;
-import com.intellij.lang.LighterASTNode;
 import com.intellij.psi.tree.IElementType;
 import com.intellij.lang.ASTNode;
 import com.intellij.psi.tree.TokenSet;
@@ -291,7 +290,7 @@ public class ExpressionParser implements PsiParser {
     if (!recursion_guard_(builder_, level_, "expr_0")) return false;
     boolean result_ = true;
     while (true) {
-      Marker left_marker_ = (Marker) builder_.getLatestDoneMarker();
+      Marker left_marker_ = left_marker_(builder_);
       if (!invalid_left_marker_guard_(builder_, left_marker_, "expr_0")) return false;
       Marker marker_ = builder_.mark();
       if (priority_ < 0 && consumeTokenSmart(builder_, "=")) {
@@ -359,7 +358,7 @@ public class ExpressionParser implements PsiParser {
         marker_.drop();
         left_marker_.precede().done(EXP_EXPR);
       }
-      else if (priority_ < 8 && ((LighterASTNode)left_marker_).getTokenType() == REF_EXPR && arg_list(builder_, level_ + 1)) {
+      else if (priority_ < 8 && markerTypeIs(left_marker_, REF_EXPR) && arg_list(builder_, level_ + 1)) {
         result_ = true;
         marker_.drop();
         left_marker_.precede().done(CALL_EXPR);

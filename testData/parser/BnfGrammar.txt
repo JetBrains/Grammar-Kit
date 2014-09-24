@@ -563,8 +563,8 @@ BnfFile:BnfGrammar.bnf
             PsiElement(string)('"attr_pattern"')
         PsiWhiteSpace('\n')
         PsiElement(})('}')
-  PsiWhiteSpace('\n')
   PsiElement(DUMMY_BLOCK)
+    PsiWhiteSpace('\n')
     BNF_RULE:attr_start_simple
       BNF_MODIFIER
         PsiElement(id)('private')
@@ -851,8 +851,8 @@ BnfFile:BnfGrammar.bnf
             PsiElement(id)('choice')
           BNF_QUANTIFIER
             PsiElement(?)('?')
-  PsiWhiteSpace('\n')
   PsiElement(DUMMY_BLOCK)
+    PsiWhiteSpace('\n')
     BNF_RULE:sequence
       PsiElement(id)('sequence')
       PsiWhiteSpace(' ')

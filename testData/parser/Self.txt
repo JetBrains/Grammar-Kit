@@ -422,8 +422,8 @@ BnfFile:Self.bnf
           BNF_STRING_LITERAL_EXPRESSION: '='
             PsiElement(string)(''='')
       PsiElement(;)(';')
-  PsiWhiteSpace('\n')
   PsiElement(DUMMY_BLOCK)
+    PsiWhiteSpace('\n')
     BNF_RULE:attr_pattern
       PsiElement(id)('attr_pattern')
       PsiWhiteSpace(' ')

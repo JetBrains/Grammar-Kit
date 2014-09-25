@@ -256,6 +256,12 @@ public class ParserGeneratorUtil {
 
   @Nullable
   public static String getRuleDisplayName(BnfRule rule, boolean force) {
+    String s = getRuleDisplayNameRaw(rule, force);
+    return StringUtil.isEmpty(s) ? null : "<" + s + ">";
+  }
+
+  @Nullable
+  public static String getRuleDisplayNameRaw(BnfRule rule, boolean force) {
     String name = getAttribute(rule, KnownAttribute.NAME);
     BnfRule realRule = rule;
     if (name != null) {
@@ -263,9 +269,11 @@ public class ParserGeneratorUtil {
       if (realRule != null) name = getAttribute(realRule, KnownAttribute.NAME);
     }
     if (name != null || (!force && realRule == rule)) {
-      return StringUtil.isEmpty(name)? null : "<" + name + ">";
+      return name;
     }
-    return "<" + toDisplayOrConstantName(realRule.getName(), false) + ">";
+    else {
+      return toDisplayOrConstantName(realRule.getName(), false);
+    }
   }
 
   public static String toDisplayOrConstantName(String name, boolean constant) {

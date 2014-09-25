@@ -120,13 +120,9 @@ public class GeneratedParserUtilBase {
     return TokenSet.create(tokenTypes_);
   }
 
-  @Nullable
-  public static PsiBuilder.Marker left_marker_(PsiBuilder builder_) {
-    return (PsiBuilder.Marker)builder_.getLatestDoneMarker();
-  }
-
-  public static boolean markerTypeIs(PsiBuilder.Marker marker, IElementType type) {
-    return ((LighterASTNode)marker).getTokenType() == type;
+  public static boolean leftMarkerTypeIs(PsiBuilder builder_, int level_, IElementType type) {
+    LighterASTNode marker = builder_.getLatestDoneMarker();
+    return marker != null && marker.getTokenType() == type;
   }
 
   private static boolean consumeTokens(PsiBuilder builder_, boolean smart, int pin, IElementType... tokens) {
@@ -423,7 +419,7 @@ public class GeneratedParserUtilBase {
     Frame prevFrame = state.frameStack.peekLast();
     if (prevFrame != null && prevFrame.errorReportedAt > frame.position) {
       // report error for previous unsuccessful frame
-      reportError(builder_, state, frame, true, false);
+      reportError(builder_, state, frame, null, true, false);
     }
     if (((frame.modifiers & _LEFT_) | (frame.modifiers & _LEFT_INNER_)) != 0) {
       PsiBuilder.Marker left = (PsiBuilder.Marker)builder_.getLatestDoneMarker();
@@ -504,7 +500,7 @@ public class GeneratedParserUtilBase {
       PsiBuilder.Marker extensionMarker = null;
       IElementType extensionTokenType = null;
       // whitespace prefix makes the very first frame offset bigger than marker start offset which is always 0
-      if (latestDoneMarker instanceof PsiBuilder.Marker &&
+      if (latestDoneMarker != null &&
           frame.position >= latestDoneMarker.getStartIndex() &&
           frame.position <= latestDoneMarker.getEndIndex()) {
         extensionMarker = ((PsiBuilder.Marker)latestDoneMarker).precede();
@@ -530,11 +526,11 @@ public class GeneratedParserUtilBase {
         }
       }
       else if (eatMoreFlag) {
-        errorReported = reportError(builder_, state, frame, true, true);
+        errorReported = reportError(builder_, state, frame, null, true, true);
         parseAsTree(state, builder_, frame.level + 1, DUMMY_BLOCK, true, TOKEN_ADVANCER, eatMore);
       }
       else if (eatMoreFlagOnce || (!result && frame.position != builder_.rawTokenIndex()) || frame.errorReportedAt > initialPos) {
-        errorReported = reportError(builder_, state, frame, true, false);
+        errorReported = reportError(builder_, state, frame, null, true, false);
       }
       if (extensionMarker != null) {
         extensionMarker.done(extensionTokenType);
@@ -550,7 +546,7 @@ public class GeneratedParserUtilBase {
       // do not report if there are errors beyond current position
       if (lastErrorPos == initialPos) {
         // do not force, inner recoverRoot might have skipped some tokens
-        reportError(builder_, state, frame, false, false);
+        reportError(builder_, state, frame, elementType, false, false);
       }
       else if (lastErrorPos > initialPos) {
         // set error pos here as if it is reported for future reference
@@ -647,7 +643,7 @@ public class GeneratedParserUtilBase {
     }
     int position = builder_.rawTokenIndex();
     if (frame.errorReportedAt < position && getLastVariantPos(state, position + 1) <= position) {
-      reportError(builder_, state, frame, true, advance);
+      reportError(builder_, state, frame, null, true, advance);
     }
   }
 
@@ -658,6 +654,7 @@ public class GeneratedParserUtilBase {
   private static boolean reportError(PsiBuilder builder_,
                                      ErrorState state,
                                      Frame frame,
+                                     IElementType elementType,
                                      boolean force,
                                      boolean advance) {
     String expectedText = state.getExpectedText(builder_);
@@ -671,6 +668,20 @@ public class GeneratedParserUtilBase {
         PsiBuilder.Marker mark = builder_.mark();
         builder_.advanceLexer();
         mark.error(message);
+      }
+      else if (!force) {
+        PsiBuilder.Marker extensionMarker = null;
+        IElementType extensionTokenType = null;
+        PsiBuilderImpl.ProductionMarker latestDoneMarker = elementType == null ? null : (PsiBuilderImpl.ProductionMarker)builder_.getLatestDoneMarker();
+        if (latestDoneMarker != null &&
+            frame.position >= latestDoneMarker.getStartIndex() &&
+            frame.position <= latestDoneMarker.getEndIndex()) {
+          extensionMarker = ((PsiBuilder.Marker)latestDoneMarker).precede();
+          extensionTokenType = latestDoneMarker.getTokenType();
+          ((PsiBuilder.Marker)latestDoneMarker).drop();
+        }
+        builder_.error(message);
+        if (extensionMarker != null) extensionMarker.done(extensionTokenType);
       }
       else {
         builder_.error(message);

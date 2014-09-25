@@ -24,8 +24,8 @@ JFLEX_FILE
       JFlexClassExpressionImpl(FLEX_CLASS_EXPRESSION)
         PsiElement([)('[')
         PsiElement(^)('^')
-      PsiErrorElement:'-', <char class>, ']', char, escaped_char or string expected, got '['
-        <empty list>
+        PsiErrorElement:'-', <char class>, ']', char, escaped_char or string expected, got '['
+          <empty list>
       PsiElement(BAD_CHARACTER)('[')
       PsiElement(])(']')
     PsiWhiteSpace('\n')
@@ -47,8 +47,8 @@ JFLEX_FILE
       PsiWhiteSpace(' ')
       JFlexClassExpressionImpl(FLEX_CLASS_EXPRESSION)
         PsiElement([)('[')
-      PsiErrorElement:'-', <char class>, ']', '^', char, escaped_char or string expected, got 'DIGITS'
-        <empty list>
+        PsiErrorElement:'-', <char class>, ']', '^', char, escaped_char or string expected, got 'DIGITS'
+          <empty list>
     PsiWhiteSpace('\n')
     PsiWhiteSpace('\n')
     JFlexMacroDefinitionImpl(FLEX_MACRO_DEFINITION)

@@ -147,8 +147,8 @@ EXPR_FILE_TYPE
         PsiWhiteSpace(' ')
         LITERAL_EXPR
           PsiElement(number)('2')
-    PsiErrorElement:')' or ',' expected, got ';'
-      <empty list>
+      PsiErrorElement:')' or ',' expected, got ';'
+        <empty list>
   PsiWhiteSpace(' ')
   PsiElement(syntax)(';')
   PsiWhiteSpace('\n\n')
@@ -240,8 +240,8 @@ EXPR_FILE_TYPE
       PsiElement(syntax)('-')
       UNARY_MIN_EXPR
         PsiElement(syntax)('-')
-      PsiErrorElement:<expr> expected, got ';'
-        <empty list>
+        PsiErrorElement:<expr> expected, got ';'
+          <empty list>
   PsiElement(syntax)(';')
   PsiWhiteSpace('\n\n')
   SPECIAL_EXPR
@@ -313,8 +313,8 @@ EXPR_FILE_TYPE
       PsiWhiteSpace(' ')
       LITERAL_EXPR
         PsiElement(number)('1')
-    PsiErrorElement:')' expected, got '+'
-      <empty list>
+      PsiErrorElement:')' expected, got '+'
+        <empty list>
     PsiWhiteSpace(' ')
     PsiElement(syntax)('+')
     PsiWhiteSpace(' ')

@@ -47,8 +47,8 @@ FILE
   ASTWrapperPsiElement(PROPERTY)
     PsiElement(id)('test_pin_results')
     PsiElement(=)('=')
-  PsiErrorElement:<expression> expected, got ';'
-    <empty list>
+    PsiErrorElement:<expression> expected, got ';'
+      <empty list>
   PsiElement(;)(';')
   PsiWhiteSpace('                        ')
   PsiElement(COMMENT)('// expression expected')

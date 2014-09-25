@@ -290,86 +290,70 @@ public class ExpressionParser implements PsiParser {
     if (!recursion_guard_(builder_, level_, "expr_0")) return false;
     boolean result_ = true;
     while (true) {
-      Marker left_marker_ = left_marker_(builder_);
-      if (!invalid_left_marker_guard_(builder_, left_marker_, "expr_0")) return false;
-      Marker marker_ = builder_.mark();
+      Marker marker_ = enter_section_(builder_, level_, _LEFT_, "<expr>");
       if (priority_ < 0 && consumeTokenSmart(builder_, "=")) {
-        result_ = report_error_(builder_, expr(builder_, level_, -1));
-        marker_.drop();
-        left_marker_.precede().done(ASSIGN_EXPR);
+        result_ = expr(builder_, level_, -1);
+        exit_section_(builder_, level_, marker_, ASSIGN_EXPR, result_, true, null);
       }
       else if (priority_ < 1 && consumeTokenSmart(builder_, "?")) {
         result_ = report_error_(builder_, expr(builder_, level_, 1));
-        result_ = report_error_(builder_, elvis_expr_1(builder_, level_ + 1)) && result_;
-        marker_.drop();
-        left_marker_.precede().done(ELVIS_EXPR);
+        result_ = elvis_expr_1(builder_, level_ + 1) && result_;
+        exit_section_(builder_, level_, marker_, ELVIS_EXPR, result_, true, null);
       }
       else if (priority_ < 1 && conditional_expr_0(builder_, level_ + 1)) {
-        result_ = report_error_(builder_, expr(builder_, level_, 1));
-        marker_.drop();
-        left_marker_.precede().done(CONDITIONAL_EXPR);
+        result_ = expr(builder_, level_, 1);
+        exit_section_(builder_, level_, marker_, CONDITIONAL_EXPR, result_, true, null);
       }
       else if (priority_ < 2 && consumeTokenSmart(builder_, "+")) {
-        result_ = report_error_(builder_, expr(builder_, level_, 2));
-        marker_.drop();
-        left_marker_.precede().done(PLUS_EXPR);
+        result_ = expr(builder_, level_, 2);
+        exit_section_(builder_, level_, marker_, PLUS_EXPR, result_, true, null);
       }
       else if (priority_ < 2 && consumeTokenSmart(builder_, "-")) {
-        result_ = report_error_(builder_, expr(builder_, level_, 2));
-        marker_.drop();
-        left_marker_.precede().done(MINUS_EXPR);
+        result_ = expr(builder_, level_, 2);
+        exit_section_(builder_, level_, marker_, MINUS_EXPR, result_, true, null);
       }
       else if (priority_ < 3 && consumeTokenSmart(builder_, "^")) {
-        result_ = report_error_(builder_, expr(builder_, level_, 3));
-        marker_.drop();
-        left_marker_.precede().done(XOR_EXPR);
+        result_ = expr(builder_, level_, 3);
+        exit_section_(builder_, level_, marker_, XOR_EXPR, result_, true, null);
       }
       else if (priority_ < 3 && consumeTokenSmart(builder_, BETWEEN)) {
         result_ = report_error_(builder_, expr(builder_, level_, 3));
-        result_ = report_error_(builder_, between_expr_1(builder_, level_ + 1)) && result_;
-        marker_.drop();
-        left_marker_.precede().done(BETWEEN_EXPR);
+        result_ = between_expr_1(builder_, level_ + 1) && result_;
+        exit_section_(builder_, level_, marker_, BETWEEN_EXPR, result_, true, null);
       }
       else if (priority_ < 3 && parseTokensSmart(builder_, 0, IS, NOT)) {
-        result_ = report_error_(builder_, expr(builder_, level_, 3));
-        marker_.drop();
-        left_marker_.precede().done(IS_NOT_EXPR);
+        result_ = expr(builder_, level_, 3);
+        exit_section_(builder_, level_, marker_, IS_NOT_EXPR, result_, true, null);
       }
       else if (priority_ < 4 && consumeTokenSmart(builder_, "*")) {
-        result_ = report_error_(builder_, expr(builder_, level_, 4));
-        marker_.drop();
-        left_marker_.precede().done(MUL_EXPR);
+        result_ = expr(builder_, level_, 4);
+        exit_section_(builder_, level_, marker_, MUL_EXPR, result_, true, null);
       }
       else if (priority_ < 4 && consumeTokenSmart(builder_, "/")) {
-        result_ = report_error_(builder_, expr(builder_, level_, 4));
-        marker_.drop();
-        left_marker_.precede().done(DIV_EXPR);
+        result_ = expr(builder_, level_, 4);
+        exit_section_(builder_, level_, marker_, DIV_EXPR, result_, true, null);
       }
       else if (priority_ < 7 && consumeTokenSmart(builder_, "!")) {
         result_ = true;
-        marker_.drop();
-        left_marker_.precede().done(FACTORIAL_EXPR);
+        exit_section_(builder_, level_, marker_, FACTORIAL_EXPR, result_, true, null);
       }
       else if (priority_ < 6 && consumeTokenSmart(builder_, "**")) {
         while (true) {
           result_ = report_error_(builder_, expr(builder_, level_, 6));
           if (!consumeTokenSmart(builder_, "**")) break;
         }
-        marker_.drop();
-        left_marker_.precede().done(EXP_EXPR);
+        exit_section_(builder_, level_, marker_, EXP_EXPR, result_, true, null);
       }
-      else if (priority_ < 8 && markerTypeIs(left_marker_, REF_EXPR) && arg_list(builder_, level_ + 1)) {
+      else if (priority_ < 8 && leftMarkerTypeIs(builder_, level_, REF_EXPR) && arg_list(builder_, level_ + 1)) {
         result_ = true;
-        marker_.drop();
-        left_marker_.precede().done(CALL_EXPR);
+        exit_section_(builder_, level_, marker_, CALL_EXPR, result_, true, null);
       }
       else if (priority_ < 9 && ref_expr_0(builder_, level_ + 1)) {
         result_ = true;
-        marker_.drop();
-        left_marker_.precede().done(REF_EXPR);
+        exit_section_(builder_, level_, marker_, REF_EXPR, result_, true, null);
       }
       else {
-        exit_section_(builder_, marker_, null, false);
+        exit_section_(builder_, level_, marker_, null, false, false, null);
         break;
       }
     }

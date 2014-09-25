@@ -156,7 +156,6 @@ public class RuleGraphHelper {
       BnfRule superRule = file.getRule(getAttribute(rule, KnownAttribute.EXTENDS));
       if (superRule == null) continue;
       ruleExtendsMap.putValue(superRule, rule);
-      ruleExtendsMap.putValue(superRule, getSynonymTargetOrSelf(rule));
     }
     for (int i = 0, len = ruleExtendsMap.size(); i < len; i++) {
       boolean changed = false;
@@ -351,7 +350,7 @@ public class RuleGraphHelper {
         else if (Rule.isLeft(targetRule)) {
           if (!Rule.isInner(targetRule) && !Rule.isPrivate(targetRule)) {
             result = psiMap();
-            result.put(getSynonymTargetOrSelf(targetRule), REQUIRED);
+            result.put(targetRule, REQUIRED);
             result.put(LEFT_MARKER, REQUIRED);
           }
           else {
@@ -368,7 +367,7 @@ public class RuleGraphHelper {
           }
         }
         else {
-          result = psiMap(getSynonymTargetOrSelf(targetRule), REQUIRED);
+          result = psiMap(targetRule, REQUIRED);
         }
       }
       else {
@@ -443,9 +442,9 @@ public class RuleGraphHelper {
       Map<BnfRule, Cardinality> rulesToTheLeft = getRulesToTheLeft(rule);
       for (BnfRule r : rulesToTheLeft.keySet()) {
         Cardinality cardinality = rulesToTheLeft.get(r);
-        Map<PsiElement, Cardinality> leftMap = psiMap(getSynonymTargetOrSelf(r), REQUIRED);
+        Map<PsiElement, Cardinality> leftMap = psiMap(r, REQUIRED);
         if (cardinality.many()) {
-          list.add(joinMaps(null, BnfTypes.BNF_CHOICE, Arrays.asList(leftMap, psiMap(getSynonymTargetOrSelf(rule), REQUIRED))));
+          list.add(joinMaps(null, BnfTypes.BNF_CHOICE, Arrays.asList(leftMap, psiMap(rule, REQUIRED))));
         }
         else {
           list.add(leftMap);
@@ -612,10 +611,19 @@ public class RuleGraphHelper {
   private List<Map<PsiElement, Cardinality>> compactInheritors(List<Map<PsiElement, Cardinality>> mapList) {
     Set<BnfRule> rulesToTry = new LinkedHashSet<BnfRule>();
     // collect all rules
+    boolean allowOne = false;
     for (Map<PsiElement, Cardinality> map : mapList) {
       for (PsiElement psiElement : map.keySet()) {
         if (!(psiElement instanceof BnfRule)) continue;
-        rulesToTry.add((BnfRule)psiElement);
+        BnfRule r = (BnfRule)psiElement;
+        BnfRule r2 = getSynonymTargetOrSelf(r);
+        if (r == r2 || myRuleExtendsMap.containsScalarValue(r)) {
+          rulesToTry.add(r);
+        }
+        else {
+          rulesToTry.add(r2);
+          allowOne = true;
+        }
       }
     }
     // add their supers & collapse-caused rules
@@ -648,7 +656,7 @@ public class RuleGraphHelper {
       }
     }
 
-    if (rulesToTry.size() < 2) return mapList;
+    if (rulesToTry.size() < 2 && !allowOne) return mapList;
     // sort rules along with their supers
     List<BnfRule> sorted = topoSort(rulesToTry, new Topology<BnfRule>() {
       @Override
@@ -677,7 +685,7 @@ public class RuleGraphHelper {
         }
       }
       if (changed) {
-        max = 0;
+        max = Math.max(max, count);
       }
       else if (count > 1 && max < count) {
         max = count;
@@ -698,11 +706,15 @@ public class RuleGraphHelper {
         Cardinality cardinality = null;
         for (Iterator<PsiElement> iterator = newMap.keySet().iterator(); iterator.hasNext(); ) {
           PsiElement cur = iterator.next();
-          if (cur == superRule || !(cur instanceof BnfRule)) continue;
-          if (!myRuleExtendsMap.get(superRule).contains(cur)) {
+          if (!(cur instanceof BnfRule)) continue;
+          BnfRule r = (BnfRule)cur;
+          BnfRule r2 = getSynonymTargetOrSelf(r);
+          if (r == superRule) continue;
+          Collection<BnfRule> inheritors = myRuleExtendsMap.get(superRule);
+          if (r2 != superRule && !inheritors.contains(r) && !inheritors.contains(r2)) {
             continue;
           }
-          cardinality = cardinality == null ? newMap.get(cur) : cardinality.or(newMap.get(cur));
+          cardinality = cardinality == null ? newMap.get(r) : cardinality.or(newMap.get(r));
           iterator.remove();
         }
         if (cardinality != null) {

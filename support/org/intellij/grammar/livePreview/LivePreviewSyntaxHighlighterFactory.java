@@ -54,7 +54,7 @@ public class LivePreviewSyntaxHighlighterFactory extends SyntaxHighlighterFactor
           @Override
           public IElementType getTokenType() {
             IElementType tokenType = super.getTokenType();
-            return tokenType instanceof KeywordTokenType? LivePreviewParserDefinition.KEYWORD : tokenType;
+            return tokenType instanceof PreviewTokenType ? ((PreviewTokenType)tokenType).delegate : tokenType;
           }
         };
       }

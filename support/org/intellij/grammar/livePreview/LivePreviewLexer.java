@@ -21,9 +21,12 @@ import com.intellij.lexer.LexerBase;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.psi.TokenType;
+import com.intellij.psi.codeStyle.NameUtil;
 import com.intellij.psi.tree.IElementType;
 import com.intellij.psi.util.CachedValueProvider;
 import com.intellij.psi.util.CachedValuesManager;
+import com.intellij.util.ArrayUtil;
+import com.intellij.util.ObjectUtils;
 import com.intellij.util.containers.ContainerUtil;
 import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.generator.ParserGeneratorUtil;
@@ -61,7 +64,6 @@ public class LivePreviewLexer extends LexerBase {
       @Override
       public Result<Token[]> compute() {
         Map<String, String> map = collectTokenPattern2Name(bnfFile);
-        if (!StringUtil.join(map.keySet(), ",").contains("regexp:")) map.put("regexp:[\\w&&[^0-9]]\\w*", "GENERIC_ID");
         Token[] tokens = new Token[map.size() + 1];
         int i = 0;
         String tokenConstantPrefix = getRootAttribute(bnfFile, KnownAttribute.ELEMENT_TYPE_PREFIX);
@@ -192,14 +194,10 @@ public class LivePreviewLexer extends LexerBase {
         tokenName = pattern;
         keyword = StringUtil.isJavaIdentifier(pattern);
       }
-      //noinspection EmptyClass
-      if (StringUtil.endsWithIgnoreCase(tokenName, "comment")) tokenType = LivePreviewParserDefinition.COMMENT;
-      else if (StringUtil.endsWithIgnoreCase(tokenName, "string")) tokenType = LivePreviewParserDefinition.STRING;
-      else if (StringUtil.endsWithIgnoreCase(tokenName, "number")) tokenType = LivePreviewParserDefinition.NUMBER;
-      else if (StringUtil.endsWithIgnoreCase(tokenName, "integer")) tokenType = LivePreviewParserDefinition.NUMBER;
-      else if (StringUtil.endsWithIgnoreCase(tokenName, "whitespace")) tokenType = TokenType.WHITE_SPACE;
-      else if (keyword) tokenType = new KeywordTokenType(tokenName, language);
-      else tokenType = new IElementType(tokenName, language, false) {};
+
+      IElementType delegate = keyword ? null : guessDelegateType(tokenName);
+      if (keyword) tokenType = new KeywordTokenType(tokenName, language);
+      else tokenType = new PreviewTokenType(tokenName, language, delegate);
     }
 
     Token(String pattern, IElementType tokenType) {
@@ -216,6 +214,19 @@ public class LivePreviewLexer extends LexerBase {
              ", tokenType=" + tokenType +
              '}';
     }
+  }
+
+  @Nullable
+  private static IElementType guessDelegateType(@NotNull String tokenName) {
+    String words = ArrayUtil.getLastElement(NameUtil.nameToWords(tokenName));
+    if (words == null) return null;
+    String s = words.toLowerCase(Locale.ENGLISH);
+    if (s.endsWith("comment")) return LivePreviewParserDefinition.COMMENT;
+    else if (s.equals("string") || s.equals("str")) return LivePreviewParserDefinition.STRING;
+    else if (s.equals("number") || s.equals("num")) return LivePreviewParserDefinition.NUMBER;
+    else if (s.equals("integer") || s.equals("int")) return LivePreviewParserDefinition.NUMBER;
+    else if (s.equals("whitespace") || s.equals("space")) return TokenType.WHITE_SPACE;
+    return null;
   }
 
   @NotNull
@@ -258,9 +269,18 @@ public class LivePreviewLexer extends LexerBase {
     return map;
   }
 
-  static class KeywordTokenType extends IElementType {
-    KeywordTokenType(String name, Language language) {
+  static class PreviewTokenType extends IElementType {
+    final IElementType delegate;
+
+    PreviewTokenType(String name, Language language, IElementType delegate) {
       super(name, language, false);
+      this.delegate = ObjectUtils.chooseNotNull(delegate, this);
+    }
+  }
+
+  static class KeywordTokenType extends PreviewTokenType {
+    KeywordTokenType(String name, Language language) {
+      super(name, language, LivePreviewParserDefinition.KEYWORD);
     }
   }
 }

@@ -121,7 +121,7 @@ public class SampleParserUtil {
 2.4 Compact expression parsing with priorities
 ----------------------------------------------
 
-Recursive descent parsers a inefficient in terms of stack depth when it comes to expressions.
+Recursive descent parsers are inefficient in terms of stack depth when it comes to expressions.
 A more natural and compact way of dealing with this is supported.
 
 1. All "expression" rules should extend "the root expression rule".
@@ -342,7 +342,7 @@ public class SamplePsiImplUtil {
 Stub indices API forces a bit different contract on PSI classes:
 * There should be a manually written so-called *stub* class
 * PSI node type should extend _IStubElementType_ (comparing to usual _IElementType_)
-* PSI interface should extend _StubBasesPsiElementBase&lt;StubClass&gt;_
+* PSI interface should extend _StubBasedPsiElementBase&lt;StubClass&gt;_
 * PSI implementation class should extend _StubBasedPsiElementBase&lt;StubClass&gt;_
 
 The first two points are not covered by the generator.

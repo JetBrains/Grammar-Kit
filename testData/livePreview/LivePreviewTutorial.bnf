@@ -5,6 +5,7 @@
     LP='('
     RP=')'
 
+    space='regexp:\s+'
     comment='regexp://.*'
     number='regexp:\d+(\.\d*)?'
     id='regexp:\p{Alpha}\w*'

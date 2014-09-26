@@ -9,6 +9,7 @@
   parserUtilClass="org.intellij.grammar.parser.GeneratedParserUtilBase"
 
   tokens=[
+    space='regexp:\s+'
     comment='regexp://.*'
     number='regexp:\d+(\.\d*)?'
     id='regexp:\p{Alpha}\w*'

@@ -1,5 +1,6 @@
 {
   tokens = [
+    space='regexp:\s+'
     string = "regexp:\"[^\"]*\"|'[^']*'"
     number = "regexp:(\+|\-)?\p{Digit}*"
     id = "regexp:\p{Alpha}\w*"

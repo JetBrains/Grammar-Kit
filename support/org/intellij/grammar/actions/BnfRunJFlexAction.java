@@ -35,6 +35,8 @@ import com.intellij.notification.NotificationType;
 import com.intellij.notification.Notifications;
 import com.intellij.openapi.actionSystem.*;
 import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.application.Result;
+import com.intellij.openapi.application.WriteAction;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.project.DumbAwareAction;
@@ -42,6 +44,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.projectRoots.Sdk;
 import com.intellij.openapi.projectRoots.SimpleJavaSdkType;
 import com.intellij.openapi.roots.OrderRootType;
+import com.intellij.openapi.roots.ProjectFileIndex;
 import com.intellij.openapi.roots.ProjectRootManager;
 import com.intellij.openapi.roots.impl.libraries.ApplicationLibraryTable;
 import com.intellij.openapi.roots.libraries.Library;
@@ -57,6 +60,9 @@ import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.*;
+import com.intellij.psi.search.FilenameIndex;
+import com.intellij.psi.search.ProjectScope;
+import com.intellij.util.ArrayUtil;
 import com.intellij.util.Consumer;
 import com.intellij.util.SystemProperties;
 import com.intellij.util.containers.ContainerUtil;
@@ -70,8 +76,8 @@ import org.jetbrains.annotations.Nullable;
 import javax.swing.*;
 import java.awt.*;
 import java.io.File;
-import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -88,7 +94,7 @@ public class BnfRunJFlexAction extends DumbAwareAction {
   };
 
   @Override
-  public void update(AnActionEvent e) {
+  public void update(@NotNull AnActionEvent e) {
     VirtualFile file = LangDataKeys.VIRTUAL_FILE.getData(e.getDataContext());
     boolean enabled = e.getProject() != null && file != null &&
                       (file.getFileType() == JFlexFileType.INSTANCE ||
@@ -97,36 +103,65 @@ public class BnfRunJFlexAction extends DumbAwareAction {
   }
 
   @Override
-  public void actionPerformed(final AnActionEvent e) {
-    Project project = e.getProject();
-    VirtualFile virtualFile = LangDataKeys.VIRTUAL_FILE.getData(e.getDataContext());
-    if (project == null || virtualFile == null) return;
+  public void actionPerformed(@NotNull AnActionEvent e) {
+    final Project project = e.getProject();
+    VirtualFile flexFile = LangDataKeys.VIRTUAL_FILE.getData(e.getDataContext());
+    if (project == null || flexFile == null) return;
 
     PsiDocumentManager.getInstance(project).commitAllDocuments();
     FileDocumentManager fileDocumentManager = FileDocumentManager.getInstance();
     fileDocumentManager.saveAllDocuments();
-    Document document = fileDocumentManager.getDocument(virtualFile);
+    Document document = fileDocumentManager.getDocument(flexFile);
     if (document == null) return;
 
     final String commandName = e.getPresentation().getText();
-    final PsiDirectory directory = PsiManager.getInstance(project).findDirectory(virtualFile.getParent());
-    if (directory == null) return;
 
     String text = document.getText();
-    Matcher matcher = Pattern.compile("%class (\\w+)").matcher(text);
-    if (!matcher.find()) {
-      Notifications.Bus.notify(new Notification(
-        BnfConstants.GENERATION_GROUP,
-        virtualFile.getName() + " lexer generation","Lexer class name option not found, use <pre>%class LexerClassName</pre>",
-        NotificationType.ERROR), project);
-
+    Matcher matcherClass = Pattern.compile("%class (\\w+)").matcher(text);
+    final String lexerClassName = matcherClass.find() ? matcherClass.group(1) : null;
+    Matcher matcherPackage = Pattern.compile("^package ([^;]+);").matcher(text);
+    final String lexerPackage = matcherPackage.find() ? StringUtil.trim(matcherPackage.group(1)) : null;
+    if (lexerClassName == null) {
+      String content = "Lexer class name option not found, use <pre>%class LexerClassName</pre>";
+      fail(project, flexFile, content);
       return;
     }
-    final String lexerClassName = matcher.group(1);
 
     try {
       List<File> jflex = getOrDownload(project, "JetBrains JFlex", JETBRAINS_JFLEX_URLS);
-      if (jflex.isEmpty()) return;
+      if (jflex.isEmpty()) {
+        fail(project, flexFile, "JFlex.jar could not be located or downloaded");
+        return;
+      }
+
+      ProjectFileIndex fileIndex = ProjectFileIndex.SERVICE.getInstance(project);
+      Collection<VirtualFile> files = FilenameIndex.getVirtualFilesByName(
+        project, lexerClassName + ".java", ProjectScope.getAllScope(project));
+      VirtualFile existingFile = ContainerUtil.getFirstItem(files);
+      boolean exitingFileInContent = existingFile != null && fileIndex.isInContent(existingFile);
+      final VirtualFile virtualRoot = exitingFileInContent ? existingFile.getParent() :
+        fileIndex.isInSource(flexFile) ? fileIndex.getSourceRootForFile(flexFile) : ArrayUtil
+          .getFirstElement(ProjectRootManager.getInstance(project).getContentSourceRoots());
+
+      if (virtualRoot == null) {
+        fail(project, flexFile, "Unable to guess target source root");
+        return;
+      }
+      final VirtualFile virtualDir;
+      try {
+        virtualDir = exitingFileInContent || StringUtil.isEmpty(lexerPackage) ? virtualRoot :
+                     new WriteAction<VirtualFile>() {
+                       @Override
+                       protected void run(@NotNull Result<VirtualFile> result) throws Throwable {
+                         result.setResult(VfsUtil.createDirectoryIfMissing(
+                           virtualRoot, lexerPackage.replace('.', '/')));
+                       }
+                     }.execute().throwException().getResultObject();
+      }
+      catch (Exception ex) {
+        fail(project, flexFile, ex.getMessage());
+        return;
+      }
 
       SimpleJavaParameters javaParameters = new SimpleJavaParameters();
       Sdk sdk = new SimpleJavaSdkType().createJdk("tmp", SystemProperties.getJavaHome());
@@ -136,8 +171,8 @@ public class BnfRunJFlexAction extends DumbAwareAction {
       javaParameters.getVMParametersList().add("-Xmx512m");
       javaParameters.getProgramParametersList().add("-sliceandcharat");
       javaParameters.getProgramParametersList().add("-skel", jflex.get(1).getAbsolutePath());
-      javaParameters.getProgramParametersList().add("-d", VfsUtil.virtualToIoFile(virtualFile.getParent()).getAbsolutePath());
-      javaParameters.getProgramParametersList().add(VfsUtil.virtualToIoFile(virtualFile).getAbsolutePath());
+      javaParameters.getProgramParametersList().add("-d", VfsUtil.virtualToIoFile(virtualDir).getAbsolutePath());
+      javaParameters.getProgramParametersList().add(VfsUtil.virtualToIoFile(flexFile).getAbsolutePath());
 
       OSProcessHandler processHandler = javaParameters.createOSProcessHandler();
 
@@ -153,9 +188,9 @@ public class BnfRunJFlexAction extends DumbAwareAction {
             ApplicationManager.getApplication().invokeLater(new Runnable() {
               @Override
               public void run() {
-                ensureLexerClassCreated(directory, lexerClassName, commandName);
+                ensureLexerClassCreated(project, virtualDir, lexerClassName, commandName);
               }
-            }, directory.getProject().getDisposed());
+            }, project.getDisposed());
           }
         }
       });
@@ -166,13 +201,23 @@ public class BnfRunJFlexAction extends DumbAwareAction {
     }
   }
 
-  private static void ensureLexerClassCreated(final PsiDirectory directory, final String lexerClassName, String commandName) {
-    LocalFileSystem.getInstance().refreshFiles(Arrays.asList(directory.getVirtualFile()));
-    final String className = lexerClassName.startsWith("_") ? lexerClassName.substring(1) : lexerClassName + "Adapter";
-    if (directory.findFile(className + ".java") != null) return;
+  private static void fail(@NotNull Project project, @NotNull VirtualFile flexFile, @NotNull String message) {
+    Notifications.Bus.notify(new Notification(
+      BnfConstants.GENERATION_GROUP,
+      flexFile.getName() + " lexer generation", message,
+      NotificationType.ERROR), project);
+  }
 
-    final Project project = directory.getProject();
-    BnfGenerateParserUtilAction.createClass(className, directory, "com.intellij.lexer.FlexAdapter", commandName, new Consumer<PsiClass>() {
+  private static void ensureLexerClassCreated(final Project project,
+                                              final VirtualFile virtualDir,
+                                              final String lexerClassName,
+                                              String commandName) {
+    LocalFileSystem.getInstance().refreshFiles(Arrays.asList(virtualDir));
+    final String className = lexerClassName.startsWith("_") ? lexerClassName.substring(1) : lexerClassName + "Adapter";
+
+    if (FilenameIndex.getFilesByName(project, className + ".java", ProjectScope.getContentScope(project)) != null) return;
+
+    BnfGenerateParserUtilAction.createClass(className, PsiManager.getInstance(project).findDirectory(virtualDir), "com.intellij.lexer.FlexAdapter", commandName, new Consumer<PsiClass>() {
       @Override
       public void consume(PsiClass aClass) {
         PsiMethod constructor = JavaPsiFacade.getElementFactory(project).createMethodFromText(
@@ -182,7 +227,7 @@ public class BnfRunJFlexAction extends DumbAwareAction {
         aClass.addAfter(constructor, aClass.getLBrace());
 
         Notifications.Bus.notify(new Notification(BnfConstants.GENERATION_GROUP,
-            aClass.getName() + " lexer class generated", "to " + directory.getVirtualFile().getPath() +
+            aClass.getName() + " lexer class generated", "to " + virtualDir.getPath() +
             "\n<br>Use this class in your ParserDefinition implementation." +
             "\n<br>For complex cases consider employing com.intellij.lexer.LookAheadLexer API.",
             NotificationType.INFORMATION), project);
@@ -191,7 +236,7 @@ public class BnfRunJFlexAction extends DumbAwareAction {
   }
 
   private static List<File> getOrDownload(@NotNull Project project, @NotNull String libraryName, String... urls) {
-    ArrayList<File> result = ContainerUtil.newArrayList();
+    List<File> result = ContainerUtil.newArrayList();
     if (findExistingLibrary(libraryName, result, urls)) return result;
     if (findCommunitySources(project, result, urls)) return result;
 

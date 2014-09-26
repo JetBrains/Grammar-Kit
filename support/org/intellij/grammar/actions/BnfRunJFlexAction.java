@@ -35,8 +35,6 @@ import com.intellij.notification.NotificationType;
 import com.intellij.notification.Notifications;
 import com.intellij.openapi.actionSystem.*;
 import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.application.Result;
-import com.intellij.openapi.application.WriteAction;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.project.DumbAwareAction;
@@ -44,7 +42,6 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.projectRoots.Sdk;
 import com.intellij.openapi.projectRoots.SimpleJavaSdkType;
 import com.intellij.openapi.roots.OrderRootType;
-import com.intellij.openapi.roots.ProjectFileIndex;
 import com.intellij.openapi.roots.ProjectRootManager;
 import com.intellij.openapi.roots.impl.libraries.ApplicationLibraryTable;
 import com.intellij.openapi.roots.libraries.Library;
@@ -62,7 +59,6 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.*;
 import com.intellij.psi.search.FilenameIndex;
 import com.intellij.psi.search.ProjectScope;
-import com.intellij.util.ArrayUtil;
 import com.intellij.util.Consumer;
 import com.intellij.util.SystemProperties;
 import com.intellij.util.containers.ContainerUtil;
@@ -77,11 +73,12 @@ import javax.swing.*;
 import java.awt.*;
 import java.io.File;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import static org.intellij.grammar.actions.FileGeneratorUtil.*;
 
 /**
  * @author greg
@@ -134,34 +131,7 @@ public class BnfRunJFlexAction extends DumbAwareAction {
         return;
       }
 
-      ProjectFileIndex fileIndex = ProjectFileIndex.SERVICE.getInstance(project);
-      Collection<VirtualFile> files = FilenameIndex.getVirtualFilesByName(
-        project, lexerClassName + ".java", ProjectScope.getAllScope(project));
-      VirtualFile existingFile = ContainerUtil.getFirstItem(files);
-      boolean exitingFileInContent = existingFile != null && fileIndex.isInContent(existingFile);
-      final VirtualFile virtualRoot = exitingFileInContent ? existingFile.getParent() :
-        fileIndex.isInSource(flexFile) ? fileIndex.getSourceRootForFile(flexFile) : ArrayUtil
-          .getFirstElement(ProjectRootManager.getInstance(project).getContentSourceRoots());
-
-      if (virtualRoot == null) {
-        fail(project, flexFile, "Unable to guess target source root");
-        return;
-      }
-      final VirtualFile virtualDir;
-      try {
-        virtualDir = exitingFileInContent || StringUtil.isEmpty(lexerPackage) ? virtualRoot :
-                     new WriteAction<VirtualFile>() {
-                       @Override
-                       protected void run(@NotNull Result<VirtualFile> result) throws Throwable {
-                         result.setResult(VfsUtil.createDirectoryIfMissing(
-                           virtualRoot, lexerPackage.replace('.', '/')));
-                       }
-                     }.execute().throwException().getResultObject();
-      }
-      catch (Exception ex) {
-        fail(project, flexFile, ex.getMessage());
-        return;
-      }
+      final VirtualFile virtualDir = getTargetDirectoryFor(project, flexFile, lexerClassName + ".java", lexerPackage);
 
       SimpleJavaParameters javaParameters = new SimpleJavaParameters();
       Sdk sdk = new SimpleJavaSdkType().createJdk("tmp", SystemProperties.getJavaHome());
@@ -199,13 +169,6 @@ public class BnfRunJFlexAction extends DumbAwareAction {
     catch (ExecutionException ex) {
       Messages.showErrorDialog(project, "Unable to run JFlex"+ "\n" + ex.getLocalizedMessage(), commandName);
     }
-  }
-
-  private static void fail(@NotNull Project project, @NotNull VirtualFile flexFile, @NotNull String message) {
-    Notifications.Bus.notify(new Notification(
-      BnfConstants.GENERATION_GROUP,
-      flexFile.getName() + " lexer generation", message,
-      NotificationType.ERROR), project);
   }
 
   private static void ensureLexerClassCreated(final Project project,

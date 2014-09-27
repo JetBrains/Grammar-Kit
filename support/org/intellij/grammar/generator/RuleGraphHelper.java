@@ -28,7 +28,6 @@ import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.util.CommonProcessors;
 import com.intellij.util.containers.ContainerUtil;
 import com.intellij.util.containers.MultiMap;
-import com.intellij.util.containers.MultiMapBasedOnSet;
 import gnu.trove.THashMap;
 import gnu.trove.THashSet;
 import gnu.trove.TObjectHashingStrategy;
@@ -41,6 +40,8 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
+import static com.intellij.util.containers.ContainerUtil.getFirstItem;
+import static com.intellij.util.containers.ContainerUtil.newTroveSet;
 import static org.intellij.grammar.generator.ParserGeneratorUtil.*;
 import static org.intellij.grammar.generator.RuleGraphHelper.Cardinality.*;
 import static org.intellij.grammar.psi.impl.GrammarUtil.collectExtraArguments;
@@ -71,10 +72,11 @@ public class RuleGraphHelper {
   };
   private final BnfFile myFile;
   private final MultiMap<BnfRule, BnfRule> myRuleExtendsMap;
-  private final Map<BnfRule, Map<PsiElement, Cardinality>> myRuleContentsMap;
-  private final MultiMap<BnfRule,BnfRule> myRulesGraph;
-  private final Set<BnfRule> myRulesWithTokens = new THashSet<BnfRule>();
-  private final Map<String, PsiElement> myExternalElements = new THashMap<String, PsiElement>();
+  private final MultiMap<BnfRule,BnfRule> myRulesGraph = newMultiMap();
+  private final Map<BnfRule, Map<PsiElement, Cardinality>> myRuleContentsMap = ContainerUtil.newTroveMap();
+  private final MultiMap<BnfRule, BnfRule> myRulesCollapseMap = newMultiMap();
+  private final Set<BnfRule> myRulesWithTokens = ContainerUtil.newTroveSet();
+  private final Map<String, PsiElement> myExternalElements = ContainerUtil.newTroveMap();
 
   private static final LeafPsiElement LEFT_MARKER = new LeafPsiElement(new IElementType("LEFT_MARKER", Language.ANY, false) {}, "LEFT_MARKER");
   private static final IElementType EXTERNAL_TYPE = new IElementType("EXTERNAL_TYPE", Language.ANY, false) {};
@@ -149,19 +151,24 @@ public class RuleGraphHelper {
 
   }
 
-  public static MultiMap<BnfRule, BnfRule> computeInheritance(BnfFile file) {
-    final MultiMap<BnfRule, BnfRule> ruleExtendsMap = new MultiMapBasedOnSet<BnfRule, BnfRule>();
+  public static MultiMap<BnfRule, BnfRule> buildExtendsMap(BnfFile file) {
+    MultiMap<BnfRule, BnfRule> ruleExtendsMap = newMultiMap();
     for (BnfRule rule : file.getRules()) {
       if (Rule.isPrivate(rule) || Rule.isExternal(rule)) continue;
       BnfRule superRule = file.getRule(getAttribute(rule, KnownAttribute.EXTENDS));
-      if (superRule == null) continue;
-      ruleExtendsMap.putValue(superRule, rule);
+      if (superRule != null) {
+        ruleExtendsMap.putValue(superRule, rule);
+      }
+      BnfRule target = getSynonymTargetOrSelf(rule);
+      if (target != rule) {
+        ruleExtendsMap.putValue(target, rule);
+      }
     }
     for (int i = 0, len = ruleExtendsMap.size(); i < len; i++) {
       boolean changed = false;
       for (BnfRule superRule : ruleExtendsMap.keySet()) {
         final Collection<BnfRule> rules = ruleExtendsMap.get(superRule);
-        for (BnfRule rule : new ArrayList<BnfRule>(rules)) {
+        for (BnfRule rule : ContainerUtil.newArrayList(rules)) {
           changed |= rules.addAll(ruleExtendsMap.get(rule));
         }
       }
@@ -171,6 +178,22 @@ public class RuleGraphHelper {
       ruleExtendsMap.putValue(rule, rule); // add super to itself
     }
     return ruleExtendsMap;
+  }
+
+  private static <K, V> MultiMap<K, V> newMultiMap() {
+    return new MultiMap<K, V>() {
+      @NotNull
+      @Override
+      protected Map<K, Collection<V>> createMap() {
+        return ContainerUtil.newLinkedHashMap();
+      }
+
+      @NotNull
+      @Override
+      protected Collection<V> createCollection() {
+        return ContainerUtil.newLinkedHashSet();
+      }
+    };
   }
 
   private static final Key<CachedValue<Map<String, String>>> TOKEN_MAP_KEY = Key.create("TOKEN_MAP_KEY");
@@ -210,21 +233,13 @@ public class RuleGraphHelper {
   }
 
   public RuleGraphHelper(BnfFile file) {
-    this(file, computeInheritance(file));
+    this(file, buildExtendsMap(file));
   }
 
   public RuleGraphHelper(BnfFile file, MultiMap<BnfRule, BnfRule> ruleExtendsMap) {
     myFile = file;
     myRuleExtendsMap = ruleExtendsMap;
-    myRuleContentsMap = new THashMap<BnfRule, Map<PsiElement, Cardinality>>();
 
-    // ordered!
-    myRulesGraph = new MultiMapBasedOnSet<BnfRule, BnfRule>() {
-      @Override
-      protected Collection<BnfRule> createCollection() {
-        return new LinkedHashSet<BnfRule>();
-      }
-    };
     buildRulesGraph();
     buildContentsMap();
   }
@@ -266,12 +281,12 @@ public class RuleGraphHelper {
         );
       }
     });
-    THashSet<PsiElement> visited = new THashSet<PsiElement>();
+    Set<PsiElement> visited = newTroveSet();
     for (BnfRule rule : rules) {
       if (myRuleContentsMap.containsKey(rule)) continue;
       Map<PsiElement, Cardinality> map = collectMembers(rule, rule.getExpression(), visited);
-      if (map.size() == 1 && ContainerUtil.getFirstItem(map.values()) == REQUIRED && !Rule.isPrivate(rule)) {
-        PsiElement r = ContainerUtil.getFirstItem(map.keySet());
+      if (map.size() == 1 && getFirstItem(map.values()) == REQUIRED && !Rule.isPrivate(rule)) {
+        PsiElement r = getFirstItem(map.keySet());
         if (r == rule || r instanceof BnfRule && collapseEachOther((BnfRule)r, rule)) {
           myRuleContentsMap.put(rule, Collections.<PsiElement, Cardinality>emptyMap());
         }
@@ -362,7 +377,7 @@ public class RuleGraphHelper {
           if (result == null) {
             BnfExpression body = targetRule.getExpression();
             Map<PsiElement, Cardinality> map = collectMembers(targetRule, body, visited);
-            result = map.containsKey(body) ? joinMaps(null, BnfTypes.BNF_CHOICE, Arrays.asList(map, map)) : map;
+            result = map.containsKey(body) ? joinMaps(rule, false, BnfTypes.BNF_CHOICE, Arrays.asList(map, map)) : map;
             myRuleContentsMap.put(targetRule, result);
           }
         }
@@ -428,14 +443,14 @@ public class RuleGraphHelper {
       for (BnfExpression child : childExpressions) {
         Map<PsiElement, Cardinality> nextMap = collectMembers(rule, child, visited);
         if (pinApplied) {
-          nextMap = joinMaps(null, BnfTypes.BNF_OP_OPT, Collections.singletonList(nextMap));
+          nextMap = joinMaps(rule, false, BnfTypes.BNF_OP_OPT, Collections.singletonList(nextMap));
         }
         list.add(nextMap);
         if (!pinApplied && pinned.contains(child)) {
           pinApplied = true;
         }
       }
-      result = joinMaps(firstNonTrivial ? rule : null, type, list);
+      result = joinMaps(rule, firstNonTrivial, type, list);
     }
     if (rule.getExpression() == tree && Rule.isLeft(rule) && !Rule.isPrivate(rule) && !Rule.isInner(rule)) {
       List<Map<PsiElement, Cardinality>> list = new ArrayList<Map<PsiElement, Cardinality>>();
@@ -444,14 +459,14 @@ public class RuleGraphHelper {
         Cardinality cardinality = rulesToTheLeft.get(r);
         Map<PsiElement, Cardinality> leftMap = psiMap(r, REQUIRED);
         if (cardinality.many()) {
-          list.add(joinMaps(null, BnfTypes.BNF_CHOICE, Arrays.asList(leftMap, psiMap(rule, REQUIRED))));
+          list.add(joinMaps(rule, false, BnfTypes.BNF_CHOICE, Arrays.asList(leftMap, psiMap(rule, REQUIRED))));
         }
         else {
           list.add(leftMap);
         }
       }
-      Map<PsiElement, Cardinality> combinedLeftMap = joinMaps(null, BnfTypes.BNF_CHOICE, list);
-      result = joinMaps(null, BnfTypes.BNF_SEQUENCE, Arrays.asList(result, combinedLeftMap));
+      Map<PsiElement, Cardinality> combinedLeftMap = joinMaps(rule, false, BnfTypes.BNF_CHOICE, list);
+      result = joinMaps(rule, false, BnfTypes.BNF_SEQUENCE, Arrays.asList(result, combinedLeftMap));
     }
     visited.remove(tree);
     return result;
@@ -480,15 +495,17 @@ public class RuleGraphHelper {
     return result;
   }
 
-  private Map<PsiElement, Cardinality> joinMaps(@Nullable BnfRule rule, IElementType type, List<Map<PsiElement, Cardinality>> list) {
+  private Map<PsiElement, Cardinality> joinMaps(@NotNull BnfRule rule, boolean tryCollapse, IElementType type, List<Map<PsiElement, Cardinality>> list) {
     if (list.isEmpty()) return Collections.emptyMap();
-    boolean checkInheritance = rule != null && myRuleExtendsMap.containsScalarValue(rule);
+    boolean checkInheritance = tryCollapse && myRuleExtendsMap.containsScalarValue(rule);
     if (type == BnfTypes.BNF_OP_OPT || type == BnfTypes.BNF_OP_ZEROMORE || type == BnfTypes.BNF_OP_ONEMORE) {
       assert list.size() == 1;
-      list = compactInheritors(list);
+      list = compactInheritors(rule, list);
       Map<PsiElement, Cardinality> m = list.get(0);
-      if (type == BnfTypes.BNF_OP_OPT && checkInheritance && m.size() == 1 && collapseNode(rule, m.keySet().iterator().next())) {
-        return Collections.emptyMap();
+      if (type == BnfTypes.BNF_OP_OPT && checkInheritance && m.size() == 1) {
+        if (collapseNode(rule, getFirstItem(m.keySet()))) {
+          return Collections.emptyMap();
+        }
       }
       Map<PsiElement, Cardinality> map = psiMap();
       boolean leftMarker = m.containsKey(LEFT_MARKER);
@@ -502,7 +519,7 @@ public class RuleGraphHelper {
       return map;
     }
     else if (type == BnfTypes.BNF_SEQUENCE || type == BnfTypes.BNF_EXPRESSION || type == BnfTypes.BNF_REFERENCE_OR_TOKEN) {
-      list = new ArrayList<Map<PsiElement, Cardinality>>(compactInheritors(list));
+      list = ContainerUtil.newArrayList(compactInheritors(rule, list));
       for (Iterator<Map<PsiElement, Cardinality>> it = list.iterator(); it.hasNext(); ) {
         if (it.next().isEmpty()) it.remove();
       }
@@ -541,8 +558,8 @@ public class RuleGraphHelper {
           map.put(t, joinedCard);
         }
       }
-      if (checkInheritance && map.size() == 1 && ContainerUtil.getFirstItem(map.values()) == REQUIRED) {
-        if (collapseNode(rule, ContainerUtil.getFirstItem(map.keySet()))) {
+      if (checkInheritance && map.size() == 1 && getFirstItem(map.values()) == REQUIRED) {
+        if (collapseNode(rule, getFirstItem(map.keySet()))) {
           return Collections.emptyMap();
         }
       }
@@ -550,11 +567,13 @@ public class RuleGraphHelper {
     }
     else if (type == BnfTypes.BNF_CHOICE) {
       Map<PsiElement, Cardinality> map = psiMap();
-      list = compactInheritors(list);
+      list = compactInheritors(rule, list);
       for (int i = 0, newListSize = list.size(); i < newListSize; i++) {
         Map<PsiElement, Cardinality> m = list.get(i);
-        if (checkInheritance && m.size() == 1 && collapseNode(rule, m.keySet().iterator().next())) {
-          list.set(i, Collections.<PsiElement, Cardinality>emptyMap());
+        if (checkInheritance && m.size() == 1) {
+          if (collapseNode(rule, getFirstItem(m.keySet()))) {
+            list.set(i, Collections.<PsiElement, Cardinality>emptyMap());
+          }
         }
       }
       Map<PsiElement, Cardinality> m0 = list.get(0);
@@ -584,12 +603,9 @@ public class RuleGraphHelper {
   }
 
   private boolean collapseNode(BnfRule rule, PsiElement t) {
-    if (!(t instanceof BnfRule)) return false;
-    for (BnfRule superRule : myRuleExtendsMap.keySet()) {
-      Collection<BnfRule> set = myRuleExtendsMap.get(superRule);
-      if (set.contains(t) && set.contains(rule)) {
-        return true;
-      }
+    if (t instanceof BnfRule && collapseEachOther(rule, (BnfRule)t)) {
+      myRulesCollapseMap.putValue(rule, (BnfRule)t);
+      return true;
     }
     return false;
   }
@@ -608,118 +624,141 @@ public class RuleGraphHelper {
     return new THashMap<PsiElement, V>(3, CARDINALITY_HASHING_STRATEGY);
   }
 
-  private List<Map<PsiElement, Cardinality>> compactInheritors(List<Map<PsiElement, Cardinality>> mapList) {
-    Set<BnfRule> rulesToTry = new LinkedHashSet<BnfRule>();
-    // collect all rules
-    boolean allowOne = false;
+  /** @noinspection UnusedParameters*/
+  private List<Map<PsiElement, Cardinality>> compactInheritors(@Nullable BnfRule forRule, @NotNull List<Map<PsiElement, Cardinality>> mapList) {
+    Map<BnfRule, BnfRule> rulesAndAlts = ContainerUtil.newLinkedHashMap();
     for (Map<PsiElement, Cardinality> map : mapList) {
-      for (PsiElement psiElement : map.keySet()) {
-        if (!(psiElement instanceof BnfRule)) continue;
-        BnfRule r = (BnfRule)psiElement;
-        BnfRule r2 = getSynonymTargetOrSelf(r);
-        if (r == r2 || myRuleExtendsMap.containsScalarValue(r)) {
-          rulesToTry.add(r);
-        }
-        else {
-          rulesToTry.add(r2);
-          allowOne = true;
-        }
+      for (BnfRule rule : ContainerUtil.findAll(map.keySet(), BnfRule.class)) {
+        rulesAndAlts.put(rule, rule);
       }
     }
-    // add their supers & collapse-caused rules
-    BnfRule[] origRulesCopy = rulesToTry.toArray(new BnfRule[rulesToTry.size()]);
-    Set<BnfRule> origRules = new LinkedHashSet<BnfRule>(rulesToTry);
-    for (BnfRule realRule : origRulesCopy) {
-      Map<PsiElement, Cardinality> availableResult = myRuleContentsMap.get(realRule);
-      Set<PsiElement> content = availableResult == null? null : availableResult.keySet();
-      for (BnfRule superRule : myRuleExtendsMap.keySet()) {
-        if (superRule == realRule) continue;
-        Collection<BnfRule> inheritors = myRuleExtendsMap.get(superRule);
-        if (inheritors.contains(realRule)) {
-          rulesToTry.add(superRule);
-          if (content != null) {
-            if (content.isEmpty()) {  // will be definitely collapsed, replace with super
-              origRules.remove(realRule);
-              origRules.add(superRule);
+    if (forRule != null && "constructor_expression".equals(forRule.getName())) {
+      int gotcha = 1;
+    }
+
+    boolean hasSynonyms = collectSynonymsAndCollapseAlternatives(rulesAndAlts);
+    if (rulesAndAlts.size() < 2) {
+      return !hasSynonyms ? mapList : replaceRulesInMaps(mapList, rulesAndAlts);
+    }
+    Set<BnfRule> allRules = ContainerUtil.newLinkedHashSet(ContainerUtil.concat(rulesAndAlts.keySet(), rulesAndAlts.values()));
+
+    List<Map.Entry<BnfRule, Collection<BnfRule>>> applicableSupers = ContainerUtil.newArrayList();
+    for (Map.Entry<BnfRule, Collection<BnfRule>> e : myRuleExtendsMap.entrySet()) {
+      int count = 0;
+      for (BnfRule rule : allRules) {
+        if (e.getValue().contains(rule)) count ++;
+      }
+      if (count > 1) {
+        applicableSupers.add(e);
+      }
+    }
+    if (applicableSupers.isEmpty()) {
+      return !hasSynonyms ? mapList : replaceRulesInMaps(mapList, rulesAndAlts);
+    }
+
+    findTheBestReplacement(rulesAndAlts, applicableSupers);
+
+    return replaceRulesInMaps(mapList, rulesAndAlts);
+  }
+
+  private boolean collectSynonymsAndCollapseAlternatives(Map<BnfRule, BnfRule> rulesAndAlts) {
+    boolean hasSynonyms = false;
+    for (Map.Entry<BnfRule, BnfRule> e : ContainerUtil.newArrayList(rulesAndAlts.entrySet())) {
+      BnfRule rule = e.getKey();
+      e.setValue(getSynonymTargetOrSelf(rule));
+      hasSynonyms |= rule != e.getValue();
+      Map<PsiElement, Cardinality> currentContents = myRuleContentsMap.get(rule);
+      if (currentContents != null) {
+        if (currentContents.isEmpty() && myRulesCollapseMap.containsKey(rule)) {
+          for (BnfRule r : myRulesCollapseMap.get(rule)) {
+            rulesAndAlts.put(r, r);
+          }
+        }
+        else if (!currentContents.isEmpty()) {
+          boolean maybeCollapsed = true;
+          PsiElement required = null;
+          for (PsiElement t : currentContents.keySet()) {
+            if (!currentContents.get(t).optional()) {
+              if (required == null) {
+                required = t;
+                maybeCollapsed = required instanceof BnfRule;
+              }
+              else {
+                maybeCollapsed = false;
+              }
+              if (!maybeCollapsed) break;
             }
-            else {
-              for (PsiElement element : content) {
-                if (!(element instanceof BnfRule)) continue;
-                BnfRule r = (BnfRule)element;
-                if (inheritors.contains(r)) {
-                  origRules.add(r);
-                }
+          }
+          if (maybeCollapsed) {
+            for (PsiElement t : required != null ? Collections.singleton(required) : currentContents.keySet()) {
+              if (collapseNode(rule, t)) {
+                rulesAndAlts.put((BnfRule)t, (BnfRule)t);
               }
             }
           }
         }
       }
     }
+    return hasSynonyms;
+  }
 
-    if (rulesToTry.size() < 2 && !allowOne) return mapList;
-    // sort rules along with their supers
-    List<BnfRule> sorted = topoSort(rulesToTry, new Topology<BnfRule>() {
-      @Override
-      public boolean contains(BnfRule t1, BnfRule t2) {
-        return myRuleExtendsMap.get(t1).contains(t2);
-      }
-    });
+  private static void findTheBestReplacement(Map<BnfRule, BnfRule> rulesAndAlts,
+                                             List<Map.Entry<BnfRule, Collection<BnfRule>>> supers) {
+    BitSet bits = new BitSet(rulesAndAlts.size());
+    int minI = -1, minC = -1, minS = -1;
+    for (int len = Math.min(16, supers.size()), i = (1 << len) - 1; i > 0; i --) {
+      if (minC != -1 && Integer.bitCount(i) > minC) continue;
+      int curC = 0, curS = 0;
+      bits.set(0, rulesAndAlts.size(), true);
+      for (int j = 0, bit = 1; j < len; j ++, bit <<= 1) {
+        if ((i & bit) == 0) continue;
+        Collection<BnfRule> vals = supers.get(j).getValue();
+        curC += 1;
+        curS += vals.size();
+        if (bits.isEmpty()) continue;
 
-    // drop unnecessary super rules: doesn't combine much, not present due collapse
-    origRulesCopy = origRules.toArray(new BnfRule[origRules.size()]);
-    int max = 0;
-    BitSet bitSet = new BitSet(origRulesCopy.length);
-    for (Iterator<BnfRule> it = sorted.iterator(); it.hasNext(); ) {
-      BnfRule superRule = it.next();
-      Collection<BnfRule> inheritors = myRuleExtendsMap.get(superRule);
-      int count = 0;
-      boolean changed = false;
-      for (int i = 0; i < origRulesCopy.length; i++) {
-        BnfRule r = origRulesCopy[i];
-        if (r == superRule || inheritors.contains(r)) {
-          count ++;
-          if (!bitSet.get(i)) {
-            bitSet.set(i);
-            changed = true;
+        int k = 0;
+        for (Map.Entry<BnfRule, BnfRule> e : rulesAndAlts.entrySet()) {
+          if (bits.get(k)) {
+            if (vals.contains(e.getKey()) || vals.contains(e.getValue())) {
+              bits.set(k, false);
+            }
           }
+          k ++;
+        }
+        if (!bits.isEmpty()) {
+          curC += bits.cardinality();
+          curS += bits.cardinality();
         }
       }
-      if (changed) {
-        max = Math.max(max, count);
-      }
-      else if (count > 1 && max < count) {
-        max = count;
-      }
-      else {
-        it.remove();
+      if (minC == -1 || minC > curC || minC == curC && minS > curS) {
+        minC = curC;
+        minS = curS;
+        minI = i;
       }
     }
+    for (Map.Entry<BnfRule, BnfRule> e : rulesAndAlts.entrySet()) {
+      for (int len = supers.size(), j = 0, bit = 1; j < len; j++, bit <<= 1) {
+        if ((minI & bit) == 0) continue;
+        Collection<BnfRule> vals = supers.get(j).getValue();
+        if (vals.contains(e.getKey()) || vals.contains(e.getValue())) {
+          e.setValue(supers.get(j).getKey());
+        }
+      }
+    }
+  }
 
-    // apply changes and merge cards
-    Collections.reverse(sorted);
-    List<Map<PsiElement, Cardinality>> result = new ArrayList<Map<PsiElement, Cardinality>>(mapList.size());
+  private static List<Map<PsiElement, Cardinality>> replaceRulesInMaps(List<Map<PsiElement, Cardinality>> mapList,
+                                                                       Map<BnfRule, BnfRule> replacementMap) {
+    List<Map<PsiElement, Cardinality>> result = ContainerUtil.newArrayListWithCapacity(mapList.size());
     for (Map<PsiElement, Cardinality> map : mapList) {
-      result.add(psiMap(map));
-    }
-    for (BnfRule superRule : sorted) {
-      for (Map<PsiElement, Cardinality> newMap : result) {
-        Cardinality cardinality = null;
-        for (Iterator<PsiElement> iterator = newMap.keySet().iterator(); iterator.hasNext(); ) {
-          PsiElement cur = iterator.next();
-          if (!(cur instanceof BnfRule)) continue;
-          BnfRule r = (BnfRule)cur;
-          BnfRule r2 = getSynonymTargetOrSelf(r);
-          if (r == superRule) continue;
-          Collection<BnfRule> inheritors = myRuleExtendsMap.get(superRule);
-          if (r2 != superRule && !inheritors.contains(r) && !inheritors.contains(r2)) {
-            continue;
-          }
-          cardinality = cardinality == null ? newMap.get(r) : cardinality.or(newMap.get(r));
-          iterator.remove();
-        }
-        if (cardinality != null) {
-          newMap.put(superRule, cardinality);
-        }
+      Map<PsiElement, Cardinality> copy = psiMap(map);
+      result.add(copy);
+      for (Map.Entry<BnfRule, BnfRule> e : replacementMap.entrySet()) {
+        Cardinality card = copy.remove(e.getKey());
+        if (card == null) continue;
+        Cardinality cur = copy.get(e.getValue());
+        copy.put(e.getValue(), cur == null ? card : cur.or(card));
       }
     }
     return result;

@@ -464,11 +464,11 @@ public class ParserGenerator {
         if (rules.isEmpty()) continue;
         for (BnfRule rule : rules) {
           if (Rule.isFake(rule)) continue;
-          elementTypes.add(getElementType(rule));
+          ContainerUtil.addIfNotNull(elementTypes, StringUtil.nullize(getElementType(rule)));
         }
+        if (elementTypes.size() < 2) continue;
         int i = 0;
         for (String elementType : elementTypes) {
-          if (StringUtil.isEmpty(elementType)) continue;
           if (i > 0) sb.append(i % 4 == 0 ? ",\n" : ", ");
           sb.append(elementType);
           i++;

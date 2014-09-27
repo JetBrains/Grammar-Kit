@@ -7,10 +7,7 @@ import org.intellij.grammar.generator.ParserGenerator;
 import org.intellij.grammar.psi.impl.BnfFileImpl;
 import org.jetbrains.annotations.NonNls;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -39,9 +36,22 @@ public class BnfGeneratorTest extends BnfGeneratorTestCase {
 
   public void testEmpty() throws Exception {
     myFile = createPsiFile("empty.bnf", "{ }");
-    ParserGenerator parserGenerator = new ParserGenerator((BnfFileImpl)myFile, "", myFullDataPath);
-    parserGenerator.setUnitTestMode(true);
-    parserGenerator.generate();
+    newTestGenerator().generate();
+  }
+
+  private ParserGenerator newTestGenerator() {
+    return new ParserGenerator((BnfFileImpl)myFile, "", myFullDataPath) {
+
+      @Override
+      protected PrintWriter openOutputInner(File file) throws IOException {
+        String grammarName = FileUtil.getNameWithoutExtension(myFile.getName());
+        String fileName = FileUtil.getNameWithoutExtension(file);
+        String name = grammarName + (fileName.startsWith(grammarName) || fileName.endsWith("Parser") ? "" : ".PSI") + ".java";
+        PrintWriter out = new PrintWriter(new FileOutputStream(new File(myFullDataPath, name), true));
+        out.println("// ---- " + file.getName() + " -----------------");
+        return out;
+      }
+    };
   }
 
   @Override
@@ -65,8 +75,7 @@ public class BnfGeneratorTest extends BnfGeneratorTestCase {
       }
     }
 
-    ParserGenerator parserGenerator = new ParserGenerator((BnfFileImpl)myFile, "", myFullDataPath);
-    parserGenerator.setUnitTestMode(true);
+    ParserGenerator parserGenerator = newTestGenerator();
     if (generatePsi) parserGenerator.generate();
     else parserGenerator.generateParser();
 

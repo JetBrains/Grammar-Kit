@@ -131,7 +131,7 @@ public class BnfRunJFlexAction extends DumbAwareAction {
         return;
       }
 
-      final VirtualFile virtualDir = getTargetDirectoryFor(project, flexFile, lexerClassName + ".java", lexerPackage);
+      final VirtualFile virtualDir = getTargetDirectoryFor(project, flexFile, lexerClassName + ".java", lexerPackage, false);
 
       SimpleJavaParameters javaParameters = new SimpleJavaParameters();
       Sdk sdk = new SimpleJavaSdkType().createJdk("tmp", SystemProperties.getJavaHome());

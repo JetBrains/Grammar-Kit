@@ -51,9 +51,12 @@ import org.intellij.grammar.psi.BnfFile;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static org.intellij.grammar.actions.FileGeneratorUtil.getTargetDirectoryFor;
 import static org.intellij.grammar.generator.ParserGeneratorUtil.getRootAttribute;
@@ -105,13 +108,17 @@ public class GenerateAction extends AnAction implements DumbAware {
         for (BnfFile file : bnfFiles) {
           String parserClass = getRootAttribute(file, KnownAttribute.PARSER_CLASS);
           VirtualFile target =
-            getTargetDirectoryFor(project, file.getVirtualFile(), StringUtil.getShortName(parserClass) + ".java", null);
+            getTargetDirectoryFor(project, file.getVirtualFile(),
+                                  StringUtil.getShortName(parserClass) + ".java",
+                                  StringUtil.getPackageName(parserClass), true);
           rootMap.put(file, target);
         }
       }
     });
 
     ProgressManager.getInstance().run(new Task.Backgroundable(project, "Parser Generation", true, new BackgroundFromStartOption()) {
+
+      Set<File> files = ContainerUtil.newLinkedHashSet();
 
       @Override
       public void run(@NotNull ProgressIndicator indicator) {
@@ -120,7 +127,7 @@ public class GenerateAction extends AnAction implements DumbAware {
           runInner();
         }
         finally {
-          LocalFileSystem.getInstance().refreshFiles(rootMap.values(), true, false, new Runnable() {
+          LocalFileSystem.getInstance().refreshIoFiles(files, true, false, new Runnable() {
             @Override
             public void run() {
               //System.out.println(System.currentTimeMillis() + ": refreshed!");
@@ -140,7 +147,13 @@ public class GenerateAction extends AnAction implements DumbAware {
             ApplicationManager.getApplication().runReadAction(new ThrowableComputable<Boolean, Exception>() {
               @Override
               public Boolean compute() throws Exception {
-                new ParserGenerator(file, sourcePath, genDir.getPath()).generate();
+                new ParserGenerator(file, sourcePath, genDir.getPath()) {
+                  @Override
+                  protected PrintWriter openOutputInner(File file) throws IOException {
+                    files.add(file);
+                    return super.openOutputInner(file);
+                  }
+                }.generate();
                 return true;
               }
             });

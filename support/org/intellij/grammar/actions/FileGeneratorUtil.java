@@ -25,11 +25,15 @@ import com.intellij.openapi.progress.ProcessCanceledException;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.ProjectFileIndex;
 import com.intellij.openapi.roots.ProjectRootManager;
+import com.intellij.openapi.util.Comparing;
 import com.intellij.openapi.util.text.StringUtil;
+import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.openapi.vfs.VirtualFileManager;
 import com.intellij.psi.search.FilenameIndex;
 import com.intellij.psi.search.ProjectScope;
+import com.intellij.util.ObjectUtils;
 import com.intellij.util.containers.ContainerUtil;
 import org.intellij.grammar.generator.BnfConstants;
 import org.jetbrains.annotations.NotNull;
@@ -46,38 +50,60 @@ import static com.intellij.util.ArrayUtil.getFirstElement;
 public class FileGeneratorUtil {
   @NotNull
   public static VirtualFile getTargetDirectoryFor(@NotNull Project project,
-                                                   @NotNull VirtualFile sourceFile,
-                                                   @Nullable String existingTargetFile,
-                                                   @Nullable String targetPackage) {
+                                                  @NotNull VirtualFile sourceFile,
+                                                  @Nullable String targetFile,
+                                                  @Nullable String targetPackage,
+                                                  boolean returnRoot) {
     boolean hasPackage = StringUtil.isNotEmpty(targetPackage);
     ProjectRootManager rootManager = ProjectRootManager.getInstance(project);
     ProjectFileIndex fileIndex = ProjectFileIndex.SERVICE.getInstance(project);
-    Collection<VirtualFile> files = existingTargetFile == null ? Collections.<VirtualFile>emptyList() :
-                                    FilenameIndex.getVirtualFilesByName(project, existingTargetFile,
+    Collection<VirtualFile> files = targetFile == null ? Collections.<VirtualFile>emptyList() :
+                                    FilenameIndex.getVirtualFilesByName(project, targetFile,
                                                                         ProjectScope.getAllScope(project));
 
-    VirtualFile existingFile = ContainerUtil.getFirstItem(files);
-    boolean reuseExistingFile = existingFile != null && fileIndex.isInContent(existingFile);
+    VirtualFile existingFile = null;
+    for (VirtualFile file : files) {
+      String existingFilePackage = fileIndex.getPackageNameByDirectory(file.getParent());
+      if (!hasPackage || existingFilePackage == null || targetPackage.equals(existingFilePackage)) {
+        existingFile = file;
+        break;
+      }
+    }
+
+    VirtualFile existingFileRoot =
+      existingFile == null ? null :
+      fileIndex.isInSourceContent(existingFile) ? fileIndex.getSourceRootForFile(existingFile) :
+      fileIndex.isInContent(existingFile) ? fileIndex.getContentRootForFile(existingFile) : null;
+
     VirtualFile[] sourceRoots = rootManager.getContentSourceRoots();
     VirtualFile[] contentRoots = rootManager.getContentRoots();
-    final VirtualFile virtualRoot = reuseExistingFile ? existingFile.getParent() :
+    final VirtualFile virtualRoot = existingFileRoot != null ? existingFileRoot :
                                     hasPackage && fileIndex.isInSource(sourceFile) ? fileIndex.getSourceRootForFile(sourceFile) :
                                     fileIndex.isInContent(sourceFile) ? fileIndex.getContentRootForFile(sourceFile) :
-                                    getFirstElement(hasPackage ? sourceRoots : contentRoots);
+                                    getFirstElement(hasPackage && sourceRoots.length > 0? sourceRoots : contentRoots);
     if (virtualRoot == null) {
       fail(project, sourceFile, "Unable to guess target source root");
       throw new ProcessCanceledException();
     }
     try {
-      final String relativePath = hasPackage ? targetPackage.replace('.', '/') : !fileIndex.isInSource(virtualRoot) ? "gen" : null;
-      return reuseExistingFile || relativePath == null ? virtualRoot :
-                   new WriteAction<VirtualFile>() {
-                     @Override
-                     protected void run(@NotNull Result<VirtualFile> result) throws Throwable {
-                       result.setResult(VfsUtil.createDirectoryIfMissing(
-                         virtualRoot, relativePath));
-                     }
-                   }.execute().throwException().getResultObject();
+      boolean newGenRoot = !fileIndex.isInSourceContent(virtualRoot);
+      final String relativePath = (hasPackage && newGenRoot? "gen." + targetPackage :
+                                  hasPackage ? targetPackage :
+                                  newGenRoot ? "gen" : "").replace('.', '/');
+      if (relativePath.isEmpty()) {
+        return virtualRoot;
+      }
+      else {
+        VirtualFile result = new WriteAction<VirtualFile>() {
+          @Override
+          protected void run(@NotNull Result<VirtualFile> result) throws Throwable {
+            result.setResult(VfsUtil.createDirectoryIfMissing(virtualRoot, relativePath));
+          }
+        }.execute().throwException().getResultObject();
+        LocalFileSystem.getInstance().refreshFiles(Collections.singleton(result));
+        return returnRoot && newGenRoot? ObjectUtils.assertNotNull(virtualRoot.findChild("gen")) :
+               returnRoot ? virtualRoot : result;
+      }
     }
     catch (Exception ex) {
       fail(project, sourceFile, ex.getMessage());

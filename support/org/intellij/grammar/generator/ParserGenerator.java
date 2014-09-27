@@ -28,7 +28,6 @@ import com.intellij.psi.tree.IElementType;
 import com.intellij.util.ArrayUtil;
 import com.intellij.util.Function;
 import com.intellij.util.ObjectUtils;
-import com.intellij.util.SmartList;
 import com.intellij.util.containers.ContainerUtil;
 import gnu.trove.THashMap;
 import gnu.trove.THashSet;
@@ -40,7 +39,10 @@ import org.intellij.grammar.psi.impl.GrammarUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.*;
 
 import static org.intellij.grammar.generator.ParserGeneratorUtil.*;
@@ -75,7 +77,6 @@ public class ParserGenerator {
   private PrintWriter myOut;
   private Function<String, String> myShortener;
 
-  private boolean myUnitTestMode;
   private final RuleGraphHelper myGraphHelper;
   private final ExpressionHelper myExpressionHelper;
   private final RuleMethodsHelper myRulesMethodsHelper;
@@ -107,23 +108,15 @@ public class ParserGenerator {
     myRulesMethodsHelper = new RuleMethodsHelper(myGraphHelper, myExpressionHelper, mySimpleTokens);
   }
 
-  public void setUnitTestMode(boolean unitTestMode) {
-    myUnitTestMode = unitTestMode;
+  private void openOutput(String className) throws IOException {
+    File file = new File(myOutputPath, className.replace('.', File.separatorChar) + ".java");
+    myOut = openOutputInner(file);
   }
 
-  private void openOutput(File file) throws FileNotFoundException {
-    String grammarName = FileUtil.getNameWithoutExtension(myFile.getName());
-    String fileName = FileUtil.getNameWithoutExtension(file);
-    if (myUnitTestMode) {
-      String name = grammarName + (fileName.startsWith(grammarName) || fileName.endsWith("Parser") ? "" : ".PSI") + ".java";
-      myOut = new PrintWriter(new FileOutputStream(new File(myOutputPath, name), true));
-      out("// ---- " + file.getName() + " -----------------");
-    }
-    else {
-      //noinspection ResultOfMethodCallIgnored
-      file.getParentFile().mkdirs();
-      myOut = new PrintWriter(new FileOutputStream(file));
-    }
+  protected PrintWriter openOutputInner(File file) throws IOException {
+    //noinspection ResultOfMethodCallIgnored
+    file.getParentFile().mkdirs();
+    return new PrintWriter(new FileOutputStream(file));
   }
 
   private void closeOutput() {
@@ -175,8 +168,7 @@ public class ParserGenerator {
     }
     if (myGrammarRoot != null) {
       String className = getRootAttribute(myFile, KnownAttribute.ELEMENT_TYPE_HOLDER_CLASS);
-      File parserFile = new File(myOutputPath, className.replace('.', File.separatorChar) + ".java");
-      openOutput(parserFile);
+      openOutput(className);
       try {
         generateElementTypesHolder(className, sortedCompositeTypes, generatePsi);
       }
@@ -203,8 +195,7 @@ public class ParserGenerator {
         String psiImplClass = psiImplPackage + "." + getRulePsiClassName(rule, myRuleClassPrefix) + suffix;
         
         infClasses.put(ruleName, psiClass);
-        File psiFile = new File(myOutputPath, psiClass.replace('.', File.separatorChar) + ".java");
-        openOutput(psiFile);
+        openOutput(psiClass);
         try {
           generatePsiIntf(rule, psiClass, getSuperInterfaceNames(rule, psiPackage), psiImplClass);
         }
@@ -215,8 +206,7 @@ public class ParserGenerator {
       for (String ruleName : sortedPsiRules.keySet()) {
         BnfRule rule = myFile.getRule(ruleName);
         String psiImplClass = psiImplPackage + "." + getRulePsiClassName(rule, myRuleClassPrefix) + suffix;
-        File psiFile = new File(myOutputPath, psiImplClass.replace('.', File.separatorChar) + ".java");
-        openOutput(psiFile);
+        openOutput(psiImplClass);
         try {
           generatePsiImpl(rule, psiImplClass, infClasses.get(ruleName), getSuperClassName(rule, psiImplPackage, suffix));
         }
@@ -226,8 +216,7 @@ public class ParserGenerator {
       }
       if (visitorClassName != null && myGrammarRoot != null) {
         String psiClass = psiPackage + "." + visitorClassName;
-        File psiFile = new File(myOutputPath, psiClass.replace('.', File.separatorChar) + ".java");
-        openOutput(psiFile);
+        openOutput(psiClass);
         try {
           generateVisitor(psiClass, sortedPsiRules);
         }
@@ -291,7 +280,7 @@ public class ParserGenerator {
   }
 
 
-  public void generateParser() throws FileNotFoundException {
+  public void generateParser() throws IOException {
     for (String className : new TreeSet<String>(myRuleParserClasses.values())) {
       Map<String, BnfRule> map = new TreeMap<String, BnfRule>();
       for (String ruleName : myRuleParserClasses.keySet()) {
@@ -299,8 +288,7 @@ public class ParserGenerator {
           map.put(ruleName, myFile.getRule(ruleName));
         }
       }
-      File parserFile = new File(myOutputPath + File.separatorChar + className.replace('.', File.separatorChar) + ".java");
-      openOutput(parserFile);
+      openOutput(className);
       try {
         generateParser(className, map.keySet());
       }

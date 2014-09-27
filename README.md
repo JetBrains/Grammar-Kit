@@ -27,11 +27,12 @@ General usage instructions
 
 Recent changes
 --------------
-1.1.10
+1.2.0
 
-* GPUB: improve error reporting in some cases
-* Generator/Editor: performance fix
-* JFlex: treat "%eof{ return;" case as forced comment instead of error
+* Generator: output directories detection for JFlex/BNF generators
+* Generator: better PSI generation in complex "extends" / "elementType" cases
+* Generator/Pratt: no more explicit PsiBuilder.Marker manipulations in generated code
+* LivePreview: pre-configured tokens are dropped, numbers/strings/whitespaces detected
 
 
 Quick documentation:

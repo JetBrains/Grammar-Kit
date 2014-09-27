@@ -1,6 +1,6 @@
 <idea-plugin url="https://github.com/JetBrains/Grammar-Kit" version="2">
   <id>org.jetbrains.idea.grammar</id>
-  <version>1.1.10_1</version>
+  <version>1.2.0</version>
   <vendor email="gregory.shrago@jetbrains.com">Greg Shrago</vendor>
   <idea-version since-build="138.1029" until-build=""/>
 
@@ -12,11 +12,12 @@
 
   <change-notes>
     <![CDATA[
-    <p>1.1.10</p>
+    <p>1.2.0</p>
     <ul>
-      <li>GPUB: improve error reporting in some cases</li>
-      <li>Generator/Editor: performance fix</li>
-      <li>JFlex: treat %eof{ return; case as forced comment instead of error</li>
+      <li>Generator: output directories detection for JFlex/BNF generators</li>
+      <li>Generator: better PSI generation in complex "extends" / "elementType" cases</li>
+      <li>Generator/Pratt: no more explicit PsiBuilder.Marker manipulations in generated code</li>
+      <li>LivePreview: pre-configured tokens are dropped, numbers/strings/whitespaces detected</li>
     </ul>
     <a href="https://github.com/JetBrains/Grammar-Kit#change-log">Full change log...</a>
     ]]>

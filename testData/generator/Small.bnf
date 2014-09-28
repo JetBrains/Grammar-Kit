@@ -25,3 +25,5 @@ private empty7 ::= !()
 private empty8 ::= [({})]
 private not_empty1 ::= [({token})]
 private not_empty2 ::= [({token someString})]
+left empty9 ::= []
+inner left empty10 ::= []

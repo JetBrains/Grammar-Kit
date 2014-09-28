@@ -45,6 +45,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.*;
 
+import static java.lang.String.format;
 import static org.intellij.grammar.generator.ParserGeneratorUtil.*;
 import static org.intellij.grammar.generator.RuleGraphHelper.Cardinality.*;
 import static org.intellij.grammar.psi.BnfTypes.*;
@@ -83,10 +84,13 @@ public class ParserGenerator {
   private final RuleMethodsHelper myRulesMethodsHelper;
   private final KnownAttribute.ListValue myUnknownRootAttributes;
 
+  final Names N;
+
   public ParserGenerator(BnfFile tree, String sourcePath, String outputPath) {
     myFile = tree;
     mySourcePath = sourcePath;
     myOutputPath = outputPath;
+    N = Names.classicNames();
     final List<BnfRule> rules = tree.getRules();
     myGrammarRoot = rules.isEmpty() ? null : rules.get(0).getName();
     for (BnfRule r : rules) {
@@ -122,6 +126,10 @@ public class ParserGenerator {
 
   private void closeOutput() {
     myOut.close();
+  }
+
+  public void out(String s, Object... args) {
+    out(format(s, args));
   }
 
   public void out(String s) {
@@ -417,40 +425,40 @@ public class ParserGenerator {
 
   private void generateRootParserContent(Set<String> ownRuleNames) {
     boolean generateExtendsSets = !myGraphHelper.getRuleExtendsMap().isEmpty();
-    out("public ASTNode parse(IElementType root_, PsiBuilder builder_) {");
-    out("parse_only_(root_, builder_);");
-    out("return builder_.getTreeBuilt();");
+    out("public ASTNode parse(IElementType %s, PsiBuilder %s) {", N.root, N.builder);
+    out("parse_only_(%s, %s);", N.root, N.builder);
+    out("return %s.getTreeBuilt();", N.builder);
     out("}");
     newLine();
-    out("public void parse_only_(IElementType root_, PsiBuilder builder_) {");
-    out("boolean result_;");
-    out("builder_ = adapt_builder_(root_, builder_, this, " + (generateExtendsSets ? "EXTENDS_SETS_" : null) + ");");
-    out("Marker marker_ = enter_section_(builder_, 0, _COLLAPSE_, null);");
+    out("public void parse_only_(IElementType %s, PsiBuilder %s) {", N.root, N.builder);
+    out("boolean %s;", N.result);
+    out("%s = adapt_builder_(%s, %s, this, %s);", N.builder, N.root, N.builder, generateExtendsSets ? "EXTENDS_SETS_" : null);
+    out("Marker %s = enter_section_(%s, 0, _COLLAPSE_, null);", N.marker, N.builder);
     boolean first = true;
     for (String ruleName : ownRuleNames) {
       BnfRule rule = myFile.getRule(ruleName);
       if (!RuleGraphHelper.shouldGeneratePsi(rule, false) || Rule.isMeta(rule)) continue;
       if (Rule.isFake(rule)) continue;
       String elementType = getElementType(rule);
-      out((first ? "" : "else ") + "if (root_ == " + elementType + ") {");
+      out("%sif (%s == %s) {", first ? "" : "else ", N.root, elementType);
       String nodeCall = generateNodeCall(rule, null, ruleName);
-      out("result_ = " + nodeCall.replace("level_ + 1", "0") + ";");
+      out("%s = %s;", N.result, nodeCall.replace(format("%s + 1", N.level), "0"));
       out("}");
       if (first) first = false;
     }
     {
       if (!first) out("else {");
-      out("result_ = parse_root_(root_, builder_, 0);");
+      out("%s = parse_root_(%s, %s, 0);", N.result, N.root, N.builder);
       if (!first) out("}");
     }
-    out("exit_section_(builder_, 0, marker_, root_, result_, true, TRUE_CONDITION);");
+    out("exit_section_(%s, 0, %s, %s, %s, true, TRUE_CONDITION);", N.builder, N.marker, N.root, N.result);
     out("}");
     newLine();
     {
       BnfRule rootRule = myFile.getRule(myGrammarRoot);
       String nodeCall = generateNodeCall(rootRule, null, myGrammarRoot);
-      out("protected boolean parse_root_(IElementType root_, PsiBuilder builder_, int level_) {");
-      out("return " + nodeCall + ";");
+      out("protected boolean parse_root_(IElementType %s, PsiBuilder %s, int %s) {", N.root, N.builder, N.level);
+      out("return %s;", nodeCall);
       out("}");
       newLine();
     }
@@ -474,7 +482,7 @@ public class ParserGenerator {
           sb.append(elementType);
           i++;
         }
-        out("create_token_set_(" + sb.toString() + "),");
+        out("create_token_set_(%s),", sb);
         sb.setLength(0);
         elementTypes.clear();
       }
@@ -491,7 +499,7 @@ public class ParserGenerator {
     generateFileHeader(className);
     String packageName = StringUtil.getPackageName(className);
     String shortClassName = StringUtil.getShortName(className);
-    out("package " + packageName + ";");
+    out("package %s;", packageName);
     newLine();
     final Set<String> realImports = new HashSet<String>();
     realImports.add(packageName + ".*");
@@ -526,7 +534,7 @@ public class ParserGenerator {
         if (!s.contains(".") || !s.equals(shortener.fun(s))) continue;
         if (myPackageClasses.contains(StringUtil.getShortName(s))) continue;
         realImports.add(s);
-        out("import " + s + ";");
+        out("import %s;", s);
       }
     }
     newLine();
@@ -550,7 +558,7 @@ public class ParserGenerator {
     if (StringUtil.isNotEmpty(annos)) {
       out(annos);
     }
-    out("public " + (intf ? "interface " : "class ") + shortClassName + sb.toString() + " {");
+    out("public %s%s%s {", intf ? "interface " : "class ", shortClassName, sb.toString());
     newLine();
     myShortener = shortener;
   }
@@ -594,13 +602,13 @@ public class ParserGenerator {
     String elementType = getElementType(rule);
 
     final List<BnfExpression> children;
-    out((!isRule ? "private " : isPrivate ? "" : "public ") + "static boolean " + funcName + "(PsiBuilder builder_, int level_"
-        + collectExtraArguments(rule, node, true) + ") {");
+    String extraArguments = collectExtraArguments(rule, node, true);
+    out("%sstatic boolean %s(PsiBuilder %s, int %s%s) {", !isRule ? "private " : isPrivate ? "" : "public ", funcName, N.builder, N.level, extraArguments);
     if (node instanceof BnfReferenceOrToken || node instanceof BnfLiteralExpression || node instanceof BnfExternalExpression) {
       children = Collections.singletonList(node);
       if (isPrivate && !isLeftInner && recoverWhile == null) {
         String nodeCall = generateNodeCall(rule, node, getNextName(funcName, 0));
-        out("return " + nodeCall + ";");
+        out("return %s;", nodeCall);
         out("}");
         if (node instanceof BnfExternalExpression && ((BnfExternalExpression)node).getExpressionList().size() > 1) {
           generateNodeChildren(rule, funcName, children, visited);
@@ -613,34 +621,39 @@ public class ParserGenerator {
     }
     else {
       children = getChildExpressions(node);
-      if (children.isEmpty() && recoverWhile == null) {
-        if (isPrivate || StringUtil.isEmpty(elementType)) {
-          out("return true;");
-        }
-        else {
-          // todo handle left rules
-          out("builder_.mark().done(" + elementType + ");");
-          out("return true;");
-        }
-        out("}");
-        return;
-      }
+      //if (children.isEmpty() && recoverWhile == null) {
+      //  if (!isPrivate && !StringUtil.isEmpty(elementType)) {
+      //    if (isLeft || isLeftInner) {
+      //      out("Marker %s = enter_section_(%s, %s, %s, %s);", N.marker, N.builder, N.level, isLeftInner ? "_LEFT_INNER_" : "_LEFT_", null);
+      //      out("exit_section_(%s, %s, %s, %s, %s, %s, %s);", N.builder, N.level, N.marker, elementType, true, false, null);
+      //    }
+      //    else {
+      //      out("Marker %s = enter_section_(%s);", N.marker, N.builder);
+      //      out("exit_section_(%s, %s, %s, %s);", N.builder, N.marker, elementType, true);
+      //    }
+      //  }
+      //  out("return true;");
+      //  out("}");
+      //  return;
+      //}
     }
-    out("if (!recursion_guard_(builder_, level_, \"" + funcName + "\")) return false;");
+    if (!children.isEmpty()) {
+      out("if (!recursion_guard_(%s, %s, \"%s\")) return false;", N.builder, N.level, funcName);
+    }
 
-    String frameName = firstNonTrivial && !Rule.isMeta(rule)? quote(getRuleDisplayName(rule, !isPrivate)) : null;
+    String frameName = !children.isEmpty() && firstNonTrivial && !Rule.isMeta(rule)? quote(getRuleDisplayName(rule, !isPrivate)) : null;
     if (recoverWhile == null && (isRule || firstNonTrivial)) {
       frameName = generateFirstCheck(rule, frameName, true);
     }
 
     PinMatcher pinMatcher = new PinMatcher(rule, type, firstNonTrivial ? rule.getName() : funcName);
     boolean pinApplied = false;
-    final boolean alwaysTrue = type == BNF_OP_OPT || type == BNF_OP_ZEROMORE;
+    final boolean alwaysTrue = children.isEmpty() || (type == BNF_OP_OPT || type == BNF_OP_ZEROMORE);
     boolean pinned = pinMatcher.active() && pinMatcher.shouldGenerate(children);
     if (!alwaysTrue) {
       boolean value = type == BNF_OP_ZEROMORE || type == BNF_OP_OPT || children.isEmpty();
-      out("boolean result_" + (children.isEmpty() || type == BNF_OP_ZEROMORE ? " = " + value : "") +
-          (pinned ? ", pinned_" : "") + ";");
+      out("boolean %s%s%s;", N.result, children.isEmpty() || type == BNF_OP_ZEROMORE ? " = " + value : "",
+          pinned ? format(", %s", N.pinned) : "");
     }
 
     List<String> modifierList = ContainerUtil.newSmartList();
@@ -654,10 +667,10 @@ public class ParserGenerator {
     boolean sectionRequiredSimple = sectionRequired && modifierList.isEmpty() && recoverWhile == null;
     String modifiers = modifierList.isEmpty()? "_NONE_" : StringUtil.join(modifierList, " | ");
     if (sectionRequiredSimple) {
-      out("Marker marker_ = enter_section_(builder_);");
+      out("Marker %s = enter_section_(%s);", N.marker, N.builder);
     }
     else if (sectionRequired) {
-      out("Marker marker_ = enter_section_(builder_, level_, "+modifiers+", "+frameName+");");
+      out("Marker %s = enter_section_(%s, %s, %s, %s);", N.marker, N.builder, N.level, modifiers, frameName);
     }
 
     ConsumeType consumeType = ConsumeType.forRule(rule);
@@ -668,35 +681,35 @@ public class ParserGenerator {
 
       String nodeCall = generateNodeCall(rule, child, getNextName(funcName, i));
       if (type == BNF_CHOICE) {
-        out((i > 0 ? "if (!result_) " : "") + "result_ = " + nodeCall + ";");
+        out("%s%s = %s;", i > 0 ? format("if (!%s) ", N.result) : "", N.result, nodeCall);
       }
       else if (type == BNF_SEQUENCE) {
         predicateEncountered |= pinApplied && ParserGeneratorUtil.getEffectiveExpression(myFile, child) instanceof BnfPredicate;
         if (skip[0] == 0) {
           nodeCall = generateTokenSequenceCall(children, i, pinMatcher, pinApplied, skip, nodeCall, false, consumeType);
           if (i == 0) {
-            out("result_ = " + nodeCall + ";");
+            out("%s = %s;", N.result, nodeCall);
           }
           else {
             if (pinApplied && generateExtendedPin && !predicateEncountered) {
               if (i == childrenSize - 1) {
                 // do not report error for last child
                 if (i == p + 1) {
-                  out("result_ = result_ && " + nodeCall + ";");
+                  out("%s = %s && %s;", N.result, N.result, nodeCall);
                 }
                 else {
-                  out("result_ = pinned_ && " + nodeCall + " && result_;");
+                  out("%s = %s && %s && %s;", N.result, N.pinned, nodeCall, N.result);
                 }
               }
               else if (i == p + 1) {
-                out("result_ = result_ && report_error_(builder_, " + nodeCall + ");");
+                out("%s = %s && report_error_(%s, %s);", N.result, N.result, N.builder, nodeCall);
               }
               else {
-                out("result_ = pinned_ && report_error_(builder_, " + nodeCall + ") && result_;");
+                out("%s = %s && report_error_(%s, %s) && %s;", N.result, N.pinned, N.builder, nodeCall, N.result);
               }
             }
             else {
-              out("result_ = result_ && " + nodeCall + ";");
+              out("%s = %s && %s;", N.result, N.result, nodeCall);
             }
           }
         }
@@ -707,7 +720,7 @@ public class ParserGenerator {
         if (pinned && !pinApplied && pinMatcher.matches(i, child)) {
           pinApplied = true;
           p = i;
-          out("pinned_ = result_; // pin = " + pinMatcher.pinValue);
+          out("%s = %s; // pin = %s", N.pinned, N.result, pinMatcher.pinValue);
         }
       }
       else if (type == BNF_OP_OPT) {
@@ -715,20 +728,20 @@ public class ParserGenerator {
       }
       else if (type == BNF_OP_ONEMORE || type == BNF_OP_ZEROMORE) {
         if (type == BNF_OP_ONEMORE) {
-          out("result_ = " + nodeCall + ";");
+          out("%s = %s;", N.result, nodeCall);
         }
-        out("int pos_ = current_position_(builder_);");
-        out("while (" + (alwaysTrue ? "true" : "result_") + ") {");
-        out("if (!" + nodeCall + ") break;");
-        out("if (!empty_element_parsed_guard_(builder_, \"" + funcName + "\", pos_)) break;");
-        out("pos_ = current_position_(builder_);");
+        out("int %s = current_position_(%s);", N.pos, N.builder);
+        out("while (%s) {", alwaysTrue ? "true" : N.result);
+        out("if (!%s) break;", nodeCall);
+        out("if (!empty_element_parsed_guard_(%s, \"%s\", %s)) break;", N.builder, funcName, N.pos);
+        out("%s = current_position_(%s);", N.pos, N.builder);
         out("}");
       }
       else if (type == BNF_OP_AND) {
-        out("result_ = " + nodeCall + ";");
+        out("%s = %s;", N.result, nodeCall);
       }
       else if (type == BNF_OP_NOT) {
-        out("result_ = !" + nodeCall + ";");
+        out("%s = !%s;", N.result, nodeCall);
       }
       else {
         addWarning(myFile.getProject(), "unexpected: " + type);
@@ -737,12 +750,12 @@ public class ParserGenerator {
 
     if (sectionRequired) {
       String elementTypeRef = !isPrivate && StringUtil.isNotEmpty(elementType)? elementType : "null";
-      String resultRef = alwaysTrue ? "true" : "result_";
+      String resultRef = alwaysTrue ? "true" : N.result;
       if (sectionRequiredSimple) {
-        out("exit_section_(builder_, marker_, " + elementTypeRef+", " + resultRef + ");");
+        out("exit_section_(%s, %s, %s, %s);", N.builder, N.marker, elementTypeRef, resultRef);
       }
       else {
-        String pinnedRef = pinned ? "pinned_" : "false";
+        String pinnedRef = pinned ? N.pinned : "false";
         String recoverCall;
         if (recoverWhile != null) {
           BnfRule predicateRule = myFile.getRule(recoverWhile);
@@ -756,11 +769,11 @@ public class ParserGenerator {
         else {
           recoverCall = null;
         }
-        out("exit_section_(builder_, level_, marker_, " + elementTypeRef +", " + resultRef + ", "+pinnedRef +", " + recoverCall + ");");
+        out("exit_section_(%s, %s, %s, %s, %s, %s, %s);", N.builder, N.level, N.marker, elementTypeRef, resultRef, pinnedRef, recoverCall);
       }
     }
 
-    out("return " + (alwaysTrue ? "true" : "result_" + (pinned ? " || pinned_" : "")) + ";");
+    out("return %s;", alwaysTrue ? "true" : N.result + (pinned ? format(" || %s", N.pinned) : ""));
     out("}");
     generateNodeChildren(rule, funcName, children, visited);
   }
@@ -787,7 +800,7 @@ public class ParserGenerator {
         break;
       }
     }
-    StringBuilder sb = new StringBuilder("!nextTokenIsFast(builder_, ");
+    StringBuilder sb = new StringBuilder(format("!nextTokenIsFast(%s, ", N.builder));
 
     appendTokenTypes(sb, tokenTypes);
     sb.append(")");
@@ -822,7 +835,7 @@ public class ParserGenerator {
     boolean dropFrameName = skipIfOne && !firstElementTypes.isEmpty() && firstElementTypes.size() == 1;
     if (!firstElementTypes.isEmpty() && firstElementTypes.size() <= generateFirstCheck) {
       StringBuilder sb = new StringBuilder("if (!");
-      sb.append(fast ? "nextTokenIsFast" : "nextTokenIs").append("(builder_, ");
+      sb.append(fast ? "nextTokenIsFast" : "nextTokenIs").append("(").append(N.builder).append(", ");
       if (!fast && !dropFrameName) sb.append(frameName != null ? frameName : "\"\"").append(", ");
 
       appendTokenTypes(sb, firstElementTypes);
@@ -948,8 +961,8 @@ public class ParserGenerator {
     }
     if (list.size() < 2) return nodeCall;
     skip[0] = list.size() - 1;
-    return ((rollbackOnFail ? "parseTokens" : "consumeTokens") + (consumeType == ConsumeType.SMART ? consumeType.getMethodSuffix() : "")) +
-           "(builder_, " + pin + ", " + StringUtil.join(list, ", ") + ")";
+    String consumeMethodName = (rollbackOnFail ? "parseTokens" : "consumeTokens") + (consumeType == ConsumeType.SMART ? consumeType.getMethodSuffix() : "");
+    return format("%s(%s, %d, %s)", consumeMethodName, N.builder, pin, StringUtil.join(list, ", "));
   }
 
   private static boolean isConsumeTokenCall(String nodeCall) {
@@ -991,7 +1004,7 @@ public class ParserGenerator {
         if (Rule.isExternal(subRule)) {
           StringBuilder clause = new StringBuilder();
           method = generateExternalCall(rule, clause, GrammarUtil.getExternalRuleExpressions(subRule), nextName);
-          return method + "(builder_, level_ + 1" + clause.toString() + ")";
+          return format("%s(%s, %s + 1%s)", method, N.builder, N.level, clause);
         }
         else {
           ExpressionHelper.ExpressionInfo info = ExpressionGeneratorHelper.getInfoForExpressionParsing(myExpressionHelper, subRule);
@@ -1001,10 +1014,10 @@ public class ParserGenerator {
             method = StringUtil.getShortName(parserClass) + "." + method;
           }
           if (info == null) {
-            return method + "(builder_, level_ + 1)";
+            return format("%s(%s, %s + 1)", method, N.builder, N.level);
           }
           else {
-            return method + "(builder_, level_ + 1, "+ (info.getPriority(subRule) - 1) + ")";
+            return format("%s(%s, %s + 1, %d)", method, N.builder, N.level, info.getPriority(subRule) - 1);
           }
         }
       }
@@ -1030,16 +1043,17 @@ public class ParserGenerator {
     else if (type == BNF_EXTERNAL_EXPRESSION) {
       List<BnfExpression> expressions = ((BnfExternalExpression)node).getExpressionList();
       if (expressions.size() == 1 && Rule.isMeta(rule)) {
-        return expressions.get(0).getText() + ".parse(builder_, level_)";
+        return format("%s.parse(%s, %s)", expressions.get(0).getText(), N.builder, N.level);
       }
       else {
         StringBuilder clause = new StringBuilder();
         String method = generateExternalCall(rule, clause, expressions, nextName);
-        return method + "(builder_, level_ + 1" + clause.toString() + ")";
+        return format("%s(%s, %s + 1%s)", method, N.builder, N.level, clause);
       }
     }
     else {
-      return nextName + "(builder_, level_ + 1" + collectExtraArguments(rule, node, false) + ")";
+      String extraArguments = collectExtraArguments(rule, node, false);
+      return format("%s(%s, %s + 1%s)", nextName, N.builder, N.level, extraArguments);
     }
   }
 
@@ -1141,11 +1155,11 @@ public class ParserGenerator {
 
   private String generateConsumeToken(String tokenName, String consumeMethodName) {
     myTokensUsedInGrammar.add(tokenName);
-    return consumeMethodName + "(builder_, " + getTokenElementType(tokenName) + ")";
+    return format("%s(%s, %s)", consumeMethodName, N.builder, getTokenElementType(tokenName));
   }
 
-  public static String generateConsumeTextToken(String tokenText, String consumeMethodName) {
-    return consumeMethodName + "(builder_, \"" + tokenText + "\")";
+  public String generateConsumeTextToken(String tokenText, String consumeMethodName) {
+    return format("%s(%s, \"%s\")", consumeMethodName, N.builder, tokenText);
   }
 
   private String getTokenElementType(String token) {
@@ -1581,7 +1595,7 @@ public class ParserGenerator {
     for (String s : javaHelper.getAnnotations(method)) {
       out("@" + myShortener.fun(s));
     }
-    out((intf ? "" : "public ") + returnType + " " + methodName + "(" + sb.toString() + ")" + (intf ? ";" : " {"));
+    out("%s%s %s(%s)%s", intf ? "" : "public ", returnType, methodName, sb, intf ? ";" : " {");
     if (!intf) {
       sb.setLength(0);
       count = -1;
@@ -1595,9 +1609,8 @@ public class ParserGenerator {
         }
       }
 
-      out(("void".equals(returnType) ? "" : "return ") +
-          myShortener.fun(StringUtil.notNullize(psiImplUtilClass, KnownAttribute.PSI_IMPL_UTIL_CLASS.getName())) + "." + methodName
-          + "(this" + sb.toString() + ");");
+      String implUtilRef = myShortener.fun(StringUtil.notNullize(psiImplUtilClass, KnownAttribute.PSI_IMPL_UTIL_CLASS.getName()));
+      out("%s%s.%s(this%s);", "void".equals(returnType) ? "" : "return ", implUtilRef, methodName, sb);
       out("}");
     }
     newLine();

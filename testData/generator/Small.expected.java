@@ -28,11 +28,17 @@ public class Small implements PsiParser {
     if (root_ == EMPTY) {
       result_ = empty(builder_, 0);
     }
+    else if (root_ == EMPTY_10) {
+      result_ = empty10(builder_, 0);
+    }
     else if (root_ == EMPTY_2) {
       result_ = empty2(builder_, 0);
     }
     else if (root_ == EMPTY_3) {
       result_ = empty3(builder_, 0);
+    }
+    else if (root_ == EMPTY_9) {
+      result_ = empty9(builder_, 0);
     }
     else if (root_ == OTHER_RULE) {
       result_ = otherRule(builder_, 0);
@@ -62,21 +68,32 @@ public class Small implements PsiParser {
   /* ********************************************************** */
   // ()
   public static boolean empty(PsiBuilder builder_, int level_) {
-    builder_.mark().done(EMPTY);
+    Marker marker_ = enter_section_(builder_);
+    exit_section_(builder_, marker_, EMPTY, true);
+    return true;
+  }
+
+  /* ********************************************************** */
+  // []
+  public static boolean empty10(PsiBuilder builder_, int level_) {
+    Marker marker_ = enter_section_(builder_, level_, _LEFT_INNER_, null);
+    exit_section_(builder_, level_, marker_, EMPTY_10, true, false, null);
     return true;
   }
 
   /* ********************************************************** */
   // {}
   public static boolean empty2(PsiBuilder builder_, int level_) {
-    builder_.mark().done(EMPTY_2);
+    Marker marker_ = enter_section_(builder_);
+    exit_section_(builder_, marker_, EMPTY_2, true);
     return true;
   }
 
   /* ********************************************************** */
   // []
   public static boolean empty3(PsiBuilder builder_, int level_) {
-    builder_.mark().done(EMPTY_3);
+    Marker marker_ = enter_section_(builder_);
+    exit_section_(builder_, marker_, EMPTY_3, true);
     return true;
   }
 
@@ -127,6 +144,14 @@ public class Small implements PsiParser {
   /* ********************************************************** */
   // [({})]
   static boolean empty8(PsiBuilder builder_, int level_) {
+    return true;
+  }
+
+  /* ********************************************************** */
+  // []
+  public static boolean empty9(PsiBuilder builder_, int level_) {
+    Marker marker_ = enter_section_(builder_, level_, _LEFT_, null);
+    exit_section_(builder_, level_, marker_, EMPTY_9, true, false, null);
     return true;
   }
 

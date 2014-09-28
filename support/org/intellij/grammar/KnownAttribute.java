@@ -42,11 +42,13 @@ public class KnownAttribute<T> {
   private static final ListValue EMPTY_LIST = new ListValue();
 
   public static final KnownAttribute<String>       CLASS_HEADER              = create(true, String.class, "classHeader", BnfConstants.CLASS_HEADER_DEF);
+  public static final KnownAttribute<ListValue>    GENERATE                  = create(true, ListValue.class, "generate", EMPTY_LIST);
   public static final KnownAttribute<Boolean>      GENERATE_PSI              = create(true, Boolean.class, "generatePsi", true);
   public static final KnownAttribute<Boolean>      GENERATE_TOKENS           = create(true, Boolean.class, "generateTokens", true);
   public static final KnownAttribute<Boolean>      GENERATE_TOKEN_ACCESSORS  = create(true, Boolean.class, "generateTokenAccessors", false);
   public static final KnownAttribute<Integer>      GENERATE_FIRST_CHECK      = create(true, Integer.class, "generateFirstCheck", 2);
   public static final KnownAttribute<Boolean>      EXTENDED_PIN              = create(true, Boolean.class, "extendedPin", true);
+
   public static final KnownAttribute<ListValue>    PARSER_IMPORTS            = create(true, ListValue.class, "parserImports", EMPTY_LIST);
   public static final KnownAttribute<String>       PSI_CLASS_PREFIX          = create(true, String.class, "psiClassPrefix", "");
   public static final KnownAttribute<String>       PSI_IMPL_CLASS_SUFFIX     = create(true, String.class, "psiImplClassSuffix", "Impl");

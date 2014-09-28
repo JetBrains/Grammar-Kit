@@ -77,6 +77,18 @@ public class ParserGeneratorUtil {
     }
   }
 
+  public static <T> T getGenerateOption(PsiElement node, KnownAttribute<T> attribute, String currentValue) {
+    if (attribute.getDefaultValue() instanceof Boolean) {
+      if ("yes".equals(currentValue)) return (T)Boolean.TRUE;
+      if ("no".equals(currentValue)) return (T)Boolean.FALSE;
+    }
+    else if (attribute.getDefaultValue() instanceof Number) {
+      int value = StringUtil.parseInt(currentValue, -1);
+      if (value != -1) return (T)Integer.valueOf(value);
+    }
+    return getRootAttribute(node, attribute, null);
+  }
+
   public static <T> T getRootAttribute(PsiElement node, KnownAttribute<T> attribute) {
     return getRootAttribute(node, attribute, null);
   }

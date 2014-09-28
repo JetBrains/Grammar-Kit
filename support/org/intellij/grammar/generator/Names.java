@@ -16,6 +16,9 @@
 
 package org.intellij.grammar.generator;
 
+import com.intellij.openapi.application.ApplicationManager;
+import org.jetbrains.annotations.NotNull;
+
 /**
 * @author greg
 */
@@ -50,5 +53,13 @@ class Names {
 
   public static Names shortNames() {
     return new Names("b", "l", "m", "p", "r", "p", "t", "g");
+  }
+
+  @NotNull
+  public static Names forName(String name) {
+    if ("long".equals(name)) return longNames();
+    if ("short".equals(name)) return shortNames();
+    if ("classic".equals(name)) return classicNames();
+    return ApplicationManager.getApplication().isUnitTestMode() ? classicNames() : shortNames();
   }
 }

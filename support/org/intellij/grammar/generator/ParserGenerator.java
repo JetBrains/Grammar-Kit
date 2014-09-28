@@ -71,9 +71,9 @@ public class ParserGenerator {
   private final String myGrammarRootParser;
   private final String myRuleClassPrefix;
   private final String myParserUtilClass;
-  private final boolean generateExtendedPin;
+
   private final String visitorClassName;
-  private final int generateFirstCheck;
+
 
   private int myOffset;
   private PrintWriter myOut;
@@ -85,20 +85,28 @@ public class ParserGenerator {
   private final KnownAttribute.ListValue myUnknownRootAttributes;
 
   final Names N;
+  private final int generateFirstCheck;
+  private final boolean generateTokens;
+  private final boolean generateExtendedPin;
+  private final boolean generatePsi;
 
   public ParserGenerator(BnfFile tree, String sourcePath, String outputPath) {
     myFile = tree;
     mySourcePath = sourcePath;
     myOutputPath = outputPath;
-    N = Names.classicNames();
-    final List<BnfRule> rules = tree.getRules();
+    Map<String, String> genOptions = getRootAttribute(myFile, KnownAttribute.GENERATE).asMap();
+    N = Names.forName(genOptions.get("names"));
+    generatePsi = getGenerateOption(myFile, KnownAttribute.GENERATE_PSI, genOptions.get("psi"));
+    generateTokens = getGenerateOption(myFile, KnownAttribute.GENERATE_TOKENS, genOptions.get("tokens"));
+    generateFirstCheck = getGenerateOption(myFile, KnownAttribute.GENERATE_FIRST_CHECK, genOptions.get("firstCheck"));
+    generateExtendedPin = getGenerateOption(myFile, KnownAttribute.EXTENDED_PIN, genOptions.get("extendedPin"));
+
+    List<BnfRule> rules = tree.getRules();
     myGrammarRoot = rules.isEmpty() ? null : rules.get(0).getName();
     for (BnfRule r : rules) {
       myRuleParserClasses.put(r.getName(), getAttribute(r, KnownAttribute.PARSER_CLASS));
     }
     myGrammarRootParser = myGrammarRoot == null? null : myRuleParserClasses.get(myGrammarRoot);
-    generateExtendedPin = getRootAttribute(myFile, KnownAttribute.EXTENDED_PIN);
-    generateFirstCheck = getRootAttribute(myFile, KnownAttribute.GENERATE_FIRST_CHECK);
     myRuleClassPrefix = getPsiClassPrefix(myFile);
     myParserUtilClass = ObjectUtils.chooseNotNull(getRootAttribute(myFile, KnownAttribute.PARSER_UTIL_CLASS.alias("stubParserClass")),
                                                   getRootAttribute(myFile, KnownAttribute.PARSER_UTIL_CLASS));
@@ -162,7 +170,6 @@ public class ParserGenerator {
     {
       generateParser();
     }
-    boolean generatePsi = getRootAttribute(myFile, KnownAttribute.GENERATE_PSI);
     Map<String, BnfRule> sortedCompositeTypes = new TreeMap<String, BnfRule>();
     Map<String, BnfRule> sortedPsiRules = new TreeMap<String, BnfRule>();
     for (BnfRule rule : myFile.getRules()) {
@@ -1170,7 +1177,6 @@ public class ParserGenerator {
 
   private void generateElementTypesHolder(String className, Map<String, BnfRule> sortedCompositeTypes, boolean generatePsi) {
     String implPackage = getPsiImplPackage(myFile);
-    boolean generateTokens = getRootAttribute(myFile, KnownAttribute.GENERATE_TOKENS);
     String tokenTypeClass = getRootAttribute(myFile, KnownAttribute.TOKEN_TYPE_CLASS);
     String tokenTypeFactory = getRootAttribute(myFile, KnownAttribute.TOKEN_TYPE_FACTORY);
     Set<String> imports = new LinkedHashSet<String>();

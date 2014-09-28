@@ -1,0 +1,54 @@
+<html>
+<body>
+A list of generator options. Supersedes global generateXXX attributes.
+<p>
+
+<table border=1>
+  <tr>
+    <th>Option</th>
+    <th>Possible Values</th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td>psi</td>
+    <td><b>yes</b>, no</td>
+    <td>PSI: generate PSI classes</td>
+  </tr>
+  <tr>
+    <td>tokens</td>
+    <td><b>yes</b>, no</td>
+    <td>Types: generate token constants</td>
+  </tr>
+  <tr>
+    <td>tokenAccessors</td>
+    <td>yes, <b>no</b></td>
+    <td>PSI: generate token getters</td>
+  </tr>
+  <tr>
+    <td>names</td>
+    <td><b>short</b>, long, classic</td>
+    <td>Parser: local variables style</td>
+  </tr>
+  <tr>
+    <td>firstCheck</td>
+    <td>positive number, <b>2</b></td>
+    <td>Parser: generate token getters</td>
+  </tr>
+  <tr>
+    <td>...</td>
+    <td>...</td>
+    <td>...</td>
+  </tr>
+</table>
+
+<h2>Examples:</h2>
+<pre><code>
+  {
+    // turn off PSI classes generation and token constants
+    // .. and prefer classic names
+    generate=[psi="no" tokens="no" names="short"]
+  }
+</code></pre>
+
+</body>
+</html>

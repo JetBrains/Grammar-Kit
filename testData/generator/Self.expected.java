@@ -95,8 +95,7 @@ public class Self implements PsiParser {
   // id attr_pattern? '=' attr_value ';'?
   public static boolean attr(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "attr")) return false;
-    boolean result_;
-    boolean pinned_;
+    boolean result_, pinned_;
     Marker marker_ = enter_section_(builder_, level_, _NONE_, null);
     result_ = consumeToken(builder_, BNF_ID);
     pinned_ = result_; // pin = 1
@@ -185,8 +184,7 @@ public class Self implements PsiParser {
   public static boolean attrs(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "attrs")) return false;
     if (!nextTokenIs(builder_, BNF_LEFT_BRACE)) return false;
-    boolean result_;
-    boolean pinned_;
+    boolean result_, pinned_;
     Marker marker_ = enter_section_(builder_, level_, _NONE_, null);
     result_ = consumeToken(builder_, BNF_LEFT_BRACE);
     pinned_ = result_; // pin = 1
@@ -284,8 +282,7 @@ public class Self implements PsiParser {
   static boolean choice_tail(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "choice_tail")) return false;
     if (!nextTokenIs(builder_, BNF_OP_OR)) return false;
-    boolean result_;
-    boolean pinned_;
+    boolean result_, pinned_;
     Marker marker_ = enter_section_(builder_, level_, _NONE_, null);
     result_ = consumeToken(builder_, BNF_OP_OR);
     pinned_ = result_; // pin = 1
@@ -371,8 +368,7 @@ public class Self implements PsiParser {
   public static boolean paren_expression(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "paren_expression")) return false;
     if (!nextTokenIs(builder_, BNF_LEFT_PAREN)) return false;
-    boolean result_;
-    boolean pinned_;
+    boolean result_, pinned_;
     Marker marker_ = enter_section_(builder_, level_, _NONE_, null);
     result_ = consumeToken(builder_, BNF_LEFT_PAREN);
     pinned_ = result_; // pin = 1
@@ -479,8 +475,7 @@ public class Self implements PsiParser {
   // modifier* id '::=' expression attrs? ';'?
   public static boolean rule(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "rule")) return false;
-    boolean result_;
-    boolean pinned_;
+    boolean result_, pinned_;
     Marker marker_ = enter_section_(builder_, level_, _NONE_, null);
     result_ = rule_0(builder_, level_ + 1);
     result_ = result_ && consumeToken(builder_, BNF_ID);

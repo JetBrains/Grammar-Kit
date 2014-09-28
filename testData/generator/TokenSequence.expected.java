@@ -68,8 +68,7 @@ public class GeneratedParser implements PsiParser {
   // bar d e f
   private static boolean foo_3(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "foo_3")) return false;
-    boolean result_;
-    boolean pinned_;
+    boolean result_, pinned_;
     Marker marker_ = enter_section_(builder_, level_, _NONE_, null);
     result_ = bar(builder_, level_ + 1);
     result_ = result_ && consumeTokens(builder_, 1, D, E, F);

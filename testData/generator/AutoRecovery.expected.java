@@ -44,8 +44,7 @@ public class GeneratedParser implements PsiParser {
   static boolean file(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "file")) return false;
     if (!nextTokenIs(builder_, PAREN1)) return false;
-    boolean result_;
-    boolean pinned_;
+    boolean result_, pinned_;
     Marker marker_ = enter_section_(builder_, level_, _NONE_, null);
     result_ = list(builder_, level_ + 1);
     pinned_ = result_; // pin = 1
@@ -69,8 +68,7 @@ public class GeneratedParser implements PsiParser {
   // ';' list
   private static boolean file_1_0(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "file_1_0")) return false;
-    boolean result_;
-    boolean pinned_;
+    boolean result_, pinned_;
     Marker marker_ = enter_section_(builder_, level_, _NONE_, null);
     result_ = consumeToken(builder_, SEMI);
     pinned_ = result_; // pin = 1
@@ -95,8 +93,7 @@ public class GeneratedParser implements PsiParser {
   public static boolean list(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "list")) return false;
     if (!nextTokenIs(builder_, PAREN1)) return false;
-    boolean result_;
-    boolean pinned_;
+    boolean result_, pinned_;
     Marker marker_ = enter_section_(builder_, level_, _NONE_, null);
     result_ = consumeToken(builder_, PAREN1);
     pinned_ = result_; // pin = 1
@@ -116,8 +113,7 @@ public class GeneratedParser implements PsiParser {
   // !")" item (',' item) *
   private static boolean list_1_0(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "list_1_0")) return false;
-    boolean result_;
-    boolean pinned_;
+    boolean result_, pinned_;
     Marker marker_ = enter_section_(builder_, level_, _NONE_, null);
     result_ = list_1_0_0(builder_, level_ + 1);
     pinned_ = result_; // pin = 1
@@ -152,8 +148,7 @@ public class GeneratedParser implements PsiParser {
   // ',' item
   private static boolean list_1_0_2_0(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "list_1_0_2_0")) return false;
-    boolean result_;
-    boolean pinned_;
+    boolean result_, pinned_;
     Marker marker_ = enter_section_(builder_, level_, _NONE_, null);
     result_ = consumeToken(builder_, COMMA);
     pinned_ = result_; // pin = 1

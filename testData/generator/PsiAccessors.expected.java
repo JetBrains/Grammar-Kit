@@ -50,8 +50,7 @@ public class PsiAccessors implements PsiParser {
   public static boolean binary(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "binary")) return false;
     if (!nextTokenIs(builder_, ID)) return false;
-    boolean result_;
-    boolean pinned_;
+    boolean result_, pinned_;
     Marker marker_ = enter_section_(builder_, level_, _NONE_, null);
     result_ = expression(builder_, level_ + 1);
     result_ = result_ && operator(builder_, level_ + 1);

@@ -126,8 +126,7 @@ public class GrammarParser implements PsiParser {
   // attr_start attr_value ';'?
   public static boolean attr(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "attr")) return false;
-    boolean result_;
-    boolean pinned_;
+    boolean result_, pinned_;
     Marker marker_ = enter_section_(builder_, level_, _NONE_, "<attr>");
     result_ = attr_start(builder_, level_ + 1);
     pinned_ = result_; // pin = 1
@@ -149,8 +148,7 @@ public class GrammarParser implements PsiParser {
   public static boolean attr_pattern(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "attr_pattern")) return false;
     if (!nextTokenIs(builder_, BNF_LEFT_PAREN)) return false;
-    boolean result_;
-    boolean pinned_;
+    boolean result_, pinned_;
     Marker marker_ = enter_section_(builder_, level_, _NONE_, null);
     result_ = consumeToken(builder_, BNF_LEFT_PAREN);
     pinned_ = result_; // pin = 1
@@ -209,8 +207,7 @@ public class GrammarParser implements PsiParser {
   // attr_pattern '='
   private static boolean attr_start_1_0(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "attr_start_1_0")) return false;
-    boolean result_;
-    boolean pinned_;
+    boolean result_, pinned_;
     Marker marker_ = enter_section_(builder_, level_, _NONE_, null);
     result_ = attr_pattern(builder_, level_ + 1);
     pinned_ = result_; // pin = attr_pattern
@@ -282,8 +279,7 @@ public class GrammarParser implements PsiParser {
   public static boolean attrs(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "attrs")) return false;
     if (!nextTokenIs(builder_, BNF_LEFT_BRACE)) return false;
-    boolean result_;
-    boolean pinned_;
+    boolean result_, pinned_;
     Marker marker_ = enter_section_(builder_, level_, _NONE_, null);
     result_ = consumeToken(builder_, BNF_LEFT_BRACE);
     pinned_ = result_; // pin = 1
@@ -326,8 +322,7 @@ public class GrammarParser implements PsiParser {
   // '|' sequence
   private static boolean choice_0(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "choice_0")) return false;
-    boolean result_;
-    boolean pinned_;
+    boolean result_, pinned_;
     Marker marker_ = enter_section_(builder_, level_, _NONE_, null);
     result_ = consumeToken(builder_, BNF_OP_OR);
     pinned_ = result_; // pin = 1
@@ -360,8 +355,7 @@ public class GrammarParser implements PsiParser {
   public static boolean external_expression(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "external_expression")) return false;
     if (!nextTokenIs(builder_, BNF_EXTERNAL_START)) return false;
-    boolean result_;
-    boolean pinned_;
+    boolean result_, pinned_;
     Marker marker_ = enter_section_(builder_, level_, _NONE_, null);
     result_ = consumeToken(builder_, BNF_EXTERNAL_START);
     result_ = result_ && reference_or_token(builder_, level_ + 1);
@@ -388,8 +382,7 @@ public class GrammarParser implements PsiParser {
   // !<<eof>> (attrs | rule)
   static boolean grammar_element(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "grammar_element")) return false;
-    boolean result_;
-    boolean pinned_;
+    boolean result_, pinned_;
     Marker marker_ = enter_section_(builder_, level_, _NONE_, null);
     result_ = grammar_element_0(builder_, level_ + 1);
     pinned_ = result_; // pin = 1
@@ -518,8 +511,7 @@ public class GrammarParser implements PsiParser {
   static boolean list_entry_tail(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "list_entry_tail")) return false;
     if (!nextTokenIs(builder_, BNF_OP_EQ)) return false;
-    boolean result_;
-    boolean pinned_;
+    boolean result_, pinned_;
     Marker marker_ = enter_section_(builder_, level_, _NONE_, null);
     result_ = consumeToken(builder_, BNF_OP_EQ);
     pinned_ = result_; // pin = 1
@@ -605,8 +597,7 @@ public class GrammarParser implements PsiParser {
   // '(' expression ')'
   private static boolean paren_expression_0(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "paren_expression_0")) return false;
-    boolean result_;
-    boolean pinned_;
+    boolean result_, pinned_;
     Marker marker_ = enter_section_(builder_, level_, _NONE_, null);
     result_ = consumeToken(builder_, BNF_LEFT_PAREN);
     result_ = result_ && expression(builder_, level_ + 1);
@@ -619,8 +610,7 @@ public class GrammarParser implements PsiParser {
   // '{' alt_choice_element '}'
   private static boolean paren_expression_1(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "paren_expression_1")) return false;
-    boolean result_;
-    boolean pinned_;
+    boolean result_, pinned_;
     Marker marker_ = enter_section_(builder_, level_, _NONE_, null);
     result_ = consumeToken(builder_, BNF_LEFT_BRACE);
     result_ = result_ && alt_choice_element(builder_, level_ + 1);
@@ -635,8 +625,7 @@ public class GrammarParser implements PsiParser {
   public static boolean paren_opt_expression(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "paren_opt_expression")) return false;
     if (!nextTokenIs(builder_, BNF_LEFT_BRACKET)) return false;
-    boolean result_;
-    boolean pinned_;
+    boolean result_, pinned_;
     Marker marker_ = enter_section_(builder_, level_, _NONE_, null);
     result_ = consumeToken(builder_, BNF_LEFT_BRACKET);
     result_ = result_ && expression(builder_, level_ + 1);
@@ -712,8 +701,7 @@ public class GrammarParser implements PsiParser {
   // rule_start expression attrs? ';'?
   public static boolean rule(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "rule")) return false;
-    boolean result_;
-    boolean pinned_;
+    boolean result_, pinned_;
     Marker marker_ = enter_section_(builder_, level_, _NONE_, "<rule>");
     result_ = rule_start(builder_, level_ + 1);
     result_ = result_ && expression(builder_, level_ + 1);
@@ -896,8 +884,7 @@ public class GrammarParser implements PsiParser {
   public static boolean value_list(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "value_list")) return false;
     if (!nextTokenIs(builder_, BNF_LEFT_BRACKET)) return false;
-    boolean result_;
-    boolean pinned_;
+    boolean result_, pinned_;
     Marker marker_ = enter_section_(builder_, level_, _NONE_, null);
     result_ = consumeToken(builder_, BNF_LEFT_BRACKET);
     pinned_ = result_; // pin = 1

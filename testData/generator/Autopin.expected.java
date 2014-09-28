@@ -73,8 +73,7 @@ public class Autopin implements PsiParser {
   public static boolean create_table_statement(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "create_table_statement")) return false;
     if (!nextTokenIs(builder_, CREATE)) return false;
-    boolean result_;
-    boolean pinned_;
+    boolean result_, pinned_;
     Marker marker_ = enter_section_(builder_, level_, _NONE_, null);
     result_ = consumeToken(builder_, CREATE);
     result_ = result_ && create_table_statement_1(builder_, level_ + 1);
@@ -136,8 +135,7 @@ public class Autopin implements PsiParser {
   public static boolean override_nested_sequence(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "override_nested_sequence")) return false;
     if (!nextTokenIs(builder_, A)) return false;
-    boolean result_;
-    boolean pinned_;
+    boolean result_, pinned_;
     Marker marker_ = enter_section_(builder_, level_, _NONE_, null);
     result_ = consumeTokens(builder_, 1, A, B);
     pinned_ = result_; // pin = 1
@@ -160,8 +158,7 @@ public class Autopin implements PsiParser {
   // [] (a|b)
   static boolean pinned_on_start(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "pinned_on_start")) return false;
-    boolean result_;
-    boolean pinned_;
+    boolean result_, pinned_;
     Marker marker_ = enter_section_(builder_, level_, _NONE_, null);
     result_ = pinned_on_start_0(builder_, level_ + 1);
     pinned_ = result_; // pin = 1
@@ -217,8 +214,7 @@ public class Autopin implements PsiParser {
   static boolean token_sequence1(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "token_sequence1")) return false;
     if (!nextTokenIs(builder_, A)) return false;
-    boolean result_;
-    boolean pinned_;
+    boolean result_, pinned_;
     Marker marker_ = enter_section_(builder_, level_, _NONE_, null);
     result_ = consumeTokens(builder_, 3, A, B, C, D);
     pinned_ = result_; // pin = 3
@@ -232,8 +228,7 @@ public class Autopin implements PsiParser {
   static boolean token_sequence2(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "token_sequence2")) return false;
     if (!nextTokenIs(builder_, A)) return false;
-    boolean result_;
-    boolean pinned_;
+    boolean result_, pinned_;
     Marker marker_ = enter_section_(builder_, level_, _NONE_, null);
     result_ = consumeTokens(builder_, 0, A, B);
     result_ = result_ && parseReference(builder_, level_ + 1);
@@ -247,8 +242,7 @@ public class Autopin implements PsiParser {
   // table_ref a b table_ref c d e
   static boolean token_sequence3(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "token_sequence3")) return false;
-    boolean result_;
-    boolean pinned_;
+    boolean result_, pinned_;
     Marker marker_ = enter_section_(builder_, level_, _NONE_, null);
     result_ = parseReference(builder_, level_ + 1);
     pinned_ = result_; // pin = 1
@@ -263,8 +257,7 @@ public class Autopin implements PsiParser {
   // [] a
   static boolean token_sequence4(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "token_sequence4")) return false;
-    boolean result_;
-    boolean pinned_;
+    boolean result_, pinned_;
     Marker marker_ = enter_section_(builder_, level_, _NONE_, null);
     result_ = token_sequence4_0(builder_, level_ + 1);
     pinned_ = result_; // pin = 1

@@ -115,8 +115,7 @@ public class ExpressionParser implements PsiParser {
   // '(' [ !')' expr  (',' expr) * ] ')'
   public static boolean arg_list(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "arg_list")) return false;
-    boolean result_;
-    boolean pinned_;
+    boolean result_, pinned_;
     Marker marker_ = enter_section_(builder_, level_, _NONE_, "<arg list>");
     result_ = consumeToken(builder_, "(");
     pinned_ = result_; // pin = 1
@@ -136,8 +135,7 @@ public class ExpressionParser implements PsiParser {
   // !')' expr  (',' expr) *
   private static boolean arg_list_1_0(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "arg_list_1_0")) return false;
-    boolean result_;
-    boolean pinned_;
+    boolean result_, pinned_;
     Marker marker_ = enter_section_(builder_, level_, _NONE_, null);
     result_ = arg_list_1_0_0(builder_, level_ + 1);
     pinned_ = result_; // pin = 1
@@ -172,8 +170,7 @@ public class ExpressionParser implements PsiParser {
   // ',' expr
   private static boolean arg_list_1_0_2_0(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "arg_list_1_0_2_0")) return false;
-    boolean result_;
-    boolean pinned_;
+    boolean result_, pinned_;
     Marker marker_ = enter_section_(builder_, level_, _NONE_, null);
     result_ = consumeToken(builder_, ",");
     pinned_ = result_; // pin = 1
@@ -270,8 +267,7 @@ public class ExpressionParser implements PsiParser {
   public static boolean expr(PsiBuilder builder_, int level_, int priority_) {
     if (!recursion_guard_(builder_, level_, "expr")) return false;
     addVariant(builder_, "<expr>");
-    boolean result_;
-    boolean pinned_;
+    boolean result_, pinned_;
     Marker marker_ = enter_section_(builder_, level_, _NONE_, "<expr>");
     result_ = unary_plus_expr(builder_, level_ + 1);
     if (!result_) result_ = unary_min_expr(builder_, level_ + 1);
@@ -388,8 +384,7 @@ public class ExpressionParser implements PsiParser {
 
   public static boolean unary_plus_expr(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "unary_plus_expr")) return false;
-    boolean result_;
-    boolean pinned_;
+    boolean result_, pinned_;
     Marker marker_ = enter_section_(builder_, level_, _NONE_, null);
     result_ = consumeTokenSmart(builder_, "+");
     pinned_ = result_;
@@ -400,8 +395,7 @@ public class ExpressionParser implements PsiParser {
 
   public static boolean unary_min_expr(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "unary_min_expr")) return false;
-    boolean result_;
-    boolean pinned_;
+    boolean result_, pinned_;
     Marker marker_ = enter_section_(builder_, level_, _NONE_, null);
     result_ = consumeTokenSmart(builder_, "-");
     pinned_ = result_;
@@ -423,8 +417,7 @@ public class ExpressionParser implements PsiParser {
 
   public static boolean unary_not_expr(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "unary_not_expr")) return false;
-    boolean result_;
-    boolean pinned_;
+    boolean result_, pinned_;
     Marker marker_ = enter_section_(builder_, level_, _NONE_, null);
     result_ = consumeTokenSmart(builder_, "!");
     pinned_ = result_;
@@ -447,8 +440,7 @@ public class ExpressionParser implements PsiParser {
   // 'multiply' '(' simple_ref_expr ',' mul_expr ')'
   public static boolean special_expr(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "special_expr")) return false;
-    boolean result_;
-    boolean pinned_;
+    boolean result_, pinned_;
     Marker marker_ = enter_section_(builder_, level_, _NONE_, "<special expr>");
     result_ = consumeTokenSmart(builder_, "multiply");
     result_ = result_ && consumeToken(builder_, "(");
@@ -485,8 +477,7 @@ public class ExpressionParser implements PsiParser {
 
   public static boolean paren_expr(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "paren_expr")) return false;
-    boolean result_;
-    boolean pinned_;
+    boolean result_, pinned_;
     Marker marker_ = enter_section_(builder_, level_, _NONE_, null);
     result_ = consumeTokenSmart(builder_, "(");
     pinned_ = result_;

@@ -111,8 +111,7 @@ public class ExternalRules implements PsiParser {
   // ',' <<param>>
   public static boolean comma_list_tail(PsiBuilder builder_, int level_, final Parser param) {
     if (!recursion_guard_(builder_, level_, "comma_list_tail")) return false;
-    boolean result_;
-    boolean pinned_;
+    boolean result_, pinned_;
     Marker marker_ = enter_section_(builder_, level_, _NONE_, null);
     result_ = consumeToken(builder_, ",");
     pinned_ = result_; // pin = 1

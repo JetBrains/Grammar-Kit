@@ -636,14 +636,13 @@ public class ParserGenerator {
     PinMatcher pinMatcher = new PinMatcher(rule, type, firstNonTrivial ? rule.getName() : funcName);
     boolean pinApplied = false;
     final boolean alwaysTrue = type == BNF_OP_OPT || type == BNF_OP_ZEROMORE;
+    boolean pinned = pinMatcher.active() && pinMatcher.shouldGenerate(children);
     if (!alwaysTrue) {
       boolean value = type == BNF_OP_ZEROMORE || type == BNF_OP_OPT || children.isEmpty();
-      out("boolean result_" + (children.isEmpty() || type == BNF_OP_ZEROMORE ? " = " + value : "") + ";");
+      out("boolean result_" + (children.isEmpty() || type == BNF_OP_ZEROMORE ? " = " + value : "") +
+          (pinned ? ", pinned_" : "") + ";");
     }
-    boolean pinned = pinMatcher.active() && pinMatcher.shouldGenerate(children);
-    if (pinned) {
-      out("boolean pinned_;");
-    }
+
     List<String> modifierList = ContainerUtil.newSmartList();
     if (canCollapse) modifierList.add("_COLLAPSE_");
     if (isLeftInner) modifierList.add("_LEFT_INNER_");

@@ -66,8 +66,7 @@ public class ExpressionGeneratorHelper {
       g.out("addVariant(builder_, " + frameName + ");");
     }
     g.generateFirstCheck(info.rootRule, frameName, true);
-    g.out("boolean result_;");
-    g.out("boolean pinned_;");
+    g.out("boolean result_, pinned_;");
     g.out("Marker marker_ = enter_section_(builder_, level_, _NONE_, " + frameName + ");");
 
     boolean first = true;
@@ -159,8 +158,7 @@ public class ExpressionGeneratorHelper {
           g.out("public static boolean " + operatorFuncName + "(PsiBuilder builder_, int level_) {");
           g.out("if (!recursion_guard_(builder_, level_, \"" + operatorFuncName + "\")) return false;");
           g.generateFirstCheck(operator.rule, frameName, false);
-          g.out("boolean result_;");
-          g.out("boolean pinned_;");
+          g.out("boolean result_, pinned_;");
           g.out("Marker marker_ = enter_section_(builder_, level_, _NONE_, null);");
 
           String elementType = ParserGeneratorUtil.getElementType(operator.rule);

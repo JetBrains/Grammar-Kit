@@ -62,6 +62,7 @@ public class ParserGenerator {
   private final Map<String, String> myParserLambdas = ContainerUtil.newTreeMap();
   private final Set<String> myPackageClasses = ContainerUtil.newTreeSet();
   private final Map<String, String> mySimpleTokens;
+  private final Set<String> myTokensUsedInGrammar = ContainerUtil.newLinkedHashSet();
   private final BnfFile myFile;
   private final String mySourcePath;
   private final String myOutputPath;
@@ -1140,6 +1141,7 @@ public class ParserGenerator {
   }
 
   private String generateConsumeToken(String tokenName, String consumeMethodName) {
+    myTokensUsedInGrammar.add(tokenName);
     return consumeMethodName + "(builder_, " + getTokenElementType(tokenName) + ")";
   }
 
@@ -1208,7 +1210,9 @@ public class ParserGenerator {
       }
       for (String tokenText : mySimpleTokens.keySet()) {
         String tokenName = ObjectUtils.chooseNotNull(mySimpleTokens.get(tokenText), tokenText);
-        sortedTokens.put(getTokenElementType(tokenName), ParserGeneratorUtil.isRegexpToken(tokenText) ? tokenName : tokenText);
+        if (isIgnoredWhitespaceToken(tokenName, tokenText)) continue;
+        sortedTokens.put(getTokenElementType(tokenName),
+                         ParserGeneratorUtil.isRegexpToken(tokenText) ? tokenName : tokenText);
       }
       for (String tokenType : sortedTokens.keySet()) {
         String callFix = tokenCreateCall.equals("new IElementType") ? ", null" : "";
@@ -1237,6 +1241,12 @@ public class ParserGenerator {
       out("}");
     }
     out("}");
+  }
+
+  private boolean isIgnoredWhitespaceToken(@NotNull String tokenName, @NotNull String tokenText) {
+    return isRegexpToken(tokenText) &&
+           !myTokensUsedInGrammar.contains(tokenName) &&
+           matchesAny(getRegexpTokenRegexp(tokenText), " ", "\n");
   }
 
 

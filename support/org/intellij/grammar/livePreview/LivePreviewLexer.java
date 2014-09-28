@@ -28,9 +28,7 @@ import com.intellij.util.ObjectUtils;
 import com.intellij.util.containers.ContainerUtil;
 import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.generator.ParserGeneratorUtil;
-import org.intellij.grammar.generator.RuleGraphHelper;
-import org.intellij.grammar.psi.*;
-import org.intellij.grammar.psi.impl.GrammarUtil;
+import org.intellij.grammar.psi.BnfFile;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -62,9 +60,8 @@ public class LivePreviewLexer extends LexerBase {
       @Nullable
       @Override
       public Result<Token[]> compute() {
-        Map<String, String> map = ContainerUtil.newLinkedHashMap();
         Set<String> usedInGrammar = ContainerUtil.newLinkedHashSet();
-        collectTokenPattern2Name(bnfFile, map, usedInGrammar);
+        Map<String, String> map = collectTokenPattern2Name(bnfFile, usedInGrammar);
 
         Token[] tokens = new Token[map.size()];
         int i = 0;
@@ -242,53 +239,8 @@ public class LivePreviewLexer extends LexerBase {
   }
 
   @NotNull
-  public static Map<String, String> collectTokenPattern2Name(@Nullable final BnfFile file) {
-    if (file == null) return Collections.emptyMap();
-
-    Map<String, String> map = ContainerUtil.newLinkedHashMap();
-    collectTokenPattern2Name(file, map, ContainerUtil.<String>newLinkedHashSet());
-    return map;
-  }
-
-  private static void collectTokenPattern2Name(@NotNull final BnfFile file, final Map<String, String> map, final Set<String> usedInGrammar) {
-    final Map<String, String> origTokens = RuleGraphHelper.getTokenMap(file);
-    final Pattern pattern = ParserGeneratorUtil.getAllTokenPattern(origTokens);
-    final int[] autoCount = {0};
-
-    GrammarUtil.visitRecursively(file, true, new BnfVisitor() {
-      @Override
-      public void visitStringLiteralExpression(@NotNull BnfStringLiteralExpression o) {
-        String text = o.getText();
-        String tokenText = StringUtil.stripQuotesAroundValue(text);
-        // add auto-XXX token for all unmatched strings to avoid BAD_CHARACTERs
-        if (!map.values().contains(tokenText) &&
-            !StringUtil.isJavaIdentifier(tokenText) &&
-            (pattern == null || !pattern.matcher(tokenText).matches())) {
-          String tokenName = "_AUTO_" + (autoCount[0]++);
-          usedInGrammar.add(text);
-          map.put(tokenText, tokenName);
-        }
-        else {
-          ContainerUtil.addIfNotNull(usedInGrammar, origTokens.get(tokenText));
-        }
-      }
-
-      @Override
-      public void visitReferenceOrToken(@NotNull BnfReferenceOrToken o) {
-        if (GrammarUtil.isExternalReference(o)) return;
-        String text = o.getText();
-        BnfRule rule = file.getRule(text);
-        if (rule != null) return;
-        usedInGrammar.add(text);
-        if (!map.containsValue(text)) map.put(text, text);
-      }
-    });
-    // fix ordering: origTokens _after_ to handle keywords correctly
-    for (String tokenText : origTokens.keySet()) {
-      String tokenName = origTokens.get(tokenText);
-      map.remove(tokenText);
-      map.put(tokenText, tokenName != null ? tokenName : "_AUTO_" + (autoCount[0]++));
-    }
+  public static Map<String, String> collectTokenPattern2Name(@NotNull BnfFile file, @Nullable Set<String> usedInGrammar) {
+    return ParserGeneratorUtil.collectTokenPattern2Name(file, true, ContainerUtil.<String, String>newLinkedHashMap(), usedInGrammar);
   }
 
   static class PreviewTokenType extends IElementType {

@@ -34,6 +34,7 @@ import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.actions.GenerateAction;
 import org.intellij.grammar.java.JavaHelper;
 import org.intellij.grammar.psi.*;
+import org.intellij.grammar.psi.impl.GrammarUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -409,6 +410,57 @@ public class ParserGeneratorUtil {
     return result;
   }
 
+  public static Map<String, String> collectTokenPattern2Name(@NotNull final BnfFile file,
+                                                             final boolean createTokenIfMissing,
+                                                             @NotNull final Map<String, String> map,
+                                                             @Nullable Set<String> usedInGrammar) {
+    final Set<String> usedNames = usedInGrammar != null ? usedInGrammar : ContainerUtil.<String>newLinkedHashSet();
+    final Map<String, String> origTokens = RuleGraphHelper.getTokenMap(file);
+    final Pattern pattern = getAllTokenPattern(origTokens);
+    final int[] autoCount = {0};
+    final Set<String> origTokenNames = ContainerUtil.newLinkedHashSet(origTokens.values());
+
+    GrammarUtil.visitRecursively(file, true, new BnfVisitor() {
+
+      @Override
+      public void visitStringLiteralExpression(@NotNull BnfStringLiteralExpression o) {
+        String text = o.getText();
+        String tokenText = StringUtil.stripQuotesAroundValue(text);
+        // add auto-XXX token for all unmatched strings to avoid BAD_CHARACTER's
+        if (createTokenIfMissing &&
+            !usedNames.contains(tokenText) &&
+            !StringUtil.isJavaIdentifier(tokenText) &&
+            (pattern == null || !pattern.matcher(tokenText).matches())) {
+          String tokenName = "_AUTO_" + (autoCount[0]++);
+          usedNames.add(text);
+          map.put(tokenText, tokenName);
+        }
+        else {
+          ContainerUtil.addIfNotNull(usedNames, origTokens.get(tokenText));
+        }
+      }
+
+      @Override
+      public void visitReferenceOrToken(@NotNull BnfReferenceOrToken o) {
+        if (GrammarUtil.isExternalReference(o)) return;
+        String tokenName = o.getText();
+        BnfRule rule = file.getRule(tokenName);
+        if (rule != null) return;
+        if (usedNames.add(tokenName) && !origTokenNames.contains(tokenName)) {
+          map.put(tokenName, tokenName);
+        }
+      }
+    });
+    // fix ordering: origTokens go _after_ to handle keywords correctly
+    for (String tokenText : origTokens.keySet()) {
+      String tokenName = origTokens.get(tokenText);
+      map.remove(tokenText);
+      map.put(tokenText, tokenName != null || !createTokenIfMissing ? tokenName : "_AUTO_" + (autoCount[0]++));
+    }
+    return map;
+  }
+
+
   public static class Rule {
 
     public static boolean isPrivate(BnfRule node) {
@@ -464,9 +516,22 @@ public class ParserGeneratorUtil {
   public static Pattern compilePattern(String text) {
     try {
       return Pattern.compile(text);
-    } catch (PatternSyntaxException e) {
+    }
+    catch (PatternSyntaxException e) {
       return null;
     }
+  }
+
+  public static boolean matchesAny(String regexp, String... text) {
+    try {
+      Pattern p = Pattern.compile(regexp);
+      for (String s : text) {
+        if (p.matcher(s).matches()) return true;
+      }
+    }
+    catch (PatternSyntaxException ignored) {
+    }
+    return false;
   }
 
   @Nullable

@@ -108,7 +108,7 @@ public class LivePreviewParser implements PsiParser {
     myGrammarRoot = myFile == null? null : ContainerUtil.getFirstItem(myFile.getRules());
     if (myGrammarRoot == null) return;
     generateExtendedPin = getRootAttribute(myFile, KnownAttribute.EXTENDED_PIN);
-    mySimpleTokens = LivePreviewLexer.collectTokenPattern2Name(myFile);
+    mySimpleTokens = LivePreviewLexer.collectTokenPattern2Name(myFile, null);
     myGraphHelper = RuleGraphHelper.getCached(myFile);
     myRuleExtendsMap = myGraphHelper.getRuleExtendsMap();
     myExpressionHelper = ExpressionHelper.getCached(myFile);

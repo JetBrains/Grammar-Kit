@@ -56,7 +56,6 @@ import java.io.PrintWriter;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import static org.intellij.grammar.actions.FileGeneratorUtil.getTargetDirectoryFor;
 import static org.intellij.grammar.generator.ParserGeneratorUtil.getRootAttribute;
@@ -118,7 +117,7 @@ public class GenerateAction extends AnAction implements DumbAware {
 
     ProgressManager.getInstance().run(new Task.Backgroundable(project, "Parser Generation", true, new BackgroundFromStartOption()) {
 
-      Set<File> files = ContainerUtil.newLinkedHashSet();
+      List<File> files = ContainerUtil.newArrayList();
 
       @Override
       public void run(@NotNull ProgressIndicator indicator) {
@@ -144,6 +143,7 @@ public class GenerateAction extends AnAction implements DumbAware {
           if (target == null) return;
           final File genDir = new File(VfsUtil.virtualToIoFile(target).getAbsolutePath());
           try {
+            int filesCount = files.size();
             ApplicationManager.getApplication().runReadAction(new ThrowableComputable<Boolean, Exception>() {
               @Override
               public Boolean compute() throws Exception {
@@ -157,9 +157,13 @@ public class GenerateAction extends AnAction implements DumbAware {
                 return true;
               }
             });
-
+            long written = 0;
+            for (File f : files.subList(filesCount, files.size())) {
+              written += f.length();
+            }
+            String totalSize = StringUtil.formatFileSize(written);
             Notifications.Bus.notify(new Notification(BnfConstants.GENERATION_GROUP,
-                                                      file.getName() + " parser generated", "to " + genDir,
+                                                      file.getName() + " generated (" + totalSize + ")", "to " + genDir,
                                                       NotificationType.INFORMATION), project);
           }
           catch (Exception ex) {

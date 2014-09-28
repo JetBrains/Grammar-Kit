@@ -632,9 +632,9 @@ public class RuleGraphHelper {
         rulesAndAlts.put(rule, rule);
       }
     }
-    if (forRule != null && "constructor_expression".equals(forRule.getName())) {
-      int gotcha = 1;
-    }
+    //if (forRule != null && "".equals(forRule.getName())) {
+    //  int gotcha = 1;
+    //}
 
     boolean hasSynonyms = collectSynonymsAndCollapseAlternatives(rulesAndAlts);
     if (rulesAndAlts.size() < 2) {

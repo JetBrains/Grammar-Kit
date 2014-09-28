@@ -430,6 +430,10 @@ public class ParserGenerator {
     out("}");
   }
 
+  public String wrapCallWithParserInstance(String nodeCall) {
+    return format("new Parser() {\npublic boolean parse(PsiBuilder %s, int %s) {\nreturn %s;\n}\n}", N.builder, N.level, nodeCall);
+  }
+
   private void generateRootParserContent(Set<String> ownRuleNames) {
     boolean generateExtendsSets = !myGraphHelper.getRuleExtendsMap().isEmpty();
     out("public ASTNode parse(IElementType %s, PsiBuilder %s) {", N.root, N.builder);

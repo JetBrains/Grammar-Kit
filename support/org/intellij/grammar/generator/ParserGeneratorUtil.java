@@ -301,10 +301,6 @@ public class ParserGeneratorUtil {
     return StringUtil.isEmpty(displayName)? "" : getAttribute(rule, KnownAttribute.ELEMENT_TYPE_PREFIX) + displayName;
   }
 
-  public static String wrapCallWithParserInstance(String nodeCall) {
-    return "new Parser() {\npublic boolean parse(PsiBuilder builder_, int level_) {\nreturn " + nodeCall + ";\n}\n}";
-  }
-
   public static Collection<BnfRule> getSortedPublicRules(Set<PsiElement> accessors) {
     Map<String, BnfRule> result = ContainerUtil.newTreeMap();
     for (PsiElement tree : accessors) {

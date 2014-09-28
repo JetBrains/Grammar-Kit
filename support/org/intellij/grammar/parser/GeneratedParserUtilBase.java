@@ -120,7 +120,7 @@ public class GeneratedParserUtilBase {
     return TokenSet.create(tokenTypes_);
   }
 
-  public static boolean leftMarkerTypeIs(PsiBuilder builder_, int level_, IElementType type) {
+  public static boolean leftMarkerIs(PsiBuilder builder_, IElementType type) {
     LighterASTNode marker = builder_.getLatestDoneMarker();
     return marker != null && marker.getTokenType() == type;
   }

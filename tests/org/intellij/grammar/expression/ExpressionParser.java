@@ -341,7 +341,7 @@ public class ExpressionParser implements PsiParser {
         }
         exit_section_(builder_, level_, marker_, EXP_EXPR, result_, true, null);
       }
-      else if (priority_ < 8 && leftMarkerTypeIs(builder_, level_, REF_EXPR) && arg_list(builder_, level_ + 1)) {
+      else if (priority_ < 8 && leftMarkerIs(builder_, REF_EXPR) && arg_list(builder_, level_ + 1)) {
         result_ = true;
         exit_section_(builder_, level_, marker_, CALL_EXPR, result_, true, null);
       }

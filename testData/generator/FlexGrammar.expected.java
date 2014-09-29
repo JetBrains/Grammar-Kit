@@ -114,7 +114,7 @@ public class JFlexParser implements PsiParser {
     if (!recursion_guard_(builder_, level_, "action")) return false;
     if (!nextTokenIs(builder_, "<action>", FLEX_BRACE1, FLEX_OR)) return false;
     boolean result_;
-    Marker marker_ = enter_section_(builder_, level_, _COLLAPSE_, "<action>");
+    Marker marker_ = enter_section_(builder_, level_, _NONE_, "<action>");
     result_ = action_0(builder_, level_ + 1);
     if (!result_) result_ = consumeToken(builder_, FLEX_OR);
     exit_section_(builder_, level_, marker_, FLEX_JAVA_CODE, result_, false, null);
@@ -909,7 +909,7 @@ public class JFlexParser implements PsiParser {
     if (!recursion_guard_(builder_, level_, "option_eof_throw")) return false;
     if (!nextTokenIs(builder_, "<option>", FLEX_PERC_31, FLEX_PERC_32)) return false;
     boolean result_;
-    Marker marker_ = enter_section_(builder_, level_, _COLLAPSE_, "<option>");
+    Marker marker_ = enter_section_(builder_, level_, _NONE_, "<option>");
     result_ = option_eof_throw_0(builder_, level_ + 1);
     if (!result_) result_ = option_eof_throw_1(builder_, level_ + 1);
     exit_section_(builder_, level_, marker_, FLEX_OPTION, result_, false, null);
@@ -988,7 +988,7 @@ public class JFlexParser implements PsiParser {
     if (!recursion_guard_(builder_, level_, "option_full")) return false;
     if (!nextTokenIs(builder_, "<option>", FLEX_PERC_47, FLEX_PERC_46)) return false;
     boolean result_;
-    Marker marker_ = enter_section_(builder_, level_, _COLLAPSE_, "<option>");
+    Marker marker_ = enter_section_(builder_, level_, _NONE_, "<option>");
     result_ = consumeToken(builder_, FLEX_PERC_46);
     if (!result_) result_ = consumeToken(builder_, FLEX_PERC_47);
     exit_section_(builder_, level_, marker_, FLEX_OPTION, result_, false, null);
@@ -1015,7 +1015,7 @@ public class JFlexParser implements PsiParser {
     if (!recursion_guard_(builder_, level_, "option_ignore_case")) return false;
     if (!nextTokenIs(builder_, "<option>", FLEX_PERC_50, FLEX_PERC_51)) return false;
     boolean result_;
-    Marker marker_ = enter_section_(builder_, level_, _COLLAPSE_, "<option>");
+    Marker marker_ = enter_section_(builder_, level_, _NONE_, "<option>");
     result_ = consumeToken(builder_, FLEX_PERC_50);
     if (!result_) result_ = consumeToken(builder_, FLEX_PERC_51);
     exit_section_(builder_, level_, marker_, FLEX_OPTION, result_, false, null);
@@ -1071,7 +1071,7 @@ public class JFlexParser implements PsiParser {
     if (!recursion_guard_(builder_, level_, "option_init_throw")) return false;
     if (!nextTokenIs(builder_, "<option>", FLEX_PERC_12, FLEX_PERC_13)) return false;
     boolean result_;
-    Marker marker_ = enter_section_(builder_, level_, _COLLAPSE_, "<option>");
+    Marker marker_ = enter_section_(builder_, level_, _NONE_, "<option>");
     result_ = option_init_throw_0(builder_, level_ + 1);
     if (!result_) result_ = option_init_throw_1(builder_, level_ + 1);
     exit_section_(builder_, level_, marker_, FLEX_OPTION, result_, false, null);
@@ -1109,7 +1109,7 @@ public class JFlexParser implements PsiParser {
     if (!recursion_guard_(builder_, level_, "option_integer")) return false;
     if (!nextTokenIs(builder_, "<option>", FLEX_PERC_21, FLEX_PERC_20)) return false;
     boolean result_;
-    Marker marker_ = enter_section_(builder_, level_, _COLLAPSE_, "<option>");
+    Marker marker_ = enter_section_(builder_, level_, _NONE_, "<option>");
     result_ = consumeToken(builder_, FLEX_PERC_20);
     if (!result_) result_ = consumeToken(builder_, FLEX_PERC_21);
     exit_section_(builder_, level_, marker_, FLEX_OPTION, result_, false, null);
@@ -1134,7 +1134,7 @@ public class JFlexParser implements PsiParser {
     if (!recursion_guard_(builder_, level_, "option_obsolete")) return false;
     if (!nextTokenIs(builder_, "<option>", FLEX_PERC_55, FLEX_PERC_56)) return false;
     boolean result_;
-    Marker marker_ = enter_section_(builder_, level_, _COLLAPSE_, "<option>");
+    Marker marker_ = enter_section_(builder_, level_, _NONE_, "<option>");
     result_ = consumeToken(builder_, FLEX_PERC_55);
     if (!result_) result_ = consumeToken(builder_, FLEX_PERC_56);
     exit_section_(builder_, level_, marker_, FLEX_OPTION, result_, false, null);
@@ -1235,7 +1235,7 @@ public class JFlexParser implements PsiParser {
     if (!recursion_guard_(builder_, level_, "option_unicode")) return false;
     if (!nextTokenIs(builder_, "<option>", FLEX_PERC_49, FLEX_PERC_48)) return false;
     boolean result_;
-    Marker marker_ = enter_section_(builder_, level_, _COLLAPSE_, "<option>");
+    Marker marker_ = enter_section_(builder_, level_, _NONE_, "<option>");
     result_ = consumeToken(builder_, FLEX_PERC_48);
     if (!result_) result_ = consumeToken(builder_, FLEX_PERC_49);
     exit_section_(builder_, level_, marker_, FLEX_OPTION, result_, false, null);
@@ -1263,7 +1263,7 @@ public class JFlexParser implements PsiParser {
     if (!recursion_guard_(builder_, level_, "option_yylexthrow")) return false;
     if (!nextTokenIs(builder_, "<option>", FLEX_PERC_24, FLEX_PERC_25)) return false;
     boolean result_;
-    Marker marker_ = enter_section_(builder_, level_, _COLLAPSE_, "<option>");
+    Marker marker_ = enter_section_(builder_, level_, _NONE_, "<option>");
     result_ = option_yylexthrow_0(builder_, level_ + 1);
     if (!result_) result_ = option_yylexthrow_1(builder_, level_ + 1);
     exit_section_(builder_, level_, marker_, FLEX_OPTION, result_, false, null);
@@ -2030,7 +2030,7 @@ public class JFlexParser implements PsiParser {
   public static boolean predefined_class_expression(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "predefined_class_expression")) return false;
     boolean result_;
-    Marker marker_ = enter_section_(builder_, level_, _COLLAPSE_, "<expression>");
+    Marker marker_ = enter_section_(builder_, level_, _NONE_, "<expression>");
     result_ = predefined_class(builder_, level_ + 1);
     if (!result_) result_ = consumeTokenSmart(builder_, FLEX_DOT);
     exit_section_(builder_, level_, marker_, FLEX_PREDEFINED_CLASS_EXPRESSION, result_, false, null);
@@ -2054,7 +2054,7 @@ public class JFlexParser implements PsiParser {
   public static boolean literal_expression(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "literal_expression")) return false;
     boolean result_;
-    Marker marker_ = enter_section_(builder_, level_, _COLLAPSE_, "<expression>");
+    Marker marker_ = enter_section_(builder_, level_, _NONE_, "<expression>");
     result_ = consumeTokenSmart(builder_, FLEX_STRING);
     if (!result_) result_ = consumeTokenSmart(builder_, FLEX_ID);
     if (!result_) result_ = allowed_chars(builder_, level_ + 1);

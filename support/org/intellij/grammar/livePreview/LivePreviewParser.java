@@ -21,8 +21,6 @@ import com.intellij.lang.impl.PsiBuilderImpl;
 import com.intellij.lexer.Lexer;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.text.StringUtil;
-import com.intellij.psi.PsiElement;
-import com.intellij.psi.impl.source.tree.LeafPsiElement;
 import com.intellij.psi.tree.IElementType;
 import com.intellij.util.NullableFunction;
 import com.intellij.util.PairProcessor;
@@ -166,7 +164,7 @@ public class LivePreviewParser implements PsiParser {
     boolean isLeft = firstNonTrivial && ParserGeneratorUtil.Rule.isLeft(rule);
     boolean isLeftInner = isLeft && (isPrivate || ParserGeneratorUtil.Rule.isInner(rule));
     String recoverWhile = firstNonTrivial ? getAttribute(rule, KnownAttribute.RECOVER_WHILE) : null;
-    boolean canCollapse = !isPrivate && (!isLeft || isLeftInner) && firstNonTrivial && canCollapse(rule);
+    boolean canCollapse = !isPrivate && (!isLeft || isLeftInner) && firstNonTrivial && myGraphHelper.canCollapse(rule);
 
     IElementType elementType = getElementType(rule);
 
@@ -541,20 +539,6 @@ public class LivePreviewParser implements PsiParser {
     }
     return rule(builder, level, targetRule, argumentMap);
   }
-
-
-  private boolean canCollapse(BnfRule rule) {
-    Map<PsiElement, RuleGraphHelper.Cardinality> map = myGraphHelper.getFor(rule);
-    for (PsiElement element : map.keySet()) {
-      if (element instanceof LeafPsiElement) continue;
-      RuleGraphHelper.Cardinality c = map.get(element);
-      if (c.optional()) continue;
-      if (!(element instanceof BnfRule)) return false;
-      if (!myGraphHelper.collapseEachOther(rule, (BnfRule)element)) return false;
-    }
-    return myRuleExtendsMap.containsScalarValue(rule);
-  }
-
 
   private String getTokenName(String value) {
     return mySimpleTokens.get(value);

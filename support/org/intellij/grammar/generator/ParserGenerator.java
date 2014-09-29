@@ -23,7 +23,6 @@ import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.psi.CommonClassNames;
 import com.intellij.psi.NavigatablePsiElement;
 import com.intellij.psi.PsiElement;
-import com.intellij.psi.impl.source.tree.LeafPsiElement;
 import com.intellij.psi.tree.IElementType;
 import com.intellij.util.ArrayUtil;
 import com.intellij.util.Function;
@@ -623,7 +622,7 @@ public class ParserGenerator {
       getAttribute(rule, KnownAttribute.RECOVER_WHILE.alias("recoverUntil")),
       getAttribute(rule, KnownAttribute.RECOVER_WHILE)) : null;
 
-    final boolean canCollapse = !isPrivate && (!isLeft || isLeftInner) && firstNonTrivial && canCollapse(rule);
+    final boolean canCollapse = !isPrivate && (!isLeft || isLeftInner) && firstNonTrivial && myGraphHelper.canCollapse(rule);
 
     String elementType = getElementType(rule);
 
@@ -869,18 +868,6 @@ public class ParserGenerator {
       out(sb.toString());
     }
     return dropFrameName? null : frameName;
-  }
-
-  private boolean canCollapse(BnfRule rule) {
-    Map<PsiElement, RuleGraphHelper.Cardinality> map = myGraphHelper.getFor(rule);
-    for (PsiElement element : map.keySet()) {
-      if (element instanceof LeafPsiElement) continue;
-      RuleGraphHelper.Cardinality c = map.get(element);
-      if (c.optional()) continue;
-      if (!(element instanceof BnfRule)) return false;
-      if (!myGraphHelper.collapseEachOther(rule, (BnfRule)element)) return false;
-    }
-    return myGraphHelper.getRuleExtendsMap().containsScalarValue(rule);
   }
 
   void generateNodeChildren(BnfRule rule, String funcName, List<BnfExpression> children, Set<BnfExpression> visited) {

@@ -588,7 +588,7 @@ public class GrammarParser implements PsiParser {
     if (!recursion_guard_(builder, level, "paren_expression")) return false;
     if (!nextTokenIs(builder, "<paren expression>", BNF_LEFT_PAREN, BNF_LEFT_BRACE)) return false;
     boolean result;
-    Marker marker = enter_section_(builder, level, _COLLAPSE_, "<paren expression>");
+    Marker marker = enter_section_(builder, level, _NONE_, "<paren expression>");
     result = paren_expression_0(builder, level + 1);
     if (!result) result = paren_expression_1(builder, level + 1);
     exit_section_(builder, level, marker, BNF_PAREN_EXPRESSION, result, false, null);

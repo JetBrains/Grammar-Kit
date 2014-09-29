@@ -895,7 +895,7 @@ public class ParserGenerator {
     }
   }
 
-  private static String collectExtraArguments(BnfRule rule, @Nullable BnfExpression expression, final boolean declaration) {
+  private static String collectExtraArguments(BnfRule rule, @Nullable BnfExpression expression, boolean declaration) {
     if (expression == null) return "";
     List<String> params = GrammarUtil.collectExtraArguments(rule, expression);
     if (params.isEmpty()) return "";
@@ -1498,7 +1498,7 @@ public class ParserGenerator {
       String className = myShortener.fun(targetInfo.rule == null ? BnfConstants.PSI_ELEMENT_CLASS : getAccessorType(targetInfo.rule));
 
       String type = (many ? myShortener.fun(CommonClassNames.JAVA_UTIL_LIST) + "<" : "") + className + (many ? "> " : " ");
-      String curId = "p" + (count++);
+      String curId = N.extraArg + (count++);
       if (!context.isEmpty()) {
         if (cardinality.optional()) {
           sb.append("if (").append(context).append(" == null) return null;\n");
@@ -1531,7 +1531,7 @@ public class ParserGenerator {
         context += ".";
         boolean isLast = index.equals("last");
         if (isLast) index = context + "size() - 1";
-        curId = "p" + (count++);
+        curId = N.extraArg + (count++);
         if (last) {
           sb.append("return ");
         }

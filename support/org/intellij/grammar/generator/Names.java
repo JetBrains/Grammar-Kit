@@ -31,8 +31,17 @@ class Names {
   public final String pos;
   public final String root;
   public final String priority;
+  public final String extraArg;
 
-  private Names(String builder, String level, String marker, String pinned, String result, String pos, String root, String priority) {
+  private Names(String builder,
+                String level,
+                String marker,
+                String pinned,
+                String result,
+                String pos,
+                String root,
+                String priority,
+                String extraArg) {
     this.builder = builder;
     this.level = level;
     this.marker = marker;
@@ -41,18 +50,19 @@ class Names {
     this.pos = pos;
     this.root = root;
     this.priority = priority;
+    this.extraArg = extraArg;
   }
 
   public static Names classicNames() {
-    return new Names("builder_", "level_", "marker_", "pinned_", "result_", "pos_", "root_", "priority_");
+    return new Names("builder_", "level_", "marker_", "pinned_", "result_", "pos_", "root_", "priority_", "p");
   }
 
   public static Names longNames() {
-    return new Names("builder", "level", "marker", "pinned", "result", "pos", "type", "priority");
+    return new Names("builder", "level", "marker", "pinned", "result", "pos", "type", "priority", "arg");
   }
 
   public static Names shortNames() {
-    return new Names("b", "l", "m", "p", "r", "p", "t", "g");
+    return new Names("b", "l", "m", "p", "r", "c", "t", "g", "a");
   }
 
   @NotNull

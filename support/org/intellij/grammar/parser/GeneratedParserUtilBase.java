@@ -808,7 +808,6 @@ public class GeneratedParserUtilBase {
       if (addExpected(sb, position, true)) {
         sb.append(" expected, ");
       }
-      else if (addExpected(sb, position, false)) sb.append(" unexpected, ");
       return sb.toString();
     }
 

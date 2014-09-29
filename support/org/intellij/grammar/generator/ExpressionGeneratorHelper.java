@@ -102,8 +102,7 @@ public class ExpressionGeneratorHelper {
 
       String substCheck = "";
       if (operator.arg1 != null) {
-        substCheck = format(" && leftMarkerTypeIs(%s, %s, %s)", g.N.builder, g.N.level,
-                            getElementType(operator.arg1));
+        substCheck = format(" && leftMarkerIs(%s, %s)", g.N.builder, getElementType(operator.arg1));
       }
       g.out("%sif (%s < %d%s && %s) {", first ? "" : "else ", g.N.priority, priority, substCheck, opCall);
       first = false;

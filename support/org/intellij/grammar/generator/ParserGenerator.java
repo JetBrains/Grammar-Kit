@@ -899,15 +899,21 @@ public class ParserGenerator {
     }
   }
 
-  private static String collectExtraArguments(BnfRule rule, @Nullable BnfExpression expression, boolean declaration) {
+  private String collectExtraArguments(BnfRule rule, @Nullable BnfExpression expression, boolean declaration) {
     if (expression == null) return "";
     List<String> params = GrammarUtil.collectExtraArguments(rule, expression);
     if (params.isEmpty()) return "";
     final StringBuilder sb = new StringBuilder();
     for (String param : params) {
-      sb.append(", ").append(declaration ? "final Parser " : "").append(param.substring(2, param.length() - 2));
+      sb.append(", ").append(declaration ? "final Parser " : "").
+        append(formatArgName(param.substring(2, param.length() - 2)));
     }
     return sb.toString();
+  }
+
+  private String formatArgName(String s) {
+    String argName = s.trim();
+    return N.argPrefix + (N.argPrefix.isEmpty() || "_".equals(N.argPrefix) ? argName : StringUtil.capitalize(argName));
   }
 
   @Nullable
@@ -1054,7 +1060,7 @@ public class ParserGenerator {
     else if (type == BNF_EXTERNAL_EXPRESSION) {
       List<BnfExpression> expressions = ((BnfExternalExpression)node).getExpressionList();
       if (expressions.size() == 1 && Rule.isMeta(rule)) {
-        return format("%s.parse(%s, %s)", expressions.get(0).getText(), N.builder, N.level);
+        return format("%s.parse(%s, %s)", formatArgName(expressions.get(0).getText()), N.builder, N.level);
       }
       else {
         StringBuilder clause = new StringBuilder();
@@ -1131,8 +1137,7 @@ public class ParserGenerator {
           List<BnfExpression> expressionList = ((BnfExternalExpression)nested).getExpressionList();
           boolean metaRule = Rule.isMeta(rule);
           if (metaRule && expressionList.size() == 1) {
-            // parameter
-            clause.append(expressionList.get(0).getText());
+            clause.append(formatArgName(expressionList.get(0).getText()));
           }
           else {
             clause.append(generateWrappedNodeCall(rule, nested, argNextName));
@@ -1502,7 +1507,7 @@ public class ParserGenerator {
       String className = myShortener.fun(targetInfo.rule == null ? BnfConstants.PSI_ELEMENT_CLASS : getAccessorType(targetInfo.rule));
 
       String type = (many ? myShortener.fun(CommonClassNames.JAVA_UTIL_LIST) + "<" : "") + className + (many ? "> " : " ");
-      String curId = N.extraArg + (count++);
+      String curId = N.psiLocal + (count++);
       if (!context.isEmpty()) {
         if (cardinality.optional()) {
           sb.append("if (").append(context).append(" == null) return null;\n");
@@ -1535,7 +1540,7 @@ public class ParserGenerator {
         context += ".";
         boolean isLast = index.equals("last");
         if (isLast) index = context + "size() - 1";
-        curId = N.extraArg + (count++);
+        curId = N.psiLocal + (count++);
         if (last) {
           sb.append("return ");
         }

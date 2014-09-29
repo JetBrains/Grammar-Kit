@@ -29,6 +29,7 @@ import com.intellij.util.ArrayUtil;
 import com.intellij.util.Function;
 import com.intellij.util.ObjectUtils;
 import com.intellij.util.containers.ContainerUtil;
+import com.intellij.util.containers.MultiMap;
 import gnu.trove.THashMap;
 import gnu.trove.THashSet;
 import org.intellij.grammar.KnownAttribute;
@@ -48,6 +49,7 @@ import java.util.*;
 import static java.lang.String.format;
 import static org.intellij.grammar.generator.ParserGeneratorUtil.*;
 import static org.intellij.grammar.generator.RuleGraphHelper.Cardinality.*;
+import static org.intellij.grammar.generator.RuleGraphHelper.getSynonymTargetOrSelf;
 import static org.intellij.grammar.psi.BnfTypes.*;
 
 
@@ -326,7 +328,7 @@ public class ParserGenerator {
     THashSet<BnfRule> visited = new THashSet<BnfRule>();
     BnfRule cur = rule, next = rule;
     for (; next != null && cur != null; cur = !visited.add(next) ? null : next) {
-      next = RuleGraphHelper.getSynonymTargetOrSelf(cur);
+      next = getSynonymTargetOrSelf(cur);
       if (next != cur) continue;
       if (cur != rule) break; // do not search for elementType any further
       String attr = getAttribute(cur, KnownAttribute.EXTENDS);
@@ -435,7 +437,8 @@ public class ParserGenerator {
   }
 
   private void generateRootParserContent(Set<String> ownRuleNames) {
-    boolean generateExtendsSets = !myGraphHelper.getRuleExtendsMap().isEmpty();
+    List<Set<String>> extendsSet = buildExtendsSet(myGraphHelper.getRuleExtendsMap());
+    boolean generateExtendsSets = !extendsSet.isEmpty();
     out("public ASTNode parse(IElementType %s, PsiBuilder %s) {", N.root, N.builder);
     out("parse_only_(%s, %s);", N.root, N.builder);
     out("return %s.getTreeBuilt();", N.builder);
@@ -476,17 +479,7 @@ public class ParserGenerator {
     if (generateExtendsSets) {
       out("public static final TokenSet[] EXTENDS_SETS_ = new TokenSet[] {");
       StringBuilder sb = new StringBuilder();
-      Set<String> elementTypes = new TreeSet<String>();
-      for (String ruleName : myRuleParserClasses.keySet()) {
-        BnfRule baseRule = myFile.getRule(ruleName);
-        if (Rule.isFake(baseRule)) continue;
-        Collection<BnfRule> rules = myGraphHelper.getRuleExtendsMap().get(baseRule);
-        if (rules.isEmpty()) continue;
-        for (BnfRule rule : rules) {
-          if (Rule.isFake(rule)) continue;
-          ContainerUtil.addIfNotNull(elementTypes, StringUtil.nullize(getElementType(rule)));
-        }
-        if (elementTypes.size() < 2) continue;
+      for (Set<String> elementTypes : extendsSet) {
         int i = 0;
         for (String elementType : elementTypes) {
           if (i > 0) sb.append(i % 4 == 0 ? ",\n" : ", ");
@@ -495,11 +488,33 @@ public class ParserGenerator {
         }
         out("create_token_set_(%s),", sb);
         sb.setLength(0);
-        elementTypes.clear();
       }
       out("};");
       newLine();
     }
+  }
+
+  @NotNull
+  private static List<Set<String>> buildExtendsSet(MultiMap<BnfRule, BnfRule> map) {
+    if (map.isEmpty()) return Collections.emptyList();
+    List<Set<String>> result = ContainerUtil.newArrayList();
+    for (Map.Entry<BnfRule, Collection<BnfRule>> entry : map.entrySet()) {
+      Set<String> set = null;
+      for (BnfRule rule : entry.getValue()) {
+        String elementType = Rule.isFake(rule) || getSynonymTargetOrSelf(rule) != rule ? null : getElementType(rule);
+        if (StringUtil.isEmpty(elementType)) continue;
+        if (set == null) set = ContainerUtil.newTreeSet();
+        set.add(elementType);
+      }
+      if (set != null && set.size() > 1) result.add(set);
+    }
+    Collections.sort(result, new Comparator<Set<?>>() {
+      @Override
+      public int compare(Set<?> o1, Set<?> o2) {
+        return o1.size() - o2.size();
+      }
+    });
+    return result;
   }
 
   private void generateClassHeader(String className,

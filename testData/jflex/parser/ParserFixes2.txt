@@ -24,7 +24,7 @@ JFLEX_FILE
       JFlexClassExpressionImpl(FLEX_CLASS_EXPRESSION)
         PsiElement([)('[')
         PsiElement(^)('^')
-        PsiErrorElement:'-', <char class>, ']', char, escaped_char or string expected, got '['
+        PsiErrorElement:<char class>, ']', char or escaped_char expected, got '['
           <empty list>
       PsiElement(BAD_CHARACTER)('[')
       PsiElement(])(']')
@@ -47,7 +47,7 @@ JFLEX_FILE
       PsiWhiteSpace(' ')
       JFlexClassExpressionImpl(FLEX_CLASS_EXPRESSION)
         PsiElement([)('[')
-        PsiErrorElement:'-', <char class>, ']', '^', char, escaped_char or string expected, got 'DIGITS'
+        PsiErrorElement:<char class>, ']', char or escaped_char expected, got 'DIGITS'
           <empty list>
     PsiWhiteSpace('\n')
     PsiWhiteSpace('\n')
@@ -62,7 +62,7 @@ JFLEX_FILE
           PsiElement(})('}')
         PsiElement(+)('+')
       PsiWhiteSpace('\n')
-      PsiErrorElement:'*', '+', '?', '{' or '|' expected, got '#'
+      PsiErrorElement:'#' unexpected
         PsiElement(char)('#')
       PsiElement(DUMMY_BLOCK)
         PsiElement(id)('if')
@@ -109,7 +109,7 @@ JFLEX_FILE
         PsiElement(char)('F')
         PsiElement(])(']')
       PsiWhiteSpace('\n')
-      PsiErrorElement:'*', '+', '?', '{' or '|' expected, got '#'
+      PsiErrorElement:'#' unexpected
         PsiElement(char)('#')
       PsiElement(id)('end')
     PsiWhiteSpace('\n')
@@ -119,7 +119,7 @@ JFLEX_FILE
       JFlexLiteralExpressionImpl(FLEX_LITERAL_EXPRESSION)
         PsiElement(id)('A')
       PsiWhiteSpace('\n')
-      PsiErrorElement:'*', '+', '?', '{' or '|' expected, got 'B'
+      PsiErrorElement:'B' unexpected
         PsiElement(id)('B')
   PsiWhiteSpace('\n\n')
   PsiElement(%%)('%%')

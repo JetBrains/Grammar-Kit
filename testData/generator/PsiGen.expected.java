@@ -55,13 +55,12 @@ public class PsiGen implements PsiParser {
   }
 
   public static final TokenSet[] EXTENDS_SETS_ = new TokenSet[] {
+    create_token_set_(REF_EXPR, SPECIAL_REF),
+    create_token_set_(CHOICE_JOINED, LITERAL),
+    create_token_set_(ROOT, ROOT_B, ROOT_C, ROOT_D),
     create_token_set_(CAST_EXPR, CHOICE_JOINED, EXPR, ID_EXPR,
       ITEM_EXPR, LITERAL, MISSING_EXTERNAL_TYPE, MUL_EXPR,
       PLUS_EXPR, REF_EXPR, SOME_EXPR, SPECIAL_REF),
-    create_token_set_(CHOICE_JOINED, LITERAL),
-    create_token_set_(REF_EXPR, SPECIAL_REF),
-    create_token_set_(REF_EXPR, SPECIAL_REF),
-    create_token_set_(ROOT, ROOT_B, ROOT_C, ROOT_D),
   };
 
   /* ********************************************************** */

@@ -193,9 +193,6 @@ import com.intellij.psi.PsiElement;
 public interface XTokenDefaults extends XComposite {
 
   @NotNull
-  PsiElement getLowcasekwd1();
-
-  @NotNull
   PsiElement getNodef();
 
 }
@@ -577,12 +574,6 @@ public class XTokenDefaultsImpl extends ASTWrapperPsiElement implements XTokenDe
   public void accept(@NotNull PsiElementVisitor visitor) {
     if (visitor instanceof XVisitor) ((XVisitor)visitor).visitTokenDefaults(this);
     else super.accept(visitor);
-  }
-
-  @Override
-  @NotNull
-  public PsiElement getLowcasekwd1() {
-    return findNotNullChildByType(LOWCASEKWD1);
   }
 
   @Override

@@ -9,6 +9,18 @@ BnfFile:BnfGrammar.bnf
         BNF_STRING_LITERAL_EXPRESSION: "license.txt"
           PsiElement(string)('"license.txt"')
       PsiWhiteSpace('\n  ')
+      BNF_ATTR:generate
+        PsiElement(id)('generate')
+        PsiElement(=)('=')
+        BNF_VALUE_LIST
+          PsiElement([)('[')
+          BNF_LIST_ENTRY
+            PsiElement(id)('names')
+            PsiElement(=)('=')
+            BNF_STRING_LITERAL_EXPRESSION: "long"
+              PsiElement(string)('"long"')
+          PsiElement(])(']')
+      PsiWhiteSpace('\n\n  ')
       BNF_ATTR:parserClass
         PsiElement(id)('parserClass')
         PsiElement(=)('=')

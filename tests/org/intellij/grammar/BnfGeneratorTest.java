@@ -21,6 +21,7 @@ public class BnfGeneratorTest extends BnfGeneratorTestCase {
   }
 
   public void testBnfGrammar() throws Exception { doGenTest(true); }
+  public void testFlexGrammar() throws Exception { doGenTest(true); }
   public void testSelf() throws Exception { doGenTest(true); }
   public void testSmall() throws Exception { doGenTest(false); }
   public void testAutopin() throws Exception { doGenTest(false); }
@@ -57,6 +58,7 @@ public class BnfGeneratorTest extends BnfGeneratorTestCase {
   @Override
   protected String loadFile(@NonNls String name) throws IOException {
     if (name.equals("BnfGrammar.bnf")) return super.loadFile("../../grammars/Grammar.bnf");
+    if (name.equals("FlexGrammar.bnf")) return super.loadFile("../../grammars/JFlex.bnf");
     return super.loadFile(name);
   }
 

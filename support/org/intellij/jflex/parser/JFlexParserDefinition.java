@@ -25,9 +25,11 @@ import com.intellij.psi.FileViewProvider;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.TokenType;
+import com.intellij.psi.tree.IElementType;
 import com.intellij.psi.tree.IFileElementType;
 import com.intellij.psi.tree.TokenSet;
 import org.intellij.jflex.JFlexLanguage;
+import org.intellij.jflex.psi.JFlexTokenType;
 import org.intellij.jflex.psi.impl.JFlexFileImpl;
 import org.jetbrains.annotations.NotNull;
 
@@ -39,6 +41,7 @@ import static org.intellij.jflex.psi.JFlexTypes.*;
 public class JFlexParserDefinition implements ParserDefinition {
 
   public static final IFileElementType JFLEX_FILE_ELEMENT_TYPE = new IFileElementType("JFLEX_FILE", JFlexLanguage.INSTANCE);
+  public static final IElementType FLEX_NEWLINE = new JFlexTokenType("newline");
   public static final TokenSet WS = TokenSet.create(TokenType.WHITE_SPACE, FLEX_NEWLINE);
   public static final TokenSet COMMENTS = TokenSet.create(FLEX_LINE_COMMENT, FLEX_BLOCK_COMMENT);
   //public static final TokenSet LITERALS = TokenSet.create(JFlexTypes.JFLEX_STRING);

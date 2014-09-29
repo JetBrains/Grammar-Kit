@@ -1,6 +1,8 @@
 package org.intellij.jflex.parser;
 import com.intellij.lexer.*;
 import com.intellij.psi.tree.IElementType;
+import static com.intellij.psi.TokenType.WHITE_SPACE;
+import static org.intellij.jflex.parser.JFlexParserDefinition.FLEX_NEWLINE;
 import static org.intellij.jflex.psi.JFlexTypes.*;
 
 %%
@@ -47,7 +49,7 @@ JAVA_CHAR=\'({ESCAPED_CHAR} | [^'])\'
 
 %%
 <YYINITIAL, DECLARATIONS, RULES, BLOCK> {
-  [\t\r ]+                { return com.intellij.psi.TokenType.WHITE_SPACE; }
+  [\t\r ]+                { return WHITE_SPACE; }
   "\n"+                   { return FLEX_NEWLINE; }
   {LINE_COMMENT}          { return FLEX_LINE_COMMENT; }
   {BLOCK_COMMENT}         { return FLEX_BLOCK_COMMENT; }

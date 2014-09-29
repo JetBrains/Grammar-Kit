@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2011 Gregory Shrago
+ * Copyright 2011-2014 Gregory Shrago
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -70,7 +70,6 @@ public interface JFlexTypes {
   IElementType FLEX_ID = new JFlexTokenType("id");
   IElementType FLEX_JAVA = new JFlexTokenType("java");
   IElementType FLEX_LINE_COMMENT = new JFlexTokenType("line_comment");
-  IElementType FLEX_NEWLINE = new JFlexTokenType("newline");
   IElementType FLEX_NOT = new JFlexTokenType("!");
   IElementType FLEX_NOT2 = new JFlexTokenType("~");
   IElementType FLEX_NUMBER = new JFlexTokenType("number");

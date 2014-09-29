@@ -11,15 +11,24 @@ import org.intellij.jflex.JFlexParserTest;
  * @author gregsh
  */
 public class BnfTestSuite extends TestCase {
+
+  public static class BnfTestSuiteFast extends TestCase {
+    public static Test suite() {
+      final TestSuite testSuite = new TestSuite();
+      testSuite.addTestSuite(JFlexGenerationTest.class);
+      testSuite.addTestSuite(JFlexParserTest.class);
+      testSuite.addTestSuite(BnfParserTest.class);
+      testSuite.addTestSuite(BnfGeneratorTest.class);
+      testSuite.addTestSuite(ExpressionParserTest.class);
+      testSuite.addTestSuite(BnfLivePreviewParserTest.class);
+      testSuite.addTestSuite(BnfAttributeDescriptionTest.class);
+      return testSuite;
+    }
+  }
+
   public static Test suite() {
     final TestSuite testSuite = new TestSuite();
-    testSuite.addTestSuite(JFlexGenerationTest.class);
-    testSuite.addTestSuite(JFlexParserTest.class);
-    testSuite.addTestSuite(BnfParserTest.class);
-    testSuite.addTestSuite(BnfGeneratorTest.class);
-    testSuite.addTestSuite(ExpressionParserTest.class);
-    testSuite.addTestSuite(BnfLivePreviewParserTest.class);
-    testSuite.addTestSuite(BnfAttributeDescriptionTest.class);
+    testSuite.addTest(BnfTestSuiteFast.suite());
     testSuite.addTestSuite(BnfFirstNextTest.class);
     testSuite.addTestSuite(BnfRuleGraphTest.class);
     testSuite.addTestSuite(BnfCompletionTest.class);

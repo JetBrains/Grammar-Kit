@@ -78,7 +78,8 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static org.intellij.grammar.actions.FileGeneratorUtil.*;
+import static org.intellij.grammar.actions.FileGeneratorUtil.fail;
+import static org.intellij.grammar.actions.FileGeneratorUtil.getTargetDirectoryFor;
 
 /**
  * @author greg
@@ -114,9 +115,9 @@ public class BnfRunJFlexAction extends DumbAwareAction {
     final String commandName = e.getPresentation().getText();
 
     String text = document.getText();
-    Matcher matcherClass = Pattern.compile("%class (\\w+)").matcher(text);
+    Matcher matcherClass = Pattern.compile("%class\\s+(\\w+)").matcher(text);
     final String lexerClassName = matcherClass.find() ? matcherClass.group(1) : null;
-    Matcher matcherPackage = Pattern.compile("^package ([^;]+);").matcher(text);
+    Matcher matcherPackage = Pattern.compile("package\\s+([^;]+);|(%%)").matcher(text);
     final String lexerPackage = matcherPackage.find() ? StringUtil.trim(matcherPackage.group(1)) : null;
     if (lexerClassName == null) {
       String content = "Lexer class name option not found, use <pre>%class LexerClassName</pre>";

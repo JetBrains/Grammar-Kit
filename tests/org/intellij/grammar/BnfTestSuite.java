@@ -14,7 +14,7 @@ public class BnfTestSuite extends TestCase {
 
   public static class BnfTestSuiteFast extends TestCase {
     public static Test suite() {
-      final TestSuite testSuite = new TestSuite();
+      TestSuite testSuite = new TestSuite("Fast");
       testSuite.addTestSuite(JFlexGenerationTest.class);
       testSuite.addTestSuite(JFlexParserTest.class);
       testSuite.addTestSuite(BnfParserTest.class);
@@ -27,7 +27,7 @@ public class BnfTestSuite extends TestCase {
   }
 
   public static Test suite() {
-    final TestSuite testSuite = new TestSuite();
+    TestSuite testSuite = new TestSuite();
     testSuite.addTest(BnfTestSuiteFast.suite());
     testSuite.addTestSuite(BnfFirstNextTest.class);
     testSuite.addTestSuite(BnfRuleGraphTest.class);

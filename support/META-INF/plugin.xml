@@ -15,7 +15,10 @@
     <p>1.2.0</p>
     <ul>
       <li>Generator: output directories detection for JFlex/BNF generators</li>
+      <li>Generator: "generate" attribute supersedes global "generateXXX" attributes</li>
+      <li>Generator: compact local variables names by default to improve code readability</li>
       <li>Generator: better PSI generation in complex "extends" / "elementType" cases</li>
+      <li>Generator: improved rule content calculation leading to more correct PSI classes</li>
       <li>Generator/Pratt: no more explicit PsiBuilder.Marker manipulations in generated code</li>
       <li>LivePreview: pre-configured tokens are dropped, numbers/strings/whitespaces detected</li>
     </ul>

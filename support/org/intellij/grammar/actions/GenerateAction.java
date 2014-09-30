@@ -143,6 +143,7 @@ public class GenerateAction extends AnAction implements DumbAware {
           if (target == null) return;
           final File genDir = new File(VfsUtil.virtualToIoFile(target).getAbsolutePath());
           try {
+            long time = System.currentTimeMillis();
             int filesCount = files.size();
             ApplicationManager.getApplication().runReadAction(new ThrowableComputable<Boolean, Exception>() {
               @Override
@@ -157,20 +158,23 @@ public class GenerateAction extends AnAction implements DumbAware {
                 return true;
               }
             });
+            long millis = System.currentTimeMillis() - time;
+            String duration = millis < 1000 ? null : StringUtil.formatDuration(millis);
             long written = 0;
             for (File f : files.subList(filesCount, files.size())) {
               written += f.length();
             }
             String totalSize = StringUtil.formatFileSize(written);
-            Notifications.Bus.notify(new Notification(BnfConstants.GENERATION_GROUP,
-                                                      file.getName() + " generated (" + totalSize + ")", "to " + genDir,
-                                                      NotificationType.INFORMATION), project);
+            Notifications.Bus.notify(new Notification(
+              BnfConstants.GENERATION_GROUP,
+              file.getName() + " generated (" + totalSize + ")",
+              "to " + genDir + (duration == null ? "" : " in " + duration), NotificationType.INFORMATION), project);
           }
           catch (Exception ex) {
-            Notifications.Bus.notify(new Notification(BnfConstants.GENERATION_GROUP,
-                                                      file.getName() + " parser generation failed",
-                                                      ExceptionUtil.getUserStackTrace(ex, ParserGenerator.LOG),
-                                                      NotificationType.ERROR), project);
+            Notifications.Bus.notify(new Notification(
+              BnfConstants.GENERATION_GROUP,
+              file.getName() + " generation failed",
+              ExceptionUtil.getUserStackTrace(ex, ParserGenerator.LOG), NotificationType.ERROR), project);
             LOG.warn(ex);
           }
         }

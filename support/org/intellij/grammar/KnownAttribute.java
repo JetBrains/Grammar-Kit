@@ -197,7 +197,7 @@ public class KnownAttribute<T> {
         String value = inverse ? pair.first : pair.second;
         if (key != null) t.put(key, value);
       }
-      return t;
+      return Collections.unmodifiableMap(t);
     }
   }
 }

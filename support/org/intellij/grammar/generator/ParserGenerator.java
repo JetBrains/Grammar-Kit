@@ -115,7 +115,7 @@ public class ParserGenerator {
     visitorClassName = StringUtil.isEmpty(tmpVisitorClass) ?
                        null : tmpVisitorClass.startsWith(myRuleClassPrefix) ?
                               tmpVisitorClass : myRuleClassPrefix + tmpVisitorClass;
-    mySimpleTokens = RuleGraphHelper.getTokenMap(myFile);
+    mySimpleTokens = ContainerUtil.newLinkedHashMap(RuleGraphHelper.getTokenMap(myFile));
     myUnknownRootAttributes = ParserGeneratorUtil.collectUnknownAttributes(myFile);
     myGraphHelper = RuleGraphHelper.getCached(myFile);
     myExpressionHelper = new ExpressionHelper(myFile, myGraphHelper, true);

@@ -661,7 +661,7 @@ public class RuleGraphHelper {
       hasSynonyms |= rule != e.getValue();
       if (myRulesCollapseMap.containsKey(rule)) {
         for (PsiElement r : myRulesCollapseMap.get(rule)) {
-          if (r instanceof BnfRule) {
+          if (r instanceof BnfRule && !rulesAndAlts.containsKey(r)) {
             rulesAndAlts.put((BnfRule)r, (BnfRule)r);
           }
         }

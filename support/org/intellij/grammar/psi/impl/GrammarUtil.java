@@ -27,6 +27,8 @@ import com.intellij.util.SmartList;
 import org.intellij.grammar.generator.ParserGeneratorUtil;
 import org.intellij.grammar.parser.GeneratedParserUtilBase;
 import org.intellij.grammar.psi.*;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Collections;
 import java.util.Comparator;
@@ -79,18 +81,22 @@ public class GrammarUtil {
     }
   }
 
-  public static boolean isOneTokenExpression(BnfExpression e1) {
+  public static boolean isInAttributesReference(@Nullable PsiElement element) {
+    return PsiTreeUtil.getParentOfType(element, BnfRule.class, BnfAttrs.class) instanceof BnfAttrs;
+  }
+
+  public static boolean isOneTokenExpression(@Nullable BnfExpression e1) {
     return e1 instanceof BnfLiteralExpression || e1 instanceof BnfReferenceOrToken;
   }
 
-  public static boolean isExternalReference(PsiElement psiElement) {
-    PsiElement parent = psiElement.getParent();
+  public static boolean isExternalReference(@Nullable PsiElement psiElement) {
+    PsiElement parent = psiElement == null? null : psiElement.getParent();
     if (parent instanceof BnfExternalExpression && ((BnfExternalExpression)parent).getExpressionList().get(0) == psiElement) return true;
     if (parent instanceof BnfSequence) parent = parent.getParent();
     return parent instanceof BnfRule && ParserGeneratorUtil.Rule.isExternal((BnfRule)parent);
   }
 
-  public static List<BnfExpression> getExternalRuleExpressions(BnfRule subRule) {
+  public static List<BnfExpression> getExternalRuleExpressions(@NotNull BnfRule subRule) {
     BnfExpression expression = subRule.getExpression();
     return expression instanceof BnfSequence ? ((BnfSequence)expression).getExpressionList() : Collections.singletonList(expression);
   }

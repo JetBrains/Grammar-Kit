@@ -16,10 +16,8 @@
 package org.intellij.grammar.generator;
 
 import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.MessageType;
-import com.intellij.openapi.util.Condition;
 import com.intellij.openapi.util.Pair;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.psi.PsiElement;
@@ -29,6 +27,7 @@ import com.intellij.psi.impl.source.tree.LeafPsiElement;
 import com.intellij.psi.tree.IElementType;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.util.ObjectUtils;
+import com.intellij.util.ThreeState;
 import com.intellij.util.containers.ContainerUtil;
 import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.actions.GenerateAction;
@@ -263,7 +262,7 @@ public class ParserGeneratorUtil {
     return packageName + "." + getRulePsiClassName(rule, getPsiClassPrefix(file)) + (impl? getPsiImplSuffix(file): "");
   }
 
-  public static BnfExpression createFake(final String text) {
+  public static BnfExpression createFake(@NotNull String text) {
     return new MyFakeExpression(text);
   }
 
@@ -330,28 +329,43 @@ public class ParserGeneratorUtil {
     return result.values();
   }
 
-  public static <T> List<T> topoSort(Collection<T> collection, Topology<T> topology) {
-    List<T> rulesToSort = new ArrayList<T>(collection);
-    if (rulesToSort.size() < 2) return new ArrayList<T>(rulesToSort);
-    Collections.reverse(rulesToSort);
-    List<T> sorted = new ArrayList<T>(rulesToSort.size());
-    int iterationCount = 0;
-    main: while (!rulesToSort.isEmpty()) {
-      inner: for (T rule : rulesToSort) {
-        for (T r : rulesToSort) {
-          if ((iterationCount ++) % 100 == 0) {
-            ProgressManager.checkCanceled();
-          }
-          if (rule == r) continue;
-          if (topology.contains(rule, r)) continue inner;
-        }
-        sorted.add(rule);
-        rulesToSort.remove(rule);
-        continue main;
-      }
-      sorted.add(topology.forceChoose(rulesToSort));
+  public static List<BnfRule> topoSort(Collection<BnfRule> rules, RuleGraphHelper ruleGraph) {
+    Map<BnfRule, ThreeState> colors = ContainerUtil.newHashMap();
+    for (BnfRule rule : rules) {
+      colors.put(rule, ThreeState.UNSURE);
     }
-    return sorted;
+    Iterator<BnfRule> iterator = rules.iterator();
+    LinkedList<BnfRule> result = ContainerUtil.newLinkedList();
+    LinkedList<BnfRule> stack = ContainerUtil.newLinkedList();
+    Collection<? extends BnfRule> inheritors = ruleGraph.getRuleExtendsMap().values();
+    while (true) {
+      if (stack.isEmpty()) {
+        if (iterator.hasNext()) stack.addFirst(iterator.next());
+        else break;
+      }
+      BnfRule rule = stack.pollFirst();
+      ThreeState color = colors.get(rule);
+      if (color == ThreeState.UNSURE) {
+        stack.addFirst(rule);
+        colors.put(rule, ThreeState.YES);
+        for (BnfRule child : ruleGraph.getSubRules(rule)) {
+          if (child == rule) continue;
+          ThreeState childColor = colors.get(child);
+          if (childColor == null || childColor == ThreeState.NO) continue;
+
+          if (childColor == ThreeState.YES &&
+              !ContainerUtil.intersects(ruleGraph.getSubRules(child), inheritors)) {
+            continue;
+          }
+          stack.addFirst(child);
+        }
+      }
+      else if (color == ThreeState.YES) {
+        colors.put(rule, ThreeState.NO);
+        result.addLast(rule);
+      }
+    }
+    return result;
   }
 
   public static void addWarning(Project project, String text) {
@@ -584,10 +598,10 @@ public class ParserGeneratorUtil {
     }
   }
 
-  private static class MyFakeExpression extends FakePsiElement implements BnfExpression{
+  private static class MyFakeExpression extends FakePsiElement implements BnfExpression {
     private final String myText;
 
-    MyFakeExpression(String text) {
+    MyFakeExpression(@NotNull String text) {
       myText = text;
     }
 
@@ -603,38 +617,8 @@ public class ParserGeneratorUtil {
 
     @Override
     public String toString() {
-      return getText();
+      return myText;
     }
   }
 
-  public static abstract class Topology<T> {
-    public abstract boolean contains(T t1, T t2);
-    public T forceChoose(Collection<T> col) {
-      // choose the first from cycle
-      return forceChooseInner(col, Condition.TRUE);
-    }
-
-    protected T forceChooseInner(Collection<T> col, Condition<T>... conditions) {
-      //for (T rule : rulesToSort) {
-      //  StringBuilder sb = new StringBuilder(rule.toString()).append(":");
-      //  for (T r : rulesToSort) {
-      //    if (rule == r) continue;
-      //    if (condition.process(rule, r)) {
-      //      sb.append(" ").append(r);
-      //    }
-      //  }
-      //  System.out.println(sb);
-      //}
-      for (Condition<T> condition : conditions) {
-        for (Iterator<T> it = col.iterator(); it.hasNext(); ) {
-          T t = it.next();
-          if (condition.value(t)) {
-            it.remove();
-            return t;
-          }
-        }
-      }
-      throw new AssertionError();
-    }
-  }
 }

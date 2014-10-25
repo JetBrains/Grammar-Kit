@@ -37,7 +37,8 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
-import static org.intellij.grammar.generator.ParserGeneratorUtil.*;
+import static org.intellij.grammar.generator.ParserGeneratorUtil.Rule;
+import static org.intellij.grammar.generator.ParserGeneratorUtil.getChildExpressions;
 import static org.intellij.grammar.generator.RuleGraphHelper.Cardinality.OPTIONAL;
 
 /**
@@ -108,13 +109,7 @@ public class ExpressionHelper {
 
       ExpressionInfo expressionInfo = new ExpressionInfo(rule);
       addToPriorityMap(rule, myRuleGraph.getExtendsRules(rule), expressionInfo);
-      List<BnfRule> rules = new ArrayList<BnfRule>(expressionInfo.priorityMap.keySet());
-      rules = ParserGeneratorUtil.topoSort(rules, new Topology<BnfRule>() {
-        @Override
-        public boolean contains(BnfRule t1, BnfRule t2) {
-          return myRuleGraph.getSubRules(t1).contains(t2);
-        }
-      });
+      List<BnfRule> rules = ParserGeneratorUtil.topoSort(expressionInfo.priorityMap.keySet(), myRuleGraph);
       for (BnfRule r : rules) {
         buildOperatorMap(r, rule, expressionInfo);
       }

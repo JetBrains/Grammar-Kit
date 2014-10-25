@@ -16,7 +16,6 @@
 package org.intellij.grammar.generator;
 
 import com.intellij.lang.Language;
-import com.intellij.openapi.util.Condition;
 import com.intellij.openapi.util.Key;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.impl.source.tree.LeafPsiElement;
@@ -29,7 +28,6 @@ import com.intellij.util.CommonProcessors;
 import com.intellij.util.containers.ContainerUtil;
 import com.intellij.util.containers.MultiMap;
 import gnu.trove.THashMap;
-import gnu.trove.THashSet;
 import gnu.trove.TObjectHashingStrategy;
 import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.analysis.BnfFirstNextAnalyzer;
@@ -252,34 +250,8 @@ public class RuleGraphHelper {
   }
 
   private void buildContentsMap() {
-    final Collection<? extends BnfRule> inheritors = new THashSet<BnfRule>(myRuleExtendsMap.values());
-    List<BnfRule> rules = topoSort(myFile.getRules(), new Topology<BnfRule>() {
-      @Override
-      public boolean contains(BnfRule t1, BnfRule t2) {
-        return myRulesGraph.get(t1).contains(t2);
-      }
+    List<BnfRule> rules = topoSort(myFile.getRules(), this);
 
-      @Override
-      public BnfRule forceChoose(Collection<BnfRule> col) {
-        return super.forceChooseInner(
-          col, new Condition<BnfRule>() {
-            @Override
-            public boolean value(BnfRule bnfRule) {
-              if (myRulesWithTokens.contains(bnfRule)) return false;
-              for (BnfRule r : myRulesGraph.get(bnfRule)) {
-                if (!inheritors.contains(r)) return false;
-              }
-              return true;
-            }
-          }, new Condition<BnfRule>() {
-            @Override
-            public boolean value(BnfRule bnfRule) {
-              return !myRulesWithTokens.contains(bnfRule);
-            }
-          }, Condition.TRUE
-        );
-      }
-    });
     Set<PsiElement> visited = newTroveSet();
     for (BnfRule rule : rules) {
       if (myRuleContentsMap.containsKey(rule)) continue;
@@ -325,6 +297,10 @@ public class RuleGraphHelper {
 
   public Collection<BnfRule> getExtendsRules(BnfRule rule) {
     return myRuleExtendsMap.get(rule);
+  }
+
+  public boolean containsTokens(BnfRule rule) {
+    return myRulesWithTokens.contains(rule);
   }
 
   public Collection<BnfRule> getSubRules(BnfRule rule) {

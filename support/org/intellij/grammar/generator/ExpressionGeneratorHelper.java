@@ -199,7 +199,7 @@ public class ExpressionGeneratorHelper {
     }
     if (result.size() > 1) {
       OperatorInfo info = list.iterator().next();
-      addWarning(info.rule.getProject(), "only first definition will be used for '" + info.operator.getText() + "': " + typeList);
+      addWarning(info.rule.getProject(), "only first definition will be used for '" + info.operator.getText() + "': " + result);
     }
     return result;
   }

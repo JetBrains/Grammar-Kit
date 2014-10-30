@@ -25,6 +25,7 @@ import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.util.ArrayUtil;
 import com.intellij.util.IncorrectOperationException;
 import com.intellij.util.ObjectUtils;
+import com.intellij.util.containers.ContainerUtil;
 import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.generator.ParserGeneratorUtil;
 import org.intellij.grammar.java.JavaHelper;
@@ -34,7 +35,6 @@ import org.intellij.grammar.psi.BnfLiteralExpression;
 import org.intellij.grammar.psi.BnfRule;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import static org.intellij.grammar.generator.ParserGeneratorUtil.getRootAttribute;
@@ -52,25 +52,31 @@ public class GrammarPsiImplUtil {
     if (id == null || value != null) return PsiReference.EMPTY_ARRAY;
     final String psiImplUtilClass = getRootAttribute(attr, KnownAttribute.PSI_IMPL_UTIL_CLASS);
     final JavaHelper javaHelper = JavaHelper.getJavaHelper(o.getProject());
+
     return new PsiReference[] {
-      new PsiReferenceBase<BnfListEntry>(o, TextRange.from(id.getStartOffsetInParent(), id.getTextLength())) {
-        @Override
-        public PsiElement resolve() {
+      new PsiPolyVariantReferenceBase<BnfListEntry>(o, TextRange.from(id.getStartOffsetInParent(), id.getTextLength())) {
+
+        private List<NavigatablePsiElement> getTargetMethods(String methodName) {
           BnfRule rule = PsiTreeUtil.getParentOfType(getElement(), BnfRule.class);
-          String implClass = rule == null ? null : ParserGeneratorUtil.getQualifiedRuleClassName(rule, true);
-          return javaHelper.findClassMethod(psiImplUtilClass, getElement().getText(), -1, implClass);
+          String mixinClass = ParserGeneratorUtil.getAttribute(rule, KnownAttribute.MIXIN);
+          String ruleClass = rule == null ? null : ParserGeneratorUtil.getQualifiedRuleClassName(rule, false);
+          List<NavigatablePsiElement> implMethods = javaHelper.findClassMethods(psiImplUtilClass, true, methodName, -1, ruleClass);
+          List<NavigatablePsiElement> mixinMethods = javaHelper.findClassMethods(mixinClass, false, methodName, -1);
+          return ContainerUtil.concat(mixinMethods, implMethods);
+        }
+
+        @NotNull
+        @Override
+        public ResolveResult[] multiResolve(boolean b) {
+          return PsiElementResolveResult.createResults(getTargetMethods(getElement().getText()));
         }
 
         @NotNull
         @Override
         public Object[] getVariants() {
-          final ArrayList<LookupElement> list = new ArrayList<LookupElement>();
-          //ParserGeneratorUtil.getQualifiedRuleClassName(rule, false)
-          for (NavigatablePsiElement element : javaHelper.getClassMethods(psiImplUtilClass, true)) {
-            List<String> methodTypes = javaHelper.getMethodTypes(element);
-            if (methodTypes.size() > 1) {
-              list.add(LookupElementBuilder.createWithIcon((PsiNamedElement)element));
-            }
+          List<LookupElement> list = ContainerUtil.newArrayList();
+          for (NavigatablePsiElement element : getTargetMethods("*")) {
+            list.add(LookupElementBuilder.createWithIcon((PsiNamedElement)element));
           }
           return ArrayUtil.toObjectArray(list);
         }

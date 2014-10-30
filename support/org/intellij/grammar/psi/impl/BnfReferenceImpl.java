@@ -22,6 +22,7 @@ import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.psi.*;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.util.ArrayUtil;
+import com.intellij.util.containers.ContainerUtil;
 import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.generator.ParserGeneratorUtil;
 import org.intellij.grammar.java.JavaHelper;
@@ -52,10 +53,10 @@ public class BnfReferenceImpl<T extends BnfCompositeElement> extends PsiReferenc
         parent instanceof BnfExternalExpression? ((BnfExternalExpression)parent).getExpressionList().size() - 1 : 0;
       BnfRule rule = PsiTreeUtil.getParentOfType(myElement, BnfRule.class);
       String parserClass = ParserGeneratorUtil.getAttribute(rule, KnownAttribute.PARSER_UTIL_CLASS);
-      if (StringUtil.isNotEmpty(parserClass)) {
-        // paramCount + 2 (builder and level)
-        result = JavaHelper.getJavaHelper(myElement.getProject()).findClassMethod(parserClass, myElement.getText(), paramCount + 2);
-      }
+      // paramCount + 2 (builder and level)
+      JavaHelper helper = JavaHelper.getJavaHelper(myElement.getProject());
+      List<NavigatablePsiElement> methods = helper.findClassMethods(parserClass, true, myElement.getText(), paramCount + 2);
+      result = ContainerUtil.getFirstItem(methods);
     }
     return result;
   }
@@ -77,7 +78,7 @@ public class BnfReferenceImpl<T extends BnfCompositeElement> extends PsiReferenc
       String parserClass = ParserGeneratorUtil.getAttribute(rule, KnownAttribute.PARSER_UTIL_CLASS);
       if (StringUtil.isNotEmpty(parserClass)) {
         JavaHelper javaHelper = JavaHelper.getJavaHelper(myElement.getProject());
-        for (NavigatablePsiElement element : javaHelper.getClassMethods(parserClass, true)) {
+        for (NavigatablePsiElement element : javaHelper.findClassMethods(parserClass, true, "*", -1, "*", "*")) {
           List<String> methodTypes = javaHelper.getMethodTypes(element);
           if (methodTypes.size() > 3 &&
               methodTypes.get(0).equals("boolean") &&

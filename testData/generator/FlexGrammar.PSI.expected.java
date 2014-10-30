@@ -534,7 +534,7 @@ public interface JFlexStateDefinition extends PsiNameIdentifierOwner {
   String getName();
 
   @NotNull
-  JFlexMacroDefinition setName(String p1);
+  JFlexStateDefinition setName(String p1);
 
   @NotNull
   PsiElement getNameIdentifier();
@@ -1279,7 +1279,7 @@ public class JFlexStateDefinitionImpl extends JFlexCompositeElementImpl implemen
   }
 
   @NotNull
-  public JFlexMacroDefinition setName(String p1) {
+  public JFlexStateDefinition setName(String p1) {
     return JFlexPsiImplUtil.setName(this, p1);
   }
 

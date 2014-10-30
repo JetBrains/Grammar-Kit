@@ -27,6 +27,7 @@ import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.psi.NavigatablePsiElement;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.util.PsiTreeUtil;
+import com.intellij.util.containers.ContainerUtil;
 import gnu.trove.THashSet;
 import org.intellij.grammar.BnfIcons;
 import org.intellij.grammar.KnownAttribute;
@@ -104,6 +105,8 @@ public class BnfRuleLineMarkerProvider extends RelatedItemLineMarkerProvider {
     Project project = element.getProject();
     String parserClass = ParserGeneratorUtil.getAttribute(rule, KnownAttribute.PARSER_CLASS);
     if (StringUtil.isEmpty(parserClass)) return null;
-    return JavaHelper.getJavaHelper(project).findClassMethod(parserClass, GrammarUtil.getMethodName(rule, element), -1);
+    JavaHelper helper = JavaHelper.getJavaHelper(project);
+    List<NavigatablePsiElement> methods = helper.findClassMethods(parserClass, true, GrammarUtil.getMethodName(rule, element), -1);
+    return ContainerUtil.getFirstItem(methods);
   }
 }

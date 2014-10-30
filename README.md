@@ -29,6 +29,7 @@ Recent changes
 --------------
 1.2.0
 
+* Generator: mixin-class methods can be used as method-mixin's to populate rule PSI interface
 * Generator: output directories detection for JFlex/BNF generators
 * Generator: "generate" attribute supersedes global "generateXXX" attributes
 * Generator: compact local variables names by default to improve code readability

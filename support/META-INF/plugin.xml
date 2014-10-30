@@ -2,7 +2,7 @@
   <id>org.jetbrains.idea.grammar</id>
   <version>1.2.0</version>
   <vendor email="gregory.shrago@jetbrains.com">Greg Shrago</vendor>
-  <idea-version since-build="138.1029" until-build=""/>
+  <idea-version since-build="139.0" until-build=""/>
 
   <name>Grammar-Kit</name>
   <description>BNF Grammars and JFlex lexers editor. Readable parser/PSI code generator.</description>
@@ -14,6 +14,7 @@
     <![CDATA[
     <p>1.2.0</p>
     <ul>
+      <li>Generator: mixin-class methods can be used as method-mixin's to populate rule PSI interface</li>
       <li>Generator: output directories detection for JFlex/BNF generators</li>
       <li>Generator: "generate" attribute supersedes global "generateXXX" attributes</li>
       <li>Generator: compact local variables names by default to improve code readability</li>

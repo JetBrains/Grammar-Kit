@@ -55,8 +55,8 @@ public class ExpressionHelper {
   private final RuleGraphHelper myRuleGraph;
   private final boolean myAddWarnings;
 
-  private final Map<BnfRule, ExpressionInfo> myExpressionMap = new HashMap<BnfRule, ExpressionInfo>();
-  private final Map<BnfRule, BnfRule> myRootRulesMap = new HashMap<BnfRule, BnfRule>();
+  private final Map<BnfRule, ExpressionInfo> myExpressionMap = ContainerUtil.newTroveMap();
+  private final Map<BnfRule, BnfRule> myRootRulesMap = ContainerUtil.newTroveMap();
 
   private static final Key<CachedValue<ExpressionHelper>> EXPRESSION_HELPER_KEY = Key.create("EXPRESSION_HELPER_KEY");
   public static ExpressionHelper getCached(final BnfFile file) {

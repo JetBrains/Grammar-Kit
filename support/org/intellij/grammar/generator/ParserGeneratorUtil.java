@@ -335,7 +335,7 @@ public class ParserGeneratorUtil {
   }
 
   public static List<BnfRule> topoSort(Collection<BnfRule> rules, RuleGraphHelper ruleGraph) {
-    Map<BnfRule, ThreeState> colors = ContainerUtil.newHashMap();
+    Map<BnfRule, ThreeState> colors = ContainerUtil.newTroveMap();
     for (BnfRule rule : rules) {
       colors.put(rule, ThreeState.UNSURE);
     }

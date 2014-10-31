@@ -203,7 +203,7 @@ public class ParserGenerator {
       for (BnfRule r : sortedPsiRules.values()) {
         myPackageClasses.add(getRulePsiClassName(r, myRuleClassPrefix));
       }
-      Map<String, String> infClasses = new HashMap<String, String>();
+      Map<String, String> infClasses = ContainerUtil.newTroveMap();
       String psiPackage = getPsiPackage(myFile);
       String suffix = getPsiImplSuffix(myFile);     
       String psiImplPackage = getPsiImplPackage(myFile);

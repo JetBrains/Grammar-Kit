@@ -27,7 +27,6 @@ import com.intellij.psi.util.CachedValuesManager;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.util.Processor;
 import com.intellij.util.containers.ContainerUtil;
-import gnu.trove.THashMap;
 import org.intellij.grammar.BnfFileType;
 import org.intellij.grammar.BnfLanguage;
 import org.intellij.grammar.KnownAttribute;
@@ -36,7 +35,10 @@ import org.intellij.grammar.psi.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 /**
@@ -144,7 +146,7 @@ public class BnfFileImpl extends PsiFileBase implements BnfFile {
   }
 
   private Map<String, BnfRule> calcRules() {
-    final Map<String, BnfRule> result = new LinkedHashMap<String, BnfRule>();
+    final Map<String, BnfRule> result = ContainerUtil.newLinkedHashMap();
     GrammarUtil.processChildrenDummyAware(this, new Processor<PsiElement>() {
       @Override
       public boolean process(PsiElement psiElement) {
@@ -159,7 +161,7 @@ public class BnfFileImpl extends PsiFileBase implements BnfFile {
   }
 
   private List<BnfAttrs> calcAttributes() {
-    final List<BnfAttrs> result = new ArrayList<BnfAttrs>();
+    final List<BnfAttrs> result = ContainerUtil.newArrayList();
     GrammarUtil.processChildrenDummyAware(this, new Processor<PsiElement>() {
       @Override
       public boolean process(PsiElement psiElement) {
@@ -171,7 +173,7 @@ public class BnfFileImpl extends PsiFileBase implements BnfFile {
   }
 
   private Map<String, List<AttributeInfo>> calcAttributeValues() {
-    final Map<String, List<AttributeInfo>> result = new THashMap<String, List<AttributeInfo>>();
+    final Map<String, List<AttributeInfo>> result = ContainerUtil.newTroveMap();
     GrammarUtil.processChildrenDummyAware(this, new Processor<PsiElement>() {
       @Override
       public boolean process(PsiElement psiElement) {

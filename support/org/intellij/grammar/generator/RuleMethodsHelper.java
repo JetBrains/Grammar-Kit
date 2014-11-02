@@ -22,6 +22,7 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.tree.IElementType;
 import com.intellij.util.containers.ContainerUtil;
 import org.intellij.grammar.KnownAttribute;
+import org.intellij.grammar.psi.BnfAttr;
 import org.intellij.grammar.psi.BnfRule;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -42,15 +43,18 @@ public class RuleMethodsHelper {
   private final RuleGraphHelper myGraphHelper;
   private final ExpressionHelper myExpressionHelper;
   private final Map<String, String> mySimpleTokens;
+  private boolean myGenerateTokensDef;
 
   private final Map<BnfRule, Pair<Map<String, MethodInfo>, Collection<MethodInfo>>> myMethods;
 
   public RuleMethodsHelper(RuleGraphHelper ruleGraphHelper,
                            ExpressionHelper expressionHelper,
-                           Map<String, String> simpleTokens) {
+                           Map<String, String> simpleTokens,
+                           boolean generateTokensDef) {
     myGraphHelper = ruleGraphHelper;
     myExpressionHelper = expressionHelper;
     mySimpleTokens = Collections.unmodifiableMap(simpleTokens);
+    myGenerateTokensDef = generateTokensDef;
 
     myMethods = ContainerUtil.newLinkedHashMap();
   }
@@ -93,7 +97,9 @@ public class RuleMethodsHelper {
     }
     Collections.sort(result);
 
-    boolean generateTokens = Boolean.TRUE.equals(getAttribute(rule, KnownAttribute.GENERATE_TOKEN_ACCESSORS));
+    BnfAttr attr = findAttribute(rule, KnownAttribute.GENERATE_TOKEN_ACCESSORS);
+    boolean generateTokens = attr == null? myGenerateTokensDef :
+                             Boolean.TRUE.equals(getAttributeValue(attr.getExpression()));
     Map<String, MethodInfo> basicMethods = ContainerUtil.newLinkedHashMap();
 
     for (MethodInfo methodInfo : result) {

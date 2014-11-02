@@ -100,6 +100,11 @@ public class ParserGeneratorUtil {
     return getAttribute(rule, attribute, null);
   }
 
+  @Nullable
+  public static <T> BnfAttr findAttribute(BnfRule rule, KnownAttribute<T> attribute) {
+    return ((BnfFile)rule.getContainingFile()).findAttribute(rule, attribute, null);
+  }
+
   public static <T> T getAttribute(BnfRule rule, KnownAttribute<T> attribute, String match) {
     return ((BnfFile)rule.getContainingFile()).findAttributeValue(rule, attribute, match);
   }

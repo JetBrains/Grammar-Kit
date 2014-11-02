@@ -90,6 +90,7 @@ public class ParserGenerator {
   private final boolean generateTokens;
   private final boolean generateExtendedPin;
   private final boolean generatePsi;
+  private final boolean generateTokenAccessors;
 
   public ParserGenerator(BnfFile tree, String sourcePath, String outputPath) {
     myFile = tree;
@@ -101,6 +102,7 @@ public class ParserGenerator {
     generateTokens = getGenerateOption(myFile, KnownAttribute.GENERATE_TOKENS, genOptions.get("tokens"));
     generateFirstCheck = getGenerateOption(myFile, KnownAttribute.GENERATE_FIRST_CHECK, genOptions.get("firstCheck"));
     generateExtendedPin = getGenerateOption(myFile, KnownAttribute.EXTENDED_PIN, genOptions.get("extendedPin"));
+    generateTokenAccessors = getGenerateOption(myFile, KnownAttribute.GENERATE_TOKEN_ACCESSORS, genOptions.get("tokenAccessors"));
 
     List<BnfRule> rules = tree.getRules();
     myGrammarRoot = rules.isEmpty() ? null : rules.get(0).getName();
@@ -119,7 +121,7 @@ public class ParserGenerator {
     myUnknownRootAttributes = ParserGeneratorUtil.collectUnknownAttributes(myFile);
     myGraphHelper = RuleGraphHelper.getCached(myFile);
     myExpressionHelper = new ExpressionHelper(myFile, myGraphHelper, true);
-    myRulesMethodsHelper = new RuleMethodsHelper(myGraphHelper, myExpressionHelper, mySimpleTokens);
+    myRulesMethodsHelper = new RuleMethodsHelper(myGraphHelper, myExpressionHelper, mySimpleTokens, generateTokenAccessors);
   }
 
   private void openOutput(String className) throws IOException {

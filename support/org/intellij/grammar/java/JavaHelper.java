@@ -143,11 +143,11 @@ public class JavaHelper {
 
     private static boolean acceptsMethod(PsiMethod method, boolean staticMethods) {
       PsiModifierList modifierList = method.getModifierList();
-      return staticMethods == modifierList.hasExplicitModifier(PsiModifier.STATIC) &&
-             !modifierList.hasExplicitModifier(PsiModifier.ABSTRACT) &&
-             (modifierList.hasExplicitModifier(PsiModifier.PUBLIC) ||
-              !(modifierList.hasExplicitModifier(PsiModifier.PROTECTED) ||
-                modifierList.hasExplicitModifier(PsiModifier.PRIVATE)));
+      return staticMethods == modifierList.hasModifierProperty(PsiModifier.STATIC) &&
+             !modifierList.hasModifierProperty(PsiModifier.ABSTRACT) &&
+             (modifierList.hasModifierProperty(PsiModifier.PUBLIC) ||
+              !(modifierList.hasModifierProperty(PsiModifier.PROTECTED) ||
+                modifierList.hasModifierProperty(PsiModifier.PRIVATE)));
     }
 
     @NotNull

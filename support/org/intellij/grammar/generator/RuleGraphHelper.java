@@ -338,13 +338,7 @@ public class RuleGraphHelper {
           }
         }
         else if (Rule.isPrivate(targetRule)) {
-          result = myRuleContentsMap.get(targetRule); // optimize performance
-          if (result == null) {
-            BnfExpression body = targetRule.getExpression();
-            Map<PsiElement, Cardinality> map = collectMembers(targetRule, body, visited);
-            result = map.containsKey(body) ? joinMaps(rule, false, BnfTypes.BNF_CHOICE, Arrays.asList(map, map)) : map;
-            myRuleContentsMap.put(targetRule, result);
-          }
+          result = getPrivateRuleContent(targetRule, visited);
         }
         else {
           result = psiMap(targetRule, REQUIRED);
@@ -369,10 +363,8 @@ public class RuleGraphHelper {
           result = psiMap(newExternalPsi("#" + ruleRef.getText()), REQUIRED);
         }
         else if (Rule.isPrivate(metaRule)) {
-          if (visited.contains(ruleRef)) return psiMap(metaRule, REQUIRED);
-
           result = psiMap();
-          Map<PsiElement, Cardinality> metaResults = collectMembers(rule, ruleRef, new HashSet<PsiElement>());
+          Map<PsiElement, Cardinality> metaResults = getPrivateRuleContent(metaRule, visited);
           List<String> params = null;
           for (PsiElement member : metaResults.keySet()) {
             Cardinality cardinality = metaResults.get(member);
@@ -421,6 +413,7 @@ public class RuleGraphHelper {
         }
       }
       result = joinMaps(rule, firstNonTrivial, type, list);
+      result = result.remove(rule.getExpression()) != null ? joinMaps(rule, false, type, Arrays.asList(result, result)) : result;
     }
     if (rule.getExpression() == tree && Rule.isLeft(rule) && !Rule.isPrivate(rule) && !Rule.isInner(rule)) {
       List<Map<PsiElement, Cardinality>> list = new ArrayList<Map<PsiElement, Cardinality>>();
@@ -440,6 +433,15 @@ public class RuleGraphHelper {
     }
     visited.remove(tree);
     return result;
+  }
+
+  private Map<PsiElement, Cardinality> getPrivateRuleContent(@NotNull BnfRule privateRule, @NotNull Set<PsiElement> visited) {
+    Map<PsiElement, Cardinality> result;
+    result = myRuleContentsMap.get(privateRule);
+    if (result != null) return result;
+    Map<PsiElement, Cardinality> map = collectMembers(privateRule, privateRule.getExpression(), visited);
+    myRuleContentsMap.put(privateRule, map);
+    return map;
   }
 
   private static Map<BnfRule, Cardinality> getRulesToTheLeft(BnfRule rule) {

@@ -20,17 +20,15 @@ import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.impl.source.tree.LeafPsiElement;
 import com.intellij.testFramework.fixtures.LightPlatformCodeInsightFixtureTestCase;
-import com.intellij.util.ArrayUtil;
-import org.intellij.grammar.analysis.BnfFirstNextAnalyzer;
 import org.intellij.grammar.generator.ParserGeneratorUtil;
 import org.intellij.grammar.generator.RuleGraphHelper;
 import org.intellij.grammar.psi.BnfExpression;
 import org.intellij.grammar.psi.BnfFile;
 import org.intellij.grammar.psi.BnfRule;
 
-import java.util.*;
-
-import static org.intellij.grammar.analysis.BnfFirstNextAnalyzer.*;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author gregsh
@@ -38,6 +36,7 @@ import static org.intellij.grammar.analysis.BnfFirstNextAnalyzer.*;
 public class BnfRuleGraphTest extends LightPlatformCodeInsightFixtureTestCase {
 
   public void testSOEInPrivateMeta() { doTest("private r ::= A <<r>> external A::=", "A+"); }
+  public void testSOEInPrivate() { doTest("private r ::= A r external A::=", "A+"); }
 
   private void doTest(String text, String... expected) {
     BnfFile f = (BnfFile)myFixture.configureByText("a.bnf", text);

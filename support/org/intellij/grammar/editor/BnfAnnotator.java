@@ -52,6 +52,21 @@ public class BnfAnnotator implements Annotator, DumbAware {
     else if (parent instanceof BnfModifier) {
       annotationHolder.createInfoAnnotation(psiElement, null).setTextAttributes(BnfSyntaxHighlighter.KEYWORD);
     }
+    else if (parent instanceof BnfListEntry && ((BnfListEntry)parent).getId() == psiElement) {
+      boolean hasValue = ((BnfListEntry)parent).getLiteralExpression() != null;
+      BnfAttr attr = PsiTreeUtil.getParentOfType(parent, BnfAttr.class);
+      KnownAttribute attribute = attr != null ? KnownAttribute.getCompatibleAttribute(attr.getName()) : null;
+      if (attribute == KnownAttribute.METHODS && !hasValue) {
+        PsiReference reference = parent.findReferenceAt(psiElement.getStartOffsetInParent());
+        PsiElement resolve = reference == null ? null : reference.resolve();
+        if (resolve == null) {
+          annotationHolder.createWarningAnnotation(psiElement, "Unresolved method reference");
+        }
+        else {
+          annotationHolder.createInfoAnnotation(psiElement, null).setTextAttributes(BnfSyntaxHighlighter.EXTERNAL);
+        }
+      }
+    }
     else if (psiElement instanceof BnfRefOrTokenImpl) {
       if (parent instanceof BnfAttr) {
         String text = psiElement.getText();

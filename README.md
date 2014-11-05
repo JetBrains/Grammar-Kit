@@ -7,6 +7,7 @@ Adds BNF Grammars and JFlex files editing support including parser/PSI code gene
 
 Open-source plugins built with Grammar-Kit:
 [intellij-erlang](https://github.com/ignatov/intellij-erlang),
+[intellij-haskforce](https://github.com/carymrobbins/intellij-haskforce),
 [Dart](https://github.com/JetBrains/intellij-plugins/tree/master/Dart),
 [intellij-haxe](https://github.com/JetBrains/intellij-haxe),
 [OGNL](https://github.com/JetBrains/intellij-plugins/tree/master/struts2).

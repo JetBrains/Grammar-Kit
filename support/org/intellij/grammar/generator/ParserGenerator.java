@@ -1300,7 +1300,7 @@ public class ParserGenerator {
                                  BnfConstants.PSI_ELEMENT_CLASS));
     imports.addAll(psiSupers);
     JavaHelper javaHelper = JavaHelper.getJavaHelper(myFile.getProject());
-    imports.addAll(getRuleMethodTypesToImport(rule, psiImplUtilClass, javaHelper));
+    imports.addAll(getRuleMethodTypesToImport(rule, psiClass, psiImplUtilClass, javaHelper));
 
     generateClassHeader(psiClass, imports, "", true, ArrayUtil.toStringArray(psiSupers));
     generatePsiClassMethods(rule, psiClass, psiImplUtilClass, javaHelper, true);
@@ -1337,7 +1337,7 @@ public class ParserGenerator {
     imports.add(StringUtil.getPackageName(superInterface) + ".*");
     if (StringUtil.isNotEmpty(psiImplUtilClass)) imports.add(psiImplUtilClass);
     JavaHelper javaHelper = JavaHelper.getJavaHelper(myFile.getProject());
-    imports.addAll(getRuleMethodTypesToImport(rule, psiImplUtilClass, javaHelper));
+    imports.addAll(getRuleMethodTypesToImport(rule, superInterface, psiImplUtilClass, javaHelper));
 
     String stubName = StringUtil.isNotEmpty(stubClass)? stubClass :
                       implSuper.indexOf("<") < implSuper.indexOf(">") &&
@@ -1388,12 +1388,12 @@ public class ParserGenerator {
             String mixinClass = getAttribute(rule, KnownAttribute.MIXIN);
             List<NavigatablePsiElement> methods = javaHelper.findClassMethods(mixinClass, false, methodInfo.name, -1);
             for (NavigatablePsiElement method : methods) {
-              generateUtilMethod(methodInfo.name, method, psiImplUtilClass, true, javaHelper);
+              generateUtilMethod(methodInfo.name, method, null, false, javaHelper);
             }
           }
           List<NavigatablePsiElement> methods = javaHelper.findClassMethods(psiImplUtilClass, true, methodInfo.name, -1, psiUtilParameterClass);
           for (NavigatablePsiElement method : methods) {
-            generateUtilMethod(methodInfo.name, method, psiImplUtilClass, intf, javaHelper);
+            generateUtilMethod(methodInfo.name, method, intf ? null : psiImplUtilClass, true, javaHelper);
           }
           break;
         default: throw new AssertionError(methodInfo.toString());
@@ -1401,7 +1401,7 @@ public class ParserGenerator {
     }
   }
 
-  public Collection<String> getRuleMethodTypesToImport(BnfRule rule, String psiImplUtilClass, JavaHelper javaHelper) {
+  public Collection<String> getRuleMethodTypesToImport(BnfRule rule, String psiUtilParameterClass, String psiImplUtilClass, JavaHelper javaHelper) {
     Set<String> result = ContainerUtil.newTreeSet();
 
     Collection<RuleMethodsHelper.MethodInfo> methods = myRulesMethodsHelper.getFor(rule);
@@ -1414,10 +1414,11 @@ public class ParserGenerator {
     for (RuleMethodsHelper.MethodInfo methodInfo : methods) {
       if (methodInfo.type != 4) continue;
 
-      int paramCount = -1;
-      NavigatablePsiElement method = psiImplUtilClass == null ? null : ContainerUtil
-        .getFirstItem(javaHelper.findClassMethods(psiImplUtilClass, true, methodInfo.name, paramCount));
-      if (method != null) {
+      String mixinClass = getAttribute(rule, KnownAttribute.MIXIN);
+      List<NavigatablePsiElement> mixinMethods = javaHelper.findClassMethods(mixinClass, false, methodInfo.name, -1);
+      List<NavigatablePsiElement> implMethods = javaHelper.findClassMethods(psiImplUtilClass, true, methodInfo.name, -1, psiUtilParameterClass);
+
+      for (NavigatablePsiElement method : ContainerUtil.concat(mixinMethods, implMethods)) {
         for (String s : javaHelper.getMethodTypes(method)) {
           if (s.contains(".")) result.add(s);
         }
@@ -1606,19 +1607,20 @@ public class ParserGenerator {
   private void generateUtilMethod(String methodName,
                                   NavigatablePsiElement method,
                                   String psiImplUtilClass,
-                                  boolean intf,
+                                  boolean isInPsiUtil,
                                   JavaHelper javaHelper) {
+    boolean intf = psiImplUtilClass == null;
     List<String> methodTypes = method == null ? Collections.<String>emptyList() : javaHelper.getMethodTypes(method);
     String returnType = methodTypes.isEmpty()? "void" : myShortener.fun(methodTypes.get(0));
-    List<String> paramsTypes = methodTypes.isEmpty()? methodTypes : methodTypes.subList(1, methodTypes.size());
+    List<String> paramsTypes = methodTypes.isEmpty() || isInPsiUtil && methodTypes.size() < 3
+                               ? Collections.<String>emptyList() : methodTypes.subList(isInPsiUtil ? 3 : 1, methodTypes.size());
     StringBuilder sb = new StringBuilder();
     int count = -1;
     for (String s : paramsTypes) {
-      if (++count < 2) continue;
-      if (count > 2 && count % 2 == 0) {
+      if (++ count > 2 && count % 2 == 0) {
         sb.append(", ");
       }
-      else if (count > 2) sb.append(" ");
+      else if (count > 0) sb.append(" ");
       sb.append(myShortener.fun(s));
     }
 
@@ -1630,8 +1632,7 @@ public class ParserGenerator {
       sb.setLength(0);
       count = -1;
       for (String s : paramsTypes) {
-        if (++count < 2) continue;
-        if (count % 2 == 0) {
+        if (++ count % 2 == 0) {
           sb.append(", ");
         }
         else {

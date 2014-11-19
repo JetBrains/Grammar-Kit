@@ -42,7 +42,6 @@ import static com.intellij.util.containers.ContainerUtil.newTroveSet;
 import static org.intellij.grammar.generator.ParserGeneratorUtil.*;
 import static org.intellij.grammar.generator.RuleGraphHelper.Cardinality.*;
 import static org.intellij.grammar.psi.impl.GrammarUtil.collectExtraArguments;
-import static org.intellij.grammar.psi.impl.GrammarUtil.nextOrParent;
 
 /**
  * @author gregory
@@ -69,7 +68,7 @@ public class RuleGraphHelper {
   };
   private final BnfFile myFile;
   private final MultiMap<BnfRule, BnfRule> myRuleExtendsMap;
-  private final MultiMap<BnfRule,BnfRule> myRulesGraph = newMultiMap();
+  private final MultiMap<BnfRule, BnfRule> myRulesGraph = newMultiMap();
   private final Map<BnfRule, Map<PsiElement, Cardinality>> myRuleContentsMap = ContainerUtil.newTroveMap();
   private final MultiMap<BnfRule, PsiElement> myRulesCollapseMap = newMultiMap();
   private final Set<BnfRule> myRulesWithTokens = ContainerUtil.newTroveSet();
@@ -270,19 +269,28 @@ public class RuleGraphHelper {
   }
 
   private void buildRulesGraph() {
+    LinkedList<BnfExpression> deque = ContainerUtil.newLinkedList();
     for (BnfRule rule : myFile.getRules()) {
-      BnfExpression expression = rule.getExpression();
-      for (PsiElement cur = nextOrParent(expression.getPrevSibling(), expression);
-           cur != null;
-           cur = nextOrParent(cur, expression) ) {
-        boolean checkPredicate = cur instanceof BnfReferenceOrToken || cur instanceof BnfStringLiteralExpression;
-        if (!checkPredicate || PsiTreeUtil.getParentOfType(cur, BnfPredicate.class) != null) continue;
-        BnfRule r = cur instanceof BnfReferenceOrToken? myFile.getRule(cur.getText()) : null;
-        if (r != null) {
-          myRulesGraph.putValue(rule, r);
-        }
-        else {
-          myRulesWithTokens.add(rule);
+      deque.addFirst(rule.getExpression());
+      while (!deque.isEmpty()) {
+        BnfExpression cur = deque.removeFirst();
+        ListIterator<BnfExpression> listIterator = deque.listIterator();
+        for (PsiElement e = cur.getFirstChild(); e != null; e = e.getNextSibling()) {
+          if (e instanceof BnfPredicate || !(e instanceof BnfExpression)) continue;
+          BnfReferenceOrToken ruleRef =
+            e instanceof BnfReferenceOrToken ? (BnfReferenceOrToken)e :
+            e instanceof BnfExternalExpression ? PsiTreeUtil.findChildOfType(e, BnfReferenceOrToken.class) :
+            null;
+          BnfRule r = ruleRef != null ? myFile.getRule(ruleRef.getText()) : null;
+          if (r != null) {
+            myRulesGraph.putValue(rule, r);
+          }
+          else if (e instanceof BnfReferenceOrToken || e instanceof BnfStringLiteralExpression) {
+            myRulesWithTokens.add(rule);
+          }
+          else {
+            listIterator.add((BnfExpression)e);
+          }
         }
       }
     }
@@ -416,7 +424,7 @@ public class RuleGraphHelper {
       result = result.remove(rule.getExpression()) != null ? joinMaps(rule, false, type, Arrays.asList(result, result)) : result;
     }
     if (rule.getExpression() == tree && Rule.isLeft(rule) && !Rule.isPrivate(rule) && !Rule.isInner(rule)) {
-      List<Map<PsiElement, Cardinality>> list = new ArrayList<Map<PsiElement, Cardinality>>();
+      List<Map<PsiElement, Cardinality>> list = ContainerUtil.newArrayList();
       Map<BnfRule, Cardinality> rulesToTheLeft = getRulesToTheLeft(rule);
       for (BnfRule r : rulesToTheLeft.keySet()) {
         Cardinality cardinality = rulesToTheLeft.get(r);

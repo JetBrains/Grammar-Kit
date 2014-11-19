@@ -18,7 +18,6 @@ package org.intellij.grammar.psi.impl;
 import com.intellij.openapi.util.Comparing;
 import com.intellij.openapi.util.Ref;
 import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiRecursiveElementWalkingVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.util.PairProcessor;
@@ -121,22 +120,6 @@ public class GrammarUtil {
       }
     });
     return result;
-  }
-
-  public static PsiElement prevOrParent(PsiElement e, PsiElement scope) {
-    if (e == null || e == scope) return null;
-    PsiElement prev = e.getPrevSibling();
-    if (prev != null) return PsiTreeUtil.getDeepestLast(prev);
-    PsiElement parent = e.getParent();
-    return parent == scope || parent instanceof PsiFile ? null : parent;
-  }
-
-  public static PsiElement nextOrParent(PsiElement e, PsiElement scope) {
-    if (e == null || e == scope) return null;
-    PsiElement next = e.getNextSibling();
-    if (next != null) return PsiTreeUtil.getDeepestFirst(next);
-    PsiElement parent = e.getParent();
-    return parent == scope || parent instanceof PsiFile? null : parent;
   }
 
   public static boolean processExpressionNames(BnfRule rule, String funcName, BnfExpression expression, PairProcessor<String, BnfExpression> processor) {

@@ -362,7 +362,7 @@ public class RuleGraphHelper {
     else if (tree instanceof BnfExternalExpression) {
       List<BnfExpression> expressionList = ((BnfExternalExpression)tree).getExpressionList();
       if (expressionList.size() == 1 && Rule.isMeta(rule)) {
-        result = psiMap(tree, REQUIRED);
+        result = psiMap(newExternalPsi(tree.getText()), REQUIRED);
       }
       else {
         BnfExpression ruleRef = expressionList.get(0);
@@ -376,7 +376,7 @@ public class RuleGraphHelper {
           List<String> params = null;
           for (PsiElement member : metaResults.keySet()) {
             Cardinality cardinality = metaResults.get(member);
-            if (!(member instanceof BnfExternalExpression)) {
+            if (!(isExternalPsi(member))) {
               result.put(member, cardinality);
             }
             else {
@@ -771,7 +771,12 @@ public class RuleGraphHelper {
   private PsiElement newExternalPsi(String name) {
     PsiElement e = myExternalElements.get(name);
     if (e == null) {
-      myExternalElements.put(name, e = new LeafPsiElement(EXTERNAL_TYPE, name));
+      myExternalElements.put(name, e = new LeafPsiElement(EXTERNAL_TYPE, name) {
+        @Override
+        public String toString() {
+          return getElementType() + ":" + getText();
+        }
+      });
     }
     return e;
   }

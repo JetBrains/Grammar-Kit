@@ -7,3 +7,6 @@ root ::=
 some ::= A
 with_recursive ::= recursive
 private recursive ::= some [recursive]
+
+private meta sequence ::= <<p>> (',' <<p>>)*  {pin(".*")=1}
+some_seq ::= <<sequence some>>

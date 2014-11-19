@@ -421,7 +421,8 @@ public class RuleGraphHelper {
         }
       }
       result = joinMaps(rule, firstNonTrivial, type, list);
-      result = result.remove(rule.getExpression()) != null ? joinMaps(rule, false, type, Arrays.asList(result, result)) : result;
+      Cardinality sameCard = firstNonTrivial ? result.remove(rule.getExpression()) : null;
+      result = sameCard != null ? joinMaps(rule, false, BnfTypes.BNF_SEQUENCE, Arrays.asList(result, result)) : result;
     }
     if (rule.getExpression() == tree && Rule.isLeft(rule) && !Rule.isPrivate(rule) && !Rule.isInner(rule)) {
       List<Map<PsiElement, Cardinality>> list = ContainerUtil.newArrayList();

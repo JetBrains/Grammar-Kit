@@ -1,0 +1,9 @@
+{
+  parserClass="Fixes"
+}
+
+root ::=
+
+some ::= A
+with_recursive ::= recursive
+private recursive ::= some [recursive]

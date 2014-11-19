@@ -4,7 +4,7 @@
   psiClassPrefix="X"
   implements="XComposite"
   parserUtilClass="PsiGenUtil"
-  extends(".*expr")="expr"
+  extends(".*expr")=expr
   extends("root_.")="root"
   tokens=[OP_MUL="*" OP_DIV="/" SLASH='\' id='regexp:A' number='regexp:B']
   elementTypeClass("root_.*")="sample.MyRootType"
@@ -49,6 +49,7 @@ left item_expr ::= '[' number ']'
 
 ;{
   parserClass="PsiGenFixes"
+  extends(".*statement")=statement
 }
 
 LeftShadowTest ::= identifier LeftShadow *
@@ -60,3 +61,8 @@ publicMethodToCall ::= identifier {elementType=""}
 fake namedElement ::= identifier publicMethodToCall (id (',' id) *) {implements="com.intellij.psi.PsiNameIdentifierOwner"}
 
 choice_joined ::= literal id '%' | '%' id literal {extends=literal}
+
+statement ::= &<<external>> (a_statement | b_statement) | !<<external>> (c_statement)
+a_statement ::= id | number
+b_statement ::= id | number
+c_statement ::= id | number

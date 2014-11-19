@@ -27,6 +27,7 @@ import com.intellij.psi.util.CachedValuesManager;
 import com.intellij.util.ObjectUtils;
 import com.intellij.util.containers.ContainerUtil;
 import org.intellij.grammar.KnownAttribute;
+import org.intellij.grammar.generator.FakeElementType;
 import org.intellij.grammar.generator.ParserGeneratorUtil;
 import org.intellij.grammar.psi.BnfFile;
 import org.jetbrains.annotations.NotNull;
@@ -243,11 +244,11 @@ public class LivePreviewLexer extends LexerBase {
     return ParserGeneratorUtil.collectTokenPattern2Name(file, true, ContainerUtil.<String, String>newLinkedHashMap(), usedInGrammar);
   }
 
-  static class PreviewTokenType extends IElementType {
+  static class PreviewTokenType extends FakeElementType {
     final IElementType delegate;
 
     PreviewTokenType(String name, Language language, IElementType delegate) {
-      super(name, language, false);
+      super(name, language);
       this.delegate = ObjectUtils.chooseNotNull(delegate, this);
     }
   }

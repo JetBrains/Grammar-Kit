@@ -58,6 +58,7 @@ public class PsiGen implements PsiParser {
     create_token_set_(REF_EXPR, SPECIAL_REF),
     create_token_set_(CHOICE_JOINED, LITERAL),
     create_token_set_(ROOT, ROOT_B, ROOT_C, ROOT_D),
+    create_token_set_(A_STATEMENT, B_STATEMENT, C_STATEMENT, STATEMENT),
     create_token_set_(CAST_EXPR, CHOICE_JOINED, EXPR, ID_EXPR,
       ITEM_EXPR, LITERAL, MISSING_EXTERNAL_TYPE, MUL_EXPR,
       PLUS_EXPR, REF_EXPR, SOME_EXPR, SPECIAL_REF),
@@ -599,6 +600,45 @@ public class PsiGenFixes {
   }
 
   /* ********************************************************** */
+  // id | number
+  public static boolean a_statement(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "a_statement")) return false;
+    if (!nextTokenIs(builder_, "<a statement>", ID, NUMBER)) return false;
+    boolean result_;
+    Marker marker_ = enter_section_(builder_, level_, _NONE_, "<a statement>");
+    result_ = consumeToken(builder_, ID);
+    if (!result_) result_ = consumeToken(builder_, NUMBER);
+    exit_section_(builder_, level_, marker_, A_STATEMENT, result_, false, null);
+    return result_;
+  }
+
+  /* ********************************************************** */
+  // id | number
+  public static boolean b_statement(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "b_statement")) return false;
+    if (!nextTokenIs(builder_, "<b statement>", ID, NUMBER)) return false;
+    boolean result_;
+    Marker marker_ = enter_section_(builder_, level_, _NONE_, "<b statement>");
+    result_ = consumeToken(builder_, ID);
+    if (!result_) result_ = consumeToken(builder_, NUMBER);
+    exit_section_(builder_, level_, marker_, B_STATEMENT, result_, false, null);
+    return result_;
+  }
+
+  /* ********************************************************** */
+  // id | number
+  public static boolean c_statement(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "c_statement")) return false;
+    if (!nextTokenIs(builder_, "<c statement>", ID, NUMBER)) return false;
+    boolean result_;
+    Marker marker_ = enter_section_(builder_, level_, _NONE_, "<c statement>");
+    result_ = consumeToken(builder_, ID);
+    if (!result_) result_ = consumeToken(builder_, NUMBER);
+    exit_section_(builder_, level_, marker_, C_STATEMENT, result_, false, null);
+    return result_;
+  }
+
+  /* ********************************************************** */
   // literal id '%' | '%' id literal
   public static boolean choice_joined(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "choice_joined")) return false;
@@ -648,6 +688,82 @@ public class PsiGenFixes {
     boolean result_;
     Marker marker_ = enter_section_(builder_);
     result_ = PsiGen2.identifier(builder_, level_ + 1);
+    exit_section_(builder_, marker_, null, result_);
+    return result_;
+  }
+
+  /* ********************************************************** */
+  // &<<external>> (a_statement | b_statement) | !<<external>> (c_statement)
+  public static boolean statement(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "statement")) return false;
+    if (!nextTokenIs(builder_, "<statement>", ID, NUMBER)) return false;
+    boolean result_;
+    Marker marker_ = enter_section_(builder_, level_, _COLLAPSE_, "<statement>");
+    result_ = statement_0(builder_, level_ + 1);
+    if (!result_) result_ = statement_1(builder_, level_ + 1);
+    exit_section_(builder_, level_, marker_, STATEMENT, result_, false, null);
+    return result_;
+  }
+
+  // &<<external>> (a_statement | b_statement)
+  private static boolean statement_0(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "statement_0")) return false;
+    boolean result_;
+    Marker marker_ = enter_section_(builder_);
+    result_ = statement_0_0(builder_, level_ + 1);
+    result_ = result_ && statement_0_1(builder_, level_ + 1);
+    exit_section_(builder_, marker_, null, result_);
+    return result_;
+  }
+
+  // &<<external>>
+  private static boolean statement_0_0(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "statement_0_0")) return false;
+    boolean result_;
+    Marker marker_ = enter_section_(builder_, level_, _AND_, null);
+    result_ = external(builder_, level_ + 1);
+    exit_section_(builder_, level_, marker_, null, result_, false, null);
+    return result_;
+  }
+
+  // a_statement | b_statement
+  private static boolean statement_0_1(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "statement_0_1")) return false;
+    boolean result_;
+    Marker marker_ = enter_section_(builder_);
+    result_ = a_statement(builder_, level_ + 1);
+    if (!result_) result_ = b_statement(builder_, level_ + 1);
+    exit_section_(builder_, marker_, null, result_);
+    return result_;
+  }
+
+  // !<<external>> (c_statement)
+  private static boolean statement_1(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "statement_1")) return false;
+    boolean result_;
+    Marker marker_ = enter_section_(builder_);
+    result_ = statement_1_0(builder_, level_ + 1);
+    result_ = result_ && statement_1_1(builder_, level_ + 1);
+    exit_section_(builder_, marker_, null, result_);
+    return result_;
+  }
+
+  // !<<external>>
+  private static boolean statement_1_0(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "statement_1_0")) return false;
+    boolean result_;
+    Marker marker_ = enter_section_(builder_, level_, _NOT_, null);
+    result_ = !external(builder_, level_ + 1);
+    exit_section_(builder_, level_, marker_, null, result_, false, null);
+    return result_;
+  }
+
+  // (c_statement)
+  private static boolean statement_1_1(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "statement_1_1")) return false;
+    boolean result_;
+    Marker marker_ = enter_section_(builder_);
+    result_ = c_statement(builder_, level_ + 1);
     exit_section_(builder_, marker_, null, result_);
     return result_;
   }

@@ -18,17 +18,18 @@ package org.intellij.grammar.generator;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.MessageType;
+import com.intellij.openapi.util.Comparing;
 import com.intellij.openapi.util.Pair;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.codeStyle.NameUtil;
-import com.intellij.psi.impl.FakePsiElement;
 import com.intellij.psi.impl.source.tree.LeafPsiElement;
 import com.intellij.psi.tree.IElementType;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.util.ObjectUtils;
 import com.intellij.util.ThreeState;
 import com.intellij.util.containers.ContainerUtil;
+import gnu.trove.TObjectHashingStrategy;
 import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.actions.GenerateAction;
 import org.intellij.grammar.java.JavaHelper;
@@ -49,7 +50,7 @@ import static org.intellij.grammar.psi.BnfTypes.BNF_SEQUENCE;
  */
 public class ParserGeneratorUtil {
   private static final Object NULL = new Object();
-  private static final BnfExpression NULL_ATTR = createFake("NULL");
+  private static final BnfExpression NULL_ATTR = new FakeBnfExpression("NULL");
 
   enum ConsumeType {
     DEFAULT, FAST, SMART;
@@ -267,10 +268,6 @@ public class ParserGeneratorUtil {
     return packageName + "." + getRulePsiClassName(rule, getPsiClassPrefix(file)) + (impl? getPsiImplSuffix(file): "");
   }
 
-  public static BnfExpression createFake(@NotNull String text) {
-    return new MyFakeExpression(text);
-  }
-
   @Nullable
   public static String getRuleDisplayName(BnfRule rule, boolean force) {
     String s = getRuleDisplayNameRaw(rule, force);
@@ -319,7 +316,7 @@ public class ParserGeneratorUtil {
   public static Collection<BnfExpression> getSortedTokens(Set<PsiElement> accessors) {
     Map<String, BnfExpression> result = ContainerUtil.newTreeMap();
     for (PsiElement tree : accessors) {
-      if (!(tree instanceof BnfExpression)) continue;
+      if (!(tree instanceof BnfReferenceOrToken || tree instanceof BnfLiteralExpression)) continue;
       result.put(tree.getText(), (BnfExpression)tree);
     }
     return result.values();
@@ -603,27 +600,20 @@ public class ParserGeneratorUtil {
     }
   }
 
-  private static class MyFakeExpression extends FakePsiElement implements BnfExpression {
-    private final String myText;
-
-    MyFakeExpression(@NotNull String text) {
-      myText = text;
+  private static final TObjectHashingStrategy<PsiElement> TEXT_STRATEGY = new TObjectHashingStrategy<PsiElement>() {
+    @Override
+    public int computeHashCode(PsiElement e) {
+      return e.getText().hashCode();
     }
 
     @Override
-    public PsiElement getParent() {
-      return null;
+    public boolean equals(PsiElement e1, PsiElement e2) {
+      return Comparing.equal(e1.getText(), e2.getText());
     }
+  };
 
-    @Override
-    public String getText() {
-      return myText;
-    }
-
-    @Override
-    public String toString() {
-      return myText;
-    }
+  public static <T extends PsiElement> TObjectHashingStrategy<T> textStrategy() {
+    return (TObjectHashingStrategy<T>)TEXT_STRATEGY;
   }
 
 }

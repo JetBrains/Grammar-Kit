@@ -17,7 +17,6 @@
 package org.intellij.grammar.analysis;
 
 import com.intellij.openapi.diagnostic.Logger;
-import com.intellij.openapi.util.Comparing;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiReference;
@@ -28,8 +27,8 @@ import com.intellij.util.CommonProcessors;
 import com.intellij.util.containers.ContainerUtil;
 import gnu.trove.THashMap;
 import gnu.trove.THashSet;
-import gnu.trove.TObjectHashingStrategy;
 import org.intellij.grammar.KnownAttribute;
+import org.intellij.grammar.generator.FakeBnfExpression;
 import org.intellij.grammar.generator.ParserGeneratorUtil;
 import org.intellij.grammar.psi.*;
 import org.intellij.grammar.psi.impl.GrammarUtil;
@@ -42,19 +41,20 @@ import java.util.*;
  * @author gregsh
  */
 public class BnfFirstNextAnalyzer {
-  
-  private static final Logger LOG = Logger.getInstance("org.intellij.grammar.analysis.BnfFirstNextAnalyzer"); 
+
+  private static final Logger LOG = Logger.getInstance("org.intellij.grammar.analysis.BnfFirstNextAnalyzer");
   
   public static final String MATCHES_EOF = "-eof-";
   public static final String MATCHES_NOTHING = "-never-matches-";
   public static final String MATCHES_ANY = "-any-";
 
-  public static final BnfExpression BNF_MATCHES_EOF     = ParserGeneratorUtil.createFake(MATCHES_EOF);
-  public static final BnfExpression BNF_MATCHES_NOTHING = ParserGeneratorUtil.createFake(MATCHES_NOTHING);
-  public static final BnfExpression BNF_MATCHES_ANY     = ParserGeneratorUtil.createFake(MATCHES_ANY);
+  public static final BnfExpression BNF_MATCHES_EOF     = new FakeBnfExpression(MATCHES_EOF);
+  public static final BnfExpression BNF_MATCHES_NOTHING = new FakeBnfExpression(MATCHES_NOTHING);
+  public static final BnfExpression BNF_MATCHES_ANY     = new FakeBnfExpression(MATCHES_ANY);
 
   private boolean myBackward;
   private boolean myPublicRuleOpaque;
+  private boolean myNoParent;
 
   public BnfFirstNextAnalyzer setBackward(boolean backward) {
     myBackward = backward;
@@ -63,6 +63,11 @@ public class BnfFirstNextAnalyzer {
 
   public BnfFirstNextAnalyzer setPublicRuleOpaque(boolean publicRuleOpaque) {
     myPublicRuleOpaque = publicRuleOpaque;
+    return this;
+  }
+
+  public BnfFirstNextAnalyzer setNoParent(boolean noParent) {
+    myNoParent = noParent;
     return this;
   }
 
@@ -75,6 +80,10 @@ public class BnfFirstNextAnalyzer {
 
   public Map<BnfExpression, BnfExpression> calcNext(@NotNull BnfRule targetRule) {
     return calcNextInner(targetRule.getExpression(), new THashMap<BnfExpression, BnfExpression>(), new THashSet<BnfExpression>());
+  }
+
+  public Map<BnfExpression, BnfExpression> calcNext(@NotNull BnfExpression targetExpression) {
+    return calcNextInner(targetExpression, new THashMap<BnfExpression, BnfExpression>(), new THashSet<BnfExpression>());
   }
 
   private Map<BnfExpression, BnfExpression> calcNextInner(@NotNull BnfExpression targetExpression, Map<BnfExpression, BnfExpression> result, Set<BnfExpression> visited) {
@@ -118,7 +127,7 @@ public class BnfFirstNextAnalyzer {
         cur = parent;
         parent = grandPa;
       }
-      if (parent instanceof BnfRule && totalVisited.add((BnfRule)parent)) {
+      if (!myNoParent && parent instanceof BnfRule && totalVisited.add((BnfRule)parent)) {
         BnfRule rule = (BnfRule)parent;
         for (PsiReference reference : ReferencesSearch.search(rule, rule.getUseScope()).findAll()) {
           PsiElement element = reference.getElement();
@@ -273,7 +282,7 @@ public class BnfFirstNextAnalyzer {
       boolean skip = predicateExpression instanceof BnfSequence &&
                      ((BnfSequence)predicateExpression).getExpressionList().size() > 1; // todo calc min length ?
       // take only one token into account which is not exactly correct but better than nothing
-      Set<BnfExpression> conditions = calcFirstInner(predicateExpression, new THashSet<BnfExpression>(new TextStrategy()), visited, null);
+      Set<BnfExpression> conditions = calcFirstInner(predicateExpression, newExprSet(), visited, null);
       Set<BnfExpression> next;
       if (!visited.add(predicateExpression)) {
         skip = true;
@@ -285,14 +294,14 @@ public class BnfFirstNextAnalyzer {
           next = calcNextInner(expression, new THashMap<BnfExpression, BnfExpression>(), visited).keySet();
         }
         else {
-          next = calcSequenceFirstInner(forcedNext, new THashSet<BnfExpression>(new TextStrategy()), visited);
+          next = calcSequenceFirstInner(forcedNext, newExprSet(), visited);
         }
         visited.remove(predicateExpression);
         if (!skip) {
           skip = filterExternalMethods(next) || filterExternalMethods(conditions);
         }
       }
-      Set<BnfExpression> mixed = new THashSet<BnfExpression>(new TextStrategy());
+      Set<BnfExpression> mixed = newExprSet();
       if (skip) {
         mixed.addAll(next);
         mixed.remove(BNF_MATCHES_EOF);
@@ -367,15 +376,8 @@ public class BnfFirstNextAnalyzer {
     return result;
   }
 
-  private static class TextStrategy implements TObjectHashingStrategy<BnfExpression> {
-    @Override
-    public int computeHashCode(BnfExpression e) {
-      return e.getText().hashCode();
-    }
-
-    @Override
-    public boolean equals(BnfExpression e1, BnfExpression e2) {
-      return Comparing.equal(e1.getText(), e2.getText());
-    }
+  private static Set<BnfExpression> newExprSet() {
+    return ContainerUtil.newTroveSet(ParserGeneratorUtil.<BnfExpression>textStrategy());
   }
+
 }

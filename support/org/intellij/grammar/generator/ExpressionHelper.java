@@ -28,7 +28,6 @@ import com.intellij.util.Function;
 import com.intellij.util.ObjectUtils;
 import com.intellij.util.PairConsumer;
 import com.intellij.util.containers.ContainerUtil;
-import gnu.trove.THashSet;
 import org.intellij.grammar.analysis.BnfFirstNextAnalyzer;
 import org.intellij.grammar.psi.*;
 import org.intellij.grammar.psi.impl.BnfElementFactory;
@@ -291,8 +290,7 @@ public class ExpressionHelper {
     List<BnfExpression> list = getOriginalExpressions(expression);
     if (list.size() == 1 && PsiTreeUtil.isAncestor(list.get(0), target, false)) return true;
     for (BnfExpression expr : list) {
-      Map<PsiElement, RuleGraphHelper.Cardinality> map =
-        myRuleGraph.collectMembers(rule, expr, new THashSet<PsiElement>());
+      Map<PsiElement, RuleGraphHelper.Cardinality> map = myRuleGraph.collectMembers(rule, expr);
       if (map.containsKey(target)) return true;
     }
     return false;

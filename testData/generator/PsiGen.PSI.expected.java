@@ -11,9 +11,12 @@ import generated.psi.impl.*;
 
 public interface GeneratedTypes {
 
+  IElementType A_STATEMENT = new IElementType("A_STATEMENT", null);
   IElementType BLOCK_OF = new IElementType("BLOCK_OF", null);
+  IElementType B_STATEMENT = new IElementType("B_STATEMENT", null);
   IElementType CAST_EXPR = MyTypeFactory.createExprType("CAST_EXPR");
   IElementType CHOICE_JOINED = new IElementType("CHOICE_JOINED", null);
+  IElementType C_STATEMENT = new IElementType("C_STATEMENT", null);
   IElementType EXPR = new IElementType("EXPR", null);
   IElementType GRAMMAR_ELEMENT = new IElementType("GRAMMAR_ELEMENT", null);
   IElementType IDENTIFIER = new IElementType("IDENTIFIER", null);
@@ -31,6 +34,7 @@ public interface GeneratedTypes {
   IElementType ROOT_D = new MyRootType("ROOT_D");
   IElementType SOME_EXPR = MyTypeFactory.createExprType("SOME_EXPR");
   IElementType SPECIAL_REF = new IElementType("SPECIAL_REF", null);
+  IElementType STATEMENT = new IElementType("STATEMENT", null);
 
   IElementType ID = new IElementType("id", null);
   IElementType NUMBER = new IElementType("number", null);
@@ -42,14 +46,23 @@ public interface GeneratedTypes {
   class Factory {
     public static PsiElement createElement(ASTNode node) {
       IElementType type = node.getElementType();
-       if (type == BLOCK_OF) {
+       if (type == A_STATEMENT) {
+        return new XAStatementImpl(node);
+      }
+      else if (type == BLOCK_OF) {
         return new XBlockOfImpl(node);
+      }
+      else if (type == B_STATEMENT) {
+        return new XBStatementImpl(node);
       }
       else if (type == CAST_EXPR) {
         return new XCastExprImpl(node);
       }
       else if (type == CHOICE_JOINED) {
         return new XChoiceJoinedImpl(node);
+      }
+      else if (type == C_STATEMENT) {
+        return new XCStatementImpl(node);
       }
       else if (type == EXPR) {
         return new XExprImpl(node);
@@ -102,6 +115,9 @@ public interface GeneratedTypes {
       else if (type == SPECIAL_REF) {
         return new XSpecialRefImpl(node);
       }
+      else if (type == STATEMENT) {
+        return new XStatementImpl(node);
+      }
       throw new AssertionError("Unknown element type: " + type);
     }
   }
@@ -140,6 +156,40 @@ public interface XLeftShadowTest extends XComposite {
   XIdentifier getIdentifier();
 
 }
+// ---- XAStatement.java -----------------
+//header.txt
+package generated.psi;
+
+import java.util.List;
+import org.jetbrains.annotations.*;
+import com.intellij.psi.PsiElement;
+
+public interface XAStatement extends XStatement {
+
+  @Nullable
+  PsiElement getId();
+
+  @Nullable
+  PsiElement getNumber();
+
+}
+// ---- XBStatement.java -----------------
+//header.txt
+package generated.psi;
+
+import java.util.List;
+import org.jetbrains.annotations.*;
+import com.intellij.psi.PsiElement;
+
+public interface XBStatement extends XStatement {
+
+  @Nullable
+  PsiElement getId();
+
+  @Nullable
+  PsiElement getNumber();
+
+}
 // ---- XBlockOf.java -----------------
 //header.txt
 package generated.psi;
@@ -149,6 +199,23 @@ import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
 public interface XBlockOf extends XComposite {
+
+}
+// ---- XCStatement.java -----------------
+//header.txt
+package generated.psi;
+
+import java.util.List;
+import org.jetbrains.annotations.*;
+import com.intellij.psi.PsiElement;
+
+public interface XCStatement extends XStatement {
+
+  @Nullable
+  PsiElement getId();
+
+  @Nullable
+  PsiElement getNumber();
 
 }
 // ---- XCastExpr.java -----------------
@@ -410,6 +477,17 @@ public interface XSpecialRef extends XRefExpr {
   XRefExpr getRefExpr();
 
 }
+// ---- XStatement.java -----------------
+//header.txt
+package generated.psi;
+
+import java.util.List;
+import org.jetbrains.annotations.*;
+import com.intellij.psi.PsiElement;
+
+public interface XStatement extends XComposite {
+
+}
 // ---- XLeftShadowImpl.java -----------------
 //header.txt
 package generated.psi.impl;
@@ -486,6 +564,80 @@ public class XLeftShadowTestImpl extends ASTWrapperPsiElement implements XLeftSh
   }
 
 }
+// ---- XAStatementImpl.java -----------------
+//header.txt
+package generated.psi.impl;
+
+import java.util.List;
+import org.jetbrains.annotations.*;
+import com.intellij.lang.ASTNode;
+import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiElementVisitor;
+import com.intellij.psi.util.PsiTreeUtil;
+import static generated.GeneratedTypes.*;
+import generated.psi.*;
+
+public class XAStatementImpl extends XStatementImpl implements XAStatement {
+
+  public XAStatementImpl(ASTNode node) {
+    super(node);
+  }
+
+  public void accept(@NotNull PsiElementVisitor visitor) {
+    if (visitor instanceof XVisitor) ((XVisitor)visitor).visitAStatement(this);
+    else super.accept(visitor);
+  }
+
+  @Override
+  @Nullable
+  public PsiElement getId() {
+    return findChildByType(ID);
+  }
+
+  @Override
+  @Nullable
+  public PsiElement getNumber() {
+    return findChildByType(NUMBER);
+  }
+
+}
+// ---- XBStatementImpl.java -----------------
+//header.txt
+package generated.psi.impl;
+
+import java.util.List;
+import org.jetbrains.annotations.*;
+import com.intellij.lang.ASTNode;
+import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiElementVisitor;
+import com.intellij.psi.util.PsiTreeUtil;
+import static generated.GeneratedTypes.*;
+import generated.psi.*;
+
+public class XBStatementImpl extends XStatementImpl implements XBStatement {
+
+  public XBStatementImpl(ASTNode node) {
+    super(node);
+  }
+
+  public void accept(@NotNull PsiElementVisitor visitor) {
+    if (visitor instanceof XVisitor) ((XVisitor)visitor).visitBStatement(this);
+    else super.accept(visitor);
+  }
+
+  @Override
+  @Nullable
+  public PsiElement getId() {
+    return findChildByType(ID);
+  }
+
+  @Override
+  @Nullable
+  public PsiElement getNumber() {
+    return findChildByType(NUMBER);
+  }
+
+}
 // ---- XBlockOfImpl.java -----------------
 //header.txt
 package generated.psi.impl;
@@ -509,6 +661,43 @@ public class XBlockOfImpl extends ASTWrapperPsiElement implements XBlockOf {
   public void accept(@NotNull PsiElementVisitor visitor) {
     if (visitor instanceof XVisitor) ((XVisitor)visitor).visitBlockOf(this);
     else super.accept(visitor);
+  }
+
+}
+// ---- XCStatementImpl.java -----------------
+//header.txt
+package generated.psi.impl;
+
+import java.util.List;
+import org.jetbrains.annotations.*;
+import com.intellij.lang.ASTNode;
+import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiElementVisitor;
+import com.intellij.psi.util.PsiTreeUtil;
+import static generated.GeneratedTypes.*;
+import generated.psi.*;
+
+public class XCStatementImpl extends XStatementImpl implements XCStatement {
+
+  public XCStatementImpl(ASTNode node) {
+    super(node);
+  }
+
+  public void accept(@NotNull PsiElementVisitor visitor) {
+    if (visitor instanceof XVisitor) ((XVisitor)visitor).visitCStatement(this);
+    else super.accept(visitor);
+  }
+
+  @Override
+  @Nullable
+  public PsiElement getId() {
+    return findChildByType(ID);
+  }
+
+  @Override
+  @Nullable
+  public PsiElement getNumber() {
+    return findChildByType(NUMBER);
   }
 
 }
@@ -1086,6 +1275,32 @@ public class XSpecialRefImpl extends XRefExprImpl implements XSpecialRef {
   }
 
 }
+// ---- XStatementImpl.java -----------------
+//header.txt
+package generated.psi.impl;
+
+import java.util.List;
+import org.jetbrains.annotations.*;
+import com.intellij.lang.ASTNode;
+import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiElementVisitor;
+import com.intellij.psi.util.PsiTreeUtil;
+import static generated.GeneratedTypes.*;
+import com.intellij.extapi.psi.ASTWrapperPsiElement;
+import generated.psi.*;
+
+public class XStatementImpl extends ASTWrapperPsiElement implements XStatement {
+
+  public XStatementImpl(ASTNode node) {
+    super(node);
+  }
+
+  public void accept(@NotNull PsiElementVisitor visitor) {
+    if (visitor instanceof XVisitor) ((XVisitor)visitor).visitStatement(this);
+    else super.accept(visitor);
+  }
+
+}
 // ---- XVisitor.java -----------------
 //header.txt
 package generated.psi;
@@ -1104,8 +1319,20 @@ public class XVisitor extends PsiElementVisitor {
     visitComposite(o);
   }
 
+  public void visitAStatement(@NotNull XAStatement o) {
+    visitStatement(o);
+  }
+
+  public void visitBStatement(@NotNull XBStatement o) {
+    visitStatement(o);
+  }
+
   public void visitBlockOf(@NotNull XBlockOf o) {
     visitComposite(o);
+  }
+
+  public void visitCStatement(@NotNull XCStatement o) {
+    visitStatement(o);
   }
 
   public void visitCastExpr(@NotNull XCastExpr o) {
@@ -1179,6 +1406,10 @@ public class XVisitor extends PsiElementVisitor {
 
   public void visitSpecialRef(@NotNull XSpecialRef o) {
     visitRefExpr(o);
+  }
+
+  public void visitStatement(@NotNull XStatement o) {
+    visitComposite(o);
   }
 
   public void visitPsiNameIdentifierOwner(@NotNull PsiNameIdentifierOwner o) {

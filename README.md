@@ -38,6 +38,7 @@ Recent changes
 * Generator: improved rule content calculation leading to more correct PSI classes
 * Generator/Pratt: no more explicit PsiBuilder.Marker manipulations in generated code
 * LivePreview: pre-configured tokens are dropped, numbers/strings/whitespaces detected
+* BNF: allow "-" in rule names and other identifiers
 
 
 Quick documentation:

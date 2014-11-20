@@ -22,6 +22,7 @@
       <li>Generator: improved rule content calculation leading to more correct PSI classes</li>
       <li>Generator/Pratt: no more explicit PsiBuilder.Marker manipulations in generated code</li>
       <li>LivePreview: pre-configured tokens are dropped, numbers/strings/whitespaces detected</li>
+      <li>BNF: allow "-" in rule names and other identifiers</li>
     </ul>
     <a href="https://github.com/JetBrains/Grammar-Kit#change-log">Full change log...</a>
     ]]>

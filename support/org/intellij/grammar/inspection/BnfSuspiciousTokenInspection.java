@@ -20,6 +20,7 @@ import com.intellij.codeInspection.InspectionManager;
 import com.intellij.codeInspection.LocalInspectionTool;
 import com.intellij.codeInspection.ProblemDescriptor;
 import com.intellij.codeInspection.ProblemsHolder;
+import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiRecursiveElementWalkingVisitor;
@@ -104,8 +105,8 @@ public class BnfSuspiciousTokenInspection extends LocalInspectionTool {
   }
 
   public static boolean isTokenTextSuspicious(String text) {
-    boolean isLowecase = text.equals(text.toLowerCase());
-    boolean isUppercase = !isLowecase && text.equals(text.toUpperCase());
-    return !isLowecase && !isUppercase || isLowecase && text.contains("_");
+    boolean isLowercase = text.equals(text.toLowerCase());
+    boolean isUppercase = !isLowercase && text.equals(text.toUpperCase());
+    return !isLowercase && !isUppercase || isLowercase && StringUtil.containsAnyChar(text, "-_");
   }
 }

@@ -32,7 +32,7 @@ BLOCK_COMMENT="/*" !([^]* "*/" [^]*) ("*/")?
 ALPHA=[:letter:]
 DIGIT=[:digit:]
 
-ID_BODY={ALPHA} | {DIGIT} | "_"
+ID_BODY={ALPHA} | {DIGIT} | "_" | "-"
 ID={ALPHA} ({ID_BODY}) * | "<" ([^<>])+ ">"
 HEX={DIGIT} | [aAbBcCdDeEfF]
 NUMBER={DIGIT}+ | "0x" {HEX}+

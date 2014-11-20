@@ -232,7 +232,7 @@ public class ParserGeneratorUtil {
 
   public static String toIdentifier(@NotNull String text, @NotNull String prefix) {
     StringBuilder sb = new StringBuilder(prefix);
-    for (String s : text.split("_")) {
+    for (String s : text.split("_|-")) {
       if (s.length() == 0) continue;
       String tail = s.substring(1);
       sb.append(StringUtil.toUpperCase(s.charAt(0)));

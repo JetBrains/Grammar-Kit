@@ -54,7 +54,7 @@ public class BnfReferenceImpl<T extends BnfCompositeElement> extends PsiReferenc
       BnfRule rule = PsiTreeUtil.getParentOfType(myElement, BnfRule.class);
       String parserClass = ParserGeneratorUtil.getAttribute(rule, KnownAttribute.PARSER_UTIL_CLASS);
       // paramCount + 2 (builder and level)
-      JavaHelper helper = JavaHelper.getJavaHelper(myElement.getProject());
+      JavaHelper helper = JavaHelper.getJavaHelper(myElement);
       List<NavigatablePsiElement> methods = helper.findClassMethods(parserClass, true, myElement.getText(), paramCount + 2);
       result = ContainerUtil.getFirstItem(methods);
     }
@@ -77,7 +77,7 @@ public class BnfReferenceImpl<T extends BnfCompositeElement> extends PsiReferenc
       BnfRule rule = PsiTreeUtil.getParentOfType(myElement, BnfRule.class);
       String parserClass = ParserGeneratorUtil.getAttribute(rule, KnownAttribute.PARSER_UTIL_CLASS);
       if (StringUtil.isNotEmpty(parserClass)) {
-        JavaHelper javaHelper = JavaHelper.getJavaHelper(myElement.getProject());
+        JavaHelper javaHelper = JavaHelper.getJavaHelper(myElement);
         for (NavigatablePsiElement element : javaHelper.findClassMethods(parserClass, true, "*", -1, "*", "*")) {
           List<String> methodTypes = javaHelper.getMethodTypes(element);
           if (methodTypes.size() > 3 &&

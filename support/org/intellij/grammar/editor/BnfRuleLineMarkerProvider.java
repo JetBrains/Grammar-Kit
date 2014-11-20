@@ -22,7 +22,6 @@ import com.intellij.codeInsight.navigation.NavigationGutterIconBuilder;
 import com.intellij.openapi.actionSystem.ActionManager;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.keymap.KeymapUtil;
-import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.psi.NavigatablePsiElement;
 import com.intellij.psi.PsiElement;
@@ -68,7 +67,7 @@ public class BnfRuleLineMarkerProvider extends RelatedItemLineMarkerProvider {
         BnfRule rule = RuleGraphHelper.getSynonymTargetOrSelf((BnfRule)parent);
         if (RuleGraphHelper.shouldGeneratePsi(rule, true)) {
           hasPSI = true;
-          JavaHelper javaHelper = JavaHelper.getJavaHelper(rule.getProject());
+          JavaHelper javaHelper = JavaHelper.getJavaHelper(rule);
           for (String className : new String[]{ParserGeneratorUtil.getQualifiedRuleClassName(rule, false),
             ParserGeneratorUtil.getQualifiedRuleClassName(rule, true)}) {
             NavigatablePsiElement aClass = javaHelper.findClass(className);
@@ -102,10 +101,9 @@ public class BnfRuleLineMarkerProvider extends RelatedItemLineMarkerProvider {
   private static NavigatablePsiElement getMethod(PsiElement element) {
     BnfRule rule = PsiTreeUtil.getParentOfType(element, BnfRule.class);
     if (rule == null) return null;
-    Project project = element.getProject();
     String parserClass = ParserGeneratorUtil.getAttribute(rule, KnownAttribute.PARSER_CLASS);
     if (StringUtil.isEmpty(parserClass)) return null;
-    JavaHelper helper = JavaHelper.getJavaHelper(project);
+    JavaHelper helper = JavaHelper.getJavaHelper(element);
     List<NavigatablePsiElement> methods = helper.findClassMethods(parserClass, true, GrammarUtil.getMethodName(rule, element), -1);
     return ContainerUtil.getFirstItem(methods);
   }

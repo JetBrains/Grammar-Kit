@@ -67,7 +67,7 @@ public class BnfAnnotator implements Annotator, DumbAware {
         }
       }
     }
-    else if (psiElement instanceof BnfRefOrTokenImpl) {
+    else if (psiElement instanceof BnfReferenceOrToken) {
       if (parent instanceof BnfAttr) {
         String text = psiElement.getText();
         if (text.equals("true") || text.equals("false")) {
@@ -117,7 +117,7 @@ public class BnfAnnotator implements Annotator, DumbAware {
           String value = (String)ParserGeneratorUtil.getAttributeValue((BnfExpression)psiElement);
           Object resolve;
           String refType = "";
-          JavaHelper javaHelper = JavaHelper.getJavaHelper(psiElement.getProject());
+          JavaHelper javaHelper = JavaHelper.getJavaHelper(psiElement);
           if (attribute.getName().endsWith("Class") || attribute == KnownAttribute.MIXIN) {
             resolve = checkJavaResolve(value, javaHelper);
             refType = "class ";

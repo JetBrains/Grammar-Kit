@@ -21,6 +21,7 @@ import com.intellij.openapi.ui.MessageType;
 import com.intellij.openapi.util.Comparing;
 import com.intellij.openapi.util.Pair;
 import com.intellij.openapi.util.text.StringUtil;
+import com.intellij.psi.NavigatablePsiElement;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.codeStyle.NameUtil;
 import com.intellij.psi.impl.source.tree.LeafPsiElement;
@@ -42,6 +43,7 @@ import java.util.*;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
+import static org.intellij.grammar.generator.RuleGraphHelper.getSynonymTargetOrSelf;
 import static org.intellij.grammar.psi.BnfTypes.BNF_SEQUENCE;
 
 /**
@@ -268,6 +270,97 @@ public class ParserGeneratorUtil {
     return packageName + "." + getRulePsiClassName(rule, getPsiClassPrefix(file)) + (impl? getPsiImplSuffix(file): "");
   }
 
+  @NotNull
+  public static List<NavigatablePsiElement> findRuleImplMethods(@NotNull JavaHelper helper,
+                                                                @Nullable String psiImplUtilClass,
+                                                                @Nullable String methodName,
+                                                                @Nullable BnfRule rule) {
+    for (String ruleClass : getRuleClasses(rule)) {
+      for (String utilClass = psiImplUtilClass; utilClass != null; utilClass = helper.getSuperClassName(utilClass)) {
+        List<NavigatablePsiElement> methods = helper.findClassMethods(utilClass, true, methodName, -1, ruleClass);
+        if (!methods.isEmpty()) return methods;
+      }
+    }
+    return Collections.emptyList();
+  }
+
+  @NotNull
+  public static Set<String> getRuleClasses(BnfRule rule) {
+    BnfFile file = (BnfFile)rule.getContainingFile();
+    Set<String> result = ContainerUtil.newLinkedHashSet();
+    String ruleClassPrefix = getPsiClassPrefix(file);
+    String superClassName = getSuperClassName(file, rule, getPsiImplPackage(file), ruleClassPrefix,
+                                              getPsiImplSuffix(file));
+    String implSuper = StringUtil.notNullize(getAttribute(rule, KnownAttribute.MIXIN), superClassName);
+    String aPackage = getPsiPackage(file);
+    result.add(getQualifiedRuleClassName(rule, false));
+    result.add(getQualifiedRuleClassName(rule, true));
+    result.add(superClassName);
+    result.add(implSuper);
+    result.addAll(getSuperInterfaceNames(file, rule, aPackage, ruleClassPrefix));
+    return result;
+  }
+
+  static BnfRule getTopSuperRule(BnfFile file, BnfRule rule) {
+    Set<BnfRule> visited = ContainerUtil.newHashSet();
+    BnfRule cur = rule, next = rule;
+    for (; next != null && cur != null; cur = !visited.add(next) ? null : next) {
+      next = getSynonymTargetOrSelf(cur);
+      if (next != cur) continue;
+      if (cur != rule) break; // do not search for elementType any further
+      String attr = getAttribute(cur, KnownAttribute.EXTENDS);
+      //noinspection StringEquality
+      next = attr != KnownAttribute.EXTENDS.getDefaultValue() ? file.getRule(attr) : null;
+      if (next == null && attr != null) break;
+    }
+    return cur;
+  }
+
+  @NotNull
+  static List<String> getSuperInterfaceNames(BnfFile file, BnfRule rule, String psiPackage, String classPrefix) {
+    List<String> strings = ContainerUtil.newArrayList();
+    List<String> topRuleImplements = Collections.emptyList();
+    String topRuleClass = null;
+    BnfRule topSuper = getTopSuperRule(file, rule);
+    boolean simpleMode = psiPackage.isEmpty();
+    if (topSuper != null && topSuper != rule) {
+      topRuleImplements = getAttribute(topSuper, KnownAttribute.IMPLEMENTS).asStrings();
+      topRuleClass =
+        StringUtil.nullize((simpleMode ? "" : psiPackage + ".") + getRulePsiClassName(topSuper, classPrefix));
+      if (!StringUtil.isEmpty(topRuleClass)) strings.add(topRuleClass);
+    }
+    List<String> rootImplements = getRootAttribute(file, KnownAttribute.IMPLEMENTS).asStrings();
+    List<String> ruleImplements = getAttribute(rule, KnownAttribute.IMPLEMENTS).asStrings();
+    for (String className : ruleImplements) {
+      BnfRule superIntfRule = file.getRule(className);
+      if (superIntfRule != null) {
+        strings.add((simpleMode ? "" : psiPackage + ".") + getRulePsiClassName(superIntfRule, classPrefix));
+      }
+      else if (!topRuleImplements.contains(className) &&
+               (topRuleClass == null || !rootImplements.contains(className))) {
+        String name = simpleMode ? StringUtil.getShortName(className) : className;
+        if (className != null && strings.size() == 1 && topSuper == null) {
+          strings.add(0, name);
+        }
+        else {
+          strings.add(name);
+        }
+      }
+    }
+    return strings;
+  }
+
+  @NotNull
+  static String getSuperClassName(BnfFile file,
+                                  BnfRule rule,
+                                  String psiPackage,
+                                  String prefix, String suffix) {
+    BnfRule topSuper = getTopSuperRule(file, rule);
+    return topSuper == null ? getRootAttribute(file, KnownAttribute.EXTENDS) :
+           topSuper == rule ? getAttribute(rule, KnownAttribute.EXTENDS) :
+           psiPackage + "." + getRulePsiClassName(topSuper, prefix) + suffix;
+  }
+
   @Nullable
   public static String getRuleDisplayName(BnfRule rule, boolean force) {
     String s = getRuleDisplayNameRaw(rule, force);
@@ -380,13 +473,13 @@ public class ParserGeneratorUtil {
     }
   }
 
-  public static void checkClassAvailability(@NotNull Project project, @Nullable String className, @Nullable String description) {
+  public static void checkClassAvailability(@NotNull BnfFile file, @Nullable String className, @Nullable String description) {
     if (StringUtil.isEmpty(className)) return;
 
-    JavaHelper javaHelper = JavaHelper.getJavaHelper(project);
+    JavaHelper javaHelper = JavaHelper.getJavaHelper(file);
     if (javaHelper.findClass(className) == null) {
       String tail = StringUtil.isEmpty(description) ? "" : " (" + description + ")";
-      addWarning(project, "class not found: " + className + tail);
+      addWarning(file.getProject(), "class not found: " + className + tail);
     }
   }
 

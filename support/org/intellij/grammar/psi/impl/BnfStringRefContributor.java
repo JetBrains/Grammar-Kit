@@ -75,7 +75,7 @@ public class BnfStringRefContributor extends PsiReferenceContributor {
         @NotNull
         @Override
         public PsiReference[] getReferencesByElement(@NotNull PsiElement element, @NotNull ProcessingContext context) {
-          PsiReferenceProvider provider = JavaHelper.getJavaHelper(element.getProject()).getClassReferenceProvider();
+          PsiReferenceProvider provider = JavaHelper.getJavaHelper(element).getClassReferenceProvider();
           return provider == null ? PsiReference.EMPTY_ARRAY : provider.getReferencesByElement(element, new ProcessingContext());
         }
       });

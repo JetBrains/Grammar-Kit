@@ -27,7 +27,6 @@ import com.intellij.util.IncorrectOperationException;
 import com.intellij.util.ObjectUtils;
 import com.intellij.util.containers.ContainerUtil;
 import org.intellij.grammar.KnownAttribute;
-import org.intellij.grammar.generator.ParserGeneratorUtil;
 import org.intellij.grammar.java.JavaHelper;
 import org.intellij.grammar.psi.BnfAttr;
 import org.intellij.grammar.psi.BnfListEntry;
@@ -37,7 +36,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
-import static org.intellij.grammar.generator.ParserGeneratorUtil.getRootAttribute;
+import static org.intellij.grammar.generator.ParserGeneratorUtil.*;
 
 /**
  * @author gregsh
@@ -51,16 +50,15 @@ public class GrammarPsiImplUtil {
     BnfLiteralExpression value = o.getLiteralExpression();
     if (id == null || value != null) return PsiReference.EMPTY_ARRAY;
     final String psiImplUtilClass = getRootAttribute(attr, KnownAttribute.PSI_IMPL_UTIL_CLASS);
-    final JavaHelper javaHelper = JavaHelper.getJavaHelper(o.getProject());
+    final JavaHelper javaHelper = JavaHelper.getJavaHelper(o);
 
     return new PsiReference[] {
       new PsiPolyVariantReferenceBase<BnfListEntry>(o, TextRange.from(id.getStartOffsetInParent(), id.getTextLength())) {
 
         private List<NavigatablePsiElement> getTargetMethods(String methodName) {
           BnfRule rule = PsiTreeUtil.getParentOfType(getElement(), BnfRule.class);
-          String mixinClass = ParserGeneratorUtil.getAttribute(rule, KnownAttribute.MIXIN);
-          String ruleClass = rule == null ? null : ParserGeneratorUtil.getQualifiedRuleClassName(rule, false);
-          List<NavigatablePsiElement> implMethods = javaHelper.findClassMethods(psiImplUtilClass, true, methodName, -1, ruleClass);
+          String mixinClass = getAttribute(rule, KnownAttribute.MIXIN);
+          List<NavigatablePsiElement> implMethods = findRuleImplMethods(javaHelper, psiImplUtilClass, methodName, rule);
           List<NavigatablePsiElement> mixinMethods = javaHelper.findClassMethods(mixinClass, false, methodName, -1);
           return ContainerUtil.concat(mixinMethods, implMethods);
         }

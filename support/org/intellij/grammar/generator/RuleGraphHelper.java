@@ -299,11 +299,18 @@ public class RuleGraphHelper {
 
   @Nullable
   private BnfRule getCommonSuperRule(BnfRule r1, BnfRule r2) {
+    int count = Integer.MAX_VALUE;
+    BnfRule result = null;
     for (BnfRule superRule : myRuleExtendsMap.keySet()) {
       Collection<BnfRule> set = myRuleExtendsMap.get(superRule);
-      if (set.contains(r1) && set.contains(r2)) return superRule;
+      if (set.contains(r1) && set.contains(r2)) {
+        if (count > set.size()) {
+          count = set.size();
+          result = superRule;
+        }
+      }
     }
-    return null;
+    return result;
   }
 
   private void buildRulesGraph() {
@@ -686,11 +693,9 @@ public class RuleGraphHelper {
       BnfRule rule = e.getKey();
       e.setValue(getSynonymTargetOrSelf(rule));
       hasSynonyms |= rule != e.getValue();
-      if (myRulesCollapseMap.containsKey(rule)) {
-        for (PsiElement r : myRulesCollapseMap.get(rule)) {
-          if (r instanceof BnfRule && !rulesAndAlts.containsKey(r)) {
-            rulesAndAlts.put((BnfRule)r, (BnfRule)r);
-          }
+      for (PsiElement r : myRulesCollapseMap.get(rule)) {
+        if (r instanceof BnfRule && !rulesAndAlts.containsKey(r)) {
+          rulesAndAlts.put((BnfRule)r, (BnfRule)r);
         }
       }
     }

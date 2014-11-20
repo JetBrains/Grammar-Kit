@@ -27,6 +27,7 @@ import com.intellij.psi.tree.IElementType;
 import com.intellij.util.ArrayUtil;
 import com.intellij.util.Function;
 import com.intellij.util.ObjectUtils;
+import com.intellij.util.PatternUtil;
 import com.intellij.util.containers.ContainerUtil;
 import com.intellij.util.containers.MultiMap;
 import gnu.trove.THashMap;
@@ -44,6 +45,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.*;
+import java.util.regex.Pattern;
 
 import static java.lang.String.format;
 import static org.intellij.grammar.generator.ParserGeneratorUtil.*;
@@ -87,6 +89,7 @@ public class ParserGenerator {
 
   final Names N;
   private final int generateFirstCheck;
+  private final Pattern generateRootRules;
   private final boolean generateTokens;
   private final boolean generateExtendedPin;
   private final boolean generatePsi;
@@ -103,6 +106,7 @@ public class ParserGenerator {
     generateFirstCheck = getGenerateOption(myFile, KnownAttribute.GENERATE_FIRST_CHECK, genOptions.get("firstCheck"));
     generateExtendedPin = getGenerateOption(myFile, KnownAttribute.EXTENDED_PIN, genOptions.get("extendedPin"));
     generateTokenAccessors = getGenerateOption(myFile, KnownAttribute.GENERATE_TOKEN_ACCESSORS, genOptions.get("tokenAccessors"));
+    generateRootRules = PatternUtil.compileSafe(genOptions.get("root-rules"), null);
 
     List<BnfRule> rules = tree.getRules();
     myGrammarRoot = rules.isEmpty() ? null : rules.get(0).getName();
@@ -454,6 +458,7 @@ public class ParserGenerator {
       BnfRule rule = myFile.getRule(ruleName);
       if (!RuleGraphHelper.shouldGeneratePsi(rule, false) || Rule.isMeta(rule)) continue;
       if (Rule.isFake(rule)) continue;
+      if (generateRootRules != null && !generateRootRules.matcher(ruleName).matches()) continue;
       String elementType = getElementType(rule);
       out("%sif (%s == %s) {", first ? "" : "else ", N.root, elementType);
       String nodeCall = generateNodeCall(rule, null, ruleName);

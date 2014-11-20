@@ -1,11 +1,11 @@
 {
-  generate=[visitor="no"]
+  generate=[visitor="no" root-rules="expression"]
   classHeader="//header.txt"
   parserClass="PsiAccessors"
   psiClassPrefix="X"
   implements="XComposite"
   parserUtilClass="PsiGenUtil"
-  generateTokenAccessors("some_.*")=true
+  generateTokenAccessors("some-.*")=true
 
   tokens=[
     MY_SOMETHING="something"
@@ -41,18 +41,18 @@ operator ::= '+' | '-'
 expression ::= value '*' value
 value ::= id
 
-fake token_defaults ::= UPCASEKWD1 lowcasekwd1 UPCASEKWD2 lowcasekwd2 nodef
-fake some_root ::= some_child value {
+fake token-defaults ::= UPCASEKWD1 lowcasekwd1 UPCASEKWD2 lowcasekwd2 nodef
+fake some-root ::= some-child value {
   methods=[
-    childSomething="some_child/MY_SOMETHING" // ok
-    childSomething2="some_child/something2" // ok
-    grandChild="some_child/some_grand_child" // ok
-    grandChildSomethin="some_child/some_grand_child/MY_SOMETHING" // ok
-    grandChildSomethin2="some_child/some_grand_child/something2" // incorrect
+    childSomething="some-child/MY_SOMETHING" // ok
+    childSomething2="some-child/something2" // ok
+    grandChild="some-child/some-grand-child" // ok
+    grandChildSomethin="some-child/some-grand-child/MY_SOMETHING" // ok
+    grandChildSomethin2="some-child/some-grand-child/something2" // incorrect
     value="" // disable value accessor
   ]
 }
-fake some_child ::= some_grand_child "something" something2 {
+fake some-child ::= some-grand-child "something" something2 {
   methods=[smth1="MY_SOMETHING" smth2="MY_SOMETHING"]
 }
-fake some_grand_child ::= MY_SOMETHING something2 {pin=1}
+fake some-grand-child ::= MY_SOMETHING something2 {pin=1}

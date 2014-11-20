@@ -23,17 +23,8 @@ public class PsiAccessors implements PsiParser {
     boolean result_;
     builder_ = adapt_builder_(root_, builder_, this, null);
     Marker marker_ = enter_section_(builder_, 0, _COLLAPSE_, null);
-    if (root_ == BINARY) {
-      result_ = binary(builder_, 0);
-    }
-    else if (root_ == EXPRESSION) {
+    if (root_ == EXPRESSION) {
       result_ = expression(builder_, 0);
-    }
-    else if (root_ == OPERATOR) {
-      result_ = operator(builder_, 0);
-    }
-    else if (root_ == VALUE) {
-      result_ = value(builder_, 0);
     }
     else {
       result_ = parse_root_(root_, builder_, 0);

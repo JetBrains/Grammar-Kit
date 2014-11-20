@@ -24,8 +24,10 @@ import com.intellij.psi.*;
 import com.intellij.psi.impl.FakePsiElement;
 import com.intellij.psi.impl.source.resolve.reference.impl.providers.JavaClassReferenceProvider;
 import com.intellij.psi.search.GlobalSearchScope;
+import com.intellij.util.IncorrectOperationException;
 import com.intellij.util.ObjectUtils;
 import com.intellij.util.containers.ContainerUtil;
+import com.intellij.util.containers.ContainerUtilRt;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.AnnotationVisitor;
@@ -50,32 +52,32 @@ import java.util.List;
 /**
  * @author gregsh
  */
-public class JavaHelper {
+public abstract class JavaHelper {
   public static JavaHelper getJavaHelper(Project project) {
     JavaHelper service = ServiceManager.getService(project, JavaHelper.class);
-    return service == null? new JavaHelper() : service;
+    return service == null? new AsmHelper() : service;
   }
+
+  @Nullable
+  public abstract NavigatablePsiElement findClass(@Nullable String className);
+
+  @NotNull
+  public abstract List<NavigatablePsiElement> findClassMethods(@Nullable String className,
+                                                               boolean staticMethods,
+                                                               @Nullable String methodName,
+                                                               int paramCount,
+                                                               String... paramTypes);
+  @NotNull
+  public abstract List<String> getMethodTypes(@Nullable NavigatablePsiElement method);
+  @NotNull
+  public abstract List<String> getAnnotations(@Nullable NavigatablePsiElement element);
 
   @Nullable
   public PsiReferenceProvider getClassReferenceProvider() { return null; }
-  @Nullable
-  public NavigatablePsiElement findClass(@Nullable String className) { return null; }
+
   @Nullable
   public NavigationItem findPackage(@Nullable String packageName) { return null; }
 
-  @NotNull
-  public List<NavigatablePsiElement> findClassMethods(@Nullable String className,
-                                                      boolean staticMethods,
-                                                      @Nullable String methodName,
-                                                      int paramCount,
-                                                      String... paramTypes) {
-    return Collections.emptyList();
-  }
-
-  @NotNull
-  public List<String> getMethodTypes(@Nullable NavigatablePsiElement method) { return Collections.singletonList("void"); }
-  @NotNull
-  public List<String> getAnnotations(@Nullable NavigatablePsiElement element) { return Collections.emptyList(); }
 
   private static boolean acceptsName(@Nullable String expected, @Nullable String actual) {
     return "*".equals(expected) || expected != null && expected.equals(actual);
@@ -88,9 +90,11 @@ public class JavaHelper {
 
   private static class PsiHelper extends JavaHelper {
     private final JavaPsiFacade myFacade;
+    private final PsiElementFactory myElementFactory;
 
-    private PsiHelper(JavaPsiFacade facade) {
+    private PsiHelper(JavaPsiFacade facade, PsiElementFactory elementFactory) {
       myFacade = facade;
+      myElementFactory = elementFactory;
     }
 
     @Override
@@ -120,13 +124,13 @@ public class JavaHelper {
       for (PsiMethod method : aClass.getMethods()) {
         if (!acceptsName(methodName, method.getName())) continue;
         if (!acceptsMethod(method, staticMethods)) continue;
-        if (!acceptsMethod(method, paramCount, paramTypes)) continue;
+        if (!acceptsMethod(myElementFactory, method, paramCount, paramTypes)) continue;
         result.add(method);
       }
       return result;
     }
 
-    private static boolean acceptsMethod(PsiMethod method, int paramCount, String... paramTypes) {
+    private static boolean acceptsMethod(PsiElementFactory elementFactory, PsiMethod method, int paramCount, String... paramTypes) {
       PsiParameterList parameterList = method.getParameterList();
       if (paramCount >= 0 && paramCount != parameterList.getParametersCount()) return false;
       if (paramTypes.length == 0) return true;
@@ -136,7 +140,12 @@ public class JavaHelper {
         String paramType = paramTypes[i];
         PsiParameter parameter = psiParameters[i];
         PsiType psiType = parameter.getType();
-        if (!acceptsName(paramType, psiType.getCanonicalText())) return false;
+        if (acceptsName(paramType, psiType.getCanonicalText())) continue;
+        try {
+          if (psiType.isAssignableFrom(elementFactory.createTypeFromText(paramType, parameter))) continue;
+        }
+        catch (IncorrectOperationException ignored) { }
+        return false;
       }
       return true;
     }
@@ -170,7 +179,7 @@ public class JavaHelper {
     public List<String> getAnnotations(NavigatablePsiElement element) {
       if (element == null) return Collections.emptyList();
       PsiModifierList modifierList = ((PsiModifierListOwner)element).getModifierList();
-      if (modifierList == null) return super.getAnnotations(element);
+      if (modifierList == null) return ContainerUtilRt.emptyList();
       List<String> strings = new ArrayList<String>();
       for (PsiAnnotation annotation  : modifierList.getAnnotations()) {
         if (annotation.getParameterList().getAttributes().length > 0) continue;
@@ -226,7 +235,12 @@ public class JavaHelper {
       for (int i = 0; i < paramTypes.length; i++) {
         String paramType = paramTypes[i];
         Class<?> parameter = parameterTypes[i];
-        if (!acceptsName(paramType, parameter.getCanonicalName())) return false;
+        if (acceptsName(paramType, parameter.getCanonicalName())) continue;
+        try {
+          if (parameter.isAssignableFrom(Class.forName(paramType))) continue;
+        }
+        catch (ClassNotFoundException ignored) { }
+        return false;
       }
       return true;
     }
@@ -271,14 +285,9 @@ public class JavaHelper {
     @Nullable
     @Override
     public NavigatablePsiElement findClass(String className) {
-      if (className == null) return null;
       try {
-        InputStream is = getClass().getClassLoader().getResourceAsStream(className.replace('.', '/') + ".class");
-        if (is == null) return null;
-        byte[] bytes = FileUtil.loadBytes(is);
-        is.close();
-        ClassInfo info = getClassInfo(className, bytes);
-        return new MyElement<ClassInfo>(info);
+        ClassInfo info = getClassInfo(className);
+        return info == null ? null : new MyElement<ClassInfo>(info);
       }
       catch (IOException e) {
         return null;
@@ -312,7 +321,13 @@ public class JavaHelper {
       for (int i = 0; i < paramTypes.length; i++) {
         String paramType = paramTypes[i];
         String parameter = method.types.get(i + 1);
-        if (!acceptsName(paramType, parameter)) return false;
+        if (acceptsName(paramType, parameter)) continue;
+        try {
+          ClassInfo info = getClassInfo(paramType);
+          if (info != null && info.supers.contains(parameter)) continue;
+        }
+        catch (Exception ignored) { }
+        return false;
       }
       return true;
     }
@@ -338,6 +353,16 @@ public class JavaHelper {
       if (delegate instanceof ClassInfo) return ((ClassInfo) delegate).annotations;
       if (delegate instanceof MethodInfo) return ((MethodInfo) delegate).annotations;
       return Collections.emptyList();
+    }
+
+    @Nullable
+    private static ClassInfo getClassInfo(String className) throws IOException {
+      if (className == null) return null;
+      InputStream is = JavaHelper.class.getClassLoader().getResourceAsStream(className.replace('.', '/') + ".class");
+      if (is == null) return null;
+      byte[] bytes = FileUtil.loadBytes(is);
+      is.close();
+      return getClassInfo(className, bytes);
     }
 
     private static ClassInfo getClassInfo(String className, byte[] bytes) {
@@ -369,7 +394,6 @@ public class JavaHelper {
 
       MyClassVisitor(ClassInfo info) {
         myInfo = info;
-        state = State.CLASS;
       }
 
       private State state;
@@ -377,6 +401,19 @@ public class JavaHelper {
       private MethodInfo methodInfo;
       private String annoDesc;
       private int annoParamCounter;
+
+      public void visit(int version,
+                        int access,
+                        String name,
+                        String signature,
+                        String superName,
+                        String[] interfaces) {
+        state = State.CLASS;
+        if (superName != null) myInfo.supers.add(superName.replace('/', '.'));
+        for (String s : interfaces) {
+          myInfo.supers.add(s.replace('/', '.'));
+        }
+      }
 
       @Override
       public void visitEnd() {
@@ -590,6 +627,7 @@ public class JavaHelper {
 
   private static class ClassInfo {
     String name;
+    List<String> supers = ContainerUtil.newSmartList();
     List<String> annotations = ContainerUtil.newSmartList();
     List<MethodInfo> methods = ContainerUtil.newSmartList();
   }

@@ -23,6 +23,7 @@ import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static org.intellij.jflex.psi.JFlexTypes.*;
 import org.intellij.jflex.psi.*;
+import com.intellij.psi.PsiNameIdentifierOwner;
 
 public class JFlexStateDefinitionImpl extends JFlexCompositeElementImpl implements JFlexStateDefinition {
 
@@ -47,7 +48,7 @@ public class JFlexStateDefinitionImpl extends JFlexCompositeElementImpl implemen
   }
 
   @NotNull
-  public JFlexStateDefinition setName(String newName) {
+  public PsiNameIdentifierOwner setName(String newName) {
     return JFlexPsiImplUtil.setName(this, newName);
   }
 

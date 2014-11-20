@@ -29,7 +29,7 @@ public interface JFlexStateDefinition extends PsiNameIdentifierOwner {
   String getName();
 
   @NotNull
-  JFlexStateDefinition setName(String newName);
+  PsiNameIdentifierOwner setName(String newName);
 
   @NotNull
   PsiElement getNameIdentifier();

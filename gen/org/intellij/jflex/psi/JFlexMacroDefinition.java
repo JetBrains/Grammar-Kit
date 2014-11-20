@@ -32,7 +32,7 @@ public interface JFlexMacroDefinition extends PsiNameIdentifierOwner {
   String getName();
 
   @NotNull
-  JFlexMacroDefinition setName(String newName);
+  PsiNameIdentifierOwner setName(String newName);
 
   @NotNull
   PsiElement getNameIdentifier();

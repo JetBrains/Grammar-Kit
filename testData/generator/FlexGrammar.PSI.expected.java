@@ -360,7 +360,7 @@ public interface JFlexMacroDefinition extends PsiNameIdentifierOwner {
   String getName();
 
   @NotNull
-  JFlexMacroDefinition setName(String p1);
+  PsiNameIdentifierOwner setName(String p1);
 
   @NotNull
   PsiElement getNameIdentifier();
@@ -534,7 +534,7 @@ public interface JFlexStateDefinition extends PsiNameIdentifierOwner {
   String getName();
 
   @NotNull
-  JFlexStateDefinition setName(String p1);
+  PsiNameIdentifierOwner setName(String p1);
 
   @NotNull
   PsiElement getNameIdentifier();
@@ -875,6 +875,7 @@ import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static org.intellij.jflex.psi.JFlexTypes.*;
 import org.intellij.jflex.psi.*;
+import com.intellij.psi.PsiNameIdentifierOwner;
 
 public class JFlexMacroDefinitionImpl extends JFlexCompositeElementImpl implements JFlexMacroDefinition {
 
@@ -905,7 +906,7 @@ public class JFlexMacroDefinitionImpl extends JFlexCompositeElementImpl implemen
   }
 
   @NotNull
-  public JFlexMacroDefinition setName(String p1) {
+  public PsiNameIdentifierOwner setName(String p1) {
     return JFlexPsiImplUtil.setName(this, p1);
   }
 
@@ -1255,6 +1256,7 @@ import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static org.intellij.jflex.psi.JFlexTypes.*;
 import org.intellij.jflex.psi.*;
+import com.intellij.psi.PsiNameIdentifierOwner;
 
 public class JFlexStateDefinitionImpl extends JFlexCompositeElementImpl implements JFlexStateDefinition {
 
@@ -1279,7 +1281,7 @@ public class JFlexStateDefinitionImpl extends JFlexCompositeElementImpl implemen
   }
 
   @NotNull
-  public JFlexStateDefinition setName(String p1) {
+  public PsiNameIdentifierOwner setName(String p1) {
     return JFlexPsiImplUtil.setName(this, p1);
   }
 

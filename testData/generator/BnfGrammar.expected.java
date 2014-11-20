@@ -15,11 +15,11 @@ import com.intellij.lang.PsiParser;
 public class GrammarParser implements PsiParser {
 
   public ASTNode parse(IElementType type, PsiBuilder builder) {
-    parse_only_(type, builder);
+    parseLight(type, builder);
     return builder.getTreeBuilt();
   }
 
-  public void parse_only_(IElementType type, PsiBuilder builder) {
+  public void parseLight(IElementType type, PsiBuilder builder) {
     boolean result;
     builder = adapt_builder_(type, builder, this, EXTENDS_SETS_);
     Marker marker = enter_section_(builder, 0, _COLLAPSE_, null);

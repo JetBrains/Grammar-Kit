@@ -114,7 +114,7 @@ public class ParserGenerator {
     myParserUtilClass = ObjectUtils.chooseNotNull(getRootAttribute(myFile, KnownAttribute.PARSER_UTIL_CLASS.alias("stubParserClass")),
                                                   getRootAttribute(myFile, KnownAttribute.PARSER_UTIL_CLASS));
     String tmpVisitorClass = getRootAttribute(myFile, KnownAttribute.PSI_VISITOR_NAME);
-    visitorClassName = StringUtil.isEmpty(tmpVisitorClass) ?
+    visitorClassName = "no".equals(genOptions.get("visitor")) || StringUtil.isEmpty(tmpVisitorClass) ?
                        null : tmpVisitorClass.startsWith(myRuleClassPrefix) ?
                               tmpVisitorClass : myRuleClassPrefix + tmpVisitorClass;
     mySimpleTokens = ContainerUtil.newLinkedHashMap(RuleGraphHelper.getTokenMap(myFile));
@@ -441,11 +441,11 @@ public class ParserGenerator {
     List<Set<String>> extendsSet = buildExtendsSet(myGraphHelper.getRuleExtendsMap());
     boolean generateExtendsSets = !extendsSet.isEmpty();
     out("public ASTNode parse(IElementType %s, PsiBuilder %s) {", N.root, N.builder);
-    out("parse_only_(%s, %s);", N.root, N.builder);
+    out("parseLight(%s, %s);", N.root, N.builder);
     out("return %s.getTreeBuilt();", N.builder);
     out("}");
     newLine();
-    out("public void parse_only_(IElementType %s, PsiBuilder %s) {", N.root, N.builder);
+    out("public void parseLight(IElementType %s, PsiBuilder %s) {", N.root, N.builder);
     out("boolean %s;", N.result);
     out("%s = adapt_builder_(%s, %s, this, %s);", N.builder, N.root, N.builder, generateExtendsSets ? "EXTENDS_SETS_" : null);
     out("Marker %s = enter_section_(%s, 0, _COLLAPSE_, null);", N.marker, N.builder);

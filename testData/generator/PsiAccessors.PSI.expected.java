@@ -218,7 +218,6 @@ import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.lang.ASTNode;
 import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static generated.GeneratedTypes.*;
 import com.intellij.extapi.psi.ASTWrapperPsiElement;
@@ -228,11 +227,6 @@ public class XBinaryImpl extends ASTWrapperPsiElement implements XBinary {
 
   public XBinaryImpl(ASTNode node) {
     super(node);
-  }
-
-  public void accept(@NotNull PsiElementVisitor visitor) {
-    if (visitor instanceof XVisitor) ((XVisitor)visitor).visitBinary(this);
-    else super.accept(visitor);
   }
 
   @Override
@@ -344,7 +338,6 @@ import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.lang.ASTNode;
 import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static generated.GeneratedTypes.*;
 import com.intellij.extapi.psi.ASTWrapperPsiElement;
@@ -354,11 +347,6 @@ public class XExpressionImpl extends ASTWrapperPsiElement implements XExpression
 
   public XExpressionImpl(ASTNode node) {
     super(node);
-  }
-
-  public void accept(@NotNull PsiElementVisitor visitor) {
-    if (visitor instanceof XVisitor) ((XVisitor)visitor).visitExpression(this);
-    else super.accept(visitor);
   }
 
   @Override
@@ -376,7 +364,6 @@ import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.lang.ASTNode;
 import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static generated.GeneratedTypes.*;
 import com.intellij.extapi.psi.ASTWrapperPsiElement;
@@ -388,11 +375,6 @@ public class XOperatorImpl extends ASTWrapperPsiElement implements XOperator {
     super(node);
   }
 
-  public void accept(@NotNull PsiElementVisitor visitor) {
-    if (visitor instanceof XVisitor) ((XVisitor)visitor).visitOperator(this);
-    else super.accept(visitor);
-  }
-
 }
 // ---- XSomeChildImpl.java -----------------
 //header.txt
@@ -402,7 +384,6 @@ import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.lang.ASTNode;
 import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static generated.GeneratedTypes.*;
 import com.intellij.extapi.psi.ASTWrapperPsiElement;
@@ -412,11 +393,6 @@ public class XSomeChildImpl extends ASTWrapperPsiElement implements XSomeChild {
 
   public XSomeChildImpl(ASTNode node) {
     super(node);
-  }
-
-  public void accept(@NotNull PsiElementVisitor visitor) {
-    if (visitor instanceof XVisitor) ((XVisitor)visitor).visitSomeChild(this);
-    else super.accept(visitor);
   }
 
   @Override
@@ -452,7 +428,6 @@ import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.lang.ASTNode;
 import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static generated.GeneratedTypes.*;
 import com.intellij.extapi.psi.ASTWrapperPsiElement;
@@ -462,11 +437,6 @@ public class XSomeGrandChildImpl extends ASTWrapperPsiElement implements XSomeGr
 
   public XSomeGrandChildImpl(ASTNode node) {
     super(node);
-  }
-
-  public void accept(@NotNull PsiElementVisitor visitor) {
-    if (visitor instanceof XVisitor) ((XVisitor)visitor).visitSomeGrandChild(this);
-    else super.accept(visitor);
   }
 
   @Override
@@ -490,7 +460,6 @@ import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.lang.ASTNode;
 import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static generated.GeneratedTypes.*;
 import com.intellij.extapi.psi.ASTWrapperPsiElement;
@@ -500,11 +469,6 @@ public class XSomeRootImpl extends ASTWrapperPsiElement implements XSomeRoot {
 
   public XSomeRootImpl(ASTNode node) {
     super(node);
-  }
-
-  public void accept(@NotNull PsiElementVisitor visitor) {
-    if (visitor instanceof XVisitor) ((XVisitor)visitor).visitSomeRoot(this);
-    else super.accept(visitor);
   }
 
   @Override
@@ -559,7 +523,6 @@ import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.lang.ASTNode;
 import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static generated.GeneratedTypes.*;
 import com.intellij.extapi.psi.ASTWrapperPsiElement;
@@ -569,11 +532,6 @@ public class XTokenDefaultsImpl extends ASTWrapperPsiElement implements XTokenDe
 
   public XTokenDefaultsImpl(ASTNode node) {
     super(node);
-  }
-
-  public void accept(@NotNull PsiElementVisitor visitor) {
-    if (visitor instanceof XVisitor) ((XVisitor)visitor).visitTokenDefaults(this);
-    else super.accept(visitor);
   }
 
   @Override
@@ -591,7 +549,6 @@ import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.lang.ASTNode;
 import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static generated.GeneratedTypes.*;
 import com.intellij.extapi.psi.ASTWrapperPsiElement;
@@ -603,61 +560,10 @@ public class XValueImpl extends ASTWrapperPsiElement implements XValue {
     super(node);
   }
 
-  public void accept(@NotNull PsiElementVisitor visitor) {
-    if (visitor instanceof XVisitor) ((XVisitor)visitor).visitValue(this);
-    else super.accept(visitor);
-  }
-
   @Override
   @NotNull
   public PsiElement getId() {
     return findNotNullChildByType(ID);
-  }
-
-}
-// ---- XVisitor.java -----------------
-//header.txt
-package generated.psi;
-
-import org.jetbrains.annotations.*;
-import com.intellij.psi.PsiElementVisitor;
-
-public class XVisitor extends PsiElementVisitor {
-
-  public void visitBinary(@NotNull XBinary o) {
-    visitComposite(o);
-  }
-
-  public void visitExpression(@NotNull XExpression o) {
-    visitComposite(o);
-  }
-
-  public void visitOperator(@NotNull XOperator o) {
-    visitComposite(o);
-  }
-
-  public void visitSomeChild(@NotNull XSomeChild o) {
-    visitComposite(o);
-  }
-
-  public void visitSomeGrandChild(@NotNull XSomeGrandChild o) {
-    visitComposite(o);
-  }
-
-  public void visitSomeRoot(@NotNull XSomeRoot o) {
-    visitComposite(o);
-  }
-
-  public void visitTokenDefaults(@NotNull XTokenDefaults o) {
-    visitComposite(o);
-  }
-
-  public void visitValue(@NotNull XValue o) {
-    visitComposite(o);
-  }
-
-  public void visitComposite(@NotNull XComposite o) {
-    visitElement(o);
   }
 
 }

@@ -17,11 +17,11 @@ import java.util.Map;
 public class Small implements PsiParser {
 
   public ASTNode parse(IElementType root_, PsiBuilder builder_) {
-    parse_only_(root_, builder_);
+    parseLight(root_, builder_);
     return builder_.getTreeBuilt();
   }
 
-  public void parse_only_(IElementType root_, PsiBuilder builder_) {
+  public void parseLight(IElementType root_, PsiBuilder builder_) {
     boolean result_;
     builder_ = adapt_builder_(root_, builder_, this, null);
     Marker marker_ = enter_section_(builder_, 0, _COLLAPSE_, null);

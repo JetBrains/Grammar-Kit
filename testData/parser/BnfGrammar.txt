@@ -1215,6 +1215,14 @@ BnfFile:BnfGrammar.bnf
         BNF_REFERENCE_OR_TOKEN: expression
           PsiElement(id)('expression')
       PsiWhiteSpace(' ')
+      BNF_ATTR:methods
+        PsiElement(id)('methods')
+        PsiElement(=)('=')
+        BNF_VALUE_LIST
+          PsiElement([)('[')
+          BNF_LIST_ENTRY
+            PsiElement(id)('resolveRule')
+          PsiElement(])(']')
       PsiElement(})('}')
   PsiWhiteSpace('\n')
   BNF_RULE:literal_expression

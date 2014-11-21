@@ -306,7 +306,7 @@ public class BnfIntroduceRuleHandler implements RefactoringActionHandler {
           existingNames.add(((BnfReferenceOrToken)element).getId().getText());
         }
         else if (element instanceof BnfRule) {
-          existingNames.add(((BnfRule)element).getId().getText());
+          existingNames.add(((BnfRule)element).getName());
         }
         super.visitElement(element);
       }

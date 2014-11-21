@@ -1,19 +1,19 @@
 {
-  parserClass="<warning>org.intellij.grammar.parser.GrammarParser</warning>"
-  <warning>stubParserClass</warning>="<warning>org.intellij.grammar.parser.GeneratedParserUtilBase</warning>"
+  parserClass="org.intellij.grammar.parser.GrammarParser"
+  <warning>stubParserClass</warning>="org.intellij.grammar.parser.GeneratedParserUtilBase"
 
-  implements="<warning>org.intellij.grammar.psi.BnfCompositeElement</warning>"
-  extends="<warning>org.intellij.grammar.psi.impl.BnfCompositeElementImpl</warning>"
+  implements="org.intellij.grammar.psi.BnfCompositeElement"
+  extends="org.intellij.grammar.psi.impl.BnfCompositeElementImpl"
 
   psiClassPrefix="Bnf"
   psiImplClassSuffix="Impl"
   psiPackage="<warning>org.intellij.grammar.psi</warning>"
   psiImplPackage="<warning>org.intellij.grammar.psi.impl</warning>"
 
-  elementTypeHolderClass="<warning>org.intellij.grammar.psi.BnfTypes</warning>"
+  elementTypeHolderClass="org.intellij.grammar.psi.BnfTypes"
   elementTypePrefix="BNF_"
-  elementTypeClass="<warning>org.intellij.grammar.psi.BnfCompositeElementType</warning>"
-  tokenTypeClass="<warning>org.intellij.grammar.psi.BnfTokenType</warning>"
+  elementTypeClass="org.intellij.grammar.psi.BnfCompositeElementType"
+  tokenTypeClass="org.intellij.grammar.psi.BnfTokenType"
 
   // tokens
   OP_EQ="="
@@ -65,9 +65,9 @@ quantified ::= '[' expression ']' | simple quantifier? { extends="expression" }
 quantifier ::= '?' | '+' | '*'
 
 private simple ::= !(modifier* id '::=' ) reference_or_token | literal_expression | paren_expression;
-reference_or_token ::= id  { extends="expression" mixin="<warning>org.intellij.grammar.psi.impl.BnfRefOrTokenImpl</warning>"}
+reference_or_token ::= id  { extends="expression" mixin="org.intellij.grammar.psi.impl.BnfRefOrTokenImpl"}
 literal_expression ::= string_literal_expression | number { extends="expression" }
-string_literal_expression ::= string { extends="literal_expression" mixin="<warning>org.intellij.grammar.psi.impl.BnfStringImpl</warning>"}
+string_literal_expression ::= string { extends="literal_expression" mixin="org.intellij.grammar.psi.impl.BnfStringImpl"}
 paren_expression ::= '(' expression ')' { pin=1 extends="expression" }
 
 

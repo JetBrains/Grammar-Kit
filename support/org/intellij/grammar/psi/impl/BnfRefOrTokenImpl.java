@@ -18,9 +18,13 @@ package org.intellij.grammar.psi.impl;
 import com.intellij.lang.ASTNode;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiReference;
 import com.intellij.util.IncorrectOperationException;
+import org.intellij.grammar.psi.BnfFile;
 import org.intellij.grammar.psi.BnfReferenceOrToken;
+import org.intellij.grammar.psi.BnfRule;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * Created by IntelliJ IDEA.
@@ -33,9 +37,17 @@ public abstract class BnfRefOrTokenImpl extends BnfExpressionImpl implements Bnf
     super(node);
   }
 
+  @Nullable
+  public BnfRule resolveRule() {
+    PsiFile file = getContainingFile();
+    return file instanceof BnfFile ? ((BnfFile)file).getRule(GrammarUtil.getIdText(getId())) : null;
+  }
+
   @Override
   public PsiReference getReference() {
-    return new BnfReferenceImpl<BnfReferenceOrToken>(this, TextRange.from(0, getTextLength())) {
+    int delta = GrammarUtil.isIdQuoted(getId().getText()) ? 1 : 0;
+    TextRange range = TextRange.create(delta, getTextLength() - delta);
+    return new BnfReferenceImpl<BnfReferenceOrToken>(this, range) {
       @Override
       public PsiElement handleElementRename(String newElementName) throws IncorrectOperationException {
         myElement.getId().replace(BnfElementFactory.createLeafFromText(getElement().getProject(), newElementName));

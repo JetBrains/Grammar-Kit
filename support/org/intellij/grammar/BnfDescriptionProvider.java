@@ -45,14 +45,14 @@ public class BnfDescriptionProvider implements ElementDescriptionProvider {
       if (location == UsageViewTypeLocation.INSTANCE) {
         return "Grammar Rule";
       }
-      return ((BnfRule)psiElement).getId().getText();
+      return ((BnfRule)psiElement).getName();
     }
     else if (psiElement instanceof BnfAttr) {
       if (location == UsageViewTypeLocation.INSTANCE) {
         BnfRule rule = PsiTreeUtil.getParentOfType(psiElement, BnfRule.class);
         return (rule == null ? "Grammar " : "Rule ") + "Attribute";
       }
-      return ((BnfAttr)psiElement).getId().getText();
+      return ((BnfAttr)psiElement).getName();
     }
     else if (psiElement instanceof BnfCompositeElement) {
       if (location == UsageViewTypeLocation.INSTANCE) {

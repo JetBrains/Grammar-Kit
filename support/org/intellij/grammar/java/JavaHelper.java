@@ -60,27 +60,43 @@ public abstract class JavaHelper {
   }
 
   @Nullable
-  public abstract NavigatablePsiElement findClass(@Nullable String className);
+  public NavigatablePsiElement findClass(@Nullable String className) {
+    return null;
+  }
 
   @NotNull
-  public abstract List<NavigatablePsiElement> findClassMethods(@Nullable String className,
+  public List<NavigatablePsiElement> findClassMethods(@Nullable String className,
                                                                boolean staticMethods,
                                                                @Nullable String methodName,
                                                                int paramCount,
-                                                               String... paramTypes);
+                                                               String... paramTypes) {
+    return Collections.emptyList();
+  }
 
   @Nullable
-  public abstract String getSuperClassName(@Nullable String className);
+  public String getSuperClassName(@Nullable String className) {
+    return null;
+  }
+
   @NotNull
-  public abstract List<String> getMethodTypes(@Nullable NavigatablePsiElement method);
+  public List<String> getMethodTypes(@Nullable NavigatablePsiElement method) {
+    return Collections.emptyList();
+  }
+
   @NotNull
-  public abstract List<String> getAnnotations(@Nullable NavigatablePsiElement element);
+  public List<String> getAnnotations(@Nullable NavigatablePsiElement element) {
+    return Collections.emptyList();
+  }
 
   @Nullable
-  public PsiReferenceProvider getClassReferenceProvider() { return null; }
+  public PsiReferenceProvider getClassReferenceProvider() {
+    return null;
+  }
 
   @Nullable
-  public NavigationItem findPackage(@Nullable String packageName) { return null; }
+  public NavigationItem findPackage(@Nullable String packageName) {
+    return null;
+  }
 
 
   private static boolean acceptsName(@Nullable String expected, @Nullable String actual) {
@@ -92,7 +108,7 @@ public abstract class JavaHelper {
            (Modifier.isPublic(modifiers) || !(Modifier.isPrivate(modifiers) || Modifier.isProtected(modifiers)));
   }
 
-  private static class PsiHelper extends JavaHelper {
+  private static class PsiHelper extends AsmHelper {
     private final JavaPsiFacade myFacade;
     private final PsiElementFactory myElementFactory;
 
@@ -109,9 +125,15 @@ public abstract class JavaHelper {
     }
 
     @Override
-    public PsiClass findClass(String className) {
+    public NavigatablePsiElement findClass(String className) {
+      PsiClass aClass = findClassSafe(className);
+      return aClass != null ? aClass : super.findClass(className);
+    }
+
+    private PsiClass findClassSafe(String className) {
       if (className == null) return null;
-      return myFacade.findClass(className, GlobalSearchScope.allScope(myFacade.getProject()));
+      PsiClass aClass = myFacade.findClass(className, GlobalSearchScope.allScope(myFacade.getProject()));
+      return aClass != null ? aClass : null;
     }
 
     @Override
@@ -122,8 +144,9 @@ public abstract class JavaHelper {
     @NotNull
     @Override
     public List<NavigatablePsiElement> findClassMethods(@Nullable String className, boolean staticMethods, @Nullable String methodName, int paramCount, String... paramTypes) {
-      PsiClass aClass = className != null ? findClass(className) : null;
-      if (aClass == null || methodName == null) return Collections.emptyList();
+      if (methodName == null) return Collections.emptyList();
+      PsiClass aClass = findClassSafe(className);
+      if (aClass == null) return super.findClassMethods(className, staticMethods, methodName, paramCount, paramTypes);
       List<NavigatablePsiElement> result = ContainerUtil.newArrayList();
       for (PsiMethod method : aClass.getMethods()) {
         if (!acceptsName(methodName, method.getName())) continue;
@@ -137,9 +160,9 @@ public abstract class JavaHelper {
     @Nullable
     @Override
     public String getSuperClassName(@Nullable String className) {
-      PsiClass aClass = findClass(className);
+      PsiClass aClass = findClassSafe(className);
       PsiClass superClass = aClass != null ? aClass.getSuperClass() : null;
-      return superClass != null ? superClass.getQualifiedName() : null;
+      return superClass != null ? superClass.getQualifiedName() : super.getSuperClassName(className);
     }
 
     private static boolean acceptsMethod(PsiElementFactory elementFactory, PsiMethod method, int paramCount, String... paramTypes) {
@@ -174,7 +197,7 @@ public abstract class JavaHelper {
     @NotNull
     @Override
     public List<String> getMethodTypes(NavigatablePsiElement method) {
-      if (method == null) return Collections.emptyList();
+      if (!(method instanceof PsiMethod)) return super.getMethodTypes(method);
       PsiMethod psiMethod = (PsiMethod)method;
       PsiType returnType = psiMethod.getReturnType();
       List<String> strings = new ArrayList<String>();
@@ -189,7 +212,7 @@ public abstract class JavaHelper {
     @NotNull
     @Override
     public List<String> getAnnotations(NavigatablePsiElement element) {
-      if (element == null) return Collections.emptyList();
+      if (!(element instanceof PsiModifierListOwner)) return super.getAnnotations(element);
       PsiModifierList modifierList = ((PsiModifierListOwner)element).getModifierList();
       if (modifierList == null) return ContainerUtilRt.emptyList();
       List<String> strings = new ArrayList<String>();

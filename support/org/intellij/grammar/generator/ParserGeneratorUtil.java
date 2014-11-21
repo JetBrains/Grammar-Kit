@@ -560,9 +560,9 @@ public class ParserGeneratorUtil {
       @Override
       public void visitReferenceOrToken(@NotNull BnfReferenceOrToken o) {
         if (GrammarUtil.isExternalReference(o)) return;
-        String tokenName = o.getText();
-        BnfRule rule = file.getRule(tokenName);
+        BnfRule rule = o.resolveRule();
         if (rule != null) return;
+        String tokenName = o.getText();
         if (usedNames.add(tokenName) && !origTokenNames.contains(tokenName)) {
           map.put(tokenName, tokenName);
         }

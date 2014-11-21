@@ -326,7 +326,7 @@ public class RuleGraphHelper {
             e instanceof BnfReferenceOrToken ? (BnfReferenceOrToken)e :
             e instanceof BnfExternalExpression ? PsiTreeUtil.findChildOfType(e, BnfReferenceOrToken.class) :
             null;
-          BnfRule r = ruleRef != null ? myFile.getRule(ruleRef.getText()) : null;
+          BnfRule r = ruleRef != null ? ruleRef.resolveRule() : null;
           if (r != null) {
             myRulesGraph.putValue(rule, r);
           }
@@ -374,7 +374,7 @@ public class RuleGraphHelper {
 
     Map<PsiElement, Cardinality> result;
     if (tree instanceof BnfReferenceOrToken) {
-      BnfRule targetRule = myFile.getRule(tree.getText());
+      BnfRule targetRule = ((BnfReferenceOrToken)tree).resolveRule();
       if (targetRule != null) {
         if (Rule.isExternal(targetRule)) {
           result = psiMap(newExternalPsi(targetRule.getName()), REQUIRED);
@@ -410,7 +410,7 @@ public class RuleGraphHelper {
       }
       else {
         BnfExpression ruleRef = expressionList.get(0);
-        BnfRule metaRule = myFile.getRule(ruleRef.getText());
+        BnfRule metaRule = ((BnfReferenceOrToken)ruleRef).resolveRule();
         if (metaRule == null) {
           result = psiMap(newExternalPsi("#" + ruleRef.getText()), REQUIRED);
         }
@@ -452,7 +452,7 @@ public class RuleGraphHelper {
 
       IElementType type = getEffectiveType(tree);
 
-      List<Map<PsiElement, Cardinality>> list = new ArrayList<Map<PsiElement, Cardinality>>();
+      List<Map<PsiElement, Cardinality>> list = ContainerUtil.newArrayList();
       List<BnfExpression> childExpressions = getChildExpressions(tree);
       for (BnfExpression child : childExpressions) {
         Map<PsiElement, Cardinality> nextMap = collectMembers(rule, child);
@@ -493,10 +493,9 @@ public class RuleGraphHelper {
   private static Map<BnfRule, Cardinality> getRulesToTheLeft(BnfRule rule) {
     Map<BnfRule, Cardinality> result = ContainerUtil.newLinkedHashMap();
     Map<BnfExpression, BnfExpression> nextMap = new BnfFirstNextAnalyzer().setBackward(true).setPublicRuleOpaque(true).calcNext(rule);
-    BnfFile containingFile = (BnfFile)rule.getContainingFile();
     for (BnfExpression e : nextMap.keySet()) {
       if (!(e instanceof BnfReferenceOrToken)) continue;
-      BnfRule r = containingFile.getRule(e.getText());
+      BnfRule r = ((BnfReferenceOrToken)e).resolveRule();
       if (r == null || ParserGeneratorUtil.Rule.isPrivate(r)) continue;
       BnfExpression context = nextMap.get(e);
       Cardinality cardinality = REQUIRED;

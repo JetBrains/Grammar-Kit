@@ -58,7 +58,7 @@ public abstract class BnfNamedElementImpl extends BnfCompositeElementImpl implem
   @Override
   public String getName() {
     if (myCachedName == null) {
-      myCachedName = getId().getText();
+      myCachedName = GrammarUtil.getIdText(getId());
     }
     return myCachedName;
   }

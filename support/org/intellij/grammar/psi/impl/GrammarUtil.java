@@ -218,4 +218,13 @@ public class GrammarUtil {
     });
     return ref.get();
   }
+
+  public static String getIdText(@Nullable PsiElement id) {
+    String text = id == null ? "" : id.getText();
+    return isIdQuoted(text) ? text.substring(1, text.length() - 1) : text;
+  }
+
+  public static boolean isIdQuoted(@Nullable String text) {
+    return text != null && text.startsWith("<") && text.endsWith(">");
+  }
 }

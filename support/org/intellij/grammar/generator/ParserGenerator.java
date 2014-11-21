@@ -91,8 +91,10 @@ public class ParserGenerator {
   private final int generateFirstCheck;
   private final Pattern generateRootRules;
   private final boolean generateTokens;
+  private final boolean generateComposites;
   private final boolean generateExtendedPin;
   private final boolean generatePsi;
+  private final boolean generatePsiFactory;
   private final boolean generateTokenAccessors;
 
   public ParserGenerator(BnfFile tree, String sourcePath, String outputPath) {
@@ -102,7 +104,9 @@ public class ParserGenerator {
     Map<String, String> genOptions = getRootAttribute(myFile, KnownAttribute.GENERATE).asMap();
     N = Names.forName(genOptions.get("names"));
     generatePsi = getGenerateOption(myFile, KnownAttribute.GENERATE_PSI, genOptions.get("psi"));
+    generatePsiFactory = !"no".equals(genOptions.get("psi-factory"));
     generateTokens = getGenerateOption(myFile, KnownAttribute.GENERATE_TOKENS, genOptions.get("tokens"));
+    generateComposites = !"no".equals(genOptions.get("composites"));
     generateFirstCheck = getGenerateOption(myFile, KnownAttribute.GENERATE_FIRST_CHECK, genOptions.get("firstCheck"));
     generateExtendedPin = getGenerateOption(myFile, KnownAttribute.EXTENDED_PIN, genOptions.get("extendedPin"));
     generateTokenAccessors = getGenerateOption(myFile, KnownAttribute.GENERATE_TOKEN_ACCESSORS, genOptions.get("tokenAccessors"));
@@ -193,7 +197,7 @@ public class ParserGenerator {
       String className = getRootAttribute(myFile, KnownAttribute.ELEMENT_TYPE_HOLDER_CLASS);
       openOutput(className);
       try {
-        generateElementTypesHolder(className, sortedCompositeTypes, generatePsi);
+        generateElementTypesHolder(className, sortedCompositeTypes);
       }
       finally {
         closeOutput();
@@ -1138,7 +1142,8 @@ public class ParserGenerator {
 
   /*ElementTypes******************************************************************/
 
-  private void generateElementTypesHolder(String className, Map<String, BnfRule> sortedCompositeTypes, boolean generatePsi) {
+  private void generateElementTypesHolder(String className, Map<String, BnfRule> sortedCompositeTypes) {
+    if (!(generateTokens || generateComposites || generatePsi && generatePsiFactory)) return;
     String implPackage = getPsiImplPackage(myFile);
     String tokenTypeClass = getRootAttribute(myFile, KnownAttribute.TOKEN_TYPE_CLASS);
     String tokenTypeFactory = getRootAttribute(myFile, KnownAttribute.TOKEN_TYPE_FACTORY);
@@ -1169,16 +1174,18 @@ public class ParserGenerator {
     }
     if (generatePsi) imports.add(implPackage + ".*");
     generateClassHeader(className, imports, "", true);
-    for (String elementType : sortedCompositeTypes.keySet()) {
-      Pair<String, String> pair = compositeToClassAndFactoryMap.get(elementType);
-      String elementCreateCall;
-      if (pair.second == null) {
-        elementCreateCall = "new " + StringUtil.getShortName(pair.first);
-      } else {
-        elementCreateCall = myShortener.fun(StringUtil.getPackageName(pair.second)) + "." + StringUtil.getShortName(pair.second);
+    if (generateComposites) {
+      for (String elementType : sortedCompositeTypes.keySet()) {
+        Pair<String, String> pair = compositeToClassAndFactoryMap.get(elementType);
+        String elementCreateCall;
+        if (pair.second == null) {
+          elementCreateCall = "new " + StringUtil.getShortName(pair.first);
+        } else {
+          elementCreateCall = myShortener.fun(StringUtil.getPackageName(pair.second)) + "." + StringUtil.getShortName(pair.second);
+        }
+        String callFix = elementCreateCall.equals("new IElementType")? ", null" : "";
+        out("IElementType " + elementType + " = " + elementCreateCall + "(\"" + elementType + "\""+callFix+");");
       }
-      String callFix = elementCreateCall.equals("new IElementType")? ", null" : "";
-      out("IElementType " + elementType + " = " + elementCreateCall + "(\"" + elementType + "\""+callFix+");");
     }
     if (generateTokens) {
       newLine();
@@ -1201,7 +1208,7 @@ public class ParserGenerator {
         out("IElementType " + tokenType + " = " + tokenCreateCall + "(\"" + StringUtil.escapeStringCharacters(tokenString) + "\""+callFix+");");
       }
     }
-    if (generatePsi) {
+    if (generatePsi && generatePsiFactory) {
       newLine();
       out("class Factory {");
       out("public static " + myShortener.fun(BnfConstants.PSI_ELEMENT_CLASS) + " createElement(" + myShortener.fun(BnfConstants.AST_NODE_CLASS) + " node) {");

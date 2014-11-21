@@ -17,7 +17,10 @@
 package org.intellij.grammar.generator;
 
 import com.intellij.lang.Language;
+import com.intellij.psi.PsiElement;
 import com.intellij.psi.tree.IElementType;
+import com.intellij.psi.util.PsiUtilCore;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * @author gregsh
@@ -25,5 +28,9 @@ import com.intellij.psi.tree.IElementType;
 public class FakeElementType extends IElementType {
   public FakeElementType(String debugName, Language language) {
     super(debugName, language, false);
+  }
+
+  public static boolean isFakeElement(@Nullable PsiElement e) {
+    return PsiUtilCore.getElementType(e) instanceof FakeElementType;
   }
 }

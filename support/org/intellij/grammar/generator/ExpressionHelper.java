@@ -290,7 +290,7 @@ public class ExpressionHelper {
     List<BnfExpression> list = getOriginalExpressions(expression);
     if (list.size() == 1 && PsiTreeUtil.isAncestor(list.get(0), target, false)) return true;
     for (BnfExpression expr : list) {
-      Map<PsiElement, RuleGraphHelper.Cardinality> map = myRuleGraph.collectMembers(rule, expr);
+      Map<PsiElement, RuleGraphHelper.Cardinality> map = myRuleGraph.collectMembers(rule, expr, ContainerUtil.newLinkedHashSet());
       if (map.containsKey(target)) return true;
     }
     return false;

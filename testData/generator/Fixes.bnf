@@ -1,5 +1,7 @@
 {
+  generate=[root-rules="" psi-factory="no"]
   parserClass="Fixes"
+  extends(".*expr")="expr"
 }
 
 root ::=
@@ -10,3 +12,13 @@ private recursive ::= some [recursive]
 
 private meta sequence ::= <<p>> (',' <<p>>)*  {pin(".*")=1}
 some_seq ::= <<sequence some>>
+
+expr ::= a_expr | b_expr
+a_expr ::= orRestriction
+b_expr ::= andRestriction
+private orRestriction ::= andRestriction ( "||" andRestriction ) *
+private andRestriction ::= singleRestriction ( "&&" singleRestriction ) *
+private singleRestriction ::= A expr | '(' orRestriction ')'
+
+some_expr ::= expr left_expr *
+left left_expr ::= expr

@@ -21,25 +21,134 @@ public class Fixes implements PsiParser {
 
   public void parseLight(IElementType root_, PsiBuilder builder_) {
     boolean result_;
-    builder_ = adapt_builder_(root_, builder_, this, null);
+    builder_ = adapt_builder_(root_, builder_, this, EXTENDS_SETS_);
     Marker marker_ = enter_section_(builder_, 0, _COLLAPSE_, null);
-    if (root_ == SOME) {
-      result_ = some(builder_, 0);
-    }
-    else if (root_ == SOME_SEQ) {
-      result_ = some_seq(builder_, 0);
-    }
-    else if (root_ == WITH_RECURSIVE) {
-      result_ = with_recursive(builder_, 0);
-    }
-    else {
-      result_ = parse_root_(root_, builder_, 0);
-    }
+    result_ = parse_root_(root_, builder_, 0);
     exit_section_(builder_, 0, marker_, root_, result_, true, TRUE_CONDITION);
   }
 
   protected boolean parse_root_(IElementType root_, PsiBuilder builder_, int level_) {
     return root(builder_, level_ + 1);
+  }
+
+  public static final TokenSet[] EXTENDS_SETS_ = new TokenSet[] {
+    create_token_set_(A_EXPR, B_EXPR, EXPR, LEFT_EXPR,
+      SOME_EXPR),
+  };
+
+  /* ********************************************************** */
+  // orRestriction
+  public static boolean a_expr(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "a_expr")) return false;
+    boolean result_;
+    Marker marker_ = enter_section_(builder_, level_, _COLLAPSE_, "<a expr>");
+    result_ = orRestriction(builder_, level_ + 1);
+    exit_section_(builder_, level_, marker_, A_EXPR, result_, false, null);
+    return result_;
+  }
+
+  /* ********************************************************** */
+  // singleRestriction ( "&&" singleRestriction ) *
+  static boolean andRestriction(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "andRestriction")) return false;
+    boolean result_;
+    Marker marker_ = enter_section_(builder_);
+    result_ = singleRestriction(builder_, level_ + 1);
+    result_ = result_ && andRestriction_1(builder_, level_ + 1);
+    exit_section_(builder_, marker_, null, result_);
+    return result_;
+  }
+
+  // ( "&&" singleRestriction ) *
+  private static boolean andRestriction_1(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "andRestriction_1")) return false;
+    int pos_ = current_position_(builder_);
+    while (true) {
+      if (!andRestriction_1_0(builder_, level_ + 1)) break;
+      if (!empty_element_parsed_guard_(builder_, "andRestriction_1", pos_)) break;
+      pos_ = current_position_(builder_);
+    }
+    return true;
+  }
+
+  // "&&" singleRestriction
+  private static boolean andRestriction_1_0(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "andRestriction_1_0")) return false;
+    boolean result_;
+    Marker marker_ = enter_section_(builder_);
+    result_ = consumeToken(builder_, "&&");
+    result_ = result_ && singleRestriction(builder_, level_ + 1);
+    exit_section_(builder_, marker_, null, result_);
+    return result_;
+  }
+
+  /* ********************************************************** */
+  // andRestriction
+  public static boolean b_expr(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "b_expr")) return false;
+    boolean result_;
+    Marker marker_ = enter_section_(builder_, level_, _COLLAPSE_, "<b expr>");
+    result_ = andRestriction(builder_, level_ + 1);
+    exit_section_(builder_, level_, marker_, B_EXPR, result_, false, null);
+    return result_;
+  }
+
+  /* ********************************************************** */
+  // a_expr | b_expr
+  public static boolean expr(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "expr")) return false;
+    boolean result_;
+    Marker marker_ = enter_section_(builder_, level_, _COLLAPSE_, "<expr>");
+    result_ = a_expr(builder_, level_ + 1);
+    if (!result_) result_ = b_expr(builder_, level_ + 1);
+    exit_section_(builder_, level_, marker_, EXPR, result_, false, null);
+    return result_;
+  }
+
+  /* ********************************************************** */
+  // expr
+  public static boolean left_expr(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "left_expr")) return false;
+    boolean result_;
+    Marker marker_ = enter_section_(builder_, level_, _LEFT_, "<left expr>");
+    result_ = expr(builder_, level_ + 1);
+    exit_section_(builder_, level_, marker_, LEFT_EXPR, result_, false, null);
+    return result_;
+  }
+
+  /* ********************************************************** */
+  // andRestriction ( "||" andRestriction ) *
+  static boolean orRestriction(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "orRestriction")) return false;
+    boolean result_;
+    Marker marker_ = enter_section_(builder_);
+    result_ = andRestriction(builder_, level_ + 1);
+    result_ = result_ && orRestriction_1(builder_, level_ + 1);
+    exit_section_(builder_, marker_, null, result_);
+    return result_;
+  }
+
+  // ( "||" andRestriction ) *
+  private static boolean orRestriction_1(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "orRestriction_1")) return false;
+    int pos_ = current_position_(builder_);
+    while (true) {
+      if (!orRestriction_1_0(builder_, level_ + 1)) break;
+      if (!empty_element_parsed_guard_(builder_, "orRestriction_1", pos_)) break;
+      pos_ = current_position_(builder_);
+    }
+    return true;
+  }
+
+  // "||" andRestriction
+  private static boolean orRestriction_1_0(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "orRestriction_1_0")) return false;
+    boolean result_;
+    Marker marker_ = enter_section_(builder_);
+    result_ = consumeToken(builder_, "||");
+    result_ = result_ && andRestriction(builder_, level_ + 1);
+    exit_section_(builder_, marker_, null, result_);
+    return result_;
   }
 
   /* ********************************************************** */
@@ -105,6 +214,41 @@ public class Fixes implements PsiParser {
   }
 
   /* ********************************************************** */
+  // A expr | '(' orRestriction ')'
+  static boolean singleRestriction(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "singleRestriction")) return false;
+    boolean result_;
+    Marker marker_ = enter_section_(builder_);
+    result_ = singleRestriction_0(builder_, level_ + 1);
+    if (!result_) result_ = singleRestriction_1(builder_, level_ + 1);
+    exit_section_(builder_, marker_, null, result_);
+    return result_;
+  }
+
+  // A expr
+  private static boolean singleRestriction_0(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "singleRestriction_0")) return false;
+    boolean result_;
+    Marker marker_ = enter_section_(builder_);
+    result_ = consumeToken(builder_, A);
+    result_ = result_ && expr(builder_, level_ + 1);
+    exit_section_(builder_, marker_, null, result_);
+    return result_;
+  }
+
+  // '(' orRestriction ')'
+  private static boolean singleRestriction_1(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "singleRestriction_1")) return false;
+    boolean result_;
+    Marker marker_ = enter_section_(builder_);
+    result_ = consumeToken(builder_, "(");
+    result_ = result_ && orRestriction(builder_, level_ + 1);
+    result_ = result_ && consumeToken(builder_, ")");
+    exit_section_(builder_, marker_, null, result_);
+    return result_;
+  }
+
+  /* ********************************************************** */
   // A
   public static boolean some(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "some")) return false;
@@ -114,6 +258,30 @@ public class Fixes implements PsiParser {
     result_ = consumeToken(builder_, A);
     exit_section_(builder_, marker_, SOME, result_);
     return result_;
+  }
+
+  /* ********************************************************** */
+  // expr left_expr *
+  public static boolean some_expr(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "some_expr")) return false;
+    boolean result_;
+    Marker marker_ = enter_section_(builder_, level_, _COLLAPSE_, "<some expr>");
+    result_ = expr(builder_, level_ + 1);
+    result_ = result_ && some_expr_1(builder_, level_ + 1);
+    exit_section_(builder_, level_, marker_, SOME_EXPR, result_, false, null);
+    return result_;
+  }
+
+  // left_expr *
+  private static boolean some_expr_1(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "some_expr_1")) return false;
+    int pos_ = current_position_(builder_);
+    while (true) {
+      if (!left_expr(builder_, level_ + 1)) break;
+      if (!empty_element_parsed_guard_(builder_, "some_expr_1", pos_)) break;
+      pos_ = current_position_(builder_);
+    }
+    return true;
   }
 
   /* ********************************************************** */

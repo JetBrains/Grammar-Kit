@@ -3,6 +3,7 @@ package org.intellij.grammar;
 import com.intellij.openapi.util.Comparing;
 import com.intellij.openapi.util.io.FileUtil;
 import com.intellij.rt.execution.junit.FileComparisonFailure;
+import com.intellij.util.containers.ContainerUtil;
 import org.intellij.grammar.generator.ParserGenerator;
 import org.intellij.grammar.psi.impl.BnfFileImpl;
 import org.jetbrains.annotations.NonNls;
@@ -67,11 +68,11 @@ public class BnfGeneratorTest extends BnfGeneratorTestCase {
     final String name = getTestName(false);
     String text = loadFile(name + "." + myFileExt);
     myFile = createPsiFile(name, text.replaceAll("generatePsi=[^\n]*", "generatePsi=" + generatePsi));
-    List<File> filesToCheck = new ArrayList<File>();
-    filesToCheck.add(new File(myFullDataPath, name + ".java"));
+    List<File> filesToCheck = ContainerUtil.newArrayList();
     if (generatePsi) {
       filesToCheck.add(new File(myFullDataPath, name + ".PSI.java"));
     }
+    filesToCheck.add(new File(myFullDataPath, name + ".java"));
     for (File file : filesToCheck) {
       if (file.exists()) {
         assertTrue(file.delete());

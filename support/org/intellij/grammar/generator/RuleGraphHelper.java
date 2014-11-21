@@ -20,10 +20,7 @@ import com.intellij.openapi.util.Key;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.impl.source.tree.LeafPsiElement;
 import com.intellij.psi.tree.IElementType;
-import com.intellij.psi.util.CachedValue;
-import com.intellij.psi.util.CachedValueProvider;
-import com.intellij.psi.util.CachedValuesManager;
-import com.intellij.psi.util.PsiTreeUtil;
+import com.intellij.psi.util.*;
 import com.intellij.util.CommonProcessors;
 import com.intellij.util.ObjectUtils;
 import com.intellij.util.containers.ContainerUtil;
@@ -78,6 +75,7 @@ public class RuleGraphHelper {
   private static final IElementType MARKER_TYPE = new FakeElementType("MARKER_TYPE", Language.ANY);
   private static final PsiElement LEFT_MARKER = new FakeBnfExpression(MARKER_TYPE, "LEFT_MARKER");
   private static final PsiElement NOT_EMPTY_MARKER = new FakeBnfExpression(MARKER_TYPE, "NOT_EMPTY_MARKER");
+  private static final Object RECURSION_MARKER = "RECURSION_DETECTED";
 
   public static String getCardinalityText(Cardinality cardinality) {
     if (cardinality == AT_LEAST_ONE) {
@@ -281,20 +279,25 @@ public class RuleGraphHelper {
 
   private void buildContentsMap() {
     List<BnfRule> rules = topoSort(myFile.getRules(), this);
-
+    Set<Object> visited = ContainerUtil.newLinkedHashSet();
     for (BnfRule rule : rules) {
-      collectMembers(rule);
+      collectMembers(rule, visited);
+      visited.clear();
     }
   }
 
-  private Map<PsiElement, Cardinality> collectMembers(BnfRule rule) {
+  private Map<PsiElement, Cardinality> collectMembers(@NotNull BnfRule rule, Set<Object> visited) {
     Map<PsiElement, Cardinality> result = myRuleContentsMap.get(rule);
     if (result != null) return result;
-    myRuleContentsMap.put(rule, psiMap(rule, REQUIRED));
-    Map<PsiElement, Cardinality> map = collectMembers(rule, rule.getExpression());
-    map.remove(NOT_EMPTY_MARKER); // todo private rules should retain this
-    myRuleContentsMap.put(rule, map);
-    return map;
+
+    BnfExpression expression = rule.getExpression();
+    result = collectMembers(rule, expression, visited);
+    if (visited.size() > 1 && visited.contains(RECURSION_MARKER) && Rule.isPrivate(rule)) {
+      return result;
+    }
+    result.remove(NOT_EMPTY_MARKER); // todo private rules should retain this
+    myRuleContentsMap.put(rule, result);
+    return result;
   }
 
   @Nullable
@@ -366,11 +369,27 @@ public class RuleGraphHelper {
     return map == null ? Collections.<PsiElement, Cardinality>emptyMap() : map;
   }
 
-  Map<PsiElement, Cardinality> collectMembers(BnfRule rule, BnfExpression tree) {
+  Map<PsiElement, Cardinality> collectMembers(BnfRule rule, BnfExpression tree, Set<Object> visited) {
     if (tree instanceof BnfPredicate) return Collections.emptyMap();
     if (tree instanceof BnfLiteralExpression) return psiMap(tree, REQUIRED);
 
+    if (!visited.add(tree)) {
+      visited.add(RECURSION_MARKER);
+      return psiMap(tree, REQUIRED);
+    }
+    try {
+      return collectMembersInner(rule, tree, visited);
+    }
+    finally {
+      visited.remove(tree);
+    }
+  }
+
+  private Map<PsiElement, Cardinality> collectMembersInner(BnfRule rule, BnfExpression tree, Set<Object> visited) {
     boolean firstNonTrivial = tree == Rule.firstNotTrivial(rule);
+    boolean outerLeft = (firstNonTrivial || rule.getExpression() == tree) &&
+                        Rule.isLeft(rule) && !Rule.isPrivate(rule) && !Rule.isInner(rule);
+    boolean tryCollapse = firstNonTrivial && !outerLeft && !Rule.isPrivate(rule);
 
     Map<PsiElement, Cardinality> result;
     if (tree instanceof BnfReferenceOrToken) {
@@ -390,7 +409,7 @@ public class RuleGraphHelper {
           }
         }
         else if (Rule.isPrivate(targetRule)) {
-          result = collectMembers(targetRule);
+          result = collectMembers(targetRule, visited);
         }
         else {
           result = psiMap(targetRule, REQUIRED);
@@ -399,7 +418,7 @@ public class RuleGraphHelper {
       else {
         result = psiMap(tree, REQUIRED);
       }
-      if (firstNonTrivial && willCollapse(rule, result) && !Rule.isPrivate(rule)) {
+      if (tryCollapse && willCollapse(rule, result)) {
         result = Collections.emptyMap();
       }
     }
@@ -416,7 +435,7 @@ public class RuleGraphHelper {
         }
         else if (Rule.isPrivate(metaRule)) {
           result = psiMap();
-          Map<PsiElement, Cardinality> metaResults = collectMembers(metaRule);
+          Map<PsiElement, Cardinality> metaResults = collectMembers(metaRule, visited);
           List<String> params = null;
           for (PsiElement member : metaResults.keySet()) {
             Cardinality cardinality = metaResults.get(member);
@@ -429,7 +448,7 @@ public class RuleGraphHelper {
               }
               int idx = params.indexOf(member.getText());
               if (idx > -1 && idx + 1 < expressionList.size()) {
-                Map<PsiElement, Cardinality> argMap = collectMembers(rule, expressionList.get(idx + 1));
+                Map<PsiElement, Cardinality> argMap = collectMembers(rule, expressionList.get(idx + 1), visited);
                 for (PsiElement element : argMap.keySet()) {
                   result.put(element, cardinality.and(argMap.get(element)));
                 }
@@ -441,7 +460,7 @@ public class RuleGraphHelper {
           result = psiMap(metaRule, REQUIRED);
         }
       }
-      if (firstNonTrivial && willCollapse(rule, result) && !Rule.isPrivate(rule)) {
+      if (tryCollapse && willCollapse(rule, result)) {
         result = Collections.emptyMap();
       }
     }
@@ -455,7 +474,7 @@ public class RuleGraphHelper {
       List<Map<PsiElement, Cardinality>> list = ContainerUtil.newArrayList();
       List<BnfExpression> childExpressions = getChildExpressions(tree);
       for (BnfExpression child : childExpressions) {
-        Map<PsiElement, Cardinality> nextMap = collectMembers(rule, child);
+        Map<PsiElement, Cardinality> nextMap = collectMembers(rule, child, visited);
         if (pinApplied) {
           nextMap = joinMaps(rule, false, BnfTypes.BNF_OP_OPT, Collections.singletonList(nextMap));
         }
@@ -464,11 +483,11 @@ public class RuleGraphHelper {
           pinApplied = true;
         }
       }
-      result = joinMaps(rule, firstNonTrivial, type, list);
-      Cardinality sameCard = firstNonTrivial ? result.remove(rule.getExpression()) : null;
-      result = sameCard != null ? joinMaps(rule, false, BnfTypes.BNF_SEQUENCE, Arrays.asList(result, result)) : result;
+      result = joinMaps(rule, tryCollapse, type, list);
+      result = firstNonTrivial && visited.contains(RECURSION_MARKER) && result.remove(rule.getExpression()) != null ?
+               joinMaps(rule, false, type, Arrays.asList(result, result)) : result;
     }
-    if (rule.getExpression() == tree && Rule.isLeft(rule) && !Rule.isPrivate(rule) && !Rule.isInner(rule)) {
+    if (outerLeft && rule.getExpression() == tree) {
       List<Map<PsiElement, Cardinality>> list = ContainerUtil.newArrayList();
       Map<BnfRule, Cardinality> rulesToTheLeft = getRulesToTheLeft(rule);
       for (BnfRule r : rulesToTheLeft.keySet()) {
@@ -482,10 +501,7 @@ public class RuleGraphHelper {
         }
       }
       Map<PsiElement, Cardinality> combinedLeftMap = joinMaps(rule, false, BnfTypes.BNF_CHOICE, list);
-      result = joinMaps(rule, false, BnfTypes.BNF_SEQUENCE, Arrays.asList(result, combinedLeftMap));
-    }
-    if (firstNonTrivial && Rule.isPrivate(rule) && result.remove(rule) != null) {
-      result = joinMaps(rule, false, BnfTypes.BNF_SEQUENCE, Arrays.asList(result, result));
+      result = joinMaps(rule, true, BnfTypes.BNF_SEQUENCE, Arrays.asList(result, combinedLeftMap));
     }
     return result;
   }
@@ -706,7 +722,7 @@ public class RuleGraphHelper {
 
     boolean requiredFound = false;
     for (PsiElement t : map.keySet()) {
-      if (t == NOT_EMPTY_MARKER) continue;
+      if (PsiUtilCore.getElementType(t) == MARKER_TYPE) continue;
       if (requiredFound || map.get(t) != REQUIRED) return false;
       requiredFound = true;
     }
@@ -718,7 +734,7 @@ public class RuleGraphHelper {
     boolean maybeCollapsed = true;
     PsiElement required = null;
     for (PsiElement t : map.keySet()) {
-      if (t == NOT_EMPTY_MARKER) continue;
+      if (PsiUtilCore.getElementType(t) == MARKER_TYPE) continue;
       if (!map.get(t).optional()) {
         if (required == null) {
           required = t;

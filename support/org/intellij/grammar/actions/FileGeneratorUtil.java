@@ -25,16 +25,14 @@ import com.intellij.openapi.progress.ProcessCanceledException;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.ProjectFileIndex;
 import com.intellij.openapi.roots.ProjectRootManager;
-import com.intellij.openapi.util.Comparing;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VirtualFile;
-import com.intellij.openapi.vfs.VirtualFileManager;
 import com.intellij.psi.search.FilenameIndex;
 import com.intellij.psi.search.ProjectScope;
 import com.intellij.util.ObjectUtils;
-import com.intellij.util.containers.ContainerUtil;
+import org.intellij.grammar.BnfFileType;
 import org.intellij.grammar.generator.BnfConstants;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -75,12 +73,14 @@ public class FileGeneratorUtil {
       fileIndex.isInSourceContent(existingFile) ? fileIndex.getSourceRootForFile(existingFile) :
       fileIndex.isInContent(existingFile) ? fileIndex.getContentRootForFile(existingFile) : null;
 
+    boolean preferGenRoot = sourceFile.getFileType() == BnfFileType.INSTANCE;
+    boolean preferSourceRoot = hasPackage && !preferGenRoot;
     VirtualFile[] sourceRoots = rootManager.getContentSourceRoots();
     VirtualFile[] contentRoots = rootManager.getContentRoots();
     final VirtualFile virtualRoot = existingFileRoot != null ? existingFileRoot :
-                                    hasPackage && fileIndex.isInSource(sourceFile) ? fileIndex.getSourceRootForFile(sourceFile) :
+                                    preferSourceRoot && fileIndex.isInSource(sourceFile) ? fileIndex.getSourceRootForFile(sourceFile) :
                                     fileIndex.isInContent(sourceFile) ? fileIndex.getContentRootForFile(sourceFile) :
-                                    getFirstElement(hasPackage && sourceRoots.length > 0? sourceRoots : contentRoots);
+                                    getFirstElement(preferSourceRoot && sourceRoots.length > 0? sourceRoots : contentRoots);
     if (virtualRoot == null) {
       fail(project, sourceFile, "Unable to guess target source root");
       throw new ProcessCanceledException();

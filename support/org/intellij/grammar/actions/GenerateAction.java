@@ -56,6 +56,7 @@ import java.io.PrintWriter;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static org.intellij.grammar.actions.FileGeneratorUtil.getTargetDirectoryFor;
 import static org.intellij.grammar.generator.ParserGeneratorUtil.getRootAttribute;
@@ -118,20 +119,29 @@ public class GenerateAction extends AnAction implements DumbAware {
     ProgressManager.getInstance().run(new Task.Backgroundable(project, "Parser Generation", true, new BackgroundFromStartOption()) {
 
       List<File> files = ContainerUtil.newArrayList();
+      Set<VirtualFile> targets = ContainerUtil.newLinkedHashSet();
+      long totalWritten = 0;
 
       @Override
       public void run(@NotNull ProgressIndicator indicator) {
+        long startTime = System.currentTimeMillis();
         indicator.setIndeterminate(true);
         try {
           runInner();
         }
         finally {
-          LocalFileSystem.getInstance().refreshIoFiles(files, true, false, new Runnable() {
-            @Override
-            public void run() {
-              //System.out.println(System.currentTimeMillis() + ": refreshed!");
-            }
-          });
+          String report = String.format("%d grammars: %d files generated (%s) in %s",
+                                        bnfFiles.size(),
+                                        files.size(),
+                                        StringUtil.formatFileSize(totalWritten),
+                                        StringUtil.formatDuration(System.currentTimeMillis() - startTime));
+          if (bnfFiles.size() > 3) {
+            Notifications.Bus.notify(new Notification(
+              BnfConstants.GENERATION_GROUP,
+              "", report, NotificationType.INFORMATION), project);
+          }
+          VfsUtil.markDirtyAndRefresh(true, true, true, targets.toArray(new VirtualFile[targets.size()]));
+          LocalFileSystem.getInstance().refreshIoFiles(files, true, false, null); // seems unnecessary
         }
       }
 
@@ -141,6 +151,7 @@ public class GenerateAction extends AnAction implements DumbAware {
             file.getVirtualFile().getParent().getPath()));
           VirtualFile target = rootMap.get(file);
           if (target == null) return;
+          targets.add(target);
           final File genDir = new File(VfsUtil.virtualToIoFile(target).getAbsolutePath());
           try {
             long time = System.currentTimeMillis();
@@ -164,10 +175,10 @@ public class GenerateAction extends AnAction implements DumbAware {
             for (File f : files.subList(filesCount, files.size())) {
               written += f.length();
             }
-            String totalSize = StringUtil.formatFileSize(written);
+            totalWritten += written;
             Notifications.Bus.notify(new Notification(
               BnfConstants.GENERATION_GROUP,
-              file.getName() + " generated (" + totalSize + ")",
+              String.format("%s generated (%s)", file.getName(), StringUtil.formatFileSize(written)),
               "to " + genDir + (duration == null ? "" : " in " + duration), NotificationType.INFORMATION), project);
           }
           catch (Exception ex) {

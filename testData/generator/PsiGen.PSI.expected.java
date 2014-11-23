@@ -37,6 +37,7 @@ public interface GeneratedTypes {
   IElementType STATEMENT = new IElementType("STATEMENT", null);
 
   IElementType ID = new IElementType("id", null);
+  IElementType NOTSPACE = new IElementType("notspace", null);
   IElementType NUMBER = new IElementType("number", null);
   IElementType OF = new IElementType("OF", null);
   IElementType OP_DIV = new IElementType("/", null);

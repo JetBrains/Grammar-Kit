@@ -6,7 +6,7 @@
   parserUtilClass="PsiGenUtil"
   extends(".*expr")=expr
   extends("root_.")="root"
-  tokens=[OP_MUL="*" OP_DIV="/" SLASH='\' id='regexp:A' number='regexp:B']
+  tokens=[OP_MUL="*" OP_DIV="/" SLASH='\' id='regexp:A' number='regexp:B' notspace='regexp:[^{}-]*']
   elementTypeClass("root_.*")="sample.MyRootType"
   elementTypeFactory(".*_expr")="sample.MyTypeFactory.createExprType"
 }

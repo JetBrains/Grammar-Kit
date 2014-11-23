@@ -1586,13 +1586,9 @@ public class ParserGenerator {
                                ? Collections.<String>emptyList() : methodTypes.subList(isInPsiUtil ? 3 : 1, methodTypes.size());
     if (!visited.add(methodName + paramsTypes)) return;
     StringBuilder sb = new StringBuilder();
-    int count = -1;
-    for (String s : paramsTypes) {
-      if (++ count > 2 && count % 2 == 0) {
-        sb.append(", ");
-      }
-      else if (count > 0) sb.append(" ");
-      sb.append(myShortener.fun(s));
+    for (int i = 0; i < paramsTypes.size(); i += 2) {
+      if (i > 0) sb.append(", ");
+      sb.append(myShortener.fun(paramsTypes.get(i))).append(" ").append(paramsTypes.get(i + 1));
     }
 
     for (String s : javaHelper.getAnnotations(method)) {
@@ -1601,16 +1597,9 @@ public class ParserGenerator {
     out("%s%s %s(%s)%s", intf ? "" : "public ", returnType, methodName, sb, intf ? ";" : " {");
     if (!intf) {
       sb.setLength(0);
-      count = -1;
-      for (String s : paramsTypes) {
-        if (++ count % 2 == 0) {
-          sb.append(", ");
-        }
-        else {
-          sb.append(s);
-        }
+      for (int i = 1; i < paramsTypes.size(); i += 2) {
+        sb.append(", ").append(paramsTypes.get(i));
       }
-
       String implUtilRef = myShortener.fun(StringUtil.notNullize(psiImplUtilClass, KnownAttribute.PSI_IMPL_UTIL_CLASS.getName()));
       out("%s%s.%s(this%s);", "void".equals(returnType) ? "" : "return ", implUtilRef, methodName, sb);
       out("}");

@@ -1234,7 +1234,8 @@ public class ParserGenerator {
   private boolean isIgnoredWhitespaceToken(@NotNull String tokenName, @NotNull String tokenText) {
     return isRegexpToken(tokenText) &&
            !myTokensUsedInGrammar.contains(tokenName) &&
-           matchesAny(getRegexpTokenRegexp(tokenText), " ", "\n");
+           matchesAny(getRegexpTokenRegexp(tokenText), " ", "\n") &&
+           !matchesAny(getRegexpTokenRegexp(tokenText), "a", "1", "_", ".");
   }
 
 

@@ -18,6 +18,7 @@ package org.intellij.grammar.java;
 
 import com.intellij.navigation.NavigationItem;
 import com.intellij.openapi.components.ServiceManager;
+import com.intellij.openapi.project.IndexNotReadyException;
 import com.intellij.openapi.util.Comparing;
 import com.intellij.openapi.util.io.FileUtil;
 import com.intellij.psi.*;
@@ -56,7 +57,7 @@ public abstract class JavaHelper {
   public static JavaHelper getJavaHelper(@NotNull PsiElement context) {
     PsiFile file = context.getContainingFile();
     JavaHelper service = ServiceManager.getService(file.getProject(), JavaHelper.class);
-    return service == null? new AsmHelper() : service;
+    return service == null ? new AsmHelper() : service;
   }
 
   @Nullable
@@ -66,10 +67,10 @@ public abstract class JavaHelper {
 
   @NotNull
   public List<NavigatablePsiElement> findClassMethods(@Nullable String className,
-                                                               boolean staticMethods,
-                                                               @Nullable String methodName,
-                                                               int paramCount,
-                                                               String... paramTypes) {
+                                                      boolean staticMethods,
+                                                      @Nullable String methodName,
+                                                      int paramCount,
+                                                      String... paramTypes) {
     return Collections.emptyList();
   }
 
@@ -132,8 +133,12 @@ public abstract class JavaHelper {
 
     private PsiClass findClassSafe(String className) {
       if (className == null) return null;
-      PsiClass aClass = myFacade.findClass(className, GlobalSearchScope.allScope(myFacade.getProject()));
-      return aClass != null ? aClass : null;
+      try {
+        return myFacade.findClass(className, GlobalSearchScope.allScope(myFacade.getProject()));
+      }
+      catch (IndexNotReadyException e) {
+        return null;
+      }
     }
 
     @Override
@@ -143,7 +148,11 @@ public abstract class JavaHelper {
 
     @NotNull
     @Override
-    public List<NavigatablePsiElement> findClassMethods(@Nullable String className, boolean staticMethods, @Nullable String methodName, int paramCount, String... paramTypes) {
+    public List<NavigatablePsiElement> findClassMethods(@Nullable String className,
+                                                        boolean staticMethods,
+                                                        @Nullable String methodName,
+                                                        int paramCount,
+                                                        String... paramTypes) {
       if (methodName == null) return Collections.emptyList();
       PsiClass aClass = findClassSafe(className);
       if (aClass == null) return super.findClassMethods(className, staticMethods, methodName, paramCount, paramTypes);
@@ -165,7 +174,10 @@ public abstract class JavaHelper {
       return superClass != null ? superClass.getQualifiedName() : super.getSuperClassName(className);
     }
 
-    private static boolean acceptsMethod(PsiElementFactory elementFactory, PsiMethod method, int paramCount, String... paramTypes) {
+    private static boolean acceptsMethod(PsiElementFactory elementFactory,
+                                         PsiMethod method,
+                                         int paramCount,
+                                         String... paramTypes) {
       PsiParameterList parameterList = method.getParameterList();
       if (paramCount >= 0 && paramCount != parameterList.getParametersCount()) return false;
       if (paramTypes.length == 0) return true;
@@ -179,7 +191,8 @@ public abstract class JavaHelper {
         try {
           if (psiType.isAssignableFrom(elementFactory.createTypeFromText(paramType, parameter))) continue;
         }
-        catch (IncorrectOperationException ignored) { }
+        catch (IncorrectOperationException ignored) {
+        }
         return false;
       }
       return true;
@@ -201,7 +214,7 @@ public abstract class JavaHelper {
       PsiMethod psiMethod = (PsiMethod)method;
       PsiType returnType = psiMethod.getReturnType();
       List<String> strings = new ArrayList<String>();
-      strings.add(returnType == null? "" : returnType.getCanonicalText());
+      strings.add(returnType == null ? "" : returnType.getCanonicalText());
       for (PsiParameter parameter : psiMethod.getParameterList().getParameters()) {
         strings.add(parameter.getType().getCanonicalText());
         strings.add(parameter.getName());
@@ -216,7 +229,7 @@ public abstract class JavaHelper {
       PsiModifierList modifierList = ((PsiModifierListOwner)element).getModifierList();
       if (modifierList == null) return ContainerUtilRt.emptyList();
       List<String> strings = new ArrayList<String>();
-      for (PsiAnnotation annotation  : modifierList.getAnnotations()) {
+      for (PsiAnnotation annotation : modifierList.getAnnotations()) {
         if (annotation.getParameterList().getAttributes().length > 0) continue;
         strings.add(annotation.getQualifiedName());
       }
@@ -295,14 +308,14 @@ public abstract class JavaHelper {
     @Override
     public List<String> getMethodTypes(NavigatablePsiElement method) {
       if (method == null) return Collections.emptyList();
-      Method delegate = ((MyElement<Method>) method).myDelegate;
+      Method delegate = ((MyElement<Method>)method).myDelegate;
       Type[] parameterTypes = delegate.getGenericParameterTypes();
       List<String> result = new ArrayList<String>(parameterTypes.length + 1);
       result.add(delegate.getGenericReturnType().toString());
       int paramCounter = 0;
       for (Type parameterType : parameterTypes) {
         result.add(parameterType.toString());
-        result.add("p" + (paramCounter ++));
+        result.add("p" + (paramCounter++));
       }
       return result;
     }
@@ -311,7 +324,7 @@ public abstract class JavaHelper {
     @Override
     public List<String> getAnnotations(NavigatablePsiElement element) {
       if (element == null) return Collections.emptyList();
-      AnnotatedElement delegate = ((MyElement<AnnotatedElement>) element).myDelegate;
+      AnnotatedElement delegate = ((MyElement<AnnotatedElement>)element).myDelegate;
       Annotation[] annotations = delegate.getDeclaredAnnotations();
       List<String> result = new ArrayList<String>(annotations.length);
       for (Annotation annotation : annotations) {
@@ -384,16 +397,16 @@ public abstract class JavaHelper {
     @Override
     public List<String> getMethodTypes(NavigatablePsiElement method) {
       if (method == null) return Collections.emptyList();
-      MethodInfo signature = ((MyElement<MethodInfo>) method).myDelegate;
+      MethodInfo signature = ((MyElement<MethodInfo>)method).myDelegate;
       return signature.types;
     }
 
     @NotNull
     @Override
     public List<String> getAnnotations(NavigatablePsiElement element) {
-      Object delegate = element == null? null : ((MyElement<?>) element).myDelegate;
-      if (delegate instanceof ClassInfo) return ((ClassInfo) delegate).annotations;
-      if (delegate instanceof MethodInfo) return ((MethodInfo) delegate).annotations;
+      Object delegate = element == null ? null : ((MyElement<?>)element).myDelegate;
+      if (delegate instanceof ClassInfo) return ((ClassInfo)delegate).annotations;
+      if (delegate instanceof MethodInfo) return ((MethodInfo)delegate).annotations;
       return Collections.emptyList();
     }
 
@@ -429,13 +442,14 @@ public abstract class JavaHelper {
         visitor.finishElement(null);
       }
       catch (Exception e) {
-        System.err.println(e.getClass().getSimpleName() + " in parsing " + className+"."+methodName +"() signature: " + signature);
+        System.err.println(
+          e.getClass().getSimpleName() + " in parsing " + className + "." + methodName + "() signature: " + signature);
       }
       return methodInfo;
     }
 
     private static class MyClassVisitor extends EmptyVisitor {
-      enum State {CLASS, METHOD, ANNO }
+      enum State {CLASS, METHOD, ANNO}
 
       private final ClassInfo myInfo;
 
@@ -472,7 +486,7 @@ public abstract class JavaHelper {
         else if (state == State.ANNO) {
           state = State.METHOD;
           if (annoParamCounter == 0) {
-            methodInfo.annotations.add(fixClassName(annoDesc.substring(1, annoDesc.length()-1)));
+            methodInfo.annotations.add(fixClassName(annoDesc.substring(1, annoDesc.length() - 1)));
           }
           annoParamCounter = 0;
           annoDesc = null;
@@ -503,23 +517,23 @@ public abstract class JavaHelper {
 
       @Override
       public void visit(String s, Object o) {
-        annoParamCounter ++;
+        annoParamCounter++;
       }
 
       @Override
       public void visitEnum(String s, String s2, String s3) {
-        annoParamCounter ++;
+        annoParamCounter++;
       }
 
       @Override
       public AnnotationVisitor visitAnnotation(String s, String s2) {
-        annoParamCounter ++;
+        annoParamCounter++;
         return null;
       }
 
       @Override
       public AnnotationVisitor visitArray(String s) {
-        annoParamCounter ++;
+        annoParamCounter++;
         return null;
       }
     }
@@ -635,7 +649,8 @@ public abstract class JavaHelper {
 
       private void finishElement(State finishState) {
         if (myBuilder.length() == 0) return;
-        main: while (!states.isEmpty()) {
+        main:
+        while (!states.isEmpty()) {
           if (finishState == states.peekFirst()) break;
           State state = states.pop();
           switch (state) {

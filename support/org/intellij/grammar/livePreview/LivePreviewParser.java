@@ -27,7 +27,6 @@ import com.intellij.util.PairProcessor;
 import com.intellij.util.containers.ContainerUtil;
 import com.intellij.util.containers.HashMap;
 import com.intellij.util.containers.MultiMap;
-import gnu.trove.THashMap;
 import gnu.trove.TObjectIntHashMap;
 import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.analysis.BnfFirstNextAnalyzer;
@@ -51,9 +50,10 @@ public class LivePreviewParser implements PsiParser {
 
   private final BnfFile myFile;
   private final LivePreviewLanguage myLanguage;
-  private Map<String,String> mySimpleTokens;
+  private final Map<String,String> mySimpleTokens = ContainerUtil.newLinkedHashMap();
+  private final Map<String, IElementType> myElementTypes = ContainerUtil.newTroveMap();
+
   private BnfRule myGrammarRoot;
-  private final Map<String, IElementType> myElementTypes = new THashMap<String, IElementType>();
   private RuleGraphHelper myGraphHelper;
   private ExpressionHelper myExpressionHelper;
   private MultiMap<BnfRule, BnfRule> myRuleExtendsMap;
@@ -103,10 +103,10 @@ public class LivePreviewParser implements PsiParser {
   }
 
   private void init(PsiBuilder builder) {
-    myGrammarRoot = myFile == null? null : ContainerUtil.getFirstItem(myFile.getRules());
-    if (myGrammarRoot == null) return;
+    if (myFile == null) return;
+    myGrammarRoot = ContainerUtil.getFirstItem(myFile.getRules());
     generateExtendedPin = getRootAttribute(myFile, KnownAttribute.EXTENDED_PIN);
-    mySimpleTokens = LivePreviewLexer.collectTokenPattern2Name(myFile, null);
+    mySimpleTokens.putAll(LivePreviewLexer.collectTokenPattern2Name(myFile, null));
     myGraphHelper = RuleGraphHelper.getCached(myFile);
     myRuleExtendsMap = myGraphHelper.getRuleExtendsMap();
     myExpressionHelper = ExpressionHelper.getCached(myFile);

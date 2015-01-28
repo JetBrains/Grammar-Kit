@@ -68,6 +68,7 @@ The fun part is that I even can _inject_ this language in some other files I wor
     LP='('
     RP=')'
 
+    space='regexp:\s+'
     comment='regexp://.*'
     number='regexp:\d+(\.\d*)?'
     id='regexp:\p{Alpha}\w*'

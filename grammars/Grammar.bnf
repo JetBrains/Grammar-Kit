@@ -38,6 +38,7 @@
     EXTERNAL_START="<<"
     EXTERNAL_END=">>"
 
+    space='regexp:\s+'
     id="regexp:\w+"
     string="regexp:('([^'\\]|\\.)*'|\"([^\"\\]|\\\"|\\\'|\\)*\")"
     number="regexp:\d+"

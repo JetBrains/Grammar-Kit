@@ -54,7 +54,6 @@ import com.intellij.openapi.util.Trinity;
 import com.intellij.openapi.util.io.FileUtil;
 import com.intellij.openapi.vfs.encoding.EncodingManager;
 import com.intellij.openapi.vfs.encoding.EncodingManagerImpl;
-import com.intellij.openapi.vfs.encoding.EncodingRegistry;
 import com.intellij.psi.*;
 import com.intellij.psi.impl.PsiCachedValuesFactory;
 import com.intellij.psi.impl.PsiFileFactoryImpl;
@@ -193,6 +192,7 @@ public class LightPsi {
     public static void initExtensions(MockProjectEx project, MockPsiManager psiManager) {
       Extensions.getRootArea().registerExtensionPoint("com.intellij.referencesSearch", "com.intellij.util.QueryExecutor");
       Extensions.getRootArea().registerExtensionPoint("com.intellij.useScopeEnlarger", "com.intellij.psi.search.UseScopeEnlarger");
+      Extensions.getRootArea().registerExtensionPoint("com.intellij.useScopeOptimizer", "com.intellij.psi.search.UseScopeOptimizer");
       Extensions.getRootArea().registerExtensionPoint("com.intellij.languageInjector", "com.intellij.psi.LanguageInjector");
       Extensions.getArea(project).registerExtensionPoint("com.intellij.multiHostInjector", "com.intellij.lang.injection.MultiHostInjector");
       Extensions.getRootArea().registerExtensionPoint("com.intellij.codeInsight.containerProvider",
@@ -283,12 +283,6 @@ public class LightPsi {
           @Override
           public FileTypeRegistry get() {
             return FileTypeManager.getInstance();
-          }
-        },
-        new Getter<EncodingRegistry>() {
-          @Override
-          public EncodingRegistry get() {
-            return EncodingManager.getInstance();
           }
         },
         rootDisposable

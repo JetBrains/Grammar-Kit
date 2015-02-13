@@ -210,6 +210,12 @@ BnfFile:BnfGrammar.bnf
               PsiElement(string)('">>"')
           PsiWhiteSpace('\n\n    ')
           BNF_LIST_ENTRY
+            PsiElement(id)('space')
+            PsiElement(=)('=')
+            BNF_STRING_LITERAL_EXPRESSION: 'regexp:\s+'
+              PsiElement(string)(''regexp:\s+'')
+          PsiWhiteSpace('\n    ')
+          BNF_LIST_ENTRY
             PsiElement(id)('id')
             PsiElement(=)('=')
             BNF_STRING_LITERAL_EXPRESSION: "regexp:\w+"

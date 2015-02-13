@@ -19,6 +19,7 @@ import com.intellij.ide.structureView.*;
 import com.intellij.ide.structureView.impl.common.PsiTreeElementBase;
 import com.intellij.ide.util.treeView.smartTree.SortableTreeElement;
 import com.intellij.lang.PsiStructureViewFactory;
+import com.intellij.openapi.editor.Editor;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiNamedElement;
@@ -27,6 +28,7 @@ import com.intellij.util.containers.ContainerUtil;
 import org.intellij.grammar.psi.*;
 import org.intellij.grammar.psi.impl.BnfFileImpl;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 import java.util.ArrayList;
@@ -41,7 +43,7 @@ public class BnfStructureViewFactory implements PsiStructureViewFactory {
   public StructureViewBuilder getStructureViewBuilder(final PsiFile psiFile) {
     return new TreeBasedStructureViewBuilder() {
       @NotNull
-      public StructureViewModel createStructureViewModel() {
+      public StructureViewModel createStructureViewModel(@Nullable Editor editor) {
         return new MyModel(psiFile);
       }
 

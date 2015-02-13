@@ -22,6 +22,7 @@ import com.intellij.ide.util.treeView.smartTree.SortableTreeElement;
 import com.intellij.lang.ASTNode;
 import com.intellij.lang.PsiStructureViewFactory;
 import com.intellij.navigation.ColoredItemPresentation;
+import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.colors.CodeInsightColors;
 import com.intellij.openapi.editor.colors.TextAttributesKey;
 import com.intellij.openapi.util.text.StringUtil;
@@ -56,7 +57,7 @@ public class LivePreviewStructureViewFactory implements PsiStructureViewFactory 
     return new TreeBasedStructureViewBuilder() {
       @NotNull
       @Override
-      public StructureViewModel createStructureViewModel() {
+      public StructureViewModel createStructureViewModel(@Nullable Editor editor) {
         return new MyModel(psiFile);
       }
 

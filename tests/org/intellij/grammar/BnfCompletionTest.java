@@ -2,7 +2,7 @@ package org.intellij.grammar;
 
 import com.intellij.codeInsight.completion.CompletionType;
 import com.intellij.testFramework.UsefulTestCase;
-import com.intellij.testFramework.fixtures.CodeInsightFixtureTestCase;
+import com.intellij.testFramework.fixtures.JavaCodeInsightFixtureTestCase;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -12,7 +12,7 @@ import java.util.List;
 /**
  * @author gregsh
  */
-public class BnfCompletionTest extends CodeInsightFixtureTestCase {
+public class BnfCompletionTest extends JavaCodeInsightFixtureTestCase {
   enum CheckType { EQUALS, INCLUDES, EXCLUDES }
 
   public void testKeywords1() throws Throwable { doTestVariants("", CompletionType.BASIC, 1, CheckType.INCLUDES, "private", "meta"); }
@@ -29,6 +29,19 @@ public class BnfCompletionTest extends CodeInsightFixtureTestCase {
   public void testAttr3() throws Throwable { doTestVariants("{pin=1 rec<caret>overUntil=abc}", CompletionType.BASIC, 1, CheckType.INCLUDES, "recoverWhile"); }
   public void testAttr4() throws Throwable { doTestVariants("a::= {name=\"A\" p<caret>=\"\"}", CompletionType.BASIC, 1, CheckType.INCLUDES, "pin", "elementType"); }
   public void testRule1() throws Throwable { doTestVariants("rule::= <caret>", CompletionType.BASIC, 1, CheckType.INCLUDES, "rule"); }
+
+  public void testExternalMethod1() throws Throwable { doTestVariants(initUtil() + "external rule::= <caret>", CompletionType.BASIC, 1, CheckType.INCLUDES, "eofX", "eofY"); }
+  public void testExternalMethod2() throws Throwable { doTestVariants(initUtil() + "external rule::= abc <caret>", CompletionType.BASIC, 1, CheckType.EXCLUDES, "eofX", "eofY"); }
+  public void testExternalMethod3() throws Throwable { doTestVariants(initUtil() + "root ::= external rule ::= <caret>", CompletionType.BASIC, 1, CheckType.EXCLUDES, "root"); }
+  public void testExternalMethod4() throws Throwable { doTestVariants(initUtil() + "root ::= external rule ::= abc <caret>", CompletionType.BASIC, 1, CheckType.INCLUDES, "root"); }
+  public void testExternalMethod5() throws Throwable { doTestVariants(initUtil() + "root ::= meta metaR ::= rule ::= <<<caret> >>", CompletionType.BASIC, 1, CheckType.INCLUDES, "eofX", "eofY", "metaR"); }
+  public void testExternalMethod6() throws Throwable { doTestVariants(initUtil() + "root ::= rule ::= <<<caret> >>", CompletionType.BASIC, 1, CheckType.EXCLUDES, "root"); }
+
+  private String initUtil() {
+    myFixture.addClass("public class X { public static boolean eofX(com.intellij.lang.PsiBuilder b, int l) { } }");
+    myFixture.addClass("public class Y extends X { public static boolean eofY(com.intellij.lang.PsiBuilder b, int l) { } }");
+    return "{ parserUtilClass='Y' } ";
+  }
 
   protected void doTestVariants(String txt, CompletionType type, int count, CheckType checkType, String... variants) throws Throwable {
     myFixture.configureByText("a.bnf", txt);

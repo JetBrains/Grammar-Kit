@@ -25,6 +25,7 @@ public interface BnfConstants {
   String CLASS_HEADER_DEF = "// This is a generated file. Not intended for manual editing.";
 
   String GPUB_CLASS = "com.intellij.lang.parser.GeneratedParserUtilBase";
+  String PSI_BUILDER_CLASS = "com.intellij.lang.PsiBuilder";
 
   String IELEMENTTYPE_CLASS = "com.intellij.psi.tree.IElementType";
   String PSI_ELEMENT_CLASS = "com.intellij.psi.PsiElement";

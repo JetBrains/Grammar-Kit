@@ -91,7 +91,7 @@ public class GrammarUtil {
   public static boolean isExternalReference(@Nullable PsiElement psiElement) {
     PsiElement parent = psiElement == null? null : psiElement.getParent();
     if (parent instanceof BnfExternalExpression && ((BnfExternalExpression)parent).getExpressionList().get(0) == psiElement) return true;
-    if (parent instanceof BnfSequence) parent = parent.getParent();
+    if (parent instanceof BnfSequence && parent.getFirstChild() == psiElement) parent = parent.getParent();
     return parent instanceof BnfRule && ParserGeneratorUtil.Rule.isExternal((BnfRule)parent);
   }
 

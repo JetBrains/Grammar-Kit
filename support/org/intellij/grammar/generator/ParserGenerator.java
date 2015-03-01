@@ -330,8 +330,8 @@ public class ParserGenerator {
     List<String> parserImports = getRootAttribute(myFile, KnownAttribute.PARSER_IMPORTS).asStrings();
     boolean rootParser = parserClass.equals(myGrammarRootParser);
     Set<String> imports = new LinkedHashSet<String>();
-    imports.addAll(Arrays.asList("com.intellij.lang.PsiBuilder",
-                                 "com.intellij.lang.PsiBuilder.Marker",
+    imports.addAll(Arrays.asList(BnfConstants.PSI_BUILDER_CLASS,
+                                 BnfConstants.PSI_BUILDER_CLASS +".Marker",
                                  "static " + elementTypeHolderClass + ".*",
                                  "static " + myParserUtilClass + ".*"));
     if (!rootParser) {

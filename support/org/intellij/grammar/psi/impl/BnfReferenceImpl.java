@@ -55,8 +55,11 @@ public class BnfReferenceImpl<T extends BnfCompositeElement> extends PsiReferenc
       String parserClass = ParserGeneratorUtil.getAttribute(rule, KnownAttribute.PARSER_UTIL_CLASS);
       // paramCount + 2 (builder and level)
       JavaHelper helper = JavaHelper.getJavaHelper(myElement);
-      List<NavigatablePsiElement> methods = helper.findClassMethods(parserClass, true, myElement.getText(), paramCount + 2);
-      result = ContainerUtil.getFirstItem(methods);
+      for (String className = parserClass; className != null; className = helper.getSuperClassName(className)) {
+        List<NavigatablePsiElement> methods = helper.findClassMethods(className, true, referenceName, paramCount + 2);
+        result = ContainerUtil.getFirstItem(methods);
+        if (result != null) break;
+      }
     }
     return result;
   }

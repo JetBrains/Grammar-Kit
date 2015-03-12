@@ -19,6 +19,7 @@ public class BnfLivePreviewParserTest extends BnfGeneratorTestCase {
     myFileExt = "live.txt";
   }
 
+  public void testEmpty() throws IOException { doTest("Empty.live.txt"); }
   public void testJsonRecovery() throws IOException { doTest("Json.bnf"); }
   public void testLivePreviewTutorial() throws IOException { doTest("LivePreviewTutorial.bnf"); }
   public void testAutoRecovery() throws IOException { doTest("AutoRecovery.bnf"); }

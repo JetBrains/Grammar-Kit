@@ -79,7 +79,7 @@ public class ParserGeneratorUtil {
     }
   }
 
-  public static <T> T getGenerateOption(PsiElement node, KnownAttribute<T> attribute, String currentValue) {
+  public static <T> T getGenerateOption(@NotNull PsiElement node, @NotNull KnownAttribute<T> attribute, @Nullable String currentValue) {
     if (attribute.getDefaultValue() instanceof Boolean) {
       if ("yes".equals(currentValue)) return (T)Boolean.TRUE;
       if ("no".equals(currentValue)) return (T)Boolean.FALSE;
@@ -91,24 +91,24 @@ public class ParserGeneratorUtil {
     return getRootAttribute(node, attribute, null);
   }
 
-  public static <T> T getRootAttribute(PsiElement node, KnownAttribute<T> attribute) {
+  public static <T> T getRootAttribute(@NotNull PsiElement node, @NotNull KnownAttribute<T> attribute) {
     return getRootAttribute(node, attribute, null);
   }
 
-  public static <T> T getRootAttribute(PsiElement node, KnownAttribute<T> attribute, @Nullable String match) {
+  public static <T> T getRootAttribute(@NotNull PsiElement node, @NotNull KnownAttribute<T> attribute, @Nullable String match) {
     return ((BnfFile)node.getContainingFile()).findAttributeValue(null, attribute, match);
   }
 
-  public static <T> T getAttribute(BnfRule rule, KnownAttribute<T> attribute) {
+  public static <T> T getAttribute(@NotNull BnfRule rule, @NotNull KnownAttribute<T> attribute) {
     return getAttribute(rule, attribute, null);
   }
 
   @Nullable
-  public static <T> BnfAttr findAttribute(BnfRule rule, KnownAttribute<T> attribute) {
+  public static <T> BnfAttr findAttribute(@NotNull BnfRule rule, @NotNull KnownAttribute<T> attribute) {
     return ((BnfFile)rule.getContainingFile()).findAttribute(rule, attribute, null);
   }
 
-  public static <T> T getAttribute(BnfRule rule, KnownAttribute<T> attribute, String match) {
+  public static <T> T getAttribute(@NotNull BnfRule rule, @NotNull KnownAttribute<T> attribute, @Nullable String match) {
     return ((BnfFile)rule.getContainingFile()).findAttributeValue(rule, attribute, match);
   }
 

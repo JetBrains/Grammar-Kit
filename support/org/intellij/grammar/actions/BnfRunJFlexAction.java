@@ -41,6 +41,7 @@ import com.intellij.openapi.project.DumbAwareAction;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.projectRoots.Sdk;
 import com.intellij.openapi.projectRoots.SimpleJavaSdkType;
+import com.intellij.openapi.projectRoots.ProjectJdkTable;
 import com.intellij.openapi.roots.OrderRootType;
 import com.intellij.openapi.roots.ProjectRootManager;
 import com.intellij.openapi.roots.impl.libraries.ApplicationLibraryTable;
@@ -135,7 +136,7 @@ public class BnfRunJFlexAction extends DumbAwareAction {
       final VirtualFile virtualDir = getTargetDirectoryFor(project, flexFile, lexerClassName + ".java", lexerPackage, false);
 
       SimpleJavaParameters javaParameters = new SimpleJavaParameters();
-      Sdk sdk = new SimpleJavaSdkType().createJdk("tmp", SystemProperties.getJavaHome());
+      Sdk sdk = getJdk();
       javaParameters.setJdk(sdk);
       javaParameters.getClassPath().add(jflex.get(0));
       javaParameters.setMainClass("JFlex.Main");
@@ -332,5 +333,13 @@ public class BnfRunJFlexAction extends DumbAwareAction {
     ExecutionManager.getInstance(project).getContentManager().showRunContent(executor, descriptor);
     consoleView.allowHeavyFilters();
     return descriptor;
+  }
+
+  private static Sdk getJdk() {
+    Sdk[] sdks = ProjectJdkTable.getInstance().getAllJdks();
+    if (sdks.length > 0) {
+      return sdks[0];
+    }
+    return new SimpleJavaSdkType().createJdk("tmp", SystemProperties.getJavaHome());
   }
 }

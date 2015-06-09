@@ -52,6 +52,8 @@
 
     <spellchecker.support language="BNF" implementationClass="org.intellij.grammar.editor.BnfSpellCheckingStrategy"/>
 
+    <languageInjector implementation="org.intellij.grammar.editor.BnfRegexpInjector"/>
+
     <!--<psi.referenceContributor implementation="org.intellij.grammar.psi.impl.BnfStringRefContributor" />-->
     <referencesSearch implementation="org.intellij.grammar.psi.BnfAttrPatternRefSearcher"/>
     <lang.refactoringSupport language="BNF" implementationClass="org.intellij.grammar.refactor.BnfRefactoringSupportProvider"/>

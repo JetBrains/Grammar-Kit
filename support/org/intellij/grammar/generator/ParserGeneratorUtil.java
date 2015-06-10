@@ -275,6 +275,7 @@ public class ParserGeneratorUtil {
                                                                 @Nullable String psiImplUtilClass,
                                                                 @Nullable String methodName,
                                                                 @Nullable BnfRule rule) {
+    if (rule == null) return Collections.emptyList();
     for (String ruleClass : getRuleClasses(rule)) {
       for (String utilClass = psiImplUtilClass; utilClass != null; utilClass = helper.getSuperClassName(utilClass)) {
         List<NavigatablePsiElement> methods = helper.findClassMethods(utilClass, true, methodName, -1, ruleClass);
@@ -285,7 +286,7 @@ public class ParserGeneratorUtil {
   }
 
   @NotNull
-  public static Set<String> getRuleClasses(BnfRule rule) {
+  public static Set<String> getRuleClasses(@NotNull BnfRule rule) {
     BnfFile file = (BnfFile)rule.getContainingFile();
     Set<String> result = ContainerUtil.newLinkedHashSet();
     String ruleClassPrefix = getPsiClassPrefix(file);

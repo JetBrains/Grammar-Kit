@@ -339,15 +339,18 @@ public class ParserGenerator {
     }
     else {
       imports.addAll(Arrays.asList(BnfConstants.IELEMENTTYPE_CLASS,
-                                   "com.intellij.lang.ASTNode",
-                                   "com.intellij.psi.tree.TokenSet",
-                                   "com.intellij.lang.PsiParser"));
+                                   BnfConstants.AST_NODE_CLASS,
+                                   BnfConstants.TOKEN_SET_CLASS,
+                                   BnfConstants.PSI_PARSER_CLASS,
+                                   BnfConstants.LIGHT_PSI_PARSER_CLASS));
     }
     imports.addAll(parserImports);
 
     generateClassHeader(parserClass, imports,
                         "@SuppressWarnings({\"SimplifiableIfStatement\", \"UnusedAssignment\"})",
-                        false, "", rootParser ? "PsiParser" : "");
+                        false, "",
+                        rootParser ? BnfConstants.PSI_PARSER_CLASS : "",
+                        rootParser ? BnfConstants.LIGHT_PSI_PARSER_CLASS : "");
 
     if (rootParser) {
       generateRootParserContent(ownRuleNames);

@@ -10,11 +10,12 @@ import com.intellij.psi.tree.IElementType;
 import com.intellij.lang.ASTNode;
 import com.intellij.psi.tree.TokenSet;
 import com.intellij.lang.PsiParser;
+import com.intellij.lang.LightPsiParser;
 import java.util.List;
 import java.util.Map;
 
 @SuppressWarnings({"SimplifiableIfStatement", "UnusedAssignment"})
-public class Small implements PsiParser {
+public class Small implements PsiParser, LightPsiParser {
 
   public ASTNode parse(IElementType root_, PsiBuilder builder_) {
     parseLight(root_, builder_);

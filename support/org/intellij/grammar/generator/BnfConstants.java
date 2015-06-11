@@ -26,6 +26,9 @@ public interface BnfConstants {
 
   String GPUB_CLASS = "com.intellij.lang.parser.GeneratedParserUtilBase";
   String PSI_BUILDER_CLASS = "com.intellij.lang.PsiBuilder";
+  String PSI_PARSER_CLASS = "com.intellij.lang.PsiParser";
+  String LIGHT_PSI_PARSER_CLASS = "com.intellij.lang.LightPsiParser";
+  String TOKEN_SET_CLASS = "com.intellij.psi.tree.TokenSet";
 
   String IELEMENTTYPE_CLASS = "com.intellij.psi.tree.IElementType";
   String PSI_ELEMENT_CLASS = "com.intellij.psi.PsiElement";

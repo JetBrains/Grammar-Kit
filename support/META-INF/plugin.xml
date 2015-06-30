@@ -1,8 +1,8 @@
 <idea-plugin url="https://github.com/JetBrains/Grammar-Kit" version="2">
   <id>org.jetbrains.idea.grammar</id>
-  <version>1.2.0.3</version>
+  <version>1.2.0.4</version>
   <vendor email="gregory.shrago@jetbrains.com">Greg Shrago</vendor>
-  <idea-version since-build="140.2285" until-build=""/>
+  <idea-version since-build="141.0" until-build=""/>
 
   <name>Grammar-Kit</name>
   <description>BNF Grammars and JFlex lexers editor. Readable parser/PSI code generator.</description>
@@ -12,6 +12,12 @@
 
   <change-notes>
     <![CDATA[
+    <p>1.2.0.1-1.2.0.4</p>
+    <ul>
+      <li>Generator: made a parser extend com.intellij.lang.LightPsiParser</li>
+      <li>Known exceptions fixed, rebuilt with 14.1.4</li>
+      <li>Editor: method reference navigation revived</li>
+    </ul>
     <p>1.2.0</p>
     <ul>
       <li>Generator: mixin-class methods can be used as method-mixin's to populate rule PSI interface</li>

@@ -272,7 +272,9 @@ public class ParserGenerator {
       boolean first = true;
       for (String top : getSuperInterfaceNames(myFile, rule, "", myRuleClassPrefix)) {
         if (!first && top.equals(superIntf)) continue;
-        else if (first) all.add(top);
+        int trimIdx = StringUtil.indexOfAny(top, TYPE_TEXT_SEPARATORS); // trim generics
+        top = myShortener.fun(trimIdx > 0 ? top.substring(0, trimIdx) : top);
+        if (first) all.add(top);
         if (top.startsWith(myRuleClassPrefix)) {
           top = top.substring(myRuleClassPrefix.length());
         }

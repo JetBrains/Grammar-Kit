@@ -323,28 +323,28 @@ public class ParserGeneratorUtil {
     List<String> topRuleImplements = Collections.emptyList();
     String topRuleClass = null;
     BnfRule topSuper = getTopSuperRule(file, rule);
-    boolean simpleMode = psiPackage.isEmpty();
+    boolean withPackage = psiPackage.isEmpty();
     if (topSuper != null && topSuper != rule) {
       topRuleImplements = getAttribute(topSuper, KnownAttribute.IMPLEMENTS).asStrings();
       topRuleClass =
-        StringUtil.nullize((simpleMode ? "" : psiPackage + ".") + getRulePsiClassName(topSuper, classPrefix));
+        StringUtil.nullize((withPackage ? "" : psiPackage + ".") + getRulePsiClassName(topSuper, classPrefix));
       if (!StringUtil.isEmpty(topRuleClass)) strings.add(topRuleClass);
     }
     List<String> rootImplements = getRootAttribute(file, KnownAttribute.IMPLEMENTS).asStrings();
     List<String> ruleImplements = getAttribute(rule, KnownAttribute.IMPLEMENTS).asStrings();
     for (String className : ruleImplements) {
+      if (className == null) continue;
       BnfRule superIntfRule = file.getRule(className);
       if (superIntfRule != null) {
-        strings.add((simpleMode ? "" : psiPackage + ".") + getRulePsiClassName(superIntfRule, classPrefix));
+        strings.add((withPackage ? "" : psiPackage + ".") + getRulePsiClassName(superIntfRule, classPrefix));
       }
       else if (!topRuleImplements.contains(className) &&
                (topRuleClass == null || !rootImplements.contains(className))) {
-        String name = simpleMode ? StringUtil.getShortName(className) : className;
-        if (className != null && strings.size() == 1 && topSuper == null) {
-          strings.add(0, name);
+        if (strings.size() == 1 && topSuper == null) {
+          strings.add(0, className);
         }
         else {
-          strings.add(name);
+          strings.add(className);
         }
       }
     }

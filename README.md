@@ -28,17 +28,13 @@ General usage instructions
 
 Recent changes
 --------------
-1.2.0
+1.2.1
 
-* Generator: mixin-class methods can be used as method-mixin's to populate rule PSI interface
-* Generator: output directories detection for JFlex/BNF generators
-* Generator: "generate" attribute supersedes global "generateXXX" attributes
-* Generator: compact local variables names by default to improve code readability
-* Generator: better PSI generation in complex "extends" / "elementType" cases
-* Generator: improved rule content calculation leading to more correct PSI classes
-* Generator/Pratt: no more explicit PsiBuilder.Marker manipulations in generated code
-* LivePreview: pre-configured tokens are dropped, numbers/strings/whitespaces detected
-* BNF: allow "-" in rule names and other identifiers
+* Generator/PSI: fix generic and vararg types generation
+* Generator/PSI: fix private recursive rules handling
+* Generator: made a parser extend com.intellij.lang.LightPsiParser
+* Known exceptions fixed, rebuilt with IntelliJ Platform 14.1.4
+* Editor: method reference navigation revived
 
 
 Quick documentation:
@@ -231,12 +227,32 @@ java -jar expression-console-sample.jar
 
 Change log
 ==========
+
+1.2.1
+
+* Generator/PSI: fix generic and vararg types generation
+* Generator/PSI: fix private recursive rules handling
+* Generator: made a parser extend com.intellij.lang.LightPsiParser
+* Known exceptions fixed, rebuilt with IntelliJ Platform 14.1.4
+* Editor: method reference navigation revived
+
+1.2.0
+
+* Generator: mixin-class methods can be used as method-mixin's to populate rule PSI interface
+* Generator: output directories detection for JFlex/BNF generators
+* Generator: "generate" attribute supersedes global "generateXXX" attributes
+* Generator: compact local variables names by default to improve code readability
+* Generator: better PSI generation in complex "extends" / "elementType" cases
+* Generator: improved rule content calculation leading to more correct PSI classes
+* Generator/Pratt: no more explicit PsiBuilder.Marker manipulations in generated code
+* LivePreview: pre-configured tokens are dropped, numbers/strings/whitespaces detected
+* BNF: allow "-" in rule names and other identifiers
+
 1.1.10
 
 * GPUB: improve error reporting in some cases
 * Generator/Editor: performance fix
 * JFlex: treat "%eof{ return;" case as forced comment instead of error
-
 
 1.1.8 / 1.1.9
 

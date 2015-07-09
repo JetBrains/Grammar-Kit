@@ -1,6 +1,6 @@
 <idea-plugin url="https://github.com/JetBrains/Grammar-Kit" version="2">
   <id>org.jetbrains.idea.grammar</id>
-  <version>1.2.0.4</version>
+  <version>1.2.1</version>
   <vendor email="gregory.shrago@jetbrains.com">Greg Shrago</vendor>
   <idea-version since-build="141.0" until-build=""/>
 
@@ -12,23 +12,13 @@
 
   <change-notes>
     <![CDATA[
-    <p>1.2.0.1-1.2.0.4</p>
+    <p>1.2.1</p>
     <ul>
+      <li>Generator/PSI: fix generic and vararg types generation</li>
+      <li>Generator/PSI: fix private recursive rules handling</li>
       <li>Generator: made a parser extend com.intellij.lang.LightPsiParser</li>
-      <li>Known exceptions fixed, rebuilt with 14.1.4</li>
+      <li>Known exceptions fixed, rebuilt with IntelliJ Platform 14.1.4</li>
       <li>Editor: method reference navigation revived</li>
-    </ul>
-    <p>1.2.0</p>
-    <ul>
-      <li>Generator: mixin-class methods can be used as method-mixin's to populate rule PSI interface</li>
-      <li>Generator: output directories detection for JFlex/BNF generators</li>
-      <li>Generator: "generate" attribute supersedes global "generateXXX" attributes</li>
-      <li>Generator: compact local variables names by default to improve code readability</li>
-      <li>Generator: better PSI generation in complex "extends" / "elementType" cases</li>
-      <li>Generator: improved rule content calculation leading to more correct PSI classes</li>
-      <li>Generator/Pratt: no more explicit PsiBuilder.Marker manipulations in generated code</li>
-      <li>LivePreview: pre-configured tokens are dropped, numbers/strings/whitespaces detected</li>
-      <li>BNF: allow "-" in rule names and other identifiers</li>
     </ul>
     <a href="https://github.com/JetBrains/Grammar-Kit#change-log">Full change log...</a>
     ]]>

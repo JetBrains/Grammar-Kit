@@ -492,24 +492,25 @@ public class ParserGenerator {
       public String fun(String s) {
         boolean changed = false;
         StringBuilder sb = new StringBuilder();
-        for (String part : StringUtil.tokenize(new StringTokenizer(s, TYPE_TEXT_SEPARATORS, true))) {
+        boolean vararg = s.endsWith("...");
+        for (String part : StringUtil.tokenize(new StringTokenizer(StringUtil.trimEnd(s, "..."), TYPE_TEXT_SEPARATORS, true))) {
           String pkg;
-          part = StringUtil.trimStart(StringUtil.trimStart(part, "? super "), "? extends ");
+          String wildcard = part.startsWith("? super ") ? "? super " : part.startsWith("? extends ") ? "? extends " : "";
+          part = StringUtil.trimStart(part, wildcard);
           if (TYPE_TEXT_SEPARATORS.contains(part)) {
-            sb.append(part);
-            if (part.equals(",")) sb.append(" ");
+            sb.append(part).append(part.equals(",") ? " " : "");
           }
           else if (realImports.contains(part) ||
                    "java.lang".equals(pkg = StringUtil.getPackageName(part)) ||
                    realImports.contains(pkg + ".*")) {
-            sb.append(StringUtil.getShortName(part));
+            sb.append(wildcard).append(StringUtil.getShortName(part));
             changed = true;
           }
           else {
-            sb.append(part);
+            sb.append(wildcard).append(part);
           }
         }
-        return changed ? sb.toString() : s;
+        return changed ? sb.append(vararg? "..." : "").toString() : s;
       }
     };
     for (String item : imports) {
@@ -1595,6 +1596,7 @@ public class ParserGenerator {
     }
 
     for (String s : javaHelper.getAnnotations(method)) {
+      if ("java.lang.Override".equals(s)) continue;
       out("@" + myShortener.fun(s));
     }
     out("%s%s %s(%s)%s", intf ? "" : "public ", returnType, methodName, sb, intf ? ";" : " {");

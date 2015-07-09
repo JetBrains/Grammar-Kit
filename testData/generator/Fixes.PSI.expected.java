@@ -11,14 +11,17 @@ public interface GeneratedTypes {
 
   IElementType A_EXPR = new IElementType("A_EXPR", null);
   IElementType B_EXPR = new IElementType("B_EXPR", null);
+  IElementType ERL_LIST = new IElementType("ERL_LIST", null);
   IElementType EXPR = new IElementType("EXPR", null);
   IElementType LEFT_EXPR = new IElementType("LEFT_EXPR", null);
   IElementType SOME = new IElementType("SOME", null);
   IElementType SOME_EXPR = new IElementType("SOME_EXPR", null);
   IElementType SOME_SEQ = new IElementType("SOME_SEQ", null);
   IElementType WITH_RECURSIVE = new IElementType("WITH_RECURSIVE", null);
+  IElementType ZOME = new IElementType("ZOME", null);
 
   IElementType A = new IElementType("A", null);
+  IElementType B = new IElementType("B", null);
 }
 // ---- AExpr.java -----------------
 // This is a generated file. Not intended for manual editing.
@@ -46,6 +49,26 @@ public interface BExpr extends Expr {
 
   @NotNull
   List<Expr> getExprList();
+
+}
+// ---- ErlList.java -----------------
+// This is a generated file. Not intended for manual editing.
+package generated.psi;
+
+import java.util.List;
+import org.jetbrains.annotations.*;
+import com.intellij.psi.PsiElement;
+
+public interface ErlList extends PsiElement {
+
+  @NotNull
+  List<Expr> getExprList();
+
+  @NotNull
+  List<Some> getSomeList();
+
+  @Nullable
+  Zome getZome();
 
 }
 // ---- Expr.java -----------------
@@ -123,6 +146,17 @@ public interface WithRecursive extends PsiElement {
   List<Some> getSomeList();
 
 }
+// ---- Zome.java -----------------
+// This is a generated file. Not intended for manual editing.
+package generated.psi;
+
+import java.util.List;
+import org.jetbrains.annotations.*;
+import com.intellij.psi.PsiElement;
+
+public interface Zome extends PsiElement {
+
+}
 // ---- AExprImpl.java -----------------
 // This is a generated file. Not intended for manual editing.
 package generated.psi.impl;
@@ -182,6 +216,50 @@ public class BExprImpl extends ExprImpl implements BExpr {
   @NotNull
   public List<Expr> getExprList() {
     return PsiTreeUtil.getChildrenOfTypeAsList(this, Expr.class);
+  }
+
+}
+// ---- ErlListImpl.java -----------------
+// This is a generated file. Not intended for manual editing.
+package generated.psi.impl;
+
+import java.util.List;
+import org.jetbrains.annotations.*;
+import com.intellij.lang.ASTNode;
+import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiElementVisitor;
+import com.intellij.psi.util.PsiTreeUtil;
+import static generated.GeneratedTypes.*;
+import com.intellij.extapi.psi.ASTWrapperPsiElement;
+import generated.psi.*;
+
+public class ErlListImpl extends ASTWrapperPsiElement implements ErlList {
+
+  public ErlListImpl(ASTNode node) {
+    super(node);
+  }
+
+  public void accept(@NotNull PsiElementVisitor visitor) {
+    if (visitor instanceof Visitor) ((Visitor)visitor).visitErlList(this);
+    else super.accept(visitor);
+  }
+
+  @Override
+  @NotNull
+  public List<Expr> getExprList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, Expr.class);
+  }
+
+  @Override
+  @NotNull
+  public List<Some> getSomeList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, Some.class);
+  }
+
+  @Override
+  @Nullable
+  public Zome getZome() {
+    return findChildByClass(Zome.class);
   }
 
 }
@@ -357,6 +435,32 @@ public class WithRecursiveImpl extends ASTWrapperPsiElement implements WithRecur
   }
 
 }
+// ---- ZomeImpl.java -----------------
+// This is a generated file. Not intended for manual editing.
+package generated.psi.impl;
+
+import java.util.List;
+import org.jetbrains.annotations.*;
+import com.intellij.lang.ASTNode;
+import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiElementVisitor;
+import com.intellij.psi.util.PsiTreeUtil;
+import static generated.GeneratedTypes.*;
+import com.intellij.extapi.psi.ASTWrapperPsiElement;
+import generated.psi.*;
+
+public class ZomeImpl extends ASTWrapperPsiElement implements Zome {
+
+  public ZomeImpl(ASTNode node) {
+    super(node);
+  }
+
+  public void accept(@NotNull PsiElementVisitor visitor) {
+    if (visitor instanceof Visitor) ((Visitor)visitor).visitZome(this);
+    else super.accept(visitor);
+  }
+
+}
 // ---- Visitor.java -----------------
 // This is a generated file. Not intended for manual editing.
 package generated.psi;
@@ -373,6 +477,10 @@ public class Visitor extends PsiElementVisitor {
 
   public void visitBExpr(@NotNull BExpr o) {
     visitExpr(o);
+  }
+
+  public void visitErlList(@NotNull ErlList o) {
+    visitPsiElement(o);
   }
 
   public void visitExpr(@NotNull Expr o) {
@@ -396,6 +504,10 @@ public class Visitor extends PsiElementVisitor {
   }
 
   public void visitWithRecursive(@NotNull WithRecursive o) {
+    visitPsiElement(o);
+  }
+
+  public void visitZome(@NotNull Zome o) {
     visitPsiElement(o);
   }
 

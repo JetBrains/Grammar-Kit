@@ -484,8 +484,8 @@ public class RuleGraphHelper {
         }
       }
       result = joinMaps(rule, tryCollapse, type, list);
-      result = firstNonTrivial && visited.contains(RECURSION_MARKER) && result.remove(rule.getExpression()) != null ?
-               joinMaps(rule, false, BnfTypes.BNF_SEQUENCE, Arrays.asList(result, result)) : result;
+      result = type == BnfTypes.BNF_SEQUENCE && visited.contains(RECURSION_MARKER) && result.remove(rule.getExpression()) != null ?
+               joinMaps(rule, false, type, Arrays.asList(result, result)) : result;
     }
     if (outerLeft && rule.getExpression() == tree) {
       List<Map<PsiElement, Cardinality>> list = ContainerUtil.newArrayList();

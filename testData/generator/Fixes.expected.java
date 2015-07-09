@@ -95,6 +95,83 @@ public class Fixes implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
+  // expr A erl_tail
+  public static boolean erl_list(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "erl_list")) return false;
+    boolean result_, pinned_;
+    Marker marker_ = enter_section_(builder_, level_, _NONE_, "<erl list>");
+    result_ = expr(builder_, level_ + 1);
+    result_ = result_ && consumeToken(builder_, A);
+    pinned_ = result_; // pin = 2
+    result_ = result_ && erl_tail(builder_, level_ + 1);
+    exit_section_(builder_, level_, marker_, ERL_LIST, result_, pinned_, null);
+    return result_ || pinned_;
+  }
+
+  /* ********************************************************** */
+  // zome | A zome | '&&' expr some erl_tail
+  static boolean erl_tail(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "erl_tail")) return false;
+    boolean result_;
+    Marker marker_ = enter_section_(builder_);
+    result_ = zome(builder_, level_ + 1);
+    if (!result_) result_ = erl_tail_1(builder_, level_ + 1);
+    if (!result_) result_ = erl_tail_2(builder_, level_ + 1);
+    exit_section_(builder_, marker_, null, result_);
+    return result_;
+  }
+
+  // A zome
+  private static boolean erl_tail_1(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "erl_tail_1")) return false;
+    boolean result_, pinned_;
+    Marker marker_ = enter_section_(builder_, level_, _NONE_, null);
+    result_ = consumeToken(builder_, A);
+    pinned_ = result_; // pin = 1
+    result_ = result_ && zome(builder_, level_ + 1);
+    exit_section_(builder_, level_, marker_, null, result_, pinned_, null);
+    return result_ || pinned_;
+  }
+
+  // '&&' expr some erl_tail
+  private static boolean erl_tail_2(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "erl_tail_2")) return false;
+    boolean result_, pinned_;
+    Marker marker_ = enter_section_(builder_, level_, _NONE_, null);
+    result_ = consumeToken(builder_, "&&");
+    pinned_ = result_; // pin = 1
+    result_ = result_ && report_error_(builder_, expr(builder_, level_ + 1));
+    result_ = pinned_ && report_error_(builder_, some(builder_, level_ + 1)) && result_;
+    result_ = pinned_ && erl_tail(builder_, level_ + 1) && result_;
+    exit_section_(builder_, level_, marker_, null, result_, pinned_, null);
+    return result_ || pinned_;
+  }
+
+  /* ********************************************************** */
+  // (A erl_tail_bad)*
+  static boolean erl_tail_bad(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "erl_tail_bad")) return false;
+    int pos_ = current_position_(builder_);
+    while (true) {
+      if (!erl_tail_bad_0(builder_, level_ + 1)) break;
+      if (!empty_element_parsed_guard_(builder_, "erl_tail_bad", pos_)) break;
+      pos_ = current_position_(builder_);
+    }
+    return true;
+  }
+
+  // A erl_tail_bad
+  private static boolean erl_tail_bad_0(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "erl_tail_bad_0")) return false;
+    boolean result_;
+    Marker marker_ = enter_section_(builder_);
+    result_ = consumeToken(builder_, A);
+    result_ = result_ && erl_tail_bad(builder_, level_ + 1);
+    exit_section_(builder_, marker_, null, result_);
+    return result_;
+  }
+
+  /* ********************************************************** */
   // a_expr | b_expr
   public static boolean expr(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "expr")) return false;
@@ -306,6 +383,18 @@ public class Fixes implements PsiParser, LightPsiParser {
     Marker marker_ = enter_section_(builder_);
     result_ = recursive(builder_, level_ + 1);
     exit_section_(builder_, marker_, WITH_RECURSIVE, result_);
+    return result_;
+  }
+
+  /* ********************************************************** */
+  // B
+  public static boolean zome(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "zome")) return false;
+    if (!nextTokenIs(builder_, B)) return false;
+    boolean result_;
+    Marker marker_ = enter_section_(builder_);
+    result_ = consumeToken(builder_, B);
+    exit_section_(builder_, marker_, ZOME, result_);
     return result_;
   }
 

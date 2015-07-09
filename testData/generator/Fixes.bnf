@@ -7,6 +7,7 @@
 root ::=
 
 some ::= A
+zome ::= B
 with_recursive ::= recursive
 private recursive ::= some [recursive]
 
@@ -22,3 +23,7 @@ private singleRestriction ::= A expr | '(' orRestriction ')'
 
 some_expr ::= expr left_expr *
 left left_expr ::= expr
+
+private erl_tail_bad ::= (A erl_tail_bad)*
+erl_list ::= expr A erl_tail {pin=2}
+private erl_tail ::= zome | A zome | '&&' expr some erl_tail {pin(".*")=1}

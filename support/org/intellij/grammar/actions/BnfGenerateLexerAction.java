@@ -46,6 +46,7 @@ import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.runtime.log.NullLogChute;
 import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.generator.BnfConstants;
+import org.intellij.grammar.generator.Case;
 import org.intellij.grammar.generator.ParserGeneratorUtil;
 import org.intellij.grammar.generator.RuleGraphHelper;
 import org.intellij.grammar.psi.BnfAttrs;
@@ -59,7 +60,6 @@ import java.io.InputStreamReader;
 import java.io.StringWriter;
 import java.util.Collection;
 import java.util.LinkedHashMap;
-import java.util.Locale;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -152,7 +152,7 @@ public class BnfGenerateLexerAction extends AnAction {
       if (name == null) continue;
       String pattern = token2JFlex(token);
       boolean isRE = ParserGeneratorUtil.isRegexpToken(token);
-      (isRE ? regexpTokens : simpleTokens).put(name.toUpperCase(Locale.ENGLISH), pattern);
+      (isRE ? regexpTokens : simpleTokens).put(Case.UPPER.apply(name), pattern);
       maxLen[0] = Math.max((isRE ? name : pattern).length() + 2, maxLen[0]);
     }
 
@@ -164,7 +164,7 @@ public class BnfGenerateLexerAction extends AnAction {
         if (GrammarUtil.isExternalReference(element)) return;
         String text = element instanceof BnfReferenceOrToken? element.getText() : null;
         if (text != null && bnfFile.getRule(text) == null) {
-          String name = text.toUpperCase(Locale.ENGLISH);
+          String name = Case.UPPER.apply(text);
           if (!simpleTokens.containsKey(name) && !regexpTokens.containsKey(name)) {
             simpleTokens.put(name, text2JFlex(text, false));
             maxLen[0] = Math.max(text.length(), maxLen[0]);

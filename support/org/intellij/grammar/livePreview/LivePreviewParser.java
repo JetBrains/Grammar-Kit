@@ -53,11 +53,11 @@ public class LivePreviewParser implements PsiParser {
   private final Map<String,String> mySimpleTokens = ContainerUtil.newLinkedHashMap();
   private final Map<String, IElementType> myElementTypes = ContainerUtil.newTroveMap();
 
+  private GenOptions G;
   private BnfRule myGrammarRoot;
   private RuleGraphHelper myGraphHelper;
   private ExpressionHelper myExpressionHelper;
   private MultiMap<BnfRule, BnfRule> myRuleExtendsMap;
-  private boolean generateExtendedPin;
   private String myTokenTypeText;
 
   private final TObjectIntHashMap<BnfRule> myRuleNumbers = new TObjectIntHashMap<BnfRule>();
@@ -105,7 +105,7 @@ public class LivePreviewParser implements PsiParser {
   private void init(PsiBuilder builder) {
     if (myFile == null) return;
     myGrammarRoot = ContainerUtil.getFirstItem(myFile.getRules());
-    generateExtendedPin = getRootAttribute(myFile, KnownAttribute.EXTENDED_PIN);
+    G = new GenOptions(myFile);
     mySimpleTokens.putAll(LivePreviewLexer.collectTokenPattern2Name(myFile, null));
     myGraphHelper = RuleGraphHelper.getCached(myFile);
     myRuleExtendsMap = myGraphHelper.getRuleExtendsMap();
@@ -120,7 +120,7 @@ public class LivePreviewParser implements PsiParser {
       }
     }
     for (BnfRule rule : myFile.getRules()) {
-      String elementType = ParserGeneratorUtil.getElementType(rule);
+      String elementType = ParserGeneratorUtil.getElementType(rule, G.generateElementCase);
       if (StringUtil.isEmpty(elementType)) continue;
       if (myElementTypes.containsKey(elementType)) continue;
       myElementTypes.put(elementType, new RuleElementType(elementType, rule, myLanguage));
@@ -238,7 +238,7 @@ public class LivePreviewParser implements PsiParser {
             result_ = generateTokenSequenceCall(builder, level, rule, children, funcName, i, pinMatcher, pinApplied, skip, externalArguments);
           }
           else {
-            if (pinApplied && generateExtendedPin && !predicateEncountered) {
+            if (pinApplied && G.generateExtendedPin && !predicateEncountered) {
               if (i == childrenSize - 1) {
                 // do not report error for last child
                 if (i == p + 1) {
@@ -546,7 +546,7 @@ public class LivePreviewParser implements PsiParser {
 
   @Nullable
   private IElementType getElementType(BnfRule rule) {
-    String elementType = ParserGeneratorUtil.getElementType(rule);
+    String elementType = ParserGeneratorUtil.getElementType(rule, G.generateElementCase);
     if (StringUtil.isEmpty(elementType)) return null;
     return getElementType(elementType);
   }

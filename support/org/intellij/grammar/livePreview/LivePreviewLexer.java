@@ -27,13 +27,17 @@ import com.intellij.psi.util.CachedValuesManager;
 import com.intellij.util.ObjectUtils;
 import com.intellij.util.containers.ContainerUtil;
 import org.intellij.grammar.KnownAttribute;
+import org.intellij.grammar.generator.Case;
 import org.intellij.grammar.generator.FakeElementType;
 import org.intellij.grammar.generator.ParserGeneratorUtil;
 import org.intellij.grammar.psi.BnfFile;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -181,7 +185,7 @@ public class LivePreviewLexer extends LexerBase {
     final IElementType tokenType;
 
     Token(String pattern, String mappedName, boolean usedInGrammar, String constantPrefix, LivePreviewLanguage language) {
-      constantName = constantPrefix + mappedName.toUpperCase(Locale.ENGLISH);
+      constantName = constantPrefix + Case.UPPER.apply(mappedName);
       String tokenName;
       boolean keyword;
       if (ParserGeneratorUtil.isRegexpToken(pattern)) {

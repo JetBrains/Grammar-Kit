@@ -79,6 +79,16 @@ public class ParserGeneratorUtil {
     }
   }
 
+  @NotNull
+  public static <T extends Enum<T>> T enumFromString(@Nullable String value, @NotNull T def) {
+    try {
+      return value == null ? def : Enum.valueOf(def.getDeclaringClass(), Case.UPPER.apply(value).replace('-', '_'));
+    }
+    catch (Exception e) {
+      return def;
+    }
+  }
+
   public static <T> T getGenerateOption(@NotNull PsiElement node, @NotNull KnownAttribute<T> attribute, @Nullable String currentValue) {
     if (attribute.getDefaultValue() instanceof Boolean) {
       if ("yes".equals(currentValue)) return (T)Boolean.TRUE;
@@ -369,7 +379,7 @@ public class ParserGeneratorUtil {
   }
 
   @Nullable
-  public static String getRuleDisplayNameRaw(BnfRule rule, boolean force) {
+  private static String getRuleDisplayNameRaw(BnfRule rule, boolean force) {
     String name = getAttribute(rule, KnownAttribute.NAME);
     BnfRule realRule = rule;
     if (name != null) {
@@ -380,19 +390,14 @@ public class ParserGeneratorUtil {
       return name;
     }
     else {
-      return toDisplayOrConstantName(realRule.getName(), false);
+      return Case.LOWER.apply(StringUtil.join(NameUtil.splitNameIntoWords(realRule.getName()), " "));
     }
   }
 
-  public static String toDisplayOrConstantName(String name, boolean constant) {
-    String[] strings = NameUtil.splitNameIntoWords(name);
-    for (int i = 0; i < strings.length; i++) strings[i] = constant? strings[i].toUpperCase() : strings[i].toLowerCase();
-    return StringUtil.join(strings, constant? "_" : " ");
-  }
-
-  public static String getElementType(BnfRule rule) {
+  public static String getElementType(BnfRule rule, @NotNull Case cas) {
     String elementType = StringUtil.notNullize(getAttribute(rule, KnownAttribute.ELEMENT_TYPE), rule.getName());
-    String displayName = toDisplayOrConstantName(elementType, true);
+    String displayName = cas == Case.AS_IS ? elementType :
+                         cas.apply(StringUtil.join(NameUtil.splitNameIntoWords(elementType), "_"));
     return StringUtil.isEmpty(displayName)? "" : getAttribute(rule, KnownAttribute.ELEMENT_TYPE_PREFIX) + displayName;
   }
 

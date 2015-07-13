@@ -43,18 +43,18 @@ public class RuleMethodsHelper {
   private final RuleGraphHelper myGraphHelper;
   private final ExpressionHelper myExpressionHelper;
   private final Map<String, String> mySimpleTokens;
-  private boolean myGenerateTokensDef;
+  private final GenOptions G;
 
   private final Map<BnfRule, Pair<Map<String, MethodInfo>, Collection<MethodInfo>>> myMethods;
 
   public RuleMethodsHelper(RuleGraphHelper ruleGraphHelper,
                            ExpressionHelper expressionHelper,
                            Map<String, String> simpleTokens,
-                           boolean generateTokensDef) {
+                           GenOptions genOptions) {
     myGraphHelper = ruleGraphHelper;
     myExpressionHelper = expressionHelper;
     mySimpleTokens = Collections.unmodifiableMap(simpleTokens);
-    myGenerateTokensDef = generateTokensDef;
+    G = genOptions;
 
     myMethods = ContainerUtil.newLinkedHashMap();
   }
@@ -98,7 +98,7 @@ public class RuleMethodsHelper {
     Collections.sort(result);
 
     BnfAttr attr = findAttribute(rule, KnownAttribute.GENERATE_TOKEN_ACCESSORS);
-    boolean generateTokens = attr == null? myGenerateTokensDef :
+    boolean generateTokens = attr == null ? G.generateTokenAccessors :
                              Boolean.TRUE.equals(getAttributeValue(attr.getExpression()));
     Map<String, MethodInfo> basicMethods = ContainerUtil.newLinkedHashMap();
 
@@ -160,7 +160,7 @@ public class RuleMethodsHelper {
     else {
       BnfRule asRule = (BnfRule)tree;
       result = asRule.getName();
-      if (StringUtil.isEmpty(getElementType(asRule))) return null;
+      if (StringUtil.isEmpty(getElementType(asRule, G.generateElementCase))) return null;
     }
     return result;
   }

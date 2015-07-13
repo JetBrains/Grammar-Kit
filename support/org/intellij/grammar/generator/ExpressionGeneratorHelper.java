@@ -102,11 +102,11 @@ public class ExpressionGeneratorHelper {
 
       String substCheck = "";
       if (operator.arg1 != null) {
-        substCheck = format(" && leftMarkerIs(%s, %s)", g.N.builder, getElementType(operator.arg1));
+        substCheck = format(" && leftMarkerIs(%s, %s)", g.N.builder, g.getElementType(operator.arg1));
       }
       g.out("%sif (%s < %d%s && %s) {", first ? "" : "else ", g.N.priority, priority, substCheck, opCall);
       first = false;
-      String elementType = ParserGeneratorUtil.getElementType(operator.rule);
+      String elementType = g.getElementType(operator.rule);
       boolean rightAssociative = ParserGeneratorUtil.getAttribute(operator.rule, KnownAttribute.RIGHT_ASSOCIATIVE);
       String tailCall =
         operator.tail == null ? null : g.generateNodeCall(operator.rule, operator.tail, getNextName(operator.rule.getName(), 1), ConsumeType.DEFAULT);
@@ -161,7 +161,7 @@ public class ExpressionGeneratorHelper {
           g.out("boolean %s, %s;", g.N.result, g.N.pinned);
           g.out("Marker %s = enter_section_(%s, %s, _NONE_, null);", g.N.marker, g.N.builder, g.N.level);
 
-          String elementType = ParserGeneratorUtil.getElementType(operator.rule);
+          String elementType = g.getElementType(operator.rule);
           String tailCall =
             operator.tail == null ? null : g.generateNodeCall(operator.rule, operator.tail, getNextName(operator.rule.getName(), 1), ConsumeType.DEFAULT);
 

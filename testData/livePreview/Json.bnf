@@ -1,5 +1,4 @@
 {
-generate=
   tokens = [
     space='regexp:\s+'
     string = "regexp:\"[^\"]*\"|'[^']*'"
@@ -7,8 +6,6 @@ generate=
     id = "regexp:\p{Alpha}\w*"
     comma = ","
     colon = ":"
-    paren1 = "("
-    paren2 = ")"
     brace1 = "{"
     brace2 = "}"
     brack1 = "["

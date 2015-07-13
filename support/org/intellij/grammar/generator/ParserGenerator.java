@@ -90,8 +90,8 @@ public class ParserGenerator {
   final Names N;
   private final int generateFirstCheck;
   private final Pattern generateRootRules;
-  private final boolean generateTokens;
-  private final boolean generateComposites;
+  private final boolean generateTokenTypes;
+  private final boolean generateElementTypes;
   private final boolean generateExtendedPin;
   private final boolean generatePsi;
   private final boolean generatePsiFactory;
@@ -105,8 +105,8 @@ public class ParserGenerator {
     N = Names.forName(genOptions.get("names"));
     generatePsi = getGenerateOption(myFile, KnownAttribute.GENERATE_PSI, genOptions.get("psi"));
     generatePsiFactory = !"no".equals(genOptions.get("psi-factory"));
-    generateTokens = getGenerateOption(myFile, KnownAttribute.GENERATE_TOKENS, genOptions.get("tokens"));
-    generateComposites = !"no".equals(genOptions.get("composites"));
+    generateTokenTypes = getGenerateOption(myFile, KnownAttribute.GENERATE_TOKENS, genOptions.get("tokens"));
+    generateElementTypes = !"no".equals(genOptions.get("elements"));
     generateFirstCheck = getGenerateOption(myFile, KnownAttribute.GENERATE_FIRST_CHECK, genOptions.get("firstCheck"));
     generateExtendedPin = getGenerateOption(myFile, KnownAttribute.EXTENDED_PIN, genOptions.get("extendedPin"));
     generateTokenAccessors = getGenerateOption(myFile, KnownAttribute.GENERATE_TOKEN_ACCESSORS, genOptions.get("tokenAccessors"));
@@ -193,7 +193,7 @@ public class ParserGenerator {
       }
       sortedPsiRules.put(rule.getName(), rule);
     }
-    if (myGrammarRoot != null) {
+    if (myGrammarRoot != null && (generateTokenTypes || generateElementTypes || generatePsi && generatePsiFactory)) {
       String className = getRootAttribute(myFile, KnownAttribute.ELEMENT_TYPE_HOLDER_CLASS);
       openOutput(className);
       try {
@@ -213,9 +213,9 @@ public class ParserGenerator {
       }
       Map<String, String> infClasses = ContainerUtil.newTroveMap();
       String psiPackage = getPsiPackage(myFile);
-      String suffix = getPsiImplSuffix(myFile);     
+      String suffix = getPsiImplSuffix(myFile);
       String psiImplPackage = getPsiImplPackage(myFile);
-      
+
       for (String ruleName : sortedPsiRules.keySet()) {
         BnfRule rule = myFile.getRule(ruleName);
         String psiClass = psiPackage + "." + getRulePsiClassName(rule, myRuleClassPrefix);
@@ -1017,7 +1017,7 @@ public class ParserGenerator {
         String t = psiElement.getText();
         if (!mySimpleTokens.containsKey(t) && !mySimpleTokens.values().contains(t)) {
           mySimpleTokens.put(t, null);
-        } 
+        }
       }
       return generateTokenSequenceCall(childExpressions, 0, pinMatcher, false, new int[]{0}, nodeCall, true, consumeType);
     }
@@ -1149,7 +1149,6 @@ public class ParserGenerator {
   /*ElementTypes******************************************************************/
 
   private void generateElementTypesHolder(String className, Map<String, BnfRule> sortedCompositeTypes) {
-    if (!(generateTokens || generateComposites || generatePsi && generatePsiFactory)) return;
     String implPackage = getPsiImplPackage(myFile);
     String tokenTypeClass = getRootAttribute(myFile, KnownAttribute.TOKEN_TYPE_CLASS);
     String tokenTypeFactory = getRootAttribute(myFile, KnownAttribute.TOKEN_TYPE_FACTORY);
@@ -1180,7 +1179,7 @@ public class ParserGenerator {
     }
     if (generatePsi) imports.add(implPackage + ".*");
     generateClassHeader(className, imports, "", true);
-    if (generateComposites) {
+    if (generateElementTypes) {
       for (String elementType : sortedCompositeTypes.keySet()) {
         Pair<String, String> pair = compositeToClassAndFactoryMap.get(elementType);
         String elementCreateCall;
@@ -1193,7 +1192,7 @@ public class ParserGenerator {
         out("IElementType " + elementType + " = " + elementCreateCall + "(\"" + elementType + "\""+callFix+");");
       }
     }
-    if (generateTokens) {
+    if (generateTokenTypes) {
       newLine();
       Map<String, String> sortedTokens = ContainerUtil.newTreeMap();
       String tokenCreateCall;

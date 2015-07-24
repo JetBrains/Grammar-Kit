@@ -14,6 +14,15 @@ Open-source plugins built with Grammar-Kit:
 
 Quick links: [Tutorial](TUTORIAL.md), [HOWTO](HOWTO.md), [Standalone usage](#standalone-usage).
 
+Recent changes / 1.2.1
+
+* Generator/PSI: fix generic and vararg types generation
+* Generator/PSI: fix private recursive rules handling
+* Generator: made a parser extend com.intellij.lang.LightPsiParser
+* Known exceptions fixed, rebuilt with IntelliJ Platform 14.1.4
+* Editor: method reference navigation revived
+
+
 General usage instructions
 --------------------------
 1. Create grammar \*.bnf file, see [Grammar.bnf](grammars/Grammar.bnf) in the plugin code.
@@ -24,17 +33,30 @@ General usage instructions
 6. Mix-in resolve and other non-trivial functionality to PSI
 
 
+Tooling support
+===========================
+
 ![Editor support](images/editor.png)
 
-Recent changes
---------------
-1.2.1
-
-* Generator/PSI: fix generic and vararg types generation
-* Generator/PSI: fix private recursive rules handling
-* Generator: made a parser extend com.intellij.lang.LightPsiParser
-* Known exceptions fixed, rebuilt with IntelliJ Platform 14.1.4
-* Editor: method reference navigation revived
+* Refactoring: extract rule (Ctrl-Alt-R/Meta-Alt-R)
+* Refactoring: introduce token (Ctrl-Alt-C/Meta-Alt-C)
+* Editing: flip _choice_ branches intention (via Alt-Enter)
+* Editing: Unwrap/remove expression (Ctrl-Shift-Del/Meta-Shift-Del)
+* Navigation: quick grammar structure popup (Ctrl-F12/Meta-F12)
+* Navigation: go to related file (parser and PSI) (Ctrl-Alt-Home/Meta-Alt-Home)
+* Navigation: navigate to matched expressions (Ctrl-B/Meta-B inside attribute pattern)
+* Highlighting: customizable colors (via Settings/Colors and Fonts)
+* Highlighting: pinned expression markers (tooltip shows pin value in charge)
+* Highlighting: a number of inspections, the list is available in Settings/Inspections
+* Documentation: rule documentation popup shows FIRST/FOLLOWS/PSI content (Ctrl-Q/Meta-J)
+* Documentation: attribute documentation popup (Ctrl-Q/Meta-J)
+* [Live preview](TUTORIAL.md): open language live preview editor (Ctrl-Alt-P/Meta-Alt-P)
+* [Live preview](TUTORIAL.md): start/stop grammar evaluator highlighting (Ctrl-Alt-F7/Meta-Alt-F7 in preview editor)
+* Generator: generate parser/PSI code (Ctrl-Shift-G/Meta-Shift-G)
+* Generator: generate custom _parserUtilClass_ class
+* Generator: generate \*.flex - JFlex lexer definition
+* Generator: run JFlex generator on a \*.flex file
+* Diagram: PSI tree diagram (UML plugin required)
 
 
 Quick documentation:
@@ -179,30 +201,6 @@ Parser generator generates token types constants and PSI by default.
 This can be switched off via *generateTokens* and *generatePSI* global boolean attributes respectively.
  
 *elementType* rule attribute allows to mix the generated code and some existing hand-made PSI.   
-
-
-Plugin facilities reference
-===========================
-
-* Refactoring: extract rule (Ctrl-Alt-R/Meta-Alt-R)
-* Refactoring: introduce token (Ctrl-Alt-C/Meta-Alt-C)
-* Editing: flip _choice_ branches intention (via Alt-Enter)
-* Editing: Unwrap/remove expression (Ctrl-Shift-Del/Meta-Shift-Del)
-* Navigation: quick grammar structure popup (Ctrl-F12/Meta-F12)
-* Navigation: go to related file (parser and PSI) (Ctrl-Alt-Home/Meta-Alt-Home)
-* Navigation: navigate to matched expressions (Ctrl-B/Meta-B inside attribute pattern)
-* Highlighting: customizable colors (via Settings/Colors and Fonts)
-* Highlighting: pinned expression markers (tooltip shows pin value in charge)
-* Highlighting: a number of inspections, the list is available in Settings/Inspections
-* Documentation: rule documentation popup shows FIRST/FOLLOWS/PSI content (Ctrl-Q/Meta-J)
-* Documentation: attribute documentation popup (Ctrl-Q/Meta-J)
-* [Live preview](TUTORIAL.md): open language live preview editor (Ctrl-Alt-P/Meta-Alt-P)
-* [Live preview](TUTORIAL.md): start/stop grammar highlighting - a way to debug grammars (Ctrl-Alt-F7/Meta-Alt-F7 inside preview editor)
-* Generator: generate parser/PSI code (Ctrl-Shift-G/Meta-Shift-G)
-* Generator: generate custom _parserUtilClass_ class
-* Generator: generate \*.flex - JFlex lexer definition
-* Generator: run JFlex generator on a \*.flex file
-* Diagram: PSI tree diagram (UML plugin required)
 
 
 Standalone usage

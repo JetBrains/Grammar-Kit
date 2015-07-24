@@ -25,6 +25,7 @@ import com.intellij.openapi.actionSystem.LangDataKeys;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.fileEditor.FileDocumentManager;
+import com.intellij.openapi.progress.ProcessCanceledException;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.progress.Task;
@@ -180,6 +181,8 @@ public class GenerateAction extends AnAction implements DumbAware {
               BnfConstants.GENERATION_GROUP,
               String.format("%s generated (%s)", file.getName(), StringUtil.formatFileSize(written)),
               "to " + genDir + (duration == null ? "" : " in " + duration), NotificationType.INFORMATION), project);
+          }
+          catch (ProcessCanceledException ignored) {
           }
           catch (Exception ex) {
             Notifications.Bus.notify(new Notification(

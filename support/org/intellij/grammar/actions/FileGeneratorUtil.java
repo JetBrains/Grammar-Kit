@@ -26,7 +26,6 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.ProjectFileIndex;
 import com.intellij.openapi.roots.ProjectRootManager;
 import com.intellij.openapi.util.text.StringUtil;
-import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.search.FilenameIndex;
@@ -100,10 +99,13 @@ public class FileGeneratorUtil {
             result.setResult(VfsUtil.createDirectoryIfMissing(virtualRoot, relativePath));
           }
         }.execute().throwException().getResultObject();
-        LocalFileSystem.getInstance().refreshFiles(Collections.singleton(result));
+        VfsUtil.markDirtyAndRefresh(false, true, true, result);
         return returnRoot && newGenRoot? ObjectUtils.assertNotNull(virtualRoot.findChild("gen")) :
                returnRoot ? virtualRoot : result;
       }
+    }
+    catch (ProcessCanceledException ex) {
+      throw ex;
     }
     catch (Exception ex) {
       fail(project, sourceFile, ex.getMessage());

@@ -35,7 +35,6 @@ import com.intellij.openapi.util.ThrowableComputable;
 import com.intellij.openapi.util.io.FileUtil;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.openapi.vcs.changes.BackgroundFromStartOption;
-import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiDocumentManager;
@@ -142,7 +141,6 @@ public class GenerateAction extends AnAction implements DumbAware {
               "", report, NotificationType.INFORMATION), project);
           }
           VfsUtil.markDirtyAndRefresh(true, true, true, targets.toArray(new VirtualFile[targets.size()]));
-          LocalFileSystem.getInstance().refreshIoFiles(files, true, false, null); // seems unnecessary
         }
       }
 

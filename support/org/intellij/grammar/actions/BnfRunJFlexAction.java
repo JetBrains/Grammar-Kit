@@ -53,7 +53,6 @@ import com.intellij.openapi.util.SystemInfo;
 import com.intellij.openapi.util.io.FileUtil;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.openapi.vfs.JarFileSystem;
-import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.*;
@@ -72,7 +71,6 @@ import org.jetbrains.annotations.Nullable;
 import javax.swing.*;
 import java.awt.*;
 import java.io.File;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -176,7 +174,7 @@ public class BnfRunJFlexAction extends DumbAwareAction {
                                               final VirtualFile virtualDir,
                                               final String lexerClassName,
                                               String commandName) {
-    LocalFileSystem.getInstance().refreshFiles(Arrays.asList(virtualDir));
+    VfsUtil.markDirtyAndRefresh(false, true, true, virtualDir);
     final String className = lexerClassName.startsWith("_") ? lexerClassName.substring(1) : lexerClassName + "Adapter";
 
     if (FilenameIndex.getFilesByName(project, className + ".java", ProjectScope.getContentScope(project)) != null) return;

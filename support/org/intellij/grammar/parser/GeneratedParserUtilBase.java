@@ -53,7 +53,7 @@ public class GeneratedParserUtilBase {
 
   private static final Logger LOG = Logger.getInstance("org.intellij.grammar.parser.GeneratedParserUtilBase");
 
-  private static final int MAX_RECURSION_LEVEL = 1000;
+  private static final int MAX_RECURSION_LEVEL = StringUtil.parseInt(System.getProperty("grammar.kit.gpub.max.level"), 1000);
   private static final int MAX_VARIANTS_SIZE = 10000;
   private static final int MAX_VARIANTS_TO_DISPLAY = 50;
 
@@ -127,7 +127,7 @@ public class GeneratedParserUtilBase {
 
   private static boolean consumeTokens(PsiBuilder builder, boolean smart, int pin, IElementType... tokens) {
     ErrorState state = ErrorState.get(builder);
-    if (state.completionState != null && state.predicateCount == 0) {
+    if (state.completionState != null && state.predicateSign) {
       addCompletionVariant(builder, state.completionState, tokens);
     }
     // suppress single token completion
@@ -298,7 +298,7 @@ public class GeneratedParserUtilBase {
   private static void addCompletionVariantSmart(PsiBuilder builder, Object token) {
     ErrorState state = ErrorState.get(builder);
     CompletionState completionState = state.completionState;
-    if (completionState != null && state.predicateCount == 0) {
+    if (completionState != null && state.predicateSign) {
       addCompletionVariant(builder, completionState, token);
     }
   }
@@ -767,23 +767,25 @@ public class GeneratedParserUtilBase {
     MyList<Variant> unexpected = new MyList<Variant>(INITIAL_VARIANTS_SIZE / 10);
 
     final LimitedPool<Variant> VARIANTS = new LimitedPool<Variant>(VARIANTS_POOL_SIZE, new LimitedPool.ObjectFactory<Variant>() {
+      @NotNull
       @Override
       public Variant create() {
         return new Variant();
       }
 
       @Override
-      public void cleanup(final Variant o) {
+      public void cleanup(Variant o) {
       }
     });
     final LimitedPool<Frame> FRAMES = new LimitedPool<Frame>(FRAMES_POOL_SIZE, new LimitedPool.ObjectFactory<Frame>() {
+      @NotNull
       @Override
       public Frame create() {
         return new Frame();
       }
 
       @Override
-      public void cleanup(final Frame o) {
+      public void cleanup(Frame o) {
       }
     });
 

@@ -452,7 +452,7 @@ BnfFile:BnfGrammar.bnf
       PsiWhiteSpace(' ')
       PsiElement(::=)('::=')
       PsiWhiteSpace(' ')
-      BNF_CHOICE: 'private' | 'external' | 'meta ... r' | 'left' | 'fake'
+      BNF_CHOICE: 'private' | 'external' | 'meta ... ' | 'upper' | 'fake'
         BNF_STRING_LITERAL_EXPRESSION: 'private'
           PsiElement(string)(''private'')
         PsiWhiteSpace(' ')
@@ -475,6 +475,11 @@ BnfFile:BnfGrammar.bnf
         PsiWhiteSpace(' ')
         BNF_STRING_LITERAL_EXPRESSION: 'left'
           PsiElement(string)(''left'')
+        PsiWhiteSpace(' ')
+        PsiElement(|)('|')
+        PsiWhiteSpace(' ')
+        BNF_STRING_LITERAL_EXPRESSION: 'upper'
+          PsiElement(string)(''upper'')
         PsiWhiteSpace(' ')
         PsiElement(|)('|')
         PsiWhiteSpace(' ')

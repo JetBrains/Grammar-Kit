@@ -24,6 +24,7 @@ public class BnfLivePreviewParserTest extends BnfGeneratorTestCase {
   public void testLivePreviewTutorial() throws IOException { doTest("LivePreviewTutorial.bnf"); }
   public void testAutoRecovery() throws IOException { doTest("AutoRecovery.bnf"); }
   public void testExprParser() throws IOException { doTest("../generator/ExprParser.bnf"); }
+  public void testUpperRules() throws IOException { doTest("../generator/UpperRules.bnf"); }
 
   @Override
   protected void doTest(String grammarFile) throws IOException {

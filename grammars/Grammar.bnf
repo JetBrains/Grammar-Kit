@@ -64,7 +64,7 @@ private grammar_element_recover::=!('{'|rule_start)
 rule ::= rule_start expression attrs? ';'? {pin=2}
 private rule_start ::= modifier* id '::='
 modifier ::= 'private' | 'external' | 'meta'
-  | 'inner' | 'left' | 'fake'
+  | 'inner' | 'left' | 'upper' | 'fake'
 
 attrs ::= '{' attr * '}' {pin=1}
 attr ::= attr_start attr_value ';'? {

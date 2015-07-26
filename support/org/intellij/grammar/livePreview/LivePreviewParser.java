@@ -163,6 +163,7 @@ public class LivePreviewParser implements PsiParser {
     boolean isPrivate = !(isRule || firstNonTrivial) || ParserGeneratorUtil.Rule.isPrivate(rule) || myGrammarRoot == rule;
     boolean isLeft = firstNonTrivial && ParserGeneratorUtil.Rule.isLeft(rule);
     boolean isLeftInner = isLeft && (isPrivate || ParserGeneratorUtil.Rule.isInner(rule));
+    boolean isBranch = !isPrivate && Rule.isUpper(rule);
     String recoverWhile = firstNonTrivial ? getAttribute(rule, KnownAttribute.RECOVER_WHILE) : null;
     boolean canCollapse = !isPrivate && (!isLeft || isLeftInner) && firstNonTrivial && myGraphHelper.canCollapse(rule);
 
@@ -211,6 +212,7 @@ public class LivePreviewParser implements PsiParser {
     else if (isLeft) modifiers |= _LEFT_;
     if (type == BNF_OP_AND) modifiers |= _AND_;
     else if (type == BNF_OP_NOT) modifiers |= _NOT_;
+    if (isBranch) modifiers |= _UPPER_;
 
     PsiBuilder.Marker marker_ = null;
     boolean sectionRequired = !alwaysTrue || !isPrivate || isLeft || recoverWhile != null;

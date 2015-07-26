@@ -35,6 +35,7 @@ public class BnfGeneratorTest extends BnfGeneratorTestCase {
   public void testTokenSequence() throws Exception { doGenTest(false); }
   public void testStub() throws Exception { doGenTest(true); }
   public void testAutoRecovery() throws Exception { doGenTest(true); }
+  public void testUpperRules() throws Exception { doGenTest(true); }
   public void testFixes() throws Exception { doGenTest(true); }
 
   public void testEmpty() throws Exception {

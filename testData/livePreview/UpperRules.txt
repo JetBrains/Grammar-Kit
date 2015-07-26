@@ -1,0 +1,13 @@
+FILE
+  ASTWrapperPsiElement(ROOT)
+    ASTWrapperPsiElement(ABC_ONE)
+      ASTWrapperPsiElement(PREFIX)
+        PsiElement(A)('A')
+      PsiWhiteSpace(' ')
+      PsiElement(B)('B')
+    PsiWhiteSpace(' ')
+    ASTWrapperPsiElement(ABC_TWO)
+      ASTWrapperPsiElement(PREFIX)
+        PsiElement(A)('A')
+      PsiWhiteSpace(' ')
+      PsiElement(C)('C')

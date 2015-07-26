@@ -113,7 +113,7 @@ public class GeneratedParserUtilBase {
     if (!goodMarker) return false;
     ErrorState state = ErrorState.get(builder);
 
-    return !state.frameStack.isEmpty();
+    return state.currentFrame != null;
   }
 
   public static TokenSet create_token_set_(IElementType... tokenTypes) {
@@ -393,6 +393,7 @@ public class GeneratedParserUtilBase {
   public static final int _LEFT_INNER_ = 0x4;
   public static final int _AND_        = 0x8;
   public static final int _NOT_        = 0x10;
+  public static final int _UPPER_      = 0x20;
 
   // simple enter/exit methods pair that doesn't require frame object
   public static PsiBuilder.Marker enter_section_(PsiBuilder builder) {
@@ -403,7 +404,7 @@ public class GeneratedParserUtilBase {
                                    PsiBuilder.Marker marker,
                                    @Nullable IElementType elementType,
                                    boolean result) {
-    close_marker_impl_(ErrorState.get(builder).frameStack.peekLast(), marker, elementType, result);
+    close_marker_impl_(ErrorState.get(builder).currentFrame, marker, elementType, result);
   }
 
   // complex enter/exit methods pair with frame object
@@ -416,7 +417,7 @@ public class GeneratedParserUtilBase {
   private static void enter_section_impl_(PsiBuilder builder, int level, int modifiers, @Nullable String frameName) {
     ErrorState state = ErrorState.get(builder);
     Frame frame = state.FRAMES.alloc().init(builder, state, level, modifiers, frameName);
-    Frame prevFrame = state.frameStack.peekLast();
+    Frame prevFrame = state.currentFrame;
     if (prevFrame != null && prevFrame.errorReportedAt > frame.position) {
       // report error for previous unsuccessful frame
       reportError(builder, state, frame, null, true, false);
@@ -427,7 +428,7 @@ public class GeneratedParserUtilBase {
         frame.leftMarker = left;
       }
     }
-    state.frameStack.add(frame);
+    state.currentFrame = frame;
     if ((modifiers & _AND_) != 0) {
       if (state.predicateCount == 0 && !state.predicateSign) {
         throw new AssertionError("Incorrect false predicate sign");
@@ -454,7 +455,9 @@ public class GeneratedParserUtilBase {
                                    @Nullable Parser eatMore) {
     ErrorState state = ErrorState.get(builder);
 
-    Frame frame = state.frameStack.pollLast();
+    Frame frame = state.currentFrame;
+    state.currentFrame = frame == null ? null : frame.parentFrame;
+    if (frame != null && frame.branchType != null) elementType = frame.branchType;
     if (frame == null || level != frame.level) {
       LOG.error("Unbalanced error section: got " + frame + ", expected level " + level);
       if (frame != null) state.FRAMES.recycle(frame);
@@ -466,11 +469,11 @@ public class GeneratedParserUtilBase {
       close_marker_impl_(frame, marker, null, false);
       state.predicateCount--;
       if ((frame.modifiers & _NOT_) != 0) state.predicateSign = !state.predicateSign;
-      state.FRAMES.recycle(frame);
-      return;
     }
-    close_frame_impl_(state, frame, builder, marker, elementType, result, pinned);
-    exit_section_impl_(state, frame, builder, elementType, result, pinned, eatMore);
+    else {
+      close_frame_impl_(state, frame, builder, marker, elementType, result, pinned);
+      exit_section_impl_(state, frame, builder, elementType, result, pinned, eatMore);
+    }
     state.FRAMES.recycle(frame);
   }
 
@@ -554,7 +557,7 @@ public class GeneratedParserUtilBase {
       }
     }
     // propagate errorReportedAt up the stack to avoid duplicate reporting
-    Frame prevFrame = willFail && eatMore == null ? null : state.frameStack.peekLast();
+    Frame prevFrame = willFail && eatMore == null ? null : state.currentFrame;
     if (prevFrame != null && prevFrame.errorReportedAt < frame.errorReportedAt) {
       prevFrame.errorReportedAt = frame.errorReportedAt;
     }
@@ -579,7 +582,11 @@ public class GeneratedParserUtilBase {
         }
       }
       if (result || pinned) {
-        if ((frame.modifiers & _LEFT_INNER_) != 0 && frame.leftMarker != null) {
+        if ((frame.modifiers & _UPPER_) != 0) {
+          marker.drop();
+          frame.parentFrame.branchType = elementType;
+        }
+        else if ((frame.modifiers & _LEFT_INNER_) != 0 && frame.leftMarker != null) {
           marker.done(elementType);
           frame.leftMarker.precede().done(((LighterASTNode)frame.leftMarker).getTokenType());
           frame.leftMarker.drop();
@@ -622,8 +629,8 @@ public class GeneratedParserUtilBase {
     else {
       if (frame != null) {
         int position = ((PsiBuilderImpl.ProductionMarker)marker).getStartIndex();
-        if (frame.errorReportedAt > position) {
-          frame.errorReportedAt = frame.errorReportedAtPrev;
+        if (frame.errorReportedAt > position && frame.parentFrame != null) {
+          frame.errorReportedAt = frame.parentFrame.errorReportedAt;
         }
       }
       marker.rollbackTo();
@@ -636,7 +643,7 @@ public class GeneratedParserUtilBase {
   }
 
   public static void report_error_(PsiBuilder builder, ErrorState state, boolean advance) {
-    Frame frame = state.frameStack.isEmpty()? null : state.frameStack.getLast();
+    Frame frame = state.currentFrame;
     if (frame == null) {
       LOG.error("unbalanced enter/exit section call: got null");
       return;
@@ -755,7 +762,7 @@ public class GeneratedParserUtilBase {
     int predicateCount;
     boolean predicateSign = true;
     boolean suppressErrors;
-    public final LinkedList<Frame> frameStack = new LinkedList<Frame>();
+    public Frame currentFrame;
     public CompletionState completionState;
 
     private boolean caseSensitive;
@@ -876,6 +883,7 @@ public class GeneratedParserUtilBase {
   }
 
   public static class Frame {
+    public Frame parentFrame;
     public int offset;
     public int position;
     public int level;
@@ -883,13 +891,14 @@ public class GeneratedParserUtilBase {
     public String name;
     public int variantCount;
     public int errorReportedAt;
-    public int errorReportedAtPrev;
     public PsiBuilder.Marker leftMarker;
+    public IElementType branchType;
 
     public Frame() {
     }
 
     public Frame init(PsiBuilder builder, ErrorState state, int level_, int modifiers_, String name_) {
+      parentFrame = state.currentFrame;
       offset = builder.getCurrentOffset();
       position = builder.rawTokenIndex();
       level = level_;
@@ -898,9 +907,8 @@ public class GeneratedParserUtilBase {
       variantCount = state.variants.size();
       errorReportedAt = -1;
 
-      Frame prev = state.frameStack.peekLast();
-      errorReportedAtPrev = prev == null? -1 : prev.errorReportedAt;
       leftMarker = null;
+      branchType = null;
       return this;
     }
 
@@ -911,7 +919,8 @@ public class GeneratedParserUtilBase {
         ((modifiers & _LEFT_) != 0? "_LEFT_, ": "") +
         ((modifiers & _LEFT_INNER_) != 0? "_LEFT_INNER_, ": "") +
         ((modifiers & _AND_) != 0? "_AND_, ": "") +
-        ((modifiers & _NOT_) != 0? "_NOT_, ": "");
+        ((modifiers & _NOT_) != 0? "_NOT_, ": "") +
+        ((modifiers & _UPPER_) != 0 ? "_UPPER_, " : "");
       return String.format("{%s:%s:%d, %d, %s%s}", offset, position, level, errorReportedAt, mod, name);
     }
   }

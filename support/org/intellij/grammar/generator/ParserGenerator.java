@@ -573,6 +573,7 @@ public class ParserGenerator {
     boolean isPrivate = !(isRule || firstNonTrivial) || Rule.isPrivate(rule) || myGrammarRoot.equals(rule.getName());
     boolean isLeft = firstNonTrivial && Rule.isLeft(rule);
     boolean isLeftInner = isLeft && (isPrivate || Rule.isInner(rule));
+    boolean isBranch = !isPrivate && Rule.isUpper(rule);
     final String recoverWhile = firstNonTrivial ? ObjectUtils.chooseNotNull(
       getAttribute(rule, KnownAttribute.RECOVER_WHILE.alias("recoverUntil")),
       getAttribute(rule, KnownAttribute.RECOVER_WHILE)) : null;
@@ -642,6 +643,7 @@ public class ParserGenerator {
     else if (isLeft) modifierList.add("_LEFT_");
     if (type == BNF_OP_AND) modifierList.add("_AND_");
     else if (type == BNF_OP_NOT) modifierList.add("_NOT_");
+    if (isBranch) modifierList.add("_UPPER_");
     if (modifierList.isEmpty() && (pinned || frameName != null)) modifierList.add("_NONE_");
     boolean sectionRequired = !alwaysTrue || !isPrivate || isLeft || recoverWhile != null;
     boolean sectionRequiredSimple = sectionRequired && modifierList.isEmpty() && recoverWhile == null;

@@ -44,7 +44,7 @@ public class BnfFlipChoiceIntention implements IntentionAction {
   @NotNull
   @Override
   public String getFamilyName() {
-    return "Flip Choice Intention";
+    return "Flip choice intention";
   }
 
   @Override
@@ -63,7 +63,7 @@ public class BnfFlipChoiceIntention implements IntentionAction {
   }
   
   @Nullable
-  private Pair<PsiElement, PsiElement> getArguments(PsiFile file, int offset) {
+  private static Pair<PsiElement, PsiElement> getArguments(PsiFile file, int offset) {
     PsiElement element = file.getViewProvider().findElementAt(offset);
     final BnfChoice choice = PsiTreeUtil.getParentOfType(element, BnfChoice.class);
     if (choice == null) return null;
@@ -71,7 +71,7 @@ public class BnfFlipChoiceIntention implements IntentionAction {
       if (!(cur instanceof BnfExpression) ) continue;
       int start = prev == null? choice.getTextRange().getStartOffset() : prev.getTextRange().getEndOffset();
       int end = cur.getTextRange().getStartOffset();
-      if (start <= offset && offset <= end) return Pair.create(cur, prev);
+      if (start <= offset && offset <= end) return prev == null ? null : Pair.create(cur, prev);
       prev = cur;
     }
     return null;

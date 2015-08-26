@@ -8,4 +8,5 @@ JFLEX_FILE
     <empty list>
   PsiElement(%%)('%%')
   JFlexLexicalRulesSectionImpl(FLEX_LEXICAL_RULES_SECTION)
-    <empty list>
+    PsiErrorElement:<rule> expected, unexpected end of file
+      <empty list>

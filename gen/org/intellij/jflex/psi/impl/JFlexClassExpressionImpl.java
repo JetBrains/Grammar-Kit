@@ -30,8 +30,12 @@ public class JFlexClassExpressionImpl extends JFlexExpressionImpl implements JFl
     super(node);
   }
 
+  public void accept(@NotNull JFlexVisitor visitor) {
+    visitor.visitClassExpression(this);
+  }
+
   public void accept(@NotNull PsiElementVisitor visitor) {
-    if (visitor instanceof JFlexVisitor) ((JFlexVisitor)visitor).visitClassExpression(this);
+    if (visitor instanceof JFlexVisitor) accept((JFlexVisitor)visitor);
     else super.accept(visitor);
   }
 

@@ -30,8 +30,12 @@ public class BnfAttrImpl extends BnfNamedElementImpl implements BnfAttr {
     super(node);
   }
 
+  public <R> R accept(@NotNull BnfVisitor<R> visitor) {
+    return visitor.visitAttr(this);
+  }
+
   public void accept(@NotNull PsiElementVisitor visitor) {
-    if (visitor instanceof BnfVisitor) ((BnfVisitor)visitor).visitAttr(this);
+    if (visitor instanceof BnfVisitor) accept((BnfVisitor)visitor);
     else super.accept(visitor);
   }
 

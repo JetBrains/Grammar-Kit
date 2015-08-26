@@ -30,8 +30,12 @@ public class BnfQuantifierImpl extends BnfCompositeElementImpl implements BnfQua
     super(node);
   }
 
+  public <R> R accept(@NotNull BnfVisitor<R> visitor) {
+    return visitor.visitQuantifier(this);
+  }
+
   public void accept(@NotNull PsiElementVisitor visitor) {
-    if (visitor instanceof BnfVisitor) ((BnfVisitor)visitor).visitQuantifier(this);
+    if (visitor instanceof BnfVisitor) accept((BnfVisitor)visitor);
     else super.accept(visitor);
   }
 

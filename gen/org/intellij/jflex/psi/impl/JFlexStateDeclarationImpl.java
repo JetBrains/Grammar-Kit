@@ -30,8 +30,12 @@ public class JFlexStateDeclarationImpl extends JFlexCompositeElementImpl impleme
     super(node);
   }
 
+  public void accept(@NotNull JFlexVisitor visitor) {
+    visitor.visitStateDeclaration(this);
+  }
+
   public void accept(@NotNull PsiElementVisitor visitor) {
-    if (visitor instanceof JFlexVisitor) ((JFlexVisitor)visitor).visitStateDeclaration(this);
+    if (visitor instanceof JFlexVisitor) accept((JFlexVisitor)visitor);
     else super.accept(visitor);
   }
 

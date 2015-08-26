@@ -30,8 +30,12 @@ public class JFlexPredefinedClassExpressionImpl extends JFlexExpressionImpl impl
     super(node);
   }
 
+  public void accept(@NotNull JFlexVisitor visitor) {
+    visitor.visitPredefinedClassExpression(this);
+  }
+
   public void accept(@NotNull PsiElementVisitor visitor) {
-    if (visitor instanceof JFlexVisitor) ((JFlexVisitor)visitor).visitPredefinedClassExpression(this);
+    if (visitor instanceof JFlexVisitor) accept((JFlexVisitor)visitor);
     else super.accept(visitor);
   }
 

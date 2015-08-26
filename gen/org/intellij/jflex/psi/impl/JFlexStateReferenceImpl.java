@@ -31,8 +31,12 @@ public class JFlexStateReferenceImpl extends JFlexCompositeElementImpl implement
     super(node);
   }
 
+  public void accept(@NotNull JFlexVisitor visitor) {
+    visitor.visitStateReference(this);
+  }
+
   public void accept(@NotNull PsiElementVisitor visitor) {
-    if (visitor instanceof JFlexVisitor) ((JFlexVisitor)visitor).visitStateReference(this);
+    if (visitor instanceof JFlexVisitor) accept((JFlexVisitor)visitor);
     else super.accept(visitor);
   }
 

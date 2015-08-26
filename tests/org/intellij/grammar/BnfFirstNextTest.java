@@ -17,6 +17,16 @@ import static org.intellij.grammar.analysis.BnfFirstNextAnalyzer.*;
  */
 public class BnfFirstNextTest extends LightPlatformCodeInsightFixtureTestCase {
 
+  @Override
+  protected void setUp() throws Exception {
+    try {
+      super.setUp();
+    }
+    catch (AssertionError e) {
+      super.setUp();
+    }
+  }
+
   public void testSeq() { doFirstTest("r ::= A B", "A"); }
   public void testChoice() { doFirstTest("r ::= A | B", "A", "B"); }
   public void testSeqOpt() { doFirstTest("r ::= [A] B", "A", "B"); }
@@ -56,6 +66,8 @@ public class BnfFirstNextTest extends LightPlatformCodeInsightFixtureTestCase {
   public void testExternalPredicate2() { doFirstTest("r ::= A | B | &isHql X external isHql ::= func", "A", "B", "X"); }
 
   public void testRecursivePredicateTest() { doFirstTest("r ::= p A s ::= p r p ::= &<<A>>", "A"); }
+
+  public void testPinnedToReport() { doFirstTest("r ::= B | s s ::= &A B {pin=1}", "A", "B"); }
 
   private void doFirstTest(String text, String... expected) { doTest(text, true, expected); }
   private void doNextTest(String text, String... expected) { doTest(text, false, expected); }

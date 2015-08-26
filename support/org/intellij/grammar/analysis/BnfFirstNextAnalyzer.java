@@ -25,6 +25,7 @@ import com.intellij.psi.tree.IElementType;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.util.CommonProcessors;
 import com.intellij.util.containers.ContainerUtil;
+import com.pty4j.util.Pair;
 import gnu.trove.THashMap;
 import gnu.trove.THashSet;
 import org.intellij.grammar.KnownAttribute;
@@ -174,7 +175,7 @@ public class BnfFirstNextAnalyzer {
       if (!result.remove(BNF_MATCHES_EOF)) break;
       matchesEof |= pinApplied;
       BnfExpression e = list.get(i);
-      calcFirstInner(e, result, visited, i < size - 1? list.subList(i + 1, size) : null);
+      calcFirstInner(e, result, visited, i < size - 1 ? Pair.create(pinned.contains(e), list.subList(i + 1, size)) : null);
       pinApplied |= pinned.contains(e);
     }
     // add empty back if was there before
@@ -186,7 +187,7 @@ public class BnfFirstNextAnalyzer {
     return calcFirstInner(expression, result, visited, null);
   }
 
-  public Set<BnfExpression> calcFirstInner(BnfExpression expression, Set<BnfExpression> result, Set<BnfExpression> visited, @Nullable List<BnfExpression> forcedNext) {
+  public Set<BnfExpression> calcFirstInner(BnfExpression expression, Set<BnfExpression> result, Set<BnfExpression> visited, @Nullable Pair<Boolean, List<BnfExpression>> forcedNext) {
     BnfFile file = (BnfFile)expression.getContainingFile();
     if (expression instanceof BnfLiteralExpression) {
       result.add(expression);
@@ -294,7 +295,7 @@ public class BnfFirstNextAnalyzer {
           next = calcNextInner(expression, new THashMap<BnfExpression, BnfExpression>(), visited).keySet();
         }
         else {
-          next = calcSequenceFirstInner(forcedNext, newExprSet(), visited);
+          next = calcSequenceFirstInner(forcedNext.second, newExprSet(), visited);
         }
         visited.remove(predicateExpression);
         if (!skip) {
@@ -307,7 +308,10 @@ public class BnfFirstNextAnalyzer {
         mixed.remove(BNF_MATCHES_EOF);
       }
       else if (elementType == BnfTypes.BNF_OP_AND) {
-        if (!conditions.contains(BNF_MATCHES_EOF)) {
+        if (forcedNext != null && forcedNext.first) {
+          mixed.addAll(conditions);
+        }
+        else if (!conditions.contains(BNF_MATCHES_EOF)) {
           if (next.contains(BNF_MATCHES_ANY)) {
             mixed.addAll(conditions);
           }

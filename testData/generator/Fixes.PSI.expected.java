@@ -176,8 +176,12 @@ public class AExprImpl extends ExprImpl implements AExpr {
     super(node);
   }
 
+  public void accept(@NotNull Visitor visitor) {
+    visitor.visitAExpr(this);
+  }
+
   public void accept(@NotNull PsiElementVisitor visitor) {
-    if (visitor instanceof Visitor) ((Visitor)visitor).visitAExpr(this);
+    if (visitor instanceof Visitor) accept((Visitor)visitor);
     else super.accept(visitor);
   }
 
@@ -207,8 +211,12 @@ public class BExprImpl extends ExprImpl implements BExpr {
     super(node);
   }
 
+  public void accept(@NotNull Visitor visitor) {
+    visitor.visitBExpr(this);
+  }
+
   public void accept(@NotNull PsiElementVisitor visitor) {
-    if (visitor instanceof Visitor) ((Visitor)visitor).visitBExpr(this);
+    if (visitor instanceof Visitor) accept((Visitor)visitor);
     else super.accept(visitor);
   }
 
@@ -239,8 +247,12 @@ public class ErlListImpl extends ASTWrapperPsiElement implements ErlList {
     super(node);
   }
 
+  public void accept(@NotNull Visitor visitor) {
+    visitor.visitErlList(this);
+  }
+
   public void accept(@NotNull PsiElementVisitor visitor) {
-    if (visitor instanceof Visitor) ((Visitor)visitor).visitErlList(this);
+    if (visitor instanceof Visitor) accept((Visitor)visitor);
     else super.accept(visitor);
   }
 
@@ -283,8 +295,12 @@ public class ExprImpl extends ASTWrapperPsiElement implements Expr {
     super(node);
   }
 
+  public void accept(@NotNull Visitor visitor) {
+    visitor.visitExpr(this);
+  }
+
   public void accept(@NotNull PsiElementVisitor visitor) {
-    if (visitor instanceof Visitor) ((Visitor)visitor).visitExpr(this);
+    if (visitor instanceof Visitor) accept((Visitor)visitor);
     else super.accept(visitor);
   }
 
@@ -308,8 +324,12 @@ public class LeftExprImpl extends ExprImpl implements LeftExpr {
     super(node);
   }
 
+  public void accept(@NotNull Visitor visitor) {
+    visitor.visitLeftExpr(this);
+  }
+
   public void accept(@NotNull PsiElementVisitor visitor) {
-    if (visitor instanceof Visitor) ((Visitor)visitor).visitLeftExpr(this);
+    if (visitor instanceof Visitor) accept((Visitor)visitor);
     else super.accept(visitor);
   }
 
@@ -340,8 +360,12 @@ public class SomeImpl extends ASTWrapperPsiElement implements Some {
     super(node);
   }
 
+  public void accept(@NotNull Visitor visitor) {
+    visitor.visitSome(this);
+  }
+
   public void accept(@NotNull PsiElementVisitor visitor) {
-    if (visitor instanceof Visitor) ((Visitor)visitor).visitSome(this);
+    if (visitor instanceof Visitor) accept((Visitor)visitor);
     else super.accept(visitor);
   }
 
@@ -365,8 +389,12 @@ public class SomeExprImpl extends ExprImpl implements SomeExpr {
     super(node);
   }
 
+  public void accept(@NotNull Visitor visitor) {
+    visitor.visitSomeExpr(this);
+  }
+
   public void accept(@NotNull PsiElementVisitor visitor) {
-    if (visitor instanceof Visitor) ((Visitor)visitor).visitSomeExpr(this);
+    if (visitor instanceof Visitor) accept((Visitor)visitor);
     else super.accept(visitor);
   }
 
@@ -391,8 +419,12 @@ public class SomeSeqImpl extends ASTWrapperPsiElement implements SomeSeq {
     super(node);
   }
 
+  public void accept(@NotNull Visitor visitor) {
+    visitor.visitSomeSeq(this);
+  }
+
   public void accept(@NotNull PsiElementVisitor visitor) {
-    if (visitor instanceof Visitor) ((Visitor)visitor).visitSomeSeq(this);
+    if (visitor instanceof Visitor) accept((Visitor)visitor);
     else super.accept(visitor);
   }
 
@@ -423,8 +455,12 @@ public class WithRecursiveImpl extends ASTWrapperPsiElement implements WithRecur
     super(node);
   }
 
+  public void accept(@NotNull Visitor visitor) {
+    visitor.visitWithRecursive(this);
+  }
+
   public void accept(@NotNull PsiElementVisitor visitor) {
-    if (visitor instanceof Visitor) ((Visitor)visitor).visitWithRecursive(this);
+    if (visitor instanceof Visitor) accept((Visitor)visitor);
     else super.accept(visitor);
   }
 
@@ -455,8 +491,12 @@ public class ZomeImpl extends ASTWrapperPsiElement implements Zome {
     super(node);
   }
 
+  public void accept(@NotNull Visitor visitor) {
+    visitor.visitZome(this);
+  }
+
   public void accept(@NotNull PsiElementVisitor visitor) {
-    if (visitor instanceof Visitor) ((Visitor)visitor).visitZome(this);
+    if (visitor instanceof Visitor) accept((Visitor)visitor);
     else super.accept(visitor);
   }
 

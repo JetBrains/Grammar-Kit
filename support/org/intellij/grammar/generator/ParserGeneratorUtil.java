@@ -543,10 +543,10 @@ public class ParserGeneratorUtil {
     final int[] autoCount = {0};
     final Set<String> origTokenNames = ContainerUtil.newLinkedHashSet(origTokens.values());
 
-    GrammarUtil.visitRecursively(file, true, new BnfVisitor() {
+    BnfVisitor<Void> visitor = new BnfVisitor<Void>() {
 
       @Override
-      public void visitStringLiteralExpression(@NotNull BnfStringLiteralExpression o) {
+      public Void visitStringLiteralExpression(@NotNull BnfStringLiteralExpression o) {
         String text = o.getText();
         String tokenText = StringUtil.stripQuotesAroundValue(text);
         // add auto-XXX token for all unmatched strings to avoid BAD_CHARACTER's
@@ -561,19 +561,24 @@ public class ParserGeneratorUtil {
         else {
           ContainerUtil.addIfNotNull(usedNames, origTokens.get(tokenText));
         }
+        return null;
       }
 
       @Override
-      public void visitReferenceOrToken(@NotNull BnfReferenceOrToken o) {
-        if (GrammarUtil.isExternalReference(o)) return;
+      public Void visitReferenceOrToken(@NotNull BnfReferenceOrToken o) {
+        if (GrammarUtil.isExternalReference(o)) return null;
         BnfRule rule = o.resolveRule();
-        if (rule != null) return;
+        if (rule != null) return null;
         String tokenName = o.getText();
         if (usedNames.add(tokenName) && !origTokenNames.contains(tokenName)) {
           map.put(tokenName, tokenName);
         }
+        return null;
       }
-    });
+    };
+    for (BnfExpression o : GrammarUtil.bnfTraverserNoAttrs(file).filter(BnfExpression.class)) {
+      o.accept(visitor);
+    }
     // fix ordering: origTokens go _after_ to handle keywords correctly
     for (String tokenText : origTokens.keySet()) {
       String tokenName = origTokens.get(tokenText);

@@ -127,8 +127,12 @@ public class Element1Impl extends MyStubbedElementBase<Element1Stub> implements 
     super(stub, nodeType);
   }
 
+  public void accept(@NotNull Visitor visitor) {
+    visitor.visitElement1(this);
+  }
+
   public void accept(@NotNull PsiElementVisitor visitor) {
-    if (visitor instanceof Visitor) ((Visitor)visitor).visitElement1(this);
+    if (visitor instanceof Visitor) accept((Visitor)visitor);
     else super.accept(visitor);
   }
 
@@ -158,8 +162,12 @@ public class Element2Impl extends MyStubbedElementBase<Element2Stub> implements 
     super(stub, nodeType);
   }
 
+  public void accept(@NotNull Visitor visitor) {
+    visitor.visitElement2(this);
+  }
+
   public void accept(@NotNull PsiElementVisitor visitor) {
-    if (visitor instanceof Visitor) ((Visitor)visitor).visitElement2(this);
+    if (visitor instanceof Visitor) accept((Visitor)visitor);
     else super.accept(visitor);
   }
 
@@ -188,8 +196,12 @@ public class Element3Impl extends MySubstituted implements Element3 {
     super(stub, nodeType);
   }
 
+  public void accept(@NotNull Visitor visitor) {
+    visitor.visitElement3(this);
+  }
+
   public void accept(@NotNull PsiElementVisitor visitor) {
-    if (visitor instanceof Visitor) ((Visitor)visitor).visitElement3(this);
+    if (visitor instanceof Visitor) accept((Visitor)visitor);
     else super.accept(visitor);
   }
 
@@ -220,8 +232,12 @@ public class Element4Impl extends StubBasedPsiElementBase<Element4Stub> implemen
     super(stub, nodeType);
   }
 
+  public void accept(@NotNull Visitor visitor) {
+    visitor.visitElement4(this);
+  }
+
   public void accept(@NotNull PsiElementVisitor visitor) {
-    if (visitor instanceof Visitor) ((Visitor)visitor).visitElement4(this);
+    if (visitor instanceof Visitor) accept((Visitor)visitor);
     else super.accept(visitor);
   }
 
@@ -246,8 +262,12 @@ public class Element5Impl extends ASTWrapperPsiElement implements Element5 {
     super(node);
   }
 
+  public void accept(@NotNull Visitor visitor) {
+    visitor.visitElement5(this);
+  }
+
   public void accept(@NotNull PsiElementVisitor visitor) {
-    if (visitor instanceof Visitor) ((Visitor)visitor).visitElement5(this);
+    if (visitor instanceof Visitor) accept((Visitor)visitor);
     else super.accept(visitor);
   }
 

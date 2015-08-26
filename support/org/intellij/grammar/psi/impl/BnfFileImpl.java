@@ -20,12 +20,10 @@ import com.intellij.openapi.fileTypes.FileType;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.psi.FileViewProvider;
-import com.intellij.psi.PsiElement;
 import com.intellij.psi.util.CachedValue;
 import com.intellij.psi.util.CachedValueProvider;
 import com.intellij.psi.util.CachedValuesManager;
 import com.intellij.psi.util.PsiTreeUtil;
-import com.intellij.util.Processor;
 import com.intellij.util.containers.ContainerUtil;
 import org.intellij.grammar.BnfFileType;
 import org.intellij.grammar.BnfLanguage;
@@ -146,72 +144,46 @@ public class BnfFileImpl extends PsiFileBase implements BnfFile {
   }
 
   private Map<String, BnfRule> calcRules() {
-    final Map<String, BnfRule> result = ContainerUtil.newLinkedHashMap();
-    GrammarUtil.processChildrenDummyAware(this, new Processor<PsiElement>() {
-      @Override
-      public boolean process(PsiElement psiElement) {
-        String name = psiElement instanceof BnfRule ? ((BnfRule)psiElement).getName() : null;
-        if (name != null && !result.containsKey(name)) {
-          result.put(name, (BnfRule)psiElement);
-        }
-        return true;
+    Map<String, BnfRule> result = ContainerUtil.newLinkedHashMap();
+    for (BnfRule o : GrammarUtil.bnfTraverser(this).filter(BnfRule.class)) {
+      if (!result.containsKey(o.getName())) {
+        result.put(o.getName(), o);
       }
-    });
+    }
     return result;
   }
 
   private List<BnfAttrs> calcAttributes() {
-    final List<BnfAttrs> result = ContainerUtil.newArrayList();
-    GrammarUtil.processChildrenDummyAware(this, new Processor<PsiElement>() {
-      @Override
-      public boolean process(PsiElement psiElement) {
-        if (psiElement instanceof BnfAttrs) result.add((BnfAttrs)psiElement);
-        return true;
-      }
-    });
-    return result;
+    return GrammarUtil.bnfTraverser(this).filter(BnfAttrs.class).toList();
   }
 
   private Map<String, List<AttributeInfo>> calcAttributeValues() {
-    final Map<String, List<AttributeInfo>> result = ContainerUtil.newTroveMap();
-    GrammarUtil.processChildrenDummyAware(this, new Processor<PsiElement>() {
-      @Override
-      public boolean process(PsiElement psiElement) {
-        BnfAttrs attrs = null;
-        boolean isRule = psiElement instanceof BnfRule;
-        if (isRule) attrs = ((BnfRule)psiElement).getAttrs();
-        else if (psiElement instanceof BnfAttrs) attrs = (BnfAttrs)psiElement;
-        if (attrs == null) return true;
-        TextRange baseRange = attrs.getTextRange();
-        List<BnfAttr> attrList = attrs.getAttrList();
+    Map<String, List<AttributeInfo>> result = ContainerUtil.newTroveMap();
+    for (BnfAttrs attrs : GrammarUtil.bnfTraverser(this).filter(BnfAttrs.class)) {
+      boolean isRule = attrs.getParent() instanceof BnfRule;
+      TextRange baseRange = attrs.getTextRange();
+      List<BnfAttr> attrList = attrs.getAttrList();
+      for (int pass = 0; pass < 2; pass ++) {
         for (int i = attrList.size()-1; i >= 0; i --) {
           BnfAttr attr = attrList.get(i);
-          if (attr.getAttrPattern() != null) continue;
-          processAttribute(isRule, baseRange, attr, null);
-        }
-        for (int i = attrList.size()-1; i >= 0; i --) {
-          BnfAttr attr = attrList.get(i);
-          if (attr.getAttrPattern() == null) continue;
-          processAttribute(isRule, baseRange, attr, attr.getAttrPattern());
-        }
-        return true;
-      }
+          BnfAttrPattern attrPattern = attr.getAttrPattern();
+          // pass 0: w/o patterns, pass 1: w/ pattern
+          if ((pass == 0) == (attrPattern != null)) continue;
 
-      private void processAttribute(boolean rule, TextRange baseRange, BnfAttr attr, BnfAttrPattern attrPattern) {
-        Pattern pattern = null;
-        if (attrPattern != null) {
-          BnfLiteralExpression expression = attrPattern.getLiteralExpression();
-          pattern =
-            expression == null ? null : ParserGeneratorUtil.compilePattern(StringUtil.stripQuotesAroundValue(expression.getText()));
+          Pattern pattern = null;
+          if (attrPattern != null) {
+            BnfLiteralExpression expression = attrPattern.getLiteralExpression();
+            pattern = expression == null ? null : ParserGeneratorUtil.compilePattern(StringUtil.stripQuotesAroundValue(expression.getText()));
+          }
+          List<AttributeInfo> list = result.get(attr.getName());
+          if (list == null) result.put(attr.getName(), list = new ArrayList<AttributeInfo>());
+          Object value = ParserGeneratorUtil.getAttributeValue(attr.getExpression());
+          int offset = attr.getTextRange().getStartOffset();
+          int infoOffset = pattern == null? baseRange.getStartOffset() + 1: baseRange.getStartOffset() + (baseRange.getEndOffset() - offset);
+          list.add(new AttributeInfo(offset, infoOffset, !isRule, pattern, value));
         }
-        List<AttributeInfo> list = result.get(attr.getName());
-        if (list == null) result.put(attr.getName(), list = new ArrayList<AttributeInfo>());
-        Object value = ParserGeneratorUtil.getAttributeValue(attr.getExpression());
-        int offset = attr.getTextRange().getStartOffset();
-        int infoOffset = pattern == null? baseRange.getStartOffset() + 1: baseRange.getStartOffset() + (baseRange.getEndOffset() - offset);
-        list.add(new AttributeInfo(offset, infoOffset, !rule, pattern, value));
       }
-    });
+    }
     return result;
   }
 

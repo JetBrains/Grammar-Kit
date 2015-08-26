@@ -51,7 +51,9 @@ import org.intellij.grammar.psi.impl.GrammarUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author greg
@@ -97,27 +99,32 @@ public class BnfIntroduceTokenHandler implements RefactoringActionHandler {
     }
     else return;
 
-    final ArrayList<BnfExpression> allOccurrences = new ArrayList<BnfExpression>();
-    final LinkedHashMap<OccurrencesChooser.ReplaceChoice, List<BnfExpression>> occurrencesMap = new LinkedHashMap<OccurrencesChooser.ReplaceChoice, List<BnfExpression>>();
+    final List<BnfExpression> allOccurrences = ContainerUtil.newArrayList();
+    final Map<OccurrencesChooser.ReplaceChoice, List<BnfExpression>> occurrencesMap = ContainerUtil.newLinkedHashMap();
     occurrencesMap.put(OccurrencesChooser.ReplaceChoice.NO, Collections.singletonList(target));
     occurrencesMap.put(OccurrencesChooser.ReplaceChoice.ALL, allOccurrences);
 
-    GrammarUtil.visitRecursively(file, true, new BnfVisitor() {
+    BnfVisitor visitor = new BnfVisitor<Void>() {
       @Override
-      public void visitStringLiteralExpression(@NotNull BnfStringLiteralExpression o) {
+      public Void visitStringLiteralExpression(@NotNull BnfStringLiteralExpression o) {
         if (tokenText != null && tokenText.equals(o.getText())) {
           allOccurrences.add(o);
         }
+        return null;
       }
 
       @Override
-      public void visitReferenceOrToken(@NotNull BnfReferenceOrToken o) {
-        if (GrammarUtil.isExternalReference(o)) return;
+      public Void visitReferenceOrToken(@NotNull BnfReferenceOrToken o) {
+        if (GrammarUtil.isExternalReference(o)) return null;
         if (tokenName != null && tokenName.equals(o.getText())) {
           allOccurrences.add(o);
         }
+        return null;
       }
-    });
+    };
+    for (PsiElement o : GrammarUtil.bnfTraverserNoAttrs(file)) {
+      o.accept(visitor);
+    }
 
     if (occurrencesMap.get(OccurrencesChooser.ReplaceChoice.ALL).size() <= 1 && !ApplicationManager.getApplication().isUnitTestMode()) {
       occurrencesMap.remove(OccurrencesChooser.ReplaceChoice.ALL);

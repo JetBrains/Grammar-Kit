@@ -591,8 +591,12 @@ public class JFlexChoiceExpressionImpl extends JFlexExpressionImpl implements JF
     super(node);
   }
 
+  public void accept(@NotNull JFlexVisitor visitor) {
+    visitor.visitChoiceExpression(this);
+  }
+
   public void accept(@NotNull PsiElementVisitor visitor) {
-    if (visitor instanceof JFlexVisitor) ((JFlexVisitor)visitor).visitChoiceExpression(this);
+    if (visitor instanceof JFlexVisitor) accept((JFlexVisitor)visitor);
     else super.accept(visitor);
   }
 
@@ -622,8 +626,12 @@ public class JFlexClassExpressionImpl extends JFlexExpressionImpl implements JFl
     super(node);
   }
 
+  public void accept(@NotNull JFlexVisitor visitor) {
+    visitor.visitClassExpression(this);
+  }
+
   public void accept(@NotNull PsiElementVisitor visitor) {
-    if (visitor instanceof JFlexVisitor) ((JFlexVisitor)visitor).visitClassExpression(this);
+    if (visitor instanceof JFlexVisitor) accept((JFlexVisitor)visitor);
     else super.accept(visitor);
   }
 
@@ -647,8 +655,12 @@ public class JFlexDeclarationsSectionImpl extends JFlexCompositeElementImpl impl
     super(node);
   }
 
+  public void accept(@NotNull JFlexVisitor visitor) {
+    visitor.visitDeclarationsSection(this);
+  }
+
   public void accept(@NotNull PsiElementVisitor visitor) {
-    if (visitor instanceof JFlexVisitor) ((JFlexVisitor)visitor).visitDeclarationsSection(this);
+    if (visitor instanceof JFlexVisitor) accept((JFlexVisitor)visitor);
     else super.accept(visitor);
   }
 
@@ -690,8 +702,12 @@ public class JFlexExpressionImpl extends JFlexCompositeElementImpl implements JF
     super(node);
   }
 
+  public void accept(@NotNull JFlexVisitor visitor) {
+    visitor.visitExpression(this);
+  }
+
   public void accept(@NotNull PsiElementVisitor visitor) {
-    if (visitor instanceof JFlexVisitor) ((JFlexVisitor)visitor).visitExpression(this);
+    if (visitor instanceof JFlexVisitor) accept((JFlexVisitor)visitor);
     else super.accept(visitor);
   }
 
@@ -715,8 +731,12 @@ public class JFlexJavaCodeImpl extends JFlexCompositeElementImpl implements JFle
     super(node);
   }
 
+  public void accept(@NotNull JFlexVisitor visitor) {
+    visitor.visitJavaCode(this);
+  }
+
   public void accept(@NotNull PsiElementVisitor visitor) {
-    if (visitor instanceof JFlexVisitor) ((JFlexVisitor)visitor).visitJavaCode(this);
+    if (visitor instanceof JFlexVisitor) accept((JFlexVisitor)visitor);
     else super.accept(visitor);
   }
 
@@ -740,8 +760,12 @@ public class JFlexJavaFqnImpl extends JFlexCompositeElementImpl implements JFlex
     super(node);
   }
 
+  public void accept(@NotNull JFlexVisitor visitor) {
+    visitor.visitJavaFqn(this);
+  }
+
   public void accept(@NotNull PsiElementVisitor visitor) {
-    if (visitor instanceof JFlexVisitor) ((JFlexVisitor)visitor).visitJavaFqn(this);
+    if (visitor instanceof JFlexVisitor) accept((JFlexVisitor)visitor);
     else super.accept(visitor);
   }
 
@@ -765,8 +789,12 @@ public class JFlexLexicalRulesSectionImpl extends JFlexCompositeElementImpl impl
     super(node);
   }
 
+  public void accept(@NotNull JFlexVisitor visitor) {
+    visitor.visitLexicalRulesSection(this);
+  }
+
   public void accept(@NotNull PsiElementVisitor visitor) {
-    if (visitor instanceof JFlexVisitor) ((JFlexVisitor)visitor).visitLexicalRulesSection(this);
+    if (visitor instanceof JFlexVisitor) accept((JFlexVisitor)visitor);
     else super.accept(visitor);
   }
 
@@ -796,8 +824,12 @@ public class JFlexLiteralExpressionImpl extends JFlexExpressionImpl implements J
     super(node);
   }
 
+  public void accept(@NotNull JFlexVisitor visitor) {
+    visitor.visitLiteralExpression(this);
+  }
+
   public void accept(@NotNull PsiElementVisitor visitor) {
-    if (visitor instanceof JFlexVisitor) ((JFlexVisitor)visitor).visitLiteralExpression(this);
+    if (visitor instanceof JFlexVisitor) accept((JFlexVisitor)visitor);
     else super.accept(visitor);
   }
 
@@ -851,8 +883,12 @@ public class JFlexLookAheadImpl extends JFlexCompositeElementImpl implements JFl
     super(node);
   }
 
+  public void accept(@NotNull JFlexVisitor visitor) {
+    visitor.visitLookAhead(this);
+  }
+
   public void accept(@NotNull PsiElementVisitor visitor) {
-    if (visitor instanceof JFlexVisitor) ((JFlexVisitor)visitor).visitLookAhead(this);
+    if (visitor instanceof JFlexVisitor) accept((JFlexVisitor)visitor);
     else super.accept(visitor);
   }
 
@@ -883,8 +919,12 @@ public class JFlexMacroDefinitionImpl extends JFlexCompositeElementImpl implemen
     super(node);
   }
 
+  public void accept(@NotNull JFlexVisitor visitor) {
+    visitor.visitMacroDefinition(this);
+  }
+
   public void accept(@NotNull PsiElementVisitor visitor) {
-    if (visitor instanceof JFlexVisitor) ((JFlexVisitor)visitor).visitMacroDefinition(this);
+    if (visitor instanceof JFlexVisitor) accept((JFlexVisitor)visitor);
     else super.accept(visitor);
   }
 
@@ -935,8 +975,12 @@ public class JFlexMacroRefExpressionImpl extends JFlexExpressionImpl implements 
     super(node);
   }
 
+  public void accept(@NotNull JFlexVisitor visitor) {
+    visitor.visitMacroRefExpression(this);
+  }
+
   public void accept(@NotNull PsiElementVisitor visitor) {
-    if (visitor instanceof JFlexVisitor) ((JFlexVisitor)visitor).visitMacroRefExpression(this);
+    if (visitor instanceof JFlexVisitor) accept((JFlexVisitor)visitor);
     else super.accept(visitor);
   }
 
@@ -967,8 +1011,12 @@ public class JFlexMacroReferenceImpl extends JFlexCompositeElementImpl implement
     super(node);
   }
 
+  public void accept(@NotNull JFlexVisitor visitor) {
+    visitor.visitMacroReference(this);
+  }
+
   public void accept(@NotNull PsiElementVisitor visitor) {
-    if (visitor instanceof JFlexVisitor) ((JFlexVisitor)visitor).visitMacroReference(this);
+    if (visitor instanceof JFlexVisitor) accept((JFlexVisitor)visitor);
     else super.accept(visitor);
   }
 
@@ -1003,8 +1051,12 @@ public class JFlexNotExpressionImpl extends JFlexExpressionImpl implements JFlex
     super(node);
   }
 
+  public void accept(@NotNull JFlexVisitor visitor) {
+    visitor.visitNotExpression(this);
+  }
+
   public void accept(@NotNull PsiElementVisitor visitor) {
-    if (visitor instanceof JFlexVisitor) ((JFlexVisitor)visitor).visitNotExpression(this);
+    if (visitor instanceof JFlexVisitor) accept((JFlexVisitor)visitor);
     else super.accept(visitor);
   }
 
@@ -1034,8 +1086,12 @@ public class JFlexOptionImpl extends JFlexCompositeElementImpl implements JFlexO
     super(node);
   }
 
+  public void accept(@NotNull JFlexVisitor visitor) {
+    visitor.visitOption(this);
+  }
+
   public void accept(@NotNull PsiElementVisitor visitor) {
-    if (visitor instanceof JFlexVisitor) ((JFlexVisitor)visitor).visitOption(this);
+    if (visitor instanceof JFlexVisitor) accept((JFlexVisitor)visitor);
     else super.accept(visitor);
   }
 
@@ -1059,8 +1115,12 @@ public class JFlexParenExpressionImpl extends JFlexExpressionImpl implements JFl
     super(node);
   }
 
+  public void accept(@NotNull JFlexVisitor visitor) {
+    visitor.visitParenExpression(this);
+  }
+
   public void accept(@NotNull PsiElementVisitor visitor) {
-    if (visitor instanceof JFlexVisitor) ((JFlexVisitor)visitor).visitParenExpression(this);
+    if (visitor instanceof JFlexVisitor) accept((JFlexVisitor)visitor);
     else super.accept(visitor);
   }
 
@@ -1090,8 +1150,12 @@ public class JFlexPredefinedClassExpressionImpl extends JFlexExpressionImpl impl
     super(node);
   }
 
+  public void accept(@NotNull JFlexVisitor visitor) {
+    visitor.visitPredefinedClassExpression(this);
+  }
+
   public void accept(@NotNull PsiElementVisitor visitor) {
-    if (visitor instanceof JFlexVisitor) ((JFlexVisitor)visitor).visitPredefinedClassExpression(this);
+    if (visitor instanceof JFlexVisitor) accept((JFlexVisitor)visitor);
     else super.accept(visitor);
   }
 
@@ -1115,8 +1179,12 @@ public class JFlexQuantifierExpressionImpl extends JFlexExpressionImpl implement
     super(node);
   }
 
+  public void accept(@NotNull JFlexVisitor visitor) {
+    visitor.visitQuantifierExpression(this);
+  }
+
   public void accept(@NotNull PsiElementVisitor visitor) {
-    if (visitor instanceof JFlexVisitor) ((JFlexVisitor)visitor).visitQuantifierExpression(this);
+    if (visitor instanceof JFlexVisitor) accept((JFlexVisitor)visitor);
     else super.accept(visitor);
   }
 
@@ -1146,8 +1214,12 @@ public class JFlexRuleImpl extends JFlexCompositeElementImpl implements JFlexRul
     super(node);
   }
 
+  public void accept(@NotNull JFlexVisitor visitor) {
+    visitor.visitRule(this);
+  }
+
   public void accept(@NotNull PsiElementVisitor visitor) {
-    if (visitor instanceof JFlexVisitor) ((JFlexVisitor)visitor).visitRule(this);
+    if (visitor instanceof JFlexVisitor) accept((JFlexVisitor)visitor);
     else super.accept(visitor);
   }
 
@@ -1201,8 +1273,12 @@ public class JFlexSequenceExpressionImpl extends JFlexExpressionImpl implements 
     super(node);
   }
 
+  public void accept(@NotNull JFlexVisitor visitor) {
+    visitor.visitSequenceExpression(this);
+  }
+
   public void accept(@NotNull PsiElementVisitor visitor) {
-    if (visitor instanceof JFlexVisitor) ((JFlexVisitor)visitor).visitSequenceExpression(this);
+    if (visitor instanceof JFlexVisitor) accept((JFlexVisitor)visitor);
     else super.accept(visitor);
   }
 
@@ -1232,8 +1308,12 @@ public class JFlexStateDeclarationImpl extends JFlexCompositeElementImpl impleme
     super(node);
   }
 
+  public void accept(@NotNull JFlexVisitor visitor) {
+    visitor.visitStateDeclaration(this);
+  }
+
   public void accept(@NotNull PsiElementVisitor visitor) {
-    if (visitor instanceof JFlexVisitor) ((JFlexVisitor)visitor).visitStateDeclaration(this);
+    if (visitor instanceof JFlexVisitor) accept((JFlexVisitor)visitor);
     else super.accept(visitor);
   }
 
@@ -1264,8 +1344,12 @@ public class JFlexStateDefinitionImpl extends JFlexCompositeElementImpl implemen
     super(node);
   }
 
+  public void accept(@NotNull JFlexVisitor visitor) {
+    visitor.visitStateDefinition(this);
+  }
+
   public void accept(@NotNull PsiElementVisitor visitor) {
-    if (visitor instanceof JFlexVisitor) ((JFlexVisitor)visitor).visitStateDefinition(this);
+    if (visitor instanceof JFlexVisitor) accept((JFlexVisitor)visitor);
     else super.accept(visitor);
   }
 
@@ -1311,8 +1395,12 @@ public class JFlexStateReferenceImpl extends JFlexCompositeElementImpl implement
     super(node);
   }
 
+  public void accept(@NotNull JFlexVisitor visitor) {
+    visitor.visitStateReference(this);
+  }
+
   public void accept(@NotNull PsiElementVisitor visitor) {
-    if (visitor instanceof JFlexVisitor) ((JFlexVisitor)visitor).visitStateReference(this);
+    if (visitor instanceof JFlexVisitor) accept((JFlexVisitor)visitor);
     else super.accept(visitor);
   }
 
@@ -1347,8 +1435,12 @@ public class JFlexUserCodeSectionImpl extends JFlexCompositeElementImpl implemen
     super(node);
   }
 
+  public void accept(@NotNull JFlexVisitor visitor) {
+    visitor.visitUserCodeSection(this);
+  }
+
   public void accept(@NotNull PsiElementVisitor visitor) {
-    if (visitor instanceof JFlexVisitor) ((JFlexVisitor)visitor).visitUserCodeSection(this);
+    if (visitor instanceof JFlexVisitor) accept((JFlexVisitor)visitor);
     else super.accept(visitor);
   }
 

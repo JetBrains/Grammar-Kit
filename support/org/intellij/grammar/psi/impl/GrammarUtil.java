@@ -16,9 +16,10 @@
 package org.intellij.grammar.psi.impl;
 
 import com.intellij.openapi.util.Comparing;
+import com.intellij.openapi.util.Conditions;
 import com.intellij.openapi.util.Ref;
 import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiRecursiveElementWalkingVisitor;
+import com.intellij.psi.SyntaxTraverser;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.util.PairProcessor;
 import com.intellij.util.Processor;
@@ -33,6 +34,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+import static com.intellij.psi.SyntaxTraverser.psiTraverser;
 import static org.intellij.grammar.generator.ParserGeneratorUtil.*;
 import static org.intellij.grammar.psi.BnfTypes.BNF_SEQUENCE;
 
@@ -102,23 +104,16 @@ public class GrammarUtil {
 
   public static List<String> collectExtraArguments(BnfRule rule, BnfExpression expression) {
     if (!ParserGeneratorUtil.Rule.isMeta(rule) && !ParserGeneratorUtil.Rule.isExternal(rule)) return Collections.emptyList();
-    final SmartList<String> result = new SmartList<String>();
-    expression.accept(new PsiRecursiveElementWalkingVisitor() {
-      @Override
-      public void visitElement(PsiElement element) {
-        if (element instanceof BnfExternalExpression) {
-          BnfExternalExpression expr = (BnfExternalExpression)element;
-          List<BnfExpression> list = expr.getExpressionList();
-          if (list.size() == 1) {
-            String text = "<<"+list.get(0).getText() +">>";
-            if (!result.contains(text)) {
-              result.add(text);
-            }
-          }
+    SmartList<String> result = new SmartList<String>();
+    for (BnfExternalExpression o : bnfTraverserNoAttrs(expression).filter(BnfExternalExpression.class)) {
+      List<BnfExpression> list = o.getExpressionList();
+      if (list.size() == 1) {
+        String text = "<<"+list.get(0).getText() +">>";
+        if (!result.contains(text)) {
+          result.add(text);
         }
-        super.visitElement(element);
       }
-    });
+    }
     return result;
   }
 
@@ -175,30 +170,14 @@ public class GrammarUtil {
            tree instanceof BnfExternalExpression;
   }
 
-  public static boolean processChildrenDummyAware(PsiElement element, final Processor<PsiElement> processor) {
-    return new Processor<PsiElement>() {
-      @Override
-      public boolean process(PsiElement psiElement) {
-        for (PsiElement child = psiElement.getFirstChild(); child != null; child = child.getNextSibling()) {
-          if (child instanceof GeneratedParserUtilBase.DummyBlock) {
-            if (!process(child)) return false;
-          }
-          else if (!processor.process(child)) return false;
-        }
-        return true;
-      }
-    }.process(element);
+  public static SyntaxTraverser<PsiElement> bnfTraverser(PsiElement root) {
+    return psiTraverser().withRoot(root).
+      forceExpandAndSkip(Conditions.instanceOf(GeneratedParserUtilBase.DummyBlock.class)).
+      filter(Conditions.instanceOf(BnfCompositeElement.class));
   }
 
-  public static void visitRecursively(PsiElement element, final boolean skipAttrs, final BnfVisitor visitor) {
-    element.acceptChildren(new PsiRecursiveElementWalkingVisitor() {
-      @Override
-      public void visitElement(PsiElement element) {
-        if (skipAttrs && element instanceof BnfAttrs) return;
-        element.accept(visitor);
-        super.visitElement(element);
-      }
-    });
+  public static SyntaxTraverser<PsiElement> bnfTraverserNoAttrs(PsiElement root) {
+    return bnfTraverser(root).forceExclude(Conditions.instanceOf(BnfAttrs.class));
   }
 
   public static String getMethodName(BnfRule rule, PsiElement element) {

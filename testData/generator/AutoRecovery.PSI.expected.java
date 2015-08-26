@@ -76,8 +76,12 @@ public class ItemImpl extends ASTWrapperPsiElement implements Item {
     super(node);
   }
 
+  public void accept(@NotNull Visitor visitor) {
+    visitor.visitItem(this);
+  }
+
   public void accept(@NotNull PsiElementVisitor visitor) {
-    if (visitor instanceof Visitor) ((Visitor)visitor).visitItem(this);
+    if (visitor instanceof Visitor) accept((Visitor)visitor);
     else super.accept(visitor);
   }
 
@@ -107,8 +111,12 @@ public class ListImpl extends ASTWrapperPsiElement implements List {
     super(node);
   }
 
+  public void accept(@NotNull Visitor visitor) {
+    visitor.visitList(this);
+  }
+
   public void accept(@NotNull PsiElementVisitor visitor) {
-    if (visitor instanceof Visitor) ((Visitor)visitor).visitList(this);
+    if (visitor instanceof Visitor) accept((Visitor)visitor);
     else super.accept(visitor);
   }
 

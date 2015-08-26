@@ -289,5 +289,10 @@ public abstract class BnfStringImpl extends BnfExpressionImpl implements BnfStri
     public PsiElement getParent() {
       return myExpression.getParent();
     }
+
+    @Override
+    public <R> R accept(@NotNull BnfVisitor<R> visitor) {
+      return null;
+    }
   }
 }

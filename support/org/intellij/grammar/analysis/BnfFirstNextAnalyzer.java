@@ -43,7 +43,7 @@ import java.util.*;
 public class BnfFirstNextAnalyzer {
 
   private static final Logger LOG = Logger.getInstance("org.intellij.grammar.analysis.BnfFirstNextAnalyzer");
-  
+
   public static final String MATCHES_EOF = "-eof-";
   public static final String MATCHES_NOTHING = "-never-matches-";
   public static final String MATCHES_ANY = "-any-";

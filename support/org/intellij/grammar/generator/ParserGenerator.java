@@ -28,6 +28,7 @@ import com.intellij.util.ArrayUtil;
 import com.intellij.util.Function;
 import com.intellij.util.ObjectUtils;
 import com.intellij.util.containers.ContainerUtil;
+import com.intellij.util.containers.JBIterable;
 import com.intellij.util.containers.MultiMap;
 import gnu.trove.THashMap;
 import gnu.trove.THashSet;
@@ -246,13 +247,16 @@ public class ParserGenerator {
     for (BnfRule rule : sortedRules.values()) {
       imports.addAll(getSuperInterfaceNames(myFile, rule, StringUtil.getPackageName(psiClass), myRuleClassPrefix));
     }
-    generateClassHeader(psiClass, imports, "", false, BnfConstants.PSI_ELEMENT_VISITOR_CLASS);
+    String r = G.visitorValue != null ? "<" + G.visitorValue + ">" : "";
+    String t = G.visitorValue != null ? G.visitorValue : "void";
+    String ret = G.visitorValue != null ? "return " : "";
+    generateClassHeader(psiClass + r, imports, "", false, BnfConstants.PSI_ELEMENT_VISITOR_CLASS);
     Set<String> visited = new HashSet<String>();
     Set<String> all = new TreeSet<String>();
     for (BnfRule rule : sortedRules.values()) {
       String methodName = getRulePsiClassName(rule, "");
       visited.add(methodName);
-      out("public void visit" + methodName + "(@NotNull " + getRulePsiClassName(rule, myRuleClassPrefix) + " o) {");
+      out("public " + t + " visit" + methodName + "(@NotNull " + getRulePsiClassName(rule, myRuleClassPrefix) + " o) {");
       boolean first = true;
       for (String top : getSuperInterfaceNames(myFile, rule, "", myRuleClassPrefix)) {
         if (!first && top.equals(superIntf)) continue;
@@ -264,7 +268,7 @@ public class ParserGenerator {
         }
         String text = "visit" + top + "(o);";
         if (first) {
-          out(text);
+          out(ret + text);
         }
         else {
           out("// " + text);
@@ -275,15 +279,16 @@ public class ParserGenerator {
       newLine();
     }
     all.remove(shortSuperIntf);
-    for (String top : ContainerUtil.concat(all, Arrays.asList(shortSuperIntf))) {
+    for (String top : JBIterable.from(all).append(shortSuperIntf)) {
       String methodName = top.startsWith(myRuleClassPrefix) ? top.substring(myRuleClassPrefix.length()) : top;
       if (visited.contains(methodName)) continue;
-      out("public void visit" + methodName + "(@NotNull " + myShortener.fun(top) + " o) {");
+      out("public " + t + " visit" + methodName + "(@NotNull " + myShortener.fun(top) + " o) {");
       if (!methodName.equals(top) && !top.equals(shortSuperIntf)) {
-        out("visit" + (shortSuperIntf.startsWith(myRuleClassPrefix) ? shortSuperIntf.substring(myRuleClassPrefix.length()) : shortSuperIntf) + "(o);");
+        out(ret + "visit" + (shortSuperIntf.startsWith(myRuleClassPrefix) ? shortSuperIntf.substring(myRuleClassPrefix.length()) : shortSuperIntf) + "(o);");
       }
       else {
         out("visitElement(o);");
+        if (G.visitorValue != null) out(ret + "null;");
       }
       out("}");
       newLine();
@@ -471,34 +476,8 @@ public class ParserGenerator {
     String shortClassName = StringUtil.getShortName(className);
     out("package %s;", packageName);
     newLine();
-    final Set<String> realImports = new HashSet<String>();
-    realImports.add(packageName + ".*");
-    Function<String, String> shortener = new Function<String, String>() {
-      @Override
-      public String fun(String s) {
-        boolean changed = false;
-        StringBuilder sb = new StringBuilder();
-        boolean vararg = s.endsWith("...");
-        for (String part : StringUtil.tokenize(new StringTokenizer(StringUtil.trimEnd(s, "..."), TYPE_TEXT_SEPARATORS, true))) {
-          String pkg;
-          String wildcard = part.startsWith("? super ") ? "? super " : part.startsWith("? extends ") ? "? extends " : "";
-          part = StringUtil.trimStart(part, wildcard);
-          if (TYPE_TEXT_SEPARATORS.contains(part)) {
-            sb.append(part).append(part.equals(",") ? " " : "");
-          }
-          else if (realImports.contains(part) ||
-                   "java.lang".equals(pkg = StringUtil.getPackageName(part)) ||
-                   realImports.contains(pkg + ".*")) {
-            sb.append(wildcard).append(StringUtil.getShortName(part));
-            changed = true;
-          }
-          else {
-            sb.append(wildcard).append(part);
-          }
-        }
-        return changed ? sb.append(vararg? "..." : "").toString() : s;
-      }
-    };
+    Set<String> realImports = ContainerUtil.newLinkedHashSet(packageName + ".*");
+    Function<String, String> shortener = newClassNameShortener(realImports);
     for (String item : imports) {
       for (String s : StringUtil.tokenize(item.replaceAll("\\s+", " "), TYPE_TEXT_SEPARATORS)) {
         s = StringUtil.trimStart(StringUtil.trimStart(s, "? super "), "? extends ");
@@ -532,6 +511,36 @@ public class ParserGenerator {
     out("public %s%s%s {", intf ? "interface " : "class ", shortClassName, sb.toString());
     newLine();
     myShortener = shortener;
+  }
+
+  @NotNull
+  private static Function<String, String> newClassNameShortener(final Set<String> realImports) {
+    return new Function<String, String>() {
+      @Override
+      public String fun(String s) {
+        boolean changed = false;
+        StringBuilder sb = new StringBuilder();
+        boolean vararg = s.endsWith("...");
+        for (String part : StringUtil.tokenize(new StringTokenizer(StringUtil.trimEnd(s, "..."), TYPE_TEXT_SEPARATORS, true))) {
+          String pkg;
+          String wildcard = part.startsWith("? super ") ? "? super " : part.startsWith("? extends ") ? "? extends " : "";
+          part = StringUtil.trimStart(part, wildcard);
+          if (TYPE_TEXT_SEPARATORS.contains(part)) {
+            sb.append(part).append(part.equals(",") ? " " : "");
+          }
+          else if (realImports.contains(part) ||
+                   "java.lang".equals(pkg = StringUtil.getPackageName(part)) ||
+                   realImports.contains(pkg + ".*")) {
+            sb.append(wildcard).append(StringUtil.getShortName(part));
+            changed = true;
+          }
+          else {
+            sb.append(wildcard).append(part);
+          }
+        }
+        return changed ? sb.append(vararg? "..." : "").toString() : s;
+      }
+    };
   }
 
   private void generateFileHeader(String className) {
@@ -1307,8 +1316,15 @@ public class ParserGenerator {
       newLine();
     }
     if (visitorClassName != null) {
+      String r = G.visitorValue != null ? "<" + G.visitorValue + ">" : "";
+      String t = G.visitorValue != null ? " " + G.visitorValue : "void";
+      String ret = G.visitorValue != null ? "return " : "";
+      out("public " + r + t + " accept(@NotNull " + visitorClassName + r + " visitor) {");
+      out(ret + "visitor.visit" + getRulePsiClassName(rule, "") + "(this);");
+      out("}");
+      newLine();
       out("public void accept(@NotNull " + myShortener.fun(BnfConstants.PSI_ELEMENT_VISITOR_CLASS) + " visitor) {");
-      out("if (visitor instanceof " + visitorClassName + ") ((" + visitorClassName + ")visitor).visit" + getRulePsiClassName(rule, "") + "(this);");
+      out("if (visitor instanceof " + visitorClassName + ") accept((" + visitorClassName + ")visitor);");
       out("else super.accept(visitor);");
       out("}");
       newLine();

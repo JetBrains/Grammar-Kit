@@ -452,8 +452,12 @@ public class BnfAttrImpl extends BnfNamedElementImpl implements BnfAttr {
     super(node);
   }
 
+  public <R> R accept(@NotNull BnfVisitor<R> visitor) {
+    return visitor.visitAttr(this);
+  }
+
   public void accept(@NotNull PsiElementVisitor visitor) {
-    if (visitor instanceof BnfVisitor) ((BnfVisitor)visitor).visitAttr(this);
+    if (visitor instanceof BnfVisitor) accept((BnfVisitor)visitor);
     else super.accept(visitor);
   }
 
@@ -495,8 +499,12 @@ public class BnfAttrPatternImpl extends BnfCompositeElementImpl implements BnfAt
     super(node);
   }
 
+  public <R> R accept(@NotNull BnfVisitor<R> visitor) {
+    return visitor.visitAttrPattern(this);
+  }
+
   public void accept(@NotNull PsiElementVisitor visitor) {
-    if (visitor instanceof BnfVisitor) ((BnfVisitor)visitor).visitAttrPattern(this);
+    if (visitor instanceof BnfVisitor) accept((BnfVisitor)visitor);
     else super.accept(visitor);
   }
 
@@ -526,8 +534,12 @@ public class BnfAttrsImpl extends BnfCompositeElementImpl implements BnfAttrs {
     super(node);
   }
 
+  public <R> R accept(@NotNull BnfVisitor<R> visitor) {
+    return visitor.visitAttrs(this);
+  }
+
   public void accept(@NotNull PsiElementVisitor visitor) {
-    if (visitor instanceof BnfVisitor) ((BnfVisitor)visitor).visitAttrs(this);
+    if (visitor instanceof BnfVisitor) accept((BnfVisitor)visitor);
     else super.accept(visitor);
   }
 
@@ -557,8 +569,12 @@ public class BnfChoiceImpl extends BnfExpressionImpl implements BnfChoice {
     super(node);
   }
 
+  public <R> R accept(@NotNull BnfVisitor<R> visitor) {
+    return visitor.visitChoice(this);
+  }
+
   public void accept(@NotNull PsiElementVisitor visitor) {
-    if (visitor instanceof BnfVisitor) ((BnfVisitor)visitor).visitChoice(this);
+    if (visitor instanceof BnfVisitor) accept((BnfVisitor)visitor);
     else super.accept(visitor);
   }
 
@@ -588,8 +604,12 @@ public class BnfExpressionImpl extends BnfCompositeElementImpl implements BnfExp
     super(node);
   }
 
+  public <R> R accept(@NotNull BnfVisitor<R> visitor) {
+    return visitor.visitExpression(this);
+  }
+
   public void accept(@NotNull PsiElementVisitor visitor) {
-    if (visitor instanceof BnfVisitor) ((BnfVisitor)visitor).visitExpression(this);
+    if (visitor instanceof BnfVisitor) accept((BnfVisitor)visitor);
     else super.accept(visitor);
   }
 
@@ -613,8 +633,12 @@ public class BnfExternalExpressionImpl extends BnfExpressionImpl implements BnfE
     super(node);
   }
 
+  public <R> R accept(@NotNull BnfVisitor<R> visitor) {
+    return visitor.visitExternalExpression(this);
+  }
+
   public void accept(@NotNull PsiElementVisitor visitor) {
-    if (visitor instanceof BnfVisitor) ((BnfVisitor)visitor).visitExternalExpression(this);
+    if (visitor instanceof BnfVisitor) accept((BnfVisitor)visitor);
     else super.accept(visitor);
   }
 
@@ -645,8 +669,12 @@ public class BnfListEntryImpl extends BnfCompositeElementImpl implements BnfList
     super(node);
   }
 
+  public <R> R accept(@NotNull BnfVisitor<R> visitor) {
+    return visitor.visitListEntry(this);
+  }
+
   public void accept(@NotNull PsiElementVisitor visitor) {
-    if (visitor instanceof BnfVisitor) ((BnfVisitor)visitor).visitListEntry(this);
+    if (visitor instanceof BnfVisitor) accept((BnfVisitor)visitor);
     else super.accept(visitor);
   }
 
@@ -687,8 +715,12 @@ public class BnfLiteralExpressionImpl extends BnfExpressionImpl implements BnfLi
     super(node);
   }
 
+  public <R> R accept(@NotNull BnfVisitor<R> visitor) {
+    return visitor.visitLiteralExpression(this);
+  }
+
   public void accept(@NotNull PsiElementVisitor visitor) {
-    if (visitor instanceof BnfVisitor) ((BnfVisitor)visitor).visitLiteralExpression(this);
+    if (visitor instanceof BnfVisitor) accept((BnfVisitor)visitor);
     else super.accept(visitor);
   }
 
@@ -718,8 +750,12 @@ public class BnfModifierImpl extends BnfCompositeElementImpl implements BnfModif
     super(node);
   }
 
+  public <R> R accept(@NotNull BnfVisitor<R> visitor) {
+    return visitor.visitModifier(this);
+  }
+
   public void accept(@NotNull PsiElementVisitor visitor) {
-    if (visitor instanceof BnfVisitor) ((BnfVisitor)visitor).visitModifier(this);
+    if (visitor instanceof BnfVisitor) accept((BnfVisitor)visitor);
     else super.accept(visitor);
   }
 
@@ -743,8 +779,12 @@ public class BnfParenExpressionImpl extends BnfParenthesizedImpl implements BnfP
     super(node);
   }
 
+  public <R> R accept(@NotNull BnfVisitor<R> visitor) {
+    return visitor.visitParenExpression(this);
+  }
+
   public void accept(@NotNull PsiElementVisitor visitor) {
-    if (visitor instanceof BnfVisitor) ((BnfVisitor)visitor).visitParenExpression(this);
+    if (visitor instanceof BnfVisitor) accept((BnfVisitor)visitor);
     else super.accept(visitor);
   }
 
@@ -774,8 +814,12 @@ public class BnfParenOptExpressionImpl extends BnfParenthesizedImpl implements B
     super(node);
   }
 
+  public <R> R accept(@NotNull BnfVisitor<R> visitor) {
+    return visitor.visitParenOptExpression(this);
+  }
+
   public void accept(@NotNull PsiElementVisitor visitor) {
-    if (visitor instanceof BnfVisitor) ((BnfVisitor)visitor).visitParenOptExpression(this);
+    if (visitor instanceof BnfVisitor) accept((BnfVisitor)visitor);
     else super.accept(visitor);
   }
 
@@ -805,8 +849,12 @@ public class BnfParenthesizedImpl extends BnfExpressionImpl implements BnfParent
     super(node);
   }
 
+  public <R> R accept(@NotNull BnfVisitor<R> visitor) {
+    return visitor.visitParenthesized(this);
+  }
+
   public void accept(@NotNull PsiElementVisitor visitor) {
-    if (visitor instanceof BnfVisitor) ((BnfVisitor)visitor).visitParenthesized(this);
+    if (visitor instanceof BnfVisitor) accept((BnfVisitor)visitor);
     else super.accept(visitor);
   }
 
@@ -836,8 +884,12 @@ public class BnfPredicateImpl extends BnfExpressionImpl implements BnfPredicate 
     super(node);
   }
 
+  public <R> R accept(@NotNull BnfVisitor<R> visitor) {
+    return visitor.visitPredicate(this);
+  }
+
   public void accept(@NotNull PsiElementVisitor visitor) {
-    if (visitor instanceof BnfVisitor) ((BnfVisitor)visitor).visitPredicate(this);
+    if (visitor instanceof BnfVisitor) accept((BnfVisitor)visitor);
     else super.accept(visitor);
   }
 
@@ -873,8 +925,12 @@ public class BnfPredicateSignImpl extends BnfCompositeElementImpl implements Bnf
     super(node);
   }
 
+  public <R> R accept(@NotNull BnfVisitor<R> visitor) {
+    return visitor.visitPredicateSign(this);
+  }
+
   public void accept(@NotNull PsiElementVisitor visitor) {
-    if (visitor instanceof BnfVisitor) ((BnfVisitor)visitor).visitPredicateSign(this);
+    if (visitor instanceof BnfVisitor) accept((BnfVisitor)visitor);
     else super.accept(visitor);
   }
 
@@ -898,8 +954,12 @@ public class BnfQuantifiedImpl extends BnfExpressionImpl implements BnfQuantifie
     super(node);
   }
 
+  public <R> R accept(@NotNull BnfVisitor<R> visitor) {
+    return visitor.visitQuantified(this);
+  }
+
   public void accept(@NotNull PsiElementVisitor visitor) {
-    if (visitor instanceof BnfVisitor) ((BnfVisitor)visitor).visitQuantified(this);
+    if (visitor instanceof BnfVisitor) accept((BnfVisitor)visitor);
     else super.accept(visitor);
   }
 
@@ -935,8 +995,12 @@ public class BnfQuantifierImpl extends BnfCompositeElementImpl implements BnfQua
     super(node);
   }
 
+  public <R> R accept(@NotNull BnfVisitor<R> visitor) {
+    return visitor.visitQuantifier(this);
+  }
+
   public void accept(@NotNull PsiElementVisitor visitor) {
-    if (visitor instanceof BnfVisitor) ((BnfVisitor)visitor).visitQuantifier(this);
+    if (visitor instanceof BnfVisitor) accept((BnfVisitor)visitor);
     else super.accept(visitor);
   }
 
@@ -960,8 +1024,12 @@ public class BnfReferenceOrTokenImpl extends BnfRefOrTokenImpl implements BnfRef
     super(node);
   }
 
+  public <R> R accept(@NotNull BnfVisitor<R> visitor) {
+    return visitor.visitReferenceOrToken(this);
+  }
+
   public void accept(@NotNull PsiElementVisitor visitor) {
-    if (visitor instanceof BnfVisitor) ((BnfVisitor)visitor).visitReferenceOrToken(this);
+    if (visitor instanceof BnfVisitor) accept((BnfVisitor)visitor);
     else super.accept(visitor);
   }
 
@@ -991,8 +1059,12 @@ public class BnfRuleImpl extends BnfNamedElementImpl implements BnfRule {
     super(node);
   }
 
+  public <R> R accept(@NotNull BnfVisitor<R> visitor) {
+    return visitor.visitRule(this);
+  }
+
   public void accept(@NotNull PsiElementVisitor visitor) {
-    if (visitor instanceof BnfVisitor) ((BnfVisitor)visitor).visitRule(this);
+    if (visitor instanceof BnfVisitor) accept((BnfVisitor)visitor);
     else super.accept(visitor);
   }
 
@@ -1040,8 +1112,12 @@ public class BnfSequenceImpl extends BnfExpressionImpl implements BnfSequence {
     super(node);
   }
 
+  public <R> R accept(@NotNull BnfVisitor<R> visitor) {
+    return visitor.visitSequence(this);
+  }
+
   public void accept(@NotNull PsiElementVisitor visitor) {
-    if (visitor instanceof BnfVisitor) ((BnfVisitor)visitor).visitSequence(this);
+    if (visitor instanceof BnfVisitor) accept((BnfVisitor)visitor);
     else super.accept(visitor);
   }
 
@@ -1071,8 +1147,12 @@ public class BnfStringLiteralExpressionImpl extends BnfStringImpl implements Bnf
     super(node);
   }
 
+  public <R> R accept(@NotNull BnfVisitor<R> visitor) {
+    return visitor.visitStringLiteralExpression(this);
+  }
+
   public void accept(@NotNull PsiElementVisitor visitor) {
-    if (visitor instanceof BnfVisitor) ((BnfVisitor)visitor).visitStringLiteralExpression(this);
+    if (visitor instanceof BnfVisitor) accept((BnfVisitor)visitor);
     else super.accept(visitor);
   }
 
@@ -1102,8 +1182,12 @@ public class BnfValueListImpl extends BnfExpressionImpl implements BnfValueList 
     super(node);
   }
 
+  public <R> R accept(@NotNull BnfVisitor<R> visitor) {
+    return visitor.visitValueList(this);
+  }
+
   public void accept(@NotNull PsiElementVisitor visitor) {
-    if (visitor instanceof BnfVisitor) ((BnfVisitor)visitor).visitValueList(this);
+    if (visitor instanceof BnfVisitor) accept((BnfVisitor)visitor);
     else super.accept(visitor);
   }
 
@@ -1121,98 +1205,99 @@ package org.intellij.grammar.psi;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElementVisitor;
 
-public class BnfVisitor extends PsiElementVisitor {
+public class BnfVisitor<R> extends PsiElementVisitor {
 
-  public void visitAttr(@NotNull BnfAttr o) {
-    visitNamedElement(o);
+  public R visitAttr(@NotNull BnfAttr o) {
+    return visitNamedElement(o);
   }
 
-  public void visitAttrPattern(@NotNull BnfAttrPattern o) {
-    visitCompositeElement(o);
+  public R visitAttrPattern(@NotNull BnfAttrPattern o) {
+    return visitCompositeElement(o);
   }
 
-  public void visitAttrs(@NotNull BnfAttrs o) {
-    visitCompositeElement(o);
+  public R visitAttrs(@NotNull BnfAttrs o) {
+    return visitCompositeElement(o);
   }
 
-  public void visitChoice(@NotNull BnfChoice o) {
-    visitExpression(o);
+  public R visitChoice(@NotNull BnfChoice o) {
+    return visitExpression(o);
   }
 
-  public void visitExpression(@NotNull BnfExpression o) {
-    visitCompositeElement(o);
+  public R visitExpression(@NotNull BnfExpression o) {
+    return visitCompositeElement(o);
   }
 
-  public void visitExternalExpression(@NotNull BnfExternalExpression o) {
-    visitExpression(o);
+  public R visitExternalExpression(@NotNull BnfExternalExpression o) {
+    return visitExpression(o);
   }
 
-  public void visitListEntry(@NotNull BnfListEntry o) {
-    visitCompositeElement(o);
+  public R visitListEntry(@NotNull BnfListEntry o) {
+    return visitCompositeElement(o);
   }
 
-  public void visitLiteralExpression(@NotNull BnfLiteralExpression o) {
-    visitExpression(o);
+  public R visitLiteralExpression(@NotNull BnfLiteralExpression o) {
+    return visitExpression(o);
   }
 
-  public void visitModifier(@NotNull BnfModifier o) {
-    visitCompositeElement(o);
+  public R visitModifier(@NotNull BnfModifier o) {
+    return visitCompositeElement(o);
   }
 
-  public void visitParenExpression(@NotNull BnfParenExpression o) {
-    visitParenthesized(o);
+  public R visitParenExpression(@NotNull BnfParenExpression o) {
+    return visitParenthesized(o);
   }
 
-  public void visitParenOptExpression(@NotNull BnfParenOptExpression o) {
-    visitParenthesized(o);
+  public R visitParenOptExpression(@NotNull BnfParenOptExpression o) {
+    return visitParenthesized(o);
   }
 
-  public void visitParenthesized(@NotNull BnfParenthesized o) {
-    visitExpression(o);
+  public R visitParenthesized(@NotNull BnfParenthesized o) {
+    return visitExpression(o);
   }
 
-  public void visitPredicate(@NotNull BnfPredicate o) {
-    visitExpression(o);
+  public R visitPredicate(@NotNull BnfPredicate o) {
+    return visitExpression(o);
   }
 
-  public void visitPredicateSign(@NotNull BnfPredicateSign o) {
-    visitCompositeElement(o);
+  public R visitPredicateSign(@NotNull BnfPredicateSign o) {
+    return visitCompositeElement(o);
   }
 
-  public void visitQuantified(@NotNull BnfQuantified o) {
-    visitExpression(o);
+  public R visitQuantified(@NotNull BnfQuantified o) {
+    return visitExpression(o);
   }
 
-  public void visitQuantifier(@NotNull BnfQuantifier o) {
-    visitCompositeElement(o);
+  public R visitQuantifier(@NotNull BnfQuantifier o) {
+    return visitCompositeElement(o);
   }
 
-  public void visitReferenceOrToken(@NotNull BnfReferenceOrToken o) {
-    visitExpression(o);
+  public R visitReferenceOrToken(@NotNull BnfReferenceOrToken o) {
+    return visitExpression(o);
   }
 
-  public void visitRule(@NotNull BnfRule o) {
-    visitNamedElement(o);
+  public R visitRule(@NotNull BnfRule o) {
+    return visitNamedElement(o);
   }
 
-  public void visitSequence(@NotNull BnfSequence o) {
-    visitExpression(o);
+  public R visitSequence(@NotNull BnfSequence o) {
+    return visitExpression(o);
   }
 
-  public void visitStringLiteralExpression(@NotNull BnfStringLiteralExpression o) {
-    visitLiteralExpression(o);
+  public R visitStringLiteralExpression(@NotNull BnfStringLiteralExpression o) {
+    return visitLiteralExpression(o);
   }
 
-  public void visitValueList(@NotNull BnfValueList o) {
-    visitExpression(o);
+  public R visitValueList(@NotNull BnfValueList o) {
+    return visitExpression(o);
   }
 
-  public void visitNamedElement(@NotNull BnfNamedElement o) {
-    visitCompositeElement(o);
+  public R visitNamedElement(@NotNull BnfNamedElement o) {
+    return visitCompositeElement(o);
   }
 
-  public void visitCompositeElement(@NotNull BnfCompositeElement o) {
+  public R visitCompositeElement(@NotNull BnfCompositeElement o) {
     visitElement(o);
+    return null;
   }
 
 }

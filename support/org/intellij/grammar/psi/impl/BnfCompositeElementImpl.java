@@ -18,10 +18,8 @@ package org.intellij.grammar.psi.impl;
 import com.intellij.extapi.psi.ASTWrapperPsiElement;
 import com.intellij.lang.ASTNode;
 import com.intellij.openapi.util.text.StringUtil;
-import org.intellij.grammar.psi.BnfCompositeElement;
-import org.intellij.grammar.psi.BnfExpression;
-import org.intellij.grammar.psi.BnfLiteralExpression;
-import org.intellij.grammar.psi.BnfValueList;
+import org.intellij.grammar.psi.*;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * Created by IntelliJ IDEA.
@@ -49,5 +47,10 @@ public class BnfCompositeElementImpl extends ASTWrapperPsiElement implements Bnf
     else {
       return elementType;
     }
+  }
+
+  @Override
+  public <R> R accept(@NotNull BnfVisitor<R> visitor) {
+    return visitor.visitCompositeElement(this);
   }
 }

@@ -20,10 +20,8 @@ import com.intellij.codeInspection.InspectionManager;
 import com.intellij.codeInspection.LocalInspectionTool;
 import com.intellij.codeInspection.ProblemDescriptor;
 import com.intellij.codeInspection.ProblemsHolder;
-import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
-import com.intellij.util.Processor;
-import gnu.trove.THashSet;
+import com.intellij.util.containers.ContainerUtil;
 import org.intellij.grammar.psi.BnfFile;
 import org.intellij.grammar.psi.BnfRule;
 import org.intellij.grammar.psi.impl.GrammarUtil;
@@ -71,23 +69,18 @@ public class BnfDuplicateRuleInspection extends LocalInspectionTool {
     return problemsHolder.getResultsArray();
   }
   
-  private static void checkFile(final PsiFile file, final ProblemsHolder problemsHolder) {
+  private static void checkFile(PsiFile file, ProblemsHolder problemsHolder) {
     if (!(file instanceof BnfFile)) return;
-    final BnfFile bnfFile = (BnfFile)file;
+    BnfFile bnfFile = (BnfFile)file;
 
-    final Set<BnfRule> rules = new THashSet<BnfRule>();
-    GrammarUtil.processChildrenDummyAware(file, new Processor<PsiElement>() {
-      @Override
-      public boolean process(PsiElement psiElement) {
-        String name = psiElement instanceof BnfRule ? ((BnfRule)psiElement).getName() : null;
-        BnfRule rule = name == null? null : bnfFile.getRule(name);
-        if (name != null && rule != psiElement) {
-          rules.add(rule);
-          rules.add((BnfRule)psiElement);
-        }
-        return true;
+    Set<BnfRule> rules = ContainerUtil.newLinkedHashSet();
+    for (BnfRule r : GrammarUtil.bnfTraverser(bnfFile).filter(BnfRule.class)) {
+      BnfRule t = bnfFile.getRule(r.getName());
+      if (r != t) {
+        rules.add(t);
+        rules.add(r);
       }
-    });
+    }
     for (BnfRule rule : rules) {
       problemsHolder.registerProblem(rule.getId(), "'" + rule.getName() + "' rule is defined more than once");
     }

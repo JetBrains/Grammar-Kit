@@ -16,6 +16,7 @@
 
 package org.intellij.grammar.generator;
 
+import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.util.PatternUtil;
 import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.psi.BnfFile;
@@ -39,6 +40,7 @@ public class GenOptions {
   public final boolean generatePsi;
   public final boolean generatePsiFactory;
   public final boolean generateVisitor;
+  public final String visitorValue;
   public final Case generateTokenCase;
   public final Case generateElementCase;
   public final boolean generateTokenAccessors;
@@ -55,6 +57,7 @@ public class GenOptions {
     generateTokenAccessors = getGenerateOption(myFile, KnownAttribute.GENERATE_TOKEN_ACCESSORS, genOptions.get("tokenAccessors"));
     generateRootRules = PatternUtil.compileSafe(genOptions.get("root-rules"), null);
     generateVisitor = !"no".equals(genOptions.get("visitor"));
+    visitorValue = "void".equals(genOptions.get("visitor-value")) ? null : StringUtil.nullize(genOptions.get("visitor-value"));
 
     generateTokenCase = ParserGeneratorUtil.enumFromString(genOptions.get("token-case"), Case.UPPER);
     generateElementCase = ParserGeneratorUtil.enumFromString(genOptions.get("element-case"), Case.UPPER);

@@ -20,6 +20,7 @@ import com.intellij.psi.impl.source.tree.LeafPsiElement;
 import com.intellij.psi.tree.IElementType;
 import org.intellij.grammar.psi.BnfExpression;
 import org.intellij.grammar.psi.BnfTypes;
+import org.intellij.grammar.psi.BnfVisitor;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -32,6 +33,11 @@ public class FakeBnfExpression extends LeafPsiElement implements BnfExpression {
 
   public FakeBnfExpression(@NotNull IElementType elementType, @NotNull String text) {
     super(elementType, text);
+  }
+
+  @Override
+  public <R> R accept(@NotNull BnfVisitor<R> visitor) {
+    return null;
   }
 
   @Override

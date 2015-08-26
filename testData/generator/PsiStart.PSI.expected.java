@@ -102,8 +102,12 @@ public class ElementImpl extends ASTWrapperPsiElement implements Element {
     super(node);
   }
 
+  public void accept(@NotNull Visitor visitor) {
+    visitor.visitElement(this);
+  }
+
   public void accept(@NotNull PsiElementVisitor visitor) {
-    if (visitor instanceof Visitor) ((Visitor)visitor).visitElement(this);
+    if (visitor instanceof Visitor) accept((Visitor)visitor);
     else super.accept(visitor);
   }
 
@@ -127,8 +131,12 @@ public class EntryImpl extends ASTWrapperPsiElement implements Entry {
     super(node);
   }
 
+  public void accept(@NotNull Visitor visitor) {
+    visitor.visitEntry(this);
+  }
+
   public void accept(@NotNull PsiElementVisitor visitor) {
-    if (visitor instanceof Visitor) ((Visitor)visitor).visitEntry(this);
+    if (visitor instanceof Visitor) accept((Visitor)visitor);
     else super.accept(visitor);
   }
 
@@ -158,8 +166,12 @@ public class ListImpl extends ASTWrapperPsiElement implements List {
     super(node);
   }
 
+  public void accept(@NotNull Visitor visitor) {
+    visitor.visitList(this);
+  }
+
   public void accept(@NotNull PsiElementVisitor visitor) {
-    if (visitor instanceof Visitor) ((Visitor)visitor).visitList(this);
+    if (visitor instanceof Visitor) accept((Visitor)visitor);
     else super.accept(visitor);
   }
 
@@ -189,8 +201,12 @@ public class MapImpl extends ASTWrapperPsiElement implements Map {
     super(node);
   }
 
+  public void accept(@NotNull Visitor visitor) {
+    visitor.visitMap(this);
+  }
+
   public void accept(@NotNull PsiElementVisitor visitor) {
-    if (visitor instanceof Visitor) ((Visitor)visitor).visitMap(this);
+    if (visitor instanceof Visitor) accept((Visitor)visitor);
     else super.accept(visitor);
   }
 

@@ -70,11 +70,11 @@ public class GeneratedParser implements PsiParser, LightPsiParser {
   private static boolean foo_3(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "foo_3")) return false;
     boolean result_, pinned_;
-    Marker marker_ = enter_section_(builder_, level_, _NONE_, null);
+    Marker marker_ = enter_section_(builder_, level_, _NONE_);
     result_ = bar(builder_, level_ + 1);
     result_ = result_ && consumeTokens(builder_, 1, D, E, F);
     pinned_ = result_; // pin = 2
-    exit_section_(builder_, level_, marker_, null, result_, pinned_, null);
+    exit_section_(builder_, level_, marker_, result_, pinned_, null);
     return result_ || pinned_;
   }
 

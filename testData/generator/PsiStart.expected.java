@@ -51,9 +51,9 @@ public class GeneratedParser implements PsiParser, LightPsiParser {
   public static boolean element(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "element")) return false;
     boolean result_;
-    Marker marker_ = enter_section_(builder_, level_, _NONE_, "<element>");
+    Marker marker_ = enter_section_(builder_, level_, _NONE_, ELEMENT, "<element>");
     result_ = consumeToken(builder_, "id");
-    exit_section_(builder_, level_, marker_, ELEMENT, result_, false, null);
+    exit_section_(builder_, level_, marker_, result_, false, null);
     return result_;
   }
 
@@ -62,11 +62,11 @@ public class GeneratedParser implements PsiParser, LightPsiParser {
   public static boolean entry(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "entry")) return false;
     boolean result_;
-    Marker marker_ = enter_section_(builder_, level_, _NONE_, "<entry>");
+    Marker marker_ = enter_section_(builder_, level_, _NONE_, ENTRY, "<entry>");
     result_ = consumeToken(builder_, "name");
     result_ = result_ && consumeToken(builder_, "->");
     result_ = result_ && element(builder_, level_ + 1);
-    exit_section_(builder_, level_, marker_, ENTRY, result_, false, null);
+    exit_section_(builder_, level_, marker_, result_, false, null);
     return result_;
   }
 
@@ -87,12 +87,12 @@ public class GeneratedParser implements PsiParser, LightPsiParser {
   public static boolean list(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "list")) return false;
     boolean result_;
-    Marker marker_ = enter_section_(builder_, level_, _NONE_, "<list>");
+    Marker marker_ = enter_section_(builder_, level_, _NONE_, LIST, "<list>");
     result_ = consumeToken(builder_, "(");
     result_ = result_ && element(builder_, level_ + 1);
     result_ = result_ && list_2(builder_, level_ + 1);
     result_ = result_ && consumeToken(builder_, ")");
-    exit_section_(builder_, level_, marker_, LIST, result_, false, null);
+    exit_section_(builder_, level_, marker_, result_, false, null);
     return result_;
   }
 
@@ -124,12 +124,12 @@ public class GeneratedParser implements PsiParser, LightPsiParser {
   public static boolean map(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "map")) return false;
     boolean result_;
-    Marker marker_ = enter_section_(builder_, level_, _NONE_, "<map>");
+    Marker marker_ = enter_section_(builder_, level_, _NONE_, MAP, "<map>");
     result_ = consumeToken(builder_, "(");
     result_ = result_ && entry(builder_, level_ + 1);
     result_ = result_ && map_2(builder_, level_ + 1);
     result_ = result_ && consumeToken(builder_, ")");
-    exit_section_(builder_, level_, marker_, MAP, result_, false, null);
+    exit_section_(builder_, level_, marker_, result_, false, null);
     return result_;
   }
 

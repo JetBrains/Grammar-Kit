@@ -49,10 +49,10 @@ public class LeftAssociative implements PsiParser, LightPsiParser {
     if (!recursion_guard_(builder_, level_, "alias_definition")) return false;
     if (!nextTokenIs(builder_, "<alias definition>", AS, ID)) return false;
     boolean result_;
-    Marker marker_ = enter_section_(builder_, level_, _LEFT_, "<alias definition>");
+    Marker marker_ = enter_section_(builder_, level_, _LEFT_, ALIAS_DEFINITION, "<alias definition>");
     result_ = alias_definition_0(builder_, level_ + 1);
     result_ = result_ && consumeToken(builder_, ID);
-    exit_section_(builder_, level_, marker_, ALIAS_DEFINITION, result_, false, null);
+    exit_section_(builder_, level_, marker_, result_, false, null);
     return result_;
   }
 
@@ -69,10 +69,10 @@ public class LeftAssociative implements PsiParser, LightPsiParser {
     if (!recursion_guard_(builder_, level_, "alias_definition2")) return false;
     if (!nextTokenIs(builder_, "<alias definition 2>", AS, ID)) return false;
     boolean result_;
-    Marker marker_ = enter_section_(builder_, level_, _LEFT_, "<alias definition 2>");
+    Marker marker_ = enter_section_(builder_, level_, _LEFT_, ALIAS_DEFINITION_2, "<alias definition 2>");
     result_ = alias_definition2_0(builder_, level_ + 1);
     result_ = result_ && consumeToken(builder_, ID);
-    exit_section_(builder_, level_, marker_, ALIAS_DEFINITION_2, result_, false, null);
+    exit_section_(builder_, level_, marker_, result_, false, null);
     return result_;
   }
 
@@ -133,9 +133,9 @@ public class LeftAssociative implements PsiParser, LightPsiParser {
     if (!recursion_guard_(builder_, level_, "leech")) return false;
     if (!nextTokenIs(builder_, ID)) return false;
     boolean result_;
-    Marker marker_ = enter_section_(builder_, level_, _LEFT_INNER_, null);
+    Marker marker_ = enter_section_(builder_, level_, _LEFT_INNER_, LEECH, null);
     result_ = consumeToken(builder_, ID);
-    exit_section_(builder_, level_, marker_, LEECH, result_, false, null);
+    exit_section_(builder_, level_, marker_, result_, false, null);
     return result_;
   }
 
@@ -145,9 +145,9 @@ public class LeftAssociative implements PsiParser, LightPsiParser {
     if (!recursion_guard_(builder_, level_, "leech2")) return false;
     if (!nextTokenIs(builder_, ID)) return false;
     boolean result_;
-    Marker marker_ = enter_section_(builder_, level_, _LEFT_INNER_, null);
+    Marker marker_ = enter_section_(builder_, level_, _LEFT_INNER_);
     result_ = consumeToken(builder_, ID);
-    exit_section_(builder_, level_, marker_, null, result_, false, null);
+    exit_section_(builder_, level_, marker_, result_, false, null);
     return result_;
   }
 
@@ -155,9 +155,9 @@ public class LeftAssociative implements PsiParser, LightPsiParser {
   // id?
   static boolean leech3(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "leech3")) return false;
-    Marker marker_ = enter_section_(builder_, level_, _LEFT_INNER_, null);
+    Marker marker_ = enter_section_(builder_, level_, _LEFT_INNER_);
     consumeToken(builder_, ID);
-    exit_section_(builder_, level_, marker_, null, true, false, null);
+    exit_section_(builder_, level_, marker_, true, false, null);
     return true;
   }
 

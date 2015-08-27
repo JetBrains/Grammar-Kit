@@ -77,8 +77,8 @@ public class Small implements PsiParser, LightPsiParser {
   /* ********************************************************** */
   // []
   public static boolean empty10(PsiBuilder builder_, int level_) {
-    Marker marker_ = enter_section_(builder_, level_, _LEFT_INNER_, null);
-    exit_section_(builder_, level_, marker_, EMPTY_10, true, false, null);
+    Marker marker_ = enter_section_(builder_, level_, _LEFT_INNER_, EMPTY_10, null);
+    exit_section_(builder_, level_, marker_, true, false, null);
     return true;
   }
 
@@ -115,9 +115,9 @@ public class Small implements PsiParser, LightPsiParser {
   static boolean empty6(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "empty6")) return false;
     boolean result_;
-    Marker marker_ = enter_section_(builder_, level_, _AND_, null);
+    Marker marker_ = enter_section_(builder_, level_, _AND_);
     result_ = empty6_0(builder_, level_ + 1);
-    exit_section_(builder_, level_, marker_, null, result_, false, null);
+    exit_section_(builder_, level_, marker_, result_, false, null);
     return result_;
   }
 
@@ -131,9 +131,9 @@ public class Small implements PsiParser, LightPsiParser {
   static boolean empty7(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "empty7")) return false;
     boolean result_;
-    Marker marker_ = enter_section_(builder_, level_, _NOT_, null);
+    Marker marker_ = enter_section_(builder_, level_, _NOT_);
     result_ = !empty7_0(builder_, level_ + 1);
-    exit_section_(builder_, level_, marker_, null, result_, false, null);
+    exit_section_(builder_, level_, marker_, result_, false, null);
     return result_;
   }
 
@@ -151,8 +151,8 @@ public class Small implements PsiParser, LightPsiParser {
   /* ********************************************************** */
   // []
   public static boolean empty9(PsiBuilder builder_, int level_) {
-    Marker marker_ = enter_section_(builder_, level_, _LEFT_, null);
-    exit_section_(builder_, level_, marker_, EMPTY_9, true, false, null);
+    Marker marker_ = enter_section_(builder_, level_, _LEFT_, EMPTY_9, null);
+    exit_section_(builder_, level_, marker_, true, false, null);
     return true;
   }
 
@@ -233,9 +233,9 @@ public class Small implements PsiParser, LightPsiParser {
   // token?
   public static boolean someRule2(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "someRule2")) return false;
-    Marker marker_ = enter_section_(builder_, level_, _NONE_, "<some rule 2>");
+    Marker marker_ = enter_section_(builder_, level_, _NONE_, SOME_RULE_2, "<some rule 2>");
     consumeToken(builder_, TOKEN);
-    exit_section_(builder_, level_, marker_, SOME_RULE_2, true, false, null);
+    exit_section_(builder_, level_, marker_, true, false, null);
     return true;
   }
 
@@ -244,9 +244,9 @@ public class Small implements PsiParser, LightPsiParser {
   public static boolean someString(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "someString")) return false;
     boolean result_;
-    Marker marker_ = enter_section_(builder_, level_, _NONE_, "<some string>");
+    Marker marker_ = enter_section_(builder_, level_, _NONE_, SOME_STRING, "<some string>");
     result_ = consumeToken(builder_, "token");
-    exit_section_(builder_, level_, marker_, SOME_STRING, result_, false, null);
+    exit_section_(builder_, level_, marker_, result_, false, null);
     return result_;
   }
 
@@ -255,11 +255,11 @@ public class Small implements PsiParser, LightPsiParser {
   public static boolean statement(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "statement")) return false;
     boolean result_;
-    Marker marker_ = enter_section_(builder_, level_, _NONE_, "<statement>");
+    Marker marker_ = enter_section_(builder_, level_, _NONE_, STATEMENT, "<statement>");
     result_ = consumeToken(builder_, TOKEN);
     if (!result_) result_ = someRule(builder_, level_ + 1);
     if (!result_) result_ = someString(builder_, level_ + 1);
-    exit_section_(builder_, level_, marker_, STATEMENT, result_, false, null);
+    exit_section_(builder_, level_, marker_, result_, false, null);
     return result_;
   }
 

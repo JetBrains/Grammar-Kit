@@ -43,12 +43,12 @@ public class PsiAccessors implements PsiParser, LightPsiParser {
     if (!recursion_guard_(builder_, level_, "binary")) return false;
     if (!nextTokenIs(builder_, ID)) return false;
     boolean result_, pinned_;
-    Marker marker_ = enter_section_(builder_, level_, _NONE_, null);
+    Marker marker_ = enter_section_(builder_, level_, _NONE_, BINARY, null);
     result_ = expression(builder_, level_ + 1);
     result_ = result_ && operator(builder_, level_ + 1);
     pinned_ = result_; // pin = operator
     result_ = result_ && expression(builder_, level_ + 1);
-    exit_section_(builder_, level_, marker_, BINARY, result_, pinned_, null);
+    exit_section_(builder_, level_, marker_, result_, pinned_, null);
     return result_ || pinned_;
   }
 
@@ -71,10 +71,10 @@ public class PsiAccessors implements PsiParser, LightPsiParser {
   public static boolean operator(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "operator")) return false;
     boolean result_;
-    Marker marker_ = enter_section_(builder_, level_, _NONE_, "<operator>");
+    Marker marker_ = enter_section_(builder_, level_, _NONE_, OPERATOR, "<operator>");
     result_ = consumeToken(builder_, "+");
     if (!result_) result_ = consumeToken(builder_, "-");
-    exit_section_(builder_, level_, marker_, OPERATOR, result_, false, null);
+    exit_section_(builder_, level_, marker_, result_, false, null);
     return result_;
   }
 

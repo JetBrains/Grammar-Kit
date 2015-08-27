@@ -408,15 +408,23 @@ public class GeneratedParserUtilBase {
   }
 
   // complex enter/exit methods pair with frame object
-  public static PsiBuilder.Marker enter_section_(PsiBuilder builder, int level, int modifiers, @Nullable String frameName) {
+  public static PsiBuilder.Marker enter_section_(PsiBuilder builder, int level, int modifiers, String frameName) {
+    return enter_section_(builder, level, modifiers, null, frameName);
+  }
+
+  public static PsiBuilder.Marker enter_section_(PsiBuilder builder, int level, int modifiers) {
+    return enter_section_(builder, level, modifiers, null, null);
+  }
+
+  public static PsiBuilder.Marker enter_section_(PsiBuilder builder, int level, int modifiers, IElementType elementType, String frameName) {
     PsiBuilder.Marker marker = builder.mark();
-    enter_section_impl_(builder, level, modifiers, frameName);
+    enter_section_impl_(builder, level, modifiers, elementType, frameName);
     return marker;
   }
 
-  private static void enter_section_impl_(PsiBuilder builder, int level, int modifiers, @Nullable String frameName) {
+  private static void enter_section_impl_(PsiBuilder builder, int level, int modifiers, IElementType elementType, String frameName) {
     ErrorState state = ErrorState.get(builder);
-    Frame frame = state.FRAMES.alloc().init(builder, state, level, modifiers, frameName);
+    Frame frame = state.FRAMES.alloc().init(builder, state, level, modifiers, elementType, frameName);
     Frame prevFrame = state.currentFrame;
     if (prevFrame != null && prevFrame.errorReportedAt > frame.position) {
       // report error for previous unsuccessful frame
@@ -449,6 +457,15 @@ public class GeneratedParserUtilBase {
   public static void exit_section_(PsiBuilder builder,
                                    int level,
                                    PsiBuilder.Marker marker,
+                                   boolean result,
+                                   boolean pinned,
+                                   @Nullable Parser eatMore) {
+    exit_section_(builder, level, marker, null, result, pinned, eatMore);
+  }
+
+  public static void exit_section_(PsiBuilder builder,
+                                   int level,
+                                   PsiBuilder.Marker marker,
                                    @Nullable IElementType elementType,
                                    boolean result,
                                    boolean pinned,
@@ -457,7 +474,7 @@ public class GeneratedParserUtilBase {
 
     Frame frame = state.currentFrame;
     state.currentFrame = frame == null ? null : frame.parentFrame;
-    if (frame != null && frame.branchType != null) elementType = frame.branchType;
+    if (frame != null && frame.elementType != null) elementType = frame.elementType;
     if (frame == null || level != frame.level) {
       LOG.error("Unbalanced error section: got " + frame + ", expected level " + level);
       if (frame != null) state.FRAMES.recycle(frame);
@@ -587,7 +604,7 @@ public class GeneratedParserUtilBase {
       if (result || pinned) {
         if ((frame.modifiers & _UPPER_) != 0) {
           marker.drop();
-          frame.parentFrame.branchType = elementType;
+          frame.parentFrame.elementType = elementType;
         }
         else if ((frame.modifiers & _LEFT_INNER_) != 0 && frame.leftMarker != null) {
           marker.done(elementType);
@@ -784,7 +801,7 @@ public class GeneratedParserUtilBase {
       }
 
       @Override
-      public void cleanup(Variant o) {
+      public void cleanup(@NotNull Variant o) {
       }
     });
     final LimitedPool<Frame> FRAMES = new LimitedPool<Frame>(FRAMES_POOL_SIZE, new LimitedPool.ObjectFactory<Frame>() {
@@ -795,7 +812,7 @@ public class GeneratedParserUtilBase {
       }
 
       @Override
-      public void cleanup(Frame o) {
+      public void cleanup(@NotNull Frame o) {
       }
     });
 
@@ -865,7 +882,11 @@ public class GeneratedParserUtilBase {
       return count > 0;
     }
 
-    public void clearVariants(boolean expected, int start) {
+    public void clearVariants(Frame frame) {
+      clearVariants(true, frame == null ? 0 : frame.variantCount);
+    }
+
+    void clearVariants(boolean expected, int start) {
       MyList<Variant> list = expected? variants : unexpected;
       if (start < 0 || start >= list.size()) return;
       for (int i = start, len = list.size(); i < len; i ++) {
@@ -874,7 +895,7 @@ public class GeneratedParserUtilBase {
       list.setSize(start);
     }
 
-    boolean typeExtends(IElementType child, IElementType parent) {
+    public boolean typeExtends(IElementType child, IElementType parent) {
       if (child == parent) return true;
       if (extendsSets != null) {
         for (TokenSet set : extendsSets) {
@@ -887,6 +908,8 @@ public class GeneratedParserUtilBase {
 
   public static class Frame {
     public Frame parentFrame;
+    public IElementType elementType;
+
     public int offset;
     public int position;
     public int level;
@@ -895,13 +918,19 @@ public class GeneratedParserUtilBase {
     public int variantCount;
     public int errorReportedAt;
     public PsiBuilder.Marker leftMarker;
-    public IElementType branchType;
 
     public Frame() {
     }
 
-    public Frame init(PsiBuilder builder, ErrorState state, int level_, int modifiers_, String name_) {
+    public Frame init(PsiBuilder builder,
+                      ErrorState state,
+                      int level_,
+                      int modifiers_,
+                      IElementType elementType_,
+                      String name_) {
       parentFrame = state.currentFrame;
+      elementType = elementType_;
+
       offset = builder.getCurrentOffset();
       position = builder.rawTokenIndex();
       level = level_;
@@ -911,7 +940,6 @@ public class GeneratedParserUtilBase {
       errorReportedAt = -1;
 
       leftMarker = null;
-      branchType = null;
       return this;
     }
 
@@ -924,7 +952,7 @@ public class GeneratedParserUtilBase {
         ((modifiers & _AND_) != 0? "_AND_, ": "") +
         ((modifiers & _NOT_) != 0? "_NOT_, ": "") +
         ((modifiers & _UPPER_) != 0 ? "_UPPER_, " : "");
-      return String.format("{%s:%s:%d, %d, %s%s}", offset, position, level, errorReportedAt, mod, name);
+      return String.format("{%s:%s:%d, %d, %s%s, %s}", offset, position, level, errorReportedAt, mod, elementType, name);
     }
   }
 

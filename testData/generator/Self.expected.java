@@ -97,14 +97,14 @@ public class Self implements PsiParser, LightPsiParser {
   public static boolean attr(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "attr")) return false;
     boolean result_, pinned_;
-    Marker marker_ = enter_section_(builder_, level_, _NONE_, null);
+    Marker marker_ = enter_section_(builder_, level_, _NONE_, BNF_ATTR, null);
     result_ = consumeToken(builder_, BNF_ID);
     pinned_ = result_; // pin = 1
     result_ = result_ && attr_1(builder_, level_ + 1);
     result_ = result_ && consumeToken(builder_, BNF_OP_EQ);
     result_ = result_ && attr_value(builder_, level_ + 1);
     result_ = result_ && attr_4(builder_, level_ + 1);
-    exit_section_(builder_, level_, marker_, BNF_ATTR, result_, pinned_, attr_recover_until_parser_);
+    exit_section_(builder_, level_, marker_, result_, pinned_, attr_recover_until_parser_);
     return result_ || pinned_;
   }
 
@@ -141,9 +141,9 @@ public class Self implements PsiParser, LightPsiParser {
   static boolean attr_recover_until(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "attr_recover_until")) return false;
     boolean result_;
-    Marker marker_ = enter_section_(builder_, level_, _NOT_, null);
+    Marker marker_ = enter_section_(builder_, level_, _NOT_);
     result_ = !consumeToken(builder_, BNF_RIGHT_BRACE);
-    exit_section_(builder_, level_, marker_, null, result_, false, null);
+    exit_section_(builder_, level_, marker_, result_, false, null);
     return result_;
   }
 
@@ -174,9 +174,9 @@ public class Self implements PsiParser, LightPsiParser {
   private static boolean attr_value_1(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "attr_value_1")) return false;
     boolean result_;
-    Marker marker_ = enter_section_(builder_, level_, _NOT_, null);
+    Marker marker_ = enter_section_(builder_, level_, _NOT_);
     result_ = !consumeToken(builder_, BNF_OP_EQ);
-    exit_section_(builder_, level_, marker_, null, result_, false, null);
+    exit_section_(builder_, level_, marker_, result_, false, null);
     return result_;
   }
 
@@ -186,12 +186,12 @@ public class Self implements PsiParser, LightPsiParser {
     if (!recursion_guard_(builder_, level_, "attrs")) return false;
     if (!nextTokenIs(builder_, BNF_LEFT_BRACE)) return false;
     boolean result_, pinned_;
-    Marker marker_ = enter_section_(builder_, level_, _NONE_, null);
+    Marker marker_ = enter_section_(builder_, level_, _NONE_, BNF_ATTRS, null);
     result_ = consumeToken(builder_, BNF_LEFT_BRACE);
     pinned_ = result_; // pin = 1
     result_ = result_ && attrs_1(builder_, level_ + 1);
     result_ = result_ && consumeToken(builder_, BNF_RIGHT_BRACE);
-    exit_section_(builder_, level_, marker_, BNF_ATTRS, result_, pinned_, null);
+    exit_section_(builder_, level_, marker_, result_, pinned_, null);
     return result_ || pinned_;
   }
 
@@ -212,10 +212,10 @@ public class Self implements PsiParser, LightPsiParser {
   public static boolean choice(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "choice")) return false;
     boolean result_;
-    Marker marker_ = enter_section_(builder_, level_, _COLLAPSE_, null);
+    Marker marker_ = enter_section_(builder_, level_, _COLLAPSE_, BNF_CHOICE, null);
     result_ = choice_0(builder_, level_ + 1);
     if (!result_) result_ = choice_1(builder_, level_ + 1);
-    exit_section_(builder_, level_, marker_, BNF_CHOICE, result_, false, null);
+    exit_section_(builder_, level_, marker_, result_, false, null);
     return result_;
   }
 
@@ -284,11 +284,11 @@ public class Self implements PsiParser, LightPsiParser {
     if (!recursion_guard_(builder_, level_, "choice_tail")) return false;
     if (!nextTokenIs(builder_, BNF_OP_OR)) return false;
     boolean result_, pinned_;
-    Marker marker_ = enter_section_(builder_, level_, _NONE_, null);
+    Marker marker_ = enter_section_(builder_, level_, _NONE_);
     result_ = consumeToken(builder_, BNF_OP_OR);
     pinned_ = result_; // pin = 1
     result_ = result_ && sequence(builder_, level_ + 1);
-    exit_section_(builder_, level_, marker_, null, result_, pinned_, null);
+    exit_section_(builder_, level_, marker_, result_, pinned_, null);
     return result_ || pinned_;
   }
 
@@ -296,9 +296,9 @@ public class Self implements PsiParser, LightPsiParser {
   // choice?
   public static boolean expression(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "expression")) return false;
-    Marker marker_ = enter_section_(builder_, level_, _COLLAPSE_, null);
+    Marker marker_ = enter_section_(builder_, level_, _COLLAPSE_, BNF_EXPRESSION, null);
     choice(builder_, level_ + 1);
-    exit_section_(builder_, level_, marker_, BNF_EXPRESSION, true, false, null);
+    exit_section_(builder_, level_, marker_, true, false, null);
     return true;
   }
 
@@ -332,10 +332,10 @@ public class Self implements PsiParser, LightPsiParser {
     if (!recursion_guard_(builder_, level_, "literal_expression")) return false;
     if (!nextTokenIs(builder_, "", BNF_NUMBER, BNF_STRING)) return false;
     boolean result_;
-    Marker marker_ = enter_section_(builder_, level_, _COLLAPSE_, null);
+    Marker marker_ = enter_section_(builder_, level_, _COLLAPSE_, BNF_LITERAL_EXPRESSION, null);
     result_ = string_literal_expression(builder_, level_ + 1);
     if (!result_) result_ = consumeToken(builder_, BNF_NUMBER);
-    exit_section_(builder_, level_, marker_, BNF_LITERAL_EXPRESSION, result_, false, null);
+    exit_section_(builder_, level_, marker_, result_, false, null);
     return result_;
   }
 
@@ -370,12 +370,12 @@ public class Self implements PsiParser, LightPsiParser {
     if (!recursion_guard_(builder_, level_, "paren_expression")) return false;
     if (!nextTokenIs(builder_, BNF_LEFT_PAREN)) return false;
     boolean result_, pinned_;
-    Marker marker_ = enter_section_(builder_, level_, _NONE_, null);
+    Marker marker_ = enter_section_(builder_, level_, _NONE_, BNF_PAREN_EXPRESSION, null);
     result_ = consumeToken(builder_, BNF_LEFT_PAREN);
     pinned_ = result_; // pin = 1
     result_ = result_ && expression(builder_, level_ + 1);
     result_ = result_ && consumeToken(builder_, BNF_RIGHT_PAREN);
-    exit_section_(builder_, level_, marker_, BNF_PAREN_EXPRESSION, result_, pinned_, null);
+    exit_section_(builder_, level_, marker_, result_, pinned_, null);
     return result_ || pinned_;
   }
 
@@ -410,10 +410,10 @@ public class Self implements PsiParser, LightPsiParser {
   public static boolean quantified(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "quantified")) return false;
     boolean result_;
-    Marker marker_ = enter_section_(builder_, level_, _COLLAPSE_, null);
+    Marker marker_ = enter_section_(builder_, level_, _COLLAPSE_, BNF_QUANTIFIED, null);
     result_ = quantified_0(builder_, level_ + 1);
     if (!result_) result_ = quantified_1(builder_, level_ + 1);
-    exit_section_(builder_, level_, marker_, BNF_QUANTIFIED, result_, false, null);
+    exit_section_(builder_, level_, marker_, result_, false, null);
     return result_;
   }
 
@@ -477,7 +477,7 @@ public class Self implements PsiParser, LightPsiParser {
   public static boolean rule(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "rule")) return false;
     boolean result_, pinned_;
-    Marker marker_ = enter_section_(builder_, level_, _NONE_, null);
+    Marker marker_ = enter_section_(builder_, level_, _NONE_, BNF_RULE, null);
     result_ = rule_0(builder_, level_ + 1);
     result_ = result_ && consumeToken(builder_, BNF_ID);
     result_ = result_ && consumeToken(builder_, BNF_OP_IS);
@@ -485,7 +485,7 @@ public class Self implements PsiParser, LightPsiParser {
     result_ = result_ && expression(builder_, level_ + 1);
     result_ = result_ && rule_4(builder_, level_ + 1);
     result_ = result_ && rule_5(builder_, level_ + 1);
-    exit_section_(builder_, level_, marker_, BNF_RULE, result_, pinned_, rule_recover_until_parser_);
+    exit_section_(builder_, level_, marker_, result_, pinned_, rule_recover_until_parser_);
     return result_ || pinned_;
   }
 
@@ -520,9 +520,9 @@ public class Self implements PsiParser, LightPsiParser {
   static boolean rule_recover_until(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "rule_recover_until")) return false;
     boolean result_;
-    Marker marker_ = enter_section_(builder_, level_, _NOT_, null);
+    Marker marker_ = enter_section_(builder_, level_, _NOT_);
     result_ = !consumeToken(builder_, BNF_LEFT_BRACE);
-    exit_section_(builder_, level_, marker_, null, result_, false, null);
+    exit_section_(builder_, level_, marker_, result_, false, null);
     return result_;
   }
 
@@ -531,7 +531,7 @@ public class Self implements PsiParser, LightPsiParser {
   public static boolean sequence(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "sequence")) return false;
     boolean result_;
-    Marker marker_ = enter_section_(builder_, level_, _COLLAPSE_, null);
+    Marker marker_ = enter_section_(builder_, level_, _COLLAPSE_, BNF_SEQUENCE, null);
     result_ = option(builder_, level_ + 1);
     int pos_ = current_position_(builder_);
     while (result_) {
@@ -539,7 +539,7 @@ public class Self implements PsiParser, LightPsiParser {
       if (!empty_element_parsed_guard_(builder_, "sequence", pos_)) break;
       pos_ = current_position_(builder_);
     }
-    exit_section_(builder_, level_, marker_, BNF_SEQUENCE, result_, false, null);
+    exit_section_(builder_, level_, marker_, result_, false, null);
     return result_;
   }
 
@@ -571,9 +571,9 @@ public class Self implements PsiParser, LightPsiParser {
   private static boolean simple_0_0(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "simple_0_0")) return false;
     boolean result_;
-    Marker marker_ = enter_section_(builder_, level_, _NOT_, null);
+    Marker marker_ = enter_section_(builder_, level_, _NOT_);
     result_ = !simple_0_0_0(builder_, level_ + 1);
-    exit_section_(builder_, level_, marker_, null, result_, false, null);
+    exit_section_(builder_, level_, marker_, result_, false, null);
     return result_;
   }
 

@@ -117,12 +117,12 @@ public class ExpressionParser implements PsiParser, LightPsiParser {
   public static boolean arg_list(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "arg_list")) return false;
     boolean result_, pinned_;
-    Marker marker_ = enter_section_(builder_, level_, _NONE_, "<arg list>");
+    Marker marker_ = enter_section_(builder_, level_, _NONE_, ARG_LIST, "<arg list>");
     result_ = consumeToken(builder_, "(");
     pinned_ = result_; // pin = 1
     result_ = result_ && report_error_(builder_, arg_list_1(builder_, level_ + 1));
     result_ = pinned_ && consumeToken(builder_, ")") && result_;
-    exit_section_(builder_, level_, marker_, ARG_LIST, result_, pinned_, null);
+    exit_section_(builder_, level_, marker_, result_, pinned_, null);
     return result_ || pinned_;
   }
 
@@ -137,12 +137,12 @@ public class ExpressionParser implements PsiParser, LightPsiParser {
   private static boolean arg_list_1_0(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "arg_list_1_0")) return false;
     boolean result_, pinned_;
-    Marker marker_ = enter_section_(builder_, level_, _NONE_, null);
+    Marker marker_ = enter_section_(builder_, level_, _NONE_);
     result_ = arg_list_1_0_0(builder_, level_ + 1);
     pinned_ = result_; // pin = 1
     result_ = result_ && report_error_(builder_, expr(builder_, level_ + 1, -1));
     result_ = pinned_ && arg_list_1_0_2(builder_, level_ + 1) && result_;
-    exit_section_(builder_, level_, marker_, null, result_, pinned_, null);
+    exit_section_(builder_, level_, marker_, result_, pinned_, null);
     return result_ || pinned_;
   }
 
@@ -150,9 +150,9 @@ public class ExpressionParser implements PsiParser, LightPsiParser {
   private static boolean arg_list_1_0_0(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "arg_list_1_0_0")) return false;
     boolean result_;
-    Marker marker_ = enter_section_(builder_, level_, _NOT_, null);
+    Marker marker_ = enter_section_(builder_, level_, _NOT_);
     result_ = !consumeToken(builder_, ")");
-    exit_section_(builder_, level_, marker_, null, result_, false, null);
+    exit_section_(builder_, level_, marker_, result_, false, null);
     return result_;
   }
 
@@ -172,11 +172,11 @@ public class ExpressionParser implements PsiParser, LightPsiParser {
   private static boolean arg_list_1_0_2_0(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "arg_list_1_0_2_0")) return false;
     boolean result_, pinned_;
-    Marker marker_ = enter_section_(builder_, level_, _NONE_, null);
+    Marker marker_ = enter_section_(builder_, level_, _NONE_);
     result_ = consumeToken(builder_, ",");
     pinned_ = result_; // pin = 1
     result_ = result_ && expr(builder_, level_ + 1, -1);
-    exit_section_(builder_, level_, marker_, null, result_, pinned_, null);
+    exit_section_(builder_, level_, marker_, result_, pinned_, null);
     return result_ || pinned_;
   }
 
@@ -185,10 +185,10 @@ public class ExpressionParser implements PsiParser, LightPsiParser {
   static boolean element(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "element")) return false;
     boolean result_;
-    Marker marker_ = enter_section_(builder_, level_, _NONE_, null);
+    Marker marker_ = enter_section_(builder_, level_, _NONE_);
     result_ = expr(builder_, level_ + 1, -1);
     result_ = result_ && element_1(builder_, level_ + 1);
-    exit_section_(builder_, level_, marker_, null, result_, false, element_recover_parser_);
+    exit_section_(builder_, level_, marker_, result_, false, element_recover_parser_);
     return result_;
   }
 
@@ -204,9 +204,9 @@ public class ExpressionParser implements PsiParser, LightPsiParser {
   static boolean element_recover(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "element_recover")) return false;
     boolean result_;
-    Marker marker_ = enter_section_(builder_, level_, _NOT_, null);
+    Marker marker_ = enter_section_(builder_, level_, _NOT_);
     result_ = !element_recover_0(builder_, level_ + 1);
-    exit_section_(builder_, level_, marker_, null, result_, false, null);
+    exit_section_(builder_, level_, marker_, result_, false, null);
     return result_;
   }
 
@@ -442,7 +442,7 @@ public class ExpressionParser implements PsiParser, LightPsiParser {
   public static boolean special_expr(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "special_expr")) return false;
     boolean result_, pinned_;
-    Marker marker_ = enter_section_(builder_, level_, _NONE_, "<special expr>");
+    Marker marker_ = enter_section_(builder_, level_, _NONE_, SPECIAL_EXPR, "<special expr>");
     result_ = consumeTokenSmart(builder_, "multiply");
     result_ = result_ && consumeToken(builder_, "(");
     pinned_ = result_; // pin = 2
@@ -450,7 +450,7 @@ public class ExpressionParser implements PsiParser, LightPsiParser {
     result_ = pinned_ && report_error_(builder_, consumeToken(builder_, ",")) && result_;
     result_ = pinned_ && report_error_(builder_, expr(builder_, level_ + 1, 3)) && result_;
     result_ = pinned_ && consumeToken(builder_, ")") && result_;
-    exit_section_(builder_, level_, marker_, SPECIAL_EXPR, result_, pinned_, null);
+    exit_section_(builder_, level_, marker_, result_, pinned_, null);
     return result_ || pinned_;
   }
 

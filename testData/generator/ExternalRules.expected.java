@@ -113,11 +113,11 @@ public class ExternalRules implements PsiParser, LightPsiParser {
   public static boolean comma_list_tail(PsiBuilder builder_, int level_, final Parser param) {
     if (!recursion_guard_(builder_, level_, "comma_list_tail")) return false;
     boolean result_, pinned_;
-    Marker marker_ = enter_section_(builder_, level_, _NONE_, null);
+    Marker marker_ = enter_section_(builder_, level_, _NONE_, COMMA_LIST_TAIL, null);
     result_ = consumeToken(builder_, ",");
     pinned_ = result_; // pin = 1
     result_ = result_ && param.parse(builder_, level_);
-    exit_section_(builder_, level_, marker_, COMMA_LIST_TAIL, result_, pinned_, null);
+    exit_section_(builder_, level_, marker_, result_, pinned_, null);
     return result_ || pinned_;
   }
 
@@ -126,9 +126,9 @@ public class ExternalRules implements PsiParser, LightPsiParser {
   static boolean item_recover(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "item_recover")) return false;
     boolean result_;
-    Marker marker_ = enter_section_(builder_, level_, _NOT_, null);
+    Marker marker_ = enter_section_(builder_, level_, _NOT_);
     result_ = !item_recover_0(builder_, level_ + 1);
-    exit_section_(builder_, level_, marker_, null, result_, false, null);
+    exit_section_(builder_, level_, marker_, result_, false, null);
     return result_;
   }
 
@@ -368,9 +368,9 @@ public class ExternalRules implements PsiParser, LightPsiParser {
   public static boolean one(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "one")) return false;
     boolean result_;
-    Marker marker_ = enter_section_(builder_, level_, _NONE_, "<one>");
+    Marker marker_ = enter_section_(builder_, level_, _NONE_, ONE, "<one>");
     result_ = consumeToken(builder_, "one");
-    exit_section_(builder_, level_, marker_, ONE, result_, false, null);
+    exit_section_(builder_, level_, marker_, result_, false, null);
     return result_;
   }
 
@@ -544,9 +544,9 @@ public class ExternalRules implements PsiParser, LightPsiParser {
   private static boolean param_seq_alt_params_ext_1_1(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "param_seq_alt_params_ext_1_1")) return false;
     boolean result_;
-    Marker marker_ = enter_section_(builder_, level_, _NOT_, null);
+    Marker marker_ = enter_section_(builder_, level_, _NOT_);
     result_ = !two(builder_, level_ + 1);
-    exit_section_(builder_, level_, marker_, null, result_, false, null);
+    exit_section_(builder_, level_, marker_, result_, false, null);
     return result_;
   }
 
@@ -561,9 +561,9 @@ public class ExternalRules implements PsiParser, LightPsiParser {
   static boolean recoverable_item(PsiBuilder builder_, int level_, final Parser param) {
     if (!recursion_guard_(builder_, level_, "recoverable_item")) return false;
     boolean result_;
-    Marker marker_ = enter_section_(builder_, level_, _NONE_, null);
+    Marker marker_ = enter_section_(builder_, level_, _NONE_);
     result_ = param.parse(builder_, level_);
-    exit_section_(builder_, level_, marker_, null, result_, false, item_recover_parser_);
+    exit_section_(builder_, level_, marker_, result_, false, item_recover_parser_);
     return result_;
   }
 
@@ -578,10 +578,10 @@ public class ExternalRules implements PsiParser, LightPsiParser {
   public static boolean statement(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "statement")) return false;
     boolean result_;
-    Marker marker_ = enter_section_(builder_, level_, _NONE_, "<statement>");
+    Marker marker_ = enter_section_(builder_, level_, _NONE_, STATEMENT, "<statement>");
     result_ = one(builder_, level_ + 1);
     if (!result_) result_ = two(builder_, level_ + 1);
-    exit_section_(builder_, level_, marker_, STATEMENT, result_, false, null);
+    exit_section_(builder_, level_, marker_, result_, false, null);
     return result_;
   }
 
@@ -590,9 +590,9 @@ public class ExternalRules implements PsiParser, LightPsiParser {
   public static boolean two(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "two")) return false;
     boolean result_;
-    Marker marker_ = enter_section_(builder_, level_, _NONE_, "<two>");
+    Marker marker_ = enter_section_(builder_, level_, _NONE_, TWO, "<two>");
     result_ = consumeToken(builder_, "two");
-    exit_section_(builder_, level_, marker_, TWO, result_, false, null);
+    exit_section_(builder_, level_, marker_, result_, false, null);
     return result_;
   }
 

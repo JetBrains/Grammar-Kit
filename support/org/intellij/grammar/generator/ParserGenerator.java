@@ -647,12 +647,19 @@ public class ParserGenerator {
     if (modifierList.isEmpty() && (pinned || frameName != null)) modifierList.add("_NONE_");
     boolean sectionRequired = !alwaysTrue || !isPrivate || isLeft || recoverWhile != null;
     boolean sectionRequiredSimple = sectionRequired && modifierList.isEmpty() && recoverWhile == null;
+    String elementTypeRef = !isPrivate && StringUtil.isNotEmpty(elementType) ? elementType : null;
     String modifiers = modifierList.isEmpty()? "_NONE_" : StringUtil.join(modifierList, " | ");
     if (sectionRequiredSimple) {
       out("Marker %s = enter_section_(%s);", N.marker, N.builder);
     }
     else if (sectionRequired) {
-      out("Marker %s = enter_section_(%s, %s, %s, %s);", N.marker, N.builder, N.level, modifiers, frameName);
+      boolean shortVersion = frameName == null && elementTypeRef == null;
+      if (shortVersion) {
+        out("Marker %s = enter_section_(%s, %s, %s);", N.marker, N.builder, N.level, modifiers);
+      }
+      else {
+        out("Marker %s = enter_section_(%s, %s, %s, %s, %s);", N.marker, N.builder, N.level, modifiers, elementTypeRef, frameName);
+      }
     }
 
     ConsumeType consumeType = ConsumeType.forRule(rule);
@@ -731,7 +738,6 @@ public class ParserGenerator {
     }
 
     if (sectionRequired) {
-      String elementTypeRef = !isPrivate && StringUtil.isNotEmpty(elementType)? elementType : "null";
       String resultRef = alwaysTrue ? "true" : N.result;
       if (sectionRequiredSimple) {
         out("exit_section_(%s, %s, %s, %s);", N.builder, N.marker, elementTypeRef, resultRef);
@@ -751,7 +757,7 @@ public class ParserGenerator {
         else {
           recoverCall = null;
         }
-        out("exit_section_(%s, %s, %s, %s, %s, %s, %s);", N.builder, N.level, N.marker, elementTypeRef, resultRef, pinnedRef, recoverCall);
+        out("exit_section_(%s, %s, %s, %s, %s, %s);", N.builder, N.level, N.marker, resultRef, pinnedRef, recoverCall);
       }
     }
 

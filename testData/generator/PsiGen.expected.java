@@ -121,10 +121,10 @@ public class PsiGen implements PsiParser, LightPsiParser {
     if (!recursion_guard_(builder_, level_, "expr")) return false;
     if (!nextTokenIs(builder_, "<expr>", ID, NUMBER)) return false;
     boolean result_;
-    Marker marker_ = enter_section_(builder_, level_, _COLLAPSE_, "<expr>");
+    Marker marker_ = enter_section_(builder_, level_, _COLLAPSE_, EXPR, "<expr>");
     result_ = a_expr(builder_, level_ + 1);
     result_ = result_ && expr_1(builder_, level_ + 1);
-    exit_section_(builder_, level_, marker_, EXPR, result_, false, null);
+    exit_section_(builder_, level_, marker_, result_, false, null);
     return result_;
   }
 
@@ -205,10 +205,10 @@ public class PsiGen implements PsiParser, LightPsiParser {
     if (!recursion_guard_(builder_, level_, "grammar_element")) return false;
     if (!nextTokenIs(builder_, "<grammar element>", ID, NUMBER)) return false;
     boolean result_;
-    Marker marker_ = enter_section_(builder_, level_, _NONE_, "<grammar element>");
+    Marker marker_ = enter_section_(builder_, level_, _NONE_, GRAMMAR_ELEMENT, "<grammar element>");
     result_ = expr(builder_, level_ + 1);
     if (!result_) result_ = external_type3(builder_, level_ + 1);
-    exit_section_(builder_, level_, marker_, GRAMMAR_ELEMENT, result_, false, null);
+    exit_section_(builder_, level_, marker_, result_, false, null);
     return result_;
   }
 
@@ -251,10 +251,10 @@ public class PsiGen implements PsiParser, LightPsiParser {
     if (!recursion_guard_(builder_, level_, "mul_expr")) return false;
     if (!nextTokenIs(builder_, OP_MUL)) return false;
     boolean result_;
-    Marker marker_ = enter_section_(builder_, level_, _LEFT_, null);
+    Marker marker_ = enter_section_(builder_, level_, _LEFT_, MUL_EXPR, null);
     result_ = consumeToken(builder_, OP_MUL);
     result_ = result_ && expr(builder_, level_ + 1);
-    exit_section_(builder_, level_, marker_, MUL_EXPR, result_, false, null);
+    exit_section_(builder_, level_, marker_, result_, false, null);
     return result_;
   }
 
@@ -263,10 +263,10 @@ public class PsiGen implements PsiParser, LightPsiParser {
   public static boolean plus_expr(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "plus_expr")) return false;
     boolean result_;
-    Marker marker_ = enter_section_(builder_, level_, _LEFT_, "<plus expr>");
+    Marker marker_ = enter_section_(builder_, level_, _LEFT_, PLUS_EXPR, "<plus expr>");
     result_ = consumeToken(builder_, "+");
     result_ = result_ && expr(builder_, level_ + 1);
-    exit_section_(builder_, level_, marker_, PLUS_EXPR, result_, false, null);
+    exit_section_(builder_, level_, marker_, result_, false, null);
     return result_;
   }
 
@@ -289,9 +289,9 @@ public class PsiGen implements PsiParser, LightPsiParser {
   public static boolean root_b(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "root_b")) return false;
     boolean result_;
-    Marker marker_ = enter_section_(builder_, level_, _COLLAPSE_, "<root b>");
+    Marker marker_ = enter_section_(builder_, level_, _COLLAPSE_, ROOT_B, "<root b>");
     result_ = parseGrammar(builder_, level_ + 1, grammar_element_parser_);
-    exit_section_(builder_, level_, marker_, ROOT_B, result_, false, null);
+    exit_section_(builder_, level_, marker_, result_, false, null);
     return result_;
   }
 
@@ -301,9 +301,9 @@ public class PsiGen implements PsiParser, LightPsiParser {
     if (!recursion_guard_(builder_, level_, "root_c")) return false;
     if (!nextTokenIs(builder_, "<root c>", ID, NUMBER)) return false;
     boolean result_;
-    Marker marker_ = enter_section_(builder_, level_, _NONE_, "<root c>");
+    Marker marker_ = enter_section_(builder_, level_, _NONE_, ROOT_C, "<root c>");
     result_ = PsiGen2.blockOf(builder_, level_ + 1, grammar_element_parser_);
-    exit_section_(builder_, level_, marker_, ROOT_C, result_, false, null);
+    exit_section_(builder_, level_, marker_, result_, false, null);
     return result_;
   }
 
@@ -313,9 +313,9 @@ public class PsiGen implements PsiParser, LightPsiParser {
     if (!recursion_guard_(builder_, level_, "root_d")) return false;
     if (!nextTokenIs(builder_, "<root d>", ID, NUMBER)) return false;
     boolean result_;
-    Marker marker_ = enter_section_(builder_, level_, _NONE_, "<root d>");
+    Marker marker_ = enter_section_(builder_, level_, _NONE_, ROOT_D, "<root d>");
     result_ = listOf(builder_, level_ + 1, grammar_element_parser_);
-    exit_section_(builder_, level_, marker_, ROOT_D, result_, false, null);
+    exit_section_(builder_, level_, marker_, result_, false, null);
     return result_;
   }
 
@@ -360,10 +360,10 @@ public class PsiGen2 {
   public static boolean cast_expr(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "cast_expr")) return false;
     boolean result_;
-    Marker marker_ = enter_section_(builder_, level_, _LEFT_, "<cast expr>");
+    Marker marker_ = enter_section_(builder_, level_, _LEFT_, CAST_EXPR, "<cast expr>");
     result_ = consumeToken(builder_, "::");
     result_ = result_ && consumeToken(builder_, ID);
-    exit_section_(builder_, level_, marker_, CAST_EXPR, result_, false, null);
+    exit_section_(builder_, level_, marker_, result_, false, null);
     return result_;
   }
 
@@ -384,11 +384,11 @@ public class PsiGen2 {
   public static boolean item_expr(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "item_expr")) return false;
     boolean result_;
-    Marker marker_ = enter_section_(builder_, level_, _LEFT_, "<item expr>");
+    Marker marker_ = enter_section_(builder_, level_, _LEFT_, ITEM_EXPR, "<item expr>");
     result_ = consumeToken(builder_, "[");
     result_ = result_ && consumeToken(builder_, NUMBER);
     result_ = result_ && consumeToken(builder_, "]");
-    exit_section_(builder_, level_, marker_, ITEM_EXPR, result_, false, null);
+    exit_section_(builder_, level_, marker_, result_, false, null);
     return result_;
   }
 
@@ -409,10 +409,10 @@ public class PsiGen2 {
   public static boolean qref_expr(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "qref_expr")) return false;
     boolean result_;
-    Marker marker_ = enter_section_(builder_, level_, _LEFT_, "<qref expr>");
+    Marker marker_ = enter_section_(builder_, level_, _LEFT_, REF_EXPR, "<qref expr>");
     result_ = consumeToken(builder_, ".");
     result_ = result_ && identifier(builder_, level_ + 1);
-    exit_section_(builder_, level_, marker_, REF_EXPR, result_, false, null);
+    exit_section_(builder_, level_, marker_, result_, false, null);
     return result_;
   }
 
@@ -459,11 +459,11 @@ public class PsiGen2 {
     if (!recursion_guard_(builder_, level_, "some_expr")) return false;
     if (!nextTokenIs(builder_, "<some expr>", ID, NUMBER)) return false;
     boolean result_;
-    Marker marker_ = enter_section_(builder_, level_, _COLLAPSE_, "<some expr>");
+    Marker marker_ = enter_section_(builder_, level_, _COLLAPSE_, SOME_EXPR, "<some expr>");
     result_ = some_expr_0(builder_, level_ + 1);
     result_ = result_ && some_expr_1(builder_, level_ + 1);
     result_ = result_ && some_expr_2(builder_, level_ + 1);
-    exit_section_(builder_, level_, marker_, SOME_EXPR, result_, false, null);
+    exit_section_(builder_, level_, marker_, result_, false, null);
     return result_;
   }
 
@@ -568,10 +568,10 @@ public class PsiGenFixes {
   public static boolean LeftShadow(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "LeftShadow")) return false;
     boolean result_;
-    Marker marker_ = enter_section_(builder_, level_, _LEFT_, "<left shadow>");
+    Marker marker_ = enter_section_(builder_, level_, _LEFT_, LEFT_SHADOW, "<left shadow>");
     result_ = consumeToken(builder_, ",");
     result_ = result_ && PsiGen2.identifier(builder_, level_ + 1);
-    exit_section_(builder_, level_, marker_, LEFT_SHADOW, result_, false, null);
+    exit_section_(builder_, level_, marker_, result_, false, null);
     return result_;
   }
 
@@ -606,10 +606,10 @@ public class PsiGenFixes {
     if (!recursion_guard_(builder_, level_, "a_statement")) return false;
     if (!nextTokenIs(builder_, "<a statement>", ID, NUMBER)) return false;
     boolean result_;
-    Marker marker_ = enter_section_(builder_, level_, _NONE_, "<a statement>");
+    Marker marker_ = enter_section_(builder_, level_, _NONE_, A_STATEMENT, "<a statement>");
     result_ = consumeToken(builder_, ID);
     if (!result_) result_ = consumeToken(builder_, NUMBER);
-    exit_section_(builder_, level_, marker_, A_STATEMENT, result_, false, null);
+    exit_section_(builder_, level_, marker_, result_, false, null);
     return result_;
   }
 
@@ -619,10 +619,10 @@ public class PsiGenFixes {
     if (!recursion_guard_(builder_, level_, "b_statement")) return false;
     if (!nextTokenIs(builder_, "<b statement>", ID, NUMBER)) return false;
     boolean result_;
-    Marker marker_ = enter_section_(builder_, level_, _NONE_, "<b statement>");
+    Marker marker_ = enter_section_(builder_, level_, _NONE_, B_STATEMENT, "<b statement>");
     result_ = consumeToken(builder_, ID);
     if (!result_) result_ = consumeToken(builder_, NUMBER);
-    exit_section_(builder_, level_, marker_, B_STATEMENT, result_, false, null);
+    exit_section_(builder_, level_, marker_, result_, false, null);
     return result_;
   }
 
@@ -632,10 +632,10 @@ public class PsiGenFixes {
     if (!recursion_guard_(builder_, level_, "c_statement")) return false;
     if (!nextTokenIs(builder_, "<c statement>", ID, NUMBER)) return false;
     boolean result_;
-    Marker marker_ = enter_section_(builder_, level_, _NONE_, "<c statement>");
+    Marker marker_ = enter_section_(builder_, level_, _NONE_, C_STATEMENT, "<c statement>");
     result_ = consumeToken(builder_, ID);
     if (!result_) result_ = consumeToken(builder_, NUMBER);
-    exit_section_(builder_, level_, marker_, C_STATEMENT, result_, false, null);
+    exit_section_(builder_, level_, marker_, result_, false, null);
     return result_;
   }
 
@@ -644,10 +644,10 @@ public class PsiGenFixes {
   public static boolean choice_joined(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "choice_joined")) return false;
     boolean result_;
-    Marker marker_ = enter_section_(builder_, level_, _NONE_, "<choice joined>");
+    Marker marker_ = enter_section_(builder_, level_, _NONE_, CHOICE_JOINED, "<choice joined>");
     result_ = choice_joined_0(builder_, level_ + 1);
     if (!result_) result_ = choice_joined_1(builder_, level_ + 1);
-    exit_section_(builder_, level_, marker_, CHOICE_JOINED, result_, false, null);
+    exit_section_(builder_, level_, marker_, result_, false, null);
     return result_;
   }
 
@@ -699,10 +699,10 @@ public class PsiGenFixes {
     if (!recursion_guard_(builder_, level_, "statement")) return false;
     if (!nextTokenIs(builder_, "<statement>", ID, NUMBER)) return false;
     boolean result_;
-    Marker marker_ = enter_section_(builder_, level_, _COLLAPSE_, "<statement>");
+    Marker marker_ = enter_section_(builder_, level_, _COLLAPSE_, STATEMENT, "<statement>");
     result_ = statement_0(builder_, level_ + 1);
     if (!result_) result_ = statement_1(builder_, level_ + 1);
-    exit_section_(builder_, level_, marker_, STATEMENT, result_, false, null);
+    exit_section_(builder_, level_, marker_, result_, false, null);
     return result_;
   }
 
@@ -721,9 +721,9 @@ public class PsiGenFixes {
   private static boolean statement_0_0(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "statement_0_0")) return false;
     boolean result_;
-    Marker marker_ = enter_section_(builder_, level_, _AND_, null);
+    Marker marker_ = enter_section_(builder_, level_, _AND_);
     result_ = external(builder_, level_ + 1);
-    exit_section_(builder_, level_, marker_, null, result_, false, null);
+    exit_section_(builder_, level_, marker_, result_, false, null);
     return result_;
   }
 
@@ -753,9 +753,9 @@ public class PsiGenFixes {
   private static boolean statement_1_0(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "statement_1_0")) return false;
     boolean result_;
-    Marker marker_ = enter_section_(builder_, level_, _NOT_, null);
+    Marker marker_ = enter_section_(builder_, level_, _NOT_);
     result_ = !external(builder_, level_ + 1);
-    exit_section_(builder_, level_, marker_, null, result_, false, null);
+    exit_section_(builder_, level_, marker_, result_, false, null);
     return result_;
   }
 

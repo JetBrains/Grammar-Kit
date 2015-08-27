@@ -303,13 +303,13 @@ public class BnfFirstNextAnalyzer {
         }
       }
       Set<BnfExpression> mixed = newExprSet();
-      if (skip) {
-        mixed.addAll(next);
-        mixed.remove(BNF_MATCHES_EOF);
-      }
-      else if (elementType == BnfTypes.BNF_OP_AND) {
+      if (elementType == BnfTypes.BNF_OP_AND) {
         if (forcedNext != null && forcedNext.first) {
           mixed.addAll(conditions);
+        }
+        else if (skip) {
+          mixed.addAll(next);
+          mixed.remove(BNF_MATCHES_EOF);
         }
         else if (!conditions.contains(BNF_MATCHES_EOF)) {
           if (next.contains(BNF_MATCHES_ANY)) {
@@ -328,7 +328,11 @@ public class BnfFirstNextAnalyzer {
         }
       }
       else {
-        if (!conditions.contains(BNF_MATCHES_EOF)) {
+        if (skip) {
+          mixed.addAll(next);
+          mixed.remove(BNF_MATCHES_EOF);
+        }
+        else if (!conditions.contains(BNF_MATCHES_EOF)) {
           mixed.addAll(next);
           mixed.removeAll(conditions);
           if (mixed.isEmpty()) {

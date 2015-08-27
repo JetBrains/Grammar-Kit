@@ -248,7 +248,7 @@ public class Fixes implements PsiParser, LightPsiParser {
     boolean result_, pinned_;
     Marker marker_ = enter_section_(builder_, level_, _NONE_, null);
     result_ = pinned_report_1_0(builder_, level_ + 1);
-    pinned_ = result_; // pin = &B
+    pinned_ = result_; // pin = 1
     result_ = result_ && consumeToken(builder_, A);
     exit_section_(builder_, level_, marker_, null, result_, pinned_, null);
     return result_ || pinned_;
@@ -260,6 +260,40 @@ public class Fixes implements PsiParser, LightPsiParser {
     boolean result_;
     Marker marker_ = enter_section_(builder_, level_, _AND_, null);
     result_ = consumeToken(builder_, B);
+    exit_section_(builder_, level_, marker_, null, result_, false, null);
+    return result_;
+  }
+
+  /* ********************************************************** */
+  // A | &<<aux>> A
+  static boolean pinned_report_ext(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "pinned_report_ext")) return false;
+    boolean result_;
+    Marker marker_ = enter_section_(builder_);
+    result_ = consumeToken(builder_, A);
+    if (!result_) result_ = pinned_report_ext_1(builder_, level_ + 1);
+    exit_section_(builder_, marker_, null, result_);
+    return result_;
+  }
+
+  // &<<aux>> A
+  private static boolean pinned_report_ext_1(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "pinned_report_ext_1")) return false;
+    boolean result_, pinned_;
+    Marker marker_ = enter_section_(builder_, level_, _NONE_, null);
+    result_ = pinned_report_ext_1_0(builder_, level_ + 1);
+    pinned_ = result_; // pin = 1
+    result_ = result_ && consumeToken(builder_, A);
+    exit_section_(builder_, level_, marker_, null, result_, pinned_, null);
+    return result_ || pinned_;
+  }
+
+  // &<<aux>>
+  private static boolean pinned_report_ext_1_0(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "pinned_report_ext_1_0")) return false;
+    boolean result_;
+    Marker marker_ = enter_section_(builder_, level_, _AND_, null);
+    result_ = aux(builder_, level_ + 1);
     exit_section_(builder_, level_, marker_, null, result_, false, null);
     return result_;
   }

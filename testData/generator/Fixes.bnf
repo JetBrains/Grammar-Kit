@@ -28,4 +28,5 @@ private erl_tail_bad ::= (A erl_tail_bad)*
 erl_list ::= expr A erl_tail {pin=2}
 private erl_tail ::= zome | A zome | '&&' expr some erl_tail {pin(".*")=1}
 
-private pinned_report ::= A | &B A {pin(".*")="&B"}
+private pinned_report ::= A | &B A {pin(".*")=1}
+private pinned_report_ext ::= A | &<<aux>> A {pin(".*")=1}

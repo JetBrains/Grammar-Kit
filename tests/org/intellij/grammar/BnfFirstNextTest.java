@@ -67,7 +67,8 @@ public class BnfFirstNextTest extends LightPlatformCodeInsightFixtureTestCase {
 
   public void testRecursivePredicateTest() { doFirstTest("r ::= p A s ::= p r p ::= &<<A>>", "A"); }
 
-  public void testPinnedToReport() { doFirstTest("r ::= B | s s ::= &A B {pin=1}", "A", "B"); }
+  public void testPinnedToReport1() { doFirstTest("r ::= B | s s ::= &A B {pin=1}", "A", "B"); }
+  public void testPinnedToReport2() { doFirstTest("r ::= B | s s ::= &<<aux>> B {pin=1}", "#aux", "B"); }
 
   private void doFirstTest(String text, String... expected) { doTest(text, true, expected); }
   private void doNextTest(String text, String... expected) { doTest(text, false, expected); }

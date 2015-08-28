@@ -56,7 +56,7 @@ In the end my IDE looked like that:
 
 Here is the grammar I designed for the sample above. No java coding, no generation, no test running.
 I still need to add a lexer and some extra attributes to generate a real parser like package and some class
-names as described in the [main readme](README) but now I'm sure the BNF part is OK.
+names as described in the [main readme](README.md) but now I'm sure the BNF part is OK.
 
 
 The fun part is that I even can _inject_ this language in some other files I work with to quickly test the syntax.

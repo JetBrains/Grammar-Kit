@@ -21,10 +21,16 @@ public class BnfLivePreviewParserTest extends BnfGeneratorTestCase {
 
   public void testEmpty() throws IOException { doTest("Empty.live.txt"); }
   public void testJsonRecovery() throws IOException { doTest("Json.bnf"); }
-  public void testLivePreviewTutorial() throws IOException { doTest("LivePreviewTutorial.bnf"); }
-  public void testAutoRecovery() throws IOException { doTest("AutoRecovery.bnf"); }
+  public void testLivePreviewTutorial() throws IOException { doTest(); }
+  public void testAutoRecovery() throws IOException { doTest(); }
   public void testExprParser() throws IOException { doTest("../generator/ExprParser.bnf"); }
   public void testUpperRules() throws IOException { doTest("../generator/UpperRules.bnf"); }
+
+  public void testCase75() throws IOException { doTest(); }
+
+  protected void doTest() throws IOException {
+    doTest(getTestName(false) + ".bnf");
+  }
 
   @Override
   protected void doTest(String grammarFile) throws IOException {

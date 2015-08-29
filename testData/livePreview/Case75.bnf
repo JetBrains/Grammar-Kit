@@ -1,0 +1,11 @@
+{
+  tokens=[
+    SEP=';'
+    foo="foo"
+    bar="bar"
+    CRLF='regexp:\n'
+    space='regexp:[ \t]+'
+  ]
+}
+root ::= (stmt+ CRLF)*
+stmt ::= foo SEP bar SEP

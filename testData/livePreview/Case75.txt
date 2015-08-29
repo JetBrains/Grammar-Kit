@@ -1,0 +1,11 @@
+FILE
+  PsiElement(foo)('foo')
+  PsiWhiteSpace(' ')
+  PsiElement(;)(';')
+  PsiWhiteSpace(' ')
+  PsiElement(bar)('bar')
+  PsiWhiteSpace(' ')
+  PsiErrorElement:';' expected, got 'foo'
+    PsiElement(foo)('foo')
+  PsiWhiteSpace(' ')
+  PsiElement(;)(';')

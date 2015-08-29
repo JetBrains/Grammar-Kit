@@ -221,7 +221,7 @@ public class LivePreviewParser implements PsiParser {
       marker_ = enter_section_(builder);
     }
     else if (sectionRequired) {
-      marker_ = enter_section_(builder, level, modifiers, frameName);
+      marker_ = enter_section_(builder, level, modifiers, isPrivate ? null : elementType, frameName);
     }
 
     boolean predicateEncountered = false;
@@ -321,7 +321,7 @@ public class LivePreviewParser implements PsiParser {
           }
         };
       }
-      exit_section_(builder, level, marker_, isPrivate ? null : elementType, alwaysTrue || result_, pinned_, recoverPredicate);
+      exit_section_(builder, level, marker_, alwaysTrue || result_, pinned_, recoverPredicate);
     }
 
     return alwaysTrue || result_ || pinned_;

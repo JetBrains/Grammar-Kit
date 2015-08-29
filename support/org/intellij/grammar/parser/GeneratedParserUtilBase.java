@@ -604,7 +604,11 @@ public class GeneratedParserUtilBase {
       if (result || pinned) {
         if ((frame.modifiers & _UPPER_) != 0) {
           marker.drop();
-          frame.parentFrame.elementType = elementType;
+          for (Frame f = frame.parentFrame; f != null; f = f.parentFrame) {
+            if (f.elementType == null) continue;
+            f.elementType = elementType;
+            break;
+          }
         }
         else if ((frame.modifiers & _LEFT_INNER_) != 0 && frame.leftMarker != null) {
           marker.done(elementType);

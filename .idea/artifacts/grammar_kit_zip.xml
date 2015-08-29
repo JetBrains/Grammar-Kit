@@ -4,7 +4,7 @@
     <root id="archive" name="GrammarKit.zip">
       <element id="directory" name="GrammarKit">
         <element id="directory" name="lib">
-          <element id="artifact" artifact-name="grammar-kit:jar" />
+          <element id="artifact" artifact-name="grammar-kit.jar" />
         </element>
       </element>
     </root>

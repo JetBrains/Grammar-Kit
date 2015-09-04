@@ -2,7 +2,7 @@
   <id>org.jetbrains.idea.grammar</id>
   <version>1.3.x</version>
   <vendor email="gregory.shrago@jetbrains.com">Greg Shrago</vendor>
-  <idea-version since-build="142.0" until-build=""/>
+  <idea-version since-build="142.4527" until-build=""/>
 
   <name>Grammar-Kit</name>
   <description>BNF Grammars and JFlex lexers editor. Readable parser/PSI code generator.</description>

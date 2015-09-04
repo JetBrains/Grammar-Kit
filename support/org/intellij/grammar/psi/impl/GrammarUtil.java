@@ -172,12 +172,12 @@ public class GrammarUtil {
 
   public static SyntaxTraverser<PsiElement> bnfTraverser(PsiElement root) {
     return psiTraverser().withRoot(root).
-      forceExpandAndSkip(Conditions.instanceOf(GeneratedParserUtilBase.DummyBlock.class)).
+      forceDisregardTypes(Conditions.equalTo(GeneratedParserUtilBase.DUMMY_BLOCK)).
       filter(Conditions.instanceOf(BnfCompositeElement.class));
   }
 
   public static SyntaxTraverser<PsiElement> bnfTraverserNoAttrs(PsiElement root) {
-    return bnfTraverser(root).forceExclude(Conditions.instanceOf(BnfAttrs.class));
+    return bnfTraverser(root).forceIgnore(Conditions.instanceOf(BnfAttrs.class));
   }
 
   public static String getMethodName(BnfRule rule, PsiElement element) {

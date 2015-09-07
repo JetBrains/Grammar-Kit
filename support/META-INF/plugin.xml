@@ -29,8 +29,8 @@
     <annotator language="BNF" implementationClass="org.intellij.grammar.editor.BnfAnnotator"/>
     <annotator language="BNF" implementationClass="org.intellij.grammar.editor.BnfPinMarkerAnnotator"/>
     <annotator language="BNF" implementationClass="org.intellij.grammar.editor.BnfExpressionMarkerAnnotator"/>
-    <lang.syntaxHighlighterFactory key="BNF" implementationClass="org.intellij.grammar.editor.BnfSyntaxHighlighterFactory"/>
-    <lang.syntaxHighlighterFactory key="BNF_LP" implementationClass="org.intellij.grammar.livePreview.LivePreviewSyntaxHighlighterFactory"/>
+    <lang.syntaxHighlighterFactory language="BNF" implementationClass="org.intellij.grammar.editor.BnfSyntaxHighlighterFactory"/>
+    <lang.syntaxHighlighterFactory language="BNF_LP" implementationClass="org.intellij.grammar.livePreview.LivePreviewSyntaxHighlighterFactory"/>
     <elementDescriptionProvider implementation="org.intellij.grammar.BnfDescriptionProvider"/>
     <lang.findUsagesProvider language="BNF" implementationClass="org.intellij.grammar.BnfFindUsagesProvider"/>
     <lang.braceMatcher language="BNF" implementationClass="org.intellij.grammar.BnfBraceMatcher"/>
@@ -87,7 +87,7 @@
     <lang.commenter language="JFlex" implementationClass="org.intellij.jflex.editor.JFlexCommenter"/>
     <lang.refactoringSupport language="JFlex" implementationClass="org.intellij.jflex.editor.JFlexRefactoringSupportProvider"/>
     <annotator language="JFlex" implementationClass="org.intellij.jflex.editor.JFlexAnnotator"/>
-    <lang.syntaxHighlighterFactory key="JFlex" implementationClass="org.intellij.jflex.editor.JFlexSyntaxHighlighterFactory"/>
+    <lang.syntaxHighlighterFactory language="JFlex" implementationClass="org.intellij.jflex.editor.JFlexSyntaxHighlighterFactory"/>
     <colorSettingsPage implementation="org.intellij.jflex.editor.JFlexColorSettingsPage"/>
     <lang.braceMatcher language="JFlex" implementationClass="org.intellij.jflex.editor.JFlexBraceMatcher"/>
     <quoteHandler fileType="JFlex" className="org.intellij.jflex.editor.JFlexQuoteHandler"/>

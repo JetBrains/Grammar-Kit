@@ -84,7 +84,7 @@ private meta list_macro ::= <<p>> (',' <<p>>) *          // meta rule
 private list_usage ::= <<list_macro rule_D>>             // external expression
 ````
 
-Basic syntax is extended with global and attributes that control code generation.
+Basic syntax is extended with rule and global attributes that control code generation.
 Attributes are specified by the list of *name=value* pairs enclosed in { .. }.
 Rule attributes are placed right after the rule definition.
 Global attributes are placed on top or separated from a rule definition with a semicolon.

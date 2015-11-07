@@ -23,6 +23,7 @@ import com.intellij.psi.tree.IElementType;
 import com.intellij.util.containers.ContainerUtil;
 import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.psi.BnfAttr;
+import org.intellij.grammar.psi.BnfReferenceOrToken;
 import org.intellij.grammar.psi.BnfRule;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -86,7 +87,7 @@ public class RuleMethodsHelper {
       String pathName = getRuleOrTokenNameForPsi(element, c);
       if (pathName == null) continue;
       if (element instanceof BnfRule) {
-        BnfRule resultType = (BnfRule)element;
+        BnfRule resultType = RuleGraphHelper.getSynonymTargetOrSelf((BnfRule)element);
         if (!ParserGeneratorUtil.Rule.isPrivate(rule)) {
           result.add(new MethodInfo(1, pathName, pathName, resultType, c)); // public rule
         }
@@ -151,7 +152,11 @@ public class RuleMethodsHelper {
         result = mySimpleTokens.get(StringUtil.stripQuotesAroundValue(tree.getText()));
       }
       else if (effectiveType == BNF_REFERENCE_OR_TOKEN) {
-        result = tree.getText();
+        BnfRule rule = ((BnfReferenceOrToken) tree).resolveRule();
+        if (rule != null)
+          result = RuleGraphHelper.getSynonymTargetOrSelf(rule).getName();
+        else
+          result = tree.getText();
       }
       else {
         result = null;
@@ -159,7 +164,7 @@ public class RuleMethodsHelper {
     }
     else {
       BnfRule asRule = (BnfRule)tree;
-      result = asRule.getName();
+      result = RuleGraphHelper.getSynonymTargetOrSelf(asRule).getName();
       if (StringUtil.isEmpty(getElementType(asRule, G.generateElementCase))) return null;
     }
     return result;

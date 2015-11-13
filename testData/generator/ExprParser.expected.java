@@ -457,7 +457,7 @@ public class ExpressionParser implements PsiParser, LightPsiParser {
   // identifier
   public static boolean simple_ref_expr(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "simple_ref_expr")) return false;
-    if (!nextTokenIsFast(builder_, ID)) return false;
+    if (!nextTokenIsSmart(builder_, ID)) return false;
     boolean result_;
     Marker marker_ = enter_section_(builder_);
     result_ = identifier(builder_, level_ + 1);
@@ -468,7 +468,7 @@ public class ExpressionParser implements PsiParser, LightPsiParser {
   // number
   public static boolean literal_expr(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "literal_expr")) return false;
-    if (!nextTokenIsFast(builder_, NUMBER)) return false;
+    if (!nextTokenIsSmart(builder_, NUMBER)) return false;
     boolean result_;
     Marker marker_ = enter_section_(builder_);
     result_ = consumeTokenSmart(builder_, NUMBER);

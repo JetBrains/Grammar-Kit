@@ -823,7 +823,7 @@ public class ParserGenerator {
     boolean dropFrameName = skipIfOne && !firstElementTypes.isEmpty() && firstElementTypes.size() == 1;
     if (!firstElementTypes.isEmpty() && firstElementTypes.size() <= G.generateFirstCheck) {
       StringBuilder sb = new StringBuilder("if (!");
-      sb.append(fast ? "nextTokenIsFast" : "nextTokenIs").append("(").append(N.builder).append(", ");
+      sb.append(fast ? "nextTokenIs" + consumeType.getMethodSuffix() : "nextTokenIs").append("(").append(N.builder).append(", ");
       if (!fast && !dropFrameName) sb.append(frameName != null ? frameName : "\"\"").append(", ");
 
       appendTokenTypes(sb, firstElementTypes);

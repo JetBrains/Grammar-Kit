@@ -1858,7 +1858,7 @@ public class JFlexParser implements PsiParser, LightPsiParser {
   // '(' expression ')'
   public static boolean paren_expression(PsiBuilder builder, int level) {
     if (!recursion_guard_(builder, level, "paren_expression")) return false;
-    if (!nextTokenIsFast(builder, FLEX_PAREN1)) return false;
+    if (!nextTokenIsSmart(builder, FLEX_PAREN1)) return false;
     boolean result, pinned;
     Marker marker = enter_section_(builder, level, _NONE_, FLEX_PAREN_EXPRESSION, null);
     result = consumeTokenSmart(builder, FLEX_PAREN1);
@@ -1871,7 +1871,7 @@ public class JFlexParser implements PsiParser, LightPsiParser {
 
   public static boolean not_expression(PsiBuilder builder, int level) {
     if (!recursion_guard_(builder, level, "not_expression")) return false;
-    if (!nextTokenIsFast(builder, FLEX_NOT, FLEX_NOT2)) return false;
+    if (!nextTokenIsSmart(builder, FLEX_NOT, FLEX_NOT2)) return false;
     boolean result, pinned;
     Marker marker = enter_section_(builder, level, _NONE_, null);
     result = not_expression_0(builder, level + 1);
@@ -1939,7 +1939,7 @@ public class JFlexParser implements PsiParser, LightPsiParser {
   // '[' '^'? '-'? (string | predefined_class | class_char [ '-' class_char]) * '-'? ']'
   public static boolean class_expression(PsiBuilder builder, int level) {
     if (!recursion_guard_(builder, level, "class_expression")) return false;
-    if (!nextTokenIsFast(builder, FLEX_BRACK1)) return false;
+    if (!nextTokenIsSmart(builder, FLEX_BRACK1)) return false;
     boolean result, pinned;
     Marker marker = enter_section_(builder, level, _NONE_, FLEX_CLASS_EXPRESSION, null);
     result = consumeTokenSmart(builder, FLEX_BRACK1);
@@ -2041,7 +2041,7 @@ public class JFlexParser implements PsiParser, LightPsiParser {
   // '{' macro_reference '}'
   public static boolean macro_ref_expression(PsiBuilder builder, int level) {
     if (!recursion_guard_(builder, level, "macro_ref_expression")) return false;
-    if (!nextTokenIsFast(builder, FLEX_BRACE1)) return false;
+    if (!nextTokenIsSmart(builder, FLEX_BRACE1)) return false;
     boolean result;
     Marker marker = enter_section_(builder);
     result = consumeTokenSmart(builder, FLEX_BRACE1);

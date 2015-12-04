@@ -871,6 +871,10 @@ public class RuleGraphHelper {
     return e;
   }
 
+  public boolean isReplacee(BnfRule rule) {
+    return myRuleReplacesMap.containsKey(rule);
+  }
+
   private static boolean isExternalPsi(PsiElement t) {
     return t instanceof LeafPsiElement && ((LeafPsiElement)t).getElementType() == EXTERNAL_TYPE;
   }

@@ -107,13 +107,11 @@ public class BnfGenerateLexerAction extends AnAction {
           String packageName = aPackage == null ? null : aPackage.getQualifiedName();
 
           String text = generateLexerText(bnfFile, packageName);
-          PsiFile psiFile = psiDirectory.findFile(flexFileName);
-          if (psiFile == null) psiFile = psiDirectory.createFile("_" + flexFileName);
 
           FileContentUtil.setFileText(project, virtualFile, text);
 
           Notifications.Bus.notify(new Notification(BnfConstants.GENERATION_GROUP,
-              psiFile.getName() + " generated", "to " + virtualFile.getParent().getPath(),
+              virtualFile.getName() + " generated", "to " + virtualFile.getParent().getPath(),
               NotificationType.INFORMATION), project);
 
           associateFileTypeAndNavigate(project, virtualFile);

@@ -710,9 +710,9 @@ public class JFlexParser implements PsiParser, LightPsiParser {
     if (!recursion_guard_(builder, level, "option_7bit")) return false;
     if (!nextTokenIs(builder, FLEX_PERC_45)) return false;
     boolean result;
-    Marker marker = enter_section_(builder);
+    Marker marker = enter_section_(builder, level, _NONE_, FLEX_OPTION, "<option>");
     result = consumeToken(builder, FLEX_PERC_45);
-    exit_section_(builder, marker, FLEX_OPTION, result);
+    exit_section_(builder, level, marker, result, false, null);
     return result;
   }
 
@@ -722,9 +722,9 @@ public class JFlexParser implements PsiParser, LightPsiParser {
     if (!recursion_guard_(builder, level, "option_abstract")) return false;
     if (!nextTokenIs(builder, FLEX_PERC_6)) return false;
     boolean result;
-    Marker marker = enter_section_(builder);
+    Marker marker = enter_section_(builder, level, _NONE_, FLEX_OPTION, "<option>");
     result = consumeToken(builder, FLEX_PERC_6);
-    exit_section_(builder, marker, FLEX_OPTION, result);
+    exit_section_(builder, level, marker, result, false, null);
     return result;
   }
 
@@ -734,9 +734,9 @@ public class JFlexParser implements PsiParser, LightPsiParser {
     if (!recursion_guard_(builder, level, "option_api_private")) return false;
     if (!nextTokenIs(builder, FLEX_PERC_7)) return false;
     boolean result;
-    Marker marker = enter_section_(builder);
+    Marker marker = enter_section_(builder, level, _NONE_, FLEX_OPTION, "<option>");
     result = consumeToken(builder, FLEX_PERC_7);
-    exit_section_(builder, marker, FLEX_OPTION, result);
+    exit_section_(builder, level, marker, result, false, null);
     return result;
   }
 
@@ -746,7 +746,7 @@ public class JFlexParser implements PsiParser, LightPsiParser {
     if (!recursion_guard_(builder, level, "option_buffer_size")) return false;
     if (!nextTokenIs(builder, FLEX_PERC_17)) return false;
     boolean result, pinned;
-    Marker marker = enter_section_(builder, level, _NONE_, FLEX_OPTION, null);
+    Marker marker = enter_section_(builder, level, _NONE_, FLEX_OPTION, "<option>");
     result = consumeToken(builder, FLEX_PERC_17);
     pinned = result; // pin = 1
     result = result && consumeToken(builder, FLEX_NUMBER);
@@ -760,9 +760,9 @@ public class JFlexParser implements PsiParser, LightPsiParser {
     if (!recursion_guard_(builder, level, "option_byacc")) return false;
     if (!nextTokenIs(builder, FLEX_PERC_41)) return false;
     boolean result;
-    Marker marker = enter_section_(builder);
+    Marker marker = enter_section_(builder, level, _NONE_, FLEX_OPTION, "<option>");
     result = consumeToken(builder, FLEX_PERC_41);
-    exit_section_(builder, marker, FLEX_OPTION, result);
+    exit_section_(builder, level, marker, result, false, null);
     return result;
   }
 
@@ -772,7 +772,7 @@ public class JFlexParser implements PsiParser, LightPsiParser {
     if (!recursion_guard_(builder, level, "option_class")) return false;
     if (!nextTokenIs(builder, FLEX_PERC_1)) return false;
     boolean result, pinned;
-    Marker marker = enter_section_(builder, level, _NONE_, FLEX_OPTION, null);
+    Marker marker = enter_section_(builder, level, _NONE_, FLEX_OPTION, "<option>");
     result = consumeToken(builder, FLEX_PERC_1);
     pinned = result; // pin = 1
     result = result && java_fqn(builder, level + 1);
@@ -786,9 +786,9 @@ public class JFlexParser implements PsiParser, LightPsiParser {
     if (!recursion_guard_(builder, level, "option_count_char")) return false;
     if (!nextTokenIs(builder, FLEX_PERC_52)) return false;
     boolean result;
-    Marker marker = enter_section_(builder);
+    Marker marker = enter_section_(builder, level, _NONE_, FLEX_OPTION, "<option>");
     result = consumeToken(builder, FLEX_PERC_52);
-    exit_section_(builder, marker, FLEX_OPTION, result);
+    exit_section_(builder, level, marker, result, false, null);
     return result;
   }
 
@@ -798,9 +798,9 @@ public class JFlexParser implements PsiParser, LightPsiParser {
     if (!recursion_guard_(builder, level, "option_count_column")) return false;
     if (!nextTokenIs(builder, FLEX_PERC_54)) return false;
     boolean result;
-    Marker marker = enter_section_(builder);
+    Marker marker = enter_section_(builder, level, _NONE_, FLEX_OPTION, "<option>");
     result = consumeToken(builder, FLEX_PERC_54);
-    exit_section_(builder, marker, FLEX_OPTION, result);
+    exit_section_(builder, level, marker, result, false, null);
     return result;
   }
 
@@ -810,9 +810,9 @@ public class JFlexParser implements PsiParser, LightPsiParser {
     if (!recursion_guard_(builder, level, "option_count_line")) return false;
     if (!nextTokenIs(builder, FLEX_PERC_53)) return false;
     boolean result;
-    Marker marker = enter_section_(builder);
+    Marker marker = enter_section_(builder, level, _NONE_, FLEX_OPTION, "<option>");
     result = consumeToken(builder, FLEX_PERC_53);
-    exit_section_(builder, marker, FLEX_OPTION, result);
+    exit_section_(builder, level, marker, result, false, null);
     return result;
   }
 
@@ -822,7 +822,7 @@ public class JFlexParser implements PsiParser, LightPsiParser {
     if (!recursion_guard_(builder, level, "option_ctor_arg")) return false;
     if (!nextTokenIs(builder, FLEX_PERC_15)) return false;
     boolean result, pinned;
-    Marker marker = enter_section_(builder, level, _NONE_, FLEX_OPTION, null);
+    Marker marker = enter_section_(builder, level, _NONE_, FLEX_OPTION, "<option>");
     result = consumeToken(builder, FLEX_PERC_15);
     pinned = result; // pin = 1
     result = result && report_error_(builder, java_fqn(builder, level + 1));
@@ -837,9 +837,9 @@ public class JFlexParser implements PsiParser, LightPsiParser {
     if (!recursion_guard_(builder, level, "option_cup")) return false;
     if (!nextTokenIs(builder, FLEX_PERC_38)) return false;
     boolean result;
-    Marker marker = enter_section_(builder);
+    Marker marker = enter_section_(builder, level, _NONE_, FLEX_OPTION, "<option>");
     result = consumeToken(builder, FLEX_PERC_38);
-    exit_section_(builder, marker, FLEX_OPTION, result);
+    exit_section_(builder, level, marker, result, false, null);
     return result;
   }
 
@@ -849,9 +849,9 @@ public class JFlexParser implements PsiParser, LightPsiParser {
     if (!recursion_guard_(builder, level, "option_cup_debug")) return false;
     if (!nextTokenIs(builder, FLEX_PERC_40)) return false;
     boolean result;
-    Marker marker = enter_section_(builder);
+    Marker marker = enter_section_(builder, level, _NONE_, FLEX_OPTION, "<option>");
     result = consumeToken(builder, FLEX_PERC_40);
-    exit_section_(builder, marker, FLEX_OPTION, result);
+    exit_section_(builder, level, marker, result, false, null);
     return result;
   }
 
@@ -861,7 +861,7 @@ public class JFlexParser implements PsiParser, LightPsiParser {
     if (!recursion_guard_(builder, level, "option_cup_sym")) return false;
     if (!nextTokenIs(builder, FLEX_PERC_39)) return false;
     boolean result, pinned;
-    Marker marker = enter_section_(builder, level, _NONE_, FLEX_OPTION, null);
+    Marker marker = enter_section_(builder, level, _NONE_, FLEX_OPTION, "<option>");
     result = consumeToken(builder, FLEX_PERC_39);
     pinned = result; // pin = 1
     result = result && java_fqn(builder, level + 1);
@@ -875,9 +875,9 @@ public class JFlexParser implements PsiParser, LightPsiParser {
     if (!recursion_guard_(builder, level, "option_debug")) return false;
     if (!nextTokenIs(builder, FLEX_PERC_36)) return false;
     boolean result;
-    Marker marker = enter_section_(builder);
+    Marker marker = enter_section_(builder, level, _NONE_, FLEX_OPTION, "<option>");
     result = consumeToken(builder, FLEX_PERC_36);
-    exit_section_(builder, marker, FLEX_OPTION, result);
+    exit_section_(builder, level, marker, result, false, null);
     return result;
   }
 
@@ -887,7 +887,7 @@ public class JFlexParser implements PsiParser, LightPsiParser {
     if (!recursion_guard_(builder, level, "option_eof")) return false;
     if (!nextTokenIs(builder, FLEX_PERC_29)) return false;
     boolean result, pinned;
-    Marker marker = enter_section_(builder, level, _NONE_, FLEX_OPTION, null);
+    Marker marker = enter_section_(builder, level, _NONE_, FLEX_OPTION, "<option>");
     result = line(builder, level + 1, perc_29_parser_);
     pinned = result; // pin = 1
     result = result && report_error_(builder, java_code(builder, level + 1));
@@ -902,7 +902,7 @@ public class JFlexParser implements PsiParser, LightPsiParser {
     if (!recursion_guard_(builder, level, "option_eof_close")) return false;
     if (!nextTokenIs(builder, FLEX_PERC_34)) return false;
     boolean result, pinned;
-    Marker marker = enter_section_(builder, level, _NONE_, FLEX_OPTION, null);
+    Marker marker = enter_section_(builder, level, _NONE_, FLEX_OPTION, "<option>");
     result = consumeToken(builder, FLEX_PERC_34);
     pinned = result; // pin = 1
     result = result && option_eof_close_1(builder, level + 1);
@@ -961,7 +961,7 @@ public class JFlexParser implements PsiParser, LightPsiParser {
     if (!recursion_guard_(builder, level, "option_eof_val")) return false;
     if (!nextTokenIs(builder, FLEX_PERC_27)) return false;
     boolean result, pinned;
-    Marker marker = enter_section_(builder, level, _NONE_, FLEX_OPTION, null);
+    Marker marker = enter_section_(builder, level, _NONE_, FLEX_OPTION, "<option>");
     result = line(builder, level + 1, perc_27_parser_);
     pinned = result; // pin = 1
     result = result && report_error_(builder, java_code(builder, level + 1));
@@ -976,7 +976,7 @@ public class JFlexParser implements PsiParser, LightPsiParser {
     if (!recursion_guard_(builder, level, "option_extends")) return false;
     if (!nextTokenIs(builder, FLEX_PERC_3)) return false;
     boolean result, pinned;
-    Marker marker = enter_section_(builder, level, _NONE_, FLEX_OPTION, null);
+    Marker marker = enter_section_(builder, level, _NONE_, FLEX_OPTION, "<option>");
     result = consumeToken(builder, FLEX_PERC_3);
     pinned = result; // pin = 1
     result = result && java_fqn(builder, level + 1);
@@ -990,9 +990,9 @@ public class JFlexParser implements PsiParser, LightPsiParser {
     if (!recursion_guard_(builder, level, "option_final")) return false;
     if (!nextTokenIs(builder, FLEX_PERC_5)) return false;
     boolean result;
-    Marker marker = enter_section_(builder);
+    Marker marker = enter_section_(builder, level, _NONE_, FLEX_OPTION, "<option>");
     result = consumeToken(builder, FLEX_PERC_5);
-    exit_section_(builder, marker, FLEX_OPTION, result);
+    exit_section_(builder, level, marker, result, false, null);
     return result;
   }
 
@@ -1015,7 +1015,7 @@ public class JFlexParser implements PsiParser, LightPsiParser {
     if (!recursion_guard_(builder, level, "option_function")) return false;
     if (!nextTokenIs(builder, FLEX_PERC_19)) return false;
     boolean result, pinned;
-    Marker marker = enter_section_(builder, level, _NONE_, FLEX_OPTION, null);
+    Marker marker = enter_section_(builder, level, _NONE_, FLEX_OPTION, "<option>");
     result = consumeToken(builder, FLEX_PERC_19);
     pinned = result; // pin = 1
     result = result && consumeToken(builder, FLEX_ID);
@@ -1042,7 +1042,7 @@ public class JFlexParser implements PsiParser, LightPsiParser {
     if (!recursion_guard_(builder, level, "option_implements")) return false;
     if (!nextTokenIs(builder, FLEX_PERC_2)) return false;
     boolean result, pinned;
-    Marker marker = enter_section_(builder, level, _NONE_, FLEX_OPTION, null);
+    Marker marker = enter_section_(builder, level, _NONE_, FLEX_OPTION, "<option>");
     result = consumeToken(builder, FLEX_PERC_2);
     pinned = result; // pin = 1
     result = result && java_fqn_list(builder, level + 1);
@@ -1056,7 +1056,7 @@ public class JFlexParser implements PsiParser, LightPsiParser {
     if (!recursion_guard_(builder, level, "option_include")) return false;
     if (!nextTokenIs(builder, FLEX_PERC_18)) return false;
     boolean result, pinned;
-    Marker marker = enter_section_(builder, level, _NONE_, FLEX_OPTION, null);
+    Marker marker = enter_section_(builder, level, _NONE_, FLEX_OPTION, "<option>");
     result = consumeToken(builder, FLEX_PERC_18);
     pinned = result; // pin = 1
     result = result && consumeToken(builder, FLEX_STRING);
@@ -1070,7 +1070,7 @@ public class JFlexParser implements PsiParser, LightPsiParser {
     if (!recursion_guard_(builder, level, "option_init")) return false;
     if (!nextTokenIs(builder, FLEX_PERC_10)) return false;
     boolean result, pinned;
-    Marker marker = enter_section_(builder, level, _NONE_, FLEX_OPTION, null);
+    Marker marker = enter_section_(builder, level, _NONE_, FLEX_OPTION, "<option>");
     result = line(builder, level + 1, perc_10_parser_);
     pinned = result; // pin = 1
     result = result && report_error_(builder, java_code(builder, level + 1));
@@ -1136,9 +1136,9 @@ public class JFlexParser implements PsiParser, LightPsiParser {
     if (!recursion_guard_(builder, level, "option_intwrap")) return false;
     if (!nextTokenIs(builder, FLEX_PERC_22)) return false;
     boolean result;
-    Marker marker = enter_section_(builder);
+    Marker marker = enter_section_(builder, level, _NONE_, FLEX_OPTION, "<option>");
     result = consumeToken(builder, FLEX_PERC_22);
-    exit_section_(builder, marker, FLEX_OPTION, result);
+    exit_section_(builder, level, marker, result, false, null);
     return result;
   }
 
@@ -1161,9 +1161,9 @@ public class JFlexParser implements PsiParser, LightPsiParser {
     if (!recursion_guard_(builder, level, "option_pack")) return false;
     if (!nextTokenIs(builder, FLEX_PERC_44)) return false;
     boolean result;
-    Marker marker = enter_section_(builder);
+    Marker marker = enter_section_(builder, level, _NONE_, FLEX_OPTION, "<option>");
     result = consumeToken(builder, FLEX_PERC_44);
-    exit_section_(builder, marker, FLEX_OPTION, result);
+    exit_section_(builder, level, marker, result, false, null);
     return result;
   }
 
@@ -1173,9 +1173,9 @@ public class JFlexParser implements PsiParser, LightPsiParser {
     if (!recursion_guard_(builder, level, "option_public")) return false;
     if (!nextTokenIs(builder, FLEX_PERC_4)) return false;
     boolean result;
-    Marker marker = enter_section_(builder);
+    Marker marker = enter_section_(builder, level, _NONE_, FLEX_OPTION, "<option>");
     result = consumeToken(builder, FLEX_PERC_4);
-    exit_section_(builder, marker, FLEX_OPTION, result);
+    exit_section_(builder, level, marker, result, false, null);
     return result;
   }
 
@@ -1185,7 +1185,7 @@ public class JFlexParser implements PsiParser, LightPsiParser {
     if (!recursion_guard_(builder, level, "option_scan_error")) return false;
     if (!nextTokenIs(builder, FLEX_PERC_16)) return false;
     boolean result, pinned;
-    Marker marker = enter_section_(builder, level, _NONE_, FLEX_OPTION, null);
+    Marker marker = enter_section_(builder, level, _NONE_, FLEX_OPTION, "<option>");
     result = consumeToken(builder, FLEX_PERC_16);
     pinned = result; // pin = 1
     result = result && java_fqn(builder, level + 1);
@@ -1199,9 +1199,9 @@ public class JFlexParser implements PsiParser, LightPsiParser {
     if (!recursion_guard_(builder, level, "option_standalone")) return false;
     if (!nextTokenIs(builder, FLEX_PERC_37)) return false;
     boolean result;
-    Marker marker = enter_section_(builder);
+    Marker marker = enter_section_(builder, level, _NONE_, FLEX_OPTION, "<option>");
     result = consumeToken(builder, FLEX_PERC_37);
-    exit_section_(builder, marker, FLEX_OPTION, result);
+    exit_section_(builder, level, marker, result, false, null);
     return result;
   }
 
@@ -1211,9 +1211,9 @@ public class JFlexParser implements PsiParser, LightPsiParser {
     if (!recursion_guard_(builder, level, "option_switch")) return false;
     if (!nextTokenIs(builder, FLEX_PERC_42)) return false;
     boolean result;
-    Marker marker = enter_section_(builder);
+    Marker marker = enter_section_(builder, level, _NONE_, FLEX_OPTION, "<option>");
     result = consumeToken(builder, FLEX_PERC_42);
-    exit_section_(builder, marker, FLEX_OPTION, result);
+    exit_section_(builder, level, marker, result, false, null);
     return result;
   }
 
@@ -1223,9 +1223,9 @@ public class JFlexParser implements PsiParser, LightPsiParser {
     if (!recursion_guard_(builder, level, "option_table")) return false;
     if (!nextTokenIs(builder, FLEX_PERC_43)) return false;
     boolean result;
-    Marker marker = enter_section_(builder);
+    Marker marker = enter_section_(builder, level, _NONE_, FLEX_OPTION, "<option>");
     result = consumeToken(builder, FLEX_PERC_43);
-    exit_section_(builder, marker, FLEX_OPTION, result);
+    exit_section_(builder, level, marker, result, false, null);
     return result;
   }
 
@@ -1235,7 +1235,7 @@ public class JFlexParser implements PsiParser, LightPsiParser {
     if (!recursion_guard_(builder, level, "option_type")) return false;
     if (!nextTokenIs(builder, FLEX_PERC_23)) return false;
     boolean result, pinned;
-    Marker marker = enter_section_(builder, level, _NONE_, FLEX_OPTION, null);
+    Marker marker = enter_section_(builder, level, _NONE_, FLEX_OPTION, "<option>");
     result = consumeToken(builder, FLEX_PERC_23);
     pinned = result; // pin = 1
     result = result && java_fqn(builder, level + 1);
@@ -1262,7 +1262,7 @@ public class JFlexParser implements PsiParser, LightPsiParser {
     if (!recursion_guard_(builder, level, "option_user_code")) return false;
     if (!nextTokenIs(builder, FLEX_PERC_8)) return false;
     boolean result, pinned;
-    Marker marker = enter_section_(builder, level, _NONE_, FLEX_OPTION, null);
+    Marker marker = enter_section_(builder, level, _NONE_, FLEX_OPTION, "<option>");
     result = line(builder, level + 1, perc_8_parser_);
     pinned = result; // pin = 1
     result = result && report_error_(builder, java_code(builder, level + 1));
@@ -1873,7 +1873,7 @@ public class JFlexParser implements PsiParser, LightPsiParser {
     if (!recursion_guard_(builder, level, "paren_expression")) return false;
     if (!nextTokenIsSmart(builder, FLEX_PAREN1)) return false;
     boolean result, pinned;
-    Marker marker = enter_section_(builder, level, _NONE_, FLEX_PAREN_EXPRESSION, null);
+    Marker marker = enter_section_(builder, level, _NONE_, FLEX_PAREN_EXPRESSION, "<expression>");
     result = consumeTokenSmart(builder, FLEX_PAREN1);
     pinned = result; // pin = 1
     result = result && report_error_(builder, expression(builder, level + 1, -1));
@@ -1954,7 +1954,7 @@ public class JFlexParser implements PsiParser, LightPsiParser {
     if (!recursion_guard_(builder, level, "class_expression")) return false;
     if (!nextTokenIsSmart(builder, FLEX_BRACK1)) return false;
     boolean result, pinned;
-    Marker marker = enter_section_(builder, level, _NONE_, FLEX_CLASS_EXPRESSION, null);
+    Marker marker = enter_section_(builder, level, _NONE_, FLEX_CLASS_EXPRESSION, "<expression>");
     result = consumeTokenSmart(builder, FLEX_BRACK1);
     pinned = result; // pin = 1
     result = result && report_error_(builder, class_expression_1(builder, level + 1));
@@ -2056,11 +2056,11 @@ public class JFlexParser implements PsiParser, LightPsiParser {
     if (!recursion_guard_(builder, level, "macro_ref_expression")) return false;
     if (!nextTokenIsSmart(builder, FLEX_BRACE1)) return false;
     boolean result;
-    Marker marker = enter_section_(builder);
+    Marker marker = enter_section_(builder, level, _NONE_, FLEX_MACRO_REF_EXPRESSION, "<expression>");
     result = consumeTokenSmart(builder, FLEX_BRACE1);
     result = result && macro_reference(builder, level + 1);
     result = result && consumeToken(builder, FLEX_BRACE2);
-    exit_section_(builder, marker, FLEX_MACRO_REF_EXPRESSION, result);
+    exit_section_(builder, level, marker, result, false, null);
     return result;
   }
 

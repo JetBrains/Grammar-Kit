@@ -820,7 +820,7 @@ public class ParserGenerator {
     ConsumeType consumeType = ObjectUtils.chooseNotNull(forcedConsumeType, ConsumeType.forRule(rule));
     boolean fast = consumeType == ConsumeType.FAST || consumeType == ConsumeType.SMART;
     // do not include frameName if FIRST is known and its size is 1
-    boolean dropFrameName = skipIfOne && !firstElementTypes.isEmpty() && firstElementTypes.size() == 1;
+    boolean dropFrameName = skipIfOne && firstElementTypes.size() == 1;
     if (!firstElementTypes.isEmpty() && firstElementTypes.size() <= G.generateFirstCheck) {
       StringBuilder sb = new StringBuilder("if (!");
       sb.append(fast ? "nextTokenIs" + consumeType.getMethodSuffix() : "nextTokenIs").append("(").append(N.builder).append(", ");
@@ -830,7 +830,7 @@ public class ParserGenerator {
       sb.append(")) return false;");
       out(sb.toString());
     }
-    return dropFrameName? null : frameName;
+    return dropFrameName && StringUtil.isEmpty(getAttribute(rule, KnownAttribute.NAME))? null : frameName;
   }
 
   void generateNodeChildren(BnfRule rule, String funcName, List<BnfExpression> children, Set<BnfExpression> visited) {

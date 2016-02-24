@@ -123,7 +123,7 @@ public class LivePreviewParser implements PsiParser {
       String elementType = ParserGeneratorUtil.getElementType(rule, G.generateElementCase);
       if (StringUtil.isEmpty(elementType)) continue;
       if (myElementTypes.containsKey(elementType)) continue;
-      myElementTypes.put(elementType, new RuleElementType(elementType, rule, myLanguage));
+      myElementTypes.put(elementType, new LivePreviewElementType.RuleType(elementType, rule, myLanguage));
     }
     int count = 0;
     for (BnfRule rule : myFile.getRules()) {
@@ -329,12 +329,13 @@ public class LivePreviewParser implements PsiParser {
 
   private boolean type_extends_(IElementType elementType1, IElementType elementType2) {
     if (elementType1 == elementType2) return true;
-    if (!(elementType1 instanceof RuleElementType)) return false;
-    if (!(elementType2 instanceof RuleElementType)) return false;
+    if (!(elementType1 instanceof LivePreviewElementType.RuleType)) return false;
+    if (!(elementType2 instanceof LivePreviewElementType.RuleType)) return false;
     for (BnfRule baseRule : myRuleExtendsMap.keySet()) {
       Collection<BnfRule> ruleClass = myRuleExtendsMap.get(baseRule);
-      if (ruleClass.contains(((RuleElementType)elementType1).rule) &&
-          ruleClass.contains(((RuleElementType)elementType2).rule)) return true;
+      BnfRule r1 = myFile.getRule(((LivePreviewElementType.RuleType)elementType1).ruleName);
+      BnfRule r2 = myFile.getRule(((LivePreviewElementType.RuleType)elementType2).ruleName);
+      if (ruleClass.contains(r1) && ruleClass.contains(r2)) return true;
     }
     return false;
   }
@@ -576,16 +577,6 @@ public class LivePreviewParser implements PsiParser {
 
   protected boolean isTokenExpression(BnfExpression node) {
     return node instanceof BnfLiteralExpression || node instanceof BnfReferenceOrToken && myFile.getRule(node.getText()) == null;
-  }
-
-  public static class RuleElementType extends IElementType {
-    public final BnfRule rule;
-
-    RuleElementType(String elementType, BnfRule rule, Language language) {
-      super(elementType, language, false);
-      this.rule = rule;
-    }
-
   }
 
   // Expression Generator Helper part

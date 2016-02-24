@@ -126,11 +126,13 @@ public class LivePreviewStructureViewFactory implements PsiStructureViewFactory 
       else if (element instanceof PsiErrorElement) {
         return "PsiErrorElement: '" + ((PsiErrorElement)element).getErrorDescription() + "'";
       }
-      else if (elementType instanceof LivePreviewParser.RuleElementType) {
-        BnfRule rule = ((LivePreviewParser.RuleElementType)elementType).rule;
-        String prefix = getPsiClassPrefix((BnfFile)rule.getContainingFile());
-        String className = getRulePsiClassName(rule, prefix);
-        return className + ": '" + StringUtil.first(element.getText(), 30, true) +"'";
+      else if (elementType instanceof LivePreviewElementType.RuleType) {
+        BnfRule rule = ((LivePreviewElementType.RuleType)elementType).getRule(element.getProject());
+        if (rule != null) {
+          String prefix = getPsiClassPrefix((BnfFile)rule.getContainingFile());
+          String className = getRulePsiClassName(rule, prefix);
+          return className + ": '" + StringUtil.first(element.getText(), 30, true) +"'";
+        }
       }
       return elementType + "";
     }
@@ -153,7 +155,7 @@ public class LivePreviewStructureViewFactory implements PsiStructureViewFactory 
       }
       ASTNode node = element != null ? element.getNode() : null;
       IElementType elementType = node != null ? node.getElementType() : null;
-      if (elementType instanceof LivePreviewParser.RuleElementType) {
+      if (elementType instanceof LivePreviewElementType.RuleType) {
         return BnfIcons.RULE;
       }
       return null;

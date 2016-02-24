@@ -19,6 +19,10 @@ package org.intellij.grammar.livePreview;
 import com.intellij.lang.Language;
 import com.intellij.openapi.application.Application;
 import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.editor.Editor;
+import com.intellij.openapi.fileEditor.FileEditor;
+import com.intellij.openapi.fileEditor.FileEditorManager;
+import com.intellij.openapi.fileEditor.TextEditor;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.vfs.pointers.VirtualFilePointer;
@@ -26,12 +30,15 @@ import com.intellij.openapi.vfs.pointers.VirtualFilePointerManager;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiManager;
 import com.intellij.util.ObjectUtils;
+import com.intellij.util.containers.ContainerUtil;
 import org.intellij.grammar.psi.BnfFile;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.*;
 
 import java.lang.ref.SoftReference;
+import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.objectweb.asm.Opcodes.*;
@@ -92,6 +99,7 @@ public class LivePreviewLanguage extends Language {
     return psiFile instanceof BnfFile? (BnfFile)psiFile : null;
   }
 
+  @NotNull
   public static LivePreviewLanguage newInstance(PsiFile psiFile) {
     try {
       return (LivePreviewLanguage)ourClassLoader.createClass().getDeclaredConstructors()[0].newInstance(psiFile);
@@ -99,6 +107,32 @@ public class LivePreviewLanguage extends Language {
     catch (Exception e) {
       throw new RuntimeException(e);
     }
+  }
+
+  @Nullable
+  public static LivePreviewLanguage findInstance(PsiFile psiFile) {
+    VirtualFile vFile = psiFile.getVirtualFile();
+    if (vFile == null) return null;
+    for (Language language : Language.getRegisteredLanguages()) {
+      if (language instanceof LivePreviewLanguage &&
+          vFile.equals(((LivePreviewLanguage)language).getGrammarFile())) {
+        return (LivePreviewLanguage)language;
+      }
+    }
+    return null;
+  }
+
+  @NotNull
+  public List<Editor> getGrammarEditors(Project project) {
+    VirtualFile file = getGrammarFile();
+    if (file == null) return Collections.emptyList();
+    FileEditor[] editors = FileEditorManager.getInstance(project).getAllEditors(file);
+    if (editors.length == 0) return Collections.emptyList();
+    List<Editor> result = ContainerUtil.newArrayList();
+    for (FileEditor editor : editors) {
+      if (editor instanceof TextEditor) result.add(((TextEditor)editor).getEditor());
+    }
+    return result;
   }
 
   private static class MyClassLoader extends ClassLoader {

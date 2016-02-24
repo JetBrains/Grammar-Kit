@@ -23,40 +23,30 @@ import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.EditorFactory;
 import com.intellij.openapi.editor.event.DocumentAdapter;
 import com.intellij.openapi.editor.event.DocumentEvent;
-import com.intellij.openapi.editor.ex.EditorEx;
-import com.intellij.openapi.editor.highlighter.EditorHighlighterFactory;
 import com.intellij.openapi.fileEditor.FileDocumentManager;
-import com.intellij.openapi.fileEditor.FileEditor;
 import com.intellij.openapi.fileEditor.FileEditorManager;
-import com.intellij.openapi.fileEditor.TextEditor;
 import com.intellij.openapi.fileEditor.ex.FileEditorManagerEx;
 import com.intellij.openapi.fileEditor.impl.EditorWindow;
 import com.intellij.openapi.progress.ProcessCanceledException;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.util.Key;
+import com.intellij.openapi.util.NotNullLazyKey;
 import com.intellij.openapi.vfs.VirtualFile;
-import com.intellij.openapi.wm.WindowManager;
+import com.intellij.psi.PsiDocumentManager;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiManager;
 import com.intellij.psi.TokenType;
-import com.intellij.psi.impl.PsiDocumentManagerImpl;
-import com.intellij.psi.impl.PsiManagerEx;
-import com.intellij.psi.impl.file.impl.FileManager;
 import com.intellij.testFramework.LightVirtualFile;
-import com.intellij.util.FileContentUtil;
-import com.intellij.util.ObjectUtils;
-import com.intellij.util.PairProcessor;
-import com.intellij.util.ui.update.MergingUpdateQueue;
-import com.intellij.util.ui.update.Update;
-import org.intellij.grammar.BnfFileType;
+import com.intellij.util.*;
+import com.intellij.util.containers.ContainerUtil;
 import org.intellij.grammar.parser.GeneratedParserUtilBase;
 import org.intellij.grammar.psi.BnfExpression;
 import org.intellij.grammar.psi.BnfFile;
 import org.intellij.grammar.psi.BnfRule;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
-import java.util.Collections;
+import java.util.Collection;
 import java.util.Map;
 
 /**
@@ -90,15 +80,8 @@ public class LivePreviewHelper {
 
   @Nullable
   public static Language getLanguageFor(BnfFile psiFile) {
-    VirtualFile vFile = psiFile.getVirtualFile();
-    if (vFile == null) return null;
-    for (Language language : Language.getRegisteredLanguages()) {
-      if (language instanceof LivePreviewLanguage &&
-          vFile == ((LivePreviewLanguage)language).getGrammarFile()) {
-        return language;
-      }
-    }
-    // create new one
+    LivePreviewLanguage existing = LivePreviewLanguage.findInstance(psiFile);
+    if (existing != null) return existing;
     LivePreviewLanguage language = LivePreviewLanguage.newInstance(psiFile);
     registerLanguageExtensions(language);
     return language;
@@ -115,46 +98,33 @@ public class LivePreviewHelper {
     LanguageParserDefinitions.INSTANCE.removeExplicitExtension(language, LanguageParserDefinitions.INSTANCE.forLanguage(language));
   }
 
-  public static MergingUpdateQueue getUpdateQueue(Project project) {
-    return project.getUserData(LIVE_PREVIEW_QUEUE);
-  }
-
-  private static final Key<MergingUpdateQueue> LIVE_PREVIEW_QUEUE = Key.create("LIVE_PREVIEW_QUEUE");
+  private static final NotNullLazyKey<SingleAlarm, Project> LIVE_PREVIEW_ALARM =
+    NotNullLazyKey.create("LIVE_PREVIEW_ALARM", new NotNullFunction<Project, SingleAlarm>() {
+      @NotNull
+      @Override
+      public SingleAlarm fun(Project project) {
+        return new SingleAlarm(new Runnable() {
+          @Override
+          public void run() {
+            reparseAllLivePreviews(project);
+          }
+        }, 300, Alarm.ThreadToUse.SWING_THREAD, project);
+      }
+    });
   private static void installUpdateListener(final Project project) {
-    MergingUpdateQueue queue = project.getUserData(LIVE_PREVIEW_QUEUE);
-    if (queue == null) {
-      JComponent activationComponent = WindowManager.getInstance().getFrame(project).getRootPane();
-      project.putUserData(LIVE_PREVIEW_QUEUE, queue = new MergingUpdateQueue("LIVE_PREVIEW_QUEUE", 1000, true, null, project, activationComponent));
-    }
-    final FileEditorManager fileEditorManager = FileEditorManager.getInstance(project);
-    final MergingUpdateQueue finalQueue = queue;
     EditorFactory.getInstance().getEventMulticaster().addDocumentListener(new DocumentAdapter() {
+
+      FileDocumentManager fileManager = FileDocumentManager.getInstance();
+      PsiManager psiManager = PsiManager.getInstance(project);
+
       @Override
       public void documentChanged(DocumentEvent e) {
         Document document = e.getDocument();
-        final FileDocumentManager fileDocumentManager = FileDocumentManager.getInstance();
-        VirtualFile file = fileDocumentManager.getFile(document);
-        if (file == null || file.getFileType() != BnfFileType.INSTANCE) return;
-        finalQueue.cancelAllUpdates();
-        finalQueue.queue(new Update(Boolean.TRUE, true) {
-          @Override
-          public void run() {
-            FileManager fileManager = ((PsiManagerEx)PsiManager.getInstance(project)).getFileManager();
-            for (FileEditor fileEditor : fileEditorManager.getAllEditors()) {
-              if (!(fileEditor instanceof TextEditor)) continue;
-              EditorEx editor = (EditorEx)((TextEditor)fileEditor).getEditor();
-              Document document = editor.getDocument();
-              VirtualFile virtualFile = editor.getVirtualFile();
-              Language language = virtualFile instanceof LightVirtualFile ? ((LightVirtualFile)virtualFile).getLanguage() : null;
-              if (!(language instanceof LivePreviewLanguage)) continue;
-
-              FileContentUtil.reparseFiles(project, Collections.singletonList(virtualFile), false);
-              fileManager.setViewProvider(virtualFile, fileManager.createFileViewProvider(virtualFile, true));
-              PsiDocumentManagerImpl.cachePsi(document, ObjectUtils.assertNotNull(PsiManager.getInstance(project).findFile(virtualFile)));
-              editor.setHighlighter(EditorHighlighterFactory.getInstance().createEditorHighlighter(project, virtualFile));
-            }
-          }
-        });
+        VirtualFile file = fileManager.getFile(document);
+        PsiFile psiFile = file == null ? null : psiManager.findFile(file);
+        if (psiFile instanceof BnfFile) {
+          LIVE_PREVIEW_ALARM.getValue(project).cancelAndRequest();
+        }
       }
     }, project);
 
@@ -177,6 +147,21 @@ public class LivePreviewHelper {
     //    Disposer.register(fileEditor, structureView);
     //  }
     //});
+  }
+
+  private static void reparseAllLivePreviews(@NotNull Project project) {
+    if (!project.isOpen()) return;
+    PsiDocumentManager.getInstance(project).commitAllDocuments();
+    Collection<VirtualFile> files = ContainerUtil.newLinkedHashSet();
+    FileEditorManager fileEditorManager = FileEditorManager.getInstance(project);
+    PsiManager psiManager = PsiManager.getInstance(project);
+    for (VirtualFile file : fileEditorManager.getOpenFiles()) {
+      PsiFile psiFile = psiManager.findFile(file);
+      Language language = psiFile == null? null : psiFile.getLanguage();
+      if (!(language instanceof LivePreviewLanguage)) continue;
+      files.add(file);
+    }
+    FileContentUtil.reparseFiles(project, files, false);
   }
 
   public static boolean collectExpressionsAtOffset(Project project, Editor previewEditor, LivePreviewLanguage language, final PairProcessor<BnfExpression, Boolean> processor) {

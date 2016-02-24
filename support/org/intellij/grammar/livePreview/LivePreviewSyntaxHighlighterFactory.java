@@ -26,7 +26,6 @@ import com.intellij.openapi.fileTypes.SyntaxHighlighterBase;
 import com.intellij.openapi.fileTypes.SyntaxHighlighterFactory;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
-import com.intellij.psi.TokenType;
 import com.intellij.psi.tree.IElementType;
 import com.intellij.testFramework.LightVirtualFile;
 import org.jetbrains.annotations.NotNull;
@@ -54,7 +53,8 @@ public class LivePreviewSyntaxHighlighterFactory extends SyntaxHighlighterFactor
           @Override
           public IElementType getTokenType() {
             IElementType tokenType = super.getTokenType();
-            return tokenType instanceof PreviewTokenType ? ((PreviewTokenType)tokenType).delegate : tokenType;
+            return tokenType instanceof LivePreviewElementType.TokenType
+                   ? ((LivePreviewElementType.TokenType)tokenType).delegate : tokenType;
           }
         };
       }
@@ -66,7 +66,7 @@ public class LivePreviewSyntaxHighlighterFactory extends SyntaxHighlighterFactor
         if (tokenType == LivePreviewParserDefinition.STRING) return pack(DefaultLanguageHighlighterColors.STRING);
         if (tokenType == LivePreviewParserDefinition.NUMBER) return pack(DefaultLanguageHighlighterColors.NUMBER);
         if (tokenType == LivePreviewParserDefinition.KEYWORD) return pack(DefaultLanguageHighlighterColors.KEYWORD);
-        if (tokenType == TokenType.BAD_CHARACTER) return pack(DefaultLanguageHighlighterColors.INVALID_STRING_ESCAPE);
+        if (tokenType == com.intellij.psi.TokenType.BAD_CHARACTER) return pack(DefaultLanguageHighlighterColors.INVALID_STRING_ESCAPE);
         return EMPTY;
       }
     };

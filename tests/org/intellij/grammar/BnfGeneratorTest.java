@@ -1,5 +1,6 @@
 package org.intellij.grammar;
 
+import com.intellij.idea.Bombed;
 import com.intellij.openapi.util.Comparing;
 import com.intellij.openapi.util.io.FileUtil;
 import com.intellij.rt.execution.junit.FileComparisonFailure;
@@ -35,6 +36,8 @@ public class BnfGeneratorTest extends BnfGeneratorTestCase {
   public void testTokenSequence() throws Exception { doGenTest(false); }
   public void testStub() throws Exception { doGenTest(true); }
   public void testAutoRecovery() throws Exception { doGenTest(true); }
+
+  @Bombed(year = 2030, user = "author", month = 1, day = 1, description = "not implemented")
   public void testUpperRules() throws Exception { doGenTest(true); }
   public void testFixes() throws Exception { doGenTest(true); }
 

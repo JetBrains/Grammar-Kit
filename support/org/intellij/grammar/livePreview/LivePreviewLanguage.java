@@ -123,7 +123,7 @@ public class LivePreviewLanguage extends Language {
   }
 
   @NotNull
-  public List<Editor> getGrammarEditors(Project project) {
+  public List<Editor> getGrammarEditors(@NotNull Project project) {
     VirtualFile file = getGrammarFile();
     if (file == null) return Collections.emptyList();
     FileEditor[] editors = FileEditorManager.getInstance(project).getAllEditors(file);
@@ -131,6 +131,25 @@ public class LivePreviewLanguage extends Language {
     List<Editor> result = ContainerUtil.newArrayList();
     for (FileEditor editor : editors) {
       if (editor instanceof TextEditor) result.add(((TextEditor)editor).getEditor());
+    }
+    return result;
+  }
+
+  @NotNull
+  public List<Editor> getPreviewEditors(@NotNull Project project) {
+    FileEditorManager fileEditorManager = FileEditorManager.getInstance(project);
+    VirtualFile[] files = fileEditorManager.getOpenFiles();
+    if (files.length == 0) return Collections.emptyList();
+    List<Editor> result = ContainerUtil.newArrayList();
+    PsiManager psiManager = PsiManager.getInstance(project);
+    for (VirtualFile file : files) {
+      PsiFile psiFile = psiManager.findFile(file);
+      Language language = psiFile == null ? null : psiFile.getLanguage();
+      if (language == this) {
+        for (FileEditor editor : fileEditorManager.getAllEditors(file)) {
+          if (editor instanceof TextEditor) result.add(((TextEditor)editor).getEditor());
+        }
+      }
     }
     return result;
   }

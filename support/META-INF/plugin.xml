@@ -130,4 +130,11 @@
       </action>
     </group>
   </actions>
+
+  <project-components>
+    <component>
+      <implementation-class>org.intellij.grammar.livePreview.GrammarAtCaretPassFactory</implementation-class>
+      <skipForDefaultProject/>
+    </component>
+  </project-components>
 </idea-plugin>

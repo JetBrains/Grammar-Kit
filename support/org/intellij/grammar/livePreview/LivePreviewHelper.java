@@ -102,7 +102,7 @@ public class LivePreviewHelper {
     NotNullLazyKey.create("LIVE_PREVIEW_ALARM", new NotNullFunction<Project, SingleAlarm>() {
       @NotNull
       @Override
-      public SingleAlarm fun(Project project) {
+      public SingleAlarm fun(final Project project) {
         return new SingleAlarm(new Runnable() {
           @Override
           public void run() {

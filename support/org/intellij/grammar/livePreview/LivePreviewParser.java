@@ -51,7 +51,9 @@ public class LivePreviewParser implements PsiParser {
   private final BnfFile myFile;
   private final LivePreviewLanguage myLanguage;
   private final Map<String,String> mySimpleTokens = ContainerUtil.newLinkedHashMap();
-  private final Map<String, IElementType> myElementTypes = ContainerUtil.newTroveMap();
+
+  private final Map<String, IElementType> myRuleElementTypes = ContainerUtil.newTroveMap();
+  private final Map<String, IElementType> myTokenElementTypes = ContainerUtil.newTroveMap();
 
   private GenOptions G;
   private BnfRule myGrammarRoot;
@@ -116,14 +118,14 @@ public class LivePreviewParser implements PsiParser {
     Lexer lexer = ((PsiBuilderImpl)builder).getLexer();
     if (lexer instanceof LivePreviewLexer) {
       for (LivePreviewLexer.Token type : ((LivePreviewLexer)lexer).getTokens()) {
-        myElementTypes.put(type.constantName, type.tokenType);
+        myTokenElementTypes.put(type.constantName, type.tokenType);
       }
     }
     for (BnfRule rule : myFile.getRules()) {
       String elementType = ParserGeneratorUtil.getElementType(rule, G.generateElementCase);
       if (StringUtil.isEmpty(elementType)) continue;
-      if (myElementTypes.containsKey(elementType)) continue;
-      myElementTypes.put(elementType, new LivePreviewElementType.RuleType(elementType, rule, myLanguage));
+      if (myRuleElementTypes.containsKey(elementType)) continue;
+      myRuleElementTypes.put(elementType, new LivePreviewElementType.RuleType(elementType, rule, myLanguage));
     }
     int count = 0;
     for (BnfRule rule : myFile.getRules()) {
@@ -167,7 +169,7 @@ public class LivePreviewParser implements PsiParser {
     String recoverWhile = firstNonTrivial ? getAttribute(rule, KnownAttribute.RECOVER_WHILE) : null;
     boolean canCollapse = !isPrivate && (!isLeft || isLeftInner) && firstNonTrivial && myGraphHelper.canCollapse(rule);
 
-    IElementType elementType = getElementType(rule);
+    IElementType elementType = getRuleElementType(rule);
 
     List<BnfExpression> children;
     if (node instanceof BnfReferenceOrToken || node instanceof BnfLiteralExpression || node instanceof BnfExternalExpression) {
@@ -548,14 +550,13 @@ public class LivePreviewParser implements PsiParser {
   }
 
   @Nullable
-  private IElementType getElementType(BnfRule rule) {
+  private IElementType getRuleElementType(BnfRule rule) {
     String elementType = ParserGeneratorUtil.getElementType(rule, G.generateElementCase);
-    if (StringUtil.isEmpty(elementType)) return null;
-    return getElementType(elementType);
+    return StringUtil.isEmpty(elementType) ? null : myRuleElementTypes.get(elementType);
   }
 
-  private IElementType getElementType(String elementType) {
-    return myElementTypes.get(elementType);
+  private IElementType getTokenElementType(String token) {
+    return token == null ? null : myTokenElementTypes.get(myTokenTypeText + token.toUpperCase());
   }
 
   private boolean generateConsumeToken(PsiBuilder builder, String tokenName) {
@@ -569,10 +570,6 @@ public class LivePreviewParser implements PsiParser {
 
   protected boolean generateConsumeTextToken(PsiBuilder builder, String tokenText) {
     return consumeToken(builder, tokenText);
-  }
-
-  private IElementType getTokenElementType(String token) {
-    return token == null? null : getElementType(myTokenTypeText + token.toUpperCase());
   }
 
   protected boolean isTokenExpression(BnfExpression node) {
@@ -636,10 +633,10 @@ public class LivePreviewParser implements PsiParser {
         if (marker_ == null) marker_ = builder.mark();
 
         if (priority_ <  priority &&
-            (operator.arg1 == null || ((LighterASTNode)left_marker_).getTokenType() == getElementType(operator.arg1)) &&
+            (operator.arg1 == null || ((LighterASTNode)left_marker_).getTokenType() == getRuleElementType(operator.arg1)) &&
             generateNodeCall(builder, level, info.rootRule, operator.operator, getNextName(operator.rule.getName(), 0), Collections.<String, Parser>emptyMap())) {
 
-          IElementType elementType = getElementType(operator.rule);
+          IElementType elementType = getRuleElementType(operator.rule);
           boolean rightAssociative = ParserGeneratorUtil.getAttribute(operator.rule, KnownAttribute.RIGHT_ASSOCIATIVE);
           if (operator.type == ExpressionHelper.OperatorType.BINARY) {
               result_ = report_error_(builder, generateExpressionRoot(builder, level, info, (rightAssociative ? argPriority - 1 : argPriority)));

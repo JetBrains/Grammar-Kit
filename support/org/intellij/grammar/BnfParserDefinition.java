@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2014 Gregory Shrago
+ * Copyright 2011-2016 Gregory Shrago
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,6 @@ import com.intellij.psi.tree.IFileElementType;
 import com.intellij.psi.tree.TokenSet;
 import org.intellij.grammar.parser.BnfLexer;
 import org.intellij.grammar.parser.GrammarParser;
-import org.intellij.grammar.psi.BnfTokenType;
 import org.intellij.grammar.psi.BnfTypes;
 import org.intellij.grammar.psi.impl.BnfFileImpl;
 import org.jetbrains.annotations.NotNull;

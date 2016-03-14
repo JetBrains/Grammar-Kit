@@ -19,7 +19,7 @@ Recent changes / 1.3.0
 * LivePreview: critical bugs fixed, revitalized
 * Generator: "upper" rules initial (no proper analyzer support)
 * Generator/GPUB: introduce frame.resultType for manual manipulation
-* Generator/Visitor: "visitor-value" generate option to generate Visitor<R>
+* Generator/Visitor: "visitor-value" generate option to generate `Visitor<R>`
 * Generator: more "generate" options: elements, element-case, token-case
 
 
@@ -231,7 +231,7 @@ Change log
 * LivePreview: critical bugs fixed, revitalized
 * Generator: "upper" rules initial (no proper analyzer support)
 * Generator/GPUB: introduce frame.resultType for manual manipulation
-* Generator/Visitor: "visitor-value" generate option to generate Visitor<R>
+* Generator/Visitor: "visitor-value" generate option to generate `Visitor<R>`
 * Generator: more "generate" options: elements, element-case, token-case
 
 1.2.1

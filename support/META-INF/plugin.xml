@@ -1,8 +1,8 @@
 <idea-plugin url="https://github.com/JetBrains/Grammar-Kit" version="2">
   <id>org.jetbrains.idea.grammar</id>
-  <version>1.3.x</version>
+  <version>1.3.0</version>
   <vendor email="gregory.shrago@jetbrains.com">Greg Shrago</vendor>
-  <idea-version since-build="144.0" until-build=""/>
+  <idea-version since-build="145.0" until-build=""/>
 
   <name>Grammar-Kit</name>
   <description>BNF Grammars and JFlex lexers editor. Readable parser/PSI code generator.</description>
@@ -12,11 +12,13 @@
 
   <change-notes>
     <![CDATA[
-    <p>1.3.x</p>
+    <p>1.3.0</p>
     <ul>
-      <li>LivePreview: revitalized</li>
-      <li>Generator: "upper" rules initial</li>
-      <li>Visitor: option to generate parametrized visitor</li>
+      <li>LivePreview: critical bugs fixed, revitalized</li>
+      <li>Generator: "upper" rules initial (no proper analyzer support)</li>
+      <li>Generator/GPUB: introduce frame.resultType for manual manipulation</li>
+      <li>Generator/Visitor: "visitor-value" generate option to generate Visitor&lt;R&gt;</li>
+      <li>Generator: more "generate" options: elements, element-case, token-case</li>
     </ul>
     <a href="https://github.com/JetBrains/Grammar-Kit#change-log">Full change log...</a>
     ]]>

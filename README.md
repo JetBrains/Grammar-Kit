@@ -14,13 +14,13 @@ Open-source plugins built with Grammar-Kit:
 
 Quick links: [Tutorial](TUTORIAL.md), [HOWTO](HOWTO.md), [Standalone usage](#standalone-usage).
 
-Recent changes / 1.2.1
+Recent changes / 1.3.0
 
-* Generator/PSI: fix generic and vararg types generation
-* Generator/PSI: fix private recursive rules handling
-* Generator: made a parser extend com.intellij.lang.LightPsiParser
-* Known exceptions fixed, rebuilt with IntelliJ Platform 14.1.4
-* Editor: method reference navigation revived
+* LivePreview: critical bugs fixed, revitalized
+* Generator: "upper" rules initial (no proper analyzer support)
+* Generator/GPUB: introduce frame.resultType for manual manipulation
+* Generator/Visitor: "visitor-value" generate option to generate Visitor<R>
+* Generator: more "generate" options: elements, element-case, token-case
 
 
 General usage instructions
@@ -225,6 +225,14 @@ java -jar expression-console-sample.jar
 
 Change log
 ==========
+
+1.3.0
+
+* LivePreview: critical bugs fixed, revitalized
+* Generator: "upper" rules initial (no proper analyzer support)
+* Generator/GPUB: introduce frame.resultType for manual manipulation
+* Generator/Visitor: "visitor-value" generate option to generate Visitor<R>
+* Generator: more "generate" options: elements, element-case, token-case
 
 1.2.1
 

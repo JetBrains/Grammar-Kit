@@ -29,6 +29,7 @@ public class BnfCompletionTest extends JavaCodeInsightFixtureTestCase {
   public void testAttr3() throws Throwable { doTestVariants("{pin=1 rec<caret>overUntil=abc}", CompletionType.BASIC, 1, CheckType.INCLUDES, "recoverWhile"); }
   public void testAttr4() throws Throwable { doTestVariants("a::= {name=\"A\" p<caret>=\"\"}", CompletionType.BASIC, 1, CheckType.INCLUDES, "pin", "elementType"); }
   public void testRule1() throws Throwable { doTestVariants("rule::= <caret>", CompletionType.BASIC, 1, CheckType.INCLUDES, "rule"); }
+  public void testRule2() throws Throwable { doTestTextAfter("<with space>::= ws<caret>", CompletionType.BASIC, 1, "<with space>::= <with space>"); }
 
   public void testExternalMethod1() throws Throwable { doTestVariants(initUtil() + "external rule::= <caret>", CompletionType.BASIC, 1, CheckType.INCLUDES, "eofX", "eofY"); }
   public void testExternalMethod2() throws Throwable { doTestVariants(initUtil() + "external rule::= abc <caret>", CompletionType.BASIC, 1, CheckType.EXCLUDES, "eofX", "eofY"); }
@@ -46,6 +47,12 @@ public class BnfCompletionTest extends JavaCodeInsightFixtureTestCase {
   protected void doTestVariants(String txt, CompletionType type, int count, CheckType checkType, String... variants) throws Throwable {
     myFixture.configureByText("a.bnf", txt);
     doTestVariantsInner(type, count, checkType, variants);
+  }
+
+  protected void doTestTextAfter(String txt, CompletionType type, int count, String textAfter) throws Throwable {
+    myFixture.configureByText("a.bnf", txt);
+    myFixture.complete(type, count);
+    assertEquals(textAfter, myFixture.getEditor().getDocument().getText());
   }
 
   protected void doTestVariantsInner(CompletionType type, int count, CheckType checkType, String... variants) throws Throwable {

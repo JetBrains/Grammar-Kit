@@ -17,6 +17,7 @@ package org.intellij.grammar.psi.impl;
 
 import com.intellij.codeInsight.lookup.LookupElement;
 import com.intellij.codeInsight.lookup.LookupElementBuilder;
+import com.intellij.openapi.util.Comparing;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.psi.*;
@@ -78,7 +79,15 @@ public class BnfReferenceImpl<T extends BnfCompositeElement> extends PsiReferenc
         boolean fakeRule = ParserGeneratorUtil.Rule.isFake(rule);
         boolean privateRule = ParserGeneratorUtil.Rule.isPrivate(rule);
         if (isExternal && !ParserGeneratorUtil.Rule.isMeta(rule)) continue;
-        list.add(LookupElementBuilder.createWithIcon(rule).withBoldness(!privateRule).withStrikeoutness(fakeRule));
+        String idText = rule.getId().getText();
+        LookupElementBuilder e = LookupElementBuilder.create(rule, idText)
+          .withIcon(rule.getIcon(0))
+          .withBoldness(!privateRule)
+          .withStrikeoutness(fakeRule);
+        if (!Comparing.equal(idText, rule.getName())) {
+          e = e.withLookupString(rule.getName());
+        }
+        list.add(e);
       }
     }
     if (isExternal) {

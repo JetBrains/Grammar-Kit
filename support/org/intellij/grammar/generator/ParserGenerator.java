@@ -351,7 +351,7 @@ public class ParserGenerator {
       if (Rule.isExternal(rule) || Rule.isFake(rule)) continue;
       if (myExpressionHelper.getExpressionInfo(rule) != null) continue;
       out("/* ********************************************************** */");
-      generateNode(rule, rule.getExpression(), ruleName, new THashSet<BnfExpression>());
+      generateNode(rule, rule.getExpression(), getFuncName(rule), new THashSet<BnfExpression>());
       newLine();
     }
     for (String ruleName : ownRuleNames) {
@@ -404,7 +404,7 @@ public class ParserGenerator {
       if (G.generateRootRules != null && !G.generateRootRules.matcher(ruleName).matches()) continue;
       String elementType = getElementType(rule);
       out("%sif (%s == %s) {", first ? "" : "else ", N.root, elementType);
-      String nodeCall = generateNodeCall(rule, null, ruleName);
+      String nodeCall = generateNodeCall(rule, null, getFuncName(rule));
       out("%s = %s;", N.result, nodeCall.replace(format("%s + 1", N.level), "0"));
       out("}");
       if (first) first = false;
@@ -1423,7 +1423,7 @@ public class ParserGenerator {
 
     boolean many = type.many();
 
-    String getterNameBody = "get" + toIdentifier(methodInfo.name, "");
+    String getterNameBody = getGetterName(methodInfo.name);
     String getterName = getterNameBody + (many ? "List" : "");
     if (!intf) out("@Override");
     if (type == REQUIRED) {
@@ -1525,7 +1525,7 @@ public class ParserGenerator {
       }
       String targetCall;
       if (StringUtil.isNotEmpty(targetInfo.name)) {
-        targetCall = "get" + toIdentifier(item, "") + (targetInfo.cardinality.many() ? "List" : "") + "()";
+        targetCall = getGetterName(item) + (targetInfo.cardinality.many() ? "List" : "") + "()";
       }
       else {
         targetCall = generatePsiAccessorImplCall(targetInfo);
@@ -1579,7 +1579,7 @@ public class ParserGenerator {
 
     boolean many = cardinality.many();
     String className = myShortener.fun(targetRule == null ? BnfConstants.PSI_ELEMENT_CLASS : getAccessorType(targetRule));
-    final String getterName = "get" + toIdentifier(methodInfo.name, "");
+    String getterName = getGetterName(methodInfo.name);
     String tail = intf ? "();" : "() {";
     out((intf ? "" : "public ") + (many ? myShortener.fun(CommonClassNames.JAVA_UTIL_LIST) + "<" : "") + className + (many ? "> " : " ") + getterName + tail);
 

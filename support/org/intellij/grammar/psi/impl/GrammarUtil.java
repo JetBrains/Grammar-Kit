@@ -144,7 +144,7 @@ public class GrammarUtil {
   }
 
   public static boolean processPinnedExpressions(final BnfRule rule, final PairProcessor<BnfExpression, PinMatcher> processor) {
-    return processExpressionNames(rule, rule.getName(), rule.getExpression(), new PairProcessor<String, BnfExpression>() {
+    return processExpressionNames(rule, getFuncName(rule), rule.getExpression(), new PairProcessor<String, BnfExpression>() {
       @Override
       public boolean process(String funcName, BnfExpression expression) {
         if (!(expression instanceof BnfSequence)) return true;
@@ -182,10 +182,10 @@ public class GrammarUtil {
 
   public static String getMethodName(BnfRule rule, PsiElement element) {
     final BnfExpression target = PsiTreeUtil.getParentOfType(element, BnfExpression.class, false);
-    String ruleName = rule.getName();
-    if (target == null) return ruleName;
+    String funcName = getFuncName(rule);
+    if (target == null) return funcName;
     final Ref<String> ref = Ref.create(null);
-    processExpressionNames(rule, ruleName, rule.getExpression(), new PairProcessor<String, BnfExpression>() {
+    processExpressionNames(rule, funcName, rule.getExpression(), new PairProcessor<String, BnfExpression>() {
       @Override
       public boolean process(String funcName, BnfExpression expression) {
         if (target == expression) {

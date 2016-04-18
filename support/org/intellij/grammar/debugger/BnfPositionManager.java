@@ -121,14 +121,14 @@ public class BnfPositionManager implements PositionManager {
       public void visitElement(PsiElement element) {
         if (element instanceof BnfRule) {
           BnfRule rule = (BnfRule) element;
-          String ruleName = rule.getName();
-          if (name.startsWith(ruleName)) {
-            if (name.equals(ruleName)) {
+          String funcName = ParserGeneratorUtil.getFuncName(rule);
+          if (name.startsWith(funcName)) {
+            if (name.equals(funcName)) {
               result.set(((BnfRule)element).getExpression());
               stopWalking();
             }
-            else if (name.substring(ruleName.length()).matches("(?:_\\d+)+")) {
-              GrammarUtil.processExpressionNames(rule, ruleName, ((BnfRule) element).getExpression(), new PairProcessor<String, BnfExpression>() {
+            else if (name.substring(funcName.length()).matches("(?:_\\d+)+")) {
+              GrammarUtil.processExpressionNames(rule, funcName, ((BnfRule) element).getExpression(), new PairProcessor<String, BnfExpression>() {
                 @Override
                 public boolean process(String funcName, BnfExpression expression) {
                   if (name.equals(funcName)) {

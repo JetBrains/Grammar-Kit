@@ -24,10 +24,11 @@ import java.util.Locale;
  * @author gregsh
  */
 public enum Case {
-  LOWER, UPPER, AS_IS;
+  LOWER, UPPER, AS_IS, CAMEL;
 
   @NotNull
   public String apply(@NotNull String s) {
+    if (s.isEmpty()) return s;
     switch (this) {
       case LOWER:
         return s.toLowerCase(Locale.ENGLISH);
@@ -35,6 +36,9 @@ public enum Case {
         return s.toUpperCase(Locale.ENGLISH);
       case AS_IS:
         return s;
+      case CAMEL:
+        return s.substring(0, 1).toUpperCase(Locale.ENGLISH) +
+               s.substring(1).toLowerCase(Locale.ENGLISH);
       default:
         throw new AssertionError();
     }

@@ -38,6 +38,7 @@ import org.intellij.grammar.psi.*;
 import org.intellij.grammar.psi.impl.GrammarUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.TestOnly;
 
 import java.util.*;
 import java.util.regex.Pattern;
@@ -238,17 +239,33 @@ public class ParserGeneratorUtil {
     return PsiTreeUtil.getChildrenOfTypeAsList(node, BnfExpression.class);
   }
 
-  public static String getNextName(String funcName, int i) {
+  public static String getFuncName(@NotNull BnfRule r) {
+    return toIdentifier(r.getName(), null, Case.AS_IS);
+  }
+
+  public static String getNextName(@NotNull String funcName, int i) {
     return funcName + "_" + i;
   }
 
-  public static String toIdentifier(@NotNull String text, @NotNull String prefix) {
-    StringBuilder sb = new StringBuilder(prefix);
-    for (String s : text.split("_|-")) {
-      if (s.length() == 0) continue;
-      String tail = s.substring(1);
-      sb.append(StringUtil.toUpperCase(s.charAt(0)));
-      sb.append(StringUtil.toUpperCase(tail).equals(tail)? StringUtil.toLowerCase(tail) : tail);
+  @NotNull
+  public static String getGetterName(@NotNull String text) {
+    return toIdentifier(text, "get", Case.CAMEL);
+  }
+
+  @TestOnly
+  @NotNull
+  public static String toIdentifier(@NotNull String text, @Nullable String prefix, @NotNull Case cas) {
+    if (text.isEmpty()) return "";
+    String fixed = text.replaceAll("[^:\\p{javaJavaIdentifierPart}]", "_").replaceAll("_+", "_");
+    StringBuilder sb = new StringBuilder(StringUtil.notNullize(prefix));
+    if (!Character.isJavaIdentifierStart(fixed.charAt(0)) && sb.length() == 0) sb.append("_");
+    String[] strings = NameUtil.nameToWords(fixed);
+    for (int i = 0, len = strings.length; i < len; i++) {
+      String s = strings[i];
+      if (cas == Case.CAMEL && "_".equals(s) && !(i == 0 || i == len - 1)) continue;
+      if (cas == Case.UPPER && !"_".equals(s) && !(i == 0 || StringUtil.endsWith(sb, "_"))) sb.append("_");
+      if (cas == Case.CAMEL && i < len - 1 && !"_".equals(strings[i+1]) && Case.UPPER.apply(s).equals(s)) sb.append(s);
+      else sb.append(cas.apply(s));
     }
     return sb.toString();
   }
@@ -267,7 +284,7 @@ public class ParserGeneratorUtil {
 
   @NotNull
   public static String getRulePsiClassName(BnfRule rule, final String prefix) {
-    return toIdentifier(rule.getName(), prefix);
+    return toIdentifier(rule.getName(), prefix, Case.CAMEL);
   }
 
   public static String getPsiClassPrefix(final BnfFile file) {
@@ -395,10 +412,10 @@ public class ParserGeneratorUtil {
   }
 
   public static String getElementType(BnfRule rule, @NotNull Case cas) {
-    String elementType = StringUtil.notNullize(getAttribute(rule, KnownAttribute.ELEMENT_TYPE), rule.getName());
-    String displayName = cas == Case.AS_IS ? elementType :
-                         cas.apply(StringUtil.join(NameUtil.splitNameIntoWords(elementType), "_"));
-    return StringUtil.isEmpty(displayName)? "" : getAttribute(rule, KnownAttribute.ELEMENT_TYPE_PREFIX) + displayName;
+    String elementType = getAttribute(rule, KnownAttribute.ELEMENT_TYPE);
+    if ("".equals(elementType)) return "";
+    String prefix = getAttribute(rule, KnownAttribute.ELEMENT_TYPE_PREFIX);
+    return toIdentifier(elementType != null ? elementType : rule.getName(), prefix, Case.UPPER);
   }
 
   public static Collection<BnfRule> getSortedPublicRules(Set<PsiElement> accessors) {

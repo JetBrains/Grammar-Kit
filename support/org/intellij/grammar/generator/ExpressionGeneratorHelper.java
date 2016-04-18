@@ -43,7 +43,7 @@ public class ExpressionGeneratorHelper {
     Map<String, List<OperatorInfo>> opCalls = ContainerUtil.newLinkedHashMap();
     for (BnfRule rule : info.priorityMap.keySet()) {
       OperatorInfo operator = info.operatorMap.get(rule);
-      String opCall = g.generateNodeCall(info.rootRule, operator.operator, getNextName(operator.rule.getName(), 0), CONSUME_TYPE_OVERRIDE);
+      String opCall = g.generateNodeCall(info.rootRule, operator.operator, getNextName(getFuncName(operator.rule), 0), CONSUME_TYPE_OVERRIDE);
       List<OperatorInfo> list = opCalls.get(opCall);
       if (list == null) opCalls.put(opCall, list = ContainerUtil.newArrayListWithCapacity(2));
       list.add(operator);
@@ -55,7 +55,7 @@ public class ExpressionGeneratorHelper {
     }
 
     // main entry
-    String methodName = info.rootRule.getName();
+    String methodName = getFuncName(info.rootRule);
     String kernelMethodName = getNextName(methodName, 0);
     String frameName = quote(ParserGeneratorUtil.getRuleDisplayName(info.rootRule, true));
     g.out("public static boolean %s(PsiBuilder %s, int %s, int %s) {", methodName, g.N.builder, g.N.level, g.N.priority);
@@ -72,7 +72,7 @@ public class ExpressionGeneratorHelper {
     for (String opCall : sortedOpCalls) {
       OperatorInfo operator = ContainerUtil.getFirstItem(findOperators(opCalls.get(opCall), OperatorType.ATOM, OperatorType.PREFIX));
       if (operator == null) continue;
-      String nodeCall = g.generateNodeCall(operator.rule, null, operator.rule.getName());
+      String nodeCall = g.generateNodeCall(operator.rule, null, getFuncName(operator.rule));
       g.out("%s%s = %s;", first ? "" : format("if (!%s) ", g.N.result), g.N.result, nodeCall);
       first = false;
     }
@@ -109,7 +109,7 @@ public class ExpressionGeneratorHelper {
       String elementType = g.getElementType(operator.rule);
       boolean rightAssociative = ParserGeneratorUtil.getAttribute(operator.rule, KnownAttribute.RIGHT_ASSOCIATIVE);
       String tailCall =
-        operator.tail == null ? null : g.generateNodeCall(operator.rule, operator.tail, getNextName(operator.rule.getName(), 1), ConsumeType.DEFAULT);
+        operator.tail == null ? null : g.generateNodeCall(operator.rule, operator.tail, getNextName(getFuncName(operator.rule), 1), ConsumeType.DEFAULT);
       if (operator.type == OperatorType.BINARY) {
         String argCall = format("%s(%s, %s, %d)", methodName, g.N.builder, g.N.level, rightAssociative ? argPriority - 1 : argPriority);
         g.out("%s = %s;", g.N.result, tailCall == null ? argCall : format("report_error_(%s, %s)", g.N.builder, argCall));
@@ -149,7 +149,7 @@ public class ExpressionGeneratorHelper {
       for (OperatorInfo operator : opCalls.get(opCall)) {
         if (operator.type == OperatorType.ATOM) {
           g.newLine();
-          g.generateNode(operator.rule, operator.rule.getExpression(), operator.rule.getName(), visited);
+          g.generateNode(operator.rule, operator.rule.getExpression(), getFuncName(operator.rule), visited);
           continue;
         }
         else if (operator.type == OperatorType.PREFIX) {
@@ -163,7 +163,7 @@ public class ExpressionGeneratorHelper {
 
           String elementType = g.getElementType(operator.rule);
           String tailCall =
-            operator.tail == null ? null : g.generateNodeCall(operator.rule, operator.tail, getNextName(operator.rule.getName(), 1), ConsumeType.DEFAULT);
+            operator.tail == null ? null : g.generateNodeCall(operator.rule, operator.tail, getNextName(getFuncName(operator.rule), 1), ConsumeType.DEFAULT);
 
           g.out("%s = %s;", g.N.result, opCall);
           g.out("%s = %s;", g.N.pinned, g.N.result);
@@ -180,7 +180,7 @@ public class ExpressionGeneratorHelper {
           g.out("return %s || %s;", g.N.result, g.N.pinned);
           g.out("}");
         }
-        g.generateNodeChild(operator.rule, operator.operator, operator.rule.getName(), 0, visited);
+        g.generateNodeChild(operator.rule, operator.operator, getFuncName(operator.rule), 0, visited);
         if (operator.tail != null) {
           g.generateNodeChild(operator.rule, operator.tail, operator.rule.getName(), 1, visited);
         }

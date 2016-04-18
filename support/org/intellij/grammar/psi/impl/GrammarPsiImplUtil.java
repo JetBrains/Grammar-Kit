@@ -59,8 +59,9 @@ public class GrammarPsiImplUtil {
           BnfRule rule = PsiTreeUtil.getParentOfType(getElement(), BnfRule.class);
           String mixinClass = rule == null ? null : getAttribute(rule, KnownAttribute.MIXIN);
           List<NavigatablePsiElement> implMethods = findRuleImplMethods(javaHelper, psiImplUtilClass, methodName, rule);
+          if (!implMethods.isEmpty()) return implMethods;
           List<NavigatablePsiElement> mixinMethods = javaHelper.findClassMethods(mixinClass, false, methodName, -1);
-          return ContainerUtil.concat(mixinMethods, implMethods);
+          return ContainerUtil.concat(implMethods, mixinMethods);
         }
 
         @NotNull

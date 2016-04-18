@@ -59,7 +59,7 @@ public class BnfInspectionTest extends LightPlatformCodeInsightFixtureTestCase {
     else {
       VfsRootAccess.disallowRootAccess(absolutePath);
     }
-    AccessToken accessToken = ApplicationManager.getApplication().acquireWriteActionLock(null);
+    AccessToken accessToken = ApplicationManager.getApplication().acquireWriteActionLock(BnfInspectionTest.class);
     try {
       ModifiableRootModel model = ModuleRootManager.getInstance(module).getModifiableModel();
       String supportUrl = getUrl(testDataPath + "/../../support");

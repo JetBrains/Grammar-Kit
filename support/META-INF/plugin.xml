@@ -1,6 +1,6 @@
 <idea-plugin url="https://github.com/JetBrains/Grammar-Kit" version="2">
   <id>org.jetbrains.idea.grammar</id>
-  <version>1.3.0</version>
+  <version>1.3.0-dev</version>
   <vendor email="gregory.shrago@jetbrains.com">Greg Shrago</vendor>
   <idea-version since-build="145.0" until-build=""/>
 
@@ -12,13 +12,10 @@
 
   <change-notes>
     <![CDATA[
-    <p>1.3.0</p>
+    <p>1.3.0-dev</p>
     <ul>
-      <li>LivePreview: critical bugs fixed, revitalized</li>
-      <li>Generator: "upper" rules initial (no proper analyzer support)</li>
-      <li>Generator/GPUB: introduce frame.resultType for manual manipulation</li>
-      <li>Generator/Visitor: "visitor-value" generate option to generate Visitor&lt;R&gt;</li>
-      <li>Generator: more "generate" options: elements, element-case, token-case</li>
+      <li>Generator: improved/unified identifiers generation #97</li>
+      <li>Editor: improved completion for quoted names &lt;quoted rule&gt;</li>
     </ul>
     <a href="https://github.com/JetBrains/Grammar-Kit#change-log">Full change log...</a>
     ]]>

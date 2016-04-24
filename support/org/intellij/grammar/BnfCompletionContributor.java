@@ -25,6 +25,7 @@ import com.intellij.lang.ASTNode;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.patterns.PlatformPatterns;
+import com.intellij.patterns.PsiElementPattern;
 import com.intellij.psi.*;
 import com.intellij.psi.impl.source.tree.TreeUtil;
 import com.intellij.psi.util.PsiTreeUtil;
@@ -51,7 +52,7 @@ import static com.intellij.patterns.PlatformPatterns.psiElement;
 public class BnfCompletionContributor extends CompletionContributor {
 
   public BnfCompletionContributor() {
-    extend(CompletionType.BASIC, psiElement().inFile(PlatformPatterns.instanceOf(BnfFileImpl.class)), new CompletionProvider<CompletionParameters>() {
+    extend(CompletionType.BASIC, insideBnfFileAndNotInsideComment(), new CompletionProvider<CompletionParameters>() {
       @Override
       protected void addCompletions(@NotNull CompletionParameters parameters,
                                     ProcessingContext context,
@@ -87,7 +88,7 @@ public class BnfCompletionContributor extends CompletionContributor {
         }
       }
     });
-    extend(CompletionType.BASIC, psiElement().inFile(PlatformPatterns.instanceOf(BnfFileImpl.class)), new CompletionProvider<CompletionParameters>() {
+    extend(CompletionType.BASIC, insideBnfFileAndNotInsideComment(), new CompletionProvider<CompletionParameters>() {
       @Override
       protected void addCompletions(@NotNull CompletionParameters parameters,
                                     ProcessingContext context,
@@ -128,6 +129,11 @@ public class BnfCompletionContributor extends CompletionContributor {
         }
       }
     });
+  }
+
+  private static PsiElementPattern.Capture<PsiElement> insideBnfFileAndNotInsideComment() {
+    return psiElement().inFile(PlatformPatterns.instanceOf(BnfFileImpl.class)).
+      andNot(psiElement().inside(PsiComment.class));
   }
 
   @Contract("null -> false")

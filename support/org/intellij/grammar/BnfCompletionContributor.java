@@ -25,6 +25,7 @@ import com.intellij.lang.ASTNode;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.patterns.PlatformPatterns;
+import com.intellij.patterns.PsiElementPattern;
 import com.intellij.psi.*;
 import com.intellij.psi.impl.source.tree.TreeUtil;
 import com.intellij.psi.util.PsiTreeUtil;
@@ -33,7 +34,6 @@ import gnu.trove.THashSet;
 import org.intellij.grammar.parser.BnfLexer;
 import org.intellij.grammar.parser.GeneratedParserUtilBase;
 import org.intellij.grammar.psi.*;
-import org.intellij.grammar.psi.impl.BnfFileImpl;
 import org.intellij.grammar.psi.impl.BnfReferenceImpl;
 import org.intellij.grammar.psi.impl.GrammarUtil;
 import org.jetbrains.annotations.Contract;
@@ -51,7 +51,11 @@ import static com.intellij.patterns.PlatformPatterns.psiElement;
 public class BnfCompletionContributor extends CompletionContributor {
 
   public BnfCompletionContributor() {
-    extend(CompletionType.BASIC, psiElement().inFile(PlatformPatterns.instanceOf(BnfFileImpl.class)), new CompletionProvider<CompletionParameters>() {
+    PsiElementPattern.Capture<PsiElement> placePattern =
+      psiElement()
+        .inFile(PlatformPatterns.instanceOf(BnfFile.class))
+        .andNot(psiElement().inside(PsiComment.class));
+    extend(CompletionType.BASIC, placePattern, new CompletionProvider<CompletionParameters>() {
       @Override
       protected void addCompletions(@NotNull CompletionParameters parameters,
                                     ProcessingContext context,
@@ -87,7 +91,7 @@ public class BnfCompletionContributor extends CompletionContributor {
         }
       }
     });
-    extend(CompletionType.BASIC, psiElement().inFile(PlatformPatterns.instanceOf(BnfFileImpl.class)), new CompletionProvider<CompletionParameters>() {
+    extend(CompletionType.BASIC, placePattern, new CompletionProvider<CompletionParameters>() {
       @Override
       protected void addCompletions(@NotNull CompletionParameters parameters,
                                     ProcessingContext context,

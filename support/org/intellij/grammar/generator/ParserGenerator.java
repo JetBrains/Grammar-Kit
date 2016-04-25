@@ -647,7 +647,7 @@ public class ParserGenerator {
     if (modifierList.isEmpty() && (pinned || frameName != null)) modifierList.add("_NONE_");
     boolean sectionRequired = !alwaysTrue || !isPrivate || isLeft || recoverWhile != null;
     boolean sectionRequiredSimple = sectionRequired && modifierList.isEmpty() && recoverWhile == null;
-    String elementTypeRef = !isPrivate && StringUtil.isNotEmpty(elementType) ? elementType : null;
+    String elementTypeRef = !isPrivate && !isBranch && StringUtil.isNotEmpty(elementType) ? elementType : null;
     String modifiers = modifierList.isEmpty()? "_NONE_" : StringUtil.join(modifierList, " | ");
     if (sectionRequiredSimple) {
       out("Marker %s = enter_section_(%s);", N.marker, N.builder);

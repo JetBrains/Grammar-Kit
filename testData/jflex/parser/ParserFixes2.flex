@@ -15,7 +15,13 @@ DIGITS={DIGIT}+
 NUMBER_PREFIX=[]
 FLOAT_POSTFIX=[dDfF]
 #end
-NO_NEWLINES=A
-B
+
+NEWLINES=A
+ "a"
+ [:digit:]
+ [a]
+ (A
+ | B)
+ BAD
 
 %%

@@ -49,7 +49,6 @@ import com.intellij.openapi.roots.libraries.LibraryTable;
 import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.util.Comparing;
 import com.intellij.openapi.util.Pair;
-import com.intellij.openapi.util.SystemInfo;
 import com.intellij.openapi.util.io.FileUtil;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.openapi.vfs.JarFileSystem;
@@ -135,8 +134,7 @@ public class BnfRunJFlexAction extends DumbAwareAction {
       SimpleJavaParameters javaParameters = new SimpleJavaParameters();
       Sdk sdk = new SimpleJavaSdkType().createJdk("tmp", SystemProperties.getJavaHome());
       javaParameters.setJdk(sdk);
-      javaParameters.getClassPath().add(jflex.get(0));
-      javaParameters.setMainClass("JFlex.Main");
+      javaParameters.setJarPath(jflex.get(0).getAbsolutePath());
       javaParameters.getVMParametersList().add("-Xmx512m");
       javaParameters.getProgramParametersList().add("-sliceandcharat");
       javaParameters.getProgramParametersList().add("-skel", jflex.get(1).getAbsolutePath());
@@ -243,11 +241,12 @@ public class BnfRunJFlexAction extends DumbAwareAction {
     main: for (int i = 0; i < urls.length; i++) {
       String url = urls[i];
       String name = url.substring(url.lastIndexOf("/") + 1);
+      Pattern pattern = Pattern.compile("(?i)" + StringUtil.replace(StringUtil.escapeToRegexp(name), "\\.", ".*\\."));
 
       for (String root : roots) {
         root = StringUtil.trimEnd(root, JarFileSystem.JAR_SEPARATOR);
         String rootName = root.substring(root.lastIndexOf("/") + 1);
-        if (Comparing.strEqual(name, rootName, SystemInfo.isFileSystemCaseSensitive)) {
+        if (pattern.matcher(rootName).matches()) {
           File file = new File(FileUtil.toSystemDependentName(VfsUtil.urlToPath(root)));
           if (file.exists() && file.isFile()) {
             result.add(file);

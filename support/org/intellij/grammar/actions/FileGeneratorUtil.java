@@ -33,6 +33,7 @@ import com.intellij.psi.search.ProjectScope;
 import com.intellij.util.ObjectUtils;
 import org.intellij.grammar.BnfFileType;
 import org.intellij.grammar.generator.BnfConstants;
+import org.intellij.jflex.parser.JFlexFileType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -72,7 +73,8 @@ public class FileGeneratorUtil {
       fileIndex.isInSourceContent(existingFile) ? fileIndex.getSourceRootForFile(existingFile) :
       fileIndex.isInContent(existingFile) ? fileIndex.getContentRootForFile(existingFile) : null;
 
-    boolean preferGenRoot = sourceFile.getFileType() == BnfFileType.INSTANCE;
+    boolean preferGenRoot = sourceFile.getFileType() == BnfFileType.INSTANCE ||
+                            sourceFile.getFileType() == JFlexFileType.INSTANCE;
     boolean preferSourceRoot = hasPackage && !preferGenRoot;
     VirtualFile[] sourceRoots = rootManager.getContentSourceRoots();
     VirtualFile[] contentRoots = rootManager.getContentRoots();

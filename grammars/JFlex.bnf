@@ -29,7 +29,7 @@
     block_comment='regexp:/\*((?<!\*/)(.|\n))*'
     escaped_char='regexp:\\.'
 
-    perc2 = '%%'
+    two_percs = '%%'
     star = '*'
     paren1 = '('
     paren2 = ')'
@@ -57,72 +57,72 @@
 
     eof = '<<EOF>>'
 
-    class1='[:jletter:]'
-    class2='[:jletterdigit:]'
-    class3='[:letter:]'
-    class4='[:digit:]'
-    class5='[:uppercase:]'
-    class6='[:lowercase:]'
+    class_jl='[:jletter:]'
+    class_jld='[:jletterdigit:]'
+    class_l='[:letter:]'
+    class_d='[:digit:]'
+    class_lu='[:uppercase:]'
+    class_ll='[:lowercase:]'
 
-    perc_1='%class'
-    perc_2='%implements'
-    perc_3='%extends'
-    perc_4='%public'
-    perc_5='%final'
-    perc_6='%abstract'
-    perc_7='%apiprivate'
-    perc_8='%{'
-    perc_9='%}'
-    perc_10='%init{'
-    perc_11='%init}'
-    perc_12='%initthrow'
-    perc_13='%initthrow{'
-    perc_14='%initthrow}'
-    perc_15='%ctorarg'
-    perc_16='%scanerror'
-    perc_17='%buffer'
-    perc_18='%include'
-    perc_19='%function'
-    perc_20='%integer'
-    perc_21='%int'
-    perc_22='%intwrap'
-    perc_23='%type'
-    perc_24='%yylexthrow'
-    perc_25='%yylexthrow{'
-    perc_26='%yylexthrow}'
-    perc_27='%eofval{'
-    perc_28='%eofval}'
-    perc_29='%eof{'
-    perc_30='%eof}'
-    perc_31='%eofthrow'
-    perc_32='%eofthrow{'
-    perc_33='%eofthrow}'
-    perc_34='%eofclose'
-    perc_36='%debug'
-    perc_37='%standalone'
-    perc_38='%cup'
-    perc_39='%cupsym'
-    perc_40='%cupdebug'
-    perc_41='%byacc'
-    perc_42='%switch'
-    perc_43='%table'
-    perc_44='%pack'
-    perc_45='%7bit'
-    perc_46='%full'
-    perc_47='%8bit'
-    perc_48='%unicode'
-    perc_49='%16bit'
-    perc_50='%caseless'
-    perc_51='%ignorecase'
-    perc_52='%char'
-    perc_53='%line'
-    perc_54='%column'
-    perc_55='%notunix'
-    perc_56='%yyeof'
-    perc_57='%state'
-    perc_58='%s'
-    perc_59='%xstate'
-    perc_69='%x'
+    opt_class='%class'
+    opt_implements='%implements'
+    opt_extends='%extends'
+    opt_public='%public'
+    opt_final='%final'
+    opt_abstract='%abstract'
+    opt_apiprivate='%apiprivate'
+    opt_code1='%{'
+    opt_code2='%}'
+    opt_init1='%init{'
+    opt_init2='%init}'
+    opt_initthrow='%initthrow'
+    opt_initthrow1='%initthrow{'
+    opt_initthrow2='%initthrow}'
+    opt_ctorarg='%ctorarg'
+    opt_scanerror='%scanerror'
+    opt_buffer='%buffer'
+    opt_include='%include'
+    opt_function='%function'
+    opt_integer='%integer'
+    opt_int='%int'
+    opt_intwrap='%intwrap'
+    opt_type='%type'
+    opt_yylexthrow='%yylexthrow'
+    opt_yylexthrow1='%yylexthrow{'
+    opt_yylexthrow2='%yylexthrow}'
+    opt_eofval1='%eofval{'
+    opt_eofval2='%eofval}'
+    opt_eof1='%eof{'
+    opt_eof2='%eof}'
+    opt_eofthrow='%eofthrow'
+    opt_eofthrow1='%eofthrow{'
+    opt_eofthrow2='%eofthrow}'
+    opt_eofclose='%eofclose'
+    opt_debug='%debug'
+    opt_standalone='%standalone'
+    opt_cup='%cup'
+    opt_cupsym='%cupsym'
+    opt_cupdebug='%cupdebug'
+    opt_byacc='%byacc'
+    opt_switch='%switch'
+    opt_table='%table'
+    opt_pack='%pack'
+    opt_7bit='%7bit'
+    opt_full='%full'
+    opt_8bit='%8bit'
+    opt_unicode='%unicode'
+    opt16bit='%16bit'
+    opt_caseless='%caseless'
+    opt_ignorecase='%ignorecase'
+    opt_char='%char'
+    opt_line='%line'
+    opt_column='%column'
+    opt_notunix='%notunix'
+    opt_yyeof='%yyeof'
+    opt_state='%state'
+    opt_s='%s'
+    opt_xstate='%xstate'
+    opt_x='%x'
 
     char='regexp:[^\{\}\[\]\(\)\+\*\?\\/]'
   ]
@@ -156,7 +156,9 @@ private section_div ::= <<line '%%'>>
 private section_recover ::= !'%%'
 
 user_code_section ::= [] java_code {pin=1}
+user_value ::= <<anything2 !new_line>>
 java_code ::= <<anything2 (&java | !<<is_percent>>)>>
+  {methods=[getReferences]}
 
 java_fqn ::= id ( safe_dot id ) * {pin(".*")=1}
 private safe_dot ::= '.' !'*'
@@ -229,7 +231,7 @@ option_init_throw ::= '%initthrow' java_fqn_list | <<line '%initthrow{'>> java_f
 option_ctor_arg ::= '%ctorarg' java_fqn id
 option_scan_error ::= '%scanerror' java_fqn
 option_buffer_size ::= '%buffer' number
-option_include ::= '%include' string // todo
+option_include ::= '%include' user_value
 
 option_function ::= '%function' id
 option_integer ::= '%integer' | '%int'
@@ -279,15 +281,16 @@ private macro_definition_recover::=!(new_line id '=' | '%%' | <<is_percent>>)
 
 
 // ======================================================
-lexical_rules_section ::= [] rule +
+lexical_rules_section ::= [] rule_group_item +
+private rule_group_item ::= option_include | rule {recoverWhile=rule_recover}
 
-rule ::= state_list (rule_group | rule_tail ) | rule_tail {pin(".*")=1 recoverWhile=rule_recover}
+rule ::= state_list (rule_group | rule_tail ) | rule_tail {pin(".*")=1}
 private rule_recover ::= !('}' | '.' | '<' | '<<EOF>>' | '^'| new_line | atom_group)
 
 private rule_tail ::= rule_tail1 | rule_tail2
 private rule_tail1 ::= '<<EOF>>' action {pin=1}
 private rule_tail2 ::= ['^'] expression look_ahead? action {pin=2}
-private rule_group ::= !('{' id '}') '{' rule + '}' {pin=2} // empty block forbidden
+private rule_group ::= !('{' id '}') '{' rule_group_item + '}' {pin=2} // empty block forbidden
 
 private state_list ::= '<' state_reference (',' state_reference) * '>' {pin(".*")=1}
 state_reference ::= id { methods=[getReference] }

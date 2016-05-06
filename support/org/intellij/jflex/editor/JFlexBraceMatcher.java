@@ -35,7 +35,7 @@ public class JFlexBraceMatcher implements PairedBraceMatcher {
     new BracePair(FLEX_PAREN1, FLEX_PAREN2, false),
     new BracePair(FLEX_BRACK1, FLEX_BRACK2, false),
     new BracePair(FLEX_ANGLE1, FLEX_ANGLE2, false),
-    new BracePair(FLEX_PERC_8, FLEX_PERC_9, false),
+    new BracePair(FLEX_OPT_CODE1, FLEX_OPT_CODE2, false),
   };
 
   @Override

@@ -1,4 +1,5 @@
 package org.intellij.jflex.parser;
+
 import com.intellij.lexer.*;
 import com.intellij.psi.tree.IElementType;
 import static com.intellij.psi.TokenType.WHITE_SPACE;
@@ -56,16 +57,16 @@ JAVA_CHAR=\'({ESCAPED_CHAR} | [^'])\'
 }
 
 <DECLARATIONS, RULES, CHAR_CLASS> {
-  "[:jletter:]"           { return FLEX_CLASS1; }
-  "[:jletterdigit:]"      { return FLEX_CLASS2; }
-  "[:letter:]"            { return FLEX_CLASS3; }
-  "[:digit:]"             { return FLEX_CLASS4; }
-  "[:uppercase:]"         { return FLEX_CLASS5; }
-  "[:lowercase:]"         { return FLEX_CLASS6; }
+  "[:jletter:]"           { return FLEX_CLASS_JL; }
+  "[:jletterdigit:]"      { return FLEX_CLASS_JLD; }
+  "[:letter:]"            { return FLEX_CLASS_L; }
+  "[:digit:]"             { return FLEX_CLASS_D; }
+  "[:uppercase:]"         { return FLEX_CLASS_LU; }
+  "[:lowercase:]"         { return FLEX_CLASS_LL; }
 }
 
 <YYINITIAL> {
-  "%%"                    { yybegin(DECLARATIONS); return FLEX_PERC2; }
+  "%%"                    { yybegin(DECLARATIONS); return FLEX_TWO_PERCS; }
 
   [^% \n]+                { return FLEX_JAVA; }
 }
@@ -73,17 +74,17 @@ JAVA_CHAR=\'({ESCAPED_CHAR} | [^'])\'
 <DECLARATIONS> {
   "="                     { return FLEX_EQ; }
 
-  "%{"                    { parenCount=1; yybegin(BLOCK_0); return FLEX_PERC_8; }
-  "%init{"                { parenCount=1; yybegin(BLOCK_0); return FLEX_PERC_10; }
-  "%eofval{"              { parenCount=1; yybegin(BLOCK_0); return FLEX_PERC_27; }
-  "%eof{"                 { parenCount=1; yybegin(BLOCK_0); return FLEX_PERC_29; }
+  "%{"                    { parenCount=1; yybegin(BLOCK_0); return FLEX_OPT_CODE1; }
+  "%init{"                { parenCount=1; yybegin(BLOCK_0); return FLEX_OPT_INIT1; }
+  "%eofval{"              { parenCount=1; yybegin(BLOCK_0); return FLEX_OPT_EOFVAL1; }
+  "%eof{"                 { parenCount=1; yybegin(BLOCK_0); return FLEX_OPT_EOF1; }
 
-  "%initthrow{"           { return FLEX_PERC_13; }
-  "%yylexthrow{"          { return FLEX_PERC_25; }
-  "%eofthrow{"            { return FLEX_PERC_32; }
-  "%initthrow}"           { return FLEX_PERC_14; }
-  "%yylexthrow}"          { return FLEX_PERC_26; }
-  "%eofthrow}"            { return FLEX_PERC_33; }
+  "%initthrow{"           { return FLEX_OPT_INITTHROW1; }
+  "%yylexthrow{"          { return FLEX_OPT_YYLEXTHROW1; }
+  "%eofthrow{"            { return FLEX_OPT_EOFTHROW1; }
+  "%initthrow}"           { return FLEX_OPT_INITTHROW2; }
+  "%yylexthrow}"          { return FLEX_OPT_YYLEXTHROW2; }
+  "%eofthrow}"            { return FLEX_OPT_EOFTHROW2; }
 }
 
 <BLOCK_0> {
@@ -92,10 +93,10 @@ JAVA_CHAR=\'({ESCAPED_CHAR} | [^'])\'
 }
 
 <BLOCK> {
-  "%}"                    { parenCount=0; yybegin(DECLARATIONS); return FLEX_PERC_9; }
-  "%init}"                { parenCount=0; yybegin(DECLARATIONS); return FLEX_PERC_11; }
-  "%eofval}"              { parenCount=0; yybegin(DECLARATIONS); return FLEX_PERC_28; }
-  "%eof}"                 { parenCount=0; yybegin(DECLARATIONS); return FLEX_PERC_30; }
+  "%}"                    { parenCount=0; yybegin(DECLARATIONS); return FLEX_OPT_CODE2; }
+  "%init}"                { parenCount=0; yybegin(DECLARATIONS); return FLEX_OPT_INIT2; }
+  "%eofval}"              { parenCount=0; yybegin(DECLARATIONS); return FLEX_OPT_EOFVAL2; }
+  "%eof}"                 { parenCount=0; yybegin(DECLARATIONS); return FLEX_OPT_EOF2; }
 
   ([^%} \n] | {JAVA_CHAR})*   { return FLEX_JAVA; }
 }
@@ -105,52 +106,55 @@ JAVA_CHAR=\'({ESCAPED_CHAR} | [^'])\'
   "}"                     { --parenCount; return FLEX_BRACE2; }
 }
 
+<DECLARATIONS, RULES> {
+  "%include"              { return FLEX_OPT_INCLUDE; }
+}
+
 <DECLARATIONS> {
-  "%class"                { return FLEX_PERC_1; }
-  "%implements"           { return FLEX_PERC_2; }
-  "%extends"              { return FLEX_PERC_3; }
-  "%public"               { return FLEX_PERC_4; }
-  "%final"                { return FLEX_PERC_5; }
-  "%abstract"             { return FLEX_PERC_6; }
-  "%apiprivate"           { return FLEX_PERC_7; }
-  "%initthrow"            { return FLEX_PERC_12; }
-  "%ctorarg"              { return FLEX_PERC_15; }
-  "%scanerror"            { return FLEX_PERC_16; }
-  "%buffer"               { return FLEX_PERC_17; }
-  "%include"              { return FLEX_PERC_18; }
-  "%function"             { return FLEX_PERC_19; }
-  "%integer"              { return FLEX_PERC_20; }
-  "%int"                  { return FLEX_PERC_21; }
-  "%intwrap"              { return FLEX_PERC_22; }
-  "%type"                 { return FLEX_PERC_23; }
-  "%yylexthrow"           { return FLEX_PERC_24; }
-  "%eofthrow"             { return FLEX_PERC_31; }
-  "%eofclose"             { return FLEX_PERC_34; }
-  "%debug"                { return FLEX_PERC_36; }
-  "%standalone"           { return FLEX_PERC_37; }
-  "%cup"                  { return FLEX_PERC_38; }
-  "%cupsym"               { return FLEX_PERC_39; }
-  "%cupdebug"             { return FLEX_PERC_40; }
-  "%byacc"                { return FLEX_PERC_41; }
-  "%switch"               { return FLEX_PERC_42; }
-  "%table"                { return FLEX_PERC_43; }
-  "%pack"                 { return FLEX_PERC_44; }
-  "%7bit"                 { return FLEX_PERC_45; }
-  "%full"                 { return FLEX_PERC_46; }
-  "%8bit"                 { return FLEX_PERC_47; }
-  "%unicode"              { return FLEX_PERC_48; }
-  "%16bit"                { return FLEX_PERC_49; }
-  "%caseless"             { return FLEX_PERC_50; }
-  "%ignorecase"           { return FLEX_PERC_51; }
-  "%char"                 { return FLEX_PERC_52; }
-  "%line"                 { return FLEX_PERC_53; }
-  "%column"               { return FLEX_PERC_54; }
-  "%notunix"              { return FLEX_PERC_55; }
-  "%yyeof"                { return FLEX_PERC_56; }
-  "%state"                { return FLEX_PERC_57; }
-  "%xstate"               { return FLEX_PERC_59; }
-  "%s"                    { return FLEX_PERC_58; }
-  "%x"                    { return FLEX_PERC_69; }
+  "%class"                { return FLEX_OPT_CLASS; }
+  "%implements"           { return FLEX_OPT_IMPLEMENTS; }
+  "%extends"              { return FLEX_OPT_EXTENDS; }
+  "%public"               { return FLEX_OPT_PUBLIC; }
+  "%final"                { return FLEX_OPT_FINAL; }
+  "%abstract"             { return FLEX_OPT_ABSTRACT; }
+  "%apiprivate"           { return FLEX_OPT_APIPRIVATE; }
+  "%initthrow"            { return FLEX_OPT_INITTHROW; }
+  "%ctorarg"              { return FLEX_OPT_CTORARG; }
+  "%scanerror"            { return FLEX_OPT_SCANERROR; }
+  "%buffer"               { return FLEX_OPT_BUFFER; }
+  "%function"             { return FLEX_OPT_FUNCTION; }
+  "%integer"              { return FLEX_OPT_INTEGER; }
+  "%int"                  { return FLEX_OPT_INT; }
+  "%intwrap"              { return FLEX_OPT_INTWRAP; }
+  "%type"                 { return FLEX_OPT_TYPE; }
+  "%yylexthrow"           { return FLEX_OPT_YYLEXTHROW; }
+  "%eofthrow"             { return FLEX_OPT_EOFTHROW; }
+  "%eofclose"             { return FLEX_OPT_EOFCLOSE; }
+  "%debug"                { return FLEX_OPT_DEBUG; }
+  "%standalone"           { return FLEX_OPT_STANDALONE; }
+  "%cup"                  { return FLEX_OPT_CUP; }
+  "%cupsym"               { return FLEX_OPT_CUPSYM; }
+  "%cupdebug"             { return FLEX_OPT_CUPDEBUG; }
+  "%byacc"                { return FLEX_OPT_BYACC; }
+  "%switch"               { return FLEX_OPT_SWITCH; }
+  "%table"                { return FLEX_OPT_TABLE; }
+  "%pack"                 { return FLEX_OPT_PACK; }
+  "%7bit"                 { return FLEX_OPT_7BIT; }
+  "%full"                 { return FLEX_OPT_FULL; }
+  "%8bit"                 { return FLEX_OPT_8BIT; }
+  "%unicode"              { return FLEX_OPT_UNICODE; }
+  "%16bit"                { return FLEX_OPT16BIT; }
+  "%caseless"             { return FLEX_OPT_CASELESS; }
+  "%ignorecase"           { return FLEX_OPT_IGNORECASE; }
+  "%char"                 { return FLEX_OPT_CHAR; }
+  "%line"                 { return FLEX_OPT_LINE; }
+  "%column"               { return FLEX_OPT_COLUMN; }
+  "%notunix"              { return FLEX_OPT_NOTUNIX; }
+  "%yyeof"                { return FLEX_OPT_YYEOF; }
+  "%state"                { return FLEX_OPT_STATE; }
+  "%xstate"               { return FLEX_OPT_XSTATE; }
+  "%s"                    { return FLEX_OPT_S; }
+  "%x"                    { return FLEX_OPT_X; }
 }
 
 <RULES> {
@@ -160,7 +164,7 @@ JAVA_CHAR=\'({ESCAPED_CHAR} | [^'])\'
 }
 
 <DECLARATIONS, RULES> {
-  "%%"                    { yybegin(RULES); return FLEX_PERC2; }
+  "%%"                    { yybegin(RULES); return FLEX_TWO_PERCS; }
   "*"                     { return FLEX_STAR; }
   "("                     { return FLEX_PAREN1; }
   ")"                     { return FLEX_PAREN2; }

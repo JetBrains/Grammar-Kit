@@ -39,6 +39,7 @@ import com.intellij.util.Function;
 import com.intellij.util.PairProcessor;
 import com.intellij.util.containers.ContainerUtil;
 import com.intellij.util.containers.LimitedPool;
+import org.intellij.grammar.config.Options;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -61,7 +62,7 @@ public class GeneratedParserUtilBase {
 
   private static final Logger LOG = Logger.getInstance("org.intellij.grammar.parser.GeneratedParserUtilBase");
 
-  private static final int MAX_RECURSION_LEVEL = StringUtil.parseInt(System.getProperty("grammar.kit.gpub.max.level"), 1000);
+  private static final int MAX_RECURSION_LEVEL = Options.GPUB_MAX_LEVEL.get();
   private static final int MAX_VARIANTS_SIZE = 10000;
   private static final int MAX_VARIANTS_TO_DISPLAY = 50;
 

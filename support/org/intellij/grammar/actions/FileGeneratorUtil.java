@@ -32,6 +32,7 @@ import com.intellij.psi.search.FilenameIndex;
 import com.intellij.psi.search.ProjectScope;
 import com.intellij.util.ObjectUtils;
 import org.intellij.grammar.BnfFileType;
+import org.intellij.grammar.config.Options;
 import org.intellij.grammar.generator.BnfConstants;
 import org.intellij.jflex.parser.JFlexFileType;
 import org.jetbrains.annotations.NotNull;
@@ -87,10 +88,11 @@ public class FileGeneratorUtil {
       throw new ProcessCanceledException();
     }
     try {
+      String genDirName = Options.GEN_DIR.get();
       boolean newGenRoot = !fileIndex.isInSourceContent(virtualRoot);
-      final String relativePath = (hasPackage && newGenRoot? "gen." + targetPackage :
+      final String relativePath = (hasPackage && newGenRoot ? genDirName + "/" + targetPackage :
                                   hasPackage ? targetPackage :
-                                  newGenRoot ? "gen" : "").replace('.', '/');
+                                  newGenRoot ? genDirName : "").replace('.', '/');
       if (relativePath.isEmpty()) {
         return virtualRoot;
       }
@@ -102,7 +104,7 @@ public class FileGeneratorUtil {
           }
         }.execute().throwException().getResultObject();
         VfsUtil.markDirtyAndRefresh(false, true, true, result);
-        return returnRoot && newGenRoot? ObjectUtils.assertNotNull(virtualRoot.findChild("gen")) :
+        return returnRoot && newGenRoot ? ObjectUtils.assertNotNull(virtualRoot.findChild(genDirName)) :
                returnRoot ? virtualRoot : result;
       }
     }

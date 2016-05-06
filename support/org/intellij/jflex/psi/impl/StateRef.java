@@ -1,0 +1,153 @@
+/*
+ * Copyright 2011-2016 Gregory Shrago
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.intellij.jflex.psi.impl;
+
+import com.intellij.openapi.util.Comparing;
+import com.intellij.openapi.util.Key;
+import com.intellij.openapi.util.TextRange;
+import com.intellij.openapi.util.UserDataHolderEx;
+import com.intellij.openapi.util.text.StringUtil;
+import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiFile;
+import com.intellij.psi.PsiNameIdentifierOwner;
+import com.intellij.psi.PsiReferenceBase;
+import com.intellij.psi.impl.RenameableFakePsiElement;
+import com.intellij.psi.util.CachedValueProvider;
+import com.intellij.psi.util.CachedValuesManager;
+import com.intellij.util.ArrayUtil;
+import com.intellij.util.CommonProcessors;
+import com.intellij.util.IncorrectOperationException;
+import com.intellij.util.Processor;
+import com.intellij.util.containers.ContainerUtil;
+import org.intellij.jflex.psi.*;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
+import javax.swing.*;
+import java.util.List;
+
+import static org.intellij.jflex.psi.impl.JFlexPsiImplUtil.computeDefinitions;
+
+/**
+ * @author gregsh
+ */
+class StateRef extends PsiReferenceBase<PsiElement> {
+  StateRef(JFlexStateReference o) {
+    super(o, TextRange.from(0, o.getTextRange().getLength()));
+  }
+
+  StateRef(JFlexJavaCode o, TextRange range) {
+    super(o, range);
+  }
+
+  @Nullable
+  @Override
+  public PsiElement resolve() {
+    if (JFlexPsiImplUtil.isYYINITIAL(getElement())) {
+      return resolveYYINITIAL(getElement());
+    }
+    final String name = getRangeInElement().substring(getElement().getText());
+    CommonProcessors.FindFirstProcessor<JFlexStateDefinition> processor =
+      new CommonProcessors.FindFirstProcessor<JFlexStateDefinition>() {
+        @Override
+        protected boolean accept(JFlexStateDefinition o) {
+          return Comparing.equal(o.getName(), name);
+        }
+      };
+    processStateVariants(getElement(), processor);
+    return processor.getFoundValue();
+  }
+
+  @NotNull
+  @Override
+  public Object[] getVariants() {
+    CommonProcessors.CollectProcessor<PsiElement> processor =
+      new CommonProcessors.CollectProcessor<PsiElement>();
+    processor.process(resolveYYINITIAL(getElement()));
+    processStateVariants(getElement(), processor);
+    return ArrayUtil.toObjectArray(processor.getResults());
+  }
+
+  @Override
+  public PsiElement handleElementRename(String newElementName) throws IncorrectOperationException {
+    PsiElement e = getElement();
+    if (e instanceof JFlexStateReference) {
+      return ((JFlexStateReference)e).getId()
+        .replace(JFlexPsiElementFactory.createIdFromText(e.getProject(), newElementName));
+    }
+    else if (e instanceof JFlexJavaCode) {
+      String text = StringUtil.replaceSubstring(e.getText(), getRangeInElement(), newElementName);
+      return e.replace(JFlexPsiElementFactory.createJavaCodeFromText(e.getProject(), text));
+    }
+    throw new UnsupportedOperationException(e.toString());
+  }
+
+  private static boolean processStateVariants(PsiElement context, Processor<? super JFlexStateDefinition> processor) {
+    final PsiFile containingFile = context.getContainingFile();
+    List<JFlexStateDefinition> macros = CachedValuesManager.getCachedValue(
+      containingFile, new CachedValueProvider<List<JFlexStateDefinition>>() {
+        @Nullable
+        @Override
+        public Result<List<JFlexStateDefinition>> compute() {
+          return Result.create(computeDefinitions(containingFile, JFlexStateDefinition.class), containingFile);
+        }
+      });
+    return ContainerUtil.process(macros, processor);
+  }
+
+  private static final Key<YYINITIALElement> YYINITIAL_ELEMENT = Key.create("YYINITIAL_ELEMENT");
+
+  private static YYINITIALElement resolveYYINITIAL(PsiElement element) {
+    PsiFile containingFile = element.getContainingFile();
+    return ((UserDataHolderEx)containingFile)
+      .putUserDataIfAbsent(YYINITIAL_ELEMENT, new YYINITIALElement(containingFile));
+  }
+
+  private static class YYINITIALElement extends RenameableFakePsiElement
+    implements JFlexCompositeElement, PsiNameIdentifierOwner {
+
+    YYINITIALElement(PsiFile containingFile) {
+      super(containingFile);
+    }
+
+    @Override
+    public String getName() {
+      return "YYINITIAL";
+    }
+
+    @Override
+    public void navigate(boolean requestFocus) {
+    }
+
+    @Override
+    public String getTypeName() {
+      return "Initial State";
+    }
+
+    @Nullable
+    @Override
+    public Icon getIcon() {
+      return null;
+    }
+
+    @Nullable
+    @Override
+    public PsiElement getNameIdentifier() {
+      return null;
+    }
+  }
+}

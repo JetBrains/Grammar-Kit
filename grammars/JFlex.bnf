@@ -160,9 +160,9 @@ user_value ::= <<anything2 !new_line>>
 java_code ::= <<anything2 (&java | !<<is_percent>>)>>
   {methods=[getReferences]}
 
-java_fqn ::= id ( safe_dot id ) * {pin(".*")=1}
+java_type ::= id ( safe_dot id ) * {pin(".*")=1 methods=[getReferences]}
 private safe_dot ::= '.' !'*'
-private java_fqn_list ::= [java_fqn (',' java_fqn) *] {pin(".*")=1 recoverWhile=declaration_recover}
+private java_type_list ::= [java_type (',' java_type) *] {pin(".*")=1 recoverWhile=declaration_recover}
 
 // ======================================================
 declarations_section ::=  [] (declaration) *
@@ -218,37 +218,37 @@ option ::= option_class
   | option_obsolete
 
 
-option_class ::= '%class' java_fqn
-option_implements ::= '%implements' java_fqn_list
-option_extends ::= '%extends' java_fqn
+option_class ::= '%class' java_type
+option_implements ::= '%implements' java_type_list
+option_extends ::= '%extends' java_type
 option_public ::= '%public'
 option_final ::= '%final'
 option_abstract ::= '%abstract'
 option_api_private ::= '%apiprivate'
 option_user_code ::= <<line '%{'>> java_code <<line '%}'>>
 option_init ::= <<line '%init{'>> java_code <<line '%init}'>>
-option_init_throw ::= '%initthrow' java_fqn_list | <<line '%initthrow{'>> java_fqn_list <<line '%initthrow}'>>
-option_ctor_arg ::= '%ctorarg' java_fqn id
-option_scan_error ::= '%scanerror' java_fqn
+option_init_throw ::= '%initthrow' java_type_list | <<line '%initthrow{'>> java_type_list <<line '%initthrow}'>>
+option_ctor_arg ::= '%ctorarg' java_type id
+option_scan_error ::= '%scanerror' java_type
 option_buffer_size ::= '%buffer' number
 option_include ::= '%include' user_value
 
 option_function ::= '%function' id
 option_integer ::= '%integer' | '%int'
 option_intwrap ::= '%intwrap'
-option_type ::= '%type' java_fqn
-option_yylexthrow ::= '%yylexthrow' java_fqn_list | <<line '%yylexthrow{'>> java_fqn_list <<line '%yylexthrow}'>>
+option_type ::= '%type' java_type
+option_yylexthrow ::= '%yylexthrow' java_type_list | <<line '%yylexthrow{'>> java_type_list <<line '%yylexthrow}'>>
 
 option_eof_val ::= <<line '%eofval{'>> java_code <<line '%eofval}'>>
 option_eof ::= <<line '%eof{'>> java_code <<line '%eof}'>>
-option_eof_throw ::= '%eofthrow' java_fqn_list | <<line '%eofthrow{'>> java_fqn_list <<line '%eofthrow}'>>
+option_eof_throw ::= '%eofthrow' java_type_list | <<line '%eofthrow{'>> java_type_list <<line '%eofthrow}'>>
 option_eof_close ::= '%eofclose' ['false']
 
 option_debug ::= '%debug'
 option_standalone ::= '%standalone'
 
 option_cup ::= '%cup'
-option_cup_sym ::= '%cupsym' java_fqn
+option_cup_sym ::= '%cupsym' java_type
 option_cup_debug ::= '%cupdebug'
 
 option_byacc ::= '%byacc'

@@ -20,6 +20,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiFileFactory;
+import com.intellij.psi.SyntaxTraverser;
 import org.intellij.jflex.JFlexLanguage;
 import org.intellij.jflex.psi.impl.JFlexPsiImplUtil;
 import org.jetbrains.annotations.NotNull;
@@ -35,5 +36,13 @@ public class JFlexPsiElementFactory {
 
   public static PsiElement createIdFromText(@NotNull Project project, @NotNull String text) {
     return JFlexPsiImplUtil.computeDefinitions(createFile(project, "%%\n" + text+"="), JFlexMacroDefinition.class).get(0).getId();
+  }
+
+  public static PsiElement createJavaCodeFromText(@NotNull Project project, @NotNull String text) {
+    return SyntaxTraverser.psiTraverser(createFile(project, text)).filter(JFlexJavaCode.class).first();
+  }
+
+  public static PsiElement createJavaTypeFromText(@NotNull Project project, @NotNull String text) {
+    return SyntaxTraverser.psiTraverser(createFile(project, "%%\n%extends " + text)).filter(JFlexJavaType.class).first();
   }
 }

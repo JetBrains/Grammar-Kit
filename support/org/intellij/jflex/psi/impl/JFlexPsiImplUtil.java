@@ -17,11 +17,8 @@
 package org.intellij.jflex.psi.impl;
 
 import com.intellij.openapi.util.Comparing;
-import com.intellij.openapi.util.Key;
 import com.intellij.openapi.util.TextRange;
-import com.intellij.openapi.util.UserDataHolderEx;
 import com.intellij.psi.*;
-import com.intellij.psi.impl.RenameableFakePsiElement;
 import com.intellij.psi.util.CachedValueProvider;
 import com.intellij.psi.util.CachedValuesManager;
 import com.intellij.util.*;
@@ -30,13 +27,12 @@ import org.intellij.jflex.psi.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import javax.swing.*;
 import java.util.List;
 
 /**
  * @author gregsh
  */
-public class JFlexPsiImplUtil {
+public class JFlexPsiImplUtil extends JavaRefHelper {
   @NotNull
   public static String getName(PsiNameIdentifierOwner o) {
     return ObjectUtils.assertNotNull(o.getNameIdentifier()).getText();
@@ -124,95 +120,11 @@ public class JFlexPsiImplUtil {
 
   @NotNull
   public static PsiReference getReference(JFlexStateReference o) {
-    return new PsiReferenceBase<JFlexStateReference>(o, TextRange.from(0, o.getTextRange().getLength())) {
-      @Nullable
-      @Override
-      public PsiElement resolve() {
-        if (isYYINITIAL(getElement())) {
-          return resolveYYINITIAL(getElement());
-        }
-        final String name = getElement().getId().getText();
-        CommonProcessors.FindFirstProcessor<JFlexStateDefinition> processor =
-          new CommonProcessors.FindFirstProcessor<JFlexStateDefinition>() {
-            @Override
-            protected boolean accept(JFlexStateDefinition o) {
-              return Comparing.equal(o.getName(), name);
-            }
-          };
-        processStateVariants(getElement(), processor);
-        return processor.getFoundValue();
-      }
-
-      @NotNull
-      @Override
-      public Object[] getVariants() {
-        CommonProcessors.CollectProcessor<PsiElement> processor =
-          new CommonProcessors.CollectProcessor<PsiElement>();
-        processor.process(resolveYYINITIAL(getElement()));
-        processStateVariants(getElement(), processor);
-        return ArrayUtil.toObjectArray(processor.getResults());
-      }
-
-      @Override
-      public PsiElement handleElementRename(String newElementName) throws IncorrectOperationException {
-        return getElement().getId().replace(JFlexPsiElementFactory.createIdFromText(getElement().getProject(), newElementName));
-      }
-    };
+    return new StateRef(o);
   }
 
-  private static boolean processStateVariants(PsiElement context, Processor<? super JFlexStateDefinition> processor) {
-    final PsiFile containingFile = context.getContainingFile();
-    List<JFlexStateDefinition> macros = CachedValuesManager.getCachedValue(
-      containingFile, new CachedValueProvider<List<JFlexStateDefinition>>() {
-        @Nullable
-        @Override
-        public Result<List<JFlexStateDefinition>> compute() {
-          return Result.create(computeDefinitions(containingFile, JFlexStateDefinition.class), containingFile);
-        }
-      });
-    return ContainerUtil.process(macros, processor);
-  }
-
-  public static boolean isYYINITIAL(JFlexStateReference element) {
+  public static boolean isYYINITIAL(PsiElement element) {
     return "YYINITIAL".equals(element.getText());
   }
 
-  private static final Key<YYINITIALElement> YYINITIAL_ELEMENT = Key.create("YYINITIAL_ELEMENT");
-  private static YYINITIALElement resolveYYINITIAL(JFlexStateReference element) {
-    PsiFile containingFile = element.getContainingFile();
-    return ((UserDataHolderEx)containingFile).putUserDataIfAbsent(YYINITIAL_ELEMENT, new YYINITIALElement(containingFile));
-  }
-
-  private static class YYINITIALElement extends RenameableFakePsiElement implements JFlexCompositeElement, PsiNameIdentifierOwner {
-
-    YYINITIALElement(PsiFile containingFile) {
-      super(containingFile);
-    }
-
-    @Override
-    public String getName() {
-      return "YYINITIAL";
-    }
-
-    @Override
-    public void navigate(boolean requestFocus) {
-    }
-
-    @Override
-    public String getTypeName() {
-      return "Initial State";
-    }
-
-    @Nullable
-    @Override
-    public Icon getIcon() {
-      return null;
-    }
-
-    @Nullable
-    @Override
-    public PsiElement getNameIdentifier() {
-      return null;
-    }
-  }
 }

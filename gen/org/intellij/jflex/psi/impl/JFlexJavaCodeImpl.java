@@ -23,6 +23,7 @@ import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static org.intellij.jflex.psi.JFlexTypes.*;
 import org.intellij.jflex.psi.*;
+import com.intellij.psi.PsiReference;
 
 public class JFlexJavaCodeImpl extends JFlexCompositeElementImpl implements JFlexJavaCode {
 
@@ -37,6 +38,11 @@ public class JFlexJavaCodeImpl extends JFlexCompositeElementImpl implements JFle
   public void accept(@NotNull PsiElementVisitor visitor) {
     if (visitor instanceof JFlexVisitor) accept((JFlexVisitor)visitor);
     else super.accept(visitor);
+  }
+
+  @NotNull
+  public PsiReference[] getReferences() {
+    return JFlexPsiImplUtil.getReferences(this);
   }
 
 }

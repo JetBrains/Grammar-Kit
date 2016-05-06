@@ -62,6 +62,7 @@ import com.intellij.util.SystemProperties;
 import com.intellij.util.containers.ContainerUtil;
 import com.intellij.util.download.DownloadableFileDescription;
 import com.intellij.util.download.DownloadableFileService;
+import org.intellij.grammar.config.Options;
 import org.intellij.grammar.generator.BnfConstants;
 import org.intellij.jflex.parser.JFlexFileType;
 import org.jetbrains.annotations.NotNull;
@@ -136,7 +137,7 @@ public class BnfRunJFlexAction extends DumbAwareAction {
       javaParameters.setJdk(sdk);
       javaParameters.setJarPath(jflex.get(0).getAbsolutePath());
       javaParameters.getVMParametersList().add("-Xmx512m");
-      javaParameters.getProgramParametersList().add("-sliceandcharat");
+      javaParameters.getProgramParametersList().addParametersString(StringUtil.nullize(Options.GEN_JFLEX_ARGS.get()));
       javaParameters.getProgramParametersList().add("-skel", jflex.get(1).getAbsolutePath());
       javaParameters.getProgramParametersList().add("-d", VfsUtil.virtualToIoFile(virtualDir).getAbsolutePath());
       javaParameters.getProgramParametersList().add(VfsUtil.virtualToIoFile(flexFile).getAbsolutePath());

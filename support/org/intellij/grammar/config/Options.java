@@ -24,6 +24,7 @@ import com.intellij.openapi.util.Getter;
 public interface Options {
 
   Getter<String> GEN_DIR = Option.strOption("grammar.kit.gen.dir", "gen");
+  Getter<String> GEN_JFLEX_ARGS = Option.strOption("grammar.kit.gen.jflex.args", "");
 
   Getter<Integer> GPUB_MAX_LEVEL = Option.intOption("grammar.kit.gpub.max.level", 1000);
 }

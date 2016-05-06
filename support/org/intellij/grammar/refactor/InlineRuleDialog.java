@@ -21,7 +21,6 @@ import com.intellij.psi.ElementDescriptionUtil;
 import com.intellij.psi.PsiReference;
 import com.intellij.refactoring.inline.InlineOptionsDialog;
 import com.intellij.usageView.UsageViewNodeTextLocation;
-import org.intellij.grammar.GrammarMessages;
 import org.intellij.grammar.psi.BnfRule;
 
 /**
@@ -56,11 +55,11 @@ public class InlineRuleDialog extends InlineOptionsDialog {
   }
 
   protected String getInlineThisText() {
-    return GrammarMessages.message("this.reference.only.and.keep.the.rule");
+    return "&This reference only and keep the rule";
   }
 
   protected String getInlineAllText() {
-    return GrammarMessages.message("all.references.and.remove.the.rule");
+    return "&All references and remove the rule";
   }
 
   protected boolean isInlineThis() {

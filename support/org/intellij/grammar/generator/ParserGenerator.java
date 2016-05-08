@@ -173,7 +173,7 @@ public class ParserGenerator {
       String elementType = getElementType(rule);
       if (StringUtil.isEmpty(elementType)) continue;
       if (sortedCompositeTypes.containsKey(elementType)) continue;
-      if (!Rule.isFake(rule)) {
+      if (!Rule.isFake(rule) || myGraphHelper.isReplacee(rule)) {
         sortedCompositeTypes.put(elementType, rule);
       }
       sortedPsiRules.put(rule.getName(), rule);

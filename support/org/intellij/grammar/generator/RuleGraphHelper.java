@@ -65,6 +65,7 @@ public class RuleGraphHelper {
   };
   private final BnfFile myFile;
   private final MultiMap<BnfRule, BnfRule> myRuleExtendsMap;
+  private final MultiMap<BnfRule, BnfRule> myRuleReplacesMap;
   private final MultiMap<BnfRule, BnfRule> myRulesGraph = newMultiMap();
   private final Map<BnfRule, Map<PsiElement, Cardinality>> myRuleContentsMap = ContainerUtil.newTroveMap();
   private final MultiMap<BnfRule, PsiElement> myRulesCollapseMap = newMultiMap();
@@ -176,6 +177,18 @@ public class RuleGraphHelper {
     return ruleExtendsMap;
   }
 
+  public static MultiMap<BnfRule, BnfRule> buildRuleReplacementMap(BnfFile file) {
+    MultiMap<BnfRule, BnfRule> ruleReplacedElementTypesMap = newMultiMap();
+    for (BnfRule rule : file.getRules()) {
+      if (Rule.isPrivate(rule) || Rule.isExternal(rule)) continue;
+      BnfRule target = getSynonymTargetOrSelf(rule);
+      if (target != rule) {
+        ruleReplacedElementTypesMap.putValue(target, rule);
+      }
+    }
+    return ruleReplacedElementTypesMap;
+  }
+
   private static <K, V> MultiMap<K, V> newMultiMap() {
     return new MultiMap<K, V>() {
       @NotNull
@@ -229,12 +242,13 @@ public class RuleGraphHelper {
   }
 
   public RuleGraphHelper(BnfFile file) {
-    this(file, buildExtendsMap(file));
+    this(file, buildExtendsMap(file), buildRuleReplacementMap(file));
   }
 
-  public RuleGraphHelper(BnfFile file, MultiMap<BnfRule, BnfRule> ruleExtendsMap) {
+  public RuleGraphHelper(BnfFile file, MultiMap<BnfRule, BnfRule> ruleExtendsMap, MultiMap<BnfRule, BnfRule> ruleReplacesMap) {
     myFile = file;
     myRuleExtendsMap = ruleExtendsMap;
+    myRuleReplacesMap = ruleReplacesMap;
 
     buildRulesGraph();
     buildCollapseMap();
@@ -296,6 +310,18 @@ public class RuleGraphHelper {
       return result;
     }
     result.remove(NOT_EMPTY_MARKER); // todo private rules should retain this
+
+    // Try coalesce accessors across the rules, which `elementType` being reset
+    // to this particular one, therefore adding new accessors to the synonym-rule
+    // _or_ relaxing existing constraints (@NotNull -> @Nullable), etc.
+    if (myRuleReplacesMap.containsKey(rule)) {
+      for (BnfRule proto : myRuleReplacesMap.get(rule)) {
+        Map<PsiElement, Cardinality> protoContent = myRuleContentsMap.get(proto);
+        if (protoContent != null)
+          result = joinMaps(rule, false, BnfTypes.BNF_CHOICE, Arrays.asList(result, protoContent));
+      }
+    }
+
     myRuleContentsMap.put(rule, result);
     return result;
   }
@@ -843,6 +869,10 @@ public class RuleGraphHelper {
       myExternalElements.put(name, e = new FakeBnfExpression(EXTERNAL_TYPE, name));
     }
     return e;
+  }
+
+  public boolean isReplacee(BnfRule rule) {
+    return myRuleReplacesMap.containsKey(rule);
   }
 
   private static boolean isExternalPsi(PsiElement t) {

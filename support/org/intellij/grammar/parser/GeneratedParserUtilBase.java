@@ -92,6 +92,43 @@ public class GeneratedParserUtilBase {
     }
   };
 
+  public interface SectionHook<T> {
+
+    void sectionExited(PsiBuilder builder, PsiBuilder.Marker marker, T param);
+
+  }
+
+  public static final SectionHook<WhitespacesAndCommentsBinder> LEFT_BINDER =
+    new SectionHook<WhitespacesAndCommentsBinder>() {
+      @Override
+      public void sectionExited(PsiBuilder builder,
+                                PsiBuilder.Marker marker,
+                                WhitespacesAndCommentsBinder param) {
+        marker.setCustomEdgeTokenBinders(param, null);
+      }
+    };
+
+  public static final SectionHook<WhitespacesAndCommentsBinder> RIGHT_BINDER =
+    new SectionHook<WhitespacesAndCommentsBinder>() {
+      @Override
+      public void sectionExited(PsiBuilder builder,
+                                PsiBuilder.Marker marker,
+                                WhitespacesAndCommentsBinder param) {
+        marker.setCustomEdgeTokenBinders(null, param);
+      }
+    };
+
+  public static final SectionHook<WhitespacesAndCommentsBinder[]> WS_BINDERS =
+    new SectionHook<WhitespacesAndCommentsBinder[]>() {
+      @Override
+      public void sectionExited(PsiBuilder builder,
+                                PsiBuilder.Marker marker,
+                                WhitespacesAndCommentsBinder[] param) {
+        marker.setCustomEdgeTokenBinders(param[0], param[1]);
+      }
+    };
+
+
   public static boolean eof(PsiBuilder builder, int level) {
     return builder.eof();
   }
@@ -478,10 +515,35 @@ public class GeneratedParserUtilBase {
       if ((frame.modifiers & _NOT_) != 0) state.predicateSign = !state.predicateSign;
     }
     else {
+      SectionHooks<?> hooks = frame.sectionHooks;
       close_frame_impl_(state, frame, builder, marker, elementType, result, pinned);
       exit_section_impl_(state, frame, builder, elementType, result, pinned, eatMore);
+      if (hooks != null && (pinned || result)) {
+        run_section_hooks_impl_(builder, hooks);
+      }
     }
     state.FRAMES.recycle(frame);
+  }
+
+  public static <T> void add_section_hook_(PsiBuilder builder, SectionHook<T> hook, T param) {
+    Frame frame = ErrorState.get(builder).currentFrame;
+    frame.sectionHooks = SectionHooks.concat(hook, param, frame.sectionHooks);
+  }
+
+  public static <T> void add_section_hook_(PsiBuilder builder, SectionHook<T[]> hook, T... param) {
+    Frame frame = ErrorState.get(builder).currentFrame;
+    frame.sectionHooks = SectionHooks.concat(hook, param, frame.sectionHooks);
+  }
+
+  private static void run_section_hooks_impl_(PsiBuilder builder, SectionHooks<?> hooks) {
+    PsiBuilder.Marker marker = (PsiBuilder.Marker)builder.getLatestDoneMarker();
+    if (marker == null) {
+      builder.error("No expected done marker at offset " + builder.getCurrentOffset());
+      return;
+    }
+    for (SectionHooks<?> cur = hooks; cur != null; cur = cur.next) {
+      ((SectionHook<Object>)cur.hook).sectionExited(builder, marker, cur.param);
+    }
   }
 
   private static void exit_section_impl_(ErrorState state,
@@ -960,6 +1022,8 @@ public class GeneratedParserUtilBase {
     public int errorReportedAt;
     public PsiBuilder.Marker leftMarker;
 
+    private SectionHooks<?> sectionHooks;
+
     public Frame() {
     }
 
@@ -981,6 +1045,7 @@ public class GeneratedParserUtilBase {
       errorReportedAt = -1;
 
       leftMarker = null;
+      sectionHooks = null;
       return this;
     }
 
@@ -1031,6 +1096,22 @@ public class GeneratedParserUtilBase {
       int result = position;
       result = 31 * result + object.hashCode();
       return result;
+    }
+  }
+
+  private static class SectionHooks<T> {
+    final SectionHook<T> hook;
+    final T param;
+    final SectionHooks<?> next;
+
+    SectionHooks(SectionHook<T> hook, T param, SectionHooks next) {
+      this.hook = hook;
+      this.param = param;
+      this.next = next;
+    }
+
+    static <E> SectionHooks<E> concat(SectionHook<E> hook, E param, SectionHooks<?> hooks) {
+      return new SectionHooks<E>(hook, param, hooks);
     }
   }
 

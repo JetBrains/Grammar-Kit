@@ -79,6 +79,7 @@ public class KnownAttribute<T> {
   public static final KnownAttribute<String>       STUB_CLASS                = create(false, String.class,  "stubClass", null);
 
   public static final KnownAttribute<ListValue>    METHODS                   = create(false, ListValue.class, "methods", EMPTY_LIST);
+  public static final KnownAttribute<ListValue>    HOOKS                     = create(false, ListValue.class, "hooks", EMPTY_LIST);
   public static final KnownAttribute<ListValue>    TOKENS                    = create(true, ListValue.class, "tokens", EMPTY_LIST);
 
   private final boolean myGlobal;

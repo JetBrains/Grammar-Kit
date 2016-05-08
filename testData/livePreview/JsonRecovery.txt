@@ -9,8 +9,9 @@ FILE
         PsiErrorElement:<name> expected, got ':'
           <empty list>
         PsiElement(:)(':')
-        PsiWhiteSpace(' ')
-        PsiElement(number)('1')
+        ASTWrapperPsiElement(VALUE)
+          PsiWhiteSpace(' ')
+          PsiElement(number)('1')
       PsiElement(})('}')
     PsiElement(,)(',')
     PsiWhiteSpace('\n            ')
@@ -18,10 +19,11 @@ FILE
       PsiElement({)('{')
       PsiWhiteSpace(' ')
       ASTWrapperPsiElement(PROP)
-        PsiElement(id)('a')
+        ASTWrapperPsiElement(NAME)
+          PsiElement(id)('a')
+          PsiWhiteSpace(' ')
         PsiErrorElement:':' expected, got '}'
           <empty list>
-      PsiWhiteSpace(' ')
       PsiElement(})('}')
     PsiElement(,)(',')
     PsiWhiteSpace('\n            ')
@@ -29,7 +31,8 @@ FILE
       PsiElement({)('{')
       PsiWhiteSpace(' ')
       ASTWrapperPsiElement(PROP)
-        PsiElement(id)('b')
+        ASTWrapperPsiElement(NAME)
+          PsiElement(id)('b')
         PsiElement(:)(':')
       PsiErrorElement:<value> expected, got '}'
         <empty list>
@@ -41,7 +44,8 @@ FILE
       PsiElement({)('{')
       PsiWhiteSpace(' ')
       ASTWrapperPsiElement(PROP)
-        PsiElement(id)('b')
+        ASTWrapperPsiElement(NAME)
+          PsiElement(id)('b')
         PsiElement(:)(':')
       PsiErrorElement:<value> expected, got ','
         <empty list>
@@ -57,16 +61,19 @@ FILE
       PsiElement({)('{')
       PsiWhiteSpace(' ')
       ASTWrapperPsiElement(PROP)
-        PsiElement(string)(''d'')
+        ASTWrapperPsiElement(NAME)
+          PsiElement(string)(''d'')
         PsiElement(:)(':')
       PsiErrorElement:<value> expected, got ','
         <empty list>
       PsiElement(,)(',')
       PsiWhiteSpace(' ')
       ASTWrapperPsiElement(PROP)
-        PsiElement(id)('e')
+        ASTWrapperPsiElement(NAME)
+          PsiElement(id)('e')
         PsiElement(:)(':')
-        PsiElement(number)('2')
+        ASTWrapperPsiElement(VALUE)
+          PsiElement(number)('2')
       PsiWhiteSpace(' ')
       PsiElement(})('}')
     PsiElement(,)(',')
@@ -74,7 +81,8 @@ FILE
     ASTWrapperPsiElement(OBJECT)
       PsiElement({)('{')
       ASTWrapperPsiElement(PROP)
-        PsiElement(id)('f')
+        ASTWrapperPsiElement(NAME)
+          PsiElement(id)('f')
         PsiElement(:)(':')
         PsiErrorElement:<value> expected, got ':'
           PsiElement(:)(':')
@@ -90,7 +98,8 @@ FILE
     ASTWrapperPsiElement(OBJECT)
       PsiElement({)('{')
       ASTWrapperPsiElement(PROP)
-        PsiElement(id)('g')
+        ASTWrapperPsiElement(NAME)
+          PsiElement(id)('g')
         PsiErrorElement:':' expected, got '#'
           <empty list>
         PsiElement(BAD_CHARACTER)('#')
@@ -103,7 +112,8 @@ FILE
     ASTWrapperPsiElement(OBJECT)
       PsiElement({)('{')
       ASTWrapperPsiElement(PROP)
-        PsiElement(id)('h')
+        ASTWrapperPsiElement(NAME)
+          PsiElement(id)('h')
         PsiErrorElement:':' expected, got '#'
           <empty list>
         PsiElement(BAD_CHARACTER)('#')
@@ -116,11 +126,13 @@ FILE
     ASTWrapperPsiElement(OBJECT)
       PsiElement({)('{')
       ASTWrapperPsiElement(PROP)
-        PsiElement(id)('k')
-        PsiWhiteSpace(' ')
+        ASTWrapperPsiElement(NAME)
+          PsiElement(id)('k')
+          PsiWhiteSpace(' ')
         PsiElement(:)(':')
-        PsiWhiteSpace(' ')
-        PsiElement(number)('5')
+        ASTWrapperPsiElement(VALUE)
+          PsiWhiteSpace(' ')
+          PsiElement(number)('5')
         PsiWhiteSpace(' ')
         PsiErrorElement:'6' unexpected
           PsiElement(number)('6')
@@ -131,11 +143,12 @@ FILE
     ASTWrapperPsiElement(OBJECT)
       PsiElement({)('{')
       ASTWrapperPsiElement(PROP)
-        PsiElement(id)('v')
-        PsiWhiteSpace(' ')
+        ASTWrapperPsiElement(NAME)
+          PsiElement(id)('v')
+          PsiWhiteSpace(' ')
         PsiElement(:)(':')
-        PsiWhiteSpace(' ')
         ASTWrapperPsiElement(OBJECT)
+          PsiWhiteSpace(' ')
           PsiElement({)('{')
           PsiWhiteSpace(' ')
           PsiElement(})('}')
@@ -150,7 +163,8 @@ FILE
     ASTWrapperPsiElement(OBJECT)
       PsiElement({)('{')
       ASTWrapperPsiElement(PROP)
-        PsiElement(id)('a')
+        ASTWrapperPsiElement(NAME)
+          PsiElement(id)('a')
         PsiErrorElement:':' expected, got ','
           <empty list>
       PsiElement(,)(',')
@@ -166,7 +180,8 @@ FILE
       PsiElement(,)(',')
       PsiWhiteSpace(' ')
       ASTWrapperPsiElement(PROP)
-        PsiElement(id)('b')
+        ASTWrapperPsiElement(NAME)
+          PsiElement(id)('b')
         PsiErrorElement:':' expected, got '}'
           <empty list>
       PsiElement(})('}')

@@ -11,15 +11,16 @@
     brack1 = "["
     brack2 = "]"
   ]
+  extends("array|object|json")=value
 }
 
 root ::= json
-json ::= array | object
-private value ::= string | number | json {name="value"}
+json ::= array | object  { hooks=[wsBinders="null, null"] }
+value ::= string | number | json {name="value" hooks=[leftBinder="GREEDY_LEFT_BINDER"]}
 
 array ::= '[' [!']' item (!']' ',' item) *] ']' {pin(".*")=1 extends=json}
 private item ::= json {recoverWhile=recover}
 object ::= '{' [!'}' prop (!'}' ',' prop) *] '}' {pin(".*")=1 extends=json}
 prop ::= [] name ':' value {pin=1 recoverWhile=recover} // remove [] to make NAME mandatory
-private name ::= id | string {name="name"}
+name ::= id | string {name="name" hooks=[rightBinder="GREEDY_RIGHT_BINDER"]}
 private recover ::= !(',' | ']' | '}' | '[' | '{')

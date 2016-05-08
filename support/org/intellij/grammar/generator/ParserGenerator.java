@@ -577,10 +577,12 @@ public class ParserGenerator {
     final String recoverWhile = firstNonTrivial ? ObjectUtils.chooseNotNull(
       getAttribute(rule, KnownAttribute.RECOVER_WHILE.alias("recoverUntil")),
       getAttribute(rule, KnownAttribute.RECOVER_WHILE)) : null;
+    Map<String, String> hooks = firstNonTrivial ? getAttribute(rule, KnownAttribute.HOOKS).asMap() : Collections.<String, String>emptyMap();
 
     final boolean canCollapse = !isPrivate && (!isLeft || isLeftInner) && firstNonTrivial && myGraphHelper.canCollapse(rule);
 
     String elementType = getElementType(rule);
+    String elementTypeRef = !isPrivate && StringUtil.isNotEmpty(elementType) ? elementType : null;
 
     final List<BnfExpression> children;
     String extraArguments = collectExtraArguments(rule, node, true);
@@ -645,9 +647,10 @@ public class ParserGenerator {
     else if (type == BNF_OP_NOT) modifierList.add("_NOT_");
     if (isBranch) modifierList.add("_UPPER_");
     if (modifierList.isEmpty() && (pinned || frameName != null)) modifierList.add("_NONE_");
+
     boolean sectionRequired = !alwaysTrue || !isPrivate || isLeft || recoverWhile != null;
-    boolean sectionRequiredSimple = sectionRequired && modifierList.isEmpty() && recoverWhile == null;
-    String elementTypeRef = !isPrivate && StringUtil.isNotEmpty(elementType) ? elementType : null;
+    boolean sectionRequiredSimple = sectionRequired && modifierList.isEmpty() && recoverWhile == null
+                                    && (elementTypeRef == null || hooks.isEmpty());
     String modifiers = modifierList.isEmpty()? "_NONE_" : StringUtil.join(modifierList, " | ");
     if (sectionRequiredSimple) {
       out("Marker %s = enter_section_(%s);", N.marker, N.builder);
@@ -743,6 +746,14 @@ public class ParserGenerator {
         out("exit_section_(%s, %s, %s, %s);", N.builder, N.marker, elementTypeRef, resultRef);
       }
       else {
+        if (elementTypeRef != null && !hooks.isEmpty()) {
+          String prefix = alwaysTrue ? "" : "if (" + N.result + (pinned ? " || " + N.pinned : "") + ") ";
+          for (Map.Entry<String, String> entry : hooks.entrySet()) {
+            String hookName = ParserGeneratorUtil.toIdentifier(entry.getKey(), null, Case.UPPER);
+            out(prefix + "add_section_hook_(%s, %s, %s);", N.builder, hookName, entry.getValue());
+          }
+        }
+
         String pinnedRef = pinned ? N.pinned : "false";
         String recoverCall;
         if (recoverWhile != null) {

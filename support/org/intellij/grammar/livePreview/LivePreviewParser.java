@@ -167,6 +167,7 @@ public class LivePreviewParser implements PsiParser {
     boolean isLeftInner = isLeft && (isPrivate || ParserGeneratorUtil.Rule.isInner(rule));
     boolean isBranch = !isPrivate && Rule.isUpper(rule);
     String recoverWhile = firstNonTrivial ? getAttribute(rule, KnownAttribute.RECOVER_WHILE) : null;
+    Map<String, String> hooks = firstNonTrivial ? getAttribute(rule, KnownAttribute.HOOKS).asMap() : Collections.<String, String>emptyMap();
     boolean canCollapse = !isPrivate && (!isLeft || isLeftInner) && firstNonTrivial && myGraphHelper.canCollapse(rule);
 
     IElementType elementType = getRuleElementType(rule);
@@ -218,7 +219,9 @@ public class LivePreviewParser implements PsiParser {
 
     PsiBuilder.Marker marker_ = null;
     boolean sectionRequired = !alwaysTrue || !isPrivate || isLeft || recoverWhile != null;
-    boolean sectionRequiredSimple = sectionRequired && modifiers == _NONE_ && recoverWhile == null && !(modifiers == 0 && (pinned || frameName != null));
+    boolean sectionRequiredSimple = sectionRequired && modifiers == _NONE_ && recoverWhile == null
+                                    && (elementType == null || hooks.isEmpty())
+                                    && !(modifiers == 0 && (pinned || frameName != null));
     if (sectionRequiredSimple) {
       marker_ = enter_section_(builder);
     }
@@ -300,10 +303,20 @@ public class LivePreviewParser implements PsiParser {
       }
     }
 
+    boolean success = alwaysTrue || result_ || pinned_;
+
     if (sectionRequiredSimple) {
       exit_section_(builder, marker_, isPrivate? null : elementType, alwaysTrue || result_);
     }
     else if (sectionRequired) {
+      if (success && elementType != null && !hooks.isEmpty()) {
+        for (Map.Entry<String, String> entry : hooks.entrySet()) {
+          if (entry.getValue() == null) continue;
+          String name = ParserGeneratorUtil.toIdentifier(entry.getKey(), null, Case.UPPER);
+          LiveHooksHelper.addHook(builder, name, entry.getValue());
+        }
+      }
+
       Parser recoverPredicate;
       final BnfRule recoverRule = recoverWhile != null ? myFile.getRule(recoverWhile) : null;
       if (BnfConstants.RECOVER_AUTO.equals(recoverWhile)) {
@@ -326,7 +339,7 @@ public class LivePreviewParser implements PsiParser {
       exit_section_(builder, level, marker_, alwaysTrue || result_, pinned_, recoverPredicate);
     }
 
-    return alwaysTrue || result_ || pinned_;
+    return success;
   }
 
   private boolean type_extends_(IElementType elementType1, IElementType elementType2) {

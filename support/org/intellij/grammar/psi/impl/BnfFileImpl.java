@@ -80,8 +80,8 @@ public class BnfFileImpl extends PsiFileBase implements BnfFile {
 
   @Nullable
   @Override
-  public BnfRule getRule(String ruleName) {
-    return myRules.getValue().get(ruleName);
+  public BnfRule getRule(@Nullable String ruleName) {
+    return ruleName == null ? null : myRules.getValue().get(ruleName);
   }
 
   @NotNull

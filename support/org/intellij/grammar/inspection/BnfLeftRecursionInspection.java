@@ -21,6 +21,7 @@ import com.intellij.psi.PsiFile;
 import org.intellij.grammar.analysis.BnfFirstNextAnalyzer;
 import org.intellij.grammar.generator.ExpressionGeneratorHelper;
 import org.intellij.grammar.generator.ExpressionHelper;
+import org.intellij.grammar.generator.ParserGeneratorUtil;
 import org.intellij.grammar.psi.BnfFile;
 import org.intellij.grammar.psi.BnfRule;
 import org.jetbrains.annotations.Nls;
@@ -64,6 +65,7 @@ public class BnfLeftRecursionInspection extends LocalInspectionTool {
       BnfFirstNextAnalyzer analyzer = new BnfFirstNextAnalyzer();
       ArrayList<ProblemDescriptor> list = new ArrayList<ProblemDescriptor>();
       for (BnfRule rule : bnfFile.getRules()) {
+        if (ParserGeneratorUtil.Rule.isFake(rule)) continue;
         String ruleName = rule.getName();
         boolean exprParsing = ExpressionGeneratorHelper.getInfoForExpressionParsing(expressionHelper, rule) != null;
 

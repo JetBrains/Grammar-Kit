@@ -43,7 +43,7 @@ private add_group ::= plus_expr | minus_expr
 private primary_group ::= special_expr | simple_ref_expr | literal_expr | paren_expr
 
 // expressions: auto-operator detection or parens
-ref_expr ::= expr? '.' identifier
+fake ref_expr ::= expr? '.' identifier
 simple_ref_expr ::= identifier {extends=ref_expr elementType=ref_expr}
 qualification_expr ::= expr '.' identifier {extends=ref_expr elementType=ref_expr}
 call_expr ::= ref_expr arg_list

@@ -415,7 +415,7 @@ public class ParserGeneratorUtil {
     String elementType = getAttribute(rule, KnownAttribute.ELEMENT_TYPE);
     if ("".equals(elementType)) return "";
     String prefix = getAttribute(rule, KnownAttribute.ELEMENT_TYPE_PREFIX);
-    return toIdentifier(elementType != null ? elementType : rule.getName(), prefix, Case.UPPER);
+    return toIdentifier(elementType != null ? elementType : rule.getName(), prefix, cas);
   }
 
   public static Collection<BnfRule> getSortedPublicRules(Set<PsiElement> accessors) {
@@ -636,8 +636,9 @@ public class ParserGeneratorUtil {
       return hasModifier(node, "upper");
     }
 
-    private static boolean hasModifier(BnfRule node, String s) {
-      for (BnfModifier modifier : node.getModifierList()) {
+    private static boolean hasModifier(@Nullable BnfRule rule, @NotNull String s) {
+      if (rule == null) return false;
+      for (BnfModifier modifier : rule.getModifierList()) {
         if (s.equals(modifier.getText())) return true;
       }
       return false;

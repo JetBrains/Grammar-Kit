@@ -34,11 +34,11 @@ public interface BnfFile extends PsiFile {
   List<BnfAttrs> getAttributes();
 
   @Nullable
-  BnfRule getRule(String ruleName);
+  BnfRule getRule(@Nullable String ruleName);
 
   @Nullable
-  public BnfAttr findAttribute(@Nullable BnfRule rule, @NotNull KnownAttribute<?> knownAttribute, @Nullable String match);
+  BnfAttr findAttribute(@Nullable BnfRule rule, @NotNull KnownAttribute<?> knownAttribute, @Nullable String match);
 
   @Nullable
-  public <T> T findAttributeValue(@Nullable BnfRule rule, @NotNull KnownAttribute<T> knownAttribute, @Nullable String match);
+  <T> T findAttributeValue(@Nullable BnfRule rule, @NotNull KnownAttribute<T> knownAttribute, @Nullable String match);
 }

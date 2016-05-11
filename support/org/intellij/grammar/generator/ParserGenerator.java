@@ -59,6 +59,7 @@ import static org.intellij.grammar.psi.BnfTypes.*;
  */
 public class ParserGenerator {
   public static final Logger LOG = Logger.getInstance("ParserGenerator");
+
   private static final String TYPE_TEXT_SEPARATORS = "<>,[]";
 
   private final Map<String, String> myRuleParserClasses = ContainerUtil.newTreeMap();
@@ -66,6 +67,8 @@ public class ParserGenerator {
   private final Set<String> myPackageClasses = ContainerUtil.newTreeSet();
   private final Map<String, String> mySimpleTokens;
   private final Set<String> myTokensUsedInGrammar = ContainerUtil.newLinkedHashSet();
+  private final Set<String> myFakeRulesWithType = ContainerUtil.newHashSet();
+
   private final BnfFile myFile;
   private final String mySourcePath;
   private final String myOutputPath;
@@ -115,6 +118,13 @@ public class ParserGenerator {
     myGraphHelper = RuleGraphHelper.getCached(myFile);
     myExpressionHelper = new ExpressionHelper(myFile, myGraphHelper, true);
     myRulesMethodsHelper = new RuleMethodsHelper(myGraphHelper, myExpressionHelper, mySimpleTokens, G);
+
+    for (BnfRule rule : myFile.getRules()) {
+      BnfRule r = myFile.getRule(getAttribute(rule, KnownAttribute.ELEMENT_TYPE));
+      if (Rule.isFake(r)) {
+        myFakeRulesWithType.add(r.getName());
+      }
+    }
   }
 
   private void openOutput(String className) throws IOException {
@@ -166,14 +176,15 @@ public class ParserGenerator {
     {
       generateParser();
     }
-    Map<String, BnfRule> sortedCompositeTypes = new TreeMap<String, BnfRule>();
-    Map<String, BnfRule> sortedPsiRules = new TreeMap<String, BnfRule>();
+    Map<String, BnfRule> sortedCompositeTypes = ContainerUtil.newTreeMap();
+    Map<String, BnfRule> sortedPsiRules = ContainerUtil.newTreeMap();
+
     for (BnfRule rule : myFile.getRules()) {
       if (!RuleGraphHelper.shouldGeneratePsi(rule, true)) continue;
       String elementType = getElementType(rule);
       if (StringUtil.isEmpty(elementType)) continue;
       if (sortedCompositeTypes.containsKey(elementType)) continue;
-      if (!Rule.isFake(rule)) {
+      if (!Rule.isFake(rule) || myFakeRulesWithType.contains(rule.getName())) {
         sortedCompositeTypes.put(elementType, rule);
       }
       sortedPsiRules.put(rule.getName(), rule);
@@ -450,7 +461,8 @@ public class ParserGenerator {
     for (Map.Entry<BnfRule, Collection<BnfRule>> entry : map.entrySet()) {
       Set<String> set = null;
       for (BnfRule rule : entry.getValue()) {
-        String elementType = Rule.isFake(rule) || getSynonymTargetOrSelf(rule) != rule ? null : getElementType(rule);
+        String elementType = Rule.isFake(rule) && !myFakeRulesWithType.contains(rule.getName())
+                             || getSynonymTargetOrSelf(rule) != rule ? null : getElementType(rule);
         if (StringUtil.isEmpty(elementType)) continue;
         if (set == null) set = ContainerUtil.newTreeSet();
         set.add(elementType);
@@ -1159,7 +1171,7 @@ public class ParserGenerator {
   }
 
   String getElementType(BnfRule r) {
-    return ParserGeneratorUtil.getElementType(r,  G.generateElementCase);
+    return ParserGeneratorUtil.getElementType(r, G.generateElementCase);
   }
 
   /*ElementTypes******************************************************************/
@@ -1493,11 +1505,11 @@ public class ParserGenerator {
     BnfRule targetRule = startRule;
     RuleGraphHelper.Cardinality cardinality = REQUIRED;
     String context = "";
-    String[] splittedPath = methodInfo.path.split("/");
+    String[] splitPath = methodInfo.path.split("/");
     boolean totalNullable = false;
-    for (int i = 0, count = 1; i < splittedPath.length; i++) {
-      String pathElement = splittedPath[i];
-      boolean last = i == splittedPath.length - 1;
+    for (int i = 0, count = 1; i < splitPath.length; i++) {
+      String pathElement = splitPath[i];
+      boolean last = i == splitPath.length - 1;
       int indexStart = pathElement.indexOf('[');
       int indexEnd = indexStart > 0 ? pathElement.lastIndexOf(']') : -1;
 

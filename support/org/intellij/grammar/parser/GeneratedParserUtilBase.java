@@ -40,6 +40,7 @@ import com.intellij.util.PairProcessor;
 import com.intellij.util.containers.ContainerUtil;
 import com.intellij.util.containers.LimitedPool;
 import org.intellij.grammar.config.Options;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -92,41 +93,57 @@ public class GeneratedParserUtilBase {
     }
   };
 
-  public interface SectionHook<T> {
+  public interface Hook<T> {
 
-    void sectionExited(PsiBuilder builder, PsiBuilder.Marker marker, T param);
+    @Contract("_,null,_->null")
+    PsiBuilder.Marker run(PsiBuilder builder, PsiBuilder.Marker marker, T param);
 
   }
 
-  public static final SectionHook<WhitespacesAndCommentsBinder> LEFT_BINDER =
-    new SectionHook<WhitespacesAndCommentsBinder>() {
+  public static final Hook<WhitespacesAndCommentsBinder> LEFT_BINDER =
+    new Hook<WhitespacesAndCommentsBinder>() {
       @Override
-      public void sectionExited(PsiBuilder builder,
-                                PsiBuilder.Marker marker,
-                                WhitespacesAndCommentsBinder param) {
-        marker.setCustomEdgeTokenBinders(param, null);
+      public PsiBuilder.Marker run(PsiBuilder builder,
+                                   PsiBuilder.Marker marker,
+                                   WhitespacesAndCommentsBinder param) {
+        if (marker != null) marker.setCustomEdgeTokenBinders(param, null);
+        return marker;
       }
     };
 
-  public static final SectionHook<WhitespacesAndCommentsBinder> RIGHT_BINDER =
-    new SectionHook<WhitespacesAndCommentsBinder>() {
+  public static final Hook<WhitespacesAndCommentsBinder> RIGHT_BINDER =
+    new Hook<WhitespacesAndCommentsBinder>() {
       @Override
-      public void sectionExited(PsiBuilder builder,
-                                PsiBuilder.Marker marker,
-                                WhitespacesAndCommentsBinder param) {
-        marker.setCustomEdgeTokenBinders(null, param);
+      public PsiBuilder.Marker run(PsiBuilder builder,
+                                   PsiBuilder.Marker marker,
+                                   WhitespacesAndCommentsBinder param) {
+        if (marker != null) marker.setCustomEdgeTokenBinders(null, param);
+        return marker;
       }
     };
 
-  public static final SectionHook<WhitespacesAndCommentsBinder[]> WS_BINDERS =
-    new SectionHook<WhitespacesAndCommentsBinder[]>() {
+  public static final Hook<WhitespacesAndCommentsBinder[]> WS_BINDERS =
+    new Hook<WhitespacesAndCommentsBinder[]>() {
       @Override
-      public void sectionExited(PsiBuilder builder,
-                                PsiBuilder.Marker marker,
-                                WhitespacesAndCommentsBinder[] param) {
-        marker.setCustomEdgeTokenBinders(param[0], param[1]);
+      public PsiBuilder.Marker run(PsiBuilder builder,
+                                   PsiBuilder.Marker marker,
+                                   WhitespacesAndCommentsBinder[] param) {
+        if (marker != null) marker.setCustomEdgeTokenBinders(param[0], param[1]);
+        return marker;
       }
     };
+
+  public static final Hook<String> LOG_HOOK = new Hook<String>() {
+    @Override
+    public PsiBuilder.Marker run(PsiBuilder builder, PsiBuilder.Marker marker, String param) {
+      PsiBuilderImpl.ProductionMarker m = (PsiBuilderImpl.ProductionMarker)marker;
+      int start = m == null ? builder.getCurrentOffset() : m.getStartOffset();
+      int end = m == null ? start : m.getEndOffset();
+      String prefix = "[" + start + ", " + end + "]" + (m == null ? "" : " " + m.getTokenType());
+      builder.mark().error(prefix + ": " + param);
+      return marker;
+    }
+  };
 
 
   public static boolean eof(PsiBuilder builder, int level) {
@@ -515,34 +532,35 @@ public class GeneratedParserUtilBase {
       if ((frame.modifiers & _NOT_) != 0) state.predicateSign = !state.predicateSign;
     }
     else {
-      SectionHooks<?> hooks = frame.sectionHooks;
       close_frame_impl_(state, frame, builder, marker, elementType, result, pinned);
       exit_section_impl_(state, frame, builder, elementType, result, pinned, eatMore);
-      if (hooks != null && (pinned || result)) {
-        run_section_hooks_impl_(builder, hooks);
-      }
+    }
+    if (state.hooks != null) {
+      run_hooks_impl_(builder, state, level, pinned || result ? elementType : null);
     }
     state.FRAMES.recycle(frame);
   }
 
-  public static <T> void add_section_hook_(PsiBuilder builder, SectionHook<T> hook, T param) {
-    Frame frame = ErrorState.get(builder).currentFrame;
-    frame.sectionHooks = SectionHooks.concat(hook, param, frame.sectionHooks);
+  public static <T> void register_hook_(PsiBuilder builder, int level, Hook<T> hook, T param) {
+    ErrorState state = ErrorState.get(builder);
+    state.hooks = Hooks.concat(hook, param, level, state.hooks);
   }
 
-  public static <T> void add_section_hook_(PsiBuilder builder, SectionHook<T[]> hook, T... param) {
-    Frame frame = ErrorState.get(builder).currentFrame;
-    frame.sectionHooks = SectionHooks.concat(hook, param, frame.sectionHooks);
+  public static <T> void register_hook_(PsiBuilder builder, int level, Hook<T[]> hook, T... param) {
+    ErrorState state = ErrorState.get(builder);
+    state.hooks = Hooks.concat(hook, param, level, state.hooks);
   }
 
-  private static void run_section_hooks_impl_(PsiBuilder builder, SectionHooks<?> hooks) {
-    PsiBuilder.Marker marker = (PsiBuilder.Marker)builder.getLatestDoneMarker();
-    if (marker == null) {
+  private static void run_hooks_impl_(PsiBuilder builder, ErrorState state, int level, @Nullable IElementType elementType) {
+    PsiBuilder.Marker marker = elementType == null ? null : (PsiBuilder.Marker)builder.getLatestDoneMarker();
+    if (elementType != null && marker == null) {
       builder.error("No expected done marker at offset " + builder.getCurrentOffset());
-      return;
     }
-    for (SectionHooks<?> cur = hooks; cur != null; cur = cur.next) {
-      ((SectionHook<Object>)cur.hook).sectionExited(builder, marker, cur.param);
+    while (state.hooks != null && state.hooks.level >= level) {
+      if (state.hooks.level == level) {
+        marker = ((Hook<Object>)state.hooks.hook).run(builder, marker, state.hooks.param);
+      }
+      state.hooks = state.hooks.next;
     }
   }
 
@@ -885,6 +903,7 @@ public class GeneratedParserUtilBase {
     int predicateCount;
     boolean predicateSign = true;
     boolean suppressErrors;
+    Hooks<?> hooks;
     public Frame currentFrame;
     public CompletionState completionState;
 
@@ -1022,8 +1041,6 @@ public class GeneratedParserUtilBase {
     public int errorReportedAt;
     public PsiBuilder.Marker leftMarker;
 
-    private SectionHooks<?> sectionHooks;
-
     public Frame() {
     }
 
@@ -1045,7 +1062,6 @@ public class GeneratedParserUtilBase {
       errorReportedAt = -1;
 
       leftMarker = null;
-      sectionHooks = null;
       return this;
     }
 
@@ -1099,19 +1115,21 @@ public class GeneratedParserUtilBase {
     }
   }
 
-  private static class SectionHooks<T> {
-    final SectionHook<T> hook;
+  private static class Hooks<T> {
+    final Hook<T> hook;
     final T param;
-    final SectionHooks<?> next;
+    final int level;
+    final Hooks<?> next;
 
-    SectionHooks(SectionHook<T> hook, T param, SectionHooks next) {
+    Hooks(Hook<T> hook, T param, int level, Hooks next) {
       this.hook = hook;
       this.param = param;
+      this.level = level;
       this.next = next;
     }
 
-    static <E> SectionHooks<E> concat(SectionHook<E> hook, E param, SectionHooks<?> hooks) {
-      return new SectionHooks<E>(hook, param, hooks);
+    static <E> Hooks<E> concat(Hook<E> hook, E param, int level, Hooks<?> hooks) {
+      return new Hooks<E>(hook, param, level, hooks);
     }
   }
 

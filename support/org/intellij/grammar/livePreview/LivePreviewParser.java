@@ -219,9 +219,8 @@ public class LivePreviewParser implements PsiParser {
 
     PsiBuilder.Marker marker_ = null;
     boolean sectionRequired = !alwaysTrue || !isPrivate || isLeft || recoverWhile != null;
-    boolean sectionRequiredSimple = sectionRequired && modifiers == _NONE_ && recoverWhile == null
-                                    && (elementType == null || hooks.isEmpty())
-                                    && !(modifiers == 0 && (pinned || frameName != null));
+    boolean sectionRequiredSimple = sectionRequired && modifiers == _NONE_ && recoverWhile == null && !(pinned || frameName != null);
+
     if (sectionRequiredSimple) {
       marker_ = enter_section_(builder);
     }
@@ -305,18 +304,17 @@ public class LivePreviewParser implements PsiParser {
 
     boolean success = alwaysTrue || result_ || pinned_;
 
+    if (!hooks.isEmpty()) {
+      for (Map.Entry<String, String> entry : hooks.entrySet()) {
+        if (entry.getValue() == null) continue;
+        String name = ParserGeneratorUtil.toIdentifier(entry.getKey(), null, Case.UPPER);
+        LiveHooksHelper.registerHook(builder, level, name, entry.getValue());
+      }
+    }
     if (sectionRequiredSimple) {
       exit_section_(builder, marker_, isPrivate? null : elementType, alwaysTrue || result_);
     }
     else if (sectionRequired) {
-      if (success && elementType != null && !hooks.isEmpty()) {
-        for (Map.Entry<String, String> entry : hooks.entrySet()) {
-          if (entry.getValue() == null) continue;
-          String name = ParserGeneratorUtil.toIdentifier(entry.getKey(), null, Case.UPPER);
-          LiveHooksHelper.addHook(builder, name, entry.getValue());
-        }
-      }
-
       Parser recoverPredicate;
       final BnfRule recoverRule = recoverWhile != null ? myFile.getRule(recoverWhile) : null;
       if (BnfConstants.RECOVER_AUTO.equals(recoverWhile)) {

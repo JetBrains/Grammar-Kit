@@ -663,8 +663,7 @@ public class ParserGenerator {
     if (modifierList.isEmpty() && (pinned || frameName != null)) modifierList.add("_NONE_");
 
     boolean sectionRequired = !alwaysTrue || !isPrivate || isLeft || recoverWhile != null;
-    boolean sectionRequiredSimple = sectionRequired && modifierList.isEmpty() && recoverWhile == null
-                                    && (elementTypeRef == null || hooks.isEmpty());
+    boolean sectionRequiredSimple = sectionRequired && modifierList.isEmpty() && recoverWhile == null && frameName == null;
     String modifiers = modifierList.isEmpty()? "_NONE_" : StringUtil.join(modifierList, " | ");
     if (sectionRequiredSimple) {
       out("Marker %s = enter_section_(%s);", N.marker, N.builder);
@@ -756,18 +755,16 @@ public class ParserGenerator {
 
     if (sectionRequired) {
       String resultRef = alwaysTrue ? "true" : N.result;
+      if (!hooks.isEmpty()) {
+        for (Map.Entry<String, String> entry : hooks.entrySet()) {
+          String hookName = ParserGeneratorUtil.toIdentifier(entry.getKey(), null, Case.UPPER);
+          out("register_hook_(%s, %s, %s, %s);", N.builder, N.level, hookName, entry.getValue());
+        }
+      }
       if (sectionRequiredSimple) {
         out("exit_section_(%s, %s, %s, %s);", N.builder, N.marker, elementTypeRef, resultRef);
       }
       else {
-        if (elementTypeRef != null && !hooks.isEmpty()) {
-          String prefix = alwaysTrue ? "" : "if (" + N.result + (pinned ? " || " + N.pinned : "") + ") ";
-          for (Map.Entry<String, String> entry : hooks.entrySet()) {
-            String hookName = ParserGeneratorUtil.toIdentifier(entry.getKey(), null, Case.UPPER);
-            out(prefix + "add_section_hook_(%s, %s, %s);", N.builder, hookName, entry.getValue());
-          }
-        }
-
         String pinnedRef = pinned ? N.pinned : "false";
         String recoverCall;
         if (recoverWhile != null) {

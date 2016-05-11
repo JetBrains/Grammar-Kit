@@ -19,6 +19,7 @@ package org.intellij.grammar.livePreview;
 import com.intellij.lang.PsiBuilder;
 import com.intellij.lang.WhitespacesAndCommentsBinder;
 import com.intellij.lang.WhitespacesBinders;
+import com.intellij.util.ObjectUtils;
 import com.intellij.util.containers.ContainerUtil;
 import org.intellij.grammar.parser.GeneratedParserUtilBase;
 import org.jetbrains.annotations.NotNull;
@@ -32,18 +33,19 @@ import java.util.Map;
  */
 public class LiveHooksHelper {
 
-  public static void addHook(PsiBuilder builder, String name, String value) {
-    final GeneratedParserUtilBase.SectionHook hookObj = getHook(name);
-    Object hookParam = hookObj == null ? null : getHookParam(value);
-    if (hookParam == null) return;
-    GeneratedParserUtilBase.add_section_hook_(builder, new GeneratedParserUtilBase.SectionHook<Object>() {
+  public static void registerHook(PsiBuilder builder, int level, String name, String value) {
+    final GeneratedParserUtilBase.Hook hookObj = getHook(name);
+    if (hookObj == null) return;
+    Object hookParam = ObjectUtils.notNull(getHookParam(value), value);
+    GeneratedParserUtilBase.register_hook_(builder, level, new GeneratedParserUtilBase.Hook<Object>() {
       @Override
-      public void sectionExited(PsiBuilder builder, PsiBuilder.Marker marker, Object param) {
+      public PsiBuilder.Marker run(PsiBuilder builder, PsiBuilder.Marker marker, Object param) {
         try {
-          hookObj.sectionExited(builder, marker, param);
+          return hookObj.run(builder, marker, param);
         }
         catch (Exception e) {
           builder.error("hook crashed: " + e.toString());
+          return marker;
         }
       }
     }, hookParam);
@@ -53,14 +55,14 @@ public class LiveHooksHelper {
   private static final Map<String, Object> ourBinders = ContainerUtil.newHashMap();
 
   static {
-    collectStaticFields(GeneratedParserUtilBase.class, GeneratedParserUtilBase.SectionHook.class, ourHooks);
+    collectStaticFields(GeneratedParserUtilBase.class, GeneratedParserUtilBase.Hook.class, ourHooks);
     collectStaticFields(WhitespacesBinders.class, WhitespacesAndCommentsBinder.class, ourBinders);
     ourBinders.put("null", null);
   }
 
 
-  public static GeneratedParserUtilBase.SectionHook getHook(String name) {
-    return (GeneratedParserUtilBase.SectionHook)ourHooks.get(name);
+  public static GeneratedParserUtilBase.Hook getHook(String name) {
+    return (GeneratedParserUtilBase.Hook)ourHooks.get(name);
   }
 
   public static Object getHookParam(@NotNull String value) {

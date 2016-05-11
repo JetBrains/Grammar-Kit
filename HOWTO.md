@@ -167,8 +167,9 @@ plus_expr ::= expr '+' expr
 exp_expr ::= expr ('^' expr) + // N-ary variant, the "(<op> expr ) +" syntax is mandatory.
 paren_expr ::= '(' expr ')'
 
-// let qualified and simple references have the same type
-ref_expr ::= expr? '.' identifier // fake base rule to make 'qualifier' getter @Nullable
+// introduce fake rule with @Nullable qualifier getter and
+// let qualified and simple references have its elementType
+fake ref_expr ::= expr? '.' identifier
 simple_ref_expr ::= identifier {extends=ref_expr elementType=ref_expr}
 qualification_expr ::= expr '.' identifier {extends=ref_expr elementType=ref_expr}
 

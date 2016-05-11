@@ -154,5 +154,5 @@ JFLEX_FILE
   PsiWhiteSpace('\n\n')
   PsiElement(%%)('%%')
   JFlexLexicalRulesSectionImpl(FLEX_LEXICAL_RULES_SECTION)
-    PsiErrorElement:<rule> expected, unexpected end of file
+    PsiErrorElement:'%include' or <rule> expected, unexpected end of file
       <empty list>

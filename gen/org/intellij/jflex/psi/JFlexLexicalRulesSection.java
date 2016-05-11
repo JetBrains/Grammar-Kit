@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2014 Gregory Shrago
+ * Copyright 2011-present Greg Shrago
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,9 @@ import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
 public interface JFlexLexicalRulesSection extends JFlexCompositeElement {
+
+  @NotNull
+  List<JFlexOption> getOptionList();
 
   @NotNull
   List<JFlexRule> getRuleList();

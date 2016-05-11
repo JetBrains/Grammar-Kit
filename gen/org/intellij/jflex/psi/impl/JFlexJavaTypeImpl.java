@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.intellij.grammar.psi.impl;
+package org.intellij.jflex.psi.impl;
 
 import java.util.List;
 import org.jetbrains.annotations.*;
@@ -21,28 +21,28 @@ import com.intellij.lang.ASTNode;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
-import static org.intellij.grammar.psi.BnfTypes.*;
-import org.intellij.grammar.psi.*;
+import static org.intellij.jflex.psi.JFlexTypes.*;
+import org.intellij.jflex.psi.*;
+import com.intellij.psi.PsiReference;
 
-public class BnfAttrsImpl extends BnfCompositeElementImpl implements BnfAttrs {
+public class JFlexJavaTypeImpl extends JFlexCompositeElementImpl implements JFlexJavaType {
 
-  public BnfAttrsImpl(ASTNode node) {
+  public JFlexJavaTypeImpl(ASTNode node) {
     super(node);
   }
 
-  public <R> R accept(@NotNull BnfVisitor<R> visitor) {
-    return visitor.visitAttrs(this);
+  public void accept(@NotNull JFlexVisitor visitor) {
+    visitor.visitJavaType(this);
   }
 
   public void accept(@NotNull PsiElementVisitor visitor) {
-    if (visitor instanceof BnfVisitor) accept((BnfVisitor)visitor);
+    if (visitor instanceof JFlexVisitor) accept((JFlexVisitor)visitor);
     else super.accept(visitor);
   }
 
-  @Override
   @NotNull
-  public List<BnfAttr> getAttrList() {
-    return PsiTreeUtil.getChildrenOfTypeAsList(this, BnfAttr.class);
+  public PsiReference[] getReferences() {
+    return JFlexPsiImplUtil.getReferences(this);
   }
 
 }

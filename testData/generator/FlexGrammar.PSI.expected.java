@@ -14,7 +14,7 @@ public interface JFlexTypes {
   IElementType FLEX_DECLARATIONS_SECTION = new JFlexCompositeElementType("FLEX_DECLARATIONS_SECTION");
   IElementType FLEX_EXPRESSION = new JFlexCompositeElementType("FLEX_EXPRESSION");
   IElementType FLEX_JAVA_CODE = new JFlexCompositeElementType("FLEX_JAVA_CODE");
-  IElementType FLEX_JAVA_FQN = new JFlexCompositeElementType("FLEX_JAVA_FQN");
+  IElementType FLEX_JAVA_TYPE = new JFlexCompositeElementType("FLEX_JAVA_TYPE");
   IElementType FLEX_LEXICAL_RULES_SECTION = new JFlexCompositeElementType("FLEX_LEXICAL_RULES_SECTION");
   IElementType FLEX_LITERAL_EXPRESSION = new JFlexCompositeElementType("FLEX_LITERAL_EXPRESSION");
   IElementType FLEX_LOOK_AHEAD = new JFlexCompositeElementType("FLEX_LOOK_AHEAD");
@@ -32,6 +32,7 @@ public interface JFlexTypes {
   IElementType FLEX_STATE_DEFINITION = new JFlexCompositeElementType("FLEX_STATE_DEFINITION");
   IElementType FLEX_STATE_REFERENCE = new JFlexCompositeElementType("FLEX_STATE_REFERENCE");
   IElementType FLEX_USER_CODE_SECTION = new JFlexCompositeElementType("FLEX_USER_CODE_SECTION");
+  IElementType FLEX_USER_VALUE = new JFlexCompositeElementType("FLEX_USER_VALUE");
 
   IElementType FLEX_ANGLE1 = new JFlexTokenType("<");
   IElementType FLEX_ANGLE2 = new JFlexTokenType(">");
@@ -41,12 +42,12 @@ public interface JFlexTypes {
   IElementType FLEX_BRACK1 = new JFlexTokenType("[");
   IElementType FLEX_BRACK2 = new JFlexTokenType("]");
   IElementType FLEX_CHAR = new JFlexTokenType("char");
-  IElementType FLEX_CLASS1 = new JFlexTokenType("[:jletter:]");
-  IElementType FLEX_CLASS2 = new JFlexTokenType("[:jletterdigit:]");
-  IElementType FLEX_CLASS3 = new JFlexTokenType("[:letter:]");
-  IElementType FLEX_CLASS4 = new JFlexTokenType("[:digit:]");
-  IElementType FLEX_CLASS5 = new JFlexTokenType("[:uppercase:]");
-  IElementType FLEX_CLASS6 = new JFlexTokenType("[:lowercase:]");
+  IElementType FLEX_CLASS_D = new JFlexTokenType("[:digit:]");
+  IElementType FLEX_CLASS_JL = new JFlexTokenType("[:jletter:]");
+  IElementType FLEX_CLASS_JLD = new JFlexTokenType("[:jletterdigit:]");
+  IElementType FLEX_CLASS_L = new JFlexTokenType("[:letter:]");
+  IElementType FLEX_CLASS_LL = new JFlexTokenType("[:lowercase:]");
+  IElementType FLEX_CLASS_LU = new JFlexTokenType("[:uppercase:]");
   IElementType FLEX_COMMA = new JFlexTokenType(",");
   IElementType FLEX_DASH = new JFlexTokenType("-");
   IElementType FLEX_DOLLAR = new JFlexTokenType("$");
@@ -60,69 +61,68 @@ public interface JFlexTypes {
   IElementType FLEX_NOT = new JFlexTokenType("!");
   IElementType FLEX_NOT2 = new JFlexTokenType("~");
   IElementType FLEX_NUMBER = new JFlexTokenType("number");
+  IElementType FLEX_OPT16BIT = new JFlexTokenType("%16bit");
+  IElementType FLEX_OPT_7BIT = new JFlexTokenType("%7bit");
+  IElementType FLEX_OPT_8BIT = new JFlexTokenType("%8bit");
+  IElementType FLEX_OPT_ABSTRACT = new JFlexTokenType("%abstract");
+  IElementType FLEX_OPT_APIPRIVATE = new JFlexTokenType("%apiprivate");
+  IElementType FLEX_OPT_BUFFER = new JFlexTokenType("%buffer");
+  IElementType FLEX_OPT_BYACC = new JFlexTokenType("%byacc");
+  IElementType FLEX_OPT_CASELESS = new JFlexTokenType("%caseless");
+  IElementType FLEX_OPT_CHAR = new JFlexTokenType("%char");
+  IElementType FLEX_OPT_CLASS = new JFlexTokenType("%class");
+  IElementType FLEX_OPT_CODE1 = new JFlexTokenType("%{");
+  IElementType FLEX_OPT_CODE2 = new JFlexTokenType("%}");
+  IElementType FLEX_OPT_COLUMN = new JFlexTokenType("%column");
+  IElementType FLEX_OPT_CTORARG = new JFlexTokenType("%ctorarg");
+  IElementType FLEX_OPT_CUP = new JFlexTokenType("%cup");
+  IElementType FLEX_OPT_CUPDEBUG = new JFlexTokenType("%cupdebug");
+  IElementType FLEX_OPT_CUPSYM = new JFlexTokenType("%cupsym");
+  IElementType FLEX_OPT_DEBUG = new JFlexTokenType("%debug");
+  IElementType FLEX_OPT_EOF1 = new JFlexTokenType("%eof{");
+  IElementType FLEX_OPT_EOF2 = new JFlexTokenType("%eof}");
+  IElementType FLEX_OPT_EOFCLOSE = new JFlexTokenType("%eofclose");
+  IElementType FLEX_OPT_EOFTHROW = new JFlexTokenType("%eofthrow");
+  IElementType FLEX_OPT_EOFTHROW1 = new JFlexTokenType("%eofthrow{");
+  IElementType FLEX_OPT_EOFTHROW2 = new JFlexTokenType("%eofthrow}");
+  IElementType FLEX_OPT_EOFVAL1 = new JFlexTokenType("%eofval{");
+  IElementType FLEX_OPT_EOFVAL2 = new JFlexTokenType("%eofval}");
+  IElementType FLEX_OPT_EXTENDS = new JFlexTokenType("%extends");
+  IElementType FLEX_OPT_FINAL = new JFlexTokenType("%final");
+  IElementType FLEX_OPT_FULL = new JFlexTokenType("%full");
+  IElementType FLEX_OPT_FUNCTION = new JFlexTokenType("%function");
+  IElementType FLEX_OPT_IGNORECASE = new JFlexTokenType("%ignorecase");
+  IElementType FLEX_OPT_IMPLEMENTS = new JFlexTokenType("%implements");
+  IElementType FLEX_OPT_INCLUDE = new JFlexTokenType("%include");
+  IElementType FLEX_OPT_INIT1 = new JFlexTokenType("%init{");
+  IElementType FLEX_OPT_INIT2 = new JFlexTokenType("%init}");
+  IElementType FLEX_OPT_INITTHROW = new JFlexTokenType("%initthrow");
+  IElementType FLEX_OPT_INITTHROW1 = new JFlexTokenType("%initthrow{");
+  IElementType FLEX_OPT_INITTHROW2 = new JFlexTokenType("%initthrow}");
+  IElementType FLEX_OPT_INT = new JFlexTokenType("%int");
+  IElementType FLEX_OPT_INTEGER = new JFlexTokenType("%integer");
+  IElementType FLEX_OPT_INTWRAP = new JFlexTokenType("%intwrap");
+  IElementType FLEX_OPT_LINE = new JFlexTokenType("%line");
+  IElementType FLEX_OPT_NOTUNIX = new JFlexTokenType("%notunix");
+  IElementType FLEX_OPT_PACK = new JFlexTokenType("%pack");
+  IElementType FLEX_OPT_PUBLIC = new JFlexTokenType("%public");
+  IElementType FLEX_OPT_S = new JFlexTokenType("%s");
+  IElementType FLEX_OPT_SCANERROR = new JFlexTokenType("%scanerror");
+  IElementType FLEX_OPT_STANDALONE = new JFlexTokenType("%standalone");
+  IElementType FLEX_OPT_STATE = new JFlexTokenType("%state");
+  IElementType FLEX_OPT_SWITCH = new JFlexTokenType("%switch");
+  IElementType FLEX_OPT_TABLE = new JFlexTokenType("%table");
+  IElementType FLEX_OPT_TYPE = new JFlexTokenType("%type");
+  IElementType FLEX_OPT_UNICODE = new JFlexTokenType("%unicode");
+  IElementType FLEX_OPT_X = new JFlexTokenType("%x");
+  IElementType FLEX_OPT_XSTATE = new JFlexTokenType("%xstate");
+  IElementType FLEX_OPT_YYEOF = new JFlexTokenType("%yyeof");
+  IElementType FLEX_OPT_YYLEXTHROW = new JFlexTokenType("%yylexthrow");
+  IElementType FLEX_OPT_YYLEXTHROW1 = new JFlexTokenType("%yylexthrow{");
+  IElementType FLEX_OPT_YYLEXTHROW2 = new JFlexTokenType("%yylexthrow}");
   IElementType FLEX_OR = new JFlexTokenType("|");
   IElementType FLEX_PAREN1 = new JFlexTokenType("(");
   IElementType FLEX_PAREN2 = new JFlexTokenType(")");
-  IElementType FLEX_PERC2 = new JFlexTokenType("%%");
-  IElementType FLEX_PERC_1 = new JFlexTokenType("%class");
-  IElementType FLEX_PERC_10 = new JFlexTokenType("%init{");
-  IElementType FLEX_PERC_11 = new JFlexTokenType("%init}");
-  IElementType FLEX_PERC_12 = new JFlexTokenType("%initthrow");
-  IElementType FLEX_PERC_13 = new JFlexTokenType("%initthrow{");
-  IElementType FLEX_PERC_14 = new JFlexTokenType("%initthrow}");
-  IElementType FLEX_PERC_15 = new JFlexTokenType("%ctorarg");
-  IElementType FLEX_PERC_16 = new JFlexTokenType("%scanerror");
-  IElementType FLEX_PERC_17 = new JFlexTokenType("%buffer");
-  IElementType FLEX_PERC_18 = new JFlexTokenType("%include");
-  IElementType FLEX_PERC_19 = new JFlexTokenType("%function");
-  IElementType FLEX_PERC_2 = new JFlexTokenType("%implements");
-  IElementType FLEX_PERC_20 = new JFlexTokenType("%integer");
-  IElementType FLEX_PERC_21 = new JFlexTokenType("%int");
-  IElementType FLEX_PERC_22 = new JFlexTokenType("%intwrap");
-  IElementType FLEX_PERC_23 = new JFlexTokenType("%type");
-  IElementType FLEX_PERC_24 = new JFlexTokenType("%yylexthrow");
-  IElementType FLEX_PERC_25 = new JFlexTokenType("%yylexthrow{");
-  IElementType FLEX_PERC_26 = new JFlexTokenType("%yylexthrow}");
-  IElementType FLEX_PERC_27 = new JFlexTokenType("%eofval{");
-  IElementType FLEX_PERC_28 = new JFlexTokenType("%eofval}");
-  IElementType FLEX_PERC_29 = new JFlexTokenType("%eof{");
-  IElementType FLEX_PERC_3 = new JFlexTokenType("%extends");
-  IElementType FLEX_PERC_30 = new JFlexTokenType("%eof}");
-  IElementType FLEX_PERC_31 = new JFlexTokenType("%eofthrow");
-  IElementType FLEX_PERC_32 = new JFlexTokenType("%eofthrow{");
-  IElementType FLEX_PERC_33 = new JFlexTokenType("%eofthrow}");
-  IElementType FLEX_PERC_34 = new JFlexTokenType("%eofclose");
-  IElementType FLEX_PERC_36 = new JFlexTokenType("%debug");
-  IElementType FLEX_PERC_37 = new JFlexTokenType("%standalone");
-  IElementType FLEX_PERC_38 = new JFlexTokenType("%cup");
-  IElementType FLEX_PERC_39 = new JFlexTokenType("%cupsym");
-  IElementType FLEX_PERC_4 = new JFlexTokenType("%public");
-  IElementType FLEX_PERC_40 = new JFlexTokenType("%cupdebug");
-  IElementType FLEX_PERC_41 = new JFlexTokenType("%byacc");
-  IElementType FLEX_PERC_42 = new JFlexTokenType("%switch");
-  IElementType FLEX_PERC_43 = new JFlexTokenType("%table");
-  IElementType FLEX_PERC_44 = new JFlexTokenType("%pack");
-  IElementType FLEX_PERC_45 = new JFlexTokenType("%7bit");
-  IElementType FLEX_PERC_46 = new JFlexTokenType("%full");
-  IElementType FLEX_PERC_47 = new JFlexTokenType("%8bit");
-  IElementType FLEX_PERC_48 = new JFlexTokenType("%unicode");
-  IElementType FLEX_PERC_49 = new JFlexTokenType("%16bit");
-  IElementType FLEX_PERC_5 = new JFlexTokenType("%final");
-  IElementType FLEX_PERC_50 = new JFlexTokenType("%caseless");
-  IElementType FLEX_PERC_51 = new JFlexTokenType("%ignorecase");
-  IElementType FLEX_PERC_52 = new JFlexTokenType("%char");
-  IElementType FLEX_PERC_53 = new JFlexTokenType("%line");
-  IElementType FLEX_PERC_54 = new JFlexTokenType("%column");
-  IElementType FLEX_PERC_55 = new JFlexTokenType("%notunix");
-  IElementType FLEX_PERC_56 = new JFlexTokenType("%yyeof");
-  IElementType FLEX_PERC_57 = new JFlexTokenType("%state");
-  IElementType FLEX_PERC_58 = new JFlexTokenType("%s");
-  IElementType FLEX_PERC_59 = new JFlexTokenType("%xstate");
-  IElementType FLEX_PERC_6 = new JFlexTokenType("%abstract");
-  IElementType FLEX_PERC_69 = new JFlexTokenType("%x");
-  IElementType FLEX_PERC_7 = new JFlexTokenType("%apiprivate");
-  IElementType FLEX_PERC_8 = new JFlexTokenType("%{");
-  IElementType FLEX_PERC_9 = new JFlexTokenType("%}");
   IElementType FLEX_PLUS = new JFlexTokenType("+");
   IElementType FLEX_QUESTION = new JFlexTokenType("?");
   IElementType FLEX_ROOF = new JFlexTokenType("^");
@@ -130,6 +130,7 @@ public interface JFlexTypes {
   IElementType FLEX_SLASH2 = new JFlexTokenType("/");
   IElementType FLEX_STAR = new JFlexTokenType("*");
   IElementType FLEX_STRING = new JFlexTokenType("string");
+  IElementType FLEX_TWO_PERCS = new JFlexTokenType("%%");
 
   class Factory {
     public static PsiElement createElement(ASTNode node) {
@@ -149,8 +150,8 @@ public interface JFlexTypes {
       else if (type == FLEX_JAVA_CODE) {
         return new JFlexJavaCodeImpl(node);
       }
-      else if (type == FLEX_JAVA_FQN) {
-        return new JFlexJavaFqnImpl(node);
+      else if (type == FLEX_JAVA_TYPE) {
+        return new JFlexJavaTypeImpl(node);
       }
       else if (type == FLEX_LEXICAL_RULES_SECTION) {
         return new JFlexLexicalRulesSectionImpl(node);
@@ -202,6 +203,9 @@ public interface JFlexTypes {
       }
       else if (type == FLEX_USER_CODE_SECTION) {
         return new JFlexUserCodeSectionImpl(node);
+      }
+      else if (type == FLEX_USER_VALUE) {
+        return new JFlexUserValueImpl(node);
       }
       throw new AssertionError("Unknown element type: " + type);
     }
@@ -270,19 +274,26 @@ package org.intellij.jflex.psi;
 import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiReference;
 
 public interface JFlexJavaCode extends JFlexCompositeElement {
 
+  PsiReference[] getReferences();
+
 }
-// ---- JFlexJavaFqn.java -----------------
+// ---- JFlexJavaType.java -----------------
 license.txt
 package org.intellij.jflex.psi;
 
 import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiReference;
 
-public interface JFlexJavaFqn extends JFlexCompositeElement {
+public interface JFlexJavaType extends JFlexCompositeElement {
+
+  @NotNull
+  PsiReference[] getReferences();
 
 }
 // ---- JFlexLexicalRulesSection.java -----------------
@@ -294,6 +305,9 @@ import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
 public interface JFlexLexicalRulesSection extends JFlexCompositeElement {
+
+  @NotNull
+  List<JFlexOption> getOptionList();
 
   @NotNull
   List<JFlexRule> getRuleList();
@@ -482,6 +496,9 @@ public interface JFlexRule extends JFlexCompositeElement {
   JFlexLookAhead getLookAhead();
 
   @NotNull
+  List<JFlexOption> getOptionList();
+
+  @NotNull
   List<JFlexRule> getRuleList();
 
   @NotNull
@@ -570,6 +587,17 @@ public interface JFlexUserCodeSection extends JFlexCompositeElement {
 
   @Nullable
   JFlexJavaCode getJavaCode();
+
+}
+// ---- JFlexUserValue.java -----------------
+license.txt
+package org.intellij.jflex.psi;
+
+import java.util.List;
+import org.jetbrains.annotations.*;
+import com.intellij.psi.PsiElement;
+
+public interface JFlexUserValue extends JFlexCompositeElement {
 
 }
 // ---- JFlexChoiceExpressionImpl.java -----------------
@@ -724,6 +752,7 @@ import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static org.intellij.jflex.psi.JFlexTypes.*;
 import org.intellij.jflex.psi.*;
+import com.intellij.psi.PsiReference;
 
 public class JFlexJavaCodeImpl extends JFlexCompositeElementImpl implements JFlexJavaCode {
 
@@ -740,8 +769,12 @@ public class JFlexJavaCodeImpl extends JFlexCompositeElementImpl implements JFle
     else super.accept(visitor);
   }
 
+  public PsiReference[] getReferences() {
+    return JFlexPsiImplUtil.getReferences(this);
+  }
+
 }
-// ---- JFlexJavaFqnImpl.java -----------------
+// ---- JFlexJavaTypeImpl.java -----------------
 license.txt
 package org.intellij.jflex.psi.impl;
 
@@ -753,20 +786,26 @@ import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static org.intellij.jflex.psi.JFlexTypes.*;
 import org.intellij.jflex.psi.*;
+import com.intellij.psi.PsiReference;
 
-public class JFlexJavaFqnImpl extends JFlexCompositeElementImpl implements JFlexJavaFqn {
+public class JFlexJavaTypeImpl extends JFlexCompositeElementImpl implements JFlexJavaType {
 
-  public JFlexJavaFqnImpl(ASTNode node) {
+  public JFlexJavaTypeImpl(ASTNode node) {
     super(node);
   }
 
   public void accept(@NotNull JFlexVisitor visitor) {
-    visitor.visitJavaFqn(this);
+    visitor.visitJavaType(this);
   }
 
   public void accept(@NotNull PsiElementVisitor visitor) {
     if (visitor instanceof JFlexVisitor) accept((JFlexVisitor)visitor);
     else super.accept(visitor);
+  }
+
+  @NotNull
+  public PsiReference[] getReferences() {
+    return JFlexPsiImplUtil.getReferences(this);
   }
 
 }
@@ -796,6 +835,12 @@ public class JFlexLexicalRulesSectionImpl extends JFlexCompositeElementImpl impl
   public void accept(@NotNull PsiElementVisitor visitor) {
     if (visitor instanceof JFlexVisitor) accept((JFlexVisitor)visitor);
     else super.accept(visitor);
+  }
+
+  @Override
+  @NotNull
+  public List<JFlexOption> getOptionList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, JFlexOption.class);
   }
 
   @Override
@@ -1243,6 +1288,12 @@ public class JFlexRuleImpl extends JFlexCompositeElementImpl implements JFlexRul
 
   @Override
   @NotNull
+  public List<JFlexOption> getOptionList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, JFlexOption.class);
+  }
+
+  @Override
+  @NotNull
   public List<JFlexRule> getRuleList() {
     return PsiTreeUtil.getChildrenOfTypeAsList(this, JFlexRule.class);
   }
@@ -1451,6 +1502,35 @@ public class JFlexUserCodeSectionImpl extends JFlexCompositeElementImpl implemen
   }
 
 }
+// ---- JFlexUserValueImpl.java -----------------
+license.txt
+package org.intellij.jflex.psi.impl;
+
+import java.util.List;
+import org.jetbrains.annotations.*;
+import com.intellij.lang.ASTNode;
+import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiElementVisitor;
+import com.intellij.psi.util.PsiTreeUtil;
+import static org.intellij.jflex.psi.JFlexTypes.*;
+import org.intellij.jflex.psi.*;
+
+public class JFlexUserValueImpl extends JFlexCompositeElementImpl implements JFlexUserValue {
+
+  public JFlexUserValueImpl(ASTNode node) {
+    super(node);
+  }
+
+  public void accept(@NotNull JFlexVisitor visitor) {
+    visitor.visitUserValue(this);
+  }
+
+  public void accept(@NotNull PsiElementVisitor visitor) {
+    if (visitor instanceof JFlexVisitor) accept((JFlexVisitor)visitor);
+    else super.accept(visitor);
+  }
+
+}
 // ---- JFlexVisitor.java -----------------
 license.txt
 package org.intellij.jflex.psi;
@@ -1481,7 +1561,7 @@ public class JFlexVisitor extends PsiElementVisitor {
     visitCompositeElement(o);
   }
 
-  public void visitJavaFqn(@NotNull JFlexJavaFqn o) {
+  public void visitJavaType(@NotNull JFlexJavaType o) {
     visitCompositeElement(o);
   }
 
@@ -1550,6 +1630,10 @@ public class JFlexVisitor extends PsiElementVisitor {
   }
 
   public void visitUserCodeSection(@NotNull JFlexUserCodeSection o) {
+    visitCompositeElement(o);
+  }
+
+  public void visitUserValue(@NotNull JFlexUserValue o) {
     visitCompositeElement(o);
   }
 

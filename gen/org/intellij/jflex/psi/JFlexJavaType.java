@@ -18,25 +18,11 @@ package org.intellij.jflex.psi;
 import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiReference;
 
-public interface JFlexRule extends JFlexCompositeElement {
-
-  @Nullable
-  JFlexExpression getExpression();
-
-  @Nullable
-  JFlexJavaCode getJavaCode();
-
-  @Nullable
-  JFlexLookAhead getLookAhead();
+public interface JFlexJavaType extends JFlexCompositeElement {
 
   @NotNull
-  List<JFlexOption> getOptionList();
-
-  @NotNull
-  List<JFlexRule> getRuleList();
-
-  @NotNull
-  List<JFlexStateReference> getStateReferenceList();
+  PsiReference[] getReferences();
 
 }

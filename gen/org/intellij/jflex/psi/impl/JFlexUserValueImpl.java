@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2014 Gregory Shrago
+ * Copyright 2011-present Greg Shrago
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,14 +24,14 @@ import com.intellij.psi.util.PsiTreeUtil;
 import static org.intellij.jflex.psi.JFlexTypes.*;
 import org.intellij.jflex.psi.*;
 
-public class JFlexJavaFqnImpl extends JFlexCompositeElementImpl implements JFlexJavaFqn {
+public class JFlexUserValueImpl extends JFlexCompositeElementImpl implements JFlexUserValue {
 
-  public JFlexJavaFqnImpl(ASTNode node) {
+  public JFlexUserValueImpl(ASTNode node) {
     super(node);
   }
 
   public void accept(@NotNull JFlexVisitor visitor) {
-    visitor.visitJavaFqn(this);
+    visitor.visitUserValue(this);
   }
 
   public void accept(@NotNull PsiElementVisitor visitor) {

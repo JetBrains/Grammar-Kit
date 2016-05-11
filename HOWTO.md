@@ -147,7 +147,7 @@ expr ::= assign_expr
   | mul_group
   | unary_group
   | exp_expr
-  | ref_expr
+  | qualification_expr
   | primary_group
 
 // private rules to define operators with the same priority
@@ -167,8 +167,11 @@ plus_expr ::= expr '+' expr
 exp_expr ::= expr ('^' expr) + // N-ary variant, the "(<op> expr ) +" syntax is mandatory.
 paren_expr ::= '(' expr ')'
 
-simple_ref_expr ::= identifier {elementType=ref_expr}  // let qualified and simple references have the same type
-ref_expr ::= expr '.' identifier
+// let qualified and simple references have the same type
+ref_expr ::= expr? '.' identifier // fake base rule to make 'qualifier' getter @Nullable
+simple_ref_expr ::= identifier {extends=ref_expr elementType=ref_expr}
+qualification_expr ::= expr '.' identifier {extends=ref_expr elementType=ref_expr}
+
 literal_expr ::= number
 identifier ::= id
 ````

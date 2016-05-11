@@ -32,7 +32,7 @@ expr ::= assign_expr
   | exp_expr
   | factorial_expr
   | call_expr
-  | ref_expr
+  | qualification_expr
   | primary_group
 private boolean_group ::= xor_expr | between_expr | is_not_expr
 
@@ -43,8 +43,9 @@ private add_group ::= plus_expr | minus_expr
 private primary_group ::= special_expr | simple_ref_expr | literal_expr | paren_expr
 
 // expressions: auto-operator detection or parens
-simple_ref_expr ::= identifier {elementType=ref_expr}
-ref_expr ::= expr '.' identifier
+ref_expr ::= expr? '.' identifier
+simple_ref_expr ::= identifier {extends=ref_expr elementType=ref_expr}
+qualification_expr ::= expr '.' identifier {extends=ref_expr elementType=ref_expr}
 call_expr ::= ref_expr arg_list
 arg_list ::= '(' [ !')' expr  (',' expr) * ] ')' {pin(".*")=1}
 literal_expr ::= number

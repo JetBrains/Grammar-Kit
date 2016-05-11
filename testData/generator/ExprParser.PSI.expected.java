@@ -370,7 +370,7 @@ import com.intellij.psi.PsiElement;
 
 public interface RefExpr extends Expr {
 
-  @NotNull
+  @Nullable
   Expr getExpr();
 
   @NotNull
@@ -1081,9 +1081,9 @@ public class RefExprImpl extends ExprImpl implements RefExpr {
   }
 
   @Override
-  @NotNull
+  @Nullable
   public Expr getExpr() {
-    return findNotNullChildByClass(Expr.class);
+    return findChildByClass(Expr.class);
   }
 
   @Override

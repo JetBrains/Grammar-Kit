@@ -76,7 +76,7 @@ public class ExpressionParser implements PsiParser, LightPsiParser {
       result_ = expr(builder_, 0, 1);
     }
     else if (root_ == REF_EXPR) {
-      result_ = expr(builder_, 0, 8);
+      result_ = ref_expr(builder_, 0);
     }
     else if (root_ == SPECIAL_EXPR) {
       result_ = special_expr(builder_, 0);
@@ -239,6 +239,26 @@ public class ExpressionParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
+  // expr? '.' identifier
+  public static boolean ref_expr(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "ref_expr")) return false;
+    boolean result_;
+    Marker marker_ = enter_section_(builder_, level_, _NONE_, REF_EXPR, "<ref expr>");
+    result_ = ref_expr_0(builder_, level_ + 1);
+    result_ = result_ && consumeToken(builder_, ".");
+    result_ = result_ && identifier(builder_, level_ + 1);
+    exit_section_(builder_, level_, marker_, result_, false, null);
+    return result_;
+  }
+
+  // expr?
+  private static boolean ref_expr_0(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "ref_expr_0")) return false;
+    expr(builder_, level_ + 1, -1);
+    return true;
+  }
+
+  /* ********************************************************** */
   // element *
   static boolean root(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "root")) return false;
@@ -263,7 +283,7 @@ public class ExpressionParser implements PsiParser, LightPsiParser {
   // 6: N_ARY(exp_expr)
   // 7: POSTFIX(factorial_expr)
   // 8: POSTFIX(call_expr)
-  // 9: POSTFIX(ref_expr)
+  // 9: POSTFIX(qualification_expr)
   // 10: ATOM(special_expr) ATOM(simple_ref_expr) ATOM(literal_expr) PREFIX(paren_expr)
   public static boolean expr(PsiBuilder builder_, int level_, int priority_) {
     if (!recursion_guard_(builder_, level_, "expr")) return false;
@@ -345,7 +365,7 @@ public class ExpressionParser implements PsiParser, LightPsiParser {
         result_ = true;
         exit_section_(builder_, level_, marker_, CALL_EXPR, result_, true, null);
       }
-      else if (priority_ < 9 && ref_expr_0(builder_, level_ + 1)) {
+      else if (priority_ < 9 && qualification_expr_0(builder_, level_ + 1)) {
         result_ = true;
         exit_section_(builder_, level_, marker_, REF_EXPR, result_, true, null);
       }
@@ -428,8 +448,8 @@ public class ExpressionParser implements PsiParser, LightPsiParser {
   }
 
   // '.' identifier
-  private static boolean ref_expr_0(PsiBuilder builder_, int level_) {
-    if (!recursion_guard_(builder_, level_, "ref_expr_0")) return false;
+  private static boolean qualification_expr_0(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "qualification_expr_0")) return false;
     boolean result_;
     Marker marker_ = enter_section_(builder_);
     result_ = consumeTokenSmart(builder_, ".");

@@ -14,12 +14,16 @@ Custom rule parsing hooks, e.g. whitespace binders. A hook is a piece of code th
   root ::= left_binder right_binder both_binders
 
   // standard hooks for left, right and both binders
-  left_binder ::= A B { hooks=[leftBinder="GREEDY_LEFT_BINDER"] }
-  right_binder ::= item { hooks=[rightBinder="GREEDY_RIGHT_BINDER"] }
-  both_binders ::= A item B { hooks=[wsBinders="GREEDY_LEFT_BINDER, GREEDY_RIGHT_BINDER"] }
+  left_binder ::= ... { hooks=[leftBinder="GREEDY_LEFT_BINDER"] }
+  right_binder ::= ... { hooks=[rightBinder="GREEDY_RIGHT_BINDER"] }
+  both_binders ::= ... { hooks=[wsBinders="GREEDY_LEFT_BINDER, GREEDY_RIGHT_BINDER"] }
+
+  // log parsing results via syntax error messages using logHook
+  logging_rule ::= ... { hooks=[logHook='in logging_rule!'] }
 
   // user hook from <code>MyHooks</code> class
-  got_hook ::= A { hooks=[myHook='"my", "hook", "param", "array"'] }
+  got_hook1 ::= ... { hooks=[myHook1="SOME_CONST"] }
+  got_hook2 ::= ... { hooks=[myHook2='"string", "array", "args"'] }
 </code></pre>
 
 </body>

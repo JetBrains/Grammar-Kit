@@ -14,13 +14,17 @@ Open-source plugins built with Grammar-Kit:
 
 Quick links: [Tutorial](TUTORIAL.md), [HOWTO](HOWTO.md), [Standalone usage](#standalone-usage).
 
-Recent changes / 1.3.0
+Recent changes / 1.3.1
 
-* LivePreview: critical bugs fixed, revitalized
-* Generator: "upper" rules initial (no proper analyzer support)
-* Generator/GPUB: introduce frame.resultType for manual manipulation
-* Generator/Visitor: "visitor-value" generate option to generate `Visitor<R>`
-* Generator: more "generate" options: elements, element-case, token-case
+* Generator: introduce "hooks" attribute and white-space binders #91
+* Generator: override 'gen' folder name via 'grammar.kit.gen.dir' system property
+* Generator: generate elementTypes for fake rules when needed #76
+* Generator: improved/unified identifiers generation #97
+* JFlex: ability to run JFlex 1.6
+* JFlex: additional arguments via 'grammar.kit.gen.jflex.args' system property
+* JFlex: resolve returned token constants & yybegin(state) in action code
+* JFlex: unify default generation path with BNF generator #96
+* Editor: improved completion for angles-quoted rules
 
 
 General usage instructions

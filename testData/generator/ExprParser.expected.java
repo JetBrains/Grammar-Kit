@@ -27,68 +27,11 @@ public class ExpressionParser implements PsiParser, LightPsiParser {
     if (root_ == ARG_LIST) {
       result_ = arg_list(builder_, 0);
     }
-    else if (root_ == ASSIGN_EXPR) {
-      result_ = expr(builder_, 0, -1);
-    }
-    else if (root_ == BETWEEN_EXPR) {
-      result_ = expr(builder_, 0, 2);
-    }
-    else if (root_ == CALL_EXPR) {
-      result_ = expr(builder_, 0, 7);
-    }
-    else if (root_ == CONDITIONAL_EXPR) {
-      result_ = expr(builder_, 0, 0);
-    }
-    else if (root_ == DIV_EXPR) {
-      result_ = expr(builder_, 0, 3);
-    }
-    else if (root_ == ELVIS_EXPR) {
-      result_ = expr(builder_, 0, 0);
-    }
-    else if (root_ == EXP_EXPR) {
-      result_ = expr(builder_, 0, 5);
-    }
     else if (root_ == EXPR) {
       result_ = expr(builder_, 0, -1);
     }
-    else if (root_ == FACTORIAL_EXPR) {
-      result_ = expr(builder_, 0, 6);
-    }
     else if (root_ == IDENTIFIER) {
       result_ = identifier(builder_, 0);
-    }
-    else if (root_ == IS_NOT_EXPR) {
-      result_ = expr(builder_, 0, 2);
-    }
-    else if (root_ == LITERAL_EXPR) {
-      result_ = literal_expr(builder_, 0);
-    }
-    else if (root_ == MINUS_EXPR) {
-      result_ = expr(builder_, 0, 1);
-    }
-    else if (root_ == MUL_EXPR) {
-      result_ = expr(builder_, 0, 3);
-    }
-    else if (root_ == PAREN_EXPR) {
-      result_ = paren_expr(builder_, 0);
-    }
-    else if (root_ == PLUS_EXPR) {
-      result_ = expr(builder_, 0, 1);
-    }
-    else if (root_ == SPECIAL_EXPR) {
-      result_ = special_expr(builder_, 0);
-    }
-    else if (root_ == UNARY_MIN_EXPR) {
-      result_ = unary_min_expr(builder_, 0);
-    }
-    else if (root_ == UNARY_NOT_EXPR) {
-      result_ = unary_not_expr(builder_, 0);
-    }
-    else if (root_ == UNARY_PLUS_EXPR) {
-      result_ = unary_plus_expr(builder_, 0);
-    }
-    else if (root_ == XOR_EXPR) {
-      result_ = expr(builder_, 0, 2);
     }
     else {
       result_ = parse_root_(root_, builder_, 0);

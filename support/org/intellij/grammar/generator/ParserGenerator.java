@@ -413,6 +413,8 @@ public class ParserGenerator {
       if (!RuleGraphHelper.shouldGeneratePsi(rule, false) || Rule.isMeta(rule)) continue;
       if (Rule.isFake(rule)) continue;
       if (G.generateRootRules != null && !G.generateRootRules.matcher(ruleName).matches()) continue;
+      ExpressionHelper.ExpressionInfo info = myExpressionHelper.getExpressionInfo(rule);
+      if (info != null && info.rootRule != rule) continue;
       String elementType = getElementType(rule);
       out("%sif (%s == %s) {", first ? "" : "else ", N.root, elementType);
       String nodeCall = generateNodeCall(rule, null, getFuncName(rule));

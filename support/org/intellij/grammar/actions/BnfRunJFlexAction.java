@@ -27,8 +27,10 @@ import com.intellij.execution.impl.ConsoleViewImpl;
 import com.intellij.execution.process.OSProcessHandler;
 import com.intellij.execution.process.ProcessAdapter;
 import com.intellij.execution.process.ProcessEvent;
+import com.intellij.execution.process.ProcessHandler;
 import com.intellij.execution.ui.ConsoleView;
 import com.intellij.execution.ui.RunContentDescriptor;
+import com.intellij.execution.ui.RunContentManager;
 import com.intellij.execution.ui.actions.CloseAction;
 import com.intellij.notification.Notification;
 import com.intellij.notification.NotificationType;
@@ -37,6 +39,7 @@ import com.intellij.openapi.actionSystem.*;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.fileEditor.FileDocumentManager;
+import com.intellij.openapi.fileTypes.FileType;
 import com.intellij.openapi.project.DumbAwareAction;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.projectRoots.Sdk;
@@ -47,7 +50,9 @@ import com.intellij.openapi.roots.impl.libraries.ApplicationLibraryTable;
 import com.intellij.openapi.roots.libraries.Library;
 import com.intellij.openapi.roots.libraries.LibraryTable;
 import com.intellij.openapi.ui.Messages;
+import com.intellij.openapi.util.ActionCallback;
 import com.intellij.openapi.util.Comparing;
+import com.intellij.openapi.util.Condition;
 import com.intellij.openapi.util.Pair;
 import com.intellij.openapi.util.io.FileUtil;
 import com.intellij.openapi.util.text.StringUtil;
@@ -60,6 +65,7 @@ import com.intellij.psi.search.ProjectScope;
 import com.intellij.util.Consumer;
 import com.intellij.util.SystemProperties;
 import com.intellij.util.containers.ContainerUtil;
+import com.intellij.util.containers.JBIterable;
 import com.intellij.util.download.DownloadableFileDescription;
 import com.intellij.util.download.DownloadableFileService;
 import org.intellij.grammar.config.Options;
@@ -72,6 +78,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.io.File;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -91,26 +98,53 @@ public class BnfRunJFlexAction extends DumbAwareAction {
 
   @Override
   public void update(@NotNull AnActionEvent e) {
-    VirtualFile file = LangDataKeys.VIRTUAL_FILE.getData(e.getDataContext());
-    boolean enabled = e.getProject() != null && file != null &&
-                      (file.getFileType() == JFlexFileType.INSTANCE ||
-                       !file.getFileType().isBinary() && file.getName().endsWith(".flex"));
-    e.getPresentation().setEnabledAndVisible(enabled);
+    Project project = e.getProject();
+    List<VirtualFile> files = getFiles(e);
+    e.getPresentation().setEnabledAndVisible(project != null && !files.isEmpty());
+  }
+
+  private static List<VirtualFile> getFiles(@NotNull AnActionEvent e) {
+    return JBIterable.of(e.getData(LangDataKeys.VIRTUAL_FILE_ARRAY)).filter(new Condition<VirtualFile>() {
+      @Override
+      public boolean value(VirtualFile file) {
+        FileType fileType = file.getFileType();
+        return fileType == JFlexFileType.INSTANCE ||
+               !fileType.isBinary() && file.getName().endsWith(".flex");
+      }
+    }).toList();
   }
 
   @Override
   public void actionPerformed(@NotNull AnActionEvent e) {
-    final Project project = e.getProject();
-    VirtualFile flexFile = LangDataKeys.VIRTUAL_FILE.getData(e.getDataContext());
-    if (project == null || flexFile == null) return;
+    final Project project = getEventProject(e);
+    final List<VirtualFile> files = getFiles(e);
+    if (project == null || files.isEmpty()) return;
 
     PsiDocumentManager.getInstance(project).commitAllDocuments();
-    FileDocumentManager fileDocumentManager = FileDocumentManager.getInstance();
-    fileDocumentManager.saveAllDocuments();
-    Document document = fileDocumentManager.getDocument(flexFile);
-    if (document == null) return;
+    FileDocumentManager.getInstance().saveAllDocuments();
 
-    final String commandName = e.getPresentation().getText();
+    final List<File> jflex = getOrDownload(project, "JetBrains JFlex", JETBRAINS_JFLEX_URLS);
+    if (jflex.isEmpty()) {
+      fail(project, files.get(0), "jflex.jar could not be located or downloaded");
+      return;
+    }
+    new Runnable() {
+      Iterator<VirtualFile> it = files.iterator();
+      @Override
+      public void run() {
+        if (it.hasNext()) {
+          doGenerate(project, it.next(), jflex).doWhenProcessed(this);
+        }
+      }
+    }.run();
+  }
+
+  public static ActionCallback doGenerate(final Project project, VirtualFile flexFile, List<File> jflex) {
+    FileDocumentManager fileDocumentManager = FileDocumentManager.getInstance();
+    Document document = fileDocumentManager.getDocument(flexFile);
+    if (document == null) return ActionCallback.REJECTED;
+
+    final String commandName = "JFlex Generator";
 
     String text = document.getText();
     Matcher matcherClass = Pattern.compile("%class\\s+(\\w+)").matcher(text);
@@ -120,27 +154,23 @@ public class BnfRunJFlexAction extends DumbAwareAction {
     if (lexerClassName == null) {
       String content = "Lexer class name option not found, use <pre>%class LexerClassName</pre>";
       fail(project, flexFile, content);
-      return;
+      return ActionCallback.REJECTED;
     }
 
     try {
-      List<File> jflex = getOrDownload(project, "JetBrains JFlex", JETBRAINS_JFLEX_URLS);
-      if (jflex.isEmpty()) {
-        fail(project, flexFile, "JFlex.jar could not be located or downloaded");
-        return;
-      }
-
       final VirtualFile virtualDir = getTargetDirectoryFor(project, flexFile, lexerClassName + ".java", lexerPackage, false);
+      File workingDir = VfsUtil.virtualToIoFile(flexFile).getParentFile().getAbsoluteFile();
 
       SimpleJavaParameters javaParameters = new SimpleJavaParameters();
       Sdk sdk = new SimpleJavaSdkType().createJdk("tmp", SystemProperties.getJavaHome());
+      javaParameters.setWorkingDirectory(workingDir);
       javaParameters.setJdk(sdk);
       javaParameters.setJarPath(jflex.get(0).getAbsolutePath());
       javaParameters.getVMParametersList().add("-Xmx512m");
       javaParameters.getProgramParametersList().addParametersString(StringUtil.nullize(Options.GEN_JFLEX_ARGS.get()));
       javaParameters.getProgramParametersList().add("-skel", jflex.get(1).getAbsolutePath());
       javaParameters.getProgramParametersList().add("-d", VfsUtil.virtualToIoFile(virtualDir).getAbsolutePath());
-      javaParameters.getProgramParametersList().add(VfsUtil.virtualToIoFile(flexFile).getAbsolutePath());
+      javaParameters.getProgramParametersList().add(flexFile.getName());
 
       OSProcessHandler processHandler = javaParameters.createOSProcessHandler();
 
@@ -148,7 +178,7 @@ public class BnfRunJFlexAction extends DumbAwareAction {
 
       ((ConsoleViewImpl) runContentDescriptor.getExecutionConsole()).attachToProcess(processHandler);
 
-
+      final ActionCallback callback = new ActionCallback();
       processHandler.addProcessListener(new ProcessAdapter() {
         @Override
         public void processTerminated(ProcessEvent event) {
@@ -156,6 +186,7 @@ public class BnfRunJFlexAction extends DumbAwareAction {
             ApplicationManager.getApplication().invokeLater(new Runnable() {
               @Override
               public void run() {
+                callback.setDone();
                 ensureLexerClassCreated(project, virtualDir, lexerClassName, commandName);
               }
             }, project.getDisposed());
@@ -163,9 +194,11 @@ public class BnfRunJFlexAction extends DumbAwareAction {
         }
       });
       processHandler.startNotify();
+      return callback;
     }
     catch (ExecutionException ex) {
       Messages.showErrorDialog(project, "Unable to run JFlex"+ "\n" + ex.getLocalizedMessage(), commandName);
+      return ActionCallback.REJECTED;
     }
   }
 
@@ -309,6 +342,12 @@ public class BnfRunJFlexAction extends DumbAwareAction {
   }
 
   public static RunContentDescriptor createConsole(@NotNull Project project, final String tabTitle) {
+    RunContentManager runContentManager = ExecutionManager.getInstance(project).getContentManager();
+    for (RunContentDescriptor descriptor : runContentManager.getAllDescriptors()) {
+      if (!Comparing.equal(tabTitle, descriptor.getDisplayName())) continue;
+      ProcessHandler handler = descriptor.getProcessHandler();
+      if (handler == null || handler.isProcessTerminated()) return descriptor;
+    }
     TextConsoleBuilder builder = TextConsoleBuilderFactory.getInstance().createBuilder(project);
     ConsoleView consoleView = builder.getConsole();
 
@@ -327,7 +366,7 @@ public class BnfRunJFlexAction extends DumbAwareAction {
       toolbarActions.add(action);
     }
     toolbarActions.add(new CloseAction(executor, descriptor, project));
-    ExecutionManager.getInstance(project).getContentManager().showRunContent(executor, descriptor);
+    runContentManager.showRunContent(executor, descriptor);
     consoleView.allowHeavyFilters();
     return descriptor;
   }

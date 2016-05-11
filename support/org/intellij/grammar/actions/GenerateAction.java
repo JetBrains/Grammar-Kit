@@ -73,14 +73,13 @@ public class GenerateAction extends AnAction implements DumbAware {
 
   @Override
   public void update(@NotNull AnActionEvent e) {
-    List<BnfFile> bnfFiles = getFiles(e);
-    boolean enabled = !bnfFiles.isEmpty();
-    e.getPresentation().setEnabled(enabled);
-    e.getPresentation().setVisible(enabled);
+    Project project = e.getProject();
+    List<BnfFile> files = getFiles(e);
+    e.getPresentation().setEnabledAndVisible(project != null && !files.isEmpty());
   }
 
   private static List<BnfFile> getFiles(AnActionEvent e) {
-    Project project = getEventProject(e);
+    Project project = e.getProject();
     VirtualFile[] files = LangDataKeys.VIRTUAL_FILE_ARRAY.getData(e.getDataContext());
     if (project == null || files == null) return Collections.emptyList();
     final PsiManager manager = PsiManager.getInstance(project);
@@ -95,12 +94,16 @@ public class GenerateAction extends AnAction implements DumbAware {
 
   @Override
   public void actionPerformed(@NotNull AnActionEvent e) {
-    final Project project = getEventProject(e);
-    final List<BnfFile> bnfFiles = getFiles(e);
-    if (project == null || bnfFiles.isEmpty()) return;
+    Project project = getEventProject(e);
+    List<BnfFile> files = getFiles(e);
+    if (project == null || files.isEmpty()) return;
     PsiDocumentManager.getInstance(project).commitAllDocuments();
     FileDocumentManager.getInstance().saveAllDocuments();
 
+    doGenerate(project, files);
+  }
+
+  public static void doGenerate(@NotNull final Project project, final List<BnfFile> bnfFiles) {
     final Map<BnfFile, VirtualFile> rootMap = ContainerUtil.newLinkedHashMap();
     ApplicationManager.getApplication().runWriteAction(new Runnable() {
       @Override

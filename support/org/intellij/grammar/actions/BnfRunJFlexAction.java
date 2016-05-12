@@ -28,9 +28,7 @@ import com.intellij.execution.process.OSProcessHandler;
 import com.intellij.execution.process.ProcessAdapter;
 import com.intellij.execution.process.ProcessEvent;
 import com.intellij.execution.process.ProcessHandler;
-import com.intellij.execution.ui.ConsoleView;
-import com.intellij.execution.ui.RunContentDescriptor;
-import com.intellij.execution.ui.RunContentManager;
+import com.intellij.execution.ui.*;
 import com.intellij.execution.ui.actions.CloseAction;
 import com.intellij.notification.Notification;
 import com.intellij.notification.NotificationType;
@@ -129,17 +127,19 @@ public class BnfRunJFlexAction extends DumbAwareAction {
       return;
     }
     new Runnable() {
+      boolean first = true;
       Iterator<VirtualFile> it = files.iterator();
       @Override
       public void run() {
         if (it.hasNext()) {
-          doGenerate(project, it.next(), jflex).doWhenProcessed(this);
+          doGenerate(project, it.next(), jflex, first).doWhenProcessed(this);
+          first = false;
         }
       }
     }.run();
   }
 
-  public static ActionCallback doGenerate(final Project project, VirtualFile flexFile, List<File> jflex) {
+  public static ActionCallback doGenerate(final Project project, VirtualFile flexFile, List<File> jflex, boolean forceNew) {
     FileDocumentManager fileDocumentManager = FileDocumentManager.getInstance();
     Document document = fileDocumentManager.getDocument(flexFile);
     if (document == null) return ActionCallback.REJECTED;
@@ -174,7 +174,7 @@ public class BnfRunJFlexAction extends DumbAwareAction {
 
       OSProcessHandler processHandler = javaParameters.createOSProcessHandler();
 
-      RunContentDescriptor runContentDescriptor = createConsole(project, commandName);
+      RunContentDescriptor runContentDescriptor = createConsole(project, commandName, forceNew);
 
       ((ConsoleViewImpl) runContentDescriptor.getExecutionConsole()).attachToProcess(processHandler);
 
@@ -341,12 +341,22 @@ public class BnfRunJFlexAction extends DumbAwareAction {
     return null;
   }
 
-  public static RunContentDescriptor createConsole(@NotNull Project project, final String tabTitle) {
+  public static RunContentDescriptor createConsole(@NotNull Project project, String tabTitle, boolean forceNew) {
     RunContentManager runContentManager = ExecutionManager.getInstance(project).getContentManager();
-    for (RunContentDescriptor descriptor : runContentManager.getAllDescriptors()) {
-      if (!Comparing.equal(tabTitle, descriptor.getDisplayName())) continue;
-      ProcessHandler handler = descriptor.getProcessHandler();
-      if (handler == null || handler.isProcessTerminated()) return descriptor;
+    if (!forceNew) {
+      for (RunContentDescriptor descriptor : runContentManager.getAllDescriptors()) {
+        if (!Comparing.equal(tabTitle, descriptor.getDisplayName())) continue;
+        ProcessHandler handler = descriptor.getProcessHandler();
+        if (handler == null || handler.isProcessTerminated()) {
+          ExecutionConsole console = descriptor.getExecutionConsole();
+          if (console instanceof ConsoleViewImpl) {
+            ConsoleView consoleView = (ConsoleView)console;
+            consoleView.print("\n\n" + StringUtil.repeatSymbol('-', 60) + "\n", ConsoleViewContentType.SYSTEM_OUTPUT);
+            ((ConsoleViewImpl)consoleView).scrollToEnd();
+          }
+          return descriptor;
+        }
+      }
     }
     TextConsoleBuilder builder = TextConsoleBuilderFactory.getInstance().createBuilder(project);
     ConsoleView consoleView = builder.getConsole();

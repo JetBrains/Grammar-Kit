@@ -90,9 +90,10 @@ import static org.intellij.grammar.actions.FileGeneratorUtil.getTargetDirectoryF
 public class BnfRunJFlexAction extends DumbAwareAction {
 
   private static final String[] JETBRAINS_JFLEX_URLS = {
-      "https://github.com/JetBrains/intellij-community/raw/master/tools/lexer/jflex-1.4/lib/JFlex.jar",
+      "https://github.com/JetBrains/intellij-community/raw/master/tools/lexer/jflex-1.7.0-SNAPSHOT.jar",
       "https://raw.github.com/JetBrains/intellij-community/master/tools/lexer/idea-flex.skeleton"
   };
+  private static final String LIB_NAME = "JetBrains JFlex";
 
   @Override
   public void update(@NotNull AnActionEvent e) {
@@ -121,9 +122,11 @@ public class BnfRunJFlexAction extends DumbAwareAction {
     PsiDocumentManager.getInstance(project).commitAllDocuments();
     FileDocumentManager.getInstance().saveAllDocuments();
 
-    final List<File> jflex = getOrDownload(project, "JetBrains JFlex", JETBRAINS_JFLEX_URLS);
+    final List<File> jflex = getOrDownload(project, LIB_NAME, JETBRAINS_JFLEX_URLS);
     if (jflex.isEmpty()) {
-      fail(project, files.get(0), "jflex.jar could not be located or downloaded");
+      fail(project, "JFlex jar not found",
+           "Create global library '" + LIB_NAME + "' " +
+           "with JFlex jar and idea-flex.skeleton file to fix.");
       return;
     }
     new Runnable() {

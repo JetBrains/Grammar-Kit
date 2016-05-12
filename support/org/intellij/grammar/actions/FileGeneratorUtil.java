@@ -118,9 +118,13 @@ public class FileGeneratorUtil {
   }
 
   static void fail(@NotNull Project project, @NotNull VirtualFile sourceFile, @NotNull String message) {
+    fail(project, sourceFile.getName(), message);
+  }
+
+  static void fail(@NotNull Project project, @NotNull String title, @NotNull String message) {
     Notifications.Bus.notify(new Notification(
       BnfConstants.GENERATION_GROUP,
-      sourceFile.getName(), message,
+      title, message,
       NotificationType.ERROR), project);
     throw new ProcessCanceledException();
   }

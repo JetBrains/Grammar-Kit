@@ -123,8 +123,8 @@ public class JFlexPsiImplUtil extends JavaRefHelper {
     return new StateRef(o);
   }
 
-  public static boolean isYYINITIAL(PsiElement element) {
-    return "YYINITIAL".equals(element.getText());
+  public static boolean isYYINITIAL(String s) {
+    return "YYINITIAL".equals(s);
   }
 
 }

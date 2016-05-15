@@ -52,8 +52,9 @@ public class JavaRefHelper {
     return PsiReference.EMPTY_ARRAY;
   }
 
-  private static final Pattern RETURN_PAT = Pattern.compile("return\\s+(\\w+)");
-  private static final Pattern YYBEGIN_PAT = Pattern.compile("yybegin\\s*\\(\\s*(\\w+)");
+  private static final Pattern RETURN_PAT = Pattern.compile("return\\s+([^;\\}]+)");
+  private static final Pattern YYBEGIN_PAT = Pattern.compile("yybegin\\s*\\(\\s*([^\\)]+)\\)");
+
   @NotNull
   private static PsiReference[] getRuleReferences(@NotNull JFlexJavaCode o) {
     String text = o.getText();
@@ -67,7 +68,9 @@ public class JavaRefHelper {
     {
       Matcher matcher = RETURN_PAT.matcher(text);
       for (int offset = 0; matcher.find(offset); offset = matcher.end() + 1) {
-        list.add(new TypeRef(o, TextRange.create(matcher.start(1), matcher.end(1))));
+        String refText = matcher.group(1);
+        PsiFile javaFile = createJavaFileForExpr("return " + refText + ";", o);
+        ContainerUtil.addAll(list, wrapJavaReferences(o, matcher.start(1), javaFile, refText));
       }
     }
     return list.isEmpty() ? PsiReference.EMPTY_ARRAY : list.toArray(new PsiReference[list.size()]);
@@ -75,38 +78,43 @@ public class JavaRefHelper {
 
   @NotNull
   public static PsiReference[] getReferences(@NotNull JFlexJavaType o) {
-    String text = o.getText();
-    PsiFile javaFile = createJavaFileForExpr(text + " val", o);
-    int end = javaFile.getText().lastIndexOf(" val");
-    int start = end - text.length();
+    String refText = o.getText();
+    PsiFile javaFile = createJavaFileForExpr(refText + " val", o);
+    return wrapJavaReferences(o, 0, javaFile, refText);
+  }
+
+  private static PsiReference[] wrapJavaReferences(@NotNull final PsiElement o, int javaOffset, PsiFile javaFile, String targetText) {
+    int start = javaFile.getText().lastIndexOf(targetText);
+    int end = start + targetText.length();
+
     List<PsiReference> list = ContainerUtil.newSmartList();
     for (PsiElement e : SyntaxTraverser.psiTraverser(javaFile).traverse(TreeTraversal.LEAVES_BFS)) {
       TextRange r = e.getTextRange();
-      if (r.intersects(start, end)) {
-        final PsiReference ref = javaFile.findReferenceAt(r.getStartOffset());
-        if (ref != null) {
-          TextRange rr = ref.getRangeInElement();
-          list.add(new PsiReferenceBase<PsiElement>(o, rr.shiftRight(r.getStartOffset() - start)) {
-            @Nullable
-            @Override
-            public PsiElement resolve() {
-              return ref.resolve();
-            }
+      if (!r.intersects(start, end)) continue;
+      final PsiReference ref = javaFile.findReferenceAt(r.getStartOffset());
+      if (ref != null) {
+        TextRange rr = ref.getRangeInElement();
+        TextRange er = ref.getElement().getTextRange();
+        list.add(new PsiReferenceBase<PsiElement>(o, rr.shiftRight(javaOffset + er.getStartOffset() - start)) {
+          @Nullable
+          @Override
+          public PsiElement resolve() {
+            return ref.resolve();
+          }
 
-            @Override
-            public PsiElement handleElementRename(String newElementName) throws IncorrectOperationException {
-              PsiElement e = getElement();
-              String text = StringUtil.replaceSubstring(e.getText(), getRangeInElement(), newElementName);
-              return e.replace(JFlexPsiElementFactory.createJavaTypeFromText(e.getProject(), text));
-            }
+          @Override
+          public PsiElement handleElementRename(String newElementName) throws IncorrectOperationException {
+            PsiElement e = getElement();
+            String text = StringUtil.replaceSubstring(e.getText(), getRangeInElement(), newElementName);
+            return e.replace(JFlexPsiElementFactory.createJavaTypeFromText(e.getProject(), text));
+          }
 
-            @NotNull
-            @Override
-            public Object[] getVariants() {
-              return ArrayUtil.EMPTY_OBJECT_ARRAY;
-            }
-          });
-        }
+          @NotNull
+          @Override
+          public Object[] getVariants() {
+            return ArrayUtil.EMPTY_OBJECT_ARRAY;
+          }
+        });
       }
     }
     return list.isEmpty() ? PsiReference.EMPTY_ARRAY : list.toArray(new PsiReference[list.size()]);

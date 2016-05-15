@@ -57,10 +57,10 @@ class StateRef extends PsiReferenceBase<PsiElement> {
   @Nullable
   @Override
   public PsiElement resolve() {
-    if (JFlexPsiImplUtil.isYYINITIAL(getElement())) {
+    final String name = getRangeInElement().substring(getElement().getText());
+    if (JFlexPsiImplUtil.isYYINITIAL(name)) {
       return resolveYYINITIAL(getElement());
     }
-    final String name = getRangeInElement().substring(getElement().getText());
     CommonProcessors.FindFirstProcessor<JFlexStateDefinition> processor =
       new CommonProcessors.FindFirstProcessor<JFlexStateDefinition>() {
         @Override

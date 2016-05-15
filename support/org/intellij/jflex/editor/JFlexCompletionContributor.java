@@ -36,9 +36,7 @@ import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.util.ProcessingContext;
 import org.intellij.grammar.parser.GeneratedParserUtilBase;
 import org.intellij.jflex.parser.JFlexFileType;
-import org.intellij.jflex.psi.JFlexDeclarationsSection;
-import org.intellij.jflex.psi.JFlexExpression;
-import org.intellij.jflex.psi.JFlexUserCodeSection;
+import org.intellij.jflex.psi.*;
 import org.intellij.jflex.psi.impl.JFlexFileImpl;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -60,8 +58,15 @@ public class JFlexCompletionContributor extends CompletionContributor {
       protected void addCompletions(@NotNull CompletionParameters parameters,
                                     ProcessingContext context,
                                     @NotNull CompletionResultSet result) {
-        for (String keyword : suggestKeywords(parameters.getPosition())) {
-          result.addElement(createKeywordLookupItem(keyword));
+        PsiElement position = parameters.getPosition();
+        JFlexCompositeElement parent = PsiTreeUtil.getParentOfType(
+          position, JFlexDeclarationsSection.class, JFlexRule.class, JFlexJavaCode.class, JFlexJavaType.class);
+        boolean inJava = parent instanceof JFlexJavaCode || parent instanceof JFlexJavaType;
+
+        if (!inJava && parameters.getInvocationCount() < 2) {
+          for (String keyword : suggestKeywords(parameters.getPosition())) {
+            result.addElement(createKeywordLookupItem(keyword));
+          }
         }
       }
     });

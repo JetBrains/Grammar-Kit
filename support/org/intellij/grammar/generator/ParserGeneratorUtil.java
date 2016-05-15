@@ -27,6 +27,7 @@ import com.intellij.psi.codeStyle.NameUtil;
 import com.intellij.psi.impl.source.tree.LeafPsiElement;
 import com.intellij.psi.tree.IElementType;
 import com.intellij.psi.util.PsiTreeUtil;
+import com.intellij.util.Function;
 import com.intellij.util.ObjectUtils;
 import com.intellij.util.ThreeState;
 import com.intellij.util.containers.ContainerUtil;
@@ -305,7 +306,7 @@ public class ParserGeneratorUtil {
     if (rule == null) return Collections.emptyList();
     for (String ruleClass : getRuleClasses(rule)) {
       for (String utilClass = psiImplUtilClass; utilClass != null; utilClass = helper.getSuperClassName(utilClass)) {
-        List<NavigatablePsiElement> methods = helper.findClassMethods(utilClass, true, methodName, -1, ruleClass);
+        List<NavigatablePsiElement> methods = helper.findClassMethods(utilClass, JavaHelper.MethodType.STATIC, methodName, -1, ruleClass);
         if (!methods.isEmpty()) return methods;
       }
     }
@@ -724,6 +725,20 @@ public class ParserGeneratorUtil {
       }
       return false;
     }
+  }
+
+  public static String getParametersString(List<String> paramsTypes,
+                                           int offset,
+                                           int mask,
+                                           Function<String, String> shortener) {
+    StringBuilder sb = new StringBuilder();
+    for (int i = offset; i < paramsTypes.size(); i += 2) {
+      if (i > offset) sb.append(", ");
+      if ((mask & 1) == 1) sb.append(shortener.fun(paramsTypes.get(i)));
+      if ((mask & 3) == 3) sb.append(" ");
+      if ((mask & 2) == 2) sb.append(paramsTypes.get(i + 1));
+    }
+    return sb.toString();
   }
 
   private static final TObjectHashingStrategy<PsiElement> TEXT_STRATEGY = new TObjectHashingStrategy<PsiElement>() {

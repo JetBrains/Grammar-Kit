@@ -20,6 +20,7 @@ Recent changes / 1.3.1
 * Generator: override 'gen' folder name via 'grammar.kit.gen.dir' system property
 * Generator: generate elementTypes for fake rules when needed #76
 * Generator: improved/unified identifiers generation #97
+* Generator/PSI: generate constructors from super-class #105
 * JFlex: ability to run JFlex 1.6
 * JFlex: additional arguments via 'grammar.kit.gen.jflex.args' system property
 * JFlex: resolve returned token constants & yybegin(state) in action code

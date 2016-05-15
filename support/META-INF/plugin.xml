@@ -18,6 +18,7 @@
       <li>Generator: override 'gen' folder name via 'grammar.kit.gen.dir' system property</li>
       <li>Generator: generate elementTypes for fake rules when needed #76</li>
       <li>Generator: improved/unified identifiers generation #97</li>
+      <li>Generator/PSI: generate constructors from super-class #105</li>
       <li>JFlex: ability to run JFlex 1.6</li>
       <li>JFlex: additional arguments via 'grammar.kit.gen.jflex.args' system property</li>
       <li>JFlex: resolve returned token constants & yybegin(state) in action code</li>

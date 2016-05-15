@@ -57,7 +57,7 @@ public class BnfReferenceImpl<T extends BnfCompositeElement> extends PsiReferenc
       // paramCount + 2 (builder and level)
       JavaHelper helper = JavaHelper.getJavaHelper(myElement);
       for (String className = parserClass; className != null; className = helper.getSuperClassName(className)) {
-        List<NavigatablePsiElement> methods = helper.findClassMethods(className, true, referenceName, paramCount + 2);
+        List<NavigatablePsiElement> methods = helper.findClassMethods(className, JavaHelper.MethodType.STATIC, referenceName, paramCount + 2);
         result = ContainerUtil.getFirstItem(methods);
         if (result != null) break;
       }
@@ -96,7 +96,7 @@ public class BnfReferenceImpl<T extends BnfCompositeElement> extends PsiReferenc
       if (StringUtil.isNotEmpty(parserClass)) {
         JavaHelper helper = JavaHelper.getJavaHelper(myElement);
         for (String className = parserClass; className != null; className = helper.getSuperClassName(className)) {
-          for (NavigatablePsiElement element : helper.findClassMethods(className, true, "*", -1, BnfConstants.PSI_BUILDER_CLASS, "int")) {
+          for (NavigatablePsiElement element : helper.findClassMethods(className, JavaHelper.MethodType.STATIC, "*", -1, BnfConstants.PSI_BUILDER_CLASS, "int")) {
             List<String> methodTypes = helper.getMethodTypes(element);
             if ("boolean".equals(ContainerUtil.getFirstItem(methodTypes))) {
               list.add(LookupElementBuilder.createWithIcon((PsiNamedElement)element));

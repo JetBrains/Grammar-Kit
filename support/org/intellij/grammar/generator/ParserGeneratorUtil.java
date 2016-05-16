@@ -37,6 +37,7 @@ import org.intellij.grammar.actions.GenerateAction;
 import org.intellij.grammar.java.JavaHelper;
 import org.intellij.grammar.psi.*;
 import org.intellij.grammar.psi.impl.GrammarUtil;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.TestOnly;
@@ -330,7 +331,8 @@ public class ParserGeneratorUtil {
     return result;
   }
 
-  static BnfRule getTopSuperRule(BnfFile file, BnfRule rule) {
+  @Nullable
+  static BnfRule getTopSuperRule(@NotNull BnfFile file, BnfRule rule) {
     Set<BnfRule> visited = ContainerUtil.newHashSet();
     BnfRule cur = rule, next = rule;
     for (; next != null && cur != null; cur = !visited.add(next) ? null : next) {
@@ -380,10 +382,7 @@ public class ParserGeneratorUtil {
   }
 
   @NotNull
-  static String getSuperClassName(BnfFile file,
-                                  BnfRule rule,
-                                  String psiPackage,
-                                  String prefix, String suffix) {
+  static String getSuperClassName(BnfFile file, BnfRule rule, String psiPackage, String prefix, String suffix) {
     BnfRule topSuper = getTopSuperRule(file, rule);
     return topSuper == null ? getRootAttribute(file, KnownAttribute.EXTENDS) :
            topSuper == rule ? getAttribute(rule, KnownAttribute.EXTENDS) :

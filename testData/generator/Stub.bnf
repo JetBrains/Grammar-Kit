@@ -10,12 +10,18 @@
   parserUtilClass="org.intellij.grammar.parser.GeneratedParserUtilBase"
   expressionUtilClass="test.FooUtil"
 
-  extends("element1|element2")="test.psi.impl.MyStubbedElementBase<?>"
+  extends("element1|element2|type")="test.psi.impl.MyStubbedElementBase<?>"
   extends("element3")="test.psi.impl.MySubstituted"
+
+  extends(".*type")=type
 }
-root ::= element1 | element2 | element3 | element4 | element5
-element1 ::= 'aa' { stubClass="test.stub.Element1Stub" }
-element2 ::= 'bb' { stubClass="test.stub.Element2Stub" }
-element3 ::= 'bb' { stubClass="test.stub.Element3Stub" }
-element4 ::= 'bb' { stubClass="test.stub.Element4Stub" }
+root ::= element1 | element2 | element3 | element4 | element5 | type
+element1 ::= 'aa' element5   { stubClass="test.stub.Element1Stub" }
+element2 ::= 'bb' element4*  { stubClass="test.stub.Element2Stub" }
+element3 ::= 'bb' element4   { stubClass="test.stub.Element3Stub" }
+element4 ::= 'bb' | element2 { stubClass="test.stub.Element4Stub" }
 element5 ::= 'cc'
+
+type ::= interface_type | struct_type {stubClass="test.stub.TypeStub"}
+struct_type ::= 'struct'
+interface_type ::= 'interface'

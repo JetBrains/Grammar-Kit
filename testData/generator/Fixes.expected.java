@@ -38,6 +38,43 @@ public class Fixes implements PsiParser, LightPsiParser {
   };
 
   /* ********************************************************** */
+  // &Foo__predicate Foo__inner
+  static boolean Foo(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "Foo")) return false;
+    boolean result_;
+    Marker marker_ = enter_section_(builder_, level_, _NONE_);
+    result_ = Foo_0(builder_, level_ + 1);
+    result_ = result_ && Foo_inner(builder_, level_ + 1);
+    exit_section_(builder_, level_, marker_, result_, false, Foo__recovery_parser_);
+    return result_;
+  }
+
+  // &Foo__predicate
+  private static boolean Foo_0(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "Foo_0")) return false;
+    boolean result_;
+    Marker marker_ = enter_section_(builder_, level_, _AND_);
+    result_ = Foo_predicate(builder_, level_ + 1);
+    exit_section_(builder_, level_, marker_, result_, false, null);
+    return result_;
+  }
+
+  /* ********************************************************** */
+  static boolean Foo_inner(PsiBuilder builder_, int level_) {
+    return true;
+  }
+
+  /* ********************************************************** */
+  static boolean Foo_predicate(PsiBuilder builder_, int level_) {
+    return true;
+  }
+
+  /* ********************************************************** */
+  static boolean Foo_recovery(PsiBuilder builder_, int level_) {
+    return true;
+  }
+
+  /* ********************************************************** */
   // orRestriction
   public static boolean a_expr(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "a_expr")) return false;
@@ -467,6 +504,11 @@ public class Fixes implements PsiParser, LightPsiParser {
     return result_;
   }
 
+  final static Parser Foo__recovery_parser_ = new Parser() {
+    public boolean parse(PsiBuilder builder_, int level_) {
+      return Foo_recovery(builder_, level_ + 1);
+    }
+  };
   final static Parser some_parser_ = new Parser() {
     public boolean parse(PsiBuilder builder_, int level_) {
       return some(builder_, level_ + 1);

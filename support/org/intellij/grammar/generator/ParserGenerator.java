@@ -1042,8 +1042,9 @@ public class ParserGenerator {
         }
         else {
           ExpressionHelper.ExpressionInfo info = ExpressionGeneratorHelper.getInfoForExpressionParsing(myExpressionHelper, subRule);
-          method = info != null ? info.rootRule.getName() : subRule.getName();
-          String parserClass = myRuleParserClasses.get(method);
+          BnfRule rr = info != null ? info.rootRule : subRule;
+          method = getFuncName(rr);
+          String parserClass = myRuleParserClasses.get(rr.getName());
           if (!parserClass.equals(myGrammarRootParser) && !parserClass.equals(myRuleParserClasses.get(rule.getName()))) {
             method = StringUtil.getShortName(parserClass) + "." + method;
           }

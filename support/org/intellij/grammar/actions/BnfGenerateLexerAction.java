@@ -33,12 +33,12 @@ import com.intellij.openapi.fileTypes.ex.FileTypeManagerEx;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.util.text.StringUtil;
+import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.vfs.VirtualFileWrapper;
 import com.intellij.psi.*;
 import com.intellij.psi.search.FilenameIndex;
 import com.intellij.psi.search.ProjectScope;
-import com.intellij.util.FileContentUtil;
 import com.intellij.util.IncorrectOperationException;
 import com.intellij.util.containers.ContainerUtil;
 import org.apache.velocity.VelocityContext;
@@ -107,13 +107,11 @@ public class BnfGenerateLexerAction extends AnAction {
           String packageName = aPackage == null ? null : aPackage.getQualifiedName();
 
           String text = generateLexerText(bnfFile, packageName);
-          PsiFile psiFile = psiDirectory.findFile(flexFileName);
-          if (psiFile == null) psiFile = psiDirectory.createFile("_" + flexFileName);
 
-          FileContentUtil.setFileText(project, virtualFile, text);
+          VfsUtil.saveText(virtualFile, text);
 
           Notifications.Bus.notify(new Notification(BnfConstants.GENERATION_GROUP,
-              psiFile.getName() + " generated", "to " + virtualFile.getParent().getPath(),
+              virtualFile.getName() + " generated", "to " + virtualFile.getParent().getPath(),
               NotificationType.INFORMATION), project);
 
           associateFileTypeAndNavigate(project, virtualFile);

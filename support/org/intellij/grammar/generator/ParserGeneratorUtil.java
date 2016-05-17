@@ -258,15 +258,15 @@ public class ParserGeneratorUtil {
   @NotNull
   public static String toIdentifier(@NotNull String text, @Nullable String prefix, @NotNull Case cas) {
     if (text.isEmpty()) return "";
-    String fixed = text.replaceAll("[^:\\p{javaJavaIdentifierPart}]", "_").replaceAll("_+", "_");
+    String fixed = text.replaceAll("[^:\\p{javaJavaIdentifierPart}]", "_");
     StringBuilder sb = new StringBuilder(StringUtil.notNullize(prefix));
     if (!Character.isJavaIdentifierStart(fixed.charAt(0)) && sb.length() == 0) sb.append("_");
     String[] strings = NameUtil.nameToWords(fixed);
     for (int i = 0, len = strings.length; i < len; i++) {
       String s = strings[i];
-      if (cas == Case.CAMEL && "_".equals(s) && !(i == 0 || i == len - 1)) continue;
-      if (cas == Case.UPPER && !"_".equals(s) && !(i == 0 || StringUtil.endsWith(sb, "_"))) sb.append("_");
-      if (cas == Case.CAMEL && i < len - 1 && !"_".equals(strings[i+1]) && Case.UPPER.apply(s).equals(s)) sb.append(s);
+      if (cas == Case.CAMEL && s.startsWith("_") && !(i == 0 || i == len - 1)) continue;
+      if (cas == Case.UPPER && !s.startsWith("_") && !(i == 0 || StringUtil.endsWith(sb, "_"))) sb.append("_");
+      if (cas == Case.CAMEL && i < len - 1 && !strings[i+1].startsWith("_") && Case.UPPER.apply(s).equals(s)) sb.append(s);
       else sb.append(cas.apply(s));
     }
     return sb.toString();

@@ -303,14 +303,52 @@ public class ParserGeneratorUtil {
                                                                 @Nullable String psiImplUtilClass,
                                                                 @Nullable String methodName,
                                                                 @Nullable BnfRule rule) {
-    if (rule == null) return Collections.emptyList();
-    for (String ruleClass : getRuleClasses(rule)) {
+    List<NavigatablePsiElement> methods = Collections.emptyList();
+    if (rule == null) return methods;
+    String selectedSuperClass = null;
+    main: for (String ruleClass : getRuleClasses(rule)) {
       for (String utilClass = psiImplUtilClass; utilClass != null; utilClass = helper.getSuperClassName(utilClass)) {
-        List<NavigatablePsiElement> methods = helper.findClassMethods(utilClass, JavaHelper.MethodType.STATIC, methodName, -1, ruleClass);
-        if (!methods.isEmpty()) return methods;
+        methods = helper.findClassMethods(utilClass, JavaHelper.MethodType.STATIC, methodName, -1, ruleClass);
+        selectedSuperClass = ruleClass;
+        if (!methods.isEmpty()) break main;
       }
     }
-    return Collections.emptyList();
+    return filterOutShadowedRuleImplMethods(selectedSuperClass, methods, helper);
+  }
+
+  @NotNull
+  private static List<NavigatablePsiElement> filterOutShadowedRuleImplMethods(String selectedClass,
+                                                                              List<NavigatablePsiElement> methods,
+                                                                              @NotNull JavaHelper helper) {
+    if (methods.size() <= 1) return methods;
+
+    // filter out less specific methods
+    // todo move to JavaHelper
+    List<NavigatablePsiElement> result = ContainerUtil.newArrayList(methods);
+    Map<String, NavigatablePsiElement> prototypes = ContainerUtil.newLinkedHashMap();
+    for (NavigatablePsiElement m2 : methods) {
+      List<String> types = helper.getMethodTypes(m2);
+      String proto = m2.getName() + types.subList(3, types.size());
+      NavigatablePsiElement m1 = prototypes.get(proto);
+      if (m1 == null) {
+        prototypes.put(proto, m2);
+        continue;
+      }
+      String type1 = helper.getMethodTypes(m1).get(1);
+      String type2 = types.get(1);
+      if (Comparing.equal(type1, type2)) continue;
+      for (String s = selectedClass; s != null; s = helper.getSuperClassName(s)) {
+        if (Comparing.equal(type1, s)) {
+          result.remove(m2);
+        }
+        else if (Comparing.equal(type2, s)) {
+          result.remove(m1);
+        }
+        else continue;
+        break;
+      }
+    }
+    return result;
   }
 
   @NotNull

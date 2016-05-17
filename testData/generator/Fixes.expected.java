@@ -38,39 +38,41 @@ public class Fixes implements PsiParser, LightPsiParser {
   };
 
   /* ********************************************************** */
-  // &Foo__predicate Foo__inner
+  // &<Foo  predicate> <Foo (ﾉ´･ω･)ﾉ ﾐ ┸━┸ inner>
   static boolean Foo(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "Foo")) return false;
     boolean result_;
     Marker marker_ = enter_section_(builder_, level_, _NONE_);
     result_ = Foo_0(builder_, level_ + 1);
-    result_ = result_ && Foo_inner(builder_, level_ + 1);
+    result_ = result_ && Foo__ﾉ__ω__ﾉ_ﾐ_____inner(builder_, level_ + 1);
     exit_section_(builder_, level_, marker_, result_, false, Foo__recovery_parser_);
     return result_;
   }
 
-  // &Foo__predicate
+  // &<Foo  predicate>
   private static boolean Foo_0(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "Foo_0")) return false;
     boolean result_;
     Marker marker_ = enter_section_(builder_, level_, _AND_);
-    result_ = Foo_predicate(builder_, level_ + 1);
+    result_ = Foo__predicate(builder_, level_ + 1);
     exit_section_(builder_, level_, marker_, result_, false, null);
     return result_;
   }
 
   /* ********************************************************** */
-  static boolean Foo_inner(PsiBuilder builder_, int level_) {
+  static boolean Foo__predicate(PsiBuilder builder_, int level_) {
     return true;
   }
 
   /* ********************************************************** */
-  static boolean Foo_predicate(PsiBuilder builder_, int level_) {
+  static boolean Foo__recovery(PsiBuilder builder_, int level_) {
     return true;
   }
 
   /* ********************************************************** */
-  static boolean Foo_recovery(PsiBuilder builder_, int level_) {
+  public static boolean Foo__ﾉ__ω__ﾉ_ﾐ_____inner(PsiBuilder builder_, int level_) {
+    Marker marker_ = enter_section_(builder_);
+    exit_section_(builder_, marker_, FOO__ﾉ__Ω__ﾉ_ﾐ_____INNER, true);
     return true;
   }
 
@@ -506,7 +508,7 @@ public class Fixes implements PsiParser, LightPsiParser {
 
   final static Parser Foo__recovery_parser_ = new Parser() {
     public boolean parse(PsiBuilder builder_, int level_) {
-      return Foo_recovery(builder_, level_ + 1);
+      return Foo__recovery(builder_, level_ + 1);
     }
   };
   final static Parser some_parser_ = new Parser() {

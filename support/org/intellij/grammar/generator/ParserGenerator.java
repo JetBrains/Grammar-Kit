@@ -1032,7 +1032,8 @@ public class ParserGenerator {
       return generateConsumeTextToken(text, consumeMethodName);
     }
     else if (type == BNF_REFERENCE_OR_TOKEN) {
-      BnfRule subRule = myFile.getRule(text);
+      String value = GrammarUtil.stripQuotesAroundId(text);
+      BnfRule subRule = myFile.getRule(value);
       if (subRule != null) {
         String method;
         if (Rule.isExternal(subRule)) {
@@ -1173,7 +1174,7 @@ public class ParserGenerator {
     if (!collectExtraArguments(rule, nested, false).isEmpty()) {
       return wrapCallWithParserInstance(generateNodeCall(rule, nested, nextName));
     }
-    String constantName = nextName + "_parser_";
+    String constantName = toIdentifier(nextName, null, Case.AS_IS) + "_parser_";
     String current = myParserLambdas.get(constantName);
     if (current == null) {
       myParserLambdas.put(constantName, "#" + generateNodeCall(rule, nested, nextName));

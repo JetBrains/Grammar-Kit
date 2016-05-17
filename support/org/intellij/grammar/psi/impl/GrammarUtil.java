@@ -27,6 +27,7 @@ import com.intellij.util.SmartList;
 import org.intellij.grammar.generator.ParserGeneratorUtil;
 import org.intellij.grammar.parser.GeneratedParserUtilBase;
 import org.intellij.grammar.psi.*;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -198,8 +199,13 @@ public class GrammarUtil {
     return ref.get();
   }
 
+  @NotNull
   public static String getIdText(@Nullable PsiElement id) {
-    String text = id == null ? "" : id.getText();
+    return id == null ? "" : stripQuotesAroundId(id.getText());
+  }
+
+  @Contract("!null->!null")
+  public static String stripQuotesAroundId(String text) {
     return isIdQuoted(text) ? text.substring(1, text.length() - 1) : text;
   }
 

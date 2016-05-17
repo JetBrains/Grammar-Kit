@@ -13,6 +13,7 @@ public interface GeneratedTypes {
   IElementType B_EXPR = new IElementType("B_EXPR", null);
   IElementType ERL_LIST = new IElementType("ERL_LIST", null);
   IElementType EXPR = new IElementType("EXPR", null);
+  IElementType FOO__ﾉ__Ω__ﾉ_ﾐ_____INNER = new IElementType("FOO__ﾉ__Ω__ﾉ_ﾐ_____INNER", null);
   IElementType LEFT_EXPR = new IElementType("LEFT_EXPR", null);
   IElementType SOME = new IElementType("SOME", null);
   IElementType SOME_EXPR = new IElementType("SOME_EXPR", null);
@@ -22,6 +23,17 @@ public interface GeneratedTypes {
 
   IElementType A = new IElementType("A", null);
   IElementType B = new IElementType("B", null);
+}
+// ---- FooΩInner.java -----------------
+// This is a generated file. Not intended for manual editing.
+package generated.psi;
+
+import java.util.List;
+import org.jetbrains.annotations.*;
+import com.intellij.psi.PsiElement;
+
+public interface FooΩInner extends PsiElement {
+
 }
 // ---- AExpr.java -----------------
 // This is a generated file. Not intended for manual editing.
@@ -155,6 +167,36 @@ import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
 public interface Zome extends PsiElement {
+
+}
+// ---- FooΩInnerImpl.java -----------------
+// This is a generated file. Not intended for manual editing.
+package generated.psi.impl;
+
+import java.util.List;
+import org.jetbrains.annotations.*;
+import com.intellij.lang.ASTNode;
+import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiElementVisitor;
+import com.intellij.psi.util.PsiTreeUtil;
+import static generated.GeneratedTypes.*;
+import com.intellij.extapi.psi.ASTWrapperPsiElement;
+import generated.psi.*;
+
+public class FooΩInnerImpl extends ASTWrapperPsiElement implements FooΩInner {
+
+  public FooΩInnerImpl(ASTNode node) {
+    super(node);
+  }
+
+  public void accept(@NotNull Visitor visitor) {
+    visitor.visitFooΩInner(this);
+  }
+
+  public void accept(@NotNull PsiElementVisitor visitor) {
+    if (visitor instanceof Visitor) accept((Visitor)visitor);
+    else super.accept(visitor);
+  }
 
 }
 // ---- AExprImpl.java -----------------
@@ -510,6 +552,10 @@ import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.PsiElement;
 
 public class Visitor extends PsiElementVisitor {
+
+  public void visitFooΩInner(@NotNull FooΩInner o) {
+    visitPsiElement(o);
+  }
 
   public void visitAExpr(@NotNull AExpr o) {
     visitExpr(o);

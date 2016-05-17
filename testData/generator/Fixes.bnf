@@ -31,9 +31,9 @@ private erl_tail ::= zome | A zome | '&&' expr some erl_tail {pin(".*")=1}
 private pinned_report ::= A | &B A {pin(".*")=1}
 private pinned_report_ext ::= A | &<<aux>> A {pin(".*")=1}
 
-private Foo ::= &Foo__predicate Foo__inner {
-  recoverWhile=Foo__recovery
+private Foo ::= &<Foo  predicate> <Foo (ﾉ´･ω･)ﾉ ﾐ ┸━┸ inner> {
+  recoverWhile="Foo  recovery"
 }
-private Foo__predicate ::=
-private Foo__recovery ::=
-private Foo__inner ::=
+private <Foo  predicate> ::=
+private <Foo  recovery> ::=
+<Foo (ﾉ´･ω･)ﾉ ﾐ ┸━┸ inner> ::=

@@ -74,10 +74,10 @@ public class BnfGeneratorTest extends BnfGeneratorTestCase {
     String text = loadFile(name + "." + myFileExt);
     myFile = createPsiFile(name, text.replaceAll("generatePsi=[^\n]*", "generatePsi=" + generatePsi));
     List<File> filesToCheck = ContainerUtil.newArrayList();
+    filesToCheck.add(new File(myFullDataPath, name + ".java"));
     if (generatePsi) {
       filesToCheck.add(new File(myFullDataPath, name + ".PSI.java"));
     }
-    filesToCheck.add(new File(myFullDataPath, name + ".java"));
     for (File file : filesToCheck) {
       if (file.exists()) {
         assertTrue(file.delete());

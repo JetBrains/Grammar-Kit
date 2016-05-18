@@ -592,20 +592,25 @@ public class ParserGenerator {
   }
 
   private void generateFileHeader(String className) {
-    final String classHeader = getStringOrFile(getRootAttribute(myFile, KnownAttribute.CLASS_HEADER, className));
-    out(classHeader);
+    String header = getRootAttribute(myFile, KnownAttribute.CLASS_HEADER, className);
+    String text = StringUtil.isEmpty(header) ? "" : getStringOrFile(header);
+    if (StringUtil.isNotEmpty(text)) {
+      out(text);
+    }
     myOffset = 0;
   }
 
   private String getStringOrFile(String classHeader) {
-    File file = new File(mySourcePath, classHeader);
     try {
-      return file.exists() ? FileUtil.loadFile(file) : classHeader;
+      File file = new File(mySourcePath, classHeader);
+      if (file.exists()) return FileUtil.loadFile(file);
     }
     catch (IOException ex) {
       LOG.error(ex);
     }
-    return classHeader;
+    return classHeader.startsWith("//") || classHeader.startsWith("/*")? classHeader :
+           StringUtil.countNewLines(classHeader) > 0 ? "/*\n" + classHeader + "\n*/" :
+           "// " + classHeader;
   }
 
   void generateNode(BnfRule rule, BnfExpression initialNode, String funcName, Set<BnfExpression> visited) {

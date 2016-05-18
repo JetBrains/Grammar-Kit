@@ -1,5 +1,5 @@
 // ---- GrammarParser.java -----------------
-license.txt
+// license.txt
 package org.intellij.grammar.parser;
 
 import com.intellij.lang.PsiBuilder;

@@ -1,5 +1,5 @@
 // ---- JFlexParser.java -----------------
-license.txt
+// license.txt
 package org.intellij.jflex.parser;
 
 import com.intellij.lang.PsiBuilder;

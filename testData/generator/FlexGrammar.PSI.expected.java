@@ -1,5 +1,5 @@
 // ---- JFlexTypes.java -----------------
-license.txt
+// license.txt
 package org.intellij.jflex.psi;
 
 import com.intellij.psi.tree.IElementType;
@@ -212,7 +212,7 @@ public interface JFlexTypes {
   }
 }
 // ---- JFlexChoiceExpression.java -----------------
-license.txt
+// license.txt
 package org.intellij.jflex.psi;
 
 import java.util.List;
@@ -226,7 +226,7 @@ public interface JFlexChoiceExpression extends JFlexExpression {
 
 }
 // ---- JFlexClassExpression.java -----------------
-license.txt
+// license.txt
 package org.intellij.jflex.psi;
 
 import java.util.List;
@@ -237,7 +237,7 @@ public interface JFlexClassExpression extends JFlexExpression {
 
 }
 // ---- JFlexDeclarationsSection.java -----------------
-license.txt
+// license.txt
 package org.intellij.jflex.psi;
 
 import java.util.List;
@@ -257,7 +257,7 @@ public interface JFlexDeclarationsSection extends JFlexCompositeElement {
 
 }
 // ---- JFlexExpression.java -----------------
-license.txt
+// license.txt
 package org.intellij.jflex.psi;
 
 import java.util.List;
@@ -268,7 +268,7 @@ public interface JFlexExpression extends JFlexCompositeElement {
 
 }
 // ---- JFlexJavaCode.java -----------------
-license.txt
+// license.txt
 package org.intellij.jflex.psi;
 
 import java.util.List;
@@ -282,7 +282,7 @@ public interface JFlexJavaCode extends JFlexCompositeElement {
 
 }
 // ---- JFlexJavaType.java -----------------
-license.txt
+// license.txt
 package org.intellij.jflex.psi;
 
 import java.util.List;
@@ -297,7 +297,7 @@ public interface JFlexJavaType extends JFlexCompositeElement {
 
 }
 // ---- JFlexLexicalRulesSection.java -----------------
-license.txt
+// license.txt
 package org.intellij.jflex.psi;
 
 import java.util.List;
@@ -314,7 +314,7 @@ public interface JFlexLexicalRulesSection extends JFlexCompositeElement {
 
 }
 // ---- JFlexLiteralExpression.java -----------------
-license.txt
+// license.txt
 package org.intellij.jflex.psi;
 
 import java.util.List;
@@ -340,7 +340,7 @@ public interface JFlexLiteralExpression extends JFlexExpression {
 
 }
 // ---- JFlexLookAhead.java -----------------
-license.txt
+// license.txt
 package org.intellij.jflex.psi;
 
 import java.util.List;
@@ -354,7 +354,7 @@ public interface JFlexLookAhead extends JFlexCompositeElement {
 
 }
 // ---- JFlexMacroDefinition.java -----------------
-license.txt
+// license.txt
 package org.intellij.jflex.psi;
 
 import java.util.List;
@@ -381,7 +381,7 @@ public interface JFlexMacroDefinition extends PsiNameIdentifierOwner {
 
 }
 // ---- JFlexMacroRefExpression.java -----------------
-license.txt
+// license.txt
 package org.intellij.jflex.psi;
 
 import java.util.List;
@@ -395,7 +395,7 @@ public interface JFlexMacroRefExpression extends JFlexExpression {
 
 }
 // ---- JFlexMacroReference.java -----------------
-license.txt
+// license.txt
 package org.intellij.jflex.psi;
 
 import java.util.List;
@@ -413,7 +413,7 @@ public interface JFlexMacroReference extends JFlexCompositeElement {
 
 }
 // ---- JFlexNotExpression.java -----------------
-license.txt
+// license.txt
 package org.intellij.jflex.psi;
 
 import java.util.List;
@@ -427,7 +427,7 @@ public interface JFlexNotExpression extends JFlexExpression {
 
 }
 // ---- JFlexOption.java -----------------
-license.txt
+// license.txt
 package org.intellij.jflex.psi;
 
 import java.util.List;
@@ -438,7 +438,7 @@ public interface JFlexOption extends JFlexCompositeElement {
 
 }
 // ---- JFlexParenExpression.java -----------------
-license.txt
+// license.txt
 package org.intellij.jflex.psi;
 
 import java.util.List;
@@ -452,7 +452,7 @@ public interface JFlexParenExpression extends JFlexExpression {
 
 }
 // ---- JFlexPredefinedClassExpression.java -----------------
-license.txt
+// license.txt
 package org.intellij.jflex.psi;
 
 import java.util.List;
@@ -463,7 +463,7 @@ public interface JFlexPredefinedClassExpression extends JFlexExpression {
 
 }
 // ---- JFlexQuantifierExpression.java -----------------
-license.txt
+// license.txt
 package org.intellij.jflex.psi;
 
 import java.util.List;
@@ -477,7 +477,7 @@ public interface JFlexQuantifierExpression extends JFlexExpression {
 
 }
 // ---- JFlexRule.java -----------------
-license.txt
+// license.txt
 package org.intellij.jflex.psi;
 
 import java.util.List;
@@ -506,7 +506,7 @@ public interface JFlexRule extends JFlexCompositeElement {
 
 }
 // ---- JFlexSequenceExpression.java -----------------
-license.txt
+// license.txt
 package org.intellij.jflex.psi;
 
 import java.util.List;
@@ -520,7 +520,7 @@ public interface JFlexSequenceExpression extends JFlexExpression {
 
 }
 // ---- JFlexStateDeclaration.java -----------------
-license.txt
+// license.txt
 package org.intellij.jflex.psi;
 
 import java.util.List;
@@ -534,7 +534,7 @@ public interface JFlexStateDeclaration extends JFlexCompositeElement {
 
 }
 // ---- JFlexStateDefinition.java -----------------
-license.txt
+// license.txt
 package org.intellij.jflex.psi;
 
 import java.util.List;
@@ -558,7 +558,7 @@ public interface JFlexStateDefinition extends PsiNameIdentifierOwner {
 
 }
 // ---- JFlexStateReference.java -----------------
-license.txt
+// license.txt
 package org.intellij.jflex.psi;
 
 import java.util.List;
@@ -576,7 +576,7 @@ public interface JFlexStateReference extends JFlexCompositeElement {
 
 }
 // ---- JFlexUserCodeSection.java -----------------
-license.txt
+// license.txt
 package org.intellij.jflex.psi;
 
 import java.util.List;
@@ -590,7 +590,7 @@ public interface JFlexUserCodeSection extends JFlexCompositeElement {
 
 }
 // ---- JFlexUserValue.java -----------------
-license.txt
+// license.txt
 package org.intellij.jflex.psi;
 
 import java.util.List;
@@ -601,7 +601,7 @@ public interface JFlexUserValue extends JFlexCompositeElement {
 
 }
 // ---- JFlexChoiceExpressionImpl.java -----------------
-license.txt
+// license.txt
 package org.intellij.jflex.psi.impl;
 
 import java.util.List;
@@ -636,7 +636,7 @@ public class JFlexChoiceExpressionImpl extends JFlexExpressionImpl implements JF
 
 }
 // ---- JFlexClassExpressionImpl.java -----------------
-license.txt
+// license.txt
 package org.intellij.jflex.psi.impl;
 
 import java.util.List;
@@ -665,7 +665,7 @@ public class JFlexClassExpressionImpl extends JFlexExpressionImpl implements JFl
 
 }
 // ---- JFlexDeclarationsSectionImpl.java -----------------
-license.txt
+// license.txt
 package org.intellij.jflex.psi.impl;
 
 import java.util.List;
@@ -712,7 +712,7 @@ public class JFlexDeclarationsSectionImpl extends JFlexCompositeElementImpl impl
 
 }
 // ---- JFlexExpressionImpl.java -----------------
-license.txt
+// license.txt
 package org.intellij.jflex.psi.impl;
 
 import java.util.List;
@@ -741,7 +741,7 @@ public class JFlexExpressionImpl extends JFlexCompositeElementImpl implements JF
 
 }
 // ---- JFlexJavaCodeImpl.java -----------------
-license.txt
+// license.txt
 package org.intellij.jflex.psi.impl;
 
 import java.util.List;
@@ -775,7 +775,7 @@ public class JFlexJavaCodeImpl extends JFlexCompositeElementImpl implements JFle
 
 }
 // ---- JFlexJavaTypeImpl.java -----------------
-license.txt
+// license.txt
 package org.intellij.jflex.psi.impl;
 
 import java.util.List;
@@ -810,7 +810,7 @@ public class JFlexJavaTypeImpl extends JFlexCompositeElementImpl implements JFle
 
 }
 // ---- JFlexLexicalRulesSectionImpl.java -----------------
-license.txt
+// license.txt
 package org.intellij.jflex.psi.impl;
 
 import java.util.List;
@@ -851,7 +851,7 @@ public class JFlexLexicalRulesSectionImpl extends JFlexCompositeElementImpl impl
 
 }
 // ---- JFlexLiteralExpressionImpl.java -----------------
-license.txt
+// license.txt
 package org.intellij.jflex.psi.impl;
 
 import java.util.List;
@@ -910,7 +910,7 @@ public class JFlexLiteralExpressionImpl extends JFlexExpressionImpl implements J
 
 }
 // ---- JFlexLookAheadImpl.java -----------------
-license.txt
+// license.txt
 package org.intellij.jflex.psi.impl;
 
 import java.util.List;
@@ -945,7 +945,7 @@ public class JFlexLookAheadImpl extends JFlexCompositeElementImpl implements JFl
 
 }
 // ---- JFlexMacroDefinitionImpl.java -----------------
-license.txt
+// license.txt
 package org.intellij.jflex.psi.impl;
 
 import java.util.List;
@@ -1002,7 +1002,7 @@ public class JFlexMacroDefinitionImpl extends JFlexCompositeElementImpl implemen
 
 }
 // ---- JFlexMacroRefExpressionImpl.java -----------------
-license.txt
+// license.txt
 package org.intellij.jflex.psi.impl;
 
 import java.util.List;
@@ -1037,7 +1037,7 @@ public class JFlexMacroRefExpressionImpl extends JFlexExpressionImpl implements 
 
 }
 // ---- JFlexMacroReferenceImpl.java -----------------
-license.txt
+// license.txt
 package org.intellij.jflex.psi.impl;
 
 import java.util.List;
@@ -1078,7 +1078,7 @@ public class JFlexMacroReferenceImpl extends JFlexCompositeElementImpl implement
 
 }
 // ---- JFlexNotExpressionImpl.java -----------------
-license.txt
+// license.txt
 package org.intellij.jflex.psi.impl;
 
 import java.util.List;
@@ -1113,7 +1113,7 @@ public class JFlexNotExpressionImpl extends JFlexExpressionImpl implements JFlex
 
 }
 // ---- JFlexOptionImpl.java -----------------
-license.txt
+// license.txt
 package org.intellij.jflex.psi.impl;
 
 import java.util.List;
@@ -1142,7 +1142,7 @@ public class JFlexOptionImpl extends JFlexCompositeElementImpl implements JFlexO
 
 }
 // ---- JFlexParenExpressionImpl.java -----------------
-license.txt
+// license.txt
 package org.intellij.jflex.psi.impl;
 
 import java.util.List;
@@ -1177,7 +1177,7 @@ public class JFlexParenExpressionImpl extends JFlexExpressionImpl implements JFl
 
 }
 // ---- JFlexPredefinedClassExpressionImpl.java -----------------
-license.txt
+// license.txt
 package org.intellij.jflex.psi.impl;
 
 import java.util.List;
@@ -1206,7 +1206,7 @@ public class JFlexPredefinedClassExpressionImpl extends JFlexExpressionImpl impl
 
 }
 // ---- JFlexQuantifierExpressionImpl.java -----------------
-license.txt
+// license.txt
 package org.intellij.jflex.psi.impl;
 
 import java.util.List;
@@ -1241,7 +1241,7 @@ public class JFlexQuantifierExpressionImpl extends JFlexExpressionImpl implement
 
 }
 // ---- JFlexRuleImpl.java -----------------
-license.txt
+// license.txt
 package org.intellij.jflex.psi.impl;
 
 import java.util.List;
@@ -1306,7 +1306,7 @@ public class JFlexRuleImpl extends JFlexCompositeElementImpl implements JFlexRul
 
 }
 // ---- JFlexSequenceExpressionImpl.java -----------------
-license.txt
+// license.txt
 package org.intellij.jflex.psi.impl;
 
 import java.util.List;
@@ -1341,7 +1341,7 @@ public class JFlexSequenceExpressionImpl extends JFlexExpressionImpl implements 
 
 }
 // ---- JFlexStateDeclarationImpl.java -----------------
-license.txt
+// license.txt
 package org.intellij.jflex.psi.impl;
 
 import java.util.List;
@@ -1376,7 +1376,7 @@ public class JFlexStateDeclarationImpl extends JFlexCompositeElementImpl impleme
 
 }
 // ---- JFlexStateDefinitionImpl.java -----------------
-license.txt
+// license.txt
 package org.intellij.jflex.psi.impl;
 
 import java.util.List;
@@ -1427,7 +1427,7 @@ public class JFlexStateDefinitionImpl extends JFlexCompositeElementImpl implemen
 
 }
 // ---- JFlexStateReferenceImpl.java -----------------
-license.txt
+// license.txt
 package org.intellij.jflex.psi.impl;
 
 import java.util.List;
@@ -1468,7 +1468,7 @@ public class JFlexStateReferenceImpl extends JFlexCompositeElementImpl implement
 
 }
 // ---- JFlexUserCodeSectionImpl.java -----------------
-license.txt
+// license.txt
 package org.intellij.jflex.psi.impl;
 
 import java.util.List;
@@ -1503,7 +1503,7 @@ public class JFlexUserCodeSectionImpl extends JFlexCompositeElementImpl implemen
 
 }
 // ---- JFlexUserValueImpl.java -----------------
-license.txt
+// license.txt
 package org.intellij.jflex.psi.impl;
 
 import java.util.List;
@@ -1532,7 +1532,7 @@ public class JFlexUserValueImpl extends JFlexCompositeElementImpl implements JFl
 
 }
 // ---- JFlexVisitor.java -----------------
-license.txt
+// license.txt
 package org.intellij.jflex.psi;
 
 import org.jetbrains.annotations.*;

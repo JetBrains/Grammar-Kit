@@ -369,7 +369,7 @@ import static test.FooTypes.*;
 import test.psi.*;
 import com.intellij.psi.stubs.IStubElementType;
 
-public class InterfaceTypeImpl extends type implements InterfaceType {
+public class InterfaceTypeImpl extends TypeImpl implements InterfaceType {
 
   public InterfaceTypeImpl(ASTNode node) {
     super(node);
@@ -403,7 +403,7 @@ import static test.FooTypes.*;
 import test.psi.*;
 import com.intellij.psi.stubs.IStubElementType;
 
-public class StructTypeImpl extends type implements StructType {
+public class StructTypeImpl extends TypeImpl implements StructType {
 
   public StructTypeImpl(ASTNode node) {
     super(node);

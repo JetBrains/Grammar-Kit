@@ -1335,15 +1335,12 @@ public class ParserGenerator {
                                String superRuleClass) {
     String typeHolderClass = getRootAttribute(myFile, KnownAttribute.ELEMENT_TYPE_HOLDER_CLASS);
     String stubName = myRulesStubNames.get(rule.getName());
-    if (StringUtil.isNotEmpty(stubName)) {
-      boolean extendsBasic = StringUtil.equals(superRuleClass, getRootAttribute(myFile, KnownAttribute.EXTENDS));
-      String extendsClass = getAttribute(rule, KnownAttribute.EXTENDS);
-      superRuleClass = StringUtil.isNotEmpty(extendsClass) && !extendsBasic
-                       ? extendsClass.replaceAll("\\?", stubName)
-                       : STUB_BASED_PSI_ELEMENT_BASE + "<" + stubName + ">";
-    }
+    String adjustedSuperRuleClass =
+      StringUtil.isEmpty(stubName) ? superRuleClass :
+      AST_WRAPPER_PSI_ELEMENT_CLASS.equals(superRuleClass) ? STUB_BASED_PSI_ELEMENT_BASE + "<" + stubName + ">" :
+      superRuleClass.contains("?") ? superRuleClass.replaceAll("\\?", stubName) : superRuleClass;
     // mixin attribute overrides "extends":
-    String implSuper = StringUtil.notNullize(getAttribute(rule, KnownAttribute.MIXIN), superRuleClass);
+    String implSuper = StringUtil.notNullize(getAttribute(rule, KnownAttribute.MIXIN), adjustedSuperRuleClass);
 
     Set<String> imports = ContainerUtil.newLinkedHashSet();
     imports.addAll(Arrays.asList(CommonClassNames.JAVA_UTIL_LIST,

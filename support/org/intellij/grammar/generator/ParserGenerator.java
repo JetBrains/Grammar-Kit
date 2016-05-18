@@ -1378,6 +1378,17 @@ public class ParserGenerator {
       if (visitedConstructors.contains(getParametersString(types, 1, 1, Function.ID))) continue;
       collectMethodTypesToImport(Collections.singletonList(m), false, imports);
     }
+    if (!G.generateTokenTypes) {
+      // add parser static imports hoping external token constants are there
+      for (RuleMethodsHelper.MethodInfo info : myRulesMethodsHelper.getFor(rule)) {
+        if (info.rule == null && !StringUtil.isEmpty(info.name)) {
+          for (String s : getRootAttribute(myFile, KnownAttribute.PARSER_IMPORTS).asStrings()) {
+            if (s.startsWith("static ")) imports.add(s);
+          }
+          break;
+        }
+      }
+    }
 
     generateClassHeader(psiClass, imports, "", false, implSuper, superInterface);
     String shortName = StringUtil.getShortName(psiClass);

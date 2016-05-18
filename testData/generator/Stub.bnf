@@ -3,6 +3,7 @@
   classHeader="//header.txt"
   psiPackage="test.psi"
   psiImplPackage="test.psi.impl"
+  psiTreeUtilClass="test.psi.MyPsiTreeUtil"
   parserClass="test.FooParser"
   elementTypeFactory="test.FooParserDefinition.createType"
   tokenTypeFactory="test.stub.FooParserDefinition.createTokenType"

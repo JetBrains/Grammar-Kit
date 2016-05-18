@@ -170,7 +170,7 @@ import org.jetbrains.annotations.*;
 import com.intellij.lang.ASTNode;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiElementVisitor;
-import com.intellij.psi.util.PsiTreeUtil;
+import test.psi.MyPsiTreeUtil;
 import static test.FooTypes.*;
 import test.stub.Element1Stub;
 import test.psi.*;
@@ -198,7 +198,7 @@ public class Element1Impl extends MyStubbedElementBase<Element1Stub> implements 
   @Override
   @NotNull
   public Element5 getElement5() {
-    return findNotNullChildByClass(Element5.class);
+    return notNullChild(MyPsiTreeUtil.getChildOfType(this, Element5.class));
   }
 
 }
@@ -211,7 +211,7 @@ import org.jetbrains.annotations.*;
 import com.intellij.lang.ASTNode;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiElementVisitor;
-import com.intellij.psi.util.PsiTreeUtil;
+import test.psi.MyPsiTreeUtil;
 import static test.FooTypes.*;
 import test.stub.Element2Stub;
 import test.psi.*;
@@ -239,7 +239,7 @@ public class Element2Impl extends MyStubbedElementBase<Element2Stub> implements 
   @Override
   @NotNull
   public List<Element4> getElement4List() {
-    return PsiTreeUtil.getStubChildrenOfTypeAsList(this, Element4.class);
+    return MyPsiTreeUtil.getStubChildrenOfTypeAsList(this, Element4.class);
   }
 
 }
@@ -252,7 +252,7 @@ import org.jetbrains.annotations.*;
 import com.intellij.lang.ASTNode;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiElementVisitor;
-import com.intellij.psi.util.PsiTreeUtil;
+import test.psi.MyPsiTreeUtil;
 import static test.FooTypes.*;
 import test.psi.*;
 import com.intellij.psi.stubs.IStubElementType;
@@ -279,7 +279,7 @@ public class Element3Impl extends MySubstituted implements Element3 {
   @Override
   @NotNull
   public Element4 getElement4() {
-    return notNullChild(PsiTreeUtil.getStubChildOfType(this, Element4.class));
+    return notNullChild(MyPsiTreeUtil.getStubChildOfType(this, Element4.class));
   }
 
 }
@@ -292,7 +292,7 @@ import org.jetbrains.annotations.*;
 import com.intellij.lang.ASTNode;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiElementVisitor;
-import com.intellij.psi.util.PsiTreeUtil;
+import test.psi.MyPsiTreeUtil;
 import static test.FooTypes.*;
 import com.intellij.extapi.psi.StubBasedPsiElementBase;
 import test.stub.Element4Stub;
@@ -321,7 +321,7 @@ public class Element4Impl extends StubBasedPsiElementBase<Element4Stub> implemen
   @Override
   @Nullable
   public Element2 getElement2() {
-    return PsiTreeUtil.getStubChildOfType(this, Element2.class);
+    return MyPsiTreeUtil.getStubChildOfType(this, Element2.class);
   }
 
 }
@@ -334,7 +334,7 @@ import org.jetbrains.annotations.*;
 import com.intellij.lang.ASTNode;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiElementVisitor;
-import com.intellij.psi.util.PsiTreeUtil;
+import test.psi.MyPsiTreeUtil;
 import static test.FooTypes.*;
 import com.intellij.extapi.psi.ASTWrapperPsiElement;
 import test.psi.*;
@@ -364,7 +364,7 @@ import org.jetbrains.annotations.*;
 import com.intellij.lang.ASTNode;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiElementVisitor;
-import com.intellij.psi.util.PsiTreeUtil;
+import test.psi.MyPsiTreeUtil;
 import static test.FooTypes.*;
 import test.psi.*;
 import com.intellij.psi.stubs.IStubElementType;
@@ -398,7 +398,7 @@ import org.jetbrains.annotations.*;
 import com.intellij.lang.ASTNode;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiElementVisitor;
-import com.intellij.psi.util.PsiTreeUtil;
+import test.psi.MyPsiTreeUtil;
 import static test.FooTypes.*;
 import test.psi.*;
 import com.intellij.psi.stubs.IStubElementType;
@@ -432,7 +432,7 @@ import org.jetbrains.annotations.*;
 import com.intellij.lang.ASTNode;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiElementVisitor;
-import com.intellij.psi.util.PsiTreeUtil;
+import test.psi.MyPsiTreeUtil;
 import static test.FooTypes.*;
 import test.stub.TypeStub;
 import test.psi.*;

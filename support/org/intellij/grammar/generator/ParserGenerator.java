@@ -78,6 +78,8 @@ public class ParserGenerator {
   private final String myGrammarRootParser;
   private final String myRuleClassPrefix;
   private final String myParserUtilClass;
+  private final String myPsiImplUtilClass;
+  private final String myPsiTreeUtilClass;
 
   private final String visitorClassName;
 
@@ -112,6 +114,9 @@ public class ParserGenerator {
     myRuleClassPrefix = getPsiClassPrefix(myFile);
     myParserUtilClass = ObjectUtils.chooseNotNull(getRootAttribute(myFile, KnownAttribute.PARSER_UTIL_CLASS.alias("stubParserClass")),
                                                   getRootAttribute(myFile, KnownAttribute.PARSER_UTIL_CLASS));
+    myPsiImplUtilClass = getRootAttribute(myFile, KnownAttribute.PSI_IMPL_UTIL_CLASS);
+    myPsiTreeUtilClass = getRootAttribute(myFile, KnownAttribute.PSI_TREE_UTIL_CLASS);
+
     String tmpVisitorClass = getRootAttribute(myFile, KnownAttribute.PSI_VISITOR_NAME);
     visitorClassName = !G.generateVisitor || StringUtil.isEmpty(tmpVisitorClass) ?
                        null : tmpVisitorClass.startsWith(myRuleClassPrefix) ?
@@ -230,8 +235,7 @@ public class ParserGenerator {
       }
     }
     if (G.generatePsi) {
-      checkClassAvailability(myFile, getRootAttribute(myFile, KnownAttribute.PSI_IMPL_UTIL_CLASS),
-                             "PSI method signatures will not be detected");
+      checkClassAvailability(myFile, myPsiImplUtilClass, "PSI method signatures will not be detected");
 
       myRulesMethodsHelper.buildMaps(sortedPsiRules.values());
       for (BnfRule r : sortedPsiRules.values()) {
@@ -1307,7 +1311,6 @@ public class ParserGenerator {
   private void generatePsiIntf(BnfRule rule,
                                String psiClass,
                                Collection<String> psiSupers) {
-    String psiImplUtilClass = getRootAttribute(myFile, KnownAttribute.PSI_IMPL_UTIL_CLASS);
     String stubClass = getAttribute(rule, KnownAttribute.STUB_CLASS);
     if (StringUtil.isNotEmpty(stubClass)) {
       psiSupers = new LinkedHashSet<String>(psiSupers);
@@ -1319,10 +1322,10 @@ public class ParserGenerator {
                                  "org.jetbrains.annotations.*",
                                  PSI_ELEMENT_CLASS));
     imports.addAll(psiSupers);
-    imports.addAll(getRuleMethodTypesToImport(rule, psiImplUtilClass));
+    imports.addAll(getRuleMethodTypesToImport(rule));
 
     generateClassHeader(psiClass, imports, "", true, ArrayUtil.toStringArray(psiSupers));
-    generatePsiClassMethods(rule, psiImplUtilClass, true);
+    generatePsiClassMethods(rule, true);
     out("}");
   }
 
@@ -1331,7 +1334,6 @@ public class ParserGenerator {
                                String superInterface,
                                String superRuleClass) {
     String typeHolderClass = getRootAttribute(myFile, KnownAttribute.ELEMENT_TYPE_HOLDER_CLASS);
-    String psiImplUtilClass = getRootAttribute(myFile, KnownAttribute.PSI_IMPL_UTIL_CLASS);
     String stubName = myRulesStubNames.get(rule.getName());
     if (StringUtil.isNotEmpty(stubName)) {
       boolean extendsBasic = StringUtil.equals(superRuleClass, getRootAttribute(myFile, KnownAttribute.EXTENDS));
@@ -1349,12 +1351,12 @@ public class ParserGenerator {
                                  AST_NODE_CLASS,
                                  PSI_ELEMENT_CLASS));
     if (visitorClassName != null) imports.add(PSI_ELEMENT_VISITOR_CLASS);
-    imports.add(PSI_TREE_UTIL_CLASS);
+    imports.add(myPsiTreeUtilClass);
     imports.add("static " + typeHolderClass + ".*");
     if (StringUtil.isNotEmpty(implSuper)) imports.add(implSuper);
     imports.add(StringUtil.getPackageName(superInterface) + ".*");
-    if (StringUtil.isNotEmpty(psiImplUtilClass)) imports.add(psiImplUtilClass);
-    imports.addAll(getRuleMethodTypesToImport(rule, psiImplUtilClass));
+    imports.add(StringUtil.notNullize(myPsiImplUtilClass));
+    imports.addAll(getRuleMethodTypesToImport(rule));
 
     String implSuperRaw = implSuper.indexOf("<") < implSuper.indexOf(">") ? implSuper.substring(0, implSuper.indexOf("<")) : implSuper;
     if (stubName != null) imports.add(ISTUBELEMENTTYPE_CLASS);
@@ -1414,11 +1416,11 @@ public class ParserGenerator {
       out("}");
       newLine();
     }
-    generatePsiClassMethods(rule, psiImplUtilClass, false);
+    generatePsiClassMethods(rule, false);
     out("}");
   }
 
-  private void generatePsiClassMethods(BnfRule rule, String psiImplUtilClass, boolean intf) {
+  private void generatePsiClassMethods(BnfRule rule, boolean intf) {
     Set<String> visited = ContainerUtil.newTreeSet();
     for (RuleMethodsHelper.MethodInfo methodInfo : myRulesMethodsHelper.getFor(rule)) {
       if (StringUtil.isEmpty(methodInfo.name)) continue;
@@ -1435,12 +1437,12 @@ public class ParserGenerator {
             String mixinClass = getAttribute(rule, KnownAttribute.MIXIN);
             List<NavigatablePsiElement> methods = myJavaHelper.findClassMethods(mixinClass, JavaHelper.MethodType.INSTANCE, methodInfo.name, -1);
             for (NavigatablePsiElement method : methods) {
-              generateUtilMethod(methodInfo.name, method, null, false, visited);
+              generateUtilMethod(methodInfo.name, method, intf, false, visited);
             }
           }
-          List<NavigatablePsiElement> methods = findRuleImplMethods(myJavaHelper, psiImplUtilClass, methodInfo.name, rule);
+          List<NavigatablePsiElement> methods = findRuleImplMethods(myJavaHelper, myPsiImplUtilClass, methodInfo.name, rule);
           for (NavigatablePsiElement method : methods) {
-            generateUtilMethod(methodInfo.name, method, intf ? null : psiImplUtilClass, true, visited);
+            generateUtilMethod(methodInfo.name, method, intf, true, visited);
           }
           break;
         default: throw new AssertionError(methodInfo.toString());
@@ -1448,7 +1450,7 @@ public class ParserGenerator {
     }
   }
 
-  public Collection<String> getRuleMethodTypesToImport(BnfRule rule, String psiImplUtilClass) {
+  public Collection<String> getRuleMethodTypesToImport(BnfRule rule) {
     Set<String> result = ContainerUtil.newTreeSet();
 
     Collection<RuleMethodsHelper.MethodInfo> methods = myRulesMethodsHelper.getFor(rule);
@@ -1464,7 +1466,7 @@ public class ParserGenerator {
       if (methodInfo.type != 4) continue;
 
       List<NavigatablePsiElement> mixinMethods = myJavaHelper.findClassMethods(mixinClass, JavaHelper.MethodType.INSTANCE, methodInfo.name, -1);
-      List<NavigatablePsiElement> implMethods = findRuleImplMethods(myJavaHelper, psiImplUtilClass, methodInfo.name, rule);
+      List<NavigatablePsiElement> implMethods = findRuleImplMethods(myJavaHelper, myPsiImplUtilClass, methodInfo.name, rule);
 
       collectMethodTypesToImport(mixinMethods, false, result);
       collectMethodTypesToImport(implMethods, true, result);
@@ -1525,14 +1527,14 @@ public class ParserGenerator {
                       myRulesStubNames.get(rule.getName()) != null &&
                       myRulesStubNames.get(methodInfo.rule.getName()) != null;
     // todo REMOVEME. Keep old generation logic for a while.
-    if (!stubbed) {
+    if (myRulesStubNames.isEmpty()) {
       if (isToken) {
         return (type == REQUIRED ? "findNotNullChildByType" : "findChildByType") +
                "(" + getTokenElementType(methodInfo.path) + ")";
       }
       else {
         String className = myShortener.fun(getAccessorType(methodInfo.rule));
-        return many ? "PsiTreeUtil.getChildrenOfTypeAsList(this, " + className + ".class)" :
+        return many ? String.format("%s.getChildrenOfTypeAsList(this, %s.class)", myShortener.fun(myPsiTreeUtilClass), className) :
                (type == REQUIRED ? "findNotNullChildByClass" : "findChildByClass") + "(" + className + ".class)";
       }
     }
@@ -1546,7 +1548,7 @@ public class ParserGenerator {
       String getterName = stubbed && many ? "getStubChildrenOfTypeAsList" :
                           stubbed ? "getStubChildOfType" :
                           many ? "getChildrenOfTypeAsList" : "getChildOfType";
-      result = "PsiTreeUtil." + getterName + "(this, " + className + ".class)";
+      result = String.format("%s.%s(this, %s.class)", myShortener.fun(myPsiTreeUtilClass), getterName, className);
     }
     return required ? "notNullChild(" + result + ")" : result;
   }
@@ -1676,10 +1678,9 @@ public class ParserGenerator {
 
   private void generateUtilMethod(String methodName,
                                   NavigatablePsiElement method,
-                                  String psiImplUtilClass,
+                                  boolean intf,
                                   boolean isInPsiUtil,
                                   Set<String> visited) {
-    boolean intf = psiImplUtilClass == null;
     List<String> methodTypes = method == null ? Collections.<String>emptyList() : myJavaHelper.getMethodTypes(method);
     String returnType = methodTypes.isEmpty()? "void" : myShortener.fun(methodTypes.get(0));
     int offset = methodTypes.isEmpty() || isInPsiUtil && methodTypes.size() < 3 ? 0 :
@@ -1694,7 +1695,7 @@ public class ParserGenerator {
         getParametersString(methodTypes, offset, 3, myShortener),
         intf ? ";" : " {");
     if (!intf) {
-      String implUtilRef = myShortener.fun(StringUtil.notNullize(psiImplUtilClass, KnownAttribute.PSI_IMPL_UTIL_CLASS.getName()));
+      String implUtilRef = myShortener.fun(StringUtil.notNullize(myPsiImplUtilClass, KnownAttribute.PSI_IMPL_UTIL_CLASS.getName()));
       String string = getParametersString(methodTypes, offset, 2, myShortener);
       out("%s%s.%s(this%s);", "void".equals(returnType) ? "" : "return ", implUtilRef, methodName,
           string.isEmpty() ? "" : ", " + string);

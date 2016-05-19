@@ -401,7 +401,7 @@ public class RuleGraphHelper {
         else if (Rule.isLeft(targetRule)) {
           if (!Rule.isInner(targetRule) && !Rule.isPrivate(targetRule)) {
             result = psiMap();
-            result.put(targetRule, REQUIRED);
+            result.put(getSynonymTargetOrSelf(targetRule), REQUIRED);
             result.put(LEFT_MARKER, REQUIRED);
           }
           else {
@@ -412,7 +412,7 @@ public class RuleGraphHelper {
           result = collectMembers(targetRule, visited);
         }
         else {
-          result = psiMap(targetRule, REQUIRED);
+          result = psiMap(getSynonymTargetOrSelf(targetRule), REQUIRED);
         }
       }
       else {

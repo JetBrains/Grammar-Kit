@@ -18,6 +18,7 @@ public interface GeneratedTypes {
   IElementType SOME = new IElementType("SOME", null);
   IElementType SOME_EXPR = new IElementType("SOME_EXPR", null);
   IElementType SOME_SEQ = new IElementType("SOME_SEQ", null);
+  IElementType THING_ITEM = new IElementType("THING_ITEM", null);
   IElementType WITH_RECURSIVE = new IElementType("WITH_RECURSIVE", null);
   IElementType ZOME = new IElementType("ZOME", null);
 
@@ -142,6 +143,31 @@ public interface SomeSeq extends PsiElement {
 
   @NotNull
   List<Some> getSomeList();
+
+}
+// ---- Thing.java -----------------
+// This is a generated file. Not intended for manual editing.
+package generated.psi;
+
+import java.util.List;
+import org.jetbrains.annotations.*;
+import com.intellij.psi.PsiElement;
+
+public interface Thing extends PsiElement {
+
+  @NotNull
+  ThingItem getThingItem();
+
+}
+// ---- ThingItem.java -----------------
+// This is a generated file. Not intended for manual editing.
+package generated.psi;
+
+import java.util.List;
+import org.jetbrains.annotations.*;
+import com.intellij.psi.PsiElement;
+
+public interface ThingItem extends PsiElement {
 
 }
 // ---- WithRecursive.java -----------------
@@ -477,6 +503,72 @@ public class SomeSeqImpl extends ASTWrapperPsiElement implements SomeSeq {
   }
 
 }
+// ---- ThingImpl.java -----------------
+// This is a generated file. Not intended for manual editing.
+package generated.psi.impl;
+
+import java.util.List;
+import org.jetbrains.annotations.*;
+import com.intellij.lang.ASTNode;
+import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiElementVisitor;
+import com.intellij.psi.util.PsiTreeUtil;
+import static generated.GeneratedTypes.*;
+import com.intellij.extapi.psi.ASTWrapperPsiElement;
+import generated.psi.*;
+
+public class ThingImpl extends ASTWrapperPsiElement implements Thing {
+
+  public ThingImpl(ASTNode node) {
+    super(node);
+  }
+
+  public void accept(@NotNull Visitor visitor) {
+    visitor.visitThing(this);
+  }
+
+  public void accept(@NotNull PsiElementVisitor visitor) {
+    if (visitor instanceof Visitor) accept((Visitor)visitor);
+    else super.accept(visitor);
+  }
+
+  @Override
+  @NotNull
+  public ThingItem getThingItem() {
+    return findNotNullChildByClass(ThingItem.class);
+  }
+
+}
+// ---- ThingItemImpl.java -----------------
+// This is a generated file. Not intended for manual editing.
+package generated.psi.impl;
+
+import java.util.List;
+import org.jetbrains.annotations.*;
+import com.intellij.lang.ASTNode;
+import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiElementVisitor;
+import com.intellij.psi.util.PsiTreeUtil;
+import static generated.GeneratedTypes.*;
+import com.intellij.extapi.psi.ASTWrapperPsiElement;
+import generated.psi.*;
+
+public class ThingItemImpl extends ASTWrapperPsiElement implements ThingItem {
+
+  public ThingItemImpl(ASTNode node) {
+    super(node);
+  }
+
+  public void accept(@NotNull Visitor visitor) {
+    visitor.visitThingItem(this);
+  }
+
+  public void accept(@NotNull PsiElementVisitor visitor) {
+    if (visitor instanceof Visitor) accept((Visitor)visitor);
+    else super.accept(visitor);
+  }
+
+}
 // ---- WithRecursiveImpl.java -----------------
 // This is a generated file. Not intended for manual editing.
 package generated.psi.impl;
@@ -586,6 +678,14 @@ public class Visitor extends PsiElementVisitor {
   }
 
   public void visitSomeSeq(@NotNull SomeSeq o) {
+    visitPsiElement(o);
+  }
+
+  public void visitThing(@NotNull Thing o) {
+    visitPsiElement(o);
+  }
+
+  public void visitThingItem(@NotNull ThingItem o) {
     visitPsiElement(o);
   }
 

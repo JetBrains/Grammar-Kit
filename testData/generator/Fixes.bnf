@@ -37,3 +37,7 @@ private Foo ::= &<Foo  predicate> <Foo (ﾉ´･ω･)ﾉ ﾐ ┸━┸ inner> {
 private <Foo  predicate> ::=
 private <Foo  recovery> ::=
 <Foo (ﾉ´･ω･)ﾉ ﾐ ┸━┸ inner> ::=
+
+fake thing ::= thing_skip
+fake thing_item ::= "foo"
+fake thing_skip ::= "bar" {elementType=thing_item}

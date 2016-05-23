@@ -33,11 +33,11 @@ import java.util.Map;
  */
 public class LiveHooksHelper {
 
-  public static void registerHook(PsiBuilder builder, int level, String name, String value) {
+  public static void registerHook(PsiBuilder builder, String name, String value) {
     final GeneratedParserUtilBase.Hook hookObj = getHook(name);
     if (hookObj == null) return;
     Object hookParam = ObjectUtils.notNull(getHookParam(value), value);
-    GeneratedParserUtilBase.register_hook_(builder, level, new GeneratedParserUtilBase.Hook<Object>() {
+    GeneratedParserUtilBase.register_hook_(builder, new GeneratedParserUtilBase.Hook<Object>() {
       @Override
       public PsiBuilder.Marker run(PsiBuilder builder, PsiBuilder.Marker marker, Object param) {
         try {

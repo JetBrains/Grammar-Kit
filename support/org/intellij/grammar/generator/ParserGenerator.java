@@ -797,7 +797,7 @@ public class ParserGenerator {
       if (!hooks.isEmpty()) {
         for (Map.Entry<String, String> entry : hooks.entrySet()) {
           String hookName = ParserGeneratorUtil.toIdentifier(entry.getKey(), null, Case.UPPER);
-          out("register_hook_(%s, %s, %s, %s);", N.builder, N.level, hookName, entry.getValue());
+          out("register_hook_(%s, %s, %s);", N.builder, hookName, entry.getValue());
         }
       }
       if (sectionRequiredSimple) {

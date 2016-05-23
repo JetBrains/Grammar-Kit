@@ -59,7 +59,7 @@ public class BindersAndHooks implements PsiParser, LightPsiParser {
     pinned_ = result_; // pin = 1
     result_ = result_ && report_error_(builder_, item(builder_, level_ + 1));
     result_ = pinned_ && consumeToken(builder_, B) && result_;
-    register_hook_(builder_, level_, WS_BINDERS, GREEDY_LEFT_BINDER, GREEDY_RIGHT_BINDER);
+    register_hook_(builder_, WS_BINDERS, GREEDY_LEFT_BINDER, GREEDY_RIGHT_BINDER);
     exit_section_(builder_, level_, marker_, result_, pinned_, null);
     return result_ || pinned_;
   }
@@ -72,7 +72,7 @@ public class BindersAndHooks implements PsiParser, LightPsiParser {
     boolean result_;
     Marker marker_ = enter_section_(builder_);
     result_ = consumeToken(builder_, A);
-    register_hook_(builder_, level_, MY_HOOK, "my", "hook", "param", "array");
+    register_hook_(builder_, MY_HOOK, "my", "hook", "param", "array");
     exit_section_(builder_, marker_, GOT_HOOK, result_);
     return result_;
   }
@@ -90,7 +90,7 @@ public class BindersAndHooks implements PsiParser, LightPsiParser {
     boolean result_;
     Marker marker_ = enter_section_(builder_);
     result_ = consumeTokens(builder_, 0, A, B);
-    register_hook_(builder_, level_, LEFT_BINDER, GREEDY_LEFT_BINDER);
+    register_hook_(builder_, LEFT_BINDER, GREEDY_LEFT_BINDER);
     exit_section_(builder_, marker_, LEFT_BINDER, result_);
     return result_;
   }
@@ -102,7 +102,7 @@ public class BindersAndHooks implements PsiParser, LightPsiParser {
     boolean result_;
     Marker marker_ = enter_section_(builder_, level_, _NONE_, RIGHT_BINDER, "<right binder>");
     result_ = item(builder_, level_ + 1);
-    register_hook_(builder_, level_, RIGHT_BINDER, GREEDY_RIGHT_BINDER);
+    register_hook_(builder_, RIGHT_BINDER, GREEDY_RIGHT_BINDER);
     exit_section_(builder_, level_, marker_, result_, false, null);
     return result_;
   }

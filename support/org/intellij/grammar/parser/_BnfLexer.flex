@@ -77,8 +77,8 @@ BAD_TOKENS={STRING_BAD1} | {STRING_BAD2}
   "&" {yybegin(YYINITIAL); return BnfTypes.BNF_OP_AND; }
   "!" {yybegin(YYINITIAL); return BnfTypes.BNF_OP_NOT; }
   "|" {yybegin(YYINITIAL); return BnfTypes.BNF_OP_OR; }
-
-  {BAD_TOKENS} {yybegin(YYINITIAL); return com.intellij.psi.TokenType.BAD_CHARACTER; }
-  [^] {yybegin(YYINITIAL); return com.intellij.psi.TokenType.BAD_CHARACTER; }
-
 }
+
+{BAD_TOKENS} {yybegin(YYINITIAL); return com.intellij.psi.TokenType.BAD_CHARACTER; }
+
+[^] {yybegin(YYINITIAL); return com.intellij.psi.TokenType.BAD_CHARACTER; }

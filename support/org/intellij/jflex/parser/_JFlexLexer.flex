@@ -51,7 +51,7 @@ JAVA_CHAR=\'({ESCAPED_CHAR} | [^'])\'
 %%
 <YYINITIAL, DECLARATIONS, RULES, BLOCK> {
   [\t\r ]+                { return WHITE_SPACE; }
-  "\n"+                   { return FLEX_NEWLINE; }
+  \R+                     { return FLEX_NEWLINE; }
   {LINE_COMMENT}          { return FLEX_LINE_COMMENT; }
   {BLOCK_COMMENT}         { return FLEX_BLOCK_COMMENT; }
 }

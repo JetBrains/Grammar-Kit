@@ -30,7 +30,9 @@ import com.intellij.execution.process.ProcessEvent;
 import com.intellij.execution.process.ProcessHandler;
 import com.intellij.execution.ui.*;
 import com.intellij.execution.ui.actions.CloseAction;
+import com.intellij.ide.actions.PinActiveTabAction;
 import com.intellij.notification.Notification;
+import com.intellij.notification.NotificationListener;
 import com.intellij.notification.NotificationType;
 import com.intellij.notification.Notifications;
 import com.intellij.openapi.actionSystem.*;
@@ -75,8 +77,7 @@ import org.jetbrains.annotations.Nullable;
 import javax.swing.*;
 import java.awt.*;
 import java.io.File;
-import java.util.Collections;
-import java.util.Iterator;
+import java.util.*;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -93,7 +94,6 @@ public class BnfRunJFlexAction extends DumbAwareAction {
       "https://github.com/JetBrains/intellij-community/raw/master/tools/lexer/jflex-1.7.0-SNAPSHOT.jar",
       "https://raw.github.com/JetBrains/intellij-community/master/tools/lexer/idea-flex.skeleton"
   };
-  private static final String LIB_NAME = "JetBrains JFlex";
 
   @Override
   public void update(@NotNull AnActionEvent e) {
@@ -122,12 +122,22 @@ public class BnfRunJFlexAction extends DumbAwareAction {
     PsiDocumentManager.getInstance(project).commitAllDocuments();
     FileDocumentManager.getInstance().saveAllDocuments();
 
-    final List<File> jflex = getOrDownload(project, LIB_NAME, JETBRAINS_JFLEX_URLS);
+    final List<File> jflex = getOrDownload(project, JETBRAINS_JFLEX_URLS);
     if (jflex.isEmpty()) {
       fail(project, "JFlex jar not found",
-           "Create global library '" + LIB_NAME + "' " +
-           "with JFlex jar and idea-flex.skeleton file to fix.");
+           "Create global library with jflex-xxx.jar and idea-flex.skeleton file to fix.");
       return;
+    }
+    if (StringUtil.endsWithIgnoreCase(jflex.get(0).getName(), "JFlex.jar")) {
+      String DOC_URL = "http://jflex.de/changelog.html";
+      Notifications.Bus.notify(new Notification(
+        BnfConstants.GENERATION_GROUP, "An old JFlex.jar is detected",
+        jflex.get(0).getAbsolutePath() +
+        "<br>See <a href=\"" + DOC_URL + "\">" + DOC_URL + "</a>." +
+        "<br><b>Compatibility note</b>: . (dot) semantics is changed, use [^] instead of .|\\n." +
+        "<br><b>To update</b>: remove the old version and the global library if present." +
+        "",
+        NotificationType.INFORMATION, NotificationListener.URL_OPENING_LISTENER), project);
     }
     new Runnable() {
       boolean first = true;
@@ -232,14 +242,23 @@ public class BnfRunJFlexAction extends DumbAwareAction {
     });
   }
 
-  private static List<File> getOrDownload(@NotNull Project project, @NotNull String libraryName, String... urls) {
+  private static List<File> getOrDownload(@NotNull Project project, String... urls) {
     List<File> result = ContainerUtil.newArrayList();
-    if (findExistingLibrary(libraryName, result, urls)) return result;
     if (findCommunitySources(project, result, urls)) return result;
+    if (findInProject(project, true, result, urls)) return result;
+    if (findExistingLibrary(result, urls)) return result;
+    if (findInProject(project, false, result, urls)) return result;
 
-    List<Pair<VirtualFile, DownloadableFileDescription>> pairs = downloadFiles(project, libraryName, urls);
+    final String libraryName = "JFlex & idea-flex.skeleton";
+    final List<Pair<VirtualFile, DownloadableFileDescription>> pairs = downloadFiles(project, libraryName, urls);
     if (pairs == null) return Collections.emptyList();
-    createOrUpdateLibrary(libraryName, pairs);
+    ApplicationManager.getApplication().runWriteAction(
+      new Runnable() {
+        @Override
+        public void run() {
+          createOrUpdateLibrary(libraryName, pairs);
+        }
+      });
 
     // ensure the order is the same
     for (String url : urls) {
@@ -256,34 +275,51 @@ public class BnfRunJFlexAction extends DumbAwareAction {
 
   private static boolean findCommunitySources(@NotNull Project project, List<File> result, String... urls) {
     String communitySrc = getCommunitySrcUrl(project);
-    if (communitySrc != null) {
-      List<String> roots = ContainerUtil.newArrayList();
-      for (String url : urls) {
-        int idx = url.indexOf("/master/");
-        if (idx > -1) {
-          roots.add(StringUtil.trimEnd(communitySrc, "/") + "/" + url.substring(idx + "/master/".length()));
+    if (communitySrc == null) return false;
+    List<String> roots = ContainerUtil.newArrayList();
+    for (String url : urls) {
+      int idx = url.indexOf("/master/");
+      if (idx <= -1) continue;
+      roots.add(StringUtil.trimEnd(communitySrc, "/") + "/" + url.substring(idx + "/master/".length()));
+    }
+    return collectFiles(result, roots, urls);
+  }
+
+  private static boolean findInProject(@NotNull Project project, boolean forceDir, List<File> result, String... urls) {
+    List<String> roots = ContainerUtil.newArrayList();
+    for (String url : urls) {
+      String fileName = url.substring(url.lastIndexOf("/") + 1);
+      for (VirtualFile file : FilenameIndex.getVirtualFilesByName(project, fileName, ProjectScope.getAllScope(project))) {
+        String fileUrl = file.getUrl();
+        if (forceDir) {
+          int idx = url.indexOf("/master/");
+          if (idx <= -1) continue;
+          if (!StringUtil.endsWithIgnoreCase(fileUrl, url.substring(idx + "/master/".length()))) continue;
         }
+        roots.add(fileUrl);
       }
-      return collectFiles(result, roots.toArray(new String[roots.size()]), urls);
+    }
+    return collectFiles(result, roots, urls);
+  }
+
+  private static boolean findExistingLibrary(@NotNull List<File> result, String... urls) {
+    for (Library library : ApplicationLibraryTable.getApplicationTable().getLibraries()) {
+      if (collectFiles(result, Arrays.asList(library.getUrls(OrderRootType.CLASSES)), urls)) return true;
     }
     return false;
   }
 
-  private static boolean findExistingLibrary(@NotNull String libraryName, @NotNull List<File> result, String... urls) {
-    Library library = ApplicationLibraryTable.getApplicationTable().getLibraryByName(libraryName);
-    return library != null && collectFiles(result, library.getUrls(OrderRootType.CLASSES), urls);
-  }
-
-  private static boolean collectFiles(List<File> result, String[] roots, String... urls) {
+  private static boolean collectFiles(List<File> result, List<String> roots, String... urls) {
     main: for (int i = 0; i < urls.length; i++) {
       String url = urls[i];
       String name = url.substring(url.lastIndexOf("/") + 1);
-      Pattern pattern = Pattern.compile("(?i)" + StringUtil.replace(StringUtil.escapeToRegexp(name), "\\.", ".*\\."));
 
       for (String root : roots) {
         root = StringUtil.trimEnd(root, JarFileSystem.JAR_SEPARATOR);
         String rootName = root.substring(root.lastIndexOf("/") + 1);
-        if (pattern.matcher(rootName).matches()) {
+        int length = StringUtil.commonPrefix(rootName.toLowerCase(Locale.ENGLISH), name.toLowerCase(Locale.ENGLISH)).length();
+        if (length < 4) continue;
+        if (rootName.length() == length || rootName.length() > length && "-_.".indexOf(rootName.charAt(length)) > -1) {
           File file = new File(FileUtil.toSystemDependentName(VfsUtil.urlToPath(root)));
           if (file.exists() && file.isFile()) {
             result.add(file);
@@ -309,24 +345,20 @@ public class BnfRunJFlexAction extends DumbAwareAction {
     return service.createDownloader(descriptions, libraryName).downloadWithProgress(null, project, null);
   }
 
-  private static void createOrUpdateLibrary(@NotNull final String libraryName,
-                                            @NotNull final List<Pair<VirtualFile, DownloadableFileDescription>> pairs) {
-    ApplicationManager.getApplication().runWriteAction(new Runnable() {
-      @Override
-      public void run() {
-        Library library = ApplicationLibraryTable.getApplicationTable().getLibraryByName(libraryName);
-        if (library == null) {
-          LibraryTable.ModifiableModel modifiableModel = ApplicationLibraryTable.getApplicationTable().getModifiableModel();
-          library = modifiableModel.createLibrary(libraryName);
-          modifiableModel.commit();
-        }
-        Library.ModifiableModel modifiableModel = library.getModifiableModel();
-        for (Pair<VirtualFile, DownloadableFileDescription> pair : pairs) {
-          modifiableModel.addRoot(pair.first, OrderRootType.CLASSES);
-        }
-        modifiableModel.commit();
-      }
-    });
+  private static void createOrUpdateLibrary(@NotNull String libraryName,
+                                            @NotNull List<Pair<VirtualFile, DownloadableFileDescription>> pairs) {
+    ApplicationManager.getApplication().assertWriteAccessAllowed();
+    Library library = ApplicationLibraryTable.getApplicationTable().getLibraryByName(libraryName);
+    if (library == null) {
+      LibraryTable.ModifiableModel modifiableModel = ApplicationLibraryTable.getApplicationTable().getModifiableModel();
+      library = modifiableModel.createLibrary(libraryName);
+      modifiableModel.commit();
+    }
+    Library.ModifiableModel modifiableModel = library.getModifiableModel();
+    for (Pair<VirtualFile, DownloadableFileDescription> pair : pairs) {
+      modifiableModel.addRoot(pair.first, OrderRootType.CLASSES);
+    }
+    modifiableModel.commit();
   }
 
   @Nullable
@@ -368,7 +400,7 @@ public class BnfRunJFlexAction extends DumbAwareAction {
     JComponent consoleComponent = new JPanel(new BorderLayout());
 
     JPanel toolbarPanel = new JPanel(new BorderLayout());
-    toolbarPanel.add(ActionManager.getInstance().createActionToolbar(ActionPlaces.UNKNOWN, toolbarActions, false).getComponent());
+    toolbarPanel.add(ActionManager.getInstance().createActionToolbar(ActionPlaces.RUNNER_TOOLBAR, toolbarActions, false).getComponent());
     consoleComponent.add(toolbarPanel, BorderLayout.WEST);
     consoleComponent.add(consoleView.getComponent(), BorderLayout.CENTER);
 
@@ -378,6 +410,7 @@ public class BnfRunJFlexAction extends DumbAwareAction {
     for (AnAction action : consoleView.createConsoleActions()) {
       toolbarActions.add(action);
     }
+    toolbarActions.add(new PinActiveTabAction());
     toolbarActions.add(new CloseAction(executor, descriptor, project));
     runContentManager.showRunContent(executor, descriptor);
     consoleView.allowHeavyFilters();

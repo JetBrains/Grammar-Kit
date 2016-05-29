@@ -24,7 +24,7 @@ import com.intellij.psi.util.PsiTreeUtil;
 import static org.intellij.jflex.psi.JFlexTypes.*;
 import org.intellij.jflex.psi.*;
 
-public class JFlexUserCodeSectionImpl extends JFlexCompositeElementImpl implements JFlexUserCodeSection {
+public class JFlexUserCodeSectionImpl extends JFlexFileSectionImpl implements JFlexUserCodeSection {
 
   public JFlexUserCodeSectionImpl(ASTNode node) {
     super(node);

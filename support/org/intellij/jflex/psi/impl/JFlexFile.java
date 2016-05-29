@@ -16,24 +16,10 @@
 
 package org.intellij.jflex.psi.impl;
 
-import com.intellij.extapi.psi.PsiFileBase;
-import com.intellij.openapi.fileTypes.FileType;
-import com.intellij.psi.FileViewProvider;
-import org.intellij.jflex.JFlexLanguage;
-import org.intellij.jflex.parser.JFlexFileType;
-import org.jetbrains.annotations.NotNull;
+import com.intellij.psi.PsiFile;
 
 /**
  * @author gregsh
  */
-public class JFlexFileImpl extends PsiFileBase implements JFlexFile {
-  public JFlexFileImpl(FileViewProvider fileViewProvider) {
-    super(fileViewProvider, JFlexLanguage.INSTANCE);
-  }
-
-  @NotNull
-  @Override
-  public FileType getFileType() {
-    return JFlexFileType.INSTANCE;
-  }
+public interface JFlexFile extends PsiFile {
 }

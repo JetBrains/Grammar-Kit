@@ -44,8 +44,11 @@ public class JFlexParserTest extends AbstractParsingTestCase {
   public void testEmpty1() throws Exception { doCodeTest(""); }
   public void testEmpty2() throws Exception { doCodeTest("%%\n"); }
   public void testEmpty3() throws Exception { doCodeTest("%%\n%%"); }
+  public void testEOF1() throws Exception { doCodeTest(" %%\n\n%%\n\""); }
   public void testParserFixes() { doTest(true); }
   public void testParserFixes2() { doTest(true); }
+
+  public void testCharClassOp() throws Exception { doCodeTest("%%\n%%\nN=[\\w_--\\d][\\w_||\\d][[\\w_]&&\\d][\\w_~~[\\d]] {}"); }
 
   @Override
   protected String loadFile(@NonNls String name) throws IOException {
@@ -56,5 +59,8 @@ public class JFlexParserTest extends AbstractParsingTestCase {
         FileUtil.loadFile(new File(myFullDataPath, name1).getCanonicalFile(), CharsetToolkit.UTF8).trim());
     }
     return super.loadFile(name);
+    //String s = super.loadFile(name);
+    //System.out.println(LexerTestCase.printTokens(s, 0, new JFlexLexer()));
+    //return s;
   }
 }

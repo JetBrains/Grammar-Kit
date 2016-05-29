@@ -19,7 +19,7 @@ import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
-public interface JFlexUserCodeSection extends JFlexCompositeElement {
+public interface JFlexUserCodeSection extends JFlexFileSection {
 
   @Nullable
   JFlexJavaCode getJavaCode();

@@ -11,10 +11,15 @@ package sample.lexer;
 
 %state STATE, STATE2,
 
-
 FUNCTION        = [_a-zA-Z]([$_a-zA-Z0-9])*?[:]([^\n\r])*?(->|=>)
 NOTTAGORCOMMENTBEGIN = ("<"[^c/C!] | "<c"[^fF] | "<C"[^fF] | "</"[^Cc] | "</c"[^Ff] | "</C"[^fF] |
              "<!"[^-] | "<!-"[^-] | "<!--"[^-])
+%x STAT
+%s STAT
+%{
+String escapes="\\ \n \r \t \f" + '\\' + '\n' + '\r' + '\t' + '\f' ;
+%}
+
 ID_CHAR = [a-zA-Z_0-9-]
 INT_LITERAL = [-+]?[0-9]+
 EXPONENT_PART=[Ee][+-]?[0-9]+
@@ -24,6 +29,7 @@ NO_STATE=<TAG>
 VARIABLE = "$"(::)?{NAME}(::{NAME})*
 BOOL            = true|yes|on|false|no|off|undefined|null
 SYNTAX = ,|\.
+M=(-?0b[01]+)
 
 %%
 <YYINITIAL> {
@@ -70,5 +76,8 @@ SYNTAX = ,|\.
   }
 
 
-
+  {HexDigit}{1,6} { }
+  {HexDigit}{ 1 , 6 } { }
+  [\w_--\d] { }
+  <<EOF>> { }
 }

@@ -24,14 +24,14 @@ import com.intellij.psi.util.PsiTreeUtil;
 import static org.intellij.jflex.psi.JFlexTypes.*;
 import org.intellij.jflex.psi.*;
 
-public class JFlexClassExpressionImpl extends JFlexExpressionImpl implements JFlexClassExpression {
+public class JFlexStateListImpl extends JFlexCompositeElementImpl implements JFlexStateList {
 
-  public JFlexClassExpressionImpl(ASTNode node) {
+  public JFlexStateListImpl(ASTNode node) {
     super(node);
   }
 
   public void accept(@NotNull JFlexVisitor visitor) {
-    visitor.visitClassExpression(this);
+    visitor.visitStateList(this);
   }
 
   public void accept(@NotNull PsiElementVisitor visitor) {
@@ -41,8 +41,8 @@ public class JFlexClassExpressionImpl extends JFlexExpressionImpl implements JFl
 
   @Override
   @NotNull
-  public List<JFlexClassExpression> getClassExpressionList() {
-    return PsiTreeUtil.getChildrenOfTypeAsList(this, JFlexClassExpression.class);
+  public List<JFlexStateReference> getStateReferenceList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, JFlexStateReference.class);
   }
 
 }

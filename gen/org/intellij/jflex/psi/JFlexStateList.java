@@ -19,12 +19,9 @@ import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
-public interface JFlexLexicalRulesSection extends JFlexFileSection {
+public interface JFlexStateList extends JFlexCompositeElement {
 
   @NotNull
-  List<JFlexOption> getOptionList();
-
-  @NotNull
-  List<JFlexRule> getRuleList();
+  List<JFlexStateReference> getStateReferenceList();
 
 }

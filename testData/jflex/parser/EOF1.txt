@@ -1,0 +1,15 @@
+JFLEX_FILE
+  JFlexUserCodeSectionImpl(FLEX_USER_CODE_SECTION)
+    JFlexJavaCodeImpl(FLEX_JAVA_CODE)
+      PsiElement(code block)(' ')
+  PsiErrorElement:<new-line> expected, got '%%'
+    <empty list>
+  JFlexDeclarationsSectionImpl(FLEX_DECLARATIONS_SECTION)
+    <empty list>
+  JFlexLexicalRulesSectionImpl(FLEX_LEXICAL_RULES_SECTION)
+    <empty list>
+  PsiElement(%%)('%%')
+  PsiWhiteSpace('\n\n')
+  PsiElement(%%)('%%')
+  PsiWhiteSpace('\n')
+  PsiElement(string)('"')

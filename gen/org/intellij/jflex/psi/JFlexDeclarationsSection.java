@@ -19,7 +19,7 @@ import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
-public interface JFlexDeclarationsSection extends JFlexCompositeElement {
+public interface JFlexDeclarationsSection extends JFlexFileSection {
 
   @NotNull
   List<JFlexMacroDefinition> getMacroDefinitionList();

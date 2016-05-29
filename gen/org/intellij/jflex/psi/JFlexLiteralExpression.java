@@ -21,19 +21,4 @@ import com.intellij.psi.PsiElement;
 
 public interface JFlexLiteralExpression extends JFlexExpression {
 
-  @Nullable
-  PsiElement getChar();
-
-  @Nullable
-  PsiElement getEscapedChar();
-
-  @Nullable
-  PsiElement getId();
-
-  @Nullable
-  PsiElement getNumber();
-
-  @Nullable
-  PsiElement getString();
-
 }

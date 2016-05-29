@@ -36,7 +36,7 @@ public interface JFlexRule extends JFlexCompositeElement {
   @NotNull
   List<JFlexRule> getRuleList();
 
-  @NotNull
-  List<JFlexStateReference> getStateReferenceList();
+  @Nullable
+  JFlexStateList getStateList();
 
 }

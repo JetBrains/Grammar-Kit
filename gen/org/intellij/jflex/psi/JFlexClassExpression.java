@@ -21,4 +21,7 @@ import com.intellij.psi.PsiElement;
 
 public interface JFlexClassExpression extends JFlexExpression {
 
+  @NotNull
+  List<JFlexClassExpression> getClassExpressionList();
+
 }

@@ -39,34 +39,4 @@ public class JFlexLiteralExpressionImpl extends JFlexExpressionImpl implements J
     else super.accept(visitor);
   }
 
-  @Override
-  @Nullable
-  public PsiElement getChar() {
-    return findChildByType(FLEX_CHAR);
-  }
-
-  @Override
-  @Nullable
-  public PsiElement getEscapedChar() {
-    return findChildByType(FLEX_ESCAPED_CHAR);
-  }
-
-  @Override
-  @Nullable
-  public PsiElement getId() {
-    return findChildByType(FLEX_ID);
-  }
-
-  @Override
-  @Nullable
-  public PsiElement getNumber() {
-    return findChildByType(FLEX_NUMBER);
-  }
-
-  @Override
-  @Nullable
-  public PsiElement getString() {
-    return findChildByType(FLEX_STRING);
-  }
-
 }

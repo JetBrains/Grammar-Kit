@@ -80,9 +80,6 @@ public class JFlexSyntaxHighlighterFactory extends SyntaxHighlighterFactory {
       else if (tokenType == FLEX_STRING) {
         return pack(STRING);
       }
-      else if (tokenType == FLEX_ESCAPED_CHAR) {
-        return pack(ESCAPED_CHAR);
-      }
       else if (tokenType == FLEX_CHAR) {
         return pack(CHAR);
       }

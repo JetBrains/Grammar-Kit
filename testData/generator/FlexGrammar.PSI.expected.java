@@ -30,36 +30,36 @@ public interface JFlexTypes {
   IElementType FLEX_SEQUENCE_EXPRESSION = new JFlexCompositeElementType("FLEX_SEQUENCE_EXPRESSION");
   IElementType FLEX_STATE_DECLARATION = new JFlexCompositeElementType("FLEX_STATE_DECLARATION");
   IElementType FLEX_STATE_DEFINITION = new JFlexCompositeElementType("FLEX_STATE_DEFINITION");
+  IElementType FLEX_STATE_LIST = new JFlexCompositeElementType("FLEX_STATE_LIST");
   IElementType FLEX_STATE_REFERENCE = new JFlexCompositeElementType("FLEX_STATE_REFERENCE");
   IElementType FLEX_USER_CODE_SECTION = new JFlexCompositeElementType("FLEX_USER_CODE_SECTION");
   IElementType FLEX_USER_VALUE = new JFlexCompositeElementType("FLEX_USER_VALUE");
 
+  IElementType FLEX_AMPAMP = new JFlexTokenType("&&");
   IElementType FLEX_ANGLE1 = new JFlexTokenType("<");
   IElementType FLEX_ANGLE2 = new JFlexTokenType(">");
+  IElementType FLEX_BANG = new JFlexTokenType("!");
+  IElementType FLEX_BAR = new JFlexTokenType("|");
+  IElementType FLEX_BARBAR = new JFlexTokenType("||");
   IElementType FLEX_BLOCK_COMMENT = new JFlexTokenType("block_comment");
   IElementType FLEX_BRACE1 = new JFlexTokenType("{");
   IElementType FLEX_BRACE2 = new JFlexTokenType("}");
   IElementType FLEX_BRACK1 = new JFlexTokenType("[");
   IElementType FLEX_BRACK2 = new JFlexTokenType("]");
+  IElementType FLEX_BSLASH = new JFlexTokenType("\\");
   IElementType FLEX_CHAR = new JFlexTokenType("char");
-  IElementType FLEX_CLASS_D = new JFlexTokenType("[:digit:]");
-  IElementType FLEX_CLASS_JL = new JFlexTokenType("[:jletter:]");
-  IElementType FLEX_CLASS_JLD = new JFlexTokenType("[:jletterdigit:]");
-  IElementType FLEX_CLASS_L = new JFlexTokenType("[:letter:]");
-  IElementType FLEX_CLASS_LL = new JFlexTokenType("[:lowercase:]");
-  IElementType FLEX_CLASS_LU = new JFlexTokenType("[:uppercase:]");
+  IElementType FLEX_CHAR_CLASS = new JFlexTokenType("char_class");
   IElementType FLEX_COMMA = new JFlexTokenType(",");
   IElementType FLEX_DASH = new JFlexTokenType("-");
+  IElementType FLEX_DASHDASH = new JFlexTokenType("--");
   IElementType FLEX_DOLLAR = new JFlexTokenType("$");
   IElementType FLEX_DOT = new JFlexTokenType(".");
   IElementType FLEX_EOF = new JFlexTokenType("<<EOF>>");
   IElementType FLEX_EQ = new JFlexTokenType("=");
-  IElementType FLEX_ESCAPED_CHAR = new JFlexTokenType("escaped_char");
+  IElementType FLEX_FSLASH = new JFlexTokenType("/");
+  IElementType FLEX_HAT = new JFlexTokenType("^");
   IElementType FLEX_ID = new JFlexTokenType("id");
-  IElementType FLEX_JAVA = new JFlexTokenType("java");
   IElementType FLEX_LINE_COMMENT = new JFlexTokenType("line_comment");
-  IElementType FLEX_NOT = new JFlexTokenType("!");
-  IElementType FLEX_NOT2 = new JFlexTokenType("~");
   IElementType FLEX_NUMBER = new JFlexTokenType("number");
   IElementType FLEX_OPT16BIT = new JFlexTokenType("%16bit");
   IElementType FLEX_OPT_7BIT = new JFlexTokenType("%7bit");
@@ -67,7 +67,6 @@ public interface JFlexTypes {
   IElementType FLEX_OPT_ABSTRACT = new JFlexTokenType("%abstract");
   IElementType FLEX_OPT_APIPRIVATE = new JFlexTokenType("%apiprivate");
   IElementType FLEX_OPT_BUFFER = new JFlexTokenType("%buffer");
-  IElementType FLEX_OPT_BYACC = new JFlexTokenType("%byacc");
   IElementType FLEX_OPT_CASELESS = new JFlexTokenType("%caseless");
   IElementType FLEX_OPT_CHAR = new JFlexTokenType("%char");
   IElementType FLEX_OPT_CLASS = new JFlexTokenType("%class");
@@ -104,33 +103,29 @@ public interface JFlexTypes {
   IElementType FLEX_OPT_INTWRAP = new JFlexTokenType("%intwrap");
   IElementType FLEX_OPT_LINE = new JFlexTokenType("%line");
   IElementType FLEX_OPT_NOTUNIX = new JFlexTokenType("%notunix");
-  IElementType FLEX_OPT_PACK = new JFlexTokenType("%pack");
   IElementType FLEX_OPT_PUBLIC = new JFlexTokenType("%public");
-  IElementType FLEX_OPT_S = new JFlexTokenType("%s");
   IElementType FLEX_OPT_SCANERROR = new JFlexTokenType("%scanerror");
   IElementType FLEX_OPT_STANDALONE = new JFlexTokenType("%standalone");
   IElementType FLEX_OPT_STATE = new JFlexTokenType("%state");
-  IElementType FLEX_OPT_SWITCH = new JFlexTokenType("%switch");
-  IElementType FLEX_OPT_TABLE = new JFlexTokenType("%table");
   IElementType FLEX_OPT_TYPE = new JFlexTokenType("%type");
   IElementType FLEX_OPT_UNICODE = new JFlexTokenType("%unicode");
-  IElementType FLEX_OPT_X = new JFlexTokenType("%x");
   IElementType FLEX_OPT_XSTATE = new JFlexTokenType("%xstate");
   IElementType FLEX_OPT_YYEOF = new JFlexTokenType("%yyeof");
   IElementType FLEX_OPT_YYLEXTHROW = new JFlexTokenType("%yylexthrow");
   IElementType FLEX_OPT_YYLEXTHROW1 = new JFlexTokenType("%yylexthrow{");
   IElementType FLEX_OPT_YYLEXTHROW2 = new JFlexTokenType("%yylexthrow}");
-  IElementType FLEX_OR = new JFlexTokenType("|");
   IElementType FLEX_PAREN1 = new JFlexTokenType("(");
   IElementType FLEX_PAREN2 = new JFlexTokenType(")");
   IElementType FLEX_PLUS = new JFlexTokenType("+");
   IElementType FLEX_QUESTION = new JFlexTokenType("?");
-  IElementType FLEX_ROOF = new JFlexTokenType("^");
-  IElementType FLEX_SLASH = new JFlexTokenType("\\");
-  IElementType FLEX_SLASH2 = new JFlexTokenType("/");
+  IElementType FLEX_RAW = new JFlexTokenType("code block");
   IElementType FLEX_STAR = new JFlexTokenType("*");
   IElementType FLEX_STRING = new JFlexTokenType("string");
+  IElementType FLEX_TILDE = new JFlexTokenType("~");
+  IElementType FLEX_TILDETILDE = new JFlexTokenType("~~");
   IElementType FLEX_TWO_PERCS = new JFlexTokenType("%%");
+  IElementType FLEX_UNCLOSED = new JFlexTokenType("unclosed");
+  IElementType FLEX_VERSION = new JFlexTokenType("version");
 
   class Factory {
     public static PsiElement createElement(ASTNode node) {
@@ -198,6 +193,9 @@ public interface JFlexTypes {
       else if (type == FLEX_STATE_DEFINITION) {
         return new JFlexStateDefinitionImpl(node);
       }
+      else if (type == FLEX_STATE_LIST) {
+        return new JFlexStateListImpl(node);
+      }
       else if (type == FLEX_STATE_REFERENCE) {
         return new JFlexStateReferenceImpl(node);
       }
@@ -235,6 +233,9 @@ import com.intellij.psi.PsiElement;
 
 public interface JFlexClassExpression extends JFlexExpression {
 
+  @NotNull
+  List<JFlexClassExpression> getClassExpressionList();
+
 }
 // ---- JFlexDeclarationsSection.java -----------------
 // license.txt
@@ -244,7 +245,7 @@ import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
-public interface JFlexDeclarationsSection extends JFlexCompositeElement {
+public interface JFlexDeclarationsSection extends JFlexFileSection {
 
   @NotNull
   List<JFlexMacroDefinition> getMacroDefinitionList();
@@ -265,6 +266,17 @@ import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
 public interface JFlexExpression extends JFlexCompositeElement {
+
+}
+// ---- JFlexFileSection.java -----------------
+// license.txt
+package org.intellij.jflex.psi;
+
+import java.util.List;
+import org.jetbrains.annotations.*;
+import com.intellij.psi.PsiElement;
+
+public interface JFlexFileSection extends JFlexCompositeElement {
 
 }
 // ---- JFlexJavaCode.java -----------------
@@ -304,7 +316,7 @@ import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
-public interface JFlexLexicalRulesSection extends JFlexCompositeElement {
+public interface JFlexLexicalRulesSection extends JFlexFileSection {
 
   @NotNull
   List<JFlexOption> getOptionList();
@@ -322,21 +334,6 @@ import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
 public interface JFlexLiteralExpression extends JFlexExpression {
-
-  @Nullable
-  PsiElement getChar();
-
-  @Nullable
-  PsiElement getEscapedChar();
-
-  @Nullable
-  PsiElement getId();
-
-  @Nullable
-  PsiElement getNumber();
-
-  @Nullable
-  PsiElement getString();
 
 }
 // ---- JFlexLookAhead.java -----------------
@@ -501,8 +498,8 @@ public interface JFlexRule extends JFlexCompositeElement {
   @NotNull
   List<JFlexRule> getRuleList();
 
-  @NotNull
-  List<JFlexStateReference> getStateReferenceList();
+  @Nullable
+  JFlexStateList getStateList();
 
 }
 // ---- JFlexSequenceExpression.java -----------------
@@ -557,6 +554,20 @@ public interface JFlexStateDefinition extends PsiNameIdentifierOwner {
   PsiElement getNameIdentifier();
 
 }
+// ---- JFlexStateList.java -----------------
+// license.txt
+package org.intellij.jflex.psi;
+
+import java.util.List;
+import org.jetbrains.annotations.*;
+import com.intellij.psi.PsiElement;
+
+public interface JFlexStateList extends JFlexCompositeElement {
+
+  @NotNull
+  List<JFlexStateReference> getStateReferenceList();
+
+}
 // ---- JFlexStateReference.java -----------------
 // license.txt
 package org.intellij.jflex.psi;
@@ -583,7 +594,7 @@ import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
-public interface JFlexUserCodeSection extends JFlexCompositeElement {
+public interface JFlexUserCodeSection extends JFlexFileSection {
 
   @Nullable
   JFlexJavaCode getJavaCode();
@@ -663,6 +674,12 @@ public class JFlexClassExpressionImpl extends JFlexExpressionImpl implements JFl
     else super.accept(visitor);
   }
 
+  @Override
+  @NotNull
+  public List<JFlexClassExpression> getClassExpressionList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, JFlexClassExpression.class);
+  }
+
 }
 // ---- JFlexDeclarationsSectionImpl.java -----------------
 // license.txt
@@ -677,7 +694,7 @@ import com.intellij.psi.util.PsiTreeUtil;
 import static org.intellij.jflex.psi.JFlexTypes.*;
 import org.intellij.jflex.psi.*;
 
-public class JFlexDeclarationsSectionImpl extends JFlexCompositeElementImpl implements JFlexDeclarationsSection {
+public class JFlexDeclarationsSectionImpl extends JFlexFileSectionImpl implements JFlexDeclarationsSection {
 
   public JFlexDeclarationsSectionImpl(ASTNode node) {
     super(node);
@@ -732,6 +749,35 @@ public class JFlexExpressionImpl extends JFlexCompositeElementImpl implements JF
 
   public void accept(@NotNull JFlexVisitor visitor) {
     visitor.visitExpression(this);
+  }
+
+  public void accept(@NotNull PsiElementVisitor visitor) {
+    if (visitor instanceof JFlexVisitor) accept((JFlexVisitor)visitor);
+    else super.accept(visitor);
+  }
+
+}
+// ---- JFlexFileSectionImpl.java -----------------
+// license.txt
+package org.intellij.jflex.psi.impl;
+
+import java.util.List;
+import org.jetbrains.annotations.*;
+import com.intellij.lang.ASTNode;
+import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiElementVisitor;
+import com.intellij.psi.util.PsiTreeUtil;
+import static org.intellij.jflex.psi.JFlexTypes.*;
+import org.intellij.jflex.psi.*;
+
+public class JFlexFileSectionImpl extends JFlexCompositeElementImpl implements JFlexFileSection {
+
+  public JFlexFileSectionImpl(ASTNode node) {
+    super(node);
+  }
+
+  public void accept(@NotNull JFlexVisitor visitor) {
+    visitor.visitFileSection(this);
   }
 
   public void accept(@NotNull PsiElementVisitor visitor) {
@@ -822,7 +868,7 @@ import com.intellij.psi.util.PsiTreeUtil;
 import static org.intellij.jflex.psi.JFlexTypes.*;
 import org.intellij.jflex.psi.*;
 
-public class JFlexLexicalRulesSectionImpl extends JFlexCompositeElementImpl implements JFlexLexicalRulesSection {
+public class JFlexLexicalRulesSectionImpl extends JFlexFileSectionImpl implements JFlexLexicalRulesSection {
 
   public JFlexLexicalRulesSectionImpl(ASTNode node) {
     super(node);
@@ -876,36 +922,6 @@ public class JFlexLiteralExpressionImpl extends JFlexExpressionImpl implements J
   public void accept(@NotNull PsiElementVisitor visitor) {
     if (visitor instanceof JFlexVisitor) accept((JFlexVisitor)visitor);
     else super.accept(visitor);
-  }
-
-  @Override
-  @Nullable
-  public PsiElement getChar() {
-    return findChildByType(FLEX_CHAR);
-  }
-
-  @Override
-  @Nullable
-  public PsiElement getEscapedChar() {
-    return findChildByType(FLEX_ESCAPED_CHAR);
-  }
-
-  @Override
-  @Nullable
-  public PsiElement getId() {
-    return findChildByType(FLEX_ID);
-  }
-
-  @Override
-  @Nullable
-  public PsiElement getNumber() {
-    return findChildByType(FLEX_NUMBER);
-  }
-
-  @Override
-  @Nullable
-  public PsiElement getString() {
-    return findChildByType(FLEX_STRING);
   }
 
 }
@@ -1299,9 +1315,9 @@ public class JFlexRuleImpl extends JFlexCompositeElementImpl implements JFlexRul
   }
 
   @Override
-  @NotNull
-  public List<JFlexStateReference> getStateReferenceList() {
-    return PsiTreeUtil.getChildrenOfTypeAsList(this, JFlexStateReference.class);
+  @Nullable
+  public JFlexStateList getStateList() {
+    return findChildByClass(JFlexStateList.class);
   }
 
 }
@@ -1426,6 +1442,41 @@ public class JFlexStateDefinitionImpl extends JFlexCompositeElementImpl implemen
   }
 
 }
+// ---- JFlexStateListImpl.java -----------------
+// license.txt
+package org.intellij.jflex.psi.impl;
+
+import java.util.List;
+import org.jetbrains.annotations.*;
+import com.intellij.lang.ASTNode;
+import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiElementVisitor;
+import com.intellij.psi.util.PsiTreeUtil;
+import static org.intellij.jflex.psi.JFlexTypes.*;
+import org.intellij.jflex.psi.*;
+
+public class JFlexStateListImpl extends JFlexCompositeElementImpl implements JFlexStateList {
+
+  public JFlexStateListImpl(ASTNode node) {
+    super(node);
+  }
+
+  public void accept(@NotNull JFlexVisitor visitor) {
+    visitor.visitStateList(this);
+  }
+
+  public void accept(@NotNull PsiElementVisitor visitor) {
+    if (visitor instanceof JFlexVisitor) accept((JFlexVisitor)visitor);
+    else super.accept(visitor);
+  }
+
+  @Override
+  @NotNull
+  public List<JFlexStateReference> getStateReferenceList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, JFlexStateReference.class);
+  }
+
+}
 // ---- JFlexStateReferenceImpl.java -----------------
 // license.txt
 package org.intellij.jflex.psi.impl;
@@ -1480,7 +1531,7 @@ import com.intellij.psi.util.PsiTreeUtil;
 import static org.intellij.jflex.psi.JFlexTypes.*;
 import org.intellij.jflex.psi.*;
 
-public class JFlexUserCodeSectionImpl extends JFlexCompositeElementImpl implements JFlexUserCodeSection {
+public class JFlexUserCodeSectionImpl extends JFlexFileSectionImpl implements JFlexUserCodeSection {
 
   public JFlexUserCodeSectionImpl(ASTNode node) {
     super(node);
@@ -1550,10 +1601,14 @@ public class JFlexVisitor extends PsiElementVisitor {
   }
 
   public void visitDeclarationsSection(@NotNull JFlexDeclarationsSection o) {
-    visitCompositeElement(o);
+    visitFileSection(o);
   }
 
   public void visitExpression(@NotNull JFlexExpression o) {
+    visitCompositeElement(o);
+  }
+
+  public void visitFileSection(@NotNull JFlexFileSection o) {
     visitCompositeElement(o);
   }
 
@@ -1566,7 +1621,7 @@ public class JFlexVisitor extends PsiElementVisitor {
   }
 
   public void visitLexicalRulesSection(@NotNull JFlexLexicalRulesSection o) {
-    visitCompositeElement(o);
+    visitFileSection(o);
   }
 
   public void visitLiteralExpression(@NotNull JFlexLiteralExpression o) {
@@ -1625,12 +1680,16 @@ public class JFlexVisitor extends PsiElementVisitor {
     visitPsiNameIdentifierOwner(o);
   }
 
+  public void visitStateList(@NotNull JFlexStateList o) {
+    visitCompositeElement(o);
+  }
+
   public void visitStateReference(@NotNull JFlexStateReference o) {
     visitCompositeElement(o);
   }
 
   public void visitUserCodeSection(@NotNull JFlexUserCodeSection o) {
-    visitCompositeElement(o);
+    visitFileSection(o);
   }
 
   public void visitUserValue(@NotNull JFlexUserValue o) {

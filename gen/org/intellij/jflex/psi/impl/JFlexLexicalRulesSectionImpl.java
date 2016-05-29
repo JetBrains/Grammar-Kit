@@ -24,7 +24,7 @@ import com.intellij.psi.util.PsiTreeUtil;
 import static org.intellij.jflex.psi.JFlexTypes.*;
 import org.intellij.jflex.psi.*;
 
-public class JFlexLexicalRulesSectionImpl extends JFlexCompositeElementImpl implements JFlexLexicalRulesSection {
+public class JFlexLexicalRulesSectionImpl extends JFlexFileSectionImpl implements JFlexLexicalRulesSection {
 
   public JFlexLexicalRulesSectionImpl(ASTNode node) {
     super(node);

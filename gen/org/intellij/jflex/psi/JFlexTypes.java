@@ -43,36 +43,36 @@ public interface JFlexTypes {
   IElementType FLEX_SEQUENCE_EXPRESSION = new JFlexCompositeElementType("FLEX_SEQUENCE_EXPRESSION");
   IElementType FLEX_STATE_DECLARATION = new JFlexCompositeElementType("FLEX_STATE_DECLARATION");
   IElementType FLEX_STATE_DEFINITION = new JFlexCompositeElementType("FLEX_STATE_DEFINITION");
+  IElementType FLEX_STATE_LIST = new JFlexCompositeElementType("FLEX_STATE_LIST");
   IElementType FLEX_STATE_REFERENCE = new JFlexCompositeElementType("FLEX_STATE_REFERENCE");
   IElementType FLEX_USER_CODE_SECTION = new JFlexCompositeElementType("FLEX_USER_CODE_SECTION");
   IElementType FLEX_USER_VALUE = new JFlexCompositeElementType("FLEX_USER_VALUE");
 
+  IElementType FLEX_AMPAMP = new JFlexTokenType("&&");
   IElementType FLEX_ANGLE1 = new JFlexTokenType("<");
   IElementType FLEX_ANGLE2 = new JFlexTokenType(">");
+  IElementType FLEX_BANG = new JFlexTokenType("!");
+  IElementType FLEX_BAR = new JFlexTokenType("|");
+  IElementType FLEX_BARBAR = new JFlexTokenType("||");
   IElementType FLEX_BLOCK_COMMENT = new JFlexTokenType("block_comment");
   IElementType FLEX_BRACE1 = new JFlexTokenType("{");
   IElementType FLEX_BRACE2 = new JFlexTokenType("}");
   IElementType FLEX_BRACK1 = new JFlexTokenType("[");
   IElementType FLEX_BRACK2 = new JFlexTokenType("]");
+  IElementType FLEX_BSLASH = new JFlexTokenType("\\");
   IElementType FLEX_CHAR = new JFlexTokenType("char");
-  IElementType FLEX_CLASS_D = new JFlexTokenType("[:digit:]");
-  IElementType FLEX_CLASS_JL = new JFlexTokenType("[:jletter:]");
-  IElementType FLEX_CLASS_JLD = new JFlexTokenType("[:jletterdigit:]");
-  IElementType FLEX_CLASS_L = new JFlexTokenType("[:letter:]");
-  IElementType FLEX_CLASS_LL = new JFlexTokenType("[:lowercase:]");
-  IElementType FLEX_CLASS_LU = new JFlexTokenType("[:uppercase:]");
+  IElementType FLEX_CHAR_CLASS = new JFlexTokenType("char_class");
   IElementType FLEX_COMMA = new JFlexTokenType(",");
   IElementType FLEX_DASH = new JFlexTokenType("-");
+  IElementType FLEX_DASHDASH = new JFlexTokenType("--");
   IElementType FLEX_DOLLAR = new JFlexTokenType("$");
   IElementType FLEX_DOT = new JFlexTokenType(".");
   IElementType FLEX_EOF = new JFlexTokenType("<<EOF>>");
   IElementType FLEX_EQ = new JFlexTokenType("=");
-  IElementType FLEX_ESCAPED_CHAR = new JFlexTokenType("escaped_char");
+  IElementType FLEX_FSLASH = new JFlexTokenType("/");
+  IElementType FLEX_HAT = new JFlexTokenType("^");
   IElementType FLEX_ID = new JFlexTokenType("id");
-  IElementType FLEX_JAVA = new JFlexTokenType("java");
   IElementType FLEX_LINE_COMMENT = new JFlexTokenType("line_comment");
-  IElementType FLEX_NOT = new JFlexTokenType("!");
-  IElementType FLEX_NOT2 = new JFlexTokenType("~");
   IElementType FLEX_NUMBER = new JFlexTokenType("number");
   IElementType FLEX_OPT16BIT = new JFlexTokenType("%16bit");
   IElementType FLEX_OPT_7BIT = new JFlexTokenType("%7bit");
@@ -80,7 +80,6 @@ public interface JFlexTypes {
   IElementType FLEX_OPT_ABSTRACT = new JFlexTokenType("%abstract");
   IElementType FLEX_OPT_APIPRIVATE = new JFlexTokenType("%apiprivate");
   IElementType FLEX_OPT_BUFFER = new JFlexTokenType("%buffer");
-  IElementType FLEX_OPT_BYACC = new JFlexTokenType("%byacc");
   IElementType FLEX_OPT_CASELESS = new JFlexTokenType("%caseless");
   IElementType FLEX_OPT_CHAR = new JFlexTokenType("%char");
   IElementType FLEX_OPT_CLASS = new JFlexTokenType("%class");
@@ -117,33 +116,29 @@ public interface JFlexTypes {
   IElementType FLEX_OPT_INTWRAP = new JFlexTokenType("%intwrap");
   IElementType FLEX_OPT_LINE = new JFlexTokenType("%line");
   IElementType FLEX_OPT_NOTUNIX = new JFlexTokenType("%notunix");
-  IElementType FLEX_OPT_PACK = new JFlexTokenType("%pack");
   IElementType FLEX_OPT_PUBLIC = new JFlexTokenType("%public");
-  IElementType FLEX_OPT_S = new JFlexTokenType("%s");
   IElementType FLEX_OPT_SCANERROR = new JFlexTokenType("%scanerror");
   IElementType FLEX_OPT_STANDALONE = new JFlexTokenType("%standalone");
   IElementType FLEX_OPT_STATE = new JFlexTokenType("%state");
-  IElementType FLEX_OPT_SWITCH = new JFlexTokenType("%switch");
-  IElementType FLEX_OPT_TABLE = new JFlexTokenType("%table");
   IElementType FLEX_OPT_TYPE = new JFlexTokenType("%type");
   IElementType FLEX_OPT_UNICODE = new JFlexTokenType("%unicode");
-  IElementType FLEX_OPT_X = new JFlexTokenType("%x");
   IElementType FLEX_OPT_XSTATE = new JFlexTokenType("%xstate");
   IElementType FLEX_OPT_YYEOF = new JFlexTokenType("%yyeof");
   IElementType FLEX_OPT_YYLEXTHROW = new JFlexTokenType("%yylexthrow");
   IElementType FLEX_OPT_YYLEXTHROW1 = new JFlexTokenType("%yylexthrow{");
   IElementType FLEX_OPT_YYLEXTHROW2 = new JFlexTokenType("%yylexthrow}");
-  IElementType FLEX_OR = new JFlexTokenType("|");
   IElementType FLEX_PAREN1 = new JFlexTokenType("(");
   IElementType FLEX_PAREN2 = new JFlexTokenType(")");
   IElementType FLEX_PLUS = new JFlexTokenType("+");
   IElementType FLEX_QUESTION = new JFlexTokenType("?");
-  IElementType FLEX_ROOF = new JFlexTokenType("^");
-  IElementType FLEX_SLASH = new JFlexTokenType("\\");
-  IElementType FLEX_SLASH2 = new JFlexTokenType("/");
+  IElementType FLEX_RAW = new JFlexTokenType("code block");
   IElementType FLEX_STAR = new JFlexTokenType("*");
   IElementType FLEX_STRING = new JFlexTokenType("string");
+  IElementType FLEX_TILDE = new JFlexTokenType("~");
+  IElementType FLEX_TILDETILDE = new JFlexTokenType("~~");
   IElementType FLEX_TWO_PERCS = new JFlexTokenType("%%");
+  IElementType FLEX_UNCLOSED = new JFlexTokenType("unclosed");
+  IElementType FLEX_VERSION = new JFlexTokenType("version");
 
   class Factory {
     public static PsiElement createElement(ASTNode node) {
@@ -210,6 +205,9 @@ public interface JFlexTypes {
       }
       else if (type == FLEX_STATE_DEFINITION) {
         return new JFlexStateDefinitionImpl(node);
+      }
+      else if (type == FLEX_STATE_LIST) {
+        return new JFlexStateListImpl(node);
       }
       else if (type == FLEX_STATE_REFERENCE) {
         return new JFlexStateReferenceImpl(node);

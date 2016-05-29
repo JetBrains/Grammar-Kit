@@ -101,7 +101,8 @@ public class JFlexCompletionContributor extends CompletionContributor {
       public String convertItem(Object o) {
         if (o == null) return null;
         if (o instanceof IElementType[]) return super.convertItem(o);
-        if (o == FLEX_ID || o == FLEX_CHAR || o == FLEX_ESCAPED_CHAR || o == FLEX_STRING || o == FLEX_NUMBER || o == FLEX_JAVA) return null;
+        if (o == FLEX_ID || o == FLEX_CHAR || o == FLEX_STRING ||
+            o == FLEX_NUMBER || o == FLEX_RAW || o == FLEX_VERSION) return null;
         String text = o.toString();
         return text.length() == 1 || inMacro && text.startsWith("%") || !inMacro && text.startsWith("[")? null : text;
       }

@@ -70,9 +70,9 @@ public class JFlexRuleImpl extends JFlexCompositeElementImpl implements JFlexRul
   }
 
   @Override
-  @NotNull
-  public List<JFlexStateReference> getStateReferenceList() {
-    return PsiTreeUtil.getChildrenOfTypeAsList(this, JFlexStateReference.class);
+  @Nullable
+  public JFlexStateList getStateList() {
+    return findChildByClass(JFlexStateList.class);
   }
 
 }

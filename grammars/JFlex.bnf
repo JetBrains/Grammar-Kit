@@ -20,14 +20,11 @@
   tokenTypeClass="org.intellij.jflex.psi.JFlexTokenType"
 
   tokens = [
-    java = 'regexp:.*'
-    newline = 'regexp:\n'
     id = 'regexp:(_|\p{Alpha})\w*'
-    string = 'regexp:"([^"\\]|\\.)*"'
-    number = 'regexp:\p{Digit}+'
-    line_comment='regexp://.*'
-    block_comment='regexp:/\*((?<!\*/)(.|\n))*'
-    escaped_char='regexp:\\.'
+    line_comment='regexp://..'
+    block_comment='regexp:/*..*/'
+    raw='code block'
+    unclosed='unclosed'
 
     two_percs = '%%'
     star = '*'
@@ -40,29 +37,27 @@
     question = '?'
     dash = '-'
     plus = '+'
-    roof = '^'
-    slash2 = '/'
+    hat = '^'
+    fslash = '/'
+
+    dashdash = '--'
+    ampamp = '&&'
+    barbar = '||'
+    tildetilde = '~~'
 
     dot = '.'
     comma = ','
 
     angle1 = '<'
     angle2 = '>'
-    or = '|'
-    slash = '\'
+    bar = '|'
+    bslash = '\'
     dollar = '$'
     eq = '='
-    not = '!'
-    not2 = '~'
+    bang = '!'
+    tilde = '~'
 
     eof = '<<EOF>>'
-
-    class_jl='[:jletter:]'
-    class_jld='[:jletterdigit:]'
-    class_l='[:letter:]'
-    class_d='[:digit:]'
-    class_lu='[:uppercase:]'
-    class_ll='[:lowercase:]'
 
     opt_class='%class'
     opt_implements='%implements'
@@ -103,10 +98,6 @@
     opt_cup='%cup'
     opt_cupsym='%cupsym'
     opt_cupdebug='%cupdebug'
-    opt_byacc='%byacc'
-    opt_switch='%switch'
-    opt_table='%table'
-    opt_pack='%pack'
     opt_7bit='%7bit'
     opt_full='%full'
     opt_8bit='%8bit'
@@ -120,12 +111,10 @@
     opt_notunix='%notunix'
     opt_yyeof='%yyeof'
     opt_state='%state'
-    opt_s='%s'
     opt_xstate='%xstate'
-    opt_x='%x'
-
-    char='regexp:[^\{\}\[\]\(\)\+\*\?\\/]'
   ]
+
+  extends(".*_section")=file_section
   recoverWhile(".*_section")=section_recover
   pin(".*_section")=1
 
@@ -135,7 +124,6 @@
   extends(".*_expression")=expression
   name(".*_expression")="expression"
   name("option.*")="option"
-  name(".*class")="char class"
 
   //consumeTokenMethod("character|macro_reference|.*_(recover|expression|op)")="consumeTokenFast"
   //consumeTokenMethod="consumeTokenFast"
@@ -148,6 +136,7 @@ flex_file ::= []
   section_div
   lexical_rules_section
   {pin=1}
+fake file_section ::= '%%'
 
 private meta line ::= new_line <<p>> new_line {pin=2}
 private new_line ::= &<<is_new_line>>
@@ -157,8 +146,7 @@ private section_recover ::= !'%%'
 
 user_code_section ::= [] java_code {pin=1}
 user_value ::= <<anything2 !new_line>>
-java_code ::= <<anything2 (&java | !<<is_percent>>)>>
-  {methods=[getReferences]}
+java_code ::= raw? { methods=[getReferences] }
 
 java_type ::= id ( safe_dot id ) * {pin(".*")=1 methods=[getReferences]}
 private safe_dot ::= '.' !'*'
@@ -206,8 +194,8 @@ option ::= option_class
 
   | option_switch
   | option_table
-  | option_pack
   | option_7bit
+  | option_16bit
   | option_full
   | option_unicode
   | option_ignore_case
@@ -255,10 +243,10 @@ option_byacc ::= '%byacc'
 
 option_switch ::= '%switch'
 option_table ::= '%table'
-option_pack ::= '%pack'
 option_7bit ::= '%7bit'
 option_full ::= '%full' | '%8bit'
-option_unicode ::= '%unicode' | '%16bit'
+option_16bit ::= '%16bit'
+option_unicode ::= '%unicode' [number | version]
 option_ignore_case ::= '%caseless' | '%ignorecase'
 option_count_char ::= '%char'
 option_count_line ::= '%line'
@@ -266,7 +254,7 @@ option_count_column ::= '%column'
 
 option_obsolete ::= '%notunix' | '%yyeof'
 
-state_declaration ::= ('%state' | '%s' | '%xstate' | '%x') state_definition ((','? !(id '=')) state_definition) * ','? {pin=1}
+state_declaration ::= ('%state' | '%xstate') state_definition ((','? !(id '=')) state_definition) * ','? {pin=1}
 state_definition ::= id {
   implements="com.intellij.psi.PsiNameIdentifierOwner"
   methods=[getName setName getNameIdentifier]
@@ -292,11 +280,10 @@ private rule_tail1 ::= '<<EOF>>' action {pin=1}
 private rule_tail2 ::= ['^'] expression look_ahead? action {pin=2}
 private rule_group ::= !('{' id '}') '{' rule_group_item + '}' {pin=2} // empty block forbidden
 
-private state_list ::= '<' state_reference (',' state_reference) * '>' {pin(".*")=1}
+state_list ::= '<' state_reference (',' state_reference) * '>' {pin(".*")=1}
 state_reference ::= id { methods=[getReference] }
 look_ahead ::= '$' | '/' expression
-action ::= '{' java_class_statements '}' | '|' {pin(".*")=1 elementType=java_code}
-private java_class_statements ::= <<anything !('}' | '<' id '>')>>
+action ::= '{' raw? '}' | '|' {pin(".*")=1 elementType=java_code}
 
 expression ::= choice_expression
   | sequence_expression
@@ -314,23 +301,17 @@ sequence_expression ::= expression (sequence_op expression) +
 paren_expression ::= '(' expression ')' {pin=1}
 not_expression ::= ('!'|'~') expression
 quantifier_expression ::=  expression ( '*' | '+' | '?' | '{' number [ ',' number] '}' )
-class_expression ::= '[' '^'? '-'? (string | predefined_class | class_char [ '-' class_char]) * '-'? ']' {pin=1}
-private class_char ::= char | escaped_char
+class_expression ::= '[' '^'? (char_class_item (char_class_op char_class_item)* )* ']' {pin(".*")=1}
+private char_class_item ::= char_class_atom | class_expression
+char_class_atom ::= string | char_class | char [ '-' char] | '-' {elementType="" name="char"}
+char_class_op ::= '&&' | '||' | '~~' | '--' {elementType="" name="char"}
 macro_ref_expression ::= '{' macro_reference '}'
 macro_reference ::= id { methods=[getReference] }
-literal_expression ::= string | id | allowed_chars
-private allowed_chars ::= escaped_char | char | number | '-' | '=' | '<' | '>' | ','
-  | ']' /*| '}' -- allowed after <STATE> } { }  and in / part */
+literal_expression ::= string | id | char | number { methods=[id=""] }
 
-sequence_op ::= &( '(' | '!' | '~' | '[' | ']'
-  | string | predefined_class | '.' | '{' id '}'
-  | !new_line (id | allowed_chars) )
+sequence_op ::= &('!' | '(' | '.' | '[' | '~'
+  | char | char_class | number | string
+  | '{' id | !new_line id )
   {elementType="" name="expression"}
 
-predefined_class_expression ::= predefined_class | '.'
-private predefined_class ::= '[:jletter:]'
-  | '[:jletterdigit:]'
-  | '[:letter:]'
-  | '[:digit:]'
-  | '[:uppercase:]'
-  | '[:lowercase:]'
+predefined_class_expression ::= char_class | '.'

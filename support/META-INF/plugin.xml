@@ -19,7 +19,8 @@
       <li>Generator: generate elementTypes for fake rules when needed #76</li>
       <li>Generator: improved/unified identifiers generation #97</li>
       <li>Generator/PSI: generate constructors from super-class #105</li>
-      <li>JFlex: ability to run JFlex 1.6</li>
+      <li>JFlex: 1.6 syntax and running</li>
+      <li>JFlex: file structure popup (Ctrl-F12)</li>
       <li>JFlex: additional arguments via 'grammar.kit.gen.jflex.args' system property</li>
       <li>JFlex: resolve returned token constants & yybegin(state) in action code</li>
       <li>JFlex: unify default generation path with BNF generator #96</li>
@@ -99,6 +100,7 @@
     <colorSettingsPage implementation="org.intellij.jflex.editor.JFlexColorSettingsPage"/>
     <lang.braceMatcher language="JFlex" implementationClass="org.intellij.jflex.editor.JFlexBraceMatcher"/>
     <quoteHandler fileType="JFlex" className="org.intellij.jflex.editor.JFlexQuoteHandler"/>
+    <lang.psiStructureViewFactory language="JFlex" implementationClass="org.intellij.jflex.editor.JFlexStructureViewFactory"/>
 
   </extensions>
   <project-components>

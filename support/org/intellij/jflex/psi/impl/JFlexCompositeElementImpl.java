@@ -18,8 +18,13 @@ package org.intellij.jflex.psi.impl;
 
 import com.intellij.extapi.psi.ASTWrapperPsiElement;
 import com.intellij.lang.ASTNode;
-import org.intellij.jflex.psi.JFlexCompositeElement;
+import com.intellij.psi.search.LocalSearchScope;
+import com.intellij.psi.search.SearchScope;
+import com.intellij.util.PlatformIcons;
+import org.intellij.jflex.psi.*;
 import org.jetbrains.annotations.NotNull;
+
+import javax.swing.*;
 
 /**
  * @author gregsh
@@ -27,5 +32,26 @@ import org.jetbrains.annotations.NotNull;
 public class JFlexCompositeElementImpl extends ASTWrapperPsiElement implements JFlexCompositeElement {
   public JFlexCompositeElementImpl(@NotNull ASTNode astNode) {
     super(astNode);
+  }
+
+  @NotNull
+  @Override
+  public SearchScope getUseScope() {
+    return new LocalSearchScope(getContainingFile());
+  }
+
+  @Override
+  public Icon getIcon(int flags) {
+    if (this instanceof JFlexRule) {
+      JFlexExpression e = ((JFlexRule)this).getExpression();
+      return e == null ? PlatformIcons.PACKAGE_ICON : PlatformIcons.METHOD_ICON;
+    }
+    else if (this instanceof JFlexOption) {
+      return PlatformIcons.PROPERTY_ICON;
+    }
+    else if (this instanceof JFlexMacroDefinition) {
+      return PlatformIcons.FIELD_ICON;
+    }
+    return super.getIcon(flags);
   }
 }

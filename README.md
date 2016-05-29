@@ -14,14 +14,15 @@ Open-source plugins built with Grammar-Kit:
 
 Quick links: [Tutorial](TUTORIAL.md), [HOWTO](HOWTO.md), [Standalone usage](#standalone-usage).
 
-Recent changes / 1.3.1
+Recent changes / dev
 
 * Generator: introduce "hooks" attribute and white-space binders #91
 * Generator: override 'gen' folder name via 'grammar.kit.gen.dir' system property
 * Generator: generate elementTypes for fake rules when needed #76
 * Generator: improved/unified identifiers generation #97
 * Generator/PSI: generate constructors from super-class #105
-* JFlex: ability to run JFlex 1.6
+* JFlex: 1.6 syntax and running
+* JFlex: file structure popup (Ctrl-F12)
 * JFlex: additional arguments via 'grammar.kit.gen.jflex.args' system property
 * JFlex: resolve returned token constants & yybegin(state) in action code
 * JFlex: unify default generation path with BNF generator #96

@@ -364,13 +364,22 @@ public class BnfRunJFlexAction extends DumbAwareAction {
   @Nullable
   private static String getCommunitySrcUrl(@NotNull Project project) {
     Sdk projectSdk = ProjectRootManager.getInstance(project).getProjectSdk();
-    if (projectSdk != null) {
-      String[] sources = projectSdk.getRootProvider().getUrls(OrderRootType.SOURCES);
-      for (String source : sources) {
-        String communityPath = StringUtil.trimEnd(source, "platform/lang-api/src");
-        if (communityPath.length() < source.length()) {
-          return communityPath;
+    if (projectSdk == null) return null;
+    String homePath = projectSdk.getHomePath();
+    String API_SCR = "/platform/lang-api/src";
+    if (homePath != null) {
+      for (String prefix : Arrays.asList("community", "")) {
+        File file = new File(homePath, FileUtil.toSystemDependentName(prefix + API_SCR));
+        if (file.exists() && file.isDirectory()) {
+          return VfsUtil.pathToUrl(FileUtil.toSystemDependentName(homePath + "/" + prefix));
         }
+      }
+    }
+    String[] sources = projectSdk.getRootProvider().getUrls(OrderRootType.SOURCES);
+    for (String source : sources) {
+      String communityPath = StringUtil.trimEnd(source, API_SCR);
+      if (communityPath.length() < source.length()) {
+        return communityPath;
       }
     }
     return null;

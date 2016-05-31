@@ -341,8 +341,10 @@ public class ExpressionHelper {
     public StringBuilder dumpPriorityTable(StringBuilder sb, PairConsumer<StringBuilder, OperatorInfo> printer) {
       for (int i = 0; i < nextPriority; i++) {
         sb.append(i).append(":");
+        int count = 0;
         for (BnfRule rule : priorityMap.keySet()) {
           if (priorityMap.get(rule) == i) {
+            if ((count ++ % 4) == 0 && count > 1) sb.append("\n  ");
             sb.append(" ");
             printer.consume(sb, operatorMap.get(rule));
           }

@@ -158,6 +158,9 @@ public class RuleGraphHelper {
       BnfRule target = getSynonymTargetOrSelf(rule);
       if (target != rule) {
         ruleExtendsMap.putValue(target, rule);
+        if (superRule != null) {
+          ruleExtendsMap.putValue(superRule, target);
+        }
       }
     }
     for (int i = 0, len = ruleExtendsMap.size(); i < len; i++) {

@@ -25,33 +25,35 @@ import org.intellij.grammar.generator.ParserGeneratorUtil;
  */
 public class BnfUtilTest extends UsefulTestCase {
   public void testIdentifiers() {
-    assertEquals("AbcEdf", ParserGeneratorUtil.toIdentifier("abc-edf", null, Case.CAMEL));
+    assertEquals("AbcEdf", ParserGeneratorUtil.toIdentifier("abc-edf", Case.CAMEL));
     assertEquals("getAbcEdf", ParserGeneratorUtil.getGetterName("abc-edf"));
     assertEquals("getMySomething", ParserGeneratorUtil.getGetterName("MY_SOMETHING"));
     assertEquals("getWithSpace", ParserGeneratorUtil.getGetterName("with space"));
     assertEquals("get_WithSpaceAround_", ParserGeneratorUtil.getGetterName(" with space around "));
-    assertEquals("_WithSpaceAround_", ParserGeneratorUtil.toIdentifier(" with space around ", null, Case.CAMEL));
+    assertEquals("_WithSpaceAround_", ParserGeneratorUtil.toIdentifier(" with space around ", Case.CAMEL));
 
     // mixed underscores in body; w/ singly-underscored margins
-    assertEquals("_with__single__under_score__on_margin_", ParserGeneratorUtil.toIdentifier("_with__single__under_score__on_margin_", null, Case.AS_IS));
-    assertEquals("_WITH__SINGLE__UNDER_SCORE__ON_MARGIN_", ParserGeneratorUtil.toIdentifier("_with__single__under_score__on_margin_", null, Case.UPPER));
-    assertEquals("_WithSingleUnderScoreOnMargin_", ParserGeneratorUtil.toIdentifier("_with__single__under_score__on_margin_", null, Case.CAMEL));
+    assertEquals("_with__single__under_score__on_margin_", ParserGeneratorUtil.toIdentifier("_with__single__under_score__on_margin_", Case.AS_IS));
+    assertEquals("_WITH__SINGLE__UNDER_SCORE__ON_MARGIN_", ParserGeneratorUtil.toIdentifier("_with__single__under_score__on_margin_", Case.UPPER));
+    assertEquals("_WithSingleUnderScoreOnMargin_", ParserGeneratorUtil.toIdentifier("_with__single__under_score__on_margin_", Case.CAMEL));
     assertEquals("get_WithSingleUnderScoreOnMargin_", ParserGeneratorUtil.getGetterName("_with__single__under_score__on_margin_"));
 
     // mixed underscores in body; w/ multiply-underscored margins
-    assertEquals("__with__multiple__under_scores__on_margin__", ParserGeneratorUtil.toIdentifier("__with__multiple__under_scores__on_margin__", null, Case.AS_IS));
-    assertEquals("__WITH__MULTIPLE__UNDER_SCORES__ON_MARGIN__", ParserGeneratorUtil.toIdentifier("__with__multiple__under_scores__on_margin__", null, Case.UPPER));
-    assertEquals("__WithMultipleUnderScoresOnMargin__", ParserGeneratorUtil.toIdentifier("__with__multiple__under_scores__on_margin__", null, Case.CAMEL));
+    assertEquals("__with__multiple__under_scores__on_margin__", ParserGeneratorUtil.toIdentifier("__with__multiple__under_scores__on_margin__",
+                                                                                                 Case.AS_IS));
+    assertEquals("__WITH__MULTIPLE__UNDER_SCORES__ON_MARGIN__", ParserGeneratorUtil.toIdentifier("__with__multiple__under_scores__on_margin__",
+                                                                                                 Case.UPPER));
+    assertEquals("__WithMultipleUnderScoresOnMargin__", ParserGeneratorUtil.toIdentifier("__with__multiple__under_scores__on_margin__", Case.CAMEL));
     assertEquals("get__WithMultipleUnderScoresOnMargin__", ParserGeneratorUtil.getGetterName("__with__multiple__under_scores__on_margin__"));
 
     // mixed underscores; w/ embedded camel-casing
-    assertEquals("SomeRule_p_r__inner__lazyVersion", ParserGeneratorUtil.toIdentifier("SomeRule_p_r__inner__lazyVersion", null, Case.AS_IS));
-    assertEquals("SOME_RULE_P_R__INNER__LAZY_VERSION", ParserGeneratorUtil.toIdentifier("SomeRule_p_r__inner__lazyVersion", null, Case.UPPER));
-    assertEquals("SomeRulePRInnerLazyVersion", ParserGeneratorUtil.toIdentifier("SomeRule_p_r__inner__lazyVersion", null, Case.CAMEL));
+    assertEquals("SomeRule_p_r__inner__lazyVersion", ParserGeneratorUtil.toIdentifier("SomeRule_p_r__inner__lazyVersion", Case.AS_IS));
+    assertEquals("SOME_RULE_P_R__INNER__LAZY_VERSION", ParserGeneratorUtil.toIdentifier("SomeRule_p_r__inner__lazyVersion", Case.UPPER));
+    assertEquals("SomeRulePRInnerLazyVersion", ParserGeneratorUtil.toIdentifier("SomeRule_p_r__inner__lazyVersion", Case.CAMEL));
     assertEquals("getSomeRulePRInnerLazyVersion", ParserGeneratorUtil.getGetterName("SomeRule_p_r__inner__lazyVersion"));
     
-    assertEquals("_12Feb12", ParserGeneratorUtil.toIdentifier("12Feb%12", null, Case.CAMEL));
-    assertEquals("CPRule", ParserGeneratorUtil.toIdentifier("CPRule", null, Case.CAMEL));
-    assertEquals("T_SOME_TYPE", ParserGeneratorUtil.toIdentifier("TSomeType", "", Case.UPPER));
+    assertEquals("_12Feb12", ParserGeneratorUtil.toIdentifier("12Feb%12", Case.CAMEL));
+    assertEquals("CPRule", ParserGeneratorUtil.toIdentifier("CPRule", Case.CAMEL));
+    assertEquals("T_SOME_TYPE", ParserGeneratorUtil.toIdentifier("TSomeType", Case.UPPER));
   }
 }

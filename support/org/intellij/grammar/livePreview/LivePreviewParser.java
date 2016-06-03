@@ -307,7 +307,7 @@ public class LivePreviewParser implements PsiParser {
     if (!hooks.isEmpty()) {
       for (Map.Entry<String, String> entry : hooks.entrySet()) {
         if (entry.getValue() == null) continue;
-        String name = ParserGeneratorUtil.toIdentifier(entry.getKey(), null, Case.UPPER);
+        String name = ParserGeneratorUtil.toIdentifier(entry.getKey(), Case.UPPER);
         LiveHooksHelper.registerHook(builder, name, entry.getValue());
       }
     }

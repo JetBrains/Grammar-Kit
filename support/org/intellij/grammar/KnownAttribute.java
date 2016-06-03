@@ -51,6 +51,7 @@ public class KnownAttribute<T> {
 
   public static final KnownAttribute<ListValue>    PARSER_IMPORTS            = create(true, ListValue.class, "parserImports", EMPTY_LIST);
   public static final KnownAttribute<String>       PSI_CLASS_PREFIX          = create(true, String.class, "psiClassPrefix", "");
+  public static final KnownAttribute<String>       PSI_CLASS_SUFFIX          = create(true, String.class, "psiClassSuffix", "");
   public static final KnownAttribute<String>       PSI_IMPL_CLASS_SUFFIX     = create(true, String.class, "psiImplClassSuffix", "Impl");
   public static final KnownAttribute<String>       PSI_TREE_UTIL_CLASS       = create(true, String.class, "psiTreeUtilClass", BnfConstants.PSI_TREE_UTIL_CLASS);
   public static final KnownAttribute<String>       PSI_PACKAGE               = create(true, String.class, "psiPackage", "generated.psi");

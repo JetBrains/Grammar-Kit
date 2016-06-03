@@ -121,8 +121,9 @@ public class ParserGenerator {
     myPsiTreeUtilClass = getRootAttribute(myFile, KnownAttribute.PSI_TREE_UTIL_CLASS);
 
     String tmpVisitorClass = getRootAttribute(myFile, KnownAttribute.PSI_VISITOR_NAME);
-    visitorClassName = !G.generateVisitor || StringUtil.isEmpty(tmpVisitorClass) ?
-                       null : myPsiClassFormat.enforce(tmpVisitorClass);
+    visitorClassName = !G.generateVisitor || StringUtil.isEmpty(tmpVisitorClass) ? null :
+                       !tmpVisitorClass.equals(myPsiClassFormat.strip(tmpVisitorClass)) ? tmpVisitorClass :
+                       myPsiClassFormat.enforce("") + tmpVisitorClass;
     mySimpleTokens = ContainerUtil.newLinkedHashMap(RuleGraphHelper.getTokenMap(myFile));
     myUnknownRootAttributes = collectUnknownAttributes(myFile);
     myGraphHelper = RuleGraphHelper.getCached(myFile);

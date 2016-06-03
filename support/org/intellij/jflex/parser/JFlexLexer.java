@@ -24,6 +24,7 @@ import org.jetbrains.annotations.NotNull;
 import java.io.IOException;
 
 /**
+ * TODO IDEA 15 compatibility: extend FlexAdapter
  * Workaround com.intellij.lexer.FlexAdapter#getTokenStart()
  *
  * @author gregsh

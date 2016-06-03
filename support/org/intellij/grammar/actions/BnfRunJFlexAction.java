@@ -409,7 +409,8 @@ public class BnfRunJFlexAction extends DumbAwareAction {
     JComponent consoleComponent = new JPanel(new BorderLayout());
 
     JPanel toolbarPanel = new JPanel(new BorderLayout());
-    toolbarPanel.add(ActionManager.getInstance().createActionToolbar(ActionPlaces.RUNNER_TOOLBAR, toolbarActions, false).getComponent());
+    // todo IDEA 15 compatibility: replace with ActionPlaces.RUNNER_TOOLBAR
+    toolbarPanel.add(ActionManager.getInstance().createActionToolbar(ActionPlaces.MAIN_TOOLBAR, toolbarActions, false).getComponent());
     consoleComponent.add(toolbarPanel, BorderLayout.WEST);
     consoleComponent.add(consoleView.getComponent(), BorderLayout.CENTER);
 

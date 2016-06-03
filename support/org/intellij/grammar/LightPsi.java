@@ -52,6 +52,7 @@ import com.intellij.openapi.util.Disposer;
 import com.intellij.openapi.util.Getter;
 import com.intellij.openapi.util.Trinity;
 import com.intellij.openapi.util.io.FileUtil;
+import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.openapi.vfs.encoding.EncodingManager;
 import com.intellij.openapi.vfs.encoding.EncodingManagerImpl;
 import com.intellij.psi.*;
@@ -87,6 +88,7 @@ import java.util.regex.Pattern;
 
 /**
  * @author greg
+ * @noinspection UseOfSystemOutOrSystemErr
  */
 public class LightPsi {
 
@@ -125,23 +127,40 @@ public class LightPsi {
     }
 
     File dir = new File(args[0]);
-    BufferedReader reader = new BufferedReader(new FileReader(new File(args[1])));
-    String s;
+    File file = new File(args[1]);
+    File out = new File(dir, "light-psi-all.jar");
+    int count = mainImpl(file, out);
+    System.out.println(StringUtil.formatFileSize(out.length()) +
+                       " and " + count + " classes written to " +
+                       out.getName());
+  }
+
+  private static int mainImpl(File classesFile, File outJarFile) throws Throwable {
+    BufferedReader reader = new BufferedReader(new FileReader(classesFile));
     Pattern pattern = Pattern.compile("\\[Loaded (.*) from (?:file:)?(.*)\\]");
 
-    JarOutputStream jarFile = new JarOutputStream(new FileOutputStream(new File(dir, "light-psi-all.jar")));
-//    JarOutputStream jarFile = new JarOutputStream(new FileOutputStream(new File(dir, "light-psi-min.jar")));
-    addJarEntry(jarFile, "misc/registry.properties");
+    JarOutputStream jar = new JarOutputStream(new FileOutputStream(outJarFile));
+    int count = 0;
+    String s;
+    addJarEntry(jar, "misc/registry.properties");
     while ((s = reader.readLine()) != null) {
       Matcher matcher = pattern.matcher(s);
       if (!matcher.matches()) continue;
       String className = matcher.group(1);
       String path = matcher.group(2);
-      if (!path.startsWith("/Applications")) continue;
-//      if (!path.contains("light-psi-all.jar")) continue;
-      addJarEntry(jarFile, className.replace(".", "/") + ".class");
+      if (!shouldAddEntry(path)) continue;
+      addJarEntry(jar, className.replace(".", "/") + ".class");
+      count ++;
     }
-    jarFile.close();
+    jar.close();
+    return count;
+  }
+
+  private static boolean shouldAddEntry(String path) {
+    if (!path.startsWith("/")) return false;
+    if (path.startsWith("/Library")) return false;
+    if (path.contains("/cglib-")) return false;
+    return true;
   }
 
   private static void addJarEntry(JarOutputStream jarFile, String resourceName) throws IOException {

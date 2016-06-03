@@ -37,7 +37,13 @@ public class JFlexParser implements PsiParser, LightPsiParser {
     boolean result;
     builder = adapt_builder_(type, builder, this, EXTENDS_SETS_);
     Marker marker = enter_section_(builder, 0, _COLLAPSE_, null);
-    if (type == FLEX_DECLARATIONS_SECTION) {
+    if (type == FLEX_CHOICE_EXPRESSION) {
+      result = expression(builder, 0, -1);
+    }
+    else if (type == FLEX_CLASS_EXPRESSION) {
+      result = class_expression(builder, 0);
+    }
+    else if (type == FLEX_DECLARATIONS_SECTION) {
       result = declarations_section(builder, 0);
     }
     else if (type == FLEX_EXPRESSION) {
@@ -52,20 +58,41 @@ public class JFlexParser implements PsiParser, LightPsiParser {
     else if (type == FLEX_LEXICAL_RULES_SECTION) {
       result = lexical_rules_section(builder, 0);
     }
+    else if (type == FLEX_LITERAL_EXPRESSION) {
+      result = literal_expression(builder, 0);
+    }
     else if (type == FLEX_LOOK_AHEAD) {
       result = look_ahead(builder, 0);
     }
     else if (type == FLEX_MACRO_DEFINITION) {
       result = macro_definition(builder, 0);
     }
+    else if (type == FLEX_MACRO_REF_EXPRESSION) {
+      result = macro_ref_expression(builder, 0);
+    }
     else if (type == FLEX_MACRO_REFERENCE) {
       result = macro_reference(builder, 0);
+    }
+    else if (type == FLEX_NOT_EXPRESSION) {
+      result = not_expression(builder, 0);
     }
     else if (type == FLEX_OPTION) {
       result = option(builder, 0);
     }
+    else if (type == FLEX_PAREN_EXPRESSION) {
+      result = paren_expression(builder, 0);
+    }
+    else if (type == FLEX_PREDEFINED_CLASS_EXPRESSION) {
+      result = predefined_class_expression(builder, 0);
+    }
+    else if (type == FLEX_QUANTIFIER_EXPRESSION) {
+      result = expression(builder, 0, 3);
+    }
     else if (type == FLEX_RULE) {
       result = rule(builder, 0);
+    }
+    else if (type == FLEX_SEQUENCE_EXPRESSION) {
+      result = expression(builder, 0, 0);
     }
     else if (type == FLEX_STATE_DECLARATION) {
       result = state_declaration(builder, 0);

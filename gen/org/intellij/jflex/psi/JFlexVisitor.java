@@ -30,10 +30,14 @@ public class JFlexVisitor extends PsiElementVisitor {
   }
 
   public void visitDeclarationsSection(@NotNull JFlexDeclarationsSection o) {
-    visitCompositeElement(o);
+    visitFileSection(o);
   }
 
   public void visitExpression(@NotNull JFlexExpression o) {
+    visitCompositeElement(o);
+  }
+
+  public void visitFileSection(@NotNull JFlexFileSection o) {
     visitCompositeElement(o);
   }
 
@@ -46,7 +50,7 @@ public class JFlexVisitor extends PsiElementVisitor {
   }
 
   public void visitLexicalRulesSection(@NotNull JFlexLexicalRulesSection o) {
-    visitCompositeElement(o);
+    visitFileSection(o);
   }
 
   public void visitLiteralExpression(@NotNull JFlexLiteralExpression o) {
@@ -105,12 +109,16 @@ public class JFlexVisitor extends PsiElementVisitor {
     visitPsiNameIdentifierOwner(o);
   }
 
+  public void visitStateList(@NotNull JFlexStateList o) {
+    visitCompositeElement(o);
+  }
+
   public void visitStateReference(@NotNull JFlexStateReference o) {
     visitCompositeElement(o);
   }
 
   public void visitUserCodeSection(@NotNull JFlexUserCodeSection o) {
-    visitCompositeElement(o);
+    visitFileSection(o);
   }
 
   public void visitUserValue(@NotNull JFlexUserValue o) {

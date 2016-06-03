@@ -1,3 +1,4 @@
+
 Grammar-Kit [[download]](../../releases)
 ==================
 
@@ -13,20 +14,6 @@ Open-source plugins built with Grammar-Kit:
 [OGNL](https://github.com/JetBrains/intellij-plugins/tree/master/struts2).
 
 Quick links: [Tutorial](TUTORIAL.md), [HOWTO](HOWTO.md), [Standalone usage](#standalone-usage).
-
-Recent changes / dev
-
-* Generator: introduce "hooks" attribute and white-space binders #91
-* Generator: override 'gen' folder name via 'grammar.kit.gen.dir' system property
-* Generator: generate elementTypes for fake rules when needed #76
-* Generator: improved/unified identifiers generation #97
-* Generator/PSI: generate constructors from super-class #105
-* JFlex: 1.6 syntax and running
-* JFlex: file structure popup (Ctrl-F12)
-* JFlex: additional arguments via 'grammar.kit.gen.jflex.args' system property
-* JFlex: resolve returned token constants & yybegin(state) in action code
-* JFlex: unify default generation path with BNF generator #96
-* Editor: improved completion for angles-quoted rules
 
 
 General usage instructions
@@ -48,7 +35,7 @@ Tooling support
 * Refactoring: introduce token (Ctrl-Alt-C/Meta-Alt-C)
 * Editing: flip _choice_ branches intention (via Alt-Enter)
 * Editing: Unwrap/remove expression (Ctrl-Shift-Del/Meta-Shift-Del)
-* Navigation: quick grammar structure popup (Ctrl-F12/Meta-F12)
+* Navigation: quick grammar and flex file structure popup (Ctrl-F12/Meta-F12)
 * Navigation: go to related file (parser and PSI) (Ctrl-Alt-Home/Meta-Alt-Home)
 * Navigation: navigate to matched expressions (Ctrl-B/Meta-B inside attribute pattern)
 * Highlighting: customizable colors (via Settings/Colors and Fonts)
@@ -231,6 +218,19 @@ java -jar expression-console-sample.jar
 
 Change log
 ==========
+1.4.0
+
+* Generator: introduce "hooks" attribute and white-space binders #91
+* Generator: override 'gen' folder name via 'grammar.kit.gen.dir' system property
+* Generator: generate elementTypes for fake rules when needed #76
+* Generator: improved/unified identifiers generation #97
+* Generator/PSI: generate constructors from super-class #105
+* JFlex: 1.6 syntax and running
+* JFlex: file structure popup (Ctrl-F12)
+* JFlex: additional arguments via 'grammar.kit.gen.jflex.args' system property
+* JFlex: resolve returned token constants & yybegin(state) in action code
+* JFlex: unify default generation path with BNF generator #96
+* Editor: improved completion for angles-quoted rules
 
 1.3.0
 

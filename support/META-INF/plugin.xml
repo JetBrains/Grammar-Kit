@@ -1,6 +1,6 @@
 <idea-plugin url="https://github.com/JetBrains/Grammar-Kit" version="2">
   <id>org.jetbrains.idea.grammar</id>
-  <version>1.3.1</version>
+  <version>1.4.0</version>
   <vendor email="gregory.shrago@jetbrains.com">Greg Shrago</vendor>
   <idea-version since-build="143.0" until-build=""/>
 
@@ -12,7 +12,7 @@
 
   <change-notes>
     <![CDATA[
-    <p>1.3.1</p>
+    <p>1.4.0</p>
     <ul>
       <li>Generator: introduce "hooks" attribute and white-space binders #91</li>
       <li>Generator: override 'gen' folder name via 'grammar.kit.gen.dir' system property</li>
@@ -26,7 +26,7 @@
       <li>JFlex: unify default generation path with BNF generator #96</li>
       <li>Editor: improved completion for angles-quoted rules</li>
     </ul>
-    <a href="https://github.com/JetBrains/Grammar-Kit">Full change log...</a>
+    <a href="https://github.com/JetBrains/Grammar-Kit#change-log">Full change log...</a>
     ]]>
   </change-notes>
 

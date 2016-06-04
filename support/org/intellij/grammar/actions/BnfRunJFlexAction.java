@@ -42,6 +42,7 @@ import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.fileTypes.FileType;
 import com.intellij.openapi.project.DumbAwareAction;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.projectRoots.ProjectJdkTable;
 import com.intellij.openapi.projectRoots.Sdk;
 import com.intellij.openapi.projectRoots.SimpleJavaSdkType;
 import com.intellij.openapi.roots.OrderRootType;
@@ -364,7 +365,16 @@ public class BnfRunJFlexAction extends DumbAwareAction {
   @Nullable
   private static String getCommunitySrcUrl(@NotNull Project project) {
     Sdk projectSdk = ProjectRootManager.getInstance(project).getProjectSdk();
-    if (projectSdk == null) return null;
+    Sdk[] jdks = ProjectJdkTable.getInstance().getAllJdks();
+    for (Sdk sdk : JBIterable.of(projectSdk).append(jdks)) {
+      String result = getCommunitySrcUrlInner(sdk);
+      if (result != null) return result;
+    }
+    return null;
+  }
+
+  @Nullable
+  private static String getCommunitySrcUrlInner(@NotNull Sdk projectSdk) {
     String homePath = projectSdk.getHomePath();
     String API_SCR = "/platform/lang-api/src";
     if (homePath != null) {

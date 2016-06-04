@@ -1,3 +1,4 @@
+// ---- ExpressionParser.java -----------------
 //header.txt
 package org.intellij.grammar.expression;
 
@@ -14,89 +15,32 @@ import com.intellij.lang.LightPsiParser;
 @SuppressWarnings({"SimplifiableIfStatement", "UnusedAssignment"})
 public class ExpressionParser implements PsiParser, LightPsiParser {
 
-  public ASTNode parse(IElementType t, PsiBuilder b) {
-    parseLight(t, b);
-    return b.getTreeBuilt();
+  public ASTNode parse(IElementType root_, PsiBuilder builder_) {
+    parseLight(root_, builder_);
+    return builder_.getTreeBuilt();
   }
 
-  public void parseLight(IElementType t, PsiBuilder b) {
-    boolean r;
-    b = adapt_builder_(t, b, this, EXTENDS_SETS_);
-    Marker m = enter_section_(b, 0, _COLLAPSE_, null);
-    if (t == ARG_LIST) {
-      r = arg_list(b, 0);
+  public void parseLight(IElementType root_, PsiBuilder builder_) {
+    boolean result_;
+    builder_ = adapt_builder_(root_, builder_, this, EXTENDS_SETS_);
+    Marker marker_ = enter_section_(builder_, 0, _COLLAPSE_, null);
+    if (root_ == ARG_LIST) {
+      result_ = arg_list(builder_, 0);
     }
-    else if (t == ASSIGN_EXPR) {
-      r = expr(b, 0, -1);
+    else if (root_ == EXPR) {
+      result_ = expr(builder_, 0, -1);
     }
-    else if (t == BETWEEN_EXPR) {
-      r = expr(b, 0, 2);
-    }
-    else if (t == CALL_EXPR) {
-      r = expr(b, 0, 7);
-    }
-    else if (t == CONDITIONAL_EXPR) {
-      r = expr(b, 0, 0);
-    }
-    else if (t == DIV_EXPR) {
-      r = expr(b, 0, 3);
-    }
-    else if (t == ELVIS_EXPR) {
-      r = expr(b, 0, 0);
-    }
-    else if (t == EXP_EXPR) {
-      r = expr(b, 0, 5);
-    }
-    else if (t == EXPR) {
-      r = expr(b, 0, -1);
-    }
-    else if (t == FACTORIAL_EXPR) {
-      r = expr(b, 0, 6);
-    }
-    else if (t == IDENTIFIER) {
-      r = identifier(b, 0);
-    }
-    else if (t == IS_NOT_EXPR) {
-      r = expr(b, 0, 2);
-    }
-    else if (t == LITERAL_EXPR) {
-      r = literal_expr(b, 0);
-    }
-    else if (t == MINUS_EXPR) {
-      r = expr(b, 0, 1);
-    }
-    else if (t == MUL_EXPR) {
-      r = expr(b, 0, 3);
-    }
-    else if (t == PAREN_EXPR) {
-      r = paren_expr(b, 0);
-    }
-    else if (t == PLUS_EXPR) {
-      r = expr(b, 0, 1);
-    }
-    else if (t == SPECIAL_EXPR) {
-      r = special_expr(b, 0);
-    }
-    else if (t == UNARY_MIN_EXPR) {
-      r = unary_min_expr(b, 0);
-    }
-    else if (t == UNARY_NOT_EXPR) {
-      r = unary_not_expr(b, 0);
-    }
-    else if (t == UNARY_PLUS_EXPR) {
-      r = unary_plus_expr(b, 0);
-    }
-    else if (t == XOR_EXPR) {
-      r = expr(b, 0, 2);
+    else if (root_ == IDENTIFIER) {
+      result_ = identifier(builder_, 0);
     }
     else {
-      r = parse_root_(t, b, 0);
+      result_ = parse_root_(root_, builder_, 0);
     }
-    exit_section_(b, 0, m, t, r, true, TRUE_CONDITION);
+    exit_section_(builder_, 0, marker_, root_, result_, true, TRUE_CONDITION);
   }
 
-  protected boolean parse_root_(IElementType t, PsiBuilder b, int l) {
-    return root(b, l + 1);
+  protected boolean parse_root_(IElementType root_, PsiBuilder builder_, int level_) {
+    return root(builder_, level_ + 1);
   }
 
   public static final TokenSet[] EXTENDS_SETS_ = new TokenSet[] {
@@ -110,139 +54,139 @@ public class ExpressionParser implements PsiParser, LightPsiParser {
 
   /* ********************************************************** */
   // '(' [ !')' expr  (',' expr) * ] ')'
-  public static boolean arg_list(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "arg_list")) return false;
-    boolean r, p;
-    Marker m = enter_section_(b, l, _NONE_, ARG_LIST, "<arg list>");
-    r = consumeToken(b, "(");
-    p = r; // pin = 1
-    r = r && report_error_(b, arg_list_1(b, l + 1));
-    r = p && consumeToken(b, ")") && r;
-    exit_section_(b, l, m, r, p, null);
-    return r || p;
+  public static boolean arg_list(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "arg_list")) return false;
+    boolean result_, pinned_;
+    Marker marker_ = enter_section_(builder_, level_, _NONE_, ARG_LIST, "<arg list>");
+    result_ = consumeToken(builder_, "(");
+    pinned_ = result_; // pin = 1
+    result_ = result_ && report_error_(builder_, arg_list_1(builder_, level_ + 1));
+    result_ = pinned_ && consumeToken(builder_, ")") && result_;
+    exit_section_(builder_, level_, marker_, result_, pinned_, null);
+    return result_ || pinned_;
   }
 
   // [ !')' expr  (',' expr) * ]
-  private static boolean arg_list_1(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "arg_list_1")) return false;
-    arg_list_1_0(b, l + 1);
+  private static boolean arg_list_1(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "arg_list_1")) return false;
+    arg_list_1_0(builder_, level_ + 1);
     return true;
   }
 
   // !')' expr  (',' expr) *
-  private static boolean arg_list_1_0(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "arg_list_1_0")) return false;
-    boolean r, p;
-    Marker m = enter_section_(b, l, _NONE_);
-    r = arg_list_1_0_0(b, l + 1);
-    p = r; // pin = 1
-    r = r && report_error_(b, expr(b, l + 1, -1));
-    r = p && arg_list_1_0_2(b, l + 1) && r;
-    exit_section_(b, l, m, r, p, null);
-    return r || p;
+  private static boolean arg_list_1_0(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "arg_list_1_0")) return false;
+    boolean result_, pinned_;
+    Marker marker_ = enter_section_(builder_, level_, _NONE_);
+    result_ = arg_list_1_0_0(builder_, level_ + 1);
+    pinned_ = result_; // pin = 1
+    result_ = result_ && report_error_(builder_, expr(builder_, level_ + 1, -1));
+    result_ = pinned_ && arg_list_1_0_2(builder_, level_ + 1) && result_;
+    exit_section_(builder_, level_, marker_, result_, pinned_, null);
+    return result_ || pinned_;
   }
 
   // !')'
-  private static boolean arg_list_1_0_0(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "arg_list_1_0_0")) return false;
-    boolean r;
-    Marker m = enter_section_(b, l, _NOT_);
-    r = !consumeToken(b, ")");
-    exit_section_(b, l, m, r, false, null);
-    return r;
+  private static boolean arg_list_1_0_0(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "arg_list_1_0_0")) return false;
+    boolean result_;
+    Marker marker_ = enter_section_(builder_, level_, _NOT_);
+    result_ = !consumeToken(builder_, ")");
+    exit_section_(builder_, level_, marker_, result_, false, null);
+    return result_;
   }
 
   // (',' expr) *
-  private static boolean arg_list_1_0_2(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "arg_list_1_0_2")) return false;
-    int c = current_position_(b);
+  private static boolean arg_list_1_0_2(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "arg_list_1_0_2")) return false;
+    int pos_ = current_position_(builder_);
     while (true) {
-      if (!arg_list_1_0_2_0(b, l + 1)) break;
-      if (!empty_element_parsed_guard_(b, "arg_list_1_0_2", c)) break;
-      c = current_position_(b);
+      if (!arg_list_1_0_2_0(builder_, level_ + 1)) break;
+      if (!empty_element_parsed_guard_(builder_, "arg_list_1_0_2", pos_)) break;
+      pos_ = current_position_(builder_);
     }
     return true;
   }
 
   // ',' expr
-  private static boolean arg_list_1_0_2_0(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "arg_list_1_0_2_0")) return false;
-    boolean r, p;
-    Marker m = enter_section_(b, l, _NONE_);
-    r = consumeToken(b, ",");
-    p = r; // pin = 1
-    r = r && expr(b, l + 1, -1);
-    exit_section_(b, l, m, r, p, null);
-    return r || p;
+  private static boolean arg_list_1_0_2_0(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "arg_list_1_0_2_0")) return false;
+    boolean result_, pinned_;
+    Marker marker_ = enter_section_(builder_, level_, _NONE_);
+    result_ = consumeToken(builder_, ",");
+    pinned_ = result_; // pin = 1
+    result_ = result_ && expr(builder_, level_ + 1, -1);
+    exit_section_(builder_, level_, marker_, result_, pinned_, null);
+    return result_ || pinned_;
   }
 
   /* ********************************************************** */
   // expr ';'?
-  static boolean element(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "element")) return false;
-    boolean r;
-    Marker m = enter_section_(b, l, _NONE_);
-    r = expr(b, l + 1, -1);
-    r = r && element_1(b, l + 1);
-    exit_section_(b, l, m, r, false, element_recover_parser_);
-    return r;
+  static boolean element(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "element")) return false;
+    boolean result_;
+    Marker marker_ = enter_section_(builder_, level_, _NONE_);
+    result_ = expr(builder_, level_ + 1, -1);
+    result_ = result_ && element_1(builder_, level_ + 1);
+    exit_section_(builder_, level_, marker_, result_, false, element_recover_parser_);
+    return result_;
   }
 
   // ';'?
-  private static boolean element_1(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "element_1")) return false;
-    consumeToken(b, ";");
+  private static boolean element_1(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "element_1")) return false;
+    consumeToken(builder_, ";");
     return true;
   }
 
   /* ********************************************************** */
   // !('(' | '+' | '-' | '!' | 'multiply' | id | number)
-  static boolean element_recover(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "element_recover")) return false;
-    boolean r;
-    Marker m = enter_section_(b, l, _NOT_);
-    r = !element_recover_0(b, l + 1);
-    exit_section_(b, l, m, r, false, null);
-    return r;
+  static boolean element_recover(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "element_recover")) return false;
+    boolean result_;
+    Marker marker_ = enter_section_(builder_, level_, _NOT_);
+    result_ = !element_recover_0(builder_, level_ + 1);
+    exit_section_(builder_, level_, marker_, result_, false, null);
+    return result_;
   }
 
   // '(' | '+' | '-' | '!' | 'multiply' | id | number
-  private static boolean element_recover_0(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "element_recover_0")) return false;
-    boolean r;
-    Marker m = enter_section_(b);
-    r = consumeToken(b, "(");
-    if (!r) r = consumeToken(b, "+");
-    if (!r) r = consumeToken(b, "-");
-    if (!r) r = consumeToken(b, "!");
-    if (!r) r = consumeToken(b, "multiply");
-    if (!r) r = consumeToken(b, ID);
-    if (!r) r = consumeToken(b, NUMBER);
-    exit_section_(b, m, null, r);
-    return r;
+  private static boolean element_recover_0(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "element_recover_0")) return false;
+    boolean result_;
+    Marker marker_ = enter_section_(builder_);
+    result_ = consumeToken(builder_, "(");
+    if (!result_) result_ = consumeToken(builder_, "+");
+    if (!result_) result_ = consumeToken(builder_, "-");
+    if (!result_) result_ = consumeToken(builder_, "!");
+    if (!result_) result_ = consumeToken(builder_, "multiply");
+    if (!result_) result_ = consumeToken(builder_, ID);
+    if (!result_) result_ = consumeToken(builder_, NUMBER);
+    exit_section_(builder_, marker_, null, result_);
+    return result_;
   }
 
   /* ********************************************************** */
   // id
-  public static boolean identifier(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "identifier")) return false;
-    if (!nextTokenIs(b, ID)) return false;
-    boolean r;
-    Marker m = enter_section_(b);
-    r = consumeToken(b, ID);
-    exit_section_(b, m, IDENTIFIER, r);
-    return r;
+  public static boolean identifier(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "identifier")) return false;
+    if (!nextTokenIs(builder_, ID)) return false;
+    boolean result_;
+    Marker marker_ = enter_section_(builder_);
+    result_ = consumeToken(builder_, ID);
+    exit_section_(builder_, marker_, IDENTIFIER, result_);
+    return result_;
   }
 
   /* ********************************************************** */
   // element *
-  static boolean root(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "root")) return false;
-    int c = current_position_(b);
+  static boolean root(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "root")) return false;
+    int pos_ = current_position_(builder_);
     while (true) {
-      if (!element(b, l + 1)) break;
-      if (!empty_element_parsed_guard_(b, "root", c)) break;
-      c = current_position_(b);
+      if (!element(builder_, level_ + 1)) break;
+      if (!empty_element_parsed_guard_(builder_, "root", pos_)) break;
+      pos_ = current_position_(builder_);
     }
     return true;
   }
@@ -261,232 +205,232 @@ public class ExpressionParser implements PsiParser, LightPsiParser {
   // 8: POSTFIX(call_expr)
   // 9: POSTFIX(qualification_expr)
   // 10: ATOM(special_expr) ATOM(simple_ref_expr) ATOM(literal_expr) PREFIX(paren_expr)
-  public static boolean expr(PsiBuilder b, int l, int g) {
-    if (!recursion_guard_(b, l, "expr")) return false;
-    addVariant(b, "<expr>");
-    boolean r, p;
-    Marker m = enter_section_(b, l, _NONE_, "<expr>");
-    r = unary_plus_expr(b, l + 1);
-    if (!r) r = unary_min_expr(b, l + 1);
-    if (!r) r = unary_not_expr(b, l + 1);
-    if (!r) r = special_expr(b, l + 1);
-    if (!r) r = simple_ref_expr(b, l + 1);
-    if (!r) r = literal_expr(b, l + 1);
-    if (!r) r = paren_expr(b, l + 1);
-    p = r;
-    r = r && expr_0(b, l + 1, g);
-    exit_section_(b, l, m, null, r, p, null);
-    return r || p;
+  public static boolean expr(PsiBuilder builder_, int level_, int priority_) {
+    if (!recursion_guard_(builder_, level_, "expr")) return false;
+    addVariant(builder_, "<expr>");
+    boolean result_, pinned_;
+    Marker marker_ = enter_section_(builder_, level_, _NONE_, "<expr>");
+    result_ = unary_plus_expr(builder_, level_ + 1);
+    if (!result_) result_ = unary_min_expr(builder_, level_ + 1);
+    if (!result_) result_ = unary_not_expr(builder_, level_ + 1);
+    if (!result_) result_ = special_expr(builder_, level_ + 1);
+    if (!result_) result_ = simple_ref_expr(builder_, level_ + 1);
+    if (!result_) result_ = literal_expr(builder_, level_ + 1);
+    if (!result_) result_ = paren_expr(builder_, level_ + 1);
+    pinned_ = result_;
+    result_ = result_ && expr_0(builder_, level_ + 1, priority_);
+    exit_section_(builder_, level_, marker_, null, result_, pinned_, null);
+    return result_ || pinned_;
   }
 
-  public static boolean expr_0(PsiBuilder b, int l, int g) {
-    if (!recursion_guard_(b, l, "expr_0")) return false;
-    boolean r = true;
+  public static boolean expr_0(PsiBuilder builder_, int level_, int priority_) {
+    if (!recursion_guard_(builder_, level_, "expr_0")) return false;
+    boolean result_ = true;
     while (true) {
-      Marker m = enter_section_(b, l, _LEFT_, null);
-      if (g < 0 && consumeTokenSmart(b, "=")) {
-        r = expr(b, l, -1);
-        exit_section_(b, l, m, ASSIGN_EXPR, r, true, null);
+      Marker marker_ = enter_section_(builder_, level_, _LEFT_, null);
+      if (priority_ < 0 && consumeTokenSmart(builder_, "=")) {
+        result_ = expr(builder_, level_, -1);
+        exit_section_(builder_, level_, marker_, ASSIGN_EXPR, result_, true, null);
       }
-      else if (g < 1 && consumeTokenSmart(b, "?")) {
-        r = report_error_(b, expr(b, l, 1));
-        r = elvis_expr_1(b, l + 1) && r;
-        exit_section_(b, l, m, ELVIS_EXPR, r, true, null);
+      else if (priority_ < 1 && consumeTokenSmart(builder_, "?")) {
+        result_ = report_error_(builder_, expr(builder_, level_, 1));
+        result_ = elvis_expr_1(builder_, level_ + 1) && result_;
+        exit_section_(builder_, level_, marker_, ELVIS_EXPR, result_, true, null);
       }
-      else if (g < 1 && conditional_expr_0(b, l + 1)) {
-        r = expr(b, l, 1);
-        exit_section_(b, l, m, CONDITIONAL_EXPR, r, true, null);
+      else if (priority_ < 1 && conditional_expr_0(builder_, level_ + 1)) {
+        result_ = expr(builder_, level_, 1);
+        exit_section_(builder_, level_, marker_, CONDITIONAL_EXPR, result_, true, null);
       }
-      else if (g < 2 && consumeTokenSmart(b, "+")) {
-        r = expr(b, l, 2);
-        exit_section_(b, l, m, PLUS_EXPR, r, true, null);
+      else if (priority_ < 2 && consumeTokenSmart(builder_, "+")) {
+        result_ = expr(builder_, level_, 2);
+        exit_section_(builder_, level_, marker_, PLUS_EXPR, result_, true, null);
       }
-      else if (g < 2 && consumeTokenSmart(b, "-")) {
-        r = expr(b, l, 2);
-        exit_section_(b, l, m, MINUS_EXPR, r, true, null);
+      else if (priority_ < 2 && consumeTokenSmart(builder_, "-")) {
+        result_ = expr(builder_, level_, 2);
+        exit_section_(builder_, level_, marker_, MINUS_EXPR, result_, true, null);
       }
-      else if (g < 3 && consumeTokenSmart(b, "^")) {
-        r = expr(b, l, 3);
-        exit_section_(b, l, m, XOR_EXPR, r, true, null);
+      else if (priority_ < 3 && consumeTokenSmart(builder_, "^")) {
+        result_ = expr(builder_, level_, 3);
+        exit_section_(builder_, level_, marker_, XOR_EXPR, result_, true, null);
       }
-      else if (g < 3 && consumeTokenSmart(b, BETWEEN)) {
-        r = report_error_(b, expr(b, l, 3));
-        r = between_expr_1(b, l + 1) && r;
-        exit_section_(b, l, m, BETWEEN_EXPR, r, true, null);
+      else if (priority_ < 3 && consumeTokenSmart(builder_, BETWEEN)) {
+        result_ = report_error_(builder_, expr(builder_, level_, 3));
+        result_ = between_expr_1(builder_, level_ + 1) && result_;
+        exit_section_(builder_, level_, marker_, BETWEEN_EXPR, result_, true, null);
       }
-      else if (g < 3 && parseTokensSmart(b, 0, IS, NOT)) {
-        r = expr(b, l, 3);
-        exit_section_(b, l, m, IS_NOT_EXPR, r, true, null);
+      else if (priority_ < 3 && parseTokensSmart(builder_, 0, IS, NOT)) {
+        result_ = expr(builder_, level_, 3);
+        exit_section_(builder_, level_, marker_, IS_NOT_EXPR, result_, true, null);
       }
-      else if (g < 4 && consumeTokenSmart(b, "*")) {
-        r = expr(b, l, 4);
-        exit_section_(b, l, m, MUL_EXPR, r, true, null);
+      else if (priority_ < 4 && consumeTokenSmart(builder_, "*")) {
+        result_ = expr(builder_, level_, 4);
+        exit_section_(builder_, level_, marker_, MUL_EXPR, result_, true, null);
       }
-      else if (g < 4 && consumeTokenSmart(b, "/")) {
-        r = expr(b, l, 4);
-        exit_section_(b, l, m, DIV_EXPR, r, true, null);
+      else if (priority_ < 4 && consumeTokenSmart(builder_, "/")) {
+        result_ = expr(builder_, level_, 4);
+        exit_section_(builder_, level_, marker_, DIV_EXPR, result_, true, null);
       }
-      else if (g < 7 && consumeTokenSmart(b, "!")) {
-        r = true;
-        exit_section_(b, l, m, FACTORIAL_EXPR, r, true, null);
+      else if (priority_ < 7 && consumeTokenSmart(builder_, "!")) {
+        result_ = true;
+        exit_section_(builder_, level_, marker_, FACTORIAL_EXPR, result_, true, null);
       }
-      else if (g < 6 && consumeTokenSmart(b, "**")) {
+      else if (priority_ < 6 && consumeTokenSmart(builder_, "**")) {
         while (true) {
-          r = report_error_(b, expr(b, l, 6));
-          if (!consumeTokenSmart(b, "**")) break;
+          result_ = report_error_(builder_, expr(builder_, level_, 6));
+          if (!consumeTokenSmart(builder_, "**")) break;
         }
-        exit_section_(b, l, m, EXP_EXPR, r, true, null);
+        exit_section_(builder_, level_, marker_, EXP_EXPR, result_, true, null);
       }
-      else if (g < 8 && leftMarkerIs(b, REF_EXPR) && arg_list(b, l + 1)) {
-        r = true;
-        exit_section_(b, l, m, CALL_EXPR, r, true, null);
+      else if (priority_ < 8 && leftMarkerIs(builder_, REF_EXPR) && arg_list(builder_, level_ + 1)) {
+        result_ = true;
+        exit_section_(builder_, level_, marker_, CALL_EXPR, result_, true, null);
       }
-      else if (g < 9 && qualification_expr_0(b, l + 1)) {
-        r = true;
-        exit_section_(b, l, m, REF_EXPR, r, true, null);
+      else if (priority_ < 9 && qualification_expr_0(builder_, level_ + 1)) {
+        result_ = true;
+        exit_section_(builder_, level_, marker_, REF_EXPR, result_, true, null);
       }
       else {
-        exit_section_(b, l, m, null, false, false, null);
+        exit_section_(builder_, level_, marker_, null, false, false, null);
         break;
       }
     }
-    return r;
+    return result_;
   }
 
   // ':' expr
-  private static boolean elvis_expr_1(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "elvis_expr_1")) return false;
-    boolean r;
-    Marker m = enter_section_(b);
-    r = consumeToken(b, ":");
-    r = r && expr(b, l + 1, -1);
-    exit_section_(b, m, null, r);
-    return r;
+  private static boolean elvis_expr_1(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "elvis_expr_1")) return false;
+    boolean result_;
+    Marker marker_ = enter_section_(builder_);
+    result_ = consumeToken(builder_, ":");
+    result_ = result_ && expr(builder_, level_ + 1, -1);
+    exit_section_(builder_, marker_, null, result_);
+    return result_;
   }
 
   // '<' | '>' | '<=' | '>=' | '==' | '!='
-  private static boolean conditional_expr_0(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "conditional_expr_0")) return false;
-    boolean r;
-    Marker m = enter_section_(b);
-    r = consumeTokenSmart(b, "<");
-    if (!r) r = consumeTokenSmart(b, ">");
-    if (!r) r = consumeTokenSmart(b, "<=");
-    if (!r) r = consumeTokenSmart(b, ">=");
-    if (!r) r = consumeTokenSmart(b, "==");
-    if (!r) r = consumeTokenSmart(b, "!=");
-    exit_section_(b, m, null, r);
-    return r;
+  private static boolean conditional_expr_0(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "conditional_expr_0")) return false;
+    boolean result_;
+    Marker marker_ = enter_section_(builder_);
+    result_ = consumeTokenSmart(builder_, "<");
+    if (!result_) result_ = consumeTokenSmart(builder_, ">");
+    if (!result_) result_ = consumeTokenSmart(builder_, "<=");
+    if (!result_) result_ = consumeTokenSmart(builder_, ">=");
+    if (!result_) result_ = consumeTokenSmart(builder_, "==");
+    if (!result_) result_ = consumeTokenSmart(builder_, "!=");
+    exit_section_(builder_, marker_, null, result_);
+    return result_;
   }
 
-  public static boolean unary_plus_expr(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "unary_plus_expr")) return false;
-    boolean r, p;
-    Marker m = enter_section_(b, l, _NONE_, null);
-    r = consumeTokenSmart(b, "+");
-    p = r;
-    r = p && expr(b, l, 5);
-    exit_section_(b, l, m, UNARY_PLUS_EXPR, r, p, null);
-    return r || p;
+  public static boolean unary_plus_expr(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "unary_plus_expr")) return false;
+    boolean result_, pinned_;
+    Marker marker_ = enter_section_(builder_, level_, _NONE_, null);
+    result_ = consumeTokenSmart(builder_, "+");
+    pinned_ = result_;
+    result_ = pinned_ && expr(builder_, level_, 5);
+    exit_section_(builder_, level_, marker_, UNARY_PLUS_EXPR, result_, pinned_, null);
+    return result_ || pinned_;
   }
 
-  public static boolean unary_min_expr(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "unary_min_expr")) return false;
-    boolean r, p;
-    Marker m = enter_section_(b, l, _NONE_, null);
-    r = consumeTokenSmart(b, "-");
-    p = r;
-    r = p && expr(b, l, 5);
-    exit_section_(b, l, m, UNARY_MIN_EXPR, r, p, null);
-    return r || p;
+  public static boolean unary_min_expr(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "unary_min_expr")) return false;
+    boolean result_, pinned_;
+    Marker marker_ = enter_section_(builder_, level_, _NONE_, null);
+    result_ = consumeTokenSmart(builder_, "-");
+    pinned_ = result_;
+    result_ = pinned_ && expr(builder_, level_, 5);
+    exit_section_(builder_, level_, marker_, UNARY_MIN_EXPR, result_, pinned_, null);
+    return result_ || pinned_;
   }
 
   // AND add_group
-  private static boolean between_expr_1(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "between_expr_1")) return false;
-    boolean r;
-    Marker m = enter_section_(b);
-    r = consumeToken(b, AND);
-    r = r && expr(b, l + 1, -2);
-    exit_section_(b, m, null, r);
-    return r;
+  private static boolean between_expr_1(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "between_expr_1")) return false;
+    boolean result_;
+    Marker marker_ = enter_section_(builder_);
+    result_ = consumeToken(builder_, AND);
+    result_ = result_ && expr(builder_, level_ + 1, -2);
+    exit_section_(builder_, marker_, null, result_);
+    return result_;
   }
 
-  public static boolean unary_not_expr(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "unary_not_expr")) return false;
-    boolean r, p;
-    Marker m = enter_section_(b, l, _NONE_, null);
-    r = consumeTokenSmart(b, "!");
-    p = r;
-    r = p && expr(b, l, 5);
-    exit_section_(b, l, m, UNARY_NOT_EXPR, r, p, null);
-    return r || p;
+  public static boolean unary_not_expr(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "unary_not_expr")) return false;
+    boolean result_, pinned_;
+    Marker marker_ = enter_section_(builder_, level_, _NONE_, null);
+    result_ = consumeTokenSmart(builder_, "!");
+    pinned_ = result_;
+    result_ = pinned_ && expr(builder_, level_, 5);
+    exit_section_(builder_, level_, marker_, UNARY_NOT_EXPR, result_, pinned_, null);
+    return result_ || pinned_;
   }
 
   // '.' identifier
-  private static boolean qualification_expr_0(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "qualification_expr_0")) return false;
-    boolean r;
-    Marker m = enter_section_(b);
-    r = consumeTokenSmart(b, ".");
-    r = r && identifier(b, l + 1);
-    exit_section_(b, m, null, r);
-    return r;
+  private static boolean qualification_expr_0(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "qualification_expr_0")) return false;
+    boolean result_;
+    Marker marker_ = enter_section_(builder_);
+    result_ = consumeTokenSmart(builder_, ".");
+    result_ = result_ && identifier(builder_, level_ + 1);
+    exit_section_(builder_, marker_, null, result_);
+    return result_;
   }
 
   // 'multiply' '(' simple_ref_expr ',' mul_expr ')'
-  public static boolean special_expr(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "special_expr")) return false;
-    boolean r, p;
-    Marker m = enter_section_(b, l, _NONE_, SPECIAL_EXPR, "<special expr>");
-    r = consumeTokenSmart(b, "multiply");
-    r = r && consumeToken(b, "(");
-    p = r; // pin = 2
-    r = r && report_error_(b, simple_ref_expr(b, l + 1));
-    r = p && report_error_(b, consumeToken(b, ",")) && r;
-    r = p && report_error_(b, expr(b, l + 1, 3)) && r;
-    r = p && consumeToken(b, ")") && r;
-    exit_section_(b, l, m, r, p, null);
-    return r || p;
+  public static boolean special_expr(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "special_expr")) return false;
+    boolean result_, pinned_;
+    Marker marker_ = enter_section_(builder_, level_, _NONE_, SPECIAL_EXPR, "<special expr>");
+    result_ = consumeTokenSmart(builder_, "multiply");
+    result_ = result_ && consumeToken(builder_, "(");
+    pinned_ = result_; // pin = 2
+    result_ = result_ && report_error_(builder_, simple_ref_expr(builder_, level_ + 1));
+    result_ = pinned_ && report_error_(builder_, consumeToken(builder_, ",")) && result_;
+    result_ = pinned_ && report_error_(builder_, expr(builder_, level_ + 1, 3)) && result_;
+    result_ = pinned_ && consumeToken(builder_, ")") && result_;
+    exit_section_(builder_, level_, marker_, result_, pinned_, null);
+    return result_ || pinned_;
   }
 
   // identifier
-  public static boolean simple_ref_expr(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "simple_ref_expr")) return false;
-    if (!nextTokenIsSmart(b, ID)) return false;
-    boolean r;
-    Marker m = enter_section_(b);
-    r = identifier(b, l + 1);
-    exit_section_(b, m, REF_EXPR, r);
-    return r;
+  public static boolean simple_ref_expr(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "simple_ref_expr")) return false;
+    if (!nextTokenIsSmart(builder_, ID)) return false;
+    boolean result_;
+    Marker marker_ = enter_section_(builder_);
+    result_ = identifier(builder_, level_ + 1);
+    exit_section_(builder_, marker_, REF_EXPR, result_);
+    return result_;
   }
 
   // number
-  public static boolean literal_expr(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "literal_expr")) return false;
-    if (!nextTokenIsSmart(b, NUMBER)) return false;
-    boolean r;
-    Marker m = enter_section_(b);
-    r = consumeTokenSmart(b, NUMBER);
-    exit_section_(b, m, LITERAL_EXPR, r);
-    return r;
+  public static boolean literal_expr(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "literal_expr")) return false;
+    if (!nextTokenIsSmart(builder_, NUMBER)) return false;
+    boolean result_;
+    Marker marker_ = enter_section_(builder_);
+    result_ = consumeTokenSmart(builder_, NUMBER);
+    exit_section_(builder_, marker_, LITERAL_EXPR, result_);
+    return result_;
   }
 
-  public static boolean paren_expr(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "paren_expr")) return false;
-    boolean r, p;
-    Marker m = enter_section_(b, l, _NONE_, null);
-    r = consumeTokenSmart(b, "(");
-    p = r;
-    r = p && expr(b, l, -1);
-    r = p && report_error_(b, consumeToken(b, ")")) && r;
-    exit_section_(b, l, m, PAREN_EXPR, r, p, null);
-    return r || p;
+  public static boolean paren_expr(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "paren_expr")) return false;
+    boolean result_, pinned_;
+    Marker marker_ = enter_section_(builder_, level_, _NONE_, null);
+    result_ = consumeTokenSmart(builder_, "(");
+    pinned_ = result_;
+    result_ = pinned_ && expr(builder_, level_, -1);
+    result_ = pinned_ && report_error_(builder_, consumeToken(builder_, ")")) && result_;
+    exit_section_(builder_, level_, marker_, PAREN_EXPR, result_, pinned_, null);
+    return result_ || pinned_;
   }
 
   final static Parser element_recover_parser_ = new Parser() {
-    public boolean parse(PsiBuilder b, int l) {
-      return element_recover(b, l + 1);
+    public boolean parse(PsiBuilder builder_, int level_) {
+      return element_recover(builder_, level_ + 1);
     }
   };
 }

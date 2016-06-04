@@ -1,5 +1,5 @@
 {
-  generatePsi=false
+  generate=[psi="no"]
   classHeader="//header.txt"
   parserClass="org.intellij.grammar.expression.ExpressionParser"
   extends(".*expr")=expr

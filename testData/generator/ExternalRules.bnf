@@ -4,6 +4,7 @@
   parserUtilClass="org.intellij.grammar.parser.GeneratedParserUtilBase"
   tokens=[
     perc='%'
+    perc_re='regexp:\%'
   ]
 }
 
@@ -17,6 +18,8 @@ two ::= 'two'
 statement ::= one | two
 
 private perc_list ::= <<listOf '%'>>
+private perc_re_list1 ::= <<listOf perc_re>>
+private perc_re_list2 ::= <<listOf (perc_re)>>
 
 private param_seq ::= '{' <<uniqueListOf "1+1" '1+1' one two 10 some>> '}'
 private param_choice ::= '{' <<uniqueListOf (one | two | 10 | some)>> '}'

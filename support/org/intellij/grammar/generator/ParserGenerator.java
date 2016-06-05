@@ -1146,7 +1146,8 @@ public class ParserGenerator {
             clause.append(generateWrappedNodeCall(rule, nested, argument));
           }
           else {
-            clause.append(argument);
+            String tokenType = getTokenElementType(argument);
+            clause.append(generateWrappedNodeCall(rule, nested, tokenType));
           }
         }
         else if (nested instanceof BnfLiteralExpression) {

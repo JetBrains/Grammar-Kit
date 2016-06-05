@@ -466,7 +466,7 @@ public class ExternalRules implements PsiParser, LightPsiParser {
     boolean result_;
     Marker marker_ = enter_section_(builder_);
     result_ = consumeToken(builder_, "{");
-    result_ = result_ && uniqueListOf(builder_, level_ + 1, "1+1", 1+1, one_parser_, two_parser_, 10, some);
+    result_ = result_ && uniqueListOf(builder_, level_ + 1, "1+1", 1+1, one_parser_, two_parser_, 10, SOME_parser_);
     result_ = result_ && consumeToken(builder_, "}");
     exit_section_(builder_, marker_, null, result_);
     return result_;
@@ -557,6 +557,28 @@ public class ExternalRules implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
+  // <<listOf perc_re>>
+  static boolean perc_re_list1(PsiBuilder builder_, int level_) {
+    return listOf(builder_, level_ + 1, PERC_RE_parser_);
+  }
+
+  /* ********************************************************** */
+  // <<listOf (perc_re)>>
+  static boolean perc_re_list2(PsiBuilder builder_, int level_) {
+    return listOf(builder_, level_ + 1, perc_re_list2_0_0_parser_);
+  }
+
+  // (perc_re)
+  private static boolean perc_re_list2_0_0(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "perc_re_list2_0_0")) return false;
+    boolean result_;
+    Marker marker_ = enter_section_(builder_);
+    result_ = consumeToken(builder_, PERC_RE);
+    exit_section_(builder_, marker_, null, result_);
+    return result_;
+  }
+
+  /* ********************************************************** */
   // <<param>>
   static boolean recoverable_item(PsiBuilder builder_, int level_, final Parser param) {
     if (!recursion_guard_(builder_, level_, "recoverable_item")) return false;
@@ -596,6 +618,16 @@ public class ExternalRules implements PsiParser, LightPsiParser {
     return result_;
   }
 
+  final static Parser PERC_RE_parser_ = new Parser() {
+    public boolean parse(PsiBuilder builder_, int level_) {
+      return consumeToken(builder_, PERC_RE);
+    }
+  };
+  final static Parser SOME_parser_ = new Parser() {
+    public boolean parse(PsiBuilder builder_, int level_) {
+      return consumeToken(builder_, SOME);
+    }
+  };
   final static Parser item_recover_parser_ = new Parser() {
     public boolean parse(PsiBuilder builder_, int level_) {
       return item_recover(builder_, level_ + 1);
@@ -666,6 +698,7 @@ public class ExternalRules implements PsiParser, LightPsiParser {
       return consumeToken(builder_, PERC);
     }
   };
+  final static Parser perc_re_list2_0_0_parser_ = PERC_RE_parser_;
   final static Parser statement_parser_ = new Parser() {
     public boolean parse(PsiBuilder builder_, int level_) {
       return statement(builder_, level_ + 1);

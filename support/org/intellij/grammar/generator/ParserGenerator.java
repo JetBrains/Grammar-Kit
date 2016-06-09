@@ -123,7 +123,7 @@ public class ParserGenerator {
     String tmpVisitorClass = getRootAttribute(myFile, KnownAttribute.PSI_VISITOR_NAME);
     visitorClassName = !G.generateVisitor || StringUtil.isEmpty(tmpVisitorClass) ? null :
                        !tmpVisitorClass.equals(myPsiClassFormat.strip(tmpVisitorClass)) ? tmpVisitorClass :
-                       myPsiClassFormat.enforce("") + tmpVisitorClass;
+                       myPsiClassFormat.apply("") + tmpVisitorClass;
     mySimpleTokens = ContainerUtil.newLinkedHashMap(RuleGraphHelper.getTokenMap(myFile));
     myUnknownRootAttributes = collectUnknownAttributes(myFile);
     myGraphHelper = RuleGraphHelper.getCached(myFile);

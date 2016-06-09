@@ -29,6 +29,12 @@ public class BnfUtilTest extends UsefulTestCase {
   public void testIdentifiers() {
     assertEquals("AbcEdf", toIdentifier("abc-edf", Case.CAMEL));
     assertEquals("SampleAbcEdfElement", toIdentifier("abc-edf", "Sample/Element", Case.CAMEL));
+
+    // w/ a single-letter psiClass-prefix coincidentally matching the 1st letter of name being transformed
+    assertEquals("CContinueStatementElement", toIdentifier("continue-statement", "C/Element", Case.CAMEL));
+    // w/ a psiClass-suffix that matches the rule name suffix but has a different meaning & context and should be preserved
+    assertEquals("HtmlBodyElementElement", toIdentifier("body-element", "Html/Element", Case.CAMEL));
+
     assertEquals("getAbcEdf", getGetterName("abc-edf"));
     assertEquals("getMySomething", getGetterName("MY_SOMETHING"));
     assertEquals("getWithSpace", getGetterName("with space"));

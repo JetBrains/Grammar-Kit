@@ -269,7 +269,7 @@ public class ParserGeneratorUtil {
       if (cas == Case.CAMEL && i < len - 1 && !strings[i+1].startsWith("_") && Case.UPPER.apply(s).equals(s)) sb.append(s);
       else sb.append(cas.apply(s));
     }
-    return format == null ? sb.toString() : format.enforce(sb.toString());
+    return format == null ? sb.toString() : format.apply(sb.toString());
   }
 
   public static String getPsiPackage(BnfFile file) {
@@ -795,6 +795,16 @@ public class ParserGeneratorUtil {
       JBIterable<String> parts = JBIterable.of(format == null ? null : format.split("/"));
       prefix = parts.get(0);
       suffix = StringUtil.join(parts.skip(1), "");
+    }
+
+    public String apply(String s) {
+      int extraCharCount = prefix == null ? suffix.length() : suffix == null ? prefix.length() : prefix.length() + suffix.length();
+      if (extraCharCount == 0) return s;
+      StringBuilder sb = new StringBuilder(s.length() + extraCharCount);
+      if (prefix != null) sb.append(prefix);
+      sb.append(s);
+      if (suffix != null) sb.append(suffix);
+      return sb.toString();
     }
 
     public String enforce(String s) {

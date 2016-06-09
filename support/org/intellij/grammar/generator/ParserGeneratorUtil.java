@@ -798,9 +798,9 @@ public class ParserGeneratorUtil {
     }
 
     public String apply(String s) {
-      int extraCapacity = prefix == null ? suffix.length() : suffix == null ? prefix.length() : prefix.length() + suffix.length();
-      if (extraCapacity == 0) return s;
-      StringBuilder sb = new StringBuilder(s.length() + extraCapacity);
+      int extraCharCount = prefix == null ? suffix.length() : suffix == null ? prefix.length() : prefix.length() + suffix.length();
+      if (extraCharCount == 0) return s;
+      StringBuilder sb = new StringBuilder(s.length() + extraCharCount);
       if (prefix != null) sb.append(prefix);
       sb.append(s);
       if (suffix != null) sb.append(suffix);

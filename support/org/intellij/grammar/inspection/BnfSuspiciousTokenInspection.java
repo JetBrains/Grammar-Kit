@@ -34,7 +34,7 @@ import org.intellij.grammar.psi.impl.BnfRefOrTokenImpl;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Created by IntelliJ IDEA.
@@ -79,7 +79,7 @@ public class BnfSuspiciousTokenInspection extends LocalInspectionTool {
 
   private static void checkFile(final PsiFile file, final ProblemsHolder problemsHolder) {
     if (!(file instanceof BnfFile)) return;
-    final HashSet<String> tokens = new HashSet<String>(RuleGraphHelper.getTokenMap((BnfFile) file).values());
+    final Set<String> tokens = RuleGraphHelper.getTokenNameToTextMap((BnfFile)file).keySet();
     file.accept(new PsiRecursiveElementWalkingVisitor() {
       @Override
       public void visitElement(PsiElement element) {

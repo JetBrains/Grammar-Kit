@@ -30,6 +30,12 @@ public class BnfCompletionTest extends JavaCodeInsightFixtureTestCase {
   public void testAttr2() throws Throwable { doTestVariants("{<caret>}", CompletionType.BASIC, 1, CheckType.INCLUDES, "pin"); }
   public void testAttr3() throws Throwable { doTestVariants("{pin=1 rec<caret>overUntil=abc}", CompletionType.BASIC, 1, CheckType.INCLUDES, "recoverWhile"); }
   public void testAttr4() throws Throwable { doTestVariants("a::= {name=\"A\" p<caret>=\"\"}", CompletionType.BASIC, 1, CheckType.INCLUDES, "pin", "elementType"); }
+  public void testAttr5() throws Throwable { doTestVariants("expr ::= {name=\"A\" e<caret>xtends=\"\"}", CompletionType.BASIC, 1, CheckType.EXCLUDES, "expr"); }
+  public void testAttr6() throws Throwable { doTestVariants("expr ::= {<caret>e= }", CompletionType.BASIC, 1, CheckType.EXCLUDES, "expr"); }
+
+  public void testToken1() throws Throwable { doTestVariants("a ::= TOK TOKEN b ::= T<caret>", CompletionType.BASIC, 1, CheckType.INCLUDES, "TOKEN"); }
+  public void testToken2() throws Throwable { doTestVariants("{tokens=[TOK TOKEN]} a ::= T<caret>", CompletionType.BASIC, 1, CheckType.INCLUDES, "TOKEN"); }
+
   public void testRule1() throws Throwable { doTestVariants("rule::= <caret>", CompletionType.BASIC, 1, CheckType.INCLUDES, "rule"); }
   public void testRule2() throws Throwable { doTestTextAfter("<with space>::= ws<caret>", CompletionType.BASIC, 1, "<with space>::= <with space>"); }
 

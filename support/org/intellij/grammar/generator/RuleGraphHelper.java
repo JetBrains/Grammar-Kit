@@ -195,20 +195,26 @@ public class RuleGraphHelper {
     };
   }
 
-  private static final Key<CachedValue<Map<String, String>>> TOKEN_MAP_KEY = Key.create("TOKEN_MAP_KEY");
-  public static Map<String, String> getTokenMap(final BnfFile file) {
-    CachedValue<Map<String, String>> value = file.getUserData(TOKEN_MAP_KEY);
-    if (value == null) {
-      file.putUserData(TOKEN_MAP_KEY, value =
-        CachedValuesManager.getManager(file.getProject()).createCachedValue(new CachedValueProvider<Map<String, String>>() {
-          @Nullable
-          @Override
-          public Result<Map<String, String>> compute() {
-            return new Result<Map<String, String>>(computeTokens(file).asInverseMap(), file);
-          }
-        }, false));
-    }
-    return value.getValue();
+  @NotNull
+  public static Map<String, String> getTokenNameToTextMap(final BnfFile file) {
+    return CachedValuesManager.getCachedValue(file, new CachedValueProvider<Map<String, String>>() {
+      @Nullable
+      @Override
+      public Result<Map<String, String>> compute() {
+        return new Result<Map<String, String>>(computeTokens(file).asMap(), file);
+      }
+    });
+  }
+
+  @NotNull
+  public static Map<String, String> getTokenTextToNameMap(final BnfFile file) {
+    return CachedValuesManager.getCachedValue(file, new CachedValueProvider<Map<String, String>>() {
+      @Nullable
+      @Override
+      public Result<Map<String, String>> compute() {
+        return new Result<Map<String, String>>(computeTokens(file).asInverseMap(), file);
+      }
+    });
   }
 
   // string value to constant name

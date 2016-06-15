@@ -54,6 +54,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * @author greg
@@ -74,7 +75,8 @@ public class BnfIntroduceTokenHandler implements RefactoringActionHandler {
     if (!(file instanceof BnfFile)) return;
     final BnfFile bnfFile = (BnfFile) file;
 
-    final Map<String, String> tokenMap = RuleGraphHelper.getTokenMap(bnfFile);
+    final Map<String, String> tokenNameMap = RuleGraphHelper.getTokenNameToTextMap(bnfFile);
+    final Map<String, String> tokenTextMap = RuleGraphHelper.getTokenTextToNameMap(bnfFile);
 
     final String tokenText;
     final String tokenName;
@@ -83,19 +85,12 @@ public class BnfIntroduceTokenHandler implements RefactoringActionHandler {
       if (bnfFile.getRule(target.getText()) != null) return;
       if (GrammarUtil.isExternalReference(target)) return;
       tokenName = target.getText();
-      String existingKey = null;
-      for (String key : tokenMap.keySet()) {
-        if (tokenName.equals(tokenMap.get(key))) {
-          existingKey = key;
-          break;
-        }
-      }
-      tokenText = existingKey;
+      tokenText = tokenNameMap.get(tokenName);
     }
     else if (target instanceof BnfStringLiteralExpression) {
       if (PsiTreeUtil.getParentOfType(target, BnfAttrs.class) != null) return;
       tokenText = target.getText();
-      tokenName = tokenMap.get(StringUtil.unquoteString(tokenText));
+      tokenName = tokenTextMap.get(StringUtil.unquoteString(tokenText));
     }
     else return;
 
@@ -135,8 +130,8 @@ public class BnfIntroduceTokenHandler implements RefactoringActionHandler {
       public void pass(final OccurrencesChooser.ReplaceChoice choice) {
         new WriteCommandAction(project, REFACTORING_NAME, file) {
           @Override
-          protected void run(com.intellij.openapi.application.Result result) throws Throwable {
-            buildTemplateAndRun(project, editor, bnfFile, occurrencesMap.get(choice), tokenName, tokenText, tokenMap);
+          protected void run(@NotNull com.intellij.openapi.application.Result result) throws Throwable {
+            buildTemplateAndRun(project, editor, bnfFile, occurrencesMap.get(choice), tokenName, tokenText, tokenNameMap.keySet());
           }
         }.execute();
       }
@@ -159,9 +154,9 @@ public class BnfIntroduceTokenHandler implements RefactoringActionHandler {
                                    BnfFile bnfFile, List<BnfExpression> occurrences,
                                    String tokenName,
                                    String tokenText,
-                                   Map<String, String> tokenMap) throws StartMarkAction.AlreadyStartedException {
+                                   Set<String> tokenNames) throws StartMarkAction.AlreadyStartedException {
     final StartMarkAction startAction = StartMarkAction.start(editor, project, REFACTORING_NAME);
-    BnfListEntry entry = addTokenDefinition(project, bnfFile, tokenName, tokenText, tokenMap);
+    BnfListEntry entry = addTokenDefinition(project, bnfFile, tokenName, tokenText, tokenNames);
     PsiDocumentManager.getInstance(project).doPostponedOperationsAndUnblockDocument(editor.getDocument());
 
     TemplateBuilderImpl builder = new TemplateBuilderImpl(bnfFile);
@@ -240,8 +235,8 @@ public class BnfIntroduceTokenHandler implements RefactoringActionHandler {
                                                  BnfFile bnfFile,
                                                  String tokenName,
                                                  String tokenText,
-                                                 Map<String, String> tokenMap) {
-    String fixedTokenName = new UniqueNameGenerator(tokenMap.values(), null).generateUniqueName(StringUtil.notNullize(tokenName, "token"));
+                                                 Set<String> tokenNames) {
+    String fixedTokenName = new UniqueNameGenerator(tokenNames, null).generateUniqueName(StringUtil.notNullize(tokenName, "token"));
     String newAttrText = "tokens = [\n    " + fixedTokenName + "=" + StringUtil.notNullize(tokenText, "\"\"") + "\n  ]";
     BnfAttr newAttr = BnfElementFactory.createAttributeFromText(project, newAttrText);
     BnfAttrs attrs = ContainerUtil.getFirstItem(bnfFile.getAttributes());

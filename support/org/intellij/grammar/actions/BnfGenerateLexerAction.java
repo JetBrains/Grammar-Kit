@@ -140,14 +140,14 @@ public class BnfGenerateLexerAction extends AnAction {
   }
 
   private String generateLexerText(final BnfFile bnfFile, @Nullable String packageName) {
-    Map<String,String> tokenMap = RuleGraphHelper.getTokenMap(bnfFile);
+    Map<String,String> tokenMap = RuleGraphHelper.getTokenNameToTextMap(bnfFile);
 
     final int[] maxLen = {"{WHITE_SPACE}".length()};
     final Map<String, String> simpleTokens = new LinkedHashMap<String, String>();
     final Map<String, String> regexpTokens = new LinkedHashMap<String, String>();
-    for (String token : tokenMap.keySet()) {
-      String name = tokenMap.get(token);
-      if (name == null) continue;
+    for (String name : tokenMap.keySet()) {
+      String token = tokenMap.get(name);
+      if (name == null || token == null) continue;
       String pattern = token2JFlex(token);
       boolean isRE = ParserGeneratorUtil.isRegexpToken(token);
       (isRE ? regexpTokens : simpleTokens).put(Case.UPPER.apply(name), pattern);

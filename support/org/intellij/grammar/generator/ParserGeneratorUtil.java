@@ -47,6 +47,7 @@ import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
 import static org.intellij.grammar.generator.RuleGraphHelper.getSynonymTargetOrSelf;
+import static org.intellij.grammar.generator.RuleGraphHelper.getTokenNameToTextMap;
 import static org.intellij.grammar.psi.BnfTypes.BNF_SEQUENCE;
 
 /**
@@ -547,11 +548,11 @@ public class ParserGeneratorUtil {
     }
   }
 
-  public static boolean isRegexpToken(String tokenText) {
+  public static boolean isRegexpToken(@NotNull String tokenText) {
     return tokenText.startsWith("regexp:");
   }
 
-  public static String getRegexpTokenRegexp(String tokenText) {
+  public static String getRegexpTokenRegexp(@NotNull String tokenText) {
     return tokenText.substring("regexp:".length());
   }
 
@@ -596,10 +597,10 @@ public class ParserGeneratorUtil {
                                                              @NotNull final Map<String, String> map,
                                                              @Nullable Set<String> usedInGrammar) {
     final Set<String> usedNames = usedInGrammar != null ? usedInGrammar : ContainerUtil.<String>newLinkedHashSet();
-    final Map<String, String> origTokens = RuleGraphHelper.getTokenMap(file);
+    final Map<String, String> origTokens = RuleGraphHelper.getTokenTextToNameMap(file);
     final Pattern pattern = getAllTokenPattern(origTokens);
     final int[] autoCount = {0};
-    final Set<String> origTokenNames = ContainerUtil.newLinkedHashSet(origTokens.values());
+    final Set<String> origTokenNames = getTokenNameToTextMap(file).keySet();
 
     BnfVisitor<Void> visitor = new BnfVisitor<Void>() {
 

@@ -156,7 +156,7 @@ public class BnfAnnotator implements Annotator, DumbAware {
       }
       else {
         String text = ParserGeneratorUtil.getLiteralValue((BnfLiteralExpression)psiElement);
-        if (!RuleGraphHelper.getTokenMap((BnfFile)psiElement.getContainingFile()).containsKey(text)) {
+        if (!RuleGraphHelper.getTokenTextToNameMap((BnfFile)psiElement.getContainingFile()).containsKey(text)) {
           String message = "Tokens matched by text are slower than tokens matched by types";
           annotationHolder.createInfoAnnotation(psiElement, null).setEnforcedTextAttributes(TextAttributes.ERASE_MARKER);
           annotationHolder.createInfoAnnotation(psiElement, message).setTextAttributes(BnfSyntaxHighlighter.PATTERN);

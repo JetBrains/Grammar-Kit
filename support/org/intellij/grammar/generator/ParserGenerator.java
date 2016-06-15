@@ -1438,14 +1438,14 @@ public class ParserGenerator {
     for (RuleMethodsHelper.MethodInfo methodInfo : myRulesMethodsHelper.getFor(rule)) {
       if (StringUtil.isEmpty(methodInfo.name)) continue;
       switch (methodInfo.type) {
-        case 1:
-        case 2:
+        case RULE:
+        case TOKEN:
           generatePsiAccessor(rule, methodInfo, intf);
           break;
-        case 3:
+        case USER:
           generateUserPsiAccessors(rule, methodInfo, intf);
           break;
-        case 4:
+        case MIXIN:
           if (intf) {
             String mixinClass = getAttribute(rule, KnownAttribute.MIXIN);
             List<NavigatablePsiElement> methods = myJavaHelper.findClassMethods(mixinClass, JavaHelper.MethodType.INSTANCE, methodInfo.name, -1);
@@ -1476,7 +1476,7 @@ public class ParserGenerator {
     String mixinClass = getAttribute(rule, KnownAttribute.MIXIN);
 
     for (RuleMethodsHelper.MethodInfo methodInfo : methods) {
-      if (methodInfo.type != 4) continue;
+      if (methodInfo.type != RuleMethodsHelper.MethodType.MIXIN) continue;
 
       List<NavigatablePsiElement> mixinMethods = myJavaHelper.findClassMethods(mixinClass, JavaHelper.MethodType.INSTANCE, methodInfo.name, -1);
       List<NavigatablePsiElement> implMethods = findRuleImplMethods(myJavaHelper, myPsiImplUtilClass, methodInfo.name, rule);
@@ -1508,8 +1508,9 @@ public class ParserGenerator {
 
     boolean many = type.many();
 
+    boolean renamed = !Comparing.equal(methodInfo.name, methodInfo.originalName);
     String getterNameBody = getGetterName(methodInfo.name);
-    String getterName = getterNameBody + (many ? "List" : "");
+    String getterName = getterNameBody + (many && !renamed? "List" : "");
     if (!intf) out("@Override");
     if (type == REQUIRED) {
       out("@NotNull");

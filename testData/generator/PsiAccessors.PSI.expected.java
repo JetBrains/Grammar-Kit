@@ -113,6 +113,20 @@ import com.intellij.psi.PsiElement;
 public interface XOperator extends XComposite {
 
 }
+// ---- XRenameList.java -----------------
+//header.txt
+package generated.psi;
+
+import java.util.List;
+import org.jetbrains.annotations.*;
+import com.intellij.psi.PsiElement;
+
+public interface XRenameList extends XComposite {
+
+  @NotNull
+  List<XSomeChild> getSomeChildren();
+
+}
 // ---- XSomeChild.java -----------------
 //header.txt
 package generated.psi;
@@ -373,6 +387,32 @@ public class XOperatorImpl extends ASTWrapperPsiElement implements XOperator {
 
   public XOperatorImpl(ASTNode node) {
     super(node);
+  }
+
+}
+// ---- XRenameListImpl.java -----------------
+//header.txt
+package generated.psi.impl;
+
+import java.util.List;
+import org.jetbrains.annotations.*;
+import com.intellij.lang.ASTNode;
+import com.intellij.psi.PsiElement;
+import com.intellij.psi.util.PsiTreeUtil;
+import static generated.GeneratedTypes.*;
+import com.intellij.extapi.psi.ASTWrapperPsiElement;
+import generated.psi.*;
+
+public class XRenameListImpl extends ASTWrapperPsiElement implements XRenameList {
+
+  public XRenameListImpl(ASTNode node) {
+    super(node);
+  }
+
+  @Override
+  @NotNull
+  public List<XSomeChild> getSomeChildren() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, XSomeChild.class);
   }
 
 }

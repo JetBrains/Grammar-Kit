@@ -56,3 +56,5 @@ fake some-child ::= some-grand-child "something" something2 {
   methods=[smth1="MY_SOMETHING" smth2="MY_SOMETHING"]
 }
 fake some-grand-child ::= MY_SOMETHING something2 {pin=1}
+
+fake rename-list ::= some-child * { methods=[some-children="some-child"]}

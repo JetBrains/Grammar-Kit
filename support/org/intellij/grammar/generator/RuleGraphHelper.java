@@ -392,7 +392,7 @@ public class RuleGraphHelper {
     boolean firstNonTrivial = tree == Rule.firstNotTrivial(rule);
     boolean outerLeft = (firstNonTrivial || rule.getExpression() == tree) &&
                         Rule.isLeft(rule) && !Rule.isPrivate(rule) && !Rule.isInner(rule);
-    boolean tryCollapse = firstNonTrivial && !outerLeft && !Rule.isPrivate(rule);
+    boolean tryCollapse = firstNonTrivial && !outerLeft && !Rule.isPrivate(rule) && !Rule.isFake(rule);
 
     Map<PsiElement, Cardinality> result;
     if (tree instanceof BnfReferenceOrToken) {

@@ -489,6 +489,20 @@ import com.intellij.psi.PsiElement;
 public interface XStatement extends XComposite {
 
 }
+// ---- XWrappingStatement.java -----------------
+//header.txt
+package generated.psi;
+
+import java.util.List;
+import org.jetbrains.annotations.*;
+import com.intellij.psi.PsiElement;
+
+public interface XWrappingStatement extends XStatement {
+
+  @NotNull
+  XStatement getStatement();
+
+}
 // ---- XLeftShadowImpl.java -----------------
 //header.txt
 package generated.psi.impl;
@@ -1402,6 +1416,41 @@ public class XStatementImpl extends ASTWrapperPsiElement implements XStatement {
   }
 
 }
+// ---- XWrappingStatementImpl.java -----------------
+//header.txt
+package generated.psi.impl;
+
+import java.util.List;
+import org.jetbrains.annotations.*;
+import com.intellij.lang.ASTNode;
+import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiElementVisitor;
+import com.intellij.psi.util.PsiTreeUtil;
+import static generated.GeneratedTypes.*;
+import generated.psi.*;
+
+public class XWrappingStatementImpl extends XStatementImpl implements XWrappingStatement {
+
+  public XWrappingStatementImpl(ASTNode node) {
+    super(node);
+  }
+
+  public void accept(@NotNull XVisitor visitor) {
+    visitor.visitWrappingStatement(this);
+  }
+
+  public void accept(@NotNull PsiElementVisitor visitor) {
+    if (visitor instanceof XVisitor) accept((XVisitor)visitor);
+    else super.accept(visitor);
+  }
+
+  @Override
+  @NotNull
+  public XStatement getStatement() {
+    return findNotNullChildByClass(XStatement.class);
+  }
+
+}
 // ---- XVisitor.java -----------------
 //header.txt
 package generated.psi;
@@ -1511,6 +1560,10 @@ public class XVisitor extends PsiElementVisitor {
 
   public void visitStatement(@NotNull XStatement o) {
     visitComposite(o);
+  }
+
+  public void visitWrappingStatement(@NotNull XWrappingStatement o) {
+    visitStatement(o);
   }
 
   public void visitPsiNameIdentifierOwner(@NotNull PsiNameIdentifierOwner o) {

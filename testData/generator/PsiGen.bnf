@@ -59,6 +59,7 @@ private fixMetaRule ::= <<blockOf identifier>>
 publicMethodToCall ::= identifier {elementType=""}
 
 fake namedElement ::= identifier publicMethodToCall (id (',' id) *) {implements="com.intellij.psi.PsiNameIdentifierOwner"}
+fake wrapping_statement ::= statement
 
 choice_joined ::= literal id '%' | '%' id literal {extends=literal}
 

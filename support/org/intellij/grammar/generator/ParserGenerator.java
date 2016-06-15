@@ -511,6 +511,15 @@ public class ParserGenerator {
         return o1.size() - o2.size();
       }
     });
+    for (ListIterator<Set<String>> it = result.listIterator(); it.hasNext(); ) {
+      Set<String> smaller = it.next();
+      for (Set<String> bigger : result.subList(it.nextIndex(), result.size())) {
+        if (bigger.containsAll(smaller)) {
+          it.remove();
+          break;
+        }
+      }
+    }
     return result;
   }
 

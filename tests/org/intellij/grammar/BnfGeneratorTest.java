@@ -1,16 +1,15 @@
 package org.intellij.grammar;
 
 import com.intellij.idea.Bombed;
-import com.intellij.openapi.util.Comparing;
 import com.intellij.openapi.util.io.FileUtil;
-import com.intellij.rt.execution.junit.FileComparisonFailure;
+import com.intellij.openapi.util.io.FileUtilRt;
+import com.intellij.openapi.vfs.CharsetToolkit;
 import com.intellij.util.containers.ContainerUtil;
 import org.intellij.grammar.generator.ParserGenerator;
 import org.intellij.grammar.psi.impl.BnfFileImpl;
 import org.jetbrains.annotations.NonNls;
 
 import java.io.*;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -55,7 +54,10 @@ public class BnfGeneratorTest extends BnfGeneratorTestCase {
         String grammarName = FileUtil.getNameWithoutExtension(myFile.getName());
         String fileName = FileUtil.getNameWithoutExtension(file);
         String name = grammarName + (fileName.startsWith(grammarName) || fileName.endsWith("Parser") ? "" : ".PSI") + ".java";
-        PrintWriter out = new PrintWriter(new FileOutputStream(new File(myFullDataPath, name), true));
+        File targetFile = new File(FileUtilRt.getTempDirectory(), name);
+        targetFile.getParentFile().mkdirs();
+        FileOutputStream outputStream = new FileOutputStream(targetFile, true);
+        PrintWriter out = new PrintWriter(new OutputStreamWriter(outputStream, CharsetToolkit.UTF8));
         out.println("// ---- " + file.getName() + " -----------------");
         return out;
       }
@@ -74,9 +76,9 @@ public class BnfGeneratorTest extends BnfGeneratorTestCase {
     String text = loadFile(name + "." + myFileExt);
     myFile = createPsiFile(name, text.replaceAll("generatePsi=[^\n]*", "generatePsi=" + generatePsi));
     List<File> filesToCheck = ContainerUtil.newArrayList();
-    filesToCheck.add(new File(myFullDataPath, name + ".java"));
+    filesToCheck.add(new File(FileUtilRt.getTempDirectory(), name + ".java"));
     if (generatePsi) {
-      filesToCheck.add(new File(myFullDataPath, name + ".PSI.java"));
+      filesToCheck.add(new File(FileUtilRt.getTempDirectory(), name + ".PSI.java"));
     }
     for (File file : filesToCheck) {
       if (file.exists()) {
@@ -88,39 +90,11 @@ public class BnfGeneratorTest extends BnfGeneratorTestCase {
     if (generatePsi) parserGenerator.generate();
     else parserGenerator.generateParser();
 
-    List<String> messages = new ArrayList<String>();
-    try {
-      for (File file : filesToCheck) {
-        assertTrue("Generated file not found: "+file, file.exists());
-        final String expectedName = FileUtil.getNameWithoutExtension(file) + ".expected.java";
-        String result = loadFile(file.getName());
-        try {
-          if (OVERWRITE_TESTDATA) throw new FileNotFoundException();
-          String expectedText = loadFile(expectedName);
-          if (!Comparing.equal(expectedText, result)) {
-            throw new FileComparisonFailure(expectedName, expectedText, result, new File(myFullDataPath + File.separator + expectedName).getAbsolutePath());
-          }
-        }
-        catch (FileNotFoundException e) {
-          FileWriter writer = new FileWriter(new File(myFullDataPath, expectedName));
-          try {
-            writer.write(result);
-          }
-          finally {
-            writer.close();
-          }
-          messages.add("No output text found. File " + expectedName + " created.");
-        }
-      }
+    for (File file : filesToCheck) {
+      assertTrue("Generated file not found: " + file, file.exists());
+      final String expectedName = FileUtil.getNameWithoutExtension(file) + ".expected.java";
+      String result = FileUtil.loadFile(file, CharsetToolkit.UTF8, true);
+      doCheckResult(myFullDataPath, expectedName, result);
     }
-    finally {
-      for (File file : filesToCheck) {
-        file.delete();
-      }
-    }
-    for (String message : messages) {
-      System.err.println(message);
-    }
-    assertTrue(OVERWRITE_TESTDATA || messages.isEmpty());
   }
 }

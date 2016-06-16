@@ -117,7 +117,7 @@ External rule expression syntax is the same as a body of external expression:
  external manually_parsed_rule ::= methodName param1 param2 ...
 ````
 
-Rule references in parameter list are implemented as [GeneratedParserUtilBase.Parser](support/org/intellij/grammar/parser/GeneratedParserUtilBase.java) instances.
+Rule references in parameter list are implemented as [GeneratedParserUtilBase.Parser](src/org/intellij/grammar/parser/GeneratedParserUtilBase.java) instances.
 
 ### Tokens:
 Tokens should appear in grammar file as is. All conflicts can be resolved by quotation.
@@ -153,7 +153,7 @@ Generator can split parser code into several classes for better support of large
 For simple cases parser will consists just of several generated classes.
 
 The actual error recovery and reporting code as well as completion functionality for parser-based completion provider and basic token matching code resides
-in a _parserUtilClass_ class. It may be altered by specifying some other class that extend or mimic the original [GeneratedParserUtilBase](support/org/intellij/grammar/parser/GeneratedParserUtilBase.java).
+in a _parserUtilClass_ class. It may be altered by specifying some other class that extend or mimic the original [GeneratedParserUtilBase](src/org/intellij/grammar/parser/GeneratedParserUtilBase.java).
 There's no need to keep a copy of GeneratedParserUtilBase in a project, it is included in IntelliJ Platform since version 12.1.
 
 The manual parsing code, i.e. _external_ rules must be implemented the same way as generated, by a static method in the _parserUtilClass_ class or any other class that will

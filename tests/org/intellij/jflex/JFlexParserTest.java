@@ -53,8 +53,8 @@ public class JFlexParserTest extends AbstractParsingTestCase {
   @Override
   protected String loadFile(@NonNls String name) throws IOException {
     if (name.startsWith("Self")) {
-      String name1 = name.startsWith("SelfFlex") ? "../../../support/org/intellij/jflex/parser/_JFlexLexer.flex" :
-                     "../../../support/org/intellij/grammar/parser/_BnfLexer.flex";
+      String name1 = name.startsWith("SelfFlex") ? "../../../src/org/intellij/jflex/parser/_JFlexLexer.flex" :
+                     "../../../src/org/intellij/grammar/parser/_BnfLexer.flex";
       return StringUtil.convertLineSeparators(
         FileUtil.loadFile(new File(myFullDataPath, name1).getCanonicalFile(), CharsetToolkit.UTF8).trim());
     }

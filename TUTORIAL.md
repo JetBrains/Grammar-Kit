@@ -58,8 +58,29 @@ Here is the grammar I designed for the sample above. No java coding, no generati
 I still need to add a lexer and some extra attributes to generate a real parser like package and some class
 names as described in the [main readme](README.md) but now I'm sure the BNF part is OK.
 
+The initial `*.flex` file and `*.java` lexer can be generated using editor context menu items.
 
 The fun part is that I even can _inject_ this language in some other files I work with to quickly test the syntax.
+
+Summary
+================
+
+The described workflow can be summarized as follows:
+
+1. prototype the grammar in *LivePreview*
+2. generate initial `*.flex` to sources and generate a `*.java` lexer from it
+3. create *ParserDefinition* and/or setup lexer and parser tests
+4. perfect the `*.flex` & `*.bnf` separately in production environment
+
+*Note 1:* Flex file shall be edited manually as it is likely to contain complex logic that is absent in `*.bnf`.
+This also implies that *LivePreview* is not useful at (4) as it requires supporting 2 different lexers.
+
+*Note 2:* Whitespaces and comments declared in a *ParserDefinition* are skipped by *PsiBuilder*.
+To mimic this behavior the *LivePreviewLexer* treats as whitespace any space or new-line matching *regexp* token
+that is not used anywhere in the rules.
+
+
+Full sample.bnf text:
 ````
 {
   tokens=[
@@ -106,5 +127,3 @@ literal_expr ::= number | string | float
 ````
 
 Try playing with _pin_ and _recoverWhile_ attributes, tokens and rule modifiers to see how this all works.
-
-Note that since version 1.1.2 one can generate *.flex file and then lexer java code using context menu items.

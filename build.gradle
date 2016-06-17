@@ -1,0 +1,45 @@
+buildscript {
+  repositories {
+    mavenCentral()
+  }
+}
+
+plugins {
+  id 'org.jetbrains.intellij' version "0.1.8"
+}
+
+version = "${version}.${buildNumber}"
+defaultTasks 'clean', 'artifacts', 'test'
+
+allprojects {
+  apply plugin: 'java'
+  sourceCompatibility = javaVersion
+  targetCompatibility = javaVersion
+
+  sourceSets {
+    main {
+      java.srcDirs 'src', 'gen'
+      java.exclude '**/grammar/debugger/**'
+      resources.srcDirs 'resources'
+    }
+    test {
+      java.srcDir 'tests'
+    }
+  }
+  apply plugin: 'org.jetbrains.intellij'
+  intellij {
+    version ideaVersion
+    type 'IU'
+    plugins 'uml'
+    updateSinceUntilBuild false
+  }
+}
+
+test {
+  useJUnit {}
+  include '**/BnfTestSuite.class'
+  scanForTestClasses false
+  ignoreFailures true
+}
+
+apply from: 'artifacts.gradle'

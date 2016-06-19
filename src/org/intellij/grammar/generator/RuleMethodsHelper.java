@@ -16,6 +16,7 @@
 
 package org.intellij.grammar.generator;
 
+import com.intellij.openapi.util.Comparing;
 import com.intellij.openapi.util.Pair;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.psi.PsiElement;
@@ -187,6 +188,15 @@ public class RuleMethodsHelper {
     public int compareTo(@NotNull MethodInfo o) {
       if (type != o.type) return type.compareTo(o.type);
       return name.compareTo(o.name);
+    }
+
+    @NotNull
+    public String generateGetterName() {
+      boolean many = cardinality.many();
+
+      boolean renamed = !Comparing.equal(name, originalName);
+      String getterNameBody = ParserGeneratorUtil.getGetterName(name);
+      return getterNameBody + (many && !renamed ? "List" : "");
     }
 
     @Override

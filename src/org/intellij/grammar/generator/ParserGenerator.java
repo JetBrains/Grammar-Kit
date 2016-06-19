@@ -1517,9 +1517,7 @@ public class ParserGenerator {
 
     boolean many = type.many();
 
-    boolean renamed = !Comparing.equal(methodInfo.name, methodInfo.originalName);
-    String getterNameBody = getGetterName(methodInfo.name);
-    String getterName = getterNameBody + (many && !renamed? "List" : "");
+    String getterName = methodInfo.generateGetterName();
     if (!intf) out("@Override");
     if (type == REQUIRED) {
       out("@NotNull");
@@ -1634,7 +1632,7 @@ public class ParserGenerator {
       }
       String targetCall;
       if (StringUtil.isNotEmpty(targetInfo.name)) {
-        targetCall = getGetterName(item) + (targetInfo.cardinality.many() ? "List" : "") + "()";
+        targetCall = targetInfo.generateGetterName() + "()";
       }
       else {
         targetCall = generatePsiAccessorImplCall(startRule, targetInfo);

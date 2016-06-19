@@ -126,6 +126,15 @@ public interface XRenameList extends XComposite {
   @NotNull
   List<XSomeChild> getSomeChildren();
 
+  @Nullable
+  XSomeChild getFirst();
+
+  @Nullable
+  PsiElement getFirstSmth();
+
+  @Nullable
+  XSomeChild getLast();
+
 }
 // ---- XSomeChild.java -----------------
 //header.txt
@@ -415,6 +424,29 @@ public class XRenameListImpl extends ASTWrapperPsiElement implements XRenameList
     return PsiTreeUtil.getChildrenOfTypeAsList(this, XSomeChild.class);
   }
 
+  @Override
+  @Nullable
+  public XSomeChild getFirst() {
+    List<XSomeChild> p1 = getSomeChildren();
+    return p1.size() < 1 ? null : p1.get(0);
+  }
+
+  @Override
+  @Nullable
+  public PsiElement getFirstSmth() {
+    List<XSomeChild> p1 = getSomeChildren();
+    XSomeChild p2 = p1.size() < 1 ? null : p1.get(0);
+    if (p2 == null) return null;
+    return p2.getSmth1();
+  }
+
+  @Override
+  @Nullable
+  public XSomeChild getLast() {
+    List<XSomeChild> p1 = getSomeChildren();
+    return p1.isEmpty()? null : p1.get(p1.size() - 1);
+  }
+
 }
 // ---- XSomeChildImpl.java -----------------
 //header.txt
@@ -456,7 +488,7 @@ public class XSomeChildImpl extends ASTWrapperPsiElement implements XSomeChild {
   @Override
   @NotNull
   public PsiElement getSmth2() {
-    return getMySomething();
+    return getSmth1();
   }
 
 }
@@ -521,7 +553,7 @@ public class XSomeRootImpl extends ASTWrapperPsiElement implements XSomeRoot {
   @NotNull
   public PsiElement getChildSomething() {
     XSomeChild p1 = getSomeChild();
-    return p1.getMySomething();
+    return p1.getSmth1();
   }
 
   @Override

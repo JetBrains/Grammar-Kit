@@ -302,20 +302,18 @@ JavaCode = ({JavaRest}|{StringLiteral}|{CharLiteral}|{JavaComment})+
   "["                        { bracketCount++; return FLEX_BRACK1; }
   "]"                        { if (bracketCount > 0) bracketCount--; else yybegin(REGEXP); return FLEX_BRACK2; }
   "^"                        { return FLEX_HAT; }
+  \"                         { nextState=CHARCLASS; yybegin(STRING_CONTENT); }
+  "\\u{" {HexDigit}{1,6} "}" { return FLEX_CHAR; }
+
   "--"                       { return FLEX_DASHDASH; }
   "&&"                       { return FLEX_AMPAMP; }
   "||"                       { return FLEX_BARBAR; }
   "~~"                       { return FLEX_TILDETILDE; }
-  "\\u{" {HexDigit}{1,6} "}" { return FLEX_CHAR; }
 
-  // this is a hack to keep JLex compatibilty with char class
-  // expressions like [+-]
-
-  \"                   { nextState=CHARCLASS; yybegin(STRING_CONTENT); }
-  [.[^\^\"\\]] / "--"  { return FLEX_CHAR; }
-  [.[^\^\"\\]] / "-"   { yybegin(CHARRANGE); return FLEX_CHAR; }
-  {Char}               { yypushback(yylength()); yybegin(CLASSCHARS); }
-  .                    { return FLEX_CHAR; }
+  [.[^\^\"\\\[\]]] / "--"    { return FLEX_CHAR; }
+  [.[^\^\"\\\[\]]] / "-"     { yybegin(CHARRANGE); return FLEX_CHAR; }
+  {Char}                     { yypushback(yylength()); yybegin(CLASSCHARS); }
+  .                          { return FLEX_CHAR; }
 
   {NL}    { bracketCount=0; yypushback(yylength()); nextState=REGEXP; yybegin(REPORT_UNCLOSED); } // fallback
 

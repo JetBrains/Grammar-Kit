@@ -49,7 +49,8 @@ public class JFlexParserTest extends AbstractParsingTestCase {
   public void testParserFixes2() { doTest(true); }
 
   public void testCharClassOp() throws Exception {
-    doCodeTest("%%\n%%\nN=[_42a-zA-Z*-?\\--][\\wX_--\\d][\\w_||\\d]" +
+    doCodeTest("%%\n%%\nN=[_42a-zA-Z*-?\\--][[\\w]--\\d]" +
+               "[\\wX_--\\d][\\w_||\\d]" +
                "[[\\w_]&&\\d][\\w_~~[\\d]][{EOL}] {}");
   }
 

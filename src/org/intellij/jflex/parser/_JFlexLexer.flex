@@ -94,7 +94,7 @@ JavaCode = ({JavaRest}|{StringLiteral}|{CharLiteral}|{JavaComment})+
 
 %%
 <YYINITIAL> {
-  "%%"             { macroDefinition = true; nextState = MACROS; yybegin(SKIP_TOEOL); return FLEX_TWO_PERCS; }
+  "%%"             { macroDefinition=true; nextState=MACROS; yybegin(SKIP_TOEOL); return FLEX_TWO_PERCS; }
   ([^\%]|\%[^\%])* { return FLEX_RAW; }
 }
 
@@ -212,7 +212,7 @@ JavaCode = ({JavaRest}|{StringLiteral}|{CharLiteral}|{JavaComment})+
 
 <REGEXPSTART> {
   {EndOfLineComment}      { return FLEX_LINE_COMMENT; }
-  "/*"                    { nextState = REGEXPSTART; yybegin(COMMENT); }
+  "/*"                    { nextState=REGEXPSTART; yybegin(COMMENT); }
 
   ^ {WSP}* "%include"     { return FLEX_OPT_INCLUDE; }
 
@@ -259,7 +259,7 @@ JavaCode = ({JavaRest}|{StringLiteral}|{CharLiteral}|{JavaComment})+
   {NL} / {WSPNL}* [\|\[\{\"\\|\!\~\(\)\*\+\?\$\^\.\/]
                           { yypushback(yylength()); nextState=REGEXP; yybegin(SKIP_WSNL); }
 
-  \"                      { nextState = REGEXP; yybegin(STRING_CONTENT); }
+  \"                      { nextState=REGEXP; yybegin(STRING_CONTENT); }
   "\\u{"                  { yybegin(REGEXP_CODEPOINT); }
 
   "!"                     { return FLEX_BANG; }
@@ -311,11 +311,11 @@ JavaCode = ({JavaRest}|{StringLiteral}|{CharLiteral}|{JavaComment})+
   // this is a hack to keep JLex compatibilty with char class
   // expressions like [+-]
 
-  \"            { nextState=CHARCLASS; yybegin(STRING_CONTENT); }
-  {Char} / "--" { return FLEX_CHAR; }
-  {Char} / "-"  { yybegin(CHARRANGE); return FLEX_CHAR; }
-  {Char}        { yypushback(yylength()); yybegin(CLASSCHARS); }
-  .             { return FLEX_CHAR; }
+  \"                   { nextState=CHARCLASS; yybegin(STRING_CONTENT); }
+  [.[^\^\"\\]] / "--"  { return FLEX_CHAR; }
+  [.[^\^\"\\]] / "-"   { yybegin(CHARRANGE); return FLEX_CHAR; }
+  {Char}               { yypushback(yylength()); yybegin(CLASSCHARS); }
+  .                    { return FLEX_CHAR; }
 
   {NL}    { bracketCount=0; yypushback(yylength()); nextState=REGEXP; yybegin(REPORT_UNCLOSED); } // fallback
 
@@ -323,9 +323,10 @@ JavaCode = ({JavaRest}|{StringLiteral}|{CharLiteral}|{JavaComment})+
 }
 
 <CLASSCHARS> {
-  {Char} / "-" { yypushback(yylength()); yybegin(CHARCLASS); return FLEX_CHAR; }
-  {Char}       { }
-  [^]          { yypushback(yylength()); yybegin(CHARCLASS); return FLEX_CHAR; }
+  {Char} / "--" { yybegin(CHARCLASS); return FLEX_CHAR; }
+  {Char} / "-"  { yypushback(yylength()); yybegin(CHARCLASS); return FLEX_CHAR; }
+  {Char}        { }
+  [^]           { yypushback(yylength()); yybegin(CHARCLASS); return FLEX_CHAR; }
 }
 
 <CHARRANGE> {

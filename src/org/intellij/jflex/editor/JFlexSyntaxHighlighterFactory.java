@@ -44,6 +44,7 @@ public class JFlexSyntaxHighlighterFactory extends SyntaxHighlighterFactory {
   public static final TextAttributesKey CLASS      = createTextAttributesKey("FLEX_CLASS");
   public static final TextAttributesKey PATTERN_OP = createTextAttributesKey("FLEX_PATTERN_OP", DefaultLanguageHighlighterColors.KEYWORD);
   public static final TextAttributesKey CLASS_OP   = createTextAttributesKey("FLEX_CHAR_CLASS_OP", DefaultLanguageHighlighterColors.KEYWORD);
+  public static final TextAttributesKey OP_RANGE   = createTextAttributesKey("FLEX_OP_RANGE", DefaultLanguageHighlighterColors.KEYWORD);
 
   public static final TextAttributesKey COMMENT    = createTextAttributesKey("FLEX_COMMENT", DefaultLanguageHighlighterColors.LINE_COMMENT);
   public static final TextAttributesKey OPTION     = createTextAttributesKey("FLEX_OPTION", DefaultLanguageHighlighterColors.LABEL);
@@ -55,13 +56,12 @@ public class JFlexSyntaxHighlighterFactory extends SyntaxHighlighterFactory {
   public static final TextAttributesKey NUMBER     = createTextAttributesKey("FLEX_NUMBER", DefaultLanguageHighlighterColors.NUMBER);
 
   public static final TextAttributesKey CLASS_STD  = createTextAttributesKey("FLEX_PREDEFINED_CLASS", DefaultLanguageHighlighterColors.KEYWORD);
+  public static final TextAttributesKey DOT        = createTextAttributesKey("FLEX_DOT", DefaultLanguageHighlighterColors.KEYWORD);
   public static final TextAttributesKey EOF        = createTextAttributesKey("FLEX_SECTION_DIV", DefaultLanguageHighlighterColors.LABEL);
   public static final TextAttributesKey LOOKAHEAD  = createTextAttributesKey("FLEX_LOOKAHEAD", DefaultLanguageHighlighterColors.OPERATION_SIGN);
 
   public static final TextAttributesKey COMMA      = createTextAttributesKey("FLEX_COMMA", DefaultLanguageHighlighterColors.COMMA);
-  public static final TextAttributesKey DOT        = createTextAttributesKey("FLEX_DOT", DefaultLanguageHighlighterColors.DOT);
   public static final TextAttributesKey OP_EQUAL   = createTextAttributesKey("FLEX_OP_EQUAL", DefaultLanguageHighlighterColors.OPERATION_SIGN);
-  public static final TextAttributesKey OP_RANGE   = createTextAttributesKey("FLEX_OP_RANGE", DefaultLanguageHighlighterColors.OPERATION_SIGN);
   public static final TextAttributesKey PARENS     = createTextAttributesKey("FLEX_PARENS", DefaultLanguageHighlighterColors.PARENTHESES);
   public static final TextAttributesKey BRACES     = createTextAttributesKey("FLEX_BRACES", DefaultLanguageHighlighterColors.BRACES);
   public static final TextAttributesKey BRACKETS   = createTextAttributesKey("FLEX_BRACKETS", DefaultLanguageHighlighterColors.BRACKETS);

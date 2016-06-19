@@ -39,24 +39,35 @@ public class JFlexColorSettingsPage implements ColorSettingsPage {
 
   static {
     ATTRS = new AttributesDescriptor[]{
-      new AttributesDescriptor("Illegal char", ILLEGAL),
-      new AttributesDescriptor("Comment", COMMENT),
-      new AttributesDescriptor("Keyword", KEYWORD),
-      new AttributesDescriptor("Predefined class", STD_CLASS),
-      new AttributesDescriptor("Character class", CLASS),
+      new AttributesDescriptor("Illegal symbol", ILLEGAL),
+
       new AttributesDescriptor("Macro", MACRO),
       new AttributesDescriptor("State", STATE),
+      new AttributesDescriptor("Character class", CLASS),
+      new AttributesDescriptor("Pattern operator", PATTERN_OP),
+      new AttributesDescriptor("Character class operator", CLASS_OP),
+
+      new AttributesDescriptor("Comment", COMMENT),
+      new AttributesDescriptor("Lexer option", OPTION),
+      new AttributesDescriptor("Java code", RAW_CODE),
+      new AttributesDescriptor("Section divider", SECT_DIV),
+
       new AttributesDescriptor("String", STRING),
-      new AttributesDescriptor("Escaped character", ESCAPED_CHAR),
       new AttributesDescriptor("Character", CHAR),
       new AttributesDescriptor("Number", NUMBER),
-      new AttributesDescriptor("Code", CODE),
-      new AttributesDescriptor("Parenthesis", PARENTHS),
-      new AttributesDescriptor("Braces", BRACES),
-      new AttributesDescriptor("Brackets", BRACKETS),
-      new AttributesDescriptor("Angles", ANGLES),
+
+      new AttributesDescriptor("Predefined character class", CLASS_STD),
+      new AttributesDescriptor("EOF matcher", EOF),
+      new AttributesDescriptor("Lookahead separator", LOOKAHEAD),
+
+      new AttributesDescriptor("Comma", COMMA),
+      new AttributesDescriptor("Dot", DOT),
       new AttributesDescriptor("Equal sign", OP_EQUAL),
-      new AttributesDescriptor("Operation sign", OP_SIGN),
+      new AttributesDescriptor("Range operator", OP_RANGE),
+      new AttributesDescriptor("Parentheses", PARENS),
+      new AttributesDescriptor("Curly braces", BRACES),
+      new AttributesDescriptor("Square brackets", BRACKETS),
+      new AttributesDescriptor("Angle brackets", ANGLES),
     };
   }
 
@@ -87,16 +98,14 @@ public class JFlexColorSettingsPage implements ColorSettingsPage {
   @NotNull
   public String getDemoText() {
     return "/* Header comment */\n" +
-           "<j>package sample.lexer;</j>\n" +
+           "package sample.lexer;\n" +
            "\n" +
            "%%\n" +
            "%public\n" +
            "%class _MyLexer\n" +
            "%unicode\n" +
-           "%eof{ return;\n" +
-           "%eof}\n" +
            "%{\n" +
-           "  <j>private int parenCount;</j>\n" +
+           "  private int parenCount;\n" +
            "%}\n" +
            "\n" +
            "// lexer states\n" +
@@ -106,23 +115,23 @@ public class JFlexColorSettingsPage implements ColorSettingsPage {
            "<m>WHITESPACE</m>=<c>[ \\n\\r\\t]</c>\n" +
            "<m>ESCAPED_CHAR</m>=\\\\.\n" +
            "<m>STRING</m>=\\\"(<c>[^\\\"\\\\]</c>|\\\\.)*\\\"\n" +
-           "<m>ID</m> = [:letter:]([:letter:]|[:digit:]|_)*\n" +
+           "<m>ID</m> = [a-z_&&[A-Z]]([:letter:]|[:digit:]|_)*\n" +
            "<m>BLOCK_COMMENT</m>=\"//\".* | \"/*\" !(<c>[^]</c>* \"*/\" <c>[^]</c>*) (\"*/\")?\n" +
            "<m>NUMBER</m>=<c>[+-]</c>[:digit:]+\n" +
            "<m>FLOAT</m>=<m>{NUMBER}</m>(\\.[:digit:]){1, 3}\n" +
            "\n" +
            "%%\n" +
            "<<s>YYINITIAL</s>, <s>BLOCK</s>> {\n" +
-           "    <m>{WHITESPACE}</m>      <j>{ return WHITESPACE; }</j>\n" +
-           "    <m>{STRING}</m>          <j>{ return STRING; }</j>\n" +
-           "    \"(\"               <j>{ return PAREN1; }</j>\n" +
-           "    \")\"               <j>{ return PAREN2; }</j>\n" +
-           "    \".\"               <j>{ yybegin(QUALIFICATION); return DOT; }</j>\n" +
-           "    <c>[^]</c>  <j>{ return BAD_CHARACER; }</j>\n" +
+           "    <m>{WHITESPACE}</m>      { return WHITESPACE; }\n" +
+           "    <m>{STRING}</m>          { return STRING; }\n" +
+           "    \"(\"               { return PAREN1; }\n" +
+           "    \")\"               { return PAREN2; }\n" +
+           "    \".\" / !<<EOF>>    { yybegin(QUALIFICATION); return DOT; }\n" +
+           "    <c>[^]</c>               { return BAD_CHARACTER; }\n" +
            "}\n";
   }
 
   public Map<String, TextAttributesKey> getAdditionalHighlightingTagToDescriptorMap() {
-    return ContainerUtil.newHashMap(Arrays.asList("s", "m", "c", "j"), Arrays.asList(STATE, MACRO, CLASS, CODE));
+    return ContainerUtil.newHashMap(Arrays.asList("s", "m", "c"), Arrays.asList(STATE, MACRO, CLASS));
   }
 }

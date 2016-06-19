@@ -58,7 +58,7 @@ public class JFlexAnnotator implements Annotator, DumbAware {
       holder.createInfoAnnotation(element, null).setTextAttributes(JFlexSyntaxHighlighterFactory.CLASS);
     }
     else if (element instanceof JFlexJavaCode || element instanceof JFlexJavaType) {
-      holder.createInfoAnnotation(element, null).setTextAttributes(JFlexSyntaxHighlighterFactory.CODE);
+      holder.createInfoAnnotation(element, null).setTextAttributes(JFlexSyntaxHighlighterFactory.RAW_CODE);
     }
   }
 }

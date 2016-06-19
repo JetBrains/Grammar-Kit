@@ -59,7 +59,6 @@ public interface JFlexTypes {
   IElementType FLEX_BRACE2 = new JFlexTokenType("}");
   IElementType FLEX_BRACK1 = new JFlexTokenType("[");
   IElementType FLEX_BRACK2 = new JFlexTokenType("]");
-  IElementType FLEX_BSLASH = new JFlexTokenType("\\");
   IElementType FLEX_CHAR = new JFlexTokenType("char");
   IElementType FLEX_CHAR_CLASS = new JFlexTokenType("char_class");
   IElementType FLEX_COMMA = new JFlexTokenType(",");

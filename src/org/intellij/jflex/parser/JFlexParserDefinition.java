@@ -30,6 +30,7 @@ import com.intellij.psi.tree.IFileElementType;
 import com.intellij.psi.tree.TokenSet;
 import org.intellij.jflex.JFlexLanguage;
 import org.intellij.jflex.psi.JFlexTokenType;
+import org.intellij.jflex.psi.JFlexTypes;
 import org.intellij.jflex.psi.impl.JFlexFileImpl;
 import org.jetbrains.annotations.NotNull;
 
@@ -40,11 +41,13 @@ import static org.intellij.jflex.psi.JFlexTypes.*;
  */
 public class JFlexParserDefinition implements ParserDefinition {
 
-  public static final IFileElementType JFLEX_FILE_ELEMENT_TYPE = new IFileElementType("JFLEX_FILE", JFlexLanguage.INSTANCE);
+  public static final IFileElementType FILE_NODE_TYPE = new IFileElementType("JFLEX_FILE", JFlexLanguage.INSTANCE);
   public static final IElementType FLEX_NEWLINE = new JFlexTokenType("newline");
   public static final TokenSet WS = TokenSet.create(TokenType.WHITE_SPACE, FLEX_NEWLINE);
   public static final TokenSet COMMENTS = TokenSet.create(FLEX_LINE_COMMENT, FLEX_BLOCK_COMMENT);
-  //public static final TokenSet LITERALS = TokenSet.create(JFlexTypes.JFLEX_STRING);
+  public static final TokenSet LITERALS = TokenSet.create(JFlexTypes.FLEX_STRING);
+  public static final TokenSet CHAR_CLASS_OPERATORS = TokenSet.create(FLEX_AMPAMP, FLEX_BARBAR, FLEX_DASHDASH, FLEX_HAT, FLEX_TILDETILDE);
+  public static final TokenSet PATTERN_OPERATORS = TokenSet.create(FLEX_BAR, FLEX_BANG, FLEX_DOLLAR, FLEX_PLUS, FLEX_QUESTION, FLEX_STAR, FLEX_TILDE);
 
   @NotNull
   @Override
@@ -59,7 +62,7 @@ public class JFlexParserDefinition implements ParserDefinition {
 
   @Override
   public IFileElementType getFileNodeType() {
-    return JFLEX_FILE_ELEMENT_TYPE;
+    return FILE_NODE_TYPE;
   }
 
   @NotNull
@@ -77,7 +80,7 @@ public class JFlexParserDefinition implements ParserDefinition {
   @NotNull
   @Override
   public TokenSet getStringLiteralElements() {
-    return TokenSet.EMPTY;
+    return LITERALS;
   }
 
   @NotNull

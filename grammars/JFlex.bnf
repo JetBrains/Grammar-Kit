@@ -51,7 +51,6 @@
     angle1 = '<'
     angle2 = '>'
     bar = '|'
-    bslash = '\'
     dollar = '$'
     eq = '='
     bang = '!'

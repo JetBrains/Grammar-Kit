@@ -24,6 +24,8 @@ public interface GeneratedTypes {
 
   IElementType A = new IElementType("A", null);
   IElementType B = new IElementType("B", null);
+  IElementType TOKEN_ONE = new IElementType("token-one", null);
+  IElementType TOKEN_TWO = new IElementType("token-two", null);
 }
 // ---- FooΩInner.java -----------------
 // This is a generated file. Not intended for manual editing.
@@ -193,6 +195,12 @@ import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
 public interface Zome extends PsiElement {
+
+  @Nullable
+  PsiElement getTokenOne();
+
+  @Nullable
+  PsiElement getTokenTwo();
 
 }
 // ---- FooΩInnerImpl.java -----------------
@@ -632,6 +640,18 @@ public class ZomeImpl extends ASTWrapperPsiElement implements Zome {
   public void accept(@NotNull PsiElementVisitor visitor) {
     if (visitor instanceof Visitor) accept((Visitor)visitor);
     else super.accept(visitor);
+  }
+
+  @Override
+  @Nullable
+  public PsiElement getTokenOne() {
+    return findChildByType(TOKEN_ONE);
+  }
+
+  @Override
+  @Nullable
+  public PsiElement getTokenTwo() {
+    return findChildByType(TOKEN_TWO);
   }
 
 }

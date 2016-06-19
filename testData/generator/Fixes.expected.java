@@ -495,14 +495,15 @@ public class Fixes implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // B
+  // token-one | token-two
   public static boolean zome(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "zome")) return false;
-    if (!nextTokenIs(builder_, B)) return false;
+    if (!nextTokenIs(builder_, "<zome>", TOKEN_ONE, TOKEN_TWO)) return false;
     boolean result_;
-    Marker marker_ = enter_section_(builder_);
-    result_ = consumeToken(builder_, B);
-    exit_section_(builder_, marker_, ZOME, result_);
+    Marker marker_ = enter_section_(builder_, level_, _NONE_, ZOME, "<zome>");
+    result_ = consumeToken(builder_, TOKEN_ONE);
+    if (!result_) result_ = consumeToken(builder_, TOKEN_TWO);
+    exit_section_(builder_, level_, marker_, result_, false, null);
     return result_;
   }
 

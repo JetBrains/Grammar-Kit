@@ -2,12 +2,14 @@
   generate=[root-rules="" psi-factory="no"]
   parserClass="Fixes"
   extends(".*expr")="expr"
+
+  tokens=[ token-one token-two ]
 }
 
 root ::=
 
 some ::= A
-zome ::= B
+zome ::= token-one | token-two
 with_recursive ::= recursive
 private recursive ::= some [recursive]
 

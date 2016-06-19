@@ -959,11 +959,11 @@ public class ParserGenerator {
     if (first != value) {
       String attributeName = getTokenName(value);
       if (attributeName != null && !first.startsWith("\"")) {
-        return getTokenElementType(attributeName);
+        return getElementType(attributeName);
       }
       return null;
     }
-    return getTokenElementType(first);
+    return getElementType(first);
   }
 
   @Nullable
@@ -1006,7 +1006,7 @@ public class ParserGenerator {
       else {
         break;
       }
-      list.add(getTokenElementType(tokenName));
+      list.add(getElementType(tokenName));
       if (!pinApplied && pinMatcher.matches(i, child)) {
         pin = i - startIndex + 1;
       }
@@ -1155,7 +1155,7 @@ public class ParserGenerator {
             clause.append(generateWrappedNodeCall(rule, nested, argument));
           }
           else {
-            String tokenType = getTokenElementType(argument);
+            String tokenType = getElementType(argument);
             clause.append(generateWrappedNodeCall(rule, nested, tokenType));
           }
         }
@@ -1209,15 +1209,15 @@ public class ParserGenerator {
 
   private String generateConsumeToken(String tokenName, String consumeMethodName) {
     myTokensUsedInGrammar.add(tokenName);
-    return format("%s(%s, %s)", consumeMethodName, N.builder, getTokenElementType(tokenName));
+    return format("%s(%s, %s)", consumeMethodName, N.builder, getElementType(tokenName));
   }
 
   public String generateConsumeTextToken(String tokenText, String consumeMethodName) {
     return format("%s(%s, \"%s\")", consumeMethodName, N.builder, tokenText);
   }
 
-  private String getTokenElementType(String token) {
-    return getRootAttribute(myFile, KnownAttribute.ELEMENT_TYPE_PREFIX) + G.generateTokenCase.apply(token);
+  private String getElementType(String token) {
+    return ParserGeneratorUtil.getTokenType(myFile, token, G.generateTokenCase);
   }
 
   String getElementType(BnfRule r) {
@@ -1283,7 +1283,7 @@ public class ParserGenerator {
       for (String tokenText : mySimpleTokens.keySet()) {
         String tokenName = ObjectUtils.chooseNotNull(mySimpleTokens.get(tokenText), tokenText);
         if (isIgnoredWhitespaceToken(tokenName, tokenText)) continue;
-        sortedTokens.put(getTokenElementType(tokenName), isRegexpToken(tokenText) ? tokenName : tokenText);
+        sortedTokens.put(getElementType(tokenName), isRegexpToken(tokenText) ? tokenName : tokenText);
       }
       for (String tokenType : sortedTokens.keySet()) {
         String callFix = tokenCreateCall.equals("new IElementType") ? ", null" : "";
@@ -1553,7 +1553,7 @@ public class ParserGenerator {
     if (myRulesStubNames.isEmpty()) {
       if (isToken) {
         return (type == REQUIRED ? "findNotNullChildByType" : "findChildByType") +
-               "(" + getTokenElementType(methodInfo.path) + ")";
+               "(" + getElementType(methodInfo.path) + ")";
       }
       else {
         String className = myShortener.fun(getAccessorType(methodInfo.rule));
@@ -1564,7 +1564,7 @@ public class ParserGenerator {
     // new logic
     String result;
     if (isToken) {
-      result = "findChildByType(" + getTokenElementType(methodInfo.path) + ")";
+      result = "findChildByType(" + getElementType(methodInfo.path) + ")";
     }
     else {
       String className = myShortener.fun(getAccessorType(methodInfo.rule));

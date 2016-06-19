@@ -460,6 +460,12 @@ public class ParserGeneratorUtil {
     return toIdentifier(elementType != null ? elementType : rule.getName(), prefix, cas);
   }
 
+  public static String getTokenType(BnfFile file, String token, @NotNull Case cas) {
+    NameFormat format = NameFormat.from(getRootAttribute(file, KnownAttribute.ELEMENT_TYPE_PREFIX));
+    String fixed = cas.apply(token.replaceAll("[^:\\p{javaJavaIdentifierPart}]", "_"));
+    return format == null ? fixed : format.apply(fixed);
+  }
+
   public static Collection<BnfRule> getSortedPublicRules(Set<PsiElement> accessors) {
     Map<String, BnfRule> result = ContainerUtil.newTreeMap();
     for (PsiElement tree : accessors) {

@@ -8,11 +8,17 @@ An [IntelliJ IDEA plugin](http://plugins.jetbrains.com/plugin/6606) for language
 Adds BNF Grammars and JFlex files editing support including parser/PSI code generator.
 
 Open-source plugins built with Grammar-Kit:
-[intellij-erlang](https://github.com/ignatov/intellij-erlang),
-[intellij-haskforce](https://github.com/carymrobbins/intellij-haskforce),
-[Dart](https://github.com/JetBrains/intellij-plugins/tree/master/Dart),
+
+* [intellij-erlang](https://github.com/ignatov/intellij-erlang),
+[go-lang-idea-plugin](https://github.com/go-lang-plugin-org/go-lang-idea-plugin),
+[intellij-rust](https://github.com/intellij-rust/intellij-rust),
+* [intellij-haskforce](https://github.com/carymrobbins/intellij-haskforce),
+[elm-plugin](https://github.com/durkiewicz/elm-plugin)
+[Perl5-IDEA](https://github.com/Camelcade/Perl5-IDEA),
+* [Dart](https://github.com/JetBrains/intellij-plugins/tree/master/Dart),
 [intellij-haxe](https://github.com/JetBrains/intellij-haxe),
-[OGNL](https://github.com/JetBrains/intellij-plugins/tree/master/struts2).
+[OGNL](https://github.com/JetBrains/intellij-plugins/tree/master/struts2)
+
 
 Quick links: [Tutorial](TUTORIAL.md), [HOWTO](HOWTO.md), [Standalone usage](#standalone-usage).
 

@@ -1,4 +1,5 @@
 package $packageName;
+
 import com.intellij.lexer.*;
 import com.intellij.psi.tree.IElementType;
 import static $typesClass.*;
@@ -18,9 +19,8 @@ import static $typesClass.*;
 %type IElementType
 %unicode
 
-EOL="\r"|"\n"|"\r\n"
-LINE_WS=[\ \t\f]
-WHITE_SPACE=({LINE_WS}|{EOL})+
+EOL=\R
+WHITE_SPACE=\s
 
 #foreach( $token in $regexpTokens.keySet() )
 $token=$regexpTokens.get($token)
@@ -39,5 +39,6 @@ $token=$regexpTokens.get($token)
   {$token} #spaces($token.length()) { return ${tokenPrefix}$token; }
 #end
 
-  [^] { return com.intellij.psi.TokenType.BAD_CHARACTER; }
 }
+
+[^] { return com.intellij.psi.TokenType.BAD_CHARACTER; }

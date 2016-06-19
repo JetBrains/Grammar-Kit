@@ -34,11 +34,10 @@ import static com.intellij.psi.TokenType.BAD_CHARACTER;
 %type IElementType
 %unicode
 
-%state COMMENT, MACROS, REGEXPSTART, EXPRBAR
-%state REGEXP, STATES, JAVA_CODE, STRING_CONTENT
-%state CHARCLASS, COPY, MACROUSE, REPEATEXP
-%state REGEXP_CODEPOINT_SEQUENCE
-%state STRING_CODEPOINT_SEQUENCE
+%state COMMENT, MACROS, CODE, REGEXPSTART, EXPRBAR
+%state REGEXP, STATES, ACTION_CODE, STRING_CONTENT
+%state CHARCLASS, MACROUSE, REPEATEXP, CLASSCHARS, CHARRANGE
+%state REGEXP_CODEPOINT, STRING_CODEPOINT
 %state SKIP_TOEOL, SKIP_WSNL, REPORT_UNCLOSED, REGEXPSTART0
 
 %{
@@ -77,6 +76,9 @@ Ident      = {IdentStart} {IdentPart}*
 
 IdentStart = [:jletter:]
 IdentPart  = [:jletterdigit:]
+
+Char = [_\p{Alpha}\p{Digit}]
+Chars = {Char}+
 
 JavaComment = {TraditionalComment}|{EndOfLineComment}
 TraditionalComment = "/*"{CommentContent}\*+"/"
@@ -120,16 +122,16 @@ JavaCode = ({JavaRest}|{StringLiteral}|{CharLiteral}|{JavaComment})+
 }
 
 <MACROS> {
-  "%{"                    { nextState=COPY; yybegin(SKIP_TOEOL); return FLEX_OPT_CODE1; }
-  "%init{"                { nextState=COPY; yybegin(SKIP_TOEOL); return FLEX_OPT_INIT1; }
-  "%eofval{"              { nextState=COPY; yybegin(SKIP_TOEOL); return FLEX_OPT_EOFVAL1; }
-  "%eof{"                 { nextState=COPY; yybegin(SKIP_TOEOL); return FLEX_OPT_EOF1; }
-  "%initthrow{"           { nextState=COPY; yybegin(SKIP_TOEOL); return FLEX_OPT_INITTHROW1; }
-  "%yylexthrow{"          { nextState=COPY; yybegin(SKIP_TOEOL); return FLEX_OPT_YYLEXTHROW1; }
-  "%eofthrow{"            { nextState=COPY; yybegin(SKIP_TOEOL); return FLEX_OPT_EOFTHROW1; }
+  "%{"                    { nextState=CODE; yybegin(SKIP_TOEOL); return FLEX_OPT_CODE1; }
+  "%init{"                { nextState=CODE; yybegin(SKIP_TOEOL); return FLEX_OPT_INIT1; }
+  "%eofval{"              { nextState=CODE; yybegin(SKIP_TOEOL); return FLEX_OPT_EOFVAL1; }
+  "%eof{"                 { nextState=CODE; yybegin(SKIP_TOEOL); return FLEX_OPT_EOF1; }
+  "%initthrow{"           { nextState=CODE; yybegin(SKIP_TOEOL); return FLEX_OPT_INITTHROW1; }
+  "%yylexthrow{"          { nextState=CODE; yybegin(SKIP_TOEOL); return FLEX_OPT_YYLEXTHROW1; }
+  "%eofthrow{"            { nextState=CODE; yybegin(SKIP_TOEOL); return FLEX_OPT_EOFTHROW1; }
 }
 
-<COPY> {
+<CODE> {
   "%}"                    { nextState=MACROS; yybegin(SKIP_TOEOL); return FLEX_OPT_CODE2; }
   "%init}"                { nextState=MACROS; yybegin(SKIP_TOEOL); return FLEX_OPT_INIT2; }
   "%eofval}"              { nextState=MACROS; yybegin(SKIP_TOEOL); return FLEX_OPT_EOFVAL2; }
@@ -236,8 +238,8 @@ JavaCode = ({JavaRest}|{StringLiteral}|{CharLiteral}|{JavaComment})+
 }
 
 <REGEXPSTART0> {
-  "{" / {WSP}* {Ident} {WSP}* "}" { yybegin(MACROUSE); return FLEX_BRACE1; }
-  "{" / "{" {WSP}* {Number}       { yybegin(REPEATEXP); return FLEX_BRACE1; }
+  "{" / {WSP}* {Ident} {WSP}* "}" { nextState=REGEXP; yybegin(MACROUSE); return FLEX_BRACE1; }
+  "{" / "{" {WSP}* {Number}       { nextState=REGEXP; yybegin(REPEATEXP); return FLEX_BRACE1; }
 
   "{"                     { yybegin(REGEXPSTART); return FLEX_BRACE1; }
 }
@@ -250,15 +252,15 @@ JavaCode = ({JavaRest}|{StringLiteral}|{CharLiteral}|{JavaComment})+
 
   "|"                     { if (macroDefinition) yybegin(EXPRBAR); return FLEX_BAR; }
 
-  "{" / {WSP}* {Ident} {WSP}* "}" { yybegin(MACROUSE); return FLEX_BRACE1; }
-  "{" / {WSP}* {Number}   { yybegin(REPEATEXP); return FLEX_BRACE1; }
-  "{"                     { if (macroDefinition) return FLEX_CHAR; else yybegin(JAVA_CODE); return FLEX_BRACE1; }
+  "{" / {WSP}* {Ident} {WSP}* "}" { nextState=REGEXP; yybegin(MACROUSE); return FLEX_BRACE1; }
+  "{" / {WSP}* {Number}   { nextState=REGEXP; yybegin(REPEATEXP); return FLEX_BRACE1; }
+  "{"                     { if (macroDefinition) return FLEX_CHAR; else yybegin(ACTION_CODE); return FLEX_BRACE1; }
 
   {NL} / {WSPNL}* [\|\[\{\"\\|\!\~\(\)\*\+\?\$\^\.\/]
-                          { yypushback(1); nextState=REGEXP; yybegin(SKIP_WSNL); }
+                          { yypushback(yylength()); nextState=REGEXP; yybegin(SKIP_WSNL); }
 
   \"                      { nextState = REGEXP; yybegin(STRING_CONTENT); }
-  "\\u{"                  { yybegin(REGEXP_CODEPOINT_SEQUENCE); }
+  "\\u{"                  { yybegin(REGEXP_CODEPOINT); }
 
   "!"                     { return FLEX_BANG; }
   "~"                     { return FLEX_TILDE; }
@@ -275,8 +277,7 @@ JavaCode = ({JavaRest}|{StringLiteral}|{CharLiteral}|{JavaComment})+
   "/"                     { return FLEX_FSLASH; }
 
   {NL}                    { yypushback(yylength()); if (macroDefinition) yybegin(MACROS); else yybegin(REGEXPSTART); }
-  {Ident}                 { return FLEX_ID; }
-  {Number}                { return FLEX_NUMBER; }
+  {Chars}                 { return FLEX_CHAR; }
   .                       { return FLEX_CHAR; }
 }
 
@@ -287,21 +288,20 @@ JavaCode = ({JavaRest}|{StringLiteral}|{CharLiteral}|{JavaComment})+
 }
 
 <REPEATEXP, MACROUSE> {
-  "}"                    { yybegin(REGEXP); return FLEX_BRACE2; }
+  "}"                    { yybegin(nextState); return FLEX_BRACE2; }
   ","                    { return FLEX_COMMA; }
   {Number}               { return FLEX_NUMBER; }
   {Ident}                { return FLEX_ID; }
 
   {WSP}+                 { return WHITE_SPACE; }
-  .                      { yypushback(yylength()); yybegin(REGEXP); } // fallback
+  .                      { yypushback(yylength()); yybegin(nextState); } // fallback
 }
 
 <CHARCLASS> {
-  "{" {Ident} "}"            { return FLEX_CHAR; }
+  "{" / {Ident} "}"          { nextState=CHARCLASS; yybegin(MACROUSE); return FLEX_BRACE1; }
   "["                        { bracketCount++; return FLEX_BRACK1; }
   "]"                        { if (bracketCount > 0) bracketCount--; else yybegin(REGEXP); return FLEX_BRACK2; }
   "^"                        { return FLEX_HAT; }
-  "-"                        { return FLEX_DASH; }
   "--"                       { return FLEX_DASHDASH; }
   "&&"                       { return FLEX_AMPAMP; }
   "||"                       { return FLEX_BARBAR; }
@@ -310,13 +310,29 @@ JavaCode = ({JavaRest}|{StringLiteral}|{CharLiteral}|{JavaComment})+
 
   // this is a hack to keep JLex compatibilty with char class
   // expressions like [+-]
-  "-]"    { yypushback(1); return FLEX_CHAR; }
 
-  \"      { nextState=CHARCLASS; yybegin(STRING_CONTENT); }
-  .       { return FLEX_CHAR; }
+  \"            { nextState=CHARCLASS; yybegin(STRING_CONTENT); }
+  {Char} / "--" { return FLEX_CHAR; }
+  {Char} / "-"  { yybegin(CHARRANGE); return FLEX_CHAR; }
+  {Char}        { yypushback(yylength()); yybegin(CLASSCHARS); }
+  .             { return FLEX_CHAR; }
+
   {NL}    { bracketCount=0; yypushback(yylength()); nextState=REGEXP; yybegin(REPORT_UNCLOSED); } // fallback
 
   <<EOF>> { nextState=REGEXP; yybegin(REPORT_UNCLOSED); return FLEX_BRACK2; }
+}
+
+<CLASSCHARS> {
+  {Char} / "-" { yypushback(yylength()); yybegin(CHARCLASS); return FLEX_CHAR; }
+  {Char}       { }
+  [^]          { yypushback(yylength()); yybegin(CHARCLASS); return FLEX_CHAR; }
+}
+
+<CHARRANGE> {
+  "-]"         { yypushback(1); yybegin(CHARCLASS); return FLEX_CHAR; }
+  "-"          { return FLEX_DASH; }
+  {Char}       { yybegin(CHARCLASS); return FLEX_CHAR; }
+  .            { yypushback(yylength()); yybegin(CHARCLASS); }
 }
 
 <STRING_CONTENT> {
@@ -329,9 +345,9 @@ JavaCode = ({JavaRest}|{StringLiteral}|{CharLiteral}|{JavaComment})+
   {Unicode4}  {  }
   {Unicode6}  {  }
 
-  "\\u{"      { yybegin(STRING_CODEPOINT_SEQUENCE); }
+  "\\u{"      { yybegin(STRING_CODEPOINT); }
 
-  \\(b|t|f|r) {  }
+  \\[btrf]    {  }
   \\.         {  }
 
   {NL}     { yypushback(yylength()); yybegin(nextState); return FLEX_STRING; }
@@ -366,7 +382,7 @@ JavaCode = ({JavaRest}|{StringLiteral}|{CharLiteral}|{JavaComment})+
 }
 
 
-<JAVA_CODE> {
+<ACTION_CODE> {
   "{"        { braceCount++; }
   "}"        { if (braceCount > 0) braceCount--; else { yypushback(1); yybegin(REGEXPSTART); return FLEX_RAW; } }
   {JavaCode} {  }
@@ -374,14 +390,14 @@ JavaCode = ({JavaRest}|{StringLiteral}|{CharLiteral}|{JavaComment})+
 }
 
 
-<REGEXP_CODEPOINT_SEQUENCE> {
+<REGEXP_CODEPOINT> {
   "}"             { yybegin(REGEXP); return FLEX_BRACE2; }
   {HexDigit}{1,6} { return FLEX_NUMBER; }
   {WSP}+          { return WHITE_SPACE; }
   {NL}+           { return FLEX_NEWLINE; }
 }
 
-<STRING_CODEPOINT_SEQUENCE> {
+<STRING_CODEPOINT> {
   "}"             { yybegin(STRING_CONTENT); }
   {HexDigit}{1,6} { }
   {WSP}+          { }

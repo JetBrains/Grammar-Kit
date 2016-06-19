@@ -21,6 +21,10 @@ import com.intellij.psi.PsiNameIdentifierOwner;
 
 public class JFlexVisitor extends PsiElementVisitor {
 
+  public void visitCharRange(@NotNull JFlexCharRange o) {
+    visitClassExpression(o);
+  }
+
   public void visitChoiceExpression(@NotNull JFlexChoiceExpression o) {
     visitExpression(o);
   }

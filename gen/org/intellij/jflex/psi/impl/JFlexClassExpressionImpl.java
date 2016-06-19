@@ -41,8 +41,8 @@ public class JFlexClassExpressionImpl extends JFlexExpressionImpl implements JFl
 
   @Override
   @NotNull
-  public List<JFlexClassExpression> getClassExpressionList() {
-    return PsiTreeUtil.getChildrenOfTypeAsList(this, JFlexClassExpression.class);
+  public List<JFlexExpression> getExpressionList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, JFlexExpression.class);
   }
 
 }

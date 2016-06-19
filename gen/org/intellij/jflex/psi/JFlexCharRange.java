@@ -19,9 +19,6 @@ import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
-public interface JFlexClassExpression extends JFlexExpression {
-
-  @NotNull
-  List<JFlexExpression> getExpressionList();
+public interface JFlexCharRange extends JFlexClassExpression {
 
 }

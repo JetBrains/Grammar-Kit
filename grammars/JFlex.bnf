@@ -123,6 +123,7 @@
   extends(".*_expression")=expression
   name(".*_expression")="expression"
   name("option.*")="option"
+  name("char_class_.*|char_range")="char"
 
   //consumeTokenMethod("character|macro_reference|.*_(recover|expression|op)")="consumeTokenFast"
   //consumeTokenMethod="consumeTokenFast"
@@ -301,9 +302,10 @@ paren_expression ::= '(' expression ')' {pin=1}
 not_expression ::= ('!'|'~') expression
 quantifier_expression ::=  expression ( '*' | '+' | '?' | '{' number [ ',' number] '}' )
 class_expression ::= '[' '^'? (char_class_item (char_class_op char_class_item)* )* ']' {pin(".*")=1}
-private char_class_item ::= char_class_atom | class_expression
-char_class_atom ::= string | char_class | char [ '-' char] | '-' {elementType="" name="char"}
-char_class_op ::= '&&' | '||' | '~~' | '--' {elementType="" name="char"}
+private char_class_item ::= char_range | class_expression | macro_ref_expression | char_class_atom
+private char_class_atom ::= string | char_class | char
+private char_class_op ::= '&&' | '||' | '~~' | '--'
+char_range ::= char '-' char {extends=class_expression}
 macro_ref_expression ::= '{' macro_reference '}'
 macro_reference ::= id { methods=[getReference] }
 literal_expression ::= string | id | char | number { methods=[id=""] }

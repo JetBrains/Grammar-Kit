@@ -13,15 +13,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.intellij.jflex.psi;
+package org.intellij.jflex.psi.impl;
 
 import java.util.List;
 import org.jetbrains.annotations.*;
+import com.intellij.lang.ASTNode;
 import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiElementVisitor;
+import com.intellij.psi.util.PsiTreeUtil;
+import static org.intellij.jflex.psi.JFlexTypes.*;
+import org.intellij.jflex.psi.*;
 
-public interface JFlexClassExpression extends JFlexExpression {
+public class JFlexCharRangeImpl extends JFlexClassExpressionImpl implements JFlexCharRange {
 
-  @NotNull
-  List<JFlexExpression> getExpressionList();
+  public JFlexCharRangeImpl(ASTNode node) {
+    super(node);
+  }
+
+  public void accept(@NotNull JFlexVisitor visitor) {
+    visitor.visitCharRange(this);
+  }
+
+  public void accept(@NotNull PsiElementVisitor visitor) {
+    if (visitor instanceof JFlexVisitor) accept((JFlexVisitor)visitor);
+    else super.accept(visitor);
+  }
 
 }

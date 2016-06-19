@@ -9,6 +9,7 @@ import org.intellij.jflex.psi.impl.*;
 
 public interface JFlexTypes {
 
+  IElementType FLEX_CHAR_RANGE = new JFlexCompositeElementType("FLEX_CHAR_RANGE");
   IElementType FLEX_CHOICE_EXPRESSION = new JFlexCompositeElementType("FLEX_CHOICE_EXPRESSION");
   IElementType FLEX_CLASS_EXPRESSION = new JFlexCompositeElementType("FLEX_CLASS_EXPRESSION");
   IElementType FLEX_DECLARATIONS_SECTION = new JFlexCompositeElementType("FLEX_DECLARATIONS_SECTION");
@@ -129,7 +130,10 @@ public interface JFlexTypes {
   class Factory {
     public static PsiElement createElement(ASTNode node) {
       IElementType type = node.getElementType();
-       if (type == FLEX_CHOICE_EXPRESSION) {
+       if (type == FLEX_CHAR_RANGE) {
+        return new JFlexCharRangeImpl(node);
+      }
+      else if (type == FLEX_CHOICE_EXPRESSION) {
         return new JFlexChoiceExpressionImpl(node);
       }
       else if (type == FLEX_CLASS_EXPRESSION) {
@@ -208,6 +212,17 @@ public interface JFlexTypes {
     }
   }
 }
+// ---- JFlexCharRange.java -----------------
+// license.txt
+package org.intellij.jflex.psi;
+
+import java.util.List;
+import org.jetbrains.annotations.*;
+import com.intellij.psi.PsiElement;
+
+public interface JFlexCharRange extends JFlexClassExpression {
+
+}
 // ---- JFlexChoiceExpression.java -----------------
 // license.txt
 package org.intellij.jflex.psi;
@@ -233,7 +248,7 @@ import com.intellij.psi.PsiElement;
 public interface JFlexClassExpression extends JFlexExpression {
 
   @NotNull
-  List<JFlexClassExpression> getClassExpressionList();
+  List<JFlexExpression> getExpressionList();
 
 }
 // ---- JFlexDeclarationsSection.java -----------------
@@ -610,6 +625,35 @@ import com.intellij.psi.PsiElement;
 public interface JFlexUserValue extends JFlexCompositeElement {
 
 }
+// ---- JFlexCharRangeImpl.java -----------------
+// license.txt
+package org.intellij.jflex.psi.impl;
+
+import java.util.List;
+import org.jetbrains.annotations.*;
+import com.intellij.lang.ASTNode;
+import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiElementVisitor;
+import com.intellij.psi.util.PsiTreeUtil;
+import static org.intellij.jflex.psi.JFlexTypes.*;
+import org.intellij.jflex.psi.*;
+
+public class JFlexCharRangeImpl extends JFlexClassExpressionImpl implements JFlexCharRange {
+
+  public JFlexCharRangeImpl(ASTNode node) {
+    super(node);
+  }
+
+  public void accept(@NotNull JFlexVisitor visitor) {
+    visitor.visitCharRange(this);
+  }
+
+  public void accept(@NotNull PsiElementVisitor visitor) {
+    if (visitor instanceof JFlexVisitor) accept((JFlexVisitor)visitor);
+    else super.accept(visitor);
+  }
+
+}
 // ---- JFlexChoiceExpressionImpl.java -----------------
 // license.txt
 package org.intellij.jflex.psi.impl;
@@ -675,8 +719,8 @@ public class JFlexClassExpressionImpl extends JFlexExpressionImpl implements JFl
 
   @Override
   @NotNull
-  public List<JFlexClassExpression> getClassExpressionList() {
-    return PsiTreeUtil.getChildrenOfTypeAsList(this, JFlexClassExpression.class);
+  public List<JFlexExpression> getExpressionList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, JFlexExpression.class);
   }
 
 }
@@ -1590,6 +1634,10 @@ import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.PsiNameIdentifierOwner;
 
 public class JFlexVisitor extends PsiElementVisitor {
+
+  public void visitCharRange(@NotNull JFlexCharRange o) {
+    visitClassExpression(o);
+  }
 
   public void visitChoiceExpression(@NotNull JFlexChoiceExpression o) {
     visitExpression(o);

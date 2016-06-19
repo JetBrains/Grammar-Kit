@@ -37,7 +37,10 @@ public class JFlexParser implements PsiParser, LightPsiParser {
     boolean result;
     builder = adapt_builder_(type, builder, this, EXTENDS_SETS_);
     Marker marker = enter_section_(builder, 0, _COLLAPSE_, null);
-    if (type == FLEX_DECLARATIONS_SECTION) {
+    if (type == FLEX_CHAR_RANGE) {
+      result = char_range(builder, 0);
+    }
+    else if (type == FLEX_DECLARATIONS_SECTION) {
       result = declarations_section(builder, 0);
     }
     else if (type == FLEX_EXPRESSION) {
@@ -97,9 +100,9 @@ public class JFlexParser implements PsiParser, LightPsiParser {
 
   public static final TokenSet[] EXTENDS_SETS_ = new TokenSet[] {
     create_token_set_(FLEX_DECLARATIONS_SECTION, FLEX_LEXICAL_RULES_SECTION, FLEX_USER_CODE_SECTION),
-    create_token_set_(FLEX_CHOICE_EXPRESSION, FLEX_CLASS_EXPRESSION, FLEX_EXPRESSION, FLEX_LITERAL_EXPRESSION,
-      FLEX_MACRO_REF_EXPRESSION, FLEX_NOT_EXPRESSION, FLEX_PAREN_EXPRESSION, FLEX_PREDEFINED_CLASS_EXPRESSION,
-      FLEX_QUANTIFIER_EXPRESSION, FLEX_SEQUENCE_EXPRESSION),
+    create_token_set_(FLEX_CHAR_RANGE, FLEX_CHOICE_EXPRESSION, FLEX_CLASS_EXPRESSION, FLEX_EXPRESSION,
+      FLEX_LITERAL_EXPRESSION, FLEX_MACRO_REF_EXPRESSION, FLEX_NOT_EXPRESSION, FLEX_PAREN_EXPRESSION,
+      FLEX_PREDEFINED_CLASS_EXPRESSION, FLEX_QUANTIFIER_EXPRESSION, FLEX_SEQUENCE_EXPRESSION),
   };
 
   /* ********************************************************** */
@@ -136,63 +139,35 @@ public class JFlexParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // string | char_class | char [ '-' char] | '-'
-  public static boolean char_class_atom(PsiBuilder builder, int level) {
+  // string | char_class | char
+  static boolean char_class_atom(PsiBuilder builder, int level) {
     if (!recursion_guard_(builder, level, "char_class_atom")) return false;
     boolean result;
     Marker marker = enter_section_(builder, level, _NONE_, null, "<char>");
     result = consumeToken(builder, FLEX_STRING);
     if (!result) result = consumeToken(builder, FLEX_CHAR_CLASS);
-    if (!result) result = char_class_atom_2(builder, level + 1);
-    if (!result) result = consumeToken(builder, FLEX_DASH);
+    if (!result) result = consumeToken(builder, FLEX_CHAR);
     exit_section_(builder, level, marker, result, false, null);
     return result;
   }
 
-  // char [ '-' char]
-  private static boolean char_class_atom_2(PsiBuilder builder, int level) {
-    if (!recursion_guard_(builder, level, "char_class_atom_2")) return false;
-    boolean result;
-    Marker marker = enter_section_(builder);
-    result = consumeToken(builder, FLEX_CHAR);
-    result = result && char_class_atom_2_1(builder, level + 1);
-    exit_section_(builder, marker, null, result);
-    return result;
-  }
-
-  // [ '-' char]
-  private static boolean char_class_atom_2_1(PsiBuilder builder, int level) {
-    if (!recursion_guard_(builder, level, "char_class_atom_2_1")) return false;
-    char_class_atom_2_1_0(builder, level + 1);
-    return true;
-  }
-
-  // '-' char
-  private static boolean char_class_atom_2_1_0(PsiBuilder builder, int level) {
-    if (!recursion_guard_(builder, level, "char_class_atom_2_1_0")) return false;
-    boolean result;
-    Marker marker = enter_section_(builder);
-    result = consumeToken(builder, FLEX_DASH);
-    result = result && consumeToken(builder, FLEX_CHAR);
-    exit_section_(builder, marker, null, result);
-    return result;
-  }
-
   /* ********************************************************** */
-  // char_class_atom | class_expression
+  // char_range | class_expression | macro_ref_expression | char_class_atom
   static boolean char_class_item(PsiBuilder builder, int level) {
     if (!recursion_guard_(builder, level, "char_class_item")) return false;
     boolean result;
-    Marker marker = enter_section_(builder);
-    result = char_class_atom(builder, level + 1);
+    Marker marker = enter_section_(builder, level, _NONE_, null, "<char>");
+    result = char_range(builder, level + 1);
     if (!result) result = class_expression(builder, level + 1);
-    exit_section_(builder, marker, null, result);
+    if (!result) result = macro_ref_expression(builder, level + 1);
+    if (!result) result = char_class_atom(builder, level + 1);
+    exit_section_(builder, level, marker, result, false, null);
     return result;
   }
 
   /* ********************************************************** */
   // '&&' | '||' | '~~' | '--'
-  public static boolean char_class_op(PsiBuilder builder, int level) {
+  static boolean char_class_op(PsiBuilder builder, int level) {
     if (!recursion_guard_(builder, level, "char_class_op")) return false;
     boolean result;
     Marker marker = enter_section_(builder, level, _NONE_, null, "<char>");
@@ -200,6 +175,20 @@ public class JFlexParser implements PsiParser, LightPsiParser {
     if (!result) result = consumeToken(builder, FLEX_BARBAR);
     if (!result) result = consumeToken(builder, FLEX_TILDETILDE);
     if (!result) result = consumeToken(builder, FLEX_DASHDASH);
+    exit_section_(builder, level, marker, result, false, null);
+    return result;
+  }
+
+  /* ********************************************************** */
+  // char '-' char
+  public static boolean char_range(PsiBuilder builder, int level) {
+    if (!recursion_guard_(builder, level, "char_range")) return false;
+    if (!nextTokenIs(builder, FLEX_CHAR)) return false;
+    boolean result;
+    Marker marker = enter_section_(builder, level, _NONE_, FLEX_CHAR_RANGE, "<char>");
+    result = consumeToken(builder, FLEX_CHAR);
+    result = result && consumeToken(builder, FLEX_DASH);
+    result = result && consumeToken(builder, FLEX_CHAR);
     exit_section_(builder, level, marker, result, false, null);
     return result;
   }

@@ -22,6 +22,7 @@ import org.intellij.jflex.psi.impl.*;
 
 public interface JFlexTypes {
 
+  IElementType FLEX_CHAR_RANGE = new JFlexCompositeElementType("FLEX_CHAR_RANGE");
   IElementType FLEX_CHOICE_EXPRESSION = new JFlexCompositeElementType("FLEX_CHOICE_EXPRESSION");
   IElementType FLEX_CLASS_EXPRESSION = new JFlexCompositeElementType("FLEX_CLASS_EXPRESSION");
   IElementType FLEX_DECLARATIONS_SECTION = new JFlexCompositeElementType("FLEX_DECLARATIONS_SECTION");
@@ -142,7 +143,10 @@ public interface JFlexTypes {
   class Factory {
     public static PsiElement createElement(ASTNode node) {
       IElementType type = node.getElementType();
-       if (type == FLEX_CHOICE_EXPRESSION) {
+       if (type == FLEX_CHAR_RANGE) {
+        return new JFlexCharRangeImpl(node);
+      }
+      else if (type == FLEX_CHOICE_EXPRESSION) {
         return new JFlexChoiceExpressionImpl(node);
       }
       else if (type == FLEX_CLASS_EXPRESSION) {

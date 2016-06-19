@@ -13,8 +13,9 @@ Open-source plugins built with Grammar-Kit:
 [go-lang-idea-plugin](https://github.com/go-lang-plugin-org/go-lang-idea-plugin),
 [intellij-rust](https://github.com/intellij-rust/intellij-rust),
 * [intellij-haskforce](https://github.com/carymrobbins/intellij-haskforce),
-[elm-plugin](https://github.com/durkiewicz/elm-plugin)
+[elm-plugin](https://github.com/durkiewicz/elm-plugin),
 [Perl5-IDEA](https://github.com/Camelcade/Perl5-IDEA),
+[Cypher](https://github.com/Neueda4j/jetbrains-plugin-cypher),
 * [Dart](https://github.com/JetBrains/intellij-plugins/tree/master/Dart),
 [intellij-haxe](https://github.com/JetBrains/intellij-haxe),
 [OGNL](https://github.com/JetBrains/intellij-plugins/tree/master/struts2)

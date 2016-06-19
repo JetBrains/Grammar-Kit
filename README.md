@@ -218,6 +218,11 @@ java -jar expression-console-sample.jar
 
 Change log
 ==========
+1.4.2 / dev
+
+* JFlex: more color options & better AST
+* Generator/PSI: do not 'collapse' fake rules
+
 1.4.0
 
 * Generator: introduce "hooks" attribute and white-space binders #91

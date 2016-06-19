@@ -1,6 +1,6 @@
 <idea-plugin url="https://github.com/JetBrains/Grammar-Kit" version="2">
   <id>org.jetbrains.idea.grammar</id>
-  <version>1.4.1</version>
+  <version>1.4.SNAPSHOT</version>
   <vendor email="gregory.shrago@jetbrains.com">Greg Shrago</vendor>
   <idea-version since-build="143.0" until-build=""/>
 
@@ -12,19 +12,10 @@
 
   <change-notes>
     <![CDATA[
-    <p>1.4.0</p>
+    <p>1.4.x</p>
     <ul>
-      <li>Generator: introduce "hooks" attribute and white-space binders #91</li>
-      <li>Generator: override 'gen' folder name via 'grammar.kit.gen.dir' system property</li>
-      <li>Generator: generate elementTypes for fake rules when needed #76</li>
-      <li>Generator: improved/unified identifiers generation #97</li>
-      <li>Generator/PSI: generate constructors from super-class #105</li>
-      <li>JFlex: 1.6 syntax and running</li>
-      <li>JFlex: file structure popup (Ctrl-F12)</li>
-      <li>JFlex: additional arguments via 'grammar.kit.gen.jflex.args' system property</li>
-      <li>JFlex: resolve returned token constants & yybegin(state) in action code</li>
-      <li>JFlex: unify default generation path with BNF generator #96</li>
-      <li>Editor: improved completion for angles-quoted rules</li>
+      <li>JFlex: more color options & better AST</li>
+      <li>Generator/PSI: do not collapse fake rules</li>
     </ul>
     <a href="https://github.com/JetBrains/Grammar-Kit#change-log">Full change log...</a>
     ]]>

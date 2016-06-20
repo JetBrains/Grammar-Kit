@@ -44,6 +44,7 @@ public class GenOptions {
   public final Case generateTokenCase;
   public final Case generateElementCase;
   public final boolean generateTokenAccessors;
+  public final boolean generateTokenAccessorsSet;
 
   public GenOptions(BnfFile myFile) {
     Map<String, String> genOptions = getRootAttribute(myFile, KnownAttribute.GENERATE).asMap();
@@ -55,6 +56,7 @@ public class GenOptions {
     generateFirstCheck = getGenerateOption(myFile, KnownAttribute.GENERATE_FIRST_CHECK, genOptions.get("firstCheck"));
     generateExtendedPin = getGenerateOption(myFile, KnownAttribute.EXTENDED_PIN, genOptions.get("extendedPin"));
     generateTokenAccessors = getGenerateOption(myFile, KnownAttribute.GENERATE_TOKEN_ACCESSORS, genOptions.get("tokenAccessors"));
+    generateTokenAccessorsSet = genOptions.containsKey("tokenAccessors");
     generateRootRules = PatternUtil.compileSafe(genOptions.get("root-rules"), null);
     generateVisitor = !"no".equals(genOptions.get("visitor"));
     visitorValue = "void".equals(genOptions.get("visitor-value")) ? null : StringUtil.nullize(genOptions.get("visitor-value"));

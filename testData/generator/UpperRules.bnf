@@ -4,18 +4,19 @@
   tokens=[
     space='regexp:\s+'
   ]
-
+  extends("abc_.*")=abc
 }
 
-file ::= root
+file ::= root (';' root) *
 
 root ::= (abc | abc_pin | abc_seq) *
 
 prefix ::= A
 
-abc ::= prefix (abc_one | abc_two)
+abc ::= prefix? abc_three? (abc_one | abc_two | abc_three)
 upper abc_one ::= B
 upper abc_two ::= C
+abc_three ::= X
 
 abc_pin ::= prefix (abc_one | abc_two) {pin=1}
 abc_seq ::= prefix abc_one abc_two

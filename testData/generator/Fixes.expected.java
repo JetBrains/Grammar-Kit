@@ -364,7 +364,7 @@ public class Fixes implements PsiParser, LightPsiParser {
 
   /* ********************************************************** */
   // <<p>> (',' <<p>>)*
-  static boolean sequence(PsiBuilder builder_, int level_, final Parser p) {
+  static boolean sequence(PsiBuilder builder_, int level_, Parser p) {
     if (!recursion_guard_(builder_, level_, "sequence")) return false;
     boolean result_, pinned_;
     Marker marker_ = enter_section_(builder_, level_, _NONE_);
@@ -376,7 +376,7 @@ public class Fixes implements PsiParser, LightPsiParser {
   }
 
   // (',' <<p>>)*
-  private static boolean sequence_1(PsiBuilder builder_, int level_, final Parser p) {
+  private static boolean sequence_1(PsiBuilder builder_, int level_, Parser p) {
     if (!recursion_guard_(builder_, level_, "sequence_1")) return false;
     int pos_ = current_position_(builder_);
     while (true) {
@@ -388,7 +388,7 @@ public class Fixes implements PsiParser, LightPsiParser {
   }
 
   // ',' <<p>>
-  private static boolean sequence_1_0(PsiBuilder builder_, int level_, final Parser p) {
+  private static boolean sequence_1_0(PsiBuilder builder_, int level_, Parser p) {
     if (!recursion_guard_(builder_, level_, "sequence_1_0")) return false;
     boolean result_, pinned_;
     Marker marker_ = enter_section_(builder_, level_, _NONE_);

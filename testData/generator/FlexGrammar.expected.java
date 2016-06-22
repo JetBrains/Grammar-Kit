@@ -434,7 +434,7 @@ public class JFlexParser implements PsiParser, LightPsiParser {
 
   /* ********************************************************** */
   // new_line <<p>> new_line
-  static boolean line(PsiBuilder builder, int level, final Parser aP) {
+  static boolean line(PsiBuilder builder, int level, Parser aP) {
     if (!recursion_guard_(builder, level, "line")) return false;
     boolean result, pinned;
     Marker marker = enter_section_(builder, level, _NONE_);

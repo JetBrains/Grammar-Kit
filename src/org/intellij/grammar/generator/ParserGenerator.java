@@ -943,7 +943,7 @@ public class ParserGenerator {
     if (params.isEmpty()) return "";
     final StringBuilder sb = new StringBuilder();
     for (String param : params) {
-      sb.append(", ").append(declaration ? "final Parser " : "").
+      sb.append(", ").append(declaration ? "Parser " : "").
         append(formatArgName(param.substring(2, param.length() - 2)));
     }
     return sb.toString();

@@ -228,7 +228,7 @@ public class PsiGen implements PsiParser, LightPsiParser {
 
   /* ********************************************************** */
   // <<p>> +
-  static boolean listOf(PsiBuilder builder_, int level_, final Parser p) {
+  static boolean listOf(PsiBuilder builder_, int level_, Parser p) {
     if (!recursion_guard_(builder_, level_, "listOf")) return false;
     boolean result_;
     Marker marker_ = enter_section_(builder_);
@@ -338,7 +338,7 @@ public class PsiGen2 {
 
   /* ********************************************************** */
   // <<p>> +
-  public static boolean blockOf(PsiBuilder builder_, int level_, final Parser p) {
+  public static boolean blockOf(PsiBuilder builder_, int level_, Parser p) {
     if (!recursion_guard_(builder_, level_, "blockOf")) return false;
     boolean result_;
     Marker marker_ = enter_section_(builder_);

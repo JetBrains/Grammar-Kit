@@ -636,9 +636,9 @@ public class ParserGenerator {
     boolean isLeft = firstNonTrivial && Rule.isLeft(rule);
     boolean isLeftInner = isLeft && (isPrivate || Rule.isInner(rule));
     boolean isBranch = !isPrivate && Rule.isUpper(rule);
-    final String recoverWhile = firstNonTrivial ? ObjectUtils.chooseNotNull(
+    String recoverWhile = !firstNonTrivial ? null : ObjectUtils.coalesce(
       getAttribute(rule, KnownAttribute.RECOVER_WHILE.alias("recoverUntil")),
-      getAttribute(rule, KnownAttribute.RECOVER_WHILE)) : null;
+      getAttribute(rule, KnownAttribute.RECOVER_WHILE));
     Map<String, String> hooks = firstNonTrivial ? getAttribute(rule, KnownAttribute.HOOKS).asMap() : Collections.<String, String>emptyMap();
 
     final boolean canCollapse = !isPrivate && (!isLeft || isLeftInner) && firstNonTrivial && myGraphHelper.canCollapse(rule);
@@ -819,6 +819,9 @@ public class ParserGenerator {
           BnfRule predicateRule = myFile.getRule(recoverWhile);
           if (RECOVER_AUTO.equals(recoverWhile)) {
             recoverCall = generateAutoRecoverCall(rule);
+          }
+          else if (Rule.isMeta(rule) && GrammarUtil.isDoubleAngles(recoverWhile)) {
+            recoverCall = formatArgName(recoverWhile.substring(2, recoverWhile.length() - 2));
           }
           else {
             recoverCall = predicateRule == null ? null : generateWrappedNodeCall(rule, null, predicateRule.getName());

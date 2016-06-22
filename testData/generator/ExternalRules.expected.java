@@ -590,6 +590,17 @@ public class ExternalRules implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
+  // <<param>>
+  static boolean recoverable_item2(PsiBuilder builder_, int level_, final Parser param, final Parser recover_arg) {
+    if (!recursion_guard_(builder_, level_, "recoverable_item2")) return false;
+    boolean result_;
+    Marker marker_ = enter_section_(builder_, level_, _NONE_);
+    result_ = param.parse(builder_, level_);
+    exit_section_(builder_, level_, marker_, result_, false, recover_arg);
+    return result_;
+  }
+
+  /* ********************************************************** */
   // <<listOf statement>>
   static boolean root(PsiBuilder builder_, int level_) {
     return listOf(builder_, level_ + 1, statement_parser_);

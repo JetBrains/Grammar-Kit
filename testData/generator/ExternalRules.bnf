@@ -52,3 +52,5 @@ private meta_mixed_list_paren ::= <<meta_mixed (<<comma_list one>>)>>
 
 private meta recoverable_item ::= <<param>> {recoverWhile="item_recover"}
 private item_recover ::= !(',' | ';' | ')')
+
+private meta recoverable_item2 ::= <<param>> {recoverWhile="<<recover_arg>>"}

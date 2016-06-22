@@ -23,7 +23,8 @@ import com.intellij.psi.SyntaxTraverser;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.util.PairProcessor;
 import com.intellij.util.Processor;
-import com.intellij.util.SmartList;
+import com.intellij.util.containers.ContainerUtil;
+import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.generator.ParserGeneratorUtil;
 import org.intellij.grammar.parser.GeneratedParserUtilBase;
 import org.intellij.grammar.psi.*;
@@ -105,7 +106,7 @@ public class GrammarUtil {
 
   public static List<String> collectExtraArguments(BnfRule rule, BnfExpression expression) {
     if (!ParserGeneratorUtil.Rule.isMeta(rule) && !ParserGeneratorUtil.Rule.isExternal(rule)) return Collections.emptyList();
-    SmartList<String> result = new SmartList<String>();
+    List<String> result = ContainerUtil.newSmartList();
     for (BnfExternalExpression o : bnfTraverserNoAttrs(expression).filter(BnfExternalExpression.class)) {
       List<BnfExpression> list = o.getExpressionList();
       if (list.size() == 1) {
@@ -115,7 +116,17 @@ public class GrammarUtil {
         }
       }
     }
+    if (ParserGeneratorUtil.Rule.isMeta(rule)) {
+      String attr = getAttribute(rule, KnownAttribute.RECOVER_WHILE);
+      if (isDoubleAngles(attr)) {
+        result.add(attr);
+      }
+    }
     return result;
+  }
+
+  public static boolean isDoubleAngles(@Nullable String str) {
+    return str != null && str.startsWith("<<") && str.endsWith(">>");
   }
 
   public static boolean processExpressionNames(BnfRule rule, String funcName, BnfExpression expression, PairProcessor<String, BnfExpression> processor) {

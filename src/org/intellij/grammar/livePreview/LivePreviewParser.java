@@ -326,6 +326,9 @@ public class LivePreviewParser implements PsiParser {
           }
         };
       }
+      else if (Rule.isMeta(rule) && GrammarUtil.isDoubleAngles(recoverWhile)) {
+        recoverPredicate = externalArguments.get(recoverWhile.substring(2, recoverWhile.length() - 2));
+      }
       else {
         recoverPredicate = recoverRule == null ? null : new Parser() {
           @Override

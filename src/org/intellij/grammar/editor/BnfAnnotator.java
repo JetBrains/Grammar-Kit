@@ -139,8 +139,14 @@ public class BnfAnnotator implements Annotator, DumbAware {
             refType = "rule or constant ";
           }
           else if (attribute == KnownAttribute.RECOVER_WHILE && !BnfConstants.RECOVER_AUTO.equals(value)) {
-            resolve = ((BnfFile)psiElement.getContainingFile()).getRule(value);
-            refType = "rule ";
+            if (GrammarUtil.isDoubleAngles(value) &&
+                ParserGeneratorUtil.Rule.isMeta(ParserGeneratorUtil.Rule.of((BnfStringLiteralExpression)psiElement))) {
+              resolve = Boolean.TRUE;
+            }
+            else {
+              resolve = ((BnfFile)psiElement.getContainingFile()).getRule(value);
+              refType = "rule ";
+            }
           }
           else {
             resolve = Boolean.TRUE;

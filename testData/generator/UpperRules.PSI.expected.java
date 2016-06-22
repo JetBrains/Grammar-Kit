@@ -13,6 +13,7 @@ public interface GeneratedTypes {
   IElementType ABC_ONE = new IElementType("ABC_ONE", null);
   IElementType ABC_PIN = new IElementType("ABC_PIN", null);
   IElementType ABC_SEQ = new IElementType("ABC_SEQ", null);
+  IElementType ABC_THREE = new IElementType("ABC_THREE", null);
   IElementType ABC_TWO = new IElementType("ABC_TWO", null);
   IElementType PREFIX = new IElementType("PREFIX", null);
   IElementType ROOT = new IElementType("ROOT", null);
@@ -20,6 +21,7 @@ public interface GeneratedTypes {
   IElementType A = new IElementType("A", null);
   IElementType B = new IElementType("B", null);
   IElementType C = new IElementType("C", null);
+  IElementType X = new IElementType("X", null);
 }
 // ---- Abc.java -----------------
 //header.txt

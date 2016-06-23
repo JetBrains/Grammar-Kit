@@ -16,27 +16,14 @@
 
 package org.intellij.grammar;
 
-import com.intellij.codeInsight.documentation.DocumentationComponent;
-import com.intellij.codeInsight.documentation.DocumentationManager;
 import com.intellij.lang.documentation.DocumentationProvider;
-import com.intellij.openapi.application.AccessToken;
-import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.project.Project;
-import com.intellij.openapi.ui.popup.JBPopup;
-import com.intellij.openapi.util.Getter;
 import com.intellij.openapi.util.text.StringUtil;
-import com.intellij.openapi.wm.ToolWindow;
-import com.intellij.openapi.wm.ToolWindowId;
-import com.intellij.openapi.wm.ToolWindowManager;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiManager;
 import com.intellij.psi.PsiNamedElement;
 import com.intellij.psi.impl.source.tree.LeafPsiElement;
 import com.intellij.ui.ColorUtil;
 import com.intellij.ui.JBColor;
-import com.intellij.ui.content.Content;
-import com.intellij.ui.popup.AbstractPopup;
-import com.intellij.util.ObjectUtils;
 import com.intellij.util.PairConsumer;
 import org.intellij.grammar.analysis.BnfFirstNextAnalyzer;
 import org.intellij.grammar.generator.BnfConstants;
@@ -102,23 +89,9 @@ public class BnfDocumentationProvider implements DocumentationProvider {
         docBuilder.append(")");
         docBuilder.append("</code>");
       }
-
-      final String prefix = docBuilder.toString();
-      if (!ParserGeneratorUtil.Rule.isMeta(rule)) {
-        updateDocPopup(rule, new Getter<String>() {
-          @Override
-          public String get() {
-            AccessToken accessToken = ApplicationManager.getApplication().acquireReadActionLock();
-            try {
-              return getUpdatedDocumentation(rule, prefix);
-            }
-            finally {
-              accessToken.finish();
-            }
-          }
-        });
-      }
-      return prefix;
+      dumpPriorityTable(docBuilder, rule, file);
+      dumpContents(docBuilder, rule, file);
+      return docBuilder.toString();
     }
     else if (element instanceof BnfAttr) {
       KnownAttribute attribute = KnownAttribute.getAttribute(((BnfAttr)element).getName());
@@ -135,14 +108,6 @@ public class BnfDocumentationProvider implements DocumentationProvider {
   @Nullable
   public PsiElement getDocumentationElementForLink(final PsiManager psiManager, final String link, final PsiElement context) {
     return null;
-  }
-
-  private static String getUpdatedDocumentation(final BnfRule rule, String prefix) {
-    StringBuilder docBuilder = new StringBuilder(prefix);
-    BnfFile file = (BnfFile)rule.getContainingFile();
-    dumpPriorityTable(docBuilder, rule, file);
-    dumpContents(docBuilder, rule, file);
-    return docBuilder.toString();
   }
 
   private static void dumpContents(StringBuilder docBuilder, BnfRule rule, BnfFile file) {
@@ -209,39 +174,5 @@ public class BnfDocumentationProvider implements DocumentationProvider {
       sb.append(" ").append(r instanceof PsiNamedElement? ((PsiNamedElement)r).getName() : r.getText()).
         append(RuleGraphHelper.getCardinalityText(map.get(r)));
     }
-  }
-
-  public static void updateDocPopup(final PsiElement element, final Getter<String> docGetter) {
-    final Project project = element.getProject();
-    ApplicationManager.getApplication().executeOnPooledThread(new Runnable() {
-      @Override
-      public void run() {
-        final String documentation = docGetter.get();
-        if (StringUtil.isEmpty(documentation)) return;
-        ApplicationManager.getApplication().invokeLater(new Runnable() {
-          @Override
-          public void run() {
-            DocumentationManager documentationManager = DocumentationManager.getInstance(project);
-            DocumentationComponent component;
-            JBPopup hint = documentationManager.getDocInfoHint();
-            if (hint != null) {
-              component = (DocumentationComponent)((AbstractPopup)hint).getComponent();
-            }
-            else if (documentationManager.hasActiveDockedDocWindow()) {
-              ToolWindow toolWindow = ToolWindowManager.getInstance(project).getToolWindow(ToolWindowId.DOCUMENTATION);
-              Content selectedContent = toolWindow == null? null : toolWindow.getContentManager().getSelectedContent();
-              component = selectedContent == null ? null : (DocumentationComponent)selectedContent.getComponent();
-            }
-            else {
-              component = null;
-            }
-            PsiElement docElement = component == null? null : ObjectUtils.chooseNotNull(component.getElement(), element);
-            if (docElement == element) {
-              component.setText(documentation, element, false);
-            }
-          }
-        });
-      }
-    });
   }
 }

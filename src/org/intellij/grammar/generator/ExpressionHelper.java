@@ -170,6 +170,11 @@ public class ExpressionHelper {
         }
       }
     }
+    if (Rule.isExternal(rule)) {
+      BnfExpression expression = (BnfExpression)ContainerUtil.getFirstItem(ruleContent.keySet());
+      expressionInfo.operatorMap.put(rule, new OperatorInfo(rule, OperatorType.ATOM, expression, null));
+      return;
+    }
     String rootRuleName = rootRule.getName();
     List<BnfExpression> childExpressions = getChildExpressions(rule.getExpression());
     OperatorInfo info;

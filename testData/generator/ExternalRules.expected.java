@@ -22,9 +22,15 @@ public class ExternalRules implements PsiParser, LightPsiParser {
 
   public void parseLight(IElementType root_, PsiBuilder builder_) {
     boolean result_;
-    builder_ = adapt_builder_(root_, builder_, this, null);
+    builder_ = adapt_builder_(root_, builder_, this, EXTENDS_SETS_);
     Marker marker_ = enter_section_(builder_, 0, _COLLAPSE_, null);
-    if (root_ == ONE) {
+    if (root_ == COLLAPSE_ONE) {
+      result_ = collapse_one(builder_, 0);
+    }
+    else if (root_ == COLLAPSE_TWO) {
+      result_ = collapse_two(builder_, 0);
+    }
+    else if (root_ == ONE) {
       result_ = one(builder_, 0);
     }
     else if (root_ == STATEMENT) {
@@ -41,6 +47,28 @@ public class ExternalRules implements PsiParser, LightPsiParser {
 
   protected boolean parse_root_(IElementType root_, PsiBuilder builder_, int level_) {
     return root(builder_, level_ + 1);
+  }
+
+  public static final TokenSet[] EXTENDS_SETS_ = new TokenSet[] {
+    create_token_set_(COLLAPSE_ONE, COLLAPSE_TWO),
+  };
+
+  /* ********************************************************** */
+  // <<uniqueListOf one>>
+  public static boolean collapse_one(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "collapse_one")) return false;
+    boolean result_;
+    Marker marker_ = enter_section_(builder_, level_, _COLLAPSE_, COLLAPSE_ONE, "<collapse one>");
+    result_ = uniqueListOf(builder_, level_ + 1, one_parser_);
+    exit_section_(builder_, level_, marker_, result_, false, null);
+    return result_;
+  }
+
+  /* ********************************************************** */
+  public static boolean collapse_two(PsiBuilder builder_, int level_) {
+    Marker marker_ = enter_section_(builder_);
+    exit_section_(builder_, marker_, COLLAPSE_TWO, true);
+    return true;
   }
 
   /* ********************************************************** */

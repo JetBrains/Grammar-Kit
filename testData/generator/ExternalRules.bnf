@@ -54,3 +54,7 @@ private meta recoverable_item ::= <<param>> {recoverWhile="item_recover"}
 private item_recover ::= !(',' | ';' | ')')
 
 private meta recoverable_item2 ::= <<param>> {recoverWhile="<<recover_arg>>"}
+
+// use _COLLAPSE_ flag due unknown external rule
+collapse_one ::= <<uniqueListOf one>>
+collapse_two ::= {extends=collapse_one}

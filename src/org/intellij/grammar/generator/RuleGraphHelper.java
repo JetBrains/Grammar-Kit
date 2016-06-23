@@ -39,6 +39,7 @@ import java.util.*;
 import static org.intellij.grammar.generator.ParserGeneratorUtil.*;
 import static org.intellij.grammar.generator.RuleGraphHelper.Cardinality.*;
 import static org.intellij.grammar.psi.impl.GrammarUtil.collectExtraArguments;
+import static org.intellij.grammar.psi.impl.GrammarUtil.isDoubleAngles;
 
 /**
  * @author gregory
@@ -150,7 +151,7 @@ public class RuleGraphHelper {
   public static MultiMap<BnfRule, BnfRule> buildExtendsMap(BnfFile file) {
     MultiMap<BnfRule, BnfRule> ruleExtendsMap = newMultiMap();
     for (BnfRule rule : file.getRules()) {
-      if (Rule.isPrivate(rule) || Rule.isExternal(rule)) continue;
+      if (Rule.isPrivate(rule)) continue;
       BnfRule superRule = file.getRule(getAttribute(rule, KnownAttribute.EXTENDS));
       if (superRule != null) {
         ruleExtendsMap.putValue(superRule, rule);
@@ -298,9 +299,12 @@ public class RuleGraphHelper {
   private Map<PsiElement, Cardinality> collectMembers(@NotNull BnfRule rule, Set<Object> visited) {
     Map<PsiElement, Cardinality> result = myRuleContentsMap.get(rule);
     if (result != null) return result;
-
-    BnfExpression expression = rule.getExpression();
-    result = collectMembers(rule, expression, visited);
+    if (Rule.isExternal(rule)) {
+      result = psiMap(newExternalPsi(rule.getName()), REQUIRED);
+    }
+    else {
+      result = collectMembers(rule, rule.getExpression(), visited);
+    }
     if (visited.size() > 1 && visited.contains(RECURSION_MARKER) && Rule.isPrivate(rule)) {
       return result;
     }
@@ -677,9 +681,20 @@ public class RuleGraphHelper {
   /** @noinspection UnusedParameters*/
   private List<Map<PsiElement, Cardinality>> compactInheritors(@Nullable BnfRule forRule, @NotNull List<Map<PsiElement, Cardinality>> mapList) {
     Map<BnfRule, BnfRule> rulesAndAlts = ContainerUtil.newLinkedHashMap();
+    Map<PsiElement, BnfRule> externalMap = ContainerUtil.newLinkedHashMap();
     for (Map<PsiElement, Cardinality> map : mapList) {
-      for (BnfRule rule : ContainerUtil.findAll(map.keySet(), BnfRule.class)) {
-        rulesAndAlts.put(rule, rule);
+      for (PsiElement element : map.keySet()) {
+        BnfRule r = null;
+        if (element instanceof BnfRule) r = (BnfRule)element;
+        else if (isExternalPsi(element) && !element.getText().startsWith("#") && !isDoubleAngles(element.getText())) {
+          String text = element.getText();
+          BnfRule rule = myFile.getRule(text);
+          if (Rule.isExternal(rule)) {
+            r = myFile.getRule(getAttribute(rule, KnownAttribute.EXTENDS));
+            if (r != null) externalMap.put(element, r);
+          }
+        }
+        if (r != null) rulesAndAlts.put(r, r);
       }
     }
     //if (forRule != null && "".equals(forRule.getName())) {
@@ -688,7 +703,7 @@ public class RuleGraphHelper {
 
     boolean hasSynonyms = collectSynonymsAndCollapseAlternatives(rulesAndAlts);
     if (rulesAndAlts.size() < 2) {
-      return !hasSynonyms ? mapList : replaceRulesInMaps(mapList, rulesAndAlts);
+      return !hasSynonyms ? mapList : replaceRulesInMaps(mapList, rulesAndAlts, externalMap);
     }
     Set<BnfRule> allRules = ContainerUtil.newLinkedHashSet(ContainerUtil.concat(rulesAndAlts.keySet(), rulesAndAlts.values()));
 
@@ -703,12 +718,12 @@ public class RuleGraphHelper {
       }
     }
     if (applicableSupers.isEmpty()) {
-      return !hasSynonyms ? mapList : replaceRulesInMaps(mapList, rulesAndAlts);
+      return !hasSynonyms ? mapList : replaceRulesInMaps(mapList, rulesAndAlts, externalMap);
     }
 
     findTheBestReplacement(rulesAndAlts, applicableSupers);
 
-    return replaceRulesInMaps(mapList, rulesAndAlts);
+    return replaceRulesInMaps(mapList, rulesAndAlts, externalMap);
   }
 
   private boolean collectSynonymsAndCollapseAlternatives(Map<BnfRule, BnfRule> rulesAndAlts) {
@@ -810,11 +825,19 @@ public class RuleGraphHelper {
   }
 
   private static List<Map<PsiElement, Cardinality>> replaceRulesInMaps(List<Map<PsiElement, Cardinality>> mapList,
-                                                                       Map<BnfRule, BnfRule> replacementMap) {
+                                                                       Map<BnfRule, BnfRule> replacementMap,
+                                                                       Map<PsiElement, BnfRule> externalMap) {
     List<Map<PsiElement, Cardinality>> result = ContainerUtil.newArrayListWithCapacity(mapList.size());
     for (Map<PsiElement, Cardinality> map : mapList) {
       Map<PsiElement, Cardinality> copy = psiMap(map);
       result.add(copy);
+      for (PsiElement element : map.keySet()) {
+        BnfRule rule = isExternalPsi(element) ? externalMap.get(element) : null;
+        BnfRule replacement = rule != null ? replacementMap.get(rule) : null;
+        if (replacement != null) {
+          copy.put(rule, copy.remove(element));
+        }
+      }
       for (Map.Entry<BnfRule, BnfRule> e : replacementMap.entrySet()) {
         Cardinality card = copy.remove(e.getKey());
         if (card == null) continue;
@@ -848,8 +871,7 @@ public class RuleGraphHelper {
     if (grammarRoot == rule) return false;
     if (Rule.isPrivate(rule) || Rule.isExternal(rule)) return false;
     String attr = getAttribute(rule, KnownAttribute.ELEMENT_TYPE);
-    if ("".equals(attr)) return false;
-    if (!psiClasses) return attr == null;
+    if (!psiClasses) return !"".equals(attr);
     BnfRule thatRule = containingFile.getRule(attr);
     return thatRule == null || thatRule == grammarRoot || Rule.isPrivate(thatRule) || Rule.isExternal(thatRule);
   }

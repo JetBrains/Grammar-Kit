@@ -56,7 +56,7 @@ public class PsiGen implements PsiParser, LightPsiParser {
   }
 
   public static final TokenSet[] EXTENDS_SETS_ = new TokenSet[] {
-    create_token_set_(ROOT, ROOT_B, ROOT_C, ROOT_D),
+    create_token_set_(ROOT_B, ROOT_C, ROOT_D),
     create_token_set_(A_STATEMENT, B_STATEMENT, C_STATEMENT, STATEMENT),
     create_token_set_(CAST_EXPR, CHOICE_JOINED, EXPR, ID_EXPR,
       ITEM_EXPR, LITERAL, MISSING_EXTERNAL_TYPE, MUL_EXPR,

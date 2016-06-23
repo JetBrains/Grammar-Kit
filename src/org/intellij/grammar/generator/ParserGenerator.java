@@ -444,8 +444,9 @@ public class ParserGenerator {
     boolean first = true;
     for (String ruleName : ownRuleNames) {
       BnfRule rule = ObjectUtils.assertNotNull(myFile.getRule(ruleName));
-      if (!RuleGraphHelper.hasElementType(rule) || Rule.isMeta(rule)) continue;
-      if (Rule.isFake(rule)) continue;
+      if (getAttribute(rule, KnownAttribute.ELEMENT_TYPE) != null) continue;
+      if (!RuleGraphHelper.hasElementType(rule)) continue;
+      if (Rule.isFake(rule) || Rule.isMeta(rule)) continue;
       if (G.generateRootRules != null && !G.generateRootRules.matcher(ruleName).matches()) continue;
       ExpressionHelper.ExpressionInfo info = myExpressionHelper.getExpressionInfo(rule);
       if (info != null && info.rootRule != rule) continue;
@@ -497,6 +498,7 @@ public class ParserGenerator {
     for (Map.Entry<BnfRule, Collection<BnfRule>> entry : map.entrySet()) {
       Set<String> set = null;
       for (BnfRule rule : entry.getValue()) {
+        if (!RuleGraphHelper.hasElementType(rule)) continue;
         String elementType = Rule.isFake(rule) && !myFakeRulesWithType.contains(rule.getName())
                              || getSynonymTargetOrSelf(rule) != rule ? null : getElementType(rule);
         if (StringUtil.isEmpty(elementType)) continue;

@@ -70,4 +70,5 @@ between_expr ::= expr BETWEEN add_group AND add_group {
 }
 
 // test specific expressions
-special_expr ::= 'multiply' '(' simple_ref_expr ',' mul_expr ')' {pin=2}
+external special_expr ::= meta_special_expr
+meta_special_expr ::= 'multiply' '(' simple_ref_expr ',' mul_expr ')' {elementType="special_expr" pin=2}

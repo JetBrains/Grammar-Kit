@@ -179,6 +179,23 @@ public class ExpressionParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
+  // 'multiply' '(' simple_ref_expr ',' mul_expr ')'
+  public static boolean meta_special_expr(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "meta_special_expr")) return false;
+    boolean result_, pinned_;
+    Marker marker_ = enter_section_(builder_, level_, _NONE_, SPECIAL_EXPR, "<meta special expr>");
+    result_ = consumeToken(builder_, "multiply");
+    result_ = result_ && consumeToken(builder_, "(");
+    pinned_ = result_; // pin = 2
+    result_ = result_ && report_error_(builder_, simple_ref_expr(builder_, level_ + 1));
+    result_ = pinned_ && report_error_(builder_, consumeToken(builder_, ",")) && result_;
+    result_ = pinned_ && report_error_(builder_, expr(builder_, level_ + 1, 3)) && result_;
+    result_ = pinned_ && consumeToken(builder_, ")") && result_;
+    exit_section_(builder_, level_, marker_, result_, pinned_, null);
+    return result_ || pinned_;
+  }
+
+  /* ********************************************************** */
   // element *
   static boolean root(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "root")) return false;
@@ -213,7 +230,7 @@ public class ExpressionParser implements PsiParser, LightPsiParser {
     result_ = unary_plus_expr(builder_, level_ + 1);
     if (!result_) result_ = unary_min_expr(builder_, level_ + 1);
     if (!result_) result_ = unary_not_expr(builder_, level_ + 1);
-    if (!result_) result_ = special_expr(builder_, level_ + 1);
+    if (!result_) result_ = meta_special_expr(builder_, level_ + 1);
     if (!result_) result_ = simple_ref_expr(builder_, level_ + 1);
     if (!result_) result_ = literal_expr(builder_, level_ + 1);
     if (!result_) result_ = paren_expr(builder_, level_ + 1);
@@ -376,22 +393,6 @@ public class ExpressionParser implements PsiParser, LightPsiParser {
     result_ = result_ && identifier(builder_, level_ + 1);
     exit_section_(builder_, marker_, null, result_);
     return result_;
-  }
-
-  // 'multiply' '(' simple_ref_expr ',' mul_expr ')'
-  public static boolean special_expr(PsiBuilder builder_, int level_) {
-    if (!recursion_guard_(builder_, level_, "special_expr")) return false;
-    boolean result_, pinned_;
-    Marker marker_ = enter_section_(builder_, level_, _NONE_, SPECIAL_EXPR, "<special expr>");
-    result_ = consumeTokenSmart(builder_, "multiply");
-    result_ = result_ && consumeToken(builder_, "(");
-    pinned_ = result_; // pin = 2
-    result_ = result_ && report_error_(builder_, simple_ref_expr(builder_, level_ + 1));
-    result_ = pinned_ && report_error_(builder_, consumeToken(builder_, ",")) && result_;
-    result_ = pinned_ && report_error_(builder_, expr(builder_, level_ + 1, 3)) && result_;
-    result_ = pinned_ && consumeToken(builder_, ")") && result_;
-    exit_section_(builder_, level_, marker_, result_, pinned_, null);
-    return result_ || pinned_;
   }
 
   // identifier

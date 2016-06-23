@@ -155,6 +155,7 @@ public class ExpressionGeneratorHelper {
     for (String opCall : sortedOpCalls) {
       for (OperatorInfo operator : opCalls.get(opCall)) {
         if (operator.type == OperatorType.ATOM) {
+          if (Rule.isExternal(operator.rule)) continue;
           g.newLine();
           g.generateNode(operator.rule, operator.rule.getExpression(), getFuncName(operator.rule), visited);
           continue;

@@ -280,7 +280,7 @@ public class BnfDiagramProvider extends DiagramProvider<PsiNamedElement> {
       List<BnfRule> rules = myFile.getRules();
       BnfRule root = ContainerUtil.getFirstItem(rules);
       for (BnfRule rule : rules) {
-        if (rule != root && !RuleGraphHelper.shouldGeneratePsi(rule, true)) continue;
+        if (rule != root && !RuleGraphHelper.hasPsiClass(rule)) continue;
         DiagramNode<PsiNamedElement> diagramNode = new PsiDiagramNode<PsiNamedElement>(rule, getProvider()) {
           @Override
           public String getTooltip() {
@@ -291,7 +291,7 @@ public class BnfDiagramProvider extends DiagramProvider<PsiNamedElement> {
         myNodes.add(diagramNode);
       }
       for (BnfRule rule : rules) {
-        if (rule != root && !RuleGraphHelper.shouldGeneratePsi(rule, true)) continue;
+        if (rule != root && !RuleGraphHelper.hasPsiClass(rule)) continue;
         Map<PsiElement, RuleGraphHelper.Cardinality> map = ruleGraphHelper.getFor(rule);
 
         BnfRule superRule = myFile.getRule(getAttribute(rule, KnownAttribute.EXTENDS));

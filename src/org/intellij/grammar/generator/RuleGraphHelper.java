@@ -842,7 +842,7 @@ public class RuleGraphHelper {
     return shouldGeneratePsi(rule, false);
   }
 
-  public static boolean shouldGeneratePsi(BnfRule rule, boolean psiClasses) {
+  private static boolean shouldGeneratePsi(BnfRule rule, boolean psiClasses) {
     BnfFile containingFile = (BnfFile)rule.getContainingFile();
     BnfRule grammarRoot = containingFile.getRules().get(0);
     if (grammarRoot == rule) return false;

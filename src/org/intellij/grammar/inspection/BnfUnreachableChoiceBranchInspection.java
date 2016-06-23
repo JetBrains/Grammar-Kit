@@ -89,11 +89,11 @@ public class BnfUnreachableChoiceBranchInspection extends LocalInspectionTool {
     List<BnfExpression> list = choice.getExpressionList();
     for (int i = 0, listSize = list.size() - 1; i < listSize; i++) {
       BnfExpression child = list.get(i);
-      Set<String> firstSet = analyzer.asStrings(analyzer.calcFirstInner(child, first, visited));
-      if (firstSet.contains(BnfFirstNextAnalyzer.MATCHES_NOTHING)) {
+      Set<BnfExpression> firstSet = analyzer.calcFirstInner(child, first, visited);
+      if (firstSet.contains(BnfFirstNextAnalyzer.BNF_MATCHES_NOTHING)) {
         registerProblem(choice, child, "Branch is unable to match anything due to & or ! conditions", problemsHolder);
       }
-      else if (firstSet.contains(BnfFirstNextAnalyzer.MATCHES_EOF)) {
+      else if (firstSet.contains(BnfFirstNextAnalyzer.BNF_MATCHES_EOF)) {
         registerProblem(choice, child, "Branch matches empty input making the rest branches unreachable", problemsHolder);
         break;
       }

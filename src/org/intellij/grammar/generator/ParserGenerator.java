@@ -218,7 +218,7 @@ public class ParserGenerator {
     Map<String, BnfRule> sortedPsiRules = ContainerUtil.newTreeMap();
 
     for (BnfRule rule : myFile.getRules()) {
-      if (!RuleGraphHelper.shouldGeneratePsi(rule, true)) continue;
+      if (!RuleGraphHelper.hasPsiClass(rule)) continue;
       String elementType = getElementType(rule);
       if (StringUtil.isEmpty(elementType)) continue;
       if (sortedCompositeTypes.containsKey(elementType)) continue;
@@ -444,7 +444,7 @@ public class ParserGenerator {
     boolean first = true;
     for (String ruleName : ownRuleNames) {
       BnfRule rule = ObjectUtils.assertNotNull(myFile.getRule(ruleName));
-      if (!RuleGraphHelper.shouldGeneratePsi(rule, false) || Rule.isMeta(rule)) continue;
+      if (!RuleGraphHelper.hasElementType(rule) || Rule.isMeta(rule)) continue;
       if (Rule.isFake(rule)) continue;
       if (G.generateRootRules != null && !G.generateRootRules.matcher(ruleName).matches()) continue;
       ExpressionHelper.ExpressionInfo info = myExpressionHelper.getExpressionInfo(rule);

@@ -65,7 +65,7 @@ public class BnfRuleLineMarkerProvider extends RelatedItemLineMarkerProvider {
       boolean hasPSI = false;
       if (isRuleId) {
         BnfRule rule = RuleGraphHelper.getSynonymTargetOrSelf((BnfRule)parent);
-        if (RuleGraphHelper.shouldGeneratePsi(rule, true)) {
+        if (RuleGraphHelper.hasPsiClass(rule)) {
           hasPSI = true;
           JavaHelper javaHelper = JavaHelper.getJavaHelper(rule);
           for (String className : new String[]{ParserGeneratorUtil.getQualifiedRuleClassName(rule, false),

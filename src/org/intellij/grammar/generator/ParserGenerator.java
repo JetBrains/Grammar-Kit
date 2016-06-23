@@ -1377,19 +1377,12 @@ public class ParserGenerator {
     String implSuperRaw = implSuper.indexOf("<") < implSuper.indexOf(">") ? implSuper.substring(0, implSuper.indexOf("<")) : implSuper;
     if (stubName != null) imports.add(ISTUBELEMENTTYPE_CLASS);
 
-    Set<String> visitedConstructors = ContainerUtil.newHashSet(AST_NODE_CLASS);
-    if (stubName != null) {
-      visitedConstructors.add(stubName + ", " + ISTUBELEMENTTYPE_CLASS);
-      visitedConstructors.add("T" + ", " + ISTUBELEMENTTYPE_CLASS);
-    }
     List<NavigatablePsiElement> constructors =
       myJavaHelper.findClassMethods(implSuperRaw, JavaHelper.MethodType.CONSTRUCTOR, "*", -1);
     for (NavigatablePsiElement m : constructors) {
       String declaringClass = myJavaHelper.getDeclaringClass(m);
       if (STUB_BASED_PSI_ELEMENT_BASE.equals(declaringClass)) continue;
       if (AST_WRAPPER_PSI_ELEMENT_CLASS.equals(declaringClass)) continue;
-      List<String> types = myJavaHelper.getMethodTypes(m);
-      if (visitedConstructors.contains(getParametersString(types, 1, 1, Function.ID))) continue;
       collectMethodTypesToImport(Collections.singletonList(m), false, imports);
     }
     if (!G.generateTokenTypes) {
@@ -1406,28 +1399,26 @@ public class ParserGenerator {
 
     generateClassHeader(psiClass, imports, "", false, implSuper, superInterface);
     String shortName = StringUtil.getShortName(psiClass);
-    out("public " + shortName + "(" + myShortener.fun(AST_NODE_CLASS) + " node) {");
-    out("super(node);");
-    out("}");
-    newLine();
-    if (stubName != null) {
-      out("public " + shortName + "(" + myShortener.fun(stubName) + " stub, " + myShortener.fun(ISTUBELEMENTTYPE_CLASS) + " nodeType) {");
-      out("super(stub, nodeType);");
+    if (constructors.isEmpty()) {
+      out("public " + shortName + "(" + myShortener.fun(AST_NODE_CLASS) + " node) {");
+      out("super(node);");
       out("}");
       newLine();
+      if (stubName != null) {
+        out("public " + shortName + "(" + myShortener.fun(stubName) + " stub, " + myShortener.fun(ISTUBELEMENTTYPE_CLASS) + " nodeType) {");
+        out("super(stub, nodeType);");
+        out("}");
+        newLine();
+      }
     }
-    // additional constructors from super
-    for (NavigatablePsiElement m : constructors) {
-      String declaringClass = myJavaHelper.getDeclaringClass(m);
-      if (STUB_BASED_PSI_ELEMENT_BASE.equals(declaringClass)) continue;
-      if (AST_WRAPPER_PSI_ELEMENT_CLASS.equals(declaringClass)) continue;
-      List<String> types = myJavaHelper.getMethodTypes(m);
-      if (!visitedConstructors.add(getParametersString(types, 1, 1, Function.ID))) continue;
-
-      out("public " + shortName + "(" + getParametersString(types, 1, 3, myShortener) + ") {");
-      out("super(" + getParametersString(types, 1, 2, myShortener) + ");");
-      out("}");
-      newLine();
+    else {
+      for (NavigatablePsiElement m : constructors) {
+        List<String> types = myJavaHelper.getMethodTypes(m);
+        out("public " + shortName + "(" + getParametersString(types, 1, 3, myShortener) + ") {");
+        out("super(" + getParametersString(types, 1, 2, myShortener) + ");");
+        out("}");
+        newLine();
+      }
     }
     if (visitorClassName != null) {
       String r = G.visitorValue != null ? "<" + G.visitorValue + ">" : "";

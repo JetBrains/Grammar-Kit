@@ -787,9 +787,12 @@ public class ParserGeneratorUtil {
     StringBuilder sb = new StringBuilder();
     for (int i = offset; i < paramsTypes.size(); i += 2) {
       if (i > offset) sb.append(", ");
-      if ((mask & 1) == 1) sb.append(shortener.fun(paramsTypes.get(i)));
+      String type = paramsTypes.get(i);
+      String name = paramsTypes.get(i + 1);
+      if (BnfConstants.AST_NODE_CLASS.equals(type)) name = "node";
+      if ((mask & 1) == 1) sb.append(shortener.fun(type));
       if ((mask & 3) == 3) sb.append(" ");
-      if ((mask & 2) == 2) sb.append(paramsTypes.get(i + 1));
+      if ((mask & 2) == 2) sb.append(name);
     }
     return sb.toString();
   }

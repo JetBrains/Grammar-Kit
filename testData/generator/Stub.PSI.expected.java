@@ -301,12 +301,16 @@ import com.intellij.psi.stubs.IStubElementType;
 
 public class Element4Impl extends StubBasedPsiElementBase<Element4Stub> implements Element4 {
 
+  public Element4Impl(IStubElementType p0) {
+    super(p0);
+  }
+
   public Element4Impl(ASTNode node) {
     super(node);
   }
 
-  public Element4Impl(Element4Stub stub, IStubElementType nodeType) {
-    super(stub, nodeType);
+  public Element4Impl(com.intellij.psi.tree.IElementType p0, ASTNode node) {
+    super(p0, node);
   }
 
   public void accept(@NotNull Visitor visitor) {

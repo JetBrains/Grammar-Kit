@@ -151,7 +151,7 @@ public class RuleGraphHelper {
   public static MultiMap<BnfRule, BnfRule> buildExtendsMap(BnfFile file) {
     MultiMap<BnfRule, BnfRule> ruleExtendsMap = newMultiMap();
     for (BnfRule rule : file.getRules()) {
-      if (Rule.isPrivate(rule)) continue;
+      if (isPrivateOrNoType(rule)) continue;
       BnfRule superRule = file.getRule(getAttribute(rule, KnownAttribute.EXTENDS));
       if (superRule != null) {
         ruleExtendsMap.putValue(superRule, rule);
@@ -306,7 +306,7 @@ public class RuleGraphHelper {
     else {
       result = collectMembers(rule, rule.getExpression(), visited);
     }
-    if (visited.size() > 1 && visited.contains(RECURSION_MARKER) && Rule.isPrivate(rule)) {
+    if (visited.size() > 1 && visited.contains(RECURSION_MARKER) && isPrivateOrNoType(rule)) {
       return result;
     }
     result.remove(NOT_EMPTY_MARKER); // todo private rules should retain this
@@ -357,7 +357,7 @@ public class RuleGraphHelper {
       }
     }
     for (BnfRule rule : myFile.getRules()) {
-      if (Rule.isLeft(rule) && !Rule.isPrivate(rule) && !Rule.isInner(rule)) {
+      if (Rule.isLeft(rule) && !isPrivateOrNoType(rule) && !Rule.isInner(rule)) {
         for (BnfRule r : getRulesToTheLeft(rule).keySet()) {
           myRulesGraph.putValue(rule, r);
         }
@@ -402,8 +402,8 @@ public class RuleGraphHelper {
   private Map<PsiElement, Cardinality> collectMembersInner(BnfRule rule, BnfExpression tree, Set<Object> visited) {
     boolean firstNonTrivial = tree == Rule.firstNotTrivial(rule);
     boolean outerLeft = (firstNonTrivial || rule.getExpression() == tree) &&
-                        Rule.isLeft(rule) && !Rule.isPrivate(rule) && !Rule.isInner(rule);
-    boolean tryCollapse = firstNonTrivial && !outerLeft && !Rule.isPrivate(rule) && !Rule.isFake(rule);
+                        Rule.isLeft(rule) && !isPrivateOrNoType(rule) && !Rule.isInner(rule);
+    boolean tryCollapse = firstNonTrivial && !outerLeft && !isPrivateOrNoType(rule) && !Rule.isFake(rule);
 
     Map<PsiElement, Cardinality> result;
     if (tree instanceof BnfReferenceOrToken) {
@@ -413,7 +413,7 @@ public class RuleGraphHelper {
           result = psiMap(newExternalPsi(targetRule.getName()), REQUIRED);
         }
         else if (Rule.isLeft(targetRule)) {
-          if (!Rule.isInner(targetRule) && !Rule.isPrivate(targetRule)) {
+          if (!Rule.isInner(targetRule) && !isPrivateOrNoType(targetRule)) {
             result = psiMap();
             result.put(getSynonymTargetOrSelf(targetRule), REQUIRED);
             result.put(LEFT_MARKER, REQUIRED);
@@ -422,7 +422,7 @@ public class RuleGraphHelper {
             result = Collections.emptyMap();
           }
         }
-        else if (Rule.isPrivate(targetRule)) {
+        else if (isPrivateOrNoType(targetRule)) {
           result = collectMembers(targetRule, visited);
         }
         else {
@@ -447,7 +447,7 @@ public class RuleGraphHelper {
         if (metaRule == null) {
           result = psiMap(newExternalPsi("#" + ruleRef.getText()), REQUIRED);
         }
-        else if (Rule.isPrivate(metaRule)) {
+        else if (isPrivateOrNoType(metaRule)) {
           result = psiMap();
           Map<PsiElement, Cardinality> metaResults = collectMembers(metaRule, visited);
           List<String> params = null;
@@ -526,7 +526,7 @@ public class RuleGraphHelper {
     for (BnfExpression e : nextMap.keySet()) {
       if (!(e instanceof BnfReferenceOrToken)) continue;
       BnfRule r = ((BnfReferenceOrToken)e).resolveRule();
-      if (r == null || Rule.isPrivate(r)) continue;
+      if (r == null || isPrivateOrNoType(r)) continue;
       BnfExpression context = nextMap.get(e);
       Cardinality cardinality = REQUIRED;
       for (PsiElement cur = context; !(cur instanceof BnfRule); cur = cur.getParent()) {
@@ -864,6 +864,10 @@ public class RuleGraphHelper {
 
   public static boolean hasElementType(BnfRule rule) {
     return shouldGeneratePsi(rule, false);
+  }
+
+  public static boolean isPrivateOrNoType(BnfRule rule) {
+    return Rule.isPrivate(rule) || "".equals(getAttribute(rule, KnownAttribute.ELEMENT_TYPE));
   }
 
   private static boolean shouldGeneratePsi(BnfRule rule, boolean psiClasses) {

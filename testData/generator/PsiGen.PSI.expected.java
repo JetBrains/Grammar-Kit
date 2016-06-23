@@ -380,7 +380,7 @@ import com.intellij.psi.PsiNameIdentifierOwner;
 public interface XNamedElement extends PsiNameIdentifierOwner {
 
   @NotNull
-  XIdentifier getIdentifier();
+  List<XIdentifier> getIdentifierList();
 
 }
 // ---- XPlusExpr.java -----------------
@@ -1142,8 +1142,8 @@ public class XNamedElementImpl extends ASTWrapperPsiElement implements XNamedEle
 
   @Override
   @NotNull
-  public XIdentifier getIdentifier() {
-    return findNotNullChildByClass(XIdentifier.class);
+  public List<XIdentifier> getIdentifierList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, XIdentifier.class);
   }
 
 }

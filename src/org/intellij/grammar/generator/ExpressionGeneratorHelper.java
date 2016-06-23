@@ -116,11 +116,18 @@ public class ExpressionGeneratorHelper {
         if (tailCall != null) g.out("%s = %s && %s;", g.N.result, tailCall, g.N.result);
       }
       else if (operator.type == OperatorType.N_ARY) {
+        boolean checkEmpty = info.checkEmpty.contains(operator);
+        if (checkEmpty) {
+          g.out("int %s = current_position_(%s);", g.N.pos, g.N.builder);
+        }
         g.out("while (true) {");
-        g.out("%s = report_error_(%s, %s(%s, %s, %d));", g.N.result, g.N.builder, methodName, g.N.builder, g.N.level,
-              argPriority);
+        g.out("%s = report_error_(%s, %s(%s, %s, %d));", g.N.result, g.N.builder, methodName, g.N.builder, g.N.level, argPriority);
         if (tailCall != null) g.out("%s = %s && %s;", g.N.result, tailCall, g.N.result);
         g.out("if (!%s) break;", opCall);
+        if (checkEmpty) {
+          g.out("if (!empty_element_parsed_guard_(%s, \"%s\", %s)) break;", g.N.builder, operator.rule.getName(), g.N.pos);
+          g.out("pos = current_position_(builder);", g.N.pos, g.N.builder);
+        }
         g.out("}");
       }
       else if (operator.type == OperatorType.POSTFIX) {

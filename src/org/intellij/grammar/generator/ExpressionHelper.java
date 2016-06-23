@@ -116,6 +116,13 @@ public class ExpressionHelper {
         myRootRulesMap.put(rule, rule);
         myExpressionMap.put(rule, expressionInfo);
       }
+      ops: for (OperatorInfo info : expressionInfo.operatorMap.values()) {
+        Map<PsiElement, RuleGraphHelper.Cardinality> map = myRuleGraph.collectMembers(info.rule, info.operator, ContainerUtil.newHashSet());
+        for (RuleGraphHelper.Cardinality c : map.values()) {
+          if (!c.optional()) continue ops;
+        }
+        expressionInfo.checkEmpty.add(info);
+      }
     }
   }
 
@@ -312,10 +319,11 @@ public class ExpressionHelper {
 
   public static class ExpressionInfo {
     public final BnfRule rootRule;
-    public final Map<BnfRule, Integer> priorityMap = new LinkedHashMap<BnfRule, Integer>();
-    public final Map<BnfRule, OperatorInfo> operatorMap = new LinkedHashMap<BnfRule, OperatorInfo>();
+    public final Map<BnfRule, Integer> priorityMap = ContainerUtil.newLinkedHashMap();
+    public final Map<BnfRule, OperatorInfo> operatorMap = ContainerUtil.newLinkedHashMap();
     public final Set<BnfRule> privateGroups = ContainerUtil.newHashSet();
     public int nextPriority;
+    public final Set<OperatorInfo> checkEmpty = ContainerUtil.newHashSet();
 
     public ExpressionInfo(BnfRule rootRule) {
       this.rootRule = rootRule;
@@ -361,7 +369,7 @@ public class ExpressionHelper {
     }
   }
 
-  public static enum OperatorType {ATOM, PREFIX, POSTFIX, BINARY, N_ARY}
+  public enum OperatorType {ATOM, PREFIX, POSTFIX, BINARY, N_ARY}
 
   public static class OperatorInfo {
     public final BnfRule rule;

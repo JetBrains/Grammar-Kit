@@ -310,9 +310,9 @@ macro_ref_expression ::= '{' macro_reference '}'
 macro_reference ::= id { methods=[getReference] }
 literal_expression ::= string | id | char | number { methods=[id=""] }
 
-sequence_op ::= &('!' | '(' | '.' | '[' | '~'
+private sequence_op ::= &('!' | '(' | '.' | '[' | '~'
   | char | char_class | number | string
   | '{' id | !new_line id )
-  {elementType="" name="expression"}
+  {name="expression"}
 
 predefined_class_expression ::= char_class | '.'

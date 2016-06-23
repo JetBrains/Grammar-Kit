@@ -657,10 +657,13 @@ public class LivePreviewParser implements PsiParser {
             if (operator.tail != null) result_ = report_error_(builder, generateNodeCall(builder, level, operator.rule, operator.tail, getNextName(operator.rule.getName(), 1), Collections.<String, Parser>emptyMap())) && result_;
           }
           else if (operator.type == ExpressionHelper.OperatorType.N_ARY) {
+            int nary_pos = current_position_(builder);
             while (true) {
               result_ = report_error_(builder, generateExpressionRoot(builder, level, info, argPriority));
               if (operator.tail != null) result_ = report_error_(builder, generateNodeCall(builder, level, operator.rule, operator.tail, getNextName(operator.rule.getName(), 1), Collections.<String, Parser>emptyMap())) && result_;
               if (!result_ || !generateNodeCall(builder, level, info.rootRule, operator.operator, getNextName(operator.rule.getName(), 0), Collections.<String, Parser>emptyMap())) break;
+              if (!empty_element_parsed_guard_(builder, operator.operator.getText(), nary_pos)) break;
+              nary_pos = current_position_(builder);
             }
           }
           else if (operator.type == ExpressionHelper.OperatorType.POSTFIX) {

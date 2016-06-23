@@ -1480,7 +1480,7 @@ public class JFlexParser implements PsiParser, LightPsiParser {
   // &('!' | '(' | '.' | '[' | '~'
   //   | char | char_class | number | string
   //   | '{' id | !new_line id )
-  public static boolean sequence_op(PsiBuilder builder, int level) {
+  static boolean sequence_op(PsiBuilder builder, int level) {
     if (!recursion_guard_(builder, level, "sequence_op")) return false;
     boolean result;
     Marker marker = enter_section_(builder, level, _AND_, null, "<expression>");
@@ -1781,9 +1781,12 @@ public class JFlexParser implements PsiParser, LightPsiParser {
         exit_section_(builder, level, marker, FLEX_CHOICE_EXPRESSION, result, true, null);
       }
       else if (priority < 1 && sequence_op(builder, level + 1)) {
+        int pos = current_position_(builder);
         while (true) {
           result = report_error_(builder, expression(builder, level, 1));
           if (!sequence_op(builder, level + 1)) break;
+          if (!empty_element_parsed_guard_(builder, "sequence_expression", pos)) break;
+          pos = current_position_(builder);
         }
         exit_section_(builder, level, marker, FLEX_SEQUENCE_EXPRESSION, result, true, null);
       }

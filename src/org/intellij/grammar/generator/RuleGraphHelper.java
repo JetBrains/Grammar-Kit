@@ -521,7 +521,7 @@ public class RuleGraphHelper {
     for (BnfExpression e : nextMap.keySet()) {
       if (!(e instanceof BnfReferenceOrToken)) continue;
       BnfRule r = ((BnfReferenceOrToken)e).resolveRule();
-      if (r == null || ParserGeneratorUtil.Rule.isPrivate(r)) continue;
+      if (r == null || Rule.isPrivate(r)) continue;
       BnfExpression context = nextMap.get(e);
       Cardinality cardinality = REQUIRED;
       for (PsiElement cur = context; !(cur instanceof BnfRule); cur = cur.getParent()) {
@@ -834,14 +834,23 @@ public class RuleGraphHelper {
     return rule;
   }
 
+  public static boolean hasPsiClass(BnfRule rule) {
+    return shouldGeneratePsi(rule, true);
+  }
+
+  public static boolean hasElementType(BnfRule rule) {
+    return shouldGeneratePsi(rule, false);
+  }
+
   public static boolean shouldGeneratePsi(BnfRule rule, boolean psiClasses) {
     BnfFile containingFile = (BnfFile)rule.getContainingFile();
     BnfRule grammarRoot = containingFile.getRules().get(0);
     if (grammarRoot == rule) return false;
     if (Rule.isPrivate(rule) || Rule.isExternal(rule)) return false;
-    String elementType = getAttribute(rule, KnownAttribute.ELEMENT_TYPE);
-    if (!psiClasses) return elementType == null;
-    BnfRule thatRule = containingFile.getRule(elementType);
+    String attr = getAttribute(rule, KnownAttribute.ELEMENT_TYPE);
+    if ("".equals(attr)) return false;
+    if (!psiClasses) return attr == null;
+    BnfRule thatRule = containingFile.getRule(attr);
     return thatRule == null || thatRule == grammarRoot || Rule.isPrivate(thatRule) || Rule.isExternal(thatRule);
   }
 

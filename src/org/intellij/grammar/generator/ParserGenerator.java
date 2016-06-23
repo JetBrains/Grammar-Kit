@@ -638,7 +638,7 @@ public class ParserGenerator {
     boolean isLeft = firstNonTrivial && Rule.isLeft(rule);
     boolean isLeftInner = isLeft && (isPrivate || Rule.isInner(rule));
     boolean isBranch = !isPrivate && Rule.isUpper(rule);
-    String recoverWhile = !firstNonTrivial ? null : ObjectUtils.coalesce(
+    String recoverWhile = !firstNonTrivial ? null : ObjectUtils.chooseNotNull(
       getAttribute(rule, KnownAttribute.RECOVER_WHILE.alias("recoverUntil")),
       getAttribute(rule, KnownAttribute.RECOVER_WHILE));
     Map<String, String> hooks = firstNonTrivial ? getAttribute(rule, KnownAttribute.HOOKS).asMap() : Collections.<String, String>emptyMap();

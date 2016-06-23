@@ -50,7 +50,7 @@ public class BnfFirstNextTest extends LightPlatformCodeInsightFixtureTestCase {
   public void testAndEmptySeq1() { doFirstTest("r ::= &() X", "X"); }
   public void testAndEmptySeq2() { doFirstTest("r ::= &()", MATCHES_EOF); }
   public void testNotEmptySeq() { doFirstTest("r ::= !() X", MATCHES_NOTHING); }
-  public void testRepeatingPredicate1() { doFirstTest("r ::= (!A) *", MATCHES_EOF, MATCHES_NOTHING); }
+  public void testRepeatingPredicate1() { doFirstTest("r ::= (!A) *", MATCHES_EOF); }
   public void testRepeatingPredicate2() { doFirstTest("r ::= (!A) * A", MATCHES_NOTHING, "A"); }
   public void testRepeatingPredicate3() { doFirstTest("r ::= (&A) + A", "A"); }
 
@@ -77,7 +77,7 @@ public class BnfFirstNextTest extends LightPlatformCodeInsightFixtureTestCase {
     BnfFile f = (BnfFile)myFixture.configureByText("a.bnf", text);
     List<BnfRule> rules = f.getRules();
     assertFalse(rules.isEmpty());
-    BnfFirstNextAnalyzer analyzer = new BnfFirstNextAnalyzer();
+    BnfFirstNextAnalyzer analyzer = new BnfFirstNextAnalyzer().setPredicateLookAhead(true);
     Set<String> strings = analyzer.asStrings(first? analyzer.calcFirst(rules.get(0)) : analyzer.calcNext(rules.get(0)).keySet());
     String[] result = ArrayUtil.toStringArray(strings);
     Arrays.sort(result);

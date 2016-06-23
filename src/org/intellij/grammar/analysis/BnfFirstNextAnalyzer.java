@@ -31,6 +31,7 @@ import gnu.trove.THashSet;
 import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.generator.FakeBnfExpression;
 import org.intellij.grammar.generator.ParserGeneratorUtil;
+import org.intellij.grammar.generator.RuleGraphHelper;
 import org.intellij.grammar.psi.*;
 import org.intellij.grammar.psi.impl.GrammarUtil;
 import org.jetbrains.annotations.NotNull;
@@ -56,6 +57,7 @@ public class BnfFirstNextAnalyzer {
   private boolean myBackward;
   private boolean myPublicRuleOpaque;
   private boolean myNoParent;
+  private boolean myPredicateLookAhead;
 
   public BnfFirstNextAnalyzer setBackward(boolean backward) {
     myBackward = backward;
@@ -69,6 +71,11 @@ public class BnfFirstNextAnalyzer {
 
   public BnfFirstNextAnalyzer setNoParent(boolean noParent) {
     myNoParent = noParent;
+    return this;
+  }
+
+  public BnfFirstNextAnalyzer setPredicateLookAhead(boolean predicateLookAhead) {
+    myPredicateLookAhead = predicateLookAhead;
     return this;
   }
 
@@ -274,7 +281,7 @@ public class BnfFirstNextAnalyzer {
         }
       }
     }
-    else if (myBackward && expression instanceof BnfPredicate) {
+    else if ((myBackward || !myPredicateLookAhead) && expression instanceof BnfPredicate) {
       result.add(BNF_MATCHES_EOF);
     }
     else if (expression instanceof BnfPredicate) {
@@ -288,7 +295,7 @@ public class BnfFirstNextAnalyzer {
       if (!visited.add(predicateExpression)) {
         skip = true;
         next = Collections.emptySet();
-        result.add(BNF_MATCHES_NOTHING);
+        //result.add(BNF_MATCHES_NOTHING);
       }
       else {
         if (forcedNext == null) {
@@ -318,7 +325,7 @@ public class BnfFirstNextAnalyzer {
           else {
             mixed.addAll(next);
             mixed.retainAll(conditions);
-            if (mixed.isEmpty()) {
+            if (mixed.isEmpty() && !involvesTextMatching(conditions)) {
               mixed.add(BNF_MATCHES_NOTHING);
             }
           }
@@ -335,7 +342,7 @@ public class BnfFirstNextAnalyzer {
         else if (!conditions.contains(BNF_MATCHES_EOF)) {
           mixed.addAll(next);
           mixed.removeAll(conditions);
-          if (mixed.isEmpty()) {
+          if (mixed.isEmpty() && !involvesTextMatching(conditions)) {
             mixed.add(BNF_MATCHES_NOTHING);
           }
         }
@@ -365,6 +372,17 @@ public class BnfFirstNextAnalyzer {
     }
     if (addEof) set.add(BNF_MATCHES_EOF);
     return skip;
+  }
+
+  private static boolean involvesTextMatching(Set<BnfExpression> set) {
+    for (BnfExpression o : set) {
+      if (o instanceof BnfStringLiteralExpression &&
+          !RuleGraphHelper.getTokenTextToNameMap((BnfFile)o.getContainingFile())
+            .containsKey(ParserGeneratorUtil.getLiteralValue((BnfStringLiteralExpression)o))) {
+        return true;
+      }
+    }
+    return false;
   }
 
   public Set<String> asStrings(Set<BnfExpression> expressions) {

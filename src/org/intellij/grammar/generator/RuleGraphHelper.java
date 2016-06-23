@@ -264,7 +264,8 @@ public class RuleGraphHelper {
   }
 
   private void buildCollapseMap() {
-    BnfFirstNextAnalyzer analyzer = new BnfFirstNextAnalyzer().setPublicRuleOpaque(true).setNoParent(true);
+    BnfFirstNextAnalyzer analyzer = new BnfFirstNextAnalyzer()
+      .setPublicRuleOpaque(true).setNoParent(true).setPredicateLookAhead(true);
 
     for (BnfRule rule : myFile.getRules()) {
       if (!myRuleExtendsMap.containsScalarValue(rule)) continue;

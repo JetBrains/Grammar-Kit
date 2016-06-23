@@ -843,7 +843,7 @@ public class ParserGenerator {
 
   /** @noinspection StringEquality*/
   private String generateAutoRecoverCall(BnfRule rule) {
-    BnfFirstNextAnalyzer analyzer = new BnfFirstNextAnalyzer();
+    BnfFirstNextAnalyzer analyzer = new BnfFirstNextAnalyzer().setPredicateLookAhead(true);
     Set<BnfExpression> nextExprSet = analyzer.calcNext(rule).keySet();
     Set<String> nextSet = analyzer.asStrings(nextExprSet);
     List<String> tokenTypes = new ArrayList<String>(nextSet.size());
@@ -875,7 +875,7 @@ public class ParserGenerator {
 
   public String generateFirstCheck(BnfRule rule, String frameName, boolean skipIfOne) {
     if (G.generateFirstCheck <= 0) return frameName;
-    BnfFirstNextAnalyzer analyzer = new BnfFirstNextAnalyzer();
+    BnfFirstNextAnalyzer analyzer = new BnfFirstNextAnalyzer().setPredicateLookAhead(true);
     Set<String> firstSet = analyzer.asStrings(analyzer.calcFirst(rule));
     List<String> firstElementTypes = new ArrayList<String>(firstSet.size());
     for (String s : firstSet) {

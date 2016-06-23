@@ -139,13 +139,19 @@ public class ParserGeneratorUtil {
       KnownAttribute.ListValue pairs = new KnownAttribute.ListValue();
       for (BnfListEntry o : ((BnfValueList)value).getListEntryList()) {
         PsiElement id = o.getId();
-        pairs.add(Pair.create(id == null? null : id.getText(), (String)getLiteralValue(o.getLiteralExpression())));
+        pairs.add(Pair.create(id == null? null : id.getText(), getLiteralValue(o.getLiteralExpression())));
       }
       return pairs;
     }
     return null;
   }
 
+  @Nullable
+  public static String getLiteralValue(BnfStringLiteralExpression child) {
+    return getLiteralValue((BnfLiteralExpression)child);
+  }
+
+  @Nullable
   public static <T> T getLiteralValue(BnfLiteralExpression child) {
     if (child == null) return null;
     PsiElement literal = PsiTreeUtil.getDeepestFirst(child);
@@ -593,7 +599,7 @@ public class ParserGeneratorUtil {
       if (KnownAttribute.getAttribute(attr.getName()) != null) continue;
       BnfExpression expression = attr.getExpression();
       if (!(expression instanceof BnfStringLiteralExpression)) continue;
-      result.add(Pair.create(attr.getName(), (String)getLiteralValue((BnfLiteralExpression)expression)));
+      result.add(Pair.create(attr.getName(), getLiteralValue((BnfStringLiteralExpression)expression)));
     }
     return result;
   }

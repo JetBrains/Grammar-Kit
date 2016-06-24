@@ -137,6 +137,32 @@ import com.intellij.psi.PsiElement;
 public interface InterfaceType extends Type {
 
 }
+// ---- Missing.java -----------------
+//header.txt
+package test.psi;
+
+import java.util.List;
+import org.jetbrains.annotations.*;
+import com.intellij.psi.PsiElement;
+import com.intellij.psi.StubBasedPsiElement;
+import test.stub.MissingStub;
+
+public interface Missing extends PsiElement, StubBasedPsiElement<MissingStub> {
+
+}
+// ---- Simple.java -----------------
+//header.txt
+package test.psi;
+
+import java.util.List;
+import org.jetbrains.annotations.*;
+import com.intellij.psi.PsiElement;
+import com.intellij.psi.StubBasedPsiElement;
+import org.intellij.grammar.test.StubTest.SimpleStub;
+
+public interface Simple extends PsiElement, StubBasedPsiElement<SimpleStub> {
+
+}
 // ---- StructType.java -----------------
 //header.txt
 package test.psi;
@@ -172,18 +198,24 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiElementVisitor;
 import test.psi.MyPsiTreeUtil;
 import static test.FooTypes.*;
+import org.intellij.grammar.test.StubTest.GenericBase;
 import test.stub.Element1Stub;
 import test.psi.*;
 import com.intellij.psi.stubs.IStubElementType;
+import com.intellij.psi.tree.IElementType;
 
-public class Element1Impl extends MyStubbedElementBase<Element1Stub> implements Element1 {
+public class Element1Impl extends GenericBase<Element1Stub> implements Element1 {
+
+  public Element1Impl(Element1Stub p0, IStubElementType p1) {
+    super(p0, p1);
+  }
 
   public Element1Impl(ASTNode node) {
     super(node);
   }
 
-  public Element1Impl(Element1Stub stub, IStubElementType nodeType) {
-    super(stub, nodeType);
+  public Element1Impl(Element1Stub p0, IElementType p1, ASTNode node) {
+    super(p0, p1, node);
   }
 
   public void accept(@NotNull Visitor visitor) {
@@ -213,18 +245,22 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiElementVisitor;
 import test.psi.MyPsiTreeUtil;
 import static test.FooTypes.*;
+import com.intellij.extapi.psi.StubBasedPsiElementBase;
 import test.stub.Element2Stub;
 import test.psi.*;
-import com.intellij.psi.stubs.IStubElementType;
 
-public class Element2Impl extends MyStubbedElementBase<Element2Stub> implements Element2 {
+public class Element2Impl extends StubBasedPsiElementBase<Element2Stub> implements Element2 {
+
+  public Element2Impl(Element2Stub p0, com.intellij.psi.stubs.IStubElementType p1) {
+    super(p0, p1);
+  }
 
   public Element2Impl(ASTNode node) {
     super(node);
   }
 
-  public Element2Impl(Element2Stub stub, IStubElementType nodeType) {
-    super(stub, nodeType);
+  public Element2Impl(Element2Stub p0, com.intellij.psi.tree.IElementType p1, ASTNode node) {
+    super(p0, p1, node);
   }
 
   public void accept(@NotNull Visitor visitor) {
@@ -254,17 +290,22 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiElementVisitor;
 import test.psi.MyPsiTreeUtil;
 import static test.FooTypes.*;
+import com.intellij.extapi.psi.StubBasedPsiElementBase;
+import test.stub.Element3Stub;
 import test.psi.*;
-import com.intellij.psi.stubs.IStubElementType;
 
-public class Element3Impl extends MySubstituted implements Element3 {
+public class Element3Impl extends StubBasedPsiElementBase<Element3Stub> implements Element3 {
+
+  public Element3Impl(Element3Stub p0, com.intellij.psi.stubs.IStubElementType p1) {
+    super(p0, p1);
+  }
 
   public Element3Impl(ASTNode node) {
     super(node);
   }
 
-  public Element3Impl(test.stub.Element3Stub stub, IStubElementType nodeType) {
-    super(stub, nodeType);
+  public Element3Impl(Element3Stub p0, com.intellij.psi.tree.IElementType p1, ASTNode node) {
+    super(p0, p1, node);
   }
 
   public void accept(@NotNull Visitor visitor) {
@@ -297,20 +338,19 @@ import static test.FooTypes.*;
 import com.intellij.extapi.psi.StubBasedPsiElementBase;
 import test.stub.Element4Stub;
 import test.psi.*;
-import com.intellij.psi.stubs.IStubElementType;
 
 public class Element4Impl extends StubBasedPsiElementBase<Element4Stub> implements Element4 {
 
-  public Element4Impl(IStubElementType p0) {
-    super(p0);
+  public Element4Impl(Element4Stub p0, com.intellij.psi.stubs.IStubElementType p1) {
+    super(p0, p1);
   }
 
   public Element4Impl(ASTNode node) {
     super(node);
   }
 
-  public Element4Impl(com.intellij.psi.tree.IElementType p0, ASTNode node) {
-    super(p0, node);
+  public Element4Impl(Element4Stub p0, com.intellij.psi.tree.IElementType p1, ASTNode node) {
+    super(p0, p1, node);
   }
 
   public void accept(@NotNull Visitor visitor) {
@@ -379,12 +419,83 @@ public class InterfaceTypeImpl extends TypeImpl implements InterfaceType {
     super(node);
   }
 
-  public InterfaceTypeImpl(test.stub.TypeStub stub, IStubElementType nodeType) {
-    super(stub, nodeType);
+  public InterfaceTypeImpl(test.stub.TypeStub stub, IStubElementType stubType) {
+    super(stub, stubType);
   }
 
   public void accept(@NotNull Visitor visitor) {
     visitor.visitInterfaceType(this);
+  }
+
+  public void accept(@NotNull PsiElementVisitor visitor) {
+    if (visitor instanceof Visitor) accept((Visitor)visitor);
+    else super.accept(visitor);
+  }
+
+}
+// ---- MissingImpl.java -----------------
+//header.txt
+package test.psi.impl;
+
+import java.util.List;
+import org.jetbrains.annotations.*;
+import com.intellij.lang.ASTNode;
+import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiElementVisitor;
+import test.psi.MyPsiTreeUtil;
+import static test.FooTypes.*;
+import test.stub.MissingBase;
+import test.psi.*;
+import com.intellij.psi.stubs.IStubElementType;
+
+public class MissingImpl extends MissingBase implements Missing {
+
+  public MissingImpl(ASTNode node) {
+    super(node);
+  }
+
+  public MissingImpl(test.stub.MissingStub stub, IStubElementType stubType) {
+    super(stub, stubType);
+  }
+
+  public void accept(@NotNull Visitor visitor) {
+    visitor.visitMissing(this);
+  }
+
+  public void accept(@NotNull PsiElementVisitor visitor) {
+    if (visitor instanceof Visitor) accept((Visitor)visitor);
+    else super.accept(visitor);
+  }
+
+}
+// ---- SimpleImpl.java -----------------
+//header.txt
+package test.psi.impl;
+
+import java.util.List;
+import org.jetbrains.annotations.*;
+import com.intellij.lang.ASTNode;
+import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiElementVisitor;
+import test.psi.MyPsiTreeUtil;
+import static test.FooTypes.*;
+import org.intellij.grammar.test.StubTest.SimpleBase;
+import test.psi.*;
+import org.intellij.grammar.test.StubTest.SimpleStub;
+import com.intellij.psi.stubs.IStubElementType;
+
+public class SimpleImpl extends SimpleBase implements Simple {
+
+  public SimpleImpl(SimpleStub p0, IStubElementType p1) {
+    super(p0, p1);
+  }
+
+  public SimpleImpl(ASTNode node) {
+    super(node);
+  }
+
+  public void accept(@NotNull Visitor visitor) {
+    visitor.visitSimple(this);
   }
 
   public void accept(@NotNull PsiElementVisitor visitor) {
@@ -413,8 +524,8 @@ public class StructTypeImpl extends TypeImpl implements StructType {
     super(node);
   }
 
-  public StructTypeImpl(test.stub.TypeStub stub, IStubElementType nodeType) {
-    super(stub, nodeType);
+  public StructTypeImpl(test.stub.TypeStub stub, IStubElementType stubType) {
+    super(stub, stubType);
   }
 
   public void accept(@NotNull Visitor visitor) {
@@ -438,18 +549,24 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiElementVisitor;
 import test.psi.MyPsiTreeUtil;
 import static test.FooTypes.*;
+import org.intellij.grammar.test.StubTest.GenericBase;
 import test.stub.TypeStub;
 import test.psi.*;
 import com.intellij.psi.stubs.IStubElementType;
+import com.intellij.psi.tree.IElementType;
 
-public class TypeImpl extends MyStubbedElementBase<TypeStub> implements Type {
+public class TypeImpl extends GenericBase<TypeStub> implements Type {
+
+  public TypeImpl(TypeStub p0, IStubElementType p1) {
+    super(p0, p1);
+  }
 
   public TypeImpl(ASTNode node) {
     super(node);
   }
 
-  public TypeImpl(TypeStub stub, IStubElementType nodeType) {
-    super(stub, nodeType);
+  public TypeImpl(TypeStub p0, IElementType p1, ASTNode node) {
+    super(p0, p1, node);
   }
 
   public void accept(@NotNull Visitor visitor) {
@@ -494,6 +611,14 @@ public class Visitor extends PsiElementVisitor {
 
   public void visitInterfaceType(@NotNull InterfaceType o) {
     visitType(o);
+  }
+
+  public void visitMissing(@NotNull Missing o) {
+    visitPsiElement(o);
+  }
+
+  public void visitSimple(@NotNull Simple o) {
+    visitPsiElement(o);
   }
 
   public void visitStructType(@NotNull StructType o) {

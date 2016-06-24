@@ -26,6 +26,7 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.tree.IElementType;
 import com.intellij.util.ArrayUtil;
 import com.intellij.util.Function;
+import com.intellij.util.Functions;
 import com.intellij.util.ObjectUtils;
 import com.intellij.util.containers.ContainerUtil;
 import com.intellij.util.containers.JBIterable;
@@ -1375,7 +1376,7 @@ public class ParserGenerator {
     imports.addAll(getRuleMethodTypesToImport(rule));
 
     String implSuperRaw = implSuper.indexOf("<") < implSuper.indexOf(">") ? implSuper.substring(0, implSuper.indexOf("<")) : implSuper;
-    if (stubName != null) imports.add(ISTUBELEMENTTYPE_CLASS);
+    Function<String, String> substitutor = stubName != null ? Functions.constant(stubName) : Function.ID;
 
     List<NavigatablePsiElement> constructors =
       myJavaHelper.findClassMethods(implSuperRaw, JavaHelper.MethodType.CONSTRUCTOR, "*", -1);
@@ -1385,6 +1386,8 @@ public class ParserGenerator {
       if (AST_WRAPPER_PSI_ELEMENT_CLASS.equals(declaringClass)) continue;
       collectMethodTypesToImport(Collections.singletonList(m), false, imports);
     }
+    if (constructors.isEmpty() && stubName != null) imports.add(ISTUBELEMENTTYPE_CLASS);
+
     if (!G.generateTokenTypes) {
       // add parser static imports hoping external token constants are there
       for (RuleMethodsHelper.MethodInfo info : myRulesMethodsHelper.getFor(rule)) {
@@ -1405,8 +1408,8 @@ public class ParserGenerator {
       out("}");
       newLine();
       if (stubName != null) {
-        out("public " + shortName + "(" + myShortener.fun(stubName) + " stub, " + myShortener.fun(ISTUBELEMENTTYPE_CLASS) + " nodeType) {");
-        out("super(stub, nodeType);");
+        out("public " + shortName + "(" + myShortener.fun(stubName) + " stub, " + myShortener.fun(ISTUBELEMENTTYPE_CLASS) + " stubType) {");
+        out("super(stub, stubType);");
         out("}");
         newLine();
       }
@@ -1414,8 +1417,8 @@ public class ParserGenerator {
     else {
       for (NavigatablePsiElement m : constructors) {
         List<String> types = myJavaHelper.getMethodTypes(m);
-        out("public " + shortName + "(" + getParametersString(types, 1, 3, myShortener) + ") {");
-        out("super(" + getParametersString(types, 1, 2, myShortener) + ");");
+        out("public " + shortName + "(" + getParametersString(types, 1, 3, substitutor, myShortener) + ") {");
+        out("super(" + getParametersString(types, 1, 2, substitutor, myShortener) + ");");
         out("}");
         newLine();
       }
@@ -1709,11 +1712,11 @@ public class ParserGenerator {
       out("@" + myShortener.fun(s));
     }
     out("%s%s %s(%s)%s", intf ? "" : "public ", returnType, methodName,
-        getParametersString(methodTypes, offset, 3, myShortener),
+        getParametersString(methodTypes, offset, 3, Function.ID, myShortener),
         intf ? ";" : " {");
     if (!intf) {
       String implUtilRef = myShortener.fun(StringUtil.notNullize(myPsiImplUtilClass, KnownAttribute.PSI_IMPL_UTIL_CLASS.getName()));
-      String string = getParametersString(methodTypes, offset, 2, myShortener);
+      String string = getParametersString(methodTypes, offset, 2, Function.ID, myShortener);
       out("%s%s.%s(this%s);", "void".equals(returnType) ? "" : "return ", implUtilRef, methodName,
           string.isEmpty() ? "" : ", " + string);
       out("}");

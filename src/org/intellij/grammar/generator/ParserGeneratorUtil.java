@@ -783,12 +783,16 @@ public class ParserGeneratorUtil {
   public static String getParametersString(List<String> paramsTypes,
                                            int offset,
                                            int mask,
+                                           Function<String, String> substitutor,
                                            Function<String, String> shortener) {
     StringBuilder sb = new StringBuilder();
     for (int i = offset; i < paramsTypes.size(); i += 2) {
       if (i > offset) sb.append(", ");
       String type = paramsTypes.get(i);
       String name = paramsTypes.get(i + 1);
+      if (type.startsWith("<") && type.endsWith(">")) {
+        type = substitutor.fun(type);
+      }
       if (BnfConstants.AST_NODE_CLASS.equals(type)) name = "node";
       if ((mask & 1) == 1) sb.append(shortener.fun(type));
       if ((mask & 3) == 3) sb.append(" ");

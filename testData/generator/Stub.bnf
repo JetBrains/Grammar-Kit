@@ -11,8 +11,9 @@
   parserUtilClass="org.intellij.grammar.parser.GeneratedParserUtilBase"
   expressionUtilClass="test.FooUtil"
 
-  extends("element1|element2|type")="test.psi.impl.MyStubbedElementBase<?>"
-  extends("element3")="test.psi.impl.MySubstituted"
+  extends("element1|type")="org.intellij.grammar.test.StubTest.GenericBase<?>"
+  extends("simple")="org.intellij.grammar.test.StubTest.SimpleBase"
+  extends("missing")="test.stub.MissingBase"
 
   extends(".*type")=type
 }
@@ -26,3 +27,6 @@ element5 ::= 'cc'
 type ::= interface_type | struct_type {stubClass="test.stub.TypeStub"}
 struct_type ::= 'struct'
 interface_type ::= 'interface'
+
+fake missing ::=  { stubClass="test.stub.MissingStub" }
+fake simple ::=  { stubClass="org.intellij.grammar.test.StubTest.SimpleStub" }

@@ -223,7 +223,9 @@ public abstract class JavaHelper {
       List<String> strings = new ArrayList<String>();
       strings.add(returnType == null ? "" : returnType.getCanonicalText());
       for (PsiParameter parameter : psiMethod.getParameterList().getParameters()) {
-        strings.add(parameter.getType().getCanonicalText());
+        PsiType type = parameter.getType();
+        boolean generic = type instanceof PsiClassType && ((PsiClassType)type).resolve() instanceof PsiTypeParameter;
+        strings.add((generic ? "<" : "") + type.getCanonicalText(false) + (generic ? ">" : ""));
         strings.add(parameter.getName());
       }
       return strings;
@@ -444,16 +446,25 @@ public abstract class JavaHelper {
     private static ClassInfo findClassSafe(String className) {
       if (className == null) return null;
       try {
-        String resourceName = className.replace('.', '/') + ".class";
-        InputStream is = JavaHelper.class.getClassLoader().getResourceAsStream(resourceName);
+        int lastDot = className.length();
+        InputStream is;
+        do {
+          String s = className.substring(0, lastDot).replace('.', '/') +
+                     className.substring(lastDot).replace('.', '$');
+          is = JavaHelper.class.getClassLoader().getResourceAsStream(s + ".class");
+          lastDot = s.lastIndexOf('/');
+        }
+        while(is == null && lastDot > 0);
+
         if (is == null) return null;
         byte[] bytes = FileUtil.loadBytes(is);
         is.close();
         return getClassInfo(className, bytes);
       }
       catch (Exception e) {
-        return null;
+        reportException(e, className, null);
       }
+      return null;
     }
 
     private static ClassInfo getClassInfo(String className, byte[] bytes) {
@@ -474,10 +485,14 @@ public abstract class JavaHelper {
         visitor.finishElement(null);
       }
       catch (Exception e) {
-        System.err.println(
-          e.getClass().getSimpleName() + " in parsing " + className + "." + methodName + "() signature: " + signature);
+        reportException(e, className + "#" + methodName + "()", signature);
       }
       return methodInfo;
+    }
+
+    private static void reportException(Exception e, String target, String signature) {
+      System.err.println(e.getClass().getSimpleName() + " while reading " + target +
+                         (signature == null ? "" : " signature " + signature));
     }
 
     private static class MyClassVisitor extends EmptyVisitor {
@@ -505,6 +520,23 @@ public abstract class JavaHelper {
         myInfo.superClass = fixClassName(superName);
         for (String s : interfaces) {
           myInfo.interfaces.add(fixClassName(s));
+        }
+        if (signature != null) {
+          // quick signature hacking due to ancient asm, cglib..
+          for (int i = 0, ang = 0, off = 0, len = signature.length(); i < len; i++) {
+            char c = signature.charAt(i);
+            if (c == '<' || c == '>') {
+              ang += c == '<' ? 1 : -1;
+              off = i + 1;
+            }
+            else if (c == ';') {
+              off = i + 1;
+            }
+            if (ang >= 2) continue;
+            if (ang == 1 && signature.startsWith("::", i)) {
+              myInfo.typeParameters.add(signature.substring(off, i));
+            }
+          }
         }
       }
 
@@ -574,7 +606,7 @@ public abstract class JavaHelper {
     }
 
     private static String fixClassName(String s) {
-      return s == null ? null : s.replace('/', '.');
+      return s == null ? null : s.replace('/', '.').replace('$', '.');
     }
 
     private static class MySignatureVisitor implements SignatureVisitor {
@@ -591,6 +623,7 @@ public abstract class JavaHelper {
 
       @Override
       public void visitFormalTypeParameter(String s) {
+        // collect them
       }
 
       @Override
@@ -639,6 +672,7 @@ public abstract class JavaHelper {
 
       @Override
       public void visitTypeVariable(String s) {
+        myBuilder.append("<").append(s).append(">");
       }
 
       @Override
@@ -741,11 +775,17 @@ public abstract class JavaHelper {
     public int hashCode() {
       return myDelegate.hashCode();
     }
+
+    @Override
+    public String toString() {
+      return myDelegate.toString();
+    }
   }
 
   private static class ClassInfo {
     String name;
     String superClass;
+    List<String> typeParameters= ContainerUtil.newSmartList();
     List<String> interfaces = ContainerUtil.newSmartList();
     List<String> annotations = ContainerUtil.newSmartList();
     List<MethodInfo> methods = ContainerUtil.newSmartList();
@@ -758,6 +798,14 @@ public abstract class JavaHelper {
     int modifiers;
     List<String> annotations = ContainerUtil.newSmartList();
     List<String> types = ContainerUtil.newSmartList();
+
+    @Override
+    public String toString() {
+      return "MethodInfo" +
+             "{" + name + types +
+             ", @" + annotations +
+             '}';
+    }
   }
 
 }

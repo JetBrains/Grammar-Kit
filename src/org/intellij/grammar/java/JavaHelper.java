@@ -33,20 +33,15 @@ import com.intellij.util.containers.ContainerUtil;
 import com.intellij.util.containers.ContainerUtilRt;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.objectweb.asm.AnnotationVisitor;
-import org.objectweb.asm.ClassReader;
-import org.objectweb.asm.MethodVisitor;
-import org.objectweb.asm.commons.EmptyVisitor;
-import org.objectweb.asm.signature.SignatureReader;
-import org.objectweb.asm.signature.SignatureVisitor;
+import org.jetbrains.org.objectweb.asm.*;
+import org.jetbrains.org.objectweb.asm.signature.SignatureReader;
+import org.jetbrains.org.objectweb.asm.signature.SignatureVisitor;
 
 import java.io.InputStream;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
+import java.lang.reflect.Type;
+import java.util.*;
 
 /**
  * @author gregsh
@@ -495,20 +490,15 @@ public abstract class JavaHelper {
                          (signature == null ? "" : " signature " + signature));
     }
 
-    private static class MyClassVisitor extends EmptyVisitor {
+    private static class MyClassVisitor extends ClassVisitor {
       enum State {CLASS, METHOD, ANNO}
 
       private final ClassInfo myInfo;
 
       MyClassVisitor(ClassInfo info) {
+        super(Opcodes.ASM5);
         myInfo = info;
       }
-
-      private State state;
-
-      private MethodInfo methodInfo;
-      private String annoDesc;
-      private int annoParamCounter;
 
       public void visit(int version,
                         int access,
@@ -516,7 +506,6 @@ public abstract class JavaHelper {
                         String signature,
                         String superName,
                         String[] interfaces) {
-        state = State.CLASS;
         myInfo.superClass = fixClassName(superName);
         for (String s : interfaces) {
           myInfo.interfaces.add(fixClassName(s));
@@ -542,19 +531,6 @@ public abstract class JavaHelper {
 
       @Override
       public void visitEnd() {
-        if (state == State.METHOD) {
-          state = State.CLASS;
-          myInfo.methods.add(methodInfo);
-          methodInfo = null;
-        }
-        else if (state == State.ANNO) {
-          state = State.METHOD;
-          if (annoParamCounter == 0) {
-            methodInfo.annotations.add(fixClassName(annoDesc.substring(1, annoDesc.length() - 1)));
-          }
-          annoParamCounter = 0;
-          annoDesc = null;
-        }
       }
 
       @Override
@@ -563,45 +539,55 @@ public abstract class JavaHelper {
                                        String desc,
                                        String signature,
                                        String[] exceptions) {
-        state = State.METHOD;
-        methodInfo = getMethodInfo(myInfo.name, name, ObjectUtils.chooseNotNull(signature, desc));
-        methodInfo.modifiers = access;
-        methodInfo.methodType = "<init>".equals(name)? MethodType.CONSTRUCTOR :
+        final MethodInfo m = getMethodInfo(myInfo.name, name, ObjectUtils.chooseNotNull(signature, desc));
+        m.modifiers = access;
+        m.methodType = "<init>".equals(name)? MethodType.CONSTRUCTOR :
                                 Modifier.isStatic(access) ? MethodType.STATIC :
                                 MethodType.INSTANCE;
-        return this; // visit annotations
+        myInfo.methods.add(m);
+        return new MethodVisitor(Opcodes.ASM5) {
+          @Override
+          public AnnotationVisitor visitAnnotation(final String desc, boolean visible) {
+            return new MyAnnotationVisitor() {
+              @Override
+              public void visitEnd() {
+                if (annoParamCounter == 0) {
+                  m.annotations.add(fixClassName(desc.substring(1, desc.length() - 1)));
+                }
+              }
+            };
+          }
+        };
       }
 
-      @Override
-      public AnnotationVisitor visitAnnotation(String s, boolean b) {
-        if (state == State.METHOD) {
-          state = State.ANNO;
-          annoDesc = s;
-          return this;
+      class MyAnnotationVisitor extends AnnotationVisitor {
+        int annoParamCounter;
+
+        MyAnnotationVisitor() {
+          super(Opcodes.ASM5);
         }
-        return null;
-      }
 
-      @Override
-      public void visit(String s, Object o) {
-        annoParamCounter++;
-      }
+        @Override
+        public void visit(String s, Object o) {
+          annoParamCounter++;
+        }
 
-      @Override
-      public void visitEnum(String s, String s2, String s3) {
-        annoParamCounter++;
-      }
+        @Override
+        public void visitEnum(String s, String s2, String s3) {
+          annoParamCounter++;
+        }
 
-      @Override
-      public AnnotationVisitor visitAnnotation(String s, String s2) {
-        annoParamCounter++;
-        return null;
-      }
+        @Override
+        public AnnotationVisitor visitAnnotation(String s, String s2) {
+          annoParamCounter++;
+          return null;
+        }
 
-      @Override
-      public AnnotationVisitor visitArray(String s) {
-        annoParamCounter++;
-        return null;
+        @Override
+        public AnnotationVisitor visitArray(String s) {
+          annoParamCounter++;
+          return null;
+        }
       }
     }
 
@@ -609,16 +595,17 @@ public abstract class JavaHelper {
       return s == null ? null : s.replace('/', '.').replace('$', '.');
     }
 
-    private static class MySignatureVisitor implements SignatureVisitor {
-      enum State {PARAM, RETURN, CLASS, ARRAY, GENERIC}
+    private static class MySignatureVisitor extends SignatureVisitor {
+      enum State {PARAM, RETURN, CLASS, ARRAY, GENERIC, BOUNDS}
 
-      private final MethodInfo myMethodInfo;
-      private final LinkedList<State> states = new LinkedList<State>();
+      final MethodInfo methodInfo;
+      final Deque<State> states = new ArrayDeque<State>();
 
-      private final StringBuilder myBuilder = new StringBuilder();
+      final StringBuilder sb = new StringBuilder();
 
       MySignatureVisitor(MethodInfo methodInfo) {
-        myMethodInfo = methodInfo;
+        super(Opcodes.ASM5);
+        this.methodInfo = methodInfo;
       }
 
       @Override
@@ -627,23 +614,24 @@ public abstract class JavaHelper {
       }
 
       @Override
-      public SignatureVisitor visitClassBound() {
-        return null;
-      }
-
-      @Override
       public SignatureVisitor visitInterfaceBound() {
+        finishElement(null);
+        states.push(State.BOUNDS);
         return this;
       }
 
       @Override
       public SignatureVisitor visitSuperclass() {
-        return null;
+        finishElement(null);
+        states.push(State.BOUNDS);
+        return this;
       }
 
       @Override
       public SignatureVisitor visitInterface() {
-        return null;
+        finishElement(null);
+        states.push(State.BOUNDS);
+        return this;
       }
 
       @Override
@@ -667,12 +655,12 @@ public abstract class JavaHelper {
 
       @Override
       public void visitBaseType(char c) {
-        myBuilder.append(org.objectweb.asm.Type.getType(String.valueOf(c)).getClassName());
+        sb.append(org.jetbrains.org.objectweb.asm.Type.getType(String.valueOf(c)).getClassName());
       }
 
       @Override
       public void visitTypeVariable(String s) {
-        myBuilder.append("<").append(s).append(">");
+        sb.append("<").append(s).append(">");
       }
 
       @Override
@@ -684,7 +672,7 @@ public abstract class JavaHelper {
       @Override
       public void visitClassType(String s) {
         states.push(State.CLASS);
-        myBuilder.append(fixClassName(s));
+        sb.append(fixClassName(s));
       }
 
       @Override
@@ -694,18 +682,18 @@ public abstract class JavaHelper {
       @Override
       public void visitTypeArgument() {
         states.push(State.GENERIC);
-        myBuilder.append("<");
+        sb.append("<");
       }
 
       @Override
       public SignatureVisitor visitTypeArgument(char c) {
         if (states.peekFirst() == State.CLASS) {
           states.push(State.GENERIC);
-          myBuilder.append("<");
+          sb.append("<");
         }
         else {
           finishElement(State.GENERIC);
-          myBuilder.append(", ");
+          sb.append(", ");
         }
         return this;
       }
@@ -717,28 +705,29 @@ public abstract class JavaHelper {
       }
 
       private void finishElement(State finishState) {
-        if (myBuilder.length() == 0) return;
+        if (sb.length() == 0) return;
         main:
         while (!states.isEmpty()) {
           if (finishState == states.peekFirst()) break;
           State state = states.pop();
           switch (state) {
             case PARAM:
-              myMethodInfo.types.add(myBuilder.toString());
-              myMethodInfo.types.add("p" + (myMethodInfo.types.size() / 2));
-              myBuilder.setLength(0);
+              methodInfo.types.add(sb.toString());
+              methodInfo.types.add("p" + (methodInfo.types.size() / 2));
+              sb.setLength(0);
               break main;
             case RETURN:
-              myMethodInfo.types.add(0, myBuilder.toString());
-              myBuilder.setLength(0);
+              methodInfo.types.add(0, sb.toString());
+              sb.setLength(0);
               break main;
             case ARRAY:
-              myBuilder.append("[]");
+              sb.append("[]");
               break;
             case GENERIC:
-              myBuilder.append(">");
+              sb.append(">");
               break;
             case CLASS:
+            case BOUNDS:
               break;
           }
         }

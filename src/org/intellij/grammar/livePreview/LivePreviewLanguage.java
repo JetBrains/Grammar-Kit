@@ -34,14 +34,14 @@ import com.intellij.util.containers.ContainerUtil;
 import org.intellij.grammar.psi.BnfFile;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.objectweb.asm.*;
+import org.jetbrains.org.objectweb.asm.*;
 
 import java.lang.ref.SoftReference;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.objectweb.asm.Opcodes.*;
+import static org.jetbrains.org.objectweb.asm.Opcodes.*;
 
 
 /**

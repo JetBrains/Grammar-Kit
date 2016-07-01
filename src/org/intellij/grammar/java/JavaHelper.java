@@ -447,7 +447,7 @@ public abstract class JavaHelper {
           String s = className.substring(0, lastDot).replace('.', '/') +
                      className.substring(lastDot).replace('.', '$');
           is = JavaHelper.class.getClassLoader().getResourceAsStream(s + ".class");
-          lastDot = s.lastIndexOf('/');
+          lastDot = className.lastIndexOf('/', lastDot - 1);
         }
         while(is == null && lastDot > 0);
 
@@ -486,12 +486,12 @@ public abstract class JavaHelper {
     }
 
     private static void reportException(Exception e, String target, String signature) {
+      //noinspection UseOfSystemOutOrSystemErr
       System.err.println(e.getClass().getSimpleName() + " while reading " + target +
                          (signature == null ? "" : " signature " + signature));
     }
 
     private static class MyClassVisitor extends ClassVisitor {
-      enum State {CLASS, METHOD, ANNO}
 
       private final ClassInfo myInfo;
 
@@ -511,21 +511,12 @@ public abstract class JavaHelper {
           myInfo.interfaces.add(fixClassName(s));
         }
         if (signature != null) {
-          // quick signature hacking due to ancient asm, cglib..
-          for (int i = 0, ang = 0, off = 0, len = signature.length(); i < len; i++) {
-            char c = signature.charAt(i);
-            if (c == '<' || c == '>') {
-              ang += c == '<' ? 1 : -1;
-              off = i + 1;
+          new SignatureReader(signature).accept(new SignatureVisitor(Opcodes.ASM5) {
+            @Override
+            public void visitFormalTypeParameter(String name) {
+              myInfo.typeParameters.add(name);
             }
-            else if (c == ';') {
-              off = i + 1;
-            }
-            if (ang >= 2) continue;
-            if (ang == 1 && signature.startsWith("::", i)) {
-              myInfo.typeParameters.add(signature.substring(off, i));
-            }
-          }
+          });
         }
       }
 
@@ -601,6 +592,7 @@ public abstract class JavaHelper {
       final MethodInfo methodInfo;
       final Deque<State> states = new ArrayDeque<State>();
 
+      /** @noinspection StringBufferField*/
       final StringBuilder sb = new StringBuilder();
 
       MySignatureVisitor(MethodInfo methodInfo) {

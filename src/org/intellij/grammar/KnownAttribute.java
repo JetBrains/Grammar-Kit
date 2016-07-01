@@ -37,7 +37,7 @@ public class KnownAttribute<T> {
   @NotNull
   public static Collection<KnownAttribute> getAttributes() { return Collections.unmodifiableCollection(ourAttributes.values()); }
   @Nullable
-  public static KnownAttribute getAttribute(String name) { return ourAttributes.get(name); }
+  public static KnownAttribute getAttribute(@Nullable String name) { return name == null ? null : ourAttributes.get(name); }
 
   private static final ListValue EMPTY_LIST = new ListValue();
 

@@ -27,16 +27,13 @@ import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.util.Key;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
-import com.intellij.psi.PsiRecursiveElementWalkingVisitor;
 import com.intellij.psi.PsiReference;
-import com.intellij.psi.util.CachedValue;
-import com.intellij.psi.util.CachedValueProvider;
-import com.intellij.psi.util.CachedValuesManager;
-import com.intellij.psi.util.PsiModificationTracker;
-import gnu.trove.THashSet;
+import com.intellij.util.Function;
+import com.intellij.util.containers.ContainerUtil;
+import com.intellij.util.containers.JBIterable;
+import org.intellij.grammar.generator.ParserGeneratorUtil;
 import org.intellij.grammar.psi.*;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
@@ -44,13 +41,18 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
+import static com.intellij.openapi.util.Condition.NOT_NULL;
+import static org.intellij.grammar.KnownAttribute.*;
+import static org.intellij.grammar.generator.ParserGeneratorUtil.findAttribute;
+import static org.intellij.grammar.psi.impl.GrammarUtil.bnfTraverser;
+import static org.intellij.grammar.psi.impl.GrammarUtil.bnfTraverserNoAttrs;
 /**
  * @author gregsh
  */
 public class BnfUnusedRulePassFactory extends AbstractProjectComponent implements TextEditorHighlightingPassFactory {
-  public static final Key<CachedValue<Set<PsiElement>>> USED_RULES_KEY = Key.create("USED_RULES_KEY");
 
   public BnfUnusedRulePassFactory(Project project, TextEditorHighlightingPassRegistrar highlightingPassRegistrar) {
     super(project);
@@ -68,33 +70,15 @@ public class BnfUnusedRulePassFactory extends AbstractProjectComponent implement
     return file instanceof BnfFile? new MyPass(myProject, (BnfFile)file, editor.getDocument()) : null;
   }
 
-  private static Set<PsiElement> getUsedElements(final PsiFile file) {
-    CachedValue<Set<PsiElement>> value = file.getUserData(USED_RULES_KEY);
-    if (value == null) {
-      file.putUserData(USED_RULES_KEY, value = CachedValuesManager.getManager(file.getProject()).createCachedValue(new CachedValueProvider<Set<PsiElement>>() {
-        @Override
-        public Result<Set<PsiElement>> compute() {
-          final THashSet<PsiElement> psiElements = new THashSet<PsiElement>();
-          file.acceptChildren(new PsiRecursiveElementWalkingVisitor() {
-            @Override
-            public void visitElement(PsiElement element) {
-              if (element instanceof BnfReferenceOrToken || element instanceof BnfStringLiteralExpression) {
-                PsiReference reference = element.getReference();
-                PsiElement target = reference != null? reference.resolve() : null;
-                if (target instanceof BnfNamedElement) {
-                  psiElements.add(target);
-                }
-              }
-              super.visitElement(element);
-            }
-          });
-          return new Result<Set<PsiElement>>(psiElements, PsiModificationTracker.MODIFICATION_COUNT);
-        }
-      }, false));
+  private static final Function<PsiElement, BnfRule> RESOLVER = new Function<PsiElement, BnfRule>() {
+    @Override
+    public BnfRule fun(PsiElement o) {
+      if (!(o instanceof BnfReferenceOrToken) && !(o instanceof BnfStringLiteralExpression)) return null;
+      PsiReference reference = o.getReference();
+      PsiElement target = reference != null ? reference.resolve() : null;
+      return target instanceof BnfRule ? (BnfRule)target : null;
     }
-    return value.getValue();
-  }
-
+  };
 
   static class MyPass extends TextEditorHighlightingPass {
 
@@ -108,33 +92,80 @@ public class BnfUnusedRulePassFactory extends AbstractProjectComponent implement
 
     @Override
     public void doCollectInformation(@NotNull ProgressIndicator progress) {
-      final Set<PsiElement> usedElements = getUsedElements(myFile);
+      Set<BnfRule> inExpr = ContainerUtil.newTroveSet();
+      final Set<BnfRule> inParsing = ContainerUtil.newTroveSet();
+      Map<BnfRule, String> inAttrs = ContainerUtil.newTroveMap();
+
+      bnfTraverserNoAttrs(myFile).traverse().transform(RESOLVER).filter(NOT_NULL).addAllTo(inExpr);
+
+      for (int size = 0, prev = -1; size != prev; prev = size, size = inParsing.size()) {
+        bnfTraverserNoAttrs(myFile).expand(new JBIterable.StatefulFilter<PsiElement>() {
+          @Override
+          public boolean value(PsiElement element) {
+            if (element instanceof BnfRule) {
+              BnfRule rule = (BnfRule)element;
+              if (inParsing.isEmpty()) inParsing.add(rule);
+              // add recovery rules to calculation
+              BnfAttr recoverAttr = findAttribute(rule, KnownAttribute.RECOVER_WHILE);
+              value(recoverAttr == null ? null : recoverAttr.getExpression());
+              return inParsing.contains(rule);
+            }
+            else if (element instanceof BnfReferenceOrToken) {
+              ContainerUtil.addIfNotNull(inParsing, ((BnfReferenceOrToken)element).resolveRule());
+              return false;
+            }
+            return true;
+          }
+        }).traverse().size();
+      }
+
+      for (BnfAttr attr : bnfTraverser(myFile).filter(BnfAttr.class)) {
+        BnfRule target = RESOLVER.fun(attr.getExpression());
+        if (target != null) inAttrs.put(target, attr.getName());
+      }
+
       boolean first = true;
-      for (BnfRule o : myFile.getRules()) {
+      for (BnfRule r : myFile.getRules()) {
         if (first) {
           first = false;
           continue;
         }
-        if (!usedElements.contains(o)) {
-          myHighlights.add(HighlightInfo.newHighlightInfo(HighlightInfoType.WARNING).
-            range(o.getId()).descriptionAndTooltip("Unused rule").create());
+        String message = null;
+        boolean fake = ParserGeneratorUtil.Rule.isFake(r);
+        if (fake) {
+          if (!inAttrs.containsKey(r)) message = "Unused fake rule";
         }
         else {
-          visitAttrs(o.getAttrs(), usedElements);
+          if (getCompatibleAttribute(inAttrs.get(r)) == RECOVER_WHILE) {
+            if (!ParserGeneratorUtil.Rule.isPrivate(r)) {
+              message = "Non-private recovery rule";
+            }
+          }
+          else if (!inExpr.contains(r)) {
+            message = "Unused rule";
+          }
+          else if (!inParsing.contains(r)) {
+            message = "Unreachable rule";
+          }
         }
+        if (message != null) {
+          myHighlights.add(HighlightInfo.newHighlightInfo(HighlightInfoType.WARNING).
+            range(r.getId()).descriptionAndTooltip(message).create());
+        }
+        visitAttrs(r.getAttrs());
       }
       for (BnfAttrs o : myFile.getAttributes()) {
-        visitAttrs(o, usedElements);
+        visitAttrs(o);
       }
     }
 
-    private void visitAttrs(BnfAttrs attrs, Set<PsiElement> usedElements) {
+    private void visitAttrs(BnfAttrs attrs) {
       if (attrs == null) return;
       for (PsiElement child = attrs.getFirstChild(); child != null; child = child.getNextSibling()) {
         if (!(child instanceof BnfAttr)) continue;
         final String name = ((BnfAttr)child).getName();
-        if (!usedElements.contains(child) && !name.toUpperCase().equals(name) && KnownAttribute.getAttribute(name) == null) {
-          KnownAttribute newAttr = KnownAttribute.getCompatibleAttribute(name);
+        if (!name.toUpperCase().equals(name) && getAttribute(name) == null) {
+          KnownAttribute newAttr = getCompatibleAttribute(name);
           PsiElement anchor = ((BnfAttr)child).getId();
           HighlightInfo.Builder builder = HighlightInfo.newHighlightInfo(HighlightInfoType.WARNING).range(anchor);
           builder.descriptionAndTooltip(newAttr == null ? "Unused attribute" : "Deprecated attribute, use '" + newAttr.getName() + "' instead");
@@ -145,8 +176,8 @@ public class BnfUnusedRulePassFactory extends AbstractProjectComponent implement
 
     @Override
     public void doApplyInformationToEditor() {
-      UpdateHighlightersUtil.setHighlightersToEditor(myProject, myDocument, 0, myFile.getTextLength(), myHighlights, getColorsScheme(),
-                                                     getId());
+      UpdateHighlightersUtil.setHighlightersToEditor(
+        myProject, myDocument, 0, myFile.getTextLength(), myHighlights, getColorsScheme(), getId());
     }
   }
 }

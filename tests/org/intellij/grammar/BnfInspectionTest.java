@@ -101,6 +101,11 @@ public class BnfInspectionTest extends LightPlatformCodeInsightFixtureTestCase {
   public void testUnreachableBranch3() { doTest("m ::=<warning>|</warning> B <warning>|</warning>"); }
   public void testUnreachableBranch4() { doTest("m ::=(A | (<warning>|</warning> B<warning>|</warning>))"); }
   public void testNeverMatchingBranch1() { doTest("m ::= <warning>! A r</warning> | B | C r ::= A"); }
+  public void testUnusedRule1() { doTest("r ::= <warning>A</warning> ::= 1 A"); }
+  public void testUnusedRule2() { doTest("r ::= B fake A ::= B ::= {extends=A}"); }
+  public void testUnusedRule3() { doTest("r ::= B fake <warning>A</warning> ::= B ::= "); }
+  public void testUnusedRule4() { doTest("r ::= {recoverWhile=A} private A ::= "); }
+  public void testUnusedRule5() { doTest("r ::= {recoverWhile=A} <warning>A</warning> ::= "); }
 
   private void doFileTest() {
     myFixture.configureByFile(getTestName(false)+".bnf");

@@ -445,9 +445,10 @@ public abstract class JavaHelper {
         InputStream is;
         do {
           String s = className.substring(0, lastDot).replace('.', '/') +
-                     className.substring(lastDot).replace('.', '$');
-          is = JavaHelper.class.getClassLoader().getResourceAsStream(s + ".class");
-          lastDot = className.lastIndexOf('/', lastDot - 1);
+                     className.substring(lastDot).replace('.', '$') +
+                     ".class";
+          is = JavaHelper.class.getClassLoader().getResourceAsStream(s);
+          lastDot = className.lastIndexOf('.', lastDot - 1);
         }
         while(is == null && lastDot > 0);
 
@@ -587,7 +588,7 @@ public abstract class JavaHelper {
     }
 
     private static class MySignatureVisitor extends SignatureVisitor {
-      enum State {PARAM, RETURN, CLASS, ARRAY, GENERIC, BOUNDS}
+      enum State {PARAM, RETURN, CLASS, ARRAY, GENERIC, BOUNDS, EXCEPTION}
 
       final MethodInfo methodInfo;
       final Deque<State> states = new ArrayDeque<State>();
@@ -642,7 +643,9 @@ public abstract class JavaHelper {
 
       @Override
       public SignatureVisitor visitExceptionType() {
-        return null;
+        finishElement(null);
+        states.push(State.EXCEPTION);
+        return this;
       }
 
       @Override

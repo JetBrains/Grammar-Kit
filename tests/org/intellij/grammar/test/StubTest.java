@@ -35,6 +35,7 @@ public class StubTest {
       super(parent, elementType);
     }
   }
+
   public static class SimpleBase extends StubBasedPsiElementBase<SimpleStub> {
     public SimpleBase(@NotNull SimpleStub stub,
                       @NotNull IStubElementType nodeType) {

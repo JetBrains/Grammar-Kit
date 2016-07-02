@@ -412,6 +412,7 @@ import test.psi.MyPsiTreeUtil;
 import static test.FooTypes.*;
 import test.psi.*;
 import com.intellij.psi.stubs.IStubElementType;
+import test.stub.TypeStub;
 
 public class InterfaceTypeImpl extends TypeImpl implements InterfaceType {
 
@@ -419,7 +420,7 @@ public class InterfaceTypeImpl extends TypeImpl implements InterfaceType {
     super(node);
   }
 
-  public InterfaceTypeImpl(test.stub.TypeStub stub, IStubElementType stubType) {
+  public InterfaceTypeImpl(TypeStub stub, IStubElementType stubType) {
     super(stub, stubType);
   }
 
@@ -447,6 +448,7 @@ import static test.FooTypes.*;
 import test.stub.MissingBase;
 import test.psi.*;
 import com.intellij.psi.stubs.IStubElementType;
+import test.stub.MissingStub;
 
 public class MissingImpl extends MissingBase implements Missing {
 
@@ -454,7 +456,7 @@ public class MissingImpl extends MissingBase implements Missing {
     super(node);
   }
 
-  public MissingImpl(test.stub.MissingStub stub, IStubElementType stubType) {
+  public MissingImpl(MissingStub stub, IStubElementType stubType) {
     super(stub, stubType);
   }
 
@@ -517,6 +519,7 @@ import test.psi.MyPsiTreeUtil;
 import static test.FooTypes.*;
 import test.psi.*;
 import com.intellij.psi.stubs.IStubElementType;
+import test.stub.TypeStub;
 
 public class StructTypeImpl extends TypeImpl implements StructType {
 
@@ -524,7 +527,7 @@ public class StructTypeImpl extends TypeImpl implements StructType {
     super(node);
   }
 
-  public StructTypeImpl(test.stub.TypeStub stub, IStubElementType stubType) {
+  public StructTypeImpl(TypeStub stub, IStubElementType stubType) {
     super(stub, stubType);
   }
 

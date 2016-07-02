@@ -1386,7 +1386,10 @@ public class ParserGenerator {
       if (AST_WRAPPER_PSI_ELEMENT_CLASS.equals(declaringClass)) continue;
       collectMethodTypesToImport(Collections.singletonList(m), false, imports);
     }
-    if (constructors.isEmpty() && stubName != null) imports.add(ISTUBELEMENTTYPE_CLASS);
+    if (constructors.isEmpty() && stubName != null) {
+      imports.add(ISTUBELEMENTTYPE_CLASS);
+      imports.add(stubName);
+    }
 
     if (!G.generateTokenTypes) {
       // add parser static imports hoping external token constants are there

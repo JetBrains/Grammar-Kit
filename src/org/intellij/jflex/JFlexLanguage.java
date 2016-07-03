@@ -16,6 +16,7 @@
 package org.intellij.jflex;
 
 import com.intellij.lang.Language;
+import org.jetbrains.annotations.NotNull;
 
 public class JFlexLanguage extends Language {
 
@@ -25,6 +26,7 @@ public class JFlexLanguage extends Language {
     super("JFlex");
   }
 
+  @NotNull
   @Override
   public String getDisplayName() {
     return "JFlex";

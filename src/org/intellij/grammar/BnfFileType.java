@@ -37,7 +37,7 @@ public class BnfFileType extends LanguageFileType {
   @NotNull
   @Override
   public String getName() {
-    return "Grammar";
+    return "BNF";
   }
 
   @NotNull

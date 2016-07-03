@@ -7,6 +7,7 @@
   <name>Grammar-Kit</name>
   <description>BNF Grammars and JFlex lexers editor. Readable parser/PSI code generator.</description>
 
+  <depends optional="true" config-file="plugin-copyright.xml">com.intellij.copyright</depends>
   <depends optional="true" config-file="plugin-java.xml">com.intellij.modules.java</depends>
   <depends optional="true" config-file="plugin-uml.xml">com.intellij.diagram</depends>
 
@@ -71,7 +72,7 @@
                      implementationClass="org.intellij.grammar.inspection.BnfUnreachableChoiceBranchInspection"/>
 
     <colorSettingsPage implementation="org.intellij.grammar.editor.BnfColorSettingsPage"/>
-    <quoteHandler fileType="Grammar" className="org.intellij.grammar.editor.BnfQuoteHandler"/>
+    <quoteHandler fileType="BNF" className="org.intellij.grammar.editor.BnfQuoteHandler"/>
 
     <intentionAction>
       <className>org.intellij.grammar.intention.BnfFlipChoiceIntention</className>

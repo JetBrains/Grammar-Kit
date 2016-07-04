@@ -263,9 +263,6 @@ import com.intellij.psi.PsiElement;
 
 public interface BnfParenExpression extends BnfParenthesized {
 
-  @NotNull
-  BnfExpression getExpression();
-
 }
 // ---- BnfParenOptExpression.java -----------------
 // license.txt
@@ -276,9 +273,6 @@ import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
 public interface BnfParenOptExpression extends BnfParenthesized {
-
-  @NotNull
-  BnfExpression getExpression();
 
 }
 // ---- BnfParenthesized.java -----------------
@@ -788,12 +782,6 @@ public class BnfParenExpressionImpl extends BnfParenthesizedImpl implements BnfP
     else super.accept(visitor);
   }
 
-  @Override
-  @NotNull
-  public BnfExpression getExpression() {
-    return findNotNullChildByClass(BnfExpression.class);
-  }
-
 }
 // ---- BnfParenOptExpressionImpl.java -----------------
 // license.txt
@@ -821,12 +809,6 @@ public class BnfParenOptExpressionImpl extends BnfParenthesizedImpl implements B
   public void accept(@NotNull PsiElementVisitor visitor) {
     if (visitor instanceof BnfVisitor) accept((BnfVisitor)visitor);
     else super.accept(visitor);
-  }
-
-  @Override
-  @NotNull
-  public BnfExpression getExpression() {
-    return findNotNullChildByClass(BnfExpression.class);
   }
 
 }

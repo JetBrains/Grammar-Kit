@@ -39,10 +39,4 @@ public class BnfParenOptExpressionImpl extends BnfParenthesizedImpl implements B
     else super.accept(visitor);
   }
 
-  @Override
-  @NotNull
-  public BnfExpression getExpression() {
-    return findNotNullChildByClass(BnfExpression.class);
-  }
-
 }

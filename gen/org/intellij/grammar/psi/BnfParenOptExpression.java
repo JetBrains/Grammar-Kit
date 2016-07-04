@@ -21,7 +21,4 @@ import com.intellij.psi.PsiElement;
 
 public interface BnfParenOptExpression extends BnfParenthesized {
 
-  @NotNull
-  BnfExpression getExpression();
-
 }

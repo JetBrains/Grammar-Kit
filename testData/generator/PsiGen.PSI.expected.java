@@ -264,7 +264,7 @@ import com.intellij.psi.PsiElement;
 public interface XExpr extends XComposite {
 
   @NotNull
-  List<XExpr> getExprList();
+  List<XExpr> getKids();
 
 }
 // ---- XExternalType.java -----------------
@@ -364,9 +364,6 @@ import com.intellij.psi.PsiElement;
 
 public interface XMulExpr extends XExpr {
 
-  @NotNull
-  List<XExpr> getExprList();
-
 }
 // ---- XNamedElement.java -----------------
 //header.txt
@@ -383,6 +380,17 @@ public interface XNamedElement extends PsiNameIdentifierOwner {
   List<XIdentifier> getIdentifierList();
 
 }
+// ---- XOtherExpr.java -----------------
+//header.txt
+package generated.psi;
+
+import java.util.List;
+import org.jetbrains.annotations.*;
+import com.intellij.psi.PsiElement;
+
+public interface XOtherExpr extends XExpr {
+
+}
 // ---- XPlusExpr.java -----------------
 //header.txt
 package generated.psi;
@@ -392,9 +400,6 @@ import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
 public interface XPlusExpr extends XExpr {
-
-  @NotNull
-  List<XExpr> getExprList();
 
 }
 // ---- XRefExpr.java -----------------
@@ -470,9 +475,6 @@ import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
 public interface XSpecialRef extends XRefExpr {
-
-  @NotNull
-  XIdentifier getIdentifier();
 
   @NotNull
   XRefExpr getRefExpr();
@@ -853,7 +855,7 @@ public class XExprImpl extends ASTWrapperPsiElement implements XExpr {
 
   @Override
   @NotNull
-  public List<XExpr> getExprList() {
+  public List<XExpr> getKids() {
     return PsiTreeUtil.getChildrenOfTypeAsList(this, XExpr.class);
   }
 
@@ -1104,12 +1106,6 @@ public class XMulExprImpl extends XExprImpl implements XMulExpr {
     else super.accept(visitor);
   }
 
-  @Override
-  @NotNull
-  public List<XExpr> getExprList() {
-    return PsiTreeUtil.getChildrenOfTypeAsList(this, XExpr.class);
-  }
-
 }
 // ---- XNamedElementImpl.java -----------------
 //header.txt
@@ -1147,6 +1143,35 @@ public class XNamedElementImpl extends ASTWrapperPsiElement implements XNamedEle
   }
 
 }
+// ---- XOtherExprImpl.java -----------------
+//header.txt
+package generated.psi.impl;
+
+import java.util.List;
+import org.jetbrains.annotations.*;
+import com.intellij.lang.ASTNode;
+import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiElementVisitor;
+import com.intellij.psi.util.PsiTreeUtil;
+import static generated.GeneratedTypes.*;
+import generated.psi.*;
+
+public class XOtherExprImpl extends XExprImpl implements XOtherExpr {
+
+  public XOtherExprImpl(ASTNode node) {
+    super(node);
+  }
+
+  public void accept(@NotNull XVisitor visitor) {
+    visitor.visitOtherExpr(this);
+  }
+
+  public void accept(@NotNull PsiElementVisitor visitor) {
+    if (visitor instanceof XVisitor) accept((XVisitor)visitor);
+    else super.accept(visitor);
+  }
+
+}
 // ---- XPlusExprImpl.java -----------------
 //header.txt
 package generated.psi.impl;
@@ -1173,12 +1198,6 @@ public class XPlusExprImpl extends XExprImpl implements XPlusExpr {
   public void accept(@NotNull PsiElementVisitor visitor) {
     if (visitor instanceof XVisitor) accept((XVisitor)visitor);
     else super.accept(visitor);
-  }
-
-  @Override
-  @NotNull
-  public List<XExpr> getExprList() {
-    return PsiTreeUtil.getChildrenOfTypeAsList(this, XExpr.class);
   }
 
 }
@@ -1375,12 +1394,6 @@ public class XSpecialRefImpl extends XRefExprImpl implements XSpecialRef {
 
   @Override
   @NotNull
-  public XIdentifier getIdentifier() {
-    return findNotNullChildByClass(XIdentifier.class);
-  }
-
-  @Override
-  @NotNull
   public XRefExpr getRefExpr() {
     return findNotNullChildByClass(XRefExpr.class);
   }
@@ -1527,6 +1540,10 @@ public class XVisitor extends PsiElementVisitor {
 
   public void visitNamedElement(@NotNull XNamedElement o) {
     visitPsiNameIdentifierOwner(o);
+  }
+
+  public void visitOtherExpr(@NotNull XOtherExpr o) {
+    visitExpr(o);
   }
 
   public void visitPlusExpr(@NotNull XPlusExpr o) {

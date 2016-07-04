@@ -65,6 +65,22 @@ public class RuleMethodsHelper {
     for (BnfRule rule : sortedPsiRules) {
       calcMethods(rule, tokensReversed);
     }
+    for (BnfRule r0 : myGraphHelper.getRuleExtendsMap().keySet()) {
+      if (!myMethods.containsKey(r0)) continue;
+      Map<String, MethodInfo> p0 = myMethods.get(r0).first;
+      for (BnfRule r : myGraphHelper.getRuleExtendsMap().get(r0)) {
+        if (r0 == r) continue;
+        if (!myMethods.containsKey(r)) continue;
+        Map<String, MethodInfo> p = myMethods.get(r).first;
+        for (String name : p.keySet()) {
+          MethodInfo m0 = p0.get(name);
+          if (m0 == null) continue;
+          MethodInfo m = p.get(name);
+          if (m0.cardinality != m.cardinality) continue;
+          m.name = ""; // suppress super method duplication
+        }
+      }
+    }
   }
 
   @NotNull

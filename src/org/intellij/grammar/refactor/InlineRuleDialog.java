@@ -16,6 +16,7 @@
 
 package org.intellij.grammar.refactor;
 
+import com.intellij.BundleBase;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.ElementDescriptionUtil;
 import com.intellij.psi.PsiReference;
@@ -55,11 +56,11 @@ public class InlineRuleDialog extends InlineOptionsDialog {
   }
 
   protected String getInlineThisText() {
-    return "&This reference only and keep the rule";
+    return BundleBase.replaceMnemonicAmpersand("&This reference only and keep the rule");
   }
 
   protected String getInlineAllText() {
-    return "&All references and remove the rule";
+    return BundleBase.replaceMnemonicAmpersand("&All references and remove the rule");
   }
 
   protected boolean isInlineThis() {

@@ -266,6 +266,7 @@ public class ParserGeneratorUtil {
   public static String toIdentifier(@NotNull String text, @Nullable NameFormat format, @NotNull Case cas) {
     if (text.isEmpty()) return "";
     String fixed = text.replaceAll("[^:\\p{javaJavaIdentifierPart}]", "_");
+    boolean allCaps = Case.UPPER.apply(fixed).equals(fixed);
     StringBuilder sb = new StringBuilder();
     if (!Character.isJavaIdentifierStart(fixed.charAt(0)) && sb.length() == 0) sb.append("_");
     String[] strings = NameUtil.nameToWords(fixed);
@@ -273,7 +274,7 @@ public class ParserGeneratorUtil {
       String s = strings[i];
       if (cas == Case.CAMEL && s.startsWith("_") && !(i == 0 || i == len - 1)) continue;
       if (cas == Case.UPPER && !s.startsWith("_") && !(i == 0 || StringUtil.endsWith(sb, "_"))) sb.append("_");
-      if (cas == Case.CAMEL && i < len - 1 && !strings[i+1].startsWith("_") && Case.UPPER.apply(s).equals(s)) sb.append(s);
+      if (cas == Case.CAMEL && !allCaps && Case.UPPER.apply(s).equals(s)) sb.append(s);
       else sb.append(cas.apply(s));
     }
     return format == null ? sb.toString() : format.apply(sb.toString());

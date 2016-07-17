@@ -20,7 +20,8 @@ import com.intellij.testFramework.UsefulTestCase;
 import org.intellij.grammar.generator.Case;
 import org.intellij.grammar.generator.ParserGeneratorUtil;
 
-import static org.intellij.grammar.generator.ParserGeneratorUtil.*;
+import static org.intellij.grammar.generator.ParserGeneratorUtil.NameFormat;
+import static org.intellij.grammar.generator.ParserGeneratorUtil.getGetterName;
 
 /**
  * @author gregsh
@@ -62,6 +63,7 @@ public class BnfUtilTest extends UsefulTestCase {
     assertEquals("_12Feb12", toIdentifier("12Feb%12", Case.CAMEL));
     assertEquals("CPRule", toIdentifier("CPRule", Case.CAMEL));
     assertEquals("T_SOME_TYPE", toIdentifier("TSomeType", Case.UPPER));
+    assertEquals("TestEOL", toIdentifier("testEOL", Case.CAMEL));
   }
   
   static String toIdentifier(String s, Case c) {

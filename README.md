@@ -1,5 +1,5 @@
 
-Grammar-Kit [[stable]](../../releases) [[dev]](https://teamcity.jetbrains.com/repository/download/IntellijIdeaPlugins_GrammarKit_Build/.lastSuccessful/GrammarKit.zip-1.4.SNAPSHOT.zip)
+Grammar-Kit [[stable]](../../releases) [[dev]](https://teamcity.jetbrains.com/guestAuth/repository/download/IntellijIdeaPlugins_GrammarKit_Build/.lastSuccessful/GrammarKit.zip-1.4.1.SNAPSHOT.zip)
 ==================
 [![Build Status](https://teamcity.jetbrains.com/app/rest/builds/buildType:(id:IntellijIdeaPlugins_GrammarKit_Build)/statusIcon.svg?guest=1)](https://teamcity.jetbrains.com/viewType.html?buildTypeId=IntellijIdeaPlugins_GrammarKit_Build&guest=1)
 

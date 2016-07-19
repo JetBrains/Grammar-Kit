@@ -226,10 +226,13 @@ java -jar expression-console-sample.jar
 
 Change log
 ==========
-1.4.2 / dev
+1.4.2
 
 * JFlex: more color options & better AST
-* Generator/PSI: do not 'collapse' fake rules
+* Generator: meta rule parameter as 'recoverWhile' predicate
+* Generator: support 'extends' with 'upper' and 'external' modifiers
+* Generator/PSI: fix for fake rules PSI accessors calculation
+* Generator/PSi: improved methods/classes names generation logic
 
 1.4.0
 

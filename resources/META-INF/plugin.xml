@@ -1,8 +1,8 @@
 <idea-plugin url="https://github.com/JetBrains/Grammar-Kit" version="2">
   <id>org.jetbrains.idea.grammar</id>
-  <version>1.4.SNAPSHOT</version>
+  <version>1.4.2</version>
   <vendor email="gregory.shrago@jetbrains.com">Greg Shrago</vendor>
-  <idea-version since-build="143.0" until-build=""/>
+  <idea-version since-build="145.0" until-build=""/>
 
   <name>Grammar-Kit</name>
   <description>BNF Grammars and JFlex lexers editor. Readable parser/PSI code generator.</description>
@@ -13,10 +13,13 @@
 
   <change-notes>
     <![CDATA[
-    <p>1.4.x</p>
+    <p>1.4.2</p>
     <ul>
       <li>JFlex: more color options & better AST</li>
-      <li>Generator/PSI: do not collapse fake rules</li>
+      <li>Generator: meta rule parameter as 'recoverWhile' predicate</li>
+      <li>Generator: support 'extends' with 'upper' and 'external' modifiers</li>
+      <li>Generator/PSI: fix for fake rules PSI accessors calculation</li>
+      <li>Generator/PSi: improved methods/classes names generation logic</li>
     </ul>
     <a href="https://github.com/JetBrains/Grammar-Kit#change-log">Full change log...</a>
     ]]>

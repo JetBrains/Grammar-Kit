@@ -118,7 +118,7 @@ public class GrammarUtil {
     }
     if (ParserGeneratorUtil.Rule.isMeta(rule)) {
       String attr = getAttribute(rule, KnownAttribute.RECOVER_WHILE);
-      if (isDoubleAngles(attr)) {
+      if (isDoubleAngles(attr) && !result.contains(attr)) {
         result.add(attr);
       }
     }

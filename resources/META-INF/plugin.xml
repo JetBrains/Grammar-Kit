@@ -13,7 +13,6 @@
 
   <change-notes>
     <![CDATA[
-    <p>1.4.2</p>
     <ul>
       <li>JFlex: more color options & better AST</li>
       <li>Generator: meta rule parameter as 'recoverWhile' predicate</li>

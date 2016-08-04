@@ -25,9 +25,7 @@ import com.intellij.openapi.util.TextRange;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.search.PsiElementProcessor;
 import com.intellij.psi.util.PsiTreeUtil;
-import org.intellij.grammar.psi.BnfAttrs;
-import org.intellij.grammar.psi.BnfFile;
-import org.intellij.grammar.psi.BnfRule;
+import org.intellij.grammar.psi.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -48,6 +46,12 @@ public class BnfFoldingBuilder extends FoldingBuilderEx implements DumbAware {
       TextRange textRange = attrs.getTextRange();
       if (textRange.getLength() <= 2) continue;
       result.add(new FoldingDescriptor(attrs, textRange));
+      for (BnfAttr attr : attrs.getAttrList()) {
+        BnfExpression attrValue = attr.getExpression();
+        if (attrValue instanceof BnfValueList && attrValue.getTextLength() > 2) {
+          result.add(new FoldingDescriptor(attrValue, attrValue.getTextRange()));
+        }
+      }
     }
     for (BnfRule rule : file.getRules()) {
       //result.add(new FoldingDescriptor(rule, rule.getTextRange()));
@@ -77,6 +81,7 @@ public class BnfFoldingBuilder extends FoldingBuilderEx implements DumbAware {
     PsiElement psi = node.getPsi();
     if (psi instanceof BnfAttrs) return "{..}";
     if (psi instanceof BnfRule) return ((BnfRule)psi).getName() + " ::= ...";
+    if (psi instanceof BnfValueList) return "[..]";
     if (node.getElementType() == BnfParserDefinition.BNF_BLOCK_COMMENT) return "/*..*/";
     return null;
   }
@@ -84,6 +89,7 @@ public class BnfFoldingBuilder extends FoldingBuilderEx implements DumbAware {
   @Override
   public boolean isCollapsedByDefault(@NotNull ASTNode node) {
     PsiElement psi = node.getPsi();
-    return psi instanceof BnfAttrs && !(psi.getParent() instanceof BnfRule);
+    return psi instanceof BnfValueList ||
+           psi instanceof BnfAttrs && !(psi.getParent() instanceof BnfRule);
   }
 }

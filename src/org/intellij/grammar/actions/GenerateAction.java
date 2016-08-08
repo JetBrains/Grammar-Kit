@@ -29,7 +29,6 @@ import com.intellij.openapi.progress.ProcessCanceledException;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.progress.Task;
-import com.intellij.openapi.project.DumbAware;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.ThrowableComputable;
 import com.intellij.openapi.util.io.FileUtil;
@@ -65,7 +64,7 @@ import static org.intellij.grammar.generator.ParserGeneratorUtil.getRootAttribut
  * @author gregory
  *         Date: 15.07.11 17:12
  */
-public class GenerateAction extends AnAction implements DumbAware {
+public class GenerateAction extends AnAction {
 
   public static final NotificationGroup LOG_GROUP = NotificationGroup.logOnlyGroup("Parser Generator Log");
   

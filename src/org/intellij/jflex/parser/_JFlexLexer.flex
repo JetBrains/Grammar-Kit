@@ -244,6 +244,32 @@ JavaCode = ({JavaRest}|{StringLiteral}|{CharLiteral}|{JavaComment})+
   "{"                     { yybegin(REGEXPSTART); return FLEX_BRACE1; }
 }
 
+<REGEXP, CHARCLASS> {
+  {HexNumber}             { return FLEX_CHAR_ESC; }
+  {OctNumber}             { return FLEX_CHAR_ESC; }
+  {Unicode4}              { return FLEX_CHAR_ESC; }
+  {Unicode6}              { return FLEX_CHAR_ESC; }
+
+  \\ [nbtrf]              { return FLEX_CHAR_ESC; }
+
+  "[:jletter:]"           { return FLEX_CHAR_CLASS; }
+  "[:jletterdigit:]"      { return FLEX_CHAR_CLASS; }
+  "[:letter:]"            { return FLEX_CHAR_CLASS; }
+  "[:uppercase:]"         { return FLEX_CHAR_CLASS; }
+  "[:lowercase:]"         { return FLEX_CHAR_CLASS; }
+  "[:digit:]"             { return FLEX_CHAR_CLASS; }
+  "\\d"                   { return FLEX_CHAR_CLASS; }
+  "\\D"                   { return FLEX_CHAR_CLASS; }
+  "\\s"                   { return FLEX_CHAR_CLASS; }
+  "\\S"                   { return FLEX_CHAR_CLASS; }
+  "\\w"                   { return FLEX_CHAR_CLASS; }
+  "\\W"                   { return FLEX_CHAR_CLASS; }
+  "\\p{"[^}]*"}"          { return FLEX_CHAR_CLASS; }
+  "\\P{"[^}]*"}"          { return FLEX_CHAR_CLASS; }
+
+  \\.                     { return FLEX_CHAR_ESC; }
+}
+
 <REGEXP> {
   "<<EOF>>"               { return FLEX_EOF; }
   {WSP}+                  { return WHITE_SPACE; }
@@ -311,7 +337,9 @@ JavaCode = ({JavaRest}|{StringLiteral}|{CharLiteral}|{JavaComment})+
   "~~"                       { return FLEX_TILDETILDE; }
 
   [.[^\^\"\\\[\]]] / "--"    { return FLEX_CHAR; }
+  \\.              / "--"    { return FLEX_CHAR_ESC; }
   [.[^\^\"\\\[\]]] / "-"     { yybegin(CHARRANGE); return FLEX_CHAR; }
+  \\.              / "-"     { yybegin(CHARRANGE); return FLEX_CHAR_ESC; }
   {Char}                     { yypushback(yylength()); yybegin(CLASSCHARS); }
   .                          { return FLEX_CHAR; }
 
@@ -331,6 +359,7 @@ JavaCode = ({JavaRest}|{StringLiteral}|{CharLiteral}|{JavaComment})+
   "-]"         { yypushback(1); yybegin(CHARCLASS); return FLEX_CHAR; }
   "-"          { return FLEX_DASH; }
   {Char}       { yybegin(CHARCLASS); return FLEX_CHAR; }
+  \\.          { yybegin(CHARCLASS); return FLEX_CHAR_ESC; }
   .            { yypushback(yylength()); yybegin(CHARCLASS); }
 }
 
@@ -351,33 +380,6 @@ JavaCode = ({JavaRest}|{StringLiteral}|{CharLiteral}|{JavaComment})+
 
   {NL}     { yypushback(yylength()); yybegin(nextState); return FLEX_STRING; }
   <<EOF>>  { yybegin(REPORT_UNCLOSED); return FLEX_STRING; }
-}
-
-
-<REGEXP, CHARCLASS> {
-  {HexNumber} { return FLEX_CHAR; }
-  {OctNumber} { return FLEX_CHAR; }
-  {Unicode4}  { return FLEX_CHAR; }
-  {Unicode6}  { return FLEX_CHAR; }
-
-  \\(b|t|f|r) { return FLEX_CHAR; }
-
-  "[:jletter:]"      { return FLEX_CHAR_CLASS; }
-  "[:jletterdigit:]" { return FLEX_CHAR_CLASS; }
-  "[:letter:]"       { return FLEX_CHAR_CLASS; }
-  "[:uppercase:]"    { return FLEX_CHAR_CLASS; }
-  "[:lowercase:]"    { return FLEX_CHAR_CLASS; }
-  "[:digit:]"        { return FLEX_CHAR_CLASS; }
-  "\\d"              { return FLEX_CHAR_CLASS; }
-  "\\D"              { return FLEX_CHAR_CLASS; }
-  "\\s"              { return FLEX_CHAR_CLASS; }
-  "\\S"              { return FLEX_CHAR_CLASS; }
-  "\\w"              { return FLEX_CHAR_CLASS; }
-  "\\W"              { return FLEX_CHAR_CLASS; }
-  "\\p{"[^}]*"}"     { return FLEX_CHAR_CLASS; }
-  "\\P{"[^}]*"}"     { return FLEX_CHAR_CLASS; }
-
-  \\.         { return FLEX_CHAR; }
 }
 
 

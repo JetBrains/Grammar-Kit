@@ -54,6 +54,7 @@ public class JFlexColorSettingsPage implements ColorSettingsPage {
 
       new AttributesDescriptor("String", STRING),
       new AttributesDescriptor("Character", CHAR),
+      new AttributesDescriptor("Character escape", CHAR_ESC),
       new AttributesDescriptor("Number", NUMBER),
 
       new AttributesDescriptor("Predefined character class", CLASS_STD),

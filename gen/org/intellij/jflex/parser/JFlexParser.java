@@ -139,14 +139,14 @@ public class JFlexParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // string | char_class | char
+  // string | char_class | char_or_esc
   static boolean char_class_atom(PsiBuilder builder, int level) {
     if (!recursion_guard_(builder, level, "char_class_atom")) return false;
     boolean result;
     Marker marker = enter_section_(builder, level, _NONE_, null, "<char>");
     result = consumeToken(builder, FLEX_STRING);
     if (!result) result = consumeToken(builder, FLEX_CHAR_CLASS);
-    if (!result) result = consumeToken(builder, FLEX_CHAR);
+    if (!result) result = char_or_esc(builder, level + 1);
     exit_section_(builder, level, marker, result, false, null);
     return result;
   }
@@ -180,15 +180,28 @@ public class JFlexParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // char '-' char
+  // char | char_esc
+  static boolean char_or_esc(PsiBuilder builder, int level) {
+    if (!recursion_guard_(builder, level, "char_or_esc")) return false;
+    if (!nextTokenIs(builder, "", FLEX_CHAR, FLEX_CHAR_ESC)) return false;
+    boolean result;
+    Marker marker = enter_section_(builder);
+    result = consumeToken(builder, FLEX_CHAR);
+    if (!result) result = consumeToken(builder, FLEX_CHAR_ESC);
+    exit_section_(builder, marker, null, result);
+    return result;
+  }
+
+  /* ********************************************************** */
+  // char_or_esc '-' char_or_esc
   public static boolean char_range(PsiBuilder builder, int level) {
     if (!recursion_guard_(builder, level, "char_range")) return false;
-    if (!nextTokenIs(builder, FLEX_CHAR)) return false;
+    if (!nextTokenIs(builder, "<char>", FLEX_CHAR, FLEX_CHAR_ESC)) return false;
     boolean result;
     Marker marker = enter_section_(builder, level, _NONE_, FLEX_CHAR_RANGE, "<char>");
-    result = consumeToken(builder, FLEX_CHAR);
+    result = char_or_esc(builder, level + 1);
     result = result && consumeToken(builder, FLEX_DASH);
-    result = result && consumeToken(builder, FLEX_CHAR);
+    result = result && char_or_esc(builder, level + 1);
     exit_section_(builder, level, marker, result, false, null);
     return result;
   }
@@ -1491,7 +1504,7 @@ public class JFlexParser implements PsiParser, LightPsiParser {
 
   /* ********************************************************** */
   // &('!' | '(' | '.' | '[' | '~'
-  //   | char | char_class | number | string
+  //   | char_or_esc | char_class | number | string
   //   | '{' id | !new_line id )
   static boolean sequence_op(PsiBuilder builder, int level) {
     if (!recursion_guard_(builder, level, "sequence_op")) return false;
@@ -1503,7 +1516,7 @@ public class JFlexParser implements PsiParser, LightPsiParser {
   }
 
   // '!' | '(' | '.' | '[' | '~'
-  //   | char | char_class | number | string
+  //   | char_or_esc | char_class | number | string
   //   | '{' id | !new_line id
   private static boolean sequence_op_0(PsiBuilder builder, int level) {
     if (!recursion_guard_(builder, level, "sequence_op_0")) return false;
@@ -1514,7 +1527,7 @@ public class JFlexParser implements PsiParser, LightPsiParser {
     if (!result) result = consumeToken(builder, FLEX_DOT);
     if (!result) result = consumeToken(builder, FLEX_BRACK1);
     if (!result) result = consumeToken(builder, FLEX_TILDE);
-    if (!result) result = consumeToken(builder, FLEX_CHAR);
+    if (!result) result = char_or_esc(builder, level + 1);
     if (!result) result = consumeToken(builder, FLEX_CHAR_CLASS);
     if (!result) result = consumeToken(builder, FLEX_NUMBER);
     if (!result) result = consumeToken(builder, FLEX_STRING);
@@ -1991,14 +2004,14 @@ public class JFlexParser implements PsiParser, LightPsiParser {
     return result;
   }
 
-  // string | id | char | number
+  // string | id | char_or_esc | number
   public static boolean literal_expression(PsiBuilder builder, int level) {
     if (!recursion_guard_(builder, level, "literal_expression")) return false;
     boolean result;
     Marker marker = enter_section_(builder, level, _NONE_, FLEX_LITERAL_EXPRESSION, "<expression>");
     result = consumeTokenSmart(builder, FLEX_STRING);
     if (!result) result = consumeTokenSmart(builder, FLEX_ID);
-    if (!result) result = consumeTokenSmart(builder, FLEX_CHAR);
+    if (!result) result = char_or_esc(builder, level + 1);
     if (!result) result = consumeTokenSmart(builder, FLEX_NUMBER);
     exit_section_(builder, level, marker, result, false, null);
     return result;

@@ -53,6 +53,7 @@ public class JFlexSyntaxHighlighterFactory extends SyntaxHighlighterFactory {
 
   public static final TextAttributesKey STRING     = createTextAttributesKey("FLEX_STRING", DefaultLanguageHighlighterColors.STRING);
   public static final TextAttributesKey CHAR       = createTextAttributesKey("FLEX_CHAR", DefaultLanguageHighlighterColors.STRING);
+  public static final TextAttributesKey CHAR_ESC   = createTextAttributesKey("FLEX_CHAR_ESC", DefaultLanguageHighlighterColors.VALID_STRING_ESCAPE);
   public static final TextAttributesKey NUMBER     = createTextAttributesKey("FLEX_NUMBER", DefaultLanguageHighlighterColors.NUMBER);
 
   public static final TextAttributesKey CLASS_STD  = createTextAttributesKey("FLEX_PREDEFINED_CLASS", DefaultLanguageHighlighterColors.KEYWORD);
@@ -89,6 +90,7 @@ public class JFlexSyntaxHighlighterFactory extends SyntaxHighlighterFactory {
       if (o == FLEX_TWO_PERCS) return pack(SECT_DIV);
       if (o == FLEX_STRING) return pack(STRING);
       if (o == FLEX_CHAR) return pack(CHAR);
+      if (o == FLEX_CHAR_ESC) return pack(CHAR_ESC);
       if (o == FLEX_NUMBER || o == FLEX_VERSION) return pack(NUMBER);
       if (o == FLEX_CHAR_CLASS) return pack(CLASS_STD);
       if (o == FLEX_EOF) return pack(EOF);

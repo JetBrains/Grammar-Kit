@@ -41,7 +41,6 @@ import com.intellij.openapi.fileTypes.FileTypeFactory;
 import com.intellij.openapi.fileTypes.FileTypeManager;
 import com.intellij.openapi.fileTypes.FileTypeRegistry;
 import com.intellij.openapi.fileTypes.PlainTextLanguage;
-import com.intellij.openapi.options.SchemesManagerFactory;
 import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.progress.impl.ProgressManagerImpl;
 import com.intellij.openapi.project.DumbService;
@@ -68,7 +67,6 @@ import com.intellij.psi.impl.source.tree.injected.InjectedLanguageManagerImpl;
 import com.intellij.psi.search.PsiSearchHelper;
 import com.intellij.psi.util.CachedValuesManager;
 import com.intellij.testFramework.LightVirtualFile;
-import com.intellij.testFramework.MockSchemesManagerFactory;
 import com.intellij.util.CachedValuesManagerImpl;
 import com.intellij.util.Function;
 import com.intellij.util.messages.MessageBus;
@@ -270,7 +268,6 @@ public class LightPsi {
       PsiFileFactoryImpl psiFileFactory = new PsiFileFactoryImpl(psiManager);
       MutablePicoContainer appContainer = application.getPicoContainer();
       registerComponentInstance(appContainer, MessageBus.class, MessageBusFactory.newMessageBus(application));
-      registerComponentInstance(appContainer, SchemesManagerFactory.class, new MockSchemesManagerFactory());
       final MockEditorFactory editorFactory = new MockEditorFactory();
       registerComponentInstance(appContainer, EditorFactory.class, editorFactory);
       registerComponentInstance(

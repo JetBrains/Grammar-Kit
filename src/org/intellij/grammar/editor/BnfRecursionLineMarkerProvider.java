@@ -66,7 +66,7 @@ public class BnfRecursionLineMarkerProvider implements LineMarkerProvider {
       super(rule,
             rule.getTextRange(),
             AllIcons.Gutter.RecursiveMethod,
-            Pass.UPDATE_OVERRIDEN_MARKERS,
+            Pass.LINE_MARKERS,
             FunctionUtil.<BnfRule, String>constant("Recursive rule"),
             null,
             GutterIconRenderer.Alignment.RIGHT

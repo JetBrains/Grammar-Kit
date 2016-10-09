@@ -126,7 +126,7 @@ public class ExpressionGeneratorHelper {
         g.out("if (!%s) break;", opCall);
         if (checkEmpty) {
           g.out("if (!empty_element_parsed_guard_(%s, \"%s\", %s)) break;", g.N.builder, operator.rule.getName(), g.N.pos);
-          g.out("pos = current_position_(builder);", g.N.pos, g.N.builder);
+          g.out("%s = current_position_(%s);", g.N.pos, g.N.builder);
         }
         g.out("}");
       }

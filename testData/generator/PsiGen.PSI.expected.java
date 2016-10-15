@@ -110,14 +110,8 @@ public interface GeneratedTypes {
       else if (type == ROOT_D) {
         return new XRootDImpl(node);
       }
-      else if (type == SOME_EXPR) {
-        return new XSomeExprImpl(node);
-      }
       else if (type == SPECIAL_REF) {
         return new XSpecialRefImpl(node);
-      }
-      else if (type == STATEMENT) {
-        return new XStatementImpl(node);
       }
       throw new AssertionError("Unknown element type: " + type);
     }
@@ -1348,7 +1342,7 @@ import com.intellij.psi.util.PsiTreeUtil;
 import static generated.GeneratedTypes.*;
 import generated.psi.*;
 
-public class XSomeExprImpl extends XExprImpl implements XSomeExpr {
+public abstract class XSomeExprImpl extends XExprImpl implements XSomeExpr {
 
   public XSomeExprImpl(ASTNode node) {
     super(node);
@@ -1413,7 +1407,7 @@ import static generated.GeneratedTypes.*;
 import com.intellij.extapi.psi.ASTWrapperPsiElement;
 import generated.psi.*;
 
-public class XStatementImpl extends ASTWrapperPsiElement implements XStatement {
+public abstract class XStatementImpl extends ASTWrapperPsiElement implements XStatement {
 
   public XStatementImpl(ASTNode node) {
     super(node);

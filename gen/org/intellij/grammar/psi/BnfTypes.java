@@ -81,9 +81,6 @@ public interface BnfTypes {
       else if (type == BNF_CHOICE) {
         return new BnfChoiceImpl(node);
       }
-      else if (type == BNF_EXPRESSION) {
-        return new BnfExpressionImpl(node);
-      }
       else if (type == BNF_EXTERNAL_EXPRESSION) {
         return new BnfExternalExpressionImpl(node);
       }

@@ -68,9 +68,6 @@ public interface BnfTypes {
       else if (type == BNF_CHOICE) {
         return new BnfChoiceImpl(node);
       }
-      else if (type == BNF_EXPRESSION) {
-        return new BnfExpressionImpl(node);
-      }
       else if (type == BNF_EXTERNAL_EXPRESSION) {
         return new BnfExternalExpressionImpl(node);
       }
@@ -592,7 +589,7 @@ import com.intellij.psi.util.PsiTreeUtil;
 import static org.intellij.grammar.psi.BnfTypes.*;
 import org.intellij.grammar.psi.*;
 
-public class BnfExpressionImpl extends BnfCompositeElementImpl implements BnfExpression {
+public abstract class BnfExpressionImpl extends BnfCompositeElementImpl implements BnfExpression {
 
   public BnfExpressionImpl(ASTNode node) {
     super(node);

@@ -44,9 +44,6 @@ public interface FooTypes {
       else if (type == STRUCT_TYPE) {
         return new StructTypeImpl(node);
       }
-      else if (type == TYPE) {
-        return new TypeImpl(node);
-      }
       throw new AssertionError("Unknown element type: " + type);
     }
   }
@@ -558,7 +555,7 @@ import test.psi.*;
 import com.intellij.psi.stubs.IStubElementType;
 import com.intellij.psi.tree.IElementType;
 
-public class TypeImpl extends GenericBase<TypeStub> implements Type {
+public abstract class TypeImpl extends GenericBase<TypeStub> implements Type {
 
   public TypeImpl(TypeStub p0, IStubElementType p1) {
     super(p0, p1);

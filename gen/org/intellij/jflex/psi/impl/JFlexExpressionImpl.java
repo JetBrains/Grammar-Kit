@@ -24,7 +24,7 @@ import com.intellij.psi.util.PsiTreeUtil;
 import static org.intellij.jflex.psi.JFlexTypes.*;
 import org.intellij.jflex.psi.*;
 
-public class JFlexExpressionImpl extends JFlexCompositeElementImpl implements JFlexExpression {
+public abstract class JFlexExpressionImpl extends JFlexCompositeElementImpl implements JFlexExpression {
 
   public JFlexExpressionImpl(ASTNode node) {
     super(node);

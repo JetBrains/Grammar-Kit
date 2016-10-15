@@ -156,9 +156,6 @@ public interface JFlexTypes {
       else if (type == FLEX_DECLARATIONS_SECTION) {
         return new JFlexDeclarationsSectionImpl(node);
       }
-      else if (type == FLEX_EXPRESSION) {
-        return new JFlexExpressionImpl(node);
-      }
       else if (type == FLEX_JAVA_CODE) {
         return new JFlexJavaCodeImpl(node);
       }

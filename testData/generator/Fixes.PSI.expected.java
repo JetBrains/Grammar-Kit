@@ -365,7 +365,7 @@ import static generated.GeneratedTypes.*;
 import com.intellij.extapi.psi.ASTWrapperPsiElement;
 import generated.psi.*;
 
-public class ExprImpl extends ASTWrapperPsiElement implements Expr {
+public abstract class ExprImpl extends ASTWrapperPsiElement implements Expr {
 
   public ExprImpl(ASTNode node) {
     super(node);
@@ -459,7 +459,7 @@ import com.intellij.psi.util.PsiTreeUtil;
 import static generated.GeneratedTypes.*;
 import generated.psi.*;
 
-public class SomeExprImpl extends ExprImpl implements SomeExpr {
+public abstract class SomeExprImpl extends ExprImpl implements SomeExpr {
 
   public SomeExprImpl(ASTNode node) {
     super(node);

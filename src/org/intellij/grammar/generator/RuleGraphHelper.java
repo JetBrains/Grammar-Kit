@@ -749,6 +749,7 @@ public class RuleGraphHelper {
     for (PsiElement t : map.keySet()) {
       if (PsiUtilCore.getElementType(t) == MARKER_TYPE) continue;
       if (requiredFound || map.get(t) != REQUIRED) return false;
+      if (isExternalPsi(t)) return false;
       requiredFound = true;
     }
     return requiredFound;

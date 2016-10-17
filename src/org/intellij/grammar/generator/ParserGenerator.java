@@ -176,8 +176,7 @@ public class ParserGenerator {
       }
       String implSuper = StringUtil.notNullize(getAttribute(rule, KnownAttribute.MIXIN),
                                                getSuperClassName(myFile, rule, "", myPsiClassFormat));
-      String implSuperRaw =
-        implSuper.indexOf("<") < implSuper.indexOf(">") ? implSuper.substring(0, implSuper.indexOf("<")) : implSuper;
+      String implSuperRaw = getRawClassName(implSuper);
       String stubName =
         StringUtil.isNotEmpty(stubClass) ? stubClass :
         implSuper.indexOf("<") < implSuper.indexOf(">") && !myJavaHelper.findClassMethods(implSuperRaw, JavaHelper.MethodType.INSTANCE, "getParentByStub", 0).isEmpty() ?
@@ -186,6 +185,24 @@ public class ParserGenerator {
         myRulesStubNames.put(rule.getName(), stubName);
       }
     }
+  }
+
+  @NotNull
+  private Map<String, String> calcRealSuperClasses(Map<String, BnfRule> sortedPsiRules, String psiImplPackage) {
+    Map<String, String> realSuperClasses = ContainerUtil.newHashMap();
+    for (String ruleName : sortedPsiRules.keySet()) {
+      BnfRule rule = ObjectUtils.assertNotNull(myFile.getRule(ruleName));
+      String superRuleClass = getSuperClassName(myFile, rule, psiImplPackage, myPsiImplClassFormat);
+      String stubName = myRulesStubNames.get(rule.getName());
+      String adjustedSuperRuleClass =
+        StringUtil.isEmpty(stubName) ? superRuleClass :
+        AST_WRAPPER_PSI_ELEMENT_CLASS.equals(superRuleClass) ? STUB_BASED_PSI_ELEMENT_BASE + "<" + stubName + ">" :
+        superRuleClass.contains("?") ? superRuleClass.replaceAll("\\?", stubName) : superRuleClass;
+      // mixin attribute overrides "extends":
+      String realSuper = StringUtil.notNullize(getAttribute(rule, KnownAttribute.MIXIN), adjustedSuperRuleClass);
+      realSuperClasses.put(ruleName, realSuper);
+    }
+    return realSuperClasses;
   }
 
   private void openOutput(String className) throws IOException {
@@ -284,13 +301,13 @@ public class ParserGenerator {
           closeOutput();
         }
       }
+      Map<String, String> realSuperClasses = calcRealSuperClasses(sortedPsiRules, psiImplPackage);
       for (String ruleName : sortedPsiRules.keySet()) {
         BnfRule rule = ObjectUtils.assertNotNull(myFile.getRule(ruleName));
         String psiImplClass = psiImplPackage + "." + getRulePsiClassName(rule, myPsiImplClassFormat);
         openOutput(psiImplClass);
         try {
-          String superClassName = getSuperClassName(myFile, rule, psiImplPackage, myPsiImplClassFormat);
-          generatePsiImpl(rule, psiImplClass, infClasses.get(ruleName), superClassName);
+          generatePsiImpl(rule, psiImplClass, infClasses.get(ruleName), realSuperClasses);
         }
         finally {
           closeOutput();
@@ -1400,15 +1417,10 @@ public class ParserGenerator {
   private void generatePsiImpl(BnfRule rule,
                                String psiClass,
                                String superInterface,
-                               String superRuleClass) {
+                               Map<String, String> realSuperClasses) {
     String typeHolderClass = getRootAttribute(myFile, KnownAttribute.ELEMENT_TYPE_HOLDER_CLASS);
     String stubName = myRulesStubNames.get(rule.getName());
-    String adjustedSuperRuleClass =
-      StringUtil.isEmpty(stubName) ? superRuleClass :
-      AST_WRAPPER_PSI_ELEMENT_CLASS.equals(superRuleClass) ? STUB_BASED_PSI_ELEMENT_BASE + "<" + stubName + ">" :
-      superRuleClass.contains("?") ? superRuleClass.replaceAll("\\?", stubName) : superRuleClass;
-    // mixin attribute overrides "extends":
-    String implSuper = StringUtil.notNullize(getAttribute(rule, KnownAttribute.MIXIN), adjustedSuperRuleClass);
+    String implSuper = realSuperClasses.get(rule.getName());
 
     Set<String> imports = ContainerUtil.newLinkedHashSet();
     imports.addAll(Arrays.asList(CommonClassNames.JAVA_UTIL_LIST,
@@ -1423,21 +1435,26 @@ public class ParserGenerator {
     imports.add(StringUtil.notNullize(myPsiImplUtilClass));
     imports.addAll(getRuleMethodTypesToImport(rule));
 
-    String implSuperRaw = implSuper.indexOf("<") < implSuper.indexOf(">") ? implSuper.substring(0, implSuper.indexOf("<")) : implSuper;
+    String implSuperRaw = getRawClassName(implSuper);
     Function<String, String> substitutor = stubName != null ? Functions.constant(stubName) : Function.ID;
 
     List<NavigatablePsiElement> constructors =
       myJavaHelper.findClassMethods(implSuperRaw, JavaHelper.MethodType.CONSTRUCTOR, "*", -1);
+    if (constructors.isEmpty()) {
+      BnfRule topSuperRule = getTopSuperRule(myFile, rule);
+      String topImplSuper = topSuperRule == null || topSuperRule == rule? null : realSuperClasses.get(topSuperRule.getName());
+      if (topImplSuper != null) {
+        constructors = myJavaHelper.findClassMethods(getRawClassName(topImplSuper), JavaHelper.MethodType.CONSTRUCTOR, "*", -1);
+      }
+    }
     for (NavigatablePsiElement m : constructors) {
       String declaringClass = myJavaHelper.getDeclaringClass(m);
       if (STUB_BASED_PSI_ELEMENT_BASE.equals(declaringClass)) continue;
       if (AST_WRAPPER_PSI_ELEMENT_CLASS.equals(declaringClass)) continue;
       collectMethodTypesToImport(Collections.singletonList(m), false, imports);
     }
-    if (constructors.isEmpty() && stubName != null) {
-      imports.add(ISTUBELEMENTTYPE_CLASS);
-      imports.add(stubName);
-    }
+    if (stubName != null && constructors.isEmpty()) imports.add(ISTUBELEMENTTYPE_CLASS);
+    if (stubName != null) imports.add(stubName);
 
     if (!G.generateTokenTypes) {
       // add parser static imports hoping external token constants are there

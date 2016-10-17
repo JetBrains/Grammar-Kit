@@ -58,6 +58,11 @@ public class ParserGeneratorUtil {
   private static final Object NULL = new Object();
   private static final BnfExpression NULL_ATTR = new FakeBnfExpression("NULL");
 
+  @NotNull
+  public static String getRawClassName(@NotNull String name) {
+    return name.indexOf("<") < name.indexOf(">") ? name.substring(0, name.indexOf("<")) : name;
+  }
+
   enum ConsumeType {
     DEFAULT, FAST, SMART;
 
@@ -381,7 +386,7 @@ public class ParserGeneratorUtil {
   }
 
   @Nullable
-  static BnfRule getTopSuperRule(@NotNull BnfFile file, BnfRule rule) {
+  static BnfRule getTopSuperRule(@NotNull BnfFile file, @Nullable BnfRule rule) {
     Set<BnfRule> visited = ContainerUtil.newHashSet();
     BnfRule cur = rule, next = rule;
     for (; next != null && cur != null; cur = !visited.add(next) ? null : next) {
@@ -431,7 +436,7 @@ public class ParserGeneratorUtil {
   }
 
   @NotNull
-  static String getSuperClassName(BnfFile file, BnfRule rule, String psiPackage, NameFormat format) {
+  static String getSuperClassName(@NotNull BnfFile file, @Nullable BnfRule rule, String psiPackage, NameFormat format) {
     BnfRule topSuper = getTopSuperRule(file, rule);
     return topSuper == null ? getRootAttribute(file, KnownAttribute.EXTENDS) :
            topSuper == rule ? getAttribute(rule, KnownAttribute.EXTENDS) :
@@ -795,6 +800,8 @@ public class ParserGeneratorUtil {
         type = substitutor.fun(type);
       }
       if (BnfConstants.AST_NODE_CLASS.equals(type)) name = "node";
+      if (type.endsWith("ElementType")) name = "type";
+      if (type.endsWith("Stub")) name = "stub";
       if ((mask & 1) == 1) sb.append(shortener.fun(type));
       if ((mask & 3) == 3) sb.append(" ");
       if ((mask & 2) == 2) sb.append(name);

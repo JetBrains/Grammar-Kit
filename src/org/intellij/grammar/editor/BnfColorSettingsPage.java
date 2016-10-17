@@ -23,6 +23,7 @@ import com.intellij.openapi.options.colors.ColorDescriptor;
 import com.intellij.openapi.options.colors.ColorSettingsPage;
 import gnu.trove.THashMap;
 import org.intellij.grammar.BnfIcons;
+import org.intellij.grammar.generator.BnfConstants;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
 
@@ -63,7 +64,7 @@ public class BnfColorSettingsPage implements ColorSettingsPage {
 
   @NotNull
   public String getDisplayName() {
-    return "Grammar";
+    return BnfConstants.BNF_DISPLAY_NAME;
   }
 
   public Icon getIcon() {

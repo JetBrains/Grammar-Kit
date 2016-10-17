@@ -16,6 +16,7 @@
 package org.intellij.grammar;
 
 import com.intellij.openapi.fileTypes.LanguageFileType;
+import org.intellij.grammar.generator.BnfConstants;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
@@ -43,7 +44,7 @@ public class BnfFileType extends LanguageFileType {
   @NotNull
   @Override
   public String getDescription() {
-    return "BNF Grammar";
+    return BnfConstants.BNF_DISPLAY_NAME;
   }
 
   @NotNull
@@ -57,9 +58,4 @@ public class BnfFileType extends LanguageFileType {
     return BnfIcons.FILE;
   }
 
-  @Override
-  public boolean isJVMDebuggingSupported() {
-    // turn off for now
-    return false;
-  }
 }

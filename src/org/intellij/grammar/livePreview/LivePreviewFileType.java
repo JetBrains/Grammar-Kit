@@ -25,6 +25,8 @@ import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 
+import static org.intellij.grammar.generator.BnfConstants.LP_DISPLAY_NAME;
+
 /**
  * @author gregsh
  */
@@ -38,13 +40,13 @@ public class LivePreviewFileType extends LanguageFileType {
   @NotNull
   @Override
   public String getName() {
-    return "Grammar Live Preview";
+    return LP_DISPLAY_NAME;
   }
 
   @NotNull
   @Override
   public String getDescription() {
-    return "Grammar Live Preview";
+    return LP_DISPLAY_NAME;
   }
 
   @NotNull

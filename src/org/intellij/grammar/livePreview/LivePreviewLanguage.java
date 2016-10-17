@@ -41,6 +41,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static org.intellij.grammar.generator.BnfConstants.LP_DISPLAY_NAME;
 import static org.jetbrains.org.objectweb.asm.Opcodes.*;
 
 
@@ -54,7 +55,7 @@ public class LivePreviewLanguage extends Language {
   public static final Language BASE_INSTANCE = new Language("BNF_LP") {
     @Override
     public String getDisplayName() {
-      return "Grammar Live Preview";
+      return LP_DISPLAY_NAME;
     }
   };
 

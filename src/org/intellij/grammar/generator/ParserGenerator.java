@@ -314,9 +314,32 @@ public class ParserGenerator {
                                            KnownAttribute.IMPLEMENTS.getDefaultValue().get(0)).second;
     String shortSuperIntf = StringUtil.getShortName(superIntf);
     List<String> imports = ContainerUtil.newArrayList("org.jetbrains.annotations.*", PSI_ELEMENT_VISITOR_CLASS, superIntf);
+    MultiMap<String, String> supers = MultiMap.createSmart();
     for (BnfRule rule : sortedRules.values()) {
-      imports.addAll(getSuperInterfaceNames(myFile, rule, StringUtil.getPackageName(psiClass), myPsiClassFormat));
+      supers.putValues(rule.getName(), getSuperInterfaceNames(myFile, rule, StringUtil.getPackageName(psiClass), myPsiClassFormat));
     }
+    {
+      // ensure only public supers are exposed, replace non-public with default super-intf for simplicity
+      Map<String, String> replacements = ContainerUtil.newHashMap();
+      Set<String> visited = ContainerUtil.newHashSet();
+      for (String s : supers.values()) {
+        if (!visited.add(s)) continue;
+        NavigatablePsiElement aClass = myJavaHelper.findClass(s);
+        if (aClass != null && !myJavaHelper.isPublic(aClass)) {
+          replacements.put(s, superIntf);
+        }
+      }
+      for (String key : supers.keySet()) {
+        for (ListIterator<String> it = ((List<String>)supers.get(key)).listIterator(); it.hasNext(); ) {
+          String s = replacements.get(it.next());
+          if (s != null) {
+            if (s.isEmpty()) it.remove();
+            else it.set(s);
+          }
+        }
+      }
+    }
+    imports.addAll(supers.values());
     String r = G.visitorValue != null ? "<" + G.visitorValue + ">" : "";
     String t = G.visitorValue != null ? G.visitorValue : "void";
     String ret = G.visitorValue != null ? "return " : "";
@@ -328,7 +351,7 @@ public class ParserGenerator {
       visited.add(methodName);
       out("public " + t + " visit" + methodName + "(@NotNull " + getRulePsiClassName(rule, myPsiClassFormat) + " o) {");
       boolean first = true;
-      for (String top : getSuperInterfaceNames(myFile, rule, "", myPsiClassFormat)) {
+      for (String top : supers.get(rule.getName())) {
         if (!first && top.equals(superIntf)) continue;
         int trimIdx = StringUtil.indexOfAny(top, TYPE_TEXT_SEPARATORS); // trim generics
         top = myShortener.fun(trimIdx > 0 ? top.substring(0, trimIdx) : top);

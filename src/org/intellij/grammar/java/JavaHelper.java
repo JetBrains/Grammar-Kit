@@ -16,6 +16,8 @@
 
 package org.intellij.grammar.java;
 
+import com.intellij.codeInsight.intention.IntentionAction;
+import com.intellij.codeInsight.intention.QuickFixFactory;
 import com.intellij.navigation.NavigationItem;
 import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.project.IndexNotReadyException;
@@ -54,6 +56,11 @@ public abstract class JavaHelper {
     PsiFile file = context.getContainingFile();
     JavaHelper service = ServiceManager.getService(file.getProject(), JavaHelper.class);
     return service == null ? new AsmHelper() : service;
+  }
+
+  @Nullable
+  public IntentionAction getCreateClassQuickFix(PsiElement context, String className, boolean intf, String superClass) {
+    return null;
   }
 
   @Nullable
@@ -124,6 +131,12 @@ public abstract class JavaHelper {
       JavaClassReferenceProvider provider = new JavaClassReferenceProvider();
       provider.setSoft(false);
       return provider;
+    }
+
+    @Nullable
+    @Override
+    public IntentionAction getCreateClassQuickFix(PsiElement context, String className, boolean intf, String superClass) {
+      return QuickFixFactory.getInstance().createCreateClassOrInterfaceFix(context, className, !intf, superClass);
     }
 
     @Override

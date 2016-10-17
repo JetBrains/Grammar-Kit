@@ -15,6 +15,8 @@
  */
 package org.intellij.grammar.editor;
 
+import com.intellij.codeInsight.intention.IntentionAction;
+import com.intellij.lang.annotation.Annotation;
 import com.intellij.lang.annotation.AnnotationHolder;
 import com.intellij.lang.annotation.Annotator;
 import com.intellij.openapi.editor.markup.TextAttributes;
@@ -156,7 +158,12 @@ public class BnfAnnotator implements Annotator, DumbAware {
             annotationHolder.createInfoAnnotation(range, null).setTextAttributes(BnfSyntaxHighlighter.RULE);
           }
           else if (resolve == null) {
-            annotationHolder.createWarningAnnotation(range, "Unresolved " + refType + "reference");
+            Annotation annotation = annotationHolder.createWarningAnnotation(range, "Unresolved " + refType + "reference");
+            if (refType.contains("class")) {
+              boolean intf = attribute == KnownAttribute.IMPLEMENTS;
+              IntentionAction fix = JavaHelper.getJavaHelper(parent).getCreateClassQuickFix(parent, value, intf, null);
+              if (fix != null) annotation.registerFix(fix, null, null);
+            }
           }
         }
       }

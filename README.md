@@ -227,6 +227,12 @@ java -jar expression-console-sample.jar
 
 Change log
 ==========
+1.4.3
+
+* Generator: constructor and visitor fixes (issues 133, 135, 136)
+* Copyright plugin integration
+* IntelliJ compatibility: 2016.3, 2017.X
+
 1.4.2
 
 * JFlex: more color options & better AST

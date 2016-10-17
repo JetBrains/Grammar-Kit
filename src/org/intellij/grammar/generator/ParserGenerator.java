@@ -378,7 +378,8 @@ public class ParserGenerator {
         out(ret + "visit" + myPsiClassFormat.strip(shortSuperIntf) + "(o);");
       }
       else {
-        out("visitElement(o);");
+        String superPrefix = methodName.equals("Element") ? "super." : "";
+        out(superPrefix + "visitElement(o);");
         if (G.visitorValue != null) out(ret + "null;");
       }
       out("}");

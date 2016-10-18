@@ -245,10 +245,12 @@ import static test.FooTypes.*;
 import com.intellij.extapi.psi.StubBasedPsiElementBase;
 import test.stub.Element2Stub;
 import test.psi.*;
+import com.intellij.psi.stubs.IStubElementType;
+import com.intellij.psi.tree.IElementType;
 
 public class Element2Impl extends StubBasedPsiElementBase<Element2Stub> implements Element2 {
 
-  public Element2Impl(Element2Stub stub, com.intellij.psi.stubs.IStubElementType type) {
+  public Element2Impl(Element2Stub stub, IStubElementType type) {
     super(stub, type);
   }
 
@@ -256,7 +258,7 @@ public class Element2Impl extends StubBasedPsiElementBase<Element2Stub> implemen
     super(node);
   }
 
-  public Element2Impl(Element2Stub stub, com.intellij.psi.tree.IElementType type, ASTNode node) {
+  public Element2Impl(Element2Stub stub, IElementType type, ASTNode node) {
     super(stub, type, node);
   }
 
@@ -290,10 +292,12 @@ import static test.FooTypes.*;
 import com.intellij.extapi.psi.StubBasedPsiElementBase;
 import test.stub.Element3Stub;
 import test.psi.*;
+import com.intellij.psi.stubs.IStubElementType;
+import com.intellij.psi.tree.IElementType;
 
 public class Element3Impl extends StubBasedPsiElementBase<Element3Stub> implements Element3 {
 
-  public Element3Impl(Element3Stub stub, com.intellij.psi.stubs.IStubElementType type) {
+  public Element3Impl(Element3Stub stub, IStubElementType type) {
     super(stub, type);
   }
 
@@ -301,7 +305,7 @@ public class Element3Impl extends StubBasedPsiElementBase<Element3Stub> implemen
     super(node);
   }
 
-  public Element3Impl(Element3Stub stub, com.intellij.psi.tree.IElementType type, ASTNode node) {
+  public Element3Impl(Element3Stub stub, IElementType type, ASTNode node) {
     super(stub, type, node);
   }
 
@@ -335,10 +339,12 @@ import static test.FooTypes.*;
 import com.intellij.extapi.psi.StubBasedPsiElementBase;
 import test.stub.Element4Stub;
 import test.psi.*;
+import com.intellij.psi.stubs.IStubElementType;
+import com.intellij.psi.tree.IElementType;
 
 public class Element4Impl extends StubBasedPsiElementBase<Element4Stub> implements Element4 {
 
-  public Element4Impl(Element4Stub stub, com.intellij.psi.stubs.IStubElementType type) {
+  public Element4Impl(Element4Stub stub, IStubElementType type) {
     super(stub, type);
   }
 
@@ -346,7 +352,7 @@ public class Element4Impl extends StubBasedPsiElementBase<Element4Stub> implemen
     super(node);
   }
 
-  public Element4Impl(Element4Stub stub, com.intellij.psi.tree.IElementType type, ASTNode node) {
+  public Element4Impl(Element4Stub stub, IElementType type, ASTNode node) {
     super(stub, type, node);
   }
 

@@ -1448,9 +1448,6 @@ public class ParserGenerator {
       }
     }
     for (NavigatablePsiElement m : constructors) {
-      String declaringClass = myJavaHelper.getDeclaringClass(m);
-      if (STUB_BASED_PSI_ELEMENT_BASE.equals(declaringClass)) continue;
-      if (AST_WRAPPER_PSI_ELEMENT_CLASS.equals(declaringClass)) continue;
       collectMethodTypesToImport(Collections.singletonList(m), false, imports);
     }
     if (stubName != null && constructors.isEmpty()) imports.add(ISTUBELEMENTTYPE_CLASS);

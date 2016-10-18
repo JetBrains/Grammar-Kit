@@ -1,6 +1,6 @@
 <idea-plugin url="https://github.com/JetBrains/Grammar-Kit" version="2">
   <id>org.jetbrains.idea.grammar</id>
-  <version>1.4.3</version>
+  <version>1.4.4-SNAPSHOT</version>
   <vendor email="gregory.shrago@jetbrains.com">Greg Shrago</vendor>
   <idea-version since-build="162.1812" until-build="173.*"/>
 
@@ -14,9 +14,7 @@
   <change-notes>
     <![CDATA[
     <ul>
-      <li>Copyright plugin integration</li>
-      <li>Generator: constructor and visitor fixes (issues 133, 135, 136)</li>
-      <li>IntelliJ compatibility: 2016.3, 2017.X</li>
+      <li>Sources migrated to Java 8</li>
     </ul>
     <a href="https://github.com/JetBrains/Grammar-Kit#change-log">Full change log...</a>
     ]]>

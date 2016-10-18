@@ -24,7 +24,6 @@ import com.intellij.openapi.actionSystem.DataContext;
 import com.intellij.openapi.actionSystem.LangDataKeys;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Comparing;
-import com.intellij.openapi.util.Condition;
 import com.intellij.openapi.util.ModificationTracker;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.openapi.vfs.VirtualFile;
@@ -103,18 +102,8 @@ public class BnfDiagramProvider extends DiagramProvider<PsiNamedElement> {
     public Object[] getNodeItems(PsiNamedElement parent) {
       if (parent instanceof BnfRule) {
         Map<PsiElement, RuleGraphHelper.Cardinality> map = myGraphHelper.getFor((BnfRule)parent);
-        Object[] objects = ContainerUtil.findAll(map.entrySet(), new Condition<Map.Entry<PsiElement, RuleGraphHelper.Cardinality>>() {
-          @Override
-          public boolean value(Map.Entry<PsiElement, RuleGraphHelper.Cardinality> p) {
-            return p.getKey() instanceof BnfRule;
-          }
-        }).toArray();
-        Arrays.sort(objects, new Comparator<Object>() {
-          @Override
-          public int compare(Object o, Object o1) {
-            return Comparing.compare(((Map.Entry<BnfRule, ?>)o).getKey().getName(), ((Map.Entry<BnfRule, ?>)o1).getKey().getName());
-          }
-        });
+        Object[] objects = ContainerUtil.findAll(map.entrySet(), p -> p.getKey() instanceof BnfRule).toArray();
+        Arrays.sort(objects, (o, o1) -> Comparing.compare(((Map.Entry<BnfRule, ?>)o).getKey().getName(), ((Map.Entry<BnfRule, ?>)o1).getKey().getName()));
         return objects;
       }
       return super.getNodeItems(parent);
@@ -236,8 +225,8 @@ public class BnfDiagramProvider extends DiagramProvider<PsiNamedElement> {
 
     private final BnfFile myFile;
 
-    private final Collection<DiagramNode<PsiNamedElement>> myNodes = new HashSet<DiagramNode<PsiNamedElement>>();
-    private final Collection<DiagramEdge<PsiNamedElement>> myEdges = new HashSet<DiagramEdge<PsiNamedElement>>();
+    private final Collection<DiagramNode<PsiNamedElement>> myNodes = new HashSet<>();
+    private final Collection<DiagramEdge<PsiNamedElement>> myEdges = new HashSet<>();
 
 
     MyDataModel(Project project, BnfFile file, BnfDiagramProvider provider) {
@@ -276,7 +265,7 @@ public class BnfDiagramProvider extends DiagramProvider<PsiNamedElement> {
       RuleGraphHelper ruleGraphHelper = RuleGraphHelper.getCached(myFile);
       ((BnfDiagramProvider)getProvider()).myGraphHelper = ruleGraphHelper;
 
-      Map<BnfRule, DiagramNode<PsiNamedElement>> nodeMap = new THashMap<BnfRule, DiagramNode<PsiNamedElement>>();
+      Map<BnfRule, DiagramNode<PsiNamedElement>> nodeMap = new THashMap<>();
       List<BnfRule> rules = myFile.getRules();
       BnfRule root = ContainerUtil.getFirstItem(rules);
       for (BnfRule rule : rules) {

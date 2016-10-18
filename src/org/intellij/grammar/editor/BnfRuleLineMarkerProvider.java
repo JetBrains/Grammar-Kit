@@ -52,12 +52,12 @@ public class BnfRuleLineMarkerProvider extends RelatedItemLineMarkerProvider {
   public void collectNavigationMarkers(List<PsiElement> elements,
                                        Collection<? super RelatedItemLineMarkerInfo> result,
                                        boolean forNavigation) {
-    Set<PsiElement> visited = forNavigation? new THashSet<PsiElement>() : null;
+    Set<PsiElement> visited = forNavigation ? new THashSet<>() : null;
     for (PsiElement element : elements) {
       PsiElement parent = element.getParent();
       boolean isRuleId = parent instanceof BnfRule && (forNavigation || element == ((BnfRule)parent).getId());
       if (!(isRuleId || forNavigation && element instanceof BnfExpression)) continue;
-      List<PsiElement> items = new ArrayList<PsiElement>();
+      List<PsiElement> items = new ArrayList<>();
       NavigatablePsiElement method = getMethod(element);
       if (method != null && (!forNavigation || visited.add(method))) {
         items.add(method);

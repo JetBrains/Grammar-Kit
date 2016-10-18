@@ -74,7 +74,7 @@ public class BnfIdenticalChoiceBranchesInspection extends LocalInspectionTool {
   }
 
   private static void checkFile(PsiFile file, final ProblemsHolder problemsHolder) {
-    final THashSet<BnfExpression> set = new THashSet<BnfExpression>();
+    final THashSet<BnfExpression> set = new THashSet<>();
     file.accept(new PsiRecursiveElementWalkingVisitor() {
       @Override
       public void visitElement(PsiElement element) {

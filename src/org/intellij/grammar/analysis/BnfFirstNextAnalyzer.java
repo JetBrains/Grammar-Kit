@@ -80,24 +80,24 @@ public class BnfFirstNextAnalyzer {
   }
 
   public Set<BnfExpression> calcFirst(@NotNull BnfRule rule) {
-    Set<BnfExpression> visited = new THashSet<BnfExpression>();
+    Set<BnfExpression> visited = new THashSet<>();
     BnfExpression expression = rule.getExpression();
     visited.add(expression);
-    return calcFirstInner(expression, new THashSet<BnfExpression>(), visited);
+    return calcFirstInner(expression, new THashSet<>(), visited);
   }
 
   public Map<BnfExpression, BnfExpression> calcNext(@NotNull BnfRule targetRule) {
-    return calcNextInner(targetRule.getExpression(), new THashMap<BnfExpression, BnfExpression>(), new THashSet<BnfExpression>());
+    return calcNextInner(targetRule.getExpression(), new THashMap<>(), new THashSet<>());
   }
 
   public Map<BnfExpression, BnfExpression> calcNext(@NotNull BnfExpression targetExpression) {
-    return calcNextInner(targetExpression, new THashMap<BnfExpression, BnfExpression>(), new THashSet<BnfExpression>());
+    return calcNextInner(targetExpression, new THashMap<>(), new THashSet<>());
   }
 
   private Map<BnfExpression, BnfExpression> calcNextInner(@NotNull BnfExpression targetExpression, Map<BnfExpression, BnfExpression> result, Set<BnfExpression> visited) {
-    LinkedList<BnfExpression> stack = new LinkedList<BnfExpression>();
-    THashSet<BnfRule> totalVisited = new THashSet<BnfRule>();
-    Set<BnfExpression> curResult = new THashSet<BnfExpression>();
+    LinkedList<BnfExpression> stack = new LinkedList<>();
+    THashSet<BnfRule> totalVisited = new THashSet<>();
+    Set<BnfExpression> curResult = new THashSet<>();
     stack.add(targetExpression);
     main: while (!stack.isEmpty()) {
 
@@ -166,8 +166,8 @@ public class BnfFirstNextAnalyzer {
       BnfExpression firstItem = ContainerUtil.getFirstItem(expressions);
       if (firstItem == null) return result;
       BnfRule rule = ParserGeneratorUtil.Rule.of(firstItem);
-      pinned = new HashSet<BnfExpression>();
-      GrammarUtil.processPinnedExpressions(rule, new CommonProcessors.CollectProcessor<BnfExpression>(pinned));
+      pinned = new HashSet<>();
+      GrammarUtil.processPinnedExpressions(rule, new CommonProcessors.CollectProcessor<>(pinned));
       if (firstItem.getParent() instanceof BnfSequence) {
         for (BnfExpression e : ((BnfSequence)firstItem.getParent()).getExpressionList()) {
           if (e == firstItem) break;
@@ -258,7 +258,7 @@ public class BnfFirstNextAnalyzer {
       }
       else {
         BnfExpression ruleRef = expressionList.get(0);
-        Set<BnfExpression> metaResults = calcFirstInner(ruleRef, new LinkedHashSet<BnfExpression>(), visited, forcedNext);
+        Set<BnfExpression> metaResults = calcFirstInner(ruleRef, new LinkedHashSet<>(), visited, forcedNext);
         List<String> params = null;
         for (BnfExpression e : metaResults) {
           if (e instanceof BnfExternalExpression) {
@@ -299,7 +299,7 @@ public class BnfFirstNextAnalyzer {
       }
       else {
         if (forcedNext == null) {
-          next = calcNextInner(expression, new THashMap<BnfExpression, BnfExpression>(), visited).keySet();
+          next = calcNextInner(expression, new THashMap<>(), visited).keySet();
         }
         else {
           next = calcSequenceFirstInner(forcedNext.second, newExprSet(), visited);
@@ -386,7 +386,7 @@ public class BnfFirstNextAnalyzer {
   }
 
   public Set<String> asStrings(Set<BnfExpression> expressions) {
-    Set<String> result = new TreeSet<String>();
+    Set<String> result = new TreeSet<>();
     for (BnfExpression expression : expressions) {
       if (expression instanceof BnfLiteralExpression) {
         String text = expression.getText();

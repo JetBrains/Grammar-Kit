@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.intellij.grammar.psi.impl;
 
 import com.intellij.extapi.psi.PsiFileBase;
@@ -52,30 +53,18 @@ public class BnfFileImpl extends PsiFileBase implements BnfFile {
 
   public BnfFileImpl(FileViewProvider fileViewProvider) {
     super(fileViewProvider, BnfLanguage.INSTANCE);
-    myRules = CachedValuesManager.getManager(getProject()).createCachedValue(new CachedValueProvider<Map<String, BnfRule>>() {
-      @Override
-      public Result<Map<String, BnfRule>> compute() {
-        return Result.create(calcRules(), BnfFileImpl.this);
-      }
-    }, false);
-    myGlobalAttributes = CachedValuesManager.getManager(getProject()).createCachedValue(new CachedValueProvider<List<BnfAttrs>>() {
-      @Override
-      public Result<List<BnfAttrs>> compute() {
-        return Result.create(calcAttributes(), BnfFileImpl.this);
-      }
-    }, false);
-    myAttributeValues = CachedValuesManager.getManager(getProject()).createCachedValue(new CachedValueProvider<Map<String, List<AttributeInfo>>>() {
-      @Override
-      public Result<Map<String, List<AttributeInfo>>> compute() {
-        return Result.create(calcAttributeValues(), BnfFileImpl.this);
-      }
-    }, false);
+    myRules = CachedValuesManager.getManager(getProject()).createCachedValue(
+      () -> CachedValueProvider.Result.create(calcRules(), BnfFileImpl.this), false);
+    myGlobalAttributes = CachedValuesManager.getManager(getProject()).createCachedValue(
+      () -> CachedValueProvider.Result.create(calcAttributes(), BnfFileImpl.this), false);
+    myAttributeValues = CachedValuesManager.getManager(getProject()).createCachedValue(
+      () -> CachedValueProvider.Result.create(calcAttributeValues(), BnfFileImpl.this), false);
   }
 
   @NotNull
   @Override
   public List<BnfRule> getRules() {
-    return new ArrayList<BnfRule>(myRules.getValue().values());
+    return new ArrayList<>(myRules.getValue().values());
   }
 
   @Nullable
@@ -176,7 +165,7 @@ public class BnfFileImpl extends PsiFileBase implements BnfFile {
             pattern = expression == null ? null : ParserGeneratorUtil.compilePattern(StringUtil.stripQuotesAroundValue(expression.getText()));
           }
           List<AttributeInfo> list = result.get(attr.getName());
-          if (list == null) result.put(attr.getName(), list = new ArrayList<AttributeInfo>());
+          if (list == null) result.put(attr.getName(), list = new ArrayList<>());
           Object value = ParserGeneratorUtil.getAttributeValue(attr.getExpression());
           int offset = attr.getTextRange().getStartOffset();
           int infoOffset = pattern == null? baseRange.getStartOffset() + 1: baseRange.getStartOffset() + (baseRange.getEndOffset() - offset);

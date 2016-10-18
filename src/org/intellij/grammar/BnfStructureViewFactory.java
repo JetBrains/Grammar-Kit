@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.intellij.grammar;
 
 import com.intellij.ide.structureView.*;
@@ -20,6 +21,7 @@ import com.intellij.ide.structureView.impl.common.PsiTreeElementBase;
 import com.intellij.ide.util.treeView.smartTree.SortableTreeElement;
 import com.intellij.lang.PsiStructureViewFactory;
 import com.intellij.openapi.editor.Editor;
+import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiNamedElement;
@@ -90,6 +92,7 @@ public class BnfStructureViewFactory implements PsiStructureViewFactory {
       super(element);
     }
 
+    @NotNull
     @Override
     public String getAlphaSortKey() {
       return getPresentableText();
@@ -103,7 +106,7 @@ public class BnfStructureViewFactory implements PsiStructureViewFactory {
           || element instanceof BnfAttr) {
         return Collections.emptyList();
       }
-      final ArrayList<StructureViewTreeElement> result = new ArrayList<StructureViewTreeElement>();
+      List<StructureViewTreeElement> result = new ArrayList<>();
       if (element instanceof BnfFile) {
         for (BnfAttrs o : ((BnfFile)element).getAttributes()) {
           result.add(new MyElement(o));
@@ -120,11 +123,12 @@ public class BnfStructureViewFactory implements PsiStructureViewFactory {
       return result;
     }
 
+    @NotNull
     @Override
     public String getPresentableText() {
       PsiElement element = getElement();
       if (element instanceof BnfRule) {
-        return ((PsiNamedElement)element).getName();
+        return StringUtil.notNullize(((PsiNamedElement)element).getName());
       }
       else if (element instanceof BnfAttr) {
         return getAttrDisplayName((BnfAttr)element);

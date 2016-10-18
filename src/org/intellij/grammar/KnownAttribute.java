@@ -32,7 +32,7 @@ import java.util.*;
  */
 @SuppressWarnings("StaticVariableOfConcreteClass")
 public class KnownAttribute<T> {
-  private static final Map<String, KnownAttribute> ourAttributes = new TreeMap<String, KnownAttribute>();
+  private static final Map<String, KnownAttribute> ourAttributes = new TreeMap<>();
 
   @NotNull
   public static Collection<KnownAttribute> getAttributes() { return Collections.unmodifiableCollection(ourAttributes.values()); }
@@ -89,11 +89,11 @@ public class KnownAttribute<T> {
   private final T myDefaultValue;
 
   public static <T> KnownAttribute<T> create(Class<T> clazz, String name, @Nullable T defaultValue) {
-    return new KnownAttribute<T>(name, clazz, defaultValue);
+    return new KnownAttribute<>(name, clazz, defaultValue);
   }
 
   private static <T> KnownAttribute<T> create(boolean global, Class<T> clazz, String name, @Nullable T defaultValue) {
-    return new KnownAttribute<T>(global, name, clazz, defaultValue);
+    return new KnownAttribute<>(global, name, clazz, defaultValue);
   }
 
   private KnownAttribute(String name, Class<T> clazz, T defaultValue) {
@@ -152,7 +152,7 @@ public class KnownAttribute<T> {
   // returns a non-registered attribute for migration purposes
   @NotNull
   public KnownAttribute<T> alias(String deprecatedName) {
-    return new KnownAttribute<T>(deprecatedName, myClazz, null);
+    return new KnownAttribute<>(deprecatedName, myClazz, null);
   }
 
   @Nullable

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.intellij.grammar.actions;
 
 import com.intellij.notification.Notification;
@@ -40,7 +41,6 @@ import com.intellij.psi.PsiDocumentManager;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiManager;
 import com.intellij.util.ExceptionUtil;
-import com.intellij.util.Function;
 import com.intellij.util.PathUtil;
 import com.intellij.util.containers.ContainerUtil;
 import org.intellij.grammar.KnownAttribute;
@@ -82,12 +82,9 @@ public class GenerateAction extends AnAction {
     VirtualFile[] files = LangDataKeys.VIRTUAL_FILE_ARRAY.getData(e.getDataContext());
     if (project == null || files == null) return Collections.emptyList();
     final PsiManager manager = PsiManager.getInstance(project);
-    return ContainerUtil.mapNotNull(files, new Function<VirtualFile, BnfFile>() {
-      @Override
-      public BnfFile fun(VirtualFile file) {
-        PsiFile psiFile = manager.findFile(file);
-        return psiFile instanceof BnfFile ? (BnfFile)psiFile : null;
-      }
+    return ContainerUtil.mapNotNull(files, file -> {
+      PsiFile psiFile = manager.findFile(file);
+      return psiFile instanceof BnfFile ? (BnfFile)psiFile : null;
     });
   }
 
@@ -104,17 +101,14 @@ public class GenerateAction extends AnAction {
 
   public static void doGenerate(@NotNull final Project project, final List<BnfFile> bnfFiles) {
     final Map<BnfFile, VirtualFile> rootMap = ContainerUtil.newLinkedHashMap();
-    ApplicationManager.getApplication().runWriteAction(new Runnable() {
-      @Override
-      public void run() {
-        for (BnfFile file : bnfFiles) {
-          String parserClass = getRootAttribute(file, KnownAttribute.PARSER_CLASS);
-          VirtualFile target =
-            getTargetDirectoryFor(project, file.getVirtualFile(),
-                                  StringUtil.getShortName(parserClass) + ".java",
-                                  StringUtil.getPackageName(parserClass), true);
-          rootMap.put(file, target);
-        }
+    ApplicationManager.getApplication().runWriteAction(() -> {
+      for (BnfFile file : bnfFiles) {
+        String parserClass = getRootAttribute(file, KnownAttribute.PARSER_CLASS);
+        VirtualFile target =
+          getTargetDirectoryFor(project, file.getVirtualFile(),
+                                StringUtil.getShortName(parserClass) + ".java",
+                                StringUtil.getPackageName(parserClass), true);
+        rootMap.put(file, target);
       }
     });
 

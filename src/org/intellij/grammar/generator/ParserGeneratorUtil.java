@@ -614,7 +614,7 @@ public class ParserGeneratorUtil {
                                                              final boolean createTokenIfMissing,
                                                              @NotNull final Map<String, String> map,
                                                              @Nullable Set<String> usedInGrammar) {
-    final Set<String> usedNames = usedInGrammar != null ? usedInGrammar : ContainerUtil.<String>newLinkedHashSet();
+    final Set<String> usedNames = usedInGrammar != null ? usedInGrammar : ContainerUtil.newLinkedHashSet();
     final Map<String, String> origTokens = RuleGraphHelper.getTokenTextToNameMap(file);
     final Pattern pattern = getAllTokenPattern(origTokens);
     final int[] autoCount = {0};

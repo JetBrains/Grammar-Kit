@@ -37,16 +37,13 @@ public class LiveHooksHelper {
     final GeneratedParserUtilBase.Hook hookObj = getHook(name);
     if (hookObj == null) return;
     Object hookParam = ObjectUtils.notNull(getHookParam(value), value);
-    GeneratedParserUtilBase.register_hook_(builder, new GeneratedParserUtilBase.Hook<Object>() {
-      @Override
-      public PsiBuilder.Marker run(PsiBuilder builder, PsiBuilder.Marker marker, Object param) {
-        try {
-          return hookObj.run(builder, marker, param);
-        }
-        catch (Exception e) {
-          builder.error("hook crashed: " + e.toString());
-          return marker;
-        }
+    GeneratedParserUtilBase.register_hook_(builder, (builder1, marker, param) -> {
+      try {
+        return hookObj.run(builder1, marker, param);
+      }
+      catch (Exception e) {
+        builder1.error("hook crashed: " + e.toString());
+        return marker;
       }
     }, hookParam);
   }

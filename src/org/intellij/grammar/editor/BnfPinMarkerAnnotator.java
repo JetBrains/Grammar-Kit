@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.intellij.grammar.editor;
 
 import com.intellij.lang.annotation.AnnotationHolder;
@@ -22,9 +23,7 @@ import com.intellij.openapi.util.Pair;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.util.PsiTreeUtil;
-import com.intellij.util.PairProcessor;
 import org.intellij.grammar.KnownAttribute;
-import org.intellij.grammar.generator.ParserGeneratorUtil;
 import org.intellij.grammar.psi.BnfAttr;
 import org.intellij.grammar.psi.BnfExpression;
 import org.intellij.grammar.psi.BnfFile;
@@ -43,13 +42,10 @@ public class BnfPinMarkerAnnotator implements Annotator, DumbAware {
     if (!(psiElement instanceof BnfRule)) return;
     BnfRule rule = (BnfRule) psiElement;
     final BnfFile bnfFile = (BnfFile)rule.getContainingFile();
-    final ArrayList<Pair<BnfExpression, BnfAttr>> pinned = new ArrayList<Pair<BnfExpression, BnfAttr>>();
-    GrammarUtil.processPinnedExpressions(rule, new PairProcessor<BnfExpression, ParserGeneratorUtil.PinMatcher>() {
-      @Override
-      public boolean process(BnfExpression bnfExpression, ParserGeneratorUtil.PinMatcher pinMatcher) {
-        BnfAttr attr = bnfFile.findAttribute(pinMatcher.rule, KnownAttribute.PIN, pinMatcher.funcName);
-        return pinned.add(Pair.create(bnfExpression, attr));
-      }
+    final ArrayList<Pair<BnfExpression, BnfAttr>> pinned = new ArrayList<>();
+    GrammarUtil.processPinnedExpressions(rule, (bnfExpression, pinMatcher) -> {
+      BnfAttr attr = bnfFile.findAttribute(pinMatcher.rule, KnownAttribute.PIN, pinMatcher.funcName);
+      return pinned.add(Pair.create(bnfExpression, attr));
     });
     for (int i = 0, len = pinned.size(); i < len; i++) {
       BnfExpression e = pinned.get(i).first;

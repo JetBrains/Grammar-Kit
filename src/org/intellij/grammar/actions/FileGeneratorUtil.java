@@ -56,7 +56,7 @@ public class FileGeneratorUtil {
     boolean hasPackage = StringUtil.isNotEmpty(targetPackage);
     ProjectRootManager rootManager = ProjectRootManager.getInstance(project);
     ProjectFileIndex fileIndex = ProjectFileIndex.SERVICE.getInstance(project);
-    Collection<VirtualFile> files = targetFile == null ? Collections.<VirtualFile>emptyList() :
+    Collection<VirtualFile> files = targetFile == null ? Collections.emptyList() :
                                     FilenameIndex.getVirtualFilesByName(project, targetFile,
                                                                         ProjectScope.getAllScope(project));
 

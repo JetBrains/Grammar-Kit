@@ -76,7 +76,7 @@ class StateRef extends PsiReferenceBase<PsiElement> {
   @Override
   public Object[] getVariants() {
     CommonProcessors.CollectProcessor<PsiElement> processor =
-      new CommonProcessors.CollectProcessor<PsiElement>();
+      new CommonProcessors.CollectProcessor<>();
     processor.process(resolveYYINITIAL(getElement()));
     processStateVariants(getElement(), processor);
     return ArrayUtil.toObjectArray(processor.getResults());
@@ -99,13 +99,8 @@ class StateRef extends PsiReferenceBase<PsiElement> {
   private static boolean processStateVariants(PsiElement context, Processor<? super JFlexStateDefinition> processor) {
     final PsiFile containingFile = context.getContainingFile();
     List<JFlexStateDefinition> macros = CachedValuesManager.getCachedValue(
-      containingFile, new CachedValueProvider<List<JFlexStateDefinition>>() {
-        @Nullable
-        @Override
-        public Result<List<JFlexStateDefinition>> compute() {
-          return Result.create(computeDefinitions(containingFile, JFlexStateDefinition.class), containingFile);
-        }
-      });
+      containingFile,
+      () -> CachedValueProvider.Result.create(computeDefinitions(containingFile, JFlexStateDefinition.class), containingFile));
     return ContainerUtil.process(macros, processor);
   }
 

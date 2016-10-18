@@ -33,7 +33,7 @@ import java.util.List;
  */
 public class BnfExpressionOptimizer {
   public static void optimize(PsiElement element) {
-    final LinkedList<PsiElement> list = new LinkedList<PsiElement>();
+    final LinkedList<PsiElement> list = new LinkedList<>();
     list.add(element.getParent());
     list.add(element);
     while (!list.isEmpty()) {

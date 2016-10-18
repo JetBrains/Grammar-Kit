@@ -53,17 +53,18 @@ import com.intellij.openapi.roots.libraries.LibraryTable;
 import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.util.ActionCallback;
 import com.intellij.openapi.util.Comparing;
-import com.intellij.openapi.util.Condition;
 import com.intellij.openapi.util.Pair;
 import com.intellij.openapi.util.io.FileUtil;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.openapi.vfs.JarFileSystem;
 import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VirtualFile;
-import com.intellij.psi.*;
+import com.intellij.psi.JavaPsiFacade;
+import com.intellij.psi.PsiDocumentManager;
+import com.intellij.psi.PsiManager;
+import com.intellij.psi.PsiMethod;
 import com.intellij.psi.search.FilenameIndex;
 import com.intellij.psi.search.ProjectScope;
-import com.intellij.util.Consumer;
 import com.intellij.util.SystemProperties;
 import com.intellij.util.containers.ContainerUtil;
 import com.intellij.util.containers.JBIterable;
@@ -104,13 +105,10 @@ public class BnfRunJFlexAction extends DumbAwareAction {
   }
 
   private static List<VirtualFile> getFiles(@NotNull AnActionEvent e) {
-    return JBIterable.of(e.getData(LangDataKeys.VIRTUAL_FILE_ARRAY)).filter(new Condition<VirtualFile>() {
-      @Override
-      public boolean value(VirtualFile file) {
-        FileType fileType = file.getFileType();
-        return fileType == JFlexFileType.INSTANCE ||
-               !fileType.isBinary() && file.getName().endsWith(".flex");
-      }
+    return JBIterable.of(e.getData(LangDataKeys.VIRTUAL_FILE_ARRAY)).filter(file -> {
+      FileType fileType = file.getFileType();
+      return fileType == JFlexFileType.INSTANCE ||
+             !fileType.isBinary() && file.getName().endsWith(".flex");
     }).toList();
   }
 
@@ -197,12 +195,9 @@ public class BnfRunJFlexAction extends DumbAwareAction {
         @Override
         public void processTerminated(ProcessEvent event) {
           if (event.getExitCode() == 0) {
-            ApplicationManager.getApplication().invokeLater(new Runnable() {
-              @Override
-              public void run() {
-                callback.setDone();
-                ensureLexerClassCreated(project, virtualDir, lexerClassName, commandName);
-              }
+            ApplicationManager.getApplication().invokeLater(() -> {
+              callback.setDone();
+              ensureLexerClassCreated(project, virtualDir, lexerClassName, commandName);
             }, project.getDisposed());
           }
         }
@@ -225,22 +220,20 @@ public class BnfRunJFlexAction extends DumbAwareAction {
 
     if (FilenameIndex.getFilesByName(project, className + ".java", ProjectScope.getContentScope(project)) != null) return;
 
-    BnfGenerateParserUtilAction.createClass(className, PsiManager.getInstance(project).findDirectory(virtualDir), "com.intellij.lexer.FlexAdapter", commandName, new Consumer<PsiClass>() {
-      @Override
-      public void consume(PsiClass aClass) {
-        PsiMethod constructor = JavaPsiFacade.getElementFactory(project).createMethodFromText(
-            "public " + className + "() {\n" +
-            "  super(new " + lexerClassName + "());\n" +
-            "}\n", aClass);
-        aClass.addAfter(constructor, aClass.getLBrace());
+    BnfGenerateParserUtilAction.createClass(className, PsiManager.getInstance(project).findDirectory(virtualDir), "com.intellij.lexer.FlexAdapter", commandName,
+                                            aClass -> {
+                                              PsiMethod constructor = JavaPsiFacade.getElementFactory(project).createMethodFromText(
+                                                  "public " + className + "() {\n" +
+                                                  "  super(new " + lexerClassName + "());\n" +
+                                                  "}\n", aClass);
+                                              aClass.addAfter(constructor, aClass.getLBrace());
 
-        Notifications.Bus.notify(new Notification(BnfConstants.GENERATION_GROUP,
-            aClass.getName() + " lexer class generated", "to " + virtualDir.getPath() +
-            "\n<br>Use this class in your ParserDefinition implementation." +
-            "\n<br>For complex cases consider employing com.intellij.lexer.LookAheadLexer API.",
-            NotificationType.INFORMATION), project);
-      }
-    });
+                                              Notifications.Bus.notify(new Notification(BnfConstants.GENERATION_GROUP,
+                                                  aClass.getName() + " lexer class generated", "to " + virtualDir.getPath() +
+                                                  "\n<br>Use this class in your ParserDefinition implementation." +
+                                                  "\n<br>For complex cases consider employing com.intellij.lexer.LookAheadLexer API.",
+                                                  NotificationType.INFORMATION), project);
+                                            });
   }
 
   private static List<File> getOrDownload(@NotNull Project project, String... urls) {
@@ -254,12 +247,7 @@ public class BnfRunJFlexAction extends DumbAwareAction {
     final List<Pair<VirtualFile, DownloadableFileDescription>> pairs = downloadFiles(project, libraryName, urls);
     if (pairs == null) return Collections.emptyList();
     ApplicationManager.getApplication().runWriteAction(
-      new Runnable() {
-        @Override
-        public void run() {
-          createOrUpdateLibrary(libraryName, pairs);
-        }
-      });
+      () -> createOrUpdateLibrary(libraryName, pairs));
 
     // ensure the order is the same
     for (String url : urls) {

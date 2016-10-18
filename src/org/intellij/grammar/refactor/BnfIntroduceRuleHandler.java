@@ -56,12 +56,7 @@ import java.util.*;
  */
 public class BnfIntroduceRuleHandler implements RefactoringActionHandler {
   public static final String REFACTORING_NAME = "Extract Rule";
-  public static final Function<BnfExpression, String> RENDER_FUNCTION = new Function<BnfExpression, String>() {
-    @Override
-    public String fun(@NotNull BnfExpression bnfExpression) {
-      return bnfExpression.getText().replaceAll("\\s+", " ");
-    }
-  };
+  public static final Function<BnfExpression, String> RENDER_FUNCTION = bnfExpression -> bnfExpression.getText().replaceAll("\\s+", " ");
 
   @Nullable
   private final Function<List<BnfExpression>, BnfExpression> myPopupVariantsHandler;
@@ -149,7 +144,7 @@ public class BnfIntroduceRuleHandler implements RefactoringActionHandler {
 
     final Map<OccurrencesChooser.ReplaceChoice, List<BnfExpression[]>> occurrencesMap = ContainerUtil.newLinkedHashMap();
     occurrencesMap.put(OccurrencesChooser.ReplaceChoice.NO, Collections.singletonList(selectedExpression.toArray(new BnfExpression[selectedExpression.size()])));
-    occurrencesMap.put(OccurrencesChooser.ReplaceChoice.ALL, new ArrayList<BnfExpression[]>());
+    occurrencesMap.put(OccurrencesChooser.ReplaceChoice.ALL, new ArrayList<>());
     file.acceptChildren(new PsiRecursiveElementWalkingVisitor() {
       @Override
       public void visitElement(PsiElement element) {
@@ -292,12 +287,12 @@ public class BnfIntroduceRuleHandler implements RefactoringActionHandler {
                                     Map<OccurrencesChooser.ReplaceChoice, List<BnfExpression[]>> occurrencesMap,
                                     BnfExpression... expressions) {
     List<BnfExpression[]> list = occurrencesMap.get(choice);
-    if (list == null) occurrencesMap.put(choice, list = new LinkedList<BnfExpression[]>());
+    if (list == null) occurrencesMap.put(choice, list = new LinkedList<>());
     list.add(expressions);
   }
 
   private static String choseRuleName(PsiFile containingFile) {
-    final Set<String> existingNames = new THashSet<String>();
+    final Set<String> existingNames = new THashSet<>();
     containingFile.accept(new PsiRecursiveElementWalkingVisitor() {
       @Override
       public void visitElement(PsiElement element) {

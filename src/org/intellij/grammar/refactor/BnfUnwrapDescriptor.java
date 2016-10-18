@@ -44,10 +44,10 @@ public class BnfUnwrapDescriptor implements UnwrapDescriptor, Unwrapper {
   @Override
   public List<Pair<PsiElement, Unwrapper>> collectUnwrappers(Project project, Editor editor, PsiFile file) {
     PsiElement element = findTargetElement(editor, file);
-    List<Pair<PsiElement, Unwrapper>> result = new ArrayList<Pair<PsiElement, Unwrapper>>();
+    List<Pair<PsiElement, Unwrapper>> result = new ArrayList<>();
     while (element != null) {
       if (element instanceof BnfParenthesized) {
-        result.add(new Pair<PsiElement, Unwrapper>(element, this));
+        result.add(new Pair<>(element, this));
       }
       element = element.getParent();
     }

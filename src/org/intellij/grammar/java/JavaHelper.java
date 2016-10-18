@@ -235,7 +235,7 @@ public abstract class JavaHelper {
       if (!(method instanceof PsiMethod)) return super.getMethodTypes(method);
       PsiMethod psiMethod = (PsiMethod)method;
       PsiType returnType = psiMethod.getReturnType();
-      List<String> strings = new ArrayList<String>();
+      List<String> strings = new ArrayList<>();
       strings.add(returnType == null ? "" : returnType.getCanonicalText());
       for (PsiParameter parameter : psiMethod.getParameterList().getParameters()) {
         PsiType type = parameter.getType();
@@ -261,7 +261,7 @@ public abstract class JavaHelper {
       if (!(element instanceof PsiModifierListOwner)) return super.getAnnotations(element);
       PsiModifierList modifierList = ((PsiModifierListOwner)element).getModifierList();
       if (modifierList == null) return ContainerUtilRt.emptyList();
-      List<String> strings = new ArrayList<String>();
+      List<String> strings = new ArrayList<>();
       for (PsiAnnotation annotation : modifierList.getAnnotations()) {
         if (annotation.getParameterList().getAttributes().length > 0) continue;
         strings.add(annotation.getQualifiedName());
@@ -313,7 +313,7 @@ public abstract class JavaHelper {
         if (!acceptsName(methodName, method.getName())) continue;
         if (!acceptsMethod(method, methodType == MethodType.STATIC)) continue;
         if (!acceptsMethod(method, paramCount, paramTypes)) continue;
-        result.add(new MyElement<Member>(method));
+        result.add(new MyElement<>(method));
       }
       return result;
     }
@@ -355,7 +355,7 @@ public abstract class JavaHelper {
       if (method == null) return Collections.emptyList();
       Method delegate = ((MyElement<Method>)method).delegate;
       Type[] parameterTypes = delegate.getGenericParameterTypes();
-      List<String> result = new ArrayList<String>(parameterTypes.length + 1);
+      List<String> result = new ArrayList<>(parameterTypes.length + 1);
       result.add(delegate.getGenericReturnType().toString());
       int paramCounter = 0;
       for (Type parameterType : parameterTypes) {
@@ -378,7 +378,7 @@ public abstract class JavaHelper {
       if (element == null) return Collections.emptyList();
       AnnotatedElement delegate = ((MyElement<AnnotatedElement>)element).delegate;
       Annotation[] annotations = delegate.getDeclaredAnnotations();
-      List<String> result = new ArrayList<String>(annotations.length);
+      List<String> result = new ArrayList<>(annotations.length);
       for (Annotation annotation : annotations) {
         Class<? extends Annotation> annotationType = annotation.annotationType(); // todo parameters?
         result.add(annotationType.getCanonicalName());
@@ -401,7 +401,7 @@ public abstract class JavaHelper {
     @Override
     public NavigatablePsiElement findClass(String className) {
       ClassInfo info = findClassSafe(className);
-      return info == null ? null : new MyElement<ClassInfo>(info);
+      return info == null ? null : new MyElement<>(info);
     }
 
     @NotNull
@@ -418,7 +418,7 @@ public abstract class JavaHelper {
         if (!acceptsName(methodName, method.name)) continue;
         if (!acceptsMethod(method, methodType)) continue;
         if (!acceptsMethod(method, paramCount, paramTypes)) continue;
-        result.add(new MyElement<MethodInfo>(method));
+        result.add(new MyElement<>(method));
       }
       return result;
     }
@@ -630,7 +630,7 @@ public abstract class JavaHelper {
       enum State {PARAM, RETURN, CLASS, ARRAY, GENERIC, BOUNDS, EXCEPTION}
 
       final MethodInfo methodInfo;
-      final Deque<State> states = new ArrayDeque<State>();
+      final Deque<State> states = new ArrayDeque<>();
 
       /** @noinspection StringBufferField*/
       final StringBuilder sb = new StringBuilder();

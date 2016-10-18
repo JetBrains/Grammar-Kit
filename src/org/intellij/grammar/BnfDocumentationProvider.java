@@ -24,7 +24,6 @@ import com.intellij.psi.PsiNamedElement;
 import com.intellij.psi.impl.source.tree.LeafPsiElement;
 import com.intellij.ui.ColorUtil;
 import com.intellij.ui.JBColor;
-import com.intellij.util.PairConsumer;
 import org.intellij.grammar.analysis.BnfFirstNextAnalyzer;
 import org.intellij.grammar.generator.BnfConstants;
 import org.intellij.grammar.generator.ExpressionHelper;
@@ -147,17 +146,14 @@ public class BnfDocumentationProvider implements DocumentationProvider {
       appendColored(docBuilder, " " + ruleOperator.type + "-" + expressionInfo.getPriority(rule));
     }
     docBuilder.append("</h1>");
-    expressionInfo.dumpPriorityTable(docBuilder.append("<code><pre>"), new PairConsumer<StringBuilder, ExpressionHelper.OperatorInfo>() {
-      @Override
-      public void consume(StringBuilder sb, ExpressionHelper.OperatorInfo operatorInfo) {
-        if (operatorInfo == ruleOperator) {
-          appendColored(sb, operatorInfo);
-        }
-        else {
-          sb.append(operatorInfo);
-        }
-
+    expressionInfo.dumpPriorityTable(docBuilder.append("<code><pre>"), (sb, operatorInfo) -> {
+      if (operatorInfo == ruleOperator) {
+        appendColored(sb, operatorInfo);
       }
+      else {
+        sb.append(operatorInfo);
+      }
+
     }).append("</pre></code>");
   }
 

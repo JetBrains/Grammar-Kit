@@ -142,8 +142,8 @@ public class BnfInlineRuleProcessor extends BaseRefactoringProcessor {
       LOG.error(parent);
       return;
     }
-    final TObjectIntHashMap<String> visited = new TObjectIntHashMap<String>();
-    final LinkedList<Pair<PsiElement, PsiElement>> work = new LinkedList<Pair<PsiElement, PsiElement>>();
+    final TObjectIntHashMap<String> visited = new TObjectIntHashMap<>();
+    final LinkedList<Pair<PsiElement, PsiElement>> work = new LinkedList<>();
     (expression = (BnfExpression)expression.copy()).acceptChildren(new PsiRecursiveElementWalkingVisitor() {
       @Override
       public void visitElement(PsiElement element) {

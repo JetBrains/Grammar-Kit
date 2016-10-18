@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.intellij.grammar.psi.impl;
 
 import com.intellij.openapi.util.Comparing;
@@ -45,12 +46,7 @@ import static org.intellij.grammar.psi.BnfTypes.BNF_SEQUENCE;
  */
 public class GrammarUtil {
 
-  public final static Comparator<BnfNamedElement> NAME_COMPARATOR = new Comparator<BnfNamedElement>() {
-    @Override
-    public int compare(BnfNamedElement o1, BnfNamedElement o2) {
-      return Comparing.compare(o1.getName(), o2.getName());
-    }
-  };
+  public final static Comparator<BnfNamedElement> NAME_COMPARATOR = (o1, o2) -> Comparing.compare(o1.getName(), o2.getName());
 
   public static PsiElement getDummyAwarePrevSibling(PsiElement child) {
     PsiElement prevSibling = child.getPrevSibling();
@@ -147,32 +143,24 @@ public class GrammarUtil {
   }
 
   public static boolean processPinnedExpressions(final BnfRule rule, final Processor<BnfExpression> processor) {
-    return processPinnedExpressions(rule, new PairProcessor<BnfExpression, PinMatcher>() {
-      @Override
-      public boolean process(BnfExpression bnfExpression, PinMatcher pinMatcher) {
-        return processor.process(bnfExpression);
-      }
-    });
+    return processPinnedExpressions(rule, (bnfExpression, pinMatcher) -> processor.process(bnfExpression));
   }
 
   public static boolean processPinnedExpressions(final BnfRule rule, final PairProcessor<BnfExpression, PinMatcher> processor) {
-    return processExpressionNames(rule, getFuncName(rule), rule.getExpression(), new PairProcessor<String, BnfExpression>() {
-      @Override
-      public boolean process(String funcName, BnfExpression expression) {
-        if (!(expression instanceof BnfSequence)) return true;
-        List<BnfExpression> children = getChildExpressions(expression);
-        if (children.size() < 2) return true;
-        PinMatcher pinMatcher = new PinMatcher(rule, BNF_SEQUENCE, funcName);
-        boolean pinApplied = false;
-        for (int i = 0, childExpressionsSize = children.size(); i < childExpressionsSize; i++) {
-          BnfExpression child = children.get(i);
-          if (!pinApplied && pinMatcher.matches(i, child)) {
-            pinApplied = true;
-            if (!processor.process(child, pinMatcher)) return false;
-          }
+    return processExpressionNames(rule, getFuncName(rule), rule.getExpression(), (funcName, expression) -> {
+      if (!(expression instanceof BnfSequence)) return true;
+      List<BnfExpression> children = getChildExpressions(expression);
+      if (children.size() < 2) return true;
+      PinMatcher pinMatcher = new PinMatcher(rule, BNF_SEQUENCE, funcName);
+      boolean pinApplied = false;
+      for (int i = 0, childExpressionsSize = children.size(); i < childExpressionsSize; i++) {
+        BnfExpression child = children.get(i);
+        if (!pinApplied && pinMatcher.matches(i, child)) {
+          pinApplied = true;
+          if (!processor.process(child, pinMatcher)) return false;
         }
-        return true;
       }
+      return true;
     });
   }
 
@@ -197,15 +185,12 @@ public class GrammarUtil {
     String funcName = getFuncName(rule);
     if (target == null) return funcName;
     final Ref<String> ref = Ref.create(null);
-    processExpressionNames(rule, funcName, rule.getExpression(), new PairProcessor<String, BnfExpression>() {
-      @Override
-      public boolean process(String funcName, BnfExpression expression) {
-        if (target == expression) {
-          ref.set(funcName);
-          return false;
-        }
-        return true;
+    processExpressionNames(rule, funcName, rule.getExpression(), (funcName1, expression) -> {
+      if (target == expression) {
+        ref.set(funcName1);
+        return false;
       }
+      return true;
     });
     return ref.get();
   }

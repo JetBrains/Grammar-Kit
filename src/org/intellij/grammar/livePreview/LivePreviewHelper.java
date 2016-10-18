@@ -36,7 +36,10 @@ import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiManager;
 import com.intellij.psi.TokenType;
 import com.intellij.testFramework.LightVirtualFile;
-import com.intellij.util.*;
+import com.intellij.util.Alarm;
+import com.intellij.util.FileContentUtil;
+import com.intellij.util.PairProcessor;
+import com.intellij.util.SingleAlarm;
 import com.intellij.util.containers.ContainerUtil;
 import org.intellij.grammar.parser.GeneratedParserUtilBase;
 import org.intellij.grammar.psi.BnfExpression;
@@ -99,18 +102,8 @@ public class LivePreviewHelper {
   }
 
   private static final NotNullLazyKey<SingleAlarm, Project> LIVE_PREVIEW_ALARM =
-    NotNullLazyKey.create("LIVE_PREVIEW_ALARM", new NotNullFunction<Project, SingleAlarm>() {
-      @NotNull
-      @Override
-      public SingleAlarm fun(final Project project) {
-        return new SingleAlarm(new Runnable() {
-          @Override
-          public void run() {
-            reparseAllLivePreviews(project);
-          }
-        }, 300, Alarm.ThreadToUse.SWING_THREAD, project);
-      }
-    });
+    NotNullLazyKey.create("LIVE_PREVIEW_ALARM",
+                          project -> new SingleAlarm(() -> reparseAllLivePreviews(project), 300, Alarm.ThreadToUse.SWING_THREAD, project));
   private static void installUpdateListener(final Project project) {
     EditorFactory.getInstance().getEventMulticaster().addDocumentListener(new DocumentAdapter() {
 

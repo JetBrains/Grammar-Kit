@@ -29,10 +29,8 @@ import com.intellij.openapi.util.Ref;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.psi.*;
 import com.intellij.psi.search.GlobalSearchScope;
-import com.intellij.psi.search.PsiNonJavaFileReferenceProcessor;
 import com.intellij.psi.search.PsiSearchHelper;
 import com.intellij.psi.util.PsiTreeUtil;
-import com.intellij.util.PairProcessor;
 import com.intellij.util.containers.FactoryMap;
 import com.sun.jdi.AbsentInformationException;
 import com.sun.jdi.Location;
@@ -61,18 +59,15 @@ public class BnfPositionManager implements PositionManager {
     protected Collection<PsiFile> create(String key) {
       final Project project = myProcess.getProject();
       final Ref<Collection<PsiFile>> result = Ref.create(null);
-      PsiSearchHelper.SERVICE.getInstance(project).processUsagesInNonJavaFiles(key, new PsiNonJavaFileReferenceProcessor() {
-        @Override
-        public boolean process(PsiFile file, int startOffset, int endOffset) {
-          if (!(file instanceof BnfFileImpl)) return true;
-          BnfAttr attr = PsiTreeUtil.getParentOfType(file.findElementAt(startOffset), BnfAttr.class);
-          if (attr == null || !"parserClass".equals(attr.getName())) return true;
-          if (result.isNull()) result.set(new LinkedHashSet<PsiFile>(1));
-          result.get().add(file);
-          return true;
-        }
+      PsiSearchHelper.SERVICE.getInstance(project).processUsagesInNonJavaFiles(key, (file, startOffset, endOffset) -> {
+        if (!(file instanceof BnfFileImpl)) return true;
+        BnfAttr attr = PsiTreeUtil.getParentOfType(file.findElementAt(startOffset), BnfAttr.class);
+        if (attr == null || !"parserClass".equals(attr.getName())) return true;
+        if (result.isNull()) result.set(new LinkedHashSet<>(1));
+        result.get().add(file);
+        return true;
       }, GlobalSearchScope.allScope(project));
-      return result.isNull()? Collections.<PsiFile>emptyList() : result.get();
+      return result.isNull() ? Collections.emptyList() : result.get();
     }
   };
 
@@ -128,15 +123,12 @@ public class BnfPositionManager implements PositionManager {
               stopWalking();
             }
             else if (name.substring(funcName.length()).matches("(?:_\\d+)+")) {
-              GrammarUtil.processExpressionNames(rule, funcName, ((BnfRule) element).getExpression(), new PairProcessor<String, BnfExpression>() {
-                @Override
-                public boolean process(String funcName, BnfExpression expression) {
-                  if (name.equals(funcName)) {
-                    result.set(expression);
-                    return false;
-                  }
-                  return true;
+              GrammarUtil.processExpressionNames(rule, funcName, ((BnfRule) element).getExpression(), (funcName1, expression) -> {
+                if (name.equals(funcName1)) {
+                  result.set(expression);
+                  return false;
                 }
+                return true;
               });
               stopWalking();
             }

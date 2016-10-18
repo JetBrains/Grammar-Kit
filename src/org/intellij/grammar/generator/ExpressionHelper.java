@@ -24,7 +24,6 @@ import com.intellij.psi.util.CachedValue;
 import com.intellij.psi.util.CachedValueProvider;
 import com.intellij.psi.util.CachedValuesManager;
 import com.intellij.psi.util.PsiTreeUtil;
-import com.intellij.util.Function;
 import com.intellij.util.ObjectUtils;
 import com.intellij.util.PairConsumer;
 import com.intellij.util.containers.ContainerUtil;
@@ -44,12 +43,6 @@ import static org.intellij.grammar.generator.RuleGraphHelper.Cardinality.OPTIONA
  * @author gregsh
  */
 public class ExpressionHelper {
-    public static final Function<BnfExpression, String> TO_STRING = new Function<BnfExpression, String>() {
-    @Override
-    public String fun(BnfExpression expression) {
-      return expression.getText();
-    }
-  };
   private final BnfFile myFile;
   private final RuleGraphHelper myRuleGraph;
   private final boolean myAddWarnings;
@@ -61,13 +54,8 @@ public class ExpressionHelper {
   public static ExpressionHelper getCached(final BnfFile file) {
     CachedValue<ExpressionHelper> value = file.getUserData(EXPRESSION_HELPER_KEY);
     if (value == null) {
-      file.putUserData(EXPRESSION_HELPER_KEY, value = CachedValuesManager.getManager(file.getProject()).createCachedValue(new CachedValueProvider<ExpressionHelper>() {
-          @Nullable
-          @Override
-          public Result<ExpressionHelper> compute() {
-            return new Result<ExpressionHelper>(new ExpressionHelper(file, RuleGraphHelper.getCached(file), false), file);
-          }
-        }, false));
+      file.putUserData(EXPRESSION_HELPER_KEY, value = CachedValuesManager.getManager(file.getProject()).createCachedValue(
+        () -> new CachedValueProvider.Result<>(new ExpressionHelper(file, RuleGraphHelper.getCached(file), false), file), false));
     }
     return value.getValue();
   }
@@ -221,7 +209,7 @@ public class ExpressionHelper {
           boolean badNAry = childExpressions.size() != 2 || !(lastExpression instanceof BnfQuantified) ||
                             !(((BnfQuantified)lastExpression).getQuantifier().getText().equals("+")) ||
                             !(((BnfQuantified)lastExpression).getExpression() instanceof BnfParenExpression);
-          List<BnfExpression> childExpressions2 = badNAry ? Collections.<BnfExpression>emptyList() :
+          List<BnfExpression> childExpressions2 = badNAry ? Collections.emptyList() :
                                                   getChildExpressions(
                                                     ((BnfParenExpression)((BnfQuantified)lastExpression).getExpression()).getExpression());
           int index3 = indexOf(rootRuleSubst, 0, childExpressions2, expressionInfo);
@@ -264,7 +252,7 @@ public class ExpressionHelper {
     if (list.isEmpty()) return null;
     if (list.size() == 1) return list.get(0);
     Project project = list.get(0).getProject();
-    String text = StringUtil.join(list, TO_STRING, " ");
+    String text = StringUtil.join(list, PsiElement::getText, " ");
     BnfExpression result = BnfElementFactory.createExpressionFromText(project, text);
     result.putUserData(ORIGINAL_EXPRESSIONS, list);
     return result;
@@ -343,12 +331,7 @@ public class ExpressionHelper {
     }
 
     public StringBuilder dumpPriorityTable(StringBuilder sb) {
-      return dumpPriorityTable(sb, new PairConsumer<StringBuilder, OperatorInfo>() {
-        @Override
-        public void consume(StringBuilder sb, OperatorInfo operatorInfo) {
-          sb.append(operatorInfo);
-        }
-      });
+      return dumpPriorityTable(sb, (sb1, operatorInfo) -> sb1.append(operatorInfo));
     }
 
     public StringBuilder dumpPriorityTable(StringBuilder sb, PairConsumer<StringBuilder, OperatorInfo> printer) {

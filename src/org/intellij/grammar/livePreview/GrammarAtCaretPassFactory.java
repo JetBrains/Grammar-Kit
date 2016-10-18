@@ -38,7 +38,6 @@ import com.intellij.openapi.util.TextRange;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
-import com.intellij.util.PairProcessor;
 import com.intellij.util.containers.ContainerUtil;
 import org.intellij.grammar.psi.BnfExpression;
 import org.intellij.grammar.psi.BnfFile;
@@ -99,19 +98,16 @@ public class GrammarAtCaretPassFactory extends AbstractProjectComponent implemen
     final Set<TextRange> trueRanges = ContainerUtil.newHashSet();
     final Set<TextRange> falseRanges = ContainerUtil.newHashSet();
     final Set<BnfExpression> visited = ContainerUtil.newHashSet();
-    LivePreviewHelper.collectExpressionsAtOffset(project, editor, livePreviewLanguage, new PairProcessor<BnfExpression, Boolean>() {
-        @Override
-        public boolean process(BnfExpression bnfExpression, Boolean result) {
-          for (PsiElement parent = bnfExpression.getParent();
-               parent instanceof BnfExpression && visited.add((BnfExpression)parent); ) {
-            parent = parent.getParent();
-          }
-          if (visited.add(bnfExpression)) {
-            (result ? trueRanges : falseRanges).add(bnfExpression.getTextRange());
-          }
-          return true;
-        }
-      });
+    LivePreviewHelper.collectExpressionsAtOffset(project, editor, livePreviewLanguage, (bnfExpression, result1) -> {
+      for (PsiElement parent = bnfExpression.getParent();
+           parent instanceof BnfExpression && visited.add((BnfExpression)parent); ) {
+        parent = parent.getParent();
+      }
+      if (visited.add(bnfExpression)) {
+        (result1 ? trueRanges : falseRanges).add(bnfExpression.getTextRange());
+      }
+      return true;
+    });
     createHighlights(trueRanges, falseRanges, result);
   }
 

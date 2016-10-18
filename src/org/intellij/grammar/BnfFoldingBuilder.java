@@ -23,7 +23,6 @@ import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.project.DumbAware;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.psi.PsiElement;
-import com.intellij.psi.search.PsiElementProcessor;
 import com.intellij.psi.util.PsiTreeUtil;
 import org.intellij.grammar.psi.*;
 import org.jetbrains.annotations.NotNull;
@@ -41,7 +40,7 @@ public class BnfFoldingBuilder extends FoldingBuilderEx implements DumbAware {
     if (!(root instanceof BnfFile)) return FoldingDescriptor.EMPTY;
     BnfFile file = (BnfFile)root;
 
-    final ArrayList<FoldingDescriptor> result = new ArrayList<FoldingDescriptor>();
+    final ArrayList<FoldingDescriptor> result = new ArrayList<>();
     for (BnfAttrs attrs : file.getAttributes()) {
       TextRange textRange = attrs.getTextRange();
       if (textRange.getLength() <= 2) continue;
@@ -61,14 +60,11 @@ public class BnfFoldingBuilder extends FoldingBuilderEx implements DumbAware {
       }
     }
     if (!quick) {
-      PsiTreeUtil.processElements(file, new PsiElementProcessor() {
-        @Override
-        public boolean execute(@NotNull PsiElement element) {
-          if (element.getNode().getElementType() == BnfParserDefinition.BNF_BLOCK_COMMENT) {
-            result.add(new FoldingDescriptor(element, element.getTextRange()));
-          }
-          return true;
+      PsiTreeUtil.processElements(file, element -> {
+        if (element.getNode().getElementType() == BnfParserDefinition.BNF_BLOCK_COMMENT) {
+          result.add(new FoldingDescriptor(element, element.getTextRange()));
         }
+        return true;
       });
     }
 

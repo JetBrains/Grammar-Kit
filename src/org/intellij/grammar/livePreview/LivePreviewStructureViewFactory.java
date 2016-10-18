@@ -101,7 +101,7 @@ public class LivePreviewStructureViewFactory implements PsiStructureViewFactory 
     public Collection<StructureViewTreeElement> getChildrenBase() {
       PsiElement element = getElement();
       if (element == null || element instanceof LeafPsiElement) return Collections.emptyList();
-      ArrayList<StructureViewTreeElement> result = new ArrayList<StructureViewTreeElement>();
+      ArrayList<StructureViewTreeElement> result = new ArrayList<>();
       for (PsiElement e = element.getFirstChild(); e != null; e = e.getNextSibling()) {
         if (e instanceof PsiWhiteSpace) continue;
         result.add(new MyElement(e));

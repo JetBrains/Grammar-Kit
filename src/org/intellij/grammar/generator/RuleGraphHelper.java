@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.intellij.grammar.generator;
 
 import com.intellij.lang.Language;
@@ -198,24 +199,13 @@ public class RuleGraphHelper {
 
   @NotNull
   public static Map<String, String> getTokenNameToTextMap(final BnfFile file) {
-    return CachedValuesManager.getCachedValue(file, new CachedValueProvider<Map<String, String>>() {
-      @Nullable
-      @Override
-      public Result<Map<String, String>> compute() {
-        return new Result<Map<String, String>>(computeTokens(file).asMap(), file);
-      }
-    });
+    return CachedValuesManager.getCachedValue(file,
+                                              () -> new CachedValueProvider.Result<>(computeTokens(file).asMap(), file));
   }
 
   @NotNull
   public static Map<String, String> getTokenTextToNameMap(final BnfFile file) {
-    return CachedValuesManager.getCachedValue(file, new CachedValueProvider<Map<String, String>>() {
-      @Nullable
-      @Override
-      public Result<Map<String, String>> compute() {
-        return new Result<Map<String, String>>(computeTokens(file).asInverseMap(), file);
-      }
-    });
+    return CachedValuesManager.getCachedValue(file, () -> new CachedValueProvider.Result<>(computeTokens(file).asInverseMap(), file));
   }
 
   // string value to constant name
@@ -227,13 +217,8 @@ public class RuleGraphHelper {
   public static RuleGraphHelper getCached(final BnfFile file) {
     CachedValue<RuleGraphHelper> value = file.getUserData(RULE_GRAPH_HELPER_KEY);
     if (value == null) {
-      file.putUserData(RULE_GRAPH_HELPER_KEY, value = CachedValuesManager.getManager(file.getProject()).createCachedValue(new CachedValueProvider<RuleGraphHelper>() {
-        @Nullable
-        @Override
-        public Result<RuleGraphHelper> compute() {
-          return new Result<RuleGraphHelper>(new RuleGraphHelper(file), file);
-        }
-      }, false));
+      file.putUserData(RULE_GRAPH_HELPER_KEY, value = CachedValuesManager.getManager(file.getProject()).createCachedValue(
+        () -> new CachedValueProvider.Result<>(new RuleGraphHelper(file), file), false));
     }
     return value.getValue();
   }
@@ -380,7 +365,7 @@ public class RuleGraphHelper {
   @NotNull
   public Map<PsiElement, Cardinality> getFor(BnfRule rule) {
     Map<PsiElement, Cardinality> map = myRuleContentsMap.get(rule); // null for duplicate
-    return map == null ? Collections.<PsiElement, Cardinality>emptyMap() : map;
+    return map == null ? Collections.emptyMap() : map;
   }
 
   Map<PsiElement, Cardinality> collectMembers(BnfRule rule, BnfExpression tree, Set<Object> visited) {
@@ -480,7 +465,7 @@ public class RuleGraphHelper {
     }
     else {
       List<BnfExpression> pinned = ContainerUtil.newArrayList();
-      GrammarUtil.processPinnedExpressions(rule, new CommonProcessors.CollectProcessor<BnfExpression>(pinned));
+      GrammarUtil.processPinnedExpressions(rule, new CommonProcessors.CollectProcessor<>(pinned));
       boolean pinApplied = false;
 
       IElementType type = getEffectiveType(tree);
@@ -614,7 +599,7 @@ public class RuleGraphHelper {
         for (int i = 0, newListSize = list.size(); i < newListSize; i++) {
           Map<PsiElement, Cardinality> m = list.get(i);
           if (willCollapse(rule, m)) {
-            list.set(i, Collections.<PsiElement, Cardinality>emptyMap());
+            list.set(i, Collections.emptyMap());
           }
         }
       }
@@ -623,7 +608,7 @@ public class RuleGraphHelper {
       for (Map<PsiElement, Cardinality> m : list) {
         map.keySet().retainAll(m.keySet());
       }
-      for (PsiElement t : new ArrayList<PsiElement>(map.keySet())) {
+      for (PsiElement t : new ArrayList<>(map.keySet())) {
         map.put(t, REQUIRED.and(m0.get(t)));
         for (Map<PsiElement, Cardinality> m : list) {
           if (m == list.get(0)) continue;
@@ -666,17 +651,17 @@ public class RuleGraphHelper {
   }
 
   private static <V> Map<PsiElement, V> psiMap(PsiElement k, V v) {
-    Map<PsiElement, V> map = new THashMap<PsiElement, V>(1, 1, CARDINALITY_HASHING_STRATEGY);
+    Map<PsiElement, V> map = new THashMap<>(1, 1, CARDINALITY_HASHING_STRATEGY);
     map.put(k, v);
     return map;
   }
 
   private static <V> Map<PsiElement, V> psiMap(Map<PsiElement, V> map) {
-    return new THashMap<PsiElement, V>(map, CARDINALITY_HASHING_STRATEGY);
+    return new THashMap<>(map, CARDINALITY_HASHING_STRATEGY);
   }
 
   private static <V> Map<PsiElement, V> psiMap() {
-    return new THashMap<PsiElement, V>(3, CARDINALITY_HASHING_STRATEGY);
+    return new THashMap<>(3, CARDINALITY_HASHING_STRATEGY);
   }
 
   /** @noinspection UnusedParameters*/

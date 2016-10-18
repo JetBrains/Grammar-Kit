@@ -63,7 +63,7 @@ public class BnfLeftRecursionInspection extends LocalInspectionTool {
       BnfFile bnfFile = (BnfFile)file;
       ExpressionHelper expressionHelper = ExpressionHelper.getCached(bnfFile);
       BnfFirstNextAnalyzer analyzer = new BnfFirstNextAnalyzer();
-      ArrayList<ProblemDescriptor> list = new ArrayList<ProblemDescriptor>();
+      ArrayList<ProblemDescriptor> list = new ArrayList<>();
       for (BnfRule rule : bnfFile.getRules()) {
         if (ParserGeneratorUtil.Rule.isFake(rule)) continue;
         String ruleName = rule.getName();

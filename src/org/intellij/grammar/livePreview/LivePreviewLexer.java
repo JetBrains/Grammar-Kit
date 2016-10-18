@@ -57,23 +57,19 @@ public class LivePreviewLexer extends LexerBase {
   public LivePreviewLexer(Project project, final LivePreviewLanguage language) {
     final BnfFile bnfFile = language.getGrammar(project);
 
-    myTokens = bnfFile == null? new Token[0] : CachedValuesManager.getCachedValue(bnfFile, new CachedValueProvider<Token[]>() {
-      @Nullable
-      @Override
-      public Result<Token[]> compute() {
-        Set<String> usedInGrammar = ContainerUtil.newLinkedHashSet();
-        Map<String, String> map = collectTokenPattern2Name(bnfFile, usedInGrammar);
+    myTokens = bnfFile == null? new Token[0] : CachedValuesManager.getCachedValue(bnfFile, () -> {
+      Set<String> usedInGrammar = ContainerUtil.newLinkedHashSet();
+      Map<String, String> map = collectTokenPattern2Name(bnfFile, usedInGrammar);
 
-        Token[] tokens = new Token[map.size()];
-        int i = 0;
-        String tokenConstantPrefix = getRootAttribute(bnfFile, KnownAttribute.ELEMENT_TYPE_PREFIX);
-        for (String pattern : map.keySet()) {
-          String tokenName = map.get(pattern);
+      Token[] tokens = new Token[map.size()];
+      int i = 0;
+      String tokenConstantPrefix = getRootAttribute(bnfFile, KnownAttribute.ELEMENT_TYPE_PREFIX);
+      for (String pattern : map.keySet()) {
+        String tokenName = map.get(pattern);
 
-          tokens[i++] = new Token(pattern, tokenName, usedInGrammar.contains(tokenName), tokenConstantPrefix, language);
-        }
-        return Result.create(tokens, bnfFile);
+        tokens[i++] = new Token(pattern, tokenName, usedInGrammar.contains(tokenName), tokenConstantPrefix, language);
       }
+      return CachedValueProvider.Result.create(tokens, bnfFile);
     });
   }
 
@@ -241,6 +237,6 @@ public class LivePreviewLexer extends LexerBase {
 
   @NotNull
   public static Map<String, String> collectTokenPattern2Name(@NotNull BnfFile file, @Nullable Set<String> usedInGrammar) {
-    return ParserGeneratorUtil.collectTokenPattern2Name(file, true, ContainerUtil.<String, String>newLinkedHashMap(), usedInGrammar);
+    return ParserGeneratorUtil.collectTokenPattern2Name(file, true, ContainerUtil.newLinkedHashMap(), usedInGrammar);
   }
 }

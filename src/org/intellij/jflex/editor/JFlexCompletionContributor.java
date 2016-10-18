@@ -120,23 +120,20 @@ public class JFlexCompletionContributor extends CompletionContributor {
     }
     else {
       final String closing = keyword.endsWith("{") ? keyword.substring(0, keyword.length()-1) + "}" : null;
-      return PrioritizedLookupElement.withPriority(builder.withInsertHandler(new InsertHandler<LookupElement>() {
-        @Override
-        public void handleInsert(InsertionContext context, LookupElement item) {
-          int caret = context.getTailOffset();
-          Document document = context.getDocument();
-          StringBuilder sb = new StringBuilder("\n");
-          caret += sb.length();
-          if (closing != null) {
-            int indentSize = CodeStyleSettingsManager.getInstance(context.getProject()).
-              getCurrentSettings().getIndentSize(JFlexFileType.INSTANCE);
-            sb.append(StringUtil.repeat(" ", indentSize));
-            caret += indentSize;
-            sb.append("\n").append(closing).append("\n");
-          }
-          document.insertString(context.getTailOffset(), sb);
-          context.getEditor().getCaretModel().moveToOffset(caret);
+      return PrioritizedLookupElement.withPriority(builder.withInsertHandler((context, item) -> {
+        int caret = context.getTailOffset();
+        Document document = context.getDocument();
+        StringBuilder sb = new StringBuilder("\n");
+        caret += sb.length();
+        if (closing != null) {
+          int indentSize = CodeStyleSettingsManager.getInstance(context.getProject()).
+            getCurrentSettings().getIndentSize(JFlexFileType.INSTANCE);
+          sb.append(StringUtil.repeat(" ", indentSize));
+          caret += indentSize;
+          sb.append("\n").append(closing).append("\n");
         }
+        document.insertString(context.getTailOffset(), sb);
+        context.getEditor().getCaretModel().moveToOffset(caret);
       }), 1.d / keyword.length());
     }
   }

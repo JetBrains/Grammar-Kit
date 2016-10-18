@@ -115,7 +115,7 @@ public class BnfColorSettingsPage implements ColorSettingsPage {
 
   public Map<String, TextAttributesKey> getAdditionalHighlightingTagToDescriptorMap() {
     @NonNls
-    final Map<String, TextAttributesKey> map = new THashMap<String, TextAttributesKey>();
+    Map<String, TextAttributesKey> map = new THashMap<>();
     map.put("r", RULE);
     map.put("mr", META_RULE);
     map.put("a", ATTRIBUTE);

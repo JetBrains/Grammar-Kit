@@ -117,12 +117,8 @@ public class BnfGenerateLexerAction extends AnAction {
           associateFileTypeAndNavigate(project, virtualFile);
         }
         catch (final IncorrectOperationException e) {
-          ApplicationManager.getApplication().invokeLater(new Runnable() {
-            @Override
-            public void run() {
-              Messages.showErrorDialog(project, "Unable to create file " + flexFileName + "\n" + e.getLocalizedMessage(), "Create JFlex Lexer");
-            }
-          });
+          ApplicationManager.getApplication().invokeLater(
+            () -> Messages.showErrorDialog(project, "Unable to create file " + flexFileName + "\n" + e.getLocalizedMessage(), "Create JFlex Lexer"));
         }
       }
     }.execute();
@@ -143,8 +139,8 @@ public class BnfGenerateLexerAction extends AnAction {
     Map<String,String> tokenMap = RuleGraphHelper.getTokenNameToTextMap(bnfFile);
 
     final int[] maxLen = {"{WHITE_SPACE}".length()};
-    final Map<String, String> simpleTokens = new LinkedHashMap<String, String>();
-    final Map<String, String> regexpTokens = new LinkedHashMap<String, String>();
+    final Map<String, String> simpleTokens = new LinkedHashMap<>();
+    final Map<String, String> regexpTokens = new LinkedHashMap<>();
     for (String name : tokenMap.keySet()) {
       String token = tokenMap.get(name);
       if (name == null || token == null) continue;

@@ -29,7 +29,6 @@ import com.intellij.lexer.Lexer;
 import com.intellij.mock.*;
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.editor.EditorFactory;
 import com.intellij.openapi.extensions.ExtensionPoint;
 import com.intellij.openapi.extensions.ExtensionPointName;
@@ -39,7 +38,6 @@ import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.fileEditor.impl.FileDocumentManagerImpl;
 import com.intellij.openapi.fileTypes.FileTypeFactory;
 import com.intellij.openapi.fileTypes.FileTypeManager;
-import com.intellij.openapi.fileTypes.FileTypeRegistry;
 import com.intellij.openapi.fileTypes.PlainTextLanguage;
 import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.progress.impl.ProgressManagerImpl;
@@ -48,7 +46,6 @@ import com.intellij.openapi.project.DumbServiceImpl;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.startup.StartupManager;
 import com.intellij.openapi.util.Disposer;
-import com.intellij.openapi.util.Getter;
 import com.intellij.openapi.util.Trinity;
 import com.intellij.openapi.util.io.FileUtil;
 import com.intellij.openapi.util.text.StringUtil;
@@ -68,7 +65,6 @@ import com.intellij.psi.search.PsiSearchHelper;
 import com.intellij.psi.util.CachedValuesManager;
 import com.intellij.testFramework.LightVirtualFile;
 import com.intellij.util.CachedValuesManagerImpl;
-import com.intellij.util.Function;
 import com.intellij.util.messages.MessageBus;
 import com.intellij.util.messages.MessageBusFactory;
 import org.intellij.grammar.java.JavaHelper;
@@ -239,12 +235,7 @@ public class LightPsi {
     private static <T> void registerApplicationService(Project project, final Class<T> aClass, T object) {
       final MockApplicationEx application = (MockApplicationEx)ApplicationManager.getApplication();
       application.registerService(aClass, object);
-      Disposer.register(project, new Disposable() {
-        @Override
-        public void dispose() {
-          application.getPicoContainer().unregisterComponent(aClass.getName());
-        }
-      });
+      Disposer.register(project, () -> application.getPicoContainer().unregisterComponent(aClass.getName()));
     }
     
     public static Trinity<MockProjectEx, MockPsiManager, PsiFileFactoryImpl> initPsiFileFactory(Disposable rootDisposable) {
@@ -272,12 +263,7 @@ public class LightPsi {
       registerComponentInstance(appContainer, EditorFactory.class, editorFactory);
       registerComponentInstance(
         appContainer, FileDocumentManager.class,
-        new MockFileDocumentManagerImpl(new Function<CharSequence, Document>() {
-          @Override
-          public Document fun(CharSequence charSequence) {
-            return editorFactory.createDocument(charSequence);
-          }
-        }, FileDocumentManagerImpl.HARD_REF_TO_DOCUMENT_KEY)
+        new MockFileDocumentManagerImpl(charSequence -> editorFactory.createDocument(charSequence), FileDocumentManagerImpl.HARD_REF_TO_DOCUMENT_KEY)
       );
       registerComponentInstance(appContainer, PsiDocumentManager.class, new MockPsiDocumentManager());
       registerComponentInstance(appContainer, FileTypeManager.class, new MockFileTypeManager(new MockLanguageFileType(PlainTextLanguage.INSTANCE, "txt")));
@@ -295,12 +281,7 @@ public class LightPsi {
       MockApplicationEx instance = new MockApplicationEx(rootDisposable);
       ApplicationManager.setApplication(
         instance,
-        new Getter<FileTypeRegistry>() {
-          @Override
-          public FileTypeRegistry get() {
-            return FileTypeManager.getInstance();
-          }
-        },
+        () -> FileTypeManager.getInstance(),
         rootDisposable
       );
       instance.registerService(EncodingManager.class, EncodingManagerImpl.class);
@@ -330,12 +311,7 @@ public class LightPsi {
 
     public static <T> void addExplicitExtension(Project project, final LanguageExtension<T> instance, final Language language, final T object) {
       instance.addExplicitExtension(language, object);
-      Disposer.register(project, new Disposable() {
-        @Override
-        public void dispose() {
-          instance.removeExplicitExtension(language, object);
-        }
-      });
+      Disposer.register(project, () -> instance.removeExplicitExtension(language, object));
     }
   }
 }

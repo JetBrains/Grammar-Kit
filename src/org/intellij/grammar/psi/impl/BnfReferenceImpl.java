@@ -74,7 +74,7 @@ public class BnfReferenceImpl<T extends BnfCompositeElement> extends PsiReferenc
 
     if (!isExternal || PsiTreeUtil.getParentOfType(myElement, BnfExternalExpression.class) != null) {
       PsiFile containingFile = myElement.getContainingFile();
-      List<BnfRule> rules = containingFile instanceof BnfFile ? ((BnfFile)containingFile).getRules() : Collections.<BnfRule>emptyList();
+      List<BnfRule> rules = containingFile instanceof BnfFile ? ((BnfFile)containingFile).getRules() : Collections.emptyList();
       for (BnfRule rule : rules) {
         boolean fakeRule = ParserGeneratorUtil.Rule.isFake(rule);
         boolean privateRule = ParserGeneratorUtil.Rule.isPrivate(rule);

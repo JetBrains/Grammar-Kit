@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.intellij.grammar;
 
 import com.intellij.codeHighlighting.Pass;
@@ -70,20 +71,17 @@ public class BnfUnusedRulePassFactory extends AbstractProjectComponent implement
     return file instanceof BnfFile? new MyPass(myProject, (BnfFile)file, editor.getDocument()) : null;
   }
 
-  private static final Function<PsiElement, BnfRule> RESOLVER = new Function<PsiElement, BnfRule>() {
-    @Override
-    public BnfRule fun(PsiElement o) {
-      if (!(o instanceof BnfReferenceOrToken) && !(o instanceof BnfStringLiteralExpression)) return null;
-      PsiReference reference = o.getReference();
-      PsiElement target = reference != null ? reference.resolve() : null;
-      return target instanceof BnfRule ? (BnfRule)target : null;
-    }
+  private static final Function<PsiElement, BnfRule> RESOLVER = o -> {
+    if (!(o instanceof BnfReferenceOrToken) && !(o instanceof BnfStringLiteralExpression)) return null;
+    PsiReference reference = o.getReference();
+    PsiElement target = reference != null ? reference.resolve() : null;
+    return target instanceof BnfRule ? (BnfRule)target : null;
   };
 
   static class MyPass extends TextEditorHighlightingPass {
 
     private final BnfFile myFile;
-    private final List<HighlightInfo> myHighlights = new ArrayList<HighlightInfo>();
+    private final List<HighlightInfo> myHighlights = new ArrayList<>();
 
     MyPass(Project myProject, BnfFile file, Document document) {
       super(myProject, document, true);

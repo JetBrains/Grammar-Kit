@@ -167,12 +167,8 @@ public class BnfGenerateParserUtilAction extends AnAction {
           }
         }
         catch (final IncorrectOperationException e) {
-          ApplicationManager.getApplication().invokeLater(new Runnable() {
-            @Override
-            public void run() {
-              Messages.showErrorDialog(project, "Unable to create class " + className + "\n" + e.getLocalizedMessage(), title);
-            }
-          });
+          ApplicationManager.getApplication().invokeLater(
+            () -> Messages.showErrorDialog(project, "Unable to create class " + className + "\n" + e.getLocalizedMessage(), title));
         }
       }
     }.execute();

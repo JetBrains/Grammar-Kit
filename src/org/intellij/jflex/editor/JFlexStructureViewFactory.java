@@ -83,18 +83,8 @@ public class JFlexStructureViewFactory implements PsiStructureViewFactory {
 
   }
 
-  static final Function<PsiElement, StructureViewTreeElement> WRAPPER = new Function<PsiElement, StructureViewTreeElement>() {
-    @Override
-    public StructureViewTreeElement fun(PsiElement element) {
-      return new MyElement(element);
-    }
-  };
-  static final Function<PsiElement, String> TO_TEXT = new Function<PsiElement, String>() {
-    @Override
-    public String fun(PsiElement element) {
-      return element.getText();
-    }
-  };
+  static final Function<PsiElement, StructureViewTreeElement> WRAPPER = element -> new MyElement(element);
+  static final Function<PsiElement, String> TO_TEXT = element -> element.getText();
   static class MyElement extends PsiTreeElementBase<PsiElement> implements SortableTreeElement {
 
     MyElement(PsiElement element) {

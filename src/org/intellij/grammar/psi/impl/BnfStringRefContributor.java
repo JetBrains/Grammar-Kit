@@ -36,10 +36,10 @@ import static org.intellij.grammar.KnownAttribute.*;
  */
 public class BnfStringRefContributor extends PsiReferenceContributor {
 
-  private static final Set<KnownAttribute> RULE_ATTRIBUTES = ContainerUtil.<KnownAttribute>newHashSet(
+  private static final Set<KnownAttribute> RULE_ATTRIBUTES = ContainerUtil.newHashSet(
     EXTENDS, IMPLEMENTS, RECOVER_WHILE, NAME);
 
-  private static final Set<KnownAttribute> JAVA_CLASS_ATTRIBUTES = ContainerUtil.<KnownAttribute>newHashSet(
+  private static final Set<KnownAttribute> JAVA_CLASS_ATTRIBUTES = ContainerUtil.newHashSet(
     EXTENDS, IMPLEMENTS, MIXIN);
 
   @Override

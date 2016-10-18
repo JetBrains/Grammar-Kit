@@ -71,7 +71,7 @@ public class JFlexPsiImplUtil extends JavaRefHelper {
       @Override
       public Object[] getVariants() {
         CommonProcessors.CollectProcessor<JFlexMacroDefinition> processor =
-          new CommonProcessors.CollectProcessor<JFlexMacroDefinition>();
+          new CommonProcessors.CollectProcessor<>();
         processMacroVariants(getElement(), processor);
         return ArrayUtil.toObjectArray(processor.getResults());
       }
@@ -86,13 +86,8 @@ public class JFlexPsiImplUtil extends JavaRefHelper {
   private static boolean processMacroVariants(PsiElement context, Processor<JFlexMacroDefinition> processor) {
     final PsiFile containingFile = context.getContainingFile();
     List<JFlexMacroDefinition> macros = CachedValuesManager.getCachedValue(
-      containingFile, new CachedValueProvider<List<JFlexMacroDefinition>>() {
-        @Nullable
-        @Override
-        public Result<List<JFlexMacroDefinition>> compute() {
-          return Result.create(computeDefinitions(containingFile, JFlexMacroDefinition.class), containingFile);
-        }
-      });
+      containingFile,
+      () -> CachedValueProvider.Result.create(computeDefinitions(containingFile, JFlexMacroDefinition.class), containingFile));
     return ContainerUtil.process(macros, processor);
   }
 

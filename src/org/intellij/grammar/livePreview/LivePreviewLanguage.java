@@ -66,7 +66,7 @@ public class LivePreviewLanguage extends Language {
     VirtualFile virtualFile = ObjectUtils.assertNotNull(grammarFile.getVirtualFile());
     Application app = ApplicationManager.getApplication();
     if (app.isUnitTestMode()) {
-      myBnfFile = new SoftReference<BnfFile>(grammarFile);
+      myBnfFile = new SoftReference<>(grammarFile);
       myFilePointer = null;
     }
     else {

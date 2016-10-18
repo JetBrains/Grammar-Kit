@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.intellij.grammar.generator;
 
 import com.intellij.openapi.diagnostic.Logger;
@@ -361,8 +362,8 @@ public class ParserGenerator {
     String t = G.visitorValue != null ? G.visitorValue : "void";
     String ret = G.visitorValue != null ? "return " : "";
     generateClassHeader(psiClass + r, imports, "", Java.CLASS, PSI_ELEMENT_VISITOR_CLASS);
-    Set<String> visited = new HashSet<String>();
-    Set<String> all = new TreeSet<String>();
+    Set<String> visited = new HashSet<>();
+    Set<String> all = new TreeSet<>();
     for (BnfRule rule : sortedRules.values()) {
       String methodName = getRulePsiClassName(rule, null);
       visited.add(methodName);
@@ -408,8 +409,8 @@ public class ParserGenerator {
 
 
   public void generateParser() throws IOException {
-    for (String className : new TreeSet<String>(myRuleParserClasses.values())) {
-      Map<String, BnfRule> map = new TreeMap<String, BnfRule>();
+    for (String className : new TreeSet<>(myRuleParserClasses.values())) {
+      Map<String, BnfRule> map = new TreeMap<>();
       for (String ruleName : myRuleParserClasses.keySet()) {
         if (className.equals(myRuleParserClasses.get(ruleName))) {
           map.put(ruleName, myFile.getRule(ruleName));
@@ -429,7 +430,7 @@ public class ParserGenerator {
     String elementTypeHolderClass = getRootAttribute(myFile, KnownAttribute.ELEMENT_TYPE_HOLDER_CLASS);
     List<String> parserImports = getRootAttribute(myFile, KnownAttribute.PARSER_IMPORTS).asStrings();
     boolean rootParser = parserClass.equals(myGrammarRootParser);
-    Set<String> imports = new LinkedHashSet<String>();
+    Set<String> imports = new LinkedHashSet<>();
     imports.addAll(Arrays.asList(PSI_BUILDER_CLASS,
                                  PSI_BUILDER_CLASS +".Marker",
                                  "static " + elementTypeHolderClass + ".*",
@@ -460,7 +461,7 @@ public class ParserGenerator {
       if (Rule.isExternal(rule) || Rule.isFake(rule)) continue;
       if (myExpressionHelper.getExpressionInfo(rule) != null) continue;
       out("/* ********************************************************** */");
-      generateNode(rule, rule.getExpression(), getFuncName(rule), new THashSet<BnfExpression>());
+      generateNode(rule, rule.getExpression(), getFuncName(rule), new THashSet<>());
       newLine();
     }
     for (String ruleName : ownRuleNames) {
@@ -472,7 +473,7 @@ public class ParserGenerator {
         newLine();
       }
     }
-    Map<String, String> reversedLambdas = new THashMap<String, String>();
+    Map<String, String> reversedLambdas = new THashMap<>();
     for (Map.Entry<String, String> e : myParserLambdas.entrySet()) {
       String body = e.getValue();
       if (body.startsWith("#")) {
@@ -571,12 +572,7 @@ public class ParserGenerator {
       }
       if (set != null && set.size() > 1) result.add(set);
     }
-    Collections.sort(result, new Comparator<Set<?>>() {
-      @Override
-      public int compare(Set<?> o1, Set<?> o2) {
-        return o1.size() - o2.size();
-      }
-    });
+    result.sort(Comparator.comparingInt(Set::size));
     for (ListIterator<Set<String>> it = result.listIterator(); it.hasNext(); ) {
       Set<String> smaller = it.next();
       for (Set<String> bigger : result.subList(it.nextIndex(), result.size())) {
@@ -639,31 +635,28 @@ public class ParserGenerator {
 
   @NotNull
   private static Function<String, String> newClassNameShortener(final Set<String> realImports) {
-    return new Function<String, String>() {
-      @Override
-      public String fun(String s) {
-        boolean changed = false;
-        StringBuilder sb = new StringBuilder();
-        boolean vararg = s.endsWith("...");
-        for (String part : StringUtil.tokenize(new StringTokenizer(StringUtil.trimEnd(s, "..."), TYPE_TEXT_SEPARATORS, true))) {
-          String pkg;
-          String wildcard = part.startsWith("? super ") ? "? super " : part.startsWith("? extends ") ? "? extends " : "";
-          part = StringUtil.trimStart(part, wildcard);
-          if (TYPE_TEXT_SEPARATORS.contains(part)) {
-            sb.append(part).append(part.equals(",") ? " " : "");
-          }
-          else if (realImports.contains(part) ||
-                   "java.lang".equals(pkg = StringUtil.getPackageName(part)) ||
-                   realImports.contains(pkg + ".*")) {
-            sb.append(wildcard).append(StringUtil.getShortName(part));
-            changed = true;
-          }
-          else {
-            sb.append(wildcard).append(part);
-          }
+    return s -> {
+      boolean changed = false;
+      StringBuilder sb = new StringBuilder();
+      boolean vararg = s.endsWith("...");
+      for (String part : StringUtil.tokenize(new StringTokenizer(StringUtil.trimEnd(s, "..."), TYPE_TEXT_SEPARATORS, true))) {
+        String pkg;
+        String wildcard = part.startsWith("? super ") ? "? super " : part.startsWith("? extends ") ? "? extends " : "";
+        part = StringUtil.trimStart(part, wildcard);
+        if (TYPE_TEXT_SEPARATORS.contains(part)) {
+          sb.append(part).append(part.equals(",") ? " " : "");
         }
-        return changed ? sb.append(vararg? "..." : "").toString() : s;
+        else if (realImports.contains(part) ||
+                 "java.lang".equals(pkg = StringUtil.getPackageName(part)) ||
+                 realImports.contains(pkg + ".*")) {
+          sb.append(wildcard).append(StringUtil.getShortName(part));
+          changed = true;
+        }
+        else {
+          sb.append(wildcard).append(part);
+        }
       }
+      return changed ? sb.append(vararg? "..." : "").toString() : s;
     };
   }
 
@@ -706,7 +699,7 @@ public class ParserGenerator {
     String recoverWhile = !firstNonTrivial ? null : ObjectUtils.chooseNotNull(
       getAttribute(rule, KnownAttribute.RECOVER_WHILE.alias("recoverUntil")),
       getAttribute(rule, KnownAttribute.RECOVER_WHILE));
-    Map<String, String> hooks = firstNonTrivial ? getAttribute(rule, KnownAttribute.HOOKS).asMap() : Collections.<String, String>emptyMap();
+    Map<String, String> hooks = firstNonTrivial ? getAttribute(rule, KnownAttribute.HOOKS).asMap() : Collections.emptyMap();
 
     final boolean canCollapse = !isPrivate && (!isLeft || isLeftInner) && firstNonTrivial && myGraphHelper.canCollapse(rule);
 
@@ -911,7 +904,7 @@ public class ParserGenerator {
     BnfFirstNextAnalyzer analyzer = new BnfFirstNextAnalyzer().setPredicateLookAhead(true);
     Set<BnfExpression> nextExprSet = analyzer.calcNext(rule).keySet();
     Set<String> nextSet = analyzer.asStrings(nextExprSet);
-    List<String> tokenTypes = new ArrayList<String>(nextSet.size());
+    List<String> tokenTypes = new ArrayList<>(nextSet.size());
 
     for (String s : nextSet) {
       if (myFile.getRule(s) != null) continue; // ignore left recursion
@@ -942,7 +935,7 @@ public class ParserGenerator {
     if (G.generateFirstCheck <= 0) return frameName;
     BnfFirstNextAnalyzer analyzer = new BnfFirstNextAnalyzer().setPredicateLookAhead(true);
     Set<String> firstSet = analyzer.asStrings(analyzer.calcFirst(rule));
-    List<String> firstElementTypes = new ArrayList<String>(firstSet.size());
+    List<String> firstElementTypes = new ArrayList<>(firstSet.size());
     for (String s : firstSet) {
       if (myFile.getRule(s) != null) continue; // ignore left recursion
       @SuppressWarnings("StringEquality")
@@ -1300,13 +1293,13 @@ public class ParserGenerator {
     String implPackage = getPsiImplPackage(myFile);
     String tokenTypeClass = getRootAttribute(myFile, KnownAttribute.TOKEN_TYPE_CLASS);
     String tokenTypeFactory = getRootAttribute(myFile, KnownAttribute.TOKEN_TYPE_FACTORY);
-    Set<String> imports = new LinkedHashSet<String>();
+    Set<String> imports = new LinkedHashSet<>();
     imports.add(IELEMENTTYPE_CLASS);
     if (G.generatePsi) {
       imports.add(PSI_ELEMENT_CLASS);
       imports.add(AST_NODE_CLASS);
     }
-    Map<String, Pair<String, String>> compositeToClassAndFactoryMap = new THashMap<String, Pair<String, String>>();
+    Map<String, Pair<String, String>> compositeToClassAndFactoryMap = new THashMap<>();
     for (String elementType : sortedCompositeTypes.keySet()) {
       BnfRule rule = sortedCompositeTypes.get(elementType);
       String elementTypeClass = getAttribute(rule, KnownAttribute.ELEMENT_TYPE_CLASS);
@@ -1398,7 +1391,7 @@ public class ParserGenerator {
                                Collection<String> psiSupers) {
     String stubClass = getAttribute(rule, KnownAttribute.STUB_CLASS);
     if (StringUtil.isNotEmpty(stubClass)) {
-      psiSupers = new LinkedHashSet<String>(psiSupers);
+      psiSupers = new LinkedHashSet<>(psiSupers);
       psiSupers.add(STUB_BASED_PSI_ELEMENT + "<" + stubClass + ">");
     }
 
@@ -1767,7 +1760,7 @@ public class ParserGenerator {
                                   boolean intf,
                                   boolean isInPsiUtil,
                                   Set<String> visited) {
-    List<String> methodTypes = method == null ? Collections.<String>emptyList() : myJavaHelper.getMethodTypes(method);
+    List<String> methodTypes = method == null ? Collections.emptyList() : myJavaHelper.getMethodTypes(method);
     String returnType = methodTypes.isEmpty()? "void" : myShortener.fun(methodTypes.get(0));
     int offset = methodTypes.isEmpty() || isInPsiUtil && methodTypes.size() < 3 ? 0 :
                  isInPsiUtil ? 3 : 1;

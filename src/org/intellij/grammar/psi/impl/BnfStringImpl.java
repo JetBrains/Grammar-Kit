@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.intellij.grammar.psi.impl;
 
 import com.intellij.lang.ASTNode;
@@ -148,13 +149,7 @@ public abstract class BnfStringImpl extends BnfExpressionImpl implements BnfStri
 
   private static class MyPatternReference extends PsiPolyVariantReferenceBase<BnfStringImpl> {
     private static final ResolveCache.PolyVariantResolver<MyPatternReference> RESOLVER =
-      new ResolveCache.PolyVariantResolver<MyPatternReference>() {
-        @NotNull
-        @Override
-        public ResolveResult[] resolve(@NotNull MyPatternReference reference, boolean b) {
-          return reference.multiResolveInner();
-        }
-      };
+      (reference, b) -> reference.multiResolveInner();
 
     MyPatternReference(BnfStringImpl element) {
       super(element);
@@ -188,7 +183,7 @@ public abstract class BnfStringImpl extends BnfExpressionImpl implements BnfStri
 
       String thisAttrName = thisAttr.getName();
       // collect priority patterns
-      List<Pattern> otherPatterns = new SmartList<Pattern>();
+      List<Pattern> otherPatterns = new SmartList<>();
       for (BnfAttr attr : thisAttrs.getAttrList()) {
         if (attr == thisAttr) break;
         if (thisAttrName.equals(attr.getName())) {
@@ -215,17 +210,14 @@ public abstract class BnfStringImpl extends BnfExpressionImpl implements BnfStri
         }
       }
       if (KnownAttribute.getAttribute(thisAttrName) == KnownAttribute.PIN) {
-        PairProcessor<String, BnfExpression> processor = new PairProcessor<String, BnfExpression>() {
-          @Override
-          public boolean process(String funcName, BnfExpression expression) {
-            if (!(expression instanceof BnfSequence)) return true;
-            PsiElement firstNotTrivial = ParserGeneratorUtil.Rule.firstNotTrivial(ParserGeneratorUtil.Rule.of(expression));
-            if (firstNotTrivial == expression) return true;
-            if (pattern.matcher(funcName).matches()) {
-              result.add(new MyFakePsiElement(funcName, expression));
-            }
-            return true;
+        PairProcessor<String, BnfExpression> processor = (funcName, expression) -> {
+          if (!(expression instanceof BnfSequence)) return true;
+          PsiElement firstNotTrivial = ParserGeneratorUtil.Rule.firstNotTrivial(ParserGeneratorUtil.Rule.of(expression));
+          if (firstNotTrivial == expression) return true;
+          if (pattern.matcher(funcName).matches()) {
+            result.add(new MyFakePsiElement(funcName, expression));
           }
+          return true;
         };
         for (Object e : result.toArray()) {
           BnfRule rule = (BnfRule)e;

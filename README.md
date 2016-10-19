@@ -16,7 +16,7 @@ Open-source plugins built with Grammar-Kit:
 * [intellij-haskforce](https://github.com/carymrobbins/intellij-haskforce),
 [elm-plugin](https://github.com/durkiewicz/elm-plugin),
 [Perl5-IDEA](https://github.com/Camelcade/Perl5-IDEA),
-[Cypher](https://github.com/Neueda4j/jetbrains-plugin-cypher),
+[Cypher](https://github.com/neueda/jetbrains-plugin-graph-database-support),
 * [Clojure-Kit](https://github.com/gregsh/Clojure-Kit), [Dart](https://github.com/JetBrains/intellij-plugins/tree/master/Dart),
 [intellij-haxe](https://github.com/JetBrains/intellij-haxe),
 [OGNL](https://github.com/JetBrains/intellij-plugins/tree/master/struts2)

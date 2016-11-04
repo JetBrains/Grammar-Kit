@@ -64,8 +64,13 @@ public class JFlexCompletionContributor extends CompletionContributor {
         boolean inJava = parent instanceof JFlexJavaCode || parent instanceof JFlexJavaType;
 
         if (!inJava && parameters.getInvocationCount() < 2) {
+          int start = position.getTextRange().getStartOffset();
+          CompletionResultSet result2 =
+            start > 0 && parameters.getEditor().getDocument().getText().charAt(start - 1) == '%' ?
+            result.withPrefixMatcher(result.getPrefixMatcher().cloneWithPrefix("%" + result.getPrefixMatcher().getPrefix())) :
+            result;
           for (String keyword : suggestKeywords(parameters.getPosition())) {
-            result.addElement(createKeywordLookupItem(keyword));
+            result2.addElement(createKeywordLookupItem(keyword));
           }
         }
       }
@@ -104,7 +109,8 @@ public class JFlexCompletionContributor extends CompletionContributor {
         if (o == FLEX_ID || o == FLEX_CHAR || o == FLEX_STRING ||
             o == FLEX_NUMBER || o == FLEX_RAW || o == FLEX_VERSION) return null;
         String text = o.toString();
-        return text.length() == 1 || inMacro && text.startsWith("%") || !inMacro && text.startsWith("[")? null : text;
+        return text.length() == 1 || inMacro && text.startsWith("%") || !inMacro && text.startsWith("[") ?
+               null : text;
       }
     };
     file.putUserData(GeneratedParserUtilBase.COMPLETION_STATE_KEY, state);

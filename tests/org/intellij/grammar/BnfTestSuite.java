@@ -4,6 +4,7 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 import org.intellij.grammar.expression.ExpressionParserTest;
+import org.intellij.jflex.JFlexCompletionTest;
 import org.intellij.jflex.JFlexGenerationTest;
 import org.intellij.jflex.JFlexParserTest;
 
@@ -37,6 +38,8 @@ public class BnfTestSuite extends TestCase {
     testSuite.addTestSuite(BnfInlineRuleTest.class);
     testSuite.addTestSuite(BnfIntroduceRuleTest.class);
     testSuite.addTestSuite(BnfFlipChoiceIntentionTest.class);
+
+    testSuite.addTestSuite(JFlexCompletionTest.class);
     return testSuite;
   }
 }

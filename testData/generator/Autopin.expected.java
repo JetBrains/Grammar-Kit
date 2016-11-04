@@ -306,4 +306,17 @@ public class Autopin implements PsiParser, LightPsiParser {
     return result_;
   }
 
+  /* ********************************************************** */
+  // '+' a "+" a '+++'
+  static boolean token_sequence6(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "token_sequence6")) return false;
+    if (!nextTokenIs(builder_, PLUS)) return false;
+    boolean result_;
+    Marker marker_ = enter_section_(builder_);
+    result_ = consumeTokens(builder_, 0, PLUS, A, PLUS, A);
+    result_ = result_ && consumeToken(builder_, "+++");
+    exit_section_(builder_, marker_, null, result_);
+    return result_;
+  }
+
 }

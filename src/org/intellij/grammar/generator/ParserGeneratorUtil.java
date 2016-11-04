@@ -577,10 +577,12 @@ public class ParserGeneratorUtil {
   public static boolean isTokenSequence(@NotNull BnfRule rule, @Nullable BnfExpression node) {
     if (node == null || ConsumeType.forRule(rule) != ConsumeType.DEFAULT) return false;
     if (getEffectiveType(node) != BNF_SEQUENCE) return false;
-    BnfFile bnfFile = (BnfFile) rule.getContainingFile();
+    BnfFile file = (BnfFile) rule.getContainingFile();
     for (PsiElement child : getChildExpressions(node)) {
-      boolean isToken = child instanceof BnfReferenceOrToken && bnfFile.getRule(child.getText()) == null;
-      if (!isToken) return false;
+      String text = child.getText();
+      String tokenName = child instanceof BnfStringLiteralExpression ? RuleGraphHelper.getTokenTextToNameMap(file).get(StringUtil.stripQuotesAroundValue(child.getText())) :
+                         child instanceof BnfReferenceOrToken && file.getRule(text) == null ? text : null;
+      if (tokenName == null) return false;
     }
     return true;
   }

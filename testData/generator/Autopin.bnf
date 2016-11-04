@@ -7,6 +7,9 @@
   pin("create_.*_statement")=".*_ref"
   pin("drop_.*_statement")=".*_ref"
   pin("override.*")=1
+  tokens=[
+    plus='+'
+  ]
 }
 
 root ::= statement *
@@ -26,3 +29,4 @@ private token_sequence3 ::= table_ref a b table_ref c d e {pin=1}
 private token_sequence4 ::= [] a {pin=1}
 private token_sequence5 ::= (a|&b) pinned_on_start
 private pinned_on_start ::= [] (a|b) {pin=1}
+private token_sequence6 ::= '+' a "+" a '+++'

@@ -234,18 +234,7 @@ public class JFlexParser implements PsiParser, LightPsiParser {
     boolean result;
     Marker marker = enter_section_(builder);
     result = is_percent(builder, level + 1);
-    if (!result) result = declaration_recover_0_0_1(builder, level + 1);
-    exit_section_(builder, marker, null, result);
-    return result;
-  }
-
-  // id '='
-  private static boolean declaration_recover_0_0_1(PsiBuilder builder, int level) {
-    if (!recursion_guard_(builder, level, "declaration_recover_0_0_1")) return false;
-    boolean result;
-    Marker marker = enter_section_(builder);
-    result = consumeToken(builder, FLEX_ID);
-    result = result && consumeToken(builder, FLEX_EQ);
+    if (!result) result = parseTokens(builder, 0, FLEX_ID, FLEX_EQ);
     exit_section_(builder, marker, null, result);
     return result;
   }
@@ -490,8 +479,7 @@ public class JFlexParser implements PsiParser, LightPsiParser {
     boolean result, pinned;
     Marker marker = enter_section_(builder, level, _NONE_, FLEX_MACRO_DEFINITION, "<macro definition>");
     result = new_line(builder, level + 1);
-    result = result && consumeToken(builder, FLEX_ID);
-    result = result && consumeToken(builder, FLEX_EQ);
+    result = result && consumeTokens(builder, 2, FLEX_ID, FLEX_EQ);
     pinned = result; // pin = 3
     result = result && expression(builder, level + 1, -1);
     exit_section_(builder, level, marker, result, pinned, macro_definition_recover_parser_);
@@ -527,8 +515,7 @@ public class JFlexParser implements PsiParser, LightPsiParser {
     boolean result;
     Marker marker = enter_section_(builder);
     result = new_line(builder, level + 1);
-    result = result && consumeToken(builder, FLEX_ID);
-    result = result && consumeToken(builder, FLEX_EQ);
+    result = result && consumeTokens(builder, 0, FLEX_ID, FLEX_EQ);
     exit_section_(builder, marker, null, result);
     return result;
   }
@@ -700,9 +687,8 @@ public class JFlexParser implements PsiParser, LightPsiParser {
     if (!nextTokenIs(builder, FLEX_OPT_BUFFER)) return false;
     boolean result, pinned;
     Marker marker = enter_section_(builder, level, _NONE_, FLEX_OPTION, "<option>");
-    result = consumeToken(builder, FLEX_OPT_BUFFER);
+    result = consumeTokens(builder, 1, FLEX_OPT_BUFFER, FLEX_NUMBER);
     pinned = result; // pin = 1
-    result = result && consumeToken(builder, FLEX_NUMBER);
     exit_section_(builder, level, marker, result, pinned, null);
     return result || pinned;
   }
@@ -968,9 +954,8 @@ public class JFlexParser implements PsiParser, LightPsiParser {
     if (!nextTokenIs(builder, FLEX_OPT_FUNCTION)) return false;
     boolean result, pinned;
     Marker marker = enter_section_(builder, level, _NONE_, FLEX_OPTION, "<option>");
-    result = consumeToken(builder, FLEX_OPT_FUNCTION);
+    result = consumeTokens(builder, 1, FLEX_OPT_FUNCTION, FLEX_ID);
     pinned = result; // pin = 1
-    result = result && consumeToken(builder, FLEX_ID);
     exit_section_(builder, level, marker, result, pinned, null);
     return result || pinned;
   }
@@ -1332,9 +1317,7 @@ public class JFlexParser implements PsiParser, LightPsiParser {
     if (!recursion_guard_(builder, level, "rule_group_0_0")) return false;
     boolean result;
     Marker marker = enter_section_(builder);
-    result = consumeToken(builder, FLEX_BRACE1);
-    result = result && consumeToken(builder, FLEX_ID);
-    result = result && consumeToken(builder, FLEX_BRACE2);
+    result = consumeTokens(builder, 0, FLEX_BRACE1, FLEX_ID, FLEX_BRACE2);
     exit_section_(builder, marker, null, result);
     return result;
   }
@@ -1518,19 +1501,8 @@ public class JFlexParser implements PsiParser, LightPsiParser {
     if (!result) result = consumeToken(builder, FLEX_CHAR_CLASS);
     if (!result) result = consumeToken(builder, FLEX_NUMBER);
     if (!result) result = consumeToken(builder, FLEX_STRING);
-    if (!result) result = sequence_op_0_9(builder, level + 1);
+    if (!result) result = parseTokens(builder, 0, FLEX_BRACE1, FLEX_ID);
     if (!result) result = sequence_op_0_10(builder, level + 1);
-    exit_section_(builder, marker, null, result);
-    return result;
-  }
-
-  // '{' id
-  private static boolean sequence_op_0_9(PsiBuilder builder, int level) {
-    if (!recursion_guard_(builder, level, "sequence_op_0_9")) return false;
-    boolean result;
-    Marker marker = enter_section_(builder);
-    result = consumeToken(builder, FLEX_BRACE1);
-    result = result && consumeToken(builder, FLEX_ID);
     exit_section_(builder, marker, null, result);
     return result;
   }
@@ -1639,8 +1611,7 @@ public class JFlexParser implements PsiParser, LightPsiParser {
     if (!recursion_guard_(builder, level, "state_declaration_2_0_0_1_0")) return false;
     boolean result;
     Marker marker = enter_section_(builder);
-    result = consumeToken(builder, FLEX_ID);
-    result = result && consumeToken(builder, FLEX_EQ);
+    result = consumeTokens(builder, 0, FLEX_ID, FLEX_EQ);
     exit_section_(builder, marker, null, result);
     return result;
   }
@@ -1870,8 +1841,7 @@ public class JFlexParser implements PsiParser, LightPsiParser {
     if (!recursion_guard_(builder, level, "quantifier_expression_0_3")) return false;
     boolean result;
     Marker marker = enter_section_(builder);
-    result = consumeTokenSmart(builder, FLEX_BRACE1);
-    result = result && consumeToken(builder, FLEX_NUMBER);
+    result = consumeTokensSmart(builder, 0, FLEX_BRACE1, FLEX_NUMBER);
     result = result && quantifier_expression_0_3_2(builder, level + 1);
     result = result && consumeToken(builder, FLEX_BRACE2);
     exit_section_(builder, marker, null, result);
@@ -1881,19 +1851,8 @@ public class JFlexParser implements PsiParser, LightPsiParser {
   // [ ',' number]
   private static boolean quantifier_expression_0_3_2(PsiBuilder builder, int level) {
     if (!recursion_guard_(builder, level, "quantifier_expression_0_3_2")) return false;
-    quantifier_expression_0_3_2_0(builder, level + 1);
+    parseTokensSmart(builder, 0, FLEX_COMMA, FLEX_NUMBER);
     return true;
-  }
-
-  // ',' number
-  private static boolean quantifier_expression_0_3_2_0(PsiBuilder builder, int level) {
-    if (!recursion_guard_(builder, level, "quantifier_expression_0_3_2_0")) return false;
-    boolean result;
-    Marker marker = enter_section_(builder);
-    result = consumeTokenSmart(builder, FLEX_COMMA);
-    result = result && consumeToken(builder, FLEX_NUMBER);
-    exit_section_(builder, marker, null, result);
-    return result;
   }
 
   // '[' '^'? (char_class_item (char_class_op char_class_item)* )* ']'

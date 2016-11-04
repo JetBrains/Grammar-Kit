@@ -734,8 +734,7 @@ public class GrammarParser implements PsiParser, LightPsiParser {
     boolean result;
     Marker marker = enter_section_(builder);
     result = rule_start_0(builder, level + 1);
-    result = result && consumeToken(builder, BNF_ID);
-    result = result && consumeToken(builder, BNF_OP_IS);
+    result = result && consumeTokens(builder, 0, BNF_ID, BNF_OP_IS);
     exit_section_(builder, marker, null, result);
     return result;
   }
@@ -850,8 +849,7 @@ public class GrammarParser implements PsiParser, LightPsiParser {
     boolean result;
     Marker marker = enter_section_(builder);
     result = simple_0_0_0_0(builder, level + 1);
-    result = result && consumeToken(builder, BNF_ID);
-    result = result && consumeToken(builder, BNF_OP_IS);
+    result = result && consumeTokens(builder, 0, BNF_ID, BNF_OP_IS);
     exit_section_(builder, marker, null, result);
     return result;
   }

@@ -270,8 +270,7 @@ public class Small implements PsiParser, LightPsiParser {
     if (!nextTokenIs(builder_, OP_EQ)) return false;
     boolean result_;
     Marker marker_ = enter_section_(builder_);
-    result_ = consumeToken(builder_, OP_EQ);
-    result_ = result_ && consumeToken(builder_, OP_EQ);
+    result_ = consumeTokens(builder_, 0, OP_EQ, OP_EQ);
     result_ = result_ && consumeToken(builder_, "==");
     result_ = result_ && consumeToken(builder_, "==");
     exit_section_(builder_, marker_, null, result_);

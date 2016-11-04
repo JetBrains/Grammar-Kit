@@ -128,9 +128,7 @@ public class Self implements PsiParser, LightPsiParser {
     if (!nextTokenIs(builder_, BNF_LEFT_PAREN)) return false;
     boolean result_;
     Marker marker_ = enter_section_(builder_);
-    result_ = consumeToken(builder_, BNF_LEFT_PAREN);
-    result_ = result_ && consumeToken(builder_, BNF_STRING);
-    result_ = result_ && consumeToken(builder_, BNF_RIGHT_PAREN);
+    result_ = consumeTokens(builder_, 0, BNF_LEFT_PAREN, BNF_STRING, BNF_RIGHT_PAREN);
     exit_section_(builder_, marker_, BNF_ATTR_PATTERN, result_);
     return result_;
   }
@@ -478,8 +476,7 @@ public class Self implements PsiParser, LightPsiParser {
     boolean result_, pinned_;
     Marker marker_ = enter_section_(builder_, level_, _NONE_, BNF_RULE, null);
     result_ = rule_0(builder_, level_ + 1);
-    result_ = result_ && consumeToken(builder_, BNF_ID);
-    result_ = result_ && consumeToken(builder_, BNF_OP_IS);
+    result_ = result_ && consumeTokens(builder_, 2, BNF_ID, BNF_OP_IS);
     pinned_ = result_; // pin = 3
     result_ = result_ && expression(builder_, level_ + 1);
     result_ = result_ && rule_4(builder_, level_ + 1);
@@ -582,8 +579,7 @@ public class Self implements PsiParser, LightPsiParser {
     boolean result_;
     Marker marker_ = enter_section_(builder_);
     result_ = simple_0_0_0_0(builder_, level_ + 1);
-    result_ = result_ && consumeToken(builder_, BNF_ID);
-    result_ = result_ && consumeToken(builder_, BNF_OP_IS);
+    result_ = result_ && consumeTokens(builder_, 0, BNF_ID, BNF_OP_IS);
     exit_section_(builder_, marker_, null, result_);
     return result_;
   }

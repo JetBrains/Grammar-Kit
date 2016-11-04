@@ -786,7 +786,6 @@ public class ParserGenerator {
       }
     }
 
-    ConsumeType consumeType = ConsumeType.forRule(rule);
     boolean predicateEncountered = false;
     int[] skip = {0};
     for (int i = 0, p = 0, childrenSize = children.size(); i < childrenSize; i++) {
@@ -799,6 +798,7 @@ public class ParserGenerator {
       else if (type == BNF_SEQUENCE) {
         predicateEncountered |= pinApplied && getEffectiveExpression(myFile, child) instanceof BnfPredicate;
         if (skip[0] == 0) {
+          ConsumeType consumeType = getEffectiveConsumeType(rule, node, null);
           nodeCall = generateTokenSequenceCall(children, i, pinMatcher, pinApplied, skip, nodeCall, false, consumeType);
           if (i == 0) {
             out("%s = %s;", N.result, nodeCall);
@@ -1057,18 +1057,10 @@ public class ParserGenerator {
     int pin = pinApplied ? -1 : 0;
     for (int i = startIndex, len = children.size(); i < len; i++) {
       BnfExpression child = children.get(i);
-      IElementType type = child.getNode().getElementType();
       String text = child.getText();
-      String tokenName;
-      if (type == BNF_STRING && text.charAt(0) != '\"') {
-        tokenName = getTokenName(StringUtil.stripQuotesAroundValue(text));
-      }
-      else if (type == BNF_REFERENCE_OR_TOKEN && myFile.getRule(text) == null) {
-        tokenName = text;
-      }
-      else {
-        break;
-      }
+      String tokenName = child instanceof BnfStringLiteralExpression ? getTokenName(StringUtil.stripQuotesAroundValue(text)) :
+                         child instanceof BnfReferenceOrToken && myFile.getRule(text) == null ? text : null;
+      if (tokenName == null) break;
       list.add(getElementType(tokenName));
       if (!pinApplied && pinMatcher.matches(i, child)) {
         pin = i - startIndex + 1;
@@ -1090,16 +1082,11 @@ public class ParserGenerator {
   }
 
   String generateNodeCall(BnfRule rule, @Nullable BnfExpression node, String nextName, @Nullable ConsumeType forcedConsumeType) {
+    ConsumeType consumeType = getEffectiveConsumeType(rule, node, forcedConsumeType);
+    String consumeMethodName = KnownAttribute.CONSUME_TOKEN_METHOD.getDefaultValue() + consumeType.getMethodSuffix();
+
     IElementType type = node == null ? BNF_REFERENCE_OR_TOKEN : getEffectiveType(node);
     String text = node == null ? nextName : node.getText();
-    PsiElement parent = node == null? null : node.getParent();
-
-    boolean forceDefaultConsumeType = forcedConsumeType == ConsumeType.DEFAULT ||
-                                      forcedConsumeType == null && parent instanceof BnfSequence && parent.getFirstChild() != node;
-    ConsumeType consumeType =
-      forceDefaultConsumeType ? ConsumeType.DEFAULT :
-      ObjectUtils.chooseNotNull(ExpressionGeneratorHelper.fixForcedConsumeType(myExpressionHelper, rule, node, forcedConsumeType), ConsumeType.forRule(rule));
-    String consumeMethodName = KnownAttribute.CONSUME_TOKEN_METHOD.getDefaultValue() + consumeType.getMethodSuffix();
 
     if (type == BNF_STRING) {
       String value = StringUtil.stripQuotesAroundValue(text);
@@ -1149,8 +1136,8 @@ public class ParserGenerator {
       List<BnfExpression> childExpressions = getChildExpressions(node);
       PsiElement firstElement = ContainerUtil.getFirstItem(childExpressions);
       String nodeCall = generateNodeCall(rule, (BnfExpression) firstElement, getNextName(nextName, 0), consumeType);
-      for (PsiElement psiElement : childExpressions) {
-        String t = psiElement.getText();
+      for (PsiElement e : childExpressions) {
+        String t = e instanceof BnfStringLiteralExpression ? StringUtil.unquoteString(e.getText()) : e.getText();
         if (!mySimpleTokens.containsKey(t) && !mySimpleTokens.values().contains(t)) {
           mySimpleTokens.put(t, null);
         }
@@ -1172,6 +1159,16 @@ public class ParserGenerator {
       String extraArguments = collectExtraArguments(rule, node, false);
       return format("%s(%s, %s + 1%s)", nextName, N.builder, N.level, extraArguments);
     }
+  }
+
+  @NotNull
+  private ConsumeType getEffectiveConsumeType(@NotNull BnfRule rule, @Nullable BnfExpression node, @Nullable ConsumeType forcedConsumeType) {
+    if (forcedConsumeType == ConsumeType.DEFAULT) return ConsumeType.DEFAULT;
+    PsiElement parent = node == null ? null : node.getParent();
+
+    if (forcedConsumeType == null && parent instanceof BnfSequence && parent.getFirstChild() != node) return ConsumeType.DEFAULT;
+    ConsumeType fixed = ExpressionGeneratorHelper.fixForcedConsumeType(myExpressionHelper, rule, node, forcedConsumeType);
+    return fixed != null ? fixed : ConsumeType.forRule(rule);
   }
 
   private String generateExternalCall(BnfRule rule, StringBuilder clause, List<BnfExpression> expressions, String nextName) {
@@ -1563,6 +1560,7 @@ public class ParserGenerator {
         if (s.contains(".")) result.add(s);
       }
       for (String s : myJavaHelper.getAnnotations(method)) {
+        if (s.startsWith("kotlin.")) continue;
         result.add(s);
       }
     }
@@ -1768,6 +1766,7 @@ public class ParserGenerator {
 
     for (String s : myJavaHelper.getAnnotations(method)) {
       if ("java.lang.Override".equals(s)) continue;
+      if (s.startsWith("kotlin.")) continue;
       out("@" + myShortener.fun(s));
     }
     out("%s%s %s(%s)%s", intf ? "" : "public ", returnType, methodName,

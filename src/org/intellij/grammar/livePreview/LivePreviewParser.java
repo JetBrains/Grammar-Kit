@@ -345,7 +345,7 @@ public class LivePreviewParser implements PsiParser {
     IElementType type = node == null ? BNF_REFERENCE_OR_TOKEN : getEffectiveType(node);
     String text = node == null ? nextName : node.getText();
     if (type == BNF_STRING) {
-      String value = StringUtil.stripQuotesAroundValue(text);
+      String value = GrammarUtil.unquote(text);
       String attributeName = getTokenName(value);
       if (attributeName != null) {
         return generateConsumeToken(builder, attributeName);
@@ -417,7 +417,7 @@ public class LivePreviewParser implements PsiParser {
       String text = child.getText();
       String tokenName;
       if (type == BNF_STRING && text.charAt(0) != '\"') {
-        tokenName = getTokenName(StringUtil.stripQuotesAroundValue(text));
+        tokenName = getTokenName(GrammarUtil.unquote(text));
       }
       else if (type == BNF_REFERENCE_OR_TOKEN && myFile.getRule(text) == null) {
         tokenName = text;
@@ -671,7 +671,7 @@ public class LivePreviewParser implements PsiParser {
       if (s == BnfFirstNextAnalyzer.MATCHES_EOF || s == BnfFirstNextAnalyzer.MATCHES_NOTHING) continue;
 
       boolean unknown = s == BnfFirstNextAnalyzer.MATCHES_ANY;
-      IElementType t = unknown ? null : getTokenElementType(getTokenName(StringUtil.stripQuotesAroundValue(s)));
+      IElementType t = unknown ? null : getTokenElementType(getTokenName(GrammarUtil.unquote(s)));
       if (t != null) {
         tokenTypes.add(t);
       }

@@ -1017,7 +1017,7 @@ public class ParserGenerator {
   @Nullable
   private String firstToElementType(String first) {
     if (first.startsWith("#") || first.startsWith("-") || first.startsWith("<<")) return null;
-    String value = StringUtil.stripQuotesAroundValue(first);
+    String value = GrammarUtil.unquote(first);
     //noinspection StringEquality
     if (first != value) {
       String attributeName = getTokenName(value);
@@ -1058,7 +1058,7 @@ public class ParserGenerator {
     for (int i = startIndex, len = children.size(); i < len; i++) {
       BnfExpression child = children.get(i);
       String text = child.getText();
-      String tokenName = child instanceof BnfStringLiteralExpression ? getTokenName(StringUtil.stripQuotesAroundValue(text)) :
+      String tokenName = child instanceof BnfStringLiteralExpression ? getTokenName(GrammarUtil.unquote(text)) :
                          child instanceof BnfReferenceOrToken && myFile.getRule(text) == null ? text : null;
       if (tokenName == null) break;
       list.add(getElementType(tokenName));
@@ -1089,7 +1089,7 @@ public class ParserGenerator {
     String text = node == null ? nextName : node.getText();
 
     if (type == BNF_STRING) {
-      String value = StringUtil.stripQuotesAroundValue(text);
+      String value = GrammarUtil.unquote(text);
       String attributeName = getTokenName(value);
       if (attributeName != null) {
         return generateConsumeToken(attributeName, consumeMethodName);
@@ -1137,7 +1137,7 @@ public class ParserGenerator {
       PsiElement firstElement = ContainerUtil.getFirstItem(childExpressions);
       String nodeCall = generateNodeCall(rule, (BnfExpression) firstElement, getNextName(nextName, 0), consumeType);
       for (PsiElement e : childExpressions) {
-        String t = e instanceof BnfStringLiteralExpression ? StringUtil.unquoteString(e.getText()) : e.getText();
+        String t = e instanceof BnfStringLiteralExpression ? GrammarUtil.unquote(e.getText()) : e.getText();
         if (!mySimpleTokens.containsKey(t) && !mySimpleTokens.values().contains(t)) {
           mySimpleTokens.put(t, null);
         }
@@ -1220,12 +1220,12 @@ public class ParserGenerator {
           }
         }
         else if (nested instanceof BnfLiteralExpression) {
-          String attributeName = getTokenName(StringUtil.unquoteString(argument));
+          String attributeName = getTokenName(GrammarUtil.unquote(argument));
           if (attributeName != null) {
             clause.append(generateWrappedNodeCall(rule, nested, attributeName));
           }
           else if (argument.startsWith("\'")) {
-            clause.append(StringUtil.unquoteString(argument));
+            clause.append(GrammarUtil.unquote(argument));
           }
           else {
             clause.append(argument);

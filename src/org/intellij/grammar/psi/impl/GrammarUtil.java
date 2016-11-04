@@ -19,6 +19,7 @@ package org.intellij.grammar.psi.impl;
 import com.intellij.openapi.util.Comparing;
 import com.intellij.openapi.util.Conditions;
 import com.intellij.openapi.util.Ref;
+import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.SyntaxTraverser;
 import com.intellij.psi.util.PsiTreeUtil;
@@ -119,6 +120,11 @@ public class GrammarUtil {
       }
     }
     return result;
+  }
+
+  @NotNull
+  public static String unquote(@NotNull String str) {
+    return StringUtil.unquoteString(str);
   }
 
   public static boolean isDoubleAngles(@Nullable String str) {

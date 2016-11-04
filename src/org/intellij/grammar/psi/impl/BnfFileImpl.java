@@ -19,7 +19,6 @@ package org.intellij.grammar.psi.impl;
 import com.intellij.extapi.psi.PsiFileBase;
 import com.intellij.openapi.fileTypes.FileType;
 import com.intellij.openapi.util.TextRange;
-import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.psi.FileViewProvider;
 import com.intellij.psi.util.CachedValue;
 import com.intellij.psi.util.CachedValueProvider;
@@ -162,7 +161,7 @@ public class BnfFileImpl extends PsiFileBase implements BnfFile {
           Pattern pattern = null;
           if (attrPattern != null) {
             BnfLiteralExpression expression = attrPattern.getLiteralExpression();
-            pattern = expression == null ? null : ParserGeneratorUtil.compilePattern(StringUtil.stripQuotesAroundValue(expression.getText()));
+            pattern = expression == null ? null : ParserGeneratorUtil.compilePattern(GrammarUtil.unquote(expression.getText()));
           }
           List<AttributeInfo> list = result.get(attr.getName());
           if (list == null) result.put(attr.getName(), list = new ArrayList<>());

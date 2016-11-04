@@ -90,7 +90,7 @@ public class BnfIntroduceTokenHandler implements RefactoringActionHandler {
     else if (target instanceof BnfStringLiteralExpression) {
       if (PsiTreeUtil.getParentOfType(target, BnfAttrs.class) != null) return;
       tokenText = target.getText();
-      tokenName = tokenTextMap.get(StringUtil.unquoteString(tokenText));
+      tokenName = tokenTextMap.get(GrammarUtil.unquote(tokenText));
     }
     else return;
 
@@ -176,7 +176,7 @@ public class BnfIntroduceTokenHandler implements RefactoringActionHandler {
           TemplateState state = TemplateManagerImpl.getTemplateState(context.getEditor());
           assert state != null;
           TextResult text = ObjectUtils.assertNotNull(state.getVariableValue("TokenText"));
-          String curText = StringUtil.unquoteString(text.getText());
+          String curText = GrammarUtil.unquote(text.getText());
           if (ParserGeneratorUtil.isRegexpToken(curText)) {
             return state.getVariableValue("TokenName");
           }

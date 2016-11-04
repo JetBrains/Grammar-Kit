@@ -390,7 +390,7 @@ public class BnfFirstNextAnalyzer {
     for (BnfExpression expression : expressions) {
       if (expression instanceof BnfLiteralExpression) {
         String text = expression.getText();
-        result.add(StringUtil.isQuotedString(text) ? '\'' + StringUtil.unquoteString(text) + '\'' : text);
+        result.add(StringUtil.isQuotedString(text) ? '\'' + GrammarUtil.unquote(text) + '\'' : text);
       }
       else if (GrammarUtil.isExternalReference(expression)) {
         result.add("#" + expression.getText());

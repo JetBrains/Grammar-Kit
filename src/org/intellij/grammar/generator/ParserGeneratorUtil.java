@@ -164,7 +164,7 @@ public class ParserGeneratorUtil {
     IElementType elementType = literal.getNode().getElementType();
     if (elementType == BnfTypes.BNF_NUMBER) return (T)Integer.valueOf(text);
     if (elementType == BnfTypes.BNF_STRING) {
-      String unquoted = StringUtil.stripQuotesAroundValue(text);
+      String unquoted = GrammarUtil.unquote(text);
       // in double-quoted strings: un-escape quotes only leaving the rest \ manageable
       String result = text.charAt(0) == '"' ? unquoted.replaceAll("\\\\(\"|')", "$1") : unquoted;
       return (T) result;
@@ -580,7 +580,7 @@ public class ParserGeneratorUtil {
     BnfFile file = (BnfFile) rule.getContainingFile();
     for (PsiElement child : getChildExpressions(node)) {
       String text = child.getText();
-      String tokenName = child instanceof BnfStringLiteralExpression ? RuleGraphHelper.getTokenTextToNameMap(file).get(StringUtil.stripQuotesAroundValue(child.getText())) :
+      String tokenName = child instanceof BnfStringLiteralExpression ? RuleGraphHelper.getTokenTextToNameMap(file).get(GrammarUtil.unquote(child.getText())) :
                          child instanceof BnfReferenceOrToken && file.getRule(text) == null ? text : null;
       if (tokenName == null) return false;
     }
@@ -627,7 +627,7 @@ public class ParserGeneratorUtil {
       @Override
       public Void visitStringLiteralExpression(@NotNull BnfStringLiteralExpression o) {
         String text = o.getText();
-        String tokenText = StringUtil.stripQuotesAroundValue(text);
+        String tokenText = GrammarUtil.unquote(text);
         // add auto-XXX token for all unmatched strings to avoid BAD_CHARACTER's
         if (createTokenIfMissing &&
             !usedNames.contains(tokenText) &&

@@ -19,7 +19,6 @@ package org.intellij.grammar.psi.impl;
 import com.intellij.lang.ASTNode;
 import com.intellij.openapi.util.Key;
 import com.intellij.openapi.util.TextRange;
-import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.patterns.ElementPattern;
 import com.intellij.psi.*;
 import com.intellij.psi.impl.FakePsiElement;
@@ -125,7 +124,7 @@ public abstract class BnfStringImpl extends BnfExpressionImpl implements BnfStri
 
   @Nullable
   private static Pattern getPattern(BnfLiteralExpression expression) {
-    return ParserGeneratorUtil.compilePattern(StringUtil.stripQuotesAroundValue(expression.getText()));
+    return ParserGeneratorUtil.compilePattern(GrammarUtil.unquote(expression.getText()));
   }
 
   private static class MyRuleReference extends BnfReferenceImpl<BnfStringImpl> {

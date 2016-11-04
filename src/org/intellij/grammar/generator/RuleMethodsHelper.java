@@ -25,6 +25,7 @@ import com.intellij.util.containers.ContainerUtil;
 import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.psi.BnfAttr;
 import org.intellij.grammar.psi.BnfRule;
+import org.intellij.grammar.psi.impl.GrammarUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -166,7 +167,7 @@ public class RuleMethodsHelper {
 
       IElementType effectiveType = getEffectiveType(tree);
       if (effectiveType == BNF_STRING) {
-        result = mySimpleTokens.get(StringUtil.stripQuotesAroundValue(tree.getText()));
+        result = mySimpleTokens.get(GrammarUtil.unquote(tree.getText()));
       }
       else if (effectiveType == BNF_REFERENCE_OR_TOKEN) {
         result = tree.getText();

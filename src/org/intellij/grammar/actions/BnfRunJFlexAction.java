@@ -53,6 +53,7 @@ import com.intellij.openapi.roots.libraries.LibraryTable;
 import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.util.ActionCallback;
 import com.intellij.openapi.util.Comparing;
+import com.intellij.openapi.util.Conditions;
 import com.intellij.openapi.util.Pair;
 import com.intellij.openapi.util.io.FileUtil;
 import com.intellij.openapi.util.text.StringUtil;
@@ -354,7 +355,7 @@ public class BnfRunJFlexAction extends DumbAwareAction {
   private static String getCommunitySrcUrl(@NotNull Project project) {
     Sdk projectSdk = ProjectRootManager.getInstance(project).getProjectSdk();
     Sdk[] jdks = ProjectJdkTable.getInstance().getAllJdks();
-    for (Sdk sdk : JBIterable.of(projectSdk).append(jdks)) {
+    for (Sdk sdk : JBIterable.of(projectSdk).append(jdks).filter(Conditions.notNull())) {
       String result = getCommunitySrcUrlInner(sdk);
       if (result != null) return result;
     }

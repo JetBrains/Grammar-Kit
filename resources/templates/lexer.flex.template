@@ -1,7 +1,11 @@
 package $packageName;
 
-import com.intellij.lexer.*;
+import com.intellij.lexer.FlexLexer;
 import com.intellij.psi.tree.IElementType;
+import org.intellij.grammar.psi.BnfTypes;
+
+import static com.intellij.psi.TokenType.BAD_CHARACTER;
+import static com.intellij.psi.TokenType.WHITE_SPACE;
 import static $typesClass.*;
 
 %%
@@ -20,7 +24,7 @@ import static $typesClass.*;
 %unicode
 
 EOL=\R
-WHITE_SPACE=\s
+WHITE_SPACE=\s+
 
 #foreach( $token in $regexpTokens.keySet() )
 $token=$regexpTokens.get($token)
@@ -29,7 +33,7 @@ $token=$regexpTokens.get($token)
 #macro(spaces $len) #set( $count = $maxTokenLength - $len ) $StringUtil.repeat(" ", $count) #end
 %%
 <YYINITIAL> {
-  {WHITE_SPACE} #spaces(11) { return com.intellij.psi.TokenType.WHITE_SPACE; }
+  {WHITE_SPACE} #spaces(11) { return WHITE_SPACE; }
 
 #foreach( $token in $simpleTokens.keySet() )
   "$simpleTokens.get($token)" #spaces($simpleTokens.get($token).length()) { return ${tokenPrefix}$token; }
@@ -41,4 +45,4 @@ $token=$regexpTokens.get($token)
 
 }
 
-[^] { return com.intellij.psi.TokenType.BAD_CHARACTER; }
+[^] { return BAD_CHARACTER; }

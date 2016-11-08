@@ -1,9 +1,13 @@
 package org.intellij.grammar.parser;
-import com.intellij.lexer.*;
+
+import com.intellij.lexer.FlexLexer;
 import com.intellij.psi.tree.IElementType;
-import org.intellij.grammar.psi.BnfTypes;
-import static org.intellij.grammar.BnfParserDefinition.BNF_LINE_COMMENT;
+
+import static com.intellij.psi.TokenType.BAD_CHARACTER;
+import static com.intellij.psi.TokenType.WHITE_SPACE;
 import static org.intellij.grammar.BnfParserDefinition.BNF_BLOCK_COMMENT;
+import static org.intellij.grammar.BnfParserDefinition.BNF_LINE_COMMENT;
+import static org.intellij.grammar.psi.BnfTypes.*;
 
 %%
 
@@ -49,36 +53,36 @@ BAD_TOKENS={STRING_BAD1} | {STRING_BAD2}
 
 %%
 <YYINITIAL> {
-  {WHITE_SPACE} {yybegin(YYINITIAL); return com.intellij.psi.TokenType.WHITE_SPACE; }
+  {WHITE_SPACE} {yybegin(YYINITIAL); return WHITE_SPACE; }
   {LINE_COMMENT} {yybegin(YYINITIAL); return BNF_LINE_COMMENT; }
   {BLOCK_COMMENT} {yybegin(YYINITIAL); return BNF_BLOCK_COMMENT; }
 
-  {STRING} {yybegin(YYINITIAL); return BnfTypes.BNF_STRING; }
-  {NUMBER} {yybegin(YYINITIAL); return BnfTypes.BNF_NUMBER; }
+  {STRING} {yybegin(YYINITIAL); return BNF_STRING; }
+  {NUMBER} {yybegin(YYINITIAL); return BNF_NUMBER; }
 
-  {ID} {yybegin(YYINITIAL); return BnfTypes.BNF_ID; }
+  {ID} {yybegin(YYINITIAL); return BNF_ID; }
 
-  ";" {yybegin(YYINITIAL); return BnfTypes.BNF_SEMICOLON; }
+  ";" {yybegin(YYINITIAL); return BNF_SEMICOLON; }
 
-  "(" {yybegin(YYINITIAL); return BnfTypes.BNF_LEFT_PAREN; }
-  ")" {yybegin(YYINITIAL); return BnfTypes.BNF_RIGHT_PAREN; }
-  "{" {yybegin(YYINITIAL); return BnfTypes.BNF_LEFT_BRACE; }
-  "}" {yybegin(YYINITIAL); return BnfTypes.BNF_RIGHT_BRACE; }
-  "[" {yybegin(YYINITIAL); return BnfTypes.BNF_LEFT_BRACKET; }
-  "]" {yybegin(YYINITIAL); return BnfTypes.BNF_RIGHT_BRACKET; }
-  "<<" {yybegin(YYINITIAL); return BnfTypes.BNF_EXTERNAL_START; }
-  ">>" {yybegin(YYINITIAL); return BnfTypes.BNF_EXTERNAL_END; }
+  "(" {yybegin(YYINITIAL); return BNF_LEFT_PAREN; }
+  ")" {yybegin(YYINITIAL); return BNF_RIGHT_PAREN; }
+  "{" {yybegin(YYINITIAL); return BNF_LEFT_BRACE; }
+  "}" {yybegin(YYINITIAL); return BNF_RIGHT_BRACE; }
+  "[" {yybegin(YYINITIAL); return BNF_LEFT_BRACKET; }
+  "]" {yybegin(YYINITIAL); return BNF_RIGHT_BRACKET; }
+  "<<" {yybegin(YYINITIAL); return BNF_EXTERNAL_START; }
+  ">>" {yybegin(YYINITIAL); return BNF_EXTERNAL_END; }
 
-  "::=" {yybegin(YYINITIAL); return BnfTypes.BNF_OP_IS; }
-  "=" {yybegin(YYINITIAL); return BnfTypes.BNF_OP_EQ; }
-  "+" {yybegin(YYINITIAL); return BnfTypes.BNF_OP_ONEMORE; }
-  "*" {yybegin(YYINITIAL); return BnfTypes.BNF_OP_ZEROMORE; }
-  "?" {yybegin(YYINITIAL); return BnfTypes.BNF_OP_OPT; }
-  "&" {yybegin(YYINITIAL); return BnfTypes.BNF_OP_AND; }
-  "!" {yybegin(YYINITIAL); return BnfTypes.BNF_OP_NOT; }
-  "|" {yybegin(YYINITIAL); return BnfTypes.BNF_OP_OR; }
+  "::=" {yybegin(YYINITIAL); return BNF_OP_IS; }
+  "=" {yybegin(YYINITIAL); return BNF_OP_EQ; }
+  "+" {yybegin(YYINITIAL); return BNF_OP_ONEMORE; }
+  "*" {yybegin(YYINITIAL); return BNF_OP_ZEROMORE; }
+  "?" {yybegin(YYINITIAL); return BNF_OP_OPT; }
+  "&" {yybegin(YYINITIAL); return BNF_OP_AND; }
+  "!" {yybegin(YYINITIAL); return BNF_OP_NOT; }
+  "|" {yybegin(YYINITIAL); return BNF_OP_OR; }
 }
 
-{BAD_TOKENS} {yybegin(YYINITIAL); return com.intellij.psi.TokenType.BAD_CHARACTER; }
+{BAD_TOKENS} {yybegin(YYINITIAL); return BAD_CHARACTER; }
 
-[^] {yybegin(YYINITIAL); return com.intellij.psi.TokenType.BAD_CHARACTER; }
+[^] {yybegin(YYINITIAL); return BAD_CHARACTER; }

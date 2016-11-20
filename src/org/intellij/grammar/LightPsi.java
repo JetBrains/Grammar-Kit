@@ -68,8 +68,8 @@ import com.intellij.util.CachedValuesManagerImpl;
 import com.intellij.util.messages.MessageBus;
 import com.intellij.util.messages.MessageBusFactory;
 import org.intellij.grammar.java.JavaHelper;
-import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.picocontainer.*;
 import org.picocontainer.defaults.AbstractComponentAdapter;
 
@@ -97,18 +97,26 @@ public class LightPsi {
     }
   }
 
-  public static PsiFile parseFile(File file, ParserDefinition parserDefinition) throws IOException {
+  @Nullable
+  public static PsiFile parseFile(@NotNull File file, @NotNull ParserDefinition parserDefinition) throws IOException {
     String name = file.getName();
     String text = FileUtil.loadFile(file);
     return parseFile(name, text, parserDefinition);
   }
 
-  public static PsiFile parseFile(String name, @NotNull String text, @NotNull ParserDefinition parserDefinition) {
+  @Nullable
+  public static PsiFile parseFile(@NotNull String name, @NotNull String text, @NotNull ParserDefinition parserDefinition) {
     return ourParsing.createFile(name, text, parserDefinition);
   }
 
+  @NotNull
   public static ASTNode parseText(@NotNull String text, @NotNull ParserDefinition parserDefinition) {
     return ourParsing.createAST(text, parserDefinition);
+  }
+
+  @NotNull
+  public static SyntaxTraverser<LighterASTNode> parseLight(@NotNull String text, @NotNull ParserDefinition parserDefinition) {
+    return ourParsing.parseLight(text, parserDefinition);
   }
 
   /*
@@ -178,17 +186,28 @@ public class LightPsi {
       Init.initExtensions(getProject(), myModel.second);
     }
 
-    protected PsiFile createFile(@NonNls String name, @NotNull String text, @NotNull ParserDefinition definition) {
+    @Nullable
+    protected PsiFile createFile(@NotNull String name, @NotNull String text, @NotNull ParserDefinition definition) {
       Language language = definition.getFileNodeType().getLanguage();
       Init.addExplicitExtension(getProject(), LanguageParserDefinitions.INSTANCE, language, definition);
       return myModel.third.trySetupPsiForFile(new LightVirtualFile(name, language, text), language, true, false);
     }
 
+    @NotNull
     protected ASTNode createAST(@NotNull String text, @NotNull ParserDefinition definition) {
       PsiParser parser = definition.createParser(getProject());
       Lexer lexer = definition.createLexer(getProject());
       PsiBuilderImpl psiBuilder = new PsiBuilderImpl(getProject(), null, definition, lexer, new CharTableImpl(), text, null, null);
       return parser.parse(definition.getFileNodeType(), psiBuilder);
+    }
+
+    @NotNull
+    protected SyntaxTraverser<LighterASTNode> parseLight(@NotNull String text, @NotNull ParserDefinition definition) {
+      LightPsiParser parser = (LightPsiParser)definition.createParser(getProject());
+      Lexer lexer = definition.createLexer(getProject());
+      PsiBuilderImpl psiBuilder = new PsiBuilderImpl(getProject(), null, definition, lexer, new CharTableImpl(), text, null, null);
+      parser.parseLight(definition.getFileNodeType(), psiBuilder);
+      return SyntaxTraverser.lightTraverser(psiBuilder);
     }
 
     private MockProjectEx getProject() {

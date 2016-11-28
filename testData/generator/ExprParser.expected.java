@@ -271,7 +271,7 @@ public class ExpressionParser implements PsiParser, LightPsiParser {
         exit_section_(builder_, level_, marker_, XOR_EXPR, result_, true, null);
       }
       else if (priority_ < 3 && consumeTokenSmart(builder_, BETWEEN)) {
-        result_ = report_error_(builder_, expr(builder_, level_, 3));
+        result_ = report_error_(builder_, expr(builder_, level_, 1));
         result_ = between_expr_1(builder_, level_ + 1) && result_;
         exit_section_(builder_, level_, marker_, BETWEEN_EXPR, result_, true, null);
       }
@@ -368,7 +368,7 @@ public class ExpressionParser implements PsiParser, LightPsiParser {
     boolean result_;
     Marker marker_ = enter_section_(builder_);
     result_ = consumeToken(builder_, AND);
-    result_ = result_ && expr(builder_, level_ + 1, -2);
+    result_ = result_ && expr(builder_, level_ + 1, 1);
     exit_section_(builder_, marker_, null, result_);
     return result_;
   }

@@ -17,6 +17,7 @@
 package org.intellij.grammar;
 
 import com.intellij.lang.documentation.DocumentationProvider;
+import com.intellij.openapi.util.Comparing;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiManager;
@@ -140,14 +141,14 @@ public class BnfDocumentationProvider implements DocumentationProvider {
     ExpressionHelper.ExpressionInfo expressionInfo = ExpressionHelper.getCached(file).getExpressionInfo(rule);
     if (expressionInfo == null) return;
     final ExpressionHelper.OperatorInfo ruleOperator = expressionInfo.operatorMap.get(rule);
+    final int priority = expressionInfo.getPriority(rule);
 
     docBuilder.append("\n<br><h1>Priority table:");
-    if (ruleOperator != null) {
-      appendColored(docBuilder, " " + ruleOperator.type + "-" + expressionInfo.getPriority(rule));
-    }
+    appendColored(docBuilder, String.format(" %s (%s)", ruleOperator != null ? ruleOperator.type : "priority group", priority));
     docBuilder.append("</h1>");
     expressionInfo.dumpPriorityTable(docBuilder.append("<code><pre>"), (sb, operatorInfo) -> {
-      if (operatorInfo == ruleOperator) {
+      if (ruleOperator == operatorInfo ||
+          ruleOperator == null && Comparing.equal(expressionInfo.getPriority(operatorInfo.rule), priority)) {
         appendColored(sb, operatorInfo);
       }
       else {

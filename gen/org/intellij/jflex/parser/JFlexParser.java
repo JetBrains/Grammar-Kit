@@ -1385,7 +1385,7 @@ public class JFlexParser implements PsiParser, LightPsiParser {
     if (!result) result = consumeToken(builder, FLEX_EOF);
     if (!result) result = consumeToken(builder, FLEX_HAT);
     if (!result) result = new_line(builder, level + 1);
-    if (!result) result = expression(builder, level + 1, -2);
+    if (!result) result = expression(builder, level + 1, 4);
     exit_section_(builder, marker, null, result);
     return result;
   }

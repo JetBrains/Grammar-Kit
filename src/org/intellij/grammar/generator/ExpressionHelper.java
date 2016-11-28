@@ -27,6 +27,8 @@ import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.util.ObjectUtils;
 import com.intellij.util.PairConsumer;
 import com.intellij.util.containers.ContainerUtil;
+import com.intellij.util.containers.JBTreeTraverser;
+import com.intellij.util.containers.TreeTraversal;
 import org.intellij.grammar.analysis.BnfFirstNextAnalyzer;
 import org.intellij.grammar.psi.*;
 import org.intellij.grammar.psi.impl.BnfElementFactory;
@@ -115,31 +117,31 @@ public class ExpressionHelper {
   }
 
   private void addToPriorityMap(BnfRule rule, Collection<BnfRule> rulesCluster, ExpressionInfo info) {
-    Collection<BnfRule> subRules = myRuleGraph.getSubRules(rule);
-    int priority = rulesCluster.contains(rule) ? -1 : info.nextPriority++;
-
-    for (BnfRule subRule : subRules) {
+    JBTreeTraverser<BnfRule> traverser = new JBTreeTraverser<>(
+      o -> ObjectUtils.notNull(rule == o || Rule.isPrivate(o) ? myRuleGraph.getSubRules(o) : null, Collections.emptyList()));
+    for (TreeTraversal.TracingIt<BnfRule> it = traverser.withRoot(rule).traverse().skip(1).typedIterator(); it.hasNext(); ) {
+      BnfRule subRule = it.next();
       if (info.priorityMap.containsKey(subRule)) {
-        addWarning(subRule + " has duplicate appearance!");
+        addWarning(String.format("'%s' priority is calculated twice", subRule.getName()));
         continue;
       }
       BnfRule prev = myRootRulesMap.put(subRule, info.rootRule);
       if (prev != null) {
-        addWarning(
-            subRule + " must not be in several expression hierarchies: " + prev.getName() + " and " + info.rootRule.getName());
+        addWarning(String.format("''%s' is in several expression hierarchies: %s and %s",
+                                 subRule.getName(), prev.getName(), info.rootRule.getName()));
       }
-
+      Integer groupPriority = info.privateGroups.get(it.parent());
+      int priority = groupPriority == null ? info.nextPriority++ : groupPriority;
       if (rulesCluster.contains(subRule)) {
         if (!Rule.isPrivate(subRule) || !myRuleGraph.getFor(subRule).isEmpty()) {
-          info.priorityMap.put(subRule, priority == -1 ? info.nextPriority++ : priority);
+          info.priorityMap.put(subRule, priority);
         }
       }
-      else if (ParserGeneratorUtil.Rule.isPrivate(subRule)) {
-        addToPriorityMap(subRule, rulesCluster, info);
-        info.privateGroups.add(subRule);
+      else if (Rule.isPrivate(subRule)) {
+        info.privateGroups.put(subRule, priority);
       }
       else {
-        addWarning(subRule + ": priority group must be 'private'");
+        addWarning(String.format("'%s' is not an expression rule nor private priority group", subRule.getName()));
       }
     }
   }
@@ -303,7 +305,7 @@ public class ExpressionHelper {
     Collection<BnfRule> extendsRules = myRuleGraph.getExtendsRules(rootRule);
     for (int i = startIndex, childExpressionsSize = childExpressions.size(); i < childExpressionsSize; i++) {
       BnfRule rule = myFile.getRule(childExpressions.get(i).getText());
-      if (rootRule == rule || extendsRules.contains(rule) || expressionInfo.privateGroups.contains(rule)) {
+      if (rootRule == rule || extendsRules.contains(rule) || expressionInfo.privateGroups.containsKey(rule)) {
         return i;
       }
     }
@@ -314,7 +316,7 @@ public class ExpressionHelper {
     public final BnfRule rootRule;
     public final Map<BnfRule, Integer> priorityMap = ContainerUtil.newLinkedHashMap();
     public final Map<BnfRule, OperatorInfo> operatorMap = ContainerUtil.newLinkedHashMap();
-    public final Set<BnfRule> privateGroups = ContainerUtil.newHashSet();
+    public final Map<BnfRule, Integer> privateGroups = ContainerUtil.newHashMap();
     public int nextPriority;
     public final Set<OperatorInfo> checkEmpty = ContainerUtil.newHashSet();
 
@@ -326,12 +328,11 @@ public class ExpressionHelper {
     public String toString() {
       StringBuilder sb = new StringBuilder("Expression root: " + rootRule.getName());
       sb.append("\nOperator priority table:\n");
-      dumpPriorityTable(sb);
-      return sb.toString();
+      return dumpPriorityTable(sb).toString();
     }
 
     public StringBuilder dumpPriorityTable(StringBuilder sb) {
-      return dumpPriorityTable(sb, (sb1, operatorInfo) -> sb1.append(operatorInfo));
+      return dumpPriorityTable(sb, StringBuilder::append);
     }
 
     public StringBuilder dumpPriorityTable(StringBuilder sb, PairConsumer<StringBuilder, OperatorInfo> printer) {
@@ -352,8 +353,10 @@ public class ExpressionHelper {
 
     public int getPriority(BnfRule subRule) {
       if (subRule == rootRule) return 0;
-      Integer integer = priorityMap.get(subRule);
-      return integer == null ? -1 : integer;
+      Integer op = priorityMap.get(subRule);
+      if (op != null) return op;
+      Integer group = privateGroups.get(subRule);
+      return group == null ? -1 : group;
     }
   }
 

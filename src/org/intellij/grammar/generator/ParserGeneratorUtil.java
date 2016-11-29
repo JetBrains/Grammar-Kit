@@ -29,9 +29,10 @@ import com.intellij.psi.tree.IElementType;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.util.Function;
 import com.intellij.util.ObjectUtils;
-import com.intellij.util.ThreeState;
 import com.intellij.util.containers.ContainerUtil;
 import com.intellij.util.containers.JBIterable;
+import com.intellij.util.containers.JBTreeTraverser;
+import com.intellij.util.containers.TreeTraversal;
 import gnu.trove.TObjectHashingStrategy;
 import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.actions.GenerateAction;
@@ -507,43 +508,14 @@ public class ParserGeneratorUtil {
     return result.values();
   }
 
-  public static List<BnfRule> topoSort(Collection<BnfRule> rules, RuleGraphHelper ruleGraph) {
-    Map<BnfRule, ThreeState> colors = ContainerUtil.newTroveMap();
-    for (BnfRule rule : rules) {
-      colors.put(rule, ThreeState.UNSURE);
-    }
-    Iterator<BnfRule> iterator = rules.iterator();
-    LinkedList<BnfRule> result = ContainerUtil.newLinkedList();
-    LinkedList<BnfRule> stack = ContainerUtil.newLinkedList();
-    Collection<? extends BnfRule> inheritors = ruleGraph.getRuleExtendsMap().values();
-    while (true) {
-      if (stack.isEmpty()) {
-        if (iterator.hasNext()) stack.addFirst(iterator.next());
-        else break;
-      }
-      BnfRule rule = stack.pollFirst();
-      ThreeState color = colors.get(rule);
-      if (color == ThreeState.UNSURE) {
-        stack.addFirst(rule);
-        colors.put(rule, ThreeState.YES);
-        for (BnfRule child : ruleGraph.getSubRules(rule)) {
-          if (child == rule) continue;
-          ThreeState childColor = colors.get(child);
-          if (childColor == null || childColor == ThreeState.NO) continue;
-
-          if (childColor == ThreeState.YES &&
-              !ContainerUtil.intersects(ruleGraph.getSubRules(child), inheritors)) {
-            continue;
-          }
-          stack.addFirst(child);
-        }
-      }
-      else if (color == ThreeState.YES) {
-        colors.put(rule, ThreeState.NO);
-        result.addLast(rule);
-      }
-    }
-    return result;
+  public static List<BnfRule> topoSort(@NotNull Collection<BnfRule> rules, @NotNull RuleGraphHelper ruleGraph) {
+    Set<BnfRule> rulesSet = ContainerUtil.newHashSet(rules);
+    return new JBTreeTraverser<BnfRule>(
+      rule -> JBIterable.from(ruleGraph.getSubRules(rule)).filter(rulesSet::contains))
+      .withRoots(ContainerUtil.reverse(ContainerUtil.newArrayList(rules)))
+      .withTraversal(TreeTraversal.POST_ORDER_DFS)
+      .unique()
+      .toList();
   }
 
   public static void addWarning(Project project, String text) {

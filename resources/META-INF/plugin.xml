@@ -2,7 +2,7 @@
   <id>org.jetbrains.idea.grammar</id>
   <version>1.4.4-SNAPSHOT</version>
   <vendor email="gregory.shrago@jetbrains.com">Greg Shrago</vendor>
-  <idea-version since-build="162.1812" until-build="173.*"/>
+  <idea-version since-build="162.2525" until-build="173.*"/>
 
   <name>Grammar-Kit</name>
   <description>BNF Grammars and JFlex lexers editor. Readable parser/PSI code generator.</description>
@@ -14,7 +14,8 @@
   <change-notes>
     <![CDATA[
     <ul>
-      <li>Sources migrated to Java 8</li>
+      <li>Generator: expression parsing fixes</li>
+      <li>Generator: include quoted tokens in token sequences</li>
     </ul>
     <a href="https://github.com/JetBrains/Grammar-Kit#change-log">Full change log...</a>
     ]]>

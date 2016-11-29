@@ -227,6 +227,11 @@ java -jar expression-console-sample.jar
 
 Change log
 ==========
+1.4.4
+
+* Generator: expression parsing fixes
+* Generator: include quoted tokens in token sequences 
+
 1.4.3
 
 * Generator: constructor and visitor fixes (issues 133, 135, 136)

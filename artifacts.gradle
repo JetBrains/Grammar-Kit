@@ -9,7 +9,7 @@ task buildGrammar_kit_jar (type: Jar, dependsOn: [rootProject.tasks['assemble']]
 }
 
 task buildGrammar_kit_zip (type: Zip, dependsOn: [buildGrammar_kit_jar]) {
-  baseName = 'GrammarKit.zip'
+  baseName = 'GrammarKit'
   destinationDir = file(artifactsPath)
   from (tasks['buildGrammar_kit_jar'].outputs) {
     into '/GrammarKit/lib'

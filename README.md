@@ -227,9 +227,9 @@ java -jar expression-console-sample.jar
 
 Change log
 ==========
-1.4.4
+1.5.0
 
-* Generator: expression parsing fixes
+* Generator: grammar analysis and expression parsing fixes
 * Generator: include quoted tokens in token sequences 
 
 1.4.3

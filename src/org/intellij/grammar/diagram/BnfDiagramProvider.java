@@ -287,7 +287,7 @@ public class BnfDiagramProvider extends DiagramProvider<PsiNamedElement> {
         if (superRule != null) {
           DiagramNode<PsiNamedElement> source = nodeMap.get(rule);
           DiagramNode<PsiNamedElement> target = nodeMap.get(superRule);
-
+          if (source == null || target == null) continue;
           myEdges.add(new DiagramEdgeBase<PsiNamedElement>(source, target, new DiagramRelationshipInfoAdapter("EXTENDS", DiagramLineType.DASHED, "extends") {
 
               public Shape getStartArrow() {
@@ -308,6 +308,7 @@ public class BnfDiagramProvider extends DiagramProvider<PsiNamedElement> {
 
           DiagramNode<PsiNamedElement> source = nodeMap.get(rule);
           DiagramNode<PsiNamedElement> target = nodeMap.get(element);
+          if (source == null || target == null) continue;
           myEdges.add(new DiagramEdgeBase<PsiNamedElement>(source, target, new DiagramRelationshipInfoAdapter("CONTAINS", DiagramLineType.SOLID, "") {
             @Override
             public String getLabel() {

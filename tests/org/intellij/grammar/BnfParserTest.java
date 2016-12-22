@@ -20,8 +20,8 @@ public class BnfParserTest extends AbstractParsingTestCase {
     addExplicitExtension(LanguageBraceMatching.INSTANCE, myLanguage, new BnfBraceMatcher());
   }
 
-  public void testBnfGrammar() { doTest(true); }
-  public void testSelf() { doTest(true); }
+  public void testSelfBnf() { doTest(true); }
+  public void testSelfFlex() { doTest(true); }
   public void testBrokenAttr() { doTest(true); }
   public void testBrokenEverything() { doTest(true); }
   public void testAlternativeSyntax() { doTest(true); }
@@ -31,7 +31,10 @@ public class BnfParserTest extends AbstractParsingTestCase {
 
   @Override
   protected String loadFile(@NonNls String name) throws IOException {
-    if (name.equals("BnfGrammar.bnf")) return super.loadFile("../../grammars/Grammar.bnf");
-    return super.loadFile(name);
+    String adjusted;
+    if ("SelfBnf.bnf".equals(name)) adjusted = "../../grammars/Grammar.bnf";
+    else if ("SelfFlex.bnf".equals(name)) adjusted = "../../grammars/JFlex.bnf";
+    else adjusted = name;
+    return super.loadFile(adjusted);
   }
 }

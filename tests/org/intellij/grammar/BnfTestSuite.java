@@ -34,7 +34,7 @@ public class BnfTestSuite extends TestCase {
     testSuite.addTestSuite(BnfFirstNextTest.class);
     testSuite.addTestSuite(BnfRuleGraphTest.class);
     testSuite.addTestSuite(BnfCompletionTest.class);
-    testSuite.addTestSuite(BnfInspectionTest.class);
+    testSuite.addTestSuite(BnfHighlightingTest.class);
     testSuite.addTestSuite(BnfInlineRuleTest.class);
     testSuite.addTestSuite(BnfIntroduceRuleTest.class);
     testSuite.addTestSuite(BnfFlipChoiceIntentionTest.class);

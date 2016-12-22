@@ -1,4 +1,4 @@
-BnfFile:BnfGrammar.bnf
+BnfFile:SelfBnf.bnf
   PsiElement(DUMMY_BLOCK)
     BNF_ATTRS
       PsiElement({)('{')

@@ -16,14 +16,10 @@
 
 package org.intellij.jflex;
 
-import com.intellij.openapi.util.io.FileUtil;
-import com.intellij.openapi.util.text.StringUtil;
-import com.intellij.openapi.vfs.CharsetToolkit;
 import org.intellij.grammar.AbstractParsingTestCase;
 import org.intellij.jflex.parser.JFlexParserDefinition;
 import org.jetbrains.annotations.NonNls;
 
-import java.io.File;
 import java.io.IOException;
 
 /**
@@ -56,15 +52,10 @@ public class JFlexParserTest extends AbstractParsingTestCase {
 
   @Override
   protected String loadFile(@NonNls String name) throws IOException {
-    if (name.startsWith("Self")) {
-      String name1 = name.startsWith("SelfFlex") ? "../../../src/org/intellij/jflex/parser/_JFlexLexer.flex" :
-                     "../../../src/org/intellij/grammar/parser/_BnfLexer.flex";
-      return StringUtil.convertLineSeparators(
-        FileUtil.loadFile(new File(myFullDataPath, name1).getCanonicalFile(), CharsetToolkit.UTF8).trim());
-    }
-    return super.loadFile(name);
-    //String s = super.loadFile(name);
-    //System.out.println(LexerTestCase.printTokens(s, 0, new JFlexLexer()));
-    //return s;
+    String adjusted;
+    if ("SelfBnf.flex".equals(name)) adjusted = "../../../src/org/intellij/grammar/parser/_BnfLexer.flex";
+    else if ("SelfFlex.flex".equals(name)) adjusted = "../../../src/org/intellij/jflex/parser/_JFlexLexer.flex";
+    else adjusted = name;
+    return super.loadFile(adjusted);
   }
 }

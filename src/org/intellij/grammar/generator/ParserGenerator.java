@@ -17,7 +17,6 @@
 package org.intellij.grammar.generator;
 
 import com.intellij.openapi.diagnostic.Logger;
-import com.intellij.openapi.util.Comparing;
 import com.intellij.openapi.util.Pair;
 import com.intellij.openapi.util.io.FileUtil;
 import com.intellij.openapi.util.text.StringUtil;
@@ -97,7 +96,6 @@ public class ParserGenerator {
   private final ExpressionHelper myExpressionHelper;
   private final RuleMethodsHelper myRulesMethodsHelper;
   private final JavaHelper myJavaHelper;
-  private final KnownAttribute.ListValue myUnknownRootAttributes;
 
   final Names N;
   final GenOptions G;
@@ -118,8 +116,7 @@ public class ParserGenerator {
     myGrammarRootParser = myGrammarRoot == null? null : myRuleParserClasses.get(myGrammarRoot);
     myPsiClassFormat = getPsiClassFormat(myFile);
     myPsiImplClassFormat = getPsiImplClassFormat(myFile);
-    myParserUtilClass = ObjectUtils.chooseNotNull(getRootAttribute(myFile, KnownAttribute.PARSER_UTIL_CLASS.alias("stubParserClass")),
-                                                  getRootAttribute(myFile, KnownAttribute.PARSER_UTIL_CLASS));
+    myParserUtilClass = getRootAttribute(myFile, KnownAttribute.PARSER_UTIL_CLASS);
     myPsiImplUtilClass = getRootAttribute(myFile, KnownAttribute.PSI_IMPL_UTIL_CLASS);
     myPsiTreeUtilClass = getRootAttribute(myFile, KnownAttribute.PSI_TREE_UTIL_CLASS);
 
@@ -128,7 +125,6 @@ public class ParserGenerator {
                        !tmpVisitorClass.equals(myPsiClassFormat.strip(tmpVisitorClass)) ? tmpVisitorClass :
                        myPsiClassFormat.apply("") + tmpVisitorClass;
     mySimpleTokens = ContainerUtil.newLinkedHashMap(RuleGraphHelper.getTokenTextToNameMap(myFile));
-    myUnknownRootAttributes = collectUnknownAttributes(myFile);
     myGraphHelper = RuleGraphHelper.getCached(myFile);
     myExpressionHelper = new ExpressionHelper(myFile, myGraphHelper, true);
     myRulesMethodsHelper = new RuleMethodsHelper(myGraphHelper, myExpressionHelper, mySimpleTokens, G);
@@ -696,9 +692,7 @@ public class ParserGenerator {
     boolean isLeft = firstNonTrivial && Rule.isLeft(rule);
     boolean isLeftInner = isLeft && (isPrivate || Rule.isInner(rule));
     boolean isUpper = !isPrivate && Rule.isUpper(rule);
-    String recoverWhile = !firstNonTrivial ? null : ObjectUtils.chooseNotNull(
-      getAttribute(rule, KnownAttribute.RECOVER_WHILE.alias("recoverUntil")),
-      getAttribute(rule, KnownAttribute.RECOVER_WHILE));
+    String recoverWhile = !firstNonTrivial ? null : getAttribute(rule, KnownAttribute.RECOVER_WHILE);
     Map<String, String> hooks = firstNonTrivial ? getAttribute(rule, KnownAttribute.HOOKS).asMap() : Collections.emptyMap();
 
     final boolean canCollapse = !isPrivate && (!isLeft || isLeftInner) && firstNonTrivial && myGraphHelper.canCollapse(rule);
@@ -1031,17 +1025,7 @@ public class ParserGenerator {
 
   @Nullable
   private String getTokenName(String value) {
-    String existing = mySimpleTokens.get(value);
-    if (existing != null || !myUnknownRootAttributes.isEmpty()) {
-      for (Pair<String, String> p : myUnknownRootAttributes) {
-        if (Comparing.equal(value, p.second)) {
-          String attrName = p.first;
-          mySimpleTokens.put(value, attrName);
-          return attrName;
-        }
-      }
-    }
-    return existing;
+    return mySimpleTokens.get(value);
   }
 
   private String generateTokenSequenceCall(List<BnfExpression> children,

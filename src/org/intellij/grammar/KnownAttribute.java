@@ -157,10 +157,7 @@ public class KnownAttribute<T> {
 
   @Nullable
   public static KnownAttribute getCompatibleAttribute(String name) {
-    KnownAttribute attr = getAttribute(name);
-    if (attr == null && "recoverUntil".equals(name)) return RECOVER_WHILE;
-    if (attr == null && "stubParserClass".equals(name)) return PARSER_UTIL_CLASS;
-    return attr;
+    return getAttribute(name);
   }
 
   public static class ListValue extends LinkedList<Pair<String, String>> {

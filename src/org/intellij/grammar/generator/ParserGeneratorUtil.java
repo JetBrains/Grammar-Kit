@@ -569,21 +569,6 @@ public class ParserGeneratorUtil {
     }
   }
 
-  @NotNull
-  public static KnownAttribute.ListValue collectUnknownAttributes(@NotNull BnfFile file) {
-    KnownAttribute.ListValue result = new KnownAttribute.ListValue();
-    BnfAttrs attrs = ContainerUtil.getFirstItem(file.getAttributes());
-    if (attrs == null) return result;
-
-    for (BnfAttr attr : attrs.getAttrList()) {
-      if (KnownAttribute.getAttribute(attr.getName()) != null) continue;
-      BnfExpression expression = attr.getExpression();
-      if (!(expression instanceof BnfStringLiteralExpression)) continue;
-      result.add(Pair.create(attr.getName(), getLiteralValue((BnfStringLiteralExpression)expression)));
-    }
-    return result;
-  }
-
   public static Map<String, String> collectTokenPattern2Name(@NotNull final BnfFile file,
                                                              final boolean createTokenIfMissing,
                                                              @NotNull final Map<String, String> map,

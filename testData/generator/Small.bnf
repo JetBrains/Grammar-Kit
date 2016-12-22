@@ -1,9 +1,8 @@
 {
   parserClass="Small"
   generatePsi=false
-  stubParserClass="org.intellij.grammar.parser.GeneratedParserUtilBase"
   parserImports=["java.util.List" "java.util.Map" ]
-  OP_EQ="="
+  tokens = [OP_EQ="="]
 }
 
 external root ::= parseRoot statement

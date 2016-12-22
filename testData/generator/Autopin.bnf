@@ -1,7 +1,6 @@
 {
   parserClass="Autopin"
   generatePsi=false
-  stubParserClass="org.intellij.grammar.parser.GeneratedParserUtilBase"
 
   extends(".*_statement")="statement"
   pin("create_.*_statement")=".*_ref"

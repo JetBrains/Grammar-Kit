@@ -1062,7 +1062,7 @@ public class GeneratedParserUtilBase {
     int position;
     Object object;
 
-    public Variant init(int pos, Object o) {
+    public Variant init(int pos, @NotNull Object o) {
       position = pos;
       object = o;
       return this;

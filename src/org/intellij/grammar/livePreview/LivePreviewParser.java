@@ -546,11 +546,11 @@ public class LivePreviewParser implements PsiParser {
     return tokenType != null && generateConsumeToken(builder, tokenType);
   }
 
-  protected boolean generateConsumeToken(PsiBuilder builder, IElementType tokenType) {
+  protected boolean generateConsumeToken(PsiBuilder builder, @NotNull IElementType tokenType) {
     return consumeToken(builder, tokenType);
   }
 
-  protected boolean generateConsumeTextToken(PsiBuilder builder, String tokenText) {
+  protected boolean generateConsumeTextToken(PsiBuilder builder, @NotNull String tokenText) {
     return consumeToken(builder, tokenText);
   }
 

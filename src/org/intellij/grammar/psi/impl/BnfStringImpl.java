@@ -26,16 +26,14 @@ import com.intellij.psi.impl.source.resolve.ResolveCache;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.util.*;
 import com.intellij.util.containers.ContainerUtil;
+import com.intellij.util.containers.ContainerUtilRt;
 import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.generator.ParserGeneratorUtil;
 import org.intellij.grammar.psi.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Pattern;
 
 /**
@@ -188,9 +186,8 @@ public abstract class BnfStringImpl extends BnfExpressionImpl implements BnfStri
         if (thisAttrName.equals(attr.getName())) {
           BnfAttrPattern attrPattern = attr.getAttrPattern();
           BnfLiteralExpression expression = attrPattern != null ? attrPattern.getLiteralExpression() : null;
-          if (expression != null) {
-            ContainerUtil.addIfNotNull(getPattern(expression), otherPatterns);
-          }
+          Pattern p = expression == null ? null : getPattern(expression);
+          if (p != null) otherPatterns.add(p);
         }
       }
 
@@ -209,18 +206,19 @@ public abstract class BnfStringImpl extends BnfExpressionImpl implements BnfStri
         }
       }
       if (KnownAttribute.getAttribute(thisAttrName) == KnownAttribute.PIN) {
-        PairProcessor<String, BnfExpression> processor = (funcName, expression) -> {
-          if (!(expression instanceof BnfSequence)) return true;
-          PsiElement firstNotTrivial = ParserGeneratorUtil.Rule.firstNotTrivial(ParserGeneratorUtil.Rule.of(expression));
-          if (firstNotTrivial == expression) return true;
-          if (pattern.matcher(funcName).matches()) {
-            result.add(new MyFakePsiElement(funcName, expression));
-          }
-          return true;
-        };
-        for (Object e : result.toArray()) {
-          BnfRule rule = (BnfRule)e;
-          GrammarUtil.processExpressionNames(rule, ParserGeneratorUtil.getFuncName(rule), rule.getExpression(), processor);
+        Set<String> visited = ContainerUtilRt.newHashSet();
+        for (Object o : thisRule != null ? rules : ContainerUtil.newArrayList(result)) {
+          BnfRule rule = (BnfRule)o;
+          GrammarUtil.processExpressionNames(rule, ParserGeneratorUtil.getFuncName(rule), rule.getExpression(), (funcName, expression) -> {
+            if (!(expression instanceof BnfSequence)) return true;
+            if (!visited.add(funcName)) return true;
+            PsiElement firstNotTrivial = ParserGeneratorUtil.Rule.firstNotTrivial(ParserGeneratorUtil.Rule.of(expression));
+            if (firstNotTrivial == expression) return true;
+            if (pattern.matcher(funcName).matches()) {
+              result.add(new MyFakePsiElement(funcName, expression));
+            }
+            return true;
+          });
         }
       }
       return PsiElementResolveResult.createResults(result);

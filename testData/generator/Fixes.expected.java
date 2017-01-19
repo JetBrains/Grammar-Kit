@@ -223,6 +223,54 @@ public class Fixes implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
+  // A (some A | A some A)
+  public static boolean import_$(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "import_$")) return false;
+    if (!nextTokenIs(builder_, A)) return false;
+    boolean result_, pinned_;
+    Marker marker_ = enter_section_(builder_, level_, _NONE_, IMPORT, null);
+    result_ = consumeToken(builder_, A);
+    pinned_ = result_; // pin = 1
+    result_ = result_ && import_1(builder_, level_ + 1);
+    exit_section_(builder_, level_, marker_, result_, pinned_, null);
+    return result_ || pinned_;
+  }
+
+  // some A | A some A
+  private static boolean import_1(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "import_1")) return false;
+    boolean result_;
+    Marker marker_ = enter_section_(builder_);
+    result_ = import_1_0(builder_, level_ + 1);
+    if (!result_) result_ = import_1_1(builder_, level_ + 1);
+    exit_section_(builder_, marker_, null, result_);
+    return result_;
+  }
+
+  // some A
+  private static boolean import_1_0(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "import_1_0")) return false;
+    boolean result_;
+    Marker marker_ = enter_section_(builder_);
+    result_ = some(builder_, level_ + 1);
+    result_ = result_ && consumeToken(builder_, A);
+    exit_section_(builder_, marker_, null, result_);
+    return result_;
+  }
+
+  // A some A
+  private static boolean import_1_1(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "import_1_1")) return false;
+    boolean result_;
+    Marker marker_ = enter_section_(builder_);
+    result_ = consumeToken(builder_, A);
+    result_ = result_ && some(builder_, level_ + 1);
+    result_ = result_ && consumeToken(builder_, A);
+    exit_section_(builder_, marker_, null, result_);
+    return result_;
+  }
+
+  /* ********************************************************** */
   // expr
   public static boolean left_expr(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "left_expr")) return false;

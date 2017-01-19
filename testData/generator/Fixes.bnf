@@ -43,3 +43,5 @@ private <Foo  recovery> ::=
 fake thing ::= thing_skip
 fake thing_item ::= "foo"
 fake thing_skip ::= "bar" {elementType=thing_item}
+
+import ::= A (some A | A some A) {pin("import")=1}

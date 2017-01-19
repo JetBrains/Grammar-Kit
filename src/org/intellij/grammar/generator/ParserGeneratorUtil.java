@@ -58,6 +58,14 @@ import static org.intellij.grammar.psi.BnfTypes.BNF_SEQUENCE;
 public class ParserGeneratorUtil {
   private static final Object NULL = new Object();
   private static final BnfExpression NULL_ATTR = new FakeBnfExpression("NULL");
+  private static final String RESERVED_SUFFIX = "_$";
+  private static final Set<String> JAVA_RESERVED = ContainerUtil.newTroveSet(
+    "abstract", "assert", "boolean", "break", "byte", "case", "catch", "char", "class",
+    "const", "default", "do", "double", "else", "enum", "extends", "false", "final", "finally",
+    "float", "for", "goto", "if", "implements", "import", "instanceof", "int", "interface", "long",
+    "native", "new", "null", "package", "private", "protected", "public", "return", "short", "static",
+    "strictfp", "super", "switch", "synchronized", "this", "throw", "throws", "transient", "true",
+    "try", "void", "volatile", "while", "continue");
 
   @NotNull
   public static String getRawClassName(@NotNull String name) {
@@ -255,11 +263,12 @@ public class ParserGeneratorUtil {
   }
 
   public static String getFuncName(@NotNull BnfRule r) {
-    return toIdentifier(r.getName(), null, Case.AS_IS);
+    String name = toIdentifier(r.getName(), null, Case.AS_IS);
+    return JAVA_RESERVED.contains(name) ? name + RESERVED_SUFFIX : name;
   }
 
   public static String getNextName(@NotNull String funcName, int i) {
-    return funcName + "_" + i;
+    return StringUtil.trimEnd(funcName, RESERVED_SUFFIX) + "_" + i;
   }
 
   @NotNull

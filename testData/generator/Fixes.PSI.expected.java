@@ -14,6 +14,7 @@ public interface GeneratedTypes {
   IElementType ERL_LIST = new IElementType("ERL_LIST", null);
   IElementType EXPR = new IElementType("EXPR", null);
   IElementType FOO__ﾉ__Ω__ﾉ_ﾐ_____INNER = new IElementType("FOO__ﾉ__Ω__ﾉ_ﾐ_____INNER", null);
+  IElementType IMPORT = new IElementType("IMPORT", null);
   IElementType LEFT_EXPR = new IElementType("LEFT_EXPR", null);
   IElementType SOME = new IElementType("SOME", null);
   IElementType SOME_EXPR = new IElementType("SOME_EXPR", null);
@@ -95,6 +96,20 @@ import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
 public interface Expr extends PsiElement {
+
+}
+// ---- Import.java -----------------
+// This is a generated file. Not intended for manual editing.
+package generated.psi;
+
+import java.util.List;
+import org.jetbrains.annotations.*;
+import com.intellij.psi.PsiElement;
+
+public interface Import extends PsiElement {
+
+  @NotNull
+  Some getSome();
 
 }
 // ---- LeftExpr.java -----------------
@@ -378,6 +393,42 @@ public abstract class ExprImpl extends ASTWrapperPsiElement implements Expr {
   public void accept(@NotNull PsiElementVisitor visitor) {
     if (visitor instanceof Visitor) accept((Visitor)visitor);
     else super.accept(visitor);
+  }
+
+}
+// ---- ImportImpl.java -----------------
+// This is a generated file. Not intended for manual editing.
+package generated.psi.impl;
+
+import java.util.List;
+import org.jetbrains.annotations.*;
+import com.intellij.lang.ASTNode;
+import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiElementVisitor;
+import com.intellij.psi.util.PsiTreeUtil;
+import static generated.GeneratedTypes.*;
+import com.intellij.extapi.psi.ASTWrapperPsiElement;
+import generated.psi.*;
+
+public class ImportImpl extends ASTWrapperPsiElement implements Import {
+
+  public ImportImpl(ASTNode node) {
+    super(node);
+  }
+
+  public void accept(@NotNull Visitor visitor) {
+    visitor.visitImport(this);
+  }
+
+  public void accept(@NotNull PsiElementVisitor visitor) {
+    if (visitor instanceof Visitor) accept((Visitor)visitor);
+    else super.accept(visitor);
+  }
+
+  @Override
+  @NotNull
+  public Some getSome() {
+    return findNotNullChildByClass(Some.class);
   }
 
 }
@@ -682,6 +733,10 @@ public class Visitor extends PsiElementVisitor {
   }
 
   public void visitExpr(@NotNull Expr o) {
+    visitPsiElement(o);
+  }
+
+  public void visitImport(@NotNull Import o) {
     visitPsiElement(o);
   }
 

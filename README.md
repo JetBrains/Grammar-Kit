@@ -227,6 +227,11 @@ java -jar expression-console-sample.jar
 
 Change log
 ==========
+1.5.1
+
+* Diagrams: fix NPE on app save/load
+* Generator: support rule names that happen to be java reserved words #32
+
 1.5.0
 
 * Generator: grammar analysis and expression parsing fixes

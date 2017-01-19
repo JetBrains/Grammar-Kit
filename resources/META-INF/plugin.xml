@@ -1,6 +1,6 @@
 <idea-plugin url="https://github.com/JetBrains/Grammar-Kit" version="2">
   <id>org.jetbrains.idea.grammar</id>
-  <version>1.5.0</version>
+  <version>1.5.1-SNAPSHOT</version>
   <vendor email="gregory.shrago@jetbrains.com">Greg Shrago</vendor>
   <idea-version since-build="162.2525" until-build="173.*"/>
 
@@ -14,8 +14,8 @@
   <change-notes>
     <![CDATA[
     <ul>
-      <li>Generator: grammar analysis and expression parsing fixes</li>
-      <li>Generator: include quoted tokens in token sequences</li>
+      <li>Diagrams: fix NPE on app save/load</li>
+      <li>Generator: support rule names that happen to be java reserved words (#32)</li>
     </ul>
     <a href="https://github.com/JetBrains/Grammar-Kit#change-log">Full change log...</a>
     ]]>

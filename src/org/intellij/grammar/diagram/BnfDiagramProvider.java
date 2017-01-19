@@ -135,16 +135,21 @@ public class BnfDiagramProvider extends DiagramProvider<PsiNamedElement> {
 
   private final DiagramVfsResolver myVfsResolver = new DiagramVfsResolver<PsiNamedElement>() {
     @Override
-    public String getQualifiedName(PsiNamedElement bnfFile) {
-      VirtualFile virtualFile = bnfFile instanceof PsiFile ? ((PsiFile)bnfFile).getVirtualFile() : null;
-      return virtualFile == null? null : virtualFile.getUrl();
+    public String getQualifiedName(PsiNamedElement o) {
+      PsiFile psiFile = o.getContainingFile();
+      VirtualFile virtualFile = psiFile == null ? null : psiFile.getVirtualFile();
+      if (virtualFile == null) return null;
+      return o instanceof BnfRule? String.format("%s?rule=%s", virtualFile.getUrl(), o.getName()) : virtualFile.getUrl();
     }
 
     @Override
     public PsiNamedElement resolveElementByFQN(String s, Project project) {
-      VirtualFile virtualFile = VirtualFileManager.getInstance().findFileByUrl(s);
+      List<String> parts = StringUtil.split(s, "?rule=");
+      if (parts.size() < 1 || parts.size() > 2) return null;
+      VirtualFile virtualFile = VirtualFileManager.getInstance().findFileByUrl(parts.get(0));
       PsiFile psiFile = virtualFile == null? null : PsiManager.getInstance(project).findFile(virtualFile);
-      return psiFile instanceof BnfFile? psiFile : null;
+      if (!(psiFile instanceof BnfFile)) return null;
+      return parts.size() == 2 ? ((BnfFile)psiFile).getRule(parts.get(1)) : psiFile;
     }
     
   };

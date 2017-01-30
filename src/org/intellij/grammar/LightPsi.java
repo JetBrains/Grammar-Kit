@@ -46,7 +46,6 @@ import com.intellij.openapi.project.DumbServiceImpl;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.startup.StartupManager;
 import com.intellij.openapi.util.Disposer;
-import com.intellij.openapi.util.Trinity;
 import com.intellij.openapi.util.io.FileUtil;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.openapi.vfs.encoding.EncodingManager;
@@ -179,18 +178,18 @@ public class LightPsi {
 
   private static class MyParsing implements Disposable {
 
-    private final Trinity<MockProjectEx,MockPsiManager,PsiFileFactoryImpl> myModel;
+    private final MockProject myProject;
 
     MyParsing() throws Exception {
-      myModel = Init.initPsiFileFactory(this);
-      Init.initExtensions(getProject(), myModel.second);
+      myProject = Init.initPsiFileFactory(this);
+      Init.initExtensions(getProject());
     }
 
     @Nullable
     protected PsiFile createFile(@NotNull String name, @NotNull String text, @NotNull ParserDefinition definition) {
       Language language = definition.getFileNodeType().getLanguage();
       Init.addExplicitExtension(getProject(), LanguageParserDefinitions.INSTANCE, language, definition);
-      return myModel.third.trySetupPsiForFile(new LightVirtualFile(name, language, text), language, true, false);
+      return ((PsiFileFactoryImpl)PsiFileFactory.getInstance(myProject)).trySetupPsiForFile(new LightVirtualFile(name, language, text), language, true, false);
     }
 
     @NotNull
@@ -210,8 +209,8 @@ public class LightPsi {
       return SyntaxTraverser.lightTraverser(psiBuilder);
     }
 
-    private MockProjectEx getProject() {
-      return myModel.first;
+    private MockProject getProject() {
+      return myProject;
     }
 
     @Override
@@ -221,7 +220,7 @@ public class LightPsi {
 
   public static class Init {
 
-    public static void initExtensions(MockProjectEx project, MockPsiManager psiManager) {
+    public static void initExtensions(@NotNull MockProject project) {
       Extensions.getRootArea().registerExtensionPoint("com.intellij.referencesSearch", "com.intellij.util.QueryExecutor");
       Extensions.getRootArea().registerExtensionPoint("com.intellij.useScopeEnlarger", "com.intellij.psi.search.UseScopeEnlarger");
       Extensions.getRootArea().registerExtensionPoint("com.intellij.useScopeOptimizer", "com.intellij.psi.search.UseScopeOptimizer");
@@ -230,13 +229,13 @@ public class LightPsi {
       Extensions.getRootArea().registerExtensionPoint("com.intellij.codeInsight.containerProvider",
                                                       "com.intellij.codeInsight.ContainerProvider");
       Extensions.getRootArea().getExtensionPoint("com.intellij.referencesSearch").registerExtension(new CachesBasedRefSearcher());
-      registerApplicationService(project, PsiReferenceService.class, new PsiReferenceServiceImpl());
-      registerApplicationService(project, JobLauncher.class, new JobLauncherImpl());
-      registerApplicationService(project, AsyncFutureFactory.class, new AsyncFutureFactoryImpl());
-      project.registerService(PsiSearchHelper.class, new PsiSearchHelperImpl(psiManager));
-      project.registerService(DumbService.class, new DumbServiceImpl(project));
-      project.registerService(ResolveCache.class, new ResolveCache(project.getMessageBus()));
-      project.registerService(PsiFileFactory.class, new PsiFileFactoryImpl(psiManager));
+      registerApplicationService(project, PsiReferenceService.class, PsiReferenceServiceImpl.class);
+      registerApplicationService(project, JobLauncher.class, JobLauncherImpl.class);
+      registerApplicationService(project, AsyncFutureFactory.class, AsyncFutureFactoryImpl.class);
+      project.registerService(PsiSearchHelper.class, PsiSearchHelperImpl.class);
+      project.registerService(DumbService.class, DumbServiceImpl.class);
+      project.registerService(ResolveCache.class, ResolveCache.class);
+      project.registerService(PsiFileFactory.class, PsiFileFactoryImpl.class);
       try {
         project.registerService(JavaHelper.class, new JavaHelper.AsmHelper());
       }
@@ -245,19 +244,17 @@ public class LightPsi {
         project.registerService(JavaHelper.class, new JavaHelper.ReflectionHelper());
       }
 
-      InjectedLanguageManagerImpl languageManager = new InjectedLanguageManagerImpl(project, DumbService.getInstance(project));
-      Disposer.register(project, languageManager);
-      project.registerService(InjectedLanguageManager.class, languageManager);
+      project.registerService(InjectedLanguageManager.class, InjectedLanguageManagerImpl.class);
       ProgressManager.getInstance();
     }
 
-    private static <T> void registerApplicationService(Project project, final Class<T> aClass, T object) {
+    private static <T, S extends T> void registerApplicationService(Project project, Class<T> intfClass, Class<S> implClass) {
       final MockApplicationEx application = (MockApplicationEx)ApplicationManager.getApplication();
-      application.registerService(aClass, object);
-      Disposer.register(project, () -> application.getPicoContainer().unregisterComponent(aClass.getName()));
+      application.registerService(intfClass, implClass);
+      Disposer.register(project, () -> application.getPicoContainer().unregisterComponent(intfClass.getName()));
     }
     
-    public static Trinity<MockProjectEx, MockPsiManager, PsiFileFactoryImpl> initPsiFileFactory(Disposable rootDisposable) {
+    public static MockProject initPsiFileFactory(Disposable rootDisposable) {
       final MockApplicationEx application = initApplication(rootDisposable);
       ComponentAdapter component = application.getPicoContainer().getComponentAdapter(ProgressManager.class.getName());
       if (component == null) {
@@ -274,35 +271,30 @@ public class LightPsi {
       }
       Extensions.registerAreaClass("IDEA_PROJECT", null);
       MockProjectEx project = new MockProjectEx(rootDisposable);
-      MockPsiManager psiManager = new MockPsiManager(project);
-      PsiFileFactoryImpl psiFileFactory = new PsiFileFactoryImpl(psiManager);
       MutablePicoContainer appContainer = application.getPicoContainer();
       registerComponentInstance(appContainer, MessageBus.class, MessageBusFactory.newMessageBus(application));
       final MockEditorFactory editorFactory = new MockEditorFactory();
       registerComponentInstance(appContainer, EditorFactory.class, editorFactory);
       registerComponentInstance(
         appContainer, FileDocumentManager.class,
-        new MockFileDocumentManagerImpl(charSequence -> editorFactory.createDocument(charSequence), FileDocumentManagerImpl.HARD_REF_TO_DOCUMENT_KEY)
+        new MockFileDocumentManagerImpl(editorFactory::createDocument, FileDocumentManagerImpl.HARD_REF_TO_DOCUMENT_KEY)
       );
       registerComponentInstance(appContainer, PsiDocumentManager.class, new MockPsiDocumentManager());
       registerComponentInstance(appContainer, FileTypeManager.class, new MockFileTypeManager(new MockLanguageFileType(PlainTextLanguage.INSTANCE, "txt")));
-      registerApplicationService(project, PsiBuilderFactory.class, new PsiBuilderFactoryImpl());
-      registerApplicationService(project, DefaultASTFactory.class, new DefaultASTFactoryImpl());
-      registerApplicationService(project, ReferenceProvidersRegistry.class, new ReferenceProvidersRegistryImpl());
-      project.registerService(CachedValuesManager.class, new CachedValuesManagerImpl(project, new PsiCachedValuesFactory(psiManager)));
-      project.registerService(PsiManager.class, psiManager);
-      project.registerService(StartupManager.class, new StartupManagerImpl(project));
+      registerApplicationService(project, PsiBuilderFactory.class, PsiBuilderFactoryImpl.class);
+      registerApplicationService(project, DefaultASTFactory.class, DefaultASTFactoryImpl.class);
+      registerApplicationService(project, ReferenceProvidersRegistry.class, ReferenceProvidersRegistryImpl.class);
+      project.registerService(PsiManager.class, MockPsiManager.class);
+      project.registerService(PsiFileFactory.class, PsiFileFactoryImpl.class);
+      project.registerService(StartupManager.class, StartupManagerImpl.class);
+      project.registerService(CachedValuesManager.class, new CachedValuesManagerImpl(project, new PsiCachedValuesFactory(PsiManager.getInstance(project))));
       registerExtensionPoint(FileTypeFactory.FILE_TYPE_FACTORY_EP, FileTypeFactory.class);
-      return Trinity.create(project, psiManager, psiFileFactory);
+      return project;
     }
 
     public static MockApplicationEx initApplication(Disposable rootDisposable) {
       MockApplicationEx instance = new MockApplicationEx(rootDisposable);
-      ApplicationManager.setApplication(
-        instance,
-        () -> FileTypeManager.getInstance(),
-        rootDisposable
-      );
+      ApplicationManager.setApplication(instance, FileTypeManager::getInstance, rootDisposable);
       instance.registerService(EncodingManager.class, EncodingManagerImpl.class);
       return instance;
     }
@@ -321,11 +313,9 @@ public class LightPsi {
       }
     }
 
-    public static <T> T registerComponentInstance(MutablePicoContainer container, Class<T> key, T implementation) {
-      Object old = container.getComponentInstance(key);
+    public static <T> void registerComponentInstance(MutablePicoContainer container, Class<T> key, T implementation) {
       container.unregisterComponent(key);
       container.registerComponentInstance(key, implementation);
-      return (T)old;
     }
 
     public static <T> void addExplicitExtension(Project project, final LanguageExtension<T> instance, final Language language, final T object) {

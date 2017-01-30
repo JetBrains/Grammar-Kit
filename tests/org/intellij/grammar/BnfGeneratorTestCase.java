@@ -11,7 +11,7 @@ public class BnfGeneratorTestCase extends AbstractParsingTestCase {
   @Override
   protected void setUp() throws Exception {
     super.setUp();
-    LightPsi.Init.initExtensions(getProject(), getPsiManager());
+    LightPsi.Init.initExtensions(getProject());
   }
 
 }

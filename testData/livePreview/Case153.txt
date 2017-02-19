@@ -1,0 +1,9 @@
+FILE
+  ASTWrapperPsiElement(EXPR)
+    ASTWrapperPsiElement(PRIMARY)
+      PsiElement(ID)('abc')
+  PsiWhiteSpace(' ')
+  PsiErrorElement:'+' unexpected
+    PsiElement(+)('+')
+  PsiWhiteSpace(' ')
+  PsiElement(ID)('edf')

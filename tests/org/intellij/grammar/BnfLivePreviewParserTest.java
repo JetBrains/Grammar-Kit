@@ -27,6 +27,7 @@ public class BnfLivePreviewParserTest extends BnfGeneratorTestCase {
   public void testUpperRules() throws IOException { doTest("../generator/UpperRules.bnf"); }
 
   public void testCase75() throws IOException { doTest(); }
+  public void testCase153() throws IOException { doTest(); }
 
   protected void doTest() throws IOException {
     doTest(getTestName(false) + ".bnf");

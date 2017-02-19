@@ -1,0 +1,15 @@
+{
+  tokens = [
+    WS = "regexp:\s+"
+    ID ='regexp:\w+'
+    PLUS ='+'
+  ]
+  extends(".*expr")="expr"
+}
+
+root ::= expr
+
+expr ::= primary | add_group
+private add_group ::= plus_expr
+plus_expr ::= expr '+' expr
+primary ::= ID

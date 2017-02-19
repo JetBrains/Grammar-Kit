@@ -119,7 +119,7 @@ public class ExpressionHelper {
   private void addToPriorityMap(BnfRule rule, Collection<BnfRule> rulesCluster, ExpressionInfo info) {
     JBTreeTraverser<BnfRule> traverser = new JBTreeTraverser<>(
       o -> ObjectUtils.notNull(rule == o || Rule.isPrivate(o) ? myRuleGraph.getSubRules(o) : null, Collections.emptyList()));
-    for (TreeTraversal.TracingIt<BnfRule> it = traverser.withRoot(rule).traverse().skip(1).typedIterator(); it.hasNext(); ) {
+    for (TreeTraversal.TracingIt<BnfRule> it = traverser.withRoot(rule).unique().traverse().skip(1).typedIterator(); it.hasNext(); ) {
       BnfRule subRule = it.next();
       if (info.priorityMap.containsKey(subRule)) {
         addWarning(String.format("'%s' priority is calculated twice", subRule.getName()));

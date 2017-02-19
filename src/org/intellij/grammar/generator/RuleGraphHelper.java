@@ -19,6 +19,7 @@ package org.intellij.grammar.generator;
 import com.intellij.lang.Language;
 import com.intellij.openapi.util.Key;
 import com.intellij.psi.PsiElement;
+import com.intellij.psi.SyntaxTraverser;
 import com.intellij.psi.impl.source.tree.LeafPsiElement;
 import com.intellij.psi.tree.IElementType;
 import com.intellij.psi.util.*;
@@ -316,28 +317,20 @@ public class RuleGraphHelper {
   }
 
   private void buildRulesGraph() {
-    LinkedList<BnfExpression> deque = ContainerUtil.newLinkedList();
+    SyntaxTraverser<PsiElement> s = SyntaxTraverser.psiTraverser()
+      .expand(o -> !(o instanceof BnfPredicate || o instanceof BnfExternalExpression));
     for (BnfRule rule : myFile.getRules()) {
-      deque.addFirst(rule.getExpression());
-      while (!deque.isEmpty()) {
-        BnfExpression cur = deque.removeFirst();
-        ListIterator<BnfExpression> listIterator = deque.listIterator();
-        for (PsiElement e = cur.getFirstChild(); e != null; e = e.getNextSibling()) {
-          if (e instanceof BnfPredicate || !(e instanceof BnfExpression)) continue;
-          BnfReferenceOrToken ruleRef =
-            e instanceof BnfReferenceOrToken ? (BnfReferenceOrToken)e :
-            e instanceof BnfExternalExpression ? PsiTreeUtil.findChildOfType(e, BnfReferenceOrToken.class) :
-            null;
-          BnfRule r = ruleRef != null ? ruleRef.resolveRule() : null;
-          if (r != null) {
-            myRulesGraph.putValue(rule, r);
-          }
-          else if (e instanceof BnfReferenceOrToken || e instanceof BnfStringLiteralExpression) {
-            myRulesWithTokens.add(rule);
-          }
-          else {
-            listIterator.add((BnfExpression)e);
-          }
+      for (PsiElement e : s.withRoot(rule.getExpression()).filter(BnfExpression.class)) {
+        BnfReferenceOrToken ruleRef =
+          e instanceof BnfReferenceOrToken ? (BnfReferenceOrToken)e :
+          e instanceof BnfExternalExpression ? PsiTreeUtil.findChildOfType(e, BnfReferenceOrToken.class) :
+          null;
+        BnfRule r = ruleRef != null ? ruleRef.resolveRule() : null;
+        if (r != null) {
+          myRulesGraph.putValue(rule, r);
+        }
+        else if (e instanceof BnfReferenceOrToken || e instanceof BnfStringLiteralExpression) {
+          myRulesWithTokens.add(rule);
         }
       }
     }

@@ -229,8 +229,9 @@ Change log
 ==========
 1.5.1
 
-* Diagrams: fix NPE on app save/load
-* Generator: support rule names that happen to be java reserved words #32
+* RGH: rule-graph analysis fix for trivial rules (#153)
+* Diagrams: NPE fix on app save/load
+* Generator: support rule names that happen to be java reserved words (#32)
 
 1.5.0
 

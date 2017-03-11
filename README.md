@@ -19,7 +19,7 @@ Open-source plugins built with Grammar-Kit:
 [Cypher](https://github.com/neueda/jetbrains-plugin-graph-database-support),
 * [Clojure-Kit](https://github.com/gregsh/Clojure-Kit), [Dart](https://github.com/JetBrains/intellij-plugins/tree/master/Dart),
 [intellij-haxe](https://github.com/JetBrains/intellij-haxe),
-[OGNL](https://github.com/JetBrains/intellij-plugins/tree/master/struts2)
+[OGNL](https://github.com/JetBrains/intellij-plugins/tree/master/struts2), [IntelliJ Elixir](https://github.com/KronicDeth/intellij-elixir)
 
 
 Quick links: [Tutorial](TUTORIAL.md), [HOWTO](HOWTO.md), [Standalone usage](#standalone-usage).

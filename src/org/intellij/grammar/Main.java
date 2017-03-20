@@ -28,7 +28,10 @@ import java.util.regex.Pattern;
  * Command-line interface to parser generator.
  * Required community jars on classpath:
  * jdom.jar, trove4j.jar, extensions.jar, picocontainer.jar, junit.jar, idea.jar, openapi.jar, util.jar.
+ *
  * @author gregsh
+ *
+ * @noinspection UseOfSystemOutOrSystemErr
  */
 public class Main {
   public static void main(String[] args) throws Exception {

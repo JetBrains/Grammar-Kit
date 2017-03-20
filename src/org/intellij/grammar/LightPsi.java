@@ -159,9 +159,12 @@ public class LightPsi {
 
   private static boolean shouldAddEntry(String path) {
     if (!path.startsWith("/")) return false;
-    if (path.startsWith("/Library")) return false;
-    if (path.contains("/cglib-")) return false;
-    return true;
+    if (path.contains("/grammar-kit/")) return false;
+
+    return path.contains("/out/classes/production/") ||
+           path.contains("extensions.jar") ||
+           path.contains("openapi.jar") ||
+           path.contains("idea.jar");
   }
 
   private static void addJarEntry(JarOutputStream jarFile, String resourceName) throws IOException {

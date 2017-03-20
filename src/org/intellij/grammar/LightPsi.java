@@ -181,8 +181,8 @@ public class LightPsi {
     private final MockProject myProject;
 
     MyParsing() throws Exception {
-      myProject = Init.initPsiFileFactory(this);
-      Init.initExtensions(getProject());
+      myProject = Init.initAppAndProject(this);
+      Init.initExtensions(myProject);
     }
 
     @Nullable
@@ -254,7 +254,7 @@ public class LightPsi {
       Disposer.register(project, () -> application.getPicoContainer().unregisterComponent(intfClass.getName()));
     }
     
-    public static MockProject initPsiFileFactory(Disposable rootDisposable) {
+    public static MockProject initAppAndProject(Disposable rootDisposable) {
       final MockApplicationEx application = initApplication(rootDisposable);
       ComponentAdapter component = application.getPicoContainer().getComponentAdapter(ProgressManager.class.getName());
       if (component == null) {
@@ -289,6 +289,7 @@ public class LightPsi {
       project.registerService(StartupManager.class, StartupManagerImpl.class);
       project.registerService(CachedValuesManager.class, new CachedValuesManagerImpl(project, new PsiCachedValuesFactory(PsiManager.getInstance(project))));
       registerExtensionPoint(FileTypeFactory.FILE_TYPE_FACTORY_EP, FileTypeFactory.class);
+      registerExtensionPoint(MetaLanguage.EP_NAME, MetaLanguage.class);
       return project;
     }
 

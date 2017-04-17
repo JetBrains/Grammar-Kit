@@ -39,6 +39,7 @@ public class GenOptions {
   public final boolean generateExtendedPin;
   public final boolean generatePsi;
   public final boolean generatePsiFactory;
+  public final boolean generatePsiClassesMap;
   public final boolean generateVisitor;
   public final String visitorValue;
   public final Case generateTokenCase;
@@ -51,6 +52,7 @@ public class GenOptions {
     names = Names.forName(genOptions.get("names"));
     generatePsi = getGenerateOption(myFile, KnownAttribute.GENERATE_PSI, genOptions.get("psi"));
     generatePsiFactory = !"no".equals(genOptions.get("psi-factory"));
+    generatePsiClassesMap = "yes".equals(genOptions.get("psi-classes-map"));
     generateTokenTypes = getGenerateOption(myFile, KnownAttribute.GENERATE_TOKENS, genOptions.get("tokens"));
     generateElementTypes = !"no".equals(genOptions.get("elements"));
     generateFirstCheck = getGenerateOption(myFile, KnownAttribute.GENERATE_FIRST_CHECK, genOptions.get("firstCheck"));

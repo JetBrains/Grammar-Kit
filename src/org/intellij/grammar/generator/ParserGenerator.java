@@ -1302,7 +1302,14 @@ public class ParserGenerator {
     else {
       ContainerUtil.addIfNotNull(imports, tokenTypeClass);
     }
-    if (G.generatePsi) imports.add(implPackage + ".*");
+    if (G.generatePsi) {
+      imports.add(implPackage + ".*");
+      if (G.generatePsiClassesMap) {
+        imports.add(CommonClassNames.JAVA_UTIL_COLLECTIONS);
+        imports.add(CommonClassNames.JAVA_UTIL_SET);
+        imports.add("java.util.LinkedHashMap");
+      }
+    }
     generateClassHeader(className, imports, "", Java.INTERFACE);
     if (G.generateElementTypes) {
       for (String elementType : sortedCompositeTypes.keySet()) {
@@ -1310,11 +1317,12 @@ public class ParserGenerator {
         String elementCreateCall;
         if (pair.second == null) {
           elementCreateCall = "new " + StringUtil.getShortName(pair.first);
-        } else {
+        }
+        else {
           elementCreateCall = myShortener.fun(StringUtil.getPackageName(pair.second)) + "." + StringUtil.getShortName(pair.second);
         }
-        String callFix = elementCreateCall.equals("new IElementType")? ", null" : "";
-        out("IElementType " + elementType + " = " + elementCreateCall + "(\"" + elementType + "\""+callFix+");");
+        String callFix = elementCreateCall.equals("new IElementType") ? ", null" : "";
+        out("IElementType " + elementType + " = " + elementCreateCall + "(\"" + elementType + "\"" + callFix + ");");
       }
     }
     if (G.generateTokenTypes) {
@@ -1337,6 +1345,30 @@ public class ParserGenerator {
         String tokenString = sortedTokens.get(tokenType);
         out("IElementType " + tokenType + " = " + tokenCreateCall + "(\"" + StringUtil.escapeStringCharacters(tokenString) + "\""+callFix+");");
       }
+    }
+    if (G.generatePsi && G.generatePsiClassesMap) {
+      newLine();
+      out("class Classes {");
+      out("public static Class<?> findClass(IElementType elementType) {");
+      out("return ourMap.get(elementType);");
+      out("}");
+      newLine();
+      out("public static %s<IElementType> elementTypes() {", myShortener.fun(CommonClassNames.JAVA_UTIL_SET));
+      out("return %s.unmodifiableSet(ourMap.keySet());", myShortener.fun(CommonClassNames.JAVA_UTIL_COLLECTIONS));
+      out("}");
+      newLine();
+      String type = myShortener.fun("java.util.LinkedHashMap") + "<IElementType, Class<?>>";
+      out("private static final %s ourMap = new %1$s();", type);
+      newLine();
+      out("static {");
+      for (String elementType : sortedCompositeTypes.keySet()) {
+        BnfRule rule = sortedCompositeTypes.get(elementType);
+        if (myAbstractRules.contains(rule.getName())) continue;
+        String psiClass = getRulePsiClassName(rule, myPsiImplClassFormat);
+        out("ourMap.put(" + elementType + ", " + psiClass + ".class);");
+      }
+      out("}");
+      out("}");
     }
     if (G.generatePsi && G.generatePsiFactory) {
       newLine();

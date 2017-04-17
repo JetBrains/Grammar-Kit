@@ -114,9 +114,11 @@ public abstract class JavaHelper {
     return "*".equals(expected) || expected != null && expected.equals(actual);
   }
 
-  private static boolean acceptsModifiers(int modifiers) {
+  private static boolean acceptsModifiers(int modifiers, MethodType methodType) {
     return !Modifier.isAbstract(modifiers) &&
-           (Modifier.isPublic(modifiers) || !(Modifier.isPrivate(modifiers) || Modifier.isProtected(modifiers)));
+           (Modifier.isPublic(modifiers) ||
+            !(Modifier.isPrivate(modifiers) || Modifier.isProtected(modifiers)) ||
+            Modifier.isProtected(modifiers) && methodType == MethodType.CONSTRUCTOR);
   }
 
   private static class PsiHelper extends AsmHelper {
@@ -181,7 +183,7 @@ public abstract class JavaHelper {
       PsiMethod[] methods = methodType == MethodType.CONSTRUCTOR ? aClass.getConstructors() : aClass.getMethods();
       for (PsiMethod method : methods) {
         if (!acceptsName(methodName, method.getName())) continue;
-        if (!acceptsMethod(method, methodType == MethodType.STATIC)) continue;
+        if (!acceptsMethod(method, methodType)) continue;
         if (!acceptsMethod(myElementFactory, method, paramCount, paramTypes)) continue;
         result.add(method);
       }
@@ -220,13 +222,13 @@ public abstract class JavaHelper {
       return true;
     }
 
-    private static boolean acceptsMethod(PsiMethod method, boolean staticMethods) {
+    private static boolean acceptsMethod(PsiMethod method, MethodType methodType) {
       PsiModifierList modifierList = method.getModifierList();
-      return staticMethods == modifierList.hasModifierProperty(PsiModifier.STATIC) &&
+      return (methodType == MethodType.STATIC) == modifierList.hasModifierProperty(PsiModifier.STATIC) &&
              !modifierList.hasModifierProperty(PsiModifier.ABSTRACT) &&
              (modifierList.hasModifierProperty(PsiModifier.PUBLIC) ||
-              !(modifierList.hasModifierProperty(PsiModifier.PROTECTED) ||
-                modifierList.hasModifierProperty(PsiModifier.PRIVATE)));
+              !(modifierList.hasModifierProperty(PsiModifier.PROTECTED) || modifierList.hasModifierProperty(PsiModifier.PRIVATE)) ||
+              methodType == MethodType.CONSTRUCTOR && modifierList.hasModifierProperty(PsiModifier.PROTECTED));
     }
 
     @NotNull
@@ -311,7 +313,7 @@ public abstract class JavaHelper {
       Member[] methods = methodType == MethodType.CONSTRUCTOR ? aClass.getDeclaredConstructors() : aClass.getDeclaredMethods();
       for (Member method : methods) {
         if (!acceptsName(methodName, method.getName())) continue;
-        if (!acceptsMethod(method, methodType == MethodType.STATIC)) continue;
+        if (!acceptsMethod(method, methodType)) continue;
         if (!acceptsMethod(method, paramCount, paramTypes)) continue;
         result.add(new MyElement<>(method));
       }
@@ -344,9 +346,10 @@ public abstract class JavaHelper {
       return true;
     }
 
-    private static boolean acceptsMethod(Member method, boolean staticMethods) {
+    private static boolean acceptsMethod(Member method, MethodType methodType) {
       int modifiers = method.getModifiers();
-      return staticMethods == Modifier.isStatic(modifiers) && acceptsModifiers(modifiers);
+      return (methodType == MethodType.STATIC) == Modifier.isStatic(modifiers) &&
+             acceptsModifiers(modifiers, methodType);
     }
 
     @NotNull
@@ -449,7 +452,7 @@ public abstract class JavaHelper {
     }
 
     private static boolean acceptsMethod(MethodInfo method, MethodType methodType) {
-      return method.methodType == methodType && acceptsModifiers(method.modifiers);
+      return method.methodType == methodType && acceptsModifiers(method.modifiers, methodType);
     }
 
     @NotNull

@@ -85,7 +85,8 @@ public class ParserGenerator {
   private final NameFormat myPsiClassFormat;
   private final NameFormat myPsiImplClassFormat;
 
-  private final String visitorClassName;
+  private final String myVisitorClassName;
+  private final boolean myMixedASTandPSI;
 
 
   private int myOffset;
@@ -121,9 +122,11 @@ public class ParserGenerator {
     myPsiTreeUtilClass = getRootAttribute(myFile, KnownAttribute.PSI_TREE_UTIL_CLASS);
 
     String tmpVisitorClass = getRootAttribute(myFile, KnownAttribute.PSI_VISITOR_NAME);
-    visitorClassName = !G.generateVisitor || StringUtil.isEmpty(tmpVisitorClass) ? null :
+    myVisitorClassName = !G.generateVisitor || StringUtil.isEmpty(tmpVisitorClass) ? null :
                        !tmpVisitorClass.equals(myPsiClassFormat.strip(tmpVisitorClass)) ? tmpVisitorClass :
                        myPsiClassFormat.apply("") + tmpVisitorClass;
+    myMixedASTandPSI = BnfConstants.COMPOSITE_PSI_ELEMENT_CLASS.equals(getRootAttribute(myFile, KnownAttribute.EXTENDS));
+
     mySimpleTokens = ContainerUtil.newLinkedHashMap(RuleGraphHelper.getTokenTextToNameMap(myFile));
     myGraphHelper = RuleGraphHelper.getCached(myFile);
     myExpressionHelper = new ExpressionHelper(myFile, myGraphHelper, true);
@@ -310,8 +313,8 @@ public class ParserGenerator {
           closeOutput();
         }
       }
-      if (visitorClassName != null && myGrammarRoot != null) {
-        String psiClass = psiPackage + "." + visitorClassName;
+      if (myVisitorClassName != null && myGrammarRoot != null) {
+        String psiClass = psiPackage + "." + myVisitorClassName;
         openOutput(psiClass);
         try {
           generateVisitor(psiClass, sortedPsiRules);
@@ -1401,7 +1404,7 @@ public class ParserGenerator {
                                  "org.jetbrains.annotations.*",
                                  AST_NODE_CLASS,
                                  PSI_ELEMENT_CLASS));
-    if (visitorClassName != null) imports.add(PSI_ELEMENT_VISITOR_CLASS);
+    if (myVisitorClassName != null) imports.add(PSI_ELEMENT_VISITOR_CLASS);
     imports.add(myPsiTreeUtilClass);
     imports.add("static " + typeHolderClass + ".*");
     if (StringUtil.isNotEmpty(implSuper)) imports.add(implSuper);
@@ -1409,17 +1412,18 @@ public class ParserGenerator {
     imports.add(StringUtil.notNullize(myPsiImplUtilClass));
     imports.addAll(getRuleMethodTypesToImport(rule));
 
-    String implSuperRaw = getRawClassName(implSuper);
     Function<String, String> substitutor = stubName != null ? Functions.constant(stubName) : Function.ID;
 
-    List<NavigatablePsiElement> constructors =
-      myJavaHelper.findClassMethods(implSuperRaw, JavaHelper.MethodType.CONSTRUCTOR, "*", -1);
-    if (constructors.isEmpty()) {
-      BnfRule topSuperRule = getTopSuperRule(myFile, rule);
-      String topImplSuper = topSuperRule == null || topSuperRule == rule? null : realSuperClasses.get(topSuperRule.getName());
-      if (topImplSuper != null) {
-        constructors = myJavaHelper.findClassMethods(getRawClassName(topImplSuper), JavaHelper.MethodType.CONSTRUCTOR, "*", -1);
-      }
+    List<NavigatablePsiElement> constructors = Collections.emptyList();
+    BnfRule topSuperRule = null;
+    for (BnfRule next = rule; next != null && next != topSuperRule; ) {
+      topSuperRule = next;
+      String superClass = realSuperClasses.get(next.getName());
+      if (superClass == null) continue;
+      next = getTopSuperRule(myFile, next);
+      if (next != null && next != topSuperRule && getAttribute(topSuperRule, KnownAttribute.MIXIN) == null) continue;
+      constructors = myJavaHelper.findClassMethods(getRawClassName(superClass), JavaHelper.MethodType.CONSTRUCTOR, "*", -1);
+      if (!constructors.isEmpty()) break;
     }
     for (NavigatablePsiElement m : constructors) {
       collectMethodTypesToImport(Collections.singletonList(m), false, imports);
@@ -1463,19 +1467,21 @@ public class ParserGenerator {
         newLine();
       }
     }
-    if (visitorClassName != null) {
+    if (myVisitorClassName != null) {
       String r = G.visitorValue != null ? "<" + G.visitorValue + ">" : "";
       String t = G.visitorValue != null ? " " + G.visitorValue : "void";
       String ret = G.visitorValue != null ? "return " : "";
-      out("public " + r + t + " accept(@NotNull " + visitorClassName + r + " visitor) {");
+      out("public " + r + t + " accept(@NotNull " + myVisitorClassName + r + " visitor) {");
       out(ret + "visitor.visit" + getRulePsiClassName(rule, null) + "(this);");
       out("}");
       newLine();
-      out("public void accept(@NotNull " + myShortener.fun(PSI_ELEMENT_VISITOR_CLASS) + " visitor) {");
-      out("if (visitor instanceof " + visitorClassName + ") accept((" + visitorClassName + ")visitor);");
-      out("else super.accept(visitor);");
-      out("}");
-      newLine();
+      //if (topSuperRule == rule) {
+        out("public void accept(@NotNull " + myShortener.fun(PSI_ELEMENT_VISITOR_CLASS) + " visitor) {");
+        out("if (visitor instanceof " + myVisitorClassName + ") accept((" + myVisitorClassName + ")visitor);");
+        out("else super.accept(visitor);");
+        out("}");
+        newLine();
+      //}
     }
     generatePsiClassMethods(rule, false);
     out("}");
@@ -1587,8 +1593,9 @@ public class ParserGenerator {
     boolean stubbed = !isToken &&
                       myRulesStubNames.get(rule.getName()) != null &&
                       myRulesStubNames.get(methodInfo.rule.getName()) != null;
+    String result;
     // todo REMOVEME. Keep old generation logic for a while.
-    if (myRulesStubNames.isEmpty()) {
+    if (!myMixedASTandPSI && myRulesStubNames.isEmpty()) {
       if (isToken) {
         return (type == REQUIRED ? "findNotNullChildByType" : "findChildByType") +
                "(" + getElementType(methodInfo.path) + ")";
@@ -1600,9 +1607,9 @@ public class ParserGenerator {
       }
     }
     // new logic
-    String result;
     if (isToken) {
-      result = "findChildByType(" + getElementType(methodInfo.path) + ")";
+      String getterName = myMixedASTandPSI ? "findPsiChildByType" : "findChildByType";
+      result = getterName + "(" + getElementType(methodInfo.path) + ")";
     }
     else {
       String className = myShortener.fun(getAccessorType(methodInfo.rule));
@@ -1611,7 +1618,7 @@ public class ParserGenerator {
                           many ? "getChildrenOfTypeAsList" : "getChildOfType";
       result = String.format("%s.%s(this, %s.class)", myShortener.fun(myPsiTreeUtilClass), getterName, className);
     }
-    return required ? "notNullChild(" + result + ")" : result;
+    return required && !myMixedASTandPSI ? "notNullChild(" + result + ")" : result;
   }
 
   private String getAccessorType(@NotNull BnfRule rule) {

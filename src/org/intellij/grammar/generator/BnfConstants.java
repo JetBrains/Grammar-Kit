@@ -39,6 +39,7 @@ public interface BnfConstants {
   String PSI_ELEMENT_VISITOR_CLASS = "com.intellij.psi.PsiElementVisitor";
   String AST_NODE_CLASS = "com.intellij.lang.ASTNode";
   String AST_WRAPPER_PSI_ELEMENT_CLASS = "com.intellij.extapi.psi.ASTWrapperPsiElement";
+  String COMPOSITE_PSI_ELEMENT_CLASS = "com.intellij.psi.impl.source.tree.CompositePsiElement";
 
   String ISTUBELEMENTTYPE_CLASS = "com.intellij.psi.stubs.IStubElementType";
   String STUB_BASED_PSI_ELEMENT = "com.intellij.psi.StubBasedPsiElement";

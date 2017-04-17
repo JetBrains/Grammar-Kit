@@ -230,9 +230,9 @@ public class ParserGenerator {
       myOut.println();
       return;
     }
-    boolean isComment = s.startsWith("//");
     boolean newStatement = true;
     for (int start = 0, end; start < length; start = end + 1) {
+      boolean isComment = s.startsWith("//", start);
       end = StringUtil.indexOf(s, '\n', start, length);
       if (end == -1) end = length;
       String substring = s.substring(start, end);
@@ -242,7 +242,7 @@ public class ParserGenerator {
       }
       if (!isComment && substring.endsWith("{")) myOffset++;
       myOut.println(substring);
-      newStatement = substring.endsWith(";") || substring.endsWith("{") || substring.endsWith("}");
+      newStatement = isComment || substring.endsWith(";") || substring.endsWith("{") || substring.endsWith("}");
     }
   }
 
@@ -1500,16 +1500,28 @@ public class ParserGenerator {
           generateUserPsiAccessors(rule, methodInfo, intf);
           break;
         case MIXIN:
+          boolean found = false;
           if (intf) {
             String mixinClass = getAttribute(rule, KnownAttribute.MIXIN);
             List<NavigatablePsiElement> methods = myJavaHelper.findClassMethods(mixinClass, JavaHelper.MethodType.INSTANCE, methodInfo.name, -1);
             for (NavigatablePsiElement method : methods) {
               generateUtilMethod(methodInfo.name, method, intf, false, visited);
+              found = true;
             }
           }
           List<NavigatablePsiElement> methods = findRuleImplMethods(myJavaHelper, myPsiImplUtilClass, methodInfo.name, rule);
           for (NavigatablePsiElement method : methods) {
             generateUtilMethod(methodInfo.name, method, intf, true, visited);
+            found = true;
+          }
+          if (intf && !found) {
+            out("//WARNING: %s(...) method is not generated, because no method\n" +
+                "//matching %s(%s, ...) signature is found in %s",
+                methodInfo.name,
+                methodInfo.name,
+                myShortener.fun(ContainerUtil.getFirstItem(getRuleClasses(rule))),
+                myShortener.fun(myPsiImplUtilClass));
+            newLine();
           }
           break;
         default: throw new AssertionError(methodInfo.toString());
@@ -1754,6 +1766,7 @@ public class ParserGenerator {
     int offset = methodTypes.isEmpty() || isInPsiUtil && methodTypes.size() < 3 ? 0 :
                  isInPsiUtil ? 3 : 1;
     if (!visited.add(methodName + methodTypes.subList(offset, methodTypes.size()))) return;
+    if (intf && methodTypes.size() == offset && "toString".equals(methodName)) return;
 
     for (String s : myJavaHelper.getAnnotations(method)) {
       if ("java.lang.Override".equals(s)) continue;

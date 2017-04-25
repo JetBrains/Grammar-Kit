@@ -16,7 +16,7 @@
 
 package org.intellij.grammar.refactor;
 
-import com.intellij.codeInsight.TargetElementUtilBase;
+import com.intellij.codeInsight.TargetElementUtil;
 import com.intellij.lang.Language;
 import com.intellij.lang.refactoring.InlineActionHandler;
 import com.intellij.openapi.editor.Editor;
@@ -83,7 +83,7 @@ public class BnfInlineRuleActionHandler extends InlineActionHandler {
       return;
     }
     if (!CommonRefactoringUtil.checkReadOnlyStatus(project, rule)) return;
-    PsiReference reference = editor != null ? TargetElementUtilBase.findReference(editor, editor.getCaretModel().getOffset()) : null;
+    PsiReference reference = editor != null ? TargetElementUtil.findReference(editor, editor.getCaretModel().getOffset()) : null;
     if (reference != null && !rule.equals(reference.resolve())) {
       reference = null;
     }

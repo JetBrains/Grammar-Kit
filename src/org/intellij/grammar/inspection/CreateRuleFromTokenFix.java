@@ -18,8 +18,6 @@ package org.intellij.grammar.inspection;
 
 import com.intellij.codeInspection.LocalQuickFix;
 import com.intellij.codeInspection.ProblemDescriptor;
-import com.intellij.openapi.application.AccessToken;
-import com.intellij.openapi.application.WriteAction;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.ScrollType;
 import com.intellij.openapi.fileEditor.FileEditor;
@@ -50,7 +48,7 @@ public class CreateRuleFromTokenFix implements LocalQuickFix {
   @NotNull
   @Override
   public String getName() {
-    return "Create '"+myName+"' rule";
+    return "Create '" + myName + "' rule";
   }
 
   @NotNull
@@ -61,22 +59,17 @@ public class CreateRuleFromTokenFix implements LocalQuickFix {
 
   @Override
   public void applyFix(final @NotNull Project project, @NotNull ProblemDescriptor descriptor) {
-    final AccessToken token = WriteAction.start();
-    try {
-      final PsiElement element = descriptor.getPsiElement();
-      final BnfRule rule = PsiTreeUtil.getParentOfType(element, BnfRule.class);
-      if (rule == null) return;
+    PsiElement element = descriptor.getPsiElement();
+    BnfRule rule = PsiTreeUtil.getParentOfType(element, BnfRule.class);
+    if (rule == null) return;
 
-      final BnfRule addedRule = BnfIntroduceRuleHandler.addNextRule(project, rule, "private " + myName + " ::= ");
-      final FileEditor selectedEditor = FileEditorManager.getInstance(project).getSelectedEditor(rule.getContainingFile().getVirtualFile());
-      if (selectedEditor instanceof TextEditor) {
-        final Editor editor = ((TextEditor)selectedEditor).getEditor();
-        editor.getCaretModel().moveToOffset(addedRule.getTextRange().getEndOffset() - (BnfIntroduceRuleHandler.endsWithSemicolon(addedRule)? 1 : 0));
-        editor.getScrollingModel().scrollToCaret(ScrollType.MAKE_VISIBLE);
-      }
-    }
-    finally {
-      token.finish();
+    BnfRule addedRule = BnfIntroduceRuleHandler.addNextRule(project, rule, "private " + myName + " ::= ");
+    FileEditor selectedEditor = FileEditorManager.getInstance(project).getSelectedEditor(rule.getContainingFile().getVirtualFile());
+    if (selectedEditor instanceof TextEditor) {
+      final Editor editor = ((TextEditor)selectedEditor).getEditor();
+      editor.getCaretModel()
+        .moveToOffset(addedRule.getTextRange().getEndOffset() - (BnfIntroduceRuleHandler.endsWithSemicolon(addedRule) ? 1 : 0));
+      editor.getScrollingModel().scrollToCaret(ScrollType.MAKE_VISIBLE);
     }
   }
 }

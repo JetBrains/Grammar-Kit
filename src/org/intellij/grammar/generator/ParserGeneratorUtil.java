@@ -47,6 +47,7 @@ import java.util.*;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
+import static java.lang.String.format;
 import static org.intellij.grammar.generator.RuleGraphHelper.getSynonymTargetOrSelf;
 import static org.intellij.grammar.generator.RuleGraphHelper.getTokenNameToTextMap;
 import static org.intellij.grammar.psi.BnfTypes.BNF_SEQUENCE;
@@ -527,6 +528,10 @@ public class ParserGeneratorUtil {
       .toList();
   }
 
+  public static void addWarning(Project project, String s, Object... args) {
+    addWarning(project, format(s, args));
+  }
+
   public static void addWarning(Project project, String text) {
     if (ApplicationManager.getApplication().isUnitTestMode()) {
       //noinspection UseOfSystemOutOrSystemErr
@@ -543,7 +548,7 @@ public class ParserGeneratorUtil {
     JavaHelper javaHelper = JavaHelper.getJavaHelper(file);
     if (javaHelper.findClass(className) == null) {
       String tail = StringUtil.isEmpty(description) ? "" : " (" + description + ")";
-      addWarning(file.getProject(), "class not found: " + className + tail);
+      addWarning(file.getProject(), className + " class not found" + tail);
     }
   }
 

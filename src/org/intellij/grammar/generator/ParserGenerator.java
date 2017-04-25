@@ -1547,13 +1547,15 @@ public class ParserGenerator {
             found = true;
           }
           if (intf && !found) {
-            out("//WARNING: %s(...) method is not generated, because no method\n" +
-                "//matching %s(%s, ...) signature is found in %s",
-                methodInfo.name,
-                methodInfo.name,
-                myShortener.fun(ContainerUtil.getFirstItem(getRuleClasses(rule))),
-                myShortener.fun(myPsiImplUtilClass));
+            String ruleClassName = myShortener.fun(ContainerUtil.getFirstItem(getRuleClasses(rule)));
+            String implClassName = StringUtil.getShortName(String.valueOf(myPsiImplUtilClass));
+            out("" +
+                "//WARNING: %s(...) is skipped\n" +
+                "//matching %s(%s, ...)\n" +
+                "//methods are not found in %s",
+                methodInfo.name, methodInfo.name, ruleClassName, implClassName);
             newLine();
+            addWarning(myFile.getProject(), "%s.%s(%s, ...) method not found", implClassName, methodInfo.name, ruleClassName);
           }
           break;
         default: throw new AssertionError(methodInfo.toString());

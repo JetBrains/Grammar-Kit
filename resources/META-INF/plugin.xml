@@ -1,6 +1,6 @@
 <idea-plugin url="https://github.com/JetBrains/Grammar-Kit" version="2">
   <id>org.jetbrains.idea.grammar</id>
-  <version>1.5.1</version>
+  <version>1.5.2-SNAPSHOT</version>
   <vendor email="gregory.shrago@jetbrains.com">Greg Shrago</vendor>
   <idea-version since-build="162.2525" until-build="173.*"/>
 
@@ -14,9 +14,10 @@
   <change-notes>
     <![CDATA[
     <ul>
-      <li>RGH: rule-graph analysis fix for trivial rules (#153)</li>
-      <li>Diagrams: NPE fix on app save/load</li>
-      <li>Generator: support rule names that happen to be java reserved words (#32)</li>
+      <li>Generator: disable first-check in presence of external predicates</li>
+      <li>Generator: support mixed AST-PSI trees (psi.impl.source.tree.CompositePsiElement inheritors)</li>
+      <li>Generator: add generate=[psi-classes-map="yes" option</li>
+      <li>Generator: alert of missing psi implementation methods #155</li>
     </ul>
     <a href="https://github.com/JetBrains/Grammar-Kit#change-log">Full change log...</a>
     ]]>

@@ -18,12 +18,7 @@ package org.intellij.grammar.psi;
 import com.intellij.psi.tree.IElementType;
 import com.intellij.psi.PsiElement;
 import com.intellij.lang.ASTNode;
-import com.intellij.util.containers.ContainerUtil;
-import gnu.trove.THashMap;
 import org.intellij.grammar.psi.impl.*;
-
-import java.util.HashMap;
-import java.util.Map;
 
 public interface BnfTypes {
 

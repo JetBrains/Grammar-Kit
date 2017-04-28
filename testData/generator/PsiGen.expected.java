@@ -695,7 +695,6 @@ public class PsiGenFixes {
   // &<<external>> (a_statement | b_statement) | !<<external>> (c_statement)
   public static boolean statement(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "statement")) return false;
-    if (!nextTokenIs(builder_, "<statement>", ID, NUMBER)) return false;
     boolean result_;
     Marker marker_ = enter_section_(builder_, level_, _COLLAPSE_, STATEMENT, "<statement>");
     result_ = statement_0(builder_, level_ + 1);

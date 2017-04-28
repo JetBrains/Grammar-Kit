@@ -26,6 +26,7 @@ import com.intellij.psi.tree.IElementType;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.util.CommonProcessors;
 import com.intellij.util.containers.ContainerUtil;
+import com.intellij.util.containers.JBIterable;
 import gnu.trove.THashMap;
 import gnu.trove.THashSet;
 import org.intellij.grammar.KnownAttribute;
@@ -292,6 +293,8 @@ public class BnfFirstNextAnalyzer {
       // take only one token into account which is not exactly correct but better than nothing
       Set<BnfExpression> conditions = calcFirstInner(predicateExpression, newExprSet(), visited, null);
       Set<BnfExpression> next;
+      List<BnfExpression> externalCond = Collections.emptyList();
+      List<BnfExpression> externalNext;
       if (!visited.add(predicateExpression)) {
         skip = true;
         next = Collections.emptySet();
@@ -305,9 +308,9 @@ public class BnfFirstNextAnalyzer {
           next = calcSequenceFirstInner(forcedNext.second, newExprSet(), visited);
         }
         visited.remove(predicateExpression);
-        if (!skip) {
-          skip = filterExternalMethods(next) || filterExternalMethods(conditions);
-        }
+        externalCond = filterExternalMethods(conditions);
+        externalNext = filterExternalMethods(next);
+        if (!skip) skip = !externalNext.isEmpty() || !externalCond.isEmpty();
       }
       Set<BnfExpression> mixed = newExprSet();
       if (elementType == BnfTypes.BNF_OP_AND) {
@@ -316,6 +319,7 @@ public class BnfFirstNextAnalyzer {
         }
         else if (skip) {
           mixed.addAll(next);
+          mixed.addAll(externalCond);
           mixed.remove(BNF_MATCHES_EOF);
         }
         else if (!conditions.contains(BNF_MATCHES_EOF)) {
@@ -337,6 +341,7 @@ public class BnfFirstNextAnalyzer {
       else {
         if (skip) {
           mixed.addAll(next);
+          mixed.addAll(externalCond); // todo shall be actually inverted
           mixed.remove(BNF_MATCHES_EOF);
         }
         else if (!conditions.contains(BNF_MATCHES_EOF)) {
@@ -356,22 +361,11 @@ public class BnfFirstNextAnalyzer {
     return result;
   }
 
-  private static boolean filterExternalMethods(Set<BnfExpression> set) {
-    boolean skip = false;
-    boolean addEof = false;
-    for (Iterator<BnfExpression> iterator = set.iterator(); !skip && iterator.hasNext(); ) {
-      BnfExpression o = iterator.next();
-      boolean isExternal = GrammarUtil.isExternalReference(o);
-      if ("<<eof>>".equals(o.getText())) {
-        addEof = true;
-        iterator.remove();
-      }
-      else {
-        skip = isExternal;
-      }
+  private static List<BnfExpression> filterExternalMethods(Set<BnfExpression> set) {
+    if (set.removeIf(o -> "<<eof>>".equals(o.getText()))) {
+      set.add(BNF_MATCHES_EOF);
     }
-    if (addEof) set.add(BNF_MATCHES_EOF);
-    return skip;
+    return JBIterable.from(set).filter(GrammarUtil::isExternalReference).toList();
   }
 
   private static boolean involvesTextMatching(Set<BnfExpression> set) {

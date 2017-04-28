@@ -823,7 +823,6 @@ public class JFlexParser implements PsiParser, LightPsiParser {
   // <<line '%eof{'>> java_code <<line '%eof}'>>
   public static boolean option_eof(PsiBuilder builder, int level) {
     if (!recursion_guard_(builder, level, "option_eof")) return false;
-    if (!nextTokenIs(builder, FLEX_OPT_EOF1)) return false;
     boolean result, pinned;
     Marker marker = enter_section_(builder, level, _NONE_, FLEX_OPTION, "<option>");
     result = line(builder, level + 1, opt_eof1_parser_);
@@ -859,7 +858,6 @@ public class JFlexParser implements PsiParser, LightPsiParser {
   // '%eofthrow' java_type_list | <<line '%eofthrow{'>> java_type_list <<line '%eofthrow}'>>
   public static boolean option_eof_throw(PsiBuilder builder, int level) {
     if (!recursion_guard_(builder, level, "option_eof_throw")) return false;
-    if (!nextTokenIs(builder, "<option>", FLEX_OPT_EOFTHROW, FLEX_OPT_EOFTHROW1)) return false;
     boolean result;
     Marker marker = enter_section_(builder, level, _NONE_, FLEX_OPTION, "<option>");
     result = option_eof_throw_0(builder, level + 1);
@@ -897,7 +895,6 @@ public class JFlexParser implements PsiParser, LightPsiParser {
   // <<line '%eofval{'>> java_code <<line '%eofval}'>>
   public static boolean option_eof_val(PsiBuilder builder, int level) {
     if (!recursion_guard_(builder, level, "option_eof_val")) return false;
-    if (!nextTokenIs(builder, FLEX_OPT_EOFVAL1)) return false;
     boolean result, pinned;
     Marker marker = enter_section_(builder, level, _NONE_, FLEX_OPTION, "<option>");
     result = line(builder, level + 1, opt_eofval1_parser_);
@@ -1005,7 +1002,6 @@ public class JFlexParser implements PsiParser, LightPsiParser {
   // <<line '%init{'>> java_code <<line '%init}'>>
   public static boolean option_init(PsiBuilder builder, int level) {
     if (!recursion_guard_(builder, level, "option_init")) return false;
-    if (!nextTokenIs(builder, FLEX_OPT_INIT1)) return false;
     boolean result, pinned;
     Marker marker = enter_section_(builder, level, _NONE_, FLEX_OPTION, "<option>");
     result = line(builder, level + 1, opt_init1_parser_);
@@ -1020,7 +1016,6 @@ public class JFlexParser implements PsiParser, LightPsiParser {
   // '%initthrow' java_type_list | <<line '%initthrow{'>> java_type_list <<line '%initthrow}'>>
   public static boolean option_init_throw(PsiBuilder builder, int level) {
     if (!recursion_guard_(builder, level, "option_init_throw")) return false;
-    if (!nextTokenIs(builder, "<option>", FLEX_OPT_INITTHROW, FLEX_OPT_INITTHROW1)) return false;
     boolean result;
     Marker marker = enter_section_(builder, level, _NONE_, FLEX_OPTION, "<option>");
     result = option_init_throw_0(builder, level + 1);
@@ -1202,7 +1197,6 @@ public class JFlexParser implements PsiParser, LightPsiParser {
   // <<line '%{'>> java_code <<line '%}'>>
   public static boolean option_user_code(PsiBuilder builder, int level) {
     if (!recursion_guard_(builder, level, "option_user_code")) return false;
-    if (!nextTokenIs(builder, FLEX_OPT_CODE1)) return false;
     boolean result, pinned;
     Marker marker = enter_section_(builder, level, _NONE_, FLEX_OPTION, "<option>");
     result = line(builder, level + 1, opt_code1_parser_);
@@ -1217,7 +1211,6 @@ public class JFlexParser implements PsiParser, LightPsiParser {
   // '%yylexthrow' java_type_list | <<line '%yylexthrow{'>> java_type_list <<line '%yylexthrow}'>>
   public static boolean option_yylexthrow(PsiBuilder builder, int level) {
     if (!recursion_guard_(builder, level, "option_yylexthrow")) return false;
-    if (!nextTokenIs(builder, "<option>", FLEX_OPT_YYLEXTHROW, FLEX_OPT_YYLEXTHROW1)) return false;
     boolean result;
     Marker marker = enter_section_(builder, level, _NONE_, FLEX_OPTION, "<option>");
     result = option_yylexthrow_0(builder, level + 1);

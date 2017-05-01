@@ -86,7 +86,6 @@ public class ParserGenerator {
   private final NameFormat myPsiImplClassFormat;
 
   private final String myVisitorClassName;
-  private final boolean myMixedASTandPSI;
 
 
   private int myOffset;
@@ -125,7 +124,6 @@ public class ParserGenerator {
     myVisitorClassName = !G.generateVisitor || StringUtil.isEmpty(tmpVisitorClass) ? null :
                        !tmpVisitorClass.equals(myPsiClassFormat.strip(tmpVisitorClass)) ? tmpVisitorClass :
                        myPsiClassFormat.apply("") + tmpVisitorClass;
-    myMixedASTandPSI = BnfConstants.COMPOSITE_PSI_ELEMENT_CLASS.equals(getRootAttribute(myFile, KnownAttribute.EXTENDS));
 
     mySimpleTokens = ContainerUtil.newLinkedHashMap(RuleGraphHelper.getTokenTextToNameMap(myFile));
     myGraphHelper = RuleGraphHelper.getCached(myFile);
@@ -1521,15 +1519,19 @@ public class ParserGenerator {
 
   private void generatePsiClassMethods(BnfRule rule, boolean intf) {
     Set<String> visited = ContainerUtil.newTreeSet();
+    Set<String> ruleClasses = getRuleClasses(rule);
+    boolean mixedAST = JBIterable.from(ruleClasses)
+      .flatMap(s -> JBIterable.generate(s, myJavaHelper::getSuperClassName))
+      .find(BnfConstants.COMPOSITE_PSI_ELEMENT_CLASS::equals) != null;
     for (RuleMethodsHelper.MethodInfo methodInfo : myRulesMethodsHelper.getFor(rule)) {
       if (StringUtil.isEmpty(methodInfo.name)) continue;
       switch (methodInfo.type) {
         case RULE:
         case TOKEN:
-          generatePsiAccessor(rule, methodInfo, intf);
+          generatePsiAccessor(rule, methodInfo, intf, mixedAST);
           break;
         case USER:
-          generateUserPsiAccessors(rule, methodInfo, intf);
+          generateUserPsiAccessors(rule, methodInfo, intf, mixedAST);
           break;
         case MIXIN:
           boolean found = false;
@@ -1537,7 +1539,7 @@ public class ParserGenerator {
             String mixinClass = getAttribute(rule, KnownAttribute.MIXIN);
             List<NavigatablePsiElement> methods = myJavaHelper.findClassMethods(mixinClass, JavaHelper.MethodType.INSTANCE, methodInfo.name, -1);
             for (NavigatablePsiElement method : methods) {
-              generateUtilMethod(methodInfo.name, method, intf, false, visited);
+              generateUtilMethod(methodInfo.name, method, true, false, visited);
               found = true;
             }
           }
@@ -1547,7 +1549,7 @@ public class ParserGenerator {
             found = true;
           }
           if (intf && !found) {
-            String ruleClassName = myShortener.fun(ContainerUtil.getFirstItem(getRuleClasses(rule)));
+            String ruleClassName = myShortener.fun(ContainerUtil.getFirstItem(ruleClasses));
             String implClassName = StringUtil.getShortName(String.valueOf(myPsiImplUtilClass));
             out("" +
                 "//WARNING: %s(...) is skipped\n" +
@@ -1603,7 +1605,7 @@ public class ParserGenerator {
   }
 
 
-  private void generatePsiAccessor(BnfRule rule, RuleMethodsHelper.MethodInfo methodInfo, boolean intf) {
+  private void generatePsiAccessor(BnfRule rule, RuleMethodsHelper.MethodInfo methodInfo, boolean intf, boolean mixedAST) {
     RuleGraphHelper.Cardinality type = methodInfo.cardinality;
     boolean isToken = methodInfo.rule == null;
 
@@ -1624,13 +1626,13 @@ public class ParserGenerator {
     String tail = intf ? "();" : "() {";
     out((intf ? "" : "public ") + (many ? myShortener.fun(CommonClassNames.JAVA_UTIL_LIST) + "<" : "") + className + (many ? "> " : " ") + getterName + tail);
     if (!intf) {
-      out("return " + generatePsiAccessorImplCall(rule, methodInfo) + ";");
+      out("return " + generatePsiAccessorImplCall(rule, methodInfo, mixedAST) + ";");
       out("}");
     }
     newLine();
   }
 
-  private String generatePsiAccessorImplCall(@NotNull BnfRule rule, @NotNull RuleMethodsHelper.MethodInfo methodInfo) {
+  private String generatePsiAccessorImplCall(@NotNull BnfRule rule, @NotNull RuleMethodsHelper.MethodInfo methodInfo, boolean mixedAST) {
     boolean isToken = methodInfo.rule == null;
 
     RuleGraphHelper.Cardinality type = methodInfo.cardinality;
@@ -1641,7 +1643,7 @@ public class ParserGenerator {
                       myRulesStubNames.get(methodInfo.rule.getName()) != null;
     String result;
     // todo REMOVEME. Keep old generation logic for a while.
-    if (!myMixedASTandPSI && myRulesStubNames.isEmpty()) {
+    if (!mixedAST && myRulesStubNames.isEmpty()) {
       if (isToken) {
         return (type == REQUIRED ? "findNotNullChildByType" : "findChildByType") +
                "(" + getElementType(methodInfo.path) + ")";
@@ -1654,7 +1656,7 @@ public class ParserGenerator {
     }
     // new logic
     if (isToken) {
-      String getterName = myMixedASTandPSI ? "findPsiChildByType" : "findChildByType";
+      String getterName = mixedAST ? "findPsiChildByType" : "findChildByType";
       result = getterName + "(" + getElementType(methodInfo.path) + ")";
     }
     else {
@@ -1664,7 +1666,7 @@ public class ParserGenerator {
                           many ? "getChildrenOfTypeAsList" : "getChildOfType";
       result = String.format("%s.%s(this, %s.class)", myShortener.fun(myPsiTreeUtilClass), getterName, className);
     }
-    return required && !myMixedASTandPSI ? "notNullChild(" + result + ")" : result;
+    return required && !mixedAST ? "notNullChild(" + result + ")" : result;
   }
 
   private String getAccessorType(@NotNull BnfRule rule) {
@@ -1677,7 +1679,7 @@ public class ParserGenerator {
     }
   }
 
-  private void generateUserPsiAccessors(BnfRule startRule, RuleMethodsHelper.MethodInfo methodInfo, boolean intf) {
+  private void generateUserPsiAccessors(BnfRule startRule, RuleMethodsHelper.MethodInfo methodInfo, boolean intf, boolean mixedAST) {
     StringBuilder sb = new StringBuilder();
     BnfRule targetRule = startRule;
     RuleGraphHelper.Cardinality cardinality = REQUIRED;
@@ -1728,7 +1730,7 @@ public class ParserGenerator {
         targetCall = targetInfo.generateGetterName() + "()";
       }
       else {
-        targetCall = generatePsiAccessorImplCall(startRule, targetInfo);
+        targetCall = generatePsiAccessorImplCall(startRule, targetInfo, mixedAST);
       }
       sb.append(context).append(targetCall).append(";\n");
 

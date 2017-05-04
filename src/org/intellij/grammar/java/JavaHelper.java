@@ -263,12 +263,12 @@ public abstract class JavaHelper {
       if (!(element instanceof PsiModifierListOwner)) return super.getAnnotations(element);
       PsiModifierList modifierList = ((PsiModifierListOwner)element).getModifierList();
       if (modifierList == null) return ContainerUtilRt.emptyList();
-      List<String> strings = new ArrayList<>();
+      List<String> result = new ArrayList<>();
       for (PsiAnnotation annotation : modifierList.getAnnotations()) {
         if (annotation.getParameterList().getAttributes().length > 0) continue;
-        strings.add(annotation.getQualifiedName());
+        ContainerUtil.addIfNotNull(result, annotation.getQualifiedName());
       }
-      return strings;
+      return result;
     }
   }
 
@@ -384,7 +384,7 @@ public abstract class JavaHelper {
       List<String> result = new ArrayList<>(annotations.length);
       for (Annotation annotation : annotations) {
         Class<? extends Annotation> annotationType = annotation.annotationType(); // todo parameters?
-        result.add(annotationType.getCanonicalName());
+        ContainerUtil.addIfNotNull(result, annotationType.getCanonicalName());
       }
       return result;
     }

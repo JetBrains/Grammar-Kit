@@ -116,9 +116,7 @@ public abstract class JavaHelper {
 
   private static boolean acceptsModifiers(int modifiers, MethodType methodType) {
     return !Modifier.isAbstract(modifiers) &&
-           (Modifier.isPublic(modifiers) ||
-            !(Modifier.isPrivate(modifiers) || Modifier.isProtected(modifiers)) ||
-            Modifier.isProtected(modifiers) && methodType == MethodType.CONSTRUCTOR);
+           !(methodType == MethodType.CONSTRUCTOR && Modifier.isPrivate(modifiers));
   }
 
   private static class PsiHelper extends AsmHelper {
@@ -226,9 +224,7 @@ public abstract class JavaHelper {
       PsiModifierList modifierList = method.getModifierList();
       return (methodType == MethodType.STATIC) == modifierList.hasModifierProperty(PsiModifier.STATIC) &&
              !modifierList.hasModifierProperty(PsiModifier.ABSTRACT) &&
-             (modifierList.hasModifierProperty(PsiModifier.PUBLIC) ||
-              !(modifierList.hasModifierProperty(PsiModifier.PROTECTED) || modifierList.hasModifierProperty(PsiModifier.PRIVATE)) ||
-              methodType == MethodType.CONSTRUCTOR && modifierList.hasModifierProperty(PsiModifier.PROTECTED));
+             !(methodType == MethodType.CONSTRUCTOR && modifierList.hasModifierProperty(PsiModifier.PROTECTED));
     }
 
     @NotNull

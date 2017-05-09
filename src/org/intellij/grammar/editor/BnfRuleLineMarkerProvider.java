@@ -104,7 +104,8 @@ public class BnfRuleLineMarkerProvider extends RelatedItemLineMarkerProvider {
     String parserClass = ParserGeneratorUtil.getAttribute(rule, KnownAttribute.PARSER_CLASS);
     if (StringUtil.isEmpty(parserClass)) return null;
     JavaHelper helper = JavaHelper.getJavaHelper(element);
-    List<NavigatablePsiElement> methods = helper.findClassMethods(parserClass, JavaHelper.MethodType.STATIC, GrammarUtil.getMethodName(rule, element), -1);
+    List<NavigatablePsiElement> methods = helper.findClassMethods(
+      parserClass, JavaHelper.MethodType.STATIC, GrammarUtil.getMethodName(rule, element), -1);
     return ContainerUtil.getFirstItem(methods);
   }
 }

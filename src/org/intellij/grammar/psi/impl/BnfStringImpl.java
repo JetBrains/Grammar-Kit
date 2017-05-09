@@ -179,15 +179,19 @@ public abstract class BnfStringImpl extends BnfExpressionImpl implements BnfStri
       BnfRule thisRule = PsiTreeUtil.getParentOfType(thisAttrs, BnfRule.class);
 
       String thisAttrName = thisAttr.getName();
+      KnownAttribute knownAttribute = KnownAttribute.getAttribute(thisAttrName);
+
       // collect priority patterns
       List<Pattern> otherPatterns = new SmartList<>();
-      for (BnfAttr attr : thisAttrs.getAttrList()) {
-        if (attr == thisAttr) break;
-        if (thisAttrName.equals(attr.getName())) {
-          BnfAttrPattern attrPattern = attr.getAttrPattern();
-          BnfLiteralExpression expression = attrPattern != null ? attrPattern.getLiteralExpression() : null;
-          Pattern p = expression == null ? null : getPattern(expression);
-          if (p != null) otherPatterns.add(p);
+      if (knownAttribute != null && !(knownAttribute.getDefaultValue() instanceof KnownAttribute.ListValue)) {
+        for (BnfAttr attr : thisAttrs.getAttrList()) {
+          if (attr == thisAttr) break;
+          if (thisAttrName.equals(attr.getName())) {
+            BnfAttrPattern attrPattern = attr.getAttrPattern();
+            BnfLiteralExpression expression = attrPattern != null ? attrPattern.getLiteralExpression() : null;
+            Pattern p = expression == null ? null : getPattern(expression);
+            if (p != null) otherPatterns.add(p);
+          }
         }
       }
 
@@ -205,7 +209,7 @@ public abstract class BnfStringImpl extends BnfExpressionImpl implements BnfStri
           result.add(rule);
         }
       }
-      if (KnownAttribute.getAttribute(thisAttrName) == KnownAttribute.PIN) {
+      if (knownAttribute == KnownAttribute.PIN) {
         Set<String> visited = ContainerUtilRt.newHashSet();
         for (Object o : thisRule != null ? rules : ContainerUtil.newArrayList(result)) {
           BnfRule rule = (BnfRule)o;

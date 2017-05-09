@@ -9,6 +9,8 @@
   tokens=[OP_MUL="*" OP_DIV="/" SLASH='\' id='regexp:A' number='regexp:B' notspace='regexp:[^{}-]*']
   elementTypeClass("root_.*")="sample.MyRootType"
   elementTypeFactory(".*_expr")="sample.MyTypeFactory.createExprType"
+
+  methods("expr")=[missing]
 }
 root ::= root_a | root_b | root_c | root_d
 external root_a ::= parseGrammar grammar_element

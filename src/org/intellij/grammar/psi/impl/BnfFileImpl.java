@@ -18,6 +18,7 @@ package org.intellij.grammar.psi.impl;
 
 import com.intellij.extapi.psi.PsiFileBase;
 import com.intellij.openapi.fileTypes.FileType;
+import com.intellij.openapi.util.Conditions;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.psi.FileViewProvider;
 import com.intellij.psi.util.CachedValue;
@@ -25,6 +26,7 @@ import com.intellij.psi.util.CachedValueProvider;
 import com.intellij.psi.util.CachedValuesManager;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.util.containers.ContainerUtil;
+import com.intellij.util.containers.JBIterable;
 import org.intellij.grammar.BnfFileType;
 import org.intellij.grammar.BnfLanguage;
 import org.intellij.grammar.KnownAttribute;
@@ -81,43 +83,68 @@ public class BnfFileImpl extends PsiFileBase implements BnfFile {
   @Override
   @Nullable
   public BnfAttr findAttribute(@Nullable BnfRule rule, @NotNull KnownAttribute<?> knownAttribute, @Nullable String match) {
-    AttributeInfo result = findAttributeInfo(rule, knownAttribute, match);
+    AttributeInfo result = getMatchingAttributes(rule, knownAttribute, match).first();
     if (result == null) return null;
     return PsiTreeUtil.getParentOfType(findElementAt(result.attrOffset), BnfAttr.class);
   }
 
   public <T> T findAttributeValue(@Nullable BnfRule rule, @NotNull KnownAttribute<T> knownAttribute, @Nullable String match) {
-    AttributeInfo result = findAttributeInfo(rule, knownAttribute, match);
-    return result == null ? knownAttribute.getDefaultValue() : knownAttribute.ensureValue(result.value);
+    T combined = null;
+    boolean copied = false;
+    for (AttributeInfo info : getMatchingAttributes(rule, knownAttribute, match)) {
+      T cur = knownAttribute.ensureValue(info.value);
+      if (combined != null && info.pattern == null) continue;
+      if (knownAttribute == KnownAttribute.PIN && match != null &&
+          info.pattern == null && !info.global && SUB_EXPRESSION.matcher(match).matches()) {
+        // do not pin nested sequences for local pin=N
+        return null;
+      }
+      if (!(cur instanceof KnownAttribute.ListValue)) {
+        return cur;
+      }
+      if (combined == null) combined = cur;
+      else if (copied) ((KnownAttribute.ListValue)combined).addAll((KnownAttribute.ListValue)cur);
+      else {
+        copied = true;
+        KnownAttribute.ListValue copy = new KnownAttribute.ListValue();
+        copy.addAll((KnownAttribute.ListValue)combined);
+        copy.addAll((KnownAttribute.ListValue)cur);
+        combined = (T)copy;
+      }
+    }
+    return combined != null ? combined : knownAttribute.getDefaultValue();
   }
 
   private static final Pattern SUB_EXPRESSION = Pattern.compile(".*(_\\d+)+");
-  @Nullable
-  public <T> AttributeInfo findAttributeInfo(@Nullable BnfRule rule, @NotNull KnownAttribute<T> knownAttribute, @Nullable String match) {
+
+  @NotNull
+  private <T> JBIterable<AttributeInfo> getMatchingAttributes(@Nullable BnfRule rule,
+                                                              @NotNull KnownAttribute<T> knownAttribute,
+                                                              @Nullable String match) {
     List<AttributeInfo> list = myAttributeValues.getValue().get(knownAttribute.getName());
-    if (list == null) return null;
-    BnfAttrs globalAttrs = rule == null? ContainerUtil.getFirstItem(getAttributes()) : null;
-    int offset = rule == null ? globalAttrs == null? 0 : globalAttrs.getTextRange().getEndOffset() : rule.getTextRange().getEndOffset();
-    if (offset == 0) return null;
+    if (list == null) return JBIterable.empty();
+    BnfAttrs globalAttrs = rule == null ? ContainerUtil.getFirstItem(getAttributes()) : null;
+    int offset = rule == null ?
+                 globalAttrs == null ? 0 :
+                 globalAttrs.getTextRange().getEndOffset() :
+                 rule.getTextRange().getEndOffset();
+    if (offset == 0) return JBIterable.empty();
     AttributeInfo key = new AttributeInfo(0, offset, true, null, null);
     int index = Collections.binarySearch(list, key);
-    int ruleStartOffset = rule == null? offset : rule.getTextRange().getStartOffset();
-    String toMatch = match == null ? rule == null? null : rule.getName() : match;
-    AttributeInfo result = null;
-    for (int i= Math.min(list.size() - 1, index < 0 ? -index - 1 : index); i >=0; i--) {
-      AttributeInfo info = list.get(i);
-      if (offset < info.offset || !info.global && ruleStartOffset > info.offset) continue;
-      if (info.pattern == null ||
-          toMatch != null && info.pattern.matcher(toMatch).matches()) {
-        result = info;
-        break;
-      }
-    }
-    if (result != null && result.pattern == null && match != null && SUB_EXPRESSION.matcher(match).matches()) {
-      // do not pin nested sequences
-      result = null;
-    }
-    return result;
+    int ruleStartOffset = rule == null ? offset : rule.getTextRange().getStartOffset();
+    String toMatch = match == null ? rule == null ? null : rule.getName() : match;
+
+    return JBIterable.generate(
+      Math.min(list.size() - 1, index < 0 ? -index - 1 : index),
+      i -> i > 0 ? i - 1 : null)
+      .map(i -> {
+        AttributeInfo info = list.get(i);
+        if (offset < info.offset || !info.global && ruleStartOffset > info.offset) return null;
+        if (info.pattern == null || toMatch != null && info.pattern.matcher(toMatch).matches()) {
+          return info;
+        }
+        return null;
+      }).filter(Conditions.notNull());
   }
 
   @NotNull
@@ -191,7 +218,7 @@ public class BnfFileImpl extends PsiFileBase implements BnfFile {
     }
 
     @Override
-    public int compareTo(AttributeInfo o) {
+    public int compareTo(@NotNull AttributeInfo o) {
       return offset - o.offset;
     }
 

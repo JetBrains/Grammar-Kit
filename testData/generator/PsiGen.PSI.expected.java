@@ -260,6 +260,10 @@ public interface XExpr extends XComposite {
   @NotNull
   List<XExpr> getKids();
 
+  //WARNING: missing(...) is skipped
+  //matching missing(XExpr, ...)
+  //methods are not found in null
+
 }
 // ---- XExternalType.java -----------------
 //header.txt

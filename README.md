@@ -227,6 +227,14 @@ java -jar expression-console-sample.jar
 
 Change log
 ==========
+1.5.2-snapshot
+
+* Generator: disable first-check in presence of external predicates
+* Generator: support mixed AST-PSI trees (psi.impl.source.tree.CompositePsiElement inheritors)
+* Generator: add generate=[psi-classes-map="yes" option
+* Generator: alert of missing psi implementation methods #155
+* Generator: merge multiple list-valued attributes, e.g. "implements", "methods"
+
 1.5.1
 
 * RGH: rule-graph analysis fix for trivial rules (#153)

@@ -227,7 +227,7 @@ java -jar expression-console-sample.jar
 
 Change log
 ==========
-1.5.2-snapshot
+1.5.2
 
 * Generator: disable first-check in presence of external predicates
 * Generator: support mixed AST-PSI trees (psi.impl.source.tree.CompositePsiElement inheritors)

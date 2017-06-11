@@ -1,6 +1,6 @@
 <idea-plugin url="https://github.com/JetBrains/Grammar-Kit">
   <id>org.jetbrains.idea.grammar</id>
-  <version>1.5.2</version>
+  <version>1.5.3-SNAPSHOT</version>
   <vendor email="gregory.shrago@jetbrains.com">Greg Shrago</vendor>
   <idea-version since-build="171" until-build="173.*"/>
 
@@ -14,11 +14,7 @@
   <change-notes>
     <![CDATA[
     <ul>
-      <li>Generator: disable first-check in presence of external predicates</li>
-      <li>Generator: support mixed AST-PSI trees (psi.impl.source.tree.CompositePsiElement inheritors)</li>
-      <li>Generator: add generate=[psi-classes-map="yes" option</li>
-      <li>Generator: alert of missing psi implementation methods #155</li>
-      <li>Generator: merge multiple list-valued attributes, e.g. "implements", "methods"</li>
+      <li>Generator: Generator: support dash-separated and angle-quoted rules</li>
     </ul>
     <a href="https://github.com/JetBrains/Grammar-Kit#change-log">Full change log...</a>
     ]]>

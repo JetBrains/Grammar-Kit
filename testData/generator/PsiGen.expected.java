@@ -30,6 +30,12 @@ public class PsiGen implements PsiParser, LightPsiParser {
     else if (root_ == GRAMMAR_ELEMENT) {
       result_ = grammar_element(builder_, 0);
     }
+    else if (root_ == INCLUDE__SECTION__ALT) {
+      result_ = include__section__alt(builder_, 0);
+    }
+    else if (root_ == INCLUDE_SECTION) {
+      result_ = include_section(builder_, 0);
+    }
     else if (root_ == MUL_EXPR) {
       result_ = mul_expr(builder_, 0);
     }
@@ -227,6 +233,46 @@ public class PsiGen implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
+  // id number
+  public static boolean include__section__alt(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "include__section__alt")) return false;
+    boolean result_;
+    Marker marker_ = enter_section_(builder_, level_, _NONE_, INCLUDE__SECTION__ALT, "<include section alt>");
+    result_ = consumeTokens(builder_, 0, ID, NUMBER);
+    exit_section_(builder_, level_, marker_, result_, false, include_section_recover__parser_);
+    return result_;
+  }
+
+  /* ********************************************************** */
+  // id number include-section <include (section) alt>
+  public static boolean include_section(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "include_section")) return false;
+    boolean result_;
+    Marker marker_ = enter_section_(builder_, level_, _NONE_, INCLUDE_SECTION, "<include section>");
+    result_ = consumeTokens(builder_, 0, ID, NUMBER);
+    result_ = result_ && include_section(builder_, level_ + 1);
+    result_ = result_ && include__section__alt(builder_, level_ + 1);
+    exit_section_(builder_, level_, marker_, result_, false, include_section_recover__parser_);
+    return result_;
+  }
+
+  /* ********************************************************** */
+  // !()
+  static boolean include_section_recover_(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "include_section_recover_")) return false;
+    boolean result_;
+    Marker marker_ = enter_section_(builder_, level_, _NOT_);
+    result_ = !include_section_recover__0(builder_, level_ + 1);
+    exit_section_(builder_, level_, marker_, result_, false, null);
+    return result_;
+  }
+
+  // ()
+  private static boolean include_section_recover__0(PsiBuilder builder_, int level_) {
+    return true;
+  }
+
+  /* ********************************************************** */
   // <<p>> +
   static boolean listOf(PsiBuilder builder_, int level_, Parser p) {
     if (!recursion_guard_(builder_, level_, "listOf")) return false;
@@ -320,6 +366,11 @@ public class PsiGen implements PsiParser, LightPsiParser {
   final static Parser grammar_element_parser_ = new Parser() {
     public boolean parse(PsiBuilder builder_, int level_) {
       return grammar_element(builder_, level_ + 1);
+    }
+  };
+  final static Parser include_section_recover__parser_ = new Parser() {
+    public boolean parse(PsiBuilder builder_, int level_) {
+      return include_section_recover_(builder_, level_ + 1);
     }
   };
 }

@@ -72,7 +72,7 @@ public class ExpressionGeneratorHelper {
     for (String opCall : sortedOpCalls) {
       OperatorInfo operator = ContainerUtil.getFirstItem(findOperators(opCalls.get(opCall), OperatorType.ATOM, OperatorType.PREFIX));
       if (operator == null) continue;
-      String nodeCall = g.generateNodeCall(operator.rule, null, getFuncName(operator.rule));
+      String nodeCall = g.generateNodeCall(operator.rule, null, operator.rule.getName());
       g.out("%s%s = %s;", first ? "" : format("if (!%s) ", g.N.result), g.N.result, nodeCall);
       first = false;
     }

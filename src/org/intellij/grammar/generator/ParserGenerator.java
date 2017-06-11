@@ -514,7 +514,7 @@ public class ParserGenerator {
       if (info != null && info.rootRule != rule) continue;
       String elementType = getElementType(rule);
       out("%sif (%s == %s) {", first ? "" : "else ", N.root, elementType);
-      String nodeCall = generateNodeCall(rule, null, getFuncName(rule));
+      String nodeCall = generateNodeCall(rule, null, rule.getName());
       out("%s = %s;", N.result, nodeCall.replace(format("%s + 1", N.level), "0"));
       out("}");
       if (first) first = false;

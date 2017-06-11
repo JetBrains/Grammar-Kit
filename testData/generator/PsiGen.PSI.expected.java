@@ -21,6 +21,8 @@ public interface GeneratedTypes {
   IElementType GRAMMAR_ELEMENT = new IElementType("GRAMMAR_ELEMENT", null);
   IElementType IDENTIFIER = new IElementType("IDENTIFIER", null);
   IElementType ID_EXPR = new IElementType("ID_EXPR", null);
+  IElementType INCLUDE_SECTION = new IElementType("INCLUDE_SECTION", null);
+  IElementType INCLUDE__SECTION__ALT = new IElementType("INCLUDE__SECTION__ALT", null);
   IElementType ITEM_EXPR = MyTypeFactory.createExprType("ITEM_EXPR");
   IElementType LEFT_SHADOW = new IElementType("LEFT_SHADOW", null);
   IElementType LEFT_SHADOW_TEST = new IElementType("LEFT_SHADOW_TEST", null);
@@ -76,6 +78,12 @@ public interface GeneratedTypes {
       }
       else if (type == ID_EXPR) {
         return new XExternalType2Impl(node);
+      }
+      else if (type == INCLUDE_SECTION) {
+        return new XIncludeSectionImpl(node);
+      }
+      else if (type == INCLUDE__SECTION__ALT) {
+        return new XIncludeSectionAltImpl(node);
       }
       else if (type == ITEM_EXPR) {
         return new XItemExprImpl(node);
@@ -319,6 +327,46 @@ public interface XIdentifier extends XComposite {
 
   @NotNull
   PsiElement getId();
+
+}
+// ---- XIncludeSectionAlt.java -----------------
+//header.txt
+package generated.psi;
+
+import java.util.List;
+import org.jetbrains.annotations.*;
+import com.intellij.psi.PsiElement;
+
+public interface XIncludeSectionAlt extends XComposite {
+
+  @NotNull
+  PsiElement getId();
+
+  @NotNull
+  PsiElement getNumber();
+
+}
+// ---- XIncludeSection.java -----------------
+//header.txt
+package generated.psi;
+
+import java.util.List;
+import org.jetbrains.annotations.*;
+import com.intellij.psi.PsiElement;
+
+public interface XIncludeSection extends XComposite {
+
+  @NotNull
+  XIncludeSectionAlt getIncludeSectionAlt();
+
+  @NotNull
+  XIncludeSection getIncludeSection();
+
+  @NotNull
+  PsiElement getId();
+
+  @NotNull
+  PsiElement getNumber();
 
 }
 // ---- XItemExpr.java -----------------
@@ -1000,6 +1048,102 @@ public class XIdentifierImpl extends ASTWrapperPsiElement implements XIdentifier
   }
 
 }
+// ---- XIncludeSectionAltImpl.java -----------------
+//header.txt
+package generated.psi.impl;
+
+import java.util.List;
+import org.jetbrains.annotations.*;
+import com.intellij.lang.ASTNode;
+import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiElementVisitor;
+import com.intellij.psi.util.PsiTreeUtil;
+import static generated.GeneratedTypes.*;
+import com.intellij.extapi.psi.ASTWrapperPsiElement;
+import generated.psi.*;
+
+public class XIncludeSectionAltImpl extends ASTWrapperPsiElement implements XIncludeSectionAlt {
+
+  public XIncludeSectionAltImpl(ASTNode node) {
+    super(node);
+  }
+
+  public void accept(@NotNull XVisitor visitor) {
+    visitor.visitIncludeSectionAlt(this);
+  }
+
+  public void accept(@NotNull PsiElementVisitor visitor) {
+    if (visitor instanceof XVisitor) accept((XVisitor)visitor);
+    else super.accept(visitor);
+  }
+
+  @Override
+  @NotNull
+  public PsiElement getId() {
+    return findNotNullChildByType(ID);
+  }
+
+  @Override
+  @NotNull
+  public PsiElement getNumber() {
+    return findNotNullChildByType(NUMBER);
+  }
+
+}
+// ---- XIncludeSectionImpl.java -----------------
+//header.txt
+package generated.psi.impl;
+
+import java.util.List;
+import org.jetbrains.annotations.*;
+import com.intellij.lang.ASTNode;
+import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiElementVisitor;
+import com.intellij.psi.util.PsiTreeUtil;
+import static generated.GeneratedTypes.*;
+import com.intellij.extapi.psi.ASTWrapperPsiElement;
+import generated.psi.*;
+
+public class XIncludeSectionImpl extends ASTWrapperPsiElement implements XIncludeSection {
+
+  public XIncludeSectionImpl(ASTNode node) {
+    super(node);
+  }
+
+  public void accept(@NotNull XVisitor visitor) {
+    visitor.visitIncludeSection(this);
+  }
+
+  public void accept(@NotNull PsiElementVisitor visitor) {
+    if (visitor instanceof XVisitor) accept((XVisitor)visitor);
+    else super.accept(visitor);
+  }
+
+  @Override
+  @NotNull
+  public XIncludeSectionAlt getIncludeSectionAlt() {
+    return findNotNullChildByClass(XIncludeSectionAlt.class);
+  }
+
+  @Override
+  @NotNull
+  public XIncludeSection getIncludeSection() {
+    return findNotNullChildByClass(XIncludeSection.class);
+  }
+
+  @Override
+  @NotNull
+  public PsiElement getId() {
+    return findNotNullChildByType(ID);
+  }
+
+  @Override
+  @NotNull
+  public PsiElement getNumber() {
+    return findNotNullChildByType(NUMBER);
+  }
+
+}
 // ---- XItemExprImpl.java -----------------
 //header.txt
 package generated.psi.impl;
@@ -1521,6 +1665,14 @@ public class XVisitor extends PsiElementVisitor {
   }
 
   public void visitIdentifier(@NotNull XIdentifier o) {
+    visitComposite(o);
+  }
+
+  public void visitIncludeSectionAlt(@NotNull XIncludeSectionAlt o) {
+    visitComposite(o);
+  }
+
+  public void visitIncludeSection(@NotNull XIncludeSection o) {
     visitComposite(o);
   }
 

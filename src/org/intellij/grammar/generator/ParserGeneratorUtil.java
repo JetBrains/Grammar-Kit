@@ -186,7 +186,7 @@ public class ParserGeneratorUtil {
     String text = child.getText();
     if (text.equals("true") || text.equals("false")) return Boolean.parseBoolean(text);
     if (text.equals("null")) return NULL;
-    return text;
+    return GrammarUtil.getIdText(child);
   }
 
   public static boolean isTrivialNode(PsiElement element) {
@@ -472,7 +472,8 @@ public class ParserGeneratorUtil {
       return name;
     }
     else {
-      return Case.LOWER.apply(StringUtil.join(NameUtil.splitNameIntoWords(realRule.getName()), " "));
+      String[] parts = NameUtil.splitNameIntoWords(getFuncName(realRule));
+      return Case.LOWER.apply(StringUtil.join(parts, " "));
     }
   }
 

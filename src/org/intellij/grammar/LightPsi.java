@@ -231,6 +231,7 @@ public class LightPsi {
       Extensions.getArea(project).registerExtensionPoint("com.intellij.multiHostInjector", "com.intellij.lang.injection.MultiHostInjector");
       Extensions.getRootArea().registerExtensionPoint("com.intellij.codeInsight.containerProvider",
                                                       "com.intellij.codeInsight.ContainerProvider");
+      Extensions.getRootArea().registerExtensionPoint("com.intellij.metaLanguage", "com.intellij.lang.MetaLanguage");
       Extensions.getRootArea().getExtensionPoint("com.intellij.referencesSearch").registerExtension(new CachesBasedRefSearcher());
       registerApplicationService(project, PsiReferenceService.class, PsiReferenceServiceImpl.class);
       registerApplicationService(project, JobLauncher.class, JobLauncherImpl.class);

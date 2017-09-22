@@ -743,7 +743,7 @@ public class ParserGenerator {
 
     String frameName = !children.isEmpty() && firstNonTrivial && !Rule.isMeta(rule)? quote(getRuleDisplayName(rule, !isPrivate)) : null;
     if (recoverWhile == null && (isRule || firstNonTrivial)) {
-      frameName = generateFirstCheck(rule, frameName, true);
+      frameName = generateFirstCheck(rule, frameName, getAttribute(rule, KnownAttribute.NAME) == null);
     }
 
     PinMatcher pinMatcher = new PinMatcher(rule, type, firstNonTrivial ? rule.getName() : funcName);

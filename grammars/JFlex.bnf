@@ -219,7 +219,7 @@ option_init_throw ::= '%initthrow' java_type_list | <<line '%initthrow{'>> java_
 option_ctor_arg ::= '%ctorarg' java_type id
 option_scan_error ::= '%scanerror' java_type
 option_buffer_size ::= '%buffer' number
-option_include ::= '%include' user_value
+option_include ::= '%include' user_value {name="include"}
 
 option_function ::= '%function' id
 option_integer ::= '%integer' | '%int'

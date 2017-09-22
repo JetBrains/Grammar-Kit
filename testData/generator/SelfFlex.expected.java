@@ -636,7 +636,7 @@ public class JFlexParser implements PsiParser, LightPsiParser {
   // '%16bit'
   public static boolean option_16bit(PsiBuilder builder, int level) {
     if (!recursion_guard_(builder, level, "option_16bit")) return false;
-    if (!nextTokenIs(builder, FLEX_OPT16BIT)) return false;
+    if (!nextTokenIs(builder, "<option>", FLEX_OPT16BIT)) return false;
     boolean result;
     Marker marker = enter_section_(builder, level, _NONE_, FLEX_OPTION, "<option>");
     result = consumeToken(builder, FLEX_OPT16BIT);
@@ -648,7 +648,7 @@ public class JFlexParser implements PsiParser, LightPsiParser {
   // '%7bit'
   public static boolean option_7bit(PsiBuilder builder, int level) {
     if (!recursion_guard_(builder, level, "option_7bit")) return false;
-    if (!nextTokenIs(builder, FLEX_OPT_7BIT)) return false;
+    if (!nextTokenIs(builder, "<option>", FLEX_OPT_7BIT)) return false;
     boolean result;
     Marker marker = enter_section_(builder, level, _NONE_, FLEX_OPTION, "<option>");
     result = consumeToken(builder, FLEX_OPT_7BIT);
@@ -660,7 +660,7 @@ public class JFlexParser implements PsiParser, LightPsiParser {
   // '%abstract'
   public static boolean option_abstract(PsiBuilder builder, int level) {
     if (!recursion_guard_(builder, level, "option_abstract")) return false;
-    if (!nextTokenIs(builder, FLEX_OPT_ABSTRACT)) return false;
+    if (!nextTokenIs(builder, "<option>", FLEX_OPT_ABSTRACT)) return false;
     boolean result;
     Marker marker = enter_section_(builder, level, _NONE_, FLEX_OPTION, "<option>");
     result = consumeToken(builder, FLEX_OPT_ABSTRACT);
@@ -672,7 +672,7 @@ public class JFlexParser implements PsiParser, LightPsiParser {
   // '%apiprivate'
   public static boolean option_api_private(PsiBuilder builder, int level) {
     if (!recursion_guard_(builder, level, "option_api_private")) return false;
-    if (!nextTokenIs(builder, FLEX_OPT_APIPRIVATE)) return false;
+    if (!nextTokenIs(builder, "<option>", FLEX_OPT_APIPRIVATE)) return false;
     boolean result;
     Marker marker = enter_section_(builder, level, _NONE_, FLEX_OPTION, "<option>");
     result = consumeToken(builder, FLEX_OPT_APIPRIVATE);
@@ -684,7 +684,7 @@ public class JFlexParser implements PsiParser, LightPsiParser {
   // '%buffer' number
   public static boolean option_buffer_size(PsiBuilder builder, int level) {
     if (!recursion_guard_(builder, level, "option_buffer_size")) return false;
-    if (!nextTokenIs(builder, FLEX_OPT_BUFFER)) return false;
+    if (!nextTokenIs(builder, "<option>", FLEX_OPT_BUFFER)) return false;
     boolean result, pinned;
     Marker marker = enter_section_(builder, level, _NONE_, FLEX_OPTION, "<option>");
     result = consumeTokens(builder, 1, FLEX_OPT_BUFFER, FLEX_NUMBER);
@@ -708,7 +708,7 @@ public class JFlexParser implements PsiParser, LightPsiParser {
   // '%class' java_type
   public static boolean option_class(PsiBuilder builder, int level) {
     if (!recursion_guard_(builder, level, "option_class")) return false;
-    if (!nextTokenIs(builder, FLEX_OPT_CLASS)) return false;
+    if (!nextTokenIs(builder, "<option>", FLEX_OPT_CLASS)) return false;
     boolean result, pinned;
     Marker marker = enter_section_(builder, level, _NONE_, FLEX_OPTION, "<option>");
     result = consumeToken(builder, FLEX_OPT_CLASS);
@@ -722,7 +722,7 @@ public class JFlexParser implements PsiParser, LightPsiParser {
   // '%char'
   public static boolean option_count_char(PsiBuilder builder, int level) {
     if (!recursion_guard_(builder, level, "option_count_char")) return false;
-    if (!nextTokenIs(builder, FLEX_OPT_CHAR)) return false;
+    if (!nextTokenIs(builder, "<option>", FLEX_OPT_CHAR)) return false;
     boolean result;
     Marker marker = enter_section_(builder, level, _NONE_, FLEX_OPTION, "<option>");
     result = consumeToken(builder, FLEX_OPT_CHAR);
@@ -734,7 +734,7 @@ public class JFlexParser implements PsiParser, LightPsiParser {
   // '%column'
   public static boolean option_count_column(PsiBuilder builder, int level) {
     if (!recursion_guard_(builder, level, "option_count_column")) return false;
-    if (!nextTokenIs(builder, FLEX_OPT_COLUMN)) return false;
+    if (!nextTokenIs(builder, "<option>", FLEX_OPT_COLUMN)) return false;
     boolean result;
     Marker marker = enter_section_(builder, level, _NONE_, FLEX_OPTION, "<option>");
     result = consumeToken(builder, FLEX_OPT_COLUMN);
@@ -746,7 +746,7 @@ public class JFlexParser implements PsiParser, LightPsiParser {
   // '%line'
   public static boolean option_count_line(PsiBuilder builder, int level) {
     if (!recursion_guard_(builder, level, "option_count_line")) return false;
-    if (!nextTokenIs(builder, FLEX_OPT_LINE)) return false;
+    if (!nextTokenIs(builder, "<option>", FLEX_OPT_LINE)) return false;
     boolean result;
     Marker marker = enter_section_(builder, level, _NONE_, FLEX_OPTION, "<option>");
     result = consumeToken(builder, FLEX_OPT_LINE);
@@ -758,7 +758,7 @@ public class JFlexParser implements PsiParser, LightPsiParser {
   // '%ctorarg' java_type id
   public static boolean option_ctor_arg(PsiBuilder builder, int level) {
     if (!recursion_guard_(builder, level, "option_ctor_arg")) return false;
-    if (!nextTokenIs(builder, FLEX_OPT_CTORARG)) return false;
+    if (!nextTokenIs(builder, "<option>", FLEX_OPT_CTORARG)) return false;
     boolean result, pinned;
     Marker marker = enter_section_(builder, level, _NONE_, FLEX_OPTION, "<option>");
     result = consumeToken(builder, FLEX_OPT_CTORARG);
@@ -773,7 +773,7 @@ public class JFlexParser implements PsiParser, LightPsiParser {
   // '%cup'
   public static boolean option_cup(PsiBuilder builder, int level) {
     if (!recursion_guard_(builder, level, "option_cup")) return false;
-    if (!nextTokenIs(builder, FLEX_OPT_CUP)) return false;
+    if (!nextTokenIs(builder, "<option>", FLEX_OPT_CUP)) return false;
     boolean result;
     Marker marker = enter_section_(builder, level, _NONE_, FLEX_OPTION, "<option>");
     result = consumeToken(builder, FLEX_OPT_CUP);
@@ -785,7 +785,7 @@ public class JFlexParser implements PsiParser, LightPsiParser {
   // '%cupdebug'
   public static boolean option_cup_debug(PsiBuilder builder, int level) {
     if (!recursion_guard_(builder, level, "option_cup_debug")) return false;
-    if (!nextTokenIs(builder, FLEX_OPT_CUPDEBUG)) return false;
+    if (!nextTokenIs(builder, "<option>", FLEX_OPT_CUPDEBUG)) return false;
     boolean result;
     Marker marker = enter_section_(builder, level, _NONE_, FLEX_OPTION, "<option>");
     result = consumeToken(builder, FLEX_OPT_CUPDEBUG);
@@ -797,7 +797,7 @@ public class JFlexParser implements PsiParser, LightPsiParser {
   // '%cupsym' java_type
   public static boolean option_cup_sym(PsiBuilder builder, int level) {
     if (!recursion_guard_(builder, level, "option_cup_sym")) return false;
-    if (!nextTokenIs(builder, FLEX_OPT_CUPSYM)) return false;
+    if (!nextTokenIs(builder, "<option>", FLEX_OPT_CUPSYM)) return false;
     boolean result, pinned;
     Marker marker = enter_section_(builder, level, _NONE_, FLEX_OPTION, "<option>");
     result = consumeToken(builder, FLEX_OPT_CUPSYM);
@@ -811,7 +811,7 @@ public class JFlexParser implements PsiParser, LightPsiParser {
   // '%debug'
   public static boolean option_debug(PsiBuilder builder, int level) {
     if (!recursion_guard_(builder, level, "option_debug")) return false;
-    if (!nextTokenIs(builder, FLEX_OPT_DEBUG)) return false;
+    if (!nextTokenIs(builder, "<option>", FLEX_OPT_DEBUG)) return false;
     boolean result;
     Marker marker = enter_section_(builder, level, _NONE_, FLEX_OPTION, "<option>");
     result = consumeToken(builder, FLEX_OPT_DEBUG);
@@ -837,7 +837,7 @@ public class JFlexParser implements PsiParser, LightPsiParser {
   // '%eofclose' ['false']
   public static boolean option_eof_close(PsiBuilder builder, int level) {
     if (!recursion_guard_(builder, level, "option_eof_close")) return false;
-    if (!nextTokenIs(builder, FLEX_OPT_EOFCLOSE)) return false;
+    if (!nextTokenIs(builder, "<option>", FLEX_OPT_EOFCLOSE)) return false;
     boolean result, pinned;
     Marker marker = enter_section_(builder, level, _NONE_, FLEX_OPTION, "<option>");
     result = consumeToken(builder, FLEX_OPT_EOFCLOSE);
@@ -909,7 +909,7 @@ public class JFlexParser implements PsiParser, LightPsiParser {
   // '%extends' java_type
   public static boolean option_extends(PsiBuilder builder, int level) {
     if (!recursion_guard_(builder, level, "option_extends")) return false;
-    if (!nextTokenIs(builder, FLEX_OPT_EXTENDS)) return false;
+    if (!nextTokenIs(builder, "<option>", FLEX_OPT_EXTENDS)) return false;
     boolean result, pinned;
     Marker marker = enter_section_(builder, level, _NONE_, FLEX_OPTION, "<option>");
     result = consumeToken(builder, FLEX_OPT_EXTENDS);
@@ -923,7 +923,7 @@ public class JFlexParser implements PsiParser, LightPsiParser {
   // '%final'
   public static boolean option_final(PsiBuilder builder, int level) {
     if (!recursion_guard_(builder, level, "option_final")) return false;
-    if (!nextTokenIs(builder, FLEX_OPT_FINAL)) return false;
+    if (!nextTokenIs(builder, "<option>", FLEX_OPT_FINAL)) return false;
     boolean result;
     Marker marker = enter_section_(builder, level, _NONE_, FLEX_OPTION, "<option>");
     result = consumeToken(builder, FLEX_OPT_FINAL);
@@ -948,7 +948,7 @@ public class JFlexParser implements PsiParser, LightPsiParser {
   // '%function' id
   public static boolean option_function(PsiBuilder builder, int level) {
     if (!recursion_guard_(builder, level, "option_function")) return false;
-    if (!nextTokenIs(builder, FLEX_OPT_FUNCTION)) return false;
+    if (!nextTokenIs(builder, "<option>", FLEX_OPT_FUNCTION)) return false;
     boolean result, pinned;
     Marker marker = enter_section_(builder, level, _NONE_, FLEX_OPTION, "<option>");
     result = consumeTokens(builder, 1, FLEX_OPT_FUNCTION, FLEX_ID);
@@ -974,7 +974,7 @@ public class JFlexParser implements PsiParser, LightPsiParser {
   // '%implements' java_type_list
   public static boolean option_implements(PsiBuilder builder, int level) {
     if (!recursion_guard_(builder, level, "option_implements")) return false;
-    if (!nextTokenIs(builder, FLEX_OPT_IMPLEMENTS)) return false;
+    if (!nextTokenIs(builder, "<option>", FLEX_OPT_IMPLEMENTS)) return false;
     boolean result, pinned;
     Marker marker = enter_section_(builder, level, _NONE_, FLEX_OPTION, "<option>");
     result = consumeToken(builder, FLEX_OPT_IMPLEMENTS);
@@ -988,9 +988,9 @@ public class JFlexParser implements PsiParser, LightPsiParser {
   // '%include' user_value
   public static boolean option_include(PsiBuilder builder, int level) {
     if (!recursion_guard_(builder, level, "option_include")) return false;
-    if (!nextTokenIs(builder, FLEX_OPT_INCLUDE)) return false;
+    if (!nextTokenIs(builder, "<include>", FLEX_OPT_INCLUDE)) return false;
     boolean result, pinned;
-    Marker marker = enter_section_(builder, level, _NONE_, FLEX_OPTION, "<option>");
+    Marker marker = enter_section_(builder, level, _NONE_, FLEX_OPTION, "<include>");
     result = consumeToken(builder, FLEX_OPT_INCLUDE);
     pinned = result; // pin = 1
     result = result && user_value(builder, level + 1);
@@ -1066,7 +1066,7 @@ public class JFlexParser implements PsiParser, LightPsiParser {
   // '%intwrap'
   public static boolean option_intwrap(PsiBuilder builder, int level) {
     if (!recursion_guard_(builder, level, "option_intwrap")) return false;
-    if (!nextTokenIs(builder, FLEX_OPT_INTWRAP)) return false;
+    if (!nextTokenIs(builder, "<option>", FLEX_OPT_INTWRAP)) return false;
     boolean result;
     Marker marker = enter_section_(builder, level, _NONE_, FLEX_OPTION, "<option>");
     result = consumeToken(builder, FLEX_OPT_INTWRAP);
@@ -1091,7 +1091,7 @@ public class JFlexParser implements PsiParser, LightPsiParser {
   // '%public'
   public static boolean option_public(PsiBuilder builder, int level) {
     if (!recursion_guard_(builder, level, "option_public")) return false;
-    if (!nextTokenIs(builder, FLEX_OPT_PUBLIC)) return false;
+    if (!nextTokenIs(builder, "<option>", FLEX_OPT_PUBLIC)) return false;
     boolean result;
     Marker marker = enter_section_(builder, level, _NONE_, FLEX_OPTION, "<option>");
     result = consumeToken(builder, FLEX_OPT_PUBLIC);
@@ -1103,7 +1103,7 @@ public class JFlexParser implements PsiParser, LightPsiParser {
   // '%scanerror' java_type
   public static boolean option_scan_error(PsiBuilder builder, int level) {
     if (!recursion_guard_(builder, level, "option_scan_error")) return false;
-    if (!nextTokenIs(builder, FLEX_OPT_SCANERROR)) return false;
+    if (!nextTokenIs(builder, "<option>", FLEX_OPT_SCANERROR)) return false;
     boolean result, pinned;
     Marker marker = enter_section_(builder, level, _NONE_, FLEX_OPTION, "<option>");
     result = consumeToken(builder, FLEX_OPT_SCANERROR);
@@ -1117,7 +1117,7 @@ public class JFlexParser implements PsiParser, LightPsiParser {
   // '%standalone'
   public static boolean option_standalone(PsiBuilder builder, int level) {
     if (!recursion_guard_(builder, level, "option_standalone")) return false;
-    if (!nextTokenIs(builder, FLEX_OPT_STANDALONE)) return false;
+    if (!nextTokenIs(builder, "<option>", FLEX_OPT_STANDALONE)) return false;
     boolean result;
     Marker marker = enter_section_(builder, level, _NONE_, FLEX_OPTION, "<option>");
     result = consumeToken(builder, FLEX_OPT_STANDALONE);
@@ -1151,7 +1151,7 @@ public class JFlexParser implements PsiParser, LightPsiParser {
   // '%type' java_type
   public static boolean option_type(PsiBuilder builder, int level) {
     if (!recursion_guard_(builder, level, "option_type")) return false;
-    if (!nextTokenIs(builder, FLEX_OPT_TYPE)) return false;
+    if (!nextTokenIs(builder, "<option>", FLEX_OPT_TYPE)) return false;
     boolean result, pinned;
     Marker marker = enter_section_(builder, level, _NONE_, FLEX_OPTION, "<option>");
     result = consumeToken(builder, FLEX_OPT_TYPE);
@@ -1165,7 +1165,7 @@ public class JFlexParser implements PsiParser, LightPsiParser {
   // '%unicode' [number | version]
   public static boolean option_unicode(PsiBuilder builder, int level) {
     if (!recursion_guard_(builder, level, "option_unicode")) return false;
-    if (!nextTokenIs(builder, FLEX_OPT_UNICODE)) return false;
+    if (!nextTokenIs(builder, "<option>", FLEX_OPT_UNICODE)) return false;
     boolean result, pinned;
     Marker marker = enter_section_(builder, level, _NONE_, FLEX_OPTION, "<option>");
     result = consumeToken(builder, FLEX_OPT_UNICODE);

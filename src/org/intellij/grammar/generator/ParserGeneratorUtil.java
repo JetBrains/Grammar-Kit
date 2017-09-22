@@ -472,7 +472,7 @@ public class ParserGeneratorUtil {
     BnfRule realRule = rule;
     if (name != null) {
       realRule = ((BnfFile)rule.getContainingFile()).getRule(name);
-      if (realRule != null) name = getAttribute(realRule, KnownAttribute.NAME);
+      if (realRule != null && realRule != rule) name = getAttribute(realRule, KnownAttribute.NAME);
     }
     if (name != null || (!force && realRule == rule)) {
       return name;

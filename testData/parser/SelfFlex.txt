@@ -1609,6 +1609,15 @@ BnfFile:SelfFlex.bnf
         PsiWhiteSpace(' ')
         BNF_REFERENCE_OR_TOKEN: user_value
           PsiElement(id)('user_value')
+      PsiWhiteSpace(' ')
+      BNF_ATTRS
+        PsiElement({)('{')
+        BNF_ATTR:name
+          PsiElement(id)('name')
+          PsiElement(=)('=')
+          BNF_STRING_LITERAL_EXPRESSION: "include"
+            PsiElement(string)('"include"')
+        PsiElement(})('}')
     PsiWhiteSpace('\n\n')
     BNF_RULE:option_function
       PsiElement(id)('option_function')

@@ -16,10 +16,10 @@
 
 package org.intellij.jflex.psi.impl;
 
-import com.intellij.extapi.psi.ASTWrapperPsiElement;
-import com.intellij.lang.ASTNode;
+import com.intellij.psi.impl.source.tree.CompositePsiElement;
 import com.intellij.psi.search.LocalSearchScope;
 import com.intellij.psi.search.SearchScope;
+import com.intellij.psi.tree.IElementType;
 import com.intellij.util.PlatformIcons;
 import org.intellij.jflex.psi.*;
 import org.jetbrains.annotations.NotNull;
@@ -29,9 +29,10 @@ import javax.swing.*;
 /**
  * @author gregsh
  */
-public class JFlexCompositeElementImpl extends ASTWrapperPsiElement implements JFlexCompositeElement {
-  public JFlexCompositeElementImpl(@NotNull ASTNode astNode) {
-    super(astNode);
+public class JFlexCompositeImpl extends CompositePsiElement implements JFlexComposite {
+
+  public JFlexCompositeImpl(IElementType type) {
+    super(type);
   }
 
   @NotNull
@@ -53,5 +54,10 @@ public class JFlexCompositeElementImpl extends ASTWrapperPsiElement implements J
       return PlatformIcons.FIELD_ICON;
     }
     return super.getIcon(flags);
+  }
+
+  @Override
+  public String toString() {
+    return getClass().getSimpleName() + "(" + getElementType().toString() + ")";
   }
 }

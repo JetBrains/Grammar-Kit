@@ -113,7 +113,7 @@ class StateRef extends PsiReferenceBase<PsiElement> {
   }
 
   private static class YYINITIALElement extends RenameableFakePsiElement
-    implements JFlexCompositeElement, PsiNameIdentifierOwner {
+    implements JFlexComposite, PsiNameIdentifierOwner {
 
     YYINITIALElement(PsiFile containingFile) {
       super(containingFile);

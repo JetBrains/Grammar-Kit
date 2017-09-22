@@ -21,5 +21,5 @@ import com.intellij.psi.PsiElement;
 /**
  * @author gregsh
  */
-public interface JFlexCompositeElement extends PsiElement {
+public interface JFlexComposite extends PsiElement {
 }

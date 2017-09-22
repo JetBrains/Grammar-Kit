@@ -6,6 +6,9 @@ import com.intellij.psi.tree.IElementType;
 import com.intellij.psi.PsiElement;
 import com.intellij.lang.ASTNode;
 import org.intellij.jflex.psi.impl.*;
+import java.util.Collections;
+import java.util.Set;
+import java.util.LinkedHashMap;
 
 public interface JFlexTypes {
 
@@ -128,85 +131,43 @@ public interface JFlexTypes {
   IElementType FLEX_UNCLOSED = new JFlexTokenType("unclosed");
   IElementType FLEX_VERSION = new JFlexTokenType("version");
 
-  class Factory {
-    public static PsiElement createElement(ASTNode node) {
-      IElementType type = node.getElementType();
-       if (type == FLEX_CHAR_RANGE) {
-        return new JFlexCharRangeImpl(node);
-      }
-      else if (type == FLEX_CHOICE_EXPRESSION) {
-        return new JFlexChoiceExpressionImpl(node);
-      }
-      else if (type == FLEX_CLASS_EXPRESSION) {
-        return new JFlexClassExpressionImpl(node);
-      }
-      else if (type == FLEX_DECLARATIONS_SECTION) {
-        return new JFlexDeclarationsSectionImpl(node);
-      }
-      else if (type == FLEX_JAVA_CODE) {
-        return new JFlexJavaCodeImpl(node);
-      }
-      else if (type == FLEX_JAVA_TYPE) {
-        return new JFlexJavaTypeImpl(node);
-      }
-      else if (type == FLEX_LEXICAL_RULES_SECTION) {
-        return new JFlexLexicalRulesSectionImpl(node);
-      }
-      else if (type == FLEX_LITERAL_EXPRESSION) {
-        return new JFlexLiteralExpressionImpl(node);
-      }
-      else if (type == FLEX_LOOK_AHEAD) {
-        return new JFlexLookAheadImpl(node);
-      }
-      else if (type == FLEX_MACRO_DEFINITION) {
-        return new JFlexMacroDefinitionImpl(node);
-      }
-      else if (type == FLEX_MACRO_REFERENCE) {
-        return new JFlexMacroReferenceImpl(node);
-      }
-      else if (type == FLEX_MACRO_REF_EXPRESSION) {
-        return new JFlexMacroRefExpressionImpl(node);
-      }
-      else if (type == FLEX_NOT_EXPRESSION) {
-        return new JFlexNotExpressionImpl(node);
-      }
-      else if (type == FLEX_OPTION) {
-        return new JFlexOptionImpl(node);
-      }
-      else if (type == FLEX_PAREN_EXPRESSION) {
-        return new JFlexParenExpressionImpl(node);
-      }
-      else if (type == FLEX_PREDEFINED_CLASS_EXPRESSION) {
-        return new JFlexPredefinedClassExpressionImpl(node);
-      }
-      else if (type == FLEX_QUANTIFIER_EXPRESSION) {
-        return new JFlexQuantifierExpressionImpl(node);
-      }
-      else if (type == FLEX_RULE) {
-        return new JFlexRuleImpl(node);
-      }
-      else if (type == FLEX_SEQUENCE_EXPRESSION) {
-        return new JFlexSequenceExpressionImpl(node);
-      }
-      else if (type == FLEX_STATE_DECLARATION) {
-        return new JFlexStateDeclarationImpl(node);
-      }
-      else if (type == FLEX_STATE_DEFINITION) {
-        return new JFlexStateDefinitionImpl(node);
-      }
-      else if (type == FLEX_STATE_LIST) {
-        return new JFlexStateListImpl(node);
-      }
-      else if (type == FLEX_STATE_REFERENCE) {
-        return new JFlexStateReferenceImpl(node);
-      }
-      else if (type == FLEX_USER_CODE_SECTION) {
-        return new JFlexUserCodeSectionImpl(node);
-      }
-      else if (type == FLEX_USER_VALUE) {
-        return new JFlexUserValueImpl(node);
-      }
-      throw new AssertionError("Unknown element type: " + type);
+  class Classes {
+    public static Class<?> findClass(IElementType elementType) {
+      return ourMap.get(elementType);
+    }
+
+    public static Set<IElementType> elementTypes() {
+      return Collections.unmodifiableSet(ourMap.keySet());
+    }
+
+    private static final LinkedHashMap<IElementType, Class<?>> ourMap = new LinkedHashMap<IElementType, Class<?>>();
+
+    static {
+      ourMap.put(FLEX_CHAR_RANGE, JFlexCharRangeImpl.class);
+      ourMap.put(FLEX_CHOICE_EXPRESSION, JFlexChoiceExpressionImpl.class);
+      ourMap.put(FLEX_CLASS_EXPRESSION, JFlexClassExpressionImpl.class);
+      ourMap.put(FLEX_DECLARATIONS_SECTION, JFlexDeclarationsSectionImpl.class);
+      ourMap.put(FLEX_JAVA_CODE, JFlexJavaCodeImpl.class);
+      ourMap.put(FLEX_JAVA_TYPE, JFlexJavaTypeImpl.class);
+      ourMap.put(FLEX_LEXICAL_RULES_SECTION, JFlexLexicalRulesSectionImpl.class);
+      ourMap.put(FLEX_LITERAL_EXPRESSION, JFlexLiteralExpressionImpl.class);
+      ourMap.put(FLEX_LOOK_AHEAD, JFlexLookAheadImpl.class);
+      ourMap.put(FLEX_MACRO_DEFINITION, JFlexMacroDefinitionImpl.class);
+      ourMap.put(FLEX_MACRO_REFERENCE, JFlexMacroReferenceImpl.class);
+      ourMap.put(FLEX_MACRO_REF_EXPRESSION, JFlexMacroRefExpressionImpl.class);
+      ourMap.put(FLEX_NOT_EXPRESSION, JFlexNotExpressionImpl.class);
+      ourMap.put(FLEX_OPTION, JFlexOptionImpl.class);
+      ourMap.put(FLEX_PAREN_EXPRESSION, JFlexParenExpressionImpl.class);
+      ourMap.put(FLEX_PREDEFINED_CLASS_EXPRESSION, JFlexPredefinedClassExpressionImpl.class);
+      ourMap.put(FLEX_QUANTIFIER_EXPRESSION, JFlexQuantifierExpressionImpl.class);
+      ourMap.put(FLEX_RULE, JFlexRuleImpl.class);
+      ourMap.put(FLEX_SEQUENCE_EXPRESSION, JFlexSequenceExpressionImpl.class);
+      ourMap.put(FLEX_STATE_DECLARATION, JFlexStateDeclarationImpl.class);
+      ourMap.put(FLEX_STATE_DEFINITION, JFlexStateDefinitionImpl.class);
+      ourMap.put(FLEX_STATE_LIST, JFlexStateListImpl.class);
+      ourMap.put(FLEX_STATE_REFERENCE, JFlexStateReferenceImpl.class);
+      ourMap.put(FLEX_USER_CODE_SECTION, JFlexUserCodeSectionImpl.class);
+      ourMap.put(FLEX_USER_VALUE, JFlexUserValueImpl.class);
     }
   }
 }
@@ -277,7 +238,7 @@ import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
-public interface JFlexExpression extends JFlexCompositeElement {
+public interface JFlexExpression extends JFlexComposite {
 
 }
 // ---- JFlexFileSection.java -----------------
@@ -288,7 +249,7 @@ import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
-public interface JFlexFileSection extends JFlexCompositeElement {
+public interface JFlexFileSection extends JFlexComposite {
 
 }
 // ---- JFlexJavaCode.java -----------------
@@ -300,7 +261,7 @@ import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiReference;
 
-public interface JFlexJavaCode extends JFlexCompositeElement {
+public interface JFlexJavaCode extends JFlexComposite {
 
   PsiReference[] getReferences();
 
@@ -314,7 +275,7 @@ import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiReference;
 
-public interface JFlexJavaType extends JFlexCompositeElement {
+public interface JFlexJavaType extends JFlexComposite {
 
   @NotNull
   PsiReference[] getReferences();
@@ -356,7 +317,7 @@ import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
-public interface JFlexLookAhead extends JFlexCompositeElement {
+public interface JFlexLookAhead extends JFlexComposite {
 
   @Nullable
   JFlexExpression getExpression();
@@ -412,7 +373,7 @@ import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiReference;
 
-public interface JFlexMacroReference extends JFlexCompositeElement {
+public interface JFlexMacroReference extends JFlexComposite {
 
   @NotNull
   PsiElement getId();
@@ -443,7 +404,7 @@ import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
-public interface JFlexOption extends JFlexCompositeElement {
+public interface JFlexOption extends JFlexComposite {
 
 }
 // ---- JFlexParenExpression.java -----------------
@@ -493,7 +454,7 @@ import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
-public interface JFlexRule extends JFlexCompositeElement {
+public interface JFlexRule extends JFlexComposite {
 
   @Nullable
   JFlexExpression getExpression();
@@ -536,7 +497,7 @@ import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
-public interface JFlexStateDeclaration extends JFlexCompositeElement {
+public interface JFlexStateDeclaration extends JFlexComposite {
 
   @NotNull
   List<JFlexStateDefinition> getStateDefinitionList();
@@ -574,7 +535,7 @@ import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
-public interface JFlexStateList extends JFlexCompositeElement {
+public interface JFlexStateList extends JFlexComposite {
 
   @NotNull
   List<JFlexStateReference> getStateReferenceList();
@@ -589,7 +550,7 @@ import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiReference;
 
-public interface JFlexStateReference extends JFlexCompositeElement {
+public interface JFlexStateReference extends JFlexComposite {
 
   @NotNull
   PsiElement getId();
@@ -620,7 +581,7 @@ import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
-public interface JFlexUserValue extends JFlexCompositeElement {
+public interface JFlexUserValue extends JFlexComposite {
 
 }
 // ---- JFlexCharRangeImpl.java -----------------
@@ -635,11 +596,12 @@ import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static org.intellij.jflex.psi.JFlexTypes.*;
 import org.intellij.jflex.psi.*;
+import com.intellij.psi.tree.IElementType;
 
 public class JFlexCharRangeImpl extends JFlexClassExpressionImpl implements JFlexCharRange {
 
-  public JFlexCharRangeImpl(ASTNode node) {
-    super(node);
+  public JFlexCharRangeImpl(IElementType type) {
+    super(type);
   }
 
   public void accept(@NotNull JFlexVisitor visitor) {
@@ -664,11 +626,12 @@ import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static org.intellij.jflex.psi.JFlexTypes.*;
 import org.intellij.jflex.psi.*;
+import com.intellij.psi.tree.IElementType;
 
 public class JFlexChoiceExpressionImpl extends JFlexExpressionImpl implements JFlexChoiceExpression {
 
-  public JFlexChoiceExpressionImpl(ASTNode node) {
-    super(node);
+  public JFlexChoiceExpressionImpl(IElementType type) {
+    super(type);
   }
 
   public void accept(@NotNull JFlexVisitor visitor) {
@@ -699,11 +662,12 @@ import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static org.intellij.jflex.psi.JFlexTypes.*;
 import org.intellij.jflex.psi.*;
+import com.intellij.psi.tree.IElementType;
 
 public class JFlexClassExpressionImpl extends JFlexExpressionImpl implements JFlexClassExpression {
 
-  public JFlexClassExpressionImpl(ASTNode node) {
-    super(node);
+  public JFlexClassExpressionImpl(IElementType type) {
+    super(type);
   }
 
   public void accept(@NotNull JFlexVisitor visitor) {
@@ -734,11 +698,12 @@ import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static org.intellij.jflex.psi.JFlexTypes.*;
 import org.intellij.jflex.psi.*;
+import com.intellij.psi.tree.IElementType;
 
 public class JFlexDeclarationsSectionImpl extends JFlexFileSectionImpl implements JFlexDeclarationsSection {
 
-  public JFlexDeclarationsSectionImpl(ASTNode node) {
-    super(node);
+  public JFlexDeclarationsSectionImpl(IElementType type) {
+    super(type);
   }
 
   public void accept(@NotNull JFlexVisitor visitor) {
@@ -781,11 +746,12 @@ import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static org.intellij.jflex.psi.JFlexTypes.*;
 import org.intellij.jflex.psi.*;
+import com.intellij.psi.tree.IElementType;
 
-public abstract class JFlexExpressionImpl extends JFlexCompositeElementImpl implements JFlexExpression {
+public abstract class JFlexExpressionImpl extends JFlexCompositeImpl implements JFlexExpression {
 
-  public JFlexExpressionImpl(ASTNode node) {
-    super(node);
+  public JFlexExpressionImpl(IElementType type) {
+    super(type);
   }
 
   public void accept(@NotNull JFlexVisitor visitor) {
@@ -810,11 +776,12 @@ import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static org.intellij.jflex.psi.JFlexTypes.*;
 import org.intellij.jflex.psi.*;
+import com.intellij.psi.tree.IElementType;
 
-public class JFlexFileSectionImpl extends JFlexCompositeElementImpl implements JFlexFileSection {
+public class JFlexFileSectionImpl extends JFlexCompositeImpl implements JFlexFileSection {
 
-  public JFlexFileSectionImpl(ASTNode node) {
-    super(node);
+  public JFlexFileSectionImpl(IElementType type) {
+    super(type);
   }
 
   public void accept(@NotNull JFlexVisitor visitor) {
@@ -840,11 +807,12 @@ import com.intellij.psi.util.PsiTreeUtil;
 import static org.intellij.jflex.psi.JFlexTypes.*;
 import org.intellij.jflex.psi.*;
 import com.intellij.psi.PsiReference;
+import com.intellij.psi.tree.IElementType;
 
-public class JFlexJavaCodeImpl extends JFlexCompositeElementImpl implements JFlexJavaCode {
+public class JFlexJavaCodeImpl extends JFlexCompositeImpl implements JFlexJavaCode {
 
-  public JFlexJavaCodeImpl(ASTNode node) {
-    super(node);
+  public JFlexJavaCodeImpl(IElementType type) {
+    super(type);
   }
 
   public void accept(@NotNull JFlexVisitor visitor) {
@@ -874,11 +842,12 @@ import com.intellij.psi.util.PsiTreeUtil;
 import static org.intellij.jflex.psi.JFlexTypes.*;
 import org.intellij.jflex.psi.*;
 import com.intellij.psi.PsiReference;
+import com.intellij.psi.tree.IElementType;
 
-public class JFlexJavaTypeImpl extends JFlexCompositeElementImpl implements JFlexJavaType {
+public class JFlexJavaTypeImpl extends JFlexCompositeImpl implements JFlexJavaType {
 
-  public JFlexJavaTypeImpl(ASTNode node) {
-    super(node);
+  public JFlexJavaTypeImpl(IElementType type) {
+    super(type);
   }
 
   public void accept(@NotNull JFlexVisitor visitor) {
@@ -908,11 +877,12 @@ import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static org.intellij.jflex.psi.JFlexTypes.*;
 import org.intellij.jflex.psi.*;
+import com.intellij.psi.tree.IElementType;
 
 public class JFlexLexicalRulesSectionImpl extends JFlexFileSectionImpl implements JFlexLexicalRulesSection {
 
-  public JFlexLexicalRulesSectionImpl(ASTNode node) {
-    super(node);
+  public JFlexLexicalRulesSectionImpl(IElementType type) {
+    super(type);
   }
 
   public void accept(@NotNull JFlexVisitor visitor) {
@@ -949,11 +919,12 @@ import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static org.intellij.jflex.psi.JFlexTypes.*;
 import org.intellij.jflex.psi.*;
+import com.intellij.psi.tree.IElementType;
 
 public class JFlexLiteralExpressionImpl extends JFlexExpressionImpl implements JFlexLiteralExpression {
 
-  public JFlexLiteralExpressionImpl(ASTNode node) {
-    super(node);
+  public JFlexLiteralExpressionImpl(IElementType type) {
+    super(type);
   }
 
   public void accept(@NotNull JFlexVisitor visitor) {
@@ -978,11 +949,12 @@ import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static org.intellij.jflex.psi.JFlexTypes.*;
 import org.intellij.jflex.psi.*;
+import com.intellij.psi.tree.IElementType;
 
-public class JFlexLookAheadImpl extends JFlexCompositeElementImpl implements JFlexLookAhead {
+public class JFlexLookAheadImpl extends JFlexCompositeImpl implements JFlexLookAhead {
 
-  public JFlexLookAheadImpl(ASTNode node) {
-    super(node);
+  public JFlexLookAheadImpl(IElementType type) {
+    super(type);
   }
 
   public void accept(@NotNull JFlexVisitor visitor) {
@@ -997,7 +969,7 @@ public class JFlexLookAheadImpl extends JFlexCompositeElementImpl implements JFl
   @Override
   @Nullable
   public JFlexExpression getExpression() {
-    return findChildByClass(JFlexExpression.class);
+    return PsiTreeUtil.getChildOfType(this, JFlexExpression.class);
   }
 
 }
@@ -1014,11 +986,12 @@ import com.intellij.psi.util.PsiTreeUtil;
 import static org.intellij.jflex.psi.JFlexTypes.*;
 import org.intellij.jflex.psi.*;
 import com.intellij.psi.PsiNameIdentifierOwner;
+import com.intellij.psi.tree.IElementType;
 
-public class JFlexMacroDefinitionImpl extends JFlexCompositeElementImpl implements JFlexMacroDefinition {
+public class JFlexMacroDefinitionImpl extends JFlexCompositeImpl implements JFlexMacroDefinition {
 
-  public JFlexMacroDefinitionImpl(ASTNode node) {
-    super(node);
+  public JFlexMacroDefinitionImpl(IElementType type) {
+    super(type);
   }
 
   public void accept(@NotNull JFlexVisitor visitor) {
@@ -1033,13 +1006,13 @@ public class JFlexMacroDefinitionImpl extends JFlexCompositeElementImpl implemen
   @Override
   @Nullable
   public JFlexExpression getExpression() {
-    return findChildByClass(JFlexExpression.class);
+    return PsiTreeUtil.getChildOfType(this, JFlexExpression.class);
   }
 
   @Override
   @NotNull
   public PsiElement getId() {
-    return findNotNullChildByType(FLEX_ID);
+    return findPsiChildByType(FLEX_ID);
   }
 
   @NotNull
@@ -1070,11 +1043,12 @@ import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static org.intellij.jflex.psi.JFlexTypes.*;
 import org.intellij.jflex.psi.*;
+import com.intellij.psi.tree.IElementType;
 
 public class JFlexMacroRefExpressionImpl extends JFlexExpressionImpl implements JFlexMacroRefExpression {
 
-  public JFlexMacroRefExpressionImpl(ASTNode node) {
-    super(node);
+  public JFlexMacroRefExpressionImpl(IElementType type) {
+    super(type);
   }
 
   public void accept(@NotNull JFlexVisitor visitor) {
@@ -1089,7 +1063,7 @@ public class JFlexMacroRefExpressionImpl extends JFlexExpressionImpl implements 
   @Override
   @NotNull
   public JFlexMacroReference getMacroReference() {
-    return findNotNullChildByClass(JFlexMacroReference.class);
+    return PsiTreeUtil.getChildOfType(this, JFlexMacroReference.class);
   }
 
 }
@@ -1106,11 +1080,12 @@ import com.intellij.psi.util.PsiTreeUtil;
 import static org.intellij.jflex.psi.JFlexTypes.*;
 import org.intellij.jflex.psi.*;
 import com.intellij.psi.PsiReference;
+import com.intellij.psi.tree.IElementType;
 
-public class JFlexMacroReferenceImpl extends JFlexCompositeElementImpl implements JFlexMacroReference {
+public class JFlexMacroReferenceImpl extends JFlexCompositeImpl implements JFlexMacroReference {
 
-  public JFlexMacroReferenceImpl(ASTNode node) {
-    super(node);
+  public JFlexMacroReferenceImpl(IElementType type) {
+    super(type);
   }
 
   public void accept(@NotNull JFlexVisitor visitor) {
@@ -1125,7 +1100,7 @@ public class JFlexMacroReferenceImpl extends JFlexCompositeElementImpl implement
   @Override
   @NotNull
   public PsiElement getId() {
-    return findNotNullChildByType(FLEX_ID);
+    return findPsiChildByType(FLEX_ID);
   }
 
   @NotNull
@@ -1146,11 +1121,12 @@ import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static org.intellij.jflex.psi.JFlexTypes.*;
 import org.intellij.jflex.psi.*;
+import com.intellij.psi.tree.IElementType;
 
 public class JFlexNotExpressionImpl extends JFlexExpressionImpl implements JFlexNotExpression {
 
-  public JFlexNotExpressionImpl(ASTNode node) {
-    super(node);
+  public JFlexNotExpressionImpl(IElementType type) {
+    super(type);
   }
 
   public void accept(@NotNull JFlexVisitor visitor) {
@@ -1165,7 +1141,7 @@ public class JFlexNotExpressionImpl extends JFlexExpressionImpl implements JFlex
   @Override
   @Nullable
   public JFlexExpression getExpression() {
-    return findChildByClass(JFlexExpression.class);
+    return PsiTreeUtil.getChildOfType(this, JFlexExpression.class);
   }
 
 }
@@ -1181,11 +1157,12 @@ import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static org.intellij.jflex.psi.JFlexTypes.*;
 import org.intellij.jflex.psi.*;
+import com.intellij.psi.tree.IElementType;
 
-public class JFlexOptionImpl extends JFlexCompositeElementImpl implements JFlexOption {
+public class JFlexOptionImpl extends JFlexCompositeImpl implements JFlexOption {
 
-  public JFlexOptionImpl(ASTNode node) {
-    super(node);
+  public JFlexOptionImpl(IElementType type) {
+    super(type);
   }
 
   public void accept(@NotNull JFlexVisitor visitor) {
@@ -1210,11 +1187,12 @@ import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static org.intellij.jflex.psi.JFlexTypes.*;
 import org.intellij.jflex.psi.*;
+import com.intellij.psi.tree.IElementType;
 
 public class JFlexParenExpressionImpl extends JFlexExpressionImpl implements JFlexParenExpression {
 
-  public JFlexParenExpressionImpl(ASTNode node) {
-    super(node);
+  public JFlexParenExpressionImpl(IElementType type) {
+    super(type);
   }
 
   public void accept(@NotNull JFlexVisitor visitor) {
@@ -1229,7 +1207,7 @@ public class JFlexParenExpressionImpl extends JFlexExpressionImpl implements JFl
   @Override
   @Nullable
   public JFlexExpression getExpression() {
-    return findChildByClass(JFlexExpression.class);
+    return PsiTreeUtil.getChildOfType(this, JFlexExpression.class);
   }
 
 }
@@ -1245,11 +1223,12 @@ import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static org.intellij.jflex.psi.JFlexTypes.*;
 import org.intellij.jflex.psi.*;
+import com.intellij.psi.tree.IElementType;
 
 public class JFlexPredefinedClassExpressionImpl extends JFlexExpressionImpl implements JFlexPredefinedClassExpression {
 
-  public JFlexPredefinedClassExpressionImpl(ASTNode node) {
-    super(node);
+  public JFlexPredefinedClassExpressionImpl(IElementType type) {
+    super(type);
   }
 
   public void accept(@NotNull JFlexVisitor visitor) {
@@ -1274,11 +1253,12 @@ import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static org.intellij.jflex.psi.JFlexTypes.*;
 import org.intellij.jflex.psi.*;
+import com.intellij.psi.tree.IElementType;
 
 public class JFlexQuantifierExpressionImpl extends JFlexExpressionImpl implements JFlexQuantifierExpression {
 
-  public JFlexQuantifierExpressionImpl(ASTNode node) {
-    super(node);
+  public JFlexQuantifierExpressionImpl(IElementType type) {
+    super(type);
   }
 
   public void accept(@NotNull JFlexVisitor visitor) {
@@ -1293,7 +1273,7 @@ public class JFlexQuantifierExpressionImpl extends JFlexExpressionImpl implement
   @Override
   @NotNull
   public JFlexExpression getExpression() {
-    return findNotNullChildByClass(JFlexExpression.class);
+    return PsiTreeUtil.getChildOfType(this, JFlexExpression.class);
   }
 
 }
@@ -1309,11 +1289,12 @@ import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static org.intellij.jflex.psi.JFlexTypes.*;
 import org.intellij.jflex.psi.*;
+import com.intellij.psi.tree.IElementType;
 
-public class JFlexRuleImpl extends JFlexCompositeElementImpl implements JFlexRule {
+public class JFlexRuleImpl extends JFlexCompositeImpl implements JFlexRule {
 
-  public JFlexRuleImpl(ASTNode node) {
-    super(node);
+  public JFlexRuleImpl(IElementType type) {
+    super(type);
   }
 
   public void accept(@NotNull JFlexVisitor visitor) {
@@ -1328,19 +1309,19 @@ public class JFlexRuleImpl extends JFlexCompositeElementImpl implements JFlexRul
   @Override
   @Nullable
   public JFlexExpression getExpression() {
-    return findChildByClass(JFlexExpression.class);
+    return PsiTreeUtil.getChildOfType(this, JFlexExpression.class);
   }
 
   @Override
   @Nullable
   public JFlexJavaCode getJavaCode() {
-    return findChildByClass(JFlexJavaCode.class);
+    return PsiTreeUtil.getChildOfType(this, JFlexJavaCode.class);
   }
 
   @Override
   @Nullable
   public JFlexLookAhead getLookAhead() {
-    return findChildByClass(JFlexLookAhead.class);
+    return PsiTreeUtil.getChildOfType(this, JFlexLookAhead.class);
   }
 
   @Override
@@ -1358,7 +1339,7 @@ public class JFlexRuleImpl extends JFlexCompositeElementImpl implements JFlexRul
   @Override
   @Nullable
   public JFlexStateList getStateList() {
-    return findChildByClass(JFlexStateList.class);
+    return PsiTreeUtil.getChildOfType(this, JFlexStateList.class);
   }
 
 }
@@ -1374,11 +1355,12 @@ import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static org.intellij.jflex.psi.JFlexTypes.*;
 import org.intellij.jflex.psi.*;
+import com.intellij.psi.tree.IElementType;
 
 public class JFlexSequenceExpressionImpl extends JFlexExpressionImpl implements JFlexSequenceExpression {
 
-  public JFlexSequenceExpressionImpl(ASTNode node) {
-    super(node);
+  public JFlexSequenceExpressionImpl(IElementType type) {
+    super(type);
   }
 
   public void accept(@NotNull JFlexVisitor visitor) {
@@ -1409,11 +1391,12 @@ import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static org.intellij.jflex.psi.JFlexTypes.*;
 import org.intellij.jflex.psi.*;
+import com.intellij.psi.tree.IElementType;
 
-public class JFlexStateDeclarationImpl extends JFlexCompositeElementImpl implements JFlexStateDeclaration {
+public class JFlexStateDeclarationImpl extends JFlexCompositeImpl implements JFlexStateDeclaration {
 
-  public JFlexStateDeclarationImpl(ASTNode node) {
-    super(node);
+  public JFlexStateDeclarationImpl(IElementType type) {
+    super(type);
   }
 
   public void accept(@NotNull JFlexVisitor visitor) {
@@ -1445,11 +1428,12 @@ import com.intellij.psi.util.PsiTreeUtil;
 import static org.intellij.jflex.psi.JFlexTypes.*;
 import org.intellij.jflex.psi.*;
 import com.intellij.psi.PsiNameIdentifierOwner;
+import com.intellij.psi.tree.IElementType;
 
-public class JFlexStateDefinitionImpl extends JFlexCompositeElementImpl implements JFlexStateDefinition {
+public class JFlexStateDefinitionImpl extends JFlexCompositeImpl implements JFlexStateDefinition {
 
-  public JFlexStateDefinitionImpl(ASTNode node) {
-    super(node);
+  public JFlexStateDefinitionImpl(IElementType type) {
+    super(type);
   }
 
   public void accept(@NotNull JFlexVisitor visitor) {
@@ -1464,7 +1448,7 @@ public class JFlexStateDefinitionImpl extends JFlexCompositeElementImpl implemen
   @Override
   @NotNull
   public PsiElement getId() {
-    return findNotNullChildByType(FLEX_ID);
+    return findPsiChildByType(FLEX_ID);
   }
 
   @NotNull
@@ -1495,11 +1479,12 @@ import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static org.intellij.jflex.psi.JFlexTypes.*;
 import org.intellij.jflex.psi.*;
+import com.intellij.psi.tree.IElementType;
 
-public class JFlexStateListImpl extends JFlexCompositeElementImpl implements JFlexStateList {
+public class JFlexStateListImpl extends JFlexCompositeImpl implements JFlexStateList {
 
-  public JFlexStateListImpl(ASTNode node) {
-    super(node);
+  public JFlexStateListImpl(IElementType type) {
+    super(type);
   }
 
   public void accept(@NotNull JFlexVisitor visitor) {
@@ -1531,11 +1516,12 @@ import com.intellij.psi.util.PsiTreeUtil;
 import static org.intellij.jflex.psi.JFlexTypes.*;
 import org.intellij.jflex.psi.*;
 import com.intellij.psi.PsiReference;
+import com.intellij.psi.tree.IElementType;
 
-public class JFlexStateReferenceImpl extends JFlexCompositeElementImpl implements JFlexStateReference {
+public class JFlexStateReferenceImpl extends JFlexCompositeImpl implements JFlexStateReference {
 
-  public JFlexStateReferenceImpl(ASTNode node) {
-    super(node);
+  public JFlexStateReferenceImpl(IElementType type) {
+    super(type);
   }
 
   public void accept(@NotNull JFlexVisitor visitor) {
@@ -1550,7 +1536,7 @@ public class JFlexStateReferenceImpl extends JFlexCompositeElementImpl implement
   @Override
   @NotNull
   public PsiElement getId() {
-    return findNotNullChildByType(FLEX_ID);
+    return findPsiChildByType(FLEX_ID);
   }
 
   @NotNull
@@ -1571,11 +1557,12 @@ import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static org.intellij.jflex.psi.JFlexTypes.*;
 import org.intellij.jflex.psi.*;
+import com.intellij.psi.tree.IElementType;
 
 public class JFlexUserCodeSectionImpl extends JFlexFileSectionImpl implements JFlexUserCodeSection {
 
-  public JFlexUserCodeSectionImpl(ASTNode node) {
-    super(node);
+  public JFlexUserCodeSectionImpl(IElementType type) {
+    super(type);
   }
 
   public void accept(@NotNull JFlexVisitor visitor) {
@@ -1590,7 +1577,7 @@ public class JFlexUserCodeSectionImpl extends JFlexFileSectionImpl implements JF
   @Override
   @Nullable
   public JFlexJavaCode getJavaCode() {
-    return findChildByClass(JFlexJavaCode.class);
+    return PsiTreeUtil.getChildOfType(this, JFlexJavaCode.class);
   }
 
 }
@@ -1606,11 +1593,12 @@ import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static org.intellij.jflex.psi.JFlexTypes.*;
 import org.intellij.jflex.psi.*;
+import com.intellij.psi.tree.IElementType;
 
-public class JFlexUserValueImpl extends JFlexCompositeElementImpl implements JFlexUserValue {
+public class JFlexUserValueImpl extends JFlexCompositeImpl implements JFlexUserValue {
 
-  public JFlexUserValueImpl(ASTNode node) {
-    super(node);
+  public JFlexUserValueImpl(IElementType type) {
+    super(type);
   }
 
   public void accept(@NotNull JFlexVisitor visitor) {
@@ -1650,19 +1638,19 @@ public class JFlexVisitor extends PsiElementVisitor {
   }
 
   public void visitExpression(@NotNull JFlexExpression o) {
-    visitCompositeElement(o);
+    visitComposite(o);
   }
 
   public void visitFileSection(@NotNull JFlexFileSection o) {
-    visitCompositeElement(o);
+    visitComposite(o);
   }
 
   public void visitJavaCode(@NotNull JFlexJavaCode o) {
-    visitCompositeElement(o);
+    visitComposite(o);
   }
 
   public void visitJavaType(@NotNull JFlexJavaType o) {
-    visitCompositeElement(o);
+    visitComposite(o);
   }
 
   public void visitLexicalRulesSection(@NotNull JFlexLexicalRulesSection o) {
@@ -1674,7 +1662,7 @@ public class JFlexVisitor extends PsiElementVisitor {
   }
 
   public void visitLookAhead(@NotNull JFlexLookAhead o) {
-    visitCompositeElement(o);
+    visitComposite(o);
   }
 
   public void visitMacroDefinition(@NotNull JFlexMacroDefinition o) {
@@ -1686,7 +1674,7 @@ public class JFlexVisitor extends PsiElementVisitor {
   }
 
   public void visitMacroReference(@NotNull JFlexMacroReference o) {
-    visitCompositeElement(o);
+    visitComposite(o);
   }
 
   public void visitNotExpression(@NotNull JFlexNotExpression o) {
@@ -1694,7 +1682,7 @@ public class JFlexVisitor extends PsiElementVisitor {
   }
 
   public void visitOption(@NotNull JFlexOption o) {
-    visitCompositeElement(o);
+    visitComposite(o);
   }
 
   public void visitParenExpression(@NotNull JFlexParenExpression o) {
@@ -1710,7 +1698,7 @@ public class JFlexVisitor extends PsiElementVisitor {
   }
 
   public void visitRule(@NotNull JFlexRule o) {
-    visitCompositeElement(o);
+    visitComposite(o);
   }
 
   public void visitSequenceExpression(@NotNull JFlexSequenceExpression o) {
@@ -1718,7 +1706,7 @@ public class JFlexVisitor extends PsiElementVisitor {
   }
 
   public void visitStateDeclaration(@NotNull JFlexStateDeclaration o) {
-    visitCompositeElement(o);
+    visitComposite(o);
   }
 
   public void visitStateDefinition(@NotNull JFlexStateDefinition o) {
@@ -1726,11 +1714,11 @@ public class JFlexVisitor extends PsiElementVisitor {
   }
 
   public void visitStateList(@NotNull JFlexStateList o) {
-    visitCompositeElement(o);
+    visitComposite(o);
   }
 
   public void visitStateReference(@NotNull JFlexStateReference o) {
-    visitCompositeElement(o);
+    visitComposite(o);
   }
 
   public void visitUserCodeSection(@NotNull JFlexUserCodeSection o) {
@@ -1738,14 +1726,14 @@ public class JFlexVisitor extends PsiElementVisitor {
   }
 
   public void visitUserValue(@NotNull JFlexUserValue o) {
-    visitCompositeElement(o);
+    visitComposite(o);
   }
 
   public void visitPsiNameIdentifierOwner(@NotNull PsiNameIdentifierOwner o) {
     visitElement(o);
   }
 
-  public void visitCompositeElement(@NotNull JFlexCompositeElement o) {
+  public void visitComposite(@NotNull JFlexComposite o) {
     visitElement(o);
   }
 

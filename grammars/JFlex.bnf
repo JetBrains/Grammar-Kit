@@ -1,12 +1,12 @@
 {
   classHeader="license.txt"
-  generate=[names="long"]
+  generate=[names="long" psi-factory="no" psi-classes-map="yes"]
 
   parserClass="org.intellij.jflex.parser.JFlexParser"
   parserUtilClass="org.intellij.jflex.parser.JFlexParserUtil"
 
-  implements="org.intellij.jflex.psi.JFlexCompositeElement"
-  extends="org.intellij.jflex.psi.impl.JFlexCompositeElementImpl"
+  implements="org.intellij.jflex.psi.JFlexComposite"
+  extends="org.intellij.jflex.psi.impl.JFlexCompositeImpl"
 
   psiClassPrefix="JFlex"
   psiImplClassSuffix="Impl"

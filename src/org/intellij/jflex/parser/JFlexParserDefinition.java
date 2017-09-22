@@ -86,7 +86,7 @@ public class JFlexParserDefinition implements ParserDefinition {
   @NotNull
   @Override
   public PsiElement createElement(ASTNode astNode) {
-    return Factory.createElement(astNode);
+    throw new UnsupportedOperationException(astNode.getElementType().toString());
   }
 
   @Override

@@ -81,6 +81,7 @@
     <!--JFlex Support -->
     <fileTypeFactory implementation="org.intellij.jflex.parser.JFlexFileTypeFactory"/>
     <lang.parserDefinition language="JFlex" implementationClass="org.intellij.jflex.parser.JFlexParserDefinition"/>
+    <lang.ast.factory language="JFlex" implementationClass="org.intellij.jflex.parser.JFlexASTFactory"/>
     <completion.contributor language="JFlex" implementationClass="org.intellij.jflex.editor.JFlexCompletionContributor" />
     <lang.findUsagesProvider language="JFlex" implementationClass="org.intellij.jflex.editor.JFlexFindUsagesProvider"/>
     <elementDescriptionProvider implementation="org.intellij.jflex.editor.JFlexFindUsagesProvider"/>

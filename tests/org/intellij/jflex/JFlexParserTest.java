@@ -16,7 +16,12 @@
 
 package org.intellij.jflex;
 
+import com.intellij.lang.LanguageASTFactory;
+import com.intellij.lang.LanguageBraceMatching;
 import org.intellij.grammar.AbstractParsingTestCase;
+import org.intellij.grammar.BnfASTFactory;
+import org.intellij.grammar.BnfBraceMatcher;
+import org.intellij.jflex.parser.JFlexASTFactory;
 import org.intellij.jflex.parser.JFlexParserDefinition;
 import org.jetbrains.annotations.NonNls;
 
@@ -33,6 +38,7 @@ public class JFlexParserTest extends AbstractParsingTestCase {
   @Override
   protected void setUp() throws Exception {
     super.setUp();
+    addExplicitExtension(LanguageASTFactory.INSTANCE, myLanguage, new JFlexASTFactory());
   }
 
   public void testSelfFlex() { doTest(true); }

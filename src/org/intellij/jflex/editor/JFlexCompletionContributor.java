@@ -59,7 +59,7 @@ public class JFlexCompletionContributor extends CompletionContributor {
                                     ProcessingContext context,
                                     @NotNull CompletionResultSet result) {
         PsiElement position = parameters.getPosition();
-        JFlexCompositeElement parent = PsiTreeUtil.getParentOfType(
+        JFlexComposite parent = PsiTreeUtil.getParentOfType(
           position, JFlexDeclarationsSection.class, JFlexRule.class, JFlexJavaCode.class, JFlexJavaType.class);
         boolean inJava = parent instanceof JFlexJavaCode || parent instanceof JFlexJavaType;
 

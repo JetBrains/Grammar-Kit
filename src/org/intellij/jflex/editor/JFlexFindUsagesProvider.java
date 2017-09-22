@@ -26,7 +26,7 @@ import com.intellij.usageView.UsageViewNodeTextLocation;
 import com.intellij.usageView.UsageViewShortNameLocation;
 import com.intellij.usageView.UsageViewTypeLocation;
 import org.apache.xmlbeans.impl.common.NameUtil;
-import org.intellij.jflex.psi.JFlexCompositeElement;
+import org.intellij.jflex.psi.JFlexComposite;
 import org.intellij.jflex.psi.JFlexMacroDefinition;
 import org.intellij.jflex.psi.JFlexStateDefinition;
 import org.jetbrains.annotations.NotNull;
@@ -43,7 +43,7 @@ public class JFlexFindUsagesProvider implements FindUsagesProvider, ElementDescr
 
   @Override
   public boolean canFindUsagesFor(@NotNull PsiElement psiElement) {
-    return psiElement instanceof JFlexCompositeElement && psiElement instanceof PsiNamedElement;
+    return psiElement instanceof JFlexComposite && psiElement instanceof PsiNamedElement;
   }
 
   @Override
@@ -72,7 +72,7 @@ public class JFlexFindUsagesProvider implements FindUsagesProvider, ElementDescr
   @Nullable
   @Override
   public String getElementDescription(@NotNull PsiElement psiElement, @NotNull ElementDescriptionLocation location) {
-    if (location == UsageViewNodeTextLocation.INSTANCE && psiElement instanceof JFlexCompositeElement) {
+    if (location == UsageViewNodeTextLocation.INSTANCE && psiElement instanceof JFlexComposite) {
       return getElementDescription(psiElement, UsageViewTypeLocation.INSTANCE) + " " +
              "'" + getElementDescription(psiElement, UsageViewShortNameLocation.INSTANCE) + "'";
     }
@@ -88,7 +88,7 @@ public class JFlexFindUsagesProvider implements FindUsagesProvider, ElementDescr
       }
       return ((JFlexStateDefinition)psiElement).getName();
     }
-    else if (psiElement instanceof JFlexCompositeElement) {
+    else if (psiElement instanceof JFlexComposite) {
       if (location == UsageViewTypeLocation.INSTANCE) {
         ASTNode node = psiElement.getNode();
         return node == null? "Initial State" : StringUtil.join(NameUtil.splitWords(node.getElementType().toString(), false), " ");

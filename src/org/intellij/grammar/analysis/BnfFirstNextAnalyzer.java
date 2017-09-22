@@ -17,6 +17,7 @@
 package org.intellij.grammar.analysis;
 
 import com.intellij.openapi.diagnostic.Logger;
+import com.intellij.openapi.util.Condition;
 import com.intellij.openapi.util.Pair;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.psi.PsiElement;
@@ -57,8 +58,8 @@ public class BnfFirstNextAnalyzer {
 
   private boolean myBackward;
   private boolean myPublicRuleOpaque;
-  private boolean myNoParent;
   private boolean myPredicateLookAhead;
+  private Condition<PsiElement> myParentFilter;
 
   public BnfFirstNextAnalyzer setBackward(boolean backward) {
     myBackward = backward;
@@ -70,8 +71,8 @@ public class BnfFirstNextAnalyzer {
     return this;
   }
 
-  public BnfFirstNextAnalyzer setNoParent(boolean noParent) {
-    myNoParent = noParent;
+  public BnfFirstNextAnalyzer setParentFilter(Condition<PsiElement> parentFilter) {
+    myParentFilter = parentFilter;
     return this;
   }
 
@@ -87,6 +88,10 @@ public class BnfFirstNextAnalyzer {
     return calcFirstInner(expression, new THashSet<>(), visited);
   }
 
+  public Set<BnfExpression> calcFirst(@NotNull BnfExpression expressions) {
+    return calcFirstInner(expressions, new THashSet<>(), new THashSet<>());
+  }
+
   public Map<BnfExpression, BnfExpression> calcNext(@NotNull BnfRule targetRule) {
     return calcNextInner(targetRule.getExpression(), new THashMap<>(), new THashSet<>());
   }
@@ -95,7 +100,9 @@ public class BnfFirstNextAnalyzer {
     return calcNextInner(targetExpression, new THashMap<>(), new THashSet<>());
   }
 
-  private Map<BnfExpression, BnfExpression> calcNextInner(@NotNull BnfExpression targetExpression, Map<BnfExpression, BnfExpression> result, Set<BnfExpression> visited) {
+  private Map<BnfExpression, BnfExpression> calcNextInner(@NotNull BnfExpression targetExpression,
+                                                          Map<BnfExpression, BnfExpression> result,
+                                                          Set<BnfExpression> visited) {
     LinkedList<BnfExpression> stack = new LinkedList<>();
     THashSet<BnfRule> totalVisited = new THashSet<>();
     Set<BnfExpression> curResult = new THashSet<>();
@@ -105,7 +112,7 @@ public class BnfFirstNextAnalyzer {
       PsiElement cur = stack.removeLast();
       BnfExpression startingExpr = cur instanceof BnfReferenceOrToken? (BnfExpression)cur : null;
       PsiElement parent = cur.getParent();
-      while (parent instanceof BnfExpression) {
+      while (parent instanceof BnfExpression && (myParentFilter == null || myParentFilter.value(parent))) {
         curResult.clear();
         PsiElement grandPa = parent.getParent();
         if (grandPa instanceof BnfRule && ParserGeneratorUtil.Rule.isExternal((BnfRule)grandPa) ||
@@ -136,7 +143,9 @@ public class BnfFirstNextAnalyzer {
         cur = parent;
         parent = grandPa;
       }
-      if (!myNoParent && parent instanceof BnfRule && totalVisited.add((BnfRule)parent)) {
+      if (parent instanceof BnfRule &&
+          (myParentFilter == null || myParentFilter.value(parent)) &&
+          totalVisited.add((BnfRule)parent)) {
         BnfRule rule = (BnfRule)parent;
         for (PsiReference reference : ReferencesSearch.search(rule, rule.getUseScope()).findAll()) {
           PsiElement element = reference.getElement();
@@ -158,9 +167,10 @@ public class BnfFirstNextAnalyzer {
     return result;
   }
 
-  private Set<BnfExpression> calcSequenceFirstInner(List<BnfExpression> expressions, final Set<BnfExpression> result, final Set<BnfExpression> visited) {
+  private Set<BnfExpression> calcSequenceFirstInner(List<BnfExpression> expressions,
+                                                    Set<BnfExpression> result,
+                                                    Set<BnfExpression> visited) {
     boolean matchesEof = !result.add(BNF_MATCHES_EOF);
-
     boolean pinApplied = false;
     Set<BnfExpression> pinned;
     if (!myBackward) {
@@ -397,7 +407,7 @@ public class BnfFirstNextAnalyzer {
   }
 
   private static Set<BnfExpression> newExprSet() {
-    return ContainerUtil.newTroveSet(ParserGeneratorUtil.<BnfExpression>textStrategy());
+    return ContainerUtil.newTroveSet(ParserGeneratorUtil.textStrategy());
   }
 
 }

@@ -76,8 +76,14 @@ public class ParserGeneratorUtil {
   enum ConsumeType {
     DEFAULT, FAST, SMART;
 
+    @NotNull
     public String getMethodSuffix() {
       return this == DEFAULT ? "" : StringUtil.capitalize(name().toLowerCase());
+    }
+
+    @NotNull
+    public String getMethodName() {
+      return KnownAttribute.CONSUME_TOKEN_METHOD.getDefaultValue() + getMethodSuffix();
     }
 
     @NotNull

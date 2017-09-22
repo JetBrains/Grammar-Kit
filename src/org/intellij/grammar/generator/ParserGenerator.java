@@ -1067,21 +1067,20 @@ public class ParserGenerator {
   }
 
   String generateNodeCall(BnfRule rule, @Nullable BnfExpression node, String nextName, @Nullable ConsumeType forcedConsumeType) {
-    ConsumeType consumeType = getEffectiveConsumeType(rule, node, forcedConsumeType);
-    String consumeMethodName = KnownAttribute.CONSUME_TOKEN_METHOD.getDefaultValue() + consumeType.getMethodSuffix();
-
     IElementType type = node == null ? BNF_REFERENCE_OR_TOKEN : getEffectiveType(node);
     String text = node == null ? nextName : node.getText();
 
     if (type == BNF_STRING) {
       String value = GrammarUtil.unquote(text);
       String attributeName = getTokenName(value);
+      String consumeMethodName = getEffectiveConsumeType(rule, node, forcedConsumeType).getMethodName();
       if (attributeName != null) {
         return generateConsumeToken(attributeName, consumeMethodName);
       }
       return generateConsumeTextToken(text.startsWith("\"") ? value : StringUtil.escapeStringCharacters(value), consumeMethodName);
     }
     else if (type == BNF_NUMBER) {
+      String consumeMethodName = getEffectiveConsumeType(rule, node, forcedConsumeType).getMethodName();
       return generateConsumeTextToken(text, consumeMethodName);
     }
     else if (type == BNF_REFERENCE_OR_TOKEN) {
@@ -1114,9 +1113,11 @@ public class ParserGenerator {
       if (!mySimpleTokens.containsKey(text) && !mySimpleTokens.values().contains(text)) {
         mySimpleTokens.put(text, null);
       }
+      String consumeMethodName = getEffectiveConsumeType(rule, node, forcedConsumeType).getMethodName();
       return generateConsumeToken(text, consumeMethodName);
     }
     else if (isTokenSequence(rule, node)) {
+      ConsumeType consumeType = getEffectiveConsumeType(rule, node, forcedConsumeType);
       PinMatcher pinMatcher = new PinMatcher(rule, type, nextName);
       List<BnfExpression> childExpressions = getChildExpressions(node);
       PsiElement firstElement = ContainerUtil.getFirstItem(childExpressions);
@@ -1151,7 +1152,15 @@ public class ParserGenerator {
     if (forcedConsumeType == ConsumeType.DEFAULT) return ConsumeType.DEFAULT;
     PsiElement parent = node == null ? null : node.getParent();
 
-    if (forcedConsumeType == null && parent instanceof BnfSequence && parent.getFirstChild() != node) return ConsumeType.DEFAULT;
+    if (forcedConsumeType == null && parent instanceof BnfSequence &&
+        ContainerUtil.getFirstItem(((BnfSequence)parent).getExpressionList()) != node) {
+      Set<BnfExpression> expressions = new BnfFirstNextAnalyzer()
+        .setParentFilter(o -> o != parent)
+        .calcFirst((BnfExpression)parent);
+      if (expressions.size() != 1 || expressions.iterator().next() != node) {
+        return ConsumeType.DEFAULT;
+      }
+    }
     ConsumeType fixed = ExpressionGeneratorHelper.fixForcedConsumeType(myExpressionHelper, rule, node, forcedConsumeType);
     return fixed != null ? fixed : ConsumeType.forRule(rule);
   }

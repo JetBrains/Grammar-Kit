@@ -23,12 +23,12 @@ import com.intellij.notification.Notifications;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.LangDataKeys;
-import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.application.ReadAction;
+import com.intellij.openapi.application.WriteAction;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.progress.*;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.util.ThrowableComputable;
 import com.intellij.openapi.util.io.FileUtil;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.openapi.vfs.VfsUtil;
@@ -39,6 +39,7 @@ import com.intellij.psi.PsiManager;
 import com.intellij.util.ExceptionUtil;
 import com.intellij.util.PathUtil;
 import com.intellij.util.containers.ContainerUtil;
+import com.intellij.util.containers.JBIterable;
 import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.generator.BnfConstants;
 import org.intellij.grammar.generator.ParserGenerator;
@@ -48,7 +49,6 @@ import org.jetbrains.annotations.NotNull;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -69,39 +69,43 @@ public class GenerateAction extends AnAction {
   @Override
   public void update(@NotNull AnActionEvent e) {
     Project project = e.getProject();
-    List<BnfFile> files = getFiles(e);
+    JBIterable<VirtualFile> files = getFiles(e);
     e.getPresentation().setEnabledAndVisible(project != null && !files.isEmpty());
-  }
-
-  private static List<BnfFile> getFiles(AnActionEvent e) {
-    Project project = e.getProject();
-    VirtualFile[] files = LangDataKeys.VIRTUAL_FILE_ARRAY.getData(e.getDataContext());
-    if (project == null || files == null) return Collections.emptyList();
-    final PsiManager manager = PsiManager.getInstance(project);
-    return ContainerUtil.mapNotNull(files, file -> {
-      PsiFile psiFile = manager.findFile(file);
-      return psiFile instanceof BnfFile ? (BnfFile)psiFile : null;
-    });
   }
 
   @Override
   public void actionPerformed(@NotNull AnActionEvent e) {
-    Project project = getEventProject(e);
-    List<BnfFile> files = getFiles(e);
-    if (project == null || files.isEmpty()) return;
+    Project project = e.getProject();
+    if (project == null) return;
     PsiDocumentManager.getInstance(project).commitAllDocuments();
     FileDocumentManager.getInstance().saveAllDocuments();
+
+    List<VirtualFile> files = getFiles(e).toList();
+    if (files.isEmpty()) return;
 
     doGenerate(project, files);
   }
 
-  public static void doGenerate(@NotNull final Project project, final List<BnfFile> bnfFiles) {
-    final Map<BnfFile, VirtualFile> rootMap = ContainerUtil.newLinkedHashMap();
-    ApplicationManager.getApplication().runWriteAction(() -> {
-      for (BnfFile file : bnfFiles) {
-        String parserClass = getRootAttribute(file, KnownAttribute.PARSER_CLASS);
+  @NotNull
+  private static JBIterable<VirtualFile> getFiles(@NotNull AnActionEvent e) {
+    Project project = e.getProject();
+    JBIterable<VirtualFile> files = JBIterable.of(e.getData(LangDataKeys.VIRTUAL_FILE_ARRAY));
+    if (project == null || files.isEmpty()) return JBIterable.empty();
+    PsiManager manager = PsiManager.getInstance(project);
+    return files.filter(o -> manager.findFile(o) instanceof BnfFile);
+  }
+
+  public static void doGenerate(@NotNull Project project, @NotNull List<VirtualFile> bnfFiles) {
+    Map<VirtualFile, VirtualFile> rootMap = ContainerUtil.newLinkedHashMap();
+    PsiManager psiManager = PsiManager.getInstance(project);
+    WriteAction.run(() -> {
+      for (VirtualFile file : bnfFiles) {
+        if (!file.isValid()) continue;
+        PsiFile bnfFile = psiManager.findFile(file);
+        if (!(bnfFile instanceof BnfFile)) continue;
+        String parserClass = getRootAttribute(bnfFile, KnownAttribute.PARSER_CLASS);
         VirtualFile target =
-          getTargetDirectoryFor(project, file.getVirtualFile(),
+          getTargetDirectoryFor(project, file,
                                 StringUtil.getShortName(parserClass) + ".java",
                                 StringUtil.getPackageName(parserClass), true);
         rootMap.put(file, target);
@@ -137,28 +141,26 @@ public class GenerateAction extends AnAction {
       }
 
       private void runInner() {
-        for (final BnfFile file : bnfFiles) {
-          final String sourcePath = FileUtil.toSystemDependentName(PathUtil.getCanonicalPath(
-            file.getVirtualFile().getParent().getPath()));
+        for (VirtualFile file : bnfFiles) {
+          String sourcePath = FileUtil.toSystemDependentName(PathUtil.getCanonicalPath(file.getParent().getPath()));
           VirtualFile target = rootMap.get(file);
           if (target == null) return;
           targets.add(target);
-          final File genDir = new File(VfsUtil.virtualToIoFile(target).getAbsolutePath());
+          File genDir = new File(VfsUtil.virtualToIoFile(target).getAbsolutePath());
           try {
             long time = System.currentTimeMillis();
             int filesCount = files.size();
-            ApplicationManager.getApplication().runReadAction(new ThrowableComputable<Boolean, Exception>() {
-              @Override
-              public Boolean compute() throws Exception {
-                new ParserGenerator(file, sourcePath, genDir.getPath()) {
-                  @Override
-                  protected PrintWriter openOutputInner(File file) throws IOException {
-                    files.add(file);
-                    return super.openOutputInner(file);
-                  }
-                }.generate();
-                return true;
-              }
+            ReadAction.run(() -> {
+              if (!file.isValid()) return;
+              PsiFile bnfFile = psiManager.findFile(file);
+              if (!(bnfFile instanceof BnfFile)) return;
+              new ParserGenerator((BnfFile)bnfFile, sourcePath, genDir.getPath()) {
+                @Override
+                protected PrintWriter openOutputInner(File file) throws IOException {
+                  files.add(file);
+                  return super.openOutputInner(file);
+                }
+              }.generate();
             });
             long millis = System.currentTimeMillis() - time;
             String duration = millis < 1000 ? null : StringUtil.formatDuration(millis);

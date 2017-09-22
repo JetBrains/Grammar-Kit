@@ -18,13 +18,13 @@ package org.intellij.grammar.psi.impl;
 
 import com.intellij.extapi.psi.PsiFileBase;
 import com.intellij.openapi.fileTypes.FileType;
+import com.intellij.openapi.util.AtomicClearableLazyValue;
+import com.intellij.openapi.util.ClearableLazyValue;
 import com.intellij.openapi.util.Conditions;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.psi.FileViewProvider;
-import com.intellij.psi.util.CachedValue;
-import com.intellij.psi.util.CachedValueProvider;
-import com.intellij.psi.util.CachedValuesManager;
 import com.intellij.psi.util.PsiTreeUtil;
+import com.intellij.util.Producer;
 import com.intellij.util.containers.ContainerUtil;
 import com.intellij.util.containers.JBIterable;
 import org.intellij.grammar.BnfFileType;
@@ -48,18 +48,20 @@ import java.util.regex.Pattern;
  */
 public class BnfFileImpl extends PsiFileBase implements BnfFile {
   
-  private final CachedValue<Map<String, BnfRule>> myRules;
-  private final CachedValue<List<BnfAttrs>> myGlobalAttributes;
-  private final CachedValue<Map<String, List<AttributeInfo>>> myAttributeValues;
+  private final ClearableLazyValue<Map<String, BnfRule>> myRules = lazyValue(this::calcRules);
+  private final ClearableLazyValue<List<BnfAttrs>> myGlobalAttributes = lazyValue(this::calcAttributes);
+  private final ClearableLazyValue<Map<String, List<AttributeInfo>>> myAttributeValues = lazyValue(this::calcAttributeValues);
 
   public BnfFileImpl(FileViewProvider fileViewProvider) {
     super(fileViewProvider, BnfLanguage.INSTANCE);
-    myRules = CachedValuesManager.getManager(getProject()).createCachedValue(
-      () -> CachedValueProvider.Result.create(calcRules(), BnfFileImpl.this), false);
-    myGlobalAttributes = CachedValuesManager.getManager(getProject()).createCachedValue(
-      () -> CachedValueProvider.Result.create(calcAttributes(), BnfFileImpl.this), false);
-    myAttributeValues = CachedValuesManager.getManager(getProject()).createCachedValue(
-      () -> CachedValueProvider.Result.create(calcAttributeValues(), BnfFileImpl.this), false);
+  }
+
+  @Override
+  public void subtreeChanged() {
+    super.subtreeChanged();
+    myRules.drop();
+    myGlobalAttributes.drop();
+    myAttributeValues.drop();
   }
 
   @NotNull
@@ -174,7 +176,10 @@ public class BnfFileImpl extends PsiFileBase implements BnfFile {
 
   private Map<String, List<AttributeInfo>> calcAttributeValues() {
     Map<String, List<AttributeInfo>> result = ContainerUtil.newTroveMap();
-    for (BnfAttrs attrs : GrammarUtil.bnfTraverser(this).filter(BnfAttrs.class)) {
+    JBIterable<BnfAttrs> allAttrs = GrammarUtil.bnfTraverser(this)
+      .expand(Conditions.notInstanceOf(BnfExpression.class))
+      .filter(BnfAttrs.class);
+    for (BnfAttrs attrs : allAttrs) {
       boolean isRule = attrs.getParent() instanceof BnfRule;
       TextRange baseRange = attrs.getTextRange();
       List<BnfAttr> attrList = attrs.getAttrList();
@@ -200,6 +205,17 @@ public class BnfFileImpl extends PsiFileBase implements BnfFile {
       }
     }
     return result;
+  }
+
+  @NotNull
+  private static <T> AtomicClearableLazyValue<T> lazyValue(Producer<T> producer) {
+    return new AtomicClearableLazyValue<T>() {
+      @NotNull
+      @Override
+      protected T compute() {
+        return producer.produce();
+      }
+    };
   }
 
   private static class AttributeInfo implements Comparable<AttributeInfo> {

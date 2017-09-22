@@ -25,6 +25,7 @@
 
     <fileTypeFactory implementation="org.intellij.grammar.BnfFileTypeFactory"/>
     <lang.parserDefinition language="BNF" implementationClass="org.intellij.grammar.BnfParserDefinition"/>
+    <lang.ast.factory language="BNF" implementationClass="org.intellij.grammar.BnfASTFactory"/>
     <annotator language="BNF" implementationClass="org.intellij.grammar.editor.BnfAnnotator"/>
     <annotator language="BNF" implementationClass="org.intellij.grammar.editor.BnfPinMarkerAnnotator"/>
     <annotator language="BNF" implementationClass="org.intellij.grammar.editor.BnfExpressionMarkerAnnotator"/>

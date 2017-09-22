@@ -23,7 +23,7 @@ import org.jetbrains.annotations.NotNull;
  * Date: 13.07.11
  * Time: 19:02
  */
-public interface BnfCompositeElement extends PsiElement {
+public interface BnfComposite extends PsiElement {
 
   <R> R accept(@NotNull BnfVisitor<R> visitor);
 

@@ -25,6 +25,18 @@ BnfFile:SelfBnf.bnf
             PsiElement(=)('=')
             BNF_STRING_LITERAL_EXPRESSION: "R"
               PsiElement(string)('"R"')
+          PsiWhiteSpace(' ')
+          BNF_LIST_ENTRY
+            PsiElement(id)('psi-factory')
+            PsiElement(=)('=')
+            BNF_STRING_LITERAL_EXPRESSION: "no"
+              PsiElement(string)('"no"')
+          PsiWhiteSpace(' ')
+          BNF_LIST_ENTRY
+            PsiElement(id)('psi-classes-map')
+            PsiElement(=)('=')
+            BNF_STRING_LITERAL_EXPRESSION: "yes"
+              PsiElement(string)('"yes"')
           PsiElement(])(']')
       PsiWhiteSpace('\n\n  ')
       BNF_ATTR:parserClass
@@ -42,14 +54,14 @@ BnfFile:SelfBnf.bnf
       BNF_ATTR:implements
         PsiElement(id)('implements')
         PsiElement(=)('=')
-        BNF_STRING_LITERAL_EXPRESSION: "org.intellij.grammar.psi.BnfCompositeElement"
-          PsiElement(string)('"org.intellij.grammar.psi.BnfCompositeElement"')
+        BNF_STRING_LITERAL_EXPRESSION: "org.intellij.grammar.psi.BnfComposite"
+          PsiElement(string)('"org.intellij.grammar.psi.BnfComposite"')
       PsiWhiteSpace('\n  ')
       BNF_ATTR:extends
         PsiElement(id)('extends')
         PsiElement(=)('=')
-        BNF_STRING_LITERAL_EXPRESSION: "org.intellij.grammar.psi.impl.BnfCompositeElementImpl"
-          PsiElement(string)('"org.intellij.grammar.psi.impl.BnfCompositeElementImpl"')
+        BNF_STRING_LITERAL_EXPRESSION: "org.intellij.grammar.psi.impl.BnfCompositeImpl"
+          PsiElement(string)('"org.intellij.grammar.psi.impl.BnfCompositeImpl"')
       PsiWhiteSpace('\n\n  ')
       BNF_ATTR:psiClassPrefix
         PsiElement(id)('psiClassPrefix')
@@ -272,8 +284,8 @@ BnfFile:SelfBnf.bnf
             PsiElement(string)('"rule|attr"')
           PsiElement())(')')
         PsiElement(=)('=')
-        BNF_STRING_LITERAL_EXPRESSION: "org.intellij.grammar.psi.impl.BnfNamedElementImpl"
-          PsiElement(string)('"org.intellij.grammar.psi.impl.BnfNamedElementImpl"')
+        BNF_STRING_LITERAL_EXPRESSION: "org.intellij.grammar.psi.impl.BnfNamedImpl"
+          PsiElement(string)('"org.intellij.grammar.psi.impl.BnfNamedImpl"')
       PsiWhiteSpace('\n  ')
       BNF_ATTR:mixin
         PsiElement(id)('mixin')

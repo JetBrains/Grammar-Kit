@@ -37,7 +37,7 @@ import java.util.List;
 /**
  * @author gregsh
  */
-public class BnfReferenceImpl<T extends BnfCompositeElement> extends PsiReferenceBase<T> {
+public class BnfReferenceImpl<T extends BnfComposite> extends PsiReferenceBase<T> {
 
   public BnfReferenceImpl(@NotNull T element, TextRange range) {
     super(element, range);

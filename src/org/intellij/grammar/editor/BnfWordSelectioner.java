@@ -21,7 +21,7 @@ import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.impl.source.tree.LeafPsiElement;
-import org.intellij.grammar.psi.BnfCompositeElement;
+import org.intellij.grammar.psi.BnfComposite;
 import org.intellij.grammar.psi.BnfTypes;
 
 import java.util.List;
@@ -32,7 +32,7 @@ import java.util.List;
 public class BnfWordSelectioner extends BraceMatcherBasedSelectioner{
   @Override
   public boolean canSelect(PsiElement e) {
-    return e instanceof BnfCompositeElement ||
+    return e instanceof BnfComposite ||
            e instanceof LeafPsiElement && ((LeafPsiElement)e).getElementType() == BnfTypes.BNF_STRING;
   }
 

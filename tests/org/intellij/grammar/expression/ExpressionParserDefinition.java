@@ -1,5 +1,6 @@
 package org.intellij.grammar.expression;
 
+import com.intellij.extapi.psi.ASTWrapperPsiElement;
 import com.intellij.extapi.psi.PsiFileBase;
 import com.intellij.lang.ASTNode;
 import com.intellij.lang.Language;
@@ -15,9 +16,6 @@ import com.intellij.psi.PsiFile;
 import com.intellij.psi.tree.IElementType;
 import com.intellij.psi.tree.IFileElementType;
 import org.intellij.grammar.BnfParserDefinition;
-import org.intellij.grammar.parser.BnfLexer;
-import org.intellij.grammar.psi.BnfTypes;
-import org.intellij.grammar.psi.impl.BnfCompositeElementImpl;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
@@ -97,7 +95,12 @@ public class ExpressionParserDefinition extends BnfParserDefinition{
   @NotNull
   @Override
   public PsiElement createElement(ASTNode astNode) {
-    return new BnfCompositeElementImpl(astNode);
+    return new ASTWrapperPsiElement(astNode) {
+      @Override
+      public String toString() {
+        return astNode.getElementType().toString();
+      }
+    };
   }
 
   public static IElementType createTokenType(String text) {

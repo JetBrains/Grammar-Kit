@@ -61,7 +61,7 @@ public class BnfCompletionContributor extends CompletionContributor {
                                     ProcessingContext context,
                                     @NotNull CompletionResultSet result) {
         PsiElement position = parameters.getPosition();
-        BnfCompositeElement parent = PsiTreeUtil.getParentOfType(position, BnfAttrs.class, BnfAttr.class, BnfParenExpression.class);
+        BnfComposite parent = PsiTreeUtil.getParentOfType(position, BnfAttrs.class, BnfAttr.class, BnfParenExpression.class);
         boolean attrCompletion;
         if (parent instanceof BnfAttrs || isPossibleEmptyAttrs(parent)) {
           attrCompletion = true;

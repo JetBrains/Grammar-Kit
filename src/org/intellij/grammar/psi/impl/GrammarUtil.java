@@ -179,7 +179,7 @@ public class GrammarUtil {
   public static SyntaxTraverser<PsiElement> bnfTraverser(PsiElement root) {
     return psiTraverser().withRoot(root).
       forceDisregardTypes(Conditions.equalTo(GeneratedParserUtilBase.DUMMY_BLOCK)).
-      filter(Conditions.instanceOf(BnfCompositeElement.class));
+      filter(Conditions.instanceOf(BnfComposite.class));
   }
 
   public static SyntaxTraverser<PsiElement> bnfTraverserNoAttrs(PsiElement root) {

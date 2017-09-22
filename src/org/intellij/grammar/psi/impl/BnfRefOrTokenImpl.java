@@ -15,11 +15,11 @@
  */
 package org.intellij.grammar.psi.impl;
 
-import com.intellij.lang.ASTNode;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiReference;
+import com.intellij.psi.tree.IElementType;
 import com.intellij.util.IncorrectOperationException;
 import org.intellij.grammar.psi.BnfFile;
 import org.intellij.grammar.psi.BnfReferenceOrToken;
@@ -33,8 +33,8 @@ import org.jetbrains.annotations.Nullable;
  * Time: 19:17
  */
 public abstract class BnfRefOrTokenImpl extends BnfExpressionImpl implements BnfReferenceOrToken {
-  public BnfRefOrTokenImpl(ASTNode node) {
-    super(node);
+  public BnfRefOrTokenImpl(IElementType elementType) {
+    super(elementType);
   }
 
   @Nullable
@@ -55,5 +55,4 @@ public abstract class BnfRefOrTokenImpl extends BnfExpressionImpl implements Bnf
       }
     };
   }
-
 }

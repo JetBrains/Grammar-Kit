@@ -16,13 +16,13 @@
 
 package org.intellij.grammar.psi.impl;
 
-import com.intellij.lang.ASTNode;
 import com.intellij.openapi.util.Key;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.patterns.ElementPattern;
 import com.intellij.psi.*;
 import com.intellij.psi.impl.FakePsiElement;
 import com.intellij.psi.impl.source.resolve.ResolveCache;
+import com.intellij.psi.tree.IElementType;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.util.*;
 import com.intellij.util.containers.ContainerUtil;
@@ -74,8 +74,8 @@ public abstract class BnfStringImpl extends BnfExpressionImpl implements BnfStri
     return ref;
   }
 
-  public BnfStringImpl(ASTNode node) {
-    super(node);
+  public BnfStringImpl(IElementType type) {
+    super(type);
   }
 
   @Override
@@ -253,7 +253,7 @@ public abstract class BnfStringImpl extends BnfExpressionImpl implements BnfStri
     return true;
   }
 
-  private static class MyFakePsiElement extends FakePsiElement implements BnfCompositeElement {
+  private static class MyFakePsiElement extends FakePsiElement implements BnfComposite {
     private final String myFuncName;
     private final BnfExpression myExpression;
 

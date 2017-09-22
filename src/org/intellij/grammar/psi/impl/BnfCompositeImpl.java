@@ -15,9 +15,9 @@
  */
 package org.intellij.grammar.psi.impl;
 
-import com.intellij.extapi.psi.ASTWrapperPsiElement;
-import com.intellij.lang.ASTNode;
 import com.intellij.openapi.util.text.StringUtil;
+import com.intellij.psi.impl.source.tree.CompositePsiElement;
+import com.intellij.psi.tree.IElementType;
 import org.intellij.grammar.psi.*;
 import org.jetbrains.annotations.NotNull;
 
@@ -27,9 +27,9 @@ import org.jetbrains.annotations.NotNull;
  * Date: 13.07.11
  * Time: 19:11
  */
-public class BnfCompositeElementImpl extends ASTWrapperPsiElement implements BnfCompositeElement {
-  public BnfCompositeElementImpl(ASTNode node) {
-    super(node);
+public class BnfCompositeImpl extends CompositePsiElement implements BnfComposite {
+  public BnfCompositeImpl(IElementType type) {
+    super(type);
   }
 
   /** @noinspection InstanceofThis*/
@@ -51,6 +51,6 @@ public class BnfCompositeElementImpl extends ASTWrapperPsiElement implements Bnf
 
   @Override
   public <R> R accept(@NotNull BnfVisitor<R> visitor) {
-    return visitor.visitCompositeElement(this);
+    return visitor.visitComposite(this);
   }
 }

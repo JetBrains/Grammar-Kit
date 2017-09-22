@@ -1,5 +1,6 @@
 package org.intellij.grammar;
 
+import com.intellij.lang.LanguageASTFactory;
 import com.intellij.lang.LanguageBraceMatching;
 import org.jetbrains.annotations.NonNls;
 
@@ -17,6 +18,7 @@ public class BnfParserTest extends AbstractParsingTestCase {
   @Override
   protected void setUp() throws Exception {
     super.setUp();
+    addExplicitExtension(LanguageASTFactory.INSTANCE, myLanguage, new BnfASTFactory());
     addExplicitExtension(LanguageBraceMatching.INSTANCE, myLanguage, new BnfBraceMatcher());
   }
 

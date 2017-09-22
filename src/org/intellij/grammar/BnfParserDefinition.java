@@ -84,7 +84,7 @@ public class BnfParserDefinition implements ParserDefinition {
   @NotNull
   @Override
   public PsiElement createElement(ASTNode astNode) {
-    return BnfTypes.Factory.createElement(astNode);
+    throw new UnsupportedOperationException(astNode.getElementType().toString());
   }
 
   @Override

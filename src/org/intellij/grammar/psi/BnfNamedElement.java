@@ -24,7 +24,7 @@ import org.jetbrains.annotations.NotNull;
  * Date: 13.07.11
  * Time: 19:02
  */
-public interface BnfNamedElement extends BnfCompositeElement, PsiNameIdentifierOwner {
+public interface BnfNamedElement extends BnfComposite, PsiNameIdentifierOwner {
   @NotNull
   String getName();
 

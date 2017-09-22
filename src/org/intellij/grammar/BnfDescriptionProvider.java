@@ -26,7 +26,7 @@ import com.intellij.usageView.UsageViewShortNameLocation;
 import com.intellij.usageView.UsageViewTypeLocation;
 import org.apache.xmlbeans.impl.common.NameUtil;
 import org.intellij.grammar.psi.BnfAttr;
-import org.intellij.grammar.psi.BnfCompositeElement;
+import org.intellij.grammar.psi.BnfComposite;
 import org.intellij.grammar.psi.BnfRule;
 import org.jetbrains.annotations.NotNull;
 
@@ -37,7 +37,7 @@ import org.jetbrains.annotations.NotNull;
 public class BnfDescriptionProvider implements ElementDescriptionProvider {
   @Override
   public String getElementDescription(@NotNull PsiElement psiElement, @NotNull ElementDescriptionLocation location) {
-    if (location == UsageViewNodeTextLocation.INSTANCE && psiElement instanceof BnfCompositeElement) {
+    if (location == UsageViewNodeTextLocation.INSTANCE && psiElement instanceof BnfComposite) {
       return getElementDescription(psiElement, UsageViewTypeLocation.INSTANCE) + " " +
              "'" + getElementDescription(psiElement, UsageViewShortNameLocation.INSTANCE) + "'";
     }
@@ -54,7 +54,7 @@ public class BnfDescriptionProvider implements ElementDescriptionProvider {
       }
       return ((BnfAttr)psiElement).getName();
     }
-    else if (psiElement instanceof BnfCompositeElement) {
+    else if (psiElement instanceof BnfComposite) {
       if (location == UsageViewTypeLocation.INSTANCE) {
         return StringUtil.join(NameUtil.splitWords(psiElement.getNode().getElementType().toString(), false), " ");
       }

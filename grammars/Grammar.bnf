@@ -1,12 +1,12 @@
 {
   classHeader="license.txt"
-  generate=[names="long" visitor-value="R"]
+  generate=[names="long" visitor-value="R" psi-factory="no" psi-classes-map="yes"]
 
   parserClass="org.intellij.grammar.parser.GrammarParser"
   parserUtilClass="org.intellij.grammar.parser.GrammarParserUtil"
 
-  implements="org.intellij.grammar.psi.BnfCompositeElement"
-  extends="org.intellij.grammar.psi.impl.BnfCompositeElementImpl"
+  implements="org.intellij.grammar.psi.BnfComposite"
+  extends="org.intellij.grammar.psi.impl.BnfCompositeImpl"
 
   psiClassPrefix="Bnf"
   psiImplClassSuffix="Impl"
@@ -47,7 +47,7 @@
   ]
 
   implements("rule|attr")="org.intellij.grammar.psi.BnfNamedElement"
-  extends("rule|attr")="org.intellij.grammar.psi.impl.BnfNamedElementImpl"
+  extends("rule|attr")="org.intellij.grammar.psi.impl.BnfNamedImpl"
   mixin("reference_or_token")="org.intellij.grammar.psi.impl.BnfRefOrTokenImpl"
   mixin("string_literal_expression")="org.intellij.grammar.psi.impl.BnfStringImpl"
   extends("paren_.*expression")=parenthesized

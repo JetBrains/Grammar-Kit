@@ -15,10 +15,10 @@
  */
 package org.intellij.grammar.psi.impl;
 
-import com.intellij.lang.ASTNode;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.search.LocalSearchScope;
 import com.intellij.psi.search.SearchScope;
+import com.intellij.psi.tree.IElementType;
 import com.intellij.ui.RowIcon;
 import com.intellij.util.IncorrectOperationException;
 import com.intellij.util.PlatformIcons;
@@ -40,12 +40,12 @@ import static org.intellij.grammar.psi.BnfTypes.BNF_ID;
  * Date: 14.07.11
  * Time: 20:04
  */
-public abstract class BnfNamedElementImpl extends BnfCompositeElementImpl implements BnfNamedElement {
+public abstract class BnfNamedImpl extends BnfCompositeImpl implements BnfNamedElement {
   
   private volatile String myCachedName;
   
-  public BnfNamedElementImpl(ASTNode node) {
-    super(node);
+  public BnfNamedImpl(IElementType elementType) {
+    super(elementType);
   }
 
   @Override
@@ -111,7 +111,7 @@ public abstract class BnfNamedElementImpl extends BnfCompositeElementImpl implem
   @Override
   public String toString() {
     // AE fix in LOG.toString in inconsistent state
-    PsiElement nullableId = findChildByType(BNF_ID);
+    PsiElement nullableId = findPsiChildByType(BNF_ID);
     return super.toString() + ":" + (nullableId == null? null : nullableId.getText());
   }
 }

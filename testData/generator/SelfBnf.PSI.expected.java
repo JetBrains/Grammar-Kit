@@ -6,6 +6,9 @@ import com.intellij.psi.tree.IElementType;
 import com.intellij.psi.PsiElement;
 import com.intellij.lang.ASTNode;
 import org.intellij.grammar.psi.impl.*;
+import java.util.Collections;
+import java.util.Set;
+import java.util.LinkedHashMap;
 
 public interface BnfTypes {
 
@@ -53,67 +56,37 @@ public interface BnfTypes {
   IElementType BNF_SEMICOLON = new BnfTokenType(";");
   IElementType BNF_STRING = new BnfTokenType("string");
 
-  class Factory {
-    public static PsiElement createElement(ASTNode node) {
-      IElementType type = node.getElementType();
-       if (type == BNF_ATTR) {
-        return new BnfAttrImpl(node);
-      }
-      else if (type == BNF_ATTRS) {
-        return new BnfAttrsImpl(node);
-      }
-      else if (type == BNF_ATTR_PATTERN) {
-        return new BnfAttrPatternImpl(node);
-      }
-      else if (type == BNF_CHOICE) {
-        return new BnfChoiceImpl(node);
-      }
-      else if (type == BNF_EXTERNAL_EXPRESSION) {
-        return new BnfExternalExpressionImpl(node);
-      }
-      else if (type == BNF_LIST_ENTRY) {
-        return new BnfListEntryImpl(node);
-      }
-      else if (type == BNF_LITERAL_EXPRESSION) {
-        return new BnfLiteralExpressionImpl(node);
-      }
-      else if (type == BNF_MODIFIER) {
-        return new BnfModifierImpl(node);
-      }
-      else if (type == BNF_PAREN_EXPRESSION) {
-        return new BnfParenExpressionImpl(node);
-      }
-      else if (type == BNF_PAREN_OPT_EXPRESSION) {
-        return new BnfParenOptExpressionImpl(node);
-      }
-      else if (type == BNF_PREDICATE) {
-        return new BnfPredicateImpl(node);
-      }
-      else if (type == BNF_PREDICATE_SIGN) {
-        return new BnfPredicateSignImpl(node);
-      }
-      else if (type == BNF_QUANTIFIED) {
-        return new BnfQuantifiedImpl(node);
-      }
-      else if (type == BNF_QUANTIFIER) {
-        return new BnfQuantifierImpl(node);
-      }
-      else if (type == BNF_REFERENCE_OR_TOKEN) {
-        return new BnfReferenceOrTokenImpl(node);
-      }
-      else if (type == BNF_RULE) {
-        return new BnfRuleImpl(node);
-      }
-      else if (type == BNF_SEQUENCE) {
-        return new BnfSequenceImpl(node);
-      }
-      else if (type == BNF_STRING_LITERAL_EXPRESSION) {
-        return new BnfStringLiteralExpressionImpl(node);
-      }
-      else if (type == BNF_VALUE_LIST) {
-        return new BnfValueListImpl(node);
-      }
-      throw new AssertionError("Unknown element type: " + type);
+  class Classes {
+    public static Class<?> findClass(IElementType elementType) {
+      return ourMap.get(elementType);
+    }
+
+    public static Set<IElementType> elementTypes() {
+      return Collections.unmodifiableSet(ourMap.keySet());
+    }
+
+    private static final LinkedHashMap<IElementType, Class<?>> ourMap = new LinkedHashMap<IElementType, Class<?>>();
+
+    static {
+      ourMap.put(BNF_ATTR, BnfAttrImpl.class);
+      ourMap.put(BNF_ATTRS, BnfAttrsImpl.class);
+      ourMap.put(BNF_ATTR_PATTERN, BnfAttrPatternImpl.class);
+      ourMap.put(BNF_CHOICE, BnfChoiceImpl.class);
+      ourMap.put(BNF_EXTERNAL_EXPRESSION, BnfExternalExpressionImpl.class);
+      ourMap.put(BNF_LIST_ENTRY, BnfListEntryImpl.class);
+      ourMap.put(BNF_LITERAL_EXPRESSION, BnfLiteralExpressionImpl.class);
+      ourMap.put(BNF_MODIFIER, BnfModifierImpl.class);
+      ourMap.put(BNF_PAREN_EXPRESSION, BnfParenExpressionImpl.class);
+      ourMap.put(BNF_PAREN_OPT_EXPRESSION, BnfParenOptExpressionImpl.class);
+      ourMap.put(BNF_PREDICATE, BnfPredicateImpl.class);
+      ourMap.put(BNF_PREDICATE_SIGN, BnfPredicateSignImpl.class);
+      ourMap.put(BNF_QUANTIFIED, BnfQuantifiedImpl.class);
+      ourMap.put(BNF_QUANTIFIER, BnfQuantifierImpl.class);
+      ourMap.put(BNF_REFERENCE_OR_TOKEN, BnfReferenceOrTokenImpl.class);
+      ourMap.put(BNF_RULE, BnfRuleImpl.class);
+      ourMap.put(BNF_SEQUENCE, BnfSequenceImpl.class);
+      ourMap.put(BNF_STRING_LITERAL_EXPRESSION, BnfStringLiteralExpressionImpl.class);
+      ourMap.put(BNF_VALUE_LIST, BnfValueListImpl.class);
     }
   }
 }
@@ -145,7 +118,7 @@ import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
-public interface BnfAttrPattern extends BnfCompositeElement {
+public interface BnfAttrPattern extends BnfComposite {
 
   @Nullable
   BnfStringLiteralExpression getLiteralExpression();
@@ -159,7 +132,7 @@ import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
-public interface BnfAttrs extends BnfCompositeElement {
+public interface BnfAttrs extends BnfComposite {
 
   @NotNull
   List<BnfAttr> getAttrList();
@@ -187,7 +160,7 @@ import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
-public interface BnfExpression extends BnfCompositeElement {
+public interface BnfExpression extends BnfComposite {
 
 }
 // ---- BnfExternalExpression.java -----------------
@@ -213,7 +186,7 @@ import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiReference;
 
-public interface BnfListEntry extends BnfCompositeElement {
+public interface BnfListEntry extends BnfComposite {
 
   @Nullable
   PsiElement getId();
@@ -247,7 +220,7 @@ import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
-public interface BnfModifier extends BnfCompositeElement {
+public interface BnfModifier extends BnfComposite {
 
 }
 // ---- BnfParenExpression.java -----------------
@@ -311,7 +284,7 @@ import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
-public interface BnfPredicateSign extends BnfCompositeElement {
+public interface BnfPredicateSign extends BnfComposite {
 
 }
 // ---- BnfQuantified.java -----------------
@@ -339,7 +312,7 @@ import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
-public interface BnfQuantifier extends BnfCompositeElement {
+public interface BnfQuantifier extends BnfComposite {
 
 }
 // ---- BnfReferenceOrToken.java -----------------
@@ -436,11 +409,12 @@ import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static org.intellij.grammar.psi.BnfTypes.*;
 import org.intellij.grammar.psi.*;
+import com.intellij.psi.tree.IElementType;
 
-public class BnfAttrImpl extends BnfNamedElementImpl implements BnfAttr {
+public class BnfAttrImpl extends BnfNamedImpl implements BnfAttr {
 
-  public BnfAttrImpl(ASTNode node) {
-    super(node);
+  public BnfAttrImpl(IElementType type) {
+    super(type);
   }
 
   public <R> R accept(@NotNull BnfVisitor<R> visitor) {
@@ -455,19 +429,19 @@ public class BnfAttrImpl extends BnfNamedElementImpl implements BnfAttr {
   @Override
   @Nullable
   public BnfAttrPattern getAttrPattern() {
-    return findChildByClass(BnfAttrPattern.class);
+    return PsiTreeUtil.getChildOfType(this, BnfAttrPattern.class);
   }
 
   @Override
   @Nullable
   public BnfExpression getExpression() {
-    return findChildByClass(BnfExpression.class);
+    return PsiTreeUtil.getChildOfType(this, BnfExpression.class);
   }
 
   @Override
   @NotNull
   public PsiElement getId() {
-    return findNotNullChildByType(BNF_ID);
+    return findPsiChildByType(BNF_ID);
   }
 
 }
@@ -483,11 +457,12 @@ import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static org.intellij.grammar.psi.BnfTypes.*;
 import org.intellij.grammar.psi.*;
+import com.intellij.psi.tree.IElementType;
 
-public class BnfAttrPatternImpl extends BnfCompositeElementImpl implements BnfAttrPattern {
+public class BnfAttrPatternImpl extends BnfCompositeImpl implements BnfAttrPattern {
 
-  public BnfAttrPatternImpl(ASTNode node) {
-    super(node);
+  public BnfAttrPatternImpl(IElementType type) {
+    super(type);
   }
 
   public <R> R accept(@NotNull BnfVisitor<R> visitor) {
@@ -502,7 +477,7 @@ public class BnfAttrPatternImpl extends BnfCompositeElementImpl implements BnfAt
   @Override
   @Nullable
   public BnfStringLiteralExpression getLiteralExpression() {
-    return findChildByClass(BnfStringLiteralExpression.class);
+    return PsiTreeUtil.getChildOfType(this, BnfStringLiteralExpression.class);
   }
 
 }
@@ -518,11 +493,12 @@ import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static org.intellij.grammar.psi.BnfTypes.*;
 import org.intellij.grammar.psi.*;
+import com.intellij.psi.tree.IElementType;
 
-public class BnfAttrsImpl extends BnfCompositeElementImpl implements BnfAttrs {
+public class BnfAttrsImpl extends BnfCompositeImpl implements BnfAttrs {
 
-  public BnfAttrsImpl(ASTNode node) {
-    super(node);
+  public BnfAttrsImpl(IElementType type) {
+    super(type);
   }
 
   public <R> R accept(@NotNull BnfVisitor<R> visitor) {
@@ -553,11 +529,12 @@ import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static org.intellij.grammar.psi.BnfTypes.*;
 import org.intellij.grammar.psi.*;
+import com.intellij.psi.tree.IElementType;
 
 public class BnfChoiceImpl extends BnfExpressionImpl implements BnfChoice {
 
-  public BnfChoiceImpl(ASTNode node) {
-    super(node);
+  public BnfChoiceImpl(IElementType type) {
+    super(type);
   }
 
   public <R> R accept(@NotNull BnfVisitor<R> visitor) {
@@ -588,11 +565,12 @@ import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static org.intellij.grammar.psi.BnfTypes.*;
 import org.intellij.grammar.psi.*;
+import com.intellij.psi.tree.IElementType;
 
-public abstract class BnfExpressionImpl extends BnfCompositeElementImpl implements BnfExpression {
+public abstract class BnfExpressionImpl extends BnfCompositeImpl implements BnfExpression {
 
-  public BnfExpressionImpl(ASTNode node) {
-    super(node);
+  public BnfExpressionImpl(IElementType type) {
+    super(type);
   }
 
   public <R> R accept(@NotNull BnfVisitor<R> visitor) {
@@ -617,11 +595,12 @@ import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static org.intellij.grammar.psi.BnfTypes.*;
 import org.intellij.grammar.psi.*;
+import com.intellij.psi.tree.IElementType;
 
 public class BnfExternalExpressionImpl extends BnfExpressionImpl implements BnfExternalExpression {
 
-  public BnfExternalExpressionImpl(ASTNode node) {
-    super(node);
+  public BnfExternalExpressionImpl(IElementType type) {
+    super(type);
   }
 
   public <R> R accept(@NotNull BnfVisitor<R> visitor) {
@@ -653,11 +632,12 @@ import com.intellij.psi.util.PsiTreeUtil;
 import static org.intellij.grammar.psi.BnfTypes.*;
 import org.intellij.grammar.psi.*;
 import com.intellij.psi.PsiReference;
+import com.intellij.psi.tree.IElementType;
 
-public class BnfListEntryImpl extends BnfCompositeElementImpl implements BnfListEntry {
+public class BnfListEntryImpl extends BnfCompositeImpl implements BnfListEntry {
 
-  public BnfListEntryImpl(ASTNode node) {
-    super(node);
+  public BnfListEntryImpl(IElementType type) {
+    super(type);
   }
 
   public <R> R accept(@NotNull BnfVisitor<R> visitor) {
@@ -672,7 +652,7 @@ public class BnfListEntryImpl extends BnfCompositeElementImpl implements BnfList
   @Override
   @Nullable
   public PsiElement getId() {
-    return findChildByType(BNF_ID);
+    return findPsiChildByType(BNF_ID);
   }
 
   @NotNull
@@ -683,7 +663,7 @@ public class BnfListEntryImpl extends BnfCompositeElementImpl implements BnfList
   @Override
   @Nullable
   public BnfStringLiteralExpression getLiteralExpression() {
-    return findChildByClass(BnfStringLiteralExpression.class);
+    return PsiTreeUtil.getChildOfType(this, BnfStringLiteralExpression.class);
   }
 
 }
@@ -699,11 +679,12 @@ import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static org.intellij.grammar.psi.BnfTypes.*;
 import org.intellij.grammar.psi.*;
+import com.intellij.psi.tree.IElementType;
 
 public class BnfLiteralExpressionImpl extends BnfExpressionImpl implements BnfLiteralExpression {
 
-  public BnfLiteralExpressionImpl(ASTNode node) {
-    super(node);
+  public BnfLiteralExpressionImpl(IElementType type) {
+    super(type);
   }
 
   public <R> R accept(@NotNull BnfVisitor<R> visitor) {
@@ -718,7 +699,7 @@ public class BnfLiteralExpressionImpl extends BnfExpressionImpl implements BnfLi
   @Override
   @Nullable
   public PsiElement getNumber() {
-    return findChildByType(BNF_NUMBER);
+    return findPsiChildByType(BNF_NUMBER);
   }
 
 }
@@ -734,11 +715,12 @@ import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static org.intellij.grammar.psi.BnfTypes.*;
 import org.intellij.grammar.psi.*;
+import com.intellij.psi.tree.IElementType;
 
-public class BnfModifierImpl extends BnfCompositeElementImpl implements BnfModifier {
+public class BnfModifierImpl extends BnfCompositeImpl implements BnfModifier {
 
-  public BnfModifierImpl(ASTNode node) {
-    super(node);
+  public BnfModifierImpl(IElementType type) {
+    super(type);
   }
 
   public <R> R accept(@NotNull BnfVisitor<R> visitor) {
@@ -763,11 +745,12 @@ import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static org.intellij.grammar.psi.BnfTypes.*;
 import org.intellij.grammar.psi.*;
+import com.intellij.psi.tree.IElementType;
 
 public class BnfParenExpressionImpl extends BnfParenthesizedImpl implements BnfParenExpression {
 
-  public BnfParenExpressionImpl(ASTNode node) {
-    super(node);
+  public BnfParenExpressionImpl(IElementType type) {
+    super(type);
   }
 
   public <R> R accept(@NotNull BnfVisitor<R> visitor) {
@@ -792,11 +775,12 @@ import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static org.intellij.grammar.psi.BnfTypes.*;
 import org.intellij.grammar.psi.*;
+import com.intellij.psi.tree.IElementType;
 
 public class BnfParenOptExpressionImpl extends BnfParenthesizedImpl implements BnfParenOptExpression {
 
-  public BnfParenOptExpressionImpl(ASTNode node) {
-    super(node);
+  public BnfParenOptExpressionImpl(IElementType type) {
+    super(type);
   }
 
   public <R> R accept(@NotNull BnfVisitor<R> visitor) {
@@ -821,11 +805,12 @@ import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static org.intellij.grammar.psi.BnfTypes.*;
 import org.intellij.grammar.psi.*;
+import com.intellij.psi.tree.IElementType;
 
 public class BnfParenthesizedImpl extends BnfExpressionImpl implements BnfParenthesized {
 
-  public BnfParenthesizedImpl(ASTNode node) {
-    super(node);
+  public BnfParenthesizedImpl(IElementType type) {
+    super(type);
   }
 
   public <R> R accept(@NotNull BnfVisitor<R> visitor) {
@@ -840,7 +825,7 @@ public class BnfParenthesizedImpl extends BnfExpressionImpl implements BnfParent
   @Override
   @NotNull
   public BnfExpression getExpression() {
-    return findNotNullChildByClass(BnfExpression.class);
+    return PsiTreeUtil.getChildOfType(this, BnfExpression.class);
   }
 
 }
@@ -856,11 +841,12 @@ import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static org.intellij.grammar.psi.BnfTypes.*;
 import org.intellij.grammar.psi.*;
+import com.intellij.psi.tree.IElementType;
 
 public class BnfPredicateImpl extends BnfExpressionImpl implements BnfPredicate {
 
-  public BnfPredicateImpl(ASTNode node) {
-    super(node);
+  public BnfPredicateImpl(IElementType type) {
+    super(type);
   }
 
   public <R> R accept(@NotNull BnfVisitor<R> visitor) {
@@ -875,13 +861,13 @@ public class BnfPredicateImpl extends BnfExpressionImpl implements BnfPredicate 
   @Override
   @NotNull
   public BnfExpression getExpression() {
-    return findNotNullChildByClass(BnfExpression.class);
+    return PsiTreeUtil.getChildOfType(this, BnfExpression.class);
   }
 
   @Override
   @NotNull
   public BnfPredicateSign getPredicateSign() {
-    return findNotNullChildByClass(BnfPredicateSign.class);
+    return PsiTreeUtil.getChildOfType(this, BnfPredicateSign.class);
   }
 
 }
@@ -897,11 +883,12 @@ import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static org.intellij.grammar.psi.BnfTypes.*;
 import org.intellij.grammar.psi.*;
+import com.intellij.psi.tree.IElementType;
 
-public class BnfPredicateSignImpl extends BnfCompositeElementImpl implements BnfPredicateSign {
+public class BnfPredicateSignImpl extends BnfCompositeImpl implements BnfPredicateSign {
 
-  public BnfPredicateSignImpl(ASTNode node) {
-    super(node);
+  public BnfPredicateSignImpl(IElementType type) {
+    super(type);
   }
 
   public <R> R accept(@NotNull BnfVisitor<R> visitor) {
@@ -926,11 +913,12 @@ import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static org.intellij.grammar.psi.BnfTypes.*;
 import org.intellij.grammar.psi.*;
+import com.intellij.psi.tree.IElementType;
 
 public class BnfQuantifiedImpl extends BnfExpressionImpl implements BnfQuantified {
 
-  public BnfQuantifiedImpl(ASTNode node) {
-    super(node);
+  public BnfQuantifiedImpl(IElementType type) {
+    super(type);
   }
 
   public <R> R accept(@NotNull BnfVisitor<R> visitor) {
@@ -945,13 +933,13 @@ public class BnfQuantifiedImpl extends BnfExpressionImpl implements BnfQuantifie
   @Override
   @NotNull
   public BnfExpression getExpression() {
-    return findNotNullChildByClass(BnfExpression.class);
+    return PsiTreeUtil.getChildOfType(this, BnfExpression.class);
   }
 
   @Override
   @NotNull
   public BnfQuantifier getQuantifier() {
-    return findNotNullChildByClass(BnfQuantifier.class);
+    return PsiTreeUtil.getChildOfType(this, BnfQuantifier.class);
   }
 
 }
@@ -967,11 +955,12 @@ import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static org.intellij.grammar.psi.BnfTypes.*;
 import org.intellij.grammar.psi.*;
+import com.intellij.psi.tree.IElementType;
 
-public class BnfQuantifierImpl extends BnfCompositeElementImpl implements BnfQuantifier {
+public class BnfQuantifierImpl extends BnfCompositeImpl implements BnfQuantifier {
 
-  public BnfQuantifierImpl(ASTNode node) {
-    super(node);
+  public BnfQuantifierImpl(IElementType type) {
+    super(type);
   }
 
   public <R> R accept(@NotNull BnfVisitor<R> visitor) {
@@ -996,11 +985,12 @@ import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static org.intellij.grammar.psi.BnfTypes.*;
 import org.intellij.grammar.psi.*;
+import com.intellij.psi.tree.IElementType;
 
 public class BnfReferenceOrTokenImpl extends BnfRefOrTokenImpl implements BnfReferenceOrToken {
 
-  public BnfReferenceOrTokenImpl(ASTNode node) {
-    super(node);
+  public BnfReferenceOrTokenImpl(IElementType type) {
+    super(type);
   }
 
   public <R> R accept(@NotNull BnfVisitor<R> visitor) {
@@ -1015,7 +1005,7 @@ public class BnfReferenceOrTokenImpl extends BnfRefOrTokenImpl implements BnfRef
   @Override
   @NotNull
   public PsiElement getId() {
-    return findNotNullChildByType(BNF_ID);
+    return findPsiChildByType(BNF_ID);
   }
 
 }
@@ -1031,11 +1021,12 @@ import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static org.intellij.grammar.psi.BnfTypes.*;
 import org.intellij.grammar.psi.*;
+import com.intellij.psi.tree.IElementType;
 
-public class BnfRuleImpl extends BnfNamedElementImpl implements BnfRule {
+public class BnfRuleImpl extends BnfNamedImpl implements BnfRule {
 
-  public BnfRuleImpl(ASTNode node) {
-    super(node);
+  public BnfRuleImpl(IElementType type) {
+    super(type);
   }
 
   public <R> R accept(@NotNull BnfVisitor<R> visitor) {
@@ -1050,13 +1041,13 @@ public class BnfRuleImpl extends BnfNamedElementImpl implements BnfRule {
   @Override
   @Nullable
   public BnfAttrs getAttrs() {
-    return findChildByClass(BnfAttrs.class);
+    return PsiTreeUtil.getChildOfType(this, BnfAttrs.class);
   }
 
   @Override
   @NotNull
   public BnfExpression getExpression() {
-    return findNotNullChildByClass(BnfExpression.class);
+    return PsiTreeUtil.getChildOfType(this, BnfExpression.class);
   }
 
   @Override
@@ -1068,7 +1059,7 @@ public class BnfRuleImpl extends BnfNamedElementImpl implements BnfRule {
   @Override
   @NotNull
   public PsiElement getId() {
-    return findNotNullChildByType(BNF_ID);
+    return findPsiChildByType(BNF_ID);
   }
 
 }
@@ -1084,11 +1075,12 @@ import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static org.intellij.grammar.psi.BnfTypes.*;
 import org.intellij.grammar.psi.*;
+import com.intellij.psi.tree.IElementType;
 
 public class BnfSequenceImpl extends BnfExpressionImpl implements BnfSequence {
 
-  public BnfSequenceImpl(ASTNode node) {
-    super(node);
+  public BnfSequenceImpl(IElementType type) {
+    super(type);
   }
 
   public <R> R accept(@NotNull BnfVisitor<R> visitor) {
@@ -1119,11 +1111,12 @@ import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static org.intellij.grammar.psi.BnfTypes.*;
 import org.intellij.grammar.psi.*;
+import com.intellij.psi.tree.IElementType;
 
 public class BnfStringLiteralExpressionImpl extends BnfStringImpl implements BnfStringLiteralExpression {
 
-  public BnfStringLiteralExpressionImpl(ASTNode node) {
-    super(node);
+  public BnfStringLiteralExpressionImpl(IElementType type) {
+    super(type);
   }
 
   public <R> R accept(@NotNull BnfVisitor<R> visitor) {
@@ -1138,7 +1131,7 @@ public class BnfStringLiteralExpressionImpl extends BnfStringImpl implements Bnf
   @Override
   @NotNull
   public PsiElement getString() {
-    return findNotNullChildByType(BNF_STRING);
+    return findPsiChildByType(BNF_STRING);
   }
 
 }
@@ -1154,11 +1147,12 @@ import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static org.intellij.grammar.psi.BnfTypes.*;
 import org.intellij.grammar.psi.*;
+import com.intellij.psi.tree.IElementType;
 
 public class BnfValueListImpl extends BnfExpressionImpl implements BnfValueList {
 
-  public BnfValueListImpl(ASTNode node) {
-    super(node);
+  public BnfValueListImpl(IElementType type) {
+    super(type);
   }
 
   public <R> R accept(@NotNull BnfVisitor<R> visitor) {
@@ -1191,11 +1185,11 @@ public class BnfVisitor<R> extends PsiElementVisitor {
   }
 
   public R visitAttrPattern(@NotNull BnfAttrPattern o) {
-    return visitCompositeElement(o);
+    return visitComposite(o);
   }
 
   public R visitAttrs(@NotNull BnfAttrs o) {
-    return visitCompositeElement(o);
+    return visitComposite(o);
   }
 
   public R visitChoice(@NotNull BnfChoice o) {
@@ -1203,7 +1197,7 @@ public class BnfVisitor<R> extends PsiElementVisitor {
   }
 
   public R visitExpression(@NotNull BnfExpression o) {
-    return visitCompositeElement(o);
+    return visitComposite(o);
   }
 
   public R visitExternalExpression(@NotNull BnfExternalExpression o) {
@@ -1211,7 +1205,7 @@ public class BnfVisitor<R> extends PsiElementVisitor {
   }
 
   public R visitListEntry(@NotNull BnfListEntry o) {
-    return visitCompositeElement(o);
+    return visitComposite(o);
   }
 
   public R visitLiteralExpression(@NotNull BnfLiteralExpression o) {
@@ -1219,7 +1213,7 @@ public class BnfVisitor<R> extends PsiElementVisitor {
   }
 
   public R visitModifier(@NotNull BnfModifier o) {
-    return visitCompositeElement(o);
+    return visitComposite(o);
   }
 
   public R visitParenExpression(@NotNull BnfParenExpression o) {
@@ -1239,7 +1233,7 @@ public class BnfVisitor<R> extends PsiElementVisitor {
   }
 
   public R visitPredicateSign(@NotNull BnfPredicateSign o) {
-    return visitCompositeElement(o);
+    return visitComposite(o);
   }
 
   public R visitQuantified(@NotNull BnfQuantified o) {
@@ -1247,7 +1241,7 @@ public class BnfVisitor<R> extends PsiElementVisitor {
   }
 
   public R visitQuantifier(@NotNull BnfQuantifier o) {
-    return visitCompositeElement(o);
+    return visitComposite(o);
   }
 
   public R visitReferenceOrToken(@NotNull BnfReferenceOrToken o) {
@@ -1271,10 +1265,10 @@ public class BnfVisitor<R> extends PsiElementVisitor {
   }
 
   public R visitNamedElement(@NotNull BnfNamedElement o) {
-    return visitCompositeElement(o);
+    return visitComposite(o);
   }
 
-  public R visitCompositeElement(@NotNull BnfCompositeElement o) {
+  public R visitComposite(@NotNull BnfComposite o) {
     visitElement(o);
     return null;
   }

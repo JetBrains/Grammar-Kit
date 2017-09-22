@@ -56,15 +56,15 @@ public class BnfRecursionLineMarkerProvider implements LineMarkerProvider {
       RuleGraphHelper helper = RuleGraphHelper.getCached((BnfFile)rule.getContainingFile());
       Map<PsiElement, RuleGraphHelper.Cardinality> map = helper.getFor(rule);
       if (map.containsKey(rule)) {
-        result.add(new MyMarkerInfo(rule));
+        result.add(new MyMarkerInfo(rule.getId()));
       }
     }
   }
 
-  private static class MyMarkerInfo extends LineMarkerInfo<BnfRule> {
-    private MyMarkerInfo(@NotNull BnfRule rule) {
-      super(rule,
-            rule.getTextRange(),
+  private static class MyMarkerInfo extends LineMarkerInfo<PsiElement> {
+    private MyMarkerInfo(@NotNull PsiElement id) {
+      super(id,
+            id.getTextRange(),
             AllIcons.Gutter.RecursiveMethod,
             Pass.LINE_MARKERS,
             FunctionUtil.constant("Recursive rule"),
@@ -76,7 +76,7 @@ public class BnfRecursionLineMarkerProvider implements LineMarkerProvider {
     @Override
     public GutterIconRenderer createGutterRenderer() {
       if (myIcon == null) return null;
-      return new LineMarkerGutterIconRenderer<BnfRule>(this) {
+      return new LineMarkerGutterIconRenderer<PsiElement>(this) {
         @Override
         public AnAction getClickAction() {
           return null;

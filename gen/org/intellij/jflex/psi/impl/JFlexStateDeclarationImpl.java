@@ -23,11 +23,12 @@ import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static org.intellij.jflex.psi.JFlexTypes.*;
 import org.intellij.jflex.psi.*;
+import com.intellij.psi.tree.IElementType;
 
-public class JFlexStateDeclarationImpl extends JFlexCompositeElementImpl implements JFlexStateDeclaration {
+public class JFlexStateDeclarationImpl extends JFlexCompositeImpl implements JFlexStateDeclaration {
 
-  public JFlexStateDeclarationImpl(ASTNode node) {
-    super(node);
+  public JFlexStateDeclarationImpl(IElementType type) {
+    super(type);
   }
 
   public void accept(@NotNull JFlexVisitor visitor) {

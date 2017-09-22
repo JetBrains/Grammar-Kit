@@ -23,11 +23,12 @@ import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static org.intellij.jflex.psi.JFlexTypes.*;
 import org.intellij.jflex.psi.*;
+import com.intellij.psi.tree.IElementType;
 
 public class JFlexPredefinedClassExpressionImpl extends JFlexExpressionImpl implements JFlexPredefinedClassExpression {
 
-  public JFlexPredefinedClassExpressionImpl(ASTNode node) {
-    super(node);
+  public JFlexPredefinedClassExpressionImpl(IElementType type) {
+    super(type);
   }
 
   public void accept(@NotNull JFlexVisitor visitor) {

@@ -23,11 +23,12 @@ import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static org.intellij.jflex.psi.JFlexTypes.*;
 import org.intellij.jflex.psi.*;
+import com.intellij.psi.tree.IElementType;
 
 public class JFlexUserCodeSectionImpl extends JFlexFileSectionImpl implements JFlexUserCodeSection {
 
-  public JFlexUserCodeSectionImpl(ASTNode node) {
-    super(node);
+  public JFlexUserCodeSectionImpl(IElementType type) {
+    super(type);
   }
 
   public void accept(@NotNull JFlexVisitor visitor) {
@@ -42,7 +43,7 @@ public class JFlexUserCodeSectionImpl extends JFlexFileSectionImpl implements JF
   @Override
   @Nullable
   public JFlexJavaCode getJavaCode() {
-    return findChildByClass(JFlexJavaCode.class);
+    return PsiTreeUtil.getChildOfType(this, JFlexJavaCode.class);
   }
 
 }

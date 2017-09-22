@@ -19,6 +19,9 @@ import com.intellij.psi.tree.IElementType;
 import com.intellij.psi.PsiElement;
 import com.intellij.lang.ASTNode;
 import org.intellij.jflex.psi.impl.*;
+import java.util.Collections;
+import java.util.Set;
+import java.util.LinkedHashMap;
 
 public interface JFlexTypes {
 
@@ -141,85 +144,43 @@ public interface JFlexTypes {
   IElementType FLEX_UNCLOSED = new JFlexTokenType("unclosed");
   IElementType FLEX_VERSION = new JFlexTokenType("version");
 
-  class Factory {
-    public static PsiElement createElement(ASTNode node) {
-      IElementType type = node.getElementType();
-       if (type == FLEX_CHAR_RANGE) {
-        return new JFlexCharRangeImpl(node);
-      }
-      else if (type == FLEX_CHOICE_EXPRESSION) {
-        return new JFlexChoiceExpressionImpl(node);
-      }
-      else if (type == FLEX_CLASS_EXPRESSION) {
-        return new JFlexClassExpressionImpl(node);
-      }
-      else if (type == FLEX_DECLARATIONS_SECTION) {
-        return new JFlexDeclarationsSectionImpl(node);
-      }
-      else if (type == FLEX_JAVA_CODE) {
-        return new JFlexJavaCodeImpl(node);
-      }
-      else if (type == FLEX_JAVA_TYPE) {
-        return new JFlexJavaTypeImpl(node);
-      }
-      else if (type == FLEX_LEXICAL_RULES_SECTION) {
-        return new JFlexLexicalRulesSectionImpl(node);
-      }
-      else if (type == FLEX_LITERAL_EXPRESSION) {
-        return new JFlexLiteralExpressionImpl(node);
-      }
-      else if (type == FLEX_LOOK_AHEAD) {
-        return new JFlexLookAheadImpl(node);
-      }
-      else if (type == FLEX_MACRO_DEFINITION) {
-        return new JFlexMacroDefinitionImpl(node);
-      }
-      else if (type == FLEX_MACRO_REFERENCE) {
-        return new JFlexMacroReferenceImpl(node);
-      }
-      else if (type == FLEX_MACRO_REF_EXPRESSION) {
-        return new JFlexMacroRefExpressionImpl(node);
-      }
-      else if (type == FLEX_NOT_EXPRESSION) {
-        return new JFlexNotExpressionImpl(node);
-      }
-      else if (type == FLEX_OPTION) {
-        return new JFlexOptionImpl(node);
-      }
-      else if (type == FLEX_PAREN_EXPRESSION) {
-        return new JFlexParenExpressionImpl(node);
-      }
-      else if (type == FLEX_PREDEFINED_CLASS_EXPRESSION) {
-        return new JFlexPredefinedClassExpressionImpl(node);
-      }
-      else if (type == FLEX_QUANTIFIER_EXPRESSION) {
-        return new JFlexQuantifierExpressionImpl(node);
-      }
-      else if (type == FLEX_RULE) {
-        return new JFlexRuleImpl(node);
-      }
-      else if (type == FLEX_SEQUENCE_EXPRESSION) {
-        return new JFlexSequenceExpressionImpl(node);
-      }
-      else if (type == FLEX_STATE_DECLARATION) {
-        return new JFlexStateDeclarationImpl(node);
-      }
-      else if (type == FLEX_STATE_DEFINITION) {
-        return new JFlexStateDefinitionImpl(node);
-      }
-      else if (type == FLEX_STATE_LIST) {
-        return new JFlexStateListImpl(node);
-      }
-      else if (type == FLEX_STATE_REFERENCE) {
-        return new JFlexStateReferenceImpl(node);
-      }
-      else if (type == FLEX_USER_CODE_SECTION) {
-        return new JFlexUserCodeSectionImpl(node);
-      }
-      else if (type == FLEX_USER_VALUE) {
-        return new JFlexUserValueImpl(node);
-      }
-      throw new AssertionError("Unknown element type: " + type);
+  class Classes {
+    public static Class<?> findClass(IElementType elementType) {
+      return ourMap.get(elementType);
+    }
+
+    public static Set<IElementType> elementTypes() {
+      return Collections.unmodifiableSet(ourMap.keySet());
+    }
+
+    private static final LinkedHashMap<IElementType, Class<?>> ourMap = new LinkedHashMap<IElementType, Class<?>>();
+
+    static {
+      ourMap.put(FLEX_CHAR_RANGE, JFlexCharRangeImpl.class);
+      ourMap.put(FLEX_CHOICE_EXPRESSION, JFlexChoiceExpressionImpl.class);
+      ourMap.put(FLEX_CLASS_EXPRESSION, JFlexClassExpressionImpl.class);
+      ourMap.put(FLEX_DECLARATIONS_SECTION, JFlexDeclarationsSectionImpl.class);
+      ourMap.put(FLEX_JAVA_CODE, JFlexJavaCodeImpl.class);
+      ourMap.put(FLEX_JAVA_TYPE, JFlexJavaTypeImpl.class);
+      ourMap.put(FLEX_LEXICAL_RULES_SECTION, JFlexLexicalRulesSectionImpl.class);
+      ourMap.put(FLEX_LITERAL_EXPRESSION, JFlexLiteralExpressionImpl.class);
+      ourMap.put(FLEX_LOOK_AHEAD, JFlexLookAheadImpl.class);
+      ourMap.put(FLEX_MACRO_DEFINITION, JFlexMacroDefinitionImpl.class);
+      ourMap.put(FLEX_MACRO_REFERENCE, JFlexMacroReferenceImpl.class);
+      ourMap.put(FLEX_MACRO_REF_EXPRESSION, JFlexMacroRefExpressionImpl.class);
+      ourMap.put(FLEX_NOT_EXPRESSION, JFlexNotExpressionImpl.class);
+      ourMap.put(FLEX_OPTION, JFlexOptionImpl.class);
+      ourMap.put(FLEX_PAREN_EXPRESSION, JFlexParenExpressionImpl.class);
+      ourMap.put(FLEX_PREDEFINED_CLASS_EXPRESSION, JFlexPredefinedClassExpressionImpl.class);
+      ourMap.put(FLEX_QUANTIFIER_EXPRESSION, JFlexQuantifierExpressionImpl.class);
+      ourMap.put(FLEX_RULE, JFlexRuleImpl.class);
+      ourMap.put(FLEX_SEQUENCE_EXPRESSION, JFlexSequenceExpressionImpl.class);
+      ourMap.put(FLEX_STATE_DECLARATION, JFlexStateDeclarationImpl.class);
+      ourMap.put(FLEX_STATE_DEFINITION, JFlexStateDefinitionImpl.class);
+      ourMap.put(FLEX_STATE_LIST, JFlexStateListImpl.class);
+      ourMap.put(FLEX_STATE_REFERENCE, JFlexStateReferenceImpl.class);
+      ourMap.put(FLEX_USER_CODE_SECTION, JFlexUserCodeSectionImpl.class);
+      ourMap.put(FLEX_USER_VALUE, JFlexUserValueImpl.class);
     }
   }
 }

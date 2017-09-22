@@ -24,11 +24,12 @@ import com.intellij.psi.util.PsiTreeUtil;
 import static org.intellij.jflex.psi.JFlexTypes.*;
 import org.intellij.jflex.psi.*;
 import com.intellij.psi.PsiNameIdentifierOwner;
+import com.intellij.psi.tree.IElementType;
 
-public class JFlexMacroDefinitionImpl extends JFlexCompositeElementImpl implements JFlexMacroDefinition {
+public class JFlexMacroDefinitionImpl extends JFlexCompositeImpl implements JFlexMacroDefinition {
 
-  public JFlexMacroDefinitionImpl(ASTNode node) {
-    super(node);
+  public JFlexMacroDefinitionImpl(IElementType type) {
+    super(type);
   }
 
   public void accept(@NotNull JFlexVisitor visitor) {
@@ -43,13 +44,13 @@ public class JFlexMacroDefinitionImpl extends JFlexCompositeElementImpl implemen
   @Override
   @Nullable
   public JFlexExpression getExpression() {
-    return findChildByClass(JFlexExpression.class);
+    return PsiTreeUtil.getChildOfType(this, JFlexExpression.class);
   }
 
   @Override
   @NotNull
   public PsiElement getId() {
-    return findNotNullChildByType(FLEX_ID);
+    return findPsiChildByType(FLEX_ID);
   }
 
   @NotNull

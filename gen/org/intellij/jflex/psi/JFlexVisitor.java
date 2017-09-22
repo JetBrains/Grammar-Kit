@@ -38,19 +38,19 @@ public class JFlexVisitor extends PsiElementVisitor {
   }
 
   public void visitExpression(@NotNull JFlexExpression o) {
-    visitCompositeElement(o);
+    visitComposite(o);
   }
 
   public void visitFileSection(@NotNull JFlexFileSection o) {
-    visitCompositeElement(o);
+    visitComposite(o);
   }
 
   public void visitJavaCode(@NotNull JFlexJavaCode o) {
-    visitCompositeElement(o);
+    visitComposite(o);
   }
 
   public void visitJavaType(@NotNull JFlexJavaType o) {
-    visitCompositeElement(o);
+    visitComposite(o);
   }
 
   public void visitLexicalRulesSection(@NotNull JFlexLexicalRulesSection o) {
@@ -62,7 +62,7 @@ public class JFlexVisitor extends PsiElementVisitor {
   }
 
   public void visitLookAhead(@NotNull JFlexLookAhead o) {
-    visitCompositeElement(o);
+    visitComposite(o);
   }
 
   public void visitMacroDefinition(@NotNull JFlexMacroDefinition o) {
@@ -74,7 +74,7 @@ public class JFlexVisitor extends PsiElementVisitor {
   }
 
   public void visitMacroReference(@NotNull JFlexMacroReference o) {
-    visitCompositeElement(o);
+    visitComposite(o);
   }
 
   public void visitNotExpression(@NotNull JFlexNotExpression o) {
@@ -82,7 +82,7 @@ public class JFlexVisitor extends PsiElementVisitor {
   }
 
   public void visitOption(@NotNull JFlexOption o) {
-    visitCompositeElement(o);
+    visitComposite(o);
   }
 
   public void visitParenExpression(@NotNull JFlexParenExpression o) {
@@ -98,7 +98,7 @@ public class JFlexVisitor extends PsiElementVisitor {
   }
 
   public void visitRule(@NotNull JFlexRule o) {
-    visitCompositeElement(o);
+    visitComposite(o);
   }
 
   public void visitSequenceExpression(@NotNull JFlexSequenceExpression o) {
@@ -106,7 +106,7 @@ public class JFlexVisitor extends PsiElementVisitor {
   }
 
   public void visitStateDeclaration(@NotNull JFlexStateDeclaration o) {
-    visitCompositeElement(o);
+    visitComposite(o);
   }
 
   public void visitStateDefinition(@NotNull JFlexStateDefinition o) {
@@ -114,11 +114,11 @@ public class JFlexVisitor extends PsiElementVisitor {
   }
 
   public void visitStateList(@NotNull JFlexStateList o) {
-    visitCompositeElement(o);
+    visitComposite(o);
   }
 
   public void visitStateReference(@NotNull JFlexStateReference o) {
-    visitCompositeElement(o);
+    visitComposite(o);
   }
 
   public void visitUserCodeSection(@NotNull JFlexUserCodeSection o) {
@@ -126,14 +126,14 @@ public class JFlexVisitor extends PsiElementVisitor {
   }
 
   public void visitUserValue(@NotNull JFlexUserValue o) {
-    visitCompositeElement(o);
+    visitComposite(o);
   }
 
   public void visitPsiNameIdentifierOwner(@NotNull PsiNameIdentifierOwner o) {
     visitElement(o);
   }
 
-  public void visitCompositeElement(@NotNull JFlexCompositeElement o) {
+  public void visitComposite(@NotNull JFlexComposite o) {
     visitElement(o);
   }
 

@@ -23,11 +23,12 @@ import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static org.intellij.jflex.psi.JFlexTypes.*;
 import org.intellij.jflex.psi.*;
+import com.intellij.psi.tree.IElementType;
 
 public class JFlexQuantifierExpressionImpl extends JFlexExpressionImpl implements JFlexQuantifierExpression {
 
-  public JFlexQuantifierExpressionImpl(ASTNode node) {
-    super(node);
+  public JFlexQuantifierExpressionImpl(IElementType type) {
+    super(type);
   }
 
   public void accept(@NotNull JFlexVisitor visitor) {
@@ -42,7 +43,7 @@ public class JFlexQuantifierExpressionImpl extends JFlexExpressionImpl implement
   @Override
   @NotNull
   public JFlexExpression getExpression() {
-    return findNotNullChildByClass(JFlexExpression.class);
+    return PsiTreeUtil.getChildOfType(this, JFlexExpression.class);
   }
 
 }

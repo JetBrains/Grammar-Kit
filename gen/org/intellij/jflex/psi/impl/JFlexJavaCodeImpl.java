@@ -24,11 +24,12 @@ import com.intellij.psi.util.PsiTreeUtil;
 import static org.intellij.jflex.psi.JFlexTypes.*;
 import org.intellij.jflex.psi.*;
 import com.intellij.psi.PsiReference;
+import com.intellij.psi.tree.IElementType;
 
-public class JFlexJavaCodeImpl extends JFlexCompositeElementImpl implements JFlexJavaCode {
+public class JFlexJavaCodeImpl extends JFlexCompositeImpl implements JFlexJavaCode {
 
-  public JFlexJavaCodeImpl(ASTNode node) {
-    super(node);
+  public JFlexJavaCodeImpl(IElementType type) {
+    super(type);
   }
 
   public void accept(@NotNull JFlexVisitor visitor) {

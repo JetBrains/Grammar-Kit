@@ -23,11 +23,12 @@ import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static org.intellij.jflex.psi.JFlexTypes.*;
 import org.intellij.jflex.psi.*;
+import com.intellij.psi.tree.IElementType;
 
-public class JFlexRuleImpl extends JFlexCompositeElementImpl implements JFlexRule {
+public class JFlexRuleImpl extends JFlexCompositeImpl implements JFlexRule {
 
-  public JFlexRuleImpl(ASTNode node) {
-    super(node);
+  public JFlexRuleImpl(IElementType type) {
+    super(type);
   }
 
   public void accept(@NotNull JFlexVisitor visitor) {
@@ -42,19 +43,19 @@ public class JFlexRuleImpl extends JFlexCompositeElementImpl implements JFlexRul
   @Override
   @Nullable
   public JFlexExpression getExpression() {
-    return findChildByClass(JFlexExpression.class);
+    return PsiTreeUtil.getChildOfType(this, JFlexExpression.class);
   }
 
   @Override
   @Nullable
   public JFlexJavaCode getJavaCode() {
-    return findChildByClass(JFlexJavaCode.class);
+    return PsiTreeUtil.getChildOfType(this, JFlexJavaCode.class);
   }
 
   @Override
   @Nullable
   public JFlexLookAhead getLookAhead() {
-    return findChildByClass(JFlexLookAhead.class);
+    return PsiTreeUtil.getChildOfType(this, JFlexLookAhead.class);
   }
 
   @Override
@@ -72,7 +73,7 @@ public class JFlexRuleImpl extends JFlexCompositeElementImpl implements JFlexRul
   @Override
   @Nullable
   public JFlexStateList getStateList() {
-    return findChildByClass(JFlexStateList.class);
+    return PsiTreeUtil.getChildOfType(this, JFlexStateList.class);
   }
 
 }

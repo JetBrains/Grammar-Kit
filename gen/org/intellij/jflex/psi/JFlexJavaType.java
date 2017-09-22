@@ -20,7 +20,7 @@ import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiReference;
 
-public interface JFlexJavaType extends JFlexCompositeElement {
+public interface JFlexJavaType extends JFlexComposite {
 
   @NotNull
   PsiReference[] getReferences();

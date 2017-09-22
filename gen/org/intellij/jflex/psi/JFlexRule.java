@@ -19,7 +19,7 @@ import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
-public interface JFlexRule extends JFlexCompositeElement {
+public interface JFlexRule extends JFlexComposite {
 
   @Nullable
   JFlexExpression getExpression();

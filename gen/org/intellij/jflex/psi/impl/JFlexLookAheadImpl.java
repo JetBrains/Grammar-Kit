@@ -23,11 +23,12 @@ import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static org.intellij.jflex.psi.JFlexTypes.*;
 import org.intellij.jflex.psi.*;
+import com.intellij.psi.tree.IElementType;
 
-public class JFlexLookAheadImpl extends JFlexCompositeElementImpl implements JFlexLookAhead {
+public class JFlexLookAheadImpl extends JFlexCompositeImpl implements JFlexLookAhead {
 
-  public JFlexLookAheadImpl(ASTNode node) {
-    super(node);
+  public JFlexLookAheadImpl(IElementType type) {
+    super(type);
   }
 
   public void accept(@NotNull JFlexVisitor visitor) {
@@ -42,7 +43,7 @@ public class JFlexLookAheadImpl extends JFlexCompositeElementImpl implements JFl
   @Override
   @Nullable
   public JFlexExpression getExpression() {
-    return findChildByClass(JFlexExpression.class);
+    return PsiTreeUtil.getChildOfType(this, JFlexExpression.class);
   }
 
 }

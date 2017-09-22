@@ -19,7 +19,7 @@ import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
-public interface JFlexStateList extends JFlexCompositeElement {
+public interface JFlexStateList extends JFlexComposite {
 
   @NotNull
   List<JFlexStateReference> getStateReferenceList();

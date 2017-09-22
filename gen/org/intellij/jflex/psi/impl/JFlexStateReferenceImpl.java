@@ -24,11 +24,12 @@ import com.intellij.psi.util.PsiTreeUtil;
 import static org.intellij.jflex.psi.JFlexTypes.*;
 import org.intellij.jflex.psi.*;
 import com.intellij.psi.PsiReference;
+import com.intellij.psi.tree.IElementType;
 
-public class JFlexStateReferenceImpl extends JFlexCompositeElementImpl implements JFlexStateReference {
+public class JFlexStateReferenceImpl extends JFlexCompositeImpl implements JFlexStateReference {
 
-  public JFlexStateReferenceImpl(ASTNode node) {
-    super(node);
+  public JFlexStateReferenceImpl(IElementType type) {
+    super(type);
   }
 
   public void accept(@NotNull JFlexVisitor visitor) {
@@ -43,7 +44,7 @@ public class JFlexStateReferenceImpl extends JFlexCompositeElementImpl implement
   @Override
   @NotNull
   public PsiElement getId() {
-    return findNotNullChildByType(FLEX_ID);
+    return findPsiChildByType(FLEX_ID);
   }
 
   @NotNull

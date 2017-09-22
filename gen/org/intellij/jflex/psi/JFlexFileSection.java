@@ -19,6 +19,6 @@ import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
-public interface JFlexFileSection extends JFlexCompositeElement {
+public interface JFlexFileSection extends JFlexComposite {
 
 }

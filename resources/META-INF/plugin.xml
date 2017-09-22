@@ -14,7 +14,11 @@
   <change-notes>
     <![CDATA[
     <ul>
-      <li>Generator: Generator: support dash-separated and angle-quoted rules</li>
+      <li>BNF and JFlex PSI: merge PSI and AST trees (memory/performance)</li>
+      <li>Generator: support dash-separated and angle-quoted rules</li>
+      <li>Generator: freeze on generation several grammars at once</li>
+      <li>Generator: honor explicitly set rule name</li>
+      <li>Generator: fix custom consume-type not being used after a predicate</li>
     </ul>
     <a href="https://github.com/JetBrains/Grammar-Kit#change-log">Full change log...</a>
     ]]>

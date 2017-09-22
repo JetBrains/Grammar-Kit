@@ -230,7 +230,11 @@ Change log
 ==========
 1.5.3-snapshot
 
+* BNF and JFlex PSI: merge PSI and AST trees (memory/performance)
 * Generator: support dash-separated and angle-quoted rules
+* Generator: freeze on generation several grammars at once
+* Generator: honor explicitly set rule name
+* Generator: fix custom consume-type not being used after a predicate
 
 1.5.2
 

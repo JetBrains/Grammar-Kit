@@ -17,6 +17,7 @@
 package org.intellij.grammar.generator;
 
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.util.Conditions;
 import com.intellij.openapi.util.Key;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.psi.PsiElement;
@@ -27,6 +28,7 @@ import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.util.ObjectUtils;
 import com.intellij.util.PairConsumer;
 import com.intellij.util.containers.ContainerUtil;
+import com.intellij.util.containers.JBIterable;
 import com.intellij.util.containers.JBTreeTraverser;
 import com.intellij.util.containers.TreeTraversal;
 import org.intellij.grammar.analysis.BnfFirstNextAnalyzer;
@@ -37,8 +39,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
-import static org.intellij.grammar.generator.ParserGeneratorUtil.Rule;
-import static org.intellij.grammar.generator.ParserGeneratorUtil.getChildExpressions;
+import static org.intellij.grammar.generator.ParserGeneratorUtil.*;
 import static org.intellij.grammar.generator.RuleGraphHelper.Cardinality.OPTIONAL;
 
 /**
@@ -152,12 +153,15 @@ public class ExpressionHelper {
     BnfRule rootRuleSubst = rootRule;
     if (cardinality == null) {
       Collection<BnfRule> extendsRules = myRuleGraph.getExtendsRules(rootRule);
-      for (PsiElement r : ruleContent.keySet()) {
-        if (r instanceof BnfRule && extendsRules.contains(r)) {
-          cardinality = ruleContent.get(r);
-          rootRuleSubst = (BnfRule)r;
-          break;
-        }
+      JBIterable<BnfRule> tryOtherRules = JBIterable.from(ruleContent.keySet())
+        .filter(BnfRule.class)
+        .filter(extendsRules::contains)
+        .append(getSuperRules(myFile, rootRule).filter(Conditions.notNull()));
+      for (BnfRule r : tryOtherRules) {
+        cardinality = ruleContent.get(r);
+        if (cardinality == null) continue;
+        rootRuleSubst = r;
+        break;
       }
     }
     if (Rule.isExternal(rule)) {

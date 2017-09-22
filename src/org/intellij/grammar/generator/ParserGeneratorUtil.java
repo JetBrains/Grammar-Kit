@@ -182,7 +182,7 @@ public class ParserGeneratorUtil {
     if (elementType == BnfTypes.BNF_STRING) {
       String unquoted = GrammarUtil.unquote(text);
       // in double-quoted strings: un-escape quotes only leaving the rest \ manageable
-      String result = text.charAt(0) == '"' ? unquoted.replaceAll("\\\\(\"|')", "$1") : unquoted;
+      String result = text.charAt(0) == '"' ? unquoted.replaceAll("\\\\([\"'])", "$1") : unquoted;
       return (T) result;
     }
     return null;
@@ -402,20 +402,31 @@ public class ParserGeneratorUtil {
     return result;
   }
 
+  @NotNull
+  static JBIterable<BnfRule> getSuperRules(@NotNull BnfFile file, @Nullable BnfRule rule) {
+    JBIterable<Object> result = JBIterable.generate(rule, new JBIterable.StatefulTransform<Object, Object>() {
+      Set<BnfRule> visited = ContainerUtil.newHashSet();
+
+      @Override
+      public Object fun(Object o) {
+        if (o == ObjectUtils.NULL) return null;
+        BnfRule cur = (BnfRule)o;
+        if (!visited.add(cur)) return ObjectUtils.NULL;
+        BnfRule next = getSynonymTargetOrSelf(cur);
+        if (next != cur) return next;
+        if (cur != rule) return null; // do not search for elementType any further
+        String attr = getAttribute(cur, KnownAttribute.EXTENDS);
+        //noinspection StringEquality
+        BnfRule ext = attr != KnownAttribute.EXTENDS.getDefaultValue() ? file.getRule(attr) : null;
+        return ext == null && attr != null ? null : ext;
+      }
+    }).map(o -> o == ObjectUtils.NULL ? null : o);
+    return (JBIterable<BnfRule>)(JBIterable)result;
+  }
+
   @Nullable
   static BnfRule getTopSuperRule(@NotNull BnfFile file, @Nullable BnfRule rule) {
-    Set<BnfRule> visited = ContainerUtil.newHashSet();
-    BnfRule cur = rule, next = rule;
-    for (; next != null && cur != null; cur = !visited.add(next) ? null : next) {
-      next = getSynonymTargetOrSelf(cur);
-      if (next != cur) continue;
-      if (cur != rule) break; // do not search for elementType any further
-      String attr = getAttribute(cur, KnownAttribute.EXTENDS);
-      //noinspection StringEquality
-      next = attr != KnownAttribute.EXTENDS.getDefaultValue() ? file.getRule(attr) : null;
-      if (next == null && attr != null) break;
-    }
-    return cur;
+    return getSuperRules(file, rule).last();
   }
 
   @NotNull
@@ -726,13 +737,13 @@ public class ParserGeneratorUtil {
 
   @Nullable
   public static Pattern getAllTokenPattern(Map<String, String> tokens) {
-    String allRegexp = "";
+    StringBuilder sb = new StringBuilder();
     for (String pattern : tokens.keySet()) {
       if (!isRegexpToken(pattern)) continue;
-      if (allRegexp.length() > 0) allRegexp += "|";
-      allRegexp += getRegexpTokenRegexp(pattern);
+      if (sb.length() > 0) sb.append("|");
+      sb.append(getRegexpTokenRegexp(pattern));
     }
-    return compilePattern(allRegexp);
+    return compilePattern(sb.toString());
   }
 
   public static class PinMatcher {

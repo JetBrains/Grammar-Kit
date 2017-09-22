@@ -23,11 +23,12 @@ import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static org.intellij.grammar.psi.BnfTypes.*;
 import org.intellij.grammar.psi.*;
+import com.intellij.psi.tree.IElementType;
 
-public abstract class BnfExpressionImpl extends BnfCompositeElementImpl implements BnfExpression {
+public abstract class BnfExpressionImpl extends BnfCompositeImpl implements BnfExpression {
 
-  public BnfExpressionImpl(ASTNode node) {
-    super(node);
+  public BnfExpressionImpl(IElementType type) {
+    super(type);
   }
 
   public <R> R accept(@NotNull BnfVisitor<R> visitor) {

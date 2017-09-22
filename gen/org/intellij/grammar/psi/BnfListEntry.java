@@ -20,7 +20,7 @@ import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiReference;
 
-public interface BnfListEntry extends BnfCompositeElement {
+public interface BnfListEntry extends BnfComposite {
 
   @Nullable
   PsiElement getId();

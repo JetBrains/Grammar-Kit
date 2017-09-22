@@ -19,6 +19,6 @@ import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
-public interface BnfQuantifier extends BnfCompositeElement {
+public interface BnfQuantifier extends BnfComposite {
 
 }

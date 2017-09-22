@@ -19,7 +19,7 @@ import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
-public interface BnfAttrs extends BnfCompositeElement {
+public interface BnfAttrs extends BnfComposite {
 
   @NotNull
   List<BnfAttr> getAttrList();

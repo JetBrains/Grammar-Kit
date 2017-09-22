@@ -23,11 +23,12 @@ import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static org.intellij.grammar.psi.BnfTypes.*;
 import org.intellij.grammar.psi.*;
+import com.intellij.psi.tree.IElementType;
 
-public class BnfPredicateSignImpl extends BnfCompositeElementImpl implements BnfPredicateSign {
+public class BnfPredicateSignImpl extends BnfCompositeImpl implements BnfPredicateSign {
 
-  public BnfPredicateSignImpl(ASTNode node) {
-    super(node);
+  public BnfPredicateSignImpl(IElementType type) {
+    super(type);
   }
 
   public <R> R accept(@NotNull BnfVisitor<R> visitor) {

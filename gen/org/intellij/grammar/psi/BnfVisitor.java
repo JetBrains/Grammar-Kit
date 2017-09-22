@@ -25,11 +25,11 @@ public class BnfVisitor<R> extends PsiElementVisitor {
   }
 
   public R visitAttrPattern(@NotNull BnfAttrPattern o) {
-    return visitCompositeElement(o);
+    return visitComposite(o);
   }
 
   public R visitAttrs(@NotNull BnfAttrs o) {
-    return visitCompositeElement(o);
+    return visitComposite(o);
   }
 
   public R visitChoice(@NotNull BnfChoice o) {
@@ -37,7 +37,7 @@ public class BnfVisitor<R> extends PsiElementVisitor {
   }
 
   public R visitExpression(@NotNull BnfExpression o) {
-    return visitCompositeElement(o);
+    return visitComposite(o);
   }
 
   public R visitExternalExpression(@NotNull BnfExternalExpression o) {
@@ -45,7 +45,7 @@ public class BnfVisitor<R> extends PsiElementVisitor {
   }
 
   public R visitListEntry(@NotNull BnfListEntry o) {
-    return visitCompositeElement(o);
+    return visitComposite(o);
   }
 
   public R visitLiteralExpression(@NotNull BnfLiteralExpression o) {
@@ -53,7 +53,7 @@ public class BnfVisitor<R> extends PsiElementVisitor {
   }
 
   public R visitModifier(@NotNull BnfModifier o) {
-    return visitCompositeElement(o);
+    return visitComposite(o);
   }
 
   public R visitParenExpression(@NotNull BnfParenExpression o) {
@@ -73,7 +73,7 @@ public class BnfVisitor<R> extends PsiElementVisitor {
   }
 
   public R visitPredicateSign(@NotNull BnfPredicateSign o) {
-    return visitCompositeElement(o);
+    return visitComposite(o);
   }
 
   public R visitQuantified(@NotNull BnfQuantified o) {
@@ -81,7 +81,7 @@ public class BnfVisitor<R> extends PsiElementVisitor {
   }
 
   public R visitQuantifier(@NotNull BnfQuantifier o) {
-    return visitCompositeElement(o);
+    return visitComposite(o);
   }
 
   public R visitReferenceOrToken(@NotNull BnfReferenceOrToken o) {
@@ -105,10 +105,10 @@ public class BnfVisitor<R> extends PsiElementVisitor {
   }
 
   public R visitNamedElement(@NotNull BnfNamedElement o) {
-    return visitCompositeElement(o);
+    return visitComposite(o);
   }
 
-  public R visitCompositeElement(@NotNull BnfCompositeElement o) {
+  public R visitComposite(@NotNull BnfComposite o) {
     visitElement(o);
     return null;
   }

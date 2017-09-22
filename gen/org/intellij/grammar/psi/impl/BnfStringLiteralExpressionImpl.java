@@ -23,11 +23,12 @@ import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static org.intellij.grammar.psi.BnfTypes.*;
 import org.intellij.grammar.psi.*;
+import com.intellij.psi.tree.IElementType;
 
 public class BnfStringLiteralExpressionImpl extends BnfStringImpl implements BnfStringLiteralExpression {
 
-  public BnfStringLiteralExpressionImpl(ASTNode node) {
-    super(node);
+  public BnfStringLiteralExpressionImpl(IElementType type) {
+    super(type);
   }
 
   public <R> R accept(@NotNull BnfVisitor<R> visitor) {
@@ -42,7 +43,7 @@ public class BnfStringLiteralExpressionImpl extends BnfStringImpl implements Bnf
   @Override
   @NotNull
   public PsiElement getString() {
-    return findNotNullChildByType(BNF_STRING);
+    return findPsiChildByType(BNF_STRING);
   }
 
 }

@@ -19,6 +19,6 @@ import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
-public interface BnfPredicateSign extends BnfCompositeElement {
+public interface BnfPredicateSign extends BnfComposite {
 
 }

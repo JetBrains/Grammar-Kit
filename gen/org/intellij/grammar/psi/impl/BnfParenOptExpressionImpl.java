@@ -23,11 +23,12 @@ import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static org.intellij.grammar.psi.BnfTypes.*;
 import org.intellij.grammar.psi.*;
+import com.intellij.psi.tree.IElementType;
 
 public class BnfParenOptExpressionImpl extends BnfParenthesizedImpl implements BnfParenOptExpression {
 
-  public BnfParenOptExpressionImpl(ASTNode node) {
-    super(node);
+  public BnfParenOptExpressionImpl(IElementType type) {
+    super(type);
   }
 
   public <R> R accept(@NotNull BnfVisitor<R> visitor) {

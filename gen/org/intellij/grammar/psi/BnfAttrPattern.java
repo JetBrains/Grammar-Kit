@@ -19,7 +19,7 @@ import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
-public interface BnfAttrPattern extends BnfCompositeElement {
+public interface BnfAttrPattern extends BnfComposite {
 
   @Nullable
   BnfStringLiteralExpression getLiteralExpression();

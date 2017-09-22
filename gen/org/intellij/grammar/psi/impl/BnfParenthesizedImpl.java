@@ -23,11 +23,12 @@ import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static org.intellij.grammar.psi.BnfTypes.*;
 import org.intellij.grammar.psi.*;
+import com.intellij.psi.tree.IElementType;
 
 public class BnfParenthesizedImpl extends BnfExpressionImpl implements BnfParenthesized {
 
-  public BnfParenthesizedImpl(ASTNode node) {
-    super(node);
+  public BnfParenthesizedImpl(IElementType type) {
+    super(type);
   }
 
   public <R> R accept(@NotNull BnfVisitor<R> visitor) {
@@ -42,7 +43,7 @@ public class BnfParenthesizedImpl extends BnfExpressionImpl implements BnfParent
   @Override
   @NotNull
   public BnfExpression getExpression() {
-    return findNotNullChildByClass(BnfExpression.class);
+    return PsiTreeUtil.getChildOfType(this, BnfExpression.class);
   }
 
 }

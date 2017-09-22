@@ -23,11 +23,12 @@ import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static org.intellij.grammar.psi.BnfTypes.*;
 import org.intellij.grammar.psi.*;
+import com.intellij.psi.tree.IElementType;
 
 public class BnfReferenceOrTokenImpl extends BnfRefOrTokenImpl implements BnfReferenceOrToken {
 
-  public BnfReferenceOrTokenImpl(ASTNode node) {
-    super(node);
+  public BnfReferenceOrTokenImpl(IElementType type) {
+    super(type);
   }
 
   public <R> R accept(@NotNull BnfVisitor<R> visitor) {
@@ -42,7 +43,7 @@ public class BnfReferenceOrTokenImpl extends BnfRefOrTokenImpl implements BnfRef
   @Override
   @NotNull
   public PsiElement getId() {
-    return findNotNullChildByType(BNF_ID);
+    return findPsiChildByType(BNF_ID);
   }
 
 }

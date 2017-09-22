@@ -23,11 +23,12 @@ import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static org.intellij.grammar.psi.BnfTypes.*;
 import org.intellij.grammar.psi.*;
+import com.intellij.psi.tree.IElementType;
 
 public class BnfPredicateImpl extends BnfExpressionImpl implements BnfPredicate {
 
-  public BnfPredicateImpl(ASTNode node) {
-    super(node);
+  public BnfPredicateImpl(IElementType type) {
+    super(type);
   }
 
   public <R> R accept(@NotNull BnfVisitor<R> visitor) {
@@ -42,13 +43,13 @@ public class BnfPredicateImpl extends BnfExpressionImpl implements BnfPredicate 
   @Override
   @NotNull
   public BnfExpression getExpression() {
-    return findNotNullChildByClass(BnfExpression.class);
+    return PsiTreeUtil.getChildOfType(this, BnfExpression.class);
   }
 
   @Override
   @NotNull
   public BnfPredicateSign getPredicateSign() {
-    return findNotNullChildByClass(BnfPredicateSign.class);
+    return PsiTreeUtil.getChildOfType(this, BnfPredicateSign.class);
   }
 
 }

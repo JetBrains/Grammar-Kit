@@ -23,11 +23,12 @@ import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static org.intellij.grammar.psi.BnfTypes.*;
 import org.intellij.grammar.psi.*;
+import com.intellij.psi.tree.IElementType;
 
-public class BnfAttrImpl extends BnfNamedElementImpl implements BnfAttr {
+public class BnfAttrImpl extends BnfNamedImpl implements BnfAttr {
 
-  public BnfAttrImpl(ASTNode node) {
-    super(node);
+  public BnfAttrImpl(IElementType type) {
+    super(type);
   }
 
   public <R> R accept(@NotNull BnfVisitor<R> visitor) {
@@ -42,19 +43,19 @@ public class BnfAttrImpl extends BnfNamedElementImpl implements BnfAttr {
   @Override
   @Nullable
   public BnfAttrPattern getAttrPattern() {
-    return findChildByClass(BnfAttrPattern.class);
+    return PsiTreeUtil.getChildOfType(this, BnfAttrPattern.class);
   }
 
   @Override
   @Nullable
   public BnfExpression getExpression() {
-    return findChildByClass(BnfExpression.class);
+    return PsiTreeUtil.getChildOfType(this, BnfExpression.class);
   }
 
   @Override
   @NotNull
   public PsiElement getId() {
-    return findNotNullChildByType(BNF_ID);
+    return findPsiChildByType(BNF_ID);
   }
 
 }

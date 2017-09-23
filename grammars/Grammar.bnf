@@ -1,6 +1,6 @@
 {
   classHeader="license.txt"
-  generate=[names="long" visitor-value="R" psi-factory="no" psi-classes-map="yes"]
+  generate=[names="long" visitor-value="R"]
 
   parserClass="org.intellij.grammar.parser.GrammarParser"
   parserUtilClass="org.intellij.grammar.parser.GrammarParserUtil"

@@ -31,24 +31,10 @@ import java.util.Map;
  * @author gregsh
  */
 public class JFlexASTFactory extends ASTFactory {
-  private static final Map<IElementType, Constructor<CompositePsiElement>> ourMap =
-    JBIterable.from(JFlexTypes.Classes.elementTypes()).toMap(o -> {
-      try {
-        return (Constructor<CompositePsiElement>)JFlexTypes.Classes.findClass(o).getConstructor(IElementType.class);
-      }
-      catch (NoSuchMethodException e) {
-        throw new AssertionError(e);
-      }
-    });
 
   @Nullable
   @Override
   public CompositeElement createComposite(IElementType type) {
-    try {
-      return ourMap.get(type).newInstance(type);
-    }
-    catch (Exception e) {
-      throw new AssertionError(e);
-    }
+    return JFlexTypes.Factory.createElement(type);
   }
 }

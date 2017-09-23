@@ -6,9 +6,7 @@ import com.intellij.psi.tree.IElementType;
 import com.intellij.psi.PsiElement;
 import com.intellij.lang.ASTNode;
 import org.intellij.grammar.psi.impl.*;
-import java.util.Collections;
-import java.util.Set;
-import java.util.LinkedHashMap;
+import com.intellij.psi.impl.source.tree.CompositePsiElement;
 
 public interface BnfTypes {
 
@@ -56,37 +54,67 @@ public interface BnfTypes {
   IElementType BNF_SEMICOLON = new BnfTokenType(";");
   IElementType BNF_STRING = new BnfTokenType("string");
 
-  class Classes {
-    public static Class<?> findClass(IElementType elementType) {
-      return ourMap.get(elementType);
-    }
+  class Factory {
 
-    public static Set<IElementType> elementTypes() {
-      return Collections.unmodifiableSet(ourMap.keySet());
-    }
-
-    private static final LinkedHashMap<IElementType, Class<?>> ourMap = new LinkedHashMap<IElementType, Class<?>>();
-
-    static {
-      ourMap.put(BNF_ATTR, BnfAttrImpl.class);
-      ourMap.put(BNF_ATTRS, BnfAttrsImpl.class);
-      ourMap.put(BNF_ATTR_PATTERN, BnfAttrPatternImpl.class);
-      ourMap.put(BNF_CHOICE, BnfChoiceImpl.class);
-      ourMap.put(BNF_EXTERNAL_EXPRESSION, BnfExternalExpressionImpl.class);
-      ourMap.put(BNF_LIST_ENTRY, BnfListEntryImpl.class);
-      ourMap.put(BNF_LITERAL_EXPRESSION, BnfLiteralExpressionImpl.class);
-      ourMap.put(BNF_MODIFIER, BnfModifierImpl.class);
-      ourMap.put(BNF_PAREN_EXPRESSION, BnfParenExpressionImpl.class);
-      ourMap.put(BNF_PAREN_OPT_EXPRESSION, BnfParenOptExpressionImpl.class);
-      ourMap.put(BNF_PREDICATE, BnfPredicateImpl.class);
-      ourMap.put(BNF_PREDICATE_SIGN, BnfPredicateSignImpl.class);
-      ourMap.put(BNF_QUANTIFIED, BnfQuantifiedImpl.class);
-      ourMap.put(BNF_QUANTIFIER, BnfQuantifierImpl.class);
-      ourMap.put(BNF_REFERENCE_OR_TOKEN, BnfReferenceOrTokenImpl.class);
-      ourMap.put(BNF_RULE, BnfRuleImpl.class);
-      ourMap.put(BNF_SEQUENCE, BnfSequenceImpl.class);
-      ourMap.put(BNF_STRING_LITERAL_EXPRESSION, BnfStringLiteralExpressionImpl.class);
-      ourMap.put(BNF_VALUE_LIST, BnfValueListImpl.class);
+    public static CompositePsiElement createElement(IElementType type) {
+       if (type == BNF_ATTR) {
+        return new BnfAttrImpl(type);
+      }
+      else if (type == BNF_ATTRS) {
+        return new BnfAttrsImpl(type);
+      }
+      else if (type == BNF_ATTR_PATTERN) {
+        return new BnfAttrPatternImpl(type);
+      }
+      else if (type == BNF_CHOICE) {
+        return new BnfChoiceImpl(type);
+      }
+      else if (type == BNF_EXTERNAL_EXPRESSION) {
+        return new BnfExternalExpressionImpl(type);
+      }
+      else if (type == BNF_LIST_ENTRY) {
+        return new BnfListEntryImpl(type);
+      }
+      else if (type == BNF_LITERAL_EXPRESSION) {
+        return new BnfLiteralExpressionImpl(type);
+      }
+      else if (type == BNF_MODIFIER) {
+        return new BnfModifierImpl(type);
+      }
+      else if (type == BNF_PAREN_EXPRESSION) {
+        return new BnfParenExpressionImpl(type);
+      }
+      else if (type == BNF_PAREN_OPT_EXPRESSION) {
+        return new BnfParenOptExpressionImpl(type);
+      }
+      else if (type == BNF_PREDICATE) {
+        return new BnfPredicateImpl(type);
+      }
+      else if (type == BNF_PREDICATE_SIGN) {
+        return new BnfPredicateSignImpl(type);
+      }
+      else if (type == BNF_QUANTIFIED) {
+        return new BnfQuantifiedImpl(type);
+      }
+      else if (type == BNF_QUANTIFIER) {
+        return new BnfQuantifierImpl(type);
+      }
+      else if (type == BNF_REFERENCE_OR_TOKEN) {
+        return new BnfReferenceOrTokenImpl(type);
+      }
+      else if (type == BNF_RULE) {
+        return new BnfRuleImpl(type);
+      }
+      else if (type == BNF_SEQUENCE) {
+        return new BnfSequenceImpl(type);
+      }
+      else if (type == BNF_STRING_LITERAL_EXPRESSION) {
+        return new BnfStringLiteralExpressionImpl(type);
+      }
+      else if (type == BNF_VALUE_LIST) {
+        return new BnfValueListImpl(type);
+      }
+      throw new AssertionError("Unknown element type: " + type);
     }
   }
 }

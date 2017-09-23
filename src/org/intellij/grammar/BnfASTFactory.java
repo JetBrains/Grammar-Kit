@@ -18,38 +18,18 @@ package org.intellij.grammar;
 
 import com.intellij.lang.ASTFactory;
 import com.intellij.psi.impl.source.tree.CompositeElement;
-import com.intellij.psi.impl.source.tree.CompositePsiElement;
 import com.intellij.psi.tree.IElementType;
-import com.intellij.util.containers.JBIterable;
 import org.intellij.grammar.psi.BnfTypes;
 import org.jetbrains.annotations.Nullable;
-
-import java.lang.reflect.Constructor;
-import java.util.Map;
 
 /**
  * @author gregsh
  */
 public class BnfASTFactory extends ASTFactory {
 
-  private static final Map<IElementType, Constructor<CompositePsiElement>> ourMap =
-    JBIterable.from(BnfTypes.Classes.elementTypes()).toMap(o -> {
-      try {
-        return (Constructor<CompositePsiElement>) BnfTypes.Classes.findClass(o).getConstructor(IElementType.class);
-      }
-      catch (NoSuchMethodException e) {
-        throw new AssertionError(e);
-      }
-    });
-
   @Nullable
   @Override
   public CompositeElement createComposite(IElementType type) {
-    try {
-      return ourMap.get(type).newInstance(type);
-    }
-    catch (Exception e) {
-      throw new AssertionError(e);
-    }
+    return BnfTypes.Factory.createElement(type);
   }
 }

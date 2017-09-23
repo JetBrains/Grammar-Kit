@@ -72,6 +72,7 @@ public class ParserGenerator {
   private final Set<String> myFakeRulesWithType = ContainerUtil.newHashSet();
   private final Set<String> myAbstractRules = ContainerUtil.newHashSet();
   private final Map<String, String> myRulesStubNames = ContainerUtil.newHashMap();
+  private final Map<String, Pair<Set<String>, Boolean>> myRuleClassesAndMixedAST = ContainerUtil.newHashMap();
 
   private final BnfFile myFile;
   private final String mySourcePath;
@@ -264,6 +265,11 @@ public class ParserGenerator {
         sortedCompositeTypes.put(elementType, rule);
       }
       sortedPsiRules.put(rule.getName(), rule);
+      Set<String> ruleClasses = getRuleClasses(rule);
+      boolean mixedAST = JBIterable.from(ruleClasses)
+                           .flatMap(s -> JBIterable.generate(s, myJavaHelper::getSuperClassName))
+                           .find(BnfConstants.COMPOSITE_PSI_ELEMENT_CLASS::equals) != null;
+      myRuleClassesAndMixedAST.put(rule.getName(), Pair.create(ruleClasses, mixedAST));
     }
     if (myGrammarRoot != null && (G.generateTokenTypes || G.generateElementTypes || G.generatePsi && G.generatePsiFactory)) {
       String className = getRootAttribute(myFile, KnownAttribute.ELEMENT_TYPE_HOLDER_CLASS);
@@ -1316,6 +1322,11 @@ public class ParserGenerator {
         imports.add(CommonClassNames.JAVA_UTIL_SET);
         imports.add("java.util.LinkedHashMap");
       }
+      if (G.generatePsiFactory) {
+        if (JBIterable.from(myRuleClassesAndMixedAST.values()).find(o -> o.second) != null) {
+          imports.add(COMPOSITE_PSI_ELEMENT_CLASS);
+        }
+      }
     }
     generateClassHeader(className, imports, "", Java.INTERFACE);
     if (G.generateElementTypes) {
@@ -1356,6 +1367,7 @@ public class ParserGenerator {
     if (G.generatePsi && G.generatePsiClassesMap) {
       newLine();
       out("class Classes {");
+      newLine();
       out("public static Class<?> findClass(IElementType elementType) {");
       out("return ourMap.get(elementType);");
       out("}");
@@ -1379,22 +1391,47 @@ public class ParserGenerator {
     }
     if (G.generatePsi && G.generatePsiFactory) {
       newLine();
+      boolean first1;
+      boolean first2;
       out("class Factory {");
-      out("public static " + myShortener.fun(PSI_ELEMENT_CLASS) + " createElement(" + myShortener.fun(AST_NODE_CLASS) + " node) {");
-      out("IElementType type = node.getElementType();");
-      boolean first = true;
+      first1 = true;
       for (String elementType : sortedCompositeTypes.keySet()) {
         BnfRule rule = sortedCompositeTypes.get(elementType);
         if (myAbstractRules.contains(rule.getName())) continue;
+        if (myRuleClassesAndMixedAST.get(rule.getName()).second) continue;
+        if (first1) {
+          out("public static %s createElement(%s node) {", myShortener.fun(PSI_ELEMENT_CLASS), myShortener.fun(AST_NODE_CLASS));
+          out("IElementType type = node.getElementType();");
+        }
         String psiClass = getRulePsiClassName(rule, myPsiImplClassFormat);
-        out((!first ? "else" : "") + " if (type == " + elementType + ") {");
+        out((!first1 ? "else" : "") + " if (type == " + elementType + ") {");
         out("return new " + psiClass + "(node);");
-        first = false;
+        first1 = false;
         out("}");
       }
-      out("throw new AssertionError(\"Unknown element type: \" + type);");
-
-      out("}");
+      if (!first1) {
+        out("throw new AssertionError(\"Unknown element type: \" + type);");
+        out("}");
+      }
+      first2 = true;
+      for (String elementType : sortedCompositeTypes.keySet()) {
+        BnfRule rule = sortedCompositeTypes.get(elementType);
+        if (myAbstractRules.contains(rule.getName())) continue;
+        if (!myRuleClassesAndMixedAST.get(rule.getName()).second) continue;
+        if (first2) {
+          if (first1) newLine();
+          out("public static %s createElement(%s type) {", myShortener.fun(COMPOSITE_PSI_ELEMENT_CLASS), myShortener.fun(IELEMENTTYPE_CLASS));
+        }
+        String psiClass = getRulePsiClassName(rule, myPsiImplClassFormat);
+        out((!first2 ? "else" : "") + " if (type == " + elementType + ") {");
+        out("return new " + psiClass + "(type);");
+        first2 = false;
+        out("}");
+      }
+      if (!first2) {
+        out("throw new AssertionError(\"Unknown element type: \" + type);");
+        out("}");
+      }
       out("}");
     }
     out("}");
@@ -1528,10 +1565,8 @@ public class ParserGenerator {
 
   private void generatePsiClassMethods(BnfRule rule, boolean intf) {
     Set<String> visited = ContainerUtil.newTreeSet();
-    Set<String> ruleClasses = getRuleClasses(rule);
-    boolean mixedAST = JBIterable.from(ruleClasses)
-      .flatMap(s -> JBIterable.generate(s, myJavaHelper::getSuperClassName))
-      .find(BnfConstants.COMPOSITE_PSI_ELEMENT_CLASS::equals) != null;
+    Set<String> ruleClasses = myRuleClassesAndMixedAST.get(rule.getName()).first;
+    boolean mixedAST = myRuleClassesAndMixedAST.get(rule.getName()).second;
     for (RuleMethodsHelper.MethodInfo methodInfo : myRulesMethodsHelper.getFor(rule)) {
       if (StringUtil.isEmpty(methodInfo.name)) continue;
       switch (methodInfo.type) {

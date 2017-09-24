@@ -1,6 +1,7 @@
 <html>
 <body>
-Custom PSI accessors and method mix-ins. See documentation and HOWTO for more.
+Custom PSI accessors and method mix-ins.
+See documentation and HOWTO for more.
 
 <h2>Examples:</h2>
 <pre><code>
@@ -17,8 +18,23 @@ Custom PSI accessors and method mix-ins. See documentation and HOWTO for more.
       right="/expr[1]"   // "expr" is the name of the auto-calculated child property (singular or list)
       op="/OP_PLUS"      // explicit token accessor
 
-      // user implementation methods from SamplePsiImplUtil class, i.e. "method mixin"s
-      getReferences evaluate toString
+      // method mix-ins from SamplePsiImplUtil
+      evaluate toString
+    ]
+  }
+  list ::= item + {
+    methods=[
+      element="item" // rename getItemList() method to getElementList()
+      // item=""     // .. or suppress it completely
+    ]
+  }
+  reference ::= id {
+    methods=[
+      // rename getId() to getNameIdentifier()
+      nameIdentifier="id"
+
+      // implement getReferences() API via mix-in
+      getReferences
     ]
   }
 </code></pre>

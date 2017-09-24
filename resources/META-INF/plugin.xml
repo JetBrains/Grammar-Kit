@@ -1,6 +1,6 @@
 <idea-plugin url="https://github.com/JetBrains/Grammar-Kit">
   <id>org.jetbrains.idea.grammar</id>
-  <version>1.5.3-SNAPSHOT</version>
+  <version>2017.1</version>
   <vendor email="gregory.shrago@jetbrains.com">Greg Shrago</vendor>
   <idea-version since-build="171" until-build="173.*"/>
 
@@ -14,10 +14,12 @@
   <change-notes>
     <![CDATA[
     <ul>
-      <li>BNF and JFlex PSI: merge PSI and AST trees (memory/performance)</li>
+      <li>Plugin: switch to IntelliJ IDEA versioning scheme</li>
+      <li>BNF and JFlex PSI: merge AST and PSI trees (memory/performance)</li>
       <li>Generator: support dash-separated and angle-quoted rules</li>
-      <li>Generator: freeze on generation several grammars at once</li>
+      <li>Generator: "psi-factory" support for merged AST and PSI trees</li>
       <li>Generator: honor explicitly set rule name</li>
+      <li>Generator: fix freeze on generation several grammars at once</li>
       <li>Generator: fix custom consume-type not being used after a predicate</li>
     </ul>
     <a href="https://github.com/JetBrains/Grammar-Kit#change-log">Full change log...</a>

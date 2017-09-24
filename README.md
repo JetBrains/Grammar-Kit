@@ -228,18 +228,19 @@ java -jar expression-console-sample.jar
 
 Change log
 ==========
-1.5.3-snapshot
+2017.1
 
-* BNF and JFlex PSI: merge PSI and AST trees (memory/performance)
+* Plugin: switch to IntelliJ IDEA versioning scheme
+* BNF and JFlex PSI: merge AST and PSI trees (memory/performance)
 * Generator: support dash-separated and angle-quoted rules
-* Generator: freeze on generation several grammars at once
+* Generator: "psi-factory" support for merged AST and PSI trees
 * Generator: honor explicitly set rule name
-* Generator: fix custom consume-type not being used after a predicate
+* Generator: fix freeze on generation several grammars at once
 
 1.5.2
 
 * Generator: disable first-check in presence of external predicates
-* Generator: support mixed AST-PSI trees (psi.impl.source.tree.CompositePsiElement inheritors)
+* Generator: support merged AST and PSI trees (psi.impl.source.tree.CompositePsiElement inheritors)
 * Generator: add generate=[psi-classes-map="yes"] option
 * Generator: alert of missing psi implementation methods #155
 * Generator: merge multiple list-valued attributes, e.g. "implements", "methods"

@@ -28,6 +28,7 @@ import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.util.Condition;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiReference;
@@ -90,6 +91,7 @@ public class BnfUnusedRulePassFactory extends AbstractProjectComponent implement
 
     @Override
     public void doCollectInformation(@NotNull ProgressIndicator progress) {
+      abstract class Cond<T> extends JBIterable.Stateful<Cond> implements Condition<T> { }
       Set<BnfRule> inExpr = ContainerUtil.newTroveSet();
       final Set<BnfRule> inParsing = ContainerUtil.newTroveSet();
       Map<BnfRule, String> inAttrs = ContainerUtil.newTroveMap();
@@ -97,7 +99,7 @@ public class BnfUnusedRulePassFactory extends AbstractProjectComponent implement
       bnfTraverserNoAttrs(myFile).traverse().transform(RESOLVER).filter(NOT_NULL).addAllTo(inExpr);
 
       for (int size = 0, prev = -1; size != prev; prev = size, size = inParsing.size()) {
-        bnfTraverserNoAttrs(myFile).expand(new JBIterable.StatefulFilter<PsiElement>() {
+        bnfTraverserNoAttrs(myFile).expand(new Cond<PsiElement>() {
           @Override
           public boolean value(PsiElement element) {
             if (element instanceof BnfRule) {

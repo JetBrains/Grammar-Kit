@@ -404,7 +404,8 @@ public class ParserGeneratorUtil {
 
   @NotNull
   static JBIterable<BnfRule> getSuperRules(@NotNull BnfFile file, @Nullable BnfRule rule) {
-    JBIterable<Object> result = JBIterable.generate(rule, new JBIterable.StatefulTransform<Object, Object>() {
+    abstract class Fun<S, T> extends JBIterable.Stateful<Fun> implements Function<S, T> { }
+    JBIterable<Object> result = JBIterable.generate(rule, new Fun<Object, Object>() {
       Set<BnfRule> visited = ContainerUtil.newHashSet();
 
       @Override

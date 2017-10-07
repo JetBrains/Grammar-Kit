@@ -120,6 +120,7 @@ package generated.psi;
 import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
+import generated.psi.child.XSomeChild;
 
 public interface XRenameList extends XComposite {
 
@@ -138,11 +139,12 @@ public interface XRenameList extends XComposite {
 }
 // ---- XSomeChild.java -----------------
 //header.txt
-package generated.psi;
+package generated.psi.child;
 
 import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
+import generated.psi.grand.XSomeGrandChild;
 
 public interface XSomeChild extends XComposite {
 
@@ -161,7 +163,7 @@ public interface XSomeChild extends XComposite {
 }
 // ---- XSomeGrandChild.java -----------------
 //header.txt
-package generated.psi;
+package generated.psi.grand;
 
 import java.util.List;
 import org.jetbrains.annotations.*;
@@ -183,6 +185,8 @@ package generated.psi;
 import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
+import generated.psi.child.XSomeChild;
+import generated.psi.grand.XSomeGrandChild;
 
 public interface XSomeRoot extends XComposite {
 
@@ -411,6 +415,7 @@ import com.intellij.psi.util.PsiTreeUtil;
 import static generated.GeneratedTypes.*;
 import com.intellij.extapi.psi.ASTWrapperPsiElement;
 import generated.psi.*;
+import generated.psi.child.XSomeChild;
 
 public class XRenameListImpl extends ASTWrapperPsiElement implements XRenameList {
 
@@ -450,7 +455,7 @@ public class XRenameListImpl extends ASTWrapperPsiElement implements XRenameList
 }
 // ---- XSomeChildImpl.java -----------------
 //header.txt
-package generated.psi.impl;
+package generated.psi.impl.child;
 
 import java.util.List;
 import org.jetbrains.annotations.*;
@@ -459,7 +464,8 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.util.PsiTreeUtil;
 import static generated.GeneratedTypes.*;
 import com.intellij.extapi.psi.ASTWrapperPsiElement;
-import generated.psi.*;
+import generated.psi.child.*;
+import generated.psi.grand.XSomeGrandChild;
 
 public class XSomeChildImpl extends ASTWrapperPsiElement implements XSomeChild {
 
@@ -494,7 +500,7 @@ public class XSomeChildImpl extends ASTWrapperPsiElement implements XSomeChild {
 }
 // ---- XSomeGrandChildImpl.java -----------------
 //header.txt
-package generated.psi.impl;
+package generated.psi.impl.grand;
 
 import java.util.List;
 import org.jetbrains.annotations.*;
@@ -503,7 +509,7 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.util.PsiTreeUtil;
 import static generated.GeneratedTypes.*;
 import com.intellij.extapi.psi.ASTWrapperPsiElement;
-import generated.psi.*;
+import generated.psi.grand.*;
 
 public class XSomeGrandChildImpl extends ASTWrapperPsiElement implements XSomeGrandChild {
 
@@ -536,6 +542,8 @@ import com.intellij.psi.util.PsiTreeUtil;
 import static generated.GeneratedTypes.*;
 import com.intellij.extapi.psi.ASTWrapperPsiElement;
 import generated.psi.*;
+import generated.psi.child.XSomeChild;
+import generated.psi.grand.XSomeGrandChild;
 
 public class XSomeRootImpl extends ASTWrapperPsiElement implements XSomeRoot {
 

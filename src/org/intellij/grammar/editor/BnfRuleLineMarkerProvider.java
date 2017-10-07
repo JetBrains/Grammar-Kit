@@ -22,6 +22,7 @@ import com.intellij.codeInsight.navigation.NavigationGutterIconBuilder;
 import com.intellij.openapi.actionSystem.ActionManager;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.keymap.KeymapUtil;
+import com.intellij.openapi.util.Couple;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.psi.NavigatablePsiElement;
 import com.intellij.psi.PsiElement;
@@ -36,6 +37,7 @@ import org.intellij.grammar.java.JavaHelper;
 import org.intellij.grammar.psi.BnfExpression;
 import org.intellij.grammar.psi.BnfRule;
 import org.intellij.grammar.psi.impl.GrammarUtil;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -49,8 +51,8 @@ import java.util.Set;
 public class BnfRuleLineMarkerProvider extends RelatedItemLineMarkerProvider {
 
   @Override
-  public void collectNavigationMarkers(List<PsiElement> elements,
-                                       Collection<? super RelatedItemLineMarkerInfo> result,
+  public void collectNavigationMarkers(@NotNull List<PsiElement> elements,
+                                       @NotNull Collection<? super RelatedItemLineMarkerInfo> result,
                                        boolean forNavigation) {
     Set<PsiElement> visited = forNavigation ? new THashSet<>() : null;
     for (PsiElement element : elements) {
@@ -68,8 +70,8 @@ public class BnfRuleLineMarkerProvider extends RelatedItemLineMarkerProvider {
         if (RuleGraphHelper.hasPsiClass(rule)) {
           hasPSI = true;
           JavaHelper javaHelper = JavaHelper.getJavaHelper(rule);
-          for (String className : new String[]{ParserGeneratorUtil.getQualifiedRuleClassName(rule, false),
-            ParserGeneratorUtil.getQualifiedRuleClassName(rule, true)}) {
+          Couple<String> names = ParserGeneratorUtil.getQualifiedRuleClassName(rule);
+          for (String className : new String[]{names.first, names.second}) {
             NavigatablePsiElement aClass = javaHelper.findClass(className);
             if (aClass != null && (!forNavigation || visited.add(aClass))) {
               items.add(aClass);

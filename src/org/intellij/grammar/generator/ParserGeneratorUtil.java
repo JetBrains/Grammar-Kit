@@ -19,6 +19,7 @@ import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.MessageType;
 import com.intellij.openapi.util.Comparing;
+import com.intellij.openapi.util.Couple;
 import com.intellij.openapi.util.Pair;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.psi.NavigatablePsiElement;
@@ -302,14 +303,6 @@ public class ParserGeneratorUtil {
     return format == null ? sb.toString() : format.apply(sb.toString());
   }
 
-  public static String getPsiPackage(BnfFile file) {
-    return getRootAttribute(file, KnownAttribute.PSI_PACKAGE);
-  }
-
-  public static String getPsiImplPackage(BnfFile file) {
-    return getRootAttribute(file, KnownAttribute.PSI_IMPL_PACKAGE);
-  }
-
   @NotNull
   public static NameFormat getPsiClassFormat(BnfFile file) {
     return NameFormat.from(getRootAttribute(file, KnownAttribute.PSI_CLASS_PREFIX));
@@ -327,11 +320,14 @@ public class ParserGeneratorUtil {
     return toIdentifier(rule.getName(), format, Case.CAMEL);
   }
 
-  public static String getQualifiedRuleClassName(BnfRule rule, boolean impl) {
+  public static Couple<String> getQualifiedRuleClassName(BnfRule rule) {
     BnfFile file = (BnfFile)rule.getContainingFile();
-    String packageName = impl ? getPsiImplPackage(file) : getPsiPackage(file);
-    NameFormat format = impl ? getPsiImplClassFormat(file) : getPsiClassFormat(file);
-    return packageName + "." + getRulePsiClassName(rule, format);
+    String psiPackage = getAttribute(rule, KnownAttribute.PSI_PACKAGE);
+    String psiImplPackage = getAttribute(rule, KnownAttribute.PSI_IMPL_PACKAGE);
+    NameFormat psiFormat = getPsiClassFormat(file);
+    NameFormat psiImplFormat = getPsiImplClassFormat(file);
+    return Couple.of(psiPackage + "." + getRulePsiClassName(rule, psiFormat),
+                     psiImplPackage + "." + getRulePsiClassName(rule, psiImplFormat));
   }
 
   @NotNull
@@ -339,8 +335,8 @@ public class ParserGeneratorUtil {
                                                                 @Nullable String psiImplUtilClass,
                                                                 @Nullable String methodName,
                                                                 @Nullable BnfRule rule) {
+    if (rule == null) return Collections.emptyList();
     List<NavigatablePsiElement> methods = Collections.emptyList();
-    if (rule == null) return methods;
     String selectedSuperClass = null;
     main: for (String ruleClass : getRuleClasses(rule)) {
       for (String utilClass = psiImplUtilClass; utilClass != null; utilClass = helper.getSuperClassName(utilClass)) {
@@ -389,16 +385,20 @@ public class ParserGeneratorUtil {
 
   @NotNull
   public static Set<String> getRuleClasses(@NotNull BnfRule rule) {
-    BnfFile file = (BnfFile)rule.getContainingFile();
     Set<String> result = ContainerUtil.newLinkedHashSet();
-    String superClassName = getSuperClassName(file, rule, getPsiImplPackage(file), getPsiImplClassFormat(file));
+    BnfFile file = (BnfFile)rule.getContainingFile();
+    BnfRule topSuper = getTopSuperRule(file, rule);
+    String superClassName = topSuper == null ? getRootAttribute(file, KnownAttribute.EXTENDS) :
+                            topSuper == rule ? getAttribute(rule, KnownAttribute.EXTENDS) :
+                            getAttribute(topSuper, KnownAttribute.PSI_PACKAGE) + "." +
+                            getRulePsiClassName(topSuper, getPsiClassFormat(file));
     String implSuper = StringUtil.notNullize(getAttribute(rule, KnownAttribute.MIXIN), superClassName);
-    String aPackage = getPsiPackage(file);
-    result.add(getQualifiedRuleClassName(rule, false));
-    result.add(getQualifiedRuleClassName(rule, true));
+    Couple<String> names = getQualifiedRuleClassName(rule);
+    result.add(names.first);
+    result.add(names.second);
     result.add(superClassName);
     result.add(implSuper);
-    result.addAll(getSuperInterfaceNames(file, rule, aPackage, getPsiClassFormat(file)));
+    result.addAll(getSuperInterfaceNames(file, rule, getPsiClassFormat(file)));
     return result;
   }
 
@@ -431,16 +431,14 @@ public class ParserGeneratorUtil {
   }
 
   @NotNull
-  static List<String> getSuperInterfaceNames(BnfFile file, BnfRule rule, String psiPackage, NameFormat classPrefix) {
+  static List<String> getSuperInterfaceNames(BnfFile file, BnfRule rule, NameFormat format) {
     List<String> strings = ContainerUtil.newArrayList();
     List<String> topRuleImplements = Collections.emptyList();
     String topRuleClass = null;
     BnfRule topSuper = getTopSuperRule(file, rule);
-    boolean withPackage = psiPackage.isEmpty();
     if (topSuper != null && topSuper != rule) {
       topRuleImplements = getAttribute(topSuper, KnownAttribute.IMPLEMENTS).asStrings();
-      topRuleClass =
-        StringUtil.nullize((withPackage ? "" : psiPackage + ".") + getRulePsiClassName(topSuper, classPrefix));
+      topRuleClass = getAttribute(topSuper, KnownAttribute.PSI_PACKAGE) + "." + getRulePsiClassName(topSuper, format);
       if (!StringUtil.isEmpty(topRuleClass)) strings.add(topRuleClass);
     }
     List<String> rootImplements = getRootAttribute(file, KnownAttribute.IMPLEMENTS).asStrings();
@@ -449,7 +447,7 @@ public class ParserGeneratorUtil {
       if (className == null) continue;
       BnfRule superIntfRule = file.getRule(className);
       if (superIntfRule != null) {
-        strings.add((withPackage ? "" : psiPackage + ".") + getRulePsiClassName(superIntfRule, classPrefix));
+        strings.add(getAttribute(superIntfRule, KnownAttribute.PSI_PACKAGE) + "." + getRulePsiClassName(superIntfRule, format));
       }
       else if (!topRuleImplements.contains(className) &&
                (topRuleClass == null || !rootImplements.contains(className))) {
@@ -462,14 +460,6 @@ public class ParserGeneratorUtil {
       }
     }
     return strings;
-  }
-
-  @NotNull
-  static String getSuperClassName(@NotNull BnfFile file, @Nullable BnfRule rule, String psiPackage, NameFormat format) {
-    BnfRule topSuper = getTopSuperRule(file, rule);
-    return topSuper == null ? getRootAttribute(file, KnownAttribute.EXTENDS) :
-           topSuper == rule ? getAttribute(rule, KnownAttribute.EXTENDS) :
-           psiPackage + "." + getRulePsiClassName(topSuper, format);
   }
 
   @Nullable

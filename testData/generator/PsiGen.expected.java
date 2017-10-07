@@ -42,6 +42,9 @@ public class PsiGen implements PsiParser, LightPsiParser {
     else if (root_ == PLUS_EXPR) {
       result_ = plus_expr(builder_, 0);
     }
+    else if (root_ == ROOT) {
+      result_ = root(builder_, 0);
+    }
     else if (root_ == ROOT_B) {
       result_ = root_b(builder_, 0);
     }
@@ -58,11 +61,11 @@ public class PsiGen implements PsiParser, LightPsiParser {
   }
 
   protected boolean parse_root_(IElementType root_, PsiBuilder builder_, int level_) {
-    return root(builder_, level_ + 1);
+    return grammar_root(builder_, level_ + 1);
   }
 
   public static final TokenSet[] EXTENDS_SETS_ = new TokenSet[] {
-    create_token_set_(ROOT_B, ROOT_C, ROOT_D),
+    create_token_set_(ROOT, ROOT_B, ROOT_C, ROOT_D),
     create_token_set_(A_STATEMENT, B_STATEMENT, C_STATEMENT, STATEMENT),
     create_token_set_(CAST_EXPR, CHOICE_JOINED, EXPR, ID_EXPR,
       ITEM_EXPR, LITERAL, MISSING_EXTERNAL_TYPE, MUL_EXPR,
@@ -217,6 +220,12 @@ public class PsiGen implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
+  // root
+  static boolean grammar_root(PsiBuilder builder_, int level_) {
+    return root(builder_, level_ + 1);
+  }
+
+  /* ********************************************************** */
   // specialRef | reference | literal | external_type | external_type2
   static boolean id_expr(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "id_expr")) return false;
@@ -316,15 +325,15 @@ public class PsiGen implements PsiParser, LightPsiParser {
 
   /* ********************************************************** */
   // root_a | root_b | root_c | root_d
-  static boolean root(PsiBuilder builder_, int level_) {
+  public static boolean root(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "root")) return false;
     boolean result_;
-    Marker marker_ = enter_section_(builder_);
+    Marker marker_ = enter_section_(builder_, level_, _COLLAPSE_, ROOT, "<root>");
     result_ = parseGrammar(builder_, level_ + 1, grammar_element_parser_);
     if (!result_) result_ = root_b(builder_, level_ + 1);
     if (!result_) result_ = root_c(builder_, level_ + 1);
     if (!result_) result_ = root_d(builder_, level_ + 1);
-    exit_section_(builder_, marker_, null, result_);
+    exit_section_(builder_, level_, marker_, result_, false, null);
     return result_;
   }
 

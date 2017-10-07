@@ -54,8 +54,14 @@ fake some-root ::= some-child value {
 }
 fake some-child ::= some-grand-child "something" something2 {
   methods=[smth1="MY_SOMETHING" smth2="MY_SOMETHING"]
+  psiPackage="generated.psi.child"
+  psiImplPackage="generated.psi.impl.child"
 }
-fake some-grand-child ::= MY_SOMETHING something2 {pin=1}
+fake some-grand-child ::= MY_SOMETHING something2 {
+  pin=1
+  psiPackage="generated.psi.grand"
+  psiImplPackage="generated.psi.impl.grand"
+}
 
 fake rename-list ::= some-child * {
   methods=[

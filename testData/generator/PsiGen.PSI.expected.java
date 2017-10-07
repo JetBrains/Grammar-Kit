@@ -31,6 +31,7 @@ public interface GeneratedTypes {
   IElementType MUL_EXPR = MyTypeFactory.createExprType("MUL_EXPR");
   IElementType PLUS_EXPR = MyTypeFactory.createExprType("PLUS_EXPR");
   IElementType REF_EXPR = MyTypeFactory.createExprType("REF_EXPR");
+  IElementType ROOT = new IElementType("ROOT", null);
   IElementType ROOT_B = new MyRootType("ROOT_B");
   IElementType ROOT_C = new MyRootType("ROOT_C");
   IElementType ROOT_D = new MyRootType("ROOT_D");
@@ -460,6 +461,17 @@ public interface XRefExpr extends XExpr, MyRef {
 
   @NotNull
   XIdentifier getIdentifier();
+
+}
+// ---- XRoot.java -----------------
+//header.txt
+package generated.psi;
+
+import java.util.List;
+import org.jetbrains.annotations.*;
+import com.intellij.psi.PsiElement;
+
+public interface XRoot extends XComposite {
 
 }
 // ---- XRootB.java -----------------
@@ -1378,6 +1390,36 @@ public class XRefExprImpl extends MyRefImpl implements XRefExpr {
   }
 
 }
+// ---- XRootImpl.java -----------------
+//header.txt
+package generated.psi.impl;
+
+import java.util.List;
+import org.jetbrains.annotations.*;
+import com.intellij.lang.ASTNode;
+import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiElementVisitor;
+import com.intellij.psi.util.PsiTreeUtil;
+import static generated.GeneratedTypes.*;
+import com.intellij.extapi.psi.ASTWrapperPsiElement;
+import generated.psi.*;
+
+public abstract class XRootImpl extends ASTWrapperPsiElement implements XRoot {
+
+  public XRootImpl(ASTNode node) {
+    super(node);
+  }
+
+  public void accept(@NotNull XVisitor visitor) {
+    visitor.visitRoot(this);
+  }
+
+  public void accept(@NotNull PsiElementVisitor visitor) {
+    if (visitor instanceof XVisitor) accept((XVisitor)visitor);
+    else super.accept(visitor);
+  }
+
+}
 // ---- XRootBImpl.java -----------------
 //header.txt
 package generated.psi.impl;
@@ -1705,6 +1747,10 @@ public class XVisitor extends PsiElementVisitor {
     // visitMyRef(o);
   }
 
+  public void visitRoot(@NotNull XRoot o) {
+    visitComposite(o);
+  }
+
   public void visitRootB(@NotNull XRootB o) {
     visitRoot(o);
   }
@@ -1735,10 +1781,6 @@ public class XVisitor extends PsiElementVisitor {
 
   public void visitPsiNameIdentifierOwner(@NotNull PsiNameIdentifierOwner o) {
     visitElement(o);
-  }
-
-  public void visitRoot(@NotNull XRoot o) {
-    visitComposite(o);
   }
 
   public void visitComposite(@NotNull XComposite o) {

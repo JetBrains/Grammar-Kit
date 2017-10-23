@@ -203,7 +203,7 @@ Lexer can be provided separately or one can use the generated \*.flex file as a 
 Parser generator generates token types constants and PSI by default.
 This can be switched off via *generateTokens* and *generatePSI* global boolean attributes respectively.
  
-*elementType* rule attribute allows to mix the generated code and some existing hand-made PSI.   
+*elementType* rule attribute allows mixing the generated code and some existing hand-made PSI.   
 
 
 Standalone usage

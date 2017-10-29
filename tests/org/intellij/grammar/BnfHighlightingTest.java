@@ -107,7 +107,7 @@ public class BnfHighlightingTest extends LightPlatformCodeInsightFixtureTestCase
     }
     WriteAction.run(() -> {
       ModifiableRootModel model = ModuleRootManager.getInstance(module).getModifiableModel();
-      String supportUrl = getUrl(testDataPath + "/../../support");
+      String supportUrl = getUrl(testDataPath + "/../../src");
       String genUrl = getUrl(testDataPath + "/../../gen");
       if (add) {
         model.addContentEntry(supportUrl).addSourceFolder(supportUrl, false);

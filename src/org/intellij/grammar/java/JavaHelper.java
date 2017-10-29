@@ -131,6 +131,9 @@ public abstract class JavaHelper {
     @Override
     public PsiReferenceProvider getClassReferenceProvider() {
       JavaClassReferenceProvider provider = new JavaClassReferenceProvider();
+      provider.setOption(JavaClassReferenceProvider.ALLOW_DOLLAR_NAMES, false);
+      provider.setOption(JavaClassReferenceProvider.ADVANCED_RESOLVE, true);
+      provider.setOption(JavaClassReferenceProvider.DEFAULT_PACKAGE, CommonClassNames.DEFAULT_PACKAGE);
       provider.setSoft(false);
       return provider;
     }

@@ -15,28 +15,26 @@
  */
 package org.intellij.grammar.editor;
 
-import com.intellij.codeInsight.intention.IntentionAction;
-import com.intellij.lang.annotation.Annotation;
 import com.intellij.lang.annotation.AnnotationHolder;
 import com.intellij.lang.annotation.Annotator;
 import com.intellij.openapi.editor.markup.TextAttributes;
 import com.intellij.openapi.project.DumbAware;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.openapi.util.text.StringUtil;
-import com.intellij.psi.*;
+import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiFile;
+import com.intellij.psi.PsiReference;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.util.ObjectUtils;
+import com.intellij.util.containers.ContainerUtil;
 import org.intellij.grammar.KnownAttribute;
-import org.intellij.grammar.generator.BnfConstants;
 import org.intellij.grammar.generator.ParserGeneratorUtil;
 import org.intellij.grammar.generator.RuleGraphHelper;
-import org.intellij.grammar.java.JavaHelper;
 import org.intellij.grammar.psi.*;
 import org.intellij.grammar.psi.impl.BnfRefOrTokenImpl;
+import org.intellij.grammar.psi.impl.BnfReferenceImpl;
 import org.intellij.grammar.psi.impl.GrammarUtil;
 import org.jetbrains.annotations.NotNull;
-
-import java.util.StringTokenizer;
 
 /**
  * @author gregsh
@@ -59,20 +57,13 @@ public class BnfAnnotator implements Annotator, DumbAware {
       BnfAttr attr = PsiTreeUtil.getParentOfType(parent, BnfAttr.class);
       KnownAttribute attribute = attr != null ? KnownAttribute.getCompatibleAttribute(attr.getName()) : null;
       if (attribute == KnownAttribute.METHODS && !hasValue) {
-        PsiReference reference = parent.findReferenceAt(psiElement.getStartOffsetInParent());
-        PsiElement resolve = reference == null ? null : reference.resolve();
-        if (resolve == null) {
-          annotationHolder.createWarningAnnotation(psiElement, "Unresolved method reference");
-        }
-        else {
-          annotationHolder.createInfoAnnotation(psiElement, null).setTextAttributes(BnfSyntaxHighlighter.EXTERNAL);
-        }
+        annotationHolder.createInfoAnnotation(psiElement, null).setTextAttributes(BnfSyntaxHighlighter.EXTERNAL);
       }
     }
     else if (psiElement instanceof BnfReferenceOrToken) {
       if (parent instanceof BnfAttr) {
         String text = psiElement.getText();
-        if (text.equals("true") || text.equals("false")) {
+        if ("true".equals(text) || "false".equals(text)) {
           annotationHolder.createInfoAnnotation(psiElement, null).setTextAttributes(BnfSyntaxHighlighter.KEYWORD);
           return;
         }
@@ -84,9 +75,6 @@ public class BnfAnnotator implements Annotator, DumbAware {
       }
       else if (resolve instanceof BnfAttr) {
         annotationHolder.createInfoAnnotation(psiElement, null).setTextAttributes(BnfSyntaxHighlighter.ATTRIBUTE);
-      }
-      else if (resolve == null && parent instanceof BnfAttr) {
-        annotationHolder.createWarningAnnotation(psiElement, "Unresolved rule reference");
       }
       else if (GrammarUtil.isExternalReference(psiElement)) {
         if (resolve == null && parent instanceof BnfExternalExpression && ((BnfExternalExpression)parent).getExpressionList().size() == 1 &&
@@ -106,64 +94,15 @@ public class BnfAnnotator implements Annotator, DumbAware {
         annotationHolder.createInfoAnnotation(psiElement, null).setEnforcedTextAttributes(TextAttributes.ERASE_MARKER);
         annotationHolder.createInfoAnnotation(psiElement, null).setTextAttributes(BnfSyntaxHighlighter.PATTERN);
       }
-      if (parent instanceof BnfAttrPattern) {
-        PsiReference reference = psiElement.getReference();
-        if (reference instanceof PsiPolyVariantReference && ((PsiPolyVariantReference)reference).multiResolve(false).length == 0) {
-          annotationHolder.createWarningAnnotation(psiElement, "Pattern doesn't match any rule");
-        }
-      }
-      else if (parent instanceof BnfAttr || parent instanceof BnfListEntry) {
-        final String attrName = ObjectUtils.assertNotNull(PsiTreeUtil.getParentOfType(psiElement, BnfAttr.class)).getName();
+      if (parent instanceof BnfAttr || parent instanceof BnfListEntry) {
+        String attrName = ObjectUtils.assertNotNull(PsiTreeUtil.getParentOfType(psiElement, BnfAttr.class)).getName();
         KnownAttribute attribute = KnownAttribute.getCompatibleAttribute(attrName);
         if (attribute != null) {
-          String value = (String)ParserGeneratorUtil.getAttributeValue((BnfExpression)psiElement);
-          Object resolve;
-          String refType = "";
-          JavaHelper javaHelper = JavaHelper.getJavaHelper(psiElement);
-          if (attribute.getName().endsWith("Class") || attribute == KnownAttribute.MIXIN) {
-            resolve = checkJavaResolve(value, javaHelper);
-            refType = "class ";
-          }
-          else if (attribute.getName().endsWith("Package")) {
-            resolve = javaHelper.findPackage(value);
-            refType = "package ";
-          }
-          else if (attribute.getName().endsWith("Factory")) {
-            resolve = Boolean.TRUE; // todo
-          }
-          else if (attribute == KnownAttribute.EXTENDS || attribute == KnownAttribute.IMPLEMENTS) {
-            resolve = value.contains(".") ? checkJavaResolve(value, javaHelper) :
-                      ((BnfFile)psiElement.getContainingFile()).getRule(value);
-            refType = "rule or class ";
-          }
-          else if (attribute == KnownAttribute.ELEMENT_TYPE || attribute == KnownAttribute.NAME) {
-            resolve = ObjectUtils.chooseNotNull(((BnfFile)psiElement.getContainingFile()).getRule(value), Boolean.TRUE);
-            refType = "rule or constant ";
-          }
-          else if (attribute == KnownAttribute.RECOVER_WHILE && !BnfConstants.RECOVER_AUTO.equals(value)) {
-            if (GrammarUtil.isDoubleAngles(value) &&
-                ParserGeneratorUtil.Rule.isMeta(ParserGeneratorUtil.Rule.of((BnfStringLiteralExpression)psiElement))) {
-              resolve = Boolean.TRUE;
-            }
-            else {
-              resolve = ((BnfFile)psiElement.getContainingFile()).getRule(value);
-              refType = "rule ";
-            }
-          }
-          else {
-            resolve = Boolean.TRUE;
-          }
-          TextRange range = ElementManipulators.getValueTextRange(psiElement).shiftRight(psiElement.getTextRange().getStartOffset());
+          BnfReferenceImpl reference = ContainerUtil.findInstance(psiElement.getReferences(), BnfReferenceImpl.class);
+          PsiElement resolve = reference == null ? null : reference.resolve();
           if (resolve instanceof BnfRule) {
+            TextRange range = reference.getRangeInElement().shiftRight(psiElement.getTextRange().getStartOffset());
             annotationHolder.createInfoAnnotation(range, null).setTextAttributes(BnfSyntaxHighlighter.RULE);
-          }
-          else if (resolve == null) {
-            Annotation annotation = annotationHolder.createWarningAnnotation(range, "Unresolved " + refType + "reference");
-            if (refType.contains("class")) {
-              boolean intf = attribute == KnownAttribute.IMPLEMENTS;
-              IntentionAction fix = JavaHelper.getJavaHelper(parent).getCreateClassQuickFix(parent, value, intf, null);
-              if (fix != null) annotation.registerFix(fix, null, null);
-            }
           }
         }
       }
@@ -191,12 +130,4 @@ public class BnfAnnotator implements Annotator, DumbAware {
     }
   }
 
-  private static Object checkJavaResolve(String value, JavaHelper javaHelper) {
-    Object resolve = null;
-    for (String s : StringUtil.tokenize(new StringTokenizer(value, "<>,?", false))) {
-      resolve = javaHelper.findClass(s.trim());
-      if (resolve == null) break;
-    }
-    return resolve;
-  }
 }

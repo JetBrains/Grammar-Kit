@@ -16,19 +16,19 @@
 
 package org.intellij.grammar.inspection;
 
-import com.intellij.codeInspection.*;
+import com.intellij.codeInspection.LocalInspectionTool;
+import com.intellij.codeInspection.LocalQuickFix;
+import com.intellij.codeInspection.ProblemsHolder;
 import com.intellij.lang.ASTNode;
 import com.intellij.openapi.util.TextRange;
-import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiFile;
-import com.intellij.psi.PsiRecursiveElementWalkingVisitor;
+import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.impl.source.tree.TreeUtil;
 import gnu.trove.THashSet;
 import org.intellij.grammar.analysis.BnfFirstNextAnalyzer;
 import org.intellij.grammar.psi.BnfChoice;
 import org.intellij.grammar.psi.BnfExpression;
 import org.intellij.grammar.psi.BnfTypes;
-import org.jetbrains.annotations.Nls;
+import org.intellij.grammar.psi.BnfVisitor;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -38,24 +38,16 @@ import java.util.Set;
  * @author gregsh
  */
 public class BnfUnreachableChoiceBranchInspection extends LocalInspectionTool {
-
+  @NotNull
   @Override
-  public ProblemDescriptor[] checkFile(@NotNull PsiFile file, @NotNull InspectionManager manager, boolean isOnTheFly) {
-    ProblemsHolder problemsHolder = new ProblemsHolder(manager, file, isOnTheFly);
-    checkFile(file, problemsHolder);
-    return problemsHolder.getResultsArray();
-  }
-
-  private static void checkFile(PsiFile file, final ProblemsHolder problemsHolder) {
-    file.accept(new PsiRecursiveElementWalkingVisitor() {
+  public PsiElementVisitor buildVisitor(@NotNull ProblemsHolder holder, boolean isOnTheFly) {
+    return new BnfVisitor<Void>() {
       @Override
-      public void visitElement(PsiElement element) {
-        if (element instanceof BnfChoice) {
-          checkChoice((BnfChoice)element, problemsHolder);
-        }
-        super.visitElement(element);
+      public Void visitChoice(@NotNull BnfChoice o) {
+        checkChoice(o, holder);
+        return null;
       }
-    });
+    };
   }
 
   private static void checkChoice(BnfChoice choice, ProblemsHolder problemsHolder) {

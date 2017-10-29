@@ -16,16 +16,13 @@
 
 package org.intellij.grammar.inspection;
 
-import com.intellij.codeInspection.InspectionManager;
 import com.intellij.codeInspection.LocalInspectionTool;
-import com.intellij.codeInspection.ProblemDescriptor;
 import com.intellij.codeInspection.ProblemsHolder;
-import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiFile;
-import com.intellij.psi.PsiRecursiveElementWalkingVisitor;
+import com.intellij.psi.PsiElementVisitor;
 import gnu.trove.THashSet;
 import org.intellij.grammar.psi.BnfChoice;
 import org.intellij.grammar.psi.BnfExpression;
+import org.intellij.grammar.psi.BnfVisitor;
 import org.intellij.grammar.psi.impl.GrammarUtil;
 import org.jetbrains.annotations.NotNull;
 
@@ -41,29 +38,22 @@ import java.util.Set;
  */
 public class BnfIdenticalChoiceBranchesInspection extends LocalInspectionTool {
 
+  @NotNull
   @Override
-  public ProblemDescriptor[] checkFile(@NotNull PsiFile file, @NotNull InspectionManager manager, boolean isOnTheFly) {
-    ProblemsHolder problemsHolder = new ProblemsHolder(manager, file, isOnTheFly);
-    checkFile(file, problemsHolder);
-    return problemsHolder.getResultsArray();
-  }
-
-  private static void checkFile(PsiFile file, final ProblemsHolder problemsHolder) {
-    final THashSet<BnfExpression> set = new THashSet<>();
-    file.accept(new PsiRecursiveElementWalkingVisitor() {
+  public PsiElementVisitor buildVisitor(@NotNull ProblemsHolder holder, boolean isOnTheFly) {
+    return new BnfVisitor<Void>() {
+      THashSet<BnfExpression> set = new THashSet<>();
       @Override
-      public void visitElement(PsiElement element) {
-        if (element instanceof BnfChoice) {
-          BnfChoice choice = (BnfChoice)element;
-          checkChoice(choice, set);
-          for (BnfExpression e : set) {
-            BnfUnreachableChoiceBranchInspection.registerProblem(choice, e, "Duplicate choice branch", problemsHolder, new BnfRemoveExpressionFix());
-          }
-          set.clear();
+      public Void visitChoice(@NotNull BnfChoice o) {
+        checkChoice(o, set);
+        for (BnfExpression e : set) {
+          BnfUnreachableChoiceBranchInspection.registerProblem(
+            o, e, "Duplicate choice branch", holder, new BnfRemoveExpressionFix());
         }
-        super.visitElement(element);
+        set.clear();
+        return null;
       }
-    });
+    };
   }
 
   private static void checkChoice(BnfChoice choice, Set<BnfExpression> set) {

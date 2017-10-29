@@ -16,25 +16,19 @@
 
 package org.intellij.grammar.inspection;
 
-import com.intellij.codeInspection.InspectionManager;
 import com.intellij.codeInspection.LocalInspectionTool;
-import com.intellij.codeInspection.ProblemDescriptor;
 import com.intellij.codeInspection.ProblemsHolder;
 import com.intellij.openapi.util.text.StringUtil;
-import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiFile;
-import com.intellij.psi.PsiRecursiveElementWalkingVisitor;
+import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.PsiReference;
+import com.intellij.util.containers.JBIterable;
 import org.intellij.grammar.generator.ParserGeneratorUtil;
-import org.intellij.grammar.generator.RuleGraphHelper;
 import org.intellij.grammar.psi.BnfExternalExpression;
-import org.intellij.grammar.psi.BnfFile;
 import org.intellij.grammar.psi.BnfRule;
+import org.intellij.grammar.psi.BnfVisitor;
 import org.intellij.grammar.psi.impl.BnfRefOrTokenImpl;
-import org.jetbrains.annotations.Nls;
+import org.intellij.grammar.psi.impl.GrammarUtil;
 import org.jetbrains.annotations.NotNull;
-
-import java.util.Set;
 
 /**
  * Created by IntelliJ IDEA.
@@ -44,39 +38,29 @@ import java.util.Set;
  * @author Vadim Romansky
  */
 public class BnfSuspiciousTokenInspection extends LocalInspectionTool {
-
+  @NotNull
   @Override
-  public ProblemDescriptor[] checkFile(@NotNull PsiFile file, @NotNull InspectionManager manager, boolean isOnTheFly) {
-    ProblemsHolder problemsHolder = new ProblemsHolder(manager, file, isOnTheFly);
-    checkFile(file, problemsHolder);
-    return problemsHolder.getResultsArray();
-  }
-
-  private static void checkFile(final PsiFile file, final ProblemsHolder problemsHolder) {
-    if (!(file instanceof BnfFile)) return;
-    final Set<String> tokens = RuleGraphHelper.getTokenNameToTextMap((BnfFile)file).keySet();
-    file.accept(new PsiRecursiveElementWalkingVisitor() {
+  public PsiElementVisitor buildVisitor(@NotNull ProblemsHolder holder, boolean isOnTheFly) {
+    return new BnfVisitor<Void>() {
       @Override
-      public void visitElement(PsiElement element) {
-        if (element instanceof BnfRule) {
-          // do not check external rules
-          if (ParserGeneratorUtil.Rule.isExternal((BnfRule)element)) return;
-        }
-        else if (element instanceof BnfExternalExpression) {
-          // do not check external expressions
-          return;
-        }
-        else if (element instanceof BnfRefOrTokenImpl) {
-          PsiReference reference = element.getReference();
+      public Void visitRule(@NotNull BnfRule o) {
+        if (ParserGeneratorUtil.Rule.isExternal(o)) return null;
+        JBIterable<BnfRefOrTokenImpl> tokens = GrammarUtil.bnfTraverser(o.getExpression())
+          .expand(s -> !(s instanceof BnfExternalExpression))
+          .filter(BnfRefOrTokenImpl.class);
+        for (BnfRefOrTokenImpl token : tokens) {
+          PsiReference reference = token.getReference();
           Object resolve = reference == null ? null : reference.resolve();
-          final String text = element.getText();
+          final String text = token.getText();
           if (resolve == null && !tokens.contains(text) && isTokenTextSuspicious(text)) {
-            problemsHolder.registerProblem(element, "'"+text+"' token looks like a reference to a missing rule", new CreateRuleFromTokenFix(text));
+            holder.registerProblem(token,
+                                   "'" + text + "' token looks like a reference to a missing rule",
+                                   new CreateRuleFromTokenFix(text));
           }
         }
-        super.visitElement(element);
+        return null;
       }
-    });
+    };
   }
 
   public static boolean isTokenTextSuspicious(String text) {

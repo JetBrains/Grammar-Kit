@@ -25,7 +25,6 @@ import com.intellij.util.containers.ContainerUtil;
 import org.intellij.grammar.psi.BnfFile;
 import org.intellij.grammar.psi.BnfRule;
 import org.intellij.grammar.psi.impl.GrammarUtil;
-import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Set;
@@ -38,30 +37,6 @@ import java.util.Set;
  * @author Vadim Romansky
  */
 public class BnfDuplicateRuleInspection extends LocalInspectionTool {
-
-  @Nls
-  @NotNull
-  @Override
-  public String getGroupDisplayName() {
-    return "Grammar/BNF";
-  }
-
-  @Nls
-  @NotNull
-  @Override
-  public String getDisplayName() {
-    return "Duplicate rule";
-  }
-
-  @NotNull
-  @Override
-  public String getShortName() {
-    return "BnfDuplicateRuleInspection";
-  }
-
-  public boolean isEnabledByDefault() {
-    return true;
-  }
 
   public ProblemDescriptor[] checkFile(@NotNull PsiFile file, @NotNull InspectionManager manager, boolean isOnTheFly) {
     ProblemsHolder problemsHolder = new ProblemsHolder(manager, file, isOnTheFly);

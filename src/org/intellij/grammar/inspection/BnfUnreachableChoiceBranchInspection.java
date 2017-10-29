@@ -39,30 +39,6 @@ import java.util.Set;
  */
 public class BnfUnreachableChoiceBranchInspection extends LocalInspectionTool {
 
-  @Nls
-  @NotNull
-  @Override
-  public String getGroupDisplayName() {
-    return "Grammar/BNF";
-  }
-
-  @Nls
-  @NotNull
-  @Override
-  public String getDisplayName() {
-    return "Unreachable choice branch";
-  }
-
-  @NotNull
-  @Override
-  public String getShortName() {
-    return "BnfUnreachableChoiceBranchInspection";
-  }
-
-  public boolean isEnabledByDefault() {
-    return true;
-  }
-
   @Override
   public ProblemDescriptor[] checkFile(@NotNull PsiFile file, @NotNull InspectionManager manager, boolean isOnTheFly) {
     ProblemsHolder problemsHolder = new ProblemsHolder(manager, file, isOnTheFly);

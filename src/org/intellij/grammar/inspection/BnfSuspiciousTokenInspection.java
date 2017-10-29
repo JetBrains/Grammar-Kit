@@ -45,31 +45,6 @@ import java.util.Set;
  */
 public class BnfSuspiciousTokenInspection extends LocalInspectionTool {
 
-  @Nls
-  @NotNull
-  @Override
-  public String getGroupDisplayName() {
-    return "Grammar/BNF";
-  }
-
-  @Nls
-  @NotNull
-  @Override
-  public String getDisplayName() {
-    return "Suspicious token";
-  }
-
-  @NotNull
-  @Override
-  public String getShortName() {
-    return "BnfSuspiciousTokenInspection";
-  }
-
-  @Override
-  public boolean isEnabledByDefault() {
-    return true;
-  }
-
   @Override
   public ProblemDescriptor[] checkFile(@NotNull PsiFile file, @NotNull InspectionManager manager, boolean isOnTheFly) {
     ProblemsHolder problemsHolder = new ProblemsHolder(manager, file, isOnTheFly);

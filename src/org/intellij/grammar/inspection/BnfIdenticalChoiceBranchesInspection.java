@@ -27,7 +27,6 @@ import gnu.trove.THashSet;
 import org.intellij.grammar.psi.BnfChoice;
 import org.intellij.grammar.psi.BnfExpression;
 import org.intellij.grammar.psi.impl.GrammarUtil;
-import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -41,30 +40,6 @@ import java.util.Set;
  * @author Vadim Romansky
  */
 public class BnfIdenticalChoiceBranchesInspection extends LocalInspectionTool {
-  @Nls
-  @NotNull
-  @Override
-  public String getGroupDisplayName() {
-    return "Grammar/BNF";
-  }
-
-  @Nls
-  @NotNull
-  @Override
-  public String getDisplayName() {
-    return "Identical choice branches";
-  }
-
-  @NotNull
-  @Override
-  public String getShortName() {
-    return "BnfIdenticalChoiceBranchesInspection";
-  }
-
-  @Override
-  public boolean isEnabledByDefault() {
-    return true;
-  }
 
   @Override
   public ProblemDescriptor[] checkFile(@NotNull PsiFile file, @NotNull InspectionManager manager, boolean isOnTheFly) {

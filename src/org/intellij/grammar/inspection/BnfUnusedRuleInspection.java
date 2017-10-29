@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.intellij.grammar;
+package org.intellij.grammar.inspection;
 
 import com.intellij.codeHighlighting.Pass;
 import com.intellij.codeHighlighting.TextEditorHighlightingPass;
@@ -35,6 +35,7 @@ import com.intellij.psi.PsiReference;
 import com.intellij.util.Function;
 import com.intellij.util.containers.ContainerUtil;
 import com.intellij.util.containers.JBIterable;
+import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.generator.ParserGeneratorUtil;
 import org.intellij.grammar.psi.*;
 import org.jetbrains.annotations.NonNls;
@@ -54,9 +55,9 @@ import static org.intellij.grammar.psi.impl.GrammarUtil.bnfTraverserNoAttrs;
 /**
  * @author gregsh
  */
-public class BnfUnusedRulePassFactory extends AbstractProjectComponent implements TextEditorHighlightingPassFactory {
+public class BnfUnusedRuleInspection extends AbstractProjectComponent implements TextEditorHighlightingPassFactory {
 
-  public BnfUnusedRulePassFactory(Project project, TextEditorHighlightingPassRegistrar highlightingPassRegistrar) {
+  public BnfUnusedRuleInspection(Project project, TextEditorHighlightingPassRegistrar highlightingPassRegistrar) {
     super(project);
     highlightingPassRegistrar.registerTextEditorHighlightingPass(this, new int[]{Pass.UPDATE_ALL,}, null, true, -1);
   }

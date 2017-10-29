@@ -63,17 +63,20 @@
 
     <documentationProvider implementation="org.intellij.grammar.BnfDocumentationProvider"/>
 
-    <localInspection language="BNF" shortName="BnfSuspiciousTokenInspection" displayName="Suspicious token" groupName="Grammar Inspections"
-                     enabledByDefault="true" level="WARNING" implementationClass="org.intellij.grammar.inspection.BnfSuspiciousTokenInspection"/>
-    <localInspection language="BNF" shortName="BnfLeftRecursionInspection" displayName="Left recursion" groupName="Grammar Inspections"
-                     enabledByDefault="true" level="WARNING" implementationClass="org.intellij.grammar.inspection.BnfLeftRecursionInspection"/>
-    <localInspection language="BNF" shortName="BnfDuplicateRuleInspection" displayName="Duplicate rule" groupName="Grammar Inspections"
-                     enabledByDefault="true" level="WARNING" implementationClass="org.intellij.grammar.inspection.BnfDuplicateRuleInspection"/>
-    <localInspection language="BNF" shortName="BnfIdenticalChoiceBranchesInspection" displayName="Identical choice branches"
-                     groupName="Grammar Inspections" enabledByDefault="true" level="WARNING"
+    <localInspection language="BNF" level="WARNING" groupName="Grammar Inspections" enabledByDefault="true"
+                     displayName="Suspicious token"
+                     implementationClass="org.intellij.grammar.inspection.BnfSuspiciousTokenInspection"/>
+    <localInspection language="BNF" level="WARNING" groupName="Grammar Inspections" enabledByDefault="true"
+                     displayName="Left recursion"
+                     implementationClass="org.intellij.grammar.inspection.BnfLeftRecursionInspection"/>
+    <localInspection language="BNF" level="WARNING" groupName="Grammar Inspections" enabledByDefault="true"
+                     displayName="Duplicate rule"
+                     implementationClass="org.intellij.grammar.inspection.BnfDuplicateRuleInspection"/>
+    <localInspection language="BNF" level="WARNING" groupName="Grammar Inspections" enabledByDefault="true"
+                     displayName="Identical choice branches"
                      implementationClass="org.intellij.grammar.inspection.BnfIdenticalChoiceBranchesInspection"/>
-    <localInspection language="BNF" shortName="BnfUnreachableChoiceBranchInspection" displayName="Unreachable choice branch"
-                     groupName="Grammar Inspections" enabledByDefault="true" level="WARNING"
+    <localInspection language="BNF" level="WARNING" groupName="Grammar Inspections" enabledByDefault="true"
+                     displayName="Unreachable choice branch"
                      implementationClass="org.intellij.grammar.inspection.BnfUnreachableChoiceBranchInspection"/>
 
     <colorSettingsPage implementation="org.intellij.grammar.editor.BnfColorSettingsPage"/>
@@ -103,7 +106,7 @@
   </extensions>
   <project-components>
     <component>
-      <implementation-class>org.intellij.grammar.BnfUnusedRulePassFactory</implementation-class>
+      <implementation-class>org.intellij.grammar.inspection.BnfUnusedRuleInspection</implementation-class>
       <skipForDefaultProject/>
     </component>
   </project-components>

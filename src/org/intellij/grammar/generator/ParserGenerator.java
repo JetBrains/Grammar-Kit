@@ -1109,6 +1109,7 @@ public class ParserGenerator {
       list.add(getElementType(tokenName));
       if (!pinApplied && pinMatcher.matches(i, child)) {
         pin = i - startIndex + 1;
+        pinApplied = true;
       }
     }
     if (list.size() < 2) return nodeCall;

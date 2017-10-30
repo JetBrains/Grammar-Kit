@@ -166,7 +166,7 @@ For simple cases parser will consists just of several generated classes.
 
 The actual error recovery and reporting code as well as completion functionality for parser-based completion provider and basic token matching code resides
 in a _parserUtilClass_ class. It may be altered by specifying some other class that extend or mimic the original [GeneratedParserUtilBase](src/org/intellij/grammar/parser/GeneratedParserUtilBase.java).
-There's no need to keep a copy of GeneratedParserUtilBase in a project, it is included in IntelliJ Platform since version 12.1.
+There's no need to keep a copy of GeneratedParserUtilBase in a project, it is included in *IntelliJ Platform* since version 12.1.
 
 The manual parsing code, i.e. _external_ rules must be implemented the same way as generated, by a static method in the _parserUtilClass_ class or any other class that will
 be imported via _parserImports_ attribute like this:
@@ -211,17 +211,33 @@ This can be switched off via *generateTokens* and *generatePSI* global boolean a
 Standalone usage
 ================
 
-Put the following files next to grammar-kit.jar:
-* jdom.jar, trove4j.jar, extensions.jar, picocontainer.jar, junit.jar, idea.jar, openapi.jar, util.jar, all in a "lib" folder
-* or [light-psi-all.jar](../../releases)
+### Standalone generator
+This way of running the parser generator has certain limitations in regards to PSI generation:
+* Method mixins require two-pass generation
+* Generic signatures may not be exact
 
-Note: light-psi-all.jar contains just the required subset of IntelliJ IDEA Platform classes. It can be rebuilt for one`s need at any moment via "LightPsi-All: Package" run configurations in this project.
+Grammar-Kit depends on *IntelliJ Platform* classes.
+Required jars are specified in [grammar-kit.jar!/META-INF/MANIFEST.MF](https://github.com/JetBrains/Grammar-Kit/blob/master/resources/META-INF/MANIFEST.MF#L3-L7).
+When running via `java -jar` one can either (1) provide original *IntelliJ Platform* jars in `lib` subfolder next to the `grammar-kit.jar`
+or (2) the experimental [light-psi-all.jar](../../releases) right next to the `grammar-kit.jar`
+(only the required platform classes in one file built by *LightPsi-All: Package* run configuration).
 
-To generate parser/PSI use the following command (light-psi-all.jar will be picked automatically from the current folder):
 ````
-java -jar grammar-kit.jar <output-dir> <grammar1> ...
+<dir>
+├─ lib/<IntelliJ jars> (1)
+├─ light-psi-all.jar   (2)
+└─ grammar-kit.jar
+
+// java -jar
+java -jar grammar-kit.jar <output-dir> <grammars-and-dirs>
+
+// java -cp
+java -cp grammar-kit.jar;<all-the-needed-jars> org.intellij.grammar.Main <output-dir> <grammars-and-dirs>
 ````
 
+[Gradle plugin](https://github.com/hurricup/gradle-grammar-kit-plugin) is also available. 
+
+### Standalone parser
 The following command demonstrates the sample [expression parser](testData/generator/ExprParser.bnf) in action:
 ````
 java -jar expression-console-sample.jar

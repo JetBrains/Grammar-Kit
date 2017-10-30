@@ -69,6 +69,12 @@
                      displayName="Unresolved BNF references"
                      implementationClass="org.intellij.grammar.inspection.BnfResolveInspection"/>
     <localInspection language="BNF" level="WARNING" groupName="Grammar Inspections" enabledByDefault="true"
+                     displayName="Unused rule"
+                     implementationClass="org.intellij.grammar.inspection.BnfUnusedRuleInspection"/>
+    <localInspection language="BNF" level="WARNING" groupName="Grammar Inspections" enabledByDefault="true"
+                     displayName="Unused attribute"
+                     implementationClass="org.intellij.grammar.inspection.BnfUnusedAttributeInspection"/>
+    <localInspection language="BNF" level="WARNING" groupName="Grammar Inspections" enabledByDefault="true"
                      displayName="Suspicious token"
                      implementationClass="org.intellij.grammar.inspection.BnfSuspiciousTokenInspection"/>
     <localInspection language="BNF" level="WARNING" groupName="Grammar Inspections" enabledByDefault="true"
@@ -109,12 +115,6 @@
     <lang.psiStructureViewFactory language="JFlex" implementationClass="org.intellij.jflex.editor.JFlexStructureViewFactory"/>
 
   </extensions>
-  <project-components>
-    <component>
-      <implementation-class>org.intellij.grammar.inspection.BnfUnusedRuleInspection</implementation-class>
-      <skipForDefaultProject/>
-    </component>
-  </project-components>
   <actions>
     <group id="grammar.file.group" popup="false">
       <action id="grammar.Generate" class="org.intellij.grammar.actions.GenerateAction" text="Generate Parser Code">

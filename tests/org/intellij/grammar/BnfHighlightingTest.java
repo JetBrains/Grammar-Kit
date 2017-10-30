@@ -78,7 +78,10 @@ public class BnfHighlightingTest extends LightPlatformCodeInsightFixtureTestCase
   }
 
   private void doTest() {
-    myFixture.enableInspections(BnfSuspiciousTokenInspection.class,
+    myFixture.enableInspections(BnfResolveInspection.class,
+                                BnfUnusedRuleInspection.class,
+                                BnfUnusedAttributeInspection.class,
+                                BnfSuspiciousTokenInspection.class,
                                 BnfDuplicateRuleInspection.class,
                                 BnfIdenticalChoiceBranchesInspection.class,
                                 BnfLeftRecursionInspection.class,

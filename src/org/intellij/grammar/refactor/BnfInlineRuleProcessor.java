@@ -62,12 +62,13 @@ public class BnfInlineRuleProcessor extends BaseRefactoringProcessor {
   }
 
   @NotNull
-  protected UsageViewDescriptor createUsageViewDescriptor(UsageInfo[] usages) {
+  protected UsageViewDescriptor createUsageViewDescriptor(@NotNull UsageInfo[] usages) {
     return new BnfInlineViewDescriptor(myRule);
   }
 
+  @NotNull
   protected String getCommandName() {
-    return "Inline rule '"+myRule.getName()+"'";
+    return "Inline rule '" + myRule.getName() + "'";
   }
 
   @NotNull
@@ -83,12 +84,12 @@ public class BnfInlineRuleProcessor extends BaseRefactoringProcessor {
     return result.toArray(new UsageInfo[result.size()]);
   }
 
-  protected void refreshElements(PsiElement[] elements) {
+  protected void refreshElements(@NotNull PsiElement[] elements) {
     LOG.assertTrue(elements.length == 1 && elements[0] instanceof BnfRule);
     myRule = (BnfRule)elements[0];
   }
 
-  protected void performRefactoring(UsageInfo[] usages) {
+  protected void performRefactoring(@NotNull UsageInfo[] usages) {
     BnfExpression expression = myRule.getExpression();
     boolean meta = ParserGeneratorUtil.Rule.isMeta(myRule);
 
@@ -154,7 +155,7 @@ public class BnfInlineRuleProcessor extends BaseRefactoringProcessor {
             int idx = visited.get(text);
             if (idx == 0) visited.put(text, idx = visited.size() + 1);
             if (idx < expressionList.size()) {
-              work.addFirst(Pair.create(element, (PsiElement)expressionList.get(idx)));
+              work.addFirst(Pair.create(element, expressionList.get(idx)));
             }
           }
         }

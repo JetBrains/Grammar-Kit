@@ -46,6 +46,13 @@ public class BnfParserDefinition implements ParserDefinition {
   public static final IElementType BNF_BLOCK_COMMENT = BnfTypes.BNF_BLOCK_COMMENT;
   public static final TokenSet COMMENTS = TokenSet.create(BNF_LINE_COMMENT, BNF_BLOCK_COMMENT);
   public static final TokenSet LITERALS = TokenSet.create(BnfTypes.BNF_STRING);
+  public static final TokenSet PARENS = TokenSet.create(
+    BnfTypes.BNF_LEFT_PAREN, BnfTypes.BNF_LEFT_BRACE, BnfTypes.BNF_LEFT_BRACKET, BnfTypes.BNF_EXTERNAL_START,
+    BnfTypes.BNF_RIGHT_PAREN, BnfTypes.BNF_RIGHT_BRACE, BnfTypes.BNF_RIGHT_BRACKET, BnfTypes.BNF_EXTERNAL_END);
+  public static final TokenSet OPERATORS = TokenSet.create(
+    BnfTypes.BNF_OP_AND, BnfTypes.BNF_OP_EQ, BnfTypes.BNF_OP_NOT, BnfTypes.BNF_OP_ONEMORE, BnfTypes.BNF_OP_OPT,
+    BnfTypes.BNF_OP_OR, BnfTypes.BNF_OP_ZEROMORE);
+  public static final TokenSet ATOMS = TokenSet.create(BnfTypes.BNF_ID, BnfTypes.BNF_NUMBER, BnfTypes.BNF_STRING);
 
   @NotNull
   @Override
@@ -93,7 +100,11 @@ public class BnfParserDefinition implements ParserDefinition {
   }
 
   @Override
-  public SpaceRequirements spaceExistanceTypeBetweenTokens(ASTNode astNode, ASTNode astNode1) {
+  public SpaceRequirements spaceExistanceTypeBetweenTokens(ASTNode node1, ASTNode node2) {
+    IElementType t1 = node1.getElementType();
+    IElementType t2 = node2.getElementType();
+    if (t1 == BnfTypes.BNF_LINE_COMMENT) return SpaceRequirements.MUST_LINE_BREAK;
+    //if (ATOMS.contains(t1) && ATOMS.contains(t2)) return SpaceRequirements.MUST;
     return SpaceRequirements.MAY;
   }
 }

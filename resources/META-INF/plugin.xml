@@ -63,6 +63,8 @@
 
     <documentationProvider implementation="org.intellij.grammar.BnfDocumentationProvider"/>
 
+    <lang.inspectionSuppressor language="BNF" implementationClass="org.intellij.grammar.inspection.BnfInspectionSuppressor"/>
+
     <localInspection language="BNF" level="WARNING" groupName="Grammar Inspections" enabledByDefault="true"
                      displayName="Unresolved BNF references"
                      implementationClass="org.intellij.grammar.inspection.BnfResolveInspection"/>

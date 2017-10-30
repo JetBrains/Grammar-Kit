@@ -46,6 +46,7 @@ import com.intellij.openapi.project.DumbServiceImpl;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.startup.StartupManager;
 import com.intellij.openapi.util.Disposer;
+import com.intellij.openapi.util.KeyedExtensionCollector;
 import com.intellij.openapi.util.io.FileUtil;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.openapi.vfs.encoding.EncodingManager;
@@ -95,6 +96,9 @@ public class LightPsi {
       throw new RuntimeException(e);
     }
   }
+  
+  public static void init() {
+  }
 
   @Nullable
   public static PsiFile parseFile(@NotNull File file, @NotNull ParserDefinition parserDefinition) throws IOException {
@@ -138,7 +142,7 @@ public class LightPsi {
 
   private static int mainImpl(File classesFile, File outJarFile) throws Throwable {
     BufferedReader reader = new BufferedReader(new FileReader(classesFile));
-    Pattern pattern = Pattern.compile("\\[Loaded (.*) from (?:file:)?(.*)\\]");
+    Pattern pattern = Pattern.compile("\\[Loaded (.*) from (?:file:)?(.*)]");
 
     JarOutputStream jar = new JarOutputStream(new FileOutputStream(outJarFile));
     int count = 0;
@@ -183,7 +187,7 @@ public class LightPsi {
 
     private final MockProject myProject;
 
-    MyParsing() throws Exception {
+    MyParsing() {
       myProject = Init.initAppAndProject(this);
       Init.initExtensions(myProject);
     }
@@ -191,7 +195,7 @@ public class LightPsi {
     @Nullable
     protected PsiFile createFile(@NotNull String name, @NotNull String text, @NotNull ParserDefinition definition) {
       Language language = definition.getFileNodeType().getLanguage();
-      Init.addExplicitExtension(getProject(), LanguageParserDefinitions.INSTANCE, language, definition);
+      Init.addKeyedExtension(LanguageParserDefinitions.INSTANCE, language, definition, getProject());
       return ((PsiFileFactoryImpl)PsiFileFactory.getInstance(myProject)).trySetupPsiForFile(new LightVirtualFile(name, language, text), language, true, false);
     }
 
@@ -229,8 +233,7 @@ public class LightPsi {
       Extensions.getRootArea().registerExtensionPoint("com.intellij.useScopeOptimizer", "com.intellij.psi.search.UseScopeOptimizer");
       Extensions.getRootArea().registerExtensionPoint("com.intellij.languageInjector", "com.intellij.psi.LanguageInjector");
       Extensions.getArea(project).registerExtensionPoint("com.intellij.multiHostInjector", "com.intellij.lang.injection.MultiHostInjector");
-      Extensions.getRootArea().registerExtensionPoint("com.intellij.codeInsight.containerProvider",
-                                                      "com.intellij.codeInsight.ContainerProvider");
+      Extensions.getRootArea().registerExtensionPoint("com.intellij.codeInsight.containerProvider", "com.intellij.codeInsight.ContainerProvider");
       Extensions.getRootArea().getExtensionPoint("com.intellij.referencesSearch").registerExtension(new CachesBasedRefSearcher());
       registerApplicationService(project, PsiReferenceService.class, PsiReferenceServiceImpl.class);
       registerApplicationService(project, JobLauncher.class, JobLauncherImpl.class);
@@ -322,9 +325,14 @@ public class LightPsi {
       container.registerComponentInstance(key, implementation);
     }
 
-    public static <T> void addExplicitExtension(Project project, final LanguageExtension<T> instance, final Language language, final T object) {
-      instance.addExplicitExtension(language, object);
-      Disposer.register(project, () -> instance.removeExplicitExtension(language, object));
+    public static <T, KeyT> void addKeyedExtension(@NotNull KeyedExtensionCollector<T, KeyT> instance, 
+                                                   @NotNull KeyT key, 
+                                                   @NotNull T object, 
+                                                   @Nullable Disposable disposable) {
+      instance.addExplicitExtension(key, object);
+      if (disposable != null) {
+        Disposer.register(disposable, () -> instance.removeExplicitExtension(key, object));
+      }
     }
   }
 }

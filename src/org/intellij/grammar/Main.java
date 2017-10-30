@@ -16,6 +16,8 @@
 
 package org.intellij.grammar;
 
+import com.intellij.lang.LanguageASTFactory;
+import com.intellij.lang.LanguageBraceMatching;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.psi.PsiFile;
 import org.intellij.grammar.generator.ParserGenerator;
@@ -34,7 +36,7 @@ import java.util.regex.Pattern;
  * @noinspection UseOfSystemOutOrSystemErr
  */
 public class Main {
-  public static void main(String[] args) throws Exception {
+  public static void main(String[] args) {
     if (args.length < 2) {
       System.out.println("Usage: Main <output-dir> <grammars or patterns>");
       return;
@@ -44,6 +46,9 @@ public class Main {
       System.out.println("Output directory not found: " + output.getAbsolutePath());
       return;
     }
+    LightPsi.init();
+    LightPsi.Init.addKeyedExtension(LanguageASTFactory.INSTANCE, BnfLanguage.INSTANCE, new BnfASTFactory(), null);
+    LightPsi.Init.addKeyedExtension(LanguageBraceMatching.INSTANCE, BnfLanguage.INSTANCE, new BnfBraceMatcher(), null);
 
     try {
       BnfParserDefinition parserDefinition = new BnfParserDefinition();

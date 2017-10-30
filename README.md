@@ -11,16 +11,18 @@ Adds BNF Grammars and JFlex files editing support including parser/PSI code gene
 
 Open-source plugins built with Grammar-Kit:
 
-* [intellij-erlang](https://github.com/ignatov/intellij-erlang),
-[go-lang-idea-plugin](https://github.com/go-lang-plugin-org/go-lang-idea-plugin),
-[intellij-rust](https://github.com/intellij-rust/intellij-rust),
-* [intellij-haskforce](https://github.com/carymrobbins/intellij-haskforce),
-[elm-plugin](https://github.com/durkiewicz/elm-plugin),
-[Perl5-IDEA](https://github.com/Camelcade/Perl5-IDEA),
-[Cypher](https://github.com/neueda/jetbrains-plugin-graph-database-support),
-* [Clojure-Kit](https://github.com/gregsh/Clojure-Kit), [Dart](https://github.com/JetBrains/intellij-plugins/tree/master/Dart),
-[intellij-haxe](https://github.com/JetBrains/intellij-haxe),
-[OGNL](https://github.com/JetBrains/intellij-plugins/tree/master/struts2)
+* [Clojure-Kit](https://github.com/gregsh/Clojure-Kit), 
+  [intellij-rust](https://github.com/intellij-rust/intellij-rust),
+  [intellij-erlang](https://github.com/ignatov/intellij-erlang),
+  [go-lang-idea-plugin](https://github.com/go-lang-plugin-org/go-lang-idea-plugin),
+* [intellij-haskforce](https://github.com/carymrobbins/intellij-haskforce), 
+  [elm-plugin](https://github.com/durkiewicz/elm-plugin),
+  [intellij-elixir](https://github.com/KronicDeth/intellij-elixir),
+  [Perl5-IDEA](https://github.com/Camelcade/Perl5-IDEA),
+* [Dart](https://github.com/JetBrains/intellij-plugins/tree/master/Dart), 
+  [intellij-haxe](https://github.com/JetBrains/intellij-haxe),
+  [Cypher](https://github.com/neueda/jetbrains-plugin-graph-database-support),
+  [OGNL](https://github.com/JetBrains/intellij-plugins/tree/master/struts2)
 
 
 Quick links: [Tutorial](TUTORIAL.md), [HOWTO](HOWTO.md), [Standalone usage](#standalone-usage).
@@ -203,7 +205,7 @@ Lexer can be provided separately or one can use the generated \*.flex file as a 
 Parser generator generates token types constants and PSI by default.
 This can be switched off via *generateTokens* and *generatePSI* global boolean attributes respectively.
  
-*elementType* rule attribute allows to mix the generated code and some existing hand-made PSI.   
+*elementType* rule attribute allows mixing the generated code and some existing hand-made PSI.   
 
 
 Standalone usage
@@ -228,6 +230,11 @@ java -jar expression-console-sample.jar
 
 Change log
 ==========
+2017.1.1-snapshot
+
+* Generator: per-rule psiPackage and psiImplPackage attributes
+* Inspections: comment-based inspection suppression
+
 2017.1
 
 * Plugin: switch to IntelliJ IDEA versioning scheme

@@ -13,28 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.intellij.jflex.psi;
 
-import java.util.List;
-import org.jetbrains.annotations.*;
-import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiNameIdentifierOwner;
 
-public interface JFlexMacroDefinition extends JFlexNamedElement {
-
-  @Nullable
-  JFlexExpression getExpression();
-
-  @NotNull
-  PsiElement getId();
-
-  @NotNull
-  String getName();
-
-  @NotNull
-  PsiNameIdentifierOwner setName(String newName);
-
-  @NotNull
-  PsiElement getNameIdentifier();
-
+/**
+ * @author gregsh
+ */
+public interface JFlexNamedElement extends JFlexComposite, PsiNameIdentifierOwner {
 }

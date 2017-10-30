@@ -19,6 +19,8 @@
   elementTypeClass="org.intellij.jflex.psi.JFlexCompositeElementType"
   tokenTypeClass="org.intellij.jflex.psi.JFlexTokenType"
 
+  implements(".*_definition")="org.intellij.jflex.psi.JFlexNamedElement"
+
   tokens = [
     id = 'regexp:(_|\p{Alpha})\w*'
     line_comment='regexp://..'
@@ -125,8 +127,6 @@
   name("option.*")="option"
   name("char_class_.*|char_range")="char"
 
-  //consumeTokenMethod("character|macro_reference|.*_(recover|expression|op)")="consumeTokenFast"
-  //consumeTokenMethod="consumeTokenFast"
 }
 
 flex_file ::= []
@@ -256,12 +256,10 @@ option_obsolete ::= '%notunix' | '%yyeof'
 
 state_declaration ::= ('%state' | '%xstate') state_definition ((','? !(id '=')) state_definition) * ','? {pin=1}
 state_definition ::= id {
-  implements="com.intellij.psi.PsiNameIdentifierOwner"
   methods=[getName setName getNameIdentifier]
 }
 
 macro_definition ::= new_line id '=' expression {pin=3
-  implements="com.intellij.psi.PsiNameIdentifierOwner"
   methods=[getName setName getNameIdentifier]
   recoverWhile=macro_definition_recover
 }

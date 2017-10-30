@@ -20,7 +20,7 @@ import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiNameIdentifierOwner;
 
-public interface JFlexStateDefinition extends PsiNameIdentifierOwner {
+public interface JFlexStateDefinition extends JFlexNamedElement {
 
   @NotNull
   PsiElement getId();

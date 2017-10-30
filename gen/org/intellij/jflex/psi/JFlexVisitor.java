@@ -17,7 +17,6 @@ package org.intellij.jflex.psi;
 
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElementVisitor;
-import com.intellij.psi.PsiNameIdentifierOwner;
 
 public class JFlexVisitor extends PsiElementVisitor {
 
@@ -66,7 +65,7 @@ public class JFlexVisitor extends PsiElementVisitor {
   }
 
   public void visitMacroDefinition(@NotNull JFlexMacroDefinition o) {
-    visitPsiNameIdentifierOwner(o);
+    visitNamedElement(o);
   }
 
   public void visitMacroRefExpression(@NotNull JFlexMacroRefExpression o) {
@@ -110,7 +109,7 @@ public class JFlexVisitor extends PsiElementVisitor {
   }
 
   public void visitStateDefinition(@NotNull JFlexStateDefinition o) {
-    visitPsiNameIdentifierOwner(o);
+    visitNamedElement(o);
   }
 
   public void visitStateList(@NotNull JFlexStateList o) {
@@ -129,8 +128,8 @@ public class JFlexVisitor extends PsiElementVisitor {
     visitComposite(o);
   }
 
-  public void visitPsiNameIdentifierOwner(@NotNull PsiNameIdentifierOwner o) {
-    visitElement(o);
+  public void visitNamedElement(@NotNull JFlexNamedElement o) {
+    visitComposite(o);
   }
 
   public void visitComposite(@NotNull JFlexComposite o) {

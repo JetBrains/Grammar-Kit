@@ -99,6 +99,17 @@ BnfFile:SelfFlex.bnf
         BNF_STRING_LITERAL_EXPRESSION: "org.intellij.jflex.psi.JFlexTokenType"
           PsiElement(string)('"org.intellij.jflex.psi.JFlexTokenType"')
       PsiWhiteSpace('\n\n  ')
+      BNF_ATTR:implements
+        PsiElement(id)('implements')
+        BNF_ATTR_PATTERN
+          PsiElement(()('(')
+          BNF_STRING_LITERAL_EXPRESSION: ".*_definition"
+            PsiElement(string)('".*_definition"')
+          PsiElement())(')')
+        PsiElement(=)('=')
+        BNF_STRING_LITERAL_EXPRESSION: "org.intellij.jflex.psi.JFlexNamedElement"
+          PsiElement(string)('"org.intellij.jflex.psi.JFlexNamedElement"')
+      PsiWhiteSpace('\n\n  ')
       BNF_ATTR:tokens
         PsiElement(id)('tokens')
         PsiWhiteSpace(' ')
@@ -784,11 +795,7 @@ BnfFile:SelfFlex.bnf
         PsiElement(=)('=')
         BNF_STRING_LITERAL_EXPRESSION: "char"
           PsiElement(string)('"char"')
-      PsiWhiteSpace('\n\n  ')
-      PsiComment(line_comment)('//consumeTokenMethod("character|macro_reference|.*_(recover|expression|op)")="consumeTokenFast"')
-      PsiWhiteSpace('\n  ')
-      PsiComment(line_comment)('//consumeTokenMethod="consumeTokenFast"')
-      PsiWhiteSpace('\n')
+      PsiWhiteSpace('\n\n')
       PsiElement(})('}')
     PsiWhiteSpace('\n\n')
     BNF_RULE:flex_file
@@ -2062,12 +2069,6 @@ BnfFile:SelfFlex.bnf
       BNF_ATTRS
         PsiElement({)('{')
         PsiWhiteSpace('\n  ')
-        BNF_ATTR:implements
-          PsiElement(id)('implements')
-          PsiElement(=)('=')
-          BNF_STRING_LITERAL_EXPRESSION: "com.intellij.psi.PsiNameIdentifierOwner"
-            PsiElement(string)('"com.intellij.psi.PsiNameIdentifierOwner"')
-        PsiWhiteSpace('\n  ')
         BNF_ATTR:methods
           PsiElement(id)('methods')
           PsiElement(=)('=')
@@ -2110,12 +2111,6 @@ BnfFile:SelfFlex.bnf
           PsiElement(=)('=')
           BNF_LITERAL_EXPRESSION: 3
             PsiElement(number)('3')
-        PsiWhiteSpace('\n  ')
-        BNF_ATTR:implements
-          PsiElement(id)('implements')
-          PsiElement(=)('=')
-          BNF_STRING_LITERAL_EXPRESSION: "com.intellij.psi.PsiNameIdentifierOwner"
-            PsiElement(string)('"com.intellij.psi.PsiNameIdentifierOwner"')
         PsiWhiteSpace('\n  ')
         BNF_ATTR:methods
           PsiElement(id)('methods')

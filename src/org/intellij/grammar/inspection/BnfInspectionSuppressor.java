@@ -26,10 +26,7 @@ import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.util.IncorrectOperationException;
 import com.intellij.util.containers.JBIterable;
 import org.intellij.grammar.BnfLanguage;
-import org.intellij.grammar.psi.BnfAttr;
-import org.intellij.grammar.psi.BnfComposite;
-import org.intellij.grammar.psi.BnfFile;
-import org.intellij.grammar.psi.BnfRule;
+import org.intellij.grammar.psi.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -72,7 +69,8 @@ public class BnfInspectionSuppressor implements InspectionSuppressor {
       JBIterable.generate(PsiTreeUtil.getDeepestFirst(root), PsiTreeUtil::nextLeaf) :
       JBIterable.generate(root, PsiTreeUtil::prevLeaf).skip(1);
     JBIterable<PsiComment> comments = leafs
-      .takeWhile(e -> e instanceof PsiWhiteSpace || e instanceof PsiComment)
+      .takeWhile(e -> e instanceof PsiWhiteSpace || e instanceof PsiComment ||
+                      e instanceof BnfSequence && e.getTextLength() == 0)
       .filter(PsiComment.class);
     for (PsiComment comment : comments) {
       Matcher matcher = SuppressionUtil.SUPPRESS_IN_LINE_COMMENT_PATTERN.matcher(comment.getText());

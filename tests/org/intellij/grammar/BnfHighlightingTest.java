@@ -53,6 +53,8 @@ public class BnfHighlightingTest extends LightPlatformCodeInsightFixtureTestCase
   public void testUnusedRule4() { doTest("r ::= {recoverWhile=A} private A ::= "); }
   public void testUnusedRule5() { doTest("r ::= {recoverWhile=A} <warning>A</warning> ::= "); }
 
+  public void testSuppressUnused() { doTest("r ::= \n//noinspection BnfUnusedRule\nA ::= B C B::= C::="); }
+
   private void doFileTest() {
     String name = getTestName(false) + ".bnf";
     String adjusted;

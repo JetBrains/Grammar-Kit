@@ -21,12 +21,12 @@ import com.intellij.openapi.util.Condition;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiReference;
-import com.intellij.util.Function;
 import com.intellij.util.containers.ContainerUtil;
 import com.intellij.util.containers.JBIterable;
 import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.generator.ParserGeneratorUtil;
 import org.intellij.grammar.psi.*;
+import org.intellij.grammar.psi.impl.BnfReferenceImpl;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -45,13 +45,6 @@ import static org.intellij.grammar.psi.impl.GrammarUtil.bnfTraverserNoAttrs;
  */
 public class BnfUnusedRuleInspection extends LocalInspectionTool {
 
-  private static final Function<PsiElement, BnfRule> RESOLVER = o -> {
-    if (!(o instanceof BnfReferenceOrToken) && !(o instanceof BnfStringLiteralExpression)) return null;
-    PsiReference reference = o.getReference();
-    PsiElement target = reference != null ? reference.resolve() : null;
-    return target instanceof BnfRule ? (BnfRule)target : null;
-  };
-
   @Override
   public boolean runForWholeFile() {
     return true;
@@ -63,28 +56,38 @@ public class BnfUnusedRuleInspection extends LocalInspectionTool {
     if (!(file instanceof BnfFile)) return null;
     if (SuppressionUtil.inspectionResultSuppressed(file, this)) return null;
     BnfFile myFile = (BnfFile)file;
+    JBIterable<BnfRule> rules = JBIterable.from(myFile.getRules());
+    if (rules.isEmpty()) return null;
+    
     ProblemsHolder holder = new ProblemsHolder(manager, file, isOnTheFly);
 
     //noinspection LimitedScopeInnerClass,EmptyClass
     abstract class Cond<T> extends JBIterable.Stateful<Cond> implements Condition<T> { }
 
     Set<BnfRule> inExpr = ContainerUtil.newTroveSet();
-    final Set<BnfRule> inParsing = ContainerUtil.newTroveSet();
+    Set<BnfRule> inParsing = ContainerUtil.newTroveSet();
+    Set<BnfRule> inSuppressed = ContainerUtil.newTroveSet();
     Map<BnfRule, String> inAttrs = ContainerUtil.newTroveMap();
+    
+    bnfTraverserNoAttrs(myFile).traverse()
+      .map(BnfUnusedRuleInspection::resolveRule)
+      .filter(NOT_NULL)
+      .addAllTo(inExpr);
+    
+    rules.filter(r -> SuppressionUtil.inspectionResultSuppressed(r, this))
+      .addAllTo(inSuppressed);
 
-    bnfTraverserNoAttrs(myFile).traverse().transform(RESOLVER).filter(NOT_NULL).addAllTo(inExpr);
-
+    inParsing.add(rules.first()); // add root rule
     for (int size = 0, prev = -1; size != prev; prev = size, size = inParsing.size()) {
       bnfTraverserNoAttrs(myFile).expand(new Cond<PsiElement>() {
         @Override
         public boolean value(PsiElement element) {
           if (element instanceof BnfRule) {
             BnfRule rule = (BnfRule)element;
-            if (inParsing.isEmpty()) inParsing.add(rule);
             // add recovery rules to calculation
             BnfAttr recoverAttr = findAttribute(rule, KnownAttribute.RECOVER_WHILE);
             value(recoverAttr == null ? null : recoverAttr.getExpression());
-            return inParsing.contains(rule);
+            return inParsing.contains(rule) || inSuppressed.contains(rule);
           }
           else if (element instanceof BnfReferenceOrToken) {
             ContainerUtil.addIfNotNull(inParsing, ((BnfReferenceOrToken)element).resolveRule());
@@ -96,39 +99,44 @@ public class BnfUnusedRuleInspection extends LocalInspectionTool {
     }
 
     for (BnfAttr attr : bnfTraverser(myFile).filter(BnfAttr.class)) {
-      BnfRule target = RESOLVER.fun(attr.getExpression());
+      BnfRule target = resolveRule(attr.getExpression());
       if (target != null) inAttrs.put(target, attr.getName());
     }
 
-    boolean first = true;
-    for (BnfRule r : myFile.getRules()) {
-      if (first) {
-        first = false;
-        continue;
-      }
+    for (BnfRule r : rules.skip(1).filter(o -> !inSuppressed.contains(o))) {
       String message = null;
-      boolean fake = ParserGeneratorUtil.Rule.isFake(r);
-      if (fake) {
-        if (!inAttrs.containsKey(r)) message = "Unused fake rule";
-      }
-      else {
-        if (getCompatibleAttribute(inAttrs.get(r)) == RECOVER_WHILE) {
-          if (!ParserGeneratorUtil.Rule.isPrivate(r)) {
-            message = "Non-private recovery rule";
-          }
+      if (ParserGeneratorUtil.Rule.isFake(r)) {
+        if (inExpr.contains(r)) {
+          message = "Reachable fake rule";
         }
-        else if (!inExpr.contains(r)) {
-          message = "Unused rule";
-        }
-        else if (!inParsing.contains(r)) {
-          message = "Unreachable rule";
+        else if (!inAttrs.containsKey(r)) {
+          message = "Unused fake rule";
         }
       }
-      if (message != null && !SuppressionUtil.inspectionResultSuppressed(r, this)) {
+      else if (getCompatibleAttribute(inAttrs.get(r)) == RECOVER_WHILE) {
+        if (!ParserGeneratorUtil.Rule.isPrivate(r)) {
+          message = "Non-private recovery rule";
+        }
+      }
+      else if (!inExpr.contains(r)) {
+        message = "Unused rule";
+      }
+      else if (!inParsing.contains(r)) {
+        message = "Unreachable rule";
+      }
+      if (message != null) {
         holder.registerProblem(r.getId(), message);
       }
     }
     return holder.getResultsArray();
   }
 
+  @Nullable
+  private static BnfRule resolveRule(@Nullable PsiElement o) {
+    if (!(o instanceof BnfReferenceOrToken ||
+          o instanceof BnfStringLiteralExpression)) return null;
+    PsiReference reference = ContainerUtil.findInstance(o.getReferences(), BnfReferenceImpl.class);
+    PsiElement target = reference != null ? reference.resolve() : null;
+    return target instanceof BnfRule ? (BnfRule)target : null;
+  }
 }

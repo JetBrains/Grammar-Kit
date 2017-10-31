@@ -69,7 +69,8 @@ public class BnfStringRefContributor extends PsiReferenceContributor {
 
     registrar.registerReferenceProvider(
       psiElement(BnfStringImpl.class).withParent(psiElement(BnfAttr.class).withName(
-        or(string().endsWith("Class"), string().endsWith("Package"), string().with(oneOf(JAVA_CLASS_ATTRIBUTES))))),
+        or(string().endsWith("Class"), string().endsWith("Package"), string().endsWith("TypeFactory"), 
+           string().with(oneOf(JAVA_CLASS_ATTRIBUTES))))),
       new PsiReferenceProvider() {
 
         @NotNull

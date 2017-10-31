@@ -18,6 +18,7 @@ package org.intellij.grammar.inspection;
 
 import com.intellij.codeInspection.LocalInspectionTool;
 import com.intellij.codeInspection.LocalInspectionToolSession;
+import com.intellij.codeInspection.ProblemHighlightType;
 import com.intellij.codeInspection.ProblemsHolder;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.psi.*;
@@ -26,6 +27,7 @@ import com.intellij.util.ObjectUtils;
 import com.intellij.util.ThreeState;
 import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.psi.*;
+import org.intellij.grammar.psi.impl.BnfReferenceImpl;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -77,6 +79,7 @@ public class BnfResolveInspection extends LocalInspectionTool {
             TextRange valueRange = ElementManipulators.getValueTextRange(o);
             ThreeState noResolveAtEnd = ThreeState.UNSURE;
             boolean reported = false;
+            PsiReference refAtEnd = null;
             for (PsiReference reference : o.getReferences()) {
               if (reference.isSoft()) continue;
               boolean atEnd = valueRange.getEndOffset() == reference.getRangeInElement().getEndOffset();
@@ -84,13 +87,23 @@ public class BnfResolveInspection extends LocalInspectionTool {
               if (atEnd && noResolveAtEnd != ThreeState.NO) {
                 noResolveAtEnd = resolve == null ? ThreeState.YES : ThreeState.NO;
               }
-              if (resolve == null && !atEnd) {
+              if (resolve != null) continue;
+              // skip "?" in java generics
+              if ("?".equals(reference.getCanonicalText()) && !(reference instanceof BnfReferenceImpl)) continue;
+              if (!atEnd) {
                 reported = true;
-                holder.registerProblem(o, reference.getRangeInElement(), "Unresolved reference");
+                holder.registerProblem(reference, 
+                                       ProblemsHolder.unresolvedReferenceMessage(reference),
+                                       ProblemHighlightType.GENERIC_ERROR_OR_WARNING);
+              }
+              else {
+                refAtEnd = reference;
               }
             }
-            if (noResolveAtEnd == ThreeState.YES && !reported) {
-              holder.registerProblem(o, valueRange, "Unresolved reference");
+            if (noResolveAtEnd == ThreeState.YES && !reported && refAtEnd != null) {
+              holder.registerProblem(refAtEnd,
+                                     ProblemsHolder.unresolvedReferenceMessage(refAtEnd),
+                                     ProblemHighlightType.GENERIC_ERROR_OR_WARNING);
             }
           }
         }

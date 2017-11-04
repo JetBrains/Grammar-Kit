@@ -77,30 +77,33 @@ public class BnfResolveInspection extends LocalInspectionTool {
           KnownAttribute attribute = KnownAttribute.getCompatibleAttribute(attrName);
           if (attribute != null && attribute != KnownAttribute.NAME && !attribute.getName().endsWith("Factory")) {
             TextRange valueRange = ElementManipulators.getValueTextRange(o);
-            ThreeState noResolveAtEnd = ThreeState.UNSURE;
-            boolean reported = false;
+            ThreeState reportAtEnd = ThreeState.UNSURE;
             PsiReference refAtEnd = null;
             for (PsiReference reference : o.getReferences()) {
               if (reference.isSoft()) continue;
               boolean atEnd = valueRange.getEndOffset() == reference.getRangeInElement().getEndOffset();
               PsiElement resolve = reference.resolve();
-              if (atEnd && noResolveAtEnd != ThreeState.NO) {
-                noResolveAtEnd = resolve == null ? ThreeState.YES : ThreeState.NO;
+              if (resolve != null) {
+                reportAtEnd = ThreeState.NO;
               }
-              if (resolve != null) continue;
-              // skip "?" in java generics
-              if ("?".equals(reference.getCanonicalText()) && !(reference instanceof BnfReferenceImpl)) continue;
-              if (!atEnd) {
-                reported = true;
+              else if (!atEnd) {
+                if (reference.getRangeInElement().getLength() == 1 && 
+                    "?".equals(reference.getCanonicalText()) &&
+                    !(reference instanceof BnfReferenceImpl)) continue;
+                reportAtEnd = ThreeState.NO;
                 holder.registerProblem(reference, 
                                        ProblemsHolder.unresolvedReferenceMessage(reference),
                                        ProblemHighlightType.GENERIC_ERROR_OR_WARNING);
               }
               else {
-                refAtEnd = reference;
+                if (reportAtEnd != ThreeState.NO) reportAtEnd = ThreeState.YES; 
+                if (refAtEnd == null ||
+                    refAtEnd.getRangeInElement().getLength() > reference.getRangeInElement().getLength()) {
+                  refAtEnd = reference;
+                }
               }
             }
-            if (noResolveAtEnd == ThreeState.YES && !reported && refAtEnd != null) {
+            if (reportAtEnd == ThreeState.YES) {
               holder.registerProblem(refAtEnd,
                                      ProblemsHolder.unresolvedReferenceMessage(refAtEnd),
                                      ProblemHighlightType.GENERIC_ERROR_OR_WARNING);

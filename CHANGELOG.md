@@ -1,7 +1,9 @@
-2017.1.1-snapshot
+2017.1.1
 
 * Generator: per-rule psiPackage and psiImplPackage attributes
-* Inspections: comment-based inspection suppression
+* Inspections: comment-based inspection suppression, e.g. `//noinspection BnfUnusedRule`
+* Editor: improved java references highlighting and "Create Class" quick fixes
+* JFlex: new download link and VM options to override defaults: `-Dgrammar.kit.jflex.jar=...`, `-Dgrammar.kit.jflex.skeleton=...`
 
 2017.1
 

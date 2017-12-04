@@ -25,7 +25,7 @@ Open-source plugins built with Grammar-Kit:
   [OGNL](https://github.com/JetBrains/intellij-plugins/tree/master/struts2)
 
 
-Quick links: [Changelog](TUTORIAL.md), [Tutorial](TUTORIAL.md), [How-to](HOWTO.md), [Standalone usage](#standalone-usage).
+Quick links: [Changelog](CHANGELOG.md), [Tutorial](TUTORIAL.md), [How-to](HOWTO.md), [Standalone usage](#standalone-usage).
 
 
 General usage instructions

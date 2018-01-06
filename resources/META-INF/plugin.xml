@@ -1,6 +1,6 @@
 <idea-plugin url="https://github.com/JetBrains/Grammar-Kit">
   <id>org.jetbrains.idea.grammar</id>
-  <version>2017.1.1</version>
+  <version>2017.1.2-SNAPSHOT</version>
   <vendor email="gregory.shrago@jetbrains.com">Greg Shrago</vendor>
   <idea-version since-build="171"/>
 
@@ -14,10 +14,7 @@
   <change-notes>
     <![CDATA[
     <ul>
-      <li>Generator: per-rule psiPackage and psiImplPackage attributes</li>
-      <li>Inspections: comment-based inspection suppression</li>
-      <li>Editor: improved java references highlighting and "Create Class" quick fixes</li>
-      <li>JFlex: new download link and VM options to override defaults</li>
+      <li>Editor: recoverWhile highlighting fix</li>
     </ul>
     <a href="https://github.com/JetBrains/Grammar-Kit#change-log">Full change log...</a>
     ]]>

@@ -52,6 +52,9 @@ public class BnfHighlightingTest extends LightPlatformCodeInsightFixtureTestCase
   public void testUnusedRule3() { doTest("r ::= B fake <warning>A</warning> ::= B ::= "); }
   public void testUnusedRule4() { doTest("r ::= {recoverWhile=A} private A ::= "); }
   public void testUnusedRule5() { doTest("r ::= {recoverWhile=A} <warning>A</warning> ::= "); }
+  public void testMissingRecover() { doTest("r ::= m m ::= {recoverWhile=\"<warning>missing</warning>\"}"); }
+  public void testAutoRecover() { doTest("r ::= m m ::= {recoverWhile=\"#auto\"}"); }
+  public void testMetaRecover() { doTest("r ::= <<m recover>> meta m ::= {recoverWhile=\"<<param>>\"} recover ::= "); }
 
   public void testSuppressUnused() { doTest("r ::= \n//noinspection BnfUnusedRule\nA ::= B C B::= C::="); }
 

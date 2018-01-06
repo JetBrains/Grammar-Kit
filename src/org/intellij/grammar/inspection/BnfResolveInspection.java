@@ -21,13 +21,17 @@ import com.intellij.codeInspection.LocalInspectionToolSession;
 import com.intellij.codeInspection.ProblemHighlightType;
 import com.intellij.codeInspection.ProblemsHolder;
 import com.intellij.openapi.util.TextRange;
+import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.psi.*;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.util.ObjectUtils;
 import com.intellij.util.ThreeState;
 import org.intellij.grammar.KnownAttribute;
+import org.intellij.grammar.generator.BnfConstants;
+import org.intellij.grammar.generator.ParserGeneratorUtil;
 import org.intellij.grammar.psi.*;
 import org.intellij.grammar.psi.impl.BnfReferenceImpl;
+import org.intellij.grammar.psi.impl.GrammarUtil;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -75,7 +79,13 @@ public class BnfResolveInspection extends LocalInspectionTool {
         else if (parent instanceof BnfAttr || parent instanceof BnfListEntry) {
           final String attrName = ObjectUtils.assertNotNull(PsiTreeUtil.getParentOfType(o, BnfAttr.class)).getName();
           KnownAttribute attribute = KnownAttribute.getCompatibleAttribute(attrName);
-          if (attribute != null && attribute != KnownAttribute.NAME && !attribute.getName().endsWith("Factory")) {
+          String value = StringUtil.unquoteString(o.getText());
+          boolean checkReferences =
+            attribute != null && attribute != KnownAttribute.NAME && !attribute.getName().endsWith("Factory") &&
+            !(attribute == KnownAttribute.RECOVER_WHILE &&
+              (BnfConstants.RECOVER_AUTO.equals(value) ||
+               GrammarUtil.isDoubleAngles(value) && ParserGeneratorUtil.Rule.isMeta(ParserGeneratorUtil.Rule.of(o))));
+          if (checkReferences) {
             TextRange valueRange = ElementManipulators.getValueTextRange(o);
             ThreeState reportAtEnd = ThreeState.UNSURE;
             PsiReference refAtEnd = null;

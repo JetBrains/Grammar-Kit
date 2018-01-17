@@ -282,6 +282,89 @@ public class Fixes implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
+  // <<p>> <<q>>
+  static boolean meta2(PsiBuilder builder_, int level_, Parser p, Parser q) {
+    if (!recursion_guard_(builder_, level_, "meta2")) return false;
+    boolean result_;
+    Marker marker_ = enter_section_(builder_);
+    result_ = p.parse(builder_, level_);
+    result_ = result_ && q.parse(builder_, level_);
+    exit_section_(builder_, marker_, null, result_);
+    return result_;
+  }
+
+  /* ********************************************************** */
+  // "1" (("2") <<meta2 ("3" "a") <<meta2 ("4" "a") ("5" "a")>>>>)
+  static boolean nested_meta_pin(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "nested_meta_pin")) return false;
+    boolean result_, pinned_;
+    Marker marker_ = enter_section_(builder_, level_, _NONE_);
+    result_ = consumeToken(builder_, "1");
+    pinned_ = result_; // pin = 1
+    result_ = result_ && nested_meta_pin_1(builder_, level_ + 1);
+    exit_section_(builder_, level_, marker_, result_, pinned_, null);
+    return result_ || pinned_;
+  }
+
+  // ("2") <<meta2 ("3" "a") <<meta2 ("4" "a") ("5" "a")>>>>
+  private static boolean nested_meta_pin_1(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "nested_meta_pin_1")) return false;
+    boolean result_, pinned_;
+    Marker marker_ = enter_section_(builder_, level_, _NONE_);
+    result_ = nested_meta_pin_1_0(builder_, level_ + 1);
+    pinned_ = result_; // pin = 1
+    result_ = result_ && meta2(builder_, level_ + 1, nested_meta_pin_1_1_0_parser_, nested_meta_pin_1_1_1_parser_);
+    exit_section_(builder_, level_, marker_, result_, pinned_, null);
+    return result_ || pinned_;
+  }
+
+  // ("2")
+  private static boolean nested_meta_pin_1_0(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "nested_meta_pin_1_0")) return false;
+    boolean result_;
+    Marker marker_ = enter_section_(builder_);
+    result_ = consumeToken(builder_, "2");
+    exit_section_(builder_, marker_, null, result_);
+    return result_;
+  }
+
+  // "3" "a"
+  private static boolean nested_meta_pin_1_1_0(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "nested_meta_pin_1_1_0")) return false;
+    boolean result_, pinned_;
+    Marker marker_ = enter_section_(builder_, level_, _NONE_);
+    result_ = consumeToken(builder_, "3");
+    pinned_ = result_; // pin = 1
+    result_ = result_ && consumeToken(builder_, "a");
+    exit_section_(builder_, level_, marker_, result_, pinned_, null);
+    return result_ || pinned_;
+  }
+
+  // "4" "a"
+  private static boolean nested_meta_pin_1_1_1_0(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "nested_meta_pin_1_1_1_0")) return false;
+    boolean result_, pinned_;
+    Marker marker_ = enter_section_(builder_, level_, _NONE_);
+    result_ = consumeToken(builder_, "4");
+    pinned_ = result_; // pin = 1
+    result_ = result_ && consumeToken(builder_, "a");
+    exit_section_(builder_, level_, marker_, result_, pinned_, null);
+    return result_ || pinned_;
+  }
+
+  // "5" "a"
+  private static boolean nested_meta_pin_1_1_1_1(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "nested_meta_pin_1_1_1_1")) return false;
+    boolean result_, pinned_;
+    Marker marker_ = enter_section_(builder_, level_, _NONE_);
+    result_ = consumeToken(builder_, "5");
+    pinned_ = result_; // pin = 1
+    result_ = result_ && consumeToken(builder_, "a");
+    exit_section_(builder_, level_, marker_, result_, pinned_, null);
+    return result_ || pinned_;
+  }
+
+  /* ********************************************************** */
   // andRestriction ( "||" andRestriction ) *
   static boolean orRestriction(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "orRestriction")) return false;
@@ -558,6 +641,26 @@ public class Fixes implements PsiParser, LightPsiParser {
   final static Parser Foo__recovery_parser_ = new Parser() {
     public boolean parse(PsiBuilder builder_, int level_) {
       return Foo__recovery(builder_, level_ + 1);
+    }
+  };
+  final static Parser nested_meta_pin_1_1_0_parser_ = new Parser() {
+    public boolean parse(PsiBuilder builder_, int level_) {
+      return nested_meta_pin_1_1_0(builder_, level_ + 1);
+    }
+  };
+  final static Parser nested_meta_pin_1_1_1_0_parser_ = new Parser() {
+    public boolean parse(PsiBuilder builder_, int level_) {
+      return nested_meta_pin_1_1_1_0(builder_, level_ + 1);
+    }
+  };
+  final static Parser nested_meta_pin_1_1_1_1_parser_ = new Parser() {
+    public boolean parse(PsiBuilder builder_, int level_) {
+      return nested_meta_pin_1_1_1_1(builder_, level_ + 1);
+    }
+  };
+  final static Parser nested_meta_pin_1_1_1_parser_ = new Parser() {
+    public boolean parse(PsiBuilder builder_, int level_) {
+      return meta2(builder_, level_ + 1, nested_meta_pin_1_1_1_0_parser_, nested_meta_pin_1_1_1_1_parser_);
     }
   };
   final static Parser some_parser_ = new Parser() {

@@ -138,11 +138,13 @@ public class GrammarUtil {
       if (!processor.process(funcName, e)) return false;
       nonTrivialExpression = n;
     }
-    final List<BnfExpression> children = getChildExpressions(nonTrivialExpression);
-    for (int i = 0, childExpressionsSize = children.size(); i < childExpressionsSize; i++) {
+    boolean isMeta = nonTrivialExpression instanceof BnfExternalExpression;
+    List<BnfExpression> children = getChildExpressions(nonTrivialExpression);
+    for (int i = isMeta ? 1 : 0, size = children.size(); i < size; i++) {
       BnfExpression child = children.get(i);
       if (isAtomicExpression(child)) continue;
-      String nextName = ParserGeneratorUtil.isTokenSequence(rule, child)? funcName : getNextName(funcName, i);
+      String nextName = ParserGeneratorUtil.isTokenSequence(rule, child) ? funcName :
+                        getNextName(funcName, isMeta ? i - 1 : i);
       if (!processExpressionNames(rule, nextName, child, processor)) return false;
     }
     return processor.process(funcName, nonTrivialExpression);
@@ -172,8 +174,7 @@ public class GrammarUtil {
 
   public static boolean isAtomicExpression(BnfExpression tree) {
     return tree instanceof BnfReferenceOrToken ||
-           tree instanceof BnfLiteralExpression ||
-           tree instanceof BnfExternalExpression;
+           tree instanceof BnfLiteralExpression;
   }
 
   public static SyntaxTraverser<PsiElement> bnfTraverser(PsiElement root) {

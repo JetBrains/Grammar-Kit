@@ -1031,11 +1031,11 @@ public class ParserGenerator {
     if (child instanceof BnfExternalExpression) {
       // generate parameters
       List<BnfExpression> expressions = ((BnfExternalExpression)child).getExpressionList();
-      for (int j = 1, expressionsSize = expressions.size(); j < expressionsSize; j++) {
+      for (int j = 1, size = expressions.size(); j < size; j++) {
         BnfExpression expression = expressions.get(j);
-        if (expression instanceof BnfLiteralExpression || expression instanceof BnfReferenceOrToken) continue;
+        if (GrammarUtil.isAtomicExpression(expression)) continue;
         if (expression instanceof BnfExternalExpression) {
-          generateNodeChildren(rule, getNextName(funcName, j - 1), Collections.singletonList(expression), visited);
+          generateNodeChild(rule, expression, getNextName(funcName, j - 1), j - 1, visited);
         }
         else {
           newLine();

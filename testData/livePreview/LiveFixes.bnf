@@ -1,0 +1,29 @@
+{
+  tokens = [
+    space='regexp:\s+'
+    string="regexp:\"[^\"]*\"|'[^']*'"
+    number="regexp:(\+|\-)?\p{Digit}*"
+    id="regexp:\p{Alpha}\w*"
+    semi=';'
+    colon=':'
+  ]
+  extends("st_.*")=statement
+  pin("st_.*")=2
+}
+
+root ::= (&':' statement) * {pin(".*")=1}
+
+statement ::= st_case1
+  | st_case2 
+  {recoverWhile=st_recover}
+private st_recover ::= !':'
+
+// case1: public predicate recovery
+st_case1 ::= ':' 'case1' string? predicate name ';'
+predicate ::= &id {recoverWhile=predicate_recover}
+name ::= id
+private predicate_recover ::= !(':' | ';' | id | number)
+
+// case2: public left predicate
+st_case2 ::= ':' 'case2' string? name left_predicate name ';'
+left left_predicate ::= &id

@@ -1,0 +1,8 @@
+:case1
+:case1 ;
+:case1 "aa ;" aa ;
+:case1 "aa aa" aa aa 
+:case1 "** aa aa 123" ** aa aa 123 
+:case1 "123 ;" 123 ;
+
+:case2 xx yy ;

@@ -222,7 +222,6 @@ public class LivePreviewParser implements PsiParser {
       marker_ = enter_section_(builder, level, modifiers, isPrivate ? null : elementType, frameName);
     }
 
-    boolean predicateEncountered = false;
     int[] skip = {0};
     for (int i = 0, p = 0, childrenSize = children.size(); i < childrenSize; i++) {
       BnfExpression child = children.get(i);
@@ -232,13 +231,12 @@ public class LivePreviewParser implements PsiParser {
         else if (!result_) result_ = generateNodeCall(builder, level, rule, child, getNextName(funcName, i), externalArguments);
       }
       else if (type == BNF_SEQUENCE) {
-        predicateEncountered |= pinApplied && ParserGeneratorUtil.getEffectiveExpression(myFile, child) instanceof BnfPredicate;
         if (skip[0] == 0) {
           if (i == 0) {
             result_ = generateTokenSequenceCall(builder, level, rule, children, funcName, i, pinMatcher, pinApplied, skip, externalArguments);
           }
           else {
-            if (pinApplied && G.generateExtendedPin && !predicateEncountered) {
+            if (pinApplied && G.generateExtendedPin) {
               if (i == childrenSize - 1) {
                 // do not report error for last child
                 if (i == p + 1) {

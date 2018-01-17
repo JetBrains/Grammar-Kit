@@ -28,6 +28,7 @@ public class BnfLivePreviewParserTest extends BnfGeneratorTestCase {
 
   public void testCase75() throws IOException { doTest(); }
   public void testCase153() throws IOException { doTest(); }
+  public void testLiveFixes() throws IOException { doTest(); }
 
   protected void doTest() throws IOException {
     doTest(getTestName(false) + ".bnf");

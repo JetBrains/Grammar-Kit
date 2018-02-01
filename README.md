@@ -1,13 +1,16 @@
 
-Grammar-Kit [[stable]](../../releases) [[dev]](https://teamcity.jetbrains.com/guestAuth/app/rest/builds/buildType:IntellijIdeaPlugins_GrammarKit_Build,status:SUCCESS/artifacts/content/GrammarKit*.zip)
+Grammar-Kit
 ==================
 [![Build Status](https://teamcity.jetbrains.com/app/rest/builds/buildType:(id:IntellijIdeaPlugins_GrammarKit_Build)/statusIcon.svg?guest=1)](https://teamcity.jetbrains.com/viewType.html?buildTypeId=IntellijIdeaPlugins_GrammarKit_Build&guest=1)
 [![GitHub license](https://img.shields.io/badge/license-Apache%20License%202.0-blue.svg?style=flat)](http://www.apache.org/licenses/LICENSE-2.0)
 [![official project](http://jb.gg/badges/official.svg)](https://confluence.jetbrains.com/display/ALL/JetBrains+on+GitHub)
 
-An [IntelliJ IDEA plugin](http://plugins.jetbrains.com/plugin/6606) for language plugin developers.
-
+An [IntelliJ IDEA plugin](http://plugins.jetbrains.com/plugin/6606) for language plugin developers.<br>
 Adds BNF Grammars and JFlex files editing support including parser/PSI code generator.
+
+Quick links: [Dev build](https://teamcity.jetbrains.com/guestAuth/app/rest/builds/buildType:IntellijIdeaPlugins_GrammarKit_Build,status:SUCCESS/artifacts/content/GrammarKit*.zip),
+[Changelog](CHANGELOG.md), [Tutorial](TUTORIAL.md), [How-to](HOWTO.md), [Standalone usage](#standalone-usage).
+
 
 Open-source plugins built with Grammar-Kit:
 
@@ -23,10 +26,6 @@ Open-source plugins built with Grammar-Kit:
   [intellij-haxe](https://github.com/JetBrains/intellij-haxe),
   [Cypher](https://github.com/neueda/jetbrains-plugin-graph-database-support),
   [OGNL](https://github.com/JetBrains/intellij-plugins/tree/master/struts2)
-
-
-Quick links: [Changelog](CHANGELOG.md), [Tutorial](TUTORIAL.md), [How-to](HOWTO.md), [Standalone usage](#standalone-usage).
-
 
 General usage instructions
 --------------------------

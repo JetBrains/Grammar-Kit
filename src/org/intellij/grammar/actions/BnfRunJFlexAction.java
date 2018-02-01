@@ -174,8 +174,10 @@ public class BnfRunJFlexAction extends DumbAwareAction {
       VirtualFile virtualDir = getTargetDirectoryFor(project, flexFile, lexerClassName + ".java", lexerPackage, false);
       File workingDir = VfsUtil.virtualToIoFile(flexFile).getParentFile().getAbsoluteFile();
 
-      SimpleJavaParameters javaParameters = new SimpleJavaParameters();
       Sdk sdk = new SimpleJavaSdkType().createJdk("tmp", SystemProperties.getJavaHome());
+
+      SimpleJavaParameters javaParameters = new SimpleJavaParameters();
+      javaParameters.setCharset(flexFile.getCharset());
       javaParameters.setWorkingDirectory(workingDir);
       javaParameters.setJdk(sdk);
       javaParameters.setJarPath(jflex.get(0).getAbsolutePath());

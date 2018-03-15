@@ -60,7 +60,7 @@ import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.openapi.vfs.JarFileSystem;
 import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VirtualFile;
-import com.intellij.psi.*;
+import com.intellij.psi.PsiDocumentManager;
 import com.intellij.psi.search.FilenameIndex;
 import com.intellij.psi.search.ProjectScope;
 import com.intellij.util.PathUtil;
@@ -196,12 +196,9 @@ public class BnfRunJFlexAction extends DumbAwareAction {
       final ActionCallback callback = new ActionCallback();
       processHandler.addProcessListener(new ProcessAdapter() {
         @Override
-        public void processTerminated(ProcessEvent event) {
+        public void processTerminated(@NotNull ProcessEvent event) {
           if (event.getExitCode() == 0) {
-            ApplicationManager.getApplication().invokeLater(() -> {
-              callback.setDone();
-              ensureLexerClassCreated(project, virtualDir, lexerClassName, commandName);
-            }, project.getDisposed());
+            ApplicationManager.getApplication().invokeLater(callback::setDone, project.getDisposed());
           }
         }
       });
@@ -212,34 +209,6 @@ public class BnfRunJFlexAction extends DumbAwareAction {
       Messages.showErrorDialog(project, "Unable to run JFlex"+ "\n" + ex.getLocalizedMessage(), commandName);
       return ActionCallback.REJECTED;
     }
-  }
-
-  private static void ensureLexerClassCreated(Project project,
-                                              VirtualFile virtualDir,
-                                              String lexerClassName,
-                                              String commandName) {
-    VfsUtil.markDirtyAndRefresh(false, true, true, virtualDir);
-    String className = lexerClassName.startsWith("_") ? lexerClassName.substring(1) : lexerClassName + "Adapter";
-
-    PsiFile[] filesByName = FilenameIndex.getFilesByName(project, className + ".java", ProjectScope.getContentScope(project));
-    if (filesByName.length > 0) return;
-
-    PsiDirectory psiDirectory = PsiManager.getInstance(project).findDirectory(virtualDir);
-    if (psiDirectory == null) return;
-    BnfGenerateParserUtilAction.createClass(className, psiDirectory, "com.intellij.lexer.FlexAdapter", commandName,
-                                            aClass -> {
-                                              PsiMethod constructor = JavaPsiFacade.getElementFactory(project).createMethodFromText(
-                                                  "public " + className + "() {\n" +
-                                                  "  super(new " + lexerClassName + "());\n" +
-                                                  "}\n", aClass);
-                                              aClass.addAfter(constructor, aClass.getLBrace());
-
-                                              Notifications.Bus.notify(new Notification(BnfConstants.GENERATION_GROUP,
-                                                  aClass.getName() + " lexer class generated", "to " + virtualDir.getPath() +
-                                                  "\n<br>Use this class in your ParserDefinition implementation." +
-                                                  "\n<br>For complex cases consider employing com.intellij.lexer.LookAheadLexer API.",
-                                                  NotificationType.INFORMATION), project);
-                                            });
   }
 
   private static List<File> getOrDownload(@NotNull Project project, String... urls) {

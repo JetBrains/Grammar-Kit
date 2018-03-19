@@ -1,6 +1,6 @@
 <idea-plugin url="https://github.com/JetBrains/Grammar-Kit">
   <id>org.jetbrains.idea.grammar</id>
-  <version>2017.1.2-SNAPSHOT</version>
+  <version>2017.1.3-SNAPSHOT</version>
   <vendor email="gregory.shrago@jetbrains.com">Greg Shrago</vendor>
   <idea-version since-build="171"/>
 
@@ -14,7 +14,11 @@
   <change-notes>
     <![CDATA[
     <ul>
-      <li>Editor: recoverWhile highlighting fix</li>
+      <li>Editor: fix some recoverWhile highlighting</li>
+      <li>Generator: drop confusing LexerAdapter generation</li>
+      <li>Generator: allow predicate rules be public, left and recoverable</li>
+      <li>Generator: make nested meta rules transparent for pinning</li>
+      <li>JFlex: explicitly reuse *.flex encoding on generation</li>
     </ul>
     <a href="https://github.com/JetBrains/Grammar-Kit#change-log">Full change log...</a>
     ]]>

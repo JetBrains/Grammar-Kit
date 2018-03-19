@@ -1,3 +1,11 @@
+2017.1.2
+
+* Editor: fix some recoverWhile highlighting
+* Generator: drop confusing LexerAdapter generation
+* Generator: allow predicate rules be public, left and recoverable
+* Generator: make nested meta rules transparent for pinning
+* JFlex: explicitly reuse *.flex encoding on generation
+
 2017.1.1
 
 * Generator: per-rule psiPackage and psiImplPackage attributes

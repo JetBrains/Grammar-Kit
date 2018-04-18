@@ -46,9 +46,11 @@ public class BnfParserDefinition implements ParserDefinition {
   public static final IElementType BNF_BLOCK_COMMENT = BnfTypes.BNF_BLOCK_COMMENT;
   public static final TokenSet COMMENTS = TokenSet.create(BNF_LINE_COMMENT, BNF_BLOCK_COMMENT);
   public static final TokenSet LITERALS = TokenSet.create(BnfTypes.BNF_STRING);
-  public static final TokenSet PARENS = TokenSet.create(
-    BnfTypes.BNF_LEFT_PAREN, BnfTypes.BNF_LEFT_BRACE, BnfTypes.BNF_LEFT_BRACKET, BnfTypes.BNF_EXTERNAL_START,
+  public static final TokenSet PARENS_L = TokenSet.create(
+    BnfTypes.BNF_LEFT_PAREN, BnfTypes.BNF_LEFT_BRACE, BnfTypes.BNF_LEFT_BRACKET, BnfTypes.BNF_EXTERNAL_START);
+  public static final TokenSet PARENS_R = TokenSet.create(
     BnfTypes.BNF_RIGHT_PAREN, BnfTypes.BNF_RIGHT_BRACE, BnfTypes.BNF_RIGHT_BRACKET, BnfTypes.BNF_EXTERNAL_END);
+  public static final TokenSet PARENS = TokenSet.andSet(PARENS_L, PARENS_R);
   public static final TokenSet OPERATORS = TokenSet.create(
     BnfTypes.BNF_OP_AND, BnfTypes.BNF_OP_EQ, BnfTypes.BNF_OP_NOT, BnfTypes.BNF_OP_ONEMORE, BnfTypes.BNF_OP_OPT,
     BnfTypes.BNF_OP_OR, BnfTypes.BNF_OP_ZEROMORE);

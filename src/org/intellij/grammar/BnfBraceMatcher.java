@@ -35,14 +35,19 @@ public class BnfBraceMatcher implements PairedBraceMatcher {
     new BracePair(BnfTypes.BNF_EXTERNAL_START, BnfTypes.BNF_EXTERNAL_END, false)
   };
 
+  @NotNull
   @Override
   public BracePair[] getPairs() {
     return PAIRS;
   }
 
   @Override
-  public boolean isPairedBracesAllowedBeforeType(@NotNull IElementType lbraceType, @Nullable IElementType contextType) {
-    return true;
+  public boolean isPairedBracesAllowedBeforeType(@NotNull IElementType lbraceType, @Nullable IElementType t) {
+    return t == BnfTypes.BNF_SEMICOLON ||
+           BnfParserDefinition.WS.contains(t) ||
+           BnfParserDefinition.OPERATORS.contains(t) && t != BnfTypes.BNF_OP_NOT && t != BnfTypes.BNF_OP_AND ||
+           BnfParserDefinition.PARENS_R.contains(t) ||
+           BnfParserDefinition.COMMENTS.contains(t);
   }
 
   @Override

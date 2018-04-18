@@ -133,15 +133,11 @@
       <keyboard-shortcut keymap="$default" first-keystroke="control alt F7"/>
     </action>
     <group id="grammar.RefactoringGroup" popup="false">
-      <add-to-group group-id="RefactoringMenu" anchor="first"/>
-      <action id="grammars.IntroduceRule" class="org.intellij.grammar.refactor.BnfIntroduceRuleAction" text="Introduce Rule"
-              description="Introduce Rule">
-        <keyboard-shortcut keymap="$default" first-keystroke="control alt R"/>
-      </action>
-      <action id="grammars.IntroduceToken" class="org.intellij.grammar.refactor.BnfIntroduceTokenAction" text="Introduce Token"
-              description="Introduce Token">
-        <keyboard-shortcut keymap="$default" first-keystroke="control alt C"/>
-      </action>
+      <add-to-group group-id="IntroduceActionsGroup" anchor="first"/>
+      <action id="grammars.IntroduceRule" class="org.intellij.grammar.refactor.BnfIntroduceRuleAction"
+              text="_Rule..." description="Extract rule" use-shortcut-of="ExtractMethod"/>
+      <action id="grammars.IntroduceToken" class="org.intellij.grammar.refactor.BnfIntroduceTokenAction"
+              text="_Token..." description="Introduce token" use-shortcut-of="IntroduceConstant" />
     </group>
   </actions>
 

@@ -71,23 +71,25 @@ public class LivePreviewParser implements PsiParser {
 
   @NotNull
   @Override
-  public ASTNode parse(IElementType root, PsiBuilder originalBuilder) {
+  public ASTNode parse(@NotNull IElementType type, @NotNull PsiBuilder originalBuilder) {
     //com.intellij.openapi.progress.ProgressIndicator indicator = com.intellij.openapi.progress.ProgressManager.getInstance().getProgressIndicator();
     //if (indicator != null ) indicator.startNonCancelableSection();
     //originalBuilder.setDebugMode(true);
     init(originalBuilder);
-    PsiBuilder builder = adapt_builder_(root, originalBuilder, this);
+    PsiBuilder builder = adapt_builder_(type, originalBuilder, this);
     ErrorState.get(builder).altExtendsChecker = (elementType, elementType2) -> type_extends_(elementType, elementType2);
     ArrayList<BracePair> braces = new ArrayList<>();
     ContainerUtil.addIfNotNull(braces, tryMakeBracePair("{", "}", true));
     ContainerUtil.addIfNotNull(braces, tryMakeBracePair("(", ")", false));
     ContainerUtil.addIfNotNull(braces, tryMakeBracePair("[", "]", false));
     ContainerUtil.addIfNotNull(braces, tryMakeBracePair("<", ">", false));
-    ErrorState.get(builder).braces = braces.isEmpty()? null : braces.toArray(new BracePair[braces.size()]);
-    int level = 0;
-    PsiBuilder.Marker mark = enter_section_(builder, level, _NONE_, null);
-    boolean result = myGrammarRoot != null && rule(builder, 1, myGrammarRoot, Collections.emptyMap());
-    exit_section_(builder, level, mark, root, result, true, TRUE_CONDITION);
+    ErrorState.get(builder).braces = braces.isEmpty() ? null : braces.toArray(new BracePair[braces.size()]);
+    boolean result = true;
+    PsiBuilder.Marker marker = enter_section_(builder, 0, _COLLAPSE_, null);
+    if (myGrammarRoot != null) {
+      result = rule(builder, 1, myGrammarRoot, Collections.emptyMap());
+    }
+    exit_section_(builder, 0, marker, type, result, true, TRUE_CONDITION);
     return builder.getTreeBuilt();
   }
 

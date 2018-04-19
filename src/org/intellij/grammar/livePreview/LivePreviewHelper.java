@@ -73,7 +73,6 @@ public class LivePreviewHelper {
   @Nullable
   public static PsiFile parseFile(BnfFile bnfFile, String text) {
     Language language = getLanguageFor(bnfFile);
-    if (language == null) return null;
 
     String fileName = bnfFile.getName() + ".preview";
     LightVirtualFile virtualFile = new LightVirtualFile(fileName, language, text);
@@ -81,7 +80,7 @@ public class LivePreviewHelper {
     return PsiManager.getInstance(project).findFile(virtualFile);
   }
 
-  @Nullable
+  @NotNull
   public static Language getLanguageFor(BnfFile psiFile) {
     LivePreviewLanguage existing = LivePreviewLanguage.findInstance(psiFile);
     if (existing != null) return existing;

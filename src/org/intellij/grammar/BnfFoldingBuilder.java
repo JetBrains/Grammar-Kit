@@ -17,30 +17,30 @@
 package org.intellij.grammar;
 
 import com.intellij.lang.ASTNode;
-import com.intellij.lang.folding.FoldingBuilderEx;
+import com.intellij.lang.folding.CustomFoldingBuilder;
 import com.intellij.lang.folding.FoldingDescriptor;
 import com.intellij.openapi.editor.Document;
-import com.intellij.openapi.project.DumbAware;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.util.PsiTreeUtil;
 import org.intellij.grammar.psi.*;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author gregsh
  */
-public class BnfFoldingBuilder extends FoldingBuilderEx implements DumbAware {
-  @NotNull
+public class BnfFoldingBuilder extends CustomFoldingBuilder {
+
   @Override
-  public FoldingDescriptor[] buildFoldRegions(@NotNull PsiElement root, @NotNull Document document, boolean quick) {
-    if (!(root instanceof BnfFile)) return FoldingDescriptor.EMPTY;
+  protected void buildLanguageFoldRegions(@NotNull List<FoldingDescriptor> result,
+                                          @NotNull PsiElement root,
+                                          @NotNull Document document,
+                                          boolean quick) {
+    if (!(root instanceof BnfFile)) return;
     BnfFile file = (BnfFile)root;
 
-    final ArrayList<FoldingDescriptor> result = new ArrayList<>();
     for (BnfAttrs attrs : file.getAttributes()) {
       TextRange textRange = attrs.getTextRange();
       if (textRange.getLength() <= 2) continue;
@@ -67,13 +67,10 @@ public class BnfFoldingBuilder extends FoldingBuilderEx implements DumbAware {
         return true;
       });
     }
-
-    return result.toArray(new FoldingDescriptor[result.size()]);
   }
 
-  @Nullable
   @Override
-  public String getPlaceholderText(@NotNull ASTNode node) {
+  protected String getLanguagePlaceholderText(@NotNull ASTNode node, @NotNull TextRange range) {
     PsiElement psi = node.getPsi();
     if (psi instanceof BnfAttrs) return "{..}";
     if (psi instanceof BnfRule) return ((BnfRule)psi).getName() + " ::= ...";
@@ -83,7 +80,7 @@ public class BnfFoldingBuilder extends FoldingBuilderEx implements DumbAware {
   }
 
   @Override
-  public boolean isCollapsedByDefault(@NotNull ASTNode node) {
+  protected boolean isRegionCollapsedByDefault(@NotNull ASTNode node) {
     PsiElement psi = node.getPsi();
     return psi instanceof BnfValueList ||
            psi instanceof BnfAttrs && !(psi.getParent() instanceof BnfRule);

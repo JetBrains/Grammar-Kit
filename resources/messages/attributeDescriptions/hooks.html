@@ -19,7 +19,7 @@ Custom rule parsing hooks, e.g. whitespace binders. A hook is a piece of code th
   both_binders ::= ... { hooks=[wsBinders="GREEDY_LEFT_BINDER, GREEDY_RIGHT_BINDER"] }
 
   // log parsing results via syntax error messages using logHook
-  logging_rule ::= ... { hooks=[logHook='in logging_rule!'] }
+  logging_rule ::= ... { hooks=[logHook='"in logging_rule!"'] }
 
   // user hook from <code>MyHooks</code> class
   got_hook1 ::= ... { hooks=[myHook1="SOME_CONST"] }

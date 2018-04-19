@@ -128,20 +128,27 @@ External rule expression syntax is the same as a body of external expression:
  external manually_parsed_rule ::= methodName param1 param2 ...
 ````
 
+External expressions and external rules interpret double- and single-quoted strings differently.
+Generally anything that appears in an external expression after rule or method name is treated
+as parameter and passed "as is" except single-quoted strings which are unquoted first.
+This helps passing qualified enum constants, java expressions, etc.
+
 Rule references in parameter list are implemented as [GeneratedParserUtilBase.Parser](src/org/intellij/grammar/parser/GeneratedParserUtilBase.java) instances.
 
 ### Tokens:
-Tokens should appear in grammar file as is. All conflicts can be resolved by quotation.
-If there is an attribute with the same value as single-quoted or double-quoted token
-then the corresponding IElementType constant will be generated and matched against
-otherwise the token will be matched by text.
+Explicit tokens are declared via _tokens_ global attribute, e.g. in *token_name=token_value* form. 
+A token name is for IElementType token constant, a token value is usually its string representation in single or double quotes.
 
+Tokens in grammar can be referenced by name or by value in single or double quotes.
+It is recommended to use values where possible for better readability.
+Names can be used to resolve conflicts when there is an unquoted token value that also match some rule.
+
+Implicit tokens are tokens not specified via _tokens_ attribute.
+Unquoted implicit tokens (aka keyword tokens) have names equals to their values.
+Quoted implicit tokens (aka text-matched tokens) are slow because they are matched by text and not by an IElementType constant returned by a lexer.
 Text-matched tokens can span more than one real token returned by lexer.
 
-External expressions and external rules interpret double- and single-quoted strings differently.
-Generally anything that appears in an external expression after rule or method name is treated
-as parameter and passed "as is" except single-quoted strings. They are unquoted first.
-This helps passing qualified enum constants, java expressions, etc.
+Rules, tokens and text-matched tokens have different colors in editor.
 
 ### Attributes for error recovery and reporting:
 * _pin_  tunes the parser to handle incomplete matches. A rule matches if the prefix of the rule up to the pinned token matches.

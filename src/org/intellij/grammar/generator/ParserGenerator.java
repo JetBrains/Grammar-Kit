@@ -17,8 +17,8 @@
 package org.intellij.grammar.generator;
 
 import com.intellij.openapi.diagnostic.Logger;
-import com.intellij.openapi.util.Couple;
 import com.intellij.openapi.util.Pair;
+import com.intellij.openapi.util.Trinity;
 import com.intellij.openapi.util.io.FileUtil;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.psi.CommonClassNames;
@@ -1348,12 +1348,16 @@ public class ParserGenerator {
       imports.add(PSI_ELEMENT_CLASS);
       imports.add(AST_NODE_CLASS);
     }
-    Map<String, Couple<String>> compositeToClassAndFactoryMap = new THashMap<>();
+    boolean useExactElements = "all".equals(G.generateExactTypes) || G.generateExactTypes.contains("elements");
+    boolean useExactTokens = "all".equals(G.generateExactTypes) || G.generateExactTypes.contains("tokens");
+
+    Map<String, Trinity<String, String, RuleInfo>> compositeToClassAndFactoryMap = new THashMap<>();
     for (String elementType : sortedCompositeTypes.keySet()) {
       BnfRule rule = sortedCompositeTypes.get(elementType);
+      RuleInfo ruleInfo = ruleInfo(rule);
       String elementTypeClass = getAttribute(rule, KnownAttribute.ELEMENT_TYPE_CLASS);
       String elementTypeFactory = getAttribute(rule, KnownAttribute.ELEMENT_TYPE_FACTORY);
-      compositeToClassAndFactoryMap.put(elementType, Couple.of(elementTypeClass, elementTypeFactory));
+      compositeToClassAndFactoryMap.put(elementType, Trinity.create(elementTypeClass, elementTypeFactory, ruleInfo));
       if (elementTypeFactory != null) {
         imports.add(StringUtil.getPackageName(elementTypeFactory));
       }
@@ -1384,28 +1388,32 @@ public class ParserGenerator {
     generateClassHeader(className, imports, "", Java.INTERFACE);
     if (G.generateElementTypes) {
       for (String elementType : sortedCompositeTypes.keySet()) {
-        Couple<String> pair = compositeToClassAndFactoryMap.get(elementType);
+        String exactType = null;
+        Trinity<String, String, RuleInfo> info = compositeToClassAndFactoryMap.get(elementType);
         String elementCreateCall;
-        if (pair.second == null) {
-          elementCreateCall = "new " + StringUtil.getShortName(pair.first);
+        if (info.second == null) {
+          elementCreateCall = "new " + (exactType = myShortener.fun(info.first));
         }
         else {
-          elementCreateCall = myShortener.fun(StringUtil.getPackageName(pair.second)) + "." + StringUtil.getShortName(pair.second);
+          elementCreateCall = myShortener.fun(StringUtil.getPackageName(info.second)) + "." + StringUtil.getShortName(info.second);
         }
+        String fieldType = ObjectUtils.notNull(useExactElements ? exactType : "IElementType");
         String callFix = elementCreateCall.equals("new IElementType") ? ", null" : "";
-        out("IElementType " + elementType + " = " + elementCreateCall + "(\"" + elementType + "\"" + callFix + ");");
+        out(fieldType + " " + elementType + " = " + elementCreateCall + "(\"" + elementType + "\"" + callFix + ");");
       }
     }
     if (G.generateTokenTypes) {
       newLine();
+      String exactType = null;
       Map<String, String> sortedTokens = ContainerUtil.newTreeMap();
       String tokenCreateCall;
       if (tokenTypeFactory == null) {
-        tokenCreateCall = "new " + StringUtil.getShortName(tokenTypeClass);
+        tokenCreateCall = "new " + (exactType = myShortener.fun(tokenTypeClass));
       }
       else {
         tokenCreateCall = myShortener.fun(StringUtil.getPackageName(tokenTypeFactory)) + "." + StringUtil.getShortName(tokenTypeFactory);
       }
+      String fieldType = ObjectUtils.notNull(useExactTokens ? exactType : null, "IElementType");
       for (String tokenText : mySimpleTokens.keySet()) {
         String tokenName = ObjectUtils.chooseNotNull(mySimpleTokens.get(tokenText), tokenText);
         if (isIgnoredWhitespaceToken(tokenName, tokenText)) continue;
@@ -1414,7 +1422,7 @@ public class ParserGenerator {
       for (String tokenType : sortedTokens.keySet()) {
         String callFix = tokenCreateCall.equals("new IElementType") ? ", null" : "";
         String tokenString = sortedTokens.get(tokenType);
-        out("IElementType " + tokenType + " = " + tokenCreateCall + "(\"" + StringUtil.escapeStringCharacters(tokenString) + "\""+callFix+");");
+        out(fieldType + " " + tokenType + " = " + tokenCreateCall + "(\"" + StringUtil.escapeStringCharacters(tokenString) + "\""+callFix+");");
       }
     }
     if (G.generatePsi && G.generatePsiClassesMap) {

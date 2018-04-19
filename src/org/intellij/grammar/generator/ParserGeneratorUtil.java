@@ -115,7 +115,9 @@ public class ParserGeneratorUtil {
     }
   }
 
-  public static <T> T getGenerateOption(@NotNull PsiElement node, @NotNull KnownAttribute<T> attribute, @Nullable String currentValue) {
+  public static <T> T getGenerateOption(@NotNull PsiElement node, @NotNull KnownAttribute<T> attribute,
+                                        @NotNull Map<String, String> genOptions, String... genOptionKeys) {
+    String currentValue = JBIterable.of(genOptionKeys).map(genOptions::get).filter(Objects::nonNull).first();
     if (attribute.getDefaultValue() instanceof Boolean) {
       if ("yes".equals(currentValue)) return (T)Boolean.TRUE;
       if ("no".equals(currentValue)) return (T)Boolean.FALSE;

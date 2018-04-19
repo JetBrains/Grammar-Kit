@@ -36,6 +36,7 @@ public class GenOptions {
   public final Pattern generateRootRules;
   public final boolean generateTokenTypes;
   public final boolean generateElementTypes;
+  public final String generateExactTypes;
   public final boolean generateExtendedPin;
   public final boolean generatePsi;
   public final boolean generatePsiFactory;
@@ -50,15 +51,16 @@ public class GenOptions {
   public GenOptions(BnfFile myFile) {
     Map<String, String> genOptions = getRootAttribute(myFile, KnownAttribute.GENERATE).asMap();
     names = Names.forName(genOptions.get("names"));
-    generatePsi = getGenerateOption(myFile, KnownAttribute.GENERATE_PSI, genOptions.get("psi"));
+    generatePsi = getGenerateOption(myFile, KnownAttribute.GENERATE_PSI, genOptions, "psi");
     generatePsiFactory = !"no".equals(genOptions.get("psi-factory"));
     generatePsiClassesMap = "yes".equals(genOptions.get("psi-classes-map"));
-    generateTokenTypes = getGenerateOption(myFile, KnownAttribute.GENERATE_TOKENS, genOptions.get("tokens"));
+    generateTokenTypes = getGenerateOption(myFile, KnownAttribute.GENERATE_TOKENS, genOptions, "tokens");
     generateElementTypes = !"no".equals(genOptions.get("elements"));
-    generateFirstCheck = getGenerateOption(myFile, KnownAttribute.GENERATE_FIRST_CHECK, genOptions.get("firstCheck"));
-    generateExtendedPin = getGenerateOption(myFile, KnownAttribute.EXTENDED_PIN, genOptions.get("extendedPin"));
-    generateTokenAccessors = getGenerateOption(myFile, KnownAttribute.GENERATE_TOKEN_ACCESSORS, genOptions.get("tokenAccessors"));
-    generateTokenAccessorsSet = genOptions.containsKey("tokenAccessors");
+    generateExactTypes = StringUtil.notNullize(genOptions.get("exact-types"));
+    generateFirstCheck = getGenerateOption(myFile, KnownAttribute.GENERATE_FIRST_CHECK, genOptions, "first-check", "firstCheck");
+    generateExtendedPin = getGenerateOption(myFile, KnownAttribute.EXTENDED_PIN, genOptions, "extended-pin", "extendedPin");
+    generateTokenAccessors = getGenerateOption(myFile, KnownAttribute.GENERATE_TOKEN_ACCESSORS, genOptions, "token-accessors", "tokenAccessors");
+    generateTokenAccessorsSet = genOptions.containsKey("token-accessors") || genOptions.containsKey("tokenAccessors");
     generateRootRules = PatternUtil.compileSafe(genOptions.get("root-rules"), null);
     generateVisitor = !"no".equals(genOptions.get("visitor"));
     visitorValue = "void".equals(genOptions.get("visitor-value")) ? null : StringUtil.nullize(genOptions.get("visitor-value"));

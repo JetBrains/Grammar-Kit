@@ -171,7 +171,10 @@ public class BnfFileImpl extends PsiFileBase implements BnfFile {
   }
 
   private List<BnfAttrs> calcAttributes() {
-    return GrammarUtil.bnfTraverser(this).filter(BnfAttrs.class).toList();
+    return GrammarUtil.bnfTraverser(this)
+      .expand(Conditions.notInstanceOf(BnfRule.class))
+      .filter(BnfAttrs.class)
+      .toList();
   }
 
   private Map<String, List<AttributeInfo>> calcAttributeValues() {

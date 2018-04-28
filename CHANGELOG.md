@@ -1,3 +1,12 @@
+2017.1.3
+
+* Generator: fix nested metas generation once again
+* Editor: fix rule attrs being shown in File Structure (improves performance too)
+* Editor: support custom folding regions (region/endregion comments)
+* Editor: tweak pairing paren insertion
+* Editor: fix incorrectly highlighted pin in expression-parsing rules
+* Refactorings: move common sub-menu, reuse common shortcuts
+
 2017.1.2
 
 * Editor: fix some recoverWhile highlighting

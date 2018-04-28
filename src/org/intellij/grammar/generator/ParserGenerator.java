@@ -1033,7 +1033,7 @@ public class ParserGenerator {
         BnfExpression expression = expressions.get(j);
         if (GrammarUtil.isAtomicExpression(expression)) continue;
         if (expression instanceof BnfExternalExpression) {
-          generateNodeChild(rule, expression, getNextName(funcName, j - 1), j - 1, visited);
+          generateNodeChild(rule, expression, getNextName(funcName, index), j - 1, visited);
         }
         else {
           newLine();

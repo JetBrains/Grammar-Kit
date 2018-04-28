@@ -47,4 +47,4 @@ fake thing_skip ::= "bar" {elementType=thing_item}
 import ::= A (some A | A some A) {pin("import")=1}
 
 private meta meta2 ::= <<p>> <<q>>
-private nested_meta_pin ::= "1" (("2") <<meta2 ("3" "a") <<meta2 ("4" "a") ("5" "a")>>>>) {pin(".*")=1}
+private nested_meta_pin ::= "1" (("2") <<meta2 <<meta2 ("3" "a") !"b">> <<meta2 ("4" "a") ("5" "a")>>>>) {pin(".*")=1}

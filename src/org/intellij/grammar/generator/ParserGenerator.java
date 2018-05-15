@@ -761,12 +761,15 @@ public class ParserGenerator {
     String elementType = getElementType(rule);
     String elementTypeRef = !isPrivate && StringUtil.isNotEmpty(elementType) ? elementType : null;
 
-    final List<BnfExpression> children;
+    boolean isSingleNode = node instanceof BnfReferenceOrToken || node instanceof BnfLiteralExpression || node instanceof BnfExternalExpression;
+
+    List<BnfExpression> children = isSingleNode ? Collections.singletonList(node) : getChildExpressions(node);
+    String frameName = !children.isEmpty() && firstNonTrivial && !Rule.isMeta(rule) ? quote(getRuleDisplayName(rule, !isPrivate)) : null;
+
     String extraArguments = collectExtraArguments(rule, node, true);
     out("%sstatic boolean %s(PsiBuilder %s, int %s%s) {", !isRule ? "private " : isPrivate ? "" : "public ", funcName, N.builder, N.level, extraArguments);
-    if (node instanceof BnfReferenceOrToken || node instanceof BnfLiteralExpression || node instanceof BnfExternalExpression) {
-      children = Collections.singletonList(node);
-      if (isPrivate && !isLeftInner && recoverWhile == null) {
+    if (isSingleNode) {
+      if (isPrivate && !isLeftInner && recoverWhile == null && frameName == null) {
         String nodeCall = generateNodeCall(rule, node, getNextName(funcName, 0));
         out("return %s;", nodeCall);
         out("}");
@@ -779,29 +782,11 @@ public class ParserGenerator {
         type = BNF_SEQUENCE;
       }
     }
-    else {
-      children = getChildExpressions(node);
-      //if (children.isEmpty() && recoverWhile == null) {
-      //  if (!isPrivate && !StringUtil.isEmpty(elementType)) {
-      //    if (isLeft || isLeftInner) {
-      //      out("Marker %s = enter_section_(%s, %s, %s, %s);", N.marker, N.builder, N.level, isLeftInner ? "_LEFT_INNER_" : "_LEFT_", null);
-      //      out("exit_section_(%s, %s, %s, %s, %s, %s, %s);", N.builder, N.level, N.marker, elementType, true, false, null);
-      //    }
-      //    else {
-      //      out("Marker %s = enter_section_(%s);", N.marker, N.builder);
-      //      out("exit_section_(%s, %s, %s, %s);", N.builder, N.marker, elementType, true);
-      //    }
-      //  }
-      //  out("return true;");
-      //  out("}");
-      //  return;
-      //}
-    }
+
     if (!children.isEmpty()) {
       out("if (!recursion_guard_(%s, %s, \"%s\")) return false;", N.builder, N.level, funcName);
     }
 
-    String frameName = !children.isEmpty() && firstNonTrivial && !Rule.isMeta(rule)? quote(getRuleDisplayName(rule, !isPrivate)) : null;
     if (recoverWhile == null && (isRule || firstNonTrivial)) {
       frameName = generateFirstCheck(rule, frameName, getAttribute(rule, KnownAttribute.NAME) == null);
     }
@@ -827,9 +812,13 @@ public class ParserGenerator {
 
     boolean sectionRequired = !alwaysTrue || !isPrivate || isLeft || recoverWhile != null;
     boolean sectionRequiredSimple = sectionRequired && modifierList.isEmpty() && recoverWhile == null && frameName == null;
+    boolean sectionMaybeDropped = sectionRequiredSimple && type == BNF_CHOICE && elementTypeRef == null &&
+                                  children.stream().noneMatch(o -> ParserGeneratorUtil.isRollbackRequired(o, myFile));
     String modifiers = modifierList.isEmpty()? "_NONE_" : StringUtil.join(modifierList, " | ");
     if (sectionRequiredSimple) {
-      out("Marker %s = enter_section_(%s);", N.marker, N.builder);
+      if (!sectionMaybeDropped) {
+        out("Marker %s = enter_section_(%s);", N.marker, N.builder);
+      }
     }
     else if (sectionRequired) {
       boolean shortVersion = frameName == null && elementTypeRef == null;
@@ -923,7 +912,9 @@ public class ParserGenerator {
         }
       }
       if (sectionRequiredSimple) {
-        out("exit_section_(%s, %s, %s, %s);", N.builder, N.marker, elementTypeRef, resultRef);
+        if (!sectionMaybeDropped) {
+          out("exit_section_(%s, %s, %s, %s);", N.builder, N.marker, elementTypeRef, resultRef);
+        }
       }
       else {
         String pinnedRef = pinned ? N.pinned : "false";

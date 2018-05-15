@@ -172,10 +172,8 @@ public class JFlexParser implements PsiParser, LightPsiParser {
     if (!recursion_guard_(builder, level, "char_or_esc")) return false;
     if (!nextTokenIs(builder, "", FLEX_CHAR, FLEX_CHAR_ESC)) return false;
     boolean result;
-    Marker marker = enter_section_(builder);
     result = consumeToken(builder, FLEX_CHAR);
     if (!result) result = consumeToken(builder, FLEX_CHAR_ESC);
-    exit_section_(builder, marker, null, result);
     return result;
   }
 
@@ -1186,10 +1184,8 @@ public class JFlexParser implements PsiParser, LightPsiParser {
   private static boolean option_unicode_1_0(PsiBuilder builder, int level) {
     if (!recursion_guard_(builder, level, "option_unicode_1_0")) return false;
     boolean result;
-    Marker marker = enter_section_(builder);
     result = consumeToken(builder, FLEX_NUMBER);
     if (!result) result = consumeToken(builder, FLEX_VERSION);
-    exit_section_(builder, marker, null, result);
     return result;
   }
 
@@ -1272,10 +1268,8 @@ public class JFlexParser implements PsiParser, LightPsiParser {
   private static boolean rule_0_1(PsiBuilder builder, int level) {
     if (!recursion_guard_(builder, level, "rule_0_1")) return false;
     boolean result;
-    Marker marker = enter_section_(builder);
     result = rule_group(builder, level + 1);
     if (!result) result = rule_tail(builder, level + 1);
-    exit_section_(builder, marker, null, result);
     return result;
   }
 
@@ -1375,10 +1369,8 @@ public class JFlexParser implements PsiParser, LightPsiParser {
   static boolean rule_tail(PsiBuilder builder, int level) {
     if (!recursion_guard_(builder, level, "rule_tail")) return false;
     boolean result;
-    Marker marker = enter_section_(builder);
     result = rule_tail1(builder, level + 1);
     if (!result) result = rule_tail2(builder, level + 1);
-    exit_section_(builder, marker, null, result);
     return result;
   }
 

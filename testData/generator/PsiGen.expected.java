@@ -231,13 +231,11 @@ public class PsiGen implements PsiParser, LightPsiParser {
     if (!recursion_guard_(builder_, level_, "id_expr")) return false;
     if (!nextTokenIs(builder_, "", ID, NUMBER)) return false;
     boolean result_;
-    Marker marker_ = enter_section_(builder_);
     result_ = PsiGen2.specialRef(builder_, level_ + 1);
     if (!result_) result_ = PsiGen2.reference(builder_, level_ + 1);
     if (!result_) result_ = PsiGen2.literal(builder_, level_ + 1);
     if (!result_) result_ = external_type(builder_, level_ + 1);
     if (!result_) result_ = external_type2(builder_, level_ + 1);
-    exit_section_(builder_, marker_, null, result_);
     return result_;
   }
 
@@ -788,10 +786,8 @@ public class PsiGenFixes {
   private static boolean statement_0_1(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "statement_0_1")) return false;
     boolean result_;
-    Marker marker_ = enter_section_(builder_);
     result_ = a_statement(builder_, level_ + 1);
     if (!result_) result_ = b_statement(builder_, level_ + 1);
-    exit_section_(builder_, marker_, null, result_);
     return result_;
   }
 

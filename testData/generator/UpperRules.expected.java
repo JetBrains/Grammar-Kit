@@ -68,11 +68,9 @@ public class GeneratedParser implements PsiParser, LightPsiParser {
   private static boolean abc_2(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "abc_2")) return false;
     boolean result_;
-    Marker marker_ = enter_section_(builder_);
     result_ = abc_one(builder_, level_ + 1);
     if (!result_) result_ = abc_two(builder_, level_ + 1);
     if (!result_) result_ = abc_three(builder_, level_ + 1);
-    exit_section_(builder_, marker_, null, result_);
     return result_;
   }
 
@@ -106,10 +104,8 @@ public class GeneratedParser implements PsiParser, LightPsiParser {
   private static boolean abc_pin_1(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "abc_pin_1")) return false;
     boolean result_;
-    Marker marker_ = enter_section_(builder_);
     result_ = abc_one(builder_, level_ + 1);
     if (!result_) result_ = abc_two(builder_, level_ + 1);
-    exit_section_(builder_, marker_, null, result_);
     return result_;
   }
 
@@ -217,11 +213,9 @@ public class GeneratedParser implements PsiParser, LightPsiParser {
   private static boolean root_0(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "root_0")) return false;
     boolean result_;
-    Marker marker_ = enter_section_(builder_);
     result_ = abc(builder_, level_ + 1);
     if (!result_) result_ = abc_pin(builder_, level_ + 1);
     if (!result_) result_ = abc_seq(builder_, level_ + 1);
-    exit_section_(builder_, marker_, null, result_);
     return result_;
   }
 

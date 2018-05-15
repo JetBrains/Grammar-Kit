@@ -266,11 +266,9 @@ public class GrammarParser implements PsiParser, LightPsiParser {
   static boolean attr_value_inner(PsiBuilder builder, int level) {
     if (!recursion_guard_(builder, level, "attr_value_inner")) return false;
     boolean result;
-    Marker marker = enter_section_(builder);
     result = reference_or_token(builder, level + 1);
     if (!result) result = literal_expression(builder, level + 1);
     if (!result) result = value_list(builder, level + 1);
-    exit_section_(builder, marker, null, result);
     return result;
   }
 
@@ -405,10 +403,8 @@ public class GrammarParser implements PsiParser, LightPsiParser {
   private static boolean grammar_element_1(PsiBuilder builder, int level) {
     if (!recursion_guard_(builder, level, "grammar_element_1")) return false;
     boolean result;
-    Marker marker = enter_section_(builder);
     result = attrs(builder, level + 1);
     if (!result) result = rule(builder, level + 1);
-    exit_section_(builder, marker, null, result);
     return result;
   }
 

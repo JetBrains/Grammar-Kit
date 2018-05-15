@@ -149,14 +149,12 @@ public class FooParser implements PsiParser, LightPsiParser {
   static boolean root(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "root")) return false;
     boolean result_;
-    Marker marker_ = enter_section_(builder_);
     result_ = element1(builder_, level_ + 1);
     if (!result_) result_ = element2(builder_, level_ + 1);
     if (!result_) result_ = element3(builder_, level_ + 1);
     if (!result_) result_ = element4(builder_, level_ + 1);
     if (!result_) result_ = element5(builder_, level_ + 1);
     if (!result_) result_ = type(builder_, level_ + 1);
-    exit_section_(builder_, marker_, null, result_);
     return result_;
   }
 

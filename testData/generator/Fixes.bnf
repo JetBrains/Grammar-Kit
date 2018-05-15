@@ -48,3 +48,8 @@ import ::= A (some A | A some A) {pin("import")=1}
 
 private meta meta2 ::= <<p>> <<q>>
 private nested_meta_pin ::= "1" (("2") <<meta2 <<meta2 ("3" "a") !"b">> <<meta2 ("4" "a") ("5" "a")>>>>) {pin(".*")=1}
+
+not_optimized_choice ::= A | private_named | private_unnamed
+private optimized_choice ::= A | private_named | private_unnamed
+private private_named ::= "foo" {name="named"}
+private private_unnamed ::= "foo"

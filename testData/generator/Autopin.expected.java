@@ -99,10 +99,8 @@ public class Autopin implements PsiParser, LightPsiParser {
   private static boolean create_table_statement_2(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "create_table_statement_2")) return false;
     boolean result_;
-    Marker marker_ = enter_section_(builder_);
     result_ = consumeToken(builder_, GLOBAL);
     if (!result_) result_ = consumeToken(builder_, LOCAL);
-    exit_section_(builder_, marker_, null, result_);
     return result_;
   }
 
@@ -177,10 +175,8 @@ public class Autopin implements PsiParser, LightPsiParser {
   private static boolean pinned_on_start_1(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "pinned_on_start_1")) return false;
     boolean result_;
-    Marker marker_ = enter_section_(builder_);
     result_ = consumeToken(builder_, A);
     if (!result_) result_ = consumeToken(builder_, B);
-    exit_section_(builder_, marker_, null, result_);
     return result_;
   }
 

@@ -331,10 +331,8 @@ public class ExternalRules implements PsiParser, LightPsiParser {
   private static boolean meta_seq_0_1(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "meta_seq_0_1")) return false;
     boolean result_;
-    Marker marker_ = enter_section_(builder_);
     result_ = one(builder_, level_ + 1);
     if (!result_) result_ = two(builder_, level_ + 1);
-    exit_section_(builder_, marker_, null, result_);
     return result_;
   }
 
@@ -348,10 +346,8 @@ public class ExternalRules implements PsiParser, LightPsiParser {
   private static boolean meta_seq_of_lists_0_1(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "meta_seq_of_lists_0_1")) return false;
     boolean result_;
-    Marker marker_ = enter_section_(builder_);
     result_ = one(builder_, level_ + 1);
     if (!result_) result_ = two(builder_, level_ + 1);
-    exit_section_(builder_, marker_, null, result_);
     return result_;
   }
 
@@ -372,10 +368,8 @@ public class ExternalRules implements PsiParser, LightPsiParser {
   private static boolean meta_seq_of_lists_opt_0_0_1(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "meta_seq_of_lists_opt_0_0_1")) return false;
     boolean result_;
-    Marker marker_ = enter_section_(builder_);
     result_ = one(builder_, level_ + 1);
     if (!result_) result_ = two(builder_, level_ + 1);
-    exit_section_(builder_, marker_, null, result_);
     return result_;
   }
 
@@ -517,10 +511,8 @@ public class ExternalRules implements PsiParser, LightPsiParser {
   private static boolean param_seq_alt_1_0(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "param_seq_alt_1_0")) return false;
     boolean result_;
-    Marker marker_ = enter_section_(builder_);
     result_ = one(builder_, level_ + 1);
     if (!result_) result_ = two(builder_, level_ + 1);
-    exit_section_(builder_, marker_, null, result_);
     return result_;
   }
 

@@ -375,6 +375,30 @@ public class Fixes implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
+  // A | private_named | private_unnamed
+  public static boolean not_optimized_choice(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "not_optimized_choice")) return false;
+    boolean result_;
+    Marker marker_ = enter_section_(builder_, level_, _NONE_, NOT_OPTIMIZED_CHOICE, "<not optimized choice>");
+    result_ = consumeToken(builder_, A);
+    if (!result_) result_ = private_named(builder_, level_ + 1);
+    if (!result_) result_ = private_unnamed(builder_, level_ + 1);
+    exit_section_(builder_, level_, marker_, result_, false, null);
+    return result_;
+  }
+
+  /* ********************************************************** */
+  // A | private_named | private_unnamed
+  static boolean optimized_choice(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "optimized_choice")) return false;
+    boolean result_;
+    result_ = consumeToken(builder_, A);
+    if (!result_) result_ = private_named(builder_, level_ + 1);
+    if (!result_) result_ = private_unnamed(builder_, level_ + 1);
+    return result_;
+  }
+
+  /* ********************************************************** */
   // andRestriction ( "||" andRestriction ) *
   static boolean orRestriction(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "orRestriction")) return false;
@@ -476,6 +500,23 @@ public class Fixes implements PsiParser, LightPsiParser {
     result_ = aux(builder_, level_ + 1);
     exit_section_(builder_, level_, marker_, result_, false, null);
     return result_;
+  }
+
+  /* ********************************************************** */
+  // "foo"
+  static boolean private_named(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "private_named")) return false;
+    boolean result_;
+    Marker marker_ = enter_section_(builder_, level_, _NONE_, null, "<named>");
+    result_ = consumeToken(builder_, "foo");
+    exit_section_(builder_, level_, marker_, result_, false, null);
+    return result_;
+  }
+
+  /* ********************************************************** */
+  // "foo"
+  static boolean private_unnamed(PsiBuilder builder_, int level_) {
+    return consumeToken(builder_, "foo");
   }
 
   /* ********************************************************** */

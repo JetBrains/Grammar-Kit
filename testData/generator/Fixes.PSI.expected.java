@@ -16,6 +16,7 @@ public interface GeneratedTypes {
   IElementType FOO__ﾉ__Ω__ﾉ_ﾐ_____INNER = new IElementType("FOO__ﾉ__Ω__ﾉ_ﾐ_____INNER", null);
   IElementType IMPORT = new IElementType("IMPORT", null);
   IElementType LEFT_EXPR = new IElementType("LEFT_EXPR", null);
+  IElementType NOT_OPTIMIZED_CHOICE = new IElementType("NOT_OPTIMIZED_CHOICE", null);
   IElementType SOME = new IElementType("SOME", null);
   IElementType SOME_EXPR = new IElementType("SOME_EXPR", null);
   IElementType SOME_SEQ = new IElementType("SOME_SEQ", null);
@@ -124,6 +125,17 @@ public interface LeftExpr extends Expr {
 
   @NotNull
   List<Expr> getExprList();
+
+}
+// ---- NotOptimizedChoice.java -----------------
+// This is a generated file. Not intended for manual editing.
+package generated.psi;
+
+import java.util.List;
+import org.jetbrains.annotations.*;
+import com.intellij.psi.PsiElement;
+
+public interface NotOptimizedChoice extends PsiElement {
 
 }
 // ---- Some.java -----------------
@@ -467,6 +479,36 @@ public class LeftExprImpl extends ExprImpl implements LeftExpr {
   }
 
 }
+// ---- NotOptimizedChoiceImpl.java -----------------
+// This is a generated file. Not intended for manual editing.
+package generated.psi.impl;
+
+import java.util.List;
+import org.jetbrains.annotations.*;
+import com.intellij.lang.ASTNode;
+import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiElementVisitor;
+import com.intellij.psi.util.PsiTreeUtil;
+import static generated.GeneratedTypes.*;
+import com.intellij.extapi.psi.ASTWrapperPsiElement;
+import generated.psi.*;
+
+public class NotOptimizedChoiceImpl extends ASTWrapperPsiElement implements NotOptimizedChoice {
+
+  public NotOptimizedChoiceImpl(ASTNode node) {
+    super(node);
+  }
+
+  public void accept(@NotNull Visitor visitor) {
+    visitor.visitNotOptimizedChoice(this);
+  }
+
+  public void accept(@NotNull PsiElementVisitor visitor) {
+    if (visitor instanceof Visitor) accept((Visitor)visitor);
+    else super.accept(visitor);
+  }
+
+}
 // ---- SomeImpl.java -----------------
 // This is a generated file. Not intended for manual editing.
 package generated.psi.impl;
@@ -742,6 +784,10 @@ public class Visitor extends PsiElementVisitor {
 
   public void visitLeftExpr(@NotNull LeftExpr o) {
     visitExpr(o);
+  }
+
+  public void visitNotOptimizedChoice(@NotNull NotOptimizedChoice o) {
+    visitPsiElement(o);
   }
 
   public void visitSome(@NotNull Some o) {

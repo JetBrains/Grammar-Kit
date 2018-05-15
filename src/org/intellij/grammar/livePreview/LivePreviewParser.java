@@ -24,7 +24,6 @@ import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.psi.tree.IElementType;
 import com.intellij.util.NullableFunction;
 import com.intellij.util.containers.ContainerUtil;
-import com.intellij.util.containers.HashMap;
 import com.intellij.util.containers.MultiMap;
 import gnu.trove.TObjectIntHashMap;
 import org.intellij.grammar.KnownAttribute;
@@ -77,7 +76,7 @@ public class LivePreviewParser implements PsiParser {
     //originalBuilder.setDebugMode(true);
     init(originalBuilder);
     PsiBuilder builder = adapt_builder_(type, originalBuilder, this);
-    ErrorState.get(builder).altExtendsChecker = (elementType, elementType2) -> type_extends_(elementType, elementType2);
+    ErrorState.get(builder).altExtendsChecker = this::type_extends_;
     ArrayList<BracePair> braces = new ArrayList<>();
     ContainerUtil.addIfNotNull(braces, tryMakeBracePair("{", "}", true));
     ContainerUtil.addIfNotNull(braces, tryMakeBracePair("(", ")", false));
@@ -166,33 +165,26 @@ public class LivePreviewParser implements PsiParser {
     Map<String, String> hooks = firstNonTrivial ? getAttribute(rule, KnownAttribute.HOOKS).asMap() : Collections.emptyMap();
     boolean canCollapse = !isPrivate && (!isLeft || isLeftInner) && firstNonTrivial && myGraphHelper.canCollapse(rule);
 
-    IElementType elementType = getRuleElementType(rule);
+    IElementType elementType = !isPrivate ? getRuleElementType(rule) : null;
 
-    List<BnfExpression> children;
-    if (node instanceof BnfReferenceOrToken || node instanceof BnfLiteralExpression || node instanceof BnfExternalExpression) {
+    boolean isSingleNode = node instanceof BnfReferenceOrToken || node instanceof BnfLiteralExpression || node instanceof BnfExternalExpression;
+
+    List<BnfExpression> children = isSingleNode ? Collections.singletonList(node) : getChildExpressions(node);
+    String frameName = !children.isEmpty() && firstNonTrivial && !Rule.isMeta(rule) ? getRuleDisplayName(rule, !isPrivate) : null;
+
+    if (isSingleNode) {
       children = Collections.singletonList(node);
-      if (isPrivate && !isLeftInner && recoverWhile == null) {
+      if (isPrivate && !isLeftInner && recoverWhile == null && frameName == null) {
         return generateNodeCall(builder, level, rule, node, getNextName(funcName, 0), externalArguments);
       }
       else {
         type = BNF_SEQUENCE;
       }
     }
-    else {
-      children = getChildExpressions(node);
-      if (children.isEmpty() && recoverWhile == null) {
-        if (isPrivate || elementType == null) {
-          return true;
-        }
-        else {
-          builder.mark().done(elementType);
-          return true;
-        }
-      }
+    if (!children.isEmpty()) {
+      if (!recursion_guard_(builder, level, funcName)) return false;
     }
-    if (!recursion_guard_(builder, level, funcName)) return false;
 
-    String frameName = firstNonTrivial && !Rule.isMeta(rule)? getRuleDisplayName(rule, !isPrivate) : null;
     //if (recoverRoot == null && (isRule || firstNonTrivial)) {
     //  frameName = generateFirstCheck(rule, frameName, true);
     //}
@@ -216,12 +208,16 @@ public class LivePreviewParser implements PsiParser {
     PsiBuilder.Marker marker_ = null;
     boolean sectionRequired = !alwaysTrue || !isPrivate || isLeft || recoverWhile != null;
     boolean sectionRequiredSimple = sectionRequired && modifiers == _NONE_ && recoverWhile == null && !(pinned || frameName != null);
+    boolean sectionMaybeDropped = sectionRequiredSimple && type == BNF_CHOICE && elementType == null &&
+                                  children.stream().noneMatch(o -> ParserGeneratorUtil.isRollbackRequired(o, myFile));
 
     if (sectionRequiredSimple) {
-      marker_ = enter_section_(builder);
+      if (!sectionMaybeDropped) {
+        marker_ = enter_section_(builder);
+      }
     }
     else if (sectionRequired) {
-      marker_ = enter_section_(builder, level, modifiers, isPrivate ? null : elementType, frameName);
+      marker_ = enter_section_(builder, level, modifiers, elementType, frameName);
     }
 
     int[] skip = {0};
@@ -306,7 +302,9 @@ public class LivePreviewParser implements PsiParser {
       }
     }
     if (sectionRequiredSimple) {
-      exit_section_(builder, marker_, isPrivate? null : elementType, alwaysTrue || result_);
+      if (!sectionMaybeDropped) {
+        exit_section_(builder, marker_, elementType, alwaysTrue || result_);
+      }
     }
     else if (sectionRequired) {
       Parser recoverPredicate;
@@ -571,8 +569,9 @@ public class LivePreviewParser implements PsiParser {
     // main entry
     String methodName = info.rootRule.getName();
     String kernelMethodName = getNextName(methodName, 0);
-    String frameName = quote(ParserGeneratorUtil.getRuleDisplayName(info.rootRule, true));
+    String frameName = ParserGeneratorUtil.getRuleDisplayName(info.rootRule, true);
     if (!recursion_guard_(builder, level, methodName)) return false;
+    if (frameName != null) addVariant(builder, frameName);
     //g.generateFirstCheck(info.rootRule, frameName, true);
     boolean result_ = false;
     boolean pinned_;

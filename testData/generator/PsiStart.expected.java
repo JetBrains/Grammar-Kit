@@ -75,10 +75,8 @@ public class GeneratedParser implements PsiParser, LightPsiParser {
   static boolean grammar(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "grammar")) return false;
     boolean result_;
-    Marker marker_ = enter_section_(builder_);
     result_ = list(builder_, level_ + 1);
     if (!result_) result_ = map(builder_, level_ + 1);
-    exit_section_(builder_, marker_, null, result_);
     return result_;
   }
 

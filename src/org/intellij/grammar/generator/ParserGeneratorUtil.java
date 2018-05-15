@@ -286,6 +286,17 @@ public class ParserGeneratorUtil {
     return toIdentifier(text, NameFormat.from("get"), Case.CAMEL);
   }
 
+  public static boolean isRollbackRequired(BnfExpression o, BnfFile file) {
+    if (!(o instanceof BnfReferenceOrToken)) return true;
+    String value = GrammarUtil.stripQuotesAroundId(o.getText());
+    BnfRule subRule = file.getRule(value);
+    if (subRule == null) return false;
+    if (getAttribute(subRule, KnownAttribute.RECOVER_WHILE) != null) return true;
+    if (!getAttribute(subRule, KnownAttribute.HOOKS).isEmpty()) return true;
+    if (Rule.isExternal(subRule)) return true;
+    return false;
+  }
+
   @TestOnly
   @NotNull
   public static String toIdentifier(@NotNull String text, @Nullable NameFormat format, @NotNull Case cas) {

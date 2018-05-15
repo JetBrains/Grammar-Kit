@@ -1027,8 +1027,11 @@ public class ParserGenerator {
           generateNodeChild(rule, expression, getNextName(funcName, index), j - 1, visited);
         }
         else {
-          newLine();
-          generateNode(rule, expression, getNextName(getNextName(funcName, index), j - 1), visited);
+          String nextName = getNextName(getNextName(funcName, index), j - 1);
+          if (shallGenerateNodeChild(nextName)) {
+            newLine();
+            generateNode(rule, expression, nextName, visited);
+          }
         }
       }
     }
@@ -1036,8 +1039,11 @@ public class ParserGenerator {
       // do not generate
     }
     else {
-      newLine();
-      generateNode(rule, child, getNextName(funcName, index), visited);
+      String nextName = getNextName(funcName, index);
+      if (shallGenerateNodeChild(nextName)) {
+        newLine();
+        generateNode(rule, child, nextName, visited);
+      }
     }
   }
 
@@ -1297,7 +1303,7 @@ public class ParserGenerator {
     if (!collectExtraArguments(rule, nested, false).isEmpty()) {
       return wrapCallWithParserInstance(generateNodeCall(rule, nested, nextName));
     }
-    String constantName = toIdentifier(nextName, null, Case.AS_IS) + "_parser_";
+    String constantName = getWrapperParserConstantName(nextName);
     String current = myParserLambdas.get(constantName);
     if (current == null) {
       myParserLambdas.put(constantName, "#" + generateNodeCall(rule, nested, nextName));
@@ -1309,6 +1315,16 @@ public class ParserGenerator {
     else {
       return current;
     }
+  }
+
+  private boolean shallGenerateNodeChild(String funcName) {
+    String constantName = getWrapperParserConstantName(funcName);
+    String current = myParserLambdas.get(constantName);
+    return current == null || current.startsWith("#" + funcName + "(");
+  }
+
+  private static String getWrapperParserConstantName(String nextName) {
+    return toIdentifier(nextName, null, Case.AS_IS) + "_parser_";
   }
 
   private String generateConsumeToken(String tokenName, String consumeMethodName) {

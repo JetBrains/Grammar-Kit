@@ -588,16 +588,6 @@ public class ExternalRules implements PsiParser, LightPsiParser {
     return listOf(builder_, level_ + 1, perc_re_list2_0_0_parser_);
   }
 
-  // (perc_re)
-  private static boolean perc_re_list2_0_0(PsiBuilder builder_, int level_) {
-    if (!recursion_guard_(builder_, level_, "perc_re_list2_0_0")) return false;
-    boolean result_;
-    Marker marker_ = enter_section_(builder_);
-    result_ = consumeToken(builder_, PERC_RE);
-    exit_section_(builder_, marker_, null, result_);
-    return result_;
-  }
-
   /* ********************************************************** */
   // <<param>>
   static boolean recoverable_item(PsiBuilder builder_, int level_, Parser param) {

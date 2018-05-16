@@ -12,5 +12,5 @@ BnfFile:BrokenAttrBeforeEOF.bnf
       BNF_ATTR:name
         PsiElement(id)('name')
         PsiElement(=)('=')
-        PsiErrorElement:<literal expression>, '[' or id expected, unexpected end of file
+        PsiErrorElement:<literal expression>, '[' or id expected
           <empty list>

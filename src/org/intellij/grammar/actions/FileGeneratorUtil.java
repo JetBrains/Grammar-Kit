@@ -25,6 +25,7 @@ import com.intellij.openapi.progress.ProcessCanceledException;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.ProjectFileIndex;
 import com.intellij.openapi.roots.ProjectRootManager;
+import com.intellij.openapi.util.Comparing;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VirtualFile;
@@ -38,8 +39,9 @@ import org.intellij.jflex.parser.JFlexFileType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Collection;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 import static com.intellij.util.ArrayUtil.getFirstElement;
 
@@ -56,16 +58,23 @@ public class FileGeneratorUtil {
     boolean hasPackage = StringUtil.isNotEmpty(targetPackage);
     ProjectRootManager rootManager = ProjectRootManager.getInstance(project);
     ProjectFileIndex fileIndex = ProjectFileIndex.SERVICE.getInstance(project);
-    Collection<VirtualFile> files = targetFile == null ? Collections.emptyList() :
-                                    FilenameIndex.getVirtualFilesByName(project, targetFile,
-                                                                        ProjectScope.getAllScope(project));
 
     VirtualFile existingFile = null;
-    for (VirtualFile file : files) {
-      String existingFilePackage = fileIndex.getPackageNameByDirectory(file.getParent());
-      if (!hasPackage || existingFilePackage == null || targetPackage.equals(existingFilePackage)) {
-        existingFile = file;
-        break;
+    if (targetFile != null) {
+      List<VirtualFile> files =
+        new ArrayList<>(FilenameIndex.getVirtualFilesByName(project, targetFile, ProjectScope.getProjectScope(project)));
+      Collections.sort(files, (f1, f2) -> {
+        boolean b1 = fileIndex.isInSource(f1);
+        boolean b2 = fileIndex.isInSource(f2);
+        if (b1 != b2) return b1 ? -1 : 1;
+        return Comparing.compare(f1.getPath().length(), f2.getPath().length());
+      });
+      for (VirtualFile file : files) {
+        String existingFilePackage = fileIndex.getPackageNameByDirectory(file.getParent());
+        if (!hasPackage || existingFilePackage == null || targetPackage.equals(existingFilePackage)) {
+          existingFile = file;
+          break;
+        }
       }
     }
 

@@ -23,12 +23,13 @@ import com.intellij.notification.Notifications;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.LangDataKeys;
-import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.application.WriteAction;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.progress.*;
+import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.util.Ref;
 import com.intellij.openapi.util.io.FileUtil;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.openapi.vfs.VfsUtil;
@@ -147,21 +148,29 @@ public class GenerateAction extends AnAction {
           if (target == null) return;
           targets.add(target);
           File genDir = new File(VfsUtil.virtualToIoFile(target).getAbsolutePath());
+          long time = System.currentTimeMillis();
+          int filesCount = files.size();
+          Ref<Exception> exRef = Ref.create();
           try {
-            long time = System.currentTimeMillis();
-            int filesCount = files.size();
-            ReadAction.run(() -> {
+            DumbService.getInstance(project).runReadActionInSmartMode(() -> {
               if (!file.isValid()) return;
               PsiFile bnfFile = psiManager.findFile(file);
               if (!(bnfFile instanceof BnfFile)) return;
-              new ParserGenerator((BnfFile)bnfFile, sourcePath, genDir.getPath()) {
+              ParserGenerator generator = new ParserGenerator((BnfFile)bnfFile, sourcePath, genDir.getPath()) {
                 @Override
                 protected PrintWriter openOutputInner(File file) throws IOException {
                   files.add(file);
                   return super.openOutputInner(file);
                 }
-              }.generate();
+              };
+              try {
+                generator.generate();
+              }
+              catch (Exception ex) {
+                exRef.set(ex);
+              }
             });
+            if (!exRef.isNull()) throw exRef.get();
             long millis = System.currentTimeMillis() - time;
             String duration = millis < 1000 ? null : StringUtil.formatDuration(millis);
             long written = 0;

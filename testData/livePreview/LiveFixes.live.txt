@@ -6,3 +6,5 @@
 :case1 "123 ;" 123 ;
 
 :case2 xx yy ;
+
+:case3 xx yy ;

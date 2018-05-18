@@ -15,6 +15,7 @@ root ::= (&':' statement) * {pin(".*")=1}
 
 statement ::= st_case1
   | st_case2 
+  | st_case3
   {recoverWhile=st_recover}
 private st_recover ::= !':'
 
@@ -27,3 +28,8 @@ private predicate_recover ::= !(':' | ';' | id | number)
 // case2: public left predicate
 st_case2 ::= ':' 'case2' string? name left_predicate name ';'
 left left_predicate ::= &id
+
+//case3: last seq item error not reported
+st_case3 ::= ':' 'case3' pinned_seq ';'
+private pinned_seq ::= <<wrap id>> <<wrap number>> <<wrap id>> <<wrap number>> {pin=1}
+private meta wrap ::= <<param>>

@@ -82,3 +82,15 @@ FILE
       PsiElement(id)('yy')
     PsiWhiteSpace(' ')
     PsiElement(;)(';')
+  PsiWhiteSpace('\n\n')
+  ASTWrapperPsiElement(ST_CASE_3)
+    PsiElement(:)(':')
+    PsiElement(id)('case3')
+    PsiWhiteSpace(' ')
+    PsiElement(id)('xx')
+    PsiErrorElement:number expected, got 'yy'
+      <empty list>
+    PsiWhiteSpace(' ')
+    PsiElement(id)('yy')
+    PsiWhiteSpace(' ')
+    PsiElement(;)(';')

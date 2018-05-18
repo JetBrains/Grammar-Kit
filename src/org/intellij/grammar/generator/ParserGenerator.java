@@ -112,6 +112,7 @@ public class ParserGenerator {
   private final Map<String, RuleInfo> myRuleInfos = ContainerUtil.newTreeMap();
 
   private final Map<String, String> myParserLambdas = ContainerUtil.newTreeMap();
+  private final Set<String> myInlinedChildNodes = ContainerUtil.newHashSet();
   private final Map<String, String> mySimpleTokens;
   private final Set<String> myTokensUsedInGrammar = ContainerUtil.newLinkedHashSet();
   private final boolean myNoStubs;
@@ -1306,7 +1307,11 @@ public class ParserGenerator {
     String constantName = getWrapperParserConstantName(nextName);
     String current = myParserLambdas.get(constantName);
     if (current == null) {
-      myParserLambdas.put(constantName, "#" + generateNodeCall(rule, nested, nextName));
+      String call = generateNodeCall(rule, nested, nextName);
+      myParserLambdas.put(constantName, "#" + call);
+      if (!call.startsWith(nextName +"(")) {
+        myInlinedChildNodes.add(nextName);
+      }
       return constantName;
     }
     else if (current.startsWith("#")) {
@@ -1318,9 +1323,7 @@ public class ParserGenerator {
   }
 
   private boolean shallGenerateNodeChild(String funcName) {
-    String constantName = getWrapperParserConstantName(funcName);
-    String current = myParserLambdas.get(constantName);
-    return current == null || current.startsWith("#" + funcName + "(");
+    return !myInlinedChildNodes.contains(funcName);
   }
 
   private static String getWrapperParserConstantName(String nextName) {

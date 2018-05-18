@@ -42,8 +42,9 @@ public class BnfFirstNextTest extends LightPlatformCodeInsightFixtureTestCase {
   public void testAndOrNot2() { doFirstTest("r ::= Y? (!X | &X) X", "X", "Y"); }
   public void testNotOrNot3() { doFirstTest("r ::= Y? (!X | !X) X", MATCHES_NOTHING, "Y"); }
   public void testNotText() { doFirstTest("r ::= !'a' s external s ::= parseA", "#parseA"); }
-  public void testAndText() { doFirstTest("r ::= &'a' s external s ::= parseA", "#parseA"); }
-  public void testAndExternal() { doFirstTest("r ::= &A s external s ::= parseA", "#parseA"); }
+  public void testAndText() { doFirstTest("r ::= &'a' s external s ::= parseA", "'a'"); }
+  public void testAndExternal() { doFirstTest("r ::= &A s external s ::= parseA", "A"); }
+  public void testAndExternalPredicate() { doFirstTest("r ::= &p s external s ::= parseA external p ::= parseB", "#parseA", "#parseB"); }
   public void testNotSeqTrivial() { doFirstTest("r ::= !(X) (X Z)", MATCHES_NOTHING); }
   public void testNotSeq() { doFirstTest("r ::= !(X Y) (X Z)", "X"); }
   public void testAndSeq() { doFirstTest("r ::= (&(X | Y) | !X) X", "X"); }

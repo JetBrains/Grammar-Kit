@@ -304,7 +304,7 @@ public class BnfFirstNextAnalyzer {
       Set<BnfExpression> conditions = calcFirstInner(predicateExpression, newExprSet(), visited, null);
       Set<BnfExpression> next;
       List<BnfExpression> externalCond = Collections.emptyList();
-      List<BnfExpression> externalNext;
+      List<BnfExpression> externalNext = Collections.emptyList();
       if (!visited.add(predicateExpression)) {
         skip = true;
         next = Collections.emptySet();
@@ -320,7 +320,7 @@ public class BnfFirstNextAnalyzer {
         visited.remove(predicateExpression);
         externalCond = filterExternalMethods(conditions);
         externalNext = filterExternalMethods(next);
-        if (!skip) skip = !externalNext.isEmpty() || !externalCond.isEmpty();
+        if (!skip) skip = !externalCond.isEmpty();
       }
       Set<BnfExpression> mixed = newExprSet();
       if (elementType == BnfTypes.BNF_OP_AND) {
@@ -337,10 +337,15 @@ public class BnfFirstNextAnalyzer {
             mixed.addAll(conditions);
           }
           else {
-            mixed.addAll(next);
-            mixed.retainAll(conditions);
-            if (mixed.isEmpty() && !involvesTextMatching(conditions)) {
-              mixed.add(BNF_MATCHES_NOTHING);
+            if (externalNext.isEmpty()) {
+              mixed.addAll(next);
+              mixed.retainAll(conditions);
+              if (mixed.isEmpty() && !involvesTextMatching(conditions)) {
+                mixed.add(BNF_MATCHES_NOTHING);
+              }
+            }
+            else {
+              mixed.addAll(conditions);
             }
           }
         }

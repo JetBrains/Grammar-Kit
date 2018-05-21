@@ -197,9 +197,9 @@ public class BnfRunJFlexAction extends DumbAwareAction {
       processHandler.addProcessListener(new ProcessAdapter() {
         @Override
         public void processTerminated(@NotNull ProcessEvent event) {
-          if (event.getExitCode() == 0) {
-            ApplicationManager.getApplication().invokeLater(callback::setDone, project.getDisposed());
-          }
+          Runnable runnable = event.getExitCode() == 0 ? callback::setDone : callback::setRejected;
+          ApplicationManager.getApplication().invokeLater(runnable, project.getDisposed());
+          VfsUtil.markDirtyAndRefresh(true, false, true, virtualDir);
         }
       });
       processHandler.startNotify();
@@ -387,8 +387,7 @@ public class BnfRunJFlexAction extends DumbAwareAction {
     JComponent consoleComponent = new JPanel(new BorderLayout());
 
     JPanel toolbarPanel = new JPanel(new BorderLayout());
-    // todo IDEA 15 compatibility: replace with ActionPlaces.RUNNER_TOOLBAR
-    toolbarPanel.add(ActionManager.getInstance().createActionToolbar(ActionPlaces.MAIN_TOOLBAR, toolbarActions, false).getComponent());
+    toolbarPanel.add(ActionManager.getInstance().createActionToolbar(ActionPlaces.RUNNER_TOOLBAR, toolbarActions, false).getComponent());
     consoleComponent.add(toolbarPanel, BorderLayout.WEST);
     consoleComponent.add(consoleView.getComponent(), BorderLayout.CENTER);
 

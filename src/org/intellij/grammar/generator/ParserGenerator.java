@@ -886,11 +886,10 @@ public class ParserGenerator {
         if (type == BNF_OP_ONEMORE) {
           out("%s = %s;", N.result, nodeCall);
         }
-        out("int %s = current_position_(%s);", N.pos, N.builder);
         out("while (%s) {", alwaysTrue ? "true" : N.result);
+        out("int %s = current_position_(%s);", N.pos, N.builder);
         out("if (!%s) break;", nodeCall);
         out("if (!empty_element_parsed_guard_(%s, \"%s\", %s)) break;", N.builder, funcName, N.pos);
-        out("%s = current_position_(%s);", N.pos, N.builder);
         out("}");
       }
       else if (type == BNF_OP_AND) {

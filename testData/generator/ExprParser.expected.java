@@ -99,11 +99,10 @@ public class ExpressionParser implements PsiParser, LightPsiParser {
   // (',' expr) *
   private static boolean arg_list_1_0_2(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "arg_list_1_0_2")) return false;
-    int pos_ = current_position_(builder_);
     while (true) {
+      int pos_ = current_position_(builder_);
       if (!arg_list_1_0_2_0(builder_, level_ + 1)) break;
       if (!empty_element_parsed_guard_(builder_, "arg_list_1_0_2", pos_)) break;
-      pos_ = current_position_(builder_);
     }
     return true;
   }
@@ -199,11 +198,10 @@ public class ExpressionParser implements PsiParser, LightPsiParser {
   // element *
   static boolean root(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "root")) return false;
-    int pos_ = current_position_(builder_);
     while (true) {
+      int pos_ = current_position_(builder_);
       if (!element(builder_, level_ + 1)) break;
       if (!empty_element_parsed_guard_(builder_, "root", pos_)) break;
-      pos_ = current_position_(builder_);
     }
     return true;
   }

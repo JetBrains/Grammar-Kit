@@ -162,11 +162,10 @@ public class GeneratedParser implements PsiParser, LightPsiParser {
   // (';' root) *
   private static boolean file_1(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "file_1")) return false;
-    int pos_ = current_position_(builder_);
     while (true) {
+      int pos_ = current_position_(builder_);
       if (!file_1_0(builder_, level_ + 1)) break;
       if (!empty_element_parsed_guard_(builder_, "file_1", pos_)) break;
-      pos_ = current_position_(builder_);
     }
     return true;
   }
@@ -199,11 +198,10 @@ public class GeneratedParser implements PsiParser, LightPsiParser {
   public static boolean root(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "root")) return false;
     Marker marker_ = enter_section_(builder_, level_, _NONE_, ROOT, "<root>");
-    int pos_ = current_position_(builder_);
     while (true) {
+      int pos_ = current_position_(builder_);
       if (!root_0(builder_, level_ + 1)) break;
       if (!empty_element_parsed_guard_(builder_, "root", pos_)) break;
-      pos_ = current_position_(builder_);
     }
     exit_section_(builder_, level_, marker_, true, false, null);
     return true;

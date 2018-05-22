@@ -290,11 +290,10 @@ public class GrammarParser implements PsiParser, LightPsiParser {
   // attr *
   private static boolean attrs_1(PsiBuilder builder, int level) {
     if (!recursion_guard_(builder, level, "attrs_1")) return false;
-    int pos = current_position_(builder);
     while (true) {
+      int pos = current_position_(builder);
       if (!attr(builder, level + 1)) break;
       if (!empty_element_parsed_guard_(builder, "attrs_1", pos)) break;
-      pos = current_position_(builder);
     }
     return true;
   }
@@ -307,11 +306,10 @@ public class GrammarParser implements PsiParser, LightPsiParser {
     boolean result;
     Marker marker = enter_section_(builder, level, _LEFT_, BNF_CHOICE, null);
     result = choice_0(builder, level + 1);
-    int pos = current_position_(builder);
     while (result) {
+      int pos = current_position_(builder);
       if (!choice_0(builder, level + 1)) break;
       if (!empty_element_parsed_guard_(builder, "choice", pos)) break;
-      pos = current_position_(builder);
     }
     exit_section_(builder, level, marker, result, false, null);
     return result;
@@ -367,11 +365,10 @@ public class GrammarParser implements PsiParser, LightPsiParser {
   // option *
   private static boolean external_expression_2(PsiBuilder builder, int level) {
     if (!recursion_guard_(builder, level, "external_expression_2")) return false;
-    int pos = current_position_(builder);
     while (true) {
+      int pos = current_position_(builder);
       if (!option(builder, level + 1)) break;
       if (!empty_element_parsed_guard_(builder, "external_expression_2", pos)) break;
-      pos = current_position_(builder);
     }
     return true;
   }
@@ -738,11 +735,10 @@ public class GrammarParser implements PsiParser, LightPsiParser {
   // modifier*
   private static boolean rule_start_0(PsiBuilder builder, int level) {
     if (!recursion_guard_(builder, level, "rule_start_0")) return false;
-    int pos = current_position_(builder);
     while (true) {
+      int pos = current_position_(builder);
       if (!modifier(builder, level + 1)) break;
       if (!empty_element_parsed_guard_(builder, "rule_start_0", pos)) break;
-      pos = current_position_(builder);
     }
     return true;
   }
@@ -752,11 +748,10 @@ public class GrammarParser implements PsiParser, LightPsiParser {
   public static boolean sequence(PsiBuilder builder, int level) {
     if (!recursion_guard_(builder, level, "sequence")) return false;
     Marker marker = enter_section_(builder, level, _COLLAPSE_, BNF_SEQUENCE, "<sequence>");
-    int pos = current_position_(builder);
     while (true) {
+      int pos = current_position_(builder);
       if (!option(builder, level + 1)) break;
       if (!empty_element_parsed_guard_(builder, "sequence", pos)) break;
-      pos = current_position_(builder);
     }
     exit_section_(builder, level, marker, true, false, sequence_recover_parser_);
     return true;
@@ -853,11 +848,10 @@ public class GrammarParser implements PsiParser, LightPsiParser {
   // modifier*
   private static boolean simple_0_0_0_0(PsiBuilder builder, int level) {
     if (!recursion_guard_(builder, level, "simple_0_0_0_0")) return false;
-    int pos = current_position_(builder);
     while (true) {
+      int pos = current_position_(builder);
       if (!modifier(builder, level + 1)) break;
       if (!empty_element_parsed_guard_(builder, "simple_0_0_0_0", pos)) break;
-      pos = current_position_(builder);
     }
     return true;
   }
@@ -892,11 +886,10 @@ public class GrammarParser implements PsiParser, LightPsiParser {
   // list_entry *
   private static boolean value_list_1(PsiBuilder builder, int level) {
     if (!recursion_guard_(builder, level, "value_list_1")) return false;
-    int pos = current_position_(builder);
     while (true) {
+      int pos = current_position_(builder);
       if (!list_entry(builder, level + 1)) break;
       if (!empty_element_parsed_guard_(builder, "value_list_1", pos)) break;
-      pos = current_position_(builder);
     }
     return true;
   }

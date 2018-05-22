@@ -102,11 +102,10 @@ public class Fixes implements PsiParser, LightPsiParser {
   // ( "&&" singleRestriction ) *
   private static boolean andRestriction_1(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "andRestriction_1")) return false;
-    int pos_ = current_position_(builder_);
     while (true) {
+      int pos_ = current_position_(builder_);
       if (!andRestriction_1_0(builder_, level_ + 1)) break;
       if (!empty_element_parsed_guard_(builder_, "andRestriction_1", pos_)) break;
-      pos_ = current_position_(builder_);
     }
     return true;
   }
@@ -190,11 +189,10 @@ public class Fixes implements PsiParser, LightPsiParser {
   // (A erl_tail_bad)*
   static boolean erl_tail_bad(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "erl_tail_bad")) return false;
-    int pos_ = current_position_(builder_);
     while (true) {
+      int pos_ = current_position_(builder_);
       if (!erl_tail_bad_0(builder_, level_ + 1)) break;
       if (!empty_element_parsed_guard_(builder_, "erl_tail_bad", pos_)) break;
-      pos_ = current_position_(builder_);
     }
     return true;
   }
@@ -413,11 +411,10 @@ public class Fixes implements PsiParser, LightPsiParser {
   // ( "||" andRestriction ) *
   private static boolean orRestriction_1(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "orRestriction_1")) return false;
-    int pos_ = current_position_(builder_);
     while (true) {
+      int pos_ = current_position_(builder_);
       if (!orRestriction_1_0(builder_, level_ + 1)) break;
       if (!empty_element_parsed_guard_(builder_, "orRestriction_1", pos_)) break;
-      pos_ = current_position_(builder_);
     }
     return true;
   }
@@ -560,11 +557,10 @@ public class Fixes implements PsiParser, LightPsiParser {
   // (',' <<p>>)*
   private static boolean sequence_1(PsiBuilder builder_, int level_, Parser p) {
     if (!recursion_guard_(builder_, level_, "sequence_1")) return false;
-    int pos_ = current_position_(builder_);
     while (true) {
+      int pos_ = current_position_(builder_);
       if (!sequence_1_0(builder_, level_ + 1, p)) break;
       if (!empty_element_parsed_guard_(builder_, "sequence_1", pos_)) break;
-      pos_ = current_position_(builder_);
     }
     return true;
   }
@@ -643,11 +639,10 @@ public class Fixes implements PsiParser, LightPsiParser {
   // left_expr *
   private static boolean some_expr_1(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "some_expr_1")) return false;
-    int pos_ = current_position_(builder_);
     while (true) {
+      int pos_ = current_position_(builder_);
       if (!left_expr(builder_, level_ + 1)) break;
       if (!empty_element_parsed_guard_(builder_, "some_expr_1", pos_)) break;
-      pos_ = current_position_(builder_);
     }
     return true;
   }

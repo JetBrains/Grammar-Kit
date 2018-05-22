@@ -258,11 +258,10 @@ public class JFlexParser implements PsiParser, LightPsiParser {
   // (declaration) *
   private static boolean declarations_section_1(PsiBuilder builder, int level) {
     if (!recursion_guard_(builder, level, "declarations_section_1")) return false;
-    int pos = current_position_(builder);
     while (true) {
+      int pos = current_position_(builder);
       if (!declarations_section_1_0(builder, level + 1)) break;
       if (!empty_element_parsed_guard_(builder, "declarations_section_1", pos)) break;
-      pos = current_position_(builder);
     }
     return true;
   }
@@ -331,11 +330,10 @@ public class JFlexParser implements PsiParser, LightPsiParser {
   // ( safe_dot id ) *
   private static boolean java_type_1(PsiBuilder builder, int level) {
     if (!recursion_guard_(builder, level, "java_type_1")) return false;
-    int pos = current_position_(builder);
     while (true) {
+      int pos = current_position_(builder);
       if (!java_type_1_0(builder, level + 1)) break;
       if (!empty_element_parsed_guard_(builder, "java_type_1", pos)) break;
-      pos = current_position_(builder);
     }
     return true;
   }
@@ -377,11 +375,10 @@ public class JFlexParser implements PsiParser, LightPsiParser {
   // (',' java_type) *
   private static boolean java_type_list_0_1(PsiBuilder builder, int level) {
     if (!recursion_guard_(builder, level, "java_type_list_0_1")) return false;
-    int pos = current_position_(builder);
     while (true) {
+      int pos = current_position_(builder);
       if (!java_type_list_0_1_0(builder, level + 1)) break;
       if (!empty_element_parsed_guard_(builder, "java_type_list_0_1", pos)) break;
-      pos = current_position_(builder);
     }
     return true;
   }
@@ -422,11 +419,10 @@ public class JFlexParser implements PsiParser, LightPsiParser {
     boolean result;
     Marker marker = enter_section_(builder);
     result = rule_group_item(builder, level + 1);
-    int pos = current_position_(builder);
     while (result) {
+      int pos = current_position_(builder);
       if (!rule_group_item(builder, level + 1)) break;
       if (!empty_element_parsed_guard_(builder, "lexical_rules_section_1", pos)) break;
-      pos = current_position_(builder);
     }
     exit_section_(builder, marker, null, result);
     return result;
@@ -1315,11 +1311,10 @@ public class JFlexParser implements PsiParser, LightPsiParser {
     boolean result;
     Marker marker = enter_section_(builder);
     result = rule_group_item(builder, level + 1);
-    int pos = current_position_(builder);
     while (result) {
+      int pos = current_position_(builder);
       if (!rule_group_item(builder, level + 1)) break;
       if (!empty_element_parsed_guard_(builder, "rule_group_2", pos)) break;
-      pos = current_position_(builder);
     }
     exit_section_(builder, marker, null, result);
     return result;
@@ -1543,11 +1538,10 @@ public class JFlexParser implements PsiParser, LightPsiParser {
   // ((','? !(id '=')) state_definition) *
   private static boolean state_declaration_2(PsiBuilder builder, int level) {
     if (!recursion_guard_(builder, level, "state_declaration_2")) return false;
-    int pos = current_position_(builder);
     while (true) {
+      int pos = current_position_(builder);
       if (!state_declaration_2_0(builder, level + 1)) break;
       if (!empty_element_parsed_guard_(builder, "state_declaration_2", pos)) break;
-      pos = current_position_(builder);
     }
     return true;
   }
@@ -1639,11 +1633,10 @@ public class JFlexParser implements PsiParser, LightPsiParser {
   // (',' state_reference) *
   private static boolean state_list_2(PsiBuilder builder, int level) {
     if (!recursion_guard_(builder, level, "state_list_2")) return false;
-    int pos = current_position_(builder);
     while (true) {
+      int pos = current_position_(builder);
       if (!state_list_2_0(builder, level + 1)) break;
       if (!empty_element_parsed_guard_(builder, "state_list_2", pos)) break;
-      pos = current_position_(builder);
     }
     return true;
   }
@@ -1865,11 +1858,10 @@ public class JFlexParser implements PsiParser, LightPsiParser {
   // (char_class_item (char_class_op char_class_item)* )*
   private static boolean class_expression_2(PsiBuilder builder, int level) {
     if (!recursion_guard_(builder, level, "class_expression_2")) return false;
-    int pos = current_position_(builder);
     while (true) {
+      int pos = current_position_(builder);
       if (!class_expression_2_0(builder, level + 1)) break;
       if (!empty_element_parsed_guard_(builder, "class_expression_2", pos)) break;
-      pos = current_position_(builder);
     }
     return true;
   }
@@ -1889,11 +1881,10 @@ public class JFlexParser implements PsiParser, LightPsiParser {
   // (char_class_op char_class_item)*
   private static boolean class_expression_2_0_1(PsiBuilder builder, int level) {
     if (!recursion_guard_(builder, level, "class_expression_2_0_1")) return false;
-    int pos = current_position_(builder);
     while (true) {
+      int pos = current_position_(builder);
       if (!class_expression_2_0_1_0(builder, level + 1)) break;
       if (!empty_element_parsed_guard_(builder, "class_expression_2_0_1", pos)) break;
-      pos = current_position_(builder);
     }
     return true;
   }

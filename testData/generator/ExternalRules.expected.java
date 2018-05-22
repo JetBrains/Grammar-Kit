@@ -86,11 +86,10 @@ public class ExternalRules implements PsiParser, LightPsiParser {
   // (',' <<param>>) *
   private static boolean comma_list_1(PsiBuilder builder_, int level_, Parser param) {
     if (!recursion_guard_(builder_, level_, "comma_list_1")) return false;
-    int pos_ = current_position_(builder_);
     while (true) {
+      int pos_ = current_position_(builder_);
       if (!comma_list_1_0(builder_, level_ + 1, param)) break;
       if (!empty_element_parsed_guard_(builder_, "comma_list_1", pos_)) break;
-      pos_ = current_position_(builder_);
     }
     return true;
   }
@@ -122,11 +121,10 @@ public class ExternalRules implements PsiParser, LightPsiParser {
   // (<<comma_list_tail <<param>>>>) *
   private static boolean comma_list_pinned_2(PsiBuilder builder_, int level_, Parser param) {
     if (!recursion_guard_(builder_, level_, "comma_list_pinned_2")) return false;
-    int pos_ = current_position_(builder_);
     while (true) {
+      int pos_ = current_position_(builder_);
       if (!comma_list_pinned_2_0(builder_, level_ + 1, param)) break;
       if (!empty_element_parsed_guard_(builder_, "comma_list_pinned_2", pos_)) break;
-      pos_ = current_position_(builder_);
     }
     return true;
   }
@@ -188,11 +186,10 @@ public class ExternalRules implements PsiParser, LightPsiParser {
   // (<<comma_list_tail <<comma_list <<param>>>>>>) *
   private static boolean list_of_lists_2(PsiBuilder builder_, int level_, Parser param) {
     if (!recursion_guard_(builder_, level_, "list_of_lists_2")) return false;
-    int pos_ = current_position_(builder_);
     while (true) {
+      int pos_ = current_position_(builder_);
       if (!list_of_lists_2_0(builder_, level_ + 1, param)) break;
       if (!empty_element_parsed_guard_(builder_, "list_of_lists_2", pos_)) break;
-      pos_ = current_position_(builder_);
     }
     return true;
   }

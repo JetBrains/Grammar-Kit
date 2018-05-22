@@ -89,11 +89,10 @@ public class FooParser implements PsiParser, LightPsiParser {
   // element4*
   private static boolean element2_1(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "element2_1")) return false;
-    int pos_ = current_position_(builder_);
     while (true) {
+      int pos_ = current_position_(builder_);
       if (!element4(builder_, level_ + 1)) break;
       if (!empty_element_parsed_guard_(builder_, "element2_1", pos_)) break;
-      pos_ = current_position_(builder_);
     }
     return true;
   }

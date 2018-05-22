@@ -184,11 +184,10 @@ public class Autopin implements PsiParser, LightPsiParser {
   // statement *
   static boolean root(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "root")) return false;
-    int pos_ = current_position_(builder_);
     while (true) {
+      int pos_ = current_position_(builder_);
       if (!statement(builder_, level_ + 1)) break;
       if (!empty_element_parsed_guard_(builder_, "root", pos_)) break;
-      pos_ = current_position_(builder_);
     }
     return true;
   }

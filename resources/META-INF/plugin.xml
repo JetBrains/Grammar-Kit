@@ -112,6 +112,7 @@
     <lang.braceMatcher language="JFlex" implementationClass="org.intellij.jflex.editor.JFlexBraceMatcher"/>
     <quoteHandler fileType="JFlex" className="org.intellij.jflex.editor.JFlexQuoteHandler"/>
     <lang.psiStructureViewFactory language="JFlex" implementationClass="org.intellij.jflex.editor.JFlexStructureViewFactory"/>
+    <languageInjector implementation="org.intellij.jflex.injection.JFlexJavaInjector" />
 
   </extensions>
   <actions>

@@ -1,0 +1,130 @@
+/*
+ * Copyright 2011-present Greg Shrago
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.intellij.jflex.psi.impl;
+
+import com.intellij.lang.injection.MultiHostInjector;
+import com.intellij.lang.injection.MultiHostRegistrar;
+import com.intellij.lang.java.JavaLanguage;
+import com.intellij.openapi.util.TextRange;
+import com.intellij.openapi.util.text.StringUtil;
+import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiFile;
+import com.intellij.psi.SyntaxTraverser;
+import com.intellij.psi.tree.IElementType;
+import com.intellij.psi.util.PsiTreeUtil;
+import com.intellij.psi.util.PsiUtilCore;
+import com.intellij.util.containers.JBIterable;
+import org.intellij.grammar.config.Options;
+import org.intellij.jflex.psi.*;
+import org.jetbrains.annotations.NotNull;
+
+import java.util.Collections;
+import java.util.List;
+
+public class JFlexJavaCodeInjector implements MultiHostInjector {
+
+  @NotNull
+  @Override
+  public List<? extends Class<? extends PsiElement>> elementsToInjectIn() {
+    return Collections.singletonList(JFlexJavaCode.class);
+  }
+
+  @Override
+  public void getLanguagesToInject(@NotNull MultiHostRegistrar registrar, @NotNull PsiElement context) {
+    if (!(context instanceof JFlexJavaCodeInjectionHostImpl)) return;
+    if (!Options.INJECT_JAVA_IN_JFLEX.get()) return;
+
+    PsiFile file = context.getContainingFile();
+    String lexerClass = getJavaOptions(file, JFlexTypes.FLEX_OPT_CLASS, "Lexer");
+    String returnType = getJavaOptions(file, JFlexTypes.FLEX_OPT_TYPE, "int");
+    String implementsStr = getJavaOptions(file, JFlexTypes.FLEX_OPT_IMPLEMENTS, "");
+
+    JFlexRule lastRule = SyntaxTraverser.revPsiTraverser()
+      .withRoot(PsiTreeUtil.findChildOfType(file, JFlexLexicalRulesSectionImpl.class))
+      .filter(JFlexRule.class).filter(o -> o.getJavaCode() != null).first();
+    int ruleCount = 0;
+
+    registrar.startInjecting(JavaLanguage.INSTANCE);
+
+    JBIterable<JFlexJavaCodeInjectionHostImpl> s = SyntaxTraverser.psiTraverser(file).filter(JFlexJavaCodeInjectionHostImpl.class);
+    for (JFlexJavaCodeInjectionHostImpl host : s) {
+      PsiElement hostParent = host.getParent();
+
+      if (hostParent instanceof JFlexUserCodeSection) {
+        StringBuilder sb = new StringBuilder().append("\nclass ").append(lexerClass);
+        if (implementsStr.isEmpty()) sb.append(" implements ").append(implementsStr);
+        sb.append(" {\n\n");
+
+        JBIterable<JFlexStateDefinition> states = SyntaxTraverser.psiTraverser(
+          PsiTreeUtil.findChildOfType(file, JFlexDeclarationsSection.class)).filter(JFlexStateDefinition.class);
+        sb.append("  public static final int YYINITIAL = 0;\n");
+        int i = 1;
+        for (JFlexStateDefinition element : states) {
+          sb.append("  public static final int ").append(element.getName()).append(" = ").append(i += 2).append(";\n");
+        }
+        sb.append("\n");
+        sb.append("  public ").append(lexerClass).append("(java.io.Reader in) {}\n");
+        sb.append("  private int zzState, zzLexicalState;\n");
+        sb.append("  private int zzStartRead, zzEndRead, zzCurrentPos, zzMarkedPos;\n");
+        sb.append("  private void yybegin(int state) {}\n");
+        sb.append("  private void yypushback(int pos) {}\n");
+        sb.append("  private int yystate() { return 0; }\n");
+        sb.append("  private int yylength() { return 0; }\n");
+        sb.append("  private char yycharat(int pos) { return 0; }\n");
+        sb.append("\n");
+        registrar.addPlace(null, sb.toString(), host, new TextRange(0, host.getTextLength()));
+      }
+      else if (hostParent instanceof JFlexOption) {
+        IElementType optionType = PsiUtilCore.getElementType(hostParent.getFirstChild());
+        if (optionType == JFlexTypes.FLEX_OPT_CODE1) {
+          registrar.addPlace(null, null, host, new TextRange(0, host.getTextLength()));
+        }
+        else if (optionType == JFlexTypes.FLEX_OPT_INIT1) {
+          registrar.addPlace("\n  {\n", "\n  }\n", host, new TextRange(0, host.getTextLength()));
+        }
+        else if (optionType == JFlexTypes.FLEX_OPT_EOF1 || optionType == JFlexTypes.FLEX_OPT_EOFVAL1) {
+          registrar.addPlace("\n  void yy_do_eof() {\n", "\n  }\n", host, new TextRange(0, host.getTextLength()));
+        }
+      }
+      else if (hostParent instanceof JFlexRule) {
+        String prefix = ruleCount == 0 ?
+                        "\n" +
+                        "  public " + returnType + " advance() throws java.io.IOException {\n" +
+                        "    switch(zzLexicalState) {" : "";
+        String suffix = hostParent == lastRule ?
+                        "\n" +
+                        "    }\n" +
+                        "    return null;\n" +
+                        "  }\n" +
+                        "}" : null;
+        registrar.addPlace(prefix + "\n    case " + (++ruleCount) + ":\n      ", suffix, host, new TextRange(0, host.getTextLength()));
+      }
+    }
+    registrar.doneInjecting();
+  }
+
+  private static String getJavaOptions(@NotNull PsiFile file, @NotNull IElementType optionType, @NotNull String defaultVal) {
+    PsiElement declarationsSection = PsiTreeUtil.findChildOfType(file, JFlexDeclarationsSection.class);
+    if (declarationsSection == null) return defaultVal;
+    JBIterable<String> strings = SyntaxTraverser.psiApi().children(declarationsSection)
+      .filter(JFlexOption.class)
+      .filter(o -> PsiUtilCore.getElementType(o.getFirstChild()) == optionType)
+      .map(o -> TextRange.create(o.getFirstChild().getTextLength(), o.getTextLength()).substring(o.getText()).trim());
+    String result = StringUtil.join(strings, ", ");
+    return result.length() == 0 ? defaultVal : result;
+  }
+}

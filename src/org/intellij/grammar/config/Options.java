@@ -27,4 +27,7 @@ public interface Options {
   Getter<String> GEN_JFLEX_ARGS = Option.strOption("grammar.kit.gen.jflex.args", "");
 
   Getter<Integer> GPUB_MAX_LEVEL = Option.intOption("grammar.kit.gpub.max.level", 1000);
+
+  Getter<Boolean> INJECT_JAVA_IN_JFLEX = Option.boolOption("grammar.kit.inject.java", true);
+  Getter<Boolean> BNF_INJECT_REGEXP_IN_BNF = Option.boolOption("grammar.kit.inject.regexp", true);
 }

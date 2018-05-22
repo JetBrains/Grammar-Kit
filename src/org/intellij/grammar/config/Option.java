@@ -55,4 +55,15 @@ abstract class Option<T> implements Getter<T> {
       }
     };
   }
+
+  static Option<Boolean> boolOption(String id, boolean def) {
+    return new Option<Boolean>(id, def) {
+      @Override
+      public Boolean get() {
+        String s = innerValue();
+        return "yes".equals(s) || "true".equals(s) ||
+               !"no".equals(s) && !"false".equals(s) && def;
+      }
+    };
+  }
 }

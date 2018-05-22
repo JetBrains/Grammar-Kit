@@ -27,6 +27,8 @@ public interface BnfConstants {
 
   String CLASS_HEADER_DEF = "// This is a generated file. Not intended for manual editing.";
 
+  String REGEXP_PREFIX = "regexp:";
+
   String GPUB_CLASS = "com.intellij.lang.parser.GeneratedParserUtilBase";
   String PSI_BUILDER_CLASS = "com.intellij.lang.PsiBuilder";
   String PSI_PARSER_CLASS = "com.intellij.lang.PsiParser";

@@ -575,11 +575,11 @@ public class ParserGeneratorUtil {
   }
 
   public static boolean isRegexpToken(@NotNull String tokenText) {
-    return tokenText.startsWith("regexp:");
+    return tokenText.startsWith(BnfConstants.REGEXP_PREFIX);
   }
 
   public static String getRegexpTokenRegexp(@NotNull String tokenText) {
-    return tokenText.substring("regexp:".length());
+    return tokenText.substring(BnfConstants.REGEXP_PREFIX.length());
   }
 
   public static boolean isTokenSequence(@NotNull BnfRule rule, @Nullable BnfExpression node) {

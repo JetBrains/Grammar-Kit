@@ -795,6 +795,17 @@ BnfFile:SelfFlex.bnf
         PsiElement(=)('=')
         BNF_STRING_LITERAL_EXPRESSION: "char"
           PsiElement(string)('"char"')
+      PsiWhiteSpace('\n  ')
+      BNF_ATTR:mixin
+        PsiElement(id)('mixin')
+        BNF_ATTR_PATTERN
+          PsiElement(()('(')
+          BNF_STRING_LITERAL_EXPRESSION: "java_code"
+            PsiElement(string)('"java_code"')
+          PsiElement())(')')
+        PsiElement(=)('=')
+        BNF_STRING_LITERAL_EXPRESSION: "org.intellij.jflex.psi.impl.JFlexJavaCodeInjectionHostImpl"
+          PsiElement(string)('"org.intellij.jflex.psi.impl.JFlexJavaCodeInjectionHostImpl"')
       PsiWhiteSpace('\n\n')
       PsiElement(})('}')
     PsiWhiteSpace('\n\n')

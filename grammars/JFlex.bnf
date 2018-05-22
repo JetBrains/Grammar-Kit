@@ -126,6 +126,7 @@
   name(".*_expression")="expression"
   name("option.*")="option"
   name("char_class_.*|char_range")="char"
+  mixin("java_code")="org.intellij.jflex.psi.impl.JFlexJavaCodeInjectionHostImpl"
 
 }
 

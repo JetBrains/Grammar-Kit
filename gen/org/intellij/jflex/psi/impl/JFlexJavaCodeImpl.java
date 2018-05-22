@@ -26,7 +26,7 @@ import org.intellij.jflex.psi.*;
 import com.intellij.psi.PsiReference;
 import com.intellij.psi.tree.IElementType;
 
-public class JFlexJavaCodeImpl extends JFlexCompositeImpl implements JFlexJavaCode {
+public class JFlexJavaCodeImpl extends JFlexJavaCodeInjectionHostImpl implements JFlexJavaCode {
 
   public JFlexJavaCodeImpl(IElementType type) {
     super(type);

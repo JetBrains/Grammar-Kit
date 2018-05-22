@@ -44,6 +44,8 @@
     <codeInsight.lineMarkerProvider language="BNF" implementationClass="org.intellij.grammar.editor.BnfRecursionLineMarkerProvider"/>
     <lang.commenter language="BNF" implementationClass="org.intellij.grammar.BnfCommenter"/>
     <completion.contributor language="BNF" implementationClass="org.intellij.grammar.BnfCompletionContributor" order="before javaClassName"/>
+
+    <languageInjector implementation="org.intellij.grammar.psi.impl.BnfStringRegexpInjector"/>
     <lang.elementManipulator forClass="org.intellij.grammar.psi.impl.BnfStringLiteralExpressionImpl"
                              implementationClass="org.intellij.grammar.psi.impl.BnfStringManipulator"/>
     <extendWordSelectionHandler implementation="org.intellij.grammar.editor.BnfWordSelectioner"/>
@@ -113,6 +115,10 @@
     <quoteHandler fileType="JFlex" className="org.intellij.jflex.editor.JFlexQuoteHandler"/>
     <lang.psiStructureViewFactory language="JFlex" implementationClass="org.intellij.jflex.editor.JFlexStructureViewFactory"/>
 
+    <multiHostInjector implementation="org.intellij.jflex.psi.impl.JFlexJavaCodeInjector" />
+    <lang.elementManipulator forClass="org.intellij.jflex.psi.impl.JFlexJavaCodeImpl"
+                             implementationClass="org.intellij.jflex.psi.impl.JFlexJavaCodeManipulator" />
+    <referencesSearch implementation="org.intellij.jflex.psi.impl.JFlexStateUsageSearcher"/>
   </extensions>
   <actions>
     <group id="grammar.file.group" popup="false">

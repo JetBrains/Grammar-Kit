@@ -43,10 +43,10 @@ import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.LinkedList;
 
 import static com.intellij.openapi.util.text.StringUtil.*;
 
@@ -1127,70 +1127,75 @@ public class GeneratedParserUtilBase {
 
 
   private static final int MAX_CHILDREN_IN_TREE = 10;
-  public static boolean parseAsTree(ErrorState state, final PsiBuilder builder, int level, final IElementType chunkType,
-                                    boolean checkBraces, final Parser parser, final Parser eatMoreCondition) {
-    final LinkedList<Pair<PsiBuilder.Marker, PsiBuilder.Marker>> parenList = new LinkedList<>();
-    final LinkedList<Pair<PsiBuilder.Marker, Integer>> siblingList = new LinkedList<>();
+  private static void checkSiblings(IElementType chunkType,
+                                    ArrayDeque<Pair<PsiBuilder.Marker, PsiBuilder.Marker>> parens,
+                                    ArrayDeque<Pair<PsiBuilder.Marker, Integer>> siblings) {
+    main:
+    while (!siblings.isEmpty()) {
+      Pair<PsiBuilder.Marker, PsiBuilder.Marker> parenPair = parens.peek();
+      int rating = siblings.getFirst().second;
+      int count = 0;
+      for (Pair<PsiBuilder.Marker, Integer> pair : siblings) {
+        if (pair.second != rating || parenPair != null && pair.first == parenPair.second) break main;
+        if (++count >= MAX_CHILDREN_IN_TREE) {
+          PsiBuilder.Marker parentMarker = pair.first.precede();
+          parentMarker.setCustomEdgeTokenBinders(WhitespacesBinders.GREEDY_LEFT_BINDER, null);
+          while (count-- > 0) {
+            siblings.removeFirst();
+          }
+          parentMarker.done(chunkType);
+          siblings.addFirst(Pair.create(parentMarker, rating + 1));
+          continue main;
+        }
+      }
+      break;
+    }
+  }
+
+  public static boolean parseAsTree(ErrorState state, PsiBuilder builder, int level,
+                                    IElementType chunkType, boolean checkBraces,
+                                    Parser parser, Parser eatMoreCondition) {
+    ArrayDeque<Pair<PsiBuilder.Marker, PsiBuilder.Marker>> parens = new ArrayDeque<>(4);
+    ArrayDeque<Pair<PsiBuilder.Marker, Integer>> siblings = new ArrayDeque<>();
     PsiBuilder.Marker marker = null;
 
-    final Runnable checkSiblingsRunnable = () -> {
-      main:
-      while (!siblingList.isEmpty()) {
-        final Pair<PsiBuilder.Marker, PsiBuilder.Marker> parenPair = parenList.peek();
-        final int rating = siblingList.getFirst().second;
-        int count = 0;
-        for (Pair<PsiBuilder.Marker, Integer> pair : siblingList) {
-          if (pair.second != rating || parenPair != null && pair.first == parenPair.second) break main;
-          if (++count >= MAX_CHILDREN_IN_TREE) {
-            PsiBuilder.Marker parentMarker = pair.first.precede();
-            parentMarker.setCustomEdgeTokenBinders(WhitespacesBinders.GREEDY_LEFT_BINDER, null);
-            while (count-- > 0) {
-              siblingList.removeFirst();
-            }
-            parentMarker.done(chunkType);
-            siblingList.addFirst(Pair.create(parentMarker, rating + 1));
-            continue main;
-          }
-        }
-        break;
-      }
-    };
-    boolean checkParens = state.braces != null && checkBraces;
+    IElementType lBrace = checkBraces && state.braces != null && state.braces.length > 0 ? state.braces[0].getLeftBraceType() : null;
+    IElementType rBrace = lBrace != null ? state.braces[0].getRightBraceType() : null;
     int totalCount = 0;
     int tokenCount = 0;
-    if (checkParens) {
+    if (lBrace != null) {
       int tokenIdx = -1;
       while (builder.rawLookup(tokenIdx) == TokenType.WHITE_SPACE) tokenIdx --;
-      LighterASTNode doneMarker = builder.rawLookup(tokenIdx) == state.braces[0].getLeftBraceType() ? builder.getLatestDoneMarker() : null;
+      LighterASTNode doneMarker = builder.rawLookup(tokenIdx) == lBrace ? builder.getLatestDoneMarker() : null;
       if (doneMarker != null && doneMarker.getStartOffset() == builder.rawTokenTypeStart(tokenIdx) && doneMarker.getTokenType() == TokenType.ERROR_ELEMENT) {
-        parenList.add(Pair.create(((PsiBuilder.Marker)doneMarker).precede(), null));
+        parens.add(Pair.create(((PsiBuilder.Marker)doneMarker).precede(), null));
       }
     }
     int c = current_position_(builder);
     while (true) {
-      final IElementType tokenType = builder.getTokenType();
-      if (checkParens && (tokenType == state.braces[0].getLeftBraceType() || tokenType == state.braces[0].getRightBraceType() && !parenList.isEmpty())) {
+      IElementType tokenType = builder.getTokenType();
+      if (lBrace != null && (tokenType == lBrace || tokenType == rBrace && !parens.isEmpty())) {
         if (marker != null) {
           marker.done(chunkType);
-          siblingList.addFirst(Pair.create(marker, 1));
+          siblings.addFirst(Pair.create(marker, 1));
           marker = null;
           tokenCount = 0;
         }
-        if (tokenType == state.braces[0].getLeftBraceType()) {
-          final Pair<PsiBuilder.Marker, Integer> prev = siblingList.peek();
-          parenList.addFirst(Pair.create(builder.mark(), prev == null ? null : prev.first));
+        if (tokenType == lBrace) {
+          Pair<PsiBuilder.Marker, Integer> prev = siblings.peek();
+          parens.addFirst(Pair.create(builder.mark(), prev == null ? null : prev.first));
         }
-        checkSiblingsRunnable.run();
+        checkSiblings(chunkType, parens, siblings);
         builder.advanceLexer();
-        if (tokenType == state.braces[0].getRightBraceType()) {
-          final Pair<PsiBuilder.Marker, PsiBuilder.Marker> pair = parenList.removeFirst();
+        if (tokenType == rBrace) {
+          Pair<PsiBuilder.Marker, PsiBuilder.Marker> pair = parens.removeFirst();
           pair.first.done(chunkType);
           // drop all markers inside parens
-          while (!siblingList.isEmpty() && siblingList.getFirst().first != pair.second) {
-            siblingList.removeFirst();
+          while (!siblings.isEmpty() && siblings.getFirst().first != pair.second) {
+            siblings.removeFirst();
           }
-          siblingList.addFirst(Pair.create(pair.first, 1));
-          checkSiblingsRunnable.run();
+          siblings.addFirst(Pair.create(pair.first, 1));
+          checkSiblings(chunkType, parens, siblings);
         }
       }
       else {
@@ -1198,20 +1203,21 @@ public class GeneratedParserUtilBase {
           marker = builder.mark();
           marker.setCustomEdgeTokenBinders(WhitespacesBinders.GREEDY_LEFT_BINDER, null);
         }
-        boolean result = (!parenList.isEmpty() || eatMoreCondition.parse(builder, level + 1)) && parser.parse(builder, level + 1);
+        boolean result = (!parens.isEmpty() || eatMoreCondition.parse(builder, level + 1)) &&
+                         parser.parse(builder, level + 1);
         if (result) {
           tokenCount++;
           totalCount++;
         }
-        if (!result) {
+        else {
           break;
         }
       }
 
       if (tokenCount >= MAX_CHILDREN_IN_TREE) {
         marker.done(chunkType);
-        siblingList.addFirst(Pair.create(marker, 1));
-        checkSiblingsRunnable.run();
+        siblings.addFirst(Pair.create(marker, 1));
+        checkSiblings(chunkType, parens, siblings);
         marker = null;
         tokenCount = 0;
       }
@@ -1219,7 +1225,7 @@ public class GeneratedParserUtilBase {
       c = current_position_(builder);
     }
     if (marker != null) marker.drop();
-    for (Pair<PsiBuilder.Marker, PsiBuilder.Marker> pair : parenList) {
+    for (Pair<PsiBuilder.Marker, PsiBuilder.Marker> pair : parens) {
       pair.first.drop();
     }
     return totalCount != 0;

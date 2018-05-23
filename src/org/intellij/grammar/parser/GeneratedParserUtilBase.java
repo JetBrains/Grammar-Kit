@@ -26,7 +26,6 @@ import com.intellij.openapi.util.Comparing;
 import com.intellij.openapi.util.Key;
 import com.intellij.openapi.util.Pair;
 import com.intellij.openapi.util.text.StringHash;
-import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiReference;
 import com.intellij.psi.TokenType;
@@ -588,15 +587,16 @@ public class GeneratedParserUtilBase {
         eatMoreFlag = eatMore.parse(builder, frame.level + 1);
       }
       boolean errorReported = frame.errorReportedAt == initialPos || !result && frame.errorReportedAt >= frame.position;
-      if (errorReported) {
-        if (eatMoreFlag) {
+      if (errorReported || eatMoreFlag) {
+        if (!errorReported) {
+          errorReported = reportError(builder, state, frame, null, true, true);
+        }
+        else if (eatMoreFlag) {
           builder.advanceLexer();
+        }
+        if (eatMore.parse(builder, frame.level + 1)) {
           parseAsTree(state, builder, frame.level + 1, DUMMY_BLOCK, true, TOKEN_ADVANCER, eatMore);
         }
-      }
-      else if (eatMoreFlag) {
-        errorReported = reportError(builder, state, frame, null, true, true);
-        parseAsTree(state, builder, frame.level + 1, DUMMY_BLOCK, true, TOKEN_ADVANCER, eatMore);
       }
       else if (eatMoreFlagOnce || (!result && frame.position != builder.rawTokenIndex()) || frame.errorReportedAt > initialPos) {
         errorReported = reportError(builder, state, frame, null, true, false);
@@ -767,8 +767,8 @@ public class GeneratedParserUtilBase {
     boolean empty = sb.length() == 0;
     if (!force && empty && !advance) return false;
 
-    String actual = StringUtil.trim(builder.getTokenText());
-    if (StringUtil.isEmpty(actual)) {
+    String actual = trim(builder.getTokenText());
+    if (isEmpty(actual)) {
       sb.append(empty ? "unmatched input" : " expected");
     }
     else {

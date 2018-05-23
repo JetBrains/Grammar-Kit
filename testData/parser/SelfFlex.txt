@@ -916,14 +916,30 @@ BnfFile:SelfFlex.bnf
       PsiWhiteSpace(' ')
       PsiElement(::=)('::=')
       PsiWhiteSpace(' ')
-      BNF_EXTERNAL_EXPRESSION: <<line '%%'>>
-        PsiElement(<<)('<<')
-        BNF_REFERENCE_OR_TOKEN: line
-          PsiElement(id)('line')
+      BNF_SEQUENCE: [] new_line '%%' new_line
+        BNF_PAREN_OPT_EXPRESSION: []
+          PsiElement([)('[')
+          BNF_SEQUENCE
+            <empty list>
+          PsiElement(])(']')
+        PsiWhiteSpace(' ')
+        BNF_REFERENCE_OR_TOKEN: new_line
+          PsiElement(id)('new_line')
         PsiWhiteSpace(' ')
         BNF_STRING_LITERAL_EXPRESSION: '%%'
           PsiElement(string)(''%%'')
-        PsiElement(>>)('>>')
+        PsiWhiteSpace(' ')
+        BNF_REFERENCE_OR_TOKEN: new_line
+          PsiElement(id)('new_line')
+      PsiWhiteSpace(' ')
+      BNF_ATTRS
+        PsiElement({)('{')
+        BNF_ATTR:pin
+          PsiElement(id)('pin')
+          PsiElement(=)('=')
+          BNF_LITERAL_EXPRESSION: 1
+            PsiElement(number)('1')
+        PsiElement(})('}')
     PsiWhiteSpace('\n')
     BNF_RULE:section_recover
       BNF_MODIFIER
@@ -1127,23 +1143,59 @@ BnfFile:SelfFlex.bnf
       PsiElement(id)('declarations_section')
       PsiWhiteSpace(' ')
       PsiElement(::=)('::=')
-      PsiWhiteSpace('  ')
-      BNF_SEQUENCE: [] (declaration) *
+      PsiWhiteSpace(' ')
+      BNF_SEQUENCE: [] declaration (!(<<eof>> | '%%') declaration) *
         BNF_PAREN_OPT_EXPRESSION: []
           PsiElement([)('[')
           BNF_SEQUENCE
             <empty list>
           PsiElement(])(']')
         PsiWhiteSpace(' ')
-        BNF_QUANTIFIED: (declaration) *
-          BNF_PAREN_EXPRESSION: (declaration)
+        BNF_REFERENCE_OR_TOKEN: declaration
+          PsiElement(id)('declaration')
+        PsiWhiteSpace(' ')
+        BNF_QUANTIFIED: (!(<<eof>> | '%%') declaration) *
+          BNF_PAREN_EXPRESSION: (!(<<eof>> | '%%') declaration)
             PsiElement(()('(')
-            BNF_REFERENCE_OR_TOKEN: declaration
-              PsiElement(id)('declaration')
+            BNF_SEQUENCE: !(<<eof>> | '%%') declaration
+              BNF_PREDICATE: !(<<eof>> | '%%')
+                BNF_PREDICATE_SIGN
+                  PsiElement(!)('!')
+                BNF_PAREN_EXPRESSION: (<<eof>> | '%%')
+                  PsiElement(()('(')
+                  BNF_CHOICE: <<eof>> | '%%'
+                    BNF_EXTERNAL_EXPRESSION: <<eof>>
+                      PsiElement(<<)('<<')
+                      BNF_REFERENCE_OR_TOKEN: eof
+                        PsiElement(id)('eof')
+                      PsiElement(>>)('>>')
+                    PsiWhiteSpace(' ')
+                    PsiElement(|)('|')
+                    PsiWhiteSpace(' ')
+                    BNF_STRING_LITERAL_EXPRESSION: '%%'
+                      PsiElement(string)(''%%'')
+                  PsiElement())(')')
+              PsiWhiteSpace(' ')
+              BNF_REFERENCE_OR_TOKEN: declaration
+                PsiElement(id)('declaration')
             PsiElement())(')')
           PsiWhiteSpace(' ')
           BNF_QUANTIFIER
             PsiElement(*)('*')
+      PsiWhiteSpace(' ')
+      BNF_ATTRS
+        PsiElement({)('{')
+        BNF_ATTR:pin
+          PsiElement(id)('pin')
+          BNF_ATTR_PATTERN
+            PsiElement(()('(')
+            BNF_STRING_LITERAL_EXPRESSION: ".*"
+              PsiElement(string)('".*"')
+            PsiElement())(')')
+          PsiElement(=)('=')
+          BNF_LITERAL_EXPRESSION: 1
+            PsiElement(number)('1')
+        PsiElement(})('}')
     PsiWhiteSpace('\n\n')
     BNF_RULE:declaration
       BNF_MODIFIER

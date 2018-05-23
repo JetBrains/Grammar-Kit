@@ -142,7 +142,7 @@ fake file_section ::= '%%'
 private meta line ::= new_line <<p>> new_line {pin=2}
 private new_line ::= &<<is_new_line>>
 
-private section_div ::= <<line '%%'>>
+private section_div ::= [] new_line '%%' new_line {pin=1}
 private section_recover ::= !'%%'
 
 user_code_section ::= [] java_code {pin=1}
@@ -154,7 +154,7 @@ private safe_dot ::= '.' !'*'
 private java_type_list ::= [java_type (',' java_type) *] {pin(".*")=1 recoverWhile=declaration_recover}
 
 // ======================================================
-declarations_section ::=  [] (declaration) *
+declarations_section ::= [] declaration (!(<<eof>> | '%%') declaration) * {pin(".*")=1}
 
 private declaration ::= macro_definition | state_declaration | option  {recoverWhile=declaration_recover}
 private declaration_recover ::= !(<<is_percent>> | id '=') section_recover

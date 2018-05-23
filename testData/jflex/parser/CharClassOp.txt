@@ -5,7 +5,8 @@ JFLEX_FILE
   PsiElement(%%)('%%')
   PsiWhiteSpace('\n')
   JFlexDeclarationsSectionImpl(FLEX_DECLARATIONS_SECTION)
-    <empty list>
+    PsiErrorElement:<option>, <state declaration> or id expected, got '%%'
+      <empty list>
   PsiElement(%%)('%%')
   PsiWhiteSpace('\n')
   JFlexLexicalRulesSectionImpl(FLEX_LEXICAL_RULES_SECTION)

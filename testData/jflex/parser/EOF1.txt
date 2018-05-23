@@ -4,12 +4,16 @@ JFLEX_FILE
       PsiElement(code block)(' ')
   PsiErrorElement:<new-line> expected, got '%%'
     <empty list>
-  JFlexDeclarationsSectionImpl(FLEX_DECLARATIONS_SECTION)
-    <empty list>
-  JFlexLexicalRulesSectionImpl(FLEX_LEXICAL_RULES_SECTION)
-    <empty list>
   PsiElement(%%)('%%')
   PsiWhiteSpace('\n\n')
+  JFlexDeclarationsSectionImpl(FLEX_DECLARATIONS_SECTION)
+    PsiErrorElement:<option>, <state declaration> or id expected, got '%%'
+      <empty list>
   PsiElement(%%)('%%')
   PsiWhiteSpace('\n')
-  PsiElement(string)('"')
+  JFlexLexicalRulesSectionImpl(FLEX_LEXICAL_RULES_SECTION)
+    JFlexRuleImpl(FLEX_RULE)
+      JFlexLiteralExpressionImpl(FLEX_LITERAL_EXPRESSION)
+        PsiElement(string)('"')
+      PsiErrorElement:<action>, <expression> or <look ahead> expected
+        <empty list>

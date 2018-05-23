@@ -54,13 +54,13 @@ public class JFlexParserUtil extends GeneratedParserUtilBase {
 
   public static boolean is_new_line(PsiBuilder builder, int level) {
     if (builder.eof()) return true;
-    addVariant(builder, "<new-line>");
     for (int i=-1; ; i--) {
       IElementType type = builder.rawLookup(i);
       if (type == TokenType.WHITE_SPACE) continue;
       if (type == JFlexTypes.FLEX_LINE_COMMENT || type == JFlexTypes.FLEX_BLOCK_COMMENT) continue;
       if (type == JFlexParserDefinition.FLEX_NEWLINE || type == null) return true;
       if (builder.getOriginalText().charAt(builder.rawTokenTypeStart(i+1)-1) == '\n') return true;
+      addVariant(builder, "<new-line>");
       return false;
     }
   }

@@ -1,3 +1,12 @@
+2017.1.4
+
+Editor: inject Regexp in BNF and Java in JFlex
+Generator: less markers & less lines in generated code
+Generator: improve target dir detection, refresh files faster
+Generator: FIRST check external rules with non-external predicates
+GPUB: cleanup and error reporting tweaks
+GPUB: re-check recoverWhile condition after advance when recovering
+
 2017.1.3
 
 * Generator: fix nested metas generation once again

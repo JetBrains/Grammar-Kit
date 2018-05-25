@@ -1,6 +1,6 @@
 <idea-plugin url="https://github.com/JetBrains/Grammar-Kit">
   <id>org.jetbrains.idea.grammar</id>
-  <version>2017.1.4-SNAPSHOT</version>
+  <version>2017.1.5-SNAPSHOT</version>
   <vendor email="gregory.shrago@jetbrains.com">Greg Shrago</vendor>
   <idea-version since-build="171"/>
 
@@ -14,12 +14,12 @@
   <change-notes>
     <![CDATA[
     <ul>
-      <li>Generator: fix nested metas generation once again</li>
-      <li>Editor: fix rule attrs being shown in File Structure (improves performance too)</li>
-      <li>Editor: support custom folding regions (region/endregion comments)</li>
-      <li>Editor: tweak pairing paren insertion</li>
-      <li>Editor: fix incorrectly highlighted pin in expression-parsing rules</li>
-      <li>Refactorings: move common sub-menu, reuse common shortcuts</li>
+      <li>Editor: inject Regexp in BNF and Java in JFlex files</li>
+      <li>Generator: less markers & less lines in generated code</li>
+      <li>Generator: improve target dir detection, refresh files faster</li>
+      <li>Generator: FIRST check external rules with non-external predicates</li>
+      <li>GPUB: cleanup and error reporting tweaks</li>
+      <li>GPUB: re-check recoverWhile condition after advance when recovering</li>
     </ul>
     <a href="https://github.com/JetBrains/Grammar-Kit#change-log">Full change log...</a>
     ]]>

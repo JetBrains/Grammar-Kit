@@ -8,7 +8,7 @@ Grammar-Kit
 An [IntelliJ IDEA plugin](http://plugins.jetbrains.com/plugin/6606) for language plugin developers.<br>
 Adds BNF Grammars and JFlex files editing support including parser/PSI code generator.
 
-Quick links: [Dev build](https://teamcity.jetbrains.com/guestAuth/app/rest/builds/buildType:IntellijIdeaPlugins_GrammarKit_Build,status:SUCCESS/artifacts/content/GrammarKit*.zip),
+Quick links: [Latest dev build](https://teamcity.jetbrains.com/guestAuth/app/rest/builds/buildType:IntellijIdeaPlugins_GrammarKit_Build,status:SUCCESS/artifacts/content/GrammarKit*.zip),
 [Changelog](CHANGELOG.md), [Tutorial](TUTORIAL.md), [How-to](HOWTO.md), [Standalone usage](#standalone-usage).
 
 

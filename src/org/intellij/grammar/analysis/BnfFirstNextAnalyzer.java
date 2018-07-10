@@ -397,18 +397,23 @@ public class BnfFirstNextAnalyzer {
   public Set<String> asStrings(Set<BnfExpression> expressions) {
     Set<String> result = new TreeSet<>();
     for (BnfExpression expression : expressions) {
-      if (expression instanceof BnfLiteralExpression) {
-        String text = expression.getText();
-        result.add(StringUtil.isQuotedString(text) ? '\'' + GrammarUtil.unquote(text) + '\'' : text);
-      }
-      else if (GrammarUtil.isExternalReference(expression)) {
-        result.add("#" + expression.getText());
-      }
-      else {
-        result.add(expression.getText());
-      }
+      result.add(asString(expression));
     }
     return result;
+  }
+
+  @NotNull
+  public static String asString(@NotNull BnfExpression expression) {
+    if (expression instanceof BnfLiteralExpression) {
+      String text = expression.getText();
+      return StringUtil.isQuotedString(text) ? '\'' + GrammarUtil.unquote(text) + '\'' : text;
+    }
+    else if (GrammarUtil.isExternalReference(expression)) {
+      return "#" + expression.getText();
+    }
+    else {
+      return expression.getText();
+    }
   }
 
   private static Set<BnfExpression> newExprSet() {

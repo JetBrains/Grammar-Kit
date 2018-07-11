@@ -21,6 +21,13 @@ token_regular ::= SAME_TOKEN 3 4
 token_smart ::= SAME_TOKEN 4 5 { consumeTokenMethod = 'smart' }
 token_fast ::= SAME_TOKEN 5 6 { consumeTokenMethod = 'fast' }
 
+regular_predicate_vs_smart ::= &token_regular token_smart
+regular_predicate_vs_fast ::= &token_regular token_fast
+smart_predicate_vs_regular ::= &token_smart token_regular
+smart_predicate_vs_fast ::= &token_smart token_fast
+fast_predicate_vs_regular ::= &token_fast token_regular
+fast_predicate_vs_smart ::= &token_fast token_smart
+
 regular_vs_smart ::= token_regular | token_smart
 regular_vs_smart_in_smart ::= token_regular | token_smart { consumeTokenMethod = 'smart' }
 regular_vs_smart_in_fast ::= token_regular | token_smart { consumeTokenMethod = 'fast' }

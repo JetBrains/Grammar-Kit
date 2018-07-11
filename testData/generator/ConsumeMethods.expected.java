@@ -24,7 +24,13 @@ public class ConsumeMethods implements PsiParser, LightPsiParser {
     boolean result_;
     builder_ = adapt_builder_(root_, builder_, this, null);
     Marker marker_ = enter_section_(builder_, 0, _COLLAPSE_, null);
-    if (root_ == FAST_RULE) {
+    if (root_ == FAST_PREDICATE_VS_REGULAR) {
+      result_ = fast_predicate_vs_regular(builder_, 0);
+    }
+    else if (root_ == FAST_PREDICATE_VS_SMART) {
+      result_ = fast_predicate_vs_smart(builder_, 0);
+    }
+    else if (root_ == FAST_RULE) {
       result_ = fast_rule(builder_, 0);
     }
     else if (root_ == FAST_VS_REGULAR) {
@@ -54,6 +60,12 @@ public class ConsumeMethods implements PsiParser, LightPsiParser {
     else if (root_ == PARENT_SMART) {
       result_ = parent_smart(builder_, 0);
     }
+    else if (root_ == REGULAR_PREDICATE_VS_FAST) {
+      result_ = regular_predicate_vs_fast(builder_, 0);
+    }
+    else if (root_ == REGULAR_PREDICATE_VS_SMART) {
+      result_ = regular_predicate_vs_smart(builder_, 0);
+    }
     else if (root_ == REGULAR_RULE) {
       result_ = regular_rule(builder_, 0);
     }
@@ -74,6 +86,12 @@ public class ConsumeMethods implements PsiParser, LightPsiParser {
     }
     else if (root_ == REGULAR_VS_SMART_IN_SMART) {
       result_ = regular_vs_smart_in_smart(builder_, 0);
+    }
+    else if (root_ == SMART_PREDICATE_VS_FAST) {
+      result_ = smart_predicate_vs_fast(builder_, 0);
+    }
+    else if (root_ == SMART_PREDICATE_VS_REGULAR) {
+      result_ = smart_predicate_vs_regular(builder_, 0);
     }
     else if (root_ == SMART_RULE) {
       result_ = smart_rule(builder_, 0);
@@ -113,6 +131,52 @@ public class ConsumeMethods implements PsiParser, LightPsiParser {
 
   protected boolean parse_root_(IElementType root_, PsiBuilder builder_, int level_) {
     return root(builder_, level_ + 1);
+  }
+
+  /* ********************************************************** */
+  // &token_fast token_regular
+  public static boolean fast_predicate_vs_regular(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "fast_predicate_vs_regular")) return false;
+    if (!nextTokenIs(builder_, SAME_TOKEN)) return false;
+    boolean result_;
+    Marker marker_ = enter_section_(builder_);
+    result_ = fast_predicate_vs_regular_0(builder_, level_ + 1);
+    result_ = result_ && token_regular(builder_, level_ + 1);
+    exit_section_(builder_, marker_, FAST_PREDICATE_VS_REGULAR, result_);
+    return result_;
+  }
+
+  // &token_fast
+  private static boolean fast_predicate_vs_regular_0(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "fast_predicate_vs_regular_0")) return false;
+    boolean result_;
+    Marker marker_ = enter_section_(builder_, level_, _AND_);
+    result_ = token_fast(builder_, level_ + 1);
+    exit_section_(builder_, level_, marker_, result_, false, null);
+    return result_;
+  }
+
+  /* ********************************************************** */
+  // &token_fast token_smart
+  public static boolean fast_predicate_vs_smart(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "fast_predicate_vs_smart")) return false;
+    if (!nextTokenIsSmart(builder_, SAME_TOKEN)) return false;
+    boolean result_;
+    Marker marker_ = enter_section_(builder_);
+    result_ = fast_predicate_vs_smart_0(builder_, level_ + 1);
+    result_ = result_ && token_smart(builder_, level_ + 1);
+    exit_section_(builder_, marker_, FAST_PREDICATE_VS_SMART, result_);
+    return result_;
+  }
+
+  // &token_fast
+  private static boolean fast_predicate_vs_smart_0(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "fast_predicate_vs_smart_0")) return false;
+    boolean result_;
+    Marker marker_ = enter_section_(builder_, level_, _AND_);
+    result_ = token_fast(builder_, level_ + 1);
+    exit_section_(builder_, level_, marker_, result_, false, null);
+    return result_;
   }
 
   /* ********************************************************** */
@@ -253,6 +317,52 @@ public class ConsumeMethods implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
+  // &token_regular token_fast
+  public static boolean regular_predicate_vs_fast(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "regular_predicate_vs_fast")) return false;
+    if (!nextTokenIs(builder_, SAME_TOKEN)) return false;
+    boolean result_;
+    Marker marker_ = enter_section_(builder_);
+    result_ = regular_predicate_vs_fast_0(builder_, level_ + 1);
+    result_ = result_ && token_fast(builder_, level_ + 1);
+    exit_section_(builder_, marker_, REGULAR_PREDICATE_VS_FAST, result_);
+    return result_;
+  }
+
+  // &token_regular
+  private static boolean regular_predicate_vs_fast_0(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "regular_predicate_vs_fast_0")) return false;
+    boolean result_;
+    Marker marker_ = enter_section_(builder_, level_, _AND_);
+    result_ = token_regular(builder_, level_ + 1);
+    exit_section_(builder_, level_, marker_, result_, false, null);
+    return result_;
+  }
+
+  /* ********************************************************** */
+  // &token_regular token_smart
+  public static boolean regular_predicate_vs_smart(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "regular_predicate_vs_smart")) return false;
+    if (!nextTokenIs(builder_, SAME_TOKEN)) return false;
+    boolean result_;
+    Marker marker_ = enter_section_(builder_);
+    result_ = regular_predicate_vs_smart_0(builder_, level_ + 1);
+    result_ = result_ && token_smart(builder_, level_ + 1);
+    exit_section_(builder_, marker_, REGULAR_PREDICATE_VS_SMART, result_);
+    return result_;
+  }
+
+  // &token_regular
+  private static boolean regular_predicate_vs_smart_0(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "regular_predicate_vs_smart_0")) return false;
+    boolean result_;
+    Marker marker_ = enter_section_(builder_, level_, _AND_);
+    result_ = token_regular(builder_, level_ + 1);
+    exit_section_(builder_, level_, marker_, result_, false, null);
+    return result_;
+  }
+
+  /* ********************************************************** */
   // REGULAR_TOKEN 1 2 3
   public static boolean regular_rule(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "regular_rule")) return false;
@@ -348,6 +458,52 @@ public class ConsumeMethods implements PsiParser, LightPsiParser {
   /* ********************************************************** */
   static boolean root(PsiBuilder builder_, int level_) {
     return true;
+  }
+
+  /* ********************************************************** */
+  // &token_smart token_fast
+  public static boolean smart_predicate_vs_fast(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "smart_predicate_vs_fast")) return false;
+    if (!nextTokenIsSmart(builder_, SAME_TOKEN)) return false;
+    boolean result_;
+    Marker marker_ = enter_section_(builder_);
+    result_ = smart_predicate_vs_fast_0(builder_, level_ + 1);
+    result_ = result_ && token_fast(builder_, level_ + 1);
+    exit_section_(builder_, marker_, SMART_PREDICATE_VS_FAST, result_);
+    return result_;
+  }
+
+  // &token_smart
+  private static boolean smart_predicate_vs_fast_0(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "smart_predicate_vs_fast_0")) return false;
+    boolean result_;
+    Marker marker_ = enter_section_(builder_, level_, _AND_);
+    result_ = token_smart(builder_, level_ + 1);
+    exit_section_(builder_, level_, marker_, result_, false, null);
+    return result_;
+  }
+
+  /* ********************************************************** */
+  // &token_smart token_regular
+  public static boolean smart_predicate_vs_regular(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "smart_predicate_vs_regular")) return false;
+    if (!nextTokenIs(builder_, SAME_TOKEN)) return false;
+    boolean result_;
+    Marker marker_ = enter_section_(builder_);
+    result_ = smart_predicate_vs_regular_0(builder_, level_ + 1);
+    result_ = result_ && token_regular(builder_, level_ + 1);
+    exit_section_(builder_, marker_, SMART_PREDICATE_VS_REGULAR, result_);
+    return result_;
+  }
+
+  // &token_smart
+  private static boolean smart_predicate_vs_regular_0(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "smart_predicate_vs_regular_0")) return false;
+    boolean result_;
+    Marker marker_ = enter_section_(builder_, level_, _AND_);
+    result_ = token_smart(builder_, level_ + 1);
+    exit_section_(builder_, level_, marker_, result_, false, null);
+    return result_;
   }
 
   /* ********************************************************** */

@@ -41,6 +41,8 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
+import static com.intellij.util.containers.ContainerUtil.union;
+
 /**
  * @author gregsh
  */
@@ -322,52 +324,48 @@ public class BnfFirstNextAnalyzer {
         externalNext = filterExternalMethods(next);
         if (!skip) skip = !externalCond.isEmpty();
       }
-      Set<BnfExpression> mixed = newExprSet();
+      final Set<BnfExpression> mixed;
       if (elementType == BnfTypes.BNF_OP_AND) {
         if (forcedNext != null && forcedNext.first) {
-          mixed.addAll(conditions);
+          mixed = newExprSet(conditions);
         }
         else if (skip) {
-          mixed.addAll(next);
-          mixed.addAll(externalCond);
+          mixed = exprSetUnion(next, externalCond);
           mixed.remove(BNF_MATCHES_EOF);
         }
         else if (!conditions.contains(BNF_MATCHES_EOF)) {
           if (next.contains(BNF_MATCHES_ANY)) {
-            mixed.addAll(conditions);
+            mixed = newExprSet(conditions);
           }
           else {
             if (externalNext.isEmpty()) {
-              mixed.addAll(next);
-              mixed.retainAll(conditions);
+              mixed = exprSetIntersection(conditions, next);
               if (mixed.isEmpty() && !involvesTextMatching(conditions)) {
                 mixed.add(BNF_MATCHES_NOTHING);
               }
             }
             else {
-              mixed.addAll(conditions);
+              mixed = newExprSet(conditions);
             }
           }
         }
         else {
-          mixed.addAll(next);
+          mixed = newExprSet(next);
         }
       }
       else {
         if (skip) {
-          mixed.addAll(next);
-          mixed.addAll(externalCond); // todo shall be actually inverted
+          mixed = exprSetUnion(next, externalCond); // todo shall be actually inverted
           mixed.remove(BNF_MATCHES_EOF);
         }
         else if (!conditions.contains(BNF_MATCHES_EOF)) {
-          mixed.addAll(next);
-          mixed.removeAll(conditions);
+          mixed = exprSetDifference(next, conditions);
           if (mixed.isEmpty() && !involvesTextMatching(conditions)) {
             mixed.add(BNF_MATCHES_NOTHING);
           }
         }
         else {
-          mixed.add(BNF_MATCHES_NOTHING);
+          mixed = Collections.singleton(BNF_MATCHES_NOTHING);
         }
       }
       result.addAll(mixed);
@@ -416,8 +414,38 @@ public class BnfFirstNextAnalyzer {
     }
   }
 
+  @NotNull
   private static Set<BnfExpression> newExprSet() {
     return ContainerUtil.newTroveSet(ParserGeneratorUtil.textStrategy());
   }
 
+  @NotNull
+  private static Set<BnfExpression> newExprSet(Collection<BnfExpression> expressions) {
+    return ContainerUtil.newTroveSet(ParserGeneratorUtil.textStrategy(), expressions);
+  }
+
+  @NotNull
+  private static Set<BnfExpression> exprSetUnion(Collection<BnfExpression> a, Collection<BnfExpression> b) {
+    Set<BnfExpression> result = newExprSet(a);
+    result.addAll(b);
+    return result;
+  }
+
+  @NotNull
+  private static Set<BnfExpression> exprSetIntersection(@NotNull Set<BnfExpression> a, @NotNull Set<BnfExpression> b) {
+    Set<BnfExpression> filter = newExprSet(a);
+    filter.retainAll(newExprSet(b));
+    Set<BnfExpression> result = union(a, b);
+    result.retainAll(filter);
+    return result;
+  }
+
+  @NotNull
+  private static Set<BnfExpression> exprSetDifference(@NotNull Set<BnfExpression> a, @NotNull Set<BnfExpression> b) {
+    Set<BnfExpression> filter = newExprSet(a);
+    filter.removeAll(newExprSet(b));
+    Set<BnfExpression> result = union(a, b);
+    result.retainAll(filter);
+    return result;
+  }
 }

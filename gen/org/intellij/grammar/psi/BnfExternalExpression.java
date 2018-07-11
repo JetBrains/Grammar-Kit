@@ -24,4 +24,7 @@ public interface BnfExternalExpression extends BnfExpression {
   @NotNull
   List<BnfExpression> getExpressionList();
 
+  @NotNull
+  List<BnfExpression> getArguments();
+
 }

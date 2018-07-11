@@ -46,4 +46,9 @@ public class BnfExternalExpressionImpl extends BnfExpressionImpl implements BnfE
     return PsiTreeUtil.getChildrenOfTypeAsList(this, BnfExpression.class);
   }
 
+  @NotNull
+  public List<BnfExpression> getArguments() {
+    return GrammarPsiImplUtil.getArguments(this);
+  }
+
 }

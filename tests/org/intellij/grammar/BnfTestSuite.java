@@ -39,6 +39,7 @@ public class BnfTestSuite extends TestCase {
     testSuite.addTestSuite(BnfIntroduceRuleTest.class);
     testSuite.addTestSuite(BnfFlipChoiceIntentionTest.class);
     testSuite.addTestSuite(BnfMoveLeftRightTest.class);
+    testSuite.addTestSuite(BnfConvertOptExpressionIntentionTest.class);
 
     testSuite.addTestSuite(JFlexCompletionTest.class);
     return testSuite;

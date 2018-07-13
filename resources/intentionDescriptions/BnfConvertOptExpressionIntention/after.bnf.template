@@ -1,0 +1,4 @@
+rule1 ::= <spot>[a]</spot>
+rule2 ::= <spot>[a b c]</spot>
+rule3 ::= <spot>a?</spot>
+rule4 ::= <spot>(a b c)?</spot>

@@ -1,0 +1,125 @@
+/*
+ * Copyright 2011-present Greg Shrago
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.intellij.grammar.intention;
+
+import com.intellij.codeInsight.intention.impl.BaseIntentionAction;
+import com.intellij.openapi.editor.Editor;
+import com.intellij.openapi.project.Project;
+import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiFile;
+import com.intellij.util.IncorrectOperationException;
+import org.intellij.grammar.psi.*;
+import org.intellij.grammar.psi.impl.BnfElementFactory;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.Nls;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
+import static com.intellij.psi.util.PsiTreeUtil.getParentOfType;
+
+public class BnfConvertOptExpressionIntention extends BaseIntentionAction {
+
+  @Nls(capitalization = Nls.Capitalization.Sentence)
+  @NotNull
+  @Override
+  public String getFamilyName() {
+    return "Convert opt expression";
+  }
+
+  @Override
+  public boolean isAvailable(@NotNull Project project, Editor editor, PsiFile file) {
+    if (editor == null || file == null) return false;
+
+    int offset = editor.getCaretModel().getOffset();
+    PsiElement element = file.getViewProvider().findElementAt(offset);
+
+    if (getQuantifiedOptExpression(element) != null) {
+      setText("Convert expr? to [expr]");
+      return true;
+    }
+    else if (getParenOptExpression(element) != null) {
+      setText("Convert [expr] to expr?");
+      return true;
+    }
+    else {
+      return false;
+    }
+  }
+
+  @Override
+  public void invoke(@NotNull Project project, Editor editor, PsiFile file) throws IncorrectOperationException {
+    int offset = editor.getCaretModel().getOffset();
+    PsiElement element = file.getViewProvider().findElementAt(offset);
+
+    BnfQuantified quantified = getQuantifiedOptExpression(element);
+    if (quantified != null) {
+      handleQuantifier(project, quantified);
+      return;
+    }
+
+    BnfParenOptExpression parenOpt = getParenOptExpression(element);
+    if (parenOpt != null) {
+      handleParenOpt(project, parenOpt);
+    }
+  }
+
+  @Nullable
+  private static BnfQuantified getQuantifiedOptExpression(PsiElement element) {
+    BnfQuantified quantified = getParentOfType(element, BnfQuantified.class);
+    return quantified != null && quantified.getQuantifier().getNode().getFirstChildNode().getElementType() == BnfTypes.BNF_OP_OPT
+           ? quantified
+           : null;
+  }
+
+  @Contract("null -> null")
+  private static BnfParenOptExpression getParenOptExpression(PsiElement element) {
+    return getParentOfType(element, BnfParenOptExpression.class);
+  }
+
+  private static void handleQuantifier(@NotNull Project project, @NotNull BnfQuantified expr) {
+    BnfExpression operand = skipParenthesesDown(expr.getExpression());
+    String newText = "[" + operand.getText() + "]";
+    expr.replace(BnfElementFactory.createExpressionFromText(project, newText));
+  }
+
+  private static void handleParenOpt(@NotNull Project project, @NotNull BnfParenOptExpression expr) {
+    BnfExpression operand = skipBracketsDown(expr.getExpression());
+    String newText = isSimple(operand) ? operand.getText() + "?" : "(" + operand.getText() + ")?";
+    expr.replace(BnfElementFactory.createExpressionFromText(project, newText));
+  }
+
+  private static BnfExpression skipParenthesesDown(BnfExpression expr) {
+    while (expr instanceof BnfParenthesized) {
+      expr = ((BnfParenthesized)expr).getExpression();
+    }
+    return expr;
+  }
+
+  private static BnfExpression skipBracketsDown(BnfExpression expr) {
+    while (expr instanceof BnfParenOptExpression) {
+      expr = ((BnfParenOptExpression)expr).getExpression();
+    }
+    return expr;
+  }
+
+  @Contract(pure = true)
+  private static boolean isSimple(@NotNull BnfExpression expression) {
+    return expression instanceof BnfReferenceOrToken ||
+           expression instanceof BnfLiteralExpression ||
+           expression instanceof BnfParenthesized ||
+           expression instanceof BnfExternalExpression;
+  }
+}

@@ -99,6 +99,10 @@
       <className>org.intellij.grammar.intention.BnfFlipChoiceIntention</className>
       <category>Grammar</category>
     </intentionAction>
+    <intentionAction>
+      <className>org.intellij.grammar.intention.BnfConvertOptExpressionIntention</className>
+      <category>Grammar</category>
+    </intentionAction>
 
     <!--JFlex Support -->
     <fileTypeFactory implementation="org.intellij.jflex.parser.JFlexFileTypeFactory"/>

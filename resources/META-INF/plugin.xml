@@ -49,6 +49,7 @@
     <lang.elementManipulator forClass="org.intellij.grammar.psi.impl.BnfStringLiteralExpressionImpl"
                              implementationClass="org.intellij.grammar.psi.impl.BnfStringManipulator"/>
     <extendWordSelectionHandler implementation="org.intellij.grammar.editor.BnfWordSelectioner"/>
+    <moveLeftRightHandler language="BNF" implementationClass="org.intellij.grammar.editor.BnfMoveLeftRightHandler"/>
 
     <spellchecker.support language="BNF" implementationClass="org.intellij.grammar.editor.BnfSpellCheckingStrategy"/>
 

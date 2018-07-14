@@ -75,7 +75,7 @@ public class ParserGeneratorUtil {
   }
 
   enum ConsumeType {
-    DEFAULT, FAST, SMART;
+    FAST, SMART, DEFAULT;
 
     @NotNull
     public String getMethodSuffix() {
@@ -102,6 +102,19 @@ public class ParserGeneratorUtil {
       if ("consumeTokenSmart".equals(value)) return SMART;
       if ("consumeToken".equals(value)) return DEFAULT;
       return null;
+    }
+
+    @Nullable
+    public static ConsumeType min(@Nullable ConsumeType a, @Nullable ConsumeType b) {
+      if (a == null || b == null) return null;
+      return a.compareTo(b) < 0 ? a : b;
+    }
+
+    @Nullable
+    public static ConsumeType max(@Nullable ConsumeType a, @Nullable ConsumeType b) {
+      if (a == null) return b;
+      if (b == null) return a;
+      return a.compareTo(b) < 0 ? b : a;
     }
   }
 

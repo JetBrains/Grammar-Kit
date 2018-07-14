@@ -579,7 +579,7 @@ public class GrammarParser implements PsiParser, LightPsiParser {
   // '(' expression ')' | '{' alt_choice_element '}'
   public static boolean paren_expression(PsiBuilder builder, int level) {
     if (!recursion_guard_(builder, level, "paren_expression")) return false;
-    if (!nextTokenIs(builder, "<paren expression>", BNF_LEFT_PAREN, BNF_LEFT_BRACE)) return false;
+    if (!nextTokenIs(builder, "<paren expression>", BNF_LEFT_BRACE, BNF_LEFT_PAREN)) return false;
     boolean result;
     Marker marker = enter_section_(builder, level, _NONE_, BNF_PAREN_EXPRESSION, "<paren expression>");
     result = paren_expression_0(builder, level + 1);
@@ -633,7 +633,7 @@ public class GrammarParser implements PsiParser, LightPsiParser {
   // predicate_sign simple
   public static boolean predicate(PsiBuilder builder, int level) {
     if (!recursion_guard_(builder, level, "predicate")) return false;
-    if (!nextTokenIs(builder, "<predicate>", BNF_OP_NOT, BNF_OP_AND)) return false;
+    if (!nextTokenIs(builder, "<predicate>", BNF_OP_AND, BNF_OP_NOT)) return false;
     boolean result;
     Marker marker = enter_section_(builder, level, _NONE_, BNF_PREDICATE, "<predicate>");
     result = predicate_sign(builder, level + 1);
@@ -646,7 +646,7 @@ public class GrammarParser implements PsiParser, LightPsiParser {
   // '&' | '!'
   public static boolean predicate_sign(PsiBuilder builder, int level) {
     if (!recursion_guard_(builder, level, "predicate_sign")) return false;
-    if (!nextTokenIs(builder, "<predicate sign>", BNF_OP_NOT, BNF_OP_AND)) return false;
+    if (!nextTokenIs(builder, "<predicate sign>", BNF_OP_AND, BNF_OP_NOT)) return false;
     boolean result;
     Marker marker = enter_section_(builder, level, _NONE_, BNF_PREDICATE_SIGN, "<predicate sign>");
     result = consumeToken(builder, BNF_OP_AND);

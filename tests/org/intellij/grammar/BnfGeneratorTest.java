@@ -35,6 +35,7 @@ public class BnfGeneratorTest extends BnfGeneratorTestCase {
   public void testStub() throws Exception { doGenTest(true); }
   public void testBindersAndHooks() throws Exception { doGenTest(false); }
   public void testAutoRecovery() throws Exception { doGenTest(true); }
+  public void testConsumeMethods() throws Exception { doGenTest(false); }
 
   @Bombed(year = 2030, user = "author", month = 1, day = 1, description = "not implemented")
   public void testUpperRules() throws Exception { doGenTest(true); }

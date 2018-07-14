@@ -47,8 +47,12 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static java.lang.String.format;
+import static java.util.stream.Collectors.*;
+import static org.intellij.grammar.analysis.BnfFirstNextAnalyzer.BNF_MATCHES_ANY;
+import static org.intellij.grammar.analysis.BnfFirstNextAnalyzer.BNF_MATCHES_EOF;
 import static org.intellij.grammar.generator.BnfConstants.*;
 import static org.intellij.grammar.generator.ParserGeneratorUtil.*;
 import static org.intellij.grammar.generator.RuleGraphHelper.Cardinality.*;
@@ -978,36 +982,54 @@ public class ParserGenerator {
   public String generateFirstCheck(BnfRule rule, String frameName, boolean skipIfOne) {
     if (G.generateFirstCheck <= 0) return frameName;
     BnfFirstNextAnalyzer analyzer = new BnfFirstNextAnalyzer().setPredicateLookAhead(true);
-    Set<String> firstSet = analyzer.asStrings(analyzer.calcFirst(rule));
-    List<String> firstElementTypes = new ArrayList<>(firstSet.size());
-    for (String s : firstSet) {
-      if (myFile.getRule(s) != null) continue; // ignore left recursion
-      @SuppressWarnings("StringEquality")
-      boolean unknown = s == BnfFirstNextAnalyzer.MATCHES_EOF || s == BnfFirstNextAnalyzer.MATCHES_ANY;
-      String t = unknown? null : firstToElementType(s);
-      if (t != null) {
-        firstElementTypes.add(t);
-      }
-      else {
-        firstElementTypes.clear();
-        break;
-      }
-    }
-    ConsumeType forcedConsumeType = ExpressionGeneratorHelper.fixForcedConsumeType(myExpressionHelper, rule, null, null);
-    ConsumeType consumeType = ObjectUtils.chooseNotNull(forcedConsumeType, ConsumeType.forRule(rule));
-    boolean fast = consumeType == ConsumeType.FAST || consumeType == ConsumeType.SMART;
-    // do not include frameName if FIRST is known and its size is 1
-    boolean dropFrameName = skipIfOne && firstElementTypes.size() == 1;
-    if (!firstElementTypes.isEmpty() && firstElementTypes.size() <= G.generateFirstCheck) {
-      StringBuilder sb = new StringBuilder("if (!");
-      sb.append(fast ? "nextTokenIs" + consumeType.getMethodSuffix() : "nextTokenIs").append("(").append(N.builder).append(", ");
-      if (!fast && !dropFrameName) sb.append(frameName != null ? frameName : "\"\"").append(", ");
+    Set<BnfExpression> firstSet = analyzer.calcFirst(rule);
+    ConsumeType ruleConsumeType = getRuleConsumeType(rule);
+    Map<String, ConsumeType> firstElementTypes = new TreeMap<>();
+    for (BnfExpression expression : firstSet) {
+      if (expression == BNF_MATCHES_EOF || expression == BNF_MATCHES_ANY) return frameName;
 
-      appendTokenTypes(sb, firstElementTypes);
-      sb.append(")) return false;");
-      out(sb.toString());
+      String expressionString = BnfFirstNextAnalyzer.asString(expression);
+      if (myFile.getRule(expressionString) != null) continue;
+
+      String t = firstToElementType(expressionString);
+      if (t == null) return frameName;
+
+      ConsumeType childConsumeType = getRuleConsumeType(ObjectUtils.notNull(Rule.of(expression)));
+      ConsumeType consumeType = ConsumeType.min(ruleConsumeType, childConsumeType);
+      ConsumeType existing = firstElementTypes.get(t);
+      firstElementTypes.put(t, ConsumeType.max(existing, consumeType));
     }
-    return dropFrameName && StringUtil.isEmpty(getAttribute(rule, KnownAttribute.NAME))? null : frameName;
+    if (firstElementTypes.isEmpty()) return frameName;
+
+    int allTokensCount = firstElementTypes.size();
+    // do not include frameName if FIRST is known and its size is 1
+    boolean dropFrameName = skipIfOne && allTokensCount == 1;
+    if (allTokensCount <= G.generateFirstCheck) {
+      Map<ConsumeType, List<String>> grouped = firstElementTypes.entrySet().stream().collect(groupingBy(
+        Map.Entry::getValue,
+        () -> new EnumMap<>(ConsumeType.class),
+        mapping(Map.Entry::getKey, toList())
+      ));
+      String condition = grouped.entrySet().stream().map(entry -> {
+        ConsumeType consumeType = entry.getKey();
+        List<String> tokenTypes = entry.getValue();
+        StringBuilder sb = new StringBuilder("!");
+        sb.append("nextTokenIs").append(consumeType.getMethodSuffix()).append("(").append(N.builder).append(", ");
+        if (!dropFrameName && consumeType == ConsumeType.DEFAULT) sb.append(StringUtil.notNullize(frameName, "\"\"")).append(", ");
+        appendTokenTypes(sb, tokenTypes);
+        sb.append(")");
+        return sb;
+      }).collect(Collectors.joining(" &&\n  ", "if (", ") return false;"));
+      out(condition);
+    }
+
+    return dropFrameName && StringUtil.isEmpty(getAttribute(rule, KnownAttribute.NAME)) ? null : frameName;
+  }
+
+  @NotNull
+  private ConsumeType getRuleConsumeType(@NotNull BnfRule rule) {
+    ConsumeType forcedConsumeType = ExpressionGeneratorHelper.fixForcedConsumeType(myExpressionHelper, rule, null, null);
+    return ObjectUtils.chooseNotNull(forcedConsumeType, ConsumeType.forRule(rule));
   }
 
   void generateNodeChildren(BnfRule rule, String funcName, List<BnfExpression> children, Set<BnfExpression> visited) {

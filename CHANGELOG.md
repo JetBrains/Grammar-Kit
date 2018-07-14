@@ -1,3 +1,11 @@
+2017.1.5-snapshot
+
+* Editor: _Move Element Left/Right_ action in BNF
+* Editor: convert `expr?` to `[expr]` and back intention (#183)
+* Generator: FIRST check with the exact `consumeTokenType` (#185)
+* GPUB: configurable token-advancer
+
+
 2017.1.4
 
 * Editor: inject Regexp in BNF and Java in JFlex
@@ -44,7 +52,7 @@
 
 * Generator: disable first-check in presence of external predicates
 * Generator: support merged AST and PSI trees (psi.impl.source.tree.CompositePsiElement inheritors)
-* Generator: add generate=[psi-classes-map="yes"] option
+* Generator: add `generate=[psi-classes-map="yes"]` option
 * Generator: alert of missing psi implementation methods #155
 * Generator: merge multiple list-valued attributes, e.g. "implements", "methods"
 

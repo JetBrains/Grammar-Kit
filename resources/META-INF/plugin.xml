@@ -14,12 +14,10 @@
   <change-notes>
     <![CDATA[
     <ul>
-      <li>Editor: inject Regexp in BNF and Java in JFlex files</li>
-      <li>Generator: less markers & less lines in generated code</li>
-      <li>Generator: improve target dir detection, refresh files faster</li>
-      <li>Generator: FIRST check external rules with non-external predicates</li>
-      <li>GPUB: cleanup and error reporting tweaks</li>
-      <li>GPUB: re-check recoverWhile condition after advance when recovering</li>
+      <li>Editor: _Move Element Left/Right_ action in BNF</li>
+      <li>Editor: convert `expr?` to `[expr]` and back intention (#183)</li>
+      <li>Generator: FIRST check with the exact `consumeTokenType` (#185)</li>
+      <li>GPUB: configurable token-advancer</li>
     </ul>
     <a href="https://github.com/JetBrains/Grammar-Kit#change-log">Full change log...</a>
     ]]>

@@ -109,7 +109,7 @@ public class JFlexParser implements PsiParser, LightPsiParser {
   // '{' raw? '}' | '|'
   public static boolean action(PsiBuilder builder, int level) {
     if (!recursion_guard_(builder, level, "action")) return false;
-    if (!nextTokenIs(builder, "<action>", FLEX_BRACE1, FLEX_BAR)) return false;
+    if (!nextTokenIs(builder, "<action>", FLEX_BAR, FLEX_BRACE1)) return false;
     boolean result;
     Marker marker = enter_section_(builder, level, _NONE_, FLEX_JAVA_CODE, "<action>");
     result = action_0(builder, level + 1);
@@ -1955,7 +1955,7 @@ public class JFlexParser implements PsiParser, LightPsiParser {
   // char_class | '.'
   public static boolean predefined_class_expression(PsiBuilder builder, int level) {
     if (!recursion_guard_(builder, level, "predefined_class_expression")) return false;
-    if (!nextTokenIsSmart(builder, FLEX_DOT, FLEX_CHAR_CLASS)) return false;
+    if (!nextTokenIsSmart(builder, FLEX_CHAR_CLASS, FLEX_DOT)) return false;
     boolean result;
     Marker marker = enter_section_(builder, level, _NONE_, FLEX_PREDEFINED_CLASS_EXPRESSION, "<expression>");
     result = consumeTokenSmart(builder, FLEX_CHAR_CLASS);

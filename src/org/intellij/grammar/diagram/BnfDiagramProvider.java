@@ -32,6 +32,7 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiManager;
 import com.intellij.psi.PsiNamedElement;
+import com.intellij.ui.JBColor;
 import com.intellij.ui.SimpleColoredText;
 import com.intellij.ui.SimpleTextAttributes;
 import com.intellij.util.PlatformIcons;
@@ -337,7 +338,7 @@ public class BnfDiagramProvider extends DiagramProvider<PsiNamedElement> {
 
             @Override
             public Color getAnchorColor() {
-              return Color.BLUE;
+              return JBColor.BLUE;
             }
 
             @Override

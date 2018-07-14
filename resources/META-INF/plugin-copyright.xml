@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<idea-plugin version="2">
+<idea-plugin>
   <extensions defaultExtensionNs="com.intellij.copyright">
     <updater filetype="BNF" implementationClass="com.maddyhome.idea.copyright.psi.UpdateAnyFileCopyright$Provider"/>
   </extensions>

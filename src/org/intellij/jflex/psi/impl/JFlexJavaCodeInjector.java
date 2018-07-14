@@ -27,6 +27,8 @@ import com.intellij.psi.SyntaxTraverser;
 import com.intellij.psi.tree.IElementType;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.psi.util.PsiUtilCore;
+import com.intellij.util.ObjectUtils;
+import com.intellij.util.containers.ContainerUtil;
 import com.intellij.util.containers.JBIterable;
 import org.intellij.grammar.config.Options;
 import org.intellij.jflex.psi.*;
@@ -34,6 +36,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 public class JFlexJavaCodeInjector implements MultiHostInjector {
 
@@ -49,9 +52,12 @@ public class JFlexJavaCodeInjector implements MultiHostInjector {
     if (!Options.INJECT_JAVA_IN_JFLEX.get()) return;
 
     PsiFile file = context.getContainingFile();
-    String lexerClass = getJavaOptions(file, JFlexTypes.FLEX_OPT_CLASS, "Lexer");
-    String returnType = getJavaOptions(file, JFlexTypes.FLEX_OPT_TYPE, "int");
-    String implementsStr = getJavaOptions(file, JFlexTypes.FLEX_OPT_IMPLEMENTS, "");
+    Map<IElementType, String> options = collectOptions(file);
+    boolean isPublic = options.containsKey(JFlexTypes.FLEX_OPT_PUBLIC);
+    boolean isFinal = options.containsKey(JFlexTypes.FLEX_OPT_FINAL);
+    String lexerClass = ObjectUtils.notNull(StringUtil.nullize(options.get(JFlexTypes.FLEX_OPT_CLASS)), "Lexer");
+    String returnType = ObjectUtils.notNull(StringUtil.nullize(options.get(JFlexTypes.FLEX_OPT_TYPE)), "int");
+    String implementsStr = ObjectUtils.notNull(StringUtil.nullize(options.get(JFlexTypes.FLEX_OPT_IMPLEMENTS)), "");
 
     JFlexRule lastRule = SyntaxTraverser.revPsiTraverser()
       .withRoot(PsiTreeUtil.findChildOfType(file, JFlexLexicalRulesSectionImpl.class))
@@ -65,7 +71,10 @@ public class JFlexJavaCodeInjector implements MultiHostInjector {
       PsiElement hostParent = host.getParent();
 
       if (hostParent instanceof JFlexUserCodeSection) {
-        StringBuilder sb = new StringBuilder().append("\nclass ").append(lexerClass);
+        StringBuilder sb = new StringBuilder("\n");
+        if (isPublic) sb.append("public ");
+        if (isFinal) sb.append("final ");
+        sb.append("class ").append(lexerClass);
         if (implementsStr.isEmpty()) sb.append(" implements ").append(implementsStr);
         sb.append(" {\n\n");
 
@@ -117,14 +126,17 @@ public class JFlexJavaCodeInjector implements MultiHostInjector {
     registrar.doneInjecting();
   }
 
-  private static String getJavaOptions(@NotNull PsiFile file, @NotNull IElementType optionType, @NotNull String defaultVal) {
+  @NotNull
+  private static Map<IElementType, String> collectOptions(@NotNull PsiFile file) {
     PsiElement declarationsSection = PsiTreeUtil.findChildOfType(file, JFlexDeclarationsSection.class);
-    if (declarationsSection == null) return defaultVal;
-    JBIterable<String> strings = SyntaxTraverser.psiApi().children(declarationsSection)
-      .filter(JFlexOption.class)
-      .filter(o -> PsiUtilCore.getElementType(o.getFirstChild()) == optionType)
-      .map(o -> TextRange.create(o.getFirstChild().getTextLength(), o.getTextLength()).substring(o.getText()).trim());
-    String result = StringUtil.join(strings, ", ");
-    return result.length() == 0 ? defaultVal : result;
+    if (declarationsSection == null) return Collections.emptyMap();
+    Map<IElementType, String> result = ContainerUtil.newLinkedHashMap();
+    for (JFlexOption o : SyntaxTraverser.psiApi().children(declarationsSection).filter(JFlexOption.class)) {
+      IElementType key = PsiUtilCore.getElementType(o.getFirstChild());
+      String value = TextRange.create(o.getFirstChild().getTextLength(), o.getTextLength()).substring(o.getText()).trim();
+      String prevValue = StringUtil.nullize(result.get(key));
+      result.put(key, prevValue == null ? value : value.isEmpty() ? prevValue : prevValue +", " + value);
+    }
+    return result;
   }
 }

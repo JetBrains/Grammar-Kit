@@ -72,7 +72,7 @@ import generated.psi.*;
 
 public class ItemImpl extends ASTWrapperPsiElement implements Item {
 
-  public ItemImpl(ASTNode node) {
+  public ItemImpl(@NotNull ASTNode node) {
     super(node);
   }
 
@@ -107,7 +107,7 @@ import generated.psi.*;
 
 public class ListImpl extends ASTWrapperPsiElement implements List {
 
-  public ListImpl(ASTNode node) {
+  public ListImpl(@NotNull ASTNode node) {
     super(node);
   }
 

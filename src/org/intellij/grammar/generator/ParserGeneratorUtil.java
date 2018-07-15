@@ -798,6 +798,7 @@ public class ParserGeneratorUtil {
                                            int offset,
                                            int mask,
                                            Function<String, String> substitutor,
+                                           Function<Integer, List<String>> annoProvider,
                                            Function<String, String> shortener) {
     StringBuilder sb = new StringBuilder();
     for (int i = offset; i < paramsTypes.size(); i += 2) {
@@ -810,7 +811,14 @@ public class ParserGeneratorUtil {
       if (BnfConstants.AST_NODE_CLASS.equals(type)) name = "node";
       if (type.endsWith("ElementType")) name = "type";
       if (type.endsWith("Stub")) name = "stub";
-      if ((mask & 1) == 1) sb.append(shortener.fun(type));
+      if ((mask & 1) == 1) {
+        List<String> annos = annoProvider.fun(i);
+        for (String s : annos) {
+          if (s.startsWith("kotlin.")) continue;
+          sb.append("@").append(shortener.fun(s)).append(" ");
+        }
+        sb.append(shortener.fun(type));
+      }
       if ((mask & 3) == 3) sb.append(" ");
       if ((mask & 2) == 2) sb.append(name);
     }

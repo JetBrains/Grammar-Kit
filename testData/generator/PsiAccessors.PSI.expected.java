@@ -252,7 +252,7 @@ import generated.psi.*;
 
 public class XBinaryImpl extends ASTWrapperPsiElement implements XBinary {
 
-  public XBinaryImpl(ASTNode node) {
+  public XBinaryImpl(@NotNull ASTNode node) {
     super(node);
   }
 
@@ -372,7 +372,7 @@ import generated.psi.*;
 
 public class XExpressionImpl extends ASTWrapperPsiElement implements XExpression {
 
-  public XExpressionImpl(ASTNode node) {
+  public XExpressionImpl(@NotNull ASTNode node) {
     super(node);
   }
 
@@ -398,7 +398,7 @@ import generated.psi.*;
 
 public class XOperatorImpl extends ASTWrapperPsiElement implements XOperator {
 
-  public XOperatorImpl(ASTNode node) {
+  public XOperatorImpl(@NotNull ASTNode node) {
     super(node);
   }
 
@@ -419,7 +419,7 @@ import generated.psi.child.XSomeChild;
 
 public class XRenameListImpl extends ASTWrapperPsiElement implements XRenameList {
 
-  public XRenameListImpl(ASTNode node) {
+  public XRenameListImpl(@NotNull ASTNode node) {
     super(node);
   }
 
@@ -469,7 +469,7 @@ import generated.psi.grand.XSomeGrandChild;
 
 public class XSomeChildImpl extends ASTWrapperPsiElement implements XSomeChild {
 
-  public XSomeChildImpl(ASTNode node) {
+  public XSomeChildImpl(@NotNull ASTNode node) {
     super(node);
   }
 
@@ -513,7 +513,7 @@ import generated.psi.grand.*;
 
 public class XSomeGrandChildImpl extends ASTWrapperPsiElement implements XSomeGrandChild {
 
-  public XSomeGrandChildImpl(ASTNode node) {
+  public XSomeGrandChildImpl(@NotNull ASTNode node) {
     super(node);
   }
 
@@ -547,7 +547,7 @@ import generated.psi.grand.XSomeGrandChild;
 
 public class XSomeRootImpl extends ASTWrapperPsiElement implements XSomeRoot {
 
-  public XSomeRootImpl(ASTNode node) {
+  public XSomeRootImpl(@NotNull ASTNode node) {
     super(node);
   }
 
@@ -610,7 +610,7 @@ import generated.psi.*;
 
 public class XTokenDefaultsImpl extends ASTWrapperPsiElement implements XTokenDefaults {
 
-  public XTokenDefaultsImpl(ASTNode node) {
+  public XTokenDefaultsImpl(@NotNull ASTNode node) {
     super(node);
   }
 
@@ -636,7 +636,7 @@ import generated.psi.*;
 
 public class XValueImpl extends ASTWrapperPsiElement implements XValue {
 
-  public XValueImpl(ASTNode node) {
+  public XValueImpl(@NotNull ASTNode node) {
     super(node);
   }
 

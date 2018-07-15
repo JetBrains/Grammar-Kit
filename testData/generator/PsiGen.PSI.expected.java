@@ -579,7 +579,7 @@ import generated.psi.*;
 
 public class XLeftShadowImpl extends ASTWrapperPsiElement implements XLeftShadow {
 
-  public XLeftShadowImpl(ASTNode node) {
+  public XLeftShadowImpl(@NotNull ASTNode node) {
     super(node);
   }
 
@@ -621,7 +621,7 @@ import generated.psi.*;
 
 public class XLeftShadowTestImpl extends ASTWrapperPsiElement implements XLeftShadowTest {
 
-  public XLeftShadowTestImpl(ASTNode node) {
+  public XLeftShadowTestImpl(@NotNull ASTNode node) {
     super(node);
   }
 
@@ -662,7 +662,7 @@ import generated.psi.*;
 
 public class XAStatementImpl extends XStatementImpl implements XAStatement {
 
-  public XAStatementImpl(ASTNode node) {
+  public XAStatementImpl(@NotNull ASTNode node) {
     super(node);
   }
 
@@ -703,7 +703,7 @@ import generated.psi.*;
 
 public class XBStatementImpl extends XStatementImpl implements XBStatement {
 
-  public XBStatementImpl(ASTNode node) {
+  public XBStatementImpl(@NotNull ASTNode node) {
     super(node);
   }
 
@@ -745,7 +745,7 @@ import generated.psi.*;
 
 public class XBlockOfImpl extends ASTWrapperPsiElement implements XBlockOf {
 
-  public XBlockOfImpl(ASTNode node) {
+  public XBlockOfImpl(@NotNull ASTNode node) {
     super(node);
   }
 
@@ -774,7 +774,7 @@ import generated.psi.*;
 
 public class XCStatementImpl extends XStatementImpl implements XCStatement {
 
-  public XCStatementImpl(ASTNode node) {
+  public XCStatementImpl(@NotNull ASTNode node) {
     super(node);
   }
 
@@ -815,7 +815,7 @@ import generated.psi.*;
 
 public class XCastExprImpl extends XExprImpl implements XCastExpr {
 
-  public XCastExprImpl(ASTNode node) {
+  public XCastExprImpl(@NotNull ASTNode node) {
     super(node);
   }
 
@@ -856,7 +856,7 @@ import generated.psi.*;
 
 public class XChoiceJoinedImpl extends XLiteralImpl implements XChoiceJoined {
 
-  public XChoiceJoinedImpl(ASTNode node) {
+  public XChoiceJoinedImpl(@NotNull ASTNode node) {
     super(node);
   }
 
@@ -898,7 +898,7 @@ import generated.psi.*;
 
 public class XExprImpl extends ASTWrapperPsiElement implements XExpr {
 
-  public XExprImpl(ASTNode node) {
+  public XExprImpl(@NotNull ASTNode node) {
     super(node);
   }
 
@@ -933,7 +933,7 @@ import generated.psi.*;
 
 public class XExternalTypeImpl extends XExprImpl implements XExternalType {
 
-  public XExternalTypeImpl(ASTNode node) {
+  public XExternalTypeImpl(@NotNull ASTNode node) {
     super(node);
   }
 
@@ -968,7 +968,7 @@ import generated.psi.*;
 
 public class XExternalType2Impl extends XExprImpl implements XExternalType2 {
 
-  public XExternalType2Impl(ASTNode node) {
+  public XExternalType2Impl(@NotNull ASTNode node) {
     super(node);
   }
 
@@ -1004,7 +1004,7 @@ import generated.psi.*;
 
 public class XGrammarElementImpl extends ASTWrapperPsiElement implements XGrammarElement {
 
-  public XGrammarElementImpl(ASTNode node) {
+  public XGrammarElementImpl(@NotNull ASTNode node) {
     super(node);
   }
 
@@ -1040,7 +1040,7 @@ import generated.psi.*;
 
 public class XIdentifierImpl extends ASTWrapperPsiElement implements XIdentifier {
 
-  public XIdentifierImpl(ASTNode node) {
+  public XIdentifierImpl(@NotNull ASTNode node) {
     super(node);
   }
 
@@ -1076,7 +1076,7 @@ import generated.psi.*;
 
 public class XIncludeSectionAltImpl extends ASTWrapperPsiElement implements XIncludeSectionAlt {
 
-  public XIncludeSectionAltImpl(ASTNode node) {
+  public XIncludeSectionAltImpl(@NotNull ASTNode node) {
     super(node);
   }
 
@@ -1118,7 +1118,7 @@ import generated.psi.*;
 
 public class XIncludeSectionImpl extends ASTWrapperPsiElement implements XIncludeSection {
 
-  public XIncludeSectionImpl(ASTNode node) {
+  public XIncludeSectionImpl(@NotNull ASTNode node) {
     super(node);
   }
 
@@ -1171,7 +1171,7 @@ import generated.psi.*;
 
 public class XItemExprImpl extends XExprImpl implements XItemExpr {
 
-  public XItemExprImpl(ASTNode node) {
+  public XItemExprImpl(@NotNull ASTNode node) {
     super(node);
   }
 
@@ -1212,7 +1212,7 @@ import generated.psi.*;
 
 public class XLiteralImpl extends XExprImpl implements XLiteral {
 
-  public XLiteralImpl(ASTNode node) {
+  public XLiteralImpl(@NotNull ASTNode node) {
     super(node);
   }
 
@@ -1247,7 +1247,7 @@ import generated.psi.*;
 
 public class XMulExprImpl extends XExprImpl implements XMulExpr {
 
-  public XMulExprImpl(ASTNode node) {
+  public XMulExprImpl(@NotNull ASTNode node) {
     super(node);
   }
 
@@ -1277,7 +1277,7 @@ import generated.psi.*;
 
 public class XNamedElementImpl extends ASTWrapperPsiElement implements XNamedElement {
 
-  public XNamedElementImpl(ASTNode node) {
+  public XNamedElementImpl(@NotNull ASTNode node) {
     super(node);
   }
 
@@ -1312,7 +1312,7 @@ import generated.psi.*;
 
 public class XOtherExprImpl extends XExprImpl implements XOtherExpr {
 
-  public XOtherExprImpl(ASTNode node) {
+  public XOtherExprImpl(@NotNull ASTNode node) {
     super(node);
   }
 
@@ -1341,7 +1341,7 @@ import generated.psi.*;
 
 public class XPlusExprImpl extends XExprImpl implements XPlusExpr {
 
-  public XPlusExprImpl(ASTNode node) {
+  public XPlusExprImpl(@NotNull ASTNode node) {
     super(node);
   }
 
@@ -1370,7 +1370,7 @@ import generated.psi.*;
 
 public class XRefExprImpl extends MyRefImpl implements XRefExpr {
 
-  public XRefExprImpl(ASTNode node) {
+  public XRefExprImpl(@NotNull ASTNode node) {
     super(node);
   }
 
@@ -1406,7 +1406,7 @@ import generated.psi.*;
 
 public abstract class XRootImpl extends ASTWrapperPsiElement implements XRoot {
 
-  public XRootImpl(ASTNode node) {
+  public XRootImpl(@NotNull ASTNode node) {
     super(node);
   }
 
@@ -1435,7 +1435,7 @@ import generated.psi.*;
 
 public class XRootBImpl extends XRootImpl implements XRootB {
 
-  public XRootBImpl(ASTNode node) {
+  public XRootBImpl(@NotNull ASTNode node) {
     super(node);
   }
 
@@ -1464,7 +1464,7 @@ import generated.psi.*;
 
 public class XRootCImpl extends XRootImpl implements XRootC {
 
-  public XRootCImpl(ASTNode node) {
+  public XRootCImpl(@NotNull ASTNode node) {
     super(node);
   }
 
@@ -1499,7 +1499,7 @@ import generated.psi.*;
 
 public class XRootDImpl extends XRootImpl implements XRootD {
 
-  public XRootDImpl(ASTNode node) {
+  public XRootDImpl(@NotNull ASTNode node) {
     super(node);
   }
 
@@ -1534,7 +1534,7 @@ import generated.psi.*;
 
 public abstract class XSomeExprImpl extends XExprImpl implements XSomeExpr {
 
-  public XSomeExprImpl(ASTNode node) {
+  public XSomeExprImpl(@NotNull ASTNode node) {
     super(node);
   }
 
@@ -1563,7 +1563,7 @@ import generated.psi.*;
 
 public class XSpecialRefImpl extends XRefExprImpl implements XSpecialRef {
 
-  public XSpecialRefImpl(ASTNode node) {
+  public XSpecialRefImpl(@NotNull ASTNode node) {
     super(node);
   }
 
@@ -1599,7 +1599,7 @@ import generated.psi.*;
 
 public abstract class XStatementImpl extends ASTWrapperPsiElement implements XStatement {
 
-  public XStatementImpl(ASTNode node) {
+  public XStatementImpl(@NotNull ASTNode node) {
     super(node);
   }
 
@@ -1628,7 +1628,7 @@ import generated.psi.*;
 
 public class XWrappingStatementImpl extends XStatementImpl implements XWrappingStatement {
 
-  public XWrappingStatementImpl(ASTNode node) {
+  public XWrappingStatementImpl(@NotNull ASTNode node) {
     super(node);
   }
 

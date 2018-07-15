@@ -1631,8 +1631,9 @@ public class ParserGenerator {
     else {
       for (NavigatablePsiElement m : constructors) {
         List<String> types = myJavaHelper.getMethodTypes(m);
-        out("public " + shortName + "(" + getParametersString(types, 1, 3, substitutor, myShortener) + ") {");
-        out("super(" + getParametersString(types, 1, 2, substitutor, myShortener) + ");");
+        Function<Integer, List<String>> annoProvider = i -> myJavaHelper.getParameterAnnotations(m, (i - 1) / 2);
+        out("public " + shortName + "(" + getParametersString(types, 1, 3, substitutor, annoProvider, myShortener) + ") {");
+        out("super(" + getParametersString(types, 1, 2, substitutor, annoProvider, myShortener) + ");");
         out("}");
         newLine();
       }
@@ -1740,15 +1741,20 @@ public class ParserGenerator {
 
   private void collectMethodTypesToImport(List<NavigatablePsiElement> methods, boolean isInPsiUtil, Set<String> result) {
     for (NavigatablePsiElement method : methods) {
-      int count = 0;
       List<String> types = myJavaHelper.getMethodTypes(method);
-      for (String s : types) {
-        if (count++ == 1 && isInPsiUtil) continue;
-        if (s.contains(".")) result.add(s);
-      }
+      String returnType = ContainerUtil.getFirstItem(types);
+      if (returnType != null && returnType.contains(".")) result.add(returnType);
       for (String s : myJavaHelper.getAnnotations(method)) {
         if (s.startsWith("kotlin.")) continue;
         result.add(s);
+      }
+      for (int i = isInPsiUtil ? 3 : 1, count = types.size(); i < count; i += 2) {
+        String s = types.get(i);
+        if (s.contains(".")) result.add(s);
+        for (String anno : myJavaHelper.getParameterAnnotations(method, (i - 1) / 2)) {
+          if (anno.startsWith("kotlin.")) continue;
+          result.add(anno);
+        }
       }
     }
   }
@@ -1974,12 +1980,13 @@ public class ParserGenerator {
       if (s.startsWith("kotlin.")) continue;
       out("@" + myShortener.fun(s));
     }
+    Function<Integer, List<String>> annoProvider = i -> myJavaHelper.getParameterAnnotations(method, (i - 1) / 2);
     out("%s%s %s(%s)%s", intf ? "" : "public ", returnType, methodName,
-        getParametersString(methodTypes, offset, 3, Function.ID, myShortener),
+        getParametersString(methodTypes, offset, 3, Function.ID, annoProvider, myShortener),
         intf ? ";" : " {");
     if (!intf) {
       String implUtilRef = myShortener.fun(StringUtil.notNullize(myPsiImplUtilClass, KnownAttribute.PSI_IMPL_UTIL_CLASS.getName()));
-      String string = getParametersString(methodTypes, offset, 2, Function.ID, myShortener);
+      String string = getParametersString(methodTypes, offset, 2, Function.ID, annoProvider, myShortener);
       out("%s%s.%s(this%s);", "void".equals(returnType) ? "" : "return ", implUtilRef, methodName,
           string.isEmpty() ? "" : ", " + string);
       out("}");

@@ -246,7 +246,7 @@ import generated.psi.*;
 
 public class FooΩInnerImpl extends ASTWrapperPsiElement implements FooΩInner {
 
-  public FooΩInnerImpl(ASTNode node) {
+  public FooΩInnerImpl(@NotNull ASTNode node) {
     super(node);
   }
 
@@ -275,7 +275,7 @@ import generated.psi.*;
 
 public class AExprImpl extends ExprImpl implements AExpr {
 
-  public AExprImpl(ASTNode node) {
+  public AExprImpl(@NotNull ASTNode node) {
     super(node);
   }
 
@@ -310,7 +310,7 @@ import generated.psi.*;
 
 public class BExprImpl extends ExprImpl implements BExpr {
 
-  public BExprImpl(ASTNode node) {
+  public BExprImpl(@NotNull ASTNode node) {
     super(node);
   }
 
@@ -346,7 +346,7 @@ import generated.psi.*;
 
 public class ErlListImpl extends ASTWrapperPsiElement implements ErlList {
 
-  public ErlListImpl(ASTNode node) {
+  public ErlListImpl(@NotNull ASTNode node) {
     super(node);
   }
 
@@ -394,7 +394,7 @@ import generated.psi.*;
 
 public abstract class ExprImpl extends ASTWrapperPsiElement implements Expr {
 
-  public ExprImpl(ASTNode node) {
+  public ExprImpl(@NotNull ASTNode node) {
     super(node);
   }
 
@@ -424,7 +424,7 @@ import generated.psi.*;
 
 public class ImportImpl extends ASTWrapperPsiElement implements Import {
 
-  public ImportImpl(ASTNode node) {
+  public ImportImpl(@NotNull ASTNode node) {
     super(node);
   }
 
@@ -459,7 +459,7 @@ import generated.psi.*;
 
 public class LeftExprImpl extends ExprImpl implements LeftExpr {
 
-  public LeftExprImpl(ASTNode node) {
+  public LeftExprImpl(@NotNull ASTNode node) {
     super(node);
   }
 
@@ -495,7 +495,7 @@ import generated.psi.*;
 
 public class NotOptimizedChoiceImpl extends ASTWrapperPsiElement implements NotOptimizedChoice {
 
-  public NotOptimizedChoiceImpl(ASTNode node) {
+  public NotOptimizedChoiceImpl(@NotNull ASTNode node) {
     super(node);
   }
 
@@ -525,7 +525,7 @@ import generated.psi.*;
 
 public class SomeImpl extends ASTWrapperPsiElement implements Some {
 
-  public SomeImpl(ASTNode node) {
+  public SomeImpl(@NotNull ASTNode node) {
     super(node);
   }
 
@@ -554,7 +554,7 @@ import generated.psi.*;
 
 public abstract class SomeExprImpl extends ExprImpl implements SomeExpr {
 
-  public SomeExprImpl(ASTNode node) {
+  public SomeExprImpl(@NotNull ASTNode node) {
     super(node);
   }
 
@@ -584,7 +584,7 @@ import generated.psi.*;
 
 public class SomeSeqImpl extends ASTWrapperPsiElement implements SomeSeq {
 
-  public SomeSeqImpl(ASTNode node) {
+  public SomeSeqImpl(@NotNull ASTNode node) {
     super(node);
   }
 
@@ -620,7 +620,7 @@ import generated.psi.*;
 
 public class ThingImpl extends ASTWrapperPsiElement implements Thing {
 
-  public ThingImpl(ASTNode node) {
+  public ThingImpl(@NotNull ASTNode node) {
     super(node);
   }
 
@@ -656,7 +656,7 @@ import generated.psi.*;
 
 public class ThingItemImpl extends ASTWrapperPsiElement implements ThingItem {
 
-  public ThingItemImpl(ASTNode node) {
+  public ThingItemImpl(@NotNull ASTNode node) {
     super(node);
   }
 
@@ -686,7 +686,7 @@ import generated.psi.*;
 
 public class WithRecursiveImpl extends ASTWrapperPsiElement implements WithRecursive {
 
-  public WithRecursiveImpl(ASTNode node) {
+  public WithRecursiveImpl(@NotNull ASTNode node) {
     super(node);
   }
 
@@ -722,7 +722,7 @@ import generated.psi.*;
 
 public class ZomeImpl extends ASTWrapperPsiElement implements Zome {
 
-  public ZomeImpl(ASTNode node) {
+  public ZomeImpl(@NotNull ASTNode node) {
     super(node);
   }
 

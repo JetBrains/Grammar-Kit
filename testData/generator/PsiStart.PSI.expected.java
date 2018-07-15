@@ -98,7 +98,7 @@ import generated.psi.*;
 
 public class ElementImpl extends ASTWrapperPsiElement implements Element {
 
-  public ElementImpl(ASTNode node) {
+  public ElementImpl(@NotNull ASTNode node) {
     super(node);
   }
 
@@ -127,7 +127,7 @@ import generated.psi.*;
 
 public class EntryImpl extends ASTWrapperPsiElement implements Entry {
 
-  public EntryImpl(ASTNode node) {
+  public EntryImpl(@NotNull ASTNode node) {
     super(node);
   }
 
@@ -162,7 +162,7 @@ import generated.psi.*;
 
 public class ListImpl extends ASTWrapperPsiElement implements List {
 
-  public ListImpl(ASTNode node) {
+  public ListImpl(@NotNull ASTNode node) {
     super(node);
   }
 
@@ -197,7 +197,7 @@ import generated.psi.*;
 
 public class MapImpl extends ASTWrapperPsiElement implements Map {
 
-  public MapImpl(ASTNode node) {
+  public MapImpl(@NotNull ASTNode node) {
     super(node);
   }
 

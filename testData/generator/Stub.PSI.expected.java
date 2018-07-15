@@ -203,11 +203,11 @@ import com.intellij.psi.tree.IElementType;
 
 public class Element1Impl extends GenericBase<Element1Stub> implements Element1 {
 
-  public Element1Impl(Element1Stub stub, IStubElementType type) {
+  public Element1Impl(@NotNull Element1Stub stub, @NotNull IStubElementType type) {
     super(stub, type);
   }
 
-  public Element1Impl(ASTNode node) {
+  public Element1Impl(@NotNull ASTNode node) {
     super(node);
   }
 
@@ -250,11 +250,11 @@ import com.intellij.psi.tree.IElementType;
 
 public class Element2Impl extends StubBasedPsiElementBase<Element2Stub> implements Element2 {
 
-  public Element2Impl(Element2Stub stub, IStubElementType type) {
+  public Element2Impl(@NotNull Element2Stub stub, @NotNull IStubElementType type) {
     super(stub, type);
   }
 
-  public Element2Impl(ASTNode node) {
+  public Element2Impl(@NotNull ASTNode node) {
     super(node);
   }
 
@@ -297,11 +297,11 @@ import com.intellij.psi.tree.IElementType;
 
 public class Element3Impl extends StubBasedPsiElementBase<Element3Stub> implements Element3 {
 
-  public Element3Impl(Element3Stub stub, IStubElementType type) {
+  public Element3Impl(@NotNull Element3Stub stub, @NotNull IStubElementType type) {
     super(stub, type);
   }
 
-  public Element3Impl(ASTNode node) {
+  public Element3Impl(@NotNull ASTNode node) {
     super(node);
   }
 
@@ -344,11 +344,11 @@ import com.intellij.psi.tree.IElementType;
 
 public class Element4Impl extends StubBasedPsiElementBase<Element4Stub> implements Element4 {
 
-  public Element4Impl(Element4Stub stub, IStubElementType type) {
+  public Element4Impl(@NotNull Element4Stub stub, @NotNull IStubElementType type) {
     super(stub, type);
   }
 
-  public Element4Impl(ASTNode node) {
+  public Element4Impl(@NotNull ASTNode node) {
     super(node);
   }
 
@@ -388,7 +388,7 @@ import test.psi.*;
 
 public class Element5Impl extends ASTWrapperPsiElement implements Element5 {
 
-  public Element5Impl(ASTNode node) {
+  public Element5Impl(@NotNull ASTNode node) {
     super(node);
   }
 
@@ -420,11 +420,11 @@ import test.stub.TypeStub;
 
 public class InterfaceTypeImpl extends TypeImpl implements InterfaceType {
 
-  public InterfaceTypeImpl(TypeStub stub, IStubElementType type) {
+  public InterfaceTypeImpl(@NotNull TypeStub stub, @NotNull IStubElementType type) {
     super(stub, type);
   }
 
-  public InterfaceTypeImpl(ASTNode node) {
+  public InterfaceTypeImpl(@NotNull ASTNode node) {
     super(node);
   }
 
@@ -496,11 +496,11 @@ import com.intellij.psi.stubs.IStubElementType;
 
 public class SimpleImpl extends SimpleBase implements Simple {
 
-  public SimpleImpl(SimpleStub stub, IStubElementType type) {
+  public SimpleImpl(@NotNull SimpleStub stub, @NotNull IStubElementType type) {
     super(stub, type);
   }
 
-  public SimpleImpl(ASTNode node) {
+  public SimpleImpl(@NotNull ASTNode node) {
     super(node);
   }
 
@@ -532,11 +532,11 @@ import test.stub.TypeStub;
 
 public class StructTypeImpl extends TypeImpl implements StructType {
 
-  public StructTypeImpl(TypeStub stub, IStubElementType type) {
+  public StructTypeImpl(@NotNull TypeStub stub, @NotNull IStubElementType type) {
     super(stub, type);
   }
 
-  public StructTypeImpl(ASTNode node) {
+  public StructTypeImpl(@NotNull ASTNode node) {
     super(node);
   }
 
@@ -573,11 +573,11 @@ import com.intellij.psi.tree.IElementType;
 
 public abstract class TypeImpl extends GenericBase<TypeStub> implements Type {
 
-  public TypeImpl(TypeStub stub, IStubElementType type) {
+  public TypeImpl(@NotNull TypeStub stub, @NotNull IStubElementType type) {
     super(stub, type);
   }
 
-  public TypeImpl(ASTNode node) {
+  public TypeImpl(@NotNull ASTNode node) {
     super(node);
   }
 

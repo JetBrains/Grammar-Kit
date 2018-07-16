@@ -1,6 +1,6 @@
 <idea-plugin url="https://github.com/JetBrains/Grammar-Kit">
   <id>org.jetbrains.idea.grammar</id>
-  <version>2017.1.5-SNAPSHOT</version>
+  <version>2017.1.6-SNAPSHOT</version>
   <vendor email="gregory.shrago@jetbrains.com">Greg Shrago</vendor>
   <idea-version since-build="171"/>
 
@@ -17,6 +17,7 @@
       <li>Editor: _Move Element Left/Right_ action in BNF</li>
       <li>Editor: convert `expr?` to `[expr]` and back intention (#183)</li>
       <li>Generator: FIRST check with the exact `consumeTokenType` (#185)</li>
+      <li>Generator/PSI: parameter annotations</li>
       <li>GPUB: configurable token-advancer</li>
     </ul>
     <a href="https://github.com/JetBrains/Grammar-Kit#change-log">Full change log...</a>

@@ -1,8 +1,9 @@
-2017.1.5-snapshot
+2017.1.5
 
 * Editor: _Move Element Left/Right_ action in BNF
 * Editor: convert `expr?` to `[expr]` and back intention (#183)
 * Generator: FIRST check with the exact `consumeTokenType` (#185)
+* Generator/PSI: parameter annotations
 * GPUB: configurable token-advancer
 
 

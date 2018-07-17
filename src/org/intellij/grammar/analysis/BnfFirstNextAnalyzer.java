@@ -265,12 +265,13 @@ public class BnfFirstNextAnalyzer {
       }
     }
     else if (expression instanceof BnfExternalExpression) {
-      List<BnfExpression> expressionList = ((BnfExternalExpression)expression).getExpressionList();
-      if (expressionList.size() == 1 && ParserGeneratorUtil.Rule.isMeta(ParserGeneratorUtil.Rule.of(expression))) {
+      BnfExternalExpression externalExpression = (BnfExternalExpression)expression;
+      List<BnfExpression> arguments = externalExpression.getArguments();
+      if (arguments.isEmpty() && ParserGeneratorUtil.Rule.isMeta(ParserGeneratorUtil.Rule.of(expression))) {
         result.add(expression);
       }
       else {
-        BnfExpression ruleRef = expressionList.get(0);
+        BnfExpression ruleRef = externalExpression.getRefElement();
         Set<BnfExpression> metaResults = calcFirstInner(ruleRef, new LinkedHashSet<>(), visited, forcedNext);
         List<String> params = null;
         for (BnfExpression e : metaResults) {
@@ -284,8 +285,8 @@ public class BnfFirstNextAnalyzer {
               params = GrammarUtil.collectExtraArguments(metaRule, metaRule.getExpression());
             }
             int idx = params.indexOf(e.getText());
-            if (idx > -1 && idx + 1 < expressionList.size()) {
-              calcFirstInner(expressionList.get(idx + 1), result, visited, null);
+            if (idx > -1 && idx < arguments.size()) {
+              calcFirstInner(arguments.get(idx), result, visited, null);
             }
           }
           else {

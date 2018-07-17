@@ -415,12 +415,13 @@ public class RuleGraphHelper {
       }
     }
     else if (tree instanceof BnfExternalExpression) {
-      List<BnfExpression> expressionList = ((BnfExternalExpression)tree).getExpressionList();
-      if (expressionList.size() == 1 && Rule.isMeta(rule)) {
+      BnfExternalExpression expression = (BnfExternalExpression)tree;
+      List<BnfExpression> arguments = expression.getArguments();
+      if (arguments.isEmpty() && Rule.isMeta(rule)) {
         result = psiMap(newExternalPsi(tree.getText()), REQUIRED);
       }
       else {
-        BnfExpression ruleRef = expressionList.get(0);
+        BnfExpression ruleRef = expression.getRefElement();
         BnfRule metaRule = ((BnfReferenceOrToken)ruleRef).resolveRule();
         if (metaRule == null) {
           result = psiMap(newExternalPsi("#" + ruleRef.getText()), REQUIRED);
@@ -439,8 +440,8 @@ public class RuleGraphHelper {
                 params = collectExtraArguments(metaRule, metaRule.getExpression());
               }
               int idx = params.indexOf(member.getText());
-              if (idx > -1 && idx + 1 < expressionList.size()) {
-                Map<PsiElement, Cardinality> argMap = collectMembers(rule, expressionList.get(idx + 1), visited);
+              if (idx > -1 && idx < arguments.size()) {
+                Map<PsiElement, Cardinality> argMap = collectMembers(rule, arguments.get(idx), visited);
                 for (PsiElement element : argMap.keySet()) {
                   result.put(element, cardinality.and(argMap.get(element)));
                 }

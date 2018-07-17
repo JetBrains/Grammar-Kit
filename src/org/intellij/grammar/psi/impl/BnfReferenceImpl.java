@@ -65,7 +65,7 @@ public class BnfReferenceImpl<T extends BnfComposite> extends PsiReferenceBase<T
     String referenceName = getRangeInElement().substring(myElement.getText());
     PsiElement parent = myElement.getParent();
     int paramCount = parent instanceof BnfSequence ? ((BnfSequence)parent).getExpressionList().size() - 1 :
-                     parent instanceof BnfExternalExpression ? ((BnfExternalExpression)parent).getExpressionList().size() - 1 : 0;
+                     parent instanceof BnfExternalExpression ? ((BnfExternalExpression)parent).getArguments().size() : 0;
     BnfRule rule = ObjectUtils.notNull(PsiTreeUtil.getParentOfType(myElement, BnfRule.class));
     String parserClass = ParserGeneratorUtil.getAttribute(rule, KnownAttribute.PARSER_UTIL_CLASS);
     // paramCount + 2 (builder and level)

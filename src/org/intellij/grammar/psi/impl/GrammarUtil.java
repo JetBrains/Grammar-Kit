@@ -91,7 +91,7 @@ public class GrammarUtil {
 
   public static boolean isExternalReference(@Nullable PsiElement psiElement) {
     PsiElement parent = psiElement == null? null : psiElement.getParent();
-    if (parent instanceof BnfExternalExpression && ((BnfExternalExpression)parent).getExpressionList().get(0) == psiElement) return true;
+    if (parent instanceof BnfExternalExpression && ((BnfExternalExpression)parent).getRefElement() == psiElement) return true;
     if (parent instanceof BnfSequence && parent.getFirstChild() == psiElement) parent = parent.getParent();
     return parent instanceof BnfRule && ParserGeneratorUtil.Rule.isExternal((BnfRule)parent);
   }
@@ -105,9 +105,8 @@ public class GrammarUtil {
     if (!ParserGeneratorUtil.Rule.isMeta(rule) && !ParserGeneratorUtil.Rule.isExternal(rule)) return Collections.emptyList();
     List<String> result = ContainerUtil.newSmartList();
     for (BnfExternalExpression o : bnfTraverserNoAttrs(expression).filter(BnfExternalExpression.class)) {
-      List<BnfExpression> list = o.getExpressionList();
-      if (list.size() == 1) {
-        String text = "<<"+list.get(0).getText() +">>";
+      if (o.getArguments().isEmpty()) {
+        String text = "<<" + o.getRefElement().getText() + ">>";
         if (!result.contains(text)) {
           result.add(text);
         }

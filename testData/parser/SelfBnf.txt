@@ -1220,6 +1220,12 @@ BnfFile:SelfBnf.bnf
         BNF_VALUE_LIST
           PsiElement([)('[')
           BNF_LIST_ENTRY
+            PsiElement(id)('refElement')
+            PsiElement(=)('=')
+            BNF_STRING_LITERAL_EXPRESSION: '/expression[0]'
+              PsiElement(string)(''/expression[0]'')
+          PsiWhiteSpace(' ')
+          BNF_LIST_ENTRY
             PsiElement(id)('getArguments')
           PsiElement(])(']')
       PsiWhiteSpace('\n')

@@ -49,6 +49,7 @@ import java.io.PrintWriter;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static com.intellij.util.containers.ContainerUtil.map;
 import static java.lang.String.format;
 import static java.util.stream.Collectors.*;
 import static org.intellij.grammar.analysis.BnfFirstNextAnalyzer.BNF_MATCHES_ANY;
@@ -772,8 +773,8 @@ public class ParserGenerator {
     List<BnfExpression> children = isSingleNode ? Collections.singletonList(node) : getChildExpressions(node);
     String frameName = !children.isEmpty() && firstNonTrivial && !Rule.isMeta(rule) ? quote(getRuleDisplayName(rule, !isPrivate)) : null;
 
-    String extraArguments = collectExtraArguments(rule, node, true);
-    out("%sstatic boolean %s(PsiBuilder %s, int %s%s) {", !isRule ? "private " : isPrivate ? "" : "public ", funcName, N.builder, N.level, extraArguments);
+    String extraParameters = collectExtraParameters(rule, node);
+    out("%sstatic boolean %s(PsiBuilder %s, int %s%s) {", !isRule ? "private " : isPrivate ? "" : "public ", funcName, N.builder, N.level, extraParameters);
     if (isSingleNode) {
       if (isPrivate && !isLeftInner && recoverWhile == null && frameName == null) {
         String nodeCall = generateNodeCall(rule, node, getNextName(funcName, 0)).render(N);
@@ -933,7 +934,7 @@ public class ParserGenerator {
             recoverCall = formatArgName(recoverWhile.substring(2, recoverWhile.length() - 2));
           }
           else {
-            recoverCall = predicateRule == null ? null : generateWrappedNodeCall(rule, null, predicateRule.getName());
+            recoverCall = predicateRule == null ? null : generateWrappedNodeCall(rule, null, predicateRule.getName()).render();
           }
         }
         else {
@@ -1070,16 +1071,18 @@ public class ParserGenerator {
     }
   }
 
-  private String collectExtraArguments(BnfRule rule, @Nullable BnfExpression expression, boolean declaration) {
-    if (expression == null) return "";
-    List<String> params = GrammarUtil.collectExtraArguments(rule, expression);
-    if (params.isEmpty()) return "";
-    final StringBuilder sb = new StringBuilder();
-    for (String param : params) {
-      sb.append(", ").append(declaration ? "Parser " : "").
-        append(formatArgName(param.substring(2, param.length() - 2)));
-    }
-    return sb.toString();
+  @NotNull
+  private List<String> collectExtraArguments(@NotNull BnfRule rule, @Nullable BnfExpression expression) {
+    if (expression == null) return Collections.emptyList();
+    return GrammarUtil.collectExtraArguments(rule, expression)
+      .stream()
+      .map(it -> formatArgName(it.substring(2, it.length() - 2)))
+      .collect(toList());
+  }
+
+  @NotNull
+  private String collectExtraParameters(@NotNull BnfRule rule, @Nullable BnfExpression expression) {
+    return collectExtraArguments(rule, expression).stream().map(it -> ", Parser " + it).collect(Collectors.joining());
   }
 
   private String formatArgName(String s) {
@@ -1218,12 +1221,12 @@ public class ParserGenerator {
       }
     }
     else {
-      String extraArguments = collectExtraArguments(rule, node, false);
+      List<String> extraArguments = collectExtraArguments(rule, node);
       if (extraArguments.isEmpty()) {
         return new MethodCall(nextName);
       }
       else {
-        return new MethodCallWithArguments(nextName, extraArguments);
+        return new MetaMethodCall(nextName, map(extraArguments, MetaParameterArgument::new));
       }
     }
   }
@@ -1272,10 +1275,9 @@ public class ParserGenerator {
       }
     }
     method = String.valueOf(method);
-    StringBuilder clause = new StringBuilder();
+    List<NodeArgument> arguments = new ArrayList<>();
     if (callParameters.size() > 1) {
       for (int i = 1, len = callParameters.size(); i < len; i++) {
-        clause.append(", ");
         BnfExpression nested = callParameters.get(i);
         String argument = nested.getText();
         String argNextName;
@@ -1290,51 +1292,60 @@ public class ParserGenerator {
         }
         if (nested instanceof BnfReferenceOrToken) {
           if (myFile.getRule(argument) != null) {
-            clause.append(generateWrappedNodeCall(rule, nested, argument));
+            arguments.add(generateWrappedNodeCall(rule, nested, argument));
           }
           else {
             String tokenType = getElementType(argument);
-            clause.append(generateWrappedNodeCall(rule, nested, tokenType));
+            arguments.add(generateWrappedNodeCall(rule, nested, tokenType));
           }
         }
         else if (nested instanceof BnfLiteralExpression) {
           String attributeName = getTokenName(GrammarUtil.unquote(argument));
           if (attributeName != null) {
-            clause.append(generateWrappedNodeCall(rule, nested, attributeName));
-          }
-          else if (argument.startsWith("\'")) {
-            clause.append(GrammarUtil.unquote(argument));
+            arguments.add(generateWrappedNodeCall(rule, nested, attributeName));
           }
           else {
-            clause.append(argument);
+            arguments.add(new TextArgument(argument.startsWith("\'") ? GrammarUtil.unquote(argument) : argument));
           }
         }
         else if (nested instanceof BnfExternalExpression) {
           List<BnfExpression> expressionList = ((BnfExternalExpression)nested).getExpressionList();
-          boolean metaRule = Rule.isMeta(rule);
-          if (metaRule && expressionList.size() == 1) {
-            clause.append(formatArgName(expressionList.get(0).getText()));
+          if (expressionList.size() == 1 && Rule.isMeta(rule)) {
+            arguments.add(new MetaParameterArgument(formatArgName(expressionList.get(0).getText())));
           }
           else {
-            clause.append(generateWrappedNodeCall(rule, nested, argNextName));
+            arguments.add(generateWrappedNodeCall(rule, nested, argNextName));
           }
         }
         else {
-          clause.append(generateWrappedNodeCall(rule, nested, argNextName));
+          arguments.add(generateWrappedNodeCall(rule, nested, argNextName));
         }
       }
     }
-    return new MethodCallWithArguments(method, clause.toString());
+    return Rule.isMeta(targetRule) ? new MetaMethodCall(method, arguments)
+                                   : new MethodCallWithArguments(method, arguments);
   }
 
   @NotNull
-  private String generateWrappedNodeCall(@NotNull BnfRule rule, @Nullable BnfExpression nested, @NotNull String nextName) {
+  private NodeArgument generateWrappedNodeCall(@NotNull BnfRule rule, @Nullable BnfExpression nested, @NotNull String nextName) {
     NodeCall nodeCall = generateNodeCall(rule, nested, nextName);
-    if (!collectExtraArguments(rule, nested, false).isEmpty()) {
-      return wrapCallWithParserInstance(nodeCall.render(N));
+    if (nodeCall instanceof MetaMethodCall && ((MetaMethodCall)nodeCall).referencesMetaParameter()) {
+      return new NodeArgument() {
+
+        @Override
+        public boolean referencesMetaParameter() {
+          return true;
+        }
+
+        @NotNull
+        @Override
+        public String render() {
+          return wrapCallWithParserInstance(nodeCall.render(N));
+        }
+      };
     }
     else {
-      return getParserLambdaRef(nodeCall, nextName);
+      return () -> getParserLambdaRef(nodeCall, nextName);
     }
   }
 

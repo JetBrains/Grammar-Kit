@@ -17,19 +17,32 @@ package org.intellij.grammar.generator;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
+
 class MethodCallWithArguments implements NodeCall {
 
   private final @NotNull String myMethodName;
-  private final @NotNull String myArguments;
+  private final @NotNull List<NodeArgument> myArguments;
 
-  MethodCallWithArguments(@NotNull String methodName, @NotNull String arguments) {
+  MethodCallWithArguments(@NotNull String methodName, @NotNull List<NodeArgument> arguments) {
     myMethodName = methodName;
-    myArguments = arguments;
+    myArguments = Collections.unmodifiableList(arguments);
+  }
+
+  @NotNull
+  List<NodeArgument> getArguments() {
+    return myArguments;
   }
 
   @NotNull
   @Override
   public String render(@NotNull Names names) {
-    return String.format("%s(%s, %s + 1%s)", myMethodName, names.builder, names.level, myArguments);
+    String arguments = getArguments().stream()
+      .map(NodeArgument::render)
+      .map(it -> ", " + it)
+      .collect(Collectors.joining());
+    return String.format("%s(%s, %s + 1%s)", myMethodName, names.builder, names.level, arguments);
   }
 }

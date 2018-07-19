@@ -124,7 +124,7 @@ public class GenerateAction extends AnAction {
         long startTime = System.currentTimeMillis();
         indicator.setIndeterminate(true);
         try {
-          runInner();
+          runInner(indicator);
         }
         finally {
           String report = String.format("%d grammars: %d files generated (%s) in %s",
@@ -141,8 +141,11 @@ public class GenerateAction extends AnAction {
         }
       }
 
-      private void runInner() {
-        for (VirtualFile file : bnfFiles) {
+      private void runInner(ProgressIndicator indicator) {
+        for (int i = 0, l = bnfFiles.size(); i < l; i++) {
+          VirtualFile file = bnfFiles.get(i);
+          indicator.setFraction((double)i / l);
+          indicator.setText2(file.getPath());
           String sourcePath = FileUtil.toSystemDependentName(PathUtil.getCanonicalPath(file.getParent().getPath()));
           VirtualFile target = rootMap.get(file);
           if (target == null) return;

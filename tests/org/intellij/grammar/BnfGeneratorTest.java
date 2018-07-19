@@ -26,6 +26,7 @@ public class BnfGeneratorTest extends BnfGeneratorTestCase {
   public void testSmall() throws Exception { doGenTest(false); }
   public void testAutopin() throws Exception { doGenTest(false); }
   public void testExternalRules() throws Exception { doGenTest(false); }
+  public void testExternalRulesLambdas() throws Exception { doGenTest(false); }
   public void testLeftAssociative() throws Exception { doGenTest(false); }
   public void testPsiGen() throws Exception { doGenTest(true); }
   public void testPsiAccessors() throws Exception { doGenTest(true); }

@@ -2,6 +2,7 @@
   parserClass="ExternalRulesLambdas"
   generate=[
     psi='no'
+    java='8'
   ]
   tokens=[
     perc='%'

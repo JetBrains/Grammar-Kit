@@ -19,14 +19,33 @@ import org.jetbrains.annotations.NotNull;
 
 class MethodCall implements NodeCall {
 
+  private final boolean myRenderClass;
+  private final @NotNull String myClassName;
   private final @NotNull String myMethodName;
 
-  MethodCall(@NotNull String methodName) {
+  MethodCall(boolean renderClass, @NotNull String className, @NotNull String methodName) {
+    myRenderClass = renderClass;
+    myClassName = className;
     myMethodName = methodName;
   }
 
   @NotNull
+  String getMethodName() {
+    return myMethodName;
+  }
+
+  @NotNull
+  String getClassName() {
+    return myClassName;
+  }
+
+  @NotNull
   public String render(@NotNull Names names) {
-    return String.format("%s(%s, %s + 1)", myMethodName, names.builder, names.level);
+    if (myRenderClass) {
+      return String.format("%s.%s(%s, %s + 1)", myClassName, myMethodName, names.builder, names.level);
+    }
+    else {
+      return String.format("%s(%s, %s + 1)", myMethodName, names.builder, names.level);
+    }
   }
 }

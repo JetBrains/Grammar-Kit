@@ -148,6 +148,18 @@ public class ExternalRules implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
+  // empty_external
+  static boolean empty_external_usage(PsiBuilder builder_, int level_) {
+    return null(builder_, level_ + 1);
+  }
+
+  /* ********************************************************** */
+  // <<>>
+  static boolean empty_external_usage2(PsiBuilder builder_, int level_) {
+    return true;
+  }
+
+  /* ********************************************************** */
   // !(',' | ';' | ')')
   static boolean item_recover(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "item_recover")) return false;
@@ -204,6 +216,12 @@ public class ExternalRules implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
+  // <<p>>
+  static boolean main_class_meta(PsiBuilder builder_, int level_, Parser p) {
+    return p.parse(builder_, level_);
+  }
+
+  /* ********************************************************** */
   // <<listOf "1+2" '1+2' <<param>>>>
   static boolean meta_mixed(PsiBuilder builder_, int level_, Parser param) {
     return listOf(builder_, level_ + 1, "1+2", 1+2, param);
@@ -257,6 +275,12 @@ public class ExternalRules implements PsiParser, LightPsiParser {
     });
     exit_section_(builder_, marker_, META_MULTI_LEVEL, result_);
     return result_;
+  }
+
+  /* ********************************************************** */
+  // <<comma_list <<comma_list <<comma_list some>>>>>>
+  static boolean meta_multi_level_no_closure(PsiBuilder builder_, int level_) {
+    return comma_list(builder_, level_ + 1, meta_multi_level_no_closure_0_0_parser_);
   }
 
   /* ********************************************************** */
@@ -377,9 +401,60 @@ public class ExternalRules implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
+  // <<comma_list (<<param>> | some)>>
+  public static boolean meta_with_in_place(PsiBuilder builder_, int level_, Parser param) {
+    if (!recursion_guard_(builder_, level_, "meta_with_in_place")) return false;
+    boolean result_;
+    Marker marker_ = enter_section_(builder_);
+    result_ = comma_list(builder_, level_ + 1, new Parser() {
+      public boolean parse(PsiBuilder builder_, int level_) {
+        return meta_with_in_place_0_0(builder_, level_ + 1, param);
+      }
+    });
+    exit_section_(builder_, marker_, META_WITH_IN_PLACE, result_);
+    return result_;
+  }
+
+  // <<param>> | some
+  private static boolean meta_with_in_place_0_0(PsiBuilder builder_, int level_, Parser param) {
+    if (!recursion_guard_(builder_, level_, "meta_with_in_place_0_0")) return false;
+    boolean result_;
+    Marker marker_ = enter_section_(builder_);
+    result_ = param.parse(builder_, level_);
+    if (!result_) result_ = consumeToken(builder_, SOME);
+    exit_section_(builder_, marker_, null, result_);
+    return result_;
+  }
+
+  /* ********************************************************** */
   // <<meta_multi_level one>>
   static boolean multi_level(PsiBuilder builder_, int level_) {
     return meta_multi_level(builder_, level_ + 1, one_parser_);
+  }
+
+  /* ********************************************************** */
+  // <<two_params_meta <<nested1>> <<two_params_meta <<nested2>> <<nested3>>>>>>
+  static boolean nested_meta(PsiBuilder builder_, int level_, Parser nested1, Parser nested2, Parser nested3) {
+    return two_params_meta(builder_, level_ + 1, nested1, new Parser() {
+      public boolean parse(PsiBuilder builder_, int level_) {
+        return two_params_meta(builder_, level_ + 1, nested2, nested3);
+      }
+    });
+  }
+
+  /* ********************************************************** */
+  // <<two_params_meta (<<two_params_meta '%' <<c>>>>) perc_re>>
+  static boolean nested_mixed(PsiBuilder builder_, int level_, Parser c) {
+    return two_params_meta(builder_, level_ + 1, new Parser() {
+      public boolean parse(PsiBuilder builder_, int level_) {
+        return nested_mixed_0_0(builder_, level_ + 1, c);
+      }
+    }, PERC_RE_parser_);
+  }
+
+  // <<two_params_meta '%' <<c>>>>
+  private static boolean nested_mixed_0_0(PsiBuilder builder_, int level_, Parser c) {
+    return two_params_meta(builder_, level_ + 1, perc_parser_, c);
   }
 
   /* ********************************************************** */
@@ -627,6 +702,12 @@ public class ExternalRules implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
+  // <<comma_list <<second_class_meta some>>>>
+  static boolean second_class_meta_usage_from_main(PsiBuilder builder_, int level_) {
+    return comma_list(builder_, level_ + 1, second_class_meta_usage_from_main_0_0_parser_);
+  }
+
+  /* ********************************************************** */
   // one | two
   public static boolean statement(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "statement")) return false;
@@ -646,6 +727,18 @@ public class ExternalRules implements PsiParser, LightPsiParser {
     Marker marker_ = enter_section_(builder_, level_, _NONE_, TWO, "<two>");
     result_ = consumeToken(builder_, "two");
     exit_section_(builder_, level_, marker_, result_, false, null);
+    return result_;
+  }
+
+  /* ********************************************************** */
+  // <<a>> <<b>>
+  public static boolean two_params_meta(PsiBuilder builder_, int level_, Parser a, Parser b) {
+    if (!recursion_guard_(builder_, level_, "two_params_meta")) return false;
+    boolean result_;
+    Marker marker_ = enter_section_(builder_);
+    result_ = a.parse(builder_, level_);
+    result_ = result_ && b.parse(builder_, level_);
+    exit_section_(builder_, marker_, TWO_PARAMS_META, result_);
     return result_;
   }
 
@@ -672,6 +765,16 @@ public class ExternalRules implements PsiParser, LightPsiParser {
   final static Parser meta_mixed_list_paren_0_0_parser_ = new Parser() {
     public boolean parse(PsiBuilder builder_, int level_) {
       return meta_mixed_list_paren_0_0(builder_, level_ + 1);
+    }
+  };
+  final static Parser meta_multi_level_no_closure_0_0_0_parser_ = new Parser() {
+    public boolean parse(PsiBuilder builder_, int level_) {
+      return comma_list(builder_, level_ + 1, SOME_parser_);
+    }
+  };
+  final static Parser meta_multi_level_no_closure_0_0_parser_ = new Parser() {
+    public boolean parse(PsiBuilder builder_, int level_) {
+      return comma_list(builder_, level_ + 1, meta_multi_level_no_closure_0_0_0_parser_);
     }
   };
   final static Parser meta_seq_0_1_parser_ = new Parser() {
@@ -730,6 +833,11 @@ public class ExternalRules implements PsiParser, LightPsiParser {
     }
   };
   final static Parser perc_re_list2_0_0_parser_ = PERC_RE_parser_;
+  final static Parser second_class_meta_usage_from_main_0_0_parser_ = new Parser() {
+    public boolean parse(PsiBuilder builder_, int level_) {
+      return ExternalRules2.second_class_meta(builder_, level_ + 1, SOME_parser_);
+    }
+  };
   final static Parser statement_parser_ = new Parser() {
     public boolean parse(PsiBuilder builder_, int level_) {
       return statement(builder_, level_ + 1);
@@ -738,6 +846,106 @@ public class ExternalRules implements PsiParser, LightPsiParser {
   final static Parser two_parser_ = new Parser() {
     public boolean parse(PsiBuilder builder_, int level_) {
       return two(builder_, level_ + 1);
+    }
+  };
+}
+// ---- ExternalRules2.java -----------------
+// This is a generated file. Not intended for manual editing.
+package ;
+
+import com.intellij.lang.PsiBuilder;
+import com.intellij.lang.PsiBuilder.Marker;
+import static generated.GeneratedTypes.*;
+import static org.intellij.grammar.parser.GeneratedParserUtilBase.*;
+import static ExternalRules.*;
+
+@SuppressWarnings({"SimplifiableIfStatement", "UnusedAssignment"})
+public class ExternalRules2 {
+
+  /* ********************************************************** */
+  // <<comma_list <<main_class_meta some>>>>
+  static boolean main_class_meta_usage_from_second(PsiBuilder builder_, int level_) {
+    return comma_list(builder_, level_ + 1, main_class_meta_usage_from_second_0_0_parser_);
+  }
+
+  /* ********************************************************** */
+  // <<listOf one>>
+  static boolean one_list(PsiBuilder builder_, int level_) {
+    return listOf(builder_, level_ + 1, ExternalRules.one_parser_);
+  }
+
+  /* ********************************************************** */
+  // <<listOf (one)>>
+  static boolean one_list_par(PsiBuilder builder_, int level_) {
+    return listOf(builder_, level_ + 1, one_list_par_0_0_parser_);
+  }
+
+  // (one)
+  private static boolean one_list_par_0_0(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "one_list_par_0_0")) return false;
+    boolean result_;
+    Marker marker_ = enter_section_(builder_);
+    result_ = one(builder_, level_ + 1);
+    exit_section_(builder_, marker_, null, result_);
+    return result_;
+  }
+
+  /* ********************************************************** */
+  // <<bmp>>
+  static boolean second_class_meta(PsiBuilder builder_, int level_, Parser bmp) {
+    return bmp.parse(builder_, level_);
+  }
+
+  /* ********************************************************** */
+  // <<comma_list <<third_class_meta some>>>>
+  static boolean third_class_meta_usage_from_second(PsiBuilder builder_, int level_) {
+    return comma_list(builder_, level_ + 1, third_class_meta_usage_from_second_0_0_parser_);
+  }
+
+  final static Parser main_class_meta_usage_from_second_0_0_parser_ = new Parser() {
+    public boolean parse(PsiBuilder builder_, int level_) {
+      return main_class_meta(builder_, level_ + 1, ExternalRules.SOME_parser_);
+    }
+  };
+  final static Parser one_list_par_0_0_parser_ = new Parser() {
+    public boolean parse(PsiBuilder builder_, int level_) {
+      return one_list_par_0_0(builder_, level_ + 1);
+    }
+  };
+  final static Parser third_class_meta_usage_from_second_0_0_parser_ = new Parser() {
+    public boolean parse(PsiBuilder builder_, int level_) {
+      return ExternalRules3.third_class_meta(builder_, level_ + 1, ExternalRules.SOME_parser_);
+    }
+  };
+}
+// ---- ExternalRules3.java -----------------
+// This is a generated file. Not intended for manual editing.
+package ;
+
+import com.intellij.lang.PsiBuilder;
+import com.intellij.lang.PsiBuilder.Marker;
+import static generated.GeneratedTypes.*;
+import static org.intellij.grammar.parser.GeneratedParserUtilBase.*;
+import static ExternalRules.*;
+
+@SuppressWarnings({"SimplifiableIfStatement", "UnusedAssignment"})
+public class ExternalRules3 {
+
+  /* ********************************************************** */
+  // <<comma_list <<second_class_meta some>>>>
+  static boolean second_class_meta_usage_from_third(PsiBuilder builder_, int level_) {
+    return comma_list(builder_, level_ + 1, second_class_meta_usage_from_third_0_0_parser_);
+  }
+
+  /* ********************************************************** */
+  // <<fmp>>
+  static boolean third_class_meta(PsiBuilder builder_, int level_, Parser fmp) {
+    return fmp.parse(builder_, level_);
+  }
+
+  final static Parser second_class_meta_usage_from_third_0_0_parser_ = new Parser() {
+    public boolean parse(PsiBuilder builder_, int level_) {
+      return ExternalRules2.second_class_meta(builder_, level_ + 1, ExternalRules.SOME_parser_);
     }
   };
 }

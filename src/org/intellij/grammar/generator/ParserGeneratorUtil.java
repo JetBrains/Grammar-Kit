@@ -881,4 +881,10 @@ public class ParserGeneratorUtil {
     return (TObjectHashingStrategy<T>)TEXT_STRATEGY;
   }
 
+  @NotNull
+  static <K extends Comparable<? super K>, V> Map<K, V> take(@NotNull Map<K, V> map) {
+    Map<K, V> result = ContainerUtil.newTreeMap(map);
+    map.clear();
+    return result;
+  }
 }

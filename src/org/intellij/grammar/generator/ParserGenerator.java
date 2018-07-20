@@ -115,7 +115,8 @@ public class ParserGenerator {
 
   private final Map<String, RuleInfo> myRuleInfos = ContainerUtil.newTreeMap();
 
-  private final Map<String, String> myParserLambdas = ContainerUtil.newTreeMap();
+  private final Map<String, String> myParserLambdas = ContainerUtil.newHashMap();       // field name -> body
+  private final Map<String, String> myRenderedLambdas = ContainerUtil.newHashMap();     // field name -> parser class FQN
   private final Set<String> myInlinedChildNodes = ContainerUtil.newHashSet();
   private final Map<String, String> mySimpleTokens;
   private final Set<String> myTokensUsedInGrammar = ContainerUtil.newLinkedHashSet();
@@ -524,21 +525,21 @@ public class ParserGenerator {
         newLine();
       }
     }
-    Map<String, String> reversedLambdas = new THashMap<>();
-    for (Map.Entry<String, String> e : myParserLambdas.entrySet()) {
-      String body = e.getValue();
-      if (body.startsWith("#")) {
-        String name = e.getKey();
-        String value = reversedLambdas.get(body);
-        if (value == null) {
-          value = wrapCallWithParserInstance(body.substring(1));
-          reversedLambdas.put(body, name);
-        }
-        out("final static Parser " + name + " = " + value + ";");
-        e.setValue(StringUtil.getShortName(parserClass) + "." + name);
-      }
-    }
+    generateParserLambdas(parserClass);
     out("}");
+  }
+
+  private void generateParserLambdas(@NotNull String parserClass) {
+    Map<String, String> reversedLambdas = new THashMap<>();
+    take(myParserLambdas).forEach((name, body) -> {
+      String value = reversedLambdas.get(body);
+      if (value == null) {
+        value = wrapCallWithParserInstance(body);
+        reversedLambdas.put(body, name);
+      }
+      out("final static Parser " + name + " = " + value + ";");
+      myRenderedLambdas.put(name, parserClass);
+    });
   }
 
   public String wrapCallWithParserInstance(String nodeCall) {
@@ -975,7 +976,7 @@ public class ParserGenerator {
     sb.append(")");
 
     String constantName = rule.getName() + "_auto_recover_";
-    myParserLambdas.put(constantName, "#" + sb.toString());
+    myParserLambdas.put(constantName, sb.toString());
     return constantName;
   }
 
@@ -1325,22 +1326,24 @@ public class ParserGenerator {
     if (!collectExtraArguments(rule, nested, false).isEmpty()) {
       return wrapCallWithParserInstance(generateNodeCall(rule, nested, nextName));
     }
+    return getParserLambdaRef(rule, nested, nextName);
+  }
+
+  @NotNull
+  private String getParserLambdaRef(BnfRule rule, @Nullable BnfExpression nested, final String nextName) {
     String constantName = getWrapperParserConstantName(nextName);
-    String current = myParserLambdas.get(constantName);
-    if (current == null) {
+    String targetClass = myRenderedLambdas.get(constantName);
+    if (targetClass != null) {
+      return StringUtil.getShortName(targetClass) + "." + constantName;
+    }
+    else if (!myParserLambdas.containsKey(constantName)) {
       String call = generateNodeCall(rule, nested, nextName);
-      myParserLambdas.put(constantName, "#" + call);
-      if (!call.startsWith(nextName +"(")) {
+      myParserLambdas.put(constantName, call);
+      if (!call.startsWith(nextName + "(")) {
         myInlinedChildNodes.add(nextName);
       }
-      return constantName;
     }
-    else if (current.startsWith("#")) {
-      return constantName;
-    }
-    else {
-      return current;
-    }
+    return constantName;
   }
 
   private boolean shallGenerateNodeChild(String funcName) {

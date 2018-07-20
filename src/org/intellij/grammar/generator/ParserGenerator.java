@@ -546,7 +546,7 @@ public class ParserGenerator {
     take(myParserLambdas).forEach((name, body) -> {
       String value = reversedLambdas.get(body);
       if (value == null) {
-        value = wrapCallWithParserInstance(body);
+        value = generateParserInstance(body);
         reversedLambdas.put(body, name);
       }
       out("final static Parser " + name + " = " + value + ";");
@@ -554,8 +554,11 @@ public class ParserGenerator {
     });
   }
 
-  public String wrapCallWithParserInstance(String nodeCall) {
-    return format("new Parser() {\npublic boolean parse(PsiBuilder %s, int %s) {\nreturn %s;\n}\n}", N.builder, N.level, nodeCall);
+  @NotNull
+  private String generateParserInstance(@NotNull String body) {
+    return G.javaVersion == JavaVersion.JAVA_8
+           ? format("(%s, %s) -> %s", N.builder, N.level, body)
+           : format("new Parser() {\npublic boolean parse(PsiBuilder %s, int %s) {\nreturn %s;\n}\n}", N.builder, N.level, body);
   }
 
   private void generateMetaMethodFields() {

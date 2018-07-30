@@ -15,8 +15,9 @@
  */
 package org.intellij.grammar;
 
+import com.intellij.icons.AllIcons;
+import com.intellij.openapi.application.ApplicationInfo;
 import com.intellij.openapi.util.IconLoader;
-import com.intellij.util.PlatformIcons;
 
 import javax.swing.*;
 
@@ -25,11 +26,16 @@ import javax.swing.*;
  *         Date: 17.07.11 2:55
  */
 public interface BnfIcons {
-  Icon FILE = IconLoader.getIcon("/resources/file.png");
+  Icon FILE = load("/resources/bnf.svg", "/resources/bnf.png");
 
-  Icon RULE = PlatformIcons.METHOD_ICON;
-  Icon EXTERNAL_RULE = PlatformIcons.ABSTRACT_METHOD_ICON;
-  Icon ATTRIBUTE = PlatformIcons.FIELD_ICON;
+  Icon RULE = AllIcons.Nodes.Method;
+  Icon EXTERNAL_RULE = AllIcons.Nodes.AbstractMethod;
+  Icon ATTRIBUTE = AllIcons.Nodes.Field;
 
-  Icon RELATED_METHOD = IconLoader.getIcon("/gutter/implementedMethod.png");
+  Icon RELATED_METHOD = AllIcons.Gutter.ImplementedMethod;
+
+  static Icon load(String svg, String png) {
+    boolean useSvg = ApplicationInfo.getInstance().getBuild().getBaselineVersion() >= 172;
+    return IconLoader.getIcon(useSvg ? svg : png);
+  }
 }

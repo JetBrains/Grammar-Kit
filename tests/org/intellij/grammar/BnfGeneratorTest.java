@@ -33,6 +33,8 @@ public class BnfGeneratorTest extends BnfGeneratorTestCase {
   public void testPsiStart() throws Exception { doGenTest(true); }
   public void testExprParser() throws Exception { doGenTest(true); }
   public void testTokenSequence() throws Exception { doGenTest(false); }
+  public void testTokenChoice() throws Exception { doGenTest(true); }
+  public void testTokenChoiceNoSets() throws Exception { doGenTest(true); }
   public void testStub() throws Exception { doGenTest(true); }
   public void testBindersAndHooks() throws Exception { doGenTest(false); }
   public void testAutoRecovery() throws Exception { doGenTest(true); }

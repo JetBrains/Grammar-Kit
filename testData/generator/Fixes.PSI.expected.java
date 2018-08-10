@@ -21,6 +21,7 @@ public interface GeneratedTypes {
   IElementType SOME_EXPR = new IElementType("SOME_EXPR", null);
   IElementType SOME_SEQ = new IElementType("SOME_SEQ", null);
   IElementType THING_ITEM = new IElementType("THING_ITEM", null);
+  IElementType TWO_USAGES_LEFT = new IElementType("TWO_USAGES_LEFT", null);
   IElementType WITH_RECURSIVE = new IElementType("WITH_RECURSIVE", null);
   IElementType ZOME = new IElementType("ZOME", null);
 
@@ -197,6 +198,20 @@ import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
 public interface ThingItem extends PsiElement {
+
+}
+// ---- TwoUsagesLeft.java -----------------
+// This is a generated file. Not intended for manual editing.
+package generated.psi;
+
+import java.util.List;
+import org.jetbrains.annotations.*;
+import com.intellij.psi.PsiElement;
+
+public interface TwoUsagesLeft extends PsiElement {
+
+  @NotNull
+  Expr getExpr();
 
 }
 // ---- WithRecursive.java -----------------
@@ -670,6 +685,42 @@ public class ThingItemImpl extends ASTWrapperPsiElement implements ThingItem {
   }
 
 }
+// ---- TwoUsagesLeftImpl.java -----------------
+// This is a generated file. Not intended for manual editing.
+package generated.psi.impl;
+
+import java.util.List;
+import org.jetbrains.annotations.*;
+import com.intellij.lang.ASTNode;
+import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiElementVisitor;
+import com.intellij.psi.util.PsiTreeUtil;
+import static generated.GeneratedTypes.*;
+import com.intellij.extapi.psi.ASTWrapperPsiElement;
+import generated.psi.*;
+
+public class TwoUsagesLeftImpl extends ASTWrapperPsiElement implements TwoUsagesLeft {
+
+  public TwoUsagesLeftImpl(@NotNull ASTNode node) {
+    super(node);
+  }
+
+  public void accept(@NotNull Visitor visitor) {
+    visitor.visitTwoUsagesLeft(this);
+  }
+
+  public void accept(@NotNull PsiElementVisitor visitor) {
+    if (visitor instanceof Visitor) accept((Visitor)visitor);
+    else super.accept(visitor);
+  }
+
+  @Override
+  @NotNull
+  public Expr getExpr() {
+    return findNotNullChildByClass(Expr.class);
+  }
+
+}
 // ---- WithRecursiveImpl.java -----------------
 // This is a generated file. Not intended for manual editing.
 package generated.psi.impl;
@@ -807,6 +858,10 @@ public class Visitor extends PsiElementVisitor {
   }
 
   public void visitThingItem(@NotNull ThingItem o) {
+    visitPsiElement(o);
+  }
+
+  public void visitTwoUsagesLeft(@NotNull TwoUsagesLeft o) {
     visitPsiElement(o);
   }
 

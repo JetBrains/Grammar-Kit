@@ -515,7 +515,7 @@ public class RuleGraphHelper {
         }
       }
       Cardinality prev = result.get(r);
-      result.put(r, prev == null? cardinality : cardinality.or(prev));
+      result.put(r, prev == null ? cardinality : cardinality.and(prev));
     }
     return result;
   }

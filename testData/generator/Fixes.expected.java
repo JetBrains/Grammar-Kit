@@ -660,6 +660,47 @@ public class Fixes implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
+  // expr two_usages_left | expr two_usages_left
+  static boolean two_usages(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "two_usages")) return false;
+    boolean result_;
+    Marker marker_ = enter_section_(builder_);
+    result_ = two_usages_0(builder_, level_ + 1);
+    if (!result_) result_ = two_usages_1(builder_, level_ + 1);
+    exit_section_(builder_, marker_, null, result_);
+    return result_;
+  }
+
+  // expr two_usages_left
+  private static boolean two_usages_0(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "two_usages_0")) return false;
+    boolean result_;
+    Marker marker_ = enter_section_(builder_);
+    result_ = expr(builder_, level_ + 1);
+    result_ = result_ && two_usages_left(builder_, level_ + 1);
+    exit_section_(builder_, marker_, null, result_);
+    return result_;
+  }
+
+  // expr two_usages_left
+  private static boolean two_usages_1(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "two_usages_1")) return false;
+    boolean result_;
+    Marker marker_ = enter_section_(builder_);
+    result_ = expr(builder_, level_ + 1);
+    result_ = result_ && two_usages_left(builder_, level_ + 1);
+    exit_section_(builder_, marker_, null, result_);
+    return result_;
+  }
+
+  /* ********************************************************** */
+  public static boolean two_usages_left(PsiBuilder builder_, int level_) {
+    Marker marker_ = enter_section_(builder_, level_, _LEFT_, TWO_USAGES_LEFT, null);
+    exit_section_(builder_, level_, marker_, true, false, null);
+    return true;
+  }
+
+  /* ********************************************************** */
   // recursive
   public static boolean with_recursive(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "with_recursive")) return false;

@@ -112,7 +112,7 @@ private simple ::= !(modifier* id '::=' ) reference_or_token
   | external_expression
   | paren_expression
 external_expression ::= '<<' reference_or_token option * '>>' {
-  pin=2 extends=expression methods=[getArguments]
+  pin=2 extends=expression methods=[refElement='/expression[0]' getArguments]
 }
 reference_or_token ::= id  {extends=expression methods=[resolveRule]}
 literal_expression ::= string_literal_expression | number {extends=expression }

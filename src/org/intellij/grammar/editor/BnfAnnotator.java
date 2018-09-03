@@ -77,7 +77,7 @@ public class BnfAnnotator implements Annotator, DumbAware {
         annotationHolder.createInfoAnnotation(psiElement, null).setTextAttributes(BnfSyntaxHighlighter.ATTRIBUTE);
       }
       else if (GrammarUtil.isExternalReference(psiElement)) {
-        if (resolve == null && parent instanceof BnfExternalExpression && ((BnfExternalExpression)parent).getExpressionList().size() == 1 &&
+        if (resolve == null && parent instanceof BnfExternalExpression && ((BnfExternalExpression)parent).getArguments().isEmpty() &&
             ParserGeneratorUtil.Rule.isMeta(ParserGeneratorUtil.Rule.of((BnfRefOrTokenImpl)psiElement))) {
           annotationHolder.createInfoAnnotation(parent, null).setTextAttributes(BnfSyntaxHighlighter.META_PARAM);
         }

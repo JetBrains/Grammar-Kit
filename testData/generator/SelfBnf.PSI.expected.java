@@ -205,6 +205,9 @@ public interface BnfExternalExpression extends BnfExpression {
   List<BnfExpression> getExpressionList();
 
   @NotNull
+  BnfExpression getRefElement();
+
+  @NotNull
   List<BnfExpression> getArguments();
 
 }
@@ -647,6 +650,13 @@ public class BnfExternalExpressionImpl extends BnfExpressionImpl implements BnfE
   @NotNull
   public List<BnfExpression> getExpressionList() {
     return PsiTreeUtil.getChildrenOfTypeAsList(this, BnfExpression.class);
+  }
+
+  @Override
+  @NotNull
+  public BnfExpression getRefElement() {
+    List<BnfExpression> p1 = getExpressionList();
+    return p1.get(0);
   }
 
   @NotNull

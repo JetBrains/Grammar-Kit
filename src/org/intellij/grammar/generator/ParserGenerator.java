@@ -494,12 +494,12 @@ public class ParserGenerator {
     Set<String> imports = new LinkedHashSet<>();
     imports.addAll(Arrays.asList(PSI_BUILDER_CLASS,
                                  PSI_BUILDER_CLASS + ".Marker",
-                                 "static " + myTypeHolderClass + ".*"));
+                                 staticStarImport(myTypeHolderClass)));
     if (StringUtil.isNotEmpty(myParserUtilClass)) {
-      imports.add("static " + myParserUtilClass + ".*");
+      imports.add(staticStarImport(myParserUtilClass));
     }
     if (!rootParser) {
-      imports.add("static " + myGrammarRootParser + ".*");
+      imports.add(staticStarImport(myGrammarRootParser));
     }
     else {
       imports.addAll(Arrays.asList(IELEMENTTYPE_CLASS,
@@ -1645,7 +1645,7 @@ public class ParserGenerator {
                                  PSI_ELEMENT_CLASS));
     if (myVisitorClassName != null) imports.add(PSI_ELEMENT_VISITOR_CLASS);
     imports.add(myPsiTreeUtilClass);
-    imports.add("static " + myTypeHolderClass + ".*");
+    imports.add(staticStarImport(myTypeHolderClass));
     if (StringUtil.isNotEmpty(implSuper)) imports.add(implSuper);
     imports.add(StringUtil.getPackageName(superInterface) + ".*");
     imports.add(StringUtil.notNullize(myVisitorClassName));

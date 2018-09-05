@@ -892,6 +892,11 @@ public class ParserGeneratorUtil {
 
   }
 
+  @NotNull
+  static String staticStarImport(@NotNull String fqn) {
+    return "static " + fqn + ".*";
+  }
+
   private static final TObjectHashingStrategy<PsiElement> TEXT_STRATEGY = new TObjectHashingStrategy<PsiElement>() {
     @Override
     public int computeHashCode(PsiElement e) {

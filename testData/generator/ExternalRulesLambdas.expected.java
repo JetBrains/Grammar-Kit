@@ -73,11 +73,7 @@ public class ExternalRulesLambdas implements PsiParser, LightPsiParser {
 
   /* ********************************************************** */
   static Parser comma_list_$(Parser param) {
-    return new Parser() {
-      public boolean parse(PsiBuilder builder_, int level_) {
-        return comma_list(builder_, level_ + 1, param);
-      }
-    };
+    return (builder_, level_) -> comma_list(builder_, level_ + 1, param);
   }
 
   // <<param>> (',' <<param>>) *
@@ -115,11 +111,7 @@ public class ExternalRulesLambdas implements PsiParser, LightPsiParser {
 
   /* ********************************************************** */
   static Parser comma_list_pinned_$(Parser head, Parser param) {
-    return new Parser() {
-      public boolean parse(PsiBuilder builder_, int level_) {
-        return comma_list_pinned(builder_, level_ + 1, head, param);
-      }
-    };
+    return (builder_, level_) -> comma_list_pinned(builder_, level_ + 1, head, param);
   }
 
   // <<head>> <<param>> (<<comma_list_tail <<param>>>>) *
@@ -229,11 +221,7 @@ public class ExternalRulesLambdas implements PsiParser, LightPsiParser {
 
   /* ********************************************************** */
   static Parser main_class_meta_$(Parser p) {
-    return new Parser() {
-      public boolean parse(PsiBuilder builder_, int level_) {
-        return main_class_meta(builder_, level_ + 1, p);
-      }
-    };
+    return (builder_, level_) -> main_class_meta(builder_, level_ + 1, p);
   }
 
   // <<p>>
@@ -310,11 +298,7 @@ public class ExternalRulesLambdas implements PsiParser, LightPsiParser {
   }
 
   private static Parser meta_multi_level_pinned_paren_0_0_1_$(Parser param) {
-    return new Parser() {
-      public boolean parse(PsiBuilder builder_, int level_) {
-        return meta_multi_level_pinned_paren_0_0_1(builder_, level_ + 1, param);
-      }
-    };
+    return (builder_, level_) -> meta_multi_level_pinned_paren_0_0_1(builder_, level_ + 1, param);
   }
 
   // <<comma_list <<comma_list <<comma_list <<param>>>>>>>>
@@ -392,11 +376,7 @@ public class ExternalRulesLambdas implements PsiParser, LightPsiParser {
   }
 
   private static Parser meta_with_in_place_0_0_$(Parser param) {
-    return new Parser() {
-      public boolean parse(PsiBuilder builder_, int level_) {
-        return meta_with_in_place_0_0(builder_, level_ + 1, param);
-      }
-    };
+    return (builder_, level_) -> meta_with_in_place_0_0(builder_, level_ + 1, param);
   }
 
   // <<param>> | some
@@ -429,11 +409,7 @@ public class ExternalRulesLambdas implements PsiParser, LightPsiParser {
   }
 
   private static Parser nested_mixed_0_0_$(Parser c) {
-    return new Parser() {
-      public boolean parse(PsiBuilder builder_, int level_) {
-        return nested_mixed_0_0(builder_, level_ + 1, c);
-      }
-    };
+    return (builder_, level_) -> nested_mixed_0_0(builder_, level_ + 1, c);
   }
 
   // <<two_params_meta '%' <<c>>>>
@@ -716,11 +692,7 @@ public class ExternalRulesLambdas implements PsiParser, LightPsiParser {
 
   /* ********************************************************** */
   static Parser two_params_meta_$(Parser a, Parser b) {
-    return new Parser() {
-      public boolean parse(PsiBuilder builder_, int level_) {
-        return two_params_meta(builder_, level_ + 1, a, b);
-      }
-    };
+    return (builder_, level_) -> two_params_meta(builder_, level_ + 1, a, b);
   }
 
   // <<a>> <<b>>
@@ -786,11 +758,7 @@ public class ExternalRulesLambdas2 {
 
   /* ********************************************************** */
   static Parser second_class_meta_$(Parser bmp) {
-    return new Parser() {
-      public boolean parse(PsiBuilder builder_, int level_) {
-        return second_class_meta(builder_, level_ + 1, bmp);
-      }
-    };
+    return (builder_, level_) -> second_class_meta(builder_, level_ + 1, bmp);
   }
 
   // <<bmp>>
@@ -828,11 +796,7 @@ public class ExternalRulesLambdas3 {
 
   /* ********************************************************** */
   static Parser third_class_meta_$(Parser fmp) {
-    return new Parser() {
-      public boolean parse(PsiBuilder builder_, int level_) {
-        return third_class_meta(builder_, level_ + 1, fmp);
-      }
-    };
+    return (builder_, level_) -> third_class_meta(builder_, level_ + 1, fmp);
   }
 
   // <<fmp>>

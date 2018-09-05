@@ -776,13 +776,10 @@ public class ParserGenerator {
     String parameterList = parameterNames.stream().map(it -> "Parser " + it).collect(joining(", "));
     String argumentList = String.join(", ", parameterNames);
     String metaParserMethodName = getWrapperParserMetaMethodName(methodName);
+    String call = String.format("%s(%s, %s + 1, %s)", methodName, N.builder, N.level, argumentList);
     // @formatter:off
     out("%sstatic Parser %s(%s) {", isRule ? "" : "private ", metaParserMethodName, parameterList);
-      out("return new Parser() {");
-        out("public boolean parse(PsiBuilder %s, int %s) {", N.builder, N.level);
-          out("return %s(%s, %s + 1, %s);", methodName, N.builder, N.level, argumentList);
-        out("}");
-      out("};");
+      out("return %s;", generateParserInstance(call));
     out("}");
     // @formatter:on
   }

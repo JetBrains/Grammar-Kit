@@ -546,7 +546,7 @@ public class ParserGenerator {
     take(myParserLambdas).forEach((name, body) -> {
       String value = reversedLambdas.get(body);
       if (value == null) {
-        value = wrapCallWithParserInstance(body);
+        value = generateParserInstance(body);
         reversedLambdas.put(body, name);
       }
       out("final static Parser " + name + " = " + value + ";");
@@ -554,8 +554,11 @@ public class ParserGenerator {
     });
   }
 
-  public String wrapCallWithParserInstance(String nodeCall) {
-    return format("new Parser() {\npublic boolean parse(PsiBuilder %s, int %s) {\nreturn %s;\n}\n}", N.builder, N.level, nodeCall);
+  @NotNull
+  private String generateParserInstance(@NotNull String body) {
+    return G.javaVersion == JavaVersion.JAVA_8
+           ? format("(%s, %s) -> %s", N.builder, N.level, body)
+           : format("new Parser() {\npublic boolean parse(PsiBuilder %s, int %s) {\nreturn %s;\n}\n}", N.builder, N.level, body);
   }
 
   private void generateMetaMethodFields() {
@@ -773,13 +776,10 @@ public class ParserGenerator {
     String parameterList = parameterNames.stream().map(it -> "Parser " + it).collect(joining(", "));
     String argumentList = String.join(", ", parameterNames);
     String metaParserMethodName = getWrapperParserMetaMethodName(methodName);
+    String call = String.format("%s(%s, %s + 1, %s)", methodName, N.builder, N.level, argumentList);
     // @formatter:off
     out("%sstatic Parser %s(%s) {", isRule ? "" : "private ", metaParserMethodName, parameterList);
-      out("return new Parser() {");
-        out("public boolean parse(PsiBuilder %s, int %s) {", N.builder, N.level);
-          out("return %s(%s, %s + 1, %s);", methodName, N.builder, N.level, argumentList);
-        out("}");
-      out("};");
+      out("return %s;", generateParserInstance(call));
     out("}");
     // @formatter:on
   }
@@ -1220,13 +1220,15 @@ public class ParserGenerator {
           BnfRule rr = info != null ? info.rootRule : subRule;
           String method = getFuncName(rr);
           String parserClass = ruleInfo(rr).parserClass;
-          if (!parserClass.equals(myGrammarRootParser) && !parserClass.equals(ruleInfo(rule).parserClass)) {
-            method = StringUtil.getShortName(parserClass) + "." + method;
-          }
+          String parserClassName = StringUtil.getShortName(parserClass);
+          boolean renderClass = !parserClass.equals(myGrammarRootParser) && !parserClass.equals(ruleInfo(rule).parserClass);
           if (info == null) {
-            return new MethodCall(method);
+            return new MethodCall(renderClass, parserClassName, method);
           }
           else {
+            if (renderClass) {
+              method = StringUtil.getQualifiedName(parserClassName, method);
+            }
             return new ExpressionMethodCall(method, info.getPriority(subRule) - 1);
           }
         }
@@ -1264,7 +1266,7 @@ public class ParserGenerator {
     else {
       List<String> extraArguments = collectExtraArguments(rule, node);
       if (extraArguments.isEmpty()) {
-        return new MethodCall(nextName);
+        return new MethodCall(false, StringUtil.getShortName(ruleInfo(rule).parserClass), nextName);
       }
       else {
         return new MetaMethodCall(null, nextName, map(extraArguments, MetaParameterArgument::new));
@@ -1380,6 +1382,10 @@ public class ParserGenerator {
       else {
         return () -> getMetaMethodFieldRef(argument.render(), nextName);
       }
+    }
+    else if (nodeCall instanceof MethodCall && G.javaVersion == JavaVersion.JAVA_8) {
+      MethodCall methodCall = (MethodCall)nodeCall;
+      return () -> String.format("%s::%s", methodCall.getClassName(), methodCall.getMethodName());
     }
     else {
       return () -> getParserLambdaRef(nodeCall, nextName);

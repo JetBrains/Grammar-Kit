@@ -47,6 +47,7 @@ public class GenOptions {
   public final Case generateElementCase;
   public final boolean generateTokenAccessors;
   public final boolean generateTokenAccessorsSet;
+  public final JavaVersion javaVersion;
 
   public GenOptions(BnfFile myFile) {
     Map<String, String> genOptions = getRootAttribute(myFile, KnownAttribute.GENERATE).asMap();
@@ -67,5 +68,6 @@ public class GenOptions {
 
     generateTokenCase = ParserGeneratorUtil.enumFromString(genOptions.get("token-case"), Case.UPPER);
     generateElementCase = ParserGeneratorUtil.enumFromString(genOptions.get("element-case"), Case.UPPER);
+    javaVersion = JavaVersion.fromString(genOptions.get("java"));
   }
 }

@@ -37,6 +37,7 @@ import gnu.trove.THashSet;
 import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.analysis.BnfFirstNextAnalyzer;
 import org.intellij.grammar.java.JavaHelper;
+import org.intellij.grammar.parser.GeneratedParserUtilBase.Parser;
 import org.intellij.grammar.psi.*;
 import org.intellij.grammar.psi.impl.GrammarUtil;
 import org.jetbrains.annotations.NotNull;
@@ -49,6 +50,7 @@ import java.io.PrintWriter;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static com.intellij.util.containers.ContainerUtil.map;
 import static java.lang.String.format;
 import static java.util.stream.Collectors.*;
 import static org.intellij.grammar.analysis.BnfFirstNextAnalyzer.BNF_MATCHES_ANY;
@@ -115,8 +117,18 @@ public class ParserGenerator {
 
   private final Map<String, RuleInfo> myRuleInfos = ContainerUtil.newTreeMap();
 
-  private final Map<String, String> myParserLambdas = ContainerUtil.newTreeMap();
+  private final Map<String, String> myParserLambdas = ContainerUtil.newHashMap();       // field name -> body
+  private final Map<String, String> myRenderedLambdas = ContainerUtil.newHashMap();     // field name -> parser class FQN
   private final Set<String> myInlinedChildNodes = ContainerUtil.newHashSet();
+  /**
+   * Some meta-method calls use only static parsers as arguments,
+   * i.e. they don't reference meta-method parameters,
+   * we want to cache them in static fields.
+   * <p/>
+   * Mapping: <code> meta field name -> meta method call </code>
+   */
+  private final Map<String, String> myMetaMethodFields = ContainerUtil.newHashMap();
+
   private final Map<String, String> mySimpleTokens;
   private final Set<String> myTokensUsedInGrammar = ContainerUtil.newLinkedHashSet();
   private final boolean myNoStubs;
@@ -524,25 +536,30 @@ public class ParserGenerator {
         newLine();
       }
     }
-    Map<String, String> reversedLambdas = new THashMap<>();
-    for (Map.Entry<String, String> e : myParserLambdas.entrySet()) {
-      String body = e.getValue();
-      if (body.startsWith("#")) {
-        String name = e.getKey();
-        String value = reversedLambdas.get(body);
-        if (value == null) {
-          value = wrapCallWithParserInstance(body.substring(1));
-          reversedLambdas.put(body, name);
-        }
-        out("final static Parser " + name + " = " + value + ";");
-        e.setValue(StringUtil.getShortName(parserClass) + "." + name);
-      }
-    }
+    generateParserLambdas(parserClass);
+    generateMetaMethodFields();
     out("}");
+  }
+
+  private void generateParserLambdas(@NotNull String parserClass) {
+    Map<String, String> reversedLambdas = new THashMap<>();
+    take(myParserLambdas).forEach((name, body) -> {
+      String value = reversedLambdas.get(body);
+      if (value == null) {
+        value = wrapCallWithParserInstance(body);
+        reversedLambdas.put(body, name);
+      }
+      out("final static Parser " + name + " = " + value + ";");
+      myRenderedLambdas.put(name, parserClass);
+    });
   }
 
   public String wrapCallWithParserInstance(String nodeCall) {
     return format("new Parser() {\npublic boolean parse(PsiBuilder %s, int %s) {\nreturn %s;\n}\n}", N.builder, N.level, nodeCall);
+  }
+
+  private void generateMetaMethodFields() {
+    take(myMetaMethodFields).forEach((field, call) -> out("private static final Parser " + field + " = " + call + ";"));
   }
 
   private void generateRootParserContent(Iterable<String> ownRuleNames) {
@@ -568,7 +585,7 @@ public class ParserGenerator {
       if (info != null && info.rootRule != rule) continue;
       String elementType = getElementType(rule);
       out("%sif (%s == %s) {", first ? "" : "else ", N.root, elementType);
-      String nodeCall = generateNodeCall(rule, null, rule.getName());
+      String nodeCall = generateNodeCall(rule, null, rule.getName()).render(N);
       out("%s = %s;", N.result, nodeCall.replace(format("%s + 1", N.level), "0"));
       out("}");
       if (first) first = false;
@@ -583,7 +600,7 @@ public class ParserGenerator {
     newLine();
     {
       BnfRule rootRule = myFile.getRule(myGrammarRoot);
-      String nodeCall = generateNodeCall(rootRule, null, myGrammarRoot);
+      String nodeCall = generateNodeCall(rootRule, null, myGrammarRoot).render(N);
       out("protected boolean parse_root_(IElementType %s, PsiBuilder %s, int %s) {", N.root, N.builder, N.level);
       out("return %s;", nodeCall);
       out("}");
@@ -744,9 +761,40 @@ public class ParserGenerator {
            "// " + classHeader;
   }
 
+  /**
+   * Meta-methods are methods that take several {@link Parser Parser} instances as parameters and return another {@link Parser instance}.
+   *
+   * @param isRule whether meta-method may be used from another parser classes, and therefore should be accessible,
+   *               e.g. it is {@code true} for {@code meta rule ::= <<p>>},
+   *               and it is {@code false} for nested in-place method generated
+   *               for {@code <<p>> | some} in {@code meta rule ::= (<<p>> | some)* }.
+   */
+  private void generateMetaMethod(@NotNull String methodName, @NotNull List<String> parameterNames, boolean isRule) {
+    String parameterList = parameterNames.stream().map(it -> "Parser " + it).collect(joining(", "));
+    String argumentList = String.join(", ", parameterNames);
+    String metaParserMethodName = getWrapperParserMetaMethodName(methodName);
+    // @formatter:off
+    out("%sstatic Parser %s(%s) {", isRule ? "" : "private ", metaParserMethodName, parameterList);
+      out("return new Parser() {");
+        out("public boolean parse(PsiBuilder %s, int %s) {", N.builder, N.level);
+          out("return %s(%s, %s + 1, %s);", methodName, N.builder, N.level, argumentList);
+        out("}");
+      out("};");
+    out("}");
+    // @formatter:on
+  }
+
   void generateNode(BnfRule rule, BnfExpression initialNode, String funcName, Set<BnfExpression> visited) {
     boolean isRule = initialNode.getParent() == rule;
     BnfExpression node = getNonTrivialNode(initialNode);
+
+    final List<String> metaParameters = collectExtraArguments(rule, node);
+    if (!metaParameters.isEmpty()) {
+      if (isRule && isUsedAsArgument(rule) || !isRule && isArgument(initialNode)) {
+        generateMetaMethod(funcName, metaParameters, isRule);
+        newLine();
+      }
+    }
 
     IElementType type = getEffectiveType(node);
 
@@ -771,11 +819,11 @@ public class ParserGenerator {
     List<BnfExpression> children = isSingleNode ? Collections.singletonList(node) : getChildExpressions(node);
     String frameName = !children.isEmpty() && firstNonTrivial && !Rule.isMeta(rule) ? quote(getRuleDisplayName(rule, !isPrivate)) : null;
 
-    String extraArguments = collectExtraArguments(rule, node, true);
-    out("%sstatic boolean %s(PsiBuilder %s, int %s%s) {", !isRule ? "private " : isPrivate ? "" : "public ", funcName, N.builder, N.level, extraArguments);
+    String extraParameters = metaParameters.stream().map(it -> ", Parser " + it).collect(Collectors.joining());
+    out("%sstatic boolean %s(PsiBuilder %s, int %s%s) {", !isRule ? "private " : isPrivate ? "" : "public ", funcName, N.builder, N.level, extraParameters);
     if (isSingleNode) {
       if (isPrivate && !isLeftInner && recoverWhile == null && frameName == null) {
-        String nodeCall = generateNodeCall(rule, node, getNextName(funcName, 0));
+        String nodeCall = generateNodeCall(rule, node, getNextName(funcName, 0)).render(N);
         out("return %s;", nodeCall);
         out("}");
         if (node instanceof BnfExternalExpression && ((BnfExternalExpression)node).getExpressionList().size() > 1) {
@@ -839,37 +887,37 @@ public class ParserGenerator {
     for (int i = 0, p = 0, childrenSize = children.size(); i < childrenSize; i++) {
       BnfExpression child = children.get(i);
 
-      String nodeCall = generateNodeCall(rule, child, getNextName(funcName, i));
+      NodeCall nodeCall = generateNodeCall(rule, child, getNextName(funcName, i));
       if (type == BNF_CHOICE) {
-        out("%s%s = %s;", i > 0 ? format("if (!%s) ", N.result) : "", N.result, nodeCall);
+        out("%s%s = %s;", i > 0 ? format("if (!%s) ", N.result) : "", N.result, nodeCall.render(N));
       }
       else if (type == BNF_SEQUENCE) {
         if (skip[0] == 0) {
           ConsumeType consumeType = getEffectiveConsumeType(rule, node, null);
           nodeCall = generateTokenSequenceCall(children, i, pinMatcher, pinApplied, skip, nodeCall, false, consumeType);
           if (i == 0) {
-            out("%s = %s;", N.result, nodeCall);
+            out("%s = %s;", N.result, nodeCall.render(N));
           }
           else {
             if (pinApplied && G.generateExtendedPin) {
               if (i == childrenSize - 1) {
                 // do not report error for last child
                 if (i == p + 1) {
-                  out("%s = %s && %s;", N.result, N.result, nodeCall);
+                  out("%s = %s && %s;", N.result, N.result, nodeCall.render(N));
                 }
                 else {
-                  out("%s = %s && %s && %s;", N.result, N.pinned, nodeCall, N.result);
+                  out("%s = %s && %s && %s;", N.result, N.pinned, nodeCall.render(N), N.result);
                 }
               }
               else if (i == p + 1) {
-                out("%s = %s && report_error_(%s, %s);", N.result, N.result, N.builder, nodeCall);
+                out("%s = %s && report_error_(%s, %s);", N.result, N.result, N.builder, nodeCall.render(N));
               }
               else {
-                out("%s = %s && report_error_(%s, %s) && %s;", N.result, N.pinned, N.builder, nodeCall, N.result);
+                out("%s = %s && report_error_(%s, %s) && %s;", N.result, N.pinned, N.builder, nodeCall.render(N), N.result);
               }
             }
             else {
-              out("%s = %s && %s;", N.result, N.result, nodeCall);
+              out("%s = %s && %s;", N.result, N.result, nodeCall.render(N));
             }
           }
         }
@@ -884,23 +932,23 @@ public class ParserGenerator {
         }
       }
       else if (type == BNF_OP_OPT) {
-        out(nodeCall + ";");
+        out(nodeCall.render(N) + ";");
       }
       else if (type == BNF_OP_ONEMORE || type == BNF_OP_ZEROMORE) {
         if (type == BNF_OP_ONEMORE) {
-          out("%s = %s;", N.result, nodeCall);
+          out("%s = %s;", N.result, nodeCall.render(N));
         }
         out("while (%s) {", alwaysTrue ? "true" : N.result);
         out("int %s = current_position_(%s);", N.pos, N.builder);
-        out("if (!%s) break;", nodeCall);
+        out("if (!%s) break;", nodeCall.render(N));
         out("if (!empty_element_parsed_guard_(%s, \"%s\", %s)) break;", N.builder, funcName, N.pos);
         out("}");
       }
       else if (type == BNF_OP_AND) {
-        out("%s = %s;", N.result, nodeCall);
+        out("%s = %s;", N.result, nodeCall.render(N));
       }
       else if (type == BNF_OP_NOT) {
-        out("%s = !%s;", N.result, nodeCall);
+        out("%s = !%s;", N.result, nodeCall.render(N));
       }
       else {
         addWarning(myFile.getProject(), "unexpected: " + type);
@@ -932,7 +980,7 @@ public class ParserGenerator {
             recoverCall = formatArgName(recoverWhile.substring(2, recoverWhile.length() - 2));
           }
           else {
-            recoverCall = predicateRule == null ? null : generateWrappedNodeCall(rule, null, predicateRule.getName());
+            recoverCall = predicateRule == null ? null : generateWrappedNodeCall(rule, null, predicateRule.getName()).render();
           }
         }
         else {
@@ -975,7 +1023,7 @@ public class ParserGenerator {
     sb.append(")");
 
     String constantName = rule.getName() + "_auto_recover_";
-    myParserLambdas.put(constantName, "#" + sb.toString());
+    myParserLambdas.put(constantName, sb.toString());
     return constantName;
   }
 
@@ -1069,16 +1117,13 @@ public class ParserGenerator {
     }
   }
 
-  private String collectExtraArguments(BnfRule rule, @Nullable BnfExpression expression, boolean declaration) {
-    if (expression == null) return "";
-    List<String> params = GrammarUtil.collectExtraArguments(rule, expression);
-    if (params.isEmpty()) return "";
-    final StringBuilder sb = new StringBuilder();
-    for (String param : params) {
-      sb.append(", ").append(declaration ? "Parser " : "").
-        append(formatArgName(param.substring(2, param.length() - 2)));
-    }
-    return sb.toString();
+  @NotNull
+  private List<String> collectExtraArguments(@NotNull BnfRule rule, @Nullable BnfExpression expression) {
+    if (expression == null) return Collections.emptyList();
+    return GrammarUtil.collectExtraArguments(rule, expression)
+      .stream()
+      .map(it -> formatArgName(it.substring(2, it.length() - 2)))
+      .collect(toList());
   }
 
   private String formatArgName(String s) {
@@ -1106,15 +1151,16 @@ public class ParserGenerator {
     return mySimpleTokens.get(value);
   }
 
-  private String generateTokenSequenceCall(List<BnfExpression> children,
-                                           int startIndex,
-                                           PinMatcher pinMatcher,
-                                           boolean pinApplied,
-                                           int[] skip,
-                                           String nodeCall,
-                                           boolean rollbackOnFail,
-                                           ConsumeType consumeType) {
-    if (startIndex == children.size() - 1 || !isConsumeTokenCall(nodeCall)) return nodeCall;
+  @NotNull
+  private NodeCall generateTokenSequenceCall(List<BnfExpression> children,
+                                             int startIndex,
+                                             PinMatcher pinMatcher,
+                                             boolean pinApplied,
+                                             int[] skip,
+                                             @NotNull NodeCall nodeCall,
+                                             boolean rollbackOnFail,
+                                             ConsumeType consumeType) {
+    if (startIndex == children.size() - 1 || !(nodeCall instanceof ConsumeTokenCall)) return nodeCall;
     List<String> list = ContainerUtil.newArrayList();
     int pin = pinApplied ? -1 : 0;
     for (int i = startIndex, len = children.size(); i < len; i++) {
@@ -1131,59 +1177,57 @@ public class ParserGenerator {
     }
     if (list.size() < 2) return nodeCall;
     skip[0] = list.size() - 1;
-    String consumeMethodName = (rollbackOnFail ? "parseTokens" : "consumeTokens") + (consumeType == ConsumeType.SMART ? consumeType.getMethodSuffix() : "");
-    return format("%s(%s, %d, %s)", consumeMethodName, N.builder, pin, StringUtil.join(list, ", "));
+    String consumeMethodName = (rollbackOnFail ? "parseTokens" : "consumeTokens") +
+                               (consumeType == ConsumeType.SMART ? consumeType.getMethodSuffix() : "");
+    return new ConsumeTokensCall(consumeMethodName, pin, list);
   }
 
-  private static boolean isConsumeTokenCall(String nodeCall) {
-    int idx = nodeCall.indexOf('(');
-    return idx > 0 && ConsumeType.forMethod(nodeCall.substring(0, idx)) != null;
-  }
-
-  String generateNodeCall(BnfRule rule, @Nullable BnfExpression node, String nextName) {
+  @NotNull
+  NodeCall generateNodeCall(@NotNull BnfRule rule, @Nullable BnfExpression node, @NotNull String nextName) {
     return generateNodeCall(rule, node, nextName, null);
   }
 
-  String generateNodeCall(BnfRule rule, @Nullable BnfExpression node, String nextName, @Nullable ConsumeType forcedConsumeType) {
+  @NotNull
+  NodeCall generateNodeCall(@NotNull BnfRule rule,
+                            @Nullable BnfExpression node,
+                            @NotNull String nextName,
+                            @Nullable ConsumeType forcedConsumeType) {
     IElementType type = node == null ? BNF_REFERENCE_OR_TOKEN : getEffectiveType(node);
     String text = node == null ? nextName : node.getText();
 
     if (type == BNF_STRING) {
       String value = GrammarUtil.unquote(text);
       String attributeName = getTokenName(value);
-      String consumeMethodName = getEffectiveConsumeType(rule, node, forcedConsumeType).getMethodName();
+      ConsumeType consumeType = getEffectiveConsumeType(rule, node, forcedConsumeType);
       if (attributeName != null) {
-        return generateConsumeToken(attributeName, consumeMethodName);
+        return generateConsumeToken(consumeType, attributeName);
       }
-      return generateConsumeTextToken(text.startsWith("\"") ? value : StringUtil.escapeStringCharacters(value), consumeMethodName);
+      return generateConsumeTextToken(consumeType, text.startsWith("\"") ? value : StringUtil.escapeStringCharacters(value));
     }
     else if (type == BNF_NUMBER) {
-      String consumeMethodName = getEffectiveConsumeType(rule, node, forcedConsumeType).getMethodName();
-      return generateConsumeTextToken(text, consumeMethodName);
+      ConsumeType consumeType = getEffectiveConsumeType(rule, node, forcedConsumeType);
+      return generateConsumeTextToken(consumeType, text);
     }
     else if (type == BNF_REFERENCE_OR_TOKEN) {
       String value = GrammarUtil.stripQuotesAroundId(text);
       BnfRule subRule = myFile.getRule(value);
       if (subRule != null) {
-        String method;
         if (Rule.isExternal(subRule)) {
-          StringBuilder clause = new StringBuilder();
-          method = generateExternalCall(rule, clause, GrammarUtil.getExternalRuleExpressions(subRule), nextName);
-          return format("%s(%s, %s + 1%s)", method, N.builder, N.level, clause);
+          return generateExternalCall(rule, GrammarUtil.getExternalRuleExpressions(subRule), nextName);
         }
         else {
           ExpressionHelper.ExpressionInfo info = ExpressionGeneratorHelper.getInfoForExpressionParsing(myExpressionHelper, subRule);
           BnfRule rr = info != null ? info.rootRule : subRule;
-          method = getFuncName(rr);
+          String method = getFuncName(rr);
           String parserClass = ruleInfo(rr).parserClass;
           if (!parserClass.equals(myGrammarRootParser) && !parserClass.equals(ruleInfo(rule).parserClass)) {
             method = StringUtil.getShortName(parserClass) + "." + method;
           }
           if (info == null) {
-            return format("%s(%s, %s + 1)", method, N.builder, N.level);
+            return new MethodCall(method);
           }
           else {
-            return format("%s(%s, %s + 1, %d)", method, N.builder, N.level, info.getPriority(subRule) - 1);
+            return new ExpressionMethodCall(method, info.getPriority(subRule) - 1);
           }
         }
       }
@@ -1191,15 +1235,15 @@ public class ParserGenerator {
       if (!mySimpleTokens.containsKey(text) && !mySimpleTokens.values().contains(text)) {
         mySimpleTokens.put(text, null);
       }
-      String consumeMethodName = getEffectiveConsumeType(rule, node, forcedConsumeType).getMethodName();
-      return generateConsumeToken(text, consumeMethodName);
+      ConsumeType consumeType = getEffectiveConsumeType(rule, node, forcedConsumeType);
+      return generateConsumeToken(consumeType, text);
     }
     else if (isTokenSequence(rule, node)) {
       ConsumeType consumeType = getEffectiveConsumeType(rule, node, forcedConsumeType);
       PinMatcher pinMatcher = new PinMatcher(rule, type, nextName);
       List<BnfExpression> childExpressions = getChildExpressions(node);
-      PsiElement firstElement = ContainerUtil.getFirstItem(childExpressions);
-      String nodeCall = generateNodeCall(rule, (BnfExpression) firstElement, getNextName(nextName, 0), consumeType);
+      BnfExpression firstElement = ContainerUtil.getFirstItem(childExpressions);
+      NodeCall nodeCall = generateNodeCall(rule, firstElement, getNextName(nextName, 0), consumeType);
       for (PsiElement e : childExpressions) {
         String t = e instanceof BnfStringLiteralExpression ? GrammarUtil.unquote(e.getText()) : e.getText();
         if (!mySimpleTokens.containsKey(t) && !mySimpleTokens.values().contains(t)) {
@@ -1211,17 +1255,20 @@ public class ParserGenerator {
     else if (type == BNF_EXTERNAL_EXPRESSION) {
       List<BnfExpression> expressions = ((BnfExternalExpression)node).getExpressionList();
       if (expressions.size() == 1 && Rule.isMeta(rule)) {
-        return format("%s.parse(%s, %s)", formatArgName(expressions.get(0).getText()), N.builder, N.level);
+        return new MetaParameterCall(formatArgName(expressions.get(0).getText()));
       }
       else {
-        StringBuilder clause = new StringBuilder();
-        String method = generateExternalCall(rule, clause, expressions, nextName);
-        return format("%s(%s, %s + 1%s)", method, N.builder, N.level, clause);
+        return generateExternalCall(rule, expressions, nextName);
       }
     }
     else {
-      String extraArguments = collectExtraArguments(rule, node, false);
-      return format("%s(%s, %s + 1%s)", nextName, N.builder, N.level, extraArguments);
+      List<String> extraArguments = collectExtraArguments(rule, node);
+      if (extraArguments.isEmpty()) {
+        return new MethodCall(nextName);
+      }
+      else {
+        return new MetaMethodCall(null, nextName, map(extraArguments, MetaParameterArgument::new));
+      }
     }
   }
 
@@ -1243,11 +1290,13 @@ public class ParserGenerator {
     return fixed != null ? fixed : ConsumeType.forRule(rule);
   }
 
-  private String generateExternalCall(BnfRule rule, StringBuilder clause, List<BnfExpression> expressions, String nextName) {
+  @NotNull
+  private NodeCall generateExternalCall(@NotNull BnfRule rule, @NotNull List<BnfExpression> expressions, @NotNull String nextName) {
     List<BnfExpression> callParameters = expressions;
     List<BnfExpression> metaParameters = Collections.emptyList();
     List<String> metaParameterNames = Collections.emptyList();
     String method = expressions.size() > 0 ? expressions.get(0).getText() : null;
+    String targetClassName = null;
     BnfRule targetRule = method == null ? null : myFile.getRule(method);
     // handle external rule call: substitute and merge arguments from external expression and rule definition
     if (targetRule != null) {
@@ -1263,13 +1312,14 @@ public class ParserGenerator {
       else {
         String parserClass = ruleInfo(targetRule).parserClass;
         if (!parserClass.equals(myGrammarRootParser) && !parserClass.equals(ruleInfo(rule).parserClass)) {
-          method = StringUtil.getShortName(parserClass) + "." + method;
+          targetClassName = StringUtil.getShortName(parserClass);
         }
       }
     }
+    method = String.valueOf(method);
+    List<NodeArgument> arguments = new ArrayList<>();
     if (callParameters.size() > 1) {
       for (int i = 1, len = callParameters.size(); i < len; i++) {
-        clause.append(", ");
         BnfExpression nested = callParameters.get(i);
         String argument = nested.getText();
         String argNextName;
@@ -1284,80 +1334,94 @@ public class ParserGenerator {
         }
         if (nested instanceof BnfReferenceOrToken) {
           if (myFile.getRule(argument) != null) {
-            clause.append(generateWrappedNodeCall(rule, nested, argument));
+            arguments.add(generateWrappedNodeCall(rule, nested, argument));
           }
           else {
             String tokenType = getElementType(argument);
-            clause.append(generateWrappedNodeCall(rule, nested, tokenType));
+            arguments.add(generateWrappedNodeCall(rule, nested, tokenType));
           }
         }
         else if (nested instanceof BnfLiteralExpression) {
           String attributeName = getTokenName(GrammarUtil.unquote(argument));
           if (attributeName != null) {
-            clause.append(generateWrappedNodeCall(rule, nested, attributeName));
-          }
-          else if (argument.startsWith("\'")) {
-            clause.append(GrammarUtil.unquote(argument));
+            arguments.add(generateWrappedNodeCall(rule, nested, attributeName));
           }
           else {
-            clause.append(argument);
+            arguments.add(new TextArgument(argument.startsWith("\'") ? GrammarUtil.unquote(argument) : argument));
           }
         }
         else if (nested instanceof BnfExternalExpression) {
           List<BnfExpression> expressionList = ((BnfExternalExpression)nested).getExpressionList();
-          boolean metaRule = Rule.isMeta(rule);
-          if (metaRule && expressionList.size() == 1) {
-            clause.append(formatArgName(expressionList.get(0).getText()));
+          if (expressionList.size() == 1 && Rule.isMeta(rule)) {
+            arguments.add(new MetaParameterArgument(formatArgName(expressionList.get(0).getText())));
           }
           else {
-            clause.append(generateWrappedNodeCall(rule, nested, argNextName));
+            arguments.add(generateWrappedNodeCall(rule, nested, argNextName));
           }
         }
         else {
-          clause.append(generateWrappedNodeCall(rule, nested, argNextName));
+          arguments.add(generateWrappedNodeCall(rule, nested, argNextName));
         }
       }
     }
-    return method;
+    return Rule.isMeta(targetRule) ? new MetaMethodCall(targetClassName, method, arguments)
+                                   : new MethodCallWithArguments(method, arguments);
   }
 
-  private String generateWrappedNodeCall(BnfRule rule, @Nullable BnfExpression nested, final String nextName) {
-    if (!collectExtraArguments(rule, nested, false).isEmpty()) {
-      return wrapCallWithParserInstance(generateNodeCall(rule, nested, nextName));
-    }
-    String constantName = getWrapperParserConstantName(nextName);
-    String current = myParserLambdas.get(constantName);
-    if (current == null) {
-      String call = generateNodeCall(rule, nested, nextName);
-      myParserLambdas.put(constantName, "#" + call);
-      if (!call.startsWith(nextName +"(")) {
-        myInlinedChildNodes.add(nextName);
+  @NotNull
+  private NodeArgument generateWrappedNodeCall(@NotNull BnfRule rule, @Nullable BnfExpression nested, @NotNull String nextName) {
+    NodeCall nodeCall = generateNodeCall(rule, nested, nextName);
+    if (nodeCall instanceof MetaMethodCall) {
+      MetaMethodCall metaCall = (MetaMethodCall)nodeCall;
+      MetaMethodCallArgument argument = new MetaMethodCallArgument(metaCall);
+      if (metaCall.referencesMetaParameter()) {
+        return argument;
       }
-      return constantName;
-    }
-    else if (current.startsWith("#")) {
-      return constantName;
+      else {
+        return () -> getMetaMethodFieldRef(argument.render(), nextName);
+      }
     }
     else {
-      return current;
+      return () -> getParserLambdaRef(nodeCall, nextName);
     }
+  }
+
+  private String getMetaMethodFieldRef(@NotNull String call, @NotNull String nextName) {
+    String fieldName = getWrapperParserConstantName(nextName);
+    myMetaMethodFields.putIfAbsent(fieldName, call);
+    return fieldName;
+  }
+
+  @NotNull
+  private String getParserLambdaRef(@NotNull NodeCall nodeCall, @NotNull String nextName) {
+    String constantName = getWrapperParserConstantName(nextName);
+    String targetClass = myRenderedLambdas.get(constantName);
+    if (targetClass != null) {
+      return StringUtil.getShortName(targetClass) + "." + constantName;
+    }
+    else if (!myParserLambdas.containsKey(constantName)) {
+      String call = nodeCall.render(N);
+      myParserLambdas.put(constantName, call);
+      if (!call.startsWith(nextName + "(")) {
+        myInlinedChildNodes.add(nextName);
+      }
+    }
+    return constantName;
   }
 
   private boolean shallGenerateNodeChild(String funcName) {
     return !myInlinedChildNodes.contains(funcName);
   }
 
-  private static String getWrapperParserConstantName(String nextName) {
-    return toIdentifier(nextName, null, Case.AS_IS) + "_parser_";
-  }
-
-  private String generateConsumeToken(String tokenName, String consumeMethodName) {
+  @NotNull
+  private NodeCall generateConsumeToken(@NotNull ConsumeType consumeType, @NotNull String tokenName) {
     myTokensUsedInGrammar.add(tokenName);
-    return format("%s(%s, %s)", consumeMethodName, N.builder, getElementType(tokenName));
+    return new ConsumeTokenCall(consumeType, getElementType(tokenName));
   }
 
-  public String generateConsumeTextToken(String tokenText, String consumeMethodName) {
-    return format("%s(%s, \"%s\")", consumeMethodName, N.builder, tokenText);
+  @NotNull
+  public static NodeCall generateConsumeTextToken(@NotNull ConsumeType consumeType, @NotNull String tokenText) {
+    return new ConsumeTokenCall(consumeType, "\"" + tokenText + "\"");
   }
 
   private String getElementType(String token) {

@@ -37,6 +37,7 @@ import gnu.trove.THashSet;
 import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.analysis.BnfFirstNextAnalyzer;
 import org.intellij.grammar.java.JavaHelper;
+import org.intellij.grammar.parser.GeneratedParserUtilBase.Parser;
 import org.intellij.grammar.psi.*;
 import org.intellij.grammar.psi.impl.GrammarUtil;
 import org.jetbrains.annotations.NotNull;
@@ -119,6 +120,15 @@ public class ParserGenerator {
   private final Map<String, String> myParserLambdas = ContainerUtil.newHashMap();       // field name -> body
   private final Map<String, String> myRenderedLambdas = ContainerUtil.newHashMap();     // field name -> parser class FQN
   private final Set<String> myInlinedChildNodes = ContainerUtil.newHashSet();
+  /**
+   * Some meta-method calls use only static parsers as arguments,
+   * i.e. they don't reference meta-method parameters,
+   * we want to cache them in static fields.
+   * <p/>
+   * Mapping: <code> meta field name -> meta method call </code>
+   */
+  private final Map<String, String> myMetaMethodFields = ContainerUtil.newHashMap();
+
   private final Map<String, String> mySimpleTokens;
   private final Set<String> myTokensUsedInGrammar = ContainerUtil.newLinkedHashSet();
   private final boolean myNoStubs;
@@ -527,6 +537,7 @@ public class ParserGenerator {
       }
     }
     generateParserLambdas(parserClass);
+    generateMetaMethodFields();
     out("}");
   }
 
@@ -545,6 +556,10 @@ public class ParserGenerator {
 
   public String wrapCallWithParserInstance(String nodeCall) {
     return format("new Parser() {\npublic boolean parse(PsiBuilder %s, int %s) {\nreturn %s;\n}\n}", N.builder, N.level, nodeCall);
+  }
+
+  private void generateMetaMethodFields() {
+    take(myMetaMethodFields).forEach((field, call) -> out("private static final Parser " + field + " = " + call + ";"));
   }
 
   private void generateRootParserContent(Iterable<String> ownRuleNames) {
@@ -746,9 +761,40 @@ public class ParserGenerator {
            "// " + classHeader;
   }
 
+  /**
+   * Meta-methods are methods that take several {@link Parser Parser} instances as parameters and return another {@link Parser instance}.
+   *
+   * @param isRule whether meta-method may be used from another parser classes, and therefore should be accessible,
+   *               e.g. it is {@code true} for {@code meta rule ::= <<p>>},
+   *               and it is {@code false} for nested in-place method generated
+   *               for {@code <<p>> | some} in {@code meta rule ::= (<<p>> | some)* }.
+   */
+  private void generateMetaMethod(@NotNull String methodName, @NotNull List<String> parameterNames, boolean isRule) {
+    String parameterList = parameterNames.stream().map(it -> "Parser " + it).collect(joining(", "));
+    String argumentList = String.join(", ", parameterNames);
+    String metaParserMethodName = getWrapperParserMetaMethodName(methodName);
+    // @formatter:off
+    out("%sstatic Parser %s(%s) {", isRule ? "" : "private ", metaParserMethodName, parameterList);
+      out("return new Parser() {");
+        out("public boolean parse(PsiBuilder %s, int %s) {", N.builder, N.level);
+          out("return %s(%s, %s + 1, %s);", methodName, N.builder, N.level, argumentList);
+        out("}");
+      out("};");
+    out("}");
+    // @formatter:on
+  }
+
   void generateNode(BnfRule rule, BnfExpression initialNode, String funcName, Set<BnfExpression> visited) {
     boolean isRule = initialNode.getParent() == rule;
     BnfExpression node = getNonTrivialNode(initialNode);
+
+    final List<String> metaParameters = collectExtraArguments(rule, node);
+    if (!metaParameters.isEmpty()) {
+      if (isRule && isUsedAsArgument(rule) || !isRule && isArgument(initialNode)) {
+        generateMetaMethod(funcName, metaParameters, isRule);
+        newLine();
+      }
+    }
 
     IElementType type = getEffectiveType(node);
 
@@ -773,7 +819,7 @@ public class ParserGenerator {
     List<BnfExpression> children = isSingleNode ? Collections.singletonList(node) : getChildExpressions(node);
     String frameName = !children.isEmpty() && firstNonTrivial && !Rule.isMeta(rule) ? quote(getRuleDisplayName(rule, !isPrivate)) : null;
 
-    String extraParameters = collectExtraParameters(rule, node);
+    String extraParameters = metaParameters.stream().map(it -> ", Parser " + it).collect(Collectors.joining());
     out("%sstatic boolean %s(PsiBuilder %s, int %s%s) {", !isRule ? "private " : isPrivate ? "" : "public ", funcName, N.builder, N.level, extraParameters);
     if (isSingleNode) {
       if (isPrivate && !isLeftInner && recoverWhile == null && frameName == null) {
@@ -1080,11 +1126,6 @@ public class ParserGenerator {
       .collect(toList());
   }
 
-  @NotNull
-  private String collectExtraParameters(@NotNull BnfRule rule, @Nullable BnfExpression expression) {
-    return collectExtraArguments(rule, expression).stream().map(it -> ", Parser " + it).collect(Collectors.joining());
-  }
-
   private String formatArgName(String s) {
     String argName = s.trim();
     return N.argPrefix + (N.argPrefix.isEmpty() || "_".equals(N.argPrefix) ? argName : StringUtil.capitalize(argName));
@@ -1226,7 +1267,7 @@ public class ParserGenerator {
         return new MethodCall(nextName);
       }
       else {
-        return new MetaMethodCall(nextName, map(extraArguments, MetaParameterArgument::new));
+        return new MetaMethodCall(null, nextName, map(extraArguments, MetaParameterArgument::new));
       }
     }
   }
@@ -1255,6 +1296,7 @@ public class ParserGenerator {
     List<BnfExpression> metaParameters = Collections.emptyList();
     List<String> metaParameterNames = Collections.emptyList();
     String method = expressions.size() > 0 ? expressions.get(0).getText() : null;
+    String targetClassName = null;
     BnfRule targetRule = method == null ? null : myFile.getRule(method);
     // handle external rule call: substitute and merge arguments from external expression and rule definition
     if (targetRule != null) {
@@ -1270,7 +1312,7 @@ public class ParserGenerator {
       else {
         String parserClass = ruleInfo(targetRule).parserClass;
         if (!parserClass.equals(myGrammarRootParser) && !parserClass.equals(ruleInfo(rule).parserClass)) {
-          method = StringUtil.getShortName(parserClass) + "." + method;
+          targetClassName = StringUtil.getShortName(parserClass);
         }
       }
     }
@@ -1322,31 +1364,32 @@ public class ParserGenerator {
         }
       }
     }
-    return Rule.isMeta(targetRule) ? new MetaMethodCall(method, arguments)
+    return Rule.isMeta(targetRule) ? new MetaMethodCall(targetClassName, method, arguments)
                                    : new MethodCallWithArguments(method, arguments);
   }
 
   @NotNull
   private NodeArgument generateWrappedNodeCall(@NotNull BnfRule rule, @Nullable BnfExpression nested, @NotNull String nextName) {
     NodeCall nodeCall = generateNodeCall(rule, nested, nextName);
-    if (nodeCall instanceof MetaMethodCall && ((MetaMethodCall)nodeCall).referencesMetaParameter()) {
-      return new NodeArgument() {
-
-        @Override
-        public boolean referencesMetaParameter() {
-          return true;
-        }
-
-        @NotNull
-        @Override
-        public String render() {
-          return wrapCallWithParserInstance(nodeCall.render(N));
-        }
-      };
+    if (nodeCall instanceof MetaMethodCall) {
+      MetaMethodCall metaCall = (MetaMethodCall)nodeCall;
+      MetaMethodCallArgument argument = new MetaMethodCallArgument(metaCall);
+      if (metaCall.referencesMetaParameter()) {
+        return argument;
+      }
+      else {
+        return () -> getMetaMethodFieldRef(argument.render(), nextName);
+      }
     }
     else {
       return () -> getParserLambdaRef(nodeCall, nextName);
     }
+  }
+
+  private String getMetaMethodFieldRef(@NotNull String call, @NotNull String nextName) {
+    String fieldName = getWrapperParserConstantName(nextName);
+    myMetaMethodFields.putIfAbsent(fieldName, call);
+    return fieldName;
   }
 
   @NotNull

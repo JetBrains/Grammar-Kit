@@ -72,6 +72,14 @@ public class ExternalRules implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
+  static Parser comma_list_$(Parser param) {
+    return new Parser() {
+      public boolean parse(PsiBuilder builder_, int level_) {
+        return comma_list(builder_, level_ + 1, param);
+      }
+    };
+  }
+
   // <<param>> (',' <<param>>) *
   public static boolean comma_list(PsiBuilder builder_, int level_, Parser param) {
     if (!recursion_guard_(builder_, level_, "comma_list")) return false;
@@ -106,6 +114,14 @@ public class ExternalRules implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
+  static Parser comma_list_pinned_$(Parser head, Parser param) {
+    return new Parser() {
+      public boolean parse(PsiBuilder builder_, int level_) {
+        return comma_list_pinned(builder_, level_ + 1, head, param);
+      }
+    };
+  }
+
   // <<head>> <<param>> (<<comma_list_tail <<param>>>>) *
   public static boolean comma_list_pinned(PsiBuilder builder_, int level_, Parser head, Parser param) {
     if (!recursion_guard_(builder_, level_, "comma_list_pinned")) return false;
@@ -208,14 +224,18 @@ public class ExternalRules implements PsiParser, LightPsiParser {
 
   // <<comma_list_tail <<comma_list <<param>>>>>>
   private static boolean list_of_lists_2_0(PsiBuilder builder_, int level_, Parser param) {
-    return comma_list_tail(builder_, level_ + 1, new Parser() {
-      public boolean parse(PsiBuilder builder_, int level_) {
-        return comma_list(builder_, level_ + 1, param);
-      }
-    });
+    return comma_list_tail(builder_, level_ + 1, comma_list_$(param));
   }
 
   /* ********************************************************** */
+  static Parser main_class_meta_$(Parser p) {
+    return new Parser() {
+      public boolean parse(PsiBuilder builder_, int level_) {
+        return main_class_meta(builder_, level_ + 1, p);
+      }
+    };
+  }
+
   // <<p>>
   static boolean main_class_meta(PsiBuilder builder_, int level_, Parser p) {
     return p.parse(builder_, level_);
@@ -256,23 +276,7 @@ public class ExternalRules implements PsiParser, LightPsiParser {
     if (!recursion_guard_(builder_, level_, "meta_multi_level")) return false;
     boolean result_;
     Marker marker_ = enter_section_(builder_);
-    result_ = comma_list(builder_, level_ + 1, new Parser() {
-      public boolean parse(PsiBuilder builder_, int level_) {
-        return comma_list(builder_, level_ + 1, new Parser() {
-          public boolean parse(PsiBuilder builder_, int level_) {
-            return comma_list(builder_, level_ + 1, new Parser() {
-              public boolean parse(PsiBuilder builder_, int level_) {
-                return comma_list(builder_, level_ + 1, new Parser() {
-                  public boolean parse(PsiBuilder builder_, int level_) {
-                    return comma_list(builder_, level_ + 1, param);
-                  }
-                });
-              }
-            });
-          }
-        });
-      }
-    });
+    result_ = comma_list(builder_, level_ + 1, comma_list_$(comma_list_$(comma_list_$(comma_list_$(param)))));
     exit_section_(builder_, marker_, META_MULTI_LEVEL, result_);
     return result_;
   }
@@ -289,23 +293,7 @@ public class ExternalRules implements PsiParser, LightPsiParser {
     if (!recursion_guard_(builder_, level_, "meta_multi_level_pinned")) return false;
     boolean result_;
     Marker marker_ = enter_section_(builder_);
-    result_ = comma_list(builder_, level_ + 1, new Parser() {
-      public boolean parse(PsiBuilder builder_, int level_) {
-        return comma_list_pinned(builder_, level_ + 1, head, new Parser() {
-          public boolean parse(PsiBuilder builder_, int level_) {
-            return comma_list(builder_, level_ + 1, new Parser() {
-              public boolean parse(PsiBuilder builder_, int level_) {
-                return comma_list(builder_, level_ + 1, new Parser() {
-                  public boolean parse(PsiBuilder builder_, int level_) {
-                    return comma_list(builder_, level_ + 1, param);
-                  }
-                });
-              }
-            });
-          }
-        });
-      }
-    });
+    result_ = comma_list(builder_, level_ + 1, comma_list_pinned_$(head, comma_list_$(comma_list_$(comma_list_$(param)))));
     exit_section_(builder_, marker_, META_MULTI_LEVEL_PINNED, result_);
     return result_;
   }
@@ -316,30 +304,22 @@ public class ExternalRules implements PsiParser, LightPsiParser {
     if (!recursion_guard_(builder_, level_, "meta_multi_level_pinned_paren")) return false;
     boolean result_;
     Marker marker_ = enter_section_(builder_);
-    result_ = comma_list(builder_, level_ + 1, new Parser() {
-      public boolean parse(PsiBuilder builder_, int level_) {
-        return comma_list_pinned(builder_, level_ + 1, head, new Parser() {
-          public boolean parse(PsiBuilder builder_, int level_) {
-            return meta_multi_level_pinned_paren_0_0_1(builder_, level_ + 1, param);
-          }
-        });
-      }
-    });
+    result_ = comma_list(builder_, level_ + 1, comma_list_pinned_$(head, meta_multi_level_pinned_paren_0_0_1_$(param)));
     exit_section_(builder_, marker_, META_MULTI_LEVEL_PINNED_PAREN, result_);
     return result_;
   }
 
+  private static Parser meta_multi_level_pinned_paren_0_0_1_$(Parser param) {
+    return new Parser() {
+      public boolean parse(PsiBuilder builder_, int level_) {
+        return meta_multi_level_pinned_paren_0_0_1(builder_, level_ + 1, param);
+      }
+    };
+  }
+
   // <<comma_list <<comma_list <<comma_list <<param>>>>>>>>
   private static boolean meta_multi_level_pinned_paren_0_0_1(PsiBuilder builder_, int level_, Parser param) {
-    return comma_list(builder_, level_ + 1, new Parser() {
-      public boolean parse(PsiBuilder builder_, int level_) {
-        return comma_list(builder_, level_ + 1, new Parser() {
-          public boolean parse(PsiBuilder builder_, int level_) {
-            return comma_list(builder_, level_ + 1, param);
-          }
-        });
-      }
-    });
+    return comma_list(builder_, level_ + 1, comma_list_$(comma_list_$(param)));
   }
 
   /* ********************************************************** */
@@ -406,13 +386,17 @@ public class ExternalRules implements PsiParser, LightPsiParser {
     if (!recursion_guard_(builder_, level_, "meta_with_in_place")) return false;
     boolean result_;
     Marker marker_ = enter_section_(builder_);
-    result_ = comma_list(builder_, level_ + 1, new Parser() {
+    result_ = comma_list(builder_, level_ + 1, meta_with_in_place_0_0_$(param));
+    exit_section_(builder_, marker_, META_WITH_IN_PLACE, result_);
+    return result_;
+  }
+
+  private static Parser meta_with_in_place_0_0_$(Parser param) {
+    return new Parser() {
       public boolean parse(PsiBuilder builder_, int level_) {
         return meta_with_in_place_0_0(builder_, level_ + 1, param);
       }
-    });
-    exit_section_(builder_, marker_, META_WITH_IN_PLACE, result_);
-    return result_;
+    };
   }
 
   // <<param>> | some
@@ -435,21 +419,21 @@ public class ExternalRules implements PsiParser, LightPsiParser {
   /* ********************************************************** */
   // <<two_params_meta <<nested1>> <<two_params_meta <<nested2>> <<nested3>>>>>>
   static boolean nested_meta(PsiBuilder builder_, int level_, Parser nested1, Parser nested2, Parser nested3) {
-    return two_params_meta(builder_, level_ + 1, nested1, new Parser() {
-      public boolean parse(PsiBuilder builder_, int level_) {
-        return two_params_meta(builder_, level_ + 1, nested2, nested3);
-      }
-    });
+    return two_params_meta(builder_, level_ + 1, nested1, two_params_meta_$(nested2, nested3));
   }
 
   /* ********************************************************** */
   // <<two_params_meta (<<two_params_meta '%' <<c>>>>) perc_re>>
   static boolean nested_mixed(PsiBuilder builder_, int level_, Parser c) {
-    return two_params_meta(builder_, level_ + 1, new Parser() {
+    return two_params_meta(builder_, level_ + 1, nested_mixed_0_0_$(c), PERC_RE_parser_);
+  }
+
+  private static Parser nested_mixed_0_0_$(Parser c) {
+    return new Parser() {
       public boolean parse(PsiBuilder builder_, int level_) {
         return nested_mixed_0_0(builder_, level_ + 1, c);
       }
-    }, PERC_RE_parser_);
+    };
   }
 
   // <<two_params_meta '%' <<c>>>>
@@ -731,6 +715,14 @@ public class ExternalRules implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
+  static Parser two_params_meta_$(Parser a, Parser b) {
+    return new Parser() {
+      public boolean parse(PsiBuilder builder_, int level_) {
+        return two_params_meta(builder_, level_ + 1, a, b);
+      }
+    };
+  }
+
   // <<a>> <<b>>
   public static boolean two_params_meta(PsiBuilder builder_, int level_, Parser a, Parser b) {
     if (!recursion_guard_(builder_, level_, "two_params_meta")) return false;
@@ -757,24 +749,9 @@ public class ExternalRules implements PsiParser, LightPsiParser {
       return item_recover(builder_, level_ + 1);
     }
   };
-  final static Parser meta_mixed_list_0_0_parser_ = new Parser() {
-    public boolean parse(PsiBuilder builder_, int level_) {
-      return comma_list(builder_, level_ + 1, one_parser_);
-    }
-  };
   final static Parser meta_mixed_list_paren_0_0_parser_ = new Parser() {
     public boolean parse(PsiBuilder builder_, int level_) {
       return meta_mixed_list_paren_0_0(builder_, level_ + 1);
-    }
-  };
-  final static Parser meta_multi_level_no_closure_0_0_0_parser_ = new Parser() {
-    public boolean parse(PsiBuilder builder_, int level_) {
-      return comma_list(builder_, level_ + 1, SOME_parser_);
-    }
-  };
-  final static Parser meta_multi_level_no_closure_0_0_parser_ = new Parser() {
-    public boolean parse(PsiBuilder builder_, int level_) {
-      return comma_list(builder_, level_ + 1, meta_multi_level_no_closure_0_0_0_parser_);
     }
   };
   final static Parser meta_seq_0_1_parser_ = new Parser() {
@@ -833,11 +810,6 @@ public class ExternalRules implements PsiParser, LightPsiParser {
     }
   };
   final static Parser perc_re_list2_0_0_parser_ = PERC_RE_parser_;
-  final static Parser second_class_meta_usage_from_main_0_0_parser_ = new Parser() {
-    public boolean parse(PsiBuilder builder_, int level_) {
-      return ExternalRules2.second_class_meta(builder_, level_ + 1, SOME_parser_);
-    }
-  };
   final static Parser statement_parser_ = new Parser() {
     public boolean parse(PsiBuilder builder_, int level_) {
       return statement(builder_, level_ + 1);
@@ -848,6 +820,10 @@ public class ExternalRules implements PsiParser, LightPsiParser {
       return two(builder_, level_ + 1);
     }
   };
+  private static final Parser meta_mixed_list_0_0_parser_ = comma_list_$(one_parser_);
+  private static final Parser meta_multi_level_no_closure_0_0_0_parser_ = comma_list_$(SOME_parser_);
+  private static final Parser meta_multi_level_no_closure_0_0_parser_ = comma_list_$(meta_multi_level_no_closure_0_0_0_parser_);
+  private static final Parser second_class_meta_usage_from_main_0_0_parser_ = ExternalRules2.second_class_meta_$(SOME_parser_);
 }
 // ---- ExternalRules2.java -----------------
 // This is a generated file. Not intended for manual editing.
@@ -891,6 +867,14 @@ public class ExternalRules2 {
   }
 
   /* ********************************************************** */
+  static Parser second_class_meta_$(Parser bmp) {
+    return new Parser() {
+      public boolean parse(PsiBuilder builder_, int level_) {
+        return second_class_meta(builder_, level_ + 1, bmp);
+      }
+    };
+  }
+
   // <<bmp>>
   static boolean second_class_meta(PsiBuilder builder_, int level_, Parser bmp) {
     return bmp.parse(builder_, level_);
@@ -902,21 +886,13 @@ public class ExternalRules2 {
     return comma_list(builder_, level_ + 1, third_class_meta_usage_from_second_0_0_parser_);
   }
 
-  final static Parser main_class_meta_usage_from_second_0_0_parser_ = new Parser() {
-    public boolean parse(PsiBuilder builder_, int level_) {
-      return main_class_meta(builder_, level_ + 1, ExternalRules.SOME_parser_);
-    }
-  };
   final static Parser one_list_par_0_0_parser_ = new Parser() {
     public boolean parse(PsiBuilder builder_, int level_) {
       return one_list_par_0_0(builder_, level_ + 1);
     }
   };
-  final static Parser third_class_meta_usage_from_second_0_0_parser_ = new Parser() {
-    public boolean parse(PsiBuilder builder_, int level_) {
-      return ExternalRules3.third_class_meta(builder_, level_ + 1, ExternalRules.SOME_parser_);
-    }
-  };
+  private static final Parser main_class_meta_usage_from_second_0_0_parser_ = main_class_meta_$(ExternalRules.SOME_parser_);
+  private static final Parser third_class_meta_usage_from_second_0_0_parser_ = ExternalRules3.third_class_meta_$(ExternalRules.SOME_parser_);
 }
 // ---- ExternalRules3.java -----------------
 // This is a generated file. Not intended for manual editing.
@@ -938,14 +914,18 @@ public class ExternalRules3 {
   }
 
   /* ********************************************************** */
+  static Parser third_class_meta_$(Parser fmp) {
+    return new Parser() {
+      public boolean parse(PsiBuilder builder_, int level_) {
+        return third_class_meta(builder_, level_ + 1, fmp);
+      }
+    };
+  }
+
   // <<fmp>>
   static boolean third_class_meta(PsiBuilder builder_, int level_, Parser fmp) {
     return fmp.parse(builder_, level_);
   }
 
-  final static Parser second_class_meta_usage_from_third_0_0_parser_ = new Parser() {
-    public boolean parse(PsiBuilder builder_, int level_) {
-      return ExternalRules2.second_class_meta(builder_, level_ + 1, ExternalRules.SOME_parser_);
-    }
-  };
+  private static final Parser second_class_meta_usage_from_third_0_0_parser_ = ExternalRules2.second_class_meta_$(ExternalRules.SOME_parser_);
 }

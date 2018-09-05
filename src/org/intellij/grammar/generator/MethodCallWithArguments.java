@@ -21,6 +21,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static com.intellij.util.containers.ContainerUtil.map;
+
 class MethodCallWithArguments implements NodeCall {
 
   private final @NotNull String myMethodName;
@@ -32,17 +34,31 @@ class MethodCallWithArguments implements NodeCall {
   }
 
   @NotNull
+  String getMethodName() {
+    return myMethodName;
+  }
+
+  @NotNull
+  protected String getMethodRef() {
+    return getMethodName();
+  }
+
+  @NotNull
   List<NodeArgument> getArguments() {
     return myArguments;
   }
 
   @NotNull
+  List<String> getArgumentStrings() {
+    return map(getArguments(), NodeArgument::render);
+  }
+
+  @NotNull
   @Override
   public String render(@NotNull Names names) {
-    String arguments = getArguments().stream()
-      .map(NodeArgument::render)
+    String arguments = getArgumentStrings().stream()
       .map(it -> ", " + it)
       .collect(Collectors.joining());
-    return String.format("%s(%s, %s + 1%s)", myMethodName, names.builder, names.level, arguments);
+    return String.format("%s(%s, %s + 1%s)", getMethodRef(), names.builder, names.level, arguments);
   }
 }

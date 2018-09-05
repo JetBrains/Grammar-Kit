@@ -16,16 +16,32 @@
 package org.intellij.grammar.generator;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
 public class MetaMethodCall extends MethodCallWithArguments {
 
-  MetaMethodCall(@NotNull String methodName, @NotNull List<NodeArgument> arguments) {
+  private final @Nullable String myTargetClassName;
+
+  MetaMethodCall(@Nullable String targetClassName, @NotNull String methodName, @NotNull List<NodeArgument> arguments) {
     super(methodName, arguments);
+    myTargetClassName = targetClassName;
   }
 
   boolean referencesMetaParameter() {
     return getArguments().stream().anyMatch(NodeArgument::referencesMetaParameter);
+  }
+
+  @Nullable
+  String getTargetClassName() {
+    return myTargetClassName;
+  }
+
+  @NotNull
+  @Override
+  protected String getMethodRef() {
+    String ref = super.getMethodRef();
+    return myTargetClassName == null ? ref : String.format("%s.%s", myTargetClassName, ref);
   }
 }

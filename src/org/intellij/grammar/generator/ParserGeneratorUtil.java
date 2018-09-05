@@ -24,8 +24,10 @@ import com.intellij.openapi.util.Pair;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.psi.NavigatablePsiElement;
 import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiReference;
 import com.intellij.psi.codeStyle.NameUtil;
 import com.intellij.psi.impl.source.tree.LeafPsiElement;
+import com.intellij.psi.search.searches.ReferencesSearch;
 import com.intellij.psi.tree.IElementType;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.util.Function;
@@ -298,6 +300,11 @@ public class ParserGeneratorUtil {
   @NotNull
   static String getWrapperParserConstantName(@NotNull String nextName) {
     return getBaseName(nextName) + "_parser_";
+  }
+
+  @NotNull
+  static String getWrapperParserMetaMethodName(@NotNull String nextName) {
+    return getBaseName(nextName) + RESERVED_SUFFIX;
   }
 
   public static String getNextName(@NotNull String funcName, int i) {
@@ -683,6 +690,26 @@ public class ParserGeneratorUtil {
     return map;
   }
 
+  static boolean isUsedAsArgument(@NotNull BnfRule rule) {
+    return !ReferencesSearch.search(rule, rule.getUseScope()).forEach(ref -> !isUsedAsArgument(ref));
+  }
+
+  private static boolean isUsedAsArgument(@NotNull PsiReference ref) {
+    PsiElement element = ref.getElement();
+    if (!(element instanceof BnfExpression)) {
+      return false;
+    }
+    PsiElement parent = element.getParent();
+    if (!(parent instanceof BnfExternalExpression) || ((BnfExternalExpression)parent).getRefElement() != element) {
+      return false;
+    }
+    return isArgument((BnfExpression)parent);
+  }
+
+  static boolean isArgument(@NotNull BnfExpression expr) {
+    PsiElement parent = expr.getParent();
+    return parent instanceof BnfExternalExpression && ((BnfExternalExpression)parent).getArguments().contains(expr);
+  }
 
   public static class Rule {
 

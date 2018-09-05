@@ -280,6 +280,14 @@ public class Fixes implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
+  static Parser meta2_$(Parser p, Parser q) {
+    return new Parser() {
+      public boolean parse(PsiBuilder builder_, int level_) {
+        return meta2(builder_, level_ + 1, p, q);
+      }
+    };
+  }
+
   // <<p>> <<q>>
   static boolean meta2(PsiBuilder builder_, int level_, Parser p, Parser q) {
     if (!recursion_guard_(builder_, level_, "meta2")) return false;
@@ -740,11 +748,6 @@ public class Fixes implements PsiParser, LightPsiParser {
       return nested_meta_pin_1_1_0_1(builder_, level_ + 1);
     }
   };
-  final static Parser nested_meta_pin_1_1_0_parser_ = new Parser() {
-    public boolean parse(PsiBuilder builder_, int level_) {
-      return meta2(builder_, level_ + 1, nested_meta_pin_1_1_0_0_parser_, nested_meta_pin_1_1_0_1_parser_);
-    }
-  };
   final static Parser nested_meta_pin_1_1_1_0_parser_ = new Parser() {
     public boolean parse(PsiBuilder builder_, int level_) {
       return nested_meta_pin_1_1_1_0(builder_, level_ + 1);
@@ -755,14 +758,11 @@ public class Fixes implements PsiParser, LightPsiParser {
       return nested_meta_pin_1_1_1_1(builder_, level_ + 1);
     }
   };
-  final static Parser nested_meta_pin_1_1_1_parser_ = new Parser() {
-    public boolean parse(PsiBuilder builder_, int level_) {
-      return meta2(builder_, level_ + 1, nested_meta_pin_1_1_1_0_parser_, nested_meta_pin_1_1_1_1_parser_);
-    }
-  };
   final static Parser some_parser_ = new Parser() {
     public boolean parse(PsiBuilder builder_, int level_) {
       return some(builder_, level_ + 1);
     }
   };
+  private static final Parser nested_meta_pin_1_1_0_parser_ = meta2_$(nested_meta_pin_1_1_0_0_parser_, nested_meta_pin_1_1_0_1_parser_);
+  private static final Parser nested_meta_pin_1_1_1_parser_ = meta2_$(nested_meta_pin_1_1_1_0_parser_, nested_meta_pin_1_1_1_1_parser_);
 }

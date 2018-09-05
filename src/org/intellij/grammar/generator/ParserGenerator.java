@@ -1347,10 +1347,6 @@ public class ParserGenerator {
     return !myInlinedChildNodes.contains(funcName);
   }
 
-  private static String getWrapperParserConstantName(String nextName) {
-    return toIdentifier(nextName, null, Case.AS_IS) + "_parser_";
-  }
-
   private String generateConsumeToken(String tokenName, String consumeMethodName) {
     myTokensUsedInGrammar.add(tokenName);
     return format("%s(%s, %s)", consumeMethodName, N.builder, getElementType(tokenName));

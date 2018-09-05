@@ -285,9 +285,19 @@ public class ParserGeneratorUtil {
     return PsiTreeUtil.getChildrenOfTypeAsList(node, BnfExpression.class);
   }
 
+  @NotNull
+  private static String getBaseName(@NotNull String name) {
+    return toIdentifier(name, null, Case.AS_IS);
+  }
+
   public static String getFuncName(@NotNull BnfRule r) {
-    String name = toIdentifier(r.getName(), null, Case.AS_IS);
+    String name = getBaseName(r.getName());
     return JAVA_RESERVED.contains(name) ? name + RESERVED_SUFFIX : name;
+  }
+
+  @NotNull
+  static String getWrapperParserConstantName(@NotNull String nextName) {
+    return getBaseName(nextName) + "_parser_";
   }
 
   public static String getNextName(@NotNull String funcName, int i) {

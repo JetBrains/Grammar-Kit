@@ -129,6 +129,7 @@ public class ParserGenerator {
    */
   private final Map<String, String> myMetaMethodFields = ContainerUtil.newHashMap();
 
+  private final Map<String, Collection<String>> myTokenSets = ContainerUtil.newTreeMap();
   private final Map<String, String> mySimpleTokens;
   private final Set<String> myTokensUsedInGrammar = ContainerUtil.newLinkedHashSet();
   private final boolean myNoStubs;
@@ -310,13 +311,28 @@ public class ParserGenerator {
       end = StringUtil.indexOf(s, '\n', start, length);
       if (end == -1) end = length;
       String substring = s.substring(start, end);
-      if (!isComment && substring.startsWith("}")) myOffset--;
+      if (!isComment && (substring.startsWith("}") || substring.startsWith(")"))) {
+        myOffset--;
+        newStatement = true;
+      }
       if (myOffset > 0) {
         myOut.print(StringUtil.repeat("  ", newStatement ? myOffset : myOffset + 1));
       }
-      if (!isComment && substring.endsWith("{")) myOffset++;
       myOut.println(substring);
-      newStatement = isComment || substring.endsWith(";") || substring.endsWith("{") || substring.endsWith("}");
+      if (isComment) {
+        newStatement = true;
+      }
+      else if (substring.endsWith("{")) {
+        myOffset++;
+        newStatement = true;
+      }
+      else if (substring.endsWith("(")) {
+        myOffset++;
+        newStatement = false;
+      }
+      else {
+        newStatement = substring.endsWith(";") || substring.endsWith("}");
+      }
     }
   }
 
@@ -480,7 +496,7 @@ public class ParserGenerator {
     for (String className : ContainerUtil.sorted(classified.keySet())) {
       openOutput(className);
       try {
-        generateParser(className, JBIterable.from(classified.get(className)).map(o -> o.name));
+        generateParser(className, map(classified.get(className), it -> it.name));
       }
       finally {
         closeOutput();
@@ -488,18 +504,21 @@ public class ParserGenerator {
     }
   }
 
-  public void generateParser(String parserClass, Iterable<String> ownRuleNames) {
+  public void generateParser(String parserClass, Collection<String> ownRuleNames) {
     List<String> parserImports = getRootAttribute(myFile, KnownAttribute.PARSER_IMPORTS).asStrings();
     boolean rootParser = parserClass.equals(myGrammarRootParser);
     Set<String> imports = new LinkedHashSet<>();
     imports.addAll(Arrays.asList(PSI_BUILDER_CLASS,
                                  PSI_BUILDER_CLASS + ".Marker",
-                                 "static " + myTypeHolderClass + ".*"));
+                                 staticStarImport(myTypeHolderClass)));
+    if (G.generateTokenSets && hasAtLeastOneTokenChoice(myFile, ownRuleNames)) {
+      imports.add(staticStarImport(myTypeHolderClass + "." + TOKEN_SET_HOLDER_NAME));
+    }
     if (StringUtil.isNotEmpty(myParserUtilClass)) {
-      imports.add("static " + myParserUtilClass + ".*");
+      imports.add(staticStarImport(myParserUtilClass));
     }
     if (!rootParser) {
-      imports.add("static " + myGrammarRootParser + ".*");
+      imports.add(staticStarImport(myGrammarRootParser));
     }
     else {
       imports.addAll(Arrays.asList(IELEMENTTYPE_CLASS,
@@ -889,6 +908,14 @@ public class ParserGenerator {
 
       NodeCall nodeCall = generateNodeCall(rule, child, getNextName(funcName, i));
       if (type == BNF_CHOICE) {
+        if (isRule && i == 0 && G.generateTokenSets) {
+          ConsumeType consumeType = getEffectiveConsumeType(rule, node, null);
+          NodeCall tokenChoice = generateTokenChoiceCall(children, consumeType, funcName);
+          if (tokenChoice != null) {
+            out("%s = %s;", N.result, tokenChoice.render(N));
+            break;
+          }
+        }
         out("%s%s = %s;", i > 0 ? format("if (!%s) ", N.result) : "", N.result, nodeCall.render(N));
       }
       else if (type == BNF_SEQUENCE) {
@@ -1182,6 +1209,26 @@ public class ParserGenerator {
     return new ConsumeTokensCall(consumeMethodName, pin, list);
   }
 
+  @Nullable
+  private NodeCall generateTokenChoiceCall(@NotNull List<BnfExpression> children,
+                                           @NotNull ConsumeType consumeType,
+                                           @NotNull String funcName) {
+    final Collection<String> tokenNames = getTokenNames(myFile, children, 2);
+    if (tokenNames == null) return null;
+
+    final Set<String> tokens = ContainerUtil.newTreeSet();
+    for (String tokenName : tokenNames) {
+      if (!mySimpleTokens.containsKey(tokenName) && !mySimpleTokens.containsValue(tokenName)) {
+        mySimpleTokens.put(tokenName, null);
+      }
+      tokens.add(getElementType(tokenName));
+    }
+
+    final String tokenSetName = getTokenSetConstantName(funcName);
+    myTokenSets.put(tokenSetName, tokens);
+    return new ConsumeTokenChoiceCall(consumeType, tokenSetName);
+  }
+
   @NotNull
   NodeCall generateNodeCall(@NotNull BnfRule rule, @Nullable BnfExpression node, @NotNull String nextName) {
     return generateNodeCall(rule, node, nextName, null);
@@ -1449,6 +1496,9 @@ public class ParserGenerator {
       imports.add(PSI_ELEMENT_CLASS);
       imports.add(AST_NODE_CLASS);
     }
+    if (G.generateTokenSets && !myTokenSets.isEmpty()) {
+      imports.add(TOKEN_SET_CLASS);
+    }
     boolean useExactElements = "all".equals(G.generateExactTypes) || G.generateExactTypes.contains("elements");
     boolean useExactTokens = "all".equals(G.generateExactTypes) || G.generateExactTypes.contains("tokens");
 
@@ -1525,6 +1575,7 @@ public class ParserGenerator {
         String tokenString = sortedTokens.get(tokenType);
         out(fieldType + " " + tokenType + " = " + tokenCreateCall + "(\"" + StringUtil.escapeStringCharacters(tokenString) + "\""+callFix+");");
       }
+      generateTokenSets();
     }
     if (G.generatePsi && G.generatePsiClassesMap) {
       newLine();
@@ -1609,6 +1660,20 @@ public class ParserGenerator {
            !matchesAny(getRegexpTokenRegexp(tokenText), "a", "1", "_", ".");
   }
 
+  private void generateTokenSets() {
+    if (myTokenSets.isEmpty()) {
+      return;
+    }
+    newLine();
+    out("interface %s {", TOKEN_SET_HOLDER_NAME);
+    Map<String, String> reverseMap = ContainerUtil.newHashMap();
+    myTokenSets.forEach((name, tokens) -> {
+      String value = String.format("TokenSet.create(%s)", tokenSetString(tokens));
+      String alreadyRendered = reverseMap.putIfAbsent(value, name);
+      out("TokenSet %s = %s;", name, ObjectUtils.chooseNotNull(alreadyRendered, value));
+    });
+    out("}");
+  }
 
   /*PSI******************************************************************/
   private void generatePsiIntf(BnfRule rule, RuleInfo info) {
@@ -1645,7 +1710,7 @@ public class ParserGenerator {
                                  PSI_ELEMENT_CLASS));
     if (myVisitorClassName != null) imports.add(PSI_ELEMENT_VISITOR_CLASS);
     imports.add(myPsiTreeUtilClass);
-    imports.add("static " + myTypeHolderClass + ".*");
+    imports.add(staticStarImport(myTypeHolderClass));
     if (StringUtil.isNotEmpty(implSuper)) imports.add(implSuper);
     imports.add(StringUtil.getPackageName(superInterface) + ".*");
     imports.add(StringUtil.notNullize(myVisitorClassName));

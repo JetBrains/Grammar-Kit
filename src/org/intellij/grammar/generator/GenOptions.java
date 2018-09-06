@@ -35,6 +35,7 @@ public class GenOptions {
   public final int generateFirstCheck;
   public final Pattern generateRootRules;
   public final boolean generateTokenTypes;
+  public final boolean generateTokenSets;
   public final boolean generateElementTypes;
   public final String generateExactTypes;
   public final boolean generateExtendedPin;
@@ -56,6 +57,7 @@ public class GenOptions {
     generatePsiFactory = !"no".equals(genOptions.get("psi-factory"));
     generatePsiClassesMap = "yes".equals(genOptions.get("psi-classes-map"));
     generateTokenTypes = getGenerateOption(myFile, KnownAttribute.GENERATE_TOKENS, genOptions, "tokens");
+    generateTokenSets = generateTokenTypes && "yes".equals(genOptions.get("token-sets"));
     generateElementTypes = !"no".equals(genOptions.get("elements"));
     generateExactTypes = StringUtil.notNullize(genOptions.get("exact-types"));
     generateFirstCheck = getGenerateOption(myFile, KnownAttribute.GENERATE_FIRST_CHECK, genOptions, "first-check", "firstCheck");

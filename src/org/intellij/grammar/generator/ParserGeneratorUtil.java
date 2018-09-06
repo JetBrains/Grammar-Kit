@@ -316,6 +316,11 @@ public class ParserGeneratorUtil {
     return toIdentifier(text, NameFormat.from("get"), Case.CAMEL);
   }
 
+  @NotNull
+  static String getTokenSetConstantName(@NotNull String nextName) {
+    return toIdentifier(nextName, null, Case.UPPER) + "_TOKENS";
+  }
+
   public static boolean isRollbackRequired(BnfExpression o, BnfFile file) {
     if (!(o instanceof BnfReferenceOrToken)) return true;
     String value = GrammarUtil.stripQuotesAroundId(o.getText());
@@ -612,17 +617,58 @@ public class ParserGeneratorUtil {
     return tokenText.substring(BnfConstants.REGEXP_PREFIX.length());
   }
 
+  @Nullable
+  static Collection<String> getTokenNames(@NotNull BnfFile file, @NotNull List<BnfExpression> expressions) {
+    return getTokenNames(file, expressions, -1);
+  }
+
+  @Nullable("when some expression is not a token or total tokens count is less than or equals threshold")
+  static Collection<String> getTokenNames(@NotNull BnfFile file, @NotNull List<BnfExpression> expressions, int threshold) {
+    Set<String> tokens = new LinkedHashSet<>();
+    for (BnfExpression expression : expressions) {
+      String token = getTokenName(file, expression);
+      if (token == null) {
+        return null;
+      }
+      else {
+        tokens.add(token);
+      }
+    }
+    return tokens.size() > threshold ? tokens : null;
+  }
+
+  private static String getTokenName(@NotNull BnfFile file, @NotNull BnfExpression expression) {
+    String text = expression.getText();
+    if (expression instanceof BnfStringLiteralExpression) {
+      return RuleGraphHelper.getTokenTextToNameMap(file).get(GrammarUtil.unquote(text));
+    }
+    else if (expression instanceof BnfReferenceOrToken) {
+      return file.getRule(text) == null ? text : null;
+    }
+    else {
+      return null;
+    }
+  }
+
   public static boolean isTokenSequence(@NotNull BnfRule rule, @Nullable BnfExpression node) {
     if (node == null || ConsumeType.forRule(rule) != ConsumeType.DEFAULT) return false;
     if (getEffectiveType(node) != BNF_SEQUENCE) return false;
-    BnfFile file = (BnfFile) rule.getContainingFile();
-    for (PsiElement child : getChildExpressions(node)) {
-      String text = child.getText();
-      String tokenName = child instanceof BnfStringLiteralExpression ? RuleGraphHelper.getTokenTextToNameMap(file).get(GrammarUtil.unquote(child.getText())) :
-                         child instanceof BnfReferenceOrToken && file.getRule(text) == null ? text : null;
-      if (tokenName == null) return false;
+    BnfFile file = (BnfFile)rule.getContainingFile();
+    return getTokenNames(file, getChildExpressions(node)) != null;
+  }
+
+  private static boolean isTokenChoice(@NotNull BnfFile file, @NotNull BnfExpression choice) {
+    return choice instanceof BnfChoice && getTokenNames(file, ((BnfChoice)choice).getExpressionList(), 2) != null;
+  }
+
+  static boolean hasAtLeastOneTokenChoice(@NotNull BnfFile file, @NotNull Collection<String> ownRuleNames) {
+    for (String ruleName : ownRuleNames) {
+      final BnfRule rule = file.getRule(ruleName);
+      if (rule == null) continue;
+      final BnfExpression expression = rule.getExpression();
+      if (isTokenChoice(file, expression)) return true;
     }
-    return true;
+    return false;
   }
 
   public static void appendTokenTypes(StringBuilder sb, List<String> tokenTypes) {
@@ -632,6 +678,32 @@ public class ParserGeneratorUtil {
       if (count > 0) sb.append(",").append(newLine ? "\n" : " ");
       sb.append(tokenTypes.get(count));
       if (newLine) line ++;
+    }
+  }
+
+  private static Collection<String> addNewLines(Collection<String> strings) {
+    if (strings.size() < 5) return strings;
+    List<String> result = new ArrayList<>();
+    int counter = 0;
+    for (String string : strings) {
+      if (counter > 0 && counter % 4 == 0) {
+        result.add("\n" + string);
+      }
+      else {
+        result.add(string);
+      }
+      counter++;
+    }
+    return result;
+  }
+
+  static String tokenSetString(Collection<String> tokens) {
+    String string = String.join(", ", addNewLines(tokens));
+    if (tokens.size() < 5) {
+      return string;
+    }
+    else {
+      return "\n" + string + "\n";
     }
   }
 
@@ -890,6 +962,11 @@ public class ParserGeneratorUtil {
       return s;
     }
 
+  }
+
+  @NotNull
+  static String staticStarImport(@NotNull String fqn) {
+    return "static " + fqn + ".*";
   }
 
   private static final TObjectHashingStrategy<PsiElement> TEXT_STRATEGY = new TObjectHashingStrategy<PsiElement>() {

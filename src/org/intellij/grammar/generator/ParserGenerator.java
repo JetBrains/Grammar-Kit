@@ -1568,7 +1568,7 @@ public class ParserGenerator {
           out("IElementType type = node.getElementType();");
         }
         String psiClass = getRulePsiClassName(rule, myImplClassFormat);
-        out((!first1 ? "else" : "") + " if (type == " + elementType + ") {");
+        out((!first1 ? "else " : "") + "if (type == " + elementType + ") {");
         out("return new " + psiClass + "(node);");
         first1 = false;
         out("}");

@@ -50,7 +50,7 @@ public interface GeneratedTypes {
   class Factory {
     public static PsiElement createElement(ASTNode node) {
       IElementType type = node.getElementType();
-       if (type == A_STATEMENT) {
+      if (type == A_STATEMENT) {
         return new XAStatementImpl(node);
       }
       else if (type == BLOCK_OF) {

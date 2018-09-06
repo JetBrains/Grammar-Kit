@@ -21,7 +21,7 @@ public interface GeneratedTypes {
   class Factory {
     public static PsiElement createElement(ASTNode node) {
       IElementType type = node.getElementType();
-       if (type == ITEM) {
+      if (type == ITEM) {
         return new ItemImpl(node);
       }
       else if (type == LIST) {

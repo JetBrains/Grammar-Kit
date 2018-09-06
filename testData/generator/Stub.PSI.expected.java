@@ -23,7 +23,7 @@ public interface FooTypes {
   class Factory {
     public static PsiElement createElement(ASTNode node) {
       IElementType type = node.getElementType();
-       if (type == ELEMENT_1) {
+      if (type == ELEMENT_1) {
         return new Element1Impl(node);
       }
       else if (type == ELEMENT_2) {

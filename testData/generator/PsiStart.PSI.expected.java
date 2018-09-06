@@ -18,7 +18,7 @@ public interface GeneratedTypes {
   class Factory {
     public static PsiElement createElement(ASTNode node) {
       IElementType type = node.getElementType();
-       if (type == ELEMENT) {
+      if (type == ELEMENT) {
         return new ElementImpl(node);
       }
       else if (type == ENTRY) {

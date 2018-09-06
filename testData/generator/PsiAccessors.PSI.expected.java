@@ -22,7 +22,7 @@ public interface GeneratedTypes {
   class Factory {
     public static PsiElement createElement(ASTNode node) {
       IElementType type = node.getElementType();
-       if (type == BINARY) {
+      if (type == BINARY) {
         return new XBinaryImpl(node);
       }
       else if (type == EXPRESSION) {

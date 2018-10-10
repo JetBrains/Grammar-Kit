@@ -140,6 +140,7 @@ the described syntax doesn't break much the ordinary BNF syntax ([complete examp
 // to keep this sample short function calls and other expressions are omitted
 {
   extends(".*expr")=expr
+  tokens=[number="regexp:[0-9]+" id="regexp:[a-z][a-z0-9]*"]
 }
 // the root expression rule
 expr ::= assign_expr

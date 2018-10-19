@@ -2,6 +2,7 @@
 <idea-plugin>
   <extensions defaultExtensionNs="com.intellij">
     <projectService serviceInterface="org.intellij.grammar.java.JavaHelper" serviceImplementation="org.intellij.grammar.java.JavaHelper$PsiHelper"/>
+    <referencesSearch implementation="org.intellij.jflex.psi.impl.JFlexStateUsageSearcher"/>
     <!--<debugger.positionManagerFactory implementation="org.intellij.grammar.debugger.BnfPositionManagerFactory"/>-->
   </extensions>
   <actions>

@@ -122,7 +122,6 @@
     <multiHostInjector implementation="org.intellij.jflex.psi.impl.JFlexJavaCodeInjector" />
     <lang.elementManipulator forClass="org.intellij.jflex.psi.impl.JFlexJavaCodeImpl"
                              implementationClass="org.intellij.jflex.psi.impl.JFlexJavaCodeManipulator" />
-    <referencesSearch implementation="org.intellij.jflex.psi.impl.JFlexStateUsageSearcher"/>
   </extensions>
   <actions>
     <group id="grammar.file.group" popup="false">

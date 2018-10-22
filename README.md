@@ -65,7 +65,7 @@ Tooling support
 
 Quick documentation:
 ====================
-See [Parsing Expression Grammar](http://en.wikipedia.org/wiki/Parsing_expression_grammar) for basic syntax.
+See [Parsing Expression Grammar (PEG)](http://en.wikipedia.org/wiki/Parsing_expression_grammar) for basic syntax.
 Use ::= for ← symbol. You can also use [ .. ] for optional sequences and { | | } for choices as these variants are popular in real-world grammars.
 Grammar-Kit source code is the main example of Grammar-Kit application.
 The grammar for BNF parser and PSI generation can be found [here](grammars/Grammar.bnf).
@@ -73,34 +73,46 @@ The grammar for BNF parser and PSI generation can be found [here](grammars/Gramm
 Here's how it may look like:
 
 ````
-root_rule ::= rule_A rule_B rule_C rule_D                // a sequence
-rule_A ::= token | 'or_text' | "another_one"             // a choice
-rule_B ::= [ optional_token ] and_another_one?           // optional parts
-rule_C ::= &required !forbidden                          // predicates
+// Basic PEG BNF syntax
+
+root_rule ::= rule_A rule_B rule_C rule_D                // sequence expression
+rule_A ::= token | 'or_text' | "another_one"             // choice expression
+rule_B ::= [ optional_token ] and_another_one?           // optional expression
+rule_C ::= &required !forbidden                          // predicate expression
 rule_D ::= { can_use_braces + (and_parens) * }           // grouping and repetition
 
-// Grammar-Kit extensions:
+// Grammar-Kit BNF syntax
 
+{ generate=[psi="no"] }                                  // top-level global attributes
 private left rule_with_modifier ::= '+'                  // rule modifiers
-left rule_with_attributes ::= '?' {elementType=rule_D}   // left rule and attributes
+left rule_with_attributes ::= '?' {elementType=rule_D}   // rule attributes
 
-private meta list_macro ::= <<p>> (',' <<p>>) *          // meta rule
-private list_usage ::= <<list_macro rule_D>>             // external expression
+private meta list ::= <<p>> (',' <<p>>) *                // meta rule with parameters
+private list_usage ::= <<list rule_D>>                   // meta rule application
 ````
 
 Basic syntax is extended with rule and global attributes that control code generation.
-Attributes are specified by the list of *name=value* pairs enclosed in { .. }.
+Attributes are specified by the list of *name=value* pairs enclosed in braces.
 Rule attributes are placed right after the rule definition.
 Global attributes are placed on top or separated from a rule definition with a semicolon.
-Rule name or generated method name pattern can specify expression an attribute applies to:
+
+Generator generates a static method for each BNF expression as follows:
+```
+static boolean rule_name(..)               // rule top level expression
+static boolean rule_name_0(..)             // rule sub-expression
+...                                        // ...
+static boolean rule_name_N1_N2_..._NX      // rule sub-sub-...-sub-expression
+```
+Naming a rule like *rule_name_N1_N2_..._NX* shall be avoided.
+
+One can specify an attribute for several rules at once in a global attributes block:
 
 ````
 {
-  pin(".*_list(?:_\d.*)?")=1
+  extends("*._expr")=expr        // applies to all .*_expr rules
+  pin(".*_list(?:_\d+)*")=1      // applies to all .*_list rules and their sub-expressions
 }
 ````
-
-This way you can keep grammar clean.
 
 ### Rule modifiers:
 1. *private*:  PSI node will not be generated for this rule. Rules are public by default.
@@ -151,9 +163,12 @@ Text-matched tokens can span more than one real token returned by lexer.
 Rules, tokens and text-matched tokens have different colors in editor.
 
 ### Attributes for error recovery and reporting:
-* _pin_  tunes the parser to handle incomplete matches. A rule matches if the prefix of the rule up to the pinned token matches.
-Pinning an opening brace allows the parser to match the closing brace even if the tokens between them does not match the rule.
-Pin takes a position indicated by either a number *(pin=2)* or a pattern string *(pin="rule_B")*.
+* _pin_ (value: a number or a pattern) tunes the parser to handle incomplete matches. 
+A sequence matches if its prefix up to a pinned item matches.
+On successfully reaching the pinned item the parser tries to match the rest items whether they match or not.
+Pin value indicates the desired item by either a number *{pin=2}* or a pattern  *{pin="rule_B"}*.
+By default the pin is applied to the top sequence expression. Sub-expressions can be included using a target pattern:
+*{pin(".\*")=1}* applies to all sub-sequences.
 
 * _recoverWhile_ (value: predicate rule) matches any number of tokens after the rule
 matching completes with any result. This attribute helps parser recover when unmatched token
@@ -163,9 +178,6 @@ sequence is encountered. See [HOWTO section](HOWTO.md#22-using-recoverwhile-attr
 expression error messages to "&lt;expression&gt; required" instead of a long list of tokens.
 
 ### Generated parser structure:
-For each rule and every its sub-expression in a grammar a static method is generated.
-Sub-expression methods are named *rule_name_K_L_..* where the *(K, L, .. )* number list describes the position of a sub-expression in an enclosing rule. Avoid naming your rules this way.
-
 Generator can split parser code into several classes for better support of large grammars.
 
 For simple cases parser will consists just of several generated classes.

@@ -91,7 +91,7 @@ public class GrammarParser implements PsiParser, LightPsiParser {
   }
 
   protected boolean parse_root_(IElementType type, PsiBuilder builder, int level) {
-    return parseGrammar(builder, level + 1, grammar_element_parser_);
+    return parseGrammar(builder, level + 1, GrammarParser::grammar_element);
   }
 
   public static final TokenSet[] EXTENDS_SETS_ = new TokenSet[] {
@@ -132,7 +132,7 @@ public class GrammarParser implements PsiParser, LightPsiParser {
     pinned = result; // pin = 1
     result = result && report_error_(builder, attr_value(builder, level + 1));
     result = pinned && attr_2(builder, level + 1) && result;
-    exit_section_(builder, level, marker, result, pinned, attr_recover_parser_);
+    exit_section_(builder, level, marker, result, pinned, GrammarParser::attr_recover);
     return result || pinned;
   }
 
@@ -382,7 +382,7 @@ public class GrammarParser implements PsiParser, LightPsiParser {
     result = grammar_element_0(builder, level + 1);
     pinned = result; // pin = 1
     result = result && grammar_element_1(builder, level + 1);
-    exit_section_(builder, level, marker, result, pinned, grammar_element_recover_parser_);
+    exit_section_(builder, level, marker, result, pinned, GrammarParser::grammar_element_recover);
     return result || pinned;
   }
 
@@ -435,7 +435,7 @@ public class GrammarParser implements PsiParser, LightPsiParser {
     Marker marker = enter_section_(builder, level, _NONE_, BNF_LIST_ENTRY, "<list entry>");
     result = list_entry_0(builder, level + 1);
     result = result && list_entry_1(builder, level + 1);
-    exit_section_(builder, level, marker, result, false, list_entry_recover_parser_);
+    exit_section_(builder, level, marker, result, false, GrammarParser::list_entry_recover);
     return result;
   }
 
@@ -753,7 +753,7 @@ public class GrammarParser implements PsiParser, LightPsiParser {
       if (!option(builder, level + 1)) break;
       if (!empty_element_parsed_guard_(builder, "sequence", pos)) break;
     }
-    exit_section_(builder, level, marker, true, false, sequence_recover_parser_);
+    exit_section_(builder, level, marker, true, false, GrammarParser::sequence_recover);
     return true;
   }
 
@@ -894,29 +894,4 @@ public class GrammarParser implements PsiParser, LightPsiParser {
     return true;
   }
 
-  static final Parser attr_recover_parser_ = new Parser() {
-    public boolean parse(PsiBuilder builder, int level) {
-      return attr_recover(builder, level + 1);
-    }
-  };
-  static final Parser grammar_element_parser_ = new Parser() {
-    public boolean parse(PsiBuilder builder, int level) {
-      return grammar_element(builder, level + 1);
-    }
-  };
-  static final Parser grammar_element_recover_parser_ = new Parser() {
-    public boolean parse(PsiBuilder builder, int level) {
-      return grammar_element_recover(builder, level + 1);
-    }
-  };
-  static final Parser list_entry_recover_parser_ = new Parser() {
-    public boolean parse(PsiBuilder builder, int level) {
-      return list_entry_recover(builder, level + 1);
-    }
-  };
-  static final Parser sequence_recover_parser_ = new Parser() {
-    public boolean parse(PsiBuilder builder, int level) {
-      return sequence_recover(builder, level + 1);
-    }
-  };
 }

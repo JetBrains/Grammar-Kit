@@ -200,7 +200,7 @@ public class JFlexParser implements PsiParser, LightPsiParser {
     result = macro_definition(builder, level + 1);
     if (!result) result = state_declaration(builder, level + 1);
     if (!result) result = option(builder, level + 1);
-    exit_section_(builder, level, marker, result, false, declaration_recover_parser_);
+    exit_section_(builder, level, marker, result, false, JFlexParser::declaration_recover);
     return result;
   }
 
@@ -247,7 +247,7 @@ public class JFlexParser implements PsiParser, LightPsiParser {
     pinned = result; // pin = 1
     result = result && report_error_(builder, declaration(builder, level + 1));
     result = pinned && declarations_section_2(builder, level + 1) && result;
-    exit_section_(builder, level, marker, result, pinned, section_recover_parser_);
+    exit_section_(builder, level, marker, result, pinned, JFlexParser::section_recover);
     return result || pinned;
   }
 
@@ -380,7 +380,7 @@ public class JFlexParser implements PsiParser, LightPsiParser {
     if (!recursion_guard_(builder, level, "java_type_list")) return false;
     Marker marker = enter_section_(builder, level, _NONE_);
     java_type_list_0(builder, level + 1);
-    exit_section_(builder, level, marker, true, false, declaration_recover_parser_);
+    exit_section_(builder, level, marker, true, false, JFlexParser::declaration_recover);
     return true;
   }
 
@@ -428,7 +428,7 @@ public class JFlexParser implements PsiParser, LightPsiParser {
     result = lexical_rules_section_0(builder, level + 1);
     pinned = result; // pin = 1
     result = result && lexical_rules_section_1(builder, level + 1);
-    exit_section_(builder, level, marker, result, pinned, section_recover_parser_);
+    exit_section_(builder, level, marker, result, pinned, JFlexParser::section_recover);
     return result || pinned;
   }
 
@@ -500,7 +500,7 @@ public class JFlexParser implements PsiParser, LightPsiParser {
     result = result && consumeTokens(builder, 2, FLEX_ID, FLEX_EQ);
     pinned = result; // pin = 3
     result = result && expression(builder, level + 1, -1);
-    exit_section_(builder, level, marker, result, pinned, macro_definition_recover_parser_);
+    exit_section_(builder, level, marker, result, pinned, JFlexParser::macro_definition_recover);
     return result || pinned;
   }
 
@@ -1352,7 +1352,7 @@ public class JFlexParser implements PsiParser, LightPsiParser {
     Marker marker = enter_section_(builder, level, _NONE_);
     result = option_include(builder, level + 1);
     if (!result) result = rule(builder, level + 1);
-    exit_section_(builder, level, marker, result, false, rule_recover_parser_);
+    exit_section_(builder, level, marker, result, false, JFlexParser::rule_recover);
     return result;
   }
 
@@ -1712,7 +1712,7 @@ public class JFlexParser implements PsiParser, LightPsiParser {
     result = user_code_section_0(builder, level + 1);
     pinned = result; // pin = 1
     result = result && java_code(builder, level + 1);
-    exit_section_(builder, level, marker, result, pinned, section_recover_parser_);
+    exit_section_(builder, level, marker, result, pinned, JFlexParser::section_recover);
     return result || pinned;
   }
 
@@ -1727,7 +1727,7 @@ public class JFlexParser implements PsiParser, LightPsiParser {
     if (!recursion_guard_(builder, level, "user_value")) return false;
     boolean result;
     Marker marker = enter_section_(builder, level, _NONE_, FLEX_USER_VALUE, "<user value>");
-    result = anything2(builder, level + 1, user_value_0_0_parser_);
+    result = anything2(builder, level + 1, JFlexParser::user_value_0_0);
     exit_section_(builder, level, marker, result, false, null);
     return result;
   }
@@ -1977,99 +1977,18 @@ public class JFlexParser implements PsiParser, LightPsiParser {
     return result;
   }
 
-  static final Parser declaration_recover_parser_ = new Parser() {
-    public boolean parse(PsiBuilder builder, int level) {
-      return declaration_recover(builder, level + 1);
-    }
-  };
-  static final Parser macro_definition_recover_parser_ = new Parser() {
-    public boolean parse(PsiBuilder builder, int level) {
-      return macro_definition_recover(builder, level + 1);
-    }
-  };
-  static final Parser opt_code1_parser_ = new Parser() {
-    public boolean parse(PsiBuilder builder, int level) {
-      return consumeToken(builder, FLEX_OPT_CODE1);
-    }
-  };
-  static final Parser opt_code2_parser_ = new Parser() {
-    public boolean parse(PsiBuilder builder, int level) {
-      return consumeToken(builder, FLEX_OPT_CODE2);
-    }
-  };
-  static final Parser opt_eof1_parser_ = new Parser() {
-    public boolean parse(PsiBuilder builder, int level) {
-      return consumeToken(builder, FLEX_OPT_EOF1);
-    }
-  };
-  static final Parser opt_eof2_parser_ = new Parser() {
-    public boolean parse(PsiBuilder builder, int level) {
-      return consumeToken(builder, FLEX_OPT_EOF2);
-    }
-  };
-  static final Parser opt_eofthrow1_parser_ = new Parser() {
-    public boolean parse(PsiBuilder builder, int level) {
-      return consumeToken(builder, FLEX_OPT_EOFTHROW1);
-    }
-  };
-  static final Parser opt_eofthrow2_parser_ = new Parser() {
-    public boolean parse(PsiBuilder builder, int level) {
-      return consumeToken(builder, FLEX_OPT_EOFTHROW2);
-    }
-  };
-  static final Parser opt_eofval1_parser_ = new Parser() {
-    public boolean parse(PsiBuilder builder, int level) {
-      return consumeToken(builder, FLEX_OPT_EOFVAL1);
-    }
-  };
-  static final Parser opt_eofval2_parser_ = new Parser() {
-    public boolean parse(PsiBuilder builder, int level) {
-      return consumeToken(builder, FLEX_OPT_EOFVAL2);
-    }
-  };
-  static final Parser opt_init1_parser_ = new Parser() {
-    public boolean parse(PsiBuilder builder, int level) {
-      return consumeToken(builder, FLEX_OPT_INIT1);
-    }
-  };
-  static final Parser opt_init2_parser_ = new Parser() {
-    public boolean parse(PsiBuilder builder, int level) {
-      return consumeToken(builder, FLEX_OPT_INIT2);
-    }
-  };
-  static final Parser opt_initthrow1_parser_ = new Parser() {
-    public boolean parse(PsiBuilder builder, int level) {
-      return consumeToken(builder, FLEX_OPT_INITTHROW1);
-    }
-  };
-  static final Parser opt_initthrow2_parser_ = new Parser() {
-    public boolean parse(PsiBuilder builder, int level) {
-      return consumeToken(builder, FLEX_OPT_INITTHROW2);
-    }
-  };
-  static final Parser opt_yylexthrow1_parser_ = new Parser() {
-    public boolean parse(PsiBuilder builder, int level) {
-      return consumeToken(builder, FLEX_OPT_YYLEXTHROW1);
-    }
-  };
-  static final Parser opt_yylexthrow2_parser_ = new Parser() {
-    public boolean parse(PsiBuilder builder, int level) {
-      return consumeToken(builder, FLEX_OPT_YYLEXTHROW2);
-    }
-  };
-  static final Parser rule_recover_parser_ = new Parser() {
-    public boolean parse(PsiBuilder builder, int level) {
-      return rule_recover(builder, level + 1);
-    }
-  };
-  static final Parser section_recover_parser_ = new Parser() {
-    public boolean parse(PsiBuilder builder, int level) {
-      return section_recover(builder, level + 1);
-    }
-  };
-  static final Parser user_value_0_0_parser_ = new Parser() {
-    public boolean parse(PsiBuilder builder, int level) {
-      return user_value_0_0(builder, level + 1);
-    }
-  };
+  static final Parser opt_code1_parser_ = (builder, level) -> consumeToken(builder, FLEX_OPT_CODE1);
+  static final Parser opt_code2_parser_ = (builder, level) -> consumeToken(builder, FLEX_OPT_CODE2);
+  static final Parser opt_eof1_parser_ = (builder, level) -> consumeToken(builder, FLEX_OPT_EOF1);
+  static final Parser opt_eof2_parser_ = (builder, level) -> consumeToken(builder, FLEX_OPT_EOF2);
+  static final Parser opt_eofthrow1_parser_ = (builder, level) -> consumeToken(builder, FLEX_OPT_EOFTHROW1);
+  static final Parser opt_eofthrow2_parser_ = (builder, level) -> consumeToken(builder, FLEX_OPT_EOFTHROW2);
+  static final Parser opt_eofval1_parser_ = (builder, level) -> consumeToken(builder, FLEX_OPT_EOFVAL1);
+  static final Parser opt_eofval2_parser_ = (builder, level) -> consumeToken(builder, FLEX_OPT_EOFVAL2);
+  static final Parser opt_init1_parser_ = (builder, level) -> consumeToken(builder, FLEX_OPT_INIT1);
+  static final Parser opt_init2_parser_ = (builder, level) -> consumeToken(builder, FLEX_OPT_INIT2);
+  static final Parser opt_initthrow1_parser_ = (builder, level) -> consumeToken(builder, FLEX_OPT_INITTHROW1);
+  static final Parser opt_initthrow2_parser_ = (builder, level) -> consumeToken(builder, FLEX_OPT_INITTHROW2);
+  static final Parser opt_yylexthrow1_parser_ = (builder, level) -> consumeToken(builder, FLEX_OPT_YYLEXTHROW1);
+  static final Parser opt_yylexthrow2_parser_ = (builder, level) -> consumeToken(builder, FLEX_OPT_YYLEXTHROW2);
 }

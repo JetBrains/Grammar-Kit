@@ -15,6 +15,12 @@ BnfFile:SelfBnf.bnf
         BNF_VALUE_LIST
           PsiElement([)('[')
           BNF_LIST_ENTRY
+            PsiElement(id)('java')
+            PsiElement(=)('=')
+            BNF_STRING_LITERAL_EXPRESSION: "8"
+              PsiElement(string)('"8"')
+          PsiWhiteSpace(' ')
+          BNF_LIST_ENTRY
             PsiElement(id)('names')
             PsiElement(=)('=')
             BNF_STRING_LITERAL_EXPRESSION: "long"

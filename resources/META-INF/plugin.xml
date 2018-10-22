@@ -1,6 +1,6 @@
 <idea-plugin url="https://github.com/JetBrains/Grammar-Kit">
   <id>org.jetbrains.idea.grammar</id>
-  <version>2017.1.6-SNAPSHOT</version>
+  <version>2017.1.7-SNAPSHOT</version>
   <vendor email="gregory.shrago@jetbrains.com">Greg Shrago</vendor>
   <idea-version since-build="171"/>
 
@@ -14,11 +14,10 @@
   <change-notes>
     <![CDATA[
     <ul>
-      <li>Editor: _Move Element Left/Right_ action in BNF</li>
-      <li>Editor: convert `expr?` to `[expr]` and back intention (#183)</li>
-      <li>Generator: FIRST check with the exact `consumeTokenType` (#185)</li>
-      <li>Generator/PSI: parameter annotations</li>
-      <li>GPUB: configurable token-advancer</li>
+      <li>Generator: generate Java 8 syntax: generate=[java="8"]</li>
+      <li>Generator: generate TokenSets for token choices: generate=[token-sets="yes"]</li>
+      <li>Generator: wrap anonymous classes with functions</li>
+      <li>RGH: fix left rule with several usage detected as recursive</li>
     </ul>
     <a href="https://github.com/JetBrains/Grammar-Kit#change-log">Full change log...</a>
     ]]>

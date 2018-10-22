@@ -1,3 +1,11 @@
+2017.1.6
+
+* Generator: generate Java 8 syntax: `generate=[java="8"]`
+* Generator: generate TokenSets for token choices: `generate=[token-sets="yes"]`
+* Generator: wrap anonymous classes with functions
+* RGH: fix left rule with several usage detected as recursive
+
+
 2017.1.5
 
 * Editor: _Move Element Left/Right_ action in BNF

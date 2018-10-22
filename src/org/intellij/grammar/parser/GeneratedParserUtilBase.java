@@ -278,7 +278,7 @@ public class GeneratedParserUtilBase {
   }
 
   public static boolean consumeTokenFast(PsiBuilder builder, TokenSet tokens) {
-    if (!nextTokenIsFast(builder, tokens)) {
+    if (nextTokenIsFast(builder, tokens)) {
       builder.advanceLexer();
       return true;
     }

@@ -733,32 +733,32 @@ public class Fixes implements PsiParser, LightPsiParser {
     return result_;
   }
 
-  final static Parser Foo__recovery_parser_ = new Parser() {
+  static final Parser Foo__recovery_parser_ = new Parser() {
     public boolean parse(PsiBuilder builder_, int level_) {
       return Foo__recovery(builder_, level_ + 1);
     }
   };
-  final static Parser nested_meta_pin_1_1_0_0_parser_ = new Parser() {
+  static final Parser nested_meta_pin_1_1_0_0_parser_ = new Parser() {
     public boolean parse(PsiBuilder builder_, int level_) {
       return nested_meta_pin_1_1_0_0(builder_, level_ + 1);
     }
   };
-  final static Parser nested_meta_pin_1_1_0_1_parser_ = new Parser() {
+  static final Parser nested_meta_pin_1_1_0_1_parser_ = new Parser() {
     public boolean parse(PsiBuilder builder_, int level_) {
       return nested_meta_pin_1_1_0_1(builder_, level_ + 1);
     }
   };
-  final static Parser nested_meta_pin_1_1_1_0_parser_ = new Parser() {
+  static final Parser nested_meta_pin_1_1_1_0_parser_ = new Parser() {
     public boolean parse(PsiBuilder builder_, int level_) {
       return nested_meta_pin_1_1_1_0(builder_, level_ + 1);
     }
   };
-  final static Parser nested_meta_pin_1_1_1_1_parser_ = new Parser() {
+  static final Parser nested_meta_pin_1_1_1_1_parser_ = new Parser() {
     public boolean parse(PsiBuilder builder_, int level_) {
       return nested_meta_pin_1_1_1_1(builder_, level_ + 1);
     }
   };
-  final static Parser some_parser_ = new Parser() {
+  static final Parser some_parser_ = new Parser() {
     public boolean parse(PsiBuilder builder_, int level_) {
       return some(builder_, level_ + 1);
     }

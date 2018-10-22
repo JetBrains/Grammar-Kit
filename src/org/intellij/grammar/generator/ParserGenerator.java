@@ -563,12 +563,12 @@ public class ParserGenerator {
   private void generateParserLambdas(@NotNull String parserClass) {
     Map<String, String> reversedLambdas = new THashMap<>();
     take(myParserLambdas).forEach((name, body) -> {
-      String value = reversedLambdas.get(body);
-      if (value == null) {
-        value = generateParserInstance(body);
+      String call = reversedLambdas.get(body);
+      if (call == null) {
+        call = generateParserInstance(body);
         reversedLambdas.put(body, name);
       }
-      out("final static Parser " + name + " = " + value + ";");
+      out("static final Parser " + name + " = " + call + ";");
       myRenderedLambdas.put(name, parserClass);
     });
   }

@@ -427,7 +427,7 @@ public class ExpressionParser implements PsiParser, LightPsiParser {
     return result_ || pinned_;
   }
 
-  final static Parser element_recover_parser_ = new Parser() {
+  static final Parser element_recover_parser_ = new Parser() {
     public boolean parse(PsiBuilder builder_, int level_) {
       return element_recover(builder_, level_ + 1);
     }

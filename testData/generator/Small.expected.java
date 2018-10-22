@@ -277,7 +277,7 @@ public class Small implements PsiParser, LightPsiParser {
     return result_;
   }
 
-  final static Parser statement_parser_ = new Parser() {
+  static final Parser statement_parser_ = new Parser() {
     public boolean parse(PsiBuilder builder_, int level_) {
       return statement(builder_, level_ + 1);
     }

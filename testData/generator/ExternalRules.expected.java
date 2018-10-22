@@ -734,88 +734,88 @@ public class ExternalRules implements PsiParser, LightPsiParser {
     return result_;
   }
 
-  final static Parser PERC_RE_parser_ = new Parser() {
+  static final Parser PERC_RE_parser_ = new Parser() {
     public boolean parse(PsiBuilder builder_, int level_) {
       return consumeToken(builder_, PERC_RE);
     }
   };
-  final static Parser SOME_parser_ = new Parser() {
+  static final Parser SOME_parser_ = new Parser() {
     public boolean parse(PsiBuilder builder_, int level_) {
       return consumeToken(builder_, SOME);
     }
   };
-  final static Parser item_recover_parser_ = new Parser() {
+  static final Parser item_recover_parser_ = new Parser() {
     public boolean parse(PsiBuilder builder_, int level_) {
       return item_recover(builder_, level_ + 1);
     }
   };
-  final static Parser meta_mixed_list_paren_0_0_parser_ = new Parser() {
+  static final Parser meta_mixed_list_paren_0_0_parser_ = new Parser() {
     public boolean parse(PsiBuilder builder_, int level_) {
       return meta_mixed_list_paren_0_0(builder_, level_ + 1);
     }
   };
-  final static Parser meta_seq_0_1_parser_ = new Parser() {
+  static final Parser meta_seq_0_1_parser_ = new Parser() {
     public boolean parse(PsiBuilder builder_, int level_) {
       return meta_seq_0_1(builder_, level_ + 1);
     }
   };
-  final static Parser meta_seq_of_lists_0_1_parser_ = new Parser() {
+  static final Parser meta_seq_of_lists_0_1_parser_ = new Parser() {
     public boolean parse(PsiBuilder builder_, int level_) {
       return meta_seq_of_lists_0_1(builder_, level_ + 1);
     }
   };
-  final static Parser meta_seq_of_lists_opt_0_0_1_parser_ = new Parser() {
+  static final Parser meta_seq_of_lists_opt_0_0_1_parser_ = new Parser() {
     public boolean parse(PsiBuilder builder_, int level_) {
       return meta_seq_of_lists_opt_0_0_1(builder_, level_ + 1);
     }
   };
-  final static Parser one_parser_ = new Parser() {
+  static final Parser one_parser_ = new Parser() {
     public boolean parse(PsiBuilder builder_, int level_) {
       return one(builder_, level_ + 1);
     }
   };
-  final static Parser param_choice_1_0_parser_ = new Parser() {
+  static final Parser param_choice_1_0_parser_ = new Parser() {
     public boolean parse(PsiBuilder builder_, int level_) {
       return param_choice_1_0(builder_, level_ + 1);
     }
   };
-  final static Parser param_choice_alt_1_0_parser_ = new Parser() {
+  static final Parser param_choice_alt_1_0_parser_ = new Parser() {
     public boolean parse(PsiBuilder builder_, int level_) {
       return param_choice_alt_1_0(builder_, level_ + 1);
     }
   };
-  final static Parser param_opt_1_0_parser_ = new Parser() {
+  static final Parser param_opt_1_0_parser_ = new Parser() {
     public boolean parse(PsiBuilder builder_, int level_) {
       return param_opt_1_0(builder_, level_ + 1);
     }
   };
-  final static Parser param_seq_alt_1_0_parser_ = new Parser() {
+  static final Parser param_seq_alt_1_0_parser_ = new Parser() {
     public boolean parse(PsiBuilder builder_, int level_) {
       return param_seq_alt_1_0(builder_, level_ + 1);
     }
   };
-  final static Parser param_seq_alt_1_1_parser_ = new Parser() {
+  static final Parser param_seq_alt_1_1_parser_ = new Parser() {
     public boolean parse(PsiBuilder builder_, int level_) {
       return param_seq_alt_1_1(builder_, level_ + 1);
     }
   };
-  final static Parser param_seq_alt_params_ext_1_1_parser_ = new Parser() {
+  static final Parser param_seq_alt_params_ext_1_1_parser_ = new Parser() {
     public boolean parse(PsiBuilder builder_, int level_) {
       return param_seq_alt_params_ext_1_1(builder_, level_ + 1);
     }
   };
-  final static Parser perc_parser_ = new Parser() {
+  static final Parser perc_parser_ = new Parser() {
     public boolean parse(PsiBuilder builder_, int level_) {
       return consumeToken(builder_, PERC);
     }
   };
-  final static Parser perc_re_list2_0_0_parser_ = PERC_RE_parser_;
-  final static Parser statement_parser_ = new Parser() {
+  static final Parser perc_re_list2_0_0_parser_ = PERC_RE_parser_;
+  static final Parser statement_parser_ = new Parser() {
     public boolean parse(PsiBuilder builder_, int level_) {
       return statement(builder_, level_ + 1);
     }
   };
-  final static Parser two_parser_ = new Parser() {
+  static final Parser two_parser_ = new Parser() {
     public boolean parse(PsiBuilder builder_, int level_) {
       return two(builder_, level_ + 1);
     }
@@ -886,7 +886,7 @@ public class ExternalRules2 {
     return comma_list(builder_, level_ + 1, third_class_meta_usage_from_second_0_0_parser_);
   }
 
-  final static Parser one_list_par_0_0_parser_ = new Parser() {
+  static final Parser one_list_par_0_0_parser_ = new Parser() {
     public boolean parse(PsiBuilder builder_, int level_) {
       return one_list_par_0_0(builder_, level_ + 1);
     }

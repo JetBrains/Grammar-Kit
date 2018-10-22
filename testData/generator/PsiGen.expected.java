@@ -366,12 +366,12 @@ public class PsiGen implements PsiParser, LightPsiParser {
     return result_;
   }
 
-  final static Parser grammar_element_parser_ = new Parser() {
+  static final Parser grammar_element_parser_ = new Parser() {
     public boolean parse(PsiBuilder builder_, int level_) {
       return grammar_element(builder_, level_ + 1);
     }
   };
-  final static Parser include_section_recover__parser_ = new Parser() {
+  static final Parser include_section_recover__parser_ = new Parser() {
     public boolean parse(PsiBuilder builder_, int level_) {
       return include_section_recover_(builder_, level_ + 1);
     }
@@ -814,7 +814,7 @@ public class PsiGenFixes {
     return result_;
   }
 
-  final static Parser identifier_parser_ = new Parser() {
+  static final Parser identifier_parser_ = new Parser() {
     public boolean parse(PsiBuilder builder_, int level_) {
       return PsiGen2.identifier(builder_, level_ + 1);
     }

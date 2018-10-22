@@ -894,27 +894,27 @@ public class GrammarParser implements PsiParser, LightPsiParser {
     return true;
   }
 
-  final static Parser attr_recover_parser_ = new Parser() {
+  static final Parser attr_recover_parser_ = new Parser() {
     public boolean parse(PsiBuilder builder, int level) {
       return attr_recover(builder, level + 1);
     }
   };
-  final static Parser grammar_element_parser_ = new Parser() {
+  static final Parser grammar_element_parser_ = new Parser() {
     public boolean parse(PsiBuilder builder, int level) {
       return grammar_element(builder, level + 1);
     }
   };
-  final static Parser grammar_element_recover_parser_ = new Parser() {
+  static final Parser grammar_element_recover_parser_ = new Parser() {
     public boolean parse(PsiBuilder builder, int level) {
       return grammar_element_recover(builder, level + 1);
     }
   };
-  final static Parser list_entry_recover_parser_ = new Parser() {
+  static final Parser list_entry_recover_parser_ = new Parser() {
     public boolean parse(PsiBuilder builder, int level) {
       return list_entry_recover(builder, level + 1);
     }
   };
-  final static Parser sequence_recover_parser_ = new Parser() {
+  static final Parser sequence_recover_parser_ = new Parser() {
     public boolean parse(PsiBuilder builder, int level) {
       return sequence_recover(builder, level + 1);
     }

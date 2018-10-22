@@ -156,7 +156,7 @@ public class GeneratedParser implements PsiParser, LightPsiParser {
     return result_ || pinned_;
   }
 
-  final static Parser item_auto_recover_ = new Parser() {
+  static final Parser item_auto_recover_ = new Parser() {
     public boolean parse(PsiBuilder builder_, int level_) {
       return !nextTokenIsFast(builder_, PAREN2, COMMA, SEMI);
     }

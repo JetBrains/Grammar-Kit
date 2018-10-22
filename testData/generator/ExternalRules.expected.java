@@ -820,6 +820,7 @@ public class ExternalRules implements PsiParser, LightPsiParser {
       return two(builder_, level_ + 1);
     }
   };
+
   private static final Parser meta_mixed_list_0_0_parser_ = comma_list_$(one_parser_);
   private static final Parser meta_multi_level_no_closure_0_0_0_parser_ = comma_list_$(SOME_parser_);
   private static final Parser meta_multi_level_no_closure_0_0_parser_ = comma_list_$(meta_multi_level_no_closure_0_0_0_parser_);
@@ -891,6 +892,7 @@ public class ExternalRules2 {
       return one_list_par_0_0(builder_, level_ + 1);
     }
   };
+
   private static final Parser main_class_meta_usage_from_second_0_0_parser_ = main_class_meta_$(ExternalRules.SOME_parser_);
   private static final Parser third_class_meta_usage_from_second_0_0_parser_ = ExternalRules3.third_class_meta_$(ExternalRules.SOME_parser_);
 }

@@ -710,6 +710,7 @@ public class ExternalRulesLambdas implements PsiParser, LightPsiParser {
   static final Parser SOME_parser_ = (builder_, level_) -> consumeToken(builder_, SOME);
   static final Parser perc_parser_ = (builder_, level_) -> consumeToken(builder_, PERC);
   static final Parser perc_re_list2_0_0_parser_ = PERC_RE_parser_;
+
   private static final Parser meta_mixed_list_0_0_parser_ = comma_list_$(ExternalRulesLambdas::one);
   private static final Parser meta_multi_level_no_closure_0_0_0_parser_ = comma_list_$(SOME_parser_);
   private static final Parser meta_multi_level_no_closure_0_0_parser_ = comma_list_$(meta_multi_level_no_closure_0_0_0_parser_);

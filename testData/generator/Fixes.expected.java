@@ -763,6 +763,7 @@ public class Fixes implements PsiParser, LightPsiParser {
       return some(builder_, level_ + 1);
     }
   };
+
   private static final Parser nested_meta_pin_1_1_0_parser_ = meta2_$(nested_meta_pin_1_1_0_0_parser_, nested_meta_pin_1_1_0_1_parser_);
   private static final Parser nested_meta_pin_1_1_1_parser_ = meta2_$(nested_meta_pin_1_1_1_0_parser_, nested_meta_pin_1_1_1_1_parser_);
 }

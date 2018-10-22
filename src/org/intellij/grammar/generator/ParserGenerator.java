@@ -555,7 +555,9 @@ public class ParserGenerator {
         newLine();
       }
     }
+    boolean addNewLine = !myParserLambdas.isEmpty() && !myMetaMethodFields.isEmpty();
     generateParserLambdas(parserClass);
+    if (addNewLine) newLine();
     generateMetaMethodFields();
     out("}");
   }

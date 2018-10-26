@@ -19,7 +19,7 @@
       <li>Generator: wrap anonymous classes with functions</li>
       <li>RGH: fix left rule with several usage detected as recursive</li>
     </ul>
-    <a href="https://github.com/JetBrains/Grammar-Kit#change-log">Full change log...</a>
+    <a href="https://github.com/JetBrains/Grammar-Kit/blob/master/CHANGELOG.md">Full change log...</a>
     ]]>
   </change-notes>
 

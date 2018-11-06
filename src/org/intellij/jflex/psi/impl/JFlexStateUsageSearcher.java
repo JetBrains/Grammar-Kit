@@ -44,8 +44,9 @@ public class JFlexStateUsageSearcher extends QueryExecutorBase<PsiReference, Ref
   @Override
   public void processQuery(@NotNull ReferencesSearch.SearchParameters queryParameters, @NotNull Processor<PsiReference> consumer) {
     PsiElement element = queryParameters.getElementToSearch();
+    PsiFile containingFile = element.getContainingFile();
     if (element instanceof PsiField) {
-      PsiElement context = element.getContainingFile().getContext();
+      PsiElement context = containingFile == null ? null : containingFile.getContext();
       if (!(context instanceof JFlexJavaCode)) return;
       String name = ((PsiField)element).getName();
       if (name == null) return;
@@ -64,7 +65,7 @@ public class JFlexStateUsageSearcher extends QueryExecutorBase<PsiReference, Ref
     else if (element instanceof JFlexStateDefinition) {
       JFlexStateDefinition state = (JFlexStateDefinition)element;
       String name = state.getName();
-      JFlexJavaCode javaCode = SyntaxTraverser.psiTraverser(element.getContainingFile()).filter(JFlexJavaCode.class).first();
+      JFlexJavaCode javaCode = SyntaxTraverser.psiTraverser(containingFile).filter(JFlexJavaCode.class).first();
 
       if (javaCode == null) return;
       Pair<PsiElement, TextRange> injectedFile =

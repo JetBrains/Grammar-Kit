@@ -55,7 +55,6 @@ public interface BnfTypes {
   IElementType BNF_STRING = new BnfTokenType("string");
 
   class Factory {
-
     public static CompositePsiElement createElement(IElementType type) {
        if (type == BNF_ATTR) {
         return new BnfAttrImpl(type);

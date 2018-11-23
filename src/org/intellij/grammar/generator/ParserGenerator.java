@@ -29,9 +29,7 @@ import com.intellij.util.ArrayUtil;
 import com.intellij.util.Function;
 import com.intellij.util.Functions;
 import com.intellij.util.ObjectUtils;
-import com.intellij.util.containers.ContainerUtil;
-import com.intellij.util.containers.JBIterable;
-import com.intellij.util.containers.MultiMap;
+import com.intellij.util.containers.*;
 import gnu.trove.THashMap;
 import gnu.trove.THashSet;
 import org.intellij.grammar.KnownAttribute;
@@ -47,6 +45,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.HashSet;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -264,12 +263,26 @@ public class ParserGenerator {
   }
 
   private void calcRealSuperClasses(Map<String, BnfRule> sortedPsiRules) {
+    Map<BnfRule, BnfRule> topSupers = ContainerUtil.newHashMap();
+    MultiMap<BnfRule, BnfRule> topSupersMulti = new MultiMap<>();
     for (BnfRule rule : sortedPsiRules.values()) {
+      BnfRule top = getTopSuperRule(myFile, rule);
+      topSupersMulti.putValue(top == null ? rule : top, rule);
+      if (top != null) topSupers.put(rule, top);
+    }
+    List<BnfRule> ordered = new JBTreeTraverser<BnfRule>(
+      rule -> JBIterable.from(topSupersMulti.get(rule)))
+      .withRoots(sortedPsiRules.values())
+      .withTraversal(TreeTraversal.POST_ORDER_DFS)
+      .unique()
+      .toList();
+    for (BnfRule rule : ContainerUtil.reverse(ordered)) {
       RuleInfo info = ruleInfo(rule);
-      BnfRule topSuper = getTopSuperRule(myFile, rule);
+      BnfRule topSuper = topSupers.get(rule);
+      RuleInfo topInfo = topSuper == null || topSuper == rule ? null : ruleInfo(topSuper);
       String superRuleClass = topSuper == null ? getRootAttribute(myFile, KnownAttribute.EXTENDS) :
                               topSuper == rule ? getAttribute(rule, KnownAttribute.EXTENDS) :
-                              ruleInfo(topSuper).implClass;
+                              topInfo.implClass;
       String stubName = info.realStubClass;
       String adjustedSuperRuleClass =
         StringUtil.isEmpty(stubName) ? superRuleClass :
@@ -277,6 +290,10 @@ public class ParserGenerator {
         superRuleClass.contains("?") ? superRuleClass.replaceAll("\\?", stubName) : superRuleClass;
       // mixin attribute overrides "extends":
       info.realSuperClass = StringUtil.notNullize(info.mixin, adjustedSuperRuleClass);
+      info.mixedAST = topInfo != null ? topInfo.mixedAST :
+                      JBIterable.of(superRuleClass, info.realSuperClass)
+                        .flatMap(s -> JBIterable.generate(s, myJavaHelper::getSuperClassName))
+                        .find(BnfConstants.COMPOSITE_PSI_ELEMENT_CLASS::equals) != null;
     }
   }
 
@@ -358,9 +375,9 @@ public class ParserGenerator {
       }
       sortedPsiRules.put(rule.getName(), rule);
       info.superInterfaces = ContainerUtil.newLinkedHashSet(getSuperInterfaceNames(myFile, rule, myIntfClassFormat));
-      info.mixedAST = JBIterable.from(info.superInterfaces).append(Arrays.asList(info.intfClass, info.implClass, info.realSuperClass))
-                        .flatMap(s -> JBIterable.generate(s, myJavaHelper::getSuperClassName))
-                        .find(BnfConstants.COMPOSITE_PSI_ELEMENT_CLASS::equals) != null;
+    }
+    if (G.generatePsi) {
+      calcRealSuperClasses(sortedPsiRules);
     }
     if (myGrammarRoot != null && (G.generateTokenTypes || G.generateElementTypes || G.generatePsi && G.generatePsiFactory)) {
       openOutput(myTypeHolderClass);
@@ -373,8 +390,6 @@ public class ParserGenerator {
     }
     if (G.generatePsi) {
       checkClassAvailability(myFile, myPsiImplUtilClass, "PSI method signatures will not be detected");
-      calcRealSuperClasses(sortedPsiRules);
-
       myRulesMethodsHelper.buildMaps(sortedPsiRules.values());
       for (BnfRule rule : sortedPsiRules.values()) {
         RuleInfo info = ruleInfo(rule);
@@ -1637,7 +1652,7 @@ public class ParserGenerator {
         if (info.isAbstract) continue;
         if (!info.mixedAST) continue;
         if (first2) {
-          if (first1) newLine();
+          if (!first1) newLine();
           out("public static %s createElement(%s type) {", myShortener.fun(COMPOSITE_PSI_ELEMENT_CLASS), myShortener.fun(IELEMENTTYPE_CLASS));
         }
         String psiClass = getRulePsiClassName(rule, myImplClassFormat);

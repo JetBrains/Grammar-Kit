@@ -130,7 +130,6 @@ public interface JFlexTypes {
   IElementType FLEX_VERSION = new JFlexTokenType("version");
 
   class Factory {
-
     public static CompositePsiElement createElement(IElementType type) {
        if (type == FLEX_CHAR_RANGE) {
         return new JFlexCharRangeImpl(type);

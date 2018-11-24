@@ -701,8 +701,7 @@ public class GeneratedParserUtilBase {
         }
         else if ((frame.modifiers & _LEFT_INNER_) != 0 && frame.leftMarker != null) {
           marker.done(elementType);
-          frame.leftMarker.precede().done(((LighterASTNode)frame.leftMarker).getTokenType());
-          frame.leftMarker.drop();
+          closeLeft(frame);
         }
         else if ((frame.modifiers & _LEFT_) != 0 && frame.leftMarker != null) {
           marker.drop();
@@ -720,13 +719,24 @@ public class GeneratedParserUtilBase {
     else if (result || pinned) {
       if (marker != null) marker.drop();
       if ((frame.modifiers & _LEFT_INNER_) != 0 && frame.leftMarker != null) {
-        frame.leftMarker.precede().done(((LighterASTNode)frame.leftMarker).getTokenType());
-        frame.leftMarker.drop();
+        closeLeft(frame);
       }
     }
     else {
       close_marker_impl_(frame, marker, null, false);
     }
+  }
+  
+  private static void closeLeft(Frame frame) {
+    LighterASTNode leftMarker = (LighterASTNode) frame.leftMarker;
+    PsiBuilder.Marker precede = frame.leftMarker.precede();
+    if (leftMarker.getTokenType() == TokenType.ERROR_ELEMENT) {
+      precede.error("");
+    }
+    else {
+      precede.done(leftMarker.getTokenType());
+    }
+    frame.leftMarker.drop();
   }
 
   private static void close_marker_impl_(Frame frame, PsiBuilder.Marker marker, IElementType elementType, boolean result) {

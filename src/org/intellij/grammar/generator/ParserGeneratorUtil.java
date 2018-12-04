@@ -242,20 +242,11 @@ public class ParserGeneratorUtil {
         }
       }
     }
-    else if (element.getFirstChild() == element.getLastChild() &&
-        (element instanceof BnfChoice || element instanceof BnfSequence || element instanceof BnfExpression)) {
+    else if (element.getFirstChild() == element.getLastChild() && element instanceof BnfExpression) {
       child = element.getFirstChild();
     }
     return child instanceof BnfExpression && !(child instanceof BnfLiteralExpression || child instanceof BnfReferenceOrToken) ?
         (BnfExpression) child : null;
-  }
-
-  public static BnfExpression getEffectiveExpression(BnfFile file, BnfExpression tree) {
-    if (tree instanceof BnfReferenceOrToken) {
-      BnfRule rule = file.getRule(tree.getText());
-      if (rule != null) return rule.getExpression();
-    }
-    return tree;
   }
 
   public static IElementType getEffectiveType(PsiElement tree) {
@@ -435,7 +426,7 @@ public class ParserGeneratorUtil {
   public static Set<String> getRuleClasses(@NotNull BnfRule rule) {
     Set<String> result = ContainerUtil.newLinkedHashSet();
     BnfFile file = (BnfFile)rule.getContainingFile();
-    BnfRule topSuper = getTopSuperRule(file, rule);
+    BnfRule topSuper = getEffectiveSuperRule(file, rule);
     String superClassName = topSuper == null ? getRootAttribute(file, KnownAttribute.EXTENDS) :
                             topSuper == rule ? getAttribute(rule, KnownAttribute.EXTENDS) :
                             getAttribute(topSuper, KnownAttribute.PSI_PACKAGE) + "." +
@@ -454,7 +445,7 @@ public class ParserGeneratorUtil {
   static JBIterable<BnfRule> getSuperRules(@NotNull BnfFile file, @Nullable BnfRule rule) {
     abstract class Fun<S, T> extends JBIterable.Stateful<Fun> implements Function<S, T> { }
     JBIterable<Object> result = JBIterable.generate(rule, new Fun<Object, Object>() {
-      Set<BnfRule> visited = ContainerUtil.newHashSet();
+      final Set<BnfRule> visited = ContainerUtil.newHashSet();
 
       @Override
       public Object fun(Object o) {
@@ -474,7 +465,7 @@ public class ParserGeneratorUtil {
   }
 
   @Nullable
-  static BnfRule getTopSuperRule(@NotNull BnfFile file, @Nullable BnfRule rule) {
+  static BnfRule getEffectiveSuperRule(@NotNull BnfFile file, @Nullable BnfRule rule) {
     return getSuperRules(file, rule).last();
   }
 
@@ -483,7 +474,7 @@ public class ParserGeneratorUtil {
     List<String> strings = ContainerUtil.newArrayList();
     List<String> topRuleImplements = Collections.emptyList();
     String topRuleClass = null;
-    BnfRule topSuper = getTopSuperRule(file, rule);
+    BnfRule topSuper = getEffectiveSuperRule(file, rule);
     if (topSuper != null && topSuper != rule) {
       topRuleImplements = getAttribute(topSuper, KnownAttribute.IMPLEMENTS).asStrings();
       topRuleClass = getAttribute(topSuper, KnownAttribute.PSI_PACKAGE) + "." + getRulePsiClassName(topSuper, format);

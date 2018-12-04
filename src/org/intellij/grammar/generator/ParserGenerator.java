@@ -37,6 +37,7 @@ import org.intellij.grammar.analysis.BnfFirstNextAnalyzer;
 import org.intellij.grammar.java.JavaHelper;
 import org.intellij.grammar.parser.GeneratedParserUtilBase.Parser;
 import org.intellij.grammar.psi.*;
+import org.intellij.grammar.psi.impl.BnfElementFactory;
 import org.intellij.grammar.psi.impl.GrammarUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -46,6 +47,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -243,10 +245,10 @@ public class ParserGenerator {
       RuleInfo info = ruleInfo(rule);
       String stubClass = info.stub;
       if (stubClass == null) {
-        BnfRule topSuper = getTopSuperRule(myFile, rule);
+        BnfRule topSuper = getEffectiveSuperRule(myFile, rule);
         stubClass = topSuper == null ? null : ruleInfo(topSuper).stub;
       }
-      BnfRule topSuper = getTopSuperRule(myFile, rule);
+      BnfRule topSuper = getEffectiveSuperRule(myFile, rule);
       String superRuleClass = topSuper == null ? getRootAttribute(myFile, KnownAttribute.EXTENDS) :
                               topSuper == rule ? getAttribute(rule, KnownAttribute.EXTENDS) :
                               ruleInfo(topSuper).intfClass;
@@ -263,22 +265,21 @@ public class ParserGenerator {
   }
 
   private void calcRealSuperClasses(Map<String, BnfRule> sortedPsiRules) {
-    Map<BnfRule, BnfRule> topSupers = ContainerUtil.newHashMap();
-    MultiMap<BnfRule, BnfRule> topSupersMulti = new MultiMap<>();
+    Map<BnfRule, BnfRule> supers = ContainerUtil.newHashMap();
     for (BnfRule rule : sortedPsiRules.values()) {
-      BnfRule top = getTopSuperRule(myFile, rule);
-      topSupersMulti.putValue(top == null ? rule : top, rule);
-      if (top != null) topSupers.put(rule, top);
+      supers.put(rule, getEffectiveSuperRule(myFile, rule));
     }
-    List<BnfRule> ordered = new JBTreeTraverser<BnfRule>(
-      rule -> JBIterable.from(topSupersMulti.get(rule)))
-      .withRoots(sortedPsiRules.values())
+    // todo unique+post-order-dfs workaround, drop when 2018.1
+    BnfRule fakeRoot = BnfElementFactory.createRuleFromText(myFile.getProject(), "<.> ::=");
+    JBTreeTraverser<BnfRule> ordered = new JBTreeTraverser<BnfRule>(
+      element -> element == fakeRoot ? sortedPsiRules.values() : JBIterable.of(supers.get(element)))
+      .withRoot(fakeRoot)
+      .filter(o -> o != fakeRoot)
       .withTraversal(TreeTraversal.POST_ORDER_DFS)
-      .unique()
-      .toList();
-    for (BnfRule rule : ContainerUtil.reverse(ordered)) {
+      .unique();
+    for (BnfRule rule : ordered) {
       RuleInfo info = ruleInfo(rule);
-      BnfRule topSuper = topSupers.get(rule);
+      BnfRule topSuper = supers.get(rule);
       RuleInfo topInfo = topSuper == null || topSuper == rule ? null : ruleInfo(topSuper);
       String superRuleClass = topSuper == null ? getRootAttribute(myFile, KnownAttribute.EXTENDS) :
                               topSuper == rule ? getAttribute(rule, KnownAttribute.EXTENDS) :
@@ -1742,7 +1743,7 @@ public class ParserGenerator {
       topSuperRule = next;
       String superClass = ruleInfo(next).realSuperClass;
       if (superClass == null) continue;
-      next = getTopSuperRule(myFile, next);
+      next = getEffectiveSuperRule(myFile, next);
       if (next != null && next != topSuperRule && getAttribute(topSuperRule, KnownAttribute.MIXIN) == null) continue;
       constructors = myJavaHelper.findClassMethods(getRawClassName(superClass), JavaHelper.MethodType.CONSTRUCTOR, "*", -1);
       if (!constructors.isEmpty()) break;

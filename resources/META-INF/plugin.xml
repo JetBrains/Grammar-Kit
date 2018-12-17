@@ -1,6 +1,6 @@
 <idea-plugin url="https://github.com/JetBrains/Grammar-Kit">
   <id>org.jetbrains.idea.grammar</id>
-  <version>2017.1.7-SNAPSHOT</version>
+  <version>2017.1.8-SNAPSHOT</version>
   <vendor email="gregory.shrago@jetbrains.com">Greg Shrago</vendor>
   <idea-version since-build="171"/>
 
@@ -14,9 +14,7 @@
   <change-notes>
     <![CDATA[
     <ul>
-      <li>GPUB: extract extend_marker_impl and improve error elements handling</li>
-      <li>Generator: fix base class calculation for merged AST and PSI</li>
-      <li>NPE: JFlexStateUsageSearcher.processQuery</li>
+      <li></li>
     </ul>
     <a href="https://github.com/JetBrains/Grammar-Kit/blob/master/CHANGELOG.md">Full change log...</a>
     ]]>

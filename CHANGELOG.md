@@ -1,10 +1,15 @@
+2017.1.7
+
+* GPUB: extract extend_marker_impl and improve error elements handling
+* Generator: fix base class calculation for merged AST and PSI
+* NPE: JFlexStateUsageSearcher.processQuery
+
 2017.1.6
 
 * Generator: generate Java 8 syntax: `generate=[java="8"]`
 * Generator: generate TokenSets for token choices: `generate=[token-sets="yes"]`
 * Generator: wrap anonymous classes with functions
 * RGH: fix left rule with several usage detected as recursive
-
 
 2017.1.5
 
@@ -13,7 +18,6 @@
 * Generator: FIRST check with the exact `consumeTokenType` (#185)
 * Generator/PSI: parameter annotations
 * GPUB: configurable token-advancer
-
 
 2017.1.4
 

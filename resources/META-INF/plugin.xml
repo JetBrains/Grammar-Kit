@@ -14,10 +14,9 @@
   <change-notes>
     <![CDATA[
     <ul>
-      <li>Generator: generate Java 8 syntax: generate=[java="8"]</li>
-      <li>Generator: generate TokenSets for token choices: generate=[token-sets="yes"]</li>
-      <li>Generator: wrap anonymous classes with functions</li>
-      <li>RGH: fix left rule with several usage detected as recursive</li>
+      <li>GPUB: extract extend_marker_impl and improve error elements handling</li>
+      <li>Generator: fix base class calculation for merged AST and PSI</li>
+      <li>NPE: JFlexStateUsageSearcher.processQuery</li>
     </ul>
     <a href="https://github.com/JetBrains/Grammar-Kit/blob/master/CHANGELOG.md">Full change log...</a>
     ]]>

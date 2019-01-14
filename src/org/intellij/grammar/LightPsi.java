@@ -16,6 +16,8 @@
 
 package org.intellij.grammar;
 
+import com.google.common.collect.Multimap;
+import com.google.common.collect.TreeMultimap;
 import com.intellij.concurrency.AsyncFutureFactory;
 import com.intellij.concurrency.AsyncFutureFactoryImpl;
 import com.intellij.concurrency.JobLauncher;
@@ -75,6 +77,7 @@ import org.picocontainer.defaults.AbstractComponentAdapter;
 
 import java.io.*;
 import java.lang.reflect.Modifier;
+import java.util.*;
 import java.util.jar.JarEntry;
 import java.util.jar.JarOutputStream;
 import java.util.regex.Matcher;
@@ -141,34 +144,60 @@ public class LightPsi {
   }
 
   private static int mainImpl(File classesFile, File outJarFile) throws Throwable {
-    BufferedReader reader = new BufferedReader(new FileReader(classesFile));
-    Pattern pattern = Pattern.compile("\\[Loaded (.*) from (?:file:)?(.*)]");
-
-    JarOutputStream jar = new JarOutputStream(new FileOutputStream(outJarFile));
-    int count = 0;
-    String s;
-    addJarEntry(jar, "misc/registry.properties");
-    while ((s = reader.readLine()) != null) {
-      Matcher matcher = pattern.matcher(s);
-      if (!matcher.matches()) continue;
-      String className = matcher.group(1);
-      String path = matcher.group(2);
-      if (!shouldAddEntry(path)) continue;
-      addJarEntry(jar, className.replace(".", "/") + ".class");
-      count ++;
+    Multimap<String, String> classesLoaded = collectClassesFromLogFile(classesFile);
+    Multimap<String, String> classesToSave = selectClassesToCopy(classesLoaded);
+    System.out.println(
+      String.format("Will save %d classes (of %d loaded) from:",
+                    classesToSave.size(), classesLoaded.size()));
+    for (Map.Entry<String, Collection<String>> entry : classesToSave.asMap().entrySet()) {
+      System.out.println(
+        String.format("    %s [%d class(es)]",
+                      entry.getKey(), entry.getValue().size()));
     }
-    jar.close();
-    return count;
+    try (JarOutputStream jar = new JarOutputStream(new FileOutputStream(outJarFile))) {
+      addJarEntry(jar, "misc/registry.properties");
+      for (String className : classesToSave.values()) {
+        addJarEntry(jar, className.replace(".", "/") + ".class");
+      }
+    }
+    return classesToSave.size();
   }
 
-  private static boolean shouldAddEntry(String path) {
-    if (!path.startsWith("/")) return false;
-    if (path.contains("/grammar-kit/")) return false;
+  /** Create a multimap from path => classnames from lines in classes.log.txt. */
+  private static Multimap<String, String> collectClassesFromLogFile(File classesFile) throws IOException {
+    Multimap<String, String> pathToClassNames = TreeMultimap.create();
+    try (BufferedReader reader = new BufferedReader(new FileReader(classesFile))) {
+      Pattern pattern = Pattern.compile("\\[Loaded (.*) from (?:file:)?(.*)]");
+      String s;
+      while ((s = reader.readLine()) != null) {
+        Matcher matcher = pattern.matcher(s);
+        if (matcher.matches()) {
+          String className = matcher.group(1);
+          String path = matcher.group(2);
+          pathToClassNames.put(path, className);
+        }
+      }
+    }
+    return pathToClassNames;
+  }
 
-    return path.contains("/out/classes/production/") ||
-           path.contains("extensions.jar") ||
-           path.contains("openapi.jar") ||
-           path.contains("idea.jar");
+  /** Select class names from the IntelliJ installation. */
+  private static Multimap<String, String> selectClassesToCopy(Multimap<String, String> classesLoaded) {
+    Set<String> pathPrefixesToAdd = new HashSet<>();
+    for (String path : classesLoaded.keySet()) {
+      if (path.endsWith("/idea.jar") || path.endsWith("/openapi.jar")) {
+        pathPrefixesToAdd.add(path.substring(0, path.lastIndexOf("/") + 1));
+      }
+    }
+    Multimap<String, String> classesToSave = TreeMultimap.create();
+    for (Map.Entry<String, Collection<String>> entry : classesLoaded.asMap().entrySet()) {
+      String path = entry.getKey();
+      String pathPrefix = path.substring(0, path.lastIndexOf("/")+1);
+      if (pathPrefixesToAdd.contains(pathPrefix)) {
+        classesToSave.putAll(path, entry.getValue());
+      }
+    }
+    return classesToSave;
   }
 
   private static void addJarEntry(JarOutputStream jarFile, String resourceName) throws IOException {

@@ -1,16 +1,15 @@
 Manifest-Version: 1.0
 Main-Class: org.intellij.grammar.Main
 Class-Path: light-psi-all.jar   
- lib/annotations.jar     
- lib/asm-all.jar
- lib/automaton.jar     
+ lib/annotations.jar
+ lib/asm-all-7.0.jar
+ lib/automaton-1.12-1.jar
  lib/extensions.jar
- lib/guava-19.0.jar
+ lib/guava-25.1-jre.jar
  lib/idea.jar
- lib/jdom.jar
- lib/junit.jar
- lib/openapi.jar  
- lib/picocontainer.jar
+ lib/picocontainer-1.2.jar
+ lib/platform-api.jar
+ lib/platform-impl.jar
  lib/trove4j.jar
  lib/util.jar
 

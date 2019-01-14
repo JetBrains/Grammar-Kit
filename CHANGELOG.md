@@ -1,3 +1,7 @@
+2018.3
+
+* Update artifacts to be based on IntelliJ IDEA 2018.3.
+
 2017.1.7
 
 * GPUB: extract extend_marker_impl and improve error elements handling

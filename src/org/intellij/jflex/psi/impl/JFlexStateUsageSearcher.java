@@ -42,7 +42,7 @@ public class JFlexStateUsageSearcher extends QueryExecutorBase<PsiReference, Ref
   }
 
   @Override
-  public void processQuery(@NotNull ReferencesSearch.SearchParameters queryParameters, @NotNull Processor<PsiReference> consumer) {
+  public void processQuery(@NotNull ReferencesSearch.SearchParameters queryParameters, @NotNull Processor<? super PsiReference> consumer) {
     PsiElement element = queryParameters.getElementToSearch();
     PsiFile containingFile = element.getContainingFile();
     if (element instanceof PsiField) {

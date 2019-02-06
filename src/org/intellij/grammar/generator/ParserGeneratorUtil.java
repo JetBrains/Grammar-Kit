@@ -925,6 +925,34 @@ public class ParserGeneratorUtil {
     return sb.toString();
   }
 
+  public static String getGenericClauseString(List<JavaHelper.TypeParameterInfo> genericParameters, Function<String, String> shortener) {
+    if (genericParameters.isEmpty()) return "";
+
+    StringBuilder buffer = new StringBuilder();
+    buffer.append('<');
+    for (int i = 0; i < genericParameters.size(); i++) {
+      if (i > 0) buffer.append(", ");
+
+      JavaHelper.TypeParameterInfo parameter = genericParameters.get(i);
+      buffer.append(parameter.getName());
+
+      List<String> extendsList = parameter.getExtendsList();
+      if (!extendsList.isEmpty()) {
+        buffer.append(" extends ");
+        for (int i1 = 0; i1 < extendsList.size(); i1++) {
+          if (i1 > 0) buffer.append(" & ");
+          String superType = extendsList.get(i1);
+          String shortened = shortener.fun(superType);
+          buffer.append(shortened);
+        }
+      }
+    }
+
+    buffer.append("> ");
+    return buffer.toString();
+  }
+
+
   public static class NameFormat {
     final static NameFormat EMPTY = new NameFormat("");
 

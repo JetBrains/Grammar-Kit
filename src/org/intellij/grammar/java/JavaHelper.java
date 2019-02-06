@@ -89,6 +89,10 @@ public abstract class JavaHelper {
     return Collections.emptyList();
   }
 
+  public List<TypeParameterInfo> getGenericParameters(NavigatablePsiElement method) {
+    return Collections.emptyList();
+  }
+
   @NotNull
   public String getDeclaringClass(@Nullable NavigatablePsiElement method) {
     return "";
@@ -246,10 +250,20 @@ public abstract class JavaHelper {
       for (PsiParameter parameter : psiMethod.getParameterList().getParameters()) {
         PsiType type = parameter.getType();
         boolean generic = type instanceof PsiClassType && ((PsiClassType)type).resolve() instanceof PsiTypeParameter;
-        strings.add((generic ? "<" : "") + type.getCanonicalText(false) + (generic ? ">" : ""));
+        String typeText = (generic ? "<" : "") + type.getCanonicalText(false) + (generic ? ">" : "");
+        strings.add(typeText);
         strings.add(parameter.getName());
       }
       return strings;
+    }
+
+    @Override
+    public List<TypeParameterInfo> getGenericParameters(NavigatablePsiElement method) {
+      if (!(method instanceof PsiMethod)) return super.getGenericParameters(method);
+
+      PsiMethod psiMethod = (PsiMethod)method;
+      PsiTypeParameter[] typeParameters = psiMethod.getTypeParameters();
+      return ContainerUtil.map(typeParameters, TypeParameterInfo::new);
     }
 
     @NotNull
@@ -387,6 +401,15 @@ public abstract class JavaHelper {
       return result;
     }
 
+    @Override
+    public List<TypeParameterInfo> getGenericParameters(NavigatablePsiElement method) {
+      if (method == null) return Collections.emptyList();
+      Method delegate = ((MyElement<Method>)method).delegate;
+
+      TypeVariable<Method>[] typeParameters = delegate.getTypeParameters();
+      return ContainerUtil.map(typeParameters, TypeParameterInfo::new);
+    }
+
     @NotNull
     @Override
     public String getDeclaringClass(@Nullable NavigatablePsiElement method) {
@@ -497,6 +520,13 @@ public abstract class JavaHelper {
       return ((MethodInfo)delegate).types;
     }
 
+    @Override
+    public List<TypeParameterInfo> getGenericParameters(NavigatablePsiElement method) {
+      Object delegate = method == null ? null : ((MyElement<?>)method).delegate;
+      if (!(delegate instanceof MethodInfo)) return Collections.emptyList();
+      return ((MethodInfo)delegate).generics;
+    }
+
     @NotNull
     @Override
     public String getDeclaringClass(@Nullable NavigatablePsiElement method) {
@@ -574,9 +604,13 @@ public abstract class JavaHelper {
     }
 
     private static void reportException(Exception e, String target, String signature) {
+      reportException(e.getClass().getSimpleName() + " while reading " + target +
+                      (signature == null ? "" : " signature " + signature));
+    }
+
+    private static void reportException(String text) {
       //noinspection UseOfSystemOutOrSystemErr
-      System.err.println(e.getClass().getSimpleName() + " while reading " + target +
-                         (signature == null ? "" : " signature " + signature));
+      System.err.println(text);
     }
 
     private static class MyClassVisitor extends ClassVisitor {
@@ -707,11 +741,19 @@ public abstract class JavaHelper {
 
       @Override
       public void visitFormalTypeParameter(String s) {
-        // collect them
+        finishElement(null);
+        methodInfo.generics.add(new TypeParameterInfo(s));
       }
 
       @Override
       public SignatureVisitor visitInterfaceBound() {
+        finishElement(null);
+        states.push(State.BOUNDS);
+        return this;
+      }
+
+      @Override
+      public SignatureVisitor visitClassBound() {
         finishElement(null);
         states.push(State.BOUNDS);
         return this;
@@ -811,13 +853,11 @@ public abstract class JavaHelper {
           State state = states.pop();
           switch (state) {
             case PARAM:
-              methodInfo.types.add(sb.toString());
+              methodInfo.types.add(sb());
               methodInfo.types.add("p" + (methodInfo.types.size() / 2));
-              sb.setLength(0);
               break main;
             case RETURN:
-              methodInfo.types.add(0, sb.toString());
-              sb.setLength(0);
+              methodInfo.types.add(0, sb());
               break main;
             case ARRAY:
               sb.append("[]");
@@ -825,12 +865,30 @@ public abstract class JavaHelper {
             case GENERIC:
               sb.append(">");
               break;
-            case CLASS:
             case BOUNDS:
+              String bound = sb();
+              if (!"java.lang.Object".equals(bound)) {
+                TypeParameterInfo currentGeneric = ContainerUtil.getLastItem(methodInfo.generics);
+                if (currentGeneric != null) {
+                  currentGeneric.extendsList.add(bound);
+                }
+                else {
+                  reportException("current generic must not be null");
+                }
+              }
+              break;
+            case CLASS:
             case EXCEPTION:
               break;
           }
         }
+      }
+
+      @NotNull
+      private String sb() {
+        String s = sb.toString();
+        sb.setLength(0);
+        return s;
       }
     }
   }
@@ -889,14 +947,42 @@ public abstract class JavaHelper {
     List<String> annotations = ContainerUtil.newSmartList();
     List<String> types = ContainerUtil.newSmartList();
     Map<Integer, List<String>> paramAnnotations = ContainerUtil.newHashMap(0);
+    List<TypeParameterInfo> generics = ContainerUtil.newSmartList();
 
     @Override
     public String toString() {
-      return "MethodInfo" +
-             "{" + name + types +
-             ", @" + annotations +
-             '}';
+      return "MethodInfo{" + name + types + ", @" + annotations + "<" + generics + ">" + '}';
     }
   }
 
+  public static class TypeParameterInfo {
+    private final String name;
+    private final List<String> extendsList;
+
+    public TypeParameterInfo(@NotNull PsiTypeParameter parameter) {
+      name = parameter.getName();
+      extendsList = ContainerUtil.map(parameter.getExtendsListTypes(), bound -> bound.getCanonicalText(false));
+    }
+
+    public TypeParameterInfo(@NotNull TypeVariable<Method> parameter) {
+      name = parameter.getName();
+      extendsList = ContainerUtil.mapNotNull(parameter.getBounds(), type -> {
+        String typeName = type.getTypeName();
+        return "java.lang.Object".equals(typeName) ? null : typeName;
+      });
+    }
+
+    public TypeParameterInfo(@NotNull String name) {
+      this.name = name;
+      this.extendsList = ContainerUtil.newSmartList();
+    }
+
+    public String getName() {
+      return name;
+    }
+
+    public List<String> getExtendsList() {
+      return extendsList;
+    }
+  }
 }

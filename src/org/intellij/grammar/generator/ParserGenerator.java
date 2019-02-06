@@ -2128,6 +2128,9 @@ public class ParserGenerator {
     if (!visited.add(methodName + methodTypes.subList(offset, methodTypes.size()))) return;
     if (intf && methodTypes.size() == offset && "toString".equals(methodName)) return;
 
+    if (!intf) {
+      out("@Override");
+    }
     for (String s : myJavaHelper.getAnnotations(method)) {
       if ("java.lang.Override".equals(s)) continue;
       if (s.startsWith("kotlin.")) continue;

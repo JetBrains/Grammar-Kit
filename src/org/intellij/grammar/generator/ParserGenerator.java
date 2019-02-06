@@ -1915,6 +1915,10 @@ public class ParserGenerator {
         String type = types.get(i);
         addTypeToImports(type, myJavaHelper.getParameterAnnotations(method, (i - 1) / 2), result);
       }
+
+      for (String exception : myJavaHelper.getExceptionList(method)) {
+        addTypeToImports(exception, emptyList(), result);
+      }
     }
   }
 
@@ -2148,6 +2152,7 @@ public class ParserGenerator {
     if (intf && methodTypes.size() == offset && "toString".equals(methodName)) return;
 
     List<JavaHelper.TypeParameterInfo> genericParameters = myJavaHelper.getGenericParameters(method);
+    List<String> exceptionList = myJavaHelper.getExceptionList(method);
 
     if (!intf) out("@" + myShortener.fun("java.lang.Override"));
     for (String s : myJavaHelper.getAnnotations(method)) {
@@ -2156,8 +2161,14 @@ public class ParserGenerator {
       out("@" + myShortener.fun(s));
     }
     Function<Integer, List<String>> annoProvider = i -> myJavaHelper.getParameterAnnotations(method, (i - 1) / 2);
-    out("%s%s%s %s(%s)%s", intf ? "" : "public ", getGenericClauseString(genericParameters, myShortener), returnType, methodName,
-        getParametersString(methodTypes, offset, 3, genericUnwrapper, annoProvider, myShortener), intf ? ";" : " {");
+    out("%s%s%s %s(%s)%s%s",
+        intf ? "" : "public ",
+        getGenericClauseString(genericParameters, myShortener),
+        returnType,
+        methodName,
+        getParametersString(methodTypes, offset, 3, genericUnwrapper, annoProvider, myShortener),
+        getThrowsString(exceptionList, myShortener),
+        intf ? ";" : " {");
     if (!intf) {
       String implUtilRef = myShortener.fun(StringUtil.notNullize(myPsiImplUtilClass, KnownAttribute.PSI_IMPL_UTIL_CLASS.getName()));
       String string = getParametersString(methodTypes, offset, 2, genericUnwrapper, annoProvider, myShortener);

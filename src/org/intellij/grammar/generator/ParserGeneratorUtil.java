@@ -952,6 +952,17 @@ public class ParserGeneratorUtil {
     return buffer.toString();
   }
 
+  @NotNull
+  public static String getThrowsString(List<String> exceptionList, Function<String, String> shortener) {
+    if (exceptionList.isEmpty()) return "";
+
+    List<String> shortened = ContainerUtil.map(exceptionList, shortener);
+
+    StringBuilder buffer = new StringBuilder();
+    buffer.append(" throws ");
+    StringUtil.join(shortened, ", ", buffer);
+    return buffer.toString();
+  }
 
   public static class NameFormat {
     final static NameFormat EMPTY = new NameFormat("");

@@ -93,6 +93,10 @@ public abstract class JavaHelper {
     return Collections.emptyList();
   }
 
+  public List<String> getExceptionList(NavigatablePsiElement method) {
+    return Collections.emptyList();
+  }
+
   @NotNull
   public String getDeclaringClass(@Nullable NavigatablePsiElement method) {
     return "";
@@ -266,6 +270,15 @@ public abstract class JavaHelper {
       return ContainerUtil.map(typeParameters, TypeParameterInfo::new);
     }
 
+    @Override
+    public List<String> getExceptionList(NavigatablePsiElement method) {
+      if (!(method instanceof PsiMethod)) return super.getExceptionList(method);
+
+      PsiMethod psiMethod = (PsiMethod)method;
+      PsiClassType[] types = psiMethod.getThrowsList().getReferencedTypes();
+      return ContainerUtil.map(types, type -> type.getCanonicalText(false));
+    }
+
     @NotNull
     @Override
     public String getDeclaringClass(@Nullable NavigatablePsiElement method) {
@@ -410,6 +423,15 @@ public abstract class JavaHelper {
       return ContainerUtil.map(typeParameters, TypeParameterInfo::new);
     }
 
+    @Override
+    public List<String> getExceptionList(NavigatablePsiElement method) {
+      if (method == null) return Collections.emptyList();
+      Method delegate = ((MyElement<Method>)method).delegate;
+
+      Class<?>[] exceptionTypes = delegate.getExceptionTypes();
+      return ContainerUtil.map(exceptionTypes, Class::getName);
+    }
+
     @NotNull
     @Override
     public String getDeclaringClass(@Nullable NavigatablePsiElement method) {
@@ -527,6 +549,13 @@ public abstract class JavaHelper {
       return ((MethodInfo)delegate).generics;
     }
 
+    @Override
+    public List<String> getExceptionList(NavigatablePsiElement method) {
+      Object delegate = method == null ? null : ((MyElement<?>)method).delegate;
+      if (!(delegate instanceof MethodInfo)) return Collections.emptyList();
+      return ((MethodInfo)delegate).exceptions;
+    }
+
     @NotNull
     @Override
     public String getDeclaringClass(@Nullable NavigatablePsiElement method) {
@@ -587,7 +616,7 @@ public abstract class JavaHelper {
       return info;
     }
 
-    private static MethodInfo getMethodInfo(String className, String methodName, String signature) {
+    private static MethodInfo getMethodInfo(String className, String methodName, String signature, String[] exceptions) {
       final MethodInfo methodInfo = new MethodInfo();
       methodInfo.name = methodName;
       methodInfo.declaringClass = className;
@@ -596,6 +625,13 @@ public abstract class JavaHelper {
         MySignatureVisitor visitor = new MySignatureVisitor(methodInfo);
         new SignatureReader(signature).accept(visitor);
         visitor.finishElement(null);
+
+        if (exceptions != null) {
+          for (String exception : exceptions) {
+            String fqn = fixClassName(exception);
+            methodInfo.exceptions.add(fqn);
+          }
+        }
       }
       catch (Exception e) {
         reportException(e, className + "#" + methodName + "()", signature);
@@ -653,7 +689,7 @@ public abstract class JavaHelper {
                                        String desc,
                                        String signature,
                                        String[] exceptions) {
-        final MethodInfo m = getMethodInfo(myInfo.name, name, ObjectUtils.chooseNotNull(signature, desc));
+        final MethodInfo m = getMethodInfo(myInfo.name, name, ObjectUtils.chooseNotNull(signature, desc), exceptions);
         m.modifiers = access;
         m.methodType = "<init>".equals(name)? MethodType.CONSTRUCTOR :
                                 Modifier.isStatic(access) ? MethodType.STATIC :
@@ -877,8 +913,10 @@ public abstract class JavaHelper {
                 }
               }
               break;
-            case CLASS:
             case EXCEPTION:
+              methodInfo.exceptions.add(sb());
+              break;
+            case CLASS:
               break;
           }
         }
@@ -948,10 +986,11 @@ public abstract class JavaHelper {
     List<String> types = ContainerUtil.newSmartList();
     Map<Integer, List<String>> paramAnnotations = ContainerUtil.newHashMap(0);
     List<TypeParameterInfo> generics = ContainerUtil.newSmartList();
+    List<String> exceptions = ContainerUtil.newSmartList();
 
     @Override
     public String toString() {
-      return "MethodInfo{" + name + types + ", @" + annotations + "<" + generics + ">" + '}';
+      return "MethodInfo{" + name + types + ", @" + annotations + "<" + generics + ">" + " throws " + exceptions + '}';
     }
   }
 

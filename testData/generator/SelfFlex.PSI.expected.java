@@ -863,6 +863,7 @@ public class JFlexJavaCodeImpl extends JFlexJavaCodeInjectionHostImpl implements
     else super.accept(visitor);
   }
 
+  @Override
   public PsiReference[] getReferences() {
     return JFlexPsiImplUtil.getReferences(this);
   }
@@ -898,6 +899,7 @@ public class JFlexJavaTypeImpl extends JFlexCompositeImpl implements JFlexJavaTy
     else super.accept(visitor);
   }
 
+  @Override
   @NotNull
   public PsiReference[] getReferences() {
     return JFlexPsiImplUtil.getReferences(this);
@@ -1054,16 +1056,19 @@ public class JFlexMacroDefinitionImpl extends JFlexCompositeImpl implements JFle
     return findPsiChildByType(FLEX_ID);
   }
 
+  @Override
   @NotNull
   public String getName() {
     return JFlexPsiImplUtil.getName(this);
   }
 
+  @Override
   @NotNull
   public PsiNameIdentifierOwner setName(String p1) {
     return JFlexPsiImplUtil.setName(this, p1);
   }
 
+  @Override
   @NotNull
   public PsiElement getNameIdentifier() {
     return JFlexPsiImplUtil.getNameIdentifier(this);
@@ -1142,6 +1147,7 @@ public class JFlexMacroReferenceImpl extends JFlexCompositeImpl implements JFlex
     return findPsiChildByType(FLEX_ID);
   }
 
+  @Override
   @NotNull
   public PsiReference getReference() {
     return JFlexPsiImplUtil.getReference(this);
@@ -1490,16 +1496,19 @@ public class JFlexStateDefinitionImpl extends JFlexCompositeImpl implements JFle
     return findPsiChildByType(FLEX_ID);
   }
 
+  @Override
   @NotNull
   public String getName() {
     return JFlexPsiImplUtil.getName(this);
   }
 
+  @Override
   @NotNull
   public PsiNameIdentifierOwner setName(String p1) {
     return JFlexPsiImplUtil.setName(this, p1);
   }
 
+  @Override
   @NotNull
   public PsiElement getNameIdentifier() {
     return JFlexPsiImplUtil.getNameIdentifier(this);
@@ -1578,6 +1587,7 @@ public class JFlexStateReferenceImpl extends JFlexCompositeImpl implements JFlex
     return findPsiChildByType(FLEX_ID);
   }
 
+  @Override
   @NotNull
   public PsiReference getReference() {
     return JFlexPsiImplUtil.getReference(this);

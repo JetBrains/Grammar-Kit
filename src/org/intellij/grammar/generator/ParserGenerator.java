@@ -47,7 +47,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -2128,6 +2127,7 @@ public class ParserGenerator {
     if (!visited.add(methodName + methodTypes.subList(offset, methodTypes.size()))) return;
     if (intf && methodTypes.size() == offset && "toString".equals(methodName)) return;
 
+    if (!intf) out("@" + myShortener.fun("java.lang.Override"));
     for (String s : myJavaHelper.getAnnotations(method)) {
       if ("java.lang.Override".equals(s)) continue;
       if (s.startsWith("kotlin.")) continue;

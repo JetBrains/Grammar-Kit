@@ -1,0 +1,26 @@
+{
+  generatePsi=true
+  classHeader="//header.txt"
+  psiPackage="test.psi"
+  psiImplPackage="test.psi.impl"
+  psiTreeUtilClass="test.psi.MyPsiTreeUtil"
+  parserClass="test.FooParser"
+  elementTypeFactory="test.FooParserDefinition.createType"
+  tokenTypeFactory="test.stub.FooParserDefinition.createTokenType"
+  elementTypeHolderClass="test.FooTypes"
+  parserUtilClass="org.intellij.grammar.parser.GeneratedParserUtilBase"
+
+  psiImplUtilClass="org.intellij.grammar.test.UtilMethods"
+}
+root ::= element1
+element1 ::= 'aa'
+{
+  methods = [
+    foo0
+    foo1
+    foo2
+    foo3
+    foo4
+    foo5
+  ]
+}

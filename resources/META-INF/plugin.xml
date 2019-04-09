@@ -1,6 +1,6 @@
 <idea-plugin url="https://github.com/JetBrains/Grammar-Kit">
   <id>org.jetbrains.idea.grammar</id>
-  <version>2017.1.8-SNAPSHOT</version>
+  <version>2019.2-SNAPSHOT</version>
   <vendor email="gregory.shrago@jetbrains.com">Greg Shrago</vendor>
   <idea-version since-build="171"/>
 
@@ -14,7 +14,11 @@
   <change-notes>
     <![CDATA[
     <ul>
-      <li></li>
+      <li>Generator: "extraRoot" attribute to explicitly mark a rule as such</li>
+      <li>Generator: method mixins with throws list</li>
+      <li>Generator: method mixins with generic parameters</li>
+      <li>RGH: cardinality calculation fix for meta rules usages</li>
+      <li>Plugin: switch to year-based versions from least "compatible IDE" versions</li>
     </ul>
     <a href="https://github.com/JetBrains/Grammar-Kit/blob/master/CHANGELOG.md">Full change log...</a>
     ]]>

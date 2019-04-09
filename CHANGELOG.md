@@ -1,3 +1,11 @@
+2019.1
+
+* Generator: "extraRoot" attribute to explicitly mark a rule as such
+* Generator: method mixins with throws list
+* Generator: method mixins with generic parameters
+* RGH: cardinality calculation fix for meta rules usages
+* Plugin: switch to year-based versions from least "compatible IDE" versions  
+
 2017.1.7
 
 * GPUB: extract extend_marker_impl and improve error elements handling

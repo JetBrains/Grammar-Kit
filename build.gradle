@@ -21,7 +21,7 @@ buildscript {
 }
 
 plugins {
-  id 'org.jetbrains.intellij' version "0.3.4"
+  id 'org.jetbrains.intellij' version "0.4.7"
 }
 
 version = "${version}"

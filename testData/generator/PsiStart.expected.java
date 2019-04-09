@@ -7,6 +7,7 @@ import com.intellij.lang.PsiBuilder.Marker;
 import static generated.GeneratedTypes.*;
 import static com.intellij.lang.parser.GeneratedParserUtilBase.*;
 import com.intellij.psi.tree.IElementType;
+import com.intellij.psi.tree.IFileElementType;
 import com.intellij.lang.ASTNode;
 import com.intellij.psi.tree.TokenSet;
 import com.intellij.lang.PsiParser;
@@ -24,22 +25,33 @@ public class GeneratedParser implements PsiParser, LightPsiParser {
     boolean result_;
     builder_ = adapt_builder_(root_, builder_, this, null);
     Marker marker_ = enter_section_(builder_, 0, _COLLAPSE_, null);
-    if (root_ == ELEMENT) {
-      result_ = element(builder_, 0);
-    }
-    else if (root_ == ENTRY) {
-      result_ = entry(builder_, 0);
-    }
-    else if (root_ == LIST) {
-      result_ = list(builder_, 0);
-    }
-    else if (root_ == MAP) {
-      result_ = map(builder_, 0);
-    }
-    else {
+    if (root_ instanceof IFileElementType) {
       result_ = parse_root_(root_, builder_, 0);
     }
+    else {
+      result_ = parse_extra_roots_(root_, builder_, 0);
+    }
     exit_section_(builder_, 0, marker_, root_, result_, true, TRUE_CONDITION);
+  }
+
+  static boolean parse_extra_roots_(IElementType root_, PsiBuilder builder_, int level_) {
+    boolean result_;
+    if (root_ == ELEMENT) {
+      result_ = element(builder_, level_ + 1);
+    }
+    else if (root_ == ENTRY) {
+      result_ = entry(builder_, level_ + 1);
+    }
+    else if (root_ == LIST) {
+      result_ = list(builder_, level_ + 1);
+    }
+    else if (root_ == MAP) {
+      result_ = map(builder_, level_ + 1);
+    }
+    else {
+      result_ = false;
+    }
+    return result_;
   }
 
   protected boolean parse_root_(IElementType root_, PsiBuilder builder_, int level_) {

@@ -7,6 +7,7 @@ import com.intellij.lang.PsiBuilder.Marker;
 import static generated.GeneratedTypes.*;
 import static PsiGenUtil.*;
 import com.intellij.psi.tree.IElementType;
+import com.intellij.psi.tree.IFileElementType;
 import com.intellij.lang.ASTNode;
 import com.intellij.psi.tree.TokenSet;
 import com.intellij.lang.PsiParser;
@@ -24,38 +25,11 @@ public class PsiGen implements PsiParser, LightPsiParser {
     boolean result_;
     builder_ = adapt_builder_(root_, builder_, this, EXTENDS_SETS_);
     Marker marker_ = enter_section_(builder_, 0, _COLLAPSE_, null);
-    if (root_ == EXPR) {
-      result_ = expr(builder_, 0);
-    }
-    else if (root_ == GRAMMAR_ELEMENT) {
-      result_ = grammar_element(builder_, 0);
-    }
-    else if (root_ == INCLUDE__SECTION__ALT) {
-      result_ = include__section__alt(builder_, 0);
-    }
-    else if (root_ == INCLUDE_SECTION) {
-      result_ = include_section(builder_, 0);
-    }
-    else if (root_ == MUL_EXPR) {
-      result_ = mul_expr(builder_, 0);
-    }
-    else if (root_ == PLUS_EXPR) {
-      result_ = plus_expr(builder_, 0);
-    }
-    else if (root_ == ROOT) {
-      result_ = root(builder_, 0);
-    }
-    else if (root_ == ROOT_B) {
-      result_ = root_b(builder_, 0);
-    }
-    else if (root_ == ROOT_C) {
-      result_ = root_c(builder_, 0);
-    }
-    else if (root_ == ROOT_D) {
-      result_ = root_d(builder_, 0);
+    if (root_ instanceof IFileElementType) {
+      result_ = parse_root_(root_, builder_, 0);
     }
     else {
-      result_ = parse_root_(root_, builder_, 0);
+      result_ = false;
     }
     exit_section_(builder_, 0, marker_, root_, result_, true, TRUE_CONDITION);
   }

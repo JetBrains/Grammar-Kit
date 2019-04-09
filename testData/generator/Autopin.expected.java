@@ -7,6 +7,7 @@ import com.intellij.lang.PsiBuilder.Marker;
 import static generated.GeneratedTypes.*;
 import static com.intellij.lang.parser.GeneratedParserUtilBase.*;
 import com.intellij.psi.tree.IElementType;
+import com.intellij.psi.tree.IFileElementType;
 import com.intellij.lang.ASTNode;
 import com.intellij.psi.tree.TokenSet;
 import com.intellij.lang.PsiParser;
@@ -24,26 +25,11 @@ public class Autopin implements PsiParser, LightPsiParser {
     boolean result_;
     builder_ = adapt_builder_(root_, builder_, this, EXTENDS_SETS_);
     Marker marker_ = enter_section_(builder_, 0, _COLLAPSE_, null);
-    if (root_ == CREATE_STATEMENT) {
-      result_ = create_statement(builder_, 0);
-    }
-    else if (root_ == CREATE_TABLE_STATEMENT) {
-      result_ = create_table_statement(builder_, 0);
-    }
-    else if (root_ == DROP_STATEMENT) {
-      result_ = drop_statement(builder_, 0);
-    }
-    else if (root_ == DROP_TABLE_STATEMENT) {
-      result_ = drop_table_statement(builder_, 0);
-    }
-    else if (root_ == OVERRIDE_NESTED_SEQUENCE) {
-      result_ = override_nested_sequence(builder_, 0);
-    }
-    else if (root_ == STATEMENT) {
-      result_ = statement(builder_, 0);
+    if (root_ instanceof IFileElementType) {
+      result_ = parse_root_(root_, builder_, 0);
     }
     else {
-      result_ = parse_root_(root_, builder_, 0);
+      result_ = false;
     }
     exit_section_(builder_, 0, marker_, root_, result_, true, TRUE_CONDITION);
   }

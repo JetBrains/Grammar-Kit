@@ -34,6 +34,7 @@ expr ::= assign_expr
   | call_expr
   | qualification_expr
   | primary_group
+  {extraRoot=true}
 private boolean_group ::= xor_expr | between_expr | is_not_expr
 
 private conditional_group ::= elvis_expr | conditional_expr

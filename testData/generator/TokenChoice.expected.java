@@ -8,6 +8,7 @@ import static generated.GeneratedTypes.*;
 import static generated.GeneratedTypes.TokenSets.*;
 import static com.intellij.lang.parser.GeneratedParserUtilBase.*;
 import com.intellij.psi.tree.IElementType;
+import com.intellij.psi.tree.IFileElementType;
 import com.intellij.lang.ASTNode;
 import com.intellij.psi.tree.TokenSet;
 import com.intellij.lang.PsiParser;
@@ -25,38 +26,11 @@ public class TokenChoice implements PsiParser, LightPsiParser {
     boolean result_;
     builder_ = adapt_builder_(root_, builder_, this, null);
     Marker marker_ = enter_section_(builder_, 0, _COLLAPSE_, null);
-    if (root_ == ANOTHER_THREE_TOKENS) {
-      result_ = another_three_tokens(builder_, 0);
-    }
-    else if (root_ == FAST_CHOICE) {
-      result_ = fast_choice(builder_, 0);
-    }
-    else if (root_ == FIVE_TOKENS_CHOICE) {
-      result_ = five_tokens_choice(builder_, 0);
-    }
-    else if (root_ == FOUR_TOKENS_CHOICE) {
-      result_ = four_tokens_choice(builder_, 0);
-    }
-    else if (root_ == PARENTHESIZED_CHOICE) {
-      result_ = parenthesized_choice(builder_, 0);
-    }
-    else if (root_ == REPEATING_TOKENS_CHOICE) {
-      result_ = repeating_tokens_choice(builder_, 0);
-    }
-    else if (root_ == SMART_CHOICE) {
-      result_ = smart_choice(builder_, 0);
-    }
-    else if (root_ == TEN_TOKENS_CHOICE) {
-      result_ = ten_tokens_choice(builder_, 0);
-    }
-    else if (root_ == THREE_TOKENS_CHOICE) {
-      result_ = three_tokens_choice(builder_, 0);
-    }
-    else if (root_ == THREE_TOKENS_IN_ANOTHER_ORDER) {
-      result_ = three_tokens_in_another_order(builder_, 0);
+    if (root_ instanceof IFileElementType) {
+      result_ = parse_root_(root_, builder_, 0);
     }
     else {
-      result_ = parse_root_(root_, builder_, 0);
+      result_ = false;
     }
     exit_section_(builder_, 0, marker_, root_, result_, true, TRUE_CONDITION);
   }

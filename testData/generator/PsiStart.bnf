@@ -1,5 +1,5 @@
 {
-
+  extraRoot(".*")=true
 }
 
 grammar ::= list | map

@@ -7,6 +7,7 @@ import com.intellij.lang.PsiBuilder.Marker;
 import static test.FooTypes.*;
 import static org.intellij.grammar.parser.GeneratedParserUtilBase.*;
 import com.intellij.psi.tree.IElementType;
+import com.intellij.psi.tree.IFileElementType;
 import com.intellij.lang.ASTNode;
 import com.intellij.psi.tree.TokenSet;
 import com.intellij.lang.PsiParser;
@@ -24,32 +25,11 @@ public class FooParser implements PsiParser, LightPsiParser {
     boolean result_;
     builder_ = adapt_builder_(root_, builder_, this, EXTENDS_SETS_);
     Marker marker_ = enter_section_(builder_, 0, _COLLAPSE_, null);
-    if (root_ == ELEMENT_1) {
-      result_ = element1(builder_, 0);
-    }
-    else if (root_ == ELEMENT_2) {
-      result_ = element2(builder_, 0);
-    }
-    else if (root_ == ELEMENT_3) {
-      result_ = element3(builder_, 0);
-    }
-    else if (root_ == ELEMENT_4) {
-      result_ = element4(builder_, 0);
-    }
-    else if (root_ == ELEMENT_5) {
-      result_ = element5(builder_, 0);
-    }
-    else if (root_ == INTERFACE_TYPE) {
-      result_ = interface_type(builder_, 0);
-    }
-    else if (root_ == STRUCT_TYPE) {
-      result_ = struct_type(builder_, 0);
-    }
-    else if (root_ == TYPE) {
-      result_ = type(builder_, 0);
+    if (root_ instanceof IFileElementType) {
+      result_ = parse_root_(root_, builder_, 0);
     }
     else {
-      result_ = parse_root_(root_, builder_, 0);
+      result_ = false;
     }
     exit_section_(builder_, 0, marker_, root_, result_, true, TRUE_CONDITION);
   }

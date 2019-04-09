@@ -7,6 +7,7 @@ import com.intellij.lang.PsiBuilder.Marker;
 import static generated.GeneratedTypes.*;
 import static com.intellij.lang.parser.GeneratedParserUtilBase.*;
 import com.intellij.psi.tree.IElementType;
+import com.intellij.psi.tree.IFileElementType;
 import com.intellij.lang.ASTNode;
 import com.intellij.psi.tree.TokenSet;
 import com.intellij.lang.PsiParser;
@@ -24,107 +25,11 @@ public class ConsumeMethods implements PsiParser, LightPsiParser {
     boolean result_;
     builder_ = adapt_builder_(root_, builder_, this, null);
     Marker marker_ = enter_section_(builder_, 0, _COLLAPSE_, null);
-    if (root_ == FAST_PREDICATE_VS_REGULAR) {
-      result_ = fast_predicate_vs_regular(builder_, 0);
-    }
-    else if (root_ == FAST_PREDICATE_VS_SMART) {
-      result_ = fast_predicate_vs_smart(builder_, 0);
-    }
-    else if (root_ == FAST_RULE) {
-      result_ = fast_rule(builder_, 0);
-    }
-    else if (root_ == FAST_VS_REGULAR) {
-      result_ = fast_vs_regular(builder_, 0);
-    }
-    else if (root_ == FAST_VS_REGULAR_IN_FAST) {
-      result_ = fast_vs_regular_in_fast(builder_, 0);
-    }
-    else if (root_ == FAST_VS_REGULAR_IN_SMART) {
-      result_ = fast_vs_regular_in_smart(builder_, 0);
-    }
-    else if (root_ == FAST_VS_SMART) {
-      result_ = fast_vs_smart(builder_, 0);
-    }
-    else if (root_ == FAST_VS_SMART_IN_FAST) {
-      result_ = fast_vs_smart_in_fast(builder_, 0);
-    }
-    else if (root_ == FAST_VS_SMART_IN_SMART) {
-      result_ = fast_vs_smart_in_smart(builder_, 0);
-    }
-    else if (root_ == PARENT_FAST) {
-      result_ = parent_fast(builder_, 0);
-    }
-    else if (root_ == PARENT_REGULAR) {
-      result_ = parent_regular(builder_, 0);
-    }
-    else if (root_ == PARENT_SMART) {
-      result_ = parent_smart(builder_, 0);
-    }
-    else if (root_ == REGULAR_PREDICATE_VS_FAST) {
-      result_ = regular_predicate_vs_fast(builder_, 0);
-    }
-    else if (root_ == REGULAR_PREDICATE_VS_SMART) {
-      result_ = regular_predicate_vs_smart(builder_, 0);
-    }
-    else if (root_ == REGULAR_RULE) {
-      result_ = regular_rule(builder_, 0);
-    }
-    else if (root_ == REGULAR_VS_FAST) {
-      result_ = regular_vs_fast(builder_, 0);
-    }
-    else if (root_ == REGULAR_VS_FAST_IN_FAST) {
-      result_ = regular_vs_fast_in_fast(builder_, 0);
-    }
-    else if (root_ == REGULAR_VS_FAST_IN_SMART) {
-      result_ = regular_vs_fast_in_smart(builder_, 0);
-    }
-    else if (root_ == REGULAR_VS_SMART) {
-      result_ = regular_vs_smart(builder_, 0);
-    }
-    else if (root_ == REGULAR_VS_SMART_IN_FAST) {
-      result_ = regular_vs_smart_in_fast(builder_, 0);
-    }
-    else if (root_ == REGULAR_VS_SMART_IN_SMART) {
-      result_ = regular_vs_smart_in_smart(builder_, 0);
-    }
-    else if (root_ == SMART_PREDICATE_VS_FAST) {
-      result_ = smart_predicate_vs_fast(builder_, 0);
-    }
-    else if (root_ == SMART_PREDICATE_VS_REGULAR) {
-      result_ = smart_predicate_vs_regular(builder_, 0);
-    }
-    else if (root_ == SMART_RULE) {
-      result_ = smart_rule(builder_, 0);
-    }
-    else if (root_ == SMART_VS_FAST) {
-      result_ = smart_vs_fast(builder_, 0);
-    }
-    else if (root_ == SMART_VS_FAST_IN_FAST) {
-      result_ = smart_vs_fast_in_fast(builder_, 0);
-    }
-    else if (root_ == SMART_VS_FAST_IN_SMART) {
-      result_ = smart_vs_fast_in_smart(builder_, 0);
-    }
-    else if (root_ == SMART_VS_REGULAR) {
-      result_ = smart_vs_regular(builder_, 0);
-    }
-    else if (root_ == SMART_VS_REGULAR_IN_FAST) {
-      result_ = smart_vs_regular_in_fast(builder_, 0);
-    }
-    else if (root_ == SMART_VS_REGULAR_IN_SMART) {
-      result_ = smart_vs_regular_in_smart(builder_, 0);
-    }
-    else if (root_ == TOKEN_FAST) {
-      result_ = token_fast(builder_, 0);
-    }
-    else if (root_ == TOKEN_REGULAR) {
-      result_ = token_regular(builder_, 0);
-    }
-    else if (root_ == TOKEN_SMART) {
-      result_ = token_smart(builder_, 0);
+    if (root_ instanceof IFileElementType) {
+      result_ = parse_root_(root_, builder_, 0);
     }
     else {
-      result_ = parse_root_(root_, builder_, 0);
+      result_ = false;
     }
     exit_section_(builder_, 0, marker_, root_, result_, true, TRUE_CONDITION);
   }

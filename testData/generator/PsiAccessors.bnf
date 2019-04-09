@@ -1,11 +1,12 @@
 {
-  generate=[visitor="no" root-rules="expression"]
+  generate=[visitor="no"]
   classHeader="//header.txt"
   parserClass="PsiAccessors"
   psiClassPrefix="X"
   implements="XComposite"
   parserUtilClass="PsiGenUtil"
   generateTokenAccessors("some-.*")=true
+  rootRule("expression")=true
 
   tokens=[
     MY_SOMETHING="something"

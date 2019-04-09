@@ -7,6 +7,7 @@ import com.intellij.lang.PsiBuilder.Marker;
 import static org.intellij.grammar.expression.ExpressionTypes.*;
 import static org.intellij.grammar.parser.GeneratedParserUtilBase.*;
 import com.intellij.psi.tree.IElementType;
+import com.intellij.psi.tree.IFileElementType;
 import com.intellij.lang.ASTNode;
 import com.intellij.psi.tree.TokenSet;
 import com.intellij.lang.PsiParser;
@@ -24,19 +25,24 @@ public class ExpressionParser implements PsiParser, LightPsiParser {
     boolean result_;
     builder_ = adapt_builder_(root_, builder_, this, EXTENDS_SETS_);
     Marker marker_ = enter_section_(builder_, 0, _COLLAPSE_, null);
-    if (root_ == ARG_LIST) {
-      result_ = arg_list(builder_, 0);
-    }
-    else if (root_ == EXPR) {
-      result_ = expr(builder_, 0, -1);
-    }
-    else if (root_ == IDENTIFIER) {
-      result_ = identifier(builder_, 0);
-    }
-    else {
+    if (root_ instanceof IFileElementType) {
       result_ = parse_root_(root_, builder_, 0);
     }
+    else {
+      result_ = parse_extra_roots_(root_, builder_, 0);
+    }
     exit_section_(builder_, 0, marker_, root_, result_, true, TRUE_CONDITION);
+  }
+
+  static boolean parse_extra_roots_(IElementType root_, PsiBuilder builder_, int level_) {
+    boolean result_;
+    if (root_ == EXPR) {
+      result_ = expr(builder_, level_ + 1, -1);
+    }
+    else {
+      result_ = false;
+    }
+    return result_;
   }
 
   protected boolean parse_root_(IElementType root_, PsiBuilder builder_, int level_) {

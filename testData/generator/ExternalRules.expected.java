@@ -29,9 +29,20 @@ public class ExternalRules implements PsiParser, LightPsiParser {
       result_ = parse_root_(root_, builder_, 0);
     }
     else {
-      result_ = false;
+      result_ = parse_extra_roots_(root_, builder_, 0);
     }
     exit_section_(builder_, 0, marker_, root_, result_, true, TRUE_CONDITION);
+  }
+
+  static boolean parse_extra_roots_(IElementType root_, PsiBuilder builder_, int level_) {
+    boolean result_;
+    if (root_ == EXTRA_ROOT) {
+      result_ = ExternalRules2.extra_root(builder_, level_ + 1);
+    }
+    else {
+      result_ = false;
+    }
+    return result_;
   }
 
   protected boolean parse_root_(IElementType root_, PsiBuilder builder_, int level_) {
@@ -96,7 +107,7 @@ public class ExternalRules implements PsiParser, LightPsiParser {
     if (!recursion_guard_(builder_, level_, "comma_list_1_0")) return false;
     boolean result_;
     Marker marker_ = enter_section_(builder_);
-    result_ = consumeToken(builder_, ",");
+    result_ = consumeToken(builder_, COMMA);
     result_ = result_ && param.parse(builder_, level_);
     exit_section_(builder_, marker_, null, result_);
     return result_;
@@ -143,13 +154,52 @@ public class ExternalRules implements PsiParser, LightPsiParser {
   // ',' <<param>>
   public static boolean comma_list_tail(PsiBuilder builder_, int level_, Parser param) {
     if (!recursion_guard_(builder_, level_, "comma_list_tail")) return false;
+    if (!nextTokenIs(builder_, COMMA)) return false;
     boolean result_, pinned_;
     Marker marker_ = enter_section_(builder_, level_, _NONE_, COMMA_LIST_TAIL, null);
-    result_ = consumeToken(builder_, ",");
+    result_ = consumeToken(builder_, COMMA);
     pinned_ = result_; // pin = 1
     result_ = result_ && param.parse(builder_, level_);
     exit_section_(builder_, level_, marker_, result_, pinned_, null);
     return result_ || pinned_;
+  }
+
+  /* ********************************************************** */
+  // '(' <<param>> (',' <<param>>) * ')'
+  static boolean comma_paren_list(PsiBuilder builder_, int level_, Parser param) {
+    if (!recursion_guard_(builder_, level_, "comma_paren_list")) return false;
+    if (!nextTokenIs(builder_, PAREN1)) return false;
+    boolean result_, pinned_;
+    Marker marker_ = enter_section_(builder_, level_, _NONE_);
+    result_ = consumeToken(builder_, PAREN1);
+    pinned_ = result_; // pin = 1
+    result_ = result_ && report_error_(builder_, param.parse(builder_, level_));
+    result_ = pinned_ && report_error_(builder_, comma_paren_list_2(builder_, level_ + 1, param)) && result_;
+    result_ = pinned_ && consumeToken(builder_, PAREN2) && result_;
+    exit_section_(builder_, level_, marker_, result_, pinned_, null);
+    return result_ || pinned_;
+  }
+
+  // (',' <<param>>) *
+  private static boolean comma_paren_list_2(PsiBuilder builder_, int level_, Parser param) {
+    if (!recursion_guard_(builder_, level_, "comma_paren_list_2")) return false;
+    while (true) {
+      int pos_ = current_position_(builder_);
+      if (!comma_paren_list_2_0(builder_, level_ + 1, param)) break;
+      if (!empty_element_parsed_guard_(builder_, "comma_paren_list_2", pos_)) break;
+    }
+    return true;
+  }
+
+  // ',' <<param>>
+  private static boolean comma_paren_list_2_0(PsiBuilder builder_, int level_, Parser param) {
+    if (!recursion_guard_(builder_, level_, "comma_paren_list_2_0")) return false;
+    boolean result_;
+    Marker marker_ = enter_section_(builder_);
+    result_ = consumeToken(builder_, COMMA);
+    result_ = result_ && param.parse(builder_, level_);
+    exit_section_(builder_, marker_, null, result_);
+    return result_;
   }
 
   /* ********************************************************** */
@@ -180,9 +230,9 @@ public class ExternalRules implements PsiParser, LightPsiParser {
     if (!recursion_guard_(builder_, level_, "item_recover_0")) return false;
     boolean result_;
     Marker marker_ = enter_section_(builder_);
-    result_ = consumeToken(builder_, ",");
+    result_ = consumeToken(builder_, COMMA);
     if (!result_) result_ = consumeToken(builder_, ";");
-    if (!result_) result_ = consumeToken(builder_, ")");
+    if (!result_) result_ = consumeToken(builder_, PAREN2);
     exit_section_(builder_, marker_, null, result_);
     return result_;
   }
@@ -634,6 +684,48 @@ public class ExternalRules implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
+  // <<comma_paren_list (ref | '(' one ')')>>
+  public static boolean public_paren_list(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "public_paren_list")) return false;
+    if (!nextTokenIs(builder_, PAREN1)) return false;
+    boolean result_;
+    Marker marker_ = enter_section_(builder_);
+    result_ = comma_paren_list(builder_, level_ + 1, public_paren_list_0_0_parser_);
+    exit_section_(builder_, marker_, PUBLIC_PAREN_LIST, result_);
+    return result_;
+  }
+
+  // ref | '(' one ')'
+  private static boolean public_paren_list_0_0(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "public_paren_list_0_0")) return false;
+    boolean result_;
+    Marker marker_ = enter_section_(builder_);
+    result_ = parseRef(builder_, level_ + 1);
+    if (!result_) result_ = public_paren_list_0_0_1(builder_, level_ + 1);
+    exit_section_(builder_, marker_, null, result_);
+    return result_;
+  }
+
+  // '(' one ')'
+  private static boolean public_paren_list_0_0_1(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "public_paren_list_0_0_1")) return false;
+    boolean result_;
+    Marker marker_ = enter_section_(builder_);
+    result_ = consumeToken(builder_, PAREN1);
+    result_ = result_ && one(builder_, level_ + 1);
+    result_ = result_ && consumeToken(builder_, PAREN2);
+    exit_section_(builder_, marker_, null, result_);
+    return result_;
+  }
+
+  /* ********************************************************** */
+  public static boolean public_paren_list2(PsiBuilder builder_, int level_) {
+    Marker marker_ = enter_section_(builder_);
+    exit_section_(builder_, marker_, PUBLIC_PAREN_LIST, true);
+    return true;
+  }
+
+  /* ********************************************************** */
   // <<param>>
   static boolean recoverable_item(PsiBuilder builder_, int level_, Parser param) {
     if (!recursion_guard_(builder_, level_, "recoverable_item")) return false;
@@ -799,6 +891,11 @@ public class ExternalRules implements PsiParser, LightPsiParser {
     }
   };
   static final Parser perc_re_list2_0_0_parser_ = PERC_RE_parser_;
+  static final Parser public_paren_list_0_0_parser_ = new Parser() {
+    public boolean parse(PsiBuilder builder_, int level_) {
+      return public_paren_list_0_0(builder_, level_ + 1);
+    }
+  };
   static final Parser statement_parser_ = new Parser() {
     public boolean parse(PsiBuilder builder_, int level_) {
       return statement(builder_, level_ + 1);
@@ -827,6 +924,13 @@ import static ExternalRules.*;
 
 @SuppressWarnings({"SimplifiableIfStatement", "UnusedAssignment"})
 public class ExternalRules2 {
+
+  /* ********************************************************** */
+  public static boolean extra_root(PsiBuilder builder_, int level_) {
+    Marker marker_ = enter_section_(builder_);
+    exit_section_(builder_, marker_, EXTRA_ROOT, true);
+    return true;
+  }
 
   /* ********************************************************** */
   // <<comma_list <<main_class_meta some>>>>

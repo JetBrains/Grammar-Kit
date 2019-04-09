@@ -443,7 +443,8 @@ public class RuleGraphHelper {
               if (idx > -1 && idx < arguments.size()) {
                 Map<PsiElement, Cardinality> argMap = collectMembers(rule, arguments.get(idx), visited);
                 for (PsiElement element : argMap.keySet()) {
-                  result.put(element, cardinality.and(argMap.get(element)));
+                  Cardinality existing = ObjectUtils.notNull(result.get(element), NONE);
+                  result.put(element, existing.or(cardinality.and(argMap.get(element))));
                 }
               }
             }

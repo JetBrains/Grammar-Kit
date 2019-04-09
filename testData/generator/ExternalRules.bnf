@@ -4,12 +4,16 @@
   parserUtilClass="org.intellij.grammar.parser.GeneratedParserUtilBase"
   tokens=[
     perc='%'
+    paren1='('
+    paren2=')'
+    comma=','
     perc_re='regexp:\%'
   ]
 }
 
 // external parsing
 root ::= <<listOf statement>>
+external ref ::= parseRef
 external unique_list_of ::= uniqueListOf
 external unique_list_of_params ::= uniqueListOf <<p1>> "1+1" <<p2>> '1+1'
 external empty_external ::=
@@ -47,6 +51,10 @@ private multi_level ::= <<meta_multi_level one>>
 private meta_seq_of_lists_opt ::= (<<list_of_lists one (one | two)>>)?
 private meta_multi_level_no_closure ::= <<comma_list <<comma_list <<comma_list some>>>>>>
 
+private meta comma_paren_list ::= '(' <<param>> (',' <<param>>) * ')' {pin=1}
+public_paren_list ::= <<comma_paren_list (ref | '(' one ')')>>
+public_paren_list2 ::= {elementType=public_paren_list}
+
 // mixed
 private meta meta_mixed ::= <<listOf "1+2" '1+2' <<param>>>>
 private meta_mixed_simple ::= <<meta_mixed statement>>
@@ -82,6 +90,7 @@ private one_list_par ::= <<listOf (one)>>
 private meta second_class_meta ::= <<bmp>>
 private main_class_meta_usage_from_second ::= <<comma_list <<main_class_meta some>>>>
 private third_class_meta_usage_from_second ::= <<comma_list <<third_class_meta some>>>>
+extra_root ::= {extraRoot=true}
 
 ;{
   parserClass="ExternalRules3"

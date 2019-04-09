@@ -47,6 +47,7 @@ public class BnfListEntryImpl extends BnfCompositeImpl implements BnfListEntry {
     return findPsiChildByType(BNF_ID);
   }
 
+  @Override
   @NotNull
   public PsiReference[] getReferences() {
     return GrammarPsiImplUtil.getReferences(this);

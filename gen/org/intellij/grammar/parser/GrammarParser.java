@@ -20,6 +20,7 @@ import com.intellij.lang.PsiBuilder.Marker;
 import static org.intellij.grammar.psi.BnfTypes.*;
 import static org.intellij.grammar.parser.GrammarParserUtil.*;
 import com.intellij.psi.tree.IElementType;
+import com.intellij.psi.tree.IFileElementType;
 import com.intellij.lang.ASTNode;
 import com.intellij.psi.tree.TokenSet;
 import com.intellij.lang.PsiParser;
@@ -37,68 +38,11 @@ public class GrammarParser implements PsiParser, LightPsiParser {
     boolean result;
     builder = adapt_builder_(type, builder, this, EXTENDS_SETS_);
     Marker marker = enter_section_(builder, 0, _COLLAPSE_, null);
-    if (type == BNF_ATTR) {
-      result = attr(builder, 0);
-    }
-    else if (type == BNF_ATTR_PATTERN) {
-      result = attr_pattern(builder, 0);
-    }
-    else if (type == BNF_ATTRS) {
-      result = attrs(builder, 0);
-    }
-    else if (type == BNF_CHOICE) {
-      result = choice(builder, 0);
-    }
-    else if (type == BNF_EXPRESSION) {
-      result = expression(builder, 0);
-    }
-    else if (type == BNF_EXTERNAL_EXPRESSION) {
-      result = external_expression(builder, 0);
-    }
-    else if (type == BNF_LIST_ENTRY) {
-      result = list_entry(builder, 0);
-    }
-    else if (type == BNF_LITERAL_EXPRESSION) {
-      result = literal_expression(builder, 0);
-    }
-    else if (type == BNF_MODIFIER) {
-      result = modifier(builder, 0);
-    }
-    else if (type == BNF_PAREN_EXPRESSION) {
-      result = paren_expression(builder, 0);
-    }
-    else if (type == BNF_PAREN_OPT_EXPRESSION) {
-      result = paren_opt_expression(builder, 0);
-    }
-    else if (type == BNF_PREDICATE) {
-      result = predicate(builder, 0);
-    }
-    else if (type == BNF_PREDICATE_SIGN) {
-      result = predicate_sign(builder, 0);
-    }
-    else if (type == BNF_QUANTIFIED) {
-      result = quantified(builder, 0);
-    }
-    else if (type == BNF_QUANTIFIER) {
-      result = quantifier(builder, 0);
-    }
-    else if (type == BNF_REFERENCE_OR_TOKEN) {
-      result = reference_or_token(builder, 0);
-    }
-    else if (type == BNF_RULE) {
-      result = rule(builder, 0);
-    }
-    else if (type == BNF_SEQUENCE) {
-      result = sequence(builder, 0);
-    }
-    else if (type == BNF_STRING_LITERAL_EXPRESSION) {
-      result = string_literal_expression(builder, 0);
-    }
-    else if (type == BNF_VALUE_LIST) {
-      result = value_list(builder, 0);
+    if (type instanceof IFileElementType) {
+      result = parse_root_(type, builder, 0);
     }
     else {
-      result = parse_root_(type, builder, 0);
+      result = false;
     }
     exit_section_(builder, 0, marker, type, result, true, TRUE_CONDITION);
   }

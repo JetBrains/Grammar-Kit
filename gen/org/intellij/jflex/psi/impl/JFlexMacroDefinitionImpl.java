@@ -53,16 +53,19 @@ public class JFlexMacroDefinitionImpl extends JFlexCompositeImpl implements JFle
     return findPsiChildByType(FLEX_ID);
   }
 
+  @Override
   @NotNull
   public String getName() {
     return JFlexPsiImplUtil.getName(this);
   }
 
+  @Override
   @NotNull
   public PsiNameIdentifierOwner setName(String newName) {
     return JFlexPsiImplUtil.setName(this, newName);
   }
 
+  @Override
   @NotNull
   public PsiElement getNameIdentifier() {
     return JFlexPsiImplUtil.getNameIdentifier(this);

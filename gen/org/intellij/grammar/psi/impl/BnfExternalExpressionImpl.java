@@ -53,6 +53,7 @@ public class BnfExternalExpressionImpl extends BnfExpressionImpl implements BnfE
     return p1.get(0);
   }
 
+  @Override
   @NotNull
   public List<BnfExpression> getArguments() {
     return GrammarPsiImplUtil.getArguments(this);

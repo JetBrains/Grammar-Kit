@@ -41,6 +41,7 @@ public class JFlexJavaCodeImpl extends JFlexJavaCodeInjectionHostImpl implements
     else super.accept(visitor);
   }
 
+  @Override
   public PsiReference[] getReferences() {
     return JFlexPsiImplUtil.getReferences(this);
   }

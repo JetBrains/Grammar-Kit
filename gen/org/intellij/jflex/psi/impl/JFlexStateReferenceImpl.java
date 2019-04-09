@@ -47,6 +47,7 @@ public class JFlexStateReferenceImpl extends JFlexCompositeImpl implements JFlex
     return findPsiChildByType(FLEX_ID);
   }
 
+  @Override
   @NotNull
   public PsiReference getReference() {
     return JFlexPsiImplUtil.getReference(this);

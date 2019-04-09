@@ -41,6 +41,7 @@ public class JFlexJavaTypeImpl extends JFlexCompositeImpl implements JFlexJavaTy
     else super.accept(visitor);
   }
 
+  @Override
   @NotNull
   public PsiReference[] getReferences() {
     return JFlexPsiImplUtil.getReferences(this);

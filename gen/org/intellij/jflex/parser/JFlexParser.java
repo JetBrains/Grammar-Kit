@@ -20,6 +20,7 @@ import com.intellij.lang.PsiBuilder.Marker;
 import static org.intellij.jflex.psi.JFlexTypes.*;
 import static org.intellij.jflex.parser.JFlexParserUtil.*;
 import com.intellij.psi.tree.IElementType;
+import com.intellij.psi.tree.IFileElementType;
 import com.intellij.lang.ASTNode;
 import com.intellij.psi.tree.TokenSet;
 import com.intellij.lang.PsiParser;
@@ -37,59 +38,11 @@ public class JFlexParser implements PsiParser, LightPsiParser {
     boolean result;
     builder = adapt_builder_(type, builder, this, EXTENDS_SETS_);
     Marker marker = enter_section_(builder, 0, _COLLAPSE_, null);
-    if (type == FLEX_CHAR_RANGE) {
-      result = char_range(builder, 0);
-    }
-    else if (type == FLEX_DECLARATIONS_SECTION) {
-      result = declarations_section(builder, 0);
-    }
-    else if (type == FLEX_EXPRESSION) {
-      result = expression(builder, 0, -1);
-    }
-    else if (type == FLEX_JAVA_CODE) {
-      result = java_code(builder, 0);
-    }
-    else if (type == FLEX_JAVA_TYPE) {
-      result = java_type(builder, 0);
-    }
-    else if (type == FLEX_LEXICAL_RULES_SECTION) {
-      result = lexical_rules_section(builder, 0);
-    }
-    else if (type == FLEX_LOOK_AHEAD) {
-      result = look_ahead(builder, 0);
-    }
-    else if (type == FLEX_MACRO_DEFINITION) {
-      result = macro_definition(builder, 0);
-    }
-    else if (type == FLEX_MACRO_REFERENCE) {
-      result = macro_reference(builder, 0);
-    }
-    else if (type == FLEX_OPTION) {
-      result = option(builder, 0);
-    }
-    else if (type == FLEX_RULE) {
-      result = rule(builder, 0);
-    }
-    else if (type == FLEX_STATE_DECLARATION) {
-      result = state_declaration(builder, 0);
-    }
-    else if (type == FLEX_STATE_DEFINITION) {
-      result = state_definition(builder, 0);
-    }
-    else if (type == FLEX_STATE_LIST) {
-      result = state_list(builder, 0);
-    }
-    else if (type == FLEX_STATE_REFERENCE) {
-      result = state_reference(builder, 0);
-    }
-    else if (type == FLEX_USER_CODE_SECTION) {
-      result = user_code_section(builder, 0);
-    }
-    else if (type == FLEX_USER_VALUE) {
-      result = user_value(builder, 0);
+    if (type instanceof IFileElementType) {
+      result = parse_root_(type, builder, 0);
     }
     else {
-      result = parse_root_(type, builder, 0);
+      result = false;
     }
     exit_section_(builder, 0, marker, type, result, true, TRUE_CONDITION);
   }

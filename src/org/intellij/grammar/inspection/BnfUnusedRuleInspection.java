@@ -37,6 +37,7 @@ import static com.intellij.openapi.util.Condition.NOT_NULL;
 import static org.intellij.grammar.KnownAttribute.RECOVER_WHILE;
 import static org.intellij.grammar.KnownAttribute.getCompatibleAttribute;
 import static org.intellij.grammar.generator.ParserGeneratorUtil.findAttribute;
+import static org.intellij.grammar.generator.ParserGeneratorUtil.getAttribute;
 import static org.intellij.grammar.psi.impl.GrammarUtil.bnfTraverser;
 import static org.intellij.grammar.psi.impl.GrammarUtil.bnfTraverserNoAttrs;
 
@@ -64,6 +65,7 @@ public class BnfUnusedRuleInspection extends LocalInspectionTool {
     //noinspection LimitedScopeInnerClass,EmptyClass
     abstract class Cond<T> extends JBIterable.Stateful<Cond> implements Condition<T> { }
 
+    Set<BnfRule> roots = ContainerUtil.newTroveSet();
     Set<BnfRule> inExpr = ContainerUtil.newTroveSet();
     Set<BnfRule> inParsing = ContainerUtil.newTroveSet();
     Set<BnfRule> inSuppressed = ContainerUtil.newTroveSet();
@@ -73,11 +75,14 @@ public class BnfUnusedRuleInspection extends LocalInspectionTool {
       .map(BnfUnusedRuleInspection::resolveRule)
       .filter(NOT_NULL)
       .addAllTo(inExpr);
-    
-    rules.filter(r -> SuppressionUtil.inspectionResultSuppressed(r, this))
-      .addAllTo(inSuppressed);
 
-    inParsing.add(rules.first()); // add root rule
+    roots.add(rules.first());
+    for (BnfRule rule : rules) {
+      if (Boolean.TRUE.equals(getAttribute(rule, KnownAttribute.EXTRA_ROOT))) roots.add(rule);
+      if (SuppressionUtil.inspectionResultSuppressed(rule, this)) inSuppressed.add(rule);
+    }
+    inParsing.addAll(roots);
+
     for (int size = 0, prev = -1; size != prev; prev = size, size = inParsing.size()) {
       bnfTraverserNoAttrs(myFile).expand(new Cond<PsiElement>() {
         @Override
@@ -103,7 +108,7 @@ public class BnfUnusedRuleInspection extends LocalInspectionTool {
       if (target != null) inAttrs.put(target, attr.getName());
     }
 
-    for (BnfRule r : rules.skip(1).filter(o -> !inSuppressed.contains(o))) {
+    for (BnfRule r : rules.filter(o -> !roots.contains(o) && !inSuppressed.contains(o))) {
       String message = null;
       if (ParserGeneratorUtil.Rule.isFake(r)) {
         if (inExpr.contains(r)) {

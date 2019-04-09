@@ -74,6 +74,7 @@ public class KnownAttribute<T> {
   public static final KnownAttribute<String>       RECOVER_WHILE             = create(false, String.class, "recoverWhile", null);
   public static final KnownAttribute<String>       NAME                      = create(false, String.class, "name", null);
 
+  public static final KnownAttribute<Boolean>      EXTRA_ROOT                = create(false, Boolean.class, "extraRoot", false);
   public static final KnownAttribute<Boolean>      RIGHT_ASSOCIATIVE         = create(false, Boolean.class, "rightAssociative", false);
   public static final KnownAttribute<String>       CONSUME_TOKEN_METHOD      = create(false, String.class,  "consumeTokenMethod", "consumeToken");
 

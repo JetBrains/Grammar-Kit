@@ -545,6 +545,7 @@ public class ParserGenerator {
     }
     else {
       imports.addAll(Arrays.asList(IELEMENTTYPE_CLASS,
+                                   IFILEELEMENTTYPE_CLASS,
                                    AST_NODE_CLASS,
                                    TOKEN_SET_CLASS,
                                    PSI_PARSER_CLASS,
@@ -559,7 +560,7 @@ public class ParserGenerator {
                         rootParser ? LIGHT_PSI_PARSER_CLASS : "");
 
     if (rootParser) {
-      generateRootParserContent(ownRuleNames);
+      generateRootParserContent();
     }
     for (String ruleName : ownRuleNames) {
       BnfRule rule = ObjectUtils.assertNotNull(myFile.getRule(ruleName));
@@ -609,7 +610,20 @@ public class ParserGenerator {
     take(myMetaMethodFields).forEach((field, call) -> out("private static final Parser " + field + " = " + call + ";"));
   }
 
-  private void generateRootParserContent(Iterable<String> ownRuleNames) {
+  private void generateRootParserContent() {
+    BnfRule rootRule = myFile.getRule(myGrammarRoot);
+    List<BnfRule> extraRoots = ContainerUtil.newArrayList();
+    for (String ruleName : myRuleInfos.keySet()) {
+      BnfRule rule = ObjectUtils.assertNotNull(myFile.getRule(ruleName));
+      if (getAttribute(rule, KnownAttribute.ELEMENT_TYPE) != null) continue;
+      if (!RuleGraphHelper.hasElementType(rule)) continue;
+      if (Rule.isFake(rule) || Rule.isMeta(rule)) continue;
+      ExpressionHelper.ExpressionInfo info = myExpressionHelper.getExpressionInfo(rule);
+      if (info != null && info.rootRule != rule) continue;
+      if (!Boolean.TRUE.equals(getAttribute(rule, KnownAttribute.EXTRA_ROOT))) continue;
+      extraRoots.add(rule);
+    }
+
     List<Set<String>> extendsSet = buildExtendsSet(myGraphHelper.getRuleExtendsMap());
     boolean generateExtendsSets = !extendsSet.isEmpty();
     out("public ASTNode parse(IElementType %s, PsiBuilder %s) {", N.root, N.builder);
@@ -621,33 +635,46 @@ public class ParserGenerator {
     out("boolean %s;", N.result);
     out("%s = adapt_builder_(%s, %s, this, %s);", N.builder, N.root, N.builder, generateExtendsSets ? "EXTENDS_SETS_" : null);
     out("Marker %s = enter_section_(%s, 0, _COLLAPSE_, null);", N.marker, N.builder);
-    boolean first = true;
-    for (String ruleName : ownRuleNames) {
-      BnfRule rule = ObjectUtils.assertNotNull(myFile.getRule(ruleName));
-      if (getAttribute(rule, KnownAttribute.ELEMENT_TYPE) != null) continue;
-      if (!RuleGraphHelper.hasElementType(rule)) continue;
-      if (Rule.isFake(rule) || Rule.isMeta(rule)) continue;
-      if (G.generateRootRules != null && !G.generateRootRules.matcher(ruleName).matches()) continue;
-      ExpressionHelper.ExpressionInfo info = myExpressionHelper.getExpressionInfo(rule);
-      if (info != null && info.rootRule != rule) continue;
-      String elementType = getElementType(rule);
-      out("%sif (%s == %s) {", first ? "" : "else ", N.root, elementType);
-      String nodeCall = generateNodeCall(rule, null, rule.getName()).render(N);
-      out("%s = %s;", N.result, nodeCall.replace(format("%s + 1", N.level), "0"));
-      out("}");
-      if (first) first = false;
+    out("if (%s instanceof IFileElementType) {", N.root);
+    out("%s = parse_root_(%s, %s, 0);", N.result, N.root, N.builder);
+    out("}");
+    out("else {");
+    if (extraRoots.isEmpty()) {
+      out("%s = false;", N.result);
     }
-    {
-      if (!first) out("else {");
-      out("%s = parse_root_(%s, %s, 0);", N.result, N.root, N.builder);
-      if (!first) out("}");
+    else {
+      out("%s = parse_extra_roots_(%s, %s, 0);", N.result, N.root, N.builder);
     }
+    out("}");
     out("exit_section_(%s, 0, %s, %s, %s, true, TRUE_CONDITION);", N.builder, N.marker, N.root, N.result);
     out("}");
+    if (!extraRoots.isEmpty()) {
+      newLine();
+      out("static boolean parse_extra_roots_(IElementType %s, PsiBuilder %s, int %s) {", N.root, N.builder, N.level);
+      boolean first = true;
+      for (BnfRule rule : extraRoots) {
+        if (first) out("boolean %s;", N.result);
+        String elementType = getElementType(rule);
+        out("%sif (%s == %s) {", first ? "" : "else ", N.root, elementType);
+        String nodeCall = generateNodeCall(ObjectUtils.notNull(rootRule, rule), null, rule.getName()).render(N);
+        out("%s = %s;", N.result, nodeCall);
+        out("}");
+        if (first) first = false;
+      }
+      if (first) {
+        out("return false;");
+      }
+      else {
+        out("else {");
+        out("%s = false;", N.result);
+        out("}");
+        out("return %s;", N.result);
+      }
+      out("}");
+    }
     newLine();
     {
-      BnfRule rootRule = myFile.getRule(myGrammarRoot);
-      String nodeCall = generateNodeCall(rootRule, null, myGrammarRoot).render(N);
+      String nodeCall = rootRule == null ? "false" : generateNodeCall(rootRule, null, myGrammarRoot).render(N);
       out("protected boolean parse_root_(IElementType %s, PsiBuilder %s, int %s) {", N.root, N.builder, N.level);
       out("return %s;", nodeCall);
       out("}");

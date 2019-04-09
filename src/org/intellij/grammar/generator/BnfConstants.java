@@ -36,6 +36,7 @@ public interface BnfConstants {
   String TOKEN_SET_CLASS = "com.intellij.psi.tree.TokenSet";
 
   String IELEMENTTYPE_CLASS = "com.intellij.psi.tree.IElementType";
+  String IFILEELEMENTTYPE_CLASS = "com.intellij.psi.tree.IFileElementType";
   String PSI_ELEMENT_CLASS = "com.intellij.psi.PsiElement";
   String PSI_TREE_UTIL_CLASS = "com.intellij.psi.util.PsiTreeUtil";
   String PSI_ELEMENT_VISITOR_CLASS = "com.intellij.psi.PsiElementVisitor";

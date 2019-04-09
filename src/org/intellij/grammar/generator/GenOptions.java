@@ -17,12 +17,10 @@
 package org.intellij.grammar.generator;
 
 import com.intellij.openapi.util.text.StringUtil;
-import com.intellij.util.PatternUtil;
 import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.psi.BnfFile;
 
 import java.util.Map;
-import java.util.regex.Pattern;
 
 import static org.intellij.grammar.generator.ParserGeneratorUtil.getGenerateOption;
 import static org.intellij.grammar.generator.ParserGeneratorUtil.getRootAttribute;
@@ -33,7 +31,6 @@ import static org.intellij.grammar.generator.ParserGeneratorUtil.getRootAttribut
 public class GenOptions {
   public final Names names;
   public final int generateFirstCheck;
-  public final Pattern generateRootRules;
   public final boolean generateTokenTypes;
   public final boolean generateTokenSets;
   public final boolean generateElementTypes;
@@ -64,7 +61,6 @@ public class GenOptions {
     generateExtendedPin = getGenerateOption(myFile, KnownAttribute.EXTENDED_PIN, genOptions, "extended-pin", "extendedPin");
     generateTokenAccessors = getGenerateOption(myFile, KnownAttribute.GENERATE_TOKEN_ACCESSORS, genOptions, "token-accessors", "tokenAccessors");
     generateTokenAccessorsSet = genOptions.containsKey("token-accessors") || genOptions.containsKey("tokenAccessors");
-    generateRootRules = PatternUtil.compileSafe(genOptions.get("root-rules"), null);
     generateVisitor = !"no".equals(genOptions.get("visitor"));
     visitorValue = "void".equals(genOptions.get("visitor-value")) ? null : StringUtil.nullize(genOptions.get("visitor-value"));
 

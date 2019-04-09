@@ -168,8 +168,10 @@ public class BnfDocumentationProvider implements DocumentationProvider {
                                    Collection<? extends PsiElement> collection,
                                    StringBuilder sb) {
     for (PsiElement r : collection) {
-      sb.append(" ").append(r instanceof PsiNamedElement? ((PsiNamedElement)r).getName() : r.getText()).
-        append(RuleGraphHelper.getCardinalityText(map.get(r)));
+      String text = r instanceof PsiNamedElement ? ((PsiNamedElement)r).getName() : r.getText();
+      sb.append(" ");
+      sb.append(StringUtil.escapeXml(StringUtil.notNullize(text, "?")));
+      sb.append(RuleGraphHelper.getCardinalityText(map.get(r)));
     }
   }
 }

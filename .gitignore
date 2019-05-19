@@ -1,6 +1,8 @@
 .idea/dictionaries/
 .idea/shelf/
-.idea/workspace
+.idea/workspace.xml
 .gradle/
 out/
+binaries/
 build/
+build-lightpsi/

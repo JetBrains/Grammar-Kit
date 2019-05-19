@@ -80,6 +80,9 @@ import java.util.jar.JarOutputStream;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static com.intellij.openapi.extensions.ExtensionPoint.Kind.BEAN_CLASS;
+import static com.intellij.openapi.extensions.ExtensionPoint.Kind.INTERFACE;
+
 /**
  * @author greg
  * @noinspection UseOfSystemOutOrSystemErr
@@ -166,9 +169,11 @@ public class LightPsi {
     if (path.contains("/grammar-kit/")) return false;
 
     return path.contains("/out/classes/production/") ||
-           path.contains("extensions.jar") ||
-           path.contains("openapi.jar") ||
-           path.contains("idea.jar");
+           path.contains("idea.jar") ||
+           path.contains("platform-api.jar") ||
+           path.contains("platform-impl.jar") ||
+           path.contains("util.jar") ||
+           path.contains("extensions.jar");
   }
 
   private static void addJarEntry(JarOutputStream jarFile, String resourceName) throws IOException {
@@ -228,13 +233,15 @@ public class LightPsi {
   public static class Init {
 
     public static void initExtensions(@NotNull MockProject project) {
-      Extensions.getRootArea().registerExtensionPoint("com.intellij.referencesSearch", "com.intellij.util.QueryExecutor");
-      Extensions.getRootArea().registerExtensionPoint("com.intellij.useScopeEnlarger", "com.intellij.psi.search.UseScopeEnlarger");
-      Extensions.getRootArea().registerExtensionPoint("com.intellij.useScopeOptimizer", "com.intellij.psi.search.UseScopeOptimizer");
-      Extensions.getRootArea().registerExtensionPoint("com.intellij.languageInjector", "com.intellij.psi.LanguageInjector");
-      Extensions.getArea(project).registerExtensionPoint("com.intellij.multiHostInjector", "com.intellij.lang.injection.MultiHostInjector");
-      Extensions.getRootArea().registerExtensionPoint("com.intellij.codeInsight.containerProvider", "com.intellij.codeInsight.ContainerProvider");
-      Extensions.getRootArea().getExtensionPoint("com.intellij.referencesSearch").registerExtension(new CachesBasedRefSearcher());
+      ExtensionsArea rootArea = Extensions.getRootArea();
+      rootArea.registerExtensionPoint("com.intellij.referencesSearch", "com.intellij.util.QueryExecutor", INTERFACE);
+      rootArea.registerExtensionPoint("com.intellij.useScopeEnlarger", "com.intellij.psi.search.UseScopeEnlarger", INTERFACE);
+      rootArea.registerExtensionPoint("com.intellij.useScopeOptimizer", "com.intellij.psi.search.UseScopeOptimizer", INTERFACE);
+      rootArea.registerExtensionPoint("com.intellij.languageInjector", "com.intellij.psi.LanguageInjector", INTERFACE);
+      rootArea.registerExtensionPoint("com.intellij.codeInsight.containerProvider", "com.intellij.codeInsight.ContainerProvider", INTERFACE);
+      rootArea.getExtensionPoint("com.intellij.referencesSearch").registerExtension(new CachesBasedRefSearcher(), project);
+      ExtensionsArea projectArea = Extensions.getArea(project);
+      projectArea.registerExtensionPoint("com.intellij.multiHostInjector", "com.intellij.lang.injection.MultiHostInjector", INTERFACE);
       registerApplicationService(project, PsiReferenceService.class, PsiReferenceServiceImpl.class);
       registerApplicationService(project, JobLauncher.class, JobLauncherImpl.class);
       registerApplicationService(project, AsyncFutureFactory.class, AsyncFutureFactoryImpl.class);
@@ -313,9 +320,7 @@ public class LightPsi {
     public static <T> void registerExtensionPoint(ExtensionsArea area, ExtensionPointName<T> extensionPointName, Class<? extends T> aClass) {
       final String name = extensionPointName.getName();
       if (!area.hasExtensionPoint(name)) {
-        ExtensionPoint.Kind kind = aClass.isInterface() || (aClass.getModifiers() & Modifier.ABSTRACT) != 0
-                                   ? ExtensionPoint.Kind.INTERFACE
-                                   : ExtensionPoint.Kind.BEAN_CLASS;
+        ExtensionPoint.Kind kind = aClass.isInterface() || (aClass.getModifiers() & Modifier.ABSTRACT) != 0 ? INTERFACE : BEAN_CLASS;
         area.registerExtensionPoint(name, aClass.getName(), kind);
       }
     }

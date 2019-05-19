@@ -18,7 +18,6 @@ package org.intellij.grammar.refactor;
 
 import com.intellij.codeInsight.lookup.LookupManager;
 import com.intellij.codeInsight.lookup.impl.LookupImpl;
-import com.intellij.openapi.application.Result;
 import com.intellij.openapi.application.WriteAction;
 import com.intellij.openapi.command.WriteCommandAction;
 import com.intellij.openapi.editor.Document;
@@ -31,14 +30,14 @@ import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiDocumentManager;
 import com.intellij.refactoring.introduce.inplace.InplaceVariableIntroducer;
 import com.intellij.ui.NonFocusableCheckBox;
-import com.intellij.util.containers.ContainerUtil;
 import com.intellij.util.ui.JBUI;
 import org.intellij.grammar.psi.BnfExpression;
 import org.intellij.grammar.psi.BnfRule;
-import org.jetbrains.annotations.NotNull;
+import org.intellij.grammar.psi.impl.GrammarUtil;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.ArrayList;
 import java.util.Collection;
 
 /**
@@ -52,7 +51,7 @@ public class BnfIntroduceRulePopup extends InplaceVariableIntroducer<BnfExpressi
   private final JCheckBox myCheckBox = new NonFocusableCheckBox("Declare private");
 
   public BnfIntroduceRulePopup(Project project, Editor editor, BnfRule rule, BnfExpression expr) {
-    super(rule, editor, project, "Introduce Rule", new BnfExpression[0], expr);
+    super(rule, editor, project, "Introduce Rule", GrammarUtil.EMPTY_EXPRESSIONS_ARRAY, expr);
 
     myCheckBox.setSelected(true);
     myCheckBox.setMnemonic('p');
@@ -79,24 +78,21 @@ public class BnfIntroduceRulePopup extends InplaceVariableIntroducer<BnfExpressi
 
   @Override
   protected JComponent getComponent() {
-    myCheckBox.addActionListener(e -> new WriteCommandAction(myProject, BnfIntroduceRuleHandler.REFACTORING_NAME, BnfIntroduceRuleHandler.REFACTORING_NAME) {
-      @Override
-      protected void run(@NotNull Result result) throws Throwable {
-        perform(myCheckBox.isSelected());
-      }
-    }.execute());
+    myCheckBox.addActionListener(e -> WriteCommandAction.writeCommandAction(myProject)
+      .withName(BnfIntroduceRuleHandler.REFACTORING_NAME)
+      .run(() -> perform(myCheckBox.isSelected())));
     return myPanel;
   }
 
-  public void perform(final boolean generatePrivate) {
+  public void perform(boolean generatePrivate) {
     final Runnable runnable = () -> {
       final DocumentEx document = (DocumentEx) myEditor.getDocument();
 
       int exprOffset = myExprMarker.getStartOffset();
       final int lineOffset = getLineOffset(document, exprOffset);
       if (generatePrivate) {
-        final Collection<RangeMarker> leftGreedyMarker = ContainerUtil.newArrayList();
-        final Collection<RangeMarker> emptyMarkers = ContainerUtil.newArrayList();
+        final Collection<RangeMarker> leftGreedyMarker = new ArrayList<>();
+        final Collection<RangeMarker> emptyMarkers = new ArrayList<>();
         for (RangeHighlighter rangeHighlighter : myEditor.getMarkupModel().getAllHighlighters()) {
           collectRangeMarker(rangeHighlighter, lineOffset, leftGreedyMarker, emptyMarkers);
         }

@@ -25,6 +25,7 @@ import com.intellij.psi.tree.IElementType;
 import com.intellij.util.NullableFunction;
 import com.intellij.util.containers.ContainerUtil;
 import com.intellij.util.containers.MultiMap;
+import gnu.trove.THashMap;
 import gnu.trove.TObjectIntHashMap;
 import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.analysis.BnfFirstNextAnalyzer;
@@ -48,10 +49,10 @@ public class LivePreviewParser implements PsiParser {
 
   private final BnfFile myFile;
   private final LivePreviewLanguage myLanguage;
-  private final Map<String,String> mySimpleTokens = ContainerUtil.newLinkedHashMap();
+  private final Map<String,String> mySimpleTokens = new LinkedHashMap<>();
 
-  private final Map<String, IElementType> myRuleElementTypes = ContainerUtil.newTroveMap();
-  private final Map<String, IElementType> myTokenElementTypes = ContainerUtil.newTroveMap();
+  private final Map<String, IElementType> myRuleElementTypes = new THashMap<>();
+  private final Map<String, IElementType> myTokenElementTypes = new THashMap<>();
 
   private GenOptions G;
   private BnfRule myGrammarRoot;

@@ -31,6 +31,7 @@ import org.intellij.grammar.java.JavaHelper;
 import org.intellij.grammar.psi.*;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.intellij.grammar.generator.ParserGeneratorUtil.*;
@@ -70,7 +71,7 @@ public class GrammarPsiImplUtil {
         @NotNull
         @Override
         public Object[] getVariants() {
-          List<LookupElement> list = ContainerUtil.newArrayList();
+          List<LookupElement> list = new ArrayList<>();
           for (NavigatablePsiElement element : getTargetMethods("*")) {
             list.add(LookupElementBuilder.createWithIcon((PsiNamedElement)element));
           }

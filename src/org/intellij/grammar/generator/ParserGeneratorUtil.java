@@ -396,7 +396,7 @@ public class ParserGeneratorUtil {
     // filter out less specific methods
     // todo move to JavaHelper
     List<NavigatablePsiElement> result = ContainerUtil.newArrayList(methods);
-    Map<String, NavigatablePsiElement> prototypes = ContainerUtil.newLinkedHashMap();
+    Map<String, NavigatablePsiElement> prototypes = new LinkedHashMap<>();
     for (NavigatablePsiElement m2 : methods) {
       List<String> types = helper.getMethodTypes(m2);
       String proto = m2.getName() + types.subList(3, types.size());
@@ -424,7 +424,7 @@ public class ParserGeneratorUtil {
 
   @NotNull
   public static Set<String> getRuleClasses(@NotNull BnfRule rule) {
-    Set<String> result = ContainerUtil.newLinkedHashSet();
+    Set<String> result = new LinkedHashSet<>();
     BnfFile file = (BnfFile)rule.getContainingFile();
     BnfRule topSuper = getEffectiveSuperRule(file, rule);
     String superClassName = topSuper == null ? getRootAttribute(file, KnownAttribute.EXTENDS) :
@@ -445,7 +445,7 @@ public class ParserGeneratorUtil {
   static JBIterable<BnfRule> getSuperRules(@NotNull BnfFile file, @Nullable BnfRule rule) {
     abstract class Fun<S, T> extends JBIterable.Stateful<Fun> implements Function<S, T> { }
     JBIterable<Object> result = JBIterable.generate(rule, new Fun<Object, Object>() {
-      final Set<BnfRule> visited = ContainerUtil.newHashSet();
+      final Set<BnfRule> visited = new HashSet<>();
 
       @Override
       public Object fun(Object o) {
@@ -471,7 +471,7 @@ public class ParserGeneratorUtil {
 
   @NotNull
   static List<String> getSuperInterfaceNames(BnfFile file, BnfRule rule, NameFormat format) {
-    List<String> strings = ContainerUtil.newArrayList();
+    List<String> strings = new ArrayList<>();
     List<String> topRuleImplements = Collections.emptyList();
     String topRuleClass = null;
     BnfRule topSuper = getEffectiveSuperRule(file, rule);
@@ -538,7 +538,7 @@ public class ParserGeneratorUtil {
   }
 
   public static Collection<BnfRule> getSortedPublicRules(Set<PsiElement> accessors) {
-    Map<String, BnfRule> result = ContainerUtil.newTreeMap();
+    Map<String, BnfRule> result = new TreeMap<>();
     for (PsiElement tree : accessors) {
       if (tree instanceof BnfRule) {
         BnfRule rule = (BnfRule)tree;
@@ -549,7 +549,7 @@ public class ParserGeneratorUtil {
   }
 
   public static Collection<BnfExpression> getSortedTokens(Set<PsiElement> accessors) {
-    Map<String, BnfExpression> result = ContainerUtil.newTreeMap();
+    Map<String, BnfExpression> result = new TreeMap<>();
     for (PsiElement tree : accessors) {
       if (!(tree instanceof BnfReferenceOrToken || tree instanceof BnfLiteralExpression)) continue;
       result.put(tree.getText(), (BnfExpression)tree);
@@ -558,7 +558,7 @@ public class ParserGeneratorUtil {
   }
 
   public static Collection<LeafPsiElement> getSortedExternalRules(Set<PsiElement> accessors) {
-    Map<String, LeafPsiElement> result = ContainerUtil.newTreeMap();
+    Map<String, LeafPsiElement> result = new TreeMap<>();
     for (PsiElement tree : accessors) {
       if (!(tree instanceof LeafPsiElement)) continue;
       result.put(tree.getText(), (LeafPsiElement) tree);
@@ -567,7 +567,7 @@ public class ParserGeneratorUtil {
   }
 
   public static List<BnfRule> topoSort(@NotNull Collection<BnfRule> rules, @NotNull RuleGraphHelper ruleGraph) {
-    Set<BnfRule> rulesSet = ContainerUtil.newHashSet(rules);
+    Set<BnfRule> rulesSet = new HashSet<>(rules);
     return new JBTreeTraverser<BnfRule>(
       rule -> JBIterable.from(ruleGraph.getSubRules(rule)).filter(rulesSet::contains))
       .withRoots(ContainerUtil.reverse(ContainerUtil.newArrayList(rules)))
@@ -702,7 +702,7 @@ public class ParserGeneratorUtil {
                                                              final boolean createTokenIfMissing,
                                                              @NotNull final Map<String, String> map,
                                                              @Nullable Set<String> usedInGrammar) {
-    final Set<String> usedNames = usedInGrammar != null ? usedInGrammar : ContainerUtil.newLinkedHashSet();
+    final Set<String> usedNames = usedInGrammar != null ? usedInGrammar : new LinkedHashSet<>();
     final Map<String, String> origTokens = RuleGraphHelper.getTokenTextToNameMap(file);
     final Pattern pattern = getAllTokenPattern(origTokens);
     final int[] autoCount = {0};
@@ -1017,7 +1017,7 @@ public class ParserGeneratorUtil {
 
   @NotNull
   static <K extends Comparable<? super K>, V> Map<K, V> take(@NotNull Map<K, V> map) {
-    Map<K, V> result = ContainerUtil.newTreeMap(map);
+    Map<K, V> result = new TreeMap<>(map);
     map.clear();
     return result;
   }

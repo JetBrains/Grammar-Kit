@@ -24,7 +24,7 @@ import com.intellij.codeInsight.daemon.impl.HighlightInfo;
 import com.intellij.codeInsight.daemon.impl.HighlightInfoType;
 import com.intellij.codeInsight.daemon.impl.UpdateHighlightersUtil;
 import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.components.AbstractProjectComponent;
+import com.intellij.openapi.components.ProjectComponent;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.colors.EditorColors;
@@ -38,22 +38,24 @@ import com.intellij.openapi.util.TextRange;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
-import com.intellij.util.containers.ContainerUtil;
 import org.intellij.grammar.psi.BnfExpression;
 import org.intellij.grammar.psi.BnfFile;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 /**
  * @author gregsh
  */
-public class GrammarAtCaretPassFactory extends AbstractProjectComponent implements TextEditorHighlightingPassFactory {
+public class GrammarAtCaretPassFactory implements ProjectComponent, TextEditorHighlightingPassFactory {
   public static final Key<Boolean> GRAMMAR_AT_CARET_KEY = Key.create("GRAMMAR_AT_CARET_KEY");
+  private final Project myProject;
 
   public GrammarAtCaretPassFactory(Project project, TextEditorHighlightingPassRegistrar highlightingPassRegistrar) {
-    super(project);
+    myProject = project;
     highlightingPassRegistrar.registerTextEditorHighlightingPass(this, null, new int[]{Pass.UPDATE_ALL}, false, -1);
   }
 
@@ -68,7 +70,7 @@ public class GrammarAtCaretPassFactory extends AbstractProjectComponent implemen
     if (virtualFile == null || !FileEditorManager.getInstance(myProject).isFileOpen(virtualFile)) return null;
 
     return new TextEditorHighlightingPass(file.getProject(), editor.getDocument(), false) {
-      List<HighlightInfo> infos = ContainerUtil.newArrayList();
+      final List<HighlightInfo> infos = new ArrayList<>();
 
       @Override
       public void doCollectInformation(@NotNull ProgressIndicator progress) {
@@ -95,9 +97,9 @@ public class GrammarAtCaretPassFactory extends AbstractProjectComponent implemen
                                           @NotNull Editor editor,
                                           @NotNull LivePreviewLanguage livePreviewLanguage,
                                           @NotNull List<HighlightInfo> result) {
-    final Set<TextRange> trueRanges = ContainerUtil.newHashSet();
-    final Set<TextRange> falseRanges = ContainerUtil.newHashSet();
-    final Set<BnfExpression> visited = ContainerUtil.newHashSet();
+    final Set<TextRange> trueRanges = new HashSet<>();
+    final Set<TextRange> falseRanges = new HashSet<>();
+    final Set<BnfExpression> visited = new HashSet<>();
     LivePreviewHelper.collectExpressionsAtOffset(project, editor, livePreviewLanguage, (bnfExpression, result1) -> {
       for (PsiElement parent = bnfExpression.getParent();
            parent instanceof BnfExpression && visited.add((BnfExpression)parent); ) {

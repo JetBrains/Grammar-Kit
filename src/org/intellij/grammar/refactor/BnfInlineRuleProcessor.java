@@ -29,7 +29,6 @@ import com.intellij.refactoring.util.CommonRefactoringUtil;
 import com.intellij.usageView.UsageInfo;
 import com.intellij.usageView.UsageViewDescriptor;
 import com.intellij.util.IncorrectOperationException;
-import com.intellij.util.containers.ContainerUtil;
 import gnu.trove.TObjectIntHashMap;
 import org.intellij.grammar.generator.ParserGeneratorUtil;
 import org.intellij.grammar.psi.*;
@@ -37,6 +36,7 @@ import org.intellij.grammar.psi.impl.BnfElementFactory;
 import org.intellij.grammar.psi.impl.GrammarUtil;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -75,7 +75,7 @@ public class BnfInlineRuleProcessor extends BaseRefactoringProcessor {
   protected UsageInfo[] findUsages() {
     if (myInlineThisOnly) return new UsageInfo[]{new UsageInfo(myReference.getElement())};
 
-    List<UsageInfo> result = ContainerUtil.newArrayList();
+    List<UsageInfo> result = new ArrayList<>();
     for (PsiReference reference : ReferencesSearch.search(myRule, myRule.getUseScope(), false)) {
       PsiElement element = reference.getElement();
       if (GrammarUtil.isInAttributesReference(element)) continue;

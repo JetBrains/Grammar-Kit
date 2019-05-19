@@ -21,12 +21,12 @@ import com.intellij.codeInspection.LocalInspectionTool;
 import com.intellij.codeInspection.ProblemDescriptor;
 import com.intellij.codeInspection.ProblemsHolder;
 import com.intellij.psi.PsiFile;
-import com.intellij.util.containers.ContainerUtil;
 import org.intellij.grammar.psi.BnfFile;
 import org.intellij.grammar.psi.BnfRule;
 import org.intellij.grammar.psi.impl.GrammarUtil;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 /**
@@ -48,7 +48,7 @@ public class BnfDuplicateRuleInspection extends LocalInspectionTool {
     if (!(file instanceof BnfFile)) return;
     BnfFile bnfFile = (BnfFile)file;
 
-    Set<BnfRule> rules = ContainerUtil.newLinkedHashSet();
+    Set<BnfRule> rules = new LinkedHashSet<>();
     for (BnfRule r : GrammarUtil.bnfTraverser(bnfFile).filter(BnfRule.class)) {
       BnfRule t = bnfFile.getRule(r.getName());
       if (r != t) {

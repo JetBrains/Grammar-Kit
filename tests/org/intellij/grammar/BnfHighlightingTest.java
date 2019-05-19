@@ -2,6 +2,7 @@ package org.intellij.grammar;
 
 import com.intellij.openapi.application.WriteAction;
 import com.intellij.openapi.module.Module;
+import com.intellij.openapi.module.ModuleManager;
 import com.intellij.openapi.roots.ContentEntry;
 import com.intellij.openapi.roots.ModifiableRootModel;
 import com.intellij.openapi.roots.ModuleRootManager;
@@ -28,7 +29,7 @@ public class BnfHighlightingTest extends LightPlatformCodeInsightFixtureTestCase
   @Override
   protected void setUp() throws Exception {
     super.setUp();
-    VfsRootAccess.allowRootAccess(new File(getTestDataPath()).getAbsolutePath());
+    VfsRootAccess.allowRootAccess(getProject(), new File(getTestDataPath()).getAbsolutePath());
   }
 
   public void testSelfBnf() { doFileTest(); }
@@ -65,16 +66,16 @@ public class BnfHighlightingTest extends LightPlatformCodeInsightFixtureTestCase
     if ("SelfBnf.bnf".equals(name)) adjusted = "../../grammars/Grammar.bnf";
     else if ("SelfFlex.bnf".equals(name)) adjusted = "../../grammars/JFlex.bnf";
     else adjusted = name;
-
+    Module module = ModuleManager.getInstance(getProject()).getModules()[0];
     boolean toggleSrc = !adjusted.equals(name);
     try {
-      if (toggleSrc) toggleGrammarKitSrc(myModule, getTestDataPath());
+      if (toggleSrc) toggleGrammarKitSrc(module, getTestDataPath());
       VirtualFile file = myFixture.copyFileToProject(adjusted, new File(adjusted).getName());
       myFixture.configureFromExistingVirtualFile(file);
       doTest();
     }
     finally {
-      if (toggleSrc) toggleGrammarKitSrc(myModule, getTestDataPath());
+      if (toggleSrc) toggleGrammarKitSrc(module, getTestDataPath());
     }
   }
 
@@ -109,10 +110,7 @@ public class BnfHighlightingTest extends LightPlatformCodeInsightFixtureTestCase
     JavaPsiFacade facade = JavaPsiFacade.getInstance(module.getProject());
     boolean add = facade.findPackage("org.intellij.grammar.psi") == null;
     if (add) {
-      VfsRootAccess.allowRootAccess(absolutePath);
-    }
-    else {
-      VfsRootAccess.disallowRootAccess(absolutePath);
+      VfsRootAccess.allowRootAccess(module, absolutePath);
     }
     WriteAction.run(() -> {
       ModifiableRootModel model = ModuleRootManager.getInstance(module).getModifiableModel();
@@ -131,7 +129,7 @@ public class BnfHighlightingTest extends LightPlatformCodeInsightFixtureTestCase
       }
       model.commit();
     });
-    assertTrue("GrammarKit src problem", add == (null != facade.findPackage("org.intellij.grammar.psi")));
+    assertEquals("GrammarKit src problem", add, (null != facade.findPackage("org.intellij.grammar.psi")));
   }
 
   private static String getUrl(String path) {

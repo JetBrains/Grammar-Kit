@@ -42,7 +42,7 @@ public class BnfIdenticalChoiceBranchesInspection extends LocalInspectionTool {
   @Override
   public PsiElementVisitor buildVisitor(@NotNull ProblemsHolder holder, boolean isOnTheFly) {
     return new BnfVisitor<Void>() {
-      THashSet<BnfExpression> set = new THashSet<>();
+      final THashSet<BnfExpression> set = new THashSet<>();
       @Override
       public Void visitChoice(@NotNull BnfChoice o) {
         checkChoice(o, set);

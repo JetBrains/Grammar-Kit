@@ -24,9 +24,9 @@ import com.intellij.openapi.util.Conditions;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.psi.FileViewProvider;
 import com.intellij.psi.util.PsiTreeUtil;
-import com.intellij.util.Producer;
 import com.intellij.util.containers.ContainerUtil;
 import com.intellij.util.containers.JBIterable;
+import gnu.trove.THashMap;
 import org.intellij.grammar.BnfFileType;
 import org.intellij.grammar.BnfLanguage;
 import org.intellij.grammar.KnownAttribute;
@@ -35,10 +35,8 @@ import org.intellij.grammar.psi.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.function.Supplier;
 import java.util.regex.Pattern;
 
 /**
@@ -161,7 +159,7 @@ public class BnfFileImpl extends PsiFileBase implements BnfFile {
   }
 
   private Map<String, BnfRule> calcRules() {
-    Map<String, BnfRule> result = ContainerUtil.newLinkedHashMap();
+    Map<String, BnfRule> result = new LinkedHashMap<>();
     for (BnfRule o : GrammarUtil.bnfTraverser(this).filter(BnfRule.class)) {
       if (!result.containsKey(o.getName())) {
         result.put(o.getName(), o);
@@ -178,7 +176,7 @@ public class BnfFileImpl extends PsiFileBase implements BnfFile {
   }
 
   private Map<String, List<AttributeInfo>> calcAttributeValues() {
-    Map<String, List<AttributeInfo>> result = ContainerUtil.newTroveMap();
+    Map<String, List<AttributeInfo>> result = new THashMap<>();
     JBIterable<BnfAttrs> allAttrs = GrammarUtil.bnfTraverser(this)
       .expand(Conditions.notInstanceOf(BnfExpression.class))
       .filter(BnfAttrs.class);
@@ -211,12 +209,12 @@ public class BnfFileImpl extends PsiFileBase implements BnfFile {
   }
 
   @NotNull
-  private static <T> AtomicClearableLazyValue<T> lazyValue(Producer<T> producer) {
+  private static <T> AtomicClearableLazyValue<T> lazyValue(Supplier<T> producer) {
     return new AtomicClearableLazyValue<T>() {
       @NotNull
       @Override
       protected T compute() {
-        return producer.produce();
+        return producer.get();
       }
     };
   }

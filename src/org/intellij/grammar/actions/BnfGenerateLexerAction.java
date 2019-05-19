@@ -56,6 +56,7 @@ import org.intellij.grammar.psi.impl.GrammarUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.StringWriter;
 import java.util.Collection;
@@ -97,32 +98,29 @@ public class BnfGenerateLexerAction extends AnAction {
     final VirtualFile virtualFile = fileWrapper.getVirtualFile(true);
     if (virtualFile == null) return;
 
-    new WriteCommandAction.Simple(project) {
-      @Override
-      protected void run() throws Throwable {
-        try {
-          PsiDirectory psiDirectory = PsiManager.getInstance(project).findDirectory(virtualFile.getParent());
-          assert psiDirectory != null;
-          PsiPackage aPackage = JavaDirectoryService.getInstance().getPackage(psiDirectory);
-          String packageName = aPackage == null ? null : aPackage.getQualifiedName();
+    WriteCommandAction.runWriteCommandAction(project, () -> {
+      try {
+        PsiDirectory psiDirectory = PsiManager.getInstance(project).findDirectory(virtualFile.getParent());
+        assert psiDirectory != null;
+        PsiPackage aPackage = JavaDirectoryService.getInstance().getPackage(psiDirectory);
+        String packageName = aPackage == null ? null : aPackage.getQualifiedName();
 
-          String text = generateLexerText(bnfFile, packageName);
+        String text = generateLexerText(bnfFile, packageName);
 
-          VfsUtil.saveText(virtualFile, text);
+        VfsUtil.saveText(virtualFile, text);
 
-          Notifications.Bus.notify(new Notification(BnfConstants.GENERATION_GROUP,
-              virtualFile.getName() + " generated", "to " + virtualFile.getParent().getPath(),
-              NotificationType.INFORMATION), project);
+        Notifications.Bus.notify(new Notification(BnfConstants.GENERATION_GROUP,
+                                                  virtualFile.getName() + " generated", "to " + virtualFile.getParent().getPath(),
+                                                  NotificationType.INFORMATION), project);
 
-          associateFileTypeAndNavigate(project, virtualFile);
-        }
-        catch (final IncorrectOperationException e) {
-          ApplicationManager.getApplication().invokeLater(
-            () -> Messages.showErrorDialog(project, "Unable to create file " + flexFileName + "\n" + e.getLocalizedMessage(), "Create JFlex Lexer"));
-        }
+        associateFileTypeAndNavigate(project, virtualFile);
       }
-    }.execute();
-
+      catch (IOException | IncorrectOperationException ex) {
+        ApplicationManager.getApplication().invokeLater(
+          () -> Messages
+            .showErrorDialog(project, "Unable to create file " + flexFileName + "\n" + ex.getLocalizedMessage(), "Create JFlex Lexer"));
+      }
+    });
   }
 
   private static void associateFileTypeAndNavigate(Project project, VirtualFile virtualFile) {

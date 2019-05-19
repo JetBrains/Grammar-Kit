@@ -25,6 +25,7 @@ import com.intellij.psi.PsiNamedElement;
 import com.intellij.psi.impl.source.tree.LeafPsiElement;
 import com.intellij.ui.ColorUtil;
 import com.intellij.ui.JBColor;
+import com.intellij.util.ArrayUtil;
 import org.intellij.grammar.analysis.BnfFirstNextAnalyzer;
 import org.intellij.grammar.generator.BnfConstants;
 import org.intellij.grammar.generator.ExpressionHelper;
@@ -62,15 +63,15 @@ public class BnfDocumentationProvider implements DocumentationProvider {
       Set<String> next = analyzer.asStrings(analyzer.calcNext(rule).keySet());
 
       StringBuilder docBuilder = new StringBuilder();
-      String[] firstS = first.toArray(new String[first.size()]);
+      String[] firstS = first.toArray(ArrayUtil.EMPTY_STRING_ARRAY);
       Arrays.sort(firstS);
       docBuilder.append("<h1>Starts with:</h1>");
-      docBuilder.append("<code>").append(StringUtil.escapeXml(StringUtil.join(firstS, " | "))).append("</code>");
+      docBuilder.append("<code>").append(StringUtil.escapeXmlEntities(StringUtil.join(firstS, " | "))).append("</code>");
 
-      String[] nextS = next.toArray(new String[next.size()]);
+      String[] nextS = next.toArray(ArrayUtil.EMPTY_STRING_ARRAY);
       Arrays.sort(nextS);
       docBuilder.append("<br><h1>Followed by:</h1>");
-      docBuilder.append("<code>").append(StringUtil.escapeXml(StringUtil.join(nextS, " | "))).append("</code>");
+      docBuilder.append("<code>").append(StringUtil.escapeXmlEntities(StringUtil.join(nextS, " | "))).append("</code>");
 
       BnfFile file = (BnfFile)rule.getContainingFile();
       String recover = file.findAttributeValue(rule, KnownAttribute.RECOVER_WHILE, null);
@@ -84,7 +85,7 @@ public class BnfDocumentationProvider implements DocumentationProvider {
           if (file.getRule(s) != null) continue;
           if (f) f = false;
           else docBuilder.append(" | ");
-          docBuilder.append(StringUtil.escapeXml(s));
+          docBuilder.append(StringUtil.escapeXmlEntities(s));
         }
         docBuilder.append(")");
         docBuilder.append("</code>");
@@ -170,7 +171,7 @@ public class BnfDocumentationProvider implements DocumentationProvider {
     for (PsiElement r : collection) {
       String text = r instanceof PsiNamedElement ? ((PsiNamedElement)r).getName() : r.getText();
       sb.append(" ");
-      sb.append(StringUtil.escapeXml(StringUtil.notNullize(text, "?")));
+      sb.append(StringUtil.escapeXmlEntities(StringUtil.notNullize(text, "?")));
       sb.append(RuleGraphHelper.getCardinalityText(map.get(r)));
     }
   }

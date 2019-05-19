@@ -22,7 +22,6 @@ import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.psi.tree.IElementType;
 import com.intellij.psi.util.CachedValueProvider;
 import com.intellij.psi.util.CachedValuesManager;
-import com.intellij.util.containers.ContainerUtil;
 import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.generator.Case;
 import org.intellij.grammar.generator.ParserGeneratorUtil;
@@ -30,10 +29,7 @@ import org.intellij.grammar.psi.BnfFile;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -58,7 +54,7 @@ public class LivePreviewLexer extends LexerBase {
     final BnfFile bnfFile = language.getGrammar(project);
 
     myTokens = bnfFile == null? new Token[0] : CachedValuesManager.getCachedValue(bnfFile, () -> {
-      Set<String> usedInGrammar = ContainerUtil.newLinkedHashSet();
+      Set<String> usedInGrammar = new LinkedHashSet<>();
       Map<String, String> map = collectTokenPattern2Name(bnfFile, usedInGrammar);
 
       Token[] tokens = new Token[map.size()];
@@ -237,6 +233,6 @@ public class LivePreviewLexer extends LexerBase {
 
   @NotNull
   public static Map<String, String> collectTokenPattern2Name(@NotNull BnfFile file, @Nullable Set<String> usedInGrammar) {
-    return ParserGeneratorUtil.collectTokenPattern2Name(file, true, ContainerUtil.newLinkedHashMap(), usedInGrammar);
+    return ParserGeneratorUtil.collectTokenPattern2Name(file, true, new LinkedHashMap<>(), usedInGrammar);
   }
 }

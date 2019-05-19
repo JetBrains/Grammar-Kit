@@ -18,14 +18,10 @@ package org.intellij.jflex.parser;
 
 import com.intellij.lang.ASTFactory;
 import com.intellij.psi.impl.source.tree.CompositeElement;
-import com.intellij.psi.impl.source.tree.CompositePsiElement;
 import com.intellij.psi.tree.IElementType;
-import com.intellij.util.containers.JBIterable;
 import org.intellij.jflex.psi.JFlexTypes;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
-import java.lang.reflect.Constructor;
-import java.util.Map;
 
 /**
  * @author gregsh
@@ -34,7 +30,7 @@ public class JFlexASTFactory extends ASTFactory {
 
   @Nullable
   @Override
-  public CompositeElement createComposite(IElementType type) {
+  public CompositeElement createComposite(@NotNull IElementType type) {
     return JFlexTypes.Factory.createElement(type);
   }
 }

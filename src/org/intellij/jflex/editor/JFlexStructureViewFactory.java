@@ -32,6 +32,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 
@@ -83,8 +84,8 @@ public class JFlexStructureViewFactory implements PsiStructureViewFactory {
 
   }
 
-  static final Function<PsiElement, StructureViewTreeElement> WRAPPER = element -> new MyElement(element);
-  static final Function<PsiElement, String> TO_TEXT = element -> element.getText();
+  static final Function<PsiElement, StructureViewTreeElement> WRAPPER = MyElement::new;
+
   static class MyElement extends PsiTreeElementBase<PsiElement> implements SortableTreeElement {
 
     MyElement(PsiElement element) {
@@ -107,14 +108,14 @@ public class JFlexStructureViewFactory implements PsiStructureViewFactory {
           .expand(instanceOf(JFlexFile.class, JFlexFileSection.class))
           .traverse()
           .filter(instanceOf(MyModel.CLASSES))
-          .transform(WRAPPER)
-          .toList();
+          .map(MyElement::new)
+          .addAllTo(new ArrayList<>());
       }
       else if (o instanceof JFlexRule) {
         return SyntaxTraverser.psiApi().children(o)
           .filter(instanceOf(MyModel.CLASSES))
-          .transform(WRAPPER)
-          .toList();
+          .map(MyElement::new)
+          .addAllTo(new ArrayList<>());
       }
       return Collections.emptyList();
     }
@@ -138,7 +139,7 @@ public class JFlexStructureViewFactory implements PsiStructureViewFactory {
         StringBuilder sb = new StringBuilder();
         if (states != null) {
           sb.append("<");
-          sb.append(join(JBIterable.from(states.getStateReferenceList()).transform(TO_TEXT), ", "));
+          sb.append(join(JBIterable.from(states.getStateReferenceList()).map(PsiElement::getText), ", "));
           sb.append(">");
         }
         if (expr != null) {

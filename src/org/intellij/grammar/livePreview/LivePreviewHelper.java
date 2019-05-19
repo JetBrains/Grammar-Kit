@@ -21,8 +21,8 @@ import com.intellij.lexer.Lexer;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.EditorFactory;
-import com.intellij.openapi.editor.event.DocumentAdapter;
 import com.intellij.openapi.editor.event.DocumentEvent;
+import com.intellij.openapi.editor.event.DocumentListener;
 import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.fileEditor.ex.FileEditorManagerEx;
@@ -40,7 +40,6 @@ import com.intellij.util.Alarm;
 import com.intellij.util.FileContentUtil;
 import com.intellij.util.PairProcessor;
 import com.intellij.util.SingleAlarm;
-import com.intellij.util.containers.ContainerUtil;
 import org.intellij.grammar.parser.GeneratedParserUtilBase;
 import org.intellij.grammar.psi.BnfExpression;
 import org.intellij.grammar.psi.BnfFile;
@@ -50,6 +49,7 @@ import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 import java.util.Collection;
+import java.util.LinkedHashSet;
 import java.util.Map;
 
 /**
@@ -104,13 +104,13 @@ public class LivePreviewHelper {
     NotNullLazyKey.create("LIVE_PREVIEW_ALARM",
                           project -> new SingleAlarm(() -> reparseAllLivePreviews(project), 300, Alarm.ThreadToUse.SWING_THREAD, project));
   private static void installUpdateListener(final Project project) {
-    EditorFactory.getInstance().getEventMulticaster().addDocumentListener(new DocumentAdapter() {
+    EditorFactory.getInstance().getEventMulticaster().addDocumentListener(new DocumentListener() {
 
-      FileDocumentManager fileManager = FileDocumentManager.getInstance();
-      PsiManager psiManager = PsiManager.getInstance(project);
+      final FileDocumentManager fileManager = FileDocumentManager.getInstance();
+      final PsiManager psiManager = PsiManager.getInstance(project);
 
       @Override
-      public void documentChanged(DocumentEvent e) {
+      public void documentChanged(@NotNull DocumentEvent e) {
         Document document = e.getDocument();
         VirtualFile file = fileManager.getFile(document);
         PsiFile psiFile = file == null ? null : psiManager.findFile(file);
@@ -144,7 +144,7 @@ public class LivePreviewHelper {
   private static void reparseAllLivePreviews(@NotNull Project project) {
     if (!project.isOpen()) return;
     PsiDocumentManager.getInstance(project).commitAllDocuments();
-    Collection<VirtualFile> files = ContainerUtil.newLinkedHashSet();
+    Collection<VirtualFile> files = new LinkedHashSet<>();
     FileEditorManager fileEditorManager = FileEditorManager.getInstance(project);
     PsiManager psiManager = PsiManager.getInstance(project);
     for (VirtualFile file : fileEditorManager.getOpenFiles()) {

@@ -90,12 +90,12 @@ public class BnfIntroduceRuleHandler implements RefactoringActionHandler {
     final BnfRule currentRule = PsiTreeUtil.getParentOfType(file.findElementAt(startOffset), BnfRule.class);
     BnfExpression parentExpression = currentRule != null ? findParentExpression(bnfFile, startOffset, endOffset) : null;
     if (parentExpression == null) {
-      CommonRefactoringUtil.showErrorHint(editor.getProject(), editor, RefactoringBundle.message("refactoring.introduce.context.error"), "Error", null);
+      CommonRefactoringUtil.showErrorHint(project, editor, RefactoringBundle.message("refactoring.introduce.context.error"), "Error", null);
       return;
     }
 
     if (!selectionModel.hasSelection()) {
-      List<BnfExpression> expressions = ContainerUtil.newArrayList();
+      List<BnfExpression> expressions = new ArrayList<>();
       while (parentExpression != null) {
         expressions.add(parentExpression);
         parentExpression = PsiTreeUtil.getParentOfType(parentExpression, BnfExpression.class);
@@ -123,7 +123,7 @@ public class BnfIntroduceRuleHandler implements RefactoringActionHandler {
     else {
       List<BnfExpression> selectedExpression = findSelectedExpressionsInRange(parentExpression, new TextRange(startOffset, endOffset));
       if (selectedExpression.isEmpty()) {
-        CommonRefactoringUtil.showErrorHint(editor.getProject(), editor,
+        CommonRefactoringUtil.showErrorHint(project, editor,
                                              RefactoringBundle.message("refactoring.introduce.selection.error"), "Error", null);
         return;
       }
@@ -142,8 +142,8 @@ public class BnfIntroduceRuleHandler implements RefactoringActionHandler {
     final BnfRule ruleFromText = BnfElementFactory.createRuleFromText(file.getProject(), "a ::= " + fixedRange.substring(file.getText()));
     BnfExpressionOptimizer.optimize(ruleFromText.getExpression());
 
-    final Map<OccurrencesChooser.ReplaceChoice, List<BnfExpression[]>> occurrencesMap = ContainerUtil.newLinkedHashMap();
-    occurrencesMap.put(OccurrencesChooser.ReplaceChoice.NO, Collections.singletonList(selectedExpression.toArray(new BnfExpression[selectedExpression.size()])));
+    final Map<OccurrencesChooser.ReplaceChoice, List<BnfExpression[]>> occurrencesMap = new LinkedHashMap<>();
+    occurrencesMap.put(OccurrencesChooser.ReplaceChoice.NO, Collections.singletonList(selectedExpression.toArray(GrammarUtil.EMPTY_EXPRESSIONS_ARRAY)));
     occurrencesMap.put(OccurrencesChooser.ReplaceChoice.ALL, new ArrayList<>());
     file.acceptChildren(new PsiRecursiveElementWalkingVisitor() {
       @Override
@@ -164,27 +164,25 @@ public class BnfIntroduceRuleHandler implements RefactoringActionHandler {
     final Pass<OccurrencesChooser.ReplaceChoice> callback = new Pass<OccurrencesChooser.ReplaceChoice>() {
       @Override
       public void pass(final OccurrencesChooser.ReplaceChoice choice) {
-        new WriteCommandAction.Simple(project, REFACTORING_NAME, file) {
-          @Override
-          public void run() {
-            final PsiFile containingFile = currentRule.getContainingFile();
-            String newRuleName = choseRuleName(containingFile);
-            String newRuleText = "private " + newRuleName + " ::= " + ruleFromText.getExpression().getText();
-            BnfRule addedRule = addNextRule(project, currentRule, newRuleText);
-            if (choice == OccurrencesChooser.ReplaceChoice.ALL) {
-              List<BnfExpression[]> exprToReplace = occurrencesMap.get(OccurrencesChooser.ReplaceChoice.ALL);
-              replaceUsages(project, exprToReplace, addedRule.getId());
-            } else {
-              List<BnfExpression[]> exprToReplace = occurrencesMap.get(OccurrencesChooser.ReplaceChoice.NO);
-              replaceUsages(project, exprToReplace, addedRule.getId());
-            }
-            final BnfIntroduceRulePopup popup = new BnfIntroduceRulePopup(project, editor, addedRule, addedRule.getExpression());
-
-            editor.getCaretModel().moveToOffset(addedRule.getTextOffset());
-            PsiDocumentManager.getInstance(project).doPostponedOperationsAndUnblockDocument(editor.getDocument());
-            popup.performInplaceRefactoring(null);
+        WriteCommandAction.runWriteCommandAction(project, REFACTORING_NAME, null, () -> {
+          final PsiFile containingFile = currentRule.getContainingFile();
+          String newRuleName = choseRuleName(containingFile);
+          String newRuleText = "private " + newRuleName + " ::= " + ruleFromText.getExpression().getText();
+          BnfRule addedRule = addNextRule(project, currentRule, newRuleText);
+          if (choice == OccurrencesChooser.ReplaceChoice.ALL) {
+            List<BnfExpression[]> exprToReplace = occurrencesMap.get(OccurrencesChooser.ReplaceChoice.ALL);
+            replaceUsages(project, exprToReplace, addedRule.getId());
           }
-        }.execute();
+          else {
+            List<BnfExpression[]> exprToReplace = occurrencesMap.get(OccurrencesChooser.ReplaceChoice.NO);
+            replaceUsages(project, exprToReplace, addedRule.getId());
+          }
+          final BnfIntroduceRulePopup popup = new BnfIntroduceRulePopup(project, editor, addedRule, addedRule.getExpression());
+
+          editor.getCaretModel().moveToOffset(addedRule.getTextOffset());
+          PsiDocumentManager.getInstance(project).doPostponedOperationsAndUnblockDocument(editor.getDocument());
+          popup.performInplaceRefactoring(null);
+        }, file);
       }
     };
     if (ApplicationManager.getApplication().isUnitTestMode()) {
@@ -223,7 +221,7 @@ public class BnfIntroduceRuleHandler implements RefactoringActionHandler {
       if (parentExpression instanceof BnfChoice) return ((BnfChoice)parentExpression).getExpressionList();
       return Collections.singletonList(parentExpression);
     }
-    List<BnfExpression> list = ContainerUtil.newArrayList();
+    List<BnfExpression> list = new ArrayList<>();
     for (PsiElement c = parentExpression.getFirstChild(); c != null; c = c.getNextSibling()) {
       if (c instanceof PsiWhiteSpace) continue;
       if (c.getTextRange().intersectsStrict(range)) {

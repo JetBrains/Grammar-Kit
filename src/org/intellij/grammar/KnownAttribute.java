@@ -18,7 +18,6 @@ package org.intellij.grammar;
 
 import com.intellij.openapi.util.Pair;
 import com.intellij.openapi.util.io.FileUtil;
-import com.intellij.util.containers.ContainerUtil;
 import org.intellij.grammar.generator.BnfConstants;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -171,7 +170,7 @@ public class KnownAttribute<T> {
 
     @NotNull
     public List<String> asStrings() {
-      List<String> t = ContainerUtil.newArrayList();
+      List<String> t = new ArrayList<>();
       for (Pair<String, String> pair : this) {
         if (pair.first != null) t.add(pair.first);
         else if (pair.second != null) t.add(pair.second);
@@ -191,7 +190,7 @@ public class KnownAttribute<T> {
 
     @NotNull
     private Map<String, String> asMap(boolean inverse) {
-      Map<String, String> t = ContainerUtil.newLinkedHashMap();
+      Map<String, String> t = new LinkedHashMap<>();
       for (Pair<String, String> pair : this) {
         String key = inverse ? pair.second : pair.first;
         String value = inverse ? pair.first : pair.second;

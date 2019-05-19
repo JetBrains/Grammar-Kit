@@ -19,7 +19,6 @@ package org.intellij.grammar.actions;
 import com.intellij.notification.Notification;
 import com.intellij.notification.NotificationType;
 import com.intellij.notification.Notifications;
-import com.intellij.openapi.application.Result;
 import com.intellij.openapi.application.WriteAction;
 import com.intellij.openapi.progress.ProcessCanceledException;
 import com.intellij.openapi.project.Project;
@@ -40,7 +39,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Collection;
 import java.util.List;
 
 import static com.intellij.util.ArrayUtil.getFirstElement;
@@ -61,9 +60,9 @@ public class FileGeneratorUtil {
 
     VirtualFile existingFile = null;
     if (targetFile != null) {
-      List<VirtualFile> files =
-        new ArrayList<>(FilenameIndex.getVirtualFilesByName(project, targetFile, ProjectScope.getProjectScope(project)));
-      Collections.sort(files, (f1, f2) -> {
+      Collection<VirtualFile> fromIndex = FilenameIndex.getVirtualFilesByName(project, targetFile, ProjectScope.getProjectScope(project));
+      List<VirtualFile> files = new ArrayList<>(fromIndex);
+      files.sort((f1, f2) -> {
         boolean b1 = fileIndex.isInSource(f1);
         boolean b2 = fileIndex.isInSource(f2);
         if (b1 != b2) return b1 ? -1 : 1;
@@ -106,12 +105,7 @@ public class FileGeneratorUtil {
         return virtualRoot;
       }
       else {
-        VirtualFile result = new WriteAction<VirtualFile>() {
-          @Override
-          protected void run(@NotNull Result<VirtualFile> result) throws Throwable {
-            result.setResult(VfsUtil.createDirectoryIfMissing(virtualRoot, relativePath));
-          }
-        }.execute().throwException().getResultObject();
+        VirtualFile result = WriteAction.compute(() -> VfsUtil.createDirectoryIfMissing(virtualRoot, relativePath));
         VfsUtil.markDirtyAndRefresh(false, true, true, result);
         return returnRoot && newGenRoot ? ObjectUtils.assertNotNull(virtualRoot.findChild(genDirName)) :
                returnRoot ? virtualRoot : result;

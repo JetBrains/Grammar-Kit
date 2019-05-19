@@ -65,7 +65,6 @@ import com.intellij.psi.search.FilenameIndex;
 import com.intellij.psi.search.ProjectScope;
 import com.intellij.util.PathUtil;
 import com.intellij.util.SystemProperties;
-import com.intellij.util.containers.ContainerUtil;
 import com.intellij.util.containers.JBIterable;
 import com.intellij.util.download.DownloadableFileDescription;
 import com.intellij.util.download.DownloadableFileService;
@@ -141,7 +140,7 @@ public class BnfRunJFlexAction extends DumbAwareAction {
     }
     new Runnable() {
       boolean first = true;
-      Iterator<VirtualFile> it = files.iterator();
+      final Iterator<VirtualFile> it = files.iterator();
       @Override
       public void run() {
         if (it.hasNext()) {
@@ -212,7 +211,7 @@ public class BnfRunJFlexAction extends DumbAwareAction {
   }
 
   private static List<File> getOrDownload(@NotNull Project project, String... urls) {
-    List<File> result = ContainerUtil.newArrayList();
+    List<File> result = new ArrayList<>();
     if (findCommunitySources(project, result, urls)) return result;
     if (findInProject(project, true, result, urls)) return result;
     if (findExistingLibrary(result, urls)) return result;
@@ -240,7 +239,7 @@ public class BnfRunJFlexAction extends DumbAwareAction {
   private static boolean findCommunitySources(@NotNull Project project, List<File> result, String... urls) {
     String communitySrc = getCommunitySrcUrl(project);
     if (communitySrc == null) return false;
-    List<String> roots = ContainerUtil.newArrayList();
+    List<String> roots = new ArrayList<>();
     for (String url : urls) {
       int idx = url.indexOf("/master/");
       if (idx > -1) {
@@ -255,7 +254,7 @@ public class BnfRunJFlexAction extends DumbAwareAction {
   }
 
   private static boolean findInProject(@NotNull Project project, boolean forceDir, List<File> result, String... urls) {
-    List<String> roots = ContainerUtil.newArrayList();
+    List<String> roots = new ArrayList<>();
     for (String url : urls) {
       String fileName = url.substring(url.lastIndexOf("/") + 1);
       for (VirtualFile file : FilenameIndex.getVirtualFilesByName(project, fileName, ProjectScope.getAllScope(project))) {
@@ -307,7 +306,7 @@ public class BnfRunJFlexAction extends DumbAwareAction {
                                                                                     @NotNull String libraryName,
                                                                                     String... urls) {
     DownloadableFileService service = DownloadableFileService.getInstance();
-    List<DownloadableFileDescription> descriptions = ContainerUtil.newArrayList();
+    List<DownloadableFileDescription> descriptions = new ArrayList<>();
     for (String url : urls) {
       descriptions.add(service.createFileDescription(url, url.substring(url.lastIndexOf("/") + 1)));
     }

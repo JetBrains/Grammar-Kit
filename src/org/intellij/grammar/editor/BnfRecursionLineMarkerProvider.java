@@ -16,7 +16,6 @@
 
 package org.intellij.grammar.editor;
 
-import com.intellij.codeHighlighting.Pass;
 import com.intellij.codeInsight.daemon.LineMarkerInfo;
 import com.intellij.codeInsight.daemon.LineMarkerProvider;
 import com.intellij.icons.AllIcons;
@@ -66,7 +65,6 @@ public class BnfRecursionLineMarkerProvider implements LineMarkerProvider {
       super(id,
             id.getTextRange(),
             AllIcons.Gutter.RecursiveMethod,
-            Pass.LINE_MARKERS,
             FunctionUtil.constant("Recursive rule"),
             null,
             GutterIconRenderer.Alignment.RIGHT

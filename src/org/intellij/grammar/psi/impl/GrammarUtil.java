@@ -16,7 +16,6 @@
 
 package org.intellij.grammar.psi.impl;
 
-import com.intellij.openapi.util.Comparing;
 import com.intellij.openapi.util.Conditions;
 import com.intellij.openapi.util.Ref;
 import com.intellij.openapi.util.text.StringUtil;
@@ -35,7 +34,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 import static com.intellij.psi.SyntaxTraverser.psiTraverser;
@@ -47,7 +45,7 @@ import static org.intellij.grammar.psi.BnfTypes.BNF_SEQUENCE;
  */
 public class GrammarUtil {
 
-  public final static Comparator<BnfNamedElement> NAME_COMPARATOR = (o1, o2) -> Comparing.compare(o1.getName(), o2.getName());
+  public static final BnfExpression[] EMPTY_EXPRESSIONS_ARRAY = new BnfExpression[0];
 
   public static PsiElement getDummyAwarePrevSibling(PsiElement child) {
     PsiElement prevSibling = child.getPrevSibling();
@@ -74,8 +72,8 @@ public class GrammarUtil {
         boolean f1 = c1 == null || c1 instanceof BnfExpression;
         boolean f2 = c2 == null || c2 instanceof BnfExpression;
         if (f1 && f2 && !equalsElement((BnfExpression)c1, (BnfExpression)c2)) return false;
-        if (f1 && f2 || !f1) c1 = c1 == null? null : c1.getNextSibling();
-        if (f1 && f2 || !f2) c2 = c2 == null? null : c2.getNextSibling();
+        if (!f1 || f2) c1 = c1 == null ? null : c1.getNextSibling();
+        if (f1 || !f2) c2 = c2 == null ? null : c2.getNextSibling();
         if (c1 == null && c2 == null) return true;
       }
     }

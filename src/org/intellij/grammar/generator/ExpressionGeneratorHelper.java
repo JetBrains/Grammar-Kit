@@ -19,6 +19,7 @@ package org.intellij.grammar.generator;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.util.containers.ContainerUtil;
+import gnu.trove.THashSet;
 import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.psi.BnfExpression;
 import org.intellij.grammar.psi.BnfRule;
@@ -41,13 +42,13 @@ public class ExpressionGeneratorHelper {
 
   @NotNull
   private static Map<String, List<OperatorInfo>> buildCallMap(ExpressionHelper.ExpressionInfo info, ParserGenerator g) {
-    Map<String, List<OperatorInfo>> opCalls = ContainerUtil.newLinkedHashMap();
+    Map<String, List<OperatorInfo>> opCalls = new LinkedHashMap<>();
     for (BnfRule rule : info.priorityMap.keySet()) {
       OperatorInfo operator = info.operatorMap.get(rule);
       String opCall = g.generateNodeCall(
         info.rootRule, operator.operator, getNextName(getFuncName(operator.rule), 0), CONSUME_TYPE_OVERRIDE
       ).render(g.N);
-      opCalls.computeIfAbsent(opCall, k -> ContainerUtil.newArrayListWithCapacity(2)).add(operator);
+      opCalls.computeIfAbsent(opCall, k -> new ArrayList<>(2)).add(operator);
     }
     return opCalls;
   }
@@ -158,7 +159,7 @@ public class ExpressionGeneratorHelper {
     g.out("}");
 
     // operators and tails
-    Set<BnfExpression> visited = ContainerUtil.newTroveSet();
+    Set<BnfExpression> visited = new THashSet<>();
     for (String opCall : sortedOpCalls) {
       for (OperatorInfo operator : opCalls.get(opCall)) {
         if (operator.type == OperatorType.ATOM) {

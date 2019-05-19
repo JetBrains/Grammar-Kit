@@ -23,6 +23,8 @@ import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiReference;
 import com.intellij.util.containers.ContainerUtil;
 import com.intellij.util.containers.JBIterable;
+import gnu.trove.THashMap;
+import gnu.trove.THashSet;
 import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.generator.ParserGeneratorUtil;
 import org.intellij.grammar.psi.*;
@@ -65,11 +67,11 @@ public class BnfUnusedRuleInspection extends LocalInspectionTool {
     //noinspection LimitedScopeInnerClass,EmptyClass
     abstract class Cond<T> extends JBIterable.Stateful<Cond> implements Condition<T> { }
 
-    Set<BnfRule> roots = ContainerUtil.newTroveSet();
-    Set<BnfRule> inExpr = ContainerUtil.newTroveSet();
-    Set<BnfRule> inParsing = ContainerUtil.newTroveSet();
-    Set<BnfRule> inSuppressed = ContainerUtil.newTroveSet();
-    Map<BnfRule, String> inAttrs = ContainerUtil.newTroveMap();
+    Set<BnfRule> roots = new THashSet<>();
+    Set<BnfRule> inExpr = new THashSet<>();
+    Set<BnfRule> inParsing = new THashSet<>();
+    Set<BnfRule> inSuppressed = new THashSet<>();
+    Map<BnfRule, String> inAttrs = new THashMap<>();
     
     bnfTraverserNoAttrs(myFile).traverse()
       .map(BnfUnusedRuleInspection::resolveRule)

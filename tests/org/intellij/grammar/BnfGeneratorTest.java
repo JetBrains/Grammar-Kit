@@ -4,12 +4,12 @@ import com.intellij.idea.Bombed;
 import com.intellij.openapi.util.io.FileUtil;
 import com.intellij.openapi.util.io.FileUtilRt;
 import com.intellij.openapi.vfs.CharsetToolkit;
-import com.intellij.util.containers.ContainerUtil;
 import org.intellij.grammar.generator.ParserGenerator;
 import org.intellij.grammar.psi.impl.BnfFileImpl;
 import org.jetbrains.annotations.NonNls;
 
 import java.io.*;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -79,7 +79,7 @@ public class BnfGeneratorTest extends BnfGeneratorTestCase {
     final String name = getTestName(false);
     String text = loadFile(name + "." + myFileExt);
     myFile = createPsiFile(name, text.replaceAll("generatePsi=[^\n]*", "generatePsi=" + generatePsi));
-    List<File> filesToCheck = ContainerUtil.newArrayList();
+    List<File> filesToCheck = new ArrayList<>();
     filesToCheck.add(new File(FileUtilRt.getTempDirectory(), name + ".java"));
     if (generatePsi) {
       filesToCheck.add(new File(FileUtilRt.getTempDirectory(), name + ".PSI.java"));

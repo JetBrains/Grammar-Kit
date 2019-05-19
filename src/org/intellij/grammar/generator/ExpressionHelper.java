@@ -31,6 +31,7 @@ import com.intellij.util.containers.ContainerUtil;
 import com.intellij.util.containers.JBIterable;
 import com.intellij.util.containers.JBTreeTraverser;
 import com.intellij.util.containers.TreeTraversal;
+import gnu.trove.THashMap;
 import org.intellij.grammar.analysis.BnfFirstNextAnalyzer;
 import org.intellij.grammar.psi.*;
 import org.intellij.grammar.psi.impl.BnfElementFactory;
@@ -50,8 +51,8 @@ public class ExpressionHelper {
   private final RuleGraphHelper myRuleGraph;
   private final boolean myAddWarnings;
 
-  private final Map<BnfRule, ExpressionInfo> myExpressionMap = ContainerUtil.newTroveMap();
-  private final Map<BnfRule, BnfRule> myRootRulesMap = ContainerUtil.newTroveMap();
+  private final Map<BnfRule, ExpressionInfo> myExpressionMap = new THashMap<>();
+  private final Map<BnfRule, BnfRule> myRootRulesMap = new THashMap<>();
 
   private static final Key<CachedValue<ExpressionHelper>> EXPRESSION_HELPER_KEY = Key.create("EXPRESSION_HELPER_KEY");
   public static ExpressionHelper getCached(final BnfFile file) {
@@ -108,7 +109,7 @@ public class ExpressionHelper {
         myExpressionMap.put(rule, expressionInfo);
       }
       ops: for (OperatorInfo info : expressionInfo.operatorMap.values()) {
-        Map<PsiElement, RuleGraphHelper.Cardinality> map = myRuleGraph.collectMembers(info.rule, info.operator, ContainerUtil.newHashSet());
+        Map<PsiElement, RuleGraphHelper.Cardinality> map = myRuleGraph.collectMembers(info.rule, info.operator, new HashSet<>());
         for (RuleGraphHelper.Cardinality c : map.values()) {
           if (!c.optional()) continue ops;
         }
@@ -296,7 +297,7 @@ public class ExpressionHelper {
     List<BnfExpression> list = getOriginalExpressions(expression);
     if (list.size() == 1 && PsiTreeUtil.isAncestor(list.get(0), target, false)) return true;
     for (BnfExpression expr : list) {
-      Map<PsiElement, RuleGraphHelper.Cardinality> map = myRuleGraph.collectMembers(rule, expr, ContainerUtil.newLinkedHashSet());
+      Map<PsiElement, RuleGraphHelper.Cardinality> map = myRuleGraph.collectMembers(rule, expr, new LinkedHashSet<>());
       if (map.containsKey(target)) return true;
     }
     return false;
@@ -318,11 +319,11 @@ public class ExpressionHelper {
 
   public static class ExpressionInfo {
     public final BnfRule rootRule;
-    public final Map<BnfRule, Integer> priorityMap = ContainerUtil.newLinkedHashMap();
-    public final Map<BnfRule, OperatorInfo> operatorMap = ContainerUtil.newLinkedHashMap();
-    public final Map<BnfRule, Integer> privateGroups = ContainerUtil.newHashMap();
+    public final Map<BnfRule, Integer> priorityMap = new LinkedHashMap<>();
+    public final Map<BnfRule, OperatorInfo> operatorMap = new LinkedHashMap<>();
+    public final Map<BnfRule, Integer> privateGroups = new HashMap<>();
     public int nextPriority;
-    public final Set<OperatorInfo> checkEmpty = ContainerUtil.newHashSet();
+    public final Set<OperatorInfo> checkEmpty = new HashSet<>();
 
     public ExpressionInfo(BnfRule rootRule) {
       this.rootRule = rootRule;

@@ -30,6 +30,7 @@ import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.RangeMarker;
 import com.intellij.openapi.editor.ScrollType;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.util.Comparing;
 import com.intellij.openapi.util.Pass;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.openapi.util.text.StringUtil;
@@ -39,6 +40,7 @@ import com.intellij.psi.PsiFile;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.refactoring.RefactoringActionHandler;
 import com.intellij.refactoring.introduce.inplace.OccurrencesChooser;
+import com.intellij.util.ExceptionUtil;
 import com.intellij.util.ObjectUtils;
 import com.intellij.util.containers.ContainerUtil;
 import com.intellij.util.text.UniqueNameGenerator;
@@ -51,10 +53,7 @@ import org.intellij.grammar.psi.impl.GrammarUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @author greg
@@ -85,7 +84,7 @@ public class BnfIntroduceTokenHandler implements RefactoringActionHandler {
       if (bnfFile.getRule(target.getText()) != null) return;
       if (GrammarUtil.isExternalReference(target)) return;
       tokenName = target.getText();
-      tokenText = tokenNameMap.get(tokenName);
+      tokenText = "\"" + StringUtil.notNullize(tokenNameMap.get(tokenName), tokenName) + "\"";
     }
     else if (target instanceof BnfStringLiteralExpression) {
       if (PsiTreeUtil.getParentOfType(target, BnfAttrs.class) != null) return;
@@ -94,15 +93,15 @@ public class BnfIntroduceTokenHandler implements RefactoringActionHandler {
     }
     else return;
 
-    final List<BnfExpression> allOccurrences = ContainerUtil.newArrayList();
-    final Map<OccurrencesChooser.ReplaceChoice, List<BnfExpression>> occurrencesMap = ContainerUtil.newLinkedHashMap();
+    final List<BnfExpression> allOccurrences = new ArrayList<>();
+    final Map<OccurrencesChooser.ReplaceChoice, List<BnfExpression>> occurrencesMap = new LinkedHashMap<>();
     occurrencesMap.put(OccurrencesChooser.ReplaceChoice.NO, Collections.singletonList(target));
     occurrencesMap.put(OccurrencesChooser.ReplaceChoice.ALL, allOccurrences);
 
     BnfVisitor visitor = new BnfVisitor<Void>() {
       @Override
       public Void visitStringLiteralExpression(@NotNull BnfStringLiteralExpression o) {
-        if (tokenText != null && tokenText.equals(o.getText())) {
+        if (Comparing.equal(tokenText, o.getText())) {
           allOccurrences.add(o);
         }
         return null;
@@ -128,12 +127,16 @@ public class BnfIntroduceTokenHandler implements RefactoringActionHandler {
     final Pass<OccurrencesChooser.ReplaceChoice> callback = new Pass<OccurrencesChooser.ReplaceChoice>() {
       @Override
       public void pass(final OccurrencesChooser.ReplaceChoice choice) {
-        new WriteCommandAction(project, REFACTORING_NAME, file) {
-          @Override
-          protected void run(@NotNull com.intellij.openapi.application.Result result) throws Throwable {
-            buildTemplateAndRun(project, editor, bnfFile, occurrencesMap.get(choice), tokenName, tokenText, tokenNameMap.keySet());
-          }
-        }.execute();
+        WriteCommandAction.writeCommandAction(project, file)
+          .withName(REFACTORING_NAME)
+          .run(() -> {
+            try {
+              buildTemplateAndRun(project, editor, bnfFile, occurrencesMap.get(choice), tokenName, tokenText, tokenNameMap.keySet());
+            }
+            catch (StartMarkAction.AlreadyStartedException e) {
+              ExceptionUtil.rethrowAllAsUnchecked(e);
+            }
+          });
       }
     };
     if (ApplicationManager.getApplication().isUnitTestMode()) {
@@ -149,19 +152,19 @@ public class BnfIntroduceTokenHandler implements RefactoringActionHandler {
     }
   }
 
-  private void buildTemplateAndRun(final Project project,
-                                   final Editor editor,
-                                   BnfFile bnfFile, List<BnfExpression> occurrences,
-                                   String tokenName,
-                                   String tokenText,
-                                   Set<String> tokenNames) throws StartMarkAction.AlreadyStartedException {
+  private static void buildTemplateAndRun(Project project,
+                                          Editor editor,
+                                          BnfFile bnfFile, List<BnfExpression> occurrences,
+                                          String tokenName,
+                                          String tokenText,
+                                          Set<String> tokenNames) throws StartMarkAction.AlreadyStartedException {
     final StartMarkAction startAction = StartMarkAction.start(editor, project, REFACTORING_NAME);
     BnfListEntry entry = addTokenDefinition(project, bnfFile, tokenName, tokenText, tokenNames);
     PsiDocumentManager.getInstance(project).doPostponedOperationsAndUnblockDocument(editor.getDocument());
 
     TemplateBuilderImpl builder = new TemplateBuilderImpl(bnfFile);
-    PsiElement tokenId = ObjectUtils.assertNotNull(entry.getId());
-    PsiElement tokenValue = ObjectUtils.assertNotNull(entry.getLiteralExpression());
+    PsiElement tokenId = ObjectUtils.notNull(entry.getId());
+    PsiElement tokenValue = ObjectUtils.notNull(entry.getLiteralExpression());
     if (tokenName == null) {
       builder.replaceElement(tokenId, "TokenName", new TextExpression(tokenId.getText()), true);
     }
@@ -175,7 +178,7 @@ public class BnfIntroduceTokenHandler implements RefactoringActionHandler {
         public Result calculateResult(ExpressionContext context) {
           TemplateState state = TemplateManagerImpl.getTemplateState(context.getEditor());
           assert state != null;
-          TextResult text = ObjectUtils.assertNotNull(state.getVariableValue("TokenText"));
+          TextResult text = ObjectUtils.notNull(state.getVariableValue("TokenText"));
           String curText = GrammarUtil.unquote(text.getText());
           if (ParserGeneratorUtil.isRegexpToken(curText)) {
             return state.getVariableValue("TokenName");
@@ -207,7 +210,7 @@ public class BnfIntroduceTokenHandler implements RefactoringActionHandler {
     TemplateManager.getInstance(project).startTemplate(editor, template, new TemplateEditingAdapter() {
 
       @Override
-      public void templateFinished(Template template, boolean brokenOff) {
+      public void templateFinished(@NotNull Template template, boolean brokenOff) {
         handleTemplateFinished(project, editor, caretMarker, startAction);
       }
 
@@ -218,10 +221,10 @@ public class BnfIntroduceTokenHandler implements RefactoringActionHandler {
     });
   }
 
-  private void handleTemplateFinished(Project project,
-                                      Editor editor,
-                                      RangeMarker caretMarker,
-                                      StartMarkAction startAction) {
+  private static void handleTemplateFinished(Project project,
+                                             Editor editor,
+                                             RangeMarker caretMarker,
+                                             StartMarkAction startAction) {
     try {
       editor.getCaretModel().moveToOffset(caretMarker.getEndOffset());
       editor.getScrollingModel().scrollToCaret(ScrollType.MAKE_VISIBLE);
@@ -243,8 +246,10 @@ public class BnfIntroduceTokenHandler implements RefactoringActionHandler {
     BnfAttr tokensAttr = null;
     if (attrs == null) {
       attrs = (BnfAttrs) bnfFile.addAfter(newAttr.getParent(), null);
+      bnfFile.addAfter(BnfElementFactory.createLeafFromText(project, "\n"), attrs);
       tokensAttr = attrs.getAttrList().get(0);
-      return ((BnfValueList) tokensAttr.getExpression()).getListEntryList().get(0);
+      BnfValueList attrExpr = (BnfValueList)ObjectUtils.notNull(tokensAttr.getExpression());
+      return attrExpr.getListEntryList().get(0);
     }
     else {
       for (BnfAttr attr : attrs.getAttrList()) {
@@ -257,14 +262,16 @@ public class BnfIntroduceTokenHandler implements RefactoringActionHandler {
         PsiElement anchor = attrList.isEmpty() ? attrs.getFirstChild() : attrList.get(attrList.size() - 1);
         newAttr = (BnfAttr) attrs.addAfter(newAttr, anchor);
         attrs.addAfter(BnfElementFactory.createLeafFromText(project, "\n  "), anchor);
-        return ((BnfValueList) newAttr.getExpression()).getListEntryList().get(0);
+        BnfValueList attrExpr = (BnfValueList)ObjectUtils.notNull(newAttr.getExpression());
+        return attrExpr.getListEntryList().get(0);
       }
       else {
         BnfExpression expression = tokensAttr.getExpression();
         List<BnfListEntry> entryList = expression instanceof BnfValueList ? ((BnfValueList) expression).getListEntryList() : null;
         if (entryList == null || entryList.isEmpty()) {
           expression.replace(newAttr.getParent());
-          return ((BnfValueList) tokensAttr.getExpression()).getListEntryList().get(0);
+          BnfValueList attrExpr = (BnfValueList)ObjectUtils.notNull(tokensAttr.getExpression());
+          return attrExpr.getListEntryList().get(0);
         }
         else {
           for (BnfListEntry entry : entryList) {
@@ -273,7 +280,8 @@ public class BnfIntroduceTokenHandler implements RefactoringActionHandler {
               return entry;
             }
           }
-          BnfListEntry newValue = ((BnfValueList) newAttr.getExpression()).getListEntryList().get(0);
+          BnfValueList attrExpr = (BnfValueList)ObjectUtils.notNull(newAttr.getExpression());
+          BnfListEntry newValue = attrExpr.getListEntryList().get(0);
           PsiElement anchor = entryList.get(entryList.size() - 1);
           newValue = (BnfListEntry) expression.addAfter(newValue, anchor);
           expression.addAfter(BnfElementFactory.createLeafFromText(project, "\n    "), anchor);

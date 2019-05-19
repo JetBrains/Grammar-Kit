@@ -39,7 +39,6 @@ import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiManager;
 import com.intellij.util.ExceptionUtil;
 import com.intellij.util.PathUtil;
-import com.intellij.util.containers.ContainerUtil;
 import com.intellij.util.containers.JBIterable;
 import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.generator.BnfConstants;
@@ -50,9 +49,7 @@ import org.jetbrains.annotations.NotNull;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import static org.intellij.grammar.actions.FileGeneratorUtil.getTargetDirectoryFor;
 import static org.intellij.grammar.generator.ParserGeneratorUtil.getRootAttribute;
@@ -97,7 +94,7 @@ public class GenerateAction extends AnAction {
   }
 
   public static void doGenerate(@NotNull Project project, @NotNull List<VirtualFile> bnfFiles) {
-    Map<VirtualFile, VirtualFile> rootMap = ContainerUtil.newLinkedHashMap();
+    Map<VirtualFile, VirtualFile> rootMap = new LinkedHashMap<>();
     PsiManager psiManager = PsiManager.getInstance(project);
     WriteAction.run(() -> {
       for (VirtualFile file : bnfFiles) {
@@ -115,8 +112,8 @@ public class GenerateAction extends AnAction {
 
     ProgressManager.getInstance().run(new Task.Backgroundable(project, "Parser Generation", true, PerformInBackgroundOption.ALWAYS_BACKGROUND) {
 
-      List<File> files = ContainerUtil.newArrayList();
-      Set<VirtualFile> targets = ContainerUtil.newLinkedHashSet();
+      final List<File> files = new ArrayList<>();
+      final Set<VirtualFile> targets = new LinkedHashSet<>();
       long totalWritten = 0;
 
       @Override

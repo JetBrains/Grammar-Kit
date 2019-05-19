@@ -20,12 +20,12 @@ import com.intellij.lang.PsiBuilder;
 import com.intellij.lang.WhitespacesAndCommentsBinder;
 import com.intellij.lang.WhitespacesBinders;
 import com.intellij.util.ObjectUtils;
-import com.intellij.util.containers.ContainerUtil;
 import org.intellij.grammar.parser.GeneratedParserUtilBase;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -48,8 +48,8 @@ public class LiveHooksHelper {
     }, hookParam);
   }
 
-  private static final Map<String, Object> ourHooks = ContainerUtil.newHashMap();
-  private static final Map<String, Object> ourBinders = ContainerUtil.newHashMap();
+  private static final Map<String, Object> ourHooks = new HashMap<>();
+  private static final Map<String, Object> ourBinders = new HashMap<>();
 
   static {
     collectStaticFields(GeneratedParserUtilBase.class, GeneratedParserUtilBase.Hook.class, ourHooks);

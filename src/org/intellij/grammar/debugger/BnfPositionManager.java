@@ -21,7 +21,6 @@ import com.intellij.debugger.PositionManager;
 import com.intellij.debugger.SourcePosition;
 import com.intellij.debugger.engine.DebugProcess;
 import com.intellij.debugger.requests.ClassPrepareRequestor;
-import com.intellij.openapi.application.AccessToken;
 import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.project.Project;
@@ -54,34 +53,33 @@ import java.util.*;
  */
 public class BnfPositionManager implements PositionManager {
   private final DebugProcess myProcess;
-  private final Map<String, Collection<PsiFile>> myGrammars = new FactoryMap<String, Collection<PsiFile>>() {
-    @Override
-    protected Collection<PsiFile> create(String key) {
-      final Project project = myProcess.getProject();
-      final Ref<Collection<PsiFile>> result = Ref.create(null);
-      PsiSearchHelper.SERVICE.getInstance(project).processUsagesInNonJavaFiles(key, (file, startOffset, endOffset) -> {
-        if (!(file instanceof BnfFileImpl)) return true;
-        BnfAttr attr = PsiTreeUtil.getParentOfType(file.findElementAt(startOffset), BnfAttr.class);
-        if (attr == null || !"parserClass".equals(attr.getName())) return true;
-        if (result.isNull()) result.set(new LinkedHashSet<>(1));
-        result.get().add(file);
-        return true;
-      }, GlobalSearchScope.allScope(project));
-      return result.isNull() ? Collections.emptyList() : result.get();
-    }
-  };
+  private final Map<String, Collection<PsiFile>> myGrammars = FactoryMap.create(this::getGrammarsImpl);
 
   public BnfPositionManager(DebugProcess process) {
     myProcess = process;
   }
 
+  private Collection<PsiFile> getGrammarsImpl(String key) {
+    final Project project = myProcess.getProject();
+    final Ref<Collection<PsiFile>> result = Ref.create(null);
+    PsiSearchHelper.getInstance(project).processUsagesInNonJavaFiles(key, (file, startOffset, endOffset) -> {
+      if (!(file instanceof BnfFileImpl)) return true;
+      BnfAttr attr = PsiTreeUtil.getParentOfType(file.findElementAt(startOffset), BnfAttr.class);
+      if (attr == null || !"parserClass".equals(attr.getName())) return true;
+      if (result.isNull()) result.set(new LinkedHashSet<>(1));
+      result.get().add(file);
+      return true;
+    }, GlobalSearchScope.allScope(project));
+    return result.isNull() ? Collections.emptyList() : result.get();
+  }
+
   @Override
   public SourcePosition getSourcePosition(@Nullable Location location) throws NoDataException {
-    if (true) throw new NoDataException();
-    if (location == null) throw new NoDataException();
+    if (true) throw NoDataException.INSTANCE;
+    if (location == null) throw NoDataException.INSTANCE;
 
     final ReferenceType refType = location.declaringType();
-    if (refType == null) throw new NoDataException();
+    if (refType == null) throw NoDataException.INSTANCE;
 
     int dollar = refType.name().indexOf("$");
     String qname = dollar == -1? refType.name() : refType.name().substring(0, dollar);
@@ -105,7 +103,7 @@ public class BnfPositionManager implements PositionManager {
         return SourcePosition.createFromElement(rule);
       }
     }
-    throw new NoDataException();
+    throw NoDataException.INSTANCE;
   }
 
   @Nullable
@@ -144,19 +142,19 @@ public class BnfPositionManager implements PositionManager {
 
   @NotNull
   @Override
-  public List<ReferenceType> getAllClasses(SourcePosition classPosition) throws NoDataException {
+  public List<ReferenceType> getAllClasses(@NotNull SourcePosition classPosition) throws NoDataException {
     String parserClass = getParserClass(classPosition);
 
     List<ReferenceType> referenceTypes = myProcess.getVirtualMachineProxy().classesByName(parserClass);
     if (referenceTypes.isEmpty()) {
-      throw new NoDataException();
+      throw NoDataException.INSTANCE;
     }
     return referenceTypes;
   }
 
   @NotNull
   @Override
-  public List<Location> locationsOfLine(ReferenceType type, SourcePosition position) throws NoDataException {
+  public List<Location> locationsOfLine(ReferenceType type, @NotNull SourcePosition position) throws NoDataException {
     String parserClass = getParserClass(position);
     int line = getLineNumber(position.getElementAt(), parserClass, 0);
     try {
@@ -165,24 +163,20 @@ public class BnfPositionManager implements PositionManager {
     catch (AbsentInformationException e) {
       // ignore
     }
-    throw new NoDataException();
+    throw NoDataException.INSTANCE;
   }
 
   private int getLineNumber(PsiElement element, String parserClass, int currentLine) {
-    int line = 0;
-    AccessToken token = ReadAction.start();
-    try {
+    return ReadAction.compute(() -> {
       BnfRule rule = PsiTreeUtil.getParentOfType(element, BnfRule.class);
       PsiClass aClass = JavaPsiFacade.getInstance(myProcess.getProject()).findClass(parserClass, myProcess.getSearchScope());
-      Document document = aClass != null? PsiDocumentManager.getInstance(myProcess.getProject()).getDocument(aClass.getContainingFile()) : null;
+      Document document =
+        aClass != null ? PsiDocumentManager.getInstance(myProcess.getProject()).getDocument(aClass.getContainingFile()) : null;
       if (rule != null && document != null) {
         return getLineNumber(aClass, document, currentLine, rule, element);
       }
-    }
-    finally {
-      token.finish();
-    }
-    return line;
+      return 0;
+    });
   }
 
   private static int getLineNumber(PsiClass aClass, Document document, int currentLine, BnfRule rule, PsiElement element) {
@@ -215,30 +209,27 @@ public class BnfPositionManager implements PositionManager {
   }
 
   @Override
-  public ClassPrepareRequest createPrepareRequest(ClassPrepareRequestor requestor, SourcePosition position) throws NoDataException {
+  public ClassPrepareRequest createPrepareRequest(@NotNull ClassPrepareRequestor requestor,
+                                                  @NotNull SourcePosition position) throws NoDataException {
     return myProcess.getRequestsManager().createClassPrepareRequest(requestor, getParserClass(position));
   }
 
   @NotNull
-  private String getParserClass(SourcePosition classPosition) throws NoDataException {
-    AccessToken token = ReadAction.start();
-    try {
+  private static String getParserClass(SourcePosition classPosition) throws NoDataException {
+    return ReadAction.compute(() -> {
       BnfRule rule = getRuleAt(classPosition);
       String parserClass = ParserGeneratorUtil.getAttribute(rule, KnownAttribute.PARSER_CLASS);
-      if (StringUtil.isEmpty(parserClass)) throw new NoDataException();
+      if (StringUtil.isEmpty(parserClass)) throw NoDataException.INSTANCE;
       return parserClass;
-    }
-    finally {
-      token.finish();
-    }
+    });
   }
 
   @NotNull
-  private BnfRule getRuleAt(SourcePosition position) throws NoDataException {
+  private static BnfRule getRuleAt(SourcePosition position) throws NoDataException {
     PsiFile file = position.getFile();
-    if (!(file instanceof BnfFileImpl)) throw new NoDataException();
+    if (!(file instanceof BnfFileImpl)) throw NoDataException.INSTANCE;
     BnfRule rule = PsiTreeUtil.getParentOfType(position.getElementAt(), BnfRule.class);
-    if (rule == null) throw new NoDataException();
+    if (rule == null) throw NoDataException.INSTANCE;
     return rule;
   }
 }

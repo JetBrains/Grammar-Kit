@@ -45,7 +45,7 @@ public abstract class BnfStringImpl extends BnfExpressionImpl implements BnfStri
   private static final Map<ElementPattern<? extends PsiElement>, PsiReferenceProvider> ourProviders;
 
   static {
-    ourProviders = ContainerUtil.newLinkedHashMap();
+    ourProviders = new LinkedHashMap<>();
     new BnfStringRefContributor().registerReferenceProviders(new PsiReferenceRegistrar() {
       @Override
       public <T extends PsiElement> void registerReferenceProvider(@NotNull ElementPattern<T> pattern,
@@ -94,7 +94,7 @@ public abstract class BnfStringImpl extends BnfExpressionImpl implements BnfStri
         result.addAll(Arrays.asList(e.getValue().getReferencesByElement(this, context)));
       }
     }
-    return result.isEmpty() ? PsiReference.EMPTY_ARRAY : ContainerUtil.toArray(result, new PsiReference[result.size()]);
+    return result.isEmpty() ? PsiReference.EMPTY_ARRAY : result.toArray(PsiReference.EMPTY_ARRAY);
   }
 
   @Override
@@ -172,7 +172,7 @@ public abstract class BnfStringImpl extends BnfExpressionImpl implements BnfStri
     public ResolveResult[] multiResolveInner() {
       final Pattern pattern = getPattern(getElement());
       if (pattern == null) return ResolveResult.EMPTY_ARRAY;
-      final List<PsiElement> result = ContainerUtil.newArrayList();
+      final List<PsiElement> result = new ArrayList<>();
 
       BnfAttr thisAttr = ObjectUtils.assertNotNull(PsiTreeUtil.getParentOfType(getElement(), BnfAttr.class));
       BnfAttrs thisAttrs = ObjectUtils.assertNotNull(PsiTreeUtil.getParentOfType(thisAttr, BnfAttrs.class));

@@ -21,7 +21,6 @@ import com.intellij.openapi.util.Pair;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.tree.IElementType;
-import com.intellij.util.containers.ContainerUtil;
 import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.psi.BnfAttr;
 import org.intellij.grammar.psi.BnfRule;
@@ -29,10 +28,7 @@ import org.intellij.grammar.psi.impl.GrammarUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static org.intellij.grammar.generator.ParserGeneratorUtil.*;
 import static org.intellij.grammar.psi.BnfTypes.BNF_REFERENCE_OR_TOKEN;
@@ -58,7 +54,7 @@ public class RuleMethodsHelper {
     mySimpleTokens = Collections.unmodifiableMap(simpleTokens);
     G = genOptions;
 
-    myMethods = ContainerUtil.newLinkedHashMap();
+    myMethods = new LinkedHashMap<>();
   }
 
   public void buildMaps(Collection<BnfRule> sortedPsiRules) {
@@ -95,7 +91,7 @@ public class RuleMethodsHelper {
   }
 
   protected void calcMethods(BnfRule rule, Map<String, String> tokensReversed) {
-    List<MethodInfo> result = ContainerUtil.newArrayList();
+    List<MethodInfo> result = new ArrayList<>();
 
     Map<PsiElement, RuleGraphHelper.Cardinality> cardMap = myGraphHelper.getFor(rule);
 
@@ -119,7 +115,7 @@ public class RuleMethodsHelper {
     boolean generateTokens = attr == null ? G.generateTokenAccessors :
                              Boolean.TRUE.equals(getAttributeValue(attr.getExpression()));
     boolean generateTokensSet = attr != null || G.generateTokenAccessorsSet;
-    Map<String, MethodInfo> basicMethods = ContainerUtil.newLinkedHashMap();
+    Map<String, MethodInfo> basicMethods = new LinkedHashMap<>();
 
     for (MethodInfo methodInfo : result) {
       basicMethods.put(methodInfo.name, methodInfo);

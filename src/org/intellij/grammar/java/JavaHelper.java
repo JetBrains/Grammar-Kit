@@ -41,8 +41,8 @@ import org.jetbrains.org.objectweb.asm.signature.SignatureVisitor;
 
 import java.io.InputStream;
 import java.lang.annotation.Annotation;
-import java.lang.reflect.*;
 import java.lang.reflect.Type;
+import java.lang.reflect.*;
 import java.util.*;
 
 /**
@@ -146,7 +146,7 @@ public abstract class JavaHelper {
       JavaClassReferenceProvider provider = new JavaClassReferenceProvider();
       provider.setOption(JavaClassReferenceProvider.ALLOW_DOLLAR_NAMES, false);
       provider.setOption(JavaClassReferenceProvider.ADVANCED_RESOLVE, true);
-      provider.setOption(JavaClassReferenceProvider.DEFAULT_PACKAGE, CommonClassNames.DEFAULT_PACKAGE);
+      provider.setOption(JavaClassReferenceProvider.IMPORTS, Collections.singletonList(CommonClassNames.DEFAULT_PACKAGE));
       provider.setSoft(false);
       return provider;
     }
@@ -193,7 +193,7 @@ public abstract class JavaHelper {
       if (methodName == null) return Collections.emptyList();
       PsiClass aClass = findClassSafe(className);
       if (aClass == null) return super.findClassMethods(className, methodType, methodName, paramCount, paramTypes);
-      List<NavigatablePsiElement> result = ContainerUtil.newArrayList();
+      List<NavigatablePsiElement> result = new ArrayList<>();
       PsiMethod[] methods = methodType == MethodType.CONSTRUCTOR ? aClass.getConstructors() : aClass.getMethods();
       for (PsiMethod method : methods) {
         if (!acceptsName(methodName, method.getName())) continue;
@@ -355,7 +355,7 @@ public abstract class JavaHelper {
                                                         String... paramTypes) {
       Class<?> aClass = findClassSafe(className);
       if (aClass == null || methodName == null) return Collections.emptyList();
-      List<NavigatablePsiElement> result = ContainerUtil.newArrayList();
+      List<NavigatablePsiElement> result = new ArrayList<>();
       Member[] methods = methodType == MethodType.CONSTRUCTOR ? aClass.getDeclaredConstructors() : aClass.getDeclaredMethods();
       for (Member method : methods) {
         if (!acceptsName(methodName, method.getName())) continue;
@@ -495,7 +495,7 @@ public abstract class JavaHelper {
                                                         String... paramTypes) {
       ClassInfo aClass = findClassSafe(className);
       if (aClass == null || methodName == null) return Collections.emptyList();
-      List<NavigatablePsiElement> result = ContainerUtil.newArrayList();
+      List<NavigatablePsiElement> result = new ArrayList<>();
       for (MethodInfo method : aClass.methods) {
         if (!acceptsName(methodName, method.name)) continue;
         if (!acceptsMethod(method, methodType)) continue;

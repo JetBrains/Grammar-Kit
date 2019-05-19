@@ -36,8 +36,8 @@ import com.intellij.psi.tree.IElementType;
 import com.intellij.psi.tree.TokenSet;
 import com.intellij.util.Function;
 import com.intellij.util.PairProcessor;
-import com.intellij.util.containers.ContainerUtil;
 import com.intellij.util.containers.LimitedPool;
+import gnu.trove.THashSet;
 import org.intellij.grammar.config.Options;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
@@ -841,7 +841,7 @@ public class GeneratedParserUtilBase {
 
   public static class CompletionState implements Function<Object, String> {
     public final int offset;
-    public final Collection<String> items = ContainerUtil.newTroveSet();
+    public final Collection<String> items = new THashSet<>();
 
     public CompletionState(int offset_) {
       offset = offset_;
@@ -976,7 +976,7 @@ public class GeneratedParserUtilBase {
 
     public static void initState(ErrorState state, PsiBuilder builder, IElementType root, TokenSet[] extendsSets) {
       state.extendsSets = extendsSets;
-      PsiFile file = builder.getUserDataUnprotected(FileContextUtil.CONTAINING_FILE_KEY);
+      PsiFile file = builder.getUserData(FileContextUtil.CONTAINING_FILE_KEY);
       state.completionState = file == null? null: file.getUserData(COMPLETION_STATE_KEY);
       Language language = file == null? root.getLanguage() : file.getLanguage();
       state.caseSensitive = language.isCaseSensitive();

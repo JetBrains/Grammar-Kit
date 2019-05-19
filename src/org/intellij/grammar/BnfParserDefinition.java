@@ -102,7 +102,7 @@ public class BnfParserDefinition implements ParserDefinition {
   }
 
   @Override
-  public SpaceRequirements spaceExistanceTypeBetweenTokens(ASTNode node1, ASTNode node2) {
+  public SpaceRequirements spaceExistenceTypeBetweenTokens(ASTNode node1, ASTNode node2) {
     IElementType t1 = node1.getElementType();
     IElementType t2 = node2.getElementType();
     if (t1 == BnfTypes.BNF_LINE_COMMENT) return SpaceRequirements.MUST_LINE_BREAK;

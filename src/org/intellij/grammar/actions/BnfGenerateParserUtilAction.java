@@ -22,7 +22,6 @@ import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.LangDataKeys;
 import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.application.Result;
 import com.intellij.openapi.command.WriteCommandAction;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.fileEditor.ex.IdeDocumentHistory;
@@ -96,24 +95,22 @@ public class BnfGenerateParserUtilAction extends AnAction {
     }
     final Document document = PsiDocumentManager.getInstance(project).getDocument(bnfFile);
     if (document == null) return;
-    new WriteCommandAction.Simple(project, file) {
-      @Override
-      protected void run() throws Throwable {
+    WriteCommandAction.writeCommandAction(project, file)
+      .run(() -> {
         int position = document.getLineEndOffset(document.getLineNumber(anchorOffset));
         document.insertString(position, text);
-      }
-    }.execute();
-
+      });
   }
 
   static String getGrammarPackage(BnfFile bnfFile) {
-    return StringUtil.getPackageName(bnfFile.findAttributeValue(null, KnownAttribute.PARSER_CLASS, null));
+    String value = bnfFile.findAttributeValue(null, KnownAttribute.PARSER_CLASS, null);
+    return value == null ? "" : StringUtil.getPackageName(value);
   }
 
   static String getGrammarName(BnfFile bnfFile) {
     String parser = bnfFile.findAttributeValue(null, KnownAttribute.PARSER_CLASS, null);
     if (!KnownAttribute.PARSER_CLASS.getDefaultValue().equals(parser)) {
-      String shortName = StringUtil.getShortName(parser);
+      String shortName = parser == null ? "" : StringUtil.getShortName(parser);
       int len = "Parser".length();
       String result = shortName.endsWith("Parser") ? shortName.substring(0, shortName.length() - len) : shortName;
       if (StringUtil.isNotEmpty(result)) return result;
@@ -136,28 +133,27 @@ public class BnfGenerateParserUtilAction extends AnAction {
     return createClass(className, targetDirectory, baseClass, title, null);
   }
 
-  static String createClass(final String className, final PsiDirectory targetDirectory,
-                            final String baseClass,
-                            final String title,
-                            final Consumer<PsiClass> consumer) {
-    final Project project = targetDirectory.getProject();
-    final Ref<PsiClass> resultRef = Ref.create();
-
-    new WriteCommandAction(project, title) {
-      @Override
-      protected void run(Result result) throws Throwable {
+  static String createClass(String className, PsiDirectory targetDirectory,
+                            String baseClass,
+                            String title,
+                            Consumer<PsiClass> consumer) {
+    Project project = targetDirectory.getProject();
+    Ref<PsiClass> resultRef = Ref.create();
+    WriteCommandAction.writeCommandAction(project)
+      .withName(title)
+      .run(() -> {
         IdeDocumentHistory.getInstance(project).includeCurrentPlaceAsChangePlace();
 
         PsiElementFactory elementFactory = JavaPsiFacade.getInstance(project).getElementFactory();
         PsiJavaCodeReferenceElement ref = baseClass == null ? null : elementFactory.createReferenceElementByFQClassName(
-            baseClass, GlobalSearchScope.allScope(project));
+          baseClass, GlobalSearchScope.allScope(project));
 
         try {
           PsiClass resultClass = JavaDirectoryService.getInstance().createClass(targetDirectory, className);
           resultRef.set(resultClass);
           if (ref != null) {
-            PsiElement baseClass = ref.resolve();
-            boolean isInterface = baseClass instanceof PsiClass && ((PsiClass) baseClass).isInterface();
+            PsiElement clazz = ref.resolve();
+            boolean isInterface = clazz instanceof PsiClass && ((PsiClass)clazz).isInterface();
             PsiReferenceList targetReferenceList = isInterface ? resultClass.getImplementsList() : resultClass.getExtendsList();
             assert targetReferenceList != null;
             targetReferenceList.add(ref);
@@ -170,9 +166,7 @@ public class BnfGenerateParserUtilAction extends AnAction {
           ApplicationManager.getApplication().invokeLater(
             () -> Messages.showErrorDialog(project, "Unable to create class " + className + "\n" + e.getLocalizedMessage(), title));
         }
-      }
-    }.execute();
+      });
     return resultRef.isNull() ? null : resultRef.get().getQualifiedName();
   }
-
 }

@@ -30,7 +30,6 @@ import com.intellij.openapi.vfs.pointers.VirtualFilePointerManager;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiManager;
 import com.intellij.util.ObjectUtils;
-import com.intellij.util.containers.ContainerUtil;
 import org.intellij.grammar.psi.BnfFile;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -39,6 +38,7 @@ import org.jetbrains.org.objectweb.asm.Label;
 import org.jetbrains.org.objectweb.asm.MethodVisitor;
 
 import java.lang.ref.SoftReference;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -133,7 +133,7 @@ public class LivePreviewLanguage extends Language {
     if (file == null) return Collections.emptyList();
     FileEditor[] editors = FileEditorManager.getInstance(project).getAllEditors(file);
     if (editors.length == 0) return Collections.emptyList();
-    List<Editor> result = ContainerUtil.newArrayList();
+    List<Editor> result = new ArrayList<>();
     for (FileEditor editor : editors) {
       if (editor instanceof TextEditor) result.add(((TextEditor)editor).getEditor());
     }
@@ -145,7 +145,7 @@ public class LivePreviewLanguage extends Language {
     FileEditorManager fileEditorManager = FileEditorManager.getInstance(project);
     VirtualFile[] files = fileEditorManager.getOpenFiles();
     if (files.length == 0) return Collections.emptyList();
-    List<Editor> result = ContainerUtil.newArrayList();
+    List<Editor> result = new ArrayList<>();
     PsiManager psiManager = PsiManager.getInstance(project);
     for (VirtualFile file : files) {
       PsiFile psiFile = psiManager.findFile(file);

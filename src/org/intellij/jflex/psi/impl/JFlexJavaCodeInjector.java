@@ -28,13 +28,13 @@ import com.intellij.psi.tree.IElementType;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.psi.util.PsiUtilCore;
 import com.intellij.util.ObjectUtils;
-import com.intellij.util.containers.ContainerUtil;
 import com.intellij.util.containers.JBIterable;
 import org.intellij.grammar.config.Options;
 import org.intellij.jflex.psi.*;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -130,7 +130,7 @@ public class JFlexJavaCodeInjector implements MultiHostInjector {
   private static Map<IElementType, String> collectOptions(@NotNull PsiFile file) {
     PsiElement declarationsSection = PsiTreeUtil.findChildOfType(file, JFlexDeclarationsSection.class);
     if (declarationsSection == null) return Collections.emptyMap();
-    Map<IElementType, String> result = ContainerUtil.newLinkedHashMap();
+    Map<IElementType, String> result = new LinkedHashMap<>();
     for (JFlexOption o : SyntaxTraverser.psiApi().children(declarationsSection).filter(JFlexOption.class)) {
       IElementType key = PsiUtilCore.getElementType(o.getFirstChild());
       String value = TextRange.create(o.getFirstChild().getTextLength(), o.getTextLength()).substring(o.getText()).trim();

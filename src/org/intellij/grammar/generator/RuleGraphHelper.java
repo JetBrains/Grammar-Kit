@@ -28,6 +28,7 @@ import com.intellij.util.ObjectUtils;
 import com.intellij.util.containers.ContainerUtil;
 import com.intellij.util.containers.MultiMap;
 import gnu.trove.THashMap;
+import gnu.trove.THashSet;
 import gnu.trove.TObjectHashingStrategy;
 import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.analysis.BnfFirstNextAnalyzer;
@@ -69,10 +70,10 @@ public class RuleGraphHelper {
   private final BnfFile myFile;
   private final MultiMap<BnfRule, BnfRule> myRuleExtendsMap;
   private final MultiMap<BnfRule, BnfRule> myRulesGraph = newMultiMap();
-  private final Map<BnfRule, Map<PsiElement, Cardinality>> myRuleContentsMap = ContainerUtil.newTroveMap();
+  private final Map<BnfRule, Map<PsiElement, Cardinality>> myRuleContentsMap = new THashMap<>();
   private final MultiMap<BnfRule, PsiElement> myRulesCollapseMap = newMultiMap();
-  private final Set<BnfRule> myRulesWithTokens = ContainerUtil.newTroveSet();
-  private final Map<String, PsiElement> myExternalElements = ContainerUtil.newTroveMap();
+  private final Set<BnfRule> myRulesWithTokens = new THashSet<>();
+  private final Map<String, PsiElement> myExternalElements = new THashMap<>();
 
   private static final IElementType EXTERNAL_TYPE = new FakeElementType("EXTERNAL_TYPE", Language.ANY);
   private static final IElementType MARKER_TYPE = new FakeElementType("MARKER_TYPE", Language.ANY);
@@ -187,13 +188,13 @@ public class RuleGraphHelper {
       @NotNull
       @Override
       protected Map<K, Collection<V>> createMap() {
-        return ContainerUtil.newLinkedHashMap();
+        return new LinkedHashMap<>();
       }
 
       @NotNull
       @Override
       protected Collection<V> createCollection() {
-        return ContainerUtil.newLinkedHashSet();
+        return new LinkedHashSet<>();
       }
     };
   }
@@ -276,7 +277,7 @@ public class RuleGraphHelper {
 
   private void buildContentsMap() {
     List<BnfRule> rules = topoSort(myFile.getRules(), this);
-    Set<Object> visited = ContainerUtil.newLinkedHashSet();
+    Set<Object> visited = new LinkedHashSet<>();
     for (BnfRule rule : rules) {
       collectMembers(rule, visited);
       visited.clear();
@@ -459,13 +460,13 @@ public class RuleGraphHelper {
       }
     }
     else {
-      List<BnfExpression> pinned = ContainerUtil.newArrayList();
+      List<BnfExpression> pinned = new ArrayList<>();
       GrammarUtil.processPinnedExpressions(rule, new CommonProcessors.CollectProcessor<>(pinned));
       boolean pinApplied = false;
 
       IElementType type = getEffectiveType(tree);
 
-      List<Map<PsiElement, Cardinality>> list = ContainerUtil.newArrayList();
+      List<Map<PsiElement, Cardinality>> list = new ArrayList<>();
       List<BnfExpression> childExpressions = getChildExpressions(tree);
       for (BnfExpression child : childExpressions) {
         Map<PsiElement, Cardinality> nextMap = collectMembers(rule, child, visited);
@@ -482,7 +483,7 @@ public class RuleGraphHelper {
                joinMaps(rule, false, type, Arrays.asList(result, result)) : result;
     }
     if (outerLeft && rule.getExpression() == tree) {
-      List<Map<PsiElement, Cardinality>> list = ContainerUtil.newArrayList();
+      List<Map<PsiElement, Cardinality>> list = new ArrayList<>();
       Map<BnfRule, Cardinality> rulesToTheLeft = getRulesToTheLeft(rule);
       for (BnfRule r : rulesToTheLeft.keySet()) {
         Cardinality cardinality = rulesToTheLeft.get(r);
@@ -501,7 +502,7 @@ public class RuleGraphHelper {
   }
 
   private static Map<BnfRule, Cardinality> getRulesToTheLeft(BnfRule rule) {
-    Map<BnfRule, Cardinality> result = ContainerUtil.newLinkedHashMap();
+    Map<BnfRule, Cardinality> result = new LinkedHashMap<>();
     Map<BnfExpression, BnfExpression> nextMap = new BnfFirstNextAnalyzer().setBackward(true).setPublicRuleOpaque(true).calcNext(rule);
     for (BnfExpression e : nextMap.keySet()) {
       if (!(e instanceof BnfReferenceOrToken)) continue;
@@ -544,9 +545,7 @@ public class RuleGraphHelper {
     }
     else if (type == BnfTypes.BNF_SEQUENCE || type == BnfTypes.BNF_EXPRESSION || type == BnfTypes.BNF_REFERENCE_OR_TOKEN) {
       list = ContainerUtil.newArrayList(compactInheritors(rule, list));
-      for (Iterator<Map<PsiElement, Cardinality>> it = list.iterator(); it.hasNext(); ) {
-        if (it.next().isEmpty()) it.remove();
-      }
+      list.removeIf(Map::isEmpty);
       Map<PsiElement, Cardinality> map = psiMap();
       for (Map<PsiElement, Cardinality> m : list) {
         Cardinality leftMarker = m.get(LEFT_MARKER);
@@ -661,8 +660,8 @@ public class RuleGraphHelper {
 
   /** @noinspection UnusedParameters*/
   private List<Map<PsiElement, Cardinality>> compactInheritors(@Nullable BnfRule forRule, @NotNull List<Map<PsiElement, Cardinality>> mapList) {
-    Map<BnfRule, BnfRule> rulesAndAlts = ContainerUtil.newLinkedHashMap();
-    Map<PsiElement, BnfRule> externalMap = ContainerUtil.newLinkedHashMap();
+    Map<BnfRule, BnfRule> rulesAndAlts = new LinkedHashMap<>();
+    Map<PsiElement, BnfRule> externalMap = new LinkedHashMap<>();
     for (Map<PsiElement, Cardinality> map : mapList) {
       for (PsiElement element : map.keySet()) {
         BnfRule r = null;
@@ -688,7 +687,7 @@ public class RuleGraphHelper {
     }
     Set<BnfRule> allRules = ContainerUtil.newLinkedHashSet(ContainerUtil.concat(rulesAndAlts.keySet(), rulesAndAlts.values()));
 
-    List<Map.Entry<BnfRule, Collection<BnfRule>>> applicableSupers = ContainerUtil.newArrayList();
+    List<Map.Entry<BnfRule, Collection<BnfRule>>> applicableSupers = new ArrayList<>();
     for (Map.Entry<BnfRule, Collection<BnfRule>> e : myRuleExtendsMap.entrySet()) {
       int count = 0;
       for (BnfRule rule : allRules) {
@@ -809,7 +808,7 @@ public class RuleGraphHelper {
   private static List<Map<PsiElement, Cardinality>> replaceRulesInMaps(List<Map<PsiElement, Cardinality>> mapList,
                                                                        Map<BnfRule, BnfRule> replacementMap,
                                                                        Map<PsiElement, BnfRule> externalMap) {
-    List<Map<PsiElement, Cardinality>> result = ContainerUtil.newArrayListWithCapacity(mapList.size());
+    List<Map<PsiElement, Cardinality>> result = new ArrayList<>(mapList.size());
     for (Map<PsiElement, Cardinality> map : mapList) {
       Map<PsiElement, Cardinality> copy = psiMap(map);
       result.add(copy);

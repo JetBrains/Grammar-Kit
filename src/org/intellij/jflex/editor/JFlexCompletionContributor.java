@@ -16,6 +16,7 @@
 
 package org.intellij.jflex.editor;
 
+import com.intellij.application.options.CodeStyle;
 import com.intellij.codeInsight.TailType;
 import com.intellij.codeInsight.completion.*;
 import com.intellij.codeInsight.lookup.LookupElement;
@@ -28,14 +29,14 @@ import com.intellij.patterns.StandardPatterns;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiFileFactory;
-import com.intellij.psi.codeStyle.CodeStyleSettingsManager;
+import com.intellij.psi.codeStyle.CommonCodeStyleSettings;
 import com.intellij.psi.impl.source.tree.LeafPsiElement;
 import com.intellij.psi.impl.source.tree.TreeUtil;
 import com.intellij.psi.tree.IElementType;
 import com.intellij.psi.util.PsiTreeUtil;
+import com.intellij.util.ObjectUtils;
 import com.intellij.util.ProcessingContext;
 import org.intellij.grammar.parser.GeneratedParserUtilBase;
-import org.intellij.jflex.parser.JFlexFileType;
 import org.intellij.jflex.psi.*;
 import org.intellij.jflex.psi.impl.JFlexFileImpl;
 import org.jetbrains.annotations.NotNull;
@@ -56,7 +57,7 @@ public class JFlexCompletionContributor extends CompletionContributor {
     extend(CompletionType.BASIC, psiElement().inFile(StandardPatterns.instanceOf(JFlexFileImpl.class)), new CompletionProvider<CompletionParameters>() {
       @Override
       protected void addCompletions(@NotNull CompletionParameters parameters,
-                                    ProcessingContext context,
+                                    @NotNull ProcessingContext context,
                                     @NotNull CompletionResultSet result) {
         PsiElement position = parameters.getPosition();
         JFlexComposite parent = PsiTreeUtil.getParentOfType(
@@ -70,7 +71,7 @@ public class JFlexCompletionContributor extends CompletionContributor {
             result.withPrefixMatcher(result.getPrefixMatcher().cloneWithPrefix("%" + result.getPrefixMatcher().getPrefix())) :
             result;
           for (String keyword : suggestKeywords(parameters.getPosition())) {
-            result2.addElement(createKeywordLookupItem(keyword));
+            result2.addElement(createKeywordLookupItem(parameters.getOriginalFile(), keyword));
           }
         }
       }
@@ -118,7 +119,7 @@ public class JFlexCompletionContributor extends CompletionContributor {
     return state.items;
   }
 
-  private static LookupElement createKeywordLookupItem(String keyword) {
+  private static LookupElement createKeywordLookupItem(PsiFile psiFile, String keyword) {
     LookupElementBuilder builder = LookupElementBuilder.create(keyword.toLowerCase()).withCaseSensitivity(false).bold();
     boolean braces = keyword.endsWith("{") || keyword.endsWith("}");
     if (!braces) {
@@ -132,8 +133,8 @@ public class JFlexCompletionContributor extends CompletionContributor {
         StringBuilder sb = new StringBuilder("\n");
         caret += sb.length();
         if (closing != null) {
-          int indentSize = CodeStyleSettingsManager.getInstance(context.getProject()).
-            getCurrentSettings().getIndentSize(JFlexFileType.INSTANCE);
+          int indentSize = ObjectUtils.notNull(CodeStyle.getLanguageSettings(psiFile).getIndentOptions(),
+                                               CommonCodeStyleSettings.IndentOptions.DEFAULT_INDENT_OPTIONS).INDENT_SIZE;
           sb.append(StringUtil.repeat(" ", indentSize));
           caret += indentSize;
           sb.append("\n").append(closing).append("\n");

@@ -37,7 +37,6 @@ import org.intellij.grammar.analysis.BnfFirstNextAnalyzer;
 import org.intellij.grammar.java.JavaHelper;
 import org.intellij.grammar.parser.GeneratedParserUtilBase.Parser;
 import org.intellij.grammar.psi.*;
-import org.intellij.grammar.psi.impl.BnfElementFactory;
 import org.intellij.grammar.psi.impl.GrammarUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -46,6 +45,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -123,11 +123,11 @@ public class ParserGenerator {
     return ObjectUtils.notNull(myRuleInfos.get(rule.getName()));
   }
 
-  private final Map<String, RuleInfo> myRuleInfos = ContainerUtil.newTreeMap();
+  private final Map<String, RuleInfo> myRuleInfos = new TreeMap<>();
+  private final Map<String, String> myParserLambdas = new HashMap<>();       // field name -> body
+  private final Map<String, String> myRenderedLambdas = new HashMap<>();     // field name -> parser class FQN
+  private final Set<String> myInlinedChildNodes = new HashSet<>();
 
-  private final Map<String, String> myParserLambdas = ContainerUtil.newHashMap();       // field name -> body
-  private final Map<String, String> myRenderedLambdas = ContainerUtil.newHashMap();     // field name -> parser class FQN
-  private final Set<String> myInlinedChildNodes = ContainerUtil.newHashSet();
   /**
    * Some meta-method calls use only static parsers as arguments,
    * i.e. they don't reference meta-method parameters,
@@ -135,11 +135,11 @@ public class ParserGenerator {
    * <p/>
    * Mapping: <code> meta field name -> meta method call </code>
    */
-  private final Map<String, String> myMetaMethodFields = ContainerUtil.newHashMap();
+  private final Map<String, String> myMetaMethodFields = new HashMap<>();
 
-  private final Map<String, Collection<String>> myTokenSets = ContainerUtil.newTreeMap();
+  private final Map<String, Collection<String>> myTokenSets = new TreeMap<>();
   private final Map<String, String> mySimpleTokens;
-  private final Set<String> myTokensUsedInGrammar = ContainerUtil.newLinkedHashSet();
+  private final Set<String> myTokensUsedInGrammar = new LinkedHashSet<>();
   private final boolean myNoStubs;
 
   private final BnfFile myFile;
@@ -191,7 +191,7 @@ public class ParserGenerator {
                          tmpVisitorClass : getRootAttribute(myFile, KnownAttribute.PSI_PACKAGE) + "." + tmpVisitorClass;
     myTypeHolderClass = getRootAttribute(myFile, KnownAttribute.ELEMENT_TYPE_HOLDER_CLASS);
 
-    mySimpleTokens = ContainerUtil.newLinkedHashMap(RuleGraphHelper.getTokenTextToNameMap(myFile));
+    mySimpleTokens = new LinkedHashMap<>(RuleGraphHelper.getTokenTextToNameMap(myFile));
     myGraphHelper = RuleGraphHelper.getCached(myFile);
     myExpressionHelper = new ExpressionHelper(myFile, myGraphHelper, true);
     myRulesMethodsHelper = new RuleMethodsHelper(myGraphHelper, myExpressionHelper, mySimpleTokens, G);
@@ -220,7 +220,7 @@ public class ParserGenerator {
   }
 
   private void calcAbstractRules() {
-    Set<String> reusedRules = ContainerUtil.newHashSet();
+    Set<String> reusedRules = new HashSet<>();
     for (BnfRule rule : myFile.getRules()) {
       String elementType = getAttribute(rule, KnownAttribute.ELEMENT_TYPE);
       BnfRule r = elementType != null ? myFile.getRule(elementType) : null;
@@ -272,16 +272,12 @@ public class ParserGenerator {
   }
 
   private void calcRealSuperClasses(Map<String, BnfRule> sortedPsiRules) {
-    Map<BnfRule, BnfRule> supers = ContainerUtil.newHashMap();
+    Map<BnfRule, BnfRule> supers = new HashMap<>();
     for (BnfRule rule : sortedPsiRules.values()) {
       supers.put(rule, getEffectiveSuperRule(myFile, rule));
     }
-    // todo unique+post-order-dfs workaround, drop when 2018.1
-    BnfRule fakeRoot = BnfElementFactory.createRuleFromText(myFile.getProject(), "<.> ::=");
-    JBTreeTraverser<BnfRule> ordered = new JBTreeTraverser<BnfRule>(
-      element -> element == fakeRoot ? sortedPsiRules.values() : JBIterable.of(supers.get(element)))
-      .withRoot(fakeRoot)
-      .filter(o -> o != fakeRoot)
+    JBTreeTraverser<BnfRule> ordered = new JBTreeTraverser<BnfRule>(key -> JBIterable.of(supers.get(key)))
+      .withRoots(sortedPsiRules.values())
       .withTraversal(TreeTraversal.POST_ORDER_DFS)
       .unique();
     for (BnfRule rule : ordered) {
@@ -369,8 +365,8 @@ public class ParserGenerator {
     {
       generateParser();
     }
-    Map<String, BnfRule> sortedCompositeTypes = ContainerUtil.newTreeMap();
-    Map<String, BnfRule> sortedPsiRules = ContainerUtil.newTreeMap();
+    Map<String, BnfRule> sortedCompositeTypes = new TreeMap<>();
+    Map<String, BnfRule> sortedPsiRules = new TreeMap<>();
 
     for (BnfRule rule : myFile.getRules()) {
       RuleInfo info = ruleInfo(rule);
@@ -442,8 +438,8 @@ public class ParserGenerator {
     }
     {
       // ensure only public supers are exposed, replace non-public with default super-intf for simplicity
-      Map<String, String> replacements = ContainerUtil.newHashMap();
-      Set<String> visited = ContainerUtil.newHashSet();
+      Map<String, String> replacements = new HashMap<>();
+      Set<String> visited = new HashSet<>();
       for (String s : supers.values()) {
         if (!visited.add(s)) continue;
         NavigatablePsiElement aClass = myJavaHelper.findClass(s);
@@ -612,7 +608,7 @@ public class ParserGenerator {
 
   private void generateRootParserContent() {
     BnfRule rootRule = myFile.getRule(myGrammarRoot);
-    List<BnfRule> extraRoots = ContainerUtil.newArrayList();
+    List<BnfRule> extraRoots = new ArrayList<>();
     for (String ruleName : myRuleInfos.keySet()) {
       BnfRule rule = ObjectUtils.assertNotNull(myFile.getRule(ruleName));
       if (getAttribute(rule, KnownAttribute.ELEMENT_TYPE) != null) continue;
@@ -701,7 +697,7 @@ public class ParserGenerator {
   @NotNull
   private List<Set<String>> buildExtendsSet(@NotNull MultiMap<BnfRule, BnfRule> map) {
     if (map.isEmpty()) return Collections.emptyList();
-    List<Set<String>> result = ContainerUtil.newArrayList();
+    List<Set<String>> result = new ArrayList<>();
     for (Map.Entry<BnfRule, Collection<BnfRule>> entry : map.entrySet()) {
       Set<String> set = null;
       for (BnfRule rule : entry.getValue()) {
@@ -743,7 +739,7 @@ public class ParserGenerator {
       .filter(o -> !o.startsWith("static") && o.endsWith(".*"))
       .map(o -> StringUtil.trimEnd(o, ".*"))
       .append(packageName).toSet();
-    Set<String> includedClasses = ContainerUtil.newTroveSet();
+    Set<String> includedClasses = new THashSet<>();
     for (RuleInfo info : myRuleInfos.values()) {
       if (includedPackages.contains(info.intfPackage)) includedClasses.add(StringUtil.getShortName(info.intfClass));
       if (includedPackages.contains(info.implPackage)) includedClasses.add(StringUtil.getShortName(info.implClass));
@@ -917,12 +913,10 @@ public class ParserGenerator {
 
     PinMatcher pinMatcher = new PinMatcher(rule, type, firstNonTrivial ? rule.getName() : funcName);
     boolean pinApplied = false;
-    final boolean alwaysTrue = children.isEmpty() || (type == BNF_OP_OPT || type == BNF_OP_ZEROMORE);
+    final boolean alwaysTrue = children.isEmpty() || type == BNF_OP_OPT || type == BNF_OP_ZEROMORE;
     boolean pinned = pinMatcher.active() && pinMatcher.shouldGenerate(children);
     if (!alwaysTrue) {
-      boolean value = type == BNF_OP_ZEROMORE || type == BNF_OP_OPT || children.isEmpty();
-      out("boolean %s%s%s;", N.result, children.isEmpty() || type == BNF_OP_ZEROMORE ? " = " + value : "",
-          pinned ? format(", %s", N.pinned) : "");
+      out("boolean %s%s%s;", N.result, children.isEmpty() ? " = true" : "", pinned ? format(", %s", N.pinned) : "");
     }
 
     List<String> modifierList = ContainerUtil.newSmartList();
@@ -1240,7 +1234,7 @@ public class ParserGenerator {
                                              boolean rollbackOnFail,
                                              ConsumeType consumeType) {
     if (startIndex == children.size() - 1 || !(nodeCall instanceof ConsumeTokenCall)) return nodeCall;
-    List<String> list = ContainerUtil.newArrayList();
+    List<String> list = new ArrayList<>();
     int pin = pinApplied ? -1 : 0;
     for (int i = startIndex, len = children.size(); i < len; i++) {
       BnfExpression child = children.get(i);
@@ -1333,7 +1327,7 @@ public class ParserGenerator {
         }
       }
       // allow token usage by registered token name instead of token text
-      if (!mySimpleTokens.containsKey(text) && !mySimpleTokens.values().contains(text)) {
+      if (!mySimpleTokens.containsKey(text) && !mySimpleTokens.containsValue(text)) {
         mySimpleTokens.put(text, null);
       }
       ConsumeType consumeType = getEffectiveConsumeType(rule, node, forcedConsumeType);
@@ -1347,7 +1341,7 @@ public class ParserGenerator {
       NodeCall nodeCall = generateNodeCall(rule, firstElement, getNextName(nextName, 0), consumeType);
       for (PsiElement e : childExpressions) {
         String t = e instanceof BnfStringLiteralExpression ? GrammarUtil.unquote(e.getText()) : e.getText();
-        if (!mySimpleTokens.containsKey(t) && !mySimpleTokens.values().contains(t)) {
+        if (!mySimpleTokens.containsKey(t) && !mySimpleTokens.containsValue(t)) {
           mySimpleTokens.put(t, null);
         }
       }
@@ -1608,7 +1602,7 @@ public class ParserGenerator {
     if (G.generateTokenTypes) {
       newLine();
       String exactType = null;
-      Map<String, String> sortedTokens = ContainerUtil.newTreeMap();
+      Map<String, String> sortedTokens = new TreeMap<>();
       String tokenCreateCall;
       if (tokenTypeFactory == null) {
         tokenCreateCall = "new " + (exactType = myShortener.fun(tokenTypeClass));
@@ -1718,7 +1712,7 @@ public class ParserGenerator {
     }
     newLine();
     out("interface %s {", TOKEN_SET_HOLDER_NAME);
-    Map<String, String> reverseMap = ContainerUtil.newHashMap();
+    Map<String, String> reverseMap = new HashMap<>();
     myTokenSets.forEach((name, tokens) -> {
       String value = String.format("TokenSet.create(%s)", tokenSetString(tokens));
       String alreadyRendered = reverseMap.putIfAbsent(value, name);
@@ -1737,7 +1731,7 @@ public class ParserGenerator {
       psiSupers.add(STUB_BASED_PSI_ELEMENT + "<" + stubClass + ">");
     }
 
-    Set<String> imports = ContainerUtil.newLinkedHashSet();
+    Set<String> imports = new LinkedHashSet<>();
     imports.addAll(Arrays.asList("java.util.List",
                                  "org.jetbrains.annotations.*",
                                  PSI_ELEMENT_CLASS));
@@ -1755,7 +1749,7 @@ public class ParserGenerator {
     String stubName = info.realStubClass;
     String implSuper = info.realSuperClass;
 
-    Set<String> imports = ContainerUtil.newLinkedHashSet();
+    Set<String> imports = new LinkedHashSet<>();
     imports.addAll(Arrays.asList(CommonClassNames.JAVA_UTIL_LIST,
                                  "org.jetbrains.annotations.*",
                                  AST_NODE_CLASS,

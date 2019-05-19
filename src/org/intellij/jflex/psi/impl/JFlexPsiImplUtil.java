@@ -27,6 +27,7 @@ import org.intellij.jflex.psi.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -92,7 +93,7 @@ public class JFlexPsiImplUtil extends JavaRefHelper {
   }
 
   public static <T> List<T> computeDefinitions(PsiFile psiFile, final Class<T> clazz) {
-    final List<T> result = ContainerUtil.newArrayList();
+    final List<T> result = new ArrayList<>();
     psiFile.acceptChildren(new PsiRecursiveElementWalkingVisitor() {
       @Override
       public void visitElement(PsiElement element) {

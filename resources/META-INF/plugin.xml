@@ -1,8 +1,8 @@
 <idea-plugin url="https://github.com/JetBrains/Grammar-Kit">
   <id>org.jetbrains.idea.grammar</id>
   <version>2019.2-SNAPSHOT</version>
-  <vendor email="gregory.shrago@jetbrains.com">Greg Shrago</vendor>
-  <idea-version since-build="171"/>
+  <vendor>JetBrains</vendor>
+  <idea-version since-build="191.7141"/>
 
   <name>Grammar-Kit</name>
   <description>BNF Grammars and JFlex lexers editor. Readable parser/PSI code generator.</description>
@@ -25,8 +25,6 @@
   </change-notes>
 
   <extensions defaultExtensionNs="com.intellij">
-    <errorHandler implementation="com.intellij.diagnostic.ITNReporter"/>
-
     <fileTypeFactory implementation="org.intellij.grammar.BnfFileTypeFactory"/>
     <lang.parserDefinition language="BNF" implementationClass="org.intellij.grammar.BnfParserDefinition"/>
     <lang.ast.factory language="BNF" implementationClass="org.intellij.grammar.BnfASTFactory"/>
@@ -66,28 +64,28 @@
 
     <lang.inspectionSuppressor language="BNF" implementationClass="org.intellij.grammar.inspection.BnfInspectionSuppressor"/>
 
-    <localInspection language="BNF" level="WARNING" groupName="Grammar Inspections" enabledByDefault="true"
+    <localInspection language="BNF" level="WARNING" groupName="Grammar inspections" enabledByDefault="true"
                      displayName="Unresolved BNF references"
                      implementationClass="org.intellij.grammar.inspection.BnfResolveInspection"/>
-    <localInspection language="BNF" level="WARNING" groupName="Grammar Inspections" enabledByDefault="true"
+    <localInspection language="BNF" level="WARNING" groupName="Grammar inspections" enabledByDefault="true"
                      displayName="Unused rule"
                      implementationClass="org.intellij.grammar.inspection.BnfUnusedRuleInspection"/>
-    <localInspection language="BNF" level="WARNING" groupName="Grammar Inspections" enabledByDefault="true"
+    <localInspection language="BNF" level="WARNING" groupName="Grammar inspections" enabledByDefault="true"
                      displayName="Unused attribute"
                      implementationClass="org.intellij.grammar.inspection.BnfUnusedAttributeInspection"/>
-    <localInspection language="BNF" level="WARNING" groupName="Grammar Inspections" enabledByDefault="true"
+    <localInspection language="BNF" level="WARNING" groupName="Grammar inspections" enabledByDefault="true"
                      displayName="Suspicious token"
                      implementationClass="org.intellij.grammar.inspection.BnfSuspiciousTokenInspection"/>
-    <localInspection language="BNF" level="WARNING" groupName="Grammar Inspections" enabledByDefault="true"
+    <localInspection language="BNF" level="WARNING" groupName="Grammar inspections" enabledByDefault="true"
                      displayName="Left recursion"
                      implementationClass="org.intellij.grammar.inspection.BnfLeftRecursionInspection"/>
-    <localInspection language="BNF" level="WARNING" groupName="Grammar Inspections" enabledByDefault="true"
+    <localInspection language="BNF" level="WARNING" groupName="Grammar inspections" enabledByDefault="true"
                      displayName="Duplicate rule"
                      implementationClass="org.intellij.grammar.inspection.BnfDuplicateRuleInspection"/>
-    <localInspection language="BNF" level="WARNING" groupName="Grammar Inspections" enabledByDefault="true"
+    <localInspection language="BNF" level="WARNING" groupName="Grammar inspections" enabledByDefault="true"
                      displayName="Identical choice branches"
                      implementationClass="org.intellij.grammar.inspection.BnfIdenticalChoiceBranchesInspection"/>
-    <localInspection language="BNF" level="WARNING" groupName="Grammar Inspections" enabledByDefault="true"
+    <localInspection language="BNF" level="WARNING" groupName="Grammar inspections" enabledByDefault="true"
                      displayName="Unreachable choice branch"
                      implementationClass="org.intellij.grammar.inspection.BnfUnreachableChoiceBranchInspection"/>
 
@@ -154,7 +152,6 @@
   <project-components>
     <component>
       <implementation-class>org.intellij.grammar.livePreview.GrammarAtCaretPassFactory</implementation-class>
-      <skipForDefaultProject/>
     </component>
   </project-components>
 </idea-plugin>

@@ -17,20 +17,13 @@
 package org.intellij.grammar.actions;
 
 import com.intellij.execution.ExecutionException;
-import com.intellij.execution.ExecutionManager;
-import com.intellij.execution.Executor;
 import com.intellij.execution.configurations.SimpleJavaParameters;
-import com.intellij.execution.executors.DefaultRunExecutor;
-import com.intellij.execution.filters.TextConsoleBuilder;
 import com.intellij.execution.filters.TextConsoleBuilderFactory;
-import com.intellij.execution.impl.ConsoleViewImpl;
 import com.intellij.execution.process.OSProcessHandler;
 import com.intellij.execution.process.ProcessAdapter;
 import com.intellij.execution.process.ProcessEvent;
-import com.intellij.execution.process.ProcessHandler;
-import com.intellij.execution.ui.*;
-import com.intellij.execution.ui.actions.CloseAction;
-import com.intellij.ide.actions.PinActiveTabAction;
+import com.intellij.execution.ui.ConsoleView;
+import com.intellij.execution.ui.ConsoleViewContentType;
 import com.intellij.notification.Notification;
 import com.intellij.notification.NotificationListener;
 import com.intellij.notification.NotificationType;
@@ -51,23 +44,28 @@ import com.intellij.openapi.roots.impl.libraries.ApplicationLibraryTable;
 import com.intellij.openapi.roots.libraries.Library;
 import com.intellij.openapi.roots.libraries.LibraryTable;
 import com.intellij.openapi.ui.Messages;
-import com.intellij.openapi.util.ActionCallback;
-import com.intellij.openapi.util.Comparing;
-import com.intellij.openapi.util.Conditions;
-import com.intellij.openapi.util.Pair;
+import com.intellij.openapi.util.*;
 import com.intellij.openapi.util.io.FileUtil;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.openapi.vfs.JarFileSystem;
 import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.openapi.wm.ToolWindow;
+import com.intellij.openapi.wm.ToolWindowId;
+import com.intellij.openapi.wm.ToolWindowManager;
 import com.intellij.psi.PsiDocumentManager;
 import com.intellij.psi.search.FilenameIndex;
 import com.intellij.psi.search.ProjectScope;
+import com.intellij.ui.content.Content;
+import com.intellij.ui.content.ContentFactory;
+import com.intellij.ui.content.MessageView;
+import com.intellij.util.ObjectUtils;
 import com.intellij.util.PathUtil;
 import com.intellij.util.SystemProperties;
 import com.intellij.util.containers.JBIterable;
 import com.intellij.util.download.DownloadableFileDescription;
 import com.intellij.util.download.DownloadableFileService;
+import com.intellij.util.ui.UIUtil;
 import org.intellij.grammar.config.Options;
 import org.intellij.grammar.generator.BnfConstants;
 import org.intellij.jflex.parser.JFlexFileType;
@@ -96,6 +94,8 @@ public class BnfRunJFlexAction extends DumbAwareAction {
     System.getProperty("grammar.kit.jflex.skeleton",
                        "https://raw.github.com/JetBrains/intellij-community/master/tools/lexer/idea-flex.skeleton")
   };
+
+  private static final Key<Pair<String, OSProcessHandler>> BATCH_ID_KEY = Key.create("BnfRunJFlexAction.batchId");
 
   @Override
   public void update(@NotNull AnActionEvent e) {
@@ -138,25 +138,25 @@ public class BnfRunJFlexAction extends DumbAwareAction {
         "",
         NotificationType.INFORMATION, NotificationListener.URL_OPENING_LISTENER), project);
     }
+    String batchId = "jflex@" + System.nanoTime();
     new Runnable() {
-      boolean first = true;
       final Iterator<VirtualFile> it = files.iterator();
       @Override
       public void run() {
         if (it.hasNext()) {
-          doGenerate(project, it.next(), flexFiles, first).doWhenProcessed(this);
-          first = false;
+          doGenerate(project, it.next(), flexFiles, batchId).doWhenProcessed(this);
         }
       }
     }.run();
   }
 
-  public static ActionCallback doGenerate(Project project, VirtualFile flexFile, List<File> jflex, boolean forceNew) {
+  public static ActionCallback doGenerate(@NotNull Project project,
+                                          @NotNull VirtualFile flexFile,
+                                          @NotNull List<File> jflex,
+                                          @NotNull String batchId) {
     FileDocumentManager fileDocumentManager = FileDocumentManager.getInstance();
     Document document = fileDocumentManager.getDocument(flexFile);
     if (document == null) return ActionCallback.REJECTED;
-
-    final String commandName = "JFlex Generator";
 
     String text = document.getText();
     Matcher matcherClass = Pattern.compile("%class\\s+(\\w+)").matcher(text);
@@ -188,11 +188,9 @@ public class BnfRunJFlexAction extends DumbAwareAction {
 
       OSProcessHandler processHandler = javaParameters.createOSProcessHandler();
 
-      RunContentDescriptor runContentDescriptor = createConsole(project, commandName, forceNew);
+      showConsole(project, "JFlex", batchId, processHandler);
 
-      ((ConsoleViewImpl) runContentDescriptor.getExecutionConsole()).attachToProcess(processHandler);
-
-      final ActionCallback callback = new ActionCallback();
+      ActionCallback callback = new ActionCallback();
       processHandler.addProcessListener(new ProcessAdapter() {
         @Override
         public void processTerminated(@NotNull ProcessEvent event) {
@@ -205,8 +203,74 @@ public class BnfRunJFlexAction extends DumbAwareAction {
       return callback;
     }
     catch (ExecutionException ex) {
-      Messages.showErrorDialog(project, "Unable to run JFlex"+ "\n" + ex.getLocalizedMessage(), commandName);
+      Messages.showErrorDialog(project, "Unable to run JFlex"+ "\n" + ex.getLocalizedMessage(), "JFlex");
       return ActionCallback.REJECTED;
+    }
+  }
+
+  public static void showConsole(@NotNull Project project,
+                                 @NotNull String title,
+                                 @NotNull String batchId,
+                                 @NotNull OSProcessHandler processHandler) {
+    MessageView messageView = MessageView.SERVICE.getInstance(project);
+    Content batchContent = null, stoppedContent = null;
+    for (Content c : messageView.getContentManager().getContents()) {
+      Pair<String, OSProcessHandler> data = c.getUserData(BATCH_ID_KEY);
+      if (data == null) continue;
+      if (data.first.equals(batchId)) {
+        batchContent = c;
+      }
+      else if (data.second.isProcessTerminated() || data.second.isProcessTerminating()) {
+        if (!c.isPinned()) {
+          stoppedContent = c;
+        }
+      }
+    }
+    Content content = ObjectUtils.chooseNotNull(batchContent, stoppedContent);
+    ConsoleView consoleView = content == null ? null : UIUtil.uiTraverser(content.getComponent()).filter(ConsoleView.class).first();
+
+    if (content != null && consoleView != null) {
+      if (content == batchContent) {
+        consoleView.print("\n\n\n", ConsoleViewContentType.SYSTEM_OUTPUT);
+      }
+      else {
+        consoleView.clear();
+      }
+      attachAndActivate(project, batchId, processHandler, content, consoleView);
+      return;
+    }
+
+    consoleView = TextConsoleBuilderFactory.getInstance().createBuilder(project).getConsole();
+
+    JComponent panel = new JPanel(new BorderLayout());
+    panel.add(consoleView.getComponent(), BorderLayout.CENTER);
+
+    DefaultActionGroup toolbarActions = new DefaultActionGroup();
+    for (AnAction action : consoleView.createConsoleActions()) {
+      toolbarActions.add(action);
+    }
+    ActionToolbar toolbar = ActionManager.getInstance().createActionToolbar(ActionPlaces.TOOLBAR, toolbarActions, false);
+    toolbar.setTargetComponent(consoleView.getComponent());
+    panel.add(toolbar.getComponent(), BorderLayout.WEST);
+
+    content = ContentFactory.SERVICE.getInstance().createContent(panel, title, true);
+    messageView.getContentManager().addContent(content);
+    Disposer.register(content, consoleView);
+
+    attachAndActivate(project, batchId, processHandler, content, consoleView);
+  }
+
+  private static void attachAndActivate(@NotNull Project project,
+                                        @NotNull String batchId,
+                                        @NotNull OSProcessHandler processHandler,
+                                        @NotNull Content content,
+                                        @NotNull ConsoleView consoleView) {
+    ToolWindow toolWindow = ToolWindowManager.getInstance(project).getToolWindow(ToolWindowId.MESSAGES_WINDOW);
+    content.putUserData(BATCH_ID_KEY, Pair.create(batchId, processHandler));
+    consoleView.attachToProcess(processHandler);
+
+    if (toolWindow != null) {
+      toolWindow.activate(() -> toolWindow.getContentManager().setSelectedContent(content), false, false);
     }
   }
 
@@ -362,44 +426,4 @@ public class BnfRunJFlexAction extends DumbAwareAction {
     return null;
   }
 
-  public static RunContentDescriptor createConsole(@NotNull Project project, String tabTitle, boolean forceNew) {
-    RunContentManager runContentManager = ExecutionManager.getInstance(project).getContentManager();
-    if (!forceNew) {
-      for (RunContentDescriptor descriptor : runContentManager.getAllDescriptors()) {
-        if (!Comparing.equal(tabTitle, descriptor.getDisplayName())) continue;
-        ProcessHandler handler = descriptor.getProcessHandler();
-        if (handler == null || handler.isProcessTerminated()) {
-          ExecutionConsole console = descriptor.getExecutionConsole();
-          if (console instanceof ConsoleViewImpl) {
-            ConsoleView consoleView = (ConsoleView)console;
-            consoleView.print("\n\n" + StringUtil.repeatSymbol('-', 60) + "\n", ConsoleViewContentType.SYSTEM_OUTPUT);
-            ((ConsoleViewImpl)consoleView).scrollToEnd();
-          }
-          return descriptor;
-        }
-      }
-    }
-    TextConsoleBuilder builder = TextConsoleBuilderFactory.getInstance().createBuilder(project);
-    ConsoleView consoleView = builder.getConsole();
-
-    DefaultActionGroup toolbarActions = new DefaultActionGroup();
-    JComponent consoleComponent = new JPanel(new BorderLayout());
-
-    JPanel toolbarPanel = new JPanel(new BorderLayout());
-    toolbarPanel.add(ActionManager.getInstance().createActionToolbar(ActionPlaces.RUNNER_TOOLBAR, toolbarActions, false).getComponent());
-    consoleComponent.add(toolbarPanel, BorderLayout.WEST);
-    consoleComponent.add(consoleView.getComponent(), BorderLayout.CENTER);
-
-    RunContentDescriptor descriptor = new RunContentDescriptor(consoleView, null, consoleComponent, tabTitle, null);
-
-    Executor executor = DefaultRunExecutor.getRunExecutorInstance();
-    for (AnAction action : consoleView.createConsoleActions()) {
-      toolbarActions.add(action);
-    }
-    toolbarActions.add(new PinActiveTabAction());
-    toolbarActions.add(new CloseAction(executor, descriptor, project));
-    runContentManager.showRunContent(executor, descriptor);
-    consoleView.allowHeavyFilters();
-    return descriptor;
-  }
 }

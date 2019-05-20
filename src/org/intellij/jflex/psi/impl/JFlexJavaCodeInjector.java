@@ -72,6 +72,7 @@ public class JFlexJavaCodeInjector implements MultiHostInjector {
 
       if (hostParent instanceof JFlexUserCodeSection) {
         StringBuilder sb = new StringBuilder("\n");
+        sb.append("/** @noinspection ALL*/");
         if (isPublic) sb.append("public ");
         if (isFinal) sb.append("final ");
         sb.append("class ").append(lexerClass);

@@ -29,6 +29,7 @@ import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.progress.*;
 import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.roots.ProjectFileIndex;
 import com.intellij.openapi.util.Ref;
 import com.intellij.openapi.util.io.FileUtil;
 import com.intellij.openapi.util.text.StringUtil;
@@ -95,7 +96,9 @@ public class GenerateAction extends AnAction {
 
   public static void doGenerate(@NotNull Project project, @NotNull List<VirtualFile> bnfFiles) {
     Map<VirtualFile, VirtualFile> rootMap = new LinkedHashMap<>();
+    Map<VirtualFile, String> packageMap = new LinkedHashMap<>();
     PsiManager psiManager = PsiManager.getInstance(project);
+    ProjectFileIndex fileIndex = ProjectFileIndex.SERVICE.getInstance(project);
     WriteAction.run(() -> {
       for (VirtualFile file : bnfFiles) {
         if (!file.isValid()) continue;
@@ -107,6 +110,7 @@ public class GenerateAction extends AnAction {
                                 StringUtil.getShortName(parserClass) + ".java",
                                 StringUtil.getPackageName(parserClass), true);
         rootMap.put(file, target);
+        packageMap.put(target, StringUtil.notNullize(fileIndex.getPackageNameByDirectory(target)));
       }
     });
 
@@ -134,7 +138,7 @@ public class GenerateAction extends AnAction {
               BnfConstants.GENERATION_GROUP,
               "", report, NotificationType.INFORMATION), project);
           }
-          VfsUtil.markDirtyAndRefresh(true, true, true, targets.toArray(new VirtualFile[targets.size()]));
+          VfsUtil.markDirtyAndRefresh(true, true, true, targets.toArray(VirtualFile.EMPTY_ARRAY));
         }
       }
 
@@ -148,6 +152,7 @@ public class GenerateAction extends AnAction {
           if (target == null) return;
           targets.add(target);
           File genDir = new File(VfsUtil.virtualToIoFile(target).getAbsolutePath());
+          String packagePrefix = packageMap.get(target);
           long time = System.currentTimeMillis();
           int filesCount = files.size();
           Ref<Exception> exRef = Ref.create();
@@ -156,7 +161,7 @@ public class GenerateAction extends AnAction {
               if (!file.isValid()) return;
               PsiFile bnfFile = psiManager.findFile(file);
               if (!(bnfFile instanceof BnfFile)) return;
-              ParserGenerator generator = new ParserGenerator((BnfFile)bnfFile, sourcePath, genDir.getPath()) {
+              ParserGenerator generator = new ParserGenerator((BnfFile)bnfFile, sourcePath, genDir.getPath(), packagePrefix) {
                 @Override
                 protected PrintWriter openOutputInner(File file) throws IOException {
                   files.add(file);

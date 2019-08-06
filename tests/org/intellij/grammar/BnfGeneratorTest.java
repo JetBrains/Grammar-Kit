@@ -51,7 +51,7 @@ public class BnfGeneratorTest extends BnfGeneratorTestCase {
   }
 
   private ParserGenerator newTestGenerator() {
-    return new ParserGenerator((BnfFileImpl)myFile, "", myFullDataPath) {
+    return new ParserGenerator((BnfFileImpl)myFile, "", myFullDataPath, "") {
 
       @Override
       protected PrintWriter openOutputInner(File file) throws IOException {

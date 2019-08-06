@@ -82,7 +82,7 @@ public class Main {
             }
 
             count ++;
-            new ParserGenerator((BnfFile) bnfFile, grammarDir.getAbsolutePath(), output.getAbsolutePath()).generate();
+            new ParserGenerator((BnfFile) bnfFile, grammarDir.getAbsolutePath(), output.getAbsolutePath(), "").generate();
             System.out.println(file.getName() + " parser generated to " + output.getCanonicalPath());
           }
         }

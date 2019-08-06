@@ -96,10 +96,11 @@ public class FileGeneratorUtil {
       throw new ProcessCanceledException();
     }
     try {
+      String packagePrefix = StringUtil.notNullize(fileIndex.getPackageNameByDirectory(virtualRoot));
       String genDirName = Options.GEN_DIR.get();
       boolean newGenRoot = !fileIndex.isInSourceContent(virtualRoot);
       final String relativePath = (hasPackage && newGenRoot ? genDirName + "/" + targetPackage :
-                                  hasPackage ? targetPackage :
+                                  hasPackage ? StringUtil.trimStart(StringUtil.trimStart(targetPackage, packagePrefix), ".") :
                                   newGenRoot ? genDirName : "").replace('.', '/');
       if (relativePath.isEmpty()) {
         return virtualRoot;

@@ -145,6 +145,7 @@ public class ParserGenerator {
   private final BnfFile myFile;
   private final String mySourcePath;
   private final String myOutputPath;
+  private final String myPackagePrefix;
   private final String myGrammarRoot;
   private final String myGrammarRootParser;
   private final String myParserUtilClass;
@@ -170,10 +171,14 @@ public class ParserGenerator {
   final Names N;
   final GenOptions G;
 
-  public ParserGenerator(BnfFile psiFile, String sourcePath, String outputPath) {
+  public ParserGenerator(@NotNull BnfFile psiFile,
+                         @NotNull String sourcePath,
+                         @NotNull String outputPath,
+                         @NotNull String packagePrefix) {
     myFile = psiFile;
     mySourcePath = sourcePath;
     myOutputPath = outputPath;
+    myPackagePrefix = packagePrefix;
 
     G = new GenOptions(myFile);
     N = G.names;
@@ -302,7 +307,8 @@ public class ParserGenerator {
   }
 
   private void openOutput(String className) throws IOException {
-    File file = new File(myOutputPath, className.replace('.', File.separatorChar) + ".java");
+    String classNameAdjusted = myPackagePrefix.isEmpty() ? className : StringUtil.trimStart(className, myPackagePrefix + ".");
+    File file = new File(myOutputPath, classNameAdjusted.replace('.', File.separatorChar) + ".java");
     myOut = openOutputInner(file);
   }
 

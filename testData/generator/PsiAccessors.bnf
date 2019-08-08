@@ -6,7 +6,7 @@
   implements="XComposite"
   parserUtilClass="PsiGenUtil"
   generateTokenAccessors("some-.*")=true
-  rootRule("expression")=true
+  extraRoot("expression")=true
 
   tokens=[
     MY_SOMETHING="something"

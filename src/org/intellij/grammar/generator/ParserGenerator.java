@@ -547,7 +547,6 @@ public class ParserGenerator {
     }
     else {
       imports.addAll(Arrays.asList(IELEMENTTYPE_CLASS,
-                                   IFILEELEMENTTYPE_CLASS,
                                    AST_NODE_CLASS,
                                    TOKEN_SET_CLASS,
                                    PSI_PARSER_CLASS,
@@ -637,25 +636,22 @@ public class ParserGenerator {
     out("boolean %s;", N.result);
     out("%s = adapt_builder_(%s, %s, this, %s);", N.builder, N.root, N.builder, generateExtendsSets ? "EXTENDS_SETS_" : null);
     out("Marker %s = enter_section_(%s, 0, _COLLAPSE_, null);", N.marker, N.builder);
-    out("if (%s instanceof IFileElementType) {", N.root);
-    out("%s = parse_root_(%s, %s, 0);", N.result, N.root, N.builder);
-    out("}");
-    out("else {");
-    if (extraRoots.isEmpty()) {
-      out("%s = false;", N.result);
-    }
-    else {
-      out("%s = parse_extra_roots_(%s, %s, 0);", N.result, N.root, N.builder);
-    }
-    out("}");
+    out("%s = parse_root_(%s, %s);", N.result, N.root, N.builder);
     out("exit_section_(%s, 0, %s, %s, %s, true, TRUE_CONDITION);", N.builder, N.marker, N.root, N.result);
     out("}");
-    if (!extraRoots.isEmpty()) {
-      newLine();
-      out("static boolean parse_extra_roots_(IElementType %s, PsiBuilder %s, int %s) {", N.root, N.builder, N.level);
+    newLine();
+    out("protected boolean parse_root_(IElementType %s, PsiBuilder %s) {", N.root, N.builder);
+    out("return parse_root_(%s, %s, 0);", N.root, N.builder);
+    out("}");
+    newLine();
+    out("static boolean parse_root_(IElementType %s, PsiBuilder %s, int %s) {", N.root, N.builder, N.level);
+    if (extraRoots.isEmpty()) {
+      out("return %s;", rootRule == null ? "false" : generateNodeCall(rootRule, null, myGrammarRoot).render(N));
+    }
+    else {
       boolean first = true;
+      out("boolean %s;", N.result);
       for (BnfRule rule : extraRoots) {
-        if (first) out("boolean %s;", N.result);
         String elementType = getElementType(rule);
         out("%sif (%s == %s) {", first ? "" : "else ", N.root, elementType);
         String nodeCall = generateNodeCall(ObjectUtils.notNull(rootRule, rule), null, rule.getName()).render(N);
@@ -663,25 +659,13 @@ public class ParserGenerator {
         out("}");
         if (first) first = false;
       }
-      if (first) {
-        out("return false;");
-      }
-      else {
-        out("else {");
-        out("%s = false;", N.result);
-        out("}");
-        out("return %s;", N.result);
-      }
+      out("else {");
+      out("%s = %s;", N.result, rootRule == null ? "false" : generateNodeCall(rootRule, null, myGrammarRoot).render(N));
       out("}");
+      out("return %s;", N.result);
     }
+    out("}");
     newLine();
-    {
-      String nodeCall = rootRule == null ? "false" : generateNodeCall(rootRule, null, myGrammarRoot).render(N);
-      out("protected boolean parse_root_(IElementType %s, PsiBuilder %s, int %s) {", N.root, N.builder, N.level);
-      out("return %s;", nodeCall);
-      out("}");
-      newLine();
-    }
     if (generateExtendsSets) {
       out("public static final TokenSet[] EXTENDS_SETS_ = new TokenSet[] {");
       StringBuilder sb = new StringBuilder();

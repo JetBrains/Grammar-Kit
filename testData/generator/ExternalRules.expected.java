@@ -7,7 +7,6 @@ import com.intellij.lang.PsiBuilder.Marker;
 import static generated.GeneratedTypes.*;
 import static org.intellij.grammar.parser.GeneratedParserUtilBase.*;
 import com.intellij.psi.tree.IElementType;
-import com.intellij.psi.tree.IFileElementType;
 import com.intellij.lang.ASTNode;
 import com.intellij.psi.tree.TokenSet;
 import com.intellij.lang.PsiParser;
@@ -25,28 +24,23 @@ public class ExternalRules implements PsiParser, LightPsiParser {
     boolean result_;
     builder_ = adapt_builder_(root_, builder_, this, EXTENDS_SETS_);
     Marker marker_ = enter_section_(builder_, 0, _COLLAPSE_, null);
-    if (root_ instanceof IFileElementType) {
-      result_ = parse_root_(root_, builder_, 0);
-    }
-    else {
-      result_ = parse_extra_roots_(root_, builder_, 0);
-    }
+    result_ = parse_root_(root_, builder_);
     exit_section_(builder_, 0, marker_, root_, result_, true, TRUE_CONDITION);
   }
 
-  static boolean parse_extra_roots_(IElementType root_, PsiBuilder builder_, int level_) {
+  protected boolean parse_root_(IElementType root_, PsiBuilder builder_) {
+    return parse_root_(root_, builder_, 0);
+  }
+
+  static boolean parse_root_(IElementType root_, PsiBuilder builder_, int level_) {
     boolean result_;
     if (root_ == EXTRA_ROOT) {
       result_ = ExternalRules2.extra_root(builder_, level_ + 1);
     }
     else {
-      result_ = false;
+      result_ = root(builder_, level_ + 1);
     }
     return result_;
-  }
-
-  protected boolean parse_root_(IElementType root_, PsiBuilder builder_, int level_) {
-    return root(builder_, level_ + 1);
   }
 
   public static final TokenSet[] EXTENDS_SETS_ = new TokenSet[] {

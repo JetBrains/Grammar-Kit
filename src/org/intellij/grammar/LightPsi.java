@@ -99,7 +99,7 @@ public class LightPsi {
       throw new RuntimeException(e);
     }
   }
-  
+
   public static void init() {
   }
 
@@ -262,11 +262,11 @@ public class LightPsi {
     }
 
     private static <T, S extends T> void registerApplicationService(Project project, Class<T> intfClass, Class<S> implClass) {
-      final MockApplicationEx application = (MockApplicationEx)ApplicationManager.getApplication();
+      MockApplication application = (MockApplication)ApplicationManager.getApplication();
       application.registerService(intfClass, implClass);
       Disposer.register(project, () -> application.getPicoContainer().unregisterComponent(intfClass.getName()));
     }
-    
+
     public static MockProject initAppAndProject(Disposable rootDisposable) {
       final MockApplicationEx application = initApplication(rootDisposable);
       ComponentAdapter component = application.getPicoContainer().getComponentAdapter(ProgressManager.class.getName());
@@ -330,9 +330,9 @@ public class LightPsi {
       container.registerComponentInstance(key, implementation);
     }
 
-    public static <T, KeyT> void addKeyedExtension(@NotNull KeyedExtensionCollector<T, KeyT> instance, 
-                                                   @NotNull KeyT key, 
-                                                   @NotNull T object, 
+    public static <T, KeyT> void addKeyedExtension(@NotNull KeyedExtensionCollector<T, KeyT> instance,
+                                                   @NotNull KeyT key,
+                                                   @NotNull T object,
                                                    @Nullable Disposable disposable) {
       instance.addExplicitExtension(key, object);
       if (disposable != null) {

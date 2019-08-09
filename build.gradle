@@ -21,7 +21,7 @@ buildscript {
 }
 
 plugins {
-  id 'org.jetbrains.intellij' version "0.4.8"
+  id 'org.jetbrains.intellij' version "0.4.10"
 }
 
 version = "${version}"
@@ -49,6 +49,7 @@ allprojects {
     plugins 'uml'
     updateSinceUntilBuild false
   }
+  buildSearchableOptions.enabled = false
 }
 
 test {

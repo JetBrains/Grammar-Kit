@@ -1,3 +1,10 @@
+2019.1.1
+
+* Generator: overridable parse_root_ and static parse_root_ methods
+* Generator: support package prefixes
+* JFlex: move generator output to Messages tool window
+* JFlex: suppress all inspections in injected fragments
+
 2019.1
 
 * Generator: "extraRoot" attribute to explicitly mark a rule as such

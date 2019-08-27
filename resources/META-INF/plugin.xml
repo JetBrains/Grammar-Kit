@@ -14,11 +14,10 @@
   <change-notes>
     <![CDATA[
     <ul>
-      <li>Generator: "extraRoot" attribute to explicitly mark a rule as such</li>
-      <li>Generator: method mixins with throws list</li>
-      <li>Generator: method mixins with generic parameters</li>
-      <li>RGH: cardinality calculation fix for meta rules usages</li>
-      <li>Plugin: switch to year-based versions from least "compatible IDE" versions</li>
+      <li>Generator: overridable parse_root_ and static parse_root_ methods</li>
+      <li>Generator: support package prefixes</li>
+      <li>JFlex: move generator output to Messages tool window</li>
+      <li>JFlex: suppress all inspections in injected fragments</li>
     </ul>
     <a href="https://github.com/JetBrains/Grammar-Kit/blob/master/CHANGELOG.md">Full change log...</a>
     ]]>

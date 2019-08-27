@@ -268,7 +268,7 @@ public class LightPsi {
     }
 
     public static MockProject initAppAndProject(Disposable rootDisposable) {
-      final MockApplicationEx application = initApplication(rootDisposable);
+      MockApplication application = initApplication(rootDisposable);
       ComponentAdapter component = application.getPicoContainer().getComponentAdapter(ProgressManager.class.getName());
       if (component == null) {
         application.getPicoContainer().registerComponent(new AbstractComponentAdapter(ProgressManager.class.getName(), Object.class) {
@@ -283,8 +283,8 @@ public class LightPsi {
         });
       }
       Extensions.registerAreaClass("IDEA_PROJECT", null);
-      MockProjectEx project = new MockProjectEx(rootDisposable);
       MutablePicoContainer appContainer = application.getPicoContainer();
+      MockProject project = new MockProject(appContainer, rootDisposable);
       registerComponentInstance(appContainer, MessageBus.class, MessageBusFactory.newMessageBus(application));
       final MockEditorFactory editorFactory = new MockEditorFactory();
       registerComponentInstance(appContainer, EditorFactory.class, editorFactory);
@@ -306,8 +306,8 @@ public class LightPsi {
       return project;
     }
 
-    public static MockApplicationEx initApplication(Disposable rootDisposable) {
-      MockApplicationEx instance = new MockApplicationEx(rootDisposable);
+    public static MockApplication initApplication(Disposable rootDisposable) {
+      MockApplication instance = new MockApplication(rootDisposable);
       ApplicationManager.setApplication(instance, FileTypeManager::getInstance, rootDisposable);
       instance.registerService(EncodingManager.class, EncodingManagerImpl.class);
       return instance;

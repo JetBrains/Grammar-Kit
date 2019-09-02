@@ -285,6 +285,15 @@ public class LightPsi {
       Extensions.registerAreaClass("IDEA_PROJECT", null);
       MutablePicoContainer appContainer = application.getPicoContainer();
       MockProject project = new MockProject(appContainer, rootDisposable);
+      try {
+        // Starting from 2019.3 MessageBusFactory is application service with MessageBusFactoryImpl implementation.
+        // So we have to register it too
+        Class messageBusFactoryImplClass = Class.forName("com.intellij.util.messages.impl.MessageBusFactoryImpl");
+        registerApplicationService(project, MessageBusFactory.class, messageBusFactoryImplClass);
+      }
+      catch (ClassNotFoundException e) {
+        System.out.println("MessageBusFactoryImpl class is not found");
+      }
       registerComponentInstance(appContainer, MessageBus.class, MessageBusFactory.newMessageBus(application));
       final MockEditorFactory editorFactory = new MockEditorFactory();
       registerComponentInstance(appContainer, EditorFactory.class, editorFactory);

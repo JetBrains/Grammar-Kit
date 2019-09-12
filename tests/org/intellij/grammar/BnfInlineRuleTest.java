@@ -2,14 +2,14 @@ package org.intellij.grammar;
 
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.util.PsiTreeUtil;
-import com.intellij.testFramework.fixtures.LightPlatformCodeInsightFixtureTestCase;
+import com.intellij.testFramework.fixtures.BasePlatformTestCase;
 import org.intellij.grammar.psi.BnfRule;
 import org.intellij.grammar.refactor.BnfInlineRuleProcessor;
 
 /**
  * @author gregsh
  */
-public class BnfInlineRuleTest extends LightPlatformCodeInsightFixtureTestCase {
+public class BnfInlineRuleTest extends BasePlatformTestCase {
 
   public void testTokenSimple() { doTest("inline ::= token; rule ::= inline", "rule ::= token"); }
   public void testTokenQuantified() { doTest("inline ::= token; rule ::= inline? inline+ inline*", "rule ::= token? token+ token*"); }

@@ -26,7 +26,6 @@ import com.intellij.psi.tree.IElementType;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.util.*;
 import com.intellij.util.containers.ContainerUtil;
-import com.intellij.util.containers.ContainerUtilRt;
 import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.generator.ParserGeneratorUtil;
 import org.intellij.grammar.psi.*;
@@ -210,7 +209,7 @@ public abstract class BnfStringImpl extends BnfExpressionImpl implements BnfStri
         }
       }
       if (knownAttribute == KnownAttribute.PIN) {
-        Set<String> visited = ContainerUtilRt.newHashSet();
+        Set<String> visited = new HashSet<String>();
         for (Object o : thisRule != null ? rules : ContainerUtil.newArrayList(result)) {
           BnfRule rule = (BnfRule)o;
           GrammarUtil.processExpressionNames(rule, ParserGeneratorUtil.getFuncName(rule), rule.getExpression(), (funcName, expression) -> {

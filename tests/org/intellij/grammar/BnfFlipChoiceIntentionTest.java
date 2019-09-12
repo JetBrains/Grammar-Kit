@@ -2,7 +2,7 @@ package org.intellij.grammar;
 
 import com.intellij.codeInsight.intention.IntentionAction;
 import com.intellij.openapi.command.WriteCommandAction;
-import com.intellij.testFramework.fixtures.LightPlatformCodeInsightFixtureTestCase;
+import com.intellij.testFramework.fixtures.BasePlatformTestCase;
 import org.intellij.grammar.intention.BnfFlipChoiceIntention;
 
 /**
@@ -12,21 +12,20 @@ import org.intellij.grammar.intention.BnfFlipChoiceIntention;
  *
  * @author Vadim Romansky
  */
-public class BnfFlipChoiceIntentionTest extends LightPlatformCodeInsightFixtureTestCase {
-  public void testCaretAtSeparator() throws Exception {doTest("rule ::= a <caret>| b","rule ::= b | a");}
-  public void testCaretBeforeSeparator() throws Exception {doTest("rule ::= a<caret> | b","rule ::= b | a");}
-  public void testCaretAfterSeparator() throws Exception {doTest("rule ::= a | <caret>b","rule ::= b | a");}
-  public void testCaretInComment() throws Exception {doTest("rule ::= a | /* <caret>*/ b","rule ::= b | /* */ a");}
-  public void testMultipleChoice() throws Exception {doTest("rule ::= a | b | c <caret>| d","rule ::= a | b | d | c");}
-  public void testComplexCase() throws Exception {doTest("rule ::= a | b | c c c <caret>| d [d d]","rule ::= a | b | d [d d] | c c c");}
+public class BnfFlipChoiceIntentionTest extends BasePlatformTestCase {
+  public void testCaretAtSeparator() {doTest("rule ::= a <caret>| b", "rule ::= b | a");}
+  public void testCaretBeforeSeparator() {doTest("rule ::= a<caret> | b","rule ::= b | a");}
+  public void testCaretAfterSeparator() {doTest("rule ::= a | <caret>b","rule ::= b | a");}
+  public void testCaretInComment() {doTest("rule ::= a | /* <caret>*/ b","rule ::= b | /* */ a");}
+  public void testMultipleChoice() {doTest("rule ::= a | b | c <caret>| d","rule ::= a | b | d | c");}
+  public void testComplexCase() {doTest("rule ::= a | b | c c c <caret>| d [d d]","rule ::= a | b | d [d d] | c c c");}
 
   private void doTest(/*@Language("BNF")*/ String text, /*@Language("BNF")*/ final String expected) {
     myFixture.configureByText("a.bnf", text);
     final IntentionAction action = new BnfFlipChoiceIntention();
     assertTrue("intention not available", action.isAvailable(getProject(), myFixture.getEditor(), myFixture.getFile()));
-    WriteCommandAction.runWriteCommandAction(getProject(), () -> {
-      action.invoke(getProject(), myFixture.getEditor(), myFixture.getFile());
-    });
+    WriteCommandAction.runWriteCommandAction(getProject(), () ->
+      action.invoke(getProject(), myFixture.getEditor(), myFixture.getFile()));
     assertSameLines(expected, myFixture.getFile().getText());
   }
 }

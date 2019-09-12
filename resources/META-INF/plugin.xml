@@ -1,30 +1,28 @@
 <idea-plugin url="https://github.com/JetBrains/Grammar-Kit">
   <id>org.jetbrains.idea.grammar</id>
-  <version>2019.2-SNAPSHOT</version>
+  <version>2019.3-SNAPSHOT</version>
   <vendor>JetBrains</vendor>
-  <idea-version since-build="191.7141"/>
+  <idea-version since-build="193.2956"/>
 
   <name>Grammar-Kit</name>
   <description>BNF Grammars and JFlex lexers editor. Readable parser/PSI code generator.</description>
 
   <depends optional="true" config-file="plugin-copyright.xml">com.intellij.copyright</depends>
-  <depends optional="true" config-file="plugin-java.xml">com.intellij.modules.java</depends>
+  <depends optional="true" config-file="plugin-java.xml">com.intellij.java</depends>
   <depends optional="true" config-file="plugin-uml.xml">com.intellij.diagram</depends>
 
   <change-notes>
     <![CDATA[
     <ul>
-      <li>Generator: overridable parse_root_ and static parse_root_ methods</li>
-      <li>Generator: support package prefixes</li>
-      <li>JFlex: move generator output to Messages tool window</li>
-      <li>JFlex: suppress all inspections in injected fragments</li>
+      <li>Compatibility: IntelliJ IDEA 2019.3</li>
     </ul>
     <a href="https://github.com/JetBrains/Grammar-Kit/blob/master/CHANGELOG.md">Full change log...</a>
     ]]>
   </change-notes>
 
   <extensions defaultExtensionNs="com.intellij">
-    <fileTypeFactory implementation="org.intellij.grammar.BnfFileTypeFactory"/>
+    <fileType name="BNF" implementationClass="org.intellij.grammar.BnfFileType" fieldName="INSTANCE" extensions="bnf" language="BNF"/>
+    <fileType name="BNF_LP" implementationClass="org.intellij.grammar.livePreview.LivePreviewFileType" fieldName="INSTANCE" language="BNF_LP"/>
     <lang.parserDefinition language="BNF" implementationClass="org.intellij.grammar.BnfParserDefinition"/>
     <lang.ast.factory language="BNF" implementationClass="org.intellij.grammar.BnfASTFactory"/>
     <annotator language="BNF" implementationClass="org.intellij.grammar.editor.BnfAnnotator"/>
@@ -101,7 +99,7 @@
     </intentionAction>
 
     <!--JFlex Support -->
-    <fileTypeFactory implementation="org.intellij.jflex.parser.JFlexFileTypeFactory"/>
+    <fileType name="JFlex" implementationClass="org.intellij.jflex.parser.JFlexFileType" fieldName="INSTANCE" extensions="flex" language="JFlex"/>
     <lang.parserDefinition language="JFlex" implementationClass="org.intellij.jflex.parser.JFlexParserDefinition"/>
     <lang.ast.factory language="JFlex" implementationClass="org.intellij.jflex.parser.JFlexASTFactory"/>
     <completion.contributor language="JFlex" implementationClass="org.intellij.jflex.editor.JFlexCompletionContributor" />

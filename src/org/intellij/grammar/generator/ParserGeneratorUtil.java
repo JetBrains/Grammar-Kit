@@ -443,7 +443,7 @@ public class ParserGeneratorUtil {
 
   @NotNull
   static JBIterable<BnfRule> getSuperRules(@NotNull BnfFile file, @Nullable BnfRule rule) {
-    abstract class Fun<S, T> extends JBIterable.Stateful<Fun> implements Function<S, T> { }
+    abstract class Fun<S, T> extends JBIterable.SFun<S, T> { }
     JBIterable<Object> result = JBIterable.generate(rule, new Fun<Object, Object>() {
       final Set<BnfRule> visited = new HashSet<>();
 
@@ -461,7 +461,7 @@ public class ParserGeneratorUtil {
         return ext == null && attr != null ? null : ext;
       }
     }).map(o -> o == ObjectUtils.NULL ? null : o);
-    return (JBIterable<BnfRule>)(JBIterable)result;
+    return (JBIterable<BnfRule>)(JBIterable<?>)result;
   }
 
   @Nullable

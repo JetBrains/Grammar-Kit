@@ -17,13 +17,13 @@
 package org.intellij.jflex;
 
 import com.intellij.codeInsight.completion.CompletionType;
-import com.intellij.testFramework.fixtures.LightCodeInsightFixtureTestCase;
+import com.intellij.testFramework.fixtures.LightJavaCodeInsightFixtureTestCase;
 import org.intellij.grammar.BnfCompletionTest;
 
 /**
  * @author gregsh
  */
-public class JFlexCompletionTest extends LightCodeInsightFixtureTestCase {
+public class JFlexCompletionTest extends LightJavaCodeInsightFixtureTestCase {
 
   public void testState1() { textAfter("%%\n%state FIRST\n%%<FIR<caret>", "%%\n%state FIRST\n%%<FIRST"); }
 

@@ -16,9 +16,9 @@
 package org.intellij.grammar;
 
 import com.intellij.openapi.actionSystem.IdeActions;
-import com.intellij.testFramework.fixtures.LightPlatformCodeInsightFixtureTestCase;
+import com.intellij.testFramework.fixtures.BasePlatformTestCase;
 
-public class BnfMoveLeftRightTest extends LightPlatformCodeInsightFixtureTestCase {
+public class BnfMoveLeftRightTest extends BasePlatformTestCase {
 
   public void testChoice() {
     doExpressionTestRightLeft("<caret>a  | b |c", "b  | <caret>a |c");

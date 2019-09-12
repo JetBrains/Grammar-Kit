@@ -40,7 +40,7 @@ public class LivePreviewFileType extends LanguageFileType {
   @NotNull
   @Override
   public String getName() {
-    return LP_DISPLAY_NAME;
+    return "BNF_LP";
   }
 
   @NotNull

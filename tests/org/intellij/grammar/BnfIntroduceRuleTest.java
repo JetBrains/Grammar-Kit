@@ -1,6 +1,6 @@
 package org.intellij.grammar;
 
-import com.intellij.testFramework.fixtures.LightPlatformCodeInsightFixtureTestCase;
+import com.intellij.testFramework.fixtures.BasePlatformTestCase;
 import com.intellij.util.Function;
 import com.intellij.util.containers.ContainerUtil;
 import org.intellij.grammar.psi.BnfExpression;
@@ -17,7 +17,7 @@ import java.util.List;
  *
  * @author Vadim Romansky
  */
-public class BnfIntroduceRuleTest extends LightPlatformCodeInsightFixtureTestCase {
+public class BnfIntroduceRuleTest extends BasePlatformTestCase {
 
   public void testTokenSimple() throws Exception { doTest("some ::= rule\nprivate rule ::= token", "some ::= <selection>token</selection>"); }
   public void testTokenQuantified() throws Exception { doTest("some ::= rule? rule+ rule*\nprivate rule ::= token", "some ::= token? token+ <selection>token</selection>*"); }

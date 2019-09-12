@@ -15,9 +15,9 @@
  */
 package org.intellij.grammar;
 
-import com.intellij.testFramework.fixtures.LightPlatformCodeInsightFixtureTestCase;
+import com.intellij.testFramework.fixtures.BasePlatformTestCase;
 
-public class BnfConvertOptExpressionIntentionTest extends LightPlatformCodeInsightFixtureTestCase {
+public class BnfConvertOptExpressionIntentionTest extends BasePlatformTestCase {
 
   public void testQuantifiedToParenOpt() {
     doExpressionTest("a?", "[a]");

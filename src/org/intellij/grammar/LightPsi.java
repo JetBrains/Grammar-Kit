@@ -16,71 +16,40 @@
 
 package org.intellij.grammar;
 
-import com.intellij.concurrency.AsyncFutureFactory;
-import com.intellij.concurrency.AsyncFutureFactoryImpl;
-import com.intellij.concurrency.JobLauncher;
-import com.intellij.concurrency.JobLauncherImpl;
-import com.intellij.ide.startup.impl.StartupManagerImpl;
+import com.intellij.core.CoreApplicationEnvironment;
+import com.intellij.core.CoreProjectEnvironment;
 import com.intellij.lang.*;
-import com.intellij.lang.impl.PsiBuilderFactoryImpl;
 import com.intellij.lang.impl.PsiBuilderImpl;
-import com.intellij.lang.injection.InjectedLanguageManager;
 import com.intellij.lexer.Lexer;
-import com.intellij.mock.*;
+import com.intellij.mock.MockApplication;
+import com.intellij.mock.MockLanguageFileType;
+import com.intellij.mock.MockProject;
 import com.intellij.openapi.Disposable;
-import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.editor.EditorFactory;
-import com.intellij.openapi.extensions.ExtensionPoint;
-import com.intellij.openapi.extensions.ExtensionPointName;
-import com.intellij.openapi.extensions.Extensions;
-import com.intellij.openapi.extensions.ExtensionsArea;
-import com.intellij.openapi.fileEditor.FileDocumentManager;
-import com.intellij.openapi.fileEditor.impl.FileDocumentManagerImpl;
-import com.intellij.openapi.fileTypes.FileTypeFactory;
-import com.intellij.openapi.fileTypes.FileTypeManager;
-import com.intellij.openapi.fileTypes.PlainTextLanguage;
-import com.intellij.openapi.progress.ProgressManager;
-import com.intellij.openapi.progress.impl.ProgressManagerImpl;
-import com.intellij.openapi.project.DumbService;
-import com.intellij.openapi.project.DumbServiceImpl;
-import com.intellij.openapi.project.Project;
-import com.intellij.openapi.startup.StartupManager;
+import com.intellij.openapi.extensions.impl.ExtensionsAreaImpl;
 import com.intellij.openapi.util.Disposer;
 import com.intellij.openapi.util.KeyedExtensionCollector;
 import com.intellij.openapi.util.io.FileUtil;
+import com.intellij.openapi.util.io.FileUtilRt;
 import com.intellij.openapi.util.text.StringUtil;
-import com.intellij.openapi.vfs.encoding.EncodingManager;
-import com.intellij.openapi.vfs.encoding.EncodingManagerImpl;
-import com.intellij.psi.*;
-import com.intellij.psi.impl.PsiCachedValuesFactory;
+import com.intellij.psi.PsiFile;
+import com.intellij.psi.PsiFileFactory;
+import com.intellij.psi.SyntaxTraverser;
 import com.intellij.psi.impl.PsiFileFactoryImpl;
 import com.intellij.psi.impl.search.CachesBasedRefSearcher;
 import com.intellij.psi.impl.search.PsiSearchHelperImpl;
 import com.intellij.psi.impl.source.CharTableImpl;
-import com.intellij.psi.impl.source.resolve.ResolveCache;
-import com.intellij.psi.impl.source.resolve.reference.ReferenceProvidersRegistry;
-import com.intellij.psi.impl.source.resolve.reference.ReferenceProvidersRegistryImpl;
-import com.intellij.psi.impl.source.tree.injected.InjectedLanguageManagerImpl;
 import com.intellij.psi.search.PsiSearchHelper;
-import com.intellij.psi.util.CachedValuesManager;
 import com.intellij.testFramework.LightVirtualFile;
-import com.intellij.util.CachedValuesManagerImpl;
-import com.intellij.util.messages.MessageBus;
-import com.intellij.util.messages.MessageBusFactory;
 import org.intellij.grammar.java.JavaHelper;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.picocontainer.*;
-import org.picocontainer.defaults.AbstractComponentAdapter;
 
 import java.io.*;
-import java.lang.reflect.Modifier;
 import java.util.jar.JarEntry;
 import java.util.jar.JarOutputStream;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static com.intellij.openapi.extensions.ExtensionPoint.Kind.BEAN_CLASS;
 import static com.intellij.openapi.extensions.ExtensionPoint.Kind.INTERFACE;
 
 /**
@@ -190,18 +159,23 @@ public class LightPsi {
 
   private static class MyParsing implements Disposable {
 
-    private final MockProject myProject;
+    final CoreApplicationEnvironment app;
+    final CoreProjectEnvironment proj;
 
     MyParsing() {
-      myProject = Init.initAppAndProject(this);
-      Init.initExtensions(myProject);
+      app = new CoreApplicationEnvironment(this);
+      proj = new CoreProjectEnvironment(this, app);
+      Init.initExtensions(app.getApplication(), getProject());
     }
 
     @Nullable
     protected PsiFile createFile(@NotNull String name, @NotNull String text, @NotNull ParserDefinition definition) {
       Language language = definition.getFileNodeType().getLanguage();
-      Init.addKeyedExtension(LanguageParserDefinitions.INSTANCE, language, definition, getProject());
-      return ((PsiFileFactoryImpl)PsiFileFactory.getInstance(myProject)).trySetupPsiForFile(new LightVirtualFile(name, language, text), language, true, false);
+      Init.addKeyedExtension(LanguageParserDefinitions.INSTANCE, language, definition, this);
+      MockLanguageFileType fileType = new MockLanguageFileType(language, FileUtilRt.getExtension(name));
+      app.registerFileType(fileType, fileType.getDefaultExtension());
+      LightVirtualFile file = new LightVirtualFile(name, fileType, text);
+      return ((PsiFileFactoryImpl)PsiFileFactory.getInstance(getProject())).trySetupPsiForFile(file, language, true, false);
     }
 
     @NotNull
@@ -222,7 +196,7 @@ public class LightPsi {
     }
 
     private MockProject getProject() {
-      return myProject;
+      return proj.getProject();
     }
 
     @Override
@@ -232,23 +206,16 @@ public class LightPsi {
 
   public static class Init {
 
-    public static void initExtensions(@NotNull MockProject project) {
-      ExtensionsArea rootArea = Extensions.getRootArea();
-      rootArea.registerExtensionPoint("com.intellij.referencesSearch", "com.intellij.util.QueryExecutor", INTERFACE);
-      rootArea.registerExtensionPoint("com.intellij.useScopeEnlarger", "com.intellij.psi.search.UseScopeEnlarger", INTERFACE);
-      rootArea.registerExtensionPoint("com.intellij.useScopeOptimizer", "com.intellij.psi.search.UseScopeOptimizer", INTERFACE);
-      rootArea.registerExtensionPoint("com.intellij.languageInjector", "com.intellij.psi.LanguageInjector", INTERFACE);
-      rootArea.registerExtensionPoint("com.intellij.codeInsight.containerProvider", "com.intellij.codeInsight.ContainerProvider", INTERFACE);
-      rootArea.getExtensionPoint("com.intellij.referencesSearch").registerExtension(new CachesBasedRefSearcher(), project);
-      ExtensionsArea projectArea = Extensions.getArea(project);
-      projectArea.registerExtensionPoint("com.intellij.multiHostInjector", "com.intellij.lang.injection.MultiHostInjector", INTERFACE);
-      registerApplicationService(project, PsiReferenceService.class, PsiReferenceServiceImpl.class);
-      registerApplicationService(project, JobLauncher.class, JobLauncherImpl.class);
-      registerApplicationService(project, AsyncFutureFactory.class, AsyncFutureFactoryImpl.class);
+    public static void initExtensions(MockApplication application, @NotNull MockProject project) {
+      ExtensionsAreaImpl ra = application.getExtensionArea();
+      ra.registerExtensionPoint("com.intellij.referencesSearch", "com.intellij.util.QueryExecutor", INTERFACE);
+      ra.getExtensionPoint("com.intellij.referencesSearch").registerExtension(new CachesBasedRefSearcher(), project);
+      ra.registerExtensionPoint("com.intellij.useScopeEnlarger", "com.intellij.psi.search.UseScopeEnlarger", INTERFACE);
+      ra.registerExtensionPoint("com.intellij.useScopeOptimizer", "com.intellij.psi.search.UseScopeOptimizer", INTERFACE);
+      ra.registerExtensionPoint("com.intellij.codeInsight.containerProvider", "com.intellij.codeInsight.ContainerProvider", INTERFACE);
+      ra.registerExtensionPoint("com.intellij.languageInjector", "com.intellij.psi.LanguageInjector", INTERFACE);
       project.registerService(PsiSearchHelper.class, PsiSearchHelperImpl.class);
-      project.registerService(DumbService.class, DumbServiceImpl.class);
-      project.registerService(ResolveCache.class, ResolveCache.class);
-      project.registerService(PsiFileFactory.class, PsiFileFactoryImpl.class);
+      project.getExtensionArea().registerExtensionPoint("com.intellij.multiHostInjector", "com.intellij.lang.injection.MultiHostInjector", INTERFACE);
       try {
         project.registerService(JavaHelper.class, new JavaHelper.AsmHelper());
       }
@@ -256,78 +223,6 @@ public class LightPsi {
         System.out.println("ASM not available, using reflection helper: " + e);
         project.registerService(JavaHelper.class, new JavaHelper.ReflectionHelper());
       }
-
-      project.registerService(InjectedLanguageManager.class, InjectedLanguageManagerImpl.class);
-      ProgressManager.getInstance();
-    }
-
-    private static <T, S extends T> void registerApplicationService(Project project, Class<T> intfClass, Class<S> implClass) {
-      MockApplication application = (MockApplication)ApplicationManager.getApplication();
-      application.registerService(intfClass, implClass);
-      Disposer.register(project, () -> application.getPicoContainer().unregisterComponent(intfClass.getName()));
-    }
-
-    public static MockProject initAppAndProject(Disposable rootDisposable) {
-      MockApplication application = initApplication(rootDisposable);
-      ComponentAdapter component = application.getPicoContainer().getComponentAdapter(ProgressManager.class.getName());
-      if (component == null) {
-        application.getPicoContainer().registerComponent(new AbstractComponentAdapter(ProgressManager.class.getName(), Object.class) {
-          @Override
-          public Object getComponentInstance(PicoContainer container) throws PicoInitializationException, PicoIntrospectionException {
-            return new ProgressManagerImpl();
-          }
-
-          @Override
-          public void verify(PicoContainer container) throws PicoIntrospectionException {
-          }
-        });
-      }
-      Extensions.registerAreaClass("IDEA_PROJECT", null);
-      MutablePicoContainer appContainer = application.getPicoContainer();
-      MockProject project = new MockProject(appContainer, rootDisposable);
-      registerComponentInstance(appContainer, MessageBus.class, MessageBusFactory.newMessageBus(application));
-      final MockEditorFactory editorFactory = new MockEditorFactory();
-      registerComponentInstance(appContainer, EditorFactory.class, editorFactory);
-      registerComponentInstance(
-        appContainer, FileDocumentManager.class,
-        new MockFileDocumentManagerImpl(editorFactory::createDocument, FileDocumentManagerImpl.HARD_REF_TO_DOCUMENT_KEY)
-      );
-      registerComponentInstance(appContainer, PsiDocumentManager.class, new MockPsiDocumentManager());
-      registerComponentInstance(appContainer, FileTypeManager.class, new MockFileTypeManager(new MockLanguageFileType(PlainTextLanguage.INSTANCE, "txt")));
-      registerApplicationService(project, PsiBuilderFactory.class, PsiBuilderFactoryImpl.class);
-      registerApplicationService(project, DefaultASTFactory.class, DefaultASTFactoryImpl.class);
-      registerApplicationService(project, ReferenceProvidersRegistry.class, ReferenceProvidersRegistryImpl.class);
-      project.registerService(PsiManager.class, MockPsiManager.class);
-      project.registerService(PsiFileFactory.class, PsiFileFactoryImpl.class);
-      project.registerService(StartupManager.class, StartupManagerImpl.class);
-      project.registerService(CachedValuesManager.class, new CachedValuesManagerImpl(project, new PsiCachedValuesFactory(PsiManager.getInstance(project))));
-      registerExtensionPoint(FileTypeFactory.FILE_TYPE_FACTORY_EP, FileTypeFactory.class);
-      registerExtensionPoint(MetaLanguage.EP_NAME, MetaLanguage.class);
-      return project;
-    }
-
-    public static MockApplication initApplication(Disposable rootDisposable) {
-      MockApplication instance = new MockApplication(rootDisposable);
-      ApplicationManager.setApplication(instance, FileTypeManager::getInstance, rootDisposable);
-      instance.registerService(EncodingManager.class, EncodingManagerImpl.class);
-      return instance;
-    }
-
-    public static <T> void registerExtensionPoint(ExtensionPointName<T> extensionPointName, final Class<T> aClass) {
-      registerExtensionPoint(Extensions.getRootArea(), extensionPointName, aClass);
-    }
-
-    public static <T> void registerExtensionPoint(ExtensionsArea area, ExtensionPointName<T> extensionPointName, Class<? extends T> aClass) {
-      final String name = extensionPointName.getName();
-      if (!area.hasExtensionPoint(name)) {
-        ExtensionPoint.Kind kind = aClass.isInterface() || (aClass.getModifiers() & Modifier.ABSTRACT) != 0 ? INTERFACE : BEAN_CLASS;
-        area.registerExtensionPoint(name, aClass.getName(), kind);
-      }
-    }
-
-    public static <T> void registerComponentInstance(MutablePicoContainer container, Class<T> key, T implementation) {
-      container.unregisterComponent(key);
-      container.registerComponentInstance(key, implementation);
     }
 
     public static <T, KeyT> void addKeyedExtension(@NotNull KeyedExtensionCollector<T, KeyT> instance,

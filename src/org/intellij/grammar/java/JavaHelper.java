@@ -984,7 +984,7 @@ public abstract class JavaHelper {
     int modifiers;
     List<String> annotations = ContainerUtil.newSmartList();
     List<String> types = ContainerUtil.newSmartList();
-    Map<Integer, List<String>> paramAnnotations = ContainerUtil.newHashMap(0);
+    Map<Integer, List<String>> paramAnnotations = new HashMap<>(0);
     List<TypeParameterInfo> generics = ContainerUtil.newSmartList();
     List<String> exceptions = ContainerUtil.newSmartList();
 

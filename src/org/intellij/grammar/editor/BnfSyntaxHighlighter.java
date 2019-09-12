@@ -94,6 +94,6 @@ class BnfSyntaxHighlighter extends SyntaxHighlighterBase {
     if (type == BNF_EXTERNAL_START || type == BNF_EXTERNAL_END) {
       return pack(ANGLES);
     }
-    return EMPTY;
+    return TextAttributesKey.EMPTY_ARRAY;
   }
 }

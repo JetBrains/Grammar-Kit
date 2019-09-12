@@ -107,7 +107,7 @@ public class JFlexSyntaxHighlighterFactory extends SyntaxHighlighterFactory {
       if (CHAR_CLASS_OPERATORS.contains(o)) return pack(CLASS_OP);
       if (o == FLEX_UNCLOSED || o == TokenType.BAD_CHARACTER) return pack(ILLEGAL);
       if (o.toString().startsWith("%")) return pack(OPTION);
-      return EMPTY;
+      return TextAttributesKey.EMPTY_ARRAY;
     }
   }
 }

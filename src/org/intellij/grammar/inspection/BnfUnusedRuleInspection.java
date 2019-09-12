@@ -17,7 +17,6 @@
 package org.intellij.grammar.inspection;
 
 import com.intellij.codeInspection.*;
-import com.intellij.openapi.util.Condition;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiReference;
@@ -35,7 +34,6 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Map;
 import java.util.Set;
 
-import static com.intellij.openapi.util.Condition.NOT_NULL;
 import static org.intellij.grammar.KnownAttribute.RECOVER_WHILE;
 import static org.intellij.grammar.KnownAttribute.getCompatibleAttribute;
 import static org.intellij.grammar.generator.ParserGeneratorUtil.findAttribute;
@@ -65,7 +63,7 @@ public class BnfUnusedRuleInspection extends LocalInspectionTool {
     ProblemsHolder holder = new ProblemsHolder(manager, file, isOnTheFly);
 
     //noinspection LimitedScopeInnerClass,EmptyClass
-    abstract class Cond<T> extends JBIterable.Stateful<Cond> implements Condition<T> { }
+    abstract class Cond<T> extends JBIterable.SCond<T> { }
 
     Set<BnfRule> roots = new THashSet<>();
     Set<BnfRule> inExpr = new THashSet<>();
@@ -74,8 +72,7 @@ public class BnfUnusedRuleInspection extends LocalInspectionTool {
     Map<BnfRule, String> inAttrs = new THashMap<>();
     
     bnfTraverserNoAttrs(myFile).traverse()
-      .map(BnfUnusedRuleInspection::resolveRule)
-      .filter(NOT_NULL)
+      .filterMap(BnfUnusedRuleInspection::resolveRule)
       .addAllTo(inExpr);
 
     roots.add(rules.first());

@@ -11,7 +11,7 @@ import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.vfs.newvfs.impl.VfsRootAccess;
 import com.intellij.psi.JavaPsiFacade;
-import com.intellij.testFramework.fixtures.LightPlatformCodeInsightFixtureTestCase;
+import com.intellij.testFramework.fixtures.BasePlatformTestCase;
 import org.intellij.grammar.inspection.*;
 
 import java.io.File;
@@ -20,7 +20,7 @@ import java.io.IOException;
 /**
  * @author gregsh
  */
-public class BnfHighlightingTest extends LightPlatformCodeInsightFixtureTestCase {
+public class BnfHighlightingTest extends BasePlatformTestCase {
   @Override
   protected String getTestDataPath() {
     return "testData/highlighting";

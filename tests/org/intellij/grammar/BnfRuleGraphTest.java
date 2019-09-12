@@ -19,7 +19,7 @@ package org.intellij.grammar;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.impl.source.tree.LeafPsiElement;
-import com.intellij.testFramework.fixtures.LightPlatformCodeInsightFixtureTestCase;
+import com.intellij.testFramework.fixtures.BasePlatformTestCase;
 import org.intellij.grammar.generator.ParserGeneratorUtil;
 import org.intellij.grammar.generator.RuleGraphHelper;
 import org.intellij.grammar.psi.BnfExpression;
@@ -33,7 +33,7 @@ import java.util.Map;
 /**
  * @author gregsh
  */
-public class BnfRuleGraphTest extends LightPlatformCodeInsightFixtureTestCase {
+public class BnfRuleGraphTest extends BasePlatformTestCase {
 
   public void testSOEInPrivateMeta() { doTest("private r ::= A <<r>> external A::=", "A+"); }
   public void testSOEInPrivate() { doTest("private r ::= A r external A::=", "A+"); }

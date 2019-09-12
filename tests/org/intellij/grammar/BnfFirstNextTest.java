@@ -1,6 +1,6 @@
 package org.intellij.grammar;
 
-import com.intellij.testFramework.fixtures.LightPlatformCodeInsightFixtureTestCase;
+import com.intellij.testFramework.fixtures.BasePlatformTestCase;
 import com.intellij.util.ArrayUtil;
 import org.intellij.grammar.analysis.BnfFirstNextAnalyzer;
 import org.intellij.grammar.psi.BnfFile;
@@ -15,7 +15,7 @@ import static org.intellij.grammar.analysis.BnfFirstNextAnalyzer.*;
 /**
  * @author gregsh
  */
-public class BnfFirstNextTest extends LightPlatformCodeInsightFixtureTestCase {
+public class BnfFirstNextTest extends BasePlatformTestCase {
 
   @Override
   protected void setUp() throws Exception {

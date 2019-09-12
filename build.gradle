@@ -35,18 +35,21 @@ allprojects {
   sourceSets {
     main {
       java.srcDirs 'src', 'gen'
-      java.exclude '**/grammar/debugger/**'
       resources.srcDirs 'resources'
     }
     test {
       java.srcDir 'tests'
     }
   }
+  apply plugin: 'idea'
+  idea.module {
+    generatedSourceDirs += file('gen')
+  }
   apply plugin: 'org.jetbrains.intellij'
   intellij {
     version ideaVersion
     type 'IU'
-    plugins 'uml'
+    plugins 'uml', 'java'
     updateSinceUntilBuild false
   }
   buildSearchableOptions.enabled = false

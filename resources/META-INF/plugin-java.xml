@@ -3,6 +3,7 @@
   <extensions defaultExtensionNs="com.intellij">
     <projectService serviceInterface="org.intellij.grammar.java.JavaHelper" serviceImplementation="org.intellij.grammar.java.JavaHelper$PsiHelper"/>
     <referencesSearch implementation="org.intellij.jflex.psi.impl.JFlexStateUsageSearcher"/>
+    <regExpLanguageHost forClass="org.intellij.grammar.psi.impl.BnfStringImpl" implementationClass="com.intellij.psi.impl.JavaRegExpHost"/>
   </extensions>
   <actions>
     <action id="grammar.Generate.ParserUtil" class="org.intellij.grammar.actions.BnfGenerateParserUtilAction" text="Generate Parser Util">

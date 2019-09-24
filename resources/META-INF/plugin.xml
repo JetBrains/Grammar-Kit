@@ -2,7 +2,7 @@
   <id>org.jetbrains.idea.grammar</id>
   <version>2019.3-SNAPSHOT</version>
   <vendor>JetBrains</vendor>
-  <idea-version since-build="193.2956"/>
+  <idea-version since-build="193.3519"/>
 
   <name>Grammar-Kit</name>
   <description>BNF Grammars and JFlex lexers editor. Readable parser/PSI code generator.</description>

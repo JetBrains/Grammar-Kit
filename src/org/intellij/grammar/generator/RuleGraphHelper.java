@@ -708,7 +708,7 @@ public class RuleGraphHelper {
 
   private boolean collectSynonymsAndCollapseAlternatives(Map<BnfRule, BnfRule> rulesAndAlts) {
     boolean hasSynonyms = false;
-    for (Map.Entry<BnfRule, BnfRule> e : ContainerUtil.newArrayList(rulesAndAlts.entrySet())) {
+    for (Map.Entry<BnfRule, BnfRule> e : new ArrayList<>(rulesAndAlts.entrySet())) {
       BnfRule rule = e.getKey();
       e.setValue(getSynonymTargetOrSelf(rule));
       hasSynonyms |= rule != e.getValue();

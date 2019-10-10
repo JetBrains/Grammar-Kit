@@ -1,6 +1,6 @@
 <idea-plugin url="https://github.com/JetBrains/Grammar-Kit">
   <id>org.jetbrains.idea.grammar</id>
-  <version>2019.3-SNAPSHOT</version>
+  <version>2019.3.1-SNAPSHOT</version>
   <vendor>JetBrains</vendor>
   <idea-version since-build="193.3519"/>
 
@@ -14,7 +14,7 @@
   <change-notes>
     <![CDATA[
     <ul>
-      <li>Compatibility: IntelliJ IDEA 2019.3</li>
+      <li>Compatibility: IntelliJ IDEA 2019.3 EAP</li>
     </ul>
     <a href="https://github.com/JetBrains/Grammar-Kit/blob/master/CHANGELOG.md">Full change log...</a>
     ]]>

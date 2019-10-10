@@ -1,3 +1,7 @@
+2019.3
+
+* Compatibility: IntelliJ IDEA 2019.3 EAP
+
 2019.1.1
 
 * Generator: overridable parse_root_ and static parse_root_ methods

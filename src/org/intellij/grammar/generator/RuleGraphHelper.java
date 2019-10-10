@@ -25,7 +25,6 @@ import com.intellij.psi.tree.IElementType;
 import com.intellij.psi.util.*;
 import com.intellij.util.CommonProcessors;
 import com.intellij.util.ObjectUtils;
-import com.intellij.util.containers.ContainerUtil;
 import com.intellij.util.containers.MultiMap;
 import gnu.trove.THashMap;
 import gnu.trove.THashSet;
@@ -171,7 +170,7 @@ public class RuleGraphHelper {
       boolean changed = false;
       for (BnfRule superRule : ruleExtendsMap.keySet()) {
         final Collection<BnfRule> rules = ruleExtendsMap.get(superRule);
-        for (BnfRule rule : ContainerUtil.newArrayList(rules)) {
+        for (BnfRule rule : new ArrayList<>(rules)) {
           changed |= rules.addAll(ruleExtendsMap.get(rule));
         }
       }
@@ -544,7 +543,7 @@ public class RuleGraphHelper {
       return map;
     }
     else if (type == BnfTypes.BNF_SEQUENCE || type == BnfTypes.BNF_EXPRESSION || type == BnfTypes.BNF_REFERENCE_OR_TOKEN) {
-      list = ContainerUtil.newArrayList(compactInheritors(rule, list));
+      list = new ArrayList<>(compactInheritors(rule, list));
       list.removeIf(Map::isEmpty);
       Map<PsiElement, Cardinality> map = psiMap();
       for (Map<PsiElement, Cardinality> m : list) {
@@ -685,7 +684,9 @@ public class RuleGraphHelper {
     if (rulesAndAlts.size() < 2) {
       return !hasSynonyms ? mapList : replaceRulesInMaps(mapList, rulesAndAlts, externalMap);
     }
-    Set<BnfRule> allRules = ContainerUtil.newLinkedHashSet(ContainerUtil.concat(rulesAndAlts.keySet(), rulesAndAlts.values()));
+    Set<BnfRule> allRules = new LinkedHashSet<>();
+    allRules.addAll(rulesAndAlts.keySet());
+    allRules.addAll(rulesAndAlts.values());
 
     List<Map.Entry<BnfRule, Collection<BnfRule>>> applicableSupers = new ArrayList<>();
     for (Map.Entry<BnfRule, Collection<BnfRule>> e : myRuleExtendsMap.entrySet()) {
@@ -708,7 +709,7 @@ public class RuleGraphHelper {
 
   private boolean collectSynonymsAndCollapseAlternatives(Map<BnfRule, BnfRule> rulesAndAlts) {
     boolean hasSynonyms = false;
-    for (Map.Entry<BnfRule, BnfRule> e : ContainerUtil.newArrayList(rulesAndAlts.entrySet())) {
+    for (Map.Entry<BnfRule, BnfRule> e : new ArrayList<>(rulesAndAlts.entrySet())) {
       BnfRule rule = e.getKey();
       e.setValue(getSynonymTargetOrSelf(rule));
       hasSynonyms |= rule != e.getValue();

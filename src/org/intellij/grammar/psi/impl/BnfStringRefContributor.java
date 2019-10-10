@@ -19,13 +19,14 @@ package org.intellij.grammar.psi.impl;
 import com.intellij.patterns.PatternCondition;
 import com.intellij.psi.*;
 import com.intellij.util.ProcessingContext;
-import com.intellij.util.containers.ContainerUtil;
 import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.java.JavaHelper;
 import org.intellij.grammar.psi.BnfAttr;
 import org.intellij.grammar.psi.BnfAttrPattern;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Set;
 
 import static com.intellij.patterns.PlatformPatterns.*;
@@ -36,11 +37,9 @@ import static org.intellij.grammar.KnownAttribute.*;
  */
 public class BnfStringRefContributor extends PsiReferenceContributor {
 
-  private static final Set<KnownAttribute> RULE_ATTRIBUTES = ContainerUtil.newHashSet(
-    EXTENDS, IMPLEMENTS, RECOVER_WHILE, NAME);
+  private static final Set<KnownAttribute<?>> RULE_ATTRIBUTES = new HashSet<>(Arrays.asList(EXTENDS, IMPLEMENTS, RECOVER_WHILE, NAME));
 
-  private static final Set<KnownAttribute> JAVA_CLASS_ATTRIBUTES = ContainerUtil.newHashSet(
-    EXTENDS, IMPLEMENTS, MIXIN);
+  private static final Set<KnownAttribute<?>> JAVA_CLASS_ATTRIBUTES = new HashSet<>(Arrays.asList(EXTENDS, IMPLEMENTS, MIXIN));
 
   @Override
   public void registerReferenceProviders(@NotNull PsiReferenceRegistrar registrar) {
@@ -82,7 +81,7 @@ public class BnfStringRefContributor extends PsiReferenceContributor {
       });
   }
 
-  private static PatternCondition<String> oneOf(final Set<KnownAttribute> attributes) {
+  private static PatternCondition<String> oneOf(Set<KnownAttribute<?>> attributes) {
     return new PatternCondition<String>("oneOf") {
       @Override
       public boolean accepts(@NotNull String s, ProcessingContext context) {

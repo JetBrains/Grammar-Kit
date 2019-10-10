@@ -25,7 +25,6 @@ import com.intellij.psi.impl.source.resolve.ResolveCache;
 import com.intellij.psi.tree.IElementType;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.util.*;
-import com.intellij.util.containers.ContainerUtil;
 import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.generator.ParserGeneratorUtil;
 import org.intellij.grammar.psi.*;
@@ -86,7 +85,7 @@ public abstract class BnfStringImpl extends BnfExpressionImpl implements BnfStri
   public PsiReference[] getReferences() {
     // performance: do not run injectors
     // return PsiReferenceService.getService().getContributedReferences(this);
-    List<PsiReference> result = ContainerUtil.newSmartList();
+    List<PsiReference> result = new SmartList<>();
     for (Map.Entry<ElementPattern<? extends PsiElement>, PsiReferenceProvider> e : ourProviders.entrySet()) {
       ProcessingContext context = new ProcessingContext();
       if (e.getKey().accepts(this, context)) {
@@ -129,13 +128,14 @@ public abstract class BnfStringImpl extends BnfExpressionImpl implements BnfStri
       super(element, null);
     }
 
+    @NotNull
     @Override
     public TextRange getRangeInElement() {
       return BnfStringManipulator.getStringTokenRange(getElement());
     }
 
     @Override
-    public PsiElement handleElementRename(String newElementName) throws IncorrectOperationException {
+    public PsiElement handleElementRename(@NotNull String newElementName) throws IncorrectOperationException {
       BnfStringImpl element = getElement();
       PsiElement string = element.getString();
       char quote = string.getText().charAt(0);
@@ -151,13 +151,14 @@ public abstract class BnfStringImpl extends BnfExpressionImpl implements BnfStri
       super(element);
     }
 
+    @NotNull
     @Override
     public TextRange getRangeInElement() {
       return BnfStringManipulator.getStringTokenRange(getElement());
     }
 
     @Override
-    public boolean isReferenceTo(PsiElement element) {
+    public boolean isReferenceTo(@NotNull PsiElement element) {
       return matchesElement(getElement(), element) && super.isReferenceTo(element);
     }
 
@@ -178,7 +179,7 @@ public abstract class BnfStringImpl extends BnfExpressionImpl implements BnfStri
       BnfRule thisRule = PsiTreeUtil.getParentOfType(thisAttrs, BnfRule.class);
 
       String thisAttrName = thisAttr.getName();
-      KnownAttribute knownAttribute = KnownAttribute.getAttribute(thisAttrName);
+      KnownAttribute<?> knownAttribute = KnownAttribute.getAttribute(thisAttrName);
 
       // collect priority patterns
       List<Pattern> otherPatterns = new SmartList<>();
@@ -209,8 +210,8 @@ public abstract class BnfStringImpl extends BnfExpressionImpl implements BnfStri
         }
       }
       if (knownAttribute == KnownAttribute.PIN) {
-        Set<String> visited = new HashSet<String>();
-        for (Object o : thisRule != null ? rules : ContainerUtil.newArrayList(result)) {
+        Set<String> visited = new HashSet<>();
+        for (Object o : thisRule != null ? rules : new ArrayList<>(result)) {
           BnfRule rule = (BnfRule)o;
           GrammarUtil.processExpressionNames(rule, ParserGeneratorUtil.getFuncName(rule), rule.getExpression(), (funcName, expression) -> {
             if (!(expression instanceof BnfSequence)) return true;
@@ -228,7 +229,7 @@ public abstract class BnfStringImpl extends BnfExpressionImpl implements BnfStri
     }
 
     @Override
-    public PsiElement handleElementRename(String newElementName) throws IncorrectOperationException {
+    public PsiElement handleElementRename(@NotNull String newElementName) throws IncorrectOperationException {
       // do not rename pattern
       return myElement;
     }
@@ -245,9 +246,7 @@ public abstract class BnfStringImpl extends BnfExpressionImpl implements BnfStri
     if (e2 instanceof PsiNamedElement) {
       String name = ((PsiNamedElement)e2).getName();
       Pattern pattern = getPattern(e1);
-      if (name == null || pattern == null || !pattern.matcher(name).matches()) {
-        return false;
-      }
+      return name != null && pattern != null && pattern.matcher(name).matches();
     }
     return true;
   }

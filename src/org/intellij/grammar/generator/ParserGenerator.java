@@ -25,10 +25,7 @@ import com.intellij.psi.CommonClassNames;
 import com.intellij.psi.NavigatablePsiElement;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.tree.IElementType;
-import com.intellij.util.ArrayUtil;
-import com.intellij.util.Function;
-import com.intellij.util.Functions;
-import com.intellij.util.ObjectUtils;
+import com.intellij.util.*;
 import com.intellij.util.containers.*;
 import gnu.trove.THashMap;
 import gnu.trove.THashSet;
@@ -384,7 +381,7 @@ public class ParserGenerator {
         sortedCompositeTypes.put(elementType, rule);
       }
       sortedPsiRules.put(rule.getName(), rule);
-      info.superInterfaces = ContainerUtil.newLinkedHashSet(getSuperInterfaceNames(myFile, rule, myIntfClassFormat));
+      info.superInterfaces = new LinkedHashSet<>(getSuperInterfaceNames(myFile, rule, myIntfClassFormat));
     }
     if (G.generatePsi) {
       calcRealSuperClasses(sortedPsiRules);
@@ -437,7 +434,7 @@ public class ParserGenerator {
     String superIntf = ObjectUtils.notNull(ContainerUtil.getFirstItem(getRootAttribute(myFile, KnownAttribute.IMPLEMENTS)),
                                            KnownAttribute.IMPLEMENTS.getDefaultValue().get(0)).second;
     String shortSuperIntf = StringUtil.getShortName(superIntf);
-    List<String> imports = ContainerUtil.newArrayList("org.jetbrains.annotations.*", PSI_ELEMENT_VISITOR_CLASS, superIntf);
+    List<String> imports = new ArrayList<>(Arrays.asList("org.jetbrains.annotations.*", PSI_ELEMENT_VISITOR_CLASS, superIntf));
     MultiMap<String, String> supers = MultiMap.createSmart();
     for (BnfRule rule : sortedRules.values()) {
       supers.putValues(rule.getName(), getSuperInterfaceNames(myFile, rule, myIntfClassFormat));
@@ -696,7 +693,7 @@ public class ParserGenerator {
         String elementType = info.isFake && !info.isInElementType ||
                              getSynonymTargetOrSelf(rule) != rule ? null : info.elementType;
         if (StringUtil.isEmpty(elementType)) continue;
-        if (set == null) set = ContainerUtil.newTreeSet();
+        if (set == null) set = new TreeSet<>();
         set.add(elementType);
       }
       if (set != null && set.size() > 1) result.add(set);
@@ -734,7 +731,8 @@ public class ParserGenerator {
       if (includedPackages.contains(info.intfPackage)) includedClasses.add(StringUtil.getShortName(info.intfClass));
       if (includedPackages.contains(info.implPackage)) includedClasses.add(StringUtil.getShortName(info.implClass));
     }
-    Set<String> realImports = ContainerUtil.newLinkedHashSet(packageName + ".*");
+    Set<String> realImports = new LinkedHashSet<>();
+    realImports.add(packageName + ".*");
     Function<String, String> shortener = newClassNameShortener(realImports);
     for (String item : imports) {
       for (String s : StringUtil.tokenize(item.replaceAll("\\s+", " "), TYPE_TEXT_SEPARATORS)) {
@@ -909,7 +907,7 @@ public class ParserGenerator {
       out("boolean %s%s%s;", N.result, children.isEmpty() ? " = true" : "", pinned ? format(", %s", N.pinned) : "");
     }
 
-    List<String> modifierList = ContainerUtil.newSmartList();
+    List<String> modifierList = new SmartList<>();
     if (canCollapse) modifierList.add("_COLLAPSE_");
     if (isLeftInner) modifierList.add("_LEFT_INNER_");
     else if (isLeft) modifierList.add("_LEFT_");
@@ -1252,7 +1250,7 @@ public class ParserGenerator {
     final Collection<String> tokenNames = getTokenNames(myFile, children, 2);
     if (tokenNames == null) return null;
 
-    final Set<String> tokens = ContainerUtil.newTreeSet();
+    final Set<String> tokens = new TreeSet<>();
     for (String tokenName : tokenNames) {
       if (!mySimpleTokens.containsKey(tokenName) && !mySimpleTokens.containsValue(tokenName)) {
         mySimpleTokens.put(tokenName, null);
@@ -1831,7 +1829,7 @@ public class ParserGenerator {
   }
 
   private void generatePsiClassMethods(BnfRule rule, RuleInfo info, boolean intf) {
-    Set<String> visited = ContainerUtil.newTreeSet();
+    Set<String> visited = new TreeSet<>();
     boolean mixedAST = info.mixedAST;
     for (RuleMethodsHelper.MethodInfo methodInfo : myRulesMethodsHelper.getFor(rule)) {
       if (StringUtil.isEmpty(methodInfo.name)) continue;
@@ -1876,7 +1874,7 @@ public class ParserGenerator {
   }
 
   public Collection<String> getRuleMethodTypesToImport(BnfRule rule) {
-    Set<String> result = ContainerUtil.newTreeSet();
+    Set<String> result = new TreeSet<>();
 
     Collection<RuleMethodsHelper.MethodInfo> methods = myRulesMethodsHelper.getFor(rule);
     for (RuleMethodsHelper.MethodInfo methodInfo : methods) {

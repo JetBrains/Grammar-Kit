@@ -18,6 +18,7 @@ package org.intellij.grammar.generator;
 
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.psi.util.PsiTreeUtil;
+import com.intellij.util.SmartList;
 import com.intellij.util.containers.ContainerUtil;
 import gnu.trove.THashSet;
 import org.intellij.grammar.KnownAttribute;
@@ -207,7 +208,7 @@ public class ExpressionGeneratorHelper {
 
   @NotNull
   public static List<OperatorInfo> findOperators(Collection<OperatorInfo> list, OperatorType... types) {
-    List<OperatorInfo> result = ContainerUtil.newSmartList();
+    List<OperatorInfo> result = new SmartList<>();
     List<OperatorType> typeList = Arrays.asList(types);
     for (OperatorInfo o : list) {
       if (ContainerUtil.find(typeList, o.type) != null) {

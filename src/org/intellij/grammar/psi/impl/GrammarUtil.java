@@ -24,7 +24,7 @@ import com.intellij.psi.SyntaxTraverser;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.util.PairProcessor;
 import com.intellij.util.Processor;
-import com.intellij.util.containers.ContainerUtil;
+import com.intellij.util.SmartList;
 import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.generator.ParserGeneratorUtil;
 import org.intellij.grammar.parser.GeneratedParserUtilBase;
@@ -101,7 +101,7 @@ public class GrammarUtil {
 
   public static List<String> collectExtraArguments(BnfRule rule, BnfExpression expression) {
     if (!ParserGeneratorUtil.Rule.isMeta(rule) && !ParserGeneratorUtil.Rule.isExternal(rule)) return Collections.emptyList();
-    List<String> result = ContainerUtil.newSmartList();
+    List<String> result = new SmartList<>();
     for (BnfExternalExpression o : bnfTraverserNoAttrs(expression).filter(BnfExternalExpression.class)) {
       if (o.getArguments().isEmpty()) {
         String text = "<<" + o.getRefElement().getText() + ">>";

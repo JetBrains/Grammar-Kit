@@ -36,6 +36,7 @@ import com.intellij.util.containers.ContainerUtil;
 import com.intellij.util.containers.JBIterable;
 import com.intellij.util.containers.JBTreeTraverser;
 import com.intellij.util.containers.TreeTraversal;
+import gnu.trove.THashSet;
 import gnu.trove.TObjectHashingStrategy;
 import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.actions.GenerateAction;
@@ -63,13 +64,13 @@ public class ParserGeneratorUtil {
   private static final Object NULL = new Object();
   private static final BnfExpression NULL_ATTR = new FakeBnfExpression("NULL");
   private static final String RESERVED_SUFFIX = "_$";
-  private static final Set<String> JAVA_RESERVED = ContainerUtil.newTroveSet(
+  private static final Set<String> JAVA_RESERVED = new THashSet<>(Arrays.asList(
     "abstract", "assert", "boolean", "break", "byte", "case", "catch", "char", "class",
     "const", "default", "do", "double", "else", "enum", "extends", "false", "final", "finally",
     "float", "for", "goto", "if", "implements", "import", "instanceof", "int", "interface", "long",
     "native", "new", "null", "package", "private", "protected", "public", "return", "short", "static",
     "strictfp", "super", "switch", "synchronized", "this", "throw", "throws", "transient", "true",
-    "try", "void", "volatile", "while", "continue");
+    "try", "void", "volatile", "while", "continue"));
 
   @NotNull
   public static String getRawClassName(@NotNull String name) {
@@ -395,7 +396,7 @@ public class ParserGeneratorUtil {
 
     // filter out less specific methods
     // todo move to JavaHelper
-    List<NavigatablePsiElement> result = ContainerUtil.newArrayList(methods);
+    List<NavigatablePsiElement> result = new ArrayList<>(methods);
     Map<String, NavigatablePsiElement> prototypes = new LinkedHashMap<>();
     for (NavigatablePsiElement m2 : methods) {
       List<String> types = helper.getMethodTypes(m2);
@@ -570,7 +571,7 @@ public class ParserGeneratorUtil {
     Set<BnfRule> rulesSet = new HashSet<>(rules);
     return new JBTreeTraverser<BnfRule>(
       rule -> JBIterable.from(ruleGraph.getSubRules(rule)).filter(rulesSet::contains))
-      .withRoots(ContainerUtil.reverse(ContainerUtil.newArrayList(rules)))
+      .withRoots(ContainerUtil.reverse(new ArrayList<>(rules)))
       .withTraversal(TreeTraversal.POST_ORDER_DFS)
       .unique()
       .toList();

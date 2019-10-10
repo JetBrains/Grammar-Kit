@@ -22,7 +22,6 @@ import com.intellij.lexer.Lexer;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.psi.tree.IElementType;
-import com.intellij.util.NullableFunction;
 import com.intellij.util.containers.ContainerUtil;
 import com.intellij.util.containers.MultiMap;
 import gnu.trove.THashMap;
@@ -653,8 +652,8 @@ public class LivePreviewParser implements PsiParser {
 
   private static Iterable<ExpressionHelper.OperatorInfo> filter(final Map<String, List<ExpressionHelper.OperatorInfo>> opCalls,
                                                                 final ExpressionHelper.OperatorType... operatorTypes) {
-    return ContainerUtil.mapNotNull(opCalls.keySet(),
-                                    (NullableFunction<String, ExpressionHelper.OperatorInfo>)opCall -> ContainerUtil.getFirstItem(ExpressionGeneratorHelper.findOperators(opCalls.get(opCall), operatorTypes)));
+    return ContainerUtil.mapNotNull(opCalls.keySet(), opCall ->
+      ContainerUtil.getFirstItem(ExpressionGeneratorHelper.findOperators(opCalls.get(opCall), operatorTypes)));
   }
 
   /**

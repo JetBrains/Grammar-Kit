@@ -31,8 +31,8 @@ import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.util.ArrayUtil;
 import com.intellij.util.IncorrectOperationException;
 import com.intellij.util.ObjectUtils;
+import com.intellij.util.SmartList;
 import com.intellij.util.containers.ContainerUtil;
-import com.intellij.util.containers.ContainerUtilRt;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.org.objectweb.asm.*;
@@ -308,7 +308,7 @@ public abstract class JavaHelper {
     @NotNull
     private static List<String> getAnnotationsInner(PsiModifierListOwner element) {
       PsiModifierList modifierList = element.getModifierList();
-      if (modifierList == null) return ContainerUtilRt.emptyList();
+      if (modifierList == null) return Collections.emptyList();
       List<String> result = new ArrayList<>();
       for (PsiAnnotation annotation : modifierList.getAnnotations()) {
         if (annotation.getParameterList().getAttributes().length > 0) continue;
@@ -716,7 +716,7 @@ public abstract class JavaHelper {
                 if (annoParamCounter == 0) {
                   List<String> list = m.paramAnnotations.get(parameter);
                   if (list == null) {
-                    m.paramAnnotations.put(parameter, list = ContainerUtil.newSmartList());
+                    m.paramAnnotations.put(parameter, list = new SmartList<>());
                   }
                   list.add(fixClassName(desc.substring(1, desc.length() - 1)));
                 }
@@ -971,10 +971,10 @@ public abstract class JavaHelper {
     String name;
     String superClass;
     int modifiers;
-    List<String> typeParameters= ContainerUtil.newSmartList();
-    List<String> interfaces = ContainerUtil.newSmartList();
-    List<String> annotations = ContainerUtil.newSmartList();
-    List<MethodInfo> methods = ContainerUtil.newSmartList();
+    List<String> typeParameters= new SmartList<>();
+    List<String> interfaces = new SmartList<>();
+    List<String> annotations = new SmartList<>();
+    List<MethodInfo> methods = new SmartList<>();
   }
 
   private static class MethodInfo {
@@ -982,11 +982,11 @@ public abstract class JavaHelper {
     String name;
     String declaringClass;
     int modifiers;
-    List<String> annotations = ContainerUtil.newSmartList();
-    List<String> types = ContainerUtil.newSmartList();
+    List<String> annotations = new SmartList<>();
+    List<String> types = new SmartList<>();
     Map<Integer, List<String>> paramAnnotations = new HashMap<>(0);
-    List<TypeParameterInfo> generics = ContainerUtil.newSmartList();
-    List<String> exceptions = ContainerUtil.newSmartList();
+    List<TypeParameterInfo> generics = new SmartList<>();
+    List<String> exceptions = new SmartList<>();
 
     @Override
     public String toString() {
@@ -1013,7 +1013,7 @@ public abstract class JavaHelper {
 
     public TypeParameterInfo(@NotNull String name) {
       this.name = name;
-      this.extendsList = ContainerUtil.newSmartList();
+      this.extendsList = new SmartList<>();
     }
 
     public String getName() {

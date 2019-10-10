@@ -4,8 +4,9 @@ import com.intellij.codeInsight.completion.CompletionType;
 import com.intellij.testFramework.UsefulTestCase;
 import com.intellij.testFramework.fixtures.CodeInsightTestFixture;
 import com.intellij.testFramework.fixtures.JavaCodeInsightFixtureTestCase;
-import com.intellij.util.containers.ContainerUtil;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
@@ -77,7 +78,7 @@ public class BnfCompletionTest extends JavaCodeInsightFixtureTestCase {
     fixture.complete(type, 1);
     List<String> stringList = fixture.getLookupElementStrings();
     assertNotNull(stringList);
-    Collection<String> varList = ContainerUtil.newArrayList(variants);
+    Collection<String> varList = new ArrayList<>(Arrays.asList(variants));
     if (checkType == EQUALS) {
       UsefulTestCase.assertSameElements(stringList, variants);
     }

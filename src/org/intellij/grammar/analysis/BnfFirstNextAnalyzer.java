@@ -417,12 +417,12 @@ public class BnfFirstNextAnalyzer {
 
   @NotNull
   private static Set<BnfExpression> newExprSet() {
-    return ContainerUtil.newTroveSet(ParserGeneratorUtil.textStrategy());
+    return new THashSet<>(ParserGeneratorUtil.textStrategy());
   }
 
   @NotNull
   private static Set<BnfExpression> newExprSet(Collection<BnfExpression> expressions) {
-    return ContainerUtil.newTroveSet(ParserGeneratorUtil.textStrategy(), expressions);
+    return new THashSet<>(expressions, ParserGeneratorUtil.textStrategy());
   }
 
   @NotNull

@@ -23,6 +23,7 @@ import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.psi.*;
 import com.intellij.util.ArrayUtil;
 import com.intellij.util.IncorrectOperationException;
+import com.intellij.util.SmartList;
 import com.intellij.util.containers.ContainerUtil;
 import com.intellij.util.containers.TreeTraversal;
 import org.intellij.jflex.psi.*;
@@ -58,7 +59,7 @@ public class JavaRefHelper {
   @NotNull
   private static PsiReference[] getRuleReferences(@NotNull JFlexJavaCode o) {
     String text = o.getText();
-    List<PsiReference> list = ContainerUtil.newSmartList();
+    List<PsiReference> list = new SmartList<>();
     {
       Matcher matcher = YYBEGIN_PAT.matcher(text);
       for (int offset = 0; matcher.find(offset); offset = matcher.end() + 1) {
@@ -87,7 +88,7 @@ public class JavaRefHelper {
     int start = javaFile.getText().lastIndexOf(targetText);
     int end = start + targetText.length();
 
-    List<PsiReference> list = ContainerUtil.newSmartList();
+    List<PsiReference> list = new SmartList<>();
     for (PsiElement e : SyntaxTraverser.psiTraverser(javaFile).traverse(TreeTraversal.LEAVES_BFS)) {
       TextRange r = e.getTextRange();
       if (!r.intersects(start, end)) continue;

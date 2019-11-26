@@ -59,7 +59,6 @@ import static com.intellij.openapi.util.text.StringUtil.*;
  * @author gregsh
  */
 public class GeneratedParserUtilBase {
-
   private static final Logger LOG = Logger.getInstance("org.intellij.grammar.parser.GeneratedParserUtilBase");
 
   private static final int MAX_RECURSION_LEVEL = Options.GPUB_MAX_LEVEL.get();
@@ -956,28 +955,8 @@ public class GeneratedParserUtilBase {
     public Parser tokenAdvancer = TOKEN_ADVANCER;
     public boolean altMode;
 
-    final LimitedPool<Variant> VARIANTS = new LimitedPool<>(VARIANTS_POOL_SIZE, new LimitedPool.ObjectFactory<Variant>() {
-      @NotNull
-      @Override
-      public Variant create() {
-        return new Variant();
-      }
-
-      @Override
-      public void cleanup(@NotNull Variant o) {
-      }
-    });
-    final LimitedPool<Frame> FRAMES = new LimitedPool<>(FRAMES_POOL_SIZE, new LimitedPool.ObjectFactory<Frame>() {
-      @NotNull
-      @Override
-      public Frame create() {
-        return new Frame();
-      }
-
-      @Override
-      public void cleanup(@NotNull Frame o) {
-      }
-    });
+    final LimitedPool<Variant> VARIANTS = new LimitedPool<>(VARIANTS_POOL_SIZE, () -> new Variant());
+    final LimitedPool<Frame> FRAMES = new LimitedPool<>(FRAMES_POOL_SIZE, () -> new Frame());
 
     public static ErrorState get(PsiBuilder builder) {
       return ((Builder)builder).state;

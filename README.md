@@ -109,7 +109,7 @@ One can specify an attribute for several rules at once in a global attributes bl
 
 ````
 {
-  extends("*._expr")=expr        // applies to all .*_expr rules
+  extends(".*_expr")=expr        // applies to all .*_expr rules
   pin(".*_list(?:_\d+)*")=1      // applies to all .*_list rules and their sub-expressions
 }
 ````

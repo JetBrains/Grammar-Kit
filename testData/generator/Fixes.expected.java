@@ -409,6 +409,27 @@ public class Fixes implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
+  // token-two | '#'
+  static boolean optimized_choice2(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "optimized_choice2")) return false;
+    if (!nextTokenIs(builder_, "", TOKEN_THREE, TOKEN_TWO)) return false;
+    boolean result_;
+    result_ = consumeToken(builder_, TOKEN_TWO);
+    if (!result_) result_ = consumeToken(builder_, TOKEN_THREE);
+    return result_;
+  }
+
+  /* ********************************************************** */
+  // "foo" | "bar"
+  static boolean optimized_choice3(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "optimized_choice3")) return false;
+    boolean result_;
+    result_ = consumeToken(builder_, "foo");
+    if (!result_) result_ = consumeToken(builder_, "bar");
+    return result_;
+  }
+
+  /* ********************************************************** */
   // andRestriction ( "||" andRestriction ) *
   static boolean orRestriction(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "orRestriction")) return false;

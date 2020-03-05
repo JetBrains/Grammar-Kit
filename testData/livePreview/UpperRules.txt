@@ -4,7 +4,10 @@ FILE
       ASTWrapperPsiElement(PREFIX)
         PsiElement(A)('A')
       PsiWhiteSpace(' ')
-      PsiElement(B)('B')
+      ASTWrapperPsiElement(JUST_B)
+        PsiElement(B)('B')
+      PsiErrorElement:X expected, got 'A'
+        <empty list>
     PsiWhiteSpace(' ')
     ASTWrapperPsiElement(ABC_TWO)
       ASTWrapperPsiElement(PREFIX)
@@ -18,4 +21,10 @@ FILE
       ASTWrapperPsiElement(ABC_THREE)
         PsiElement(X)('X')
       PsiWhiteSpace(' ')
-      PsiElement(B)('B')
+      ASTWrapperPsiElement(JUST_B)
+        PsiElement(B)('B')
+      PsiWhiteSpace(' ')
+      PsiElement(X)('X')
+  PsiElement(;)(';')
+  ASTWrapperPsiElement(ROOT)
+    <empty list>

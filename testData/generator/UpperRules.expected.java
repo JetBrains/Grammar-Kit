@@ -79,15 +79,17 @@ public class GeneratedParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // B
+  // just_b X
   public static boolean abc_one(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "abc_one")) return false;
     if (!nextTokenIs(builder_, B)) return false;
-    boolean result_;
+    boolean result_, pinned_;
     Marker marker_ = enter_section_(builder_, level_, _UPPER_, ABC_ONE, null);
-    result_ = consumeToken(builder_, B);
-    exit_section_(builder_, level_, marker_, result_, false, null);
-    return result_;
+    result_ = just_b(builder_, level_ + 1);
+    pinned_ = result_; // pin = 1
+    result_ = result_ && consumeToken(builder_, X);
+    exit_section_(builder_, level_, marker_, result_, pinned_, null);
+    return result_ || pinned_;
   }
 
   /* ********************************************************** */
@@ -182,6 +184,18 @@ public class GeneratedParser implements PsiParser, LightPsiParser {
     result_ = consumeToken(builder_, ";");
     result_ = result_ && root(builder_, level_ + 1);
     exit_section_(builder_, marker_, null, result_);
+    return result_;
+  }
+
+  /* ********************************************************** */
+  // B
+  public static boolean just_b(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "just_b")) return false;
+    if (!nextTokenIs(builder_, B)) return false;
+    boolean result_;
+    Marker marker_ = enter_section_(builder_);
+    result_ = consumeToken(builder_, B);
+    exit_section_(builder_, marker_, JUST_B, result_);
     return result_;
   }
 

@@ -15,6 +15,7 @@ public interface GeneratedTypes {
   IElementType ABC_SEQ = new IElementType("ABC_SEQ", null);
   IElementType ABC_THREE = new IElementType("ABC_THREE", null);
   IElementType ABC_TWO = new IElementType("ABC_TWO", null);
+  IElementType JUST_B = new IElementType("JUST_B", null);
   IElementType PREFIX = new IElementType("PREFIX", null);
   IElementType ROOT = new IElementType("ROOT", null);
 

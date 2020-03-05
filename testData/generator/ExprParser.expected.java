@@ -153,7 +153,6 @@ public class ExpressionParser implements PsiParser, LightPsiParser {
   private static boolean element_recover_0(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "element_recover_0")) return false;
     boolean result_;
-    Marker marker_ = enter_section_(builder_);
     result_ = consumeToken(builder_, "(");
     if (!result_) result_ = consumeToken(builder_, "+");
     if (!result_) result_ = consumeToken(builder_, "-");
@@ -161,7 +160,6 @@ public class ExpressionParser implements PsiParser, LightPsiParser {
     if (!result_) result_ = consumeToken(builder_, "multiply");
     if (!result_) result_ = consumeToken(builder_, ID);
     if (!result_) result_ = consumeToken(builder_, NUMBER);
-    exit_section_(builder_, marker_, null, result_);
     return result_;
   }
 
@@ -327,14 +325,12 @@ public class ExpressionParser implements PsiParser, LightPsiParser {
   private static boolean conditional_expr_0(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "conditional_expr_0")) return false;
     boolean result_;
-    Marker marker_ = enter_section_(builder_);
     result_ = consumeTokenSmart(builder_, "<");
     if (!result_) result_ = consumeTokenSmart(builder_, ">");
     if (!result_) result_ = consumeTokenSmart(builder_, "<=");
     if (!result_) result_ = consumeTokenSmart(builder_, ">=");
     if (!result_) result_ = consumeTokenSmart(builder_, "==");
     if (!result_) result_ = consumeTokenSmart(builder_, "!=");
-    exit_section_(builder_, marker_, null, result_);
     return result_;
   }
 

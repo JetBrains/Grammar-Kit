@@ -28,6 +28,7 @@ public interface GeneratedTypes {
   IElementType A = new IElementType("A", null);
   IElementType B = new IElementType("B", null);
   IElementType TOKEN_ONE = new IElementType("token-one", null);
+  IElementType TOKEN_THREE = new IElementType("#", null);
   IElementType TOKEN_TWO = new IElementType("token-two", null);
 }
 // ---- FooΩInner.java -----------------

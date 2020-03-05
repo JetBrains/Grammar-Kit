@@ -314,6 +314,7 @@ public class ParserGeneratorUtil {
   }
 
   public static boolean isRollbackRequired(BnfExpression o, BnfFile file) {
+    if (o instanceof BnfStringLiteralExpression) return false;
     if (!(o instanceof BnfReferenceOrToken)) return true;
     String value = GrammarUtil.stripQuotesAroundId(o.getText());
     BnfRule subRule = file.getRule(value);

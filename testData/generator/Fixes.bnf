@@ -3,7 +3,11 @@
   parserClass="Fixes"
   extends(".*expr")="expr"
 
-  tokens=[ token-one token-two ]
+  tokens=[
+    token-one
+    token-two
+    token-three='#'
+  ]
 }
 
 root ::=
@@ -56,3 +60,6 @@ not_optimized_choice ::= A | private_named | private_unnamed
 private optimized_choice ::= A | private_named | private_unnamed
 private private_named ::= "foo" {name="named"}
 private private_unnamed ::= "foo"
+
+private optimized_choice2 ::= token-two | '#'
+private optimized_choice3 ::= "foo" | "bar"

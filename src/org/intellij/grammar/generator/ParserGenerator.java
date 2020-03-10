@@ -502,7 +502,7 @@ public class ParserGenerator {
       }
       else {
         String superPrefix = methodName.equals("Element") ? "super." : "";
-        out(superPrefix + "visitElement(o);");
+        out(superPrefix + "visitElement((" + PSI_ELEMENT_CLASS + ") o);");
         if (G.visitorValue != null) out(ret + "null;");
       }
       out("}");

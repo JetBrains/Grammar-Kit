@@ -1563,6 +1563,7 @@ public class ParserGenerator {
         imports.add(CommonClassNames.JAVA_UTIL_COLLECTIONS);
         imports.add(CommonClassNames.JAVA_UTIL_SET);
         imports.add("java.util.LinkedHashMap");
+        imports.add("org.jetbrains.annotations.NotNull");
       }
       if (G.generatePsiFactory) {
         if (JBIterable.from(myRuleInfos.values()).find(o -> o.mixedAST) != null) {
@@ -1584,7 +1585,7 @@ public class ParserGenerator {
         }
         String fieldType = ObjectUtils.notNull(useExactElements ? exactType : "IElementType");
         String callFix = elementCreateCall.equals("new IElementType") ? ", null" : "";
-        out(fieldType + " " + elementType + " = " + elementCreateCall + "(\"" + elementType + "\"" + callFix + ");");
+        out("@NotNull " + fieldType + " " + elementType + " = " + elementCreateCall + "(\"" + elementType + "\"" + callFix + ");");
       }
     }
     if (G.generateTokenTypes) {

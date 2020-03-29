@@ -17,6 +17,8 @@ public interface GeneratedTypes {
   IElementType IMPORT = new IElementType("IMPORT", null);
   IElementType LEFT_EXPR = new IElementType("LEFT_EXPR", null);
   IElementType NOT_OPTIMIZED_CHOICE = new IElementType("NOT_OPTIMIZED_CHOICE", null);
+  IElementType RECURSIVE_EXTEND_A = new IElementType("RECURSIVE_EXTEND_A", null);
+  IElementType RECURSIVE_EXTEND_B = new IElementType("RECURSIVE_EXTEND_B", null);
   IElementType SOME = new IElementType("SOME", null);
   IElementType SOME_EXPR = new IElementType("SOME_EXPR", null);
   IElementType SOME_SEQ = new IElementType("SOME_SEQ", null);
@@ -138,6 +140,28 @@ import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
 public interface NotOptimizedChoice extends PsiElement {
+
+}
+// ---- RecursiveExtendA.java -----------------
+// This is a generated file. Not intended for manual editing.
+package generated.psi;
+
+import java.util.List;
+import org.jetbrains.annotations.*;
+import com.intellij.psi.PsiElement;
+
+public interface RecursiveExtendA extends RecursiveExtendB {
+
+}
+// ---- RecursiveExtendB.java -----------------
+// This is a generated file. Not intended for manual editing.
+package generated.psi;
+
+import java.util.List;
+import org.jetbrains.annotations.*;
+import com.intellij.psi.PsiElement;
+
+public interface RecursiveExtendB extends RecursiveExtendA {
 
 }
 // ---- Some.java -----------------
@@ -525,6 +549,64 @@ public class NotOptimizedChoiceImpl extends ASTWrapperPsiElement implements NotO
   }
 
 }
+// ---- RecursiveExtendAImpl.java -----------------
+// This is a generated file. Not intended for manual editing.
+package generated.psi.impl;
+
+import java.util.List;
+import org.jetbrains.annotations.*;
+import com.intellij.lang.ASTNode;
+import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiElementVisitor;
+import com.intellij.psi.util.PsiTreeUtil;
+import static generated.GeneratedTypes.*;
+import generated.psi.*;
+
+public class RecursiveExtendAImpl extends RecursiveExtendBImpl implements RecursiveExtendA {
+
+  public RecursiveExtendAImpl(ASTNode node) {
+    super(node);
+  }
+
+  public void accept(@NotNull Visitor visitor) {
+    visitor.visitRecursiveExtendA(this);
+  }
+
+  public void accept(@NotNull PsiElementVisitor visitor) {
+    if (visitor instanceof Visitor) accept((Visitor)visitor);
+    else super.accept(visitor);
+  }
+
+}
+// ---- RecursiveExtendBImpl.java -----------------
+// This is a generated file. Not intended for manual editing.
+package generated.psi.impl;
+
+import java.util.List;
+import org.jetbrains.annotations.*;
+import com.intellij.lang.ASTNode;
+import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiElementVisitor;
+import com.intellij.psi.util.PsiTreeUtil;
+import static generated.GeneratedTypes.*;
+import generated.psi.*;
+
+public class RecursiveExtendBImpl extends RecursiveExtendAImpl implements RecursiveExtendB {
+
+  public RecursiveExtendBImpl(ASTNode node) {
+    super(node);
+  }
+
+  public void accept(@NotNull Visitor visitor) {
+    visitor.visitRecursiveExtendB(this);
+  }
+
+  public void accept(@NotNull PsiElementVisitor visitor) {
+    if (visitor instanceof Visitor) accept((Visitor)visitor);
+    else super.accept(visitor);
+  }
+
+}
 // ---- SomeImpl.java -----------------
 // This is a generated file. Not intended for manual editing.
 package generated.psi.impl;
@@ -840,6 +922,14 @@ public class Visitor extends PsiElementVisitor {
 
   public void visitNotOptimizedChoice(@NotNull NotOptimizedChoice o) {
     visitPsiElement(o);
+  }
+
+  public void visitRecursiveExtendA(@NotNull RecursiveExtendA o) {
+    visitRecursiveExtendB(o);
+  }
+
+  public void visitRecursiveExtendB(@NotNull RecursiveExtendB o) {
+    visitRecursiveExtendA(o);
   }
 
   public void visitSome(@NotNull Some o) {

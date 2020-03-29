@@ -1753,9 +1753,14 @@ public class ParserGenerator {
 
     Function<String, String> substitutor = stubName != null ? Functions.constant(stubName) : genericUnwrapper;
 
+    Set<BnfRule> visited = new HashSet<>();
     List<NavigatablePsiElement> constructors = Collections.emptyList();
     BnfRule topSuperRule = null;
     for (BnfRule next = rule; next != null && next != topSuperRule; ) {
+      if (!visited.add(next)) {
+        ParserGeneratorUtil.addWarning(myFile.getProject(), rule.getName() + " employs cyclic inheritance");
+        break;
+      }
       topSuperRule = next;
       String superClass = ruleInfo(next).realSuperClass;
       if (superClass == null) continue;

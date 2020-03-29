@@ -37,6 +37,7 @@ public class Fixes implements PsiParser, LightPsiParser {
   }
 
   public static final TokenSet[] EXTENDS_SETS_ = new TokenSet[] {
+    create_token_set_(RECURSIVE_EXTEND_A, RECURSIVE_EXTEND_B),
     create_token_set_(A_EXPR, B_EXPR, EXPR, LEFT_EXPR,
       SOME_EXPR),
   };
@@ -566,6 +567,20 @@ public class Fixes implements PsiParser, LightPsiParser {
   private static boolean recursive_1(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "recursive_1")) return false;
     recursive(builder_, level_ + 1);
+    return true;
+  }
+
+  /* ********************************************************** */
+  public static boolean recursive_extendA(PsiBuilder builder_, int level_) {
+    Marker marker_ = enter_section_(builder_);
+    exit_section_(builder_, marker_, RECURSIVE_EXTEND_A, true);
+    return true;
+  }
+
+  /* ********************************************************** */
+  public static boolean recursive_extendB(PsiBuilder builder_, int level_) {
+    Marker marker_ = enter_section_(builder_);
+    exit_section_(builder_, marker_, RECURSIVE_EXTEND_B, true);
     return true;
   }
 

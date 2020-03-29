@@ -2,7 +2,7 @@
   <library name="org.jetbrains:annotations:Latest" type="repository">
     <properties maven-id="org.jetbrains:annotations:LATEST" />
     <CLASSES>
-      <root url="jar://$MAVEN_REPOSITORY$/org/jetbrains/annotations/17.0.0/annotations-17.0.0.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/org/jetbrains/annotations/19.0.0/annotations-19.0.0.jar!/" />
     </CLASSES>
     <JAVADOC />
     <SOURCES />

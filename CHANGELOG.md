@@ -1,3 +1,10 @@
+2020.1
+
+* Generator: fix an endless cycle on cyclic inheritance (#234)
+* Generator: skip sections for string-matched tokens (#231)
+* GPUB: fix pinned upper rules error reporting
+* Compatibility: IntelliJ IDEA 2020.1 EAP
+
 2019.3
 
 * Compatibility: IntelliJ IDEA 2019.3 EAP

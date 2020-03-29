@@ -1,8 +1,8 @@
 <idea-plugin url="https://github.com/JetBrains/Grammar-Kit">
   <id>org.jetbrains.idea.grammar</id>
-  <version>2019.3.1-SNAPSHOT</version>
+  <version>2020.1-SNAPSHOT</version>
   <vendor>JetBrains</vendor>
-  <idea-version since-build="193.3519"/>
+  <idea-version since-build="201.6668"/>
 
   <name>Grammar-Kit</name>
   <description>BNF Grammars and JFlex lexers editor. Readable parser/PSI code generator.</description>
@@ -14,7 +14,10 @@
   <change-notes>
     <![CDATA[
     <ul>
-      <li>Compatibility: IntelliJ IDEA 2019.3 EAP</li>
+      <li>Generator: fix an endless cycle on cyclic inheritance (#234)</li>
+      <li>Generator: skip sections for string-matched tokens (#231)</li>
+      <li>GPUB: fix pinned upper rules error reporting</li>
+      <li>Compatibility: IntelliJ IDEA 2020.1 EAP</li>
     </ul>
     <a href="https://github.com/JetBrains/Grammar-Kit/blob/master/CHANGELOG.md">Full change log...</a>
     ]]>

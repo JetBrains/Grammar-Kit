@@ -16,15 +16,11 @@
 
 package org.intellij.grammar.livePreview;
 
-import com.intellij.codeHighlighting.Pass;
-import com.intellij.codeHighlighting.TextEditorHighlightingPass;
-import com.intellij.codeHighlighting.TextEditorHighlightingPassFactory;
-import com.intellij.codeHighlighting.TextEditorHighlightingPassRegistrar;
+import com.intellij.codeHighlighting.*;
 import com.intellij.codeInsight.daemon.impl.HighlightInfo;
 import com.intellij.codeInsight.daemon.impl.HighlightInfoType;
 import com.intellij.codeInsight.daemon.impl.UpdateHighlightersUtil;
 import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.components.ProjectComponent;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.colors.EditorColors;
@@ -50,24 +46,23 @@ import java.util.Set;
 /**
  * @author gregsh
  */
-public class GrammarAtCaretPassFactory implements ProjectComponent, TextEditorHighlightingPassFactory {
+public class GrammarAtCaretPassFactory implements TextEditorHighlightingPassFactory, TextEditorHighlightingPassFactoryRegistrar {
   public static final Key<Boolean> GRAMMAR_AT_CARET_KEY = Key.create("GRAMMAR_AT_CARET_KEY");
-  private final Project myProject;
 
-  public GrammarAtCaretPassFactory(Project project, TextEditorHighlightingPassRegistrar highlightingPassRegistrar) {
-    myProject = project;
-    highlightingPassRegistrar.registerTextEditorHighlightingPass(this, null, new int[]{Pass.UPDATE_ALL}, false, -1);
+  @Override
+  public void registerHighlightingPassFactory(@NotNull TextEditorHighlightingPassRegistrar registrar, @NotNull Project project) {
+    registrar.registerTextEditorHighlightingPass(this, null, new int[]{Pass.UPDATE_ALL}, false, -1);
   }
 
   @Override
-  public TextEditorHighlightingPass createHighlightingPass(@NotNull final PsiFile file, @NotNull final Editor editor) {
+  public TextEditorHighlightingPass createHighlightingPass(@NotNull PsiFile file, @NotNull Editor editor) {
     if (ApplicationManager.getApplication().isHeadlessEnvironment()) return null;
 
     if (editor.isOneLineMode()) return null;
     if (!(file instanceof BnfFile)) return null;
 
-    final VirtualFile virtualFile = file.getVirtualFile();
-    if (virtualFile == null || !FileEditorManager.getInstance(myProject).isFileOpen(virtualFile)) return null;
+    VirtualFile virtualFile = file.getVirtualFile();
+    if (virtualFile == null || !FileEditorManager.getInstance(file.getProject()).isFileOpen(virtualFile)) return null;
 
     return new TextEditorHighlightingPass(file.getProject(), editor.getDocument(), false) {
       final List<HighlightInfo> infos = new ArrayList<>();

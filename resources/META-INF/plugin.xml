@@ -33,6 +33,7 @@
     <annotator language="BNF" implementationClass="org.intellij.grammar.editor.BnfExpressionMarkerAnnotator"/>
     <lang.syntaxHighlighterFactory language="BNF" implementationClass="org.intellij.grammar.editor.BnfSyntaxHighlighterFactory"/>
     <lang.syntaxHighlighterFactory language="BNF_LP" implementationClass="org.intellij.grammar.livePreview.LivePreviewSyntaxHighlighterFactory"/>
+    <highlightingPassFactory implementation="org.intellij.grammar.livePreview.GrammarAtCaretPassFactory"/>
     <elementDescriptionProvider implementation="org.intellij.grammar.BnfDescriptionProvider"/>
     <lang.findUsagesProvider language="BNF" implementationClass="org.intellij.grammar.BnfFindUsagesProvider"/>
     <lang.braceMatcher language="BNF" implementationClass="org.intellij.grammar.BnfBraceMatcher"/>
@@ -148,10 +149,4 @@
               text="_Token..." description="Introduce token" use-shortcut-of="IntroduceConstant" />
     </group>
   </actions>
-
-  <project-components>
-    <component>
-      <implementation-class>org.intellij.grammar.livePreview.GrammarAtCaretPassFactory</implementation-class>
-    </component>
-  </project-components>
 </idea-plugin>

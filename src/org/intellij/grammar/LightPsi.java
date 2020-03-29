@@ -22,10 +22,10 @@ import com.intellij.lang.*;
 import com.intellij.lang.impl.PsiBuilderImpl;
 import com.intellij.lexer.Lexer;
 import com.intellij.mock.MockApplication;
-import com.intellij.mock.MockLanguageFileType;
 import com.intellij.mock.MockProject;
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.extensions.impl.ExtensionsAreaImpl;
+import com.intellij.openapi.fileTypes.LanguageFileType;
 import com.intellij.openapi.util.Disposer;
 import com.intellij.openapi.util.KeyedExtensionCollector;
 import com.intellij.openapi.util.io.FileUtil;
@@ -44,6 +44,7 @@ import org.intellij.grammar.java.JavaHelper;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import javax.swing.*;
 import java.io.*;
 import java.util.jar.JarEntry;
 import java.util.jar.JarOutputStream;
@@ -235,4 +236,23 @@ public class LightPsi {
       }
     }
   }
-}
+
+  public static class MockLanguageFileType extends LanguageFileType {
+
+    private final String myExtension;
+
+    public MockLanguageFileType(@NotNull Language language, String extension) {
+      super(language);
+      myExtension = extension;
+    }
+
+    @NotNull @Override public String getName() { return getLanguage().getID(); }
+    @NotNull @Override public String getDescription() { return ""; }
+    @NotNull @Override public String getDefaultExtension() { return myExtension; }
+    @Override public Icon getIcon() { return null; }
+    @Override
+    public boolean equals(Object obj) {
+      if (!(obj instanceof LanguageFileType)) return false;
+      return getLanguage().equals(((LanguageFileType)obj).getLanguage());
+    }
+  }}

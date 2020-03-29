@@ -1,13 +1,13 @@
 Manifest-Version: 1.0
 Class-Path: light-psi-all.jar
-  lib/annotations.jar
+  lib/annotations-19.0.0.jar
   lib/asm-all-7.0.1.jar
   lib/automaton-1.12-1.jar
   lib/extensions.jar
-  lib/guava-25.1-jre.jar
+  lib/guava-28.2-jre.jar
   lib/idea.jar
-  lib/picocontainer-1.2.jar
   lib/platform-api.jar
+  lib/platform-concurrency.jar
   lib/platform-impl.jar
   lib/util.jar
   lib/trove4j.jar

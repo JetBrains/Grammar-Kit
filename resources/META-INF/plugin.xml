@@ -17,7 +17,7 @@
       <li>Generator: fix an endless cycle on cyclic inheritance (#234)</li>
       <li>Generator: skip sections for string-matched tokens (#231)</li>
       <li>GPUB: fix pinned upper rules error reporting</li>
-      <li>Compatibility: IntelliJ IDEA 2020.1 EAP</li>
+      <li>Compatibility: IntelliJ IDEA 2020.1</li>
     </ul>
     <a href="https://github.com/JetBrains/Grammar-Kit/blob/master/CHANGELOG.md">Full change log...</a>
     ]]>

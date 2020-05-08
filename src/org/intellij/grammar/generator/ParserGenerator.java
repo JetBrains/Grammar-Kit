@@ -1092,7 +1092,7 @@ public class ParserGenerator {
     if (G.generateFirstCheck <= 0) return frameName;
     BnfFirstNextAnalyzer analyzer = new BnfFirstNextAnalyzer().setPredicateLookAhead(true);
     Set<BnfExpression> firstSet = analyzer.calcFirst(rule);
-    ConsumeType ruleConsumeType = getRuleConsumeType(rule);
+    ConsumeType ruleConsumeType = getRuleConsumeType(rule, null);
     Map<String, ConsumeType> firstElementTypes = new TreeMap<>();
     for (BnfExpression expression : firstSet) {
       if (expression == BNF_MATCHES_EOF || expression == BNF_MATCHES_ANY) return frameName;
@@ -1103,7 +1103,7 @@ public class ParserGenerator {
       String t = firstToElementType(expressionString);
       if (t == null) return frameName;
 
-      ConsumeType childConsumeType = getRuleConsumeType(ObjectUtils.notNull(Rule.of(expression)));
+      ConsumeType childConsumeType = getRuleConsumeType(ObjectUtils.notNull(Rule.of(expression)), rule);
       ConsumeType consumeType = ConsumeType.min(ruleConsumeType, childConsumeType);
       ConsumeType existing = firstElementTypes.get(t);
       firstElementTypes.put(t, ConsumeType.max(existing, consumeType));
@@ -1136,8 +1136,12 @@ public class ParserGenerator {
   }
 
   @NotNull
-  private ConsumeType getRuleConsumeType(@NotNull BnfRule rule) {
+  private ConsumeType getRuleConsumeType(@NotNull BnfRule rule, @Nullable BnfRule contextRule) {
     ConsumeType forcedConsumeType = ExpressionGeneratorHelper.fixForcedConsumeType(myExpressionHelper, rule, null, null);
+    if (forcedConsumeType != null && contextRule != null && myExpressionHelper.getExpressionInfo(contextRule) == null) {
+      // do not force child expr consume-type in a non-expr context
+      forcedConsumeType = null;
+    }
     return ObjectUtils.chooseNotNull(forcedConsumeType, ConsumeType.forRule(rule));
   }
 

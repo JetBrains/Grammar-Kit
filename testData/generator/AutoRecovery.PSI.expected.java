@@ -80,6 +80,7 @@ public class ItemImpl extends ASTWrapperPsiElement implements Item {
     visitor.visitItem(this);
   }
 
+  @Override
   public void accept(@NotNull PsiElementVisitor visitor) {
     if (visitor instanceof Visitor) accept((Visitor)visitor);
     else super.accept(visitor);
@@ -115,6 +116,7 @@ public class ListImpl extends ASTWrapperPsiElement implements List {
     visitor.visitList(this);
   }
 
+  @Override
   public void accept(@NotNull PsiElementVisitor visitor) {
     if (visitor instanceof Visitor) accept((Visitor)visitor);
     else super.accept(visitor);

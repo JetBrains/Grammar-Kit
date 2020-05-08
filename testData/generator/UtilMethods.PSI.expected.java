@@ -77,6 +77,7 @@ public class Element1Impl extends ASTWrapperPsiElement implements Element1 {
     visitor.visitElement1(this);
   }
 
+  @Override
   public void accept(@NotNull PsiElementVisitor visitor) {
     if (visitor instanceof Visitor) accept((Visitor)visitor);
     else super.accept(visitor);

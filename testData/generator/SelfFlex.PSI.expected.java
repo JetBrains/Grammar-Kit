@@ -643,10 +643,12 @@ public class JFlexCharRangeImpl extends JFlexClassExpressionImpl implements JFle
     super(type);
   }
 
+  @Override
   public void accept(@NotNull JFlexVisitor visitor) {
     visitor.visitCharRange(this);
   }
 
+  @Override
   public void accept(@NotNull PsiElementVisitor visitor) {
     if (visitor instanceof JFlexVisitor) accept((JFlexVisitor)visitor);
     else super.accept(visitor);
@@ -673,10 +675,12 @@ public class JFlexChoiceExpressionImpl extends JFlexExpressionImpl implements JF
     super(type);
   }
 
+  @Override
   public void accept(@NotNull JFlexVisitor visitor) {
     visitor.visitChoiceExpression(this);
   }
 
+  @Override
   public void accept(@NotNull PsiElementVisitor visitor) {
     if (visitor instanceof JFlexVisitor) accept((JFlexVisitor)visitor);
     else super.accept(visitor);
@@ -709,10 +713,12 @@ public class JFlexClassExpressionImpl extends JFlexExpressionImpl implements JFl
     super(type);
   }
 
+  @Override
   public void accept(@NotNull JFlexVisitor visitor) {
     visitor.visitClassExpression(this);
   }
 
+  @Override
   public void accept(@NotNull PsiElementVisitor visitor) {
     if (visitor instanceof JFlexVisitor) accept((JFlexVisitor)visitor);
     else super.accept(visitor);
@@ -745,10 +751,12 @@ public class JFlexDeclarationsSectionImpl extends JFlexFileSectionImpl implement
     super(type);
   }
 
+  @Override
   public void accept(@NotNull JFlexVisitor visitor) {
     visitor.visitDeclarationsSection(this);
   }
 
+  @Override
   public void accept(@NotNull PsiElementVisitor visitor) {
     if (visitor instanceof JFlexVisitor) accept((JFlexVisitor)visitor);
     else super.accept(visitor);
@@ -797,6 +805,7 @@ public abstract class JFlexExpressionImpl extends JFlexCompositeImpl implements 
     visitor.visitExpression(this);
   }
 
+  @Override
   public void accept(@NotNull PsiElementVisitor visitor) {
     if (visitor instanceof JFlexVisitor) accept((JFlexVisitor)visitor);
     else super.accept(visitor);
@@ -827,6 +836,7 @@ public class JFlexFileSectionImpl extends JFlexCompositeImpl implements JFlexFil
     visitor.visitFileSection(this);
   }
 
+  @Override
   public void accept(@NotNull PsiElementVisitor visitor) {
     if (visitor instanceof JFlexVisitor) accept((JFlexVisitor)visitor);
     else super.accept(visitor);
@@ -858,6 +868,7 @@ public class JFlexJavaCodeImpl extends JFlexJavaCodeInjectionHostImpl implements
     visitor.visitJavaCode(this);
   }
 
+  @Override
   public void accept(@NotNull PsiElementVisitor visitor) {
     if (visitor instanceof JFlexVisitor) accept((JFlexVisitor)visitor);
     else super.accept(visitor);
@@ -894,6 +905,7 @@ public class JFlexJavaTypeImpl extends JFlexCompositeImpl implements JFlexJavaTy
     visitor.visitJavaType(this);
   }
 
+  @Override
   public void accept(@NotNull PsiElementVisitor visitor) {
     if (visitor instanceof JFlexVisitor) accept((JFlexVisitor)visitor);
     else super.accept(visitor);
@@ -926,10 +938,12 @@ public class JFlexLexicalRulesSectionImpl extends JFlexFileSectionImpl implement
     super(type);
   }
 
+  @Override
   public void accept(@NotNull JFlexVisitor visitor) {
     visitor.visitLexicalRulesSection(this);
   }
 
+  @Override
   public void accept(@NotNull PsiElementVisitor visitor) {
     if (visitor instanceof JFlexVisitor) accept((JFlexVisitor)visitor);
     else super.accept(visitor);
@@ -968,10 +982,12 @@ public class JFlexLiteralExpressionImpl extends JFlexExpressionImpl implements J
     super(type);
   }
 
+  @Override
   public void accept(@NotNull JFlexVisitor visitor) {
     visitor.visitLiteralExpression(this);
   }
 
+  @Override
   public void accept(@NotNull PsiElementVisitor visitor) {
     if (visitor instanceof JFlexVisitor) accept((JFlexVisitor)visitor);
     else super.accept(visitor);
@@ -1002,6 +1018,7 @@ public class JFlexLookAheadImpl extends JFlexCompositeImpl implements JFlexLookA
     visitor.visitLookAhead(this);
   }
 
+  @Override
   public void accept(@NotNull PsiElementVisitor visitor) {
     if (visitor instanceof JFlexVisitor) accept((JFlexVisitor)visitor);
     else super.accept(visitor);
@@ -1039,6 +1056,7 @@ public class JFlexMacroDefinitionImpl extends JFlexCompositeImpl implements JFle
     visitor.visitMacroDefinition(this);
   }
 
+  @Override
   public void accept(@NotNull PsiElementVisitor visitor) {
     if (visitor instanceof JFlexVisitor) accept((JFlexVisitor)visitor);
     else super.accept(visitor);
@@ -1095,10 +1113,12 @@ public class JFlexMacroRefExpressionImpl extends JFlexExpressionImpl implements 
     super(type);
   }
 
+  @Override
   public void accept(@NotNull JFlexVisitor visitor) {
     visitor.visitMacroRefExpression(this);
   }
 
+  @Override
   public void accept(@NotNull PsiElementVisitor visitor) {
     if (visitor instanceof JFlexVisitor) accept((JFlexVisitor)visitor);
     else super.accept(visitor);
@@ -1136,6 +1156,7 @@ public class JFlexMacroReferenceImpl extends JFlexCompositeImpl implements JFlex
     visitor.visitMacroReference(this);
   }
 
+  @Override
   public void accept(@NotNull PsiElementVisitor visitor) {
     if (visitor instanceof JFlexVisitor) accept((JFlexVisitor)visitor);
     else super.accept(visitor);
@@ -1174,10 +1195,12 @@ public class JFlexNotExpressionImpl extends JFlexExpressionImpl implements JFlex
     super(type);
   }
 
+  @Override
   public void accept(@NotNull JFlexVisitor visitor) {
     visitor.visitNotExpression(this);
   }
 
+  @Override
   public void accept(@NotNull PsiElementVisitor visitor) {
     if (visitor instanceof JFlexVisitor) accept((JFlexVisitor)visitor);
     else super.accept(visitor);
@@ -1214,6 +1237,7 @@ public class JFlexOptionImpl extends JFlexCompositeImpl implements JFlexOption {
     visitor.visitOption(this);
   }
 
+  @Override
   public void accept(@NotNull PsiElementVisitor visitor) {
     if (visitor instanceof JFlexVisitor) accept((JFlexVisitor)visitor);
     else super.accept(visitor);
@@ -1240,10 +1264,12 @@ public class JFlexParenExpressionImpl extends JFlexExpressionImpl implements JFl
     super(type);
   }
 
+  @Override
   public void accept(@NotNull JFlexVisitor visitor) {
     visitor.visitParenExpression(this);
   }
 
+  @Override
   public void accept(@NotNull PsiElementVisitor visitor) {
     if (visitor instanceof JFlexVisitor) accept((JFlexVisitor)visitor);
     else super.accept(visitor);
@@ -1276,10 +1302,12 @@ public class JFlexPredefinedClassExpressionImpl extends JFlexExpressionImpl impl
     super(type);
   }
 
+  @Override
   public void accept(@NotNull JFlexVisitor visitor) {
     visitor.visitPredefinedClassExpression(this);
   }
 
+  @Override
   public void accept(@NotNull PsiElementVisitor visitor) {
     if (visitor instanceof JFlexVisitor) accept((JFlexVisitor)visitor);
     else super.accept(visitor);
@@ -1306,10 +1334,12 @@ public class JFlexQuantifierExpressionImpl extends JFlexExpressionImpl implement
     super(type);
   }
 
+  @Override
   public void accept(@NotNull JFlexVisitor visitor) {
     visitor.visitQuantifierExpression(this);
   }
 
+  @Override
   public void accept(@NotNull PsiElementVisitor visitor) {
     if (visitor instanceof JFlexVisitor) accept((JFlexVisitor)visitor);
     else super.accept(visitor);
@@ -1346,6 +1376,7 @@ public class JFlexRuleImpl extends JFlexCompositeImpl implements JFlexRule {
     visitor.visitRule(this);
   }
 
+  @Override
   public void accept(@NotNull PsiElementVisitor visitor) {
     if (visitor instanceof JFlexVisitor) accept((JFlexVisitor)visitor);
     else super.accept(visitor);
@@ -1408,10 +1439,12 @@ public class JFlexSequenceExpressionImpl extends JFlexExpressionImpl implements 
     super(type);
   }
 
+  @Override
   public void accept(@NotNull JFlexVisitor visitor) {
     visitor.visitSequenceExpression(this);
   }
 
+  @Override
   public void accept(@NotNull PsiElementVisitor visitor) {
     if (visitor instanceof JFlexVisitor) accept((JFlexVisitor)visitor);
     else super.accept(visitor);
@@ -1448,6 +1481,7 @@ public class JFlexStateDeclarationImpl extends JFlexCompositeImpl implements JFl
     visitor.visitStateDeclaration(this);
   }
 
+  @Override
   public void accept(@NotNull PsiElementVisitor visitor) {
     if (visitor instanceof JFlexVisitor) accept((JFlexVisitor)visitor);
     else super.accept(visitor);
@@ -1485,6 +1519,7 @@ public class JFlexStateDefinitionImpl extends JFlexCompositeImpl implements JFle
     visitor.visitStateDefinition(this);
   }
 
+  @Override
   public void accept(@NotNull PsiElementVisitor visitor) {
     if (visitor instanceof JFlexVisitor) accept((JFlexVisitor)visitor);
     else super.accept(visitor);
@@ -1539,6 +1574,7 @@ public class JFlexStateListImpl extends JFlexCompositeImpl implements JFlexState
     visitor.visitStateList(this);
   }
 
+  @Override
   public void accept(@NotNull PsiElementVisitor visitor) {
     if (visitor instanceof JFlexVisitor) accept((JFlexVisitor)visitor);
     else super.accept(visitor);
@@ -1576,6 +1612,7 @@ public class JFlexStateReferenceImpl extends JFlexCompositeImpl implements JFlex
     visitor.visitStateReference(this);
   }
 
+  @Override
   public void accept(@NotNull PsiElementVisitor visitor) {
     if (visitor instanceof JFlexVisitor) accept((JFlexVisitor)visitor);
     else super.accept(visitor);
@@ -1614,10 +1651,12 @@ public class JFlexUserCodeSectionImpl extends JFlexFileSectionImpl implements JF
     super(type);
   }
 
+  @Override
   public void accept(@NotNull JFlexVisitor visitor) {
     visitor.visitUserCodeSection(this);
   }
 
+  @Override
   public void accept(@NotNull PsiElementVisitor visitor) {
     if (visitor instanceof JFlexVisitor) accept((JFlexVisitor)visitor);
     else super.accept(visitor);
@@ -1654,6 +1693,7 @@ public class JFlexUserValueImpl extends JFlexCompositeImpl implements JFlexUserV
     visitor.visitUserValue(this);
   }
 
+  @Override
   public void accept(@NotNull PsiElementVisitor visitor) {
     if (visitor instanceof JFlexVisitor) accept((JFlexVisitor)visitor);
     else super.accept(visitor);

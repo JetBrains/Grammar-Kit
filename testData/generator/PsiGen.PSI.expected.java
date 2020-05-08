@@ -587,6 +587,7 @@ public class XLeftShadowImpl extends ASTWrapperPsiElement implements XLeftShadow
     visitor.visitLeftShadow(this);
   }
 
+  @Override
   public void accept(@NotNull PsiElementVisitor visitor) {
     if (visitor instanceof XVisitor) accept((XVisitor)visitor);
     else super.accept(visitor);
@@ -629,6 +630,7 @@ public class XLeftShadowTestImpl extends ASTWrapperPsiElement implements XLeftSh
     visitor.visitLeftShadowTest(this);
   }
 
+  @Override
   public void accept(@NotNull PsiElementVisitor visitor) {
     if (visitor instanceof XVisitor) accept((XVisitor)visitor);
     else super.accept(visitor);
@@ -666,10 +668,12 @@ public class XAStatementImpl extends XStatementImpl implements XAStatement {
     super(node);
   }
 
+  @Override
   public void accept(@NotNull XVisitor visitor) {
     visitor.visitAStatement(this);
   }
 
+  @Override
   public void accept(@NotNull PsiElementVisitor visitor) {
     if (visitor instanceof XVisitor) accept((XVisitor)visitor);
     else super.accept(visitor);
@@ -707,10 +711,12 @@ public class XBStatementImpl extends XStatementImpl implements XBStatement {
     super(node);
   }
 
+  @Override
   public void accept(@NotNull XVisitor visitor) {
     visitor.visitBStatement(this);
   }
 
+  @Override
   public void accept(@NotNull PsiElementVisitor visitor) {
     if (visitor instanceof XVisitor) accept((XVisitor)visitor);
     else super.accept(visitor);
@@ -753,6 +759,7 @@ public class XBlockOfImpl extends ASTWrapperPsiElement implements XBlockOf {
     visitor.visitBlockOf(this);
   }
 
+  @Override
   public void accept(@NotNull PsiElementVisitor visitor) {
     if (visitor instanceof XVisitor) accept((XVisitor)visitor);
     else super.accept(visitor);
@@ -778,10 +785,12 @@ public class XCStatementImpl extends XStatementImpl implements XCStatement {
     super(node);
   }
 
+  @Override
   public void accept(@NotNull XVisitor visitor) {
     visitor.visitCStatement(this);
   }
 
+  @Override
   public void accept(@NotNull PsiElementVisitor visitor) {
     if (visitor instanceof XVisitor) accept((XVisitor)visitor);
     else super.accept(visitor);
@@ -819,10 +828,12 @@ public class XCastExprImpl extends XExprImpl implements XCastExpr {
     super(node);
   }
 
+  @Override
   public void accept(@NotNull XVisitor visitor) {
     visitor.visitCastExpr(this);
   }
 
+  @Override
   public void accept(@NotNull PsiElementVisitor visitor) {
     if (visitor instanceof XVisitor) accept((XVisitor)visitor);
     else super.accept(visitor);
@@ -860,10 +871,12 @@ public class XChoiceJoinedImpl extends XLiteralImpl implements XChoiceJoined {
     super(node);
   }
 
+  @Override
   public void accept(@NotNull XVisitor visitor) {
     visitor.visitChoiceJoined(this);
   }
 
+  @Override
   public void accept(@NotNull PsiElementVisitor visitor) {
     if (visitor instanceof XVisitor) accept((XVisitor)visitor);
     else super.accept(visitor);
@@ -906,6 +919,7 @@ public class XExprImpl extends ASTWrapperPsiElement implements XExpr {
     visitor.visitExpr(this);
   }
 
+  @Override
   public void accept(@NotNull PsiElementVisitor visitor) {
     if (visitor instanceof XVisitor) accept((XVisitor)visitor);
     else super.accept(visitor);
@@ -937,10 +951,12 @@ public class XExternalTypeImpl extends XExprImpl implements XExternalType {
     super(node);
   }
 
+  @Override
   public void accept(@NotNull XVisitor visitor) {
     visitor.visitExternalType(this);
   }
 
+  @Override
   public void accept(@NotNull PsiElementVisitor visitor) {
     if (visitor instanceof XVisitor) accept((XVisitor)visitor);
     else super.accept(visitor);
@@ -972,10 +988,12 @@ public class XExternalType2Impl extends XExprImpl implements XExternalType2 {
     super(node);
   }
 
+  @Override
   public void accept(@NotNull XVisitor visitor) {
     visitor.visitExternalType2(this);
   }
 
+  @Override
   public void accept(@NotNull PsiElementVisitor visitor) {
     if (visitor instanceof XVisitor) accept((XVisitor)visitor);
     else super.accept(visitor);
@@ -1012,6 +1030,7 @@ public class XGrammarElementImpl extends ASTWrapperPsiElement implements XGramma
     visitor.visitGrammarElement(this);
   }
 
+  @Override
   public void accept(@NotNull PsiElementVisitor visitor) {
     if (visitor instanceof XVisitor) accept((XVisitor)visitor);
     else super.accept(visitor);
@@ -1048,6 +1067,7 @@ public class XIdentifierImpl extends ASTWrapperPsiElement implements XIdentifier
     visitor.visitIdentifier(this);
   }
 
+  @Override
   public void accept(@NotNull PsiElementVisitor visitor) {
     if (visitor instanceof XVisitor) accept((XVisitor)visitor);
     else super.accept(visitor);
@@ -1084,6 +1104,7 @@ public class XIncludeSectionAltImpl extends ASTWrapperPsiElement implements XInc
     visitor.visitIncludeSectionAlt(this);
   }
 
+  @Override
   public void accept(@NotNull PsiElementVisitor visitor) {
     if (visitor instanceof XVisitor) accept((XVisitor)visitor);
     else super.accept(visitor);
@@ -1126,6 +1147,7 @@ public class XIncludeSectionImpl extends ASTWrapperPsiElement implements XInclud
     visitor.visitIncludeSection(this);
   }
 
+  @Override
   public void accept(@NotNull PsiElementVisitor visitor) {
     if (visitor instanceof XVisitor) accept((XVisitor)visitor);
     else super.accept(visitor);
@@ -1175,10 +1197,12 @@ public class XItemExprImpl extends XExprImpl implements XItemExpr {
     super(node);
   }
 
+  @Override
   public void accept(@NotNull XVisitor visitor) {
     visitor.visitItemExpr(this);
   }
 
+  @Override
   public void accept(@NotNull PsiElementVisitor visitor) {
     if (visitor instanceof XVisitor) accept((XVisitor)visitor);
     else super.accept(visitor);
@@ -1216,10 +1240,12 @@ public class XLiteralImpl extends XExprImpl implements XLiteral {
     super(node);
   }
 
+  @Override
   public void accept(@NotNull XVisitor visitor) {
     visitor.visitLiteral(this);
   }
 
+  @Override
   public void accept(@NotNull PsiElementVisitor visitor) {
     if (visitor instanceof XVisitor) accept((XVisitor)visitor);
     else super.accept(visitor);
@@ -1251,10 +1277,12 @@ public class XMulExprImpl extends XExprImpl implements XMulExpr {
     super(node);
   }
 
+  @Override
   public void accept(@NotNull XVisitor visitor) {
     visitor.visitMulExpr(this);
   }
 
+  @Override
   public void accept(@NotNull PsiElementVisitor visitor) {
     if (visitor instanceof XVisitor) accept((XVisitor)visitor);
     else super.accept(visitor);
@@ -1285,6 +1313,7 @@ public class XNamedElementImpl extends ASTWrapperPsiElement implements XNamedEle
     visitor.visitNamedElement(this);
   }
 
+  @Override
   public void accept(@NotNull PsiElementVisitor visitor) {
     if (visitor instanceof XVisitor) accept((XVisitor)visitor);
     else super.accept(visitor);
@@ -1316,10 +1345,12 @@ public class XOtherExprImpl extends XExprImpl implements XOtherExpr {
     super(node);
   }
 
+  @Override
   public void accept(@NotNull XVisitor visitor) {
     visitor.visitOtherExpr(this);
   }
 
+  @Override
   public void accept(@NotNull PsiElementVisitor visitor) {
     if (visitor instanceof XVisitor) accept((XVisitor)visitor);
     else super.accept(visitor);
@@ -1345,10 +1376,12 @@ public class XPlusExprImpl extends XExprImpl implements XPlusExpr {
     super(node);
   }
 
+  @Override
   public void accept(@NotNull XVisitor visitor) {
     visitor.visitPlusExpr(this);
   }
 
+  @Override
   public void accept(@NotNull PsiElementVisitor visitor) {
     if (visitor instanceof XVisitor) accept((XVisitor)visitor);
     else super.accept(visitor);
@@ -1374,10 +1407,12 @@ public class XRefExprImpl extends MyRefImpl implements XRefExpr {
     super(node);
   }
 
+  @Override
   public void accept(@NotNull XVisitor visitor) {
     visitor.visitRefExpr(this);
   }
 
+  @Override
   public void accept(@NotNull PsiElementVisitor visitor) {
     if (visitor instanceof XVisitor) accept((XVisitor)visitor);
     else super.accept(visitor);
@@ -1414,6 +1449,7 @@ public abstract class XRootImpl extends ASTWrapperPsiElement implements XRoot {
     visitor.visitRoot(this);
   }
 
+  @Override
   public void accept(@NotNull PsiElementVisitor visitor) {
     if (visitor instanceof XVisitor) accept((XVisitor)visitor);
     else super.accept(visitor);
@@ -1439,10 +1475,12 @@ public class XRootBImpl extends XRootImpl implements XRootB {
     super(node);
   }
 
+  @Override
   public void accept(@NotNull XVisitor visitor) {
     visitor.visitRootB(this);
   }
 
+  @Override
   public void accept(@NotNull PsiElementVisitor visitor) {
     if (visitor instanceof XVisitor) accept((XVisitor)visitor);
     else super.accept(visitor);
@@ -1468,10 +1506,12 @@ public class XRootCImpl extends XRootImpl implements XRootC {
     super(node);
   }
 
+  @Override
   public void accept(@NotNull XVisitor visitor) {
     visitor.visitRootC(this);
   }
 
+  @Override
   public void accept(@NotNull PsiElementVisitor visitor) {
     if (visitor instanceof XVisitor) accept((XVisitor)visitor);
     else super.accept(visitor);
@@ -1503,10 +1543,12 @@ public class XRootDImpl extends XRootImpl implements XRootD {
     super(node);
   }
 
+  @Override
   public void accept(@NotNull XVisitor visitor) {
     visitor.visitRootD(this);
   }
 
+  @Override
   public void accept(@NotNull PsiElementVisitor visitor) {
     if (visitor instanceof XVisitor) accept((XVisitor)visitor);
     else super.accept(visitor);
@@ -1538,10 +1580,12 @@ public abstract class XSomeExprImpl extends XExprImpl implements XSomeExpr {
     super(node);
   }
 
+  @Override
   public void accept(@NotNull XVisitor visitor) {
     visitor.visitSomeExpr(this);
   }
 
+  @Override
   public void accept(@NotNull PsiElementVisitor visitor) {
     if (visitor instanceof XVisitor) accept((XVisitor)visitor);
     else super.accept(visitor);
@@ -1567,10 +1611,12 @@ public class XSpecialRefImpl extends XRefExprImpl implements XSpecialRef {
     super(node);
   }
 
+  @Override
   public void accept(@NotNull XVisitor visitor) {
     visitor.visitSpecialRef(this);
   }
 
+  @Override
   public void accept(@NotNull PsiElementVisitor visitor) {
     if (visitor instanceof XVisitor) accept((XVisitor)visitor);
     else super.accept(visitor);
@@ -1607,6 +1653,7 @@ public abstract class XStatementImpl extends ASTWrapperPsiElement implements XSt
     visitor.visitStatement(this);
   }
 
+  @Override
   public void accept(@NotNull PsiElementVisitor visitor) {
     if (visitor instanceof XVisitor) accept((XVisitor)visitor);
     else super.accept(visitor);
@@ -1632,10 +1679,12 @@ public class XWrappingStatementImpl extends XStatementImpl implements XWrappingS
     super(node);
   }
 
+  @Override
   public void accept(@NotNull XVisitor visitor) {
     visitor.visitWrappingStatement(this);
   }
 
+  @Override
   public void accept(@NotNull PsiElementVisitor visitor) {
     if (visitor instanceof XVisitor) accept((XVisitor)visitor);
     else super.accept(visitor);

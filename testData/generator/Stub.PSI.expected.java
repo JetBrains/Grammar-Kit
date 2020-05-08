@@ -219,6 +219,7 @@ public class Element1Impl extends GenericBase<Element1Stub> implements Element1 
     visitor.visitElement1(this);
   }
 
+  @Override
   public void accept(@NotNull PsiElementVisitor visitor) {
     if (visitor instanceof Visitor) accept((Visitor)visitor);
     else super.accept(visitor);
@@ -266,6 +267,7 @@ public class Element2Impl extends StubBasedPsiElementBase<Element2Stub> implemen
     visitor.visitElement2(this);
   }
 
+  @Override
   public void accept(@NotNull PsiElementVisitor visitor) {
     if (visitor instanceof Visitor) accept((Visitor)visitor);
     else super.accept(visitor);
@@ -313,6 +315,7 @@ public class Element3Impl extends StubBasedPsiElementBase<Element3Stub> implemen
     visitor.visitElement3(this);
   }
 
+  @Override
   public void accept(@NotNull PsiElementVisitor visitor) {
     if (visitor instanceof Visitor) accept((Visitor)visitor);
     else super.accept(visitor);
@@ -360,6 +363,7 @@ public class Element4Impl extends StubBasedPsiElementBase<Element4Stub> implemen
     visitor.visitElement4(this);
   }
 
+  @Override
   public void accept(@NotNull PsiElementVisitor visitor) {
     if (visitor instanceof Visitor) accept((Visitor)visitor);
     else super.accept(visitor);
@@ -396,6 +400,7 @@ public class Element5Impl extends ASTWrapperPsiElement implements Element5 {
     visitor.visitElement5(this);
   }
 
+  @Override
   public void accept(@NotNull PsiElementVisitor visitor) {
     if (visitor instanceof Visitor) accept((Visitor)visitor);
     else super.accept(visitor);
@@ -432,10 +437,12 @@ public class InterfaceTypeImpl extends TypeImpl implements InterfaceType {
     super(stub, type, node);
   }
 
+  @Override
   public void accept(@NotNull Visitor visitor) {
     visitor.visitInterfaceType(this);
   }
 
+  @Override
   public void accept(@NotNull PsiElementVisitor visitor) {
     if (visitor instanceof Visitor) accept((Visitor)visitor);
     else super.accept(visitor);
@@ -472,6 +479,7 @@ public class MissingImpl extends MissingBase implements Missing {
     visitor.visitMissing(this);
   }
 
+  @Override
   public void accept(@NotNull PsiElementVisitor visitor) {
     if (visitor instanceof Visitor) accept((Visitor)visitor);
     else super.accept(visitor);
@@ -508,6 +516,7 @@ public class SimpleImpl extends SimpleBase implements Simple {
     visitor.visitSimple(this);
   }
 
+  @Override
   public void accept(@NotNull PsiElementVisitor visitor) {
     if (visitor instanceof Visitor) accept((Visitor)visitor);
     else super.accept(visitor);
@@ -544,10 +553,12 @@ public class StructTypeImpl extends TypeImpl implements StructType {
     super(stub, type, node);
   }
 
+  @Override
   public void accept(@NotNull Visitor visitor) {
     visitor.visitStructType(this);
   }
 
+  @Override
   public void accept(@NotNull PsiElementVisitor visitor) {
     if (visitor instanceof Visitor) accept((Visitor)visitor);
     else super.accept(visitor);
@@ -589,6 +600,7 @@ public abstract class TypeImpl extends GenericBase<TypeStub> implements Type {
     visitor.visitType(this);
   }
 
+  @Override
   public void accept(@NotNull PsiElementVisitor visitor) {
     if (visitor instanceof Visitor) accept((Visitor)visitor);
     else super.accept(visitor);

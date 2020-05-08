@@ -454,6 +454,7 @@ public class BnfAttrImpl extends BnfNamedImpl implements BnfAttr {
     return visitor.visitAttr(this);
   }
 
+  @Override
   public void accept(@NotNull PsiElementVisitor visitor) {
     if (visitor instanceof BnfVisitor) accept((BnfVisitor)visitor);
     else super.accept(visitor);
@@ -502,6 +503,7 @@ public class BnfAttrPatternImpl extends BnfCompositeImpl implements BnfAttrPatte
     return visitor.visitAttrPattern(this);
   }
 
+  @Override
   public void accept(@NotNull PsiElementVisitor visitor) {
     if (visitor instanceof BnfVisitor) accept((BnfVisitor)visitor);
     else super.accept(visitor);
@@ -538,6 +540,7 @@ public class BnfAttrsImpl extends BnfCompositeImpl implements BnfAttrs {
     return visitor.visitAttrs(this);
   }
 
+  @Override
   public void accept(@NotNull PsiElementVisitor visitor) {
     if (visitor instanceof BnfVisitor) accept((BnfVisitor)visitor);
     else super.accept(visitor);
@@ -570,10 +573,12 @@ public class BnfChoiceImpl extends BnfExpressionImpl implements BnfChoice {
     super(type);
   }
 
+  @Override
   public <R> R accept(@NotNull BnfVisitor<R> visitor) {
     return visitor.visitChoice(this);
   }
 
+  @Override
   public void accept(@NotNull PsiElementVisitor visitor) {
     if (visitor instanceof BnfVisitor) accept((BnfVisitor)visitor);
     else super.accept(visitor);
@@ -610,6 +615,7 @@ public abstract class BnfExpressionImpl extends BnfCompositeImpl implements BnfE
     return visitor.visitExpression(this);
   }
 
+  @Override
   public void accept(@NotNull PsiElementVisitor visitor) {
     if (visitor instanceof BnfVisitor) accept((BnfVisitor)visitor);
     else super.accept(visitor);
@@ -636,10 +642,12 @@ public class BnfExternalExpressionImpl extends BnfExpressionImpl implements BnfE
     super(type);
   }
 
+  @Override
   public <R> R accept(@NotNull BnfVisitor<R> visitor) {
     return visitor.visitExternalExpression(this);
   }
 
+  @Override
   public void accept(@NotNull PsiElementVisitor visitor) {
     if (visitor instanceof BnfVisitor) accept((BnfVisitor)visitor);
     else super.accept(visitor);
@@ -690,6 +698,7 @@ public class BnfListEntryImpl extends BnfCompositeImpl implements BnfListEntry {
     return visitor.visitListEntry(this);
   }
 
+  @Override
   public void accept(@NotNull PsiElementVisitor visitor) {
     if (visitor instanceof BnfVisitor) accept((BnfVisitor)visitor);
     else super.accept(visitor);
@@ -734,10 +743,12 @@ public class BnfLiteralExpressionImpl extends BnfExpressionImpl implements BnfLi
     super(type);
   }
 
+  @Override
   public <R> R accept(@NotNull BnfVisitor<R> visitor) {
     return visitor.visitLiteralExpression(this);
   }
 
+  @Override
   public void accept(@NotNull PsiElementVisitor visitor) {
     if (visitor instanceof BnfVisitor) accept((BnfVisitor)visitor);
     else super.accept(visitor);
@@ -774,6 +785,7 @@ public class BnfModifierImpl extends BnfCompositeImpl implements BnfModifier {
     return visitor.visitModifier(this);
   }
 
+  @Override
   public void accept(@NotNull PsiElementVisitor visitor) {
     if (visitor instanceof BnfVisitor) accept((BnfVisitor)visitor);
     else super.accept(visitor);
@@ -800,10 +812,12 @@ public class BnfParenExpressionImpl extends BnfParenthesizedImpl implements BnfP
     super(type);
   }
 
+  @Override
   public <R> R accept(@NotNull BnfVisitor<R> visitor) {
     return visitor.visitParenExpression(this);
   }
 
+  @Override
   public void accept(@NotNull PsiElementVisitor visitor) {
     if (visitor instanceof BnfVisitor) accept((BnfVisitor)visitor);
     else super.accept(visitor);
@@ -830,10 +844,12 @@ public class BnfParenOptExpressionImpl extends BnfParenthesizedImpl implements B
     super(type);
   }
 
+  @Override
   public <R> R accept(@NotNull BnfVisitor<R> visitor) {
     return visitor.visitParenOptExpression(this);
   }
 
+  @Override
   public void accept(@NotNull PsiElementVisitor visitor) {
     if (visitor instanceof BnfVisitor) accept((BnfVisitor)visitor);
     else super.accept(visitor);
@@ -860,10 +876,12 @@ public class BnfParenthesizedImpl extends BnfExpressionImpl implements BnfParent
     super(type);
   }
 
+  @Override
   public <R> R accept(@NotNull BnfVisitor<R> visitor) {
     return visitor.visitParenthesized(this);
   }
 
+  @Override
   public void accept(@NotNull PsiElementVisitor visitor) {
     if (visitor instanceof BnfVisitor) accept((BnfVisitor)visitor);
     else super.accept(visitor);
@@ -896,10 +914,12 @@ public class BnfPredicateImpl extends BnfExpressionImpl implements BnfPredicate 
     super(type);
   }
 
+  @Override
   public <R> R accept(@NotNull BnfVisitor<R> visitor) {
     return visitor.visitPredicate(this);
   }
 
+  @Override
   public void accept(@NotNull PsiElementVisitor visitor) {
     if (visitor instanceof BnfVisitor) accept((BnfVisitor)visitor);
     else super.accept(visitor);
@@ -942,6 +962,7 @@ public class BnfPredicateSignImpl extends BnfCompositeImpl implements BnfPredica
     return visitor.visitPredicateSign(this);
   }
 
+  @Override
   public void accept(@NotNull PsiElementVisitor visitor) {
     if (visitor instanceof BnfVisitor) accept((BnfVisitor)visitor);
     else super.accept(visitor);
@@ -968,10 +989,12 @@ public class BnfQuantifiedImpl extends BnfExpressionImpl implements BnfQuantifie
     super(type);
   }
 
+  @Override
   public <R> R accept(@NotNull BnfVisitor<R> visitor) {
     return visitor.visitQuantified(this);
   }
 
+  @Override
   public void accept(@NotNull PsiElementVisitor visitor) {
     if (visitor instanceof BnfVisitor) accept((BnfVisitor)visitor);
     else super.accept(visitor);
@@ -1014,6 +1037,7 @@ public class BnfQuantifierImpl extends BnfCompositeImpl implements BnfQuantifier
     return visitor.visitQuantifier(this);
   }
 
+  @Override
   public void accept(@NotNull PsiElementVisitor visitor) {
     if (visitor instanceof BnfVisitor) accept((BnfVisitor)visitor);
     else super.accept(visitor);
@@ -1044,6 +1068,7 @@ public class BnfReferenceOrTokenImpl extends BnfRefOrTokenImpl implements BnfRef
     return visitor.visitReferenceOrToken(this);
   }
 
+  @Override
   public void accept(@NotNull PsiElementVisitor visitor) {
     if (visitor instanceof BnfVisitor) accept((BnfVisitor)visitor);
     else super.accept(visitor);
@@ -1080,6 +1105,7 @@ public class BnfRuleImpl extends BnfNamedImpl implements BnfRule {
     return visitor.visitRule(this);
   }
 
+  @Override
   public void accept(@NotNull PsiElementVisitor visitor) {
     if (visitor instanceof BnfVisitor) accept((BnfVisitor)visitor);
     else super.accept(visitor);
@@ -1130,10 +1156,12 @@ public class BnfSequenceImpl extends BnfExpressionImpl implements BnfSequence {
     super(type);
   }
 
+  @Override
   public <R> R accept(@NotNull BnfVisitor<R> visitor) {
     return visitor.visitSequence(this);
   }
 
+  @Override
   public void accept(@NotNull PsiElementVisitor visitor) {
     if (visitor instanceof BnfVisitor) accept((BnfVisitor)visitor);
     else super.accept(visitor);
@@ -1170,6 +1198,7 @@ public class BnfStringLiteralExpressionImpl extends BnfStringImpl implements Bnf
     return visitor.visitStringLiteralExpression(this);
   }
 
+  @Override
   public void accept(@NotNull PsiElementVisitor visitor) {
     if (visitor instanceof BnfVisitor) accept((BnfVisitor)visitor);
     else super.accept(visitor);
@@ -1202,10 +1231,12 @@ public class BnfValueListImpl extends BnfExpressionImpl implements BnfValueList 
     super(type);
   }
 
+  @Override
   public <R> R accept(@NotNull BnfVisitor<R> visitor) {
     return visitor.visitValueList(this);
   }
 
+  @Override
   public void accept(@NotNull PsiElementVisitor visitor) {
     if (visitor instanceof BnfVisitor) accept((BnfVisitor)visitor);
     else super.accept(visitor);

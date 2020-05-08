@@ -1756,6 +1756,7 @@ public class ParserGenerator {
     Set<BnfRule> visited = new HashSet<>();
     List<NavigatablePsiElement> constructors = Collections.emptyList();
     BnfRule topSuperRule = null;
+    String topSuperClass = null;
     for (BnfRule next = rule; next != null && next != topSuperRule; ) {
       if (!visited.add(next)) {
         ParserGeneratorUtil.addWarning(myFile.getProject(), rule.getName() + " employs cyclic inheritance");
@@ -1766,7 +1767,8 @@ public class ParserGenerator {
       if (superClass == null) continue;
       next = getEffectiveSuperRule(myFile, next);
       if (next != null && next != topSuperRule && getAttribute(topSuperRule, KnownAttribute.MIXIN) == null) continue;
-      constructors = myJavaHelper.findClassMethods(getRawClassName(superClass), JavaHelper.MethodType.CONSTRUCTOR, "*", -1);
+      topSuperClass = getRawClassName(superClass);
+      constructors = myJavaHelper.findClassMethods(topSuperClass, JavaHelper.MethodType.CONSTRUCTOR, "*", -1);
       if (!constructors.isEmpty()) break;
     }
     for (NavigatablePsiElement m : constructors) {
@@ -1817,11 +1819,17 @@ public class ParserGenerator {
       String r = G.visitorValue != null ? "<" + G.visitorValue + ">" : "";
       String t = G.visitorValue != null ? " " + G.visitorValue : "void";
       String ret = G.visitorValue != null ? "return " : "";
+      if (topSuperRule != rule ||
+          topSuperClass != null && !myJavaHelper.findClassMethods(
+            topSuperClass, JavaHelper.MethodType.INSTANCE, "accept", 1, myVisitorClassName).isEmpty()) {
+        out("@Override");
+      }
       out("public " + r + t + " accept(@NotNull " + shortened + r + " visitor) {");
       out(ret + "visitor.visit" + getRulePsiClassName(rule, null) + "(this);");
       out("}");
       newLine();
       //if (topSuperRule == rule) {
+        out("@Override");
         out("public void accept(@NotNull " + myShortener.fun(PSI_ELEMENT_VISITOR_CLASS) + " visitor) {");
         out("if (visitor instanceof " + shortened + ") accept((" + shortened + ")visitor);");
         out("else super.accept(visitor);");

@@ -240,7 +240,7 @@ public abstract class JavaHelper {
       PsiModifierList modifierList = method.getModifierList();
       return (methodType == MethodType.STATIC) == modifierList.hasModifierProperty(PsiModifier.STATIC) &&
              !modifierList.hasModifierProperty(PsiModifier.ABSTRACT) &&
-             !(methodType == MethodType.CONSTRUCTOR && modifierList.hasModifierProperty(PsiModifier.PROTECTED));
+             !(methodType == MethodType.CONSTRUCTOR && modifierList.hasModifierProperty(PsiModifier.PRIVATE));
     }
 
     @NotNull

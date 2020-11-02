@@ -55,22 +55,21 @@ public class BnfStringRefContributor extends PsiReferenceContributor {
     );
 
     registrar.registerReferenceProvider(
-      psiElement(BnfStringImpl.class).withParent(psiElement(BnfAttr.class).withName(
-        or(string().endsWith("Class"), string().endsWith("Package"), string().endsWith("TypeFactory"), 
+      psiElement(BnfStringImpl.class).withAncestor(3, psiElement(BnfAttr.class).withName(
+        or(string().endsWith("Class"), string().endsWith("Package"), string().endsWith("TypeFactory"),
            string().with(oneOf(JAVA_CLASS_ATTRIBUTES))))),
       new PsiReferenceProvider() {
 
         @NotNull
         @Override
         public PsiReference[] getReferencesByElement(@NotNull PsiElement element, @NotNull ProcessingContext context) {
-          PsiReferenceProvider provider = JavaHelper.getJavaHelper(element).getClassReferenceProvider();
-          return provider == null ? PsiReference.EMPTY_ARRAY : provider.getReferencesByElement(element, new ProcessingContext());
+          return JavaHelper.getJavaHelper(element).getClassReferences(element, context);
         }
       });
   }
 
   private static PatternCondition<String> oneOf(Set<KnownAttribute<?>> attributes) {
-    return new PatternCondition<String>("oneOf") {
+    return new PatternCondition<>("oneOf") {
       @Override
       public boolean accepts(@NotNull String s, ProcessingContext context) {
         return attributes.contains(KnownAttribute.getCompatibleAttribute(s));

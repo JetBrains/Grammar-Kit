@@ -16,11 +16,14 @@ import com.intellij.psi.*;
 import com.intellij.psi.impl.FakePsiElement;
 import com.intellij.psi.impl.source.resolve.reference.impl.providers.JavaClassReferenceProvider;
 import com.intellij.psi.search.GlobalSearchScope;
-import com.intellij.util.ArrayUtil;
-import com.intellij.util.IncorrectOperationException;
-import com.intellij.util.ObjectUtils;
-import com.intellij.util.SmartList;
+import com.intellij.psi.util.PsiTreeUtil;
+import com.intellij.util.*;
 import com.intellij.util.containers.ContainerUtil;
+import org.intellij.grammar.KnownAttribute;
+import org.intellij.grammar.generator.ParserGeneratorUtil;
+import org.intellij.grammar.psi.BnfAttr;
+import org.intellij.grammar.psi.BnfRule;
+import org.intellij.grammar.psi.impl.GrammarUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.org.objectweb.asm.*;
@@ -32,6 +35,8 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.lang.reflect.*;
 import java.util.*;
+
+import static org.intellij.grammar.generator.ParserGeneratorUtil.getRootAttribute;
 
 /**
  * @author gregsh
@@ -100,9 +105,9 @@ public abstract class JavaHelper {
     return Collections.emptyList();
   }
 
-  @Nullable
-  public PsiReferenceProvider getClassReferenceProvider() {
-    return null;
+  @NotNull
+  public PsiReference[] getClassReferences(@NotNull PsiElement element, @NotNull ProcessingContext context) {
+    return PsiReference.EMPTY_ARRAY;
   }
 
   @Nullable
@@ -129,14 +134,28 @@ public abstract class JavaHelper {
       myElementFactory = elementFactory;
     }
 
+    @NotNull
     @Override
-    public PsiReferenceProvider getClassReferenceProvider() {
+    public PsiReference[] getClassReferences(@NotNull PsiElement element, @NotNull ProcessingContext context) {
+      BnfAttr bnfAttr = PsiTreeUtil.getParentOfType(element, BnfAttr.class);
+      KnownAttribute<?> attr = bnfAttr == null ? null : KnownAttribute.getAttribute(bnfAttr.getName());
       JavaClassReferenceProvider provider = new JavaClassReferenceProvider();
       provider.setOption(JavaClassReferenceProvider.ALLOW_DOLLAR_NAMES, false);
       provider.setOption(JavaClassReferenceProvider.ADVANCED_RESOLVE, true);
-      provider.setOption(JavaClassReferenceProvider.IMPORTS, Collections.singletonList(CommonClassNames.DEFAULT_PACKAGE));
+      if (attr == KnownAttribute.EXTENDS || attr == KnownAttribute.IMPLEMENTS || attr == KnownAttribute.STUB_CLASS) {
+        provider.setOption(JavaClassReferenceProvider.IMPORTS, Arrays.asList(
+          CommonClassNames.DEFAULT_PACKAGE, getRootAttribute(element, KnownAttribute.PSI_PACKAGE)));
+      }
+      else if (attr == KnownAttribute.MIXIN) {
+        provider.setOption(JavaClassReferenceProvider.IMPORTS, Arrays.asList(
+          CommonClassNames.DEFAULT_PACKAGE, getRootAttribute(element, KnownAttribute.PSI_PACKAGE),
+          getRootAttribute(element, KnownAttribute.PSI_IMPL_PACKAGE)));
+      }
+      else if (attr != null && attr.getName().endsWith("Class")) {
+        provider.setOption(JavaClassReferenceProvider.IMPORTS, Collections.singletonList(CommonClassNames.DEFAULT_PACKAGE));
+      }
       provider.setSoft(false);
-      return provider;
+      return provider.getReferencesByElement(element, context);
     }
 
     @Nullable

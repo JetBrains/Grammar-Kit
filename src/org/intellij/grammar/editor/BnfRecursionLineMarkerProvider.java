@@ -40,12 +40,12 @@ import java.util.Map;
 public class BnfRecursionLineMarkerProvider implements LineMarkerProvider {
   @Nullable
   @Override
-  public LineMarkerInfo getLineMarkerInfo(@NotNull PsiElement element) {
+  public LineMarkerInfo<?> getLineMarkerInfo(@NotNull PsiElement element) {
     return null;
   }
 
   @Override
-  public void collectSlowLineMarkers(@NotNull List<PsiElement> elements, @NotNull Collection<LineMarkerInfo> result) {
+  public void collectSlowLineMarkers(@NotNull List<? extends PsiElement> elements, @NotNull Collection<? super LineMarkerInfo<?>> result) {
     for (PsiElement element : elements) {
       if (!(element instanceof BnfRule)) continue;
       BnfRule rule = (BnfRule)element;

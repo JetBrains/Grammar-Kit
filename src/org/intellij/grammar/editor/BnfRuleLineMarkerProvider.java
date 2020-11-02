@@ -51,8 +51,8 @@ import java.util.Set;
 public class BnfRuleLineMarkerProvider extends RelatedItemLineMarkerProvider {
 
   @Override
-  public void collectNavigationMarkers(@NotNull List<PsiElement> elements,
-                                       @NotNull Collection<? super RelatedItemLineMarkerInfo> result,
+  public void collectNavigationMarkers(@NotNull List<? extends PsiElement> elements,
+                                       @NotNull Collection<? super RelatedItemLineMarkerInfo<?>> result,
                                        boolean forNavigation) {
     Set<PsiElement> visited = forNavigation ? new THashSet<>() : null;
     for (PsiElement element : elements) {

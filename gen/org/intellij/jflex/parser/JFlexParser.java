@@ -1,17 +1,5 @@
 /*
- * Copyright 2011-present Greg Shrago
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Copyright 2011-present JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
  */
 package org.intellij.jflex.parser;
 
@@ -1335,7 +1323,6 @@ public class JFlexParser implements PsiParser, LightPsiParser {
   private static boolean rule_recover_0(PsiBuilder builder, int level) {
     if (!recursion_guard_(builder, level, "rule_recover_0")) return false;
     boolean result;
-    Marker marker = enter_section_(builder);
     result = consumeToken(builder, FLEX_BRACE2);
     if (!result) result = consumeToken(builder, FLEX_DOT);
     if (!result) result = consumeToken(builder, FLEX_ANGLE1);
@@ -1343,7 +1330,6 @@ public class JFlexParser implements PsiParser, LightPsiParser {
     if (!result) result = consumeToken(builder, FLEX_HAT);
     if (!result) result = new_line(builder, level + 1);
     if (!result) result = expression(builder, level + 1, 4);
-    exit_section_(builder, marker, null, result);
     return result;
   }
 
@@ -1530,10 +1516,8 @@ public class JFlexParser implements PsiParser, LightPsiParser {
   private static boolean state_declaration_0(PsiBuilder builder, int level) {
     if (!recursion_guard_(builder, level, "state_declaration_0")) return false;
     boolean result;
-    Marker marker = enter_section_(builder);
     result = consumeToken(builder, FLEX_OPT_STATE);
     if (!result) result = consumeToken(builder, FLEX_OPT_XSTATE);
-    exit_section_(builder, marker, null, result);
     return result;
   }
 
@@ -1796,10 +1780,8 @@ public class JFlexParser implements PsiParser, LightPsiParser {
   private static boolean not_expression_0(PsiBuilder builder, int level) {
     if (!recursion_guard_(builder, level, "not_expression_0")) return false;
     boolean result;
-    Marker marker = enter_section_(builder);
     result = consumeTokenSmart(builder, FLEX_BANG);
     if (!result) result = consumeTokenSmart(builder, FLEX_TILDE);
-    exit_section_(builder, marker, null, result);
     return result;
   }
 

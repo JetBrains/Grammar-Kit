@@ -1,17 +1,5 @@
 /*
- * Copyright 2011-present Greg Shrago
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Copyright 2011-present JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
  */
 package org.intellij.grammar.parser;
 
@@ -128,10 +116,8 @@ public class GrammarParser implements PsiParser, LightPsiParser {
   private static boolean attr_recover_0(PsiBuilder builder, int level) {
     if (!recursion_guard_(builder, level, "attr_recover_0")) return false;
     boolean result;
-    Marker marker = enter_section_(builder);
     result = consumeToken(builder, BNF_RIGHT_BRACE);
     if (!result) result = attr_start(builder, level + 1);
-    exit_section_(builder, marker, null, result);
     return result;
   }
 
@@ -375,10 +361,8 @@ public class GrammarParser implements PsiParser, LightPsiParser {
   private static boolean grammar_element_recover_0(PsiBuilder builder, int level) {
     if (!recursion_guard_(builder, level, "grammar_element_recover_0")) return false;
     boolean result;
-    Marker marker = enter_section_(builder);
     result = consumeToken(builder, BNF_LEFT_BRACE);
     if (!result) result = rule_start(builder, level + 1);
-    exit_section_(builder, marker, null, result);
     return result;
   }
 
@@ -445,12 +429,10 @@ public class GrammarParser implements PsiParser, LightPsiParser {
   private static boolean list_entry_recover_0(PsiBuilder builder, int level) {
     if (!recursion_guard_(builder, level, "list_entry_recover_0")) return false;
     boolean result;
-    Marker marker = enter_section_(builder);
     result = consumeToken(builder, BNF_RIGHT_BRACKET);
     if (!result) result = consumeToken(builder, BNF_RIGHT_BRACE);
     if (!result) result = consumeToken(builder, BNF_ID);
     if (!result) result = consumeToken(builder, BNF_STRING);
-    exit_section_(builder, marker, null, result);
     return result;
   }
 
@@ -738,7 +720,6 @@ public class GrammarParser implements PsiParser, LightPsiParser {
   private static boolean sequence_recover_0_0(PsiBuilder builder, int level) {
     if (!recursion_guard_(builder, level, "sequence_recover_0_0")) return false;
     boolean result;
-    Marker marker = enter_section_(builder);
     result = consumeToken(builder, BNF_SEMICOLON);
     if (!result) result = consumeToken(builder, BNF_OP_OR);
     if (!result) result = consumeToken(builder, BNF_LEFT_PAREN);
@@ -747,7 +728,6 @@ public class GrammarParser implements PsiParser, LightPsiParser {
     if (!result) result = consumeToken(builder, BNF_RIGHT_BRACKET);
     if (!result) result = consumeToken(builder, BNF_LEFT_BRACE);
     if (!result) result = consumeToken(builder, BNF_RIGHT_BRACE);
-    exit_section_(builder, marker, null, result);
     return result;
   }
 

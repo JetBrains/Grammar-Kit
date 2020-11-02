@@ -54,6 +54,7 @@ public class BnfHighlightingTest extends BasePlatformTestCase {
   public void testUnusedRule3() { doTest("r ::= B fake <warning>A</warning> ::= B ::= "); }
   public void testUnusedRule4() { doTest("r ::= {recoverWhile=A} private A ::= "); }
   public void testUnusedRule5() { doTest("r ::= {recoverWhile=A} <warning>A</warning> ::= "); }
+  public void testExternalMethod() { doTest("r ::= <<m <<<warning>EOF</warning>>>>> meta m ::= <<p>>"); }
   public void testMissingRecover() { doTest("r ::= m m ::= {recoverWhile=\"<warning>missing</warning>\"}"); }
   public void testAutoRecover() { doTest("r ::= m m ::= {recoverWhile=\"#auto\"}"); }
   public void testMetaRecover() { doTest("r ::= <<m recover>> meta m ::= {recoverWhile=\"<<param>>\"} recover ::= "); }

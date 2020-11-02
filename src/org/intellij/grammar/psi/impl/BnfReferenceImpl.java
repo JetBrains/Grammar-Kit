@@ -38,6 +38,15 @@ public class BnfReferenceImpl<T extends BnfComposite> extends PsiReferenceBase<T
     boolean isExternal = GrammarUtil.isExternalReference(myElement);
     PsiElement result = containingFile instanceof BnfFile? ((BnfFile)containingFile).getRule(referenceName) : null;
     if (result != null || !isExternal) return result;
+    PsiElement parent = myElement.getParent();
+    if (parent instanceof BnfExternalExpression) {
+      BnfRule rule = ParserGeneratorUtil.Rule.of((BnfExpression)parent);
+      if (((BnfExternalExpression)parent).getArguments().isEmpty() &&
+          (ParserGeneratorUtil.Rule.isMeta(rule) || ParserGeneratorUtil.Rule.isExternal(rule))) {
+        // todo resolve to fake named element; support meta recover attr
+        return myElement;
+      }
+    }
 
     return resolveMethod();
   }

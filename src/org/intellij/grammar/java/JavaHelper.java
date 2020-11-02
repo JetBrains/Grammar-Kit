@@ -223,8 +223,10 @@ public abstract class JavaHelper {
                                          PsiMethod method,
                                          int paramCount,
                                          String... paramTypes) {
+      boolean varArgs = method.isVarArgs();
       PsiParameterList parameterList = method.getParameterList();
-      if (paramCount >= 0 && paramCount != parameterList.getParametersCount()) return false;
+      if (paramCount >= 0 && (!varArgs && paramCount != parameterList.getParametersCount() ||
+                              varArgs && paramCount < parameterList.getParametersCount() - 1)) return false;
       if (paramTypes.length == 0) return true;
       if (parameterList.getParametersCount() < paramTypes.length) return false;
       PsiParameter[] psiParameters = parameterList.getParameters();

@@ -1,7 +1,7 @@
 {
   parserClass="ExternalRules"
   generatePsi=false
-  parserUtilClass="org.intellij.grammar.parser.GeneratedParserUtilBase"
+  parserUtilClass="org.intellij.grammar.test.ParserUtil"
   tokens=[
     perc='%'
     paren1='('

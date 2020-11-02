@@ -5,7 +5,7 @@ package ;
 import com.intellij.lang.PsiBuilder;
 import com.intellij.lang.PsiBuilder.Marker;
 import static generated.GeneratedTypes.*;
-import static org.intellij.grammar.parser.GeneratedParserUtilBase.*;
+import static org.intellij.grammar.test.ParserUtil.*;
 import com.intellij.psi.tree.IElementType;
 import com.intellij.lang.ASTNode;
 import com.intellij.psi.tree.TokenSet;
@@ -911,7 +911,7 @@ package ;
 import com.intellij.lang.PsiBuilder;
 import com.intellij.lang.PsiBuilder.Marker;
 import static generated.GeneratedTypes.*;
-import static org.intellij.grammar.parser.GeneratedParserUtilBase.*;
+import static org.intellij.grammar.test.ParserUtil.*;
 import static ExternalRules.*;
 
 @SuppressWarnings({"SimplifiableIfStatement", "UnusedAssignment"})
@@ -988,7 +988,7 @@ package ;
 import com.intellij.lang.PsiBuilder;
 import com.intellij.lang.PsiBuilder.Marker;
 import static generated.GeneratedTypes.*;
-import static org.intellij.grammar.parser.GeneratedParserUtilBase.*;
+import static org.intellij.grammar.test.ParserUtil.*;
 import static ExternalRules.*;
 
 @SuppressWarnings({"SimplifiableIfStatement", "UnusedAssignment"})

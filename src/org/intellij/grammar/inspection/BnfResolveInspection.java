@@ -47,8 +47,13 @@ public class BnfResolveInspection extends LocalInspectionTool {
         else {
           PsiReference reference = o.getReference();
           Object resolve = reference == null ? null : reference.resolve();
-          if (resolve == null && parent instanceof BnfAttr) {
-            holder.registerProblem(o, "Unresolved rule reference");
+          if (resolve == null) {
+            if (parent instanceof BnfAttr) {
+              holder.registerProblem(o, "Unresolved rule reference");
+            }
+            else if (GrammarUtil.isExternalReference(o)) {
+              holder.registerProblem(o, "Unresolved rule or method reference");
+            }
           }
         }
 

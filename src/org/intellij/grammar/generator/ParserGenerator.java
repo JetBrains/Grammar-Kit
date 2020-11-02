@@ -312,7 +312,7 @@ public class ParserGenerator {
   protected PrintWriter openOutputInner(File file) throws IOException {
     //noinspection ResultOfMethodCallIgnored
     file.getParentFile().mkdirs();
-    return new PrintWriter(new FileOutputStream(file));
+    return new PrintWriter(new FileOutputStream(file), false, myFile.getVirtualFile().getCharset());
   }
 
   private void closeOutput() {

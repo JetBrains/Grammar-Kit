@@ -61,7 +61,7 @@ public class BnfGeneratorTest extends BnfGeneratorTestCase {
         File targetFile = new File(FileUtilRt.getTempDirectory(), name);
         targetFile.getParentFile().mkdirs();
         FileOutputStream outputStream = new FileOutputStream(targetFile, true);
-        PrintWriter out = new PrintWriter(new OutputStreamWriter(outputStream, CharsetToolkit.UTF8));
+        PrintWriter out = new PrintWriter(new OutputStreamWriter(outputStream, myFile.getVirtualFile().getCharset()));
         out.println("// ---- " + file.getName() + " -----------------");
         return out;
       }

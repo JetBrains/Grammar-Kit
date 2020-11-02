@@ -257,11 +257,11 @@ public abstract class JavaHelper {
       PsiMethod psiMethod = (PsiMethod)method;
       PsiType returnType = psiMethod.getReturnType();
       List<String> strings = new ArrayList<>();
-      strings.add(returnType == null ? "" : returnType.getCanonicalText());
+      strings.add(returnType == null ? "" : returnType.getCanonicalText(true));
       for (PsiParameter parameter : psiMethod.getParameterList().getParameters()) {
         PsiType type = parameter.getType();
         boolean generic = type instanceof PsiClassType && ((PsiClassType)type).resolve() instanceof PsiTypeParameter;
-        String typeText = (generic ? "<" : "") + type.getCanonicalText(false) + (generic ? ">" : "");
+        String typeText = (generic ? "<" : "") + type.getCanonicalText(true) + (generic ? ">" : "");
         strings.add(typeText);
         strings.add(parameter.getName());
       }
@@ -316,9 +316,13 @@ public abstract class JavaHelper {
     private static List<String> getAnnotationsInner(PsiModifierListOwner element) {
       PsiModifierList modifierList = element.getModifierList();
       if (modifierList == null) return Collections.emptyList();
+      PsiType typeToSkip = element instanceof PsiMethod ? ((PsiMethod)element).getReturnType() :
+                           element instanceof PsiVariable ? ((PsiVariable)element).getType() : null;
+      PsiAnnotation[] annoToSkip = typeToSkip == null ? null : typeToSkip.getAnnotations();
       List<String> result = new ArrayList<>();
       for (PsiAnnotation annotation : modifierList.getAnnotations()) {
         if (annotation.getParameterList().getAttributes().length > 0) continue;
+        if (annoToSkip != null && ArrayUtil.indexOf(annoToSkip, annotation) != - 1) continue;
         ContainerUtil.addIfNotNull(result, annotation.getQualifiedName());
       }
       return result;
@@ -705,7 +709,7 @@ public abstract class JavaHelper {
                                 Modifier.isStatic(access) ? MethodType.STATIC :
                                 MethodType.INSTANCE;
         myInfo.methods.add(m);
-        return new MethodVisitor(Opcodes.ASM5) {
+        return new MethodVisitor(ASM_OPCODES) {
           @Override
           public AnnotationVisitor visitAnnotation(final String desc, boolean visible) {
             return new MyAnnotationVisitor() {
@@ -733,6 +737,12 @@ public abstract class JavaHelper {
               }
             };
           }
+
+          @Override
+          public AnnotationVisitor visitTypeAnnotation(int typeRef, TypePath typePath, String descriptor, boolean visible) {
+            // TODO
+            return super.visitTypeAnnotation(typeRef, typePath, descriptor, visible);
+          }
         };
       }
 
@@ -740,7 +750,7 @@ public abstract class JavaHelper {
         int annoParamCounter;
 
         MyAnnotationVisitor() {
-          super(Opcodes.ASM5);
+          super(ASM_OPCODES);
         }
 
         @Override
@@ -781,7 +791,7 @@ public abstract class JavaHelper {
       final StringBuilder sb = new StringBuilder();
 
       MySignatureVisitor(MethodInfo methodInfo) {
-        super(Opcodes.ASM5);
+        super(ASM_OPCODES);
         this.methodInfo = methodInfo;
       }
 

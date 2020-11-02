@@ -42,6 +42,8 @@ import static java.util.stream.Collectors.*;
 import static org.intellij.grammar.analysis.BnfFirstNextAnalyzer.BNF_MATCHES_ANY;
 import static org.intellij.grammar.analysis.BnfFirstNextAnalyzer.BNF_MATCHES_EOF;
 import static org.intellij.grammar.generator.BnfConstants.*;
+import static org.intellij.grammar.generator.NameShortener.addTypeToImports;
+import static org.intellij.grammar.generator.NameShortener.getRawClassName;
 import static org.intellij.grammar.generator.ParserGeneratorUtil.*;
 import static org.intellij.grammar.generator.RuleGraphHelper.Cardinality.*;
 import static org.intellij.grammar.generator.RuleGraphHelper.getSynonymTargetOrSelf;
@@ -55,8 +57,6 @@ import static org.intellij.grammar.psi.BnfTypes.*;
  */
 public class ParserGenerator {
   public static final Logger LOG = Logger.getInstance("ParserGenerator");
-
-  private static final String TYPE_TEXT_SEPARATORS = "<>,[]";
 
   private static final Function<String, String> genericUnwrapper = type -> {
     if (type.startsWith("<") && type.endsWith(">")) {
@@ -146,7 +146,7 @@ public class ParserGenerator {
 
   private int myOffset;
   private PrintWriter myOut;
-  private Function<String, String> myShortener;
+  private NameShortener myShortener;
 
   private final RuleGraphHelper myGraphHelper;
   private final ExpressionHelper myExpressionHelper;
@@ -464,8 +464,7 @@ public class ParserGenerator {
       boolean first = true;
       for (String top : supers.get(rule.getName())) {
         if (!first && top.equals(superIntf)) continue;
-        int trimIdx = StringUtil.indexOfAny(top, TYPE_TEXT_SEPARATORS); // trim generics
-        top = myShortener.fun(trimIdx > 0 ? top.substring(0, trimIdx) : top);
+        top = myShortener.shorten(getRawClassName(top));
         if (first) all.add(top);
         top = myIntfClassFormat.strip(top);
         String text = "visit" + top + "(o);";
@@ -484,7 +483,7 @@ public class ParserGenerator {
     for (String top : JBIterable.from(all).append(shortSuperIntf)) {
       String methodName = myIntfClassFormat.strip(top);
       if (visited.contains(methodName)) continue;
-      out("public " + t + " visit" + methodName + "(@NotNull " + myShortener.fun(top) + " o) {");
+      out("public " + t + " visit" + methodName + "(@NotNull " + myShortener.shorten(top) + " o) {");
       if (!methodName.equals(top) && !top.equals(shortSuperIntf)) {
         out(ret + "visit" + myIntfClassFormat.strip(shortSuperIntf) + "(o);");
       }
@@ -719,18 +718,10 @@ public class ParserGenerator {
       if (includedPackages.contains(info.intfPackage)) includedClasses.add(StringUtil.getShortName(info.intfClass));
       if (includedPackages.contains(info.implPackage)) includedClasses.add(StringUtil.getShortName(info.implClass));
     }
-    Set<String> realImports = new LinkedHashSet<>();
-    realImports.add(packageName + ".*");
-    Function<String, String> shortener = newClassNameShortener(realImports);
-    for (String item : imports) {
-      for (String s : StringUtil.tokenize(item.replaceAll("\\s+", " "), TYPE_TEXT_SEPARATORS)) {
-        s = StringUtil.trimStart(StringUtil.trimStart(s, "? super "), "? extends ");
-        if (!s.contains(".") || !s.equals(shortener.fun(s))) continue;
-        if (packageName.equals(StringUtil.getPackageName(s))) continue;
-        if (includedClasses.contains(StringUtil.getShortName(s))) continue;
-        realImports.add(s);
-        out("import %s;", s);
-      }
+    NameShortener shortener = new NameShortener(packageName);
+    shortener.addImports(imports, includedClasses);
+    for (String s : shortener.getImports()) {
+      out("import %s;", s);
     }
     newLine();
     StringBuilder sb = new StringBuilder();
@@ -741,13 +732,13 @@ public class ParserGenerator {
         aSuper = StringUtil.getShortName(aSuper);
       }
       if (i == 0) {
-        sb.append(" extends ").append(shortener.fun(aSuper));
+        sb.append(" extends ").append(shortener.shorten(aSuper));
       }
       else if (javaType != Java.INTERFACE && i == 1) {
-        sb.append(" implements ").append(shortener.fun(aSuper));
+        sb.append(" implements ").append(shortener.shorten(aSuper));
       }
       else {
-        sb.append(", ").append(shortener.fun(aSuper));
+        sb.append(", ").append(shortener.shorten(aSuper));
       }
     }
     if (StringUtil.isNotEmpty(annos)) {
@@ -756,33 +747,6 @@ public class ParserGenerator {
     out("public %s %s%s {", Case.LOWER.apply(javaType.name()).replace('_', ' '), shortClassName, sb.toString());
     newLine();
     myShortener = shortener;
-  }
-
-  @NotNull
-  private static Function<String, String> newClassNameShortener(final Set<String> realImports) {
-    return s -> {
-      boolean changed = false;
-      StringBuilder sb = new StringBuilder();
-      boolean vararg = s.endsWith("...");
-      for (String part : StringUtil.tokenize(new StringTokenizer(StringUtil.trimEnd(s, "..."), TYPE_TEXT_SEPARATORS, true))) {
-        String pkg;
-        String wildcard = part.startsWith("? super ") ? "? super " : part.startsWith("? extends ") ? "? extends " : "";
-        part = StringUtil.trimStart(part, wildcard);
-        if (TYPE_TEXT_SEPARATORS.contains(part)) {
-          sb.append(part).append(part.equals(",") ? " " : "");
-        }
-        else if (realImports.contains(part) ||
-                 "java.lang".equals(pkg = StringUtil.getPackageName(part)) ||
-                 realImports.contains(pkg + ".*")) {
-          sb.append(wildcard).append(StringUtil.getShortName(part));
-          changed = true;
-        }
-        else {
-          sb.append(wildcard).append(part);
-        }
-      }
-      return changed ? sb.append(vararg? "..." : "").toString() : s;
-    };
   }
 
   private void generateFileHeader(String className) {
@@ -1569,10 +1533,10 @@ public class ParserGenerator {
         Trinity<String, String, RuleInfo> info = compositeToClassAndFactoryMap.get(elementType);
         String elementCreateCall;
         if (info.second == null) {
-          elementCreateCall = "new " + (exactType = myShortener.fun(info.first));
+          elementCreateCall = "new " + (exactType = myShortener.shorten(info.first));
         }
         else {
-          elementCreateCall = myShortener.fun(StringUtil.getPackageName(info.second)) + "." + StringUtil.getShortName(info.second);
+          elementCreateCall = myShortener.shorten(StringUtil.getPackageName(info.second)) + "." + StringUtil.getShortName(info.second);
         }
         String fieldType = ObjectUtils.notNull(useExactElements ? exactType : "IElementType");
         String callFix = elementCreateCall.equals("new IElementType") ? ", null" : "";
@@ -1585,10 +1549,10 @@ public class ParserGenerator {
       Map<String, String> sortedTokens = new TreeMap<>();
       String tokenCreateCall;
       if (tokenTypeFactory == null) {
-        tokenCreateCall = "new " + (exactType = myShortener.fun(tokenTypeClass));
+        tokenCreateCall = "new " + (exactType = myShortener.shorten(tokenTypeClass));
       }
       else {
-        tokenCreateCall = myShortener.fun(StringUtil.getPackageName(tokenTypeFactory)) + "." + StringUtil.getShortName(tokenTypeFactory);
+        tokenCreateCall = myShortener.shorten(StringUtil.getPackageName(tokenTypeFactory)) + "." + StringUtil.getShortName(tokenTypeFactory);
       }
       String fieldType = ObjectUtils.notNull(useExactTokens ? exactType : null, "IElementType");
       for (String tokenText : mySimpleTokens.keySet()) {
@@ -1611,11 +1575,11 @@ public class ParserGenerator {
       out("return ourMap.get(elementType);");
       out("}");
       newLine();
-      out("public static %s<IElementType> elementTypes() {", myShortener.fun(CommonClassNames.JAVA_UTIL_SET));
-      out("return %s.unmodifiableSet(ourMap.keySet());", myShortener.fun(CommonClassNames.JAVA_UTIL_COLLECTIONS));
+      out("public static %s<IElementType> elementTypes() {", myShortener.shorten(CommonClassNames.JAVA_UTIL_SET));
+      out("return %s.unmodifiableSet(ourMap.keySet());", myShortener.shorten(CommonClassNames.JAVA_UTIL_COLLECTIONS));
       out("}");
       newLine();
-      String type = myShortener.fun("java.util.LinkedHashMap") + "<IElementType, Class<?>>";
+      String type = myShortener.shorten("java.util.LinkedHashMap") + "<IElementType, Class<?>>";
       out("private static final %s ourMap = new %1$s();", type);
       newLine();
       out("static {");
@@ -1641,7 +1605,7 @@ public class ParserGenerator {
         if (info.isAbstract) continue;
         if (info.mixedAST) continue;
         if (first1) {
-          out("public static %s createElement(%s node) {", myShortener.fun(PSI_ELEMENT_CLASS), myShortener.fun(AST_NODE_CLASS));
+          out("public static %s createElement(%s node) {", myShortener.shorten(PSI_ELEMENT_CLASS), myShortener.shorten(AST_NODE_CLASS));
           out("IElementType type = node.getElementType();");
         }
         String psiClass = getRulePsiClassName(rule, myImplClassFormat);
@@ -1662,7 +1626,8 @@ public class ParserGenerator {
         if (!info.mixedAST) continue;
         if (first2) {
           if (!first1) newLine();
-          out("public static %s createElement(%s type) {", myShortener.fun(COMPOSITE_PSI_ELEMENT_CLASS), myShortener.fun(IELEMENTTYPE_CLASS));
+          out("public static %s createElement(%s type) {", myShortener.shorten(COMPOSITE_PSI_ELEMENT_CLASS),
+              myShortener.shorten(IELEMENTTYPE_CLASS));
         }
         String psiClass = getRulePsiClassName(rule, myImplClassFormat);
         out((!first2 ? "else" : "") + " if (type == " + elementType + ") {");
@@ -1743,7 +1708,11 @@ public class ParserGenerator {
     imports.add(StringUtil.notNullize(myPsiImplUtilClass));
     imports.addAll(getRuleMethodTypesToImport(rule));
 
-    Function<String, String> substitutor = stubName != null ? Functions.constant(stubName) : genericUnwrapper;
+    Function<String, String> substitutor = stubName == null ? genericUnwrapper : o -> {
+      String oo = genericUnwrapper.fun(o);
+      int idx = oo.lastIndexOf(" ");
+      return idx == -1 ? stubName : oo.substring(0, idx) + " " + stubName;
+    };
 
     Set<BnfRule> visited = new HashSet<>();
     List<NavigatablePsiElement> constructors = Collections.emptyList();
@@ -1785,12 +1754,14 @@ public class ParserGenerator {
     generateClassHeader(psiClass, imports, "", javaType, implSuper, superInterface);
     String shortName = StringUtil.getShortName(psiClass);
     if (constructors.isEmpty()) {
-      out("public " + shortName + "(" + myShortener.fun(AST_NODE_CLASS) + " node) {");
+      out("public " + shortName + "(" + myShortener.shorten(AST_NODE_CLASS) + " node) {");
       out("super(node);");
       out("}");
       newLine();
       if (stubName != null) {
-        out("public " + shortName + "(" + myShortener.fun(stubName) + " stub, " + myShortener.fun(ISTUBELEMENTTYPE_CLASS) + " stubType) {");
+        out("public " + shortName + "(" +
+            myShortener.shorten(stubName) + " stub, " +
+            myShortener.shorten(ISTUBELEMENTTYPE_CLASS) + " stubType) {");
         out("super(stub, stubType);");
         out("}");
         newLine();
@@ -1807,7 +1778,7 @@ public class ParserGenerator {
       }
     }
     if (myVisitorClassName != null) {
-      String shortened = myShortener.fun(myVisitorClassName);
+      String shortened = myShortener.shorten(myVisitorClassName);
       String r = G.visitorValue != null ? "<" + G.visitorValue + ">" : "";
       String t = G.visitorValue != null ? " " + G.visitorValue : "void";
       String ret = G.visitorValue != null ? "return " : "";
@@ -1822,7 +1793,7 @@ public class ParserGenerator {
       newLine();
       //if (topSuperRule == rule) {
         out("@Override");
-        out("public void accept(@NotNull " + myShortener.fun(PSI_ELEMENT_VISITOR_CLASS) + " visitor) {");
+      out("public void accept(@NotNull " + myShortener.shorten(PSI_ELEMENT_VISITOR_CLASS) + " visitor) {");
         out("if (visitor instanceof " + shortened + ") accept((" + shortened + ")visitor);");
         out("else super.accept(visitor);");
         out("}");
@@ -1862,7 +1833,7 @@ public class ParserGenerator {
             found = true;
           }
           if (intf && !found) {
-            String ruleClassName = myShortener.fun(info.intfClass);
+            String ruleClassName = myShortener.shorten(info.intfClass);
             String implClassName = StringUtil.getShortName(String.valueOf(myPsiImplUtilClass));
             out("" +
                 "//WARNING: %s(...) is skipped\n" +
@@ -1936,19 +1907,6 @@ public class ParserGenerator {
     }
   }
 
-  private static void addTypeToImports(@Nullable String type,
-                                       @NotNull List<String> typeAnnotations,
-                                       @NotNull Collection<String> result) {
-    if (type != null && type.contains(".")) {
-      result.add(type);
-    }
-    for (String anno : typeAnnotations) {
-      if (!anno.startsWith("kotlin.")) {
-        result.add(anno);
-      }
-    }
-  }
-
 
   private void generatePsiAccessor(BnfRule rule, RuleMethodsHelper.MethodInfo methodInfo, boolean intf, boolean mixedAST) {
     RuleGraphHelper.Cardinality type = methodInfo.cardinality;
@@ -1967,9 +1925,10 @@ public class ParserGenerator {
     else {
       out("@NotNull");
     }
-    String className = myShortener.fun(isToken ? PSI_ELEMENT_CLASS : getAccessorType(methodInfo.rule));
+    String s = isToken ? PSI_ELEMENT_CLASS : getAccessorType(methodInfo.rule);
+    String className = myShortener.shorten(s);
     String tail = intf ? "();" : "() {";
-    out((intf ? "" : "public ") + (many ? myShortener.fun(CommonClassNames.JAVA_UTIL_LIST) + "<" : "") + className + (many ? "> " : " ") + getterName + tail);
+    out((intf ? "" : "public ") + (many ? myShortener.shorten(CommonClassNames.JAVA_UTIL_LIST) + "<" : "") + className + (many ? "> " : " ") + getterName + tail);
     if (!intf) {
       out("return " + generatePsiAccessorImplCall(rule, methodInfo, mixedAST) + ";");
       out("}");
@@ -1994,8 +1953,8 @@ public class ParserGenerator {
                "(" + getElementType(methodInfo.path) + ")";
       }
       else {
-        String className = myShortener.fun(getAccessorType(methodInfo.rule));
-        return many ? String.format("%s.getChildrenOfTypeAsList(this, %s.class)", myShortener.fun(myPsiTreeUtilClass), className) :
+        String className = myShortener.shorten(getAccessorType(methodInfo.rule));
+        return many ? String.format("%s.getChildrenOfTypeAsList(this, %s.class)", myShortener.shorten(myPsiTreeUtilClass), className) :
                (type == REQUIRED ? "findNotNullChildByClass" : "findChildByClass") + "(" + className + ".class)";
       }
     }
@@ -2005,11 +1964,11 @@ public class ParserGenerator {
       result = getterName + "(" + getElementType(methodInfo.path) + ")";
     }
     else {
-      String className = myShortener.fun(getAccessorType(methodInfo.rule));
+      String className = myShortener.shorten(getAccessorType(methodInfo.rule));
       String getterName = stubbed && many ? "getStubChildrenOfTypeAsList" :
                           stubbed ? "getStubChildOfType" :
                           many ? "getChildrenOfTypeAsList" : "getChildOfType";
-      result = String.format("%s.%s(this, %s.class)", myShortener.fun(myPsiTreeUtilClass), getterName, className);
+      result = String.format("%s.%s(this, %s.class)", myShortener.shorten(myPsiTreeUtilClass), getterName, className);
     }
     return required && !mixedAST ? "notNullChild(" + result + ")" : result;
   }
@@ -2070,9 +2029,9 @@ public class ParserGenerator {
       }
 
       boolean many = targetInfo.cardinality.many();
-      String className = myShortener.fun(targetInfo.rule == null ? PSI_ELEMENT_CLASS : getAccessorType(targetInfo.rule));
+      String className = myShortener.shorten(targetInfo.rule == null ? PSI_ELEMENT_CLASS : getAccessorType(targetInfo.rule));
 
-      String type = (many ? myShortener.fun(CommonClassNames.JAVA_UTIL_LIST) + "<" : "") + className + (many ? "> " : " ");
+      String type = (many ? myShortener.shorten(CommonClassNames.JAVA_UTIL_LIST) + "<" : "") + className + (many ? "> " : " ");
       String curId = N.psiLocal + (count++);
       if (!context.isEmpty()) {
         if (cardinality.optional()) {
@@ -2141,10 +2100,11 @@ public class ParserGenerator {
     }
 
     boolean many = cardinality.many();
-    String className = myShortener.fun(targetRule == null ? PSI_ELEMENT_CLASS : getAccessorType(targetRule));
+    String s = targetRule == null ? PSI_ELEMENT_CLASS : getAccessorType(targetRule);
+    String className = myShortener.shorten(s);
     String getterName = getGetterName(methodInfo.name);
     String tail = intf ? "();" : "() {";
-    out((intf ? "" : "public ") + (many ? myShortener.fun(CommonClassNames.JAVA_UTIL_LIST) + "<" : "") + className + (many ? "> " : " ") + getterName + tail);
+    out((intf ? "" : "public ") + (many ? myShortener.shorten(CommonClassNames.JAVA_UTIL_LIST) + "<" : "") + className + (many ? "> " : " ") + getterName + tail);
 
     if (!intf) {
       out(sb.toString());
@@ -2159,7 +2119,7 @@ public class ParserGenerator {
                                   boolean isInPsiUtil,
                                   Set<String> visited) {
     List<String> methodTypes = method == null ? Collections.emptyList() : myJavaHelper.getMethodTypes(method);
-    String returnType = methodTypes.isEmpty()? "void" : myShortener.fun(methodTypes.get(0));
+    String returnType = methodTypes.isEmpty()? "void" : myShortener.shorten(methodTypes.get(0));
     int offset = methodTypes.isEmpty() || isInPsiUtil && methodTypes.size() < 3 ? 0 :
                  isInPsiUtil ? 3 : 1;
     if (!visited.add(methodName + methodTypes.subList(offset, methodTypes.size()))) return;
@@ -2168,11 +2128,11 @@ public class ParserGenerator {
     List<JavaHelper.TypeParameterInfo> genericParameters = myJavaHelper.getGenericParameters(method);
     List<String> exceptionList = myJavaHelper.getExceptionList(method);
 
-    if (!intf) out("@" + myShortener.fun("java.lang.Override"));
+    if (!intf /*|| hasMethodInInfos*/) out("@" + myShortener.shorten("java.lang.Override"));
     for (String s : myJavaHelper.getAnnotations(method)) {
       if ("java.lang.Override".equals(s)) continue;
       if (s.startsWith("kotlin.")) continue;
-      out("@" + myShortener.fun(s));
+      out("@" + myShortener.shorten(s));
     }
     Function<Integer, List<String>> annoProvider = i -> myJavaHelper.getParameterAnnotations(method, (i - 1) / 2);
     out("%s%s%s %s(%s)%s%s",
@@ -2184,7 +2144,7 @@ public class ParserGenerator {
         getThrowsString(exceptionList, myShortener),
         intf ? ";" : " {");
     if (!intf) {
-      String implUtilRef = myShortener.fun(StringUtil.notNullize(myPsiImplUtilClass, KnownAttribute.PSI_IMPL_UTIL_CLASS.getName()));
+      String implUtilRef = myShortener.shorten(StringUtil.notNullize(myPsiImplUtilClass, KnownAttribute.PSI_IMPL_UTIL_CLASS.getName()));
       String string = getParametersString(methodTypes, offset, 2, genericUnwrapper, annoProvider, myShortener);
       out("%s%s.%s(this%s);", "void".equals(returnType) ? "" : "return ", implUtilRef, methodName,
           string.isEmpty() ? "" : ", " + string);

@@ -18,7 +18,10 @@ package org.intellij.grammar;
 
 import com.intellij.testFramework.UsefulTestCase;
 import org.intellij.grammar.generator.Case;
+import org.intellij.grammar.generator.NameShortener;
 import org.intellij.grammar.generator.ParserGeneratorUtil;
+
+import java.util.*;
 
 import static org.intellij.grammar.generator.ParserGeneratorUtil.NameFormat;
 import static org.intellij.grammar.generator.ParserGeneratorUtil.getGetterName;
@@ -72,5 +75,23 @@ public class BnfUtilTest extends UsefulTestCase {
 
   static String toIdentifier(String s, String f, Case c) {
     return ParserGeneratorUtil.toIdentifier(s, NameFormat.from(f), c);
+  }
+
+  public void testNameShortener1() {
+    String longType = "java.util.@org.jetbrains.annotations.NotNull(\"some.text and.more\", arr = [@Nullable]) List<java.util.@Nullable Set<java.lang.Integer>>";
+    NameShortener shortener = new NameShortener("com");
+    shortener.addImports(Arrays.asList("java.util.*", "org.jetbrains.annotations.*"), Collections.emptySet());
+    assertEquals("@NotNull(\"some.text and.more\", arr = [@Nullable]) List<@Nullable Set<Integer>>", shortener.shorten(longType));
+  }
+
+  public void testNameShortener2() {
+    String longType = "java.util.@org.jetbrains.annotations.NotNull(\"some.text and.more\", arr = [@Nullable]) List<java.util.@Nullable Set<java.lang.Integer>>";
+    List<String> imports = new ArrayList<>();
+    NameShortener.addTypeToImports(
+      longType, Collections.emptyList(), imports);
+    assertEquals(Arrays.asList("org.jetbrains.annotations.NotNull", "java.util.List", "java.util.Set", "java.lang.Integer"), imports);
+    NameShortener shortener = new NameShortener("com");
+    shortener.addImports(imports, Collections.emptySet());
+    assertEquals("@NotNull(\"some.text and.more\", arr = [@Nullable]) List<@Nullable Set<Integer>>", shortener.shorten(longType));
   }
 }

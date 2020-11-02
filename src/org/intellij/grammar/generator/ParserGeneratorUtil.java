@@ -60,11 +60,6 @@ public class ParserGeneratorUtil {
     "strictfp", "super", "switch", "synchronized", "this", "throw", "throws", "transient", "true",
     "try", "void", "volatile", "while", "continue"));
 
-  @NotNull
-  public static String getRawClassName(@NotNull String name) {
-    return name.indexOf("<") < name.indexOf(">") ? name.substring(0, name.indexOf("<")) : name;
-  }
-
   enum ConsumeType {
     FAST, SMART, DEFAULT;
 
@@ -889,7 +884,7 @@ public class ParserGeneratorUtil {
                                            int mask,
                                            Function<String, String> substitutor,
                                            Function<Integer, List<String>> annoProvider,
-                                           Function<String, String> shortener) {
+                                           NameShortener shortener) {
     StringBuilder sb = new StringBuilder();
     for (int i = offset; i < paramsTypes.size(); i += 2) {
       if (i > offset) sb.append(", ");
@@ -905,9 +900,9 @@ public class ParserGeneratorUtil {
         List<String> annos = annoProvider.fun(i);
         for (String s : annos) {
           if (s.startsWith("kotlin.")) continue;
-          sb.append("@").append(shortener.fun(s)).append(" ");
+          sb.append("@").append(shortener.shorten(s)).append(" ");
         }
-        sb.append(shortener.fun(type));
+        sb.append(shortener.shorten(type));
       }
       if ((mask & 3) == 3) sb.append(" ");
       if ((mask & 2) == 2) sb.append(name);
@@ -915,7 +910,7 @@ public class ParserGeneratorUtil {
     return sb.toString();
   }
 
-  public static String getGenericClauseString(List<JavaHelper.TypeParameterInfo> genericParameters, Function<String, String> shortener) {
+  public static String getGenericClauseString(List<JavaHelper.TypeParameterInfo> genericParameters, NameShortener shortener) {
     if (genericParameters.isEmpty()) return "";
 
     StringBuilder buffer = new StringBuilder();
@@ -932,7 +927,7 @@ public class ParserGeneratorUtil {
         for (int i1 = 0; i1 < extendsList.size(); i1++) {
           if (i1 > 0) buffer.append(" & ");
           String superType = extendsList.get(i1);
-          String shortened = shortener.fun(superType);
+          String shortened = shortener.shorten(superType);
           buffer.append(shortened);
         }
       }
@@ -943,10 +938,10 @@ public class ParserGeneratorUtil {
   }
 
   @NotNull
-  public static String getThrowsString(List<String> exceptionList, Function<String, String> shortener) {
+  public static String getThrowsString(List<String> exceptionList, NameShortener shortener) {
     if (exceptionList.isEmpty()) return "";
 
-    List<String> shortened = ContainerUtil.map(exceptionList, shortener);
+    List<String> shortened = ContainerUtil.map(exceptionList, shortener::shorten);
 
     StringBuilder buffer = new StringBuilder();
     buffer.append(" throws ");

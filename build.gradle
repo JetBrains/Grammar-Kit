@@ -14,20 +14,17 @@
  * limitations under the License.
  */
 
-buildscript {
-  repositories {
-    mavenCentral()
-  }
-}
-
 plugins {
-  id 'org.jetbrains.intellij' version "0.4.19"
+  id 'org.jetbrains.intellij' version "0.6.1"
 }
 
 version = "${version}"
 defaultTasks 'clean', 'artifacts', 'test'
 
 allprojects {
+  repositories {
+    mavenCentral()
+  }
   apply plugin: 'java'
   sourceCompatibility = javaVersion
   targetCompatibility = javaVersion

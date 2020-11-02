@@ -470,6 +470,9 @@ public abstract class JavaHelper {
   }
 
   public static class AsmHelper extends JavaHelper {
+
+    private static final int ASM_OPCODES = Opcodes.ASM9;
+
     @Override
     public boolean isPublic(@Nullable NavigatablePsiElement element) {
       Object delegate = element instanceof MyElement ? ((MyElement)element).delegate : null;
@@ -654,7 +657,7 @@ public abstract class JavaHelper {
       private final ClassInfo myInfo;
 
       MyClassVisitor(ClassInfo info) {
-        super(Opcodes.ASM5);
+        super(ASM_OPCODES);
         myInfo = info;
       }
 
@@ -670,7 +673,7 @@ public abstract class JavaHelper {
           myInfo.interfaces.add(fixClassName(s));
         }
         if (signature != null) {
-          new SignatureReader(signature).accept(new SignatureVisitor(Opcodes.ASM5) {
+          new SignatureReader(signature).accept(new SignatureVisitor(ASM_OPCODES) {
             @Override
             public void visitFormalTypeParameter(String name) {
               myInfo.typeParameters.add(name);

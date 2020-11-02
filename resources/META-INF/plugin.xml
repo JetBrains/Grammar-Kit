@@ -14,6 +14,7 @@
   <change-notes>
     <![CDATA[
     <ul>
+      <li>Generator: type annotations support</li>
       <li>Generator: use same charset as bnf explicitly</li>
       <li>Compatibility: IntelliJ IDEA 2020.3</li>
     </ul>

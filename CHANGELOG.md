@@ -1,3 +1,9 @@
+2020.3-SNAPSHOT
+
+* Generator: type annotations support
+* Generator: use same charset as bnf explicitly
+* Compatibility: IntelliJ IDEA 2020.3
+
 2020.1
 
 * Generator: fix an endless cycle on cyclic inheritance (#234)

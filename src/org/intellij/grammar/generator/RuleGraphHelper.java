@@ -391,6 +391,9 @@ public class RuleGraphHelper {
         else if (isPrivateOrNoType(targetRule)) {
           result = collectMembers(targetRule, visited);
         }
+        else if (Rule.isUpper(targetRule)) {
+          result = Collections.emptyMap();
+        }
         else {
           result = psiMap(getSynonymTargetOrSelf(targetRule), REQUIRED);
         }

@@ -37,40 +37,31 @@ public class GeneratedParser implements PsiParser, LightPsiParser {
   }
 
   public static final TokenSet[] EXTENDS_SETS_ = new TokenSet[] {
-    create_token_set_(ABC, ABC_ONE, ABC_PIN, ABC_SEQ,
-      ABC_THREE, ABC_TWO),
+    create_token_set_(ABC, ABC_ONE, ABC_THREE, ABC_TWO),
   };
 
   /* ********************************************************** */
-  // prefix? abc_three? (abc_one | abc_two | abc_three)
+  // abc_three? (abc_one | abc_two | abc_three)
   public static boolean abc(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "abc")) return false;
     boolean result_;
     Marker marker_ = enter_section_(builder_, level_, _COLLAPSE_, ABC, "<abc>");
     result_ = abc_0(builder_, level_ + 1);
     result_ = result_ && abc_1(builder_, level_ + 1);
-    result_ = result_ && abc_2(builder_, level_ + 1);
     exit_section_(builder_, level_, marker_, result_, false, null);
     return result_;
   }
 
-  // prefix?
+  // abc_three?
   private static boolean abc_0(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "abc_0")) return false;
-    prefix(builder_, level_ + 1);
-    return true;
-  }
-
-  // abc_three?
-  private static boolean abc_1(PsiBuilder builder_, int level_) {
-    if (!recursion_guard_(builder_, level_, "abc_1")) return false;
     abc_three(builder_, level_ + 1);
     return true;
   }
 
   // abc_one | abc_two | abc_three
-  private static boolean abc_2(PsiBuilder builder_, int level_) {
-    if (!recursion_guard_(builder_, level_, "abc_2")) return false;
+  private static boolean abc_1(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "abc_1")) return false;
     boolean result_;
     result_ = abc_one(builder_, level_ + 1);
     if (!result_) result_ = abc_two(builder_, level_ + 1);
@@ -90,43 +81,6 @@ public class GeneratedParser implements PsiParser, LightPsiParser {
     result_ = result_ && consumeToken(builder_, X);
     exit_section_(builder_, level_, marker_, result_, pinned_, null);
     return result_ || pinned_;
-  }
-
-  /* ********************************************************** */
-  // prefix (abc_one | abc_two)
-  public static boolean abc_pin(PsiBuilder builder_, int level_) {
-    if (!recursion_guard_(builder_, level_, "abc_pin")) return false;
-    if (!nextTokenIs(builder_, A)) return false;
-    boolean result_, pinned_;
-    Marker marker_ = enter_section_(builder_, level_, _NONE_, ABC_PIN, null);
-    result_ = prefix(builder_, level_ + 1);
-    pinned_ = result_; // pin = 1
-    result_ = result_ && abc_pin_1(builder_, level_ + 1);
-    exit_section_(builder_, level_, marker_, result_, pinned_, null);
-    return result_ || pinned_;
-  }
-
-  // abc_one | abc_two
-  private static boolean abc_pin_1(PsiBuilder builder_, int level_) {
-    if (!recursion_guard_(builder_, level_, "abc_pin_1")) return false;
-    boolean result_;
-    result_ = abc_one(builder_, level_ + 1);
-    if (!result_) result_ = abc_two(builder_, level_ + 1);
-    return result_;
-  }
-
-  /* ********************************************************** */
-  // prefix abc_one abc_two
-  public static boolean abc_seq(PsiBuilder builder_, int level_) {
-    if (!recursion_guard_(builder_, level_, "abc_seq")) return false;
-    if (!nextTokenIs(builder_, A)) return false;
-    boolean result_;
-    Marker marker_ = enter_section_(builder_);
-    result_ = prefix(builder_, level_ + 1);
-    result_ = result_ && abc_one(builder_, level_ + 1);
-    result_ = result_ && abc_two(builder_, level_ + 1);
-    exit_section_(builder_, marker_, ABC_SEQ, result_);
-    return result_;
   }
 
   /* ********************************************************** */
@@ -154,37 +108,51 @@ public class GeneratedParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // root (';' root) *
-  static boolean file(PsiBuilder builder_, int level_) {
-    if (!recursion_guard_(builder_, level_, "file")) return false;
+  // abc | pinned_seq | plain_seq
+  static boolean content(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "content")) return false;
     boolean result_;
-    Marker marker_ = enter_section_(builder_);
-    result_ = root(builder_, level_ + 1);
-    result_ = result_ && file_1(builder_, level_ + 1);
-    exit_section_(builder_, marker_, null, result_);
+    Marker marker_ = enter_section_(builder_, level_, _NONE_);
+    result_ = abc(builder_, level_ + 1);
+    if (!result_) result_ = pinned_seq(builder_, level_ + 1);
+    if (!result_) result_ = plain_seq(builder_, level_ + 1);
+    exit_section_(builder_, level_, marker_, result_, false, content_recover_parser_);
     return result_;
   }
 
-  // (';' root) *
-  private static boolean file_1(PsiBuilder builder_, int level_) {
-    if (!recursion_guard_(builder_, level_, "file_1")) return false;
+  /* ********************************************************** */
+  // !';'
+  static boolean content_recover(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "content_recover")) return false;
+    boolean result_;
+    Marker marker_ = enter_section_(builder_, level_, _NOT_);
+    result_ = !consumeToken(builder_, ";");
+    exit_section_(builder_, level_, marker_, result_, false, null);
+    return result_;
+  }
+
+  /* ********************************************************** */
+  // (content ';') *
+  static boolean file(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "file")) return false;
     while (true) {
       int pos_ = current_position_(builder_);
-      if (!file_1_0(builder_, level_ + 1)) break;
-      if (!empty_element_parsed_guard_(builder_, "file_1", pos_)) break;
+      if (!file_0(builder_, level_ + 1)) break;
+      if (!empty_element_parsed_guard_(builder_, "file", pos_)) break;
     }
     return true;
   }
 
-  // ';' root
-  private static boolean file_1_0(PsiBuilder builder_, int level_) {
-    if (!recursion_guard_(builder_, level_, "file_1_0")) return false;
-    boolean result_;
-    Marker marker_ = enter_section_(builder_);
-    result_ = consumeToken(builder_, ";");
-    result_ = result_ && root(builder_, level_ + 1);
-    exit_section_(builder_, marker_, null, result_);
-    return result_;
+  // content ';'
+  private static boolean file_0(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "file_0")) return false;
+    boolean result_, pinned_;
+    Marker marker_ = enter_section_(builder_, level_, _NONE_);
+    result_ = content(builder_, level_ + 1);
+    pinned_ = result_; // pin = 1
+    result_ = result_ && consumeToken(builder_, ";");
+    exit_section_(builder_, level_, marker_, result_, pinned_, null);
+    return result_ || pinned_;
   }
 
   /* ********************************************************** */
@@ -200,6 +168,43 @@ public class GeneratedParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
+  // prefix (abc_one | abc_two)
+  public static boolean pinned_seq(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "pinned_seq")) return false;
+    if (!nextTokenIs(builder_, A)) return false;
+    boolean result_, pinned_;
+    Marker marker_ = enter_section_(builder_, level_, _NONE_, PINNED_SEQ, null);
+    result_ = prefix(builder_, level_ + 1);
+    pinned_ = result_; // pin = 1
+    result_ = result_ && pinned_seq_1(builder_, level_ + 1);
+    exit_section_(builder_, level_, marker_, result_, pinned_, null);
+    return result_ || pinned_;
+  }
+
+  // abc_one | abc_two
+  private static boolean pinned_seq_1(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "pinned_seq_1")) return false;
+    boolean result_;
+    result_ = abc_one(builder_, level_ + 1);
+    if (!result_) result_ = abc_two(builder_, level_ + 1);
+    return result_;
+  }
+
+  /* ********************************************************** */
+  // prefix abc_one abc_two
+  public static boolean plain_seq(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "plain_seq")) return false;
+    if (!nextTokenIs(builder_, A)) return false;
+    boolean result_;
+    Marker marker_ = enter_section_(builder_);
+    result_ = prefix(builder_, level_ + 1);
+    result_ = result_ && abc_one(builder_, level_ + 1);
+    result_ = result_ && abc_two(builder_, level_ + 1);
+    exit_section_(builder_, marker_, PLAIN_SEQ, result_);
+    return result_;
+  }
+
+  /* ********************************************************** */
   // A
   public static boolean prefix(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "prefix")) return false;
@@ -211,28 +216,9 @@ public class GeneratedParser implements PsiParser, LightPsiParser {
     return result_;
   }
 
-  /* ********************************************************** */
-  // (abc | abc_pin | abc_seq) *
-  public static boolean root(PsiBuilder builder_, int level_) {
-    if (!recursion_guard_(builder_, level_, "root")) return false;
-    Marker marker_ = enter_section_(builder_, level_, _NONE_, ROOT, "<root>");
-    while (true) {
-      int pos_ = current_position_(builder_);
-      if (!root_0(builder_, level_ + 1)) break;
-      if (!empty_element_parsed_guard_(builder_, "root", pos_)) break;
+  static final Parser content_recover_parser_ = new Parser() {
+    public boolean parse(PsiBuilder builder_, int level_) {
+      return content_recover(builder_, level_ + 1);
     }
-    exit_section_(builder_, level_, marker_, true, false, null);
-    return true;
-  }
-
-  // abc | abc_pin | abc_seq
-  private static boolean root_0(PsiBuilder builder_, int level_) {
-    if (!recursion_guard_(builder_, level_, "root_0")) return false;
-    boolean result_;
-    result_ = abc(builder_, level_ + 1);
-    if (!result_) result_ = abc_pin(builder_, level_ + 1);
-    if (!result_) result_ = abc_seq(builder_, level_ + 1);
-    return result_;
-  }
-
+  };
 }

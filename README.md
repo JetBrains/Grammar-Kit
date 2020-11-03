@@ -1,15 +1,15 @@
 
 Grammar-Kit
-==================
+===========
 [![Build Status](https://teamcity.jetbrains.com/app/rest/builds/buildType:(id:IntellijIdeaPlugins_GrammarKit_Build)/statusIcon.svg?guest=1)](https://teamcity.jetbrains.com/viewType.html?buildTypeId=IntellijIdeaPlugins_GrammarKit_Build&guest=1)
 [![GitHub license](https://img.shields.io/badge/license-Apache%20License%202.0-blue.svg?style=flat)](http://www.apache.org/licenses/LICENSE-2.0)
 [![official project](http://jb.gg/badges/official.svg)](https://confluence.jetbrains.com/display/ALL/JetBrains+on+GitHub)
 
 An [IntelliJ IDEA plugin](http://plugins.jetbrains.com/plugin/6606) for language plugin developers.<br>
-Adds BNF Grammars and JFlex files editing support including parser/PSI code generator.
+Adds BNF Grammars and JFlex files editing support, and a parser/PSI code generator.
 
 Quick links: [Latest dev build](https://teamcity.jetbrains.com/guestAuth/app/rest/builds/buildType:IntellijIdeaPlugins_GrammarKit_Build,status:SUCCESS/artifacts/content/GrammarKit*.zip),
-[Changelog](CHANGELOG.md), [Tutorial](TUTORIAL.md), [How-to](HOWTO.md), [Standalone usage](#standalone-usage).
+[Changelog](CHANGELOG.md), [Tutorial](TUTORIAL.md), [How-to](HOWTO.md)
 
 
 Open-source plugins built with Grammar-Kit:
@@ -30,41 +30,50 @@ Open-source plugins built with Grammar-Kit:
 General usage instructions
 --------------------------
 1. Create grammar \*.bnf file, see [Grammar.bnf](grammars/Grammar.bnf) in the plugin code.
-2. Tune the grammar using _Live Preview_ + Structure view (ctrl-alt-P / meta-alt-P)
-3. Generate parser/ElementTypes/PSI classes (ctrl-shift-G / meta-shift-G)
+2. Tune the grammar using _Live Preview_ + Structure view (Ctrl-Alt-P / Cmd-Alt-P)
+3. Generate parser/ElementTypes/PSI classes (Ctrl-Shift-G / Cmd-Shift-G)
 4. Generate lexer \*.flex file and then run JFlex generator (both via context menu) 
 5. Implement ParserDefinition and add the corresponding registrations to the plugin.xml
 6. Mix-in resolve and other non-trivial functionality to PSI
 
+Using with Gradle
+-----------------
 
-Tooling support
-===========================
+Invoking the parser generator from an IDE as described above is the preferred way.<br/>
+Otherwise use [gradle-grammar-kit-plugin](https://github.com/JetBrains/gradle-grammar-kit-plugin) if the following limitations are not critical:
+
+* Method mixins are not supported (two-pass generation is not implemented)
+* Generic signatures and annotations may not be correct
+
+
+Plugin features
+===============
 
 ![Editor support](images/editor.png)
 
-* Refactoring: extract rule (Ctrl-Alt-R/Meta-Alt-R)
-* Refactoring: introduce token (Ctrl-Alt-C/Meta-Alt-C)
+* Refactoring: extract rule (Ctrl-Alt-M/Cmd-Alt-M)
+* Refactoring: introduce token (Ctrl-Alt-C/Cmd-Alt-C)
 * Editing: flip _choice_ branches intention (via Alt-Enter)
-* Editing: Unwrap/remove expression (Ctrl-Shift-Del/Meta-Shift-Del)
-* Navigation: quick grammar and flex file structure popup (Ctrl-F12/Meta-F12)
-* Navigation: go to related file (parser and PSI) (Ctrl-Alt-Home/Meta-Alt-Home)
-* Navigation: navigate to matched expressions (Ctrl-B/Meta-B inside attribute pattern)
+* Editing: Unwrap/remove expression (Ctrl-Shift-Del/Cmd-Shift-Del)
+* Navigation: quick grammar and flex file structure popup (Ctrl-F12/Cmd-F12)
+* Navigation: go to related file (parser and PSI) (Ctrl-Alt-Home/Cmd-Alt-Home)
+* Navigation: navigate to matched expressions (Ctrl-B/Cmd-B inside attribute pattern)
 * Highlighting: customizable colors (via Settings/Colors and Fonts)
 * Highlighting: pinned expression markers (tooltip shows pin value in charge)
 * Highlighting: a number of inspections, the list is available in Settings/Inspections
-* Documentation: rule documentation popup shows FIRST/FOLLOWS/PSI content (Ctrl-Q/Meta-J)
-* Documentation: attribute documentation popup (Ctrl-Q/Meta-J)
-* [Live preview](TUTORIAL.md): open language live preview editor (Ctrl-Alt-P/Meta-Alt-P)
-* [Live preview](TUTORIAL.md): start/stop grammar evaluator highlighting (Ctrl-Alt-F7/Meta-Alt-F7 in preview editor)
-* Generator: generate parser/PSI code (Ctrl-Shift-G/Meta-Shift-G)
+* Documentation: rule documentation popup shows FIRST/FOLLOWS/PSI content (Ctrl-Q/Cmd-J)
+* Documentation: attribute documentation popup (Ctrl-Q/Cmd-J)
+* [Live preview](TUTORIAL.md): open language live preview editor (Ctrl-Alt-P/Cmd-Alt-P)
+* [Live preview](TUTORIAL.md): start/stop grammar evaluator highlighting (Ctrl-Alt-F7/Cmd-Alt-F7 in preview editor)
+* Generator: generate parser/PSI code (Ctrl-Shift-G/Cmd-Shift-G)
 * Generator: generate custom _parserUtilClass_ class
 * Generator: generate \*.flex - JFlex lexer definition
 * Generator: run JFlex generator on a \*.flex file
 * Diagram: PSI tree diagram (UML plugin required)
 
 
-Quick documentation:
-====================
+Syntax overview
+===============
 See [Parsing Expression Grammar (PEG)](http://en.wikipedia.org/wiki/Parsing_expression_grammar) for basic syntax.
 Use ::= for ← symbol. You can also use [ .. ] for optional sequences and { | | } for choices as these variants are popular in real-world grammars.
 Grammar-Kit source code is the main example of Grammar-Kit application.
@@ -160,14 +169,14 @@ Unquoted implicit tokens (aka keyword tokens) have names equals to their values.
 Quoted implicit tokens (aka text-matched tokens) are slow because they are matched by text and not by an IElementType constant returned by a lexer.
 Text-matched tokens can span more than one real token returned by lexer.
 
-Rules, tokens and text-matched tokens have different colors in editor.
+Rules, tokens and text-matched tokens have different colors.
 
 ### Attributes for error recovery and reporting:
-* _pin_ (value: a number or a pattern) tunes the parser to handle incomplete matches. 
+* _pin_ (value: a number or pattern) tunes the parser to handle incomplete matches. 
 A sequence matches if its prefix up to a pinned item matches.
 On successfully reaching the pinned item the parser tries to match the rest items whether they match or not.
-Pin value indicates the desired item by either a number *{pin=2}* or a pattern  *{pin="rule_B"}*.
-By default the pin is applied to the top sequence expression. Sub-expressions can be included using a target pattern:
+Pin value indicates the desired item by either a number *{pin=2}* or pattern  *{pin="rule_B"}*.
+By default, the pin is applied to the top sequence expression. Sub-expressions can be included using a target pattern:
 *{pin(".\*")=1}* applies to all sub-sequences.
 
 * _recoverWhile_ (value: predicate rule) matches any number of tokens after the rule
@@ -180,7 +189,7 @@ expression error messages to "&lt;expression&gt; required" instead of a long lis
 ### Generated parser structure:
 Generator can split parser code into several classes for better support of large grammars.
 
-For simple cases parser will consists just of several generated classes.
+In simple cases a parser will consist just of several generated classes.
 
 The actual error recovery and reporting code as well as completion functionality for parser-based completion provider and basic token matching code resides
 in a _parserUtilClass_ class. It may be altered by specifying some other class that extend or mimic the original [GeneratedParserUtilBase](src/org/intellij/grammar/parser/GeneratedParserUtilBase.java).
@@ -224,39 +233,3 @@ Parser generator generates token types constants and PSI by default.
 This can be switched off via *generateTokens* and *generatePSI* global boolean attributes respectively.
  
 *elementType* rule attribute allows mixing the generated code and some existing hand-made PSI.   
-
-
-Standalone usage
-================
-
-### Standalone generator
-This way of running the parser generator has certain limitations in regards to PSI generation:
-* Method mixins require two-pass generation
-* Generic signatures may not be exact
-
-Grammar-Kit depends on *IntelliJ Platform* classes.
-Required jars are specified in [grammar-kit.jar!/META-INF/MANIFEST.MF](https://github.com/JetBrains/Grammar-Kit/blob/master/resources/META-INF/MANIFEST.MF#L3-L7).
-When running via `java -jar` one can either (1) provide original *IntelliJ Platform* jars in `lib` subfolder next to the `grammar-kit.jar`
-or (2) the experimental [light-psi-all.jar](../../releases) right next to the `grammar-kit.jar`
-(only the required platform classes in one file built by *LightPsi-All: Package* run configuration).
-
-````
-<dir>
-├─ lib/<IntelliJ jars> (1)
-├─ light-psi-all.jar   (2)
-└─ grammar-kit.jar
-
-// java -jar
-java -jar grammar-kit.jar <output-dir> <grammars-and-dirs>
-
-// java -cp
-java -cp grammar-kit.jar;<all-the-needed-jars> org.intellij.grammar.Main <output-dir> <grammars-and-dirs>
-````
-
-[Gradle plugin](https://github.com/hurricup/gradle-grammar-kit-plugin) is also available. 
-
-### Standalone parser
-The following command demonstrates the sample [expression parser](testData/generator/ExprParser.bnf) in action:
-````
-java -jar expression-console-sample.jar
-````

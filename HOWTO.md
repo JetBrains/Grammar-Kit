@@ -4,11 +4,11 @@ I. General Notes
 
 1. Writing a grammar doesn't mean the generated parser will work and produce nice AST.
 The tricky part is to *tune* some raw grammar that *looks correct* into a *working* grammar i.e. the grammar that produces working parser.
-But once you've mastered some basics the rest is as easy as combining different blocks into a working solution.
+Once you've mastered some basics, the rest is as easy as combining different blocks into a working solution.
 
-2. While editing grammar it is better to think that you manipulate generated code on a higher level of abstraction.
+2. While editing a grammar, it is better to think that you manipulate the generated code on a higher level of abstraction.
 
-3. Handwritten classes and generated classes should be in different source roots.
+3. Handwritten classes and generated classes should always be in different source roots.
 
 
 --------------------------
@@ -20,7 +20,7 @@ II. HOWTO: Generated Parser
 
 Each rule is either matched or not so every BNF expression is a boolean expression.
 **True** means some part of an input sequence is matched, **false** *always* means nothing is matched even if some part of the input was matched.
-Here are some of the grammar-to-code mappings:
+Here are some grammar-to-code mappings:
 
 Sequence:
 ````
@@ -81,7 +81,7 @@ Attributes like *pin* and *recoverWhile*, rule modifiers add some lines to this 
 The contract is defined as follows:
 
 1. The attributed rule is handled as usual
-2. And regardless of the result parser will continue to consume tokens while the predicate rule matches
+2. Regardless of the result parser will continue to consume tokens while the predicate rule matches
 
 
 ````
@@ -126,14 +126,14 @@ A more natural and compact way of dealing with this is supported.
 
 1. All "expression" rules should extend "the root expression rule".
    When done correctly this will ensure that AST will be of optimal depth and consistent even in case of errors.
-   Due to *extends* attribute semantics redundant nodes will be collapsed
+   Due to *extends* attribute semantics redundant nodes will be collapsed,
    and the root expression rule node will never appear in AST, use *Quick Documentation* (Ctrl-Q/Ctrl-J) to verify.
 2. Priority increases from top to bottom, ordered choice semantics is preserved
 3. Use left recursion for binary and postfix expressions
 4. Use *private* rules to define a group of operators with the same priority
 5. Use *rightAssociative* attribute when the default left associativity is not appropriate
 
-The following snippet demonstrates that "expression" parts of the BNF look compact and
+The following snippet demonstrates that "expression" parts of the BNF look compact, and
 the described syntax doesn't break much the ordinary BNF syntax ([complete example](testData/generator/ExprParser.bnf)):
 
 ````
@@ -344,7 +344,7 @@ public class SamplePsiImplUtil {
 3.5 Stub indices support
 ------------------------
 
-Stub indices API forces a bit different contract on PSI classes:
+Stub indices API forces a different contract on PSI classes:
 * There should be a manually written so-called *stub* class
 * PSI node type should extend _IStubElementType_ (comparing to usual _IElementType_)
 * PSI interface should extend _StubBasedPsiElementBase&lt;StubClass&gt;_
@@ -395,3 +395,36 @@ element_list ::= '(' element (',' (element | &')'))* ')' {pin(".*")=1}
 ```
 
 ... to be continued
+
+
+V. Standalone usage POC
+=======================
+
+This section is a **Proof-of-Concept** only. All described below is not supported and certainly out of date.
+
+Grammar-Kit project provides artifact configurations to build `grammar-kit.jar` and `expression-console-sample.jar`,
+and a run configuration to build `light-psi-all.jar` (only the required *IntelliJ Platform* classes in one file).
+
+To enable the simplest `java -jar grammar-kit.jar ...` command the required jars are already listed
+in [grammar-kit.jar!/META-INF/MANIFEST.MF](https://github.com/JetBrains/Grammar-Kit/blob/master/resources/META-INF/MANIFEST.MF#L3-L7),
+so one can either 
+**(1)** provide original *IntelliJ Platform* jars in `lib` subfolder next to the `grammar-kit.jar` or 
+**(2)** the `light-psi-all.jar` right next to `grammar-kit.jar`.
+````
+<dir>
+├─ lib/<IntelliJ jars> (1)
+├─ light-psi-all.jar   (2)
+└─ grammar-kit.jar
+
+// using java -jar
+java -jar grammar-kit.jar <output-dir> <grammars-and-dirs>
+
+// using java -cp
+java -cp grammar-kit.jar;<all-the-needed-jars> org.intellij.grammar.Main <output-dir> <grammars-and-dirs>
+````
+
+To see [expression parser](testData/generator/ExprParser.bnf) in action:
+
+````
+java -jar expression-console-sample.jar
+````

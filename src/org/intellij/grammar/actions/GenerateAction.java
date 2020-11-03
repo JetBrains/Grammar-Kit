@@ -106,6 +106,7 @@ public class GenerateAction extends AnAction {
 
       final List<File> files = new ArrayList<>();
       final Set<VirtualFile> targets = new LinkedHashSet<>();
+      int filesProcessed = 0;
       long totalWritten = 0;
 
       @Override
@@ -117,7 +118,7 @@ public class GenerateAction extends AnAction {
         }
         finally {
           String report = String.format("%d grammars: %d files generated (%s) in %s",
-                                        bnfFiles.size(),
+                                        filesProcessed,
                                         files.size(),
                                         StringUtil.formatFileSize(totalWritten),
                                         StringUtil.formatDuration(System.currentTimeMillis() - startTime));
@@ -170,6 +171,7 @@ public class GenerateAction extends AnAction {
             for (File f : files.subList(filesCount, files.size())) {
               written += f.length();
             }
+            filesProcessed ++;
             totalWritten += written;
             Notifications.Bus.notify(new Notification(
               BnfConstants.GENERATION_GROUP,

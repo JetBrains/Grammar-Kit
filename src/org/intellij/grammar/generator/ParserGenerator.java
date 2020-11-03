@@ -13,7 +13,10 @@ import com.intellij.psi.CommonClassNames;
 import com.intellij.psi.NavigatablePsiElement;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.tree.IElementType;
-import com.intellij.util.*;
+import com.intellij.util.ArrayUtil;
+import com.intellij.util.Function;
+import com.intellij.util.ObjectUtils;
+import com.intellij.util.SmartList;
 import com.intellij.util.containers.*;
 import gnu.trove.THashMap;
 import gnu.trove.THashSet;
@@ -284,10 +287,9 @@ public class ParserGenerator {
         superRuleClass.contains("?") ? superRuleClass.replaceAll("\\?", stubName) : superRuleClass;
       // mixin attribute overrides "extends":
       info.realSuperClass = StringUtil.notNullize(info.mixin, adjustedSuperRuleClass);
-      info.mixedAST = topInfo != null ? topInfo.mixedAST :
-                      JBIterable.of(superRuleClass, info.realSuperClass)
-                        .flatMap(s -> JBIterable.generate(s, myJavaHelper::getSuperClassName))
-                        .find(BnfConstants.COMPOSITE_PSI_ELEMENT_CLASS::equals) != null;
+      info.mixedAST = topInfo != null ? topInfo.mixedAST : JBIterable.of(superRuleClass, info.realSuperClass)
+        .flatMap(s -> JBTreeTraverser.<String>from(o -> JBIterable.of(myJavaHelper.getSuperClassName(o))).withRoot(s).unique())
+        .find(BnfConstants.COMPOSITE_PSI_ELEMENT_CLASS::equals) != null;
     }
   }
 

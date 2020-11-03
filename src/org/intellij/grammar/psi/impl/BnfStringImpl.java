@@ -273,5 +273,12 @@ public abstract class BnfStringImpl extends BnfExpressionImpl implements BnfStri
     public <R> R accept(@NotNull BnfVisitor<R> visitor) {
       return null;
     }
+
+    @Override
+    public boolean isEquivalentTo(PsiElement another) {
+      return another instanceof MyFakePsiElement &&
+             Objects.equals(myFuncName, ((MyFakePsiElement)another).myFuncName) &&
+             myExpression.getManager().areElementsEquivalent(myExpression, ((MyFakePsiElement)another).myExpression);
+    }
   }
 }

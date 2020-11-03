@@ -5,22 +5,23 @@ package org.intellij.grammar.psi.impl;
 
 import com.intellij.codeInsight.daemon.EmptyResolveMessageProvider;
 import com.intellij.openapi.util.TextRange;
-import com.intellij.psi.NavigatablePsiElement;
-import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiFile;
-import com.intellij.psi.PsiReferenceBase;
+import com.intellij.psi.*;
+import com.intellij.psi.impl.RenameableFakePsiElement;
 import com.intellij.psi.util.PsiTreeUtil;
-import com.intellij.util.ArrayUtil;
-import com.intellij.util.ObjectUtils;
 import com.intellij.util.containers.ContainerUtil;
 import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.generator.ParserGeneratorUtil;
 import org.intellij.grammar.java.JavaHelper;
 import org.intellij.grammar.psi.*;
+import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import javax.swing.*;
 import java.util.List;
+import java.util.Objects;
+
+import static org.intellij.grammar.psi.impl.GrammarUtil.bnfTraverserNoAttrs;
 
 /**
  * @author gregsh
@@ -43,18 +44,11 @@ public class BnfReferenceImpl<T extends BnfComposite> extends PsiReferenceBase<T
       BnfRule rule = ParserGeneratorUtil.Rule.of((BnfExpression)parent);
       if (((BnfExternalExpression)parent).getArguments().isEmpty() &&
           (ParserGeneratorUtil.Rule.isMeta(rule) || ParserGeneratorUtil.Rule.isExternal(rule))) {
-        // todo resolve to fake named element; support meta recover attr
-        return myElement;
+        return new MetaArgument(rule, ((BnfExternalExpression)parent).getRefElement().getText());
       }
     }
 
     return resolveMethod();
-  }
-
-  @NotNull
-  @Override
-  public Object[] getVariants() {
-    return ArrayUtil.EMPTY_OBJECT_ARRAY;
   }
 
   @Nullable
@@ -63,7 +57,7 @@ public class BnfReferenceImpl<T extends BnfComposite> extends PsiReferenceBase<T
     PsiElement parent = myElement.getParent();
     int paramCount = parent instanceof BnfSequence ? ((BnfSequence)parent).getExpressionList().size() - 1 :
                      parent instanceof BnfExternalExpression ? ((BnfExternalExpression)parent).getArguments().size() : 0;
-    BnfRule rule = ObjectUtils.notNull(PsiTreeUtil.getParentOfType(myElement, BnfRule.class));
+    BnfRule rule = Objects.requireNonNull(PsiTreeUtil.getParentOfType(myElement, BnfRule.class));
     String parserClass = ParserGeneratorUtil.getAttribute(rule, KnownAttribute.PARSER_UTIL_CLASS);
     // paramCount + 2 (builder and level)
     JavaHelper helper = JavaHelper.getJavaHelper(myElement);
@@ -81,5 +75,53 @@ public class BnfReferenceImpl<T extends BnfComposite> extends PsiReferenceBase<T
     return GrammarUtil.isExternalReference(myElement) ?
            "Unresolved meta rule or method ''{0}''" :
            "Unresolved rule ''{0}''";
+  }
+
+  public static class MetaArgument extends RenameableFakePsiElement implements PsiNameIdentifierOwner {
+    private final String myName;
+
+    MetaArgument(BnfRule rule, String name) {
+      super(rule);
+      myName = name;
+    }
+
+    @Override
+    public String getName() {
+      return myName;
+    }
+
+    @Override
+    public @Nullable @Nls String getTypeName() {
+      return "meta argument";
+    }
+
+    @Override
+    public @Nullable Icon getIcon() {
+      return null;
+    }
+
+    @Override
+    public @Nullable PsiElement getNameIdentifier() {
+      for (BnfExternalExpression o : bnfTraverserNoAttrs(getParent()).filter(BnfExternalExpression.class)) {
+        if (o.getArguments().isEmpty() && Objects.equals(myName, o.getRefElement().getText())) {
+          return o.getRefElement();
+        }
+      }
+      return null;
+    }
+
+    @Override
+    public @NotNull PsiElement getNavigationElement() {
+      PsiElement identifier = getNameIdentifier();
+      if (identifier != null) return identifier;
+      throw new PsiInvalidElementAccessException(this);
+    }
+
+    @Override
+    public boolean isEquivalentTo(PsiElement another) {
+      return another instanceof BnfReferenceImpl.MetaArgument &&
+             Objects.equals(myName, ((MetaArgument)another).myName) &&
+             getManager().areElementsEquivalent(getParent(), another.getParent());
+    }
   }
 }

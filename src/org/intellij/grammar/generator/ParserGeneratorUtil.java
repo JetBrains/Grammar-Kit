@@ -893,7 +893,7 @@ public class ParserGeneratorUtil {
       if (type.startsWith("<") && type.endsWith(">")) {
         type = substitutor.fun(type);
       }
-      if (BnfConstants.AST_NODE_CLASS.equals(type)) name = "node";
+      if (type.endsWith(BnfConstants.AST_NODE_CLASS)) name = "node";
       if (type.endsWith("ElementType")) name = "type";
       if (type.endsWith("Stub")) name = "stub";
       if ((mask & 1) == 1) {

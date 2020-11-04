@@ -1784,9 +1784,18 @@ public class ParserGenerator {
       String r = G.visitorValue != null ? "<" + G.visitorValue + ">" : "";
       String t = G.visitorValue != null ? " " + G.visitorValue : "void";
       String ret = G.visitorValue != null ? "return " : "";
-      if (topSuperRule != rule ||
-          topSuperClass != null && !myJavaHelper.findClassMethods(
-            topSuperClass, JavaHelper.MethodType.INSTANCE, "accept", 1, myVisitorClassName).isEmpty()) {
+      boolean addOverride = topSuperRule != rule;
+      if (!addOverride && topSuperClass != null) {
+        for (NavigatablePsiElement m : myJavaHelper.findClassMethods(
+          topSuperClass, JavaHelper.MethodType.INSTANCE, "accept", 1, myVisitorClassName)) {
+          String paramType = myJavaHelper.getMethodTypes(m).get(1);
+          if (paramType.endsWith(myVisitorClassName + r)) {
+            addOverride = true;
+            break;
+          }
+        }
+      }
+      if (addOverride) {
         out("@Override");
       }
       out("public " + r + t + " accept(@NotNull " + shortened + r + " visitor) {");

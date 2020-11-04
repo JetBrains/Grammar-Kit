@@ -96,7 +96,8 @@ public class NameShortener {
     if (s == null) return;
     boolean quoted = false;
     int offset = 0, parenCount = 0;
-    Deque<int[]> packagePrefix = null;
+    Deque<int[]> prefixStack = null;
+    int[] prefix;
     for (String part : StringUtil.tokenize(new StringTokenizer(StringUtil.trimEnd(s, "..."), TYPE_TEXT_SEPARATORS, true))) {
       if (TYPE_TEXT_SEPARATORS.contains(part) ||
           "?".equals(part) || "extends".equals(part) || "super".equals(part)) {
@@ -105,26 +106,25 @@ public class NameShortener {
         if (!quoted && ")".equals(part)) parenCount --;
       }
       else if (!quoted && part.endsWith(".")) {
-        if (packagePrefix == null) packagePrefix = new ArrayDeque<>();
+        if (prefixStack == null) prefixStack = new ArrayDeque<>();
         int idx = s.indexOf('@', offset);
         if (idx != -1 && part.equals(s.substring(offset, idx).trim())) {
-          packagePrefix.push(new int[] { parenCount, offset, offset + part.length(), idx });
+          prefixStack.push(new int[] { parenCount, offset, offset + part.length(), idx });
+        }
+      }
+      else if (!quoted && prefixStack != null && !prefixStack.isEmpty() && parenCount == (prefix = prefixStack.peek())[0] &&
+               s.substring(prefix[3] + 1, offset).trim().length() > 0) {
+        prefixStack.pop();
+        if (forcedOffset == -1 || prefix[1] == forcedOffset) {
+          int idx = part.indexOf('.');
+          result.accept(s.substring(prefix[1], prefix[2]) + (idx == -1 ? part : part.substring(0, idx)));
+          if (prefix[1] == forcedOffset) return;
         }
       }
       else if (!quoted && part.contains(".")) {
         if (forcedOffset == -1 || offset == forcedOffset) {
           result.accept(part);
           if (offset == forcedOffset) return;
-        }
-      }
-      else if (!quoted && packagePrefix != null && !packagePrefix.isEmpty()) {
-        int[] o = packagePrefix.peek();
-        if (o[0] == parenCount && s.substring(o[3]+1, offset).trim().length() > 0) {
-          packagePrefix.pop();
-          if (forcedOffset == -1 || o[1] == forcedOffset) {
-            result.accept(s.substring(o[1], o[2]) + part);
-            if (o[1] == forcedOffset) return;
-          }
         }
       }
       offset += part.length();

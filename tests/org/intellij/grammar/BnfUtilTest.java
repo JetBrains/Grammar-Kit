@@ -85,13 +85,12 @@ public class BnfUtilTest extends UsefulTestCase {
   }
 
   public void testNameShortener2() {
-    String longType = "java.util.@org.jetbrains.annotations.NotNull(\"some.text and.more\", arr = [@Nullable]) List<java.util.@Nullable Set<java.lang.Integer>>";
+    String longType = "java.util.@org.jetbrains.annotations.NotNull(\"some.text and.more\", arr = [@Nullable]) List<sample.@Nullable Inner.Class<java.lang.Integer>>";
     List<String> imports = new ArrayList<>();
-    NameShortener.addTypeToImports(
-      longType, Collections.emptyList(), imports);
-    assertEquals(Arrays.asList("org.jetbrains.annotations.NotNull", "java.util.List", "java.util.Set", "java.lang.Integer"), imports);
+    NameShortener.addTypeToImports(longType, Collections.emptyList(), imports);
+    assertEquals(Arrays.asList("org.jetbrains.annotations.NotNull", "java.util.List", "sample.Inner", "java.lang.Integer"), imports);
     NameShortener shortener = new NameShortener("com");
     shortener.addImports(imports, Collections.emptySet());
-    assertEquals("@NotNull(\"some.text and.more\", arr = [@Nullable]) List<@Nullable Set<Integer>>", shortener.shorten(longType));
+    assertEquals("@NotNull(\"some.text and.more\", arr = [@Nullable]) List<@Nullable Inner.Class<Integer>>", shortener.shorten(longType));
   }
 }

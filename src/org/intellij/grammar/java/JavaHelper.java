@@ -201,7 +201,7 @@ public abstract class JavaHelper {
       PsiClass aClass = findClassSafe(className);
       if (aClass == null) return super.findClassMethods(className, methodType, methodName, paramCount, paramTypes);
       List<NavigatablePsiElement> result = new ArrayList<>();
-      PsiMethod[] methods = methodType == MethodType.CONSTRUCTOR ? aClass.getConstructors() : aClass.getMethods();
+      PsiMethod[] methods = methodType == MethodType.CONSTRUCTOR ? aClass.getConstructors() : aClass.getMethods(); // todo super methods too
       for (PsiMethod method : methods) {
         if (!acceptsName(methodName, method.getName())) continue;
         if (!acceptsMethod(method, methodType)) continue;
@@ -320,7 +320,9 @@ public abstract class JavaHelper {
       if (modifierList == null) return Collections.emptyList();
       PsiType typeToSkip = element instanceof PsiMethod ? ((PsiMethod)element).getReturnType() :
                            element instanceof PsiVariable ? ((PsiVariable)element).getType() : null;
-      PsiAnnotation[] annoToSkip = typeToSkip == null ? null : typeToSkip.getAnnotations();
+      PsiAnnotation[] annoToSkip = typeToSkip == null ? null :
+                                   typeToSkip instanceof PsiArrayType ? ((PsiArrayType)typeToSkip).getComponentType().getAnnotations() :
+                                   typeToSkip.getAnnotations();
       List<String> result = new ArrayList<>();
       for (PsiAnnotation annotation : modifierList.getAnnotations()) {
         if (annotation.getParameterList().getAttributes().length > 0) continue;
@@ -512,7 +514,7 @@ public abstract class JavaHelper {
       ClassInfo aClass = findClassSafe(className);
       if (aClass == null || methodName == null) return Collections.emptyList();
       List<NavigatablePsiElement> result = new ArrayList<>();
-      for (MethodInfo method : aClass.methods) {
+      for (MethodInfo method : aClass.methods) { // todo super methods too
         if (!acceptsName(methodName, method.name)) continue;
         if (!acceptsMethod(method, methodType)) continue;
         if (!acceptsMethod(method, paramCount, paramTypes)) continue;

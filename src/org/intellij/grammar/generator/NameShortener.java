@@ -19,10 +19,12 @@ public class NameShortener {
   public static final String TYPE_TEXT_SEPARATORS = "<>,[]()@\" \n";
 
   private final String myPackage;
+  private final boolean myEnabled;
   private final Set<String> myImports = new LinkedHashSet<>();
 
-  public NameShortener(String packageName) {
+  public NameShortener(String packageName, boolean enabled) {
     myPackage = packageName;
+    myEnabled = enabled;
   }
 
   public Set<String> getImports() {
@@ -30,6 +32,7 @@ public class NameShortener {
   }
 
   public void addImports(Collection<String> initialImports, Collection<String> includedClasses) {
+    if (!myEnabled) return;
     for (String item : initialImports) {
       boolean isStatic = false;
       for (String s : StringUtil.tokenize(item.replaceAll("\\s+", " "), TYPE_TEXT_SEPARATORS)) {
@@ -47,6 +50,7 @@ public class NameShortener {
 
   @NotNull
   public String shorten(String s) {
+    if (!myEnabled) return s;
     boolean changed = false;
     StringBuilder sb = new StringBuilder();
     boolean quoted = false;

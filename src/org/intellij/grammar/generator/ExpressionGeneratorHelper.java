@@ -18,6 +18,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.*;
 
 import static java.lang.String.format;
+import static org.intellij.grammar.generator.BnfConstants.PSI_BUILDER_CLASS;
 import static org.intellij.grammar.generator.ExpressionHelper.OperatorInfo;
 import static org.intellij.grammar.generator.ExpressionHelper.OperatorType;
 import static org.intellij.grammar.generator.ParserGeneratorUtil.*;
@@ -54,7 +55,9 @@ public class ExpressionGeneratorHelper {
     String methodName = getFuncName(info.rootRule);
     String kernelMethodName = getNextName(methodName, 0);
     String frameName = quote(ParserGeneratorUtil.getRuleDisplayName(info.rootRule, true));
-    g.out("public static boolean %s(PsiBuilder %s, int %s, int %s) {", methodName, g.N.builder, g.N.level, g.N.priority);
+    String shortPB = g.shorten(BnfConstants.PSI_BUILDER_CLASS);
+    String shortMarker = !g.G.generateFQN ? "Marker" : PSI_BUILDER_CLASS + ".Marker";
+    g.out("public static boolean %s(%s %s, int %s, int %s) {", methodName, shortPB, g.N.builder, g.N.level, g.N.priority);
     g.out("if (!recursion_guard_(%s, %s, \"%s\")) return false;", g.N.builder, g.N.level, methodName);
 
     if (frameName != null) {
@@ -62,7 +65,7 @@ public class ExpressionGeneratorHelper {
     }
     g.generateFirstCheck(info.rootRule, frameName, true);
     g.out("boolean %s, %s;", g.N.result, g.N.pinned);
-    g.out("Marker %s = enter_section_(%s, %s, _NONE_, %s);", g.N.marker, g.N.builder, g.N.level, frameName);
+    g.out("%s %s = enter_section_(%s, %s, _NONE_, %s);", shortMarker, g.N.marker, g.N.builder, g.N.level, frameName);
 
     boolean first = true;
     for (String opCall : sortedOpCalls) {
@@ -81,11 +84,11 @@ public class ExpressionGeneratorHelper {
     g.newLine();
 
     // kernel
-    g.out("public static boolean %s(PsiBuilder %s, int %s, int %s) {", kernelMethodName, g.N.builder, g.N.level, g.N.priority);
+    g.out("public static boolean %s(%s %s, int %s, int %s) {", kernelMethodName, shortPB, g.N.builder, g.N.level, g.N.priority);
     g.out("if (!recursion_guard_(%s, %s, \"%s\")) return false;", g.N.builder, g.N.level, kernelMethodName);
     g.out("boolean %s = true;", g.N.result);
     g.out("while (true) {");
-    g.out("Marker %s = enter_section_(%s, %s, _LEFT_, null);", g.N.marker, g.N.builder, g.N.level);
+    g.out("%s %s = enter_section_(%s, %s, _LEFT_, null);", shortMarker, g.N.marker, g.N.builder, g.N.level);
 
     first = true;
     for (String opCall : sortedOpCalls) {
@@ -160,11 +163,11 @@ public class ExpressionGeneratorHelper {
         else if (operator.type == OperatorType.PREFIX) {
           g.newLine();
           String operatorFuncName = operator.rule.getName();
-          g.out("public static boolean %s(PsiBuilder %s, int %s) {", operatorFuncName, g.N.builder, g.N.level);
+          g.out("public static boolean %s(%s %s, int %s) {", operatorFuncName, shortPB, g.N.builder, g.N.level);
           g.out("if (!recursion_guard_(%s, %s, \"%s\")) return false;", g.N.builder, g.N.level, operatorFuncName);
           g.generateFirstCheck(operator.rule, frameName, false);
           g.out("boolean %s, %s;", g.N.result, g.N.pinned);
-          g.out("Marker %s = enter_section_(%s, %s, _NONE_, null);", g.N.marker, g.N.builder, g.N.level);
+          g.out("%s %s = enter_section_(%s, %s, _NONE_, null);", shortMarker, g.N.marker, g.N.builder, g.N.level);
 
           String elementType = g.getElementType(operator.rule);
           String tailCall = operator.tail == null ? null : g.generateNodeCall(

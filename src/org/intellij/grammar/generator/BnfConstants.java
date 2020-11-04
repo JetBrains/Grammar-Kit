@@ -32,6 +32,11 @@ public interface BnfConstants {
   String AST_WRAPPER_PSI_ELEMENT_CLASS = "com.intellij.extapi.psi.ASTWrapperPsiElement";
   String COMPOSITE_PSI_ELEMENT_CLASS = "com.intellij.psi.impl.source.tree.CompositePsiElement";
 
+  String OVERRIDE_ANNO = "@java.lang.Override";
+  String NOTNULL_ANNO = "@org.jetbrains.annotations.NotNull";
+  String NULLABLE_ANNO = "@org.jetbrains.annotations.Nullable";
+  String SUPPRESS_WARNINGS_ANNO = "@java.lang.SuppressWarnings";
+
   String ISTUBELEMENTTYPE_CLASS = "com.intellij.psi.stubs.IStubElementType";
   String STUB_BASED_PSI_ELEMENT = "com.intellij.psi.StubBasedPsiElement";
   String STUB_BASED_PSI_ELEMENT_BASE = "com.intellij.extapi.psi.StubBasedPsiElementBase";

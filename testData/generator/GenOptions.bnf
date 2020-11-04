@@ -1,0 +1,19 @@
+{
+  parserClass="GenOptions"
+  generate=[java="7" fqn="yes" visitor-value="Val" token-case="lower" element-case="upper" psi-classes-map="yes"]
+
+  extends(".*_statement")="statement"
+  pin("create_.*_statement")=".*_ref"
+  pin("drop_.*_statement")=".*_ref"
+}
+
+root ::= statement *
+
+table_ref ::= id
+
+statement ::= create_statement | drop_statement
+create_statement ::= create_table_statement
+create_table_statement ::= CREATE TEMP? (GLOBAL|LOCAL) TABLE table_ref '(' ')'
+
+drop_statement ::= drop_table_statement
+drop_table_statement ::= DROP TABLE table_ref

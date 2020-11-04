@@ -35,6 +35,11 @@ A list of generator options. Supersedes global generateXXX attributes.
     <td>PSI: generate visitor with generic argument</td>
   </tr>
   <tr>
+    <td>fqn</td>
+    <td><b>no</b>, yes</td>
+    <td>PSI: generate fully qualified class names</td>
+  </tr>
+  <tr>
     <td>elements</td>
     <td><b>yes</b>, no</td>
     <td>Types: generate composite element type constants</td>
@@ -62,7 +67,7 @@ A list of generator options. Supersedes global generateXXX attributes.
   <tr>
     <td>exact-types</td>
     <td>all | <b>no</b> | tokens, elements</td>
-    <td>Token and element types constants exact type</td>
+    <td>Types: token and element types constants exact type; no means IElementType</td>
   </tr>
   <tr>
     <td>token-accessors</td>
@@ -81,8 +86,8 @@ A list of generator options. Supersedes global generateXXX attributes.
   </tr>
   <tr>
     <td>java</td>
-    <td><b>6</b>, 8</td>
-    <td>Parser: use λ-s or other language constructs supported in selected version</td>
+    <td><b>6</b>6, 8, 11, etc.</td>
+    <td>Generator: generate lambda-s or other language constructs supported in selected version</td>
   </tr>
   <tr>
     <td>...</td>

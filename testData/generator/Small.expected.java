@@ -35,7 +35,7 @@ public class Small implements PsiParser, LightPsiParser {
   }
 
   static boolean parse_root_(IElementType root_, PsiBuilder builder_, int level_) {
-    return parseRoot(builder_, level_ + 1, statement_parser_);
+    return parseRoot(builder_, level_ + 1, Small::statement);
   }
 
   /* ********************************************************** */
@@ -249,9 +249,4 @@ public class Small implements PsiParser, LightPsiParser {
     return result_;
   }
 
-  static final Parser statement_parser_ = new Parser() {
-    public boolean parse(PsiBuilder builder_, int level_) {
-      return statement(builder_, level_ + 1);
-    }
-  };
 }

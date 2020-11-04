@@ -56,6 +56,6 @@ public class GenOptions {
 
     generateTokenCase = ParserGeneratorUtil.enumFromString(genOptions.get("token-case"), Case.UPPER);
     generateElementCase = ParserGeneratorUtil.enumFromString(genOptions.get("element-case"), Case.UPPER);
-    javaVersion = StringUtil.parseInt(genOptions.get("java"), 6);
+    javaVersion = StringUtil.parseInt(genOptions.get("java"), 11);
   }
 }

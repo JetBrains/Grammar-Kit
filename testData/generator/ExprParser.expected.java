@@ -127,7 +127,7 @@ public class ExpressionParser implements PsiParser, LightPsiParser {
     Marker marker_ = enter_section_(builder_, level_, _NONE_);
     result_ = expr(builder_, level_ + 1, -1);
     result_ = result_ && element_1(builder_, level_ + 1);
-    exit_section_(builder_, level_, marker_, result_, false, element_recover_parser_);
+    exit_section_(builder_, level_, marker_, result_, false, ExpressionParser::element_recover);
     return result_;
   }
 
@@ -423,9 +423,4 @@ public class ExpressionParser implements PsiParser, LightPsiParser {
     return result_ || pinned_;
   }
 
-  static final Parser element_recover_parser_ = new Parser() {
-    public boolean parse(PsiBuilder builder_, int level_) {
-      return element_recover(builder_, level_ + 1);
-    }
-  };
 }

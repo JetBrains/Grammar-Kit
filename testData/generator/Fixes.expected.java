@@ -50,7 +50,7 @@ public class Fixes implements PsiParser, LightPsiParser {
     Marker marker_ = enter_section_(builder_, level_, _NONE_);
     result_ = Foo_0(builder_, level_ + 1);
     result_ = result_ && Foo__ﾉ__ω__ﾉ_ﾐ_____inner(builder_, level_ + 1);
-    exit_section_(builder_, level_, marker_, result_, false, Foo__recovery_parser_);
+    exit_section_(builder_, level_, marker_, result_, false, Fixes::Foo__recovery);
     return result_;
   }
 
@@ -286,11 +286,7 @@ public class Fixes implements PsiParser, LightPsiParser {
 
   /* ********************************************************** */
   static Parser meta2_$(Parser p, Parser q) {
-    return new Parser() {
-      public boolean parse(PsiBuilder builder_, int level_) {
-        return meta2(builder_, level_ + 1, p, q);
-      }
-    };
+    return (builder_, level_) -> meta2(builder_, level_ + 1, p, q);
   }
 
   // <<p>> <<q>>
@@ -702,7 +698,7 @@ public class Fixes implements PsiParser, LightPsiParser {
     if (!nextTokenIs(builder_, A)) return false;
     boolean result_;
     Marker marker_ = enter_section_(builder_);
-    result_ = sequence(builder_, level_ + 1, some_parser_);
+    result_ = sequence(builder_, level_ + 1, Fixes::some);
     exit_section_(builder_, marker_, SOME_SEQ, result_);
     return result_;
   }
@@ -773,37 +769,6 @@ public class Fixes implements PsiParser, LightPsiParser {
     return result_;
   }
 
-  static final Parser Foo__recovery_parser_ = new Parser() {
-    public boolean parse(PsiBuilder builder_, int level_) {
-      return Foo__recovery(builder_, level_ + 1);
-    }
-  };
-  static final Parser nested_meta_pin_1_1_0_0_parser_ = new Parser() {
-    public boolean parse(PsiBuilder builder_, int level_) {
-      return nested_meta_pin_1_1_0_0(builder_, level_ + 1);
-    }
-  };
-  static final Parser nested_meta_pin_1_1_0_1_parser_ = new Parser() {
-    public boolean parse(PsiBuilder builder_, int level_) {
-      return nested_meta_pin_1_1_0_1(builder_, level_ + 1);
-    }
-  };
-  static final Parser nested_meta_pin_1_1_1_0_parser_ = new Parser() {
-    public boolean parse(PsiBuilder builder_, int level_) {
-      return nested_meta_pin_1_1_1_0(builder_, level_ + 1);
-    }
-  };
-  static final Parser nested_meta_pin_1_1_1_1_parser_ = new Parser() {
-    public boolean parse(PsiBuilder builder_, int level_) {
-      return nested_meta_pin_1_1_1_1(builder_, level_ + 1);
-    }
-  };
-  static final Parser some_parser_ = new Parser() {
-    public boolean parse(PsiBuilder builder_, int level_) {
-      return some(builder_, level_ + 1);
-    }
-  };
-
-  private static final Parser nested_meta_pin_1_1_0_parser_ = meta2_$(nested_meta_pin_1_1_0_0_parser_, nested_meta_pin_1_1_0_1_parser_);
-  private static final Parser nested_meta_pin_1_1_1_parser_ = meta2_$(nested_meta_pin_1_1_1_0_parser_, nested_meta_pin_1_1_1_1_parser_);
+  private static final Parser nested_meta_pin_1_1_0_parser_ = meta2_$(Fixes::nested_meta_pin_1_1_0_0, Fixes::nested_meta_pin_1_1_0_1);
+  private static final Parser nested_meta_pin_1_1_1_parser_ = meta2_$(Fixes::nested_meta_pin_1_1_1_0, Fixes::nested_meta_pin_1_1_1_1);
 }

@@ -215,7 +215,7 @@ public class PsiGen implements PsiParser, LightPsiParser {
     boolean result_;
     Marker marker_ = enter_section_(builder_, level_, _NONE_, INCLUDE__SECTION__ALT, "<include section alt>");
     result_ = consumeTokens(builder_, 0, ID, NUMBER);
-    exit_section_(builder_, level_, marker_, result_, false, include_section_recover__parser_);
+    exit_section_(builder_, level_, marker_, result_, false, PsiGen::include_section_recover_);
     return result_;
   }
 
@@ -228,7 +228,7 @@ public class PsiGen implements PsiParser, LightPsiParser {
     result_ = consumeTokens(builder_, 0, ID, NUMBER);
     result_ = result_ && include_section(builder_, level_ + 1);
     result_ = result_ && include__section__alt(builder_, level_ + 1);
-    exit_section_(builder_, level_, marker_, result_, false, include_section_recover__parser_);
+    exit_section_(builder_, level_, marker_, result_, false, PsiGen::include_section_recover_);
     return result_;
   }
 
@@ -295,7 +295,7 @@ public class PsiGen implements PsiParser, LightPsiParser {
     if (!recursion_guard_(builder_, level_, "root")) return false;
     boolean result_;
     Marker marker_ = enter_section_(builder_, level_, _COLLAPSE_, ROOT, "<root>");
-    result_ = parseGrammar(builder_, level_ + 1, grammar_element_parser_);
+    result_ = parseGrammar(builder_, level_ + 1, PsiGen::grammar_element);
     if (!result_) result_ = root_b(builder_, level_ + 1);
     if (!result_) result_ = root_c(builder_, level_ + 1);
     if (!result_) result_ = root_d(builder_, level_ + 1);
@@ -309,7 +309,7 @@ public class PsiGen implements PsiParser, LightPsiParser {
     if (!recursion_guard_(builder_, level_, "root_b")) return false;
     boolean result_;
     Marker marker_ = enter_section_(builder_, level_, _COLLAPSE_, ROOT_B, "<root b>");
-    result_ = parseGrammar(builder_, level_ + 1, grammar_element_parser_);
+    result_ = parseGrammar(builder_, level_ + 1, PsiGen::grammar_element);
     exit_section_(builder_, level_, marker_, result_, false, null);
     return result_;
   }
@@ -321,7 +321,7 @@ public class PsiGen implements PsiParser, LightPsiParser {
     if (!nextTokenIs(builder_, "<root c>", ID, NUMBER)) return false;
     boolean result_;
     Marker marker_ = enter_section_(builder_, level_, _NONE_, ROOT_C, "<root c>");
-    result_ = PsiGen2.blockOf(builder_, level_ + 1, grammar_element_parser_);
+    result_ = PsiGen2.blockOf(builder_, level_ + 1, PsiGen::grammar_element);
     exit_section_(builder_, level_, marker_, result_, false, null);
     return result_;
   }
@@ -333,21 +333,11 @@ public class PsiGen implements PsiParser, LightPsiParser {
     if (!nextTokenIs(builder_, "<root d>", ID, NUMBER)) return false;
     boolean result_;
     Marker marker_ = enter_section_(builder_, level_, _NONE_, ROOT_D, "<root d>");
-    result_ = listOf(builder_, level_ + 1, grammar_element_parser_);
+    result_ = listOf(builder_, level_ + 1, PsiGen::grammar_element);
     exit_section_(builder_, level_, marker_, result_, false, null);
     return result_;
   }
 
-  static final Parser grammar_element_parser_ = new Parser() {
-    public boolean parse(PsiBuilder builder_, int level_) {
-      return grammar_element(builder_, level_ + 1);
-    }
-  };
-  static final Parser include_section_recover__parser_ = new Parser() {
-    public boolean parse(PsiBuilder builder_, int level_) {
-      return include_section_recover_(builder_, level_ + 1);
-    }
-  };
 }
 // ---- PsiGen2.java -----------------
 //header.txt
@@ -698,7 +688,7 @@ public class PsiGenFixes {
   /* ********************************************************** */
   // <<blockOf identifier>>
   static boolean fixMetaRule(PsiBuilder builder_, int level_) {
-    return PsiGen2.blockOf(builder_, level_ + 1, identifier_parser_);
+    return PsiGen2.blockOf(builder_, level_ + 1, PsiGen2::identifier);
   }
 
   /* ********************************************************** */
@@ -786,9 +776,4 @@ public class PsiGenFixes {
     return result_;
   }
 
-  static final Parser identifier_parser_ = new Parser() {
-    public boolean parse(PsiBuilder builder_, int level_) {
-      return PsiGen2.identifier(builder_, level_ + 1);
-    }
-  };
 }

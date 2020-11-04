@@ -116,7 +116,7 @@ public class GeneratedParser implements PsiParser, LightPsiParser {
     result_ = abc(builder_, level_ + 1);
     if (!result_) result_ = pinned_seq(builder_, level_ + 1);
     if (!result_) result_ = plain_seq(builder_, level_ + 1);
-    exit_section_(builder_, level_, marker_, result_, false, content_recover_parser_);
+    exit_section_(builder_, level_, marker_, result_, false, GeneratedParser::content_recover);
     return result_;
   }
 
@@ -216,9 +216,4 @@ public class GeneratedParser implements PsiParser, LightPsiParser {
     return result_;
   }
 
-  static final Parser content_recover_parser_ = new Parser() {
-    public boolean parse(PsiBuilder builder_, int level_) {
-      return content_recover(builder_, level_ + 1);
-    }
-  };
 }

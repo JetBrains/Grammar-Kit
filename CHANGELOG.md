@@ -1,7 +1,16 @@
-2020.3-SNAPSHOT
+2020.3
 
-* Generator: type annotations support
+* Generator: add type annotations (in IDE only)
+* Generator: add @override to visitor methods
+* Generator: do not force child expr consume-type in a non-expr context
+* Generator: skip "upper" rules in containing rules PSI (#248)
+* Generator: switch default java version to 11
 * Generator: use same charset as bnf explicitly
+* Generator: introduce `generate=[fqn="yes/no"]` option
+* Editor: highlight missing external methods (#242)
+* Editor: more class references in strings
+* Editor: in-place meta arg rename
+* Editor: fix "redundant character escape" warning (#243)
 * Compatibility: IntelliJ IDEA 2020.3
 
 2020.1

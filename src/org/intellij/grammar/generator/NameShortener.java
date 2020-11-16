@@ -54,7 +54,7 @@ public class NameShortener {
     boolean changed = false;
     StringBuilder sb = new StringBuilder();
     boolean quoted = false;
-    int offset = 0;
+    int offset = 0, len = s.length();
     boolean vararg = s.endsWith("...");
     for (String part : StringUtil.tokenize(new StringTokenizer(StringUtil.trimEnd(s, "..."), TYPE_TEXT_SEPARATORS, true))) {
       String pkg;
@@ -62,6 +62,9 @@ public class NameShortener {
           "?".equals(part) || "extends".equals(part) || "super".equals(part)) {
         if ("\"".equals(part) && offset > 0 && s.indexOf(offset - 1) != '\\') quoted = !quoted;
         sb.append(part);
+        if (",".equals(part) && offset < len && !Character.isWhitespace(s.charAt(offset + 1))) {
+          sb.append(" "); // Map<K,V> psi types skip space after comma
+        }
       }
       else if (!quoted && (myImports.contains(part) ||
                            "java.lang".equals(pkg = StringUtil.getPackageName(part)) ||

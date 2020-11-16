@@ -323,10 +323,12 @@ public abstract class JavaHelper {
       PsiAnnotation[] annoToSkip = typeToSkip == null ? null :
                                    typeToSkip instanceof PsiArrayType ? ((PsiArrayType)typeToSkip).getComponentType().getAnnotations() :
                                    typeToSkip.getAnnotations();
+      String[] textToSkip = annoToSkip == null ? null :
+                            ContainerUtil.map(annoToSkip, PsiElement::getText, ArrayUtil.EMPTY_STRING_ARRAY);
       List<String> result = new ArrayList<>();
       for (PsiAnnotation annotation : modifierList.getAnnotations()) {
         if (annotation.getParameterList().getAttributes().length > 0) continue;
-        if (annoToSkip != null && ArrayUtil.indexOf(annoToSkip, annotation) != - 1) continue;
+        if (textToSkip != null && ArrayUtil.indexOf(textToSkip, annotation.getText()) != - 1) continue;
         ContainerUtil.addIfNotNull(result, annotation.getQualifiedName());
       }
       return result;

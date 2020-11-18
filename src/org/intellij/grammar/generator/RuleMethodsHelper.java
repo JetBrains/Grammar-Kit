@@ -78,6 +78,11 @@ public class RuleMethodsHelper {
     return myMethods.get(rule).first.get(name);
   }
 
+  @Nullable
+  public Collection<String> getAvailableMethodInfo(BnfRule rule) {
+    return myMethods.get(rule).first.keySet();
+  }
+
   protected void calcMethods(BnfRule rule, Map<String, String> tokensReversed) {
     List<MethodInfo> result = new ArrayList<>();
 

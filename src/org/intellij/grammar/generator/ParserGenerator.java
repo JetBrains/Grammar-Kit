@@ -2042,35 +2042,121 @@ public class ParserGenerator {
     });
   }
 
+  private static class PsiPathMethod {
+    /** Specified index. */
+    @Nullable
+    public final String index;
+    /** The encountered error, if any. */
+    @Nullable
+    public final String error;
+    @Nullable
+    public final RuleMethodsHelper.MethodInfo targetInfo;
+
+    private PsiPathMethod(@Nullable String error) {
+      this.error = error;
+      this.index = null;
+      this.targetInfo = null;
+    }
+
+    private PsiPathMethod(@Nullable String index,
+                          @Nullable RuleMethodsHelper.MethodInfo targetInfo) {
+      this.index = index;
+      this.error = null;
+      this.targetInfo = targetInfo;
+    }
+  }
+
+  private List<PsiPathMethod> resolveUserPsiPathMethods(BnfRule startRule, String path) {
+    BnfRule targetRule = startRule;
+    final String[] splitPath = path.trim().split("\\s*/\\s*"); // Split by slashes and remove whitespace around them
+    final List<PsiPathMethod> result = new ArrayList<>(splitPath.length);
+
+    for (int i = 0; i < splitPath.length; i++) {
+      final String pathElement = splitPath[i];
+
+      final String pathElementWithoutIndex;
+      final String index;
+
+      final int indexStart = pathElement.indexOf('[');
+      final int indexEnd = pathElement.lastIndexOf(']');
+      if (indexStart >= 0) {
+        if (indexEnd != pathElement.length() - 1) {
+          // Invalid indexing
+          result.add(new PsiPathMethod("Index must be in a form 'name[index]'"));
+          break;
+        }
+        pathElementWithoutIndex = pathElement.substring(0, indexStart).trim();
+        index = pathElement.substring(indexStart + 1, indexEnd).trim();
+      }
+      else {
+        pathElementWithoutIndex = pathElement;
+        index = null;
+      }
+
+      if (pathElementWithoutIndex.isEmpty()) {
+        result.add(new PsiPathMethod(null));
+        continue;
+      }
+
+      RuleMethodsHelper.MethodInfo targetInfo = myRulesMethodsHelper.getMethodInfo(targetRule, pathElementWithoutIndex);
+      if (targetInfo == null) {
+        Collection<String> available = myRulesMethodsHelper.getAvailableMethodInfo(targetRule);
+        if (available == null || available.isEmpty()) {
+          result.add(new PsiPathMethod("Target '" + pathElementWithoutIndex + "' not found in '" + targetRule
+                                       + "'. No available targets."));
+        }
+        else {
+          result.add(new PsiPathMethod("Target '" + pathElementWithoutIndex + "' not found in '" + targetRule
+                                       + "'. Available targets are: " + String.join(", ", available)));
+        }
+        break;
+      }
+
+      if (index != null && !targetInfo.cardinality.many()) {
+        result.add(new PsiPathMethod("Can't index target '" + pathElementWithoutIndex
+                                     + "', because its cardinality is " + targetInfo.cardinality, targetInfo));
+        break;
+      }
+
+      if ((i > 0) && StringUtil.isEmpty(targetInfo.name) && (targetInfo.rule == null)) {
+        result.add(new PsiPathMethod("Non-first target '" + pathElementWithoutIndex
+                                     + "', references empty rule: "+targetInfo, targetInfo));
+        break;
+      }
+
+      targetRule = targetInfo.rule;
+      result.add(new PsiPathMethod(index, targetInfo));
+    }
+
+    return result;
+  }
+
   private void generateUserPsiAccessors(BnfRule startRule, RuleMethodsHelper.MethodInfo methodInfo, boolean intf, boolean mixedAST) {
     StringBuilder sb = new StringBuilder();
     BnfRule targetRule = startRule;
     RuleGraphHelper.Cardinality cardinality = REQUIRED;
     String context = "";
-    String[] splitPath = methodInfo.path.split("/");
 
-    int i = -1, count = 1;
+    int count = 1;
     boolean totalNullable = false;
-    for (Object m : resolveUserPsiPathMethods(startRule, splitPath)) {
-      String pathElement = splitPath[++i];
-      if (m instanceof String) continue;
-      boolean last = i == splitPath.length - 1;
-      int indexStart = pathElement.indexOf('[');
-      int indexEnd = indexStart > 0 ? pathElement.lastIndexOf(']') : -1;
-      String index = indexEnd > -1 ? pathElement.substring(indexStart + 1, indexEnd).trim() : null;
-      if ("first".equals(index)) index = "0";
-
-      RuleMethodsHelper.MethodInfo targetInfo = (RuleMethodsHelper.MethodInfo)m;
-      if (targetInfo == null ||
-          index != null && !targetInfo.cardinality.many() ||
-          i > 0 && StringUtil.isEmpty(targetInfo.name) && targetInfo.rule == null) {
+    final List<PsiPathMethod> methods = resolveUserPsiPathMethods(startRule, methodInfo.path);
+    for (int i = 0; i < methods.size(); i++) {
+      final PsiPathMethod method = methods.get(i);
+      if (method.error != null) {
         if (intf) { // warn only once
-          addWarning(startRule.getProject(), "incorrect item '" + pathElement + "' in '" + startRule.getName() + "' method " +
-                                             methodInfo.name + "=\"" + methodInfo.path + "\"");
+          addWarning(startRule.getProject(),
+                     "incorrect item in '" + startRule.getName() + "' method " + methodInfo.name + "=\"" + methodInfo.path + "\": " + method.error);
         }
-        return; // missing rule, unknown or wrong cardinality
+        return;
       }
 
+      if (method.targetInfo == null) {
+        continue;
+      }
+
+      boolean last = i == methods.size() - 1;
+      RuleMethodsHelper.MethodInfo targetInfo = method.targetInfo;
+      String index = method.index;
       boolean many = targetInfo.cardinality.many();
       String className = shorten(targetInfo.rule == null ? PSI_ELEMENT_CLASS : getAccessorType(targetInfo.rule));
 

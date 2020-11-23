@@ -14,18 +14,10 @@
   <change-notes>
     <![CDATA[
     <ul>
-      <li>Generator: add type annotations (in IDE only)</li>
-      <li>Generator: add @override to visitor methods</li>
-      <li>Generator: do not force child expr consume-type in a non-expr context</li>
-      <li>Generator: skip "upper" rules in containing rules PSI (#248)</li>
-      <li>Generator: switch default java version to 11</li>
-      <li>Generator: use same charset as bnf explicitly</li>
-      <li>Generator: introduce `generate=[fqn="yes/no"]` option</li>
-      <li>Editor: highlight missing external methods (#242)</li>
-      <li>Editor: more class references in strings</li>
-      <li>Editor: in-place meta arg rename</li>
-      <li>Editor: fix "redundant character escape" warning (#243)</li>
-      <li>Compatibility: IntelliJ IDEA 2020.3</li>
+      <li>Generator: add missing space after comma in types</li>
+      <li>Generator: fix double annotations for compiled elements (#251)</li>
+      <li>Generator: add override check if mixin present</li>
+      <li>Generator: detailed warning on incorrect method spec (#252)</li>
     </ul>
     <a href="https://github.com/JetBrains/Grammar-Kit/blob/master/CHANGELOG.md">Full change log...</a>
     ]]>

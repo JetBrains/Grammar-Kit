@@ -1,3 +1,10 @@
+2020.3.1
+
+* Generator: add missing space after comma in types
+* Generator: fix double annotations for compiled elements (#251)
+* Generator: add override check if mixin present 
+* Generator: detailed warning on incorrect method spec (#252)
+
 2020.3
 
 * Generator: add type annotations (in IDE only)

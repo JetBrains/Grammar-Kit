@@ -1818,7 +1818,7 @@ public class ParserGenerator {
       String r = G.visitorValue != null ? "<" + G.visitorValue + ">" : "";
       String t = G.visitorValue != null ? " " + G.visitorValue : "void";
       String ret = G.visitorValue != null ? "return " : "";
-      boolean addOverride = topSuperRule != rule;
+      boolean addOverride = topSuperRule != rule && info.mixin == null;
       if (!addOverride && topSuperClass != null) {
         for (NavigatablePsiElement m : myJavaHelper.findClassMethods(
           topSuperClass, JavaHelper.MethodType.INSTANCE, "accept", 1, myVisitorClassName)) {

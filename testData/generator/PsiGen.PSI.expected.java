@@ -1407,7 +1407,6 @@ public class XRefExprImpl extends MyRefImpl implements XRefExpr {
     super(node);
   }
 
-  @Override
   public void accept(@NotNull XVisitor visitor) {
     visitor.visitRefExpr(this);
   }

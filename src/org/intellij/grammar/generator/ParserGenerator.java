@@ -49,8 +49,7 @@ import static org.intellij.grammar.generator.NameShortener.addTypeToImports;
 import static org.intellij.grammar.generator.NameShortener.getRawClassName;
 import static org.intellij.grammar.generator.ParserGeneratorUtil.*;
 import static org.intellij.grammar.generator.RuleGraphHelper.Cardinality.*;
-import static org.intellij.grammar.generator.RuleGraphHelper.getSynonymTargetOrSelf;
-import static org.intellij.grammar.generator.RuleGraphHelper.hasPsiClass;
+import static org.intellij.grammar.generator.RuleGraphHelper.*;
 import static org.intellij.grammar.psi.BnfTypes.*;
 
 
@@ -2036,6 +2035,7 @@ public class ParserGenerator {
       String item = indexStart > -1 ? pathElement.substring(0, indexStart).trim() : pathElement.trim();
 
       if (item.isEmpty()) return item;
+      if (targetRule[0] == null) return null;
       RuleMethodsHelper.MethodInfo targetInfo = myRulesMethodsHelper.getMethodInfo(targetRule[0], item);
       targetRule[0] = targetInfo == null ? null : targetInfo.rule;
       return targetInfo;
@@ -2057,18 +2057,44 @@ public class ParserGenerator {
       boolean last = i == splitPath.length - 1;
       int indexStart = pathElement.indexOf('[');
       int indexEnd = indexStart > 0 ? pathElement.lastIndexOf(']') : -1;
+      String base = (indexStart > -1 ? pathElement.substring(0, indexStart) : pathElement).trim();
       String index = indexEnd > -1 ? pathElement.substring(indexStart + 1, indexEnd).trim() : null;
-      if ("first".equals(index)) index = "0";
+
 
       RuleMethodsHelper.MethodInfo targetInfo = (RuleMethodsHelper.MethodInfo)m;
-      if (targetInfo == null ||
-          index != null && !targetInfo.cardinality.many() ||
-          i > 0 && StringUtil.isEmpty(targetInfo.name) && targetInfo.rule == null) {
-        if (intf) { // warn only once
-          addWarning(startRule.getProject(), "incorrect item '" + pathElement + "' in '" + startRule.getName() + "' method " +
-                                             methodInfo.name + "=\"" + methodInfo.path + "\"");
+      String error;
+      if (indexStart > 0 && (indexEnd == -1 || StringUtil.isNotEmpty(pathElement.substring(indexEnd + 1)))) {
+        error = "'<name>[<index>]' expected, got '" + pathElement + "'";
+      }
+      else if (targetInfo == null) {
+        Collection<String> available = targetRule == null ? null : myRulesMethodsHelper.getMethodNames(targetRule);
+        if (targetRule == null) {
+          error = "'" + base + "' not found in '" + splitPath[i - 1] + "' (not a rule)";
         }
-        return; // missing rule, unknown or wrong cardinality
+        else if (available == null || available.isEmpty()) {
+          error = "'" + base + "' not found in '" + targetRule.getName() + "' (available: nothing)";
+        }
+        else {
+          error = "'" + base + "' not found in '" + targetRule.getName() + "' (available: " + String.join(", ", available) + ")";
+        }
+      }
+      else if (index != null && !targetInfo.cardinality.many()) {
+        error = "'[" + index + "]' unexpected after '" + base + getCardinalityText(targetInfo.cardinality) + "'";
+      }
+      else if (!last && index == null && targetInfo.cardinality.many()) {
+        error = "'[<index>]' required after '" + base + getCardinalityText(targetInfo.cardinality) + "'";
+      }
+      else if (i > 0 && StringUtil.isEmpty(targetInfo.name)) {
+        error = "'" + base + "' accessor suppressed in '" + splitPath[i - 1] + "'";
+      }
+      else {
+        error = null;
+      }
+      if (error != null) {
+        if (intf) { // warn only once
+          addWarning(startRule.getProject(), "%s#%s(\"%s\"): %s", startRule.getName(), methodInfo.name, methodInfo.path, error);
+        }
+        return;
       }
 
       boolean many = targetInfo.cardinality.many();
@@ -2105,6 +2131,8 @@ public class ParserGenerator {
 
       // list item
       if (index != null) {
+        if ("first".equals(index)) index = "0";
+
         context += ".";
         boolean isLast = index.equals("last");
         if (isLast) index = context + "size() - 1";

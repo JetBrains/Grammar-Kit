@@ -41,6 +41,7 @@ operator ::= '+' | '-'
 
 expression ::= value '*' value
 value ::= id
+fake empty ::=
 
 fake token-defaults ::= UPCASEKWD1 lowcasekwd1 UPCASEKWD2 lowcasekwd2 nodef
 fake some-root ::= some-child value {
@@ -70,5 +71,20 @@ fake rename-list ::= some-child * {
     first="some-child[first]"
     first-smth="some-child[first]/MY_SOMETHING"
     last="some-child[last]"
+  ]
+}
+
+fake report_some_bad ::= report_some_bad empty some-child * {
+  methods=[
+    some-child=""
+    empty=""
+
+    bad0="some-child[0]zzz/"
+    bad1="some-child[0]/missing-child"
+    bad2="empty/missing-child"
+    bad3="some-child/MY_SOMETHING"
+    bad4="some-child[first]/MY_SOMETHING/BAD"
+    bad5="report_some_bad[0]/some-child"
+    bad6="report_some_bad/some-child"
   ]
 }

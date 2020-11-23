@@ -88,6 +88,17 @@ public interface XBinary extends XComposite {
   XValue getBadIndex();
 
 }
+// ---- XEmpty.java -----------------
+//header.txt
+package generated.psi;
+
+import java.util.List;
+import org.jetbrains.annotations.*;
+import com.intellij.psi.PsiElement;
+
+public interface XEmpty extends XComposite {
+
+}
 // ---- XExpression.java -----------------
 //header.txt
 package generated.psi;
@@ -135,6 +146,21 @@ public interface XRenameList extends XComposite {
 
   @Nullable
   XSomeChild getLast();
+
+}
+// ---- XReportSomeBad.java -----------------
+//header.txt
+package generated.psi;
+
+import java.util.List;
+import org.jetbrains.annotations.*;
+import com.intellij.psi.PsiElement;
+import generated.psi.child.XSomeChild;
+
+public interface XReportSomeBad extends XComposite {
+
+  @NotNull
+  XReportSomeBad getReportSomeBad();
 
 }
 // ---- XSomeChild.java -----------------
@@ -357,6 +383,26 @@ public class XBinaryImpl extends ASTWrapperPsiElement implements XBinary {
   }
 
 }
+// ---- XEmptyImpl.java -----------------
+//header.txt
+package generated.psi.impl;
+
+import java.util.List;
+import org.jetbrains.annotations.*;
+import com.intellij.lang.ASTNode;
+import com.intellij.psi.PsiElement;
+import com.intellij.psi.util.PsiTreeUtil;
+import static generated.GeneratedTypes.*;
+import com.intellij.extapi.psi.ASTWrapperPsiElement;
+import generated.psi.*;
+
+public class XEmptyImpl extends ASTWrapperPsiElement implements XEmpty {
+
+  public XEmptyImpl(@NotNull ASTNode node) {
+    super(node);
+  }
+
+}
 // ---- XExpressionImpl.java -----------------
 //header.txt
 package generated.psi.impl;
@@ -450,6 +496,33 @@ public class XRenameListImpl extends ASTWrapperPsiElement implements XRenameList
   public XSomeChild getLast() {
     List<XSomeChild> p1 = getSomeChildren();
     return p1.isEmpty()? null : p1.get(p1.size() - 1);
+  }
+
+}
+// ---- XReportSomeBadImpl.java -----------------
+//header.txt
+package generated.psi.impl;
+
+import java.util.List;
+import org.jetbrains.annotations.*;
+import com.intellij.lang.ASTNode;
+import com.intellij.psi.PsiElement;
+import com.intellij.psi.util.PsiTreeUtil;
+import static generated.GeneratedTypes.*;
+import com.intellij.extapi.psi.ASTWrapperPsiElement;
+import generated.psi.*;
+import generated.psi.child.XSomeChild;
+
+public class XReportSomeBadImpl extends ASTWrapperPsiElement implements XReportSomeBad {
+
+  public XReportSomeBadImpl(@NotNull ASTNode node) {
+    super(node);
+  }
+
+  @Override
+  @NotNull
+  public XReportSomeBad getReportSomeBad() {
+    return findNotNullChildByClass(XReportSomeBad.class);
   }
 
 }

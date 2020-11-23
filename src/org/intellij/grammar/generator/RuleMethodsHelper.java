@@ -69,13 +69,18 @@ public class RuleMethodsHelper {
   }
 
   @NotNull
-  public Collection<MethodInfo> getFor(BnfRule rule) {
+  public Collection<MethodInfo> getFor(@NotNull BnfRule rule) {
     return myMethods.get(rule).second;
   }
 
   @Nullable
-  public MethodInfo getMethodInfo(BnfRule rule, String name) {
+  public MethodInfo getMethodInfo(@NotNull BnfRule rule, String name) {
     return myMethods.get(rule).first.get(name);
+  }
+
+  @Nullable
+  public Collection<String> getMethodNames(@NotNull BnfRule rule) {
+    return myMethods.get(rule).first.keySet();
   }
 
   protected void calcMethods(BnfRule rule, Map<String, String> tokensReversed) {

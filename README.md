@@ -124,14 +124,22 @@ One can specify an attribute for several rules at once in a global attributes bl
 ````
 
 ### Rule modifiers:
-1. *private*:  PSI node will not be generated for this rule. Rules are public by default.
-2. *external*:  not generated. Used for generated and handwritten code integration.
-3. *left*:  left-associativity support. PSI node for this rule will enclose the one to the left.
-4. *inner*:  left-injection. PSI node for this rule will be injected into the one to the left.
-5. *meta*:  meta grammar support. Meta rules work in conjunction with external expressions.
-6. *fake*:  no parser code will be generated. For PSI hierarchy generation only.
 
-Modifiers can be combined, *inner* should only be used together with *left*, *private left* is equivalent to *private left inner*.
+1. *private* (PSI tree): skip node creation and let its child nodes be included in its parent. 
+2. *left* (PSI tree):  take a node on the left (previous sibling) and enclose it by becoming its parent. 
+3. *inner* (PSI tree):  take a node on the left (previous sibling) and inject itself into it by becoming its child.
+4. *upper* (PSI tree):  take the parent node and replace it by adopting all its children.
+
+5. *meta* (parser):  a parametrized rule; its parse function can take other parse functions as parameters.
+6. *external* (parser):  a rule with a hand-written parse function; no parsing code is generated. 
+   
+7. *fake* (PSI classes):  a rule for shaping the generated PSI classes; only PSI classes are generated.
+
+Modifiers can be combined, *inner* should only be used together with *left*,
+*private left* is equivalent to *private left inner*, 
+*fake* should not be combined with *private*.
+
+By default, rules are *public*, i.e. *non-private*, *non-fake*, etc.
 
 ### Meta rules & external expressions:
 External expression *<< ... >>* is simply an inline variant of external rule. It can also be used to specify meta rule along with arguments.

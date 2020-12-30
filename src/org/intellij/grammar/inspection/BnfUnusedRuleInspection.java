@@ -5,6 +5,7 @@
 package org.intellij.grammar.inspection;
 
 import com.intellij.codeInspection.*;
+import com.intellij.openapi.util.Condition;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiReference;
@@ -50,15 +51,12 @@ public class BnfUnusedRuleInspection extends LocalInspectionTool {
     
     ProblemsHolder holder = new ProblemsHolder(manager, file, isOnTheFly);
 
-    //noinspection LimitedScopeInnerClass,EmptyClass
-    abstract class Cond<T> extends JBIterable.SCond<T> { }
-
     Set<BnfRule> roots = new THashSet<>();
     Set<BnfRule> inExpr = new THashSet<>();
     Set<BnfRule> inParsing = new THashSet<>();
     Set<BnfRule> inSuppressed = new THashSet<>();
     Map<BnfRule, String> inAttrs = new THashMap<>();
-    
+
     bnfTraverserNoAttrs(myFile).traverse()
       .filterMap(BnfUnusedRuleInspection::resolveRule)
       .addAllTo(inExpr);
@@ -71,7 +69,7 @@ public class BnfUnusedRuleInspection extends LocalInspectionTool {
     inParsing.addAll(roots);
 
     for (int size = 0, prev = -1; size != prev; prev = size, size = inParsing.size()) {
-      bnfTraverserNoAttrs(myFile).expand(new Cond<PsiElement>() {
+      bnfTraverserNoAttrs(myFile).expand(new Condition<>() {
         @Override
         public boolean value(PsiElement element) {
           if (element instanceof BnfRule) {

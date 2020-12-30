@@ -428,14 +428,14 @@ public class ParserGeneratorUtil {
 
   @NotNull
   static JBIterable<BnfRule> getSuperRules(@NotNull BnfFile file, @Nullable BnfRule rule) {
-    abstract class Fun<S, T> extends JBIterable.SFun<S, T> { }
-    JBIterable<Object> result = JBIterable.generate(rule, new Fun<Object, Object>() {
-      final Set<BnfRule> visited = new HashSet<>();
+    JBIterable<Object> result = JBIterable.generate(rule, new JBIterable.SFun<Object, Object>() {
+      Set<BnfRule> visited;
 
       @Override
       public Object fun(Object o) {
         if (o == ObjectUtils.NULL) return null;
         BnfRule cur = (BnfRule)o;
+        if (visited == null) visited = new HashSet<>();
         if (!visited.add(cur)) return ObjectUtils.NULL;
         BnfRule next = getSynonymTargetOrSelf(cur);
         if (next != cur) return next;

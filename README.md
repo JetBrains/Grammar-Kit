@@ -100,7 +100,7 @@ private meta list ::= <<p>> (',' <<p>>) *                // meta rule with param
 private list_usage ::= <<list rule_D>>                   // meta rule application
 ````
 
-Basic syntax is extended with rule and global attributes that control code generation.
+The basic syntax is extended with global attributes and rule attributes.
 Attributes are specified by the list of *name=value* pairs enclosed in braces.
 Rule attributes are placed right after the rule definition.
 Global attributes are placed on top or separated from a rule definition with a semicolon.
@@ -126,8 +126,8 @@ One can specify an attribute for several rules at once in a global attributes bl
 ### Rule modifiers:
 
 1. *private* (PSI tree): skip node creation and let its child nodes be included in its parent. 
-2. *left* (PSI tree):  take a node on the left (previous sibling) and enclose it by becoming its parent. 
-3. *inner* (PSI tree):  take a node on the left (previous sibling) and inject itself into it by becoming its child.
+2. *left* (PSI tree):  take an AST node on the left (previous sibling) and enclose it by becoming its parent. 
+3. *inner* (PSI tree):  take an AST node on the left (previous sibling) and inject itself into it by becoming its child.
 4. *upper* (PSI tree):  take the parent node and replace it by adopting all its children.
 
 5. *meta* (parser):  a parametrized rule; its parse function can take other parse functions as parameters.
@@ -142,7 +142,7 @@ Modifiers can be combined, *inner* should only be used together with *left*,
 By default, rules are *public*, i.e. *non-private*, *non-fake*, etc.
 
 ### Meta rules & external expressions:
-External expression *<< ... >>* is simply an inline variant of external rule. It can also be used to specify meta rule along with arguments.
+The external expression *<< ... >>* is simply an inline variant of an external rule. It can also be used to specify a meta rule along with arguments.
 
 For example:
 
@@ -158,26 +158,26 @@ External rule expression syntax is the same as a body of external expression:
 ````
 
 External expressions and external rules interpret double- and single-quoted strings differently.
-Generally anything that appears in an external expression after rule or method name is treated
-as parameter and passed "as is" except single-quoted strings which are unquoted first.
-This helps passing qualified enum constants, java expressions, etc.
+Generally, anything that appears in an external expression after rule or method name is treated
+as a parameter and passed "as is" except single-quoted strings which are unquoted first.
+This helps to pass qualified enum constants, java expressions, etc.
 
 Rule references in parameter list are implemented as [GeneratedParserUtilBase.Parser](src/org/intellij/grammar/parser/GeneratedParserUtilBase.java) instances.
 
 ### Tokens:
 Explicit tokens are declared via _tokens_ global attribute, e.g. in *token_name=token_value* form. 
-A token name is for IElementType token constant, a token value is usually its string representation in single or double quotes.
+A token name is for the IElementType token constant, a token value is usually its string representation in single or double-quotes.
 
-Tokens in grammar can be referenced by name or by value in single or double quotes.
+Tokens in grammar can be referenced by name or by value in single or double-quotes.
 It is recommended to use values where possible for better readability.
-Names can be used to resolve conflicts when there is an unquoted token value that also match some rule.
+Names can be used to resolve conflicts when there is an unquoted token value that also matches some rule.
 
 Implicit tokens are tokens not specified via _tokens_ attribute.
 Unquoted implicit tokens (aka keyword tokens) have names equals to their values.
 Quoted implicit tokens (aka text-matched tokens) are slow because they are matched by text and not by an IElementType constant returned by a lexer.
-Text-matched tokens can span more than one real token returned by lexer.
+Text-matched tokens can span more than one real token returned by the lexer.
 
-Rules, tokens and text-matched tokens have different colors.
+Rules, tokens, and text-matched tokens have different colors.
 
 ### Attributes for error recovery and reporting:
 * _pin_ (value: a number or pattern) tunes the parser to handle incomplete matches. 
@@ -188,19 +188,19 @@ By default, the pin is applied to the top sequence expression. Sub-expressions c
 *{pin(".\*")=1}* applies to all sub-sequences.
 
 * _recoverWhile_ (value: predicate rule) matches any number of tokens after the rule
-matching completes with any result. This attribute helps parser recover when unmatched token
+matching completes with any result. This attribute helps the parser recover when an unmatched token
 sequence is encountered. See [HOWTO section](HOWTO.md#22-using-recoverwhile-attribute) for more.
 
 * _name_ (value: string) specifies a name for a rule to be used in error reports. For example, *name("_.*expr")=expression* changes
 expression error messages to "&lt;expression&gt; required" instead of a long list of tokens.
 
 ### Generated parser structure:
-Generator can split parser code into several classes for better support of large grammars.
+The generator can split parser code into several classes for better support of large grammars.
 
-In simple cases a parser will consist just of several generated classes.
+In simple cases, a parser will consist just of several generated classes.
 
-The actual error recovery and reporting code as well as completion functionality for parser-based completion provider and basic token matching code resides
-in a _parserUtilClass_ class. It may be altered by specifying some other class that extend or mimic the original [GeneratedParserUtilBase](src/org/intellij/grammar/parser/GeneratedParserUtilBase.java).
+The actual error recovery and reporting code as well as the parser-based completion provider support code and the basic token matching code reside
+in a _parserUtilClass_ class. It may be altered by specifying some other class that extends or mimics the original [GeneratedParserUtilBase](src/org/intellij/grammar/parser/GeneratedParserUtilBase.java).
 There's no need to keep a copy of GeneratedParserUtilBase in a project, it is included in *IntelliJ Platform* since version 12.1.
 
 The manual parsing code, i.e. _external_ rules must be implemented the same way as generated, by a static method in the _parserUtilClass_ class or any other class that will
@@ -212,8 +212,8 @@ be imported via _parserImports_ attribute like this:
 ````
 
 ### Lexer and PSI:
-IElementType constants generated by parser generator have to be recognized and returned by the lexer.
-JFlex-based lexer can be generated from grammar that defines all the required tokens ( *Generate JFlex Lexer* menu).
+IElementType constants generated by the parser generator have to be recognized and returned by the lexer.
+The JFlex-based lexer can be generated from a grammar that defines all the required tokens ( *Generate JFlex Lexer* menu).
 
 *Run JFlex Generator* menu in a \*.flex file calls JFlex to generate lexer java code.
 Keywords are picked right from usages while tokens like *string*, *identifier* and *comment* can be defined like this (from [TUTORIAL](TUTORIAL.md)):
@@ -235,7 +235,7 @@ Keywords are picked right from usages while tokens like *string*, *identifier* a
 While *Live Preview* mode supports full Java RegExp syntax and JFlex supports only a subset (see [JFlex documentation](http://jflex.de/manual.html#SECTION00053000000000000000))
 Grammar-Kit tries to perform some obvious conversions.
 
-Lexer can be provided separately or one can use the generated \*.flex file as a base.
+The lexer can be provided separately or one can use the generated \*.flex file as a base.
 
 Parser generator generates token types constants and PSI by default.
 This can be switched off via *generateTokens* and *generatePSI* global boolean attributes respectively.

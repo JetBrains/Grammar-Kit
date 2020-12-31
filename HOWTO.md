@@ -335,8 +335,8 @@ my_named ::= part1 part2 part3 {
 ````
 public class SamplePsiImplUtil {
   // methods from PsiNamedElement interface with an extra MyName parameter
-  @Nullable @NonNls String getName(MyNamed o) { ... }
-  PsiElement setName(MyNamed o, @NonNls @NotNull String name) throws IncorrectOperationException { ... }
+  public static @Nullable String getName(MyNamed o) { ... }
+  public static PsiElement setName(MyNamed o, @NotNull String name) throws IncorrectOperationException { ... }
 }
 ````
 

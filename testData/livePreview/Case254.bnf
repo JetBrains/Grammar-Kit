@@ -1,0 +1,27 @@
+{
+    generate=[tokenAccessors="no"]
+    tokens=[
+        LPAR='('
+        RPAR=')'
+        DOT='.'
+        number='regexp:\d+'
+        identifier='regexp:\w+'
+        whitespace='regexp:\s+'
+        comment='regexp:;.*'
+    ]
+}
+root ::= sexpr *
+
+sexpr ::= atom | cons
+
+atom ::= identifier | number
+
+cons ::= list
+
+private meta items ::= <<items_entry <<recover1>> <<param1>>>> * {recoverWhile="<<recover1>>"}
+private meta items_entry ::= <<recover2>> <<param2>> {pin=1}
+private list_body ::= <<items_ex !')' sexpr>>
+list ::= '(' list_body ')'
+
+external items_ex ::= items_ex0 <<p>>
+external items_ex0 ::= items <<p1>> <<p2>>

@@ -287,6 +287,7 @@ public class ParserGenerator {
       // mixin attribute overrides "extends":
       info.realSuperClass = StringUtil.notNullize(info.mixin, adjustedSuperRuleClass);
       info.mixedAST = topInfo != null ? topInfo.mixedAST : JBIterable.of(superRuleClass, info.realSuperClass)
+        .map(NameShortener::getRawClassName)
         .flatMap(s -> JBTreeTraverser.<String>from(o -> JBIterable.of(myJavaHelper.getSuperClassName(o))).withRoot(s).unique())
         .find(BnfConstants.COMPOSITE_PSI_ELEMENT_CLASS::equals) != null;
     }
@@ -1354,7 +1355,6 @@ public class ParserGenerator {
   @NotNull
   private NodeCall generateExternalCall(@NotNull BnfRule rule, @NotNull List<BnfExpression> expressions, @NotNull String nextName) {
     List<BnfExpression> callParameters = expressions;
-    List<BnfExpression> metaParameters = Collections.emptyList();
     List<String> metaParameterNames = Collections.emptyList();
     String method = expressions.size() > 0 ? expressions.get(0).getText() : null;
     String targetClassName = null;
@@ -1364,7 +1364,6 @@ public class ParserGenerator {
       if (Rule.isExternal(targetRule)) {
         metaParameterNames = GrammarUtil.collectExtraArguments(targetRule, targetRule.getExpression());
         callParameters = GrammarUtil.getExternalRuleExpressions(targetRule);
-        metaParameters = expressions;
         method = callParameters.get(0).getText();
         if (metaParameterNames.size() < expressions.size() - 1) {
           callParameters = ContainerUtil.concat(callParameters, expressions.subList(metaParameterNames.size() + 1, expressions.size()));
@@ -1386,7 +1385,7 @@ public class ParserGenerator {
         String argNextName;
         int metaIdx;
         if (argument.startsWith("<<") && (metaIdx = metaParameterNames.indexOf(argument)) > -1) {
-          nested = metaParameters.get(metaIdx + 1);
+          nested = expressions.get(metaIdx + 1);
           argument = nested.getText();
           argNextName = getNextName(nextName, metaIdx);
         }

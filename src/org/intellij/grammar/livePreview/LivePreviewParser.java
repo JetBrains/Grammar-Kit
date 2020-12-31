@@ -430,22 +430,22 @@ public class LivePreviewParser implements PsiParser {
                                        final String nextName,
                                        final Map<String, Parser> externalArguments) {
     List<BnfExpression> callParameters = expressions;
-    List<BnfExpression> metaParameters = Collections.emptyList();
     List<String> metaParameterNames;
     String method = expressions.size() > 0 ? expressions.get(0).getText() : null;
-    final BnfRule targetRule = method == null ? null : myFile.getRule(method);
+    BnfRule targetRule = method == null ? null : myFile.getRule(method);
     // handle external rule call: substitute and merge arguments from external expression and rule definition
     if (targetRule != null) {
       metaParameterNames = GrammarUtil.collectExtraArguments(targetRule, targetRule.getExpression());
       if (Rule.isExternal(targetRule)) {
-        // not supported
-        return false;
-        //callParameters = GrammarUtil.getExternalRuleExpressions(targetRule);
-        //metaParameters = expressions;
-        //method = callParameters.get(0).getText();
-        //if (metaParameterNames.size() < expressions.size() - 1) {
-        //  callParameters = ContainerUtil.concat(callParameters, expressions.subList(metaParameterNames.size() + 1, expressions.size()));
-        //}
+        callParameters = GrammarUtil.getExternalRuleExpressions(targetRule);
+        method = callParameters.get(0).getText();
+        if (metaParameterNames.size() < expressions.size() - 1) {
+          callParameters = ContainerUtil.concat(callParameters, expressions.subList(metaParameterNames.size() + 1, expressions.size()));
+        }
+        if (myFile.getRule(method) == null) {
+          // not supported
+          return false;
+        }
       }
     }
     else {
@@ -469,22 +469,19 @@ public class LivePreviewParser implements PsiParser {
     for (int i = 1, len = Math.min(callParameters.size(), metaParameterNames.size() + 1); i < len; i++) {
       BnfExpression nested = callParameters.get(i);
       String argument = nested.getText();
-      final String argNextName;
-      final String argName;
+      String argName = metaParameterNames.get(i - 1);
+      String argNextName;
       int metaIdx;
       if (argument.startsWith("<<") && (metaIdx = metaParameterNames.indexOf(argument)) > -1) {
-        nested = metaParameters.get(metaIdx + 1);
-        argument = nested.getText();
+        nested = expressions.get(metaIdx + 1);
         argNextName = getNextName(nextName, metaIdx);
-        argName = argument;
       }
       else {
         argNextName = getNextName(nextName, i - 1);
-        argName = metaParameterNames.get(i - 1);
       }
       final BnfExpression finalNested = nested;
       if (nested instanceof BnfReferenceOrToken || nested instanceof BnfLiteralExpression) {
-        final BnfRule argRule = nested instanceof BnfReferenceOrToken? myFile.getRule(argument) : null;
+        final BnfRule argRule = nested instanceof BnfReferenceOrToken? myFile.getRule(nested.getText()) : null;
         argumentMap.put(argName, (builder13, level13) -> {
           if (argRule != null) {
             return rule(builder13, level13, argRule, Collections.emptyMap());
@@ -496,10 +493,10 @@ public class LivePreviewParser implements PsiParser {
       }
       else if (nested instanceof BnfExternalExpression) {
         List<BnfExpression> expressionList = ((BnfExternalExpression)nested).getExpressionList();
-        boolean metaRule = Rule.isMeta(rule);
+        boolean metaRule = Rule.isMeta(rule) || Rule.isExternal(rule);
         if (metaRule && expressionList.size() == 1) {
           // parameter
-          argumentMap.put(argName, externalArguments.get(expressionList.get(0).getText()));
+          argumentMap.put(argName, externalArguments.get("<<" + expressionList.get(0).getText() + ">>"));
         }
         else {
           argumentMap.put(argName, (builder12, level12) -> generateNodeCall(builder12, level12, targetRule, finalNested, argNextName, externalArguments));
@@ -509,6 +506,9 @@ public class LivePreviewParser implements PsiParser {
         argumentMap.put(argName,
                         (builder1, level1) -> generateNodeCall(builder1, level1, targetRule, finalNested, argNextName, externalArguments));
       }
+    }
+    if (Rule.isExternal(targetRule)) {
+      return generateExternalCall(builder, level, targetRule, callParameters, targetRule.getName(), argumentMap);
     }
     return rule(builder, level, targetRule, argumentMap);
   }

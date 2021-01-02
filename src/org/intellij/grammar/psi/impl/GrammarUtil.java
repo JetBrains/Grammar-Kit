@@ -87,7 +87,7 @@ public class GrammarUtil {
     return expression instanceof BnfSequence ? ((BnfSequence)expression).getExpressionList() : Collections.singletonList(expression);
   }
 
-  public static List<String> collectExtraArguments(BnfRule rule, BnfExpression expression) {
+  public static List<String> collectMetaParameters(BnfRule rule, BnfExpression expression) {
     if (!ParserGeneratorUtil.Rule.isMeta(rule) && !ParserGeneratorUtil.Rule.isExternal(rule)) return Collections.emptyList();
     List<String> result = new SmartList<>();
     for (BnfExternalExpression o : bnfTraverserNoAttrs(expression).filter(BnfExternalExpression.class)) {

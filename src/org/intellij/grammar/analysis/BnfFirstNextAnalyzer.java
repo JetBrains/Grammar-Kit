@@ -270,7 +270,7 @@ public class BnfFirstNextAnalyzer {
                 LOG.error("ruleRef:" + ruleRef.getText() +", metaResult:" + metaResults);
                 continue;
               }
-              params = GrammarUtil.collectExtraArguments(metaRule, metaRule.getExpression());
+              params = GrammarUtil.collectMetaParameters(metaRule, metaRule.getExpression());
             }
             int idx = params.indexOf(e.getText());
             if (idx > -1 && idx < arguments.size()) {

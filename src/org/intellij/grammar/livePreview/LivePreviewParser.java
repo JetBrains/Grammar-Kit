@@ -435,7 +435,7 @@ public class LivePreviewParser implements PsiParser {
     BnfRule targetRule = method == null ? null : myFile.getRule(method);
     // handle external rule call: substitute and merge arguments from external expression and rule definition
     if (targetRule != null) {
-      metaParameterNames = GrammarUtil.collectExtraArguments(targetRule, targetRule.getExpression());
+      metaParameterNames = GrammarUtil.collectMetaParameters(targetRule, targetRule.getExpression());
       if (Rule.isExternal(targetRule)) {
         callParameters = GrammarUtil.getExternalRuleExpressions(targetRule);
         method = callParameters.get(0).getText();

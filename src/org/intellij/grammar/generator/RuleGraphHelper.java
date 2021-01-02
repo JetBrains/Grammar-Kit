@@ -28,7 +28,7 @@ import java.util.*;
 
 import static org.intellij.grammar.generator.ParserGeneratorUtil.*;
 import static org.intellij.grammar.generator.RuleGraphHelper.Cardinality.*;
-import static org.intellij.grammar.psi.impl.GrammarUtil.collectExtraArguments;
+import static org.intellij.grammar.psi.impl.GrammarUtil.collectMetaParameters;
 import static org.intellij.grammar.psi.impl.GrammarUtil.isDoubleAngles;
 
 /**
@@ -428,7 +428,7 @@ public class RuleGraphHelper {
             }
             else {
               if (params == null) {
-                params = collectExtraArguments(metaRule, metaRule.getExpression());
+                params = collectMetaParameters(metaRule, metaRule.getExpression());
               }
               int idx = params.indexOf(member.getText());
               if (idx > -1 && idx < arguments.size()) {

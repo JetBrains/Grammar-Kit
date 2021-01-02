@@ -19,7 +19,7 @@ class Names {
   public final String pos;
   public final String root;
   public final String priority;
-  public final String argPrefix;
+  public final String metaParamPrefix;
   public final String psiLocal = "p";
 
   private Names(String builder,
@@ -30,7 +30,7 @@ class Names {
                 String pos,
                 String root,
                 String priority,
-                String argPrefix) {
+                String metaParamPrefix) {
     this.builder = builder;
     this.level = level;
     this.marker = marker;
@@ -39,7 +39,7 @@ class Names {
     this.pos = pos;
     this.root = root;
     this.priority = priority;
-    this.argPrefix = argPrefix;
+    this.metaParamPrefix = metaParamPrefix;
   }
 
   public static Names classicNames() {

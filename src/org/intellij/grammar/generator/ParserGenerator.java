@@ -816,7 +816,7 @@ public class ParserGenerator {
     boolean isRule = initialNode.getParent() == rule;
     BnfExpression node = getNonTrivialNode(initialNode);
 
-    final List<String> metaParameters = collectExtraArguments(rule, node);
+    final List<String> metaParameters = collectMetaParametersFormatted(rule, node);
     if (!metaParameters.isEmpty()) {
       if (isRule && isUsedAsArgument(rule) || !isRule && isArgument(initialNode)) {
         generateMetaMethod(funcName, metaParameters, isRule);
@@ -1013,7 +1013,7 @@ public class ParserGenerator {
             recoverCall = generateAutoRecoverCall(rule);
           }
           else if (Rule.isMeta(rule) && GrammarUtil.isDoubleAngles(recoverWhile)) {
-            recoverCall = formatArgName(recoverWhile.substring(2, recoverWhile.length() - 2));
+            recoverCall = formatMetaParamName(recoverWhile.substring(2, recoverWhile.length() - 2));
           }
           else {
             recoverCall = predicateRule == null ? null : generateWrappedNodeCall(rule, null, predicateRule.getName()).render();
@@ -1158,17 +1158,18 @@ public class ParserGenerator {
   }
 
   @NotNull
-  private List<String> collectExtraArguments(@NotNull BnfRule rule, @Nullable BnfExpression expression) {
+  private List<String> collectMetaParametersFormatted(@NotNull BnfRule rule, @Nullable BnfExpression expression) {
     if (expression == null) return Collections.emptyList();
-    return GrammarUtil.collectExtraArguments(rule, expression)
+    return GrammarUtil.collectMetaParameters(rule, expression)
       .stream()
-      .map(it -> formatArgName(it.substring(2, it.length() - 2)))
+      .map(it -> formatMetaParamName(it.substring(2, it.length() - 2)))
       .collect(toList());
   }
 
-  private String formatArgName(String s) {
+  @NotNull
+  private String formatMetaParamName(@NotNull String s) {
     String argName = s.trim();
-    return N.argPrefix + (N.argPrefix.isEmpty() || "_".equals(N.argPrefix) ? argName : StringUtil.capitalize(argName));
+    return N.metaParamPrefix + (N.metaParamPrefix.isEmpty() || "_".equals(N.metaParamPrefix) ? argName : StringUtil.capitalize(argName));
   }
 
   @Nullable
@@ -1317,14 +1318,14 @@ public class ParserGenerator {
     else if (type == BNF_EXTERNAL_EXPRESSION) {
       List<BnfExpression> expressions = ((BnfExternalExpression)node).getExpressionList();
       if (expressions.size() == 1 && Rule.isMeta(rule)) {
-        return new MetaParameterCall(formatArgName(expressions.get(0).getText()));
+        return new MetaParameterCall(formatMetaParamName(expressions.get(0).getText()));
       }
       else {
         return generateExternalCall(rule, expressions, nextName);
       }
     }
     else {
-      List<String> extraArguments = collectExtraArguments(rule, node);
+      List<String> extraArguments = collectMetaParametersFormatted(rule, node);
       if (extraArguments.isEmpty()) {
         return new MethodCall(false, StringUtil.getShortName(ruleInfo(rule).parserClass), nextName);
       }
@@ -1362,7 +1363,7 @@ public class ParserGenerator {
     // handle external rule call: substitute and merge arguments from external expression and rule definition
     if (targetRule != null) {
       if (Rule.isExternal(targetRule)) {
-        metaParameterNames = GrammarUtil.collectExtraArguments(targetRule, targetRule.getExpression());
+        metaParameterNames = GrammarUtil.collectMetaParameters(targetRule, targetRule.getExpression());
         callParameters = GrammarUtil.getExternalRuleExpressions(targetRule);
         method = callParameters.get(0).getText();
         if (metaParameterNames.size() < expressions.size() - 1) {
@@ -1413,7 +1414,7 @@ public class ParserGenerator {
         else if (nested instanceof BnfExternalExpression) {
           List<BnfExpression> expressionList = ((BnfExternalExpression)nested).getExpressionList();
           if (expressionList.size() == 1 && Rule.isMeta(rule)) {
-            arguments.add(new MetaParameterArgument(formatArgName(expressionList.get(0).getText())));
+            arguments.add(new MetaParameterArgument(formatMetaParamName(expressionList.get(0).getText())));
           }
           else {
             arguments.add(generateWrappedNodeCall(rule, nested, argNextName));

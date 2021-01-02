@@ -8,7 +8,9 @@ import com.intellij.psi.ElementDescriptionLocation;
 import com.intellij.psi.ElementDescriptionProvider;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiNamedElement;
+import com.intellij.psi.tree.IElementType;
 import com.intellij.psi.util.PsiTreeUtil;
+import com.intellij.psi.util.PsiUtilCore;
 import com.intellij.usageView.UsageViewNodeTextLocation;
 import com.intellij.usageView.UsageViewShortNameLocation;
 import com.intellij.usageView.UsageViewTypeLocation;
@@ -38,13 +40,14 @@ public class BnfDescriptionProvider implements ElementDescriptionProvider {
     else if (psiElement instanceof BnfAttr) {
       if (location == UsageViewTypeLocation.INSTANCE) {
         BnfRule rule = PsiTreeUtil.getParentOfType(psiElement, BnfRule.class);
-        return (rule == null ? "Grammar " : "Rule ") + "Attribute";
+        return (rule == null ? "Grammar" : "Rule") + " Attribute";
       }
       return ((BnfAttr)psiElement).getName();
     }
     else if (psiElement instanceof BnfComposite) {
       if (location == UsageViewTypeLocation.INSTANCE) {
-        return StringUtil.join(NameUtil.splitWords(psiElement.getNode().getElementType().toString(), false), " ");
+        IElementType elementType = PsiUtilCore.getElementType(psiElement);
+        return elementType == null ? null : StringUtil.join(NameUtil.splitWords(elementType.toString(), false), " ");
       }
       return psiElement instanceof PsiNamedElement? ((PsiNamedElement) psiElement).getName() : psiElement.getClass().getSimpleName();
     }

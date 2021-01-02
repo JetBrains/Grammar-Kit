@@ -7,7 +7,10 @@ import com.intellij.codeInsight.daemon.EmptyResolveMessageProvider;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.psi.*;
 import com.intellij.psi.impl.RenameableFakePsiElement;
+import com.intellij.psi.search.LocalSearchScope;
+import com.intellij.psi.search.SearchScope;
 import com.intellij.psi.util.PsiTreeUtil;
+import com.intellij.util.ObjectUtils;
 import com.intellij.util.containers.ContainerUtil;
 import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.generator.ParserGeneratorUtil;
@@ -26,7 +29,7 @@ import static org.intellij.grammar.psi.impl.GrammarUtil.bnfTraverserNoAttrs;
 /**
  * @author gregsh
  */
-public class BnfReferenceImpl<T extends BnfComposite> extends PsiReferenceBase<T> implements EmptyResolveMessageProvider {
+public class BnfReferenceImpl<T extends BnfExpression> extends PsiReferenceBase<T> implements EmptyResolveMessageProvider {
 
   public BnfReferenceImpl(@NotNull T element, TextRange range) {
     super(element, range);
@@ -37,18 +40,22 @@ public class BnfReferenceImpl<T extends BnfComposite> extends PsiReferenceBase<T
     PsiFile containingFile = myElement.getContainingFile();
     String referenceName = getRangeInElement().substring(myElement.getText());
     boolean isExternal = GrammarUtil.isExternalReference(myElement);
-    PsiElement result = containingFile instanceof BnfFile? ((BnfFile)containingFile).getRule(referenceName) : null;
-    if (result != null || !isExternal) return result;
-    PsiElement parent = myElement.getParent();
-    if (parent instanceof BnfExternalExpression) {
-      BnfRule rule = ParserGeneratorUtil.Rule.of((BnfExpression)parent);
-      if (((BnfExternalExpression)parent).getArguments().isEmpty() &&
-          (ParserGeneratorUtil.Rule.isMeta(rule) || ParserGeneratorUtil.Rule.isExternal(rule))) {
-        return new MetaArgument(rule, ((BnfExternalExpression)parent).getRefElement().getText());
-      }
+    PsiElement targetRule = containingFile instanceof BnfFile? ((BnfFile)containingFile).getRule(referenceName) : null;
+    if (!isExternal) return targetRule;
+
+    BnfRule rule = ParserGeneratorUtil.Rule.of(myElement);
+
+    if (!ParserGeneratorUtil.Rule.isMeta(rule) &&
+        !ParserGeneratorUtil.Rule.isExternal(rule)) {
+      return targetRule != null ? targetRule : resolveMethod();
     }
 
-    return resolveMethod();
+    BnfExternalExpression externalExpr = ObjectUtils.tryCast(myElement.getParent(), BnfExternalExpression.class);
+    if (externalExpr != null && externalExpr.getArguments().isEmpty()) {
+      return new MetaParameter(rule, myElement.getText());
+    }
+
+    return targetRule != null ? targetRule : resolveMethod();
   }
 
   @Nullable
@@ -77,14 +84,26 @@ public class BnfReferenceImpl<T extends BnfComposite> extends PsiReferenceBase<T
            "Unresolved rule ''{0}''";
   }
 
-  public static class MetaArgument extends RenameableFakePsiElement implements PsiNameIdentifierOwner {
+  public static class MetaParameter extends RenameableFakePsiElement implements BnfNamedElement {
     private final String myName;
 
-    MetaArgument(BnfRule rule, String name) {
+    MetaParameter(BnfRule rule, String name) {
       super(rule);
       myName = name;
     }
 
+    @Override
+    public <R> R accept(@NotNull BnfVisitor<R> visitor) {
+      return visitor.visitNamedElement(this);
+    }
+
+    @NotNull
+    @Override
+    public PsiElement getId() {
+      return ObjectUtils.notNull(getNameIdentifier());
+    }
+
+    @NotNull
     @Override
     public String getName() {
       return myName;
@@ -92,7 +111,7 @@ public class BnfReferenceImpl<T extends BnfComposite> extends PsiReferenceBase<T
 
     @Override
     public @Nullable @Nls String getTypeName() {
-      return "meta argument";
+      return "Meta Rule Parameter";
     }
 
     @Override
@@ -119,9 +138,14 @@ public class BnfReferenceImpl<T extends BnfComposite> extends PsiReferenceBase<T
 
     @Override
     public boolean isEquivalentTo(PsiElement another) {
-      return another instanceof BnfReferenceImpl.MetaArgument &&
-             Objects.equals(myName, ((MetaArgument)another).myName) &&
+      return another instanceof BnfReferenceImpl.MetaParameter &&
+             Objects.equals(myName, ((MetaParameter)another).myName) &&
              getManager().areElementsEquivalent(getParent(), another.getParent());
+    }
+
+    @Override
+    public @NotNull SearchScope getUseScope() {
+      return new LocalSearchScope(getContainingFile());
     }
   }
 }

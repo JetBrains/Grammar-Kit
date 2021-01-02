@@ -20,6 +20,6 @@ import org.jetbrains.annotations.NotNull;
 public class BnfRefactoringSupportProvider extends RefactoringSupportProvider {
   @Override
   public boolean isMemberInplaceRenameAvailable(@NotNull PsiElement element, PsiElement context) {
-    return element instanceof BnfNamedElement || element instanceof BnfReferenceImpl.MetaArgument;
+    return element instanceof BnfNamedElement || element instanceof BnfReferenceImpl.MetaParameter;
   }
 }

@@ -22,6 +22,7 @@ import gnu.trove.THashMap;
 import gnu.trove.THashSet;
 import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.analysis.BnfFirstNextAnalyzer;
+import org.intellij.grammar.generator.NodeCalls.*;
 import org.intellij.grammar.java.JavaHelper;
 import org.intellij.grammar.parser.GeneratedParserUtilBase.Parser;
 import org.intellij.grammar.psi.*;

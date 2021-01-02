@@ -30,6 +30,12 @@ import static org.intellij.grammar.generator.ParserGeneratorUtil.getGetterName;
  * @author gregsh
  */
 public class BnfUtilTest extends UsefulTestCase {
+  public void testAttributeDescriptions() {
+    for (KnownAttribute<?> attribute : KnownAttribute.getAttributes()) {
+      assertNotNull("No description for attribute: " + attribute.getName(), attribute.getDescription());
+    }
+  }
+
   public void testIdentifiers() {
     assertEquals("AbcEdf", toIdentifier("abc-edf", Case.CAMEL));
     assertEquals("SampleAbcEdfElement", toIdentifier("abc-edf", "Sample/Element", Case.CAMEL));

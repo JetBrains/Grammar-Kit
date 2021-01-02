@@ -23,7 +23,6 @@ public class BnfTestSuite extends TestCase {
       testSuite.addTestSuite(BnfGeneratorTest.class);
       testSuite.addTestSuite(ExpressionParserTest.class);
       testSuite.addTestSuite(BnfLivePreviewParserTest.class);
-      testSuite.addTestSuite(BnfAttributeDescriptionTest.class);
       return testSuite;
     }
   }

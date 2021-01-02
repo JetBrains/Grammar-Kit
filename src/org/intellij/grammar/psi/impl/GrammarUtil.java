@@ -4,11 +4,14 @@
 
 package org.intellij.grammar.psi.impl;
 
+import com.intellij.lang.Language;
 import com.intellij.openapi.util.Conditions;
 import com.intellij.openapi.util.Ref;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.SyntaxTraverser;
+import com.intellij.psi.impl.source.tree.LeafPsiElement;
+import com.intellij.psi.tree.IElementType;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.util.PairProcessor;
 import com.intellij.util.Processor;
@@ -199,5 +202,31 @@ public class GrammarUtil {
 
   public static boolean isIdQuoted(@Nullable String text) {
     return text != null && text.startsWith("<") && text.endsWith(">");
+  }
+
+  public static class FakeElementType extends IElementType {
+    public FakeElementType(String debugName, Language language) {
+      super(debugName, language, false);
+    }
+  }
+
+  public static class FakeBnfExpression extends LeafPsiElement implements BnfExpression {
+    public FakeBnfExpression(@NotNull String text) {
+      this(BnfTypes.BNF_EXPRESSION, text);
+    }
+
+    public FakeBnfExpression(@NotNull IElementType elementType, @NotNull String text) {
+      super(elementType, text);
+    }
+
+    @Override
+    public <R> R accept(@NotNull BnfVisitor<R> visitor) {
+      return visitor.visitExpression(this);
+    }
+
+    @Override
+    public String toString() {
+      return getText();
+    }
   }
 }

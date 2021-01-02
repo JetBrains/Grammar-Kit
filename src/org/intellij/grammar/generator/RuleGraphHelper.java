@@ -21,6 +21,8 @@ import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.analysis.BnfFirstNextAnalyzer;
 import org.intellij.grammar.psi.*;
 import org.intellij.grammar.psi.impl.GrammarUtil;
+import org.intellij.grammar.psi.impl.GrammarUtil.FakeElementType;
+import org.intellij.grammar.psi.impl.GrammarUtil.FakeBnfExpression;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

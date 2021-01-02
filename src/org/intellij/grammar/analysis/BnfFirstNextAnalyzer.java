@@ -19,7 +19,7 @@ import com.intellij.util.containers.JBIterable;
 import gnu.trove.THashMap;
 import gnu.trove.THashSet;
 import org.intellij.grammar.KnownAttribute;
-import org.intellij.grammar.generator.FakeBnfExpression;
+import org.intellij.grammar.psi.impl.GrammarUtil.FakeBnfExpression;
 import org.intellij.grammar.generator.ParserGeneratorUtil;
 import org.intellij.grammar.generator.RuleGraphHelper;
 import org.intellij.grammar.psi.*;

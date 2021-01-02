@@ -49,8 +49,6 @@ import static org.intellij.grammar.psi.BnfTypes.BNF_SEQUENCE;
  *         Date: 16.07.11 10:41
  */
 public class ParserGeneratorUtil {
-  private static final Object NULL = new Object();
-  private static final BnfExpression NULL_ATTR = new FakeBnfExpression("NULL");
   private static final String RESERVED_SUFFIX = "_$";
   private static final Set<String> JAVA_RESERVED = new THashSet<>(Arrays.asList(
     "abstract", "assert", "boolean", "break", "byte", "case", "catch", "char", "class",
@@ -151,7 +149,6 @@ public class ParserGeneratorUtil {
 
   public static Object getAttributeValue(BnfExpression value) {
     if (value == null) return null;
-    if (value == NULL_ATTR) return NULL;
     if (value instanceof BnfReferenceOrToken) {
       return getTokenValue((BnfReferenceOrToken)value);
     }
@@ -192,8 +189,8 @@ public class ParserGeneratorUtil {
 
   private static Object getTokenValue(BnfReferenceOrToken child) {
     String text = child.getText();
-    if (text.equals("true") || text.equals("false")) return Boolean.parseBoolean(text);
-    if (text.equals("null")) return NULL;
+    if (text.equals("true")) return true;
+    if (text.equals("false")) return false;
     return GrammarUtil.getIdText(child);
   }
 

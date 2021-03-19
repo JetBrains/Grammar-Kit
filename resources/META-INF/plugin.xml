@@ -117,10 +117,6 @@
     <lang.braceMatcher language="JFlex" implementationClass="org.intellij.jflex.editor.JFlexBraceMatcher"/>
     <quoteHandler fileType="JFlex" className="org.intellij.jflex.editor.JFlexQuoteHandler"/>
     <lang.psiStructureViewFactory language="JFlex" implementationClass="org.intellij.jflex.editor.JFlexStructureViewFactory"/>
-
-    <multiHostInjector implementation="org.intellij.jflex.psi.impl.JFlexJavaCodeInjector" />
-    <lang.elementManipulator forClass="org.intellij.jflex.psi.impl.JFlexJavaCodeImpl"
-                             implementationClass="org.intellij.jflex.psi.impl.JFlexJavaCodeManipulator" />
   </extensions>
   <actions>
     <group id="grammar.file.group" popup="false">

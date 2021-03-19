@@ -4,6 +4,10 @@
     <projectService serviceInterface="org.intellij.grammar.java.JavaHelper" serviceImplementation="org.intellij.grammar.java.JavaHelper$PsiHelper"/>
     <referencesSearch implementation="org.intellij.jflex.psi.impl.JFlexStateUsageSearcher"/>
     <regExpLanguageHost forClass="org.intellij.grammar.psi.impl.BnfStringImpl" implementationClass="org.intellij.grammar.psi.impl.BnfStringRegexHost"/>
+
+    <multiHostInjector implementation="org.intellij.jflex.psi.impl.JFlexJavaCodeInjector"/>
+    <lang.elementManipulator forClass="org.intellij.jflex.psi.impl.JFlexJavaCodeImpl"
+                             implementationClass="org.intellij.jflex.psi.impl.JFlexJavaCodeManipulator"/>
   </extensions>
   <actions>
     <action id="grammar.Generate.ParserUtil" class="org.intellij.grammar.actions.BnfGenerateParserUtilAction" text="Generate Parser Util">

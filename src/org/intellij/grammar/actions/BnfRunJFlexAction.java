@@ -78,7 +78,7 @@ public class BnfRunJFlexAction extends DumbAwareAction {
 
   private static final String[] JETBRAINS_JFLEX_URLS = {
     System.getProperty("grammar.kit.jflex.jar",
-                       "https://jetbrains.bintray.com/intellij-third-party-dependencies/org/jetbrains/intellij/deps/jflex/jflex/1.7.0-2/jflex-1.7.0-2.jar"),
+                       "https://cache-redirector.jetbrains.com/intellij-dependencies/org/jetbrains/intellij/deps/jflex/jflex/1.7.0-2/jflex-1.7.0-2.jar"),
     System.getProperty("grammar.kit.jflex.skeleton",
                        "https://raw.github.com/JetBrains/intellij-community/master/tools/lexer/idea-flex.skeleton")
   };
@@ -264,10 +264,10 @@ public class BnfRunJFlexAction extends DumbAwareAction {
 
   private static List<File> getOrDownload(@NotNull Project project, String... urls) {
     List<File> result = new ArrayList<>();
-    if (findCommunitySources(project, result, urls)) return result;
-    if (findInProject(project, true, result, urls)) return result;
-    if (findExistingLibrary(result, urls)) return result;
-    if (findInProject(project, false, result, urls)) return result;
+    if (false && findCommunitySources(project, result, urls)) return result;
+    if (false && findInProject(project, true, result, urls)) return result;
+    if (false && findExistingLibrary(result, urls)) return result;
+    if (false && findInProject(project, false, result, urls)) return result;
 
     String libraryName = "JFlex & idea-flex.skeleton";
     List<Pair<VirtualFile, DownloadableFileDescription>> pairs = downloadFiles(project, libraryName, urls);

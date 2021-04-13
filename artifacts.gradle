@@ -1,6 +1,6 @@
 task buildGrammar_kit_jar (type: Jar, dependsOn: [rootProject.tasks['assemble']]) {
-  baseName = 'grammar-kit'
-  destinationDir = file(artifactsPath)
+  archiveBaseName = 'grammar-kit'
+  destinationDirectory = file(artifactsPath)
   manifest { from "$rootDir/resources/META-INF/MANIFEST.MF" }
   from (rootProject.sourceSets.main.output)
   from (file ("$rootDir/src/org/intellij/grammar/parser/GeneratedParserUtilBase.java")) {
@@ -9,16 +9,16 @@ task buildGrammar_kit_jar (type: Jar, dependsOn: [rootProject.tasks['assemble']]
 }
 
 task buildGrammar_kit_zip (type: Zip, dependsOn: [buildGrammar_kit_jar]) {
-  baseName = 'GrammarKit'
-  destinationDir = file(artifactsPath)
+  archiveBaseName = 'GrammarKit'
+  destinationDirectory = file(artifactsPath)
   from (tasks['buildGrammar_kit_jar'].outputs) {
     into '/GrammarKit/lib'
   }
 }
 
 task buildExpression_console_sample (type: Jar) {
-  baseName = 'expression-console-sample'
-  destinationDir = file(artifactsPath)
+  archiveBaseName = 'expression-console-sample'
+  destinationDirectory = file(artifactsPath)
   manifest { from "$rootDir/tests/org/intellij/grammar/expression/META-INF/MANIFEST.MF" }
   from (files("$rootDir/out/test/grammar-kit/org/intellij/grammar/expression")) {
     into '/org/intellij/grammar/expression'

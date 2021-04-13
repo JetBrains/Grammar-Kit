@@ -1,3 +1,10 @@
+2021.1
+
+* JFlex: update downloadable lib url #264 
+* Plugin: move java-related extensions to optional config #261 
+* Editor: do not resolve meta rule parameters to rules 
+* LivePreview: problem with meta rules #254 
+
 2020.3.1
 
 * Generator: add missing space after comma in types

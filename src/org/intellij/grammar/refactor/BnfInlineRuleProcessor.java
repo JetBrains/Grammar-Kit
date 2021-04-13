@@ -87,10 +87,10 @@ public class BnfInlineRuleProcessor extends BaseRefactoringProcessor {
         final BnfExpression element = (BnfExpression)info.getElement();
         boolean metaRuleRef = GrammarUtil.isExternalReference(element);
         if (meta && metaRuleRef) {
-          inlineMetaRuleUsage(element, expression);
+          inlineMetaRuleUsage(myProject, element, expression);
         }
         else if (!meta && !metaRuleRef) {
-          inlineExpressionUsage(element, expression);
+          inlineExpressionUsage(myProject, element, expression);
         }
       }
       catch (IncorrectOperationException e) {
@@ -108,13 +108,13 @@ public class BnfInlineRuleProcessor extends BaseRefactoringProcessor {
     }
   }
 
-  private static void inlineExpressionUsage(BnfExpression place, BnfExpression ruleExpr) throws IncorrectOperationException {
-    BnfExpression replacement = BnfElementFactory.createExpressionFromText(ruleExpr.getProject(), '(' + ruleExpr.getText() + ')');
-    BnfExpressionOptimizer.optimize(place.replace(replacement));
+  private static void inlineExpressionUsage(Project project, BnfExpression place, BnfExpression ruleExpr) throws IncorrectOperationException {
+    BnfExpression replacement = BnfElementFactory.createExpressionFromText(project, '(' + ruleExpr.getText() + ')');
+    BnfExpressionOptimizer.optimize(project, place.replace(replacement));
   }
 
 
-  private static void inlineMetaRuleUsage(BnfExpression place, BnfExpression expression) {
+  private static void inlineMetaRuleUsage(Project project, BnfExpression place, BnfExpression expression) {
     BnfRule rule = PsiTreeUtil.getParentOfType(place, BnfRule.class);
     PsiElement parent = place.getParent();
     final List<BnfExpression> expressionList;
@@ -153,9 +153,9 @@ public class BnfInlineRuleProcessor extends BaseRefactoringProcessor {
       }
     });
     for (Pair<PsiElement, PsiElement> pair : work) {
-      BnfExpressionOptimizer.optimize(pair.first.replace(pair.second));
+      BnfExpressionOptimizer.optimize(project, pair.first.replace(pair.second));
     }
-    inlineExpressionUsage((BnfExpression)parent, expression);
+    inlineExpressionUsage(project, (BnfExpression)parent, expression);
     if (!(parent instanceof BnfExternalExpression)) {
       for (BnfModifier modifier : rule.getModifierList()) {
         if (modifier.getText().equals("external")) {

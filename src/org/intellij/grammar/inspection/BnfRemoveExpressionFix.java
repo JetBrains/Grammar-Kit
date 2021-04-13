@@ -53,6 +53,6 @@ public class BnfRemoveExpressionFix implements LocalQuickFix {
     else {
       element.delete();
     }
-    BnfExpressionOptimizer.optimize(parent);
+    BnfExpressionOptimizer.optimize(project, parent);
   }
 }

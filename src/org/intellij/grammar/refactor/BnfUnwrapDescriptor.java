@@ -17,6 +17,7 @@ import com.intellij.psi.util.PsiUtil;
 import com.intellij.util.IncorrectOperationException;
 import org.intellij.grammar.psi.*;
 import org.intellij.grammar.psi.impl.BnfElementFactory;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -95,7 +96,8 @@ public class BnfUnwrapDescriptor implements UnwrapDescriptor, Unwrapper {
   }
 
   @Override
-  public List<PsiElement> unwrap(Editor editor, PsiElement element) throws IncorrectOperationException {
+  public List<PsiElement> unwrap(@NotNull Editor editor, PsiElement element) throws IncorrectOperationException {
+    Project project = element.getProject();
     PsiElement last = element.getLastChild();
     PsiElement first = element.getFirstChild();
     if (element instanceof BnfParenthesized) {
@@ -108,11 +110,11 @@ public class BnfUnwrapDescriptor implements UnwrapDescriptor, Unwrapper {
     while (last != first && last instanceof PsiWhiteSpace) {
       last = last.getPrevSibling();
     }
-    if (first == null || last == null || first == last && last instanceof PsiWhiteSpace) return null;
+    if (first == null || last == null || first == last && last instanceof PsiWhiteSpace) return Collections.emptyList();
     PsiElement parent = element.getParent();
     PsiElement target = parent instanceof BnfQuantified || parent instanceof BnfPredicate? parent : element;
     return Collections.singletonList(target.replace(BnfElementFactory.createExpressionFromText(
-      editor.getProject(), element.getContainingFile().getText().substring(first.getTextRange().getStartOffset(), last.getTextRange().getEndOffset()))));
+      project, element.getContainingFile().getText().substring(first.getTextRange().getStartOffset(), last.getTextRange().getEndOffset()))));
   }
 
   @Nullable

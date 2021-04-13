@@ -127,8 +127,8 @@ public class BnfIntroduceRuleHandler implements RefactoringActionHandler {
     BnfExpression firstExpression = ObjectUtils.assertNotNull(ContainerUtil.getFirstItem(selectedExpression));
     BnfExpression lastExpression = ObjectUtils.assertNotNull(ContainerUtil.getLastItem(selectedExpression));
     final TextRange fixedRange = new TextRange(firstExpression.getTextRange().getStartOffset(), lastExpression.getTextRange().getEndOffset());
-    final BnfRule ruleFromText = BnfElementFactory.createRuleFromText(file.getProject(), "a ::= " + fixedRange.substring(file.getText()));
-    BnfExpressionOptimizer.optimize(ruleFromText.getExpression());
+    final BnfRule ruleFromText = BnfElementFactory.createRuleFromText(project, "a ::= " + fixedRange.substring(file.getText()));
+    BnfExpressionOptimizer.optimize(project, ruleFromText.getExpression());
 
     final Map<OccurrencesChooser.ReplaceChoice, List<BnfExpression[]>> occurrencesMap = new LinkedHashMap<>();
     occurrencesMap.put(OccurrencesChooser.ReplaceChoice.NO, Collections.singletonList(selectedExpression.toArray(GrammarUtil.EMPTY_EXPRESSIONS_ARRAY)));

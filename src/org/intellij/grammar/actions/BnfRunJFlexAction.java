@@ -264,10 +264,10 @@ public class BnfRunJFlexAction extends DumbAwareAction {
 
   private static List<File> getOrDownload(@NotNull Project project, String... urls) {
     List<File> result = new ArrayList<>();
-    if (false && findCommunitySources(project, result, urls)) return result;
-    if (false && findInProject(project, true, result, urls)) return result;
-    if (false && findExistingLibrary(result, urls)) return result;
-    if (false && findInProject(project, false, result, urls)) return result;
+    if (findCommunitySources(project, result, urls)) return result;
+    if (findInProject(project, true, result, urls)) return result;
+    if (findExistingLibrary(result, urls)) return result;
+    if (findInProject(project, false, result, urls)) return result;
 
     String libraryName = "JFlex & idea-flex.skeleton";
     List<Pair<VirtualFile, DownloadableFileDescription>> pairs = downloadFiles(project, libraryName, urls);

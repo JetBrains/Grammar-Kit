@@ -16,7 +16,7 @@ import com.intellij.openapi.fileChooser.FileChooserFactory;
 import com.intellij.openapi.fileChooser.FileSaverDescriptor;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.fileTypes.FileTypes;
-import com.intellij.openapi.fileTypes.StdFileTypes;
+import com.intellij.openapi.fileTypes.PlainTextFileType;
 import com.intellij.openapi.fileTypes.ex.FileTypeManagerEx;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.Messages;
@@ -115,7 +115,7 @@ public class BnfGenerateLexerAction extends AnAction {
     String extension = virtualFile.getExtension();
     FileTypeManagerEx fileTypeManagerEx = FileTypeManagerEx.getInstanceEx();
     if (extension != null && fileTypeManagerEx.getFileTypeByExtension(extension) == FileTypes.UNKNOWN) {
-      fileTypeManagerEx.associateExtension(StdFileTypes.PLAIN_TEXT, "flex");
+      fileTypeManagerEx.associateExtension(PlainTextFileType.INSTANCE, "flex");
     }
     FileEditorManager.getInstance(project).openFile(virtualFile, false, true);
     //new OpenFileDescriptor(project, virtualFile).navigate(false);
@@ -138,7 +138,7 @@ public class BnfGenerateLexerAction extends AnAction {
 
     bnfFile.acceptChildren(new PsiRecursiveElementWalkingVisitor() {
       @Override
-      public void visitElement(PsiElement element) {
+      public void visitElement(@NotNull PsiElement element) {
         if (element instanceof BnfAttrs) return;
 
         if (GrammarUtil.isExternalReference(element)) return;
@@ -185,7 +185,7 @@ public class BnfGenerateLexerAction extends AnAction {
   }
 
   private static String javaPattern2JFlex(String javaRegexp) {
-    Matcher m = Pattern.compile("\\[(?:[^]\\\\]|\\\\.)*\\]").matcher(javaRegexp);
+    Matcher m = Pattern.compile("\\[(?:[^]\\\\]|\\\\.)*]").matcher(javaRegexp);
     int start = 0;
     StringBuilder sb = new StringBuilder();
     while (m.find(start)) {
@@ -201,7 +201,7 @@ public class BnfGenerateLexerAction extends AnAction {
   private static String text2JFlex(String text, boolean isRegexp) {
     String s;
     if (!isRegexp) {
-      s = text.replaceAll("(\"|\\\\)", "\\\\$1");
+      s = text.replaceAll("([\"\\\\])", "\\\\$1");
       return s;
     }
     else {
@@ -214,13 +214,13 @@ public class BnfGenerateLexerAction extends AnAction {
       s = s.replaceAll("\\\\S", "[^" + spaces + "]");
       s = s.replaceAll("\\\\w", "[a-zA-Z_0-9]");
       s = s.replaceAll("\\\\W", "[^a-zA-Z_0-9]");
-      s = s.replaceAll("\\\\p\\{Space\\}", "[" + spaces + "]");
-      s = s.replaceAll("\\\\p\\{Digit\\}", "[:digit:]");
-      s = s.replaceAll("\\\\p\\{Alpha\\}", "[:letter:]");
-      s = s.replaceAll("\\\\p\\{Lower\\}", "[:lowercase:]");
-      s = s.replaceAll("\\\\p\\{Upper\\}", "[:uppercase:]");
-      s = s.replaceAll("\\\\p\\{Alnum\\}", "([:letter:]|[:digit:])");
-      s = s.replaceAll("\\\\p\\{ASCII\\}", "[\\x00-\\x7F]");
+      s = s.replaceAll("\\\\p\\{Space}", "[" + spaces + "]");
+      s = s.replaceAll("\\\\p\\{Digit}", "[:digit:]");
+      s = s.replaceAll("\\\\p\\{Alpha}", "[:letter:]");
+      s = s.replaceAll("\\\\p\\{Lower}", "[:lowercase:]");
+      s = s.replaceAll("\\\\p\\{Upper}", "[:uppercase:]");
+      s = s.replaceAll("\\\\p\\{Alnum}", "([:letter:]|[:digit:])");
+      s = s.replaceAll("\\\\p\\{ASCII}", "[\\x00-\\x7F]");
       return s;
     }
   }

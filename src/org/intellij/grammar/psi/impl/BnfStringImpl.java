@@ -12,7 +12,10 @@ import com.intellij.psi.impl.FakePsiElement;
 import com.intellij.psi.impl.source.resolve.ResolveCache;
 import com.intellij.psi.tree.IElementType;
 import com.intellij.psi.util.PsiTreeUtil;
-import com.intellij.util.*;
+import com.intellij.util.ArrayUtil;
+import com.intellij.util.IncorrectOperationException;
+import com.intellij.util.ProcessingContext;
+import com.intellij.util.SmartList;
 import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.generator.ParserGeneratorUtil;
 import org.intellij.grammar.psi.*;
@@ -162,8 +165,8 @@ public abstract class BnfStringImpl extends BnfExpressionImpl implements BnfStri
       if (pattern == null) return ResolveResult.EMPTY_ARRAY;
       final List<PsiElement> result = new ArrayList<>();
 
-      BnfAttr thisAttr = ObjectUtils.assertNotNull(PsiTreeUtil.getParentOfType(getElement(), BnfAttr.class));
-      BnfAttrs thisAttrs = ObjectUtils.assertNotNull(PsiTreeUtil.getParentOfType(thisAttr, BnfAttrs.class));
+      BnfAttr thisAttr = Objects.requireNonNull(PsiTreeUtil.getParentOfType(getElement(), BnfAttr.class));
+      BnfAttrs thisAttrs = Objects.requireNonNull(PsiTreeUtil.getParentOfType(thisAttr, BnfAttrs.class));
       BnfRule thisRule = PsiTreeUtil.getParentOfType(thisAttrs, BnfRule.class);
 
       String thisAttrName = thisAttr.getName();

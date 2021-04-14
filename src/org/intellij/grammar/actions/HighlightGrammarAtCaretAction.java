@@ -13,13 +13,13 @@ import com.intellij.openapi.actionSystem.PlatformDataKeys;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiFile;
-import com.intellij.util.ObjectUtils;
 import org.intellij.grammar.livePreview.GrammarAtCaretPassFactory;
 import org.intellij.grammar.livePreview.LivePreviewLanguage;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * @author gregsh
@@ -38,7 +38,7 @@ public class HighlightGrammarAtCaretAction extends AnAction {
   }
 
   @Override
-  public void update(AnActionEvent e) {
+  public void update(@NotNull AnActionEvent e) {
     Editor editor = getPreviewEditor(e);
     boolean enabled = editor != null;
     String command = !enabled ? "" : GrammarAtCaretPassFactory.GRAMMAR_AT_CARET_KEY.get(editor) != null ? "Stop " : "Start ";
@@ -47,13 +47,13 @@ public class HighlightGrammarAtCaretAction extends AnAction {
   }
 
   @Override
-  public void actionPerformed(AnActionEvent e) {
+  public void actionPerformed(@NotNull AnActionEvent e) {
     Editor editor = getPreviewEditor(e);
     if (editor == null) return;
     Boolean value = GrammarAtCaretPassFactory.GRAMMAR_AT_CARET_KEY.get(editor);
     GrammarAtCaretPassFactory.GRAMMAR_AT_CARET_KEY.set(editor, value == null ? Boolean.TRUE : null);
 
-    Project project = ObjectUtils.assertNotNull(e.getProject());
+    Project project = Objects.requireNonNull(e.getProject());
     DaemonCodeAnalyzer.getInstance(project).restart();
   }
 }

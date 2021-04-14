@@ -21,8 +21,8 @@ import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.analysis.BnfFirstNextAnalyzer;
 import org.intellij.grammar.psi.*;
 import org.intellij.grammar.psi.impl.GrammarUtil;
-import org.intellij.grammar.psi.impl.GrammarUtil.FakeElementType;
 import org.intellij.grammar.psi.impl.GrammarUtil.FakeBnfExpression;
+import org.intellij.grammar.psi.impl.GrammarUtil.FakeElementType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -38,7 +38,7 @@ import static org.intellij.grammar.psi.impl.GrammarUtil.isDoubleAngles;
  *         Date: 16.07.11 10:41
  */
 public class RuleGraphHelper {
-  private static final TObjectHashingStrategy<PsiElement> CARDINALITY_HASHING_STRATEGY = new TObjectHashingStrategy<PsiElement>() {
+  private static final TObjectHashingStrategy<PsiElement> CARDINALITY_HASHING_STRATEGY = new TObjectHashingStrategy<>() {
     @Override
     public int computeHashCode(PsiElement e) {
       if (e instanceof BnfReferenceOrToken || e instanceof BnfLiteralExpression) {
@@ -173,19 +173,7 @@ public class RuleGraphHelper {
   }
 
   private static <K, V> MultiMap<K, V> newMultiMap() {
-    return new MultiMap<K, V>() {
-      @NotNull
-      @Override
-      protected Map<K, Collection<V>> createMap() {
-        return new LinkedHashMap<>();
-      }
-
-      @NotNull
-      @Override
-      protected Collection<V> createCollection() {
-        return new LinkedHashSet<>();
-      }
-    };
+    return MultiMap.createLinkedSet();
   }
 
   @NotNull

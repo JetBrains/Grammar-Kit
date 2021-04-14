@@ -20,7 +20,6 @@ import com.intellij.refactoring.RefactoringBundle;
 import com.intellij.refactoring.introduce.inplace.OccurrencesChooser;
 import com.intellij.refactoring.util.CommonRefactoringUtil;
 import com.intellij.util.Function;
-import com.intellij.util.ObjectUtils;
 import com.intellij.util.containers.ContainerUtil;
 import gnu.trove.THashSet;
 import org.intellij.grammar.generator.ParserGeneratorUtil;
@@ -98,7 +97,7 @@ public class BnfIntroduceRuleHandler implements RefactoringActionHandler {
         else {
           IntroduceTargetChooser.showChooser(
             editor, expressions,
-            new Pass<BnfExpression>() {
+            new Pass<>() {
               public void pass(final BnfExpression bnfExpression) {
                 invokeIntroduce(project, editor, file, currentRule,
                                 Collections.singletonList(bnfExpression));
@@ -124,8 +123,8 @@ public class BnfIntroduceRuleHandler implements RefactoringActionHandler {
                                       final PsiFile file,
                                       final BnfRule currentRule,
                                       final List<BnfExpression> selectedExpression) {
-    BnfExpression firstExpression = ObjectUtils.assertNotNull(ContainerUtil.getFirstItem(selectedExpression));
-    BnfExpression lastExpression = ObjectUtils.assertNotNull(ContainerUtil.getLastItem(selectedExpression));
+    BnfExpression firstExpression = Objects.requireNonNull(ContainerUtil.getFirstItem(selectedExpression));
+    BnfExpression lastExpression = Objects.requireNonNull(ContainerUtil.getLastItem(selectedExpression));
     final TextRange fixedRange = new TextRange(firstExpression.getTextRange().getStartOffset(), lastExpression.getTextRange().getEndOffset());
     final BnfRule ruleFromText = BnfElementFactory.createRuleFromText(project, "a ::= " + fixedRange.substring(file.getText()));
     BnfExpressionOptimizer.optimize(project, ruleFromText.getExpression());
@@ -135,7 +134,7 @@ public class BnfIntroduceRuleHandler implements RefactoringActionHandler {
     occurrencesMap.put(OccurrencesChooser.ReplaceChoice.ALL, new ArrayList<>());
     file.acceptChildren(new PsiRecursiveElementWalkingVisitor() {
       @Override
-      public void visitElement(PsiElement element) {
+      public void visitElement(@NotNull PsiElement element) {
         if (element instanceof BnfExpression) {
           findOccurrences((BnfExpression)element, selectedExpression, occurrencesMap);
         }
@@ -149,7 +148,7 @@ public class BnfIntroduceRuleHandler implements RefactoringActionHandler {
       occurrencesMap.remove(OccurrencesChooser.ReplaceChoice.ALL);
     }
 
-    final Pass<OccurrencesChooser.ReplaceChoice> callback = new Pass<OccurrencesChooser.ReplaceChoice>() {
+    final Pass<OccurrencesChooser.ReplaceChoice> callback = new Pass<>() {
       @Override
       public void pass(final OccurrencesChooser.ReplaceChoice choice) {
         WriteCommandAction.runWriteCommandAction(project, REFACTORING_NAME, null, () -> {
@@ -281,7 +280,7 @@ public class BnfIntroduceRuleHandler implements RefactoringActionHandler {
     final Set<String> existingNames = new THashSet<>();
     containingFile.accept(new PsiRecursiveElementWalkingVisitor() {
       @Override
-      public void visitElement(PsiElement element) {
+      public void visitElement(@NotNull PsiElement element) {
         if (element instanceof BnfAttrs) return;
         if (element instanceof BnfReferenceOrToken) {
           existingNames.add(((BnfReferenceOrToken)element).getId().getText());

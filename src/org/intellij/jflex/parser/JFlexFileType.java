@@ -5,7 +5,7 @@
 package org.intellij.jflex.parser;
 
 import com.intellij.openapi.fileTypes.LanguageFileType;
-import com.intellij.openapi.fileTypes.StdFileTypes;
+import com.intellij.openapi.fileTypes.PlainTextFileType;
 import org.intellij.jflex.JFlexLanguage;
 import org.jetbrains.annotations.NotNull;
 
@@ -39,6 +39,6 @@ public class JFlexFileType extends LanguageFileType {
 
   @Override
   public Icon getIcon() {
-    return StdFileTypes.PLAIN_TEXT.getIcon();
+    return PlainTextFileType.INSTANCE.getIcon();
   }
 }

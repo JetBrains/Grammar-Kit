@@ -6,13 +6,11 @@ package org.intellij.grammar.psi.impl;
 
 import com.intellij.codeInsight.lookup.LookupElement;
 import com.intellij.codeInsight.lookup.LookupElementBuilder;
-import com.intellij.openapi.util.Comparing;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.psi.*;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.util.ArrayUtil;
 import com.intellij.util.IncorrectOperationException;
-import com.intellij.util.ObjectUtils;
 import com.intellij.util.containers.ContainerUtil;
 import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.java.JavaHelper;
@@ -21,6 +19,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import static org.intellij.grammar.generator.ParserGeneratorUtil.*;
 
@@ -31,7 +30,7 @@ public class GrammarPsiImplUtil {
   @NotNull
   public static PsiReference[] getReferences(BnfListEntry o) {
     BnfAttr attr = PsiTreeUtil.getParentOfType(o, BnfAttr.class);
-    if (attr == null || !Comparing.equal(KnownAttribute.METHODS.getName(), attr.getName())) return PsiReference.EMPTY_ARRAY;
+    if (attr == null || !Objects.equals(KnownAttribute.METHODS.getName(), attr.getName())) return PsiReference.EMPTY_ARRAY;
     PsiElement id = o.getId();
     BnfLiteralExpression value = o.getLiteralExpression();
     if (id == null || value != null) return PsiReference.EMPTY_ARRAY;
@@ -39,7 +38,7 @@ public class GrammarPsiImplUtil {
     final JavaHelper javaHelper = JavaHelper.getJavaHelper(o);
 
     return new PsiReference[] {
-      new PsiPolyVariantReferenceBase<BnfListEntry>(o, TextRange.from(id.getStartOffsetInParent(), id.getTextLength())) {
+      new PsiPolyVariantReferenceBase<>(o, TextRange.from(id.getStartOffsetInParent(), id.getTextLength())) {
 
         private List<NavigatablePsiElement> getTargetMethods(String methodName) {
           BnfRule rule = PsiTreeUtil.getParentOfType(getElement(), BnfRule.class);
@@ -67,9 +66,9 @@ public class GrammarPsiImplUtil {
         }
 
         @Override
-        public PsiElement handleElementRename(String newElementName) throws IncorrectOperationException {
+        public PsiElement handleElementRename(@NotNull String newElementName) throws IncorrectOperationException {
           BnfListEntry element = getElement();
-          PsiElement id = ObjectUtils.assertNotNull(element.getId());
+          PsiElement id = Objects.requireNonNull(element.getId());
           id.replace(BnfElementFactory.createLeafFromText(element.getProject(), newElementName));
           return element;
         }

@@ -34,8 +34,9 @@ public class BnfInlineViewDescriptor implements UsageViewDescriptor {
       return "Rule";
     }
 
+    @NotNull
     public String getCodeReferencesText(int usagesCount, int filesCount) {
-      return RefactoringBundle.message("invocations.to.be.inlined", UsageViewBundle.getReferencesString(usagesCount, filesCount));
+      return "Invocations to be inlined " + UsageViewBundle.getReferencesString(usagesCount, filesCount);
     }
 
     public String getCommentReferencesText(int usagesCount, int filesCount) {

@@ -18,7 +18,6 @@ import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.search.FilenameIndex;
 import com.intellij.psi.search.ProjectScope;
-import com.intellij.util.ObjectUtils;
 import org.intellij.grammar.BnfFileType;
 import org.intellij.grammar.config.Options;
 import org.intellij.grammar.generator.BnfConstants;
@@ -29,6 +28,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 
 import static com.intellij.util.ArrayUtil.getFirstElement;
 
@@ -96,7 +96,7 @@ public class FileGeneratorUtil {
       else {
         VirtualFile result = WriteAction.compute(() -> VfsUtil.createDirectoryIfMissing(virtualRoot, relativePath));
         VfsUtil.markDirtyAndRefresh(false, true, true, result);
-        return returnRoot && newGenRoot ? ObjectUtils.assertNotNull(virtualRoot.findChild(genDirName)) :
+        return returnRoot && newGenRoot ? Objects.requireNonNull(virtualRoot.findChild(genDirName)) :
                returnRoot ? virtualRoot : result;
       }
     }

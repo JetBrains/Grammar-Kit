@@ -13,7 +13,7 @@ import javax.swing.*;
  *         Date: 17.07.11 2:55
  */
 public interface BnfIcons {
-  Icon FILE = IconLoader.getIcon("/resources/bnf.svg");
+  Icon FILE = IconLoader.getIcon("/resources/bnf.svg", BnfIcons.class);
 
   Icon RULE = AllIcons.Nodes.Method;
   Icon EXTERNAL_RULE = AllIcons.Nodes.AbstractMethod;

@@ -100,7 +100,7 @@ public class BnfReferenceImpl<T extends BnfExpression> extends PsiReferenceBase<
     @NotNull
     @Override
     public PsiElement getId() {
-      return ObjectUtils.notNull(getNameIdentifier());
+      return Objects.requireNonNull(getNameIdentifier());
     }
 
     @NotNull

@@ -100,15 +100,12 @@ public class ParserGenerator {
       this.intfClass = intfPackage + "." + intfClass;
       this.implClass = implPackage + "." + implClass;
       this.mixin = mixin;
-      //this.stubName = stubName;
-      //this.classes = classes;
-      //this.mixedAST = mixedAST;
     }
   }
 
   @NotNull
   RuleInfo ruleInfo(BnfRule rule) {
-    return ObjectUtils.notNull(myRuleInfos.get(rule.getName()));
+    return Objects.requireNonNull(myRuleInfos.get(rule.getName()));
   }
 
   private final Map<String, RuleInfo> myRuleInfos = new TreeMap<>();
@@ -430,7 +427,7 @@ public class ParserGenerator {
     String superIntf = ObjectUtils.notNull(ContainerUtil.getFirstItem(getRootAttribute(myFile, KnownAttribute.IMPLEMENTS)),
                                            KnownAttribute.IMPLEMENTS.getDefaultValue().get(0)).second;
     Set<String> imports = new LinkedHashSet<>(Arrays.asList("org.jetbrains.annotations.*", PSI_ELEMENT_VISITOR_CLASS, superIntf));
-    MultiMap<String, String> supers = MultiMap.createSmart();
+    MultiMap<String, String> supers = new MultiMap<>();
     for (BnfRule rule : sortedRules.values()) {
       supers.putValues(rule.getName(), getSuperInterfaceNames(myFile, rule, myIntfClassFormat));
     }
@@ -559,7 +556,7 @@ public class ParserGenerator {
       generateRootParserContent();
     }
     for (String ruleName : ownRuleNames) {
-      BnfRule rule = ObjectUtils.assertNotNull(myFile.getRule(ruleName));
+      BnfRule rule = Objects.requireNonNull(myFile.getRule(ruleName));
       if (Rule.isExternal(rule) || Rule.isFake(rule)) continue;
       if (myExpressionHelper.getExpressionInfo(rule) != null) continue;
       out("/* ********************************************************** */");
@@ -611,7 +608,7 @@ public class ParserGenerator {
     BnfRule rootRule = myFile.getRule(myGrammarRoot);
     List<BnfRule> extraRoots = new ArrayList<>();
     for (String ruleName : myRuleInfos.keySet()) {
-      BnfRule rule = ObjectUtils.assertNotNull(myFile.getRule(ruleName));
+      BnfRule rule = Objects.requireNonNull(myFile.getRule(ruleName));
       if (getAttribute(rule, KnownAttribute.ELEMENT_TYPE) != null) continue;
       if (!RuleGraphHelper.hasElementType(rule)) continue;
       if (Rule.isFake(rule) || Rule.isMeta(rule)) continue;
@@ -1079,7 +1076,7 @@ public class ParserGenerator {
       String t = firstToElementType(expressionString);
       if (t == null) return frameName;
 
-      ConsumeType childConsumeType = getRuleConsumeType(ObjectUtils.notNull(Rule.of(expression)), rule);
+      ConsumeType childConsumeType = getRuleConsumeType(Objects.requireNonNull(Rule.of(expression)), rule);
       ConsumeType consumeType = ConsumeType.min(ruleConsumeType, childConsumeType);
       ConsumeType existing = firstElementTypes.get(t);
       firstElementTypes.put(t, ConsumeType.max(existing, consumeType));
@@ -1409,7 +1406,7 @@ public class ParserGenerator {
             arguments.add(generateWrappedNodeCall(rule, nested, attributeName));
           }
           else {
-            arguments.add(new TextArgument(argument.startsWith("\'") ? GrammarUtil.unquote(argument) : argument));
+            arguments.add(new TextArgument(argument.startsWith("'") ? GrammarUtil.unquote(argument) : argument));
           }
         }
         else if (nested instanceof BnfExternalExpression) {
@@ -1562,7 +1559,7 @@ public class ParserGenerator {
         else {
           elementCreateCall = shorten(StringUtil.getPackageName(info.second)) + "." + StringUtil.getShortName(info.second);
         }
-        String fieldType = ObjectUtils.notNull(useExactElements ? exactType : IELEMENTTYPE_CLASS);
+        String fieldType = Objects.requireNonNull(useExactElements ? exactType : IELEMENTTYPE_CLASS);
         String callFix = elementCreateCall.endsWith("IElementType") ? ", null" : "";
         out("%s %s = %s(\"%s\"%s);", shorten(fieldType), elementType, elementCreateCall, elementType, callFix);
       }
@@ -2020,7 +2017,7 @@ public class ParserGenerator {
   private String getAccessorType(@NotNull BnfRule rule) {
     if (Rule.isExternal(rule)) {
       Pair<String, String> first = ContainerUtil.getFirstItem(getAttribute(rule, KnownAttribute.IMPLEMENTS));
-      return ObjectUtils.assertNotNull(first).second;
+      return Objects.requireNonNull(first).second;
     }
     else {
       return ruleInfo(rule).intfClass;

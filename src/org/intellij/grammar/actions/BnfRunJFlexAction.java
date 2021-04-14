@@ -278,7 +278,7 @@ public class BnfRunJFlexAction extends DumbAwareAction {
     // ensure the order is the same
     for (String url : urls) {
       for (Pair<VirtualFile, DownloadableFileDescription> pair : pairs) {
-        if (Comparing.equal(url, pair.second.getDownloadUrl())) {
+        if (Objects.equals(url, pair.second.getDownloadUrl())) {
           result.add(VfsUtil.virtualToIoFile(pair.first));
           break;
         }

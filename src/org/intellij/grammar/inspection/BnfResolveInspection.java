@@ -12,7 +12,6 @@ import com.intellij.openapi.util.TextRange;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.psi.*;
 import com.intellij.psi.util.PsiTreeUtil;
-import com.intellij.util.ObjectUtils;
 import com.intellij.util.ThreeState;
 import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.generator.BnfConstants;
@@ -21,6 +20,8 @@ import org.intellij.grammar.psi.*;
 import org.intellij.grammar.psi.impl.BnfReferenceImpl;
 import org.intellij.grammar.psi.impl.GrammarUtil;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.Objects;
 
 /**
  * @author gregsh
@@ -70,8 +71,8 @@ public class BnfResolveInspection extends LocalInspectionTool {
           }
         }
         else if (parent instanceof BnfAttr || parent instanceof BnfListEntry) {
-          final String attrName = ObjectUtils.assertNotNull(PsiTreeUtil.getParentOfType(o, BnfAttr.class)).getName();
-          KnownAttribute attribute = KnownAttribute.getCompatibleAttribute(attrName);
+          final String attrName = Objects.requireNonNull(PsiTreeUtil.getParentOfType(o, BnfAttr.class)).getName();
+          KnownAttribute<?> attribute = KnownAttribute.getCompatibleAttribute(attrName);
           String value = StringUtil.unquoteString(o.getText());
           boolean checkReferences =
             attribute != null && attribute != KnownAttribute.NAME && !attribute.getName().endsWith("Factory") &&

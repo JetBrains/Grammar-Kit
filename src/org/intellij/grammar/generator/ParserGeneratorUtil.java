@@ -6,7 +6,6 @@ package org.intellij.grammar.generator;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.MessageType;
-import com.intellij.openapi.util.Comparing;
 import com.intellij.openapi.util.Couple;
 import com.intellij.openapi.util.Pair;
 import com.intellij.openapi.util.text.StringUtil;
@@ -389,12 +388,12 @@ public class ParserGeneratorUtil {
       }
       String type1 = helper.getMethodTypes(m1).get(1);
       String type2 = types.get(1);
-      if (Comparing.equal(type1, type2)) continue;
+      if (Objects.equals(type1, type2)) continue;
       for (String s = selectedClass; s != null; s = helper.getSuperClassName(s)) {
-        if (Comparing.equal(type1, s)) {
+        if (Objects.equals(type1, s)) {
           result.remove(m2);
         }
-        else if (Comparing.equal(type2, s)) {
+        else if (Objects.equals(type2, s)) {
           result.remove(m1);
         }
         else continue;
@@ -981,7 +980,7 @@ public class ParserGeneratorUtil {
     return "static " + fqn + ".*";
   }
 
-  private static final TObjectHashingStrategy<PsiElement> TEXT_STRATEGY = new TObjectHashingStrategy<PsiElement>() {
+  private static final TObjectHashingStrategy<PsiElement> TEXT_STRATEGY = new TObjectHashingStrategy<>() {
     @Override
     public int computeHashCode(PsiElement e) {
       return e.getText().hashCode();
@@ -989,7 +988,7 @@ public class ParserGeneratorUtil {
 
     @Override
     public boolean equals(PsiElement e1, PsiElement e2) {
-      return Comparing.equal(e1.getText(), e2.getText());
+      return Objects.equals(e1.getText(), e2.getText());
     }
   };
 

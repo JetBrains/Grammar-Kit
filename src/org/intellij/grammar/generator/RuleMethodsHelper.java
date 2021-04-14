@@ -4,7 +4,6 @@
 
 package org.intellij.grammar.generator;
 
-import com.intellij.openapi.util.Comparing;
 import com.intellij.openapi.util.Pair;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.psi.PsiElement;
@@ -144,7 +143,7 @@ public class RuleMethodsHelper {
         result.add(new MethodInfo(MethodType.MIXIN, pair.first, null, null, null));
       }
     }
-    myMethods.put(rule, Pair.create(basicMethods, (Collection<MethodInfo>)result));
+    myMethods.put(rule, Pair.create(basicMethods, result));
   }
 
   @Nullable
@@ -201,7 +200,7 @@ public class RuleMethodsHelper {
     public String generateGetterName() {
       boolean many = cardinality.many();
 
-      boolean renamed = !Comparing.equal(name, originalName);
+      boolean renamed = !Objects.equals(name, originalName);
       String getterNameBody = ParserGeneratorUtil.getGetterName(name);
       return getterNameBody + (many && !renamed ? "List" : "");
     }

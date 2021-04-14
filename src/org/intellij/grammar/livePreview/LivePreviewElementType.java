@@ -5,13 +5,14 @@
 package org.intellij.grammar.livePreview;
 
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.util.Comparing;
 import com.intellij.psi.tree.IElementType;
 import com.intellij.util.ObjectUtils;
 import org.intellij.grammar.psi.BnfFile;
 import org.intellij.grammar.psi.BnfRule;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.Objects;
 
 import static org.intellij.grammar.livePreview.LivePreviewParserDefinition.KEYWORD;
 
@@ -36,7 +37,7 @@ public class LivePreviewElementType extends IElementType {
     if (o == null || getClass() != o.getClass()) return false;
     LivePreviewElementType t = (LivePreviewElementType)o;
 
-    return Comparing.equal(toString(), o.toString()) && getLanguage() == t.getLanguage();
+    return Objects.equals(toString(), o.toString()) && getLanguage() == t.getLanguage();
   }
 
   @Override

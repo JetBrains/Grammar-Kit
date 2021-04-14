@@ -7,9 +7,7 @@ package org.intellij.grammar.java;
 import com.intellij.codeInsight.intention.IntentionAction;
 import com.intellij.codeInsight.intention.QuickFixFactory;
 import com.intellij.navigation.NavigationItem;
-import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.project.IndexNotReadyException;
-import com.intellij.openapi.util.Comparing;
 import com.intellij.openapi.util.io.FileUtil;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.psi.*;
@@ -20,10 +18,7 @@ import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.util.*;
 import com.intellij.util.containers.ContainerUtil;
 import org.intellij.grammar.KnownAttribute;
-import org.intellij.grammar.generator.ParserGeneratorUtil;
 import org.intellij.grammar.psi.BnfAttr;
-import org.intellij.grammar.psi.BnfRule;
-import org.intellij.grammar.psi.impl.GrammarUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.org.objectweb.asm.*;
@@ -46,8 +41,7 @@ public abstract class JavaHelper {
   public enum MethodType { STATIC, INSTANCE, CONSTRUCTOR }
 
   public static JavaHelper getJavaHelper(@NotNull PsiElement context) {
-    PsiFile file = context.getContainingFile();
-    JavaHelper service = ServiceManager.getService(file.getProject(), JavaHelper.class);
+    JavaHelper service = context.getProject().getService(JavaHelper.class);
     return service == null ? new AsmHelper() : service;
   }
 
@@ -542,7 +536,7 @@ public abstract class JavaHelper {
         if (acceptsName(paramType, parameter)) continue;
         ClassInfo info = findClassSafe(paramType);
         if (info != null) {
-          if (Comparing.equal(info.superClass, parameter)) continue;
+          if (Objects.equals(info.superClass, parameter)) continue;
           if (info.interfaces.contains(parameter)) continue;
         }
         return false;

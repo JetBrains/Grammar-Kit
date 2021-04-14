@@ -4,7 +4,6 @@
 
 package org.intellij.jflex.psi.impl;
 
-import com.intellij.openapi.util.Comparing;
 import com.intellij.openapi.util.Key;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.openapi.util.UserDataHolderEx;
@@ -27,6 +26,7 @@ import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 import java.util.List;
+import java.util.Objects;
 
 import static org.intellij.jflex.psi.impl.JFlexPsiImplUtil.computeDefinitions;
 
@@ -50,10 +50,10 @@ class StateRef extends PsiReferenceBase<PsiElement> {
       return resolveYYINITIAL(getElement());
     }
     CommonProcessors.FindFirstProcessor<JFlexStateDefinition> processor =
-      new CommonProcessors.FindFirstProcessor<JFlexStateDefinition>() {
+      new CommonProcessors.FindFirstProcessor<>() {
         @Override
         protected boolean accept(JFlexStateDefinition o) {
-          return Comparing.equal(o.getName(), name);
+          return Objects.equals(o.getName(), name);
         }
       };
     processStateVariants(getElement(), processor);
@@ -71,7 +71,7 @@ class StateRef extends PsiReferenceBase<PsiElement> {
   }
 
   @Override
-  public PsiElement handleElementRename(String newElementName) throws IncorrectOperationException {
+  public PsiElement handleElementRename(@NotNull String newElementName) throws IncorrectOperationException {
     PsiElement e = getElement();
     if (e instanceof JFlexStateReference) {
       return ((JFlexStateReference)e).getId()

@@ -17,7 +17,6 @@ import com.intellij.openapi.vfs.pointers.VirtualFilePointer;
 import com.intellij.openapi.vfs.pointers.VirtualFilePointerManager;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiManager;
-import com.intellij.util.ObjectUtils;
 import org.intellij.grammar.psi.BnfFile;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -29,6 +28,7 @@ import java.lang.ref.SoftReference;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.intellij.grammar.generator.BnfConstants.LP_DISPLAY_NAME;
@@ -53,8 +53,8 @@ public class LivePreviewLanguage extends Language {
   private static final MyClassLoader ourClassLoader = new MyClassLoader();
 
   protected LivePreviewLanguage(@NotNull BnfFile grammarFile) {
-    super(BASE_INSTANCE, ObjectUtils.assertNotNull(grammarFile.getVirtualFile()).getPath());
-    VirtualFile virtualFile = ObjectUtils.assertNotNull(grammarFile.getVirtualFile());
+    super(BASE_INSTANCE, Objects.requireNonNull(grammarFile.getVirtualFile()).getPath());
+    VirtualFile virtualFile = Objects.requireNonNull(grammarFile.getVirtualFile());
     Application app = ApplicationManager.getApplication();
     if (app.isUnitTestMode()) {
       myBnfFile = new SoftReference<>(grammarFile);

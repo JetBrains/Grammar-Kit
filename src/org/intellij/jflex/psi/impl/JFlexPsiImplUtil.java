@@ -4,12 +4,14 @@
 
 package org.intellij.jflex.psi.impl;
 
-import com.intellij.openapi.util.Comparing;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.psi.*;
 import com.intellij.psi.util.CachedValueProvider;
 import com.intellij.psi.util.CachedValuesManager;
-import com.intellij.util.*;
+import com.intellij.util.ArrayUtil;
+import com.intellij.util.CommonProcessors;
+import com.intellij.util.IncorrectOperationException;
+import com.intellij.util.Processor;
 import com.intellij.util.containers.ContainerUtil;
 import org.intellij.jflex.psi.*;
 import org.jetbrains.annotations.NotNull;
@@ -17,6 +19,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * @author gregsh
@@ -24,12 +27,12 @@ import java.util.List;
 public class JFlexPsiImplUtil extends JavaRefHelper {
   @NotNull
   public static String getName(PsiNameIdentifierOwner o) {
-    return ObjectUtils.assertNotNull(o.getNameIdentifier()).getText();
+    return Objects.requireNonNull(o.getNameIdentifier()).getText();
   }
 
   @NotNull
   public static PsiNameIdentifierOwner setName(PsiNameIdentifierOwner o, String newName) {
-    ObjectUtils.assertNotNull(o.getNameIdentifier()).replace(JFlexPsiElementFactory.createIdFromText(o.getProject(), newName));
+    Objects.requireNonNull(o.getNameIdentifier()).replace(JFlexPsiElementFactory.createIdFromText(o.getProject(), newName));
     return o;
   }
 
@@ -40,16 +43,16 @@ public class JFlexPsiImplUtil extends JavaRefHelper {
 
   @NotNull
   public static PsiReference getReference(JFlexMacroReference o) {
-    return new PsiReferenceBase<JFlexMacroReference>(o, TextRange.from(0, o.getTextRange().getLength())) {
+    return new PsiReferenceBase<>(o, TextRange.from(0, o.getTextRange().getLength())) {
       @Nullable
       @Override
       public PsiElement resolve() {
         final String name = getElement().getId().getText();
         CommonProcessors.FindFirstProcessor<JFlexMacroDefinition> processor =
-          new CommonProcessors.FindFirstProcessor<JFlexMacroDefinition>() {
+          new CommonProcessors.FindFirstProcessor<>() {
             @Override
             protected boolean accept(JFlexMacroDefinition o) {
-              return Comparing.equal(o.getName(), name);
+              return Objects.equals(o.getName(), name);
             }
           };
         processMacroVariants(getElement(), processor);
@@ -66,7 +69,7 @@ public class JFlexPsiImplUtil extends JavaRefHelper {
       }
 
       @Override
-      public PsiElement handleElementRename(String newElementName) throws IncorrectOperationException {
+      public PsiElement handleElementRename(@NotNull String newElementName) throws IncorrectOperationException {
         return getElement().getId().replace(JFlexPsiElementFactory.createIdFromText(getElement().getProject(), newElementName));
       }
     };
@@ -84,7 +87,7 @@ public class JFlexPsiImplUtil extends JavaRefHelper {
     final List<T> result = new ArrayList<>();
     psiFile.acceptChildren(new PsiRecursiveElementWalkingVisitor() {
       @Override
-      public void visitElement(PsiElement element) {
+      public void visitElement(@NotNull PsiElement element) {
         if (clazz.isInstance(element)) {
           result.add((T)element);
         }

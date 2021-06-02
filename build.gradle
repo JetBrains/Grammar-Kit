@@ -44,10 +44,10 @@ idea.module {
 }
 apply plugin: 'org.jetbrains.intellij'
 intellij {
-  version ideaVersion
-  type 'IU'
-  plugins 'uml', 'java'
-  updateSinceUntilBuild false
+  version = ideaVersion
+  type = 'IU'
+  plugins = ['uml', 'java']
+  updateSinceUntilBuild = false
 }
 buildSearchableOptions.enabled = false
 

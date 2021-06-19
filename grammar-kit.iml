@@ -12,8 +12,8 @@
       <excludeFolder url="file://$MODULE_DIR$/build" />
       <excludeFolder url="file://$MODULE_DIR$/build-lightpsi" />
     </content>
+    <orderEntry type="library" name="org.jetbrains:annotations:Latest" level="project" />
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="library" name="org.jetbrains:annotations:Latest" level="project" />
   </component>
 </module>

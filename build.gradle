@@ -29,6 +29,10 @@ repositories {
   mavenCentral()
 }
 
+dependencies {
+  compileOnly 'org.jetbrains:annotations:21.0.1'
+}
+
 sourceSets {
   main {
     java.srcDirs 'src', 'gen'

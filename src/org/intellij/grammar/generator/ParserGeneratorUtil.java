@@ -3,9 +3,6 @@
  */
 package org.intellij.grammar.generator;
 
-import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.project.Project;
-import com.intellij.openapi.ui.MessageType;
 import com.intellij.openapi.util.Couple;
 import com.intellij.openapi.util.Pair;
 import com.intellij.openapi.util.text.StringUtil;
@@ -26,7 +23,6 @@ import com.intellij.util.containers.TreeTraversal;
 import gnu.trove.THashSet;
 import gnu.trove.TObjectHashingStrategy;
 import org.intellij.grammar.KnownAttribute;
-import org.intellij.grammar.actions.GenerateAction;
 import org.intellij.grammar.java.JavaHelper;
 import org.intellij.grammar.psi.*;
 import org.intellij.grammar.psi.impl.GrammarUtil;
@@ -38,7 +34,6 @@ import java.util.*;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
-import static java.lang.String.format;
 import static org.intellij.grammar.generator.RuleGraphHelper.getSynonymTargetOrSelf;
 import static org.intellij.grammar.generator.RuleGraphHelper.getTokenNameToTextMap;
 import static org.intellij.grammar.psi.BnfTypes.BNF_SEQUENCE;
@@ -528,30 +523,6 @@ public class ParserGeneratorUtil {
       .withTraversal(TreeTraversal.POST_ORDER_DFS)
       .unique()
       .toList();
-  }
-
-  public static void addWarning(Project project, String s, Object... args) {
-    addWarning(project, format(s, args));
-  }
-
-  public static void addWarning(Project project, String text) {
-    if (ApplicationManager.getApplication().isUnitTestMode()) {
-      //noinspection UseOfSystemOutOrSystemErr
-      System.out.println(text);
-    }
-    else {
-      GenerateAction.LOG_GROUP.createNotification(text, MessageType.WARNING).notify(project);
-    }
-  }
-
-  public static void checkClassAvailability(@NotNull BnfFile file, @Nullable String className, @Nullable String description) {
-    if (StringUtil.isEmpty(className)) return;
-
-    JavaHelper javaHelper = JavaHelper.getJavaHelper(file);
-    if (javaHelper.findClass(className) == null) {
-      String tail = StringUtil.isEmpty(description) ? "" : " (" + description + ")";
-      addWarning(file.getProject(), className + " class not found" + tail);
-    }
   }
 
   public static boolean isRegexpToken(@NotNull String tokenText) {

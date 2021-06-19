@@ -27,6 +27,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
+import java.util.function.Consumer;
 
 import static org.intellij.grammar.generator.ParserGeneratorUtil.*;
 import static org.intellij.grammar.generator.RuleGraphHelper.Cardinality.OPTIONAL;
@@ -37,7 +38,7 @@ import static org.intellij.grammar.generator.RuleGraphHelper.Cardinality.OPTIONA
 public class ExpressionHelper {
   private final BnfFile myFile;
   private final RuleGraphHelper myRuleGraph;
-  private final boolean myAddWarnings;
+  private final Consumer<String> myWarningConsumer;
 
   private final Map<BnfRule, ExpressionInfo> myExpressionMap = new THashMap<>();
   private final Map<BnfRule, BnfRule> myRootRulesMap = new THashMap<>();
@@ -47,16 +48,16 @@ public class ExpressionHelper {
     CachedValue<ExpressionHelper> value = file.getUserData(EXPRESSION_HELPER_KEY);
     if (value == null) {
       file.putUserData(EXPRESSION_HELPER_KEY, value = CachedValuesManager.getManager(file.getProject()).createCachedValue(
-        () -> new CachedValueProvider.Result<>(new ExpressionHelper(file, RuleGraphHelper.getCached(file), false), file), false));
+        () -> new CachedValueProvider.Result<>(new ExpressionHelper(file, RuleGraphHelper.getCached(file), null), file), false));
     }
     return value.getValue();
   }
 
 
-  public ExpressionHelper(BnfFile file, RuleGraphHelper ruleGraph, boolean addWarnings) {
+  public ExpressionHelper(BnfFile file, RuleGraphHelper ruleGraph, @Nullable Consumer<String> warningConsumer) {
     myFile = file;
     myRuleGraph = ruleGraph;
-    myAddWarnings = addWarnings;
+    myWarningConsumer = warningConsumer;
     buildExpressionRules();
   }
 
@@ -65,8 +66,8 @@ public class ExpressionHelper {
   }
 
   public void addWarning(String text) {
-    if (!myAddWarnings) return;
-    ParserGeneratorUtil.addWarning(myFile.getProject(), text);
+    if (myWarningConsumer == null) return;
+    myWarningConsumer.accept(text);
   }
 
   public ExpressionInfo getExpressionInfo(BnfRule rule) {

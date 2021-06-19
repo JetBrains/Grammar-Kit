@@ -4,7 +4,9 @@
 
 package org.intellij.grammar.generator;
 
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.diagnostic.Logger;
+import com.intellij.openapi.ui.MessageType;
 import com.intellij.openapi.util.Pair;
 import com.intellij.openapi.util.Trinity;
 import com.intellij.openapi.util.io.FileUtil;
@@ -21,6 +23,7 @@ import com.intellij.util.containers.*;
 import gnu.trove.THashMap;
 import gnu.trove.THashSet;
 import org.intellij.grammar.KnownAttribute;
+import org.intellij.grammar.actions.GenerateAction;
 import org.intellij.grammar.analysis.BnfFirstNextAnalyzer;
 import org.intellij.grammar.generator.NodeCalls.*;
 import org.intellij.grammar.java.JavaHelper;
@@ -183,7 +186,7 @@ public class ParserGenerator {
 
     mySimpleTokens = new LinkedHashMap<>(RuleGraphHelper.getTokenTextToNameMap(myFile));
     myGraphHelper = RuleGraphHelper.getCached(myFile);
-    myExpressionHelper = new ExpressionHelper(myFile, myGraphHelper, true);
+    myExpressionHelper = new ExpressionHelper(myFile, myGraphHelper, this::addWarning);
     myRulesMethodsHelper = new RuleMethodsHelper(myGraphHelper, myExpressionHelper, mySimpleTokens, G);
     myJavaHelper = JavaHelper.getJavaHelper(myFile);
 
@@ -291,13 +294,23 @@ public class ParserGenerator {
     }
   }
 
+  public void addWarning(String text) {
+    if (ApplicationManager.getApplication().isUnitTestMode()) {
+      //noinspection UseOfSystemOutOrSystemErr
+      System.out.println(text);
+    }
+    else {
+      GenerateAction.LOG_GROUP.createNotification(text, MessageType.WARNING).notify(myFile.getProject());
+    }
+  }
+
   private void openOutput(String className) throws IOException {
     String classNameAdjusted = myPackagePrefix.isEmpty() ? className : StringUtil.trimStart(className, myPackagePrefix + ".");
     File file = new File(myOutputPath, classNameAdjusted.replace('.', File.separatorChar) + ".java");
-    myOut = openOutputInner(file);
+    myOut = openOutputInner(className, file);
   }
 
-  protected PrintWriter openOutputInner(File file) throws IOException {
+  protected PrintWriter openOutputInner(String className, File file) throws IOException {
     //noinspection ResultOfMethodCallIgnored
     file.getParentFile().mkdirs();
     return new PrintWriter(new FileOutputStream(file), false, myFile.getVirtualFile().getCharset());
@@ -419,6 +432,14 @@ public class ParserGenerator {
           closeOutput();
         }
       }
+    }
+  }
+
+  private void checkClassAvailability(@NotNull BnfFile file, @Nullable String className, @Nullable String description) {
+    if (StringUtil.isEmpty(className)) return;
+    if (myJavaHelper.findClass(className) == null) {
+      String tail = StringUtil.isEmpty(description) ? "" : " (" + description + ")";
+      addWarning(className + " class not found" + tail);
     }
   }
 
@@ -982,7 +1003,7 @@ public class ParserGenerator {
         out("%s = !%s;", N.result, nodeCall.render(N));
       }
       else {
-        addWarning(myFile.getProject(), "unexpected: " + type);
+        addWarning("unexpected: " + type);
       }
     }
 
@@ -1044,7 +1065,7 @@ public class ParserGenerator {
       }
       else {
         tokenTypes.clear();
-        addWarning(myFile.getProject(), rule.getName() + " #auto recovery generation failed: " + s);
+        addWarning(rule.getName() + " #auto recovery generation failed: " + s);
         break;
       }
     }
@@ -1735,7 +1756,7 @@ public class ParserGenerator {
     String topSuperClass = null;
     for (BnfRule next = rule; next != null && next != topSuperRule; ) {
       if (!visited.add(next)) {
-        ParserGeneratorUtil.addWarning(myFile.getProject(), rule.getName() + " employs cyclic inheritance");
+        addWarning(rule.getName() + " employs cyclic inheritance");
         break;
       }
       topSuperRule = next;
@@ -1865,7 +1886,7 @@ public class ParserGenerator {
                 "//methods are not found in %s",
                 methodInfo.name, methodInfo.name, ruleClassName, implClassName);
             newLine();
-            addWarning(myFile.getProject(), "%s.%s(%s, ...) method not found", implClassName, methodInfo.name, ruleClassName);
+            addWarning(format("%s.%s(%s, ...) method not found", implClassName, methodInfo.name, ruleClassName));
           }
           break;
         default: throw new AssertionError(methodInfo.toString());
@@ -2073,7 +2094,7 @@ public class ParserGenerator {
       }
       if (error != null) {
         if (intf) { // warn only once
-          addWarning(startRule.getProject(), "%s#%s(\"%s\"): %s", startRule.getName(), methodInfo.name, methodInfo.path, error);
+          addWarning(format("%s#%s(\"%s\"): %s", startRule.getName(), methodInfo.name, methodInfo.path, error));
         }
         return;
       }

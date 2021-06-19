@@ -7,6 +7,7 @@ package org.intellij.grammar.livePreview;
 import com.intellij.lang.*;
 import com.intellij.lang.impl.PsiBuilderImpl;
 import com.intellij.lexer.Lexer;
+import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.psi.tree.IElementType;
@@ -33,6 +34,7 @@ import static org.intellij.grammar.psi.BnfTypes.*;
  * @author gregsh
  */
 public class LivePreviewParser implements PsiParser {
+  private static final Logger LOG = Logger.getInstance(LivePreviewParser.class);
 
   private final BnfFile myFile;
   private final LivePreviewLanguage myLanguage;
@@ -271,7 +273,7 @@ public class LivePreviewParser implements PsiParser {
         result_ = !generateNodeCall(builder, level, rule, child, getNextName(funcName, i), externalArguments);
       }
       else {
-        addWarning(myFile.getProject(), "unexpected: " + type);
+        LOG.warn("unexpected: " + type);
       }
     }
 

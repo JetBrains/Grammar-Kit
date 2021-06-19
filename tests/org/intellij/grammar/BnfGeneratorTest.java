@@ -55,7 +55,7 @@ public class BnfGeneratorTest extends BnfGeneratorTestCase {
     return new ParserGenerator((BnfFileImpl)myFile, "", myFullDataPath, "") {
 
       @Override
-      protected PrintWriter openOutputInner(File file) throws IOException {
+      protected PrintWriter openOutputInner(String className, File file) throws IOException {
         String grammarName = FileUtil.getNameWithoutExtension(myFile.getName());
         String fileName = FileUtil.getNameWithoutExtension(file);
         String name = grammarName + (fileName.startsWith(grammarName) || fileName.endsWith("Parser") ? "" : ".PSI") + ".java";

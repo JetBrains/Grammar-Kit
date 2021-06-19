@@ -150,9 +150,9 @@ public class GenerateAction extends AnAction {
               if (!(bnfFile instanceof BnfFile)) return;
               ParserGenerator generator = new ParserGenerator((BnfFile)bnfFile, sourcePath, genDir.getPath(), packagePrefix) {
                 @Override
-                protected PrintWriter openOutputInner(File file) throws IOException {
+                protected PrintWriter openOutputInner(String className, File file) throws IOException {
                   files.add(file);
-                  return super.openOutputInner(file);
+                  return super.openOutputInner(className, file);
                 }
               };
               try {

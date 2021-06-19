@@ -57,22 +57,19 @@ public class JFlexSyntaxHighlighterFactory extends SyntaxHighlighterFactory {
   public static final TextAttributesKey ANGLES     = createTextAttributesKey("FLEX_ANGLES", DefaultLanguageHighlighterColors.BRACKETS);
 
 
-  @NotNull
   @Override
-  public SyntaxHighlighter getSyntaxHighlighter(Project project, VirtualFile virtualFile) {
+  public @NotNull SyntaxHighlighter getSyntaxHighlighter(Project project, VirtualFile virtualFile) {
     return new JFlexSyntaxHighlighter();
   }
 
-  private class JFlexSyntaxHighlighter extends SyntaxHighlighterBase {
-    @NotNull
+  private static class JFlexSyntaxHighlighter extends SyntaxHighlighterBase {
     @Override
-    public Lexer getHighlightingLexer() {
+    public @NotNull Lexer getHighlightingLexer() {
       return new JFlexLexer();
     }
 
-    @NotNull
     @Override
-    public TextAttributesKey[] getTokenHighlights(IElementType o) {
+    public @NotNull TextAttributesKey @NotNull [] getTokenHighlights(IElementType o) {
       if (o == FLEX_LINE_COMMENT || o == FLEX_BLOCK_COMMENT) return pack(COMMENT);
       if (o == FLEX_RAW) return pack(RAW_CODE);
       if (o == FLEX_TWO_PERCS) return pack(SECT_DIV);

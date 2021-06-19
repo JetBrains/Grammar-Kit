@@ -50,27 +50,23 @@ public class BnfFileImpl extends PsiFileBase implements BnfFile {
     myAttributeValues.drop();
   }
 
-  @NotNull
   @Override
-  public List<BnfRule> getRules() {
+  public @NotNull List<BnfRule> getRules() {
     return new ArrayList<>(myRules.getValue().values());
   }
 
-  @Nullable
   @Override
-  public BnfRule getRule(@Nullable String ruleName) {
+  public @Nullable BnfRule getRule(@Nullable String ruleName) {
     return ruleName == null ? null : myRules.getValue().get(ruleName);
   }
 
-  @NotNull
   @Override
-  public List<BnfAttrs> getAttributes() {
+  public @NotNull List<BnfAttrs> getAttributes() {
     return myGlobalAttributes.getValue();
   }
 
   @Override
-  @Nullable
-  public BnfAttr findAttribute(@Nullable BnfRule rule, @NotNull KnownAttribute<?> knownAttribute, @Nullable String match) {
+  public @Nullable BnfAttr findAttribute(@Nullable BnfRule rule, @NotNull KnownAttribute<?> knownAttribute, @Nullable String match) {
     AttributeInfo result = getMatchingAttributes(rule, knownAttribute, match).first();
     if (result == null) return null;
     return PsiTreeUtil.getParentOfType(findElementAt(result.attrOffset), BnfAttr.class);
@@ -105,10 +101,9 @@ public class BnfFileImpl extends PsiFileBase implements BnfFile {
 
   private static final Pattern SUB_EXPRESSION = Pattern.compile(".*(_\\d+)+");
 
-  @NotNull
-  private <T> JBIterable<AttributeInfo> getMatchingAttributes(@Nullable BnfRule rule,
-                                                              @NotNull KnownAttribute<T> knownAttribute,
-                                                              @Nullable String match) {
+  private @NotNull <T> JBIterable<AttributeInfo> getMatchingAttributes(@Nullable BnfRule rule,
+                                                                       @NotNull KnownAttribute<T> knownAttribute,
+                                                                       @Nullable String match) {
     List<AttributeInfo> list = myAttributeValues.getValue().get(knownAttribute.getName());
     if (list == null) return JBIterable.empty();
     BnfAttrs globalAttrs = rule == null ? ContainerUtil.getFirstItem(getAttributes()) : null;
@@ -135,9 +130,8 @@ public class BnfFileImpl extends PsiFileBase implements BnfFile {
       }).filter(Conditions.notNull());
   }
 
-  @NotNull
   @Override
-  public FileType getFileType() {
+  public @NotNull FileType getFileType() {
     return BnfFileType.INSTANCE;
   }
 
@@ -196,12 +190,10 @@ public class BnfFileImpl extends PsiFileBase implements BnfFile {
     return result;
   }
 
-  @NotNull
-  private static <T> AtomicClearableLazyValue<T> lazyValue(Supplier<T> producer) {
-    return new AtomicClearableLazyValue<T>() {
-      @NotNull
+  private static @NotNull <T> AtomicClearableLazyValue<T> lazyValue(Supplier<T> producer) {
+    return new AtomicClearableLazyValue<>() {
       @Override
-      protected T compute() {
+      protected @NotNull T compute() {
         return producer.get();
       }
     };

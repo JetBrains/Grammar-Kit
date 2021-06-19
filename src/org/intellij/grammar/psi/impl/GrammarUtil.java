@@ -110,8 +110,7 @@ public class GrammarUtil {
     return result;
   }
 
-  @NotNull
-  public static String unquote(@NotNull String str) {
+  public static @NotNull String unquote(@NotNull String str) {
     return StringUtil.unquoteString(str);
   }
 
@@ -138,11 +137,11 @@ public class GrammarUtil {
     return processor.process(funcName, nonTrivialExpression);
   }
 
-  public static boolean processPinnedExpressions(final BnfRule rule, final Processor<BnfExpression> processor) {
+  public static boolean processPinnedExpressions(BnfRule rule, Processor<BnfExpression> processor) {
     return processPinnedExpressions(rule, (bnfExpression, pinMatcher) -> processor.process(bnfExpression));
   }
 
-  public static boolean processPinnedExpressions(final BnfRule rule, final PairProcessor<BnfExpression, PinMatcher> processor) {
+  public static boolean processPinnedExpressions(BnfRule rule, PairProcessor<BnfExpression, PinMatcher> processor) {
     return processExpressionNames(rule, getFuncName(rule), rule.getExpression(), (funcName, expression) -> {
       if (!(expression instanceof BnfSequence)) return true;
       List<BnfExpression> children = getChildExpressions(expression);
@@ -176,10 +175,10 @@ public class GrammarUtil {
   }
 
   public static String getMethodName(BnfRule rule, PsiElement element) {
-    final BnfExpression target = PsiTreeUtil.getParentOfType(element, BnfExpression.class, false);
+    BnfExpression target = PsiTreeUtil.getParentOfType(element, BnfExpression.class, false);
     String funcName = getFuncName(rule);
     if (target == null) return funcName;
-    final Ref<String> ref = Ref.create(null);
+    Ref<String> ref = Ref.create(null);
     processExpressionNames(rule, funcName, rule.getExpression(), (funcName1, expression) -> {
       if (target == expression) {
         ref.set(funcName1);
@@ -190,8 +189,7 @@ public class GrammarUtil {
     return ref.get();
   }
 
-  @NotNull
-  public static String getIdText(@Nullable PsiElement id) {
+  public static @NotNull String getIdText(@Nullable PsiElement id) {
     return id == null ? "" : stripQuotesAroundId(id.getText());
   }
 

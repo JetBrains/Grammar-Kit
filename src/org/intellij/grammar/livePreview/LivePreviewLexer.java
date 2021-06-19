@@ -38,8 +38,8 @@ public class LivePreviewLexer extends LexerBase {
   private final Token[] myTokens;
   private Matcher[] myMatchers;
 
-  public LivePreviewLexer(Project project, final LivePreviewLanguage language) {
-    final BnfFile bnfFile = language.getGrammar(project);
+  public LivePreviewLexer(Project project, LivePreviewLanguage language) {
+    BnfFile bnfFile = language.getGrammar(project);
 
     myTokens = bnfFile == null? new Token[0] : CachedValuesManager.getCachedValue(bnfFile, () -> {
       Set<String> usedInGrammar = new LinkedHashSet<>();
@@ -111,9 +111,8 @@ public class LivePreviewLexer extends LexerBase {
     return 0;
   }
 
-  @Nullable
   @Override
-  public IElementType getTokenType() {
+  public @Nullable IElementType getTokenType() {
     if (myTokenType == null && myPosition != myEndOffset) {
       nextToken();
       assert false : "not lexed: '" + myBuffer.subSequence(myPosition, myEndOffset) + "'";
@@ -139,9 +138,8 @@ public class LivePreviewLexer extends LexerBase {
     }
   }
 
-  @NotNull
   @Override
-  public CharSequence getBufferSequence() {
+  public @NotNull CharSequence getBufferSequence() {
     return myBuffer;
   }
 
@@ -198,10 +196,9 @@ public class LivePreviewLexer extends LexerBase {
     }
   }
 
-  @Nullable
-  private static IElementType guessDelegateType(@NotNull String tokenName,
-                                                @Nullable Pattern pattern,
-                                                boolean usedInGrammar) {
+  private static @Nullable IElementType guessDelegateType(@NotNull String tokenName,
+                                                          @Nullable Pattern pattern,
+                                                          boolean usedInGrammar) {
     if (pattern != null) {
       if (!usedInGrammar && (pattern.matcher(" ").matches() || pattern.matcher("\n").matches())) {
         return com.intellij.psi.TokenType.WHITE_SPACE;
@@ -209,7 +206,7 @@ public class LivePreviewLexer extends LexerBase {
       else if (pattern.matcher("1234").matches()) {
         return NUMBER;
       }
-      else if (pattern.matcher("\"sdf\"").matches() || pattern.matcher("\'sdf\'").matches()) {
+      else if (pattern.matcher("\"sdf\"").matches() || pattern.matcher("'sdf'").matches()) {
         return STRING;
       }
     }
@@ -219,8 +216,7 @@ public class LivePreviewLexer extends LexerBase {
     return null;
   }
 
-  @NotNull
-  public static Map<String, String> collectTokenPattern2Name(@NotNull BnfFile file, @Nullable Set<String> usedInGrammar) {
+  public static @NotNull Map<String, String> collectTokenPattern2Name(@NotNull BnfFile file, @Nullable Set<String> usedInGrammar) {
     return ParserGeneratorUtil.collectTokenPattern2Name(file, true, new LinkedHashMap<>(), usedInGrammar);
   }
 }

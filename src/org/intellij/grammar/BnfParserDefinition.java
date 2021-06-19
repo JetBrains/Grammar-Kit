@@ -44,53 +44,48 @@ public class BnfParserDefinition implements ParserDefinition {
     BnfTypes.BNF_OP_OR, BnfTypes.BNF_OP_ZEROMORE);
   public static final TokenSet ATOMS = TokenSet.create(BnfTypes.BNF_ID, BnfTypes.BNF_NUMBER, BnfTypes.BNF_STRING);
 
-  @NotNull
   @Override
-  public Lexer createLexer(Project project) {
+  public @NotNull Lexer createLexer(Project project) {
     return new BnfLexer();
   }
 
   @Override
-  public PsiParser createParser(Project project) {
+  public @NotNull PsiParser createParser(Project project) {
     return new GrammarParser();
   }
 
   @Override
-  public IFileElementType getFileNodeType() {
+  public @NotNull IFileElementType getFileNodeType() {
     return BNF_FILE_ELEMENT_TYPE;
   }
 
-  @NotNull
   @Override
-  public TokenSet getWhitespaceTokens() {
+  public @NotNull TokenSet getWhitespaceTokens() {
     return WS;
   }
 
-  @NotNull
   @Override
-  public TokenSet getCommentTokens() {
+  public @NotNull TokenSet getCommentTokens() {
     return COMMENTS;
   }
 
-  @NotNull
   @Override
-  public TokenSet getStringLiteralElements() {
+  public @NotNull TokenSet getStringLiteralElements() {
     return LITERALS;
   }
 
-  @NotNull
   @Override
-  public PsiElement createElement(ASTNode astNode) {
+  public @NotNull PsiElement createElement(ASTNode astNode) {
     throw new UnsupportedOperationException(astNode.getElementType().toString());
   }
 
   @Override
-  public PsiFile createFile(FileViewProvider fileViewProvider) {
+  public @NotNull PsiFile createFile(@NotNull FileViewProvider fileViewProvider) {
     return new BnfFileImpl(fileViewProvider);
   }
 
   @Override
-  public SpaceRequirements spaceExistenceTypeBetweenTokens(ASTNode node1, ASTNode node2) {
+  public @NotNull SpaceRequirements spaceExistenceTypeBetweenTokens(ASTNode node1, ASTNode node2) {
     IElementType t1 = node1.getElementType();
     IElementType t2 = node2.getElementType();
     if (t1 == BnfTypes.BNF_LINE_COMMENT) return SpaceRequirements.MUST_LINE_BREAK;

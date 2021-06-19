@@ -14,9 +14,8 @@ public class JFlexLanguage extends Language {
     super("JFlex");
   }
 
-  @NotNull
   @Override
-  public String getDisplayName() {
+  public @NotNull String getDisplayName() {
     return "JFlex";
   }
 }

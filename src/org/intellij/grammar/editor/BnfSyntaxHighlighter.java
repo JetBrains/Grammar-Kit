@@ -45,15 +45,13 @@ class BnfSyntaxHighlighter extends SyntaxHighlighterBase {
   public static final TextAttributesKey PIN_MARKER = createTextAttributesKey(
     "BNF_PIN", new TextAttributes(null, null, DefaultLanguageHighlighterColors.LINE_COMMENT.getDefaultAttributes().getForegroundColor(), EffectType.BOLD_DOTTED_LINE, 0));
 
-  @NotNull
   @Override
-  public Lexer getHighlightingLexer() {
+  public @NotNull Lexer getHighlightingLexer() {
     return new BnfLexer();
   }
 
-  @NotNull
   @Override
-  public TextAttributesKey[] getTokenHighlights(IElementType type) {
+  public TextAttributesKey @NotNull [] getTokenHighlights(IElementType type) {
     if (type == TokenType.BAD_CHARACTER) {
       return pack(ILLEGAL);
     }

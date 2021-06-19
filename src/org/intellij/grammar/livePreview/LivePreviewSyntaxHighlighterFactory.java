@@ -27,19 +27,16 @@ public class LivePreviewSyntaxHighlighterFactory extends SyntaxHighlighterFactor
   public LivePreviewSyntaxHighlighterFactory() {
   }
 
-  @NotNull
   @Override
-  public SyntaxHighlighter getSyntaxHighlighter(@Nullable final Project project, @Nullable VirtualFile virtualFile) {
-    final Language language = virtualFile instanceof LightVirtualFile ? ((LightVirtualFile)virtualFile).getLanguage() : null;
+  public @NotNull SyntaxHighlighter getSyntaxHighlighter(@Nullable Project project, @Nullable VirtualFile virtualFile) {
+    Language language = virtualFile instanceof LightVirtualFile ? ((LightVirtualFile)virtualFile).getLanguage() : null;
     if (!(language instanceof LivePreviewLanguage)) return new PlainSyntaxHighlighter();
     return new SyntaxHighlighterBase() {
-      @NotNull
       @Override
-      public Lexer getHighlightingLexer() {
+      public @NotNull Lexer getHighlightingLexer() {
         return new LivePreviewLexer(project, (LivePreviewLanguage)language) {
-          @Nullable
           @Override
-          public IElementType getTokenType() {
+          public @Nullable IElementType getTokenType() {
             IElementType tokenType = super.getTokenType();
             return tokenType instanceof LivePreviewElementType.TokenType
                    ? ((LivePreviewElementType.TokenType)tokenType).delegate : tokenType;
@@ -47,9 +44,8 @@ public class LivePreviewSyntaxHighlighterFactory extends SyntaxHighlighterFactor
         };
       }
 
-      @NotNull
       @Override
-      public TextAttributesKey[] getTokenHighlights(IElementType tokenType) {
+      public TextAttributesKey @NotNull [] getTokenHighlights(IElementType tokenType) {
         if (tokenType == LivePreviewParserDefinition.COMMENT) return pack(DefaultLanguageHighlighterColors.LINE_COMMENT);
         if (tokenType == LivePreviewParserDefinition.STRING) return pack(DefaultLanguageHighlighterColors.STRING);
         if (tokenType == LivePreviewParserDefinition.NUMBER) return pack(DefaultLanguageHighlighterColors.NUMBER);

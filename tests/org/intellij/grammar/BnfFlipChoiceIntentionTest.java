@@ -20,9 +20,9 @@ public class BnfFlipChoiceIntentionTest extends BasePlatformTestCase {
   public void testMultipleChoice() {doTest("rule ::= a | b | c <caret>| d","rule ::= a | b | d | c");}
   public void testComplexCase() {doTest("rule ::= a | b | c c c <caret>| d [d d]","rule ::= a | b | d [d d] | c c c");}
 
-  private void doTest(/*@Language("BNF")*/ String text, /*@Language("BNF")*/ final String expected) {
+  private void doTest(/*@Language("BNF")*/ String text, /*@Language("BNF")*/ String expected) {
     myFixture.configureByText("a.bnf", text);
-    final IntentionAction action = new BnfFlipChoiceIntention();
+    IntentionAction action = new BnfFlipChoiceIntention();
     assertTrue("intention not available", action.isAvailable(getProject(), myFixture.getEditor(), myFixture.getFile()));
     WriteCommandAction.runWriteCommandAction(getProject(), () ->
       action.invoke(getProject(), myFixture.getEditor(), myFixture.getFile()));

@@ -13,9 +13,8 @@ import java.util.List;
 
 public class BnfMoveLeftRightHandler extends MoveElementLeftRightHandler {
 
-  @NotNull
   @Override
-  public PsiElement[] getMovableSubElements(@NotNull PsiElement element) {
+  public PsiElement @NotNull [] getMovableSubElements(@NotNull PsiElement element) {
     return doGetMovableSubElements(element).toArray(PsiElement.EMPTY_ARRAY);
   }
 

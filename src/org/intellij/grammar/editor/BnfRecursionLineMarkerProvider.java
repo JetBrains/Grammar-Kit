@@ -26,9 +26,8 @@ import java.util.Map;
  * @author gregsh
  */
 public class BnfRecursionLineMarkerProvider implements LineMarkerProvider {
-  @Nullable
   @Override
-  public LineMarkerInfo<?> getLineMarkerInfo(@NotNull PsiElement element) {
+  public @Nullable LineMarkerInfo<?> getLineMarkerInfo(@NotNull PsiElement element) {
     return null;
   }
 

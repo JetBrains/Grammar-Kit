@@ -14,11 +14,10 @@ import org.jetbrains.annotations.Nullable;
  * @author gregsh
  */
 public class JFlexJavaCodeManipulator extends AbstractElementManipulator<JFlexJavaCodeInjectionHostImpl> {
-  @Nullable
   @Override
-  public JFlexJavaCodeInjectionHostImpl handleContentChange(@NotNull JFlexJavaCodeInjectionHostImpl psi,
-                                                            @NotNull TextRange range,
-                                                            String newContent) throws IncorrectOperationException {
+  public @Nullable JFlexJavaCodeInjectionHostImpl handleContentChange(@NotNull JFlexJavaCodeInjectionHostImpl psi,
+                                                                      @NotNull TextRange range,
+                                                                      String newContent) throws IncorrectOperationException {
     String oldText = psi.getText();
     String newText = oldText.substring(0, range.getStartOffset()) + newContent + oldText.substring(range.getEndOffset());
     return psi.updateText(newText);

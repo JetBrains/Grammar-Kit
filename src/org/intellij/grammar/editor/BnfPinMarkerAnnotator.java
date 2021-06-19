@@ -52,7 +52,7 @@ public class BnfPinMarkerAnnotator implements Annotator, DumbAware {
       boolean fullRange = prev == null || !PsiTreeUtil.isAncestor(e, prev, true);
       TextRange textRange = e.getTextRange();
       TextRange infoRange = fullRange ? textRange : TextRange.create(prev.getTextRange().getEndOffset() + 1, textRange.getEndOffset());
-      String message = attr == null ? (fullRange ? "pinned" : "pinned again") : attr.getText();
+      String message = attr == null ? (fullRange ? "Pinned" : "Pinned again") : attr.getText();
       annotationHolder.createInfoAnnotation(infoRange, message).setTextAttributes(BnfSyntaxHighlighter.PIN_MARKER);
     }
   }

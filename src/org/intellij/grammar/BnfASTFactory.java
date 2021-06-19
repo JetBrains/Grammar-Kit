@@ -8,6 +8,7 @@ import com.intellij.lang.ASTFactory;
 import com.intellij.psi.impl.source.tree.CompositeElement;
 import com.intellij.psi.tree.IElementType;
 import org.intellij.grammar.psi.BnfTypes;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -15,9 +16,8 @@ import org.jetbrains.annotations.Nullable;
  */
 public class BnfASTFactory extends ASTFactory {
 
-  @Nullable
   @Override
-  public CompositeElement createComposite(IElementType type) {
+  public @Nullable CompositeElement createComposite(@NotNull IElementType type) {
     return BnfTypes.Factory.createElement(type);
   }
 }

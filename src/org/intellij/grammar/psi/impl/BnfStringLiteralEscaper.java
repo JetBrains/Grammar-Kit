@@ -18,7 +18,7 @@ public class BnfStringLiteralEscaper extends LiteralTextEscaper<BnfStringImpl> {
   }
 
   @Override
-  public boolean decode(@NotNull final TextRange rangeInsideHost, @NotNull final StringBuilder outChars) {
+  public boolean decode(@NotNull TextRange rangeInsideHost, @NotNull StringBuilder outChars) {
     // todo implement proper java-like string escapes support
     ProperTextRange.assertProperRange(rangeInsideHost);
     outChars.append(myHost.getText(), rangeInsideHost.getStartOffset(), rangeInsideHost.getEndOffset());
@@ -26,7 +26,7 @@ public class BnfStringLiteralEscaper extends LiteralTextEscaper<BnfStringImpl> {
   }
 
   @Override
-  public int getOffsetInHost(final int offsetInDecoded, @NotNull final TextRange rangeInsideHost) {
+  public int getOffsetInHost(int offsetInDecoded, @NotNull TextRange rangeInsideHost) {
     ProperTextRange.assertProperRange(rangeInsideHost);
     int offset = offsetInDecoded;
     // todo implement proper java-like string escapes support

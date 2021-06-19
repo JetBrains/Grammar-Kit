@@ -33,7 +33,7 @@ public class BnfIntroduceRuleAction extends BasePlatformRefactoringAction {
     return file instanceof BnfFile;
   }
 
-  protected boolean isEnabledOnElements(PsiElement[] elements) {
+  protected boolean isEnabledOnElements(PsiElement @NotNull [] elements) {
     return false;
   }
 

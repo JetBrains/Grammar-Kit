@@ -30,8 +30,7 @@ public class ExpressionGeneratorHelper {
 
   private static final ConsumeType CONSUME_TYPE_OVERRIDE = ConsumeType.SMART;
 
-  @NotNull
-  private static Map<String, List<OperatorInfo>> buildCallMap(ExpressionHelper.ExpressionInfo info, ParserGenerator g) {
+  private static @NotNull Map<String, List<OperatorInfo>> buildCallMap(ExpressionHelper.ExpressionInfo info, ParserGenerator g) {
     Map<String, List<OperatorInfo>> opCalls = new LinkedHashMap<>();
     for (BnfRule rule : info.priorityMap.keySet()) {
       OperatorInfo operator = info.operatorMap.get(rule);
@@ -197,8 +196,7 @@ public class ExpressionGeneratorHelper {
     }
   }
 
-  @NotNull
-  public static List<OperatorInfo> findOperators(Collection<OperatorInfo> list, OperatorType... types) {
+  public static @NotNull List<OperatorInfo> findOperators(Collection<OperatorInfo> list, OperatorType... types) {
     List<OperatorInfo> result = new SmartList<>();
     List<OperatorType> typeList = Arrays.asList(types);
     for (OperatorInfo o : list) {
@@ -213,8 +211,7 @@ public class ExpressionGeneratorHelper {
     return result;
   }
 
-  @Nullable
-  public static ExpressionHelper.ExpressionInfo getInfoForExpressionParsing(ExpressionHelper expressionHelper, BnfRule rule) {
+  public static @Nullable ExpressionHelper.ExpressionInfo getInfoForExpressionParsing(ExpressionHelper expressionHelper, BnfRule rule) {
     ExpressionHelper.ExpressionInfo expressionInfo = expressionHelper.getExpressionInfo(rule);
     OperatorInfo operatorInfo = expressionInfo == null ? null : expressionInfo.operatorMap.get(rule);
     if (expressionInfo != null && (operatorInfo == null || operatorInfo.type != OperatorType.ATOM &&
@@ -224,11 +221,10 @@ public class ExpressionGeneratorHelper {
     return null;
   }
 
-  @Nullable
-  public static ConsumeType fixForcedConsumeType(@NotNull ExpressionHelper expressionHelper,
-                                                 @NotNull BnfRule rule,
-                                                 @Nullable BnfExpression node,
-                                                 @Nullable ConsumeType defValue) {
+  public static @Nullable ConsumeType fixForcedConsumeType(@NotNull ExpressionHelper expressionHelper,
+                                                           @NotNull BnfRule rule,
+                                                           @Nullable BnfExpression node,
+                                                           @Nullable ConsumeType defValue) {
     if (defValue != null) return defValue;
     ExpressionHelper.ExpressionInfo expressionInfo = expressionHelper.getExpressionInfo(rule);
     ExpressionHelper.OperatorInfo operatorInfo = expressionInfo == null ? null : expressionInfo.operatorMap.get(rule);

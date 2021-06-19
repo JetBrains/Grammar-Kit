@@ -50,8 +50,7 @@ public class BnfColorSettingsPage implements ColorSettingsPage {
     };
   }
 
-  @NotNull
-  public String getDisplayName() {
+  public @NotNull String getDisplayName() {
     return BnfConstants.BNF_DISPLAY_NAME;
   }
 
@@ -59,23 +58,19 @@ public class BnfColorSettingsPage implements ColorSettingsPage {
     return BnfIcons.FILE;
   }
 
-  @NotNull
-  public AttributesDescriptor[] getAttributeDescriptors() {
+  public AttributesDescriptor @NotNull [] getAttributeDescriptors() {
     return ATTRS;
   }
 
-  @NotNull
-  public ColorDescriptor[] getColorDescriptors() {
+  public ColorDescriptor @NotNull [] getColorDescriptors() {
     return ColorDescriptor.EMPTY_ARRAY;
   }
 
-  @NotNull
-  public SyntaxHighlighter getHighlighter() {
+  public @NotNull SyntaxHighlighter getHighlighter() {
     return new BnfSyntaxHighlighter();
   }
 
-  @NotNull
-  public String getDemoText() {
+  public @NotNull String getDemoText() {
     return "/*\n" +
            " * Sample grammar\n" +
            " */\n" +

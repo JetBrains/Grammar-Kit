@@ -19,9 +19,8 @@ public class BnfStringManipulator extends AbstractElementManipulator<BnfStringIm
     return psi.updateText(newText);
   }
 
-  @NotNull
   @Override
-  public TextRange getRangeInElement(@NotNull BnfStringImpl element) {
+  public @NotNull TextRange getRangeInElement(@NotNull BnfStringImpl element) {
     return getStringTokenRange(element);
   }
 

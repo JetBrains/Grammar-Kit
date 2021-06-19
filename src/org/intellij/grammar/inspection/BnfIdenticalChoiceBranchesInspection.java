@@ -26,9 +26,8 @@ import java.util.Set;
  */
 public class BnfIdenticalChoiceBranchesInspection extends LocalInspectionTool {
 
-  @NotNull
   @Override
-  public PsiElementVisitor buildVisitor(@NotNull ProblemsHolder holder, boolean isOnTheFly) {
+  public @NotNull PsiElementVisitor buildVisitor(@NotNull ProblemsHolder holder, boolean isOnTheFly) {
     return new BnfVisitor<Void>() {
       final THashSet<BnfExpression> set = new THashSet<>();
       @Override

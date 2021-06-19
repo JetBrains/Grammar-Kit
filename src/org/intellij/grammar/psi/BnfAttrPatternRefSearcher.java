@@ -24,8 +24,8 @@ public class BnfAttrPatternRefSearcher extends QueryExecutorBase<PsiReference, R
   }
 
   @Override
-  public void processQuery(@NotNull ReferencesSearch.SearchParameters queryParameters, @NotNull final Processor<? super PsiReference> consumer) {
-    final PsiElement target = queryParameters.getElementToSearch();
+  public void processQuery(@NotNull ReferencesSearch.SearchParameters queryParameters, @NotNull Processor<? super PsiReference> consumer) {
+    PsiElement target = queryParameters.getElementToSearch();
     if (!(target instanceof BnfRule)) return;
 
     SearchScope scope = queryParameters.getEffectiveSearchScope();

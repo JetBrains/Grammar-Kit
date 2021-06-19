@@ -21,15 +21,14 @@ import static org.intellij.grammar.KnownAttribute.getCompatibleAttribute;
  */
 public class BnfUnusedAttributeInspection extends LocalInspectionTool {
 
-  @NotNull
   @Override
-  public PsiElementVisitor buildVisitor(@NotNull ProblemsHolder holder, boolean isOnTheFly, @NotNull LocalInspectionToolSession session) {
+  public @NotNull PsiElementVisitor buildVisitor(@NotNull ProblemsHolder holder, boolean isOnTheFly, @NotNull LocalInspectionToolSession session) {
     return new BnfVisitor<Void>() {
       @Override
       public Void visitAttr(@NotNull BnfAttr o) {
-        final String name = o.getName();
+        String name = o.getName();
         if (!name.toUpperCase().equals(name) && getAttribute(name) == null) {
-          KnownAttribute newAttr = getCompatibleAttribute(name);
+          KnownAttribute<?> newAttr = getCompatibleAttribute(name);
           String text = newAttr == null ? "Unused attribute" : "Deprecated attribute, use '" + newAttr.getName() + "' instead";
           holder.registerProblem(o.getId(), text);
         }

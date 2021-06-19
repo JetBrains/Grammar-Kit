@@ -27,9 +27,8 @@ import java.util.Objects;
  * @author gregsh
  */
 public class BnfResolveInspection extends LocalInspectionTool {
-  @NotNull
   @Override
-  public PsiElementVisitor buildVisitor(@NotNull ProblemsHolder holder, boolean isOnTheFly, @NotNull LocalInspectionToolSession session) {
+  public @NotNull PsiElementVisitor buildVisitor(@NotNull ProblemsHolder holder, boolean isOnTheFly, @NotNull LocalInspectionToolSession session) {
     return new BnfVisitor<Void>() {
       @Override
       public Void visitReferenceOrToken(@NotNull BnfReferenceOrToken o) {
@@ -71,7 +70,7 @@ public class BnfResolveInspection extends LocalInspectionTool {
           }
         }
         else if (parent instanceof BnfAttr || parent instanceof BnfListEntry) {
-          final String attrName = Objects.requireNonNull(PsiTreeUtil.getParentOfType(o, BnfAttr.class)).getName();
+          String attrName = Objects.requireNonNull(PsiTreeUtil.getParentOfType(o, BnfAttr.class)).getName();
           KnownAttribute<?> attribute = KnownAttribute.getCompatibleAttribute(attrName);
           String value = StringUtil.unquoteString(o.getText());
           boolean checkReferences =

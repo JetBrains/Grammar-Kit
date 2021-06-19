@@ -20,10 +20,8 @@ import static com.intellij.psi.util.PsiTreeUtil.getParentOfType;
 
 public class BnfConvertOptExpressionIntention extends BaseIntentionAction {
 
-  @Nls(capitalization = Nls.Capitalization.Sentence)
-  @NotNull
   @Override
-  public String getFamilyName() {
+  public @Nls(capitalization = Nls.Capitalization.Sentence) @NotNull String getFamilyName() {
     return "Convert opt expression";
   }
 
@@ -64,8 +62,7 @@ public class BnfConvertOptExpressionIntention extends BaseIntentionAction {
     }
   }
 
-  @Nullable
-  private static BnfQuantified getQuantifiedOptExpression(PsiElement element) {
+  private static @Nullable BnfQuantified getQuantifiedOptExpression(PsiElement element) {
     BnfQuantified quantified = getParentOfType(element, BnfQuantified.class);
     return quantified != null && quantified.getQuantifier().getNode().getFirstChildNode().getElementType() == BnfTypes.BNF_OP_OPT
            ? quantified

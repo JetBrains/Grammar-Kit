@@ -42,9 +42,8 @@ public abstract class BnfNamedImpl extends BnfCompositeImpl implements BnfNamedE
     myCachedName = null;
   }
 
-  @NotNull
   @Override
-  public String getName() {
+  public @NotNull String getName() {
     if (myCachedName == null) {
       myCachedName = GrammarUtil.getIdText(getId());
     }
@@ -62,18 +61,17 @@ public abstract class BnfNamedImpl extends BnfCompositeImpl implements BnfNamedE
     return getId().getTextOffset();
   }
 
-  @NotNull
   @Override
-  public SearchScope getUseScope() {
+  public @NotNull SearchScope getUseScope() {
     return new LocalSearchScope(getContainingFile());
   }
 
   @Override
   public Icon getIcon(int flags) {
     if (this instanceof BnfRule) {
-      final Icon base = hasModifier((BnfRule)this, "external") ? BnfIcons.EXTERNAL_RULE : BnfIcons.RULE;
-      final Icon visibility = hasModifier((BnfRule)this, "private") ? PlatformIcons.PRIVATE_ICON : PlatformIcons.PUBLIC_ICON;
-      final RowIcon row = new RowIcon(2);
+      Icon base = hasModifier((BnfRule)this, "external") ? BnfIcons.EXTERNAL_RULE : BnfIcons.RULE;
+      Icon visibility = hasModifier((BnfRule)this, "private") ? PlatformIcons.PRIVATE_ICON : PlatformIcons.PUBLIC_ICON;
+      RowIcon row = new RowIcon(2);
       row.setIcon(base, 0);
       row.setIcon(visibility, 1);
       return row;
@@ -98,7 +96,7 @@ public abstract class BnfNamedImpl extends BnfCompositeImpl implements BnfNamedE
 
   @Override
   public String toString() {
-    // AE fix in LOG.toString in inconsistent state
+    // Assertion in LOG.toString fix in inconsistent state
     PsiElement nullableId = findPsiChildByType(BNF_ID);
     return super.toString() + ":" + (nullableId == null? null : nullableId.getText());
   }

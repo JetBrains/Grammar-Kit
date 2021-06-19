@@ -90,7 +90,7 @@ public class BnfCompletionContributor extends CompletionContributor {
       @Override
       protected void addCompletions(@NotNull CompletionParameters parameters,
                                     @NotNull ProcessingContext context,
-                                    @NotNull final CompletionResultSet result) {
+                                    @NotNull CompletionResultSet result) {
         BnfFile file = (BnfFile)parameters.getOriginalFile();
         PsiElement positionRefOrToken = PsiTreeUtil.getParentOfType(parameters.getOriginalPosition(), BnfReferenceOrToken.class);
         Set<String> explicitTokens = RuleGraphHelper.getTokenNameToTextMap(file).keySet();
@@ -199,7 +199,7 @@ public class BnfCompletionContributor extends CompletionContributor {
     TextRange posRange = position.getTextRange();
     BnfFile posFile = (BnfFile)position.getContainingFile();
     BnfRule statement = PsiTreeUtil.getTopmostParentOfType(position, BnfRule.class);
-    final TextRange range;
+    TextRange range;
     if (statement != null) {
       range = new TextRange(statement.getTextRange().getStartOffset(), posRange.getStartOffset());
     }

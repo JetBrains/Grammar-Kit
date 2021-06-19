@@ -16,9 +16,8 @@ import org.jetbrains.annotations.Nullable;
  */
 public class JFlexASTFactory extends ASTFactory {
 
-  @Nullable
   @Override
-  public CompositeElement createComposite(@NotNull IElementType type) {
+  public @Nullable CompositeElement createComposite(@NotNull IElementType type) {
     return JFlexTypes.Factory.createElement(type);
   }
 }

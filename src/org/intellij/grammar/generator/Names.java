@@ -54,8 +54,7 @@ class Names {
     return new Names("b", "l", "m", "p", "r", "c", "t", "g", "_");
   }
 
-  @NotNull
-  public static Names forName(String name) {
+  public static @NotNull Names forName(String name) {
     if ("long".equals(name)) return longNames();
     if ("short".equals(name)) return shortNames();
     if ("classic".equals(name)) return classicNames();

@@ -40,9 +40,8 @@ public class BnfUnusedRuleInspection extends LocalInspectionTool {
     return true;
   }
 
-  @Nullable
   @Override
-  public ProblemDescriptor[] checkFile(@NotNull PsiFile file, @NotNull InspectionManager manager, boolean isOnTheFly) {
+  public @Nullable ProblemDescriptor[] checkFile(@NotNull PsiFile file, @NotNull InspectionManager manager, boolean isOnTheFly) {
     if (!(file instanceof BnfFile)) return null;
     if (SuppressionUtil.inspectionResultSuppressed(file, this)) return null;
     BnfFile myFile = (BnfFile)file;
@@ -121,8 +120,7 @@ public class BnfUnusedRuleInspection extends LocalInspectionTool {
     return holder.getResultsArray();
   }
 
-  @Nullable
-  private static BnfRule resolveRule(@Nullable PsiElement o) {
+  private static @Nullable BnfRule resolveRule(@Nullable PsiElement o) {
     if (!(o instanceof BnfReferenceOrToken ||
           o instanceof BnfStringLiteralExpression)) return null;
     PsiReference reference = ContainerUtil.findInstance(o.getReferences(), BnfReferenceImpl.class);

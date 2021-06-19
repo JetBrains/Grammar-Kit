@@ -26,9 +26,8 @@ import java.util.Set;
  * @author gregsh
  */
 public class BnfUnreachableChoiceBranchInspection extends LocalInspectionTool {
-  @NotNull
   @Override
-  public PsiElementVisitor buildVisitor(@NotNull ProblemsHolder holder, boolean isOnTheFly) {
+  public @NotNull PsiElementVisitor buildVisitor(@NotNull ProblemsHolder holder, boolean isOnTheFly) {
     return new BnfVisitor<Void>() {
       @Override
       public Void visitChoice(@NotNull BnfChoice o) {

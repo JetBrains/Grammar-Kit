@@ -76,8 +76,8 @@ public class BnfGeneratorTest extends BnfGeneratorTestCase {
     return super.loadFile(name);
   }
 
-  public void doGenTest(final boolean generatePsi) throws Exception {
-    final String name = getTestName(false);
+  public void doGenTest(boolean generatePsi) throws Exception {
+    String name = getTestName(false);
     String text = loadFile(name + "." + myFileExt);
     myFile = createPsiFile(name, text.replaceAll("generatePsi=[^\n]*", "generatePsi=" + generatePsi));
     List<File> filesToCheck = new ArrayList<>();
@@ -97,7 +97,7 @@ public class BnfGeneratorTest extends BnfGeneratorTestCase {
 
     for (File file : filesToCheck) {
       assertTrue("Generated file not found: " + file, file.exists());
-      final String expectedName = FileUtil.getNameWithoutExtension(file) + ".expected.java";
+      String expectedName = FileUtil.getNameWithoutExtension(file) + ".expected.java";
       String result = FileUtil.loadFile(file, CharsetToolkit.UTF8, true);
       doCheckResult(myFullDataPath, expectedName, result);
     }

@@ -12,7 +12,6 @@ import com.intellij.openapi.editor.Editor;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.SyntaxTraverser;
-import com.intellij.util.Function;
 import com.intellij.util.containers.JBIterable;
 import org.intellij.jflex.psi.*;
 import org.intellij.jflex.psi.impl.JFlexFile;
@@ -31,10 +30,9 @@ import static com.intellij.openapi.util.text.StringUtil.*;
  * @author gregsh
  */
 public class JFlexStructureViewFactory implements PsiStructureViewFactory {
-  public StructureViewBuilder getStructureViewBuilder(final PsiFile psiFile) {
+  public StructureViewBuilder getStructureViewBuilder(@NotNull PsiFile psiFile) {
     return new TreeBasedStructureViewBuilder() {
-      @NotNull
-      public StructureViewModel createStructureViewModel(@Nullable Editor editor) {
+      public @NotNull StructureViewModel createStructureViewModel(@Nullable Editor editor) {
         return new MyModel(psiFile);
       }
 
@@ -47,7 +45,7 @@ public class JFlexStructureViewFactory implements PsiStructureViewFactory {
 
   static class MyModel extends StructureViewModelBase implements StructureViewModel.ElementInfoProvider {
 
-    static final Class[] CLASSES = {JFlexOption.class, JFlexMacroDefinition.class, JFlexRule.class};
+    static final Class<?>[] CLASSES = {JFlexOption.class, JFlexMacroDefinition.class, JFlexRule.class};
 
     protected MyModel(@NotNull PsiFile psiFile) {
       super(psiFile, new MyElement(psiFile));
@@ -72,23 +70,19 @@ public class JFlexStructureViewFactory implements PsiStructureViewFactory {
 
   }
 
-  static final Function<PsiElement, StructureViewTreeElement> WRAPPER = MyElement::new;
-
   static class MyElement extends PsiTreeElementBase<PsiElement> implements SortableTreeElement {
 
     MyElement(PsiElement element) {
       super(element);
     }
 
-    @NotNull
     @Override
-    public String getAlphaSortKey() {
+    public @NotNull String getAlphaSortKey() {
       return notNullize(getPresentableText());
     }
 
-    @NotNull
     @Override
-    public Collection<StructureViewTreeElement> getChildrenBase() {
+    public @NotNull Collection<StructureViewTreeElement> getChildrenBase() {
       PsiElement o = getElement();
       if (o == null) return Collections.emptyList();
       if (o instanceof JFlexFile) {

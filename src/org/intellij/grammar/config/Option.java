@@ -27,7 +27,7 @@ abstract class Option<T> implements Getter<T> {
   }
 
   static Option<Integer> intOption(String id, int def) {
-    return new Option<Integer>(id, def) {
+    return new Option<>(id, def) {
       @Override
       public Integer get() {
         return StringUtil.parseInt(innerValue(), defValue);
@@ -36,7 +36,7 @@ abstract class Option<T> implements Getter<T> {
   }
 
   static Option<String> strOption(String id, String def) {
-    return new Option<String>(id, def) {
+    return new Option<>(id, def) {
       @Override
       public String get() {
         return ObjectUtils.chooseNotNull(innerValue(), defValue);
@@ -45,7 +45,7 @@ abstract class Option<T> implements Getter<T> {
   }
 
   static Option<Boolean> boolOption(String id, boolean def) {
-    return new Option<Boolean>(id, def) {
+    return new Option<>(id, def) {
       @Override
       public Boolean get() {
         String s = innerValue();

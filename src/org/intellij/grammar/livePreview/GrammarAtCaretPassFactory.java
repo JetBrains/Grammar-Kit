@@ -76,13 +76,13 @@ public class GrammarAtCaretPassFactory implements TextEditorHighlightingPassFact
     };
   }
 
-  private static void collectHighlighters(@NotNull final Project project,
+  private static void collectHighlighters(@NotNull Project project,
                                           @NotNull Editor editor,
                                           @NotNull LivePreviewLanguage livePreviewLanguage,
                                           @NotNull List<HighlightInfo> result) {
-    final Set<TextRange> trueRanges = new HashSet<>();
-    final Set<TextRange> falseRanges = new HashSet<>();
-    final Set<BnfExpression> visited = new HashSet<>();
+    Set<TextRange> trueRanges = new HashSet<>();
+    Set<TextRange> falseRanges = new HashSet<>();
+    Set<BnfExpression> visited = new HashSet<>();
     LivePreviewHelper.collectExpressionsAtOffset(project, editor, livePreviewLanguage, (bnfExpression, result1) -> {
       for (PsiElement parent = bnfExpression.getParent();
            parent instanceof BnfExpression && visited.add((BnfExpression)parent); ) {

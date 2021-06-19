@@ -28,9 +28,8 @@ import java.util.Map;
 
 public class JFlexJavaCodeInjector implements MultiHostInjector {
 
-  @NotNull
   @Override
-  public List<? extends Class<? extends PsiElement>> elementsToInjectIn() {
+  public @NotNull List<? extends Class<? extends PsiElement>> elementsToInjectIn() {
     return Collections.singletonList(JFlexJavaCode.class);
   }
 
@@ -115,8 +114,7 @@ public class JFlexJavaCodeInjector implements MultiHostInjector {
     registrar.doneInjecting();
   }
 
-  @NotNull
-  private static Map<IElementType, String> collectOptions(@NotNull PsiFile file) {
+  private static @NotNull Map<IElementType, String> collectOptions(@NotNull PsiFile file) {
     PsiElement declarationsSection = PsiTreeUtil.findChildOfType(file, JFlexDeclarationsSection.class);
     if (declarationsSection == null) return Collections.emptyMap();
     Map<IElementType, String> result = new LinkedHashMap<>();

@@ -7,7 +7,6 @@ package org.intellij.grammar.refactor;
 import com.intellij.lang.refactoring.RefactoringSupportProvider;
 import com.intellij.psi.PsiElement;
 import org.intellij.grammar.psi.BnfNamedElement;
-import org.intellij.grammar.psi.impl.BnfReferenceImpl;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -20,6 +19,6 @@ import org.jetbrains.annotations.NotNull;
 public class BnfRefactoringSupportProvider extends RefactoringSupportProvider {
   @Override
   public boolean isMemberInplaceRenameAvailable(@NotNull PsiElement element, PsiElement context) {
-    return element instanceof BnfNamedElement || element instanceof BnfReferenceImpl.MetaParameter;
+    return element instanceof BnfNamedElement;
   }
 }

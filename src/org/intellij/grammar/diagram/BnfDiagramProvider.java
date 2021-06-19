@@ -36,8 +36,8 @@ import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.*;
 import java.util.List;
+import java.util.*;
 
 import static org.intellij.grammar.generator.ParserGeneratorUtil.getAttribute;
 
@@ -80,7 +80,7 @@ public class BnfDiagramProvider extends DiagramProvider<PsiNamedElement> {
 
     @Override
     public SimpleColoredText getItemName(Object o, DiagramState diagramState) {
-      if (o instanceof Map.Entry) o = ((Map.Entry)o).getKey();
+      if (o instanceof Map.Entry) o = ((Map.Entry<?, ?>)o).getKey();
       if (o instanceof PsiNamedElement) {
         return new SimpleColoredText(StringUtil.notNullize(((PsiNamedElement)o).getName()), DEFAULT_TITLE_ATTR);
       }
@@ -101,7 +101,7 @@ public class BnfDiagramProvider extends DiagramProvider<PsiNamedElement> {
     @Override
     public SimpleColoredText getItemType(Object element) {
       if (element instanceof Map.Entry) {
-        RuleGraphHelper.Cardinality cardinality = (RuleGraphHelper.Cardinality)((Map.Entry)element).getValue();
+        RuleGraphHelper.Cardinality cardinality = (RuleGraphHelper.Cardinality)((Map.Entry<?, ?>)element).getValue();
         String text = RuleGraphHelper.getCardinalityText(cardinality);
         if (StringUtil.isNotEmpty(text)) {
           return new SimpleColoredText(" "+text+" ", SimpleTextAttributes.GRAY_ITALIC_ATTRIBUTES);
@@ -112,7 +112,7 @@ public class BnfDiagramProvider extends DiagramProvider<PsiNamedElement> {
 
     @Override
     public Icon getItemIcon(Object element, DiagramState presentation) {
-      if (element instanceof Map.Entry) element = ((Map.Entry)element).getKey();
+      if (element instanceof Map.Entry) element = ((Map.Entry<?, ?>)element).getKey();
       return super.getItemIcon(element, presentation);
     }
 
@@ -192,16 +192,15 @@ public class BnfDiagramProvider extends DiagramProvider<PsiNamedElement> {
   }
 
   @Override
-  public DiagramDataModel<PsiNamedElement> createDataModel(@NotNull final Project project,
-                                                   @Nullable final PsiNamedElement element,
-                                                   @Nullable final VirtualFile file,
-                                                   DiagramPresentationModel presentationModel) {
+  public DiagramDataModel<PsiNamedElement> createDataModel(@NotNull Project project,
+                                                           @Nullable PsiNamedElement element,
+                                                           @Nullable VirtualFile file,
+                                                           DiagramPresentationModel presentationModel) {
     return new MyDataModel(project, (BnfFile)element, this);
   }
 
-  @NotNull
   @Override
-  public DiagramExtras getExtras() {
+  public @NotNull DiagramExtras getExtras() {
     return myExtras;
   }
 
@@ -228,21 +227,18 @@ public class BnfDiagramProvider extends DiagramProvider<PsiNamedElement> {
       myFile = file;
     }
 
-    @NotNull
     @Override
-    public Collection<DiagramNode<PsiNamedElement>> getNodes() {
+    public @NotNull Collection<DiagramNode<PsiNamedElement>> getNodes() {
       return myNodes;
     }
 
-    @NotNull
     @Override
-    public Collection<DiagramEdge<PsiNamedElement>> getEdges() {
+    public @NotNull Collection<DiagramEdge<PsiNamedElement>> getEdges() {
       return myEdges;
     }
 
-    @NotNull
     @Override
-    public String getNodeName(DiagramNode<PsiNamedElement> node) {
+    public @NotNull String getNodeName(DiagramNode<PsiNamedElement> node) {
       return StringUtil.notNullize(node.getTooltip());
     }
 
@@ -295,9 +291,9 @@ public class BnfDiagramProvider extends DiagramProvider<PsiNamedElement> {
               }
             });
         }
-        for (final PsiElement element : map.keySet()) {
+        for (PsiElement element : map.keySet()) {
           if (!(element instanceof BnfRule)) continue;
-          final RuleGraphHelper.Cardinality cardinality = map.get(element);
+          RuleGraphHelper.Cardinality cardinality = map.get(element);
           assert cardinality != RuleGraphHelper.Cardinality.NONE;
 
           DiagramNode<PsiNamedElement> source = nodeMap.get(rule);
@@ -338,9 +334,8 @@ public class BnfDiagramProvider extends DiagramProvider<PsiNamedElement> {
       }
     }
 
-    @NotNull
     @Override
-    public ModificationTracker getModificationTracker() {
+    public @NotNull ModificationTracker getModificationTracker() {
       return this;
     }
 

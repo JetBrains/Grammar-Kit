@@ -60,8 +60,7 @@ public class JFlexColorSettingsPage implements ColorSettingsPage {
     };
   }
 
-  @NotNull
-  public String getDisplayName() {
+  public @NotNull String getDisplayName() {
     return "JFlex";
   }
 
@@ -69,23 +68,19 @@ public class JFlexColorSettingsPage implements ColorSettingsPage {
     return JFlexFileType.INSTANCE.getIcon();
   }
 
-  @NotNull
-  public AttributesDescriptor[] getAttributeDescriptors() {
+  public AttributesDescriptor @NotNull [] getAttributeDescriptors() {
     return ATTRS;
   }
 
-  @NotNull
-  public ColorDescriptor[] getColorDescriptors() {
+  public ColorDescriptor @NotNull [] getColorDescriptors() {
     return ColorDescriptor.EMPTY_ARRAY;
   }
 
-  @NotNull
-  public SyntaxHighlighter getHighlighter() {
+  public @NotNull SyntaxHighlighter getHighlighter() {
     return new JFlexSyntaxHighlighterFactory().getSyntaxHighlighter(null, null);
   }
 
-  @NotNull
-  public String getDemoText() {
+  public @NotNull String getDemoText() {
     return "/* Header comment */\n" +
            "package sample.lexer;\n" +
            "\n" +

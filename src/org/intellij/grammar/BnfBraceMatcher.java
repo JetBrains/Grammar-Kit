@@ -23,9 +23,8 @@ public class BnfBraceMatcher implements PairedBraceMatcher {
     new BracePair(BnfTypes.BNF_EXTERNAL_START, BnfTypes.BNF_EXTERNAL_END, false)
   };
 
-  @NotNull
   @Override
-  public BracePair[] getPairs() {
+  public BracePair @NotNull [] getPairs() {
     return PAIRS;
   }
 

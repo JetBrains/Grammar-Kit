@@ -39,27 +39,23 @@ public class JFlexFindUsagesProvider implements FindUsagesProvider, ElementDescr
     return null;
   }
 
-  @NotNull
   @Override
-  public String getType(@NotNull PsiElement element) {
+  public @NotNull String getType(@NotNull PsiElement element) {
     return ElementDescriptionUtil.getElementDescription(element, UsageViewTypeLocation.INSTANCE);
   }
 
-  @NotNull
   @Override
-  public String getDescriptiveName(@NotNull PsiElement element) {
+  public @NotNull String getDescriptiveName(@NotNull PsiElement element) {
     return ElementDescriptionUtil.getElementDescription(element, UsageViewLongNameLocation.INSTANCE);
   }
 
-  @NotNull
   @Override
-  public String getNodeText(@NotNull PsiElement element, boolean useFullName) {
+  public @NotNull String getNodeText(@NotNull PsiElement element, boolean useFullName) {
     return ElementDescriptionUtil.getElementDescription(element, UsageViewNodeTextLocation.INSTANCE);
   }
 
-  @Nullable
   @Override
-  public String getElementDescription(@NotNull PsiElement psiElement, @NotNull ElementDescriptionLocation location) {
+  public @Nullable String getElementDescription(@NotNull PsiElement psiElement, @NotNull ElementDescriptionLocation location) {
     if (location == UsageViewNodeTextLocation.INSTANCE && psiElement instanceof JFlexComposite) {
       return getElementDescription(psiElement, UsageViewTypeLocation.INSTANCE) + " " +
              "'" + getElementDescription(psiElement, UsageViewShortNameLocation.INSTANCE) + "'";

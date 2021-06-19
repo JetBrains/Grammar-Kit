@@ -71,7 +71,7 @@ public class ExpressionParserDefinition extends BnfParserDefinition{
   }
 
   @Override
-  public PsiFile createFile(FileViewProvider fileViewProvider) {
+  public @NotNull PsiFile createFile(@NotNull FileViewProvider fileViewProvider) {
     return new PsiFileBase(fileViewProvider, EXPR_LANGUAGE) {
 
       @NotNull
@@ -88,7 +88,7 @@ public class ExpressionParserDefinition extends BnfParserDefinition{
   }
 
   @Override
-  public PsiParser createParser(Project project) {
+  public @NotNull PsiParser createParser(Project project) {
     return new ExpressionParser();
   }
 

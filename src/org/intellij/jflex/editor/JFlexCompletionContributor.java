@@ -42,7 +42,7 @@ import static org.intellij.jflex.psi.JFlexTypes.*;
 public class JFlexCompletionContributor extends CompletionContributor {
 
   public JFlexCompletionContributor() {
-    extend(CompletionType.BASIC, psiElement().inFile(StandardPatterns.instanceOf(JFlexFileImpl.class)), new CompletionProvider<CompletionParameters>() {
+    extend(CompletionType.BASIC, psiElement().inFile(StandardPatterns.instanceOf(JFlexFileImpl.class)), new CompletionProvider<>() {
       @Override
       protected void addCompletions(@NotNull CompletionParameters parameters,
                                     @NotNull ProcessingContext context,
@@ -81,18 +81,16 @@ public class JFlexCompletionContributor extends CompletionContributor {
     int positionOffset = position.getTextRange().getEndOffset();
 
     JFlexExpression expr = PsiTreeUtil.getParentOfType(position, JFlexExpression.class);
-    final boolean inMacro =
-      expr != null && expr.getText().substring(0, positionOffset - expr.getTextRange().getStartOffset()).indexOf('\n') == -1;
+    boolean inMacro = expr != null && expr.getText().substring(0, positionOffset - expr.getTextRange().getStartOffset()).indexOf('\n') == -1;
 
     String fragment = (inDeclare ? "%%\n" : "%%\n%%\n") + flexFileText.substring(flexFileText.lastIndexOf("%%", positionOffset-1) + 2, positionOffset);
     boolean empty = StringUtil.isEmptyOrSpaces(fragment);
-    final String text = empty ? CompletionInitializationContext.DUMMY_IDENTIFIER : fragment;
+    String text = empty ? CompletionInitializationContext.DUMMY_IDENTIFIER : fragment;
     int completionOffset = empty ? 0 : fragment.length();
     PsiFile file = PsiFileFactory.getInstance(flexFile.getProject()).createFileFromText("a.flex", language, text, true, false);
     GeneratedParserUtilBase.CompletionState state = new GeneratedParserUtilBase.CompletionState(completionOffset) {
-      @Nullable
       @Override
-      public String convertItem(Object o) {
+      public @Nullable String convertItem(Object o) {
         if (o == null) return null;
         if (o instanceof IElementType[]) return super.convertItem(o);
         if (o == FLEX_ID || o == FLEX_CHAR || o == FLEX_STRING ||
@@ -114,7 +112,7 @@ public class JFlexCompletionContributor extends CompletionContributor {
       return keyword.startsWith("%") ? TailTypeDecorator.withTail(builder, TailType.SPACE) : builder;
     }
     else {
-      final String closing = keyword.endsWith("{") ? keyword.substring(0, keyword.length()-1) + "}" : null;
+      String closing = keyword.endsWith("{") ? keyword.substring(0, keyword.length()-1) + "}" : null;
       return PrioritizedLookupElement.withPriority(builder.withInsertHandler((context, item) -> {
         int caret = context.getTailOffset();
         Document document = context.getDocument();

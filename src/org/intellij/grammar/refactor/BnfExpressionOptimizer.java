@@ -23,7 +23,7 @@ import java.util.List;
  */
 public class BnfExpressionOptimizer {
   public static void optimize(@NotNull Project project, @NotNull PsiElement element) {
-    final LinkedList<PsiElement> list = new LinkedList<>();
+    LinkedList<PsiElement> list = new LinkedList<>();
     list.add(element.getParent());
     list.add(element);
     while (!list.isEmpty()) {
@@ -33,7 +33,7 @@ public class BnfExpressionOptimizer {
         mergeChildrenTo(parent, cur, list);
       }
       else if (cur instanceof BnfParenOptExpression && isTrivialOrSingular(((BnfParenOptExpression)cur).getExpression())) {
-        // currently <expr> + ? expressions are not supported, thus:
+        // currently, <expr> + ? expressions are not supported, thus:
         BnfExpression child = ((BnfParenOptExpression)cur).getExpression();
         IElementType type = ParserGeneratorUtil.getEffectiveType(child);
         if (type == BnfTypes.BNF_OP_OPT || type == BnfTypes.BNF_OP_ZEROMORE) {
@@ -86,8 +86,7 @@ public class BnfExpressionOptimizer {
         return list.isEmpty() || !GrammarUtil.isExternalReference(list.get(0));
       }
     }
-    if (cur instanceof BnfChoice && parent instanceof BnfChoice) return true;
-    return false;
+    return cur instanceof BnfChoice && parent instanceof BnfChoice;
   }
 
   private static void mergeChildrenTo(PsiElement parent, PsiElement cur, List<PsiElement> list) {

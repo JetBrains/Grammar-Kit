@@ -21,9 +21,8 @@ public class BnfLanguage extends Language {
     super("BNF");
   }
 
-  @NotNull
   @Override
-  public String getDisplayName() {
+  public @NotNull String getDisplayName() {
     return BnfConstants.BNF_DISPLAY_NAME;
   }
 }

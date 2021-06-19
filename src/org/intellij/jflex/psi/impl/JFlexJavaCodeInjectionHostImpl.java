@@ -29,9 +29,8 @@ public class JFlexJavaCodeInjectionHostImpl extends JFlexCompositeImpl implement
     return (JFlexJavaCodeInjectionHostImpl)this.replace(newElement);
   }
 
-  @NotNull
-  public LiteralTextEscaper<JFlexJavaCodeInjectionHostImpl> createLiteralTextEscaper() {
-    return new LiteralTextEscaper<JFlexJavaCodeInjectionHostImpl>(this) {
+  public @NotNull LiteralTextEscaper<JFlexJavaCodeInjectionHostImpl> createLiteralTextEscaper() {
+    return new LiteralTextEscaper<>(this) {
       public boolean decode(@NotNull TextRange textrange, @NotNull StringBuilder stringbuilder) {
         stringbuilder.append(myHost.getText(), textrange.getStartOffset(), textrange.getEndOffset());
         return true;

@@ -27,15 +27,14 @@ import static org.intellij.grammar.generator.ParserGeneratorUtil.*;
  * @author gregsh
  */
 public class GrammarPsiImplUtil {
-  @NotNull
-  public static PsiReference[] getReferences(BnfListEntry o) {
+  public static @NotNull PsiReference[] getReferences(BnfListEntry o) {
     BnfAttr attr = PsiTreeUtil.getParentOfType(o, BnfAttr.class);
     if (attr == null || !Objects.equals(KnownAttribute.METHODS.getName(), attr.getName())) return PsiReference.EMPTY_ARRAY;
     PsiElement id = o.getId();
     BnfLiteralExpression value = o.getLiteralExpression();
     if (id == null || value != null) return PsiReference.EMPTY_ARRAY;
-    final String psiImplUtilClass = getRootAttribute(attr, KnownAttribute.PSI_IMPL_UTIL_CLASS);
-    final JavaHelper javaHelper = JavaHelper.getJavaHelper(o);
+    String psiImplUtilClass = getRootAttribute(attr, KnownAttribute.PSI_IMPL_UTIL_CLASS);
+    JavaHelper javaHelper = JavaHelper.getJavaHelper(o);
 
     return new PsiReference[] {
       new PsiPolyVariantReferenceBase<>(o, TextRange.from(id.getStartOffsetInParent(), id.getTextLength())) {
@@ -49,15 +48,13 @@ public class GrammarPsiImplUtil {
           return ContainerUtil.concat(implMethods, mixinMethods);
         }
 
-        @NotNull
         @Override
-        public ResolveResult[] multiResolve(boolean b) {
+        public ResolveResult @NotNull [] multiResolve(boolean b) {
           return PsiElementResolveResult.createResults(getTargetMethods(getElement().getText()));
         }
 
-        @NotNull
         @Override
-        public Object[] getVariants() {
+        public Object @NotNull [] getVariants() {
           List<LookupElement> list = new ArrayList<>();
           for (NavigatablePsiElement element : getTargetMethods("*")) {
             list.add(LookupElementBuilder.createWithIcon((PsiNamedElement)element));
@@ -76,8 +73,7 @@ public class GrammarPsiImplUtil {
     };
   }
 
-  @NotNull
-  public static List<BnfExpression> getArguments(@NotNull BnfExternalExpression expr) {
+  public static @NotNull List<BnfExpression> getArguments(@NotNull BnfExternalExpression expr) {
     List<BnfExpression> expressions = expr.getExpressionList();
     return expressions.subList(1, expressions.size());
   }

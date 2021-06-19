@@ -25,8 +25,7 @@ public class BnfInlineViewDescriptor implements UsageViewDescriptor {
         this.myElement = myElement;
     }
 
-    @NotNull
-    public PsiElement[] getElements() {
+    public PsiElement @NotNull [] getElements() {
       return new PsiElement[] {myElement};
     }
 
@@ -34,8 +33,7 @@ public class BnfInlineViewDescriptor implements UsageViewDescriptor {
       return "Rule";
     }
 
-    @NotNull
-    public String getCodeReferencesText(int usagesCount, int filesCount) {
+    public @NotNull String getCodeReferencesText(int usagesCount, int filesCount) {
       return "Invocations to be inlined " + UsageViewBundle.getReferencesString(usagesCount, filesCount);
     }
 

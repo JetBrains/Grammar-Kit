@@ -42,14 +42,12 @@ public class BnfElementFactory {
   public static BnfRule createRuleFromText(Project project, String text) {
     PsiElement firstChild = createFile(project, text).getFirstChild();
     LOG.assertTrue(firstChild instanceof BnfRule, text);
-    //noinspection ConstantConditions
     return (BnfRule)firstChild;
   }
 
   public static BnfAttr createAttributeFromText(Project project, String text) {
     PsiElement firstChild = createFile(project, "{\n  " + text + "\n}").getFirstChild();
     LOG.assertTrue(firstChild instanceof BnfAttrs, text);
-    //noinspection ConstantConditions
     List<BnfAttr> attrList = ((BnfAttrs) firstChild).getAttrList();
     LOG.assertTrue(attrList.size() == 1, text);
     return attrList.get(0);

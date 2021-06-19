@@ -26,8 +26,7 @@ import java.util.Objects;
  */
 public class HighlightGrammarAtCaretAction extends AnAction {
 
-  @Nullable
-  private static Editor getPreviewEditor(@NotNull AnActionEvent e) {
+  private static @Nullable Editor getPreviewEditor(@NotNull AnActionEvent e) {
     Editor editor = PlatformDataKeys.EDITOR.getData(e.getDataContext());
     PsiFile psiFile = LangDataKeys.PSI_FILE.getData(e.getDataContext());
     Language language = psiFile == null ? null : psiFile.getLanguage();

@@ -33,20 +33,18 @@ public class CreateRuleFromTokenFix implements LocalQuickFix {
     myName = name;
   }
 
-  @NotNull
   @Override
-  public String getName() {
+  public @NotNull String getName() {
     return "Create '" + myName + "' rule";
   }
 
-  @NotNull
   @Override
-  public String getFamilyName() {
+  public @NotNull String getFamilyName() {
     return "Create rule from usage";
   }
 
   @Override
-  public void applyFix(final @NotNull Project project, @NotNull ProblemDescriptor descriptor) {
+  public void applyFix(@NotNull Project project, @NotNull ProblemDescriptor descriptor) {
     PsiElement element = descriptor.getPsiElement();
     BnfRule rule = PsiTreeUtil.getParentOfType(element, BnfRule.class);
     if (rule == null) return;
@@ -54,7 +52,7 @@ public class CreateRuleFromTokenFix implements LocalQuickFix {
     BnfRule addedRule = BnfIntroduceRuleHandler.addNextRule(project, rule, "private " + myName + " ::= ");
     FileEditor selectedEditor = FileEditorManager.getInstance(project).getSelectedEditor(rule.getContainingFile().getVirtualFile());
     if (selectedEditor instanceof TextEditor) {
-      final Editor editor = ((TextEditor)selectedEditor).getEditor();
+      Editor editor = ((TextEditor)selectedEditor).getEditor();
       editor.getCaretModel()
         .moveToOffset(addedRule.getTextRange().getEndOffset() - (BnfIntroduceRuleHandler.endsWithSemicolon(addedRule) ? 1 : 0));
       editor.getScrollingModel().scrollToCaret(ScrollType.MAKE_VISIBLE);

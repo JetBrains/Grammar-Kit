@@ -34,9 +34,8 @@ public class BnfStringRefContributor extends PsiReferenceContributor {
     registrar.registerReferenceProvider(
       psiElement(BnfStringImpl.class).withParent(psiElement(BnfAttrPattern.class)), new PsiReferenceProvider() {
 
-        @NotNull
         @Override
-        public PsiReference[] getReferencesByElement(@NotNull PsiElement element, @NotNull ProcessingContext context) {
+        public PsiReference @NotNull [] getReferencesByElement(@NotNull PsiElement element, @NotNull ProcessingContext context) {
           return new PsiReference[]{BnfStringImpl.createPatternReference((BnfStringImpl)element)};
         }
       }
@@ -46,9 +45,8 @@ public class BnfStringRefContributor extends PsiReferenceContributor {
       psiElement(BnfStringImpl.class).withParent(psiElement(BnfAttr.class).withName(string().with(oneOf(RULE_ATTRIBUTES)))),
       new PsiReferenceProvider() {
 
-        @NotNull
         @Override
-        public PsiReference[] getReferencesByElement(@NotNull PsiElement element, @NotNull ProcessingContext context) {
+        public PsiReference @NotNull [] getReferencesByElement(@NotNull PsiElement element, @NotNull ProcessingContext context) {
           return new PsiReference[]{BnfStringImpl.createRuleReference((BnfStringImpl)element)};
         }
       }
@@ -60,9 +58,8 @@ public class BnfStringRefContributor extends PsiReferenceContributor {
            string().with(oneOf(JAVA_CLASS_ATTRIBUTES))))),
       new PsiReferenceProvider() {
 
-        @NotNull
         @Override
-        public PsiReference[] getReferencesByElement(@NotNull PsiElement element, @NotNull ProcessingContext context) {
+        public PsiReference @NotNull [] getReferencesByElement(@NotNull PsiElement element, @NotNull ProcessingContext context) {
           return JavaHelper.getJavaHelper(element).getClassReferences(element, context);
         }
       });

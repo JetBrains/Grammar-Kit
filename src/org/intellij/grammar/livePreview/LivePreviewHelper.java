@@ -58,18 +58,16 @@ public class LivePreviewHelper {
     fileEditorManager.openFile(virtualFile, true);
   }
 
-  @Nullable
-  public static PsiFile parseFile(BnfFile bnfFile, String text) {
+  public static @Nullable PsiFile parseFile(BnfFile bnfFile, String text) {
     Language language = getLanguageFor(bnfFile);
 
     String fileName = bnfFile.getName() + ".preview";
     LightVirtualFile virtualFile = new LightVirtualFile(fileName, language, text);
-    final Project project = bnfFile.getProject();
+    Project project = bnfFile.getProject();
     return PsiManager.getInstance(project).findFile(virtualFile);
   }
 
-  @NotNull
-  public static Language getLanguageFor(BnfFile psiFile) {
+  public static @NotNull Language getLanguageFor(BnfFile psiFile) {
     LivePreviewLanguage existing = LivePreviewLanguage.findInstance(psiFile);
     if (existing != null) return existing;
     LivePreviewLanguage language = LivePreviewLanguage.newInstance(psiFile);
@@ -91,7 +89,7 @@ public class LivePreviewHelper {
   private static final NotNullLazyKey<SingleAlarm, Project> LIVE_PREVIEW_ALARM =
     NotNullLazyKey.create("LIVE_PREVIEW_ALARM",
                           project -> new SingleAlarm(() -> reparseAllLivePreviews(project), 300, Alarm.ThreadToUse.SWING_THREAD, project));
-  private static void installUpdateListener(final Project project) {
+  private static void installUpdateListener(Project project) {
     EditorFactory.getInstance().getEventMulticaster().addDocumentListener(new DocumentListener() {
 
       final FileDocumentManager fileManager = FileDocumentManager.getInstance();
@@ -107,26 +105,6 @@ public class LivePreviewHelper {
         }
       }
     }, project);
-
-    //project.getMessageBus().connect(project).subscribe(FileEditorManagerListener.FILE_EDITOR_MANAGER, new FileEditorManagerAdapter() {
-    //  @Override
-    //  public void fileOpened(FileEditorManager source, VirtualFile file) {
-    //
-    //
-    //    // add structure component
-    //
-    //    FileEditor fileEditor = source.getSelectedEditor(file);
-    //    if (!(fileEditor instanceof TextEditor)) return;
-    //    StructureViewBuilder builder =
-    //      StructureViewBuilder.PROVIDER.getStructureViewBuilder(file.getFileType(), file, project);
-    //    if (builder == null) return;
-    //    StructureView structureView = builder.createStructureView(fileEditor, project);
-    //
-    //    Editor editor = ((TextEditor)fileEditor).getEditor();
-    //    editor.getComponent().getParent().getParent().add(structureView.getComponent(), BorderLayout.EAST);
-    //    Disposer.register(fileEditor, structureView);
-    //  }
-    //});
   }
 
   private static void reparseAllLivePreviews(@NotNull Project project) {
@@ -144,12 +122,12 @@ public class LivePreviewHelper {
     FileContentUtil.reparseFiles(project, files, false);
   }
 
-  public static boolean collectExpressionsAtOffset(Project project, Editor previewEditor, LivePreviewLanguage language, final PairProcessor<BnfExpression, Boolean> processor) {
+  public static boolean collectExpressionsAtOffset(Project project, Editor previewEditor, LivePreviewLanguage language, PairProcessor<BnfExpression, Boolean> processor) {
     Lexer lexer = new LivePreviewLexer(project, language);
-    final ParserDefinition parserDefinition = LanguageParserDefinitions.INSTANCE.forLanguage(language);
-    final PsiBuilder builder = PsiBuilderFactory.getInstance().createBuilder(parserDefinition, lexer, previewEditor.getDocument().getText());
-    final int caretOffset = previewEditor.getCaretModel().getOffset();
-    final PsiParser parser = new LivePreviewParser(project, language) {
+    ParserDefinition parserDefinition = LanguageParserDefinitions.INSTANCE.forLanguage(language);
+    PsiBuilder builder = PsiBuilderFactory.getInstance().createBuilder(parserDefinition, lexer, previewEditor.getDocument().getText());
+    int caretOffset = previewEditor.getCaretModel().getOffset();
+    PsiParser parser = new LivePreviewParser(project, language) {
       @Override
       protected boolean generateNodeCall(PsiBuilder builder,
                                          int level,
@@ -167,8 +145,7 @@ public class LivePreviewHelper {
         if (node != null) {
           if (result && initialOffset <= caretOffset && finalOffset > caretOffset ||
               !result && initialOffset <= caretOffset && tokenEndOffset > caretOffset) {
-            boolean inWhitespace = isTokenExpression(node) &&
-                                   initialOffset <= caretOffset && tokenStartOffset > caretOffset;
+            boolean inWhitespace = isTokenExpression(node) && tokenStartOffset > caretOffset;
             if (!processor.process(node, result && !inWhitespace)) {
               throw new ProcessCanceledException();
             }

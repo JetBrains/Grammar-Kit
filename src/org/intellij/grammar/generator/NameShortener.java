@@ -48,8 +48,7 @@ public class NameShortener {
     }
   }
 
-  @NotNull
-  public String shorten(String s) {
+  public @NotNull String shorten(String s) {
     if (!myEnabled) return s;
     boolean changed = false;
     StringBuilder sb = new StringBuilder();
@@ -82,8 +81,7 @@ public class NameShortener {
     return changed ? sb.append(vararg ? "..." : "").toString() : s;
   }
 
-  @Nullable
-  private static String getAnnotatedFQNAt(@NotNull String s, int offset) {
+  private static @Nullable String getAnnotatedFQNAt(@NotNull String s, int offset) {
     Ref<String> result = Ref.create();
     addTypeToImports(s.substring(offset), result::set, 0);
     return result.get();
@@ -138,8 +136,7 @@ public class NameShortener {
     }
   }
 
-  @NotNull
-  public static String getRawClassName(@NotNull String name) {
+  public static @NotNull String getRawClassName(@NotNull String name) {
     return name.indexOf("<") < name.indexOf(">") ? name.substring(0, name.indexOf("<")) : name;
   }
 

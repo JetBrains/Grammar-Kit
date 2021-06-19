@@ -36,12 +36,11 @@ import static com.intellij.util.ArrayUtil.getFirstElement;
  * @author gregsh
  */
 public class FileGeneratorUtil {
-  @NotNull
-  public static VirtualFile getTargetDirectoryFor(@NotNull Project project,
-                                                  @NotNull VirtualFile sourceFile,
-                                                  @Nullable String targetFile,
-                                                  @Nullable String targetPackage,
-                                                  boolean returnRoot) {
+  public static @NotNull VirtualFile getTargetDirectoryFor(@NotNull Project project,
+                                                           @NotNull VirtualFile sourceFile,
+                                                           @Nullable String targetFile,
+                                                           @Nullable String targetPackage,
+                                                           boolean returnRoot) {
     boolean hasPackage = StringUtil.isNotEmpty(targetPackage);
     ProjectRootManager rootManager = ProjectRootManager.getInstance(project);
     ProjectFileIndex fileIndex = ProjectFileIndex.SERVICE.getInstance(project);
@@ -75,7 +74,7 @@ public class FileGeneratorUtil {
     boolean preferSourceRoot = hasPackage && !preferGenRoot;
     VirtualFile[] sourceRoots = rootManager.getContentSourceRoots();
     VirtualFile[] contentRoots = rootManager.getContentRoots();
-    final VirtualFile virtualRoot = existingFileRoot != null ? existingFileRoot :
+    VirtualFile virtualRoot = existingFileRoot != null ? existingFileRoot :
                                     preferSourceRoot && fileIndex.isInSource(sourceFile) ? fileIndex.getSourceRootForFile(sourceFile) :
                                     fileIndex.isInContent(sourceFile) ? fileIndex.getContentRootForFile(sourceFile) :
                                     getFirstElement(preferSourceRoot && sourceRoots.length > 0? sourceRoots : contentRoots);
@@ -87,9 +86,9 @@ public class FileGeneratorUtil {
       String packagePrefix = StringUtil.notNullize(fileIndex.getPackageNameByDirectory(virtualRoot));
       String genDirName = Options.GEN_DIR.get();
       boolean newGenRoot = !fileIndex.isInSourceContent(virtualRoot);
-      final String relativePath = (hasPackage && newGenRoot ? genDirName + "/" + targetPackage :
-                                  hasPackage ? StringUtil.trimStart(StringUtil.trimStart(targetPackage, packagePrefix), ".") :
-                                  newGenRoot ? genDirName : "").replace('.', '/');
+      String relativePath = (hasPackage && newGenRoot ? genDirName + "/" + targetPackage :
+                             hasPackage ? StringUtil.trimStart(StringUtil.trimStart(targetPackage, packagePrefix), ".") :
+                             newGenRoot ? genDirName : "").replace('.', '/');
       if (relativePath.isEmpty()) {
         return virtualRoot;
       }

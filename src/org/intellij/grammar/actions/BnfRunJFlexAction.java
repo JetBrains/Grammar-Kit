@@ -148,9 +148,9 @@ public class BnfRunJFlexAction extends DumbAwareAction {
 
     String text = document.getText();
     Matcher matcherClass = Pattern.compile("%class\\s+(\\w+)").matcher(text);
-    final String lexerClassName = matcherClass.find() ? matcherClass.group(1) : null;
+    String lexerClassName = matcherClass.find() ? matcherClass.group(1) : null;
     Matcher matcherPackage = Pattern.compile("package\\s+([^;]+);|(%%)").matcher(text);
-    final String lexerPackage = matcherPackage.find() ? StringUtil.trim(matcherPackage.group(1)) : null;
+    String lexerPackage = matcherPackage.find() ? StringUtil.trim(matcherPackage.group(1)) : null;
     if (lexerClassName == null) {
       String content = "Lexer class name option not found, use <pre>%class LexerClassName</pre>";
       fail(project, flexFile, content);
@@ -381,8 +381,7 @@ public class BnfRunJFlexAction extends DumbAwareAction {
     modifiableModel.commit();
   }
 
-  @Nullable
-  private static String getCommunitySrcUrl(@NotNull Project project) {
+  private static @Nullable String getCommunitySrcUrl(@NotNull Project project) {
     Sdk projectSdk = ProjectRootManager.getInstance(project).getProjectSdk();
     Sdk[] jdks = ProjectJdkTable.getInstance().getAllJdks();
     for (Sdk sdk : JBIterable.of(projectSdk).append(jdks).filter(Conditions.notNull())) {
@@ -392,8 +391,7 @@ public class BnfRunJFlexAction extends DumbAwareAction {
     return null;
   }
 
-  @Nullable
-  private static String getCommunitySrcUrlInner(@NotNull Sdk projectSdk) {
+  private static @Nullable String getCommunitySrcUrlInner(@NotNull Sdk projectSdk) {
     String homePath = projectSdk.getHomePath();
     String API_SCR = "/platform/lang-api/src";
     if (homePath != null) {

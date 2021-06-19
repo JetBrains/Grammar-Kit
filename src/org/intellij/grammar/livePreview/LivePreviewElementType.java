@@ -25,9 +25,8 @@ public class LivePreviewElementType extends IElementType {
     super(debugName, language, false);
   }
 
-  @NotNull
   @Override
-  public LivePreviewLanguage getLanguage() {
+  public @NotNull LivePreviewLanguage getLanguage() {
     return (LivePreviewLanguage)super.getLanguage();
   }
 
@@ -70,8 +69,7 @@ public class LivePreviewElementType extends IElementType {
       ruleName = rule.getName();
     }
 
-    @Nullable
-    public BnfRule getRule(Project project) {
+    public @Nullable BnfRule getRule(Project project) {
       BnfFile file = getLanguage().getGrammar(project);
       return file != null ? file.getRule(ruleName) : null;
     }

@@ -43,7 +43,7 @@ public class BnfAnnotator implements Annotator, DumbAware {
     else if (parent instanceof BnfListEntry && ((BnfListEntry)parent).getId() == psiElement) {
       boolean hasValue = ((BnfListEntry)parent).getLiteralExpression() != null;
       BnfAttr attr = PsiTreeUtil.getParentOfType(parent, BnfAttr.class);
-      KnownAttribute attribute = attr != null ? KnownAttribute.getCompatibleAttribute(attr.getName()) : null;
+      KnownAttribute<?> attribute = attr != null ? KnownAttribute.getCompatibleAttribute(attr.getName()) : null;
       if (attribute == KnownAttribute.METHODS && !hasValue) {
         annotationHolder.createInfoAnnotation(psiElement, null).setTextAttributes(BnfSyntaxHighlighter.EXTERNAL);
       }
@@ -84,9 +84,9 @@ public class BnfAnnotator implements Annotator, DumbAware {
       }
       if (parent instanceof BnfAttr || parent instanceof BnfListEntry) {
         String attrName = ObjectUtils.assertNotNull(PsiTreeUtil.getParentOfType(psiElement, BnfAttr.class)).getName();
-        KnownAttribute attribute = KnownAttribute.getCompatibleAttribute(attrName);
+        KnownAttribute<?> attribute = KnownAttribute.getCompatibleAttribute(attrName);
         if (attribute != null) {
-          BnfReferenceImpl reference = ContainerUtil.findInstance(psiElement.getReferences(), BnfReferenceImpl.class);
+          BnfReferenceImpl<?> reference = ContainerUtil.findInstance(psiElement.getReferences(), BnfReferenceImpl.class);
           PsiElement resolve = reference == null ? null : reference.resolve();
           if (resolve instanceof BnfRule) {
             TextRange range = reference.getRangeInElement().shiftRight(psiElement.getTextRange().getStartOffset());

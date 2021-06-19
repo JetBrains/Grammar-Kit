@@ -26,9 +26,8 @@ import static com.intellij.codeInspection.SuppressionUtilCore.SUPPRESS_INSPECTIO
  * @author gregsh
  */
 public class BnfInspectionSuppressor implements InspectionSuppressor {
-  @NotNull
   @Override
-  public SuppressQuickFix[] getSuppressActions(@Nullable PsiElement element, @NotNull String toolId) {
+  public SuppressQuickFix @NotNull [] getSuppressActions(@Nullable PsiElement element, @NotNull String toolId) {
     return new SuppressQuickFix[]{
       new MyFix(toolId, BnfRule.class),
       new MyFix(toolId, BnfAttr.class),
@@ -52,11 +51,11 @@ public class BnfInspectionSuppressor implements InspectionSuppressor {
   }
 
   private static boolean isSuppressedInComment(@Nullable PsiElement root, @NotNull String toolId) {
-    JBIterable<PsiElement> leafs =
+    JBIterable<PsiElement> leaves =
       root instanceof PsiFile ?
       JBIterable.generate(PsiTreeUtil.getDeepestFirst(root), PsiTreeUtil::nextLeaf) :
       JBIterable.generate(root, PsiTreeUtil::prevLeaf).skip(1);
-    JBIterable<PsiComment> comments = leafs
+    JBIterable<PsiComment> comments = leaves
       .takeWhile(e -> e instanceof PsiWhiteSpace || e instanceof PsiComment ||
                       e instanceof BnfSequence && e.getTextLength() == 0)
       .filter(PsiComment.class);
@@ -77,9 +76,8 @@ public class BnfInspectionSuppressor implements InspectionSuppressor {
       super(BnfFile.class.isAssignableFrom(clazz) ? toolId + "ForFile": toolId, clazz);
     }
 
-    @NotNull
     @Override
-    public String getName() {
+    public @NotNull String getName() {
       Class<? extends PsiElement> clazz = mySuppressionHolderClass;
       String target = BnfRule.class.isAssignableFrom(clazz) ? "rule" :
                       BnfAttr.class.isAssignableFrom(clazz) ? "attribute" :

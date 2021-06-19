@@ -87,8 +87,7 @@ public class BnfRuleLineMarkerProvider extends RelatedItemLineMarkerProvider {
     }
   }
 
-  @Nullable
-  private static NavigatablePsiElement getMethod(PsiElement element) {
+  private static @Nullable NavigatablePsiElement getMethod(PsiElement element) {
     BnfRule rule = PsiTreeUtil.getParentOfType(element, BnfRule.class);
     if (rule == null) return null;
     String parserClass = ParserGeneratorUtil.getAttribute(rule, KnownAttribute.PARSER_CLASS);

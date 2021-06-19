@@ -48,9 +48,8 @@ public class NodeCalls {
       this.token = token;
     }
 
-    @NotNull
     @Override
-    public String render(@NotNull Names names) {
+    public @NotNull String render(@NotNull Names names) {
       return String.format("%s(%s, %s)", consumeType.getMethodName(), names.builder, token);
     }
   }
@@ -65,9 +64,8 @@ public class NodeCalls {
       this.tokenSetName = tokenSetName;
     }
 
-    @NotNull
     @Override
-    public String render(@NotNull Names names) {
+    public @NotNull String render(@NotNull Names names) {
       return String.format("%s(%s, %s)", consumeType.getMethodName(), names.builder, tokenSetName);
     }
   }
@@ -84,9 +82,8 @@ public class NodeCalls {
       this.tokens = Collections.unmodifiableList(tokens);
     }
 
-    @NotNull
     @Override
-    public String render(@NotNull Names names) {
+    public @NotNull String render(@NotNull Names names) {
       return String.format("%s(%s, %d, %s)", methodName, names.builder, pin, StringUtil.join(tokens, ", "));
     }
   }
@@ -101,9 +98,8 @@ public class NodeCalls {
       this.priority = priority;
     }
 
-    @NotNull
     @Override
-    public String render(@NotNull Names names) {
+    public @NotNull String render(@NotNull Names names) {
       return String.format("%s(%s, %s + 1, %d)", methodName, names.builder, names.level, priority);
     }
   }
@@ -126,9 +122,8 @@ public class NodeCalls {
       return targetClassName;
     }
 
-    @NotNull
     @Override
-    protected String getMethodRef() {
+    protected @NotNull String getMethodRef() {
       String ref = super.getMethodRef();
       return targetClassName == null ? ref : String.format("%s.%s", targetClassName, ref);
     }
@@ -147,16 +142,14 @@ public class NodeCalls {
       return true;
     }
 
-    @NotNull
-    private String getMethodRef() {
+    private @NotNull String getMethodRef() {
       String ref = getWrapperParserMetaMethodName(call.methodName);
       String className = call.getTargetClassName();
       return className == null ? ref : String.format("%s.%s", className, ref);
     }
 
-    @NotNull
     @Override
-    public String render() {
+    public @NotNull String render() {
       String arguments = String.join(", ", ContainerUtil.map(call.arguments, NodeArgument::render));
       return String.format("%s(%s)", getMethodRef(), arguments);
     }
@@ -170,9 +163,8 @@ public class NodeCalls {
       this.metaParameterName = metaParameterName;
     }
 
-    @NotNull
     @Override
-    public String render(@NotNull Names names) {
+    public @NotNull String render(@NotNull Names names) {
       return String.format("%s.parse(%s, %s)", metaParameterName, names.builder, names.level);
     }
   }
@@ -199,8 +191,7 @@ public class NodeCalls {
       return className;
     }
 
-    @NotNull
-    public String render(@NotNull Names names) {
+    public @NotNull String render(@NotNull Names names) {
       if (renderClass) {
         return String.format("%s.%s(%s, %s + 1)", className, methodName, names.builder, names.level);
       }
@@ -220,14 +211,12 @@ public class NodeCalls {
       this.arguments = Collections.unmodifiableList(arguments);
     }
 
-    @NotNull
-    protected String getMethodRef() {
+    protected @NotNull String getMethodRef() {
       return methodName;
     }
 
-    @NotNull
     @Override
-    public String render(@NotNull Names names) {
+    public @NotNull String render(@NotNull Names names) {
       String argumentStr = arguments.stream()
         .map(NodeArgument::render)
         .map(it -> ", " + it)
@@ -245,9 +234,8 @@ public class NodeCalls {
       this.text = text;
     }
 
-    @NotNull
     @Override
-    public String render() {
+    public @NotNull String render() {
       return text;
     }
   }

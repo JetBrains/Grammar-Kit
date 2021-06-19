@@ -49,18 +49,15 @@ public class BnfInlineRuleProcessor extends BaseRefactoringProcessor {
     myInlineThisOnly = isInlineThisOnly;
   }
 
-  @NotNull
-  protected UsageViewDescriptor createUsageViewDescriptor(@NotNull UsageInfo[] usages) {
+  protected @NotNull UsageViewDescriptor createUsageViewDescriptor(UsageInfo @NotNull [] usages) {
     return new BnfInlineViewDescriptor(myRule);
   }
 
-  @NotNull
-  protected String getCommandName() {
+  protected @NotNull String getCommandName() {
     return "Inline rule '" + myRule.getName() + "'";
   }
 
-  @NotNull
-  protected UsageInfo[] findUsages() {
+  protected UsageInfo @NotNull [] findUsages() {
     if (myInlineThisOnly) return new UsageInfo[]{new UsageInfo(myReference.getElement())};
 
     List<UsageInfo> result = new ArrayList<>();
@@ -69,22 +66,22 @@ public class BnfInlineRuleProcessor extends BaseRefactoringProcessor {
       if (GrammarUtil.isInAttributesReference(element)) continue;
       result.add(new UsageInfo(element));
     }
-    return result.toArray(new UsageInfo[result.size()]);
+    return result.toArray(UsageInfo.EMPTY_ARRAY);
   }
 
-  protected void refreshElements(@NotNull PsiElement[] elements) {
+  protected void refreshElements(PsiElement @NotNull [] elements) {
     LOG.assertTrue(elements.length == 1 && elements[0] instanceof BnfRule);
     myRule = (BnfRule)elements[0];
   }
 
-  protected void performRefactoring(@NotNull UsageInfo[] usages) {
+  protected void performRefactoring(UsageInfo @NotNull [] usages) {
     BnfExpression expression = myRule.getExpression();
     boolean meta = ParserGeneratorUtil.Rule.isMeta(myRule);
 
     CommonRefactoringUtil.sortDepthFirstRightLeftOrder(usages);
     for (UsageInfo info : usages) {
       try {
-        final BnfExpression element = (BnfExpression)info.getElement();
+        BnfExpression element = (BnfExpression)info.getElement();
         boolean metaRuleRef = GrammarUtil.isExternalReference(element);
         if (meta && metaRuleRef) {
           inlineMetaRuleUsage(myProject, element, expression);
@@ -117,7 +114,7 @@ public class BnfInlineRuleProcessor extends BaseRefactoringProcessor {
   private static void inlineMetaRuleUsage(Project project, BnfExpression place, BnfExpression expression) {
     BnfRule rule = PsiTreeUtil.getParentOfType(place, BnfRule.class);
     PsiElement parent = place.getParent();
-    final List<BnfExpression> expressionList;
+    List<BnfExpression> expressionList;
     if (parent instanceof BnfExternalExpression) {
       expressionList = ((BnfExternalExpression)parent).getExpressionList();
     }
@@ -131,11 +128,11 @@ public class BnfInlineRuleProcessor extends BaseRefactoringProcessor {
       LOG.error(parent);
       return;
     }
-    final TObjectIntHashMap<String> visited = new TObjectIntHashMap<>();
-    final LinkedList<Pair<PsiElement, PsiElement>> work = new LinkedList<>();
+    TObjectIntHashMap<String> visited = new TObjectIntHashMap<>();
+    LinkedList<Pair<PsiElement, PsiElement>> work = new LinkedList<>();
     (expression = (BnfExpression)expression.copy()).acceptChildren(new PsiRecursiveElementWalkingVisitor() {
       @Override
-      public void visitElement(PsiElement element) {
+      public void visitElement(@NotNull PsiElement element) {
         if (element instanceof BnfExternalExpression) {
           List<BnfExpression> list = ((BnfExternalExpression)element).getExpressionList();
           if (list.size() == 1) {

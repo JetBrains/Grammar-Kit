@@ -12,6 +12,7 @@ import com.intellij.util.IncorrectOperationException;
 import org.intellij.grammar.psi.BnfFile;
 import org.intellij.grammar.psi.BnfReferenceOrToken;
 import org.intellij.grammar.psi.BnfRule;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -25,8 +26,7 @@ public abstract class BnfRefOrTokenImpl extends BnfExpressionImpl implements Bnf
     super(elementType);
   }
 
-  @Nullable
-  public BnfRule resolveRule() {
+  public @Nullable BnfRule resolveRule() {
     PsiFile file = getContainingFile();
     return file instanceof BnfFile ? ((BnfFile)file).getRule(GrammarUtil.getIdText(getId())) : null;
   }
@@ -37,7 +37,7 @@ public abstract class BnfRefOrTokenImpl extends BnfExpressionImpl implements Bnf
     TextRange range = TextRange.create(delta, getTextLength() - delta);
     return new BnfReferenceImpl<BnfReferenceOrToken>(this, range) {
       @Override
-      public PsiElement handleElementRename(String newElementName) throws IncorrectOperationException {
+      public PsiElement handleElementRename(@NotNull String newElementName) throws IncorrectOperationException {
         myElement.getId().replace(BnfElementFactory.createLeafFromText(getElement().getProject(), newElementName));
         return myElement;
       }

@@ -32,20 +32,14 @@ public class JavaRefHelper {
     if (parent instanceof JFlexRule) {
       return getRuleReferences(o);
     }
-    //else if (parent instanceof JFlexUserCodeSection) {
-    //  return PsiReference.EMPTY_ARRAY;
-    //}
-    //else if (parent instanceof JFlexOption) {
-    //  return PsiReference.EMPTY_ARRAY;
-    //}
+    // JFlexUserCodeSection, JFlexOption, etc.
     return PsiReference.EMPTY_ARRAY;
   }
 
-  private static final Pattern RETURN_PAT = Pattern.compile("return\\s+([^;\\}]+)");
-  private static final Pattern YYBEGIN_PAT = Pattern.compile("yybegin\\s*\\(\\s*([^\\)]+)\\)");
+  private static final Pattern RETURN_PAT = Pattern.compile("return\\s+([^;}]+)");
+  private static final Pattern YYBEGIN_PAT = Pattern.compile("yybegin\\s*\\(\\s*([^)]+)\\)");
 
-  @NotNull
-  private static PsiReference[] getRuleReferences(@NotNull JFlexJavaCode o) {
+  private static @NotNull PsiReference[] getRuleReferences(@NotNull JFlexJavaCode o) {
     String text = o.getText();
     List<PsiReference> list = new SmartList<>();
     {
@@ -62,17 +56,16 @@ public class JavaRefHelper {
         ContainerUtil.addAll(list, wrapJavaReferences(o, matcher.start(1), javaFile, refText));
       }
     }
-    return list.isEmpty() ? PsiReference.EMPTY_ARRAY : list.toArray(new PsiReference[list.size()]);
+    return list.isEmpty() ? PsiReference.EMPTY_ARRAY : list.toArray(PsiReference.EMPTY_ARRAY);
   }
 
-  @NotNull
-  public static PsiReference[] getReferences(@NotNull JFlexJavaType o) {
+  public static @NotNull PsiReference[] getReferences(@NotNull JFlexJavaType o) {
     String refText = o.getText();
     PsiFile javaFile = createJavaFileForExpr(refText + " val", o);
     return wrapJavaReferences(o, 0, javaFile, refText);
   }
 
-  private static PsiReference[] wrapJavaReferences(@NotNull final PsiElement o, int javaOffset, PsiFile javaFile, String targetText) {
+  private static PsiReference[] wrapJavaReferences(@NotNull PsiElement o, int javaOffset, PsiFile javaFile, String targetText) {
     int start = javaFile.getText().lastIndexOf(targetText);
     int end = start + targetText.length();
 
@@ -80,37 +73,34 @@ public class JavaRefHelper {
     for (PsiElement e : SyntaxTraverser.psiTraverser(javaFile).traverse(TreeTraversal.LEAVES_BFS)) {
       TextRange r = e.getTextRange();
       if (!r.intersects(start, end)) continue;
-      final PsiReference ref = javaFile.findReferenceAt(r.getStartOffset());
+      PsiReference ref = javaFile.findReferenceAt(r.getStartOffset());
       if (ref != null) {
         TextRange rr = ref.getRangeInElement();
         TextRange er = ref.getElement().getTextRange();
-        list.add(new PsiReferenceBase<PsiElement>(o, rr.shiftRight(javaOffset + er.getStartOffset() - start)) {
-          @Nullable
+        list.add(new PsiReferenceBase<>(o, rr.shiftRight(javaOffset + er.getStartOffset() - start)) {
           @Override
-          public PsiElement resolve() {
+          public @Nullable PsiElement resolve() {
             return ref.resolve();
           }
 
           @Override
-          public PsiElement handleElementRename(String newElementName) throws IncorrectOperationException {
+          public PsiElement handleElementRename(@NotNull String newElementName) throws IncorrectOperationException {
             PsiElement e = getElement();
             String text = StringUtil.replaceSubstring(e.getText(), getRangeInElement(), newElementName);
             return e.replace(JFlexPsiElementFactory.createJavaTypeFromText(e.getProject(), text));
           }
 
-          @NotNull
           @Override
-          public Object[] getVariants() {
+          public Object @NotNull [] getVariants() {
             return ArrayUtil.EMPTY_OBJECT_ARRAY;
           }
         });
       }
     }
-    return list.isEmpty() ? PsiReference.EMPTY_ARRAY : list.toArray(new PsiReference[list.size()]);
+    return list.isEmpty() ? PsiReference.EMPTY_ARRAY : list.toArray(PsiReference.EMPTY_ARRAY);
   }
 
-  @NotNull
-  public static PsiFile createJavaFileForExpr(String text, PsiElement context) {
+  public static @NotNull PsiFile createJavaFileForExpr(String text, PsiElement context) {
     JFlexJavaCode userCode = SyntaxTraverser.psiTraverser(context.getContainingFile()).filter(JFlexJavaCode.class).first();
     String imports = userCode == null || !(userCode.getParent() instanceof JFlexUserCodeSection) ? "" : userCode.getText();
 

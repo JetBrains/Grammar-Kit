@@ -30,10 +30,9 @@ import java.util.List;
  * @author gregsh
  */
 public class BnfStructureViewFactory implements PsiStructureViewFactory {
-  public StructureViewBuilder getStructureViewBuilder(final PsiFile psiFile) {
+  public StructureViewBuilder getStructureViewBuilder(@NotNull PsiFile psiFile) {
     return new TreeBasedStructureViewBuilder() {
-      @NotNull
-      public StructureViewModel createStructureViewModel(@Nullable Editor editor) {
+      public @NotNull StructureViewModel createStructureViewModel(@Nullable Editor editor) {
         return new MyModel(psiFile);
       }
 
@@ -59,7 +58,7 @@ public class BnfStructureViewFactory implements PsiStructureViewFactory {
 
     @Override
     public boolean isAlwaysLeaf(StructureViewTreeElement element) {
-      final Object value = element.getValue();
+      Object value = element.getValue();
       return value instanceof BnfRule || value instanceof BnfAttr;
     }
 
@@ -80,15 +79,13 @@ public class BnfStructureViewFactory implements PsiStructureViewFactory {
       super(element);
     }
 
-    @NotNull
     @Override
-    public String getAlphaSortKey() {
+    public @NotNull String getAlphaSortKey() {
       return getPresentableText();
     }
 
-    @NotNull
     @Override
-    public Collection<StructureViewTreeElement> getChildrenBase() {
+    public @NotNull Collection<StructureViewTreeElement> getChildrenBase() {
       PsiElement element = getElement();
       if (element instanceof BnfRule
           || element instanceof BnfAttr) {
@@ -111,9 +108,8 @@ public class BnfStructureViewFactory implements PsiStructureViewFactory {
       return result;
     }
 
-    @NotNull
     @Override
-    public String getPresentableText() {
+    public @NotNull String getPresentableText() {
       PsiElement element = getElement();
       if (element instanceof BnfRule) {
         return StringUtil.notNullize(((PsiNamedElement)element).getName());
@@ -123,7 +119,7 @@ public class BnfStructureViewFactory implements PsiStructureViewFactory {
       }
       else if (element instanceof BnfAttrs) {
         List<BnfAttr> attrList = ((BnfAttrs)element).getAttrList();
-        final BnfAttr firstAttr = ContainerUtil.getFirstItem(attrList);
+        BnfAttr firstAttr = ContainerUtil.getFirstItem(attrList);
         if (firstAttr == null) return "Attributes { <empty> }";
         String suffix = attrList.size() > 1? " & " + attrList.size()+" more..." : " ";
         return "Attributes { " + getAttrDisplayName(firstAttr) + suffix+ "}";
@@ -135,8 +131,8 @@ public class BnfStructureViewFactory implements PsiStructureViewFactory {
     }
 
     private static String getAttrDisplayName(BnfAttr attr) {
-      final BnfAttrPattern attrPattern = attr.getAttrPattern();
-      final BnfExpression attrValue = attr.getExpression();
+      BnfAttrPattern attrPattern = attr.getAttrPattern();
+      BnfExpression attrValue = attr.getExpression();
       String attrValueText = attrValue == null? "" : attrValue instanceof BnfValueList? "[ ... ]" : attrValue.getText();
       return attr.getName() + (attrPattern == null ? "" : attrPattern.getText()) + " = " + attrValueText;
     }

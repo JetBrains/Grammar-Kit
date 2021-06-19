@@ -14,8 +14,7 @@ import java.util.Locale;
 public enum Case {
   LOWER, UPPER, AS_IS, CAMEL;
 
-  @NotNull
-  public String apply(@NotNull String s) {
+  public @NotNull String apply(@NotNull String s) {
     if (s.isEmpty()) return s;
     switch (this) {
       case LOWER:

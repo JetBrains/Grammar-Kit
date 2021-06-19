@@ -16,9 +16,8 @@ import org.jetbrains.annotations.NotNull;
  * Time: 13:25
  */
 public class BnfSyntaxHighlighterFactory extends SyntaxHighlighterFactory {
-  @NotNull
   @Override
-  public SyntaxHighlighter getSyntaxHighlighter(Project project, VirtualFile virtualFile) {
+  public @NotNull SyntaxHighlighter getSyntaxHighlighter(Project project, VirtualFile virtualFile) {
     return new BnfSyntaxHighlighter();
   }
 }

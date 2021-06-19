@@ -13,9 +13,8 @@ import org.jetbrains.annotations.NotNull;
  * @author gregsh
  */
 public class BnfSpellCheckingStrategy extends SpellcheckingStrategy {
-  @NotNull
   @Override
-  public Tokenizer getTokenizer(PsiElement element) {
+  public @NotNull Tokenizer<?> getTokenizer(PsiElement element) {
     return super.getTokenizer(element);
   }
 }

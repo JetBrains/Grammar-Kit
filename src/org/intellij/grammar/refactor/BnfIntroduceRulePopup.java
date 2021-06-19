@@ -73,14 +73,14 @@ public class BnfIntroduceRulePopup extends InplaceVariableIntroducer<BnfExpressi
   }
 
   public void perform(boolean generatePrivate) {
-    final Runnable runnable = () -> {
-      final DocumentEx document = (DocumentEx) myEditor.getDocument();
+    Runnable runnable = () -> {
+      DocumentEx document = (DocumentEx) myEditor.getDocument();
 
       int exprOffset = myExprMarker.getStartOffset();
-      final int lineOffset = getLineOffset(document, exprOffset);
+      int lineOffset = getLineOffset(document, exprOffset);
       if (generatePrivate) {
-        final Collection<RangeMarker> leftGreedyMarker = new ArrayList<>();
-        final Collection<RangeMarker> emptyMarkers = new ArrayList<>();
+        Collection<RangeMarker> leftGreedyMarker = new ArrayList<>();
+        Collection<RangeMarker> emptyMarkers = new ArrayList<>();
         for (RangeHighlighter rangeHighlighter : myEditor.getMarkupModel().getAllHighlighters()) {
           collectRangeMarker(rangeHighlighter, lineOffset, leftGreedyMarker, emptyMarkers);
         }
@@ -106,10 +106,11 @@ public class BnfIntroduceRulePopup extends InplaceVariableIntroducer<BnfExpressi
       }
       PsiDocumentManager.getInstance(myProject).commitDocument(document);
     };
-    final LookupImpl lookup = (LookupImpl) LookupManager.getActiveLookup(myEditor);
+    LookupImpl lookup = (LookupImpl) LookupManager.getActiveLookup(myEditor);
     if (lookup != null) {
       lookup.performGuardedChange(runnable);
-    } else {
+    }
+    else {
       runnable.run();
     }
   }
@@ -136,7 +137,7 @@ public class BnfIntroduceRulePopup extends InplaceVariableIntroducer<BnfExpressi
     }
   }
 
-  private static int getLineOffset(Document document, final int offset) {
+  private static int getLineOffset(Document document, int offset) {
     return 0 <= offset && offset < document.getTextLength()
         ? document.getLineStartOffset(document.getLineNumber(offset))
         : 0;

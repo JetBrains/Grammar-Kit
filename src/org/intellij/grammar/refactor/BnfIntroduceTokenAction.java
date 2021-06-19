@@ -28,7 +28,7 @@ public class BnfIntroduceTokenAction extends BasePlatformRefactoringAction {
     return file instanceof BnfFile;
   }
 
-  protected boolean isEnabledOnElements(@NotNull PsiElement[] elements) {
+  protected boolean isEnabledOnElements(PsiElement @NotNull [] elements) {
     return false;
   }
 

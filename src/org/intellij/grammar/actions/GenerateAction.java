@@ -72,8 +72,7 @@ public class GenerateAction extends AnAction {
     doGenerate(project, files);
   }
 
-  @NotNull
-  private static JBIterable<VirtualFile> getFiles(@NotNull AnActionEvent e) {
+  private static @NotNull JBIterable<VirtualFile> getFiles(@NotNull AnActionEvent e) {
     Project project = e.getProject();
     JBIterable<VirtualFile> files = JBIterable.of(e.getData(LangDataKeys.VIRTUAL_FILE_ARRAY));
     if (project == null || files.isEmpty()) return JBIterable.empty();

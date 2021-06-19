@@ -60,18 +60,15 @@ public class ParserGeneratorUtil {
   enum ConsumeType {
     FAST, SMART, DEFAULT;
 
-    @NotNull
-    public String getMethodSuffix() {
+    public @NotNull String getMethodSuffix() {
       return this == DEFAULT ? "" : StringUtil.capitalize(name().toLowerCase());
     }
 
-    @NotNull
-    public String getMethodName() {
+    public @NotNull String getMethodName() {
       return KnownAttribute.CONSUME_TOKEN_METHOD.getDefaultValue() + getMethodSuffix();
     }
 
-    @NotNull
-    public static ConsumeType forRule(@NotNull BnfRule rule) {
+    public static @NotNull ConsumeType forRule(@NotNull BnfRule rule) {
       String value = getAttribute(rule, KnownAttribute.CONSUME_TOKEN_METHOD);
       for (ConsumeType method : values()) {
         if (StringUtil.equalsIgnoreCase(value, method.name())) return method;
@@ -79,30 +76,26 @@ public class ParserGeneratorUtil {
       return ObjectUtils.chooseNotNull(forMethod(value), DEFAULT);
     }
 
-    @Nullable
-    public static ConsumeType forMethod(String value) {
+    public static @Nullable ConsumeType forMethod(String value) {
       if ("consumeTokenFast".equals(value)) return FAST;
       if ("consumeTokenSmart".equals(value)) return SMART;
       if ("consumeToken".equals(value)) return DEFAULT;
       return null;
     }
 
-    @Nullable
-    public static ConsumeType min(@Nullable ConsumeType a, @Nullable ConsumeType b) {
+    public static @Nullable ConsumeType min(@Nullable ConsumeType a, @Nullable ConsumeType b) {
       if (a == null || b == null) return null;
       return a.compareTo(b) < 0 ? a : b;
     }
 
-    @Nullable
-    public static ConsumeType max(@Nullable ConsumeType a, @Nullable ConsumeType b) {
+    public static @Nullable ConsumeType max(@Nullable ConsumeType a, @Nullable ConsumeType b) {
       if (a == null) return b;
       if (b == null) return a;
       return a.compareTo(b) < 0 ? b : a;
     }
   }
 
-  @NotNull
-  public static <T extends Enum<T>> T enumFromString(@Nullable String value, @NotNull T def) {
+  public static @NotNull <T extends Enum<T>> T enumFromString(@Nullable String value, @NotNull T def) {
     try {
       return value == null ? def : Enum.valueOf(def.getDeclaringClass(), Case.UPPER.apply(value).replace('-', '_'));
     }
@@ -137,8 +130,7 @@ public class ParserGeneratorUtil {
     return getAttribute(rule, attribute, null);
   }
 
-  @Nullable
-  public static <T> BnfAttr findAttribute(@NotNull BnfRule rule, @NotNull KnownAttribute<T> attribute) {
+  public static @Nullable <T> BnfAttr findAttribute(@NotNull BnfRule rule, @NotNull KnownAttribute<T> attribute) {
     return ((BnfFile)rule.getContainingFile()).findAttribute(rule, attribute, null);
   }
 
@@ -165,13 +157,11 @@ public class ParserGeneratorUtil {
     return null;
   }
 
-  @Nullable
-  public static String getLiteralValue(BnfStringLiteralExpression child) {
+  public static @Nullable String getLiteralValue(BnfStringLiteralExpression child) {
     return getLiteralValue((BnfLiteralExpression)child);
   }
 
-  @Nullable
-  public static <T> T getLiteralValue(BnfLiteralExpression child) {
+  public static @Nullable <T> T getLiteralValue(BnfLiteralExpression child) {
     if (child == null) return null;
     PsiElement literal = PsiTreeUtil.getDeepestFirst(child);
     String text = child.getText();
@@ -234,7 +224,7 @@ public class ParserGeneratorUtil {
       return BnfTypes.BNF_OP_OPT;
     }
     else if (tree instanceof BnfQuantified) {
-      final BnfQuantifier quantifier = ((BnfQuantified)tree).getQuantifier();
+      BnfQuantifier quantifier = ((BnfQuantified)tree).getQuantifier();
       return PsiTreeUtil.getDeepestFirst(quantifier).getNode().getElementType();
     }
     else if (tree instanceof BnfPredicate) {
@@ -258,8 +248,7 @@ public class ParserGeneratorUtil {
     return PsiTreeUtil.getChildrenOfTypeAsList(node, BnfExpression.class);
   }
 
-  @NotNull
-  private static String getBaseName(@NotNull String name) {
+  private static @NotNull String getBaseName(@NotNull String name) {
     return toIdentifier(name, null, Case.AS_IS);
   }
 
@@ -268,13 +257,11 @@ public class ParserGeneratorUtil {
     return JAVA_RESERVED.contains(name) ? name + RESERVED_SUFFIX : name;
   }
 
-  @NotNull
-  static String getWrapperParserConstantName(@NotNull String nextName) {
+  static @NotNull String getWrapperParserConstantName(@NotNull String nextName) {
     return getBaseName(nextName) + "_parser_";
   }
 
-  @NotNull
-  static String getWrapperParserMetaMethodName(@NotNull String nextName) {
+  static @NotNull String getWrapperParserMetaMethodName(@NotNull String nextName) {
     return getBaseName(nextName) + RESERVED_SUFFIX;
   }
 
@@ -282,13 +269,11 @@ public class ParserGeneratorUtil {
     return StringUtil.trimEnd(funcName, RESERVED_SUFFIX) + "_" + i;
   }
 
-  @NotNull
-  public static String getGetterName(@NotNull String text) {
+  public static @NotNull String getGetterName(@NotNull String text) {
     return toIdentifier(text, NameFormat.from("get"), Case.CAMEL);
   }
 
-  @NotNull
-  static String getTokenSetConstantName(@NotNull String nextName) {
+  static @NotNull String getTokenSetConstantName(@NotNull String nextName) {
     return toIdentifier(nextName, null, Case.UPPER) + "_TOKENS";
   }
 
@@ -305,8 +290,7 @@ public class ParserGeneratorUtil {
   }
 
   @TestOnly
-  @NotNull
-  public static String toIdentifier(@NotNull String text, @Nullable NameFormat format, @NotNull Case cas) {
+  public static @NotNull String toIdentifier(@NotNull String text, @Nullable NameFormat format, @NotNull Case cas) {
     if (text.isEmpty()) return "";
     String fixed = text.replaceAll("[^:\\p{javaJavaIdentifierPart}]", "_");
     boolean allCaps = Case.UPPER.apply(fixed).equals(fixed);
@@ -323,20 +307,17 @@ public class ParserGeneratorUtil {
     return format == null ? sb.toString() : format.apply(sb.toString());
   }
 
-  @NotNull
-  public static NameFormat getPsiClassFormat(BnfFile file) {
+  public static @NotNull NameFormat getPsiClassFormat(BnfFile file) {
     return NameFormat.from(getRootAttribute(file, KnownAttribute.PSI_CLASS_PREFIX));
   }
 
-  @NotNull
-  public static NameFormat getPsiImplClassFormat(BnfFile file) {
+  public static @NotNull NameFormat getPsiImplClassFormat(BnfFile file) {
     String prefix = getRootAttribute(file, KnownAttribute.PSI_CLASS_PREFIX);
     String suffix = getRootAttribute(file, KnownAttribute.PSI_IMPL_CLASS_SUFFIX);
     return NameFormat.from(prefix + "/" + StringUtil.notNullize(suffix));
   }
 
-  @NotNull
-  public static String getRulePsiClassName(@NotNull BnfRule rule, @Nullable NameFormat format) {
+  public static @NotNull String getRulePsiClassName(@NotNull BnfRule rule, @Nullable NameFormat format) {
     return toIdentifier(rule.getName(), format, Case.CAMEL);
   }
 
@@ -350,11 +331,10 @@ public class ParserGeneratorUtil {
                      psiImplPackage + "." + getRulePsiClassName(rule, psiImplFormat));
   }
 
-  @NotNull
-  public static List<NavigatablePsiElement> findRuleImplMethods(@NotNull JavaHelper helper,
-                                                                @Nullable String psiImplUtilClass,
-                                                                @Nullable String methodName,
-                                                                @Nullable BnfRule rule) {
+  public static @NotNull List<NavigatablePsiElement> findRuleImplMethods(@NotNull JavaHelper helper,
+                                                                         @Nullable String psiImplUtilClass,
+                                                                         @Nullable String methodName,
+                                                                         @Nullable BnfRule rule) {
     if (rule == null) return Collections.emptyList();
     List<NavigatablePsiElement> methods = Collections.emptyList();
     String selectedSuperClass = null;
@@ -368,10 +348,9 @@ public class ParserGeneratorUtil {
     return filterOutShadowedRuleImplMethods(selectedSuperClass, methods, helper);
   }
 
-  @NotNull
-  private static List<NavigatablePsiElement> filterOutShadowedRuleImplMethods(String selectedClass,
-                                                                              List<NavigatablePsiElement> methods,
-                                                                              @NotNull JavaHelper helper) {
+  private static @NotNull List<NavigatablePsiElement> filterOutShadowedRuleImplMethods(String selectedClass,
+                                                                                       List<NavigatablePsiElement> methods,
+                                                                                       @NotNull JavaHelper helper) {
     if (methods.size() <= 1) return methods;
 
     // filter out less specific methods
@@ -403,8 +382,7 @@ public class ParserGeneratorUtil {
     return result;
   }
 
-  @NotNull
-  public static Set<String> getRuleClasses(@NotNull BnfRule rule) {
+  public static @NotNull Set<String> getRuleClasses(@NotNull BnfRule rule) {
     Set<String> result = new LinkedHashSet<>();
     BnfFile file = (BnfFile)rule.getContainingFile();
     BnfRule topSuper = getEffectiveSuperRule(file, rule);
@@ -422,8 +400,7 @@ public class ParserGeneratorUtil {
     return result;
   }
 
-  @NotNull
-  static JBIterable<BnfRule> getSuperRules(@NotNull BnfFile file, @Nullable BnfRule rule) {
+  static @NotNull JBIterable<BnfRule> getSuperRules(@NotNull BnfFile file, @Nullable BnfRule rule) {
     JBIterable<Object> result = JBIterable.generate(rule, new JBIterable.SFun<Object, Object>() {
       Set<BnfRule> visited;
 
@@ -445,13 +422,11 @@ public class ParserGeneratorUtil {
     return (JBIterable<BnfRule>)(JBIterable<?>)result;
   }
 
-  @Nullable
-  static BnfRule getEffectiveSuperRule(@NotNull BnfFile file, @Nullable BnfRule rule) {
+  static @Nullable BnfRule getEffectiveSuperRule(@NotNull BnfFile file, @Nullable BnfRule rule) {
     return getSuperRules(file, rule).last();
   }
 
-  @NotNull
-  static List<String> getSuperInterfaceNames(BnfFile file, BnfRule rule, NameFormat format) {
+  static @NotNull List<String> getSuperInterfaceNames(BnfFile file, BnfRule rule, NameFormat format) {
     List<String> strings = new ArrayList<>();
     List<String> topRuleImplements = Collections.emptyList();
     String topRuleClass = null;
@@ -482,14 +457,12 @@ public class ParserGeneratorUtil {
     return strings;
   }
 
-  @Nullable
-  public static String getRuleDisplayName(BnfRule rule, boolean force) {
+  public static @Nullable String getRuleDisplayName(BnfRule rule, boolean force) {
     String s = getRuleDisplayNameRaw(rule, force);
     return StringUtil.isEmpty(s) ? null : "<" + s + ">";
   }
 
-  @Nullable
-  private static String getRuleDisplayNameRaw(BnfRule rule, boolean force) {
+  private static @Nullable String getRuleDisplayNameRaw(BnfRule rule, boolean force) {
     String name = getAttribute(rule, KnownAttribute.NAME);
     BnfRule realRule = rule;
     if (name != null) {
@@ -589,13 +562,12 @@ public class ParserGeneratorUtil {
     return tokenText.substring(BnfConstants.REGEXP_PREFIX.length());
   }
 
-  @Nullable
-  static Collection<String> getTokenNames(@NotNull BnfFile file, @NotNull List<BnfExpression> expressions) {
+  static @Nullable Collection<String> getTokenNames(@NotNull BnfFile file, @NotNull List<BnfExpression> expressions) {
     return getTokenNames(file, expressions, -1);
   }
 
-  @Nullable("when some expression is not a token or total tokens count is less than or equals threshold")
-  static Collection<String> getTokenNames(@NotNull BnfFile file, @NotNull List<BnfExpression> expressions, int threshold) {
+  // null when some expression is not a token or total tokens count is less than or equals threshold
+  static @Nullable Collection<String> getTokenNames(@NotNull BnfFile file, @NotNull List<BnfExpression> expressions, int threshold) {
     Set<String> tokens = new LinkedHashSet<>();
     for (BnfExpression expression : expressions) {
       String token = getTokenName(file, expression);
@@ -635,9 +607,9 @@ public class ParserGeneratorUtil {
 
   static boolean hasAtLeastOneTokenChoice(@NotNull BnfFile file, @NotNull Collection<String> ownRuleNames) {
     for (String ruleName : ownRuleNames) {
-      final BnfRule rule = file.getRule(ruleName);
+      BnfRule rule = file.getRule(ruleName);
       if (rule == null) continue;
-      final BnfExpression expression = rule.getExpression();
+      BnfExpression expression = rule.getExpression();
       if (isTokenChoice(file, expression)) return true;
     }
     return false;
@@ -679,17 +651,17 @@ public class ParserGeneratorUtil {
     }
   }
 
-  public static Map<String, String> collectTokenPattern2Name(@NotNull final BnfFile file,
-                                                             final boolean createTokenIfMissing,
-                                                             @NotNull final Map<String, String> map,
+  public static Map<String, String> collectTokenPattern2Name(@NotNull BnfFile file,
+                                                             boolean createTokenIfMissing,
+                                                             @NotNull Map<String, String> map,
                                                              @Nullable Set<String> usedInGrammar) {
-    final Set<String> usedNames = usedInGrammar != null ? usedInGrammar : new LinkedHashSet<>();
-    final Map<String, String> origTokens = RuleGraphHelper.getTokenTextToNameMap(file);
-    final Pattern pattern = getAllTokenPattern(origTokens);
-    final int[] autoCount = {0};
-    final Set<String> origTokenNames = getTokenNameToTextMap(file).keySet();
+    Set<String> usedNames = usedInGrammar != null ? usedInGrammar : new LinkedHashSet<>();
+    Map<String, String> origTokens = RuleGraphHelper.getTokenTextToNameMap(file);
+    Pattern pattern = getAllTokenPattern(origTokens);
+    int[] autoCount = {0};
+    Set<String> origTokenNames = getTokenNameToTextMap(file).keySet();
 
-    BnfVisitor<Void> visitor = new BnfVisitor<Void>() {
+    BnfVisitor<Void> visitor = new BnfVisitor<>() {
 
       @Override
       public Void visitStringLiteralExpression(@NotNull BnfStringLiteralExpression o) {
@@ -805,14 +777,12 @@ public class ParserGeneratorUtil {
     }
   }
 
-  @Nullable
-  public static String quote(@Nullable String text) {
+  public static @Nullable String quote(@Nullable String text) {
     if (text == null) return null;
     return "\"" + text + "\"";
   }
 
-  @Nullable
-  public static Pattern compilePattern(String text) {
+  public static @Nullable Pattern compilePattern(String text) {
     try {
       return Pattern.compile(text);
     }
@@ -833,8 +803,7 @@ public class ParserGeneratorUtil {
     return false;
   }
 
-  @Nullable
-  public static Pattern getAllTokenPattern(Map<String, String> tokens) {
+  public static @Nullable Pattern getAllTokenPattern(Map<String, String> tokens) {
     StringBuilder sb = new StringBuilder();
     for (String pattern : tokens.keySet()) {
       if (!isRegexpToken(pattern)) continue;
@@ -933,8 +902,7 @@ public class ParserGeneratorUtil {
     return buffer.toString();
   }
 
-  @NotNull
-  public static String getThrowsString(List<String> exceptionList, NameShortener shortener) {
+  public static @NotNull String getThrowsString(List<String> exceptionList, NameShortener shortener) {
     if (exceptionList.isEmpty()) return "";
 
     List<String> shortened = ContainerUtil.map(exceptionList, shortener::shorten);
@@ -946,7 +914,7 @@ public class ParserGeneratorUtil {
   }
 
   public static class NameFormat {
-    final static NameFormat EMPTY = new NameFormat("");
+    static final NameFormat EMPTY = new NameFormat("");
 
     final String prefix;
     final String suffix;
@@ -975,8 +943,7 @@ public class ParserGeneratorUtil {
 
   }
 
-  @NotNull
-  static String staticStarImport(@NotNull String fqn) {
+  static @NotNull String staticStarImport(@NotNull String fqn) {
     return "static " + fqn + ".*";
   }
 
@@ -996,8 +963,7 @@ public class ParserGeneratorUtil {
     return (TObjectHashingStrategy<T>)TEXT_STRATEGY;
   }
 
-  @NotNull
-  static <K extends Comparable<? super K>, V> Map<K, V> take(@NotNull Map<K, V> map) {
+  static @NotNull <K extends Comparable<? super K>, V> Map<K, V> take(@NotNull Map<K, V> map) {
     Map<K, V> result = new TreeMap<>(map);
     map.clear();
     return result;

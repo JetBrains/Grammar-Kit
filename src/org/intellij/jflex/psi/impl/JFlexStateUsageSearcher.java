@@ -37,7 +37,6 @@ public class JFlexStateUsageSearcher extends QueryExecutorBase<PsiReference, Ref
       PsiElement context = containingFile == null ? null : containingFile.getContext();
       if (!(context instanceof JFlexJavaCode)) return;
       String name = ((PsiField)element).getName();
-      if (name == null) return;
       PsiFile file = context.getContainingFile();
       JFlexStateDefinition state =
         SyntaxTraverser.psiTraverser(

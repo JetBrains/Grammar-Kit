@@ -67,18 +67,15 @@ public class RuleMethodsHelper {
     }
   }
 
-  @NotNull
-  public Collection<MethodInfo> getFor(@NotNull BnfRule rule) {
+  public @NotNull Collection<MethodInfo> getFor(@NotNull BnfRule rule) {
     return myMethods.get(rule).second;
   }
 
-  @Nullable
-  public MethodInfo getMethodInfo(@NotNull BnfRule rule, String name) {
+  public @Nullable MethodInfo getMethodInfo(@NotNull BnfRule rule, String name) {
     return myMethods.get(rule).first.get(name);
   }
 
-  @Nullable
-  public Collection<String> getMethodNames(@NotNull BnfRule rule) {
+  public @Nullable Collection<String> getMethodNames(@NotNull BnfRule rule) {
     return myMethods.get(rule).first.keySet();
   }
 
@@ -146,8 +143,7 @@ public class RuleMethodsHelper {
     myMethods.put(rule, Pair.create(basicMethods, result));
   }
 
-  @Nullable
-  private String getRuleOrTokenNameForPsi(@NotNull PsiElement tree, @NotNull RuleGraphHelper.Cardinality type) {
+  private @Nullable String getRuleOrTokenNameForPsi(@NotNull PsiElement tree, @NotNull RuleGraphHelper.Cardinality type) {
     String result;
 
     if (!(tree instanceof BnfRule)) {
@@ -196,8 +192,7 @@ public class RuleMethodsHelper {
       return name.compareTo(o.name);
     }
 
-    @NotNull
-    public String generateGetterName() {
+    public @NotNull String generateGetterName() {
       boolean many = cardinality.many();
 
       boolean renamed = !Objects.equals(name, originalName);

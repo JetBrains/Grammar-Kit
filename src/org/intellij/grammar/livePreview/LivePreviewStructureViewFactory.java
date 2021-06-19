@@ -39,13 +39,11 @@ import static org.intellij.grammar.generator.ParserGeneratorUtil.getRulePsiClass
  */
 public class LivePreviewStructureViewFactory implements PsiStructureViewFactory {
 
-  @Nullable
-  public StructureViewBuilder getStructureViewBuilder(final PsiFile psiFile) {
+  public @Nullable StructureViewBuilder getStructureViewBuilder(@NotNull PsiFile psiFile) {
     if (!(psiFile.getLanguage() instanceof LivePreviewLanguage)) return null;
     return new TreeBasedStructureViewBuilder() {
-      @NotNull
       @Override
-      public StructureViewModel createStructureViewModel(@Nullable Editor editor) {
+      public @NotNull StructureViewModel createStructureViewModel(@Nullable Editor editor) {
         return new MyModel(psiFile);
       }
 
@@ -85,8 +83,7 @@ public class LivePreviewStructureViewFactory implements PsiStructureViewFactory 
       super(element);
     }
 
-    @NotNull
-    public Collection<StructureViewTreeElement> getChildrenBase() {
+    public @NotNull Collection<StructureViewTreeElement> getChildrenBase() {
       PsiElement element = getElement();
       if (element == null || element instanceof LeafPsiElement) return Collections.emptyList();
       ArrayList<StructureViewTreeElement> result = new ArrayList<>();
@@ -98,13 +95,12 @@ public class LivePreviewStructureViewFactory implements PsiStructureViewFactory 
     }
 
     @Override
-    public String getAlphaSortKey() {
+    public @NotNull String getAlphaSortKey() {
       return getPresentableText();
     }
 
-    @NotNull
     @Override
-    public String getPresentableText() {
+    public @NotNull String getPresentableText() {
       PsiElement element = getElement();
       ASTNode node = element != null ? element.getNode() : null;
       IElementType elementType = node != null ? node.getElementType() : null;
@@ -125,15 +121,13 @@ public class LivePreviewStructureViewFactory implements PsiStructureViewFactory 
       return elementType + "";
     }
 
-    @Nullable
     @Override
-    public String getLocationString() {
+    public @Nullable String getLocationString() {
       return null;
     }
 
-    @Nullable
     @Override
-    public Icon getIcon(boolean unused) {
+    public @Nullable Icon getIcon(boolean unused) {
       PsiElement element = getElement();
       if (element instanceof PsiErrorElement) {
         return null; //AllIcons.General.Error;
@@ -149,9 +143,8 @@ public class LivePreviewStructureViewFactory implements PsiStructureViewFactory 
       return null;
     }
 
-    @Nullable
     @Override
-    public TextAttributesKey getTextAttributesKey() {
+    public @Nullable TextAttributesKey getTextAttributesKey() {
       return getElement() instanceof PsiErrorElement? CodeInsightColors.ERRORS_ATTRIBUTES : null;
     }
   }

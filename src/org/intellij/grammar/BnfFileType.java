@@ -23,21 +23,18 @@ public class BnfFileType extends LanguageFileType {
     super(BnfLanguage.INSTANCE);
   }
 
-  @NotNull
   @Override
-  public String getName() {
+  public @NotNull String getName() {
     return "BNF";
   }
 
-  @NotNull
   @Override
-  public String getDescription() {
+  public @NotNull String getDescription() {
     return BnfConstants.BNF_DISPLAY_NAME;
   }
 
-  @NotNull
   @Override
-  public String getDefaultExtension() {
+  public @NotNull String getDefaultExtension() {
     return "bnf";
   }
 

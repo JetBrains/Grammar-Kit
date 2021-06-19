@@ -56,14 +56,14 @@ public class BnfGenerateParserUtilAction extends AnAction {
 
     Project project = file.getProject();
     BnfFile bnfFile = (BnfFile) file;
-    final String qualifiedName = createClass(
+    String qualifiedName = createClass(
         bnfFile, "Create Parser Util Class", BnfConstants.GPUB_CLASS,
         getGrammarName(bnfFile) + "ParserUtil",
         getGrammarPackage(bnfFile));
     if (qualifiedName == null) return;
 
-    final int anchorOffset;
-    final String text;
+    int anchorOffset;
+    String text;
     String definition = "\n  " + KnownAttribute.PARSER_UTIL_CLASS.getName() + "=\"" + qualifiedName + "\"";
     BnfAttr attrParser = bnfFile.findAttribute(null, KnownAttribute.PARSER_CLASS, null);
     if (attrParser == null) {
@@ -81,7 +81,7 @@ public class BnfGenerateParserUtilAction extends AnAction {
       anchorOffset = attrParser.getTextRange().getEndOffset();
       text = definition;
     }
-    final Document document = PsiDocumentManager.getInstance(project).getDocument(bnfFile);
+    Document document = PsiDocumentManager.getInstance(project).getDocument(bnfFile);
     if (document == null) return;
     WriteCommandAction.writeCommandAction(project, file)
       .run(() -> {
@@ -107,8 +107,8 @@ public class BnfGenerateParserUtilAction extends AnAction {
   }
 
   public static String createClass(@NotNull PsiFile origin,
-                                   @NotNull final String title,
-                                   @Nullable final String baseClass,
+                                   @NotNull String title,
+                                   @Nullable String baseClass,
                                    @NotNull String suggestedName,
                                    @NotNull String suggestedPackage) {
     Project project = origin.getProject();
@@ -116,8 +116,8 @@ public class BnfGenerateParserUtilAction extends AnAction {
     CreateClassDialog dialog = new CreateClassDialog(project, title, suggestedName, suggestedPackage, CreateClassKind.CLASS, true, module);
     if (!dialog.showAndGet()) return null;
 
-    final String className = dialog.getClassName();
-    final PsiDirectory targetDirectory = dialog.getTargetDirectory();
+    String className = dialog.getClassName();
+    PsiDirectory targetDirectory = dialog.getTargetDirectory();
     return createClass(className, targetDirectory, baseClass, title, null);
   }
 
@@ -150,7 +150,7 @@ public class BnfGenerateParserUtilAction extends AnAction {
             consumer.consume(resultClass);
           }
         }
-        catch (final IncorrectOperationException e) {
+        catch (IncorrectOperationException e) {
           ApplicationManager.getApplication().invokeLater(
             () -> Messages.showErrorDialog(project, "Unable to create class " + className + "\n" + e.getLocalizedMessage(), title));
         }

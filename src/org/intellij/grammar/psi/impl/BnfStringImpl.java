@@ -45,8 +45,7 @@ public abstract class BnfStringImpl extends BnfExpressionImpl implements BnfStri
     });
   }
 
-  @NotNull
-  public static PsiReference createPatternReference(@NotNull BnfStringImpl e) {
+  public static @NotNull PsiReference createPatternReference(@NotNull BnfStringImpl e) {
     PsiReference ref = e.getUserData(REF_KEY);
     if (ref == null) {
       e.putUserData(REF_KEY, ref = new MyPatternReference(e));
@@ -54,8 +53,7 @@ public abstract class BnfStringImpl extends BnfExpressionImpl implements BnfStri
     return ref;
   }
 
-  @NotNull
-  public static PsiReference createRuleReference(@NotNull BnfStringImpl e) {
+  public static @NotNull PsiReference createRuleReference(@NotNull BnfStringImpl e) {
     PsiReference ref = e.getUserData(REF_KEY);
     if (ref == null) {
       e.putUserData(REF_KEY, ref = new MyRuleReference(e));
@@ -72,8 +70,7 @@ public abstract class BnfStringImpl extends BnfExpressionImpl implements BnfStri
     return null;
   }
 
-  @NotNull
-  public PsiReference[] getReferences() {
+  public PsiReference @NotNull [] getReferences() {
     // performance: do not run injectors
     // return PsiReferenceService.getService().getContributedReferences(this);
     List<PsiReference> result = new SmartList<>();
@@ -97,20 +94,18 @@ public abstract class BnfStringImpl extends BnfExpressionImpl implements BnfStri
   }
 
   @Override
-  public BnfStringImpl updateText(@NotNull final String text) {
-    final BnfExpression expression = BnfElementFactory.createExpressionFromText(getProject(), text);
+  public BnfStringImpl updateText(@NotNull String text) {
+    BnfExpression expression = BnfElementFactory.createExpressionFromText(getProject(), text);
     assert expression instanceof BnfStringImpl : text + "-->" + expression;
     return (BnfStringImpl)this.replace(expression);
   }
 
-  @NotNull
   @Override
-  public LiteralTextEscaper<? extends PsiLanguageInjectionHost> createLiteralTextEscaper() {
+  public @NotNull LiteralTextEscaper<? extends PsiLanguageInjectionHost> createLiteralTextEscaper() {
     return new BnfStringLiteralEscaper(this);
   }
 
-  @Nullable
-  private static Pattern getPattern(BnfLiteralExpression expression) {
+  private static @Nullable Pattern getPattern(BnfLiteralExpression expression) {
     return ParserGeneratorUtil.compilePattern(GrammarUtil.unquote(expression.getText()));
   }
 
@@ -119,9 +114,8 @@ public abstract class BnfStringImpl extends BnfExpressionImpl implements BnfStri
       super(element, null);
     }
 
-    @NotNull
     @Override
-    public TextRange getRangeInElement() {
+    public @NotNull TextRange getRangeInElement() {
       return BnfStringManipulator.getStringTokenRange(getElement());
     }
 
@@ -142,9 +136,8 @@ public abstract class BnfStringImpl extends BnfExpressionImpl implements BnfStri
       super(element);
     }
 
-    @NotNull
     @Override
-    public TextRange getRangeInElement() {
+    public @NotNull TextRange getRangeInElement() {
       return BnfStringManipulator.getStringTokenRange(getElement());
     }
 
@@ -153,17 +146,15 @@ public abstract class BnfStringImpl extends BnfExpressionImpl implements BnfStri
       return matchesElement(getElement(), element) && super.isReferenceTo(element);
     }
 
-    @NotNull
     @Override
-    public ResolveResult[] multiResolve(boolean b) {
+    public ResolveResult @NotNull [] multiResolve(boolean b) {
       return ResolveCache.getInstance(getElement().getProject()).resolveWithCaching(this, RESOLVER, false, b);
     }
 
-    @NotNull
-    public ResolveResult[] multiResolveInner() {
-      final Pattern pattern = getPattern(getElement());
+    public ResolveResult @NotNull [] multiResolveInner() {
+      Pattern pattern = getPattern(getElement());
       if (pattern == null) return ResolveResult.EMPTY_ARRAY;
-      final List<PsiElement> result = new ArrayList<>();
+      List<PsiElement> result = new ArrayList<>();
 
       BnfAttr thisAttr = Objects.requireNonNull(PsiTreeUtil.getParentOfType(getElement(), BnfAttr.class));
       BnfAttrs thisAttrs = Objects.requireNonNull(PsiTreeUtil.getParentOfType(thisAttr, BnfAttrs.class));
@@ -225,9 +216,8 @@ public abstract class BnfStringImpl extends BnfExpressionImpl implements BnfStri
       return myElement;
     }
 
-    @NotNull
     @Override
-    public Object[] getVariants() {
+    public Object @NotNull [] getVariants() {
       return ArrayUtil.EMPTY_OBJECT_ARRAY;
     }
   }
@@ -256,9 +246,8 @@ public abstract class BnfStringImpl extends BnfExpressionImpl implements BnfStri
       return myFuncName;
     }
 
-    @NotNull
     @Override
-    public PsiElement getNavigationElement() {
+    public @NotNull PsiElement getNavigationElement() {
       return myExpression;
     }
 

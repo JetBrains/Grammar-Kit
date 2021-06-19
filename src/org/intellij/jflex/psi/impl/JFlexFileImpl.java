@@ -19,9 +19,8 @@ public class JFlexFileImpl extends PsiFileBase implements JFlexFile {
     super(fileViewProvider, JFlexLanguage.INSTANCE);
   }
 
-  @NotNull
   @Override
-  public FileType getFileType() {
+  public @NotNull FileType getFileType() {
     return JFlexFileType.INSTANCE;
   }
 }

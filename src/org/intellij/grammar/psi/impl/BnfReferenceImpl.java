@@ -58,8 +58,7 @@ public class BnfReferenceImpl<T extends BnfExpression> extends PsiReferenceBase<
     return targetRule != null ? targetRule : resolveMethod();
   }
 
-  @Nullable
-  private PsiElement resolveMethod() {
+  private @Nullable PsiElement resolveMethod() {
     String referenceName = getRangeInElement().substring(myElement.getText());
     PsiElement parent = myElement.getParent();
     int paramCount = parent instanceof BnfSequence ? ((BnfSequence)parent).getExpressionList().size() - 1 :
@@ -76,9 +75,8 @@ public class BnfReferenceImpl<T extends BnfExpression> extends PsiReferenceBase<
     return null;
   }
 
-  @NotNull
   @Override
-  public String getUnresolvedMessagePattern() {
+  public @NotNull String getUnresolvedMessagePattern() {
     return GrammarUtil.isExternalReference(myElement) ?
            "Unresolved meta rule or method ''{0}''" :
            "Unresolved rule ''{0}''";
@@ -97,15 +95,13 @@ public class BnfReferenceImpl<T extends BnfExpression> extends PsiReferenceBase<
       return visitor.visitNamedElement(this);
     }
 
-    @NotNull
     @Override
-    public PsiElement getId() {
+    public @NotNull PsiElement getId() {
       return Objects.requireNonNull(getNameIdentifier());
     }
 
-    @NotNull
     @Override
-    public String getName() {
+    public @NotNull String getName() {
       return myName;
     }
 

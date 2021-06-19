@@ -33,21 +33,18 @@ public class BnfFindUsagesProvider implements FindUsagesProvider {
     return null;
   }
 
-  @NotNull
   @Override
-  public String getType(@NotNull PsiElement element) {
+  public @NotNull String getType(@NotNull PsiElement element) {
     return ElementDescriptionUtil.getElementDescription(element, UsageViewTypeLocation.INSTANCE);
   }
 
-  @NotNull
   @Override
-  public String getDescriptiveName(@NotNull PsiElement element) {
+  public @NotNull String getDescriptiveName(@NotNull PsiElement element) {
     return ElementDescriptionUtil.getElementDescription(element, UsageViewLongNameLocation.INSTANCE);
   }
 
-  @NotNull
   @Override
-  public String getNodeText(@NotNull PsiElement element, boolean useFullName) {
+  public @NotNull String getNodeText(@NotNull PsiElement element, boolean useFullName) {
     return ElementDescriptionUtil.getElementDescription(element, UsageViewNodeTextLocation.INSTANCE);
   }
 }

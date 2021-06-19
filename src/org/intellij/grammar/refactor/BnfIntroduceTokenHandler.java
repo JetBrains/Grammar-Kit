@@ -48,23 +48,23 @@ public class BnfIntroduceTokenHandler implements RefactoringActionHandler {
   public static final String REFACTORING_NAME = "Introduce Token";
 
   @Override
-  public void invoke(final @NotNull Project project, @NotNull PsiElement[] elements, DataContext dataContext) {
+  public void invoke(@NotNull Project project, PsiElement @NotNull [] elements, DataContext dataContext) {
     // do not support this case
   }
 
   @Override
-  public void invoke(@NotNull final Project project,
-                     final Editor editor,
-                     final PsiFile file,
+  public void invoke(@NotNull Project project,
+                     Editor editor,
+                     PsiFile file,
                      @Nullable DataContext dataContext) {
     if (!(file instanceof BnfFile)) return;
-    final BnfFile bnfFile = (BnfFile) file;
+    BnfFile bnfFile = (BnfFile) file;
 
-    final Map<String, String> tokenNameMap = RuleGraphHelper.getTokenNameToTextMap(bnfFile);
-    final Map<String, String> tokenTextMap = RuleGraphHelper.getTokenTextToNameMap(bnfFile);
+    Map<String, String> tokenNameMap = RuleGraphHelper.getTokenNameToTextMap(bnfFile);
+    Map<String, String> tokenTextMap = RuleGraphHelper.getTokenTextToNameMap(bnfFile);
 
-    final String tokenText;
-    final String tokenName;
+    String tokenText;
+    String tokenName;
     BnfExpression target = PsiTreeUtil.getParentOfType(file.findElementAt(editor.getCaretModel().getOffset()), BnfReferenceOrToken.class, BnfStringLiteralExpression.class);
     if (target instanceof BnfReferenceOrToken) {
       if (bnfFile.getRule(target.getText()) != null) return;
@@ -79,8 +79,8 @@ public class BnfIntroduceTokenHandler implements RefactoringActionHandler {
     }
     else return;
 
-    final List<BnfExpression> allOccurrences = new ArrayList<>();
-    final Map<OccurrencesChooser.ReplaceChoice, List<BnfExpression>> occurrencesMap = new LinkedHashMap<>();
+    List<BnfExpression> allOccurrences = new ArrayList<>();
+    Map<OccurrencesChooser.ReplaceChoice, List<BnfExpression>> occurrencesMap = new LinkedHashMap<>();
     occurrencesMap.put(OccurrencesChooser.ReplaceChoice.NO, Collections.singletonList(target));
     occurrencesMap.put(OccurrencesChooser.ReplaceChoice.ALL, allOccurrences);
 
@@ -110,9 +110,9 @@ public class BnfIntroduceTokenHandler implements RefactoringActionHandler {
       occurrencesMap.remove(OccurrencesChooser.ReplaceChoice.ALL);
     }
 
-    final Pass<OccurrencesChooser.ReplaceChoice> callback = new Pass<>() {
+    Pass<OccurrencesChooser.ReplaceChoice> callback = new Pass<>() {
       @Override
-      public void pass(final OccurrencesChooser.ReplaceChoice choice) {
+      public void pass(OccurrencesChooser.ReplaceChoice choice) {
         WriteCommandAction.writeCommandAction(project, file)
           .withName(REFACTORING_NAME)
           .run(() -> {
@@ -144,7 +144,7 @@ public class BnfIntroduceTokenHandler implements RefactoringActionHandler {
                                           String tokenName,
                                           String tokenText,
                                           Set<String> tokenNames) throws StartMarkAction.AlreadyStartedException {
-    final StartMarkAction startAction = StartMarkAction.start(editor, project, REFACTORING_NAME);
+    StartMarkAction startAction = StartMarkAction.start(editor, project, REFACTORING_NAME);
     BnfListEntry entry = addTokenDefinition(project, bnfFile, tokenName, tokenText, tokenNames);
     PsiDocumentManager.getInstance(project).doPostponedOperationsAndUnblockDocument(editor.getDocument());
 
@@ -159,9 +159,8 @@ public class BnfIntroduceTokenHandler implements RefactoringActionHandler {
     for (BnfExpression occurrence : occurrences) {
       builder.replaceElement(occurrence, "Other", new Expression() {
 
-        @Nullable
         @Override
-        public Result calculateResult(ExpressionContext context) {
+        public @Nullable Result calculateResult(ExpressionContext context) {
           TemplateState state = TemplateManagerImpl.getTemplateState(context.getEditor());
           assert state != null;
           TextResult text = Objects.requireNonNull(state.getVariableValue("TokenText"));
@@ -174,9 +173,8 @@ public class BnfIntroduceTokenHandler implements RefactoringActionHandler {
           }
         }
 
-        @Nullable
         @Override
-        public Result calculateQuickResult(ExpressionContext context) {
+        public @Nullable Result calculateQuickResult(ExpressionContext context) {
           return calculateResult(context);
         }
 
@@ -186,7 +184,7 @@ public class BnfIntroduceTokenHandler implements RefactoringActionHandler {
         }
       }, false);
     }
-    final RangeMarker caretMarker = editor.getDocument().createRangeMarker(0, editor.getCaretModel().getOffset());
+    RangeMarker caretMarker = editor.getDocument().createRangeMarker(0, editor.getCaretModel().getOffset());
     caretMarker.setGreedyToRight(true);
     editor.getCaretModel().moveToOffset(0);
     Template template = builder.buildInlineTemplate();

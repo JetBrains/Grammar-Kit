@@ -26,9 +26,8 @@ import org.jetbrains.annotations.NotNull;
  * @author Vadim Romansky
  */
 public class BnfSuspiciousTokenInspection extends LocalInspectionTool {
-  @NotNull
   @Override
-  public PsiElementVisitor buildVisitor(@NotNull ProblemsHolder holder, boolean isOnTheFly) {
+  public @NotNull PsiElementVisitor buildVisitor(@NotNull ProblemsHolder holder, boolean isOnTheFly) {
     return new BnfVisitor<Void>() {
       @Override
       public Void visitRule(@NotNull BnfRule o) {
@@ -39,7 +38,7 @@ public class BnfSuspiciousTokenInspection extends LocalInspectionTool {
         for (BnfRefOrTokenImpl token : tokens) {
           PsiReference reference = token.getReference();
           Object resolve = reference == null ? null : reference.resolve();
-          final String text = token.getText();
+          String text = token.getText();
           if (resolve == null && !tokens.contains(text) && isTokenTextSuspicious(text)) {
             holder.registerProblem(token,
                                    "'" + text + "' token looks like a reference to a missing rule",

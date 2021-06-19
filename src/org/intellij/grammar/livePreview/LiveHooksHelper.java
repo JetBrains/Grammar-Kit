@@ -22,7 +22,7 @@ import java.util.Map;
 public class LiveHooksHelper {
 
   public static void registerHook(PsiBuilder builder, String name, String value) {
-    final GeneratedParserUtilBase.Hook hookObj = getHook(name);
+    GeneratedParserUtilBase.Hook<Object> hookObj = getHook(name);
     if (hookObj == null) return;
     Object hookParam = ObjectUtils.notNull(getHookParam(value), value);
     GeneratedParserUtilBase.register_hook_(builder, (builder1, marker, param) -> {
@@ -30,7 +30,7 @@ public class LiveHooksHelper {
         return hookObj.run(builder1, marker, param);
       }
       catch (Exception e) {
-        builder1.error("hook crashed: " + e.toString());
+        builder1.error("hook crashed: " + e);
         return marker;
       }
     }, hookParam);
@@ -46,8 +46,8 @@ public class LiveHooksHelper {
   }
 
 
-  public static GeneratedParserUtilBase.Hook getHook(String name) {
-    return (GeneratedParserUtilBase.Hook)ourHooks.get(name);
+  public static GeneratedParserUtilBase.Hook<Object> getHook(String name) {
+    return (GeneratedParserUtilBase.Hook<Object>)ourHooks.get(name);
   }
 
   public static Object getHookParam(@NotNull String value) {

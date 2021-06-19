@@ -32,23 +32,20 @@ import java.util.*;
  */
 public class BnfDocumentationProvider implements DocumentationProvider {
 
-  @Nullable
-  public String getQuickNavigateInfo(final PsiElement element, PsiElement originalElement) {
+  public @Nullable String getQuickNavigateInfo(PsiElement element, PsiElement originalElement) {
     return null;
   }
 
-  @Nullable
-  public List<String> getUrlFor(final PsiElement element, final PsiElement originalElement) {
+  public @Nullable List<String> getUrlFor(PsiElement element, PsiElement originalElement) {
     return null;
   }
 
-  @Nullable
-  public String generateDoc(final PsiElement element, final PsiElement originalElement) {
+  public @Nullable String generateDoc(PsiElement element, PsiElement originalElement) {
     if (element instanceof BnfRule) {
-      final BnfRule rule = (BnfRule)element;
+      BnfRule rule = (BnfRule)element;
       BnfFirstNextAnalyzer analyzer = new BnfFirstNextAnalyzer();
-      Set<String> first = analyzer.asStrings(analyzer.calcFirst(rule));
-      Set<String> next = analyzer.asStrings(analyzer.calcNext(rule).keySet());
+      Set<String> first = BnfFirstNextAnalyzer.asStrings(analyzer.calcFirst(rule));
+      Set<String> next = BnfFirstNextAnalyzer.asStrings(analyzer.calcNext(rule).keySet());
 
       StringBuilder docBuilder = new StringBuilder();
       String[] firstS = first.toArray(ArrayUtil.EMPTY_STRING_ARRAY);
@@ -83,19 +80,17 @@ public class BnfDocumentationProvider implements DocumentationProvider {
       return docBuilder.toString();
     }
     else if (element instanceof BnfAttr) {
-      KnownAttribute attribute = KnownAttribute.getAttribute(((BnfAttr)element).getName());
+      KnownAttribute<?> attribute = KnownAttribute.getAttribute(((BnfAttr)element).getName());
       if (attribute != null) return attribute.getDescription();
     }
     return null;
   }
 
-  @Nullable
-  public PsiElement getDocumentationElementForLookupItem(final PsiManager psiManager, final Object obj5ect, final PsiElement element) {
+  public @Nullable PsiElement getDocumentationElementForLookupItem(PsiManager psiManager, Object obj5ect, PsiElement element) {
     return null;
   }
 
-  @Nullable
-  public PsiElement getDocumentationElementForLink(final PsiManager psiManager, final String link, final PsiElement context) {
+  public @Nullable PsiElement getDocumentationElementForLink(PsiManager psiManager, String link, PsiElement context) {
     return null;
   }
 
@@ -129,8 +124,8 @@ public class BnfDocumentationProvider implements DocumentationProvider {
   private static void dumpPriorityTable(StringBuilder docBuilder, BnfRule rule, BnfFile file) {
     ExpressionHelper.ExpressionInfo expressionInfo = ExpressionHelper.getCached(file).getExpressionInfo(rule);
     if (expressionInfo == null) return;
-    final ExpressionHelper.OperatorInfo ruleOperator = expressionInfo.operatorMap.get(rule);
-    final int priority = expressionInfo.getPriority(rule);
+    ExpressionHelper.OperatorInfo ruleOperator = expressionInfo.operatorMap.get(rule);
+    int priority = expressionInfo.getPriority(rule);
 
     docBuilder.append("\n<br><h1>Priority table:");
     appendColored(docBuilder, String.format(" %s (%s)", ruleOperator != null ? ruleOperator.type : "priority group", priority));

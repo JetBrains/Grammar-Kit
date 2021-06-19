@@ -11,6 +11,7 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.impl.source.tree.LeafPsiElement;
 import org.intellij.grammar.psi.BnfComposite;
 import org.intellij.grammar.psi.BnfTypes;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
@@ -19,14 +20,15 @@ import java.util.List;
  */
 public class BnfWordSelectioner extends BraceMatcherBasedSelectioner{
   @Override
-  public boolean canSelect(PsiElement e) {
+  public boolean canSelect(@NotNull PsiElement e) {
     return e instanceof BnfComposite ||
            e instanceof LeafPsiElement && ((LeafPsiElement)e).getElementType() == BnfTypes.BNF_STRING;
   }
 
   @Override
-  public List<TextRange> select(PsiElement e, CharSequence editorText, int cursorOffset, Editor editor) {
+  public List<TextRange> select(@NotNull PsiElement e, @NotNull CharSequence editorText, int cursorOffset, @NotNull Editor editor) {
     List<TextRange> list = super.select(e, editorText, cursorOffset, editor);
+    if (list == null) return null;
     if (e instanceof LeafPsiElement && ((LeafPsiElement)e).getElementType() == BnfTypes.BNF_STRING) {
       TextRange range = e.getTextRange();
       list.add(TextRange.from(range.getStartOffset() + 1, range.getLength() - 2));

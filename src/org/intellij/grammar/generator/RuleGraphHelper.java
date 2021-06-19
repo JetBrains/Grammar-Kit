@@ -159,7 +159,7 @@ public class RuleGraphHelper {
     for (int i = 0, len = ruleExtendsMap.size(); i < len; i++) {
       boolean changed = false;
       for (BnfRule superRule : ruleExtendsMap.keySet()) {
-        final Collection<BnfRule> rules = ruleExtendsMap.get(superRule);
+        Collection<BnfRule> rules = ruleExtendsMap.get(superRule);
         for (BnfRule rule : new ArrayList<>(rules)) {
           changed |= rules.addAll(ruleExtendsMap.get(rule));
         }
@@ -176,14 +176,11 @@ public class RuleGraphHelper {
     return MultiMap.createLinkedSet();
   }
 
-  @NotNull
-  public static Map<String, String> getTokenNameToTextMap(final BnfFile file) {
-    return CachedValuesManager.getCachedValue(file,
-                                              () -> new CachedValueProvider.Result<>(computeTokens(file).asMap(), file));
+  public static @NotNull Map<String, String> getTokenNameToTextMap(BnfFile file) {
+    return CachedValuesManager.getCachedValue(file, () -> new CachedValueProvider.Result<>(computeTokens(file).asMap(), file));
   }
 
-  @NotNull
-  public static Map<String, String> getTokenTextToNameMap(final BnfFile file) {
+  public static @NotNull Map<String, String> getTokenTextToNameMap(BnfFile file) {
     return CachedValuesManager.getCachedValue(file, () -> new CachedValueProvider.Result<>(computeTokens(file).asInverseMap(), file));
   }
 
@@ -193,7 +190,7 @@ public class RuleGraphHelper {
   }
 
   private static final Key<CachedValue<RuleGraphHelper>> RULE_GRAPH_HELPER_KEY = Key.create("RULE_GRAPH_HELPER_KEY");
-  public static RuleGraphHelper getCached(final BnfFile file) {
+  public static RuleGraphHelper getCached(@NotNull BnfFile file) {
     CachedValue<RuleGraphHelper> value = file.getUserData(RULE_GRAPH_HELPER_KEY);
     if (value == null) {
       file.putUserData(RULE_GRAPH_HELPER_KEY, value = CachedValuesManager.getManager(file.getProject()).createCachedValue(
@@ -278,8 +275,7 @@ public class RuleGraphHelper {
     return result;
   }
 
-  @Nullable
-  private BnfRule getCommonSuperRule(BnfRule r1, BnfRule r2) {
+  private @Nullable BnfRule getCommonSuperRule(BnfRule r1, BnfRule r2) {
     int count = Integer.MAX_VALUE;
     BnfRule result = null;
     for (BnfRule superRule : myRuleExtendsMap.keySet()) {
@@ -333,8 +329,7 @@ public class RuleGraphHelper {
     return myRulesGraph.get(rule);
   }
 
-  @NotNull
-  public Map<PsiElement, Cardinality> getFor(BnfRule rule) {
+  public @NotNull Map<PsiElement, Cardinality> getFor(BnfRule rule) {
     Map<PsiElement, Cardinality> map = myRuleContentsMap.get(rule); // null for duplicate
     return map == null ? Collections.emptyMap() : map;
   }
@@ -657,9 +652,6 @@ public class RuleGraphHelper {
         if (r != null) rulesAndAlts.put(r, r);
       }
     }
-    //if (forRule != null && "".equals(forRule.getName())) {
-    //  int gotcha = 1;
-    //}
 
     boolean hasSynonyms = collectSynonymsAndCollapseAlternatives(rulesAndAlts);
     if (rulesAndAlts.size() < 2) {
@@ -843,8 +835,7 @@ public class RuleGraphHelper {
     return thatRule == null || thatRule == grammarRoot || Rule.isPrivate(thatRule) || Rule.isExternal(thatRule);
   }
 
-  @NotNull
-  private PsiElement newExternalPsi(String name) {
+  private @NotNull PsiElement newExternalPsi(String name) {
     PsiElement e = myExternalElements.get(name);
     if (e == null) {
       myExternalElements.put(name, e = new FakeBnfExpression(EXTERNAL_TYPE, name));

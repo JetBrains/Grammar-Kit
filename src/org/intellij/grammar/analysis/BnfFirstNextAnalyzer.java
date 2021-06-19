@@ -19,11 +19,11 @@ import com.intellij.util.containers.JBIterable;
 import gnu.trove.THashMap;
 import gnu.trove.THashSet;
 import org.intellij.grammar.KnownAttribute;
-import org.intellij.grammar.psi.impl.GrammarUtil.FakeBnfExpression;
 import org.intellij.grammar.generator.ParserGeneratorUtil;
 import org.intellij.grammar.generator.RuleGraphHelper;
 import org.intellij.grammar.psi.*;
 import org.intellij.grammar.psi.impl.GrammarUtil;
+import org.intellij.grammar.psi.impl.GrammarUtil.FakeBnfExpression;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -313,7 +313,7 @@ public class BnfFirstNextAnalyzer {
         externalNext = filterExternalMethods(next);
         if (!skip) skip = !externalCond.isEmpty();
       }
-      final Set<BnfExpression> mixed;
+      Set<BnfExpression> mixed;
       if (elementType == BnfTypes.BNF_OP_AND) {
         if (forcedNext != null && forcedNext.first) {
           mixed = newExprSet(conditions);
@@ -381,7 +381,7 @@ public class BnfFirstNextAnalyzer {
     return false;
   }
 
-  public Set<String> asStrings(Set<BnfExpression> expressions) {
+  public static Set<String> asStrings(Set<BnfExpression> expressions) {
     Set<String> result = new TreeSet<>();
     for (BnfExpression expression : expressions) {
       result.add(asString(expression));
@@ -389,8 +389,7 @@ public class BnfFirstNextAnalyzer {
     return result;
   }
 
-  @NotNull
-  public static String asString(@NotNull BnfExpression expression) {
+  public static @NotNull String asString(@NotNull BnfExpression expression) {
     if (expression instanceof BnfLiteralExpression) {
       String text = expression.getText();
       return StringUtil.isQuotedString(text) ? '\'' + GrammarUtil.unquote(text) + '\'' : text;
@@ -403,25 +402,21 @@ public class BnfFirstNextAnalyzer {
     }
   }
 
-  @NotNull
-  private static Set<BnfExpression> newExprSet() {
+  private static @NotNull Set<BnfExpression> newExprSet() {
     return new THashSet<>(ParserGeneratorUtil.textStrategy());
   }
 
-  @NotNull
-  private static Set<BnfExpression> newExprSet(Collection<BnfExpression> expressions) {
+  private static @NotNull Set<BnfExpression> newExprSet(Collection<BnfExpression> expressions) {
     return new THashSet<>(expressions, ParserGeneratorUtil.textStrategy());
   }
 
-  @NotNull
-  private static Set<BnfExpression> exprSetUnion(Collection<BnfExpression> a, Collection<BnfExpression> b) {
+  private static @NotNull Set<BnfExpression> exprSetUnion(Collection<BnfExpression> a, Collection<BnfExpression> b) {
     Set<BnfExpression> result = newExprSet(a);
     result.addAll(b);
     return result;
   }
 
-  @NotNull
-  private static Set<BnfExpression> exprSetIntersection(@NotNull Set<BnfExpression> a, @NotNull Set<BnfExpression> b) {
+  private static @NotNull Set<BnfExpression> exprSetIntersection(@NotNull Set<BnfExpression> a, @NotNull Set<BnfExpression> b) {
     Set<BnfExpression> filter = newExprSet(a);
     filter.retainAll(newExprSet(b));
     Set<BnfExpression> result = union(a, b);
@@ -429,8 +424,7 @@ public class BnfFirstNextAnalyzer {
     return result;
   }
 
-  @NotNull
-  private static Set<BnfExpression> exprSetDifference(@NotNull Set<BnfExpression> a, @NotNull Set<BnfExpression> b) {
+  private static @NotNull Set<BnfExpression> exprSetDifference(@NotNull Set<BnfExpression> a, @NotNull Set<BnfExpression> b) {
     Set<BnfExpression> filter = newExprSet(a);
     filter.removeAll(newExprSet(b));
     Set<BnfExpression> result = union(a, b);

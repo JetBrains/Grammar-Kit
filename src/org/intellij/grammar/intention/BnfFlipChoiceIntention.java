@@ -23,15 +23,13 @@ import org.jetbrains.annotations.Nullable;
  * @author gregsh
  */
 public class BnfFlipChoiceIntention implements IntentionAction {
-  @NotNull
   @Override
-  public String getText() {
+  public @NotNull String getText() {
     return "Flip arguments";
   }
 
-  @NotNull
   @Override
-  public String getFamilyName() {
+  public @NotNull String getFamilyName() {
     return "Flip choice intention";
   }
 
@@ -42,7 +40,7 @@ public class BnfFlipChoiceIntention implements IntentionAction {
 
   @Override
   public void invoke(@NotNull Project project, Editor editor, PsiFile file) throws IncorrectOperationException {
-    final Pair<PsiElement, PsiElement> arguments = getArguments(file, editor.getCaretModel().getOffset());
+    Pair<PsiElement, PsiElement> arguments = getArguments(file, editor.getCaretModel().getOffset());
     if (arguments == null) return;
     PsiElement newFirst = BnfElementFactory.createRuleFromText(project, "a ::=" + arguments.second.getText()).getExpression();
     PsiElement newSecond = BnfElementFactory.createRuleFromText(project, "a ::=" + arguments.first.getText()).getExpression();
@@ -50,10 +48,9 @@ public class BnfFlipChoiceIntention implements IntentionAction {
     arguments.first.replace(newFirst);
   }
   
-  @Nullable
-  private static Pair<PsiElement, PsiElement> getArguments(PsiFile file, int offset) {
+  private static @Nullable Pair<PsiElement, PsiElement> getArguments(PsiFile file, int offset) {
     PsiElement element = file.getViewProvider().findElementAt(offset);
-    final BnfChoice choice = PsiTreeUtil.getParentOfType(element, BnfChoice.class);
+    BnfChoice choice = PsiTreeUtil.getParentOfType(element, BnfChoice.class);
     if (choice == null) return null;
     for (PsiElement cur = choice.getFirstChild(), prev = null; cur != null; cur = cur.getNextSibling()) {
       if (!(cur instanceof BnfExpression) ) continue;

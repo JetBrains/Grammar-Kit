@@ -25,27 +25,23 @@ public class LivePreviewFileType extends LanguageFileType {
     super(LivePreviewLanguage.BASE_INSTANCE);
   }
 
-  @NotNull
   @Override
-  public String getName() {
+  public @NotNull String getName() {
     return "BNF_LP";
   }
 
-  @NotNull
   @Override
-  public String getDescription() {
+  public @NotNull String getDescription() {
     return LP_DISPLAY_NAME;
   }
 
-  @NotNull
   @Override
-  public String getDefaultExtension() {
+  public @NotNull String getDefaultExtension() {
     return "preview";
   }
 
-  @Nullable
   @Override
-  public Icon getIcon() {
+  public @Nullable Icon getIcon() {
     return BnfIcons.FILE;
   }
 
@@ -54,9 +50,8 @@ public class LivePreviewFileType extends LanguageFileType {
     return false;
   }
 
-  @Nullable
   @Override
-  public String getCharset(@NotNull VirtualFile file, byte[] content) {
+  public @Nullable String getCharset(@NotNull VirtualFile file, byte @NotNull [] content) {
     return null;
   }
 }

@@ -316,7 +316,7 @@ import com.intellij.psi.PsiReference;
 
 public interface JFlexJavaType extends JFlexComposite {
 
-  PsiReference[] getReferences();
+  PsiReference @NotNull [] getReferences();
 
 }
 // ---- JFlexLexicalRulesSection.java -----------------
@@ -378,14 +378,11 @@ public interface JFlexMacroDefinition extends JFlexNamedElement {
   @NotNull
   PsiElement getId();
 
-  @NotNull
-  String getName();
+  @NotNull String getName();
 
-  @NotNull
-  PsiNameIdentifierOwner setName(String p1);
+  @NotNull PsiNameIdentifierOwner setName(String p1);
 
-  @NotNull
-  PsiElement getNameIdentifier();
+  @NotNull PsiElement getNameIdentifier();
 
 }
 // ---- JFlexMacroRefExpression.java -----------------
@@ -416,8 +413,7 @@ public interface JFlexMacroReference extends JFlexComposite {
   @NotNull
   PsiElement getId();
 
-  @NotNull
-  PsiReference getReference();
+  @NotNull PsiReference getReference();
 
 }
 // ---- JFlexNotExpression.java -----------------
@@ -555,14 +551,11 @@ public interface JFlexStateDefinition extends JFlexNamedElement {
   @NotNull
   PsiElement getId();
 
-  @NotNull
-  String getName();
+  @NotNull String getName();
 
-  @NotNull
-  PsiNameIdentifierOwner setName(String p1);
+  @NotNull PsiNameIdentifierOwner setName(String p1);
 
-  @NotNull
-  PsiElement getNameIdentifier();
+  @NotNull PsiElement getNameIdentifier();
 
 }
 // ---- JFlexStateList.java -----------------
@@ -593,8 +586,7 @@ public interface JFlexStateReference extends JFlexComposite {
   @NotNull
   PsiElement getId();
 
-  @NotNull
-  PsiReference getReference();
+  @NotNull PsiReference getReference();
 
 }
 // ---- JFlexUserCodeSection.java -----------------
@@ -911,7 +903,7 @@ public class JFlexJavaTypeImpl extends JFlexCompositeImpl implements JFlexJavaTy
   }
 
   @Override
-  public PsiReference[] getReferences() {
+  public PsiReference @NotNull [] getReferences() {
     return JFlexPsiImplUtil.getReferences(this);
   }
 
@@ -1073,20 +1065,17 @@ public class JFlexMacroDefinitionImpl extends JFlexCompositeImpl implements JFle
   }
 
   @Override
-  @NotNull
-  public String getName() {
+  public @NotNull String getName() {
     return JFlexPsiImplUtil.getName(this);
   }
 
   @Override
-  @NotNull
-  public PsiNameIdentifierOwner setName(String p1) {
+  public @NotNull PsiNameIdentifierOwner setName(String p1) {
     return JFlexPsiImplUtil.setName(this, p1);
   }
 
   @Override
-  @NotNull
-  public PsiElement getNameIdentifier() {
+  public @NotNull PsiElement getNameIdentifier() {
     return JFlexPsiImplUtil.getNameIdentifier(this);
   }
 
@@ -1167,8 +1156,7 @@ public class JFlexMacroReferenceImpl extends JFlexCompositeImpl implements JFlex
   }
 
   @Override
-  @NotNull
-  public PsiReference getReference() {
+  public @NotNull PsiReference getReference() {
     return JFlexPsiImplUtil.getReference(this);
   }
 
@@ -1530,20 +1518,17 @@ public class JFlexStateDefinitionImpl extends JFlexCompositeImpl implements JFle
   }
 
   @Override
-  @NotNull
-  public String getName() {
+  public @NotNull String getName() {
     return JFlexPsiImplUtil.getName(this);
   }
 
   @Override
-  @NotNull
-  public PsiNameIdentifierOwner setName(String p1) {
+  public @NotNull PsiNameIdentifierOwner setName(String p1) {
     return JFlexPsiImplUtil.setName(this, p1);
   }
 
   @Override
-  @NotNull
-  public PsiElement getNameIdentifier() {
+  public @NotNull PsiElement getNameIdentifier() {
     return JFlexPsiImplUtil.getNameIdentifier(this);
   }
 
@@ -1623,8 +1608,7 @@ public class JFlexStateReferenceImpl extends JFlexCompositeImpl implements JFlex
   }
 
   @Override
-  @NotNull
-  public PsiReference getReference() {
+  public @NotNull PsiReference getReference() {
     return JFlexPsiImplUtil.getReference(this);
   }
 

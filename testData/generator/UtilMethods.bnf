@@ -16,11 +16,6 @@ root ::= element1
 element1 ::= 'aa'
 {
   methods = [
-    foo0
-    foo1
-    foo2
-    foo3
-    foo4
-    foo5
+    foo0 foo1 foo2 foo3 foo4 foo5 foo6
   ]
 }

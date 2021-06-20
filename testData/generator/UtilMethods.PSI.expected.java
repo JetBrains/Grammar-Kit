@@ -44,9 +44,11 @@ public interface Element1 extends PsiElement {
 
   <T extends X, K extends Y> void foo3(T p1, K p2);
 
-  <T extends X, K> void foo4(T p1, K p2);
+  <@Nls @NonNls T extends @NonNls @Nls X & @Nls @NonNls Y, @Nls @NonNls K> @Nls String foo4(@Nls @NonNls T p1, @Nls @NonNls K p2);
 
-  <T, K extends X> void foo5(T p1, K p2);
+  <@Nls @NonNls T, @Nls @NonNls K extends @NonNls @Nls X & @Nls @NonNls Y> @Nls String foo5(@Nls @NonNls T p1, @Nls @NonNls K p2);
+
+  @NotNull @Nls List<? super String> @Nullable @Unmodifiable [][] foo6(@NotNull @Nls List<? super String> @Nullable @Unmodifiable [][] p1);
 
 }
 // ---- Element1Impl.java -----------------
@@ -104,13 +106,18 @@ public class Element1Impl extends ASTWrapperPsiElement implements Element1 {
   }
 
   @Override
-  public <T extends X, K> void foo4(T p1, K p2) {
-    UtilMethods.foo4(this, p1, p2);
+  public <@Nls @NonNls T extends @NonNls @Nls X & @Nls @NonNls Y, @Nls @NonNls K> @Nls String foo4(@Nls @NonNls T p1, @Nls @NonNls K p2) {
+    return UtilMethods.foo4(this, p1, p2);
   }
 
   @Override
-  public <T, K extends X> void foo5(T p1, K p2) {
-    UtilMethods.foo5(this, p1, p2);
+  public <@Nls @NonNls T, @Nls @NonNls K extends @NonNls @Nls X & @Nls @NonNls Y> @Nls String foo5(@Nls @NonNls T p1, @Nls @NonNls K p2) {
+    return UtilMethods.foo5(this, p1, p2);
+  }
+
+  @Override
+  public @NotNull @Nls List<? super String> @Nullable @Unmodifiable [][] foo6(@NotNull @Nls List<? super String> @Nullable @Unmodifiable [][] p1) {
+    return UtilMethods.foo6(this, p1);
   }
 
 }

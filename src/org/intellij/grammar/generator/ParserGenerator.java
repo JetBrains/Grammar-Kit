@@ -64,13 +64,6 @@ import static org.intellij.grammar.psi.BnfTypes.*;
 public class ParserGenerator {
   public static final Logger LOG = Logger.getInstance("ParserGenerator");
 
-  private static final Function<String, String> genericUnwrapper = type -> {
-    if (type.startsWith("<") && type.endsWith(">")) {
-      return type.substring(1, type.length() - 1);
-    }
-    return type;
-  };
-
   static class RuleInfo {
     final String name;
     final boolean isFake;
@@ -1744,8 +1737,9 @@ public class ParserGenerator {
       imports.addAll(getRuleMethodTypesToImport(rule));
     }
 
-    Function<String, String> substitutor = stubName == null ? genericUnwrapper : o -> {
-      String oo = genericUnwrapper.fun(o);
+    Function<String, String> substitutor = stubName == null ? ParserGeneratorUtil::unwrapTypeArgumentForParamList : o -> {
+      String oo = unwrapTypeArgumentForParamList(o);
+      if (oo.equals(o)) return o;
       int idx = oo.lastIndexOf(" ");
       return idx == -1 ? stubName : oo.substring(0, idx) + " " + stubName;
     };
@@ -1936,8 +1930,11 @@ public class ParserGenerator {
       addTypeToImports(returnType, myJavaHelper.getAnnotations(method), result);
 
       for (JavaHelper.TypeParameterInfo generic : myJavaHelper.getGenericParameters(method)) {
-        for (String superType : generic.getExtendsList()) {
-          addTypeToImports(superType, emptyList(), result);
+        for (String type : generic.getExtendsList()) {
+          addTypeToImports(type, emptyList(), result);
+        }
+        for (String type : generic.getAnnotations()) {
+          addTypeToImports(type, emptyList(), result);
         }
       }
 
@@ -2208,17 +2205,18 @@ public class ParserGenerator {
       out("@" + shorten(s));
     }
     Function<Integer, List<String>> annoProvider = i -> myJavaHelper.getParameterAnnotations(method, (i - 1) / 2);
+    Function<String, String> substitutor = ParserGeneratorUtil::unwrapTypeArgumentForParamList;
     out("%s%s%s %s(%s)%s%s",
         intf ? "" : "public ",
         getGenericClauseString(genericParameters, myShortener),
         returnType,
         methodName,
-        getParametersString(methodTypes, offset, 3, genericUnwrapper, annoProvider, myShortener),
+        getParametersString(methodTypes, offset, 3, substitutor, annoProvider, myShortener),
         getThrowsString(exceptionList, myShortener),
         intf ? ";" : " {");
     if (!intf) {
       String implUtilRef = shorten(StringUtil.notNullize(myPsiImplUtilClass, KnownAttribute.PSI_IMPL_UTIL_CLASS.getName()));
-      String string = getParametersString(methodTypes, offset, 2, genericUnwrapper, annoProvider, myShortener);
+      String string = getParametersString(methodTypes, offset, 2, substitutor, annoProvider, myShortener);
       out("%s%s.%s(this%s);", "void".equals(returnType) ? "" : "return ", implUtilRef, methodName,
           string.isEmpty() ? "" : ", " + string);
       out("}");

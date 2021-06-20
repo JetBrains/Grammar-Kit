@@ -16,6 +16,10 @@
 
 package org.intellij.grammar.test;
 
+import org.jetbrains.annotations.*;
+
+import java.util.List;
+
 public class UtilMethods {
   interface X { }
 
@@ -27,6 +31,12 @@ public class UtilMethods {
   public static <T> void foo1(Object bar, T param) { }
   public static <T, K> void foo2(Object bar, T param, K k) { }
   public static <T extends X, K extends Y> void foo3(Object bar, T param, K k) { }
-  public static <T extends X, K> void foo4(Object bar, T param, K k) { }
-  public static <T, K extends X> void foo5(Object bar, T param, K k) { }
+  public static <@Nls @NonNls T extends @Nls @NonNls X & @NonNls @Nls Y, @Nls @NonNls K> @Nls String foo4(
+    Object bar, @Nls @NonNls T param, @Nls @NonNls K k) { return null; }
+  public static <@Nls @NonNls T, @Nls @NonNls K extends @Nls @NonNls X & @NonNls @Nls Y> @Nls String foo5(
+    Object bar, @Nls @NonNls T param, @Nls @NonNls K k) { return null; }
+  public static @NotNull @Nls List<? super @NotNull @Nls String> @Nullable @Unmodifiable [][] foo6(
+    Object bar, @NotNull @Nls List<? super @NotNull @Nls String> @Nullable @Unmodifiable [][] args) {
+    return null;
+  }
 }

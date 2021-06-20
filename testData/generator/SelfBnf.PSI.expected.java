@@ -206,8 +206,7 @@ public interface BnfExternalExpression extends BnfExpression {
   @NotNull
   BnfExpression getRefElement();
 
-  @NotNull
-  List<BnfExpression> getArguments();
+  @NotNull List<BnfExpression> getArguments();
 
 }
 // ---- BnfListEntry.java -----------------
@@ -224,7 +223,7 @@ public interface BnfListEntry extends BnfComposite {
   @Nullable
   PsiElement getId();
 
-  PsiReference[] getReferences();
+  PsiReference @NotNull [] getReferences();
 
   @Nullable
   BnfStringLiteralExpression getLiteralExpression();
@@ -360,8 +359,7 @@ public interface BnfReferenceOrToken extends BnfExpression {
   @NotNull
   PsiElement getId();
 
-  @Nullable
-  BnfRule resolveRule();
+  @Nullable BnfRule resolveRule();
 
 }
 // ---- BnfRule.java -----------------
@@ -666,8 +664,7 @@ public class BnfExternalExpressionImpl extends BnfExpressionImpl implements BnfE
   }
 
   @Override
-  @NotNull
-  public List<BnfExpression> getArguments() {
+  public @NotNull List<BnfExpression> getArguments() {
     return GrammarPsiImplUtil.getArguments(this);
   }
 
@@ -710,7 +707,7 @@ public class BnfListEntryImpl extends BnfCompositeImpl implements BnfListEntry {
   }
 
   @Override
-  public PsiReference[] getReferences() {
+  public PsiReference @NotNull [] getReferences() {
     return GrammarPsiImplUtil.getReferences(this);
   }
 

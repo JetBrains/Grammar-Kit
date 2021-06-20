@@ -17,6 +17,7 @@ import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.util.*;
 import com.intellij.util.containers.ContainerUtil;
+import com.intellij.util.containers.FactoryMap;
 import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.psi.BnfAttr;
 import org.jetbrains.annotations.NotNull;
@@ -521,7 +522,7 @@ public abstract class JavaHelper {
     public @NotNull List<String> getMethodTypes(NavigatablePsiElement method) {
       Object delegate = method == null ? null : ((MyElement<?>)method).delegate;
       if (!(delegate instanceof MethodInfo)) return Collections.emptyList();
-      return ((MethodInfo)delegate).types;
+      return ((MethodInfo)delegate).annotatedTypes;
     }
 
     @Override
@@ -549,7 +550,7 @@ public abstract class JavaHelper {
     public @NotNull List<String> getAnnotations(NavigatablePsiElement element) {
       Object delegate = element == null ? null : ((MyElement<?>)element).delegate;
       if (delegate instanceof ClassInfo) return ((ClassInfo)delegate).annotations;
-      if (delegate instanceof MethodInfo) return ((MethodInfo)delegate).annotations;
+      if (delegate instanceof MethodInfo) return ((MethodInfo)delegate).annotations.get(0);
       return Collections.emptyList();
     }
 
@@ -557,7 +558,7 @@ public abstract class JavaHelper {
     public @NotNull List<String> getParameterAnnotations(@Nullable NavigatablePsiElement method, int paramIndex) {
       Object delegate = method == null ? null : ((MyElement<?>)method).delegate;
       if (!(delegate instanceof MethodInfo)) return Collections.emptyList();
-      Map<Integer, List<String>> annotations = ((MethodInfo)delegate).paramAnnotations;
+      Map<Integer, List<String>> annotations = ((MethodInfo)delegate).annotations;
       if (paramIndex < 0 || paramIndex >= annotations.size()) return Collections.emptyList();
       List<String> result = annotations.get(paramIndex);
       return result == null ? Collections.emptyList() : result;
@@ -674,39 +675,100 @@ public abstract class JavaHelper {
                                 Modifier.isStatic(access) ? MethodType.STATIC :
                                 MethodType.INSTANCE;
         myInfo.methods.add(m);
+        class ParamTypeAnno { int index; String anno; TypePath path; }
+        List<ParamTypeAnno> typeAnnos = new SmartList<>();
         return new MethodVisitor(ASM_OPCODES) {
           @Override
+          public void visitEnd() {
+            m.annotatedTypes.addAll(m.types);
+            int[] plainOffsets = new int[m.types.size()];
+            for (ParamTypeAnno ta : typeAnnos) {
+              int idx = ta.index == 0 ? 0 : 2 * (ta.index - 1) + 1;
+              String prevType = m.annotatedTypes.get(idx);
+              boolean isArray = false;
+              if (ta.path != null) {
+                isArray = true;
+                int typePtr = prevType.length();
+                for (int i = 0; i < ta.path.getLength(); i++, typePtr -= 2) {
+                  if (!(ta.path.getStep(i) == TypePath.ARRAY_ELEMENT && typePtr > 2 &&
+                        prevType.charAt(typePtr - 2) == '[' && prevType.charAt(typePtr - 1) == ']')) {
+                    isArray = false;
+                    break;
+                  }
+                }
+                if (isArray && typePtr > 2 && prevType.charAt(typePtr - 1) == ']') isArray = false;
+              }
+              if (ta.path != null && !isArray) continue;
+              int bracketIdx = prevType.indexOf('[');
+              String newType;
+              if (!isArray && bracketIdx > 0) {
+                boolean addSpace = prevType.charAt(bracketIdx - 1) != ' ';
+                newType = prevType.substring(0, bracketIdx) + (addSpace ? " " : "") + "@" + ta.anno + " " + prevType.substring(bracketIdx);
+              }
+              else {
+                int offset = plainOffsets[idx];
+                newType = prevType.substring(0, offset) + "@" + ta.anno + " " + prevType.substring(offset);
+                plainOffsets[idx] += 2 + ta.anno.length();
+              }
+              m.annotatedTypes.set(idx, newType);
+              if (isArray || bracketIdx < 1) {
+                m.annotations.get(ta.index).remove(ta.anno);
+              }
+            }
+          }
+
+          @Override
           public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
+            String anno = fixClassName(desc.substring(1, desc.length() - 1));
             return new MyAnnotationVisitor() {
               @Override
               public void visitEnd() {
-                if (annoParamCounter == 0) {
-                  m.annotations.add(fixClassName(desc.substring(1, desc.length() - 1)));
-                }
+                if (annoParamCounter != 0) return;
+                m.annotations.get(0).add(anno);
               }
             };
           }
 
           @Override
           public AnnotationVisitor visitParameterAnnotation(int parameter, String desc, boolean visible) {
+            String anno = fixClassName(desc.substring(1, desc.length() - 1));
             return new MyAnnotationVisitor() {
               @Override
               public void visitEnd() {
-                if (annoParamCounter == 0) {
-                  List<String> list = m.paramAnnotations.get(parameter);
-                  if (list == null) {
-                    m.paramAnnotations.put(parameter, list = new SmartList<>());
-                  }
-                  list.add(fixClassName(desc.substring(1, desc.length() - 1)));
-                }
+                if (annoParamCounter != 0) return;
+                m.annotations.get(parameter + 1).add(anno);
               }
             };
           }
 
           @Override
-          public AnnotationVisitor visitTypeAnnotation(int typeRef, TypePath typePath, String descriptor, boolean visible) {
-            // TODO
-            return super.visitTypeAnnotation(typeRef, typePath, descriptor, visible);
+          public AnnotationVisitor visitTypeAnnotation(int typeRef, TypePath typePath, String desc, boolean visible) {
+            String anno = fixClassName(desc.substring(1, desc.length() - 1));
+            TypeReference typeReference = new TypeReference(typeRef);
+            return new MyAnnotationVisitor() {
+              @Override
+              public void visitEnd() {
+                if (annoParamCounter != 0) return;
+                if (typeReference.getSort() == TypeReference.METHOD_TYPE_PARAMETER) {
+                  m.generics.get(typeReference.getTypeParameterIndex()).getAnnotations().add(anno);
+                }
+                else if (typeReference.getSort() == TypeReference.METHOD_RETURN ||
+                         typeReference.getSort() == TypeReference.METHOD_FORMAL_PARAMETER) {
+                  ParamTypeAnno o = new ParamTypeAnno();
+                  o.index = typeReference.getSort() == TypeReference.METHOD_RETURN ? 0 : typeReference.getFormalParameterIndex() + 1;
+                  o.anno = anno;
+                  o.path = typePath;
+                  typeAnnos.add(o);
+                }
+                else if (typeReference.getSort() == TypeReference.METHOD_TYPE_PARAMETER_BOUND) {
+                  List<String> bounds = m.generics.get(typeReference.getTypeParameterIndex()).extendsList;
+                  if (typeReference.getTypeParameterBoundIndex() <= bounds.size()) {
+                    String prev = bounds.get(typeReference.getTypeParameterBoundIndex() - 1);
+                    bounds.set(typeReference.getTypeParameterBoundIndex() - 1, "@" + anno + " " + prev);
+                  }
+                }
+              }
+            };
           }
         };
       }
@@ -863,10 +925,10 @@ public abstract class JavaHelper {
           sb.append(", ");
         }
         if (c == '+') {
-          sb.append("? extends");
+          sb.append("? extends ");
         }
         else if (c == '-') {
-          sb.append("? super");
+          sb.append("? super ");
         }
         return this;
       }
@@ -966,7 +1028,7 @@ public abstract class JavaHelper {
     String name;
     String superClass;
     int modifiers;
-    final List<String> typeParameters= new SmartList<>();
+    final List<String> typeParameters = new SmartList<>();
     final List<String> interfaces = new SmartList<>();
     final List<String> annotations = new SmartList<>();
     final List<MethodInfo> methods = new SmartList<>();
@@ -977,25 +1039,27 @@ public abstract class JavaHelper {
     String name;
     String declaringClass;
     int modifiers;
-    final List<String> annotations = new SmartList<>();
     final List<String> types = new SmartList<>();
-    final Map<Integer, List<String>> paramAnnotations = new HashMap<>(0);
+    final List<String> annotatedTypes = new SmartList<>();
+    final Map<Integer, List<String>> annotations = FactoryMap.create(o -> new SmartList<>());
     final List<TypeParameterInfo> generics = new SmartList<>();
     final List<String> exceptions = new SmartList<>();
 
     @Override
     public String toString() {
-      return "MethodInfo{" + name + types + ", @" + annotations + "<" + generics + ">" + " throws " + exceptions + '}';
+      return "MethodInfo{" + name + types + ", @" + annotations.get(0) + "<" + generics + ">" + " throws " + exceptions + '}';
     }
   }
 
   public static class TypeParameterInfo {
     private final String name;
     private final List<String> extendsList;
+    private final List<String> annotations;
 
     public TypeParameterInfo(@NotNull PsiTypeParameter parameter) {
       name = parameter.getName();
       extendsList = ContainerUtil.map(parameter.getExtendsListTypes(), bound -> bound.getCanonicalText(false));
+      annotations = PsiHelper.getAnnotationsInner(parameter);
     }
 
     public TypeParameterInfo(@NotNull TypeVariable<Method> parameter) {
@@ -1004,11 +1068,13 @@ public abstract class JavaHelper {
         String typeName = type.getTypeName();
         return "java.lang.Object".equals(typeName) ? null : typeName;
       });
+      annotations = ContainerUtil.mapNotNull(parameter.getAnnotations(), o -> o.annotationType().getCanonicalName());
     }
 
     public TypeParameterInfo(@NotNull String name) {
       this.name = name;
       this.extendsList = new SmartList<>();
+      this.annotations = new SmartList<>();
     }
 
     public String getName() {
@@ -1017,6 +1083,10 @@ public abstract class JavaHelper {
 
     public List<String> getExtendsList() {
       return extendsList;
+    }
+
+    public List<String> getAnnotations() {
+      return annotations;
     }
   }
 }

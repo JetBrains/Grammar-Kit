@@ -824,11 +824,8 @@ public class ParserGeneratorUtil {
     StringBuilder sb = new StringBuilder();
     for (int i = offset; i < paramsTypes.size(); i += 2) {
       if (i > offset) sb.append(", ");
-      String type = paramsTypes.get(i);
+      String type = substitutor.fun(paramsTypes.get(i));
       String name = paramsTypes.get(i + 1);
-      if (type.startsWith("<") && type.endsWith(">")) {
-        type = substitutor.fun(type);
-      }
       String rawType = NameShortener.getRawClassName(type);
       if (rawType.endsWith(BnfConstants.AST_NODE_CLASS)) name = "node";
       if (rawType.endsWith("ElementType")) name = "type";
@@ -847,6 +844,13 @@ public class ParserGeneratorUtil {
     return sb.toString();
   }
 
+  public static @NotNull String unwrapTypeArgumentForParamList(String type) {
+    if (!type.endsWith(">")) return type;
+    int idx = type.lastIndexOf('<');
+    if (idx < 0 || idx > 0 && type.charAt(idx - 1) != ' ') return type;
+    return type.substring(0, idx) + type.substring(idx + 1, type.length() - 1);
+  }
+
   public static String getGenericClauseString(List<JavaHelper.TypeParameterInfo> genericParameters, NameShortener shortener) {
     if (genericParameters.isEmpty()) return "";
 
@@ -856,6 +860,9 @@ public class ParserGeneratorUtil {
       if (i > 0) buffer.append(", ");
 
       JavaHelper.TypeParameterInfo parameter = genericParameters.get(i);
+      for (String annotation : parameter.getAnnotations()) {
+        buffer.append("@").append(shortener.shorten(annotation)).append(" ");
+      }
       buffer.append(parameter.getName());
 
       List<String> extendsList = parameter.getExtendsList();

@@ -20,8 +20,8 @@ public class JFlexUserCodeSectionImpl extends JFlexFileSectionImpl implements JF
   }
 
   @Override
-  public void accept(@NotNull JFlexVisitor visitor) {
-    visitor.visitUserCodeSection(this);
+  public <R> R accept(@NotNull JFlexVisitor<R> visitor) {
+    return visitor.visitUserCodeSection(this);
   }
 
   @Override

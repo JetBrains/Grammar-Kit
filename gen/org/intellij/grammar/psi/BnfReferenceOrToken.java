@@ -12,7 +12,6 @@ public interface BnfReferenceOrToken extends BnfExpression {
   @NotNull
   PsiElement getId();
 
-  @Nullable
-  BnfRule resolveRule();
+  @Nullable BnfRule resolveRule();
 
 }

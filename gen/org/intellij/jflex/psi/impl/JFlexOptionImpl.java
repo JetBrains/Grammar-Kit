@@ -19,8 +19,9 @@ public class JFlexOptionImpl extends JFlexCompositeImpl implements JFlexOption {
     super(type);
   }
 
-  public void accept(@NotNull JFlexVisitor visitor) {
-    visitor.visitOption(this);
+  @Override
+  public <R> R accept(@NotNull JFlexVisitor<R> visitor) {
+    return visitor.visitOption(this);
   }
 
   @Override

@@ -19,8 +19,9 @@ public class JFlexRuleImpl extends JFlexCompositeImpl implements JFlexRule {
     super(type);
   }
 
-  public void accept(@NotNull JFlexVisitor visitor) {
-    visitor.visitRule(this);
+  @Override
+  public <R> R accept(@NotNull JFlexVisitor<R> visitor) {
+    return visitor.visitRule(this);
   }
 
   @Override

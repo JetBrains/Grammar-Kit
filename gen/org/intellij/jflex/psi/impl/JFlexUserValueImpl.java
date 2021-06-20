@@ -19,8 +19,9 @@ public class JFlexUserValueImpl extends JFlexCompositeImpl implements JFlexUserV
     super(type);
   }
 
-  public void accept(@NotNull JFlexVisitor visitor) {
-    visitor.visitUserValue(this);
+  @Override
+  public <R> R accept(@NotNull JFlexVisitor<R> visitor) {
+    return visitor.visitUserValue(this);
   }
 
   @Override

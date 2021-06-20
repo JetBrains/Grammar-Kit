@@ -20,8 +20,8 @@ public class JFlexQuantifierExpressionImpl extends JFlexExpressionImpl implement
   }
 
   @Override
-  public void accept(@NotNull JFlexVisitor visitor) {
-    visitor.visitQuantifierExpression(this);
+  public <R> R accept(@NotNull JFlexVisitor<R> visitor) {
+    return visitor.visitQuantifierExpression(this);
   }
 
   @Override

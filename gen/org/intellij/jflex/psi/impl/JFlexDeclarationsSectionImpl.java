@@ -20,8 +20,8 @@ public class JFlexDeclarationsSectionImpl extends JFlexFileSectionImpl implement
   }
 
   @Override
-  public void accept(@NotNull JFlexVisitor visitor) {
-    visitor.visitDeclarationsSection(this);
+  public <R> R accept(@NotNull JFlexVisitor<R> visitor) {
+    return visitor.visitDeclarationsSection(this);
   }
 
   @Override

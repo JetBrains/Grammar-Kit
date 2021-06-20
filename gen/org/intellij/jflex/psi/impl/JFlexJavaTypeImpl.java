@@ -20,8 +20,9 @@ public class JFlexJavaTypeImpl extends JFlexCompositeImpl implements JFlexJavaTy
     super(type);
   }
 
-  public void accept(@NotNull JFlexVisitor visitor) {
-    visitor.visitJavaType(this);
+  @Override
+  public <R> R accept(@NotNull JFlexVisitor<R> visitor) {
+    return visitor.visitJavaType(this);
   }
 
   @Override
@@ -31,8 +32,7 @@ public class JFlexJavaTypeImpl extends JFlexCompositeImpl implements JFlexJavaTy
   }
 
   @Override
-  @NotNull
-  public PsiReference[] getReferences() {
+  public PsiReference @NotNull [] getReferences() {
     return JFlexPsiImplUtil.getReferences(this);
   }
 

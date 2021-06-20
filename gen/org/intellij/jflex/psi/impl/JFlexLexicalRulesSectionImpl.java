@@ -20,8 +20,8 @@ public class JFlexLexicalRulesSectionImpl extends JFlexFileSectionImpl implement
   }
 
   @Override
-  public void accept(@NotNull JFlexVisitor visitor) {
-    visitor.visitLexicalRulesSection(this);
+  public <R> R accept(@NotNull JFlexVisitor<R> visitor) {
+    return visitor.visitLexicalRulesSection(this);
   }
 
   @Override

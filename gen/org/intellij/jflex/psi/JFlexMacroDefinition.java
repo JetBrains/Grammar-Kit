@@ -16,13 +16,10 @@ public interface JFlexMacroDefinition extends JFlexNamedElement {
   @NotNull
   PsiElement getId();
 
-  @NotNull
-  String getName();
+  @NotNull String getName();
 
-  @NotNull
-  PsiNameIdentifierOwner setName(String newName);
+  @NotNull PsiNameIdentifierOwner setName(String newName);
 
-  @NotNull
-  PsiElement getNameIdentifier();
+  @NotNull PsiElement getNameIdentifier();
 
 }

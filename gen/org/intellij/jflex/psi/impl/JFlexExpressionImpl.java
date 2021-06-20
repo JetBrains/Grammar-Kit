@@ -19,8 +19,9 @@ public abstract class JFlexExpressionImpl extends JFlexCompositeImpl implements 
     super(type);
   }
 
-  public void accept(@NotNull JFlexVisitor visitor) {
-    visitor.visitExpression(this);
+  @Override
+  public <R> R accept(@NotNull JFlexVisitor<R> visitor) {
+    return visitor.visitExpression(this);
   }
 
   @Override

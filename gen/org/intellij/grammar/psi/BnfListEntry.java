@@ -13,8 +13,7 @@ public interface BnfListEntry extends BnfComposite {
   @Nullable
   PsiElement getId();
 
-  @NotNull
-  PsiReference[] getReferences();
+  PsiReference @NotNull [] getReferences();
 
   @Nullable
   BnfStringLiteralExpression getLiteralExpression();

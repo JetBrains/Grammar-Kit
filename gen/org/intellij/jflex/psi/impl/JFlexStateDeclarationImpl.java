@@ -19,8 +19,9 @@ public class JFlexStateDeclarationImpl extends JFlexCompositeImpl implements JFl
     super(type);
   }
 
-  public void accept(@NotNull JFlexVisitor visitor) {
-    visitor.visitStateDeclaration(this);
+  @Override
+  public <R> R accept(@NotNull JFlexVisitor<R> visitor) {
+    return visitor.visitStateDeclaration(this);
   }
 
   @Override

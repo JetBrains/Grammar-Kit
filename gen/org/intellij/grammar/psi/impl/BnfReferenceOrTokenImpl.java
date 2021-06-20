@@ -19,6 +19,7 @@ public class BnfReferenceOrTokenImpl extends BnfRefOrTokenImpl implements BnfRef
     super(type);
   }
 
+  @Override
   public <R> R accept(@NotNull BnfVisitor<R> visitor) {
     return visitor.visitReferenceOrToken(this);
   }

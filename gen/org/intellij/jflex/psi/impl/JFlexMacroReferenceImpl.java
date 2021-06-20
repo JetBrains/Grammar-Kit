@@ -20,8 +20,9 @@ public class JFlexMacroReferenceImpl extends JFlexCompositeImpl implements JFlex
     super(type);
   }
 
-  public void accept(@NotNull JFlexVisitor visitor) {
-    visitor.visitMacroReference(this);
+  @Override
+  public <R> R accept(@NotNull JFlexVisitor<R> visitor) {
+    return visitor.visitMacroReference(this);
   }
 
   @Override
@@ -37,8 +38,7 @@ public class JFlexMacroReferenceImpl extends JFlexCompositeImpl implements JFlex
   }
 
   @Override
-  @NotNull
-  public PsiReference getReference() {
+  public @NotNull PsiReference getReference() {
     return JFlexPsiImplUtil.getReference(this);
   }
 

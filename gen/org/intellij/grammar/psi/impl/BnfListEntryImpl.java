@@ -38,8 +38,7 @@ public class BnfListEntryImpl extends BnfCompositeImpl implements BnfListEntry {
   }
 
   @Override
-  @NotNull
-  public PsiReference[] getReferences() {
+  public PsiReference @NotNull [] getReferences() {
     return GrammarPsiImplUtil.getReferences(this);
   }
 

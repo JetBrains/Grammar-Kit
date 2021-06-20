@@ -10,7 +10,6 @@ import com.intellij.psi.PsiReference;
 
 public interface JFlexJavaType extends JFlexComposite {
 
-  @NotNull
-  PsiReference[] getReferences();
+  PsiReference @NotNull [] getReferences();
 
 }

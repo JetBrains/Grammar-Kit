@@ -20,8 +20,9 @@ public class JFlexMacroDefinitionImpl extends JFlexCompositeImpl implements JFle
     super(type);
   }
 
-  public void accept(@NotNull JFlexVisitor visitor) {
-    visitor.visitMacroDefinition(this);
+  @Override
+  public <R> R accept(@NotNull JFlexVisitor<R> visitor) {
+    return visitor.visitMacroDefinition(this);
   }
 
   @Override
@@ -43,20 +44,17 @@ public class JFlexMacroDefinitionImpl extends JFlexCompositeImpl implements JFle
   }
 
   @Override
-  @NotNull
-  public String getName() {
+  public @NotNull String getName() {
     return JFlexPsiImplUtil.getName(this);
   }
 
   @Override
-  @NotNull
-  public PsiNameIdentifierOwner setName(String newName) {
+  public @NotNull PsiNameIdentifierOwner setName(String newName) {
     return JFlexPsiImplUtil.setName(this, newName);
   }
 
   @Override
-  @NotNull
-  public PsiElement getNameIdentifier() {
+  public @NotNull PsiElement getNameIdentifier() {
     return JFlexPsiImplUtil.getNameIdentifier(this);
   }
 

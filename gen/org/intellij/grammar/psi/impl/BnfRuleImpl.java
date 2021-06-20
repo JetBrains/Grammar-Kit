@@ -19,6 +19,7 @@ public class BnfRuleImpl extends BnfNamedImpl implements BnfRule {
     super(type);
   }
 
+  @Override
   public <R> R accept(@NotNull BnfVisitor<R> visitor) {
     return visitor.visitRule(this);
   }

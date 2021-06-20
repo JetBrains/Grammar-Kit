@@ -13,7 +13,6 @@ public interface JFlexMacroReference extends JFlexComposite {
   @NotNull
   PsiElement getId();
 
-  @NotNull
-  PsiReference getReference();
+  @NotNull PsiReference getReference();
 
 }

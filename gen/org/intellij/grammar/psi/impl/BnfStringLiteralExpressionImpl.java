@@ -19,6 +19,7 @@ public class BnfStringLiteralExpressionImpl extends BnfStringImpl implements Bnf
     super(type);
   }
 
+  @Override
   public <R> R accept(@NotNull BnfVisitor<R> visitor) {
     return visitor.visitStringLiteralExpression(this);
   }

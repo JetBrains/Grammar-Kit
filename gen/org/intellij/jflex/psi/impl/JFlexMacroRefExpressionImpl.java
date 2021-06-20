@@ -20,8 +20,8 @@ public class JFlexMacroRefExpressionImpl extends JFlexExpressionImpl implements 
   }
 
   @Override
-  public void accept(@NotNull JFlexVisitor visitor) {
-    visitor.visitMacroRefExpression(this);
+  public <R> R accept(@NotNull JFlexVisitor<R> visitor) {
+    return visitor.visitMacroRefExpression(this);
   }
 
   @Override

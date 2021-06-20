@@ -20,8 +20,8 @@ public class JFlexSequenceExpressionImpl extends JFlexExpressionImpl implements 
   }
 
   @Override
-  public void accept(@NotNull JFlexVisitor visitor) {
-    visitor.visitSequenceExpression(this);
+  public <R> R accept(@NotNull JFlexVisitor<R> visitor) {
+    return visitor.visitSequenceExpression(this);
   }
 
   @Override

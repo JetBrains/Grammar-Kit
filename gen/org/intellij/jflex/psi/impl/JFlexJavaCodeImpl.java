@@ -20,8 +20,9 @@ public class JFlexJavaCodeImpl extends JFlexJavaCodeInjectionHostImpl implements
     super(type);
   }
 
-  public void accept(@NotNull JFlexVisitor visitor) {
-    visitor.visitJavaCode(this);
+  @Override
+  public <R> R accept(@NotNull JFlexVisitor<R> visitor) {
+    return visitor.visitJavaCode(this);
   }
 
   @Override

@@ -20,8 +20,8 @@ public class JFlexChoiceExpressionImpl extends JFlexExpressionImpl implements JF
   }
 
   @Override
-  public void accept(@NotNull JFlexVisitor visitor) {
-    visitor.visitChoiceExpression(this);
+  public <R> R accept(@NotNull JFlexVisitor<R> visitor) {
+    return visitor.visitChoiceExpression(this);
   }
 
   @Override

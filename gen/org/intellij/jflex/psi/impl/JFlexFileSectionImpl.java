@@ -19,8 +19,9 @@ public class JFlexFileSectionImpl extends JFlexCompositeImpl implements JFlexFil
     super(type);
   }
 
-  public void accept(@NotNull JFlexVisitor visitor) {
-    visitor.visitFileSection(this);
+  @Override
+  public <R> R accept(@NotNull JFlexVisitor<R> visitor) {
+    return visitor.visitFileSection(this);
   }
 
   @Override

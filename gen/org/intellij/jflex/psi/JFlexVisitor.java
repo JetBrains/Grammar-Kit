@@ -6,122 +6,123 @@ package org.intellij.jflex.psi;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElementVisitor;
 
-public class JFlexVisitor extends PsiElementVisitor {
+public class JFlexVisitor<R> extends PsiElementVisitor {
 
-  public void visitCharRange(@NotNull JFlexCharRange o) {
-    visitClassExpression(o);
+  public R visitCharRange(@NotNull JFlexCharRange o) {
+    return visitClassExpression(o);
   }
 
-  public void visitChoiceExpression(@NotNull JFlexChoiceExpression o) {
-    visitExpression(o);
+  public R visitChoiceExpression(@NotNull JFlexChoiceExpression o) {
+    return visitExpression(o);
   }
 
-  public void visitClassExpression(@NotNull JFlexClassExpression o) {
-    visitExpression(o);
+  public R visitClassExpression(@NotNull JFlexClassExpression o) {
+    return visitExpression(o);
   }
 
-  public void visitDeclarationsSection(@NotNull JFlexDeclarationsSection o) {
-    visitFileSection(o);
+  public R visitDeclarationsSection(@NotNull JFlexDeclarationsSection o) {
+    return visitFileSection(o);
   }
 
-  public void visitExpression(@NotNull JFlexExpression o) {
-    visitComposite(o);
+  public R visitExpression(@NotNull JFlexExpression o) {
+    return visitComposite(o);
   }
 
-  public void visitFileSection(@NotNull JFlexFileSection o) {
-    visitComposite(o);
+  public R visitFileSection(@NotNull JFlexFileSection o) {
+    return visitComposite(o);
   }
 
-  public void visitJavaCode(@NotNull JFlexJavaCode o) {
-    visitComposite(o);
+  public R visitJavaCode(@NotNull JFlexJavaCode o) {
+    return visitComposite(o);
   }
 
-  public void visitJavaType(@NotNull JFlexJavaType o) {
-    visitComposite(o);
+  public R visitJavaType(@NotNull JFlexJavaType o) {
+    return visitComposite(o);
   }
 
-  public void visitLexicalRulesSection(@NotNull JFlexLexicalRulesSection o) {
-    visitFileSection(o);
+  public R visitLexicalRulesSection(@NotNull JFlexLexicalRulesSection o) {
+    return visitFileSection(o);
   }
 
-  public void visitLiteralExpression(@NotNull JFlexLiteralExpression o) {
-    visitExpression(o);
+  public R visitLiteralExpression(@NotNull JFlexLiteralExpression o) {
+    return visitExpression(o);
   }
 
-  public void visitLookAhead(@NotNull JFlexLookAhead o) {
-    visitComposite(o);
+  public R visitLookAhead(@NotNull JFlexLookAhead o) {
+    return visitComposite(o);
   }
 
-  public void visitMacroDefinition(@NotNull JFlexMacroDefinition o) {
-    visitNamedElement(o);
+  public R visitMacroDefinition(@NotNull JFlexMacroDefinition o) {
+    return visitNamedElement(o);
   }
 
-  public void visitMacroRefExpression(@NotNull JFlexMacroRefExpression o) {
-    visitExpression(o);
+  public R visitMacroRefExpression(@NotNull JFlexMacroRefExpression o) {
+    return visitExpression(o);
   }
 
-  public void visitMacroReference(@NotNull JFlexMacroReference o) {
-    visitComposite(o);
+  public R visitMacroReference(@NotNull JFlexMacroReference o) {
+    return visitComposite(o);
   }
 
-  public void visitNotExpression(@NotNull JFlexNotExpression o) {
-    visitExpression(o);
+  public R visitNotExpression(@NotNull JFlexNotExpression o) {
+    return visitExpression(o);
   }
 
-  public void visitOption(@NotNull JFlexOption o) {
-    visitComposite(o);
+  public R visitOption(@NotNull JFlexOption o) {
+    return visitComposite(o);
   }
 
-  public void visitParenExpression(@NotNull JFlexParenExpression o) {
-    visitExpression(o);
+  public R visitParenExpression(@NotNull JFlexParenExpression o) {
+    return visitExpression(o);
   }
 
-  public void visitPredefinedClassExpression(@NotNull JFlexPredefinedClassExpression o) {
-    visitExpression(o);
+  public R visitPredefinedClassExpression(@NotNull JFlexPredefinedClassExpression o) {
+    return visitExpression(o);
   }
 
-  public void visitQuantifierExpression(@NotNull JFlexQuantifierExpression o) {
-    visitExpression(o);
+  public R visitQuantifierExpression(@NotNull JFlexQuantifierExpression o) {
+    return visitExpression(o);
   }
 
-  public void visitRule(@NotNull JFlexRule o) {
-    visitComposite(o);
+  public R visitRule(@NotNull JFlexRule o) {
+    return visitComposite(o);
   }
 
-  public void visitSequenceExpression(@NotNull JFlexSequenceExpression o) {
-    visitExpression(o);
+  public R visitSequenceExpression(@NotNull JFlexSequenceExpression o) {
+    return visitExpression(o);
   }
 
-  public void visitStateDeclaration(@NotNull JFlexStateDeclaration o) {
-    visitComposite(o);
+  public R visitStateDeclaration(@NotNull JFlexStateDeclaration o) {
+    return visitComposite(o);
   }
 
-  public void visitStateDefinition(@NotNull JFlexStateDefinition o) {
-    visitNamedElement(o);
+  public R visitStateDefinition(@NotNull JFlexStateDefinition o) {
+    return visitNamedElement(o);
   }
 
-  public void visitStateList(@NotNull JFlexStateList o) {
-    visitComposite(o);
+  public R visitStateList(@NotNull JFlexStateList o) {
+    return visitComposite(o);
   }
 
-  public void visitStateReference(@NotNull JFlexStateReference o) {
-    visitComposite(o);
+  public R visitStateReference(@NotNull JFlexStateReference o) {
+    return visitComposite(o);
   }
 
-  public void visitUserCodeSection(@NotNull JFlexUserCodeSection o) {
-    visitFileSection(o);
+  public R visitUserCodeSection(@NotNull JFlexUserCodeSection o) {
+    return visitFileSection(o);
   }
 
-  public void visitUserValue(@NotNull JFlexUserValue o) {
-    visitComposite(o);
+  public R visitUserValue(@NotNull JFlexUserValue o) {
+    return visitComposite(o);
   }
 
-  public void visitNamedElement(@NotNull JFlexNamedElement o) {
-    visitComposite(o);
+  public R visitNamedElement(@NotNull JFlexNamedElement o) {
+    return visitComposite(o);
   }
 
-  public void visitComposite(@NotNull JFlexComposite o) {
+  public R visitComposite(@NotNull JFlexComposite o) {
     visitElement(o);
+    return null;
   }
 
 }

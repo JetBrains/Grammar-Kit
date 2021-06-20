@@ -20,8 +20,8 @@ public class JFlexCharRangeImpl extends JFlexClassExpressionImpl implements JFle
   }
 
   @Override
-  public void accept(@NotNull JFlexVisitor visitor) {
-    visitor.visitCharRange(this);
+  public <R> R accept(@NotNull JFlexVisitor<R> visitor) {
+    return visitor.visitCharRange(this);
   }
 
   @Override

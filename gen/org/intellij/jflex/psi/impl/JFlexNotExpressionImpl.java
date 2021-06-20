@@ -20,8 +20,8 @@ public class JFlexNotExpressionImpl extends JFlexExpressionImpl implements JFlex
   }
 
   @Override
-  public void accept(@NotNull JFlexVisitor visitor) {
-    visitor.visitNotExpression(this);
+  public <R> R accept(@NotNull JFlexVisitor<R> visitor) {
+    return visitor.visitNotExpression(this);
   }
 
   @Override

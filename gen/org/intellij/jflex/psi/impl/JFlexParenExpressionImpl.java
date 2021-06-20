@@ -20,8 +20,8 @@ public class JFlexParenExpressionImpl extends JFlexExpressionImpl implements JFl
   }
 
   @Override
-  public void accept(@NotNull JFlexVisitor visitor) {
-    visitor.visitParenExpression(this);
+  public <R> R accept(@NotNull JFlexVisitor<R> visitor) {
+    return visitor.visitParenExpression(this);
   }
 
   @Override

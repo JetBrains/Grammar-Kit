@@ -19,6 +19,7 @@ public class BnfAttrImpl extends BnfNamedImpl implements BnfAttr {
     super(type);
   }
 
+  @Override
   public <R> R accept(@NotNull BnfVisitor<R> visitor) {
     return visitor.visitAttr(this);
   }

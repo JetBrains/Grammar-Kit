@@ -20,8 +20,8 @@ public class JFlexLiteralExpressionImpl extends JFlexExpressionImpl implements J
   }
 
   @Override
-  public void accept(@NotNull JFlexVisitor visitor) {
-    visitor.visitLiteralExpression(this);
+  public <R> R accept(@NotNull JFlexVisitor<R> visitor) {
+    return visitor.visitLiteralExpression(this);
   }
 
   @Override

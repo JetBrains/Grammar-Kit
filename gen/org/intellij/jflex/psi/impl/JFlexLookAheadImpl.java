@@ -19,8 +19,9 @@ public class JFlexLookAheadImpl extends JFlexCompositeImpl implements JFlexLookA
     super(type);
   }
 
-  public void accept(@NotNull JFlexVisitor visitor) {
-    visitor.visitLookAhead(this);
+  @Override
+  public <R> R accept(@NotNull JFlexVisitor<R> visitor) {
+    return visitor.visitLookAhead(this);
   }
 
   @Override

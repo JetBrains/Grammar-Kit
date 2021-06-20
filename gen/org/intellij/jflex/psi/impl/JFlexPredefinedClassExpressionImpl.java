@@ -20,8 +20,8 @@ public class JFlexPredefinedClassExpressionImpl extends JFlexExpressionImpl impl
   }
 
   @Override
-  public void accept(@NotNull JFlexVisitor visitor) {
-    visitor.visitPredefinedClassExpression(this);
+  public <R> R accept(@NotNull JFlexVisitor<R> visitor) {
+    return visitor.visitPredefinedClassExpression(this);
   }
 
   @Override

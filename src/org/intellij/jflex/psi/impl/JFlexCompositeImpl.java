@@ -24,6 +24,11 @@ public class JFlexCompositeImpl extends CompositePsiElement implements JFlexComp
   }
 
   @Override
+  public <R> R accept(@NotNull JFlexVisitor<R> visitor) {
+    return visitor.visitComposite(this);
+  }
+
+  @Override
   public @NotNull SearchScope getUseScope() {
     return new LocalSearchScope(getContainingFile());
   }

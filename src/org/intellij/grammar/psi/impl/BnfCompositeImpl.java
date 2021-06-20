@@ -20,6 +20,11 @@ public class BnfCompositeImpl extends CompositePsiElement implements BnfComposit
     super(type);
   }
 
+  @Override
+  public <R> R accept(@NotNull BnfVisitor<R> visitor) {
+    return visitor.visitComposite(this);
+  }
+
   /** @noinspection InstanceofThis*/
   @Override
   public String toString() {
@@ -35,10 +40,5 @@ public class BnfCompositeImpl extends CompositePsiElement implements BnfComposit
     else {
       return elementType;
     }
-  }
-
-  @Override
-  public <R> R accept(@NotNull BnfVisitor<R> visitor) {
-    return visitor.visitComposite(this);
   }
 }

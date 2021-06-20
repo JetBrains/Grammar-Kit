@@ -19,6 +19,7 @@ import com.intellij.util.*;
 import com.intellij.util.containers.ContainerUtil;
 import com.intellij.util.containers.FactoryMap;
 import org.intellij.grammar.KnownAttribute;
+import org.intellij.grammar.generator.NameShortener;
 import org.intellij.grammar.psi.BnfAttr;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -497,13 +498,13 @@ public abstract class JavaHelper {
     }
 
     private static boolean acceptsMethod(MethodInfo method, int paramCount, String... paramTypes) {
-      if (paramCount >= 0 && paramCount + 1 != method.types.size()) return false;
+      if (paramCount >= 0 && paramCount != (method.types.size() - 1) / 2) return false;
       if (paramTypes.length == 0) return true;
-      if (paramTypes.length + 1 > method.types.size()) return false;
-      for (int i = 0; i < paramTypes.length; i++) {
+      if (paramTypes.length > (method.types.size() - 1) / 2) return false;
+      for (int i = 0; i < paramTypes.length; i ++) {
         String paramType = paramTypes[i];
-        String parameter = method.types.get(i + 1);
-        if (acceptsName(paramType, parameter)) continue;
+        String parameter = method.types.get(2 * i + 1);
+        if (acceptsName(paramType, NameShortener.getRawClassName(parameter))) continue;
         ClassInfo info = findClassSafe(paramType);
         if (info != null) {
           if (Objects.equals(info.superClass, parameter)) continue;

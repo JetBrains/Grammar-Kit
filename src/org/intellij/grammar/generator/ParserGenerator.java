@@ -1816,12 +1816,14 @@ public class ParserGenerator {
       String ret = G.visitorValue != null ? "return " : "";
       boolean addOverride = topSuperRule != rule && info.mixin == null;
       if (!addOverride && topSuperClass != null) {
-        for (NavigatablePsiElement m : myJavaHelper.findClassMethods(
-          topSuperClass, JavaHelper.MethodType.INSTANCE, "accept", 1, myVisitorClassName)) {
-          String paramType = myJavaHelper.getMethodTypes(m).get(1);
-          if (paramType.endsWith(myVisitorClassName + r)) {
-            addOverride = true;
-            break;
+        main: for (String curClass = topSuperClass; curClass != null; curClass = myJavaHelper.getSuperClassName(curClass)) {
+          for (NavigatablePsiElement m : myJavaHelper.findClassMethods(
+            curClass, JavaHelper.MethodType.INSTANCE, "accept", 1, myVisitorClassName)) {
+            String paramType = myJavaHelper.getMethodTypes(m).get(1);
+            if (NameShortener.getRawClassName(paramType).endsWith(StringUtil.getShortName(myVisitorClassName))) {
+              addOverride = true;
+              break main;
+            }
           }
         }
       }

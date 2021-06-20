@@ -13,6 +13,8 @@ import org.jetbrains.annotations.NotNull;
  */
 public interface BnfComposite extends PsiElement {
 
-  <R> R accept(@NotNull BnfVisitor<R> visitor);
+  default <R> R accept(@NotNull BnfVisitor<R> visitor) {
+    return visitor.visitComposite(this);
+  }
 
 }

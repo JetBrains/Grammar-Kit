@@ -1,6 +1,6 @@
 {
   classHeader="license.txt"
-  generate=[java="8" names="long"]
+  generate=[java="8" names="long" visitor-value="R"]
 
   parserClass="org.intellij.jflex.parser.JFlexParser"
   parserUtilClass="org.intellij.jflex.parser.JFlexParserUtil"

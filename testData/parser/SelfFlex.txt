@@ -25,6 +25,12 @@ BnfFile:SelfFlex.bnf
             PsiElement(=)('=')
             BNF_STRING_LITERAL_EXPRESSION: "long"
               PsiElement(string)('"long"')
+          PsiWhiteSpace(' ')
+          BNF_LIST_ENTRY
+            PsiElement(id)('visitor-value')
+            PsiElement(=)('=')
+            BNF_STRING_LITERAL_EXPRESSION: "R"
+              PsiElement(string)('"R"')
           PsiElement(])(']')
       PsiWhiteSpace('\n\n  ')
       BNF_ATTR:parserClass

@@ -41,7 +41,7 @@ public class BnfUnusedRuleInspection extends LocalInspectionTool {
   }
 
   @Override
-  public @Nullable ProblemDescriptor[] checkFile(@NotNull PsiFile file, @NotNull InspectionManager manager, boolean isOnTheFly) {
+  public ProblemDescriptor @Nullable [] checkFile(@NotNull PsiFile file, @NotNull InspectionManager manager, boolean isOnTheFly) {
     if (!(file instanceof BnfFile)) return null;
     if (SuppressionUtil.inspectionResultSuppressed(file, this)) return null;
     BnfFile myFile = (BnfFile)file;

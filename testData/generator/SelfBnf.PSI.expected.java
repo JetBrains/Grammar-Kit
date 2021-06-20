@@ -224,7 +224,6 @@ public interface BnfListEntry extends BnfComposite {
   @Nullable
   PsiElement getId();
 
-  @NotNull
   PsiReference[] getReferences();
 
   @Nullable
@@ -711,7 +710,6 @@ public class BnfListEntryImpl extends BnfCompositeImpl implements BnfListEntry {
   }
 
   @Override
-  @NotNull
   public PsiReference[] getReferences() {
     return GrammarPsiImplUtil.getReferences(this);
   }

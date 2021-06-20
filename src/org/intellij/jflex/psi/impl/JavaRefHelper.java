@@ -39,7 +39,7 @@ public class JavaRefHelper {
   private static final Pattern RETURN_PAT = Pattern.compile("return\\s+([^;}]+)");
   private static final Pattern YYBEGIN_PAT = Pattern.compile("yybegin\\s*\\(\\s*([^)]+)\\)");
 
-  private static @NotNull PsiReference[] getRuleReferences(@NotNull JFlexJavaCode o) {
+  private static PsiReference @NotNull [] getRuleReferences(@NotNull JFlexJavaCode o) {
     String text = o.getText();
     List<PsiReference> list = new SmartList<>();
     {
@@ -59,7 +59,7 @@ public class JavaRefHelper {
     return list.isEmpty() ? PsiReference.EMPTY_ARRAY : list.toArray(PsiReference.EMPTY_ARRAY);
   }
 
-  public static @NotNull PsiReference[] getReferences(@NotNull JFlexJavaType o) {
+  public static PsiReference @NotNull [] getReferences(@NotNull JFlexJavaType o) {
     String refText = o.getText();
     PsiFile javaFile = createJavaFileForExpr(refText + " val", o);
     return wrapJavaReferences(o, 0, javaFile, refText);

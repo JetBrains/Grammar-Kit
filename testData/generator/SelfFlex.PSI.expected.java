@@ -316,7 +316,6 @@ import com.intellij.psi.PsiReference;
 
 public interface JFlexJavaType extends JFlexComposite {
 
-  @NotNull
   PsiReference[] getReferences();
 
 }
@@ -912,7 +911,6 @@ public class JFlexJavaTypeImpl extends JFlexCompositeImpl implements JFlexJavaTy
   }
 
   @Override
-  @NotNull
   public PsiReference[] getReferences() {
     return JFlexPsiImplUtil.getReferences(this);
   }

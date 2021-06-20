@@ -27,7 +27,7 @@ import static org.intellij.grammar.generator.ParserGeneratorUtil.*;
  * @author gregsh
  */
 public class GrammarPsiImplUtil {
-  public static @NotNull PsiReference[] getReferences(BnfListEntry o) {
+  public static PsiReference @NotNull [] getReferences(BnfListEntry o) {
     BnfAttr attr = PsiTreeUtil.getParentOfType(o, BnfAttr.class);
     if (attr == null || !Objects.equals(KnownAttribute.METHODS.getName(), attr.getName())) return PsiReference.EMPTY_ARRAY;
     PsiElement id = o.getId();

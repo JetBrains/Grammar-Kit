@@ -91,7 +91,7 @@ public abstract class JavaHelper {
     return Collections.emptyList();
   }
 
-  public @NotNull PsiReference[] getClassReferences(@NotNull PsiElement element, @NotNull ProcessingContext context) {
+  public PsiReference @NotNull [] getClassReferences(@NotNull PsiElement element, @NotNull ProcessingContext context) {
     return PsiReference.EMPTY_ARRAY;
   }
 
@@ -119,7 +119,7 @@ public abstract class JavaHelper {
     }
 
     @Override
-    public @NotNull PsiReference[] getClassReferences(@NotNull PsiElement element, @NotNull ProcessingContext context) {
+    public PsiReference @NotNull [] getClassReferences(@NotNull PsiElement element, @NotNull ProcessingContext context) {
       BnfAttr bnfAttr = PsiTreeUtil.getParentOfType(element, BnfAttr.class);
       KnownAttribute<?> attr = bnfAttr == null ? null : KnownAttribute.getAttribute(bnfAttr.getName());
       JavaClassReferenceProvider provider = new JavaClassReferenceProvider();

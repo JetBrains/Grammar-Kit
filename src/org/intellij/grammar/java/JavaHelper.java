@@ -843,19 +843,30 @@ public abstract class JavaHelper {
 
       @Override
       public void visitTypeArgument() {
-        states.push(State.GENERIC);
-        sb.append("<");
-      }
-
-      @Override
-      public SignatureVisitor visitTypeArgument(char c) {
-        if (states.peekFirst() == State.CLASS) {
+        if (states.peekFirst() != State.GENERIC) {
           states.push(State.GENERIC);
           sb.append("<");
         }
         else {
-          finishElement(State.GENERIC);
           sb.append(", ");
+        }
+        sb.append("?");
+      }
+
+      @Override
+      public SignatureVisitor visitTypeArgument(char c) {
+        if (states.peekFirst() != State.GENERIC) {
+          states.push(State.GENERIC);
+          sb.append("<");
+        }
+        else {
+          sb.append(", ");
+        }
+        if (c == '+') {
+          sb.append("? extends");
+        }
+        else if (c == '-') {
+          sb.append("? super");
         }
         return this;
       }

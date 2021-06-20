@@ -829,9 +829,10 @@ public class ParserGeneratorUtil {
       if (type.startsWith("<") && type.endsWith(">")) {
         type = substitutor.fun(type);
       }
-      if (type.endsWith(BnfConstants.AST_NODE_CLASS)) name = "node";
-      if (type.endsWith("ElementType")) name = "type";
-      if (type.endsWith("Stub")) name = "stub";
+      String rawType = NameShortener.getRawClassName(type);
+      if (rawType.endsWith(BnfConstants.AST_NODE_CLASS)) name = "node";
+      if (rawType.endsWith("ElementType")) name = "type";
+      if (rawType.endsWith("Stub")) name = "stub";
       if ((mask & 1) == 1) {
         List<String> annos = annoProvider.fun(i);
         for (String s : annos) {

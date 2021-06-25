@@ -28,6 +28,8 @@ targetCompatibility = javaVersion
 
 repositories {
   mavenCentral()
+//   maven { url 'https://www.jitpack.io' }
+//   maven { url "https://cache-redirector.jetbrains.com/intellij-dependencies" }
 }
 
 dependencies {
@@ -43,6 +45,47 @@ sourceSets {
     java.srcDir 'tests'
   }
 }
+// def bnfFiles = files('grammars/Grammar.bnf', 'grammars/JFlex.bnf')
+// configurations {
+//   GrammarPlugin {
+//     exclude group: 'com.jetbrains.rd'
+//     exclude group: 'org.jetbrains.marketplace'
+//     exclude group: 'org.roaringbitmap'
+//     exclude group: 'org.jetbrains.plugins'
+//     exclude module: 'idea'
+//     exclude module: 'ant'
+//   }
+// }
+// dependencies {
+//   GrammarPlugin 'com.github.JetBrains:Grammar-Kit:51a409d'
+//   GrammarPlugin "com.jetbrains.intellij.platform:lang-impl:$ideaVersion"
+//   GrammarPlugin 'org.jetbrains.intellij.deps:asm-all:7.0.1'
+// }
+// compileJava {
+//   inputs.files bnfFiles
+//   options.annotationProcessorPath = configurations.GrammarPlugin
+//   options.compilerArgs
+//     << "-Xplugin:GrammarPlugin ${bnfFiles.asPath}"
+//     << "-s" << files('out/generated').asPath
+//   options.compilerArgs
+//     << "--add-exports" << "jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED"
+//     << "--add-exports" << "jdk.compiler/com.sun.tools.javac.code=ALL-UNNAMED"
+//     << "--add-exports" << "jdk.compiler/com.sun.tools.javac.comp=ALL-UNNAMED"
+//     << "--add-exports" << "jdk.compiler/com.sun.tools.javac.main=ALL-UNNAMED"
+//     << "--add-exports" << "jdk.compiler/com.sun.tools.javac.processing=ALL-UNNAMED"
+//     << "--add-exports" << "jdk.compiler/com.sun.tools.javac.tree=ALL-UNNAMED"
+//     << "--add-exports" << "jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED"
+//// for Java16 and up
+//   options.fork=true
+//   options.forkOptions.jvmArgs
+//     << "--add-exports" << "jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED"
+//     << "--add-exports" << "jdk.compiler/com.sun.tools.javac.code=ALL-UNNAMED"
+//     << "--add-exports" << "jdk.compiler/com.sun.tools.javac.comp=ALL-UNNAMED"
+//     << "--add-exports" << "jdk.compiler/com.sun.tools.javac.main=ALL-UNNAMED"
+//     << "--add-exports" << "jdk.compiler/com.sun.tools.javac.processing=ALL-UNNAMED"
+//     << "--add-exports" << "jdk.compiler/com.sun.tools.javac.tree=ALL-UNNAMED"
+//     << "--add-exports" << "jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED"
+// }
 apply plugin: 'idea'
 idea.module {
   generatedSourceDirs += file('gen')

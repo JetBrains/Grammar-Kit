@@ -16,6 +16,7 @@
 
 plugins {
   id 'org.jetbrains.intellij' version "$ijpVersion"
+  id 'maven-publish'
 }
 
 version = "$pluginVersion"
@@ -63,3 +64,17 @@ test {
 }
 
 apply from: 'artifacts.gradle'
+apply plugin: 'maven-publish'
+publishing {
+  publications {
+    grammarKitJar(MavenPublication) {
+      groupId = 'com.github.JetBrains'
+      artifactId = 'grammar-kit'
+      version = "$version"
+      artifact buildGrammar_kit_jar
+    }
+  }
+  repositories {
+    mavenLocal()
+  }
+}

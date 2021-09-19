@@ -1547,11 +1547,10 @@ public class ParserGenerator {
     generateClassHeader(className, imports, "", Java.INTERFACE);
     if (G.generateElementTypes) {
       for (String elementType : sortedCompositeTypes.keySet()) {
-        String exactType = null;
         Trinity<String, String, RuleInfo> info = compositeToClassAndFactoryMap.get(elementType);
+        String exactType = info.first;
         String elementCreateCall;
         if (info.second == null) {
-          exactType = info.first;
           elementCreateCall = "new " + shorten(exactType);
         }
         else {

@@ -1547,17 +1547,15 @@ public class ParserGenerator {
     generateClassHeader(className, imports, "", Java.INTERFACE);
     if (G.generateElementTypes) {
       for (String elementType : sortedCompositeTypes.keySet()) {
-        String exactType = null;
         Trinity<String, String, RuleInfo> info = compositeToClassAndFactoryMap.get(elementType);
         String elementCreateCall;
         if (info.second == null) {
-          exactType = info.first;
-          elementCreateCall = "new " + shorten(exactType);
+          elementCreateCall = "new " + shorten(info.first);
         }
         else {
           elementCreateCall = shorten(StringUtil.getPackageName(info.second)) + "." + StringUtil.getShortName(info.second);
         }
-        String fieldType = Objects.requireNonNull(useExactElements ? exactType : IELEMENTTYPE_CLASS);
+        String fieldType = useExactElements && info.first != null ? info.first : IELEMENTTYPE_CLASS;
         String callFix = elementCreateCall.endsWith("IElementType") ? ", null" : "";
         out("%s %s = %s(\"%s\"%s);", shorten(fieldType), elementType, elementCreateCall, elementType, callFix);
       }

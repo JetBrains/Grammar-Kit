@@ -42,18 +42,18 @@ public class KnownAttribute<T> {
   public static final KnownAttribute<String>       PSI_IMPL_PACKAGE          = create(true, String.class, "psiImplPackage", "generated.psi.impl");
   public static final KnownAttribute<String>       PSI_VISITOR_NAME          = create(true, String.class, "psiVisitorName", "Visitor");
   public static final KnownAttribute<String>       PSI_IMPL_UTIL_CLASS       = create(true, String.class, "psiImplUtilClass", null);
-  public static final KnownAttribute<String>       ELEMENT_TYPE_CLASS        = create(true, String.class, "elementTypeClass", BnfConstants.IELEMENTTYPE_CLASS);
   public static final KnownAttribute<String>       TOKEN_TYPE_CLASS          = create(true, String.class, "tokenTypeClass", BnfConstants.IELEMENTTYPE_CLASS);
   public static final KnownAttribute<String>       PARSER_CLASS              = create(true, String.class, "parserClass", "generated.GeneratedParser");
   public static final KnownAttribute<String>       PARSER_UTIL_CLASS         = create(true, String.class, "parserUtilClass", BnfConstants.GPUB_CLASS);
   public static final KnownAttribute<String>       ELEMENT_TYPE_HOLDER_CLASS = create(true, String.class, "elementTypeHolderClass", "generated.GeneratedTypes");
   public static final KnownAttribute<String>       ELEMENT_TYPE_PREFIX       = create(true, String.class, "elementTypePrefix", "");
-  public static final KnownAttribute<String>       ELEMENT_TYPE_FACTORY      = create(true, String.class, "elementTypeFactory", null);
   public static final KnownAttribute<String>       TOKEN_TYPE_FACTORY        = create(true, String.class, "tokenTypeFactory", null);
 
   public static final KnownAttribute<String>       EXTENDS                   = create(false, String.class, "extends", BnfConstants.AST_WRAPPER_PSI_ELEMENT_CLASS);
   public static final KnownAttribute<ListValue>    IMPLEMENTS                = create(false, ListValue.class, "implements", ListValue.singleValue( null, BnfConstants.PSI_ELEMENT_CLASS));
   public static final KnownAttribute<String>       ELEMENT_TYPE              = create(false, String.class, "elementType", null);
+  public static final KnownAttribute<String>       ELEMENT_TYPE_CLASS        = create(false, String.class, "elementTypeClass", BnfConstants.IELEMENTTYPE_CLASS);
+  public static final KnownAttribute<String>       ELEMENT_TYPE_FACTORY      = create(false, String.class, "elementTypeFactory", null);
   public static final KnownAttribute<Object>       PIN                       = create(false, Object.class, "pin", -1);
   public static final KnownAttribute<String>       MIXIN                     = create(false, String.class, "mixin", null);
   public static final KnownAttribute<String>       RECOVER_WHILE             = create(false, String.class, "recoverWhile", null);

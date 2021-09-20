@@ -193,7 +193,7 @@ public class LightPsi {
       ra.registerExtensionPoint("com.intellij.referencesSearch", "com.intellij.util.QueryExecutor", INTERFACE);
       ra.getExtensionPoint("com.intellij.referencesSearch").registerExtension(new CachesBasedRefSearcher(), project);
       ra.registerExtensionPoint("com.intellij.useScopeEnlarger", "com.intellij.psi.search.UseScopeEnlarger", INTERFACE);
-      ra.registerExtensionPoint("com.intellij.useScopeOptimizer", "com.intellij.psi.search.UseScopeOptimizer", INTERFACE);
+      ra.registerExtensionPoint("com.intellij.useScopeOptimizer", "com.intellij.psi.search.ScopeOptimizer", INTERFACE);
       ra.registerExtensionPoint("com.intellij.codeInsight.containerProvider", "com.intellij.codeInsight.ContainerProvider", INTERFACE);
       ra.registerExtensionPoint("com.intellij.languageInjector", "com.intellij.psi.LanguageInjector", INTERFACE);
       project.registerService(PsiSearchHelper.class, PsiSearchHelperImpl.class);

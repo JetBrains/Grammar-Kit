@@ -99,7 +99,7 @@ public class LightPsi {
 
   private static int mainImpl(File classesFile, File outJarFile) throws Throwable {
     BufferedReader reader = new BufferedReader(new FileReader(classesFile));
-    Pattern pattern = Pattern.compile("\\[Loaded (.*) from (?:file:)?(.*)]");
+    Pattern pattern = Pattern.compile(".*\\[class,load] (?<c>.*) source: (?:file:)?(?<f>.*)");
 
     JarOutputStream jar = new JarOutputStream(new FileOutputStream(outJarFile));
     int count = 0;
@@ -108,8 +108,8 @@ public class LightPsi {
     while ((s = reader.readLine()) != null) {
       Matcher matcher = pattern.matcher(s);
       if (!matcher.matches()) continue;
-      String className = matcher.group(1);
-      String path = matcher.group(2);
+      String className = matcher.group("c");
+      String path = matcher.group("f");
       if (!shouldAddEntry(path)) continue;
       addJarEntry(jar, className.replace(".", "/") + ".class");
       count ++;

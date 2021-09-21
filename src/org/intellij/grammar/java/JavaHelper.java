@@ -257,7 +257,10 @@ public abstract class JavaHelper {
 
       PsiMethod psiMethod = (PsiMethod)method;
       PsiTypeParameter[] typeParameters = psiMethod.getTypeParameters();
-      return ContainerUtil.map(typeParameters, TypeParameterInfo::new);
+      return ContainerUtil.map(typeParameters, param -> new TypeParameterInfo(
+        param.getName(),
+        ContainerUtil.map(param.getExtendsListTypes(), bound -> bound.getCanonicalText(false)),
+        getAnnotationsInner(param)));
     }
 
     @Override
@@ -409,7 +412,13 @@ public abstract class JavaHelper {
       Method delegate = ((MyElement<Method>)method).delegate;
 
       TypeVariable<Method>[] typeParameters = delegate.getTypeParameters();
-      return ContainerUtil.map(typeParameters, TypeParameterInfo::new);
+      return ContainerUtil.map(typeParameters, param -> new TypeParameterInfo(
+        param.getName(),
+        ContainerUtil.mapNotNull(param.getBounds(), type -> {
+          String typeName = type.getTypeName();
+          return "java.lang.Object".equals(typeName) ? null : typeName;
+        }),
+        ContainerUtil.mapNotNull(param.getAnnotations(), o -> o.annotationType().getCanonicalName())));
     }
 
     @Override
@@ -1057,25 +1066,16 @@ public abstract class JavaHelper {
     private final List<String> extendsList;
     private final List<String> annotations;
 
-    public TypeParameterInfo(@NotNull PsiTypeParameter parameter) {
-      name = parameter.getName();
-      extendsList = ContainerUtil.map(parameter.getExtendsListTypes(), bound -> bound.getCanonicalText(false));
-      annotations = PsiHelper.getAnnotationsInner(parameter);
-    }
-
-    public TypeParameterInfo(@NotNull TypeVariable<Method> parameter) {
-      name = parameter.getName();
-      extendsList = ContainerUtil.mapNotNull(parameter.getBounds(), type -> {
-        String typeName = type.getTypeName();
-        return "java.lang.Object".equals(typeName) ? null : typeName;
-      });
-      annotations = ContainerUtil.mapNotNull(parameter.getAnnotations(), o -> o.annotationType().getCanonicalName());
+    public TypeParameterInfo(@Nullable String name,
+                             @NotNull List<String> extendsList,
+                             @NotNull List<String> annotations) {
+      this.name = name;
+      this.extendsList = extendsList;
+      this.annotations = annotations;
     }
 
     public TypeParameterInfo(@NotNull String name) {
-      this.name = name;
-      this.extendsList = new SmartList<>();
-      this.annotations = new SmartList<>();
+      this(name, new SmartList<>(), new SmartList<>());
     }
 
     public String getName() {

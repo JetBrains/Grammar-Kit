@@ -48,6 +48,7 @@ public class LivePreviewParser implements PsiParser {
   private RuleGraphHelper myGraphHelper;
   private ExpressionHelper myExpressionHelper;
   private MultiMap<BnfRule, BnfRule> myRuleExtendsMap;
+  private BnfFirstNextAnalyzer myFirstNextAnalyzer;
   private String myTokenTypeText;
 
   private final TObjectIntHashMap<BnfRule> myRuleNumbers = new TObjectIntHashMap<>();
@@ -92,6 +93,7 @@ public class LivePreviewParser implements PsiParser {
     myGraphHelper = RuleGraphHelper.getCached(myFile);
     myRuleExtendsMap = myGraphHelper.getRuleExtendsMap();
     myExpressionHelper = ExpressionHelper.getCached(myFile);
+    myFirstNextAnalyzer = BnfFirstNextAnalyzer.createAnalyzer(true);
 
     myTokenTypeText = getRootAttribute(myFile, KnownAttribute.ELEMENT_TYPE_PREFIX);
 
@@ -644,8 +646,7 @@ public class LivePreviewParser implements PsiParser {
    * @noinspection StringEquality
    */
   private IElementType[] generateAutoRecoverCall(BnfRule rule) {
-    BnfFirstNextAnalyzer analyzer = new BnfFirstNextAnalyzer();
-    Set<BnfExpression> nextExprSet = analyzer.calcNext(rule).keySet();
+    Set<BnfExpression> nextExprSet = myFirstNextAnalyzer.calcNext(rule).keySet();
     Set<String> nextSet = BnfFirstNextAnalyzer.asStrings(nextExprSet);
     List<IElementType> tokenTypes = new ArrayList<>(nextSet.size());
 

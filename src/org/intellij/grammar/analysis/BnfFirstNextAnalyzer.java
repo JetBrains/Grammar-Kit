@@ -46,29 +46,36 @@ public class BnfFirstNextAnalyzer {
   public static final BnfExpression BNF_MATCHES_NOTHING = new FakeBnfExpression(MATCHES_NOTHING);
   public static final BnfExpression BNF_MATCHES_ANY     = new FakeBnfExpression(MATCHES_ANY);
 
-  private boolean myBackward;
-  private boolean myPublicRuleOpaque;
-  private boolean myPredicateLookAhead;
-  private Condition<PsiElement> myParentFilter;
+  private final boolean myBackward;
+  private final boolean myPublicRuleOpaque;
+  private final boolean myPredicateLookAhead;
+  private final Condition<PsiElement> myParentFilter;
 
-  public BnfFirstNextAnalyzer setBackward(boolean backward) {
+  // reference search and predicates can quickly get out of control, so NEXT results need to be cached
+  private final Map<BnfExpression, Map<BnfExpression, BnfExpression>> myNextCache = new THashMap<>();
+
+  public static BnfFirstNextAnalyzer createAnalyzer(boolean predicateLookAhead) {
+    return new BnfFirstNextAnalyzer(false, false, predicateLookAhead, null);
+  }
+
+  public static BnfFirstNextAnalyzer createAnalyzer(boolean predicateLookAhead,
+                                                    boolean publicRuleOpaque,
+                                                    Condition<PsiElement> parentFilter) {
+    return new BnfFirstNextAnalyzer(false, publicRuleOpaque, predicateLookAhead, parentFilter);
+  }
+
+  public static BnfFirstNextAnalyzer createBackwardAnalyzer(boolean publicRuleOpaque) {
+    return new BnfFirstNextAnalyzer(true, publicRuleOpaque, false, null);
+  }
+
+  private BnfFirstNextAnalyzer(boolean backward,
+                               boolean publicRuleOpaque,
+                               boolean predicateLookAhead,
+                               Condition<PsiElement> parentFilter) {
     myBackward = backward;
-    return this;
-  }
-
-  public BnfFirstNextAnalyzer setPublicRuleOpaque(boolean publicRuleOpaque) {
     myPublicRuleOpaque = publicRuleOpaque;
-    return this;
-  }
-
-  public BnfFirstNextAnalyzer setParentFilter(Condition<PsiElement> parentFilter) {
-    myParentFilter = parentFilter;
-    return this;
-  }
-
-  public BnfFirstNextAnalyzer setPredicateLookAhead(boolean predicateLookAhead) {
     myPredicateLookAhead = predicateLookAhead;
-    return this;
+    myParentFilter = parentFilter;
   }
 
   public Set<BnfExpression> calcFirst(@NotNull BnfRule rule) {
@@ -78,8 +85,8 @@ public class BnfFirstNextAnalyzer {
     return calcFirstInner(expression, new THashSet<>(), visited);
   }
 
-  public Set<BnfExpression> calcFirst(@NotNull BnfExpression expressions) {
-    return calcFirstInner(expressions, new THashSet<>(), new THashSet<>());
+  public Set<BnfExpression> calcFirst(@NotNull BnfExpression expression) {
+    return calcFirstInner(expression, new THashSet<>(), new THashSet<>());
   }
 
   public Map<BnfExpression, BnfExpression> calcNext(@NotNull BnfRule targetRule) {
@@ -93,6 +100,9 @@ public class BnfFirstNextAnalyzer {
   private Map<BnfExpression, BnfExpression> calcNextInner(@NotNull BnfExpression targetExpression,
                                                           Map<BnfExpression, BnfExpression> result,
                                                           Set<BnfExpression> visited) {
+    Map<BnfExpression, BnfExpression> cached = myNextCache.get(targetExpression);
+    if (cached != null) return cached;
+
     LinkedList<BnfExpression> stack = new LinkedList<>();
     THashSet<BnfRule> totalVisited = new THashSet<>();
     Set<BnfExpression> curResult = new THashSet<>();
@@ -154,6 +164,7 @@ public class BnfFirstNextAnalyzer {
       }
     }
     if (result.isEmpty()) result.put(BNF_MATCHES_EOF, null);
+    myNextCache.put(targetExpression, result);
     return result;
   }
 

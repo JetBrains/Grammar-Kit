@@ -43,7 +43,7 @@ public class BnfDocumentationProvider implements DocumentationProvider {
   public @Nullable String generateDoc(PsiElement element, PsiElement originalElement) {
     if (element instanceof BnfRule) {
       BnfRule rule = (BnfRule)element;
-      BnfFirstNextAnalyzer analyzer = new BnfFirstNextAnalyzer();
+      BnfFirstNextAnalyzer analyzer = BnfFirstNextAnalyzer.createAnalyzer(false);
       Set<String> first = BnfFirstNextAnalyzer.asStrings(analyzer.calcFirst(rule));
       Set<String> next = BnfFirstNextAnalyzer.asStrings(analyzer.calcNext(rule).keySet());
 

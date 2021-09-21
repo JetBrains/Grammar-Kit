@@ -24,12 +24,13 @@ public class BnfLeftRecursionInspection extends LocalInspectionTool {
   @Override
   public @NotNull PsiElementVisitor buildVisitor(@NotNull ProblemsHolder holder, boolean isOnTheFly) {
     return new BnfVisitor<Void>() {
+      final BnfFirstNextAnalyzer analyzer = BnfFirstNextAnalyzer.createAnalyzer(false);
+
       @Override
       public Void visitRule(@NotNull BnfRule o) {
         if (ParserGeneratorUtil.Rule.isFake(o)) return null;
         BnfFile file = (BnfFile)o.getContainingFile();
         ExpressionHelper expressionHelper = ExpressionHelper.getCached(file);
-        BnfFirstNextAnalyzer analyzer = new BnfFirstNextAnalyzer();
         String ruleName = o.getName();
         boolean exprParsing = ExpressionGeneratorHelper.getInfoForExpressionParsing(expressionHelper, o) != null;
 

@@ -79,7 +79,7 @@ public class ExpressionHelper {
   }
 
   private void buildExpressionRules() {
-    BnfFirstNextAnalyzer analyzer = new BnfFirstNextAnalyzer();
+    BnfFirstNextAnalyzer analyzer = BnfFirstNextAnalyzer.createAnalyzer(false);
     for (BnfRule rule : myFile.getRules()) {
       if (Rule.isPrivate(rule) || Rule.isFake(rule)) continue;
       if (myRootRulesMap.containsKey(rule)) continue;

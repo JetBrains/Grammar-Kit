@@ -147,6 +147,7 @@ public class ParserGenerator {
   private final RuleGraphHelper myGraphHelper;
   private final ExpressionHelper myExpressionHelper;
   private final RuleMethodsHelper myRulesMethodsHelper;
+  private final BnfFirstNextAnalyzer myFirstNextAnalyzer;
   private final JavaHelper myJavaHelper;
 
   final Names N;
@@ -181,6 +182,7 @@ public class ParserGenerator {
     myGraphHelper = RuleGraphHelper.getCached(myFile);
     myExpressionHelper = new ExpressionHelper(myFile, myGraphHelper, this::addWarning);
     myRulesMethodsHelper = new RuleMethodsHelper(myGraphHelper, myExpressionHelper, mySimpleTokens, G);
+    myFirstNextAnalyzer = BnfFirstNextAnalyzer.createAnalyzer(true);
     myJavaHelper = JavaHelper.getJavaHelper(myFile);
 
     List<BnfRule> rules = psiFile.getRules();
@@ -1042,8 +1044,7 @@ public class ParserGenerator {
 
   /** @noinspection StringEquality*/
   private String generateAutoRecoverCall(BnfRule rule) {
-    BnfFirstNextAnalyzer analyzer = new BnfFirstNextAnalyzer().setPredicateLookAhead(true);
-    Set<BnfExpression> nextExprSet = analyzer.calcNext(rule).keySet();
+    Set<BnfExpression> nextExprSet = myFirstNextAnalyzer.calcNext(rule).keySet();
     Set<String> nextSet = BnfFirstNextAnalyzer.asStrings(nextExprSet);
     List<String> tokenTypes = new ArrayList<>(nextSet.size());
 
@@ -1074,8 +1075,7 @@ public class ParserGenerator {
 
   public String generateFirstCheck(BnfRule rule, String frameName, boolean skipIfOne) {
     if (G.generateFirstCheck <= 0) return frameName;
-    BnfFirstNextAnalyzer analyzer = new BnfFirstNextAnalyzer().setPredicateLookAhead(true);
-    Set<BnfExpression> firstSet = analyzer.calcFirst(rule);
+    Set<BnfExpression> firstSet = myFirstNextAnalyzer.calcFirst(rule);
     ConsumeType ruleConsumeType = getRuleConsumeType(rule, null);
     Map<String, ConsumeType> firstElementTypes = new TreeMap<>();
     for (BnfExpression expression : firstSet) {
@@ -1343,8 +1343,7 @@ public class ParserGenerator {
 
     if (forcedConsumeType == null && parent instanceof BnfSequence &&
         ContainerUtil.getFirstItem(((BnfSequence)parent).getExpressionList()) != node) {
-      Set<BnfExpression> expressions = new BnfFirstNextAnalyzer()
-        .setParentFilter(o -> o != parent)
+      Set<BnfExpression> expressions = BnfFirstNextAnalyzer.createAnalyzer(false, false, o -> o != parent)
         .calcFirst((BnfExpression)parent);
       if (expressions.size() != 1 || expressions.iterator().next() != node) {
         return ConsumeType.DEFAULT;

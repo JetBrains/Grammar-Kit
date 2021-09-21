@@ -225,8 +225,7 @@ public class RuleGraphHelper {
   }
 
   private void buildCollapseMap() {
-    BnfFirstNextAnalyzer analyzer = new BnfFirstNextAnalyzer()
-      .setPublicRuleOpaque(true).setParentFilter(o -> !(o instanceof BnfRule)).setPredicateLookAhead(true);
+    BnfFirstNextAnalyzer analyzer = BnfFirstNextAnalyzer.createAnalyzer(true, true, o -> !(o instanceof BnfRule));
 
     for (BnfRule rule : myFile.getRules()) {
       if (!myRuleExtendsMap.containsScalarValue(rule)) continue;
@@ -478,7 +477,7 @@ public class RuleGraphHelper {
 
   private static Map<BnfRule, Cardinality> getRulesToTheLeft(BnfRule rule) {
     Map<BnfRule, Cardinality> result = new LinkedHashMap<>();
-    Map<BnfExpression, BnfExpression> nextMap = new BnfFirstNextAnalyzer().setBackward(true).setPublicRuleOpaque(true).calcNext(rule);
+    Map<BnfExpression, BnfExpression> nextMap = BnfFirstNextAnalyzer.createBackwardAnalyzer(true).calcNext(rule);
     for (BnfExpression e : nextMap.keySet()) {
       if (!(e instanceof BnfReferenceOrToken)) continue;
       BnfRule r = ((BnfReferenceOrToken)e).resolveRule();

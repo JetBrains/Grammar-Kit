@@ -1,3 +1,11 @@
+2021.1.2
+
+* Generator: cache NEXT to avoid freezes
+* Generator: avoid java-api in standalone mode #278
+* Generator: fix NPE for "exact-types" + factory method #286
+* Generator: fix missing @Override on visitor methods
+* Generator: type annotations support (ASM)
+
 2021.1
 
 * JFlex: update downloadable lib url #264 

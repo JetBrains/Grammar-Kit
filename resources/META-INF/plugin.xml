@@ -15,10 +15,11 @@
   <change-notes>
     <![CDATA[
     <ul>
-      <li>JFlex: update downloadable lib url #264</li>
-      <li>Plugin: move java-related extensions to optional config #261</li>
-      <li>Editor: do not resolve meta rule parameters to rules</li>
-      <li>LivePreview: problem with meta rules #254</li>
+      <li>Generator: cache NEXT to avoid freezes</li>
+      <li>Generator: avoid java-api in standalone mode #278</li>
+      <li>Generator: fix NPE for "exact-types" + factory method #286</li>
+      <li>Generator: fix missing @Override on visitor methods</li>
+      <li>Generator: type annotations support (ASM)</li>
     </ul>
     <a href="https://github.com/JetBrains/Grammar-Kit/blob/master/CHANGELOG.md">Full change log...</a>
     ]]>

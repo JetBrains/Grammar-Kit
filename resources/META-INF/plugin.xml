@@ -12,19 +12,6 @@
   <depends optional="true" config-file="plugin-java.xml">com.intellij.java</depends>
   <depends optional="true" config-file="plugin-uml.xml">com.intellij.diagram</depends>
 
-  <change-notes>
-    <![CDATA[
-    <ul>
-      <li>Generator: cache NEXT to avoid freezes</li>
-      <li>Generator: avoid java-api in standalone mode #278</li>
-      <li>Generator: fix NPE for "exact-types" + factory method #286</li>
-      <li>Generator: fix missing @Override on visitor methods</li>
-      <li>Generator: type annotations support (ASM)</li>
-    </ul>
-    <a href="https://github.com/JetBrains/Grammar-Kit/blob/master/CHANGELOG.md">Full change log...</a>
-    ]]>
-  </change-notes>
-
   <extensions defaultExtensionNs="com.intellij">
     <fileType name="BNF" implementationClass="org.intellij.grammar.BnfFileType" fieldName="INSTANCE" extensions="bnf" language="BNF"/>
     <fileType name="BNF_LP" implementationClass="org.intellij.grammar.livePreview.LivePreviewFileType" fieldName="INSTANCE" language="BNF_LP"/>

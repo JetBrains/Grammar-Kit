@@ -48,6 +48,13 @@ intellij {
     updateSinceUntilBuild.set(false)
 }
 
+changelog {
+    header.set("${{ -> version.get() }}")
+    headerParserRegex.set("""(\d+(\.\d+)+)""")
+    itemPrefix.set("*")
+    unreleasedTerm.set("Unreleased")
+}
+
 val artifactsPath = properties("artifactsPath")
 
 val buildGrammarKitJar = tasks.create<Jar>("buildGrammarKitJar") {
@@ -94,6 +101,14 @@ tasks {
 
     buildSearchableOptions {
         enabled = false
+    }
+
+    patchPluginXml {
+        changeNotes.set(provider {
+            changelog.run {
+                getOrNull(project.version.toString()) ?: getLatest()
+            }.toHTML() + "<a href=\"https://github.com/JetBrains/Grammar-Kit/blob/master/CHANGELOG.md\">Full change log...</a>"
+        })
     }
 
     val buildGrammarKitZip = create<Zip>("buildGrammarKitZip") {

@@ -138,17 +138,59 @@ tasks {
     defaultTasks("clean", "artifacts", "test")
 }
 
+signing {
+    val signingKey = properties("signingKey")
+    val signingPassword = properties("signingPassword")
+
+    isRequired = !signingKey.isNullOrEmpty() && !signingPassword.isNullOrEmpty()
+
+    useInMemoryPgpKeys(signingKey, signingPassword)
+    sign(publishing.publications["zip-signer-maven"])
+    sign(publishing.publications["zip-signer-maven-all"])
+}
+
 publishing {
     publications {
         create<MavenPublication>("grammarKitJar") {
-            groupId = "com.github.JetBrains"
+            groupId = "org.jetbrains"
             artifactId = "grammar-kit"
             version = project.version.toString()
             from(components["java"])
             artifact(buildGrammarKitJar)
+
+            pom {
+                name.set("JetBrains Grammar-Kit")
+                description.set("Grammar-Kit library didicated for language plugin developers.")
+                url.set("https://github.com/JetBrains/Grammar-Kit")
+                licenses {
+                    license {
+                        name.set("The Apache Software License, Version 2.0")
+                        url.set("https://github.com/JetBrains/Grammar-Kit/blob/master/LICENSE.md")
+                    }
+                }
+                developers {
+                    developer {
+                        id.set("gregsh")
+                        name.set("Greg Shrago")
+                        organization.set("JetBrains")
+                    }
+                }
+                scm {
+                    connection.set("scm:git:git://github.com/JetBrains/Grammar-Kit.git")
+                    developerConnection.set("scm:git:ssh://github.com/JetBrains/Grammar-Kit.git")
+                    url.set("https://github.com/JetBrains/Grammar-Kit")
+                }
+            }
         }
     }
     repositories {
-        mavenLocal()
+        maven {
+            url = uri("https://oss.sonatype.org/service/local/staging/deploy/maven2")
+
+            credentials {
+                username = property("mavenCentralUsername")
+                password = property("mavenCentralPassword")
+            }
+        }
     }
 }

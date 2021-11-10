@@ -26,7 +26,7 @@ plugins {
     id("com.github.breadmoirai.github-release") version "2.2.12"
 }
 
-version = properties("pluginVersion")
+version = properties("pluginVersion").toString()
 
 repositories {
     mavenCentral()
@@ -56,7 +56,7 @@ changelog {
     unreleasedTerm.set("Unreleased")
 }
 
-val artifactsPath = properties("artifactsPath")
+val artifactsPath = properties("artifactsPath").toString()
 
 val buildGrammarKitJar = tasks.create<Jar>("buildGrammarKitJar") {
     dependsOn("assemble")

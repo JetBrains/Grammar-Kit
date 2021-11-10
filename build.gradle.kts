@@ -22,6 +22,7 @@ plugins {
     id("idea")
     id("java")
     id("maven-publish")
+    id("signing")
     id("com.github.breadmoirai.github-release") version "2.2.12"
 }
 
@@ -138,17 +139,6 @@ tasks {
     defaultTasks("clean", "artifacts", "test")
 }
 
-signing {
-    val signingKey = properties("signingKey")
-    val signingPassword = properties("signingPassword")
-
-    isRequired = !signingKey.isNullOrEmpty() && !signingPassword.isNullOrEmpty()
-
-    useInMemoryPgpKeys(signingKey, signingPassword)
-    sign(publishing.publications["zip-signer-maven"])
-    sign(publishing.publications["zip-signer-maven-all"])
-}
-
 publishing {
     publications {
         create<MavenPublication>("grammarKitJar") {
@@ -188,9 +178,19 @@ publishing {
             url = uri("https://oss.sonatype.org/service/local/staging/deploy/maven2")
 
             credentials {
-                username = property("mavenCentralUsername")
-                password = property("mavenCentralPassword")
+                username = properties("mavenCentralUsername")
+                password = properties("mavenCentralPassword")
             }
         }
     }
+}
+
+signing {
+    val signingKey = properties("signingKey")
+    val signingPassword = properties("signingPassword")
+
+    isRequired = !signingKey.isNullOrEmpty() && !signingPassword.isNullOrEmpty()
+
+    useInMemoryPgpKeys(signingKey, signingPassword)
+    sign(publishing.publications["grammarKitJar"])
 }

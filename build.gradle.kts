@@ -42,6 +42,11 @@ idea {
     }
 }
 
+java {
+    withJavadocJar()
+    withSourcesJar()
+}
+
 intellij {
     pluginName.set(properties("pluginName"))
     version.set(properties("ideaVersion"))
@@ -85,6 +90,12 @@ tasks {
         include("**/BnfTestSuite.class")
         isScanForTestClasses = false
         ignoreFailures = true
+    }
+
+    withType<Javadoc>().configureEach {
+        (options as StandardJavadocDocletOptions).apply {
+            addStringOption("Xdoclint:none", "-quiet")
+        }
     }
 
     wrapper {
@@ -147,11 +158,10 @@ publishing {
             artifactId = "grammar-kit"
             version = project.version.toString()
             from(components["java"])
-            artifact(buildGrammarKitJar)
 
             pom {
                 name.set("JetBrains Grammar-Kit")
-                description.set("Grammar-Kit library didicated for language plugin developers.")
+                description.set("Grammar-Kit library dedicated for language plugin developers.")
                 url.set("https://github.com/JetBrains/Grammar-Kit")
                 licenses {
                     license {

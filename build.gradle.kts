@@ -43,6 +43,7 @@ idea {
 }
 
 intellij {
+    pluginName.set(properties("pluginName"))
     version.set(properties("ideaVersion"))
     type.set("IU")
     plugins.set(listOf("uml", "java"))

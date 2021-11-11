@@ -1,7 +1,7 @@
 <component name="InspectionProjectProfileManager">
   <profile version="1.0" is_locked="false">
     <option name="myName" value="Project Default" />
-    <inspection_tool class="AssignmentToCatchBlockParameter" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="AssignmentOrReturnOfFieldWithMutableTypeMerged" />
     <inspection_tool class="AssignmentToCollectionFieldFromParameter" enabled="true" level="WARNING" enabled_by_default="true">
       <option name="ignorePrivateMethods" value="true" />
     </inspection_tool>
@@ -9,7 +9,6 @@
       <option name="ignorePrivateMethods" value="true" />
     </inspection_tool>
     <inspection_tool class="AssignmentToStaticFieldFromInstanceMethod" enabled="true" level="WARNING" enabled_by_default="true" />
-    <inspection_tool class="AssignmentUsedAsCondition" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="ClassInTopLevelPackage" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="ClassInitializer" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="ClassMayBeInterface" enabled="true" level="WARNING" enabled_by_default="true" />
@@ -17,7 +16,6 @@
     <inspection_tool class="ClassReferencesSubclass" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="CloneCallsConstructors" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="CloneInNonCloneableClass" enabled="true" level="WARNING" enabled_by_default="true" />
-    <inspection_tool class="ConditionalExpressionWithIdenticalBranches" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="ConstantDeclaredInAbstractClass" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="DeclareCollectionAsInterface" enabled="true" level="WARNING" enabled_by_default="true">
       <option name="ignoreLocalVariables" value="false" />
@@ -25,9 +23,6 @@
     </inspection_tool>
     <inspection_tool class="DefaultNotLastCaseInSwitch" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="DuplicateBooleanBranch" enabled="true" level="WARNING" enabled_by_default="true" />
-    <inspection_tool class="DuplicateCondition" enabled="true" level="WARNING" enabled_by_default="true">
-      <option name="ignoreMethodCalls" value="false" />
-    </inspection_tool>
     <inspection_tool class="EmptyClass" enabled="true" level="WARNING" enabled_by_default="true">
       <option name="ignorableAnnotations">
         <value />
@@ -40,10 +35,8 @@
       <option name="ignoreSwitchStatementsWithDefault" value="false" />
     </inspection_tool>
     <inspection_tool class="FallthruInSwitchStatement" enabled="true" level="WARNING" enabled_by_default="true" />
-    <inspection_tool class="FieldMayBeFinal" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="FinalClass" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="FinalMethod" enabled="true" level="WARNING" enabled_by_default="true" />
-    <inspection_tool class="FinalMethodInFinalClass" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="ForLoopReplaceableByWhile" enabled="true" level="WARNING" enabled_by_default="true">
       <option name="m_ignoreLoopsWithoutConditions" value="false" />
     </inspection_tool>
@@ -56,9 +49,6 @@
     <inspection_tool class="LimitedScopeInnerClass" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="ListenerMayUseAdapter" enabled="true" level="WARNING" enabled_by_default="true">
       <option name="checkForEmptyMethods" value="true" />
-    </inspection_tool>
-    <inspection_tool class="LoopConditionNotUpdatedInsideLoop" enabled="true" level="WARNING" enabled_by_default="true">
-      <option name="ignoreIterators" value="false" />
     </inspection_tool>
     <inspection_tool class="LoopWithImplicitTerminationCondition" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="MagicNumber" enabled="true" level="WARNING" enabled_by_default="true" />
@@ -76,8 +66,6 @@
       <option name="ignoreRequiredObsoleteCollectionTypes" value="false" />
     </inspection_tool>
     <inspection_tool class="PointlessIndexOfComparison" enabled="true" level="WARNING" enabled_by_default="true" />
-    <inspection_tool class="PointlessNullCheck" enabled="true" level="WARNING" enabled_by_default="true" />
-    <inspection_tool class="ProtectedMemberInFinalClass" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="PublicConstructorInNonPublicClass" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="ReplaceAssignmentWithOperatorAssignment" enabled="true" level="WARNING" enabled_by_default="true">
       <option name="ignoreLazyOperators" value="true" />
@@ -93,9 +81,6 @@
       <option name="m_limit" value="20" />
     </inspection_tool>
     <inspection_tool class="SwitchStatementWithConfusingDeclaration" enabled="true" level="WARNING" enabled_by_default="true" />
-    <inspection_tool class="SwitchStatementWithTooFewBranches" enabled="true" level="WARNING" enabled_by_default="true">
-      <option name="m_limit" value="2" />
-    </inspection_tool>
     <inspection_tool class="SwitchStatementWithTooManyBranches" enabled="true" level="WARNING" enabled_by_default="true">
       <option name="m_limit" value="10" />
     </inspection_tool>
@@ -112,13 +97,7 @@
       <option name="m_ignoreStaticMethodCalls" value="false" />
       <option name="m_ignoreStaticAccessFromStaticContext" value="false" />
     </inspection_tool>
-    <inspection_tool class="UnnecessaryDefault" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="UtilityClassWithPublicConstructor" enabled="true" level="WARNING" enabled_by_default="true" />
-    <inspection_tool class="WeakerAccess" enabled="false" level="WARNING" enabled_by_default="false">
-      <option name="SUGGEST_PACKAGE_LOCAL_FOR_MEMBERS" value="true" />
-      <option name="SUGGEST_PACKAGE_LOCAL_FOR_TOP_CLASSES" value="true" />
-      <option name="SUGGEST_PRIVATE_FOR_INNERS" value="false" />
-    </inspection_tool>
     <inspection_tool class="ZeroLengthArrayInitialization" enabled="true" level="WARNING" enabled_by_default="true" />
   </profile>
 </component>

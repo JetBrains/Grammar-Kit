@@ -16,7 +16,7 @@ jobs:
 
       # Check out current repository
       - name: Fetch Sources
-        uses: actions/checkout@v2.3.5
+        uses: actions/checkout@v2.4.0
         with:
           ref: ${{ github.event.release.tag_name }}
 
@@ -38,16 +38,19 @@ jobs:
           EOM
           )"
           
+          CHANGELOG="${CHANGELOG//'%'/'%25'}"
+          CHANGELOG="${CHANGELOG//$'\n'/'%0A'}"
+          CHANGELOG="${CHANGELOG//$'\r'/'%0D'}"
+
           echo "::set-output name=changelog::$CHANGELOG"
 
       # Update Unreleased section with the current release note
       - name: Patch Changelog
         if: ${{ steps.properties.outputs.changelog != '' }}
+        env:
+          CHANGELOG: ${{ steps.properties.outputs.changelog }}
         run: |
-          ./gradlew patchChangelog --release-note "$(cat << 'EOM'
-          ${{ steps.properties.outputs.changelog }}
-          EOM
-          )"
+          ./gradlew patchChangelog --release-note="$CHANGELOG"
 
       # Publish JAR to Maven Central
       - name: Publish library

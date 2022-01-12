@@ -13,7 +13,7 @@ import com.intellij.openapi.util.Pair;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiWhiteSpace;
-import com.intellij.psi.util.PsiUtil;
+import com.intellij.psi.util.PsiUtilCore;
 import com.intellij.util.IncorrectOperationException;
 import org.intellij.grammar.psi.*;
 import org.intellij.grammar.psi.impl.BnfElementFactory;
@@ -57,7 +57,7 @@ public class BnfUnwrapDescriptor implements UnwrapDescriptor, Unwrapper {
 
   @Override
   public boolean isApplicableTo(@NotNull PsiElement e) {
-    return e instanceof BnfParenthesized && !PsiUtil.hasErrorElementChild(e);
+    return e instanceof BnfParenthesized && !PsiUtilCore.hasErrorElementChild(e);
   }
 
   @Override

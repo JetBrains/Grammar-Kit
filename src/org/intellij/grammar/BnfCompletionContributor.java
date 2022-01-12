@@ -16,7 +16,7 @@ import com.intellij.patterns.PsiElementPattern;
 import com.intellij.psi.*;
 import com.intellij.psi.impl.source.tree.TreeUtil;
 import com.intellij.psi.util.PsiTreeUtil;
-import com.intellij.psi.util.PsiUtil;
+import com.intellij.psi.util.PsiUtilCore;
 import com.intellij.util.ObjectUtils;
 import com.intellij.util.ProcessingContext;
 import com.intellij.util.containers.ContainerUtil;
@@ -157,7 +157,7 @@ public class BnfCompletionContributor extends CompletionContributor {
     if (file == null) return;
     int offset = context.getStartOffset();
     PsiElement element = file.findElementAt(offset);
-    if (PsiUtil.getElementType(element) == BNF_ID) {
+    if (PsiUtilCore.getElementType(element) == BNF_ID) {
       context.setDummyIdentifier("");
     }
   }

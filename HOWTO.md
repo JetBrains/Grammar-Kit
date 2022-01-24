@@ -384,6 +384,9 @@ IV. Tips and Tricks
 
 4.1. Trailing commas
 --------------------
+
+The `&rule` checks if the `rule` can be parsed in this position. Effectively it parses rule and then rollbacks to the original state and allows one to implement a lookahead.
+
 Imagine a language which allows trailing commas in lists, e.g.
 ```
 ( item1, item2, item3, )

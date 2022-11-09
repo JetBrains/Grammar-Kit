@@ -16,8 +16,7 @@ import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.util.CommonProcessors;
 import com.intellij.util.containers.ContainerUtil;
 import com.intellij.util.containers.JBIterable;
-import gnu.trove.THashMap;
-import gnu.trove.THashSet;
+import it.unimi.dsi.fastutil.objects.ObjectOpenCustomHashSet;
 import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.generator.ParserGeneratorUtil;
 import org.intellij.grammar.generator.RuleGraphHelper;
@@ -36,7 +35,7 @@ import static com.intellij.util.containers.ContainerUtil.union;
  */
 public class BnfFirstNextAnalyzer {
 
-  private static final Logger LOG = Logger.getInstance("org.intellij.grammar.analysis.BnfFirstNextAnalyzer");
+  private static final Logger LOG = Logger.getInstance(BnfFirstNextAnalyzer.class);
 
   public static final String MATCHES_EOF = "-eof-";
   public static final String MATCHES_NOTHING = "-never-matches-";
@@ -52,7 +51,7 @@ public class BnfFirstNextAnalyzer {
   private final Condition<PsiElement> myParentFilter;
 
   // reference search and predicates can quickly get out of control, so NEXT results need to be cached
-  private final Map<BnfExpression, Map<BnfExpression, BnfExpression>> myNextCache = new THashMap<>();
+  private final Map<BnfExpression, Map<BnfExpression, BnfExpression>> myNextCache = new HashMap<>();
 
   public static BnfFirstNextAnalyzer createAnalyzer(boolean predicateLookAhead) {
     return new BnfFirstNextAnalyzer(false, false, predicateLookAhead, null);
@@ -79,22 +78,22 @@ public class BnfFirstNextAnalyzer {
   }
 
   public Set<BnfExpression> calcFirst(@NotNull BnfRule rule) {
-    Set<BnfExpression> visited = new THashSet<>();
+    Set<BnfExpression> visited = new HashSet<>();
     BnfExpression expression = rule.getExpression();
     visited.add(expression);
-    return calcFirstInner(expression, new THashSet<>(), visited);
+    return calcFirstInner(expression, new HashSet<>(), visited);
   }
 
   public Set<BnfExpression> calcFirst(@NotNull BnfExpression expression) {
-    return calcFirstInner(expression, new THashSet<>(), new THashSet<>());
+    return calcFirstInner(expression, new HashSet<>(), new HashSet<>());
   }
 
   public Map<BnfExpression, BnfExpression> calcNext(@NotNull BnfRule targetRule) {
-    return calcNextInner(targetRule.getExpression(), new THashMap<>(), new THashSet<>());
+    return calcNextInner(targetRule.getExpression(), new HashMap<>(), new HashSet<>());
   }
 
   public Map<BnfExpression, BnfExpression> calcNext(@NotNull BnfExpression targetExpression) {
-    return calcNextInner(targetExpression, new THashMap<>(), new THashSet<>());
+    return calcNextInner(targetExpression, new HashMap<>(), new HashSet<>());
   }
 
   private Map<BnfExpression, BnfExpression> calcNextInner(@NotNull BnfExpression targetExpression,
@@ -104,8 +103,8 @@ public class BnfFirstNextAnalyzer {
     if (cached != null) return cached;
 
     LinkedList<BnfExpression> stack = new LinkedList<>();
-    THashSet<BnfRule> totalVisited = new THashSet<>();
-    Set<BnfExpression> curResult = new THashSet<>();
+    HashSet<BnfRule> totalVisited = new HashSet<>();
+    Set<BnfExpression> curResult = new HashSet<>();
     stack.add(targetExpression);
     main: while (!stack.isEmpty()) {
 
@@ -314,7 +313,7 @@ public class BnfFirstNextAnalyzer {
       }
       else {
         if (forcedNext == null) {
-          next = calcNextInner(expression, new THashMap<>(), visited).keySet();
+          next = calcNextInner(expression, new HashMap<>(), visited).keySet();
         }
         else {
           next = calcSequenceFirstInner(forcedNext.second, newExprSet(), visited);
@@ -414,11 +413,11 @@ public class BnfFirstNextAnalyzer {
   }
 
   private static @NotNull Set<BnfExpression> newExprSet() {
-    return new THashSet<>(ParserGeneratorUtil.textStrategy());
+    return new ObjectOpenCustomHashSet<>(ParserGeneratorUtil.textStrategy());
   }
 
   private static @NotNull Set<BnfExpression> newExprSet(Collection<BnfExpression> expressions) {
-    return new THashSet<>(expressions, ParserGeneratorUtil.textStrategy());
+    return new ObjectOpenCustomHashSet<>(expressions, ParserGeneratorUtil.textStrategy());
   }
 
   private static @NotNull Set<BnfExpression> exprSetUnion(Collection<BnfExpression> a, Collection<BnfExpression> b) {

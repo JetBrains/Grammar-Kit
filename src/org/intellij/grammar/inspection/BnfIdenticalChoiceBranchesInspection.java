@@ -7,13 +7,13 @@ package org.intellij.grammar.inspection;
 import com.intellij.codeInspection.LocalInspectionTool;
 import com.intellij.codeInspection.ProblemsHolder;
 import com.intellij.psi.PsiElementVisitor;
-import gnu.trove.THashSet;
 import org.intellij.grammar.psi.BnfChoice;
 import org.intellij.grammar.psi.BnfExpression;
 import org.intellij.grammar.psi.BnfVisitor;
 import org.intellij.grammar.psi.impl.GrammarUtil;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -29,7 +29,7 @@ public class BnfIdenticalChoiceBranchesInspection extends LocalInspectionTool {
   @Override
   public @NotNull PsiElementVisitor buildVisitor(@NotNull ProblemsHolder holder, boolean isOnTheFly) {
     return new BnfVisitor<Void>() {
-      final THashSet<BnfExpression> set = new THashSet<>();
+      final HashSet<BnfExpression> set = new HashSet<>();
       @Override
       public Void visitChoice(@NotNull BnfChoice o) {
         checkChoice(o, set);

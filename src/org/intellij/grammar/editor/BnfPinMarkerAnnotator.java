@@ -6,6 +6,7 @@ package org.intellij.grammar.editor;
 
 import com.intellij.lang.annotation.AnnotationHolder;
 import com.intellij.lang.annotation.Annotator;
+import com.intellij.lang.annotation.HighlightSeverity;
 import com.intellij.openapi.project.DumbAware;
 import com.intellij.openapi.util.Pair;
 import com.intellij.openapi.util.TextRange;
@@ -53,7 +54,10 @@ public class BnfPinMarkerAnnotator implements Annotator, DumbAware {
       TextRange textRange = e.getTextRange();
       TextRange infoRange = fullRange ? textRange : TextRange.create(prev.getTextRange().getEndOffset() + 1, textRange.getEndOffset());
       String message = attr == null ? (fullRange ? "Pinned" : "Pinned again") : attr.getText();
-      annotationHolder.createInfoAnnotation(infoRange, message).setTextAttributes(BnfSyntaxHighlighter.PIN_MARKER);
+      annotationHolder.newAnnotation(HighlightSeverity.INFORMATION, message)
+        .range(infoRange)
+        .textAttributes(BnfSyntaxHighlighter.PIN_MARKER)
+        .create();
     }
   }
 }

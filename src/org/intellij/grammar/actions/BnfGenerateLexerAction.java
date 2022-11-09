@@ -76,7 +76,7 @@ public class BnfGenerateLexerAction extends AnAction {
     BnfFile bnfFile = (BnfFile) file;
     String flexFileName = getFlexFileName(bnfFile);
 
-    Collection<VirtualFile> files = FilenameIndex.getVirtualFilesByName(project, flexFileName, ProjectScope.getAllScope(project));
+    Collection<VirtualFile> files = FilenameIndex.getVirtualFilesByName(flexFileName, ProjectScope.getAllScope(project));
     VirtualFile firstItem = ContainerUtil.getFirstItem(files);
 
     FileSaverDescriptor descriptor = new FileSaverDescriptor("Save JFlex Lexer", "", "flex");

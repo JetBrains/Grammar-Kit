@@ -20,8 +20,7 @@ import com.intellij.util.containers.ContainerUtil;
 import com.intellij.util.containers.JBIterable;
 import com.intellij.util.containers.JBTreeTraverser;
 import com.intellij.util.containers.TreeTraversal;
-import gnu.trove.THashSet;
-import gnu.trove.TObjectHashingStrategy;
+import it.unimi.dsi.fastutil.Hash;
 import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.java.JavaHelper;
 import org.intellij.grammar.psi.*;
@@ -44,7 +43,7 @@ import static org.intellij.grammar.psi.BnfTypes.BNF_SEQUENCE;
  */
 public class ParserGeneratorUtil {
   private static final String RESERVED_SUFFIX = "_$";
-  private static final Set<String> JAVA_RESERVED = new THashSet<>(Arrays.asList(
+  private static final Set<String> JAVA_RESERVED = new HashSet<>(Arrays.asList(
     "abstract", "assert", "boolean", "break", "byte", "case", "catch", "char", "class",
     "const", "default", "do", "double", "else", "enum", "extends", "false", "final", "finally",
     "float", "for", "goto", "if", "implements", "import", "instanceof", "int", "interface", "long",
@@ -926,20 +925,20 @@ public class ParserGeneratorUtil {
     return "static " + fqn + ".*";
   }
 
-  private static final TObjectHashingStrategy<PsiElement> TEXT_STRATEGY = new TObjectHashingStrategy<>() {
+  private static final Hash.Strategy<PsiElement> TEXT_STRATEGY = new Hash.Strategy<>() {
     @Override
-    public int computeHashCode(PsiElement e) {
-      return e.getText().hashCode();
+    public int hashCode(PsiElement e) {
+      return e == null ? 0 : e.getText().hashCode();
     }
 
     @Override
     public boolean equals(PsiElement e1, PsiElement e2) {
-      return Objects.equals(e1.getText(), e2.getText());
+      return e1 == null ? e2 == null : e2 != null && Objects.equals(e1.getText(), e2.getText());
     }
   };
 
-  public static <T extends PsiElement> TObjectHashingStrategy<T> textStrategy() {
-    return (TObjectHashingStrategy<T>)TEXT_STRATEGY;
+  public static <T extends PsiElement> Hash.Strategy<T> textStrategy() {
+    return (Hash.Strategy<T>)TEXT_STRATEGY;
   }
 
   static @NotNull <K extends Comparable<? super K>, V> Map<K, V> take(@NotNull Map<K, V> map) {

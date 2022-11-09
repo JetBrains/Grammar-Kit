@@ -9,13 +9,13 @@ import com.intellij.openapi.fileTypes.SyntaxHighlighter;
 import com.intellij.openapi.options.colors.AttributesDescriptor;
 import com.intellij.openapi.options.colors.ColorDescriptor;
 import com.intellij.openapi.options.colors.ColorSettingsPage;
-import gnu.trove.THashMap;
 import org.intellij.grammar.BnfIcons;
 import org.intellij.grammar.generator.BnfConstants;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
+import java.util.HashMap;
 import java.util.Map;
 
 import static org.intellij.grammar.editor.BnfSyntaxHighlighter.*;
@@ -98,7 +98,7 @@ public class BnfColorSettingsPage implements ColorSettingsPage {
 
   public Map<String, TextAttributesKey> getAdditionalHighlightingTagToDescriptorMap() {
     @NonNls
-    Map<String, TextAttributesKey> map = new THashMap<>();
+    Map<String, TextAttributesKey> map = new HashMap<>();
     map.put("r", RULE);
     map.put("mr", META_RULE);
     map.put("a", ATTRIBUTE);

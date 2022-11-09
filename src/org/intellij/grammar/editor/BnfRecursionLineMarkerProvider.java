@@ -54,7 +54,8 @@ public class BnfRecursionLineMarkerProvider implements LineMarkerProvider {
             AllIcons.Gutter.RecursiveMethod,
             FunctionUtil.constant("Recursive rule"),
             null,
-            GutterIconRenderer.Alignment.RIGHT
+            GutterIconRenderer.Alignment.RIGHT,
+            () -> "Recursive rule"
       );
     }
 

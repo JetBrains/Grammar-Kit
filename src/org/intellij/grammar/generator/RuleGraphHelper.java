@@ -14,9 +14,8 @@ import com.intellij.psi.util.*;
 import com.intellij.util.CommonProcessors;
 import com.intellij.util.ObjectUtils;
 import com.intellij.util.containers.MultiMap;
-import gnu.trove.THashMap;
-import gnu.trove.THashSet;
-import gnu.trove.TObjectHashingStrategy;
+import it.unimi.dsi.fastutil.Hash;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenCustomHashMap;
 import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.analysis.BnfFirstNextAnalyzer;
 import org.intellij.grammar.psi.*;
@@ -38,13 +37,13 @@ import static org.intellij.grammar.psi.impl.GrammarUtil.isDoubleAngles;
  *         Date: 16.07.11 10:41
  */
 public class RuleGraphHelper {
-  private static final TObjectHashingStrategy<PsiElement> CARDINALITY_HASHING_STRATEGY = new TObjectHashingStrategy<>() {
+  private static final Hash.Strategy<PsiElement> CARDINALITY_HASHING_STRATEGY = new Hash.Strategy<>() {
     @Override
-    public int computeHashCode(PsiElement e) {
+    public int hashCode(PsiElement e) {
       if (e instanceof BnfReferenceOrToken || e instanceof BnfLiteralExpression) {
         return e.getText().hashCode();
       }
-      return CANONICAL.computeHashCode(e);
+      return Objects.hashCode(e);
     }
 
     @Override
@@ -53,16 +52,16 @@ public class RuleGraphHelper {
           e1 instanceof BnfLiteralExpression && e2 instanceof BnfLiteralExpression) {
         return e1.getText().equals(e2.getText());
       }
-      return CANONICAL.equals(e1, e2);
+      return Objects.equals(e1, e2);
     }
   };
   private final BnfFile myFile;
   private final MultiMap<BnfRule, BnfRule> myRuleExtendsMap;
   private final MultiMap<BnfRule, BnfRule> myRulesGraph = newMultiMap();
-  private final Map<BnfRule, Map<PsiElement, Cardinality>> myRuleContentsMap = new THashMap<>();
+  private final Map<BnfRule, Map<PsiElement, Cardinality>> myRuleContentsMap = new HashMap<>();
   private final MultiMap<BnfRule, PsiElement> myRulesCollapseMap = newMultiMap();
-  private final Set<BnfRule> myRulesWithTokens = new THashSet<>();
-  private final Map<String, PsiElement> myExternalElements = new THashMap<>();
+  private final Set<BnfRule> myRulesWithTokens = new HashSet<>();
+  private final Map<String, PsiElement> myExternalElements = new HashMap<>();
 
   private static final IElementType EXTERNAL_TYPE = new FakeElementType("EXTERNAL_TYPE", Language.ANY);
   private static final IElementType MARKER_TYPE = new FakeElementType("MARKER_TYPE", Language.ANY);
@@ -619,17 +618,17 @@ public class RuleGraphHelper {
   }
 
   private static <V> Map<PsiElement, V> psiMap(PsiElement k, V v) {
-    Map<PsiElement, V> map = new THashMap<>(1, 1, CARDINALITY_HASHING_STRATEGY);
+    Map<PsiElement, V> map = new Object2ObjectOpenCustomHashMap<>(1, CARDINALITY_HASHING_STRATEGY);
     map.put(k, v);
     return map;
   }
 
   private static <V> Map<PsiElement, V> psiMap(Map<PsiElement, V> map) {
-    return new THashMap<>(map, CARDINALITY_HASHING_STRATEGY);
+    return new Object2ObjectOpenCustomHashMap<>(map, CARDINALITY_HASHING_STRATEGY);
   }
 
   private static <V> Map<PsiElement, V> psiMap() {
-    return new THashMap<>(3, CARDINALITY_HASHING_STRATEGY);
+    return new Object2ObjectOpenCustomHashMap<>(3, CARDINALITY_HASHING_STRATEGY);
   }
 
   /** @noinspection UnusedParameters*/

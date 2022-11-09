@@ -22,7 +22,7 @@ import java.util.List;
  */
 public class BnfElementFactory {
 
-  private static final Logger LOG = Logger.getInstance("org.intellij.grammar.psi.impl.BnfElementFactory");
+  private static final Logger LOG = Logger.getInstance(BnfElementFactory.class);
 
   private BnfElementFactory() {
   }

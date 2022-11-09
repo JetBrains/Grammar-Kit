@@ -5,9 +5,9 @@
 package org.intellij.grammar.actions;
 
 import com.intellij.notification.Notification;
-import com.intellij.notification.NotificationGroup;
 import com.intellij.notification.NotificationType;
 import com.intellij.notification.Notifications;
+import com.intellij.openapi.actionSystem.ActionUpdateThread;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.LangDataKeys;
@@ -17,7 +17,7 @@ import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.progress.*;
 import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.roots.ProjectFileIndex;
+import com.intellij.openapi.roots.PackageIndex;
 import com.intellij.openapi.util.Ref;
 import com.intellij.openapi.util.io.FileUtil;
 import com.intellij.openapi.util.text.StringUtil;
@@ -47,10 +47,12 @@ import static org.intellij.grammar.generator.ParserGeneratorUtil.getRootAttribut
  *         Date: 15.07.11 17:12
  */
 public class GenerateAction extends AnAction {
+  private static final Logger LOG = Logger.getInstance(GenerateAction.class);
 
-  public static final NotificationGroup LOG_GROUP = NotificationGroup.logOnlyGroup("Parser Generator Log");
-  
-  private static final Logger LOG = Logger.getInstance("org.intellij.grammar.actions.GenerateAction");
+  @Override
+  public @NotNull ActionUpdateThread getActionUpdateThread() {
+    return ActionUpdateThread.BGT;
+  }
 
   @Override
   public void update(@NotNull AnActionEvent e) {
@@ -84,7 +86,7 @@ public class GenerateAction extends AnAction {
     Map<VirtualFile, VirtualFile> rootMap = new LinkedHashMap<>();
     Map<VirtualFile, String> packageMap = new LinkedHashMap<>();
     PsiManager psiManager = PsiManager.getInstance(project);
-    ProjectFileIndex fileIndex = ProjectFileIndex.SERVICE.getInstance(project);
+    PackageIndex packageIndex = PackageIndex.getInstance(project);
     WriteAction.run(() -> {
       for (VirtualFile file : bnfFiles) {
         if (!file.isValid()) continue;
@@ -96,7 +98,7 @@ public class GenerateAction extends AnAction {
                                 StringUtil.getShortName(parserClass) + ".java",
                                 StringUtil.getPackageName(parserClass), true);
         rootMap.put(file, target);
-        packageMap.put(target, StringUtil.notNullize(fileIndex.getPackageNameByDirectory(target)));
+        packageMap.put(target, StringUtil.notNullize(packageIndex.getPackageNameByDirectory(target)));
       }
     });
 

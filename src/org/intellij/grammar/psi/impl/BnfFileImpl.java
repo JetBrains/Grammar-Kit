@@ -14,7 +14,6 @@ import com.intellij.psi.FileViewProvider;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.util.containers.ContainerUtil;
 import com.intellij.util.containers.JBIterable;
-import gnu.trove.THashMap;
 import org.intellij.grammar.BnfFileType;
 import org.intellij.grammar.BnfLanguage;
 import org.intellij.grammar.KnownAttribute;
@@ -158,7 +157,7 @@ public class BnfFileImpl extends PsiFileBase implements BnfFile {
   }
 
   private Map<String, List<AttributeInfo>> calcAttributeValues() {
-    Map<String, List<AttributeInfo>> result = new THashMap<>();
+    Map<String, List<AttributeInfo>> result = new HashMap<>();
     JBIterable<BnfAttrs> allAttrs = GrammarUtil.bnfTraverser(this)
       .expand(Conditions.notInstanceOf(BnfExpression.class))
       .filter(BnfAttrs.class);

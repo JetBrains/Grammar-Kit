@@ -17,7 +17,7 @@ import com.intellij.refactoring.util.CommonRefactoringUtil;
 import com.intellij.usageView.UsageInfo;
 import com.intellij.usageView.UsageViewDescriptor;
 import com.intellij.util.IncorrectOperationException;
-import gnu.trove.TObjectIntHashMap;
+import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import org.intellij.grammar.generator.ParserGeneratorUtil;
 import org.intellij.grammar.psi.*;
 import org.intellij.grammar.psi.impl.BnfElementFactory;
@@ -37,7 +37,8 @@ import java.util.List;
  * @author Vadim Romansky
  */
 public class BnfInlineRuleProcessor extends BaseRefactoringProcessor {
-  private static final Logger LOG = Logger.getInstance("org.intellij.grammar.refactor.BnfInlineRuleProcessor");
+  private static final Logger LOG = Logger.getInstance(BnfInlineRuleProcessor.class);
+
   private BnfRule myRule;
   private final PsiReference myReference;
   private final boolean myInlineThisOnly;
@@ -128,7 +129,7 @@ public class BnfInlineRuleProcessor extends BaseRefactoringProcessor {
       LOG.error(parent);
       return;
     }
-    TObjectIntHashMap<String> visited = new TObjectIntHashMap<>();
+    Object2IntOpenHashMap<String> visited = new Object2IntOpenHashMap<>();
     LinkedList<Pair<PsiElement, PsiElement>> work = new LinkedList<>();
     (expression = (BnfExpression)expression.copy()).acceptChildren(new PsiRecursiveElementWalkingVisitor() {
       @Override
@@ -137,7 +138,7 @@ public class BnfInlineRuleProcessor extends BaseRefactoringProcessor {
           List<BnfExpression> list = ((BnfExternalExpression)element).getExpressionList();
           if (list.size() == 1) {
             String text = list.get(0).getText();
-            int idx = visited.get(text);
+            int idx = visited.getInt(text);
             if (idx == 0) visited.put(text, idx = visited.size() + 1);
             if (idx < expressionList.size()) {
               work.addFirst(Pair.create(element, expressionList.get(idx)));

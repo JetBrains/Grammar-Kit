@@ -10,6 +10,7 @@ import com.intellij.notification.Notifications;
 import com.intellij.openapi.application.WriteAction;
 import com.intellij.openapi.progress.ProcessCanceledException;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.roots.PackageIndex;
 import com.intellij.openapi.roots.ProjectFileIndex;
 import com.intellij.openapi.roots.ProjectRootManager;
 import com.intellij.openapi.util.Comparing;
@@ -43,11 +44,12 @@ public class FileGeneratorUtil {
                                                            boolean returnRoot) {
     boolean hasPackage = StringUtil.isNotEmpty(targetPackage);
     ProjectRootManager rootManager = ProjectRootManager.getInstance(project);
-    ProjectFileIndex fileIndex = ProjectFileIndex.SERVICE.getInstance(project);
+    PackageIndex packageIndex = PackageIndex.getInstance(project);
+    ProjectFileIndex fileIndex = ProjectFileIndex.getInstance(project);
 
     VirtualFile existingFile = null;
     if (targetFile != null) {
-      Collection<VirtualFile> fromIndex = FilenameIndex.getVirtualFilesByName(project, targetFile, ProjectScope.getProjectScope(project));
+      Collection<VirtualFile> fromIndex = FilenameIndex.getVirtualFilesByName(targetFile, ProjectScope.getProjectScope(project));
       List<VirtualFile> files = new ArrayList<>(fromIndex);
       files.sort((f1, f2) -> {
         boolean b1 = fileIndex.isInSource(f1);
@@ -56,7 +58,7 @@ public class FileGeneratorUtil {
         return Comparing.compare(f1.getPath().length(), f2.getPath().length());
       });
       for (VirtualFile file : files) {
-        String existingFilePackage = fileIndex.getPackageNameByDirectory(file.getParent());
+        String existingFilePackage = packageIndex.getPackageNameByDirectory(file.getParent());
         if (!hasPackage || existingFilePackage == null || targetPackage.equals(existingFilePackage)) {
           existingFile = file;
           break;
@@ -83,7 +85,7 @@ public class FileGeneratorUtil {
       throw new ProcessCanceledException();
     }
     try {
-      String packagePrefix = StringUtil.notNullize(fileIndex.getPackageNameByDirectory(virtualRoot));
+      String packagePrefix = StringUtil.notNullize(packageIndex.getPackageNameByDirectory(virtualRoot));
       String genDirName = Options.GEN_DIR.get();
       boolean newGenRoot = !fileIndex.isInSourceContent(virtualRoot);
       String relativePath = (hasPackage && newGenRoot ? genDirName + "/" + targetPackage :

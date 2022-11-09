@@ -11,8 +11,6 @@ import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiReference;
 import com.intellij.util.containers.ContainerUtil;
 import com.intellij.util.containers.JBIterable;
-import gnu.trove.THashMap;
-import gnu.trove.THashSet;
 import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.generator.ParserGeneratorUtil;
 import org.intellij.grammar.psi.*;
@@ -20,6 +18,8 @@ import org.intellij.grammar.psi.impl.BnfReferenceImpl;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -50,11 +50,11 @@ public class BnfUnusedRuleInspection extends LocalInspectionTool {
     
     ProblemsHolder holder = new ProblemsHolder(manager, file, isOnTheFly);
 
-    Set<BnfRule> roots = new THashSet<>();
-    Set<BnfRule> inExpr = new THashSet<>();
-    Set<BnfRule> inParsing = new THashSet<>();
-    Set<BnfRule> inSuppressed = new THashSet<>();
-    Map<BnfRule, String> inAttrs = new THashMap<>();
+    Set<BnfRule> roots = new HashSet<>();
+    Set<BnfRule> inExpr = new HashSet<>();
+    Set<BnfRule> inParsing = new HashSet<>();
+    Set<BnfRule> inSuppressed = new HashSet<>();
+    Map<BnfRule, String> inAttrs = new HashMap<>();
 
     bnfTraverserNoAttrs(myFile).traverse()
       .filterMap(BnfUnusedRuleInspection::resolveRule)

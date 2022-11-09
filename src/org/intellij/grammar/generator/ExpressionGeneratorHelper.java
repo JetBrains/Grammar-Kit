@@ -8,7 +8,6 @@ import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.util.ArrayUtil;
 import com.intellij.util.SmartList;
-import gnu.trove.THashSet;
 import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.psi.BnfExpression;
 import org.intellij.grammar.psi.BnfRule;
@@ -157,7 +156,7 @@ public class ExpressionGeneratorHelper {
     g.out("}");
 
     // operators and tails
-    Set<BnfExpression> visited = new THashSet<>();
+    Set<BnfExpression> visited = new HashSet<>();
     for (String opCall : sortedOpCalls) {
       for (OperatorInfo operator : opCalls.get(opCall)) {
         if (operator.type == OperatorType.ATOM) {

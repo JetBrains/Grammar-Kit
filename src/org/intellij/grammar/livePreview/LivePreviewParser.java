@@ -13,8 +13,7 @@ import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.psi.tree.IElementType;
 import com.intellij.util.containers.ContainerUtil;
 import com.intellij.util.containers.MultiMap;
-import gnu.trove.THashMap;
-import gnu.trove.TObjectIntHashMap;
+import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.analysis.BnfFirstNextAnalyzer;
 import org.intellij.grammar.generator.*;
@@ -40,8 +39,8 @@ public class LivePreviewParser implements PsiParser {
   private final LivePreviewLanguage myLanguage;
   private final Map<String,String> mySimpleTokens = new LinkedHashMap<>();
 
-  private final Map<String, IElementType> myRuleElementTypes = new THashMap<>();
-  private final Map<String, IElementType> myTokenElementTypes = new THashMap<>();
+  private final Map<String, IElementType> myRuleElementTypes = new HashMap<>();
+  private final Map<String, IElementType> myTokenElementTypes = new HashMap<>();
 
   private GenOptions G;
   private BnfRule myGrammarRoot;
@@ -51,7 +50,7 @@ public class LivePreviewParser implements PsiParser {
   private BnfFirstNextAnalyzer myFirstNextAnalyzer;
   private String myTokenTypeText;
 
-  private final TObjectIntHashMap<BnfRule> myRuleNumbers = new TObjectIntHashMap<>();
+  private final Object2IntOpenHashMap<BnfRule> myRuleNumbers = new Object2IntOpenHashMap<>();
   private BitSet[] myBitSets;
 
   public LivePreviewParser(Project project, LivePreviewLanguage language) {
@@ -121,7 +120,7 @@ public class LivePreviewParser implements PsiParser {
 
   private boolean rule(PsiBuilder builder, int level, BnfRule rule, Map<String, Parser> externalArguments) {
     BitSet bitSet = myBitSets[builder.getCurrentOffset()];
-    int ruleNumber = myRuleNumbers.get(rule);
+    int ruleNumber = myRuleNumbers.getInt(rule);
     if (bitSet.get(ruleNumber)) {
       builder.error("Endless recursion detected for '" + rule.getName() + "'");
       return false;

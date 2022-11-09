@@ -21,7 +21,6 @@ import com.intellij.refactoring.introduce.inplace.OccurrencesChooser;
 import com.intellij.refactoring.util.CommonRefactoringUtil;
 import com.intellij.util.Function;
 import com.intellij.util.containers.ContainerUtil;
-import gnu.trove.THashSet;
 import org.intellij.grammar.generator.ParserGeneratorUtil;
 import org.intellij.grammar.psi.*;
 import org.intellij.grammar.psi.impl.BnfElementFactory;
@@ -276,7 +275,7 @@ public class BnfIntroduceRuleHandler implements RefactoringActionHandler {
   }
 
   private static String choseRuleName(PsiFile containingFile) {
-    Set<String> existingNames = new THashSet<>();
+    Set<String> existingNames = new HashSet<>();
     containingFile.accept(new PsiRecursiveElementWalkingVisitor() {
       @Override
       public void visitElement(@NotNull PsiElement element) {

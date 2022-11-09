@@ -19,7 +19,6 @@ import com.intellij.util.containers.ContainerUtil;
 import com.intellij.util.containers.JBIterable;
 import com.intellij.util.containers.JBTreeTraverser;
 import com.intellij.util.containers.TreeTraversal;
-import gnu.trove.THashMap;
 import org.intellij.grammar.analysis.BnfFirstNextAnalyzer;
 import org.intellij.grammar.psi.*;
 import org.intellij.grammar.psi.impl.BnfElementFactory;
@@ -40,8 +39,8 @@ public class ExpressionHelper {
   private final RuleGraphHelper myRuleGraph;
   private final Consumer<String> myWarningConsumer;
 
-  private final Map<BnfRule, ExpressionInfo> myExpressionMap = new THashMap<>();
-  private final Map<BnfRule, BnfRule> myRootRulesMap = new THashMap<>();
+  private final Map<BnfRule, ExpressionInfo> myExpressionMap = new HashMap<>();
+  private final Map<BnfRule, BnfRule> myRootRulesMap = new HashMap<>();
 
   private static final Key<CachedValue<ExpressionHelper>> EXPRESSION_HELPER_KEY = Key.create("EXPRESSION_HELPER_KEY");
   public static ExpressionHelper getCached(@NotNull BnfFile file) {

@@ -4,6 +4,7 @@
 
 package org.intellij.grammar.generator;
 
+import com.intellij.notification.NotificationGroupManager;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.ui.MessageType;
@@ -20,10 +21,7 @@ import com.intellij.util.Function;
 import com.intellij.util.ObjectUtils;
 import com.intellij.util.SmartList;
 import com.intellij.util.containers.*;
-import gnu.trove.THashMap;
-import gnu.trove.THashSet;
 import org.intellij.grammar.KnownAttribute;
-import org.intellij.grammar.actions.GenerateAction;
 import org.intellij.grammar.analysis.BnfFirstNextAnalyzer;
 import org.intellij.grammar.generator.NodeCalls.*;
 import org.intellij.grammar.java.JavaHelper;
@@ -62,7 +60,7 @@ import static org.intellij.grammar.psi.BnfTypes.*;
  *         Date 16.07.11 10:41
  */
 public class ParserGenerator {
-  public static final Logger LOG = Logger.getInstance("ParserGenerator");
+  public static final Logger LOG = Logger.getInstance(ParserGenerator.class);
 
   static class RuleInfo {
     final String name;
@@ -295,7 +293,9 @@ public class ParserGenerator {
       System.out.println(text);
     }
     else {
-      GenerateAction.LOG_GROUP.createNotification(text, MessageType.WARNING).notify(myFile.getProject());
+      NotificationGroupManager.getInstance()
+        .getNotificationGroup("Parser Generator Log")
+        .createNotification(text, MessageType.WARNING).notify(myFile.getProject());
     }
   }
 
@@ -575,7 +575,7 @@ public class ParserGenerator {
       if (Rule.isExternal(rule) || Rule.isFake(rule)) continue;
       if (myExpressionHelper.getExpressionInfo(rule) != null) continue;
       out("/* ********************************************************** */");
-      generateNode(rule, rule.getExpression(), getFuncName(rule), new THashSet<>());
+      generateNode(rule, rule.getExpression(), getFuncName(rule), new HashSet<>());
       newLine();
     }
     for (String ruleName : ownRuleNames) {
@@ -595,7 +595,7 @@ public class ParserGenerator {
   }
 
   private void generateParserLambdas(@NotNull String parserClass) {
-    Map<String, String> reversedLambdas = new THashMap<>();
+    Map<String, String> reversedLambdas = new HashMap<>();
     take(myParserLambdas).forEach((name, body) -> {
       String call = reversedLambdas.get(body);
       if (call == null) {
@@ -740,7 +740,7 @@ public class ParserGenerator {
       .filter(o -> !o.startsWith("static") && o.endsWith(".*"))
       .map(o -> StringUtil.trimEnd(o, ".*"))
       .append(packageName).toSet();
-    Set<String> includedClasses = new THashSet<>();
+    Set<String> includedClasses = new HashSet<>();
     for (RuleInfo info : myRuleInfos.values()) {
       if (includedPackages.contains(info.intfPackage)) includedClasses.add(StringUtil.getShortName(info.intfClass));
       if (includedPackages.contains(info.implPackage)) includedClasses.add(StringUtil.getShortName(info.implClass));
@@ -1509,7 +1509,7 @@ public class ParserGenerator {
     boolean useExactElements = "all".equals(G.generateExactTypes) || G.generateExactTypes.contains("elements");
     boolean useExactTokens = "all".equals(G.generateExactTypes) || G.generateExactTypes.contains("tokens");
 
-    Map<String, Trinity<String, String, RuleInfo>> compositeToClassAndFactoryMap = new THashMap<>();
+    Map<String, Trinity<String, String, RuleInfo>> compositeToClassAndFactoryMap = new HashMap<>();
     for (String elementType : sortedCompositeTypes.keySet()) {
       BnfRule rule = sortedCompositeTypes.get(elementType);
       RuleInfo ruleInfo = ruleInfo(rule);

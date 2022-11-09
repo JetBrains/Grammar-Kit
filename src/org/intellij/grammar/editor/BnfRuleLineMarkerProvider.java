@@ -16,7 +16,6 @@ import com.intellij.psi.NavigatablePsiElement;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.util.containers.ContainerUtil;
-import gnu.trove.THashSet;
 import org.intellij.grammar.BnfIcons;
 import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.generator.ParserGeneratorUtil;
@@ -28,10 +27,7 @@ import org.intellij.grammar.psi.impl.GrammarUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @author gregsh
@@ -42,7 +38,7 @@ public class BnfRuleLineMarkerProvider extends RelatedItemLineMarkerProvider {
   public void collectNavigationMarkers(@NotNull List<? extends PsiElement> elements,
                                        @NotNull Collection<? super RelatedItemLineMarkerInfo<?>> result,
                                        boolean forNavigation) {
-    Set<PsiElement> visited = forNavigation ? new THashSet<>() : null;
+    Set<PsiElement> visited = forNavigation ? new HashSet<>() : null;
     for (PsiElement element : elements) {
       PsiElement parent = element.getParent();
       boolean isRuleId = parent instanceof BnfRule && (forNavigation || element == ((BnfRule)parent).getId());

@@ -86,6 +86,11 @@ public class BnfRunJFlexAction extends DumbAwareAction {
   private static final Key<Pair<String, OSProcessHandler>> BATCH_ID_KEY = Key.create("BnfRunJFlexAction.batchId");
 
   @Override
+  public @NotNull ActionUpdateThread getActionUpdateThread() {
+    return ActionUpdateThread.BGT;
+  }
+
+  @Override
   public void update(@NotNull AnActionEvent e) {
     Project project = e.getProject();
     List<VirtualFile> files = getFiles(e);
@@ -117,14 +122,16 @@ public class BnfRunJFlexAction extends DumbAwareAction {
     }
     if (StringUtil.endsWithIgnoreCase(flexFiles.get(0).getName(), "JFlex.jar")) {
       String DOC_URL = "http://jflex.de/changelog.html";
-      Notifications.Bus.notify(new Notification(
+      Notification notification = new Notification(
         BnfConstants.GENERATION_GROUP, "An old JFlex.jar is detected",
         flexFiles.get(0).getAbsolutePath() +
         "<br>See <a href=\"" + DOC_URL + "\">" + DOC_URL + "</a>." +
         "<br><b>Compatibility note</b>: . (dot) semantics is changed, use [^] instead of .|\\n." +
         "<br><b>To update</b>: remove the old version and the global library if present." +
         "",
-        NotificationType.INFORMATION, NotificationListener.URL_OPENING_LISTENER), project);
+        NotificationType.INFORMATION)
+        .setListener(NotificationListener.URL_OPENING_LISTENER);
+      Notifications.Bus.notify(notification, project);
     }
     String batchId = "jflex@" + System.nanoTime();
     new Runnable() {
@@ -200,7 +207,7 @@ public class BnfRunJFlexAction extends DumbAwareAction {
                                  @NotNull String title,
                                  @NotNull String batchId,
                                  @NotNull OSProcessHandler processHandler) {
-    MessageView messageView = MessageView.SERVICE.getInstance(project);
+    MessageView messageView = MessageView.getInstance(project);
     Content batchContent = null, stoppedContent = null;
     for (Content c : messageView.getContentManager().getContents()) {
       Pair<String, OSProcessHandler> data = c.getUserData(BATCH_ID_KEY);
@@ -241,7 +248,7 @@ public class BnfRunJFlexAction extends DumbAwareAction {
     toolbar.setTargetComponent(consoleView.getComponent());
     panel.add(toolbar.getComponent(), BorderLayout.WEST);
 
-    content = ContentFactory.SERVICE.getInstance().createContent(panel, title, true);
+    content = ContentFactory.getInstance().createContent(panel, title, true);
     messageView.getContentManager().addContent(content);
     Disposer.register(content, consoleView);
 
@@ -309,7 +316,7 @@ public class BnfRunJFlexAction extends DumbAwareAction {
     List<String> roots = new ArrayList<>();
     for (String url : urls) {
       String fileName = url.substring(url.lastIndexOf("/") + 1);
-      for (VirtualFile file : FilenameIndex.getVirtualFilesByName(project, fileName, ProjectScope.getAllScope(project))) {
+      for (VirtualFile file : FilenameIndex.getVirtualFilesByName(fileName, ProjectScope.getAllScope(project))) {
         String fileUrl = file.getUrl();
         if (forceDir) {
           int idx = url.indexOf("/master/");

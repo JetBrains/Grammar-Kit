@@ -8,16 +8,20 @@
     <multiHostInjector implementation="org.intellij.jflex.psi.impl.JFlexJavaCodeInjector"/>
     <lang.elementManipulator forClass="org.intellij.jflex.psi.impl.JFlexJavaCodeImpl"
                              implementationClass="org.intellij.jflex.psi.impl.JFlexJavaCodeManipulator"/>
+
+    <notificationGroup id="Parser Generator Log" displayType="NONE"/>
   </extensions>
   <actions>
-    <action id="grammar.Generate.ParserUtil" class="org.intellij.grammar.actions.BnfGenerateParserUtilAction" text="Generate Parser Util">
-      <add-to-group group-id="grammar.file.group" anchor="after" relative-to-action="grammar.Generate"/>
-    </action>
-    <action id="grammar.Generate.JFlexLexer" class="org.intellij.grammar.actions.BnfGenerateLexerAction" text="Generate JFlex Lexer">
-      <add-to-group group-id="grammar.file.group" anchor="after" relative-to-action="grammar.Generate"/>
-    </action>
-    <action id="grammar.Run.JFlex" class="org.intellij.grammar.actions.BnfRunJFlexAction" text="Run JFlex Generator" use-shortcut-of="grammar.Generate">
+    <group>
+      <action id="grammar.Generate" class="org.intellij.grammar.actions.GenerateAction" text="Generate Parser Code">
+        <keyboard-shortcut keymap="$default" first-keystroke="control shift G"/>
+      </action>
+      <action id="grammar.Run.JFlex" class="org.intellij.grammar.actions.BnfRunJFlexAction" text="Run JFlex Generator"
+              use-shortcut-of="grammar.Generate">
+      </action>
+      <action id="grammar.Generate.ParserUtil" class="org.intellij.grammar.actions.BnfGenerateParserUtilAction" text="Generate Parser Util"/>
+      <action id="grammar.Generate.JFlexLexer" class="org.intellij.grammar.actions.BnfGenerateLexerAction" text="Generate JFlex Lexer"/>
       <add-to-group group-id="grammar.file.group" anchor="first"/>
-    </action>
+    </group>
   </actions>
 </idea-plugin>

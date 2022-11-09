@@ -108,9 +108,6 @@
   </extensions>
   <actions>
     <group id="grammar.file.group" popup="false">
-      <action id="grammar.Generate" class="org.intellij.grammar.actions.GenerateAction" text="Generate Parser Code">
-        <keyboard-shortcut keymap="$default" first-keystroke="control shift G"/>
-      </action>
       <separator/>
       <action id="grammar.LivePreview" class="org.intellij.grammar.actions.LivePreviewAction" text="Live Preview">
         <keyboard-shortcut keymap="$default" first-keystroke="control alt P"/>

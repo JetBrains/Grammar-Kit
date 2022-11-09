@@ -1,27 +1,30 @@
+import org.jetbrains.changelog.Changelog
+import org.jetbrains.changelog.ChangelogSectionUrlBuilder
+
 /*
  * Copyright 2011-2021 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
  */
 
-fun properties(key: String) = project.findProperty(key)?.toString()
+fun properties(key: String) = project.findProperty(key).toString()
 
 plugins {
-    id("org.jetbrains.intellij") version "1.2.1"
-    id("org.jetbrains.changelog") version "1.3.1"
-    id("idea")
     id("java")
+    id("org.jetbrains.intellij") version "1.10.0-SNAPSHOT"
+    id("org.jetbrains.changelog") version "2.0.0"
+    id("idea")
     id("maven-publish")
     id("signing")
     id("com.github.breadmoirai.github-release") version "2.2.12"
 }
 
-version = properties("pluginVersion").toString()
+version = properties("pluginVersion")
 
 repositories {
     mavenCentral()
 }
 
 dependencies {
-    compileOnly("org.jetbrains:annotations:22.0.0")
+    compileOnly("org.jetbrains:annotations:23.0.0")
 }
 
 idea {
@@ -44,13 +47,26 @@ intellij {
 }
 
 changelog {
-    header.set("${{ -> version.get() }}")
+    header.set(project.provider { project.version.toString() })
     headerParserRegex.set("""(\d+(\.\d+)+)""")
     itemPrefix.set("*")
-    unreleasedTerm.set("Unreleased")
+    groups.set(emptyList())
+    repositoryUrl.set("https://github.com/JetBrains/Grammar-Kit")
+    sectionUrlBuilder.set(ChangelogSectionUrlBuilder { repositoryUrl, currentVersion, previousVersion, isUnreleased ->
+        repositoryUrl + when {
+            isUnreleased -> when (previousVersion) {
+                null -> "/commits"
+                else -> "/compare/$previousVersion...HEAD"
+            }
+
+            previousVersion == null -> "/commits/$currentVersion"
+
+            else -> "/compare/$previousVersion...$currentVersion"
+        }
+    })
 }
 
-val artifactsPath = properties("artifactsPath").toString()
+val artifactsPath = properties("artifactsPath")
 
 val buildGrammarKitJar = tasks.create<Jar>("buildGrammarKitJar") {
     dependsOn("assemble")
@@ -107,10 +123,20 @@ tasks {
     patchPluginXml {
         sinceBuild.set(properties("pluginSinceIdeaBuild"))
         changeNotes.set(provider {
-            changelog.run {
-                getOrNull(project.version.toString()) ?: getLatest()
-            }.toHTML() + "<a href=\"https://github.com/JetBrains/Grammar-Kit/blob/master/CHANGELOG.md\">Full change log...</a>"
+            changelog.renderItem(
+                    changelog
+                            .getUnreleased()
+                            .withHeader(false)
+                            .withEmptySections(false),
+                    Changelog.OutputType.HTML
+            )
         })
+    }
+
+    signPlugin {
+        certificateChain.set(System.getenv("CERTIFICATE_CHAIN"))
+        privateKey.set(System.getenv("PRIVATE_KEY"))
+        password.set(System.getenv("PRIVATE_KEY_PASSWORD"))
     }
 
     publishPlugin {
@@ -119,7 +145,7 @@ tasks {
         // pluginVersion is based on the SemVer (https://semver.org) and supports pre-release labels, like 2.1.7-alpha.3
         // Specify pre-release label to publish the plugin in a custom Release Channel automatically. Read more:
         // https://plugins.jetbrains.com/docs/intellij/deployment.html#specifying-a-release-channel
-        channels.set(listOf(properties("pluginVersion")!!.split('-').getOrElse(1) { "default" }.split('.').first()))
+        channels.set(listOf(properties("pluginVersion").split('-').getOrElse(1) { "default" }.split('.').first()))
     }
 
     val buildGrammarKitZip = create<Zip>("buildGrammarKitZip") {
@@ -198,7 +224,7 @@ signing {
     val signingKey = properties("signingKey")
     val signingPassword = properties("signingPassword")
 
-    isRequired = !signingKey.isNullOrEmpty() && !signingPassword.isNullOrEmpty()
+    isRequired = signingKey.isNotEmpty() && signingPassword.isNotEmpty()
 
     useInMemoryPgpKeys(signingKey, signingPassword)
     sign(publishing.publications["grammarKitJar"])

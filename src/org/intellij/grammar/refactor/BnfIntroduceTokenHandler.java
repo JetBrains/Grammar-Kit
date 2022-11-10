@@ -252,7 +252,7 @@ public class BnfIntroduceTokenHandler implements RefactoringActionHandler {
         BnfExpression expression = tokensAttr.getExpression();
         List<BnfListEntry> entryList = expression instanceof BnfValueList ? ((BnfValueList) expression).getListEntryList() : null;
         if (entryList == null || entryList.isEmpty()) {
-          expression.replace(newAttr.getParent());
+          tokensAttr = (BnfAttr)tokensAttr.replace(newAttr);
           BnfValueList attrExpr = (BnfValueList)Objects.requireNonNull(tokensAttr.getExpression());
           return attrExpr.getListEntryList().get(0);
         }

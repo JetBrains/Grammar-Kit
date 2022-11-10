@@ -4,6 +4,7 @@
 
 package org.intellij.jflex.psi.impl;
 
+import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.impl.source.tree.CompositePsiElement;
 import com.intellij.psi.search.LocalSearchScope;
 import com.intellij.psi.search.SearchScope;
@@ -26,6 +27,12 @@ public class JFlexCompositeImpl extends CompositePsiElement implements JFlexComp
   @Override
   public <R> R accept(@NotNull JFlexVisitor<R> visitor) {
     return visitor.visitComposite(this);
+  }
+
+  @Override
+  public void accept(@NotNull PsiElementVisitor visitor) {
+    if (visitor instanceof JFlexVisitor) accept((JFlexVisitor<?>)visitor);
+    else super.accept(visitor);
   }
 
   @Override

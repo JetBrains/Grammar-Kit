@@ -50,52 +50,61 @@ public class BnfColorSettingsPage implements ColorSettingsPage {
     };
   }
 
+  @Override
   public @NotNull String getDisplayName() {
     return GrammarKitBundle.message("language.name.bnf");
   }
 
+  @Override
   public Icon getIcon() {
     return BnfIcons.FILE;
   }
 
+  @Override
   public AttributesDescriptor @NotNull [] getAttributeDescriptors() {
     return ATTRS;
   }
 
+  @Override
   public ColorDescriptor @NotNull [] getColorDescriptors() {
     return ColorDescriptor.EMPTY_ARRAY;
   }
 
+  @Override
   public @NotNull SyntaxHighlighter getHighlighter() {
     return new BnfSyntaxHighlighter();
   }
 
+  @Override
   public @NotNull String getDemoText() {
-    return "/*\n" +
-           " * Sample grammar\n" +
-           " */\n" +
-           "{\n" +
-           "  <a>generatePsi</a>=<k>false</k>\n" +
-           "  <a>classHeader</a>=<pa>\"header.txt\"</pa>\n" +
-           "  <a>parserClass</a>=<pa>\"org.MyParser\"</pa>\n" +
-           "  <a>pin</a>(<pa>\".*_list(?:_\\d.*)?\"</pa>)=1\n" +
-           "  <a>tokens</a>=[\n" +
-           "    <a>COMMA</a>=<pa>\",\"</pa>\n" +
-           "    <a>LEFT_PAREN</a>=<pa>\"(\"</pa>\n" +
-           "    <a>RIGHT_PAREN</a>=<pa>\")\"</pa>\n" +
-           "  ]\n" +
-           "}\n" +
-           "// Grammar rules\n" +
-           "<r>root</r> ::= <r>header</r> <r>content</r>\n" +
-           "<r>header</r> ::= <t>DECLARE</t> <r>reference</r>\n" +
-           "<k>external</k> <r>reference</r> ::= <e>parseReference</e>\n" +
-           "<k>private</k> <k>meta</k> <mr>comma_list</mr> ::= <pin><s>'('</s></pin> <mp><<p>></mp> (<pin><s>','</s></pin> <mp><<p>></mp>) * ')'\n" +
-           "<k>private</k> <r>content</r> ::= <pin><t>AS</t></pin> <<<mr>comma_list</mr> <ru><r>element</r></ru>>> {<a>pin</a>=1}\n" +
-           "<ru><r>element</r></ru> ::= <r>reference</r> [ {<pa>'+'</pa> | <pa>'-'</pa>} <r>reference</r> <t>ONLY</t>?] {<a>recoverWhile</a>=<r>element_recover</r>}\n" +
-           "<k>private</k> <r>element_recover</r> ::= !(',' | ')')\n" +
-           "\n";
+    return """
+      /*
+       * Sample grammar
+       */
+      {
+        <a>generatePsi</a>=<k>false</k>
+        <a>classHeader</a>=<pa>"header.txt"</pa>
+        <a>parserClass</a>=<pa>"org.MyParser"</pa>
+        <a>pin</a>(<pa>".*_list(?:_\\d.*)?"</pa>)=1
+        <a>tokens</a>=[
+          <a>COMMA</a>=<pa>","</pa>
+          <a>LEFT_PAREN</a>=<pa>"("</pa>
+          <a>RIGHT_PAREN</a>=<pa>")"</pa>
+        ]
+      }
+      // Grammar rules
+      <r>root</r> ::= <r>header</r> <r>content</r>
+      <r>header</r> ::= <t>DECLARE</t> <r>reference</r>
+      <k>external</k> <r>reference</r> ::= <e>parseReference</e>
+      <k>private</k> <k>meta</k> <mr>comma_list</mr> ::= <pin><s>'('</s></pin> <mp><<p>></mp> (<pin><s>','</s></pin> <mp><<p>></mp>) * ')'
+      <k>private</k> <r>content</r> ::= <pin><t>AS</t></pin> <<<mr>comma_list</mr> <ru><r>element</r></ru>>> {<a>pin</a>=1}
+      <ru><r>element</r></ru> ::= <r>reference</r> [ {<pa>'+'</pa> | <pa>'-'</pa>} <r>reference</r> <t>ONLY</t>?] {<a>recoverWhile</a>=<r>element_recover</r>}
+      <k>private</k> <r>element_recover</r> ::= !(',' | ')')
+
+      """;
   }
 
+  @Override
   public Map<String, TextAttributesKey> getAdditionalHighlightingTagToDescriptorMap() {
     @NonNls
     Map<String, TextAttributesKey> map = new HashMap<>();

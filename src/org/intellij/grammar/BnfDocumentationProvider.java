@@ -32,14 +32,17 @@ import java.util.*;
  */
 public class BnfDocumentationProvider implements DocumentationProvider {
 
+  @Override
   public @Nullable String getQuickNavigateInfo(PsiElement element, PsiElement originalElement) {
     return null;
   }
 
+  @Override
   public @Nullable List<String> getUrlFor(PsiElement element, PsiElement originalElement) {
     return null;
   }
 
+  @Override
   public @Nullable String generateDoc(PsiElement element, PsiElement originalElement) {
     if (element instanceof BnfRule) {
       BnfRule rule = (BnfRule)element;
@@ -48,12 +51,12 @@ public class BnfDocumentationProvider implements DocumentationProvider {
       Set<String> next = BnfFirstNextAnalyzer.asStrings(analyzer.calcNext(rule).keySet());
 
       StringBuilder docBuilder = new StringBuilder();
-      String[] firstS = first.toArray(ArrayUtil.EMPTY_STRING_ARRAY);
+      String[] firstS = ArrayUtil.toStringArray(first);
       Arrays.sort(firstS);
       docBuilder.append("<h1>Starts with:</h1>");
       docBuilder.append("<code>").append(StringUtil.escapeXmlEntities(StringUtil.join(firstS, " | "))).append("</code>");
 
-      String[] nextS = next.toArray(ArrayUtil.EMPTY_STRING_ARRAY);
+      String[] nextS = ArrayUtil.toStringArray(next);
       Arrays.sort(nextS);
       docBuilder.append("<br><h1>Followed by:</h1>");
       docBuilder.append("<code>").append(StringUtil.escapeXmlEntities(StringUtil.join(nextS, " | "))).append("</code>");
@@ -86,10 +89,12 @@ public class BnfDocumentationProvider implements DocumentationProvider {
     return null;
   }
 
+  @Override
   public @Nullable PsiElement getDocumentationElementForLookupItem(PsiManager psiManager, Object obj5ect, PsiElement element) {
     return null;
   }
 
+  @Override
   public @Nullable PsiElement getDocumentationElementForLink(PsiManager psiManager, String link, PsiElement context) {
     return null;
   }

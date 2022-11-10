@@ -60,7 +60,7 @@ public class ExpressionParserDefinition extends BnfParserDefinition{
   public static final IFileElementType EXPR_FILE_TYPE = new IFileElementType("EXPR_FILE_TYPE", EXPR_LANGUAGE);
 
   @Override
-  public IFileElementType getFileNodeType() {
+  public @NotNull IFileElementType getFileNodeType() {
     return EXPR_FILE_TYPE;
   }
 

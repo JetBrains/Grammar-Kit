@@ -7,6 +7,7 @@ package org.intellij.grammar.livePreview;
 import com.intellij.lexer.LexerBase;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.text.StringUtil;
+import com.intellij.psi.TokenType;
 import com.intellij.psi.tree.IElementType;
 import com.intellij.psi.util.CachedValueProvider;
 import com.intellij.psi.util.CachedValuesManager;
@@ -85,7 +86,7 @@ public class LivePreviewLexer extends LexerBase {
         if (findAtOffset(nextOffset)) break;
       }
       myTokenEnd = nextOffset;
-      myTokenType = com.intellij.psi.TokenType.BAD_CHARACTER;
+      myTokenType = TokenType.BAD_CHARACTER;
     }
   }
 
@@ -178,7 +179,7 @@ public class LivePreviewLexer extends LexerBase {
       if (keyword) {
         tokenType = new LivePreviewElementType.KeywordType(tokenName, language);
       }
-      else if (delegate == com.intellij.psi.TokenType.WHITE_SPACE || delegate == COMMENT) {
+      else if (delegate == TokenType.WHITE_SPACE || delegate == COMMENT) {
         tokenType = delegate; // PreviewTokenType(tokenName, language, delegate);
       }
       else {
@@ -201,7 +202,7 @@ public class LivePreviewLexer extends LexerBase {
                                                           boolean usedInGrammar) {
     if (pattern != null) {
       if (!usedInGrammar && (pattern.matcher(" ").matches() || pattern.matcher("\n").matches())) {
-        return com.intellij.psi.TokenType.WHITE_SPACE;
+        return TokenType.WHITE_SPACE;
       }
       else if (pattern.matcher("1234").matches()) {
         return NUMBER;

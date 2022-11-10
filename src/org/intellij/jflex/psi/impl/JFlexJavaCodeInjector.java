@@ -103,11 +103,12 @@ public class JFlexJavaCodeInjector implements MultiHostInjector {
                         "  public " + returnType + " advance() throws java.io.IOException {\n" +
                         "    switch(zzLexicalState) {" : "";
         String suffix = hostParent == lastRule ?
-                        "\n" +
-                        "    }\n" +
-                        "    return null;\n" +
-                        "  }\n" +
-                        "}" : null;
+                        """
+
+                              }
+                              return null;
+                            }
+                          }""" : null;
         registrar.addPlace(prefix + "\n    case " + (++ruleCount) + ":\n      ", suffix, host, new TextRange(0, host.getTextLength()));
       }
     }

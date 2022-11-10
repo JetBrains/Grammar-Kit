@@ -137,7 +137,8 @@ public final class LivePreviewHelper implements Disposable {
     FileContentUtilCore.reparseFiles(files);
   }
 
-  public static void collectExpressionsAtOffset(Project project, Editor previewEditor, LivePreviewLanguage language, PairProcessor<BnfExpression, Boolean> processor) {
+  public static void collectExpressionsAtOffset(Project project, Editor previewEditor, LivePreviewLanguage language,
+                                                PairProcessor<? super BnfExpression, ? super Boolean> processor) {
     Lexer lexer = new LivePreviewLexer(project, language);
     ParserDefinition parserDefinition = LanguageParserDefinitions.INSTANCE.forLanguage(language);
     PsiBuilder builder = PsiBuilderFactory.getInstance().createBuilder(parserDefinition, lexer, previewEditor.getDocument().getText());

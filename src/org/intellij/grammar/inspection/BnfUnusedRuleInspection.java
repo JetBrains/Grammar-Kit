@@ -74,7 +74,7 @@ public class BnfUnusedRuleInspection extends LocalInspectionTool {
           if (element instanceof BnfRule) {
             BnfRule rule = (BnfRule)element;
             // add recovery rules to calculation
-            BnfAttr recoverAttr = findAttribute(rule, KnownAttribute.RECOVER_WHILE);
+            BnfAttr recoverAttr = findAttribute(rule, RECOVER_WHILE);
             value(recoverAttr == null ? null : recoverAttr.getExpression());
             return inParsing.contains(rule) || inSuppressed.contains(rule);
           }

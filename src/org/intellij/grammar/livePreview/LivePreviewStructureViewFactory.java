@@ -39,6 +39,7 @@ import static org.intellij.grammar.generator.ParserGeneratorUtil.getRulePsiClass
  */
 public class LivePreviewStructureViewFactory implements PsiStructureViewFactory {
 
+  @Override
   public @Nullable StructureViewBuilder getStructureViewBuilder(@NotNull PsiFile psiFile) {
     if (!(psiFile.getLanguage() instanceof LivePreviewLanguage)) return null;
     return new TreeBasedStructureViewBuilder() {
@@ -83,6 +84,7 @@ public class LivePreviewStructureViewFactory implements PsiStructureViewFactory 
       super(element);
     }
 
+    @Override
     public @NotNull Collection<StructureViewTreeElement> getChildrenBase() {
       PsiElement element = getElement();
       if (element == null || element instanceof LeafPsiElement) return Collections.emptyList();
@@ -118,7 +120,7 @@ public class LivePreviewStructureViewFactory implements PsiStructureViewFactory 
           return className + ": '" + StringUtil.first(element.getText(), 30, true) +"'";
         }
       }
-      return elementType + "";
+      return String.valueOf(elementType);
     }
 
     @Override

@@ -61,61 +61,70 @@ public class JFlexColorSettingsPage implements ColorSettingsPage {
     };
   }
 
+  @Override
   public @NotNull String getDisplayName() {
     return GrammarKitBundle.message("language.name.jflex");
   }
 
+  @Override
   public Icon getIcon() {
     return JFlexFileType.INSTANCE.getIcon();
   }
 
+  @Override
   public AttributesDescriptor @NotNull [] getAttributeDescriptors() {
     return ATTRS;
   }
 
+  @Override
   public ColorDescriptor @NotNull [] getColorDescriptors() {
     return ColorDescriptor.EMPTY_ARRAY;
   }
 
+  @Override
   public @NotNull SyntaxHighlighter getHighlighter() {
     return new JFlexSyntaxHighlighterFactory().getSyntaxHighlighter(null, null);
   }
 
+  @Override
   public @NotNull String getDemoText() {
-    return "/* Header comment */\n" +
-           "package sample.lexer;\n" +
-           "\n" +
-           "%%\n" +
-           "%public\n" +
-           "%class _MyLexer\n" +
-           "%unicode\n" +
-           "%{\n" +
-           "  private int parenCount;\n" +
-           "%}\n" +
-           "\n" +
-           "// lexer states\n" +
-           "%state <s>BLOCK</s>, <s>QUALIFICATION</s>\n" +
-           "\n" +
-           "// macro definitions\n" +
-           "<m>WHITESPACE</m>=<c>[ \\n\\r\\t]</c>\n" +
-           "<m>ESCAPED_CHAR</m>=\\\\.\n" +
-           "<m>STRING</m>=\\\"(<c>[^\\\"\\\\]</c>|\\\\.)*\\\"\n" +
-           "<m>ID</m> = [a-z_&&[A-Z]]([:letter:]|[:digit:]|_)*\n" +
-           "<m>BLOCK_COMMENT</m>=\"//\".* | \"/*\" !(<c>[^]</c>* \"*/\" <c>[^]</c>*) (\"*/\")?\n" +
-           "<m>NUMBER</m>=<c>[+-]</c>[:digit:]+\n" +
-           "<m>FLOAT</m>=<m>{NUMBER}</m>(\\.[:digit:]){1, 3}\n" +
-           "\n" +
-           "%%\n" +
-           "<<s>YYINITIAL</s>, <s>BLOCK</s>> {\n" +
-           "    <m>{WHITESPACE}</m>      { return WHITESPACE; }\n" +
-           "    <m>{STRING}</m>          { return STRING; }\n" +
-           "    \"(\"               { return PAREN1; }\n" +
-           "    \")\"               { return PAREN2; }\n" +
-           "    \".\" / !<<EOF>>    { yybegin(QUALIFICATION); return DOT; }\n" +
-           "    <c>[^]</c>               { return BAD_CHARACTER; }\n" +
-           "}\n";
+    return """
+      /* Header comment */
+      package sample.lexer;
+
+      %%
+      %public
+      %class _MyLexer
+      %unicode
+      %{
+        private int parenCount;
+      %}
+
+      // lexer states
+      %state <s>BLOCK</s>, <s>QUALIFICATION</s>
+
+      // macro definitions
+      <m>WHITESPACE</m>=<c>[ \\n\\r\\t]</c>
+      <m>ESCAPED_CHAR</m>=\\\\.
+      <m>STRING</m>=\\"(<c>[^\\"\\\\]</c>|\\\\.)*\\"
+      <m>ID</m> = [a-z_&&[A-Z]]([:letter:]|[:digit:]|_)*
+      <m>BLOCK_COMMENT</m>="//".* | "/*" !(<c>[^]</c>* "*/" <c>[^]</c>*) ("*/")?
+      <m>NUMBER</m>=<c>[+-]</c>[:digit:]+
+      <m>FLOAT</m>=<m>{NUMBER}</m>(\\.[:digit:]){1, 3}
+
+      %%
+      <<s>YYINITIAL</s>, <s>BLOCK</s>> {
+          <m>{WHITESPACE}</m>      { return WHITESPACE; }
+          <m>{STRING}</m>          { return STRING; }
+          "("               { return PAREN1; }
+          ")"               { return PAREN2; }
+          "." / !<<EOF>>    { yybegin(QUALIFICATION); return DOT; }
+          <c>[^]</c>               { return BAD_CHARACTER; }
+      }
+      """;
   }
 
+  @Override
   public Map<String, TextAttributesKey> getAdditionalHighlightingTagToDescriptorMap() {
     return ContainerUtil.newHashMap(Arrays.asList("s", "m", "c"), Arrays.asList(STATE, MACRO, CLASS));
   }

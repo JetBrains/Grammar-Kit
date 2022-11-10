@@ -51,7 +51,8 @@ public class JFlexAnnotator implements Annotator, DumbAware {
       PsiElement resolve = reference == null ? null : reference.resolve();
       holder.newSilentAnnotation(HighlightSeverity.INFORMATION)
         .range(element)
-        .textAttributes(JFlexSyntaxHighlighterFactory.STATE);
+        .textAttributes(JFlexSyntaxHighlighterFactory.STATE)
+        .create();
       if (!isYYINITIAL && resolve == null) {
         holder.newAnnotation(HighlightSeverity.WARNING, "Unresolved state reference")
           .range(element)

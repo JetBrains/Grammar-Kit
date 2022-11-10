@@ -35,30 +35,37 @@ public class InlineRuleDialog extends InlineOptionsDialog {
     init();
   }
 
+  @Override
   protected String getNameLabelText() {
     return ElementDescriptionUtil.getElementDescription(myElement, UsageViewNodeTextLocation.INSTANCE);
   }
 
+  @Override
   protected String getBorderTitle() {
     return "Inline";
   }
 
+  @Override
   protected String getInlineThisText() {
     return BundleBase.replaceMnemonicAmpersand("&This reference only and keep the rule");
   }
 
+  @Override
   protected String getInlineAllText() {
     return BundleBase.replaceMnemonicAmpersand("&All references and remove the rule");
   }
 
+  @Override
   protected boolean isInlineThis() {
     return false;
   }
 
+  @Override
   protected void doAction() {
     invokeRefactoring(new BnfInlineRuleProcessor(myRule, getProject(), myReference, isInlineThisOnly()));
   }
 
+  @Override
   protected void doHelpAction() {
   }
 }

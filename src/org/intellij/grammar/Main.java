@@ -8,6 +8,7 @@ import com.intellij.lang.LanguageASTFactory;
 import com.intellij.lang.LanguageBraceMatching;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.psi.PsiFile;
+import com.intellij.psi.impl.DebugUtil;
 import org.intellij.grammar.generator.ParserGenerator;
 import org.intellij.grammar.psi.BnfFile;
 
@@ -66,7 +67,7 @@ public class Main {
               Class.forName("org.jetbrains.annotations.Nullable");
               Class.forName("org.intellij.lang.annotations.Pattern");
               Class.forName("org.intellij.lang.annotations.RegExp");
-              com.intellij.psi.impl.DebugUtil.psiToString(bnfFile, false);
+              DebugUtil.psiToString(bnfFile, false);
             }
 
             count ++;

@@ -114,7 +114,7 @@ public class NodeCalls {
     }
 
     boolean referencesMetaParameter() {
-      return arguments.stream().anyMatch(NodeArgument::referencesMetaParameter);
+      return ContainerUtil.exists(arguments, NodeArgument::referencesMetaParameter);
     }
 
     @Nullable
@@ -191,6 +191,7 @@ public class NodeCalls {
       return className;
     }
 
+    @Override
     public @NotNull String render(@NotNull Names names) {
       if (renderClass) {
         return String.format("%s.%s(%s, %s + 1)", className, methodName, names.builder, names.level);

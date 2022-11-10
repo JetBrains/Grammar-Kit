@@ -30,8 +30,10 @@ import static com.intellij.openapi.util.text.StringUtil.*;
  * @author gregsh
  */
 public class JFlexStructureViewFactory implements PsiStructureViewFactory {
+  @Override
   public StructureViewBuilder getStructureViewBuilder(@NotNull PsiFile psiFile) {
     return new TreeBasedStructureViewBuilder() {
+      @Override
       public @NotNull StructureViewModel createStructureViewModel(@Nullable Editor editor) {
         return new MyModel(psiFile);
       }

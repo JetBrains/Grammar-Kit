@@ -37,6 +37,7 @@ import com.intellij.openapi.util.io.FileUtil;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.openapi.vfs.JarFileSystem;
 import com.intellij.openapi.vfs.VfsUtil;
+import com.intellij.openapi.vfs.VfsUtilCore;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowId;
@@ -98,7 +99,7 @@ public class BnfRunJFlexAction extends DumbAwareAction {
   }
 
   private static List<VirtualFile> getFiles(@NotNull AnActionEvent e) {
-    return JBIterable.of(e.getData(LangDataKeys.VIRTUAL_FILE_ARRAY)).filter(file -> {
+    return JBIterable.of(e.getData(CommonDataKeys.VIRTUAL_FILE_ARRAY)).filter(file -> {
       FileType fileType = file.getFileType();
       return fileType == JFlexFileType.INSTANCE ||
              !fileType.isBinary() && file.getName().endsWith(".flex");
@@ -127,8 +128,7 @@ public class BnfRunJFlexAction extends DumbAwareAction {
         flexFiles.get(0).getAbsolutePath() +
         "<br>See <a href=\"" + DOC_URL + "\">" + DOC_URL + "</a>." +
         "<br><b>Compatibility note</b>: . (dot) semantics is changed, use [^] instead of .|\\n." +
-        "<br><b>To update</b>: remove the old version and the global library if present." +
-        "",
+        "<br><b>To update</b>: remove the old version and the global library if present.",
         NotificationType.INFORMATION)
         .setListener(NotificationListener.URL_OPENING_LISTENER);
       Notifications.Bus.notify(notification, project);
@@ -166,7 +166,7 @@ public class BnfRunJFlexAction extends DumbAwareAction {
 
     try {
       VirtualFile virtualDir = getTargetDirectoryFor(project, flexFile, lexerClassName + ".java", lexerPackage, false);
-      File workingDir = VfsUtil.virtualToIoFile(flexFile).getParentFile().getAbsoluteFile();
+      File workingDir = VfsUtilCore.virtualToIoFile(flexFile).getParentFile().getAbsoluteFile();
 
       Sdk sdk = new SimpleJavaSdkType().createJdk("tmp", SystemProperties.getJavaHome());
 
@@ -178,7 +178,7 @@ public class BnfRunJFlexAction extends DumbAwareAction {
       javaParameters.getVMParametersList().add("-Xmx512m");
       javaParameters.getProgramParametersList().addParametersString(StringUtil.nullize(Options.GEN_JFLEX_ARGS.get()));
       javaParameters.getProgramParametersList().add("-skel", jflex.get(1).getAbsolutePath());
-      javaParameters.getProgramParametersList().add("-d", VfsUtil.virtualToIoFile(virtualDir).getAbsolutePath());
+      javaParameters.getProgramParametersList().add("-d", VfsUtilCore.virtualToIoFile(virtualDir).getAbsolutePath());
       javaParameters.getProgramParametersList().add(flexFile.getName());
 
       OSProcessHandler processHandler = javaParameters.createOSProcessHandler();
@@ -286,7 +286,7 @@ public class BnfRunJFlexAction extends DumbAwareAction {
     for (String url : urls) {
       for (Pair<VirtualFile, DownloadableFileDescription> pair : pairs) {
         if (Objects.equals(url, pair.second.getDownloadUrl())) {
-          result.add(VfsUtil.virtualToIoFile(pair.first));
+          result.add(VfsUtilCore.virtualToIoFile(pair.first));
           break;
         }
       }
@@ -347,7 +347,7 @@ public class BnfRunJFlexAction extends DumbAwareAction {
         int length = StringUtil.commonPrefix(rootName.toLowerCase(Locale.ENGLISH), name.toLowerCase(Locale.ENGLISH)).length();
         if (length < 4) continue;
         if (rootName.length() == length || rootName.length() > length && "-_.".indexOf(rootName.charAt(length)) > -1) {
-          File file = new File(FileUtil.toSystemDependentName(VfsUtil.urlToPath(root)));
+          File file = new File(FileUtil.toSystemDependentName(VfsUtilCore.urlToPath(root)));
           if (file.exists() && file.isFile()) {
             result.add(file);
             continue main;
@@ -405,7 +405,7 @@ public class BnfRunJFlexAction extends DumbAwareAction {
       for (String prefix : Arrays.asList("community", "")) {
         File file = new File(homePath, FileUtil.toSystemDependentName(prefix + API_SCR));
         if (file.exists() && file.isDirectory()) {
-          return VfsUtil.pathToUrl(FileUtil.toSystemDependentName(homePath + "/" + prefix));
+          return VfsUtilCore.pathToUrl(FileUtil.toSystemDependentName(homePath + "/" + prefix));
         }
       }
     }

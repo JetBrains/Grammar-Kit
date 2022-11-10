@@ -26,6 +26,7 @@ import java.util.Set;
  */
 public class BnfDuplicateRuleInspection extends LocalInspectionTool {
 
+  @Override
   public ProblemDescriptor[] checkFile(@NotNull PsiFile file, @NotNull InspectionManager manager, boolean isOnTheFly) {
     ProblemsHolder problemsHolder = new ProblemsHolder(manager, file, isOnTheFly);
     checkFile(file, problemsHolder);

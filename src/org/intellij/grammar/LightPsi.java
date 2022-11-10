@@ -34,6 +34,7 @@ import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.jar.JarEntry;
 import java.util.jar.JarOutputStream;
 import java.util.regex.Matcher;
@@ -98,7 +99,7 @@ public class LightPsi {
   }
 
   private static int mainImpl(File classesFile, File outJarFile) throws Throwable {
-    BufferedReader reader = new BufferedReader(new FileReader(classesFile));
+    BufferedReader reader = new BufferedReader(new FileReader(classesFile, StandardCharsets.UTF_8));
     Pattern pattern = Pattern.compile(".*\\[class,load] (?<c>.*) source: (?:file:)?(?<f>.*)");
 
     JarOutputStream jar = new JarOutputStream(new FileOutputStream(outJarFile));
@@ -190,14 +191,14 @@ public class LightPsi {
 
     public static void initExtensions(MockApplication application, @NotNull MockProject project) {
       ExtensionsAreaImpl ra = application.getExtensionArea();
-      ra.registerExtensionPoint("com.intellij.referencesSearch", "com.intellij.util.QueryExecutor", INTERFACE);
+      ra.registerExtensionPoint("com.intellij.referencesSearch", "com.intellij.util.QueryExecutor", INTERFACE, false);
       ra.getExtensionPoint("com.intellij.referencesSearch").registerExtension(new CachesBasedRefSearcher(), project);
-      ra.registerExtensionPoint("com.intellij.useScopeEnlarger", "com.intellij.psi.search.UseScopeEnlarger", INTERFACE);
-      ra.registerExtensionPoint("com.intellij.useScopeOptimizer", "com.intellij.psi.search.ScopeOptimizer", INTERFACE);
-      ra.registerExtensionPoint("com.intellij.codeInsight.containerProvider", "com.intellij.codeInsight.ContainerProvider", INTERFACE);
-      ra.registerExtensionPoint("com.intellij.languageInjector", "com.intellij.psi.LanguageInjector", INTERFACE);
+      ra.registerExtensionPoint("com.intellij.useScopeEnlarger", "com.intellij.psi.search.UseScopeEnlarger", INTERFACE, false);
+      ra.registerExtensionPoint("com.intellij.useScopeOptimizer", "com.intellij.psi.search.ScopeOptimizer", INTERFACE, false);
+      ra.registerExtensionPoint("com.intellij.codeInsight.containerProvider", "com.intellij.codeInsight.ContainerProvider", INTERFACE, false);
+      ra.registerExtensionPoint("com.intellij.languageInjector", "com.intellij.psi.LanguageInjector", INTERFACE, false);
       project.registerService(PsiSearchHelper.class, PsiSearchHelperImpl.class);
-      project.getExtensionArea().registerExtensionPoint("com.intellij.multiHostInjector", "com.intellij.lang.injection.MultiHostInjector", INTERFACE);
+      project.getExtensionArea().registerExtensionPoint("com.intellij.multiHostInjector", "com.intellij.lang.injection.MultiHostInjector", INTERFACE, false);
       try {
         project.registerService(JavaHelper.class, new JavaHelper.AsmHelper());
       }

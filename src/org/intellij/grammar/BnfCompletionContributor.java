@@ -11,8 +11,8 @@ import com.intellij.codeInsight.lookup.TailTypeDecorator;
 import com.intellij.lang.ASTNode;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.openapi.util.text.StringUtil;
-import com.intellij.patterns.PlatformPatterns;
 import com.intellij.patterns.PsiElementPattern;
+import com.intellij.patterns.StandardPatterns;
 import com.intellij.psi.*;
 import com.intellij.psi.impl.source.tree.TreeUtil;
 import com.intellij.psi.util.PsiTreeUtil;
@@ -48,7 +48,7 @@ public class BnfCompletionContributor extends CompletionContributor {
   public BnfCompletionContributor() {
     PsiElementPattern.Capture<PsiElement> placePattern =
       psiElement()
-        .inFile(PlatformPatterns.instanceOf(BnfFile.class))
+        .inFile(StandardPatterns.instanceOf(BnfFile.class))
         .andNot(psiElement().inside(PsiComment.class));
     extend(CompletionType.BASIC, placePattern, new CompletionProvider<>() {
       @Override

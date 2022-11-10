@@ -27,7 +27,6 @@ import org.intellij.grammar.psi.*;
 import org.intellij.grammar.psi.impl.GrammarUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.jetbrains.annotations.TestOnly;
 
 import java.util.*;
 import java.util.regex.Pattern;
@@ -43,13 +42,13 @@ import static org.intellij.grammar.psi.BnfTypes.BNF_SEQUENCE;
  */
 public class ParserGeneratorUtil {
   private static final String RESERVED_SUFFIX = "_$";
-  private static final Set<String> JAVA_RESERVED = new HashSet<>(Arrays.asList(
-    "abstract", "assert", "boolean", "break", "byte", "case", "catch", "char", "class",
-    "const", "default", "do", "double", "else", "enum", "extends", "false", "final", "finally",
-    "float", "for", "goto", "if", "implements", "import", "instanceof", "int", "interface", "long",
-    "native", "new", "null", "package", "private", "protected", "public", "return", "short", "static",
-    "strictfp", "super", "switch", "synchronized", "this", "throw", "throws", "transient", "true",
-    "try", "void", "volatile", "while", "continue"));
+  private static final Set<String> JAVA_RESERVED =
+    ContainerUtil.set("abstract", "assert", "boolean", "break", "byte", "case", "catch", "char", "class",
+                      "const", "default", "do", "double", "else", "enum", "extends", "false", "final", "finally",
+                      "float", "for", "goto", "if", "implements", "import", "instanceof", "int", "interface", "long",
+                      "native", "new", "null", "package", "private", "protected", "public", "return", "short", "static",
+                      "strictfp", "super", "switch", "synchronized", "this", "throw", "throws", "transient", "true",
+                      "try", "void", "volatile", "while", "continue");
 
   enum ConsumeType {
     FAST, SMART, DEFAULT;
@@ -231,7 +230,7 @@ public class ParserGeneratorUtil {
       return tree.getFirstChild().getNode().getElementType();
     }
     else if (tree instanceof BnfParenExpression) {
-      return BnfTypes.BNF_SEQUENCE;
+      return BNF_SEQUENCE;
     }
     else {
       return tree.getNode().getElementType();
@@ -283,7 +282,6 @@ public class ParserGeneratorUtil {
     return false;
   }
 
-  @TestOnly
   public static @NotNull String toIdentifier(@NotNull String text, @Nullable NameFormat format, @NotNull Case cas) {
     if (text.isEmpty()) return "";
     String fixed = text.replaceAll("[^:\\p{javaJavaIdentifierPart}]", "_");
@@ -817,8 +815,8 @@ public class ParserGeneratorUtil {
   public static String getParametersString(List<String> paramsTypes,
                                            int offset,
                                            int mask,
-                                           Function<String, String> substitutor,
-                                           Function<Integer, List<String>> annoProvider,
+                                           Function<? super String, String> substitutor,
+                                           Function<? super Integer, ? extends List<String>> annoProvider,
                                            NameShortener shortener) {
     StringBuilder sb = new StringBuilder();
     for (int i = offset; i < paramsTypes.size(); i += 2) {

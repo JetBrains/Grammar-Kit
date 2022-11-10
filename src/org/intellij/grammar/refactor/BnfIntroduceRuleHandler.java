@@ -44,14 +44,14 @@ public class BnfIntroduceRuleHandler implements RefactoringActionHandler {
   public static final String REFACTORING_NAME = "Extract Rule";
   public static final Function<BnfExpression, String> RENDER_FUNCTION = bnfExpression -> bnfExpression.getText().replaceAll("\\s+", " ");
 
-  private final @Nullable Function<List<BnfExpression>, BnfExpression> myPopupVariantsHandler;
+  private final @Nullable Function<? super List<BnfExpression>, ? extends BnfExpression> myPopupVariantsHandler;
 
   public BnfIntroduceRuleHandler() {
     myPopupVariantsHandler = null;
   }
 
   @TestOnly
-  public BnfIntroduceRuleHandler(@Nullable Function<List<BnfExpression>, BnfExpression> popupVariantsHandler) {
+  public BnfIntroduceRuleHandler(@Nullable Function<? super List<BnfExpression>, ? extends BnfExpression> popupVariantsHandler) {
     this.myPopupVariantsHandler = popupVariantsHandler;
   }
 
@@ -96,6 +96,7 @@ public class BnfIntroduceRuleHandler implements RefactoringActionHandler {
           IntroduceTargetChooser.showChooser(
             editor, expressions,
             new Pass<>() {
+              @Override
               public void pass(BnfExpression bnfExpression) {
                 invokeIntroduce(project, editor, file, currentRule,
                                 Collections.singletonList(bnfExpression));

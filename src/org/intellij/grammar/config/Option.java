@@ -20,6 +20,7 @@ abstract class Option<T> implements Getter<T> {
     this.defValue = defValue;
   }
 
+  @Override
   public abstract T get();
 
   String innerValue() {

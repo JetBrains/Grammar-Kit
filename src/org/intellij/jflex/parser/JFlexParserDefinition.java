@@ -18,7 +18,6 @@ import com.intellij.psi.tree.IFileElementType;
 import com.intellij.psi.tree.TokenSet;
 import org.intellij.jflex.JFlexLanguage;
 import org.intellij.jflex.psi.JFlexTokenType;
-import org.intellij.jflex.psi.JFlexTypes;
 import org.intellij.jflex.psi.impl.JFlexFileImpl;
 import org.jetbrains.annotations.NotNull;
 
@@ -33,7 +32,7 @@ public class JFlexParserDefinition implements ParserDefinition {
   public static final IElementType FLEX_NEWLINE = new JFlexTokenType("newline");
   public static final TokenSet WS = TokenSet.create(TokenType.WHITE_SPACE, FLEX_NEWLINE);
   public static final TokenSet COMMENTS = TokenSet.create(FLEX_LINE_COMMENT, FLEX_BLOCK_COMMENT);
-  public static final TokenSet LITERALS = TokenSet.create(JFlexTypes.FLEX_STRING);
+  public static final TokenSet LITERALS = TokenSet.create(FLEX_STRING);
   public static final TokenSet CHAR_CLASS_OPERATORS = TokenSet.create(FLEX_AMPAMP, FLEX_BARBAR, FLEX_DASHDASH, FLEX_HAT, FLEX_TILDETILDE);
   public static final TokenSet PATTERN_OPERATORS = TokenSet.create(FLEX_BAR, FLEX_BANG, FLEX_DOLLAR, FLEX_PLUS, FLEX_QUESTION, FLEX_STAR, FLEX_TILDE);
 

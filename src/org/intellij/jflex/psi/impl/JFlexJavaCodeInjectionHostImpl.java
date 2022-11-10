@@ -24,18 +24,22 @@ public class JFlexJavaCodeInjectionHostImpl extends JFlexCompositeImpl implement
     return true;
   }
 
+  @Override
   public JFlexJavaCodeInjectionHostImpl updateText(@NotNull String text) {
     PsiElement newElement = JFlexPsiElementFactory.createJavaCodeFromText(getProject(), text);
     return (JFlexJavaCodeInjectionHostImpl)this.replace(newElement);
   }
 
+  @Override
   public @NotNull LiteralTextEscaper<JFlexJavaCodeInjectionHostImpl> createLiteralTextEscaper() {
     return new LiteralTextEscaper<>(this) {
+      @Override
       public boolean decode(@NotNull TextRange textrange, @NotNull StringBuilder stringbuilder) {
         stringbuilder.append(myHost.getText(), textrange.getStartOffset(), textrange.getEndOffset());
         return true;
       }
 
+      @Override
       public int getOffsetInHost(int i, @NotNull TextRange textrange) {
         int j = i + textrange.getStartOffset();
         if (j < textrange.getStartOffset()) {
@@ -47,6 +51,7 @@ public class JFlexJavaCodeInjectionHostImpl extends JFlexCompositeImpl implement
         return j;
       }
 
+      @Override
       public boolean isOneLine() {
         return false;
       }

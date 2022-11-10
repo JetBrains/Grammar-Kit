@@ -26,6 +26,7 @@ public abstract class BnfRefOrTokenImpl extends BnfExpressionImpl implements Bnf
     super(elementType);
   }
 
+  @Override
   public @Nullable BnfRule resolveRule() {
     PsiFile file = getContainingFile();
     return file instanceof BnfFile ? ((BnfFile)file).getRule(GrammarUtil.getIdText(getId())) : null;

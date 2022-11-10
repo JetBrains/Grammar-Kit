@@ -30,8 +30,10 @@ import java.util.List;
  * @author gregsh
  */
 public class BnfStructureViewFactory implements PsiStructureViewFactory {
+  @Override
   public StructureViewBuilder getStructureViewBuilder(@NotNull PsiFile psiFile) {
     return new TreeBasedStructureViewBuilder() {
+      @Override
       public @NotNull StructureViewModel createStructureViewModel(@Nullable Editor editor) {
         return new MyModel(psiFile);
       }
@@ -127,7 +129,7 @@ public class BnfStructureViewFactory implements PsiStructureViewFactory {
       else if (element instanceof BnfFileImpl) {
         return ((BnfFileImpl)element).getName();
       }
-      return "" + element;
+      return String.valueOf(element);
     }
 
     private static String getAttrDisplayName(BnfAttr attr) {

@@ -52,8 +52,8 @@ public class ExpressionGeneratorHelper {
     // main entry
     String methodName = getFuncName(info.rootRule);
     String kernelMethodName = getNextName(methodName, 0);
-    String frameName = quote(ParserGeneratorUtil.getRuleDisplayName(info.rootRule, true));
-    String shortPB = g.shorten(BnfConstants.PSI_BUILDER_CLASS);
+    String frameName = quote(getRuleDisplayName(info.rootRule, true));
+    String shortPB = g.shorten(PSI_BUILDER_CLASS);
     String shortMarker = !g.G.generateFQN ? "Marker" : PSI_BUILDER_CLASS + ".Marker";
     g.out("public static boolean %s(%s %s, int %s, int %s) {", methodName, shortPB, g.N.builder, g.N.level, g.N.priority);
     g.out("if (!recursion_guard_(%s, %s, \"%s\")) return false;", g.N.builder, g.N.level, methodName);
@@ -111,7 +111,7 @@ public class ExpressionGeneratorHelper {
       g.out("%sif (%s < %d%s && %s) {", first ? "" : "else ", g.N.priority, priority, substCheck, opCall);
       first = false;
       String elementType = g.getElementType(operator.rule);
-      boolean rightAssociative = ParserGeneratorUtil.getAttribute(operator.rule, KnownAttribute.RIGHT_ASSOCIATIVE);
+      boolean rightAssociative = getAttribute(operator.rule, KnownAttribute.RIGHT_ASSOCIATIVE);
       String tailCall = operator.tail == null ? null : g.generateNodeCall(
         operator.rule, operator.tail, getNextName(getFuncName(operator.rule), 1), ConsumeType.DEFAULT
       ).render(g.N);
@@ -228,7 +228,7 @@ public class ExpressionGeneratorHelper {
                                                            @Nullable ConsumeType defValue) {
     if (defValue != null) return defValue;
     ExpressionHelper.ExpressionInfo expressionInfo = expressionHelper.getExpressionInfo(rule);
-    ExpressionHelper.OperatorInfo operatorInfo = expressionInfo == null ? null : expressionInfo.operatorMap.get(rule);
+    OperatorInfo operatorInfo = expressionInfo == null ? null : expressionInfo.operatorMap.get(rule);
     if (operatorInfo != null) {
       if (node == null) {
         return operatorInfo.type == OperatorType.PREFIX || operatorInfo.type == OperatorType.ATOM ?

@@ -15,7 +15,6 @@ import com.intellij.openapi.project.Project;
 import com.intellij.psi.FileViewProvider;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
-import com.intellij.psi.TokenType;
 import com.intellij.psi.tree.IElementType;
 import com.intellij.psi.tree.IFileElementType;
 import com.intellij.psi.tree.TokenSet;
@@ -30,7 +29,7 @@ public class LivePreviewParserDefinition implements ParserDefinition {
   public static final IElementType NUMBER = new IElementType("NUMBER", LivePreviewLanguage.BASE_INSTANCE);
   public static final IElementType KEYWORD = new IElementType("KEYWORD", LivePreviewLanguage.BASE_INSTANCE);
 
-  private static final TokenSet ourWhiteSpaceTokens = TokenSet.create(TokenType.WHITE_SPACE);
+  private static final TokenSet ourWhiteSpaceTokens = TokenSet.WHITE_SPACE;
   private static final TokenSet ourCommentTokens = TokenSet.create(COMMENT);
   private static final TokenSet ourStringLiteralElements = TokenSet.create(STRING);
 
@@ -40,10 +39,6 @@ public class LivePreviewParserDefinition implements ParserDefinition {
   public LivePreviewParserDefinition(LivePreviewLanguage language) {
     myLanguage = language;
     myFileElementType = new IFileElementType(myLanguage); // todo do not register
-  }
-
-  public LivePreviewLanguage getLanguage() {
-    return myLanguage;
   }
 
   @Override

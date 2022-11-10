@@ -487,7 +487,7 @@ public class RuleGraphHelper {
         if (PsiTreeUtil.isAncestor(cur, e, true)) break;
         IElementType curType = getEffectiveType(cur);
         if (curType == BnfTypes.BNF_OP_OPT || curType == BnfTypes.BNF_OP_ONEMORE || curType == BnfTypes.BNF_OP_ZEROMORE) {
-          cardinality = cardinality.and(Cardinality.fromNodeType(curType));
+          cardinality = cardinality.and(fromNodeType(curType));
         }
       }
       Cardinality prev = result.get(r);
@@ -529,7 +529,7 @@ public class RuleGraphHelper {
         else if (leftMarker == OPTIONAL) {
           for (PsiElement t : map.keySet()) {
             if (!m.containsKey(t)) {
-              map.put(t, map.get(t).and(Cardinality.OPTIONAL));
+              map.put(t, map.get(t).and(OPTIONAL));
             }
           }
         }

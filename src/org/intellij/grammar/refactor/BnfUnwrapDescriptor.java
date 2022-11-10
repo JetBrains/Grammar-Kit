@@ -31,9 +31,9 @@ import java.util.Set;
 public class BnfUnwrapDescriptor implements UnwrapDescriptor, Unwrapper {
   
   @Override
-  public List<Pair<PsiElement, Unwrapper>> collectUnwrappers(@NotNull Project project,
-                                                             @NotNull Editor editor,
-                                                             @NotNull PsiFile file) {
+  public @NotNull List<Pair<PsiElement, Unwrapper>> collectUnwrappers(@NotNull Project project,
+                                                                      @NotNull Editor editor,
+                                                                      @NotNull PsiFile file) {
     PsiElement element = findTargetElement(editor, file);
     List<Pair<PsiElement, Unwrapper>> result = new ArrayList<>();
     while (element != null) {

@@ -17,6 +17,7 @@ import org.intellij.jflex.psi.JFlexTypes;
  * @author gregsh
  */
 public class JFlexParserUtil extends GeneratedParserUtilBase {
+  /** @noinspection MethodOverridesStaticMethodOfSuperclass*/
   public static PsiBuilder adapt_builder_(IElementType root, PsiBuilder builder, PsiParser parser, TokenSet[] extendsSets) {
     PsiBuilder result = GeneratedParserUtilBase.adapt_builder_(root, builder, parser, extendsSets);
     ErrorState.get(result).braces = new JFlexBraceMatcher().getPairs();

@@ -13,6 +13,7 @@ import org.jetbrains.annotations.NotNull;
  * Time: 19:02
  */
 public interface BnfNamedElement extends BnfComposite, PsiNameIdentifierOwner {
+  @Override
   @NotNull
   String getName();
 

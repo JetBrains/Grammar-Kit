@@ -96,6 +96,12 @@ public class BnfReferenceImpl<T extends BnfExpression> extends PsiReferenceBase<
     }
 
     @Override
+    public void accept(@NotNull PsiElementVisitor visitor) {
+      if (visitor instanceof BnfVisitor) accept((BnfVisitor<?>)visitor);
+      else super.accept(visitor);
+    }
+
+    @Override
     public @NotNull PsiElement getId() {
       return Objects.requireNonNull(getNameIdentifier());
     }

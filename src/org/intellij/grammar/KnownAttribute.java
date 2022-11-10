@@ -74,19 +74,8 @@ public class KnownAttribute<T> {
   private final Class<T> myClazz;
   private final T myDefaultValue;
 
-  public static <T> KnownAttribute<T> create(Class<T> clazz, String name, @Nullable T defaultValue) {
-    return new KnownAttribute<>(name, clazz, defaultValue);
-  }
-
   private static <T> KnownAttribute<T> create(boolean global, Class<T> clazz, String name, @Nullable T defaultValue) {
     return new KnownAttribute<>(global, name, clazz, defaultValue);
-  }
-
-  private KnownAttribute(String name, Class<T> clazz, T defaultValue) {
-    myName = name;
-    myClazz = clazz;
-    myDefaultValue = defaultValue;
-    myGlobal = false;
   }
 
   private KnownAttribute(boolean global, String name, Class<T> clazz, T defaultValue) {
@@ -110,6 +99,7 @@ public class KnownAttribute<T> {
     return myDefaultValue;
   }
 
+  /** @noinspection unchecked*/
   public T ensureValue(Object o) {
     if (o == null) return getDefaultValue();
     if (myClazz == ListValue.class && o instanceof String) {
@@ -132,11 +122,6 @@ public class KnownAttribute<T> {
     catch (IOException e) {
       return null;
     }
-  }
-
-  // returns a non-registered attribute for migration purposes
-  public @NotNull KnownAttribute<T> alias(String deprecatedName) {
-    return new KnownAttribute<>(deprecatedName, myClazz, null);
   }
 
   public static @Nullable KnownAttribute<?> getCompatibleAttribute(String name) {

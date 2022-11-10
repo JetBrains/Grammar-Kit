@@ -10,7 +10,7 @@ import com.intellij.notification.Notifications;
 import com.intellij.openapi.actionSystem.ActionUpdateThread;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
-import com.intellij.openapi.actionSystem.LangDataKeys;
+import com.intellij.openapi.actionSystem.CommonDataKeys;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.command.WriteCommandAction;
 import com.intellij.openapi.fileChooser.FileChooserFactory;
@@ -32,6 +32,7 @@ import com.intellij.util.IncorrectOperationException;
 import com.intellij.util.containers.ContainerUtil;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
+import org.apache.velocity.runtime.RuntimeConstants;
 import org.apache.velocity.runtime.log.NullLogChute;
 import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.generator.BnfConstants;
@@ -68,13 +69,13 @@ public class BnfGenerateLexerAction extends AnAction {
 
   @Override
   public void update(AnActionEvent e) {
-    PsiFile file = LangDataKeys.PSI_FILE.getData(e.getDataContext());
+    PsiFile file = e.getData(CommonDataKeys.PSI_FILE);
     e.getPresentation().setEnabledAndVisible(file instanceof BnfFile);
   }
 
   @Override
   public void actionPerformed(AnActionEvent e) {
-    PsiFile file = LangDataKeys.PSI_FILE.getData(e.getDataContext());
+    PsiFile file = e.getData(CommonDataKeys.PSI_FILE);
     if (!(file instanceof BnfFile)) return;
 
     Project project = file.getProject();
@@ -93,7 +94,7 @@ public class BnfGenerateLexerAction extends AnAction {
     VirtualFile virtualFile = fileWrapper.getVirtualFile(true);
     if (virtualFile == null) return;
 
-    WriteCommandAction.runWriteCommandAction(project, () -> {
+    WriteCommandAction.runWriteCommandAction(project, e.getPresentation().getText(), null, () -> {
       try {
         PsiDirectory psiDirectory = PsiManager.getInstance(project).findDirectory(virtualFile.getParent());
         assert psiDirectory != null;
@@ -162,7 +163,7 @@ public class BnfGenerateLexerAction extends AnAction {
     });
 
     VelocityEngine ve = new VelocityEngine();
-    ve.setProperty(VelocityEngine.RUNTIME_LOG_LOGSYSTEM, new NullLogChute());
+    ve.setProperty(RuntimeConstants.RUNTIME_LOG_LOGSYSTEM, new NullLogChute());
     ve.init();
     
     VelocityContext context = new VelocityContext();

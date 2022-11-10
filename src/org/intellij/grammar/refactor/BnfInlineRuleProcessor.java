@@ -17,6 +17,7 @@ import com.intellij.refactoring.util.CommonRefactoringUtil;
 import com.intellij.usageView.UsageInfo;
 import com.intellij.usageView.UsageViewDescriptor;
 import com.intellij.util.IncorrectOperationException;
+import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import org.intellij.grammar.generator.ParserGeneratorUtil;
 import org.intellij.grammar.psi.*;
@@ -50,14 +51,17 @@ public class BnfInlineRuleProcessor extends BaseRefactoringProcessor {
     myInlineThisOnly = isInlineThisOnly;
   }
 
+  @Override
   protected @NotNull UsageViewDescriptor createUsageViewDescriptor(UsageInfo @NotNull [] usages) {
     return new BnfInlineViewDescriptor(myRule);
   }
 
+  @Override
   protected @NotNull String getCommandName() {
     return "Inline rule '" + myRule.getName() + "'";
   }
 
+  @Override
   protected UsageInfo @NotNull [] findUsages() {
     if (myInlineThisOnly) return new UsageInfo[]{new UsageInfo(myReference.getElement())};
 
@@ -70,11 +74,13 @@ public class BnfInlineRuleProcessor extends BaseRefactoringProcessor {
     return result.toArray(UsageInfo.EMPTY_ARRAY);
   }
 
+  @Override
   protected void refreshElements(PsiElement @NotNull [] elements) {
     LOG.assertTrue(elements.length == 1 && elements[0] instanceof BnfRule);
     myRule = (BnfRule)elements[0];
   }
 
+  @Override
   protected void performRefactoring(UsageInfo @NotNull [] usages) {
     BnfExpression expression = myRule.getExpression();
     boolean meta = ParserGeneratorUtil.Rule.isMeta(myRule);
@@ -129,7 +135,7 @@ public class BnfInlineRuleProcessor extends BaseRefactoringProcessor {
       LOG.error(parent);
       return;
     }
-    Object2IntOpenHashMap<String> visited = new Object2IntOpenHashMap<>();
+    Object2IntMap<String> visited = new Object2IntOpenHashMap<>();
     LinkedList<Pair<PsiElement, PsiElement>> work = new LinkedList<>();
     (expression = (BnfExpression)expression.copy()).acceptChildren(new PsiRecursiveElementWalkingVisitor() {
       @Override

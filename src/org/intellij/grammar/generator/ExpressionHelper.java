@@ -60,10 +60,6 @@ public class ExpressionHelper {
     buildExpressionRules();
   }
 
-  public boolean hasExpressions() {
-    return !myExpressionMap.isEmpty();
-  }
-
   public void addWarning(String text) {
     if (myWarningConsumer == null) return;
     myWarningConsumer.accept(text);
@@ -88,7 +84,7 @@ public class ExpressionHelper {
 
       ExpressionInfo expressionInfo = new ExpressionInfo(rule);
       addToPriorityMap(rule, myRuleGraph.getExtendsRules(rule), expressionInfo);
-      List<BnfRule> rules = ParserGeneratorUtil.topoSort(expressionInfo.priorityMap.keySet(), myRuleGraph);
+      List<BnfRule> rules = topoSort(expressionInfo.priorityMap.keySet(), myRuleGraph);
       for (BnfRule r : rules) {
         buildOperatorMap(r, rule, expressionInfo);
       }
@@ -325,7 +321,7 @@ public class ExpressionHelper {
       return dumpPriorityTable(sb, StringBuilder::append);
     }
 
-    public StringBuilder dumpPriorityTable(StringBuilder sb, PairConsumer<StringBuilder, OperatorInfo> printer) {
+    public StringBuilder dumpPriorityTable(StringBuilder sb, PairConsumer<? super StringBuilder, ? super OperatorInfo> printer) {
       for (int i = 0; i < nextPriority; i++) {
         sb.append(i).append(":");
         int count = 0;

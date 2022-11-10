@@ -25,18 +25,22 @@ public class BnfInlineViewDescriptor implements UsageViewDescriptor {
         this.myElement = myElement;
     }
 
+    @Override
     public PsiElement @NotNull [] getElements() {
       return new PsiElement[] {myElement};
     }
 
+    @Override
     public String getProcessedElementsHeader() {
       return "Rule";
     }
 
+    @Override
     public @NotNull String getCodeReferencesText(int usagesCount, int filesCount) {
       return "Invocations to be inlined " + UsageViewBundle.getReferencesString(usagesCount, filesCount);
     }
 
+    @Override
     public String getCommentReferencesText(int usagesCount, int filesCount) {
       return RefactoringBundle.message("comments.elements.header",
                                        UsageViewBundle.getOccurencesString(usagesCount, filesCount));

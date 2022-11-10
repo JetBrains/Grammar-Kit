@@ -16,18 +16,12 @@ public enum Case {
 
   public @NotNull String apply(@NotNull String s) {
     if (s.isEmpty()) return s;
-    switch (this) {
-      case LOWER:
-        return s.toLowerCase(Locale.ENGLISH);
-      case UPPER:
-        return s.toUpperCase(Locale.ENGLISH);
-      case AS_IS:
-        return s;
-      case CAMEL:
-        return s.substring(0, 1).toUpperCase(Locale.ENGLISH) +
-               s.substring(1).toLowerCase(Locale.ENGLISH);
-      default:
-        throw new AssertionError();
-    }
+    return switch (this) {
+      case LOWER -> s.toLowerCase(Locale.ENGLISH);
+      case UPPER -> s.toUpperCase(Locale.ENGLISH);
+      case AS_IS -> s;
+      case CAMEL -> s.substring(0, 1).toUpperCase(Locale.ENGLISH) +
+                    s.substring(1).toLowerCase(Locale.ENGLISH);
+    };
   }
 }

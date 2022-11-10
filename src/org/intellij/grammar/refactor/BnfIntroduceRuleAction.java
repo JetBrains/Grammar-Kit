@@ -24,6 +24,7 @@ public class BnfIntroduceRuleAction extends BasePlatformRefactoringAction {
     setInjectedContext(true);
   }
 
+  @Override
   protected boolean isAvailableInEditorOnly() {
     return true;
   }
@@ -33,6 +34,7 @@ public class BnfIntroduceRuleAction extends BasePlatformRefactoringAction {
     return file instanceof BnfFile;
   }
 
+  @Override
   protected boolean isEnabledOnElements(PsiElement @NotNull [] elements) {
     return false;
   }

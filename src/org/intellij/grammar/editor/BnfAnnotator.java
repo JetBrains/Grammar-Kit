@@ -19,7 +19,6 @@ import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.generator.ParserGeneratorUtil;
 import org.intellij.grammar.generator.RuleGraphHelper;
 import org.intellij.grammar.psi.*;
-import org.intellij.grammar.psi.impl.BnfRefOrTokenImpl;
 import org.intellij.grammar.psi.impl.BnfReferenceImpl;
 import org.intellij.grammar.psi.impl.GrammarUtil;
 import org.jetbrains.annotations.NotNull;
@@ -83,7 +82,7 @@ public class BnfAnnotator implements Annotator, DumbAware {
       }
       else if (GrammarUtil.isExternalReference(psiElement)) {
         if (resolve == null && parent instanceof BnfExternalExpression && ((BnfExternalExpression)parent).getArguments().isEmpty() &&
-            ParserGeneratorUtil.Rule.isMeta(ParserGeneratorUtil.Rule.of((BnfRefOrTokenImpl)psiElement))) {
+            ParserGeneratorUtil.Rule.isMeta(ParserGeneratorUtil.Rule.of((BnfReferenceOrToken)psiElement))) {
           annotationHolder.newSilentAnnotation(HighlightSeverity.INFORMATION)
             .range(parent)
             .textAttributes(BnfSyntaxHighlighter.META_PARAM)

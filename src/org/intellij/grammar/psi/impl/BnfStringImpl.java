@@ -70,6 +70,7 @@ public abstract class BnfStringImpl extends BnfExpressionImpl implements BnfStri
     return null;
   }
 
+  @Override
   public PsiReference @NotNull [] getReferences() {
     // performance: do not run injectors
     // return PsiReferenceService.getService().getContributedReferences(this);
@@ -264,6 +265,10 @@ public abstract class BnfStringImpl extends BnfExpressionImpl implements BnfStri
     @Override
     public <R> R accept(@NotNull BnfVisitor<R> visitor) {
       return null;
+    }
+
+    @Override
+    public void accept(@NotNull PsiElementVisitor visitor) {
     }
 
     @Override

@@ -10,7 +10,7 @@ import com.intellij.notification.Notifications;
 import com.intellij.openapi.actionSystem.ActionUpdateThread;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
-import com.intellij.openapi.actionSystem.LangDataKeys;
+import com.intellij.openapi.actionSystem.CommonDataKeys;
 import com.intellij.openapi.application.WriteAction;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.fileEditor.FileDocumentManager;
@@ -22,6 +22,7 @@ import com.intellij.openapi.util.Ref;
 import com.intellij.openapi.util.io.FileUtil;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.openapi.vfs.VfsUtil;
+import com.intellij.openapi.vfs.VfsUtilCore;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiDocumentManager;
 import com.intellij.psi.PsiFile;
@@ -76,7 +77,7 @@ public class GenerateAction extends AnAction {
 
   private static @NotNull JBIterable<VirtualFile> getFiles(@NotNull AnActionEvent e) {
     Project project = e.getProject();
-    JBIterable<VirtualFile> files = JBIterable.of(e.getData(LangDataKeys.VIRTUAL_FILE_ARRAY));
+    JBIterable<VirtualFile> files = JBIterable.of(e.getData(CommonDataKeys.VIRTUAL_FILE_ARRAY));
     if (project == null || files.isEmpty()) return JBIterable.empty();
     PsiManager manager = PsiManager.getInstance(project);
     return files.filter(o -> manager.findFile(o) instanceof BnfFile);
@@ -141,7 +142,7 @@ public class GenerateAction extends AnAction {
           VirtualFile target = rootMap.get(file);
           if (target == null) return;
           targets.add(target);
-          File genDir = new File(VfsUtil.virtualToIoFile(target).getAbsolutePath());
+          File genDir = new File(VfsUtilCore.virtualToIoFile(target).getAbsolutePath());
           String packagePrefix = packageMap.get(target);
           long time = System.currentTimeMillis();
           int filesCount = files.size();

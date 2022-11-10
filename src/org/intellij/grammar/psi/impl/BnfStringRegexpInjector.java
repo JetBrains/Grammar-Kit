@@ -25,7 +25,7 @@ public class BnfStringRegexpInjector implements LanguageInjector {
     if (!Options.BNF_INJECT_REGEXP_IN_BNF.get()) return;
 
     BnfStringImpl bnfString = (BnfStringImpl)host;
-    String text = StringUtil.stripQuotesAroundValue(bnfString.getString().getText());
+    String text = StringUtil.unquoteString(bnfString.getString().getText());
     if (!text.startsWith(REGEXP_PREFIX)) return;
     places.addPlace(RegExpLanguage.INSTANCE, TextRange.create(REGEXP_PREFIX.length(), text.length()).shiftRight(1), null, null);
   }

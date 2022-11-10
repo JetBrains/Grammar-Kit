@@ -9,6 +9,7 @@ import com.intellij.openapi.util.Conditions;
 import com.intellij.openapi.util.Ref;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.SyntaxTraverser;
 import com.intellij.psi.impl.source.tree.LeafPsiElement;
 import com.intellij.psi.tree.IElementType;
@@ -17,7 +18,6 @@ import com.intellij.util.PairProcessor;
 import com.intellij.util.Processor;
 import com.intellij.util.SmartList;
 import org.intellij.grammar.KnownAttribute;
-import org.intellij.grammar.generator.ParserGeneratorUtil;
 import org.intellij.grammar.parser.GeneratedParserUtilBase;
 import org.intellij.grammar.psi.*;
 import org.jetbrains.annotations.Contract;
@@ -54,7 +54,7 @@ public class GrammarUtil {
   public static boolean equalsElement(BnfExpression e1, BnfExpression e2) {
     if (e1 == null) return e2 == null;
     if (e2 == null) return false;
-    if (ParserGeneratorUtil.getEffectiveType(e1) != ParserGeneratorUtil.getEffectiveType(e2)) return false;
+    if (getEffectiveType(e1) != getEffectiveType(e2)) return false;
     if (isOneTokenExpression(e1)) {
       return e1.getText().equals(e2.getText());
     }
@@ -82,7 +82,7 @@ public class GrammarUtil {
     PsiElement parent = psiElement == null? null : psiElement.getParent();
     if (parent instanceof BnfExternalExpression && ((BnfExternalExpression)parent).getRefElement() == psiElement) return true;
     if (parent instanceof BnfSequence && parent.getFirstChild() == psiElement) parent = parent.getParent();
-    return parent instanceof BnfRule && ParserGeneratorUtil.Rule.isExternal((BnfRule)parent);
+    return parent instanceof BnfRule && Rule.isExternal((BnfRule)parent);
   }
 
   public static List<BnfExpression> getExternalRuleExpressions(@NotNull BnfRule subRule) {
@@ -91,7 +91,7 @@ public class GrammarUtil {
   }
 
   public static List<String> collectMetaParameters(BnfRule rule, BnfExpression expression) {
-    if (!ParserGeneratorUtil.Rule.isMeta(rule) && !ParserGeneratorUtil.Rule.isExternal(rule)) return Collections.emptyList();
+    if (!Rule.isMeta(rule) && !Rule.isExternal(rule)) return Collections.emptyList();
     List<String> result = new SmartList<>();
     for (BnfExternalExpression o : bnfTraverserNoAttrs(expression).filter(BnfExternalExpression.class)) {
       if (o.getArguments().isEmpty()) {
@@ -101,7 +101,7 @@ public class GrammarUtil {
         }
       }
     }
-    if (ParserGeneratorUtil.Rule.isMeta(rule)) {
+    if (Rule.isMeta(rule)) {
       String attr = getAttribute(rule, KnownAttribute.RECOVER_WHILE);
       if (isDoubleAngles(attr) && !result.contains(attr)) {
         result.add(attr);
@@ -118,7 +118,8 @@ public class GrammarUtil {
     return str != null && str.startsWith("<<") && str.endsWith(">>");
   }
 
-  public static boolean processExpressionNames(BnfRule rule, String funcName, BnfExpression expression, PairProcessor<String, BnfExpression> processor) {
+  public static boolean processExpressionNames(BnfRule rule, String funcName, BnfExpression expression,
+                                               PairProcessor<? super String, ? super BnfExpression> processor) {
     if (isAtomicExpression(expression)) return true;
     BnfExpression nonTrivialExpression = expression;
     for (BnfExpression e = expression, n = getTrivialNodeChild(e); n != null; e = n, n = getTrivialNodeChild(e)) {
@@ -130,18 +131,18 @@ public class GrammarUtil {
     for (int i = isMeta ? 1 : 0, size = children.size(); i < size; i++) {
       BnfExpression child = children.get(i);
       if (isAtomicExpression(child)) continue;
-      String nextName = ParserGeneratorUtil.isTokenSequence(rule, child) ? funcName :
+      String nextName = isTokenSequence(rule, child) ? funcName :
                         getNextName(funcName, isMeta ? i - 1 : i);
       if (!processExpressionNames(rule, nextName, child, processor)) return false;
     }
     return processor.process(funcName, nonTrivialExpression);
   }
 
-  public static boolean processPinnedExpressions(BnfRule rule, Processor<BnfExpression> processor) {
+  public static boolean processPinnedExpressions(BnfRule rule, Processor<? super BnfExpression> processor) {
     return processPinnedExpressions(rule, (bnfExpression, pinMatcher) -> processor.process(bnfExpression));
   }
 
-  public static boolean processPinnedExpressions(BnfRule rule, PairProcessor<BnfExpression, PinMatcher> processor) {
+  public static boolean processPinnedExpressions(BnfRule rule, PairProcessor<? super BnfExpression, ? super PinMatcher> processor) {
     return processExpressionNames(rule, getFuncName(rule), rule.getExpression(), (funcName, expression) -> {
       if (!(expression instanceof BnfSequence)) return true;
       List<BnfExpression> children = getChildExpressions(expression);
@@ -220,6 +221,12 @@ public class GrammarUtil {
     @Override
     public <R> R accept(@NotNull BnfVisitor<R> visitor) {
       return visitor.visitExpression(this);
+    }
+
+    @Override
+    public void accept(@NotNull PsiElementVisitor visitor) {
+      if (visitor instanceof BnfVisitor) accept((BnfVisitor<?>)visitor);
+      else super.accept(visitor);
     }
 
     @Override

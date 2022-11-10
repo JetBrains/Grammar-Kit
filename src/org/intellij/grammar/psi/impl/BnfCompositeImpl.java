@@ -4,6 +4,7 @@
 package org.intellij.grammar.psi.impl;
 
 import com.intellij.openapi.util.text.StringUtil;
+import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.impl.source.tree.CompositePsiElement;
 import com.intellij.psi.tree.IElementType;
 import org.intellij.grammar.psi.*;
@@ -23,6 +24,12 @@ public class BnfCompositeImpl extends CompositePsiElement implements BnfComposit
   @Override
   public <R> R accept(@NotNull BnfVisitor<R> visitor) {
     return visitor.visitComposite(this);
+  }
+
+  @Override
+  public void accept(@NotNull PsiElementVisitor visitor) {
+    if (visitor instanceof BnfVisitor) accept((BnfVisitor<?>)visitor);
+    else super.accept(visitor);
   }
 
   /** @noinspection InstanceofThis*/

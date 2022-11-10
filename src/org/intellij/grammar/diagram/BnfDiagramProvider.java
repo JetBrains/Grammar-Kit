@@ -7,9 +7,8 @@ package org.intellij.grammar.diagram;
 import com.intellij.diagram.*;
 import com.intellij.diagram.extras.DiagramExtras;
 import com.intellij.diagram.presentation.DiagramLineType;
-import com.intellij.diagram.presentation.DiagramState;
+import com.intellij.openapi.actionSystem.CommonDataKeys;
 import com.intellij.openapi.actionSystem.DataContext;
-import com.intellij.openapi.actionSystem.LangDataKeys;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Comparing;
 import com.intellij.openapi.util.ModificationTracker;
@@ -25,12 +24,13 @@ import com.intellij.ui.SimpleColoredText;
 import com.intellij.ui.SimpleTextAttributes;
 import com.intellij.util.PlatformIcons;
 import com.intellij.util.containers.ContainerUtil;
-import gnu.trove.THashMap;
+import org.intellij.grammar.GrammarKitBundle;
 import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.generator.RuleGraphHelper;
 import org.intellij.grammar.psi.BnfFile;
 import org.intellij.grammar.psi.BnfRule;
 import org.intellij.lang.annotations.Pattern;
+import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -44,28 +44,39 @@ import static org.intellij.grammar.generator.ParserGeneratorUtil.getAttribute;
 /**
  * @author gregsh
  */
-public class BnfDiagramProvider extends DiagramProvider<PsiNamedElement> {
+public class BnfDiagramProvider extends DiagramProvider<BnfRule> {
   public static final String ID = "GRAMMAR";
+
+  private record Item(BnfRule rule, RuleGraphHelper.Cardinality cardinality) {
+  }
+
   private final DiagramVisibilityManager myVisibilityManager = new EmptyDiagramVisibilityManager();
 
-  private static final DiagramCategory[] CATEGORIES = new DiagramCategory[]{new DiagramCategory("Properties", PlatformIcons.PROPERTY_ICON, true, false)};
-  private final DiagramNodeContentManager myNodeContentManager = new AbstractDiagramNodeContentManager() {
+  private static final DiagramCategory[] CATEGORIES = new DiagramCategory[]{
+    new DiagramCategory(GrammarKitBundle.messagePointer("diagram.category.properties"), PlatformIcons.PROPERTY_ICON, true, false)};
 
+  private static class BnfNodeContentManager extends AbstractDiagramNodeContentManager {
     @Override
-    public boolean isInCategory(Object o, DiagramCategory diagramCategory, DiagramState diagramState) {
+    public boolean isInCategory(@Nullable Object nodeElement,
+                                @Nullable Object item,
+                                @NotNull DiagramCategory category,
+                                @Nullable DiagramBuilder builder) {
       return true;
     }
 
     @Override
-    public DiagramCategory[] getContentCategories() {
+    public DiagramCategory @NotNull [] getContentCategories() {
       return CATEGORIES;
     }
-  };
-  private final DiagramElementManager myElementManager = new AbstractDiagramElementManager<PsiNamedElement>() {
+  }
+
+  private final DiagramElementManager<BnfRule> myElementManager = new AbstractDiagramElementManager<>() {
     @Override
-    public PsiNamedElement findInDataContext(DataContext context) {
-      PsiFile file = LangDataKeys.PSI_FILE.getData(context);
-      return file instanceof BnfFile ? file : null;
+    public BnfRule findInDataContext(@NotNull DataContext context) {
+      PsiFile file = CommonDataKeys.PSI_FILE.getData(context);
+      if (!(file instanceof BnfFile bnfFile)) return null;
+      List<BnfRule> rules = bnfFile.getRules();
+      return rules.get(0);
     }
 
     @Override
@@ -74,86 +85,83 @@ public class BnfDiagramProvider extends DiagramProvider<PsiNamedElement> {
     }
 
     @Override
-    public String getElementTitle(PsiNamedElement bnfFile) {
-      return bnfFile.getName();
+    public @Nullable @Nls String getEditorTitle(BnfRule element, @NotNull Collection<BnfRule> additionalElements) {
+      PsiFile file = element == null ? null : element.getContainingFile();
+      return file == null ? null : file.getName();
     }
 
     @Override
-    public SimpleColoredText getItemName(Object o, DiagramState diagramState) {
-      if (o instanceof Map.Entry) o = ((Map.Entry<?, ?>)o).getKey();
-      if (o instanceof PsiNamedElement) {
-        return new SimpleColoredText(StringUtil.notNullize(((PsiNamedElement)o).getName()), DEFAULT_TITLE_ATTR);
+    public String getElementTitle(BnfRule o) {
+      return o.getName();
+    }
+
+    @Override
+    public @Nullable SimpleColoredText getItemName(@Nullable BnfRule element, @Nullable Object item, @NotNull DiagramBuilder builder) {
+      if (item instanceof Item o) item = o.rule;
+      if (item instanceof PsiNamedElement) {
+        return new SimpleColoredText(StringUtil.notNullize(((PsiNamedElement)item).getName()), DEFAULT_TITLE_ATTR);
       }
       return null;
     }
 
     @Override
-    public Object[] getNodeItems(PsiNamedElement parent) {
-      if (parent instanceof BnfRule) {
-        Map<PsiElement, RuleGraphHelper.Cardinality> map = myGraphHelper.getFor((BnfRule)parent);
-        Object[] objects = ContainerUtil.findAll(map.entrySet(), p -> p.getKey() instanceof BnfRule).toArray();
-        Arrays.sort(objects, (o, o1) -> Comparing.compare(((Map.Entry<BnfRule, ?>)o).getKey().getName(), ((Map.Entry<BnfRule, ?>)o1).getKey().getName()));
-        return objects;
+    public Object @NotNull [] getNodeItems(BnfRule element) {
+      Map<PsiElement, RuleGraphHelper.Cardinality> map = myGraphHelper.getFor(element);
+      List<Item> entries = ContainerUtil.mapNotNull(map.entrySet(), p -> p.getKey() instanceof BnfRule o ? new Item(o, p.getValue()) : null);
+      Collections.sort(entries, (o, o1) -> Comparing.compare(o.rule.getName(), o1.rule.getName()));
+      return entries.toArray();
+    }
+
+    @Override
+    public @Nullable SimpleColoredText getItemType(@Nullable BnfRule element, @Nullable Object item, @Nullable DiagramBuilder builder) {
+      if (item == null) return null;
+      RuleGraphHelper.Cardinality cardinality = ((Item)item).cardinality;
+      String text = RuleGraphHelper.getCardinalityText(cardinality);
+      if (StringUtil.isNotEmpty(text)) {
+        return new SimpleColoredText(" " + text + " ", SimpleTextAttributes.GRAY_ITALIC_ATTRIBUTES);
       }
-      return super.getNodeItems(parent);
+      return null;
     }
 
     @Override
-    public SimpleColoredText getItemType(Object element) {
-      if (element instanceof Map.Entry) {
-        RuleGraphHelper.Cardinality cardinality = (RuleGraphHelper.Cardinality)((Map.Entry<?, ?>)element).getValue();
-        String text = RuleGraphHelper.getCardinalityText(cardinality);
-        if (StringUtil.isNotEmpty(text)) {
-          return new SimpleColoredText(" "+text+" ", SimpleTextAttributes.GRAY_ITALIC_ATTRIBUTES);
-        }
-      }
-      return super.getItemType(element);
+    public @Nullable Icon getItemIcon(@Nullable BnfRule element, @Nullable Object item, @Nullable DiagramBuilder builder) {
+      if (item == null) return null;
+      return ((Item)item).rule.getIcon(0);
     }
 
     @Override
-    public Icon getItemIcon(Object element, DiagramState presentation) {
-      if (element instanceof Map.Entry) element = ((Map.Entry<?, ?>)element).getKey();
-      return super.getItemIcon(element, presentation);
-    }
-
-    @Override
-    public String getNodeTooltip(PsiNamedElement bnfFile) {
+    public @Nullable @Nls String getNodeTooltip(BnfRule rule) {
       return null;
     }
   };
 
-  private final DiagramVfsResolver myVfsResolver = new DiagramVfsResolver<PsiNamedElement>() {
+  private final DiagramVfsResolver<BnfRule> myVfsResolver = new DiagramVfsResolver<>() {
     @Override
-    public String getQualifiedName(PsiNamedElement o) {
-      PsiFile psiFile = o.getContainingFile();
+    public String getQualifiedName(BnfRule element) {
+      if (element == null) return null;
+      PsiFile psiFile = element.getContainingFile();
       VirtualFile virtualFile = psiFile == null ? null : psiFile.getVirtualFile();
       if (virtualFile == null) return null;
-      return o instanceof BnfRule? String.format("%s?rule=%s", virtualFile.getUrl(), o.getName()) : virtualFile.getUrl();
+      return String.format("%s?rule=%s", virtualFile.getUrl(), element.getName());
     }
 
     @Override
-    public PsiNamedElement resolveElementByFQN(String s, Project project) {
+    public BnfRule resolveElementByFQN(@NotNull String s, @NotNull Project project) {
       List<String> parts = StringUtil.split(s, "?rule=");
       if (parts.size() < 1 || parts.size() > 2) return null;
       VirtualFile virtualFile = VirtualFileManager.getInstance().findFileByUrl(parts.get(0));
-      PsiFile psiFile = virtualFile == null? null : PsiManager.getInstance(project).findFile(virtualFile);
-      if (!(psiFile instanceof BnfFile)) return null;
-      return parts.size() == 2 ? ((BnfFile)psiFile).getRule(parts.get(1)) : psiFile;
+      PsiFile psiFile = virtualFile == null ? null : PsiManager.getInstance(project).findFile(virtualFile);
+      if (!(psiFile instanceof BnfFile bnfFile)) return null;
+      return parts.size() == 2 ? ((BnfFile)psiFile).getRule(parts.get(1)) : ContainerUtil.getFirstItem(bnfFile.getRules());
     }
-    
   };
-  private final DiagramRelationshipManager myRelationshipManager = new DiagramRelationshipManager<PsiNamedElement>() {
+  private final DiagramRelationshipManager<BnfRule> myRelationshipManager = new DiagramRelationshipManager<>() {
     @Override
-    public DiagramRelationshipInfo getDependencyInfo(PsiNamedElement e1, PsiNamedElement e2, DiagramCategory diagramCategory) {
+    public @Nullable DiagramRelationshipInfo getDependencyInfo(BnfRule rule, BnfRule t1, DiagramCategory category) {
       return null;
     }
-
-    @Override
-    public DiagramCategory[] getContentCategories() {
-      return CATEGORIES;
-    }
   };
-  private final DiagramExtras myExtras = new DiagramExtras();
+  private final DiagramExtras<BnfRule> myExtras = new DiagramExtras<>();
   private RuleGraphHelper myGraphHelper;
 
   public BnfDiagramProvider() {
@@ -162,65 +170,68 @@ public class BnfDiagramProvider extends DiagramProvider<PsiNamedElement> {
 
   @Pattern("[a-zA-Z0-9_-]*")
   @Override
-  public String getID() {
+  public @NotNull String getID() {
     return ID;
   }
 
   @Override
-  public DiagramVisibilityManager createVisibilityManager() {
+  public @NotNull DiagramVisibilityManager createVisibilityManager() {
     return myVisibilityManager;
   }
 
   @Override
-  public DiagramNodeContentManager getNodeContentManager() {
-    return myNodeContentManager;
+  public @NotNull DiagramNodeContentManager createNodeContentManager() {
+    return new BnfNodeContentManager();
   }
 
   @Override
-  public DiagramElementManager<PsiNamedElement> getElementManager() {
+  public @NotNull DiagramElementManager<BnfRule> getElementManager() {
     return myElementManager;
   }
 
   @Override
-  public DiagramVfsResolver<PsiNamedElement> getVfsResolver() {
+  public @NotNull DiagramVfsResolver<BnfRule> getVfsResolver() {
     return myVfsResolver;
   }
 
   @Override
-  public DiagramRelationshipManager<PsiNamedElement> getRelationshipManager() {
+  public @NotNull DiagramRelationshipManager<BnfRule> getRelationshipManager() {
     return myRelationshipManager;
   }
 
   @Override
-  public DiagramDataModel<PsiNamedElement> createDataModel(@NotNull Project project,
-                                                           @Nullable PsiNamedElement element,
-                                                           @Nullable VirtualFile file,
-                                                           DiagramPresentationModel presentationModel) {
-    return new MyDataModel(project, (BnfFile)element, this);
+  public @NotNull DiagramDataModel<BnfRule> createDataModel(@NotNull Project project,
+                                                            @Nullable BnfRule element,
+                                                            @Nullable VirtualFile file,
+                                                            @NotNull DiagramPresentationModel presentationModel) {
+    return new MyDataModel(project, element == null ? null : (BnfFile)element.getContainingFile(), this);
   }
 
   @Override
-  public @NotNull DiagramExtras getExtras() {
+  public @NotNull DiagramExtras<BnfRule> getExtras() {
     return myExtras;
   }
 
   @Override
-  public String getActionName(boolean isPopup) {
-    return "Visualisation";
+  public DiagramCategory @NotNull [] getAllContentCategories() {
+    return CATEGORIES;
   }
 
   @Override
-  public String getPresentableName() {
-    return "Grammar Diagrams";
+  public @NotNull String getActionName(boolean isPopup) {
+    return GrammarKitBundle.message("diagram.action.name");
   }
 
-  private static class MyDataModel extends DiagramDataModel<PsiNamedElement> implements ModificationTracker {
+  @Override
+  public @NotNull String getPresentableName() {
+    return GrammarKitBundle.message("diagram.presentable.name");
+  }
+
+  private static class MyDataModel extends DiagramDataModel<BnfRule> implements ModificationTracker {
 
     private final BnfFile myFile;
-
-    private final Collection<DiagramNode<PsiNamedElement>> myNodes = new HashSet<>();
-    private final Collection<DiagramEdge<PsiNamedElement>> myEdges = new HashSet<>();
-
+    private final Collection<DiagramNode<BnfRule>> myNodes = new HashSet<>();
+    private final Collection<DiagramEdge<BnfRule>> myEdges = new HashSet<>();
 
     MyDataModel(Project project, BnfFile file, BnfDiagramProvider provider) {
       super(project, provider);
@@ -228,22 +239,22 @@ public class BnfDiagramProvider extends DiagramProvider<PsiNamedElement> {
     }
 
     @Override
-    public @NotNull Collection<DiagramNode<PsiNamedElement>> getNodes() {
+    public @NotNull Collection<DiagramNode<BnfRule>> getNodes() {
       return myNodes;
     }
 
     @Override
-    public @NotNull Collection<DiagramEdge<PsiNamedElement>> getEdges() {
+    public @NotNull Collection<DiagramEdge<BnfRule>> getEdges() {
       return myEdges;
     }
 
     @Override
-    public @NotNull String getNodeName(DiagramNode<PsiNamedElement> node) {
+    public @NotNull String getNodeName(DiagramNode<BnfRule> node) {
       return StringUtil.notNullize(node.getTooltip());
     }
 
     @Override
-    public DiagramNode<PsiNamedElement> addElement(PsiNamedElement psiElement) {
+    public DiagramNode<BnfRule> addElement(BnfRule psiElement) {
       return null;
     }
 
@@ -255,12 +266,12 @@ public class BnfDiagramProvider extends DiagramProvider<PsiNamedElement> {
       RuleGraphHelper ruleGraphHelper = RuleGraphHelper.getCached(myFile);
       ((BnfDiagramProvider)getProvider()).myGraphHelper = ruleGraphHelper;
 
-      Map<BnfRule, DiagramNode<PsiNamedElement>> nodeMap = new THashMap<>();
+      Map<BnfRule, DiagramNode<BnfRule>> nodeMap = new HashMap<>();
       List<BnfRule> rules = myFile.getRules();
       BnfRule root = ContainerUtil.getFirstItem(rules);
       for (BnfRule rule : rules) {
         if (rule != root && !RuleGraphHelper.hasPsiClass(rule)) continue;
-        DiagramNode<PsiNamedElement> diagramNode = new PsiDiagramNode<PsiNamedElement>(rule, getProvider()) {
+        DiagramNode<BnfRule> diagramNode = new PsiDiagramNode<>(rule, getProvider()) {
           @Override
           public String getTooltip() {
             return getIdentifyingElement().getName();
@@ -275,61 +286,66 @@ public class BnfDiagramProvider extends DiagramProvider<PsiNamedElement> {
 
         BnfRule superRule = myFile.getRule(getAttribute(rule, KnownAttribute.EXTENDS));
         if (superRule != null) {
-          DiagramNode<PsiNamedElement> source = nodeMap.get(rule);
-          DiagramNode<PsiNamedElement> target = nodeMap.get(superRule);
+          DiagramNode<BnfRule> source = nodeMap.get(rule);
+          DiagramNode<BnfRule> target = nodeMap.get(superRule);
           if (source == null || target == null) continue;
-          myEdges.add(new DiagramEdgeBase<PsiNamedElement>(source, target, new DiagramRelationshipInfoAdapter("EXTENDS", DiagramLineType.DASHED, "extends") {
+          myEdges.add(new DiagramEdgeBase<>(source, target,
+                                            new DiagramRelationshipInfoAdapter("EXTENDS", DiagramLineType.DASHED,
+                                                                               "extends") {
 
-              public Shape getStartArrow() {
-                return DELTA;
-              }
-            }) {
+                                              @Override
+                                              public Shape getStartArrow() {
+                                                return DELTA;
+                                              }
+                                            }) {
 
-              @Override
-              public String getName() {
-                return "";
-              }
-            });
+            @Override
+            public @NotNull String getName() {
+              return "";
+            }
+          });
         }
         for (PsiElement element : map.keySet()) {
           if (!(element instanceof BnfRule)) continue;
           RuleGraphHelper.Cardinality cardinality = map.get(element);
           assert cardinality != RuleGraphHelper.Cardinality.NONE;
 
-          DiagramNode<PsiNamedElement> source = nodeMap.get(rule);
-          DiagramNode<PsiNamedElement> target = nodeMap.get(element);
+          DiagramNode<BnfRule> source = nodeMap.get(rule);
+          DiagramNode<BnfRule> target = nodeMap.get(element);
           if (source == null || target == null) continue;
-          myEdges.add(new DiagramEdgeBase<PsiNamedElement>(source, target, new DiagramRelationshipInfoAdapter("CONTAINS", DiagramLineType.SOLID, "") {
-            @Override
-            public String getLabel() {
-              return cardinality.name().toLowerCase();
-            }
+          myEdges.add(
+            new DiagramEdgeBase<>(source, target, new DiagramRelationshipInfoAdapter("CONTAINS", DiagramLineType.SOLID, "") {
+              @Override
+              public Label getUpperCenterLabel() {
+                return new ColoredLabel(StringUtil.toLowerCase(cardinality.name()));
+              }
 
-            public Shape getStartArrow() {
-              return DELTA;
-            }
-          } ) {
+              @Override
+              public Shape getStartArrow() {
+                return DELTA;
+              }
+            }) {
 
-            @Override
-            public Object getSourceAnchor() {
-              return element;
-            }
+              @Override
+              public Object getSourceAnchor() {
+                return element;
+              }
 
-            @Override
-            public Object getTargetAnchor() {
-              return element;
-            }
+              @Override
+              public Object getTargetAnchor() {
+                return element;
+              }
 
-            @Override
-            public Color getAnchorColor() {
-              return JBColor.BLUE;
-            }
+              @Override
+              public Color getAnchorColor() {
+                return JBColor.BLUE;
+              }
 
-            @Override
-            public String getName() {
-              return "";
-            }
-          });
+              @Override
+              public @NotNull String getName() {
+                return "";
+              }
+            });
         }
       }
     }

@@ -26,6 +26,6 @@ public class LivePreviewAction extends DumbAwareAction {
     PsiFile psiFile = LangDataKeys.PSI_FILE.getData(e.getDataContext());
     if (!(psiFile instanceof BnfFile)) return;
 
-    LivePreviewHelper.showFor((BnfFile)psiFile);
+    LivePreviewHelper.getInstance().showFor((BnfFile)psiFile);
   }
 }

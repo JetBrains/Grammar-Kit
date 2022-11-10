@@ -4,6 +4,7 @@
 
 package org.intellij.grammar.livePreview;
 
+import com.intellij.lang.DependentLanguage;
 import com.intellij.lang.Language;
 import com.intellij.openapi.application.Application;
 import com.intellij.openapi.application.ApplicationManager;
@@ -38,7 +39,7 @@ import static org.jetbrains.org.objectweb.asm.Opcodes.*;
 /**
  * @author gregsh
  */
-public class LivePreviewLanguage extends Language {
+public class LivePreviewLanguage extends Language implements DependentLanguage {
 
   private final VirtualFilePointer myFilePointer;
   private final SoftReference<BnfFile> myBnfFile;
@@ -60,7 +61,7 @@ public class LivePreviewLanguage extends Language {
       myFilePointer = null;
     }
     else {
-      myFilePointer = VirtualFilePointerManager.getInstance().create(virtualFile, app, null);
+      myFilePointer = VirtualFilePointerManager.getInstance().create(virtualFile, LivePreviewHelper.getInstance(), null);
       myBnfFile = null;
     }
   }
@@ -146,7 +147,7 @@ public class LivePreviewLanguage extends Language {
       super(LivePreviewHelper.class.getClassLoader());
     }
 
-    Class<LivePreviewLanguage> createClass() throws Exception {
+    Class<LivePreviewLanguage> createClass() {
       int index = myCounter.incrementAndGet();
       String className = LivePreviewLanguage.class.getName() + "$$_" + index;
       byte[] b = dump(className);

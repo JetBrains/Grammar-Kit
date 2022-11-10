@@ -6,6 +6,9 @@ package org.intellij.grammar.livePreview;
 
 import com.intellij.lang.*;
 import com.intellij.lexer.Lexer;
+import com.intellij.openapi.Disposable;
+import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.components.Service;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.EditorFactory;
@@ -15,9 +18,10 @@ import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.fileEditor.ex.FileEditorManagerEx;
 import com.intellij.openapi.fileEditor.impl.EditorWindow;
+import com.intellij.openapi.fileTypes.FileTypeManager;
 import com.intellij.openapi.progress.ProcessCanceledException;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.util.NotNullLazyKey;
+import com.intellij.openapi.project.ProjectManager;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiDocumentManager;
 import com.intellij.psi.PsiFile;
@@ -25,9 +29,11 @@ import com.intellij.psi.PsiManager;
 import com.intellij.psi.TokenType;
 import com.intellij.testFramework.LightVirtualFile;
 import com.intellij.util.Alarm;
-import com.intellij.util.FileContentUtil;
+import com.intellij.util.FileContentUtilCore;
 import com.intellij.util.PairProcessor;
-import com.intellij.util.SingleAlarm;
+import com.intellij.util.ui.update.MergingUpdateQueue;
+import com.intellij.util.ui.update.Update;
+import org.intellij.grammar.BnfFileType;
 import org.intellij.grammar.parser.GeneratedParserUtilBase;
 import org.intellij.grammar.psi.BnfExpression;
 import org.intellij.grammar.psi.BnfFile;
@@ -43,14 +49,41 @@ import java.util.Map;
 /**
  * @author gregsh
  */
-public class LivePreviewHelper {
+@Service
+public final class LivePreviewHelper implements Disposable {
 
-  public static void showFor(BnfFile bnfFile) {
-    PsiFile psiFile = parseFile(bnfFile, "");
-    VirtualFile virtualFile = psiFile == null? null : psiFile.getVirtualFile();
-    if (virtualFile == null) return;
+  public static LivePreviewHelper getInstance() {
+    return ApplicationManager.getApplication().getService(LivePreviewHelper.class);
+  }
+
+  private final MergingUpdateQueue myQueue;
+
+  public LivePreviewHelper() {
+    myQueue = new MergingUpdateQueue(
+      "LivePreview update queue", 500, true, null, this, null, Alarm.ThreadToUse.SWING_THREAD);
+    FileDocumentManager fileManager = FileDocumentManager.getInstance();
+    EditorFactory.getInstance().getEventMulticaster().addDocumentListener(new DocumentListener() {
+      @Override
+      public void documentChanged(@NotNull DocumentEvent e) {
+        Document document = e.getDocument();
+        VirtualFile file = fileManager.getFile(document);
+        if (file == null) return;
+        if (FileTypeManager.getInstance().getFileTypeByFileName(file.getName()) != BnfFileType.INSTANCE) return;
+        myQueue.run(Update.create(file, () -> reparseAllLivePreviews(file, document)));
+      }
+    }, this);
+  }
+
+  @Override
+  public void dispose() {
+  }
+
+  /** @noinspection MethodMayBeStatic*/
+  public void showFor(@NotNull BnfFile bnfFile) {
     Project project = bnfFile.getProject();
-    installUpdateListener(project);
+    PsiFile psiFile = parseFile(bnfFile, "");
+    VirtualFile virtualFile = psiFile == null ? null : psiFile.getVirtualFile();
+    if (virtualFile == null) return;
 
     FileEditorManagerEx fileEditorManager = FileEditorManagerEx.getInstanceEx(project);
     EditorWindow curWindow = fileEditorManager.getCurrentWindow();
@@ -60,7 +93,6 @@ public class LivePreviewHelper {
 
   public static @Nullable PsiFile parseFile(BnfFile bnfFile, String text) {
     Language language = getLanguageFor(bnfFile);
-
     String fileName = bnfFile.getName() + ".preview";
     LightVirtualFile virtualFile = new LightVirtualFile(fileName, language, text);
     Project project = bnfFile.getProject();
@@ -78,7 +110,6 @@ public class LivePreviewHelper {
   public static void registerLanguageExtensions(LivePreviewLanguage language) {
     LanguageStructureViewBuilder.INSTANCE.addExplicitExtension(language, new LivePreviewStructureViewFactory());
     LanguageParserDefinitions.INSTANCE.addExplicitExtension(language, new LivePreviewParserDefinition(language));
-    //SyntaxHighlighterFactory.LANGUAGE_FACTORY.addExplicitExtension(language, new LivePreviewSyntaxHighlighterFactory(language));
   }
 
   public static void unregisterLanguageExtensions(LivePreviewLanguage language) {
@@ -86,43 +117,27 @@ public class LivePreviewHelper {
     LanguageParserDefinitions.INSTANCE.removeExplicitExtension(language, LanguageParserDefinitions.INSTANCE.forLanguage(language));
   }
 
-  private static final NotNullLazyKey<SingleAlarm, Project> LIVE_PREVIEW_ALARM =
-    NotNullLazyKey.create("LIVE_PREVIEW_ALARM",
-                          project -> new SingleAlarm(() -> reparseAllLivePreviews(project), 300, Alarm.ThreadToUse.SWING_THREAD, project));
-  private static void installUpdateListener(Project project) {
-    EditorFactory.getInstance().getEventMulticaster().addDocumentListener(new DocumentListener() {
-
-      final FileDocumentManager fileManager = FileDocumentManager.getInstance();
-      final PsiManager psiManager = PsiManager.getInstance(project);
-
-      @Override
-      public void documentChanged(@NotNull DocumentEvent e) {
-        Document document = e.getDocument();
-        VirtualFile file = fileManager.getFile(document);
-        PsiFile psiFile = file == null ? null : psiManager.findFile(file);
-        if (psiFile instanceof BnfFile) {
-          LIVE_PREVIEW_ALARM.getValue(project).cancelAndRequest();
+  private static void reparseAllLivePreviews(@NotNull VirtualFile bnfFile, @NotNull Document document) {
+    Collection<VirtualFile> files = new LinkedHashSet<>();
+    for (Project project : ProjectManager.getInstance().getOpenProjects()) {
+      FileEditorManager fileEditorManager = FileEditorManager.getInstance(project);
+      boolean committed = false;
+      for (VirtualFile file : fileEditorManager.getOpenFiles()) {
+        Language language = file instanceof LightVirtualFile ? ((LightVirtualFile)file).getLanguage() : null;
+        if (!(language instanceof LivePreviewLanguage previewLanguage)) continue;
+        if (!bnfFile.equals(previewLanguage.getGrammarFile())) continue;
+        files.add(file);
+        if (!committed) {
+          PsiDocumentManager.getInstance(project).commitDocument(document);
+          committed = true;
         }
       }
-    }, project);
-  }
-
-  private static void reparseAllLivePreviews(@NotNull Project project) {
-    if (!project.isOpen()) return;
-    PsiDocumentManager.getInstance(project).commitAllDocuments();
-    Collection<VirtualFile> files = new LinkedHashSet<>();
-    FileEditorManager fileEditorManager = FileEditorManager.getInstance(project);
-    PsiManager psiManager = PsiManager.getInstance(project);
-    for (VirtualFile file : fileEditorManager.getOpenFiles()) {
-      PsiFile psiFile = psiManager.findFile(file);
-      Language language = psiFile == null? null : psiFile.getLanguage();
-      if (!(language instanceof LivePreviewLanguage)) continue;
-      files.add(file);
     }
-    FileContentUtil.reparseFiles(project, files, false);
+    if (files.isEmpty()) return;
+    FileContentUtilCore.reparseFiles(files);
   }
 
-  public static boolean collectExpressionsAtOffset(Project project, Editor previewEditor, LivePreviewLanguage language, PairProcessor<BnfExpression, Boolean> processor) {
+  public static void collectExpressionsAtOffset(Project project, Editor previewEditor, LivePreviewLanguage language, PairProcessor<BnfExpression, Boolean> processor) {
     Lexer lexer = new LivePreviewLexer(project, language);
     ParserDefinition parserDefinition = LanguageParserDefinitions.INSTANCE.forLanguage(language);
     PsiBuilder builder = PsiBuilderFactory.getInstance().createBuilder(parserDefinition, lexer, previewEditor.getDocument().getText());
@@ -155,12 +170,6 @@ public class LivePreviewHelper {
       }
 
     };
-    try {
-      parser.parse(parserDefinition.getFileNodeType(), builder);
-      return true;
-    }
-    catch (ProcessCanceledException e) {
-      return false;
-    }
+    parser.parse(parserDefinition.getFileNodeType(), builder);
   }
 }

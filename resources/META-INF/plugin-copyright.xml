@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <idea-plugin>
+  <resource-bundle>messages.GrammarKitBundle</resource-bundle>
   <extensions defaultExtensionNs="com.intellij.copyright">
     <updater filetype="BNF" implementationClass="com.maddyhome.idea.copyright.psi.UpdateAnyFileCopyright$Provider"/>
   </extensions>

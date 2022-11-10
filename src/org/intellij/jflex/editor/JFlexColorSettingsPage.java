@@ -10,6 +10,7 @@ import com.intellij.openapi.options.colors.AttributesDescriptor;
 import com.intellij.openapi.options.colors.ColorDescriptor;
 import com.intellij.openapi.options.colors.ColorSettingsPage;
 import com.intellij.util.containers.ContainerUtil;
+import org.intellij.grammar.GrammarKitBundle;
 import org.intellij.jflex.parser.JFlexFileType;
 import org.jetbrains.annotations.NotNull;
 
@@ -61,7 +62,7 @@ public class JFlexColorSettingsPage implements ColorSettingsPage {
   }
 
   public @NotNull String getDisplayName() {
-    return "JFlex";
+    return GrammarKitBundle.message("language.name.jflex");
   }
 
   public Icon getIcon() {

@@ -4,7 +4,6 @@
 package org.intellij.grammar;
 
 import com.intellij.lang.Language;
-import org.intellij.grammar.generator.BnfConstants;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -23,6 +22,6 @@ public class BnfLanguage extends Language {
 
   @Override
   public @NotNull String getDisplayName() {
-    return BnfConstants.BNF_DISPLAY_NAME;
+    return GrammarKitBundle.message("language.name.bnf");
   }
 }

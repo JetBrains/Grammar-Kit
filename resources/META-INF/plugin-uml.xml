@@ -1,4 +1,5 @@
 <idea-plugin url="http://www.jetbrains.com/idea">
+  <resource-bundle>messages.GrammarKitBundle</resource-bundle>
   <extensions defaultExtensionNs="com.intellij">
     <diagram.Provider implementation="org.intellij.grammar.diagram.BnfDiagramProvider"/>
   </extensions>

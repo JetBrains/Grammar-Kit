@@ -48,7 +48,7 @@ public class BnfDiagramProvider extends DiagramProvider<PsiNamedElement> {
   public static final String ID = "GRAMMAR";
   private final DiagramVisibilityManager myVisibilityManager = new EmptyDiagramVisibilityManager();
 
-  private static final DiagramCategory[] CATEGORIES = new DiagramCategory[]{new DiagramCategory("Properties", PlatformIcons.PROPERTY_ICON, true)};
+  private static final DiagramCategory[] CATEGORIES = new DiagramCategory[]{new DiagramCategory("Properties", PlatformIcons.PROPERTY_ICON, true, false)};
   private final DiagramNodeContentManager myNodeContentManager = new AbstractDiagramNodeContentManager() {
 
     @Override

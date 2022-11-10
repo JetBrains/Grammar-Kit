@@ -9,6 +9,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.util.IncorrectOperationException;
+import org.intellij.grammar.GrammarKitBundle;
 import org.intellij.grammar.psi.*;
 import org.intellij.grammar.psi.impl.BnfElementFactory;
 import org.jetbrains.annotations.Contract;
@@ -22,7 +23,7 @@ public class BnfConvertOptExpressionIntention extends BaseIntentionAction {
 
   @Override
   public @Nls(capitalization = Nls.Capitalization.Sentence) @NotNull String getFamilyName() {
-    return "Convert opt expression";
+    return GrammarKitBundle.message("intention.convert.opt.expression.family");
   }
 
   @Override
@@ -33,11 +34,11 @@ public class BnfConvertOptExpressionIntention extends BaseIntentionAction {
     PsiElement element = file.getViewProvider().findElementAt(offset);
 
     if (getQuantifiedOptExpression(element) != null) {
-      setText("Convert expr? to [expr]");
+      setText(GrammarKitBundle.message("intention.convert.opt.expression.text1"));
       return true;
     }
     else if (getParenOptExpression(element) != null) {
-      setText("Convert [expr] to expr?");
+      setText(GrammarKitBundle.message("intention.convert.opt.expression.text2"));
       return true;
     }
     else {

@@ -10,7 +10,7 @@ import com.intellij.openapi.options.colors.AttributesDescriptor;
 import com.intellij.openapi.options.colors.ColorDescriptor;
 import com.intellij.openapi.options.colors.ColorSettingsPage;
 import org.intellij.grammar.BnfIcons;
-import org.intellij.grammar.generator.BnfConstants;
+import org.intellij.grammar.GrammarKitBundle;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
 
@@ -51,7 +51,7 @@ public class BnfColorSettingsPage implements ColorSettingsPage {
   }
 
   public @NotNull String getDisplayName() {
-    return BnfConstants.BNF_DISPLAY_NAME;
+    return GrammarKitBundle.message("language.name.bnf");
   }
 
   public Icon getIcon() {

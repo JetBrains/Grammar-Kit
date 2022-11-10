@@ -18,6 +18,7 @@ import com.intellij.openapi.vfs.pointers.VirtualFilePointer;
 import com.intellij.openapi.vfs.pointers.VirtualFilePointerManager;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiManager;
+import org.intellij.grammar.GrammarKitBundle;
 import org.intellij.grammar.psi.BnfFile;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -32,7 +33,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.intellij.grammar.generator.BnfConstants.LP_DISPLAY_NAME;
 import static org.jetbrains.org.objectweb.asm.Opcodes.*;
 
 
@@ -46,7 +46,7 @@ public class LivePreviewLanguage extends Language implements DependentLanguage {
   public static final Language BASE_INSTANCE = new Language("BNF_LP") {
     @Override
     public @NotNull String getDisplayName() {
-      return LP_DISPLAY_NAME;
+      return GrammarKitBundle.message("language.name.bnf.live.preview");
     }
   };
 

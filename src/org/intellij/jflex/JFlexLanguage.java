@@ -4,6 +4,7 @@
 package org.intellij.jflex;
 
 import com.intellij.lang.Language;
+import org.intellij.grammar.GrammarKitBundle;
 import org.jetbrains.annotations.NotNull;
 
 public class JFlexLanguage extends Language {
@@ -16,6 +17,6 @@ public class JFlexLanguage extends Language {
 
   @Override
   public @NotNull String getDisplayName() {
-    return "JFlex";
+    return GrammarKitBundle.message("language.name.jflex");
   }
 }

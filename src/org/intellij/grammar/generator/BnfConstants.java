@@ -8,8 +8,6 @@ package org.intellij.grammar.generator;
  * @author gregsh
  */
 public interface BnfConstants {
-  String BNF_DISPLAY_NAME = "Grammar-Kit BNF";
-  String LP_DISPLAY_NAME = "Grammar-Kit Live Preview";
 
   String GENERATION_GROUP = "Grammar Generator";
 

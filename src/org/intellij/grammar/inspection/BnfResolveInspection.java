@@ -13,6 +13,7 @@ import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.psi.*;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.util.ThreeState;
+import org.intellij.grammar.GrammarKitBundle;
 import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.generator.BnfConstants;
 import org.intellij.grammar.generator.ParserGeneratorUtil;
@@ -41,7 +42,7 @@ public class BnfResolveInspection extends LocalInspectionTool {
           PsiReference reference = parent.findReferenceAt(o.getStartOffsetInParent());
           PsiElement resolve = reference == null ? null : reference.resolve();
           if (resolve == null) {
-            holder.registerProblem(o, "Unresolved method reference");
+            holder.registerProblem(o, GrammarKitBundle.message("inspection.message.unresolved.method.reference"));
           }
         }
         else {
@@ -49,10 +50,10 @@ public class BnfResolveInspection extends LocalInspectionTool {
           Object resolve = reference == null ? null : reference.resolve();
           if (resolve == null) {
             if (parent instanceof BnfAttr) {
-              holder.registerProblem(o, "Unresolved rule reference");
+              holder.registerProblem(o, GrammarKitBundle.message("inspection.message.unresolved.rule.reference"));
             }
             else if (GrammarUtil.isExternalReference(o)) {
-              holder.registerProblem(o, "Unresolved rule or method reference");
+              holder.registerProblem(o, GrammarKitBundle.message("inspection.message.unresolved.rule.or.method.reference"));
             }
           }
         }
@@ -66,7 +67,7 @@ public class BnfResolveInspection extends LocalInspectionTool {
         if (parent instanceof BnfAttrPattern) {
           PsiReference reference = o.getReference();
           if (reference instanceof PsiPolyVariantReference && ((PsiPolyVariantReference)reference).multiResolve(false).length == 0) {
-            holder.registerProblem(o, "Pattern doesn't match any rule");
+            holder.registerProblem(o, GrammarKitBundle.message("inspection.message.pattern.does.not.match.any.rule"));
           }
         }
         else if (parent instanceof BnfAttr || parent instanceof BnfListEntry) {

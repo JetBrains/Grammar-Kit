@@ -12,6 +12,7 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.util.IncorrectOperationException;
+import org.intellij.grammar.GrammarKitBundle;
 import org.intellij.grammar.psi.BnfChoice;
 import org.intellij.grammar.psi.BnfExpression;
 import org.intellij.grammar.psi.impl.BnfElementFactory;
@@ -25,12 +26,12 @@ import org.jetbrains.annotations.Nullable;
 public class BnfFlipChoiceIntention implements IntentionAction {
   @Override
   public @NotNull String getText() {
-    return "Flip arguments";
+    return GrammarKitBundle.message("intention.flip.arguments.text");
   }
 
   @Override
   public @NotNull String getFamilyName() {
-    return "Flip choice intention";
+    return GrammarKitBundle.message("intention.flip.arguments.family");
   }
 
   @Override

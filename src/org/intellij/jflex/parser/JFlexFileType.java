@@ -6,6 +6,7 @@ package org.intellij.jflex.parser;
 
 import com.intellij.openapi.fileTypes.LanguageFileType;
 import com.intellij.openapi.fileTypes.PlainTextFileType;
+import org.intellij.grammar.GrammarKitBundle;
 import org.intellij.jflex.JFlexLanguage;
 import org.jetbrains.annotations.NotNull;
 
@@ -26,7 +27,7 @@ public class JFlexFileType extends LanguageFileType {
 
   @Override
   public @NotNull String getDescription() {
-    return "JFlex lexer";
+    return GrammarKitBundle.message("language.name.jflex");
   }
 
   @Override

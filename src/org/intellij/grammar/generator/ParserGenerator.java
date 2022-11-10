@@ -294,7 +294,7 @@ public class ParserGenerator {
     }
     else {
       NotificationGroupManager.getInstance()
-        .getNotificationGroup("Parser Generator Log")
+        .getNotificationGroup("grammarkit.parser.generator.log")
         .createNotification(text, MessageType.WARNING).notify(myFile.getProject());
     }
   }

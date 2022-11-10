@@ -8,12 +8,11 @@ import com.intellij.openapi.fileTypes.FileType;
 import com.intellij.openapi.fileTypes.LanguageFileType;
 import com.intellij.openapi.vfs.VirtualFile;
 import org.intellij.grammar.BnfIcons;
+import org.intellij.grammar.GrammarKitBundle;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
-
-import static org.intellij.grammar.generator.BnfConstants.LP_DISPLAY_NAME;
 
 /**
  * @author gregsh
@@ -32,7 +31,7 @@ public class LivePreviewFileType extends LanguageFileType {
 
   @Override
   public @NotNull String getDescription() {
-    return LP_DISPLAY_NAME;
+    return GrammarKitBundle.message("language.name.bnf.live.preview");
   }
 
   @Override

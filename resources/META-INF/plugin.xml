@@ -1,10 +1,11 @@
 <idea-plugin url="https://github.com/JetBrains/Grammar-Kit">
   <id>org.jetbrains.idea.grammar</id>
-  <version>2021.1.3-SNAPSHOT</version>
+  <version>2022.3-SNAPSHOT</version>
   <vendor>JetBrains</vendor>
 
   <name>Grammar-Kit</name>
   <description>BNF Grammars and JFlex lexers editor. Readable parser/PSI code generator.</description>
+  <resource-bundle>messages.GrammarKitBundle</resource-bundle>
 
   <depends>com.intellij.modules.lang</depends>
   <depends optional="true" config-file="plugin-copyright.xml">com.intellij.copyright</depends>
@@ -53,41 +54,43 @@
 
     <lang.inspectionSuppressor language="BNF" implementationClass="org.intellij.grammar.inspection.BnfInspectionSuppressor"/>
 
-    <localInspection language="BNF" level="WARNING" groupName="Grammar inspections" enabledByDefault="true"
-                     displayName="Unresolved BNF references"
-                     implementationClass="org.intellij.grammar.inspection.BnfResolveInspection"/>
-    <localInspection language="BNF" level="WARNING" groupName="Grammar inspections" enabledByDefault="true"
-                     displayName="Unused rule"
-                     implementationClass="org.intellij.grammar.inspection.BnfUnusedRuleInspection"/>
-    <localInspection language="BNF" level="WARNING" groupName="Grammar inspections" enabledByDefault="true"
-                     displayName="Unused attribute"
-                     implementationClass="org.intellij.grammar.inspection.BnfUnusedAttributeInspection"/>
-    <localInspection language="BNF" level="WARNING" groupName="Grammar inspections" enabledByDefault="true"
-                     displayName="Suspicious token"
-                     implementationClass="org.intellij.grammar.inspection.BnfSuspiciousTokenInspection"/>
-    <localInspection language="BNF" level="WARNING" groupName="Grammar inspections" enabledByDefault="true"
-                     displayName="Left recursion"
-                     implementationClass="org.intellij.grammar.inspection.BnfLeftRecursionInspection"/>
-    <localInspection language="BNF" level="WARNING" groupName="Grammar inspections" enabledByDefault="true"
-                     displayName="Duplicate rule"
-                     implementationClass="org.intellij.grammar.inspection.BnfDuplicateRuleInspection"/>
-    <localInspection language="BNF" level="WARNING" groupName="Grammar inspections" enabledByDefault="true"
-                     displayName="Identical choice branches"
-                     implementationClass="org.intellij.grammar.inspection.BnfIdenticalChoiceBranchesInspection"/>
-    <localInspection language="BNF" level="WARNING" groupName="Grammar inspections" enabledByDefault="true"
-                     displayName="Unreachable choice branch"
-                     implementationClass="org.intellij.grammar.inspection.BnfUnreachableChoiceBranchInspection"/>
+    <localInspection language="BNF" level="WARNING" groupKey="inspection.group.bnf" enabledByDefault="true"
+                     implementationClass="org.intellij.grammar.inspection.BnfResolveInspection"
+                     key="inspection.bnf.resolve.display.name"/>
+    <localInspection language="BNF" level="WARNING" groupKey="inspection.group.bnf" enabledByDefault="true"
+                     implementationClass="org.intellij.grammar.inspection.BnfUnusedRuleInspection"
+                     key="inspection.bnf.unused.rule.display.name"/>
+    <localInspection language="BNF" level="WARNING" groupKey="inspection.group.bnf" enabledByDefault="true"
+                     implementationClass="org.intellij.grammar.inspection.BnfUnusedAttributeInspection"
+                     key="inspection.bnf.unused.attribute.display.name"/>
+    <localInspection language="BNF" level="WARNING" groupKey="inspection.group.bnf" enabledByDefault="true"
+                     implementationClass="org.intellij.grammar.inspection.BnfSuspiciousTokenInspection"
+                     key="inspection.bnf.suspicious.token.display.name"/>
+    <localInspection language="BNF" level="WARNING" groupKey="inspection.group.bnf" enabledByDefault="true"
+                     implementationClass="org.intellij.grammar.inspection.BnfLeftRecursionInspection"
+                     key="inspection.bnf.left.recursion.display.name"/>
+    <localInspection language="BNF" level="WARNING" groupKey="inspection.group.bnf" enabledByDefault="true"
+                     implementationClass="org.intellij.grammar.inspection.BnfDuplicateRuleInspection"
+                     key="inspection.bnf.duplicate.rule.display.name"/>
+    <localInspection language="BNF" level="WARNING" groupKey="inspection.group.bnf" enabledByDefault="true"
+                     implementationClass="org.intellij.grammar.inspection.BnfIdenticalChoiceBranchesInspection"
+                     key="inspection.bnf.identical.choice.branches.display.name"/>
+    <localInspection language="BNF" level="WARNING" groupKey="inspection.group.bnf" enabledByDefault="true"
+                     implementationClass="org.intellij.grammar.inspection.BnfUnreachableChoiceBranchInspection"
+                     key="inspection.bnf.unreachable.choice.branch.display.name"/>
 
     <colorSettingsPage implementation="org.intellij.grammar.editor.BnfColorSettingsPage"/>
     <quoteHandler fileType="BNF" className="org.intellij.grammar.editor.BnfQuoteHandler"/>
 
     <intentionAction>
       <className>org.intellij.grammar.intention.BnfFlipChoiceIntention</className>
-      <category>Grammar</category>
+      <categoryKey>intention.category.bnf</categoryKey>
+      <language>BNF</language>
     </intentionAction>
     <intentionAction>
       <className>org.intellij.grammar.intention.BnfConvertOptExpressionIntention</className>
-      <category>Grammar</category>
+      <categoryKey>intention.category.bnf</categoryKey>
+      <language>BNF</language>
     </intentionAction>
 
     <!--JFlex Support -->
@@ -109,7 +112,7 @@
   <actions>
     <group id="grammar.file.group" popup="false">
       <separator/>
-      <action id="grammar.LivePreview" class="org.intellij.grammar.actions.LivePreviewAction" text="Live Preview">
+      <action id="grammar.LivePreview" class="org.intellij.grammar.actions.LivePreviewAction">
         <keyboard-shortcut keymap="$default" first-keystroke="control alt P"/>
       </action>
       <separator/>
@@ -117,17 +120,17 @@
       <add-to-group group-id="EditorPopupMenu" anchor="last"/>
       <add-to-group group-id="ProjectViewPopupMenu" anchor="last"/>
     </group>
-    <action id="grammar.HighlightGrammarAtCaretAction" class="org.intellij.grammar.actions.HighlightGrammarAtCaretAction"
-            text="Grammar Highlighting">
+    <action id="grammar.HighlightGrammarAtCaretAction" class="org.intellij.grammar.actions.HighlightGrammarAtCaretAction">
       <add-to-group group-id="EditorPopupMenu" anchor="last"/>
       <keyboard-shortcut keymap="$default" first-keystroke="control alt F7"/>
     </action>
     <group id="grammar.RefactoringGroup" popup="false">
       <add-to-group group-id="IntroduceActionsGroup" anchor="first"/>
       <action id="grammars.IntroduceRule" class="org.intellij.grammar.refactor.BnfIntroduceRuleAction"
-              text="_Rule..." description="Extract rule" use-shortcut-of="ExtractMethod"/>
+              use-shortcut-of="ExtractMethod"/>
       <action id="grammars.IntroduceToken" class="org.intellij.grammar.refactor.BnfIntroduceTokenAction"
-              text="_Token..." description="Introduce token" use-shortcut-of="IntroduceConstant" />
+              use-shortcut-of="IntroduceConstant" />
     </group>
   </actions>
+  <resource-bundle>messages.GrammarKitBundle</resource-bundle>
 </idea-plugin>

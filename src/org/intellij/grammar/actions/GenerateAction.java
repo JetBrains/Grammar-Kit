@@ -136,7 +136,8 @@ public class GenerateAction extends AnAction {
           VirtualFile file = bnfFiles.get(i);
           indicator.setFraction((double)i / l);
           indicator.setText2(file.getPath());
-          String sourcePath = FileUtil.toSystemDependentName(FileUtil.toCanonicalPath(file.getParent().getPath()));
+          String sourcePath = file.isInLocalFileSystem() ? FileUtil.toSystemDependentName(
+            FileUtil.toCanonicalPath(file.getParent().getPath())) : "";
           VirtualFile target = rootMap.get(file);
           if (target == null) return;
           targets.add(target);

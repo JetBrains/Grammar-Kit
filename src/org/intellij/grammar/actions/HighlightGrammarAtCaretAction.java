@@ -6,10 +6,7 @@ package org.intellij.grammar.actions;
 
 import com.intellij.codeInsight.daemon.DaemonCodeAnalyzer;
 import com.intellij.lang.Language;
-import com.intellij.openapi.actionSystem.AnAction;
-import com.intellij.openapi.actionSystem.AnActionEvent;
-import com.intellij.openapi.actionSystem.LangDataKeys;
-import com.intellij.openapi.actionSystem.PlatformDataKeys;
+import com.intellij.openapi.actionSystem.*;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiFile;
@@ -25,6 +22,11 @@ import java.util.Objects;
  * @author gregsh
  */
 public class HighlightGrammarAtCaretAction extends AnAction {
+
+  @Override
+  public @NotNull ActionUpdateThread getActionUpdateThread() {
+    return ActionUpdateThread.BGT;
+  }
 
   private static @Nullable Editor getPreviewEditor(@NotNull AnActionEvent e) {
     Editor editor = PlatformDataKeys.EDITOR.getData(e.getDataContext());

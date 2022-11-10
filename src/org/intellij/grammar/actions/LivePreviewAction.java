@@ -4,17 +4,24 @@
 
 package org.intellij.grammar.actions;
 
+import com.intellij.openapi.actionSystem.ActionUpdateThread;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.LangDataKeys;
 import com.intellij.openapi.project.DumbAwareAction;
 import com.intellij.psi.PsiFile;
 import org.intellij.grammar.livePreview.LivePreviewHelper;
 import org.intellij.grammar.psi.BnfFile;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * @author gregsh
  */
 public class LivePreviewAction extends DumbAwareAction {
+  @Override
+  public @NotNull ActionUpdateThread getActionUpdateThread() {
+    return ActionUpdateThread.BGT;
+  }
+
   @Override
   public void update(AnActionEvent e) {
     PsiFile psiFile = LangDataKeys.PSI_FILE.getData(e.getDataContext());

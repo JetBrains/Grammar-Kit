@@ -7,6 +7,7 @@ package org.intellij.grammar.actions;
 import com.intellij.notification.Notification;
 import com.intellij.notification.NotificationType;
 import com.intellij.notification.Notifications;
+import com.intellij.openapi.actionSystem.ActionUpdateThread;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.LangDataKeys;
@@ -60,6 +61,11 @@ import static org.intellij.grammar.generator.ParserGeneratorUtil.getRootAttribut
  * @author greg
  */
 public class BnfGenerateLexerAction extends AnAction {
+  @Override
+  public @NotNull ActionUpdateThread getActionUpdateThread() {
+    return ActionUpdateThread.BGT;
+  }
+
   @Override
   public void update(AnActionEvent e) {
     PsiFile file = LangDataKeys.PSI_FILE.getData(e.getDataContext());

@@ -6,6 +6,7 @@ package org.intellij.grammar.actions;
 
 import com.intellij.codeInsight.daemon.impl.quickfix.CreateClassKind;
 import com.intellij.codeInsight.intention.impl.CreateClassDialog;
+import com.intellij.openapi.actionSystem.ActionUpdateThread;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.LangDataKeys;
@@ -37,6 +38,11 @@ import org.jetbrains.annotations.Nullable;
  * @author greg
  */
 public class BnfGenerateParserUtilAction extends AnAction {
+  @Override
+  public @NotNull ActionUpdateThread getActionUpdateThread() {
+    return ActionUpdateThread.BGT;
+  }
+
   @Override
   public void update(AnActionEvent e) {
     PsiFile file = LangDataKeys.PSI_FILE.getData(e.getDataContext());

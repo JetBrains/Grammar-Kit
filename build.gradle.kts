@@ -14,7 +14,7 @@ plugins {
     id("idea")
     id("maven-publish")
     id("signing")
-    id("com.github.breadmoirai.github-release") version "2.2.12"
+    id("com.github.breadmoirai.github-release") version "2.4.1"
 }
 
 version = properties("pluginVersion")

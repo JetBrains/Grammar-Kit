@@ -6,12 +6,12 @@ updates:
   # Maintain dependencies for Gradle dependencies
   - package-ecosystem: "gradle"
     directory: "/"
-    target-branch: "next"
+    target-branch: "master"
     schedule:
       interval: "daily"
   # Maintain dependencies for GitHub Actions
   - package-ecosystem: "github-actions"
     directory: "/"
-    target-branch: "next"
+    target-branch: "master"
     schedule:
       interval: "daily"

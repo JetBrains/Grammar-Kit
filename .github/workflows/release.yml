@@ -5,6 +5,12 @@ name: Release
 on:
   release:
     types: [prereleased, released]
+  workflow_dispatch:
+    inputs:
+      tagName:
+        description: 'The tag name (e.g. v2023.1)'
+        required: true
+        type: string
 
 jobs:
 
@@ -21,7 +27,7 @@ jobs:
       - name: Fetch Sources
         uses: actions/checkout@v3
         with:
-          ref: ${{ github.event.release.tag_name }}
+          ref: ${{ inputs.tagName || github.event.release.tag_name }}
 
       # Setup Java 17 environment for the next steps
       - name: Setup Java

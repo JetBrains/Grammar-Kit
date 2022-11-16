@@ -1,6 +1,6 @@
 # Grammar-Kit Changelog
 
-## [2022.3]
+## [Unreleased]
 * IJ SDK: update to 2022.3
 * CI: Integration with [gradle-changelog-plugin](https://github.com/JetBrains/gradle-changelog-plugin)
 * CI: GitHub Actions Workflow based on [IntelliJ Platform Plugin Template](https://github.com/JetBrains/intellij-platform-plugin-template)

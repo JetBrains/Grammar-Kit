@@ -11,6 +11,14 @@ on:
         description: 'The tag name (e.g. v2023.1)'
         required: true
         type: string
+      publishLibrary:
+        description: 'Publish library'
+        default: true
+        type: boolean
+      publishPlugin:
+        description: 'Publish plugin'
+        default: true
+        type: boolean
 
 jobs:
 
@@ -62,6 +70,7 @@ jobs:
 
       # Publish JAR to Maven Central
       - name: Publish library
+        if: ${{ inputs.publishLibrary }}
         env:
           PUBLISH_TOKEN: ${{ secrets.PUBLISH_TOKEN }}
           ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
@@ -72,6 +81,7 @@ jobs:
 
       # Publish the plugin to the Marketplace
       - name: Publish Plugin
+        if: ${{ inputs.publishPlugin }}
         env:
           PUBLISH_TOKEN: ${{ secrets.PUBLISH_TOKEN }}
           CERTIFICATE_CHAIN: ${{ secrets.CERTIFICATE_CHAIN }}
@@ -81,6 +91,7 @@ jobs:
 
       # Upload artifact as a release asset
       - name: Upload Release Asset
+        if: ${{ !inputs.tagName }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: gh release upload ${{ github.event.release.tag_name }} ./build/distributions/*

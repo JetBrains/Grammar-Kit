@@ -11,6 +11,9 @@ Adds BNF Grammars and JFlex files editing support, and a parser/PSI code generat
 Quick links: [Latest dev build](https://teamcity.jetbrains.com/guestAuth/app/rest/builds/buildType:IntellijIdeaPlugins_GrammarKit_Build,status:SUCCESS/artifacts/content/GrammarKit*.zip),
 [Changelog](CHANGELOG.md), [Tutorial](TUTORIAL.md), [How-to](HOWTO.md)
 
+> **Note**
+>
+> Since 2022.3, Grammar-Kit plugin requires Java 17.
 
 Open-source plugins built with Grammar-Kit:
 

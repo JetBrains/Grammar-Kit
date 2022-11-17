@@ -251,7 +251,7 @@ import com.intellij.psi.tree.IElementType;
 
 public class Element2Impl extends StubBasedPsiElementBase<Element2Stub> implements Element2 {
 
-  public Element2Impl(@NotNull Element2Stub stub, @NotNull IStubElementType type) {
+  public Element2Impl(@NotNull Element2Stub stub, @NotNull IStubElementType<?, ?> type) {
     super(stub, type);
   }
 
@@ -299,7 +299,7 @@ import com.intellij.psi.tree.IElementType;
 
 public class Element3Impl extends StubBasedPsiElementBase<Element3Stub> implements Element3 {
 
-  public Element3Impl(@NotNull Element3Stub stub, @NotNull IStubElementType type) {
+  public Element3Impl(@NotNull Element3Stub stub, @NotNull IStubElementType<?, ?> type) {
     super(stub, type);
   }
 
@@ -347,7 +347,7 @@ import com.intellij.psi.tree.IElementType;
 
 public class Element4Impl extends StubBasedPsiElementBase<Element4Stub> implements Element4 {
 
-  public Element4Impl(@NotNull Element4Stub stub, @NotNull IStubElementType type) {
+  public Element4Impl(@NotNull Element4Stub stub, @NotNull IStubElementType<?, ?> type) {
     super(stub, type);
   }
 

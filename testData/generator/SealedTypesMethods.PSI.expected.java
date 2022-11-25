@@ -38,7 +38,7 @@ import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
-public sealed interface Bar extends Foo, PsiElement permits Barbar, Barfoo {
+public sealed interface Bar extends Foo permits Barbar, Barfoo {
 
   <T> void foo1(T p1);
 
@@ -51,7 +51,7 @@ import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
-public non-sealed interface Barbar extends Bar, PsiElement {
+public non-sealed interface Barbar extends Bar {
 
 }
 // ---- Barfoo.java -----------------
@@ -62,7 +62,7 @@ import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
-public non-sealed interface Barfoo extends Bar, PsiElement {
+public non-sealed interface Barfoo extends Bar {
 
 }
 // ---- Baz.java -----------------
@@ -73,7 +73,7 @@ import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
-public non-sealed interface Baz extends Foo, PsiElement {
+public non-sealed interface Baz extends Foo {
 
 }
 // ---- Foo.java -----------------

@@ -34,7 +34,7 @@ import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
-public non-sealed interface Bar extends Foo, PsiElement {
+public non-sealed interface Bar extends Foo {
 
 }
 // ---- Baz.java -----------------
@@ -45,7 +45,7 @@ import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
-public non-sealed interface Baz extends Foo, PsiElement {
+public non-sealed interface Baz extends Foo {
 
 }
 // ---- Foo.java -----------------

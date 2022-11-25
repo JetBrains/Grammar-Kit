@@ -137,10 +137,11 @@ One can specify an attribute for several rules at once in a global attributes bl
 6. *external* (parser):  a rule with a hand-written parse function; no parsing code is generated. 
    
 7. *fake* (PSI classes):  a rule for shaping the generated PSI classes; only PSI classes are generated.
+8. *sealed* (PSI tree, PSI classes):  a rule for shaping the generated PSI classes; It is always inlined, and has a defined set of sub-rules
 
 Modifiers can be combined, *inner* should only be used together with *left*,
 *private left* is equivalent to *private left inner*, 
-*fake* should not be combined with *private*.
+*fake* and *sealed* should not be combined with *private*.
 
 By default, rules are *public*, i.e. *non-private*, *non-fake*, etc.
 
@@ -166,6 +167,27 @@ as a parameter and passed "as is" except single-quoted strings which are unquote
 This helps to pass qualified enum constants, java expressions, etc.
 
 Rule references in parameter list are implemented as [GeneratedParserUtilBase.Parser](src/org/intellij/grammar/parser/GeneratedParserUtilBase.java) instances.
+
+### Sealed rules:
+Sealed rules are rules with a known set of sub-rules. These sub-rules are defined as a choice of references to 
+*public* (i.e. *non-private*) sub-rules.
+
+Given:
+```
+sealed expression ::= literal | reference | call
+sealed literal ::= string | number | regex
+string ::= ...
+...
+```
+
+Has the following semantics: 
+- `expression` generates `sealed interface` that permits `literal`, `reference`, and `call`.
+  
+  It generates no implementation nor it's associated `IElementType` (it can never be instantiated).
+- `literal` has similar semantics to `expression`, sealed type hierarchies are fully supported
+- `string` generates a `non-sealed interface` with an implementation and `IElementType`
+
+methods on sealed class are automatically added to all its sub-rules.
 
 ### Tokens:
 Explicit tokens are declared via _tokens_ global attribute, e.g. in *token_name=token_value* form. 

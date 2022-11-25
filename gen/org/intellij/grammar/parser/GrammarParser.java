@@ -465,7 +465,7 @@ public class GrammarParser implements PsiParser, LightPsiParser {
 
   /* ********************************************************** */
   // 'private' | 'external' | 'meta'
-  //   | 'inner' | 'left' | 'upper' | 'fake'
+  //   | 'inner' | 'left' | 'upper' | 'fake' | 'sealed'
   public static boolean modifier(PsiBuilder builder, int level) {
     if (!recursion_guard_(builder, level, "modifier")) return false;
     boolean result;
@@ -477,6 +477,7 @@ public class GrammarParser implements PsiParser, LightPsiParser {
     if (!result) result = consumeToken(builder, "left");
     if (!result) result = consumeToken(builder, "upper");
     if (!result) result = consumeToken(builder, "fake");
+    if (!result) result = consumeToken(builder, "sealed");
     exit_section_(builder, level, marker, result, false, null);
     return result;
   }

@@ -35,6 +35,9 @@ public class BnfGeneratorTest extends BnfGeneratorTestCase {
   public void testTokenSequence() throws Exception { doGenTest(false); }
   public void testTokenChoice() throws Exception { doGenTest(true); }
   public void testTokenChoiceNoSets() throws Exception { doGenTest(true); }
+  public void testSimpleSealedTypes() throws Exception { doGenTest(true); }
+  public void testSealedTypesMethods() throws Exception { doGenTest(true); }
+  public void testExtendsIsAppliedOverSealed() throws Exception { doGenTest(true); }
   public void testStub() throws Exception { doGenTest(true); }
   public void testUtilMethods() throws Exception { doGenTest(true); }
   public void testBindersAndHooks() throws Exception { doGenTest(false); }

@@ -14,8 +14,12 @@ import com.intellij.psi.util.*;
 import com.intellij.util.CommonProcessors;
 import com.intellij.util.ObjectUtils;
 import com.intellij.util.containers.MultiMap;
+import com.intellij.util.graph.Graph;
+import com.intellij.util.graph.GraphGenerator;
+import com.intellij.util.graph.InboundSemiGraph;
 import it.unimi.dsi.fastutil.Hash;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenCustomHashMap;
+import org.apache.tools.ant.util.StreamUtils;
 import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.analysis.BnfFirstNextAnalyzer;
 import org.intellij.grammar.psi.*;
@@ -26,6 +30,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.intellij.grammar.generator.ParserGeneratorUtil.*;
 import static org.intellij.grammar.generator.RuleGraphHelper.Cardinality.*;
@@ -68,6 +74,7 @@ public class RuleGraphHelper {
   private static final PsiElement LEFT_MARKER = new FakeBnfExpression(MARKER_TYPE, "LEFT_MARKER");
   private static final PsiElement NOT_EMPTY_MARKER = new FakeBnfExpression(MARKER_TYPE, "NOT_EMPTY_MARKER");
   private static final Object RECURSION_MARKER = "RECURSION_DETECTED";
+  private final SealedHierarchyGraph mySealedRulesGraph;
 
   public static String getCardinalityText(Cardinality cardinality) {
     if (cardinality == AT_LEAST_ONE) {
@@ -139,6 +146,73 @@ public class RuleGraphHelper {
 
   }
 
+  public static class SealedHierarchyGraph {
+    private final Graph<@NotNull BnfRule> myGraph;
+    SealedHierarchyGraph(BnfFile file) {
+      myGraph = createInternalGraphFrom(file);
+    }
+
+    public boolean isSubRuleOfValidSealedRule(@NotNull BnfRule rule) {
+      return myGraph.getOut(rule).hasNext();
+    }
+
+    public @NotNull Stream<@NotNull BnfRule> getSealedSuperRulesOf(@NotNull BnfRule rule) {
+      return StreamUtils.iteratorAsStream(myGraph.getOut(rule));
+    }
+
+    public boolean isValidSealedRule(@NotNull BnfRule rule) {
+      return myGraph.getIn(rule).hasNext();
+    }
+
+    public @NotNull Stream<@NotNull BnfRule> getSealedSubRulesOf(@NotNull BnfRule rule) {
+      return StreamUtils.iteratorAsStream(myGraph.getIn(rule));
+    }
+
+    private static @NotNull Graph<@NotNull BnfRule> createInternalGraphFrom(BnfFile file) {
+      var ruleNamesThatAreBeingExtendedTo = findAllRuleNamesThatAreSubClassedByExtendsIn(file);
+
+      var sealedRulesToSubRulesMap = new HashMap<@NotNull BnfRule, @NotNull Set<@NotNull BnfRule>>();
+      for (BnfRule rule : file.getRules()) {
+        if (ruleNamesThatAreBeingExtendedTo.contains(rule.getName())) continue;
+        var subRules = sealedSubRulesOf(rule);
+        if (subRules == null) continue;
+        sealedRulesToSubRulesMap.put(rule, subRules);
+      }
+
+      return GraphGenerator.generate(new InboundSemiGraph<@NotNull BnfRule>() {
+        @Override
+        public @NotNull Collection<@NotNull BnfRule> getNodes() {
+          return sealedRulesToSubRulesMap.keySet();
+        }
+
+        @Override
+        public @NotNull Iterator<@NotNull BnfRule> getIn(@NotNull BnfRule rule) {
+          return sealedRulesToSubRulesMap.getOrDefault(rule, Set.of()).iterator();
+        }
+      });
+    }
+
+    /** @return null if this rule is not a valid sealed rule */
+    private static @Nullable Set<@NotNull BnfRule> sealedSubRulesOf(BnfRule rule) {
+      if (!Rule.isSealed(rule)) return null;
+      if (!(rule.getExpression() instanceof BnfChoice choice)) return null;
+      Set<BnfRule> subRules = new HashSet<>();
+      for (BnfExpression option : choice.getExpressionList()) {
+        if (!(option instanceof BnfReferenceOrToken subRuleReference)) return null;
+        BnfRule subRule = subRuleReference.resolveRule();
+        if (subRule == null || !willGeneratePsiFor(subRule)) return null;
+        subRules.add(subRule);
+      }
+      return subRules;
+    }
+  }
+
+  public static @NotNull Set<@NotNull String> findAllRuleNamesThatAreSubClassedByExtendsIn(@NotNull BnfFile file) {
+    return file.getRules().stream()
+      .map(it -> getAttribute(it, KnownAttribute.EXTENDS))
+      .collect(Collectors.toSet());
+  }
+
   public static MultiMap<BnfRule, BnfRule> buildExtendsMap(BnfFile file) {
     MultiMap<BnfRule, BnfRule> ruleExtendsMap = newMultiMap();
     for (BnfRule rule : file.getRules()) {
@@ -205,6 +279,7 @@ public class RuleGraphHelper {
   public RuleGraphHelper(BnfFile file, MultiMap<BnfRule, BnfRule> ruleExtendsMap) {
     myFile = file;
     myRuleExtendsMap = ruleExtendsMap;
+    mySealedRulesGraph = new SealedHierarchyGraph(file);
 
     buildRulesGraph();
     buildCollapseMap();
@@ -217,6 +292,10 @@ public class RuleGraphHelper {
 
   public BnfFile getFile() {
     return myFile;
+  }
+
+  public SealedHierarchyGraph getSealedRulesGraph() {
+    return mySealedRulesGraph;
   }
 
   public boolean canCollapse(@NotNull BnfRule rule) {
@@ -810,7 +889,11 @@ public class RuleGraphHelper {
     return rule;
   }
 
-  public static boolean hasPsiClass(BnfRule rule) {
+  public boolean willGeneratePsiImplFor(BnfRule rule) {
+    return willGeneratePsiFor(rule) && !mySealedRulesGraph.isValidSealedRule(rule);
+  }
+
+  public static boolean willGeneratePsiFor(BnfRule rule) {
     return shouldGeneratePsi(rule, true);
   }
 

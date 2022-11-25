@@ -16,10 +16,7 @@ import com.intellij.psi.tree.IElementType;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.util.Function;
 import com.intellij.util.ObjectUtils;
-import com.intellij.util.containers.ContainerUtil;
-import com.intellij.util.containers.JBIterable;
-import com.intellij.util.containers.JBTreeTraverser;
-import com.intellij.util.containers.TreeTraversal;
+import com.intellij.util.containers.*;
 import it.unimi.dsi.fastutil.Hash;
 import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.java.JavaHelper;
@@ -29,11 +26,11 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
+import java.util.HashSet;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
-import static org.intellij.grammar.generator.RuleGraphHelper.getSynonymTargetOrSelf;
-import static org.intellij.grammar.generator.RuleGraphHelper.getTokenNameToTextMap;
+import static org.intellij.grammar.generator.RuleGraphHelper.*;
 import static org.intellij.grammar.psi.BnfTypes.BNF_SEQUENCE;
 
 /**
@@ -315,22 +312,31 @@ public class ParserGeneratorUtil {
 
   public static Couple<String> getQualifiedRuleClassName(BnfRule rule) {
     BnfFile file = (BnfFile)rule.getContainingFile();
-    String psiPackage = getAttribute(rule, KnownAttribute.PSI_PACKAGE);
     String psiImplPackage = getAttribute(rule, KnownAttribute.PSI_IMPL_PACKAGE);
-    NameFormat psiFormat = getPsiClassFormat(file);
     NameFormat psiImplFormat = getPsiImplClassFormat(file);
-    return Couple.of(psiPackage + "." + getRulePsiClassName(rule, psiFormat),
+    return Couple.of(getQualifiedIntfName(rule),
                      psiImplPackage + "." + getRulePsiClassName(rule, psiImplFormat));
+  }
+
+  @NotNull
+  public static String getQualifiedIntfName(BnfRule rule) {
+    return getAttribute(rule, KnownAttribute.PSI_PACKAGE) + "." + getShortIntfName(rule);
+  }
+
+  @NotNull
+  public static String getShortIntfName(BnfRule rule) {
+    return getRulePsiClassName(rule, getPsiClassFormat((BnfFile)rule.getContainingFile()));
   }
 
   public static @NotNull List<NavigatablePsiElement> findRuleImplMethods(@NotNull JavaHelper helper,
                                                                          @Nullable String psiImplUtilClass,
                                                                          @Nullable String methodName,
-                                                                         @Nullable BnfRule rule) {
+                                                                         @Nullable BnfRule rule,
+                                                                         @NotNull SealedHierarchyGraph sealedRuleGraph) {
     if (rule == null) return Collections.emptyList();
     List<NavigatablePsiElement> methods = Collections.emptyList();
     String selectedSuperClass = null;
-    main: for (String ruleClass : getRuleClasses(rule)) {
+    main: for (String ruleClass : getRuleClasses(rule, sealedRuleGraph)) {
       for (String utilClass = psiImplUtilClass; utilClass != null; utilClass = helper.getSuperClassName(utilClass)) {
         methods = helper.findClassMethods(utilClass, JavaHelper.MethodType.STATIC, methodName, -1, ruleClass);
         selectedSuperClass = ruleClass;
@@ -374,7 +380,7 @@ public class ParserGeneratorUtil {
     return result;
   }
 
-  public static @NotNull Set<String> getRuleClasses(@NotNull BnfRule rule) {
+  public static @NotNull Set<String> getRuleClasses(@NotNull BnfRule rule, @NotNull SealedHierarchyGraph sealedRuleGraph) {
     Set<String> result = new LinkedHashSet<>();
     BnfFile file = (BnfFile)rule.getContainingFile();
     BnfRule topSuper = getEffectiveSuperRule(file, rule);
@@ -388,7 +394,7 @@ public class ParserGeneratorUtil {
     result.add(names.second);
     result.add(superClassName);
     result.add(implSuper);
-    result.addAll(getSuperInterfaceNames(file, rule, getPsiClassFormat(file)));
+    result.addAll(getSuperInterfaceNames(file, sealedRuleGraph, rule, getPsiClassFormat(file)));
     return result;
   }
 
@@ -418,7 +424,10 @@ public class ParserGeneratorUtil {
     return getSuperRules(file, rule).last();
   }
 
-  static @NotNull List<String> getSuperInterfaceNames(BnfFile file, BnfRule rule, NameFormat format) {
+  static @NotNull List<String> getSuperInterfaceNames(BnfFile file,
+                                                      @NotNull SealedHierarchyGraph sealedRuleGraph,
+                                                      BnfRule rule,
+                                                      NameFormat format) {
     List<String> strings = new ArrayList<>();
     List<String> topRuleImplements = Collections.emptyList();
     String topRuleClass = null;
@@ -428,13 +437,14 @@ public class ParserGeneratorUtil {
       topRuleClass = getAttribute(topSuper, KnownAttribute.PSI_PACKAGE) + "." + getRulePsiClassName(topSuper, format);
       if (!StringUtil.isEmpty(topRuleClass)) strings.add(topRuleClass);
     }
+    sealedRuleGraph.getSealedSuperRulesOf(rule).forEach(sealedSuperRule -> strings.add(getQualifiedPsiClassName(sealedSuperRule, format)));
     List<String> rootImplements = getRootAttribute(file, KnownAttribute.IMPLEMENTS).asStrings();
     List<String> ruleImplements = getAttribute(rule, KnownAttribute.IMPLEMENTS).asStrings();
     for (String className : ruleImplements) {
       if (className == null) continue;
       BnfRule superIntfRule = file.getRule(className);
       if (superIntfRule != null) {
-        strings.add(getAttribute(superIntfRule, KnownAttribute.PSI_PACKAGE) + "." + getRulePsiClassName(superIntfRule, format));
+        strings.add(getQualifiedPsiClassName(superIntfRule, format));
       }
       else if (!topRuleImplements.contains(className) &&
                (topRuleClass == null || !rootImplements.contains(className))) {
@@ -447,6 +457,11 @@ public class ParserGeneratorUtil {
       }
     }
     return strings;
+  }
+
+  @NotNull
+  public static String getQualifiedPsiClassName(BnfRule rule, NameFormat format) {
+    return getAttribute(rule, KnownAttribute.PSI_PACKAGE) + "." + getRulePsiClassName(rule, format);
   }
 
   public static @Nullable String getRuleDisplayName(BnfRule rule, boolean force) {
@@ -719,6 +734,11 @@ public class ParserGeneratorUtil {
 
     public static boolean isFake(BnfRule node) {
       return hasModifier(node, "fake");
+    }
+
+    /** If you want to know whether this rule is actually legal use {@link SealedHierarchyGraph#isValidSealedRule(BnfRule) */
+    public static boolean isSealed(BnfRule node) {
+      return hasModifier(node, "sealed");
     }
 
     public static boolean isUpper(BnfRule node) {

@@ -38,10 +38,11 @@ public class BnfIntroduceRulePopup extends InplaceVariableIntroducer<BnfExpressi
   private final JPanel myPanel = new JPanel(new GridBagLayout());
   private final JCheckBox myCheckBox = new NonFocusableCheckBox("Declare private");
 
-  public BnfIntroduceRulePopup(Project project, Editor editor, BnfRule rule, BnfExpression expr) {
+  public BnfIntroduceRulePopup(boolean canBePrivate, Project project, Editor editor, BnfRule rule, BnfExpression expr) {
     super(rule, editor, project, "Introduce Rule", GrammarUtil.EMPTY_EXPRESSIONS_ARRAY, expr);
 
-    myCheckBox.setSelected(true);
+    myCheckBox.setSelected(canBePrivate);
+    myCheckBox.setEnabled(canBePrivate);
     myCheckBox.setMnemonic('p');
 
     myPanel.setBorder(null);

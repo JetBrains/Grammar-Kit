@@ -86,11 +86,11 @@ public class BnfIntroduceRuleHandler implements RefactoringActionHandler {
         parentExpression = PsiTreeUtil.getParentOfType(parentExpression, BnfExpression.class);
       }
       if (expressions.size() == 1) {
-        invokeIntroduce(project, editor, file, currentRule, expressions);
+        invokeIntroduce(project, editor, file, currentRule, expressions, true);
       }
       else {
         if (myPopupVariantsHandler != null) {
-          invokeIntroduce(project, editor, file, currentRule, Collections.singletonList(myPopupVariantsHandler.fun(expressions)));
+          invokeIntroduce(project, editor, file, currentRule, Collections.singletonList(myPopupVariantsHandler.fun(expressions)), true);
         }
         else {
           IntroduceTargetChooser.showChooser(
@@ -99,7 +99,7 @@ public class BnfIntroduceRuleHandler implements RefactoringActionHandler {
               @Override
               public void pass(BnfExpression bnfExpression) {
                 invokeIntroduce(project, editor, file, currentRule,
-                                Collections.singletonList(bnfExpression));
+                                Collections.singletonList(bnfExpression), true);
               }
             }, RENDER_FUNCTION, "Expressions"
           );
@@ -113,15 +113,16 @@ public class BnfIntroduceRuleHandler implements RefactoringActionHandler {
                                              RefactoringBundle.message("refactoring.introduce.selection.error"), "Error", null);
         return;
       }
-      invokeIntroduce(project, editor, file, currentRule, selectedExpression);
+      invokeIntroduce(project, editor, file, currentRule, selectedExpression, true);
     }
   }
 
-  private static void invokeIntroduce(Project project,
-                                      Editor editor,
-                                      PsiFile file,
-                                      BnfRule currentRule,
-                                      List<BnfExpression> selectedExpression) {
+  public static void invokeIntroduce(Project project,
+                                     Editor editor,
+                                     PsiFile file,
+                                     BnfRule currentRule,
+                                     List<BnfExpression> selectedExpression,
+                                     boolean canBePrivate) {
     BnfExpression firstExpression = Objects.requireNonNull(ContainerUtil.getFirstItem(selectedExpression));
     BnfExpression lastExpression = Objects.requireNonNull(ContainerUtil.getLastItem(selectedExpression));
     TextRange fixedRange = new TextRange(firstExpression.getTextRange().getStartOffset(), lastExpression.getTextRange().getEndOffset());
@@ -153,7 +154,8 @@ public class BnfIntroduceRuleHandler implements RefactoringActionHandler {
         WriteCommandAction.runWriteCommandAction(project, REFACTORING_NAME, null, () -> {
           PsiFile containingFile = currentRule.getContainingFile();
           String newRuleName = choseRuleName(containingFile);
-          String newRuleText = "private " + newRuleName + " ::= " + ruleFromText.getExpression().getText();
+          String modifier = canBePrivate ? "private " : "";
+          String newRuleText = modifier + newRuleName + " ::= " + ruleFromText.getExpression().getText();
           BnfRule addedRule = addNextRule(project, currentRule, newRuleText);
           if (choice == OccurrencesChooser.ReplaceChoice.ALL) {
             List<BnfExpression[]> exprToReplace = occurrencesMap.get(OccurrencesChooser.ReplaceChoice.ALL);
@@ -163,7 +165,7 @@ public class BnfIntroduceRuleHandler implements RefactoringActionHandler {
             List<BnfExpression[]> exprToReplace = occurrencesMap.get(OccurrencesChooser.ReplaceChoice.NO);
             replaceUsages(project, exprToReplace, addedRule.getId());
           }
-          BnfIntroduceRulePopup popup = new BnfIntroduceRulePopup(project, editor, addedRule, addedRule.getExpression());
+          BnfIntroduceRulePopup popup = new BnfIntroduceRulePopup(canBePrivate, project, editor, addedRule, addedRule.getExpression());
 
           editor.getCaretModel().moveToOffset(addedRule.getTextOffset());
           PsiDocumentManager.getInstance(project).doPostponedOperationsAndUnblockDocument(editor.getDocument());

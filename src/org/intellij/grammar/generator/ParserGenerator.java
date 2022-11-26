@@ -73,7 +73,6 @@ public class ParserGenerator {
     final String mixin;
     final String stub;
     String realStubClass;
-    Set<String> superInterfaces;
     boolean mixedAST;
     String realSuperClass;
     boolean isAbstract;
@@ -390,8 +389,6 @@ public class ParserGenerator {
         }
       }
       sortedPsiRules.put(rule.getName(), rule);
-      info.superInterfaces =
-        new LinkedHashSet<>(getSuperInterfaceNames(myFile, myGraphHelper.getSealedRulesGraph(), rule, myIntfClassFormat));
     }
     if (G.generatePsi) {
       calcRealSuperClasses(sortedPsiRules);
@@ -455,7 +452,7 @@ public class ParserGenerator {
     Set<String> imports = new LinkedHashSet<>(Arrays.asList("org.jetbrains.annotations.*", PSI_ELEMENT_VISITOR_CLASS, superIntf));
     MultiMap<String, String> supers = new MultiMap<>();
     for (BnfRule rule : sortedRules.values()) {
-      supers.putValues(rule.getName(), getSuperInterfaceNames(myFile, myGraphHelper.getSealedRulesGraph(), rule, myIntfClassFormat));
+      supers.putValues(rule.getName(), getSuperInterfacesOf(rule));
     }
     {
       // ensure only public supers are exposed, replace non-public with default super-intf for simplicity
@@ -1729,11 +1726,13 @@ public class ParserGenerator {
   private void generatePsiIntf(BnfRule rule, RuleInfo info) {
     String psiClass = info.intfClass;
     String stubClass = info.stub;
-    Collection<String> psiSupers = info.superInterfaces;
+    Collection<String> psiSupers = new LinkedHashSet<>(getSuperInterfacesOf(rule));
     if (StringUtil.isNotEmpty(stubClass)) {
-      psiSupers = new LinkedHashSet<>(psiSupers);
       psiSupers.add(STUB_BASED_PSI_ELEMENT + "<" + stubClass + ">");
     }
+    myGraphHelper.getSealedRulesGraph().getSealedSuperRulesOf(rule)
+      .flatMap(directSuperRule -> getSuperInterfacesOf(directSuperRule).stream())
+      .forEach(psiSupers::remove);
 
     Set<String> imports = new LinkedHashSet<>();
     imports.addAll(Arrays.asList("java.util.List",
@@ -1753,6 +1752,11 @@ public class ParserGenerator {
     generateClassHeader(psiClass, imports, "", interfaceType, permits, ArrayUtil.toStringArray(psiSupers));
     generatePsiClassMethods(rule, info, true);
     out("}");
+  }
+
+  @NotNull
+  private List<String> getSuperInterfacesOf(BnfRule rule) {
+    return getSuperInterfaceNames(myFile, myGraphHelper.getSealedRulesGraph(), rule, myIntfClassFormat);
   }
 
   boolean generatesImplementation(@NotNull BnfRule rule) {

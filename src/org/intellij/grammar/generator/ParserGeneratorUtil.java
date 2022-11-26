@@ -445,19 +445,15 @@ public class ParserGeneratorUtil {
       BnfRule superIntfRule = file.getRule(className);
       if (superIntfRule != null) {
         strings.add(getQualifiedPsiClassName(superIntfRule, format));
-        continue;
       }
-      var typeIsImplementedBySealedSuperType = sealedRuleGraph.getSealedSuperRulesOf(rule)
-        .flatMap(it -> getRootAttribute(file, KnownAttribute.IMPLEMENTS).asStrings().stream())
-        .anyMatch(it -> it.equals(className));
-      if (typeIsImplementedBySealedSuperType) continue;
-      if (topRuleImplements.contains(className)) continue;
-      if (topRuleClass != null && rootImplements.contains(className)) continue;
-      if (strings.size() == 1 && topSuper == null) {
-        strings.add(0, className);
-      }
-      else {
-        strings.add(className);
+      else if (!topRuleImplements.contains(className) &&
+             (topRuleClass == null || !rootImplements.contains(className))) {
+        if (strings.size() == 1 && topSuper == null) {
+          strings.add(0, className);
+        }
+        else {
+          strings.add(className);
+        }
       }
     }
     return strings;

@@ -437,7 +437,7 @@ public class ParserGeneratorUtil {
       topRuleClass = getAttribute(topSuper, KnownAttribute.PSI_PACKAGE) + "." + getRulePsiClassName(topSuper, format);
       if (!StringUtil.isEmpty(topRuleClass)) strings.add(topRuleClass);
     }
-    sealedRuleGraph.getSealedSuperRulesOf(rule).forEach(sealedSuperRule -> strings.add(getQualifiedPsiClassName(sealedSuperRule, format)));
+    sealedRuleGraph.getDirectSealedSuperRulesOf(rule).forEach(sealedSuperRule -> strings.add(getQualifiedPsiClassName(sealedSuperRule, format)));
     List<String> rootImplements = getRootAttribute(file, KnownAttribute.IMPLEMENTS).asStrings();
     List<String> ruleImplements = getAttribute(rule, KnownAttribute.IMPLEMENTS).asStrings();
     for (String className : ruleImplements) {

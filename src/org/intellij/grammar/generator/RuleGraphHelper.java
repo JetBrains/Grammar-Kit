@@ -158,15 +158,22 @@ public class RuleGraphHelper {
       return myGraph.getOut(rule).hasNext();
     }
 
-    public @NotNull Stream<@NotNull BnfRule> getSealedSuperRulesOf(@NotNull BnfRule rule) {
+    public @NotNull Stream<@NotNull BnfRule> getDirectSealedSuperRulesOf(@NotNull BnfRule rule) {
       return StreamUtils.iteratorAsStream(myGraph.getOut(rule));
+    }
+
+    public @NotNull Stream<@NotNull BnfRule> getDeepSealedSuperRulesIncludingSelf(@NotNull BnfRule rule) {
+      return Stream.concat(
+        Stream.of(rule),
+        getDirectSealedSuperRulesOf(rule).flatMap(this::getDeepSealedSuperRulesIncludingSelf)
+       );
     }
 
     public boolean isValidSealedRule(@NotNull BnfRule rule) {
       return myGraph.getIn(rule).hasNext();
     }
 
-    public @NotNull Stream<@NotNull BnfRule> getSealedSubRulesOf(@NotNull BnfRule rule) {
+    public @NotNull Stream<@NotNull BnfRule> getDirectSealedSubRulesOf(@NotNull BnfRule rule) {
       return StreamUtils.iteratorAsStream(myGraph.getIn(rule));
     }
 

@@ -1730,7 +1730,7 @@ public class ParserGenerator {
     if (StringUtil.isNotEmpty(stubClass)) {
       psiSupers.add(STUB_BASED_PSI_ELEMENT + "<" + stubClass + ">");
     }
-    myGraphHelper.getSealedRulesGraph().getSealedSuperRulesOf(rule)
+    myGraphHelper.getSealedRulesGraph().getDirectSealedSuperRulesOf(rule)
       .flatMap(directSuperRule -> getSuperInterfacesOf(directSuperRule).stream())
       .forEach(psiSupers::remove);
 
@@ -1741,7 +1741,7 @@ public class ParserGenerator {
     imports.addAll(psiSupers);
     imports.addAll(getRuleMethodTypesToImport(rule, true));
 
-    var permits = myGraphHelper.getSealedRulesGraph().getSealedSubRulesOf(rule)
+    var permits = myGraphHelper.getSealedRulesGraph().getDirectSealedSubRulesOf(rule)
       .map(ParserGeneratorUtil::getShortIntfName)
       .sorted()
       .toList();

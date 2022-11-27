@@ -308,7 +308,7 @@ public class BnfDiagramProvider extends DiagramProvider<BnfRule> {
         }
 
         ruleGraphHelper.getSealedRulesGraph()
-          .getSealedSuperRulesOf(rule)
+          .getDirectSealedSuperRulesOf(rule)
           .map(sealedSuperRule -> createSealedRelationshipBetween(source, nodeMap.get(superRule)))
           .filter(Objects::nonNull)
           .forEach(myEdges::add);

@@ -17,7 +17,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
-import java.util.stream.Stream;
 
 import static org.intellij.grammar.generator.ParserGeneratorUtil.*;
 import static org.intellij.grammar.psi.BnfTypes.BNF_REFERENCE_OR_TOKEN;
@@ -79,17 +78,9 @@ public class RuleMethodsHelper {
 
   @NotNull
   private List<MethodInfo> getIncludingAllMethodsOfSealedSuperRulesFor(@NotNull BnfRule rule) {
-    return recurseUpSealedHierarchy(rule, new HashSet<>())
+    return mySealedRuleGraph.getDeepSealedSuperRulesIncludingSelf(rule)
       .flatMap(it -> myMethods.get(it).second.stream())
       .toList();
-  }
-
-  public @NotNull Stream<BnfRule> recurseUpSealedHierarchy(@NotNull BnfRule rule, @NotNull HashSet<BnfRule> visited) {
-    if (!visited.add(rule)) return Stream.empty();
-    return Stream.concat(
-      Stream.of(rule),
-      mySealedRuleGraph.getSealedSuperRulesOf(rule).flatMap(superRule -> recurseUpSealedHierarchy(superRule, visited))
-    );
   }
 
   public @Nullable MethodInfo getMethodInfo(@NotNull BnfRule rule, String name) {

@@ -26,10 +26,12 @@ import org.intellij.grammar.psi.*;
 import org.intellij.grammar.psi.impl.GrammarUtil;
 import org.intellij.grammar.psi.impl.GrammarUtil.FakeBnfExpression;
 import org.intellij.grammar.psi.impl.GrammarUtil.FakeElementType;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -171,25 +173,57 @@ public class RuleGraphHelper {
     private static @NotNull Graph<@NotNull BnfRule> createInternalGraphFrom(BnfFile file) {
       var ruleNamesThatAreBeingExtendedTo = findAllRuleNamesThatAreSubClassedByExtendsIn(file);
 
-      var sealedRulesToSubRulesMap = new HashMap<@NotNull BnfRule, @NotNull Set<@NotNull BnfRule>>();
+      var legalSealedRulesToSubRulesMap = new HashMap<@NotNull BnfRule, @NotNull Set<@NotNull BnfRule>>();
       for (BnfRule rule : file.getRules()) {
         if (ruleNamesThatAreBeingExtendedTo.contains(rule.getName())) continue;
         var subRules = sealedSubRulesOf(rule);
         if (subRules == null) continue;
-        sealedRulesToSubRulesMap.put(rule, subRules);
+        legalSealedRulesToSubRulesMap.put(rule, subRules);
       }
+
+      getCyclicNodesIn(legalSealedRulesToSubRulesMap)
+        .forEach(legalSealedRulesToSubRulesMap::remove);
 
       return GraphGenerator.generate(new InboundSemiGraph<@NotNull BnfRule>() {
         @Override
         public @NotNull Collection<@NotNull BnfRule> getNodes() {
-          return sealedRulesToSubRulesMap.keySet();
+          return legalSealedRulesToSubRulesMap.keySet();
         }
 
         @Override
         public @NotNull Iterator<@NotNull BnfRule> getIn(@NotNull BnfRule rule) {
-          return sealedRulesToSubRulesMap.getOrDefault(rule, Set.of()).iterator();
+          return legalSealedRulesToSubRulesMap.getOrDefault(rule, Set.of()).iterator();
         }
       });
+    }
+
+    private static <Node> Set<@NotNull Node> getCyclicNodesIn(Map<@NotNull Node, @NotNull Set<@NotNull Node>> nodeOutMap) {
+      Set<@NotNull Node> cyclicNodes = new HashSet<>();
+      for (Node node : nodeOutMap.keySet()) {
+        if (cyclicNodes.contains(node)) continue;
+        gatherCycles(node, nodeOutMap::get, new ArrayList<>(), cyclicNodes);
+      }
+      return cyclicNodes;
+    }
+
+    @Contract(mutates = "param3, param4")
+    private static <Node> void gatherCycles(@NotNull Node currentNode,
+                                            @NotNull Function<@NotNull Node, @Nullable Iterable<@NotNull Node>> descendantSelector,
+                                            @NotNull List<@NotNull Node> currentPath,
+                                            @NotNull Set<@NotNull Node> results) {
+      int indexOfStartOfCycle = currentPath.indexOf(currentNode);
+      if (indexOfStartOfCycle != -1) {
+        results.addAll(currentPath.subList(indexOfStartOfCycle, currentPath.size()));
+        return;
+      }
+      currentPath.add(currentNode);
+      var descendants = descendantSelector.apply(currentNode);
+      if (descendants != null) {
+        for (Node descendant : descendants) {
+          gatherCycles(descendant, descendantSelector, currentPath, results);
+        }
+      }
+      currentPath.remove(currentPath.size() - 1);
     }
 
     /** @return null if this rule is not a valid sealed rule */

@@ -6,9 +6,12 @@ import com.intellij.openapi.util.io.FileUtilRt;
 import com.intellij.openapi.vfs.CharsetToolkit;
 import org.intellij.grammar.generator.ParserGenerator;
 import org.intellij.grammar.psi.impl.BnfFileImpl;
+import org.intellij.lang.annotations.Language;
 import org.jetbrains.annotations.NonNls;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.*;
+import java.nio.CharBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -37,7 +40,48 @@ public class BnfGeneratorTest extends BnfGeneratorTestCase {
   public void testTokenChoiceNoSets() throws Exception { doGenTest(true); }
   public void testSimpleSealedTypes() throws Exception { doGenTest(true); }
   public void testSealedTypesMethods() throws Exception { doGenTest(true); }
-  public void testExtendsIsAppliedOverSealed() throws Exception { doGenTest(true); }
+  public void testExtendsIsAppliedOverSealed() throws Exception {
+    assertGeneratesSameCode(
+      """
+        {
+          generate=[java="17"]
+        }
+        root ::= foo
+        sealed foo ::= bar | baz
+        bar ::= 'bar'
+        baz ::= 'baz' {extends=foo}
+        """,
+      """
+        root ::= foo
+        foo ::= bar | baz // no sealed modifier!
+        bar ::= 'bar'
+        baz ::= 'baz' {extends=foo}
+        """
+    );
+  }
+  public void testCyclicSealedHierarchyInvalidatesSealedModifier() throws Exception {
+    assertGeneratesSameCode(
+      """
+        {
+          generate=[java="17"]
+        }
+        root ::= a
+        sealed a ::= b | c
+        sealed b ::= a | c
+        sealed c ::= c | a
+        sealed d ::= d | e
+        e ::= 'e'
+        """,
+      """
+        root ::= a
+        a ::= b | c
+        b ::= a | c
+        c ::= c | a
+        d ::= d | e
+        e ::= 'e'
+        """
+    );
+  }
   public void testStub() throws Exception { doGenTest(true); }
   public void testUtilMethods() throws Exception { doGenTest(true); }
   public void testBindersAndHooks() throws Exception { doGenTest(false); }
@@ -66,6 +110,30 @@ public class BnfGeneratorTest extends BnfGeneratorTestCase {
         targetFile.getParentFile().mkdirs();
         FileOutputStream outputStream = new FileOutputStream(targetFile, true);
         PrintWriter out = new PrintWriter(new OutputStreamWriter(outputStream, myFile.getVirtualFile().getCharset()));
+        out.println("// ---- " + file.getName() + " -----------------");
+        return out;
+      }
+    };
+  }
+  private ParserGenerator generatorThatGeneratesInto(StringBuilder builder) {
+    return new ParserGenerator((BnfFileImpl)myFile, "", myFullDataPath, "") {
+      @Override
+      protected PrintWriter openOutputInner(String className, File file) {
+         var out = new PrintWriter(new Writer() {
+          @Override
+          public void write(char @NotNull [] cbuf, int off, int len) {
+            builder.append(CharBuffer.wrap(cbuf), off, len);
+          }
+
+          @Override
+          public void flush() {
+            builder.setLength(0);
+          }
+
+          @Override
+          public void close() {
+          }
+        });
         out.println("// ---- " + file.getName() + " -----------------");
         return out;
       }
@@ -104,5 +172,16 @@ public class BnfGeneratorTest extends BnfGeneratorTestCase {
       String result = FileUtil.loadFile(file, CharsetToolkit.UTF8, true);
       doCheckResult(myFullDataPath, expectedName, result);
     }
+  }
+
+  public void assertGeneratesSameCode(@Language("bnf") String left, @Language("bnf") String right) throws Exception {
+    assertEquals(generateOutputToString(left), generateOutputToString(right));
+  }
+
+  private String generateOutputToString(@Language("bnf") String bnf) throws IOException {
+    var out = new StringBuilder();
+    myFile = createPsiFile("test.bnf", bnf);
+    generatorThatGeneratesInto(out).generate();
+    return out.toString();
   }
 }

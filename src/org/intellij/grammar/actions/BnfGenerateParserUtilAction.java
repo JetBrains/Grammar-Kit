@@ -24,7 +24,6 @@ import com.intellij.openapi.util.io.FileUtil;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.psi.*;
 import com.intellij.psi.search.GlobalSearchScope;
-import com.intellij.util.Consumer;
 import com.intellij.util.IncorrectOperationException;
 import com.intellij.util.containers.ContainerUtil;
 import org.intellij.grammar.KnownAttribute;
@@ -34,6 +33,8 @@ import org.intellij.grammar.psi.BnfAttrs;
 import org.intellij.grammar.psi.BnfFile;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.function.Consumer;
 
 /**
  * @author greg
@@ -154,7 +155,7 @@ public class BnfGenerateParserUtilAction extends AnAction {
             targetReferenceList.add(ref);
           }
           if (consumer != null) {
-            consumer.consume(resultClass);
+            consumer.accept(resultClass);
           }
         }
         catch (IncorrectOperationException e) {

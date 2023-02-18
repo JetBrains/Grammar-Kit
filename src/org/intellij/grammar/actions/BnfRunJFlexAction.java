@@ -28,9 +28,9 @@ import com.intellij.openapi.projectRoots.Sdk;
 import com.intellij.openapi.projectRoots.SimpleJavaSdkType;
 import com.intellij.openapi.roots.OrderRootType;
 import com.intellij.openapi.roots.ProjectRootManager;
-import com.intellij.openapi.roots.impl.libraries.ApplicationLibraryTable;
 import com.intellij.openapi.roots.libraries.Library;
 import com.intellij.openapi.roots.libraries.LibraryTable;
+import com.intellij.openapi.roots.libraries.LibraryTablesRegistrar;
 import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.util.*;
 import com.intellij.openapi.util.io.FileUtil;
@@ -330,7 +330,8 @@ public class BnfRunJFlexAction extends DumbAwareAction {
   }
 
   private static boolean findExistingLibrary(@NotNull List<File> result, String... urls) {
-    for (Library library : ApplicationLibraryTable.getApplicationTable().getLibraries()) {
+    LibraryTable libraryTable = LibraryTablesRegistrar.getInstance().getLibraryTable();
+    for (Library library : libraryTable.getLibraries()) {
       if (collectFiles(result, Arrays.asList(library.getUrls(OrderRootType.CLASSES)), urls)) return true;
     }
     return false;
@@ -375,9 +376,10 @@ public class BnfRunJFlexAction extends DumbAwareAction {
   private static void createOrUpdateLibrary(@NotNull String libraryName,
                                             @NotNull List<Pair<VirtualFile, DownloadableFileDescription>> pairs) {
     ApplicationManager.getApplication().assertWriteAccessAllowed();
-    Library library = ApplicationLibraryTable.getApplicationTable().getLibraryByName(libraryName);
+    LibraryTable libraryTable = LibraryTablesRegistrar.getInstance().getLibraryTable();
+    Library library = libraryTable.getLibraryByName(libraryName);
     if (library == null) {
-      LibraryTable.ModifiableModel modifiableModel = ApplicationLibraryTable.getApplicationTable().getModifiableModel();
+      LibraryTable.ModifiableModel modifiableModel = libraryTable.getModifiableModel();
       library = modifiableModel.createLibrary(libraryName);
       modifiableModel.commit();
     }

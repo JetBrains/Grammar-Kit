@@ -132,7 +132,7 @@ public class BnfInlineRuleProcessor extends BaseRefactoringProcessor {
       expressionList = Collections.emptyList();
     }
     else {
-      LOG.error(parent);
+      LOG.error("Unexpected element: " + (parent == null ? "null" : parent.getClass().getName()));
       return;
     }
     Object2IntMap<String> visited = new Object2IntOpenHashMap<>();

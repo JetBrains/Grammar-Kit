@@ -13,7 +13,6 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.PackageIndex;
 import com.intellij.openapi.roots.ProjectFileIndex;
 import com.intellij.openapi.roots.ProjectRootManager;
-import com.intellij.openapi.util.Comparing;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VirtualFile;
@@ -55,7 +54,7 @@ public class FileGeneratorUtil {
         boolean b1 = fileIndex.isInSource(f1);
         boolean b2 = fileIndex.isInSource(f2);
         if (b1 != b2) return b1 ? -1 : 1;
-        return Comparing.compare(f1.getPath().length(), f2.getPath().length());
+        return Integer.compare(f1.getPath().length(), f2.getPath().length());
       });
       for (VirtualFile file : files) {
         String existingFilePackage = packageIndex.getPackageNameByDirectory(file.getParent());

@@ -11,7 +11,7 @@ import com.intellij.psi.impl.JavaRegExpHost;
  */
 public class BnfStringRegexHost extends JavaRegExpHost {
   @Override
-  public boolean characterNeedsEscaping(char c) {
-    return c == '\"' || super.characterNeedsEscaping(c);
+  public boolean characterNeedsEscaping(char c, boolean isInClass) {
+    return c == '\"';
   }
 }

@@ -6,6 +6,7 @@ package org.intellij.grammar.java;
 
 import com.intellij.navigation.NavigationItem;
 import com.intellij.openapi.project.IndexNotReadyException;
+import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.io.FileUtil;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.psi.*;
@@ -109,9 +110,9 @@ public abstract class JavaHelper {
     private final JavaPsiFacade myFacade;
     private final PsiElementFactory myElementFactory;
 
-    private PsiHelper(JavaPsiFacade facade, PsiElementFactory elementFactory) {
-      myFacade = facade;
-      myElementFactory = elementFactory;
+    private PsiHelper(@NotNull Project project) {
+      myFacade = JavaPsiFacade.getInstance(project);
+      myElementFactory = PsiElementFactory.getInstance(project);
     }
 
     @Override

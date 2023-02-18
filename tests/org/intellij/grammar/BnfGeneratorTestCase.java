@@ -5,6 +5,7 @@ import com.intellij.concurrency.JobLauncherImpl;
 import com.intellij.lang.LanguageASTFactory;
 import com.intellij.lang.LanguageBraceMatching;
 import com.intellij.lang.injection.InjectedLanguageManager;
+import com.intellij.openapi.application.impl.ReadActionCacheIml;
 import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.DumbServiceImpl;
 import com.intellij.psi.PsiFileFactory;
@@ -15,6 +16,7 @@ import com.intellij.psi.impl.source.resolve.ResolveCache;
 import com.intellij.psi.impl.source.tree.injected.EditorWindowTracker;
 import com.intellij.psi.impl.source.tree.injected.EditorWindowTrackerImpl;
 import com.intellij.psi.impl.source.tree.injected.InjectedLanguageManagerImpl;
+import com.intellij.psi.util.ReadActionCache;
 
 /**
  * @author gregsh
@@ -30,6 +32,7 @@ public class BnfGeneratorTestCase extends AbstractParsingTestCase {
     getApplication().registerService(JobLauncher.class, JobLauncherImpl.class);
     getApplication().registerService(PsiReferenceService.class, PsiReferenceServiceImpl.class);
     getApplication().registerService(EditorWindowTracker.class, EditorWindowTrackerImpl.class);
+    getApplication().registerService(ReadActionCache.class, ReadActionCacheIml.class);
     getProject().registerService(DumbService.class, DumbServiceImpl.class);
     getProject().registerService(InjectedLanguageManager.class, InjectedLanguageManagerImpl.class);
     getProject().registerService(PsiFileFactory.class, PsiFileFactoryImpl.class);

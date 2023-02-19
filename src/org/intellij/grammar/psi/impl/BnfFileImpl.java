@@ -42,8 +42,8 @@ public class BnfFileImpl extends PsiFileBase implements BnfFile {
   }
 
   @Override
-  public void subtreeChanged() {
-    super.subtreeChanged();
+  public void clearCaches() {
+    super.clearCaches();
     myRules.drop();
     myGlobalAttributes.drop();
     myAttributeValues.drop();

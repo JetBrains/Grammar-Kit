@@ -37,8 +37,8 @@ public abstract class BnfNamedImpl extends BnfCompositeImpl implements BnfNamedE
   }
 
   @Override
-  public void subtreeChanged() {
-    super.subtreeChanged();
+  public void clearCaches() {
+    super.clearCaches();
     myCachedName = null;
   }
 

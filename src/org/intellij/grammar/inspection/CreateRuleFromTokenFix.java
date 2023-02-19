@@ -12,6 +12,7 @@ import com.intellij.openapi.fileEditor.FileEditor;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.fileEditor.TextEditor;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.util.PsiTreeUtil;
 import org.intellij.grammar.psi.BnfRule;
@@ -50,7 +51,9 @@ public class CreateRuleFromTokenFix implements LocalQuickFix {
     if (rule == null) return;
 
     BnfRule addedRule = BnfIntroduceRuleHandler.addNextRule(project, rule, "private " + myName + " ::= ");
-    FileEditor selectedEditor = FileEditorManager.getInstance(project).getSelectedEditor(rule.getContainingFile().getVirtualFile());
+    VirtualFile virtualFile = rule.getContainingFile().getVirtualFile();
+    FileEditor selectedEditor = virtualFile == null ? null :
+                                FileEditorManager.getInstance(project).getSelectedEditor(virtualFile);
     if (selectedEditor instanceof TextEditor) {
       Editor editor = ((TextEditor)selectedEditor).getEditor();
       editor.getCaretModel()

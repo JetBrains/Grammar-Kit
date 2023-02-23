@@ -1,6 +1,12 @@
 # Grammar-Kit Changelog
 
 ## [Unreleased]
+* Update Platform version to `2022.3.1`
+* Fixed Exception with `2023.1 EAP`: "Do not use constructor injection" (#323)
+* Fixed IAE: `FileEditorManagerImpl.$$$reportNull$$$0` (EA-746745)
+* Fixed PIEAE: `CompositePsiElement.getContainingFile` (EA-746675)
+
+## [2022.3]
 * IJ SDK: update to 2022.3
 * CI: Integration with [gradle-changelog-plugin](https://github.com/JetBrains/gradle-changelog-plugin)
 * CI: GitHub Actions Workflow based on [IntelliJ Platform Plugin Template](https://github.com/JetBrains/intellij-platform-plugin-template)

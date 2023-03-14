@@ -79,7 +79,7 @@ public class BnfRunJFlexAction extends DumbAwareAction {
 
   private static final String[] JETBRAINS_JFLEX_URLS = {
     System.getProperty("grammar.kit.jflex.jar",
-                       "https://cache-redirector.jetbrains.com/intellij-dependencies/org/jetbrains/intellij/deps/jflex/jflex/1.7.0-2/jflex-1.7.0-2.jar"),
+                       "https://cache-redirector.jetbrains.com/intellij-dependencies/org/jetbrains/intellij/deps/jflex/jflex/1.9.1/jflex-1.9.1.jar"),
     System.getProperty("grammar.kit.jflex.skeleton",
                        "https://raw.github.com/JetBrains/intellij-community/master/tools/lexer/idea-flex.skeleton")
   };

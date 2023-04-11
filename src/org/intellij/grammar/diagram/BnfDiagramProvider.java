@@ -76,7 +76,7 @@ public class BnfDiagramProvider extends DiagramProvider<BnfRule> {
       PsiFile file = CommonDataKeys.PSI_FILE.getData(context);
       if (!(file instanceof BnfFile bnfFile)) return null;
       List<BnfRule> rules = bnfFile.getRules();
-      return rules.get(0);
+      return ContainerUtil.getFirstItem(rules);
     }
 
     @Override

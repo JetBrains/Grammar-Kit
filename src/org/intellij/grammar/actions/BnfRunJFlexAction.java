@@ -12,22 +12,17 @@ import com.intellij.execution.process.ProcessAdapter;
 import com.intellij.execution.process.ProcessEvent;
 import com.intellij.execution.ui.ConsoleView;
 import com.intellij.execution.ui.ConsoleViewContentType;
-import com.intellij.notification.Notification;
-import com.intellij.notification.NotificationListener;
-import com.intellij.notification.NotificationType;
-import com.intellij.notification.Notifications;
 import com.intellij.openapi.actionSystem.*;
 import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.application.WriteAction;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.fileTypes.FileType;
 import com.intellij.openapi.project.DumbAwareAction;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.projectRoots.ProjectJdkTable;
 import com.intellij.openapi.projectRoots.Sdk;
 import com.intellij.openapi.projectRoots.SimpleJavaSdkType;
 import com.intellij.openapi.roots.OrderRootType;
-import com.intellij.openapi.roots.ProjectRootManager;
 import com.intellij.openapi.roots.libraries.Library;
 import com.intellij.openapi.roots.libraries.LibraryTable;
 import com.intellij.openapi.roots.libraries.LibraryTablesRegistrar;
@@ -43,20 +38,17 @@ import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowId;
 import com.intellij.openapi.wm.ToolWindowManager;
 import com.intellij.psi.PsiDocumentManager;
-import com.intellij.psi.search.FilenameIndex;
-import com.intellij.psi.search.ProjectScope;
 import com.intellij.ui.content.Content;
 import com.intellij.ui.content.ContentFactory;
 import com.intellij.ui.content.MessageView;
 import com.intellij.util.ObjectUtils;
-import com.intellij.util.PathUtil;
 import com.intellij.util.SystemProperties;
+import com.intellij.util.containers.ContainerUtil;
 import com.intellij.util.containers.JBIterable;
 import com.intellij.util.download.DownloadableFileDescription;
 import com.intellij.util.download.DownloadableFileService;
 import com.intellij.util.ui.UIUtil;
 import org.intellij.grammar.config.Options;
-import org.intellij.grammar.generator.BnfConstants;
 import org.intellij.jflex.parser.JFlexFileType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -64,8 +56,10 @@ import org.jetbrains.annotations.Nullable;
 import javax.swing.*;
 import java.awt.*;
 import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
-import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -77,12 +71,11 @@ import static org.intellij.grammar.actions.FileGeneratorUtil.getTargetDirectoryF
  */
 public class BnfRunJFlexAction extends DumbAwareAction {
 
-  private static final String[] JETBRAINS_JFLEX_URLS = {
-    System.getProperty("grammar.kit.jflex.jar",
-                       "https://cache-redirector.jetbrains.com/intellij-dependencies/org/jetbrains/intellij/deps/jflex/jflex/1.9.1/jflex-1.9.1.jar"),
-    System.getProperty("grammar.kit.jflex.skeleton",
-                       "https://raw.github.com/JetBrains/intellij-community/master/tools/lexer/idea-flex.skeleton")
-  };
+  private static final String JFLEX_URL = "https://cache-redirector.jetbrains.com/intellij-dependencies" +
+                                          "/org/jetbrains/intellij/deps/jflex/jflex/1.9.1/jflex-1.9.1.jar";
+  private static final String SKEL_NAME = "idea-flex.skeleton";
+  private static final String JFLEX_JAR_PREFIX = "jflex-";
+  private static final String LIB_NAME = "JFlex & idea-flex.skeleton";
 
   private static final Key<Pair<String, OSProcessHandler>> BATCH_ID_KEY = Key.create("BnfRunJFlexAction.batchId");
 
@@ -115,23 +108,11 @@ public class BnfRunJFlexAction extends DumbAwareAction {
     PsiDocumentManager.getInstance(project).commitAllDocuments();
     FileDocumentManager.getInstance().saveAllDocuments();
 
-    List<File> flexFiles = getOrDownload(project, JETBRAINS_JFLEX_URLS);
-    if (flexFiles.isEmpty()) {
+    Couple<File> flexFiles = getOrDownload(project);
+    if (flexFiles == null) {
       fail(project, "JFlex jar not found",
            "Create global library with jflex-xxx.jar and idea-flex.skeleton file to fix.");
       return;
-    }
-    if (StringUtil.endsWithIgnoreCase(flexFiles.get(0).getName(), "JFlex.jar")) {
-      String DOC_URL = "http://jflex.de/changelog.html";
-      Notification notification = new Notification(
-        BnfConstants.GENERATION_GROUP, "An old JFlex.jar is detected",
-        flexFiles.get(0).getAbsolutePath() +
-        "<br>See <a href=\"" + DOC_URL + "\">" + DOC_URL + "</a>." +
-        "<br><b>Compatibility note</b>: . (dot) semantics is changed, use [^] instead of .|\\n." +
-        "<br><b>To update</b>: remove the old version and the global library if present.",
-        NotificationType.INFORMATION)
-        .setListener(NotificationListener.URL_OPENING_LISTENER);
-      Notifications.Bus.notify(notification, project);
     }
     String batchId = "jflex@" + System.nanoTime();
     new Runnable() {
@@ -147,7 +128,7 @@ public class BnfRunJFlexAction extends DumbAwareAction {
 
   public static ActionCallback doGenerate(@NotNull Project project,
                                           @NotNull VirtualFile flexFile,
-                                          @NotNull List<File> jflex,
+                                          @NotNull Couple<File> jflex,
                                           @NotNull String batchId) {
     FileDocumentManager fileDocumentManager = FileDocumentManager.getInstance();
     Document document = fileDocumentManager.getDocument(flexFile);
@@ -174,10 +155,12 @@ public class BnfRunJFlexAction extends DumbAwareAction {
       javaParameters.setCharset(flexFile.getCharset());
       javaParameters.setWorkingDirectory(workingDir);
       javaParameters.setJdk(sdk);
-      javaParameters.setJarPath(jflex.get(0).getAbsolutePath());
+      javaParameters.setJarPath(jflex.first.getAbsolutePath());
       javaParameters.getVMParametersList().add("-Xmx512m");
       javaParameters.getProgramParametersList().addParametersString(StringUtil.nullize(Options.GEN_JFLEX_ARGS.get()));
-      javaParameters.getProgramParametersList().add("-skel", jflex.get(1).getAbsolutePath());
+      if (jflex.second != null) {
+        javaParameters.getProgramParametersList().add("-skel", jflex.second.getAbsolutePath());
+      }
       javaParameters.getProgramParametersList().add("-d", VfsUtilCore.virtualToIoFile(virtualDir).getAbsolutePath());
       javaParameters.getProgramParametersList().add(flexFile.getName());
 
@@ -269,112 +252,67 @@ public class BnfRunJFlexAction extends DumbAwareAction {
     }
   }
 
-  private static List<File> getOrDownload(@NotNull Project project, String... urls) {
-    List<File> result = new ArrayList<>();
-    if (findCommunitySources(project, result, urls)) return result;
-    if (findInProject(project, true, result, urls)) return result;
-    if (findExistingLibrary(result, urls)) return result;
-    if (findInProject(project, false, result, urls)) return result;
-
-    String libraryName = "JFlex & idea-flex.skeleton";
-    List<Pair<VirtualFile, DownloadableFileDescription>> pairs = downloadFiles(project, libraryName, urls);
-    if (pairs == null) return Collections.emptyList();
-    ApplicationManager.getApplication().runWriteAction(
-      () -> createOrUpdateLibrary(libraryName, pairs));
-
-    // ensure the order is the same
-    for (String url : urls) {
-      for (Pair<VirtualFile, DownloadableFileDescription> pair : pairs) {
-        if (Objects.equals(url, pair.second.getDownloadUrl())) {
-          result.add(VfsUtilCore.virtualToIoFile(pair.first));
-          break;
-        }
-      }
+  private static @Nullable Couple<File> getOrDownload(@NotNull Project project) {
+    LibraryTable libraryTable = LibraryTablesRegistrar.getInstance().getLibraryTable();
+    for (Library library : libraryTable.getLibraries()) {
+      Couple<File> result = findInUrls(library.getUrls(OrderRootType.CLASSES));
+      if (result != null) return result;
     }
 
+    File jarFile = downloadJFlex(project);
+    if (jarFile == null) return null;
+    File skelFile = new File(jarFile.getParent(), SKEL_NAME);
+    VirtualFile skel = JarFileSystem.getInstance().findFileByPath(jarFile.getPath() + JarFileSystem.JAR_SEPARATOR + "/jflex/" + SKEL_NAME);
+    if (!skelFile.exists() && skel != null && !skel.isDirectory()) {
+      try {
+        FileUtil.writeToFile(skelFile, skel.contentsToByteArray());
+      }
+      catch (IOException e) {
+        fail(project, "Writing " + SKEL_NAME + " failed", e.toString());
+        skelFile = null;
+      }
+    }
+    Couple<File> result = Couple.of(jarFile, skelFile);
+    WriteAction.run(() -> createOrUpdateLibrary(result));
     return result;
   }
 
-  private static boolean findCommunitySources(@NotNull Project project, List<File> result, String... urls) {
-    String communitySrc = getCommunitySrcUrl(project);
-    if (communitySrc == null) return false;
-    List<String> roots = new ArrayList<>();
-    for (String url : urls) {
-      int idx = url.indexOf("/master/");
-      if (idx > -1) {
-        roots.add(StringUtil.trimEnd(communitySrc, "/") + "/" + url.substring(idx + "/master/".length()));
+
+  private static @Nullable Couple<File> findInUrls(String... rootUrls) {
+    File jarFile = null, skelFile = null;
+    for (String root : rootUrls) {
+      root = StringUtil.trimEnd(root, JarFileSystem.JAR_SEPARATOR);
+      String rootName = root.substring(root.lastIndexOf("/") + 1);
+      boolean isJar;
+      if (jarFile == null && rootName.startsWith(JFLEX_JAR_PREFIX) && rootName.endsWith(".jar")) isJar = true;
+      else if (skelFile == null && rootName.equals(SKEL_NAME)) isJar = false;
+      else continue;
+      File file = new File(FileUtil.toSystemDependentName(VfsUtilCore.urlToPath(root)));
+      if (!file.exists() || !file.isFile()) continue;
+      if (isJar) {
+        jarFile = file;
       }
       else {
-        String file = PathUtil.getFileName(url);
-        roots.add(PathUtil.getParentPath(communitySrc) + "/tools/lexer/lib/" + file);
+        skelFile = file;
       }
     }
-    return collectFiles(result, roots, urls);
+    return jarFile != null ? Couple.of(jarFile, skelFile) : null;
   }
 
-  private static boolean findInProject(@NotNull Project project, boolean forceDir, List<File> result, String... urls) {
-    List<String> roots = new ArrayList<>();
-    for (String url : urls) {
-      String fileName = url.substring(url.lastIndexOf("/") + 1);
-      for (VirtualFile file : FilenameIndex.getVirtualFilesByName(fileName, ProjectScope.getAllScope(project))) {
-        String fileUrl = file.getUrl();
-        if (forceDir) {
-          int idx = url.indexOf("/master/");
-          if (idx <= -1) continue;
-          if (!StringUtil.endsWithIgnoreCase(fileUrl, url.substring(idx + "/master/".length()))) continue;
-        }
-        roots.add(fileUrl);
-      }
-    }
-    return collectFiles(result, roots, urls);
-  }
-
-  private static boolean findExistingLibrary(@NotNull List<File> result, String... urls) {
-    LibraryTable libraryTable = LibraryTablesRegistrar.getInstance().getLibraryTable();
-    for (Library library : libraryTable.getLibraries()) {
-      if (collectFiles(result, Arrays.asList(library.getUrls(OrderRootType.CLASSES)), urls)) return true;
-    }
-    return false;
-  }
-
-  private static boolean collectFiles(List<File> result, List<String> roots, String... urls) {
-    main: for (int i = 0; i < urls.length; i++) {
-      String url = urls[i];
-      String name = url.substring(url.lastIndexOf("/") + 1);
-
-      for (String root : roots) {
-        root = StringUtil.trimEnd(root, JarFileSystem.JAR_SEPARATOR);
-        String rootName = root.substring(root.lastIndexOf("/") + 1);
-        int length = StringUtil.commonPrefix(rootName.toLowerCase(Locale.ENGLISH), name.toLowerCase(Locale.ENGLISH)).length();
-        if (length < 4) continue;
-        if (rootName.length() == length || rootName.length() > length && "-_.".indexOf(rootName.charAt(length)) > -1) {
-          File file = new File(FileUtil.toSystemDependentName(VfsUtilCore.urlToPath(root)));
-          if (file.exists() && file.isFile()) {
-            result.add(file);
-            continue main;
-          }
-        }
-      }
-      if(result.size() < i) break;
-    }
-    if (result.size() == urls.length) return true;
-    result.clear();
-    return false;
-  }
-
-  private static List<Pair<VirtualFile, DownloadableFileDescription>> downloadFiles(@NotNull Project project,
-                                                                                    @NotNull String libraryName,
-                                                                                    String... urls) {
+  private static @Nullable File downloadJFlex(@NotNull Project project) {
+    String url = JFLEX_URL;
     DownloadableFileService service = DownloadableFileService.getInstance();
     List<DownloadableFileDescription> descriptions = new ArrayList<>();
-    for (String url : urls) {
-      descriptions.add(service.createFileDescription(url, url.substring(url.lastIndexOf("/") + 1)));
-    }
-    return service.createDownloader(descriptions, libraryName).downloadWithProgress(null, project, null);
+    descriptions.add(service.createFileDescription(url, url.substring(url.lastIndexOf("/") + 1)));
+    Pair<VirtualFile, DownloadableFileDescription> pair = ContainerUtil.getFirstItem(
+      service.createDownloader(descriptions, LIB_NAME)
+        .downloadWithProgress(null, project, null));
+    File file = pair == null ? null : VfsUtil.virtualToIoFile(pair.first);
+    return file != null && file.exists() && file.isFile() ? file : null;
   }
 
-  private static void createOrUpdateLibrary(@NotNull String libraryName,
-                                            @NotNull List<Pair<VirtualFile, DownloadableFileDescription>> pairs) {
+  private static void createOrUpdateLibrary(@NotNull Couple<File> files) {
+    String libraryName = LIB_NAME;
     ApplicationManager.getApplication().assertWriteAccessAllowed();
     LibraryTable libraryTable = LibraryTablesRegistrar.getInstance().getLibraryTable();
     Library library = libraryTable.getLibraryByName(libraryName);
@@ -384,41 +322,10 @@ public class BnfRunJFlexAction extends DumbAwareAction {
       modifiableModel.commit();
     }
     Library.ModifiableModel modifiableModel = library.getModifiableModel();
-    for (Pair<VirtualFile, DownloadableFileDescription> pair : pairs) {
-      modifiableModel.addRoot(pair.first, OrderRootType.CLASSES);
+    modifiableModel.addRoot(VfsUtil.fileToUrl(files.first), OrderRootType.CLASSES);
+    if (files.second != null) {
+      modifiableModel.addRoot(VfsUtil.fileToUrl(files.second), OrderRootType.CLASSES);
     }
     modifiableModel.commit();
   }
-
-  private static @Nullable String getCommunitySrcUrl(@NotNull Project project) {
-    Sdk projectSdk = ProjectRootManager.getInstance(project).getProjectSdk();
-    Sdk[] jdks = ProjectJdkTable.getInstance().getAllJdks();
-    for (Sdk sdk : JBIterable.of(projectSdk).append(jdks).filter(Conditions.notNull())) {
-      String result = getCommunitySrcUrlInner(sdk);
-      if (result != null) return result;
-    }
-    return null;
-  }
-
-  private static @Nullable String getCommunitySrcUrlInner(@NotNull Sdk projectSdk) {
-    String homePath = projectSdk.getHomePath();
-    String API_SCR = "/platform/lang-api/src";
-    if (homePath != null) {
-      for (String prefix : Arrays.asList("community", "")) {
-        File file = new File(homePath, FileUtil.toSystemDependentName(prefix + API_SCR));
-        if (file.exists() && file.isDirectory()) {
-          return VfsUtilCore.pathToUrl(FileUtil.toSystemDependentName(homePath + "/" + prefix));
-        }
-      }
-    }
-    String[] sources = projectSdk.getRootProvider().getUrls(OrderRootType.SOURCES);
-    for (String source : sources) {
-      String communityPath = StringUtil.trimEnd(source, API_SCR);
-      if (communityPath.length() < source.length()) {
-        return communityPath;
-      }
-    }
-    return null;
-  }
-
 }

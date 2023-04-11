@@ -12,6 +12,8 @@
 * CI: GitHub Actions Workflow based on [IntelliJ Platform Plugin Template](https://github.com/JetBrains/intellij-platform-plugin-template)
 * CI: Dependabot integration
 * CI: Publishing to MavenCentral setup
+* Generator: switch default java version to 17
+* Generator: sealed rules added (#305)
 
 ## [2021.1.2]
 * Generator: cache NEXT to avoid freezes

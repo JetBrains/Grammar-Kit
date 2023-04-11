@@ -1,0 +1,22 @@
+/*
+ * Copyright 2011-2022 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
+ */
+
+{
+  generate=[java="17"]
+  psiImplUtilClass="org.intellij.grammar.test.UtilMethods"
+}
+root ::= foo
+sealed foo ::= bar | baz {
+  methods=[
+    foo0
+  ]
+}
+sealed bar ::= barfoo | barbar {
+  methods=[
+    foo1
+  ]
+}
+barfoo ::= 'barfoo'
+barbar ::= 'barfoo'
+baz ::= 'baz'

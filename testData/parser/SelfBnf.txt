@@ -458,7 +458,7 @@ BnfFile:SelfBnf.bnf
       PsiWhiteSpace(' ')
       PsiElement(::=)('::=')
       PsiWhiteSpace(' ')
-      BNF_CHOICE: 'private' | 'external' | 'meta ... ' | 'upper' | 'fake'
+      BNF_CHOICE: 'private' | 'external' | 'meta ...  | 'fake' | 'sealed'
         BNF_STRING_LITERAL_EXPRESSION: 'private'
           PsiElement(string)(''private'')
         PsiWhiteSpace(' ')
@@ -491,6 +491,11 @@ BnfFile:SelfBnf.bnf
         PsiWhiteSpace(' ')
         BNF_STRING_LITERAL_EXPRESSION: 'fake'
           PsiElement(string)(''fake'')
+        PsiWhiteSpace(' ')
+        PsiElement(|)('|')
+        PsiWhiteSpace(' ')
+        BNF_STRING_LITERAL_EXPRESSION: 'sealed'
+          PsiElement(string)(''sealed'')
     PsiWhiteSpace('\n\n')
     BNF_RULE:attrs
       PsiElement(id)('attrs')

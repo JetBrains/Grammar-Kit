@@ -58,6 +58,12 @@
                      implementationClass="org.intellij.grammar.inspection.BnfResolveInspection"
                      key="inspection.bnf.resolve.display.name"/>
     <localInspection language="BNF" level="WARNING" groupKey="inspection.group.bnf" enabledByDefault="true"
+                     implementationClass="org.intellij.grammar.inspection.BnfSealedRuleIsNotChoiceConsistingOfReferencesInspection"
+                     key="inspection.bnf.sealed.rule.not.choice.display.name"/>
+    <localInspection language="BNF" level="WARNING" groupKey="inspection.group.bnf" enabledByDefault="true"
+                     implementationClass="org.intellij.grammar.inspection.BnfSealedRuleChoiceIsNotPublicAndNotExtendedInspection"
+                     key="inspection.bnf.sealed.rule.not.choice.display.name"/>
+    <localInspection language="BNF" level="WARNING" groupKey="inspection.group.bnf" enabledByDefault="true"
                      implementationClass="org.intellij.grammar.inspection.BnfUnusedRuleInspection"
                      key="inspection.bnf.unused.rule.display.name"/>
     <localInspection language="BNF" level="WARNING" groupKey="inspection.group.bnf" enabledByDefault="true"

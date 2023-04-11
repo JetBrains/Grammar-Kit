@@ -270,7 +270,7 @@ public class BnfDiagramProvider extends DiagramProvider<BnfRule> {
       List<BnfRule> rules = myFile.getRules();
       BnfRule root = ContainerUtil.getFirstItem(rules);
       for (BnfRule rule : rules) {
-        if (rule != root && !RuleGraphHelper.hasPsiClass(rule)) continue;
+        if (rule != root && !RuleGraphHelper.willGeneratePsiFor(rule)) continue;
         DiagramNode<BnfRule> diagramNode = new PsiDiagramNode<>(rule, getProvider()) {
           @Override
           public String getTooltip() {
@@ -281,14 +281,15 @@ public class BnfDiagramProvider extends DiagramProvider<BnfRule> {
         myNodes.add(diagramNode);
       }
       for (BnfRule rule : rules) {
-        if (rule != root && !RuleGraphHelper.hasPsiClass(rule)) continue;
+        DiagramNode<BnfRule> source = nodeMap.get(rule);
+        if (source == null) continue;
+        if (rule != root && !RuleGraphHelper.willGeneratePsiFor(rule)) continue;
         Map<PsiElement, RuleGraphHelper.Cardinality> map = ruleGraphHelper.getFor(rule);
 
         BnfRule superRule = myFile.getRule(getAttribute(rule, KnownAttribute.EXTENDS));
         if (superRule != null) {
-          DiagramNode<BnfRule> source = nodeMap.get(rule);
           DiagramNode<BnfRule> target = nodeMap.get(superRule);
-          if (source == null || target == null) continue;
+          if (target == null) continue;
           myEdges.add(new DiagramEdgeBase<>(source, target,
                                             new DiagramRelationshipInfoAdapter("EXTENDS", DiagramLineType.DASHED,
                                                                                "extends") {
@@ -305,14 +306,20 @@ public class BnfDiagramProvider extends DiagramProvider<BnfRule> {
             }
           });
         }
+
+        ruleGraphHelper.getSealedRulesGraph()
+          .getDirectSealedSuperRulesOf(rule)
+          .map(sealedSuperRule -> createSealedRelationshipBetween(source, nodeMap.get(superRule)))
+          .filter(Objects::nonNull)
+          .forEach(myEdges::add);
+
         for (PsiElement element : map.keySet()) {
           if (!(element instanceof BnfRule)) continue;
           RuleGraphHelper.Cardinality cardinality = map.get(element);
           assert cardinality != RuleGraphHelper.Cardinality.NONE;
 
-          DiagramNode<BnfRule> source = nodeMap.get(rule);
           DiagramNode<BnfRule> target = nodeMap.get(element);
-          if (source == null || target == null) continue;
+          if (target == null) continue;
           myEdges.add(
             new DiagramEdgeBase<>(source, target, new DiagramRelationshipInfoAdapter("CONTAINS", DiagramLineType.SOLID, "") {
               @Override
@@ -348,6 +355,29 @@ public class BnfDiagramProvider extends DiagramProvider<BnfRule> {
             });
         }
       }
+    }
+
+    private static @Nullable DiagramEdgeBase<BnfRule> createSealedRelationshipBetween(@NotNull DiagramNode<BnfRule> source,
+                                                                                      @Nullable DiagramNode<BnfRule> target) {
+      if (target == null) return null;
+      return new DiagramEdgeBase<>(source, target, createSealedRelationship()) {
+        @Override
+        public @NotNull String getName() {
+          return "";
+        }
+      };
+    }
+
+    @NotNull
+    private static DiagramRelationshipInfoAdapter createSealedRelationship() {
+      return new DiagramRelationshipInfoAdapter("SEALED", DiagramLineType.DASHED,
+                                                null, "seals") {
+
+        @Override
+        public Shape getStartArrow() {
+          return DELTA;
+        }
+      };
     }
 
     @Override

@@ -9,6 +9,7 @@ import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.tree.IElementType;
 import org.intellij.grammar.KnownAttribute;
+import org.intellij.grammar.generator.RuleGraphHelper.SealedHierarchyGraph;
 import org.intellij.grammar.psi.BnfAttr;
 import org.intellij.grammar.psi.BnfRule;
 import org.intellij.grammar.psi.impl.GrammarUtil;
@@ -29,17 +30,20 @@ public class RuleMethodsHelper {
   private final ExpressionHelper myExpressionHelper;
   private final Map<String, String> mySimpleTokens;
   private final GenOptions G;
+  private final SealedHierarchyGraph mySealedRuleGraph;
 
   private final Map<BnfRule, Pair<Map<String, MethodInfo>, Collection<MethodInfo>>> myMethods;
 
   public RuleMethodsHelper(RuleGraphHelper ruleGraphHelper,
                            ExpressionHelper expressionHelper,
                            Map<String, String> simpleTokens,
-                           GenOptions genOptions) {
+                           GenOptions genOptions,
+                           SealedHierarchyGraph sealedRuleGraph) {
     myGraphHelper = ruleGraphHelper;
     myExpressionHelper = expressionHelper;
     mySimpleTokens = Collections.unmodifiableMap(simpleTokens);
     G = genOptions;
+    mySealedRuleGraph = sealedRuleGraph;
 
     myMethods = new LinkedHashMap<>();
   }
@@ -67,8 +71,16 @@ public class RuleMethodsHelper {
     }
   }
 
-  public @NotNull Collection<MethodInfo> getFor(@NotNull BnfRule rule) {
-    return myMethods.get(rule).second;
+  public @NotNull Collection<MethodInfo> getFor(@NotNull BnfRule rule, boolean isForInterface) {
+    if (isForInterface) return myMethods.get(rule).second;
+    return getIncludingAllMethodsOfSealedSuperRulesFor(rule);
+  }
+
+  @NotNull
+  private List<MethodInfo> getIncludingAllMethodsOfSealedSuperRulesFor(@NotNull BnfRule rule) {
+    return mySealedRuleGraph.getDeepSealedSuperRulesIncludingSelf(rule)
+      .flatMap(it -> myMethods.get(it).second.stream())
+      .toList();
   }
 
   public @Nullable MethodInfo getMethodInfo(@NotNull BnfRule rule, String name) {
@@ -90,7 +102,7 @@ public class RuleMethodsHelper {
       if (pathName == null) continue;
       if (element instanceof BnfRule) {
         BnfRule resultType = (BnfRule)element;
-        if (!Rule.isPrivate(rule)) {
+        if (!Rule.isPrivate(rule) && !mySealedRuleGraph.isValidSealedRule(rule)) {
           result.add(new MethodInfo(MethodType.RULE, pathName, pathName, resultType, c));
         }
       }

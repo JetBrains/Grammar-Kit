@@ -9,7 +9,6 @@ import com.intellij.openapi.fileTypes.FileTypeManager;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.psi.*;
-import com.intellij.util.ArrayUtil;
 import com.intellij.util.IncorrectOperationException;
 import com.intellij.util.SmartList;
 import com.intellij.util.containers.ContainerUtil;
@@ -92,7 +91,7 @@ public class JavaRefHelper {
 
           @Override
           public Object @NotNull [] getVariants() {
-            return ArrayUtil.EMPTY_OBJECT_ARRAY;
+            return ref.getVariants();
           }
         });
       }

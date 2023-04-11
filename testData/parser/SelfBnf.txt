@@ -458,7 +458,7 @@ BnfFile:SelfBnf.bnf
       PsiWhiteSpace(' ')
       PsiElement(::=)('::=')
       PsiWhiteSpace(' ')
-      BNF_CHOICE: 'private' | 'external' | 'meta ... ' | 'upper' | 'fake'
+      BNF_CHOICE: 'private' | 'external'...'left' | 'upper' | 'fake'
         BNF_STRING_LITERAL_EXPRESSION: 'private'
           PsiElement(string)(''private'')
         PsiWhiteSpace(' ')
@@ -670,9 +670,7 @@ BnfFile:SelfBnf.bnf
       PsiWhiteSpace(' ')
       PsiElement(::=)('::=')
       PsiWhiteSpace(' ')
-      BNF_CHOICE: reference_or_token
-  | literal ... ssion
-  | value_list
+      BNF_CHOICE: reference_or_token   |...expression   | value_list
         BNF_REFERENCE_OR_TOKEN: reference_or_token
           PsiElement(id)('reference_or_token')
         PsiWhiteSpace('\n  ')
@@ -763,7 +761,7 @@ BnfFile:SelfBnf.bnf
       PsiWhiteSpace(' ')
       PsiElement(::=)('::=')
       PsiWhiteSpace(' ')
-      BNF_SEQUENCE: (id list_entry_tail? | string_ ... ral_expression) ';'?
+      BNF_SEQUENCE: (id list_entry_tail? |..._literal_expression) ';'?
         BNF_PAREN_EXPRESSION: (id list_entry_tail? | string_literal_expression)
           PsiElement(()('(')
           BNF_CHOICE: id list_entry_tail? | string_literal_expression
@@ -925,7 +923,7 @@ BnfFile:SelfBnf.bnf
       PsiWhiteSpace(' ')
       PsiElement(::=)('::=')
       PsiWhiteSpace('\n  ')
-      BNF_SEQUENCE: !(';'|'|'|'('|')'|'['|']'|'{'| ... mmar_element_recover
+      BNF_SEQUENCE: !(';'|'|'|'('|')'|'['|...) grammar_element_recover
         BNF_PREDICATE: !(';'|'|'|'('|')'|'['|']'|'{'|'}')
           BNF_PREDICATE_SIGN
             PsiElement(!)('!')
@@ -968,7 +966,7 @@ BnfFile:SelfBnf.bnf
       PsiWhiteSpace(' ')
       PsiElement(::=)('::=')
       PsiWhiteSpace(' ')
-      BNF_CHOICE: predicate | paren_opt_expressi ... | simple quantified?
+      BNF_CHOICE: predicate | paren_opt_...sion | simple quantified?
         BNF_REFERENCE_OR_TOKEN: predicate
           PsiElement(id)('predicate')
         PsiWhiteSpace(' ')
@@ -1143,7 +1141,7 @@ BnfFile:SelfBnf.bnf
       PsiWhiteSpace(' ')
       PsiElement(::=)('::=')
       PsiWhiteSpace(' ')
-      BNF_CHOICE: !(modifier* id '::=' ) referen ...   | paren_expression
+      BNF_CHOICE: !(modifier* id '::=' )...sion   | paren_expression
         BNF_SEQUENCE: !(modifier* id '::=' ) reference_or_token
           BNF_PREDICATE: !(modifier* id '::=' )
             BNF_PREDICATE_SIGN

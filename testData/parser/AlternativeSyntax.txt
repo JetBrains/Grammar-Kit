@@ -15,10 +15,10 @@ BnfFile:AlternativeSyntax.bnf
     PsiWhiteSpace(' ')
     PsiElement(::=)('::=')
     PsiWhiteSpace(' ')
-    BNF_PAREN_OPT_EXPRESSION: [ FOR { READ ONLY | UPDATE [ O ... umn name list> ] } ]
+    BNF_PAREN_OPT_EXPRESSION: [ FOR { READ ONLY | UP... <column name list> ] } ]
       PsiElement([)('[')
       PsiWhiteSpace(' ')
-      BNF_SEQUENCE: FOR { READ ONLY | UPDATE [ OF  ... olumn name list> ] }
+      BNF_SEQUENCE: FOR { READ ONLY | UPDA...OF <column name list> ] }
         BNF_REFERENCE_OR_TOKEN: FOR
           PsiElement(id)('FOR')
         PsiWhiteSpace(' ')

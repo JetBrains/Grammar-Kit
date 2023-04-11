@@ -18,7 +18,7 @@ BnfFile:ExternalExpression.bnf
     PsiWhiteSpace(' ')
     PsiElement(::=)('::=')
     PsiWhiteSpace(' ')
-    BNF_CHOICE: simple_case | complex_case | c ... | multi_complex_case
+    BNF_CHOICE: simple_case | complex_...aces | multi_complex_case
       BNF_REFERENCE_OR_TOKEN: simple_case
         PsiElement(id)('simple_case')
       PsiWhiteSpace(' ')

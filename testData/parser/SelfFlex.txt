@@ -826,9 +826,7 @@ BnfFile:SelfFlex.bnf
       PsiWhiteSpace(' ')
       PsiElement(::=)('::=')
       PsiWhiteSpace(' ')
-      BNF_SEQUENCE: []
-  user_code_section
-  secti ... exical_rules_section
+      BNF_SEQUENCE: []   user_code_section...v   lexical_rules_section
         BNF_PAREN_OPT_EXPRESSION: []
           PsiElement([)('[')
           BNF_SEQUENCE
@@ -1279,9 +1277,7 @@ BnfFile:SelfFlex.bnf
       PsiWhiteSpace(' ')
       PsiElement(::=)('::=')
       PsiWhiteSpace(' ')
-      BNF_CHOICE: option_class
-  | option_implem ... 
-  | option_obsolete
+      BNF_CHOICE: option_class   | optio...lumn    | option_obsolete
         BNF_REFERENCE_OR_TOKEN: option_class
           PsiElement(id)('option_class')
         PsiWhiteSpace('\n  ')
@@ -1608,7 +1604,7 @@ BnfFile:SelfFlex.bnf
       PsiWhiteSpace(' ')
       PsiElement(::=)('::=')
       PsiWhiteSpace(' ')
-      BNF_CHOICE: '%initthrow' java_type_list |  ... line '%initthrow}'>>
+      BNF_CHOICE: '%initthrow' java_type...st <<line '%initthrow}'>>
         BNF_SEQUENCE: '%initthrow' java_type_list
           BNF_STRING_LITERAL_EXPRESSION: '%initthrow'
             PsiElement(string)(''%initthrow'')
@@ -1618,7 +1614,7 @@ BnfFile:SelfFlex.bnf
         PsiWhiteSpace(' ')
         PsiElement(|)('|')
         PsiWhiteSpace(' ')
-        BNF_SEQUENCE: <<line '%initthrow{'>> java_ty ... line '%initthrow}'>>
+        BNF_SEQUENCE: <<line '%initthrow{'>>...st <<line '%initthrow}'>>
           BNF_EXTERNAL_EXPRESSION: <<line '%initthrow{'>>
             PsiElement(<<)('<<')
             BNF_REFERENCE_OR_TOKEN: line
@@ -1752,7 +1748,7 @@ BnfFile:SelfFlex.bnf
       PsiWhiteSpace(' ')
       PsiElement(::=)('::=')
       PsiWhiteSpace(' ')
-      BNF_CHOICE: '%yylexthrow' java_type_list | ... ine '%yylexthrow}'>>
+      BNF_CHOICE: '%yylexthrow' java_typ...t <<line '%yylexthrow}'>>
         BNF_SEQUENCE: '%yylexthrow' java_type_list
           BNF_STRING_LITERAL_EXPRESSION: '%yylexthrow'
             PsiElement(string)(''%yylexthrow'')
@@ -1762,7 +1758,7 @@ BnfFile:SelfFlex.bnf
         PsiWhiteSpace(' ')
         PsiElement(|)('|')
         PsiWhiteSpace(' ')
-        BNF_SEQUENCE: <<line '%yylexthrow{'>> java_t ... ine '%yylexthrow}'>>
+        BNF_SEQUENCE: <<line '%yylexthrow{'>...t <<line '%yylexthrow}'>>
           BNF_EXTERNAL_EXPRESSION: <<line '%yylexthrow{'>>
             PsiElement(<<)('<<')
             BNF_REFERENCE_OR_TOKEN: line
@@ -1843,7 +1839,7 @@ BnfFile:SelfFlex.bnf
       PsiWhiteSpace(' ')
       PsiElement(::=)('::=')
       PsiWhiteSpace(' ')
-      BNF_CHOICE: '%eofthrow' java_type_list | < ... <line '%eofthrow}'>>
+      BNF_CHOICE: '%eofthrow' java_type_...ist <<line '%eofthrow}'>>
         BNF_SEQUENCE: '%eofthrow' java_type_list
           BNF_STRING_LITERAL_EXPRESSION: '%eofthrow'
             PsiElement(string)(''%eofthrow'')
@@ -1853,7 +1849,7 @@ BnfFile:SelfFlex.bnf
         PsiWhiteSpace(' ')
         PsiElement(|)('|')
         PsiWhiteSpace(' ')
-        BNF_SEQUENCE: <<line '%eofthrow{'>> java_typ ... <line '%eofthrow}'>>
+        BNF_SEQUENCE: <<line '%eofthrow{'>> ...ist <<line '%eofthrow}'>>
           BNF_EXTERNAL_EXPRESSION: <<line '%eofthrow{'>>
             PsiElement(<<)('<<')
             BNF_REFERENCE_OR_TOKEN: line
@@ -2068,7 +2064,7 @@ BnfFile:SelfFlex.bnf
       PsiWhiteSpace(' ')
       PsiElement(::=)('::=')
       PsiWhiteSpace(' ')
-      BNF_SEQUENCE: ('%state' | '%xstate') state_d ... e_definition) * ','?
+      BNF_SEQUENCE: ('%state' | '%xstate')... state_definition) * ','?
         BNF_PAREN_EXPRESSION: ('%state' | '%xstate')
           PsiElement(()('(')
           BNF_CHOICE: '%state' | '%xstate'
@@ -2344,12 +2340,12 @@ BnfFile:SelfFlex.bnf
       PsiWhiteSpace(' ')
       PsiElement(::=)('::=')
       PsiWhiteSpace(' ')
-      BNF_PREDICATE: !('}' | '.' | '<' | '<<EOF>>'  ... w_line | atom_group)
+      BNF_PREDICATE: !('}' | '.' | '<' | '<...'| new_line | atom_group)
         BNF_PREDICATE_SIGN
           PsiElement(!)('!')
-        BNF_PAREN_EXPRESSION: ('}' | '.' | '<' | '<<EOF>>' | ... w_line | atom_group)
+        BNF_PAREN_EXPRESSION: ('}' | '.' | '<' | '<<...'| new_line | atom_group)
           PsiElement(()('(')
-          BNF_CHOICE: '}' | '.' | '<' | '<<EOF>>' |  ... ew_line | atom_group
+          BNF_CHOICE: '}' | '.' | '<' | '<<E...^'| new_line | atom_group
             BNF_STRING_LITERAL_EXPRESSION: '}'
               PsiElement(string)(''}'')
             PsiWhiteSpace(' ')
@@ -2642,9 +2638,7 @@ BnfFile:SelfFlex.bnf
       PsiWhiteSpace(' ')
       PsiElement(::=)('::=')
       PsiWhiteSpace(' ')
-      BNF_CHOICE: choice_expression
-  | sequence ... ssion
-  | atom_group
+      BNF_CHOICE: choice_expression   | ...expression   | atom_group
         BNF_REFERENCE_OR_TOKEN: choice_expression
           PsiElement(id)('choice_expression')
         PsiWhiteSpace('\n  ')
@@ -2681,8 +2675,7 @@ BnfFile:SelfFlex.bnf
       PsiWhiteSpace(' ')
       PsiElement(::=)('::=')
       PsiWhiteSpace(' ')
-      BNF_CHOICE: class_expression
-  | predefine ... | literal_expression
+      BNF_CHOICE: class_expression   | p...on   | literal_expression
         BNF_REFERENCE_OR_TOKEN: class_expression
           PsiElement(id)('class_expression')
         PsiWhiteSpace('\n  ')
@@ -2795,7 +2788,7 @@ BnfFile:SelfFlex.bnf
       PsiWhiteSpace(' ')
       PsiElement(::=)('::=')
       PsiWhiteSpace('  ')
-      BNF_SEQUENCE: expression ( '*' | '+' | '?' | ...  [ ',' number] '}' )
+      BNF_SEQUENCE: expression ( '*' | '+'...umber [ ',' number] '}' )
         BNF_REFERENCE_OR_TOKEN: expression
           PsiElement(id)('expression')
         PsiWhiteSpace(' ')
@@ -2847,7 +2840,7 @@ BnfFile:SelfFlex.bnf
       PsiWhiteSpace(' ')
       PsiElement(::=)('::=')
       PsiWhiteSpace(' ')
-      BNF_SEQUENCE: '[' '^'? (char_class_item (cha ... _class_item)* )* ']'
+      BNF_SEQUENCE: '[' '^'? (char_class_i... char_class_item)* )* ']'
         BNF_STRING_LITERAL_EXPRESSION: '['
           PsiElement(string)(''['')
         PsiWhiteSpace(' ')
@@ -2857,8 +2850,8 @@ BnfFile:SelfFlex.bnf
           BNF_QUANTIFIER
             PsiElement(?)('?')
         PsiWhiteSpace(' ')
-        BNF_QUANTIFIED: (char_class_item (char_class_o ... char_class_item)* )*
-          BNF_PAREN_EXPRESSION: (char_class_item (char_class_o ...  char_class_item)* )
+        BNF_QUANTIFIED: (char_class_item (char...s_op char_class_item)* )*
+          BNF_PAREN_EXPRESSION: (char_class_item (char...ss_op char_class_item)* )
             PsiElement(()('(')
             BNF_SEQUENCE: char_class_item (char_class_op char_class_item)*
               BNF_REFERENCE_OR_TOKEN: char_class_item
@@ -2906,7 +2899,7 @@ BnfFile:SelfFlex.bnf
       PsiWhiteSpace(' ')
       PsiElement(::=)('::=')
       PsiWhiteSpace(' ')
-      BNF_CHOICE: char_range | class_expression  ... on | char_class_atom
+      BNF_CHOICE: char_range | class_exp...ression | char_class_atom
         BNF_REFERENCE_OR_TOKEN: char_range
           PsiElement(id)('char_range')
         PsiWhiteSpace(' ')
@@ -3101,15 +3094,12 @@ BnfFile:SelfFlex.bnf
       PsiWhiteSpace(' ')
       PsiElement(::=)('::=')
       PsiWhiteSpace(' ')
-      BNF_PREDICATE: &('!' | '(' | '.' | '[' | '~'
- ...  id | !new_line id )
+      BNF_PREDICATE: &('!' | '(' | '.' | '[...| '{' id | !new_line id )
         BNF_PREDICATE_SIGN
           PsiElement(&)('&')
-        BNF_PAREN_EXPRESSION: ('!' | '(' | '.' | '[' | '~'
-  ...  id | !new_line id )
+        BNF_PAREN_EXPRESSION: ('!' | '(' | '.' | '['...| '{' id | !new_line id )
           PsiElement(()('(')
-          BNF_CHOICE: '!' | '(' | '.' | '[' | '~'
-   ... {' id | !new_line id
+          BNF_CHOICE: '!' | '(' | '.' | '[' ...  | '{' id | !new_line id
             BNF_STRING_LITERAL_EXPRESSION: '!'
               PsiElement(string)(''!'')
             PsiWhiteSpace(' ')

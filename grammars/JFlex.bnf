@@ -149,9 +149,11 @@ user_code_section ::= [] java_code {pin=1}
 user_value ::= <<anything2 !new_line>>
 java_code ::= raw? { methods=[getReferences] }
 
-java_type ::= id ( safe_dot id ) * {pin(".*")=1 methods=[getReferences]}
-private safe_dot ::= '.' !'*'
-private java_type_list ::= [java_type (',' java_type) *] {pin(".*")=1 recoverWhile=declaration_recover}
+java_type ::= java_name java_type_parameters? {pin(".*")=1 recoverWhile=type_recover}
+java_type_parameters ::= '<' !'>' java_type (',' java_type) * '>' {pin(".*")=1}
+java_name ::= id ( '.' id ) * {pin(".*")=1 methods=[getReferences]}
+private type_recover ::= !(',' | '>') declaration_recover
+private java_type_list ::= [java_type (',' java_type) *] {pin(".*")=1}
 
 // ======================================================
 declarations_section ::= [] declaration (!(<<eof>> | '%%') declaration) * {pin(".*")=1}

@@ -200,6 +200,8 @@ JavaCode = ({JavaRest}|{StringLiteral}|{CharLiteral}|{JavaComment})+
   "/*"                    { nextState=MACROS; yybegin(COMMENT); }
   "."                     { return FLEX_DOT; }
   ","                     { return FLEX_COMMA; }
+  "<"                     { return FLEX_ANGLE1; }
+  ">"                     { return FLEX_ANGLE2; }
 
   "="                     { yybegin(REGEXP); return FLEX_EQ; }
   {Ident}                 { return FLEX_ID; }

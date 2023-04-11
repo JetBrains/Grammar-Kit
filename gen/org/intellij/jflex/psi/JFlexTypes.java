@@ -17,7 +17,9 @@ public interface JFlexTypes {
   IElementType FLEX_DECLARATIONS_SECTION = new JFlexCompositeElementType("FLEX_DECLARATIONS_SECTION");
   IElementType FLEX_EXPRESSION = new JFlexCompositeElementType("FLEX_EXPRESSION");
   IElementType FLEX_JAVA_CODE = new JFlexCompositeElementType("FLEX_JAVA_CODE");
+  IElementType FLEX_JAVA_NAME = new JFlexCompositeElementType("FLEX_JAVA_NAME");
   IElementType FLEX_JAVA_TYPE = new JFlexCompositeElementType("FLEX_JAVA_TYPE");
+  IElementType FLEX_JAVA_TYPE_PARAMETERS = new JFlexCompositeElementType("FLEX_JAVA_TYPE_PARAMETERS");
   IElementType FLEX_LEXICAL_RULES_SECTION = new JFlexCompositeElementType("FLEX_LEXICAL_RULES_SECTION");
   IElementType FLEX_LITERAL_EXPRESSION = new JFlexCompositeElementType("FLEX_LITERAL_EXPRESSION");
   IElementType FLEX_LOOK_AHEAD = new JFlexCompositeElementType("FLEX_LOOK_AHEAD");
@@ -147,8 +149,14 @@ public interface JFlexTypes {
       else if (type == FLEX_JAVA_CODE) {
         return new JFlexJavaCodeImpl(type);
       }
+      else if (type == FLEX_JAVA_NAME) {
+        return new JFlexJavaNameImpl(type);
+      }
       else if (type == FLEX_JAVA_TYPE) {
         return new JFlexJavaTypeImpl(type);
+      }
+      else if (type == FLEX_JAVA_TYPE_PARAMETERS) {
+        return new JFlexJavaTypeParametersImpl(type);
       }
       else if (type == FLEX_LEXICAL_RULES_SECTION) {
         return new JFlexLexicalRulesSectionImpl(type);

@@ -1037,17 +1037,101 @@ BnfFile:SelfFlex.bnf
       PsiWhiteSpace(' ')
       PsiElement(::=)('::=')
       PsiWhiteSpace(' ')
-      BNF_SEQUENCE: id ( safe_dot id ) *
+      BNF_SEQUENCE: java_name java_type_parameters?
+        BNF_REFERENCE_OR_TOKEN: java_name
+          PsiElement(id)('java_name')
+        PsiWhiteSpace(' ')
+        BNF_QUANTIFIED: java_type_parameters?
+          BNF_REFERENCE_OR_TOKEN: java_type_parameters
+            PsiElement(id)('java_type_parameters')
+          BNF_QUANTIFIER
+            PsiElement(?)('?')
+      PsiWhiteSpace(' ')
+      BNF_ATTRS
+        PsiElement({)('{')
+        BNF_ATTR:pin
+          PsiElement(id)('pin')
+          BNF_ATTR_PATTERN
+            PsiElement(()('(')
+            BNF_STRING_LITERAL_EXPRESSION: ".*"
+              PsiElement(string)('".*"')
+            PsiElement())(')')
+          PsiElement(=)('=')
+          BNF_LITERAL_EXPRESSION: 1
+            PsiElement(number)('1')
+        PsiWhiteSpace(' ')
+        BNF_ATTR:recoverWhile
+          PsiElement(id)('recoverWhile')
+          PsiElement(=)('=')
+          BNF_REFERENCE_OR_TOKEN: type_recover
+            PsiElement(id)('type_recover')
+        PsiElement(})('}')
+    PsiWhiteSpace('\n')
+    BNF_RULE:java_type_parameters
+      PsiElement(id)('java_type_parameters')
+      PsiWhiteSpace(' ')
+      PsiElement(::=)('::=')
+      PsiWhiteSpace(' ')
+      BNF_SEQUENCE: '<' !'>' java_type (',' java_type) * '>'
+        BNF_STRING_LITERAL_EXPRESSION: '<'
+          PsiElement(string)(''<'')
+        PsiWhiteSpace(' ')
+        BNF_PREDICATE: !'>'
+          BNF_PREDICATE_SIGN
+            PsiElement(!)('!')
+          BNF_STRING_LITERAL_EXPRESSION: '>'
+            PsiElement(string)(''>'')
+        PsiWhiteSpace(' ')
+        BNF_REFERENCE_OR_TOKEN: java_type
+          PsiElement(id)('java_type')
+        PsiWhiteSpace(' ')
+        BNF_QUANTIFIED: (',' java_type) *
+          BNF_PAREN_EXPRESSION: (',' java_type)
+            PsiElement(()('(')
+            BNF_SEQUENCE: ',' java_type
+              BNF_STRING_LITERAL_EXPRESSION: ','
+                PsiElement(string)('','')
+              PsiWhiteSpace(' ')
+              BNF_REFERENCE_OR_TOKEN: java_type
+                PsiElement(id)('java_type')
+            PsiElement())(')')
+          PsiWhiteSpace(' ')
+          BNF_QUANTIFIER
+            PsiElement(*)('*')
+        PsiWhiteSpace(' ')
+        BNF_STRING_LITERAL_EXPRESSION: '>'
+          PsiElement(string)(''>'')
+      PsiWhiteSpace(' ')
+      BNF_ATTRS
+        PsiElement({)('{')
+        BNF_ATTR:pin
+          PsiElement(id)('pin')
+          BNF_ATTR_PATTERN
+            PsiElement(()('(')
+            BNF_STRING_LITERAL_EXPRESSION: ".*"
+              PsiElement(string)('".*"')
+            PsiElement())(')')
+          PsiElement(=)('=')
+          BNF_LITERAL_EXPRESSION: 1
+            PsiElement(number)('1')
+        PsiElement(})('}')
+    PsiWhiteSpace('\n')
+    BNF_RULE:java_name
+      PsiElement(id)('java_name')
+      PsiWhiteSpace(' ')
+      PsiElement(::=)('::=')
+      PsiWhiteSpace(' ')
+      BNF_SEQUENCE: id ( '.' id ) *
         BNF_REFERENCE_OR_TOKEN: id
           PsiElement(id)('id')
         PsiWhiteSpace(' ')
-        BNF_QUANTIFIED: ( safe_dot id ) *
-          BNF_PAREN_EXPRESSION: ( safe_dot id )
+        BNF_QUANTIFIED: ( '.' id ) *
+          BNF_PAREN_EXPRESSION: ( '.' id )
             PsiElement(()('(')
             PsiWhiteSpace(' ')
-            BNF_SEQUENCE: safe_dot id
-              BNF_REFERENCE_OR_TOKEN: safe_dot
-                PsiElement(id)('safe_dot')
+            BNF_SEQUENCE: '.' id
+              BNF_STRING_LITERAL_EXPRESSION: '.'
+                PsiElement(string)(''.'')
               PsiWhiteSpace(' ')
               BNF_REFERENCE_OR_TOKEN: id
                 PsiElement(id)('id')
@@ -1080,23 +1164,32 @@ BnfFile:SelfFlex.bnf
             PsiElement(])(']')
         PsiElement(})('}')
     PsiWhiteSpace('\n')
-    BNF_RULE:safe_dot
+    BNF_RULE:type_recover
       BNF_MODIFIER
         PsiElement(id)('private')
       PsiWhiteSpace(' ')
-      PsiElement(id)('safe_dot')
+      PsiElement(id)('type_recover')
       PsiWhiteSpace(' ')
       PsiElement(::=)('::=')
       PsiWhiteSpace(' ')
-      BNF_SEQUENCE: '.' !'*'
-        BNF_STRING_LITERAL_EXPRESSION: '.'
-          PsiElement(string)(''.'')
-        PsiWhiteSpace(' ')
-        BNF_PREDICATE: !'*'
+      BNF_SEQUENCE: !(',' | '>') declaration_recover
+        BNF_PREDICATE: !(',' | '>')
           BNF_PREDICATE_SIGN
             PsiElement(!)('!')
-          BNF_STRING_LITERAL_EXPRESSION: '*'
-            PsiElement(string)(''*'')
+          BNF_PAREN_EXPRESSION: (',' | '>')
+            PsiElement(()('(')
+            BNF_CHOICE: ',' | '>'
+              BNF_STRING_LITERAL_EXPRESSION: ','
+                PsiElement(string)('','')
+              PsiWhiteSpace(' ')
+              PsiElement(|)('|')
+              PsiWhiteSpace(' ')
+              BNF_STRING_LITERAL_EXPRESSION: '>'
+                PsiElement(string)(''>'')
+            PsiElement())(')')
+        PsiWhiteSpace(' ')
+        BNF_REFERENCE_OR_TOKEN: declaration_recover
+          PsiElement(id)('declaration_recover')
     PsiWhiteSpace('\n')
     BNF_RULE:java_type_list
       BNF_MODIFIER
@@ -1139,12 +1232,6 @@ BnfFile:SelfFlex.bnf
           PsiElement(=)('=')
           BNF_LITERAL_EXPRESSION: 1
             PsiElement(number)('1')
-        PsiWhiteSpace(' ')
-        BNF_ATTR:recoverWhile
-          PsiElement(id)('recoverWhile')
-          PsiElement(=)('=')
-          BNF_REFERENCE_OR_TOKEN: declaration_recover
-            PsiElement(id)('declaration_recover')
         PsiElement(})('}')
     PsiWhiteSpace('\n\n')
     PsiComment(line_comment)('// ======================================================')
@@ -1487,6 +1574,7 @@ BnfFile:SelfFlex.bnf
         PsiWhiteSpace(' ')
         BNF_REFERENCE_OR_TOKEN: java_type
           PsiElement(id)('java_type')
+  PsiElement(DUMMY_BLOCK)
     PsiWhiteSpace('\n')
     BNF_RULE:option_implements
       PsiElement(id)('option_implements')
@@ -1511,7 +1599,6 @@ BnfFile:SelfFlex.bnf
         PsiWhiteSpace(' ')
         BNF_REFERENCE_OR_TOKEN: java_type
           PsiElement(id)('java_type')
-  PsiElement(DUMMY_BLOCK)
     PsiWhiteSpace('\n')
     BNF_RULE:option_public
       PsiElement(id)('option_public')
@@ -1650,6 +1737,7 @@ BnfFile:SelfFlex.bnf
         PsiWhiteSpace(' ')
         BNF_REFERENCE_OR_TOKEN: id
           PsiElement(id)('id')
+  PsiElement(DUMMY_BLOCK)
     PsiWhiteSpace('\n')
     BNF_RULE:option_scan_error
       PsiElement(id)('option_scan_error')
@@ -1674,7 +1762,6 @@ BnfFile:SelfFlex.bnf
         PsiWhiteSpace(' ')
         BNF_REFERENCE_OR_TOKEN: number
           PsiElement(id)('number')
-  PsiElement(DUMMY_BLOCK)
     PsiWhiteSpace('\n')
     BNF_RULE:option_include
       PsiElement(id)('option_include')
@@ -1833,6 +1920,7 @@ BnfFile:SelfFlex.bnf
           BNF_STRING_LITERAL_EXPRESSION: '%eof}'
             PsiElement(string)(''%eof}'')
           PsiElement(>>)('>>')
+  PsiElement(DUMMY_BLOCK)
     PsiWhiteSpace('\n')
     BNF_RULE:option_eof_throw
       PsiElement(id)('option_eof_throw')
@@ -1885,7 +1973,6 @@ BnfFile:SelfFlex.bnf
           BNF_STRING_LITERAL_EXPRESSION: 'false'
             PsiElement(string)(''false'')
           PsiElement(])(']')
-  PsiElement(DUMMY_BLOCK)
     PsiWhiteSpace('\n\n')
     BNF_RULE:option_debug
       PsiElement(id)('option_debug')
@@ -1954,6 +2041,7 @@ BnfFile:SelfFlex.bnf
       PsiWhiteSpace(' ')
       BNF_STRING_LITERAL_EXPRESSION: '%table'
         PsiElement(string)(''%table'')
+  PsiElement(DUMMY_BLOCK)
     PsiWhiteSpace('\n')
     BNF_RULE:option_7bit
       PsiElement(id)('option_7bit')
@@ -1976,7 +2064,6 @@ BnfFile:SelfFlex.bnf
         PsiWhiteSpace(' ')
         BNF_STRING_LITERAL_EXPRESSION: '%8bit'
           PsiElement(string)(''%8bit'')
-  PsiElement(DUMMY_BLOCK)
     PsiWhiteSpace('\n')
     BNF_RULE:option_16bit
       PsiElement(id)('option_16bit')
@@ -2128,6 +2215,7 @@ BnfFile:SelfFlex.bnf
           BNF_LITERAL_EXPRESSION: 1
             PsiElement(number)('1')
         PsiElement(})('}')
+  PsiElement(DUMMY_BLOCK)
     PsiWhiteSpace('\n')
     BNF_RULE:state_definition
       PsiElement(id)('state_definition')
@@ -2205,7 +2293,6 @@ BnfFile:SelfFlex.bnf
             PsiElement(id)('macro_definition_recover')
         PsiWhiteSpace('\n')
         PsiElement(})('}')
-  PsiElement(DUMMY_BLOCK)
     PsiWhiteSpace('\n')
     BNF_RULE:macro_definition_recover
       BNF_MODIFIER
@@ -2455,6 +2542,7 @@ BnfFile:SelfFlex.bnf
           BNF_LITERAL_EXPRESSION: 2
             PsiElement(number)('2')
         PsiElement(})('}')
+  PsiElement(DUMMY_BLOCK)
     PsiWhiteSpace('\n')
     BNF_RULE:rule_group
       BNF_MODIFIER
@@ -2547,7 +2635,6 @@ BnfFile:SelfFlex.bnf
           BNF_LITERAL_EXPRESSION: 1
             PsiElement(number)('1')
         PsiElement(})('}')
-  PsiElement(DUMMY_BLOCK)
     PsiWhiteSpace('\n')
     BNF_RULE:state_reference
       PsiElement(id)('state_reference')
@@ -2763,6 +2850,7 @@ BnfFile:SelfFlex.bnf
           BNF_LITERAL_EXPRESSION: 1
             PsiElement(number)('1')
         PsiElement(})('}')
+  PsiElement(DUMMY_BLOCK)
     PsiWhiteSpace('\n')
     BNF_RULE:not_expression
       PsiElement(id)('not_expression')
@@ -2833,7 +2921,6 @@ BnfFile:SelfFlex.bnf
                 PsiElement(string)(''}'')
           PsiWhiteSpace(' ')
           PsiElement())(')')
-  PsiElement(DUMMY_BLOCK)
     PsiWhiteSpace('\n')
     BNF_RULE:class_expression
       PsiElement(id)('class_expression')
@@ -3044,136 +3131,136 @@ BnfFile:SelfFlex.bnf
             PsiElement(])(']')
         PsiWhiteSpace(' ')
         PsiElement(})('}')
-    PsiWhiteSpace('\n')
-    BNF_RULE:literal_expression
-      PsiElement(id)('literal_expression')
+  PsiWhiteSpace('\n')
+  BNF_RULE:literal_expression
+    PsiElement(id)('literal_expression')
+    PsiWhiteSpace(' ')
+    PsiElement(::=)('::=')
+    PsiWhiteSpace(' ')
+    BNF_CHOICE: string | id | char_or_esc | number
+      BNF_REFERENCE_OR_TOKEN: string
+        PsiElement(id)('string')
       PsiWhiteSpace(' ')
-      PsiElement(::=)('::=')
+      PsiElement(|)('|')
       PsiWhiteSpace(' ')
-      BNF_CHOICE: string | id | char_or_esc | number
-        BNF_REFERENCE_OR_TOKEN: string
-          PsiElement(id)('string')
-        PsiWhiteSpace(' ')
-        PsiElement(|)('|')
-        PsiWhiteSpace(' ')
-        BNF_REFERENCE_OR_TOKEN: id
-          PsiElement(id)('id')
-        PsiWhiteSpace(' ')
-        PsiElement(|)('|')
-        PsiWhiteSpace(' ')
-        BNF_REFERENCE_OR_TOKEN: char_or_esc
-          PsiElement(id)('char_or_esc')
-        PsiWhiteSpace(' ')
-        PsiElement(|)('|')
-        PsiWhiteSpace(' ')
-        BNF_REFERENCE_OR_TOKEN: number
-          PsiElement(id)('number')
+      BNF_REFERENCE_OR_TOKEN: id
+        PsiElement(id)('id')
       PsiWhiteSpace(' ')
-      BNF_ATTRS
-        PsiElement({)('{')
-        PsiWhiteSpace(' ')
-        BNF_ATTR:methods
-          PsiElement(id)('methods')
-          PsiElement(=)('=')
-          BNF_VALUE_LIST
-            PsiElement([)('[')
-            BNF_LIST_ENTRY
-              PsiElement(id)('id')
-              PsiElement(=)('=')
-              BNF_STRING_LITERAL_EXPRESSION: ""
-                PsiElement(string)('""')
-            PsiElement(])(']')
-        PsiWhiteSpace(' ')
-        PsiElement(})('}')
-    PsiWhiteSpace('\n\n')
-    BNF_RULE:sequence_op
-      BNF_MODIFIER
-        PsiElement(id)('private')
+      PsiElement(|)('|')
       PsiWhiteSpace(' ')
-      PsiElement(id)('sequence_op')
+      BNF_REFERENCE_OR_TOKEN: char_or_esc
+        PsiElement(id)('char_or_esc')
       PsiWhiteSpace(' ')
-      PsiElement(::=)('::=')
+      PsiElement(|)('|')
       PsiWhiteSpace(' ')
-      BNF_PREDICATE: &('!' | '(' | '.' | '[...| '{' id | !new_line id )
-        BNF_PREDICATE_SIGN
-          PsiElement(&)('&')
-        BNF_PAREN_EXPRESSION: ('!' | '(' | '.' | '['...| '{' id | !new_line id )
-          PsiElement(()('(')
-          BNF_CHOICE: '!' | '(' | '.' | '[' ...  | '{' id | !new_line id
-            BNF_STRING_LITERAL_EXPRESSION: '!'
-              PsiElement(string)(''!'')
-            PsiWhiteSpace(' ')
-            PsiElement(|)('|')
-            PsiWhiteSpace(' ')
-            BNF_STRING_LITERAL_EXPRESSION: '('
-              PsiElement(string)(''('')
-            PsiWhiteSpace(' ')
-            PsiElement(|)('|')
-            PsiWhiteSpace(' ')
-            BNF_STRING_LITERAL_EXPRESSION: '.'
-              PsiElement(string)(''.'')
-            PsiWhiteSpace(' ')
-            PsiElement(|)('|')
-            PsiWhiteSpace(' ')
-            BNF_STRING_LITERAL_EXPRESSION: '['
-              PsiElement(string)(''['')
-            PsiWhiteSpace(' ')
-            PsiElement(|)('|')
-            PsiWhiteSpace(' ')
-            BNF_STRING_LITERAL_EXPRESSION: '~'
-              PsiElement(string)(''~'')
-            PsiWhiteSpace('\n  ')
-            PsiElement(|)('|')
-            PsiWhiteSpace(' ')
-            BNF_REFERENCE_OR_TOKEN: char_or_esc
-              PsiElement(id)('char_or_esc')
-            PsiWhiteSpace(' ')
-            PsiElement(|)('|')
-            PsiWhiteSpace(' ')
-            BNF_REFERENCE_OR_TOKEN: char_class
-              PsiElement(id)('char_class')
-            PsiWhiteSpace(' ')
-            PsiElement(|)('|')
-            PsiWhiteSpace(' ')
-            BNF_REFERENCE_OR_TOKEN: number
-              PsiElement(id)('number')
-            PsiWhiteSpace(' ')
-            PsiElement(|)('|')
-            PsiWhiteSpace(' ')
-            BNF_REFERENCE_OR_TOKEN: string
-              PsiElement(id)('string')
-            PsiWhiteSpace('\n  ')
-            PsiElement(|)('|')
-            PsiWhiteSpace(' ')
-            BNF_SEQUENCE: '{' id
-              BNF_STRING_LITERAL_EXPRESSION: '{'
-                PsiElement(string)(''{'')
-              PsiWhiteSpace(' ')
-              BNF_REFERENCE_OR_TOKEN: id
-                PsiElement(id)('id')
-            PsiWhiteSpace(' ')
-            PsiElement(|)('|')
-            PsiWhiteSpace(' ')
-            BNF_SEQUENCE: !new_line id
-              BNF_PREDICATE: !new_line
-                BNF_PREDICATE_SIGN
-                  PsiElement(!)('!')
-                BNF_REFERENCE_OR_TOKEN: new_line
-                  PsiElement(id)('new_line')
-              PsiWhiteSpace(' ')
-              BNF_REFERENCE_OR_TOKEN: id
-                PsiElement(id)('id')
+      BNF_REFERENCE_OR_TOKEN: number
+        PsiElement(id)('number')
+    PsiWhiteSpace(' ')
+    BNF_ATTRS
+      PsiElement({)('{')
+      PsiWhiteSpace(' ')
+      BNF_ATTR:methods
+        PsiElement(id)('methods')
+        PsiElement(=)('=')
+        BNF_VALUE_LIST
+          PsiElement([)('[')
+          BNF_LIST_ENTRY
+            PsiElement(id)('id')
+            PsiElement(=)('=')
+            BNF_STRING_LITERAL_EXPRESSION: ""
+              PsiElement(string)('""')
+          PsiElement(])(']')
+      PsiWhiteSpace(' ')
+      PsiElement(})('}')
+  PsiWhiteSpace('\n\n')
+  BNF_RULE:sequence_op
+    BNF_MODIFIER
+      PsiElement(id)('private')
+    PsiWhiteSpace(' ')
+    PsiElement(id)('sequence_op')
+    PsiWhiteSpace(' ')
+    PsiElement(::=)('::=')
+    PsiWhiteSpace(' ')
+    BNF_PREDICATE: &('!' | '(' | '.' | '[...| '{' id | !new_line id )
+      BNF_PREDICATE_SIGN
+        PsiElement(&)('&')
+      BNF_PAREN_EXPRESSION: ('!' | '(' | '.' | '['...| '{' id | !new_line id )
+        PsiElement(()('(')
+        BNF_CHOICE: '!' | '(' | '.' | '[' ...  | '{' id | !new_line id
+          BNF_STRING_LITERAL_EXPRESSION: '!'
+            PsiElement(string)(''!'')
           PsiWhiteSpace(' ')
-          PsiElement())(')')
-      PsiWhiteSpace('\n  ')
-      BNF_ATTRS
-        PsiElement({)('{')
-        BNF_ATTR:name
-          PsiElement(id)('name')
-          PsiElement(=)('=')
-          BNF_STRING_LITERAL_EXPRESSION: "expression"
-            PsiElement(string)('"expression"')
-        PsiElement(})('}')
+          PsiElement(|)('|')
+          PsiWhiteSpace(' ')
+          BNF_STRING_LITERAL_EXPRESSION: '('
+            PsiElement(string)(''('')
+          PsiWhiteSpace(' ')
+          PsiElement(|)('|')
+          PsiWhiteSpace(' ')
+          BNF_STRING_LITERAL_EXPRESSION: '.'
+            PsiElement(string)(''.'')
+          PsiWhiteSpace(' ')
+          PsiElement(|)('|')
+          PsiWhiteSpace(' ')
+          BNF_STRING_LITERAL_EXPRESSION: '['
+            PsiElement(string)(''['')
+          PsiWhiteSpace(' ')
+          PsiElement(|)('|')
+          PsiWhiteSpace(' ')
+          BNF_STRING_LITERAL_EXPRESSION: '~'
+            PsiElement(string)(''~'')
+          PsiWhiteSpace('\n  ')
+          PsiElement(|)('|')
+          PsiWhiteSpace(' ')
+          BNF_REFERENCE_OR_TOKEN: char_or_esc
+            PsiElement(id)('char_or_esc')
+          PsiWhiteSpace(' ')
+          PsiElement(|)('|')
+          PsiWhiteSpace(' ')
+          BNF_REFERENCE_OR_TOKEN: char_class
+            PsiElement(id)('char_class')
+          PsiWhiteSpace(' ')
+          PsiElement(|)('|')
+          PsiWhiteSpace(' ')
+          BNF_REFERENCE_OR_TOKEN: number
+            PsiElement(id)('number')
+          PsiWhiteSpace(' ')
+          PsiElement(|)('|')
+          PsiWhiteSpace(' ')
+          BNF_REFERENCE_OR_TOKEN: string
+            PsiElement(id)('string')
+          PsiWhiteSpace('\n  ')
+          PsiElement(|)('|')
+          PsiWhiteSpace(' ')
+          BNF_SEQUENCE: '{' id
+            BNF_STRING_LITERAL_EXPRESSION: '{'
+              PsiElement(string)(''{'')
+            PsiWhiteSpace(' ')
+            BNF_REFERENCE_OR_TOKEN: id
+              PsiElement(id)('id')
+          PsiWhiteSpace(' ')
+          PsiElement(|)('|')
+          PsiWhiteSpace(' ')
+          BNF_SEQUENCE: !new_line id
+            BNF_PREDICATE: !new_line
+              BNF_PREDICATE_SIGN
+                PsiElement(!)('!')
+              BNF_REFERENCE_OR_TOKEN: new_line
+                PsiElement(id)('new_line')
+            PsiWhiteSpace(' ')
+            BNF_REFERENCE_OR_TOKEN: id
+              PsiElement(id)('id')
+        PsiWhiteSpace(' ')
+        PsiElement())(')')
+    PsiWhiteSpace('\n  ')
+    BNF_ATTRS
+      PsiElement({)('{')
+      BNF_ATTR:name
+        PsiElement(id)('name')
+        PsiElement(=)('=')
+        BNF_STRING_LITERAL_EXPRESSION: "expression"
+          PsiElement(string)('"expression"')
+      PsiElement(})('}')
   PsiWhiteSpace('\n\n')
   BNF_RULE:predefined_class_expression
     PsiElement(id)('predefined_class_expression')

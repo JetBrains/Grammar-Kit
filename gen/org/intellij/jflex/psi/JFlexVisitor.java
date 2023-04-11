@@ -36,7 +36,15 @@ public class JFlexVisitor<R> extends PsiElementVisitor {
     return visitComposite(o);
   }
 
+  public R visitJavaName(@NotNull JFlexJavaName o) {
+    return visitComposite(o);
+  }
+
   public R visitJavaType(@NotNull JFlexJavaType o) {
+    return visitComposite(o);
+  }
+
+  public R visitJavaTypeParameters(@NotNull JFlexJavaTypeParameters o) {
     return visitComposite(o);
   }
 

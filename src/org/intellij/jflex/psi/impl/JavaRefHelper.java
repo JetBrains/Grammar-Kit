@@ -58,7 +58,7 @@ public class JavaRefHelper {
     return list.isEmpty() ? PsiReference.EMPTY_ARRAY : list.toArray(PsiReference.EMPTY_ARRAY);
   }
 
-  public static PsiReference @NotNull [] getReferences(@NotNull JFlexJavaType o) {
+  public static PsiReference @NotNull [] getReferences(@NotNull JFlexJavaName o) {
     String refText = o.getText();
     PsiFile javaFile = createJavaFileForExpr(refText + " val", o);
     return wrapJavaReferences(o, 0, javaFile, refText);

@@ -16,7 +16,9 @@ public interface JFlexTypes {
   IElementType FLEX_DECLARATIONS_SECTION = new JFlexCompositeElementType("FLEX_DECLARATIONS_SECTION");
   IElementType FLEX_EXPRESSION = new JFlexCompositeElementType("FLEX_EXPRESSION");
   IElementType FLEX_JAVA_CODE = new JFlexCompositeElementType("FLEX_JAVA_CODE");
+  IElementType FLEX_JAVA_NAME = new JFlexCompositeElementType("FLEX_JAVA_NAME");
   IElementType FLEX_JAVA_TYPE = new JFlexCompositeElementType("FLEX_JAVA_TYPE");
+  IElementType FLEX_JAVA_TYPE_PARAMETERS = new JFlexCompositeElementType("FLEX_JAVA_TYPE_PARAMETERS");
   IElementType FLEX_LEXICAL_RULES_SECTION = new JFlexCompositeElementType("FLEX_LEXICAL_RULES_SECTION");
   IElementType FLEX_LITERAL_EXPRESSION = new JFlexCompositeElementType("FLEX_LITERAL_EXPRESSION");
   IElementType FLEX_LOOK_AHEAD = new JFlexCompositeElementType("FLEX_LOOK_AHEAD");
@@ -146,8 +148,14 @@ public interface JFlexTypes {
       else if (type == FLEX_JAVA_CODE) {
         return new JFlexJavaCodeImpl(type);
       }
+      else if (type == FLEX_JAVA_NAME) {
+        return new JFlexJavaNameImpl(type);
+      }
       else if (type == FLEX_JAVA_TYPE) {
         return new JFlexJavaTypeImpl(type);
+      }
+      else if (type == FLEX_JAVA_TYPE_PARAMETERS) {
+        return new JFlexJavaTypeParametersImpl(type);
       }
       else if (type == FLEX_LEXICAL_RULES_SECTION) {
         return new JFlexLexicalRulesSectionImpl(type);
@@ -305,7 +313,7 @@ public interface JFlexJavaCode extends JFlexComposite {
   PsiReference[] getReferences();
 
 }
-// ---- JFlexJavaType.java -----------------
+// ---- JFlexJavaName.java -----------------
 // license.txt
 package org.intellij.jflex.psi;
 
@@ -314,9 +322,40 @@ import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiReference;
 
-public interface JFlexJavaType extends JFlexComposite {
+public interface JFlexJavaName extends JFlexComposite {
 
   PsiReference @NotNull [] getReferences();
+
+}
+// ---- JFlexJavaType.java -----------------
+// license.txt
+package org.intellij.jflex.psi;
+
+import java.util.List;
+import org.jetbrains.annotations.*;
+import com.intellij.psi.PsiElement;
+
+public interface JFlexJavaType extends JFlexComposite {
+
+  @NotNull
+  JFlexJavaName getJavaName();
+
+  @Nullable
+  JFlexJavaTypeParameters getJavaTypeParameters();
+
+}
+// ---- JFlexJavaTypeParameters.java -----------------
+// license.txt
+package org.intellij.jflex.psi;
+
+import java.util.List;
+import org.jetbrains.annotations.*;
+import com.intellij.psi.PsiElement;
+
+public interface JFlexJavaTypeParameters extends JFlexComposite {
+
+  @NotNull
+  List<JFlexJavaType> getJavaTypeList();
 
 }
 // ---- JFlexLexicalRulesSection.java -----------------
@@ -874,7 +913,7 @@ public class JFlexJavaCodeImpl extends JFlexJavaCodeInjectionHostImpl implements
   }
 
 }
-// ---- JFlexJavaTypeImpl.java -----------------
+// ---- JFlexJavaNameImpl.java -----------------
 // license.txt
 package org.intellij.jflex.psi.impl;
 
@@ -887,6 +926,43 @@ import com.intellij.psi.util.PsiTreeUtil;
 import static org.intellij.jflex.psi.JFlexTypes.*;
 import org.intellij.jflex.psi.*;
 import com.intellij.psi.PsiReference;
+import com.intellij.psi.tree.IElementType;
+
+public class JFlexJavaNameImpl extends JFlexCompositeImpl implements JFlexJavaName {
+
+  public JFlexJavaNameImpl(IElementType type) {
+    super(type);
+  }
+
+  @Override
+  public <R> R accept(@NotNull JFlexVisitor<R> visitor) {
+    return visitor.visitJavaName(this);
+  }
+
+  @Override
+  public void accept(@NotNull PsiElementVisitor visitor) {
+    if (visitor instanceof JFlexVisitor) accept((JFlexVisitor)visitor);
+    else super.accept(visitor);
+  }
+
+  @Override
+  public PsiReference @NotNull [] getReferences() {
+    return JFlexPsiImplUtil.getReferences(this);
+  }
+
+}
+// ---- JFlexJavaTypeImpl.java -----------------
+// license.txt
+package org.intellij.jflex.psi.impl;
+
+import java.util.List;
+import org.jetbrains.annotations.*;
+import com.intellij.lang.ASTNode;
+import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiElementVisitor;
+import com.intellij.psi.util.PsiTreeUtil;
+import static org.intellij.jflex.psi.JFlexTypes.*;
+import org.intellij.jflex.psi.*;
 import com.intellij.psi.tree.IElementType;
 
 public class JFlexJavaTypeImpl extends JFlexCompositeImpl implements JFlexJavaType {
@@ -907,8 +983,53 @@ public class JFlexJavaTypeImpl extends JFlexCompositeImpl implements JFlexJavaTy
   }
 
   @Override
-  public PsiReference @NotNull [] getReferences() {
-    return JFlexPsiImplUtil.getReferences(this);
+  @NotNull
+  public JFlexJavaName getJavaName() {
+    return PsiTreeUtil.getChildOfType(this, JFlexJavaName.class);
+  }
+
+  @Override
+  @Nullable
+  public JFlexJavaTypeParameters getJavaTypeParameters() {
+    return PsiTreeUtil.getChildOfType(this, JFlexJavaTypeParameters.class);
+  }
+
+}
+// ---- JFlexJavaTypeParametersImpl.java -----------------
+// license.txt
+package org.intellij.jflex.psi.impl;
+
+import java.util.List;
+import org.jetbrains.annotations.*;
+import com.intellij.lang.ASTNode;
+import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiElementVisitor;
+import com.intellij.psi.util.PsiTreeUtil;
+import static org.intellij.jflex.psi.JFlexTypes.*;
+import org.intellij.jflex.psi.*;
+import com.intellij.psi.tree.IElementType;
+
+public class JFlexJavaTypeParametersImpl extends JFlexCompositeImpl implements JFlexJavaTypeParameters {
+
+  public JFlexJavaTypeParametersImpl(IElementType type) {
+    super(type);
+  }
+
+  @Override
+  public <R> R accept(@NotNull JFlexVisitor<R> visitor) {
+    return visitor.visitJavaTypeParameters(this);
+  }
+
+  @Override
+  public void accept(@NotNull PsiElementVisitor visitor) {
+    if (visitor instanceof JFlexVisitor) accept((JFlexVisitor)visitor);
+    else super.accept(visitor);
+  }
+
+  @Override
+  @NotNull
+  public List<JFlexJavaType> getJavaTypeList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, JFlexJavaType.class);
   }
 
 }
@@ -1733,7 +1854,15 @@ public class JFlexVisitor<R> extends PsiElementVisitor {
     return visitComposite(o);
   }
 
+  public R visitJavaName(@NotNull JFlexJavaName o) {
+    return visitComposite(o);
+  }
+
   public R visitJavaType(@NotNull JFlexJavaType o) {
+    return visitComposite(o);
+  }
+
+  public R visitJavaTypeParameters(@NotNull JFlexJavaTypeParameters o) {
     return visitComposite(o);
   }
 

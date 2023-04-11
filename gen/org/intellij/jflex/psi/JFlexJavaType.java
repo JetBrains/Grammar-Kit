@@ -6,10 +6,13 @@ package org.intellij.jflex.psi;
 import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiReference;
 
 public interface JFlexJavaType extends JFlexComposite {
 
-  PsiReference @NotNull [] getReferences();
+  @NotNull
+  JFlexJavaName getJavaName();
+
+  @Nullable
+  JFlexJavaTypeParameters getJavaTypeParameters();
 
 }

@@ -289,49 +289,66 @@ public class JFlexParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // id ( safe_dot id ) *
-  public static boolean java_type(PsiBuilder builder, int level) {
-    if (!recursion_guard_(builder, level, "java_type")) return false;
+  // id ( '.' id ) *
+  public static boolean java_name(PsiBuilder builder, int level) {
+    if (!recursion_guard_(builder, level, "java_name")) return false;
     if (!nextTokenIs(builder, FLEX_ID)) return false;
     boolean result, pinned;
-    Marker marker = enter_section_(builder, level, _NONE_, FLEX_JAVA_TYPE, null);
+    Marker marker = enter_section_(builder, level, _NONE_, FLEX_JAVA_NAME, null);
     result = consumeToken(builder, FLEX_ID);
     pinned = result; // pin = 1
-    result = result && java_type_1(builder, level + 1);
+    result = result && java_name_1(builder, level + 1);
     exit_section_(builder, level, marker, result, pinned, null);
     return result || pinned;
   }
 
-  // ( safe_dot id ) *
-  private static boolean java_type_1(PsiBuilder builder, int level) {
-    if (!recursion_guard_(builder, level, "java_type_1")) return false;
+  // ( '.' id ) *
+  private static boolean java_name_1(PsiBuilder builder, int level) {
+    if (!recursion_guard_(builder, level, "java_name_1")) return false;
     while (true) {
       int pos = current_position_(builder);
-      if (!java_type_1_0(builder, level + 1)) break;
-      if (!empty_element_parsed_guard_(builder, "java_type_1", pos)) break;
+      if (!java_name_1_0(builder, level + 1)) break;
+      if (!empty_element_parsed_guard_(builder, "java_name_1", pos)) break;
     }
     return true;
   }
 
-  // safe_dot id
-  private static boolean java_type_1_0(PsiBuilder builder, int level) {
-    if (!recursion_guard_(builder, level, "java_type_1_0")) return false;
+  // '.' id
+  private static boolean java_name_1_0(PsiBuilder builder, int level) {
+    if (!recursion_guard_(builder, level, "java_name_1_0")) return false;
     boolean result, pinned;
     Marker marker = enter_section_(builder, level, _NONE_);
-    result = safe_dot(builder, level + 1);
+    result = consumeTokens(builder, 1, FLEX_DOT, FLEX_ID);
     pinned = result; // pin = 1
-    result = result && consumeToken(builder, FLEX_ID);
     exit_section_(builder, level, marker, result, pinned, null);
     return result || pinned;
+  }
+
+  /* ********************************************************** */
+  // java_name java_type_parameters?
+  public static boolean java_type(PsiBuilder builder, int level) {
+    if (!recursion_guard_(builder, level, "java_type")) return false;
+    boolean result, pinned;
+    Marker marker = enter_section_(builder, level, _NONE_, FLEX_JAVA_TYPE, "<java type>");
+    result = java_name(builder, level + 1);
+    pinned = result; // pin = 1
+    result = result && java_type_1(builder, level + 1);
+    exit_section_(builder, level, marker, result, pinned, JFlexParser::type_recover);
+    return result || pinned;
+  }
+
+  // java_type_parameters?
+  private static boolean java_type_1(PsiBuilder builder, int level) {
+    if (!recursion_guard_(builder, level, "java_type_1")) return false;
+    java_type_parameters(builder, level + 1);
+    return true;
   }
 
   /* ********************************************************** */
   // [java_type (',' java_type) *]
   static boolean java_type_list(PsiBuilder builder, int level) {
     if (!recursion_guard_(builder, level, "java_type_list")) return false;
-    Marker marker = enter_section_(builder, level, _NONE_);
     java_type_list_0(builder, level + 1);
-    exit_section_(builder, level, marker, true, false, JFlexParser::declaration_recover);
     return true;
   }
 
@@ -361,6 +378,56 @@ public class JFlexParser implements PsiParser, LightPsiParser {
   // ',' java_type
   private static boolean java_type_list_0_1_0(PsiBuilder builder, int level) {
     if (!recursion_guard_(builder, level, "java_type_list_0_1_0")) return false;
+    boolean result, pinned;
+    Marker marker = enter_section_(builder, level, _NONE_);
+    result = consumeToken(builder, FLEX_COMMA);
+    pinned = result; // pin = 1
+    result = result && java_type(builder, level + 1);
+    exit_section_(builder, level, marker, result, pinned, null);
+    return result || pinned;
+  }
+
+  /* ********************************************************** */
+  // '<' !'>' java_type (',' java_type) * '>'
+  public static boolean java_type_parameters(PsiBuilder builder, int level) {
+    if (!recursion_guard_(builder, level, "java_type_parameters")) return false;
+    if (!nextTokenIs(builder, FLEX_ANGLE1)) return false;
+    boolean result, pinned;
+    Marker marker = enter_section_(builder, level, _NONE_, FLEX_JAVA_TYPE_PARAMETERS, null);
+    result = consumeToken(builder, FLEX_ANGLE1);
+    pinned = result; // pin = 1
+    result = result && report_error_(builder, java_type_parameters_1(builder, level + 1));
+    result = pinned && report_error_(builder, java_type(builder, level + 1)) && result;
+    result = pinned && report_error_(builder, java_type_parameters_3(builder, level + 1)) && result;
+    result = pinned && consumeToken(builder, FLEX_ANGLE2) && result;
+    exit_section_(builder, level, marker, result, pinned, null);
+    return result || pinned;
+  }
+
+  // !'>'
+  private static boolean java_type_parameters_1(PsiBuilder builder, int level) {
+    if (!recursion_guard_(builder, level, "java_type_parameters_1")) return false;
+    boolean result;
+    Marker marker = enter_section_(builder, level, _NOT_);
+    result = !consumeToken(builder, FLEX_ANGLE2);
+    exit_section_(builder, level, marker, result, false, null);
+    return result;
+  }
+
+  // (',' java_type) *
+  private static boolean java_type_parameters_3(PsiBuilder builder, int level) {
+    if (!recursion_guard_(builder, level, "java_type_parameters_3")) return false;
+    while (true) {
+      int pos = current_position_(builder);
+      if (!java_type_parameters_3_0(builder, level + 1)) break;
+      if (!empty_element_parsed_guard_(builder, "java_type_parameters_3", pos)) break;
+    }
+    return true;
+  }
+
+  // ',' java_type
+  private static boolean java_type_parameters_3_0(PsiBuilder builder, int level) {
+    if (!recursion_guard_(builder, level, "java_type_parameters_3_0")) return false;
     boolean result, pinned;
     Marker marker = enter_section_(builder, level, _NONE_);
     result = consumeToken(builder, FLEX_COMMA);
@@ -1386,29 +1453,6 @@ public class JFlexParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // '.' !'*'
-  static boolean safe_dot(PsiBuilder builder, int level) {
-    if (!recursion_guard_(builder, level, "safe_dot")) return false;
-    if (!nextTokenIs(builder, FLEX_DOT)) return false;
-    boolean result;
-    Marker marker = enter_section_(builder);
-    result = consumeToken(builder, FLEX_DOT);
-    result = result && safe_dot_1(builder, level + 1);
-    exit_section_(builder, marker, null, result);
-    return result;
-  }
-
-  // !'*'
-  private static boolean safe_dot_1(PsiBuilder builder, int level) {
-    if (!recursion_guard_(builder, level, "safe_dot_1")) return false;
-    boolean result;
-    Marker marker = enter_section_(builder, level, _NOT_);
-    result = !consumeToken(builder, FLEX_STAR);
-    exit_section_(builder, level, marker, result, false, null);
-    return result;
-  }
-
-  /* ********************************************************** */
   // [] new_line '%%' new_line
   static boolean section_div(PsiBuilder builder, int level) {
     if (!recursion_guard_(builder, level, "section_div")) return false;
@@ -1647,6 +1691,37 @@ public class JFlexParser implements PsiParser, LightPsiParser {
     Marker marker = enter_section_(builder);
     result = consumeToken(builder, FLEX_ID);
     exit_section_(builder, marker, FLEX_STATE_REFERENCE, result);
+    return result;
+  }
+
+  /* ********************************************************** */
+  // !(',' | '>') declaration_recover
+  static boolean type_recover(PsiBuilder builder, int level) {
+    if (!recursion_guard_(builder, level, "type_recover")) return false;
+    boolean result;
+    Marker marker = enter_section_(builder);
+    result = type_recover_0(builder, level + 1);
+    result = result && declaration_recover(builder, level + 1);
+    exit_section_(builder, marker, null, result);
+    return result;
+  }
+
+  // !(',' | '>')
+  private static boolean type_recover_0(PsiBuilder builder, int level) {
+    if (!recursion_guard_(builder, level, "type_recover_0")) return false;
+    boolean result;
+    Marker marker = enter_section_(builder, level, _NOT_);
+    result = !type_recover_0_0(builder, level + 1);
+    exit_section_(builder, level, marker, result, false, null);
+    return result;
+  }
+
+  // ',' | '>'
+  private static boolean type_recover_0_0(PsiBuilder builder, int level) {
+    if (!recursion_guard_(builder, level, "type_recover_0_0")) return false;
+    boolean result;
+    result = consumeToken(builder, FLEX_COMMA);
+    if (!result) result = consumeToken(builder, FLEX_ANGLE2);
     return result;
   }
 

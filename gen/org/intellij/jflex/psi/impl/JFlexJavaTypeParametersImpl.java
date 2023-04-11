@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-present JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
+ * Copyright 2011-2023 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
  */
 package org.intellij.jflex.psi.impl;
 
@@ -13,15 +13,15 @@ import static org.intellij.jflex.psi.JFlexTypes.*;
 import org.intellij.jflex.psi.*;
 import com.intellij.psi.tree.IElementType;
 
-public class JFlexJavaTypeImpl extends JFlexCompositeImpl implements JFlexJavaType {
+public class JFlexJavaTypeParametersImpl extends JFlexCompositeImpl implements JFlexJavaTypeParameters {
 
-  public JFlexJavaTypeImpl(IElementType type) {
+  public JFlexJavaTypeParametersImpl(IElementType type) {
     super(type);
   }
 
   @Override
   public <R> R accept(@NotNull JFlexVisitor<R> visitor) {
-    return visitor.visitJavaType(this);
+    return visitor.visitJavaTypeParameters(this);
   }
 
   @Override
@@ -32,14 +32,8 @@ public class JFlexJavaTypeImpl extends JFlexCompositeImpl implements JFlexJavaTy
 
   @Override
   @NotNull
-  public JFlexJavaName getJavaName() {
-    return PsiTreeUtil.getChildOfType(this, JFlexJavaName.class);
-  }
-
-  @Override
-  @Nullable
-  public JFlexJavaTypeParameters getJavaTypeParameters() {
-    return PsiTreeUtil.getChildOfType(this, JFlexJavaTypeParameters.class);
+  public List<JFlexJavaType> getJavaTypeList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, JFlexJavaType.class);
   }
 
 }

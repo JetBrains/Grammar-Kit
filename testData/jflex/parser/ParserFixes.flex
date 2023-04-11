@@ -9,6 +9,9 @@ package sample.lexer;
 %{ // empty user code
 %}
 
+%class X<A, B<C, D>>
+%implements Y<A, B<C, D>>, B<C, D>
+
 %state STATE, STATE2,
 
 FUNCTION        = [_a-zA-Z]([$_a-zA-Z0-9])*?[:]([^\n\r])*?(->|=>)

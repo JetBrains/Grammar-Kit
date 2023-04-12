@@ -1,8 +1,16 @@
 # Grammar-Kit Changelog
 
 ## [Unreleased]
-* Update Platform version to `2022.3.1`
-* Fixed Exception with `2023.1 EAP`: "Do not use constructor injection" (#323)
+
+* JFlex: complete classes in java references
+* JFlex: support generic java class names #333
+* JFlex: extract skeleton from jflex jar #332
+* JFlex: update library from 1.7.0-2 to jflex-1.9.1 #325
+* JFlex: support both Velocity 1.7 and 2.3 (IJ 232+) #331
+
+## [2022.3.1]
+* Update IntelliJ Platform to `2022.3.1`
+* Fixed Exception with `2023.1 EAP`: "Do not use constructor injection" #323
 * Fixed IAE: `FileEditorManagerImpl.$$$reportNull$$$0` (EA-746745)
 * Fixed PIEAE: `CompositePsiElement.getContainingFile` (EA-746675)
 

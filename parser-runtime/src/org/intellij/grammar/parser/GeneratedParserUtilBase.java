@@ -928,8 +928,8 @@ public class GeneratedParserUtilBase {
 
     public Frame currentFrame;
     public CompletionState completionState;
-    MyList<Variant> variants = new MyList<>(INITIAL_VARIANTS_SIZE);
-    MyList<Variant> unexpected = new MyList<>(INITIAL_VARIANTS_SIZE / 10);
+    final MyList<Variant> variants = new MyList<>(INITIAL_VARIANTS_SIZE);
+    final MyList<Variant> unexpected = new MyList<>(INITIAL_VARIANTS_SIZE / 10);
 
     int predicateCount;
     int level;

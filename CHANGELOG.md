@@ -1,7 +1,9 @@
 # Grammar-Kit Changelog
 
 ## [Unreleased]
+* JFlex: update library from jflex-1.9.1 to jflex-1.9.2 #349
 
+## [2022.3.2]
 * JFlex: complete classes in java references
 * JFlex: support generic java class names #333
 * JFlex: extract skeleton from jflex jar #332

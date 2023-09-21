@@ -67,10 +67,20 @@ public class BnfReferenceImpl<T extends BnfExpression> extends PsiReferenceBase<
     String parserClass = ParserGeneratorUtil.getAttribute(rule, KnownAttribute.PARSER_UTIL_CLASS);
     // paramCount + 2 (builder and level)
     JavaHelper helper = JavaHelper.getJavaHelper(myElement);
+    String defaultParserUtilClass = KnownAttribute.PARSER_UTIL_CLASS.getDefaultValue();
+    boolean checkedDefaultParserUtilClass = false;
     for (String className = parserClass; className != null; className = helper.getSuperClassName(className)) {
+      if (className.equals(defaultParserUtilClass)) {
+        checkedDefaultParserUtilClass = true;
+      }
       List<NavigatablePsiElement> methods = helper.findClassMethods(className, JavaHelper.MethodType.STATIC, referenceName, paramCount + 2);
       PsiElement first = ContainerUtil.getFirstItem(methods);
       if (first != null) return first;
+    }
+    if (!checkedDefaultParserUtilClass) {
+      // Check case when parserClass does not inherit from default parser util class
+      List<NavigatablePsiElement> methods = helper.findClassMethods(defaultParserUtilClass, JavaHelper.MethodType.STATIC, referenceName, paramCount + 2);
+      return ContainerUtil.getFirstItem(methods);
     }
     return null;
   }

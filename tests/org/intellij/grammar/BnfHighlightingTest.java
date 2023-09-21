@@ -59,6 +59,17 @@ public class BnfHighlightingTest extends BasePlatformTestCase {
   public void testAutoRecover() { doTest("r ::= m m ::= {recoverWhile=\"#auto\"}"); }
   public void testMetaRecover() { doTest("r ::= <<m recover>> meta m ::= {recoverWhile=\"<<param>>\"} recover ::= "); }
 
+  public void testNotUnresolvedMethodFromGPUB() {
+    myFixture.addFileToProject("CustomPsiImplUtil.java", "public class CustomPsiImplUtil {}");
+    doTest("""
+             {
+               parserImports=["static com.intellij.lang.parser.GeneratedParserUtilBase.*;"]
+               parserUtilClass="CustomPsiImplUtil"
+             }
+             main ::= <<eof>>
+             """);
+  }
+
   public void testSuppressUnused() { doTest("r ::= \n//noinspection BnfUnusedRule\nA ::= B C B::= C::="); }
 
   private void doFileTest() {

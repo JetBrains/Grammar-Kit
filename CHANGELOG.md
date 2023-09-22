@@ -300,15 +300,12 @@
 * Intentions: flip choice branches
 * Readable PsiBuilder-based recursive descent parser and PSI hierarchy generation
 
-[Unreleased]: https://github.com/JetBrains/Grammar-Kit/compare/2021.1.2...HEAD
+[Unreleased]: https://github.com/JetBrains/Grammar-Kit/compare/2022.3.2...HEAD
+[2022.3.2]: https://github.com/JetBrains/Grammar-Kit/compare/2022.3.1...2022.3.2
+[2022.3.1]: https://github.com/JetBrains/Grammar-Kit/compare/2022.3...2022.3.1
 [2021.1.2]: https://github.com/JetBrains/Grammar-Kit/compare/2021.1...2021.1.2
-[2021.1]: https://github.com/JetBrains/Grammar-Kit/compare/2020.3.1...2021.1
 [2020.3.1]: https://github.com/JetBrains/Grammar-Kit/compare/2020.3...2020.3.1
-[2020.3]: https://github.com/JetBrains/Grammar-Kit/compare/2020.1...2020.3
-[2020.1]: https://github.com/JetBrains/Grammar-Kit/compare/2019.3...2020.1
 [2019.1.1]: https://github.com/JetBrains/Grammar-Kit/compare/2019.1...2019.1.1
-[2019.3]: https://github.com/JetBrains/Grammar-Kit/compare/2019.1.1...2019.3
-[2019.1]: https://github.com/JetBrains/Grammar-Kit/compare/2017.1.7...2019.1
 [2017.1.7]: https://github.com/JetBrains/Grammar-Kit/compare/2017.1.6...2017.1.7
 [2017.1.6]: https://github.com/JetBrains/Grammar-Kit/compare/2017.1.5...2017.1.6
 [2017.1.5]: https://github.com/JetBrains/Grammar-Kit/compare/2017.1.4...2017.1.5
@@ -316,7 +313,6 @@
 [2017.1.3]: https://github.com/JetBrains/Grammar-Kit/compare/2017.1.2...2017.1.3
 [2017.1.2]: https://github.com/JetBrains/Grammar-Kit/compare/2017.1.1...2017.1.2
 [2017.1.1]: https://github.com/JetBrains/Grammar-Kit/compare/2017.1...2017.1.1
-[2017.1]: https://github.com/JetBrains/Grammar-Kit/compare/1.5.2...2017.1
 [1.5.2]: https://github.com/JetBrains/Grammar-Kit/compare/1.5.1...1.5.2
 [1.5.1]: https://github.com/JetBrains/Grammar-Kit/compare/1.5.0...1.5.1
 [1.5.0]: https://github.com/JetBrains/Grammar-Kit/compare/1.4.3...1.5.0
@@ -345,3 +341,10 @@
 [1.0.2]: https://github.com/JetBrains/Grammar-Kit/commits
 [1.0.1]: https://github.com/JetBrains/Grammar-Kit/commits
 [1.0]: https://github.com/JetBrains/Grammar-Kit/commits
+[2017.1]: https://github.com/JetBrains/Grammar-Kit/compare/1.5.2...2017.1
+[2019.1]: https://github.com/JetBrains/Grammar-Kit/compare/2017.1.7...2019.1
+[2019.3]: https://github.com/JetBrains/Grammar-Kit/compare/2019.1.1...2019.3
+[2020.1]: https://github.com/JetBrains/Grammar-Kit/compare/2019.3...2020.1
+[2020.3]: https://github.com/JetBrains/Grammar-Kit/compare/2020.1...2020.3
+[2021.1]: https://github.com/JetBrains/Grammar-Kit/compare/2020.3.1...2021.1
+[2022.3]: https://github.com/JetBrains/Grammar-Kit/compare/2021.1.2...2022.3

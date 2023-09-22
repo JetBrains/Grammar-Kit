@@ -111,6 +111,18 @@ public class FooParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
+  // 'dd' type
+  public static boolean element6(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "element6")) return false;
+    boolean result_;
+    Marker marker_ = enter_section_(builder_, level_, _NONE_, ELEMENT_6, "<element 6>");
+    result_ = consumeToken(builder_, "dd");
+    result_ = result_ && type(builder_, level_ + 1);
+    exit_section_(builder_, level_, marker_, result_, false, null);
+    return result_;
+  }
+
+  /* ********************************************************** */
   // 'interface'
   public static boolean interface_type(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "interface_type")) return false;
@@ -122,7 +134,7 @@ public class FooParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // element1 | element2 | element3 | element4 | element5 | type
+  // element1 | element2 | element3 | element4 | element5 | element6
   static boolean root(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "root")) return false;
     boolean result_;
@@ -131,7 +143,7 @@ public class FooParser implements PsiParser, LightPsiParser {
     if (!result_) result_ = element3(builder_, level_ + 1);
     if (!result_) result_ = element4(builder_, level_ + 1);
     if (!result_) result_ = element5(builder_, level_ + 1);
-    if (!result_) result_ = type(builder_, level_ + 1);
+    if (!result_) result_ = element6(builder_, level_ + 1);
     return result_;
   }
 

@@ -1503,8 +1503,6 @@ public class ParserGenerator {
     if (G.generateTokenSets && !myTokenSets.isEmpty()) {
       imports.add(TOKEN_SET_CLASS);
     }
-    boolean useExactElements = "all".equals(G.generateExactTypes) || G.generateExactTypes.contains("elements");
-    boolean useExactTokens = "all".equals(G.generateExactTypes) || G.generateExactTypes.contains("tokens");
 
     Map<String, Trinity<String, String, RuleInfo>> compositeToClassAndFactoryMap = new HashMap<>();
     for (String elementType : sortedCompositeTypes.keySet()) {
@@ -1551,7 +1549,7 @@ public class ParserGenerator {
         else {
           elementCreateCall = shorten(StringUtil.getPackageName(info.second)) + "." + StringUtil.getShortName(info.second);
         }
-        String fieldType = useExactElements && info.first != null ? info.first : IELEMENTTYPE_CLASS;
+        String fieldType = G.generateExactElements && info.first != null ? info.first : IELEMENTTYPE_CLASS;
         String callFix = elementCreateCall.endsWith("IElementType") ? ", null" : "";
         out("%s %s = %s(\"%s\"%s);", shorten(fieldType), elementType, elementCreateCall, elementType, callFix);
       }
@@ -1568,7 +1566,7 @@ public class ParserGenerator {
       else {
         tokenCreateCall = shorten(StringUtil.getPackageName(tokenTypeFactory)) + "." + StringUtil.getShortName(tokenTypeFactory);
       }
-      String fieldType = ObjectUtils.notNull(useExactTokens ? exactType : null, IELEMENTTYPE_CLASS);
+      String fieldType = ObjectUtils.notNull(G.generateExactTokens ? exactType : null, IELEMENTTYPE_CLASS);
       for (String tokenText : mySimpleTokens.keySet()) {
         String tokenName = ObjectUtils.chooseNotNull(mySimpleTokens.get(tokenText), tokenText);
         if (isIgnoredWhitespaceToken(tokenName, tokenText)) continue;
@@ -1998,11 +1996,15 @@ public class ParserGenerator {
       result = getterName + "(" + getElementType(methodInfo.path) + ")";
     }
     else {
-      String className = shorten(getAccessorType(methodInfo.rule));
-      String getterName = stubbed && many ? "getStubChildrenOfTypeAsList" :
-                          stubbed ? "getStubChildOfType" :
-                          many ? "getChildrenOfTypeAsList" : "getChildOfType";
-      result = format("%s.%s(this, %s.class)", shorten(myPsiTreeUtilClass), getterName, className);
+      if (stubbed && !many && G.generateFastStubChildAccessors && myGraphHelper.getExtendsRules(methodInfo.rule).size() < 2) {
+        result = format("getStubOrPsiChild(%s)", getElementType(methodInfo.rule));
+      } else {
+        String className = shorten(getAccessorType(methodInfo.rule));
+        String getterName = stubbed && many ? "getStubChildrenOfTypeAsList" :
+                            stubbed ? "getStubChildOfType" :
+                            many ? "getChildrenOfTypeAsList" : "getChildOfType";
+        result = format("%s.%s(this, %s.class)", shorten(myPsiTreeUtilClass), getterName, className);
+      }
     }
     return required && !mixedAST ? "notNullChild(" + result + ")" : result;
   }

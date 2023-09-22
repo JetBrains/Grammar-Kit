@@ -82,7 +82,8 @@ public class ParserGenerator {
     RuleInfo(String name, boolean isFake,
              String elementType, String parserClass,
              String intfPackage, String implPackage,
-             String intfClass, String implClass, String mixin, String stub) {
+             String intfClass, String implClass, String mixin, String stub,
+             Boolean mixedAST) {
       this.name = name;
       this.isFake = isFake;
       this.elementType = elementType;
@@ -93,6 +94,7 @@ public class ParserGenerator {
       this.intfClass = intfPackage + "." + intfClass;
       this.implClass = implPackage + "." + implClass;
       this.mixin = mixin;
+      this.mixedAST = mixedAST && stub == null;
     }
   }
 
@@ -194,7 +196,8 @@ public class ParserGenerator {
         noPsi ? null : getAttribute(r, KnownAttribute.PSI_PACKAGE),
         noPsi ? null : getAttribute(r, KnownAttribute.PSI_IMPL_PACKAGE),
         noPsi ? null : getRulePsiClassName(r, myIntfClassFormat), noPsi ? null : getRulePsiClassName(r, myImplClassFormat),
-        noPsi ? null : getAttribute(r, KnownAttribute.MIXIN), noPsi ? null : getAttribute(r, KnownAttribute.STUB_CLASS)));
+        noPsi ? null : getAttribute(r, KnownAttribute.MIXIN), noPsi ? null : getAttribute(r, KnownAttribute.STUB_CLASS),
+        !noPsi && getAttribute(r, KnownAttribute.MIXED_AST)));
     }
     myGrammarRootParser = rootRule == null ? null : ruleInfo(rootRule).parserClass;
     myNoStubs = JBIterable.from(myRuleInfos.values()).find(o -> o.stub != null) == null;
@@ -279,10 +282,10 @@ public class ParserGenerator {
         superRuleClass.contains("?") ? superRuleClass.replaceAll("\\?", stubName) : superRuleClass;
       // mixin attribute overrides "extends":
       info.realSuperClass = StringUtil.notNullize(info.mixin, adjustedSuperRuleClass);
-      info.mixedAST = topInfo != null ? topInfo.mixedAST : JBIterable.of(superRuleClass, info.realSuperClass)
+      info.mixedAST = info.mixedAST || (topInfo != null ? topInfo.mixedAST : JBIterable.of(superRuleClass, info.realSuperClass)
         .map(NameShortener::getRawClassName)
         .flatMap(s -> JBTreeTraverser.<String>from(o -> JBIterable.of(myJavaHelper.getSuperClassName(o))).withRoot(s).unique())
-        .find(COMPOSITE_PSI_ELEMENT_CLASS::equals) != null;
+        .find(COMPOSITE_PSI_ELEMENT_CLASS::equals) != null);
     }
   }
 
@@ -1760,6 +1763,7 @@ public class ParserGenerator {
       for (NavigatablePsiElement m : constructors) {
         collectMethodTypesToImport(Collections.singletonList(m), false, imports);
       }
+      if (info.mixedAST && constructors.isEmpty()) imports.add(IELEMENTTYPE_CLASS);
       if (stubName != null && constructors.isEmpty()) imports.add(ISTUBELEMENTTYPE_CLASS);
       if (stubName != null) imports.add(stubName);
     }
@@ -1780,15 +1784,22 @@ public class ParserGenerator {
     generateClassHeader(psiClass, imports, "", javaType, implSuper, superInterface);
     String shortName = StringUtil.getShortName(psiClass);
     if (constructors.isEmpty()) {
-      out("public " + shortName + "(" + shorten(AST_NODE_CLASS) + " node) {");
-      out("super(node);");
-      out("}");
-      newLine();
-      if (stubName != null) {
-        out("public " + shortName + "(" +
-            shorten(stubName) + " stub, " +
-            shorten(ISTUBELEMENTTYPE_CLASS) + " stubType) {");
-        out("super(stub, stubType);");
+      if (!info.mixedAST) {
+        out("public " + shortName + "(" + shorten(AST_NODE_CLASS) + " node) {");
+        out("super(node);");
+        out("}");
+        newLine();
+        if (stubName != null) {
+          out("public " + shortName + "(" +
+              shorten(stubName) + " stub, " +
+              shorten(ISTUBELEMENTTYPE_CLASS) + " stubType) {");
+          out("super(stub, stubType);");
+          out("}");
+          newLine();
+        }
+      } else {
+        out("public " + shortName + "(" + shorten(IELEMENTTYPE_CLASS) + " type) {");
+        out("super(type);");
         out("}");
         newLine();
       }

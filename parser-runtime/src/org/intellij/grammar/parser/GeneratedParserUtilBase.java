@@ -757,8 +757,7 @@ public class GeneratedParserUtilBase {
     }
   }
 
-  @Nullable
-  private static PsiBuilderImpl.ProductionMarker getLatestExtensibleDoneMarker(@NotNull PsiBuilder builder) {
+  private static @Nullable PsiBuilderImpl.ProductionMarker getLatestExtensibleDoneMarker(@NotNull PsiBuilder builder) {
     PsiBuilderImpl.ProductionMarker marker = ContainerUtil.getLastItem(((Builder)builder).getProductions());
     return marker == null || marker.getTokenType() == null || !(marker instanceof PsiBuilder.Marker) ? null : marker;
   }
@@ -838,8 +837,7 @@ public class GeneratedParserUtilBase {
       offset = offset_;
     }
 
-    @Nullable
-    public String convertItem(Object o) {
+    public @Nullable String convertItem(Object o) {
       return o instanceof Object[] ? join((Object[]) o, this, " ") : o.toString();
     }
 
@@ -903,13 +901,11 @@ public class GeneratedParserUtilBase {
       parser = parser_;
     }
 
-    @NotNull
-    public Lexer getLexer() {
+    public @NotNull Lexer getLexer() {
       return ((PsiBuilderImpl)myDelegate).getLexer();
     }
 
-    @NotNull
-    public List<PsiBuilderImpl.ProductionMarker> getProductions() {
+    public @NotNull List<PsiBuilderImpl.ProductionMarker> getProductions() {
       return ((PsiBuilderImpl)myDelegate).getProductions();
     }
   }
@@ -1216,9 +1212,8 @@ public class GeneratedParserUtilBase {
       super("DUMMY_BLOCK", Language.ANY);
     }
 
-    @NotNull
     @Override
-    public ASTNode createCompositeNode() {
+    public @NotNull ASTNode createCompositeNode() {
       return new DummyBlock();
     }
   }
@@ -1233,9 +1228,8 @@ public class GeneratedParserUtilBase {
       return PsiReference.EMPTY_ARRAY;
     }
 
-    @NotNull
     @Override
-    public Language getLanguage() {
+    public @NotNull Language getLanguage() {
       return getParent().getLanguage();
     }
   }

@@ -75,7 +75,7 @@ final class BnfUnwrapDescriptor implements UnwrapDescriptor, Unwrapper {
   }
 
   @Override
-  public PsiElement collectAffectedElements(@NotNull PsiElement element, @NotNull List<PsiElement> toExtract) {
+  public PsiElement collectAffectedElements(@NotNull PsiElement element, @NotNull List<? super PsiElement> toExtract) {
     PsiElement last = element.getLastChild();
     PsiElement first = element.getFirstChild();
     if (element instanceof BnfParenthesized) {

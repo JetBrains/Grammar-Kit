@@ -124,6 +124,7 @@ public class ParserGenerator {
   private final String mySourcePath;
   private final String myOutputPath;
   private final String myPackagePrefix;
+  private String myPsiPackagesNamespacePrefix = "";
   private final String myGrammarRoot;
   private final String myGrammarRootParser;
   private final String myParserUtilClass;
@@ -360,7 +361,7 @@ public class ParserGenerator {
   }
 
   public @NotNull String shorten(@NotNull String s) {
-    return myShortener.shorten(s);
+    return myShortener.shorten(myPsiPackagesNamespacePrefix + s);
   }
 
   public void generate() throws IOException {
@@ -534,37 +535,40 @@ public class ParserGenerator {
     List<String> parserImports = getRootAttribute(myFile, KnownAttribute.PARSER_IMPORTS).asStrings();
     boolean rootParser = parserClass.equals(myGrammarRootParser);
     Set<String> imports = new LinkedHashSet<>();
+    if (G.generateForFleet)
+      myPsiPackagesNamespacePrefix = FLEET_NAMESPACE_PREFIX;
+
     if (!G.generateFQN) {
-      imports.add(PSI_BUILDER_CLASS);
-      imports.add(PSI_BUILDER_CLASS + ".Marker");
+      imports.add(myPsiPackagesNamespacePrefix + PSI_BUILDER_CLASS);
+      imports.add(myPsiPackagesNamespacePrefix + PSI_BUILDER_CLASS + ".Marker");
     }
     else {
       imports.add("#forced");
     }
-    imports.add(staticStarImport(myTypeHolderClass));
+    imports.add(staticStarImport(myPsiPackagesNamespacePrefix + myTypeHolderClass));
     if (G.generateTokenSets && hasAtLeastOneTokenChoice(myFile, ownRuleNames)) {
-      imports.add(staticStarImport(myTypeHolderClass + "." + TOKEN_SET_HOLDER_NAME));
+      imports.add(staticStarImport(myPsiPackagesNamespacePrefix + myTypeHolderClass + "." + TOKEN_SET_HOLDER_NAME));
     }
-    if (StringUtil.isNotEmpty(myParserUtilClass)) {
-      imports.add(staticStarImport(myParserUtilClass));
+    if (StringUtil.isNotEmpty(myPsiPackagesNamespacePrefix + myParserUtilClass)) {
+      imports.add(staticStarImport(myPsiPackagesNamespacePrefix + myParserUtilClass));
     }
     if (!rootParser) {
-      imports.add(staticStarImport(myGrammarRootParser));
+      imports.add(staticStarImport(myPsiPackagesNamespacePrefix + myGrammarRootParser));
     }
     else if (!G.generateFQN) {
-      imports.addAll(Arrays.asList(IELEMENTTYPE_CLASS,
-                                   AST_NODE_CLASS,
-                                   TOKEN_SET_CLASS,
-                                   PSI_PARSER_CLASS,
-                                   LIGHT_PSI_PARSER_CLASS));
+      imports.addAll(Arrays.asList(myPsiPackagesNamespacePrefix + IELEMENTTYPE_CLASS,
+                                   myPsiPackagesNamespacePrefix + AST_NODE_CLASS,
+                                   myPsiPackagesNamespacePrefix + TOKEN_SET_CLASS,
+                                   myPsiPackagesNamespacePrefix + PSI_PARSER_CLASS,
+                                   myPsiPackagesNamespacePrefix + LIGHT_PSI_PARSER_CLASS));
     }
     imports.addAll(parserImports);
 
     generateClassHeader(parserClass, imports,
                         SUPPRESS_WARNINGS_ANNO + "({\"SimplifiableIfStatement\", \"UnusedAssignment\"})",
                         Java.CLASS, "",
-                        rootParser ? PSI_PARSER_CLASS : "",
-                        rootParser ? LIGHT_PSI_PARSER_CLASS : "");
+                        rootParser ? myPsiPackagesNamespacePrefix + PSI_PARSER_CLASS : "",
+                        rootParser ? myPsiPackagesNamespacePrefix + LIGHT_PSI_PARSER_CLASS : "");
 
     if (rootParser) {
       generateRootParserContent();
@@ -769,7 +773,7 @@ public class ParserGenerator {
         sb.append(" implements ").append(shortener.shorten(aSuper));
       }
       else {
-        sb.append(", ").append(shortener.shorten(aSuper));
+         sb.append(", ").append(shortener.shorten(aSuper));
       }
     }
     if (StringUtil.isNotEmpty(annos)) {

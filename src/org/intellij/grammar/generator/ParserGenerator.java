@@ -643,8 +643,13 @@ public class ParserGenerator {
     String shortTS = shorten(TOKEN_SET_CLASS);
     String shortMarker = !G.generateFQN ? "Marker" : PSI_BUILDER_CLASS + ".Marker";
     out("public %s parse(%s %s, %s %s) {", shortAN, shortET, N.root, shortPB, N.builder);
-    out("parseLight(%s, %s);", N.root, N.builder);
-    out("return %s.getTreeBuilt();", N.builder);
+    if (G.generateForFleet) {
+      out("throw new IllegalStateException(\"Use parseLight instead\");");
+    }
+    else {
+      out("parseLight(%s, %s);", N.root, N.builder);
+      out("return %s.getTreeBuilt();", N.builder);
+    }
     out("}");
     newLine();
     out("public void parseLight(%s %s, %s %s) {", shortET, N.root, shortPB, N.builder);

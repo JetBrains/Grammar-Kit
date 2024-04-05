@@ -34,13 +34,13 @@ public class GenOptions {
   public final Case generateElementCase;
   public final boolean generateTokenAccessors;
   public final boolean generateTokenAccessorsSet;
-  public final boolean generateForFleet = true;
+  public final boolean generateForFleet;
   public final int javaVersion;
 
   public GenOptions(BnfFile myFile) {
     Map<String, String> genOptions = getRootAttribute(myFile, KnownAttribute.GENERATE).asMap();
     names = Names.forName(genOptions.get("names"));
-    //generateForFleet = "yes".equals(genOptions.get("fleet"));
+    generateForFleet = "yes".equals(genOptions.get("fleet"));
     generatePsi = getGenerateOption(myFile, KnownAttribute.GENERATE_PSI, genOptions, "psi")
                   && !generateForFleet;
     generatePsiFactory = !"no".equals(genOptions.get("psi-factory"));

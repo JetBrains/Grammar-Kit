@@ -42,6 +42,9 @@ public class BnfGeneratorTest extends BnfGeneratorTestCase {
   public void testConsumeMethods() throws Exception { doGenTest(false); }
   public void testGenOptions() throws Exception { doGenTest(true); }
 
+  public void testFleetJson() throws Exception { doGenTest(true);}
+  public void testFleetPsiGen() throws Exception { doGenTest(true);}
+
   @Bombed(year = 2030, user = "author", month = 1, day = 1, description = "not implemented")
   public void _testUpperRules() throws Exception { doGenTest(true); }
   public void testFixes() throws Exception { doGenTest(true); }

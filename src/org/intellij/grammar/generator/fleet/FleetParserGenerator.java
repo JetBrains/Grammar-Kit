@@ -12,6 +12,7 @@ import org.jetbrains.annotations.NotNull;
 public class FleetParserGenerator extends ParserGenerator {
 
   private final String intellijNamespacePrefix = "com.intellij";
+  private final String jetbrainsNamespacePrefix = "com.jetbrains";
 
   public FleetParserGenerator(@NotNull BnfFile psiFile,
                               @NotNull String sourcePath,
@@ -19,13 +20,6 @@ public class FleetParserGenerator extends ParserGenerator {
                               @NotNull String packagePrefix) {
     super(psiFile, sourcePath, outputPath, packagePrefix);
     G = new FleetGenOptions(psiFile);
-  }
-
-  protected String adjustNameSpace(String original){
-    if (original.startsWith(intellijNamespacePrefix))
-      return BnfConstants.FLEET_NAMESPACE_PREFIX + original;
-
-    return original;
   }
 
   @Override
@@ -41,8 +35,11 @@ public class FleetParserGenerator extends ParserGenerator {
   }
 
   @Override
-  protected @NotNull String generateImport(String s){
-    return BnfConstants.FLEET_NAMESPACE_PREFIX + s;
+  protected @NotNull String adjustName(String original){
+    if (original.startsWith(intellijNamespacePrefix) || original.startsWith(jetbrainsNamespacePrefix))
+      return BnfConstants.FLEET_NAMESPACE_PREFIX + original;
+
+    return original;
   }
 
   @Override

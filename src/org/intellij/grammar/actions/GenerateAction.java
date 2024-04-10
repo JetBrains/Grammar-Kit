@@ -83,7 +83,7 @@ public class GenerateAction extends AnAction {
     return files.filter(o -> manager.findFile(o) instanceof BnfFile);
   }
 
-  public static void doGenerate(@NotNull Project project, @NotNull List<VirtualFile> bnfFiles) {
+  public void doGenerate(@NotNull Project project, @NotNull List<VirtualFile> bnfFiles) {
     Map<VirtualFile, VirtualFile> rootMap = new LinkedHashMap<>();
     Map<VirtualFile, String> packageMap = new LinkedHashMap<>();
     PsiManager psiManager = PsiManager.getInstance(project);
@@ -152,13 +152,7 @@ public class GenerateAction extends AnAction {
               if (!file.isValid()) return;
               PsiFile bnfFile = psiManager.findFile(file);
               if (!(bnfFile instanceof BnfFile)) return;
-              ParserGenerator generator = new ParserGenerator((BnfFile)bnfFile, sourcePath, genDir.getPath(), packagePrefix) {
-                @Override
-                protected PrintWriter openOutputInner(String className, File file) throws IOException {
-                  files.add(file);
-                  return super.openOutputInner(className, file);
-                }
-              };
+              ParserGenerator generator = createGenerator((BnfFile)bnfFile, sourcePath, genDir, packagePrefix, files);
               try {
                 generator.generate();
               }
@@ -193,5 +187,16 @@ public class GenerateAction extends AnAction {
 
       }
     });
+  }
+
+  @NotNull
+  protected ParserGenerator createGenerator(BnfFile bnfFile, String sourcePath, File genDir, String packagePrefix, List<File> files) {
+    return new ParserGenerator(bnfFile, sourcePath, genDir.getPath(), packagePrefix) {
+      @Override
+      protected PrintWriter openOutputInner(String className, File file) throws IOException {
+        files.add(file);
+        return super.openOutputInner(className, file);
+      }
+    };
   }
 }

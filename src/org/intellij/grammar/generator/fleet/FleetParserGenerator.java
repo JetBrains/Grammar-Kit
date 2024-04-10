@@ -7,14 +7,7 @@ package org.intellij.grammar.generator.fleet;
 import org.intellij.grammar.generator.BnfConstants;
 import org.intellij.grammar.generator.ParserGenerator;
 import org.intellij.grammar.psi.BnfFile;
-import org.intellij.grammar.psi.BnfRule;
 import org.jetbrains.annotations.NotNull;
-
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 public class FleetParserGenerator extends ParserGenerator {
 
@@ -48,16 +41,12 @@ public class FleetParserGenerator extends ParserGenerator {
   }
 
   @Override
-  protected @NotNull Set<String> generateParserImports(Collection<String> ownRuleNames, boolean rootParser, List<String> parserImports){
-    var result = super.generateParserImports(ownRuleNames, rootParser, parserImports);
-    return result.stream().map(this::adjustNameSpace).collect(Collectors.toSet());
+  protected @NotNull String generateImport(String s){
+    return BnfConstants.FLEET_NAMESPACE_PREFIX + s;
   }
 
   @Override
-  protected @NotNull Set<String> generateElementTypeImports(Map<String, BnfRule> sortedCompositeTypes,
-                                                            Map<String, FactoryCompositeRecord> compositeToClassAndFactoryMap,
-                                                            String tokenTypeFactory, String tokenTypeClass) {
-    var initialResult = super.generateElementTypeImports(sortedCompositeTypes, compositeToClassAndFactoryMap, tokenTypeFactory, tokenTypeClass);
-    return initialResult.stream().map(this::adjustNameSpace).collect(Collectors.toSet());
+  public @NotNull String shorten(@NotNull String s){
+    return super.shorten(BnfConstants.FLEET_NAMESPACE_PREFIX + s);
   }
 }

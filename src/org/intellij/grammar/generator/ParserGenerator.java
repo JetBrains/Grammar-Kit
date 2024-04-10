@@ -538,8 +538,8 @@ public class ParserGenerator {
     generateClassHeader(parserClass, imports,
                         SUPPRESS_WARNINGS_ANNO + "({\"SimplifiableIfStatement\", \"UnusedAssignment\"})",
                         Java.CLASS, "",
-                        rootParser ? generateImport(PSI_PARSER_CLASS) : "",
-                        rootParser ? generateImport(LIGHT_PSI_PARSER_CLASS) : "");
+                        rootParser ? adjustName(PSI_PARSER_CLASS) : "",
+                        rootParser ? adjustName(LIGHT_PSI_PARSER_CLASS) : "");
 
     if (rootParser) {
       generateRootParserContent();
@@ -573,28 +573,28 @@ public class ParserGenerator {
     Set<String> imports = new LinkedHashSet<>();
 
     if (!G.generateFQN) {
-      imports.add(generateImport(PSI_BUILDER_CLASS));
-      imports.add(generateImport(PSI_BUILDER_CLASS) + ".Marker");
+      imports.add(adjustName(PSI_BUILDER_CLASS));
+      imports.add(adjustName(PSI_BUILDER_CLASS) + ".Marker");
     }
     else {
       imports.add("#forced");
     }
-    imports.add(staticStarImport(generateImport(myTypeHolderClass)));
+    imports.add(staticStarImport(adjustName(myTypeHolderClass)));
     if (G.generateTokenSets && hasAtLeastOneTokenChoice(myFile, ownRuleNames)) {
-      imports.add(staticStarImport(generateImport(myTypeHolderClass) + "." + TOKEN_SET_HOLDER_NAME));
+      imports.add(staticStarImport(adjustName(myTypeHolderClass) + "." + TOKEN_SET_HOLDER_NAME));
     }
-    if (StringUtil.isNotEmpty(generateImport( myParserUtilClass))) {
-      imports.add(staticStarImport(generateImport(myParserUtilClass)));
+    if (StringUtil.isNotEmpty(adjustName(myParserUtilClass))) {
+      imports.add(staticStarImport(adjustName(myParserUtilClass)));
     }
     if (!rootParser) {
-      imports.add(staticStarImport(generateImport(myGrammarRootParser)));
+      imports.add(staticStarImport(adjustName(myGrammarRootParser)));
     }
     else if (!G.generateFQN) {
-      imports.addAll(Arrays.asList(generateImport(IELEMENTTYPE_CLASS),
-                                   generateImport(AST_NODE_CLASS),
-                                   generateImport(TOKEN_SET_CLASS),
-                                   generateImport(PSI_PARSER_CLASS),
-                                   generateImport(LIGHT_PSI_PARSER_CLASS)));
+      imports.addAll(Arrays.asList(adjustName(IELEMENTTYPE_CLASS),
+                                   adjustName(AST_NODE_CLASS),
+                                   adjustName(TOKEN_SET_CLASS),
+                                   adjustName(PSI_PARSER_CLASS),
+                                   adjustName(LIGHT_PSI_PARSER_CLASS)));
     }
     imports.addAll(parserImports);
     return imports;
@@ -797,7 +797,7 @@ public class ParserGenerator {
   }
 
   @NotNull
-  protected String generateImport(String importName) {
+  protected String adjustName(String importName) {
     return importName;
   }
 
@@ -1653,32 +1653,32 @@ public class ParserGenerator {
                                                    Map<String, FactoryCompositeRecord> compositeToClassAndFactoryMap,
                                                    String tokenTypeFactory, String tokenTypeClass) {
     Set<String> imports = new LinkedHashSet<>();
-    imports.add(generateImport(IELEMENTTYPE_CLASS));
+    imports.add(adjustName(IELEMENTTYPE_CLASS));
     if (G.getGeneratePsi()) {
-      imports.add(generateImport(PSI_ELEMENT_CLASS));
-      imports.add(generateImport(AST_NODE_CLASS));
+      imports.add(adjustName(PSI_ELEMENT_CLASS));
+      imports.add(adjustName(AST_NODE_CLASS));
     }
     if (G.generateTokenSets && !myTokenSets.isEmpty()) {
-      imports.add(generateImport(TOKEN_SET_CLASS));
+      imports.add(adjustName(TOKEN_SET_CLASS));
     }
 
     for (FactoryCompositeRecord record : compositeToClassAndFactoryMap.values()) {
       if (record.elementTypeFactory != null) {
-        imports.add(generateImport(StringUtil.getPackageName(record.elementTypeFactory)));
+        imports.add(adjustName(StringUtil.getPackageName(record.elementTypeFactory)));
       }
       else {
-        ContainerUtil.addIfNotNull(imports, generateImport(record.elementTypeClass));
+        ContainerUtil.addIfNotNull(imports, adjustName(record.elementTypeClass));
       }
     }
     if (tokenTypeFactory != null) {
-      imports.add(generateImport(StringUtil.getPackageName(tokenTypeFactory)));
+      imports.add(adjustName(StringUtil.getPackageName(tokenTypeFactory)));
     }
     else {
-      ContainerUtil.addIfNotNull(imports, generateImport(tokenTypeClass));
+      ContainerUtil.addIfNotNull(imports, adjustName(tokenTypeClass));
     }
     if (G.getGeneratePsi()) {
       imports.addAll(ContainerUtil.sorted(
-        JBIterable.from(sortedCompositeTypes.values()).map(this::ruleInfo).map(o -> generateImport(o.implPackage) + ".*").toSet()));
+        JBIterable.from(sortedCompositeTypes.values()).map(this::ruleInfo).map(o -> adjustName(o.implPackage) + ".*").toSet()));
       if (G.getGeneratePsiClassesMap()) {
         imports.add(CommonClassNames.JAVA_UTIL_COLLECTIONS);
         imports.add(CommonClassNames.JAVA_UTIL_SET);
@@ -1686,7 +1686,7 @@ public class ParserGenerator {
       }
       if (G.getGeneratePsiFactory()) {
         if (JBIterable.from(myRuleInfos.values()).find(o -> o.mixedAST) != null) {
-          imports.add(generateImport(COMPOSITE_PSI_ELEMENT_CLASS));
+          imports.add(adjustName(COMPOSITE_PSI_ELEMENT_CLASS));
         }
       }
     }

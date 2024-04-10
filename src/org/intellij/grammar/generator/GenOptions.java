@@ -24,9 +24,13 @@ public class GenOptions {
   public final boolean generateElementTypes;
   public final String generateExactTypes;
   public final boolean generateExtendedPin;
-  public final boolean generatePsi;
-  public final boolean generatePsiFactory;
-  public final boolean generatePsiClassesMap;
+  private final boolean generatePsi;
+  public boolean getGeneratePsi(){ return generatePsi;}
+  private final boolean generatePsiFactory;
+  public boolean getGeneratePsiFactory(){ return generatePsiFactory; }
+  private final boolean generatePsiClassesMap;
+  public boolean getGeneratePsiClassesMap(){ return generatePsiClassesMap; }
+
   public final boolean generateVisitor;
   public final String visitorValue;
   public final boolean generateFQN;
@@ -34,15 +38,12 @@ public class GenOptions {
   public final Case generateElementCase;
   public final boolean generateTokenAccessors;
   public final boolean generateTokenAccessorsSet;
-  public final boolean generateForFleet;
   public final int javaVersion;
 
   public GenOptions(BnfFile myFile) {
     Map<String, String> genOptions = getRootAttribute(myFile, KnownAttribute.GENERATE).asMap();
     names = Names.forName(genOptions.get("names"));
-    generateForFleet = "yes".equals(genOptions.get("fleet"));
-    generatePsi = getGenerateOption(myFile, KnownAttribute.GENERATE_PSI, genOptions, "psi")
-                  && !generateForFleet;
+    generatePsi = getGenerateOption(myFile, KnownAttribute.GENERATE_PSI, genOptions, "psi");
     generatePsiFactory = !"no".equals(genOptions.get("psi-factory"));
     generatePsiClassesMap = "yes".equals(genOptions.get("psi-classes-map"));
     generateTokenTypes = getGenerateOption(myFile, KnownAttribute.GENERATE_TOKENS, genOptions, "tokens");

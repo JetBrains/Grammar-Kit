@@ -10,7 +10,7 @@ import org.jetbrains.annotations.NotNull;
 /**
 * @author greg
 */
-class Names {
+public class Names {
   public final String builder;
   public final String level;
   public final String marker;

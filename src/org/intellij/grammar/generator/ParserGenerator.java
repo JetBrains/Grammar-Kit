@@ -360,7 +360,7 @@ public class ParserGenerator {
   }
 
   public @NotNull String shorten(@NotNull String s) {
-    return myShortener.shorten(myPsiPackagesNamespacePrefix + s);
+    return myShortener.shorten(s);
   }
 
   public void generate() throws IOException {
@@ -538,8 +538,8 @@ public class ParserGenerator {
     generateClassHeader(parserClass, imports,
                         SUPPRESS_WARNINGS_ANNO + "({\"SimplifiableIfStatement\", \"UnusedAssignment\"})",
                         Java.CLASS, "",
-                        rootParser ? myPsiPackagesNamespacePrefix + PSI_PARSER_CLASS : "",
-                        rootParser ? myPsiPackagesNamespacePrefix + LIGHT_PSI_PARSER_CLASS : "");
+                        rootParser ? generateImport(PSI_PARSER_CLASS) : "",
+                        rootParser ? generateImport(LIGHT_PSI_PARSER_CLASS) : "");
 
     if (rootParser) {
       generateRootParserContent();
@@ -573,28 +573,28 @@ public class ParserGenerator {
     Set<String> imports = new LinkedHashSet<>();
 
     if (!G.generateFQN) {
-      imports.add(myPsiPackagesNamespacePrefix + PSI_BUILDER_CLASS);
-      imports.add(myPsiPackagesNamespacePrefix + PSI_BUILDER_CLASS + ".Marker");
+      imports.add(generateImport(PSI_BUILDER_CLASS));
+      imports.add(generateImport(PSI_BUILDER_CLASS) + ".Marker");
     }
     else {
       imports.add("#forced");
     }
-    imports.add(staticStarImport(myPsiPackagesNamespacePrefix + myTypeHolderClass));
+    imports.add(staticStarImport(generateImport(myTypeHolderClass)));
     if (G.generateTokenSets && hasAtLeastOneTokenChoice(myFile, ownRuleNames)) {
-      imports.add(staticStarImport(myPsiPackagesNamespacePrefix + myTypeHolderClass + "." + TOKEN_SET_HOLDER_NAME));
+      imports.add(staticStarImport(generateImport(myTypeHolderClass) + "." + TOKEN_SET_HOLDER_NAME));
     }
-    if (StringUtil.isNotEmpty(myPsiPackagesNamespacePrefix + myParserUtilClass)) {
-      imports.add(staticStarImport(myPsiPackagesNamespacePrefix + myParserUtilClass));
+    if (StringUtil.isNotEmpty(generateImport( myParserUtilClass))) {
+      imports.add(staticStarImport(generateImport(myParserUtilClass)));
     }
     if (!rootParser) {
-      imports.add(staticStarImport(myPsiPackagesNamespacePrefix + myGrammarRootParser));
+      imports.add(staticStarImport(generateImport(myGrammarRootParser)));
     }
     else if (!G.generateFQN) {
-      imports.addAll(Arrays.asList(myPsiPackagesNamespacePrefix + IELEMENTTYPE_CLASS,
-                                   myPsiPackagesNamespacePrefix + AST_NODE_CLASS,
-                                   myPsiPackagesNamespacePrefix + TOKEN_SET_CLASS,
-                                   myPsiPackagesNamespacePrefix + PSI_PARSER_CLASS,
-                                   myPsiPackagesNamespacePrefix + LIGHT_PSI_PARSER_CLASS));
+      imports.addAll(Arrays.asList(generateImport(IELEMENTTYPE_CLASS),
+                                   generateImport(AST_NODE_CLASS),
+                                   generateImport(TOKEN_SET_CLASS),
+                                   generateImport(PSI_PARSER_CLASS),
+                                   generateImport(LIGHT_PSI_PARSER_CLASS)));
     }
     imports.addAll(parserImports);
     return imports;
@@ -794,6 +794,11 @@ public class ParserGenerator {
   @NotNull
   protected String generatePackageName(String className) {
     return StringUtil.getPackageName(className);
+  }
+
+  @NotNull
+  protected String generateImport(String importName) {
+    return importName;
   }
 
   private void generateFileHeader(String className) {
@@ -1648,32 +1653,32 @@ public class ParserGenerator {
                                                    Map<String, FactoryCompositeRecord> compositeToClassAndFactoryMap,
                                                    String tokenTypeFactory, String tokenTypeClass) {
     Set<String> imports = new LinkedHashSet<>();
-    imports.add(myPsiPackagesNamespacePrefix + IELEMENTTYPE_CLASS);
+    imports.add(generateImport(IELEMENTTYPE_CLASS));
     if (G.getGeneratePsi()) {
-      imports.add(myPsiPackagesNamespacePrefix + PSI_ELEMENT_CLASS);
-      imports.add(myPsiPackagesNamespacePrefix + AST_NODE_CLASS);
+      imports.add(generateImport(PSI_ELEMENT_CLASS));
+      imports.add(generateImport(AST_NODE_CLASS));
     }
     if (G.generateTokenSets && !myTokenSets.isEmpty()) {
-      imports.add(myPsiPackagesNamespacePrefix + TOKEN_SET_CLASS);
+      imports.add(generateImport(TOKEN_SET_CLASS));
     }
 
     for (FactoryCompositeRecord record : compositeToClassAndFactoryMap.values()) {
       if (record.elementTypeFactory != null) {
-        imports.add(myPsiPackagesNamespacePrefix + StringUtil.getPackageName(record.elementTypeFactory));
+        imports.add(generateImport(StringUtil.getPackageName(record.elementTypeFactory)));
       }
       else {
-        ContainerUtil.addIfNotNull(imports, myPsiPackagesNamespacePrefix + record.elementTypeClass);
+        ContainerUtil.addIfNotNull(imports, generateImport(record.elementTypeClass));
       }
     }
     if (tokenTypeFactory != null) {
-      imports.add(myPsiPackagesNamespacePrefix + StringUtil.getPackageName(tokenTypeFactory));
+      imports.add(generateImport(StringUtil.getPackageName(tokenTypeFactory)));
     }
     else {
-      ContainerUtil.addIfNotNull(imports, myPsiPackagesNamespacePrefix + tokenTypeClass);
+      ContainerUtil.addIfNotNull(imports, generateImport(tokenTypeClass));
     }
     if (G.getGeneratePsi()) {
       imports.addAll(ContainerUtil.sorted(
-        JBIterable.from(sortedCompositeTypes.values()).map(this::ruleInfo).map(o -> myPsiPackagesNamespacePrefix + o.implPackage + ".*").toSet()));
+        JBIterable.from(sortedCompositeTypes.values()).map(this::ruleInfo).map(o -> generateImport(o.implPackage) + ".*").toSet()));
       if (G.getGeneratePsiClassesMap()) {
         imports.add(CommonClassNames.JAVA_UTIL_COLLECTIONS);
         imports.add(CommonClassNames.JAVA_UTIL_SET);
@@ -1681,7 +1686,7 @@ public class ParserGenerator {
       }
       if (G.getGeneratePsiFactory()) {
         if (JBIterable.from(myRuleInfos.values()).find(o -> o.mixedAST) != null) {
-          imports.add(myPsiPackagesNamespacePrefix + COMPOSITE_PSI_ELEMENT_CLASS);
+          imports.add(generateImport(COMPOSITE_PSI_ELEMENT_CLASS));
         }
       }
     }

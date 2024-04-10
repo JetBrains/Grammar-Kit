@@ -15,46 +15,13 @@ import java.util.List;
 /**
  * @author gregsh
  */
-public class BnfGeneratorTest extends BnfGeneratorTestCase {
+public abstract class BnfGeneratorTest extends BnfGeneratorTestCase {
 
-  public BnfGeneratorTest() {
-    super("generator");
+  public BnfGeneratorTest(String s) {
+    super(s);
   }
 
-  public void testSelfBnf() throws Exception { doGenTest(true); }
-  public void testSelfFlex() throws Exception { doGenTest(true); }
-  public void testSmall() throws Exception { doGenTest(false); }
-  public void testAutopin() throws Exception { doGenTest(false); }
-  public void testExternalRules() throws Exception { doGenTest(false); }
-  public void testExternalRulesLambdas() throws Exception { doGenTest(false); }
-  public void testLeftAssociative() throws Exception { doGenTest(false); }
-  public void testPsiGen() throws Exception { doGenTest(true); }
-  public void testPsiAccessors() throws Exception { doGenTest(true); }
-  public void testPsiStart() throws Exception { doGenTest(true); }
-  public void testExprParser() throws Exception { doGenTest(true); }
-  public void testTokenSequence() throws Exception { doGenTest(false); }
-  public void testTokenChoice() throws Exception { doGenTest(true); }
-  public void testTokenChoiceNoSets() throws Exception { doGenTest(true); }
-  public void testStub() throws Exception { doGenTest(true); }
-  public void testUtilMethods() throws Exception { doGenTest(true); }
-  public void testBindersAndHooks() throws Exception { doGenTest(false); }
-  public void testAutoRecovery() throws Exception { doGenTest(true); }
-  public void testConsumeMethods() throws Exception { doGenTest(false); }
-  public void testGenOptions() throws Exception { doGenTest(true); }
-
-  public void testFleetJson() throws Exception { doGenTest(true);}
-  public void testFleetPsiGen() throws Exception { doGenTest(true);}
-
-  @Bombed(year = 2030, user = "author", month = 1, day = 1, description = "not implemented")
-  public void _testUpperRules() throws Exception { doGenTest(true); }
-  public void testFixes() throws Exception { doGenTest(true); }
-
-  public void testEmpty() throws Exception {
-    myFile = createPsiFile("empty.bnf", "{ }");
-    newTestGenerator().generate();
-  }
-
-  private ParserGenerator newTestGenerator() {
+  protected ParserGenerator newTestGenerator() {
     return new ParserGenerator((BnfFileImpl)myFile, "", myFullDataPath, "") {
 
       @Override

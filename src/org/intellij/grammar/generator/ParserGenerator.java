@@ -125,16 +125,16 @@ public class ParserGenerator {
   private final String myPackagePrefix;
   private String myPsiPackagesNamespacePrefix = "";
   private final String myGrammarRoot;
-  private final String myGrammarRootParser;
-  private final String myParserUtilClass;
-  private final String myPsiImplUtilClass;
+  protected final String myGrammarRootParser;
+  protected final String myParserUtilClass;
+  protected final String myPsiImplUtilClass;
   private final String myPsiTreeUtilClass;
 
   private final NameFormat myIntfClassFormat;
   private final NameFormat myImplClassFormat;
 
-  private final String myVisitorClassName;
-  private final String myTypeHolderClass;
+  protected final String myVisitorClassName;
+  protected final String myTypeHolderClass;
 
 
   private int myOffset;

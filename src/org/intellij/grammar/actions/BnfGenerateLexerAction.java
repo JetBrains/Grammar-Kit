@@ -61,6 +61,11 @@ import static org.intellij.grammar.generator.ParserGeneratorUtil.getRootAttribut
  * @author greg
  */
 public class BnfGenerateLexerAction extends AnAction {
+
+  private static final String LEXER_FLEX_TEMPLATE = "/templates/lexer.flex.template";
+
+  protected String getLexerFlexTemplate() { return LEXER_FLEX_TEMPLATE; }
+
   @Override
   public @NotNull ActionUpdateThread getActionUpdateThread() {
     return ActionUpdateThread.BGT;
@@ -172,12 +177,12 @@ public class BnfGenerateLexerAction extends AnAction {
     }
     catch (Throwable ignore) {}
     ve.init();
-    
+
     VelocityContext context = new VelocityContext();
     context.put("lexerClass", getLexerName(bnfFile));
-    context.put("packageName", StringUtil.notNullize(packageName, StringUtil.getPackageName(getRootAttribute(bnfFile, KnownAttribute.PARSER_CLASS))));
+    putPackageName(context, bnfFile, packageName);
     context.put("tokenPrefix", getRootAttribute(bnfFile, KnownAttribute.ELEMENT_TYPE_PREFIX));
-    context.put("typesClass", getRootAttribute(bnfFile, KnownAttribute.ELEMENT_TYPE_HOLDER_CLASS));
+    putTypeHolderClass(context, bnfFile);
     context.put("tokenPrefix", getRootAttribute(bnfFile, KnownAttribute.ELEMENT_TYPE_PREFIX));
     context.put("simpleTokens", simpleTokens);
     context.put("regexpTokens", regexpTokens);
@@ -185,9 +190,17 @@ public class BnfGenerateLexerAction extends AnAction {
     context.put("maxTokenLength", maxLen[0]);
 
     StringWriter out = new StringWriter();
-    InputStream stream = getClass().getResourceAsStream("/templates/lexer.flex.template");
+    InputStream stream = getClass().getResourceAsStream(getLexerFlexTemplate());
     ve.evaluate(context, out, "lexer.flex.template", new InputStreamReader(stream));
     return StringUtil.convertLineSeparators(out.toString());
+  }
+
+  protected void putPackageName(@NotNull VelocityContext context, BnfFile bnfFile, @Nullable String packageName) {
+    context.put("packageName", StringUtil.notNullize(packageName, StringUtil.getPackageName(getRootAttribute(bnfFile, KnownAttribute.PARSER_CLASS))));
+  }
+
+  protected void putTypeHolderClass(@NotNull VelocityContext context, BnfFile bnfFile) {
+    context.put("typesClass", getRootAttribute(bnfFile, KnownAttribute.ELEMENT_TYPE_HOLDER_CLASS));
   }
 
   public static @NotNull String token2JFlex(@NotNull String tokenText) {

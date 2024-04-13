@@ -24,6 +24,7 @@
       </action>
       <action id="grammar.Generate.ParserUtil" class="org.intellij.grammar.actions.BnfGenerateParserUtilAction"/>
       <action id="grammar.Generate.JFlexLexer" class="org.intellij.grammar.actions.BnfGenerateLexerAction"/>
+      <action id="grammar.Generate.JFlexLexerFleet" class="org.intellij.grammar.actions.BnfGenerateFleetLexerAction"/>
       <add-to-group group-id="grammar.file.group" anchor="first"/>
     </group>
   </actions>

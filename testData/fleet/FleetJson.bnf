@@ -1,6 +1,4 @@
 {
-  generate = [fleet = "yes"]
-
   parserClass = 'com.intellij.json.JsonParser'
   parserUtilClass = "com.intellij.json.psi.JsonParserUtil"
   psiPackage = 'com.intellij.json.psi'

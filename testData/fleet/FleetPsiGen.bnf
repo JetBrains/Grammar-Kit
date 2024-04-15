@@ -1,5 +1,4 @@
 {
-  generate = [fleet = "yes"]
   classHeader="//header.txt"
   parserClass="FleetPsiGen"
   psiClassPrefix="X"

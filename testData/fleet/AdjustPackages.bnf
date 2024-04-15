@@ -1,0 +1,17 @@
+{
+  implements="XComposite"
+  parserUtilClass="PsiGenUtil"
+  extends("root_.")="root"
+  elementTypeClass("root_.*")="sample.MyRootType"
+  elementTypeFactory(".*_expr")="sample.MyTypeFactory.createExprType"
+
+  methods("expr")=[missing]
+  extraRoot(".*")=true
+  adjustPackagesForFleet=false
+}
+
+grammar ::= list | map
+list ::= '(' element (',' element) * ')'
+map ::= '(' entry (',' entry) * ')'
+entry ::= 'name' '->' element
+element ::= 'id'

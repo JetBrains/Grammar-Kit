@@ -37,7 +37,6 @@ public interface BnfConstants {
   String ISTUBELEMENTTYPE_CLASS = "com.intellij.psi.stubs.IStubElementType";
   String STUB_BASED_PSI_ELEMENT = "com.intellij.psi.StubBasedPsiElement";
   String STUB_BASED_PSI_ELEMENT_BASE = "com.intellij.extapi.psi.StubBasedPsiElementBase";
-  String FLEET_NAMESPACE_PREFIX = "fleet.";
   String RECOVER_AUTO = "#auto";
 
   String TOKEN_SET_HOLDER_NAME = "TokenSets";

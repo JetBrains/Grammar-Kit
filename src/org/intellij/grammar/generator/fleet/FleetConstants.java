@@ -4,9 +4,8 @@
 
 package org.intellij.grammar.generator.fleet;
 
-interface FleetConstants {
+public interface FleetConstants {
 
-  String GENERATION_GROUP = "Grammar Generator";
   String GPUB_CLASS = "fleet.com.intellij.lang.parser.GeneratedParserUtilBase";
   String PSI_BUILDER_CLASS = "fleet.com.intellij.lang.PsiBuilder";
   String PSI_PARSER_CLASS = "fleet.com.intellij.lang.PsiParser";
@@ -16,4 +15,5 @@ interface FleetConstants {
   String PSI_ELEMENT_CLASS = "fleet.com.intellij.psi.PsiElement";
   String AST_NODE_CLASS = "fleet.com.intellij.lang.ASTNode";
   String FLEET_NAMESPACE_PREFIX = "fleet.";
+  String FLEET_NAMESPACE = "fleet";
 }

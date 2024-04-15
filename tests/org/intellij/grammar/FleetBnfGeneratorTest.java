@@ -38,5 +38,6 @@ public class FleetBnfGeneratorTest extends BnfGeneratorTest {
   }
 
   public void testFleetJson() throws Exception { doGenTest(true);}
+  public void testAdjustPackages() throws Exception { doGenTest(true);}
   public void testFleetPsiGen() throws Exception { doGenTest(true);}
 }

@@ -1,6 +1,6 @@
 // ---- FleetPsiGen.java -----------------
 //header.txt
-package fleet.;
+package fleet;
 
 import fleet.com.intellij.lang.PsiBuilder;
 import fleet.com.intellij.lang.PsiBuilder.Marker;
@@ -340,7 +340,7 @@ public class FleetPsiGen implements PsiParser, LightPsiParser {
 }
 // ---- FleetPsiGen2.java -----------------
 //header.txt
-package fleet.;
+package fleet;
 
 import fleet.com.intellij.lang.PsiBuilder;
 import fleet.com.intellij.lang.PsiBuilder.Marker;
@@ -562,7 +562,7 @@ public class FleetPsiGen2 {
 }
 // ---- FleetPsiGenFixes.java -----------------
 //header.txt
-package fleet.;
+package fleet;
 
 import fleet.com.intellij.lang.PsiBuilder;
 import fleet.com.intellij.lang.PsiBuilder.Marker;

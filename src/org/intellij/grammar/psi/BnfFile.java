@@ -9,8 +9,8 @@ import org.intellij.grammar.KnownAttribute;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 
 /**
  * @author gregsh
@@ -31,5 +31,5 @@ public interface BnfFile extends PsiFile {
   @Nullable
   <T> T findAttributeValue(@Nullable BnfRule rule, @NotNull KnownAttribute<T> knownAttribute, @Nullable String match);
 
-  <T> Set<T> getPossibleAttributeValues(KnownAttribute<T> knownAttribute);
+  <T> Collection<T> getPossibleAttributeValues(KnownAttribute<T> knownAttribute);
 }

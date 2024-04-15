@@ -11,15 +11,18 @@ import org.intellij.grammar.generator.ParserGenerator;
 import org.intellij.grammar.psi.BnfFile;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.List;
-import java.util.Set;
+import java.util.Collection;
+import java.util.LinkedList;
 import java.util.stream.Collectors;
 
 import static org.intellij.grammar.generator.ParserGeneratorUtil.getRootAttribute;
+import static org.intellij.grammar.generator.fleet.FleetConstants.FLEET_NAMESPACE;
+import static org.intellij.grammar.generator.fleet.FleetConstants.FLEET_NAMESPACE_PREFIX;
 
 public class FleetParserGenerator extends ParserGenerator {
 
-  private Set<String> myPossibleImports;
+  private final boolean myAdjustGeneratedNamespaces;
+  private final Collection<String> myPossibleImports;
 
   public FleetParserGenerator(@NotNull BnfFile psiFile,
                               @NotNull String sourcePath,
@@ -27,8 +30,10 @@ public class FleetParserGenerator extends ParserGenerator {
                               @NotNull String packagePrefix) {
     super(psiFile, sourcePath, outputPath, packagePrefix);
     G = new FleetGenOptions(psiFile);
-    myPossibleImports = psiFile.getPossibleAttributeValues(KnownAttribute.ELEMENT_TYPE_CLASS);
-    var importList = psiFile.getPossibleAttributeValues(KnownAttribute.ELEMENT_TYPE_FACTORY);
+    myPossibleImports = new LinkedList<>();
+    var importList = psiFile.getPossibleAttributeValues(KnownAttribute.ELEMENT_TYPE_CLASS);
+    if (importList != null) myPossibleImports.addAll(psiFile.getPossibleAttributeValues(KnownAttribute.ELEMENT_TYPE_CLASS));
+    importList = psiFile.getPossibleAttributeValues(KnownAttribute.ELEMENT_TYPE_FACTORY);
     if (importList != null) myPossibleImports.addAll(importList.stream().map(StringUtil::getPackageName).collect(Collectors.toSet()));
     importList = psiFile.getPossibleAttributeValues(KnownAttribute.TOKEN_TYPE_CLASS);
     if (importList != null) myPossibleImports.addAll(importList);
@@ -50,11 +55,19 @@ public class FleetParserGenerator extends ParserGenerator {
     rootImport = getRootAttribute(psiFile, KnownAttribute.ELEMENT_TYPE_HOLDER_CLASS);
     if (rootImport != null) myPossibleImports.add(rootImport);
 
+    myAdjustGeneratedNamespaces = getRootAttribute(psiFile, KnownAttribute.ADJUST_FLEET_PACKAGE);
   }
 
   @Override
   protected @NotNull String generatePackageName(String className){
-    return BnfConstants.FLEET_NAMESPACE_PREFIX + super.generatePackageName(className);
+    var packageName = super.generatePackageName(className);
+    if (myAdjustGeneratedNamespaces) {
+      if (packageName.isEmpty())
+        return FLEET_NAMESPACE;
+      return FLEET_NAMESPACE_PREFIX + packageName;
+    }
+
+    return packageName;
   }
 
   @Override
@@ -80,9 +93,9 @@ public class FleetParserGenerator extends ParserGenerator {
         break;
     }
 
-    if (original.equals(myVisitorClassName) || myPossibleImports.contains(original))
+    if (myAdjustGeneratedNamespaces && (original.equals(myVisitorClassName) || myPossibleImports.contains(original)))
     {
-      return FleetConstants.FLEET_NAMESPACE_PREFIX + original;
+      return FLEET_NAMESPACE_PREFIX + original;
     }
 
     return original;

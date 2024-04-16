@@ -126,7 +126,7 @@ public class LightPsi {
     return path.contains("/out/classes/production/") ||
            path.contains("util.jar") ||
            path.contains("util-8.jar") ||
-           path.contains("util_ке.jar") ||
+           path.contains("util_rt.jar") ||
            path.contains("app-client.jar") ||
            path.contains("lib-client.jar") ||
            path.contains("opentelemetry.jar");

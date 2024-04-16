@@ -386,7 +386,7 @@ public class ParserGenerator {
       calcRealSuperClasses(sortedPsiRules);
     }
     if (myGrammarRoot != null && (G.generateTokenTypes || G.generateElementTypes || G.getGeneratePsi() && G.getGeneratePsiFactory())) {
-      openOutput(myTypeHolderClass);
+      openOutput(adjustName(myTypeHolderClass));
       try {
         generateElementTypesHolder(myTypeHolderClass, sortedCompositeTypes);
       }
@@ -399,7 +399,7 @@ public class ParserGenerator {
       myRulesMethodsHelper.buildMaps(sortedPsiRules.values());
       for (BnfRule rule : sortedPsiRules.values()) {
         RuleInfo info = ruleInfo(rule);
-        openOutput(info.intfClass);
+        openOutput(adjustName(info.intfClass));
         try {
           generatePsiIntf(rule, info);
         }
@@ -409,7 +409,7 @@ public class ParserGenerator {
       }
       for (BnfRule rule : sortedPsiRules.values()) {
         RuleInfo info = ruleInfo(rule);
-        openOutput(info.implClass);
+        openOutput(adjustName(info.implClass));
         try {
           generatePsiImpl(rule, info);
         }
@@ -418,7 +418,7 @@ public class ParserGenerator {
         }
       }
       if (myVisitorClassName != null && myGrammarRoot != null) {
-        openOutput(myVisitorClassName);
+        openOutput(adjustName(myVisitorClassName));
         try {
           generateVisitor(myVisitorClassName, sortedPsiRules);
         }
@@ -520,7 +520,7 @@ public class ParserGenerator {
   public void generateParser() throws IOException {
     Map<String, Set<RuleInfo>> classified = ContainerUtil.classify(myRuleInfos.values().iterator(), o -> o.parserClass);
     for (String className : ContainerUtil.sorted(classified.keySet())) {
-      openOutput(className);
+      openOutput(adjustName(className));
       try {
         generateParser(className, map(classified.get(className), it -> it.name));
       }

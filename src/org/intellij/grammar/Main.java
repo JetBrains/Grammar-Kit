@@ -10,9 +10,11 @@ import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.impl.DebugUtil;
 import org.intellij.grammar.generator.ParserGenerator;
+import org.intellij.grammar.generator.fleet.FleetParserGenerator;
 import org.intellij.grammar.psi.BnfFile;
 
 import java.io.File;
+import java.util.Arrays;
 import java.util.regex.Pattern;
 
 /**
@@ -43,6 +45,7 @@ public class Main {
       BnfParserDefinition parserDefinition = new BnfParserDefinition();
 
       for (int i = 1; i < args.length; i++) {
+        if(args[i].startsWith("-")) continue;
         String grammar = args[i];
         int idx = grammar.lastIndexOf(File.separator);
         File grammarDir = new File(idx >= 0 ? grammar.substring(0, idx) : ".");
@@ -71,7 +74,11 @@ public class Main {
             }
 
             count ++;
-            new ParserGenerator((BnfFile) bnfFile, grammarDir.getAbsolutePath(), output.getAbsolutePath(), "").generate();
+            if (args[2].equals("-f"))
+              new FleetParserGenerator((BnfFile) bnfFile, grammarDir.getAbsolutePath(), output.getAbsolutePath(), "").generate();
+            else
+              new ParserGenerator((BnfFile) bnfFile, grammarDir.getAbsolutePath(), output.getAbsolutePath(), "").generate();
+
             System.out.println(file.getName() + " parser generated to " + output.getCanonicalPath());
           }
         }

@@ -11,8 +11,7 @@ import org.intellij.grammar.generator.ParserGenerator;
 import org.intellij.grammar.psi.BnfFile;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Collection;
-import java.util.LinkedList;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.intellij.grammar.generator.ParserGeneratorUtil.getRootAttribute;
@@ -37,14 +36,6 @@ public class FleetParserGenerator extends ParserGenerator {
     if (importList != null) myPossibleImports.addAll(importList.stream().map(StringUtil::getPackageName).collect(Collectors.toSet()));
     importList = psiFile.getPossibleAttributeValues(KnownAttribute.TOKEN_TYPE_CLASS);
     if (importList != null) myPossibleImports.addAll(importList);
-    importList = psiFile.getPossibleAttributeValues(KnownAttribute.TOKEN_TYPE_FACTORY);
-    if (importList != null) myPossibleImports.addAll(importList.stream().map(StringUtil::getPackageName).collect(Collectors.toSet()));
-    //importList = psiFile.getPossibleAttributeValues(KnownAttribute.PARSER_UTIL_CLASS);
-    //if (importList != null) myPossibleImports.addAll(importList);
-    //importList = psiFile.getPossibleAttributeValues(KnownAttribute.PSI_IMPL_UTIL_CLASS);
-    //if (importList != null) myPossibleImports.addAll(importList);
-    //importList = psiFile.getPossibleAttributeValues(KnownAttribute.ELEMENT_TYPE_HOLDER_CLASS);
-    //if (importList != null) myPossibleImports.addAll(importList);
     importList = psiFile.getPossibleAttributeValues(KnownAttribute.PARSER_CLASS);
     if (importList != null) myPossibleImports.addAll(importList);
 
@@ -99,6 +90,12 @@ public class FleetParserGenerator extends ParserGenerator {
     }
 
     return original;
+  }
+
+  @Override
+  protected boolean useFactory(String factory)
+  {
+    return false;
   }
 
   @Override

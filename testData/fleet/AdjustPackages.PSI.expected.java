@@ -26,7 +26,7 @@ public class MyFileType extends IFileElementType {
   public static final MyFileType INSTANCE = new MyFileType();
 
   public MyFileType() {
-    super("MyFileName", MyLanguage.INSTANCE)
+    super("MyFileName", MyLanguage.INSTANCE);
   }
 
   @Override

@@ -48,7 +48,7 @@ public class JsonFileType extends IFileElementType {
   public static final JsonFileType INSTANCE = new JsonFileType();
 
   public JsonFileType() {
-    super("JSON", JsonLanguage.INSTANCE)
+    super("JSON", JsonLanguage.INSTANCE);
   }
 
   @Override

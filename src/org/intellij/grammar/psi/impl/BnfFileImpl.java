@@ -102,7 +102,7 @@ public class BnfFileImpl extends PsiFileBase implements BnfFile {
   }
 
   @Override
-  public <T> Collection<T> getPossibleAttributeValues(KnownAttribute<T> attribute) {
+  public <T> Collection<T> getAllPossibleAttributeValues(KnownAttribute<T> attribute) {
     var attributeInfos = myAttributeValues.getValue().get(attribute.getName());
     if (attributeInfos == null) return null;
     return attributeInfos.stream().map(info -> attribute.ensureValue(info.value)).collect(Collectors.toList());

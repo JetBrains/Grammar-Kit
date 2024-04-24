@@ -36,13 +36,13 @@ public class FleetParserGenerator extends ParserGenerator {
     super(psiFile, sourcePath, outputPath, packagePrefix);
     G = new FleetGenOptions(psiFile);
     myPossibleImports = new LinkedList<>();
-    var importList = psiFile.getPossibleAttributeValues(KnownAttribute.ELEMENT_TYPE_CLASS);
-    if (importList != null) myPossibleImports.addAll(psiFile.getPossibleAttributeValues(KnownAttribute.ELEMENT_TYPE_CLASS));
-    importList = psiFile.getPossibleAttributeValues(KnownAttribute.ELEMENT_TYPE_FACTORY);
+    var importList = psiFile.getAllPossibleAttributeValues(KnownAttribute.ELEMENT_TYPE_CLASS);
+    if (importList != null) myPossibleImports.addAll(psiFile.getAllPossibleAttributeValues(KnownAttribute.ELEMENT_TYPE_CLASS));
+    importList = psiFile.getAllPossibleAttributeValues(KnownAttribute.ELEMENT_TYPE_FACTORY);
     if (importList != null) myPossibleImports.addAll(importList.stream().map(StringUtil::getPackageName).collect(Collectors.toSet()));
-    importList = psiFile.getPossibleAttributeValues(KnownAttribute.TOKEN_TYPE_CLASS);
+    importList = psiFile.getAllPossibleAttributeValues(KnownAttribute.TOKEN_TYPE_CLASS);
     if (importList != null) myPossibleImports.addAll(importList);
-    importList = psiFile.getPossibleAttributeValues(KnownAttribute.PARSER_CLASS);
+    importList = psiFile.getAllPossibleAttributeValues(KnownAttribute.PARSER_CLASS);
     if (importList != null) myPossibleImports.addAll(importList);
 
     var rootImport = getRootAttribute(psiFile, KnownAttribute.PARSER_UTIL_CLASS);
@@ -78,8 +78,8 @@ public class FleetParserGenerator extends ParserGenerator {
   }
 
   @Override
-  protected void generateParseMethod(String shortAN, String shortET, String shortPB){
-    out("public %s parse(%s %s, %s %s) {", shortAN, shortET, N.root, shortPB, N.builder);
+  protected void generateParseMethod(String shortAN, String shortET, String root, String shortPB, String builder){
+    out("public %s parse(%s %s, %s %s) {", shortAN, shortET, root, shortPB, builder);
     out("throw new IllegalStateException(\"Use parseLight instead\");");
     out("}");
   }
@@ -92,7 +92,6 @@ public class FleetParserGenerator extends ParserGenerator {
       case BnfConstants.PSI_PARSER_CLASS : return FleetConstants.PSI_PARSER_CLASS;
       case BnfConstants.LIGHT_PSI_PARSER_CLASS : return FleetConstants.LIGHT_PSI_PARSER_CLASS;
       case BnfConstants.TOKEN_SET_CLASS : return FleetConstants.TOKEN_SET_CLASS;
-
       case BnfConstants.IELEMENTTYPE_CLASS : return FleetConstants.IELEMENTTYPE_CLASS;
       case BnfConstants.PSI_ELEMENT_CLASS : return FleetConstants.PSI_ELEMENT_CLASS;
       case BnfConstants.AST_NODE_CLASS : return FleetConstants.AST_NODE_CLASS;

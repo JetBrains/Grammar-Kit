@@ -14,7 +14,6 @@ import org.intellij.grammar.generator.fleet.FleetParserGenerator;
 import org.intellij.grammar.psi.BnfFile;
 
 import java.io.File;
-import java.util.Arrays;
 import java.util.regex.Pattern;
 
 /**

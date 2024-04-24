@@ -25,12 +25,8 @@ public class GenOptions {
   public final String generateExactTypes;
   public final boolean generateExtendedPin;
   private final boolean generatePsi;
-  public boolean getGeneratePsi(){ return generatePsi;}
   private final boolean generatePsiFactory;
-  public boolean getGeneratePsiFactory(){ return generatePsiFactory; }
   private final boolean generatePsiClassesMap;
-  public boolean getGeneratePsiClassesMap(){ return generatePsiClassesMap; }
-
   public final boolean generateVisitor;
   public final String visitorValue;
   public final boolean generateFQN;
@@ -39,6 +35,11 @@ public class GenOptions {
   public final boolean generateTokenAccessors;
   public final boolean generateTokenAccessorsSet;
   public final int javaVersion;
+
+  //These properties are overridden in FleetGenOptions for Fleet-compatible generation
+  public boolean getGeneratePsi(){ return generatePsi;}
+  public boolean getGeneratePsiFactory(){ return generatePsiFactory; }
+  public boolean getGeneratePsiClassesMap(){ return generatePsiClassesMap; }
 
   public GenOptions(BnfFile myFile) {
     Map<String, String> genOptions = getRootAttribute(myFile, KnownAttribute.GENERATE).asMap();

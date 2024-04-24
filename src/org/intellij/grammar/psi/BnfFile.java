@@ -31,5 +31,5 @@ public interface BnfFile extends PsiFile {
   @Nullable
   <T> T findAttributeValue(@Nullable BnfRule rule, @NotNull KnownAttribute<T> knownAttribute, @Nullable String match);
 
-  <T> Collection<T> getPossibleAttributeValues(KnownAttribute<T> knownAttribute);
+  <T> Collection<T> getAllPossibleAttributeValues(KnownAttribute<T> knownAttribute);
 }

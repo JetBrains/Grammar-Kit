@@ -12,8 +12,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import static org.intellij.grammar.generator.ParserGeneratorUtil.getRootAttribute;
-import static org.intellij.grammar.generator.fleet.FleetConstants.FLEET_NAMESPACE;
-import static org.intellij.grammar.generator.fleet.FleetConstants.FLEET_NAMESPACE_PREFIX;
+import static org.intellij.grammar.generator.fleet.FleetConstants.*;
 
 public class BnfGenerateFleetLexerAction extends BnfGenerateLexerAction {
 

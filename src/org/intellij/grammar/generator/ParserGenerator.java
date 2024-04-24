@@ -124,7 +124,6 @@ public class ParserGenerator {
   private final String mySourcePath;
   private final String myOutputPath;
   private final String myPackagePrefix;
-  private String myPsiPackagesNamespacePrefix = "";
   private final String myGrammarRoot;
   protected final String myGrammarRootParser;
   protected final String myParserUtilClass;
@@ -428,6 +427,7 @@ public class ParserGenerator {
         }
       }
     }
+    //Generate other files. This generation is required for Fleet features and is isolated from psi files generation.
     generateAdditionalFiles();
   }
 
@@ -640,7 +640,7 @@ public class ParserGenerator {
     String shortPB = shorten(PSI_BUILDER_CLASS);
     String shortTS = shorten(TOKEN_SET_CLASS);
     String shortMarker = !G.generateFQN ? "Marker" : PSI_BUILDER_CLASS + ".Marker";
-    generateParseMethod(shortAN, shortET, shortPB);
+    generateParseMethod(shortAN, shortET, N.root, shortPB, N.builder);
     newLine();
     out("public void parseLight(%s %s, %s %s) {", shortET, N.root, shortPB, N.builder);
     out("boolean %s;", N.result);
@@ -694,10 +694,10 @@ public class ParserGenerator {
     }
   }
 
-  protected void generateParseMethod(String shortAN, String shortET, String shortPB) {
-    out("public %s parse(%s %s, %s %s) {", shortAN, shortET, N.root, shortPB, N.builder);
-    out("parseLight(%s, %s);", N.root, N.builder);
-    out("return %s.getTreeBuilt();", N.builder);
+  protected void generateParseMethod(String shortAN, String shortET, String root, String shortPB, String builder) {
+    out("public %s parse(%s %s, %s %s) {", shortAN, shortET, root, shortPB, builder);
+    out("parseLight(%s, %s);", root, builder);
+    out("return %s.getTreeBuilt();", builder);
     out("}");
   }
 

@@ -40,7 +40,4 @@ public class BnfGeneratorTestImpl extends BnfGeneratorTest {
     myFile = createPsiFile("empty.bnf", "{ }");
     newTestGenerator().generate();
   }
-
-
-
 }

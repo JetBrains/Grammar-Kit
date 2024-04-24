@@ -19,7 +19,7 @@ import java.util.regex.Pattern;
 /**
  * Command-line interface to parser generator.
  * Required community jars on classpath:
- * jdom.jar, trove4j.jar, extensions.jar, picocontainer.jar, junit.jar, idea.jar, openapi.jar, util.jar.
+ * app-client.jar, lib-client.jar, opentelemetry.jar, util.jar, util-8.jar, util_rt.jar
  *
  * @author gregsh
  *
@@ -28,7 +28,7 @@ import java.util.regex.Pattern;
 public class Main {
   public static void main(String[] args) {
     if (args.length < 2) {
-      System.out.println("Usage: Main <output-dir> <grammars or patterns>");
+      System.out.println("Usage: Main <output-dir> <grammars or patterns> [-f]");
       return;
     }
     File output = new File(args[0]);
@@ -42,9 +42,12 @@ public class Main {
 
     try {
       BnfParserDefinition parserDefinition = new BnfParserDefinition();
-
+      boolean generateForFleet = false;
       for (int i = 1; i < args.length; i++) {
-        if(args[i].startsWith("-")) continue;
+        if(args[i].equals("-f")) {
+          generateForFleet = true;
+          continue;
+        }
         String grammar = args[i];
         int idx = grammar.lastIndexOf(File.separator);
         File grammarDir = new File(idx >= 0 ? grammar.substring(0, idx) : ".");
@@ -73,7 +76,7 @@ public class Main {
             }
 
             count ++;
-            if (args[2].equals("-f"))
+            if (generateForFleet)
               new FleetParserGenerator((BnfFile) bnfFile, grammarDir.getAbsolutePath(), output.getAbsolutePath(), "").generate();
             else
               new ParserGenerator((BnfFile) bnfFile, grammarDir.getAbsolutePath(), output.getAbsolutePath(), "").generate();

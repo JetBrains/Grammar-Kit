@@ -299,7 +299,7 @@ public class ParserGenerator {
     }
   }
 
-  private void openOutput(String className) throws IOException {
+  protected void openOutput(String className) throws IOException {
     String classNameAdjusted = myPackagePrefix.isEmpty() ? className : StringUtil.trimStart(className, myPackagePrefix + ".");
     File file = new File(myOutputPath, classNameAdjusted.replace('.', File.separatorChar) + ".java");
     myOut = openOutputInner(className, file);
@@ -311,7 +311,7 @@ public class ParserGenerator {
     return new PrintWriter(new FileOutputStream(file), false, myFile.getVirtualFile().getCharset());
   }
 
-  private void closeOutput() {
+  protected void closeOutput() {
     myOut.close();
   }
 
@@ -428,6 +428,7 @@ public class ParserGenerator {
         }
       }
     }
+    generateAdditionalFiles();
   }
 
   private void checkClassAvailability(@Nullable String className, @Nullable String description) {
@@ -729,8 +730,8 @@ public class ParserGenerator {
     return result;
   }
 
-  private enum Java { CLASS, INTERFACE, ABSTRACT_CLASS }
-  private void generateClassHeader(String className,
+  protected enum Java { CLASS, INTERFACE, ABSTRACT_CLASS }
+  protected void generateClassHeader(String className,
                                    Set<String> imports,
                                    String annos,
                                    Java javaType,
@@ -2234,4 +2235,6 @@ public class ParserGenerator {
     }
     newLine();
   }
+
+  protected void generateAdditionalFiles() throws IOException {}
 }

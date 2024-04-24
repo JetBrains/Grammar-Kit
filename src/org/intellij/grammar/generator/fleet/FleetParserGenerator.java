@@ -11,6 +11,7 @@ import org.intellij.grammar.generator.ParserGenerator;
 import org.intellij.grammar.psi.BnfFile;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -22,6 +23,11 @@ public class FleetParserGenerator extends ParserGenerator {
 
   private final boolean myAdjustGeneratedNamespaces;
   private final Collection<String> myPossibleImports;
+
+  private final boolean myGenerateIFileType;
+  private final String myFileTypeClassName;
+  private final String myFileTypeDebugName;
+  private final String myLanguageClass;
 
   public FleetParserGenerator(@NotNull BnfFile psiFile,
                               @NotNull String sourcePath,
@@ -47,12 +53,18 @@ public class FleetParserGenerator extends ParserGenerator {
     if (rootImport != null) myPossibleImports.add(rootImport);
 
     myAdjustGeneratedNamespaces = getRootAttribute(psiFile, KnownAttribute.ADJUST_FLEET_PACKAGE);
+
+    var iFiletypeGenerationOptions = getRootAttribute(psiFile, KnownAttribute.FLEET_FILETYPE_GENERATION).asMap();
+    myGenerateIFileType = !iFiletypeGenerationOptions.isEmpty();
+    myFileTypeClassName = iFiletypeGenerationOptions.getOrDefault("fileTypeClass", "");
+    myFileTypeDebugName = iFiletypeGenerationOptions.getOrDefault("debugName", "");
+    myLanguageClass = iFiletypeGenerationOptions.getOrDefault("languageClass", "");
   }
 
   @Override
   protected @NotNull String generatePackageName(String className){
     var packageName = super.generatePackageName(className);
-    if (myAdjustGeneratedNamespaces) {
+    if (myAdjustGeneratedNamespaces && !className.startsWith(FLEET_NAMESPACE)) {
       if (packageName.isEmpty())
         return FLEET_NAMESPACE;
       return FLEET_NAMESPACE_PREFIX + packageName;
@@ -84,7 +96,7 @@ public class FleetParserGenerator extends ParserGenerator {
         break;
     }
 
-    if (myAdjustGeneratedNamespaces && (original.equals(myVisitorClassName) || myPossibleImports.contains(original)))
+    if (myAdjustGeneratedNamespaces && (original.equals(myVisitorClassName) || myPossibleImports.contains(original)) && !original.startsWith(FLEET_NAMESPACE))
     {
       return FLEET_NAMESPACE_PREFIX + original;
     }
@@ -101,5 +113,41 @@ public class FleetParserGenerator extends ParserGenerator {
   @Override
   public @NotNull String shorten(@NotNull String s){
     return super.shorten(adjustName(s));
+  }
+
+  @Override
+  protected void generateAdditionalFiles() throws IOException {
+    if (myGenerateIFileType) {
+      openOutput(myFileTypeClassName);
+      try {
+        generateFileTypeClass();
+      }
+      finally {
+        closeOutput();
+      }
+    }
+  }
+
+  private void generateFileTypeClass(){
+    var imports = new HashSet<String>();
+    imports.add(FleetConstants.FLEET_FILE_ELEMENT_TYPE_CLASS);
+    imports.add(FleetConstants.FLEET_PSI_BUILDER_CLASS);
+    imports.add(adjustName(myLanguageClass));
+    imports.add(adjustName(myGrammarRootParser));
+    imports.add(BnfConstants.NOTNULL_ANNO);
+
+    generateClassHeader(myFileTypeClassName, imports, "", Java.CLASS, FleetConstants.FLEET_FILE_ELEMENT_TYPE_CLASS);
+
+    out("public static final %s INSTANCE = new %s();", shorten(myFileTypeClassName), shorten(myFileTypeClassName));
+    newLine();
+    out("public %s() {", shorten(myFileTypeClassName));
+    out("super(\"%s\", %s.INSTANCE)",  shorten(myFileTypeDebugName),  shorten(myLanguageClass));
+    out("}");
+    newLine();
+    out(shorten(BnfConstants.OVERRIDE_ANNO));
+    out("public void parse(%s %s<?> builder) {", shorten(BnfConstants.NOTNULL_ANNO), shorten(FleetConstants.FLEET_PSI_BUILDER_CLASS));
+    out("new %s().parseLight(this, builder);",  shorten(myGrammarRootParser));
+    out("}");
+    out("}");
   }
 }

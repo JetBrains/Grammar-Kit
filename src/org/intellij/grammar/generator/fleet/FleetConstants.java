@@ -9,6 +9,8 @@ public interface FleetConstants {
   String GPUB_CLASS = "fleet.com.intellij.lang.parser.GeneratedParserUtilBase";
   String PSI_BUILDER_CLASS = "fleet.com.intellij.lang.PsiBuilder";
   String PSI_PARSER_CLASS = "fleet.com.intellij.lang.PsiParser";
+  String FLEET_PSI_BUILDER_CLASS = "fleet.com.intellij.psi.builder.FleetPsiBuilder";
+  String FLEET_FILE_ELEMENT_TYPE_CLASS = "fleet.com.intellij.psi.tree.IFileElementType";
   String LIGHT_PSI_PARSER_CLASS = "fleet.com.intellij.lang.LightPsiParser";
   String TOKEN_SET_CLASS = "fleet.com.intellij.psi.tree.TokenSet";
   String IELEMENTTYPE_CLASS = "fleet.com.intellij.psi.tree.IElementType";

@@ -33,3 +33,26 @@ public interface JsonElementTypes {
   IElementType SINGLE_QUOTED_STRING = new JsonTokenType("SINGLE_QUOTED_STRING");
   IElementType TRUE = new JsonTokenType("true");
 }
+// ---- JsonFileType.java -----------------
+// This is a generated file. Not intended for manual editing.
+package fleet.com.intellij.json.psi;
+
+import fleet.com.intellij.json.JsonLanguage;
+import fleet.com.intellij.json.JsonParser;
+import fleet.com.intellij.psi.tree.IFileElementType;
+import org.jetbrains.annotations.NotNull;
+import fleet.com.intellij.psi.builder.FleetPsiBuilder;
+
+public class JsonFileType extends IFileElementType {
+
+  public static final JsonFileType INSTANCE = new JsonFileType();
+
+  public JsonFileType() {
+    super("JSON", JsonLanguage.INSTANCE)
+  }
+
+  @Override
+  public void parse(@NotNull FleetPsiBuilder<?> builder) {
+    new JsonParser().parseLight(this, builder);
+  }
+}

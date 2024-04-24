@@ -1,6 +1,6 @@
 // ---- GeneratedTypes.java -----------------
 // This is a generated file. Not intended for manual editing.
-package generated;
+package fleet.generated;
 
 import fleet.com.intellij.psi.tree.IElementType;
 
@@ -14,11 +14,12 @@ public interface GeneratedTypes {
 }
 // ---- MyFileType.java -----------------
 // This is a generated file. Not intended for manual editing.
-package sample;
+package fleet.some.filetype.psi;
 
+import fleet.some.language.MyLanguage;
 import fleet.com.intellij.psi.tree.IFileElementType;
-import generated.GeneratedParser;
 import org.jetbrains.annotations.NotNull;
+import fleet.generated.GeneratedParser;
 import fleet.com.intellij.psi.builder.FleetPsiBuilder;
 
 public class MyFileType extends IFileElementType {

@@ -122,7 +122,7 @@ public class FleetParserGenerator extends ParserGenerator {
   @Override
   protected void generateAdditionalFiles() throws IOException {
     if (myGenerateIFileType) {
-      openOutput(myFileTypeClassName);
+      openOutput(adjustName(myFileTypeClassName));
       try {
         generateFileTypeClass();
       }
@@ -145,7 +145,7 @@ public class FleetParserGenerator extends ParserGenerator {
     out("public static final %s INSTANCE = new %s();", shorten(adjustName(myFileTypeClassName)), shorten(adjustName(myFileTypeClassName)));
     newLine();
     out("public %s() {", shorten(adjustName(myFileTypeClassName)));
-    out("super(\"%s\", %s.INSTANCE)",  shorten(myFileTypeDebugName),  shorten(adjustName(myLanguageClass)));
+    out("super(\"%s\", %s.INSTANCE);",  shorten(myFileTypeDebugName),  shorten(adjustName(myLanguageClass)));
     out("}");
     newLine();
     out(shorten(BnfConstants.OVERRIDE_ANNO));

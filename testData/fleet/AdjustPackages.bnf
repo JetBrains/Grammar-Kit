@@ -8,6 +8,7 @@
   methods("expr")=[missing]
   extraRoot(".*")=true
   adjustPackagesForFleet=false
+  generateFileTypeForFleet=[fileTypeClass="sample.MyFileType" debugName="MyFileName" languageClass="sample.MyLanguage"]
 }
 
 grammar ::= list | map

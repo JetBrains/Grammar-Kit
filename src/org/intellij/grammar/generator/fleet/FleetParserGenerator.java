@@ -57,8 +57,12 @@ public class FleetParserGenerator extends ParserGenerator {
     var iFiletypeGenerationOptions = getRootAttribute(psiFile, KnownAttribute.FLEET_FILETYPE_GENERATION).asMap();
     myGenerateIFileType = !iFiletypeGenerationOptions.isEmpty();
     myFileTypeClassName = iFiletypeGenerationOptions.getOrDefault("fileTypeClass", "");
-    myFileTypeDebugName = iFiletypeGenerationOptions.getOrDefault("debugName", "");
+    myFileTypeDebugName = iFiletypeGenerationOptions.getOrDefault("debugName", "FILE");
     myLanguageClass = iFiletypeGenerationOptions.getOrDefault("languageClass", "");
+
+    myPossibleImports.add(myFileTypeClassName);
+    myPossibleImports.add(myLanguageClass);
+    myPossibleImports.add(myGrammarRootParser);
   }
 
   @Override
@@ -136,17 +140,17 @@ public class FleetParserGenerator extends ParserGenerator {
     imports.add(adjustName(myGrammarRootParser));
     imports.add(BnfConstants.NOTNULL_ANNO);
 
-    generateClassHeader(myFileTypeClassName, imports, "", Java.CLASS, FleetConstants.FLEET_FILE_ELEMENT_TYPE_CLASS);
+    generateClassHeader(adjustName(myFileTypeClassName), imports, "", Java.CLASS, FleetConstants.FLEET_FILE_ELEMENT_TYPE_CLASS);
 
-    out("public static final %s INSTANCE = new %s();", shorten(myFileTypeClassName), shorten(myFileTypeClassName));
+    out("public static final %s INSTANCE = new %s();", shorten(adjustName(myFileTypeClassName)), shorten(adjustName(myFileTypeClassName)));
     newLine();
-    out("public %s() {", shorten(myFileTypeClassName));
-    out("super(\"%s\", %s.INSTANCE)",  shorten(myFileTypeDebugName),  shorten(myLanguageClass));
+    out("public %s() {", shorten(adjustName(myFileTypeClassName)));
+    out("super(\"%s\", %s.INSTANCE)",  shorten(myFileTypeDebugName),  shorten(adjustName(myLanguageClass)));
     out("}");
     newLine();
     out(shorten(BnfConstants.OVERRIDE_ANNO));
     out("public void parse(%s %s<?> builder) {", shorten(BnfConstants.NOTNULL_ANNO), shorten(FleetConstants.FLEET_PSI_BUILDER_CLASS));
-    out("new %s().parseLight(this, builder);",  shorten(myGrammarRootParser));
+    out("new %s().parseLight(this, builder);",  shorten(adjustName(myGrammarRootParser)));
     out("}");
     out("}");
   }

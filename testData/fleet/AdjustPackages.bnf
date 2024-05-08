@@ -1,4 +1,5 @@
 {
+  generate=[adjustPackagesForFleet="no"]
   implements="XComposite"
   parserUtilClass="PsiGenUtil"
   extends("root_.")="root"
@@ -7,7 +8,6 @@
 
   methods("expr")=[missing]
   extraRoot(".*")=true
-  adjustPackagesForFleet=false
   generateFileTypeForFleet=[fileTypeClass="sample.MyFileType" debugName="MyFileName" languageClass="sample.MyLanguage"]
 }
 

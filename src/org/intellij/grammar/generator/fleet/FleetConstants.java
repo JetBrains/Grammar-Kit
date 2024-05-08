@@ -5,7 +5,6 @@
 package org.intellij.grammar.generator.fleet;
 
 public interface FleetConstants {
-
   String GPUB_CLASS = "fleet.com.intellij.lang.parser.GeneratedParserUtilBase";
   String PSI_BUILDER_CLASS = "fleet.com.intellij.lang.PsiBuilder";
   String PSI_PARSER_CLASS = "fleet.com.intellij.lang.PsiParser";

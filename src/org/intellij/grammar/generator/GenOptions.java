@@ -24,9 +24,9 @@ public class GenOptions {
   public final boolean generateElementTypes;
   public final String generateExactTypes;
   public final boolean generateExtendedPin;
-  private final boolean generatePsi;
-  private final boolean generatePsiFactory;
-  private final boolean generatePsiClassesMap;
+  public final boolean generatePsi;
+  public final boolean generatePsiFactory;
+  public final boolean generatePsiClassesMap;
   public final boolean generateVisitor;
   public final String visitorValue;
   public final boolean generateFQN;
@@ -35,18 +35,18 @@ public class GenOptions {
   public final boolean generateTokenAccessors;
   public final boolean generateTokenAccessorsSet;
   public final int javaVersion;
-
-  //These properties are overridden in FleetGenOptions for Fleet-compatible generation
-  public boolean getGeneratePsi(){ return generatePsi;}
-  public boolean getGeneratePsiFactory(){ return generatePsiFactory; }
-  public boolean getGeneratePsiClassesMap(){ return generatePsiClassesMap; }
+  public final boolean adjustPackagesForFleet;
 
   public GenOptions(BnfFile myFile) {
+    this(myFile, false);
+  }
+
+  public GenOptions(BnfFile myFile, boolean generateForFleet) {
     Map<String, String> genOptions = getRootAttribute(myFile, KnownAttribute.GENERATE).asMap();
     names = Names.forName(genOptions.get("names"));
-    generatePsi = getGenerateOption(myFile, KnownAttribute.GENERATE_PSI, genOptions, "psi");
-    generatePsiFactory = !"no".equals(genOptions.get("psi-factory"));
-    generatePsiClassesMap = "yes".equals(genOptions.get("psi-classes-map"));
+    generatePsi = getGenerateOption(myFile, KnownAttribute.GENERATE_PSI, genOptions, "psi") && !generateForFleet;
+    generatePsiFactory = !"no".equals(genOptions.get("psi-factory")) && !generateForFleet;
+    generatePsiClassesMap = "yes".equals(genOptions.get("psi-classes-map")) && !generateForFleet;
     generateTokenTypes = getGenerateOption(myFile, KnownAttribute.GENERATE_TOKENS, genOptions, "tokens");
     generateTokenSets = generateTokenTypes && "yes".equals(genOptions.get("token-sets"));
     generateElementTypes = !"no".equals(genOptions.get("elements"));
@@ -62,5 +62,7 @@ public class GenOptions {
     generateTokenCase = ParserGeneratorUtil.enumFromString(genOptions.get("token-case"), Case.UPPER);
     generateElementCase = ParserGeneratorUtil.enumFromString(genOptions.get("element-case"), Case.UPPER);
     javaVersion = StringUtil.parseInt(genOptions.get("java"), 11);
+
+    adjustPackagesForFleet = !"no".equals(genOptions.get("adjustPackagesForFleet"));
   }
 }

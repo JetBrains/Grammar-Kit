@@ -7,6 +7,7 @@ package org.intellij.grammar.generator.fleet;
 import com.intellij.openapi.util.text.StringUtil;
 import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.generator.BnfConstants;
+import org.intellij.grammar.generator.GenOptions;
 import org.intellij.grammar.generator.ParserGenerator;
 import org.intellij.grammar.psi.BnfFile;
 import org.jetbrains.annotations.NotNull;
@@ -21,7 +22,6 @@ import static org.intellij.grammar.generator.fleet.FleetConstants.FLEET_NAMESPAC
 
 public class FleetParserGenerator extends ParserGenerator {
 
-  private final boolean myAdjustGeneratedNamespaces;
   private final Collection<String> myPossibleImports;
 
   private final boolean myGenerateIFileType;
@@ -34,7 +34,6 @@ public class FleetParserGenerator extends ParserGenerator {
                               @NotNull String outputPath,
                               @NotNull String packagePrefix) {
     super(psiFile, sourcePath, outputPath, packagePrefix);
-    G = new FleetGenOptions(psiFile);
     myPossibleImports = new LinkedList<>();
     var importList = psiFile.getAllPossibleAttributeValues(KnownAttribute.ELEMENT_TYPE_CLASS);
     if (importList != null) myPossibleImports.addAll(psiFile.getAllPossibleAttributeValues(KnownAttribute.ELEMENT_TYPE_CLASS));
@@ -52,8 +51,6 @@ public class FleetParserGenerator extends ParserGenerator {
     rootImport = getRootAttribute(psiFile, KnownAttribute.ELEMENT_TYPE_HOLDER_CLASS);
     if (rootImport != null) myPossibleImports.add(rootImport);
 
-    myAdjustGeneratedNamespaces = getRootAttribute(psiFile, KnownAttribute.ADJUST_FLEET_PACKAGE);
-
     var iFiletypeGenerationOptions = getRootAttribute(psiFile, KnownAttribute.FLEET_FILETYPE_GENERATION).asMap();
     myGenerateIFileType = !iFiletypeGenerationOptions.isEmpty();
     myFileTypeClassName = iFiletypeGenerationOptions.getOrDefault("fileTypeClass", "");
@@ -66,11 +63,17 @@ public class FleetParserGenerator extends ParserGenerator {
   }
 
   @Override
-  protected @NotNull String generatePackageName(String className){
+  protected @NotNull GenOptions createGenerator(BnfFile file) {
+    return new GenOptions(file, true);
+  }
+
+  @Override
+  protected @NotNull String generatePackageName(String className) {
     var packageName = super.generatePackageName(className);
-    if (myAdjustGeneratedNamespaces && !className.startsWith(FLEET_NAMESPACE)) {
-      if (packageName.isEmpty())
+    if (G.adjustPackagesForFleet && !className.startsWith(FLEET_NAMESPACE)) {
+      if (packageName.isEmpty()) {
         return FLEET_NAMESPACE;
+      }
       return FLEET_NAMESPACE_PREFIX + packageName;
     }
 
@@ -78,7 +81,7 @@ public class FleetParserGenerator extends ParserGenerator {
   }
 
   @Override
-  protected void generateParseMethod(String shortAN, String shortET, String root, String shortPB, String builder){
+  protected void generateParseMethod(String shortAN, String shortET, String root, String shortPB, String builder) {
     out("public %s parse(%s %s, %s %s) {", shortAN, shortET, root, shortPB, builder);
     out("throw new IllegalStateException(\"Use parseLight instead\");");
     out("}");
@@ -99,8 +102,9 @@ public class FleetParserGenerator extends ParserGenerator {
         break;
     }
 
-    if (myAdjustGeneratedNamespaces && (original.equals(myVisitorClassName) || myPossibleImports.contains(original)) && !original.startsWith(FLEET_NAMESPACE))
-    {
+    if (G.adjustPackagesForFleet &&
+        (original.equals(myVisitorClassName) || myPossibleImports.contains(original)) &&
+        !original.startsWith(FLEET_NAMESPACE)) {
       return FLEET_NAMESPACE_PREFIX + original;
     }
 

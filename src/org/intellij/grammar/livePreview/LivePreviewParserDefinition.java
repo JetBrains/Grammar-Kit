@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
+ * Copyright 2011-2024 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
  */
 
 package org.intellij.grammar.livePreview;
@@ -23,6 +23,7 @@ import org.jetbrains.annotations.NotNull;
 /**
  * @author gregsh
  */
+@SuppressWarnings("TokenSetInParserDefinition")
 public class LivePreviewParserDefinition implements ParserDefinition {
   public static final IElementType COMMENT = new IElementType("COMMENT", LivePreviewLanguage.BASE_INSTANCE);
   public static final IElementType STRING = new IElementType("STRING", LivePreviewLanguage.BASE_INSTANCE);

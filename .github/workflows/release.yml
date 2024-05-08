@@ -1,28 +1,15 @@
-# GitHub Actions Workflow created for handling the release process based on the draft release prepared
-# with the Build workflow. Running the publishPlugin task requires the PUBLISH_TOKEN secret provided.
+# GitHub Actions Workflow created for handling the release process based on the draft release prepared with the Build workflow.
+# Running the publishPlugin task requires all following secrets to be provided: PUBLISH_TOKEN, PRIVATE_KEY, PRIVATE_KEY_PASSWORD, CERTIFICATE_CHAIN.
+# See https://plugins.jetbrains.com/docs/intellij/plugin-signing.html for more information.
 
 name: Release
 on:
   release:
-    types: [ prereleased, released ]
-  workflow_dispatch:
-    inputs:
-      tagName:
-        description: 'The tag name (e.g. v2023.1)'
-        required: true
-        type: string
-      publishLibrary:
-        description: 'Publish library'
-        default: true
-        type: boolean
-      publishPlugin:
-        description: 'Publish plugin'
-        default: true
-        type: boolean
+    types: [prereleased, released]
 
 jobs:
 
-  # Prepare and publish the plugin to the Marketplace repository
+  # Prepare and publish the plugin to JetBrains Marketplace repository
   release:
     name: Publish Plugin
     runs-on: ubuntu-latest
@@ -33,16 +20,22 @@ jobs:
 
       # Check out current repository
       - name: Fetch Sources
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
-          ref: ${{ inputs.tagName || github.event.release.tag_name }}
+          ref: ${{ github.event.release.tag_name }}
 
-      # Setup Java 17 environment for the next steps
+      # Set up Java environment for the next steps
       - name: Setup Java
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           distribution: zulu
           java-version: 17
+
+      # Setup Gradle
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+        with:
+          gradle-home-cache-cleanup: true
 
       # Set environment variables
       - name: Export Properties
@@ -66,20 +59,8 @@ jobs:
         run: |
           ./gradlew patchChangelog --release-note="$CHANGELOG"
 
-      # Publish JAR to Maven Central
-      - name: Publish library
-        if: ${{ github.event_name != 'workflow_dispatch' || inputs.publishLibrary }}
-        env:
-          PUBLISH_TOKEN: ${{ secrets.PUBLISH_TOKEN }}
-          ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
-          ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.MAVEN_CENTRAL_PASSWORD }}
-          ORG_GRADLE_PROJECT_signingKey: ${{ secrets.SIGNING_KEY }}
-          ORG_GRADLE_PROJECT_signingPassword: ${{ secrets.SIGNING_PASSWORD }}
-        run: ./gradlew publish
-
-      # Publish the plugin to the Marketplace
+      # Publish the plugin to JetBrains Marketplace
       - name: Publish Plugin
-        if: ${{ github.event_name != 'workflow_dispatch' || inputs.publishPlugin }}
         env:
           PUBLISH_TOKEN: ${{ secrets.PUBLISH_TOKEN }}
           CERTIFICATE_CHAIN: ${{ secrets.CERTIFICATE_CHAIN }}
@@ -89,12 +70,11 @@ jobs:
 
       # Upload artifact as a release asset
       - name: Upload Release Asset
-        if: ${{ inputs.tagName || github.event.release.tag_name }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: gh release upload ${{ github.event.release.tag_name }} ./build/distributions/*
 
-      # Create pull request
+      # Create a pull request
       - name: Create Pull Request
         if: ${{ steps.properties.outputs.changelog != '' }}
         env:
@@ -103,18 +83,19 @@ jobs:
           VERSION="${{ github.event.release.tag_name }}"
           BRANCH="changelog-update-$VERSION"
           LABEL="release changelog"
-          
+
           git config user.email "action@github.com"
           git config user.name "GitHub Action"
-          
+
           git checkout -b $BRANCH
           git commit -am "Changelog update - $VERSION"
           git push --set-upstream origin $BRANCH
           
           gh label create "$LABEL" \
             --description "Pull requests with release changelog update" \
+            --force \
             || true
-          
+
           gh pr create \
             --title "Changelog update - \`$VERSION\`" \
             --body "Current pull request contains patched \`CHANGELOG.md\` file for the \`$VERSION\` version." \

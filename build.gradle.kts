@@ -214,8 +214,8 @@ publishing {
             url = uri("https://oss.sonatype.org/service/local/staging/deploy/maven2")
 
             credentials {
-                username = properties("mavenCentralUsername").get()
-                password = properties("mavenCentralPassword").get()
+                username = properties("mavenCentralUsername").orNull
+                password = properties("mavenCentralPassword").orNull
             }
         }
     }

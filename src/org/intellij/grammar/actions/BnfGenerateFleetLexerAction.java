@@ -24,7 +24,7 @@ public class BnfGenerateFleetLexerAction extends BnfGenerateLexerAction {
 
   @Override
   protected void putPackageName(@NotNull VelocityContext context, BnfFile bnfFile, @Nullable String packageName) {
-    if (getRootAttribute(bnfFile, KnownAttribute.ADJUST_FLEET_PACKAGE))
+    if (adjustPackage(bnfFile))
     {
       var original = StringUtil.notNullize(packageName, StringUtil.getPackageName(getRootAttribute(bnfFile, KnownAttribute.PARSER_CLASS)));
       if(!original.isEmpty())
@@ -39,7 +39,7 @@ public class BnfGenerateFleetLexerAction extends BnfGenerateLexerAction {
 
   @Override
   protected void putTypeHolderClass(@NotNull VelocityContext context, BnfFile bnfFile) {
-    if (getRootAttribute(bnfFile, KnownAttribute.ADJUST_FLEET_PACKAGE))
+    if (adjustPackage(bnfFile))
     {
       context.put("typesClass", FLEET_NAMESPACE_PREFIX + getRootAttribute(bnfFile, KnownAttribute.ELEMENT_TYPE_HOLDER_CLASS));
     }
@@ -48,4 +48,8 @@ public class BnfGenerateFleetLexerAction extends BnfGenerateLexerAction {
     }
   }
 
+  private static boolean adjustPackage(BnfFile file) {
+    return getRootAttribute(file, KnownAttribute.GENERATE).stream()
+      .noneMatch(pair -> pair.first.equals("adjustPackagesForFleet") && pair.second.equals("no"));
+  }
 }

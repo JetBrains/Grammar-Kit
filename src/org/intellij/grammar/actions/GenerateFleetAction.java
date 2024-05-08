@@ -24,10 +24,15 @@ public class GenerateFleetAction extends GenerateAction {
   @Override
   protected String getParserClass(PsiFile bnfFile) {
     var original = super.getParserClass(bnfFile);
-    if (getRootAttribute(bnfFile, KnownAttribute.ADJUST_FLEET_PACKAGE)){
+    if (adjustPackages(bnfFile)){
       original = FleetConstants.FLEET_NAMESPACE_PREFIX + original;
     }
     return original;
+  }
+
+  private static boolean adjustPackages(PsiFile file) {
+    return getRootAttribute(file, KnownAttribute.GENERATE).stream()
+      .noneMatch(pair -> pair.first.equals("adjustPackagesForFleet") && pair.second.equals("no"));
   }
 
   @Override

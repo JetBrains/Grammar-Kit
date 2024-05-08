@@ -159,7 +159,7 @@ public class ParserGenerator {
     myOutputPath = outputPath;
     myPackagePrefix = packagePrefix;
 
-    G = new GenOptions(myFile);
+    G = createGenerator(myFile);
     N = G.names;
 
     myIntfClassFormat = getPsiClassFormat(myFile);
@@ -202,6 +202,11 @@ public class ParserGenerator {
     calcFakeRulesWithType();
     calcRulesStubNames();
     calcAbstractRules();
+  }
+
+  @NotNull
+  protected GenOptions createGenerator(BnfFile file) {
+    return new GenOptions(file);
   }
 
   private void calcAbstractRules() {
@@ -382,10 +387,10 @@ public class ParserGenerator {
       sortedPsiRules.put(rule.getName(), rule);
       info.superInterfaces = new LinkedHashSet<>(getSuperInterfaceNames(myFile, rule, myIntfClassFormat));
     }
-    if (G.getGeneratePsi()) {
+    if (G.generatePsi) {
       calcRealSuperClasses(sortedPsiRules);
     }
-    if (myGrammarRoot != null && (G.generateTokenTypes || G.generateElementTypes || G.getGeneratePsi() && G.getGeneratePsiFactory())) {
+    if (myGrammarRoot != null && (G.generateTokenTypes || G.generateElementTypes || G.generatePsi && G.generatePsiFactory)) {
       openOutput(adjustName(myTypeHolderClass));
       try {
         generateElementTypesHolder(myTypeHolderClass, sortedCompositeTypes);
@@ -394,7 +399,7 @@ public class ParserGenerator {
         closeOutput();
       }
     }
-    if (G.getGeneratePsi()) {
+    if (G.generatePsi) {
       checkClassAvailability(myPsiImplUtilClass, "PSI method signatures will not be detected");
       myRulesMethodsHelper.buildMaps(sortedPsiRules.values());
       for (BnfRule rule : sortedPsiRules.values()) {
@@ -1512,7 +1517,7 @@ public class ParserGenerator {
     String tokenTypeFactory = getRootAttribute(myFile, KnownAttribute.TOKEN_TYPE_FACTORY);
     Set<String> imports = new LinkedHashSet<>();
     imports.add(adjustName(IELEMENTTYPE_CLASS));
-    if (G.getGeneratePsi()) {
+    if (G.generatePsi) {
       imports.add(adjustName(PSI_ELEMENT_CLASS));
       imports.add(adjustName(AST_NODE_CLASS));
     }
@@ -1542,15 +1547,15 @@ public class ParserGenerator {
     else {
       ContainerUtil.addIfNotNull(imports, adjustName(tokenTypeClass));
     }
-    if (G.getGeneratePsi()) {
+    if (G.generatePsi) {
       imports.addAll(ContainerUtil.sorted(
         JBIterable.from(sortedCompositeTypes.values()).map(this::ruleInfo).map(o -> o.implPackage + ".*").toSet()));
-      if (G.getGeneratePsiClassesMap()) {
+      if (G.generatePsiClassesMap) {
         imports.add(CommonClassNames.JAVA_UTIL_COLLECTIONS);
         imports.add(CommonClassNames.JAVA_UTIL_SET);
         imports.add("java.util.LinkedHashMap");
       }
-      if (G.getGeneratePsiFactory()) {
+      if (G.generatePsiFactory) {
         if (JBIterable.from(myRuleInfos.values()).find(o -> o.mixedAST) != null) {
           imports.add(COMPOSITE_PSI_ELEMENT_CLASS);
         }
@@ -1597,7 +1602,7 @@ public class ParserGenerator {
       }
       generateTokenSets();
     }
-    if (G.getGeneratePsi() && G.getGeneratePsiClassesMap()) {
+    if (G.generatePsi && G.generatePsiClassesMap) {
       String shortJC = shorten(CommonClassNames.JAVA_LANG_CLASS);
       String shortET = shorten(IELEMENTTYPE_CLASS);
       newLine();
@@ -1625,7 +1630,7 @@ public class ParserGenerator {
       out("}");
       out("}");
     }
-    if (G.getGeneratePsi() && G.getGeneratePsiFactory()) {
+    if (G.generatePsi && G.generatePsiFactory) {
       newLine();
       boolean first1;
       boolean first2;

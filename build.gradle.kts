@@ -221,9 +221,10 @@ publishing {
     }
 }
 
+// only available in release workflow
 signing {
-    val signingKey = properties("signingKey").get()
-    val signingPassword = properties("signingPassword").get()
+    val signingKey = project.findProperty("signingKey").toString()
+    val signingPassword = project.findProperty("signingPassword").toString()
 
     isRequired = signingKey.isNotEmpty() && signingPassword.isNotEmpty()
 

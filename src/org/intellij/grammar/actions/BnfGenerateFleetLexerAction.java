@@ -24,13 +24,14 @@ public class BnfGenerateFleetLexerAction extends BnfGenerateLexerAction {
 
   @Override
   protected void putPackageName(@NotNull VelocityContext context, BnfFile bnfFile, @Nullable String packageName) {
-    if (adjustPackage(bnfFile))
-    {
+    if (adjustPackage(bnfFile)) {
       var original = StringUtil.notNullize(packageName, StringUtil.getPackageName(getRootAttribute(bnfFile, KnownAttribute.PARSER_CLASS)));
-      if(!original.isEmpty())
+      if (!original.isEmpty()) {
         context.put("packageName", FLEET_NAMESPACE_PREFIX + original);
-      else
+      }
+      else {
         context.put("packageName", FLEET_NAMESPACE);
+      }
     }
     else {
       super.putPackageName(context, bnfFile, packageName);
@@ -39,8 +40,7 @@ public class BnfGenerateFleetLexerAction extends BnfGenerateLexerAction {
 
   @Override
   protected void putTypeHolderClass(@NotNull VelocityContext context, BnfFile bnfFile) {
-    if (adjustPackage(bnfFile))
-    {
+    if (adjustPackage(bnfFile)) {
       context.put("typesClass", FLEET_NAMESPACE_PREFIX + getRootAttribute(bnfFile, KnownAttribute.ELEMENT_TYPE_HOLDER_CLASS));
     }
     else {

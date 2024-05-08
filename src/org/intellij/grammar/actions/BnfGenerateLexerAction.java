@@ -64,7 +64,9 @@ public class BnfGenerateLexerAction extends AnAction {
 
   private static final String LEXER_FLEX_TEMPLATE = "/templates/lexer.flex.template";
 
-  protected String getLexerFlexTemplate() { return LEXER_FLEX_TEMPLATE; }
+  protected String getLexerFlexTemplate() {
+    return LEXER_FLEX_TEMPLATE;
+  }
 
   @Override
   public @NotNull ActionUpdateThread getActionUpdateThread() {
@@ -196,7 +198,8 @@ public class BnfGenerateLexerAction extends AnAction {
   }
 
   protected void putPackageName(@NotNull VelocityContext context, BnfFile bnfFile, @Nullable String packageName) {
-    context.put("packageName", StringUtil.notNullize(packageName, StringUtil.getPackageName(getRootAttribute(bnfFile, KnownAttribute.PARSER_CLASS))));
+    context.put("packageName",
+                StringUtil.notNullize(packageName, StringUtil.getPackageName(getRootAttribute(bnfFile, KnownAttribute.PARSER_CLASS))));
   }
 
   protected void putTypeHolderClass(@NotNull VelocityContext context, BnfFile bnfFile) {

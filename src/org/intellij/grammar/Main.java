@@ -44,7 +44,7 @@ public class Main {
       BnfParserDefinition parserDefinition = new BnfParserDefinition();
       boolean generateForFleet = false;
       for (int i = 1; i < args.length; i++) {
-        if(args[i].equals("-f")) {
+        if (args[i].equals("-f")) {
           generateForFleet = true;
           continue;
         }
@@ -76,10 +76,12 @@ public class Main {
             }
 
             count ++;
-            if (generateForFleet)
-              new FleetParserGenerator((BnfFile) bnfFile, grammarDir.getAbsolutePath(), output.getAbsolutePath(), "").generate();
-            else
-              new ParserGenerator((BnfFile) bnfFile, grammarDir.getAbsolutePath(), output.getAbsolutePath(), "").generate();
+            if (generateForFleet) {
+              new FleetParserGenerator((BnfFile)bnfFile, grammarDir.getAbsolutePath(), output.getAbsolutePath(), "").generate();
+            }
+            else {
+              new ParserGenerator((BnfFile)bnfFile, grammarDir.getAbsolutePath(), output.getAbsolutePath(), "").generate();
+            }
 
             System.out.println(file.getName() + " parser generated to " + output.getCanonicalPath());
           }

@@ -13,7 +13,7 @@ import com.intellij.usageView.UsageViewLongNameLocation;
 import com.intellij.usageView.UsageViewNodeTextLocation;
 import com.intellij.usageView.UsageViewShortNameLocation;
 import com.intellij.usageView.UsageViewTypeLocation;
-import org.apache.xmlbeans.impl.common.NameUtil;
+import com.intellij.util.text.NameUtilCore;
 import org.intellij.jflex.psi.JFlexComposite;
 import org.intellij.jflex.psi.JFlexMacroDefinition;
 import org.intellij.jflex.psi.JFlexStateDefinition;
@@ -75,7 +75,7 @@ final class JFlexFindUsagesProvider implements FindUsagesProvider, ElementDescri
     else if (psiElement instanceof JFlexComposite) {
       if (location == UsageViewTypeLocation.INSTANCE) {
         ASTNode node = psiElement.getNode();
-        return node == null? "Initial State" : StringUtil.join(NameUtil.splitWords(node.getElementType().toString(), false), " ");
+        return node == null ? "Initial State" : StringUtil.join(NameUtilCore.nameToWords(node.getElementType().toString()), " ");
       }
       return psiElement instanceof PsiNamedElement ? ((PsiNamedElement)psiElement).getName() : psiElement.getClass().getSimpleName();
     }

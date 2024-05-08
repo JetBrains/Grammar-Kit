@@ -14,7 +14,7 @@ import com.intellij.psi.util.PsiUtilCore;
 import com.intellij.usageView.UsageViewNodeTextLocation;
 import com.intellij.usageView.UsageViewShortNameLocation;
 import com.intellij.usageView.UsageViewTypeLocation;
-import org.apache.xmlbeans.impl.common.NameUtil;
+import com.intellij.util.text.NameUtilCore;
 import org.intellij.grammar.psi.BnfAttr;
 import org.intellij.grammar.psi.BnfComposite;
 import org.intellij.grammar.psi.BnfRule;
@@ -47,7 +47,7 @@ final class BnfDescriptionProvider implements ElementDescriptionProvider {
     else if (psiElement instanceof BnfComposite) {
       if (location == UsageViewTypeLocation.INSTANCE) {
         IElementType elementType = PsiUtilCore.getElementType(psiElement);
-        return elementType == null ? null : StringUtil.join(NameUtil.splitWords(elementType.toString(), false), " ");
+        return elementType == null ? null : StringUtil.join(NameUtilCore.nameToWords(elementType.toString()), " ");
       }
       return psiElement instanceof PsiNamedElement? ((PsiNamedElement) psiElement).getName() : psiElement.getClass().getSimpleName();
     }

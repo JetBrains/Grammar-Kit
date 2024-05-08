@@ -17,7 +17,6 @@ import com.intellij.openapi.editor.markup.TextAttributes;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.util.Key;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiElement;
@@ -34,8 +33,7 @@ import java.util.Set;
 /**
  * @author gregsh
  */
-public final class GrammarAtCaretPassFactory implements TextEditorHighlightingPassFactory, TextEditorHighlightingPassFactoryRegistrar {
-  public static final Key<Boolean> GRAMMAR_AT_CARET_KEY = Key.create("GRAMMAR_AT_CARET_KEY");
+final class GrammarAtCaretPassFactory implements TextEditorHighlightingPassFactory, TextEditorHighlightingPassFactoryRegistrar {
 
   @Override
   public void registerHighlightingPassFactory(@NotNull TextEditorHighlightingPassRegistrar registrar, @NotNull Project project) {
@@ -62,7 +60,7 @@ public final class GrammarAtCaretPassFactory implements TextEditorHighlightingPa
         if (previewLanguage == null) return;
         List<Editor> previewEditors = previewLanguage.getPreviewEditors(myProject);
         for (Editor e : previewEditors) {
-          if (Boolean.TRUE.equals(GRAMMAR_AT_CARET_KEY.get(e))) {
+          if (Boolean.TRUE.equals(LivePreviewHelper.GRAMMAR_AT_CARET_KEY.get(e))) {
             collectHighlighters(myProject, previewEditors.get(0), previewLanguage, infos);
           }
         }

@@ -22,6 +22,7 @@ import com.intellij.openapi.fileTypes.FileTypeManager;
 import com.intellij.openapi.progress.ProcessCanceledException;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.project.ProjectManager;
+import com.intellij.openapi.util.Key;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiDocumentManager;
 import com.intellij.psi.PsiFile;
@@ -51,6 +52,8 @@ import java.util.Map;
  */
 @Service
 public final class LivePreviewHelper implements Disposable {
+
+  public static final Key<Boolean> GRAMMAR_AT_CARET_KEY = Key.create("GRAMMAR_AT_CARET_KEY");
 
   public static LivePreviewHelper getInstance() {
     return ApplicationManager.getApplication().getService(LivePreviewHelper.class);

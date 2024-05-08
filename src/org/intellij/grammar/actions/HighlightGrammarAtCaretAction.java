@@ -13,7 +13,7 @@ import com.intellij.openapi.actionSystem.CommonDataKeys;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiFile;
-import org.intellij.grammar.livePreview.GrammarAtCaretPassFactory;
+import org.intellij.grammar.livePreview.LivePreviewHelper;
 import org.intellij.grammar.livePreview.LivePreviewLanguage;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -45,7 +45,7 @@ public class HighlightGrammarAtCaretAction extends AnAction {
   public void update(@NotNull AnActionEvent e) {
     Editor editor = getPreviewEditor(e);
     boolean enabled = editor != null;
-    String command = !enabled ? "" : GrammarAtCaretPassFactory.GRAMMAR_AT_CARET_KEY.get(editor) != null ? "Stop " : "Start ";
+    String command = !enabled ? "" : LivePreviewHelper.GRAMMAR_AT_CARET_KEY.get(editor) != null ? "Stop " : "Start ";
     e.getPresentation().setText(command + getTemplatePresentation().getText());
     e.getPresentation().setEnabledAndVisible(enabled);
   }
@@ -54,8 +54,8 @@ public class HighlightGrammarAtCaretAction extends AnAction {
   public void actionPerformed(@NotNull AnActionEvent e) {
     Editor editor = getPreviewEditor(e);
     if (editor == null) return;
-    Boolean value = GrammarAtCaretPassFactory.GRAMMAR_AT_CARET_KEY.get(editor);
-    GrammarAtCaretPassFactory.GRAMMAR_AT_CARET_KEY.set(editor, value == null ? Boolean.TRUE : null);
+    Boolean value = LivePreviewHelper.GRAMMAR_AT_CARET_KEY.get(editor);
+    LivePreviewHelper.GRAMMAR_AT_CARET_KEY.set(editor, value == null ? Boolean.TRUE : null);
 
     Project project = Objects.requireNonNull(e.getProject());
     DaemonCodeAnalyzer.getInstance(project).restart();

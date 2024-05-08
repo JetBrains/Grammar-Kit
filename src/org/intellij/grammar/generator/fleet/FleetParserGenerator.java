@@ -88,16 +88,24 @@ public class FleetParserGenerator extends ParserGenerator {
   }
 
   @Override
-  protected @NotNull String adjustName(String original){
-    switch (original){
-      case BnfConstants.GPUB_CLASS: return FleetConstants.GPUB_CLASS;
-      case BnfConstants.PSI_BUILDER_CLASS : return FleetConstants.PSI_BUILDER_CLASS;
-      case BnfConstants.PSI_PARSER_CLASS : return FleetConstants.PSI_PARSER_CLASS;
-      case BnfConstants.LIGHT_PSI_PARSER_CLASS : return FleetConstants.LIGHT_PSI_PARSER_CLASS;
-      case BnfConstants.TOKEN_SET_CLASS : return FleetConstants.TOKEN_SET_CLASS;
-      case BnfConstants.IELEMENTTYPE_CLASS : return FleetConstants.IELEMENTTYPE_CLASS;
-      case BnfConstants.PSI_ELEMENT_CLASS : return FleetConstants.PSI_ELEMENT_CLASS;
-      case BnfConstants.AST_NODE_CLASS : return FleetConstants.AST_NODE_CLASS;
+  protected @NotNull String adjustName(String original) {
+    switch (original) {
+      case BnfConstants.GPUB_CLASS:
+        return FleetConstants.GPUB_CLASS;
+      case BnfConstants.PSI_BUILDER_CLASS:
+        return FleetConstants.PSI_BUILDER_CLASS;
+      case BnfConstants.PSI_PARSER_CLASS:
+        return FleetConstants.PSI_PARSER_CLASS;
+      case BnfConstants.LIGHT_PSI_PARSER_CLASS:
+        return FleetConstants.LIGHT_PSI_PARSER_CLASS;
+      case BnfConstants.TOKEN_SET_CLASS:
+        return FleetConstants.TOKEN_SET_CLASS;
+      case BnfConstants.IELEMENTTYPE_CLASS:
+        return FleetConstants.IELEMENTTYPE_CLASS;
+      case BnfConstants.PSI_ELEMENT_CLASS:
+        return FleetConstants.PSI_ELEMENT_CLASS;
+      case BnfConstants.AST_NODE_CLASS:
+        return FleetConstants.AST_NODE_CLASS;
       default:
         break;
     }
@@ -112,13 +120,12 @@ public class FleetParserGenerator extends ParserGenerator {
   }
 
   @Override
-  protected boolean useFactory(String factory)
-  {
+  protected boolean useFactory(String factory) {
     return false;
   }
 
   @Override
-  public @NotNull String shorten(@NotNull String s){
+  public @NotNull String shorten(@NotNull String s) {
     return super.shorten(adjustName(s));
   }
 
@@ -135,7 +142,7 @@ public class FleetParserGenerator extends ParserGenerator {
     }
   }
 
-  private void generateFileTypeClass(){
+  private void generateFileTypeClass() {
     var imports = new HashSet<String>();
     imports.add(FleetConstants.FLEET_FILE_ELEMENT_TYPE_CLASS);
     imports.add(FleetConstants.FLEET_PSI_BUILDER_CLASS);
@@ -148,12 +155,12 @@ public class FleetParserGenerator extends ParserGenerator {
     out("public static final %s INSTANCE = new %s();", shorten(adjustName(myFileTypeClassName)), shorten(adjustName(myFileTypeClassName)));
     newLine();
     out("public %s() {", shorten(adjustName(myFileTypeClassName)));
-    out("super(\"%s\", %s.INSTANCE);",  shorten(myFileTypeDebugName),  shorten(adjustName(myLanguageClass)));
+    out("super(\"%s\", %s.INSTANCE);", shorten(myFileTypeDebugName), shorten(adjustName(myLanguageClass)));
     out("}");
     newLine();
     out(shorten(BnfConstants.OVERRIDE_ANNO));
     out("public void parse(%s %s<?> builder) {", shorten(BnfConstants.NOTNULL_ANNO), shorten(FleetConstants.FLEET_PSI_BUILDER_CLASS));
-    out("new %s().parseLight(this, builder);",  shorten(adjustName(myGrammarRootParser)));
+    out("new %s().parseLight(this, builder);", shorten(adjustName(myGrammarRootParser)));
     out("}");
     out("}");
   }

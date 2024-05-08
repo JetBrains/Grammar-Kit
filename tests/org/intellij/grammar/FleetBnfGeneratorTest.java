@@ -12,14 +12,14 @@ import org.intellij.grammar.psi.impl.BnfFileImpl;
 
 import java.io.*;
 
-public class FleetBnfGeneratorTest extends BnfGeneratorTest {
+public class FleetBnfGeneratorTest extends BnfGeneratorAbstractTest {
 
   public FleetBnfGeneratorTest() {
     super("fleet");
   }
 
   @Override
-  protected ParserGenerator newTestGenerator(){
+  protected ParserGenerator newTestGenerator() {
     return new FleetParserGenerator((BnfFileImpl)myFile, "", myFullDataPath, "") {
 
       @Override

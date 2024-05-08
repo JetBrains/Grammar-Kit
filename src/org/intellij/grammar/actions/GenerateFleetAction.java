@@ -24,7 +24,7 @@ public class GenerateFleetAction extends GenerateAction {
   @Override
   protected String getParserClass(PsiFile bnfFile) {
     var original = super.getParserClass(bnfFile);
-    if (adjustPackages(bnfFile)){
+    if (adjustPackages(bnfFile)) {
       original = FleetConstants.FLEET_NAMESPACE_PREFIX + original;
     }
     return original;

@@ -38,12 +38,12 @@ final class BnfCommenter implements CodeDocumentationAwareCommenter {
 
   @Override
   public IElementType getLineCommentTokenType() {
-    return BnfParserDefinition.BNF_LINE_COMMENT;
+    return BnfTokenSets.BNF_LINE_COMMENT;
   }
 
   @Override
   public IElementType getBlockCommentTokenType() {
-    return BnfParserDefinition.BNF_BLOCK_COMMENT;
+    return BnfTokenSets.BNF_BLOCK_COMMENT;
   }
 
   @Override

@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
+ * Copyright 2011-2024 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
  */
 
 package org.intellij.grammar.editor;
@@ -12,7 +12,7 @@ import com.intellij.openapi.editor.markup.TextAttributes;
 import com.intellij.openapi.fileTypes.SyntaxHighlighterBase;
 import com.intellij.psi.TokenType;
 import com.intellij.psi.tree.IElementType;
-import org.intellij.grammar.BnfParserDefinition;
+import org.intellij.grammar.BnfTokenSets;
 import org.intellij.grammar.parser.BnfLexer;
 import org.jetbrains.annotations.NotNull;
 
@@ -55,7 +55,7 @@ class BnfSyntaxHighlighter extends SyntaxHighlighterBase {
     if (type == TokenType.BAD_CHARACTER) {
       return pack(ILLEGAL);
     }
-    if (type == BnfParserDefinition.BNF_LINE_COMMENT || type == BnfParserDefinition.BNF_BLOCK_COMMENT) {
+    if (type == BnfTokenSets.BNF_LINE_COMMENT || type == BnfTokenSets.BNF_BLOCK_COMMENT) {
       return pack(COMMENT);
     }
     if (type == BNF_STRING) {

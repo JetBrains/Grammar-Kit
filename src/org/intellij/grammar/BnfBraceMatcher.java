@@ -31,10 +31,10 @@ public final class BnfBraceMatcher implements PairedBraceMatcher {
   @Override
   public boolean isPairedBracesAllowedBeforeType(@NotNull IElementType lbraceType, @Nullable IElementType t) {
     return t == BnfTypes.BNF_SEMICOLON ||
-           BnfParserDefinition.WS.contains(t) ||
-           BnfParserDefinition.OPERATORS.contains(t) && t != BnfTypes.BNF_OP_NOT && t != BnfTypes.BNF_OP_AND ||
-           BnfParserDefinition.PARENS_R.contains(t) ||
-           BnfParserDefinition.COMMENTS.contains(t);
+           BnfTokenSets.WS.contains(t) ||
+           BnfTokenSets.OPERATORS.contains(t) && t != BnfTypes.BNF_OP_NOT && t != BnfTypes.BNF_OP_AND ||
+           BnfTokenSets.PARENS_R.contains(t) ||
+           BnfTokenSets.COMMENTS.contains(t);
   }
 
   @Override

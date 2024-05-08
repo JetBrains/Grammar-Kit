@@ -5,8 +5,8 @@ import com.intellij.psi.tree.IElementType;
 
 import static com.intellij.psi.TokenType.BAD_CHARACTER;
 import static com.intellij.psi.TokenType.WHITE_SPACE;
-import static org.intellij.grammar.BnfParserDefinition.BNF_BLOCK_COMMENT;
-import static org.intellij.grammar.BnfParserDefinition.BNF_LINE_COMMENT;
+import static org.intellij.grammar.BnfTokenSets.BNF_BLOCK_COMMENT;
+import static org.intellij.grammar.BnfTokenSets.BNF_LINE_COMMENT;
 import static org.intellij.grammar.psi.BnfTypes.*;
 
 %%

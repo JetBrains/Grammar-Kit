@@ -49,7 +49,7 @@ final class BnfFoldingBuilder extends CustomFoldingBuilder {
     }
     if (!quick) {
       PsiTreeUtil.processElements(file, element -> {
-        if (element.getNode().getElementType() == BnfParserDefinition.BNF_BLOCK_COMMENT) {
+        if (element.getNode().getElementType() == BnfTokenSets.BNF_BLOCK_COMMENT) {
           result.add(new FoldingDescriptor(element, element.getTextRange()));
         }
         return true;
@@ -63,7 +63,7 @@ final class BnfFoldingBuilder extends CustomFoldingBuilder {
     if (psi instanceof BnfAttrs) return "{..}";
     if (psi instanceof BnfRule) return ((BnfRule)psi).getName() + " ::= ...";
     if (psi instanceof BnfValueList) return "[..]";
-    if (node.getElementType() == BnfParserDefinition.BNF_BLOCK_COMMENT) return "/*..*/";
+    if (node.getElementType() == BnfTokenSets.BNF_BLOCK_COMMENT) return "/*..*/";
     return null;
   }
 

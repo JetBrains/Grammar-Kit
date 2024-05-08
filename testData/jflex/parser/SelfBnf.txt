@@ -1,7 +1,7 @@
 JFLEX_FILE
   JFlexUserCodeSectionImpl(FLEX_USER_CODE_SECTION)
     JFlexJavaCodeImpl(FLEX_JAVA_CODE)
-      PsiElement(code block)('package org.intellij.grammar.parser;\n\nimport com.intellij.lexer.FlexLexer;\nimport com.intellij.psi.tree.IElementType;\n\nimport static com.intellij.psi.TokenType.BAD_CHARACTER;\nimport static com.intellij.psi.TokenType.WHITE_SPACE;\nimport static org.intellij.grammar.BnfParserDefinition.BNF_BLOCK_COMMENT;\nimport static org.intellij.grammar.BnfParserDefinition.BNF_LINE_COMMENT;\nimport static org.intellij.grammar.psi.BnfTypes.*;\n\n')
+      PsiElement(code block)('package org.intellij.grammar.parser;\n\nimport com.intellij.lexer.FlexLexer;\nimport com.intellij.psi.tree.IElementType;\n\nimport static com.intellij.psi.TokenType.BAD_CHARACTER;\nimport static com.intellij.psi.TokenType.WHITE_SPACE;\nimport static org.intellij.grammar.BnfTokenSets.BNF_BLOCK_COMMENT;\nimport static org.intellij.grammar.BnfTokenSets.BNF_LINE_COMMENT;\nimport static org.intellij.grammar.psi.BnfTypes.*;\n\n')
   PsiElement(%%)('%%')
   PsiWhiteSpace('\n\n')
   JFlexDeclarationsSectionImpl(FLEX_DECLARATIONS_SECTION)

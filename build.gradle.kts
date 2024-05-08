@@ -5,7 +5,8 @@ import org.jetbrains.changelog.ChangelogSectionUrlBuilder
  * Copyright 2011-2024 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
  */
 
-fun properties(key: String) = project.findProperty(key).toString()
+fun properties(key: String) = providers.gradleProperty(key)
+fun environment(key: String) = providers.environmentVariable(key)
 
 plugins {
     id("java")
@@ -17,7 +18,7 @@ plugins {
     id("com.github.breadmoirai.github-release") version "2.5.2"
 }
 
-version = properties("pluginVersion")
+version = properties("pluginVersion").get()
 
 repositories {
     mavenCentral()
@@ -82,7 +83,7 @@ val buildGrammarKitJar = tasks.create<Jar>("buildGrammarKitJar") {
 }
 
 tasks {
-    properties("javaVersion").let {
+    properties("javaVersion").get().let {
         withType<JavaCompile> {
             sourceCompatibility = it
             targetCompatibility = it
@@ -103,7 +104,7 @@ tasks {
     }
 
     wrapper {
-        gradleVersion = properties("gradleVersion")
+        gradleVersion = properties("gradleVersion").get()
     }
 
     sourceSets {
@@ -134,18 +135,18 @@ tasks {
     }
 
     signPlugin {
-        certificateChain.set(System.getenv("CERTIFICATE_CHAIN"))
-        privateKey.set(System.getenv("PRIVATE_KEY"))
-        password.set(System.getenv("PRIVATE_KEY_PASSWORD"))
+        certificateChain = environment("CERTIFICATE_CHAIN")
+        privateKey = environment("PRIVATE_KEY")
+        password = environment("PRIVATE_KEY_PASSWORD")
     }
 
     publishPlugin {
         dependsOn("patchChangelog")
-        token.set(System.getenv("PUBLISH_TOKEN"))
-        // pluginVersion is based on the SemVer (https://semver.org) and supports pre-release labels, like 2.1.7-alpha.3
+        token = environment("PUBLISH_TOKEN")
+        // The pluginVersion is based on the SemVer (https://semver.org) and supports pre-release labels, like 2.1.7-alpha.3
         // Specify pre-release label to publish the plugin in a custom Release Channel automatically. Read more:
         // https://plugins.jetbrains.com/docs/intellij/deployment.html#specifying-a-release-channel
-        channels.set(listOf(properties("pluginVersion").split('-').getOrElse(1) { "default" }.split('.').first()))
+        channels = properties("pluginVersion").map { listOf(it.substringAfter('-', "").substringBefore('.').ifEmpty { "default" }) }
     }
 
     val buildGrammarKitZip = create<Zip>("buildGrammarKitZip") {
@@ -213,16 +214,16 @@ publishing {
             url = uri("https://oss.sonatype.org/service/local/staging/deploy/maven2")
 
             credentials {
-                username = properties("mavenCentralUsername")
-                password = properties("mavenCentralPassword")
+                username = properties("mavenCentralUsername").get()
+                password = properties("mavenCentralPassword").get()
             }
         }
     }
 }
 
 signing {
-    val signingKey = properties("signingKey")
-    val signingPassword = properties("signingPassword")
+    val signingKey = properties("signingKey").get()
+    val signingPassword = properties("signingPassword").get()
 
     isRequired = signingKey.isNotEmpty() && signingPassword.isNotEmpty()
 

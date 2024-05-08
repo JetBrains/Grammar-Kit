@@ -23,7 +23,7 @@ import com.intellij.psi.tree.IElementType;
 
 import static com.intellij.psi.TokenType.BAD_CHARACTER;
 import static com.intellij.psi.TokenType.WHITE_SPACE;
-import static org.intellij.jflex.parser.JFlexParserDefinition.FLEX_NEWLINE;
+import static org.intellij.jflex.psi.JFlexTokenSets.FLEX_NEWLINE;
 import static org.intellij.jflex.psi.JFlexTypes.*;
 
 

@@ -11,6 +11,7 @@ import com.intellij.psi.tree.IElementType;
 import com.intellij.psi.tree.TokenSet;
 import org.intellij.grammar.parser.GeneratedParserUtilBase;
 import org.intellij.jflex.editor.JFlexBraceMatcher;
+import org.intellij.jflex.psi.JFlexTokenSets;
 import org.intellij.jflex.psi.JFlexTypes;
 
 /**
@@ -47,7 +48,7 @@ public class JFlexParserUtil extends GeneratedParserUtilBase {
       IElementType type = builder.rawLookup(i);
       if (type == TokenType.WHITE_SPACE) continue;
       if (type == JFlexTypes.FLEX_LINE_COMMENT || type == JFlexTypes.FLEX_BLOCK_COMMENT) continue;
-      if (type == JFlexParserDefinition.FLEX_NEWLINE || type == null) return true;
+      if (type == JFlexTokenSets.FLEX_NEWLINE || type == null) return true;
       if (builder.getOriginalText().charAt(builder.rawTokenTypeStart(i+1)-1) == '\n') return true;
       addVariant(builder, "<new-line>");
       return false;

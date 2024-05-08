@@ -20,8 +20,8 @@ import org.intellij.jflex.parser.JFlexLexer;
 import org.jetbrains.annotations.NotNull;
 
 import static com.intellij.openapi.editor.colors.TextAttributesKey.createTextAttributesKey;
-import static org.intellij.jflex.parser.JFlexParserDefinition.CHAR_CLASS_OPERATORS;
-import static org.intellij.jflex.parser.JFlexParserDefinition.PATTERN_OPERATORS;
+import static org.intellij.jflex.psi.JFlexTokenSets.CHAR_CLASS_OPERATORS;
+import static org.intellij.jflex.psi.JFlexTokenSets.PATTERN_OPERATORS;
 import static org.intellij.jflex.psi.JFlexTypes.*;
 
 final class JFlexSyntaxHighlighterFactory extends SyntaxHighlighterFactory {

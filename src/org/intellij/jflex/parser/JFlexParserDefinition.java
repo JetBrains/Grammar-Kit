@@ -12,29 +12,19 @@ import com.intellij.openapi.project.Project;
 import com.intellij.psi.FileViewProvider;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
-import com.intellij.psi.TokenType;
-import com.intellij.psi.tree.IElementType;
 import com.intellij.psi.tree.IFileElementType;
 import com.intellij.psi.tree.TokenSet;
 import org.intellij.jflex.JFlexLanguage;
-import org.intellij.jflex.psi.JFlexTokenType;
+import org.intellij.jflex.psi.JFlexTokenSets;
 import org.intellij.jflex.psi.impl.JFlexFileImpl;
 import org.jetbrains.annotations.NotNull;
-
-import static org.intellij.jflex.psi.JFlexTypes.*;
 
 /**
  * @author gregsh
  */
-public final class JFlexParserDefinition implements ParserDefinition {
+final class JFlexParserDefinition implements ParserDefinition {
 
-  public static final IFileElementType FILE_NODE_TYPE = new IFileElementType("JFLEX_FILE", JFlexLanguage.INSTANCE);
-  public static final IElementType FLEX_NEWLINE = new JFlexTokenType("newline");
-  public static final TokenSet WS = TokenSet.create(TokenType.WHITE_SPACE, FLEX_NEWLINE);
-  public static final TokenSet COMMENTS = TokenSet.create(FLEX_LINE_COMMENT, FLEX_BLOCK_COMMENT);
-  public static final TokenSet LITERALS = TokenSet.create(FLEX_STRING);
-  public static final TokenSet CHAR_CLASS_OPERATORS = TokenSet.create(FLEX_AMPAMP, FLEX_BARBAR, FLEX_DASHDASH, FLEX_HAT, FLEX_TILDETILDE);
-  public static final TokenSet PATTERN_OPERATORS = TokenSet.create(FLEX_BAR, FLEX_BANG, FLEX_DOLLAR, FLEX_PLUS, FLEX_QUESTION, FLEX_STAR, FLEX_TILDE);
+  private static final IFileElementType FILE_NODE_TYPE = new IFileElementType("JFLEX_FILE", JFlexLanguage.INSTANCE);
 
   @Override
   public @NotNull Lexer createLexer(Project project) {
@@ -53,17 +43,17 @@ public final class JFlexParserDefinition implements ParserDefinition {
 
   @Override
   public @NotNull TokenSet getWhitespaceTokens() {
-    return WS;
+    return JFlexTokenSets.WS;
   }
 
   @Override
   public @NotNull TokenSet getCommentTokens() {
-    return COMMENTS;
+    return JFlexTokenSets.COMMENTS;
   }
 
   @Override
   public @NotNull TokenSet getStringLiteralElements() {
-    return LITERALS;
+    return JFlexTokenSets.LITERALS;
   }
 
   @Override
@@ -80,5 +70,4 @@ public final class JFlexParserDefinition implements ParserDefinition {
   public @NotNull SpaceRequirements spaceExistenceTypeBetweenTokens(ASTNode astNode, ASTNode astNode1) {
     return SpaceRequirements.MAY;
   }
-  
 }

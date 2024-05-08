@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
+ * Copyright 2011-2024 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
  */
 
 package org.intellij.grammar.livePreview;
@@ -17,10 +17,10 @@ import javax.swing.*;
 /**
  * @author gregsh
  */
-public class LivePreviewFileType extends LanguageFileType {
-  public static final FileType INSTANCE = new LivePreviewFileType();
+final class LivePreviewFileType extends LanguageFileType {
+  static final FileType INSTANCE = new LivePreviewFileType();
 
-  protected LivePreviewFileType() {
+  private LivePreviewFileType() {
     super(LivePreviewLanguage.BASE_INSTANCE);
   }
 

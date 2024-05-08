@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
+ * Copyright 2011-2024 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
  */
 
 package org.intellij.jflex.parser;
@@ -26,7 +26,7 @@ import static org.intellij.jflex.psi.JFlexTypes.*;
 /**
  * @author gregsh
  */
-public class JFlexParserDefinition implements ParserDefinition {
+public final class JFlexParserDefinition implements ParserDefinition {
 
   public static final IFileElementType FILE_NODE_TYPE = new IFileElementType("JFLEX_FILE", JFlexLanguage.INSTANCE);
   public static final IElementType FLEX_NEWLINE = new JFlexTokenType("newline");

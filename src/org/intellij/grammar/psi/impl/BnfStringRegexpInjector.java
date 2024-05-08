@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
+ * Copyright 2011-2024 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
  */
 
 package org.intellij.grammar.psi.impl;
@@ -18,7 +18,7 @@ import static org.intellij.grammar.generator.BnfConstants.REGEXP_PREFIX;
 /**
  * @author gregsh
  */
-public class BnfStringRegexpInjector implements LanguageInjector {
+final class BnfStringRegexpInjector implements LanguageInjector {
   @Override
   public void getLanguagesToInject(@NotNull PsiLanguageInjectionHost host, @NotNull InjectedLanguagePlaces places) {
     if (!(host instanceof BnfStringImpl)) return;

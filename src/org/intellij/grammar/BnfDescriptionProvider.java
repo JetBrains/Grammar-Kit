@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
+ * Copyright 2011-2024 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
  */
 package org.intellij.grammar;
 
@@ -24,7 +24,7 @@ import org.jetbrains.annotations.NotNull;
  * @author gregory
  *         Date: 17.07.11 18:46
  */
-public class BnfDescriptionProvider implements ElementDescriptionProvider {
+final class BnfDescriptionProvider implements ElementDescriptionProvider {
   @Override
   public String getElementDescription(@NotNull PsiElement psiElement, @NotNull ElementDescriptionLocation location) {
     if (location == UsageViewNodeTextLocation.INSTANCE && psiElement instanceof BnfComposite) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
+ * Copyright 2011-2024 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
  */
 
 package org.intellij.grammar.refactor;
@@ -28,7 +28,7 @@ import java.util.Set;
 /**
  * @author gregsh
  */
-public class BnfUnwrapDescriptor implements UnwrapDescriptor, Unwrapper {
+final class BnfUnwrapDescriptor implements UnwrapDescriptor, Unwrapper {
   
   @Override
   public @NotNull List<Pair<PsiElement, Unwrapper>> collectUnwrappers(@NotNull Project project,

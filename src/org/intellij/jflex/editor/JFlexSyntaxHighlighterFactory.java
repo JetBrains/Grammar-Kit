@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
+ * Copyright 2011-2024 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
  */
 
 package org.intellij.jflex.editor;
@@ -24,7 +24,7 @@ import static org.intellij.jflex.parser.JFlexParserDefinition.CHAR_CLASS_OPERATO
 import static org.intellij.jflex.parser.JFlexParserDefinition.PATTERN_OPERATORS;
 import static org.intellij.jflex.psi.JFlexTypes.*;
 
-public class JFlexSyntaxHighlighterFactory extends SyntaxHighlighterFactory {
+final class JFlexSyntaxHighlighterFactory extends SyntaxHighlighterFactory {
   public static final TextAttributesKey ILLEGAL    = createTextAttributesKey("FLEX_ILLEGAL", HighlighterColors.BAD_CHARACTER);
 
   public static final TextAttributesKey MACRO      = createTextAttributesKey("FLEX_MACRO", DefaultLanguageHighlighterColors.INSTANCE_FIELD);

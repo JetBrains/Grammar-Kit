@@ -1,12 +1,19 @@
+/*
+ * Copyright 2011-2024 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
+ */
+
 package org.intellij.grammar;
 
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 import org.intellij.grammar.expression.ExpressionParserTest;
+import org.intellij.grammar.inspection.BnfHighlightingTest;
+import org.intellij.grammar.intention.BnfConvertOptExpressionIntentionTest;
+import org.intellij.grammar.intention.BnfFlipChoiceIntentionTest;
 import org.intellij.jflex.JFlexCompletionTest;
 import org.intellij.jflex.JFlexGenerationTest;
-import org.intellij.jflex.JFlexParserTest;
+import org.intellij.jflex.parser.JFlexParserTest;
 
 /**
  * @author gregsh

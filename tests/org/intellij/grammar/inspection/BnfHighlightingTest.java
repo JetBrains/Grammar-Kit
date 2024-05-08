@@ -1,4 +1,8 @@
-package org.intellij.grammar;
+/*
+ * Copyright 2011-2024 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
+ */
+
+package org.intellij.grammar.inspection;
 
 import com.intellij.openapi.application.WriteAction;
 import com.intellij.openapi.module.Module;
@@ -12,7 +16,6 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.vfs.newvfs.impl.VfsRootAccess;
 import com.intellij.psi.JavaPsiFacade;
 import com.intellij.testFramework.fixtures.BasePlatformTestCase;
-import org.intellij.grammar.inspection.*;
 
 import java.io.File;
 import java.io.IOException;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
+ * Copyright 2011-2024 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
  */
 
 package org.intellij.grammar;
@@ -43,9 +43,9 @@ import static org.intellij.grammar.psi.BnfTypes.BNF_ID;
 /**
  * @author gregsh
  */
-public class BnfCompletionContributor extends CompletionContributor {
+final class BnfCompletionContributor extends CompletionContributor {
 
-  public BnfCompletionContributor() {
+  BnfCompletionContributor() {
     PsiElementPattern.Capture<PsiElement> placePattern =
       psiElement()
         .inFile(StandardPatterns.instanceOf(BnfFile.class))

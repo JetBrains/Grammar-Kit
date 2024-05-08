@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
+ * Copyright 2011-2024 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
  */
 
 package org.intellij.grammar.inspection;
@@ -33,7 +33,7 @@ import static org.intellij.grammar.psi.impl.GrammarUtil.bnfTraverserNoAttrs;
 /**
  * @author gregsh
  */
-public class BnfUnusedRuleInspection extends LocalInspectionTool {
+final class BnfUnusedRuleInspection extends LocalInspectionTool {
 
   @Override
   public boolean runForWholeFile() {

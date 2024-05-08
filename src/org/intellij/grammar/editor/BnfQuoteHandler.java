@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
+ * Copyright 2011-2024 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
  */
 
 package org.intellij.grammar.editor;
@@ -11,8 +11,8 @@ import org.intellij.grammar.psi.BnfTypes;
 /**
  * @author gregsh
  */
-public class BnfQuoteHandler extends SimpleTokenSetQuoteHandler {
-  public BnfQuoteHandler() {
+final class BnfQuoteHandler extends SimpleTokenSetQuoteHandler {
+  BnfQuoteHandler() {
     super(BnfTypes.BNF_STRING, TokenType.BAD_CHARACTER);
   }
 }

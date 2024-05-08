@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
+ * Copyright 2011-2024 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
  */
 
 package org.intellij.jflex.editor;
@@ -16,7 +16,7 @@ import static org.intellij.jflex.psi.JFlexTypes.*;
 /**
  * @author gregsh
  */
-public class JFlexBraceMatcher implements PairedBraceMatcher {
+public final class JFlexBraceMatcher implements PairedBraceMatcher {
 
   private static final BracePair[] PAIRS = new BracePair[]{
     new BracePair(FLEX_BRACE1, FLEX_BRACE2, true),

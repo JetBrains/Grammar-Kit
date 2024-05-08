@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
+ * Copyright 2011-2024 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
  */
 
 package org.intellij.jflex.editor;
@@ -12,7 +12,7 @@ import org.intellij.jflex.psi.JFlexTypes;
 /**
  * @author gregsh
  */
-public class JFlexCommenter implements CodeDocumentationAwareCommenter {
+final class JFlexCommenter implements CodeDocumentationAwareCommenter {
   @Override
   public String getLineCommentPrefix() {
     return "//";

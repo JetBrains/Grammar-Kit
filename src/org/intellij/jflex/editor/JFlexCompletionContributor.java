@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
+ * Copyright 2011-2024 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
  */
 
 package org.intellij.jflex.editor;
@@ -39,9 +39,9 @@ import static org.intellij.jflex.psi.JFlexTypes.*;
 /**
  * @author gregsh
  */
-public class JFlexCompletionContributor extends CompletionContributor {
+final class JFlexCompletionContributor extends CompletionContributor {
 
-  public JFlexCompletionContributor() {
+  JFlexCompletionContributor() {
     extend(CompletionType.BASIC, psiElement().inFile(StandardPatterns.instanceOf(JFlexFileImpl.class)), new CompletionProvider<>() {
       @Override
       protected void addCompletions(@NotNull CompletionParameters parameters,

@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
+ * Copyright 2011-2024 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
  */
 
 package org.intellij.grammar.diagram;
@@ -44,8 +44,8 @@ import static org.intellij.grammar.generator.ParserGeneratorUtil.getAttribute;
 /**
  * @author gregsh
  */
-public class BnfDiagramProvider extends DiagramProvider<BnfRule> {
-  public static final String ID = "GRAMMAR";
+final class BnfDiagramProvider extends DiagramProvider<BnfRule> {
+  private static final String ID = "GRAMMAR";
 
   private record Item(BnfRule rule, RuleGraphHelper.Cardinality cardinality) {
   }
@@ -164,7 +164,7 @@ public class BnfDiagramProvider extends DiagramProvider<BnfRule> {
   private final DiagramExtras<BnfRule> myExtras = new DiagramExtras<>();
   private RuleGraphHelper myGraphHelper;
 
-  public BnfDiagramProvider() {
+  BnfDiagramProvider() {
     myElementManager.setUmlProvider(this);
   }
 

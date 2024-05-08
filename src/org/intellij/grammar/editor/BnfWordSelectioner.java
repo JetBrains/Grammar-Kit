@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
+ * Copyright 2011-2024 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
  */
 
 package org.intellij.grammar.editor;
@@ -18,7 +18,7 @@ import java.util.List;
 /**
  * @author gregsh
  */
-public class BnfWordSelectioner extends BraceMatcherBasedSelectioner{
+final class BnfWordSelectioner extends BraceMatcherBasedSelectioner{
   @Override
   public boolean canSelect(@NotNull PsiElement e) {
     return e instanceof BnfComposite ||

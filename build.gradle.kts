@@ -42,7 +42,7 @@ intellij {
     pluginName.set(properties("pluginName"))
     version.set(properties("ideaVersion"))
     type.set("IU")
-    plugins.set(listOf("uml", "java"))
+    plugins.set(listOf("com.intellij.diagram", "com.intellij.java", "com.intellij.copyright"))
     updateSinceUntilBuild.set(false)
 }
 
@@ -124,11 +124,11 @@ tasks {
         sinceBuild.set(properties("pluginSinceIdeaBuild"))
         changeNotes.set(provider {
             changelog.renderItem(
-                    changelog
-                            .getUnreleased()
-                            .withHeader(false)
-                            .withEmptySections(false),
-                    Changelog.OutputType.HTML
+                changelog
+                    .getUnreleased()
+                    .withHeader(false)
+                    .withEmptySections(false),
+                Changelog.OutputType.HTML
             )
         })
     }

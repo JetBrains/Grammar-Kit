@@ -432,8 +432,6 @@ public class ParserGenerator {
         }
       }
     }
-    //Generate other files. This generation is required for Fleet features and is isolated from psi files generation.
-    generateAdditionalFiles();
   }
 
   private void checkClassAvailability(@Nullable String className, @Nullable String description) {
@@ -2240,6 +2238,4 @@ public class ParserGenerator {
     }
     newLine();
   }
-
-  protected void generateAdditionalFiles() throws IOException {}
 }

@@ -33,6 +33,17 @@ public class FleetParserGenerator extends ParserGenerator {
                               @NotNull String sourcePath,
                               @NotNull String outputPath,
                               @NotNull String packagePrefix) {
+    this (psiFile, sourcePath, outputPath, packagePrefix, false, "", "", "");
+  }
+
+  public FleetParserGenerator(@NotNull BnfFile psiFile,
+                              @NotNull String sourcePath,
+                              @NotNull String outputPath,
+                              @NotNull String packagePrefix,
+                              Boolean generateIFileType,
+                              String classFileTypeName,
+                              String debugFileTypeName,
+                              String languageClass) {
     super(psiFile, sourcePath, outputPath, packagePrefix);
     myPossibleImports = new LinkedList<>();
     var importList = psiFile.getAllPossibleAttributeValues(KnownAttribute.ELEMENT_TYPE_CLASS);
@@ -51,11 +62,10 @@ public class FleetParserGenerator extends ParserGenerator {
     rootImport = getRootAttribute(psiFile, KnownAttribute.ELEMENT_TYPE_HOLDER_CLASS);
     if (rootImport != null) myPossibleImports.add(rootImport);
 
-    var iFiletypeGenerationOptions = getRootAttribute(psiFile, KnownAttribute.FLEET_FILETYPE_GENERATION).asMap();
-    myGenerateIFileType = !iFiletypeGenerationOptions.isEmpty();
-    myFileTypeClassName = iFiletypeGenerationOptions.getOrDefault("fileTypeClass", "");
-    myFileTypeDebugName = iFiletypeGenerationOptions.getOrDefault("debugName", "FILE");
-    myLanguageClass = iFiletypeGenerationOptions.getOrDefault("languageClass", "");
+    myGenerateIFileType = generateIFileType;
+    myFileTypeClassName = classFileTypeName;
+    myFileTypeDebugName = debugFileTypeName;
+    myLanguageClass = languageClass;
 
     myPossibleImports.add(myFileTypeClassName);
     myPossibleImports.add(myLanguageClass);
@@ -130,7 +140,8 @@ public class FleetParserGenerator extends ParserGenerator {
   }
 
   @Override
-  protected void generateAdditionalFiles() throws IOException {
+  public void generate() throws IOException {
+    super.generate();
     if (myGenerateIFileType) {
       openOutput(adjustName(myFileTypeClassName));
       try {

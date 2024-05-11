@@ -22,7 +22,7 @@ Open-source plugins built with Grammar-Kit:
   [intellij-erlang](https://github.com/ignatov/intellij-erlang),
   [go-lang-idea-plugin](https://github.com/go-lang-plugin-org/go-lang-idea-plugin),
 * [intellij-haskforce](https://github.com/carymrobbins/intellij-haskforce), 
-  [elm-plugin](https://github.com/intellij-elm/intellij-elm/tree/master),
+  [intellij-elm](https://github.com/intellij-elm/intellij-elm),
   [intellij-elixir](https://github.com/KronicDeth/intellij-elixir),
   [Perl5-IDEA](https://github.com/Camelcade/Perl5-IDEA),
 * [Dart](https://github.com/JetBrains/intellij-plugins/tree/master/Dart), 

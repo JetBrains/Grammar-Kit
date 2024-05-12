@@ -91,7 +91,7 @@ public class BnfRunJFlexAction extends DumbAwareAction {
     e.getPresentation().setEnabledAndVisible(project != null && !files.isEmpty());
   }
 
-  private static List<VirtualFile> getFiles(@NotNull AnActionEvent e) {
+  protected static List<VirtualFile> getFiles(@NotNull AnActionEvent e) {
     return JBIterable.of(e.getData(CommonDataKeys.VIRTUAL_FILE_ARRAY)).filter(file -> {
       FileType fileType = file.getFileType();
       return fileType == JFlexFileType.INSTANCE ||
@@ -116,7 +116,7 @@ public class BnfRunJFlexAction extends DumbAwareAction {
     }
     String batchId = "jflex@" + System.nanoTime();
     new Runnable() {
-      final Iterator<VirtualFile> it = files.iterator();
+      final Iterator<VirtualFile> it = getFileIterator(files);
       @Override
       public void run() {
         if (it.hasNext()) {
@@ -126,7 +126,11 @@ public class BnfRunJFlexAction extends DumbAwareAction {
     }.run();
   }
 
-  public static ActionCallback doGenerate(@NotNull Project project,
+  protected Iterator<VirtualFile> getFileIterator(List<VirtualFile> files) {
+    return files.iterator();
+  }
+
+  public ActionCallback doGenerate(@NotNull Project project,
                                           @NotNull VirtualFile flexFile,
                                           @NotNull Couple<File> jflex,
                                           @NotNull String batchId) {
@@ -252,7 +256,7 @@ public class BnfRunJFlexAction extends DumbAwareAction {
     }
   }
 
-  private static @Nullable Couple<File> getOrDownload(@NotNull Project project) {
+  protected static @Nullable Couple<File> getOrDownload(@NotNull Project project) {
     LibraryTable libraryTable = LibraryTablesRegistrar.getInstance().getLibraryTable();
     for (Library library : libraryTable.getLibraries()) {
       Couple<File> result = findInUrls(library.getUrls(OrderRootType.CLASSES));

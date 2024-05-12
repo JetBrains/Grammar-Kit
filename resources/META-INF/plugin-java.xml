@@ -20,9 +20,10 @@
       <action id="grammar.Run.JFlex" class="org.intellij.grammar.actions.BnfRunJFlexAction"
               use-shortcut-of="grammar.Generate">
       </action>
-      <action id="grammar.fleet.Generate" class="org.intellij.grammar.actions.GenerateFleetAction"/>
+      <action id="grammar.fleet.Run.JFlex" class="org.intellij.grammar.actions.BnfRunFleetJFlexAction"/>
       <action id="grammar.Generate.ParserUtil" class="org.intellij.grammar.actions.BnfGenerateParserUtilAction"/>
       <action id="grammar.Generate.JFlexLexer" class="org.intellij.grammar.actions.BnfGenerateLexerAction"/>
+      <action id="grammar.fleet.Generate" class="org.intellij.grammar.actions.GenerateFleetAction"/>
       <action id="grammar.fleet.Generate.JFlexLexer" class="org.intellij.grammar.actions.BnfGenerateFleetLexerAction"/>
       <add-to-group group-id="grammar.file.group" anchor="first"/>
     </group>

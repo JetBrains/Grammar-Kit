@@ -80,6 +80,7 @@ val buildGrammarKitJar = tasks.create<Jar>("buildGrammarKitJar") {
     from(file("$rootDir/src/org/intellij/grammar/parser/GeneratedParserUtilBase.java")) {
         into("/templates")
     }
+    exclude("**/classpath.index")
 }
 
 tasks {

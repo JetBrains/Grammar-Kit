@@ -1,6 +1,5 @@
 <idea-plugin url="https://github.com/JetBrains/Grammar-Kit">
   <id>org.jetbrains.idea.grammar</id>
-  <version>2022.3-SNAPSHOT</version>
   <vendor>JetBrains</vendor>
 
   <name>Grammar-Kit</name>

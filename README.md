@@ -5,13 +5,14 @@ Grammar-Kit
 [![GitHub license](https://img.shields.io/badge/license-Apache%20License%202.0-blue.svg?style=flat)](http://www.apache.org/licenses/LICENSE-2.0)
 [![official project](http://jb.gg/badges/official.svg)](https://confluence.jetbrains.com/display/ALL/JetBrains+on+GitHub)
 
-An [IntelliJ IDEA plugin](http://plugins.jetbrains.com/plugin/6606) for language plugin developers.<br>
-Adds BNF Grammars and JFlex files editing support, and a parser/PSI code generator.
+An [IntelliJ IDEA plugin](http://plugins.jetbrains.com/plugin/6606) for language plugin developers.
+
+Adds BNF Grammars and JFlex file editing support, and a parser/PSI code generator.
 
 Quick links: [Latest dev build](https://teamcity.jetbrains.com/guestAuth/app/rest/builds/buildType:IntellijIdeaPlugins_GrammarKit_Build,status:SUCCESS/artifacts/content/GrammarKit*.zip),
 [Changelog](CHANGELOG.md), [Tutorial](TUTORIAL.md), [How-to](HOWTO.md)
 
-> **Note**
+> [!IMPORTANT]
 >
 > Since 2022.3, Grammar-Kit plugin requires Java 17.
 
@@ -20,15 +21,14 @@ Open-source plugins built with Grammar-Kit:
 * [Clojure-Kit](https://github.com/gregsh/Clojure-Kit), 
   [intellij-rust](https://github.com/intellij-rust/intellij-rust),
   [intellij-erlang](https://github.com/ignatov/intellij-erlang),
-  [go-lang-idea-plugin](https://github.com/go-lang-plugin-org/go-lang-idea-plugin),
-* [intellij-haskforce](https://github.com/carymrobbins/intellij-haskforce), 
-  [intellij-elm](https://github.com/intellij-elm/intellij-elm),
-  [intellij-elixir](https://github.com/KronicDeth/intellij-elixir),
+  [intellij-elm](https://github.com/intellij-elm/intellij-elm)
+* [intellij-elixir](https://github.com/KronicDeth/intellij-elixir),
   [Perl5-IDEA](https://github.com/Camelcade/Perl5-IDEA),
-* [Dart](https://github.com/JetBrains/intellij-plugins/tree/master/Dart), 
+  [Dart](https://github.com/JetBrains/intellij-plugins/tree/master/Dart), 
   [intellij-haxe](https://github.com/HaxeFoundation/intellij-haxe),
-  [Cypher](https://github.com/neueda/jetbrains-plugin-graph-database-support),
-  [OGNL](https://github.com/JetBrains/intellij-plugins/tree/master/struts2)
+  [Cypher](https://github.com/neueda/jetbrains-plugin-graph-database-support)
+
+See also [Custom Language Support Tutorial](https://plugins.jetbrains.com/docs/intellij/custom-language-support-tutorial.html).
 
 General usage instructions
 --------------------------

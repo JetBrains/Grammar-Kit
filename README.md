@@ -1,9 +1,11 @@
 
 Grammar-Kit
 ===========
+[![official project](http://jb.gg/badges/official.svg)](https://confluence.jetbrains.com/display/ALL/JetBrains+on+GitHub)
 [![Build Status](https://teamcity.jetbrains.com/app/rest/builds/buildType:(id:IntellijIdeaPlugins_GrammarKit_Build)/statusIcon.svg?guest=1)](https://teamcity.jetbrains.com/viewType.html?buildTypeId=IntellijIdeaPlugins_GrammarKit_Build&guest=1)
 [![GitHub license](https://img.shields.io/badge/license-Apache%20License%202.0-blue.svg?style=flat)](http://www.apache.org/licenses/LICENSE-2.0)
-[![official project](http://jb.gg/badges/official.svg)](https://confluence.jetbrains.com/display/ALL/JetBrains+on+GitHub)
+[![X Follow](https://img.shields.io/badge/follow-%40JBPlatform-1DA1F2?logo=x)][jb:x]
+[![Slack](https://img.shields.io/badge/Slack-%23intellij--platform-blue?style=flat-square&logo=Slack)][jb:slack]
 
 An [IntelliJ IDEA plugin](http://plugins.jetbrains.com/plugin/6606) for language plugin developers.
 
@@ -244,3 +246,6 @@ Parser generator generates token types constants and PSI by default.
 This can be switched off via *generateTokens* and *generatePSI* global boolean attributes respectively.
  
 *elementType* rule attribute allows mixing the generated code and some existing hand-made PSI.   
+
+[jb:slack]: https://plugins.jetbrains.com/slack
+[jb:x]: https://x.com/JBPlatform

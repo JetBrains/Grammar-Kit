@@ -23,8 +23,6 @@ import java.nio.file.Files;
 import java.util.Iterator;
 import java.util.List;
 
-import static org.intellij.grammar.actions.FileGeneratorUtil.fail;
-
 public class BnfRunFleetJFlexAction extends BnfRunJFlexAction {
   private static final String TEMP_FLEX_DIRECTORY = "temp-grammar-kit";
   private static final String PACKAGE_PREFIX = "package ";
@@ -40,7 +38,7 @@ public class BnfRunFleetJFlexAction extends BnfRunJFlexAction {
   private JavaHelper javaHelper;
 
   @Override
-  public void actionPerformed(AnActionEvent e) {
+  public void actionPerformed(@NotNull AnActionEvent e) {
     var project = e.getProject();
     if (project == null) return;
 

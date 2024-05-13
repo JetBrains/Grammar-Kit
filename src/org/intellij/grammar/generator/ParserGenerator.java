@@ -733,7 +733,8 @@ public class ParserGenerator {
     return result;
   }
 
-  protected enum Java { CLASS, INTERFACE, ABSTRACT_CLASS }
+  protected enum Java {CLASS, INTERFACE, ABSTRACT_CLASS}
+
   protected void generateClassHeader(String className,
                                    Set<String> imports,
                                    String annos,

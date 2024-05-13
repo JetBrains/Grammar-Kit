@@ -57,7 +57,6 @@
       "com.intellij.json.psi.JsonElement"
       "com.intellij.psi.PsiNamedElement"
     ]
-    generateFileTypeForFleet = [fileTypeClass = "fleet.com.intellij.json.psi.JsonFileType" debugName = "JSON" languageClass = "fleet.com.intellij.json.JsonLanguage"]
 }
 
 // For compatibility we allow any value at root level (see JsonStandardComplianceAnnotator)

@@ -14,13 +14,26 @@ import java.io.*;
 
 public class FleetBnfGeneratorTest extends BnfGeneratorAbstractTest {
 
+  private FileGeneratorParams myFileGeneratorParams = null;
+  private record FileGeneratorParams(boolean doGenerate, String className, String debugName, String languageClass) {}
+
   public FleetBnfGeneratorTest() {
     super("fleet");
   }
 
   @Override
   protected ParserGenerator newTestGenerator() {
-    return new FleetParserGenerator((BnfFileImpl)myFile, "", myFullDataPath, "") {
+    var doGenerate = false;
+    var className = "";
+    var languageName = "";
+    var debugName = "";
+    if (myFileGeneratorParams != null) {
+      doGenerate = true;
+      className = myFileGeneratorParams.className;
+      languageName = myFileGeneratorParams.languageClass;
+      debugName = myFileGeneratorParams.debugName;
+    }
+    return new FleetParserGenerator((BnfFileImpl)myFile, "", myFullDataPath, "", doGenerate, className, debugName, languageName) {
 
       @Override
       protected PrintWriter openOutputInner(String className, File file) throws IOException {
@@ -37,8 +50,14 @@ public class FleetBnfGeneratorTest extends BnfGeneratorAbstractTest {
     };
   }
 
-  public void testFleetJson() throws Exception { doGenTest(true);}
+  public void doGenTest(boolean generatePsi, String fileTypeClass, String debugName, String languageClass) throws Exception {
+    myFileGeneratorParams = new FileGeneratorParams(true, fileTypeClass, debugName, languageClass);
+    super.doGenTest(generatePsi);
+    myFileGeneratorParams = null;
+  }
+
+  public void testFleetJson() throws Exception { doGenTest(true, "fleet.com.intellij.json.psi.JsonFileType", "JSON", "fleet.com.intellij.json.JsonLanguage");}
   public void testAdjustPackages() throws Exception { doGenTest(true);}
-  public void testIFileTypeGeneration() throws Exception { doGenTest(true);}
+  public void testIFileTypeGeneration() throws Exception { doGenTest(true, "some.filetype.psi.MyFileType", "TEST", "some.language.MyLanguage");}
   public void testFleetPsiGen() throws Exception { doGenTest(true);}
 }

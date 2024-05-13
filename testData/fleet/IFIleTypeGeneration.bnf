@@ -1,6 +1,5 @@
 {
   extraRoot(".*")=true
-  generateFileTypeForFleet=[fileTypeClass="some.filetype.psi.MyFileType" debugName="MyFileName" languageClass="some.language.MyLanguage"]
 }
 
 grammar ::= list | map

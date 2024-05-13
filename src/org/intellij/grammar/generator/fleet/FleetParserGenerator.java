@@ -33,7 +33,7 @@ public class FleetParserGenerator extends ParserGenerator {
                               @NotNull String sourcePath,
                               @NotNull String outputPath,
                               @NotNull String packagePrefix) {
-    this (psiFile, sourcePath, outputPath, packagePrefix, false, "", "", "");
+    this(psiFile, sourcePath, outputPath, packagePrefix, false, "", "", "");
   }
 
   public FleetParserGenerator(@NotNull BnfFile psiFile,

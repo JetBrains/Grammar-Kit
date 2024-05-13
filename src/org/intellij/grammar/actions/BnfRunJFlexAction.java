@@ -117,6 +117,7 @@ public class BnfRunJFlexAction extends DumbAwareAction {
     String batchId = "jflex@" + System.nanoTime();
     new Runnable() {
       final Iterator<VirtualFile> it = getFileIterator(files);
+
       @Override
       public void run() {
         if (it.hasNext()) {

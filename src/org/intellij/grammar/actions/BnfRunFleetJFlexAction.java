@@ -111,25 +111,21 @@ public class BnfRunFleetJFlexAction extends BnfRunJFlexAction {
   }
 
   private static String adjustLine(String line, Boolean adjust, JavaHelper javaHelper) {
-    if (adjust) {
-      var tokens = line.split("[ ;]");
-      var name = tokens[tokens.length - 1];
+    var tokens = line.split("[ ;]");
+    var name = tokens[tokens.length - 1];
 
-      if (line.startsWith(PACKAGE_PREFIX) || nameNeedsAdjusting(true, name, javaHelper)) {
-        name = FleetConstants.FLEET_NAMESPACE_PREFIX + name;
-        StringBuilder lineBuilder = new StringBuilder();
-        for (int i = 0; i < tokens.length - 1; i++) {
-          lineBuilder.append(tokens[i]).append(" ");
-        }
-        return lineBuilder + name + ';';
+    if (line.startsWith(PACKAGE_PREFIX) || nameNeedsAdjusting(adjust, name, javaHelper)) {
+      name = FleetConstants.FLEET_NAMESPACE_PREFIX + name;
+      StringBuilder lineBuilder = new StringBuilder();
+      for (int i = 0; i < tokens.length - 1; i++) {
+        lineBuilder.append(tokens[i]).append(" ");
       }
+      return lineBuilder + name + ';';
     }
     return line;
   }
 
   private static Boolean nameNeedsAdjusting(Boolean movePackagesToFleet, String className, JavaHelper javaHelper) {
-    if (!movePackagesToFleet) return false;
-
     if (className.startsWith(FleetConstants.FLEET_NAMESPACE_PREFIX) ||
         className.equals(IELEMENTTYPE_CLASS) ||
         className.equals(FLEX_LEXER_CLASS) ||
@@ -148,6 +144,6 @@ public class BnfRunFleetJFlexAction extends BnfRunJFlexAction {
       return true;
     }
 
-    return javaHelper.findClass(name) == null && javaHelper.findPackage(name) == null;
+    return movePackagesToFleet && javaHelper.findClass(name) == null && javaHelper.findPackage(name) == null;
   }
 }

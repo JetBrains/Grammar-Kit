@@ -779,7 +779,7 @@ public class ParserGenerator {
         sb.append(" implements ").append(shortener.shorten(aSuper));
       }
       else {
-         sb.append(", ").append(shortener.shorten(aSuper));
+        sb.append(", ").append(shortener.shorten(aSuper));
       }
     }
     if (StringUtil.isNotEmpty(annos)) {

@@ -29,7 +29,7 @@ public class Main {
   public static void main(String[] args) {
     if (args.length < 2) {
       System.out.println(
-        "Usage: Main <output-dir> <grammars or pattern 1>[-f][--generateFileTypeElement --className=<fqn> --debugName=<debugName> --languageClass=<fqn>]... <grammars or pattern n>[-f][--generateFileTypeElement...]");
+        "Usage: Main <output-dir> <grammar-or-pattern 1>[--fleet][--generateFileTypeElement --className=<fqn> --debugName=<debugName> --languageClass=<fqn>][ ... <grammar-or-pattern n>[--fleet][--generateFileTypeElement...]]");
       return;
     }
     File output = new File(args[0]);
@@ -61,10 +61,10 @@ public class Main {
           return;
         }
 
-        while (i + 1 < args.length && (args[i + 1].startsWith("-f") || args[i + 1].startsWith("--generateFileTypeElement"))) {
+        while (i + 1 < args.length && (args[i + 1].startsWith("--fleet") || args[i + 1].startsWith("--generateFileTypeElement"))) {
           i++;
           var arg = args[i];
-          if (arg.equals("-f")) {
+          if (arg.equals("--fleet")) {
             generateForFleet = true;
           }
           if (arg.startsWith("--generateFileTypeElement")) {

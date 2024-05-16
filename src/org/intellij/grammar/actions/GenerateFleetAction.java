@@ -4,7 +4,12 @@
 
 package org.intellij.grammar.actions;
 
+import com.intellij.openapi.actionSystem.AnActionEvent;
+import com.intellij.openapi.project.Project;
+import com.intellij.openapi.roots.libraries.LibraryTablesRegistrar;
+import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiFile;
+import com.intellij.util.containers.JBIterable;
 import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.generator.ParserGenerator;
 import org.intellij.grammar.generator.fleet.FleetConstants;
@@ -20,6 +25,16 @@ import java.util.List;
 import static org.intellij.grammar.generator.ParserGeneratorUtil.getRootAttribute;
 
 public class GenerateFleetAction extends GenerateAction {
+
+  private final LibraryTablesRegistrar libraryTablesRegistrar = LibraryTablesRegistrar.getInstance();
+
+  @Override
+  public void update(@NotNull AnActionEvent e) {
+    Project project = e.getProject();
+    JBIterable<VirtualFile> files = getFiles(e);
+    var hasActionableFiles = project != null && !files.isEmpty();
+    e.getPresentation().setEnabledAndVisible(hasActionableFiles && FleetActionsUtil.HasFleetLibraries(e, libraryTablesRegistrar));
+  }
 
   @Override
   protected String getParserClass(PsiFile bnfFile) {

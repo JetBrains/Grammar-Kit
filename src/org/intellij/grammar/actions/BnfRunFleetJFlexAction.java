@@ -114,7 +114,8 @@ public class BnfRunFleetJFlexAction extends BnfRunJFlexAction {
     var tokens = line.split("[ ;]");
     var name = tokens[tokens.length - 1];
 
-    if (line.startsWith(PACKAGE_PREFIX) || nameNeedsAdjusting(adjust, name, javaHelper)) {
+    if ((line.startsWith(PACKAGE_PREFIX) && (!name.startsWith(FleetConstants.FLEET_NAMESPACE_PREFIX))) ||
+        nameNeedsAdjusting(adjust, name, javaHelper)) {
       name = FleetConstants.FLEET_NAMESPACE_PREFIX + name;
       StringBuilder lineBuilder = new StringBuilder();
       for (int i = 0; i < tokens.length - 1; i++) {
@@ -126,8 +127,11 @@ public class BnfRunFleetJFlexAction extends BnfRunJFlexAction {
   }
 
   private static Boolean nameNeedsAdjusting(Boolean movePackagesToFleet, String className, JavaHelper javaHelper) {
-    if (className.startsWith(FleetConstants.FLEET_NAMESPACE_PREFIX) ||
-        className.equals(IELEMENTTYPE_CLASS) ||
+    if (className.startsWith(FleetConstants.FLEET_NAMESPACE_PREFIX)) {
+      return false;
+    }
+
+    if (className.equals(IELEMENTTYPE_CLASS) ||
         className.equals(FLEX_LEXER_CLASS) ||
         className.equals(WHITESPACE_TOKEN) ||
         className.equals(BAD_CHARACTER_TOKEN)) {

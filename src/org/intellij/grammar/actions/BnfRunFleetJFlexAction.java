@@ -6,7 +6,6 @@ package org.intellij.grammar.actions;
 
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.roots.libraries.LibraryTablesRegistrar;
 import com.intellij.openapi.ui.MessageConstants;
 import com.intellij.openapi.ui.MessageDialogBuilder;
 import com.intellij.openapi.util.ActionCallback;
@@ -37,15 +36,6 @@ public class BnfRunFleetJFlexAction extends BnfRunJFlexAction {
 
   private Boolean adjustPackages = true;
   private JavaHelper javaHelper;
-  private final LibraryTablesRegistrar libraryTablesRegistrar = LibraryTablesRegistrar.getInstance();
-
-  @Override
-  public void update(@NotNull AnActionEvent e) {
-    Project project = e.getProject();
-    List<VirtualFile> files = getFiles(e);
-    var hasActionableFiles = project != null && !files.isEmpty();
-    e.getPresentation().setEnabledAndVisible(hasActionableFiles && FleetActionsUtil.HasFleetLibraries(e, libraryTablesRegistrar));
-  }
 
   @Override
   public void actionPerformed(@NotNull AnActionEvent e) {

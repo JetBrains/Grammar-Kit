@@ -4,11 +4,7 @@
 
 package org.intellij.grammar.actions;
 
-import com.intellij.openapi.actionSystem.AnActionEvent;
-import com.intellij.openapi.actionSystem.CommonDataKeys;
-import com.intellij.openapi.roots.libraries.LibraryTablesRegistrar;
 import com.intellij.openapi.util.text.StringUtil;
-import com.intellij.psi.PsiFile;
 import org.apache.velocity.VelocityContext;
 import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.psi.BnfFile;
@@ -22,19 +18,9 @@ public class BnfGenerateFleetLexerAction extends BnfGenerateLexerAction {
 
 
   private static final String FLEET_LEXER_FLEX_TEMPLATE = "/templates/fleet.lexer.flex.template";
-  private final LibraryTablesRegistrar libraryTablesRegistrar = LibraryTablesRegistrar.getInstance();
 
   @Override
-  public void update(AnActionEvent e) {
-    PsiFile file = e.getData(CommonDataKeys.PSI_FILE);
-    var isBnf = file instanceof BnfFile;
-    e.getPresentation().setEnabledAndVisible(isBnf && FleetActionsUtil.HasFleetLibraries(e, libraryTablesRegistrar));
-  }
-
-  @Override
-  protected String getLexerFlexTemplate() {
-    return FLEET_LEXER_FLEX_TEMPLATE;
-  }
+  protected String getLexerFlexTemplate() { return FLEET_LEXER_FLEX_TEMPLATE; }
 
   @Override
   protected void putPackageName(@NotNull VelocityContext context, BnfFile bnfFile, @Nullable String packageName) {

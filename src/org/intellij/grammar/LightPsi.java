@@ -124,12 +124,16 @@ public class LightPsi {
     if (path.contains("/grammar-kit/")) return false;
 
     return path.contains("/out/classes/production/") ||
+           path.contains("idea.jar") ||
+           path.contains("platform-api.jar") ||
+           path.contains("platform-impl.jar") ||
            path.contains("util.jar") ||
            path.contains("util-8.jar") ||
            path.contains("util_rt.jar") ||
            path.contains("app-client.jar") ||
            path.contains("lib-client.jar") ||
-           path.contains("opentelemetry.jar");
+           path.contains("opentelemetry.jar") ||
+           path.contains("extensions.jar");
   }
 
   private static void addJarEntry(JarOutputStream jarFile, String resourceName) throws IOException {

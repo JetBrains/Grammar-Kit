@@ -3,6 +3,9 @@
 ## [Unreleased]
 * JFlex: update library from jflex-1.9.1 to jflex-1.9.2 #349
 * Compatibility: IntelliJ IDEA 2024.2
+* Context menu: Fleet: Generate Parser Code
+* Context menu: Fleet: Generate JFlex Lexer
+* Context menu: Fleet: Run JFlex Generator
 
 ## [2022.3.2]
 * JFlex: complete classes in java references

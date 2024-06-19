@@ -11,18 +11,24 @@
   parserUtilClass="org.intellij.grammar.parser.GeneratedParserUtilBase"
   expressionUtilClass="test.FooUtil"
 
+  generate = [
+    exact-types = "elements"
+    fast-stub-child-accessors = "yes"
+  ]
+
   extends("element1|type")="org.intellij.grammar.test.StubTest.GenericBase<?>"
   extends("simple")="org.intellij.grammar.test.StubTest.SimpleBase"
   extends("missing")="test.stub.MissingBase"
 
   extends(".*type")=type
 }
-root ::= element1 | element2 | element3 | element4 | element5 | type
+root ::= element1 | element2 | element3 | element4 | element5 | element6
 element1 ::= 'aa' element5   { stubClass="test.stub.Element1Stub" }
 element2 ::= 'bb' element4*  { stubClass="test.stub.Element2Stub" }
 element3 ::= 'bb' element4   { stubClass="test.stub.Element3Stub" }
 element4 ::= 'bb' | element2 { stubClass="test.stub.Element4Stub" }
 element5 ::= 'cc'
+element6 ::= 'dd' type
 
 type ::= interface_type | struct_type {stubClass="test.stub.TypeStub"}
 struct_type ::= 'struct'

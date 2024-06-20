@@ -35,13 +35,18 @@ public class GenOptions {
   public final boolean generateTokenAccessors;
   public final boolean generateTokenAccessorsSet;
   public final int javaVersion;
+  public final boolean adjustPackagesForFleet;
 
   public GenOptions(BnfFile myFile) {
+    this(myFile, false);
+  }
+
+  public GenOptions(BnfFile myFile, boolean generateForFleet) {
     Map<String, String> genOptions = getRootAttribute(myFile, KnownAttribute.GENERATE).asMap();
     names = Names.forName(genOptions.get("names"));
-    generatePsi = getGenerateOption(myFile, KnownAttribute.GENERATE_PSI, genOptions, "psi");
-    generatePsiFactory = !"no".equals(genOptions.get("psi-factory"));
-    generatePsiClassesMap = "yes".equals(genOptions.get("psi-classes-map"));
+    generatePsi = getGenerateOption(myFile, KnownAttribute.GENERATE_PSI, genOptions, "psi") && !generateForFleet;
+    generatePsiFactory = !"no".equals(genOptions.get("psi-factory")) && !generateForFleet;
+    generatePsiClassesMap = "yes".equals(genOptions.get("psi-classes-map")) && !generateForFleet;
     generateTokenTypes = getGenerateOption(myFile, KnownAttribute.GENERATE_TOKENS, genOptions, "tokens");
     generateTokenSets = generateTokenTypes && "yes".equals(genOptions.get("token-sets"));
     generateElementTypes = !"no".equals(genOptions.get("elements"));
@@ -57,5 +62,7 @@ public class GenOptions {
     generateTokenCase = ParserGeneratorUtil.enumFromString(genOptions.get("token-case"), Case.UPPER);
     generateElementCase = ParserGeneratorUtil.enumFromString(genOptions.get("element-case"), Case.UPPER);
     javaVersion = StringUtil.parseInt(genOptions.get("java"), 11);
+
+    adjustPackagesForFleet = !"no".equals(genOptions.get("adjustPackagesForFleet"));
   }
 }

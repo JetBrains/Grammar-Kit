@@ -11,7 +11,7 @@ fun environment(key: String) = providers.environmentVariable(key)
 plugins {
     id("java")
     id("org.jetbrains.intellij") version "1.17.4"
-    id("org.jetbrains.changelog") version "2.2.0"
+    id("org.jetbrains.changelog") version "2.2.1"
     id("idea")
     id("maven-publish")
     id("signing")

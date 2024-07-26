@@ -1,8 +1,10 @@
 Manifest-Version: 1.0
 Class-Path: light-psi-all.jar
-  lib/3rd-party-rt.jar
-  lib/platform-api.jar
-  lib/platform-impl.jar
   lib/util.jar
+  lib/util-8.jar
+  lib/util_rt.jar
+  lib/app-client.jar
+  lib/lib-client.jar
+  lib/opentelemetry.jar
 Main-Class: org.intellij.grammar.Main
 

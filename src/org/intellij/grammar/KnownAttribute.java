@@ -58,6 +58,7 @@ public class KnownAttribute<T> {
   public static final KnownAttribute<String>       MIXIN                     = create(false, String.class, "mixin", null);
   public static final KnownAttribute<String>       RECOVER_WHILE             = create(false, String.class, "recoverWhile", null);
   public static final KnownAttribute<String>       NAME                      = create(false, String.class, "name", null);
+  public static final KnownAttribute<Boolean>      MIXED_AST                 = create(false, Boolean.class, "mixedAST", false);
 
   public static final KnownAttribute<Boolean>      EXTRA_ROOT                = create(false, Boolean.class, "extraRoot", false);
   public static final KnownAttribute<Boolean>      RIGHT_ASSOCIATIVE         = create(false, Boolean.class, "rightAssociative", false);

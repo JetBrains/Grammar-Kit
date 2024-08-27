@@ -38,6 +38,8 @@ public class BnfGeneratorTest extends BnfGeneratorAbstractTest {
 
   public void testEmpty() throws Exception {
     myFile = createPsiFile("empty.bnf", "{ }");
-    newTestGenerator().generate();
+    for (var generator : newTestGenerator()) {
+      generator.generate();
+    }
   }
 }

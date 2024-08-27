@@ -40,8 +40,8 @@ package fleet.com.intellij.json.psi;
 import fleet.com.intellij.json.JsonLanguage;
 import fleet.com.intellij.json.JsonParser;
 import fleet.com.intellij.psi.tree.IFileElementType;
+import fleet.com.intellij.lang.PsiBuilder;
 import org.jetbrains.annotations.NotNull;
-import fleet.com.intellij.psi.builder.FleetPsiBuilder;
 
 public class JsonFileType extends IFileElementType {
 
@@ -52,7 +52,7 @@ public class JsonFileType extends IFileElementType {
   }
 
   @Override
-  public void parse(@NotNull FleetPsiBuilder<?> builder) {
+  public void parse(@NotNull PsiBuilder<?> builder) {
     new JsonParser().parseLight(this, builder);
   }
 }

@@ -18,9 +18,9 @@ package fleet.some.filetype.psi;
 
 import fleet.some.language.MyLanguage;
 import fleet.com.intellij.psi.tree.IFileElementType;
+import fleet.com.intellij.lang.PsiBuilder;
 import org.jetbrains.annotations.NotNull;
 import fleet.generated.GeneratedParser;
-import fleet.com.intellij.psi.builder.FleetPsiBuilder;
 
 public class MyFileType extends IFileElementType {
 
@@ -31,7 +31,7 @@ public class MyFileType extends IFileElementType {
   }
 
   @Override
-  public void parse(@NotNull FleetPsiBuilder<?> builder) {
+  public void parse(@NotNull PsiBuilder<?> builder) {
     new GeneratedParser().parseLight(this, builder);
   }
 }

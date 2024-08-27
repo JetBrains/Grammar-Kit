@@ -6,11 +6,15 @@ package org.intellij.grammar;
 
 import com.intellij.openapi.util.io.FileUtil;
 import com.intellij.openapi.util.io.FileUtilRt;
+import org.intellij.grammar.generator.GeneratorBase;
 import org.intellij.grammar.generator.ParserGenerator;
-import org.intellij.grammar.generator.fleet.FleetParserGenerator;
-import org.intellij.grammar.psi.impl.BnfFileImpl;
+import org.intellij.grammar.generator.fleet.FleetBnfFileImpl;
+import org.intellij.grammar.generator.fleet.FleetFileTypeGenerator;
 
 import java.io.*;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
 
 public class FleetBnfGeneratorTest extends BnfGeneratorAbstractTest {
 
@@ -22,32 +26,46 @@ public class FleetBnfGeneratorTest extends BnfGeneratorAbstractTest {
   }
 
   @Override
-  protected ParserGenerator newTestGenerator() {
-    var doGenerate = false;
-    var className = "";
-    var languageName = "";
-    var debugName = "";
-    if (myFileGeneratorParams != null) {
-      doGenerate = true;
-      className = myFileGeneratorParams.className;
-      languageName = myFileGeneratorParams.languageClass;
-      debugName = myFileGeneratorParams.debugName;
-    }
-    return new FleetParserGenerator((BnfFileImpl)myFile, "", myFullDataPath, "", doGenerate, className, debugName, languageName) {
+  protected Collection<GeneratorBase> newTestGenerator() {
+    var fleetBnfFile = new FleetBnfFileImpl(myFile.getViewProvider());
 
-      @Override
-      protected PrintWriter openOutputInner(String className, File file) throws IOException {
-        String grammarName = FileUtil.getNameWithoutExtension(myFile.getName());
-        String fileName = FileUtil.getNameWithoutExtension(file);
-        String name = grammarName + (fileName.startsWith(grammarName) || fileName.endsWith("Parser") ? "" : ".PSI") + ".java";
-        File targetFile = new File(FileUtilRt.getTempDirectory(), name);
-        targetFile.getParentFile().mkdirs();
-        FileOutputStream outputStream = new FileOutputStream(targetFile, true);
-        PrintWriter out = new PrintWriter(new OutputStreamWriter(outputStream, myFile.getVirtualFile().getCharset()));
-        out.println("// ---- " + file.getName() + " -----------------");
-        return out;
-      }
-    };
+    var parserGenerator = new ParserGenerator(fleetBnfFile, "", myFullDataPath, "") {
+
+        @Override
+        protected PrintWriter openOutputInner(String className, File file) throws IOException {
+          String grammarName = FileUtil.getNameWithoutExtension(myFile.getName());
+          String fileName = FileUtil.getNameWithoutExtension(file);
+          String name = grammarName + (fileName.startsWith(grammarName) || fileName.endsWith("Parser") ? "" : ".PSI") + ".java";
+          File targetFile = new File(FileUtilRt.getTempDirectory(), name);
+          targetFile.getParentFile().mkdirs();
+          FileOutputStream outputStream = new FileOutputStream(targetFile, true);
+          PrintWriter out = new PrintWriter(new OutputStreamWriter(outputStream, myFile.getVirtualFile().getCharset()));
+          out.println("// ---- " + file.getName() + " -----------------");
+          return out;
+        }
+      };
+
+    if (myFileGeneratorParams != null) {
+      var fileTypeGenerator = new FleetFileTypeGenerator(fleetBnfFile,
+                                                         "", myFullDataPath, "",
+                                                         myFileGeneratorParams.className,
+                                                         myFileGeneratorParams.debugName,
+                                                         myFileGeneratorParams.languageClass) {
+        @Override
+        protected PrintWriter openOutputInner(String className, File file) throws IOException {
+          String grammarName = FileUtil.getNameWithoutExtension(myFile.getName());
+          String name = grammarName + ".PSI.java";
+          File targetFile = new File(FileUtilRt.getTempDirectory(), name);
+          targetFile.getParentFile().mkdirs();
+          FileOutputStream outputStream = new FileOutputStream(targetFile, true);
+          PrintWriter out = new PrintWriter(new OutputStreamWriter(outputStream, myFile.getVirtualFile().getCharset()));
+          out.println("// ---- " + file.getName() + " -----------------");
+          return out;
+        }
+      };
+      return Arrays.asList(parserGenerator, fileTypeGenerator);
+    }
+    return List.of(parserGenerator);
   }
 
   public void doGenTest(boolean generatePsi, String fileTypeClass, String debugName, String languageClass) throws Exception {

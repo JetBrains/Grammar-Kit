@@ -5,7 +5,6 @@
 package org.intellij.grammar.generator.fleet;
 
 import org.intellij.grammar.generator.BnfConstants;
-import org.intellij.grammar.generator.GenOptions;
 import org.intellij.grammar.generator.GeneratorBase;
 import org.intellij.grammar.psi.BnfFile;
 import org.jetbrains.annotations.NotNull;
@@ -20,7 +19,6 @@ public class FleetFileTypeGenerator extends GeneratorBase {
   private final String myLanguageClass;
 
   public FleetFileTypeGenerator(@NotNull BnfFile psiFile,
-                                @NotNull GenOptions genOptions,
                                 @NotNull String sourcePath,
                                 @NotNull String outputPath,
                                 @NotNull String packagePrefix,

@@ -17,4 +17,8 @@ public interface FleetConstants {
   String AST_NODE_CLASS = "fleet.com.intellij.lang.ASTNode";
   String FLEET_NAMESPACE_PREFIX = "fleet.";
   String FLEET_NAMESPACE = "fleet";
+
+  String PARSER_CLASS_DEFAULT = "fleet.generated.GeneratedParser";
+  String ELEMENT_TYPE_HOLDER_DEFAULT = "fleet.generated.GeneratedTypes";
+
 }

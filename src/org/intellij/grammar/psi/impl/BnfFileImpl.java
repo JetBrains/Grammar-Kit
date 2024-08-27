@@ -191,7 +191,11 @@ public class BnfFileImpl extends PsiFileBase implements BnfFile {
     return result;
   }
 
-  private static @NotNull <T> AtomicClearableLazyValue<T> lazyValue(Supplier<T> producer) {
+  protected boolean hasAttributeValue(KnownAttribute<?> attribute) {
+    return myAttributeValues.getValue().containsKey(attribute.getName());
+  }
+
+  protected static @NotNull <T> AtomicClearableLazyValue<T> lazyValue(Supplier<T> producer) {
     return new AtomicClearableLazyValue<>() {
       @Override
       protected @NotNull T compute() {

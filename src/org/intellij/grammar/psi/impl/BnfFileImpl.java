@@ -25,7 +25,6 @@ import org.jetbrains.annotations.Nullable;
 import java.util.*;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 /**
  * User: gregory
@@ -99,13 +98,6 @@ public class BnfFileImpl extends PsiFileBase implements BnfFile {
       }
     }
     return combined != null ? combined : knownAttribute.getDefaultValue();
-  }
-
-  @Override
-  public <T> Collection<T> getAllPossibleAttributeValues(KnownAttribute<T> attribute) {
-    var attributeInfos = myAttributeValues.getValue().get(attribute.getName());
-    if (attributeInfos == null) return null;
-    return attributeInfos.stream().map(info -> attribute.ensureValue(info.value)).collect(Collectors.toList());
   }
 
   private static final Pattern SUB_EXPRESSION = Pattern.compile(".*(_\\d+)+");

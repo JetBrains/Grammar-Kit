@@ -6,6 +6,7 @@ package org.intellij.grammar.generator;
 
 import com.intellij.openapi.util.text.StringUtil;
 import org.intellij.grammar.KnownAttribute;
+import org.intellij.grammar.generator.fleet.FleetBnfFileImpl;
 import org.intellij.grammar.psi.BnfFile;
 
 import java.util.Map;
@@ -38,10 +39,7 @@ public class GenOptions {
   public final boolean adjustPackagesForFleet;
 
   public GenOptions(BnfFile myFile) {
-    this(myFile, false);
-  }
-
-  public GenOptions(BnfFile myFile, boolean generateForFleet) {
+    var generateForFleet = myFile instanceof FleetBnfFileImpl;
     Map<String, String> genOptions = getRootAttribute(myFile, KnownAttribute.GENERATE).asMap();
     names = Names.forName(genOptions.get("names"));
     generatePsi = getGenerateOption(myFile, KnownAttribute.GENERATE_PSI, genOptions, "psi") && !generateForFleet;
@@ -63,6 +61,6 @@ public class GenOptions {
     generateElementCase = ParserGeneratorUtil.enumFromString(genOptions.get("element-case"), Case.UPPER);
     javaVersion = StringUtil.parseInt(genOptions.get("java"), 11);
 
-    adjustPackagesForFleet = !"no".equals(genOptions.get("adjustPackagesForFleet"));
+    adjustPackagesForFleet = getGenerateOption(myFile, KnownAttribute.ADJUST_PACKAGES_FOR_FLEET, genOptions, "adjustPackagesForFleet");
   }
 }

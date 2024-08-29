@@ -94,7 +94,7 @@ public class GenerateAction extends AnAction {
         if (!file.isValid()) continue;
         PsiFile bnfFile = getBnfFile(file, psiManager);
         if (!(bnfFile instanceof BnfFile)) continue;
-        String parserClass = getParserClass(bnfFile);
+        String parserClass = getRootAttribute(bnfFile, KnownAttribute.PARSER_CLASS);
         VirtualFile target =
           getTargetDirectoryFor(project, file,
                                 StringUtil.getShortName(parserClass) + ".java",
@@ -198,9 +198,5 @@ public class GenerateAction extends AnAction {
 
   protected @Nullable PsiFile getBnfFile(VirtualFile file, PsiManager psiManager) {
     return psiManager.findFile(file);
-  }
-
-  protected String getParserClass(PsiFile bnfFile) {
-    return getRootAttribute(bnfFile, KnownAttribute.PARSER_CLASS);
   }
 }

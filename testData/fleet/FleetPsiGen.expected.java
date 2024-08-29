@@ -16,7 +16,8 @@ import fleet.com.intellij.lang.LightPsiParser;
 public class FleetPsiGen implements PsiParser, LightPsiParser {
 
   public ASTNode parse(IElementType root_, PsiBuilder builder_) {
-    throw new IllegalStateException("Use parseLight instead");
+    parseLight(root_, builder_);
+    return builder_.getTreeBuilt();
   }
 
   public void parseLight(IElementType root_, PsiBuilder builder_) {

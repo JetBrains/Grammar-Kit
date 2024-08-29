@@ -8,7 +8,7 @@ import com.intellij.openapi.util.io.FileUtil;
 import com.intellij.openapi.util.io.FileUtilRt;
 import org.intellij.grammar.generator.GeneratorBase;
 import org.intellij.grammar.generator.ParserGenerator;
-import org.intellij.grammar.generator.fleet.FleetBnfFileImpl;
+import org.intellij.grammar.generator.fleet.FleetBnfFileWrapper;
 import org.intellij.grammar.generator.fleet.FleetFileTypeGenerator;
 
 import java.io.*;
@@ -27,7 +27,7 @@ public class FleetBnfGeneratorTest extends BnfGeneratorAbstractTest {
 
   @Override
   protected Collection<GeneratorBase> newTestGenerator() {
-    var fleetBnfFile = new FleetBnfFileImpl(myFile.getViewProvider());
+    var fleetBnfFile = new FleetBnfFileWrapper(myFile.getViewProvider());
 
     var parserGenerator = new ParserGenerator(fleetBnfFile, "", myFullDataPath, "") {
 
@@ -78,4 +78,5 @@ public class FleetBnfGeneratorTest extends BnfGeneratorAbstractTest {
   public void testAdjustPackages() throws Exception { doGenTest(true);}
   public void testIFileTypeGeneration() throws Exception { doGenTest(true, "some.filetype.psi.MyFileType", "TEST", "some.language.MyLanguage");}
   public void testFleetPsiGen() throws Exception { doGenTest(true);}
+  public void testExprParser() throws Exception { doGenTest(true);}
 }

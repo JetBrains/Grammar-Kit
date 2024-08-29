@@ -34,6 +34,7 @@ import org.intellij.grammar.generator.BnfConstants;
 import org.intellij.grammar.generator.ParserGenerator;
 import org.intellij.grammar.psi.BnfFile;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.io.IOException;
@@ -91,7 +92,7 @@ public class GenerateAction extends AnAction {
     WriteAction.run(() -> {
       for (VirtualFile file : bnfFiles) {
         if (!file.isValid()) continue;
-        PsiFile bnfFile = psiManager.findFile(file);
+        PsiFile bnfFile = getBnfFile(file, psiManager);
         if (!(bnfFile instanceof BnfFile)) continue;
         String parserClass = getParserClass(bnfFile);
         VirtualFile target =
@@ -150,9 +151,15 @@ public class GenerateAction extends AnAction {
           try {
             DumbService.getInstance(project).runReadActionInSmartMode(() -> {
               if (!file.isValid()) return;
-              PsiFile bnfFile = psiManager.findFile(file);
+              PsiFile bnfFile = getBnfFile(file, psiManager);
               if (!(bnfFile instanceof BnfFile)) return;
-              ParserGenerator generator = createGenerator((BnfFile)bnfFile, sourcePath, genDir, packagePrefix, files);
+              ParserGenerator generator = new ParserGenerator((BnfFile)bnfFile, sourcePath, genDir.getPath(), packagePrefix) {
+                @Override
+                protected PrintWriter openOutputInner(String className, File file) throws IOException {
+                  files.add(file);
+                  return super.openOutputInner(className, file);
+                }
+              };
               try {
                 generator.generate();
               }
@@ -189,18 +196,11 @@ public class GenerateAction extends AnAction {
     });
   }
 
-  protected String getParserClass(PsiFile bnfFile) {
-    return getRootAttribute(bnfFile, KnownAttribute.PARSER_CLASS);
+  protected @Nullable PsiFile getBnfFile(VirtualFile file, PsiManager psiManager) {
+    return psiManager.findFile(file);
   }
 
-  @NotNull
-  protected ParserGenerator createGenerator(BnfFile bnfFile, String sourcePath, File genDir, String packagePrefix, List<File> files) {
-    return new ParserGenerator(bnfFile, sourcePath, genDir.getPath(), packagePrefix) {
-      @Override
-      protected PrintWriter openOutputInner(String className, File file) throws IOException {
-        files.add(file);
-        return super.openOutputInner(className, file);
-      }
-    };
+  protected String getParserClass(PsiFile bnfFile) {
+    return getRootAttribute(bnfFile, KnownAttribute.PARSER_CLASS);
   }
 }

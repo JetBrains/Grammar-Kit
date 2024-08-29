@@ -4,18 +4,13 @@
 
 package org.intellij.grammar.actions;
 
+import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiFile;
+import com.intellij.psi.PsiManager;
 import org.intellij.grammar.KnownAttribute;
-import org.intellij.grammar.generator.ParserGenerator;
+import org.intellij.grammar.generator.fleet.FleetBnfFileWrapper;
 import org.intellij.grammar.generator.fleet.FleetConstants;
-import org.intellij.grammar.generator.fleet.FleetParserGenerator;
-import org.intellij.grammar.psi.BnfFile;
-import org.jetbrains.annotations.NotNull;
-
-import java.io.File;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.util.List;
+import org.jetbrains.annotations.Nullable;
 
 import static org.intellij.grammar.generator.ParserGeneratorUtil.getRootAttribute;
 
@@ -24,7 +19,7 @@ public class GenerateFleetAction extends GenerateAction {
   @Override
   protected String getParserClass(PsiFile bnfFile) {
     var original = super.getParserClass(bnfFile);
-    if (adjustPackages(bnfFile)) {
+    if (adjustPackages(bnfFile) && !original.startsWith(FleetConstants.FLEET_NAMESPACE_PREFIX)) {
       original = FleetConstants.FLEET_NAMESPACE_PREFIX + original;
     }
     return original;
@@ -36,14 +31,10 @@ public class GenerateFleetAction extends GenerateAction {
   }
 
   @Override
-  @NotNull
-  protected ParserGenerator createGenerator(BnfFile bnfFile, String sourcePath, File genDir, String packagePrefix, List<File> files) {
-    return new FleetParserGenerator(bnfFile, sourcePath, genDir.getPath(), packagePrefix) {
-      @Override
-      protected PrintWriter openOutputInner(String className, File file) throws IOException {
-        files.add(file);
-        return super.openOutputInner(className, file);
-      }
-    };
+  protected @Nullable PsiFile getBnfFile(VirtualFile file, PsiManager psiManager) {
+    var psiFile = super.getBnfFile(file, psiManager);
+    if (psiFile == null) return null;
+    var viewProvider = psiFile.getViewProvider();
+    return new FleetBnfFileWrapper(viewProvider);
   }
 }

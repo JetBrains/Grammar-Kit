@@ -61,6 +61,6 @@ public class GenOptions {
     generateElementCase = ParserGeneratorUtil.enumFromString(genOptions.get("element-case"), Case.UPPER);
     javaVersion = StringUtil.parseInt(genOptions.get("java"), 11);
 
-    adjustPackagesForFleet = getGenerateOption(myFile, KnownAttribute.ADJUST_PACKAGES_FOR_FLEET, genOptions, "adjustPackagesForFleet");
+    adjustPackagesForFleet = !"no".equals(genOptions.get("adjustPackagesForFleet"));
   }
 }

@@ -77,7 +77,7 @@ public class FleetBnfFileWrapper extends BnfFileImpl implements BnfFile {
     var attributeValue = super.findAttributeValue(null, KnownAttribute.GENERATE, null);
     var adjustPackages =
       !(attributeValue == null ||
-        attributeValue.asMap().getOrDefault(ADJUST_PACKAGES_FOR_FLEET.getName(), "").equals("no"));
+        attributeValue.asMap().getOrDefault("adjustPackagesForFleet", "").equals("no"));
 
     if (myFleetAttributeValuesSubstitution.containsKey(knownAttribute.getName())) {
       if (hasAttributeValue(rule, knownAttribute, match)) {

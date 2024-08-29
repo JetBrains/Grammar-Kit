@@ -68,7 +68,6 @@ public class KnownAttribute<T> {
   public static final KnownAttribute<ListValue>    METHODS                   = create(false, ListValue.class, "methods", EMPTY_LIST);
   public static final KnownAttribute<ListValue>    HOOKS                     = create(false, ListValue.class, "hooks", EMPTY_LIST);
   public static final KnownAttribute<ListValue>    TOKENS                    = create(true, ListValue.class, "tokens", EMPTY_LIST);
-  public static final KnownAttribute<Boolean>      ADJUST_PACKAGES_FOR_FLEET = create(true, Boolean.class, "adjustPackagesForFleet", true);
 
   private final boolean myGlobal;
   private final String myName;

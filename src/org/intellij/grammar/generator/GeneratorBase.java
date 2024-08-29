@@ -9,7 +9,7 @@ import com.intellij.openapi.util.io.FileUtil;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.util.containers.JBIterable;
 import org.intellij.grammar.KnownAttribute;
-import org.intellij.grammar.generator.fleet.FleetBnfFileWrapper;
+import org.intellij.grammar.fleet.FleetBnfFileWrapper;
 import org.intellij.grammar.psi.BnfFile;
 import org.intellij.grammar.psi.BnfRule;
 import org.jetbrains.annotations.NotNull;
@@ -23,9 +23,8 @@ import java.util.*;
 import static java.lang.String.format;
 import static org.intellij.grammar.generator.ParserGeneratorUtil.*;
 import static org.intellij.grammar.generator.ParserGeneratorUtil.getPsiImplClassFormat;
-import static org.intellij.grammar.generator.RuleGraphHelper.hasPsiClass;
-import static org.intellij.grammar.generator.fleet.FleetConstants.FLEET_NAMESPACE;
-import static org.intellij.grammar.generator.fleet.FleetConstants.FLEET_NAMESPACE_PREFIX;
+import static org.intellij.grammar.fleet.FleetConstants.FLEET_NAMESPACE;
+import static org.intellij.grammar.fleet.FleetConstants.FLEET_NAMESPACE_PREFIX;
 
 public abstract class GeneratorBase {
   public static final Logger LOG = Logger.getInstance(GeneratorBase.class);
@@ -54,44 +53,11 @@ public abstract class GeneratorBase {
     return myFile;
   }
 
-  protected enum Java {CLASS, INTERFACE, ABSTRACT_CLASS}
-
-  protected static class RuleInfo {
-    final String name;
-    final boolean isFake;
-    final String elementType;
-    final String parserClass;
-    final String intfPackage;
-    final String implPackage;
-    final String intfClass;
-    final String implClass;
-    final String mixin;
-    final String stub;
-    String realStubClass;
-    Set<String> superInterfaces;
-    boolean mixedAST;
-    String realSuperClass;
-    boolean isAbstract;
-    boolean isInElementType;
-
-    RuleInfo(String name, boolean isFake,
-             String elementType, String parserClass,
-             String intfPackage, String implPackage,
-             String intfClass, String implClass, String mixin, String stub) {
-      this.name = name;
-      this.isFake = isFake;
-      this.elementType = elementType;
-      this.parserClass = parserClass;
-      this.intfPackage = intfPackage;
-      this.implPackage = implPackage;
-      this.stub = stub;
-      this.intfClass = intfPackage + "." + intfClass;
-      this.implClass = implPackage + "." + implClass;
-      this.mixin = mixin;
-    }
+  protected NameShortener getShortener() {
+    return myShortener;
   }
 
-  protected final Map<String, RuleInfo> myRuleInfos = new TreeMap<>();
+  protected enum Java {CLASS, INTERFACE, ABSTRACT_CLASS}
 
   protected GeneratorBase(@NotNull BnfFile psiFile,
                           @NotNull String sourcePath,
@@ -110,18 +76,7 @@ public abstract class GeneratorBase {
     List<BnfRule> rules = psiFile.getRules();
     BnfRule rootRule = rules.isEmpty() ? null : rules.get(0);
     myGrammarRoot = rootRule == null ? null : rootRule.getName();
-    for (BnfRule r : rules) {
-      String ruleName = r.getName();
-      boolean noPsi = !hasPsiClass(r);
-      myRuleInfos.put(ruleName, new ParserGenerator.RuleInfo(
-        ruleName, ParserGeneratorUtil.Rule.isFake(r),
-        ParserGeneratorUtil.getElementType(r, G.generateElementCase), getAttribute(r, KnownAttribute.PARSER_CLASS),
-        noPsi ? null : getAttribute(r, KnownAttribute.PSI_PACKAGE),
-        noPsi ? null : getAttribute(r, KnownAttribute.PSI_IMPL_PACKAGE),
-        noPsi ? null : getRulePsiClassName(r, myIntfClassFormat), noPsi ? null : getRulePsiClassName(r, myImplClassFormat),
-        noPsi ? null : getAttribute(r, KnownAttribute.MIXIN), noPsi ? null : getAttribute(r, KnownAttribute.STUB_CLASS)));
-    }
-    myGrammarRootParser = rootRule == null ? null : ruleInfo(rootRule).parserClass;
+    myGrammarRootParser = rootRule == null ? null : getRootAttribute(rootRule, KnownAttribute.PARSER_CLASS);
   }
 
   public abstract void generate() throws IOException;
@@ -129,23 +84,15 @@ public abstract class GeneratorBase {
   protected void generateClassHeader(String className,
                                      Set<String> imports,
                                      String annos,
-                                     ParserGenerator.Java javaType,
+                                     Java javaType,
                                      String... supers) {
     generateFileHeader(className);
     String packageName = generatePackageName(className);
     String shortClassName = StringUtil.getShortName(className);
     out("package %s;", packageName);
     newLine();
-    Set<String> includedPackages = JBIterable.from(imports)
-      .filter(o -> !o.startsWith("static") && o.endsWith(".*"))
-      .map(o -> StringUtil.trimEnd(o, ".*"))
-      .append(packageName).toSet();
-    Set<String> includedClasses = new HashSet<>();
-    for (RuleInfo info : myRuleInfos.values()) {
-      if (includedPackages.contains(info.intfPackage)) includedClasses.add(StringUtil.getShortName(info.intfClass));
-      if (includedPackages.contains(info.implPackage)) includedClasses.add(StringUtil.getShortName(info.implClass));
-    }
     NameShortener shortener = new NameShortener(packageName, !G.generateFQN);
+    Set<String> includedClasses = collectClasses(imports, packageName);
     shortener.addImports(imports, includedClasses);
     for (String s : shortener.getImports()) {
       out("import %s;", s);
@@ -181,7 +128,9 @@ public abstract class GeneratorBase {
     myShortener = shortener;
   }
 
-  private void generateFileHeader(String className) {
+  protected abstract @NotNull Set<String> collectClasses(Set<String> imports, String packageName);
+
+  protected void generateFileHeader(String className) {
     String header = getRootAttribute(myFile, KnownAttribute.CLASS_HEADER, className);
     String text = StringUtil.isEmpty(header) ? "" : getStringOrFile(header);
     if (StringUtil.isNotEmpty(text)) {
@@ -279,12 +228,6 @@ public abstract class GeneratorBase {
 
   public @NotNull String shorten(@NotNull String s) {
     return myShortener.shorten(s);
-  }
-
-
-  @NotNull
-  ParserGenerator.RuleInfo ruleInfo(BnfRule rule) {
-    return Objects.requireNonNull(myRuleInfos.get(rule.getName()));
   }
 
   protected void resetOffset() {

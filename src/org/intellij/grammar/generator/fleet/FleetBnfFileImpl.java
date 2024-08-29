@@ -100,6 +100,7 @@ public class FleetBnfFileImpl extends BnfFileImpl implements BnfFile {
   private static Map<String, String> calcFleetAttributeOverridingValues() {
     var valueMap = new HashMap<String, String>();
     valueMap.put(ELEMENT_TYPE_FACTORY.getName(), null);
+    valueMap.put(TOKEN_TYPE_FACTORY.getName(), null);
     valueMap.put(ELEMENT_TYPE_CLASS.getName(), IELEMENTTYPE_CLASS);
     valueMap.put(TOKEN_TYPE_CLASS.getName(), IELEMENTTYPE_CLASS);
     return valueMap;

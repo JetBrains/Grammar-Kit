@@ -191,8 +191,8 @@ public class BnfFileImpl extends PsiFileBase implements BnfFile {
     return result;
   }
 
-  protected boolean hasAttributeValue(KnownAttribute<?> attribute) {
-    return myAttributeValues.getValue().containsKey(attribute.getName());
+  protected boolean hasAttributeValue(@Nullable BnfRule rule, @NotNull KnownAttribute<?> attribute, @Nullable String match) {
+    return getMatchingAttributes(rule, attribute, match).isNotEmpty();
   }
 
   protected static @NotNull <T> AtomicClearableLazyValue<T> lazyValue(Supplier<T> producer) {

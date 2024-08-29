@@ -17,7 +17,6 @@ import org.jetbrains.annotations.Nullable;
 import java.util.*;
 
 import static java.lang.String.format;
-import static org.intellij.grammar.generator.BnfConstants.PSI_BUILDER_CLASS;
 import static org.intellij.grammar.generator.ExpressionHelper.OperatorInfo;
 import static org.intellij.grammar.generator.ExpressionHelper.OperatorType;
 import static org.intellij.grammar.generator.ParserGeneratorUtil.*;
@@ -53,8 +52,8 @@ public class ExpressionGeneratorHelper {
     String methodName = getFuncName(info.rootRule);
     String kernelMethodName = getNextName(methodName, 0);
     String frameName = quote(getRuleDisplayName(info.rootRule, true));
-    String shortPB = g.shorten(PSI_BUILDER_CLASS);
-    String shortMarker = !g.G.generateFQN ? "Marker" : PSI_BUILDER_CLASS + ".Marker";
+    String shortPB = g.shorten(g.C.PsiBuilderClass);
+    String shortMarker = !g.G.generateFQN ? "Marker" : g.C.PsiBuilderClass + ".Marker";
     g.out("public static boolean %s(%s %s, int %s, int %s) {", methodName, shortPB, g.N.builder, g.N.level, g.N.priority);
     g.out("if (!recursion_guard_(%s, %s, \"%s\")) return false;", g.N.builder, g.N.level, methodName);
 

@@ -848,7 +848,8 @@ public class ParserGeneratorUtil {
     return type.substring(0, idx) + type.substring(idx + 1, type.length() - 1);
   }
 
-  public static String getGenericClauseString(List<JavaHelper.TypeParameterInfo> genericParameters, Function<? super String, String> shortener) {
+  public static String getGenericClauseString(List<JavaHelper.TypeParameterInfo> genericParameters,
+                                              Function<? super String, String> shortener) {
     if (genericParameters.isEmpty()) return "";
 
     StringBuilder buffer = new StringBuilder();

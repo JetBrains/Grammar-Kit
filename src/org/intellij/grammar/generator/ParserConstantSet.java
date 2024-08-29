@@ -49,7 +49,7 @@ public class ParserConstantSet {
                                                                                  FleetConstants.LIGHT_PSI_PARSER_CLASS,
                                                                                  FleetConstants.TOKEN_SET_CLASS);
 
-  public static ParserConstantSet getConstantSetForBnf(BnfFile file){
+  public static ParserConstantSet getConstantSetForBnf(BnfFile file) {
     return (file instanceof FleetBnfFileWrapper) ? FleetConstantSet : IdeaConstantSet;
   }
 }

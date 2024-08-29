@@ -6,6 +6,7 @@ package org.intellij.grammar.generator;
 
 import com.intellij.notification.NotificationGroupManager;
 import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.ui.MessageType;
 import com.intellij.openapi.util.Pair;
 import com.intellij.openapi.util.Trinity;
@@ -54,7 +55,49 @@ import static org.intellij.grammar.psi.BnfTypes.*;
  *         Date 16.07.11 10:41
  */
 public class ParserGenerator extends GeneratorBase {
+  public static final Logger LOG = Logger.getInstance(ParserGenerator.class);
 
+  static class RuleInfo {
+    final String name;
+    final boolean isFake;
+    final String elementType;
+    final String parserClass;
+    final String intfPackage;
+    final String implPackage;
+    final String intfClass;
+    final String implClass;
+    final String mixin;
+    final String stub;
+    String realStubClass;
+    Set<String> superInterfaces;
+    boolean mixedAST;
+    String realSuperClass;
+    boolean isAbstract;
+    boolean isInElementType;
+
+    RuleInfo(String name, boolean isFake,
+             String elementType, String parserClass,
+             String intfPackage, String implPackage,
+             String intfClass, String implClass, String mixin, String stub) {
+      this.name = name;
+      this.isFake = isFake;
+      this.elementType = elementType;
+      this.parserClass = parserClass;
+      this.intfPackage = intfPackage;
+      this.implPackage = implPackage;
+      this.stub = stub;
+      this.intfClass = intfPackage + "." + intfClass;
+      this.implClass = implPackage + "." + implClass;
+      this.mixin = mixin;
+    }
+  }
+
+  @NotNull
+  RuleInfo ruleInfo(BnfRule rule) {
+    return Objects.requireNonNull(myRuleInfos.get(rule.getName()));
+  }
+
+  private final Map<String, RuleInfo> myRuleInfos = new TreeMap<>();
   private final Map<String, String> myParserLambdas = new HashMap<>();       // field name -> body
   private final Map<String, String> myRenderedLambdas = new HashMap<>();     // field name -> parser class FQN
   private final Set<String> myInlinedChildNodes = new HashSet<>();
@@ -87,7 +130,7 @@ public class ParserGenerator extends GeneratorBase {
   private final JavaHelper myJavaHelper;
 
   protected final Names N;
-  protected final ParserConstantSet C;
+  protected final IntelliJPlatformConstants C;
 
   public ParserGenerator(@NotNull BnfFile psiFile,
                          @NotNull String sourcePath,
@@ -108,7 +151,7 @@ public class ParserGenerator extends GeneratorBase {
                          tmpVisitorClass : getRootAttribute(getFile(), KnownAttribute.PSI_PACKAGE) + "." + tmpVisitorClass;
     myTypeHolderClass = getRootAttribute(getFile(), KnownAttribute.ELEMENT_TYPE_HOLDER_CLASS);
 
-    C = ParserConstantSet.getConstantSetForBnf(getFile());
+    C = IntelliJPlatformConstants.getConstantSetForBnf(getFile());
 
     mySimpleTokens = new LinkedHashMap<>(getTokenTextToNameMap(getFile()));
     myGraphHelper = getCached(getFile());
@@ -116,6 +159,19 @@ public class ParserGenerator extends GeneratorBase {
     myRulesMethodsHelper = new RuleMethodsHelper(myGraphHelper, myExpressionHelper, mySimpleTokens, G);
     myFirstNextAnalyzer = BnfFirstNextAnalyzer.createAnalyzer(true);
     myJavaHelper = JavaHelper.getJavaHelper(getFile());
+
+    List<BnfRule> rules = psiFile.getRules();
+    for (BnfRule r : rules) {
+      String ruleName = r.getName();
+      boolean noPsi = !hasPsiClass(r);
+      myRuleInfos.put(ruleName, new RuleInfo(
+        ruleName, Rule.isFake(r),
+        getElementType(r), getAttribute(r, KnownAttribute.PARSER_CLASS),
+        noPsi ? null : getAttribute(r, KnownAttribute.PSI_PACKAGE),
+        noPsi ? null : getAttribute(r, KnownAttribute.PSI_IMPL_PACKAGE),
+        noPsi ? null : getRulePsiClassName(r, myIntfClassFormat), noPsi ? null : getRulePsiClassName(r, myImplClassFormat),
+        noPsi ? null : getAttribute(r, KnownAttribute.MIXIN), noPsi ? null : getAttribute(r, KnownAttribute.STUB_CLASS)));
+    }
     myNoStubs = JBIterable.from(myRuleInfos.values()).find(o -> o.stub != null) == null;
 
     calcFakeRulesWithType();
@@ -576,6 +632,25 @@ public class ParserGenerator extends GeneratorBase {
       }
     }
     return result;
+  }
+
+  @Override
+  protected @NotNull Set<String> collectClasses(Set<String> imports, String packageName) {
+    Set<String> includedPackages = JBIterable.from(imports)
+      .filter(o -> !o.startsWith("static") && o.endsWith(".*"))
+      .map(o -> StringUtil.trimEnd(o, ".*"))
+      .append(packageName).toSet();
+    Set<String> includedClasses = new HashSet<>();
+    for (RuleInfo info : myRuleInfos.values()) {
+      if (includedPackages.contains(info.intfPackage)) includedClasses.add(StringUtil.getShortName(info.intfClass));
+      if (includedPackages.contains(info.implPackage)) includedClasses.add(StringUtil.getShortName(info.implClass));
+    }
+    return includedClasses;
+  }
+
+  @NotNull
+  protected String generatePackageName(String className) {
+    return StringUtil.getPackageName(className);
   }
 
   /**
@@ -1577,8 +1652,8 @@ public class ParserGenerator extends GeneratorBase {
       for (NavigatablePsiElement m : constructors) {
         List<String> types = myJavaHelper.getMethodTypes(m);
         Function<Integer, List<String>> annoProvider = i -> myJavaHelper.getParameterAnnotations(m, (i - 1) / 2);
-        out("public " + shortName + "(" + getParametersString(types, 1, 3, substitutor, annoProvider, this::shorten) + ") {");
-        out("super(" + getParametersString(types, 1, 2, substitutor, annoProvider, this::shorten) + ");");
+        out("public " + shortName + "(" + getParametersString(types, 1, 3, substitutor, annoProvider, getShortener()) + ") {");
+        out("super(" + getParametersString(types, 1, 2, substitutor, annoProvider, getShortener()) + ");");
         out("}");
         newLine();
       }
@@ -1980,15 +2055,15 @@ public class ParserGenerator extends GeneratorBase {
     Function<String, String> substitutor = ParserGeneratorUtil::unwrapTypeArgumentForParamList;
     out("%s%s%s %s(%s)%s%s",
         intf ? "" : "public ",
-        getGenericClauseString(genericParameters, this::shorten),
+        getGenericClauseString(genericParameters, getShortener()),
         returnType,
         methodName,
-        getParametersString(methodTypes, offset, 3, substitutor, annoProvider, this::shorten),
-        getThrowsString(exceptionList, this::shorten),
+        getParametersString(methodTypes, offset, 3, substitutor, annoProvider, getShortener()),
+        getThrowsString(exceptionList, getShortener()),
         intf ? ";" : " {");
     if (!intf) {
       String implUtilRef = shorten(StringUtil.notNullize(myPsiImplUtilClass, KnownAttribute.PSI_IMPL_UTIL_CLASS.getName()));
-      String string = getParametersString(methodTypes, offset, 2, substitutor, annoProvider, this::shorten);
+      String string = getParametersString(methodTypes, offset, 2, substitutor, annoProvider, getShortener());
       out("%s%s.%s(this%s);", "void".equals(returnType) ? "" : "return ", implUtilRef, methodName,
           string.isEmpty() ? "" : ", " + string);
       out("}");

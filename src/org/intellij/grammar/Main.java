@@ -10,7 +10,8 @@ import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.impl.DebugUtil;
 import org.intellij.grammar.generator.ParserGenerator;
-import org.intellij.grammar.generator.fleet.FleetParserGenerator;
+import org.intellij.grammar.generator.fleet.FleetBnfFileWrapper;
+import org.intellij.grammar.generator.fleet.FleetFileTypeGenerator;
 import org.intellij.grammar.psi.BnfFile;
 
 import java.io.File;
@@ -22,7 +23,6 @@ import java.util.regex.Pattern;
  * app-client.jar, lib-client.jar, opentelemetry.jar, util.jar, util-8.jar, util_rt.jar
  *
  * @author gregsh
- *
  * @noinspection UseOfSystemOutOrSystemErr
  */
 public class Main {
@@ -126,8 +126,8 @@ public class Main {
         if (files != null) {
           for (File file : files) {
             if (file.isDirectory() || !grammarPattern.matcher(file.getName()).matches()) continue;
-            PsiFile bnfFile = LightPsi.parseFile(file, parserDefinition);
-            if (!(bnfFile instanceof BnfFile)) continue;
+            PsiFile psiFile = LightPsi.parseFile(file, parserDefinition);
+            if (!(psiFile instanceof BnfFile)) continue;
 
             // for light-psi-all building:
             if (args[0].contains("lightpsi")) {
@@ -135,16 +135,18 @@ public class Main {
               Class.forName("org.jetbrains.annotations.Nullable");
               Class.forName("org.intellij.lang.annotations.Pattern");
               Class.forName("org.intellij.lang.annotations.RegExp");
-              DebugUtil.psiToString(bnfFile, false);
+              DebugUtil.psiToString(psiFile, false);
             }
-
             count++;
-            if (generateForFleet) {
-              new FleetParserGenerator((BnfFile)bnfFile, grammarDir.getAbsolutePath(), output.getAbsolutePath(), "",
-                                       generateFileTypeElement, className, debugName, languageClass).generate();
-            }
-            else {
-              new ParserGenerator((BnfFile)bnfFile, grammarDir.getAbsolutePath(), output.getAbsolutePath(), "").generate();
+
+            BnfFile bnfFile = (generateForFleet) ? new FleetBnfFileWrapper(psiFile.getViewProvider()) : (BnfFile)psiFile;
+            new ParserGenerator(bnfFile, grammarDir.getAbsolutePath(), output.getAbsolutePath(), "").generate();
+            if (generateFileTypeElement) {
+              new FleetFileTypeGenerator((BnfFile)psiFile,
+                                         grammarDir.getAbsolutePath(),
+                                         output.getAbsolutePath(),
+                                         "",
+                                         className, debugName, languageClass).generate();
             }
 
             System.out.println(file.getName() + " parser generated to " + output.getCanonicalPath());

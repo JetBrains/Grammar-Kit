@@ -11,6 +11,8 @@ import org.intellij.grammar.psi.BnfFile;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Map;
+
 import static org.intellij.grammar.generator.ParserGeneratorUtil.getRootAttribute;
 import static org.intellij.grammar.generator.fleet.FleetConstants.*;
 
@@ -20,10 +22,19 @@ public class BnfGenerateFleetLexerAction extends BnfGenerateLexerAction {
   private static final String FLEET_LEXER_FLEX_TEMPLATE = "/templates/fleet.lexer.flex.template";
 
   @Override
-  protected String getLexerFlexTemplate() { return FLEET_LEXER_FLEX_TEMPLATE; }
+  protected String getLexerFlexTemplate() {
+    return FLEET_LEXER_FLEX_TEMPLATE;
+  }
+
 
   @Override
-  protected void putPackageName(@NotNull VelocityContext context, BnfFile bnfFile, @Nullable String packageName) {
+  protected VelocityContext makeContext(BnfFile bnfFile,
+                                        @Nullable String packageName,
+                                        Map<String, String> simpleTokens,
+                                        Map<String, String> regexpTokens,
+                                        int[] maxLen) {
+    var context = new VelocityContext();
+    context.put("lexerClass", getLexerName(bnfFile));
     if (adjustPackage(bnfFile)) {
       var original = StringUtil.notNullize(packageName, StringUtil.getPackageName(getRootAttribute(bnfFile, KnownAttribute.PARSER_CLASS)));
       if (!original.isEmpty()) {
@@ -34,18 +45,21 @@ public class BnfGenerateFleetLexerAction extends BnfGenerateLexerAction {
       }
     }
     else {
-      super.putPackageName(context, bnfFile, packageName);
+      context.put("packageName",
+                  StringUtil.notNullize(packageName, StringUtil.getPackageName(getRootAttribute(bnfFile, KnownAttribute.PARSER_CLASS))));
     }
-  }
-
-  @Override
-  protected void putTypeHolderClass(@NotNull VelocityContext context, BnfFile bnfFile) {
+    context.put("tokenPrefix", getRootAttribute(bnfFile, KnownAttribute.ELEMENT_TYPE_PREFIX));
     if (adjustPackage(bnfFile)) {
       context.put("typesClass", FLEET_NAMESPACE_PREFIX + getRootAttribute(bnfFile, KnownAttribute.ELEMENT_TYPE_HOLDER_CLASS));
     }
     else {
-      super.putTypeHolderClass(context, bnfFile);
+      context.put("typesClass", getRootAttribute(bnfFile, KnownAttribute.ELEMENT_TYPE_HOLDER_CLASS));
     }
+    context.put("simpleTokens", simpleTokens);
+    context.put("regexpTokens", regexpTokens);
+    context.put("StringUtil", StringUtil.class);
+    context.put("maxTokenLength", maxLen[0]);
+    return context;
   }
 
   private static boolean adjustPackage(BnfFile file) {

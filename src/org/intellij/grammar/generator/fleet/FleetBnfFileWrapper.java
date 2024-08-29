@@ -5,7 +5,6 @@
 package org.intellij.grammar.generator.fleet;
 
 import com.intellij.openapi.fileTypes.FileType;
-import com.intellij.openapi.util.ClearableLazyValue;
 import com.intellij.psi.FileViewProvider;
 import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.psi.BnfAttr;
@@ -21,21 +20,25 @@ import java.util.*;
 import static org.intellij.grammar.KnownAttribute.*;
 import static org.intellij.grammar.generator.fleet.FleetConstants.*;
 
+//Wraps BnfFile to produce fleet-related attribute values.
+//Implemented as BnfFileImpl extension to avoid implementation of all methods in BnfFile interface
+public class FleetBnfFileWrapper extends BnfFileImpl implements BnfFile {
 
-public class FleetBnfFileImpl extends BnfFileImpl implements BnfFile {
-
-  private final Map<String, String> myOverriddenDefaults = Map.of(
-    PARSER_CLASS.getName(), PARSER_CLASS_DEFAULT,
+  private final Map<String, String> myFleetAttributeValuesSubstitution = Map.of(
     PARSER_UTIL_CLASS.getName(), GPUB_CLASS,
     ELEMENT_TYPE_CLASS.getName(), IELEMENTTYPE_CLASS,
-    TOKEN_TYPE_CLASS.getName(), IELEMENTTYPE_CLASS,
+    TOKEN_TYPE_CLASS.getName(), IELEMENTTYPE_CLASS
+  );
+
+  private final Map<String, String> myDefaultGeneratedNames = Map.of(
+    PARSER_CLASS.getName(), PARSER_CLASS_DEFAULT,
     ELEMENT_TYPE_HOLDER_CLASS.getName(), ELEMENT_TYPE_HOLDER_DEFAULT
   );
 
-  private final ClearableLazyValue<Map<String, String>> myOverriddenAttributeValues =
-    lazyValue(FleetBnfFileImpl::calcFleetAttributeOverridingValues);
+  private final Set<String> mySuppressedFactories = new HashSet<>(Arrays.asList(ELEMENT_TYPE_FACTORY.getName(),
+                                                                                TOKEN_TYPE_FACTORY.getName()));
 
-  public FleetBnfFileImpl(FileViewProvider viewProvider) {
+  public FleetBnfFileWrapper(FileViewProvider viewProvider) {
     super(viewProvider);
   }
 
@@ -66,19 +69,37 @@ public class FleetBnfFileImpl extends BnfFileImpl implements BnfFile {
 
   @Override
   public <T> T findAttributeValue(@Nullable BnfRule rule, @NotNull KnownAttribute<T> knownAttribute, @Nullable String match) {
-    var map = super.findAttributeValue(null, KnownAttribute.GENERATE, null).asMap();
-    boolean adjustPackages = !map.getOrDefault(ADJUST_PACKAGES_FOR_FLEET.getName(), "").equals("no");
-    if (myOverriddenDefaults.containsKey(knownAttribute.getName())) {
-      if (adjustPackages){
-        return (hasAttributeValue(knownAttribute)) ?
+    //Bypass adjustment logic for the GENERATE attribute
+    if (knownAttribute.getName().equals(GENERATE.getName())) {
+      return super.findAttributeValue(rule, knownAttribute, match);
+    }
+
+    var attributeValue = super.findAttributeValue(null, KnownAttribute.GENERATE, null);
+    var adjustPackages =
+      !(attributeValue == null ||
+        attributeValue.asMap().getOrDefault(ADJUST_PACKAGES_FOR_FLEET.getName(), "").equals("no"));
+
+    if (myFleetAttributeValuesSubstitution.containsKey(knownAttribute.getName())) {
+      if (hasAttributeValue(rule, knownAttribute, match)) {
+        return (adjustPackages) ?
                adjustedValue(rule, knownAttribute, match) :
-               (T)myOverriddenDefaults.get(knownAttribute.getName());
+               super.findAttributeValue(rule, knownAttribute, match);
+      }
+      else {
+        return (T)myFleetAttributeValuesSubstitution.get(knownAttribute.getName());
       }
     }
 
-    //Class
-    if (myOverriddenAttributeValues.getValue().containsKey(knownAttribute.getName())) {
-      return (T)myOverriddenAttributeValues.getValue().get(knownAttribute.getName());
+    ////If a generated element name has been requested, return value adjusted accordingly
+    if (myDefaultGeneratedNames.containsKey(knownAttribute.getName())) {
+      return (adjustPackages) ?
+             adjustedValue(rule, knownAttribute, match) :
+             super.findAttributeValue(rule, knownAttribute, match);
+    }
+
+    //If a factory attribute is requested, return null to force generation of non-factory methods
+    if (mySuppressedFactories.contains(knownAttribute.getName())) {
+      return null;
     }
 
     return super.findAttributeValue(rule, knownAttribute, match);
@@ -95,14 +116,5 @@ public class FleetBnfFileImpl extends BnfFileImpl implements BnfFile {
   @Override
   public @NotNull FileType getFileType() {
     return super.getFileType();
-  }
-
-  private static Map<String, String> calcFleetAttributeOverridingValues() {
-    var valueMap = new HashMap<String, String>();
-    valueMap.put(ELEMENT_TYPE_FACTORY.getName(), null);
-    valueMap.put(TOKEN_TYPE_FACTORY.getName(), null);
-    valueMap.put(ELEMENT_TYPE_CLASS.getName(), IELEMENTTYPE_CLASS);
-    valueMap.put(TOKEN_TYPE_CLASS.getName(), IELEMENTTYPE_CLASS);
-    return valueMap;
   }
 }

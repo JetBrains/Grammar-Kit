@@ -15,6 +15,7 @@ public interface FooTypes {
   IElementType ELEMENT_3 = FooParserDefinition.createType("ELEMENT_3");
   IElementType ELEMENT_4 = FooParserDefinition.createType("ELEMENT_4");
   IElementType ELEMENT_5 = FooParserDefinition.createType("ELEMENT_5");
+  IElementType ELEMENT_6 = FooParserDefinition.createType("ELEMENT_6");
   IElementType INTERFACE_TYPE = FooParserDefinition.createType("INTERFACE_TYPE");
   IElementType STRUCT_TYPE = FooParserDefinition.createType("STRUCT_TYPE");
   IElementType TYPE = FooParserDefinition.createType("TYPE");
@@ -37,6 +38,9 @@ public interface FooTypes {
       }
       else if (type == ELEMENT_5) {
         return new Element5Impl(node);
+      }
+      else if (type == ELEMENT_6) {
+        return new Element6Impl(node);
       }
       else if (type == INTERFACE_TYPE) {
         return new InterfaceTypeImpl(node);
@@ -121,6 +125,20 @@ import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
 public interface Element5 extends PsiElement {
+
+}
+// ---- Element6.java -----------------
+//header.txt
+package test.psi;
+
+import java.util.List;
+import org.jetbrains.annotations.*;
+import com.intellij.psi.PsiElement;
+
+public interface Element6 extends PsiElement {
+
+  @NotNull
+  Type getType();
 
 }
 // ---- InterfaceType.java -----------------
@@ -324,7 +342,7 @@ public class Element3Impl extends StubBasedPsiElementBase<Element3Stub> implemen
   @Override
   @NotNull
   public Element4 getElement4() {
-    return notNullChild(MyPsiTreeUtil.getStubChildOfType(this, Element4.class));
+    return notNullChild(getStubOrPsiChild(ELEMENT_4));
   }
 
 }
@@ -372,7 +390,7 @@ public class Element4Impl extends StubBasedPsiElementBase<Element4Stub> implemen
   @Override
   @Nullable
   public Element2 getElement2() {
-    return MyPsiTreeUtil.getStubChildOfType(this, Element2.class);
+    return getStubOrPsiChild(ELEMENT_2);
   }
 
 }
@@ -404,6 +422,43 @@ public class Element5Impl extends ASTWrapperPsiElement implements Element5 {
   public void accept(@NotNull PsiElementVisitor visitor) {
     if (visitor instanceof Visitor) accept((Visitor)visitor);
     else super.accept(visitor);
+  }
+
+}
+// ---- Element6Impl.java -----------------
+//header.txt
+package test.psi.impl;
+
+import java.util.List;
+import org.jetbrains.annotations.*;
+import com.intellij.lang.ASTNode;
+import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiElementVisitor;
+import test.psi.MyPsiTreeUtil;
+import static test.FooTypes.*;
+import com.intellij.extapi.psi.ASTWrapperPsiElement;
+import test.psi.*;
+
+public class Element6Impl extends ASTWrapperPsiElement implements Element6 {
+
+  public Element6Impl(@NotNull ASTNode node) {
+    super(node);
+  }
+
+  public void accept(@NotNull Visitor visitor) {
+    visitor.visitElement6(this);
+  }
+
+  @Override
+  public void accept(@NotNull PsiElementVisitor visitor) {
+    if (visitor instanceof Visitor) accept((Visitor)visitor);
+    else super.accept(visitor);
+  }
+
+  @Override
+  @NotNull
+  public Type getType() {
+    return notNullChild(MyPsiTreeUtil.getChildOfType(this, Type.class));
   }
 
 }
@@ -634,6 +689,10 @@ public class Visitor extends PsiElementVisitor {
   }
 
   public void visitElement5(@NotNull Element5 o) {
+    visitPsiElement(o);
+  }
+
+  public void visitElement6(@NotNull Element6 o) {
     visitPsiElement(o);
   }
 

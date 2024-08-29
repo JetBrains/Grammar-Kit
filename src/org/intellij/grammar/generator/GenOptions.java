@@ -22,7 +22,8 @@ public class GenOptions {
   public final boolean generateTokenTypes;
   public final boolean generateTokenSets;
   public final boolean generateElementTypes;
-  public final String generateExactTypes;
+  public final boolean generateExactElements;
+  public final boolean generateExactTokens;
   public final boolean generateExtendedPin;
   public final boolean generatePsi;
   public final boolean generatePsiFactory;
@@ -30,6 +31,7 @@ public class GenOptions {
   public final boolean generateVisitor;
   public final String visitorValue;
   public final boolean generateFQN;
+  public final boolean generateFastStubChildAccessors;
   public final Case generateTokenCase;
   public final Case generateElementCase;
   public final boolean generateTokenAccessors;
@@ -45,7 +47,9 @@ public class GenOptions {
     generateTokenTypes = getGenerateOption(myFile, KnownAttribute.GENERATE_TOKENS, genOptions, "tokens");
     generateTokenSets = generateTokenTypes && "yes".equals(genOptions.get("token-sets"));
     generateElementTypes = !"no".equals(genOptions.get("elements"));
-    generateExactTypes = StringUtil.notNullize(genOptions.get("exact-types"));
+    String generateExactTypes = StringUtil.notNullize(genOptions.get("exact-types"));
+    generateExactElements = "all".equals(generateExactTypes) || generateExactTypes.contains("elements");
+    generateExactTokens = "all".equals(generateExactTypes) || generateExactTypes.contains("tokens");
     generateFirstCheck = getGenerateOption(myFile, KnownAttribute.GENERATE_FIRST_CHECK, genOptions, "first-check", "firstCheck");
     generateExtendedPin = getGenerateOption(myFile, KnownAttribute.EXTENDED_PIN, genOptions, "extended-pin", "extendedPin");
     generateTokenAccessors = getGenerateOption(myFile, KnownAttribute.GENERATE_TOKEN_ACCESSORS, genOptions, "token-accessors", "tokenAccessors");
@@ -53,6 +57,7 @@ public class GenOptions {
     generateVisitor = !"no".equals(genOptions.get("visitor"));
     visitorValue = "void".equals(genOptions.get("visitor-value")) ? null : StringUtil.nullize(genOptions.get("visitor-value"));
     generateFQN = "yes".equals(genOptions.get("fqn"));
+    generateFastStubChildAccessors = generateExactElements && "yes".equals(genOptions.get("fast-stub-child-accessors"));
 
     generateTokenCase = ParserGeneratorUtil.enumFromString(genOptions.get("token-case"), Case.UPPER);
     generateElementCase = ParserGeneratorUtil.enumFromString(genOptions.get("element-case"), Case.UPPER);

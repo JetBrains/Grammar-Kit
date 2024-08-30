@@ -8,8 +8,8 @@ import com.intellij.openapi.util.io.FileUtil;
 import com.intellij.openapi.util.io.FileUtilRt;
 import org.intellij.grammar.generator.GeneratorBase;
 import org.intellij.grammar.generator.ParserGenerator;
-import org.intellij.grammar.generator.fleet.FleetBnfFileWrapper;
-import org.intellij.grammar.generator.fleet.FleetFileTypeGenerator;
+import org.intellij.grammar.fleet.FleetBnfFileWrapper;
+import org.intellij.grammar.fleet.FleetFileTypeGenerator;
 
 import java.io.*;
 import java.util.Arrays;

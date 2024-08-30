@@ -6,7 +6,7 @@ package org.intellij.grammar.generator;
 
 import com.intellij.openapi.util.text.StringUtil;
 import org.intellij.grammar.KnownAttribute;
-import org.intellij.grammar.generator.fleet.FleetBnfFileWrapper;
+import org.intellij.grammar.fleet.FleetBnfFileWrapper;
 import org.intellij.grammar.psi.BnfFile;
 
 import java.util.Map;

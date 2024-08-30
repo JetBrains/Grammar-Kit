@@ -2,19 +2,19 @@
  * Copyright 2011-2024 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
  */
 
-package org.intellij.grammar.actions;
+package org.intellij.grammar.fleet;
 
 import com.intellij.openapi.util.text.StringUtil;
 import org.apache.velocity.VelocityContext;
 import org.intellij.grammar.KnownAttribute;
+import org.intellij.grammar.actions.BnfGenerateLexerAction;
 import org.intellij.grammar.psi.BnfFile;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
 
 import static org.intellij.grammar.generator.ParserGeneratorUtil.getRootAttribute;
-import static org.intellij.grammar.generator.fleet.FleetConstants.*;
+import static org.intellij.grammar.fleet.FleetConstants.*;
 
 public class BnfGenerateFleetLexerAction extends BnfGenerateLexerAction {
 

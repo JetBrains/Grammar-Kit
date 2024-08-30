@@ -2,7 +2,7 @@
  * Copyright 2011-2024 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
  */
 
-package org.intellij.grammar.generator.fleet;
+package org.intellij.grammar.fleet;
 
 import com.intellij.openapi.fileTypes.FileType;
 import com.intellij.psi.FileViewProvider;
@@ -18,7 +18,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.*;
 
 import static org.intellij.grammar.KnownAttribute.*;
-import static org.intellij.grammar.generator.fleet.FleetConstants.*;
+import static org.intellij.grammar.fleet.FleetConstants.*;
 
 //Wraps BnfFile to produce fleet-related attribute values.
 //Implemented as BnfFileImpl extension to avoid implementation of all methods in BnfFile interface

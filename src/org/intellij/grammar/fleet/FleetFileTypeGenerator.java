@@ -2,7 +2,7 @@
  * Copyright 2011-2024 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
  */
 
-package org.intellij.grammar.generator.fleet;
+package org.intellij.grammar.fleet;
 
 import org.intellij.grammar.generator.BnfConstants;
 import org.intellij.grammar.generator.GeneratorBase;
@@ -45,6 +45,11 @@ public class FleetFileTypeGenerator extends GeneratorBase {
     finally {
       closeOutput();
     }
+  }
+
+  @Override
+  protected @NotNull Set<String> collectClasses(Set<String> imports, String packageName) {
+    return Set.of();
   }
 
   private void generateFileTypeClass() {

@@ -2,7 +2,7 @@
  * Copyright 2011-2024 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
  */
 
-package org.intellij.grammar.actions;
+package org.intellij.grammar.fleet;
 
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.project.Project;
@@ -14,7 +14,7 @@ import com.intellij.openapi.util.io.FileUtil;
 import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import org.intellij.grammar.GrammarKitBundle;
-import org.intellij.grammar.generator.fleet.FleetConstants;
+import org.intellij.grammar.actions.BnfRunJFlexAction;
 import org.intellij.grammar.java.JavaHelper;
 import org.jetbrains.annotations.NotNull;
 

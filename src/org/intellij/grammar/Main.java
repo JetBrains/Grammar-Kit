@@ -10,8 +10,8 @@ import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.impl.DebugUtil;
 import org.intellij.grammar.generator.ParserGenerator;
-import org.intellij.grammar.generator.fleet.FleetBnfFileWrapper;
-import org.intellij.grammar.generator.fleet.FleetFileTypeGenerator;
+import org.intellij.grammar.fleet.FleetBnfFileWrapper;
+import org.intellij.grammar.fleet.FleetFileTypeGenerator;
 import org.intellij.grammar.psi.BnfFile;
 
 import java.io.File;
@@ -29,7 +29,7 @@ public class Main {
   public static void main(String[] args) {
     if (args.length < 2) {
       System.out.println(
-        "Usage: Main <output-dir> <grammar-or-pattern 1>[--fleet][--generateFileTypeElement --className=<fqn> --debugName=<debugName> --languageClass=<fqn>][ ... <grammar-or-pattern n>[--fleet][--generateFileTypeElement...]]");
+        "Usage: Main <output-dir> <grammar-or-pattern 1> [--fleet] [--generateFileTypeElement --className=<fqn> --debugName=<debugName> --languageClass=<fqn>] [ ... <grammar-or-pattern n> [--fleet] [--generateFileTypeElement...]]");
       return;
     }
     File output = new File(args[0]);

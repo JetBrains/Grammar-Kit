@@ -74,16 +74,9 @@ public class FleetBnfFileWrapper extends BnfFileImpl implements BnfFile {
       return super.findAttributeValue(rule, knownAttribute, match);
     }
 
-    var attributeValue = super.findAttributeValue(null, KnownAttribute.GENERATE, null);
-    var adjustPackages =
-      !(attributeValue == null ||
-        attributeValue.asMap().getOrDefault("adjustPackagesForFleet", "").equals("no"));
-
     if (myFleetAttributeValuesSubstitution.containsKey(knownAttribute.getName())) {
       if (hasAttributeValue(rule, knownAttribute, match)) {
-        return (adjustPackages) ?
-               adjustedValue(rule, knownAttribute, match) :
-               super.findAttributeValue(rule, knownAttribute, match);
+        return adjustedValue(rule, knownAttribute, match);
       }
       else {
         return (T)myFleetAttributeValuesSubstitution.get(knownAttribute.getName());
@@ -92,9 +85,7 @@ public class FleetBnfFileWrapper extends BnfFileImpl implements BnfFile {
 
     ////If a generated element name has been requested, return value adjusted accordingly
     if (myDefaultGeneratedNames.containsKey(knownAttribute.getName())) {
-      return (adjustPackages) ?
-             adjustedValue(rule, knownAttribute, match) :
-             super.findAttributeValue(rule, knownAttribute, match);
+      return adjustedValue(rule, knownAttribute, match);
     }
 
     //If a factory attribute is requested, return null to force generation of non-factory methods

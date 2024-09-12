@@ -137,7 +137,7 @@ public abstract class GeneratorBase {
   @NotNull
   protected String generatePackageName(String className) {
     var packageName = StringUtil.getPackageName(className);
-    if (myGenerateForFleet && G.adjustPackagesForFleet && !className.startsWith(FLEET_NAMESPACE)) {
+    if (myGenerateForFleet && !className.startsWith(FLEET_NAMESPACE)) {
       if (packageName.isEmpty()) {
         return FLEET_NAMESPACE;
       }

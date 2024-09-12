@@ -6,13 +6,10 @@ package org.intellij.grammar.fleet;
 
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.ui.MessageConstants;
-import com.intellij.openapi.ui.MessageDialogBuilder;
 import com.intellij.openapi.util.Couple;
 import com.intellij.openapi.util.io.FileUtil;
 import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VirtualFile;
-import org.intellij.grammar.GrammarKitBundle;
 import org.intellij.grammar.actions.BnfRunJFlexAction;
 import org.intellij.grammar.java.JavaHelper;
 import org.jetbrains.annotations.NotNull;
@@ -32,7 +29,6 @@ public class BnfRunFleetJFlexAction extends BnfRunJFlexAction {
   private static final String WHITESPACE_TOKEN = "com.intellij.psi.TokenType.WHITE_SPACE";
   private static final String BAD_CHARACTER_TOKEN = "com.intellij.psi.TokenType.BAD_CHARACTER";
 
-  private Boolean adjustPackages = true;
   private JavaHelper javaHelper;
 
   @Override
@@ -42,24 +38,6 @@ public class BnfRunFleetJFlexAction extends BnfRunJFlexAction {
 
     javaHelper = project.getService(JavaHelper.class);
     javaHelper = javaHelper == null ? new JavaHelper.AsmHelper() : javaHelper;
-
-    var title = GrammarKitBundle.message("adjust.packages.fleet.title");
-    var prompt = GrammarKitBundle.message("adjust.packages.fleet.request");
-    var exitCode = MessageDialogBuilder.yesNoCancel(title, prompt)
-      .yesText(GrammarKitBundle.message("adjust.packages.fleet.yes"))
-      .noText(GrammarKitBundle.message("adjust.packages.fleet.no"))
-      .cancelText(GrammarKitBundle.message("adjust.packages.fleet.cancel")).show(project);
-
-    switch (exitCode) {
-      case MessageConstants.YES:
-        adjustPackages = true;
-        break;
-      case MessageConstants.NO:
-        adjustPackages = false;
-        break;
-      default:
-        return;
-    }
 
     super.actionPerformed(e);
   }
@@ -78,7 +56,7 @@ public class BnfRunFleetJFlexAction extends BnfRunJFlexAction {
         var printer = new PrintWriter(new FileOutputStream(newFile), false, f.getCharset());
         Files.readAllLines(f.toNioPath()).forEach(line -> {
           if (line.startsWith(PACKAGE_PREFIX) || line.startsWith(IMPORT_PREFIX) || line.startsWith(IMPORT_STATIC_PREFIX)) {
-            printer.println(adjustLine(line, adjustPackages, javaHelper));
+            printer.println(adjustLine(line, javaHelper));
           }
           else {
             printer.println(line);
@@ -105,12 +83,12 @@ public class BnfRunFleetJFlexAction extends BnfRunJFlexAction {
     });
   }
 
-  private static String adjustLine(String line, Boolean adjust, JavaHelper javaHelper) {
+  private static String adjustLine(String line, JavaHelper javaHelper) {
     var tokens = line.split("[ ;]");
     var name = tokens[tokens.length - 1];
 
     if ((line.startsWith(PACKAGE_PREFIX) && (!name.startsWith(FleetConstants.FLEET_NAMESPACE_PREFIX))) ||
-        nameNeedsAdjusting(adjust, name, javaHelper)) {
+        nameNeedsAdjusting(name, javaHelper)) {
       name = FleetConstants.FLEET_NAMESPACE_PREFIX + name;
       StringBuilder lineBuilder = new StringBuilder();
       for (int i = 0; i < tokens.length - 1; i++) {
@@ -121,7 +99,7 @@ public class BnfRunFleetJFlexAction extends BnfRunJFlexAction {
     return line;
   }
 
-  private static Boolean nameNeedsAdjusting(Boolean movePackagesToFleet, String className, JavaHelper javaHelper) {
+  private static Boolean nameNeedsAdjusting(String className, JavaHelper javaHelper) {
     if (className.startsWith(FleetConstants.FLEET_NAMESPACE_PREFIX)) {
       return false;
     }
@@ -143,6 +121,6 @@ public class BnfRunFleetJFlexAction extends BnfRunJFlexAction {
       return true;
     }
 
-    return movePackagesToFleet && javaHelper.findClass(name) == null && javaHelper.findPackage(name) == null;
+    return javaHelper.findClass(name) == null && javaHelper.findPackage(name) == null;
   }
 }

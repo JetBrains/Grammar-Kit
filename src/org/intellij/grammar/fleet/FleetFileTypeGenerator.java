@@ -26,12 +26,10 @@ public class FleetFileTypeGenerator extends GeneratorBase {
                                 String debugFileTypeName,
                                 String languageClass) {
     super(psiFile, sourcePath, outputPath, packagePrefix);
-    myFileTypeClassName = (G.adjustPackagesForFleet &&
-                           !classFileTypeName.startsWith(FleetConstants.FLEET_NAMESPACE_PREFIX)
+    myFileTypeClassName = (!classFileTypeName.startsWith(FleetConstants.FLEET_NAMESPACE_PREFIX)
                            ? FleetConstants.FLEET_NAMESPACE_PREFIX
                            : "") + classFileTypeName;
-    myLanguageClass = (G.adjustPackagesForFleet &&
-                       !languageClass.startsWith(FleetConstants.FLEET_NAMESPACE_PREFIX) ? FleetConstants.FLEET_NAMESPACE_PREFIX : "") +
+    myLanguageClass = (!languageClass.startsWith(FleetConstants.FLEET_NAMESPACE_PREFIX) ? FleetConstants.FLEET_NAMESPACE_PREFIX : "") +
                       languageClass;
     myFileTypeDebugName = debugFileTypeName;
   }

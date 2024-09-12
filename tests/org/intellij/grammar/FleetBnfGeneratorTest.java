@@ -76,5 +76,6 @@ public class FleetBnfGeneratorTest extends BnfGeneratorAbstractTest {
 
   public void testIFileTypeGeneration() throws Exception { doGenTest(true, "some.filetype.psi.MyFileType", "TEST", "some.language.MyLanguage");}
   public void testFleetPsiGen() throws Exception { doGenTest(true);}
-  public void testExprParser() throws Exception { doGenTest(true);}
+  public void testFleetExprParser() throws Exception { doGenTest(true);}
+  public void testFleetExternalRules() throws Exception { doGenTest(false);}
 }

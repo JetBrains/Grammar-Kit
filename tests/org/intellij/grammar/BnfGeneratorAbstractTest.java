@@ -3,7 +3,6 @@ package org.intellij.grammar;
 import com.intellij.openapi.util.io.FileUtil;
 import com.intellij.openapi.util.io.FileUtilRt;
 import com.intellij.openapi.vfs.CharsetToolkit;
-import org.intellij.grammar.generator.GenOptions;
 import org.intellij.grammar.generator.GeneratorBase;
 import org.intellij.grammar.generator.ParserGenerator;
 import org.intellij.grammar.psi.BnfFile;
@@ -26,22 +25,19 @@ public abstract class BnfGeneratorAbstractTest extends BnfGeneratorTestCase {
   protected Collection<GeneratorBase> newTestGenerator() {
     var bnfFile = (BnfFile)myFile;
     return List.of((new ParserGenerator(bnfFile, "", myFullDataPath, "") {
-
-                     @Override
-                     protected PrintWriter openOutputInner(String className, File file) throws IOException {
-                       String grammarName = FileUtil.getNameWithoutExtension(myFile.getName());
-                       String fileName = FileUtil.getNameWithoutExtension(file);
-                       String name = grammarName + (fileName.startsWith(grammarName) || fileName.endsWith("Parser") ? "" : ".PSI") + ".java";
-                       File targetFile = new File(FileUtilRt.getTempDirectory(), name);
-                       targetFile.getParentFile().mkdirs();
-                       FileOutputStream outputStream = new FileOutputStream(targetFile, true);
-                       PrintWriter out = new PrintWriter(new OutputStreamWriter(outputStream, myFile.getVirtualFile().getCharset()));
-                       out.println("// ---- " + file.getName() + " -----------------");
-                       return out;
-                     }
-                   }
-                   )
-    );
+      @Override
+      protected PrintWriter openOutputInner(String className, File file) throws IOException {
+        String grammarName = FileUtil.getNameWithoutExtension(this.file.getName());
+        String fileName = FileUtil.getNameWithoutExtension(file);
+        String name = grammarName + (fileName.startsWith(grammarName) || fileName.endsWith("Parser") ? "" : ".PSI") + ".java";
+        File targetFile = new File(FileUtilRt.getTempDirectory(), name);
+        targetFile.getParentFile().mkdirs();
+        FileOutputStream outputStream = new FileOutputStream(targetFile, true);
+        PrintWriter out = new PrintWriter(new OutputStreamWriter(outputStream, this.file.getVirtualFile().getCharset()));
+        out.println("// ---- " + file.getName() + " -----------------");
+        return out;
+      }
+    }));
   }
 
   @Override

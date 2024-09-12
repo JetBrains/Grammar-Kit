@@ -29,8 +29,7 @@ import static org.intellij.grammar.fleet.FleetConstants.FLEET_NAMESPACE_PREFIX;
 public abstract class GeneratorBase {
   public static final Logger LOG = Logger.getInstance(GeneratorBase.class);
 
-  private final BnfFile myFile;
-
+  protected final BnfFile file;
 
   protected final Boolean myGenerateForFleet;
 
@@ -49,10 +48,6 @@ public abstract class GeneratorBase {
 
   protected final GenOptions G;
 
-  protected BnfFile getFile() {
-    return myFile;
-  }
-
   protected NameShortener getShortener() {
     return myShortener;
   }
@@ -63,15 +58,15 @@ public abstract class GeneratorBase {
                           @NotNull String sourcePath,
                           @NotNull String outputPath,
                           @NotNull String packagePrefix) {
-    myFile = psiFile;
+    file = psiFile;
     myGenerateForFleet = psiFile instanceof FleetBnfFileWrapper;
 
     G = new GenOptions(psiFile);
     mySourcePath = sourcePath;
     myOutputPath = outputPath;
     myPackagePrefix = packagePrefix;
-    myIntfClassFormat = getPsiClassFormat(myFile);
-    myImplClassFormat = getPsiImplClassFormat(myFile);
+    myIntfClassFormat = getPsiClassFormat(file);
+    myImplClassFormat = getPsiImplClassFormat(file);
 
     List<BnfRule> rules = psiFile.getRules();
     BnfRule rootRule = rules.isEmpty() ? null : rules.get(0);
@@ -131,7 +126,7 @@ public abstract class GeneratorBase {
   protected abstract @NotNull Set<String> collectClasses(Set<String> imports, String packageName);
 
   protected void generateFileHeader(String className) {
-    String header = getRootAttribute(myFile, KnownAttribute.CLASS_HEADER, className);
+    String header = getRootAttribute(file, KnownAttribute.CLASS_HEADER, className);
     String text = StringUtil.isEmpty(header) ? "" : getStringOrFile(header);
     if (StringUtil.isNotEmpty(text)) {
       out(text);
@@ -174,7 +169,7 @@ public abstract class GeneratorBase {
   protected PrintWriter openOutputInner(String className, File file) throws IOException {
     //noinspection ResultOfMethodCallIgnored
     file.getParentFile().mkdirs();
-    return new PrintWriter(new FileOutputStream(file), false, myFile.getVirtualFile().getCharset());
+    return new PrintWriter(new FileOutputStream(file), false, this.file.getVirtualFile().getCharset());
   }
 
   protected void closeOutput() {

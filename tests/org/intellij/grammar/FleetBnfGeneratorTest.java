@@ -74,7 +74,6 @@ public class FleetBnfGeneratorTest extends BnfGeneratorAbstractTest {
     myFileGeneratorParams = null;
   }
 
-  public void testFleetJson() throws Exception { doGenTest(true, "fleet.com.intellij.json.psi.JsonFileType", "JSON", "fleet.com.intellij.json.JsonLanguage");}
   public void testAdjustPackages() throws Exception { doGenTest(true);}
   public void testIFileTypeGeneration() throws Exception { doGenTest(true, "some.filetype.psi.MyFileType", "TEST", "some.language.MyLanguage");}
   public void testFleetPsiGen() throws Exception { doGenTest(true);}

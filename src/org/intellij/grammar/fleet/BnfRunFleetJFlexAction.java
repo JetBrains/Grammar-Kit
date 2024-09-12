@@ -8,7 +8,6 @@ import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.MessageConstants;
 import com.intellij.openapi.ui.MessageDialogBuilder;
-import com.intellij.openapi.util.ActionCallback;
 import com.intellij.openapi.util.Couple;
 import com.intellij.openapi.util.io.FileUtil;
 import com.intellij.openapi.vfs.VfsUtil;
@@ -20,8 +19,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.*;
 import java.nio.file.Files;
-import java.util.Iterator;
-import java.util.List;
+import java.util.Collection;
 
 public class BnfRunFleetJFlexAction extends BnfRunJFlexAction {
   private static final String TEMP_FLEX_DIRECTORY = "temp-grammar-kit";
@@ -67,8 +65,11 @@ public class BnfRunFleetJFlexAction extends BnfRunJFlexAction {
   }
 
   @Override
-  protected Iterator<VirtualFile> getFileIterator(List<VirtualFile> files) {
-    return files.stream().map(f -> {
+  public void doGenerate(@NotNull Project project,
+                                   @NotNull Collection<VirtualFile> flexFiles,
+                                   @NotNull Couple<File> jflex,
+                                   @NotNull String batchId) {
+    flexFiles.stream().map(f -> {
       try {
         if (f == null) return null;
         var tempFileDirectory = f.getParent().getPath() + VfsUtil.VFS_SEPARATOR + TEMP_FLEX_DIRECTORY;
@@ -89,25 +90,19 @@ public class BnfRunFleetJFlexAction extends BnfRunJFlexAction {
       catch (Exception ignored) {
         return null;
       }
-    }).iterator();
-  }
-
-  @Override
-  public ActionCallback doGenerate(@NotNull Project project,
-                                   @NotNull VirtualFile flexFile,
-                                   @NotNull Couple<File> jflex,
-                                   @NotNull String batchId) {
-    var result = super.doGenerate(project, flexFile, jflex, batchId);
-    result.doWhenProcessed(() -> {
-      try {
-        FileUtil.delete(flexFile.getParent().toNioPath());
-        VfsUtil.markDirtyAndRefresh(true, false, true, flexFile.getParent());
-      }
-      catch (IOException e) {
-        throw new RuntimeException(e);
-      }
+    }).forEach(flexFile -> {
+      if (flexFile == null) return;
+      var result = doGenerateInner(project, flexFile, jflex, batchId);
+      result.doWhenProcessed(() -> {
+        try {
+          FileUtil.delete(flexFile.getParent().toNioPath());
+          VfsUtil.markDirtyAndRefresh(true, false, true, flexFile.getParent());
+        }
+        catch (IOException e) {
+          throw new RuntimeException(e);
+        }
+      });
     });
-    return result;
   }
 
   private static String adjustLine(String line, Boolean adjust, JavaHelper javaHelper) {

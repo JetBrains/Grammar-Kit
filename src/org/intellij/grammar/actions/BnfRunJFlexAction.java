@@ -58,7 +58,7 @@ import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Iterator;
+import java.util.Collection;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -115,26 +115,20 @@ public class BnfRunJFlexAction extends DumbAwareAction {
       return;
     }
     String batchId = "jflex@" + System.nanoTime();
-    new Runnable() {
-      final Iterator<VirtualFile> it = getFileIterator(files);
-
-      @Override
-      public void run() {
-        if (it.hasNext()) {
-          doGenerate(project, it.next(), flexFiles, batchId).doWhenProcessed(this);
-        }
-      }
-    }.run();
+    doGenerate(project, files, flexFiles, batchId);
   }
 
-  protected Iterator<VirtualFile> getFileIterator(List<VirtualFile> files) {
-    return files.iterator();
+  protected void doGenerate(@NotNull Project project,
+                                      Collection<VirtualFile> flexFiles,
+                                      @NotNull Couple<File> jflex,
+                                      @NotNull String batchId){
+    flexFiles.forEach(file -> doGenerateInner(project, file, jflex, batchId));
   }
 
-  public ActionCallback doGenerate(@NotNull Project project,
-                                          @NotNull VirtualFile flexFile,
-                                          @NotNull Couple<File> jflex,
-                                          @NotNull String batchId) {
+  protected static ActionCallback doGenerateInner(@NotNull Project project,
+                                      @NotNull VirtualFile flexFile,
+                                      @NotNull Couple<File> jflex,
+                                      @NotNull String batchId) {
     FileDocumentManager fileDocumentManager = FileDocumentManager.getInstance();
     Document document = fileDocumentManager.getDocument(flexFile);
     if (document == null) return ActionCallback.REJECTED;

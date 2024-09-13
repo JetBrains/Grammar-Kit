@@ -6,6 +6,7 @@ package org.intellij.grammar.fleet;
 
 import com.intellij.openapi.fileTypes.FileType;
 import com.intellij.psi.FileViewProvider;
+import com.intellij.psi.SingleRootFileViewProvider;
 import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.psi.BnfAttr;
 import org.intellij.grammar.psi.BnfAttrs;
@@ -40,6 +41,10 @@ public class FleetBnfFileWrapper extends BnfFileImpl implements BnfFile {
 
   public FleetBnfFileWrapper(FileViewProvider viewProvider) {
     super(viewProvider);
+    if (viewProvider instanceof SingleRootFileViewProvider){
+      //feels super hacky, probably illegal
+      ((SingleRootFileViewProvider)viewProvider).forceCachedPsi(this);
+    }
   }
 
   @Override

@@ -139,7 +139,7 @@ public class Main {
             }
             count++;
 
-            BnfFile bnfFile = (generateForFleet) ? new FleetBnfFileWrapper(psiFile.getViewProvider()) : (BnfFile)psiFile;
+            BnfFile bnfFile = (generateForFleet) ? FleetBnfFileWrapper.wrapBnfFile((BnfFile)psiFile) : (BnfFile)psiFile;
             new ParserGenerator(bnfFile, grammarDir.getAbsolutePath(), output.getAbsolutePath(), "").generate();
             if (generateFileTypeElement) {
               new FleetFileTypeGenerator((BnfFile)psiFile,

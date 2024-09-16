@@ -6,14 +6,13 @@ package org.intellij.grammar;
 
 import com.intellij.openapi.util.io.FileUtil;
 import com.intellij.openapi.util.io.FileUtilRt;
+import com.intellij.psi.PsiFile;
 import org.intellij.grammar.generator.GeneratorBase;
-import org.intellij.grammar.generator.ParserGenerator;
 import org.intellij.grammar.fleet.FleetBnfFileWrapper;
 import org.intellij.grammar.fleet.FleetFileTypeGenerator;
+import org.intellij.grammar.psi.BnfFile;
 
 import java.io.*;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 
 public class FleetBnfGeneratorTest extends BnfGeneratorAbstractTest {
@@ -26,27 +25,10 @@ public class FleetBnfGeneratorTest extends BnfGeneratorAbstractTest {
   }
 
   @Override
-  protected Collection<GeneratorBase> newTestGenerator() {
-    var fleetBnfFile = new FleetBnfFileWrapper(myFile.getViewProvider());
-
-    var parserGenerator = new ParserGenerator(fleetBnfFile, "", myFullDataPath, "") {
-
-        @Override
-        protected PrintWriter openOutputInner(String className, File file) throws IOException {
-          String grammarName = FileUtil.getNameWithoutExtension(this.file.getName());
-          String fileName = FileUtil.getNameWithoutExtension(file);
-          String name = grammarName + (fileName.startsWith(grammarName) || fileName.endsWith("Parser") ? "" : ".PSI") + ".java";
-          File targetFile = new File(FileUtilRt.getTempDirectory(), name);
-          targetFile.getParentFile().mkdirs();
-          FileOutputStream outputStream = new FileOutputStream(targetFile, true);
-          PrintWriter out = new PrintWriter(new OutputStreamWriter(outputStream, this.file.getVirtualFile().getCharset()));
-          out.println("// ---- " + file.getName() + " -----------------");
-          return out;
-        }
-      };
-
+  protected List<GeneratorBase> newTestGenerator() {
+    var listOfGens = super.newTestGenerator();
     if (myFileGeneratorParams != null) {
-      var fileTypeGenerator = new FleetFileTypeGenerator(fleetBnfFile,
+      var fileTypeGenerator = new FleetFileTypeGenerator((BnfFile)myFile,
                                                          "", myFullDataPath, "",
                                                          myFileGeneratorParams.className,
                                                          myFileGeneratorParams.debugName,
@@ -63,9 +45,14 @@ public class FleetBnfGeneratorTest extends BnfGeneratorAbstractTest {
           return out;
         }
       };
-      return Arrays.asList(parserGenerator, fileTypeGenerator);
+      listOfGens.add(fileTypeGenerator);
     }
-    return List.of(parserGenerator);
+    return listOfGens;
+  }
+
+  @Override
+  protected PsiFile createBnfFile(boolean generatePsi, String name, String text) {
+    return FleetBnfFileWrapper.wrapBnfFile((BnfFile)createPsiFile(name, text.replaceAll("generatePsi=[^\n]*", "generatePsi=" + generatePsi)));
   }
 
   public void doGenTest(boolean generatePsi, String fileTypeClass, String debugName, String languageClass) throws Exception {

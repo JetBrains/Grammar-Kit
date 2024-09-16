@@ -8,6 +8,7 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiManager;
 import org.intellij.grammar.actions.GenerateAction;
+import org.intellij.grammar.psi.BnfFile;
 import org.jetbrains.annotations.Nullable;
 
 public class GenerateFleetAction extends GenerateAction {
@@ -16,7 +17,6 @@ public class GenerateFleetAction extends GenerateAction {
   protected @Nullable PsiFile getBnfFile(VirtualFile file, PsiManager psiManager) {
     var psiFile = super.getBnfFile(file, psiManager);
     if (psiFile == null) return null;
-    var viewProvider = psiFile.getViewProvider();
-    return new FleetBnfFileWrapper(viewProvider);
+    return FleetBnfFileWrapper.wrapBnfFile((BnfFile)psiFile);
   }
 }

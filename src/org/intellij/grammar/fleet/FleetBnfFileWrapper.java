@@ -39,12 +39,18 @@ public class FleetBnfFileWrapper extends BnfFileImpl implements BnfFile {
   private final Set<String> mySuppressedFactories = new HashSet<>(Arrays.asList(ELEMENT_TYPE_FACTORY.getName(),
                                                                                 TOKEN_TYPE_FACTORY.getName()));
 
-  public FleetBnfFileWrapper(FileViewProvider viewProvider) {
+  private FleetBnfFileWrapper(FileViewProvider viewProvider) {
     super(viewProvider);
+  }
+
+  public static FleetBnfFileWrapper wrapBnfFile(@NotNull BnfFile bnfFile) {
+    var viewProvider = bnfFile.getViewProvider();
+    var wrapped = new FleetBnfFileWrapper(viewProvider);
     if (viewProvider instanceof SingleRootFileViewProvider){
       //feels super hacky, probably illegal
-      ((SingleRootFileViewProvider)viewProvider).forceCachedPsi(this);
+      ((SingleRootFileViewProvider)viewProvider).forceCachedPsi(wrapped);
     }
+    return wrapped;
   }
 
   @Override

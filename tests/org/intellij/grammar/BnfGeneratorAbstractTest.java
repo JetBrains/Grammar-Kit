@@ -3,6 +3,7 @@ package org.intellij.grammar;
 import com.intellij.openapi.util.io.FileUtil;
 import com.intellij.openapi.util.io.FileUtilRt;
 import com.intellij.openapi.vfs.CharsetToolkit;
+import com.intellij.psi.PsiFile;
 import org.intellij.grammar.generator.GeneratorBase;
 import org.intellij.grammar.generator.ParserGenerator;
 import org.intellij.grammar.psi.BnfFile;
@@ -10,7 +11,6 @@ import org.jetbrains.annotations.NonNls;
 
 import java.io.*;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 /**
@@ -22,9 +22,10 @@ public abstract class BnfGeneratorAbstractTest extends BnfGeneratorTestCase {
     super(s);
   }
 
-  protected Collection<GeneratorBase> newTestGenerator() {
+  protected List<GeneratorBase> newTestGenerator() {
+    var list = new ArrayList<GeneratorBase>();
     var bnfFile = (BnfFile)myFile;
-    return List.of((new ParserGenerator(bnfFile, "", myFullDataPath, "") {
+   list.add((new ParserGenerator(bnfFile, "", myFullDataPath, "") {
       @Override
       protected PrintWriter openOutputInner(String className, File file) throws IOException {
         String grammarName = FileUtil.getNameWithoutExtension(this.file.getName());
@@ -38,6 +39,7 @@ public abstract class BnfGeneratorAbstractTest extends BnfGeneratorTestCase {
         return out;
       }
     }));
+   return list;
   }
 
   @Override
@@ -50,7 +52,7 @@ public abstract class BnfGeneratorAbstractTest extends BnfGeneratorTestCase {
   public void doGenTest(boolean generatePsi) throws Exception {
     String name = getTestName(false);
     String text = loadFile(name + "." + myFileExt);
-    myFile = createPsiFile(name, text.replaceAll("generatePsi=[^\n]*", "generatePsi=" + generatePsi));
+    myFile = createBnfFile(generatePsi, name, text);
     List<File> filesToCheck = new ArrayList<>();
     filesToCheck.add(new File(FileUtilRt.getTempDirectory(), name + ".java"));
     if (generatePsi) {
@@ -83,5 +85,9 @@ public abstract class BnfGeneratorAbstractTest extends BnfGeneratorTestCase {
       String result = FileUtil.loadFile(file, CharsetToolkit.UTF8, true);
       doCheckResult(myFullDataPath, expectedName, result);
     }
+  }
+
+  protected PsiFile createBnfFile(boolean generatePsi, String name, String text) {
+    return createPsiFile(name, text.replaceAll("generatePsi=[^\n]*", "generatePsi=" + generatePsi));
   }
 }

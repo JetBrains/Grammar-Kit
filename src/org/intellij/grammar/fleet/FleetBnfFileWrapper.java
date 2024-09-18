@@ -46,8 +46,12 @@ public class FleetBnfFileWrapper extends BnfFileImpl implements BnfFile {
   public static FleetBnfFileWrapper wrapBnfFile(@NotNull BnfFile bnfFile) {
     var viewProvider = bnfFile.getViewProvider();
     var wrapped = new FleetBnfFileWrapper(viewProvider);
+    //ViewProvider we use to construct FleetBnfFileWrapper cache BnfFile and returns it for getPsiInner(BnfLanguage).
+    //This may cause problems with, for example, producing LocalSearchScope, because it searches in cached psiFile,
+    //not the psiFile that was passed to it.
+    //To mitigate problems caused by this caching, we call forceCachedPsi(wrapped) to cache FleetBnfFileWrapper.
+    //It works, but legality of this is not clear.
     if (viewProvider instanceof SingleRootFileViewProvider){
-      //feels super hacky, probably illegal
       ((SingleRootFileViewProvider)viewProvider).forceCachedPsi(wrapped);
     }
     return wrapped;

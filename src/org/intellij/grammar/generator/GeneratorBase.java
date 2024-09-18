@@ -22,7 +22,6 @@ import java.util.*;
 
 import static java.lang.String.format;
 import static org.intellij.grammar.generator.ParserGeneratorUtil.*;
-import static org.intellij.grammar.generator.ParserGeneratorUtil.getPsiImplClassFormat;
 import static org.intellij.grammar.fleet.FleetConstants.FLEET_NAMESPACE;
 import static org.intellij.grammar.fleet.FleetConstants.FLEET_NAMESPACE_PREFIX;
 

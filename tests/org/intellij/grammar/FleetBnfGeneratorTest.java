@@ -35,12 +35,12 @@ public class FleetBnfGeneratorTest extends BnfGeneratorAbstractTest {
                                                          myFileGeneratorParams.languageClass) {
         @Override
         protected PrintWriter openOutputInner(String className, File file) throws IOException {
-          String grammarName = FileUtil.getNameWithoutExtension(this.file.getName());
+          String grammarName = FileUtil.getNameWithoutExtension(this.myFile.getName());
           String name = grammarName + ".PSI.java";
           File targetFile = new File(FileUtilRt.getTempDirectory(), name);
           targetFile.getParentFile().mkdirs();
           FileOutputStream outputStream = new FileOutputStream(targetFile, true);
-          PrintWriter out = new PrintWriter(new OutputStreamWriter(outputStream, this.file.getVirtualFile().getCharset()));
+          PrintWriter out = new PrintWriter(new OutputStreamWriter(outputStream, this.myFile.getVirtualFile().getCharset()));
           out.println("// ---- " + file.getName() + " -----------------");
           return out;
         }

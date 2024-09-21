@@ -58,7 +58,7 @@ import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Iterator;
+import java.util.Collection;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -91,7 +91,7 @@ public class BnfRunJFlexAction extends DumbAwareAction {
     e.getPresentation().setEnabledAndVisible(project != null && !files.isEmpty());
   }
 
-  private static List<VirtualFile> getFiles(@NotNull AnActionEvent e) {
+  protected static List<VirtualFile> getFiles(@NotNull AnActionEvent e) {
     return JBIterable.of(e.getData(CommonDataKeys.VIRTUAL_FILE_ARRAY)).filter(file -> {
       FileType fileType = file.getFileType();
       return fileType == JFlexFileType.INSTANCE ||
@@ -115,21 +115,20 @@ public class BnfRunJFlexAction extends DumbAwareAction {
       return;
     }
     String batchId = "jflex@" + System.nanoTime();
-    new Runnable() {
-      final Iterator<VirtualFile> it = files.iterator();
-      @Override
-      public void run() {
-        if (it.hasNext()) {
-          doGenerate(project, it.next(), flexFiles, batchId).doWhenProcessed(this);
-        }
-      }
-    }.run();
+    doGenerate(project, files, flexFiles, batchId);
   }
 
-  public static ActionCallback doGenerate(@NotNull Project project,
-                                          @NotNull VirtualFile flexFile,
-                                          @NotNull Couple<File> jflex,
-                                          @NotNull String batchId) {
+  protected void doGenerate(@NotNull Project project,
+                                      Collection<VirtualFile> flexFiles,
+                                      @NotNull Couple<File> jflex,
+                                      @NotNull String batchId){
+    flexFiles.forEach(file -> doGenerateInner(project, file, jflex, batchId));
+  }
+
+  protected static ActionCallback doGenerateInner(@NotNull Project project,
+                                      @NotNull VirtualFile flexFile,
+                                      @NotNull Couple<File> jflex,
+                                      @NotNull String batchId) {
     FileDocumentManager fileDocumentManager = FileDocumentManager.getInstance();
     Document document = fileDocumentManager.getDocument(flexFile);
     if (document == null) return ActionCallback.REJECTED;
@@ -252,7 +251,7 @@ public class BnfRunJFlexAction extends DumbAwareAction {
     }
   }
 
-  private static @Nullable Couple<File> getOrDownload(@NotNull Project project) {
+  protected static @Nullable Couple<File> getOrDownload(@NotNull Project project) {
     LibraryTable libraryTable = LibraryTablesRegistrar.getInstance().getLibraryTable();
     for (Library library : libraryTable.getLibraries()) {
       Couple<File> result = findInUrls(library.getUrls(OrderRootType.CLASSES));

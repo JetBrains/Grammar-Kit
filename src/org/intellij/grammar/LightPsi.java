@@ -128,6 +128,11 @@ public class LightPsi {
            path.contains("platform-api.jar") ||
            path.contains("platform-impl.jar") ||
            path.contains("util.jar") ||
+           path.contains("util-8.jar") ||
+           path.contains("util_rt.jar") ||
+           path.contains("app-client.jar") ||
+           path.contains("lib-client.jar") ||
+           path.contains("opentelemetry.jar") ||
            path.contains("extensions.jar");
   }
 

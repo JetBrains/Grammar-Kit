@@ -1,0 +1,9 @@
+{
+  extraRoot(".*")=true
+}
+
+grammar ::= list | map
+list ::= '(' element (',' element) * ')'
+map ::= '(' entry (',' entry) * ')'
+entry ::= 'name' '->' element
+element ::= 'id'

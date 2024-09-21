@@ -61,6 +61,13 @@ import static org.intellij.grammar.generator.ParserGeneratorUtil.getRootAttribut
  * @author greg
  */
 public class BnfGenerateLexerAction extends AnAction {
+
+  private static final String LEXER_FLEX_TEMPLATE = "/templates/lexer.flex.template";
+
+  protected String getLexerFlexTemplate() {
+    return LEXER_FLEX_TEMPLATE;
+  }
+
   @Override
   public @NotNull ActionUpdateThread getActionUpdateThread() {
     return ActionUpdateThread.BGT;
@@ -172,22 +179,31 @@ public class BnfGenerateLexerAction extends AnAction {
     }
     catch (Throwable ignore) {}
     ve.init();
-    
-    VelocityContext context = new VelocityContext();
+
+    VelocityContext context = makeContext(bnfFile, packageName, simpleTokens, regexpTokens, maxLen);
+
+    StringWriter out = new StringWriter();
+    InputStream stream = getClass().getResourceAsStream(getLexerFlexTemplate());
+    ve.evaluate(context, out, "lexer.flex.template", new InputStreamReader(stream));
+    return StringUtil.convertLineSeparators(out.toString());
+  }
+
+  protected VelocityContext makeContext(BnfFile bnfFile,
+                                             @Nullable String packageName,
+                                             Map<String, String> simpleTokens,
+                                             Map<String, String> regexpTokens,
+                                             int[] maxLen) {
+    var context = new VelocityContext();
     context.put("lexerClass", getLexerName(bnfFile));
-    context.put("packageName", StringUtil.notNullize(packageName, StringUtil.getPackageName(getRootAttribute(bnfFile, KnownAttribute.PARSER_CLASS))));
+    context.put("packageName",
+                StringUtil.notNullize(packageName, StringUtil.getPackageName(getRootAttribute(bnfFile, KnownAttribute.PARSER_CLASS))));
     context.put("tokenPrefix", getRootAttribute(bnfFile, KnownAttribute.ELEMENT_TYPE_PREFIX));
     context.put("typesClass", getRootAttribute(bnfFile, KnownAttribute.ELEMENT_TYPE_HOLDER_CLASS));
-    context.put("tokenPrefix", getRootAttribute(bnfFile, KnownAttribute.ELEMENT_TYPE_PREFIX));
     context.put("simpleTokens", simpleTokens);
     context.put("regexpTokens", regexpTokens);
     context.put("StringUtil", StringUtil.class);
     context.put("maxTokenLength", maxLen[0]);
-
-    StringWriter out = new StringWriter();
-    InputStream stream = getClass().getResourceAsStream("/templates/lexer.flex.template");
-    ve.evaluate(context, out, "lexer.flex.template", new InputStreamReader(stream));
-    return StringUtil.convertLineSeparators(out.toString());
+    return context;
   }
 
   public static @NotNull String token2JFlex(@NotNull String tokenText) {
@@ -243,7 +259,7 @@ public class BnfGenerateLexerAction extends AnAction {
     return getLexerName(bnfFile) + ".flex";
   }
 
-  private static String getLexerName(BnfFile bnfFile) {
+  protected static String getLexerName(BnfFile bnfFile) {
     return "_" + BnfGenerateParserUtilAction.getGrammarName(bnfFile) + "Lexer";
   }
 

@@ -18,7 +18,7 @@ import java.util.regex.Pattern;
 /**
  * Command-line interface to parser generator.
  * Required community jars on classpath:
- * jdom.jar, trove4j.jar, extensions.jar, picocontainer.jar, junit.jar, idea.jar, openapi.jar, util.jar.
+ * app-client.jar, lib-client.jar, opentelemetry.jar, util.jar, util-8.jar, util_rt.jar
  *
  * @author gregsh
  *
@@ -27,7 +27,8 @@ import java.util.regex.Pattern;
 public class Main {
   public static void main(String[] args) {
     if (args.length < 2) {
-      System.out.println("Usage: Main <output-dir> <grammars or patterns>");
+      System.out.println(
+        "Usage: Main <output-dir> <grammar-or-pattern 1> [--fleet] [--generateFileTypeElement --className=<fqn> --debugName=<debugName> --languageClass=<fqn>] [ ... <grammar-or-pattern n> [--fleet] [--generateFileTypeElement...]]");
       return;
     }
     File output = new File(args[0]);

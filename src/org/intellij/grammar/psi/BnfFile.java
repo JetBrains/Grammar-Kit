@@ -4,8 +4,10 @@
 
 package org.intellij.grammar.psi;
 
+import com.intellij.openapi.util.Key;
 import com.intellij.psi.PsiFile;
 import org.intellij.grammar.KnownAttribute;
+import org.intellij.grammar.generator.IAttributePostProcessor;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

@@ -6,10 +6,7 @@ package org.intellij.grammar.psi.impl;
 
 import com.intellij.extapi.psi.PsiFileBase;
 import com.intellij.openapi.fileTypes.FileType;
-import com.intellij.openapi.util.AtomicClearableLazyValue;
-import com.intellij.openapi.util.ClearableLazyValue;
-import com.intellij.openapi.util.Conditions;
-import com.intellij.openapi.util.TextRange;
+import com.intellij.openapi.util.*;
 import com.intellij.psi.FileViewProvider;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.util.containers.ContainerUtil;
@@ -17,6 +14,7 @@ import com.intellij.util.containers.JBIterable;
 import org.intellij.grammar.BnfFileType;
 import org.intellij.grammar.BnfLanguage;
 import org.intellij.grammar.KnownAttribute;
+import org.intellij.grammar.generator.IAttributePostProcessor;
 import org.intellij.grammar.generator.ParserGeneratorUtil;
 import org.intellij.grammar.psi.*;
 import org.jetbrains.annotations.NotNull;
@@ -32,7 +30,7 @@ import java.util.regex.Pattern;
  * Time: 23:55
  */
 public class BnfFileImpl extends PsiFileBase implements BnfFile {
-  
+
   private final ClearableLazyValue<Map<String, BnfRule>> myRules = lazyValue(this::calcRules);
   private final ClearableLazyValue<List<BnfAttrs>> myGlobalAttributes = lazyValue(this::calcAttributes);
   private final ClearableLazyValue<Map<String, List<AttributeInfo>>> myAttributeValues = lazyValue(this::calcAttributeValues);
@@ -73,6 +71,12 @@ public class BnfFileImpl extends PsiFileBase implements BnfFile {
 
   @Override
   public <T> T findAttributeValue(@Nullable BnfRule rule, @NotNull KnownAttribute<T> knownAttribute, @Nullable String match) {
+    var postProcessor = getUserData(IAttributePostProcessor.ATTRIBUTE_POSTPROCESSOR);
+    if (postProcessor == null) return findAttributeValueInner(rule, knownAttribute, match);
+    else return postProcessor.postProcessValue(knownAttribute, findAttributeValueInner(rule, knownAttribute, match));
+  }
+
+  private  <T> T findAttributeValueInner(@Nullable BnfRule rule, @NotNull KnownAttribute<T> knownAttribute, @Nullable String match) {
     T combined = null;
     boolean copied = false;
     for (AttributeInfo info : getMatchingAttributes(rule, knownAttribute, match)) {

@@ -9,7 +9,7 @@ import com.intellij.openapi.util.io.FileUtil;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.util.containers.JBIterable;
 import org.intellij.grammar.KnownAttribute;
-import org.intellij.grammar.fleet.FleetBnfFileWrapper;
+import org.intellij.grammar.fleet.FleetBnfAttributePostprocessor;
 import org.intellij.grammar.psi.BnfFile;
 import org.intellij.grammar.psi.BnfRule;
 import org.jetbrains.annotations.NotNull;
@@ -58,7 +58,7 @@ public abstract class GeneratorBase {
                           @NotNull String outputPath,
                           @NotNull String packagePrefix) {
     myFile = psiFile;
-    myGenerateForFleet = psiFile instanceof FleetBnfFileWrapper;
+    myGenerateForFleet = psiFile.getUserData(FleetBnfAttributePostprocessor.GENERATE_FOR_FLEET);
 
     G = new GenOptions(psiFile);
     mySourcePath = sourcePath;

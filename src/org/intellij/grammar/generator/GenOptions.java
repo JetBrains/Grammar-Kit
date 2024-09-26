@@ -6,7 +6,7 @@ package org.intellij.grammar.generator;
 
 import com.intellij.openapi.util.text.StringUtil;
 import org.intellij.grammar.KnownAttribute;
-import org.intellij.grammar.fleet.FleetBnfFileWrapper;
+import org.intellij.grammar.fleet.FleetBnfAttributePostprocessor;
 import org.intellij.grammar.psi.BnfFile;
 
 import java.util.Map;
@@ -38,7 +38,7 @@ public class GenOptions {
   public final int javaVersion;
 
   public GenOptions(BnfFile myFile) {
-    var generateForFleet = myFile instanceof FleetBnfFileWrapper;
+    var generateForFleet = Boolean.TRUE.equals(myFile.getUserData(FleetBnfAttributePostprocessor.GENERATE_FOR_FLEET));
     Map<String, String> genOptions = getRootAttribute(myFile, KnownAttribute.GENERATE).asMap();
     names = Names.forName(genOptions.get("names"));
     generatePsi = getGenerateOption(myFile, KnownAttribute.GENERATE_PSI, genOptions, "psi") && !generateForFleet;

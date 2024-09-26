@@ -8,7 +8,7 @@ import com.intellij.openapi.util.io.FileUtil;
 import com.intellij.openapi.util.io.FileUtilRt;
 import com.intellij.psi.PsiFile;
 import org.intellij.grammar.generator.GeneratorBase;
-import org.intellij.grammar.fleet.FleetBnfFileWrapper;
+import org.intellij.grammar.fleet.FleetBnfAttributePostprocessor;
 import org.intellij.grammar.fleet.FleetFileTypeGenerator;
 import org.intellij.grammar.psi.BnfFile;
 
@@ -52,7 +52,7 @@ public class FleetBnfGeneratorTest extends BnfGeneratorAbstractTest {
 
   @Override
   protected PsiFile createBnfFile(boolean generatePsi, String name, String text) {
-    return FleetBnfFileWrapper.wrapBnfFile((BnfFile)createPsiFile(name, text.replaceAll("generatePsi=[^\n]*", "generatePsi=" + generatePsi)));
+    return FleetBnfAttributePostprocessor.prepareForFleetGeneration((BnfFile)createPsiFile(name, text.replaceAll("generatePsi=[^\n]*", "generatePsi=" + generatePsi)));
   }
 
   public void doGenTest(boolean generatePsi, String fileTypeClass, String debugName, String languageClass) throws Exception {

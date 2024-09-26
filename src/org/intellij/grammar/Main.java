@@ -9,8 +9,8 @@ import com.intellij.lang.LanguageBraceMatching;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.impl.DebugUtil;
+import org.intellij.grammar.fleet.FleetBnfAttributePostprocessor;
 import org.intellij.grammar.generator.ParserGenerator;
-import org.intellij.grammar.fleet.FleetBnfFileWrapper;
 import org.intellij.grammar.fleet.FleetFileTypeGenerator;
 import org.intellij.grammar.psi.BnfFile;
 
@@ -127,7 +127,7 @@ public class Main {
           for (File file : files) {
             if (file.isDirectory() || !grammarPattern.matcher(file.getName()).matches()) continue;
             PsiFile psiFile = LightPsi.parseFile(file, parserDefinition);
-            if (!(psiFile instanceof BnfFile)) continue;
+            if (!(psiFile instanceof BnfFile bnfFile)) continue;
 
             // for light-psi-all building:
             if (args[0].contains("lightpsi")) {
@@ -139,7 +139,9 @@ public class Main {
             }
             count++;
 
-            BnfFile bnfFile = (generateForFleet) ? FleetBnfFileWrapper.wrapBnfFile((BnfFile)psiFile) : (BnfFile)psiFile;
+            if (generateForFleet) {
+              FleetBnfAttributePostprocessor.prepareForFleetGeneration(bnfFile);
+            }
             new ParserGenerator(bnfFile, grammarDir.getAbsolutePath(), output.getAbsolutePath(), "").generate();
             if (generateFileTypeElement) {
               new FleetFileTypeGenerator((BnfFile)psiFile,

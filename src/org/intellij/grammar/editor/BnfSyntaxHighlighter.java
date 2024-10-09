@@ -7,8 +7,6 @@ package org.intellij.grammar.editor;
 import com.intellij.lexer.Lexer;
 import com.intellij.openapi.editor.DefaultLanguageHighlighterColors;
 import com.intellij.openapi.editor.colors.TextAttributesKey;
-import com.intellij.openapi.editor.markup.EffectType;
-import com.intellij.openapi.editor.markup.TextAttributes;
 import com.intellij.openapi.fileTypes.SyntaxHighlighterBase;
 import com.intellij.psi.TokenType;
 import com.intellij.psi.tree.IElementType;
@@ -42,8 +40,7 @@ class BnfSyntaxHighlighter extends SyntaxHighlighterBase {
 
   public static final TextAttributesKey OP_SIGN = createTextAttributesKey("BNF_OP_SIGN", DefaultLanguageHighlighterColors.OPERATION_SIGN);
   public static final TextAttributesKey RECOVER_MARKER = createTextAttributesKey("BNF_RECOVER_MARKER");
-  public static final TextAttributesKey PIN_MARKER = createTextAttributesKey(
-    "BNF_PIN", new TextAttributes(null, null, DefaultLanguageHighlighterColors.LINE_COMMENT.getDefaultAttributes().getForegroundColor(), EffectType.BOLD_DOTTED_LINE, 0));
+  public static final TextAttributesKey PIN_MARKER = createTextAttributesKey("BNF_PIN", DefaultLanguageHighlighterColors.REASSIGNED_LOCAL_VARIABLE);
 
   @Override
   public @NotNull Lexer getHighlightingLexer() {

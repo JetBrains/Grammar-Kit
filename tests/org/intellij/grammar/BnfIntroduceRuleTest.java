@@ -7,7 +7,6 @@ import org.intellij.grammar.psi.BnfExpression;
 import org.intellij.grammar.refactor.BnfIntroduceRuleHandler;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.IOException;
 import java.util.List;
 
 /**
@@ -19,104 +18,101 @@ import java.util.List;
  */
 public class BnfIntroduceRuleTest extends BasePlatformTestCase {
 
-  public void testTokenSimple() throws Exception { doTest("some ::= rule\nprivate rule ::= token", "some ::= <selection>token</selection>"); }
-  public void testTokenQuantified() throws Exception { doTest("some ::= rule? rule+ rule*\nprivate rule ::= token", "some ::= token? token+ <selection>token</selection>*"); }
-  public void testTokenParen() throws Exception { doTest("some ::= (x rule) [x rule] {x rule}\nprivate rule ::= token", "some ::= (x token) [x token] {x <selection>token</selection>}"); }
-  public void testTokenParenTrivial() throws Exception { doTest("some ::= (rule) [rule] {rule}\nprivate rule ::= token", "some ::= (token) [token] {<selection>token</selection>}"); }
-  public void testTokenChoice() throws Exception { doTest("some ::= (x | rule) [x | rule] {x | rule}\nprivate rule ::= token", "some ::= (x | token) [x | token] {x | <selection>token</selection>}"); }
+  public void testTokenSimple() { doTest("some ::= rule\nprivate rule ::= token", "some ::= <selection>token</selection>"); }
+  public void testTokenQuantified() { doTest("some ::= rule? rule+ rule*\nprivate rule ::= token", "some ::= token? token+ <selection>token</selection>*"); }
+  public void testTokenParen() { doTest("some ::= (x rule) [x rule] {x rule}\nprivate rule ::= token", "some ::= (x token) [x token] {x <selection>token</selection>}"); }
+  public void testTokenParenTrivial() { doTest("some ::= (rule) [rule] {rule}\nprivate rule ::= token", "some ::= (token) [token] {<selection>token</selection>}"); }
+  public void testTokenChoice() { doTest("some ::= (x | rule) [x | rule] {x | rule}\nprivate rule ::= token", "some ::= (x | token) [x | token] {x | <selection>token</selection>}"); }
 
-  public void testSequenceSimple() throws Exception { doTest("some ::= rule\nprivate rule ::= tok en", "some ::= <selection>tok en</selection>"); }
-  public void testSequenceQuantified() throws Exception { doTest("some ::= (rule)? (rule)+ (rule)*\nprivate rule ::= tok en", "some ::= (tok en)? (tok en)+ (<selection>tok en</selection>)*"); }
-  public void testSequenceParen() throws Exception { doTest("some ::= (x rule) [x rule] {x rule}\nprivate rule ::= tok en", "some ::= (x tok en) [x tok en] {x <selection>tok en</selection>}"); }
-  public void testSequenceParenTrivial() throws Exception { doTest("some ::= rule [rule] rule\nprivate rule ::= tok en", "some ::= tok en [tok en] <selection>tok en</selection>"); }
-  public void testSequenceChoice() throws Exception { doTest("some ::= (x | rule) [x | rule] {x | rule}\nprivate rule ::= tok en", "some ::= (x | tok en) [x | tok en] {x | <selection>tok en</selection>}"); }
+  public void testSequenceSimple() { doTest("some ::= rule\nprivate rule ::= tok en", "some ::= <selection>tok en</selection>"); }
+  public void testSequenceQuantified() { doTest("some ::= (rule)? (rule)+ (rule)*\nprivate rule ::= tok en", "some ::= (tok en)? (tok en)+ (<selection>tok en</selection>)*"); }
+  public void testSequenceParen() { doTest("some ::= (x rule) [x rule] {x rule}\nprivate rule ::= tok en", "some ::= (x tok en) [x tok en] {x <selection>tok en</selection>}"); }
+  public void testSequenceParenTrivial() { doTest("some ::= rule [rule] rule\nprivate rule ::= tok en", "some ::= tok en [tok en] <selection>tok en</selection>"); }
+  public void testSequenceChoice() { doTest("some ::= (x | rule) [x | rule] {x | rule}\nprivate rule ::= tok en", "some ::= (x | tok en) [x | tok en] {x | <selection>tok en</selection>}"); }
 
-  public void testChoiceSimple() throws Exception { doTest("some ::= rule\nprivate rule ::= tok|en", "some ::= <selection>tok|en</selection>"); }
-  public void testChoiceQuantified() throws Exception { doTest("some ::= (rule)? (rule)+ (rule)*\nprivate rule ::= tok|en", "some ::= (tok|en)? (tok|en)+ (<selection>tok|en</selection>)*"); }
-  public void testChoiceParen() throws Exception { doTest("some ::= (x (rule)) [x (rule)] {x (rule)}\nprivate rule ::= tok|en", "some ::= (x (tok|en)) [x (tok|en)] {x (<selection>tok|en</selection>)}"); }
-  public void testChoiceParenTrivial() throws Exception { doTest("some ::= (rule) [rule] {rule}\nprivate rule ::= tok|en", "some ::= (tok|en) [tok|en] {<selection>tok|en</selection>}"); }
-  public void testChoiceChoice() throws Exception { doTest("some ::= (x | rule) [x | rule] {x | rule}\nprivate rule ::= tok|en", "some ::= (x | tok|en) [x | tok|en] {x | <selection>tok|en</selection>}"); }
+  public void testChoiceSimple() { doTest("some ::= rule\nprivate rule ::= tok|en", "some ::= <selection>tok|en</selection>"); }
+  public void testChoiceQuantified() { doTest("some ::= (rule)? (rule)+ (rule)*\nprivate rule ::= tok|en", "some ::= (tok|en)? (tok|en)+ (<selection>tok|en</selection>)*"); }
+  public void testChoiceParen() { doTest("some ::= (x (rule)) [x (rule)] {x (rule)}\nprivate rule ::= tok|en", "some ::= (x (tok|en)) [x (tok|en)] {x (<selection>tok|en</selection>)}"); }
+  public void testChoiceParenTrivial() { doTest("some ::= (rule) [rule] {rule}\nprivate rule ::= tok|en", "some ::= (tok|en) [tok|en] {<selection>tok|en</selection>}"); }
+  public void testChoiceChoice() { doTest("some ::= (x | rule) [x | rule] {x | rule}\nprivate rule ::= tok|en", "some ::= (x | tok|en) [x | tok|en] {x | <selection>tok|en</selection>}"); }
 
-  public void testOptionalSimple() throws Exception { doTest("some ::= rule\nprivate rule ::= token?", "some ::= <selection>token?</selection>"); }
-  public void testOptionalQuantified() throws Exception { doTest("some ::= token+ token* rule\nprivate rule ::= token?", "some ::= token+ token* <selection>token?</selection>"); }
-  public void testOptionalParen() throws Exception { doTest("some ::= (x rule) [x rule] {x rule}\nprivate rule ::= token?", "some ::= (x token?) [x token?] {x <selection>token?</selection>}"); }
-  public void testOptionalParenTrivial() throws Exception { doTest("some ::= rule rule rule\nprivate rule ::= token?", "some ::= token? token? <selection>token?</selection>"); }
-  public void testOptionalChoice() throws Exception { doTest("some ::= (x | rule) [x | rule] {x | rule}\nprivate rule ::= token?", "some ::= (x | token?) [x | token?] {x | <selection>token?</selection>}"); }
+  public void testOptionalSimple() { doTest("some ::= rule\nprivate rule ::= token?", "some ::= <selection>token?</selection>"); }
+  public void testOptionalQuantified() { doTest("some ::= token+ token* rule\nprivate rule ::= token?", "some ::= token+ token* <selection>token?</selection>"); }
+  public void testOptionalParen() { doTest("some ::= (x rule) [x rule] {x rule}\nprivate rule ::= token?", "some ::= (x token?) [x token?] {x <selection>token?</selection>}"); }
+  public void testOptionalParenTrivial() { doTest("some ::= rule rule rule\nprivate rule ::= token?", "some ::= token? token? <selection>token?</selection>"); }
+  public void testOptionalChoice() { doTest("some ::= (x | rule) [x | rule] {x | rule}\nprivate rule ::= token?", "some ::= (x | token?) [x | token?] {x | <selection>token?</selection>}"); }
 
-  public void testOneManylSimple() throws Exception { doTest("some ::= rule\nprivate rule ::= token+", "some ::= <selection>token+</selection>"); }
-  public void testOneManylQuantified() throws Exception { doTest("some ::= token* rule rule\nprivate rule ::= token+", "some ::= token* token+ <selection>token+</selection>"); }
-  public void testOneManylParen() throws Exception { doTest("some ::= (x rule) [x rule] {x rule}\nprivate rule ::= token+", "some ::= (x token+) [x token+] {x <selection>token+</selection>}"); }
-  public void testOneManylParenTrivial() throws Exception { doTest("some ::= rule token* rule\nprivate rule ::= token+", "some ::= token+ token* <selection>token+</selection>"); }
-  public void testOneManylChoice() throws Exception { doTest("some ::= (x | rule) [x | rule] {x | rule}\nprivate rule ::= token+", "some ::= (x | token+) [x | token+] {x | <selection>token+</selection>}"); }
+  public void testOneManylSimple() { doTest("some ::= rule\nprivate rule ::= token+", "some ::= <selection>token+</selection>"); }
+  public void testOneManylQuantified() { doTest("some ::= token* rule rule\nprivate rule ::= token+", "some ::= token* token+ <selection>token+</selection>"); }
+  public void testOneManylParen() { doTest("some ::= (x rule) [x rule] {x rule}\nprivate rule ::= token+", "some ::= (x token+) [x token+] {x <selection>token+</selection>}"); }
+  public void testOneManylParenTrivial() { doTest("some ::= rule token* rule\nprivate rule ::= token+", "some ::= token+ token* <selection>token+</selection>"); }
+  public void testOneManylChoice() { doTest("some ::= (x | rule) [x | rule] {x | rule}\nprivate rule ::= token+", "some ::= (x | token+) [x | token+] {x | <selection>token+</selection>}"); }
 
-  public void testZeroManylSimple() throws Exception { doTest("some ::= rule\nprivate rule ::= token*", "some ::= <selection>token*</selection>"); }
-  public void testZeroManylQuantified() throws Exception { doTest("some ::= rule rule rule\nprivate rule ::= token*", "some ::= token* token* <selection>token*</selection>"); }
-  public void testZeroManylParen() throws Exception { doTest("some ::= (x rule) [x rule] {x rule}\nprivate rule ::= token*", "some ::= (x token*) [x token*] {x <selection>token*</selection>}"); }
-  public void testZeroManylParenTrivial() throws Exception { doTest("some ::= rule rule rule\nprivate rule ::= token*", "some ::= token* token* <selection>token*</selection>"); }
-  public void testZeroManylChoice() throws Exception { doTest("some ::= (x | rule) [x | rule] {x | rule}\nprivate rule ::= token*", "some ::= (x | token*) [x | token*] {x | <selection>token*</selection>}"); }
+  public void testZeroManylSimple() { doTest("some ::= rule\nprivate rule ::= token*", "some ::= <selection>token*</selection>"); }
+  public void testZeroManylQuantified() { doTest("some ::= rule rule rule\nprivate rule ::= token*", "some ::= token* token* <selection>token*</selection>"); }
+  public void testZeroManylParen() { doTest("some ::= (x rule) [x rule] {x rule}\nprivate rule ::= token*", "some ::= (x token*) [x token*] {x <selection>token*</selection>}"); }
+  public void testZeroManylParenTrivial() { doTest("some ::= rule rule rule\nprivate rule ::= token*", "some ::= token* token* <selection>token*</selection>"); }
+  public void testZeroManylChoice() { doTest("some ::= (x | rule) [x | rule] {x | rule}\nprivate rule ::= token*", "some ::= (x | token*) [x | token*] {x | <selection>token*</selection>}"); }
 
-  public void testOptSequenceSimple() throws Exception { doTest("some ::= rule\nprivate rule ::= [tok en]","some ::= [<selection>tok en]</selection>"); }
-  public void testOptSequenceQuantified() throws Exception { doTest("some ::= [tok en] rule rule\nprivate rule ::= (tok en)*", "some ::= [tok en] (tok en)* (<selection>tok en)*</selection>"); }
-  public void testOptSequenceParen() throws Exception { doTest("some ::= (x rule) [x rule] {x rule}\nprivate rule ::= [tok en]", "some ::= (x [tok en]) [x [tok en]] {x [<selection>tok en]</selection>}"); }
-  public void testOptSequenceParenTrivial() throws Exception { doTest("some ::= rule rule rule\nprivate rule ::= [tok en]", "some ::= [tok en] [tok en] [<selection>tok en]</selection>"); }
-  public void testOptSequenceChoice() throws Exception { doTest("some ::= (x | rule) [x | rule] {x | rule}\nprivate rule ::= [tok en]", "some ::= (x | [tok en]) [x | [tok en]] {x | [<selection>tok en]</selection>}"); }
+  public void testOptSequenceSimple() { doTest("some ::= rule\nprivate rule ::= [tok en]", "some ::= [<selection>tok en]</selection>"); }
+  public void testOptSequenceQuantified() { doTest("some ::= [tok en] rule rule\nprivate rule ::= (tok en)*", "some ::= [tok en] (tok en)* (<selection>tok en)*</selection>"); }
+  public void testOptSequenceParen() { doTest("some ::= (x rule) [x rule] {x rule}\nprivate rule ::= [tok en]", "some ::= (x [tok en]) [x [tok en]] {x [<selection>tok en]</selection>}"); }
+  public void testOptSequenceParenTrivial() { doTest("some ::= rule rule rule\nprivate rule ::= [tok en]", "some ::= [tok en] [tok en] [<selection>tok en]</selection>"); }
+  public void testOptSequenceChoice() { doTest("some ::= (x | rule) [x | rule] {x | rule}\nprivate rule ::= [tok en]", "some ::= (x | [tok en]) [x | [tok en]] {x | [<selection>tok en]</selection>}"); }
 
-  public void testAltChoiceSimple() throws Exception { doTest("some ::= rule\nprivate rule ::= tok|en", "some ::= <selection>tok|en</selection>"); }
-  public void testAltChoiceQuantified() throws Exception { doTest("some ::= {rule}? {rule}+ {rule}*\nprivate rule ::= tok|en", "some ::= {tok|en}? {tok|en}+ {<selection>tok|en</selection>}*"); }
-  public void testAltChoiceParen() throws Exception { doTest("some ::= (x {rule}) [x {rule}] {x {rule}}\nprivate rule ::= tok|en", "some ::= (x {tok|en}) [x {tok|en}] {x {<selection>tok|en</selection>}}"); }
-  public void testAltChoiceParenTrivial() throws Exception { doTest("some ::= (rule) [rule] {rule}\nprivate rule ::= tok|en", "some ::= (tok|en) [tok|en] {<selection>tok|en</selection>}"); }
-  public void testAltChoiceChoice() throws Exception { doTest("some ::= (x | rule) [x | rule] {x | rule}\nprivate rule ::= tok|en", "some ::= (x | tok|en) [x | tok|en] {x | <selection>tok|en</selection>}"); }
+  public void testAltChoiceSimple() { doTest("some ::= rule\nprivate rule ::= tok|en", "some ::= <selection>tok|en</selection>"); }
+  public void testAltChoiceQuantified() { doTest("some ::= {rule}? {rule}+ {rule}*\nprivate rule ::= tok|en", "some ::= {tok|en}? {tok|en}+ {<selection>tok|en</selection>}*"); }
+  public void testAltChoiceParen() { doTest("some ::= (x {rule}) [x {rule}] {x {rule}}\nprivate rule ::= tok|en", "some ::= (x {tok|en}) [x {tok|en}] {x {<selection>tok|en</selection>}}"); }
+  public void testAltChoiceParenTrivial() { doTest("some ::= (rule) [rule] {rule}\nprivate rule ::= tok|en", "some ::= (tok|en) [tok|en] {<selection>tok|en</selection>}"); }
+  public void testAltChoiceChoice() { doTest("some ::= (x | rule) [x | rule] {x | rule}\nprivate rule ::= tok|en", "some ::= (x | tok|en) [x | tok|en] {x | <selection>tok|en</selection>}"); }
 
-  public void testParenTokenSimple() throws Exception { doTest("some ::= (rule)\nprivate rule ::= token", "some ::= (<selection>token</selection>)"); }
-  public void testParenTokenQuantified() throws Exception { doTest("some ::= rule? rule+ (rule)*\nprivate rule ::= token", "some ::= token? token+ (<selection>token</selection>)*"); }
-  public void testParenTokenParen() throws Exception { doTest("some ::= (x rule) [x rule] {x (rule)}\nprivate rule ::= token", "some ::= (x token) [x token] {x (<selection>token</selection>)}"); }
-  public void testParenTokenParenTrivial() throws Exception { doTest("some ::= rule rule? (rule)\nprivate rule ::= token", "some ::= token token? (<selection>token</selection>)"); }
-  public void testParenTokenChoice() throws Exception { doTest("some ::= (x | (rule)) [x | (rule)] {x | (rule)}\nprivate rule ::= token", "some ::= (x | (token)) [x | (token)] {x | (<selection>token</selection>)}"); }
+  public void testParenTokenSimple() { doTest("some ::= (rule)\nprivate rule ::= token", "some ::= (<selection>token</selection>)"); }
+  public void testParenTokenQuantified() { doTest("some ::= rule? rule+ (rule)*\nprivate rule ::= token", "some ::= token? token+ (<selection>token</selection>)*"); }
+  public void testParenTokenParen() { doTest("some ::= (x rule) [x rule] {x (rule)}\nprivate rule ::= token", "some ::= (x token) [x token] {x (<selection>token</selection>)}"); }
+  public void testParenTokenParenTrivial() { doTest("some ::= rule rule? (rule)\nprivate rule ::= token", "some ::= token token? (<selection>token</selection>)"); }
+  public void testParenTokenChoice() { doTest("some ::= (x | (rule)) [x | (rule)] {x | (rule)}\nprivate rule ::= token", "some ::= (x | (token)) [x | (token)] {x | (<selection>token</selection>)}"); }
 
-  public void testParenSequenceSimple() throws Exception { doTest("some ::= (rule)\nprivate rule ::= tok en", "some ::= (<selection>tok en</selection>)"); }
-  public void testParenSequenceQuantified() throws Exception { doTest("some ::= rule? rule+ rule*\nprivate rule ::= tok en", "some ::= (tok en)? (tok en)+ (<selection>tok en)</selection>*"); }
-  public void testParenSequenceParen() throws Exception { doTest("some ::= (x rule) [x rule] {x rule}\nprivate rule ::= tok en", "some ::= (x tok en) [x tok en] {x <selection>tok en</selection>}"); }
-  public void testParenSequenceParenTrivial() throws Exception { doTest("some ::= rule [rule] rule\nprivate rule ::= tok en", "some ::= tok en [tok en] <selection>tok en</selection>"); }
-  public void testParenSequenceChoice() throws Exception { doTest("some ::= (x | rule) [x | rule] {x | rule}\nprivate rule ::= tok en", "some ::= (x | tok en) [x | tok en] {x | <selection>tok en</selection>}"); }
+  public void testParenSequenceSimple() { doTest("some ::= (rule)\nprivate rule ::= tok en", "some ::= (<selection>tok en</selection>)"); }
+  public void testParenSequenceQuantified() { doTest("some ::= rule? rule+ rule*\nprivate rule ::= tok en", "some ::= (tok en)? (tok en)+ (<selection>tok en)</selection>*"); }
+  public void testParenSequenceParen() { doTest("some ::= (x rule) [x rule] {x rule}\nprivate rule ::= tok en", "some ::= (x tok en) [x tok en] {x <selection>tok en</selection>}"); }
+  public void testParenSequenceParenTrivial() { doTest("some ::= rule [rule] rule\nprivate rule ::= tok en", "some ::= tok en [tok en] <selection>tok en</selection>"); }
+  public void testParenSequenceChoice() { doTest("some ::= (x | rule) [x | rule] {x | rule}\nprivate rule ::= tok en", "some ::= (x | tok en) [x | tok en] {x | <selection>tok en</selection>}"); }
 
-  public void testParenChoiceSimple() throws Exception { doTest("some ::= rule\nprivate rule ::= tok|en", "some ::= <selection>tok|en</selection>"); }
-  public void testParenChoiceQuantified() throws Exception { doTest("some ::= rule? rule+ rule*\nprivate rule ::= tok|en", "some ::= (tok|en)? (tok|en)+ (<selection>tok|en)</selection>*"); }
-  public void testParenChoiceParen() throws Exception { doTest("some ::= (x rule) [x rule] {x rule}\nprivate rule ::= tok|en", "some ::= (x (tok|en)) [x (tok|en)] {x (<selection>tok|en)</selection>}"); }
-  public void testParenChoiceParenTrivial() throws Exception { doTest("some ::= rule [tok|en] rule\nprivate rule ::= tok|en", "some ::= (tok|en) [tok|en] {<selection>tok|en}</selection>"); }
-  public void testParenChoiceChoice() throws Exception { doTest("some ::= (x | rule) [x | rule] {x | rule}\nprivate rule ::= tok|en", "some ::= (x | tok|en) [x | tok|en] {x | <selection>tok|en</selection>}"); }
+  public void testParenChoiceSimple() { doTest("some ::= rule\nprivate rule ::= tok|en", "some ::= <selection>tok|en</selection>"); }
+  public void testParenChoiceQuantified() { doTest("some ::= rule? rule+ rule*\nprivate rule ::= tok|en", "some ::= (tok|en)? (tok|en)+ (<selection>tok|en)</selection>*"); }
+  public void testParenChoiceParen() { doTest("some ::= (x rule) [x rule] {x rule}\nprivate rule ::= tok|en", "some ::= (x (tok|en)) [x (tok|en)] {x (<selection>tok|en)</selection>}"); }
+  public void testParenChoiceParenTrivial() { doTest("some ::= rule [tok|en] rule\nprivate rule ::= tok|en", "some ::= (tok|en) [tok|en] {<selection>tok|en}</selection>"); }
+  public void testParenChoiceChoice() { doTest("some ::= (x | rule) [x | rule] {x | rule}\nprivate rule ::= tok|en", "some ::= (x | tok|en) [x | tok|en] {x | <selection>tok|en</selection>}"); }
 
-  public void testParenOptionalSimple() throws Exception { doTest("some ::= rule\nprivate rule ::= (tok en)?", "some ::= (<selection>tok en)?</selection>"); }
-  public void testParenOptionalQuantified() throws Exception { doTest("some ::= (tok en)? rule rule\nprivate rule ::= (tok en)*", "some ::= (tok en)? (tok en)* (<selection>tok en)*</selection>"); }
-  public void testParenOptionalParen() throws Exception { doTest("some ::= (x rule) [x rule] {x rule}\nprivate rule ::= (tok en)?", "some ::= (x (tok en)?) [x (tok en)?] {x (<selection>tok en)?</selection>}"); }
-  public void testParenOptionalParenTrivial() throws Exception { doTest("some ::= rule rule rule\nprivate rule ::= (tok en)?", "some ::= (tok en)? (tok en)? (<selection>tok en)?</selection>"); }
-  public void testParenOptionalChoice() throws Exception { doTest("some ::= (x | rule) [x | rule] {x | rule}\nprivate rule ::= (tok en)?", "some ::= (x | (tok en)?) [x | (tok en)?] {x | (<selection>tok en)?</selection>}"); }
+  public void testParenOptionalSimple() { doTest("some ::= rule\nprivate rule ::= (tok en)?", "some ::= (<selection>tok en)?</selection>"); }
+  public void testParenOptionalQuantified() { doTest("some ::= (tok en)? rule rule\nprivate rule ::= (tok en)*", "some ::= (tok en)? (tok en)* (<selection>tok en)*</selection>"); }
+  public void testParenOptionalParen() { doTest("some ::= (x rule) [x rule] {x rule}\nprivate rule ::= (tok en)?", "some ::= (x (tok en)?) [x (tok en)?] {x (<selection>tok en)?</selection>}"); }
+  public void testParenOptionalParenTrivial() { doTest("some ::= rule rule rule\nprivate rule ::= (tok en)?", "some ::= (tok en)? (tok en)? (<selection>tok en)?</selection>"); }
+  public void testParenOptionalChoice() { doTest("some ::= (x | rule) [x | rule] {x | rule}\nprivate rule ::= (tok en)?", "some ::= (x | (tok en)?) [x | (tok en)?] {x | (<selection>tok en)?</selection>}"); }
   
-  public void testChoiceSequence() throws Exception {doTest("some ::= tok|en| x | rule y\nprivate rule ::= tok en","some ::= tok|en| x | <selection>tok en</selection> y");}
-  public void testChoicePart() throws Exception {doTest("some ::=tok en x | rule| y\nprivate rule ::= tok| en","some ::=tok en x | <selection>tok| en</selection>| y");}
+  public void testChoiceSequence() {doTest("some ::= tok|en| x | rule y\nprivate rule ::= tok en", "some ::= tok|en| x | <selection>tok en</selection> y");}
+  public void testChoicePart() {doTest("some ::=tok en x | rule| y\nprivate rule ::= tok| en", "some ::=tok en x | <selection>tok| en</selection>| y");}
 
-  public void testFalseStartSequences() throws Exception {doTest("root ::= tok tok rule en tok rule\nsome ::=rule\nprivate rule ::= tok en","root ::= tok tok tok en en tok tok en\nsome ::=<selection>tok en</selection>");}
-  public void testAttrsAfterRule() throws Exception {doTest("root ::= tok rule;\nprivate rule ::= tok en;\n{pin=1}","root ::= tok <selection>tok en</selection>;{pin=1}");}
+  public void testFalseStartSequences() {doTest("root ::= tok tok rule en tok rule\nsome ::=rule\nprivate rule ::= tok en", "root ::= tok tok tok en en tok tok en\nsome ::=<selection>tok en</selection>");}
+  public void testAttrsAfterRule() {doTest("root ::= tok rule;\nprivate rule ::= tok en;\n{pin=1}", "root ::= tok <selection>tok en</selection>;{pin=1}");}
 
-  public void testSpaces() throws Exception { doTest("some ::= (x rule) [x rule] {x rule}\nprivate rule ::= [tok? en]", "some ::= (x [  tok  ? en  ]) [x [tok  ?  en]] {x [<selection>tok? en]</selection>}"); }
-  public void testNoWsSiblings() throws Exception { doTest("some ::= x's'rule\nprivate rule ::= tok en", "some ::= x's'<selection>tok en</selection>"); }
+  public void testSpaces() { doTest("some ::= (x rule) [x rule] {x rule}\nprivate rule ::= [tok? en]", "some ::= (x [  tok  ? en  ]) [x [tok  ?  en]] {x [<selection>tok? en]</selection>}"); }
+  public void testNoWsSiblings() { doTest("some ::= x's'rule\nprivate rule ::= tok en", "some ::= x's'<selection>tok en</selection>"); }
 
-  public void testWithoutSelectionSingleVariant() throws Exception { doTest("some ::= rule\nprivate rule ::= expr1", "some ::= exp<caret>r1"); }
-  public void testWithoutSelectionAtTheStartOfExpression() throws Exception { doTest("some ::= rule\nprivate rule ::= expr1", "some ::= <caret>expr1"); }
-  public void testWithoutSelection() throws Exception {
-    doTest("some ::= rule | expr3\nprivate rule ::= expr1    expr2+", "some ::= expr1    exp<caret>r2+ | expr3", new Function<List<BnfExpression>, BnfExpression>() {
-      @Override
-      public BnfExpression fun(List<BnfExpression> bnfExpressions) {
-        assertSameElements(ContainerUtil.map(bnfExpressions, BnfIntroduceRuleHandler.RENDER_FUNCTION), "expr2", "expr2+", "expr1 expr2+", "expr1 expr2+ | expr3");
-        return bnfExpressions.get(2);
-      }
+  public void testWithoutSelectionSingleVariant() { doTest("some ::= rule\nprivate rule ::= expr1", "some ::= exp<caret>r1"); }
+  public void testWithoutSelectionAtTheStartOfExpression() { doTest("some ::= rule\nprivate rule ::= expr1", "some ::= <caret>expr1"); }
+  public void testWithoutSelection() {
+    doTest("some ::= rule | expr3\nprivate rule ::= expr1    expr2+", "some ::= expr1    exp<caret>r2+ | expr3", bnfExpressions -> {
+      assertSameElements(ContainerUtil.map(bnfExpressions, BnfIntroduceRuleHandler.RENDER_FUNCTION), "expr2", "expr2+", "expr1 expr2+", "expr1 expr2+ | expr3");
+      return bnfExpressions.get(2);
     });
   }
 
-  private void doTest(/*@Language("BNF")*/ String expected, /*@Language("BNF")*/ String text) throws IOException {
+  private void doTest(/*@Language("BNF")*/ String expected, /*@Language("BNF")*/ String text) {
     doTest(expected, text, null);
   }
 
-  private void doTest(/*@Language("BNF")*/ String expected, /*@Language("BNF")*/ String text, @Nullable Function<List<BnfExpression>, BnfExpression> popupHandler) throws IOException {
+  private void doTest(/*@Language("BNF")*/ String expected, /*@Language("BNF")*/ String text, @Nullable Function<List<BnfExpression>, BnfExpression> popupHandler) {
     myFixture.configureByText("a.bnf", text);
     new BnfIntroduceRuleHandler(popupHandler).invoke(getProject(), myFixture.getEditor(), myFixture.getFile(), null);
     assertSameLines(expected, myFixture.getFile().getText());

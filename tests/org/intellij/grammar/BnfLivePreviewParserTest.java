@@ -39,7 +39,7 @@ public class BnfLivePreviewParserTest extends BnfGeneratorTestCase {
   @Override
   protected void doTest(String grammarFile) throws IOException {
     File grammarIOFile = new File(myFullDataPath, grammarFile);
-    assertNotNull(grammarFile + "not found", grammarIOFile.exists());
+    assertTrue(grammarFile + "not found", grammarIOFile.exists());
     LightVirtualFile grammarVFile = new LightVirtualFile(grammarFile, FileUtil.loadFile(grammarIOFile));
     myLanguage = BnfLanguage.INSTANCE;
     BnfFile grammarPsi = (BnfFile) createFile(grammarVFile);

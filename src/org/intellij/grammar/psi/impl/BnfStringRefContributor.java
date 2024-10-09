@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
+ * Copyright 2011-2024 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
  */
 
 package org.intellij.grammar.psi.impl;
@@ -24,9 +24,9 @@ import static org.intellij.grammar.KnownAttribute.*;
  */
 public class BnfStringRefContributor extends PsiReferenceContributor {
 
-  private static final Set<KnownAttribute<?>> RULE_ATTRIBUTES = ContainerUtil.set(EXTENDS, IMPLEMENTS, RECOVER_WHILE, NAME);
+  private static final Set<KnownAttribute<?>> RULE_ATTRIBUTES = Set.of(EXTENDS, IMPLEMENTS, RECOVER_WHILE, NAME);
 
-  private static final Set<KnownAttribute<?>> JAVA_CLASS_ATTRIBUTES = ContainerUtil.set(EXTENDS, IMPLEMENTS, MIXIN);
+  private static final Set<KnownAttribute<?>> JAVA_CLASS_ATTRIBUTES = Set.of(EXTENDS, IMPLEMENTS, MIXIN);
 
   @Override
   public void registerReferenceProviders(@NotNull PsiReferenceRegistrar registrar) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
+ * Copyright 2011-2024 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
  */
 package org.intellij.grammar.generator;
 
@@ -43,12 +43,12 @@ import static org.intellij.grammar.psi.BnfTypes.BNF_SEQUENCE;
 public class ParserGeneratorUtil {
   private static final String RESERVED_SUFFIX = "_$";
   private static final Set<String> JAVA_RESERVED =
-    ContainerUtil.set("abstract", "assert", "boolean", "break", "byte", "case", "catch", "char", "class",
-                      "const", "default", "do", "double", "else", "enum", "extends", "false", "final", "finally",
-                      "float", "for", "goto", "if", "implements", "import", "instanceof", "int", "interface", "long",
-                      "native", "new", "null", "package", "private", "protected", "public", "return", "short", "static",
-                      "strictfp", "super", "switch", "synchronized", "this", "throw", "throws", "transient", "true",
-                      "try", "void", "volatile", "while", "continue");
+    Set.of("abstract", "assert", "boolean", "break", "byte", "case", "catch", "char", "class",
+           "const", "default", "do", "double", "else", "enum", "extends", "false", "final", "finally",
+           "float", "for", "goto", "if", "implements", "import", "instanceof", "int", "interface", "long",
+           "native", "new", "null", "package", "private", "protected", "public", "return", "short", "static",
+           "strictfp", "super", "switch", "synchronized", "this", "throw", "throws", "transient", "true",
+           "try", "void", "volatile", "while", "continue");
 
   enum ConsumeType {
     FAST, SMART, DEFAULT;

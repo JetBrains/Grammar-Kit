@@ -4,7 +4,7 @@
 
 package org.intellij.grammar;
 
-import com.intellij.codeInsight.TailType;
+import com.intellij.codeInsight.TailTypes;
 import com.intellij.codeInsight.completion.*;
 import com.intellij.codeInsight.lookup.LookupElementBuilder;
 import com.intellij.codeInsight.lookup.TailTypeDecorator;
@@ -81,7 +81,7 @@ final class BnfCompletionContributor extends CompletionContributor {
         }
         if (!attrCompletion && parameters.getInvocationCount() < 2) {
           for (String keywords : suggestKeywords(parameters.getPosition())) {
-            result.addElement(TailTypeDecorator.withTail(LookupElementBuilder.create(keywords), TailType.SPACE));
+            result.addElement(TailTypeDecorator.withTail(LookupElementBuilder.create(keywords), TailTypes.spaceType()));
           }
         }
       }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
+ * Copyright 2011-2024 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
  */
 
 package org.intellij.grammar.refactor;
@@ -31,6 +31,7 @@ import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.TestOnly;
 
 import java.util.*;
+import java.util.function.Consumer;
 
 /**
  * Created by IntelliJ IDEA.
@@ -147,7 +148,7 @@ public class BnfIntroduceRuleHandler implements RefactoringActionHandler {
       occurrencesMap.remove(OccurrencesChooser.ReplaceChoice.ALL);
     }
 
-    Pass<OccurrencesChooser.ReplaceChoice> callback = new Pass<>() {
+    Consumer<OccurrencesChooser.ReplaceChoice> callback = new Pass<>() {
       @Override
       public void pass(OccurrencesChooser.ReplaceChoice choice) {
         WriteCommandAction.runWriteCommandAction(project, REFACTORING_NAME, null, () -> {
@@ -172,7 +173,7 @@ public class BnfIntroduceRuleHandler implements RefactoringActionHandler {
       }
     };
     if (ApplicationManager.getApplication().isUnitTestMode()) {
-      callback.pass(OccurrencesChooser.ReplaceChoice.ALL);
+      callback.accept(OccurrencesChooser.ReplaceChoice.ALL);
     }
     else {
       new OccurrencesChooser<BnfExpression[]>(editor) {
@@ -181,7 +182,7 @@ public class BnfIntroduceRuleHandler implements RefactoringActionHandler {
           return new TextRange(occurrence[0].getTextRange().getStartOffset(),
                                occurrence[occurrence.length - 1].getTextRange().getEndOffset());
         }
-      }.showChooser(callback, occurrencesMap);
+      }.showChooser(occurrencesMap, callback);
     }
   }
 

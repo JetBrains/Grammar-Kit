@@ -5,7 +5,7 @@
 package org.intellij.jflex.editor;
 
 import com.intellij.application.options.CodeStyle;
-import com.intellij.codeInsight.TailType;
+import com.intellij.codeInsight.TailTypes;
 import com.intellij.codeInsight.completion.*;
 import com.intellij.codeInsight.lookup.LookupElement;
 import com.intellij.codeInsight.lookup.LookupElementBuilder;
@@ -109,7 +109,7 @@ final class JFlexCompletionContributor extends CompletionContributor {
     LookupElementBuilder builder = LookupElementBuilder.create(keyword.toLowerCase()).withCaseSensitivity(false).bold();
     boolean braces = keyword.endsWith("{") || keyword.endsWith("}");
     if (!braces) {
-      return keyword.startsWith("%") ? TailTypeDecorator.withTail(builder, TailType.SPACE) : builder;
+      return keyword.startsWith("%") ? TailTypeDecorator.withTail(builder, TailTypes.spaceType()) : builder;
     }
     else {
       String closing = keyword.endsWith("{") ? keyword.substring(0, keyword.length()-1) + "}" : null;

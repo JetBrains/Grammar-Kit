@@ -17,7 +17,7 @@ import org.jetbrains.annotations.Nullable;
 final class BnfASTFactory extends ASTFactory {
 
   @Override
-  public @Nullable CompositeElement createComposite(@NotNull IElementType type) {
+  public CompositeElement createComposite(@NotNull IElementType type) {
     return BnfTypes.Factory.createElement(type);
   }
 }

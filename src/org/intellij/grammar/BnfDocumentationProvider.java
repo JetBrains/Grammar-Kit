@@ -33,16 +33,6 @@ import java.util.*;
 final class BnfDocumentationProvider implements DocumentationProvider {
 
   @Override
-  public @Nullable String getQuickNavigateInfo(PsiElement element, PsiElement originalElement) {
-    return null;
-  }
-
-  @Override
-  public @Nullable List<String> getUrlFor(PsiElement element, PsiElement originalElement) {
-    return null;
-  }
-
-  @Override
   public @Nullable String generateDoc(PsiElement element, PsiElement originalElement) {
     if (element instanceof BnfRule) {
       BnfRule rule = (BnfRule)element;
@@ -86,16 +76,6 @@ final class BnfDocumentationProvider implements DocumentationProvider {
       KnownAttribute<?> attribute = KnownAttribute.getAttribute(((BnfAttr)element).getName());
       if (attribute != null) return attribute.getDescription();
     }
-    return null;
-  }
-
-  @Override
-  public @Nullable PsiElement getDocumentationElementForLookupItem(PsiManager psiManager, Object obj5ect, PsiElement element) {
-    return null;
-  }
-
-  @Override
-  public @Nullable PsiElement getDocumentationElementForLink(PsiManager psiManager, String link, PsiElement context) {
     return null;
   }
 

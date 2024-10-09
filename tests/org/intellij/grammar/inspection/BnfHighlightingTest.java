@@ -104,11 +104,6 @@ public class BnfHighlightingTest extends BasePlatformTestCase {
     myFixture.checkHighlighting(true, false, false);
   }
 
-  @Override
-  protected boolean isWriteActionRequired() {
-    return false;
-  }
-
   private static void toggleGrammarKitSrc(Module module, String testDataPath) {
     String absolutePath = new File("").getAbsolutePath();
     JavaPsiFacade facade = JavaPsiFacade.getInstance(module.getProject());

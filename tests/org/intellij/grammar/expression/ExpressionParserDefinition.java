@@ -80,10 +80,6 @@ public class ExpressionParserDefinition extends BnfParserDefinition{
         return FILE_TYPE;
       }
 
-      @Override
-      public void accept(@NotNull PsiElementVisitor visitor) {
-        visitor.visitFile(this);
-      }
     };
   }
 

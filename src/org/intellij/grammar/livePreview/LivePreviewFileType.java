@@ -29,6 +29,7 @@ final class LivePreviewFileType extends LanguageFileType {
     return "BNF_LP";
   }
 
+  @SuppressWarnings("DialogTitleCapitalization")
   @Override
   public @NotNull String getDescription() {
     return GrammarKitBundle.message("language.name.bnf.live.preview");
@@ -40,17 +41,8 @@ final class LivePreviewFileType extends LanguageFileType {
   }
 
   @Override
-  public @Nullable Icon getIcon() {
+  public Icon getIcon() {
     return BnfIcons.FILE;
   }
 
-  @Override
-  public boolean isReadOnly() {
-    return false;
-  }
-
-  @Override
-  public @Nullable String getCharset(@NotNull VirtualFile file, byte @NotNull [] content) {
-    return null;
-  }
 }

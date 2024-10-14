@@ -4,6 +4,7 @@
 * JFlex: update library from jflex-1.9.1 to jflex-1.9.2 #349
 * Update IntelliJ Platform to `2023.3`
 * Compatibility: IntelliJ IDEA 2024.2
+* BNF Highlighting: highlight pinned elements re-using _Language Defaults | Identifiers | Reassigned local variable_ instead of custom setting
 * Context menu: Fleet: Generate Parser Code
 * Context menu: Fleet: Generate JFlex Lexer
 * Context menu: Fleet: Run JFlex Generator

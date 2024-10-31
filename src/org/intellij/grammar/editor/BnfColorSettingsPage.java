@@ -34,7 +34,7 @@ final class BnfColorSettingsPage implements ColorSettingsPage {
       new AttributesDescriptor("String", STRING),
       new AttributesDescriptor("Number", NUMBER),
       new AttributesDescriptor("Keyword", KEYWORD),
-      new AttributesDescriptor("Token", TOKEN),
+      new AttributesDescriptor("Explicit token", EXPLICIT_TOKEN),
       new AttributesDescriptor("Implicit token", IMPLICIT_TOKEN),
       new AttributesDescriptor("Rule", RULE),
       new AttributesDescriptor("Attribute", ATTRIBUTE),
@@ -114,7 +114,7 @@ final class BnfColorSettingsPage implements ColorSettingsPage {
     map.put("mr", META_RULE);
     map.put("a", ATTRIBUTE);
     map.put("pa", PATTERN);
-    map.put("t", TOKEN);
+    map.put("t", EXPLICIT_TOKEN);
     map.put("it", IMPLICIT_TOKEN);
     map.put("k", KEYWORD);
     map.put("e", EXTERNAL);

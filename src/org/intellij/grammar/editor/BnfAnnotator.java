@@ -100,7 +100,7 @@ final class BnfAnnotator implements Annotator, DumbAware {
         if (RuleGraphHelper.getTokenNameToTextMap((BnfFile)refOrToken.getContainingFile()).containsKey(text)) {
           annotationHolder.newSilentAnnotation(HighlightSeverity.INFORMATION)
             .range(refOrToken)
-            .textAttributes(BnfSyntaxHighlighter.TOKEN)
+            .textAttributes(BnfSyntaxHighlighter.EXPLICIT_TOKEN)
             .create();
         } else {
           annotationHolder.newSilentAnnotation(HighlightSeverity.INFORMATION)

@@ -11,6 +11,7 @@ import com.intellij.openapi.options.colors.ColorDescriptor;
 import com.intellij.openapi.options.colors.ColorSettingsPage;
 import org.intellij.grammar.BnfIcons;
 import org.intellij.grammar.GrammarKitBundle;
+import org.intellij.lang.annotations.Language;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
 
@@ -77,7 +78,7 @@ final class BnfColorSettingsPage implements ColorSettingsPage {
   }
 
   @Override
-  public @NotNull String getDemoText() {
+  public @NotNull @Language("HTML") String getDemoText() {
     return """
       /*
        * Sample grammar

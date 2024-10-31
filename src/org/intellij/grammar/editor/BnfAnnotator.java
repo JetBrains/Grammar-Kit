@@ -58,7 +58,7 @@ final class BnfAnnotator implements Annotator, DumbAware {
           .create();
       }
     }
-    else if (psiElement instanceof BnfReferenceOrToken) {
+    else if (psiElement instanceof BnfReferenceOrToken refOrToken) {
       if (parent instanceof BnfAttr) {
         String text = psiElement.getText();
         if ("true".equals(text) || "false".equals(text)) {
@@ -96,10 +96,18 @@ final class BnfAnnotator implements Annotator, DumbAware {
         }
       }
       else if (resolve == null) {
-        annotationHolder.newSilentAnnotation(HighlightSeverity.INFORMATION)
-          .range(psiElement)
-          .textAttributes(BnfSyntaxHighlighter.TOKEN)
-          .create();
+        var text = refOrToken.getId().getText();
+        if (RuleGraphHelper.getTokenNameToTextMap((BnfFile)psiElement.getContainingFile()).containsKey(text)) {
+          annotationHolder.newSilentAnnotation(HighlightSeverity.INFORMATION)
+            .range(psiElement)
+            .textAttributes(BnfSyntaxHighlighter.TOKEN)
+            .create();
+        } else {
+          annotationHolder.newSilentAnnotation(HighlightSeverity.INFORMATION)
+            .range(psiElement)
+            .textAttributes(BnfSyntaxHighlighter.IMPLICIT_TOKEN)
+            .create();
+        }
       }
     }
     else if (psiElement instanceof BnfStringLiteralExpression) {

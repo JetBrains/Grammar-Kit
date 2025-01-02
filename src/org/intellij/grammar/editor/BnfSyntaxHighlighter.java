@@ -27,7 +27,8 @@ class BnfSyntaxHighlighter extends SyntaxHighlighterBase {
   public static final TextAttributesKey PATTERN = createTextAttributesKey("BNF_PATTERN", DefaultLanguageHighlighterColors.INSTANCE_FIELD);
   public static final TextAttributesKey NUMBER = createTextAttributesKey("BNF_NUMBER", DefaultLanguageHighlighterColors.NUMBER);
   public static final TextAttributesKey KEYWORD = createTextAttributesKey("BNF_KEYWORD", DefaultLanguageHighlighterColors.MARKUP_ATTRIBUTE);
-  public static final TextAttributesKey TOKEN = createTextAttributesKey("BNF_TOKEN", DefaultLanguageHighlighterColors.STRING);
+  public static final TextAttributesKey EXPLICIT_TOKEN = createTextAttributesKey("BNF_EXPLICIT_TOKEN", DefaultLanguageHighlighterColors.STRING);
+  public static final TextAttributesKey IMPLICIT_TOKEN = createTextAttributesKey("BNF_IMPLICIT_TOKEN", DefaultLanguageHighlighterColors.STATIC_FIELD);
   public static final TextAttributesKey RULE = createTextAttributesKey("BNF_RULE", DefaultLanguageHighlighterColors.KEYWORD);
   public static final TextAttributesKey META_RULE = createTextAttributesKey("BNF_META_RULE", DefaultLanguageHighlighterColors.KEYWORD);
   public static final TextAttributesKey META_PARAM = createTextAttributesKey("BNF_META_RULE_PARAM");

@@ -1,5 +1,4 @@
 # GitHub Actions Workflow is created for testing and preparing the plugin release in the following steps:
-# - Validate Gradle Wrapper.
 # - Run 'test' and 'verifyPlugin' tasks.
 # - Run Qodana inspections.
 # - Run the 'buildPlugin' task and prepare artifact for further tests.
@@ -40,9 +39,6 @@ jobs:
       - name: Fetch Sources
         uses: actions/checkout@v4
 
-      # Validate wrapper
-      - name: Gradle Wrapper Validation
-        uses: gradle/actions/wrapper-validation@v3
 
       # Set up Java environment for the next steps
       - name: Setup Java

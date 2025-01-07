@@ -107,9 +107,11 @@ final class BnfDiagramProvider extends DiagramProvider<BnfRule> {
     @Override
     public Object @NotNull [] getNodeItems(BnfRule element) {
       Map<PsiElement, RuleGraphHelper.Cardinality> map = myGraphHelper.getFor(element);
-      List<Item> entries = ContainerUtil.mapNotNull(map.entrySet(), p -> p.getKey() instanceof BnfRule o ? new Item(o, p.getValue()) : null);
-      Collections.sort(entries, (o, o1) -> Comparing.compare(o.rule.getName(), o1.rule.getName()));
-      return entries.toArray();
+      return map.entrySet().stream()
+        .map(p -> p.getKey() instanceof BnfRule o ? new Item(o, p.getValue()) : null)
+        .filter(Objects::nonNull)
+        .sorted((o, o1) -> Comparing.compare(o.rule.getName(), o1.rule.getName()))
+        .toArray();
     }
 
     @Override

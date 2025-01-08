@@ -429,7 +429,7 @@ public class BnfFirstNextAnalyzer {
   private static @NotNull Set<BnfExpression> exprSetIntersection(@NotNull Set<BnfExpression> a, @NotNull Set<BnfExpression> b) {
     Set<BnfExpression> filter = newExprSet(a);
     filter.retainAll(newExprSet(b));
-    Set<BnfExpression> result = union(a, b);
+    Set<BnfExpression> result = new HashSet<>(union(a, b));
     result.retainAll(filter);
     return result;
   }
@@ -437,7 +437,7 @@ public class BnfFirstNextAnalyzer {
   private static @NotNull Set<BnfExpression> exprSetDifference(@NotNull Set<BnfExpression> a, @NotNull Set<BnfExpression> b) {
     Set<BnfExpression> filter = newExprSet(a);
     filter.removeAll(newExprSet(b));
-    Set<BnfExpression> result = union(a, b);
+    Set<BnfExpression> result = new HashSet<>(union(a, b));
     result.retainAll(filter);
     return result;
   }

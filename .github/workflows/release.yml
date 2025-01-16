@@ -80,7 +80,7 @@ jobs:
           ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.MAVEN_CENTRAL_PASSWORD }}
           ORG_GRADLE_PROJECT_signingKey: ${{ secrets.SIGNING_KEY }}
           ORG_GRADLE_PROJECT_signingPassword: ${{ secrets.SIGNING_PASSWORD }}
-        run: ./gradlew publish
+        run: ./gradlew publishToSonatype closeAndReleaseSonatypeStagingRepository
 
       # Publish the plugin to JetBrains Marketplace
       - name: Publish Plugin

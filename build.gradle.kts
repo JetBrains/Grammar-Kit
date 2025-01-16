@@ -16,8 +16,10 @@ plugins {
     id("maven-publish")
     id("signing")
     id("com.github.breadmoirai.github-release") version "2.5.2"
+    id("io.github.gradle-nexus.publish-plugin") version "2.0.0"
 }
 
+group = "org.jetbrains"
 version = properties("pluginVersion").get()
 
 repositories {
@@ -180,8 +182,8 @@ tasks {
 publishing {
     publications {
         create<MavenPublication>("grammarKitJar") {
-            groupId = "org.jetbrains"
-            artifactId = "grammar-kit"
+            groupId = project.group.toString()
+            artifactId = project.name
             version = project.version.toString()
             from(components["java"])
 
@@ -210,14 +212,13 @@ publishing {
             }
         }
     }
-    repositories {
-        maven {
-            url = uri("https://oss.sonatype.org/service/local/staging/deploy/maven2")
+}
 
-            credentials {
-                username = properties("mavenCentralUsername").orNull
-                password = properties("mavenCentralPassword").orNull
-            }
+nexusPublishing {
+    repositories {
+        sonatype {
+            username = properties("mavenCentralUsername").orNull
+            password = properties("mavenCentralPassword").orNull
         }
     }
 }

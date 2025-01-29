@@ -1511,7 +1511,7 @@ public class ParserGenerator extends GeneratorBase {
     out("}");
   }
 
-  protected boolean useFactory(String factory) {
+  protected static boolean useFactory(String factory) {
     return factory != null;
   }
 

@@ -4,7 +4,7 @@
 
 package org.intellij.grammar.generator;
 
-import org.intellij.grammar.fleet.FleetBnfFileWrapper;
+import org.intellij.grammar.fleet.FleetBnfAttributePostprocessor;
 import org.intellij.grammar.fleet.FleetConstants;
 import org.intellij.grammar.psi.BnfFile;
 
@@ -52,6 +52,6 @@ public class IntelliJPlatformConstants {
                                   FleetConstants.TOKEN_SET_CLASS);
 
   public static IntelliJPlatformConstants getConstantSetForBnf(BnfFile file) {
-    return (file instanceof FleetBnfFileWrapper) ? FleetConstantSet : IdeaConstantSet;
+    return (Boolean.TRUE.equals(file.getUserData(FleetBnfAttributePostprocessor.GENERATE_FOR_FLEET))) ? FleetConstantSet : IdeaConstantSet;
   }
 }

@@ -22,18 +22,18 @@ public class FleetBnfAttributePostprocessor implements IAttributePostProcessor {
 
   public static final Key<Boolean> GENERATE_FOR_FLEET = Key.create("GENERATE_FOR_FLEET");
 
-  private static final Map<String, String> myFleetAttributeValuesSubstitution = Map.of(
+  private final Map<String, String> myFleetAttributeValuesSubstitution = Map.of(
     PARSER_UTIL_CLASS.getName(), GPUB_CLASS,
     ELEMENT_TYPE_CLASS.getName(), IELEMENTTYPE_CLASS,
     TOKEN_TYPE_CLASS.getName(), IELEMENTTYPE_CLASS
   );
 
-  private static final Map<String, String> myDefaultGeneratedNames = Map.of(
+  private final Map<String, String> myDefaultGeneratedNames = Map.of(
     PARSER_CLASS.getName(), PARSER_CLASS_DEFAULT,
     ELEMENT_TYPE_HOLDER_CLASS.getName(), ELEMENT_TYPE_HOLDER_DEFAULT
   );
 
-  private static final List<String> mySuppressedFactories = List.of(ELEMENT_TYPE_FACTORY.getName(),
+  private final List<String> mySuppressedFactories = List.of(ELEMENT_TYPE_FACTORY.getName(),
                                                                     TOKEN_TYPE_FACTORY.getName());
 
   @Override

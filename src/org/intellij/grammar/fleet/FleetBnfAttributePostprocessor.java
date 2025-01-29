@@ -48,7 +48,7 @@ public class FleetBnfAttributePostprocessor implements IAttributePostProcessor {
   }
 
   private static <T> T findAttributeValue(@Nullable T value,
-                                         @NotNull KnownAttribute<T> knownAttribute) {
+                                          @NotNull KnownAttribute<T> knownAttribute) {
     //Bypass adjustment logic for the GENERATE attribute
     if (knownAttribute.getName().equals(GENERATE.getName())) {
       return value;

@@ -1,6 +1,7 @@
 # Grammar-Kit Changelog
 
 ## [Unreleased]
+* BNF Highlighting: distinguish explicit vs. implicit tokens [#383](https://github.com/JetBrains/Grammar-Kit/pull/383) by @fan-tom
 
 ## [2023.3]
 

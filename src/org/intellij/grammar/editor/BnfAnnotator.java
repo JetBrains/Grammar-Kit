@@ -32,10 +32,10 @@ final class BnfAnnotator implements Annotator, DumbAware {
   @Override
   public void annotate(@NotNull PsiElement psiElement, @NotNull AnnotationHolder annotationHolder) {
     PsiElement parent = psiElement.getParent();
-    if (parent instanceof BnfRule && ((BnfRule)parent).getId() == psiElement) {
-      addRuleHighlighting((BnfRule)parent, psiElement, annotationHolder);
+    if (parent instanceof BnfRule rule && rule.getId() == psiElement) {
+      addRuleHighlighting(rule, psiElement, annotationHolder);
     }
-    else if (parent instanceof BnfAttr && ((BnfAttr)parent).getId() == psiElement) {
+    else if (parent instanceof BnfAttr attr && attr.getId() == psiElement) {
       annotationHolder.newSilentAnnotation(HighlightSeverity.INFORMATION)
         .range(psiElement)
         .textAttributes(BnfSyntaxHighlighter.ATTRIBUTE)
@@ -47,9 +47,9 @@ final class BnfAnnotator implements Annotator, DumbAware {
         .textAttributes(BnfSyntaxHighlighter.KEYWORD)
         .create();
     }
-    else if (parent instanceof BnfListEntry && ((BnfListEntry)parent).getId() == psiElement) {
-      boolean hasValue = ((BnfListEntry)parent).getLiteralExpression() != null;
-      BnfAttr attr = PsiTreeUtil.getParentOfType(parent, BnfAttr.class);
+    else if (parent instanceof BnfListEntry listEntry && listEntry.getId() == psiElement) {
+      boolean hasValue = listEntry.getLiteralExpression() != null;
+      BnfAttr attr = PsiTreeUtil.getParentOfType(listEntry, BnfAttr.class);
       KnownAttribute<?> attribute = attr != null ? KnownAttribute.getCompatibleAttribute(attr.getName()) : null;
       if (attribute == KnownAttribute.METHODS && !hasValue) {
         annotationHolder.newSilentAnnotation(HighlightSeverity.INFORMATION)
@@ -58,31 +58,31 @@ final class BnfAnnotator implements Annotator, DumbAware {
           .create();
       }
     }
-    else if (psiElement instanceof BnfReferenceOrToken) {
+    else if (psiElement instanceof BnfReferenceOrToken refOrToken) {
       if (parent instanceof BnfAttr) {
-        String text = psiElement.getText();
+        String text = refOrToken.getText();
         if ("true".equals(text) || "false".equals(text)) {
           annotationHolder.newSilentAnnotation(HighlightSeverity.INFORMATION)
-            .range(psiElement)
+            .range(refOrToken)
             .textAttributes(BnfSyntaxHighlighter.KEYWORD)
             .create();
           return;
         }
       }
-      PsiReference reference = psiElement.getReference();
+      PsiReference reference = refOrToken.getReference();
       Object resolve = reference == null ? null : reference.resolve();
-      if (resolve instanceof BnfRule) {
-        addRuleHighlighting((BnfRule)resolve, psiElement, annotationHolder);
+      if (resolve instanceof BnfRule rule) {
+        addRuleHighlighting(rule, refOrToken, annotationHolder);
       }
       else if (resolve instanceof BnfAttr) {
         annotationHolder.newSilentAnnotation(HighlightSeverity.INFORMATION)
-          .range(psiElement)
+          .range(refOrToken)
           .textAttributes(BnfSyntaxHighlighter.ATTRIBUTE)
           .create();
       }
-      else if (GrammarUtil.isExternalReference(psiElement)) {
-        if (resolve == null && parent instanceof BnfExternalExpression && ((BnfExternalExpression)parent).getArguments().isEmpty() &&
-            ParserGeneratorUtil.Rule.isMeta(ParserGeneratorUtil.Rule.of((BnfReferenceOrToken)psiElement))) {
+      else if (GrammarUtil.isExternalReference(refOrToken)) {
+        if (resolve == null && parent instanceof BnfExternalExpression extExpr && extExpr.getArguments().isEmpty() &&
+            ParserGeneratorUtil.Rule.isMeta(ParserGeneratorUtil.Rule.of(refOrToken))) {
           annotationHolder.newSilentAnnotation(HighlightSeverity.INFORMATION)
             .range(parent)
             .textAttributes(BnfSyntaxHighlighter.META_PARAM)
@@ -90,16 +90,24 @@ final class BnfAnnotator implements Annotator, DumbAware {
         }
         else {
           annotationHolder.newSilentAnnotation(HighlightSeverity.INFORMATION)
-            .range(psiElement)
+            .range(refOrToken)
             .textAttributes(BnfSyntaxHighlighter.EXTERNAL)
             .create();
         }
       }
       else if (resolve == null) {
-        annotationHolder.newSilentAnnotation(HighlightSeverity.INFORMATION)
-          .range(psiElement)
-          .textAttributes(BnfSyntaxHighlighter.TOKEN)
-          .create();
+        var text = refOrToken.getId().getText();
+        if (RuleGraphHelper.getTokenNameToTextMap((BnfFile)refOrToken.getContainingFile()).containsKey(text)) {
+          annotationHolder.newSilentAnnotation(HighlightSeverity.INFORMATION)
+            .range(refOrToken)
+            .textAttributes(BnfSyntaxHighlighter.EXPLICIT_TOKEN)
+            .create();
+        } else {
+          annotationHolder.newSilentAnnotation(HighlightSeverity.INFORMATION)
+            .range(refOrToken)
+            .textAttributes(BnfSyntaxHighlighter.IMPLICIT_TOKEN)
+            .create();
+        }
       }
     }
     else if (psiElement instanceof BnfStringLiteralExpression) {

@@ -11,6 +11,7 @@ import com.intellij.openapi.options.colors.ColorDescriptor;
 import com.intellij.openapi.options.colors.ColorSettingsPage;
 import org.intellij.grammar.BnfIcons;
 import org.intellij.grammar.GrammarKitBundle;
+import org.intellij.lang.annotations.Language;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
 
@@ -33,7 +34,8 @@ final class BnfColorSettingsPage implements ColorSettingsPage {
       new AttributesDescriptor("String", STRING),
       new AttributesDescriptor("Number", NUMBER),
       new AttributesDescriptor("Keyword", KEYWORD),
-      new AttributesDescriptor("Token", TOKEN),
+      new AttributesDescriptor("Explicit token", EXPLICIT_TOKEN),
+      new AttributesDescriptor("Implicit token", IMPLICIT_TOKEN),
       new AttributesDescriptor("Rule", RULE),
       new AttributesDescriptor("Attribute", ATTRIBUTE),
       new AttributesDescriptor("Meta rule", META_RULE),
@@ -76,7 +78,7 @@ final class BnfColorSettingsPage implements ColorSettingsPage {
   }
 
   @Override
-  public @NotNull String getDemoText() {
+  public @NotNull @Language("HTML") String getDemoText() {
     return """
       /*
        * Sample grammar
@@ -94,11 +96,11 @@ final class BnfColorSettingsPage implements ColorSettingsPage {
       }
       // Grammar rules
       <r>root</r> ::= <r>header</r> <r>content</r>
-      <r>header</r> ::= <t>DECLARE</t> <r>reference</r>
+      <r>header</r> ::= <it>DECLARE</it> <r>reference</r>
       <k>external</k> <r>reference</r> ::= <e>parseReference</e>
-      <k>private</k> <k>meta</k> <mr>comma_list</mr> ::= <pin><s>'('</s></pin> <mp><<p>></mp> (<pin><s>','</s></pin> <mp><<p>></mp>) * ')'
-      <k>private</k> <r>content</r> ::= <pin><t>AS</t></pin> <<<mr>comma_list</mr> <ru><r>element</r></ru>>> {<a>pin</a>=1}
-      <ru><r>element</r></ru> ::= <r>reference</r> [ {<pa>'+'</pa> | <pa>'-'</pa>} <r>reference</r> <t>ONLY</t>?] {<a>recoverWhile</a>=<r>element_recover</r>}
+      <k>private</k> <k>meta</k> <mr>comma_list</mr> ::= <pin><t>LEFT_PAREN</t></pin> <mp><<p>></mp> (<pin><s>','</s></pin> <mp><<p>></mp>) * <t>RIGHT_PAREN</t>
+      <k>private</k> <r>content</r> ::= <pin><it>AS</it></pin> <<<mr>comma_list</mr> <ru><r>element</r></ru>>> {<a>pin</a>=1}
+      <ru><r>element</r></ru> ::= <r>reference</r> [ {<pa>'+'</pa> | <pa>'-'</pa>} <r>reference</r> <it>ONLY</it>?] {<a>recoverWhile</a>=<r>element_recover</r>}
       <k>private</k> <r>element_recover</r> ::= !(',' | ')')
 
       """;
@@ -112,7 +114,8 @@ final class BnfColorSettingsPage implements ColorSettingsPage {
     map.put("mr", META_RULE);
     map.put("a", ATTRIBUTE);
     map.put("pa", PATTERN);
-    map.put("t", TOKEN);
+    map.put("t", EXPLICIT_TOKEN);
+    map.put("it", IMPLICIT_TOKEN);
     map.put("k", KEYWORD);
     map.put("e", EXTERNAL);
     map.put("pin", PIN_MARKER);

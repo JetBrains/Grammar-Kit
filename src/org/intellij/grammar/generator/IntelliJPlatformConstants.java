@@ -5,6 +5,8 @@
 package org.intellij.grammar.generator;
 
 import org.intellij.grammar.psi.BnfFile;
+import org.intellij.grammar.syntax.SyntaxBnfAttributePostProcessor;
+import org.intellij.grammar.syntax.SyntaxConstants;
 
 public class IntelliJPlatformConstants {
   public final String PsiBuilderClass;
@@ -40,7 +42,16 @@ public class IntelliJPlatformConstants {
                                   BnfConstants.LIGHT_PSI_PARSER_CLASS,
                                   BnfConstants.TOKEN_SET_CLASS);
 
+  public static final IntelliJPlatformConstants SyntaxConstantSet =
+    new IntelliJPlatformConstants(SyntaxConstants.SYNTAX_BUILDER_CLASS,
+                                  SyntaxConstants.SYNTAX_ELEMENT_TYPE,
+                                  BnfConstants.PSI_ELEMENT_CLASS,
+                                  BnfConstants.AST_NODE_CLASS,
+                                  BnfConstants.PSI_PARSER_CLASS,
+                                  BnfConstants.LIGHT_PSI_PARSER_CLASS,
+                                  SyntaxConstants.TOKEN_SET_CLASS);
+
   public static IntelliJPlatformConstants getConstantSetForBnf(BnfFile file) {
-    return IdeaConstantSet;
+    return (Boolean.TRUE.equals(file.getUserData(SyntaxBnfAttributePostProcessor.GENERATE_WITH_SYNTAX))) ? SyntaxConstantSet : IdeaConstantSet;
   }
 }

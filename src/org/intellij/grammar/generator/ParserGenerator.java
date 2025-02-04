@@ -1681,9 +1681,10 @@ public class ParserGenerator {
     out("interface %s {", TOKEN_SET_HOLDER_NAME);
     Map<String, String> reverseMap = new HashMap<>();
     myTokenSets.forEach((name, tokens) -> {
-      String value = format("TokenSet.create(%s)", tokenSetString(tokens));
+      String creationMethod = (C.TokenSetClass.startsWith("java.util.Set") && G.javaVersion > 9) ? "Set.of(%s)" : shorten(C.TokenSetClass) + ".create(%s)";
+      String value = format(creationMethod, tokenSetString(tokens));
       String alreadyRendered = reverseMap.putIfAbsent(value, name);
-      out("TokenSet %s = %s;", name, ObjectUtils.chooseNotNull(alreadyRendered, value));
+      out("%s %s = %s;", shorten(C.TokenSetClass), name, ObjectUtils.chooseNotNull(alreadyRendered, value));
     });
     out("}");
   }

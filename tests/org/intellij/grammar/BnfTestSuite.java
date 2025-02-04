@@ -28,6 +28,7 @@ public class BnfTestSuite extends TestCase {
       testSuite.addTestSuite(JFlexParserTest.class);
       testSuite.addTestSuite(BnfParserTest.class);
       testSuite.addTestSuite(BnfGeneratorTest.class);
+      testSuite.addTestSuite(SyntaxBnfGeneratorTest.class);
       testSuite.addTestSuite(ExpressionParserTest.class);
       testSuite.addTestSuite(BnfLivePreviewParserTest.class);
       return testSuite;

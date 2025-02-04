@@ -560,7 +560,7 @@ public class ParserGenerator {
     else if (!G.generateFQN) {
       imports.addAll(Arrays.asList(C.IElementTypeClass,
                                    C.AstNodeClass,
-                                   C.TokenSetClass,
+                                   C.ParserNodeSetClass,
                                    C.PsiParserClass,
                                    C.LightPsiParserClass));
     }
@@ -642,7 +642,7 @@ public class ParserGenerator {
     String shortET = shorten(C.IElementTypeClass);
     String shortAN = shorten(C.AstNodeClass);
     String shortPB = shorten(C.PsiBuilderClass);
-    String shortTS = shorten(C.TokenSetClass);
+    String shortTS = shorten(C.ParserNodeSetClass);
     String shortMarker = !G.generateFQN ? "Marker" : C.PsiBuilderClass + ".Marker";
     out("public %s parse(%s %s, %s %s) {", shortAN, shortET, N.root, shortPB, N.builder);
     out("parseLight(%s, %s);", N.root, N.builder);
@@ -1501,7 +1501,7 @@ public class ParserGenerator {
     String tokenTypeClass = getRootAttribute(myFile, KnownAttribute.TOKEN_TYPE_CLASS);
     String tokenTypeFactory = getRootAttribute(myFile, KnownAttribute.TOKEN_TYPE_FACTORY);
     Set<String> imports = new LinkedHashSet<>();
-    imports.add(C.IElementTypeClass);
+    imports.add(C.ElementTypeBaseClass);
     if (G.generatePsi) {
       imports.add(C.PsiElementClass);
       imports.add(C.AstNodeClass);
@@ -1557,7 +1557,7 @@ public class ParserGenerator {
         else {
           elementCreateCall = shorten(StringUtil.getPackageName(info.second)) + "." + StringUtil.getShortName(info.second);
         }
-        String fieldType = useExactElements && info.first != null ? info.first : C.IElementTypeClass;
+        String fieldType = useExactElements && info.first != null ? info.first : C.ElementTypeBaseClass;
         String callFix = elementCreateCall.endsWith("IElementType") ? ", null" : "";
         out("%s %s = %s(\"%s\"%s);", shorten(fieldType), elementType, elementCreateCall, elementType, callFix);
       }
@@ -1574,7 +1574,7 @@ public class ParserGenerator {
       else {
         tokenCreateCall = shorten(StringUtil.getPackageName(tokenTypeFactory)) + "." + StringUtil.getShortName(tokenTypeFactory);
       }
-      String fieldType = ObjectUtils.notNull(useExactTokens ? exactType : null, C.IElementTypeClass);
+      String fieldType = ObjectUtils.notNull(useExactTokens ? exactType : null, C.ElementTypeBaseClass);
       for (String tokenText : mySimpleTokens.keySet()) {
         String tokenName = ObjectUtils.chooseNotNull(mySimpleTokens.get(tokenText), tokenText);
         if (isIgnoredWhitespaceToken(tokenName, tokenText)) continue;
@@ -1589,7 +1589,7 @@ public class ParserGenerator {
     }
     if (G.generatePsi && G.generatePsiClassesMap) {
       String shortJC = shorten(CommonClassNames.JAVA_LANG_CLASS);
-      String shortET = shorten(C.IElementTypeClass);
+      String shortET = shorten(C.ElementTypeBaseClass);
       newLine();
       out("class Classes {");
       newLine();
@@ -1601,7 +1601,7 @@ public class ParserGenerator {
       out("return %s.unmodifiableSet(ourMap.keySet());", shorten(CommonClassNames.JAVA_UTIL_COLLECTIONS));
       out("}");
       newLine();
-      String type = shorten("java.util.LinkedHashMap<" + C.IElementTypeClass + ", java.lang.Class<?>>");
+      String type = shorten("java.util.LinkedHashMap<" + C.ElementTypeBaseClass + ", java.lang.Class<?>>");
       out("private static final %s ourMap = new %1$s();", type);
       newLine();
       out("static {");
@@ -1628,7 +1628,7 @@ public class ParserGenerator {
         if (info.mixedAST) continue;
         if (first1) {
           out("public static %s createElement(%s node) {", shorten(C.PsiElementClass), shorten(C.AstNodeClass));
-          out("%s type = node.getElementType();", shorten(C.IElementTypeClass));
+          out("%s type = node.getElementType();", shorten(C.ElementTypeBaseClass));
         }
         String psiClass = getAttribute(rule, KnownAttribute.PSI_IMPL_PACKAGE) + "." + getRulePsiClassName(rule, myImplClassFormat);
         out((!first1 ? "else " : "") + "if (type == " + elementType + ") {");
@@ -1649,7 +1649,7 @@ public class ParserGenerator {
         if (first2) {
           if (!first1) newLine();
           out("public static %s createElement(%s type) {", shorten(COMPOSITE_PSI_ELEMENT_CLASS),
-              shorten(C.IElementTypeClass));
+              shorten(C.ElementTypeBaseClass));
         }
         String psiClass = getRulePsiClassName(rule, myImplClassFormat);
         out((!first2 ? "else" : "") + " if (type == " + elementType + ") {");

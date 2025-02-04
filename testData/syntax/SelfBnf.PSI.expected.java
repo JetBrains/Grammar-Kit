@@ -2,7 +2,7 @@
 // license.txt
 package org.intellij.grammar.psi;
 
-import com.intellij.platform.syntax.SyntaxElementType;
+import com.intellij.psi.tree.IElementType;
 import com.intellij.psi.PsiElement;
 import com.intellij.lang.ASTNode;
 import org.intellij.grammar.psi.impl.*;
@@ -10,52 +10,52 @@ import com.intellij.psi.impl.source.tree.CompositePsiElement;
 
 public interface BnfTypes {
 
-  SyntaxElementType BNF_ATTR = new BnfCompositeElementType("BNF_ATTR");
-  SyntaxElementType BNF_ATTRS = new BnfCompositeElementType("BNF_ATTRS");
-  SyntaxElementType BNF_ATTR_PATTERN = new BnfCompositeElementType("BNF_ATTR_PATTERN");
-  SyntaxElementType BNF_CHOICE = new BnfCompositeElementType("BNF_CHOICE");
-  SyntaxElementType BNF_EXPRESSION = new BnfCompositeElementType("BNF_EXPRESSION");
-  SyntaxElementType BNF_EXTERNAL_EXPRESSION = new BnfCompositeElementType("BNF_EXTERNAL_EXPRESSION");
-  SyntaxElementType BNF_LIST_ENTRY = new BnfCompositeElementType("BNF_LIST_ENTRY");
-  SyntaxElementType BNF_LITERAL_EXPRESSION = new BnfCompositeElementType("BNF_LITERAL_EXPRESSION");
-  SyntaxElementType BNF_MODIFIER = new BnfCompositeElementType("BNF_MODIFIER");
-  SyntaxElementType BNF_PAREN_EXPRESSION = new BnfCompositeElementType("BNF_PAREN_EXPRESSION");
-  SyntaxElementType BNF_PAREN_OPT_EXPRESSION = new BnfCompositeElementType("BNF_PAREN_OPT_EXPRESSION");
-  SyntaxElementType BNF_PREDICATE = new BnfCompositeElementType("BNF_PREDICATE");
-  SyntaxElementType BNF_PREDICATE_SIGN = new BnfCompositeElementType("BNF_PREDICATE_SIGN");
-  SyntaxElementType BNF_QUANTIFIED = new BnfCompositeElementType("BNF_QUANTIFIED");
-  SyntaxElementType BNF_QUANTIFIER = new BnfCompositeElementType("BNF_QUANTIFIER");
-  SyntaxElementType BNF_REFERENCE_OR_TOKEN = new BnfCompositeElementType("BNF_REFERENCE_OR_TOKEN");
-  SyntaxElementType BNF_RULE = new BnfCompositeElementType("BNF_RULE");
-  SyntaxElementType BNF_SEQUENCE = new BnfCompositeElementType("BNF_SEQUENCE");
-  SyntaxElementType BNF_STRING_LITERAL_EXPRESSION = new BnfCompositeElementType("BNF_STRING_LITERAL_EXPRESSION");
-  SyntaxElementType BNF_VALUE_LIST = new BnfCompositeElementType("BNF_VALUE_LIST");
+  IElementType BNF_ATTR = new BnfCompositeElementType("BNF_ATTR");
+  IElementType BNF_ATTRS = new BnfCompositeElementType("BNF_ATTRS");
+  IElementType BNF_ATTR_PATTERN = new BnfCompositeElementType("BNF_ATTR_PATTERN");
+  IElementType BNF_CHOICE = new BnfCompositeElementType("BNF_CHOICE");
+  IElementType BNF_EXPRESSION = new BnfCompositeElementType("BNF_EXPRESSION");
+  IElementType BNF_EXTERNAL_EXPRESSION = new BnfCompositeElementType("BNF_EXTERNAL_EXPRESSION");
+  IElementType BNF_LIST_ENTRY = new BnfCompositeElementType("BNF_LIST_ENTRY");
+  IElementType BNF_LITERAL_EXPRESSION = new BnfCompositeElementType("BNF_LITERAL_EXPRESSION");
+  IElementType BNF_MODIFIER = new BnfCompositeElementType("BNF_MODIFIER");
+  IElementType BNF_PAREN_EXPRESSION = new BnfCompositeElementType("BNF_PAREN_EXPRESSION");
+  IElementType BNF_PAREN_OPT_EXPRESSION = new BnfCompositeElementType("BNF_PAREN_OPT_EXPRESSION");
+  IElementType BNF_PREDICATE = new BnfCompositeElementType("BNF_PREDICATE");
+  IElementType BNF_PREDICATE_SIGN = new BnfCompositeElementType("BNF_PREDICATE_SIGN");
+  IElementType BNF_QUANTIFIED = new BnfCompositeElementType("BNF_QUANTIFIED");
+  IElementType BNF_QUANTIFIER = new BnfCompositeElementType("BNF_QUANTIFIER");
+  IElementType BNF_REFERENCE_OR_TOKEN = new BnfCompositeElementType("BNF_REFERENCE_OR_TOKEN");
+  IElementType BNF_RULE = new BnfCompositeElementType("BNF_RULE");
+  IElementType BNF_SEQUENCE = new BnfCompositeElementType("BNF_SEQUENCE");
+  IElementType BNF_STRING_LITERAL_EXPRESSION = new BnfCompositeElementType("BNF_STRING_LITERAL_EXPRESSION");
+  IElementType BNF_VALUE_LIST = new BnfCompositeElementType("BNF_VALUE_LIST");
 
-  SyntaxElementType BNF_BLOCK_COMMENT = new BnfTokenType("block_comment");
-  SyntaxElementType BNF_EXTERNAL_END = new BnfTokenType(">>");
-  SyntaxElementType BNF_EXTERNAL_START = new BnfTokenType("<<");
-  SyntaxElementType BNF_ID = new BnfTokenType("id");
-  SyntaxElementType BNF_LEFT_BRACE = new BnfTokenType("{");
-  SyntaxElementType BNF_LEFT_BRACKET = new BnfTokenType("[");
-  SyntaxElementType BNF_LEFT_PAREN = new BnfTokenType("(");
-  SyntaxElementType BNF_LINE_COMMENT = new BnfTokenType("line_comment");
-  SyntaxElementType BNF_NUMBER = new BnfTokenType("number");
-  SyntaxElementType BNF_OP_AND = new BnfTokenType("&");
-  SyntaxElementType BNF_OP_EQ = new BnfTokenType("=");
-  SyntaxElementType BNF_OP_IS = new BnfTokenType("::=");
-  SyntaxElementType BNF_OP_NOT = new BnfTokenType("!");
-  SyntaxElementType BNF_OP_ONEMORE = new BnfTokenType("+");
-  SyntaxElementType BNF_OP_OPT = new BnfTokenType("?");
-  SyntaxElementType BNF_OP_OR = new BnfTokenType("|");
-  SyntaxElementType BNF_OP_ZEROMORE = new BnfTokenType("*");
-  SyntaxElementType BNF_RIGHT_BRACE = new BnfTokenType("}");
-  SyntaxElementType BNF_RIGHT_BRACKET = new BnfTokenType("]");
-  SyntaxElementType BNF_RIGHT_PAREN = new BnfTokenType(")");
-  SyntaxElementType BNF_SEMICOLON = new BnfTokenType(";");
-  SyntaxElementType BNF_STRING = new BnfTokenType("string");
+  IElementType BNF_BLOCK_COMMENT = new BnfTokenType("block_comment");
+  IElementType BNF_EXTERNAL_END = new BnfTokenType(">>");
+  IElementType BNF_EXTERNAL_START = new BnfTokenType("<<");
+  IElementType BNF_ID = new BnfTokenType("id");
+  IElementType BNF_LEFT_BRACE = new BnfTokenType("{");
+  IElementType BNF_LEFT_BRACKET = new BnfTokenType("[");
+  IElementType BNF_LEFT_PAREN = new BnfTokenType("(");
+  IElementType BNF_LINE_COMMENT = new BnfTokenType("line_comment");
+  IElementType BNF_NUMBER = new BnfTokenType("number");
+  IElementType BNF_OP_AND = new BnfTokenType("&");
+  IElementType BNF_OP_EQ = new BnfTokenType("=");
+  IElementType BNF_OP_IS = new BnfTokenType("::=");
+  IElementType BNF_OP_NOT = new BnfTokenType("!");
+  IElementType BNF_OP_ONEMORE = new BnfTokenType("+");
+  IElementType BNF_OP_OPT = new BnfTokenType("?");
+  IElementType BNF_OP_OR = new BnfTokenType("|");
+  IElementType BNF_OP_ZEROMORE = new BnfTokenType("*");
+  IElementType BNF_RIGHT_BRACE = new BnfTokenType("}");
+  IElementType BNF_RIGHT_BRACKET = new BnfTokenType("]");
+  IElementType BNF_RIGHT_PAREN = new BnfTokenType(")");
+  IElementType BNF_SEMICOLON = new BnfTokenType(";");
+  IElementType BNF_STRING = new BnfTokenType("string");
 
   class Factory {
-    public static CompositePsiElement createElement(SyntaxElementType type) {
+    public static CompositePsiElement createElement(IElementType type) {
        if (type == BNF_ATTR) {
         return new BnfAttrImpl(type);
       }
@@ -439,11 +439,11 @@ import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static org.intellij.grammar.psi.BnfTypes.*;
 import org.intellij.grammar.psi.*;
-import com.intellij.platform.syntax.SyntaxElementType;
+import com.intellij.psi.tree.IElementType;
 
 public class BnfAttrImpl extends BnfNamedImpl implements BnfAttr {
 
-  public BnfAttrImpl(SyntaxElementType type) {
+  public BnfAttrImpl(IElementType type) {
     super(type);
   }
 
@@ -489,11 +489,11 @@ import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static org.intellij.grammar.psi.BnfTypes.*;
 import org.intellij.grammar.psi.*;
-import com.intellij.platform.syntax.SyntaxElementType;
+import com.intellij.psi.tree.IElementType;
 
 public class BnfAttrPatternImpl extends BnfCompositeImpl implements BnfAttrPattern {
 
-  public BnfAttrPatternImpl(SyntaxElementType type) {
+  public BnfAttrPatternImpl(IElementType type) {
     super(type);
   }
 
@@ -527,11 +527,11 @@ import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static org.intellij.grammar.psi.BnfTypes.*;
 import org.intellij.grammar.psi.*;
-import com.intellij.platform.syntax.SyntaxElementType;
+import com.intellij.psi.tree.IElementType;
 
 public class BnfAttrsImpl extends BnfCompositeImpl implements BnfAttrs {
 
-  public BnfAttrsImpl(SyntaxElementType type) {
+  public BnfAttrsImpl(IElementType type) {
     super(type);
   }
 
@@ -565,11 +565,11 @@ import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static org.intellij.grammar.psi.BnfTypes.*;
 import org.intellij.grammar.psi.*;
-import com.intellij.platform.syntax.SyntaxElementType;
+import com.intellij.psi.tree.IElementType;
 
 public class BnfChoiceImpl extends BnfExpressionImpl implements BnfChoice {
 
-  public BnfChoiceImpl(SyntaxElementType type) {
+  public BnfChoiceImpl(IElementType type) {
     super(type);
   }
 
@@ -603,11 +603,11 @@ import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static org.intellij.grammar.psi.BnfTypes.*;
 import org.intellij.grammar.psi.*;
-import com.intellij.platform.syntax.SyntaxElementType;
+import com.intellij.psi.tree.IElementType;
 
 public abstract class BnfExpressionImpl extends BnfCompositeImpl implements BnfExpression {
 
-  public BnfExpressionImpl(SyntaxElementType type) {
+  public BnfExpressionImpl(IElementType type) {
     super(type);
   }
 
@@ -635,11 +635,11 @@ import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static org.intellij.grammar.psi.BnfTypes.*;
 import org.intellij.grammar.psi.*;
-import com.intellij.platform.syntax.SyntaxElementType;
+import com.intellij.psi.tree.IElementType;
 
 public class BnfExternalExpressionImpl extends BnfExpressionImpl implements BnfExternalExpression {
 
-  public BnfExternalExpressionImpl(SyntaxElementType type) {
+  public BnfExternalExpressionImpl(IElementType type) {
     super(type);
   }
 
@@ -686,11 +686,11 @@ import com.intellij.psi.util.PsiTreeUtil;
 import static org.intellij.grammar.psi.BnfTypes.*;
 import org.intellij.grammar.psi.*;
 import com.intellij.psi.PsiReference;
-import com.intellij.platform.syntax.SyntaxElementType;
+import com.intellij.psi.tree.IElementType;
 
 public class BnfListEntryImpl extends BnfCompositeImpl implements BnfListEntry {
 
-  public BnfListEntryImpl(SyntaxElementType type) {
+  public BnfListEntryImpl(IElementType type) {
     super(type);
   }
 
@@ -735,11 +735,11 @@ import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static org.intellij.grammar.psi.BnfTypes.*;
 import org.intellij.grammar.psi.*;
-import com.intellij.platform.syntax.SyntaxElementType;
+import com.intellij.psi.tree.IElementType;
 
 public class BnfLiteralExpressionImpl extends BnfExpressionImpl implements BnfLiteralExpression {
 
-  public BnfLiteralExpressionImpl(SyntaxElementType type) {
+  public BnfLiteralExpressionImpl(IElementType type) {
     super(type);
   }
 
@@ -773,11 +773,11 @@ import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static org.intellij.grammar.psi.BnfTypes.*;
 import org.intellij.grammar.psi.*;
-import com.intellij.platform.syntax.SyntaxElementType;
+import com.intellij.psi.tree.IElementType;
 
 public class BnfModifierImpl extends BnfCompositeImpl implements BnfModifier {
 
-  public BnfModifierImpl(SyntaxElementType type) {
+  public BnfModifierImpl(IElementType type) {
     super(type);
   }
 
@@ -805,11 +805,11 @@ import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static org.intellij.grammar.psi.BnfTypes.*;
 import org.intellij.grammar.psi.*;
-import com.intellij.platform.syntax.SyntaxElementType;
+import com.intellij.psi.tree.IElementType;
 
 public class BnfParenExpressionImpl extends BnfParenthesizedImpl implements BnfParenExpression {
 
-  public BnfParenExpressionImpl(SyntaxElementType type) {
+  public BnfParenExpressionImpl(IElementType type) {
     super(type);
   }
 
@@ -837,11 +837,11 @@ import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static org.intellij.grammar.psi.BnfTypes.*;
 import org.intellij.grammar.psi.*;
-import com.intellij.platform.syntax.SyntaxElementType;
+import com.intellij.psi.tree.IElementType;
 
 public class BnfParenOptExpressionImpl extends BnfParenthesizedImpl implements BnfParenOptExpression {
 
-  public BnfParenOptExpressionImpl(SyntaxElementType type) {
+  public BnfParenOptExpressionImpl(IElementType type) {
     super(type);
   }
 
@@ -869,11 +869,11 @@ import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static org.intellij.grammar.psi.BnfTypes.*;
 import org.intellij.grammar.psi.*;
-import com.intellij.platform.syntax.SyntaxElementType;
+import com.intellij.psi.tree.IElementType;
 
 public class BnfParenthesizedImpl extends BnfExpressionImpl implements BnfParenthesized {
 
-  public BnfParenthesizedImpl(SyntaxElementType type) {
+  public BnfParenthesizedImpl(IElementType type) {
     super(type);
   }
 
@@ -907,11 +907,11 @@ import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static org.intellij.grammar.psi.BnfTypes.*;
 import org.intellij.grammar.psi.*;
-import com.intellij.platform.syntax.SyntaxElementType;
+import com.intellij.psi.tree.IElementType;
 
 public class BnfPredicateImpl extends BnfExpressionImpl implements BnfPredicate {
 
-  public BnfPredicateImpl(SyntaxElementType type) {
+  public BnfPredicateImpl(IElementType type) {
     super(type);
   }
 
@@ -951,11 +951,11 @@ import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static org.intellij.grammar.psi.BnfTypes.*;
 import org.intellij.grammar.psi.*;
-import com.intellij.platform.syntax.SyntaxElementType;
+import com.intellij.psi.tree.IElementType;
 
 public class BnfPredicateSignImpl extends BnfCompositeImpl implements BnfPredicateSign {
 
-  public BnfPredicateSignImpl(SyntaxElementType type) {
+  public BnfPredicateSignImpl(IElementType type) {
     super(type);
   }
 
@@ -983,11 +983,11 @@ import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static org.intellij.grammar.psi.BnfTypes.*;
 import org.intellij.grammar.psi.*;
-import com.intellij.platform.syntax.SyntaxElementType;
+import com.intellij.psi.tree.IElementType;
 
 public class BnfQuantifiedImpl extends BnfExpressionImpl implements BnfQuantified {
 
-  public BnfQuantifiedImpl(SyntaxElementType type) {
+  public BnfQuantifiedImpl(IElementType type) {
     super(type);
   }
 
@@ -1027,11 +1027,11 @@ import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static org.intellij.grammar.psi.BnfTypes.*;
 import org.intellij.grammar.psi.*;
-import com.intellij.platform.syntax.SyntaxElementType;
+import com.intellij.psi.tree.IElementType;
 
 public class BnfQuantifierImpl extends BnfCompositeImpl implements BnfQuantifier {
 
-  public BnfQuantifierImpl(SyntaxElementType type) {
+  public BnfQuantifierImpl(IElementType type) {
     super(type);
   }
 
@@ -1059,11 +1059,11 @@ import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static org.intellij.grammar.psi.BnfTypes.*;
 import org.intellij.grammar.psi.*;
-import com.intellij.platform.syntax.SyntaxElementType;
+import com.intellij.psi.tree.IElementType;
 
 public class BnfReferenceOrTokenImpl extends BnfRefOrTokenImpl implements BnfReferenceOrToken {
 
-  public BnfReferenceOrTokenImpl(SyntaxElementType type) {
+  public BnfReferenceOrTokenImpl(IElementType type) {
     super(type);
   }
 
@@ -1097,11 +1097,11 @@ import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static org.intellij.grammar.psi.BnfTypes.*;
 import org.intellij.grammar.psi.*;
-import com.intellij.platform.syntax.SyntaxElementType;
+import com.intellij.psi.tree.IElementType;
 
 public class BnfRuleImpl extends BnfNamedImpl implements BnfRule {
 
-  public BnfRuleImpl(SyntaxElementType type) {
+  public BnfRuleImpl(IElementType type) {
     super(type);
   }
 
@@ -1153,11 +1153,11 @@ import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static org.intellij.grammar.psi.BnfTypes.*;
 import org.intellij.grammar.psi.*;
-import com.intellij.platform.syntax.SyntaxElementType;
+import com.intellij.psi.tree.IElementType;
 
 public class BnfSequenceImpl extends BnfExpressionImpl implements BnfSequence {
 
-  public BnfSequenceImpl(SyntaxElementType type) {
+  public BnfSequenceImpl(IElementType type) {
     super(type);
   }
 
@@ -1191,11 +1191,11 @@ import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static org.intellij.grammar.psi.BnfTypes.*;
 import org.intellij.grammar.psi.*;
-import com.intellij.platform.syntax.SyntaxElementType;
+import com.intellij.psi.tree.IElementType;
 
 public class BnfStringLiteralExpressionImpl extends BnfStringImpl implements BnfStringLiteralExpression {
 
-  public BnfStringLiteralExpressionImpl(SyntaxElementType type) {
+  public BnfStringLiteralExpressionImpl(IElementType type) {
     super(type);
   }
 
@@ -1229,11 +1229,11 @@ import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static org.intellij.grammar.psi.BnfTypes.*;
 import org.intellij.grammar.psi.*;
-import com.intellij.platform.syntax.SyntaxElementType;
+import com.intellij.psi.tree.IElementType;
 
 public class BnfValueListImpl extends BnfExpressionImpl implements BnfValueList {
 
-  public BnfValueListImpl(SyntaxElementType type) {
+  public BnfValueListImpl(IElementType type) {
     super(type);
   }
 

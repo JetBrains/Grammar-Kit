@@ -17,8 +17,8 @@ public class SyntaxBnfAttributePostProcessor implements IAttributePostProcessor 
   public static final Key<Boolean> GENERATE_WITH_SYNTAX = Key.create("GENERATE_WITH_SYNTAX");
 
   private static final Map<String, String> myAttributesValuesSubstitution = Map.of(
-    TOKEN_TYPE_CLASS.getName(),SyntaxConstants.SYNTAX_ELEMENT_TYPE,
-    ELEMENT_TYPE_CLASS.getName(), SyntaxConstants.SYNTAX_ELEMENT_TYPE,
+    //TOKEN_TYPE_CLASS.getName(), SyntaxConstants.SYNTAX_ELEMENT_TYPE,
+    //ELEMENT_TYPE_CLASS.getName(), SyntaxConstants.SYNTAX_ELEMENT_TYPE,
     PARSER_UTIL_CLASS.getName(), SyntaxConstants.GPUB_CLASS
   );
 

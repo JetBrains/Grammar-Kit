@@ -2,7 +2,7 @@
 //header.txt
 package generated;
 
-import com.intellij.platform.syntax.SyntaxElementType;
+import com.intellij.psi.tree.IElementType;
 import com.intellij.psi.PsiElement;
 import com.intellij.lang.ASTNode;
 import sample.MyTypeFactory;
@@ -11,45 +11,45 @@ import generated.psi.impl.*;
 
 public interface GeneratedTypes {
 
-  SyntaxElementType A_STATEMENT = new SyntaxElementType("A_STATEMENT");
-  SyntaxElementType BLOCK_OF = new SyntaxElementType("BLOCK_OF");
-  SyntaxElementType B_STATEMENT = new SyntaxElementType("B_STATEMENT");
-  SyntaxElementType CAST_EXPR = MyTypeFactory.createExprType("CAST_EXPR");
-  SyntaxElementType CHOICE_JOINED = new SyntaxElementType("CHOICE_JOINED");
-  SyntaxElementType C_STATEMENT = new SyntaxElementType("C_STATEMENT");
-  SyntaxElementType EXPR = new SyntaxElementType("EXPR");
-  SyntaxElementType GRAMMAR_ELEMENT = new SyntaxElementType("GRAMMAR_ELEMENT");
-  SyntaxElementType IDENTIFIER = new SyntaxElementType("IDENTIFIER");
-  SyntaxElementType ID_EXPR = new SyntaxElementType("ID_EXPR");
-  SyntaxElementType INCLUDE_SECTION = new SyntaxElementType("INCLUDE_SECTION");
-  SyntaxElementType INCLUDE__SECTION__ALT = new SyntaxElementType("INCLUDE__SECTION__ALT");
-  SyntaxElementType ITEM_EXPR = MyTypeFactory.createExprType("ITEM_EXPR");
-  SyntaxElementType LEFT_SHADOW = new SyntaxElementType("LEFT_SHADOW");
-  SyntaxElementType LEFT_SHADOW_TEST = new SyntaxElementType("LEFT_SHADOW_TEST");
-  SyntaxElementType LITERAL = new SyntaxElementType("LITERAL");
-  SyntaxElementType MISSING_EXTERNAL_TYPE = new SyntaxElementType("MISSING_EXTERNAL_TYPE");
-  SyntaxElementType MUL_EXPR = MyTypeFactory.createExprType("MUL_EXPR");
-  SyntaxElementType PLUS_EXPR = MyTypeFactory.createExprType("PLUS_EXPR");
-  SyntaxElementType REF_EXPR = MyTypeFactory.createExprType("REF_EXPR");
-  SyntaxElementType ROOT = new SyntaxElementType("ROOT");
-  SyntaxElementType ROOT_B = new MyRootType("ROOT_B");
-  SyntaxElementType ROOT_C = new MyRootType("ROOT_C");
-  SyntaxElementType ROOT_D = new MyRootType("ROOT_D");
-  SyntaxElementType SOME_EXPR = MyTypeFactory.createExprType("SOME_EXPR");
-  SyntaxElementType SPECIAL_REF = new SyntaxElementType("SPECIAL_REF");
-  SyntaxElementType STATEMENT = new SyntaxElementType("STATEMENT");
+  IElementType A_STATEMENT = new IElementType("A_STATEMENT", null);
+  IElementType BLOCK_OF = new IElementType("BLOCK_OF", null);
+  IElementType B_STATEMENT = new IElementType("B_STATEMENT", null);
+  IElementType CAST_EXPR = MyTypeFactory.createExprType("CAST_EXPR");
+  IElementType CHOICE_JOINED = new IElementType("CHOICE_JOINED", null);
+  IElementType C_STATEMENT = new IElementType("C_STATEMENT", null);
+  IElementType EXPR = new IElementType("EXPR", null);
+  IElementType GRAMMAR_ELEMENT = new IElementType("GRAMMAR_ELEMENT", null);
+  IElementType IDENTIFIER = new IElementType("IDENTIFIER", null);
+  IElementType ID_EXPR = new IElementType("ID_EXPR", null);
+  IElementType INCLUDE_SECTION = new IElementType("INCLUDE_SECTION", null);
+  IElementType INCLUDE__SECTION__ALT = new IElementType("INCLUDE__SECTION__ALT", null);
+  IElementType ITEM_EXPR = MyTypeFactory.createExprType("ITEM_EXPR");
+  IElementType LEFT_SHADOW = new IElementType("LEFT_SHADOW", null);
+  IElementType LEFT_SHADOW_TEST = new IElementType("LEFT_SHADOW_TEST", null);
+  IElementType LITERAL = new IElementType("LITERAL", null);
+  IElementType MISSING_EXTERNAL_TYPE = new IElementType("MISSING_EXTERNAL_TYPE", null);
+  IElementType MUL_EXPR = MyTypeFactory.createExprType("MUL_EXPR");
+  IElementType PLUS_EXPR = MyTypeFactory.createExprType("PLUS_EXPR");
+  IElementType REF_EXPR = MyTypeFactory.createExprType("REF_EXPR");
+  IElementType ROOT = new IElementType("ROOT", null);
+  IElementType ROOT_B = new MyRootType("ROOT_B");
+  IElementType ROOT_C = new MyRootType("ROOT_C");
+  IElementType ROOT_D = new MyRootType("ROOT_D");
+  IElementType SOME_EXPR = MyTypeFactory.createExprType("SOME_EXPR");
+  IElementType SPECIAL_REF = new IElementType("SPECIAL_REF", null);
+  IElementType STATEMENT = new IElementType("STATEMENT", null);
 
-  SyntaxElementType ID = new SyntaxElementType("id");
-  SyntaxElementType NOTSPACE = new SyntaxElementType("notspace");
-  SyntaxElementType NUMBER = new SyntaxElementType("number");
-  SyntaxElementType OF = new SyntaxElementType("OF");
-  SyntaxElementType OP_DIV = new SyntaxElementType("/");
-  SyntaxElementType OP_MUL = new SyntaxElementType("*");
-  SyntaxElementType SLASH = new SyntaxElementType("\\");
+  IElementType ID = new IElementType("id", null);
+  IElementType NOTSPACE = new IElementType("notspace", null);
+  IElementType NUMBER = new IElementType("number", null);
+  IElementType OF = new IElementType("OF", null);
+  IElementType OP_DIV = new IElementType("/", null);
+  IElementType OP_MUL = new IElementType("*", null);
+  IElementType SLASH = new IElementType("\\", null);
 
   class Factory {
     public static PsiElement createElement(ASTNode node) {
-      SyntaxElementType type = node.getElementType();
+      IElementType type = node.getElementType();
       if (type == A_STATEMENT) {
         return new XAStatementImpl(node);
       }

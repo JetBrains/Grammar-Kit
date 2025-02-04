@@ -2,25 +2,25 @@
 // This is a generated file. Not intended for manual editing.
 package generated;
 
-import com.intellij.platform.syntax.SyntaxElementType;
+import com.intellij.psi.tree.IElementType;
 import com.intellij.psi.PsiElement;
 import com.intellij.lang.ASTNode;
 import generated.psi.impl.*;
 
 public interface GeneratedTypes {
 
-  SyntaxElementType ITEM = new SyntaxElementType("ITEM");
-  SyntaxElementType LIST = new SyntaxElementType("LIST");
+  IElementType ITEM = new IElementType("ITEM", null);
+  IElementType LIST = new IElementType("LIST", null);
 
-  SyntaxElementType COMMA = new SyntaxElementType(",");
-  SyntaxElementType NUMBER = new SyntaxElementType("number");
-  SyntaxElementType PAREN1 = new SyntaxElementType("(");
-  SyntaxElementType PAREN2 = new SyntaxElementType(")");
-  SyntaxElementType SEMI = new SyntaxElementType(";");
+  IElementType COMMA = new IElementType(",", null);
+  IElementType NUMBER = new IElementType("number", null);
+  IElementType PAREN1 = new IElementType("(", null);
+  IElementType PAREN2 = new IElementType(")", null);
+  IElementType SEMI = new IElementType(";", null);
 
   class Factory {
     public static PsiElement createElement(ASTNode node) {
-      SyntaxElementType type = node.getElementType();
+      IElementType type = node.getElementType();
       if (type == ITEM) {
         return new ItemImpl(node);
       }

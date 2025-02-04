@@ -2,7 +2,7 @@
 //header.txt
 package test;
 
-import com.intellij.platform.syntax.SyntaxElementType;
+import com.intellij.psi.tree.IElementType;
 import com.intellij.psi.PsiElement;
 import com.intellij.lang.ASTNode;
 import test.stub.FooParserDefinition;
@@ -10,12 +10,12 @@ import test.psi.impl.*;
 
 public interface FooTypes {
 
-  SyntaxElementType ELEMENT_1 = FooParserDefinition.createType("ELEMENT_1");
+  IElementType ELEMENT_1 = FooParserDefinition.createType("ELEMENT_1");
 
 
   class Factory {
     public static PsiElement createElement(ASTNode node) {
-      SyntaxElementType type = node.getElementType();
+      IElementType type = node.getElementType();
       if (type == ELEMENT_1) {
         return new Element1Impl(node);
       }

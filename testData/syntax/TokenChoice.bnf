@@ -1,0 +1,30 @@
+{
+  parserClass = 'generated.TokenChoice'
+  generate = [
+    psi = 'no'
+    psi-factory = 'no'
+    tokens = 'yes'
+    token-sets = 'yes'
+  ]
+}
+
+root ::=
+
+three_tokens_choice ::= A | B | C
+three_tokens_in_another_order ::= B | A | C
+another_three_tokens ::= D | A | B
+repeating_tokens_choice ::= D | C | A | B | B | A | C
+private private_choice ::= P2 | P3 | P0 | P1
+parenthesized_choice ::= (A | B | C)
+fast_choice ::= A | B | F { consumeTokenMethod = 'fast' }
+smart_choice ::= A | B | S { consumeTokenMethod = 'smart' }
+
+four_tokens_choice ::= A | B | C | D
+five_tokens_choice ::= A | B | C | D | E
+ten_tokens_choice ::=  A | B | C | D | E | F | G | H | I | J
+
+;{
+  parserClass = 'generated.TokenChoice2'
+}
+
+some ::=

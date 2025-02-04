@@ -1,0 +1,76 @@
+{
+  classHeader="//header.txt"
+  parserClass="PsiGen"
+  psiClassPrefix="X"
+  implements="XComposite"
+  parserUtilClass="PsiGenUtil"
+  extends(".*expr")=expr
+  extends("root_.")="root"
+  tokens=[OP_MUL="*" OP_DIV="/" SLASH='\' id='regexp:A' number='regexp:B' notspace='regexp:[^{}-]*']
+  elementTypeClass("root_.*")="sample.MyRootType"
+  elementTypeFactory(".*_expr")="sample.MyTypeFactory.createExprType"
+
+  methods("expr")=[missing]
+}
+grammar_root ::= root
+root ::= root_a | root_b | root_c | root_d
+external root_a ::= parseGrammar grammar_element
+root_b ::= <<parseGrammar grammar_element>>
+root_c ::= <<blockOf grammar_element>>
+root_d ::= <<listOf grammar_element>>
+
+private meta listOf ::= <<p>> +
+grammar_element ::= expr | external_type3
+expr ::= a_expr (',' a_expr) * {methods=[kids="expr"]}
+private a_expr ::= b_expr plus_expr *
+left plus_expr ::= '+' expr {extends="expr"}
+private b_expr ::= id_expr mul_expr *
+left mul_expr ::= '*' expr {extends="expr"}
+private id_expr ::= specialRef | reference | literal | external_type | external_type2
+external_type ::= number {elementType="missing_external_type" extends="expr"}
+external_type2 ::= id {elementType="id_expr" extends="expr"}
+external_same_as_type2 ::= id {elementType="id_expr" extends="expr"}
+external_type3 ::= id {elementType="expr"} // do not generate anything
+include-section ::= id number include-section <include (section) alt> {recoverWhile=<include-section-recover?>}
+<include (section) alt> ::= id number {recoverWhile=<include-section-recover?>}
+private <include-section-recover?> ::= !()
+fake other_expr ::= expr +
+
+;{
+  parserClass="PsiGen2"
+}
+
+meta blockOf ::= <<p>> +
+private reference ::= ref_expr qref_expr *
+ref_expr ::= identifier  {extends="expr" mixin="MyRefImpl" implements="MyRef"}
+left qref_expr ::= '.' identifier {extends="ref_expr" elementType="ref_expr"}
+identifier ::= id
+
+literal ::= number {extends="expr"}
+specialRef ::= identifier OF reference {extends="qref_expr"} // test this kind of 'casting'
+
+some_expr ::= (a_expr | specialRef b_expr | some_expr_private) (cast_expr) (item_expr) *
+private some_expr_private ::= specialRef b_expr
+left cast_expr ::= '::' id
+left item_expr ::= '[' number ']'
+
+;{
+  parserClass="PsiGenFixes"
+  extends(".*statement")=statement
+}
+
+LeftShadowTest ::= identifier LeftShadow *
+left LeftShadow ::= ',' identifier
+
+private fixMetaRule ::= <<blockOf identifier>>
+publicMethodToCall ::= identifier {elementType=""}
+
+fake namedElement ::= identifier publicMethodToCall (id (',' id) *) {implements="com.intellij.psi.PsiNameIdentifierOwner"}
+fake wrapping_statement ::= statement
+
+choice_joined ::= literal id '%' | '%' id literal {extends=literal}
+
+statement ::= &<<external>> (a_statement | b_statement) | !<<external>> (c_statement)
+a_statement ::= id | number
+b_statement ::= id | number
+c_statement ::= id | number

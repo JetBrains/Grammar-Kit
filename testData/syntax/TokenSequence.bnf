@@ -1,0 +1,7 @@
+foo ::=
+   a 
+  | b c d
+  | c d e
+  | bar d e f {pin(".*")=2}
+  
+bar ::= a

@@ -1,28 +1,37 @@
 package org.intellij.grammar.syntax;
 
 import com.intellij.openapi.util.Key;
+import com.intellij.psi.PsiFile;
 import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.generator.IAttributePostProcessor;
+import org.intellij.grammar.psi.BnfFile;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
 
-import static org.intellij.grammar.KnownAttribute.ELEMENT_TYPE_CLASS;
-import static org.intellij.grammar.KnownAttribute.GENERATE;
+import static org.intellij.grammar.KnownAttribute.*;
 
-class SyntaxBnfAttributePostProcessor implements IAttributePostProcessor {
+public class SyntaxBnfAttributePostProcessor implements IAttributePostProcessor {
 
   public static final Key<Boolean> GENERATE_WITH_SYNTAX = Key.create("GENERATE_WITH_SYNTAX");
 
   private static final Map<String, String> myAttributesValuesSubstitution = Map.of(
-    ELEMENT_TYPE_CLASS.getName(), SyntaxConstants.SYNTAX_ELEMENT_TYPE
+    TOKEN_TYPE_CLASS.getName(),SyntaxConstants.SYNTAX_ELEMENT_TYPE,
+    ELEMENT_TYPE_CLASS.getName(), SyntaxConstants.SYNTAX_ELEMENT_TYPE,
+    PARSER_UTIL_CLASS.getName(), SyntaxConstants.GPUB_CLASS
   );
+
+  public static PsiFile prepareForGeneration(BnfFile file) {
+    file.putUserData(GENERATE_WITH_SYNTAX, true);
+    file.putUserData(ATTRIBUTE_POSTPROCESSOR, new SyntaxBnfAttributePostProcessor());
+    return file;
+  }
 
 
   @Override
   public <T> @Nullable T postProcessValue(@NotNull KnownAttribute<T> knownAttribute, @Nullable T value) {
-    return IAttributePostProcessor.super.postProcessValue(knownAttribute, value);
+    return findAttributeValue(value, knownAttribute);
   }
 
 
@@ -35,22 +44,12 @@ class SyntaxBnfAttributePostProcessor implements IAttributePostProcessor {
 
     if (myAttributesValuesSubstitution.containsKey(knownAttribute.getName())) {
       if (!knownAttribute.getDefaultValue().equals(value)) {
-        return adjustedValue(value);
+        return value;
       }
       else {
         return (T)myAttributesValuesSubstitution.get(knownAttribute.getName());
       }
     }
-
-    //If a generated element name has been requested, return value adjusted accordingly
-    if (myDefaultGeneratedNames.containsKey(knownAttribute.getName())) {
-      return adjustedValue(value);
-    }
-
-//    If a factory attribute is requested, return null to force generation of non-factory methods
-//    if (mySuppressedFactories.contains(knownAttribute.getName())) {
-//      return null;
-//    }
 
     return value;
   }

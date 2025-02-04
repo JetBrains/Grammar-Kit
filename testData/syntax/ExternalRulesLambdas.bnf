@@ -1,0 +1,92 @@
+{
+  parserClass="ExternalRulesLambdas"
+  generate=[
+    psi='no'
+    java='8'
+  ]
+  tokens=[
+    perc='%'
+    perc_re='regexp:\%'
+  ]
+}
+
+// external parsing
+root ::= <<listOf statement>>
+external unique_list_of ::= uniqueListOf
+external unique_list_of_params ::= uniqueListOf <<p1>> "1+1" <<p2>> '1+1'
+external empty_external ::=
+
+one ::= 'one'
+two ::= 'two'
+statement ::= one | two
+
+private perc_list ::= <<listOf '%'>>
+private perc_re_list1 ::= <<listOf perc_re>>
+private perc_re_list2 ::= <<listOf (perc_re)>>
+
+private param_seq ::= '{' <<uniqueListOf "1+1" '1+1' one two 10 some>> '}'
+private param_choice ::= '{' <<uniqueListOf (one | two | 10 | some)>> '}'
+private param_opt ::= '{' <<uniqueListOf [one | two | 10 | some]>> '}'
+private param_choice_alt ::= '{' <<uniqueListOf {one | two | 10 | some}>> '}'
+private param_seq_alt ::= '{' <<uniqueListOf {one | two} [10 | some]>> '}'
+private param_seq_alt_ext ::= '{' <<unique_list_of one two>> '}'
+private param_seq_alt_params_ext ::= '{' <<unique_list_of_params one !two>> '}'
+
+// meta rules
+meta comma_list ::= <<param>> (',' <<param>>) *
+meta comma_list_pinned ::= <<head>> <<param>> (<<comma_list_tail <<param>>>>) *
+meta comma_list_tail ::= ',' <<param>> {pin=1}
+meta list_of_lists ::= <<head>> <<comma_list <<param>>>> (<<comma_list_tail <<comma_list <<param>>>>>>) *
+meta meta_multi_level ::= <<comma_list <<comma_list <<comma_list <<comma_list <<comma_list <<param>>>>>>>>>>>>
+meta meta_multi_level_pinned ::= <<comma_list <<comma_list_pinned <<head>> <<comma_list <<comma_list <<comma_list <<param>>>>>>>>>>>>
+meta meta_multi_level_pinned_paren ::= <<comma_list <<comma_list_pinned <<head>> (<<comma_list <<comma_list <<comma_list <<param>>>>>>>>)>>>>
+meta meta_with_in_place ::= <<comma_list (<<param>> | some)>>
+
+private meta_simple ::= <<comma_list one>>
+private meta_seq ::= <<comma_list_pinned one (one | two)>>
+private meta_seq_of_lists ::= <<list_of_lists one (one | two)>>
+private multi_level ::= <<meta_multi_level one>>
+private meta_seq_of_lists_opt ::= (<<list_of_lists one (one | two)>>)?
+private meta_multi_level_no_closure ::= <<comma_list <<comma_list <<comma_list some>>>>>>
+
+// mixed
+private meta meta_mixed ::= <<listOf "1+2" '1+2' <<param>>>>
+private meta_mixed_simple ::= <<meta_mixed statement>>
+private meta_mixed_list ::= <<meta_mixed <<comma_list one>>>>
+private meta_mixed_list_paren ::= <<meta_mixed (<<comma_list one>>)>>
+
+private meta recoverable_item ::= <<param>> {recoverWhile="item_recover"}
+private item_recover ::= !(',' | ';' | ')')
+
+private meta recoverable_item2 ::= <<param>> {recoverWhile="<<recover_arg>>"}
+private meta recoverable_item3 ::= <<recover_arg>> <<param>> {pin=1 recoverWhile="<<recover_arg>>"}
+
+// use _COLLAPSE_ flag due unknown external rule
+collapse_one ::= <<uniqueListOf one>>
+collapse_two ::= {extends=collapse_one}
+
+private empty_external_usage ::= empty_external
+private empty_external_usage2 ::= <<>>
+
+meta two_params_meta ::= <<a>> <<b>>
+private meta nested_meta ::= <<two_params_meta <<nested1>> <<two_params_meta <<nested2>> <<nested3>>>>>>
+private meta nested_mixed ::= <<two_params_meta (<<two_params_meta '%' <<c>>>>) perc_re>>
+
+private meta main_class_meta ::= <<p>>
+private second_class_meta_usage_from_main ::= <<comma_list <<second_class_meta some>>>>
+
+;{
+  parserClass="ExternalRulesLambdas2"
+}
+private one_list ::= <<listOf one>>
+private one_list_par ::= <<listOf (one)>>
+
+private meta second_class_meta ::= <<bmp>>
+private main_class_meta_usage_from_second ::= <<comma_list <<main_class_meta some>>>>
+private third_class_meta_usage_from_second ::= <<comma_list <<third_class_meta some>>>>
+
+;{
+  parserClass="ExternalRulesLambdas3"
+}
+private meta third_class_meta ::= <<fmp>>
+private second_class_meta_usage_from_third ::= <<comma_list <<second_class_meta some>>>>

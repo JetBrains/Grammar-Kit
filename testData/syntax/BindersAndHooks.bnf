@@ -1,0 +1,19 @@
+{
+  parserClass="BindersAndHooks"
+  parserUtilClass="org.intellij.grammar.parser.GeneratedParserUtilBase"
+  parserImports=[
+    "static com.intellij.lang.WhitespacesBinders.*"
+    "static com.sample.MyHooks.*" ]
+}
+
+root ::= left_binder right_binder both_binders
+
+// standard hooks for left, right and both binders
+left_binder ::= A B { hooks=[leftBinder="GREEDY_LEFT_BINDER"] }
+right_binder ::= item { hooks=[rightBinder="GREEDY_RIGHT_BINDER"] }
+both_binders ::= A item B { hooks=[wsBinders="GREEDY_LEFT_BINDER, GREEDY_RIGHT_BINDER"] pin=1 }
+
+private item ::=
+
+// user hook from <code>MyHooks</code> class
+got_hook ::= A { hooks=[myHook='"my", "hook", "param", "array"'] }

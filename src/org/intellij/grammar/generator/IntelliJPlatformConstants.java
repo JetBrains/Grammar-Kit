@@ -11,11 +11,33 @@ import org.intellij.grammar.syntax.SyntaxConstants;
 public class IntelliJPlatformConstants {
   public final String PsiBuilderClass;
   public final String IElementTypeClass;
+  public final String ElementTypeBaseClass;
   public final String PsiElementClass;
   public final String AstNodeClass;
   public final String PsiParserClass;
   public final String LightPsiParserClass;
   public final String TokenSetClass;
+  public final String ParserNodeSetClass;
+
+  private IntelliJPlatformConstants(String builder,
+                                    String iElementTypeClass,
+                                    String elementTypeBaseClass,
+                                    String psiElementClass,
+                                    String astNodeClass,
+                                    String psiParserClass,
+                                    String lightPsiParserClass,
+                                    String tokenSetClass,
+                                    String parserNodeSetClass) {
+    PsiBuilderClass = builder;
+    IElementTypeClass = iElementTypeClass;
+    ElementTypeBaseClass = elementTypeBaseClass;
+    PsiElementClass = psiElementClass;
+    AstNodeClass = astNodeClass;
+    PsiParserClass = psiParserClass;
+    LightPsiParserClass = lightPsiParserClass;
+    TokenSetClass = tokenSetClass;
+    ParserNodeSetClass = parserNodeSetClass;
+  }
 
   private IntelliJPlatformConstants(String builder,
                                     String iElementTypeClass,
@@ -26,11 +48,13 @@ public class IntelliJPlatformConstants {
                                     String tokenSetClass) {
     PsiBuilderClass = builder;
     IElementTypeClass = iElementTypeClass;
+    ElementTypeBaseClass = iElementTypeClass;
     PsiElementClass = psiElementClass;
     AstNodeClass = astNodeClass;
     PsiParserClass = psiParserClass;
     LightPsiParserClass = lightPsiParserClass;
     TokenSetClass = tokenSetClass;
+    ParserNodeSetClass = tokenSetClass;
   }
 
   public static final IntelliJPlatformConstants IdeaConstantSet =
@@ -45,10 +69,12 @@ public class IntelliJPlatformConstants {
   public static final IntelliJPlatformConstants SyntaxConstantSet =
     new IntelliJPlatformConstants(SyntaxConstants.SYNTAX_BUILDER_CLASS,
                                   SyntaxConstants.SYNTAX_ELEMENT_TYPE,
+                                  BnfConstants.IELEMENTTYPE_CLASS,
                                   BnfConstants.PSI_ELEMENT_CLASS,
                                   BnfConstants.AST_NODE_CLASS,
                                   BnfConstants.PSI_PARSER_CLASS,
                                   BnfConstants.LIGHT_PSI_PARSER_CLASS,
+                                  BnfConstants.TOKEN_SET_CLASS,
                                   SyntaxConstants.TOKEN_SET_CLASS);
 
   public static IntelliJPlatformConstants getConstantSetForBnf(BnfFile file) {

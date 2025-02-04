@@ -2,18 +2,18 @@
 // This is a generated file. Not intended for manual editing.
 package generated;
 
-import com.intellij.platform.syntax.SyntaxElementType;
+import com.intellij.psi.tree.IElementType;
 
 public interface GeneratedTypes {
 
-  SyntaxElementType INNER_CHOICE = new SyntaxElementType("INNER_CHOICE");
-  SyntaxElementType INNER_PARENTHESIZED_CHOICE = new SyntaxElementType("INNER_PARENTHESIZED_CHOICE");
-  SyntaxElementType TEXT_TOKEN_CHOICE = new SyntaxElementType("TEXT_TOKEN_CHOICE");
-  SyntaxElementType TWO_TOKENS_CHOICE = new SyntaxElementType("TWO_TOKENS_CHOICE");
-  SyntaxElementType TWO_TOKENS_REPEATING_CHOICE = new SyntaxElementType("TWO_TOKENS_REPEATING_CHOICE");
+  IElementType INNER_CHOICE = new IElementType("INNER_CHOICE", null);
+  IElementType INNER_PARENTHESIZED_CHOICE = new IElementType("INNER_PARENTHESIZED_CHOICE", null);
+  IElementType TEXT_TOKEN_CHOICE = new IElementType("TEXT_TOKEN_CHOICE", null);
+  IElementType TWO_TOKENS_CHOICE = new IElementType("TWO_TOKENS_CHOICE", null);
+  IElementType TWO_TOKENS_REPEATING_CHOICE = new IElementType("TWO_TOKENS_REPEATING_CHOICE", null);
 
-  SyntaxElementType A = new SyntaxElementType("A");
-  SyntaxElementType B = new SyntaxElementType("B");
-  SyntaxElementType C = new SyntaxElementType("C");
-  SyntaxElementType D = new SyntaxElementType("D");
+  IElementType A = new IElementType("A", null);
+  IElementType B = new IElementType("B", null);
+  IElementType C = new IElementType("C", null);
+  IElementType D = new IElementType("D", null);
 }

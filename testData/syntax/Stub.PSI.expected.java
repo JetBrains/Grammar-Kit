@@ -2,7 +2,7 @@
 //header.txt
 package test;
 
-import com.intellij.platform.syntax.SyntaxElementType;
+import com.intellij.psi.tree.IElementType;
 import com.intellij.psi.PsiElement;
 import com.intellij.lang.ASTNode;
 import test.stub.FooParserDefinition;
@@ -10,19 +10,19 @@ import test.psi.impl.*;
 
 public interface FooTypes {
 
-  SyntaxElementType ELEMENT_1 = FooParserDefinition.createType("ELEMENT_1");
-  SyntaxElementType ELEMENT_2 = FooParserDefinition.createType("ELEMENT_2");
-  SyntaxElementType ELEMENT_3 = FooParserDefinition.createType("ELEMENT_3");
-  SyntaxElementType ELEMENT_4 = FooParserDefinition.createType("ELEMENT_4");
-  SyntaxElementType ELEMENT_5 = FooParserDefinition.createType("ELEMENT_5");
-  SyntaxElementType INTERFACE_TYPE = FooParserDefinition.createType("INTERFACE_TYPE");
-  SyntaxElementType STRUCT_TYPE = FooParserDefinition.createType("STRUCT_TYPE");
-  SyntaxElementType TYPE = FooParserDefinition.createType("TYPE");
+  IElementType ELEMENT_1 = FooParserDefinition.createType("ELEMENT_1");
+  IElementType ELEMENT_2 = FooParserDefinition.createType("ELEMENT_2");
+  IElementType ELEMENT_3 = FooParserDefinition.createType("ELEMENT_3");
+  IElementType ELEMENT_4 = FooParserDefinition.createType("ELEMENT_4");
+  IElementType ELEMENT_5 = FooParserDefinition.createType("ELEMENT_5");
+  IElementType INTERFACE_TYPE = FooParserDefinition.createType("INTERFACE_TYPE");
+  IElementType STRUCT_TYPE = FooParserDefinition.createType("STRUCT_TYPE");
+  IElementType TYPE = FooParserDefinition.createType("TYPE");
 
 
   class Factory {
     public static PsiElement createElement(ASTNode node) {
-      SyntaxElementType type = node.getElementType();
+      IElementType type = node.getElementType();
       if (type == ELEMENT_1) {
         return new Element1Impl(node);
       }
@@ -199,7 +199,7 @@ import org.intellij.grammar.test.StubTest.GenericBase;
 import test.stub.Element1Stub;
 import test.psi.*;
 import com.intellij.psi.stubs.IStubElementType;
-import com.intellij.platform.syntax.SyntaxElementType;
+import com.intellij.psi.tree.IElementType;
 
 public class Element1Impl extends GenericBase<Element1Stub> implements Element1 {
 
@@ -211,7 +211,7 @@ public class Element1Impl extends GenericBase<Element1Stub> implements Element1 
     super(node);
   }
 
-  public Element1Impl(Element1Stub stub, SyntaxElementType type, ASTNode node) {
+  public Element1Impl(Element1Stub stub, IElementType type, ASTNode node) {
     super(stub, type, node);
   }
 
@@ -247,7 +247,7 @@ import com.intellij.extapi.psi.StubBasedPsiElementBase;
 import test.stub.Element2Stub;
 import test.psi.*;
 import com.intellij.psi.stubs.IStubElementType;
-import com.intellij.platform.syntax.SyntaxElementType;
+import com.intellij.psi.tree.IElementType;
 
 public class Element2Impl extends StubBasedPsiElementBase<Element2Stub> implements Element2 {
 
@@ -259,7 +259,7 @@ public class Element2Impl extends StubBasedPsiElementBase<Element2Stub> implemen
     super(node);
   }
 
-  public Element2Impl(Element2Stub stub, SyntaxElementType type, ASTNode node) {
+  public Element2Impl(Element2Stub stub, IElementType type, ASTNode node) {
     super(stub, type, node);
   }
 
@@ -295,7 +295,7 @@ import com.intellij.extapi.psi.StubBasedPsiElementBase;
 import test.stub.Element3Stub;
 import test.psi.*;
 import com.intellij.psi.stubs.IStubElementType;
-import com.intellij.platform.syntax.SyntaxElementType;
+import com.intellij.psi.tree.IElementType;
 
 public class Element3Impl extends StubBasedPsiElementBase<Element3Stub> implements Element3 {
 
@@ -307,7 +307,7 @@ public class Element3Impl extends StubBasedPsiElementBase<Element3Stub> implemen
     super(node);
   }
 
-  public Element3Impl(Element3Stub stub, SyntaxElementType type, ASTNode node) {
+  public Element3Impl(Element3Stub stub, IElementType type, ASTNode node) {
     super(stub, type, node);
   }
 
@@ -343,7 +343,7 @@ import com.intellij.extapi.psi.StubBasedPsiElementBase;
 import test.stub.Element4Stub;
 import test.psi.*;
 import com.intellij.psi.stubs.IStubElementType;
-import com.intellij.platform.syntax.SyntaxElementType;
+import com.intellij.psi.tree.IElementType;
 
 public class Element4Impl extends StubBasedPsiElementBase<Element4Stub> implements Element4 {
 
@@ -355,7 +355,7 @@ public class Element4Impl extends StubBasedPsiElementBase<Element4Stub> implemen
     super(node);
   }
 
-  public Element4Impl(Element4Stub stub, SyntaxElementType type, ASTNode node) {
+  public Element4Impl(Element4Stub stub, IElementType type, ASTNode node) {
     super(stub, type, node);
   }
 
@@ -420,7 +420,7 @@ import test.psi.MyPsiTreeUtil;
 import static test.FooTypes.*;
 import test.psi.*;
 import com.intellij.psi.stubs.IStubElementType;
-import com.intellij.platform.syntax.SyntaxElementType;
+import com.intellij.psi.tree.IElementType;
 import test.stub.TypeStub;
 
 public class InterfaceTypeImpl extends TypeImpl implements InterfaceType {
@@ -433,7 +433,7 @@ public class InterfaceTypeImpl extends TypeImpl implements InterfaceType {
     super(node);
   }
 
-  public InterfaceTypeImpl(TypeStub stub, SyntaxElementType type, ASTNode node) {
+  public InterfaceTypeImpl(TypeStub stub, IElementType type, ASTNode node) {
     super(stub, type, node);
   }
 
@@ -536,7 +536,7 @@ import test.psi.MyPsiTreeUtil;
 import static test.FooTypes.*;
 import test.psi.*;
 import com.intellij.psi.stubs.IStubElementType;
-import com.intellij.platform.syntax.SyntaxElementType;
+import com.intellij.psi.tree.IElementType;
 import test.stub.TypeStub;
 
 public class StructTypeImpl extends TypeImpl implements StructType {
@@ -549,7 +549,7 @@ public class StructTypeImpl extends TypeImpl implements StructType {
     super(node);
   }
 
-  public StructTypeImpl(TypeStub stub, SyntaxElementType type, ASTNode node) {
+  public StructTypeImpl(TypeStub stub, IElementType type, ASTNode node) {
     super(stub, type, node);
   }
 
@@ -580,7 +580,7 @@ import org.intellij.grammar.test.StubTest.GenericBase;
 import test.stub.TypeStub;
 import test.psi.*;
 import com.intellij.psi.stubs.IStubElementType;
-import com.intellij.platform.syntax.SyntaxElementType;
+import com.intellij.psi.tree.IElementType;
 
 public abstract class TypeImpl extends GenericBase<TypeStub> implements Type {
 
@@ -592,7 +592,7 @@ public abstract class TypeImpl extends GenericBase<TypeStub> implements Type {
     super(node);
   }
 
-  public TypeImpl(TypeStub stub, SyntaxElementType type, ASTNode node) {
+  public TypeImpl(TypeStub stub, IElementType type, ASTNode node) {
     super(stub, type, node);
   }
 

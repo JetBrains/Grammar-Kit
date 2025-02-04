@@ -5,32 +5,32 @@ package generated;
 
 public interface GeneratedTypes {
 
-  com.intellij.platform.syntax.SyntaxElementType CREATE_STATEMENT = new com.intellij.platform.syntax.SyntaxElementType("CREATE_STATEMENT");
-  com.intellij.platform.syntax.SyntaxElementType CREATE_TABLE_STATEMENT = new com.intellij.platform.syntax.SyntaxElementType("CREATE_TABLE_STATEMENT");
-  com.intellij.platform.syntax.SyntaxElementType DROP_STATEMENT = new com.intellij.platform.syntax.SyntaxElementType("DROP_STATEMENT");
-  com.intellij.platform.syntax.SyntaxElementType DROP_TABLE_STATEMENT = new com.intellij.platform.syntax.SyntaxElementType("DROP_TABLE_STATEMENT");
-  com.intellij.platform.syntax.SyntaxElementType STATEMENT = new com.intellij.platform.syntax.SyntaxElementType("STATEMENT");
-  com.intellij.platform.syntax.SyntaxElementType TABLE_REF = new com.intellij.platform.syntax.SyntaxElementType("TABLE_REF");
+  com.intellij.psi.tree.IElementType CREATE_STATEMENT = new com.intellij.psi.tree.IElementType("CREATE_STATEMENT", null);
+  com.intellij.psi.tree.IElementType CREATE_TABLE_STATEMENT = new com.intellij.psi.tree.IElementType("CREATE_TABLE_STATEMENT", null);
+  com.intellij.psi.tree.IElementType DROP_STATEMENT = new com.intellij.psi.tree.IElementType("DROP_STATEMENT", null);
+  com.intellij.psi.tree.IElementType DROP_TABLE_STATEMENT = new com.intellij.psi.tree.IElementType("DROP_TABLE_STATEMENT", null);
+  com.intellij.psi.tree.IElementType STATEMENT = new com.intellij.psi.tree.IElementType("STATEMENT", null);
+  com.intellij.psi.tree.IElementType TABLE_REF = new com.intellij.psi.tree.IElementType("TABLE_REF", null);
 
-  com.intellij.platform.syntax.SyntaxElementType create = new com.intellij.platform.syntax.SyntaxElementType("CREATE");
-  com.intellij.platform.syntax.SyntaxElementType drop = new com.intellij.platform.syntax.SyntaxElementType("DROP");
-  com.intellij.platform.syntax.SyntaxElementType global = new com.intellij.platform.syntax.SyntaxElementType("GLOBAL");
-  com.intellij.platform.syntax.SyntaxElementType id = new com.intellij.platform.syntax.SyntaxElementType("id");
-  com.intellij.platform.syntax.SyntaxElementType local = new com.intellij.platform.syntax.SyntaxElementType("LOCAL");
-  com.intellij.platform.syntax.SyntaxElementType table = new com.intellij.platform.syntax.SyntaxElementType("TABLE");
-  com.intellij.platform.syntax.SyntaxElementType temp = new com.intellij.platform.syntax.SyntaxElementType("TEMP");
+  com.intellij.psi.tree.IElementType create = new com.intellij.psi.tree.IElementType("CREATE", null);
+  com.intellij.psi.tree.IElementType drop = new com.intellij.psi.tree.IElementType("DROP", null);
+  com.intellij.psi.tree.IElementType global = new com.intellij.psi.tree.IElementType("GLOBAL", null);
+  com.intellij.psi.tree.IElementType id = new com.intellij.psi.tree.IElementType("id", null);
+  com.intellij.psi.tree.IElementType local = new com.intellij.psi.tree.IElementType("LOCAL", null);
+  com.intellij.psi.tree.IElementType table = new com.intellij.psi.tree.IElementType("TABLE", null);
+  com.intellij.psi.tree.IElementType temp = new com.intellij.psi.tree.IElementType("TEMP", null);
 
   class Classes {
 
-    public static java.lang.Class<?> findClass(com.intellij.platform.syntax.SyntaxElementType elementType) {
+    public static java.lang.Class<?> findClass(com.intellij.psi.tree.IElementType elementType) {
       return ourMap.get(elementType);
     }
 
-    public static java.util.Set<com.intellij.platform.syntax.SyntaxElementType> elementTypes() {
+    public static java.util.Set<com.intellij.psi.tree.IElementType> elementTypes() {
       return java.util.Collections.unmodifiableSet(ourMap.keySet());
     }
 
-    private static final java.util.LinkedHashMap<com.intellij.platform.syntax.SyntaxElementType, java.lang.Class<?>> ourMap = new java.util.LinkedHashMap<com.intellij.platform.syntax.SyntaxElementType, java.lang.Class<?>>();
+    private static final java.util.LinkedHashMap<com.intellij.psi.tree.IElementType, java.lang.Class<?>> ourMap = new java.util.LinkedHashMap<com.intellij.psi.tree.IElementType, java.lang.Class<?>>();
 
     static {
       ourMap.put(CREATE_TABLE_STATEMENT, CreateTableStatementImpl.class);
@@ -41,7 +41,7 @@ public interface GeneratedTypes {
 
   class Factory {
     public static com.intellij.psi.PsiElement createElement(com.intellij.lang.ASTNode node) {
-      com.intellij.platform.syntax.SyntaxElementType type = node.getElementType();
+      com.intellij.psi.tree.IElementType type = node.getElementType();
       if (type == CREATE_TABLE_STATEMENT) {
         return new generated.psi.impl.CreateTableStatementImpl(node);
       }

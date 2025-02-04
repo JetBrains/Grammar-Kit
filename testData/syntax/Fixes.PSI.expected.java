@@ -2,36 +2,36 @@
 // This is a generated file. Not intended for manual editing.
 package generated;
 
-import com.intellij.platform.syntax.SyntaxElementType;
+import com.intellij.psi.tree.IElementType;
 import com.intellij.psi.PsiElement;
 import com.intellij.lang.ASTNode;
 import generated.psi.impl.*;
 
 public interface GeneratedTypes {
 
-  SyntaxElementType A_EXPR = new SyntaxElementType("A_EXPR");
-  SyntaxElementType B_EXPR = new SyntaxElementType("B_EXPR");
-  SyntaxElementType ERL_LIST = new SyntaxElementType("ERL_LIST");
-  SyntaxElementType EXPR = new SyntaxElementType("EXPR");
-  SyntaxElementType FOO__ﾉ__Ω__ﾉ_ﾐ_____INNER = new SyntaxElementType("FOO__ﾉ__Ω__ﾉ_ﾐ_____INNER");
-  SyntaxElementType IMPORT = new SyntaxElementType("IMPORT");
-  SyntaxElementType LEFT_EXPR = new SyntaxElementType("LEFT_EXPR");
-  SyntaxElementType NOT_OPTIMIZED_CHOICE = new SyntaxElementType("NOT_OPTIMIZED_CHOICE");
-  SyntaxElementType RECURSIVE_EXTEND_A = new SyntaxElementType("RECURSIVE_EXTEND_A");
-  SyntaxElementType RECURSIVE_EXTEND_B = new SyntaxElementType("RECURSIVE_EXTEND_B");
-  SyntaxElementType SOME = new SyntaxElementType("SOME");
-  SyntaxElementType SOME_EXPR = new SyntaxElementType("SOME_EXPR");
-  SyntaxElementType SOME_SEQ = new SyntaxElementType("SOME_SEQ");
-  SyntaxElementType THING_ITEM = new SyntaxElementType("THING_ITEM");
-  SyntaxElementType TWO_USAGES_LEFT = new SyntaxElementType("TWO_USAGES_LEFT");
-  SyntaxElementType WITH_RECURSIVE = new SyntaxElementType("WITH_RECURSIVE");
-  SyntaxElementType ZOME = new SyntaxElementType("ZOME");
+  IElementType A_EXPR = new IElementType("A_EXPR", null);
+  IElementType B_EXPR = new IElementType("B_EXPR", null);
+  IElementType ERL_LIST = new IElementType("ERL_LIST", null);
+  IElementType EXPR = new IElementType("EXPR", null);
+  IElementType FOO__ﾉ__Ω__ﾉ_ﾐ_____INNER = new IElementType("FOO__ﾉ__Ω__ﾉ_ﾐ_____INNER", null);
+  IElementType IMPORT = new IElementType("IMPORT", null);
+  IElementType LEFT_EXPR = new IElementType("LEFT_EXPR", null);
+  IElementType NOT_OPTIMIZED_CHOICE = new IElementType("NOT_OPTIMIZED_CHOICE", null);
+  IElementType RECURSIVE_EXTEND_A = new IElementType("RECURSIVE_EXTEND_A", null);
+  IElementType RECURSIVE_EXTEND_B = new IElementType("RECURSIVE_EXTEND_B", null);
+  IElementType SOME = new IElementType("SOME", null);
+  IElementType SOME_EXPR = new IElementType("SOME_EXPR", null);
+  IElementType SOME_SEQ = new IElementType("SOME_SEQ", null);
+  IElementType THING_ITEM = new IElementType("THING_ITEM", null);
+  IElementType TWO_USAGES_LEFT = new IElementType("TWO_USAGES_LEFT", null);
+  IElementType WITH_RECURSIVE = new IElementType("WITH_RECURSIVE", null);
+  IElementType ZOME = new IElementType("ZOME", null);
 
-  SyntaxElementType A = new SyntaxElementType("A");
-  SyntaxElementType B = new SyntaxElementType("B");
-  SyntaxElementType TOKEN_ONE = new SyntaxElementType("token-one");
-  SyntaxElementType TOKEN_THREE = new SyntaxElementType("#");
-  SyntaxElementType TOKEN_TWO = new SyntaxElementType("token-two");
+  IElementType A = new IElementType("A", null);
+  IElementType B = new IElementType("B", null);
+  IElementType TOKEN_ONE = new IElementType("token-one", null);
+  IElementType TOKEN_THREE = new IElementType("#", null);
+  IElementType TOKEN_TWO = new IElementType("token-two", null);
 }
 // ---- FooΩInner.java -----------------
 // This is a generated file. Not intended for manual editing.

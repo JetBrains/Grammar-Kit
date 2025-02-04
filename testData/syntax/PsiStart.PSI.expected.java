@@ -2,22 +2,22 @@
 // This is a generated file. Not intended for manual editing.
 package generated;
 
-import com.intellij.platform.syntax.SyntaxElementType;
+import com.intellij.psi.tree.IElementType;
 import com.intellij.psi.PsiElement;
 import com.intellij.lang.ASTNode;
 import generated.psi.impl.*;
 
 public interface GeneratedTypes {
 
-  SyntaxElementType ELEMENT = new SyntaxElementType("ELEMENT");
-  SyntaxElementType ENTRY = new SyntaxElementType("ENTRY");
-  SyntaxElementType LIST = new SyntaxElementType("LIST");
-  SyntaxElementType MAP = new SyntaxElementType("MAP");
+  IElementType ELEMENT = new IElementType("ELEMENT", null);
+  IElementType ENTRY = new IElementType("ENTRY", null);
+  IElementType LIST = new IElementType("LIST", null);
+  IElementType MAP = new IElementType("MAP", null);
 
 
   class Factory {
     public static PsiElement createElement(ASTNode node) {
-      SyntaxElementType type = node.getElementType();
+      IElementType type = node.getElementType();
       if (type == ELEMENT) {
         return new ElementImpl(node);
       }

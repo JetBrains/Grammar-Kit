@@ -2,26 +2,26 @@
 //header.txt
 package generated;
 
-import com.intellij.platform.syntax.SyntaxElementType;
+import com.intellij.psi.tree.IElementType;
 import com.intellij.psi.PsiElement;
 import com.intellij.lang.ASTNode;
 import generated.psi.impl.*;
 
 public interface GeneratedTypes {
 
-  SyntaxElementType BINARY = new SyntaxElementType("BINARY");
-  SyntaxElementType EXPRESSION = new SyntaxElementType("EXPRESSION");
-  SyntaxElementType OPERATOR = new SyntaxElementType("OPERATOR");
-  SyntaxElementType VALUE = new SyntaxElementType("VALUE");
+  IElementType BINARY = new IElementType("BINARY", null);
+  IElementType EXPRESSION = new IElementType("EXPRESSION", null);
+  IElementType OPERATOR = new IElementType("OPERATOR", null);
+  IElementType VALUE = new IElementType("VALUE", null);
 
-  SyntaxElementType ID = new SyntaxElementType("id");
-  SyntaxElementType LOWCASEKWD1 = new SyntaxElementType("lowcasekwd1");
-  SyntaxElementType MY_SOMETHING = new SyntaxElementType("something");
-  SyntaxElementType UPCASEKWD1 = new SyntaxElementType("UPCASEKWD1");
+  IElementType ID = new IElementType("id", null);
+  IElementType LOWCASEKWD1 = new IElementType("lowcasekwd1", null);
+  IElementType MY_SOMETHING = new IElementType("something", null);
+  IElementType UPCASEKWD1 = new IElementType("UPCASEKWD1", null);
 
   class Factory {
     public static PsiElement createElement(ASTNode node) {
-      SyntaxElementType type = node.getElementType();
+      IElementType type = node.getElementType();
       if (type == BINARY) {
         return new XBinaryImpl(node);
       }

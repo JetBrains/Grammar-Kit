@@ -2,7 +2,7 @@
 // license.txt
 package org.intellij.jflex.psi;
 
-import com.intellij.platform.syntax.SyntaxElementType;
+import com.intellij.psi.tree.IElementType;
 import com.intellij.psi.PsiElement;
 import com.intellij.lang.ASTNode;
 import org.intellij.jflex.psi.impl.*;
@@ -10,129 +10,129 @@ import com.intellij.psi.impl.source.tree.CompositePsiElement;
 
 public interface JFlexTypes {
 
-  SyntaxElementType FLEX_CHAR_RANGE = new JFlexCompositeElementType("FLEX_CHAR_RANGE");
-  SyntaxElementType FLEX_CHOICE_EXPRESSION = new JFlexCompositeElementType("FLEX_CHOICE_EXPRESSION");
-  SyntaxElementType FLEX_CLASS_EXPRESSION = new JFlexCompositeElementType("FLEX_CLASS_EXPRESSION");
-  SyntaxElementType FLEX_DECLARATIONS_SECTION = new JFlexCompositeElementType("FLEX_DECLARATIONS_SECTION");
-  SyntaxElementType FLEX_EXPRESSION = new JFlexCompositeElementType("FLEX_EXPRESSION");
-  SyntaxElementType FLEX_JAVA_CODE = new JFlexCompositeElementType("FLEX_JAVA_CODE");
-  SyntaxElementType FLEX_JAVA_NAME = new JFlexCompositeElementType("FLEX_JAVA_NAME");
-  SyntaxElementType FLEX_JAVA_TYPE = new JFlexCompositeElementType("FLEX_JAVA_TYPE");
-  SyntaxElementType FLEX_JAVA_TYPE_PARAMETERS = new JFlexCompositeElementType("FLEX_JAVA_TYPE_PARAMETERS");
-  SyntaxElementType FLEX_LEXICAL_RULES_SECTION = new JFlexCompositeElementType("FLEX_LEXICAL_RULES_SECTION");
-  SyntaxElementType FLEX_LITERAL_EXPRESSION = new JFlexCompositeElementType("FLEX_LITERAL_EXPRESSION");
-  SyntaxElementType FLEX_LOOK_AHEAD = new JFlexCompositeElementType("FLEX_LOOK_AHEAD");
-  SyntaxElementType FLEX_MACRO_DEFINITION = new JFlexCompositeElementType("FLEX_MACRO_DEFINITION");
-  SyntaxElementType FLEX_MACRO_REFERENCE = new JFlexCompositeElementType("FLEX_MACRO_REFERENCE");
-  SyntaxElementType FLEX_MACRO_REF_EXPRESSION = new JFlexCompositeElementType("FLEX_MACRO_REF_EXPRESSION");
-  SyntaxElementType FLEX_NOT_EXPRESSION = new JFlexCompositeElementType("FLEX_NOT_EXPRESSION");
-  SyntaxElementType FLEX_OPTION = new JFlexCompositeElementType("FLEX_OPTION");
-  SyntaxElementType FLEX_PAREN_EXPRESSION = new JFlexCompositeElementType("FLEX_PAREN_EXPRESSION");
-  SyntaxElementType FLEX_PREDEFINED_CLASS_EXPRESSION = new JFlexCompositeElementType("FLEX_PREDEFINED_CLASS_EXPRESSION");
-  SyntaxElementType FLEX_QUANTIFIER_EXPRESSION = new JFlexCompositeElementType("FLEX_QUANTIFIER_EXPRESSION");
-  SyntaxElementType FLEX_RULE = new JFlexCompositeElementType("FLEX_RULE");
-  SyntaxElementType FLEX_SEQUENCE_EXPRESSION = new JFlexCompositeElementType("FLEX_SEQUENCE_EXPRESSION");
-  SyntaxElementType FLEX_STATE_DECLARATION = new JFlexCompositeElementType("FLEX_STATE_DECLARATION");
-  SyntaxElementType FLEX_STATE_DEFINITION = new JFlexCompositeElementType("FLEX_STATE_DEFINITION");
-  SyntaxElementType FLEX_STATE_LIST = new JFlexCompositeElementType("FLEX_STATE_LIST");
-  SyntaxElementType FLEX_STATE_REFERENCE = new JFlexCompositeElementType("FLEX_STATE_REFERENCE");
-  SyntaxElementType FLEX_USER_CODE_SECTION = new JFlexCompositeElementType("FLEX_USER_CODE_SECTION");
-  SyntaxElementType FLEX_USER_VALUE = new JFlexCompositeElementType("FLEX_USER_VALUE");
+  IElementType FLEX_CHAR_RANGE = new JFlexCompositeElementType("FLEX_CHAR_RANGE");
+  IElementType FLEX_CHOICE_EXPRESSION = new JFlexCompositeElementType("FLEX_CHOICE_EXPRESSION");
+  IElementType FLEX_CLASS_EXPRESSION = new JFlexCompositeElementType("FLEX_CLASS_EXPRESSION");
+  IElementType FLEX_DECLARATIONS_SECTION = new JFlexCompositeElementType("FLEX_DECLARATIONS_SECTION");
+  IElementType FLEX_EXPRESSION = new JFlexCompositeElementType("FLEX_EXPRESSION");
+  IElementType FLEX_JAVA_CODE = new JFlexCompositeElementType("FLEX_JAVA_CODE");
+  IElementType FLEX_JAVA_NAME = new JFlexCompositeElementType("FLEX_JAVA_NAME");
+  IElementType FLEX_JAVA_TYPE = new JFlexCompositeElementType("FLEX_JAVA_TYPE");
+  IElementType FLEX_JAVA_TYPE_PARAMETERS = new JFlexCompositeElementType("FLEX_JAVA_TYPE_PARAMETERS");
+  IElementType FLEX_LEXICAL_RULES_SECTION = new JFlexCompositeElementType("FLEX_LEXICAL_RULES_SECTION");
+  IElementType FLEX_LITERAL_EXPRESSION = new JFlexCompositeElementType("FLEX_LITERAL_EXPRESSION");
+  IElementType FLEX_LOOK_AHEAD = new JFlexCompositeElementType("FLEX_LOOK_AHEAD");
+  IElementType FLEX_MACRO_DEFINITION = new JFlexCompositeElementType("FLEX_MACRO_DEFINITION");
+  IElementType FLEX_MACRO_REFERENCE = new JFlexCompositeElementType("FLEX_MACRO_REFERENCE");
+  IElementType FLEX_MACRO_REF_EXPRESSION = new JFlexCompositeElementType("FLEX_MACRO_REF_EXPRESSION");
+  IElementType FLEX_NOT_EXPRESSION = new JFlexCompositeElementType("FLEX_NOT_EXPRESSION");
+  IElementType FLEX_OPTION = new JFlexCompositeElementType("FLEX_OPTION");
+  IElementType FLEX_PAREN_EXPRESSION = new JFlexCompositeElementType("FLEX_PAREN_EXPRESSION");
+  IElementType FLEX_PREDEFINED_CLASS_EXPRESSION = new JFlexCompositeElementType("FLEX_PREDEFINED_CLASS_EXPRESSION");
+  IElementType FLEX_QUANTIFIER_EXPRESSION = new JFlexCompositeElementType("FLEX_QUANTIFIER_EXPRESSION");
+  IElementType FLEX_RULE = new JFlexCompositeElementType("FLEX_RULE");
+  IElementType FLEX_SEQUENCE_EXPRESSION = new JFlexCompositeElementType("FLEX_SEQUENCE_EXPRESSION");
+  IElementType FLEX_STATE_DECLARATION = new JFlexCompositeElementType("FLEX_STATE_DECLARATION");
+  IElementType FLEX_STATE_DEFINITION = new JFlexCompositeElementType("FLEX_STATE_DEFINITION");
+  IElementType FLEX_STATE_LIST = new JFlexCompositeElementType("FLEX_STATE_LIST");
+  IElementType FLEX_STATE_REFERENCE = new JFlexCompositeElementType("FLEX_STATE_REFERENCE");
+  IElementType FLEX_USER_CODE_SECTION = new JFlexCompositeElementType("FLEX_USER_CODE_SECTION");
+  IElementType FLEX_USER_VALUE = new JFlexCompositeElementType("FLEX_USER_VALUE");
 
-  SyntaxElementType FLEX_AMPAMP = new JFlexTokenType("&&");
-  SyntaxElementType FLEX_ANGLE1 = new JFlexTokenType("<");
-  SyntaxElementType FLEX_ANGLE2 = new JFlexTokenType(">");
-  SyntaxElementType FLEX_BANG = new JFlexTokenType("!");
-  SyntaxElementType FLEX_BAR = new JFlexTokenType("|");
-  SyntaxElementType FLEX_BARBAR = new JFlexTokenType("||");
-  SyntaxElementType FLEX_BLOCK_COMMENT = new JFlexTokenType("block_comment");
-  SyntaxElementType FLEX_BRACE1 = new JFlexTokenType("{");
-  SyntaxElementType FLEX_BRACE2 = new JFlexTokenType("}");
-  SyntaxElementType FLEX_BRACK1 = new JFlexTokenType("[");
-  SyntaxElementType FLEX_BRACK2 = new JFlexTokenType("]");
-  SyntaxElementType FLEX_CHAR = new JFlexTokenType("char");
-  SyntaxElementType FLEX_CHAR_CLASS = new JFlexTokenType("char_class");
-  SyntaxElementType FLEX_CHAR_ESC = new JFlexTokenType("char_esc");
-  SyntaxElementType FLEX_COMMA = new JFlexTokenType(",");
-  SyntaxElementType FLEX_DASH = new JFlexTokenType("-");
-  SyntaxElementType FLEX_DASHDASH = new JFlexTokenType("--");
-  SyntaxElementType FLEX_DOLLAR = new JFlexTokenType("$");
-  SyntaxElementType FLEX_DOT = new JFlexTokenType(".");
-  SyntaxElementType FLEX_EOF = new JFlexTokenType("<<EOF>>");
-  SyntaxElementType FLEX_EQ = new JFlexTokenType("=");
-  SyntaxElementType FLEX_FSLASH = new JFlexTokenType("/");
-  SyntaxElementType FLEX_HAT = new JFlexTokenType("^");
-  SyntaxElementType FLEX_ID = new JFlexTokenType("id");
-  SyntaxElementType FLEX_LINE_COMMENT = new JFlexTokenType("line_comment");
-  SyntaxElementType FLEX_NUMBER = new JFlexTokenType("number");
-  SyntaxElementType FLEX_OPT16BIT = new JFlexTokenType("%16bit");
-  SyntaxElementType FLEX_OPT_7BIT = new JFlexTokenType("%7bit");
-  SyntaxElementType FLEX_OPT_8BIT = new JFlexTokenType("%8bit");
-  SyntaxElementType FLEX_OPT_ABSTRACT = new JFlexTokenType("%abstract");
-  SyntaxElementType FLEX_OPT_APIPRIVATE = new JFlexTokenType("%apiprivate");
-  SyntaxElementType FLEX_OPT_BUFFER = new JFlexTokenType("%buffer");
-  SyntaxElementType FLEX_OPT_CASELESS = new JFlexTokenType("%caseless");
-  SyntaxElementType FLEX_OPT_CHAR = new JFlexTokenType("%char");
-  SyntaxElementType FLEX_OPT_CLASS = new JFlexTokenType("%class");
-  SyntaxElementType FLEX_OPT_CODE1 = new JFlexTokenType("%{");
-  SyntaxElementType FLEX_OPT_CODE2 = new JFlexTokenType("%}");
-  SyntaxElementType FLEX_OPT_COLUMN = new JFlexTokenType("%column");
-  SyntaxElementType FLEX_OPT_CTORARG = new JFlexTokenType("%ctorarg");
-  SyntaxElementType FLEX_OPT_CUP = new JFlexTokenType("%cup");
-  SyntaxElementType FLEX_OPT_CUPDEBUG = new JFlexTokenType("%cupdebug");
-  SyntaxElementType FLEX_OPT_CUPSYM = new JFlexTokenType("%cupsym");
-  SyntaxElementType FLEX_OPT_DEBUG = new JFlexTokenType("%debug");
-  SyntaxElementType FLEX_OPT_EOF1 = new JFlexTokenType("%eof{");
-  SyntaxElementType FLEX_OPT_EOF2 = new JFlexTokenType("%eof}");
-  SyntaxElementType FLEX_OPT_EOFCLOSE = new JFlexTokenType("%eofclose");
-  SyntaxElementType FLEX_OPT_EOFTHROW = new JFlexTokenType("%eofthrow");
-  SyntaxElementType FLEX_OPT_EOFTHROW1 = new JFlexTokenType("%eofthrow{");
-  SyntaxElementType FLEX_OPT_EOFTHROW2 = new JFlexTokenType("%eofthrow}");
-  SyntaxElementType FLEX_OPT_EOFVAL1 = new JFlexTokenType("%eofval{");
-  SyntaxElementType FLEX_OPT_EOFVAL2 = new JFlexTokenType("%eofval}");
-  SyntaxElementType FLEX_OPT_EXTENDS = new JFlexTokenType("%extends");
-  SyntaxElementType FLEX_OPT_FINAL = new JFlexTokenType("%final");
-  SyntaxElementType FLEX_OPT_FULL = new JFlexTokenType("%full");
-  SyntaxElementType FLEX_OPT_FUNCTION = new JFlexTokenType("%function");
-  SyntaxElementType FLEX_OPT_IGNORECASE = new JFlexTokenType("%ignorecase");
-  SyntaxElementType FLEX_OPT_IMPLEMENTS = new JFlexTokenType("%implements");
-  SyntaxElementType FLEX_OPT_INCLUDE = new JFlexTokenType("%include");
-  SyntaxElementType FLEX_OPT_INIT1 = new JFlexTokenType("%init{");
-  SyntaxElementType FLEX_OPT_INIT2 = new JFlexTokenType("%init}");
-  SyntaxElementType FLEX_OPT_INITTHROW = new JFlexTokenType("%initthrow");
-  SyntaxElementType FLEX_OPT_INITTHROW1 = new JFlexTokenType("%initthrow{");
-  SyntaxElementType FLEX_OPT_INITTHROW2 = new JFlexTokenType("%initthrow}");
-  SyntaxElementType FLEX_OPT_INT = new JFlexTokenType("%int");
-  SyntaxElementType FLEX_OPT_INTEGER = new JFlexTokenType("%integer");
-  SyntaxElementType FLEX_OPT_INTWRAP = new JFlexTokenType("%intwrap");
-  SyntaxElementType FLEX_OPT_LINE = new JFlexTokenType("%line");
-  SyntaxElementType FLEX_OPT_NOTUNIX = new JFlexTokenType("%notunix");
-  SyntaxElementType FLEX_OPT_PUBLIC = new JFlexTokenType("%public");
-  SyntaxElementType FLEX_OPT_SCANERROR = new JFlexTokenType("%scanerror");
-  SyntaxElementType FLEX_OPT_STANDALONE = new JFlexTokenType("%standalone");
-  SyntaxElementType FLEX_OPT_STATE = new JFlexTokenType("%state");
-  SyntaxElementType FLEX_OPT_TYPE = new JFlexTokenType("%type");
-  SyntaxElementType FLEX_OPT_UNICODE = new JFlexTokenType("%unicode");
-  SyntaxElementType FLEX_OPT_XSTATE = new JFlexTokenType("%xstate");
-  SyntaxElementType FLEX_OPT_YYEOF = new JFlexTokenType("%yyeof");
-  SyntaxElementType FLEX_OPT_YYLEXTHROW = new JFlexTokenType("%yylexthrow");
-  SyntaxElementType FLEX_OPT_YYLEXTHROW1 = new JFlexTokenType("%yylexthrow{");
-  SyntaxElementType FLEX_OPT_YYLEXTHROW2 = new JFlexTokenType("%yylexthrow}");
-  SyntaxElementType FLEX_PAREN1 = new JFlexTokenType("(");
-  SyntaxElementType FLEX_PAREN2 = new JFlexTokenType(")");
-  SyntaxElementType FLEX_PLUS = new JFlexTokenType("+");
-  SyntaxElementType FLEX_QUESTION = new JFlexTokenType("?");
-  SyntaxElementType FLEX_RAW = new JFlexTokenType("code block");
-  SyntaxElementType FLEX_STAR = new JFlexTokenType("*");
-  SyntaxElementType FLEX_STRING = new JFlexTokenType("string");
-  SyntaxElementType FLEX_TILDE = new JFlexTokenType("~");
-  SyntaxElementType FLEX_TILDETILDE = new JFlexTokenType("~~");
-  SyntaxElementType FLEX_TWO_PERCS = new JFlexTokenType("%%");
-  SyntaxElementType FLEX_UNCLOSED = new JFlexTokenType("unclosed");
-  SyntaxElementType FLEX_VERSION = new JFlexTokenType("version");
+  IElementType FLEX_AMPAMP = new JFlexTokenType("&&");
+  IElementType FLEX_ANGLE1 = new JFlexTokenType("<");
+  IElementType FLEX_ANGLE2 = new JFlexTokenType(">");
+  IElementType FLEX_BANG = new JFlexTokenType("!");
+  IElementType FLEX_BAR = new JFlexTokenType("|");
+  IElementType FLEX_BARBAR = new JFlexTokenType("||");
+  IElementType FLEX_BLOCK_COMMENT = new JFlexTokenType("block_comment");
+  IElementType FLEX_BRACE1 = new JFlexTokenType("{");
+  IElementType FLEX_BRACE2 = new JFlexTokenType("}");
+  IElementType FLEX_BRACK1 = new JFlexTokenType("[");
+  IElementType FLEX_BRACK2 = new JFlexTokenType("]");
+  IElementType FLEX_CHAR = new JFlexTokenType("char");
+  IElementType FLEX_CHAR_CLASS = new JFlexTokenType("char_class");
+  IElementType FLEX_CHAR_ESC = new JFlexTokenType("char_esc");
+  IElementType FLEX_COMMA = new JFlexTokenType(",");
+  IElementType FLEX_DASH = new JFlexTokenType("-");
+  IElementType FLEX_DASHDASH = new JFlexTokenType("--");
+  IElementType FLEX_DOLLAR = new JFlexTokenType("$");
+  IElementType FLEX_DOT = new JFlexTokenType(".");
+  IElementType FLEX_EOF = new JFlexTokenType("<<EOF>>");
+  IElementType FLEX_EQ = new JFlexTokenType("=");
+  IElementType FLEX_FSLASH = new JFlexTokenType("/");
+  IElementType FLEX_HAT = new JFlexTokenType("^");
+  IElementType FLEX_ID = new JFlexTokenType("id");
+  IElementType FLEX_LINE_COMMENT = new JFlexTokenType("line_comment");
+  IElementType FLEX_NUMBER = new JFlexTokenType("number");
+  IElementType FLEX_OPT16BIT = new JFlexTokenType("%16bit");
+  IElementType FLEX_OPT_7BIT = new JFlexTokenType("%7bit");
+  IElementType FLEX_OPT_8BIT = new JFlexTokenType("%8bit");
+  IElementType FLEX_OPT_ABSTRACT = new JFlexTokenType("%abstract");
+  IElementType FLEX_OPT_APIPRIVATE = new JFlexTokenType("%apiprivate");
+  IElementType FLEX_OPT_BUFFER = new JFlexTokenType("%buffer");
+  IElementType FLEX_OPT_CASELESS = new JFlexTokenType("%caseless");
+  IElementType FLEX_OPT_CHAR = new JFlexTokenType("%char");
+  IElementType FLEX_OPT_CLASS = new JFlexTokenType("%class");
+  IElementType FLEX_OPT_CODE1 = new JFlexTokenType("%{");
+  IElementType FLEX_OPT_CODE2 = new JFlexTokenType("%}");
+  IElementType FLEX_OPT_COLUMN = new JFlexTokenType("%column");
+  IElementType FLEX_OPT_CTORARG = new JFlexTokenType("%ctorarg");
+  IElementType FLEX_OPT_CUP = new JFlexTokenType("%cup");
+  IElementType FLEX_OPT_CUPDEBUG = new JFlexTokenType("%cupdebug");
+  IElementType FLEX_OPT_CUPSYM = new JFlexTokenType("%cupsym");
+  IElementType FLEX_OPT_DEBUG = new JFlexTokenType("%debug");
+  IElementType FLEX_OPT_EOF1 = new JFlexTokenType("%eof{");
+  IElementType FLEX_OPT_EOF2 = new JFlexTokenType("%eof}");
+  IElementType FLEX_OPT_EOFCLOSE = new JFlexTokenType("%eofclose");
+  IElementType FLEX_OPT_EOFTHROW = new JFlexTokenType("%eofthrow");
+  IElementType FLEX_OPT_EOFTHROW1 = new JFlexTokenType("%eofthrow{");
+  IElementType FLEX_OPT_EOFTHROW2 = new JFlexTokenType("%eofthrow}");
+  IElementType FLEX_OPT_EOFVAL1 = new JFlexTokenType("%eofval{");
+  IElementType FLEX_OPT_EOFVAL2 = new JFlexTokenType("%eofval}");
+  IElementType FLEX_OPT_EXTENDS = new JFlexTokenType("%extends");
+  IElementType FLEX_OPT_FINAL = new JFlexTokenType("%final");
+  IElementType FLEX_OPT_FULL = new JFlexTokenType("%full");
+  IElementType FLEX_OPT_FUNCTION = new JFlexTokenType("%function");
+  IElementType FLEX_OPT_IGNORECASE = new JFlexTokenType("%ignorecase");
+  IElementType FLEX_OPT_IMPLEMENTS = new JFlexTokenType("%implements");
+  IElementType FLEX_OPT_INCLUDE = new JFlexTokenType("%include");
+  IElementType FLEX_OPT_INIT1 = new JFlexTokenType("%init{");
+  IElementType FLEX_OPT_INIT2 = new JFlexTokenType("%init}");
+  IElementType FLEX_OPT_INITTHROW = new JFlexTokenType("%initthrow");
+  IElementType FLEX_OPT_INITTHROW1 = new JFlexTokenType("%initthrow{");
+  IElementType FLEX_OPT_INITTHROW2 = new JFlexTokenType("%initthrow}");
+  IElementType FLEX_OPT_INT = new JFlexTokenType("%int");
+  IElementType FLEX_OPT_INTEGER = new JFlexTokenType("%integer");
+  IElementType FLEX_OPT_INTWRAP = new JFlexTokenType("%intwrap");
+  IElementType FLEX_OPT_LINE = new JFlexTokenType("%line");
+  IElementType FLEX_OPT_NOTUNIX = new JFlexTokenType("%notunix");
+  IElementType FLEX_OPT_PUBLIC = new JFlexTokenType("%public");
+  IElementType FLEX_OPT_SCANERROR = new JFlexTokenType("%scanerror");
+  IElementType FLEX_OPT_STANDALONE = new JFlexTokenType("%standalone");
+  IElementType FLEX_OPT_STATE = new JFlexTokenType("%state");
+  IElementType FLEX_OPT_TYPE = new JFlexTokenType("%type");
+  IElementType FLEX_OPT_UNICODE = new JFlexTokenType("%unicode");
+  IElementType FLEX_OPT_XSTATE = new JFlexTokenType("%xstate");
+  IElementType FLEX_OPT_YYEOF = new JFlexTokenType("%yyeof");
+  IElementType FLEX_OPT_YYLEXTHROW = new JFlexTokenType("%yylexthrow");
+  IElementType FLEX_OPT_YYLEXTHROW1 = new JFlexTokenType("%yylexthrow{");
+  IElementType FLEX_OPT_YYLEXTHROW2 = new JFlexTokenType("%yylexthrow}");
+  IElementType FLEX_PAREN1 = new JFlexTokenType("(");
+  IElementType FLEX_PAREN2 = new JFlexTokenType(")");
+  IElementType FLEX_PLUS = new JFlexTokenType("+");
+  IElementType FLEX_QUESTION = new JFlexTokenType("?");
+  IElementType FLEX_RAW = new JFlexTokenType("code block");
+  IElementType FLEX_STAR = new JFlexTokenType("*");
+  IElementType FLEX_STRING = new JFlexTokenType("string");
+  IElementType FLEX_TILDE = new JFlexTokenType("~");
+  IElementType FLEX_TILDETILDE = new JFlexTokenType("~~");
+  IElementType FLEX_TWO_PERCS = new JFlexTokenType("%%");
+  IElementType FLEX_UNCLOSED = new JFlexTokenType("unclosed");
+  IElementType FLEX_VERSION = new JFlexTokenType("version");
 
   class Factory {
-    public static CompositePsiElement createElement(SyntaxElementType type) {
+    public static CompositePsiElement createElement(IElementType type) {
        if (type == FLEX_CHAR_RANGE) {
         return new JFlexCharRangeImpl(type);
       }
@@ -665,11 +665,11 @@ import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static org.intellij.jflex.psi.JFlexTypes.*;
 import org.intellij.jflex.psi.*;
-import com.intellij.platform.syntax.SyntaxElementType;
+import com.intellij.psi.tree.IElementType;
 
 public class JFlexCharRangeImpl extends JFlexClassExpressionImpl implements JFlexCharRange {
 
-  public JFlexCharRangeImpl(SyntaxElementType type) {
+  public JFlexCharRangeImpl(IElementType type) {
     super(type);
   }
 
@@ -697,11 +697,11 @@ import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static org.intellij.jflex.psi.JFlexTypes.*;
 import org.intellij.jflex.psi.*;
-import com.intellij.platform.syntax.SyntaxElementType;
+import com.intellij.psi.tree.IElementType;
 
 public class JFlexChoiceExpressionImpl extends JFlexExpressionImpl implements JFlexChoiceExpression {
 
-  public JFlexChoiceExpressionImpl(SyntaxElementType type) {
+  public JFlexChoiceExpressionImpl(IElementType type) {
     super(type);
   }
 
@@ -735,11 +735,11 @@ import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static org.intellij.jflex.psi.JFlexTypes.*;
 import org.intellij.jflex.psi.*;
-import com.intellij.platform.syntax.SyntaxElementType;
+import com.intellij.psi.tree.IElementType;
 
 public class JFlexClassExpressionImpl extends JFlexExpressionImpl implements JFlexClassExpression {
 
-  public JFlexClassExpressionImpl(SyntaxElementType type) {
+  public JFlexClassExpressionImpl(IElementType type) {
     super(type);
   }
 
@@ -773,11 +773,11 @@ import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static org.intellij.jflex.psi.JFlexTypes.*;
 import org.intellij.jflex.psi.*;
-import com.intellij.platform.syntax.SyntaxElementType;
+import com.intellij.psi.tree.IElementType;
 
 public class JFlexDeclarationsSectionImpl extends JFlexFileSectionImpl implements JFlexDeclarationsSection {
 
-  public JFlexDeclarationsSectionImpl(SyntaxElementType type) {
+  public JFlexDeclarationsSectionImpl(IElementType type) {
     super(type);
   }
 
@@ -823,11 +823,11 @@ import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static org.intellij.jflex.psi.JFlexTypes.*;
 import org.intellij.jflex.psi.*;
-import com.intellij.platform.syntax.SyntaxElementType;
+import com.intellij.psi.tree.IElementType;
 
 public abstract class JFlexExpressionImpl extends JFlexCompositeImpl implements JFlexExpression {
 
-  public JFlexExpressionImpl(SyntaxElementType type) {
+  public JFlexExpressionImpl(IElementType type) {
     super(type);
   }
 
@@ -855,11 +855,11 @@ import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static org.intellij.jflex.psi.JFlexTypes.*;
 import org.intellij.jflex.psi.*;
-import com.intellij.platform.syntax.SyntaxElementType;
+import com.intellij.psi.tree.IElementType;
 
 public class JFlexFileSectionImpl extends JFlexCompositeImpl implements JFlexFileSection {
 
-  public JFlexFileSectionImpl(SyntaxElementType type) {
+  public JFlexFileSectionImpl(IElementType type) {
     super(type);
   }
 
@@ -888,11 +888,11 @@ import com.intellij.psi.util.PsiTreeUtil;
 import static org.intellij.jflex.psi.JFlexTypes.*;
 import org.intellij.jflex.psi.*;
 import com.intellij.psi.PsiReference;
-import com.intellij.platform.syntax.SyntaxElementType;
+import com.intellij.psi.tree.IElementType;
 
 public class JFlexJavaCodeImpl extends JFlexJavaCodeInjectionHostImpl implements JFlexJavaCode {
 
-  public JFlexJavaCodeImpl(SyntaxElementType type) {
+  public JFlexJavaCodeImpl(IElementType type) {
     super(type);
   }
 
@@ -926,11 +926,11 @@ import com.intellij.psi.util.PsiTreeUtil;
 import static org.intellij.jflex.psi.JFlexTypes.*;
 import org.intellij.jflex.psi.*;
 import com.intellij.psi.PsiReference;
-import com.intellij.platform.syntax.SyntaxElementType;
+import com.intellij.psi.tree.IElementType;
 
 public class JFlexJavaNameImpl extends JFlexCompositeImpl implements JFlexJavaName {
 
-  public JFlexJavaNameImpl(SyntaxElementType type) {
+  public JFlexJavaNameImpl(IElementType type) {
     super(type);
   }
 
@@ -963,11 +963,11 @@ import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static org.intellij.jflex.psi.JFlexTypes.*;
 import org.intellij.jflex.psi.*;
-import com.intellij.platform.syntax.SyntaxElementType;
+import com.intellij.psi.tree.IElementType;
 
 public class JFlexJavaTypeImpl extends JFlexCompositeImpl implements JFlexJavaType {
 
-  public JFlexJavaTypeImpl(SyntaxElementType type) {
+  public JFlexJavaTypeImpl(IElementType type) {
     super(type);
   }
 
@@ -1007,11 +1007,11 @@ import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static org.intellij.jflex.psi.JFlexTypes.*;
 import org.intellij.jflex.psi.*;
-import com.intellij.platform.syntax.SyntaxElementType;
+import com.intellij.psi.tree.IElementType;
 
 public class JFlexJavaTypeParametersImpl extends JFlexCompositeImpl implements JFlexJavaTypeParameters {
 
-  public JFlexJavaTypeParametersImpl(SyntaxElementType type) {
+  public JFlexJavaTypeParametersImpl(IElementType type) {
     super(type);
   }
 
@@ -1045,11 +1045,11 @@ import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static org.intellij.jflex.psi.JFlexTypes.*;
 import org.intellij.jflex.psi.*;
-import com.intellij.platform.syntax.SyntaxElementType;
+import com.intellij.psi.tree.IElementType;
 
 public class JFlexLexicalRulesSectionImpl extends JFlexFileSectionImpl implements JFlexLexicalRulesSection {
 
-  public JFlexLexicalRulesSectionImpl(SyntaxElementType type) {
+  public JFlexLexicalRulesSectionImpl(IElementType type) {
     super(type);
   }
 
@@ -1089,11 +1089,11 @@ import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static org.intellij.jflex.psi.JFlexTypes.*;
 import org.intellij.jflex.psi.*;
-import com.intellij.platform.syntax.SyntaxElementType;
+import com.intellij.psi.tree.IElementType;
 
 public class JFlexLiteralExpressionImpl extends JFlexExpressionImpl implements JFlexLiteralExpression {
 
-  public JFlexLiteralExpressionImpl(SyntaxElementType type) {
+  public JFlexLiteralExpressionImpl(IElementType type) {
     super(type);
   }
 
@@ -1121,11 +1121,11 @@ import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static org.intellij.jflex.psi.JFlexTypes.*;
 import org.intellij.jflex.psi.*;
-import com.intellij.platform.syntax.SyntaxElementType;
+import com.intellij.psi.tree.IElementType;
 
 public class JFlexLookAheadImpl extends JFlexCompositeImpl implements JFlexLookAhead {
 
-  public JFlexLookAheadImpl(SyntaxElementType type) {
+  public JFlexLookAheadImpl(IElementType type) {
     super(type);
   }
 
@@ -1160,11 +1160,11 @@ import com.intellij.psi.util.PsiTreeUtil;
 import static org.intellij.jflex.psi.JFlexTypes.*;
 import org.intellij.jflex.psi.*;
 import com.intellij.psi.PsiNameIdentifierOwner;
-import com.intellij.platform.syntax.SyntaxElementType;
+import com.intellij.psi.tree.IElementType;
 
 public class JFlexMacroDefinitionImpl extends JFlexCompositeImpl implements JFlexMacroDefinition {
 
-  public JFlexMacroDefinitionImpl(SyntaxElementType type) {
+  public JFlexMacroDefinitionImpl(IElementType type) {
     super(type);
   }
 
@@ -1219,11 +1219,11 @@ import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static org.intellij.jflex.psi.JFlexTypes.*;
 import org.intellij.jflex.psi.*;
-import com.intellij.platform.syntax.SyntaxElementType;
+import com.intellij.psi.tree.IElementType;
 
 public class JFlexMacroRefExpressionImpl extends JFlexExpressionImpl implements JFlexMacroRefExpression {
 
-  public JFlexMacroRefExpressionImpl(SyntaxElementType type) {
+  public JFlexMacroRefExpressionImpl(IElementType type) {
     super(type);
   }
 
@@ -1258,11 +1258,11 @@ import com.intellij.psi.util.PsiTreeUtil;
 import static org.intellij.jflex.psi.JFlexTypes.*;
 import org.intellij.jflex.psi.*;
 import com.intellij.psi.PsiReference;
-import com.intellij.platform.syntax.SyntaxElementType;
+import com.intellij.psi.tree.IElementType;
 
 public class JFlexMacroReferenceImpl extends JFlexCompositeImpl implements JFlexMacroReference {
 
-  public JFlexMacroReferenceImpl(SyntaxElementType type) {
+  public JFlexMacroReferenceImpl(IElementType type) {
     super(type);
   }
 
@@ -1301,11 +1301,11 @@ import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static org.intellij.jflex.psi.JFlexTypes.*;
 import org.intellij.jflex.psi.*;
-import com.intellij.platform.syntax.SyntaxElementType;
+import com.intellij.psi.tree.IElementType;
 
 public class JFlexNotExpressionImpl extends JFlexExpressionImpl implements JFlexNotExpression {
 
-  public JFlexNotExpressionImpl(SyntaxElementType type) {
+  public JFlexNotExpressionImpl(IElementType type) {
     super(type);
   }
 
@@ -1339,11 +1339,11 @@ import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static org.intellij.jflex.psi.JFlexTypes.*;
 import org.intellij.jflex.psi.*;
-import com.intellij.platform.syntax.SyntaxElementType;
+import com.intellij.psi.tree.IElementType;
 
 public class JFlexOptionImpl extends JFlexCompositeImpl implements JFlexOption {
 
-  public JFlexOptionImpl(SyntaxElementType type) {
+  public JFlexOptionImpl(IElementType type) {
     super(type);
   }
 
@@ -1371,11 +1371,11 @@ import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static org.intellij.jflex.psi.JFlexTypes.*;
 import org.intellij.jflex.psi.*;
-import com.intellij.platform.syntax.SyntaxElementType;
+import com.intellij.psi.tree.IElementType;
 
 public class JFlexParenExpressionImpl extends JFlexExpressionImpl implements JFlexParenExpression {
 
-  public JFlexParenExpressionImpl(SyntaxElementType type) {
+  public JFlexParenExpressionImpl(IElementType type) {
     super(type);
   }
 
@@ -1409,11 +1409,11 @@ import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static org.intellij.jflex.psi.JFlexTypes.*;
 import org.intellij.jflex.psi.*;
-import com.intellij.platform.syntax.SyntaxElementType;
+import com.intellij.psi.tree.IElementType;
 
 public class JFlexPredefinedClassExpressionImpl extends JFlexExpressionImpl implements JFlexPredefinedClassExpression {
 
-  public JFlexPredefinedClassExpressionImpl(SyntaxElementType type) {
+  public JFlexPredefinedClassExpressionImpl(IElementType type) {
     super(type);
   }
 
@@ -1441,11 +1441,11 @@ import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static org.intellij.jflex.psi.JFlexTypes.*;
 import org.intellij.jflex.psi.*;
-import com.intellij.platform.syntax.SyntaxElementType;
+import com.intellij.psi.tree.IElementType;
 
 public class JFlexQuantifierExpressionImpl extends JFlexExpressionImpl implements JFlexQuantifierExpression {
 
-  public JFlexQuantifierExpressionImpl(SyntaxElementType type) {
+  public JFlexQuantifierExpressionImpl(IElementType type) {
     super(type);
   }
 
@@ -1479,11 +1479,11 @@ import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static org.intellij.jflex.psi.JFlexTypes.*;
 import org.intellij.jflex.psi.*;
-import com.intellij.platform.syntax.SyntaxElementType;
+import com.intellij.psi.tree.IElementType;
 
 public class JFlexRuleImpl extends JFlexCompositeImpl implements JFlexRule {
 
-  public JFlexRuleImpl(SyntaxElementType type) {
+  public JFlexRuleImpl(IElementType type) {
     super(type);
   }
 
@@ -1547,11 +1547,11 @@ import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static org.intellij.jflex.psi.JFlexTypes.*;
 import org.intellij.jflex.psi.*;
-import com.intellij.platform.syntax.SyntaxElementType;
+import com.intellij.psi.tree.IElementType;
 
 public class JFlexSequenceExpressionImpl extends JFlexExpressionImpl implements JFlexSequenceExpression {
 
-  public JFlexSequenceExpressionImpl(SyntaxElementType type) {
+  public JFlexSequenceExpressionImpl(IElementType type) {
     super(type);
   }
 
@@ -1585,11 +1585,11 @@ import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static org.intellij.jflex.psi.JFlexTypes.*;
 import org.intellij.jflex.psi.*;
-import com.intellij.platform.syntax.SyntaxElementType;
+import com.intellij.psi.tree.IElementType;
 
 public class JFlexStateDeclarationImpl extends JFlexCompositeImpl implements JFlexStateDeclaration {
 
-  public JFlexStateDeclarationImpl(SyntaxElementType type) {
+  public JFlexStateDeclarationImpl(IElementType type) {
     super(type);
   }
 
@@ -1624,11 +1624,11 @@ import com.intellij.psi.util.PsiTreeUtil;
 import static org.intellij.jflex.psi.JFlexTypes.*;
 import org.intellij.jflex.psi.*;
 import com.intellij.psi.PsiNameIdentifierOwner;
-import com.intellij.platform.syntax.SyntaxElementType;
+import com.intellij.psi.tree.IElementType;
 
 public class JFlexStateDefinitionImpl extends JFlexCompositeImpl implements JFlexStateDefinition {
 
-  public JFlexStateDefinitionImpl(SyntaxElementType type) {
+  public JFlexStateDefinitionImpl(IElementType type) {
     super(type);
   }
 
@@ -1677,11 +1677,11 @@ import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static org.intellij.jflex.psi.JFlexTypes.*;
 import org.intellij.jflex.psi.*;
-import com.intellij.platform.syntax.SyntaxElementType;
+import com.intellij.psi.tree.IElementType;
 
 public class JFlexStateListImpl extends JFlexCompositeImpl implements JFlexStateList {
 
-  public JFlexStateListImpl(SyntaxElementType type) {
+  public JFlexStateListImpl(IElementType type) {
     super(type);
   }
 
@@ -1716,11 +1716,11 @@ import com.intellij.psi.util.PsiTreeUtil;
 import static org.intellij.jflex.psi.JFlexTypes.*;
 import org.intellij.jflex.psi.*;
 import com.intellij.psi.PsiReference;
-import com.intellij.platform.syntax.SyntaxElementType;
+import com.intellij.psi.tree.IElementType;
 
 public class JFlexStateReferenceImpl extends JFlexCompositeImpl implements JFlexStateReference {
 
-  public JFlexStateReferenceImpl(SyntaxElementType type) {
+  public JFlexStateReferenceImpl(IElementType type) {
     super(type);
   }
 
@@ -1759,11 +1759,11 @@ import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static org.intellij.jflex.psi.JFlexTypes.*;
 import org.intellij.jflex.psi.*;
-import com.intellij.platform.syntax.SyntaxElementType;
+import com.intellij.psi.tree.IElementType;
 
 public class JFlexUserCodeSectionImpl extends JFlexFileSectionImpl implements JFlexUserCodeSection {
 
-  public JFlexUserCodeSectionImpl(SyntaxElementType type) {
+  public JFlexUserCodeSectionImpl(IElementType type) {
     super(type);
   }
 
@@ -1797,11 +1797,11 @@ import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static org.intellij.jflex.psi.JFlexTypes.*;
 import org.intellij.jflex.psi.*;
-import com.intellij.platform.syntax.SyntaxElementType;
+import com.intellij.psi.tree.IElementType;
 
 public class JFlexUserValueImpl extends JFlexCompositeImpl implements JFlexUserValue {
 
-  public JFlexUserValueImpl(SyntaxElementType type) {
+  public JFlexUserValueImpl(IElementType type) {
     super(type);
   }
 

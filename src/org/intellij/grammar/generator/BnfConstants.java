@@ -15,7 +15,7 @@ public interface BnfConstants {
 
   String REGEXP_PREFIX = "regexp:";
 
-  String GPUB_CLASS = "com.intellij.lang.parser.GeneratedParserUtilBase";
+  String GP_UTILS_BASE_CLASS = "com.intellij.lang.parser.GeneratedParserUtilBase";
   String PSI_BUILDER_CLASS = "com.intellij.lang.PsiBuilder";
   String PSI_PARSER_CLASS = "com.intellij.lang.PsiParser";
   String LIGHT_PSI_PARSER_CLASS = "com.intellij.lang.LightPsiParser";

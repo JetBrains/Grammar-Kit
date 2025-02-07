@@ -44,7 +44,7 @@ public class KnownAttribute<T> {
   public static final KnownAttribute<String>       PSI_IMPL_UTIL_CLASS       = create(true, String.class, "psiImplUtilClass", null);
   public static final KnownAttribute<String>       TOKEN_TYPE_CLASS          = create(true, String.class, "tokenTypeClass", BnfConstants.IELEMENTTYPE_CLASS);
   public static final KnownAttribute<String>       PARSER_CLASS              = create(true, String.class, "parserClass", "generated.GeneratedParser");
-  public static final KnownAttribute<String>       PARSER_UTIL_CLASS         = create(true, String.class, "parserUtilClass", BnfConstants.GPUB_CLASS);
+  public static final KnownAttribute<String>       PARSER_UTIL_CLASS         = create(true, String.class, "parserUtilClass", BnfConstants.GP_UTILS_BASE_CLASS);
   public static final KnownAttribute<String>       ELEMENT_TYPE_HOLDER_CLASS = create(true, String.class, "elementTypeHolderClass", "generated.GeneratedTypes");
   public static final KnownAttribute<String>       ELEMENT_TYPE_PREFIX       = create(true, String.class, "elementTypePrefix", "");
   public static final KnownAttribute<String>       TOKEN_TYPE_FACTORY        = create(true, String.class, "tokenTypeFactory", null);

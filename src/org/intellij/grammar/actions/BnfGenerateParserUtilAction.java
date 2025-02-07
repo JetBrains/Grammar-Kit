@@ -65,7 +65,7 @@ public class BnfGenerateParserUtilAction extends AnAction {
     Project project = file.getProject();
     BnfFile bnfFile = (BnfFile) file;
     String qualifiedName = createClass(
-        bnfFile, "Create Parser Util Class", BnfConstants.GPUB_CLASS,
+        bnfFile, "Create Parser Util Class", BnfConstants.GP_UTILS_BASE_CLASS,
         getGrammarName(bnfFile) + "ParserUtil",
         getGrammarPackage(bnfFile));
     if (qualifiedName == null) return;

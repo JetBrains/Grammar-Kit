@@ -1,0 +1,32 @@
+{
+  generatePsi=true
+  classHeader="//header.txt"
+  psiPackage="test.psi"
+  psiImplPackage="test.psi.impl"
+  psiTreeUtilClass="test.psi.MyPsiTreeUtil"
+  parserClass="test.FooParser"
+  elementTypeFactory="test.FooParserDefinition.createType"
+  tokenTypeFactory="test.stub.FooParserDefinition.createTokenType"
+  elementTypeHolderClass="test.FooTypes"
+  parserUtilClass="org.intellij.grammar.parser.GeneratedParserUtilBase"
+  expressionUtilClass="test.FooUtil"
+
+  extends("element1|type")="org.intellij.grammar.test.StubTest.GenericBase<?>"
+  extends("simple")="org.intellij.grammar.test.StubTest.SimpleBase"
+  extends("missing")="test.stub.MissingBase"
+
+  extends(".*type")=type
+}
+root ::= element1 | element2 | element3 | element4 | element5 | type
+element1 ::= 'aa' element5   { stubClass="test.stub.Element1Stub" }
+element2 ::= 'bb' element4*  { stubClass="test.stub.Element2Stub" }
+element3 ::= 'bb' element4   { stubClass="test.stub.Element3Stub" }
+element4 ::= 'bb' | element2 { stubClass="test.stub.Element4Stub" }
+element5 ::= 'cc'
+
+type ::= interface_type | struct_type {stubClass="test.stub.TypeStub"}
+struct_type ::= 'struct'
+interface_type ::= 'interface'
+
+fake missing ::=  { stubClass="test.stub.MissingStub" }
+fake simple ::=  { stubClass="org.intellij.grammar.test.StubTest.SimpleStub" }

@@ -1,0 +1,28 @@
+{
+  parserClass="Small"
+  generatePsi=false
+  parserImports=["java.util.List" "java.util.Map" ]
+  tokens = [OP_EQ="="]
+}
+
+external root ::= parseRoot statement
+statement ::= token | someRule | someString
+someRule::= token
+someRule2 ::= token?
+someString::= 'token'
+otherRule::= ( token )
+private privateRule::= token
+private privateString ::= 'token'
+private tokenRule ::= '=' "=" '==' "=="
+empty ::= ()
+empty2 ::= {}
+empty3 ::= []
+private empty4 ::= ()
+private empty5 ::= []
+private empty6 ::= &()
+private empty7 ::= !()
+private empty8 ::= [({})]
+private not_empty1 ::= [({token})]
+private not_empty2 ::= [({token someString})]
+left empty9 ::= []
+inner left empty10 ::= []

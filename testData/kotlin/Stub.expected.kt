@@ -13,7 +13,7 @@ import com.intellij.lang.PsiParser
 import com.intellij.lang.LightPsiParser
 
 class FooParser: PsiParser, LightPsiParser {
-  
+
   override fun parse(root_: IElementType, builder_: PsiBuilder): ASTNode {
     parseLight(root_, builder_)
     return builder_.getTreeBuilt()
@@ -30,15 +30,16 @@ class FooParser: PsiParser, LightPsiParser {
   protected fun parse_root_(root_: IElementType, builder_: PsiBuilder) {
     return parse_root_(root_, builder_, 0)
   }
-  
+
   companion object {
     fun parse_root_(root_: IElementType, builder_: PsiBuilder, level_: Int): Boolean {
       return root(builder_, level + 1)
     }
-    
+
     val EXTENDS_SETS_: Array<TokenSet> = arrayOf(
       create_token_set_(INTERFACE_TYPE, STRUCT_TYPE, TYPE),
-    ) 
+    )
+
     /* ********************************************************** */
     // 'aa' element5
     fun element1(builder_: PsiBuilder, level_: Int): Boolean {
@@ -50,7 +51,7 @@ class FooParser: PsiParser, LightPsiParser {
       exit_section_(builder_, level_, marker_, result_, false, null)
       return result_
     }
-    
+
     /* ********************************************************** */
     // 'bb' element4*
     fun element2(builder_: PsiBuilder, level_: Int): Boolean {
@@ -62,7 +63,7 @@ class FooParser: PsiParser, LightPsiParser {
       exit_section_(builder_, level_, marker_, result_, false, null)
       return result_
     }
-    
+
     // element4*
     private fun element2_1(builder_: PsiBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "element2_1")) return false

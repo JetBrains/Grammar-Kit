@@ -22,12 +22,12 @@ class GeneratedParser: PsiParser, LightPsiParser {
   override fun parseLight(root_: IElementType, builder_: PsiBuilder) {
     var result_: Boolean
     val builder_ = adapt_builder_(root_, builder_, this, null)
-    val marker_ = enter_section_(builder_, 0, _COLLAPSE_, null)
+    val marker_: Marker = enter_section_(builder_, 0, _COLLAPSE_, null)
     result_ = parse_root_(root_, builder_)
     exit_section_(builder_, 0, marker_, root_, result_, true, TRUE_CONDITION)
   }
-  
-  protected fun parse_root_(root_: IElementType, builder_: PsiBuilder) {
+
+  protected fun parse_root_(root_: IElementType, builder_: PsiBuilder): Boolean {
     return parse_root_(root_, builder_, 0)
   }
   

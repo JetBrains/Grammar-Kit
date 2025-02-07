@@ -3,6 +3,8 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/grammar-kit.iml" filepath="$PROJECT_DIR$/grammar-kit.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/grammar-kit.main.iml" filepath="$PROJECT_DIR$/.idea/modules/grammar-kit.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/grammar-kit.test.iml" filepath="$PROJECT_DIR$/.idea/modules/grammar-kit.test.iml" />
     </modules>
   </component>
 </project>

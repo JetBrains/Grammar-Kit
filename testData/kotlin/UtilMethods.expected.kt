@@ -1,7 +1,3 @@
-/*
- * Copyright 2011-2025 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
- */
-
 // ---- FooParser.java -----------------
 //header.txt
 package test
@@ -16,8 +12,8 @@ import com.intellij.psi.tree.TokenSet
 import com.intellij.lang.PsiParser
 import com.intellij.lang.LightPsiParser
 
-class FooParser : PsiParser, LightPsiParser {
-  
+class FooParser: PsiParser, LightPsiParser {
+
   override fun parse(root_: IElementType, builder_: PsiBuilder): ASTNode {
     parseLight(root_, builder_)
     return builder_.getTreeBuilt()
@@ -26,18 +22,18 @@ class FooParser : PsiParser, LightPsiParser {
   override fun parseLight(root_: IElementType, builder_: PsiBuilder) {
     var result_: Boolean
     val builder_ = adapt_builder_(root_, builder_, this, null)
-    val marker_ = enter_section_(builder_, 0, _COLLAPSE_, null)
+    val marker_: Marker = enter_section_(builder_, 0, _COLLAPSE_, null)
     result_ = parse_root_(root_, builder_)
     exit_section_(builder_, 0, marker_, root_, result_, true, TRUE_CONDITION)
   }
 
-  protected fun parse_root_(root_: IElementType, builder_: PsiBuilder) {
+  protected fun parse_root_(root_: IElementType, builder_: PsiBuilder): Boolean {
     return parse_root_(root_, builder_, 0)
   }
 
   companion object {
     internal fun parse_root_(root_: IElementType, builder_: PsiBuilder, level_: Int): Boolean {
-      return root(builder_, level + 1)
+      return root(builder_, level_ + 1)
     }
 
     /* ********************************************************** */
@@ -54,7 +50,7 @@ class FooParser : PsiParser, LightPsiParser {
     /* ********************************************************** */
     // element1
     internal fun root(builder_: PsiBuilder, level_: Int): Boolean {
-      return element1(builder_, level + 1)
+      return element1(builder_, level_ + 1)
     }
   }
 }

@@ -17,6 +17,7 @@
       <action id="grammar.Generate" class="org.intellij.grammar.actions.GenerateAction">
         <keyboard-shortcut keymap="$default" first-keystroke="control shift G"/>
       </action>
+      <action id="grammar.GenerateKotlin" class="org.intellij.grammar.actions.GenerateKotlinAction"/>
       <action id="grammar.Run.JFlex" class="org.intellij.grammar.actions.BnfRunJFlexAction"
               use-shortcut-of="grammar.Generate">
       </action>

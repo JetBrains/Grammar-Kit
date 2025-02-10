@@ -1,4 +1,4 @@
-// ---- GeneratedParser.java -----------------
+// ---- GeneratedParser.kt -----------------
 // This is a generated file. Not intended for manual editing.
 package generated
 
@@ -32,13 +32,13 @@ class GeneratedParser: PsiParser, LightPsiParser {
   }
   
   companion object {
-    fun parse_root_(root_: IElementType, builder_: PsiBuilder, level_: Int): Boolean {
-      return file(builder_, level + 1)
+    internal fun parse_root_(root_: IElementType, builder_: PsiBuilder, level_: Int): Boolean {
+      return file(builder_, level_ + 1)
     }
-    
+
     /* ********************************************************** */
     // list (';' list ) *
-    fun file(builder_: PsiBuilder, level_: Int): Boolean {
+    internal fun file(builder_: PsiBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "file")) return false
       if (!nextTokenIs(builder_, PAREN1)) return false
       var result_: Boolean
@@ -50,31 +50,31 @@ class GeneratedParser: PsiParser, LightPsiParser {
       exit_section_(builder_, level_, marker_, result_, pinned_, null)
       return result_ || pinned_
     }
-    
+
     // (';' list ) *
-    private fun file_1(builder_: PsiBuilder, level_: Int) {
-      if(!recursion_guard_(builder_, level_, "file_1")) return false
-      while(true) {
-        val pos_ = current_position_(builder_)
-        if(!file_1_0(builder_, level_ + 1)) break
-        if(!empty_element_parsed_guard_(builder_, "file_1", pos_)) break
+    private fun file_1(builder_: PsiBuilder, level_: Int): Boolean {
+      if (!recursion_guard_(builder_, level_, "file_1")) return false
+      while (true) {
+        val pos_: Int = current_position_(builder_)
+        if (!file_1_0(builder_, level_ + 1)) break
+        if (!empty_element_parsed_guard_(builder_, "file_1", pos_)) break
       }
       return true
     }
-    
+
     // ';' list
     private fun file_1_0(builder_: PsiBuilder, level_: Int): Boolean {
-      if(!recursion_guard_(builder_, level_, "file_1_0")) return false
+      if (!recursion_guard_(builder_, level_, "file_1_0")) return false
       var result_: Boolean
       var pinned_: Boolean
       val marker_: Marker = enter_section_(builder_, level_, _NONE_)
       result_ = consumeToken(builder_, SEMI)
       pinned_ = result_ // pin = 1
       result_ = result_ && list(builder_, level_ + 1)
-      exit_section_(builder_, level_, marker_, result_, false, null)
+      exit_section_(builder_, level_, marker_, result_, pinned_, null)
       return result_ || pinned_
     }
-    
+
     /* ********************************************************** */
     // number
     fun item(builder_: PsiBuilder, level_: Int): Boolean {
@@ -85,7 +85,7 @@ class GeneratedParser: PsiParser, LightPsiParser {
       exit_section_(builder_, level_, marker_, result_, false, item_auto_recover_)
       return result_
     }
-    
+
     /* ********************************************************** */
     // "(" [!")" item (',' item) * ] ")"
     fun list(builder_: PsiBuilder, level_: Int): Boolean {
@@ -101,14 +101,14 @@ class GeneratedParser: PsiParser, LightPsiParser {
       exit_section_(builder_, level_, marker_, result_, pinned_, null)
       return result_ || pinned_
     }
-    
+
     // [!")" item (',' item) * ]
     private fun list_1(builder_: PsiBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "list_1")) return false
       list_1_0(builder_, level_ + 1)
       return true
     }
-    
+
     // !")" item (',' item) *
     private fun list_1_0(builder_: PsiBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "list_1_0")) return false
@@ -122,7 +122,7 @@ class GeneratedParser: PsiParser, LightPsiParser {
       exit_section_(builder_, level_, marker_, result_, pinned_, null)
       return result_ || pinned_
     }
-    
+
     // !")"
     private fun list_1_0_0(builder_: PsiBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "list_1_0_0")) return false
@@ -132,18 +132,18 @@ class GeneratedParser: PsiParser, LightPsiParser {
       exit_section_(builder_, level_, marker_, result_, false, null)
       return result_
     }
-    
+
     // (',' item) *
     private fun list_1_0_2(builder_: PsiBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "list_1_0_2")) return false
       while (true) {
-        val pos_ = current_position_(builder_)
+        val pos_: Int = current_position_(builder_)
         if (!list_1_0_2_0(builder_, level_ + 1)) break
         if (!empty_element_parsed_guard_(builder_, "list_1_0_2", pos_)) break
       }
       return true
     }
-    
+
     // ',' item
     private fun list_1_0_2_0(builder_: PsiBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "list_1_0_2_0")) return false
@@ -156,7 +156,7 @@ class GeneratedParser: PsiParser, LightPsiParser {
       exit_section_(builder_, level_, marker_, result_, pinned_, null)
       return result_ || pinned_
     }
-    
-    val item_auto_recover = Parser { builder_, level_ -> !nextTokenIsFast(builder_, PAREN2, COMMA, SEMI) }
+
+    internal val item_auto_recover_: Parser = Parser { builder_, level_ -> !nextTokenIsFast(builder_, PAREN2, COMMA, SEMI) }
   }
 }

@@ -1,4 +1,4 @@
-// ---- FooParser.java -----------------
+// ---- FooParser.kt -----------------
 //header.txt
 package test
 
@@ -27,13 +27,13 @@ class FooParser: PsiParser, LightPsiParser {
     exit_section_(builder_, 0, marker_, root_, result_, true, TRUE_CONDITION)
   }
 
-  protected fun parse_root_(root_: IElementType, builder_: PsiBuilder) {
+  protected fun parse_root_(root_: IElementType, builder_: PsiBuilder): Boolean {
     return parse_root_(root_, builder_, 0)
   }
 
   companion object {
-    fun parse_root_(root_: IElementType, builder_: PsiBuilder, level_: Int): Boolean {
-      return root(builder_, level + 1)
+    internal fun parse_root_(root_: IElementType, builder_: PsiBuilder, level_: Int): Boolean {
+      return root(builder_, level_ + 1)
     }
 
     val EXTENDS_SETS_: Array<TokenSet> = arrayOf(
@@ -68,13 +68,13 @@ class FooParser: PsiParser, LightPsiParser {
     private fun element2_1(builder_: PsiBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "element2_1")) return false
       while (true) {
-        val pos_ = current_position_(builder_)
+        val pos_: Int = current_position_(builder_)
         if (!element4(builder_, level_ + 1)) break
         if (!empty_element_parsed_guard_(builder_, "element2_1", pos_)) break
       }
       return true
     }
-    
+
     /* ********************************************************** */
     // 'bb' element4
     fun element3(builder_: PsiBuilder, level_: Int): Boolean {
@@ -86,7 +86,7 @@ class FooParser: PsiParser, LightPsiParser {
       exit_section_(builder_, level_, marker_, result_, false, null)
       return result_
     }
-    
+
     /* ********************************************************** */
     // 'bb' | element2
     fun element4(builder_: PsiBuilder, level_: Int): Boolean {
@@ -98,7 +98,7 @@ class FooParser: PsiParser, LightPsiParser {
       exit_section_(builder_, level_, marker_, result_, false, null)
       return result_
     }
-    
+
     /* ********************************************************** */
     // 'cc'
     fun element5(builder_: PsiBuilder, level_: Int): Boolean {
@@ -109,7 +109,7 @@ class FooParser: PsiParser, LightPsiParser {
       exit_section_(builder_, level_, marker_, result_, false, null)
       return result_
     }
-    
+
     /* ********************************************************** */
     // 'interface'
     fun interface_type(builder_: PsiBuilder, level_: Int): Boolean {
@@ -120,10 +120,10 @@ class FooParser: PsiParser, LightPsiParser {
       exit_section_(builder_, level_, marker_, result_, false, null)
       return result_
     }
-    
+
     /* ********************************************************** */
     // element1 | element2 | element3 | element4 | element5 | type
-    fun root(builder_: PsiBuilder, level_: Int): Boolean {
+    internal fun root(builder_: PsiBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "root")) return false
       var result_: Boolean
       result_ = element1(builder_, level_ + 1)
@@ -134,7 +134,7 @@ class FooParser: PsiParser, LightPsiParser {
       if (!result_) result_ = type(builder_, level_ + 1)
       return result_
     }
-    
+
     /* ********************************************************** */
     // 'struct'
     fun struct_type(builder_: PsiBuilder, level_: Int): Boolean {
@@ -145,7 +145,7 @@ class FooParser: PsiParser, LightPsiParser {
       exit_section_(builder_, level_, marker_, result_, false, null)
       return result_
     }
-    
+
     /* ********************************************************** */
     // interface_type | struct_type
     fun type(builder_: PsiBuilder, level_: Int): Boolean {

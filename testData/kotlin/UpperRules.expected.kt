@@ -30,12 +30,12 @@ class GeneratedParser: PsiParser, LightPsiParser {
   protected fun parse_root_(root_: IElementType, builder_: PsiBuilder): Boolean {
     return parse_root_(root_, builder_, 0)
   }
-  
+
   companion object {
     internal fun parse_root_(root_: IElementType, builder_: PsiBuilder, level_: Int): Boolean {
       return file(builder_, level_ + 1)
     }
-  
+
     val EXTENDS_SETS_: Array<TokenSet> = arrayOf(
       create_token_set_(ABC, ABC_ONE, ABC_THREE, ABC_TWO),
     )
@@ -137,7 +137,7 @@ class GeneratedParser: PsiParser, LightPsiParser {
     internal fun file(builder_: PsiBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "file")) return false
       while (true) {
-        val pos_ = current_position_(builder_)
+        val pos_: Int = current_position_(builder_)
         if (!file_0(builder_, level_ + 1)) break
         if (!empty_element_parsed_guard_(builder_, "file", pos_)) break
       }
@@ -218,5 +218,6 @@ class GeneratedParser: PsiParser, LightPsiParser {
       exit_section_(builder_, marker_, PREFIX, result_)
       return result_
     }
+
   }
 }

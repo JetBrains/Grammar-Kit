@@ -157,5 +157,6 @@ class FooParser: PsiParser, LightPsiParser {
       exit_section_(builder_, level_, marker_, result_, false, null)
       return result_
     }
+
   }
 }

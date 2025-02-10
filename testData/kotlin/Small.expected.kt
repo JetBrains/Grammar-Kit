@@ -83,7 +83,7 @@ class Small: PsiParser, LightPsiParser {
     /* ********************************************************** */
     // &()
     internal fun empty6(builder_: PsiBuilder, level_: Int): Boolean {
-      if (!recursion_buard_(builder_, level_, "empty6")) return false
+      if (!recursion_guard_(builder_, level_, "empty6")) return false
       var result_: Boolean
       val marker_: Marker = enter_section_(builder_, level_, _AND_)
       result_ = empty6_0(builder_, level_ + 1)
@@ -246,5 +246,6 @@ class Small: PsiParser, LightPsiParser {
       exit_section_(builder_, marker_, null, result_)
       return result_
     }
+
   }
 }

@@ -1,4 +1,4 @@
-// ---- FooParser.java -----------------
+// ---- FooParser.kt -----------------
 //header.txt
 package test
 

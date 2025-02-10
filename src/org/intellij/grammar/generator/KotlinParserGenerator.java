@@ -30,6 +30,7 @@ import org.intellij.grammar.psi.impl.GrammarUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -238,6 +239,13 @@ public class KotlinParserGenerator extends GeneratorBase {
         .getNotificationGroup("grammarkit.parser.generator.log")
         .createNotification(text, MessageType.WARNING).notify(myFile.getProject());
     }
+  }
+
+  @Override
+  protected void openOutput(String className) throws IOException {
+    final var classNameAdjusted = myPackagePrefix.isEmpty() ? className : StringUtil.trimStart(className, myPackagePrefix + ".");
+    final var file = new File(myOutputPath, classNameAdjusted.replace('.', File.separatorChar) + ".kt");
+    myOut = openOutputInner(className, file);
   }
 
   @Override
@@ -506,17 +514,19 @@ public class KotlinParserGenerator extends GeneratorBase {
         call = generateParserInstance(body);
         reversedLambdas.put(body, name);
       }
-      out("static final Parser " + name + " = " + call);
+      out("internal val %s: Parser = %s", name, call);
       myRenderedLambdas.put(name, parserClass);
     });
   }
 
   private @NotNull String generateParserInstance(@NotNull String body) {
-    return "{ %s, %s -> %s }".formatted(NAMES.builder, NAMES.level, body);
+    return "Parser { %s, %s -> %s }".formatted(NAMES.builder, NAMES.level, body);
   }
 
   private void generateMetaMethodFields() {
-    take(myMetaMethodFields).forEach((field, call) -> out("private static final Parser " + field + " = " + call));
+    take(myMetaMethodFields).forEach(
+      (field, call) -> out("private static final Parser " + field + " = " + call)
+    );
   }
 
   private void generateRootParserContent() {
@@ -571,7 +581,6 @@ public class KotlinParserGenerator extends GeneratorBase {
     // this is where statics begin - have to convert them to
     // methods in a companion object
 
-    //out("static boolean parse_root_(%s %s, %s %s, int %s) {", shortElementType, NAMES.root, shortPsiBuilder, NAMES.builder, NAMES.level);
     out("internal fun parse_root_(%s: %s, %s: %s, %s: Int): Boolean {", NAMES.root, shortElementType, NAMES.builder, shortPsiBuilder, NAMES.level);
     if (extraRoots.isEmpty()) {
       out("return %s", rootRule == null ? "false" : generateNodeCall(rootRule, null, myGrammarRoot).render(NAMES));
@@ -999,7 +1008,7 @@ public class KotlinParserGenerator extends GeneratorBase {
         appendTokenTypes(sb, tokenTypes);
         sb.append(")");
         return sb;
-      }).collect(joining(" &&\n  ", "if (", ") return false;"));
+      }).collect(joining(" &&\n  ", "if (", ") return false"));
       out(condition);
     }
 

@@ -32,8 +32,8 @@ public abstract class GeneratorBase {
 
   protected final Boolean myGenerateForFleet;
 
-  private final String myOutputPath;
-  private final String myPackagePrefix;
+  protected final String myOutputPath;
+  protected final String myPackagePrefix;
   protected final String mySourcePath;
   protected final String myGrammarRoot;
   protected final String myGrammarRootParser;
@@ -42,7 +42,7 @@ public abstract class GeneratorBase {
   protected final NameFormat myImplClassFormat;
 
   private int myOffset;
-  private PrintWriter myOut;
+  protected PrintWriter myOut;
   protected NameShortener myShortener;
 
   protected final GenOptions G;

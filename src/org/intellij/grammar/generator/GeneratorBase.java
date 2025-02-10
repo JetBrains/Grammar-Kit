@@ -20,13 +20,10 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.*;
 
-import static java.lang.String.format;
 import static org.intellij.grammar.generator.ParserGeneratorUtil.*;
-import static org.intellij.grammar.fleet.FleetConstants.FLEET_NAMESPACE;
-import static org.intellij.grammar.fleet.FleetConstants.FLEET_NAMESPACE_PREFIX;
 
 public abstract class GeneratorBase {
-  public static final Logger LOG = Logger.getInstance(GeneratorBase.class);
+  private static final Logger LOG = Logger.getInstance(GeneratorBase.class);
 
   protected final BnfFile myFile;
 
@@ -34,6 +31,7 @@ public abstract class GeneratorBase {
 
   protected final String myOutputPath;
   protected final String myPackagePrefix;
+  private final @NotNull String myOutputFileExtension;
   protected final String mySourcePath;
   protected final String myGrammarRoot;
   protected final String myGrammarRootParser;
@@ -41,8 +39,7 @@ public abstract class GeneratorBase {
   protected final NameFormat myIntfClassFormat;
   protected final NameFormat myImplClassFormat;
 
-  private int myOffset;
-  protected PrintWriter myOut;
+  private FilePrinter myPrinter;
   protected NameShortener myShortener;
 
   protected final GenOptions G;
@@ -56,7 +53,8 @@ public abstract class GeneratorBase {
   protected GeneratorBase(@NotNull BnfFile psiFile,
                           @NotNull String sourcePath,
                           @NotNull String outputPath,
-                          @NotNull String packagePrefix) {
+                          @NotNull String packagePrefix,
+                          @NotNull String outputFileExtension) {
     myFile = psiFile;
     myGenerateForFleet = psiFile instanceof FleetBnfFileWrapper;
 
@@ -64,6 +62,7 @@ public abstract class GeneratorBase {
     mySourcePath = sourcePath;
     myOutputPath = outputPath;
     myPackagePrefix = packagePrefix;
+    myOutputFileExtension = outputFileExtension;
     myIntfClassFormat = getPsiClassFormat(myFile);
     myImplClassFormat = getPsiImplClassFormat(myFile);
 
@@ -132,19 +131,10 @@ public abstract class GeneratorBase {
     }
     resetOffset();
   }
-
+  
+  
   @NotNull
-  protected String generatePackageName(String className) {
-    var packageName = StringUtil.getPackageName(className);
-    if (myGenerateForFleet && !className.startsWith(FLEET_NAMESPACE)) {
-      if (packageName.isEmpty()) {
-        return FLEET_NAMESPACE;
-      }
-      return FLEET_NAMESPACE_PREFIX + packageName;
-    }
-
-    return packageName;
-  }
+  protected abstract String generatePackageName(String className);
 
   /**
    * If the classHeader is a file path, loads the file content and returns it.
@@ -166,8 +156,8 @@ public abstract class GeneratorBase {
 
   protected void openOutput(String className) throws IOException {
     String classNameAdjusted = myPackagePrefix.isEmpty() ? className : StringUtil.trimStart(className, myPackagePrefix + ".");
-    File file = new File(myOutputPath, classNameAdjusted.replace('.', File.separatorChar) + ".java");
-    myOut = openOutputInner(className, file);
+    File file = new File(myOutputPath, classNameAdjusted.replace('.', File.separatorChar) + "." + myOutputFileExtension);
+    myPrinter = new FilePrinter(openOutputInner(className, file));
   }
 
   protected PrintWriter openOutputInner(String className, File file) throws IOException {
@@ -176,49 +166,16 @@ public abstract class GeneratorBase {
     return new PrintWriter(new FileOutputStream(file), false, this.myFile.getVirtualFile().getCharset());
   }
 
-  protected void closeOutput() {
-    myOut.close();
+  protected void closeOutput() throws IOException {
+    myPrinter.close();
   }
 
   public void out(String s, Object... args) {
-    out(format(s, args));
+    myPrinter.out(s, args);
   }
 
   public void out(String s) {
-    int length = s.length();
-    if (length == 0) {
-      myOut.println();
-      return;
-    }
-    boolean newStatement = true;
-    for (int start = 0, end; start < length; start = end + 1) {
-      boolean isComment = s.startsWith("//", start);
-      end = StringUtil.indexOf(s, '\n', start, length);
-      if (end == -1) end = length;
-      String substring = s.substring(start, end);
-      if (!isComment && (substring.startsWith("}") || substring.startsWith(")"))) {
-        myOffset--;
-        newStatement = true;
-      }
-      if (myOffset > 0) {
-        myOut.print(StringUtil.repeat("  ", newStatement ? myOffset : myOffset + 1));
-      }
-      myOut.println(substring);
-      if (isComment) {
-        newStatement = true;
-      }
-      else if (substring.endsWith("{")) {
-        myOffset++;
-        newStatement = true;
-      }
-      else if (substring.endsWith("(")) {
-        myOffset++;
-        newStatement = false;
-      }
-      else {
-        newStatement = substring.endsWith(";") || substring.endsWith("}");
-      }
-    }
+    myPrinter.out(s);
   }
 
   public void newLine() {
@@ -230,6 +187,6 @@ public abstract class GeneratorBase {
   }
 
   protected void resetOffset() {
-    myOffset = 0;
+    myPrinter.resetOffset();
   }
 }

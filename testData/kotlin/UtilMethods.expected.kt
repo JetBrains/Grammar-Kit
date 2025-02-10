@@ -40,7 +40,7 @@ class FooParser: PsiParser, LightPsiParser {
     // 'aa'
     fun element1(builder_: PsiBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "element1")) return false
-      var result: Boolean
+      var result_: Boolean
       val marker_: Marker = enter_section_(builder_, level_, _NONE_, ELEMENT_1, "<element 1>")
       result_ = consumeToken(builder_, "aa")
       exit_section_(builder_, level_, marker_, result_, false, null)
@@ -52,5 +52,6 @@ class FooParser: PsiParser, LightPsiParser {
     internal fun root(builder_: PsiBuilder, level_: Int): Boolean {
       return element1(builder_, level_ + 1)
     }
+
   }
 }

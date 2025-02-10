@@ -55,7 +55,7 @@ public class KotlinBnfGeneratorTest extends BnfGeneratorAbstractTest {
       assertTrue(fileToCheck.delete());
     }
 
-    for (GeneratorBase generator : newTestGenerator()) {
+    for (final var generator : newTestGenerator()) {
       generator.generate();
     }
 

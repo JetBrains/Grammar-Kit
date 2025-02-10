@@ -22,7 +22,6 @@ class GenOptions: com.intellij.lang.PsiParser, com.intellij.lang.LightPsiParser 
     return parse_root_(root_, builder_, 0)
   }
 
-  
   companion object {
     internal fun parse_root_(root_: com.intellij.psi.tree.IElementType, builder_: com.intellij.lang.PsiBuilder, level_: Int): Boolean {
       return root(builder_, level_ + 1)

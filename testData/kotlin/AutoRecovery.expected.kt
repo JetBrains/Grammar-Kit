@@ -30,7 +30,7 @@ class GeneratedParser: PsiParser, LightPsiParser {
   protected fun parse_root_(root_: IElementType, builder_: PsiBuilder): Boolean {
     return parse_root_(root_, builder_, 0)
   }
-  
+
   companion object {
     internal fun parse_root_(root_: IElementType, builder_: PsiBuilder, level_: Int): Boolean {
       return file(builder_, level_ + 1)

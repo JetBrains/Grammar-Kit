@@ -46,7 +46,7 @@ public class ExpressionGeneratorHelper {
     for (BnfRule rule : info.priorityMap.keySet()) {
       OperatorInfo operator = info.operatorMap.get(rule);
       String opCall = g.generateNodeCall(
-        info.rootRule, operator.operator, getNextName(getFuncName(operator.rule), 0), CONSUME_TYPE_OVERRIDE
+        info.rootRule, operator.operator, getNextNameKt(getKtFuncName(operator.rule), 0), CONSUME_TYPE_OVERRIDE
       ).render(g.N);
       opCalls.computeIfAbsent(opCall, k -> new ArrayList<>(2)).add(operator);
     }
@@ -226,7 +226,7 @@ public class ExpressionGeneratorHelper {
     }
 
     // main entry
-    String methodName = getFuncName(info.rootRule);
+    String methodName = getKtFuncName(info.rootRule);
     String kernelMethodName = getNextName(methodName, 0);
     String frameName = quote(getRuleDisplayName(info.rootRule, true));
     String shortPB = g.shorten(g.C.PsiBuilderClass);
@@ -290,7 +290,7 @@ public class ExpressionGeneratorHelper {
       String elementType = g.getElementType(operator.rule);
       boolean rightAssociative = getAttribute(operator.rule, KnownAttribute.RIGHT_ASSOCIATIVE);
       String tailCall = operator.tail == null ? null : g.generateNodeCall(
-        operator.rule, operator.tail, getNextName(getFuncName(operator.rule), 1), ConsumeType.DEFAULT
+        operator.rule, operator.tail, getNextName(getKtFuncName(operator.rule), 1), ConsumeType.DEFAULT
       ).render(g.N);
       if (operator.type == OperatorType.BINARY) {
         String argCall = format("%s(%s, %s, %d)", methodName, g.N.builder, g.N.level, rightAssociative ? argPriority - 1 : argPriority);
@@ -339,7 +339,7 @@ public class ExpressionGeneratorHelper {
         if (operator.type == OperatorType.ATOM) {
           if (Rule.isExternal(operator.rule)) continue;
           g.newLine();
-          g.generateNode(operator.rule, operator.rule.getExpression(), getFuncName(operator.rule), visited);
+          g.generateNode(operator.rule, operator.rule.getExpression(), getKtFuncName(operator.rule), visited);
           continue;
         }
         else if (operator.type == OperatorType.PREFIX) {
@@ -354,7 +354,7 @@ public class ExpressionGeneratorHelper {
 
           String elementType = g.getElementType(operator.rule);
           String tailCall = operator.tail == null ? null : g.generateNodeCall(
-            operator.rule, operator.tail, getNextName(getFuncName(operator.rule), 1), ConsumeType.DEFAULT
+            operator.rule, operator.tail, getNextName(getKtFuncName(operator.rule), 1), ConsumeType.DEFAULT
           ).render(g.N);
 
           g.out("%s = %s", g.N.result, opCall);
@@ -372,7 +372,7 @@ public class ExpressionGeneratorHelper {
           g.out("return %s || %s", g.N.result, g.N.pinned);
           g.out("}");
         }
-        g.generateNodeChild(operator.rule, operator.operator, getFuncName(operator.rule), 0, visited);
+        g.generateNodeChild(operator.rule, operator.operator, getKtFuncName(operator.rule), 0, visited);
         if (operator.tail != null) {
           g.generateNodeChild(operator.rule, operator.tail, operator.rule.getName(), 1, visited);
         }

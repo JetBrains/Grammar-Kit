@@ -241,8 +241,37 @@ public class ParserGeneratorUtil {
     return PsiTreeUtil.getChildrenOfTypeAsList(node, BnfExpression.class);
   }
 
-  private static @NotNull String getBaseName(@NotNull String name) {
+  public static @NotNull String getBaseName(@NotNull String name) {
     return toIdentifier(name, null, Case.AS_IS);
+  }
+
+  private static final @NotNull Set<@NotNull String> KOTLIN_RESERVED = Set.of(
+    // hard keywords
+    "as", "break", "class", "continue", "do", "else", "false", "for", "fun",
+    "if", "in", "interface", "is", "null", "object", "package", "return",
+    "super", "this", "throw", "true", "try", "typealias", "typeof", "val",
+    "var", "when", "while",
+    // soft keywords
+    "by", "catch", "constructor", "delegate", "dynamic", "field", "file",
+    "finally", "get", "import", "init", "param", "property", "receiver",
+    "set", "setparam", "value", "where",
+    // modifiers
+    "abstract", "actual", "annotation", "companion", "const", "crossinline",
+    "data", "enum", "expect", "external", "final", "infix", "inline", "inner",
+    "internal", "lateinit", "noinline", "open", "operator", "out", "override",
+    "private", "protected", "public", "reified", "sealed", "suspend", "tailrec",
+    "vararg",
+    // special identifiers (just in case)
+    /*"field", */"it"
+  );
+
+  public static String getNextNameKt(@NotNull String funcName, int i) {
+    return StringUtil.unquoteString(funcName, '`') + "_" + i;
+  }
+  
+  public static @NotNull String getKtFuncName(@NotNull BnfRule rule) {
+    final var name = getBaseName(rule.getName());
+    return KOTLIN_RESERVED.contains(name) ? "`%s`".formatted(name) : name;
   }
 
   public static String getFuncName(@NotNull BnfRule r) {

@@ -324,15 +324,15 @@ public class KotlinParserGenerator extends GeneratorBase {
     else {
       imports.add("#forced");
     }
-    imports.add(staticStarImport(myTypeHolderClass));
+    imports.add(starImport(myTypeHolderClass));
     if (G.generateTokenSets && hasAtLeastOneTokenChoice(myFile, ownRuleNames)) {
-      imports.add(staticStarImport(myTypeHolderClass + "." + TOKEN_SET_HOLDER_NAME));
+      imports.add(starImport(myTypeHolderClass + "." + TOKEN_SET_HOLDER_NAME));
     }
     if (StringUtil.isNotEmpty(myParserUtilClass)) {
-      imports.add(staticStarImport(myParserUtilClass));
+      imports.add(starImport(myParserUtilClass));
     }
     if (!isRootParser) {
-      imports.add(staticStarImport(myGrammarRootParser));
+      imports.add(starImport(myGrammarRootParser));
     }
     else if (!G.generateFQN) {
       imports.addAll(Arrays.asList(C.IElementTypeClass,

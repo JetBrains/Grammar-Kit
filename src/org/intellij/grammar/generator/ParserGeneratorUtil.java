@@ -38,7 +38,7 @@ import static org.intellij.grammar.psi.BnfTypes.BNF_SEQUENCE;
 
 /**
  * @author gregory
- *         Date: 16.07.11 10:41
+ * Date: 16.07.11 10:41
  */
 public class ParserGeneratorUtil {
   private static final String RESERVED_SUFFIX = "_$";
@@ -143,7 +143,7 @@ public class ParserGeneratorUtil {
       KnownAttribute.ListValue pairs = new KnownAttribute.ListValue();
       for (BnfListEntry o : ((BnfValueList)value).getListEntryList()) {
         PsiElement id = o.getId();
-        pairs.add(Pair.create(id == null? null : id.getText(), getLiteralValue(o.getLiteralExpression())));
+        pairs.add(Pair.create(id == null ? null : id.getText(), getLiteralValue(o.getLiteralExpression())));
       }
       return pairs;
     }
@@ -164,7 +164,7 @@ public class ParserGeneratorUtil {
       String unquoted = GrammarUtil.unquote(text);
       // in double-quoted strings: un-escape quotes only leaving the rest \ manageable
       String result = text.charAt(0) == '"' ? unquoted.replaceAll("\\\\([\"'])", "$1") : unquoted;
-      return (T) result;
+      return (T)result;
     }
     return null;
   }
@@ -209,7 +209,7 @@ public class ParserGeneratorUtil {
       child = element.getFirstChild();
     }
     return child instanceof BnfExpression && !(child instanceof BnfLiteralExpression || child instanceof BnfReferenceOrToken) ?
-        (BnfExpression) child : null;
+           (BnfExpression)child : null;
   }
 
   public static IElementType getEffectiveType(PsiElement tree) {
@@ -293,8 +293,12 @@ public class ParserGeneratorUtil {
       String s = strings[i];
       if (cas == Case.CAMEL && s.startsWith("_") && !(i == 0 || i == len - 1)) continue;
       if (cas == Case.UPPER && !s.startsWith("_") && !(i == 0 || StringUtil.endsWith(sb, "_"))) sb.append("_");
-      if (cas == Case.CAMEL && !allCaps && Case.UPPER.apply(s).equals(s)) sb.append(s);
-      else sb.append(cas.apply(s));
+      if (cas == Case.CAMEL && !allCaps && Case.UPPER.apply(s).equals(s)) {
+        sb.append(s);
+      }
+      else {
+        sb.append(cas.apply(s));
+      }
     }
     return format == null ? sb.toString() : format.apply(sb.toString());
   }
@@ -330,7 +334,8 @@ public class ParserGeneratorUtil {
     if (rule == null) return Collections.emptyList();
     List<NavigatablePsiElement> methods = Collections.emptyList();
     String selectedSuperClass = null;
-    main: for (String ruleClass : getRuleClasses(rule)) {
+    main:
+    for (String ruleClass : getRuleClasses(rule)) {
       for (String utilClass = psiImplUtilClass; utilClass != null; utilClass = helper.getSuperClassName(utilClass)) {
         methods = helper.findClassMethods(utilClass, JavaHelper.MethodType.STATIC, methodName, -1, ruleClass);
         selectedSuperClass = ruleClass;
@@ -367,7 +372,9 @@ public class ParserGeneratorUtil {
         else if (Objects.equals(type2, s)) {
           result.remove(m1);
         }
-        else continue;
+        else {
+          continue;
+        }
         break;
       }
     }
@@ -507,7 +514,7 @@ public class ParserGeneratorUtil {
     Map<String, LeafPsiElement> result = new TreeMap<>();
     for (PsiElement tree : accessors) {
       if (!(tree instanceof LeafPsiElement)) continue;
-      result.put(tree.getText(), (LeafPsiElement) tree);
+      result.put(tree.getText(), (LeafPsiElement)tree);
     }
     return result.values();
   }
@@ -589,7 +596,7 @@ public class ParserGeneratorUtil {
       newLine &= (size - count) > 2;
       if (count > 0) sb.append(",").append(newLine ? "\n" : " ");
       sb.append(tokenTypes.get(count));
-      if (newLine) line ++;
+      if (newLine) line++;
     }
   }
 
@@ -793,14 +800,16 @@ public class ParserGeneratorUtil {
       this.rule = rule;
       this.funcName = funcName;
       pinValue = type == BNF_SEQUENCE ? getAttribute(rule, KnownAttribute.PIN, funcName) : null;
-      pinIndex = pinValue instanceof Integer? (Integer)pinValue : -1;
-      pinPattern = pinValue instanceof String ? compilePattern((String) pinValue) : null;
+      pinIndex = pinValue instanceof Integer ? (Integer)pinValue : -1;
+      pinPattern = pinValue instanceof String ? compilePattern((String)pinValue) : null;
     }
 
-    public boolean active() { return pinIndex > -1 || pinPattern != null; }
+    public boolean active() {
+      return pinIndex > -1 || pinPattern != null;
+    }
 
     public boolean matches(int i, BnfExpression child) {
-      return  i == pinIndex - 1 || pinPattern != null && pinPattern.matcher(child.getText()).matches();
+      return i == pinIndex - 1 || pinPattern != null && pinPattern.matcher(child.getText()).matches();
     }
 
     public boolean shouldGenerate(List<BnfExpression> children) {
@@ -916,15 +925,14 @@ public class ParserGeneratorUtil {
       if (suffix != null && s.endsWith(suffix)) s = s.substring(0, s.length() - suffix.length());
       return s;
     }
-
   }
 
   static @NotNull String staticStarImport(@NotNull String fqn) {
     return "static " + fqn + ".*";
   }
 
-  static @NotNull String staticImport(@NotNull String fqn) {
-    return "static " + fqn;
+  public static @NotNull String starImport(@NotNull String fqn) {
+    return fqn + ".*";
   }
 
   private static final Hash.Strategy<PsiElement> TEXT_STRATEGY = new Hash.Strategy<>() {

@@ -141,5 +141,6 @@ class GenOptions: com.intellij.lang.PsiParser, com.intellij.lang.LightPsiParser 
       exit_section_(builder_, marker_, TABLE_REF, result_)
       return result_
     }
+
   }
 }

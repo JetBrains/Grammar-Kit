@@ -263,7 +263,6 @@ public class ExpressionGeneratorHelper {
     g.newLine();
 
     // kernel
-    //g.out("public static boolean %s(%s %s, int %s, int %s) {", kernelMethodName, shortPB, g.N.builder, g.N.level, g.N.priority);
     g.out("fun %s(%s: %s, %s: Int, %s: Int): Boolean {", kernelMethodName, shortPB, g.N.builder, g.N.level, g.N.priority);
     g.out("if (!recursion_guard_(%s, %s, \"%s\")) return false", g.N.builder, g.N.level, kernelMethodName);
     g.out("var %s: Boolean = true", g.N.result);

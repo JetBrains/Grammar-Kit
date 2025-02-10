@@ -70,5 +70,6 @@ public class KotlinBnfGeneratorTest extends BnfGeneratorAbstractTest {
   public void testGenOptions() throws Exception { doGenTest(); }
   public void testSmall() throws Exception { doGenTest(); }
   public void testStub() throws Exception { doGenTest(); }
+  public void testUpperRules() throws Exception { doGenTest(); }
   public void testUtilMethods() throws Exception { doGenTest(); }
 }

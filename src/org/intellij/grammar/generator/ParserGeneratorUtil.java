@@ -9,7 +9,6 @@ import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.psi.NavigatablePsiElement;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiReference;
-import com.intellij.psi.codeStyle.NameUtil;
 import com.intellij.psi.impl.source.tree.LeafPsiElement;
 import com.intellij.psi.search.searches.ReferencesSearch;
 import com.intellij.psi.tree.IElementType;
@@ -214,38 +213,6 @@ public class ParserGeneratorUtil {
     return PsiTreeUtil.getChildrenOfTypeAsList(node, BnfExpression.class);
   }
 
-
-  public static @NotNull String getBaseName(@NotNull String name) {
-    return toIdentifier(name, null, Case.AS_IS);
-  }
-
-
-  public static String getFuncName(@NotNull BnfRule r) {
-    String name = getBaseName(r.getName());
-    return JAVA_RESERVED.contains(name) ? name + RESERVED_SUFFIX : name;
-  }
-
-  static @NotNull String getWrapperParserConstantName(@NotNull String nextName) {
-    return getBaseName(nextName) + "_parser_";
-  }
-
-  // TODO: create a kotlin equivalent
-  static @NotNull String getWrapperParserMetaMethodName(@NotNull String nextName) {
-    return getBaseName(nextName) + RESERVED_SUFFIX;
-  }
-
-  public static String getNextName(@NotNull String funcName, int i) {
-    return StringUtil.trimEnd(funcName, RESERVED_SUFFIX) + "_" + i;
-  }
-
-  public static @NotNull String getGetterName(@NotNull String text) {
-    return toIdentifier(text, NameFormat.from("get"), Case.CAMEL);
-  }
-
-  static @NotNull String getTokenSetConstantName(@NotNull String nextName) {
-    return toIdentifier(nextName, null, Case.UPPER) + "_TOKENS";
-  }
-
   public static boolean isRollbackRequired(BnfExpression o, BnfFile file) {
     if (o instanceof BnfStringLiteralExpression) return false;
     if (!(o instanceof BnfReferenceOrToken)) return true;
@@ -258,26 +225,6 @@ public class ParserGeneratorUtil {
     return false;
   }
 
-  public static @NotNull String toIdentifier(@NotNull String text, @Nullable NameFormat format, @NotNull Case cas) {
-    if (text.isEmpty()) return "";
-    String fixed = text.replaceAll("[^:\\p{javaJavaIdentifierPart}]", "_");
-    boolean allCaps = Case.UPPER.apply(fixed).equals(fixed);
-    StringBuilder sb = new StringBuilder();
-    if (!Character.isJavaIdentifierStart(fixed.charAt(0)) && sb.length() == 0) sb.append("_");
-    String[] strings = NameUtil.nameToWords(fixed);
-    for (int i = 0, len = strings.length; i < len; i++) {
-      String s = strings[i];
-      if (cas == Case.CAMEL && s.startsWith("_") && !(i == 0 || i == len - 1)) continue;
-      if (cas == Case.UPPER && !s.startsWith("_") && !(i == 0 || StringUtil.endsWith(sb, "_"))) sb.append("_");
-      if (cas == Case.CAMEL && !allCaps && Case.UPPER.apply(s).equals(s)) {
-        sb.append(s);
-      }
-      else {
-        sb.append(cas.apply(s));
-      }
-    }
-    return format == null ? sb.toString() : format.apply(sb.toString());
-  }
 
   public static @NotNull NameFormat getPsiClassFormat(BnfFile file) {
     return NameFormat.from(getRootAttribute(file, KnownAttribute.PSI_CLASS_PREFIX));
@@ -289,29 +236,16 @@ public class ParserGeneratorUtil {
     return NameFormat.from(prefix + "/" + StringUtil.notNullize(suffix));
   }
 
-  public static @NotNull String getRulePsiClassName(@NotNull BnfRule rule, @Nullable NameFormat format) {
-    return toIdentifier(rule.getName(), format, Case.CAMEL);
-  }
-
-  public static Couple<String> getQualifiedRuleClassName(BnfRule rule) {
-    BnfFile file = (BnfFile)rule.getContainingFile();
-    String psiPackage = getAttribute(rule, KnownAttribute.PSI_PACKAGE);
-    String psiImplPackage = getAttribute(rule, KnownAttribute.PSI_IMPL_PACKAGE);
-    NameFormat psiFormat = getPsiClassFormat(file);
-    NameFormat psiImplFormat = getPsiImplClassFormat(file);
-    return Couple.of(psiPackage + "." + getRulePsiClassName(rule, psiFormat),
-                     psiImplPackage + "." + getRulePsiClassName(rule, psiImplFormat));
-  }
-
   public static @NotNull List<NavigatablePsiElement> findRuleImplMethods(@NotNull JavaHelper helper,
                                                                          @Nullable String psiImplUtilClass,
                                                                          @Nullable String methodName,
-                                                                         @Nullable BnfRule rule) {
+                                                                         @Nullable BnfRule rule,
+                                                                         @NotNull Renderer renderer) {
     if (rule == null) return Collections.emptyList();
     List<NavigatablePsiElement> methods = Collections.emptyList();
     String selectedSuperClass = null;
     main:
-    for (String ruleClass : getRuleClasses(rule)) {
+    for (String ruleClass : getRuleClasses(rule, renderer)) {
       for (String utilClass = psiImplUtilClass; utilClass != null; utilClass = helper.getSuperClassName(utilClass)) {
         methods = helper.findClassMethods(utilClass, JavaHelper.MethodType.STATIC, methodName, -1, ruleClass);
         selectedSuperClass = ruleClass;
@@ -357,21 +291,24 @@ public class ParserGeneratorUtil {
     return result;
   }
 
-  public static @NotNull Set<String> getRuleClasses(@NotNull BnfRule rule) {
+  public static @NotNull Set<String> getRuleClasses(
+    @NotNull BnfRule rule,
+    @NotNull Renderer renderer
+  ) {
     Set<String> result = new LinkedHashSet<>();
     BnfFile file = (BnfFile)rule.getContainingFile();
     BnfRule topSuper = getEffectiveSuperRule(file, rule);
     String superClassName = topSuper == null ? getRootAttribute(file, KnownAttribute.EXTENDS) :
                             topSuper == rule ? getAttribute(rule, KnownAttribute.EXTENDS) :
                             getAttribute(topSuper, KnownAttribute.PSI_PACKAGE) + "." +
-                            getRulePsiClassName(topSuper, getPsiClassFormat(file));
+                            renderer.getRulePsiClassName(topSuper, getPsiClassFormat(file));
     String implSuper = StringUtil.notNullize(getAttribute(rule, KnownAttribute.MIXIN), superClassName);
-    Couple<String> names = getQualifiedRuleClassName(rule);
+    Couple<String> names = renderer.getQualifiedRuleClassName(rule);
     result.add(names.first);
     result.add(names.second);
     result.add(superClassName);
     result.add(implSuper);
-    result.addAll(getSuperInterfaceNames(file, rule, getPsiClassFormat(file)));
+    result.addAll(getSuperInterfaceNames(file, rule, getPsiClassFormat(file), renderer));
     return result;
   }
 
@@ -401,14 +338,14 @@ public class ParserGeneratorUtil {
     return getSuperRules(file, rule).last();
   }
 
-  static @NotNull List<String> getSuperInterfaceNames(BnfFile file, BnfRule rule, NameFormat format) {
+  static @NotNull List<String> getSuperInterfaceNames(BnfFile file, BnfRule rule, NameFormat format, @NotNull Renderer renderer) {
     List<String> strings = new ArrayList<>();
     List<String> topRuleImplements = Collections.emptyList();
     String topRuleClass = null;
     BnfRule topSuper = getEffectiveSuperRule(file, rule);
     if (topSuper != null && topSuper != rule) {
       topRuleImplements = getAttribute(topSuper, KnownAttribute.IMPLEMENTS).asStrings();
-      topRuleClass = getAttribute(topSuper, KnownAttribute.PSI_PACKAGE) + "." + getRulePsiClassName(topSuper, format);
+      topRuleClass = getAttribute(topSuper, KnownAttribute.PSI_PACKAGE) + "." + renderer.getRulePsiClassName(topSuper, format);
       if (!StringUtil.isEmpty(topRuleClass)) strings.add(topRuleClass);
     }
     List<String> rootImplements = getRootAttribute(file, KnownAttribute.IMPLEMENTS).asStrings();
@@ -417,7 +354,7 @@ public class ParserGeneratorUtil {
       if (className == null) continue;
       BnfRule superIntfRule = file.getRule(className);
       if (superIntfRule != null) {
-        strings.add(getAttribute(superIntfRule, KnownAttribute.PSI_PACKAGE) + "." + getRulePsiClassName(superIntfRule, format));
+        strings.add(getAttribute(superIntfRule, KnownAttribute.PSI_PACKAGE) + "." + renderer.getRulePsiClassName(superIntfRule, format));
       }
       else if (!topRuleImplements.contains(className) &&
                (topRuleClass == null || !rootImplements.contains(className))) {
@@ -430,34 +367,6 @@ public class ParserGeneratorUtil {
       }
     }
     return strings;
-  }
-
-  public static @Nullable String getRuleDisplayName(BnfRule rule, boolean force) {
-    String s = getRuleDisplayNameRaw(rule, force);
-    return StringUtil.isEmpty(s) ? null : "<" + s + ">";
-  }
-
-  private static @Nullable String getRuleDisplayNameRaw(BnfRule rule, boolean force) {
-    String name = getAttribute(rule, KnownAttribute.NAME);
-    BnfRule realRule = rule;
-    if (name != null) {
-      realRule = ((BnfFile)rule.getContainingFile()).getRule(name);
-      if (realRule != null && realRule != rule) name = getAttribute(realRule, KnownAttribute.NAME);
-    }
-    if (name != null || (!force && realRule == rule)) {
-      return name;
-    }
-    else {
-      String[] parts = NameUtil.splitNameIntoWords(getFuncName(realRule));
-      return Case.LOWER.apply(StringUtil.join(parts, " "));
-    }
-  }
-
-  public static String getElementType(BnfRule rule, @NotNull Case cas) {
-    String elementType = getAttribute(rule, KnownAttribute.ELEMENT_TYPE);
-    if ("".equals(elementType)) return "";
-    NameFormat prefix = NameFormat.from(getAttribute(rule, KnownAttribute.ELEMENT_TYPE_PREFIX));
-    return toIdentifier(elementType != null ? elementType : rule.getName(), prefix, cas);
   }
 
   public static String getTokenType(BnfFile file, String token, @NotNull Case cas) {
@@ -931,35 +840,6 @@ public class ParserGeneratorUtil {
         if (matches(i, children.get(i))) return true;
       }
       return false;
-    }
-  }
-
-  public static class NameFormat {
-    static final NameFormat EMPTY = new NameFormat("");
-
-    final String prefix;
-    final String suffix;
-
-    private NameFormat(@Nullable String format) {
-      JBIterable<String> parts = JBIterable.of(format == null ? null : format.split("/"));
-      prefix = parts.get(0);
-      suffix = StringUtil.join(parts.skip(1), "");
-    }
-
-    public static NameFormat from(@Nullable String format) {
-      return StringUtil.isEmpty(format) ? EMPTY : new NameFormat(format);
-    }
-
-    public String apply(String s) {
-      if (prefix != null) s = prefix + s;
-      if (suffix != null) s += suffix;
-      return s;
-    }
-
-    public String strip(String s) {
-      if (prefix != null && s.startsWith(prefix)) s = s.substring(prefix.length());
-      if (suffix != null && s.endsWith(suffix)) s = s.substring(0, s.length() - suffix.length());
-      return s;
     }
   }
 }

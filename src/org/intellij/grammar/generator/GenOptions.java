@@ -6,7 +6,6 @@ package org.intellij.grammar.generator;
 
 import com.intellij.openapi.util.text.StringUtil;
 import org.intellij.grammar.KnownAttribute;
-import org.intellij.grammar.fleet.FleetBnfFileWrapper;
 import org.intellij.grammar.psi.BnfFile;
 
 import java.util.Map;
@@ -40,12 +39,11 @@ public class GenOptions {
   public final int javaVersion;
 
   public GenOptions(BnfFile myFile) {
-    var generateForFleet = myFile instanceof FleetBnfFileWrapper;
     Map<String, String> genOptions = getRootAttribute(myFile, KnownAttribute.GENERATE).asMap();
     names = Names.forName(genOptions.get("names"));
-    generatePsi = getGenerateOption(myFile, KnownAttribute.GENERATE_PSI, genOptions, "psi") && !generateForFleet;
-    generatePsiFactory = !"no".equals(genOptions.get("psi-factory")) && !generateForFleet;
-    generatePsiClassesMap = "yes".equals(genOptions.get("psi-classes-map")) && !generateForFleet;
+    generatePsi = getGenerateOption(myFile, KnownAttribute.GENERATE_PSI, genOptions, "psi");
+    generatePsiFactory = !"no".equals(genOptions.get("psi-factory"));
+    generatePsiClassesMap = "yes".equals(genOptions.get("psi-classes-map"));
     generateTokenTypes = getGenerateOption(myFile, KnownAttribute.GENERATE_TOKENS, genOptions, "tokens");
     generateTokenSets = generateTokenTypes && "yes".equals(genOptions.get("token-sets"));
     generateElementTypes = !"no".equals(genOptions.get("elements"));

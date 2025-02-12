@@ -4,8 +4,6 @@
 
 package org.intellij.grammar.generator;
 
-import org.intellij.grammar.fleet.FleetBnfFileWrapper;
-import org.intellij.grammar.fleet.FleetConstants;
 import org.intellij.grammar.psi.BnfFile;
 
 public class IntelliJPlatformConstants {
@@ -42,16 +40,7 @@ public class IntelliJPlatformConstants {
                                   BnfConstants.LIGHT_PSI_PARSER_CLASS,
                                   BnfConstants.TOKEN_SET_CLASS);
 
-  public static final IntelliJPlatformConstants FleetConstantSet =
-    new IntelliJPlatformConstants(FleetConstants.PSI_BUILDER_CLASS,
-                                  FleetConstants.IELEMENTTYPE_CLASS,
-                                  FleetConstants.PSI_ELEMENT_CLASS,
-                                  FleetConstants.AST_NODE_CLASS,
-                                  FleetConstants.PSI_PARSER_CLASS,
-                                  FleetConstants.LIGHT_PSI_PARSER_CLASS,
-                                  FleetConstants.TOKEN_SET_CLASS);
-
   public static IntelliJPlatformConstants getConstantSetForBnf(BnfFile file) {
-    return (file instanceof FleetBnfFileWrapper) ? FleetConstantSet : IdeaConstantSet;
+    return IdeaConstantSet;
   }
 }

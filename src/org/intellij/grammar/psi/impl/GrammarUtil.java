@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
+ * Copyright 2011-2025 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
  */
 
 package org.intellij.grammar.psi.impl;
@@ -18,6 +18,7 @@ import com.intellij.util.PairProcessor;
 import com.intellij.util.Processor;
 import com.intellij.util.SmartList;
 import org.intellij.grammar.KnownAttribute;
+import org.intellij.grammar.generator.JavaRenderer;
 import org.intellij.grammar.parser.GeneratedParserUtilBase;
 import org.intellij.grammar.psi.*;
 import org.jetbrains.annotations.Contract;
@@ -48,7 +49,7 @@ public class GrammarUtil {
     while (parent instanceof GeneratedParserUtilBase.DummyBlock && parent.getPrevSibling() == null) {
       parent = parent.getParent();
     }
-    return parent == null? null : parent.getPrevSibling();
+    return parent == null ? null : parent.getPrevSibling();
   }
 
   public static boolean equalsElement(BnfExpression e1, BnfExpression e2) {
@@ -59,7 +60,7 @@ public class GrammarUtil {
       return e1.getText().equals(e2.getText());
     }
     else {
-      for (PsiElement c1 = e1.getFirstChild(), c2 = e2.getFirstChild(); ;) {
+      for (PsiElement c1 = e1.getFirstChild(), c2 = e2.getFirstChild(); ; ) {
         boolean f1 = c1 == null || c1 instanceof BnfExpression;
         boolean f2 = c2 == null || c2 instanceof BnfExpression;
         if (f1 && f2 && !equalsElement((BnfExpression)c1, (BnfExpression)c2)) return false;
@@ -79,7 +80,7 @@ public class GrammarUtil {
   }
 
   public static boolean isExternalReference(@Nullable PsiElement psiElement) {
-    PsiElement parent = psiElement == null? null : psiElement.getParent();
+    PsiElement parent = psiElement == null ? null : psiElement.getParent();
     if (parent instanceof BnfExternalExpression && ((BnfExternalExpression)parent).getRefElement() == psiElement) return true;
     if (parent instanceof BnfSequence && parent.getFirstChild() == psiElement) parent = parent.getParent();
     return parent instanceof BnfRule && Rule.isExternal((BnfRule)parent);
@@ -132,7 +133,7 @@ public class GrammarUtil {
       BnfExpression child = children.get(i);
       if (isAtomicExpression(child)) continue;
       String nextName = isTokenSequence(rule, child) ? funcName :
-                        getNextName(funcName, isMeta ? i - 1 : i);
+                        JavaRenderer.INSTANCE.getNextName(funcName, isMeta ? i - 1 : i);
       if (!processExpressionNames(rule, nextName, child, processor)) return false;
     }
     return processor.process(funcName, nonTrivialExpression);
@@ -143,7 +144,7 @@ public class GrammarUtil {
   }
 
   public static boolean processPinnedExpressions(BnfRule rule, PairProcessor<? super BnfExpression, ? super PinMatcher> processor) {
-    return processExpressionNames(rule, getFuncName(rule), rule.getExpression(), (funcName, expression) -> {
+    return processExpressionNames(rule, JavaRenderer.INSTANCE.getFuncName(rule), rule.getExpression(), (funcName, expression) -> {
       if (!(expression instanceof BnfSequence)) return true;
       List<BnfExpression> children = getChildExpressions(expression);
       if (children.size() < 2) return true;
@@ -177,7 +178,7 @@ public class GrammarUtil {
 
   public static String getMethodName(BnfRule rule, PsiElement element) {
     BnfExpression target = PsiTreeUtil.getParentOfType(element, BnfExpression.class, false);
-    String funcName = getFuncName(rule);
+    String funcName = JavaRenderer.INSTANCE.getFuncName(rule);
     if (target == null) return funcName;
     Ref<String> ref = Ref.create(null);
     processExpressionNames(rule, funcName, rule.getExpression(), (funcName1, expression) -> {
@@ -225,8 +226,12 @@ public class GrammarUtil {
 
     @Override
     public void accept(@NotNull PsiElementVisitor visitor) {
-      if (visitor instanceof BnfVisitor) accept((BnfVisitor<?>)visitor);
-      else super.accept(visitor);
+      if (visitor instanceof BnfVisitor) {
+        accept((BnfVisitor<?>)visitor);
+      }
+      else {
+        super.accept(visitor);
+      }
     }
 
     @Override

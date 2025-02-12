@@ -13,7 +13,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.intellij.grammar.generator.ParserGeneratorUtil.getWrapperParserMetaMethodName;
 
 /**
  * @author Daniil Ovchinnikov
@@ -26,7 +25,7 @@ public final class NodeCalls {
   interface NodeCall {
 
     @NotNull
-    String render();
+    String render(@NotNull Renderer renderer, @NotNull Names names);
   }
 
   @FunctionalInterface
@@ -37,24 +36,22 @@ public final class NodeCalls {
     }
 
     @NotNull
-    String render();
+    String render(@NotNull Renderer renderer);
   }
 
   static class ConsumeTokenCall implements NodeCall {
 
     final ParserGeneratorUtil.ConsumeType consumeType;
     final String token;
-    final String stateHolder;
 
-    ConsumeTokenCall(@NotNull ParserGeneratorUtil.ConsumeType consumeType, @NotNull String token, @NotNull String stateHolder) {
+    ConsumeTokenCall(@NotNull ParserGeneratorUtil.ConsumeType consumeType, @NotNull String token) {
       this.consumeType = consumeType;
       this.token = token;
-      this.stateHolder = stateHolder;
     }
 
     @Override
-    public @NotNull String render() {
-      return String.format("%s(%s, %s)", consumeType.getMethodName(), stateHolder, token);
+    public @NotNull String render(@NotNull Renderer renderer, @NotNull Names names) {
+      return String.format("%s(%s, %s)", consumeType.getMethodName(), names.builder, token);
     }
   }
 
@@ -62,57 +59,49 @@ public final class NodeCalls {
 
     final ParserGeneratorUtil.ConsumeType consumeType;
     final String tokenSetName;
-    final String stateHolder;
 
-    ConsumeTokenChoiceCall(@NotNull ParserGeneratorUtil.ConsumeType consumeType, @NotNull String tokenSetName, String stateHolder) {
+    ConsumeTokenChoiceCall(@NotNull ParserGeneratorUtil.ConsumeType consumeType, @NotNull String tokenSetName) {
       this.consumeType = consumeType;
       this.tokenSetName = tokenSetName;
-      this.stateHolder = stateHolder;
     }
 
     @Override
-    public @NotNull String render() {
-      return String.format("%s(%s, %s)", consumeType.getMethodName(), stateHolder, tokenSetName);
+    public @NotNull String render(@NotNull Renderer renderer, @NotNull Names names) {
+      return String.format("%s(%s, %s)", consumeType.getMethodName(), names.builder, tokenSetName);
     }
   }
 
   static class ConsumeTokensCall implements NodeCall {
 
     final String methodName;
-    final String stateHolder;
     final int pin;
     final List<String> tokens;
 
-    ConsumeTokensCall(@NotNull String methodName, @NotNull String stateHolder, int pin, @NotNull List<String> tokens) {
+    ConsumeTokensCall(@NotNull String methodName, int pin, @NotNull List<String> tokens) {
       this.methodName = methodName;
-      this.stateHolder = stateHolder;
       this.pin = pin;
       this.tokens = Collections.unmodifiableList(tokens);
     }
 
     @Override
-    public @NotNull String render() {
-      return String.format("%s(%s, %d, %s)", methodName, stateHolder, pin, StringUtil.join(tokens, ", "));
+    public @NotNull String render(@NotNull Renderer renderer, @NotNull Names names) {
+      return String.format("%s(%s, %d, %s)", methodName, names.builder, pin, StringUtil.join(tokens, ", "));
     }
   }
 
   static class ExpressionMethodCall implements NodeCall {
 
     final String methodName;
-    final String stateHolder;
-    final String level;
     final int priority;
 
-    ExpressionMethodCall(@NotNull String methodName, @NotNull String stateHolder, @NotNull String level, int priority) {
+    ExpressionMethodCall(@NotNull String methodName, int priority) {
       this.methodName = methodName;
-      this.stateHolder = stateHolder;
-      this.level = level;
       this.priority = priority;
     }
 
     @Override
-    public @NotNull String render() {
-      return String.format("%s(%s, %s + 1, %d)", methodName, stateHolder, level, priority);
+    public @NotNull String render(@NotNull Renderer renderer, @NotNull Names names) {
+      return String.format("%s(%s, %s + 1, %d)", methodName, names.builder, names.level, priority);
     }
   }
 
@@ -120,8 +109,8 @@ public final class NodeCalls {
 
     final @Nullable String targetClassName;
 
-    MetaMethodCall(@Nullable String targetClassName, @NotNull String methodName, @NotNull String stateHolder, @NotNull String level,  @NotNull List<NodeArgument> arguments) {
-      super(methodName, stateHolder, level, arguments);
+    MetaMethodCall(@Nullable String targetClassName, @NotNull String methodName, @NotNull List<NodeArgument> arguments) {
+      super(methodName, arguments);
       this.targetClassName = targetClassName;
     }
 
@@ -154,34 +143,30 @@ public final class NodeCalls {
       return true;
     }
 
-    private @NotNull String getMethodRef() {
-      String ref = getWrapperParserMetaMethodName(call.methodName);
+    private @NotNull String getMethodRef(@NotNull Renderer renderer) {
+      String ref = renderer.getWrapperParserMetaMethodName(call.methodName);
       String className = call.getTargetClassName();
       return className == null ? ref : String.format("%s.%s", className, ref);
     }
 
     @Override
-    public @NotNull String render() {
-      String arguments = String.join(", ", ContainerUtil.map(call.arguments, NodeArgument::render));
-      return String.format("%s(%s)", getMethodRef(), arguments);
+    public @NotNull String render(@NotNull Renderer renderer) {
+      String arguments = String.join(", ", ContainerUtil.map(call.arguments, argument -> argument.render(renderer)));
+      return String.format("%s(%s)", getMethodRef(renderer), arguments);
     }
   }
 
   static class MetaParameterCall implements NodeCall {
 
     final String metaParameterName;
-    final String stateHolder;
-    final String level;
 
-    MetaParameterCall(@NotNull String metaParameterName, String stateHolder, String level) {
+    MetaParameterCall(@NotNull String metaParameterName) {
       this.metaParameterName = metaParameterName;
-      this.stateHolder = stateHolder;
-      this.level = level;
     }
 
     @Override
-    public @NotNull String render() {
-      return String.format("%s.parse(%s, %s)", metaParameterName, stateHolder, level);
+    public @NotNull String render(@NotNull Renderer renderer, @NotNull Names names) {
+      return String.format("%s.parse(%s, %s)", metaParameterName, names.builder, names.level);
     }
   }
 
@@ -190,15 +175,11 @@ public final class NodeCalls {
     final boolean renderClass;
     final String className;
     final String methodName;
-    final String stateHolder;
-    final String level;
 
-    MethodCall(boolean renderClass, @NotNull String className, @NotNull String methodName, String stateHolder, String level) {
+    MethodCall(boolean renderClass, @NotNull String className, @NotNull String methodName) {
       this.renderClass = renderClass;
       this.className = className;
       this.methodName = methodName;
-      this.stateHolder = stateHolder;
-      this.level = level;
     }
 
     @NotNull
@@ -212,12 +193,12 @@ public final class NodeCalls {
     }
 
     @Override
-    public @NotNull String render() {
+    public @NotNull String render(@NotNull Renderer renderer, @NotNull Names names) {
       if (renderClass) {
-        return String.format("%s.%s(%s, %s + 1)", className, methodName, stateHolder, level);
+        return String.format("%s.%s(%s, %s + 1)", className, methodName, names.builder, names.level);
       }
       else {
-        return String.format("%s(%s, %s + 1)", methodName, stateHolder, level);
+        return String.format("%s(%s, %s + 1)", methodName, names.builder, names.level);
       }
     }
   }
@@ -225,14 +206,10 @@ public final class NodeCalls {
   static class MethodCallWithArguments implements NodeCall {
 
     final String methodName;
-    final String stateHolder;
-    final String level;
     final List<NodeArgument> arguments;
 
-    MethodCallWithArguments(@NotNull String methodName, @NotNull String stateHolder, @NotNull String level, @NotNull List<NodeArgument> arguments) {
+    MethodCallWithArguments(@NotNull String methodName, @NotNull List<NodeArgument> arguments) {
       this.methodName = methodName;
-      this.stateHolder = stateHolder;
-      this.level = level;
       this.arguments = Collections.unmodifiableList(arguments);
     }
 
@@ -241,15 +218,14 @@ public final class NodeCalls {
     }
 
     @Override
-    public @NotNull String render() {
+    public @NotNull String render(@NotNull Renderer renderer, @NotNull Names names) {
       String argumentStr = arguments.stream()
-        .map(NodeArgument::render)
+        .map(argument -> argument.render(renderer))
         .map(it -> ", " + it)
         .collect(Collectors.joining());
-      return String.format("%s(%s, %s + 1%s)", getMethodRef(), stateHolder, level, argumentStr);
+      return String.format("%s(%s, %s + 1%s)", getMethodRef(), names.builder, names.level, argumentStr);
     }
   }
-
 
   static class TextArgument implements NodeArgument {
 
@@ -260,7 +236,7 @@ public final class NodeCalls {
     }
 
     @Override
-    public @NotNull String render() {
+    public @NotNull String render(@NotNull Renderer renderer) {
       return text;
     }
   }

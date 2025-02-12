@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2024 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
+ * Copyright 2011-2025 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
  */
 
 package org.intellij.grammar.editor;
@@ -18,6 +18,7 @@ import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.util.containers.ContainerUtil;
 import org.intellij.grammar.BnfIcons;
 import org.intellij.grammar.KnownAttribute;
+import org.intellij.grammar.generator.JavaRenderer;
 import org.intellij.grammar.generator.ParserGeneratorUtil;
 import org.intellij.grammar.generator.RuleGraphHelper;
 import org.intellij.grammar.java.JavaHelper;
@@ -33,6 +34,18 @@ import java.util.*;
  * @author gregsh
  */
 final class BnfRuleLineMarkerProvider extends RelatedItemLineMarkerProvider {
+  private final @NotNull JavaRenderer myRenderer = JavaRenderer.INSTANCE;
+
+  private static @Nullable NavigatablePsiElement getMethod(PsiElement element) {
+    BnfRule rule = PsiTreeUtil.getParentOfType(element, BnfRule.class);
+    if (rule == null) return null;
+    String parserClass = ParserGeneratorUtil.getAttribute(rule, KnownAttribute.PARSER_CLASS);
+    if (StringUtil.isEmpty(parserClass)) return null;
+    JavaHelper helper = JavaHelper.getJavaHelper(element);
+    List<NavigatablePsiElement> methods = helper.findClassMethods(
+      parserClass, JavaHelper.MethodType.STATIC, GrammarUtil.getMethodName(rule, element), -1);
+    return ContainerUtil.getFirstItem(methods);
+  }
 
   @Override
   public void collectNavigationMarkers(@NotNull List<? extends PsiElement> elements,
@@ -54,7 +67,7 @@ final class BnfRuleLineMarkerProvider extends RelatedItemLineMarkerProvider {
         if (RuleGraphHelper.hasPsiClass(rule)) {
           hasPSI = true;
           JavaHelper javaHelper = JavaHelper.getJavaHelper(rule);
-          Couple<String> names = ParserGeneratorUtil.getQualifiedRuleClassName(rule);
+          Couple<String> names = myRenderer.getQualifiedRuleClassName(rule);
           for (String className : new String[]{names.first, names.second}) {
             NavigatablePsiElement aClass = javaHelper.findClass(className);
             if (aClass != null && (!forNavigation || visited.add(aClass))) {
@@ -69,28 +82,18 @@ final class BnfRuleLineMarkerProvider extends RelatedItemLineMarkerProvider {
         String popupTitleAd = "";
         if (action != null) {
           String shortcutText = KeymapUtil.getFirstKeyboardShortcutText(action);
-          String actionText = StringUtil.isEmpty(shortcutText) ? "'" + action.getTemplatePresentation().getText() + "' action" : shortcutText;
+          String actionText =
+            StringUtil.isEmpty(shortcutText) ? "'" + action.getTemplatePresentation().getText() + "' action" : shortcutText;
           tooltipAd = "\nGo to sub-expression code via " + actionText;
           popupTitleAd = " (for sub-expressions use " + actionText + ")";
         }
         String title = "parser " + (hasPSI ? "and PSI " : "") + "code";
         NavigationGutterIconBuilder<PsiElement> builder = NavigationGutterIconBuilder.create(BnfIcons.RELATED_METHOD).
           setTargets(items).
-          setTooltipText("Click to navigate to "+title + tooltipAd).
+          setTooltipText("Click to navigate to " + title + tooltipAd).
           setPopupTitle(StringUtil.capitalize(title) + popupTitleAd);
         result.add(builder.createLineMarkerInfo(element));
       }
     }
-  }
-
-  private static @Nullable NavigatablePsiElement getMethod(PsiElement element) {
-    BnfRule rule = PsiTreeUtil.getParentOfType(element, BnfRule.class);
-    if (rule == null) return null;
-    String parserClass = ParserGeneratorUtil.getAttribute(rule, KnownAttribute.PARSER_CLASS);
-    if (StringUtil.isEmpty(parserClass)) return null;
-    JavaHelper helper = JavaHelper.getJavaHelper(element);
-    List<NavigatablePsiElement> methods = helper.findClassMethods(
-      parserClass, JavaHelper.MethodType.STATIC, GrammarUtil.getMethodName(rule, element), -1);
-    return ContainerUtil.getFirstItem(methods);
   }
 }

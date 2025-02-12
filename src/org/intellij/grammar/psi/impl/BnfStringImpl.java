@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
+ * Copyright 2011-2025 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
  */
 
 package org.intellij.grammar.psi.impl;
@@ -17,6 +17,7 @@ import com.intellij.util.IncorrectOperationException;
 import com.intellij.util.ProcessingContext;
 import com.intellij.util.SmartList;
 import org.intellij.grammar.KnownAttribute;
+import org.intellij.grammar.generator.JavaRenderer;
 import org.intellij.grammar.generator.ParserGeneratorUtil;
 import org.intellij.grammar.psi.*;
 import org.jetbrains.annotations.NotNull;
@@ -45,6 +46,10 @@ public abstract class BnfStringImpl extends BnfExpressionImpl implements BnfStri
     });
   }
 
+  public BnfStringImpl(IElementType type) {
+    super(type);
+  }
+
   public static @NotNull PsiReference createPatternReference(@NotNull BnfStringImpl e) {
     PsiReference ref = e.getUserData(REF_KEY);
     if (ref == null) {
@@ -61,8 +66,18 @@ public abstract class BnfStringImpl extends BnfExpressionImpl implements BnfStri
     return ref;
   }
 
-  public BnfStringImpl(IElementType type) {
-    super(type);
+  private static @Nullable Pattern getPattern(BnfLiteralExpression expression) {
+    return ParserGeneratorUtil.compilePattern(GrammarUtil.unquote(expression.getText()));
+  }
+
+  public static boolean matchesElement(@Nullable BnfLiteralExpression e1, @NotNull PsiElement e2) {
+    if (e1 == null) return false;
+    if (e2 instanceof PsiNamedElement) {
+      String name = ((PsiNamedElement)e2).getName();
+      Pattern pattern = getPattern(e1);
+      return name != null && pattern != null && pattern.matcher(name).matches();
+    }
+    return true;
   }
 
   @Override
@@ -104,10 +119,6 @@ public abstract class BnfStringImpl extends BnfExpressionImpl implements BnfStri
   @Override
   public @NotNull LiteralTextEscaper<? extends PsiLanguageInjectionHost> createLiteralTextEscaper() {
     return new BnfStringLiteralEscaper(this);
-  }
-
-  private static @Nullable Pattern getPattern(BnfLiteralExpression expression) {
-    return ParserGeneratorUtil.compilePattern(GrammarUtil.unquote(expression.getText()));
   }
 
   private static class MyRuleReference extends BnfReferenceImpl<BnfStringImpl> {
@@ -196,16 +207,18 @@ public abstract class BnfStringImpl extends BnfExpressionImpl implements BnfStri
         Set<String> visited = new HashSet<>();
         for (Object o : thisRule != null ? rules : new ArrayList<>(result)) {
           BnfRule rule = (BnfRule)o;
-          GrammarUtil.processExpressionNames(rule, ParserGeneratorUtil.getFuncName(rule), rule.getExpression(), (funcName, expression) -> {
-            if (!(expression instanceof BnfSequence)) return true;
-            if (!visited.add(funcName)) return true;
-            PsiElement firstNotTrivial = ParserGeneratorUtil.Rule.firstNotTrivial(ParserGeneratorUtil.Rule.of(expression));
-            if (firstNotTrivial == expression) return true;
-            if (pattern.matcher(funcName).matches()) {
-              result.add(new MyFakePsiElement(funcName, expression));
-            }
-            return true;
-          });
+          GrammarUtil.processExpressionNames(rule, JavaRenderer.INSTANCE.getFuncName(rule), rule.getExpression(),
+                                             (funcName, expression) -> {
+                                               if (!(expression instanceof BnfSequence)) return true;
+                                               if (!visited.add(funcName)) return true;
+                                               PsiElement firstNotTrivial =
+                                                 ParserGeneratorUtil.Rule.firstNotTrivial(ParserGeneratorUtil.Rule.of(expression));
+                                               if (firstNotTrivial == expression) return true;
+                                               if (pattern.matcher(funcName).matches()) {
+                                                 result.add(new MyFakePsiElement(funcName, expression));
+                                               }
+                                               return true;
+                                             });
         }
       }
       return PsiElementResolveResult.createResults(result);
@@ -221,16 +234,6 @@ public abstract class BnfStringImpl extends BnfExpressionImpl implements BnfStri
     public Object @NotNull [] getVariants() {
       return ArrayUtil.EMPTY_OBJECT_ARRAY;
     }
-  }
-
-  public static boolean matchesElement(@Nullable BnfLiteralExpression e1, @NotNull PsiElement e2) {
-    if (e1 == null) return false;
-    if (e2 instanceof PsiNamedElement) {
-      String name = ((PsiNamedElement)e2).getName();
-      Pattern pattern = getPattern(e1);
-      return name != null && pattern != null && pattern.matcher(name).matches();
-    }
-    return true;
   }
 
   private static class MyFakePsiElement extends FakePsiElement implements BnfComposite {

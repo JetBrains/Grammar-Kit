@@ -13,7 +13,9 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.tree.IElementType;
 import com.intellij.util.ObjectUtils;
 import com.intellij.util.SmartList;
-import com.intellij.util.containers.*;
+import com.intellij.util.containers.ContainerUtil;
+import com.intellij.util.containers.JBIterable;
+import com.intellij.util.containers.MultiMap;
 import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.analysis.BnfFirstNextAnalyzer;
 import org.intellij.grammar.generator.NodeCalls.*;
@@ -26,8 +28,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.*;
 
 import static com.intellij.util.containers.ContainerUtil.map;
@@ -36,7 +36,8 @@ import static java.util.stream.Collectors.*;
 import static org.intellij.grammar.analysis.BnfFirstNextAnalyzer.BNF_MATCHES_ANY;
 import static org.intellij.grammar.analysis.BnfFirstNextAnalyzer.BNF_MATCHES_EOF;
 import static org.intellij.grammar.generator.BnfConstants.*;
-import static org.intellij.grammar.generator.NameShortener.getRawClassName;
+import static org.intellij.grammar.generator.JavaNameShortener.getRawClassName;
+import static org.intellij.grammar.generator.KotlinParserGeneratorUtil.*;
 import static org.intellij.grammar.generator.ParserGeneratorUtil.*;
 import static org.intellij.grammar.generator.RuleGraphHelper.*;
 import static org.intellij.grammar.psi.BnfTypes.*;
@@ -48,28 +49,7 @@ import static org.intellij.grammar.psi.BnfTypes.*;
  */
 public class KotlinParserGenerator extends GeneratorBase {
   public static final Logger LOG = Logger.getInstance(KotlinParserGenerator.class);
-
-  @NotNull
-  RuleInfo ruleInfo(BnfRule rule) {
-    return Objects.requireNonNull(myRuleInfos.get(rule.getName()));
-  }
-
-  private final Map<String, RuleInfo> myRuleInfos = new TreeMap<>();
-  private final Map<String, String> myParserLambdas = new HashMap<>();       // field name -> body
-  private final Map<String, String> myRenderedLambdas = new HashMap<>();     // field name -> parser class FQN
-  private final Set<String> myInlinedChildNodes = new HashSet<>();
-
-  /**
-   * Some meta-method calls use only static parsers as arguments,
-   * i.e. they don't reference meta-method parameters,
-   * we want to cache them in static fields.
-   * <p/>
-   * Mapping: <code> meta field name -> meta method call </code>
-   */
-  private final Map<String, String> myMetaMethodFields = new HashMap<>();
-
-  private final Map<String, String> mySimpleTokens;
-
+  private static final @NotNull String HORIZONTAL_SEPARATOR = "/* ********************************************************** */";
   /**
    * Name of the class containing runtime parser utilities
    * (default: {@link GeneratedParserUtilBase}).
@@ -80,20 +60,30 @@ public class KotlinParserGenerator extends GeneratorBase {
    * to use in the parser.
    */
   protected final String myPsiImplUtilClass;
-
   /**
    * Name of the visitor class
    */
   protected final String myVisitorClassName;
   protected final String myTypeHolderClass;
-
+  protected final IntelliJPlatformConstants C;
+  final Names N;
+  private final Map<String, RuleInfo> myRuleInfos = new TreeMap<>();
+  private final Map<String, String> myParserLambdas = new HashMap<>();       // field name -> body
+  private final Map<String, String> myRenderedLambdas = new HashMap<>();     // field name -> parser class FQN
+  private final Set<String> myInlinedChildNodes = new HashSet<>();
+  /**
+   * Some meta-method calls use only static parsers as arguments,
+   * i.e. they don't reference meta-method parameters,
+   * we want to cache them in static fields.
+   * <p/>
+   * Mapping: <code> meta field name -> meta method call </code>
+   */
+  private final Map<String, String> myMetaMethodFields = new HashMap<>();
+  private final Map<String, String> mySimpleTokens;
   private final RuleGraphHelper myGraphHelper;
   private final ExpressionHelper myExpressionHelper;
   private final BnfFirstNextAnalyzer myFirstNextAnalyzer;
   private final JavaHelper myJavaHelper;
-
-  final Names N;
-  protected final IntelliJPlatformConstants C;
 
   public KotlinParserGenerator(@NotNull BnfFile psiFile,
                                @NotNull String sourcePath,
@@ -155,6 +145,15 @@ public class KotlinParserGenerator extends GeneratorBase {
     calcFakeRulesWithType();
     calcRulesStubNames();
     calcAbstractRules();
+  }
+
+  private static @NotNull NodeCall generateConsumeTextToken(@NotNull ConsumeType consumeType, @NotNull String tokenText) {
+    return new ConsumeTokenCall(consumeType, "\"" + tokenText + "\"");
+  }
+
+  @NotNull
+  RuleInfo ruleInfo(BnfRule rule) {
+    return Objects.requireNonNull(myRuleInfos.get(rule.getName()));
   }
 
   private void calcAbstractRules() {
@@ -263,7 +262,7 @@ public class KotlinParserGenerator extends GeneratorBase {
       newLine();
     }
     String shortClassName = StringUtil.getShortName(className);
-    NameShortener shortener = new NameShortener(packageName, !G.generateFQN);
+    final var shortener = new KotlinNameShortener(packageName, !G.generateFQN);
 
     // imports
     Set<String> includedClasses = collectClasses(imports, packageName);
@@ -305,7 +304,9 @@ public class KotlinParserGenerator extends GeneratorBase {
     }
 
     // type header itself
-    out("%s %s%s {", Case.LOWER.apply(javaType.name()).replace('_', ' '), shortClassName, sb.toString());
+    final var optOpenSpecifier = (javaType == Java.CLASS) ? "open " : "";
+    final var typeString = Case.LOWER.apply(javaType.name()).replace('_', ' ');
+    out("%s%s %s%s {", optOpenSpecifier, typeString, shortClassName, sb.toString());
     newLine();
 
     myShortener = shortener;
@@ -345,15 +346,13 @@ public class KotlinParserGenerator extends GeneratorBase {
     return imports;
   }
 
-  private static final @NotNull String HORIZONTAL_SEPARATOR = "/* ********************************************************** */";
-
   private void generateParser(String parserClass, Collection<String> ownRuleNames) {
     final var isRootParser = parserClass.equals(myGrammarRootParser);
     final var imports = generateImportsSet(isRootParser, ownRuleNames);
 
     generateClassHeader(parserClass,
                         imports,
-                        "",
+                        KT_SUPPRESS_ANNO + "(\"unused\", \"FunctionName\", \"JoinDeclarationAndAssignment\")",
                         Java.CLASS, "",
                         isRootParser ? C.PsiParserClass : "",
                         isRootParser ? C.LightPsiParserClass : "");
@@ -362,7 +361,8 @@ public class KotlinParserGenerator extends GeneratorBase {
       generateRootParserNonStatics();
       out("companion object {");
       generateRootParserStatics();
-    } else {
+    }
+    else {
       out("companion object {");
     }
 
@@ -420,7 +420,7 @@ public class KotlinParserGenerator extends GeneratorBase {
       (field, call) -> out("private val %s: Parser = %s", field, call)
     );
   }
-  
+
   private void generateRootParserNonStatics() {
     BnfRule rootRule = myFile.getRule(myGrammarRoot);
     List<BnfRule> extraRoots = new ArrayList<>();
@@ -626,7 +626,7 @@ public class KotlinParserGenerator extends GeneratorBase {
     List<BnfExpression> children = isSingleNode ? Collections.singletonList(node) : getChildExpressions(node);
     String frameName = !children.isEmpty() && firstNonTrivial && !Rule.isMeta(rule) ? quote(getRuleDisplayName(rule, !isPrivate)) : null;
 
-    String extraParameters = metaParameters.stream().map(it -> ", Parser " + it).collect(joining());
+    String extraParameters = metaParameters.stream().map(", %s: Parser"::formatted).collect(joining());
 
     // the actual method header
     out("%sfun %s(%s: %s, %s: Int%s): Boolean {",
@@ -639,7 +639,8 @@ public class KotlinParserGenerator extends GeneratorBase {
     );
     if (isSingleNode) {
       if (isPrivate && !isLeftInner && recoverWhile == null && frameName == null) {
-        String nodeCall = generateNodeCall(rule, node, getNextNameKt(funcName, 0)).render(N);
+        final var nodeCallElement = generateNodeCall(rule, node, getNextNameKt(funcName, 0));
+        String nodeCall = nodeCallElement.render(N);
         out("return %s", nodeCall);
         out("}");
         if (node instanceof BnfExternalExpression && ((BnfExternalExpression)node).getExpressionList().size() > 1) {
@@ -827,7 +828,7 @@ public class KotlinParserGenerator extends GeneratorBase {
     out("}");
     generateNodeChildren(rule, funcName, children, visited);
   }
-  
+
   /**
    * Meta-methods are methods that take several {@link Parser Parser} instances as parameters and return another {@link Parser instance}.
    * These *must* be enclosed in a companion object.
@@ -838,12 +839,12 @@ public class KotlinParserGenerator extends GeneratorBase {
    *               for {@code <<p>> | some} in {@code meta rule ::= (<<p>> | some)* }.
    */
   private void generateMetaMethod(@NotNull String methodName, @NotNull List<String> parameterNames, boolean isRule) {
-    String parameterList = parameterNames.stream().map(it -> "Parser " + it).collect(joining(", "));
+    String parameterList = parameterNames.stream().map("%s: Parser"::formatted).collect(joining(", "));
     String argumentList = String.join(", ", parameterNames);
-    String metaParserMethodName = getWrapperParserMetaMethodName(methodName);
+    String metaParserMethodName = getWrapperParserMetaMethodNameKt(methodName);
     String call = format("%s(%s, %s + 1, %s)", methodName, N.builder, N.level, argumentList);
     // @formatter:off
-    out("%sstatic Parser %s(%s) {", isRule ? "" : "private ", metaParserMethodName, parameterList);
+    out("%s fun %s(%s): Parser {", isRule ? "internal" : "private", metaParserMethodName, parameterList);
     out("return %s", generateParserInstance(call));
     out("}");
     // @formatter:on
@@ -1124,7 +1125,7 @@ public class KotlinParserGenerator extends GeneratorBase {
     else if (type == BNF_EXTERNAL_EXPRESSION) {
       List<BnfExpression> expressions = ((BnfExternalExpression)node).getExpressionList();
       if (expressions.size() == 1 && Rule.isMeta(rule)) {
-        return new MetaParameterCall(formatMetaParamName(expressions.getFirst().getText()));
+        return new MetaParameterCall(formatMetaParamName(expressions.get(0).getText()));
       }
       else {
         return generateExternalCall(rule, expressions, nextName);
@@ -1172,7 +1173,7 @@ public class KotlinParserGenerator extends GeneratorBase {
       if (Rule.isExternal(targetRule)) {
         metaParameterNames = GrammarUtil.collectMetaParameters(targetRule, targetRule.getExpression());
         callParameters = GrammarUtil.getExternalRuleExpressions(targetRule);
-        method = callParameters.getFirst().getText();
+        method = callParameters.get(0).getText();
         if (metaParameterNames.size() < expressions.size() - 1) {
           callParameters = ContainerUtil.concat(callParameters, expressions.subList(metaParameterNames.size() + 1, expressions.size()));
         }
@@ -1221,7 +1222,7 @@ public class KotlinParserGenerator extends GeneratorBase {
         else if (nested instanceof BnfExternalExpression expression) {
           List<BnfExpression> expressionList = expression.getExpressionList();
           if (expressionList.size() == 1 && Rule.isMeta(rule)) {
-            arguments.add(new MetaParameterArgument(formatMetaParamName(expressionList.getFirst().getText())));
+            arguments.add(new MetaParameterArgument(formatMetaParamName(expressionList.get(0).getText())));
           }
           else {
             arguments.add(generateWrappedNodeCall(rule, nested, argNextName));
@@ -1285,10 +1286,6 @@ public class KotlinParserGenerator extends GeneratorBase {
     return new ConsumeTokenCall(consumeType, getElementType(tokenName));
   }
 
-  private static @NotNull NodeCall generateConsumeTextToken(@NotNull ConsumeType consumeType, @NotNull String tokenText) {
-    return new ConsumeTokenCall(consumeType, "\"" + tokenText + "\"");
-  }
-
   private String getElementType(String token) {
     return getTokenType(myFile, token, G.generateTokenCase);
   }
@@ -1296,6 +1293,4 @@ public class KotlinParserGenerator extends GeneratorBase {
   String getElementType(BnfRule r) {
     return ParserGeneratorUtil.getElementType(r, G.generateElementCase);
   }
-
-  /*ElementTypes******************************************************************/
 }

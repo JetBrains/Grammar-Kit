@@ -44,10 +44,6 @@ public abstract class GeneratorBase {
 
   protected final GenOptions G;
 
-  protected NameShortener getShortener() {
-    return myShortener;
-  }
-
   protected enum Java {CLASS, INTERFACE, ABSTRACT_CLASS}
 
   protected GeneratorBase(@NotNull BnfFile psiFile,
@@ -84,7 +80,7 @@ public abstract class GeneratorBase {
     String shortClassName = StringUtil.getShortName(className);
     out("package %s;", packageName);
     newLine();
-    NameShortener shortener = new NameShortener(packageName, !G.generateFQN);
+    JavaNameShortener shortener = new JavaNameShortener(packageName, !G.generateFQN);
     Set<String> includedClasses = collectClasses(imports, packageName);
     shortener.addImports(imports, includedClasses);
     for (String s : shortener.getImports()) {

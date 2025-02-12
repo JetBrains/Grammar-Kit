@@ -1,0 +1,31 @@
+{
+  parserClass="Autopin"
+  generatePsi=false
+
+  extends(".*_statement")="statement"
+  pin("create_.*_statement")=".*_ref"
+  pin("drop_.*_statement")=".*_ref"
+  pin("override.*")=1
+  tokens=[
+    plus='+'
+  ]
+}
+
+root ::= statement *
+
+external table_ref ::= parseReference
+
+statement ::= create_statement | drop_statement
+create_statement ::= create_table_statement
+create_table_statement ::= CREATE TEMP? (GLOBAL|LOCAL) TABLE table_ref '(' ')'
+
+drop_statement ::= drop_table_statement
+drop_table_statement ::= DROP TABLE table_ref
+override_nested_sequence ::= a b (c d e) {pin=1}
+private token_sequence1 ::= a b c d table_ref {pin=3}
+private token_sequence2 ::= a b table_ref c d e {pin=5}
+private token_sequence3 ::= table_ref a b table_ref c d e {pin=1}
+private token_sequence4 ::= [] a {pin=1}
+private token_sequence5 ::= (a|&b) pinned_on_start
+private pinned_on_start ::= [] (a|b) {pin=1}
+private token_sequence6 ::= '+' a "+" a '+++'

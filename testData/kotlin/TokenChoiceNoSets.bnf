@@ -1,0 +1,16 @@
+{
+  generate = [
+    psi = 'no'
+    psi-factory = 'no'
+    tokens = 'yes'
+    token-sets = 'yes'
+  ]
+}
+
+root ::=
+
+two_tokens_choice ::= A | B
+two_tokens_repeating_choice ::= A | B | B | A
+text_token_choice ::= A | B | 'c'
+inner_parenthesized_choice ::= A | (B) | C
+inner_choice ::= (A | B | C) D

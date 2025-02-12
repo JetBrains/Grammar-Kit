@@ -1,0 +1,53 @@
+//noinspection BnfUnusedRuleForFile
+{
+  generate = [
+    psi = "no"
+    first-check = "3"
+  ]
+  parserClass = "ConsumeMethods"
+}
+
+root ::=
+
+regular_rule ::= REGULAR_TOKEN 1 2 3
+smart_rule ::= SMART_TOKEN 2 4 { consumeTokenMethod = 'smart' }
+fast_rule ::= FAST_TOKEN 3 5 { consumeTokenMethod = 'fast' }
+
+parent_regular ::= regular_rule | smart_rule | fast_rule
+parent_smart ::= regular_rule | smart_rule | fast_rule { consumeTokenMethod = 'smart' }
+parent_fast ::= regular_rule | smart_rule | fast_rule { consumeTokenMethod = 'fast' }
+
+token_regular ::= SAME_TOKEN 3 4
+token_smart ::= SAME_TOKEN 4 5 { consumeTokenMethod = 'smart' }
+token_fast ::= SAME_TOKEN 5 6 { consumeTokenMethod = 'fast' }
+
+regular_predicate_vs_smart ::= &token_regular token_smart
+regular_predicate_vs_fast ::= &token_regular token_fast
+smart_predicate_vs_regular ::= &token_smart token_regular
+smart_predicate_vs_fast ::= &token_smart token_fast
+fast_predicate_vs_regular ::= &token_fast token_regular
+fast_predicate_vs_smart ::= &token_fast token_smart
+
+regular_vs_smart ::= token_regular | token_smart
+regular_vs_smart_in_smart ::= token_regular | token_smart { consumeTokenMethod = 'smart' }
+regular_vs_smart_in_fast ::= token_regular | token_smart { consumeTokenMethod = 'fast' }
+
+regular_vs_fast ::= token_regular | token_fast
+regular_vs_fast_in_smart ::= token_regular | token_fast { consumeTokenMethod = 'smart' }
+regular_vs_fast_in_fast ::= token_regular | token_fast { consumeTokenMethod = 'fast' }
+
+smart_vs_regular ::= token_smart | token_regular
+smart_vs_regular_in_smart ::= token_smart | token_regular { consumeTokenMethod = 'smart' }
+smart_vs_regular_in_fast ::= token_smart | token_regular { consumeTokenMethod = 'fast' }
+
+smart_vs_fast ::= token_smart | token_fast
+smart_vs_fast_in_smart ::= token_smart | token_fast { consumeTokenMethod = 'smart' }
+smart_vs_fast_in_fast ::= token_smart | token_fast { consumeTokenMethod = 'fast' }
+
+fast_vs_smart ::= token_fast | token_smart
+fast_vs_smart_in_smart ::= token_fast | token_smart { consumeTokenMethod = 'smart' }
+fast_vs_smart_in_fast ::= token_fast | token_smart { consumeTokenMethod = 'fast' }
+
+fast_vs_regular ::= token_fast | token_regular
+fast_vs_regular_in_smart ::= token_fast | token_regular { consumeTokenMethod = 'smart' }
+fast_vs_regular_in_fast ::= token_fast | token_regular { consumeTokenMethod = 'fast' }

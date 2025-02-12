@@ -42,8 +42,8 @@ import static java.util.stream.Collectors.*;
 import static org.intellij.grammar.analysis.BnfFirstNextAnalyzer.BNF_MATCHES_ANY;
 import static org.intellij.grammar.analysis.BnfFirstNextAnalyzer.BNF_MATCHES_EOF;
 import static org.intellij.grammar.generator.BnfConstants.*;
+import static org.intellij.grammar.generator.JavaNameShortener.getRawClassName;
 import static org.intellij.grammar.generator.NameShortener.addTypeToImports;
-import static org.intellij.grammar.generator.NameShortener.getRawClassName;
 import static org.intellij.grammar.generator.ParserGeneratorUtil.*;
 import static org.intellij.grammar.generator.RuleGraphHelper.*;
 import static org.intellij.grammar.generator.RuleGraphHelper.Cardinality.*;
@@ -220,7 +220,7 @@ public class ParserGenerator extends GeneratorBase {
       // mixin attribute overrides "extends":
       info.realSuperClass = StringUtil.notNullize(info.mixin, adjustedSuperRuleClass);
       info.mixedAST = topInfo != null ? topInfo.mixedAST : JBIterable.of(superRuleClass, info.realSuperClass)
-        .map(NameShortener::getRawClassName)
+        .map(JavaNameShortener::getRawClassName)
         .flatMap(s -> JBTreeTraverser.<String>from(o -> JBIterable.of(myJavaHelper.getSuperClassName(o))).withRoot(s).unique())
         .find(COMPOSITE_PSI_ELEMENT_CLASS::equals) != null;
     }
@@ -1617,8 +1617,8 @@ public class ParserGenerator extends GeneratorBase {
       for (NavigatablePsiElement m : constructors) {
         List<String> types = myJavaHelper.getMethodTypes(m);
         Function<Integer, List<String>> annoProvider = i -> myJavaHelper.getParameterAnnotations(m, (i - 1) / 2);
-        out("public " + shortName + "(" + getParametersString(types, 1, 3, substitutor, annoProvider, getShortener()) + ") {");
-        out("super(" + getParametersString(types, 1, 2, substitutor, annoProvider, getShortener()) + ");");
+        out("public " + shortName + "(" + getParametersString(types, 1, 3, substitutor, annoProvider, myShortener) + ") {");
+        out("super(" + getParametersString(types, 1, 2, substitutor, annoProvider, myShortener) + ");");
         out("}");
         newLine();
       }
@@ -2020,15 +2020,15 @@ public class ParserGenerator extends GeneratorBase {
     Function<String, String> substitutor = ParserGeneratorUtil::unwrapTypeArgumentForParamList;
     out("%s%s%s %s(%s)%s%s",
         intf ? "" : "public ",
-        getGenericClauseString(genericParameters, getShortener()),
+        getGenericClauseString(genericParameters, myShortener),
         returnType,
         methodName,
-        getParametersString(methodTypes, offset, 3, substitutor, annoProvider, getShortener()),
-        getThrowsString(exceptionList, getShortener()),
+        getParametersString(methodTypes, offset, 3, substitutor, annoProvider, myShortener),
+        getThrowsString(exceptionList, myShortener),
         intf ? ";" : " {");
     if (!intf) {
       String implUtilRef = shorten(StringUtil.notNullize(myPsiImplUtilClass, KnownAttribute.PSI_IMPL_UTIL_CLASS.getName()));
-      String string = getParametersString(methodTypes, offset, 2, substitutor, annoProvider, getShortener());
+      String string = getParametersString(methodTypes, offset, 2, substitutor, annoProvider, myShortener);
       out("%s%s.%s(this%s);", "void".equals(returnType) ? "" : "return ", implUtilRef, methodName,
           string.isEmpty() ? "" : ", " + string);
       out("}");

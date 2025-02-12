@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
+ * Copyright 2011-2025 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
  */
 
 package org.intellij.grammar.generator;
@@ -19,6 +19,8 @@ import java.util.*;
 import static java.lang.String.format;
 import static org.intellij.grammar.generator.ExpressionHelper.OperatorInfo;
 import static org.intellij.grammar.generator.ExpressionHelper.OperatorType;
+import static org.intellij.grammar.generator.KotlinParserGeneratorUtil.getKtFuncName;
+import static org.intellij.grammar.generator.KotlinParserGeneratorUtil.getNextNameKt;
 import static org.intellij.grammar.generator.ParserGeneratorUtil.*;
 
 /**
@@ -40,7 +42,7 @@ public class ExpressionGeneratorHelper {
     }
     return opCalls;
   }
-  
+
   private static @NotNull Map<String, List<OperatorInfo>> buildCallMap(ExpressionHelper.ExpressionInfo info, KotlinParserGenerator g) {
     Map<String, List<OperatorInfo>> opCalls = new LinkedHashMap<>();
     for (BnfRule rule : info.priorityMap.keySet()) {

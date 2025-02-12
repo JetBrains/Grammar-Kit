@@ -34,7 +34,6 @@ import org.intellij.grammar.generator.BnfConstants;
 import org.intellij.grammar.generator.ParserGenerator;
 import org.intellij.grammar.psi.BnfFile;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.io.IOException;
@@ -84,7 +83,7 @@ public class GenerateAction extends AnAction {
     return files.filter(o -> manager.findFile(o) instanceof BnfFile);
   }
 
-  public void doGenerate(@NotNull Project project, @NotNull List<VirtualFile> bnfFiles) {
+  public static void doGenerate(@NotNull Project project, @NotNull List<VirtualFile> bnfFiles) {
     Map<VirtualFile, VirtualFile> rootMap = new LinkedHashMap<>();
     Map<VirtualFile, String> packageMap = new LinkedHashMap<>();
     PsiManager psiManager = PsiManager.getInstance(project);
@@ -92,7 +91,7 @@ public class GenerateAction extends AnAction {
     WriteAction.run(() -> {
       for (VirtualFile file : bnfFiles) {
         if (!file.isValid()) continue;
-        PsiFile bnfFile = getBnfFile(file, psiManager);
+        PsiFile bnfFile = psiManager.findFile(file);
         if (!(bnfFile instanceof BnfFile)) continue;
         String parserClass = getRootAttribute(bnfFile, KnownAttribute.PARSER_CLASS);
         VirtualFile target =
@@ -151,7 +150,7 @@ public class GenerateAction extends AnAction {
           try {
             DumbService.getInstance(project).runReadActionInSmartMode(() -> {
               if (!file.isValid()) return;
-              PsiFile bnfFile = getBnfFile(file, psiManager);
+              PsiFile bnfFile = psiManager.findFile(file);
               if (!(bnfFile instanceof BnfFile)) return;
               ParserGenerator generator = new ParserGenerator((BnfFile)bnfFile, sourcePath, genDir.getPath(), packagePrefix) {
                 @Override
@@ -194,9 +193,5 @@ public class GenerateAction extends AnAction {
 
       }
     });
-  }
-
-  protected @Nullable PsiFile getBnfFile(VirtualFile file, PsiManager psiManager) {
-    return psiManager.findFile(file);
   }
 }

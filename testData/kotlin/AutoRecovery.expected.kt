@@ -12,7 +12,8 @@ import com.intellij.psi.tree.TokenSet
 import com.intellij.lang.PsiParser
 import com.intellij.lang.LightPsiParser
 
-class GeneratedParser: PsiParser, LightPsiParser {
+@Suppress("unused", "FunctionName", "JoinDeclarationAndAssignment")
+open class GeneratedParser: PsiParser, LightPsiParser {
 
   override fun parse(root_: IElementType, builder_: PsiBuilder): ASTNode {
     parseLight(root_, builder_)
@@ -33,13 +34,13 @@ class GeneratedParser: PsiParser, LightPsiParser {
 
   companion object {
     internal fun parse_root_(root_: IElementType, builder_: PsiBuilder, level_: Int): Boolean {
-      return file(builder_, level_ + 1)
+      return `file_$`(builder_, level_ + 1)
     }
 
     /* ********************************************************** */
     // list (';' list ) *
-    internal fun file(builder_: PsiBuilder, level_: Int): Boolean {
-      if (!recursion_guard_(builder_, level_, "file")) return false
+    internal fun `file_$`(builder_: PsiBuilder, level_: Int): Boolean {
+      if (!recursion_guard_(builder_, level_, "`file_$`")) return false
       if (!nextTokenIs(builder_, PAREN1)) return false
       var result_: Boolean
       var pinned_: Boolean

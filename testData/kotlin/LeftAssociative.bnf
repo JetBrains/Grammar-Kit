@@ -1,0 +1,11 @@
+{
+  parserClass="LeftAssociative"
+  generatePsi=false
+}
+
+from ::= reference alias_definition? alias_definition2? leech? leech2?
+left alias_definition ::= AS? id
+left alias_definition2 ::= (AS? id)
+left inner leech ::= id
+private left inner leech2 ::= id
+private left leech3 ::= id?

@@ -65,13 +65,36 @@ public class KotlinBnfGeneratorTest extends BnfGeneratorAbstractTest {
     String result = FileUtil.loadFile(fileToCheck, CharsetToolkit.UTF8, true);
     doCheckResult(myFullDataPath, expectedName, result);
   }
-  
+
+  public void testAutopin() throws Exception { doGenTest(); }
   public void testAutoRecovery() throws Exception { doGenTest(); }
+  public void testBindersAndHooks() throws Exception { doGenTest(); }
+  public void testConsumeMethods() throws Exception { doGenTest(); }
+  public void testExprParser() throws Exception { doGenTest(); }
+  public void testExternalRules() throws Exception { doGenTest(); }
+  public void testExternalRulesLambdas() throws Exception { doGenTest(); }
   public void testGenOptions() throws Exception { doGenTest(); }
+  public void testLeftAssociative() throws Exception { doGenTest(); }
+  public void testPsiAccessors() throws Exception { doGenTest(); }
+  public void testPsiGen() throws Exception { doGenTest(); }
+  public void testPsiStart() throws Exception { doGenTest(); }
   public void testSmall() throws Exception { doGenTest(); }
   public void testStub() throws Exception { doGenTest(); }
+  public void testTokenChoice() throws Exception { doGenTest(); }
+  public void testTokenChoiceNoSets() throws Exception { doGenTest(); }
+  public void testTokenSequence() throws Exception { doGenTest(); }
   public void testUpperRules() throws Exception { doGenTest(); }
   public void testUtilMethods() throws Exception { doGenTest(); }
   
+  public void testSelfBnf() throws Exception { doGenTest(); }
+  public void testSelfFlex() throws Exception { doGenTest(); }
+  
   public void testJson() throws Exception { doGenTest(); }
+  
+  public void testEmpty() throws Exception {
+    myFile = createPsiFile("empty.bnf", "{ }");
+    for (var generator : newTestGenerator()) {
+      generator.generate();
+    }
+  }
 }

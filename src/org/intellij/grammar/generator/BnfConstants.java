@@ -33,6 +33,7 @@ public interface BnfConstants {
   String NOTNULL_ANNO = "@org.jetbrains.annotations.NotNull";
   String NULLABLE_ANNO = "@org.jetbrains.annotations.Nullable";
   String SUPPRESS_WARNINGS_ANNO = "@java.lang.SuppressWarnings";
+  String KT_SUPPRESS_ANNO = "@kotlin.Suppress";
 
   String ISTUBELEMENTTYPE_CLASS = "com.intellij.psi.stubs.IStubElementType";
   String STUB_BASED_PSI_ELEMENT = "com.intellij.psi.StubBasedPsiElement";

@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2024 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
+ * Copyright 2011-2025 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
  */
 package org.intellij.grammar.generator;
 
@@ -41,7 +41,7 @@ import static org.intellij.grammar.psi.BnfTypes.BNF_SEQUENCE;
  * Date: 16.07.11 10:41
  */
 public class ParserGeneratorUtil {
-  private static final String RESERVED_SUFFIX = "_$";
+  public static final String RESERVED_SUFFIX = "_$";
   private static final Set<String> JAVA_RESERVED =
     Set.of("abstract", "assert", "boolean", "break", "byte", "case", "catch", "char", "class",
            "const", "default", "do", "double", "else", "enum", "extends", "false", "final", "finally",
@@ -49,44 +49,17 @@ public class ParserGeneratorUtil {
            "native", "new", "null", "package", "private", "protected", "public", "return", "short", "static",
            "strictfp", "super", "switch", "synchronized", "this", "throw", "throws", "transient", "true",
            "try", "void", "volatile", "while", "continue");
-
-  enum ConsumeType {
-    FAST, SMART, DEFAULT;
-
-    public @NotNull String getMethodSuffix() {
-      return this == DEFAULT ? "" : StringUtil.capitalize(name().toLowerCase());
+  private static final Hash.Strategy<PsiElement> TEXT_STRATEGY = new Hash.Strategy<>() {
+    @Override
+    public int hashCode(PsiElement e) {
+      return e == null ? 0 : e.getText().hashCode();
     }
 
-    public @NotNull String getMethodName() {
-      return KnownAttribute.CONSUME_TOKEN_METHOD.getDefaultValue() + getMethodSuffix();
+    @Override
+    public boolean equals(PsiElement e1, PsiElement e2) {
+      return e1 == null ? e2 == null : e2 != null && Objects.equals(e1.getText(), e2.getText());
     }
-
-    public static @NotNull ConsumeType forRule(@NotNull BnfRule rule) {
-      String value = getAttribute(rule, KnownAttribute.CONSUME_TOKEN_METHOD);
-      for (ConsumeType method : values()) {
-        if (StringUtil.equalsIgnoreCase(value, method.name())) return method;
-      }
-      return ObjectUtils.chooseNotNull(forMethod(value), DEFAULT);
-    }
-
-    public static @Nullable ConsumeType forMethod(String value) {
-      if ("consumeTokenFast".equals(value)) return FAST;
-      if ("consumeTokenSmart".equals(value)) return SMART;
-      if ("consumeToken".equals(value)) return DEFAULT;
-      return null;
-    }
-
-    public static @Nullable ConsumeType min(@Nullable ConsumeType a, @Nullable ConsumeType b) {
-      if (a == null || b == null) return null;
-      return a.compareTo(b) < 0 ? a : b;
-    }
-
-    public static @Nullable ConsumeType max(@Nullable ConsumeType a, @Nullable ConsumeType b) {
-      if (a == null) return b;
-      if (b == null) return a;
-      return a.compareTo(b) < 0 ? b : a;
-    }
-  }
+  };
 
   public static @NotNull <T extends Enum<T>> T enumFromString(@Nullable String value, @NotNull T def) {
     try {
@@ -241,38 +214,11 @@ public class ParserGeneratorUtil {
     return PsiTreeUtil.getChildrenOfTypeAsList(node, BnfExpression.class);
   }
 
+
   public static @NotNull String getBaseName(@NotNull String name) {
     return toIdentifier(name, null, Case.AS_IS);
   }
 
-  private static final @NotNull Set<@NotNull String> KOTLIN_RESERVED = Set.of(
-    // hard keywords
-    "as", "break", "class", "continue", "do", "else", "false", "for", "fun",
-    "if", "in", "interface", "is", "null", "object", "package", "return",
-    "super", "this", "throw", "true", "try", "typealias", "typeof", "val",
-    "var", "when", "while",
-    // soft keywords
-    "by", "catch", "constructor", "delegate", "dynamic", "field", "file",
-    "finally", "get", "import", "init", "param", "property", "receiver",
-    "set", "setparam", "value", "where",
-    // modifiers
-    "abstract", "actual", "annotation", "companion", "const", "crossinline",
-    "data", "enum", "expect", "external", "final", "infix", "inline", "inner",
-    "internal", "lateinit", "noinline", "open", "operator", "out", "override",
-    "private", "protected", "public", "reified", "sealed", "suspend", "tailrec",
-    "vararg",
-    // special identifiers (just in case)
-    /*"field", */"it"
-  );
-
-  public static String getNextNameKt(@NotNull String funcName, int i) {
-    return StringUtil.unquoteString(funcName, '`') + "_" + i;
-  }
-  
-  public static @NotNull String getKtFuncName(@NotNull BnfRule rule) {
-    final var name = getBaseName(rule.getName());
-    return KOTLIN_RESERVED.contains(name) ? "`%s`".formatted(name) : name;
-  }
 
   public static String getFuncName(@NotNull BnfRule r) {
     String name = getBaseName(r.getName());
@@ -283,6 +229,7 @@ public class ParserGeneratorUtil {
     return getBaseName(nextName) + "_parser_";
   }
 
+  // TODO: create a kotlin equivalent
   static @NotNull String getWrapperParserMetaMethodName(@NotNull String nextName) {
     return getBaseName(nextName) + RESERVED_SUFFIX;
   }
@@ -731,59 +678,13 @@ public class ParserGeneratorUtil {
     return parent instanceof BnfExternalExpression && ((BnfExternalExpression)parent).getArguments().contains(expr);
   }
 
-  public static class Rule {
-
-    public static boolean isPrivate(BnfRule node) {
-      return hasModifier(node, "private");
-    }
-
-    public static boolean isExternal(BnfRule node) {
-      return hasModifier(node, "external");
-    }
-
-    public static boolean isMeta(BnfRule node) {
-      return hasModifier(node, "meta");
-    }
-
-    public static boolean isLeft(BnfRule node) {
-      return hasModifier(node, "left");
-    }
-
-    public static boolean isInner(BnfRule node) {
-      return hasModifier(node, "inner");
-    }
-
-    public static boolean isFake(BnfRule node) {
-      return hasModifier(node, "fake");
-    }
-
-    public static boolean isUpper(BnfRule node) {
-      return hasModifier(node, "upper");
-    }
-
-    private static boolean hasModifier(@Nullable BnfRule rule, @NotNull String s) {
-      if (rule == null) return false;
-      for (BnfModifier modifier : rule.getModifierList()) {
-        if (s.equals(modifier.getText())) return true;
-      }
-      return false;
-    }
-
-    public static PsiElement firstNotTrivial(BnfRule rule) {
-      for (PsiElement tree = rule.getExpression(); tree != null; tree = PsiTreeUtil.getChildOfType(tree, BnfExpression.class)) {
-        if (!isTrivialNode(tree)) return tree;
-      }
-      return null;
-    }
-
-    public static BnfRule of(BnfExpression expr) {
-      return PsiTreeUtil.getParentOfType(expr, BnfRule.class);
-    }
+  public static @Nullable String quote(@Nullable String text) {
+    return quote(text, "\"");
   }
 
-  public static @Nullable String quote(@Nullable String text) {
+  public static @Nullable String quote(@Nullable String text, @NotNull String quoteString) {
     if (text == null) return null;
-    return "\"" + text + "\"";
+    return quoteString + text + quoteString;
   }
 
   public static @Nullable Pattern compilePattern(String text) {
@@ -817,39 +718,6 @@ public class ParserGeneratorUtil {
     return compilePattern(sb.toString());
   }
 
-  public static class PinMatcher {
-
-    public final BnfRule rule;
-    public final String funcName;
-    public final Object pinValue;
-    private final int pinIndex;
-    private final Pattern pinPattern;
-
-    public PinMatcher(BnfRule rule, IElementType type, String funcName) {
-      this.rule = rule;
-      this.funcName = funcName;
-      pinValue = type == BNF_SEQUENCE ? getAttribute(rule, KnownAttribute.PIN, funcName) : null;
-      pinIndex = pinValue instanceof Integer ? (Integer)pinValue : -1;
-      pinPattern = pinValue instanceof String ? compilePattern((String)pinValue) : null;
-    }
-
-    public boolean active() {
-      return pinIndex > -1 || pinPattern != null;
-    }
-
-    public boolean matches(int i, BnfExpression child) {
-      return i == pinIndex - 1 || pinPattern != null && pinPattern.matcher(child.getText()).matches();
-    }
-
-    public boolean shouldGenerate(List<BnfExpression> children) {
-      // do not check last expression, last item pin is trivial
-      for (int i = 0, size = children.size(); i < size - 1; i++) {
-        if (matches(i, children.get(i))) return true;
-      }
-      return false;
-    }
-  }
-
   public static String getParametersString(List<String> paramsTypes,
                                            int offset,
                                            int mask,
@@ -861,7 +729,7 @@ public class ParserGeneratorUtil {
       if (i > offset) sb.append(", ");
       String type = substitutor.fun(paramsTypes.get(i));
       String name = paramsTypes.get(i + 1);
-      String rawType = NameShortener.getRawClassName(type);
+      String rawType = JavaNameShortener.getRawClassName(type);
       if (rawType.endsWith(BnfConstants.AST_NODE_CLASS)) name = "node";
       if (rawType.endsWith("ElementType")) name = "type";
       if (rawType.endsWith("Stub")) name = "stub";
@@ -927,20 +795,159 @@ public class ParserGeneratorUtil {
     return buffer.toString();
   }
 
+  static @NotNull String staticStarImport(@NotNull String fqn) {
+    return "static " + fqn + ".*";
+  }
+
+  public static @NotNull String starImport(@NotNull String fqn) {
+    return fqn + ".*";
+  }
+
+  public static <T extends PsiElement> Hash.Strategy<T> textStrategy() {
+    return (Hash.Strategy<T>)TEXT_STRATEGY;
+  }
+
+  static @NotNull <K extends Comparable<? super K>, V> Map<K, V> take(@NotNull Map<K, V> map) {
+    Map<K, V> result = new TreeMap<>(map);
+    map.clear();
+    return result;
+  }
+
+  enum ConsumeType {
+    FAST, SMART, DEFAULT;
+
+    public static @NotNull ConsumeType forRule(@NotNull BnfRule rule) {
+      String value = getAttribute(rule, KnownAttribute.CONSUME_TOKEN_METHOD);
+      for (ConsumeType method : values()) {
+        if (StringUtil.equalsIgnoreCase(value, method.name())) return method;
+      }
+      return ObjectUtils.chooseNotNull(forMethod(value), DEFAULT);
+    }
+
+    public static @Nullable ConsumeType forMethod(String value) {
+      if ("consumeTokenFast".equals(value)) return FAST;
+      if ("consumeTokenSmart".equals(value)) return SMART;
+      if ("consumeToken".equals(value)) return DEFAULT;
+      return null;
+    }
+
+    public static @Nullable ConsumeType min(@Nullable ConsumeType a, @Nullable ConsumeType b) {
+      if (a == null || b == null) return null;
+      return a.compareTo(b) < 0 ? a : b;
+    }
+
+    public static @Nullable ConsumeType max(@Nullable ConsumeType a, @Nullable ConsumeType b) {
+      if (a == null) return b;
+      if (b == null) return a;
+      return a.compareTo(b) < 0 ? b : a;
+    }
+
+    public @NotNull String getMethodSuffix() {
+      return this == DEFAULT ? "" : StringUtil.capitalize(name().toLowerCase());
+    }
+
+    public @NotNull String getMethodName() {
+      return KnownAttribute.CONSUME_TOKEN_METHOD.getDefaultValue() + getMethodSuffix();
+    }
+  }
+
+  public static class Rule {
+
+    public static boolean isPrivate(BnfRule node) {
+      return hasModifier(node, "private");
+    }
+
+    public static boolean isExternal(BnfRule node) {
+      return hasModifier(node, "external");
+    }
+
+    public static boolean isMeta(BnfRule node) {
+      return hasModifier(node, "meta");
+    }
+
+    public static boolean isLeft(BnfRule node) {
+      return hasModifier(node, "left");
+    }
+
+    public static boolean isInner(BnfRule node) {
+      return hasModifier(node, "inner");
+    }
+
+    public static boolean isFake(BnfRule node) {
+      return hasModifier(node, "fake");
+    }
+
+    public static boolean isUpper(BnfRule node) {
+      return hasModifier(node, "upper");
+    }
+
+    private static boolean hasModifier(@Nullable BnfRule rule, @NotNull String s) {
+      if (rule == null) return false;
+      for (BnfModifier modifier : rule.getModifierList()) {
+        if (s.equals(modifier.getText())) return true;
+      }
+      return false;
+    }
+
+    public static PsiElement firstNotTrivial(BnfRule rule) {
+      for (PsiElement tree = rule.getExpression(); tree != null; tree = PsiTreeUtil.getChildOfType(tree, BnfExpression.class)) {
+        if (!isTrivialNode(tree)) return tree;
+      }
+      return null;
+    }
+
+    public static BnfRule of(BnfExpression expr) {
+      return PsiTreeUtil.getParentOfType(expr, BnfRule.class);
+    }
+  }
+
+  public static class PinMatcher {
+
+    public final BnfRule rule;
+    public final String funcName;
+    public final Object pinValue;
+    private final int pinIndex;
+    private final Pattern pinPattern;
+
+    public PinMatcher(BnfRule rule, IElementType type, String funcName) {
+      this.rule = rule;
+      this.funcName = funcName;
+      pinValue = type == BNF_SEQUENCE ? getAttribute(rule, KnownAttribute.PIN, funcName) : null;
+      pinIndex = pinValue instanceof Integer ? (Integer)pinValue : -1;
+      pinPattern = pinValue instanceof String ? compilePattern((String)pinValue) : null;
+    }
+
+    public boolean active() {
+      return pinIndex > -1 || pinPattern != null;
+    }
+
+    public boolean matches(int i, BnfExpression child) {
+      return i == pinIndex - 1 || pinPattern != null && pinPattern.matcher(child.getText()).matches();
+    }
+
+    public boolean shouldGenerate(List<BnfExpression> children) {
+      // do not check last expression, last item pin is trivial
+      for (int i = 0, size = children.size(); i < size - 1; i++) {
+        if (matches(i, children.get(i))) return true;
+      }
+      return false;
+    }
+  }
+
   public static class NameFormat {
     static final NameFormat EMPTY = new NameFormat("");
 
     final String prefix;
     final String suffix;
 
-    public static NameFormat from(@Nullable String format) {
-      return StringUtil.isEmpty(format) ? EMPTY : new NameFormat(format);
-    }
-
     private NameFormat(@Nullable String format) {
       JBIterable<String> parts = JBIterable.of(format == null ? null : format.split("/"));
       prefix = parts.get(0);
       suffix = StringUtil.join(parts.skip(1), "");
+    }
+
+    public static NameFormat from(@Nullable String format) {
+      return StringUtil.isEmpty(format) ? EMPTY : new NameFormat(format);
     }
 
     public String apply(String s) {
@@ -954,35 +961,5 @@ public class ParserGeneratorUtil {
       if (suffix != null && s.endsWith(suffix)) s = s.substring(0, s.length() - suffix.length());
       return s;
     }
-  }
-
-  static @NotNull String staticStarImport(@NotNull String fqn) {
-    return "static " + fqn + ".*";
-  }
-
-  public static @NotNull String starImport(@NotNull String fqn) {
-    return fqn + ".*";
-  }
-
-  private static final Hash.Strategy<PsiElement> TEXT_STRATEGY = new Hash.Strategy<>() {
-    @Override
-    public int hashCode(PsiElement e) {
-      return e == null ? 0 : e.getText().hashCode();
-    }
-
-    @Override
-    public boolean equals(PsiElement e1, PsiElement e2) {
-      return e1 == null ? e2 == null : e2 != null && Objects.equals(e1.getText(), e2.getText());
-    }
-  };
-
-  public static <T extends PsiElement> Hash.Strategy<T> textStrategy() {
-    return (Hash.Strategy<T>)TEXT_STRATEGY;
-  }
-
-  static @NotNull <K extends Comparable<? super K>, V> Map<K, V> take(@NotNull Map<K, V> map) {
-    Map<K, V> result = new TreeMap<>(map);
-    map.clear();
-    return result;
   }
 }

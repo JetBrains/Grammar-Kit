@@ -3,7 +3,8 @@
 import generated.GeneratedTypes.*
 import com.intellij.lang.parser.GeneratedParserUtilBase.*
 
-class GenOptions: com.intellij.lang.PsiParser, com.intellij.lang.LightPsiParser {
+@kotlin.Suppress("unused", "FunctionName", "JoinDeclarationAndAssignment")
+open class GenOptions: com.intellij.lang.PsiParser, com.intellij.lang.LightPsiParser {
 
   override fun parse(root_: com.intellij.psi.tree.IElementType, builder_: com.intellij.lang.PsiBuilder): com.intellij.lang.ASTNode {
     parseLight(root_, builder_)

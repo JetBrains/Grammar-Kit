@@ -4,6 +4,7 @@ import com.intellij.openapi.util.io.FileUtil;
 import com.intellij.openapi.util.io.FileUtilRt;
 import com.intellij.openapi.vfs.CharsetToolkit;
 import com.intellij.psi.PsiFile;
+import org.intellij.grammar.generator.GeneratorBase;
 import org.intellij.grammar.generator.ParserGenerator;
 import org.intellij.grammar.psi.BnfFile;
 import org.jetbrains.annotations.NonNls;
@@ -12,23 +13,19 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.intellij.grammar.generator.ParserGeneratorUtil.getRootAttribute;
-import static org.junit.Assert.assertTrue;
-
 /**
  * @author gregsh
  */
 public abstract class BnfGeneratorAbstractTest extends BnfGeneratorTestCase {
-  
-  String myPsiOutputPath = "";
 
   public BnfGeneratorAbstractTest(String s) {
     super(s);
   }
 
-  protected ParserGenerator makeTestGenerator() {
+  protected List<GeneratorBase> newTestGenerator() {
+    var list = new ArrayList<GeneratorBase>();
     var bnfFile = (BnfFile)myFile;
-    return new ParserGenerator(bnfFile, "", myFullDataPath, myPsiOutputPath, "") {
+    list.add((new ParserGenerator(bnfFile, "", myFullDataPath, "") {
       @Override
       protected PrintWriter openOutputInner(String className, File file) throws IOException {
         String grammarName = FileUtil.getNameWithoutExtension(this.myFile.getName());
@@ -38,10 +35,11 @@ public abstract class BnfGeneratorAbstractTest extends BnfGeneratorTestCase {
         targetFile.getParentFile().mkdirs();
         FileOutputStream outputStream = new FileOutputStream(targetFile, true);
         PrintWriter out = new PrintWriter(new OutputStreamWriter(outputStream, this.myFile.getVirtualFile().getCharset()));
-        out.println("// ---- " + FileUtil.getRelativePath(new File(myFullDataPath), file.getAbsoluteFile()) + " -----------------");
+        out.println("// ---- " + file.getName() + " -----------------");
         return out;
       }
-    };
+    }));
+    return list;
   }
 
   @Override
@@ -54,15 +52,7 @@ public abstract class BnfGeneratorAbstractTest extends BnfGeneratorTestCase {
   public void doGenTest(boolean generatePsi) throws Exception {
     String name = getTestName(false);
     String text = loadFile(name + "." + myFileExt);
-    PsiFile file = createPsiFile(name, text.replaceAll("generatePsi=[^\n]*", "generatePsi=" + generatePsi));
-    String psiModulePath = getRootAttribute(file, KnownAttribute.OUTER_PSI_MODULE).replace('.', File.separatorChar);
-    String myProjectPath = myFullDataPath.substring(0, myFullDataPath.lastIndexOf(File.separatorChar) + 1);
-    myPsiOutputPath = !psiModulePath.isEmpty() ? myProjectPath + psiModulePath : "";
-    doGenTest(generatePsi, name, file);
-  }
-
-  protected void doGenTest(boolean generatePsi, String name, PsiFile testFile) throws Exception {
-    myFile = testFile;
+    myFile = createBnfFile(generatePsi, name, text);
     List<File> filesToCheck = new ArrayList<>();
     filesToCheck.add(new File(FileUtilRt.getTempDirectory(), name + ".java"));
     if (generatePsi) {
@@ -74,13 +64,20 @@ public abstract class BnfGeneratorAbstractTest extends BnfGeneratorTestCase {
       }
     }
 
-    var generator = makeTestGenerator();
-    if (generatePsi) {
-      generator.generate();
+    for (GeneratorBase generator : newTestGenerator()) {
+      if (generator instanceof ParserGenerator parserGenerator) {
+        if (generatePsi) {
+          parserGenerator.generate();
+        }
+        else {
+          parserGenerator.generateParser();
+        }
+      }
+      else {
+        generator.generate();
+      }
     }
-    else {
-      generator.generateParser();
-    }
+
 
     for (File file : filesToCheck) {
       assertTrue("Generated file not found: " + file, file.exists());
@@ -88,5 +85,9 @@ public abstract class BnfGeneratorAbstractTest extends BnfGeneratorTestCase {
       String result = FileUtil.loadFile(file, CharsetToolkit.UTF8, true);
       doCheckResult(myFullDataPath, expectedName, result);
     }
+  }
+
+  protected PsiFile createBnfFile(boolean generatePsi, String name, String text) {
+    return createPsiFile(name, text.replaceAll("generatePsi=[^\n]*", "generatePsi=" + generatePsi));
   }
 }

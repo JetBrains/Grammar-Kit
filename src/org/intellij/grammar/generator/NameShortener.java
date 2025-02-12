@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
+ * Copyright 2011-2025 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
  */
 
 package org.intellij.grammar.generator;
@@ -12,82 +12,30 @@ import org.jetbrains.annotations.Nullable;
 import java.util.*;
 import java.util.function.Consumer;
 
-/**
- * @author gregsh
- */
-public class NameShortener {
-  public static final String TYPE_TEXT_SEPARATORS = "<>,[]()@\" \n";
+public interface NameShortener {
+  /**
+   * Returns all the imports this shortener contains.
+   */
+  @NotNull Set<@NotNull String> getImports();
 
-  private final String myPackage;
-  private final boolean myEnabled;
-  private final Set<String> myImports = new LinkedHashSet<>();
+  void addImports(@NotNull Collection<@NotNull String> initialImports, @NotNull Collection<@NotNull String> includedClasses);
 
-  public NameShortener(String packageName, boolean enabled) {
-    myPackage = packageName;
-    myEnabled = enabled;
-  }
+  /**
+   * Given a fully qualified name, returns a shortened version of it.
+   * The shortening algorithm takes into consideration all the imported
+   * packages stored in this object.
+   */
+  @NotNull String shorten(@NotNull String fqn);
 
-  public Set<String> getImports() {
-    return Collections.unmodifiableSet(myImports);
-  }
+  String TYPE_TEXT_SEPARATORS = "<>,[]()@\" \n";
 
-  public void addImports(Collection<String> initialImports, Collection<String> includedClasses) {
-    if (!myEnabled) return;
-    for (String item : initialImports) {
-      boolean isStatic = false;
-      for (String s : StringUtil.tokenize(item.replaceAll("\\s+", " "), TYPE_TEXT_SEPARATORS)) {
-        s = StringUtil.trimStart(StringUtil.trimStart(s, "? super "), "? extends ");
-        boolean wasStatic = isStatic;
-        isStatic = "static".equals(s);
-        if (!s.contains(".") || !s.equals(shorten(s))) continue;
-        if (myPackage.equals(StringUtil.getPackageName(s))) continue;
-        if (includedClasses.contains(StringUtil.getShortName(s))) continue;
-        if (wasStatic) s = "static " + s;
-        myImports.add(s);
-      }
-    }
-  }
-
-  public @NotNull String shorten(String s) {
-    if (!myEnabled) return s;
-    boolean changed = false;
-    StringBuilder sb = new StringBuilder();
-    boolean quoted = false;
-    int offset = 0, len = s.length();
-    boolean vararg = s.endsWith("...");
-    for (String part : StringUtil.tokenize(new StringTokenizer(StringUtil.trimEnd(s, "..."), TYPE_TEXT_SEPARATORS, true))) {
-      String pkg;
-      if (TYPE_TEXT_SEPARATORS.contains(part) ||
-          "?".equals(part) || "extends".equals(part) || "super".equals(part)) {
-        if ("\"".equals(part) && offset > 0 && s.charAt(offset - 1) != '\\') quoted = !quoted;
-        sb.append(part);
-        if (",".equals(part) && offset < len && !Character.isWhitespace(s.charAt(offset + 1))) {
-          sb.append(" "); // Map<K,V> psi types skip space after comma
-        }
-      }
-      else if (!quoted && (myImports.contains(part) ||
-                           "java.lang".equals(pkg = StringUtil.getPackageName(part)) ||
-                           myPackage.equals(pkg) ||
-                           myImports.contains(pkg + ".*") ||
-                           part.endsWith(".") && myImports.contains(getAnnotatedFQNAt(s, offset)))) {
-        sb.append(StringUtil.getShortName(part));
-        changed = true;
-      }
-      else {
-        sb.append(part);
-      }
-      offset += part.length();
-    }
-    return changed ? sb.append(vararg ? "..." : "").toString() : s;
-  }
-
-  private static @Nullable String getAnnotatedFQNAt(@NotNull String s, int offset) {
+  static @Nullable String getAnnotatedFQNAt(@NotNull String s, int offset) {
     Ref<String> result = Ref.create();
     addTypeToImports(s.substring(offset), result::set, 0);
     return result.get();
   }
 
-  public static void addTypeToImports(@Nullable String type,
+  static void addTypeToImports(@Nullable String type,
                                       @NotNull List<String> typeAnnotations,
                                       @NotNull Collection<String> result) {
     addTypeToImports(type, result::add, -1);
@@ -124,7 +72,7 @@ public class NameShortener {
         }
       }
       else if (!quoted && prefixStack != null && !prefixStack.isEmpty() && parenCount == (prefix = prefixStack.peek())[0] &&
-               s.substring(prefix[3] + 1, offset).trim().length() > 0) {
+               !s.substring(prefix[3] + 1, offset).trim().isEmpty()) {
         prefixStack.pop();
         if (forcedOffset == -1 || prefix[1] == forcedOffset) {
           int idx = part.indexOf('.');
@@ -142,16 +90,12 @@ public class NameShortener {
     }
   }
 
-  public static @NotNull String getRawClassName(@NotNull String name) {
-    return name.indexOf("<") < name.indexOf(">") ? name.substring(0, name.indexOf("<")) : name;
-  }
-
   /**
    * Finds the first {@code <} that is not inside a quoted string ({@code "..."}).
    * Used to locate the start of generic type parameters while ignoring
    * angle brackets inside annotation string arguments.
    */
-  public static int indexOfUnquotedAngleBracket(@NotNull String s) {
+  static int indexOfUnquotedAngleBracket(@NotNull String s) {
     boolean inQuotes = false;
     for (int i = 0; i < s.length(); i++) {
       char c = s.charAt(i);

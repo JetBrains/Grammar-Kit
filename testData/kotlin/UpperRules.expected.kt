@@ -12,7 +12,8 @@ import com.intellij.psi.tree.TokenSet
 import com.intellij.lang.PsiParser
 import com.intellij.lang.LightPsiParser
 
-class GeneratedParser: PsiParser, LightPsiParser {
+@Suppress("unused", "FunctionName", "JoinDeclarationAndAssignment")
+open class GeneratedParser: PsiParser, LightPsiParser {
 
   override fun parse(root_: IElementType, builder_: PsiBuilder): ASTNode {
     parseLight(root_, builder_)
@@ -33,7 +34,7 @@ class GeneratedParser: PsiParser, LightPsiParser {
 
   companion object {
     internal fun parse_root_(root_: IElementType, builder_: PsiBuilder, level_: Int): Boolean {
-      return file(builder_, level_ + 1)
+      return `file_$`(builder_, level_ + 1)
     }
 
     val EXTENDS_SETS_: Array<TokenSet> = arrayOf(
@@ -134,12 +135,12 @@ class GeneratedParser: PsiParser, LightPsiParser {
 
     /* ********************************************************** */
     // (content ';') *
-    internal fun file(builder_: PsiBuilder, level_: Int): Boolean {
-      if (!recursion_guard_(builder_, level_, "file")) return false
+    internal fun `file_$`(builder_: PsiBuilder, level_: Int): Boolean {
+      if (!recursion_guard_(builder_, level_, "`file_$`")) return false
       while (true) {
         val pos_: Int = current_position_(builder_)
         if (!file_0(builder_, level_ + 1)) break
-        if (!empty_element_parsed_guard_(builder_, "file", pos_)) break
+        if (!empty_element_parsed_guard_(builder_, "`file_$`", pos_)) break
       }
       return true
     }

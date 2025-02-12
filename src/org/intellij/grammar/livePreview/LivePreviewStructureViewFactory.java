@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
+ * Copyright 2011-2025 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
  */
 
 package org.intellij.grammar.livePreview;
@@ -21,6 +21,7 @@ import com.intellij.psi.PsiWhiteSpace;
 import com.intellij.psi.impl.source.tree.LeafPsiElement;
 import com.intellij.psi.tree.IElementType;
 import org.intellij.grammar.BnfIcons;
+import org.intellij.grammar.generator.JavaRenderer;
 import org.intellij.grammar.psi.BnfFile;
 import org.intellij.grammar.psi.BnfRule;
 import org.jetbrains.annotations.NotNull;
@@ -32,7 +33,6 @@ import java.util.Collection;
 import java.util.Collections;
 
 import static org.intellij.grammar.generator.ParserGeneratorUtil.getPsiClassFormat;
-import static org.intellij.grammar.generator.ParserGeneratorUtil.getRulePsiClassName;
 
 /**
  * @author gregsh
@@ -55,7 +55,7 @@ public class LivePreviewStructureViewFactory implements PsiStructureViewFactory 
     };
   }
 
-  private static class MyModel extends StructureViewModelBase implements StructureViewModel.ElementInfoProvider{
+  private static class MyModel extends StructureViewModelBase implements StructureViewModel.ElementInfoProvider {
     protected MyModel(@NotNull PsiFile psiFile) {
       super(psiFile, new MyElement(psiFile));
       withSuitableClasses(PsiElement.class);
@@ -75,7 +75,6 @@ public class LivePreviewStructureViewFactory implements PsiStructureViewFactory 
     public boolean isAlwaysLeaf(StructureViewTreeElement element) {
       return element.getValue() instanceof LeafPsiElement;
     }
-
   }
 
   private static class MyElement extends PsiTreeElementBase<PsiElement> implements SortableTreeElement, ColoredItemPresentation {
@@ -116,8 +115,8 @@ public class LivePreviewStructureViewFactory implements PsiStructureViewFactory 
         BnfRule rule = ((LivePreviewElementType.RuleType)elementType).getRule(element.getProject());
         if (rule != null) {
           BnfFile file = (BnfFile)rule.getContainingFile();
-          String className = getRulePsiClassName(rule, getPsiClassFormat(file));
-          return className + ": '" + StringUtil.first(element.getText(), 30, true) +"'";
+          String className = JavaRenderer.INSTANCE.getRulePsiClassName(rule, getPsiClassFormat(file));
+          return className + ": '" + StringUtil.first(element.getText(), 30, true) + "'";
         }
       }
       return String.valueOf(elementType);
@@ -147,7 +146,7 @@ public class LivePreviewStructureViewFactory implements PsiStructureViewFactory 
 
     @Override
     public @Nullable TextAttributesKey getTextAttributesKey() {
-      return getElement() instanceof PsiErrorElement? CodeInsightColors.ERRORS_ATTRIBUTES : null;
+      return getElement() instanceof PsiErrorElement ? CodeInsightColors.ERRORS_ATTRIBUTES : null;
     }
   }
 }

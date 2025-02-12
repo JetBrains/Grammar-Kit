@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
+ * Copyright 2011-2025 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
  */
 
 package org.intellij.grammar.generator;
@@ -22,13 +22,14 @@ import static org.intellij.grammar.psi.BnfTypes.BNF_REFERENCE_OR_TOKEN;
 import static org.intellij.grammar.psi.BnfTypes.BNF_STRING;
 
 /**
-* @author gregsh
-*/
+ * @author gregsh
+ */
 public class RuleMethodsHelper {
   private final RuleGraphHelper myGraphHelper;
   private final ExpressionHelper myExpressionHelper;
   private final Map<String, String> mySimpleTokens;
   private final GenOptions G;
+  private final @NotNull JavaRenderer R = JavaRenderer.INSTANCE;
 
   private final Map<BnfRule, Pair<Map<String, MethodInfo>, Collection<MethodInfo>>> myMethods;
 
@@ -136,7 +137,7 @@ public class RuleMethodsHelper {
           result.add(new MethodInfo(MethodType.USER, pair.first, pair.second, null, null));
         }
       }
-      else if (methodInfo ==  null) {
+      else if (methodInfo == null) {
         result.add(new MethodInfo(MethodType.MIXIN, pair.first, null, null, null));
       }
     }
@@ -163,18 +164,20 @@ public class RuleMethodsHelper {
     else {
       BnfRule asRule = (BnfRule)tree;
       result = asRule.getName();
-      if (StringUtil.isEmpty(getElementType(asRule, G.generateElementCase))) return null;
+      if (StringUtil.isEmpty(R.getElementType(asRule, G.generateElementCase))) return null;
     }
     return result;
   }
 
-  public enum MethodType { RULE, TOKEN, USER, MIXIN }
+  public enum MethodType {RULE, TOKEN, USER, MIXIN}
+
   public static class MethodInfo implements Comparable<MethodInfo> {
     final MethodType type;
     final String originalName;
     final String path;
     final BnfRule rule;
     final RuleGraphHelper.Cardinality cardinality;
+    final @NotNull JavaRenderer R = JavaRenderer.INSTANCE;
 
     String name;
 
@@ -196,7 +199,7 @@ public class RuleMethodsHelper {
       boolean many = cardinality.many();
 
       boolean renamed = !Objects.equals(name, originalName);
-      String getterNameBody = getGetterName(name);
+      String getterNameBody = R.getGetterName(name);
       return getterNameBody + (many && !renamed ? "List" : "");
     }
 

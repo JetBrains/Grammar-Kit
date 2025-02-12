@@ -12,7 +12,8 @@ import com.intellij.psi.tree.TokenSet
 import com.intellij.lang.PsiParser
 import com.intellij.lang.LightPsiParser
 
-class FooParser: PsiParser, LightPsiParser {
+@Suppress("unused", "FunctionName", "JoinDeclarationAndAssignment")
+open class FooParser: PsiParser, LightPsiParser {
 
   override fun parse(root_: IElementType, builder_: PsiBuilder): ASTNode {
     parseLight(root_, builder_)

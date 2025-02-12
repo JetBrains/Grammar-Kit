@@ -12,7 +12,8 @@ import com.intellij.psi.tree.TokenSet
 import com.intellij.lang.PsiParser
 import com.intellij.lang.LightPsiParser
 
-class JsonParser: PsiParser, LightPsiParser {
+@Suppress("unused", "FunctionName", "JoinDeclarationAndAssignment")
+open class JsonParser: PsiParser, LightPsiParser {
 
   override fun parse(root_: IElementType, builder_: PsiBuilder): ASTNode {
     parseLight(root_, builder_)
@@ -76,7 +77,7 @@ class JsonParser: PsiParser, LightPsiParser {
       var result_: Boolean
       var pinned_: Boolean
       val marker_: Marker = enter_section_(builder_, level_, _NONE_)
-      result_ = `value`(builder_, level_ + 1)
+      result_ = `value_$`(builder_, level_ + 1)
       pinned_ = result_ // pin = 1
       result_ = result_ && array_element_1(builder_, level_ + 1)
       exit_section_(builder_, level_, marker_, result_, pinned_, JsonParser::not_bracket_or_next_value)
@@ -123,7 +124,7 @@ class JsonParser: PsiParser, LightPsiParser {
       if (!recursion_guard_(builder_, level_, "json")) return false
       while (true) {
         val pos_: Int = current_position_(builder_)
-        if (!`value`(builder_, level_ + 1)) break
+        if (!`value_$`(builder_, level_ + 1)) break
         if (!empty_element_parsed_guard_(builder_, "json", pos_)) break
       }
       return true
@@ -159,7 +160,7 @@ class JsonParser: PsiParser, LightPsiParser {
       if (!recursion_guard_(builder_, level_, "not_brace_or_next_value_0")) return false
       var result_: Boolean
       result_ = consumeToken(builder_, R_CURLY)
-      if (!result_) result_ = `value`(builder_, level_ + 1)
+      if (!result_) result_ = `value_$`(builder_, level_ + 1)
       return result_
     }
 
@@ -179,7 +180,7 @@ class JsonParser: PsiParser, LightPsiParser {
       if (!recursion_guard_(builder_, level_, "not_bracket_or_next_value_0")) return false
       var result_: Boolean
       result_ = consumeToken(builder_, R_BRACKET)
-      if (!result_) result_ = `value`(builder_, level_ + 1)
+      if (!result_) result_ = `value_$`(builder_, level_ + 1)
       return result_
     }
 
@@ -209,8 +210,8 @@ class JsonParser: PsiParser, LightPsiParser {
 
     /* ********************************************************** */
     // '{' object_element* '}'
-    fun `object`(builder_: PsiBuilder, level_: Int): Boolean {
-      if (!recursion_guard_(builder_, level_, "`object`")) return false
+    fun `object_$`(builder_: PsiBuilder, level_: Int): Boolean {
+      if (!recursion_guard_(builder_, level_, "`object_$`")) return false
       if (!nextTokenIs(builder_, L_CURLY)) return false
       var result_: Boolean
       var pinned_: Boolean
@@ -241,7 +242,7 @@ class JsonParser: PsiParser, LightPsiParser {
       var result_: Boolean
       var pinned_: Boolean
       val marker_: Marker = enter_section_(builder_, level_, _NONE_)
-      result_ = `property`(builder_, level_ + 1)
+      result_ = `property_$`(builder_, level_ + 1)
       pinned_ = result_ // pin = 1
       result_ = result_ && object_element_1(builder_, level_ + 1)
       exit_section_(builder_, level_, marker_, result_, pinned_, JsonParser::not_brace_or_next_value)
@@ -271,8 +272,8 @@ class JsonParser: PsiParser, LightPsiParser {
 
     /* ********************************************************** */
     // property_name (':' property_value)
-    fun `property`(builder_: PsiBuilder, level_: Int): Boolean {
-      if (!recursion_guard_(builder_, level_, "`property`")) return false
+    fun `property_$`(builder_: PsiBuilder, level_: Int): Boolean {
+      if (!recursion_guard_(builder_, level_, "`property_$`")) return false
       var result_: Boolean
       var pinned_: Boolean
       val marker_: Marker = enter_section_(builder_, level_, _NONE_, PROPERTY, "<property>")
@@ -309,7 +310,7 @@ class JsonParser: PsiParser, LightPsiParser {
     /* ********************************************************** */
     // value
     internal fun property_value(builder_: PsiBuilder, level_: Int): Boolean {
-      return `value`(builder_, level_ + 1)
+      return `value_$`(builder_, level_ + 1)
     }
 
     /* ********************************************************** */
@@ -339,11 +340,11 @@ class JsonParser: PsiParser, LightPsiParser {
 
     /* ********************************************************** */
     // object | array | literal | reference_expression
-    fun `value`(builder_: PsiBuilder, level_: Int): Boolean {
-      if (!recursion_guard_(builder_, level_, "`value`")) return false
+    fun `value_$`(builder_: PsiBuilder, level_: Int): Boolean {
+      if (!recursion_guard_(builder_, level_, "`value_$`")) return false
       var result_: Boolean
       val marker_: Marker = enter_section_(builder_, level_, _COLLAPSE_, VALUE, "<value>")
-      result_ = `object`(builder_, level_ + 1)
+      result_ = `object_$`(builder_, level_ + 1)
       if (!result_) result_ = array(builder_, level_ + 1)
       if (!result_) result_ = literal(builder_, level_ + 1)
       if (!result_) result_ = reference_expression(builder_, level_ + 1)

@@ -12,7 +12,8 @@ import com.intellij.lang.LightPsiParser
 import java.util.List
 import java.util.Map
 
-class Small: PsiParser, LightPsiParser {
+@Suppress("unused", "FunctionName", "JoinDeclarationAndAssignment")
+open class Small: PsiParser, LightPsiParser {
 
   override fun parse(root_: IElementType, builder_: PsiBuilder): ASTNode {
     parseLight(root_, builder_)

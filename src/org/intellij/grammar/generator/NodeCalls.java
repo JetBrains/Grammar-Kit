@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2021 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
+ * Copyright 2011-2025 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
  */
 
 package org.intellij.grammar.generator;
@@ -18,16 +18,18 @@ import static org.intellij.grammar.generator.ParserGeneratorUtil.getWrapperParse
 /**
  * @author Daniil Ovchinnikov
  */
-public class NodeCalls {
+public final class NodeCalls {
   private NodeCalls() {
   }
 
+  @FunctionalInterface
   interface NodeCall {
 
     @NotNull
     String render();
   }
 
+  @FunctionalInterface
   interface NodeArgument {
 
     default boolean referencesMetaParameter() {

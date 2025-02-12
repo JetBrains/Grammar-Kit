@@ -18,7 +18,7 @@ import com.intellij.util.*;
 import com.intellij.util.containers.ContainerUtil;
 import com.intellij.util.containers.FactoryMap;
 import org.intellij.grammar.KnownAttribute;
-import org.intellij.grammar.generator.NameShortener;
+import org.intellij.grammar.generator.JavaNameShortener;
 import org.intellij.grammar.psi.BnfAttr;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -503,7 +503,7 @@ public abstract class JavaHelper {
       for (int i = 0; i < paramTypes.length; i ++) {
         String paramType = paramTypes[i];
         String parameter = method.types.get(2 * i + 1);
-        if (acceptsName(paramType, NameShortener.getRawClassName(parameter))) continue;
+        if (acceptsName(paramType, JavaNameShortener.getRawClassName(parameter))) continue;
         ClassInfo info = findClassSafe(paramType);
         if (info != null) {
           if (Objects.equals(info.superClass, parameter)) continue;

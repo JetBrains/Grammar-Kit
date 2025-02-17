@@ -2,11 +2,14 @@
  * Copyright 2011-2025 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
  */
 
-package org.intellij.grammar.generator;
+package org.intellij.grammar.generator.java;
 
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.psi.codeStyle.NameUtil;
 import org.intellij.grammar.KnownAttribute;
+import org.intellij.grammar.generator.Case;
+import org.intellij.grammar.generator.NameFormat;
+import org.intellij.grammar.generator.Renderer;
 import org.intellij.grammar.psi.BnfFile;
 import org.intellij.grammar.psi.BnfRule;
 import org.jetbrains.annotations.NotNull;
@@ -14,18 +17,22 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Set;
 
-import static org.intellij.grammar.generator.ParserGeneratorUtil.RESERVED_SUFFIX;
 import static org.intellij.grammar.generator.ParserGeneratorUtil.getAttribute;
 
 public final class JavaRenderer implements Renderer {
   public static final @NotNull JavaRenderer INSTANCE = new JavaRenderer();
-  private static final Set<String> JAVA_RESERVED =
-    Set.of("abstract", "assert", "boolean", "break", "byte", "case", "catch", "char", "class",
-           "const", "default", "do", "double", "else", "enum", "extends", "false", "final", "finally",
-           "float", "for", "goto", "if", "implements", "import", "instanceof", "int", "interface", "long",
-           "native", "new", "null", "package", "private", "protected", "public", "return", "short", "static",
-           "strictfp", "super", "switch", "synchronized", "this", "throw", "throws", "transient", "true",
-           "try", "void", "volatile", "while", "continue");
+  // shared with kotlin renderer
+  public static final @NotNull Set<@NotNull String> JAVA_RESERVED = Set.of(
+    // reserved keywords
+    "abstract", "assert", "boolean", "break", "byte", "case", "catch", "char", "class", "const", "continue",
+    "default", "do", "double", "else", "enum", "extends", "final", "finally", "float", "for", "goto", "if",
+    "implements", "import", "instanceof", "int", "interface", "long", "native", "new", "package", "private",
+    "protected", "public", "return", "short", "static", "strictfp", "super", "switch", "synchronized", "this",
+    "throw", "throws", "transient", "try", "void", "volatile", "while",
+    // contextual keywords
+    "exports", "module", "non-sealed", "open", "opens", "permits", "provides", "record", "requires", "sealed",
+    "to", "transitive", "uses", "var", "when", "with", "yield"
+  );
 
   private JavaRenderer() {
 

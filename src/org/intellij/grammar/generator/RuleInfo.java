@@ -6,6 +6,9 @@ package org.intellij.grammar.generator;
 
 import java.util.Set;
 
+/**
+ * A class representing the properties of a given bnf rule.
+ */
 class RuleInfo {
   final String name;
   final boolean isFake;

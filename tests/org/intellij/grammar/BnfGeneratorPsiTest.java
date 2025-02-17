@@ -12,7 +12,8 @@ import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.testFramework.fixtures.BasePlatformTestCase;
 import com.intellij.util.ProcessingContext;
 import org.intellij.grammar.generator.NameShortener;
-import org.intellij.grammar.generator.ParserGenerator;
+import org.intellij.grammar.generator.JavaParserGenerator;
+import org.intellij.grammar.generator.OutputOpener;
 import org.intellij.grammar.java.JavaHelper;
 import org.intellij.grammar.psi.BnfFile;
 import org.jetbrains.annotations.NotNull;
@@ -214,28 +215,26 @@ public class BnfGeneratorPsiTest extends BasePlatformTestCase {
     File outputFile = new File(FileUtilRt.getTempDirectory(), "BnfGeneratorPsiTest.PSI.java");
     if (outputFile.exists()) assertTrue(outputFile.delete());
 
-    ParserGenerator generator = new ParserGenerator(bnfFile, "", FileUtilRt.getTempDirectory(), "") {
-      @Override
-      protected PrintWriter openOutputInner(String className, File file) throws IOException {
-        String fileName = FileUtil.getNameWithoutExtension(file);
-        if (fileName.startsWith("Test") || fileName.equals("Visitor")) {
-          //noinspection ResultOfMethodCallIgnored
-          outputFile.getParentFile().mkdirs();
-          FileOutputStream outputStream = new FileOutputStream(outputFile, true);
-          PrintWriter out = new PrintWriter(new OutputStreamWriter(outputStream, this.myFile.getVirtualFile().getCharset()));
-          out.println("// ---- " + file.getName() + " -----------------");
-          return out;
-        }
-        return super.openOutputInner(className, file);
+    OutputOpener outputOpener = (className, file, myBnfFile) -> {
+      String fileName = FileUtil.getNameWithoutExtension(file);
+      if (fileName.startsWith("Test") || fileName.equals("Visitor")) {
+        //noinspection ResultOfMethodCallIgnored
+        outputFile.getParentFile().mkdirs();
+        FileOutputStream outputStream = new FileOutputStream(outputFile, true);
+        PrintWriter out = new PrintWriter(new OutputStreamWriter(outputStream, myBnfFile.getVirtualFile().getCharset()));
+        out.println("// ---- " + file.getName() + " -----------------");
+        return out;
       }
+      return OutputOpener.DEFAULT.openOutput(className, file, myBnfFile);
     };
+    JavaParserGenerator generator = new JavaParserGenerator(bnfFile, "", FileUtilRt.getTempDirectory(), "", outputOpener);
 
     // Simulate PsiHelper bug for qualified types (#436):
     // In real IDE with platform SDK classes resolved from bytecode,
     // PsiHelper.getAnnotationsInner() fails to filter @NotNull from method annotations
     // when PsiType.getAnnotations() doesn't return annotations on inner type components
     // of qualified types. We simulate this by wrapping the JavaHelper.
-    Field javaHelperField = ParserGenerator.class.getDeclaredField("myJavaHelper");
+    Field javaHelperField = JavaParserGenerator.class.getDeclaredField("myJavaHelper");
     javaHelperField.setAccessible(true);
     JavaHelper original = (JavaHelper) javaHelperField.get(generator);
     javaHelperField.set(generator, new DuplicateAnnotationJavaHelper(original));

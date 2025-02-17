@@ -2,73 +2,76 @@
  * Copyright 2011-2025 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
  */
 
-package org.intellij.grammar;
+package org.intellij.grammar.generator;
 
-import org.junit.Test;
+import org.jetbrains.annotations.NotNull;
 
-public class BnfGeneratorTest extends BnfGeneratorAbstractTest {
-  public BnfGeneratorTest() {
-    super("generator");
+import java.io.IOException;
+import java.util.List;
+
+public class JavaBnfGeneratorTest extends AbstractBnfGeneratorTest {
+  public JavaBnfGeneratorTest() {
+    super("generator", ".java");
   }
 
   public void testSelfBnf() throws Exception {
-    doGenTest(true);
+    doPsiTest();
   }
 
   public void testSelfFlex() throws Exception {
-    doGenTest(true);
+    doPsiTest();
   }
 
   public void testSmall() throws Exception {
-    doGenTest(false);
+    doParserTest();
   }
 
   public void testAutopin() throws Exception {
-    doGenTest(false);
+    doParserTest();
   }
 
   public void testExternalRules() throws Exception {
-    doGenTest(false);
+    doParserTest();
   }
 
   public void testExternalRulesLambdas() throws Exception {
-    doGenTest(false);
+    doParserTest();
   }
 
   public void testLeftAssociative() throws Exception {
-    doGenTest(false);
+    doParserTest();
   }
 
   public void testPsiGen() throws Exception {
-    doGenTest(true);
+    doPsiTest();
   }
 
   public void testPsiAccessors() throws Exception {
-    doGenTest(true);
+    doPsiTest();
   }
 
   public void testPsiStart() throws Exception {
-    doGenTest(true);
+    doPsiTest();
   }
 
   public void testExprParser() throws Exception {
-    doGenTest(true);
+    doPsiTest();
   }
 
   public void testTokenSequence() throws Exception {
-    doGenTest(false);
+    doParserTest();
   }
 
   public void testTokenChoice() throws Exception {
-    doGenTest(true);
+    doPsiTest();
   }
 
   public void testTokenChoiceNoSets() throws Exception {
-    doGenTest(true);
+    doPsiTest();
   }
 
   public void testStub() throws Exception {
-    doGenTest(true);
+    doPsiTest();
   }
 
   public void testStubFallback() throws Exception {
@@ -76,40 +79,44 @@ public class BnfGeneratorTest extends BnfGeneratorAbstractTest {
   }
 
   public void testUtilMethods() throws Exception {
-    doGenTest(true);
+    doPsiTest();
   }
 
   public void testBindersAndHooks() throws Exception {
-    doGenTest(false);
+    doParserTest();
   }
 
   public void testAutoRecovery() throws Exception {
-    doGenTest(true);
+    doPsiTest();
   }
 
   public void testConsumeMethods() throws Exception {
-    doGenTest(false);
+    doParserTest();
   }
 
   public void testGenOptions() throws Exception {
-    doGenTest(true);
+    doPsiTest();
   }
 
   public void testDollar() throws Exception {
-    doGenTest(false);
+    doParserTest();
   }
 
   // TODO not implemented
   public void _testUpperRules() throws Exception {
-    doGenTest(true);
+    doPsiTest();
   }
 
   public void testFixes() throws Exception {
-    doGenTest(true);
+    doPsiTest();
   }
 
-  public void testEmpty() throws Exception {
-    myFile = createPsiFile("empty.bnf", "{ }");
-    makeTestGenerator().generate();
+  public void testEmpty() throws IOException {
+    doTestEmpty();
+  }
+
+  @Override
+  protected @NotNull List<@NotNull Generator> createGenerators() {
+    return List.of(Generator.JAVA_GENERATOR);
   }
 }

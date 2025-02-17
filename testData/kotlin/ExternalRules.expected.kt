@@ -32,7 +32,7 @@ open class ExternalRules: PsiParser, LightPsiParser {
 
   companion object {
     internal fun parse_root_(root_: IElementType, builder_: PsiBuilder, level_: Int): Boolean {
-      boolean result_
+      var result_: Boolean
       if (root_ == EXTRA_ROOT) {
         result_ = ExternalRules2.extra_root(builder_, level_ + 1)
       }

@@ -5,7 +5,11 @@
 package org.intellij.grammar;
 
 import com.intellij.testFramework.UsefulTestCase;
-import org.intellij.grammar.generator.*;
+import org.intellij.grammar.generator.Case;
+import org.intellij.grammar.generator.NameFormat;
+import org.intellij.grammar.generator.NameShortener;
+import org.intellij.grammar.generator.java.JavaNameShortener;
+import org.intellij.grammar.generator.java.JavaRenderer;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -96,7 +100,7 @@ public class BnfUtilTest extends UsefulTestCase {
     List<String> imports = new ArrayList<>();
     NameShortener.addTypeToImports(longType, Collections.emptyList(), imports);
     assertEquals(Arrays.asList("org.jetbrains.annotations.NotNull", "org.jetbrains.annotations.Unmodifiable", "java.util.List", "com.intellij.psi.PsiElement"), imports);
-    NameShortener shortener = new NameShortener("com", true);
+    NameShortener shortener = new JavaNameShortener("com", true);
     shortener.addImports(imports, Collections.emptySet());
     assertEquals("@NotNull @Unmodifiable List<PsiElement>", shortener.shorten(longType));
   }
@@ -106,7 +110,7 @@ public class BnfUtilTest extends UsefulTestCase {
     List<String> imports = new ArrayList<>();
     NameShortener.addTypeToImports(longType, Collections.emptyList(), imports);
     assertEquals(Arrays.asList("org.jetbrains.annotations.NotNull", "org.jetbrains.annotations.Unmodifiable", "java.util.List", "java.lang.String"), imports);
-    NameShortener shortener = new NameShortener("com", true);
+    NameShortener shortener = new JavaNameShortener("com", true);
     shortener.addImports(imports, Collections.emptySet());
     assertEquals("@NotNull(\"val\") @Unmodifiable List<String>", shortener.shorten(longType));
   }
@@ -116,7 +120,7 @@ public class BnfUtilTest extends UsefulTestCase {
     List<String> imports = new ArrayList<>();
     NameShortener.addTypeToImports(longType, Collections.emptyList(), imports);
     assertEquals(Arrays.asList("org.a.A", "org.b.B", "org.c.C", "java.util.List"), imports);
-    NameShortener shortener = new NameShortener("com", true);
+    NameShortener shortener = new JavaNameShortener("com", true);
     shortener.addImports(imports, Collections.emptySet());
     assertEquals("@A @B @C List", shortener.shorten(longType));
   }
@@ -126,7 +130,7 @@ public class BnfUtilTest extends UsefulTestCase {
     List<String> imports = new ArrayList<>();
     NameShortener.addTypeToImports(longType, Collections.emptyList(), imports);
     assertEquals(Arrays.asList("java.util.Map", "org.a.A", "org.b.B", "java.util.List", "java.lang.String", "java.lang.Integer"), imports);
-    NameShortener shortener = new NameShortener("com", true);
+    NameShortener shortener = new JavaNameShortener("com", true);
     shortener.addImports(imports, Collections.emptySet());
     assertEquals("Map<@A @B List<String>, Integer>", shortener.shorten(longType));
   }
@@ -136,7 +140,7 @@ public class BnfUtilTest extends UsefulTestCase {
     List<String> imports = new ArrayList<>();
     NameShortener.addTypeToImports(longType, Collections.emptyList(), imports);
     assertEquals(Arrays.asList("org.jetbrains.annotations.NotNull", "java.util.List", "java.lang.Integer"), imports);
-    NameShortener shortener = new NameShortener("com", true);
+    NameShortener shortener = new JavaNameShortener("com", true);
     shortener.addImports(imports, Collections.emptySet());
     assertEquals("@NotNull(\"escaped\\\"quote.pkg\") List<Integer>", shortener.shorten(longType));
   }
@@ -152,7 +156,7 @@ public class BnfUtilTest extends UsefulTestCase {
 
   public void testNameShortener_angleBracketInAnnotationStringArg() {
     String longType = "test.Outer.@test.AnnoWithArg(\"List<Integer>\") @org.jetbrains.annotations.NotNull Access";
-    NameShortener shortener = new NameShortener("com", true);
+    NameShortener shortener = new JavaNameShortener("com", true);
     shortener.addImports(Arrays.asList("test.Outer", "test.AnnoWithArg", "org.jetbrains.annotations.NotNull"), Collections.emptySet());
     String shortened = shortener.shorten(longType);
     // The '<' inside the string arg must NOT break shortening

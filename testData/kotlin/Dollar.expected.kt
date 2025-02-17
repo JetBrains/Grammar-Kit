@@ -1,0 +1,87 @@
+// ---- GeneratedParser.kt -----------------
+// This is a generated file. Not intended for manual editing.
+package generated
+
+import com.intellij.lang.PsiBuilder
+import com.intellij.lang.PsiBuilder.Marker
+import generated.GeneratedTypes.*
+import com.intellij.lang.parser.GeneratedParserUtilBase.*
+import com.intellij.psi.tree.IElementType
+import com.intellij.lang.ASTNode
+import com.intellij.psi.tree.TokenSet
+import com.intellij.lang.PsiParser
+import com.intellij.lang.LightPsiParser
+
+@Suppress("unused", "FunctionName", "JoinDeclarationAndAssignment")
+open class GeneratedParser: PsiParser, LightPsiParser {
+
+  override fun parse(root_: IElementType, builder_: PsiBuilder): ASTNode {
+    parseLight(root_, builder_)
+    return builder_.getTreeBuilt()
+  }
+
+  override fun parseLight(root_: IElementType, builder_: PsiBuilder) {
+    var result_: Boolean
+    val builder_ = adapt_builder_(root_, builder_, this, null)
+    val marker_: Marker = enter_section_(builder_, 0, _COLLAPSE_, null)
+    result_ = parse_root_(root_, builder_)
+    exit_section_(builder_, 0, marker_, root_, result_, true, TRUE_CONDITION)
+  }
+
+  protected fun parse_root_(root_: IElementType, builder_: PsiBuilder): Boolean {
+    return parse_root_(root_, builder_, 0)
+  }
+
+  companion object {
+    internal fun parse_root_(root_: IElementType, builder_: PsiBuilder, level_: Int): Boolean {
+      return parseRoot(builder_, level_ + 1, GeneratedParser::`class_$`)
+    }
+
+    /* ********************************************************** */
+    // token?
+    fun `abstract_$`(builder_: PsiBuilder, level_: Int): Boolean {
+      if (!recursion_guard_(builder_, level_, "`abstract_$`")) return false
+      val marker_: Marker = enter_section_(builder_, level_, _NONE_, ABSTRACT, "<abstract>")
+      consumeToken(builder_, TOKEN)
+      exit_section_(builder_, level_, marker_, true, false, null)
+      return true
+    }
+
+    /* ********************************************************** */
+    // token | interface | record
+    fun `class_$`(builder_: PsiBuilder, level_: Int): Boolean {
+      if (!recursion_guard_(builder_, level_, "`class_$`")) return false
+      var result_: Boolean
+      val marker_: Marker = enter_section_(builder_, level_, _NONE_, CLASS, "<class>")
+      result_ = consumeToken(builder_, TOKEN)
+      if (!result_) result_ = `interface_$`(builder_, level_ + 1)
+      if (!result_) result_ = `record_$`(builder_, level_ + 1)
+      exit_section_(builder_, level_, marker_, result_, false, null)
+      return result_
+    }
+
+    /* ********************************************************** */
+    // token
+    fun `interface_$`(builder_: PsiBuilder, level_: Int): Boolean {
+      if (!recursion_guard_(builder_, level_, "`interface_$`")) return false
+      if (!nextTokenIs(builder_, TOKEN)) return false
+      var result_: Boolean
+      val marker_: Marker = enter_section_(builder_)
+      result_ = consumeToken(builder_, TOKEN)
+      exit_section_(builder_, marker_, INTERFACE, result_)
+      return result_
+    }
+
+    /* ********************************************************** */
+    // 'token'
+    fun `record_$`(builder_: PsiBuilder, level_: Int): Boolean {
+      if (!recursion_guard_(builder_, level_, "`record_$`")) return false
+      var result_: Boolean
+      val marker_: Marker = enter_section_(builder_, level_, _NONE_, RECORD, "<record>")
+      result_ = consumeToken(builder_, "token")
+      exit_section_(builder_, level_, marker_, result_, false, null)
+      return result_
+    }
+
+  }
+}

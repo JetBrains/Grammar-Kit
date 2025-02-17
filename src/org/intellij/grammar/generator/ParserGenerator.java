@@ -23,6 +23,8 @@ import com.intellij.util.containers.*;
 import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.analysis.BnfFirstNextAnalyzer;
 import org.intellij.grammar.generator.NodeCalls.*;
+import org.intellij.grammar.generator.java.JavaNameShortener;
+import org.intellij.grammar.generator.java.JavaRenderer;
 import org.intellij.grammar.java.JavaHelper;
 import org.intellij.grammar.parser.GeneratedParserUtilBase.Parser;
 import org.intellij.grammar.psi.*;
@@ -42,11 +44,11 @@ import static java.util.stream.Collectors.*;
 import static org.intellij.grammar.analysis.BnfFirstNextAnalyzer.BNF_MATCHES_ANY;
 import static org.intellij.grammar.analysis.BnfFirstNextAnalyzer.BNF_MATCHES_EOF;
 import static org.intellij.grammar.generator.BnfConstants.*;
-import static org.intellij.grammar.generator.JavaNameShortener.getRawClassName;
 import static org.intellij.grammar.generator.NameShortener.addTypeToImports;
 import static org.intellij.grammar.generator.ParserGeneratorUtil.*;
 import static org.intellij.grammar.generator.RuleGraphHelper.*;
 import static org.intellij.grammar.generator.RuleGraphHelper.Cardinality.*;
+import static org.intellij.grammar.generator.java.JavaNameShortener.getRawClassName;
 import static org.intellij.grammar.psi.BnfTypes.*;
 
 
@@ -89,8 +91,9 @@ public class ParserGenerator extends GeneratorBase {
   public ParserGenerator(@NotNull BnfFile psiFile,
                          @NotNull String sourcePath,
                          @NotNull String outputPath,
-                         @NotNull String packagePrefix) {
-    super(psiFile, sourcePath, outputPath, packagePrefix, "java");
+                         @NotNull String packagePrefix,
+                         @NotNull OutputOpener outputOpener) {
+    super(psiFile, sourcePath, outputPath, packagePrefix, "java", outputOpener);
 
     N = G.names;
 
@@ -99,8 +102,8 @@ public class ParserGenerator extends GeneratorBase {
     myPsiTreeUtilClass = getRootAttribute(myFile, KnownAttribute.PSI_TREE_UTIL_CLASS);
     String tmpVisitorClass = getRootAttribute(myFile, KnownAttribute.PSI_VISITOR_NAME);
     tmpVisitorClass = !G.generateVisitor || StringUtil.isEmpty(tmpVisitorClass) ? null :
-                      !tmpVisitorClass.equals(myIntfClassFormat.strip(tmpVisitorClass)) ? tmpVisitorClass :
-                      myIntfClassFormat.apply("") + tmpVisitorClass;
+                      !tmpVisitorClass.equals(myPsiInterfaceFormat.strip(tmpVisitorClass)) ? tmpVisitorClass :
+                      myPsiInterfaceFormat.apply("") + tmpVisitorClass;
     myVisitorClassName = tmpVisitorClass == null || !tmpVisitorClass.equals(StringUtil.getShortName(tmpVisitorClass)) ?
                          tmpVisitorClass : getRootAttribute(myFile, KnownAttribute.PSI_PACKAGE) + "." + tmpVisitorClass;
     myTypeHolderClass = getRootAttribute(myFile, KnownAttribute.ELEMENT_TYPE_HOLDER_CLASS);
@@ -123,7 +126,7 @@ public class ParserGenerator extends GeneratorBase {
         getElementType(r), getAttribute(r, KnownAttribute.PARSER_CLASS),
         noPsi ? null : getAttribute(r, KnownAttribute.PSI_PACKAGE),
         noPsi ? null : getAttribute(r, KnownAttribute.PSI_IMPL_PACKAGE),
-        noPsi ? null : R.getRulePsiClassName(r, myIntfClassFormat), noPsi ? null : R.getRulePsiClassName(r, myImplClassFormat),
+        noPsi ? null : R.getRulePsiClassName(r, myPsiInterfaceFormat), noPsi ? null : R.getRulePsiClassName(r, myImplClassFormat),
         noPsi ? null : getAttribute(r, KnownAttribute.MIXIN), noPsi ? null : getAttribute(r, KnownAttribute.STUB_CLASS)));
     }
     myNoStubs = JBIterable.from(myRuleInfos.values()).find(o -> o.stub != null) == null;
@@ -256,7 +259,7 @@ public class ParserGenerator extends GeneratorBase {
         sortedCompositeTypes.put(elementType, rule);
       }
       sortedPsiRules.put(rule.getName(), rule);
-      info.superInterfaces = new LinkedHashSet<>(getSuperInterfaceNames(myFile, rule, myIntfClassFormat, R));
+      info.superInterfaces = new LinkedHashSet<>(getSuperInterfaceNames(myFile, rule, myPsiInterfaceFormat, R));
     }
     if (G.generatePsi) {
       calcRealSuperClasses(sortedPsiRules);
@@ -319,7 +322,7 @@ public class ParserGenerator extends GeneratorBase {
     Set<String> imports = new LinkedHashSet<>(Arrays.asList("org.jetbrains.annotations.*", PSI_ELEMENT_VISITOR_CLASS, superIntf));
     MultiMap<String, String> supers = new MultiMap<>();
     for (BnfRule rule : sortedRules.values()) {
-      supers.putValues(rule.getName(), getSuperInterfaceNames(myFile, rule, myIntfClassFormat, R));
+      supers.putValues(rule.getName(), getSuperInterfaceNames(myFile, rule, myPsiInterfaceFormat, R));
     }
     {
       // ensure only public supers are exposed, replace non-public with default super-intf for simplicity
@@ -352,19 +355,19 @@ public class ParserGenerator extends GeneratorBase {
     String r = G.visitorValue != null ? "<" + G.visitorValue + ">" : "";
     String t = G.visitorValue != null ? G.visitorValue : "void";
     String ret = G.visitorValue != null ? "return " : "";
-    generateClassHeader(psiClass + r, imports, "", Java.CLASS, PSI_ELEMENT_VISITOR_CLASS);
+    generateClassHeader(psiClass + r, imports, "", TypeKind.CLASS, PSI_ELEMENT_VISITOR_CLASS);
     Set<String> visited = new HashSet<>();
     Set<String> all = new TreeSet<>();
     for (BnfRule rule : sortedRules.values()) {
       String methodName = R.getRulePsiClassName(rule, null);
       visited.add(methodName);
-      out("public %s visit%s(%s %s o) {", t, methodName, shorten(NOTNULL_ANNO), R.getRulePsiClassName(rule, myIntfClassFormat));
+      out("public %s visit%s(%s %s o) {", t, methodName, shorten(NOTNULL_ANNO), R.getRulePsiClassName(rule, myPsiInterfaceFormat));
       boolean first = true;
       for (String top : supers.get(rule.getName())) {
         if (!first && top.equals(superIntf)) continue;
         top = getRawClassName(top);
         if (first) all.add(top);
-        String text = "visit" + myIntfClassFormat.strip(StringUtil.getShortName(top)) + "(o);";
+        String text = "visit" + myPsiInterfaceFormat.strip(StringUtil.getShortName(top)) + "(o);";
         if (first) {
           out(ret + text);
         }
@@ -378,11 +381,11 @@ public class ParserGenerator extends GeneratorBase {
     }
     all.remove(superIntf);
     for (String top : JBIterable.from(all).append(superIntf)) {
-      String methodName = myIntfClassFormat.strip(StringUtil.getShortName(top));
+      String methodName = myPsiInterfaceFormat.strip(StringUtil.getShortName(top));
       if (visited.contains(methodName)) continue;
       out("public %s visit%s(%s %s o) {", t, methodName, shorten(NOTNULL_ANNO), shorten(top));
       if (!methodName.equals(StringUtil.getShortName(top)) && !top.equals(superIntf)) {
-        out(ret + "visit" + myIntfClassFormat.strip(StringUtil.getShortName(superIntf)) + "(o);");
+        out(ret + "visit" + myPsiInterfaceFormat.strip(StringUtil.getShortName(superIntf)) + "(o);");
       }
       else {
         String superPrefix = methodName.equals("Element") ? "super." : "";
@@ -394,6 +397,49 @@ public class ParserGenerator extends GeneratorBase {
     }
 
     out("}");
+  }
+
+  protected void generateClassHeader(String className, Set<String> imports, String annos, TypeKind typeKind, String... supers) {
+    generateFileHeader(className);
+    String packageName = getPackageName(className);
+    String shortClassName = StringUtil.getShortName(className);
+    out("package %s;", packageName);
+    newLine();
+    JavaNameShortener shortener = new JavaNameShortener(packageName, !G.generateFQN);
+    Set<String> includedClasses = collectClasses(imports, packageName);
+    shortener.addImports(imports, includedClasses);
+    for (String s : shortener.getImports()) {
+      out("import %s;", s);
+    }
+    if (G.generateFQN && imports.contains("#forced")) {
+      for (String s : JBIterable.from(imports).filter(o -> !"#forced".equals(o))) {
+        out("import %s;", s);
+      }
+    }
+    newLine();
+    StringBuilder sb = new StringBuilder();
+    for (int i = 0, supersLength = supers.length; i < supersLength; i++) {
+      String aSuper = supers[i];
+      if (StringUtil.isEmpty(aSuper)) continue;
+      if (imports.contains(aSuper + ";")) {
+        aSuper = StringUtil.getShortName(aSuper);
+      }
+      if (i == 0) {
+        sb.append(" extends ").append(shortener.shorten(aSuper));
+      }
+      else if (typeKind != TypeKind.INTERFACE && i == 1) {
+        sb.append(" implements ").append(shortener.shorten(aSuper));
+      }
+      else {
+        sb.append(", ").append(shortener.shorten(aSuper));
+      }
+    }
+    if (StringUtil.isNotEmpty(annos)) {
+      out(shortener.shorten(annos));
+    }
+    out("public %s %s%s {", Case.LOWER.apply(typeKind.name()).replace('_', ' '), shortClassName, sb.toString());
+    newLine();
+    myShortener = shortener;
   }
 
   public void generateParser() throws IOException {
@@ -441,7 +487,7 @@ public class ParserGenerator extends GeneratorBase {
 
     generateClassHeader(parserClass, imports,
                         SUPPRESS_WARNINGS_ANNO + "({\"SimplifiableIfStatement\", \"UnusedAssignment\"})",
-                        Java.CLASS, "",
+                        TypeKind.CLASS, "",
                         rootParser ? C.PsiParserClass : "",
                         rootParser ? C.LightPsiParserClass : "");
 
@@ -603,7 +649,6 @@ public class ParserGenerator extends GeneratorBase {
     return result;
   }
 
-  @Override
   protected @NotNull Set<String> collectClasses(Set<String> imports, String packageName) {
     Set<String> includedPackages = JBIterable.from(imports)
       .filter(o -> !o.startsWith("static") && o.endsWith(".*"))
@@ -618,7 +663,7 @@ public class ParserGenerator extends GeneratorBase {
   }
 
   @NotNull
-  protected String generatePackageName(String className) {
+  protected String getPackageName(String className) {
     return StringUtil.getPackageName(className);
   }
 
@@ -1367,7 +1412,7 @@ public class ParserGenerator extends GeneratorBase {
         }
       }
     }
-    generateClassHeader(className, imports, "", Java.INTERFACE);
+    generateClassHeader(className, imports, "", TypeKind.INTERFACE);
     if (G.generateElementTypes) {
       for (String elementType : sortedCompositeTypes.keySet()) {
         Trinity<String, String, RuleInfo> info = compositeToClassAndFactoryMap.get(elementType);
@@ -1531,12 +1576,12 @@ public class ParserGenerator extends GeneratorBase {
     imports.addAll(psiSupers);
     imports.addAll(getRuleMethodTypesToImport(rule));
 
-    generateClassHeader(psiClass, imports, "", Java.INTERFACE, ArrayUtil.toStringArray(psiSupers));
+    generateClassHeader(psiClass, imports, "", TypeKind.INTERFACE, ArrayUtil.toStringArray(psiSupers));
     generatePsiClassMethods(rule, info, true);
     out("}");
   }
 
-  private void generatePsiImpl(BnfRule rule, RuleInfo info) {
+  private void generatePsiImpl(@NotNull BnfRule rule, @NotNull RuleInfo info) {
     String psiClass = info.implClass;
     String superInterface = info.intfClass;
     String stubName = info.realStubClass;
@@ -1608,8 +1653,8 @@ public class ParserGenerator extends GeneratorBase {
       }
     }
 
-    Java javaType = info.isAbstract ? Java.ABSTRACT_CLASS : Java.CLASS;
-    generateClassHeader(psiClass, imports, "", javaType, implSuper, superInterface);
+    TypeKind typeKind = info.isAbstract ? TypeKind.ABSTRACT_CLASS : TypeKind.CLASS;
+    generateClassHeader(psiClass, imports, "", typeKind, implSuper, superInterface);
     String shortName = StringUtil.getShortName(psiClass);
     if (constructors.isEmpty()) {
       out("public " + shortName + "(" + shorten(C.AstNodeClass) + " node) {");

@@ -54,7 +54,7 @@ public class GeneratedParser implements PsiParser, LightPsiParser {
     Marker marker_ = enter_section_(builder_, level_, _NONE_, CLASS, "<class>");
     result_ = consumeToken(builder_, TOKEN);
     if (!result_) result_ = interface_$(builder_, level_ + 1);
-    if (!result_) result_ = record(builder_, level_ + 1);
+    if (!result_) result_ = record_$(builder_, level_ + 1);
     exit_section_(builder_, level_, marker_, result_, false, null);
     return result_;
   }
@@ -73,8 +73,8 @@ public class GeneratedParser implements PsiParser, LightPsiParser {
 
   /* ********************************************************** */
   // 'token'
-  public static boolean record(PsiBuilder builder_, int level_) {
-    if (!recursion_guard_(builder_, level_, "record")) return false;
+  public static boolean record_$(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "record_$")) return false;
     boolean result_;
     Marker marker_ = enter_section_(builder_, level_, _NONE_, RECORD, "<record>");
     result_ = consumeToken(builder_, "token");

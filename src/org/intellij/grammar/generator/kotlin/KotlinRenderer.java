@@ -17,7 +17,9 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Set;
 
-import static org.intellij.grammar.generator.ParserGeneratorUtil.*;
+import static org.intellij.grammar.generator.ParserGeneratorUtil.getAttribute;
+import static org.intellij.grammar.generator.ParserGeneratorUtil.quote;
+import static org.intellij.grammar.generator.java.JavaRenderer.JAVA_RESERVED;
 
 public final class KotlinRenderer implements Renderer {
   public static final @NotNull KotlinRenderer INSTANCE = new KotlinRenderer();
@@ -81,7 +83,11 @@ public final class KotlinRenderer implements Renderer {
   @Override
   public @NotNull String getFuncName(@NotNull BnfRule rule) {
     final var name = getBaseName(rule.getName());
-    return KOTLIN_RESERVED.contains(name) ? "`%s%s`".formatted(name, RESERVED_SUFFIX) : name;
+    // to ensure Java compatibility, we also check for any Java
+    // reserved identifiers in addition to kotlin ones
+    return (KOTLIN_RESERVED.contains(name) || JAVA_RESERVED.contains(name))
+           ? "`%s%s`".formatted(name, RESERVED_SUFFIX)
+           : name;
   }
 
   @Override

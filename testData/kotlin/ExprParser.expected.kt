@@ -34,7 +34,7 @@ open class ExpressionParser: PsiParser, LightPsiParser {
 
   companion object {
     internal fun parse_root_(root_: IElementType, builder_: PsiBuilder, level_: Int): Boolean {
-      boolean result_
+      var result_: Boolean
       if (root_ == EXPR) {
         result_ = expr(builder_, level_ + 1, -1)
       }
@@ -223,12 +223,12 @@ open class ExpressionParser: PsiParser, LightPsiParser {
     // 8: POSTFIX(call_expr)
     // 9: POSTFIX(qualification_expr)
     // 10: ATOM(special_expr) ATOM(simple_ref_expr) ATOM(literal_expr) PREFIX(paren_expr)
-    fun expr(PsiBuilder: builder_, level_: Int, priority_: Int): Boolean {
+    fun expr(builder_: PsiBuilder, level_: Int, priority_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "expr")) return false
       addVariant(builder_, "<expr>")
       var result_: Boolean
       var pinned_: Boolean
-      val marker_: Marker = enter_section_(builder_, level_, _NONE_, "<expr>");
+      val marker_: Marker = enter_section_(builder_, level_, _NONE_, "<expr>")
       result_ = unary_plus_expr(builder_, level_ + 1)
       if (!result_) result_ = unary_min_expr(builder_, level_ + 1)
       if (!result_) result_ = unary_not_expr(builder_, level_ + 1)
@@ -244,7 +244,7 @@ open class ExpressionParser: PsiParser, LightPsiParser {
 
     fun expr_0(PsiBuilder: builder_, level_: Int, priority_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "expr_0")) return false
-      var result_: Boolean = true
+      var result_ = true
       while (true) {
         val marker_: Marker = enter_section_(builder_, level_, _LEFT_, null)
         if (priority_ < 0 && consumeTokenSmart(builder_, "=")) {

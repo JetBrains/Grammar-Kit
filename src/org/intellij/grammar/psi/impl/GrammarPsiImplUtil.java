@@ -13,7 +13,7 @@ import com.intellij.util.ArrayUtil;
 import com.intellij.util.IncorrectOperationException;
 import com.intellij.util.containers.ContainerUtil;
 import org.intellij.grammar.KnownAttribute;
-import org.intellij.grammar.generator.JavaRenderer;
+import org.intellij.grammar.generator.java.JavaRenderer;
 import org.intellij.grammar.java.JavaHelper;
 import org.intellij.grammar.psi.*;
 import org.jetbrains.annotations.NotNull;

@@ -18,7 +18,7 @@ import com.intellij.util.PairProcessor;
 import com.intellij.util.Processor;
 import com.intellij.util.SmartList;
 import org.intellij.grammar.KnownAttribute;
-import org.intellij.grammar.generator.JavaRenderer;
+import org.intellij.grammar.generator.java.JavaRenderer;
 import org.intellij.grammar.parser.GeneratedParserUtilBase;
 import org.intellij.grammar.psi.*;
 import org.jetbrains.annotations.Contract;

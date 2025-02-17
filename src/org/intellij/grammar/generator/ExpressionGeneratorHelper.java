@@ -48,7 +48,7 @@ public class ExpressionGeneratorHelper {
     Map<String, List<OperatorInfo>> opCalls = new LinkedHashMap<>();
     for (BnfRule rule : info.priorityMap.keySet()) {
       OperatorInfo operator = info.operatorMap.get(rule);
-      String opCall = g.generateNodeCall(
+      String opCall = g.createNodeCall(
         info.rootRule, operator.operator, R.getNextName(R.getFuncName(operator.rule), 0), CONSUME_TYPE_OVERRIDE
       ).render(R, g.N);
       opCalls.computeIfAbsent(opCall, k -> new ArrayList<>(2)).add(operator);
@@ -234,7 +234,7 @@ public class ExpressionGeneratorHelper {
     String frameName = quote(R.getRuleDisplayName(info.rootRule, true));
     String shortPB = g.shorten(g.C.PsiBuilderClass);
     String shortMarker = !g.G.generateFQN ? "Marker" : g.C.PsiBuilderClass + ".Marker";
-    g.out("fun %s(%s: %s, %s: Int, %s: Int): Boolean {", methodName, shortPB, g.N.builder, g.N.level, g.N.priority);
+    g.out("fun %s(%s: %s, %s: Int, %s: Int): Boolean {", methodName, g.N.builder, shortPB, g.N.level, g.N.priority);
     g.out("if (!recursion_guard_(%s, %s, \"%s\")) return false", g.N.builder, g.N.level, methodName);
 
     if (frameName != null) {
@@ -243,7 +243,7 @@ public class ExpressionGeneratorHelper {
     g.generateFirstCheck(info.rootRule, frameName, true);
     g.out("var %s: Boolean", g.N.result);
     g.out("var %s: Boolean", g.N.pinned);
-    g.out("val %s: %s = enter_section_(%s, %s, _NONE_, %s);", g.N.marker, shortMarker, g.N.builder, g.N.level, frameName);
+    g.out("val %s: %s = enter_section_(%s, %s, _NONE_, %s)", g.N.marker, shortMarker, g.N.builder, g.N.level, frameName);
 
     boolean first = true;
     for (String opCall : sortedOpCalls) {
@@ -253,7 +253,7 @@ public class ExpressionGeneratorHelper {
       if (operators.size() > 1) {
         g.addWarning("only first definition will be used for '" + operator.operator.getText() + "': " + operators);
       }
-      String nodeCall = g.generateNodeCall(operator.rule, null, operator.rule.getName()).render(R, g.N);
+      String nodeCall = g.createNodeCall(operator.rule, null, operator.rule.getName()).render(R, g.N);
       g.out("%s%s = %s", first ? "" : format("if (!%s) ", g.N.result), g.N.result, nodeCall);
       first = false;
     }
@@ -268,7 +268,7 @@ public class ExpressionGeneratorHelper {
     // kernel
     g.out("fun %s(%s: %s, %s: Int, %s: Int): Boolean {", kernelMethodName, shortPB, g.N.builder, g.N.level, g.N.priority);
     g.out("if (!recursion_guard_(%s, %s, \"%s\")) return false", g.N.builder, g.N.level, kernelMethodName);
-    g.out("var %s: Boolean = true", g.N.result);
+    g.out("var %s = true", g.N.result);
     g.out("while (true) {");
     g.out("val %s: %s = enter_section_(%s, %s, _LEFT_, null)", g.N.marker, shortMarker, g.N.builder, g.N.level);
 
@@ -292,7 +292,7 @@ public class ExpressionGeneratorHelper {
       first = false;
       String elementType = g.getElementType(operator.rule);
       boolean rightAssociative = getAttribute(operator.rule, KnownAttribute.RIGHT_ASSOCIATIVE);
-      String tailCall = operator.tail == null ? null : g.generateNodeCall(
+      String tailCall = operator.tail == null ? null : g.createNodeCall(
         operator.rule, operator.tail, R.getNextName(R.getFuncName(operator.rule), 1), ConsumeType.DEFAULT
       ).render(R, g.N);
       if (operator.type == OperatorType.BINARY) {
@@ -356,7 +356,7 @@ public class ExpressionGeneratorHelper {
           g.out("val %s: %s = enter_section_(%s, %s, _NONE_, null)", g.N.marker, shortMarker, g.N.builder, g.N.level);
 
           String elementType = g.getElementType(operator.rule);
-          String tailCall = operator.tail == null ? null : g.generateNodeCall(
+          String tailCall = operator.tail == null ? null : g.createNodeCall(
             operator.rule, operator.tail, R.getNextName(R.getFuncName(operator.rule), 1), ConsumeType.DEFAULT
           ).render(R, g.N);
 

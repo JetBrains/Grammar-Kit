@@ -1819,12 +1819,12 @@ open class JFlexParser: PsiParser, LightPsiParser {
     // 3: PREFIX(not_expression)
     // 4: POSTFIX(quantifier_expression)
     // 5: ATOM(class_expression) ATOM(predefined_class_expression) ATOM(macro_ref_expression) ATOM(literal_expression)
-    fun expression(PsiBuilder: builder, level: Int, priority: Int): Boolean {
+    fun expression(builder: PsiBuilder, level: Int, priority: Int): Boolean {
       if (!recursion_guard_(builder, level, "expression")) return false
       addVariant(builder, "<expression>")
       var result: Boolean
       var pinned: Boolean
-      val marker: Marker = enter_section_(builder, level, _NONE_, "<expression>");
+      val marker: Marker = enter_section_(builder, level, _NONE_, "<expression>")
       result = paren_expression(builder, level + 1)
       if (!result) result = not_expression(builder, level + 1)
       if (!result) result = class_expression(builder, level + 1)
@@ -1839,7 +1839,7 @@ open class JFlexParser: PsiParser, LightPsiParser {
 
     fun expression_0(PsiBuilder: builder, level: Int, priority: Int): Boolean {
       if (!recursion_guard_(builder, level, "expression_0")) return false
-      var result: Boolean = true
+      var result = true
       while (true) {
         val marker: Marker = enter_section_(builder, level, _LEFT_, null)
         if (priority < 0 && consumeTokenSmart(builder, FLEX_BAR)) {

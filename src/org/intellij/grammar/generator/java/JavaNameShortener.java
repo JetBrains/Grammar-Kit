@@ -1,10 +1,11 @@
 /*
- * Copyright 2011-2020 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
+ * Copyright 2011-2025 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
  */
 
-package org.intellij.grammar.generator;
+package org.intellij.grammar.generator.java;
 
 import com.intellij.openapi.util.text.StringUtil;
+import org.intellij.grammar.generator.NameShortener;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -12,7 +13,7 @@ import java.util.*;
 /**
  * @author gregsh
  */
-public class JavaNameShortener implements NameShortener {
+public final class JavaNameShortener implements NameShortener {
 
   private final String myPackage;
   private final boolean myEnabled;
@@ -21,6 +22,10 @@ public class JavaNameShortener implements NameShortener {
   public JavaNameShortener(String packageName, boolean enabled) {
     myPackage = packageName;
     myEnabled = enabled;
+  }
+
+  public static @NotNull String getRawClassName(@NotNull String name) {
+    return name.indexOf("<") < name.indexOf(">") ? name.substring(0, name.indexOf("<")) : name;
   }
 
   public @NotNull Set<String> getImports() {
@@ -75,9 +80,5 @@ public class JavaNameShortener implements NameShortener {
       offset += part.length();
     }
     return changed ? sb.append(vararg ? "..." : "").toString() : s;
-  }
-
-  public static @NotNull String getRawClassName(@NotNull String name) {
-    return name.indexOf("<") < name.indexOf(">") ? name.substring(0, name.indexOf("<")) : name;
   }
 }

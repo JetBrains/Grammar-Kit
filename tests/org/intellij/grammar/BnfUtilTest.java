@@ -5,7 +5,11 @@
 package org.intellij.grammar;
 
 import com.intellij.testFramework.UsefulTestCase;
-import org.intellij.grammar.generator.*;
+import org.intellij.grammar.generator.Case;
+import org.intellij.grammar.generator.NameFormat;
+import org.intellij.grammar.generator.NameShortener;
+import org.intellij.grammar.generator.java.JavaNameShortener;
+import org.intellij.grammar.generator.java.JavaRenderer;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;

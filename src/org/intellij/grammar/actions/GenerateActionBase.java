@@ -31,7 +31,8 @@ import com.intellij.util.ExceptionUtil;
 import com.intellij.util.containers.JBIterable;
 import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.generator.BnfConstants;
-import org.intellij.grammar.generator.GeneratorBase;
+import org.intellij.grammar.generator.Generator;
+import org.intellij.grammar.generator.OutputOpener;
 import org.intellij.grammar.generator.ParserGenerator;
 import org.intellij.grammar.psi.BnfFile;
 import org.jetbrains.annotations.NotNull;
@@ -46,11 +47,11 @@ import static org.intellij.grammar.generator.ParserGeneratorUtil.getRootAttribut
 
 public abstract class GenerateActionBase extends AnAction {
   private static final Logger LOG = Logger.getInstance(GenerateActionBase.class);
-  private final @NotNull GenerateActionBase.GeneratorSupplier myGeneratorSupplier;
+  private final @NotNull Generator myGenerator;
 
-  public GenerateActionBase(@NotNull GeneratorSupplier generatorSupplier) {
+  public GenerateActionBase(@NotNull Generator generator) {
     super();
-    myGeneratorSupplier = generatorSupplier;
+    myGenerator = generator;
   }
 
   private static @NotNull JBIterable<VirtualFile> getFiles(@NotNull AnActionEvent e) {
@@ -160,15 +161,18 @@ public abstract class GenerateActionBase extends AnAction {
                 if (!file.isValid()) return;
                 PsiFile bnfFile = getBnfFile(file, psiManager);
                 if (!(bnfFile instanceof BnfFile)) return;
-                final var generator = myGeneratorSupplier.get(
-                  (BnfFile)bnfFile,
-                  sourcePath,
-                  genDir.getPath(),
-                  packagePrefix,
-                  Ref.create(files)
-                );
                 try {
-                  generator.generate();
+                  myGenerator.generate(
+                    (BnfFile)bnfFile,
+                    sourcePath,
+                    genDir.getPath(),
+                    packagePrefix,
+                    ((className, fileToOpen, myBnfFile) -> {
+                      files.add(fileToOpen);
+                      return OutputOpener.DEFAULT.openOutput(className, fileToOpen, myBnfFile);
+                    })
+                  );
+                  //generator.generate();
                 }
                 catch (Exception ex) {
                   exRef.set(ex);
@@ -200,22 +204,5 @@ public abstract class GenerateActionBase extends AnAction {
           }
         }
       });
-  }
-
-  /**
-   * A functional interface, whose goal is to serve as a supplier of
-   * the GeneratorBase objects.
-   */
-  @FunctionalInterface
-  public interface GeneratorSupplier {
-    /// Creates a new `GeneratorBase` object, that adds each file opened
-    /// by the object to the list stored in the `filesRef` object.
-    @NotNull GeneratorBase get(
-      @NotNull BnfFile bnfFile,
-      @NotNull String sourcePath,
-      @NotNull String outputPath,
-      @NotNull String packagePrefix,
-      @NotNull Ref<List<File>> filesRef
-    );
   }
 }

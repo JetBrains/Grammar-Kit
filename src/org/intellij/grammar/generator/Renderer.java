@@ -20,6 +20,8 @@ import static org.intellij.grammar.generator.ParserGeneratorUtil.*;
  * for different programming languages (in our case, Java and Kotlin).
  */
 public interface Renderer {
+  @NotNull String RESERVED_SUFFIX = "_$";
+
   @NotNull String toIdentifier(@NotNull String text, @Nullable NameFormat format, @NotNull Case textCase);
 
   default @NotNull String getBaseName(@NotNull String name) {

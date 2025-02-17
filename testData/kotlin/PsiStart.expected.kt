@@ -34,7 +34,7 @@ open class GeneratedParser: PsiParser, LightPsiParser {
 
   companion object {
     internal fun parse_root_(root_: IElementType, builder_: PsiBuilder, level_: Int): Boolean {
-      boolean result_
+      var result_: Boolean
       if (root_ == ELEMENT) {
         result_ = element(builder_, level_ + 1)
       }

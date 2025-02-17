@@ -21,6 +21,7 @@ import com.intellij.util.containers.JBTreeTraverser;
 import com.intellij.util.containers.TreeTraversal;
 import it.unimi.dsi.fastutil.Hash;
 import org.intellij.grammar.KnownAttribute;
+import org.intellij.grammar.generator.java.JavaNameShortener;
 import org.intellij.grammar.java.JavaHelper;
 import org.intellij.grammar.psi.*;
 import org.intellij.grammar.psi.impl.GrammarUtil;
@@ -40,14 +41,6 @@ import static org.intellij.grammar.psi.BnfTypes.BNF_SEQUENCE;
  * Date: 16.07.11 10:41
  */
 public class ParserGeneratorUtil {
-  public static final String RESERVED_SUFFIX = "_$";
-  private static final Set<String> JAVA_RESERVED =
-    Set.of("abstract", "assert", "boolean", "break", "byte", "case", "catch", "char", "class",
-           "const", "default", "do", "double", "else", "enum", "extends", "false", "final", "finally",
-           "float", "for", "goto", "if", "implements", "import", "instanceof", "int", "interface", "long",
-           "native", "new", "null", "package", "private", "protected", "public", "return", "short", "static",
-           "strictfp", "super", "switch", "synchronized", "this", "throw", "throws", "transient", "true",
-           "try", "void", "volatile", "while", "continue");
   private static final Hash.Strategy<PsiElement> TEXT_STRATEGY = new Hash.Strategy<>() {
     @Override
     public int hashCode(PsiElement e) {

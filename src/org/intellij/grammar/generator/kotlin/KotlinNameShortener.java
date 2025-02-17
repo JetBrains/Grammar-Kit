@@ -20,7 +20,7 @@ public final class KotlinNameShortener implements NameShortener {
   private final boolean myEnabled;
   private final Set<String> myImports = new LinkedHashSet<>();
 
-  public KotlinNameShortener(String packageName, boolean enabled) {
+  public KotlinNameShortener(@NotNull String packageName, boolean enabled) {
     myPackage = packageName;
     myEnabled = enabled;
   }

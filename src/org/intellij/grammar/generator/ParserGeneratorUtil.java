@@ -214,8 +214,7 @@ public class ParserGeneratorUtil {
     if (subRule == null) return false;
     if (getAttribute(subRule, KnownAttribute.RECOVER_WHILE) != null) return true;
     if (!getAttribute(subRule, KnownAttribute.HOOKS).isEmpty()) return true;
-    if (Rule.isExternal(subRule)) return true;
-    return false;
+    return Rule.isExternal(subRule);
   }
 
 
@@ -332,17 +331,20 @@ public class ParserGeneratorUtil {
   }
 
   static @NotNull List<String> getSuperInterfaceNames(BnfFile file, BnfRule rule, NameFormat format, @NotNull Renderer renderer) {
-    List<String> strings = new ArrayList<>();
-    List<String> topRuleImplements = Collections.emptyList();
-    String topRuleClass = null;
-    BnfRule topSuper = getEffectiveSuperRule(file, rule);
+    final var strings = new ArrayList<String>();
+    final var topSuper = getEffectiveSuperRule(file, rule);
+    final List<String> topRuleImplements;
+    final String topRuleClass;
     if (topSuper != null && topSuper != rule) {
       topRuleImplements = getAttribute(topSuper, KnownAttribute.IMPLEMENTS).asStrings();
       topRuleClass = getAttribute(topSuper, KnownAttribute.PSI_PACKAGE) + "." + renderer.getRulePsiClassName(topSuper, format);
       if (!StringUtil.isEmpty(topRuleClass)) strings.add(topRuleClass);
+    } else {
+      topRuleImplements = Collections.emptyList();
+      topRuleClass = null;
     }
-    List<String> rootImplements = getRootAttribute(file, KnownAttribute.IMPLEMENTS).asStrings();
-    List<String> ruleImplements = getAttribute(rule, KnownAttribute.IMPLEMENTS).asStrings();
+    final var rootImplements = getRootAttribute(file, KnownAttribute.IMPLEMENTS).asStrings();
+    final var ruleImplements = getAttribute(rule, KnownAttribute.IMPLEMENTS).asStrings();
     for (String className : ruleImplements) {
       if (className == null) continue;
       BnfRule superIntfRule = file.getRule(className);
@@ -363,23 +365,22 @@ public class ParserGeneratorUtil {
   }
 
   public static String getTokenType(BnfFile file, String token, @NotNull Case cas) {
-    NameFormat format = NameFormat.from(getRootAttribute(file, KnownAttribute.ELEMENT_TYPE_PREFIX));
+    final var format = NameFormat.from(getRootAttribute(file, KnownAttribute.ELEMENT_TYPE_PREFIX));
     String fixed = cas.apply(token.replaceAll("[^:\\p{javaJavaIdentifierPart}]", "_"));
-    return format == null ? fixed : format.apply(fixed);
+    return format.apply(fixed);
   }
 
-  public static Collection<BnfRule> getSortedPublicRules(Set<PsiElement> accessors) {
+  public static @NotNull Collection<BnfRule> getSortedPublicRules(@NotNull Set<PsiElement> accessors) {
     Map<String, BnfRule> result = new TreeMap<>();
     for (PsiElement tree : accessors) {
-      if (tree instanceof BnfRule) {
-        BnfRule rule = (BnfRule)tree;
+      if (tree instanceof BnfRule rule) {
         if (!Rule.isPrivate(rule)) result.put(rule.getName(), rule);
       }
     }
     return result.values();
   }
 
-  public static Collection<BnfExpression> getSortedTokens(Set<PsiElement> accessors) {
+  public static @NotNull Collection<BnfExpression> getSortedTokens(@NotNull Set<PsiElement> accessors) {
     Map<String, BnfExpression> result = new TreeMap<>();
     for (PsiElement tree : accessors) {
       if (!(tree instanceof BnfReferenceOrToken || tree instanceof BnfLiteralExpression)) continue;
@@ -388,7 +389,7 @@ public class ParserGeneratorUtil {
     return result.values();
   }
 
-  public static Collection<LeafPsiElement> getSortedExternalRules(Set<PsiElement> accessors) {
+  public static @NotNull Collection<LeafPsiElement> getSortedExternalRules(@NotNull Set<PsiElement> accessors) {
     Map<String, LeafPsiElement> result = new TreeMap<>();
     for (PsiElement tree : accessors) {
       if (!(tree instanceof LeafPsiElement)) continue;
@@ -397,7 +398,7 @@ public class ParserGeneratorUtil {
     return result.values();
   }
 
-  public static List<BnfRule> topoSort(@NotNull Collection<BnfRule> rules, @NotNull RuleGraphHelper ruleGraph) {
+  public static @NotNull List<BnfRule> topoSort(@NotNull Collection<BnfRule> rules, @NotNull RuleGraphHelper ruleGraph) {
     Set<BnfRule> rulesSet = new HashSet<>(rules);
     return new JBTreeTraverser<BnfRule>(
       rule -> JBIterable.from(ruleGraph.getSubRules(rule)).filter(rulesSet::contains))
@@ -411,7 +412,7 @@ public class ParserGeneratorUtil {
     return tokenText.startsWith(BnfConstants.REGEXP_PREFIX);
   }
 
-  public static String getRegexpTokenRegexp(@NotNull String tokenText) {
+  public static @NotNull String getRegexpTokenRegexp(@NotNull String tokenText) {
     return tokenText.substring(BnfConstants.REGEXP_PREFIX.length());
   }
 
@@ -434,7 +435,7 @@ public class ParserGeneratorUtil {
     return tokens.size() > threshold ? tokens : null;
   }
 
-  private static String getTokenName(@NotNull BnfFile file, @NotNull BnfExpression expression) {
+  private static @Nullable String getTokenName(@NotNull BnfFile file, @NotNull BnfExpression expression) {
     String text = expression.getText();
     if (expression instanceof BnfStringLiteralExpression) {
       return RuleGraphHelper.getTokenTextToNameMap(file).get(GrammarUtil.unquote(text));
@@ -474,6 +475,16 @@ public class ParserGeneratorUtil {
       newLine &= (size - count) > 2;
       if (count > 0) sb.append(",").append(newLine ? "\n" : " ");
       sb.append(tokenTypes.get(count));
+      if (newLine) line++;
+    }
+  }
+
+  public static void appendTokenTypes(@NotNull StringBuilder builder, @NotNull List<@NotNull String> tokenTypes, @NotNull String elementTypesHolder) {
+    for (int count = 0, line = 0, size = tokenTypes.size(); count < size; count++) {
+      boolean newLine = line == 0 && count == 2 || line > 0 && (count - 2) % 6 == 0;
+      newLine &= (size - count) > 2;
+      if (count > 0) builder.append(",").append(newLine ? "\n" : " ");
+      builder.append(elementTypesHolder).append(".").append(tokenTypes.get(count));
       if (newLine) line++;
     }
   }
@@ -614,7 +625,7 @@ public class ParserGeneratorUtil {
     StringBuilder sb = new StringBuilder();
     for (String pattern : tokens.keySet()) {
       if (!isRegexpToken(pattern)) continue;
-      if (sb.length() > 0) sb.append("|");
+      if (!sb.isEmpty()) sb.append("|");
       sb.append(getRegexpTokenRegexp(pattern));
     }
     return compilePattern(sb.toString());

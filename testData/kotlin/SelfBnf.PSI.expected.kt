@@ -1,0 +1,51 @@
+// ---- BnfTypes.kt -----------------
+// license.txt
+package org.intellij.grammar.psi
+
+import com.intellij.platform.syntax.SyntaxElementType
+
+object BnfTypes {
+  val BNF_ATTR = SyntaxElementType("BNF_ATTR")
+  val BNF_ATTRS = SyntaxElementType("BNF_ATTRS")
+  val BNF_ATTR_PATTERN = SyntaxElementType("BNF_ATTR_PATTERN")
+  val BNF_CHOICE = SyntaxElementType("BNF_CHOICE")
+  val BNF_EXPRESSION = SyntaxElementType("BNF_EXPRESSION")
+  val BNF_EXTERNAL_EXPRESSION = SyntaxElementType("BNF_EXTERNAL_EXPRESSION")
+  val BNF_LIST_ENTRY = SyntaxElementType("BNF_LIST_ENTRY")
+  val BNF_LITERAL_EXPRESSION = SyntaxElementType("BNF_LITERAL_EXPRESSION")
+  val BNF_MODIFIER = SyntaxElementType("BNF_MODIFIER")
+  val BNF_PAREN_EXPRESSION = SyntaxElementType("BNF_PAREN_EXPRESSION")
+  val BNF_PAREN_OPT_EXPRESSION = SyntaxElementType("BNF_PAREN_OPT_EXPRESSION")
+  val BNF_PREDICATE = SyntaxElementType("BNF_PREDICATE")
+  val BNF_PREDICATE_SIGN = SyntaxElementType("BNF_PREDICATE_SIGN")
+  val BNF_QUANTIFIED = SyntaxElementType("BNF_QUANTIFIED")
+  val BNF_QUANTIFIER = SyntaxElementType("BNF_QUANTIFIER")
+  val BNF_REFERENCE_OR_TOKEN = SyntaxElementType("BNF_REFERENCE_OR_TOKEN")
+  val BNF_RULE = SyntaxElementType("BNF_RULE")
+  val BNF_SEQUENCE = SyntaxElementType("BNF_SEQUENCE")
+  val BNF_STRING_LITERAL_EXPRESSION = SyntaxElementType("BNF_STRING_LITERAL_EXPRESSION")
+  val BNF_VALUE_LIST = SyntaxElementType("BNF_VALUE_LIST")
+
+  val BNF_BLOCK_COMMENT = SyntaxElementType("block_comment")
+  val BNF_EXTERNAL_END = SyntaxElementType(">>")
+  val BNF_EXTERNAL_START = SyntaxElementType("<<")
+  val BNF_ID = SyntaxElementType("id")
+  val BNF_LEFT_BRACE = SyntaxElementType("{")
+  val BNF_LEFT_BRACKET = SyntaxElementType("[")
+  val BNF_LEFT_PAREN = SyntaxElementType("(")
+  val BNF_LINE_COMMENT = SyntaxElementType("line_comment")
+  val BNF_NUMBER = SyntaxElementType("number")
+  val BNF_OP_AND = SyntaxElementType("&")
+  val BNF_OP_EQ = SyntaxElementType("=")
+  val BNF_OP_IS = SyntaxElementType("::=")
+  val BNF_OP_NOT = SyntaxElementType("!")
+  val BNF_OP_ONEMORE = SyntaxElementType("+")
+  val BNF_OP_OPT = SyntaxElementType("?")
+  val BNF_OP_OR = SyntaxElementType("|")
+  val BNF_OP_ZEROMORE = SyntaxElementType("*")
+  val BNF_RIGHT_BRACE = SyntaxElementType("}")
+  val BNF_RIGHT_BRACKET = SyntaxElementType("]")
+  val BNF_RIGHT_PAREN = SyntaxElementType(")")
+  val BNF_SEMICOLON = SyntaxElementType(";")
+  val BNF_STRING = SyntaxElementType("string")
+}

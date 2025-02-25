@@ -2,25 +2,15 @@
 // This is a generated file. Not intended for manual editing.
 package com.intellij.json
 
-import com.intellij.lang.PsiBuilder
-import com.intellij.lang.PsiBuilder.Marker
-import com.intellij.json.JsonElementTypes.*
-import com.intellij.json.psi.JsonParserUtil.*
-import com.intellij.psi.tree.IElementType
-import com.intellij.lang.ASTNode
-import com.intellij.psi.tree.TokenSet
-import com.intellij.lang.PsiParser
-import com.intellij.lang.LightPsiParser
+import com.intellij.platform.syntax.parser.SyntaxTreeBuilder
+import com.intellij.platform.syntax.parser.SyntaxTreeBuilder.Marker
+import com.intellij.platform.syntax.util.SyntaxGeneratedParserRuntimeBase
+import com.intellij.platform.syntax.SyntaxElementType
 
 @Suppress("unused", "FunctionName", "JoinDeclarationAndAssignment")
-open class JsonParser: PsiParser, LightPsiParser {
+open class JsonParser {
 
-  override fun parse(root_: IElementType, builder_: PsiBuilder): ASTNode {
-    parseLight(root_, builder_)
-    return builder_.getTreeBuilt()
-  }
-
-  override fun parseLight(root_: IElementType, builder_: PsiBuilder) {
+  fun parse(root_: SyntaxElementType, builder_: SyntaxTreeBuilder) {
     var result_: Boolean
     val builder_ = adapt_builder_(root_, builder_, this, EXTENDS_SETS_)
     val marker_: Marker = enter_section_(builder_, 0, _COLLAPSE_, null)
@@ -28,39 +18,39 @@ open class JsonParser: PsiParser, LightPsiParser {
     exit_section_(builder_, 0, marker_, root_, result_, true, TRUE_CONDITION)
   }
 
-  protected fun parse_root_(root_: IElementType, builder_: PsiBuilder): Boolean {
+  protected fun parse_root_(root_: SyntaxElementType, builder_: SyntaxTreeBuilder): Boolean {
     return parse_root_(root_, builder_, 0)
   }
 
   companion object {
-    internal fun parse_root_(root_: IElementType, builder_: PsiBuilder, level_: Int): Boolean {
+    internal fun parse_root_(root_: SyntaxElementType, builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       return json(builder_, level_ + 1)
     }
 
-    val EXTENDS_SETS_: Array<TokenSet> = arrayOf(
-      create_token_set_(ARRAY, BOOLEAN_LITERAL, LITERAL, NULL_LITERAL,
-        NUMBER_LITERAL, OBJECT, REFERENCE_EXPRESSION, STRING_LITERAL,
-        VALUE),
+    val EXTENDS_SETS_: Array<Set<SyntaxElementType>> = arrayOf(
+      create_token_set_(JsonElementTypes.ARRAY, JsonElementTypes.BOOLEAN_LITERAL, JsonElementTypes.LITERAL, JsonElementTypes.NULL_LITERAL,
+        JsonElementTypes.NUMBER_LITERAL, JsonElementTypes.OBJECT, JsonElementTypes.REFERENCE_EXPRESSION, JsonElementTypes.STRING_LITERAL,
+        JsonElementTypes.VALUE),
     )
 
     /* ********************************************************** */
     // '[' array_element* ']'
-    fun array(builder_: PsiBuilder, level_: Int): Boolean {
+    fun array(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "array")) return false
-      if (!nextTokenIs(builder_, L_BRACKET)) return false
+      if (!nextTokenIs(builder_, JsonElementTypes.L_BRACKET)) return false
       var result_: Boolean
       var pinned_: Boolean
-      val marker_: Marker = enter_section_(builder_, level_, _NONE_, ARRAY, null)
-      result_ = consumeToken(builder_, L_BRACKET)
+      val marker_: Marker = enter_section_(builder_, level_, _NONE_, JsonElementTypes.ARRAY, null)
+      result_ = consumeToken(builder_, JsonElementTypes.L_BRACKET)
       pinned_ = result_ // pin = 1
       result_ = result_ && report_error_(builder_, array_1(builder_, level_ + 1))
-      result_ = pinned_ && consumeToken(builder_, R_BRACKET) && result_
+      result_ = pinned_ && consumeToken(builder_, JsonElementTypes.R_BRACKET) && result_
       exit_section_(builder_, level_, marker_, result_, pinned_, null)
       return result_ || pinned_
     }
 
     // array_element*
-    private fun array_1(builder_: PsiBuilder, level_: Int): Boolean {
+    private fun array_1(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "array_1")) return false
       while (true) {
         val pos_: Int = current_position_(builder_)
@@ -72,7 +62,7 @@ open class JsonParser: PsiParser, LightPsiParser {
 
     /* ********************************************************** */
     // value (','|&']')
-    internal fun array_element(builder_: PsiBuilder, level_: Int): Boolean {
+    internal fun array_element(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "array_element")) return false
       var result_: Boolean
       var pinned_: Boolean
@@ -85,42 +75,42 @@ open class JsonParser: PsiParser, LightPsiParser {
     }
 
     // ','|&']'
-    private fun array_element_1(builder_: PsiBuilder, level_: Int): Boolean {
+    private fun array_element_1(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "array_element_1")) return false
       var result_: Boolean
       val marker_: Marker = enter_section_(builder_)
-      result_ = consumeToken(builder_, COMMA)
+      result_ = consumeToken(builder_, JsonElementTypes.COMMA)
       if (!result_) result_ = array_element_1_1(builder_, level_ + 1)
       exit_section_(builder_, marker_, null, result_)
       return result_
     }
 
     // &']'
-    private fun array_element_1_1(builder_: PsiBuilder, level_: Int): Boolean {
+    private fun array_element_1_1(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "array_element_1_1")) return false
       var result_: Boolean
       val marker_: Marker = enter_section_(builder_, level_, _AND_)
-      result_ = consumeToken(builder_, R_BRACKET)
+      result_ = consumeToken(builder_, JsonElementTypes.R_BRACKET)
       exit_section_(builder_, level_, marker_, result_, false, null)
       return result_
     }
 
     /* ********************************************************** */
     // TRUE | FALSE
-    fun boolean_literal(builder_: PsiBuilder, level_: Int): Boolean {
+    fun boolean_literal(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "boolean_literal")) return false
-      if (!nextTokenIs(builder_, "<boolean literal>", FALSE, TRUE)) return false
+      if (!nextTokenIs(builder_, "<boolean literal>", JsonElementTypes.FALSE, JsonElementTypes.TRUE)) return false
       var result_: Boolean
-      val marker_: Marker = enter_section_(builder_, level_, _NONE_, BOOLEAN_LITERAL, "<boolean literal>")
-      result_ = consumeToken(builder_, TRUE)
-      if (!result_) result_ = consumeToken(builder_, FALSE)
+      val marker_: Marker = enter_section_(builder_, level_, _NONE_, JsonElementTypes.BOOLEAN_LITERAL, "<boolean literal>")
+      result_ = consumeToken(builder_, JsonElementTypes.TRUE)
+      if (!result_) result_ = consumeToken(builder_, JsonElementTypes.FALSE)
       exit_section_(builder_, level_, marker_, result_, false, null)
       return result_
     }
 
     /* ********************************************************** */
     // value*
-    internal fun json(builder_: PsiBuilder, level_: Int): Boolean {
+    internal fun json(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "json")) return false
       while (true) {
         val pos_: Int = current_position_(builder_)
@@ -132,10 +122,10 @@ open class JsonParser: PsiParser, LightPsiParser {
 
     /* ********************************************************** */
     // string_literal | number_literal | boolean_literal | null_literal
-    fun literal(builder_: PsiBuilder, level_: Int): Boolean {
+    fun literal(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "literal")) return false
       var result_: Boolean
-      val marker_: Marker = enter_section_(builder_, level_, _COLLAPSE_, LITERAL, "<literal>")
+      val marker_: Marker = enter_section_(builder_, level_, _COLLAPSE_, JsonElementTypes.LITERAL, "<literal>")
       result_ = string_literal(builder_, level_ + 1)
       if (!result_) result_ = number_literal(builder_, level_ + 1)
       if (!result_) result_ = boolean_literal(builder_, level_ + 1)
@@ -146,7 +136,7 @@ open class JsonParser: PsiParser, LightPsiParser {
 
     /* ********************************************************** */
     // !('}'|value)
-    internal fun not_brace_or_next_value(builder_: PsiBuilder, level_: Int): Boolean {
+    internal fun not_brace_or_next_value(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "not_brace_or_next_value")) return false
       var result_: Boolean
       val marker_: Marker = enter_section_(builder_, level_, _NOT_)
@@ -156,17 +146,17 @@ open class JsonParser: PsiParser, LightPsiParser {
     }
 
     // '}'|value
-    private fun not_brace_or_next_value_0(builder_: PsiBuilder, level_: Int): Boolean {
+    private fun not_brace_or_next_value_0(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "not_brace_or_next_value_0")) return false
       var result_: Boolean
-      result_ = consumeToken(builder_, R_CURLY)
+      result_ = consumeToken(builder_, JsonElementTypes.R_CURLY)
       if (!result_) result_ = `value_$`(builder_, level_ + 1)
       return result_
     }
 
     /* ********************************************************** */
     // !(']'|value)
-    internal fun not_bracket_or_next_value(builder_: PsiBuilder, level_: Int): Boolean {
+    internal fun not_bracket_or_next_value(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "not_bracket_or_next_value")) return false
       var result_: Boolean
       val marker_: Marker = enter_section_(builder_, level_, _NOT_)
@@ -176,56 +166,56 @@ open class JsonParser: PsiParser, LightPsiParser {
     }
 
     // ']'|value
-    private fun not_bracket_or_next_value_0(builder_: PsiBuilder, level_: Int): Boolean {
+    private fun not_bracket_or_next_value_0(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "not_bracket_or_next_value_0")) return false
       var result_: Boolean
-      result_ = consumeToken(builder_, R_BRACKET)
+      result_ = consumeToken(builder_, JsonElementTypes.R_BRACKET)
       if (!result_) result_ = `value_$`(builder_, level_ + 1)
       return result_
     }
 
     /* ********************************************************** */
     // NULL
-    fun null_literal(builder_: PsiBuilder, level_: Int): Boolean {
+    fun null_literal(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "null_literal")) return false
-      if (!nextTokenIs(builder_, NULL)) return false
+      if (!nextTokenIs(builder_, JsonElementTypes.NULL)) return false
       var result_: Boolean
       val marker_: Marker = enter_section_(builder_)
-      result_ = consumeToken(builder_, NULL)
-      exit_section_(builder_, marker_, NULL_LITERAL, result_)
+      result_ = consumeToken(builder_, JsonElementTypes.NULL)
+      exit_section_(builder_, marker_, JsonElementTypes.NULL_LITERAL, result_)
       return result_
     }
 
     /* ********************************************************** */
     // NUMBER
-    fun number_literal(builder_: PsiBuilder, level_: Int): Boolean {
+    fun number_literal(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "number_literal")) return false
-      if (!nextTokenIs(builder_, NUMBER)) return false
+      if (!nextTokenIs(builder_, JsonElementTypes.NUMBER)) return false
       var result_: Boolean
       val marker_: Marker = enter_section_(builder_)
-      result_ = consumeToken(builder_, NUMBER)
-      exit_section_(builder_, marker_, NUMBER_LITERAL, result_)
+      result_ = consumeToken(builder_, JsonElementTypes.NUMBER)
+      exit_section_(builder_, marker_, JsonElementTypes.NUMBER_LITERAL, result_)
       return result_
     }
 
     /* ********************************************************** */
     // '{' object_element* '}'
-    fun `object_$`(builder_: PsiBuilder, level_: Int): Boolean {
+    fun `object_$`(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "`object_$`")) return false
-      if (!nextTokenIs(builder_, L_CURLY)) return false
+      if (!nextTokenIs(builder_, JsonElementTypes.L_CURLY)) return false
       var result_: Boolean
       var pinned_: Boolean
-      val marker_: Marker = enter_section_(builder_, level_, _NONE_, OBJECT, null)
-      result_ = consumeToken(builder_, L_CURLY)
+      val marker_: Marker = enter_section_(builder_, level_, _NONE_, JsonElementTypes.OBJECT, null)
+      result_ = consumeToken(builder_, JsonElementTypes.L_CURLY)
       pinned_ = result_ // pin = 1
       result_ = result_ && report_error_(builder_, object_1(builder_, level_ + 1))
-      result_ = pinned_ && consumeToken(builder_, R_CURLY) && result_
+      result_ = pinned_ && consumeToken(builder_, JsonElementTypes.R_CURLY) && result_
       exit_section_(builder_, level_, marker_, result_, pinned_, null)
       return result_ || pinned_
     }
 
     // object_element*
-    private fun object_1(builder_: PsiBuilder, level_: Int): Boolean {
+    private fun object_1(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "object_1")) return false
       while (true) {
         val pos_: Int = current_position_(builder_)
@@ -237,7 +227,7 @@ open class JsonParser: PsiParser, LightPsiParser {
 
     /* ********************************************************** */
     // property (','|&'}')
-    internal fun object_element(builder_: PsiBuilder, level_: Int): Boolean {
+    internal fun object_element(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "object_element")) return false
       var result_: Boolean
       var pinned_: Boolean
@@ -250,33 +240,33 @@ open class JsonParser: PsiParser, LightPsiParser {
     }
 
     // ','|&'}'
-    private fun object_element_1(builder_: PsiBuilder, level_: Int): Boolean {
+    private fun object_element_1(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "object_element_1")) return false
       var result_: Boolean
       val marker_: Marker = enter_section_(builder_)
-      result_ = consumeToken(builder_, COMMA)
+      result_ = consumeToken(builder_, JsonElementTypes.COMMA)
       if (!result_) result_ = object_element_1_1(builder_, level_ + 1)
       exit_section_(builder_, marker_, null, result_)
       return result_
     }
 
     // &'}'
-    private fun object_element_1_1(builder_: PsiBuilder, level_: Int): Boolean {
+    private fun object_element_1_1(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "object_element_1_1")) return false
       var result_: Boolean
       val marker_: Marker = enter_section_(builder_, level_, _AND_)
-      result_ = consumeToken(builder_, R_CURLY)
+      result_ = consumeToken(builder_, JsonElementTypes.R_CURLY)
       exit_section_(builder_, level_, marker_, result_, false, null)
       return result_
     }
 
     /* ********************************************************** */
     // property_name (':' property_value)
-    fun `property_$`(builder_: PsiBuilder, level_: Int): Boolean {
+    fun `property_$`(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "`property_$`")) return false
       var result_: Boolean
       var pinned_: Boolean
-      val marker_: Marker = enter_section_(builder_, level_, _NONE_, PROPERTY, "<property>")
+      val marker_: Marker = enter_section_(builder_, level_, _NONE_, JsonElementTypes.PROPERTY, "<property>")
       result_ = property_name(builder_, level_ + 1)
       pinned_ = result_ // pin = 1
       result_ = result_ && property_1(builder_, level_ + 1)
@@ -285,12 +275,12 @@ open class JsonParser: PsiParser, LightPsiParser {
     }
 
     // ':' property_value
-    private fun property_1(builder_: PsiBuilder, level_: Int): Boolean {
+    private fun property_1(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "property_1")) return false
       var result_: Boolean
       var pinned_: Boolean
       val marker_: Marker = enter_section_(builder_, level_, _NONE_)
-      result_ = consumeToken(builder_, COLON)
+      result_ = consumeToken(builder_, JsonElementTypes.COLON)
       pinned_ = result_ // pin = 1
       result_ = result_ && property_value(builder_, level_ + 1)
       exit_section_(builder_, level_, marker_, result_, pinned_, null)
@@ -299,7 +289,7 @@ open class JsonParser: PsiParser, LightPsiParser {
 
     /* ********************************************************** */
     // literal | reference_expression
-    internal fun property_name(builder_: PsiBuilder, level_: Int): Boolean {
+    internal fun property_name(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "property_name")) return false
       var result_: Boolean
       result_ = literal(builder_, level_ + 1)
@@ -309,41 +299,41 @@ open class JsonParser: PsiParser, LightPsiParser {
 
     /* ********************************************************** */
     // value
-    internal fun property_value(builder_: PsiBuilder, level_: Int): Boolean {
+    internal fun property_value(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       return `value_$`(builder_, level_ + 1)
     }
 
     /* ********************************************************** */
     // IDENTIFIER
-    fun reference_expression(builder_: PsiBuilder, level_: Int): Boolean {
+    fun reference_expression(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "reference_expression")) return false
-      if (!nextTokenIs(builder_, IDENTIFIER)) return false
+      if (!nextTokenIs(builder_, JsonElementTypes.IDENTIFIER)) return false
       var result_: Boolean
       val marker_: Marker = enter_section_(builder_)
-      result_ = consumeToken(builder_, IDENTIFIER)
-      exit_section_(builder_, marker_, REFERENCE_EXPRESSION, result_)
+      result_ = consumeToken(builder_, JsonElementTypes.IDENTIFIER)
+      exit_section_(builder_, marker_, JsonElementTypes.REFERENCE_EXPRESSION, result_)
       return result_
     }
 
     /* ********************************************************** */
     // SINGLE_QUOTED_STRING | DOUBLE_QUOTED_STRING
-    fun string_literal(builder_: PsiBuilder, level_: Int): Boolean {
+    fun string_literal(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "string_literal")) return false
-      if (!nextTokenIs(builder_, "<string literal>", DOUBLE_QUOTED_STRING, SINGLE_QUOTED_STRING)) return false
+      if (!nextTokenIs(builder_, "<string literal>", JsonElementTypes.DOUBLE_QUOTED_STRING, JsonElementTypes.SINGLE_QUOTED_STRING)) return false
       var result_: Boolean
-      val marker_: Marker = enter_section_(builder_, level_, _NONE_, STRING_LITERAL, "<string literal>")
-      result_ = consumeToken(builder_, SINGLE_QUOTED_STRING)
-      if (!result_) result_ = consumeToken(builder_, DOUBLE_QUOTED_STRING)
+      val marker_: Marker = enter_section_(builder_, level_, _NONE_, JsonElementTypes.STRING_LITERAL, "<string literal>")
+      result_ = consumeToken(builder_, JsonElementTypes.SINGLE_QUOTED_STRING)
+      if (!result_) result_ = consumeToken(builder_, JsonElementTypes.DOUBLE_QUOTED_STRING)
       exit_section_(builder_, level_, marker_, result_, false, null)
       return result_
     }
 
     /* ********************************************************** */
     // object | array | literal | reference_expression
-    fun `value_$`(builder_: PsiBuilder, level_: Int): Boolean {
+    fun `value_$`(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "`value_$`")) return false
       var result_: Boolean
-      val marker_: Marker = enter_section_(builder_, level_, _COLLAPSE_, VALUE, "<value>")
+      val marker_: Marker = enter_section_(builder_, level_, _COLLAPSE_, JsonElementTypes.VALUE, "<value>")
       result_ = `object_$`(builder_, level_ + 1)
       if (!result_) result_ = array(builder_, level_ + 1)
       if (!result_) result_ = literal(builder_, level_ + 1)

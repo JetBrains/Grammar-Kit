@@ -29,7 +29,7 @@ public class ExpressionGeneratorHelper {
   private static final ConsumeType CONSUME_TYPE_OVERRIDE = ConsumeType.SMART;
 
   private static @NotNull Map<String, List<OperatorInfo>> buildCallMap(ExpressionHelper.ExpressionInfo info,
-                                                                       ParserGenerator g,
+                                                                       JavaParserGenerator g,
                                                                        @NotNull Renderer R) {
     Map<String, List<OperatorInfo>> opCalls = new LinkedHashMap<>();
     for (BnfRule rule : info.priorityMap.keySet()) {
@@ -56,7 +56,7 @@ public class ExpressionGeneratorHelper {
     return opCalls;
   }
 
-  public static void generateExpressionRoot(ExpressionHelper.ExpressionInfo info, ParserGenerator g, @NotNull Renderer R) {
+  public static void generateExpressionRoot(ExpressionHelper.ExpressionInfo info, JavaParserGenerator g, @NotNull Renderer R) {
     Map<String, List<OperatorInfo>> opCalls = buildCallMap(info, g, R);
     Set<String> sortedOpCalls = opCalls.keySet();
 
@@ -232,8 +232,8 @@ public class ExpressionGeneratorHelper {
     String methodName = R.getFuncName(info.rootRule);
     String kernelMethodName = R.getNextName(methodName, 0);
     String frameName = quote(R.getRuleDisplayName(info.rootRule, true));
-    String shortPB = g.shorten(g.C.PsiBuilderClass);
-    String shortMarker = !g.G.generateFQN ? "Marker" : g.C.PsiBuilderClass + ".Marker";
+    String shortPB = g.shorten(g.C.SyntaxTreeBuilderClass());
+    String shortMarker = !g.G.generateFQN ? "Marker" : g.C.SyntaxTreeBuilderClass() + ".Marker";
     g.out("fun %s(%s: %s, %s: Int, %s: Int): Boolean {", methodName, g.N.builder, shortPB, g.N.level, g.N.priority);
     g.out("if (!recursion_guard_(%s, %s, \"%s\")) return false", g.N.builder, g.N.level, methodName);
 
@@ -286,11 +286,11 @@ public class ExpressionGeneratorHelper {
 
       String substCheck = "";
       if (operator.arg1 != null) {
-        substCheck = format(" && leftMarkerIs(%s, %s)", g.N.builder, g.getElementType(operator.arg1));
+        substCheck = format(" && leftMarkerIs(%s, %s)", g.N.builder, g.shortElementTypesHolderName() + "." + g.getElementType(operator.arg1));
       }
       g.out("%sif (%s < %d%s && %s) {", first ? "" : "else ", g.N.priority, priority, substCheck, opCall);
       first = false;
-      String elementType = g.getElementType(operator.rule);
+      String elementType = g.shortElementTypesHolderName() + "." + g.getElementType(operator.rule);
       boolean rightAssociative = getAttribute(operator.rule, KnownAttribute.RIGHT_ASSOCIATIVE);
       String tailCall = operator.tail == null ? null : g.createNodeCall(
         operator.rule, operator.tail, R.getNextName(R.getFuncName(operator.rule), 1), ConsumeType.DEFAULT
@@ -369,7 +369,7 @@ public class ExpressionGeneratorHelper {
           if (tailCall != null) {
             g.out("%s = %s && report_error_(%s, %s) && %s", g.N.result, g.N.pinned, g.N.builder, tailCall, g.N.result);
           }
-          String elementTypeRef = StringUtil.isNotEmpty(elementType) ? elementType : "null";
+          String elementTypeRef = StringUtil.isNotEmpty(elementType) ? g.shortElementTypesHolderName() + "." + elementType : "null";
           g.out("exit_section_(%s, %s, %s, %s, %s, %s, null)", g.N.builder, g.N.level, g.N.marker, elementTypeRef,
                 g.N.result, g.N.pinned);
           g.out("return %s || %s", g.N.result, g.N.pinned);

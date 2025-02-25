@@ -12,7 +12,7 @@ import java.io.IOException;
 
 public interface Generator {
   @NotNull Generator KOTLIN_GENERATOR = fromGeneratorBase(KotlinParserGenerator::new);
-  @NotNull Generator JAVA_GENERATOR = fromGeneratorBase(ParserGenerator::new);
+  @NotNull Generator JAVA_GENERATOR = fromGeneratorBase(JavaParserGenerator::new);
 
   static <T extends GeneratorBase> @NotNull Generator fromGeneratorBase(@NotNull Generator.GeneratorBaseFactory<T> generatorBaseFactory) {
     return new Generator() {

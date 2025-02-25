@@ -23,7 +23,7 @@ public class KotlinBnfGeneratorTest extends AbstractBnfGeneratorTest {
   }
 
   public void testAutoRecovery() throws Exception {
-    doParserTest();
+    doPsiTest();
   }
 
   public void testBindersAndHooks() throws Exception {
@@ -39,7 +39,7 @@ public class KotlinBnfGeneratorTest extends AbstractBnfGeneratorTest {
   }
 
   public void testExprParser() throws Exception {
-    doParserTest();
+    doPsiTest();
   }
 
   public void testExternalRules() throws Exception {
@@ -50,8 +50,12 @@ public class KotlinBnfGeneratorTest extends AbstractBnfGeneratorTest {
     doParserTest();
   }
 
+  public void testFixes() throws Exception {
+    doPsiTest();
+  }
+
   public void testGenOptions() throws Exception {
-    doParserTest();
+    doPsiTest();
   }
 
   public void testLeftAssociative() throws Exception {
@@ -59,15 +63,15 @@ public class KotlinBnfGeneratorTest extends AbstractBnfGeneratorTest {
   }
 
   public void testPsiAccessors() throws Exception {
-    doParserTest();
+    doPsiTest();
   }
 
   public void testPsiGen() throws Exception {
-    doParserTest();
+    doPsiTest();
   }
 
   public void testPsiStart() throws Exception {
-    doParserTest();
+    doPsiTest();
   }
 
   public void testSmall() throws Exception {
@@ -75,15 +79,15 @@ public class KotlinBnfGeneratorTest extends AbstractBnfGeneratorTest {
   }
 
   public void testStub() throws Exception {
-    doParserTest();
+    doPsiTest();
   }
 
   public void testTokenChoice() throws Exception {
-    doParserTest();
+    doPsiTest();
   }
 
   public void testTokenChoiceNoSets() throws Exception {
-    doParserTest();
+    doPsiTest();
   }
 
   public void testTokenSequence() throws Exception {
@@ -95,19 +99,19 @@ public class KotlinBnfGeneratorTest extends AbstractBnfGeneratorTest {
   }
 
   public void testUtilMethods() throws Exception {
-    doParserTest();
+    doPsiTest();
   }
 
   public void testSelfBnf() throws Exception {
-    doParserTest();
+    doPsiTest();
   }
 
   public void testSelfFlex() throws Exception {
-    doParserTest();
+    doPsiTest();
   }
 
-  public void testJson() throws Exception {
-    doParserTest();
+  public void testJsonParser() throws Exception {
+    doPsiTest();
   }
 
   public void testEmpty() throws Exception {

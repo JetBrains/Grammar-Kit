@@ -9,6 +9,7 @@ import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.ui.MessageType;
 import com.intellij.openapi.util.Pair;
+import com.intellij.openapi.util.Ref;
 import com.intellij.openapi.util.Trinity;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.psi.CommonClassNames;
@@ -56,8 +57,8 @@ import static org.intellij.grammar.psi.BnfTypes.*;
  * @author gregory
  * Date 16.07.11 10:41
  */
-public class ParserGenerator extends GeneratorBase {
-  public static final Logger LOG = Logger.getInstance(ParserGenerator.class);
+public class JavaParserGenerator extends GeneratorBase {
+  public static final Logger LOG = Logger.getInstance(JavaParserGenerator.class);
   protected final String myParserUtilClass;
   protected final String myPsiImplUtilClass;
   protected final String myVisitorClassName;
@@ -88,11 +89,11 @@ public class ParserGenerator extends GeneratorBase {
   private final JavaHelper myJavaHelper;
   private final @NotNull JavaRenderer R = JavaRenderer.INSTANCE;
 
-  public ParserGenerator(@NotNull BnfFile psiFile,
-                         @NotNull String sourcePath,
-                         @NotNull String outputPath,
-                         @NotNull String packagePrefix,
-                         @NotNull OutputOpener outputOpener) {
+  public JavaParserGenerator(@NotNull BnfFile psiFile,
+                             @NotNull String sourcePath,
+                             @NotNull String outputPath,
+                             @NotNull String packagePrefix,
+                             @NotNull OutputOpener outputOpener) {
     super(psiFile, sourcePath, outputPath, packagePrefix, "java", outputOpener);
 
     N = G.names;
@@ -791,7 +792,7 @@ public class ParserGenerator extends GeneratorBase {
       }
     }
 
-    int[] skip = {0};
+    final var skip = Ref.create(0);
     for (int i = 0, p = 0, childrenSize = children.size(); i < childrenSize; i++) {
       BnfExpression child = children.get(i);
 
@@ -808,7 +809,7 @@ public class ParserGenerator extends GeneratorBase {
         out("%s%s = %s;", i > 0 ? format("if (!%s) ", N.result) : "", N.result, nodeCall.render(R, N));
       }
       else if (type == BNF_SEQUENCE) {
-        if (skip[0] == 0) {
+        if (skip.get() == 0) {
           ConsumeType consumeType = getEffectiveConsumeType(rule, node, null);
           nodeCall = generateTokenSequenceCall(children, i, pinMatcher, pinApplied, skip, nodeCall, false, consumeType);
           if (i == 0) {
@@ -838,7 +839,7 @@ public class ParserGenerator extends GeneratorBase {
           }
         }
         else {
-          skip[0]--; // we are inside already generated token sequence
+          skip.set(skip.get() - 1); // we are inside already generated token sequence
           if (pinApplied && i == p + 1) p++; // shift pinned index as we skip
         }
         if (pinned && !pinApplied && pinMatcher.matches(i, child)) {
@@ -1069,7 +1070,7 @@ public class ParserGenerator extends GeneratorBase {
                                                       int startIndex,
                                                       PinMatcher pinMatcher,
                                                       boolean pinApplied,
-                                                      int[] skip,
+                                                      Ref<Integer> skip,
                                                       @NotNull NodeCall nodeCall,
                                                       boolean rollbackOnFail,
                                                       ConsumeType consumeType) {
@@ -1089,7 +1090,7 @@ public class ParserGenerator extends GeneratorBase {
       }
     }
     if (list.size() < 2) return nodeCall;
-    skip[0] = list.size() - 1;
+    skip.set(list.size() - 1);
     String consumeMethodName = (rollbackOnFail ? "parseTokens" : "consumeTokens") +
                                (consumeType == ConsumeType.SMART ? consumeType.getMethodSuffix() : "");
     return new ConsumeTokensCall(consumeMethodName, pin, list);
@@ -1184,7 +1185,7 @@ public class ParserGenerator extends GeneratorBase {
           mySimpleTokens.put(t, null);
         }
       }
-      return generateTokenSequenceCall(childExpressions, 0, pinMatcher, false, new int[]{0}, nodeCall, true, consumeType);
+      return generateTokenSequenceCall(childExpressions, 0, pinMatcher, false, Ref.create(0), nodeCall, true, consumeType);
     }
     else if (type == BNF_EXTERNAL_EXPRESSION) {
       List<BnfExpression> expressions = ((BnfExternalExpression)node).getExpressionList();
@@ -1310,15 +1311,15 @@ public class ParserGenerator extends GeneratorBase {
         return argument;
       }
       else {
-        return (@NotNull Renderer renderer) -> getMetaMethodFieldRef(argument.render(R), nextName);
+        return renderer -> getMetaMethodFieldRef(argument.render(renderer), nextName);
       }
     }
     else if (nodeCall instanceof MethodCall && G.javaVersion > 6) {
       MethodCall methodCall = (MethodCall)nodeCall;
-      return (@NotNull Renderer renderer) -> format("%s::%s", methodCall.getClassName(), methodCall.getMethodName());
+      return renderer -> format("%s::%s", methodCall.className(), methodCall.methodName());
     }
     else {
-      return (@NotNull Renderer renderer) -> getParserLambdaRef(nodeCall, nextName);
+      return renderer -> getParserLambdaRef(nodeCall, nextName);
     }
   }
 

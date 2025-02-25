@@ -299,13 +299,13 @@
 
 ## [1.0.9]
 
-* [Pratt-like](http://javascript.crockford.com/tdop/tdop.html) expression parsing stabilized, see [grammar sample](testData/generator/ExprParser.bnf) for more
+* [Pratt-like](http://javascript.crockford.com/tdop/tdop.html) expression parsing stabilized, see [grammar sample](testData/java/ExprParser.bnf) for more
 * No compile errors in generated code on cold start
 * Drop unneeded inheritance checks during parse-time
 
 ## [1.0.8]
 
-* Experimental [Pratt-like](http://javascript.crockford.com/tdop/tdop.html) expression parsing ([compact grammars and improved performance](testData/generator/ExprParser.bnf))
+* Experimental [Pratt-like](http://javascript.crockford.com/tdop/tdop.html) expression parsing ([compact grammars and improved performance](testData/java/ExprParser.bnf))
 * Per-rule elementTypeClass/Factory attribute & empty elementType attribute support
 * CamelCase rule names support and PSI classes calculation fixes
 * Grammar code folding for attribute groups and multiline comments

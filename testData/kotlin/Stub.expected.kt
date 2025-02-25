@@ -2,25 +2,15 @@
 //header.txt
 package test
 
-import com.intellij.lang.PsiBuilder
-import com.intellij.lang.PsiBuilder.Marker
-import test.FooTypes.*
-import org.intellij.grammar.parser.GeneratedParserUtilBase.*
-import com.intellij.psi.tree.IElementType
-import com.intellij.lang.ASTNode
-import com.intellij.psi.tree.TokenSet
-import com.intellij.lang.PsiParser
-import com.intellij.lang.LightPsiParser
+import com.intellij.platform.syntax.parser.SyntaxTreeBuilder
+import com.intellij.platform.syntax.parser.SyntaxTreeBuilder.Marker
+import com.intellij.platform.syntax.util.SyntaxGeneratedParserRuntimeBase
+import com.intellij.platform.syntax.SyntaxElementType
 
 @Suppress("unused", "FunctionName", "JoinDeclarationAndAssignment")
-open class FooParser: PsiParser, LightPsiParser {
+open class FooParser {
 
-  override fun parse(root_: IElementType, builder_: PsiBuilder): ASTNode {
-    parseLight(root_, builder_)
-    return builder_.getTreeBuilt()
-  }
-
-  override fun parseLight(root_: IElementType, builder_: PsiBuilder) {
+  fun parse(root_: SyntaxElementType, builder_: SyntaxTreeBuilder) {
     var result_: Boolean
     val builder_ = adapt_builder_(root_, builder_, this, EXTENDS_SETS_)
     val marker_: Marker = enter_section_(builder_, 0, _COLLAPSE_, null)
@@ -28,25 +18,25 @@ open class FooParser: PsiParser, LightPsiParser {
     exit_section_(builder_, 0, marker_, root_, result_, true, TRUE_CONDITION)
   }
 
-  protected fun parse_root_(root_: IElementType, builder_: PsiBuilder): Boolean {
+  protected fun parse_root_(root_: SyntaxElementType, builder_: SyntaxTreeBuilder): Boolean {
     return parse_root_(root_, builder_, 0)
   }
 
   companion object {
-    internal fun parse_root_(root_: IElementType, builder_: PsiBuilder, level_: Int): Boolean {
+    internal fun parse_root_(root_: SyntaxElementType, builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       return root(builder_, level_ + 1)
     }
 
-    val EXTENDS_SETS_: Array<TokenSet> = arrayOf(
-      create_token_set_(INTERFACE_TYPE, STRUCT_TYPE, TYPE),
+    val EXTENDS_SETS_: Array<Set<SyntaxElementType>> = arrayOf(
+      create_token_set_(FooTypes.INTERFACE_TYPE, FooTypes.STRUCT_TYPE, FooTypes.TYPE),
     )
 
     /* ********************************************************** */
     // 'aa' element5
-    fun element1(builder_: PsiBuilder, level_: Int): Boolean {
+    fun element1(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "element1")) return false
       var result_: Boolean
-      val marker_: Marker = enter_section_(builder_, level_, _NONE_, ELEMENT_1, "<element 1>")
+      val marker_: Marker = enter_section_(builder_, level_, _NONE_, FooTypes.ELEMENT_1, "<element 1>")
       result_ = consumeToken(builder_, "aa")
       result_ = result_ && element5(builder_, level_ + 1)
       exit_section_(builder_, level_, marker_, result_, false, null)
@@ -55,10 +45,10 @@ open class FooParser: PsiParser, LightPsiParser {
 
     /* ********************************************************** */
     // 'bb' element4*
-    fun element2(builder_: PsiBuilder, level_: Int): Boolean {
+    fun element2(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "element2")) return false
       var result_: Boolean
-      val marker_: Marker = enter_section_(builder_, level_, _NONE_, ELEMENT_2, "<element 2>")
+      val marker_: Marker = enter_section_(builder_, level_, _NONE_, FooTypes.ELEMENT_2, "<element 2>")
       result_ = consumeToken(builder_, "bb")
       result_ = result_ && element2_1(builder_, level_ + 1)
       exit_section_(builder_, level_, marker_, result_, false, null)
@@ -66,7 +56,7 @@ open class FooParser: PsiParser, LightPsiParser {
     }
 
     // element4*
-    private fun element2_1(builder_: PsiBuilder, level_: Int): Boolean {
+    private fun element2_1(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "element2_1")) return false
       while (true) {
         val pos_: Int = current_position_(builder_)
@@ -78,10 +68,10 @@ open class FooParser: PsiParser, LightPsiParser {
 
     /* ********************************************************** */
     // 'bb' element4
-    fun element3(builder_: PsiBuilder, level_: Int): Boolean {
+    fun element3(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "element3")) return false
       var result_: Boolean
-      val marker_: Marker = enter_section_(builder_, level_, _NONE_, ELEMENT_3, "<element 3>")
+      val marker_: Marker = enter_section_(builder_, level_, _NONE_, FooTypes.ELEMENT_3, "<element 3>")
       result_ = consumeToken(builder_, "bb")
       result_ = result_ && element4(builder_, level_ + 1)
       exit_section_(builder_, level_, marker_, result_, false, null)
@@ -90,10 +80,10 @@ open class FooParser: PsiParser, LightPsiParser {
 
     /* ********************************************************** */
     // 'bb' | element2
-    fun element4(builder_: PsiBuilder, level_: Int): Boolean {
+    fun element4(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "element4")) return false
       var result_: Boolean
-      val marker_: Marker = enter_section_(builder_, level_, _NONE_, ELEMENT_4, "<element 4>")
+      val marker_: Marker = enter_section_(builder_, level_, _NONE_, FooTypes.ELEMENT_4, "<element 4>")
       result_ = consumeToken(builder_, "bb")
       if (!result_) result_ = element2(builder_, level_ + 1)
       exit_section_(builder_, level_, marker_, result_, false, null)
@@ -102,10 +92,10 @@ open class FooParser: PsiParser, LightPsiParser {
 
     /* ********************************************************** */
     // 'cc'
-    fun element5(builder_: PsiBuilder, level_: Int): Boolean {
+    fun element5(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "element5")) return false
       var result_: Boolean
-      val marker_: Marker = enter_section_(builder_, level_, _NONE_, ELEMENT_5, "<element 5>")
+      val marker_: Marker = enter_section_(builder_, level_, _NONE_, FooTypes.ELEMENT_5, "<element 5>")
       result_ = consumeToken(builder_, "cc")
       exit_section_(builder_, level_, marker_, result_, false, null)
       return result_
@@ -113,10 +103,10 @@ open class FooParser: PsiParser, LightPsiParser {
 
     /* ********************************************************** */
     // 'interface'
-    fun interface_type(builder_: PsiBuilder, level_: Int): Boolean {
+    fun interface_type(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "interface_type")) return false
       var result_: Boolean
-      val marker_: Marker = enter_section_(builder_, level_, _NONE_, INTERFACE_TYPE, "<interface type>")
+      val marker_: Marker = enter_section_(builder_, level_, _NONE_, FooTypes.INTERFACE_TYPE, "<interface type>")
       result_ = consumeToken(builder_, "interface")
       exit_section_(builder_, level_, marker_, result_, false, null)
       return result_
@@ -124,7 +114,7 @@ open class FooParser: PsiParser, LightPsiParser {
 
     /* ********************************************************** */
     // element1 | element2 | element3 | element4 | element5 | type
-    internal fun root(builder_: PsiBuilder, level_: Int): Boolean {
+    internal fun root(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "root")) return false
       var result_: Boolean
       result_ = element1(builder_, level_ + 1)
@@ -138,10 +128,10 @@ open class FooParser: PsiParser, LightPsiParser {
 
     /* ********************************************************** */
     // 'struct'
-    fun struct_type(builder_: PsiBuilder, level_: Int): Boolean {
+    fun struct_type(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "struct_type")) return false
       var result_: Boolean
-      val marker_: Marker = enter_section_(builder_, level_, _NONE_, STRUCT_TYPE, "<struct type>")
+      val marker_: Marker = enter_section_(builder_, level_, _NONE_, FooTypes.STRUCT_TYPE, "<struct type>")
       result_ = consumeToken(builder_, "struct")
       exit_section_(builder_, level_, marker_, result_, false, null)
       return result_
@@ -149,10 +139,10 @@ open class FooParser: PsiParser, LightPsiParser {
 
     /* ********************************************************** */
     // interface_type | struct_type
-    fun type(builder_: PsiBuilder, level_: Int): Boolean {
+    fun type(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "type")) return false
       var result_: Boolean
-      val marker_: Marker = enter_section_(builder_, level_, _COLLAPSE_, TYPE, "<type>")
+      val marker_: Marker = enter_section_(builder_, level_, _COLLAPSE_, FooTypes.TYPE, "<type>")
       result_ = interface_type(builder_, level_ + 1)
       if (!result_) result_ = struct_type(builder_, level_ + 1)
       exit_section_(builder_, level_, marker_, result_, false, null)

@@ -134,7 +134,7 @@ A more natural and compact way of dealing with this is supported.
 5. Use *rightAssociative* attribute when the default left associativity is not appropriate
 
 The following snippet demonstrates that "expression" parts of the BNF look compact, and
-the described syntax doesn't break much the ordinary BNF syntax ([complete example](testData/generator/ExprParser.bnf)):
+the described syntax doesn't break much the ordinary BNF syntax ([complete example](testData/java/ExprParser.bnf)):
 
 ````
 // to keep this sample short function calls and other expressions are omitted
@@ -423,7 +423,7 @@ java -jar grammar-kit.jar <output-dir> <grammars-and-dirs>
 java -cp grammar-kit.jar;<all-the-needed-jars> org.intellij.grammar.Main <output-dir> <grammars-and-dirs>
 ````
 
-To see [expression parser](testData/generator/ExprParser.bnf) in action:
+To see [expression parser](testData/java/ExprParser.bnf) in action:
 
 ````
 java -jar expression-console-sample.jar

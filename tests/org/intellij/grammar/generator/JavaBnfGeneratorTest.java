@@ -11,7 +11,7 @@ import java.util.List;
 
 public class JavaBnfGeneratorTest extends AbstractBnfGeneratorTest {
   public JavaBnfGeneratorTest() {
-    super("generator", ".java");
+    super("java", ".java");
   }
 
   public void testSelfBnf() throws Exception {

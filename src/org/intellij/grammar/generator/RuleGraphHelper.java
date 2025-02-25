@@ -499,7 +499,7 @@ public class RuleGraphHelper {
   private Map<PsiElement, Cardinality> joinMaps(@NotNull BnfRule rule, boolean tryCollapse, IElementType type, List<Map<PsiElement, Cardinality>> list) {
     if (list.isEmpty()) return Collections.emptyMap();
     if (type == BnfTypes.BNF_OP_OPT || type == BnfTypes.BNF_OP_ZEROMORE || type == BnfTypes.BNF_OP_ONEMORE) {
-      ParserGenerator.LOG.assertTrue(list.size() == 1);
+      JavaParserGenerator.LOG.assertTrue(list.size() == 1);
       list = compactInheritors(rule, list);
       Map<PsiElement, Cardinality> m = list.get(0);
       if (tryCollapse && willCollapse(rule, m) && type == BnfTypes.BNF_OP_OPT) {

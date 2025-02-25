@@ -98,7 +98,7 @@ public abstract class GeneratorBase {
    * If it's a string representing a comment, returns it as is.
    * Otherwise, wraps the string in a comment.
    */
-  private final String getStringOrFile(String classHeader) {
+  private String getStringOrFile(String classHeader) {
     try {
       File file = new File(mySourcePath, classHeader);
       if (file.exists()) return FileUtil.loadFile(file);

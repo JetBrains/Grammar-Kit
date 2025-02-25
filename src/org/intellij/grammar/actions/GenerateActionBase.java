@@ -32,8 +32,8 @@ import com.intellij.util.containers.JBIterable;
 import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.generator.BnfConstants;
 import org.intellij.grammar.generator.Generator;
+import org.intellij.grammar.generator.JavaParserGenerator;
 import org.intellij.grammar.generator.OutputOpener;
-import org.intellij.grammar.generator.ParserGenerator;
 import org.intellij.grammar.psi.BnfFile;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -198,7 +198,7 @@ public abstract class GenerateActionBase extends AnAction {
               Notifications.Bus.notify(new Notification(
                 BnfConstants.GENERATION_GROUP,
                 file.getName() + " generation failed",
-                ExceptionUtil.getUserStackTrace(ex, ParserGenerator.LOG), NotificationType.ERROR), project);
+                ExceptionUtil.getUserStackTrace(ex, JavaParserGenerator.LOG), NotificationType.ERROR), project);
               LOG.warn(ex);
             }
           }

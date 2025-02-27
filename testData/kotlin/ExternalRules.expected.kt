@@ -3,7 +3,7 @@
 import com.intellij.platform.syntax.parser.SyntaxTreeBuilder
 import com.intellij.platform.syntax.parser.SyntaxTreeBuilder.Marker
 import generated.GeneratedTypes
-import org.intellij.grammar.test.ParserUtil
+import com.intellij.platform.syntax.util.SyntaxGeneratedParserRuntimeBase
 import com.intellij.platform.syntax.SyntaxElementType
 
 @Suppress("unused", "FunctionName", "JoinDeclarationAndAssignment")
@@ -788,7 +788,7 @@ open class ExternalRules {
 import com.intellij.platform.syntax.parser.SyntaxTreeBuilder
 import com.intellij.platform.syntax.parser.SyntaxTreeBuilder.Marker
 import generated.GeneratedTypes
-import org.intellij.grammar.test.ParserUtil
+import com.intellij.platform.syntax.util.SyntaxGeneratedParserRuntimeBase
 import ExternalRules.*
 
 @Suppress("unused", "FunctionName", "JoinDeclarationAndAssignment")
@@ -855,7 +855,7 @@ open class ExternalRules2 {
 import com.intellij.platform.syntax.parser.SyntaxTreeBuilder
 import com.intellij.platform.syntax.parser.SyntaxTreeBuilder.Marker
 import generated.GeneratedTypes
-import org.intellij.grammar.test.ParserUtil
+import com.intellij.platform.syntax.util.SyntaxGeneratedParserRuntimeBase
 import ExternalRules.*
 
 @Suppress("unused", "FunctionName", "JoinDeclarationAndAssignment")

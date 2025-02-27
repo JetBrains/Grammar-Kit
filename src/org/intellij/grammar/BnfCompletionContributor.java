@@ -20,9 +20,9 @@ import com.intellij.psi.util.PsiUtilCore;
 import com.intellij.util.ObjectUtils;
 import com.intellij.util.ProcessingContext;
 import com.intellij.util.containers.ContainerUtil;
-import org.intellij.grammar.generator.BnfConstants;
 import org.intellij.grammar.generator.ParserGeneratorUtil;
 import org.intellij.grammar.generator.RuleGraphHelper;
+import org.intellij.grammar.generator.java.JavaBnfConstants;
 import org.intellij.grammar.java.JavaHelper;
 import org.intellij.grammar.parser.GeneratedParserUtilBase;
 import org.intellij.grammar.psi.*;
@@ -139,7 +139,7 @@ final class BnfCompletionContributor extends CompletionContributor {
           JavaHelper helper = JavaHelper.getJavaHelper(rule);
           for (String className = parserClass; className != null; className = helper.getSuperClassName(className)) {
             for (NavigatablePsiElement element : helper
-              .findClassMethods(className, JavaHelper.MethodType.STATIC, "*", -1, BnfConstants.PSI_BUILDER_CLASS, "int")) {
+              .findClassMethods(className, JavaHelper.MethodType.STATIC, "*", -1, JavaBnfConstants.PSI_BUILDER_CLASS, "int")) {
               List<String> methodTypes = helper.getMethodTypes(element);
               if ("boolean".equals(ContainerUtil.getFirstItem(methodTypes))) {
                 result.addElement(LookupElementBuilder.createWithIcon((PsiNamedElement)element));
@@ -151,22 +151,11 @@ final class BnfCompletionContributor extends CompletionContributor {
     });
   }
 
-  @Override
-  public void beforeCompletion(@NotNull CompletionInitializationContext context) {
-    BnfFile file = ObjectUtils.tryCast(context.getFile(), BnfFile.class);
-    if (file == null) return;
-    int offset = context.getStartOffset();
-    PsiElement element = file.findElementAt(offset);
-    if (PsiUtilCore.getElementType(element) == BNF_ID) {
-      context.setDummyIdentifier("");
-    }
-  }
-
   @Contract("null -> false")
   private static boolean isPossibleEmptyAttrs(PsiElement attrs) {
     if (!(attrs instanceof BnfParenExpression)) return false;
     if (attrs.getFirstChild().getNode().getElementType() != BnfTypes.BNF_LEFT_BRACE) return false;
-    if (!(((BnfParenExpression) attrs).getExpression() instanceof BnfReferenceOrToken)) return false;
+    if (!(((BnfParenExpression)attrs).getExpression() instanceof BnfReferenceOrToken)) return false;
     return isLastInRuleOrFree(attrs);
   }
 
@@ -206,22 +195,28 @@ final class BnfCompletionContributor extends CompletionContributor {
     else {
       int offset = posRange.getStartOffset();
       for (PsiElement cur = GrammarUtil.getDummyAwarePrevSibling(position); cur != null; cur = GrammarUtil.getDummyAwarePrevSibling(cur)) {
-        if (cur instanceof BnfAttrs) offset = cur.getTextRange().getEndOffset();
-        else if (cur instanceof BnfRule) offset = cur.getTextRange().getStartOffset();
-        else continue;
+        if (cur instanceof BnfAttrs) {
+          offset = cur.getTextRange().getEndOffset();
+        }
+        else if (cur instanceof BnfRule) {
+          offset = cur.getTextRange().getStartOffset();
+        }
+        else {
+          continue;
+        }
         break;
       }
       range = new TextRange(offset, posRange.getStartOffset());
     }
     String headText = range.substring(posFile.getText());
-    int completionOffset = StringUtil.isEmptyOrSpaces(headText)? 0 : headText.length();
+    int completionOffset = StringUtil.isEmptyOrSpaces(headText) ? 0 : headText.length();
     String text = completionOffset == 0 ? CompletionInitializationContext.DUMMY_IDENTIFIER : headText;
 
     GeneratedParserUtilBase.CompletionState state = new GeneratedParserUtilBase.CompletionState(completionOffset) {
       @Override
       public String convertItem(Object o) {
         // we do not have other keywords
-        return o instanceof String? (String)o : null;
+        return o instanceof String ? (String)o : null;
       }
     };
     PsiFileFactory psiFileFactory = PsiFileFactory.getInstance(posFile.getProject());
@@ -232,11 +227,22 @@ final class BnfCompletionContributor extends CompletionContributor {
     if (completionOffset != 0) {
       TextRange altRange = TextRange.create(posRange.getEndOffset(), Math.min(posRange.getEndOffset() + 100, posFile.getTextLength()));
       String tailText = altRange.substring(posFile.getText());
-      String text2 = text + (StringUtil.isEmptyOrSpaces(tailText)? "a ::= " : tailText);
+      String text2 = text + (StringUtil.isEmptyOrSpaces(tailText) ? "a ::= " : tailText);
       PsiFile file2 = psiFileFactory.createFileFromText("a.bnf", BnfLanguage.INSTANCE, text2, true, false);
       file2.putUserData(GeneratedParserUtilBase.COMPLETION_STATE_KEY, state);
       TreeUtil.ensureParsed(file2.getNode());
     }
     return state.items;
+  }
+
+  @Override
+  public void beforeCompletion(@NotNull CompletionInitializationContext context) {
+    BnfFile file = ObjectUtils.tryCast(context.getFile(), BnfFile.class);
+    if (file == null) return;
+    int offset = context.getStartOffset();
+    PsiElement element = file.findElementAt(offset);
+    if (PsiUtilCore.getElementType(element) == BNF_ID) {
+      context.setDummyIdentifier("");
+    }
   }
 }

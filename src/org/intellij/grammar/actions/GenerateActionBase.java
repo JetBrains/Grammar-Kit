@@ -30,7 +30,7 @@ import com.intellij.psi.PsiManager;
 import com.intellij.util.ExceptionUtil;
 import com.intellij.util.containers.JBIterable;
 import org.intellij.grammar.KnownAttribute;
-import org.intellij.grammar.generator.BnfConstants;
+import org.intellij.grammar.generator.CommonBnfConstants;
 import org.intellij.grammar.generator.Generator;
 import org.intellij.grammar.generator.JavaParserGenerator;
 import org.intellij.grammar.generator.OutputOpener;
@@ -47,11 +47,11 @@ import static org.intellij.grammar.generator.ParserGeneratorUtil.getRootAttribut
 
 public abstract class GenerateActionBase extends AnAction {
   private static final Logger LOG = Logger.getInstance(GenerateActionBase.class);
-  private final @NotNull Generator myGenerator;
+  private final @NotNull GeneratorConstructor myGeneratorConstructor;
 
-  public GenerateActionBase(@NotNull Generator generator) {
+  public GenerateActionBase(@NotNull GeneratorConstructor constructor) {
     super();
-    myGenerator = generator;
+    myGeneratorConstructor = constructor;
   }
 
   private static @NotNull JBIterable<VirtualFile> getFiles(@NotNull AnActionEvent e) {
@@ -134,7 +134,7 @@ public abstract class GenerateActionBase extends AnAction {
                                           StringUtil.formatDuration(System.currentTimeMillis() - startTime));
             if (bnfFiles.size() > 3) {
               Notifications.Bus.notify(new Notification(
-                BnfConstants.GENERATION_GROUP,
+                CommonBnfConstants.GENERATION_GROUP,
                 "", report, NotificationType.INFORMATION), project);
             }
             VfsUtil.markDirtyAndRefresh(true, true, true, targets.toArray(VirtualFile.EMPTY_ARRAY));
@@ -162,7 +162,7 @@ public abstract class GenerateActionBase extends AnAction {
                 PsiFile bnfFile = getBnfFile(file, psiManager);
                 if (!(bnfFile instanceof BnfFile)) return;
                 try {
-                  myGenerator.generate(
+                  myGeneratorConstructor.create(
                     (BnfFile)bnfFile,
                     sourcePath,
                     genDir.getPath(),
@@ -171,8 +171,7 @@ public abstract class GenerateActionBase extends AnAction {
                       files.add(fileToOpen);
                       return OutputOpener.DEFAULT.openOutput(className, fileToOpen, myBnfFile);
                     })
-                  );
-                  //generator.generate();
+                  ).generate();
                 }
                 catch (Exception ex) {
                   exRef.set(ex);
@@ -188,7 +187,7 @@ public abstract class GenerateActionBase extends AnAction {
               filesProcessed++;
               totalWritten += written;
               Notifications.Bus.notify(new Notification(
-                BnfConstants.GENERATION_GROUP,
+                CommonBnfConstants.GENERATION_GROUP,
                 String.format("%s generated (%s)", file.getName(), StringUtil.formatFileSize(written)),
                 "to " + genDir + (duration == null ? "" : " in " + duration), NotificationType.INFORMATION), project);
             }
@@ -196,7 +195,7 @@ public abstract class GenerateActionBase extends AnAction {
             }
             catch (Exception ex) {
               Notifications.Bus.notify(new Notification(
-                BnfConstants.GENERATION_GROUP,
+                CommonBnfConstants.GENERATION_GROUP,
                 file.getName() + " generation failed",
                 ExceptionUtil.getUserStackTrace(ex, JavaParserGenerator.LOG), NotificationType.ERROR), project);
               LOG.warn(ex);
@@ -204,5 +203,16 @@ public abstract class GenerateActionBase extends AnAction {
           }
         }
       });
+  }
+
+  @FunctionalInterface
+  public interface GeneratorConstructor {
+    @NotNull Generator create(
+      @NotNull BnfFile psiFile,
+      @NotNull String sourcePath,
+      @NotNull String outputPath,
+      @NotNull String packagePrefix,
+      @NotNull OutputOpener outputOpener
+    );
   }
 }

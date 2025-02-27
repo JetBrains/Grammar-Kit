@@ -90,8 +90,7 @@ public class RuleMethodsHelper {
       RuleGraphHelper.Cardinality c = myExpressionHelper.fixCardinality(rule, element, cardMap.get(element));
       String pathName = getRuleOrTokenNameForPsi(element, c);
       if (pathName == null) continue;
-      if (element instanceof BnfRule) {
-        BnfRule resultType = (BnfRule)element;
+      if (element instanceof BnfRule resultType) {
         if (!Rule.isPrivate(rule)) {
           result.add(new MethodInfo(MethodType.RULE, pathName, pathName, resultType, c));
         }
@@ -148,7 +147,7 @@ public class RuleMethodsHelper {
   private @Nullable String getRuleOrTokenNameForPsi(@NotNull PsiElement tree, @NotNull RuleGraphHelper.Cardinality type) {
     String result;
 
-    if (!(tree instanceof BnfRule)) {
+    if (!(tree instanceof BnfRule asRule)) {
       if (type.many()) return null; // do not generate token lists
 
       IElementType effectiveType = getEffectiveType(tree);
@@ -163,7 +162,6 @@ public class RuleMethodsHelper {
       }
     }
     else {
-      BnfRule asRule = (BnfRule)tree;
       result = asRule.getName();
       if (StringUtil.isEmpty(R.getElementType(asRule, G.generateElementCase))) return null;
     }

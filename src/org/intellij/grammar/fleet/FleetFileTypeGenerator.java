@@ -6,10 +6,10 @@ package org.intellij.grammar.fleet;
 
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.util.containers.JBIterable;
-import org.intellij.grammar.generator.BnfConstants;
 import org.intellij.grammar.generator.Case;
-import org.intellij.grammar.generator.GeneratorBase;
+import org.intellij.grammar.generator.Generator;
 import org.intellij.grammar.generator.OutputOpener;
+import org.intellij.grammar.generator.java.JavaBnfConstants;
 import org.intellij.grammar.generator.java.JavaNameShortener;
 import org.intellij.grammar.psi.BnfFile;
 import org.jetbrains.annotations.NotNull;
@@ -21,11 +21,15 @@ import java.util.Set;
 import static org.intellij.grammar.fleet.FleetConstants.FLEET_NAMESPACE;
 import static org.intellij.grammar.fleet.FleetConstants.FLEET_NAMESPACE_PREFIX;
 
-public class FleetFileTypeGenerator extends GeneratorBase {
+public class FleetFileTypeGenerator extends Generator {
 
   private final String myFileTypeClassName;
   private final String myFileTypeDebugName;
   private final String myLanguageClass;
+  /**
+   * Whether the generated parser should be generated for Fleet.
+   */
+  private final Boolean myGenerateForFleet;
 
   public FleetFileTypeGenerator(@NotNull BnfFile psiFile,
                                 @NotNull String sourcePath,
@@ -37,6 +41,7 @@ public class FleetFileTypeGenerator extends GeneratorBase {
                                 @NotNull OutputOpener outputOpener
   ) {
     super(psiFile, sourcePath, outputPath, packagePrefix, "java", outputOpener);
+    myGenerateForFleet = psiFile instanceof FleetBnfFileWrapper;
     myFileTypeClassName = (!classFileTypeName.startsWith(FLEET_NAMESPACE_PREFIX)
                            ? FLEET_NAMESPACE_PREFIX
                            : "") + classFileTypeName;
@@ -126,7 +131,7 @@ public class FleetFileTypeGenerator extends GeneratorBase {
     imports.add(FleetConstants.FLEET_FILE_ELEMENT_TYPE_CLASS);
     imports.add(FleetConstants.PSI_BUILDER_CLASS);
     imports.add(myGrammarRootParser);
-    imports.add(BnfConstants.NOTNULL_ANNO);
+    imports.add(JavaBnfConstants.NOTNULL_ANNO);
 
     generateClassHeader(myFileTypeClassName, imports, "", TypeKind.CLASS, FleetConstants.FLEET_FILE_ELEMENT_TYPE_CLASS);
 
@@ -136,8 +141,8 @@ public class FleetFileTypeGenerator extends GeneratorBase {
     out("super(\"%s\", %s.INSTANCE);", shorten(myFileTypeDebugName), shorten(myLanguageClass));
     out("}");
     newLine();
-    out(shorten(BnfConstants.OVERRIDE_ANNO));
-    out("public void parse(%s %s<?> builder) {", shorten(BnfConstants.NOTNULL_ANNO), shorten(FleetConstants.PSI_BUILDER_CLASS));
+    out(shorten(JavaBnfConstants.OVERRIDE_ANNO));
+    out("public void parse(%s %s<?> builder) {", shorten(JavaBnfConstants.NOTNULL_ANNO), shorten(FleetConstants.PSI_BUILDER_CLASS));
     out("new %s().parseLight(this, builder);", shorten(myGrammarRootParser));
     out("}");
     out("}");

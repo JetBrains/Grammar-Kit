@@ -8,13 +8,12 @@ import com.intellij.openapi.util.text.StringUtil;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.Closeable;
-import java.io.IOException;
 import java.io.PrintWriter;
 
 public final class FilePrinter implements Closeable {
   private final @NotNull PrintWriter myOut;
   private int myOffset;
-  
+
   public FilePrinter(@NotNull PrintWriter output) {
     myOut = output;
     myOffset = 0;
@@ -31,6 +30,7 @@ public final class FilePrinter implements Closeable {
   /**
    * Prints the given string to the output.
    * Additionally, it manages the indent level appropriately.
+   *
    * @param output the string to print
    */
   public void out(@NotNull String output) {
@@ -70,13 +70,15 @@ public final class FilePrinter implements Closeable {
     }
   }
 
-  /** Sets the current offset level of this object to 0. */
+  /**
+   * Sets the current offset level of this object to 0.
+   */
   public void resetOffset() {
     myOffset = 0;
   }
-  
+
   @Override
-  public void close() throws IOException {
+  public void close() {
     myOut.close();
   }
 }

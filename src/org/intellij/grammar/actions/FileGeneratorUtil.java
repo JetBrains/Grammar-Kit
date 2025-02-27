@@ -21,7 +21,7 @@ import com.intellij.psi.search.FilenameIndex;
 import com.intellij.psi.search.ProjectScope;
 import org.intellij.grammar.BnfFileType;
 import org.intellij.grammar.config.Options;
-import org.intellij.grammar.generator.BnfConstants;
+import org.intellij.grammar.generator.CommonBnfConstants;
 import org.intellij.jflex.parser.JFlexFileType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -77,9 +77,9 @@ public class FileGeneratorUtil {
     VirtualFile[] sourceRoots = rootManager.getContentSourceRoots();
     VirtualFile[] contentRoots = rootManager.getContentRoots();
     VirtualFile virtualRoot = existingFileRoot != null ? existingFileRoot :
-                                    preferSourceRoot && fileIndex.isInSource(sourceFile) ? fileIndex.getSourceRootForFile(sourceFile) :
-                                    fileIndex.isInContent(sourceFile) ? fileIndex.getContentRootForFile(sourceFile) :
-                                    getFirstElement(preferSourceRoot && sourceRoots.length > 0? sourceRoots : contentRoots);
+                              preferSourceRoot && fileIndex.isInSource(sourceFile) ? fileIndex.getSourceRootForFile(sourceFile) :
+                              fileIndex.isInContent(sourceFile) ? fileIndex.getContentRootForFile(sourceFile) :
+                              getFirstElement(preferSourceRoot && sourceRoots.length > 0 ? sourceRoots : contentRoots);
     if (virtualRoot == null) {
       fail(project, sourceFile, "Unable to guess target source root");
       throw new ProcessCanceledException();
@@ -154,7 +154,7 @@ public class FileGeneratorUtil {
 
   static void fail(@NotNull Project project, @NotNull String title, @NotNull String message) {
     Notifications.Bus.notify(new Notification(
-      BnfConstants.GENERATION_GROUP,
+      CommonBnfConstants.GENERATION_GROUP,
       title, message,
       NotificationType.ERROR), project);
     throw new ProcessCanceledException();

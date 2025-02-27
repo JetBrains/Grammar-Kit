@@ -49,7 +49,11 @@ public abstract class AbstractBnfGeneratorTest extends BnfGeneratorTestCase {
     };
   }
 
-  protected abstract @NotNull List<@NotNull Generator> createGenerators();
+  protected abstract @NotNull List<@NotNull Generator> createGenerators(
+    @NotNull BnfFile psiFile,
+    @NotNull String outputPath,
+    @NotNull OutputOpener outputOpener
+  );
 
   @Override
   protected String loadFile(@NonNls @NotNull String name) throws IOException {
@@ -90,12 +94,12 @@ public abstract class AbstractBnfGeneratorTest extends BnfGeneratorTestCase {
       }
     }
 
-    for (final var generator : createGenerators()) {
+    for (final var generator : createGenerators((BnfFile)myFile, myFullDataPath, getTestOpener())) {
       if (generatePsi) {
-        generator.generate((BnfFile)myFile, "", myFullDataPath, "", getTestOpener());
+        generator.generate();
       }
       else {
-        generator.generateParser((BnfFile)myFile, "", myFullDataPath, "", getTestOpener());
+        generator.generateParser();
       }
     }
 
@@ -109,8 +113,8 @@ public abstract class AbstractBnfGeneratorTest extends BnfGeneratorTestCase {
 
   protected void doTestEmpty() throws IOException {
     myFile = createPsiFile("empty.bnf", "{ }");
-    for (final var generator : createGenerators()) {
-      generator.generate((BnfFile)myFile, "", myFullDataPath, "", getTestOpener());
+    for (final var generator : createGenerators((BnfFile)myFile, myFullDataPath, getTestOpener())) {
+      generator.generate();
     }
   }
 

@@ -33,8 +33,8 @@ import com.intellij.util.containers.ContainerUtil;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
 import org.intellij.grammar.KnownAttribute;
-import org.intellij.grammar.generator.BnfConstants;
 import org.intellij.grammar.generator.Case;
+import org.intellij.grammar.generator.CommonBnfConstants;
 import org.intellij.grammar.generator.ParserGeneratorUtil;
 import org.intellij.grammar.generator.RuleGraphHelper;
 import org.intellij.grammar.psi.BnfAttrs;
@@ -61,62 +61,8 @@ import static org.intellij.grammar.generator.ParserGeneratorUtil.getRootAttribut
  * @author greg
  */
 public class BnfGenerateLexerAction extends AnAction {
-  @Override
-  public @NotNull ActionUpdateThread getActionUpdateThread() {
-    return ActionUpdateThread.BGT;
-  }
 
-  @Override
-  public void update(AnActionEvent e) {
-    PsiFile file = e.getData(CommonDataKeys.PSI_FILE);
-    e.getPresentation().setEnabledAndVisible(file instanceof BnfFile);
-  }
-
-  @Override
-  public void actionPerformed(AnActionEvent e) {
-    PsiFile file = e.getData(CommonDataKeys.PSI_FILE);
-    if (!(file instanceof BnfFile)) return;
-
-    Project project = file.getProject();
-
-    BnfFile bnfFile = (BnfFile) file;
-    String flexFileName = getFlexFileName(bnfFile);
-
-    Collection<VirtualFile> files = FilenameIndex.getVirtualFilesByName(flexFileName, ProjectScope.getAllScope(project));
-    VirtualFile firstItem = ContainerUtil.getFirstItem(files);
-
-    FileSaverDescriptor descriptor = new FileSaverDescriptor("Save JFlex Lexer", "", "flex");
-    VirtualFile baseDir = firstItem != null ? firstItem.getParent() : bnfFile.getVirtualFile().getParent();
-    VirtualFileWrapper fileWrapper = FileChooserFactory.getInstance().createSaveFileDialog(descriptor, project).
-      save(baseDir, firstItem != null ? firstItem.getName() : flexFileName);
-    if (fileWrapper == null) return;
-    VirtualFile virtualFile = fileWrapper.getVirtualFile(true);
-    if (virtualFile == null) return;
-
-    WriteCommandAction.runWriteCommandAction(project, e.getPresentation().getText(), null, () -> {
-      try {
-        PsiDirectory psiDirectory = PsiManager.getInstance(project).findDirectory(virtualFile.getParent());
-        assert psiDirectory != null;
-        PsiPackage aPackage = JavaDirectoryService.getInstance().getPackage(psiDirectory);
-        String packageName = aPackage == null ? null : aPackage.getQualifiedName();
-
-        String text = generateLexerText(bnfFile, packageName);
-
-        VfsUtil.saveText(virtualFile, text);
-
-        Notifications.Bus.notify(new Notification(BnfConstants.GENERATION_GROUP,
-                                                  virtualFile.getName() + " generated", "to " + virtualFile.getParent().getPath(),
-                                                  NotificationType.INFORMATION), project);
-
-        associateFileTypeAndNavigate(project, virtualFile);
-      }
-      catch (IOException | IncorrectOperationException ex) {
-        ApplicationManager.getApplication().invokeLater(
-          () -> Messages
-            .showErrorDialog(project, "Unable to create file " + flexFileName + "\n" + ex.getLocalizedMessage(), "Create JFlex Lexer"));
-      }
-    });
-  }
+  private static final String LEXER_FLEX_TEMPLATE = "/templates/lexer.flex.template";
 
   private static void associateFileTypeAndNavigate(Project project, VirtualFile virtualFile) {
     String extension = virtualFile.getExtension();
@@ -126,68 +72,6 @@ public class BnfGenerateLexerAction extends AnAction {
     }
     FileEditorManager.getInstance(project).openFile(virtualFile, false, true);
     //new OpenFileDescriptor(project, virtualFile).navigate(false);
-  }
-
-  private String generateLexerText(BnfFile bnfFile, @Nullable String packageName) {
-    Map<String,String> tokenMap = RuleGraphHelper.getTokenNameToTextMap(bnfFile);
-
-    int[] maxLen = {"{WHITE_SPACE}".length()};
-    Map<String, String> simpleTokens = new LinkedHashMap<>();
-    Map<String, String> regexpTokens = new LinkedHashMap<>();
-    for (String name : tokenMap.keySet()) {
-      String token = tokenMap.get(name);
-      if (name == null || token == null) continue;
-      String pattern = token2JFlex(token);
-      boolean isRE = ParserGeneratorUtil.isRegexpToken(token);
-      (isRE ? regexpTokens : simpleTokens).put(Case.UPPER.apply(name), pattern);
-      maxLen[0] = Math.max((isRE ? name : pattern).length() + 2, maxLen[0]);
-    }
-
-    bnfFile.acceptChildren(new PsiRecursiveElementWalkingVisitor() {
-      @Override
-      public void visitElement(@NotNull PsiElement element) {
-        if (element instanceof BnfAttrs) return;
-
-        if (GrammarUtil.isExternalReference(element)) return;
-        String text = element instanceof BnfReferenceOrToken? element.getText() : null;
-        if (text != null && bnfFile.getRule(text) == null) {
-          String name = Case.UPPER.apply(text);
-          if (!simpleTokens.containsKey(name) && !regexpTokens.containsKey(name)) {
-            simpleTokens.put(name, text2JFlex(text, false));
-            maxLen[0] = Math.max(text.length(), maxLen[0]);
-          }
-        }
-        super.visitElement(element);
-      }
-    });
-
-    VelocityEngine ve = new VelocityEngine();
-    //RuntimeConstants.RUNTIME_LOG_INSTANCE
-    ve.setProperty("runtime.log.instance", NOPLogger.NOP_LOGGER);
-    try {
-      // Velocity < 2.0, IJ platform < 232
-      Class<?> chuteClass = Class.forName("org.apache.velocity.runtime.log.NullLogChute");
-      // RuntimeConstants.RUNTIME_LOG_LOGSYSTEM
-      ve.setProperty("runtime.log.logsystem", chuteClass.getDeclaredConstructor().newInstance());
-    }
-    catch (Throwable ignore) {}
-    ve.init();
-    
-    VelocityContext context = new VelocityContext();
-    context.put("lexerClass", getLexerName(bnfFile));
-    context.put("packageName", StringUtil.notNullize(packageName, StringUtil.getPackageName(getRootAttribute(bnfFile, KnownAttribute.PARSER_CLASS))));
-    context.put("tokenPrefix", getRootAttribute(bnfFile, KnownAttribute.ELEMENT_TYPE_PREFIX));
-    context.put("typesClass", getRootAttribute(bnfFile, KnownAttribute.ELEMENT_TYPE_HOLDER_CLASS));
-    context.put("tokenPrefix", getRootAttribute(bnfFile, KnownAttribute.ELEMENT_TYPE_PREFIX));
-    context.put("simpleTokens", simpleTokens);
-    context.put("regexpTokens", regexpTokens);
-    context.put("StringUtil", StringUtil.class);
-    context.put("maxTokenLength", maxLen[0]);
-
-    StringWriter out = new StringWriter();
-    InputStream stream = getClass().getResourceAsStream("/templates/lexer.flex.template");
-    ve.evaluate(context, out, "lexer.flex.template", new InputStreamReader(stream));
-    return StringUtil.convertLineSeparators(out.toString());
   }
 
   public static @NotNull String token2JFlex(@NotNull String tokenText) {
@@ -243,8 +127,140 @@ public class BnfGenerateLexerAction extends AnAction {
     return getLexerName(bnfFile) + ".flex";
   }
 
-  private static String getLexerName(BnfFile bnfFile) {
+  protected static String getLexerName(BnfFile bnfFile) {
     return "_" + BnfGenerateParserUtilAction.getGrammarName(bnfFile) + "Lexer";
   }
 
+  protected String getLexerFlexTemplate() {
+    return LEXER_FLEX_TEMPLATE;
+  }
+
+  @Override
+  public @NotNull ActionUpdateThread getActionUpdateThread() {
+    return ActionUpdateThread.BGT;
+  }
+
+  @Override
+  public void update(AnActionEvent e) {
+    PsiFile file = e.getData(CommonDataKeys.PSI_FILE);
+    e.getPresentation().setEnabledAndVisible(file instanceof BnfFile);
+  }
+
+  @Override
+  public void actionPerformed(AnActionEvent e) {
+    PsiFile file = e.getData(CommonDataKeys.PSI_FILE);
+    if (!(file instanceof BnfFile)) return;
+
+    Project project = file.getProject();
+
+    BnfFile bnfFile = (BnfFile)file;
+    String flexFileName = getFlexFileName(bnfFile);
+
+    Collection<VirtualFile> files = FilenameIndex.getVirtualFilesByName(flexFileName, ProjectScope.getAllScope(project));
+    VirtualFile firstItem = ContainerUtil.getFirstItem(files);
+
+    FileSaverDescriptor descriptor = new FileSaverDescriptor("Save JFlex Lexer", "", "flex");
+    VirtualFile baseDir = firstItem != null ? firstItem.getParent() : bnfFile.getVirtualFile().getParent();
+    VirtualFileWrapper fileWrapper = FileChooserFactory.getInstance().createSaveFileDialog(descriptor, project).
+      save(baseDir, firstItem != null ? firstItem.getName() : flexFileName);
+    if (fileWrapper == null) return;
+    VirtualFile virtualFile = fileWrapper.getVirtualFile(true);
+    if (virtualFile == null) return;
+
+    WriteCommandAction.runWriteCommandAction(project, e.getPresentation().getText(), null, () -> {
+      try {
+        PsiDirectory psiDirectory = PsiManager.getInstance(project).findDirectory(virtualFile.getParent());
+        assert psiDirectory != null;
+        PsiPackage aPackage = JavaDirectoryService.getInstance().getPackage(psiDirectory);
+        String packageName = aPackage == null ? null : aPackage.getQualifiedName();
+
+        String text = generateLexerText(bnfFile, packageName);
+
+        VfsUtil.saveText(virtualFile, text);
+
+        Notifications.Bus.notify(new Notification(CommonBnfConstants.GENERATION_GROUP,
+                                                  virtualFile.getName() + " generated", "to " + virtualFile.getParent().getPath(),
+                                                  NotificationType.INFORMATION), project);
+
+        associateFileTypeAndNavigate(project, virtualFile);
+      }
+      catch (IOException | IncorrectOperationException ex) {
+        ApplicationManager.getApplication().invokeLater(
+          () -> Messages
+            .showErrorDialog(project, "Unable to create file " + flexFileName + "\n" + ex.getLocalizedMessage(), "Create JFlex Lexer"));
+      }
+    });
+  }
+
+  private String generateLexerText(BnfFile bnfFile, @Nullable String packageName) {
+    Map<String, String> tokenMap = RuleGraphHelper.getTokenNameToTextMap(bnfFile);
+
+    int[] maxLen = {"{WHITE_SPACE}".length()};
+    Map<String, String> simpleTokens = new LinkedHashMap<>();
+    Map<String, String> regexpTokens = new LinkedHashMap<>();
+    for (String name : tokenMap.keySet()) {
+      String token = tokenMap.get(name);
+      if (name == null || token == null) continue;
+      String pattern = token2JFlex(token);
+      boolean isRE = ParserGeneratorUtil.isRegexpToken(token);
+      (isRE ? regexpTokens : simpleTokens).put(Case.UPPER.apply(name), pattern);
+      maxLen[0] = Math.max((isRE ? name : pattern).length() + 2, maxLen[0]);
+    }
+
+    bnfFile.acceptChildren(new PsiRecursiveElementWalkingVisitor() {
+      @Override
+      public void visitElement(@NotNull PsiElement element) {
+        if (element instanceof BnfAttrs) return;
+
+        if (GrammarUtil.isExternalReference(element)) return;
+        String text = element instanceof BnfReferenceOrToken ? element.getText() : null;
+        if (text != null && bnfFile.getRule(text) == null) {
+          String name = Case.UPPER.apply(text);
+          if (!simpleTokens.containsKey(name) && !regexpTokens.containsKey(name)) {
+            simpleTokens.put(name, text2JFlex(text, false));
+            maxLen[0] = Math.max(text.length(), maxLen[0]);
+          }
+        }
+        super.visitElement(element);
+      }
+    });
+
+    VelocityEngine ve = new VelocityEngine();
+    //RuntimeConstants.RUNTIME_LOG_INSTANCE
+    ve.setProperty("runtime.log.instance", NOPLogger.NOP_LOGGER);
+    try {
+      // Velocity < 2.0, IJ platform < 232
+      Class<?> chuteClass = Class.forName("org.apache.velocity.runtime.log.NullLogChute");
+      // RuntimeConstants.RUNTIME_LOG_LOGSYSTEM
+      ve.setProperty("runtime.log.logsystem", chuteClass.getDeclaredConstructor().newInstance());
+    }
+    catch (Throwable ignore) {
+    }
+    ve.init();
+
+    VelocityContext context = makeContext(bnfFile, packageName, simpleTokens, regexpTokens, maxLen);
+
+    StringWriter out = new StringWriter();
+    InputStream stream = getClass().getResourceAsStream(getLexerFlexTemplate());
+    ve.evaluate(context, out, "lexer.flex.template", new InputStreamReader(stream));
+    return StringUtil.convertLineSeparators(out.toString());
+  }
+
+  protected VelocityContext makeContext(BnfFile bnfFile,
+                                        @Nullable String packageName,
+                                        Map<String, String> simpleTokens,
+                                        Map<String, String> regexpTokens,
+                                        int[] maxLen) {
+    var context = new VelocityContext();
+    context.put("lexerClass", getLexerName(bnfFile));
+    context.put("packageName",
+                StringUtil.notNullize(packageName, StringUtil.getPackageName(getRootAttribute(bnfFile, KnownAttribute.PARSER_CLASS))));
+    context.put("tokenPrefix", getRootAttribute(bnfFile, KnownAttribute.ELEMENT_TYPE_PREFIX));
+    context.put("typesClass", getRootAttribute(bnfFile, KnownAttribute.ELEMENT_TYPE_HOLDER_CLASS));
+    context.put("simpleTokens", simpleTokens);
+    context.put("regexpTokens", regexpTokens);
+    context.put("StringUtil", StringUtil.class);
+    context.put("maxTokenLength", maxLen[0]);
+    return context;
+  }
 }

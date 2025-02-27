@@ -1,21 +1,12 @@
 /*
- * Copyright 2011-2020 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
+ * Copyright 2011-2025 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
  */
 
-package org.intellij.grammar.generator;
+package org.intellij.grammar.generator.java;
 
-/**
- * @author gregsh
- */
-public interface BnfConstants {
-
-  String GENERATION_GROUP = "Grammar Generator";
-
-  String CLASS_HEADER_DEF = "// This is a generated file. Not intended for manual editing.";
-
-  String REGEXP_PREFIX = "regexp:";
-
+public interface JavaBnfConstants {
   String GP_UTILS_BASE_CLASS = "com.intellij.lang.parser.GeneratedParserUtilBase";
+
   String PSI_BUILDER_CLASS = "com.intellij.lang.PsiBuilder";
   String PSI_PARSER_CLASS = "com.intellij.lang.PsiParser";
   String LIGHT_PSI_PARSER_CLASS = "com.intellij.lang.LightPsiParser";
@@ -37,7 +28,6 @@ public interface BnfConstants {
   String ISTUBELEMENTTYPE_CLASS = "com.intellij.psi.stubs.IStubElementType";
   String STUB_BASED_PSI_ELEMENT = "com.intellij.psi.StubBasedPsiElement";
   String STUB_BASED_PSI_ELEMENT_BASE = "com.intellij.extapi.psi.StubBasedPsiElementBase";
-  String RECOVER_AUTO = "#auto";
 
   String TOKEN_SET_HOLDER_NAME = "TokenSets";
 }

@@ -61,7 +61,7 @@ public interface Renderer {
     return toIdentifier(rule.getName(), format, Case.CAMEL);
   }
 
-  default @NotNull Couple<@NotNull String> getQualifiedRuleClassName(BnfRule rule) {
+  default @NotNull Couple<@NotNull String> getQualifiedRuleClassName(@NotNull BnfRule rule) {
     BnfFile file = (BnfFile)rule.getContainingFile();
     String psiPackage = getAttribute(rule, KnownAttribute.PSI_PACKAGE);
     String psiImplPackage = getAttribute(rule, KnownAttribute.PSI_IMPL_PACKAGE);

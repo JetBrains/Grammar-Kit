@@ -4,10 +4,10 @@
 
 package org.intellij.grammar.actions;
 
-import org.intellij.grammar.generator.Generator;
+import org.intellij.grammar.generator.KotlinParserGenerator;
 
 public final class GenerateKotlinAction extends GenerateActionBase {
   public GenerateKotlinAction() {
-    super(Generator.KOTLIN_GENERATOR);
+    super(KotlinParserGenerator::new);
   }
 }

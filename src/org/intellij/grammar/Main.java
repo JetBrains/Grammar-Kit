@@ -11,7 +11,7 @@ import com.intellij.psi.PsiFile;
 import com.intellij.psi.impl.DebugUtil;
 import org.intellij.grammar.fleet.FleetBnfFileWrapper;
 import org.intellij.grammar.fleet.FleetFileTypeGenerator;
-import org.intellij.grammar.generator.Generator;
+import org.intellij.grammar.generator.JavaParserGenerator;
 import org.intellij.grammar.generator.OutputOpener;
 import org.intellij.grammar.psi.BnfFile;
 
@@ -141,7 +141,7 @@ public class Main {
             count++;
 
             BnfFile bnfFile = (generateForFleet) ? FleetBnfFileWrapper.wrapBnfFile((BnfFile)psiFile) : (BnfFile)psiFile;
-            Generator.JAVA_GENERATOR.generate(bnfFile, grammarDir.getAbsolutePath(), output.getAbsolutePath(), "", OutputOpener.DEFAULT);
+            new JavaParserGenerator(bnfFile, grammarDir.getAbsolutePath(), output.getAbsolutePath(), "", OutputOpener.DEFAULT).generate();
             if (generateFileTypeElement) {
               new FleetFileTypeGenerator((BnfFile)psiFile,
                                          grammarDir.getAbsolutePath(),

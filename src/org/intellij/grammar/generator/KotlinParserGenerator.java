@@ -20,7 +20,9 @@ import com.intellij.util.containers.MultiMap;
 import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.analysis.BnfFirstNextAnalyzer;
 import org.intellij.grammar.generator.NodeCalls.*;
+import org.intellij.grammar.generator.kotlin.KotlinBnfConstants;
 import org.intellij.grammar.generator.kotlin.KotlinNameShortener;
+import org.intellij.grammar.generator.kotlin.KotlinPlatformConstants;
 import org.intellij.grammar.generator.kotlin.KotlinRenderer;
 import org.intellij.grammar.java.JavaHelper;
 import org.intellij.grammar.parser.GeneratedParserUtilBase;
@@ -38,7 +40,9 @@ import static com.intellij.util.containers.ContainerUtil.map;
 import static java.lang.String.format;
 import static org.intellij.grammar.analysis.BnfFirstNextAnalyzer.BNF_MATCHES_ANY;
 import static org.intellij.grammar.analysis.BnfFirstNextAnalyzer.BNF_MATCHES_EOF;
-import static org.intellij.grammar.generator.BnfConstants.RECOVER_AUTO;
+import static org.intellij.grammar.generator.CommonBnfConstants.RECOVER_AUTO;
+import static org.intellij.grammar.generator.ExpressionGeneratorHelper.CONSUME_TYPE_OVERRIDE;
+import static org.intellij.grammar.generator.ExpressionGeneratorHelper.findOperators;
 import static org.intellij.grammar.generator.ParserGeneratorUtil.*;
 import static org.intellij.grammar.generator.java.JavaNameShortener.getRawClassName;
 import static org.intellij.grammar.psi.BnfTypes.*;
@@ -48,33 +52,33 @@ import static org.intellij.grammar.psi.BnfTypes.*;
 ///
 /// Implementation notes:
 /// 1. A method's name starts with `generate` if it either calls the
-///   [GeneratorBase#out] method or calls another `generate*` method.
+///   [Generator#out] method or calls another `generate*` method.
 /// 2. `build*` methods are generally used for building strings that
 ///   are then going to be outputted via one of the `generate*`
 ///   methods to the file.
-public final class KotlinParserGenerator extends GeneratorBase {
-  public static final Logger LOG = Logger.getInstance(KotlinParserGenerator.class);
+public final class KotlinParserGenerator extends Generator {
+  public static final @NotNull Logger LOG = Logger.getInstance(KotlinParserGenerator.class);
   private static final @NotNull String HORIZONTAL_SEPARATOR = "/* ********************************************************** */";
-  final KotlinPlatformConstants C;
-  final Names N;
+  private final @NotNull KotlinPlatformConstants C;
+  private final @NotNull Names N;
   /**
    * Name of the class containing runtime parser utilities
    * (default: {@link GeneratedParserUtilBase}).
    */
-  private final String myParserRuntimeName;
+  private final @NotNull String myParserRuntimeName;
   /**
    * Name of the class containing all the generated element types.
    */
-  private final String myElementTypesHolderName;
-  private final Map<String, RuleInfo> myRuleInfos = new TreeMap<>();
-  private final Map<String, String> myParserLambdas = new HashMap<>();       // field name -> body
-  private final Map<String, String> myRenderedLambdas = new HashMap<>();     // field name -> parser class FQN
-  private final Set<String> myInlinedChildNodes = new HashSet<>();
+  private final @NotNull String myElementTypesHolderName;
+  private final @NotNull Map<String, RuleInfo> myRuleInfos = new TreeMap<>();
+  private final @NotNull Map<String, String> myParserLambdas = new HashMap<>();       // field name -> body
+  private final @NotNull Map<String, String> myRenderedLambdas = new HashMap<>();     // field name -> parser class FQN
+  private final @NotNull Set<String> myInlinedChildNodes = new HashSet<>();
   /**
    * All token elements that the generator has deemed necessary to make it
    * work.
    */
-  private final Set<String> myTokensUsedInGrammar = new LinkedHashSet<>();
+  private final @NotNull Set<String> myTokensUsedInGrammar = new LinkedHashSet<>();
   /**
    * Some meta-method calls use only static parsers as arguments,
    * i.e. they don't reference meta-method parameters,
@@ -137,7 +141,11 @@ public final class KotlinParserGenerator extends GeneratorBase {
     calcAbstractRules();
   }
 
-  @NotNull String shortElementTypesHolderName() {
+  private static @NotNull NodeCall getConsumeTextToken(@NotNull ConsumeType consumeType, @NotNull String tokenText) {
+    return new ConsumeTokenCall(consumeType, "\"" + tokenText + "\"");
+  }
+
+  private @NotNull String shortElementTypesHolderName() {
     return StringUtil.getShortName(myElementTypesHolderName);
   }
 
@@ -192,10 +200,6 @@ public final class KotlinParserGenerator extends GeneratorBase {
         getRuleInfo(rule).isAbstract = true;
       }
     }
-  }
-
-  private static @NotNull NodeCall getConsumeTextToken(@NotNull ConsumeType consumeType, @NotNull String tokenText) {
-    return new ConsumeTokenCall(consumeType, "\"" + tokenText + "\"");
   }
 
   // region generate* methods
@@ -281,10 +285,10 @@ public final class KotlinParserGenerator extends GeneratorBase {
     }
     for (String ruleName : ownRuleNames) {
       BnfRule rule = myFile.getRule(ruleName);
-      ExpressionHelper.ExpressionInfo info = myExpressionHelper.getExpressionInfo(rule);
-      if (info != null && info.rootRule == rule) {
+      final var expressionInfo = myExpressionHelper.getExpressionInfo(rule);
+      if (expressionInfo != null && expressionInfo.rootRule == rule) {
         out(HORIZONTAL_SEPARATOR);
-        ExpressionGeneratorHelper.generateExpressionRoot(info, this, R);
+        generateExpressionRoot(expressionInfo);
         newLine();
       }
     }
@@ -382,7 +386,7 @@ public final class KotlinParserGenerator extends GeneratorBase {
    * Generates a method corresponding to a given rule.
    * This method *must* be enclosed in a companion object.
    */
-  void generateNode(BnfRule rule, @NotNull BnfExpression initialNode, String funcName, Set<BnfExpression> visited) {
+  private void generateNode(BnfRule rule, @NotNull BnfExpression initialNode, String funcName, Set<BnfExpression> visited) {
     boolean isRule = initialNode.getParent() == rule;
     BnfExpression node = getNonTrivialNode(initialNode);
 
@@ -618,6 +622,185 @@ public final class KotlinParserGenerator extends GeneratorBase {
   }
 
   /**
+   * *Must* be in a companion object.
+   */
+  private void generateExpressionRoot(@NotNull ExpressionInfo info) {
+    final var opCalls = buildCallMap(info);
+    final var sortedOpCalls = opCalls.keySet();
+
+    for (final var s : info.toString().split("\n")) {
+      out("// " + s);
+    }
+
+    // main entry
+    String methodName = R.getFuncName(info.rootRule);
+    String kernelMethodName = R.getNextName(methodName, 0);
+    String frameName = quote(R.getRuleDisplayName(info.rootRule, true));
+    String shortPB = shorten(C.SyntaxTreeBuilderClass());
+    String shortMarker = !G.generateFQN ? "Marker" : C.SyntaxTreeBuilderClass() + ".Marker";
+    out("fun %s(%s: %s, %s: Int, %s: Int): Boolean {", methodName, N.builder, shortPB, N.level, N.priority);
+    out("if (!recursion_guard_(%s, %s, \"%s\")) return false", N.builder, N.level, methodName);
+
+    if (frameName != null) {
+      out("addVariant(%s, %s)", N.builder, frameName);
+    }
+    generateFirstCheck(info.rootRule, frameName, true);
+    out("var %s: Boolean", N.result);
+    out("var %s: Boolean", N.pinned);
+    out("val %s: %s = enter_section_(%s, %s, _NONE_, %s)", N.marker, shortMarker, N.builder, N.level, frameName);
+
+    boolean first = true;
+    for (String opCall : sortedOpCalls) {
+      List<OperatorInfo> operators = findOperators(opCalls.get(opCall), OperatorType.ATOM, OperatorType.PREFIX);
+      if (operators.isEmpty()) continue;
+      OperatorInfo operator = operators.get(0);
+      if (operators.size() > 1) {
+        addWarning("only first definition will be used for '" + operator.operator.getText() + "': " + operators);
+      }
+      String nodeCall = createNodeCall(operator.rule, null, operator.rule.getName()).render(R, N);
+      out("%s%s = %s", first ? "" : format("if (!%s) ", N.result), N.result, nodeCall);
+      first = false;
+    }
+
+    out("%s = %s", N.pinned, N.result);
+    out("%s = %s && %s(%s, %s + 1, %s)", N.result, N.result, kernelMethodName, N.builder, N.level, N.priority);
+    out("exit_section_(%s, %s, %s, null, %s, %s, null)", N.builder, N.level, N.marker, N.result, N.pinned);
+    out("return %s || %s", N.result, N.pinned);
+    out("}");
+    newLine();
+
+    // kernel
+    out("fun %s(%s: %s, %s: Int, %s: Int): Boolean {", kernelMethodName, shortPB, N.builder, N.level, N.priority);
+    out("if (!recursion_guard_(%s, %s, \"%s\")) return false", N.builder, N.level, kernelMethodName);
+    out("var %s = true", N.result);
+    out("while (true) {");
+    out("val %s: %s = enter_section_(%s, %s, _LEFT_, null)", N.marker, shortMarker, N.builder, N.level);
+
+    first = true;
+    for (String opCall : sortedOpCalls) {
+      List<OperatorInfo> operators = findOperators(opCalls.get(opCall), OperatorType.BINARY, OperatorType.N_ARY, OperatorType.POSTFIX);
+      if (operators.isEmpty()) continue;
+      OperatorInfo operator = operators.get(0);
+      if (operators.size() > 1) {
+        addWarning("only first definition will be used for '" + operator.operator.getText() + "': " + operators);
+      }
+      int priority = info.getPriority(operator.rule);
+      int arg2Priority = operator.arg2 == null ? -1 : info.getPriority(operator.arg2);
+      int argPriority = arg2Priority == -1 ? priority : arg2Priority - 1;
+
+      String substCheck = "";
+      if (operator.arg1 != null) {
+        substCheck =
+          format(" && leftMarkerIs(%s, %s)", N.builder, shortElementTypesHolderName() + "." + getElementType(operator.arg1));
+      }
+      out("%sif (%s < %d%s && %s) {", first ? "" : "else ", N.priority, priority, substCheck, opCall);
+      first = false;
+      String elementType = shortElementTypesHolderName() + "." + getElementType(operator.rule);
+      boolean rightAssociative = getAttribute(operator.rule, KnownAttribute.RIGHT_ASSOCIATIVE);
+      String tailCall = operator.tail == null ? null : createNodeCall(
+        operator.rule, operator.tail, R.getNextName(R.getFuncName(operator.rule), 1), ConsumeType.DEFAULT
+      ).render(R, N);
+      if (operator.type == OperatorType.BINARY) {
+        String argCall = format("%s(%s, %s, %d)", methodName, N.builder, N.level, rightAssociative ? argPriority - 1 : argPriority);
+        out("%s = %s", N.result, tailCall == null ? argCall : format("report_error_(%s, %s)", N.builder, argCall));
+        if (tailCall != null) out("%s = %s && %s", N.result, tailCall, N.result);
+      }
+      else if (operator.type == OperatorType.N_ARY) {
+        boolean checkEmpty = info.checkEmpty.contains(operator);
+        if (checkEmpty) {
+          out("val %s: Int = current_position_(%s)", N.pos, N.builder);
+        }
+        out("while (true) {");
+        out("%s = report_error_(%s, %s(%s, %s, %d))", N.result, N.builder, methodName, N.builder, N.level, argPriority);
+        if (tailCall != null) out("%s = %s && %s", N.result, tailCall, N.result);
+        out("if (!%s) break", opCall);
+        if (checkEmpty) {
+          out("if (!empty_element_parsed_guard_(%s, \"%s\", %s)) break", N.builder, operator.rule.getName(), N.pos);
+          out("%s = current_position_(%s)", N.pos, N.builder);
+        }
+        out("}");
+      }
+      else if (operator.type == OperatorType.POSTFIX) {
+        out("%s = true", N.result);
+      }
+      out("exit_section_(%s, %s, %s, %s, %s, true, null)", N.builder, N.level, N.marker, elementType, N.result);
+      out("}");
+    }
+    if (first) {
+      out("// no BINARY or POSTFIX operators present");
+      out("break");
+    }
+    else {
+      out("else {");
+      out("exit_section_(%s, %s, %s, null, false, false, null)", N.builder, N.level, N.marker);
+      out("break");
+      out("}");
+    }
+    out("}");
+    out("return %s", N.result);
+    out("}");
+
+    // operators and tails
+    Set<BnfExpression> visited = new HashSet<>();
+    for (String opCall : sortedOpCalls) {
+      for (final var operator : opCalls.get(opCall)) {
+        if (operator.type == OperatorType.ATOM) {
+          if (Rule.isExternal(operator.rule)) continue;
+          newLine();
+          generateNode(operator.rule, operator.rule.getExpression(), R.getFuncName(operator.rule), visited);
+          continue;
+        }
+        else if (operator.type == OperatorType.PREFIX) {
+          newLine();
+          String operatorFuncName = operator.rule.getName();
+          out("fun %s(%s: %s, %s: Int): Boolean {", operatorFuncName, shortPB, N.builder, N.level);
+          out("if (!recursion_guard_(%s, %s, \"%s\")) return false", N.builder, N.level, operatorFuncName);
+          generateFirstCheck(operator.rule, frameName, false);
+          out("var %s: Boolean", N.result);
+          out("var %s: Boolean", N.pinned);
+          out("val %s: %s = enter_section_(%s, %s, _NONE_, null)", N.marker, shortMarker, N.builder, N.level);
+
+          String elementType = getElementType(operator.rule);
+          String tailCall = operator.tail == null ? null : createNodeCall(
+            operator.rule, operator.tail, R.getNextName(R.getFuncName(operator.rule), 1), ConsumeType.DEFAULT
+          ).render(R, N);
+
+          out("%s = %s", N.result, opCall);
+          out("%s = %s", N.pinned, N.result);
+          int priority = info.getPriority(operator.rule);
+          int arg1Priority = operator.arg1 == null ? -1 : info.getPriority(operator.arg1);
+          int argPriority = arg1Priority == -1 ? (priority == info.nextPriority - 1 ? -1 : priority) : arg1Priority - 1;
+          out("%s = %s && %s(%s, %s, %d)", N.result, N.pinned, methodName, N.builder, N.level, argPriority);
+          if (tailCall != null) {
+            out("%s = %s && report_error_(%s, %s) && %s", N.result, N.pinned, N.builder, tailCall, N.result);
+          }
+          String elementTypeRef = StringUtil.isNotEmpty(elementType) ? shortElementTypesHolderName() + "." + elementType : "null";
+          out("exit_section_(%s, %s, %s, %s, %s, %s, null)", N.builder, N.level, N.marker, elementTypeRef,
+              N.result, N.pinned);
+          out("return %s || %s", N.result, N.pinned);
+          out("}");
+        }
+        generateNodeChild(operator.rule, operator.operator, R.getFuncName(operator.rule), 0, visited);
+        if (operator.tail != null) {
+          generateNodeChild(operator.rule, operator.tail, operator.rule.getName(), 1, visited);
+        }
+      }
+    }
+  }
+
+  private @NotNull Map<String, List<OperatorInfo>> buildCallMap(@NotNull ExpressionInfo info) {
+    final var result = new LinkedHashMap<String, List<OperatorInfo>>();
+    for (final var bnfRule : info.priorityMap.keySet()) {
+      final var operatorInfo = info.operatorMap.get(bnfRule);
+      String opCall = createNodeCall(
+        info.rootRule, operatorInfo.operator, R.getNextName(R.getFuncName(operatorInfo.rule), 0), CONSUME_TYPE_OVERRIDE
+      ).render(R, N);
+      result.computeIfAbsent(opCall, k -> new ArrayList<>(2)).add(operatorInfo);
+    }
+    return result;
+  }
+
+  /**
    * These *must* be in a companion object.
    */
   private void generateParserLambdas(@NotNull String parserClass) {
@@ -647,11 +830,9 @@ public final class KotlinParserGenerator extends GeneratorBase {
     String argumentList = String.join(", ", parameterNames);
     String metaParserMethodName = R.getWrapperParserMetaMethodName(methodName);
     String call = format("%s(%s, %s + 1, %s)", methodName, N.builder, N.level, argumentList);
-    // @formatter:off
     out("%s fun %s(%s): Parser {", isRule ? "internal" : "private", metaParserMethodName, parameterList);
     out("return %s", buildParserInstance(call));
     out("}");
-    // @formatter:on
   }
 
   /**
@@ -688,7 +869,7 @@ public final class KotlinParserGenerator extends GeneratorBase {
     out(")");
   }
 
-  public @Nullable String generateFirstCheck(@NotNull BnfRule rule, @Nullable String frameName, boolean skipIfOne) {
+  private @Nullable String generateFirstCheck(@NotNull BnfRule rule, @Nullable String frameName, boolean skipIfOne) {
     if (G.generateFirstCheck <= 0) return frameName;
     Set<BnfExpression> firstSet = myFirstNextAnalyzer.calcFirst(rule);
     ConsumeType ruleConsumeType = getRuleConsumeType(rule, null);
@@ -746,11 +927,11 @@ public final class KotlinParserGenerator extends GeneratorBase {
     }
   }
 
-  void generateNodeChild(@NotNull BnfRule rule,
-                         @NotNull BnfExpression child,
-                         @NotNull String funcName,
-                         int index,
-                         @NotNull Set<BnfExpression> visited) {
+  private void generateNodeChild(@NotNull BnfRule rule,
+                                 @NotNull BnfExpression child,
+                                 @NotNull String funcName,
+                                 int index,
+                                 @NotNull Set<BnfExpression> visited) {
     if (child instanceof BnfExternalExpression externalExpression) {
       // generate parameters
       final var expressions = externalExpression.getExpressionList();
@@ -794,7 +975,6 @@ public final class KotlinParserGenerator extends GeneratorBase {
       if (!info.isFake || info.isInElementType) {
         sortedCompositeTypes.add(elementType);
       }
-      info.superInterfaces = new LinkedHashSet<>(getSuperInterfaceNames(myFile, rule, myPsiInterfaceFormat, R));
     }
     openOutput(myElementTypesHolderName);
     try {
@@ -940,7 +1120,7 @@ public final class KotlinParserGenerator extends GeneratorBase {
   }
 
 
-  @NotNull RuleInfo getRuleInfo(@NotNull BnfRule rule) {
+  private @NotNull RuleInfo getRuleInfo(@NotNull BnfRule rule) {
     return Objects.requireNonNull(myRuleInfos.get(rule.getName()));
   }
 
@@ -1080,16 +1260,14 @@ public final class KotlinParserGenerator extends GeneratorBase {
     return new ConsumeTokenChoiceCall(consumeType, shortElementTypesHolderName() + "." + tokenSetName);
   }
 
-  @NotNull
-  NodeCall createNodeCall(@NotNull BnfRule rule, @Nullable BnfExpression node, @NotNull String nextName) {
+  private @NotNull NodeCall createNodeCall(@NotNull BnfRule rule, @Nullable BnfExpression node, @NotNull String nextName) {
     return createNodeCall(rule, node, nextName, null);
   }
 
-  @NotNull
-  NodeCall createNodeCall(@NotNull BnfRule rule,
-                          @Nullable BnfExpression node,
-                          @NotNull String nextName,
-                          @Nullable ConsumeType forcedConsumeType) {
+  private @NotNull NodeCall createNodeCall(@NotNull BnfRule rule,
+                                           @Nullable BnfExpression node,
+                                           @NotNull String nextName,
+                                           @Nullable ConsumeType forcedConsumeType) {
     IElementType type = node == null ? BNF_REFERENCE_OR_TOKEN : getEffectiveType(node);
     String text = node == null ? nextName : node.getText();
 
@@ -1114,7 +1292,7 @@ public final class KotlinParserGenerator extends GeneratorBase {
           return createExternalCall(rule, GrammarUtil.getExternalRuleExpressions(subRule), nextName);
         }
         else {
-          ExpressionHelper.ExpressionInfo info = ExpressionGeneratorHelper.getInfoForExpressionParsing(myExpressionHelper, subRule);
+          ExpressionInfo info = ExpressionGeneratorHelper.getInfoForExpressionParsing(myExpressionHelper, subRule);
           BnfRule rr = info != null ? info.rootRule : subRule;
           String method = R.getFuncName(rr);
           String parserClass = getRuleInfo(rr).parserClass;
@@ -1320,7 +1498,7 @@ public final class KotlinParserGenerator extends GeneratorBase {
     return getTokenType(myFile, token, G.generateTokenCase);
   }
 
-  @NotNull String getElementType(BnfRule rule) {
+  private @NotNull String getElementType(BnfRule rule) {
     return R.getElementType(rule, G.generateElementCase);
   }
 
@@ -1328,7 +1506,7 @@ public final class KotlinParserGenerator extends GeneratorBase {
     return !myInlinedChildNodes.contains(funcName);
   }
 
-  public void addWarning(String text) {
+  private void addWarning(String text) {
     if (ApplicationManager.getApplication().isUnitTestMode()) {
       //noinspection UseOfSystemOutOrSystemErr
       System.out.println(text);

@@ -6,7 +6,8 @@ package org.intellij.grammar;
 
 import com.intellij.openapi.util.Pair;
 import com.intellij.openapi.util.io.FileUtil;
-import org.intellij.grammar.generator.BnfConstants;
+import org.intellij.grammar.generator.CommonBnfConstants;
+import org.intellij.grammar.generator.java.JavaBnfConstants;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -21,55 +22,67 @@ import java.util.*;
 public class KnownAttribute<T> {
   private static final Map<String, KnownAttribute<?>> ourAttributes = new TreeMap<>();
 
-  public static @NotNull Collection<KnownAttribute<?>> getAttributes() { return Collections.unmodifiableCollection(ourAttributes.values()); }
-  public static @Nullable KnownAttribute<?> getAttribute(@Nullable String name) { return name == null ? null : ourAttributes.get(name); }
+  public static @NotNull Collection<KnownAttribute<?>> getAttributes() {
+    return Collections.unmodifiableCollection(ourAttributes.values());
+  }
+
+  public static @Nullable KnownAttribute<?> getAttribute(@Nullable String name) {
+    return name == null ? null : ourAttributes.get(name);
+  }
 
   private static final ListValue EMPTY_LIST = new ListValue();
 
-  public static final KnownAttribute<String>       CLASS_HEADER              = create(true, String.class, "classHeader", BnfConstants.CLASS_HEADER_DEF);
-  public static final KnownAttribute<ListValue>    GENERATE                  = create(true, ListValue.class, "generate", EMPTY_LIST);
-  public static final KnownAttribute<Boolean>      GENERATE_PSI              = create(true, Boolean.class, "generatePsi", true);
-  public static final KnownAttribute<Boolean>      GENERATE_TOKENS           = create(true, Boolean.class, "generateTokens", true);
-  public static final KnownAttribute<Boolean>      GENERATE_TOKEN_ACCESSORS  = create(true, Boolean.class, "generateTokenAccessors", false);
-  public static final KnownAttribute<Integer>      GENERATE_FIRST_CHECK      = create(true, Integer.class, "generateFirstCheck", 2);
-  public static final KnownAttribute<Boolean>      EXTENDED_PIN              = create(true, Boolean.class, "extendedPin", true);
+  public static final KnownAttribute<String> CLASS_HEADER = create(true, String.class, "classHeader", CommonBnfConstants.CLASS_HEADER_DEF);
+  public static final KnownAttribute<ListValue> GENERATE = create(true, ListValue.class, "generate", EMPTY_LIST);
+  public static final KnownAttribute<Boolean> GENERATE_PSI = create(true, Boolean.class, "generatePsi", true);
+  public static final KnownAttribute<Boolean> GENERATE_TOKENS = create(true, Boolean.class, "generateTokens", true);
+  public static final KnownAttribute<Boolean> GENERATE_TOKEN_ACCESSORS = create(true, Boolean.class, "generateTokenAccessors", false);
+  public static final KnownAttribute<Integer> GENERATE_FIRST_CHECK = create(true, Integer.class, "generateFirstCheck", 2);
+  public static final KnownAttribute<Boolean> EXTENDED_PIN = create(true, Boolean.class, "extendedPin", true);
 
-  public static final KnownAttribute<ListValue>    PARSER_IMPORTS            = create(true, ListValue.class, "parserImports", EMPTY_LIST);
-  public static final KnownAttribute<String>       PSI_CLASS_PREFIX          = create(true, String.class, "psiClassPrefix", "");
-  public static final KnownAttribute<String>       PSI_IMPL_CLASS_SUFFIX     = create(true, String.class, "psiImplClassSuffix", "Impl");
-  public static final KnownAttribute<String>       PSI_TREE_UTIL_CLASS       = create(true, String.class, "psiTreeUtilClass", BnfConstants.PSI_TREE_UTIL_CLASS);
-  public static final KnownAttribute<String>       PSI_PACKAGE               = create(true, String.class, "psiPackage", "generated.psi");
-  public static final KnownAttribute<String>       PSI_IMPL_PACKAGE          = create(true, String.class, "psiImplPackage", "generated.psi.impl");
-  public static final KnownAttribute<String>       PSI_VISITOR_NAME          = create(true, String.class, "psiVisitorName", "Visitor");
-  public static final KnownAttribute<String>       PSI_IMPL_UTIL_CLASS       = create(true, String.class, "psiImplUtilClass", null);
-  public static final KnownAttribute<String>       TOKEN_TYPE_CLASS          = create(true, String.class, "tokenTypeClass", BnfConstants.IELEMENTTYPE_CLASS);
-  public static final KnownAttribute<String>       PARSER_CLASS              = create(true, String.class, "parserClass", "generated.GeneratedParser");
-  public static final KnownAttribute<String>       PARSER_UTIL_CLASS         = create(true, String.class, "parserUtilClass", BnfConstants.GP_UTILS_BASE_CLASS);
-  public static final KnownAttribute<String>       ELEMENT_TYPE_HOLDER_CLASS = create(true, String.class, "elementTypeHolderClass", "generated.GeneratedTypes");
-  public static final KnownAttribute<String>       ELEMENT_TYPE_PREFIX       = create(true, String.class, "elementTypePrefix", "");
-  public static final KnownAttribute<String>       TOKEN_TYPE_FACTORY        = create(true, String.class, "tokenTypeFactory", null);
+  public static final KnownAttribute<ListValue> PARSER_IMPORTS = create(true, ListValue.class, "parserImports", EMPTY_LIST);
+  public static final KnownAttribute<String> PSI_CLASS_PREFIX = create(true, String.class, "psiClassPrefix", "");
+  public static final KnownAttribute<String> PSI_IMPL_CLASS_SUFFIX = create(true, String.class, "psiImplClassSuffix", "Impl");
+  public static final KnownAttribute<String> PSI_TREE_UTIL_CLASS =
+    create(true, String.class, "psiTreeUtilClass", JavaBnfConstants.PSI_TREE_UTIL_CLASS);
+  public static final KnownAttribute<String> PSI_PACKAGE = create(true, String.class, "psiPackage", "generated.psi");
+  public static final KnownAttribute<String> PSI_IMPL_PACKAGE = create(true, String.class, "psiImplPackage", "generated.psi.impl");
+  public static final KnownAttribute<String> PSI_VISITOR_NAME = create(true, String.class, "psiVisitorName", "Visitor");
+  public static final KnownAttribute<String> PSI_IMPL_UTIL_CLASS = create(true, String.class, "psiImplUtilClass", null);
+  public static final KnownAttribute<String> TOKEN_TYPE_CLASS =
+    create(true, String.class, "tokenTypeClass", JavaBnfConstants.IELEMENTTYPE_CLASS);
+  public static final KnownAttribute<String> PARSER_CLASS = create(true, String.class, "parserClass", "generated.GeneratedParser");
+  public static final KnownAttribute<String> PARSER_UTIL_CLASS =
+    create(true, String.class, "parserUtilClass", JavaBnfConstants.GP_UTILS_BASE_CLASS);
+  public static final KnownAttribute<String> ELEMENT_TYPE_HOLDER_CLASS =
+    create(true, String.class, "elementTypeHolderClass", "generated.GeneratedTypes");
+  public static final KnownAttribute<String> ELEMENT_TYPE_PREFIX = create(true, String.class, "elementTypePrefix", "");
+  public static final KnownAttribute<String> TOKEN_TYPE_FACTORY = create(true, String.class, "tokenTypeFactory", null);
 
-  public static final KnownAttribute<String>       EXTENDS                   = create(false, String.class, "extends", BnfConstants.AST_WRAPPER_PSI_ELEMENT_CLASS);
-  public static final KnownAttribute<ListValue>    IMPLEMENTS                = create(false, ListValue.class, "implements", ListValue.singleValue( null, BnfConstants.PSI_ELEMENT_CLASS));
-  public static final KnownAttribute<String>       ELEMENT_TYPE              = create(false, String.class, "elementType", null);
+  public static final KnownAttribute<String> EXTENDS =
+    create(false, String.class, "extends", JavaBnfConstants.AST_WRAPPER_PSI_ELEMENT_CLASS);
+  public static final KnownAttribute<ListValue> IMPLEMENTS =
+    create(false, ListValue.class, "implements", ListValue.singleValue(null, JavaBnfConstants.PSI_ELEMENT_CLASS));
+  public static final KnownAttribute<String> ELEMENT_TYPE = create(false, String.class, "elementType", null);
   public static final KnownAttribute<String> FALLBACK_STUB_ELEMENT_TYPE =
     create(false, String.class, "fallbackStubElementType", BnfConstants.ISTUBELEMENTTYPE_CLASS);
-  public static final KnownAttribute<String>       ELEMENT_TYPE_CLASS        = create(false, String.class, "elementTypeClass", BnfConstants.IELEMENTTYPE_CLASS);
-  public static final KnownAttribute<String>       ELEMENT_TYPE_FACTORY      = create(false, String.class, "elementTypeFactory", null);
-  public static final KnownAttribute<Object>       PIN                       = create(false, Object.class, "pin", -1);
-  public static final KnownAttribute<String>       MIXIN                     = create(false, String.class, "mixin", null);
-  public static final KnownAttribute<String>       RECOVER_WHILE             = create(false, String.class, "recoverWhile", null);
-  public static final KnownAttribute<String>       NAME                      = create(false, String.class, "name", null);
+  public static final KnownAttribute<String> ELEMENT_TYPE_CLASS =
+    create(false, String.class, "elementTypeClass", JavaBnfConstants.IELEMENTTYPE_CLASS);
+  public static final KnownAttribute<String> ELEMENT_TYPE_FACTORY = create(false, String.class, "elementTypeFactory", null);
+  public static final KnownAttribute<Object> PIN = create(false, Object.class, "pin", -1);
+  public static final KnownAttribute<String> MIXIN = create(false, String.class, "mixin", null);
+  public static final KnownAttribute<String> RECOVER_WHILE = create(false, String.class, "recoverWhile", null);
+  public static final KnownAttribute<String> NAME = create(false, String.class, "name", null);
 
-  public static final KnownAttribute<Boolean>      EXTRA_ROOT                = create(false, Boolean.class, "extraRoot", false);
-  public static final KnownAttribute<Boolean>      RIGHT_ASSOCIATIVE         = create(false, Boolean.class, "rightAssociative", false);
-  public static final KnownAttribute<String>       CONSUME_TOKEN_METHOD      = create(false, String.class,  "consumeTokenMethod", "consumeToken");
+  public static final KnownAttribute<Boolean> EXTRA_ROOT = create(false, Boolean.class, "extraRoot", false);
+  public static final KnownAttribute<Boolean> RIGHT_ASSOCIATIVE = create(false, Boolean.class, "rightAssociative", false);
+  public static final KnownAttribute<String> CONSUME_TOKEN_METHOD = create(false, String.class, "consumeTokenMethod", "consumeToken");
 
-  public static final KnownAttribute<String>       STUB_CLASS                = create(false, String.class,  "stubClass", null);
+  public static final KnownAttribute<String> STUB_CLASS = create(false, String.class, "stubClass", null);
 
-  public static final KnownAttribute<ListValue>    METHODS                   = create(false, ListValue.class, "methods", EMPTY_LIST);
-  public static final KnownAttribute<ListValue>    HOOKS                     = create(false, ListValue.class, "hooks", EMPTY_LIST);
-  public static final KnownAttribute<ListValue>    TOKENS                    = create(true, ListValue.class, "tokens", EMPTY_LIST);
+  public static final KnownAttribute<ListValue> METHODS = create(false, ListValue.class, "methods", EMPTY_LIST);
+  public static final KnownAttribute<ListValue> HOOKS = create(false, ListValue.class, "hooks", EMPTY_LIST);
+  public static final KnownAttribute<ListValue> TOKENS = create(true, ListValue.class, "tokens", EMPTY_LIST);
 
   //Syntax api
   public static final KnownAttribute<String> OUTER_PSI_MODULE                     = create(true, String.class, "outerPsiModule", "");
@@ -106,7 +119,6 @@ public class KnownAttribute<T> {
     return myDefaultValue;
   }
 
-  /** @noinspection unchecked*/
   public T ensureValue(Object o) {
     if (o == null) return getDefaultValue();
     if (myClazz == ListValue.class && o instanceof String) {
@@ -124,7 +136,7 @@ public class KnownAttribute<T> {
   public String getDescription() {
     try {
       InputStream resourceAsStream = getClass().getResourceAsStream("/messages/attributeDescriptions/" + getName() + ".html");
-      return resourceAsStream == null? null : FileUtil.loadTextAndClose(resourceAsStream);
+      return resourceAsStream == null ? null : FileUtil.loadTextAndClose(resourceAsStream);
     }
     catch (IOException e) {
       return null;
@@ -145,7 +157,9 @@ public class KnownAttribute<T> {
     public @NotNull List<String> asStrings() {
       List<String> t = new ArrayList<>();
       for (Pair<String, String> pair : this) {
-        if (pair.first != null) t.add(pair.first);
+        if (pair.first != null) {
+          t.add(pair.first);
+        }
         else if (pair.second != null) t.add(pair.second);
       }
       return t;

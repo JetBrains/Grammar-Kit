@@ -27,7 +27,7 @@ import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.util.IncorrectOperationException;
 import com.intellij.util.containers.ContainerUtil;
 import org.intellij.grammar.KnownAttribute;
-import org.intellij.grammar.generator.BnfConstants;
+import org.intellij.grammar.generator.java.JavaBnfConstants;
 import org.intellij.grammar.psi.BnfAttr;
 import org.intellij.grammar.psi.BnfAttrs;
 import org.intellij.grammar.psi.BnfFile;
@@ -40,64 +40,6 @@ import java.util.function.Consumer;
  * @author greg
  */
 public class BnfGenerateParserUtilAction extends AnAction {
-  @Override
-  public @NotNull ActionUpdateThread getActionUpdateThread() {
-    return ActionUpdateThread.BGT;
-  }
-
-  @Override
-  public void update(AnActionEvent e) {
-    PsiFile file = e.getData(CommonDataKeys.PSI_FILE);
-    if (!(file instanceof BnfFile)) {
-      e.getPresentation().setEnabledAndVisible(false);
-    }
-    else {
-      boolean enabled = ((BnfFile) file).findAttribute(null, KnownAttribute.PARSER_UTIL_CLASS, null) == null;
-      e.getPresentation().setEnabledAndVisible(enabled);
-    }
-  }
-
-  @Override
-  public void actionPerformed(AnActionEvent e) {
-    PsiFile file = e.getData(CommonDataKeys.PSI_FILE);
-    if (!(file instanceof BnfFile)) return;
-
-    Project project = file.getProject();
-    BnfFile bnfFile = (BnfFile) file;
-    String qualifiedName = createClass(
-        bnfFile, "Create Parser Util Class", BnfConstants.GP_UTILS_BASE_CLASS,
-        getGrammarName(bnfFile) + "ParserUtil",
-        getGrammarPackage(bnfFile));
-    if (qualifiedName == null) return;
-
-    int anchorOffset;
-    String text;
-    String definition = "\n  " + KnownAttribute.PARSER_UTIL_CLASS.getName() + "=\"" + qualifiedName + "\"";
-    BnfAttr attrParser = bnfFile.findAttribute(null, KnownAttribute.PARSER_CLASS, null);
-    if (attrParser == null) {
-      BnfAttrs rootAttrs = ContainerUtil.getFirstItem(bnfFile.getAttributes());
-      if (rootAttrs == null) {
-        anchorOffset = 0;
-        text = "{" + definition + "\n}";
-      }
-      else {
-        anchorOffset = rootAttrs.getFirstChild().getTextOffset();
-        text = definition;
-      }
-    }
-    else {
-      anchorOffset = attrParser.getTextRange().getEndOffset();
-      text = definition;
-    }
-    Document document = PsiDocumentManager.getInstance(project).getDocument(bnfFile);
-    if (document == null) return;
-    WriteCommandAction.writeCommandAction(project, file)
-      .run(() -> {
-        int position = document.getLineEndOffset(document.getLineNumber(anchorOffset));
-        document.insertString(position, text);
-      });
-  }
-
   static String getGrammarPackage(BnfFile bnfFile) {
     String value = bnfFile.findAttributeValue(null, KnownAttribute.PARSER_CLASS, null);
     return value == null ? "" : StringUtil.getPackageName(value);
@@ -164,5 +106,63 @@ public class BnfGenerateParserUtilAction extends AnAction {
         }
       });
     return resultRef.isNull() ? null : resultRef.get().getQualifiedName();
+  }
+
+  @Override
+  public @NotNull ActionUpdateThread getActionUpdateThread() {
+    return ActionUpdateThread.BGT;
+  }
+
+  @Override
+  public void update(AnActionEvent e) {
+    PsiFile file = e.getData(CommonDataKeys.PSI_FILE);
+    if (!(file instanceof BnfFile)) {
+      e.getPresentation().setEnabledAndVisible(false);
+    }
+    else {
+      boolean enabled = ((BnfFile)file).findAttribute(null, KnownAttribute.PARSER_UTIL_CLASS, null) == null;
+      e.getPresentation().setEnabledAndVisible(enabled);
+    }
+  }
+
+  @Override
+  public void actionPerformed(AnActionEvent e) {
+    PsiFile file = e.getData(CommonDataKeys.PSI_FILE);
+    if (!(file instanceof BnfFile)) return;
+
+    Project project = file.getProject();
+    BnfFile bnfFile = (BnfFile)file;
+    String qualifiedName = createClass(
+      bnfFile, "Create Parser Util Class", JavaBnfConstants.GP_UTILS_BASE_CLASS,
+      getGrammarName(bnfFile) + "ParserUtil",
+      getGrammarPackage(bnfFile));
+    if (qualifiedName == null) return;
+
+    int anchorOffset;
+    String text;
+    String definition = "\n  " + KnownAttribute.PARSER_UTIL_CLASS.getName() + "=\"" + qualifiedName + "\"";
+    BnfAttr attrParser = bnfFile.findAttribute(null, KnownAttribute.PARSER_CLASS, null);
+    if (attrParser == null) {
+      BnfAttrs rootAttrs = ContainerUtil.getFirstItem(bnfFile.getAttributes());
+      if (rootAttrs == null) {
+        anchorOffset = 0;
+        text = "{" + definition + "\n}";
+      }
+      else {
+        anchorOffset = rootAttrs.getFirstChild().getTextOffset();
+        text = definition;
+      }
+    }
+    else {
+      anchorOffset = attrParser.getTextRange().getEndOffset();
+      text = definition;
+    }
+    Document document = PsiDocumentManager.getInstance(project).getDocument(bnfFile);
+    if (document == null) return;
+    WriteCommandAction.writeCommandAction(project, file)
+      .run(() -> {
+        int position = document.getLineEndOffset(document.getLineNumber(anchorOffset));
+        document.insertString(position, text);
+      });
   }
 }

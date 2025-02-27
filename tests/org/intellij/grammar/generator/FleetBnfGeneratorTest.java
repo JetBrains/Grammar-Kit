@@ -16,21 +16,21 @@ import java.util.List;
 public class FleetBnfGeneratorTest extends AbstractBnfGeneratorTest {
 
   private FileGeneratorParams myFileGeneratorParams = null;
-  private final @NotNull Generator FLEET_GENERATOR = Generator.fromGeneratorBase(
-    ((bnf, source, output, prefix, opener) -> new FleetFileTypeGenerator(bnf, source, output, prefix, myFileGeneratorParams.className,
-                                                                         myFileGeneratorParams.debugName,
-                                                                         myFileGeneratorParams.languageClass, opener)));
 
   public FleetBnfGeneratorTest() {
     super("fleet", ".java");
   }
 
   @Override
-  protected @NotNull List<@NotNull Generator> createGenerators() {
+  protected @NotNull List<@NotNull Generator> createGenerators(@NotNull BnfFile psiFile,
+                                                               @NotNull String outputPath,
+                                                               @NotNull OutputOpener outputOpener) {
     final var result = new ArrayList<Generator>();
-    result.add(Generator.JAVA_GENERATOR);
+    result.add(new JavaParserGenerator(psiFile, "", outputPath, "", outputOpener));
     if (myFileGeneratorParams != null) {
-      result.add(FLEET_GENERATOR);
+      result.add(new FleetFileTypeGenerator(
+        psiFile, "", outputPath, "", myFileGeneratorParams.className, myFileGeneratorParams.debugName,
+        myFileGeneratorParams.languageClass, outputOpener));
     }
     return result;
   }

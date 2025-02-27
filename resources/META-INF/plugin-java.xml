@@ -2,9 +2,11 @@
 <idea-plugin>
   <resource-bundle>messages.GrammarKitBundle</resource-bundle>
   <extensions defaultExtensionNs="com.intellij">
-    <projectService serviceInterface="org.intellij.grammar.java.JavaHelper" serviceImplementation="org.intellij.grammar.java.JavaHelper$PsiHelper"/>
+    <projectService serviceInterface="org.intellij.grammar.java.JavaHelper"
+                    serviceImplementation="org.intellij.grammar.java.JavaHelper$PsiHelper"/>
     <referencesSearch implementation="org.intellij.jflex.psi.impl.JFlexStateUsageSearcher"/>
-    <regExpLanguageHost forClass="org.intellij.grammar.psi.impl.BnfStringImpl" implementationClass="org.intellij.grammar.psi.impl.BnfStringRegexHost"/>
+    <regExpLanguageHost forClass="org.intellij.grammar.psi.impl.BnfStringImpl"
+                        implementationClass="org.intellij.grammar.psi.impl.BnfStringRegexHost"/>
 
     <multiHostInjector implementation="org.intellij.jflex.psi.impl.JFlexJavaCodeInjector"/>
     <lang.elementManipulator forClass="org.intellij.jflex.psi.impl.JFlexJavaCodeImpl"
@@ -14,7 +16,7 @@
   </extensions>
   <actions>
     <group id="grammar.group">
-      <action id="grammar.Generate" class="org.intellij.grammar.actions.GenerateAction">
+      <action id="grammar.Generate" class="org.intellij.grammar.actions.GenerateJavaAction">
         <keyboard-shortcut keymap="$default" first-keystroke="control shift G"/>
       </action>
       <action id="grammar.GenerateKotlin" class="org.intellij.grammar.actions.GenerateKotlinAction"/>

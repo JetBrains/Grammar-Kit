@@ -4,6 +4,7 @@
 
 package org.intellij.grammar.generator;
 
+import org.intellij.grammar.psi.BnfFile;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -14,8 +15,10 @@ public class KotlinBnfGeneratorTest extends AbstractBnfGeneratorTest {
   }
 
   @Override
-  protected @NotNull List<@NotNull Generator> createGenerators() {
-    return List.of(Generator.KOTLIN_GENERATOR);
+  protected @NotNull List<@NotNull Generator> createGenerators(@NotNull BnfFile psiFile,
+                                                               @NotNull String outputPath,
+                                                               @NotNull OutputOpener outputOpener) {
+    return List.of(new KotlinParserGenerator(psiFile, "", outputPath, "", outputOpener));
   }
 
   public void testAutopin() throws Exception {

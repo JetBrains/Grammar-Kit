@@ -14,7 +14,6 @@ import com.intellij.psi.util.CachedValueProvider;
 import com.intellij.psi.util.CachedValuesManager;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.util.ObjectUtils;
-import com.intellij.util.PairConsumer;
 import com.intellij.util.containers.ContainerUtil;
 import com.intellij.util.containers.JBIterable;
 import com.intellij.util.containers.JBTreeTraverser;
@@ -65,7 +64,7 @@ public class ExpressionHelper {
     myWarningConsumer.accept(text);
   }
 
-  public ExpressionInfo getExpressionInfo(BnfRule rule) {
+  public @Nullable ExpressionInfo getExpressionInfo(BnfRule rule) {
     BnfRule root = myRootRulesMap.get(rule);
     ExpressionInfo info = root == null ? null : myExpressionMap.get(root);
     if (info == null) return null;
@@ -256,9 +255,9 @@ public class ExpressionHelper {
   public @NotNull RuleGraphHelper.Cardinality fixCardinality(BnfRule rule, PsiElement tree, RuleGraphHelper.Cardinality type) {
     if (type.optional()) return type;
     // in Expression parsing mode REQUIRED may go OPTIONAL
-    ExpressionHelper.ExpressionInfo info = getExpressionInfo(rule);
-    ExpressionHelper.OperatorInfo operatorInfo = info == null ? null : info.operatorMap.get(rule);
-    if (operatorInfo == null || operatorInfo.type == ExpressionHelper.OperatorType.ATOM) return type;
+    ExpressionInfo info = getExpressionInfo(rule);
+    OperatorInfo operatorInfo = info == null ? null : info.operatorMap.get(rule);
+    if (operatorInfo == null || operatorInfo.type == OperatorType.ATOM) return type;
 
     // emulate expr-parsing pin processing
     if ((operatorInfo.type == OperatorType.BINARY ||
@@ -296,87 +295,5 @@ public class ExpressionHelper {
       }
     }
     return -1;
-  }
-
-  public static class ExpressionInfo {
-    public final BnfRule rootRule;
-    public final Map<BnfRule, Integer> priorityMap = new LinkedHashMap<>();
-    public final Map<BnfRule, OperatorInfo> operatorMap = new LinkedHashMap<>();
-    public final Map<BnfRule, Integer> privateGroups = new HashMap<>();
-    public int nextPriority;
-    public final Set<OperatorInfo> checkEmpty = new HashSet<>();
-
-    public ExpressionInfo(BnfRule rootRule) {
-      this.rootRule = rootRule;
-    }
-
-    @Override
-    public String toString() {
-      StringBuilder sb = new StringBuilder("Expression root: " + rootRule.getName());
-      sb.append("\nOperator priority table:\n");
-      return dumpPriorityTable(sb).toString();
-    }
-
-    public StringBuilder dumpPriorityTable(StringBuilder sb) {
-      return dumpPriorityTable(sb, StringBuilder::append);
-    }
-
-    public StringBuilder dumpPriorityTable(StringBuilder sb, PairConsumer<? super StringBuilder, ? super OperatorInfo> printer) {
-      for (int i = 0; i < nextPriority; i++) {
-        sb.append(i).append(":");
-        int count = 0;
-        for (BnfRule rule : priorityMap.keySet()) {
-          if (priorityMap.get(rule) == i) {
-            if ((count ++ % 4) == 0 && count > 1) sb.append("\n  ");
-            sb.append(" ");
-            printer.consume(sb, operatorMap.get(rule));
-          }
-        }
-        sb.append("\n");
-      }
-      return sb;
-    }
-
-    public int getPriority(BnfRule subRule) {
-      if (subRule == rootRule) return 0;
-      Integer op = priorityMap.get(subRule);
-      if (op != null) return op;
-      Integer group = privateGroups.get(subRule);
-      return group == null ? -1 : group;
-    }
-  }
-
-  public enum OperatorType {ATOM, PREFIX, POSTFIX, BINARY, N_ARY}
-
-  public static class OperatorInfo {
-    public final BnfRule rule;
-    public final OperatorType type;
-    public final BnfExpression operator;
-    public final BnfExpression tail; // null for postfix
-    public final BnfRule arg1;
-    public final BnfRule arg2;
-
-    public OperatorInfo(BnfRule rule, OperatorType type, BnfExpression operator, BnfExpression tail) {
-      this(rule, type, operator, tail, null, null);
-    }
-
-    public OperatorInfo(BnfRule rule, OperatorType type, BnfExpression operator, BnfExpression tail,
-                        @Nullable BnfRule arg1,
-                        @Nullable BnfRule arg2) {
-      if (operator == null) {
-        throw new AssertionError(rule + ": operator must not be null");
-      }
-      this.rule = rule;
-      this.type = type;
-      this.operator = operator;
-      this.tail = tail;
-      this.arg1 = arg1;
-      this.arg2 = arg2;
-    }
-
-    @Override
-    public String toString() {
-      return type + "(" + rule.getName() + ")";
-    }
   }
 }

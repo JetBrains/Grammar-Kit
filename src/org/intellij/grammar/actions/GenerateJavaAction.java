@@ -4,14 +4,14 @@
 
 package org.intellij.grammar.actions;
 
-import org.intellij.grammar.generator.Generator;
+import org.intellij.grammar.generator.JavaParserGenerator;
 
 /**
  * @author gregory
  * Date: 15.07.11 17:12
  */
-public class GenerateAction extends GenerateActionBase {
-  public GenerateAction() {
-    super(Generator.JAVA_GENERATOR);
+public class GenerateJavaAction extends GenerateActionBase {
+  public GenerateJavaAction() {
+    super(JavaParserGenerator::new);
   }
 }

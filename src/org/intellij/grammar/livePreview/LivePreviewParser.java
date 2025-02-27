@@ -58,8 +58,8 @@ public class LivePreviewParser implements PsiParser {
     myFile = language.getGrammar(project);
   }
 
-  private static Iterable<ExpressionHelper.OperatorInfo> filter(Map<String, List<ExpressionHelper.OperatorInfo>> opCalls,
-                                                                ExpressionHelper.OperatorType... operatorTypes) {
+  private static Iterable<OperatorInfo> filter(Map<String, List<OperatorInfo>> opCalls,
+                                               OperatorType... operatorTypes) {
     return ContainerUtil.mapNotNull(opCalls.keySet(), opCall ->
       ContainerUtil.getFirstItem(ExpressionGeneratorHelper.findOperators(opCalls.get(opCall), operatorTypes)));
   }
@@ -323,7 +323,7 @@ public class LivePreviewParser implements PsiParser {
     else if (sectionRequired) {
       Parser recoverPredicate;
       BnfRule recoverRule = recoverWhile != null ? myFile.getRule(recoverWhile) : null;
-      if (BnfConstants.RECOVER_AUTO.equals(recoverWhile)) {
+      if (CommonBnfConstants.RECOVER_AUTO.equals(recoverWhile)) {
         IElementType[] nextTokens = generateAutoRecoverCall(rule);
         recoverPredicate = (builder12, level12) -> !nextTokenIsFast(builder12, nextTokens);
       }
@@ -382,7 +382,7 @@ public class LivePreviewParser implements PsiParser {
           //return method + "(builder_, level_ + 1" + clause.toString() + ")";
         }
         else {
-          ExpressionHelper.ExpressionInfo info = ExpressionGeneratorHelper.getInfoForExpressionParsing(myExpressionHelper, subRule);
+          ExpressionInfo info = ExpressionGeneratorHelper.getInfoForExpressionParsing(myExpressionHelper, subRule);
           if (info == null) {
             return rule(builder, level + 1, subRule, externalArguments);
           }
@@ -576,12 +576,12 @@ public class LivePreviewParser implements PsiParser {
   }
 
   // Expression Generator Helper part
-  private boolean generateExpressionRoot(PsiBuilder builder, int level, ExpressionHelper.ExpressionInfo info, int priority_) {
-    Map<String, List<ExpressionHelper.OperatorInfo>> opCalls = new LinkedHashMap<>();
+  private boolean generateExpressionRoot(PsiBuilder builder, int level, ExpressionInfo info, int priority_) {
+    Map<String, List<OperatorInfo>> opCalls = new LinkedHashMap<>();
     for (BnfRule rule : info.priorityMap.keySet()) {
-      ExpressionHelper.OperatorInfo operator = info.operatorMap.get(rule);
+      OperatorInfo operator = info.operatorMap.get(rule);
       String opCall = R.getNextName(operator.rule.getName(), 0);
-      List<ExpressionHelper.OperatorInfo> list = opCalls.get(opCall);
+      List<OperatorInfo> list = opCalls.get(opCall);
       if (list == null) opCalls.put(opCall, list = new ArrayList<>(2));
       list.add(operator);
     }
@@ -597,8 +597,8 @@ public class LivePreviewParser implements PsiParser {
     PsiBuilder.Marker marker_ = enter_section_(builder, level, _NONE_, frameName);
 
     boolean first = true;
-    for (ExpressionHelper.OperatorInfo operator : filter(opCalls, ExpressionHelper.OperatorType.ATOM,
-                                                         ExpressionHelper.OperatorType.PREFIX)) {
+    for (OperatorInfo operator : filter(opCalls, OperatorType.ATOM,
+                                        OperatorType.PREFIX)) {
       if (first || !result_) {
         result_ = generateNodeCall(builder, level, operator.rule, null, operator.rule.getName(), Collections.emptyMap());
       }
@@ -614,8 +614,8 @@ public class LivePreviewParser implements PsiParser {
   private boolean generateKernelMethod(PsiBuilder builder,
                                        int level,
                                        String methodName,
-                                       ExpressionHelper.ExpressionInfo info,
-                                       Map<String, List<ExpressionHelper.OperatorInfo>> opCalls,
+                                       ExpressionInfo info,
+                                       Map<String, List<OperatorInfo>> opCalls,
                                        int priority_) {
     if (!recursion_guard_(builder, level, methodName)) return false;
     PsiBuilder.Marker marker_ = null;
@@ -627,8 +627,8 @@ public class LivePreviewParser implements PsiParser {
       PsiBuilder.Marker left_marker_ = (PsiBuilder.Marker)builder.getLatestDoneMarker();
       if (!invalid_left_marker_guard_(builder, left_marker_, methodName)) return false;
 
-      for (ExpressionHelper.OperatorInfo operator : filter(opCalls, ExpressionHelper.OperatorType.BINARY,
-                                                           ExpressionHelper.OperatorType.N_ARY, ExpressionHelper.OperatorType.POSTFIX)) {
+      for (OperatorInfo operator : filter(opCalls, OperatorType.BINARY,
+                                          OperatorType.N_ARY, OperatorType.POSTFIX)) {
         int priority = info.getPriority(operator.rule);
         int arg2Priority = operator.arg2 == null ? -1 : info.getPriority(operator.arg2);
         int argPriority = arg2Priority == -1 ? priority : arg2Priority - 1;
@@ -642,7 +642,7 @@ public class LivePreviewParser implements PsiParser {
 
           IElementType elementType = getRuleElementType(operator.rule);
           boolean rightAssociative = getAttribute(operator.rule, KnownAttribute.RIGHT_ASSOCIATIVE);
-          if (operator.type == ExpressionHelper.OperatorType.BINARY) {
+          if (operator.type == OperatorType.BINARY) {
             result_ =
               report_error_(builder, generateExpressionRoot(builder, level, info, (rightAssociative ? argPriority - 1 : argPriority)));
             if (operator.tail != null) {
@@ -651,7 +651,7 @@ public class LivePreviewParser implements PsiParser {
                                                                 Collections.emptyMap())) && result_;
             }
           }
-          else if (operator.type == ExpressionHelper.OperatorType.N_ARY) {
+          else if (operator.type == OperatorType.N_ARY) {
             int nary_pos = current_position_(builder);
             while (true) {
               result_ = report_error_(builder, generateExpressionRoot(builder, level, info, argPriority));
@@ -669,7 +669,7 @@ public class LivePreviewParser implements PsiParser {
               nary_pos = current_position_(builder);
             }
           }
-          else if (operator.type == ExpressionHelper.OperatorType.POSTFIX) {
+          else if (operator.type == OperatorType.POSTFIX) {
             result_ = true;
           }
           marker_.drop();

@@ -34,7 +34,7 @@ import static org.intellij.grammar.psi.impl.GrammarUtil.isDoubleAngles;
 
 /**
  * @author gregory
- *         Date: 16.07.11 10:41
+ * Date: 16.07.11 10:41
  */
 public class RuleGraphHelper {
   private static final Hash.Strategy<PsiElement> CARDINALITY_HASHING_STRATEGY = new Hash.Strategy<>() {
@@ -94,7 +94,7 @@ public class RuleGraphHelper {
     }
 
     public Cardinality single() {
-      return this == AT_LEAST_ONE? REQUIRED : this == ANY_NUMBER? OPTIONAL : this;
+      return this == AT_LEAST_ONE ? REQUIRED : this == ANY_NUMBER ? OPTIONAL : this;
     }
 
     public static Cardinality fromNodeType(IElementType type) {
@@ -136,7 +136,6 @@ public class RuleGraphHelper {
       if (c == NONE) return this;
       return optional() && c.optional() ? ANY_NUMBER : AT_LEAST_ONE;
     }
-
   }
 
   public static MultiMap<BnfRule, BnfRule> buildExtendsMap(BnfFile file) {
@@ -189,6 +188,7 @@ public class RuleGraphHelper {
   }
 
   private static final Key<CachedValue<RuleGraphHelper>> RULE_GRAPH_HELPER_KEY = Key.create("RULE_GRAPH_HELPER_KEY");
+
   public static RuleGraphHelper getCached(@NotNull BnfFile file) {
     CachedValue<RuleGraphHelper> value = file.getUserData(RULE_GRAPH_HELPER_KEY);
     if (value == null) {
@@ -388,8 +388,7 @@ public class RuleGraphHelper {
         result = Collections.emptyMap();
       }
     }
-    else if (tree instanceof BnfExternalExpression) {
-      BnfExternalExpression expression = (BnfExternalExpression)tree;
+    else if (tree instanceof BnfExternalExpression expression) {
       List<BnfExpression> arguments = expression.getArguments();
       if (arguments.isEmpty() && Rule.isMeta(rule)) {
         result = psiMap(newExternalPsi(tree.getText()), REQUIRED);
@@ -496,7 +495,10 @@ public class RuleGraphHelper {
     return result;
   }
 
-  private Map<PsiElement, Cardinality> joinMaps(@NotNull BnfRule rule, boolean tryCollapse, IElementType type, List<Map<PsiElement, Cardinality>> list) {
+  private Map<PsiElement, Cardinality> joinMaps(@NotNull BnfRule rule,
+                                                boolean tryCollapse,
+                                                IElementType type,
+                                                List<Map<PsiElement, Cardinality>> list) {
     if (list.isEmpty()) return Collections.emptyMap();
     if (type == BnfTypes.BNF_OP_OPT || type == BnfTypes.BNF_OP_ZEROMORE || type == BnfTypes.BNF_OP_ONEMORE) {
       JavaParserGenerator.LOG.assertTrue(list.size() == 1);
@@ -540,16 +542,21 @@ public class RuleGraphHelper {
           Cardinality joinedCard;
           if (leftMarker == null) {
             joinedCard = c2.or(c1);
-
           }
           // handle left semantic in a choice-like way
           else if (c1 == null) {
             joinedCard = c2;
           }
           else {
-            if (c1 == REQUIRED) joinedCard = c2.many()? AT_LEAST_ONE : REQUIRED;
-            else if (c1 == AT_LEAST_ONE) joinedCard = ANY_NUMBER;
-            else joinedCard = c1;
+            if (c1 == REQUIRED) {
+              joinedCard = c2.many() ? AT_LEAST_ONE : REQUIRED;
+            }
+            else if (c1 == AT_LEAST_ONE) {
+              joinedCard = ANY_NUMBER;
+            }
+            else {
+              joinedCard = c1;
+            }
           }
           map.put(t, joinedCard);
         }
@@ -590,7 +597,8 @@ public class RuleGraphHelper {
         }
       }
       boolean notEmpty = true;
-      empty: for (Map<PsiElement, Cardinality> m : list) {
+      empty:
+      for (Map<PsiElement, Cardinality> m : list) {
         for (Cardinality c : m.values()) {
           if (!c.optional()) continue empty;
         }
@@ -631,14 +639,19 @@ public class RuleGraphHelper {
     return new Object2ObjectOpenCustomHashMap<>(3, CARDINALITY_HASHING_STRATEGY);
   }
 
-  /** @noinspection UnusedParameters*/
-  private List<Map<PsiElement, Cardinality>> compactInheritors(@Nullable BnfRule forRule, @NotNull List<Map<PsiElement, Cardinality>> mapList) {
+  /**
+   * @noinspection UnusedParameters
+   */
+  private List<Map<PsiElement, Cardinality>> compactInheritors(@Nullable BnfRule forRule,
+                                                               @NotNull List<Map<PsiElement, Cardinality>> mapList) {
     Map<BnfRule, BnfRule> rulesAndAlts = new LinkedHashMap<>();
     Map<PsiElement, BnfRule> externalMap = new LinkedHashMap<>();
     for (Map<PsiElement, Cardinality> map : mapList) {
       for (PsiElement element : map.keySet()) {
         BnfRule r = null;
-        if (element instanceof BnfRule) r = (BnfRule)element;
+        if (element instanceof BnfRule) {
+          r = (BnfRule)element;
+        }
         else if (isExternalPsi(element) && !element.getText().startsWith("#") && !isDoubleAngles(element.getText())) {
           String text = element.getText();
           BnfRule rule = myFile.getRule(text);
@@ -663,7 +676,7 @@ public class RuleGraphHelper {
     for (Map.Entry<BnfRule, Collection<BnfRule>> e : myRuleExtendsMap.entrySet()) {
       int count = 0;
       for (BnfRule rule : allRules) {
-        if (e.getValue().contains(rule)) count ++;
+        if (e.getValue().contains(rule)) count++;
       }
       if (count > 1) {
         applicableSupers.add(e);
@@ -735,11 +748,11 @@ public class RuleGraphHelper {
                                              List<Map.Entry<BnfRule, Collection<BnfRule>>> supers) {
     BitSet bits = new BitSet(rulesAndAlts.size());
     int minI = -1, minC = -1, minS = -1;
-    for (int len = Math.min(16, supers.size()), i = (1 << len) - 1; i > 0; i --) {
+    for (int len = Math.min(16, supers.size()), i = (1 << len) - 1; i > 0; i--) {
       if (minC != -1 && Integer.bitCount(i) > minC) continue;
       int curC = 0, curS = 0;
       bits.set(0, rulesAndAlts.size(), true);
-      for (int j = 0, bit = 1; j < len; j ++, bit <<= 1) {
+      for (int j = 0, bit = 1; j < len; j++, bit <<= 1) {
         if ((i & bit) == 0) continue;
         Collection<BnfRule> vals = supers.get(j).getValue();
         curC += 1;
@@ -753,7 +766,7 @@ public class RuleGraphHelper {
               bits.set(k, false);
             }
           }
-          k ++;
+          k++;
         }
         if (!bits.isEmpty()) {
           curC += bits.cardinality();
@@ -794,8 +807,7 @@ public class RuleGraphHelper {
       for (Map.Entry<BnfRule, BnfRule> e : replacementMap.entrySet()) {
         Cardinality card = copy.remove(e.getKey());
         if (card == null) continue;
-        Cardinality cur = copy.get(e.getValue());
-        copy.put(e.getValue(), cur == null ? card : cur.or(card));
+        copy.compute(e.getValue(), (k, cur) -> cur == null ? card : cur.or(card));
       }
     }
     return result;
@@ -844,5 +856,4 @@ public class RuleGraphHelper {
   private static boolean isExternalPsi(PsiElement t) {
     return t instanceof LeafPsiElement && ((LeafPsiElement)t).getElementType() == EXTERNAL_TYPE;
   }
-
 }

@@ -15,7 +15,7 @@ import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.util.ThreeState;
 import org.intellij.grammar.GrammarKitBundle;
 import org.intellij.grammar.KnownAttribute;
-import org.intellij.grammar.generator.BnfConstants;
+import org.intellij.grammar.generator.CommonBnfConstants;
 import org.intellij.grammar.generator.ParserGeneratorUtil;
 import org.intellij.grammar.psi.*;
 import org.intellij.grammar.psi.impl.BnfReferenceImpl;
@@ -29,7 +29,9 @@ import java.util.Objects;
  */
 final class BnfResolveInspection extends LocalInspectionTool {
   @Override
-  public @NotNull PsiElementVisitor buildVisitor(@NotNull ProblemsHolder holder, boolean isOnTheFly, @NotNull LocalInspectionToolSession session) {
+  public @NotNull PsiElementVisitor buildVisitor(@NotNull ProblemsHolder holder,
+                                                 boolean isOnTheFly,
+                                                 @NotNull LocalInspectionToolSession session) {
     return new BnfVisitor<Void>() {
       @Override
       public Void visitReferenceOrToken(@NotNull BnfReferenceOrToken o) {
@@ -77,7 +79,7 @@ final class BnfResolveInspection extends LocalInspectionTool {
           boolean checkReferences =
             attribute != null && attribute != KnownAttribute.NAME && !attribute.getName().endsWith("Factory") &&
             !(attribute == KnownAttribute.RECOVER_WHILE &&
-              (BnfConstants.RECOVER_AUTO.equals(value) ||
+              (CommonBnfConstants.RECOVER_AUTO.equals(value) ||
                GrammarUtil.isDoubleAngles(value) && ParserGeneratorUtil.Rule.isMeta(ParserGeneratorUtil.Rule.of(o))));
           if (checkReferences) {
             TextRange valueRange = ElementManipulators.getValueTextRange(o);
@@ -91,16 +93,18 @@ final class BnfResolveInspection extends LocalInspectionTool {
                 reportAtEnd = ThreeState.NO;
               }
               else if (!atEnd) {
-                if (reference.getRangeInElement().getLength() == 1 && 
+                if (reference.getRangeInElement().getLength() == 1 &&
                     "?".equals(reference.getCanonicalText()) &&
-                    !(reference instanceof BnfReferenceImpl)) continue;
+                    !(reference instanceof BnfReferenceImpl)) {
+                  continue;
+                }
                 reportAtEnd = ThreeState.NO;
-                holder.registerProblem(reference, 
+                holder.registerProblem(reference,
                                        ProblemsHolder.unresolvedReferenceMessage(reference),
                                        ProblemHighlightType.GENERIC_ERROR_OR_WARNING);
               }
               else {
-                if (reportAtEnd != ThreeState.NO) reportAtEnd = ThreeState.YES; 
+                if (reportAtEnd != ThreeState.NO) reportAtEnd = ThreeState.YES;
                 if (refAtEnd == null ||
                     refAtEnd.getRangeInElement().getLength() > reference.getRangeInElement().getLength()) {
                   refAtEnd = reference;

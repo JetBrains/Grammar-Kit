@@ -21,6 +21,7 @@ import com.intellij.util.containers.JBTreeTraverser;
 import com.intellij.util.containers.TreeTraversal;
 import it.unimi.dsi.fastutil.Hash;
 import org.intellij.grammar.KnownAttribute;
+import org.intellij.grammar.generator.java.JavaBnfConstants;
 import org.intellij.grammar.generator.java.JavaNameShortener;
 import org.intellij.grammar.java.JavaHelper;
 import org.intellij.grammar.psi.*;
@@ -339,7 +340,8 @@ public class ParserGeneratorUtil {
       topRuleImplements = getAttribute(topSuper, KnownAttribute.IMPLEMENTS).asStrings();
       topRuleClass = getAttribute(topSuper, KnownAttribute.PSI_PACKAGE) + "." + renderer.getRulePsiClassName(topSuper, format);
       if (!StringUtil.isEmpty(topRuleClass)) strings.add(topRuleClass);
-    } else {
+    }
+    else {
       topRuleImplements = Collections.emptyList();
       topRuleClass = null;
     }
@@ -409,11 +411,11 @@ public class ParserGeneratorUtil {
   }
 
   public static boolean isRegexpToken(@NotNull String tokenText) {
-    return tokenText.startsWith(BnfConstants.REGEXP_PREFIX);
+    return tokenText.startsWith(CommonBnfConstants.REGEXP_PREFIX);
   }
 
   public static @NotNull String getRegexpTokenRegexp(@NotNull String tokenText) {
-    return tokenText.substring(BnfConstants.REGEXP_PREFIX.length());
+    return tokenText.substring(CommonBnfConstants.REGEXP_PREFIX.length());
   }
 
   static @Nullable Collection<String> getTokenNames(@NotNull BnfFile file, @NotNull List<BnfExpression> expressions) {
@@ -479,7 +481,9 @@ public class ParserGeneratorUtil {
     }
   }
 
-  public static void appendTokenTypes(@NotNull StringBuilder builder, @NotNull List<@NotNull String> tokenTypes, @NotNull String elementTypesHolder) {
+  public static void appendTokenTypes(@NotNull StringBuilder builder,
+                                      @NotNull List<@NotNull String> tokenTypes,
+                                      @NotNull String elementTypesHolder) {
     for (int count = 0, line = 0, size = tokenTypes.size(); count < size; count++) {
       boolean newLine = line == 0 && count == 2 || line > 0 && (count - 2) % 6 == 0;
       newLine &= (size - count) > 2;
@@ -643,7 +647,7 @@ public class ParserGeneratorUtil {
       String type = substitutor.fun(paramsTypes.get(i));
       String name = paramsTypes.get(i + 1);
       String rawType = JavaNameShortener.getRawClassName(type);
-      if (rawType.endsWith(BnfConstants.AST_NODE_CLASS)) name = "node";
+      if (rawType.endsWith(JavaBnfConstants.AST_NODE_CLASS)) name = "node";
       if (rawType.endsWith("ElementType")) name = "type";
       if (rawType.endsWith("Stub")) name = "stub";
       if ((mask & 1) == 1) {

@@ -13,7 +13,7 @@ import org.intellij.grammar.config.Options;
 import org.intellij.lang.regexp.RegExpLanguage;
 import org.jetbrains.annotations.NotNull;
 
-import static org.intellij.grammar.generator.BnfConstants.REGEXP_PREFIX;
+import static org.intellij.grammar.generator.CommonBnfConstants.REGEXP_PREFIX;
 
 /**
  * @author gregsh

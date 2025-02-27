@@ -8,24 +8,23 @@ import com.intellij.lang.documentation.DocumentationProvider;
 import com.intellij.openapi.util.Comparing;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiManager;
 import com.intellij.psi.PsiNamedElement;
 import com.intellij.psi.impl.source.tree.LeafPsiElement;
 import com.intellij.ui.ColorUtil;
 import com.intellij.ui.JBColor;
 import com.intellij.util.ArrayUtil;
 import org.intellij.grammar.analysis.BnfFirstNextAnalyzer;
-import org.intellij.grammar.generator.BnfConstants;
-import org.intellij.grammar.generator.ExpressionHelper;
-import org.intellij.grammar.generator.ParserGeneratorUtil;
-import org.intellij.grammar.generator.RuleGraphHelper;
+import org.intellij.grammar.generator.*;
 import org.intellij.grammar.psi.BnfAttr;
 import org.intellij.grammar.psi.BnfExpression;
 import org.intellij.grammar.psi.BnfFile;
 import org.intellij.grammar.psi.BnfRule;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * @author gregsh
@@ -34,8 +33,7 @@ final class BnfDocumentationProvider implements DocumentationProvider {
 
   @Override
   public @Nullable String generateDoc(PsiElement element, PsiElement originalElement) {
-    if (element instanceof BnfRule) {
-      BnfRule rule = (BnfRule)element;
+    if (element instanceof BnfRule rule) {
       BnfFirstNextAnalyzer analyzer = BnfFirstNextAnalyzer.createAnalyzer(false);
       Set<String> first = BnfFirstNextAnalyzer.asStrings(analyzer.calcFirst(rule));
       Set<String> next = BnfFirstNextAnalyzer.asStrings(analyzer.calcNext(rule).keySet());
@@ -53,7 +51,7 @@ final class BnfDocumentationProvider implements DocumentationProvider {
 
       BnfFile file = (BnfFile)rule.getContainingFile();
       String recover = file.findAttributeValue(rule, KnownAttribute.RECOVER_WHILE, null);
-      if (BnfConstants.RECOVER_AUTO.equals(recover)) {
+      if (CommonBnfConstants.RECOVER_AUTO.equals(recover)) {
         docBuilder.append("<br><h1>#auto recovery predicate:</h1>");
         docBuilder.append("<code>");
         docBuilder.append("private ").append(rule.getName()).append("_recover ::= !(");
@@ -61,8 +59,12 @@ final class BnfDocumentationProvider implements DocumentationProvider {
         for (String s : nextS) {
           if (s.startsWith("-") || s.startsWith("<")) continue;
           if (file.getRule(s) != null) continue;
-          if (f) f = false;
-          else docBuilder.append(" | ");
+          if (f) {
+            f = false;
+          }
+          else {
+            docBuilder.append(" | ");
+          }
           docBuilder.append(StringUtil.escapeXmlEntities(s));
         }
         docBuilder.append(")");
@@ -88,13 +90,13 @@ final class BnfDocumentationProvider implements DocumentationProvider {
       docBuilder.append("\n<br><h1>Contains no public rules and no tokens</h1>");
     }
     else {
-      if (sortedPublicRules.size() > 0) {
+      if (!sortedPublicRules.isEmpty()) {
         printElements(map, sortedPublicRules, docBuilder.append("\n<br><h1>Contains public rules:</h1>"));
       }
       else {
         docBuilder.append("<h2>Contains no public rules</h2>");
       }
-      if (sortedTokens.size() > 0) {
+      if (!sortedTokens.isEmpty()) {
         printElements(map, sortedTokens, docBuilder.append("\n<br><h1>Contains tokens:</h1>"));
       }
       else {
@@ -107,9 +109,9 @@ final class BnfDocumentationProvider implements DocumentationProvider {
   }
 
   private static void dumpPriorityTable(StringBuilder docBuilder, BnfRule rule, BnfFile file) {
-    ExpressionHelper.ExpressionInfo expressionInfo = ExpressionHelper.getCached(file).getExpressionInfo(rule);
+    ExpressionInfo expressionInfo = ExpressionHelper.getCached(file).getExpressionInfo(rule);
     if (expressionInfo == null) return;
-    ExpressionHelper.OperatorInfo ruleOperator = expressionInfo.operatorMap.get(rule);
+    OperatorInfo ruleOperator = expressionInfo.operatorMap.get(rule);
     int priority = expressionInfo.getPriority(rule);
 
     docBuilder.append("\n<br><h1>Priority table:");
@@ -123,7 +125,6 @@ final class BnfDocumentationProvider implements DocumentationProvider {
       else {
         sb.append(operatorInfo);
       }
-
     }).append("</pre></code>");
   }
 

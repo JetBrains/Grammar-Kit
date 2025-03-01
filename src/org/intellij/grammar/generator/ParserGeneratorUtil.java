@@ -923,6 +923,10 @@ public class ParserGeneratorUtil {
     return "static " + fqn + ".*";
   }
 
+  static @NotNull String staticImport(@NotNull String fqn) {
+    return "static " + fqn;
+  }
+
   private static final Hash.Strategy<PsiElement> TEXT_STRATEGY = new Hash.Strategy<>() {
     @Override
     public int hashCode(PsiElement e) {

@@ -4,7 +4,6 @@ import com.intellij.openapi.util.io.FileUtil;
 import com.intellij.openapi.util.io.FileUtilRt;
 import com.intellij.openapi.vfs.CharsetToolkit;
 import com.intellij.psi.PsiFile;
-import org.intellij.grammar.generator.GeneratorBase;
 import org.intellij.grammar.generator.ParserGenerator;
 import org.intellij.grammar.psi.BnfFile;
 import org.jetbrains.annotations.NonNls;
@@ -12,6 +11,8 @@ import org.jetbrains.annotations.NonNls;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
+
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author gregsh
@@ -22,10 +23,9 @@ public abstract class BnfGeneratorAbstractTest extends BnfGeneratorTestCase {
     super(s);
   }
 
-  protected List<GeneratorBase> newTestGenerator() {
-    var list = new ArrayList<GeneratorBase>();
+  protected ParserGenerator newTestGenerator() {
     var bnfFile = (BnfFile)myFile;
-   list.add((new ParserGenerator(bnfFile, "", myFullDataPath, "") {
+    return new ParserGenerator(bnfFile, "", myFullDataPath, "") {
       @Override
       protected PrintWriter openOutputInner(String className, File file) throws IOException {
         String grammarName = FileUtil.getNameWithoutExtension(this.myFile.getName());
@@ -38,8 +38,7 @@ public abstract class BnfGeneratorAbstractTest extends BnfGeneratorTestCase {
         out.println("// ---- " + file.getName() + " -----------------");
         return out;
       }
-    }));
-   return list;
+    };
   }
 
   @Override
@@ -64,20 +63,13 @@ public abstract class BnfGeneratorAbstractTest extends BnfGeneratorTestCase {
       }
     }
 
-    for (GeneratorBase generator : newTestGenerator()) {
-      if (generator instanceof ParserGenerator parserGenerator) {
-        if (generatePsi) {
-          parserGenerator.generate();
-        }
-        else {
-          parserGenerator.generateParser();
-        }
-      }
-      else {
-        generator.generate();
-      }
+    var generator = newTestGenerator();
+    if (generatePsi) {
+      generator.generate();
     }
-
+    else {
+      generator.generateParser();
+    }
 
     for (File file : filesToCheck) {
       assertTrue("Generated file not found: " + file, file.exists());

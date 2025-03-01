@@ -10,7 +10,7 @@ import org.intellij.grammar.syntax.SyntaxConstants;
 
 public class IntelliJPlatformConstants {
   public final String PsiBuilderClass;
-  public final String IElementTypeClass;
+  public final String ParserElementTypeClass;
   public final String ElementTypeBaseClass;
   public final String PsiElementClass;
   public final String AstNodeClass;
@@ -18,6 +18,7 @@ public class IntelliJPlatformConstants {
   public final String LightPsiParserClass;
   public final String TokenSetClass;
   public final String ParserNodeSetClass;
+  public final String ParserOutputType;
 
   private IntelliJPlatformConstants(String builder,
                                     String iElementTypeClass,
@@ -27,9 +28,10 @@ public class IntelliJPlatformConstants {
                                     String psiParserClass,
                                     String lightPsiParserClass,
                                     String tokenSetClass,
-                                    String parserNodeSetClass) {
+                                    String parserNodeSetClass,
+                                    String parserOutputType) {
     PsiBuilderClass = builder;
-    IElementTypeClass = iElementTypeClass;
+    ParserElementTypeClass = iElementTypeClass;
     ElementTypeBaseClass = elementTypeBaseClass;
     PsiElementClass = psiElementClass;
     AstNodeClass = astNodeClass;
@@ -37,6 +39,7 @@ public class IntelliJPlatformConstants {
     LightPsiParserClass = lightPsiParserClass;
     TokenSetClass = tokenSetClass;
     ParserNodeSetClass = parserNodeSetClass;
+    ParserOutputType = parserOutputType;
   }
 
   private IntelliJPlatformConstants(String builder,
@@ -47,7 +50,7 @@ public class IntelliJPlatformConstants {
                                     String lightPsiParserClass,
                                     String tokenSetClass) {
     PsiBuilderClass = builder;
-    IElementTypeClass = iElementTypeClass;
+    ParserElementTypeClass = iElementTypeClass;
     ElementTypeBaseClass = iElementTypeClass;
     PsiElementClass = psiElementClass;
     AstNodeClass = astNodeClass;
@@ -55,6 +58,7 @@ public class IntelliJPlatformConstants {
     LightPsiParserClass = lightPsiParserClass;
     TokenSetClass = tokenSetClass;
     ParserNodeSetClass = tokenSetClass;
+    ParserOutputType = astNodeClass;
   }
 
   public static final IntelliJPlatformConstants IdeaConstantSet =
@@ -67,7 +71,7 @@ public class IntelliJPlatformConstants {
                                   BnfConstants.TOKEN_SET_CLASS);
 
   public static final IntelliJPlatformConstants SyntaxConstantSet =
-    new IntelliJPlatformConstants(SyntaxConstants.SYNTAX_BUILDER_CLASS,
+    new IntelliJPlatformConstants(SyntaxConstants.RUNTIME_CLASS,
                                   SyntaxConstants.SYNTAX_ELEMENT_TYPE,
                                   BnfConstants.IELEMENTTYPE_CLASS,
                                   BnfConstants.PSI_ELEMENT_CLASS,
@@ -75,7 +79,8 @@ public class IntelliJPlatformConstants {
                                   BnfConstants.PSI_PARSER_CLASS,
                                   BnfConstants.LIGHT_PSI_PARSER_CLASS,
                                   BnfConstants.TOKEN_SET_CLASS,
-                                  SyntaxConstants.TOKEN_SET_CLASS);
+                                  SyntaxConstants.TOKEN_SET_CLASS,
+                                  SyntaxConstants.PRODUCTION_RESULT);
 
   public static IntelliJPlatformConstants getConstantSetForBnf(BnfFile file) {
     return (Boolean.TRUE.equals(file.getUserData(SyntaxBnfAttributePostProcessor.GENERATE_WITH_SYNTAX))) ? SyntaxConstantSet : IdeaConstantSet;

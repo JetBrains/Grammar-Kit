@@ -71,6 +71,10 @@ public class KnownAttribute<T> {
   public static final KnownAttribute<ListValue>    HOOKS                     = create(false, ListValue.class, "hooks", EMPTY_LIST);
   public static final KnownAttribute<ListValue>    TOKENS                    = create(true, ListValue.class, "tokens", EMPTY_LIST);
 
+  //Syntax api
+  public static final KnownAttribute<String> SYNTAX_ELEMENT_TYPE_HOLDER_CLASS = create(true, String.class, "syntaxElementTypeHolderClass", "generated.GeneratedSyntaxElementTypes");
+  public static final KnownAttribute<String> SYNTAX_ELEMENT_TYPE_CONVERTER    = create(true, String.class, "syntaxElementTypeConverterClass", "generated.GeneratedSyntaxElementTypeConverter");
+
   private final boolean myGlobal;
   private final String myName;
   private final Class<T> myClazz;

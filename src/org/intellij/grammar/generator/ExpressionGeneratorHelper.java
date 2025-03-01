@@ -34,7 +34,7 @@ public class ExpressionGeneratorHelper {
       OperatorInfo operator = info.operatorMap.get(rule);
       String opCall = g.generateNodeCall(
         info.rootRule, operator.operator, getNextName(getFuncName(operator.rule), 0), CONSUME_TYPE_OVERRIDE
-      ).render(g.N);
+      ).render();
       opCalls.computeIfAbsent(opCall, k -> new ArrayList<>(2)).add(operator);
     }
     return opCalls;
@@ -72,7 +72,7 @@ public class ExpressionGeneratorHelper {
       if (operators.size() > 1) {
         g.addWarning("only first definition will be used for '" + operator.operator.getText() + "': " + operators);
       }
-      String nodeCall = g.generateNodeCall(operator.rule, null, operator.rule.getName()).render(g.N);
+      String nodeCall = g.generateNodeCall(operator.rule, null, operator.rule.getName()).render();
       g.out("%s%s = %s;", first ? "" : format("if (!%s) ", g.N.result), g.N.result, nodeCall);
       first = false;
     }
@@ -113,7 +113,7 @@ public class ExpressionGeneratorHelper {
       boolean rightAssociative = getAttribute(operator.rule, KnownAttribute.RIGHT_ASSOCIATIVE);
       String tailCall = operator.tail == null ? null : g.generateNodeCall(
         operator.rule, operator.tail, getNextName(getFuncName(operator.rule), 1), ConsumeType.DEFAULT
-      ).render(g.N);
+      ).render();
       if (operator.type == OperatorType.BINARY) {
         String argCall = format("%s(%s, %s, %d)", methodName, g.N.builder, g.N.level, rightAssociative ? argPriority - 1 : argPriority);
         g.out("%s = %s;", g.N.result, tailCall == null ? argCall : format("report_error_(%s, %s)", g.N.builder, argCall));
@@ -176,7 +176,7 @@ public class ExpressionGeneratorHelper {
           String elementType = g.getElementType(operator.rule);
           String tailCall = operator.tail == null ? null : g.generateNodeCall(
             operator.rule, operator.tail, getNextName(getFuncName(operator.rule), 1), ConsumeType.DEFAULT
-          ).render(g.N);
+          ).render();
 
           g.out("%s = %s;", g.N.result, opCall);
           g.out("%s = %s;", g.N.pinned, g.N.result);

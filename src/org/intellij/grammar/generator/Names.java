@@ -16,42 +16,47 @@ class Names {
   public final String marker;
   public final String pinned;
   public final String result;
+  public final String parse;
   public final String pos;
   public final String root;
   public final String priority;
   public final String metaParamPrefix;
   public final String psiLocal = "p";
+  public final String runtime;
 
   private Names(String builder,
                 String level,
                 String marker,
                 String pinned,
-                String result,
+                String result, String parse,
                 String pos,
                 String root,
                 String priority,
+                String runtime,
                 String metaParamPrefix) {
     this.builder = builder;
     this.level = level;
     this.marker = marker;
     this.pinned = pinned;
     this.result = result;
+    this.parse = parse;
     this.pos = pos;
     this.root = root;
     this.priority = priority;
+    this.runtime = runtime;
     this.metaParamPrefix = metaParamPrefix;
   }
 
   public static Names classicNames() {
-    return new Names("builder_", "level_", "marker_", "pinned_", "result_", "pos_", "root_", "priority_", "");
+    return new Names("builder_", "level_", "marker_", "pinned_", "result_", "parse_", "pos_", "root_", "priority_", "runtime_", "");
   }
 
   public static Names longNames() {
-    return new Names("builder", "level", "marker", "pinned", "result", "pos", "type", "priority", "a");
+    return new Names("builder", "level", "marker", "pinned", "result", "parse", "pos", "type", "priority", "runtime", "a");
   }
 
   public static Names shortNames() {
-    return new Names("b", "l", "m", "p", "r", "c", "t", "g", "_");
+    return new Names("b", "l", "m", "p", "r", "f", "c", "t", "g", "s", "_");
   }
 
   public static @NotNull Names forName(String name) {

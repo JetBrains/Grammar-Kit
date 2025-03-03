@@ -5,11 +5,11 @@ package org.intellij.jflex.parser
 import com.intellij.platform.syntax.parser.SyntaxTreeBuilder
 import com.intellij.platform.syntax.parser.SyntaxTreeBuilder.Marker
 import org.intellij.jflex.psi.JFlexTypes
-import com.intellij.platform.syntax.util.SyntaxGeneratedParserRuntimeBase
 import com.intellij.platform.syntax.SyntaxElementType
+import com.intellij.platform.syntax.util.SyntaxGeneratedParserRuntimeBase
 
 @Suppress("unused", "FunctionName", "JoinDeclarationAndAssignment")
-open class JFlexParser {
+open class JFlexParser(protected val runtime: SyntaxGeneratedParserRuntimeBase) {
 
   fun parse(type: SyntaxElementType, builder: SyntaxTreeBuilder) {
     var result: Boolean

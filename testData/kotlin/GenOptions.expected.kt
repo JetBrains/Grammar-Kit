@@ -1,10 +1,9 @@
 // ---- GenOptions.kt -----------------
 // This is a generated file. Not intended for manual editing.
 import generated.GeneratedTypes
-import com.intellij.platform.syntax.util.SyntaxGeneratedParserRuntimeBase
 
 @kotlin.Suppress("unused", "FunctionName", "JoinDeclarationAndAssignment")
-open class GenOptions {
+open class GenOptions(protected val runtime_: com.intellij.platform.syntax.util.SyntaxGeneratedParserRuntimeBase) {
 
   fun parse(root_: com.intellij.platform.syntax.SyntaxElementType, builder_: com.intellij.platform.syntax.parser.SyntaxTreeBuilder) {
     var result_: Boolean

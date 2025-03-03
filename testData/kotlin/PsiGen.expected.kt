@@ -3,11 +3,11 @@
 import com.intellij.platform.syntax.parser.SyntaxTreeBuilder
 import com.intellij.platform.syntax.parser.SyntaxTreeBuilder.Marker
 import generated.GeneratedTypes
-import com.intellij.platform.syntax.util.SyntaxGeneratedParserRuntimeBase
 import com.intellij.platform.syntax.SyntaxElementType
+import com.intellij.platform.syntax.util.SyntaxGeneratedParserRuntimeBase
 
 @Suppress("unused", "FunctionName", "JoinDeclarationAndAssignment")
-open class PsiGen {
+open class PsiGen(protected val runtime_: SyntaxGeneratedParserRuntimeBase) {
 
   fun parse(root_: SyntaxElementType, builder_: SyntaxTreeBuilder) {
     var result_: Boolean
@@ -335,8 +335,6 @@ open class PsiGen {
 import com.intellij.platform.syntax.parser.SyntaxTreeBuilder
 import com.intellij.platform.syntax.parser.SyntaxTreeBuilder.Marker
 import generated.GeneratedTypes
-import com.intellij.platform.syntax.util.SyntaxGeneratedParserRuntimeBase
-import PsiGen.*
 
 @Suppress("unused", "FunctionName", "JoinDeclarationAndAssignment")
 open class PsiGen2 {
@@ -557,8 +555,6 @@ open class PsiGen2 {
 import com.intellij.platform.syntax.parser.SyntaxTreeBuilder
 import com.intellij.platform.syntax.parser.SyntaxTreeBuilder.Marker
 import generated.GeneratedTypes
-import com.intellij.platform.syntax.util.SyntaxGeneratedParserRuntimeBase
-import PsiGen.*
 
 @Suppress("unused", "FunctionName", "JoinDeclarationAndAssignment")
 open class PsiGenFixes {

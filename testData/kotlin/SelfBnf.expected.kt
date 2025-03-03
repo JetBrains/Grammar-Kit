@@ -5,11 +5,11 @@ package org.intellij.grammar.parser
 import com.intellij.platform.syntax.parser.SyntaxTreeBuilder
 import com.intellij.platform.syntax.parser.SyntaxTreeBuilder.Marker
 import org.intellij.grammar.psi.BnfTypes
-import com.intellij.platform.syntax.util.SyntaxGeneratedParserRuntimeBase
 import com.intellij.platform.syntax.SyntaxElementType
+import com.intellij.platform.syntax.util.SyntaxGeneratedParserRuntimeBase
 
 @Suppress("unused", "FunctionName", "JoinDeclarationAndAssignment")
-open class GrammarParser {
+open class GrammarParser(protected val runtime: SyntaxGeneratedParserRuntimeBase) {
 
   fun parse(type: SyntaxElementType, builder: SyntaxTreeBuilder) {
     var result: Boolean

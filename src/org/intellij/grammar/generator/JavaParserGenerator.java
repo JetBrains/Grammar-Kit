@@ -59,13 +59,13 @@ import static org.intellij.grammar.psi.BnfTypes.*;
  * @author gregory
  * Date 16.07.11 10:41
  */
-public class JavaParserGenerator extends Generator {
+public final class JavaParserGenerator extends Generator {
   public static final Logger LOG = Logger.getInstance(JavaParserGenerator.class);
-  protected final String myParserUtilClass;
-  protected final String myPsiImplUtilClass;
-  protected final String myVisitorClassName;
-  protected final String myTypeHolderClass;
-  protected final IntelliJPlatformConstants C;
+  private final String myParserUtilClass;
+  private final String myPsiImplUtilClass;
+  private final String myVisitorClassName;
+  private final String myTypeHolderClass;
+  final IntelliJPlatformConstants C;
   final Names N;
   /**
    * Name format used for the generated PSI interfaces.
@@ -418,7 +418,7 @@ public class JavaParserGenerator extends Generator {
     out("}");
   }
 
-  protected void generateClassHeader(String className, Set<String> imports, String annos, TypeKind typeKind, String... supers) {
+  private void generateClassHeader(String className, Set<String> imports, String annos, TypeKind typeKind, String... supers) {
     generateFileHeader(className);
     String packageName = getPackageName(className);
     String shortClassName = StringUtil.getShortName(className);
@@ -668,7 +668,7 @@ public class JavaParserGenerator extends Generator {
     return result;
   }
 
-  protected @NotNull Set<String> collectClasses(Set<String> imports, String packageName) {
+  private @NotNull Set<String> collectClasses(Set<String> imports, String packageName) {
     Set<String> includedPackages = JBIterable.from(imports)
       .filter(o -> !o.startsWith("static") && o.endsWith(".*"))
       .map(o -> StringUtil.trimEnd(o, ".*"))
@@ -682,7 +682,7 @@ public class JavaParserGenerator extends Generator {
   }
 
   @NotNull
-  protected String getPackageName(String className) {
+  private String getPackageName(String className) {
     return StringUtil.getPackageName(className);
   }
 
@@ -1547,7 +1547,7 @@ public class JavaParserGenerator extends Generator {
     out("}");
   }
 
-  protected static boolean useFactory(String factory) {
+  private static boolean useFactory(String factory) {
     return factory != null;
   }
 

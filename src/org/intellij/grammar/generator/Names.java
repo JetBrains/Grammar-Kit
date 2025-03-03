@@ -5,32 +5,35 @@
 package org.intellij.grammar.generator;
 
 import com.intellij.openapi.application.ApplicationManager;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 /**
  * @author greg
  */
 public class Names {
-  public final String builder;
-  public final String level;
-  public final String marker;
-  public final String pinned;
-  public final String result;
-  public final String pos;
-  public final String root;
-  public final String priority;
-  public final String metaParamPrefix;
-  public final String psiLocal = "p";
+  public final @NotNull String builder;
+  public final @NotNull String level;
+  public final @NotNull String marker;
+  public final @NotNull String pinned;
+  public final @NotNull String result;
+  public final @NotNull String pos;
+  public final @NotNull String root;
+  public final @NotNull String priority;
+  public final @NotNull String metaParamPrefix;
+  public final @NotNull String psiLocal = "p";
+  public final @NotNull String runtime;
 
-  private Names(String builder,
-                String level,
-                String marker,
-                String pinned,
-                String result,
-                String pos,
-                String root,
-                String priority,
-                String metaParamPrefix) {
+  private Names(@NotNull String builder,
+                @NotNull String level,
+                @NotNull String marker,
+                @NotNull String pinned,
+                @NotNull String result,
+                @NotNull String pos,
+                @NotNull String root,
+                @NotNull String priority,
+                @NotNull String metaParamPrefix,
+                @NotNull String runtime) {
     this.builder = builder;
     this.level = level;
     this.marker = marker;
@@ -40,18 +43,53 @@ public class Names {
     this.root = root;
     this.priority = priority;
     this.metaParamPrefix = metaParamPrefix;
+    this.runtime = runtime;
   }
 
-  public static Names classicNames() {
-    return new Names("builder_", "level_", "marker_", "pinned_", "result_", "pos_", "root_", "priority_", "");
+  @Contract(value = " -> new", pure = true)
+  public static @NotNull Names classicNames() {
+    return new Names(
+      "builder_",
+      "level_",
+      "marker_",
+      "pinned_",
+      "result_",
+      "pos_",
+      "root_",
+      "priority_",
+      "",
+      "runtime_"
+    );
   }
 
   public static Names longNames() {
-    return new Names("builder", "level", "marker", "pinned", "result", "pos", "type", "priority", "a");
+    return new Names(
+      "builder",
+      "level",
+      "marker",
+      "pinned",
+      "result",
+      "pos",
+      "type",
+      "priority",
+      "a",
+      "runtime"
+    );
   }
 
   public static Names shortNames() {
-    return new Names("b", "l", "m", "p", "r", "c", "t", "g", "_");
+    return new Names(
+      "b",
+      "l",
+      "m",
+      "p",
+      "r",
+      "c",
+      "t",
+      "g",
+      "_",
+      "rt"
+    );
   }
 
   public static @NotNull Names forName(String name) {

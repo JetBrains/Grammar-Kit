@@ -3,13 +3,13 @@
 import com.intellij.platform.syntax.parser.SyntaxTreeBuilder
 import com.intellij.platform.syntax.parser.SyntaxTreeBuilder.Marker
 import generated.GeneratedTypes
-import com.intellij.platform.syntax.util.SyntaxGeneratedParserRuntimeBase
 import com.intellij.platform.syntax.SyntaxElementType
+import com.intellij.platform.syntax.util.SyntaxGeneratedParserRuntimeBase
 import java.util.List
 import java.util.Map
 
 @Suppress("unused", "FunctionName", "JoinDeclarationAndAssignment")
-open class Small {
+open class Small(protected val runtime_: SyntaxGeneratedParserRuntimeBase) {
 
   fun parse(root_: SyntaxElementType, builder_: SyntaxTreeBuilder) {
     var result_: Boolean

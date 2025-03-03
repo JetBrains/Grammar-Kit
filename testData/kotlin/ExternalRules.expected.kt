@@ -3,11 +3,11 @@
 import com.intellij.platform.syntax.parser.SyntaxTreeBuilder
 import com.intellij.platform.syntax.parser.SyntaxTreeBuilder.Marker
 import generated.GeneratedTypes
-import com.intellij.platform.syntax.util.SyntaxGeneratedParserRuntimeBase
 import com.intellij.platform.syntax.SyntaxElementType
+import com.intellij.platform.syntax.util.SyntaxGeneratedParserRuntimeBase
 
 @Suppress("unused", "FunctionName", "JoinDeclarationAndAssignment")
-open class ExternalRules {
+open class ExternalRules(protected val runtime_: SyntaxGeneratedParserRuntimeBase) {
 
   fun parse(root_: SyntaxElementType, builder_: SyntaxTreeBuilder) {
     var result_: Boolean
@@ -788,8 +788,6 @@ open class ExternalRules {
 import com.intellij.platform.syntax.parser.SyntaxTreeBuilder
 import com.intellij.platform.syntax.parser.SyntaxTreeBuilder.Marker
 import generated.GeneratedTypes
-import com.intellij.platform.syntax.util.SyntaxGeneratedParserRuntimeBase
-import ExternalRules.*
 
 @Suppress("unused", "FunctionName", "JoinDeclarationAndAssignment")
 open class ExternalRules2 {
@@ -805,7 +803,7 @@ open class ExternalRules2 {
     /* ********************************************************** */
     // <<comma_list <<main_class_meta some>>>>
     internal fun main_class_meta_usage_from_second(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
-      return comma_list(builder_, level_ + 1, main_class_meta_usage_from_second_0_0_parser_)
+      return ExternalRules.comma_list(builder_, level_ + 1, main_class_meta_usage_from_second_0_0_parser_)
     }
 
     /* ********************************************************** */
@@ -843,10 +841,10 @@ open class ExternalRules2 {
     /* ********************************************************** */
     // <<comma_list <<third_class_meta some>>>>
     internal fun third_class_meta_usage_from_second(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
-      return comma_list(builder_, level_ + 1, third_class_meta_usage_from_second_0_0_parser_)
+      return ExternalRules.comma_list(builder_, level_ + 1, third_class_meta_usage_from_second_0_0_parser_)
     }
 
-    private val main_class_meta_usage_from_second_0_0_parser_: Parser = `main_class_meta_$`(ExternalRules.SOME_parser_)
+    private val main_class_meta_usage_from_second_0_0_parser_: Parser = ExternalRules.`main_class_meta_$`(ExternalRules.SOME_parser_)
     private val third_class_meta_usage_from_second_0_0_parser_: Parser = ExternalRules3.`third_class_meta_$`(ExternalRules.SOME_parser_)
   }
 }
@@ -855,8 +853,6 @@ open class ExternalRules2 {
 import com.intellij.platform.syntax.parser.SyntaxTreeBuilder
 import com.intellij.platform.syntax.parser.SyntaxTreeBuilder.Marker
 import generated.GeneratedTypes
-import com.intellij.platform.syntax.util.SyntaxGeneratedParserRuntimeBase
-import ExternalRules.*
 
 @Suppress("unused", "FunctionName", "JoinDeclarationAndAssignment")
 open class ExternalRules3 {
@@ -865,7 +861,7 @@ open class ExternalRules3 {
     /* ********************************************************** */
     // <<comma_list <<second_class_meta some>>>>
     internal fun second_class_meta_usage_from_third(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
-      return comma_list(builder_, level_ + 1, second_class_meta_usage_from_third_0_0_parser_)
+      return ExternalRules.comma_list(builder_, level_ + 1, second_class_meta_usage_from_third_0_0_parser_)
     }
 
     /* ********************************************************** */

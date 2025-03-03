@@ -41,6 +41,9 @@ public interface Renderer {
    */
   @NotNull String getFuncName(@NotNull BnfRule rule);
 
+  /**
+   * Undoes the effect of the {@link Renderer#getFuncName} method.
+   */
   @NotNull String unwrapFuncName(@NotNull String funcName);
 
   @NotNull String getWrapperParserMetaMethodName(@NotNull String nextName);

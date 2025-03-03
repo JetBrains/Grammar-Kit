@@ -25,7 +25,6 @@ import org.intellij.grammar.generator.kotlin.KotlinNameShortener;
 import org.intellij.grammar.generator.kotlin.KotlinPlatformConstants;
 import org.intellij.grammar.generator.kotlin.KotlinRenderer;
 import org.intellij.grammar.java.JavaHelper;
-import org.intellij.grammar.parser.GeneratedParserUtilBase;
 import org.intellij.grammar.parser.GeneratedParserUtilBase.Parser;
 import org.intellij.grammar.psi.*;
 import org.intellij.grammar.psi.impl.GrammarUtil;
@@ -61,22 +60,27 @@ public final class KotlinParserGenerator extends Generator {
   private static final @NotNull String HORIZONTAL_SEPARATOR = "/* ********************************************************** */";
   private final @NotNull KotlinPlatformConstants C;
   private final @NotNull Names N;
-  /**
-   * Name of the class containing runtime parser utilities
-   * (default: {@link GeneratedParserUtilBase}).
-   */
-  private final @NotNull String myParserRuntimeName;
+
   /**
    * Name of the class containing all the generated element types.
    */
   private final @NotNull String myElementTypesHolderName;
   private final @NotNull Map<String, RuleInfo> myRuleInfos = new TreeMap<>();
-  private final @NotNull Map<String, String> myParserLambdas = new HashMap<>();       // field name -> body
-  private final @NotNull Map<String, String> myRenderedLambdas = new HashMap<>();     // field name -> parser class FQN
-  private final @NotNull Set<String> myInlinedChildNodes = new HashSet<>();
+
   /**
-   * All token elements that the generator has deemed necessary to make it
-   * work.
+   * Maps field names to their corresponding parser function bodies.
+   * These functions are generated as lambda fields in the parser implementation.
+   */
+  private final @NotNull Map<String, String> myParserLambdas = new HashMap<>();
+  /**
+   * Maps field names to their corresponding parser class fully qualified names (FQNs).
+   */
+  private final @NotNull Map<String, String> myRenderedLambdas = new HashMap<>();
+  private final @NotNull Set<String> myInlinedChildNodes = new HashSet<>();
+
+  /**
+   * Contains names of all the tokens whose corresponding {@code SyntaxElementType}
+   * definitions were generated.
    */
   private final @NotNull Set<String> myTokensUsedInGrammar = new LinkedHashSet<>();
   /**
@@ -87,7 +91,20 @@ public final class KotlinParserGenerator extends Generator {
    * Mapping: <code> meta field name -> meta method call </code>
    */
   private final Map<String, String> myMetaMethodFields = new HashMap<>();
-  private final Map<String, Collection<String>> myTokenSets = new TreeMap<>();
+
+  /**
+   * Collection of token sets corresponding to each of the token choice
+   * expressions in the grammar.
+   */
+  private final Map<String, Collection<String>> myChoiceTokenSets = new TreeMap<>();
+
+  /**
+   * Contains information regarding all the tokens in the grammar.
+   * The entries are divided into two categories:
+   * 1. Token entries based on the `tokens` attribute in the grammar.
+   *    These entries are *reversed* and map the token text to the token name.
+   * 2.
+   */
   private final Map<String, String> mySimpleTokens;
   private final RuleGraphHelper myGraphHelper;
   private final ExpressionHelper myExpressionHelper;
@@ -107,7 +124,6 @@ public final class KotlinParserGenerator extends Generator {
     C = KotlinPlatformConstants.DEFAULT_CONSTANTS;
 
     // TODO: consider creating kotlin specific attributes for this
-    myParserRuntimeName = KotlinBnfConstants.KT_PARSER_RUNTIME_CLASS;/*getRootAttribute(myFile, KnownAttribute.PARSER_UTIL_CLASS);*/
     myElementTypesHolderName = getRootAttribute(myFile, KnownAttribute.ELEMENT_TYPE_HOLDER_CLASS);
 
     mySimpleTokens = new LinkedHashMap<>(RuleGraphHelper.getTokenTextToNameMap(myFile));
@@ -171,11 +187,17 @@ public final class KotlinParserGenerator extends Generator {
                               getRuleInfo(topSuper).intfClass;
       String implSuper = StringUtil.notNullize(info.mixin, superRuleClass);
       String implSuperRaw = getRawClassName(implSuper);
-      String stubName =
-        StringUtil.isNotEmpty(stubClass) ? stubClass :
-        implSuper.indexOf("<") < implSuper.indexOf(">") &&
-        !myJavaHelper.findClassMethods(implSuperRaw, JavaHelper.MethodType.INSTANCE, "getParentByStub", 0).isEmpty() ?
-        implSuper.substring(implSuper.indexOf("<") + 1, implSuper.indexOf(">")) : null;
+      final String stubName;
+      if (StringUtil.isNotEmpty(stubClass)) {
+        stubName = stubClass;
+      }
+      else if (implSuper.indexOf("<") < implSuper.indexOf(">") &&
+               !myJavaHelper.findClassMethods(implSuperRaw, JavaHelper.MethodType.INSTANCE, "getParentByStub", 0).isEmpty()) {
+        stubName = implSuper.substring(implSuper.indexOf("<") + 1, implSuper.indexOf(">"));
+      }
+      else {
+        stubName = null;
+      }
       if (StringUtil.isNotEmpty(stubName)) {
         info.realStubClass = stubClass;
       }
@@ -261,7 +283,17 @@ public final class KotlinParserGenerator extends Generator {
     out("%s(\"unused\", \"FunctionName\", \"JoinDeclarationAndAssignment\")", nameShortener.shorten(KotlinBnfConstants.KT_SUPPRESS_ANNO));
 
     // type header itself
-    out("open class %s {", StringUtil.getShortName(parserClass));
+    if (isRootParser) {
+      out(
+        "open class %s(protected val %s: %s) {",
+        StringUtil.getShortName(parserClass),
+        nameShortener.shorten(N.runtime),
+        nameShortener.shorten(KotlinBnfConstants.KT_PARSER_RUNTIME_CLASS)
+      );
+    }
+    else {
+      out("open class %s {", StringUtil.getShortName(parserClass));
+    }
     newLine();
 
     myShortener = nameShortener;
@@ -414,19 +446,31 @@ public final class KotlinParserGenerator extends Generator {
     boolean canCollapse = !isPrivate && (!isLeft || isLeftInner) && isFirstNonTrivial && myGraphHelper.canCollapse(rule);
 
     String elementType = getElementType(rule);
-    String elementTypeRef = !isPrivate && StringUtil.isNotEmpty(elementType) ? shortElementTypesHolderName() + "." + elementType : null;
+    String elementTypeRef = !isPrivate && StringUtil.isNotEmpty(elementType)
+                            ? shortElementTypesHolderName() + "." + elementType
+                            : null;
 
     boolean isSingleNode =
       node instanceof BnfReferenceOrToken || node instanceof BnfLiteralExpression || node instanceof BnfExternalExpression;
 
     List<BnfExpression> children = isSingleNode ? Collections.singletonList(node) : getChildExpressions(node);
-    String frameName =
-      !children.isEmpty() && isFirstNonTrivial && !Rule.isMeta(rule) ? quote(R.getRuleDisplayName(rule, !isPrivate)) : null;
+    String frameName = !children.isEmpty() && isFirstNonTrivial && !Rule.isMeta(rule)
+                       ? quote(R.getRuleDisplayName(rule, !isPrivate))
+                       : null;
 
     String extraParameters = metaParameters.stream().map(", %s: Parser"::formatted).collect(Collectors.joining());
 
     // the actual method header
-    final var access = !isRule ? "private " : isPrivate ? "internal " : "";
+    final String access;
+    if (!isRule) {
+      access = "private ";
+    }
+    else if (isPrivate) {
+      access = "internal ";
+    }
+    else {
+      access = "";
+    }
     out("%sfun %s(%s: %s, %s: Int%s): Boolean {", access, funcName, N.builder, shorten(C.SyntaxTreeBuilderClass()), N.level,
         extraParameters);
     if (isSingleNode) {
@@ -616,7 +660,10 @@ public final class KotlinParserGenerator extends Generator {
       }
     }
 
-    out("return %s", alwaysTrue ? "true" : N.result + (pinned ? format(" || %s", N.pinned) : ""));
+    final String resultValue = alwaysTrue
+                               ? "true"
+                               : N.result + (pinned ? " || " + N.pinned : "");
+    out("return %s", resultValue);
     out("}");
     generateNodeChildren(rule, funcName, children, visited);
   }
@@ -761,7 +808,7 @@ public final class KotlinParserGenerator extends Generator {
           out("val %s: %s = enter_section_(%s, %s, _NONE_, null)", N.marker, shortMarker, N.builder, N.level);
 
           String elementType = getElementType(operator.rule);
-          String tailCall = operator.tail == null ? null : createNodeCall(
+          String tailCall = (operator.tail == null) ? null : createNodeCall(
             operator.rule, operator.tail, R.getNextName(R.getFuncName(operator.rule), 1), ConsumeType.DEFAULT
           ).render(R, N);
 
@@ -774,7 +821,9 @@ public final class KotlinParserGenerator extends Generator {
           if (tailCall != null) {
             out("%s = %s && report_error_(%s, %s) && %s", N.result, N.pinned, N.builder, tailCall, N.result);
           }
-          String elementTypeRef = StringUtil.isNotEmpty(elementType) ? shortElementTypesHolderName() + "." + elementType : "null";
+          String elementTypeRef = StringUtil.isNotEmpty(elementType)
+                                  ? shortElementTypesHolderName() + "." + elementType
+                                  : "null";
           out("exit_section_(%s, %s, %s, %s, %s, %s, null)", N.builder, N.level, N.marker, elementTypeRef,
               N.result, N.pinned);
           out("return %s || %s", N.result, N.pinned);
@@ -1038,13 +1087,13 @@ public final class KotlinParserGenerator extends Generator {
   }
 
   private void generateTokenSets(@NotNull NameShortener shortener) {
-    if (myTokenSets.isEmpty()) return;
+    if (myChoiceTokenSets.isEmpty()) return;
     newLine();
     Map<String, String> reverseMap = new HashMap<>();
     final var shortSetOf = shortener.shorten(KotlinBnfConstants.KT_SET_OF_FUNCTION);
     final var shortSetClass = shortener.shorten(KotlinBnfConstants.KT_SET_CLASS);
     final var shortElementType = shortener.shorten(KotlinBnfConstants.KT_ELEMENT_TYPE_CLASS);
-    myTokenSets.forEach((name, tokens) -> {
+    myChoiceTokenSets.forEach((name, tokens) -> {
       final var call = "%s(%s)".formatted(shortSetOf, tokenSetString(tokens));
       String alreadyRendered = reverseMap.putIfAbsent(call, name);
       out("val %s: %s<%s> = %s", name, shortSetClass, shortElementType, ObjectUtils.chooseNotNull(alreadyRendered, call));
@@ -1069,14 +1118,12 @@ public final class KotlinParserGenerator extends Generator {
       imports.add("#forced");
     }
     imports.add(myElementTypesHolderName);
-    if (StringUtil.isNotEmpty(myParserRuntimeName)) {
-      imports.add(myParserRuntimeName);
-    }
     if (!isRootParser) {
-      imports.add(starImport(myGrammarRootParser));
+      imports.add(myGrammarRootParser);
     }
     else if (!G.generateFQN) {
       imports.add(KotlinBnfConstants.KT_ELEMENT_TYPE_CLASS);
+      imports.add(KotlinBnfConstants.KT_PARSER_RUNTIME_CLASS);
     }
     imports.addAll(parserImports);
     return imports;
@@ -1222,11 +1269,16 @@ public final class KotlinParserGenerator extends Generator {
     for (int i = startIndex, len = children.size(); i < len; i++) {
       BnfExpression child = children.get(i);
       final var text = child.getText();
-      final var tokenName = child instanceof BnfStringLiteralExpression
-                            ? getTokenName(GrammarUtil.unquote(text))
-                            : child instanceof BnfReferenceOrToken && myFile.getRule(text) == null
-                              ? text
-                              : null;
+      final String tokenName;
+      if (child instanceof BnfStringLiteralExpression) {
+        tokenName = getTokenName(GrammarUtil.unquote(text));
+      }
+      else if (child instanceof BnfReferenceOrToken && myFile.getRule(text) == null) {
+        tokenName = text;
+      }
+      else {
+        tokenName = null;
+      }
       if (tokenName == null) break;
       list.add(shortElementTypesHolderName() + "." + getElementType(tokenName));
       if (!pinApplied && pinMatcher.matches(i, child)) {
@@ -1256,7 +1308,7 @@ public final class KotlinParserGenerator extends Generator {
     }
 
     String tokenSetName = R.getTokenSetConstantName(funcName);
-    myTokenSets.put(tokenSetName, tokens);
+    myChoiceTokenSets.put(tokenSetName, tokens);
     return new ConsumeTokenChoiceCall(consumeType, shortElementTypesHolderName() + "." + tokenSetName);
   }
 
@@ -1343,8 +1395,9 @@ public final class KotlinParserGenerator extends Generator {
     }
     else {
       List<String> extraArguments = collectMetaParametersFormatted(rule, node);
+      final var className = StringUtil.getShortName(getRuleInfo(rule).parserClass);
       if (extraArguments.isEmpty()) {
-        return new MethodCall(false, StringUtil.getShortName(getRuleInfo(rule).parserClass), nextName);
+        return new MethodCall(false, className, nextName);
       }
       else {
         return new MetaMethodCall(null, nextName, map(extraArguments, MetaParameterArgument::new));
@@ -1390,13 +1443,13 @@ public final class KotlinParserGenerator extends Generator {
       }
       else {
         String parserClass = getRuleInfo(targetRule).parserClass;
-        if (!parserClass.equals(myGrammarRootParser) && !parserClass.equals(getRuleInfo(rule).parserClass)) {
+        if (!parserClass.equals(getRuleInfo(rule).parserClass)) {
           targetClassName = StringUtil.getShortName(parserClass);
         }
       }
     }
     method = String.valueOf(method);
-    List<NodeArgument> arguments = new ArrayList<>();
+    final var arguments = new ArrayList<NodeArgument>();
     if (callParameters.size() > 1) {
       for (int i = 1, len = callParameters.size(); i < len; i++) {
         BnfExpression nested = callParameters.get(i);
@@ -1426,7 +1479,7 @@ public final class KotlinParserGenerator extends Generator {
             arguments.add(createWrappedNodeCall(rule, nested, attributeName));
           }
           else {
-            arguments.add(new TextArgument(argument.startsWith("'") ? GrammarUtil.unquote(argument) : argument));
+            arguments.add(new TextArgument(StringUtil.unquoteString(argument, '\'')));
           }
         }
         else if (nested instanceof BnfExternalExpression expression) {
@@ -1443,8 +1496,9 @@ public final class KotlinParserGenerator extends Generator {
         }
       }
     }
-    return Rule.isMeta(targetRule) ? new MetaMethodCall(targetClassName, method, arguments)
-                                   : new MethodCallWithArguments(method, arguments);
+    return Rule.isMeta(targetRule)
+           ? new MetaMethodCall(targetClassName, method, arguments)
+           : new MethodCallWithArguments(method, arguments);
   }
 
   private @NotNull NodeArgument createWrappedNodeCall(@NotNull BnfRule rule, @Nullable BnfExpression nested, @NotNull String nextName) {
@@ -1458,7 +1512,7 @@ public final class KotlinParserGenerator extends Generator {
         return r -> getMetaMethodFieldRef(callArgument.render(r), nextName);
       }
     }
-    else if (nodeCall instanceof MethodCall methodCall && G.javaVersion > 6) {
+    else if (nodeCall instanceof MethodCall methodCall) {
       return r -> format("%s::%s", methodCall.className(), methodCall.methodName());
     }
     else {

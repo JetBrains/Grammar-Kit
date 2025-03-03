@@ -4,11 +4,11 @@ package generated
 
 import com.intellij.platform.syntax.parser.SyntaxTreeBuilder
 import com.intellij.platform.syntax.parser.SyntaxTreeBuilder.Marker
-import com.intellij.platform.syntax.util.SyntaxGeneratedParserRuntimeBase
 import com.intellij.platform.syntax.SyntaxElementType
+import com.intellij.platform.syntax.util.SyntaxGeneratedParserRuntimeBase
 
 @Suppress("unused", "FunctionName", "JoinDeclarationAndAssignment")
-open class TokenChoice {
+open class TokenChoice(protected val runtime_: SyntaxGeneratedParserRuntimeBase) {
 
   fun parse(root_: SyntaxElementType, builder_: SyntaxTreeBuilder) {
     var result_: Boolean
@@ -159,8 +159,6 @@ package generated
 
 import com.intellij.platform.syntax.parser.SyntaxTreeBuilder
 import com.intellij.platform.syntax.parser.SyntaxTreeBuilder.Marker
-import com.intellij.platform.syntax.util.SyntaxGeneratedParserRuntimeBase
-import generated.TokenChoice.*
 
 @Suppress("unused", "FunctionName", "JoinDeclarationAndAssignment")
 open class TokenChoice2 {

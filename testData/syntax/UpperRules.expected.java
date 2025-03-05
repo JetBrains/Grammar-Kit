@@ -2,25 +2,25 @@
 //header.txt
 package generated;
 
-import com.intellij.lang.SyntaxTreeBuilder;
-import com.intellij.lang.SyntaxTreeBuilder.Marker;
+import com.intellij.lang.PsiBuilder;
+import com.intellij.lang.PsiBuilder.Marker;
 import static generated.GeneratedTypes.*;
-import static com.intellij.platform.syntax.SyntaxGeneratedParserUtil.*;
-import com.intellij.platform.syntax.SyntaxElementType;
+import static com.intellij.lang.parser.GeneratedParserUtilBase.*;
+import com.intellij.psi.tree.IElementType;
 import com.intellij.lang.ASTNode;
-import java.util.Set;
+import com.intellij.psi.tree.TokenSet;
 import com.intellij.lang.PsiParser;
 import com.intellij.lang.LightPsiParser;
 
 @SuppressWarnings({"SimplifiableIfStatement", "UnusedAssignment"})
 public class GeneratedParser implements PsiParser, LightPsiParser {
 
-  public ASTNode parse(SyntaxElementType root_, SyntaxTreeBuilder builder_) {
+  public ASTNode parse(IElementType root_, PsiBuilder builder_) {
     parseLight(root_, builder_);
     return builder_.getTreeBuilt();
   }
 
-  public void parseLight(SyntaxElementType root_, SyntaxTreeBuilder builder_) {
+  public void parseLight(IElementType root_, PsiBuilder builder_) {
     boolean result_;
     builder_ = adapt_builder_(root_, builder_, this, EXTENDS_SETS_);
     Marker marker_ = enter_section_(builder_, 0, _COLLAPSE_, null);
@@ -28,21 +28,21 @@ public class GeneratedParser implements PsiParser, LightPsiParser {
     exit_section_(builder_, 0, marker_, root_, result_, true, TRUE_CONDITION);
   }
 
-  protected boolean parse_root_(SyntaxElementType root_, SyntaxTreeBuilder builder_) {
+  protected boolean parse_root_(IElementType root_, PsiBuilder builder_) {
     return parse_root_(root_, builder_, 0);
   }
 
-  static boolean parse_root_(SyntaxElementType root_, SyntaxTreeBuilder builder_, int level_) {
+  static boolean parse_root_(IElementType root_, PsiBuilder builder_, int level_) {
     return file(builder_, level_ + 1);
   }
 
-  public static final Set<SyntaxElementType>[] EXTENDS_SETS_ = new Set<SyntaxElementType>[] {
+  public static final TokenSet[] EXTENDS_SETS_ = new TokenSet[] {
     create_token_set_(ABC, ABC_ONE, ABC_THREE, ABC_TWO),
   };
 
   /* ********************************************************** */
   // abc_three? (abc_one | abc_two | abc_three)
-  public static boolean abc(SyntaxTreeBuilder builder_, int level_) {
+  public static boolean abc(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "abc")) return false;
     boolean result_;
     Marker marker_ = enter_section_(builder_, level_, _COLLAPSE_, ABC, "<abc>");
@@ -53,14 +53,14 @@ public class GeneratedParser implements PsiParser, LightPsiParser {
   }
 
   // abc_three?
-  private static boolean abc_0(SyntaxTreeBuilder builder_, int level_) {
+  private static boolean abc_0(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "abc_0")) return false;
     abc_three(builder_, level_ + 1);
     return true;
   }
 
   // abc_one | abc_two | abc_three
-  private static boolean abc_1(SyntaxTreeBuilder builder_, int level_) {
+  private static boolean abc_1(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "abc_1")) return false;
     boolean result_;
     result_ = abc_one(builder_, level_ + 1);
@@ -71,7 +71,7 @@ public class GeneratedParser implements PsiParser, LightPsiParser {
 
   /* ********************************************************** */
   // just_b X
-  public static boolean abc_one(SyntaxTreeBuilder builder_, int level_) {
+  public static boolean abc_one(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "abc_one")) return false;
     if (!nextTokenIs(builder_, B)) return false;
     boolean result_, pinned_;
@@ -85,7 +85,7 @@ public class GeneratedParser implements PsiParser, LightPsiParser {
 
   /* ********************************************************** */
   // X
-  public static boolean abc_three(SyntaxTreeBuilder builder_, int level_) {
+  public static boolean abc_three(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "abc_three")) return false;
     if (!nextTokenIs(builder_, X)) return false;
     boolean result_;
@@ -97,7 +97,7 @@ public class GeneratedParser implements PsiParser, LightPsiParser {
 
   /* ********************************************************** */
   // C
-  public static boolean abc_two(SyntaxTreeBuilder builder_, int level_) {
+  public static boolean abc_two(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "abc_two")) return false;
     if (!nextTokenIs(builder_, C)) return false;
     boolean result_;
@@ -109,7 +109,7 @@ public class GeneratedParser implements PsiParser, LightPsiParser {
 
   /* ********************************************************** */
   // abc | pinned_seq | plain_seq
-  static boolean content(SyntaxTreeBuilder builder_, int level_) {
+  static boolean content(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "content")) return false;
     boolean result_;
     Marker marker_ = enter_section_(builder_, level_, _NONE_);
@@ -122,7 +122,7 @@ public class GeneratedParser implements PsiParser, LightPsiParser {
 
   /* ********************************************************** */
   // !';'
-  static boolean content_recover(SyntaxTreeBuilder builder_, int level_) {
+  static boolean content_recover(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "content_recover")) return false;
     boolean result_;
     Marker marker_ = enter_section_(builder_, level_, _NOT_);
@@ -133,7 +133,7 @@ public class GeneratedParser implements PsiParser, LightPsiParser {
 
   /* ********************************************************** */
   // (content ';') *
-  static boolean file(SyntaxTreeBuilder builder_, int level_) {
+  static boolean file(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "file")) return false;
     while (true) {
       int pos_ = current_position_(builder_);
@@ -144,7 +144,7 @@ public class GeneratedParser implements PsiParser, LightPsiParser {
   }
 
   // content ';'
-  private static boolean file_0(SyntaxTreeBuilder builder_, int level_) {
+  private static boolean file_0(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "file_0")) return false;
     boolean result_, pinned_;
     Marker marker_ = enter_section_(builder_, level_, _NONE_);
@@ -157,7 +157,7 @@ public class GeneratedParser implements PsiParser, LightPsiParser {
 
   /* ********************************************************** */
   // B
-  public static boolean just_b(SyntaxTreeBuilder builder_, int level_) {
+  public static boolean just_b(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "just_b")) return false;
     if (!nextTokenIs(builder_, B)) return false;
     boolean result_;
@@ -169,7 +169,7 @@ public class GeneratedParser implements PsiParser, LightPsiParser {
 
   /* ********************************************************** */
   // prefix (abc_one | abc_two)
-  public static boolean pinned_seq(SyntaxTreeBuilder builder_, int level_) {
+  public static boolean pinned_seq(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "pinned_seq")) return false;
     if (!nextTokenIs(builder_, A)) return false;
     boolean result_, pinned_;
@@ -182,7 +182,7 @@ public class GeneratedParser implements PsiParser, LightPsiParser {
   }
 
   // abc_one | abc_two
-  private static boolean pinned_seq_1(SyntaxTreeBuilder builder_, int level_) {
+  private static boolean pinned_seq_1(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "pinned_seq_1")) return false;
     boolean result_;
     result_ = abc_one(builder_, level_ + 1);
@@ -192,7 +192,7 @@ public class GeneratedParser implements PsiParser, LightPsiParser {
 
   /* ********************************************************** */
   // prefix abc_one abc_two
-  public static boolean plain_seq(SyntaxTreeBuilder builder_, int level_) {
+  public static boolean plain_seq(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "plain_seq")) return false;
     if (!nextTokenIs(builder_, A)) return false;
     boolean result_;
@@ -206,7 +206,7 @@ public class GeneratedParser implements PsiParser, LightPsiParser {
 
   /* ********************************************************** */
   // A
-  public static boolean prefix(SyntaxTreeBuilder builder_, int level_) {
+  public static boolean prefix(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "prefix")) return false;
     if (!nextTokenIs(builder_, A)) return false;
     boolean result_;

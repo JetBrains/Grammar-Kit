@@ -2,26 +2,26 @@
 //header.txt
 package generated;
 
-import com.intellij.platform.syntax.SyntaxElementType;
+import com.intellij.psi.tree.IElementType;
 import com.intellij.psi.PsiElement;
 import com.intellij.lang.ASTNode;
 import generated.psi.impl.*;
 
 public interface GeneratedTypes {
 
-  SyntaxElementType ABC = new SyntaxElementType("ABC", null);
-  SyntaxElementType ABC_ONE = new SyntaxElementType("ABC_ONE", null);
-  SyntaxElementType ABC_THREE = new SyntaxElementType("ABC_THREE", null);
-  SyntaxElementType ABC_TWO = new SyntaxElementType("ABC_TWO", null);
-  SyntaxElementType JUST_B = new SyntaxElementType("JUST_B", null);
-  SyntaxElementType PINNED_SEQ = new SyntaxElementType("PINNED_SEQ", null);
-  SyntaxElementType PLAIN_SEQ = new SyntaxElementType("PLAIN_SEQ", null);
-  SyntaxElementType PREFIX = new SyntaxElementType("PREFIX", null);
+  IElementType ABC = new IElementType("ABC", null);
+  IElementType ABC_ONE = new IElementType("ABC_ONE", null);
+  IElementType ABC_THREE = new IElementType("ABC_THREE", null);
+  IElementType ABC_TWO = new IElementType("ABC_TWO", null);
+  IElementType JUST_B = new IElementType("JUST_B", null);
+  IElementType PINNED_SEQ = new IElementType("PINNED_SEQ", null);
+  IElementType PLAIN_SEQ = new IElementType("PLAIN_SEQ", null);
+  IElementType PREFIX = new IElementType("PREFIX", null);
 
-  SyntaxElementType A = new SyntaxElementType("A", null);
-  SyntaxElementType B = new SyntaxElementType("B", null);
-  SyntaxElementType C = new SyntaxElementType("C", null);
-  SyntaxElementType X = new SyntaxElementType("X", null);
+  IElementType A = new IElementType("A", null);
+  IElementType B = new IElementType("B", null);
+  IElementType C = new IElementType("C", null);
+  IElementType X = new IElementType("X", null);
 }
 // ---- Abc.java -----------------
 //header.txt

@@ -110,6 +110,18 @@ BnfFile:SelfBnf.bnf
         PsiElement(=)('=')
         BNF_STRING_LITERAL_EXPRESSION: "org.intellij.grammar.psi.BnfTokenType"
           PsiElement(string)('"org.intellij.grammar.psi.BnfTokenType"')
+      PsiWhiteSpace('\n  ')
+      BNF_ATTR:syntaxElementTypeHolderClass
+        PsiElement(id)('syntaxElementTypeHolderClass')
+        PsiElement(=)('=')
+        BNF_STRING_LITERAL_EXPRESSION: "org.intellij.grammar.BnfSyntaxTypes"
+          PsiElement(string)('"org.intellij.grammar.BnfSyntaxTypes"')
+      PsiWhiteSpace('\n  ')
+      BNF_ATTR:syntaxElementTypeConverterClass
+        PsiElement(id)('syntaxElementTypeConverterClass')
+        PsiElement(=)('=')
+        BNF_STRING_LITERAL_EXPRESSION: "org.intellij.grammar.BnfSyntaxElementTypeConverter"
+          PsiElement(string)('"org.intellij.grammar.BnfSyntaxElementTypeConverter"')
       PsiWhiteSpace('\n  \n  ')
       BNF_ATTR:tokens
         PsiElement(id)('tokens')

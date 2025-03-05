@@ -131,7 +131,6 @@ public class ParserGenerator {
   private final String myGrammarRoot;
   private final String myGrammarRootParser;
   private final String myParserUtilClass;
-  private final String myStateHolder;
   private final String myStateHolderClass;
   private final String myPsiImplUtilClass;
   private final String myPsiTreeUtilClass;
@@ -140,7 +139,8 @@ public class ParserGenerator {
   private final NameFormat myImplClassFormat;
 
   private final String myVisitorClassName;
-  private final String myTypeHolderClass;
+  private final String myParserTypeHolderClass;
+  private final String myPsiElementTypeHolderClass;
 
 
   private int myOffset;
@@ -167,7 +167,7 @@ public class ParserGenerator {
     myPackagePrefix = packagePrefix;
 
     myGenerateWithSyntax = psiFile.getUserData(SyntaxBnfAttributePostProcessor.GENERATE_WITH_SYNTAX) == Boolean.TRUE;
-    G = new GenOptions(myFile);
+    G = new GenOptions(myFile, myGenerateWithSyntax);
     N = G.names;
 
     myIntfClassFormat = getPsiClassFormat(myFile);
@@ -181,11 +181,11 @@ public class ParserGenerator {
                       myIntfClassFormat.apply("") + tmpVisitorClass;
     myVisitorClassName = tmpVisitorClass == null || !tmpVisitorClass.equals(StringUtil.getShortName(tmpVisitorClass)) ?
                          tmpVisitorClass : getRootAttribute(myFile, KnownAttribute.PSI_PACKAGE) + "." + tmpVisitorClass;
-    myTypeHolderClass = (myGenerateWithSyntax) ? getRootAttribute(myFile, KnownAttribute.SYNTAX_ELEMENT_TYPE_HOLDER_CLASS) :
-                        getRootAttribute(myFile, KnownAttribute.ELEMENT_TYPE_HOLDER_CLASS);
+    myParserTypeHolderClass = (myGenerateWithSyntax) ? getRootAttribute(myFile, KnownAttribute.SYNTAX_ELEMENT_TYPE_HOLDER_CLASS)
+                                                     : getRootAttribute(myFile, KnownAttribute.ELEMENT_TYPE_HOLDER_CLASS);
+    myPsiElementTypeHolderClass = getRootAttribute(myFile, KnownAttribute.ELEMENT_TYPE_HOLDER_CLASS);
 
     C = IntelliJPlatformConstants.getConstantSetForBnf(myFile);
-    myStateHolder = (myGenerateWithSyntax) ? N.runtime : N.builder;
     myStateHolderClass = (myGenerateWithSyntax) ? SyntaxConstants.RUNTIME_CLASS : C.PsiBuilderClass;
 
     mySimpleTokens = new LinkedHashMap<>(getTokenTextToNameMap(myFile));
@@ -405,12 +405,13 @@ public class ParserGenerator {
       calcRealSuperClasses(sortedPsiRules);
     }
     if (myGrammarRoot != null && (G.generateTokenTypes || G.generateElementTypes || G.generatePsi && G.generatePsiFactory)) {
-      openOutput(myTypeHolderClass);
+      openOutput(myPsiElementTypeHolderClass);
       try {
-        generateElementTypesHolder(myTypeHolderClass,
+        generateElementTypesHolder(myPsiElementTypeHolderClass,
                                    sortedCompositeTypes,
                                    getRootAttribute(myFile, KnownAttribute.TOKEN_TYPE_FACTORY),
                                    C.ElementTypeBaseClass,
+                                   C.TokenSetClass,
                                    G.generatePsi,
                                    false);
       }
@@ -418,13 +419,13 @@ public class ParserGenerator {
         closeOutput();
       }
       if (myGenerateWithSyntax) {
-        var syntaxElementTypeHolderClass = getRootAttribute(myFile, KnownAttribute.SYNTAX_ELEMENT_TYPE_HOLDER_CLASS);
-        openOutput(syntaxElementTypeHolderClass);
+        openOutput(myParserTypeHolderClass);
         try {
-          generateElementTypesHolder(syntaxElementTypeHolderClass,
+          generateElementTypesHolder(myParserTypeHolderClass,
                                      sortedCompositeTypes,
                                      null,
                                      SyntaxConstants.SYNTAX_ELEMENT_TYPE,
+                                     C.ParserNodeSetClass,
                                      false,
                                      true);
         }
@@ -436,7 +437,7 @@ public class ParserGenerator {
         try {
           generateElementTypesConverter(converterClass,
                                         getRootAttribute(myFile, KnownAttribute.ELEMENT_TYPE_HOLDER_CLASS),
-                                        syntaxElementTypeHolderClass,
+                                        myParserTypeHolderClass,
                                         sortedCompositeTypes);
         }
         finally {
@@ -589,17 +590,19 @@ public class ParserGenerator {
     Set<String> imports = new LinkedHashSet<>();
     if (!G.generateFQN) {
       imports.add(C.PsiBuilderClass);
-      if (!myGenerateWithSyntax)
+      if (!myGenerateWithSyntax) {
         imports.add(PSI_BUILDER_CLASS + ".Marker");
-      else
+      }
+      else {
         imports.add(SyntaxConstants.SYNTAX_BUILDER_CLASS + ".Marker");
+      }
     }
     else {
       imports.add("#forced");
     }
-     imports.add(staticStarImport(myTypeHolderClass));
+     imports.add(staticStarImport(myParserTypeHolderClass));
     if (G.generateTokenSets && hasAtLeastOneTokenChoice(myFile, ownRuleNames)) {
-      imports.add(staticStarImport(myTypeHolderClass + "." + TOKEN_SET_HOLDER_NAME));
+      imports.add(staticStarImport(myParserTypeHolderClass + "." + TOKEN_SET_HOLDER_NAME));
     }
     if (StringUtil.isNotEmpty(myParserUtilClass)) {
       imports.add(staticStarImport(myParserUtilClass));
@@ -672,9 +675,9 @@ public class ParserGenerator {
 
   private @NotNull String generateParserInstance(@NotNull String body) {
     return G.javaVersion > 6
-           ? format("(%s, %s) -> %s", N.builder, N.level, body)
+           ? format("(%s, %s) -> %s", N.stateHolder, N.level, body)
            : format("new Parser() {\npublic boolean parse(%s %s, int %s) {\nreturn %s;\n}\n}",
-                    shorten(C.PsiBuilderClass), N.builder, N.level, body);
+                    shorten(C.PsiBuilderClass), N.stateHolder, N.level, body);
   }
 
   private void generateMetaMethodFields() {
@@ -703,46 +706,46 @@ public class ParserGenerator {
     String shortTS = shorten(C.ParserNodeSetClass);
     String shortMarker = !G.generateFQN ? "Marker" : C.PsiBuilderClass + ".Marker";
     if (myGenerateWithSyntax){
-      out("public %s parse(%s %s, %s %s) {", shortAN, shortET, N.root, shortPB, myStateHolder);
-      out("parseLight(%s, %s);", N.root, myStateHolder);
-      out("return prepareProduction(%s.getBuilder());", myStateHolder);
+      out("public %s parse(%s %s, %s %s) {", shortAN, shortET, N.root, shortPB, N.stateHolder);
+      out("parseLight(%s, %s);", N.root, N.stateHolder);
+      out("return prepareProduction(%s.getBuilder());", N.stateHolder);
       out("}");
       newLine();
-      out("public void parseLight(%s %s, %s %s) {", shortET, N.root, shortPB, myStateHolder);
+      out("public void parseLight(%s %s, %s %s) {", shortET, N.root, shortPB, N.stateHolder);
       out("boolean %s;", N.result);
       String unit = shorten(SyntaxConstants.KOTLIN_UNIT_CLASS);
       String function2 = format("%s<%s, %s, %s>", shorten(SyntaxConstants.KOTLIN_FUNCTION2_CLASS), shortET, shortPB, unit);
       out("%s %s = new %s(){", function2, N.parse, function2);
       out("@Override");
-      out("public %s invoke(%s %s, %s %s) {", unit, shortET, N.root, shortPB, myStateHolder);
-      out("parseLight(%s, %s);", N.root, myStateHolder);
+      out("public %s invoke(%s %s, %s %s) {", unit, shortET, N.root, shortPB, N.stateHolder);
+      out("parseLight(%s, %s);", N.root, N.stateHolder);
       out("return %s.INSTANCE;", unit);
       out("}");
       out("};");
       out("");
-      out("%s.init(%s, %s);", N.runtime, N.parse, generateExtendsSets ? "EXTENDS_SETS_" : null);
+      out("%s.init(%s, %s);", N.stateHolder, N.parse, generateExtendsSets ? "EXTENDS_SETS_" : null);
     }
     else {
-      out("public %s parse(%s %s, %s %s) {", shortAN, shortET, N.root, shortPB, myStateHolder);
-      out("parseLight(%s, %s);", N.root, myStateHolder);
-      out("return %s.getTreeBuilt();", N.builder);
+      out("public %s parse(%s %s, %s %s) {", shortAN, shortET, N.root, shortPB, N.stateHolder);
+      out("parseLight(%s, %s);", N.root, N.stateHolder);
+      out("return %s.getTreeBuilt();", N.stateHolder);
       out("}");
       newLine();
-      out("public void parseLight(%s %s, %s %s) {", shortET, N.root, shortPB, N.builder);
+      out("public void parseLight(%s %s, %s %s) {", shortET, N.root, shortPB, N.stateHolder);
       out("boolean %s;", N.result);
-      out("%s = adapt_builder_(%s, %s, %s, %s);", N.builder, N.root, N.builder, "this", generateExtendsSets ? "EXTENDS_SETS_" : null);
+      out("%s = adapt_builder_(%s, %s, %s, %s);", N.stateHolder, N.root, N.stateHolder, "this", generateExtendsSets ? "EXTENDS_SETS_" : null);
     }
 
-    out("%s %s = enter_section_(%s, 0, _COLLAPSE_, null);", shortMarker, N.marker, myStateHolder);
-    out("%s = parse_root_(%s, %s);", N.result, N.root, myStateHolder);
-    out("exit_section_(%s, 0, %s, %s, %s, true, TRUE_CONDITION);", myStateHolder, N.marker, N.root, N.result);
+    out("%s %s = enter_section_(%s, 0, _COLLAPSE_, null);", shortMarker, N.marker, N.stateHolder);
+    out("%s = parse_root_(%s, %s);", N.result, N.root, N.stateHolder);
+    out("exit_section_(%s, 0, %s, %s, %s, true, TRUE_CONDITION);", N.stateHolder, N.marker, N.root, N.result);
     out("}");
     newLine();
-    out("protected boolean parse_root_(%s %s, %s %s) {", shortET, N.root, shortPB, myStateHolder);
-    out("return parse_root_(%s, %s, 0);", N.root, myStateHolder);
+    out("protected boolean parse_root_(%s %s, %s %s) {", shortET, N.root, shortPB, N.stateHolder);
+    out("return parse_root_(%s, %s, 0);", N.root, N.stateHolder);
     out("}");
     newLine();
-    out("static boolean parse_root_(%s %s, %s %s, int %s) {", shortET, N.root, shortPB, myStateHolder, N.level);
+    out("static boolean parse_root_(%s %s, %s %s, int %s) {", shortET, N.root, shortPB, N.stateHolder, N.level);
     if (extraRoots.isEmpty()) {
       out("return %s;", rootRule == null ? "false" : generateNodeCall(rootRule, null, myGrammarRoot).render());
     }
@@ -903,7 +906,7 @@ public class ParserGenerator {
     String parameterList = parameterNames.stream().map(it -> "Parser " + it).collect(joining(", "));
     String argumentList = String.join(", ", parameterNames);
     String metaParserMethodName = getWrapperParserMetaMethodName(methodName);
-    String call = format("%s(%s, %s + 1, %s)", methodName, N.builder, N.level, argumentList);
+    String call = format("%s(%s, %s + 1, %s)", methodName, N.stateHolder, N.level, argumentList);
     // @formatter:off
     out("%sstatic Parser %s(%s) {", isRule ? "" : "private ", metaParserMethodName, parameterList);
       out("return %s;", generateParserInstance(call));
@@ -949,7 +952,7 @@ public class ParserGenerator {
 
     String extraParameters = metaParameters.stream().map(it -> ", Parser " + it).collect(joining());
     out("%sstatic boolean %s(%s %s, int %s%s) {", !isRule ? "private " : isPrivate ? "" : "public ",
-        funcName, shorten(myStateHolderClass), myStateHolder, N.level, extraParameters);
+        funcName, shorten(myStateHolderClass), N.stateHolder, N.level, extraParameters);
     if (isSingleNode) {
       if (isPrivate && !isLeftInner && recoverWhile == null && frameName == null) {
         String nodeCall = generateNodeCall(rule, node, getNextName(funcName, 0)).render();
@@ -966,7 +969,7 @@ public class ParserGenerator {
     }
 
     if (!children.isEmpty()) {
-      out("if (!recursion_guard_(%s, %s, \"%s\")) return false;", myStateHolder, N.level, funcName);
+      out("if (!recursion_guard_(%s, %s, \"%s\")) return false;", N.stateHolder, N.level, funcName);
     }
 
     if (recoverWhile == null && (isRule || firstNonTrivial)) {
@@ -1002,16 +1005,16 @@ public class ParserGenerator {
     String shortMarker = !G.generateFQN ? "Marker" : C.PsiBuilderClass + ".Marker";
     if (sectionRequiredSimple) {
       if (!sectionMaybeDropped) {
-        out("%s %s = enter_section_(%s);", shortMarker, N.marker, myStateHolder);
+        out("%s %s = enter_section_(%s);", shortMarker, N.marker, N.stateHolder);
       }
     }
     else if (sectionRequired) {
       boolean shortVersion = frameName == null && elementTypeRef == null;
       if (shortVersion) {
-        out("%s %s = enter_section_(%s, %s, %s);", shortMarker, N.marker, myStateHolder, N.level, modifiers);
+        out("%s %s = enter_section_(%s, %s, %s);", shortMarker, N.marker, N.stateHolder, N.level, modifiers);
       }
       else {
-        out("%s %s = enter_section_(%s, %s, %s, %s, %s);", shortMarker, N.marker, myStateHolder, N.level, modifiers,
+        out("%s %s = enter_section_(%s, %s, %s, %s, %s);", shortMarker, N.marker, N.stateHolder, N.level, modifiers,
             elementTypeRef, frameName);
       }
     }
@@ -1051,10 +1054,10 @@ public class ParserGenerator {
                 }
               }
               else if (i == p + 1) {
-                out("%s = %s && report_error_(%s, %s);", N.result, N.result, myStateHolder, nodeCall.render());
+                out("%s = %s && report_error_(%s, %s);", N.result, N.result, N.stateHolder, nodeCall.render());
               }
               else {
-                out("%s = %s && report_error_(%s, %s) && %s;", N.result, N.pinned, myStateHolder, nodeCall.render(),
+                out("%s = %s && report_error_(%s, %s) && %s;", N.result, N.pinned, N.stateHolder, nodeCall.render(),
                     N.result);
               }
             }
@@ -1081,9 +1084,9 @@ public class ParserGenerator {
           out("%s = %s;", N.result, nodeCall.render());
         }
         out("while (%s) {", alwaysTrue ? "true" : N.result);
-        out("int %s = current_position_(%s);", N.pos, myStateHolder);
+        out("int %s = current_position_(%s);", N.pos, N.stateHolder);
         out("if (!%s) break;", nodeCall.render());
-        out("if (!empty_element_parsed_guard_(%s, \"%s\", %s)) break;", myStateHolder, funcName, N.pos);
+        out("if (!empty_element_parsed_guard_(%s, \"%s\", %s)) break;", N.stateHolder, funcName, N.pos);
         out("}");
       }
       else if (type == BNF_OP_AND) {
@@ -1102,12 +1105,12 @@ public class ParserGenerator {
       if (!hooks.isEmpty()) {
         for (Map.Entry<String, String> entry : hooks.entrySet()) {
           String hookName = toIdentifier(entry.getKey(), null, Case.UPPER);
-          out("register_hook_(%s, %s, %s);", myStateHolder, hookName, entry.getValue());
+          out("register_hook_(%s, %s, %s);", N.stateHolder, hookName, entry.getValue());
         }
       }
       if (sectionRequiredSimple) {
         if (!sectionMaybeDropped) {
-          out("exit_section_(%s, %s, %s, %s);", myStateHolder, N.marker, elementTypeRef, resultRef);
+          out("exit_section_(%s, %s, %s, %s);", N.stateHolder, N.marker, elementTypeRef, resultRef);
         }
       }
       else {
@@ -1128,7 +1131,7 @@ public class ParserGenerator {
         else {
           recoverCall = null;
         }
-        out("exit_section_(%s, %s, %s, %s, %s, %s);", myStateHolder, N.level, N.marker, resultRef, pinnedRef,
+        out("exit_section_(%s, %s, %s, %s, %s, %s);", N.stateHolder, N.level, N.marker, resultRef, pinnedRef,
             recoverCall);
       }
     }
@@ -1161,7 +1164,7 @@ public class ParserGenerator {
         break;
       }
     }
-    StringBuilder sb = new StringBuilder(format("!nextTokenIsFast(%s, ", myStateHolder));
+    StringBuilder sb = new StringBuilder(format("!nextTokenIsFast(%s, ", N.stateHolder));
 
     appendTokenTypes(sb, tokenTypes);
     sb.append(")");
@@ -1205,7 +1208,7 @@ public class ParserGenerator {
         ConsumeType consumeType = entry.getKey();
         List<String> tokenTypes = entry.getValue();
         StringBuilder sb = new StringBuilder("!nextTokenIs")
-          .append(consumeType.getMethodSuffix()).append("(").append(myStateHolder).append(", ");
+          .append(consumeType.getMethodSuffix()).append("(").append(N.stateHolder).append(", ");
         if (!dropFrameName && consumeType == ConsumeType.DEFAULT) sb.append(StringUtil.notNullize(frameName, "\"\"")).append(", ");
         appendTokenTypes(sb, tokenTypes);
         sb.append(")");
@@ -1319,7 +1322,7 @@ public class ParserGenerator {
     skip[0] = list.size() - 1;
     String consumeMethodName = (rollbackOnFail ? ("parseTokens") : ("consumeTokens")) +
                                (consumeType == ConsumeType.SMART ? consumeType.getMethodSuffix() : "");
-    return new ConsumeTokensCall(consumeMethodName, myStateHolder, pin, list);
+    return new ConsumeTokensCall(consumeMethodName, N.stateHolder, pin, list);
   }
 
   private @Nullable NodeCall generateTokenChoiceCall(@NotNull List<BnfExpression> children,
@@ -1338,7 +1341,7 @@ public class ParserGenerator {
 
     String tokenSetName = getTokenSetConstantName(funcName);
     myTokenSets.put(tokenSetName, tokens);
-    return new ConsumeTokenChoiceCall(consumeType, tokenSetName, myStateHolder);
+    return new ConsumeTokenChoiceCall(consumeType, tokenSetName, N.stateHolder);
   }
 
   @NotNull
@@ -1363,11 +1366,11 @@ public class ParserGenerator {
       }
       return generateConsumeTextToken(consumeType,
                                       text.startsWith("\"") ? value : StringUtil.escapeStringCharacters(value),
-                                      myStateHolder);
+                                      N.stateHolder);
     }
     else if (type == BNF_NUMBER) {
       ConsumeType consumeType = getEffectiveConsumeType(rule, node, forcedConsumeType);
-      return generateConsumeTextToken(consumeType, text, myStateHolder);
+      return generateConsumeTextToken(consumeType, text, N.stateHolder);
     }
     else if (type == BNF_REFERENCE_OR_TOKEN) {
       String value = GrammarUtil.stripQuotesAroundId(text);
@@ -1384,13 +1387,13 @@ public class ParserGenerator {
           String parserClassName = StringUtil.getShortName(parserClass);
           boolean renderClass = !parserClass.equals(myGrammarRootParser) && !parserClass.equals(ruleInfo(rule).parserClass);
           if (info == null) {
-            return new MethodCall(renderClass, parserClassName, method, myStateHolder, N.level);
+            return new MethodCall(renderClass, parserClassName, method, N.stateHolder, N.level);
           }
           else {
             if (renderClass) {
               method = StringUtil.getQualifiedName(parserClassName, method);
             }
-            return new ExpressionMethodCall(method, myStateHolder, N.level, info.getPriority(subRule) - 1);
+            return new ExpressionMethodCall(method, N.stateHolder, N.level, info.getPriority(subRule) - 1);
           }
         }
       }
@@ -1418,7 +1421,7 @@ public class ParserGenerator {
     else if (type == BNF_EXTERNAL_EXPRESSION) {
       List<BnfExpression> expressions = ((BnfExternalExpression)node).getExpressionList();
       if (expressions.size() == 1 && Rule.isMeta(rule)) {
-        return new MetaParameterCall(formatMetaParamName(expressions.get(0).getText()), myStateHolder, N.level);
+        return new MetaParameterCall(formatMetaParamName(expressions.get(0).getText()), N.stateHolder, N.level);
       }
       else {
         return generateExternalCall(rule, expressions, nextName);
@@ -1427,10 +1430,10 @@ public class ParserGenerator {
     else {
       List<String> extraArguments = collectMetaParametersFormatted(rule, node);
       if (extraArguments.isEmpty()) {
-        return new MethodCall(false, StringUtil.getShortName(ruleInfo(rule).parserClass), nextName, myStateHolder, N.level);
+        return new MethodCall(false, StringUtil.getShortName(ruleInfo(rule).parserClass), nextName, N.stateHolder, N.level);
       }
       else {
-        return new MetaMethodCall(null, nextName, myStateHolder, N.level, map(extraArguments, MetaParameterArgument::new));
+        return new MetaMethodCall(null, nextName, N.stateHolder, N.level, map(extraArguments, MetaParameterArgument::new));
       }
     }
   }
@@ -1526,8 +1529,8 @@ public class ParserGenerator {
         }
       }
     }
-    return Rule.isMeta(targetRule) ? new MetaMethodCall(targetClassName, method, myStateHolder, N.level, arguments)
-                                   : new MethodCallWithArguments(method, myStateHolder, N.level, arguments);
+    return Rule.isMeta(targetRule) ? new MetaMethodCall(targetClassName, method, N.stateHolder, N.level, arguments)
+                                   : new MethodCallWithArguments(method, N.stateHolder, N.level, arguments);
   }
 
   private @NotNull NodeArgument generateWrappedNodeCall(@NotNull BnfRule rule, @Nullable BnfExpression nested, @NotNull String nextName) {
@@ -1579,7 +1582,7 @@ public class ParserGenerator {
 
   private @NotNull NodeCall generateConsumeToken(@NotNull ConsumeType consumeType, @NotNull String tokenName) {
     myTokensUsedInGrammar.add(tokenName);
-    return new ConsumeTokenCall(consumeType, getElementType(tokenName), myStateHolder);
+    return new ConsumeTokenCall(consumeType, getElementType(tokenName), N.stateHolder);
   }
 
   public static @NotNull NodeCall generateConsumeTextToken(@NotNull ConsumeType consumeType,
@@ -1602,10 +1605,13 @@ public class ParserGenerator {
                                           Map<String, BnfRule> sortedCompositeTypes,
                                           String tokenTypeFactory,
                                           String elementTypeClassBase,
+                                          String tokenSetClass,
                                           boolean generatePsi,
                                           boolean generateWithSyntax) {
     String tokenTypeClass =
-      (!generateWithSyntax) ? getRootAttribute(myFile, KnownAttribute.TOKEN_TYPE_CLASS) : SyntaxConstants.SYNTAX_ELEMENT_TYPE;
+      (!generateWithSyntax) ?
+      getRootAttribute(myFile, KnownAttribute.TOKEN_TYPE_CLASS) :
+      SyntaxConstants.SYNTAX_ELEMENT_TYPE;
     Set<String> imports = new LinkedHashSet<>();
     imports.add(elementTypeClassBase);
     if (generatePsi) {
@@ -1613,7 +1619,7 @@ public class ParserGenerator {
       imports.add(C.AstNodeClass);
     }
     if (G.generateTokenSets && !myTokenSets.isEmpty()) {
-      imports.add(C.TokenSetClass);
+      imports.add(tokenSetClass);
     }
     boolean useExactElements = "all".equals(G.generateExactTypes) || G.generateExactTypes.contains("elements");
     boolean useExactTokens = "all".equals(G.generateExactTypes) || G.generateExactTypes.contains("tokens");
@@ -1693,7 +1699,7 @@ public class ParserGenerator {
         out("%s %s = %s(\"%s\"%s);", shorten(fieldType), tokenType, tokenCreateCall, StringUtil.escapeStringCharacters(tokenString),
             callFix);
       }
-      generateTokenSets();
+      generateTokenSets(tokenSetClass);
     }
     if (generatePsi && G.generatePsiClassesMap) {
       String shortJC = shorten(CommonClassNames.JAVA_LANG_CLASS);
@@ -1781,7 +1787,7 @@ public class ParserGenerator {
            !matchesAny(getRegexpTokenRegexp(tokenText), "a", "1", "_", ".");
   }
 
-  private void generateTokenSets() {
+  private void generateTokenSets(String tokenSetType) {
     if (myTokenSets.isEmpty()) {
       return;
     }
@@ -1790,10 +1796,10 @@ public class ParserGenerator {
     Map<String, String> reverseMap = new HashMap<>();
     myTokenSets.forEach((name, tokens) -> {
       String creationMethod =
-        (C.TokenSetClass.startsWith("java.util.Set") && G.javaVersion > 9) ? "Set.of(%s)" : shorten(C.TokenSetClass) + ".create(%s)";
+        (tokenSetType.startsWith("java.util.Set") && G.javaVersion > 9) ? "Set.of(%s)" : shorten(tokenSetType) + ".create(%s)";
       String value = format(creationMethod, tokenSetString(tokens));
       String alreadyRendered = reverseMap.putIfAbsent(value, name);
-      out("%s %s = %s;", shorten(C.TokenSetClass), name, ObjectUtils.chooseNotNull(alreadyRendered, value));
+      out("%s %s = %s;", shorten(tokenSetType), name, ObjectUtils.chooseNotNull(alreadyRendered, value));
     });
     out("}");
   }
@@ -1838,7 +1844,7 @@ public class ParserGenerator {
     else {
       imports.add("#forced");
     }
-    imports.add(staticStarImport(myTypeHolderClass));
+    imports.add(staticStarImport(myPsiElementTypeHolderClass));
     if (!G.generateFQN) {
       if (StringUtil.isNotEmpty(implSuper)) imports.add(implSuper);
       imports.add(StringUtil.getPackageName(superInterface) + ".*");

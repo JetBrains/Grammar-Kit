@@ -8,6 +8,8 @@
   elementTypeFactory="test.FooParserDefinition.createType"
   tokenTypeFactory="test.stub.FooParserDefinition.createTokenType"
   elementTypeHolderClass="test.FooTypes"
+  syntaxElementTypeHolderClass="test.FooSyntaxTypes"
+  syntaxElementTypeConverterClass="test.FooTypesConverter"
   parserUtilClass="org.intellij.grammar.parser.GeneratedParserUtilBase"
   expressionUtilClass="test.FooUtil"
 

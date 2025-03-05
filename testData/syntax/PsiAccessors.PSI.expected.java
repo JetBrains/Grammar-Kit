@@ -38,6 +38,54 @@ public interface GeneratedTypes {
     }
   }
 }
+// ---- GeneratedSyntaxElementTypes.java -----------------
+//header.txt
+package generated;
+
+import com.intellij.platform.syntax.SyntaxElementType;
+
+public interface GeneratedSyntaxElementTypes {
+
+  SyntaxElementType BINARY = new SyntaxElementType("BINARY");
+  SyntaxElementType EXPRESSION = new SyntaxElementType("EXPRESSION");
+  SyntaxElementType OPERATOR = new SyntaxElementType("OPERATOR");
+  SyntaxElementType VALUE = new SyntaxElementType("VALUE");
+
+  SyntaxElementType ID = new SyntaxElementType("id");
+  SyntaxElementType LOWCASEKWD1 = new SyntaxElementType("lowcasekwd1");
+  SyntaxElementType MY_SOMETHING = new SyntaxElementType("something");
+  SyntaxElementType UPCASEKWD1 = new SyntaxElementType("UPCASEKWD1");
+}
+// ---- GeneratedSyntaxElementTypeConverter.java -----------------
+//header.txt
+package generated;
+
+import com.intellij.psi.tree.IElementType;
+import com.intellij.platform.syntax.SyntaxElementType;
+import java.util.Map;
+import java.util.HashMap;
+import com.intellij.platform.syntax.psi.ElementTypeConverterBase;
+
+public class GeneratedSyntaxElementTypeConverter extends ElementTypeConverterBase {
+
+  public GeneratedSyntaxElementTypeConverter() {
+    super(makeElementMap());
+  }
+
+  private static Map<SyntaxElementType, IElementType> makeElementMap() {
+    Map<SyntaxElementType, IElementType> map = new HashMap<>();
+    map.put(GeneratedSyntaxElementTypes.BINARY, GeneratedTypes.BINARY);
+    map.put(GeneratedSyntaxElementTypes.EXPRESSION, GeneratedTypes.EXPRESSION);
+    map.put(GeneratedSyntaxElementTypes.OPERATOR, GeneratedTypes.OPERATOR);
+    map.put(GeneratedSyntaxElementTypes.VALUE, GeneratedTypes.VALUE);
+
+    map.put(GeneratedSyntaxElementTypes.MY_SOMETHING, GeneratedTypes.MY_SOMETHING);
+    map.put(GeneratedSyntaxElementTypes.ID, GeneratedTypes.ID);
+    map.put(GeneratedSyntaxElementTypes.LOWCASEKWD1, GeneratedTypes.LOWCASEKWD1);
+    map.put(GeneratedSyntaxElementTypes.UPCASEKWD1, GeneratedTypes.UPCASEKWD1);
+    return map;
+  }
+}
 // ---- XBinary.java -----------------
 //header.txt
 package generated.psi;

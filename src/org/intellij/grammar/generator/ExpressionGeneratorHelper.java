@@ -54,15 +54,15 @@ public class ExpressionGeneratorHelper {
     String frameName = quote(getRuleDisplayName(info.rootRule, true));
     String shortPB = g.shorten(g.C.PsiBuilderClass);
     String shortMarker = !g.G.generateFQN ? "Marker" : g.C.PsiBuilderClass + ".Marker";
-    g.out("public static boolean %s(%s %s, int %s, int %s) {", methodName, shortPB, g.N.builder, g.N.level, g.N.priority);
-    g.out("if (!recursion_guard_(%s, %s, \"%s\")) return false;", g.N.builder, g.N.level, methodName);
+    g.out("public static boolean %s(%s %s, int %s, int %s) {", methodName, shortPB, g.N.stateHolder, g.N.level, g.N.priority);
+    g.out("if (!recursion_guard_(%s, %s, \"%s\")) return false;", g.N.stateHolder, g.N.level, methodName);
 
     if (frameName != null) {
-      g.out("addVariant(%s, %s);", g.N.builder, frameName);
+      g.out("addVariant(%s, %s);", g.N.stateHolder, frameName);
     }
     g.generateFirstCheck(info.rootRule, frameName, true);
     g.out("boolean %s, %s;", g.N.result, g.N.pinned);
-    g.out("%s %s = enter_section_(%s, %s, _NONE_, %s);", shortMarker, g.N.marker, g.N.builder, g.N.level, frameName);
+    g.out("%s %s = enter_section_(%s, %s, _NONE_, %s);", shortMarker, g.N.marker, g.N.stateHolder, g.N.level, frameName);
 
     boolean first = true;
     for (String opCall : sortedOpCalls) {
@@ -78,18 +78,18 @@ public class ExpressionGeneratorHelper {
     }
 
     g.out("%s = %s;", g.N.pinned, g.N.result);
-    g.out("%s = %s && %s(%s, %s + 1, %s);", g.N.result, g.N.result, kernelMethodName, g.N.builder, g.N.level, g.N.priority);
-    g.out("exit_section_(%s, %s, %s, null, %s, %s, null);", g.N.builder, g.N.level, g.N.marker, g.N.result, g.N.pinned);
+    g.out("%s = %s && %s(%s, %s + 1, %s);", g.N.result, g.N.result, kernelMethodName, g.N.stateHolder, g.N.level, g.N.priority);
+    g.out("exit_section_(%s, %s, %s, null, %s, %s, null);", g.N.stateHolder, g.N.level, g.N.marker, g.N.result, g.N.pinned);
     g.out("return %s || %s;", g.N.result, g.N.pinned);
     g.out("}");
     g.newLine();
 
     // kernel
-    g.out("public static boolean %s(%s %s, int %s, int %s) {", kernelMethodName, shortPB, g.N.builder, g.N.level, g.N.priority);
-    g.out("if (!recursion_guard_(%s, %s, \"%s\")) return false;", g.N.builder, g.N.level, kernelMethodName);
+    g.out("public static boolean %s(%s %s, int %s, int %s) {", kernelMethodName, shortPB, g.N.stateHolder, g.N.level, g.N.priority);
+    g.out("if (!recursion_guard_(%s, %s, \"%s\")) return false;", g.N.stateHolder, g.N.level, kernelMethodName);
     g.out("boolean %s = true;", g.N.result);
     g.out("while (true) {");
-    g.out("%s %s = enter_section_(%s, %s, _LEFT_, null);", shortMarker, g.N.marker, g.N.builder, g.N.level);
+    g.out("%s %s = enter_section_(%s, %s, _LEFT_, null);", shortMarker, g.N.marker, g.N.stateHolder, g.N.level);
 
     first = true;
     for (String opCall : sortedOpCalls) {
@@ -105,7 +105,7 @@ public class ExpressionGeneratorHelper {
 
       String substCheck = "";
       if (operator.arg1 != null) {
-        substCheck = format(" && leftMarkerIs(%s, %s)", g.N.builder, g.getElementType(operator.arg1));
+        substCheck = format(" && leftMarkerIs(%s, %s)", g.N.stateHolder, g.getElementType(operator.arg1));
       }
       g.out("%sif (%s < %d%s && %s) {", first ? "" : "else ", g.N.priority, priority, substCheck, opCall);
       first = false;
@@ -115,29 +115,29 @@ public class ExpressionGeneratorHelper {
         operator.rule, operator.tail, getNextName(getFuncName(operator.rule), 1), ConsumeType.DEFAULT
       ).render();
       if (operator.type == OperatorType.BINARY) {
-        String argCall = format("%s(%s, %s, %d)", methodName, g.N.builder, g.N.level, rightAssociative ? argPriority - 1 : argPriority);
-        g.out("%s = %s;", g.N.result, tailCall == null ? argCall : format("report_error_(%s, %s)", g.N.builder, argCall));
+        String argCall = format("%s(%s, %s, %d)", methodName, g.N.stateHolder, g.N.level, rightAssociative ? argPriority - 1 : argPriority);
+        g.out("%s = %s;", g.N.result, tailCall == null ? argCall : format("report_error_(%s, %s)", g.N.stateHolder, argCall));
         if (tailCall != null) g.out("%s = %s && %s;", g.N.result, tailCall, g.N.result);
       }
       else if (operator.type == OperatorType.N_ARY) {
         boolean checkEmpty = info.checkEmpty.contains(operator);
         if (checkEmpty) {
-          g.out("int %s = current_position_(%s);", g.N.pos, g.N.builder);
+          g.out("int %s = current_position_(%s);", g.N.pos, g.N.stateHolder);
         }
         g.out("while (true) {");
-        g.out("%s = report_error_(%s, %s(%s, %s, %d));", g.N.result, g.N.builder, methodName, g.N.builder, g.N.level, argPriority);
+        g.out("%s = report_error_(%s, %s(%s, %s, %d));", g.N.result, g.N.stateHolder, methodName, g.N.stateHolder, g.N.level, argPriority);
         if (tailCall != null) g.out("%s = %s && %s;", g.N.result, tailCall, g.N.result);
         g.out("if (!%s) break;", opCall);
         if (checkEmpty) {
-          g.out("if (!empty_element_parsed_guard_(%s, \"%s\", %s)) break;", g.N.builder, operator.rule.getName(), g.N.pos);
-          g.out("%s = current_position_(%s);", g.N.pos, g.N.builder);
+          g.out("if (!empty_element_parsed_guard_(%s, \"%s\", %s)) break;", g.N.stateHolder, operator.rule.getName(), g.N.pos);
+          g.out("%s = current_position_(%s);", g.N.pos, g.N.stateHolder);
         }
         g.out("}");
       }
       else if (operator.type == OperatorType.POSTFIX) {
         g.out("%s = true;", g.N.result);
       }
-      g.out("exit_section_(%s, %s, %s, %s, %s, true, null);", g.N.builder, g.N.level, g.N.marker, elementType, g.N.result);
+      g.out("exit_section_(%s, %s, %s, %s, %s, true, null);", g.N.stateHolder, g.N.level, g.N.marker, elementType, g.N.result);
       g.out("}");
     }
     if (first) {
@@ -146,7 +146,7 @@ public class ExpressionGeneratorHelper {
     }
     else {
       g.out("else {");
-      g.out("exit_section_(%s, %s, %s, null, false, false, null);", g.N.builder, g.N.level, g.N.marker);
+      g.out("exit_section_(%s, %s, %s, null, false, false, null);", g.N.stateHolder, g.N.level, g.N.marker);
       g.out("break;");
       g.out("}");
     }
@@ -167,11 +167,11 @@ public class ExpressionGeneratorHelper {
         else if (operator.type == OperatorType.PREFIX) {
           g.newLine();
           String operatorFuncName = operator.rule.getName();
-          g.out("public static boolean %s(%s %s, int %s) {", operatorFuncName, shortPB, g.N.builder, g.N.level);
-          g.out("if (!recursion_guard_(%s, %s, \"%s\")) return false;", g.N.builder, g.N.level, operatorFuncName);
+          g.out("public static boolean %s(%s %s, int %s) {", operatorFuncName, shortPB, g.N.stateHolder, g.N.level);
+          g.out("if (!recursion_guard_(%s, %s, \"%s\")) return false;", g.N.stateHolder, g.N.level, operatorFuncName);
           g.generateFirstCheck(operator.rule, frameName, false);
           g.out("boolean %s, %s;", g.N.result, g.N.pinned);
-          g.out("%s %s = enter_section_(%s, %s, _NONE_, null);", shortMarker, g.N.marker, g.N.builder, g.N.level);
+          g.out("%s %s = enter_section_(%s, %s, _NONE_, null);", shortMarker, g.N.marker, g.N.stateHolder, g.N.level);
 
           String elementType = g.getElementType(operator.rule);
           String tailCall = operator.tail == null ? null : g.generateNodeCall(
@@ -183,12 +183,12 @@ public class ExpressionGeneratorHelper {
           int priority = info.getPriority(operator.rule);
           int arg1Priority = operator.arg1 == null ? -1 : info.getPriority(operator.arg1);
           int argPriority = arg1Priority == -1 ? (priority == info.nextPriority - 1 ? -1 : priority) : arg1Priority - 1;
-          g.out("%s = %s && %s(%s, %s, %d);", g.N.result, g.N.pinned, methodName, g.N.builder, g.N.level, argPriority);
+          g.out("%s = %s && %s(%s, %s, %d);", g.N.result, g.N.pinned, methodName, g.N.stateHolder, g.N.level, argPriority);
           if (tailCall != null) {
-            g.out("%s = %s && report_error_(%s, %s) && %s;", g.N.result, g.N.pinned, g.N.builder, tailCall, g.N.result);
+            g.out("%s = %s && report_error_(%s, %s) && %s;", g.N.result, g.N.pinned, g.N.stateHolder, tailCall, g.N.result);
           }
           String elementTypeRef = StringUtil.isNotEmpty(elementType) ? elementType : "null";
-          g.out("exit_section_(%s, %s, %s, %s, %s, %s, null);", g.N.builder, g.N.level, g.N.marker, elementTypeRef,
+          g.out("exit_section_(%s, %s, %s, %s, %s, %s, null);", g.N.stateHolder, g.N.level, g.N.marker, elementTypeRef,
                 g.N.result, g.N.pinned);
           g.out("return %s || %s;", g.N.result, g.N.pinned);
           g.out("}");

@@ -18,6 +18,8 @@
   elementTypePrefix="BNF_"
   elementTypeClass="org.intellij.grammar.psi.BnfCompositeElementType"
   tokenTypeClass="org.intellij.grammar.psi.BnfTokenType"
+  syntaxElementTypeHolderClass="org.intellij.grammar.BnfSyntaxTypes"
+  syntaxElementTypeConverterClass="org.intellij.grammar.BnfSyntaxElementTypeConverter"
   
   tokens = [
     OP_EQ="="

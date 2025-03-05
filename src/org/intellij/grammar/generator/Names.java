@@ -11,7 +11,7 @@ import org.jetbrains.annotations.NotNull;
 * @author greg
 */
 class Names {
-  public final String builder;
+  public final String stateHolder;
   public final String level;
   public final String marker;
   public final String pinned;
@@ -22,9 +22,8 @@ class Names {
   public final String priority;
   public final String metaParamPrefix;
   public final String psiLocal = "p";
-  public final String runtime;
 
-  private Names(String builder,
+  private Names(String stateHolder,
                 String level,
                 String marker,
                 String pinned,
@@ -32,9 +31,8 @@ class Names {
                 String pos,
                 String root,
                 String priority,
-                String runtime,
                 String metaParamPrefix) {
-    this.builder = builder;
+    this.stateHolder = stateHolder;
     this.level = level;
     this.marker = marker;
     this.pinned = pinned;
@@ -43,26 +41,25 @@ class Names {
     this.pos = pos;
     this.root = root;
     this.priority = priority;
-    this.runtime = runtime;
     this.metaParamPrefix = metaParamPrefix;
   }
 
-  public static Names classicNames() {
-    return new Names("builder_", "level_", "marker_", "pinned_", "result_", "parse_", "pos_", "root_", "priority_", "runtime_", "");
+  public static Names classicNames(Boolean useRuntime) {
+    return new Names(useRuntime ? "runtime_" : "builder_", "level_", "marker_", "pinned_", "result_", "parse_", "pos_", "root_", "priority_", "");
   }
 
-  public static Names longNames() {
-    return new Names("builder", "level", "marker", "pinned", "result", "parse", "pos", "type", "priority", "runtime", "a");
+  public static Names longNames(Boolean useRuntime) {
+    return new Names(useRuntime ? "runtime" : "builder", "level", "marker", "pinned", "result", "parse", "pos", "type", "priority", "a");
   }
 
-  public static Names shortNames() {
-    return new Names("b", "l", "m", "p", "r", "f", "c", "t", "g", "s", "_");
+  public static Names shortNames(Boolean useRuntime) {
+    return new Names(useRuntime ? "s" : "b", "l", "m", "p", "r", "f", "c", "t", "g", "_");
   }
 
-  public static @NotNull Names forName(String name) {
-    if ("long".equals(name)) return longNames();
-    if ("short".equals(name)) return shortNames();
-    if ("classic".equals(name)) return classicNames();
-    return ApplicationManager.getApplication().isUnitTestMode() ? classicNames() : shortNames();
+  public static @NotNull Names forName(String name, Boolean useRuntime) {
+    if ("long".equals(name)) return longNames(useRuntime);
+    if ("short".equals(name)) return shortNames(useRuntime);
+    if ("classic".equals(name)) return classicNames(useRuntime);
+    return ApplicationManager.getApplication().isUnitTestMode() ? classicNames(useRuntime) : shortNames(useRuntime);
   }
 }

@@ -36,9 +36,9 @@ public class GenOptions {
   public final boolean generateTokenAccessorsSet;
   public final int javaVersion;
 
-  public GenOptions(BnfFile myFile) {
+  public GenOptions(BnfFile myFile, Boolean generateWithSyntax) {
     Map<String, String> genOptions = getRootAttribute(myFile, KnownAttribute.GENERATE).asMap();
-    names = Names.forName(genOptions.get("names"));
+    names = Names.forName(genOptions.get("names"), generateWithSyntax);
     generatePsi = getGenerateOption(myFile, KnownAttribute.GENERATE_PSI, genOptions, "psi");
     generatePsiFactory = !"no".equals(genOptions.get("psi-factory"));
     generatePsiClassesMap = "yes".equals(genOptions.get("psi-classes-map"));

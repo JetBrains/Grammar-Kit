@@ -126,6 +126,106 @@ public interface GeneratedTypes {
     }
   }
 }
+// ---- GeneratedSyntaxElementTypes.java -----------------
+//header.txt
+package generated;
+
+import com.intellij.platform.syntax.SyntaxElementType;
+
+public interface GeneratedSyntaxElementTypes {
+
+  SyntaxElementType A_STATEMENT = new SyntaxElementType("A_STATEMENT");
+  SyntaxElementType BLOCK_OF = new SyntaxElementType("BLOCK_OF");
+  SyntaxElementType B_STATEMENT = new SyntaxElementType("B_STATEMENT");
+  SyntaxElementType CAST_EXPR = new SyntaxElementType("CAST_EXPR");
+  SyntaxElementType CHOICE_JOINED = new SyntaxElementType("CHOICE_JOINED");
+  SyntaxElementType C_STATEMENT = new SyntaxElementType("C_STATEMENT");
+  SyntaxElementType EXPR = new SyntaxElementType("EXPR");
+  SyntaxElementType GRAMMAR_ELEMENT = new SyntaxElementType("GRAMMAR_ELEMENT");
+  SyntaxElementType IDENTIFIER = new SyntaxElementType("IDENTIFIER");
+  SyntaxElementType ID_EXPR = new SyntaxElementType("ID_EXPR");
+  SyntaxElementType INCLUDE_SECTION = new SyntaxElementType("INCLUDE_SECTION");
+  SyntaxElementType INCLUDE__SECTION__ALT = new SyntaxElementType("INCLUDE__SECTION__ALT");
+  SyntaxElementType ITEM_EXPR = new SyntaxElementType("ITEM_EXPR");
+  SyntaxElementType LEFT_SHADOW = new SyntaxElementType("LEFT_SHADOW");
+  SyntaxElementType LEFT_SHADOW_TEST = new SyntaxElementType("LEFT_SHADOW_TEST");
+  SyntaxElementType LITERAL = new SyntaxElementType("LITERAL");
+  SyntaxElementType MISSING_EXTERNAL_TYPE = new SyntaxElementType("MISSING_EXTERNAL_TYPE");
+  SyntaxElementType MUL_EXPR = new SyntaxElementType("MUL_EXPR");
+  SyntaxElementType PLUS_EXPR = new SyntaxElementType("PLUS_EXPR");
+  SyntaxElementType REF_EXPR = new SyntaxElementType("REF_EXPR");
+  SyntaxElementType ROOT = new SyntaxElementType("ROOT");
+  SyntaxElementType ROOT_B = new SyntaxElementType("ROOT_B");
+  SyntaxElementType ROOT_C = new SyntaxElementType("ROOT_C");
+  SyntaxElementType ROOT_D = new SyntaxElementType("ROOT_D");
+  SyntaxElementType SOME_EXPR = new SyntaxElementType("SOME_EXPR");
+  SyntaxElementType SPECIAL_REF = new SyntaxElementType("SPECIAL_REF");
+  SyntaxElementType STATEMENT = new SyntaxElementType("STATEMENT");
+
+  SyntaxElementType ID = new SyntaxElementType("id");
+  SyntaxElementType NOTSPACE = new SyntaxElementType("notspace");
+  SyntaxElementType NUMBER = new SyntaxElementType("number");
+  SyntaxElementType OF = new SyntaxElementType("OF");
+  SyntaxElementType OP_DIV = new SyntaxElementType("/");
+  SyntaxElementType OP_MUL = new SyntaxElementType("*");
+  SyntaxElementType SLASH = new SyntaxElementType("\\");
+}
+// ---- GeneratedSyntaxElementTypeConverter.java -----------------
+//header.txt
+package generated;
+
+import com.intellij.psi.tree.IElementType;
+import com.intellij.platform.syntax.SyntaxElementType;
+import java.util.Map;
+import java.util.HashMap;
+import com.intellij.platform.syntax.psi.ElementTypeConverterBase;
+
+public class GeneratedSyntaxElementTypeConverter extends ElementTypeConverterBase {
+
+  public GeneratedSyntaxElementTypeConverter() {
+    super(makeElementMap());
+  }
+
+  private static Map<SyntaxElementType, IElementType> makeElementMap() {
+    Map<SyntaxElementType, IElementType> map = new HashMap<>();
+    map.put(GeneratedSyntaxElementTypes.A_STATEMENT, GeneratedTypes.A_STATEMENT);
+    map.put(GeneratedSyntaxElementTypes.BLOCK_OF, GeneratedTypes.BLOCK_OF);
+    map.put(GeneratedSyntaxElementTypes.B_STATEMENT, GeneratedTypes.B_STATEMENT);
+    map.put(GeneratedSyntaxElementTypes.CAST_EXPR, GeneratedTypes.CAST_EXPR);
+    map.put(GeneratedSyntaxElementTypes.CHOICE_JOINED, GeneratedTypes.CHOICE_JOINED);
+    map.put(GeneratedSyntaxElementTypes.C_STATEMENT, GeneratedTypes.C_STATEMENT);
+    map.put(GeneratedSyntaxElementTypes.EXPR, GeneratedTypes.EXPR);
+    map.put(GeneratedSyntaxElementTypes.GRAMMAR_ELEMENT, GeneratedTypes.GRAMMAR_ELEMENT);
+    map.put(GeneratedSyntaxElementTypes.IDENTIFIER, GeneratedTypes.IDENTIFIER);
+    map.put(GeneratedSyntaxElementTypes.ID_EXPR, GeneratedTypes.ID_EXPR);
+    map.put(GeneratedSyntaxElementTypes.INCLUDE_SECTION, GeneratedTypes.INCLUDE_SECTION);
+    map.put(GeneratedSyntaxElementTypes.INCLUDE__SECTION__ALT, GeneratedTypes.INCLUDE__SECTION__ALT);
+    map.put(GeneratedSyntaxElementTypes.ITEM_EXPR, GeneratedTypes.ITEM_EXPR);
+    map.put(GeneratedSyntaxElementTypes.LEFT_SHADOW, GeneratedTypes.LEFT_SHADOW);
+    map.put(GeneratedSyntaxElementTypes.LEFT_SHADOW_TEST, GeneratedTypes.LEFT_SHADOW_TEST);
+    map.put(GeneratedSyntaxElementTypes.LITERAL, GeneratedTypes.LITERAL);
+    map.put(GeneratedSyntaxElementTypes.MISSING_EXTERNAL_TYPE, GeneratedTypes.MISSING_EXTERNAL_TYPE);
+    map.put(GeneratedSyntaxElementTypes.MUL_EXPR, GeneratedTypes.MUL_EXPR);
+    map.put(GeneratedSyntaxElementTypes.PLUS_EXPR, GeneratedTypes.PLUS_EXPR);
+    map.put(GeneratedSyntaxElementTypes.REF_EXPR, GeneratedTypes.REF_EXPR);
+    map.put(GeneratedSyntaxElementTypes.ROOT, GeneratedTypes.ROOT);
+    map.put(GeneratedSyntaxElementTypes.ROOT_B, GeneratedTypes.ROOT_B);
+    map.put(GeneratedSyntaxElementTypes.ROOT_C, GeneratedTypes.ROOT_C);
+    map.put(GeneratedSyntaxElementTypes.ROOT_D, GeneratedTypes.ROOT_D);
+    map.put(GeneratedSyntaxElementTypes.SOME_EXPR, GeneratedTypes.SOME_EXPR);
+    map.put(GeneratedSyntaxElementTypes.SPECIAL_REF, GeneratedTypes.SPECIAL_REF);
+    map.put(GeneratedSyntaxElementTypes.STATEMENT, GeneratedTypes.STATEMENT);
+
+    map.put(GeneratedSyntaxElementTypes.OP_MUL, GeneratedTypes.OP_MUL);
+    map.put(GeneratedSyntaxElementTypes.OP_DIV, GeneratedTypes.OP_DIV);
+    map.put(GeneratedSyntaxElementTypes.SLASH, GeneratedTypes.SLASH);
+    map.put(GeneratedSyntaxElementTypes.ID, GeneratedTypes.ID);
+    map.put(GeneratedSyntaxElementTypes.NUMBER, GeneratedTypes.NUMBER);
+    map.put(GeneratedSyntaxElementTypes.NOTSPACE, GeneratedTypes.NOTSPACE);
+    map.put(GeneratedSyntaxElementTypes.OF, GeneratedTypes.OF);
+    return map;
+  }
+}
 // ---- XLeftShadow.java -----------------
 //header.txt
 package generated.psi;

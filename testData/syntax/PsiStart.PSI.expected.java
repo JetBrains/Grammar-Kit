@@ -34,6 +34,46 @@ public interface GeneratedTypes {
     }
   }
 }
+// ---- GeneratedSyntaxElementTypes.java -----------------
+// This is a generated file. Not intended for manual editing.
+package generated;
+
+import com.intellij.platform.syntax.SyntaxElementType;
+
+public interface GeneratedSyntaxElementTypes {
+
+  SyntaxElementType ELEMENT = new SyntaxElementType("ELEMENT");
+  SyntaxElementType ENTRY = new SyntaxElementType("ENTRY");
+  SyntaxElementType LIST = new SyntaxElementType("LIST");
+  SyntaxElementType MAP = new SyntaxElementType("MAP");
+
+}
+// ---- GeneratedSyntaxElementTypeConverter.java -----------------
+// This is a generated file. Not intended for manual editing.
+package generated;
+
+import com.intellij.psi.tree.IElementType;
+import com.intellij.platform.syntax.SyntaxElementType;
+import java.util.Map;
+import java.util.HashMap;
+import com.intellij.platform.syntax.psi.ElementTypeConverterBase;
+
+public class GeneratedSyntaxElementTypeConverter extends ElementTypeConverterBase {
+
+  public GeneratedSyntaxElementTypeConverter() {
+    super(makeElementMap());
+  }
+
+  private static Map<SyntaxElementType, IElementType> makeElementMap() {
+    Map<SyntaxElementType, IElementType> map = new HashMap<>();
+    map.put(GeneratedSyntaxElementTypes.ELEMENT, GeneratedTypes.ELEMENT);
+    map.put(GeneratedSyntaxElementTypes.ENTRY, GeneratedTypes.ENTRY);
+    map.put(GeneratedSyntaxElementTypes.LIST, GeneratedTypes.LIST);
+    map.put(GeneratedSyntaxElementTypes.MAP, GeneratedTypes.MAP);
+
+    return map;
+  }
+}
 // ---- Element.java -----------------
 // This is a generated file. Not intended for manual editing.
 package generated.psi;

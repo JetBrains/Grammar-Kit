@@ -2,118 +2,131 @@
 // This is a generated file. Not intended for manual editing.
 package generated;
 
-import com.intellij.lang.SyntaxTreeBuilder;
-import com.intellij.lang.SyntaxTreeBuilder.Marker;
-import static generated.GeneratedTypes.*;
-import static com.intellij.platform.syntax.SyntaxGeneratedParserUtil.*;
+import com.intellij.platform.syntax.runtime.SyntaxGeneratedParserRuntime;
+import com.intellij.platform.syntax.parser.SyntaxTreeBuilder.Marker;
+import static generated.GeneratedSyntaxElementTypes.*;
+import static com.intellij.platform.syntax.runtime.SyntaxGeneratedParserRuntime.*;
+import static com.intellij.platform.syntax.runtime.SyntaxGeneratedParserRuntimeKt.*;
+import static com.intellij.platform.syntax.parser.ProductionResult.*;
+import static com.intellij.platform.syntax.parser.ProductionResultKt.prepareProduction;
+import kotlin.jvm.functions.Function2;
+import kotlin.Unit;
 import com.intellij.platform.syntax.SyntaxElementType;
-import com.intellij.lang.ASTNode;
+import com.intellij.platform.syntax.parser.ProductionResult;
 import java.util.Set;
 import com.intellij.lang.PsiParser;
 import com.intellij.lang.LightPsiParser;
 
 @SuppressWarnings({"SimplifiableIfStatement", "UnusedAssignment"})
-public class GeneratedParser implements PsiParser, LightPsiParser {
+public class GeneratedParser {
 
-  public ASTNode parse(SyntaxElementType root_, SyntaxTreeBuilder builder_) {
-    parseLight(root_, builder_);
-    return builder_.getTreeBuilt();
+  public ProductionResult parse(SyntaxElementType root_, SyntaxGeneratedParserRuntime runtime_) {
+    parseLight(root_, runtime_);
+    return prepareProduction(runtime_.getBuilder());
   }
 
-  public void parseLight(SyntaxElementType root_, SyntaxTreeBuilder builder_) {
+  public void parseLight(SyntaxElementType root_, SyntaxGeneratedParserRuntime runtime_) {
     boolean result_;
-    builder_ = adapt_builder_(root_, builder_, this, null);
-    Marker marker_ = enter_section_(builder_, 0, _COLLAPSE_, null);
-    result_ = parse_root_(root_, builder_);
-    exit_section_(builder_, 0, marker_, root_, result_, true, TRUE_CONDITION);
+    Function2<SyntaxElementType, SyntaxGeneratedParserRuntime, Unit> parse_ = new Function2<SyntaxElementType, SyntaxGeneratedParserRuntime, Unit>(){
+      @Override
+      public Unit invoke(SyntaxElementType root_, SyntaxGeneratedParserRuntime runtime_) {
+        parseLight(root_, runtime_);
+        return Unit.INSTANCE;
+      }
+    };
+
+    runtime_.init(parse_, null);
+    Marker marker_ = enter_section_(runtime_, 0, _COLLAPSE_, null);
+    result_ = parse_root_(root_, runtime_);
+    exit_section_(runtime_, 0, marker_, root_, result_, true, TRUE_CONDITION);
   }
 
-  protected boolean parse_root_(SyntaxElementType root_, SyntaxTreeBuilder builder_) {
-    return parse_root_(root_, builder_, 0);
+  protected boolean parse_root_(SyntaxElementType root_, SyntaxGeneratedParserRuntime runtime_) {
+    return parse_root_(root_, runtime_, 0);
   }
 
-  static boolean parse_root_(SyntaxElementType root_, SyntaxTreeBuilder builder_, int level_) {
-    return root(builder_, level_ + 1);
+  static boolean parse_root_(SyntaxElementType root_, SyntaxGeneratedParserRuntime runtime_, int level_) {
+    return root(runtime_, level_ + 1);
   }
 
   /* ********************************************************** */
   // (A | B | C) D
-  public static boolean inner_choice(SyntaxTreeBuilder builder_, int level_) {
-    if (!recursion_guard_(builder_, level_, "inner_choice")) return false;
+  public static boolean inner_choice(SyntaxGeneratedParserRuntime runtime_, int level_) {
+    if (!recursion_guard_(runtime_, level_, "inner_choice")) return false;
     boolean result_;
-    Marker marker_ = enter_section_(builder_, level_, _NONE_, INNER_CHOICE, "<inner choice>");
-    result_ = inner_choice_0(builder_, level_ + 1);
-    result_ = result_ && consumeToken(builder_, D);
-    exit_section_(builder_, level_, marker_, result_, false, null);
+    Marker marker_ = enter_section_(runtime_, level_, _NONE_, INNER_CHOICE, "<inner choice>");
+    result_ = inner_choice_0(runtime_, level_ + 1);
+    result_ = result_ && consumeToken(runtime_, D);
+    exit_section_(runtime_, level_, marker_, result_, false, null);
     return result_;
   }
 
   // A | B | C
-  private static boolean inner_choice_0(SyntaxTreeBuilder builder_, int level_) {
-    if (!recursion_guard_(builder_, level_, "inner_choice_0")) return false;
+  private static boolean inner_choice_0(SyntaxGeneratedParserRuntime runtime_, int level_) {
+    if (!recursion_guard_(runtime_, level_, "inner_choice_0")) return false;
     boolean result_;
-    result_ = consumeToken(builder_, A);
-    if (!result_) result_ = consumeToken(builder_, B);
-    if (!result_) result_ = consumeToken(builder_, C);
+    result_ = consumeToken(runtime_, A);
+    if (!result_) result_ = consumeToken(runtime_, B);
+    if (!result_) result_ = consumeToken(runtime_, C);
     return result_;
   }
 
   /* ********************************************************** */
   // A | (B) | C
-  public static boolean inner_parenthesized_choice(SyntaxTreeBuilder builder_, int level_) {
-    if (!recursion_guard_(builder_, level_, "inner_parenthesized_choice")) return false;
+  public static boolean inner_parenthesized_choice(SyntaxGeneratedParserRuntime runtime_, int level_) {
+    if (!recursion_guard_(runtime_, level_, "inner_parenthesized_choice")) return false;
     boolean result_;
-    Marker marker_ = enter_section_(builder_, level_, _NONE_, INNER_PARENTHESIZED_CHOICE, "<inner parenthesized choice>");
-    result_ = consumeToken(builder_, A);
-    if (!result_) result_ = consumeToken(builder_, B);
-    if (!result_) result_ = consumeToken(builder_, C);
-    exit_section_(builder_, level_, marker_, result_, false, null);
+    Marker marker_ = enter_section_(runtime_, level_, _NONE_, INNER_PARENTHESIZED_CHOICE, "<inner parenthesized choice>");
+    result_ = consumeToken(runtime_, A);
+    if (!result_) result_ = consumeToken(runtime_, B);
+    if (!result_) result_ = consumeToken(runtime_, C);
+    exit_section_(runtime_, level_, marker_, result_, false, null);
     return result_;
   }
 
   /* ********************************************************** */
-  static boolean root(SyntaxTreeBuilder builder_, int level_) {
+  static boolean root(SyntaxGeneratedParserRuntime runtime_, int level_) {
     return true;
   }
 
   /* ********************************************************** */
   // A | B | 'c'
-  public static boolean text_token_choice(SyntaxTreeBuilder builder_, int level_) {
-    if (!recursion_guard_(builder_, level_, "text_token_choice")) return false;
+  public static boolean text_token_choice(SyntaxGeneratedParserRuntime runtime_, int level_) {
+    if (!recursion_guard_(runtime_, level_, "text_token_choice")) return false;
     boolean result_;
-    Marker marker_ = enter_section_(builder_, level_, _NONE_, TEXT_TOKEN_CHOICE, "<text token choice>");
-    result_ = consumeToken(builder_, A);
-    if (!result_) result_ = consumeToken(builder_, B);
-    if (!result_) result_ = consumeToken(builder_, "c");
-    exit_section_(builder_, level_, marker_, result_, false, null);
+    Marker marker_ = enter_section_(runtime_, level_, _NONE_, TEXT_TOKEN_CHOICE, "<text token choice>");
+    result_ = consumeToken(runtime_, A);
+    if (!result_) result_ = consumeToken(runtime_, B);
+    if (!result_) result_ = consumeToken(runtime_, "c");
+    exit_section_(runtime_, level_, marker_, result_, false, null);
     return result_;
   }
 
   /* ********************************************************** */
   // A | B
-  public static boolean two_tokens_choice(SyntaxTreeBuilder builder_, int level_) {
-    if (!recursion_guard_(builder_, level_, "two_tokens_choice")) return false;
-    if (!nextTokenIs(builder_, "<two tokens choice>", A, B)) return false;
+  public static boolean two_tokens_choice(SyntaxGeneratedParserRuntime runtime_, int level_) {
+    if (!recursion_guard_(runtime_, level_, "two_tokens_choice")) return false;
+    if (!nextTokenIs(runtime_, "<two tokens choice>", A, B)) return false;
     boolean result_;
-    Marker marker_ = enter_section_(builder_, level_, _NONE_, TWO_TOKENS_CHOICE, "<two tokens choice>");
-    result_ = consumeToken(builder_, A);
-    if (!result_) result_ = consumeToken(builder_, B);
-    exit_section_(builder_, level_, marker_, result_, false, null);
+    Marker marker_ = enter_section_(runtime_, level_, _NONE_, TWO_TOKENS_CHOICE, "<two tokens choice>");
+    result_ = consumeToken(runtime_, A);
+    if (!result_) result_ = consumeToken(runtime_, B);
+    exit_section_(runtime_, level_, marker_, result_, false, null);
     return result_;
   }
 
   /* ********************************************************** */
   // A | B | B | A
-  public static boolean two_tokens_repeating_choice(SyntaxTreeBuilder builder_, int level_) {
-    if (!recursion_guard_(builder_, level_, "two_tokens_repeating_choice")) return false;
-    if (!nextTokenIs(builder_, "<two tokens repeating choice>", A, B)) return false;
+  public static boolean two_tokens_repeating_choice(SyntaxGeneratedParserRuntime runtime_, int level_) {
+    if (!recursion_guard_(runtime_, level_, "two_tokens_repeating_choice")) return false;
+    if (!nextTokenIs(runtime_, "<two tokens repeating choice>", A, B)) return false;
     boolean result_;
-    Marker marker_ = enter_section_(builder_, level_, _NONE_, TWO_TOKENS_REPEATING_CHOICE, "<two tokens repeating choice>");
-    result_ = consumeToken(builder_, A);
-    if (!result_) result_ = consumeToken(builder_, B);
-    if (!result_) result_ = consumeToken(builder_, B);
-    if (!result_) result_ = consumeToken(builder_, A);
-    exit_section_(builder_, level_, marker_, result_, false, null);
+    Marker marker_ = enter_section_(runtime_, level_, _NONE_, TWO_TOKENS_REPEATING_CHOICE, "<two tokens repeating choice>");
+    result_ = consumeToken(runtime_, A);
+    if (!result_) result_ = consumeToken(runtime_, B);
+    if (!result_) result_ = consumeToken(runtime_, B);
+    if (!result_) result_ = consumeToken(runtime_, A);
+    exit_section_(runtime_, level_, marker_, result_, false, null);
     return result_;
   }
 

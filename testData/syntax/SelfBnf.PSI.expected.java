@@ -117,6 +117,123 @@ public interface BnfTypes {
     }
   }
 }
+// ---- BnfSyntaxTypes.java -----------------
+// license.txt
+package org.intellij.grammar;
+
+import com.intellij.platform.syntax.SyntaxElementType;
+
+public interface BnfSyntaxTypes {
+
+  SyntaxElementType BNF_ATTR = new SyntaxElementType("BNF_ATTR");
+  SyntaxElementType BNF_ATTRS = new SyntaxElementType("BNF_ATTRS");
+  SyntaxElementType BNF_ATTR_PATTERN = new SyntaxElementType("BNF_ATTR_PATTERN");
+  SyntaxElementType BNF_CHOICE = new SyntaxElementType("BNF_CHOICE");
+  SyntaxElementType BNF_EXPRESSION = new SyntaxElementType("BNF_EXPRESSION");
+  SyntaxElementType BNF_EXTERNAL_EXPRESSION = new SyntaxElementType("BNF_EXTERNAL_EXPRESSION");
+  SyntaxElementType BNF_LIST_ENTRY = new SyntaxElementType("BNF_LIST_ENTRY");
+  SyntaxElementType BNF_LITERAL_EXPRESSION = new SyntaxElementType("BNF_LITERAL_EXPRESSION");
+  SyntaxElementType BNF_MODIFIER = new SyntaxElementType("BNF_MODIFIER");
+  SyntaxElementType BNF_PAREN_EXPRESSION = new SyntaxElementType("BNF_PAREN_EXPRESSION");
+  SyntaxElementType BNF_PAREN_OPT_EXPRESSION = new SyntaxElementType("BNF_PAREN_OPT_EXPRESSION");
+  SyntaxElementType BNF_PREDICATE = new SyntaxElementType("BNF_PREDICATE");
+  SyntaxElementType BNF_PREDICATE_SIGN = new SyntaxElementType("BNF_PREDICATE_SIGN");
+  SyntaxElementType BNF_QUANTIFIED = new SyntaxElementType("BNF_QUANTIFIED");
+  SyntaxElementType BNF_QUANTIFIER = new SyntaxElementType("BNF_QUANTIFIER");
+  SyntaxElementType BNF_REFERENCE_OR_TOKEN = new SyntaxElementType("BNF_REFERENCE_OR_TOKEN");
+  SyntaxElementType BNF_RULE = new SyntaxElementType("BNF_RULE");
+  SyntaxElementType BNF_SEQUENCE = new SyntaxElementType("BNF_SEQUENCE");
+  SyntaxElementType BNF_STRING_LITERAL_EXPRESSION = new SyntaxElementType("BNF_STRING_LITERAL_EXPRESSION");
+  SyntaxElementType BNF_VALUE_LIST = new SyntaxElementType("BNF_VALUE_LIST");
+
+  SyntaxElementType BNF_BLOCK_COMMENT = new SyntaxElementType("block_comment");
+  SyntaxElementType BNF_EXTERNAL_END = new SyntaxElementType(">>");
+  SyntaxElementType BNF_EXTERNAL_START = new SyntaxElementType("<<");
+  SyntaxElementType BNF_ID = new SyntaxElementType("id");
+  SyntaxElementType BNF_LEFT_BRACE = new SyntaxElementType("{");
+  SyntaxElementType BNF_LEFT_BRACKET = new SyntaxElementType("[");
+  SyntaxElementType BNF_LEFT_PAREN = new SyntaxElementType("(");
+  SyntaxElementType BNF_LINE_COMMENT = new SyntaxElementType("line_comment");
+  SyntaxElementType BNF_NUMBER = new SyntaxElementType("number");
+  SyntaxElementType BNF_OP_AND = new SyntaxElementType("&");
+  SyntaxElementType BNF_OP_EQ = new SyntaxElementType("=");
+  SyntaxElementType BNF_OP_IS = new SyntaxElementType("::=");
+  SyntaxElementType BNF_OP_NOT = new SyntaxElementType("!");
+  SyntaxElementType BNF_OP_ONEMORE = new SyntaxElementType("+");
+  SyntaxElementType BNF_OP_OPT = new SyntaxElementType("?");
+  SyntaxElementType BNF_OP_OR = new SyntaxElementType("|");
+  SyntaxElementType BNF_OP_ZEROMORE = new SyntaxElementType("*");
+  SyntaxElementType BNF_RIGHT_BRACE = new SyntaxElementType("}");
+  SyntaxElementType BNF_RIGHT_BRACKET = new SyntaxElementType("]");
+  SyntaxElementType BNF_RIGHT_PAREN = new SyntaxElementType(")");
+  SyntaxElementType BNF_SEMICOLON = new SyntaxElementType(";");
+  SyntaxElementType BNF_STRING = new SyntaxElementType("string");
+}
+// ---- BnfSyntaxElementTypeConverter.java -----------------
+// license.txt
+package org.intellij.grammar;
+
+import org.intellij.grammar.psi.BnfTypes;
+import com.intellij.psi.tree.IElementType;
+import com.intellij.platform.syntax.SyntaxElementType;
+import java.util.Map;
+import java.util.HashMap;
+import com.intellij.platform.syntax.psi.ElementTypeConverterBase;
+
+public class BnfSyntaxElementTypeConverter extends ElementTypeConverterBase {
+
+  public BnfSyntaxElementTypeConverter() {
+    super(makeElementMap());
+  }
+
+  private static Map<SyntaxElementType, IElementType> makeElementMap() {
+    Map<SyntaxElementType, IElementType> map = new HashMap<>();
+    map.put(BnfSyntaxTypes.BNF_ATTR, BnfTypes.BNF_ATTR);
+    map.put(BnfSyntaxTypes.BNF_ATTRS, BnfTypes.BNF_ATTRS);
+    map.put(BnfSyntaxTypes.BNF_ATTR_PATTERN, BnfTypes.BNF_ATTR_PATTERN);
+    map.put(BnfSyntaxTypes.BNF_CHOICE, BnfTypes.BNF_CHOICE);
+    map.put(BnfSyntaxTypes.BNF_EXPRESSION, BnfTypes.BNF_EXPRESSION);
+    map.put(BnfSyntaxTypes.BNF_EXTERNAL_EXPRESSION, BnfTypes.BNF_EXTERNAL_EXPRESSION);
+    map.put(BnfSyntaxTypes.BNF_LIST_ENTRY, BnfTypes.BNF_LIST_ENTRY);
+    map.put(BnfSyntaxTypes.BNF_LITERAL_EXPRESSION, BnfTypes.BNF_LITERAL_EXPRESSION);
+    map.put(BnfSyntaxTypes.BNF_MODIFIER, BnfTypes.BNF_MODIFIER);
+    map.put(BnfSyntaxTypes.BNF_PAREN_EXPRESSION, BnfTypes.BNF_PAREN_EXPRESSION);
+    map.put(BnfSyntaxTypes.BNF_PAREN_OPT_EXPRESSION, BnfTypes.BNF_PAREN_OPT_EXPRESSION);
+    map.put(BnfSyntaxTypes.BNF_PREDICATE, BnfTypes.BNF_PREDICATE);
+    map.put(BnfSyntaxTypes.BNF_PREDICATE_SIGN, BnfTypes.BNF_PREDICATE_SIGN);
+    map.put(BnfSyntaxTypes.BNF_QUANTIFIED, BnfTypes.BNF_QUANTIFIED);
+    map.put(BnfSyntaxTypes.BNF_QUANTIFIER, BnfTypes.BNF_QUANTIFIER);
+    map.put(BnfSyntaxTypes.BNF_REFERENCE_OR_TOKEN, BnfTypes.BNF_REFERENCE_OR_TOKEN);
+    map.put(BnfSyntaxTypes.BNF_RULE, BnfTypes.BNF_RULE);
+    map.put(BnfSyntaxTypes.BNF_SEQUENCE, BnfTypes.BNF_SEQUENCE);
+    map.put(BnfSyntaxTypes.BNF_STRING_LITERAL_EXPRESSION, BnfTypes.BNF_STRING_LITERAL_EXPRESSION);
+    map.put(BnfSyntaxTypes.BNF_VALUE_LIST, BnfTypes.BNF_VALUE_LIST);
+
+    map.put(BnfSyntaxTypes.BNF_OP_EQ, BnfTypes.BNF_OP_EQ);
+    map.put(BnfSyntaxTypes.BNF_OP_IS, BnfTypes.BNF_OP_IS);
+    map.put(BnfSyntaxTypes.BNF_OP_OR, BnfTypes.BNF_OP_OR);
+    map.put(BnfSyntaxTypes.BNF_OP_OPT, BnfTypes.BNF_OP_OPT);
+    map.put(BnfSyntaxTypes.BNF_OP_ONEMORE, BnfTypes.BNF_OP_ONEMORE);
+    map.put(BnfSyntaxTypes.BNF_OP_ZEROMORE, BnfTypes.BNF_OP_ZEROMORE);
+    map.put(BnfSyntaxTypes.BNF_OP_AND, BnfTypes.BNF_OP_AND);
+    map.put(BnfSyntaxTypes.BNF_OP_NOT, BnfTypes.BNF_OP_NOT);
+    map.put(BnfSyntaxTypes.BNF_SEMICOLON, BnfTypes.BNF_SEMICOLON);
+    map.put(BnfSyntaxTypes.BNF_LEFT_BRACE, BnfTypes.BNF_LEFT_BRACE);
+    map.put(BnfSyntaxTypes.BNF_RIGHT_BRACE, BnfTypes.BNF_RIGHT_BRACE);
+    map.put(BnfSyntaxTypes.BNF_LEFT_BRACKET, BnfTypes.BNF_LEFT_BRACKET);
+    map.put(BnfSyntaxTypes.BNF_RIGHT_BRACKET, BnfTypes.BNF_RIGHT_BRACKET);
+    map.put(BnfSyntaxTypes.BNF_LEFT_PAREN, BnfTypes.BNF_LEFT_PAREN);
+    map.put(BnfSyntaxTypes.BNF_RIGHT_PAREN, BnfTypes.BNF_RIGHT_PAREN);
+    map.put(BnfSyntaxTypes.BNF_EXTERNAL_START, BnfTypes.BNF_EXTERNAL_START);
+    map.put(BnfSyntaxTypes.BNF_EXTERNAL_END, BnfTypes.BNF_EXTERNAL_END);
+    map.put(BnfSyntaxTypes.BNF_ID, BnfTypes.BNF_ID);
+    map.put(BnfSyntaxTypes.BNF_STRING, BnfTypes.BNF_STRING);
+    map.put(BnfSyntaxTypes.BNF_NUMBER, BnfTypes.BNF_NUMBER);
+    map.put(BnfSyntaxTypes.BNF_LINE_COMMENT, BnfTypes.BNF_LINE_COMMENT);
+    map.put(BnfSyntaxTypes.BNF_BLOCK_COMMENT, BnfTypes.BNF_BLOCK_COMMENT);
+    return map;
+  }
+}
 // ---- BnfAttr.java -----------------
 // license.txt
 package org.intellij.grammar.psi;

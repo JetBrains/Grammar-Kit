@@ -33,6 +33,82 @@ public interface GeneratedTypes {
   IElementType TOKEN_THREE = new IElementType("#", null);
   IElementType TOKEN_TWO = new IElementType("token-two", null);
 }
+// ---- GeneratedSyntaxElementTypes.java -----------------
+// This is a generated file. Not intended for manual editing.
+package generated;
+
+import com.intellij.platform.syntax.SyntaxElementType;
+
+public interface GeneratedSyntaxElementTypes {
+
+  SyntaxElementType A_EXPR = new SyntaxElementType("A_EXPR");
+  SyntaxElementType B_EXPR = new SyntaxElementType("B_EXPR");
+  SyntaxElementType ERL_LIST = new SyntaxElementType("ERL_LIST");
+  SyntaxElementType EXPR = new SyntaxElementType("EXPR");
+  SyntaxElementType FOO__ﾉ__Ω__ﾉ_ﾐ_____INNER = new SyntaxElementType("FOO__ﾉ__Ω__ﾉ_ﾐ_____INNER");
+  SyntaxElementType IMPORT = new SyntaxElementType("IMPORT");
+  SyntaxElementType LEFT_EXPR = new SyntaxElementType("LEFT_EXPR");
+  SyntaxElementType NOT_OPTIMIZED_CHOICE = new SyntaxElementType("NOT_OPTIMIZED_CHOICE");
+  SyntaxElementType RECURSIVE_EXTEND_A = new SyntaxElementType("RECURSIVE_EXTEND_A");
+  SyntaxElementType RECURSIVE_EXTEND_B = new SyntaxElementType("RECURSIVE_EXTEND_B");
+  SyntaxElementType SOME = new SyntaxElementType("SOME");
+  SyntaxElementType SOME_EXPR = new SyntaxElementType("SOME_EXPR");
+  SyntaxElementType SOME_SEQ = new SyntaxElementType("SOME_SEQ");
+  SyntaxElementType THING_ITEM = new SyntaxElementType("THING_ITEM");
+  SyntaxElementType TWO_USAGES_LEFT = new SyntaxElementType("TWO_USAGES_LEFT");
+  SyntaxElementType WITH_RECURSIVE = new SyntaxElementType("WITH_RECURSIVE");
+  SyntaxElementType ZOME = new SyntaxElementType("ZOME");
+
+  SyntaxElementType A = new SyntaxElementType("A");
+  SyntaxElementType B = new SyntaxElementType("B");
+  SyntaxElementType TOKEN_ONE = new SyntaxElementType("token-one");
+  SyntaxElementType TOKEN_THREE = new SyntaxElementType("#");
+  SyntaxElementType TOKEN_TWO = new SyntaxElementType("token-two");
+}
+// ---- GeneratedSyntaxElementTypeConverter.java -----------------
+// This is a generated file. Not intended for manual editing.
+package generated;
+
+import com.intellij.psi.tree.IElementType;
+import com.intellij.platform.syntax.SyntaxElementType;
+import java.util.Map;
+import java.util.HashMap;
+import com.intellij.platform.syntax.psi.ElementTypeConverterBase;
+
+public class GeneratedSyntaxElementTypeConverter extends ElementTypeConverterBase {
+
+  public GeneratedSyntaxElementTypeConverter() {
+    super(makeElementMap());
+  }
+
+  private static Map<SyntaxElementType, IElementType> makeElementMap() {
+    Map<SyntaxElementType, IElementType> map = new HashMap<>();
+    map.put(GeneratedSyntaxElementTypes.A_EXPR, GeneratedTypes.A_EXPR);
+    map.put(GeneratedSyntaxElementTypes.B_EXPR, GeneratedTypes.B_EXPR);
+    map.put(GeneratedSyntaxElementTypes.ERL_LIST, GeneratedTypes.ERL_LIST);
+    map.put(GeneratedSyntaxElementTypes.EXPR, GeneratedTypes.EXPR);
+    map.put(GeneratedSyntaxElementTypes.FOO__ﾉ__Ω__ﾉ_ﾐ_____INNER, GeneratedTypes.FOO__ﾉ__Ω__ﾉ_ﾐ_____INNER);
+    map.put(GeneratedSyntaxElementTypes.IMPORT, GeneratedTypes.IMPORT);
+    map.put(GeneratedSyntaxElementTypes.LEFT_EXPR, GeneratedTypes.LEFT_EXPR);
+    map.put(GeneratedSyntaxElementTypes.NOT_OPTIMIZED_CHOICE, GeneratedTypes.NOT_OPTIMIZED_CHOICE);
+    map.put(GeneratedSyntaxElementTypes.RECURSIVE_EXTEND_A, GeneratedTypes.RECURSIVE_EXTEND_A);
+    map.put(GeneratedSyntaxElementTypes.RECURSIVE_EXTEND_B, GeneratedTypes.RECURSIVE_EXTEND_B);
+    map.put(GeneratedSyntaxElementTypes.SOME, GeneratedTypes.SOME);
+    map.put(GeneratedSyntaxElementTypes.SOME_EXPR, GeneratedTypes.SOME_EXPR);
+    map.put(GeneratedSyntaxElementTypes.SOME_SEQ, GeneratedTypes.SOME_SEQ);
+    map.put(GeneratedSyntaxElementTypes.THING_ITEM, GeneratedTypes.THING_ITEM);
+    map.put(GeneratedSyntaxElementTypes.TWO_USAGES_LEFT, GeneratedTypes.TWO_USAGES_LEFT);
+    map.put(GeneratedSyntaxElementTypes.WITH_RECURSIVE, GeneratedTypes.WITH_RECURSIVE);
+    map.put(GeneratedSyntaxElementTypes.ZOME, GeneratedTypes.ZOME);
+
+    map.put(GeneratedSyntaxElementTypes.TOKEN_THREE, GeneratedTypes.TOKEN_THREE);
+    map.put(GeneratedSyntaxElementTypes.A, GeneratedTypes.A);
+    map.put(GeneratedSyntaxElementTypes.TOKEN_TWO, GeneratedTypes.TOKEN_TWO);
+    map.put(GeneratedSyntaxElementTypes.B, GeneratedTypes.B);
+    map.put(GeneratedSyntaxElementTypes.TOKEN_ONE, GeneratedTypes.TOKEN_ONE);
+    return map;
+  }
+}
 // ---- FooΩInner.java -----------------
 // This is a generated file. Not intended for manual editing.
 package generated.psi;

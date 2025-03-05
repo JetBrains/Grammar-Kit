@@ -2,55 +2,68 @@
 //header.txt
 package test;
 
-import com.intellij.lang.SyntaxTreeBuilder;
-import com.intellij.lang.SyntaxTreeBuilder.Marker;
-import static test.FooTypes.*;
+import com.intellij.platform.syntax.runtime.SyntaxGeneratedParserRuntime;
+import com.intellij.platform.syntax.parser.SyntaxTreeBuilder.Marker;
+import static generated.GeneratedSyntaxElementTypes.*;
 import static org.intellij.grammar.parser.GeneratedParserUtilBase.*;
+import static com.intellij.platform.syntax.runtime.SyntaxGeneratedParserRuntimeKt.*;
+import static com.intellij.platform.syntax.parser.ProductionResult.*;
+import static com.intellij.platform.syntax.parser.ProductionResultKt.prepareProduction;
+import kotlin.jvm.functions.Function2;
+import kotlin.Unit;
 import com.intellij.platform.syntax.SyntaxElementType;
-import com.intellij.lang.ASTNode;
+import com.intellij.platform.syntax.parser.ProductionResult;
 import java.util.Set;
 import com.intellij.lang.PsiParser;
 import com.intellij.lang.LightPsiParser;
 
 @SuppressWarnings({"SimplifiableIfStatement", "UnusedAssignment"})
-public class FooParser implements PsiParser, LightPsiParser {
+public class FooParser {
 
-  public ASTNode parse(SyntaxElementType root_, SyntaxTreeBuilder builder_) {
-    parseLight(root_, builder_);
-    return builder_.getTreeBuilt();
+  public ProductionResult parse(SyntaxElementType root_, SyntaxGeneratedParserRuntime runtime_) {
+    parseLight(root_, runtime_);
+    return prepareProduction(runtime_.getBuilder());
   }
 
-  public void parseLight(SyntaxElementType root_, SyntaxTreeBuilder builder_) {
+  public void parseLight(SyntaxElementType root_, SyntaxGeneratedParserRuntime runtime_) {
     boolean result_;
-    builder_ = adapt_builder_(root_, builder_, this, null);
-    Marker marker_ = enter_section_(builder_, 0, _COLLAPSE_, null);
-    result_ = parse_root_(root_, builder_);
-    exit_section_(builder_, 0, marker_, root_, result_, true, TRUE_CONDITION);
+    Function2<SyntaxElementType, SyntaxGeneratedParserRuntime, Unit> parse_ = new Function2<SyntaxElementType, SyntaxGeneratedParserRuntime, Unit>(){
+      @Override
+      public Unit invoke(SyntaxElementType root_, SyntaxGeneratedParserRuntime runtime_) {
+        parseLight(root_, runtime_);
+        return Unit.INSTANCE;
+      }
+    };
+
+    runtime_.init(parse_, null);
+    Marker marker_ = enter_section_(runtime_, 0, _COLLAPSE_, null);
+    result_ = parse_root_(root_, runtime_);
+    exit_section_(runtime_, 0, marker_, root_, result_, true, TRUE_CONDITION);
   }
 
-  protected boolean parse_root_(SyntaxElementType root_, SyntaxTreeBuilder builder_) {
-    return parse_root_(root_, builder_, 0);
+  protected boolean parse_root_(SyntaxElementType root_, SyntaxGeneratedParserRuntime runtime_) {
+    return parse_root_(root_, runtime_, 0);
   }
 
-  static boolean parse_root_(SyntaxElementType root_, SyntaxTreeBuilder builder_, int level_) {
-    return root(builder_, level_ + 1);
+  static boolean parse_root_(SyntaxElementType root_, SyntaxGeneratedParserRuntime runtime_, int level_) {
+    return root(runtime_, level_ + 1);
   }
 
   /* ********************************************************** */
   // 'aa'
-  public static boolean element1(SyntaxTreeBuilder builder_, int level_) {
-    if (!recursion_guard_(builder_, level_, "element1")) return false;
+  public static boolean element1(SyntaxGeneratedParserRuntime runtime_, int level_) {
+    if (!recursion_guard_(runtime_, level_, "element1")) return false;
     boolean result_;
-    Marker marker_ = enter_section_(builder_, level_, _NONE_, ELEMENT_1, "<element 1>");
-    result_ = consumeToken(builder_, "aa");
-    exit_section_(builder_, level_, marker_, result_, false, null);
+    Marker marker_ = enter_section_(runtime_, level_, _NONE_, ELEMENT_1, "<element 1>");
+    result_ = consumeToken(runtime_, "aa");
+    exit_section_(runtime_, level_, marker_, result_, false, null);
     return result_;
   }
 
   /* ********************************************************** */
   // element1
-  static boolean root(SyntaxTreeBuilder builder_, int level_) {
-    return element1(builder_, level_ + 1);
+  static boolean root(SyntaxGeneratedParserRuntime runtime_, int level_) {
+    return element1(runtime_, level_ + 1);
   }
 
 }

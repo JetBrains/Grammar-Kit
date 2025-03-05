@@ -55,6 +55,58 @@ public interface GeneratedTypes {
     }
   }
 }
+// ---- GeneratedSyntaxElementTypes.java -----------------
+// This is a generated file. Not intended for manual editing.
+package generated;
+
+
+public interface GeneratedSyntaxElementTypes {
+
+  com.intellij.platform.syntax.SyntaxElementType CREATE_STATEMENT = new com.intellij.platform.syntax.SyntaxElementType("CREATE_STATEMENT");
+  com.intellij.platform.syntax.SyntaxElementType CREATE_TABLE_STATEMENT = new com.intellij.platform.syntax.SyntaxElementType("CREATE_TABLE_STATEMENT");
+  com.intellij.platform.syntax.SyntaxElementType DROP_STATEMENT = new com.intellij.platform.syntax.SyntaxElementType("DROP_STATEMENT");
+  com.intellij.platform.syntax.SyntaxElementType DROP_TABLE_STATEMENT = new com.intellij.platform.syntax.SyntaxElementType("DROP_TABLE_STATEMENT");
+  com.intellij.platform.syntax.SyntaxElementType STATEMENT = new com.intellij.platform.syntax.SyntaxElementType("STATEMENT");
+  com.intellij.platform.syntax.SyntaxElementType TABLE_REF = new com.intellij.platform.syntax.SyntaxElementType("TABLE_REF");
+
+  com.intellij.platform.syntax.SyntaxElementType create = new com.intellij.platform.syntax.SyntaxElementType("CREATE");
+  com.intellij.platform.syntax.SyntaxElementType drop = new com.intellij.platform.syntax.SyntaxElementType("DROP");
+  com.intellij.platform.syntax.SyntaxElementType global = new com.intellij.platform.syntax.SyntaxElementType("GLOBAL");
+  com.intellij.platform.syntax.SyntaxElementType id = new com.intellij.platform.syntax.SyntaxElementType("id");
+  com.intellij.platform.syntax.SyntaxElementType local = new com.intellij.platform.syntax.SyntaxElementType("LOCAL");
+  com.intellij.platform.syntax.SyntaxElementType table = new com.intellij.platform.syntax.SyntaxElementType("TABLE");
+  com.intellij.platform.syntax.SyntaxElementType temp = new com.intellij.platform.syntax.SyntaxElementType("TEMP");
+}
+// ---- GeneratedSyntaxElementTypeConverter.java -----------------
+// This is a generated file. Not intended for manual editing.
+package generated;
+
+
+public class GeneratedSyntaxElementTypeConverter extends com.intellij.platform.syntax.psi.ElementTypeConverterBase {
+
+  public generated.GeneratedSyntaxElementTypeConverter() {
+    super(makeElementMap());
+  }
+
+  private static java.util.Map<com.intellij.platform.syntax.SyntaxElementType, com.intellij.psi.tree.IElementType> makeElementMap() {
+    java.util.Map<com.intellij.platform.syntax.SyntaxElementType, com.intellij.psi.tree.IElementType> map = new java.util.HashMap<>();
+    map.put(generated.GeneratedSyntaxElementTypes.CREATE_STATEMENT, generated.GeneratedTypes.CREATE_STATEMENT);
+    map.put(generated.GeneratedSyntaxElementTypes.CREATE_TABLE_STATEMENT, generated.GeneratedTypes.CREATE_TABLE_STATEMENT);
+    map.put(generated.GeneratedSyntaxElementTypes.DROP_STATEMENT, generated.GeneratedTypes.DROP_STATEMENT);
+    map.put(generated.GeneratedSyntaxElementTypes.DROP_TABLE_STATEMENT, generated.GeneratedTypes.DROP_TABLE_STATEMENT);
+    map.put(generated.GeneratedSyntaxElementTypes.STATEMENT, generated.GeneratedTypes.STATEMENT);
+    map.put(generated.GeneratedSyntaxElementTypes.TABLE_REF, generated.GeneratedTypes.TABLE_REF);
+
+    map.put(generated.GeneratedSyntaxElementTypes.create, generated.GeneratedTypes.create);
+    map.put(generated.GeneratedSyntaxElementTypes.table, generated.GeneratedTypes.table);
+    map.put(generated.GeneratedSyntaxElementTypes.temp, generated.GeneratedTypes.temp);
+    map.put(generated.GeneratedSyntaxElementTypes.global, generated.GeneratedTypes.global);
+    map.put(generated.GeneratedSyntaxElementTypes.local, generated.GeneratedTypes.local);
+    map.put(generated.GeneratedSyntaxElementTypes.drop, generated.GeneratedTypes.drop);
+    map.put(generated.GeneratedSyntaxElementTypes.id, generated.GeneratedTypes.id);
+    return map;
+  }
+}
 // ---- CreateStatement.java -----------------
 // This is a generated file. Not intended for manual editing.
 package generated.psi;

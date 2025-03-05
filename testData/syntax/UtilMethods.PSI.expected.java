@@ -23,6 +23,41 @@ public interface FooTypes {
     }
   }
 }
+// ---- GeneratedSyntaxElementTypes.java -----------------
+//header.txt
+package generated;
+
+import com.intellij.platform.syntax.SyntaxElementType;
+
+public interface GeneratedSyntaxElementTypes {
+
+  SyntaxElementType ELEMENT_1 = new SyntaxElementType("ELEMENT_1");
+
+}
+// ---- GeneratedSyntaxElementTypeConverter.java -----------------
+//header.txt
+package generated;
+
+import test.FooTypes;
+import com.intellij.psi.tree.IElementType;
+import com.intellij.platform.syntax.SyntaxElementType;
+import java.util.Map;
+import java.util.HashMap;
+import com.intellij.platform.syntax.psi.ElementTypeConverterBase;
+
+public class GeneratedSyntaxElementTypeConverter extends ElementTypeConverterBase {
+
+  public GeneratedSyntaxElementTypeConverter() {
+    super(makeElementMap());
+  }
+
+  private static Map<SyntaxElementType, IElementType> makeElementMap() {
+    Map<SyntaxElementType, IElementType> map = new HashMap<>();
+    map.put(GeneratedSyntaxElementTypes.ELEMENT_1, FooTypes.ELEMENT_1);
+
+    return map;
+  }
+}
 // ---- Element1.java -----------------
 //header.txt
 package test.psi;

@@ -48,6 +48,54 @@ public interface FooTypes {
     }
   }
 }
+// ---- FooSyntaxTypes.java -----------------
+//header.txt
+package test;
+
+import com.intellij.platform.syntax.SyntaxElementType;
+
+public interface FooSyntaxTypes {
+
+  SyntaxElementType ELEMENT_1 = new SyntaxElementType("ELEMENT_1");
+  SyntaxElementType ELEMENT_2 = new SyntaxElementType("ELEMENT_2");
+  SyntaxElementType ELEMENT_3 = new SyntaxElementType("ELEMENT_3");
+  SyntaxElementType ELEMENT_4 = new SyntaxElementType("ELEMENT_4");
+  SyntaxElementType ELEMENT_5 = new SyntaxElementType("ELEMENT_5");
+  SyntaxElementType INTERFACE_TYPE = new SyntaxElementType("INTERFACE_TYPE");
+  SyntaxElementType STRUCT_TYPE = new SyntaxElementType("STRUCT_TYPE");
+  SyntaxElementType TYPE = new SyntaxElementType("TYPE");
+
+}
+// ---- FooTypesConverter.java -----------------
+//header.txt
+package test;
+
+import com.intellij.psi.tree.IElementType;
+import com.intellij.platform.syntax.SyntaxElementType;
+import java.util.Map;
+import java.util.HashMap;
+import com.intellij.platform.syntax.psi.ElementTypeConverterBase;
+
+public class FooTypesConverter extends ElementTypeConverterBase {
+
+  public FooTypesConverter() {
+    super(makeElementMap());
+  }
+
+  private static Map<SyntaxElementType, IElementType> makeElementMap() {
+    Map<SyntaxElementType, IElementType> map = new HashMap<>();
+    map.put(FooSyntaxTypes.ELEMENT_1, FooTypes.ELEMENT_1);
+    map.put(FooSyntaxTypes.ELEMENT_2, FooTypes.ELEMENT_2);
+    map.put(FooSyntaxTypes.ELEMENT_3, FooTypes.ELEMENT_3);
+    map.put(FooSyntaxTypes.ELEMENT_4, FooTypes.ELEMENT_4);
+    map.put(FooSyntaxTypes.ELEMENT_5, FooTypes.ELEMENT_5);
+    map.put(FooSyntaxTypes.INTERFACE_TYPE, FooTypes.INTERFACE_TYPE);
+    map.put(FooSyntaxTypes.STRUCT_TYPE, FooTypes.STRUCT_TYPE);
+    map.put(FooSyntaxTypes.TYPE, FooTypes.TYPE);
+
+    return map;
+  }
+}
 // ---- Element1.java -----------------
 //header.txt
 package test.psi;

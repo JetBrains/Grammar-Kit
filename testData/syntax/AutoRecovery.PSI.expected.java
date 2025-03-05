@@ -31,6 +31,52 @@ public interface GeneratedTypes {
     }
   }
 }
+// ---- GeneratedSyntaxElementTypes.java -----------------
+// This is a generated file. Not intended for manual editing.
+package generated;
+
+import com.intellij.platform.syntax.SyntaxElementType;
+
+public interface GeneratedSyntaxElementTypes {
+
+  SyntaxElementType ITEM = new SyntaxElementType("ITEM");
+  SyntaxElementType LIST = new SyntaxElementType("LIST");
+
+  SyntaxElementType COMMA = new SyntaxElementType(",");
+  SyntaxElementType NUMBER = new SyntaxElementType("number");
+  SyntaxElementType PAREN1 = new SyntaxElementType("(");
+  SyntaxElementType PAREN2 = new SyntaxElementType(")");
+  SyntaxElementType SEMI = new SyntaxElementType(";");
+}
+// ---- GeneratedSyntaxElementTypeConverter.java -----------------
+// This is a generated file. Not intended for manual editing.
+package generated;
+
+import com.intellij.psi.tree.IElementType;
+import com.intellij.platform.syntax.SyntaxElementType;
+import java.util.Map;
+import java.util.HashMap;
+import com.intellij.platform.syntax.psi.ElementTypeConverterBase;
+
+public class GeneratedSyntaxElementTypeConverter extends ElementTypeConverterBase {
+
+  public GeneratedSyntaxElementTypeConverter() {
+    super(makeElementMap());
+  }
+
+  private static Map<SyntaxElementType, IElementType> makeElementMap() {
+    Map<SyntaxElementType, IElementType> map = new HashMap<>();
+    map.put(GeneratedSyntaxElementTypes.ITEM, GeneratedTypes.ITEM);
+    map.put(GeneratedSyntaxElementTypes.LIST, GeneratedTypes.LIST);
+
+    map.put(GeneratedSyntaxElementTypes.NUMBER, GeneratedTypes.NUMBER);
+    map.put(GeneratedSyntaxElementTypes.COMMA, GeneratedTypes.COMMA);
+    map.put(GeneratedSyntaxElementTypes.PAREN1, GeneratedTypes.PAREN1);
+    map.put(GeneratedSyntaxElementTypes.PAREN2, GeneratedTypes.PAREN2);
+    map.put(GeneratedSyntaxElementTypes.SEMI, GeneratedTypes.SEMI);
+    return map;
+  }
+}
 // ---- Item.java -----------------
 // This is a generated file. Not intended for manual editing.
 package generated.psi;

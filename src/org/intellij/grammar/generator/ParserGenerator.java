@@ -405,18 +405,21 @@ public class ParserGenerator {
       calcRealSuperClasses(sortedPsiRules);
     }
     if (myGrammarRoot != null && (G.generateTokenTypes || G.generateElementTypes || G.generatePsi && G.generatePsiFactory)) {
-      openOutput(myPsiElementTypeHolderClass);
-      try {
-        generateElementTypesHolder(myPsiElementTypeHolderClass,
-                                   sortedCompositeTypes,
-                                   getRootAttribute(myFile, KnownAttribute.TOKEN_TYPE_FACTORY),
-                                   C.ElementTypeBaseClass,
-                                   C.TokenSetClass,
-                                   G.generatePsi,
-                                   false);
-      }
-      finally {
-        closeOutput();
+      if (G.generatePsi || !myGenerateWithSyntax)
+      {
+        openOutput(myPsiElementTypeHolderClass);
+        try {
+          generateElementTypesHolder(myPsiElementTypeHolderClass,
+                                     sortedCompositeTypes,
+                                     getRootAttribute(myFile, KnownAttribute.TOKEN_TYPE_FACTORY),
+                                     C.ElementTypeBaseClass,
+                                     C.TokenSetClass,
+                                     G.generatePsi,
+                                     false);
+        }
+        finally {
+          closeOutput();
+        }
       }
       if (myGenerateWithSyntax) {
         openOutput(myParserTypeHolderClass);

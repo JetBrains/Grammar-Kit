@@ -32,9 +32,10 @@ public class ExpressionGeneratorHelper {
     Map<String, List<OperatorInfo>> opCalls = new LinkedHashMap<>();
     for (BnfRule rule : info.priorityMap.keySet()) {
       OperatorInfo operator = info.operatorMap.get(rule);
-      String opCall = g.generateNodeCall(
-        info.rootRule, operator.operator, getNextName(getFuncName(operator.rule), 0), CONSUME_TYPE_OVERRIDE
-      ).render();
+      String opCall = g.generateNodeCall(info.rootRule,
+                                         operator.operator,
+                                         getNextName(getFuncName(operator.rule), 0),
+                                         CONSUME_TYPE_OVERRIDE).render();
       opCalls.computeIfAbsent(opCall, k -> new ArrayList<>(2)).add(operator);
     }
     return opCalls;

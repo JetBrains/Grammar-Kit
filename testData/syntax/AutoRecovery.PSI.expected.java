@@ -54,27 +54,26 @@ package generated;
 
 import com.intellij.psi.tree.IElementType;
 import com.intellij.platform.syntax.SyntaxElementType;
-import java.util.Map;
-import java.util.HashMap;
-import com.intellij.platform.syntax.psi.ElementTypeConverterBase;
+import com.intellij.platform.syntax.psi.ElementTypeConverterFactory;
+import com.intellij.platform.syntax.psi.ElementTypeConverter;
+import com.intellij.platform.syntax.psi.ElementTypeConverterKt;
+import org.jetbrains.annotations.NotNull;
+import kotlin.Pair;
 
-public class GeneratedSyntaxElementTypeConverter extends ElementTypeConverterBase {
+public class GeneratedSyntaxElementTypeConverter implements ElementTypeConverterFactory {
 
-  public GeneratedSyntaxElementTypeConverter() {
-    super(makeElementMap());
-  }
+  @Override
+  public @NotNull ElementTypeConverter getElementTypeConverter() {
+    return ElementTypeConverterKt.elementTypeConverterOf(
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.ITEM, GeneratedTypes.ITEM),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.LIST, GeneratedTypes.LIST),
 
-  private static Map<SyntaxElementType, IElementType> makeElementMap() {
-    Map<SyntaxElementType, IElementType> map = new HashMap<>();
-    map.put(GeneratedSyntaxElementTypes.ITEM, GeneratedTypes.ITEM);
-    map.put(GeneratedSyntaxElementTypes.LIST, GeneratedTypes.LIST);
-
-    map.put(GeneratedSyntaxElementTypes.NUMBER, GeneratedTypes.NUMBER);
-    map.put(GeneratedSyntaxElementTypes.COMMA, GeneratedTypes.COMMA);
-    map.put(GeneratedSyntaxElementTypes.PAREN1, GeneratedTypes.PAREN1);
-    map.put(GeneratedSyntaxElementTypes.PAREN2, GeneratedTypes.PAREN2);
-    map.put(GeneratedSyntaxElementTypes.SEMI, GeneratedTypes.SEMI);
-    return map;
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.NUMBER, GeneratedTypes.NUMBER),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.COMMA, GeneratedTypes.COMMA),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.PAREN1, GeneratedTypes.PAREN1),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.PAREN2, GeneratedTypes.PAREN2),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.SEMI, GeneratedTypes.SEMI)
+    );
   }
 }
 // ---- Item.java -----------------

@@ -62,28 +62,27 @@ package generated;
 
 import com.intellij.psi.tree.IElementType;
 import com.intellij.platform.syntax.SyntaxElementType;
-import java.util.Map;
-import java.util.HashMap;
-import com.intellij.platform.syntax.psi.ElementTypeConverterBase;
+import com.intellij.platform.syntax.psi.ElementTypeConverterFactory;
+import com.intellij.platform.syntax.psi.ElementTypeConverter;
+import com.intellij.platform.syntax.psi.ElementTypeConverterKt;
+import org.jetbrains.annotations.NotNull;
+import kotlin.Pair;
 
-public class GeneratedSyntaxElementTypeConverter extends ElementTypeConverterBase {
+public class GeneratedSyntaxElementTypeConverter implements ElementTypeConverterFactory {
 
-  public GeneratedSyntaxElementTypeConverter() {
-    super(makeElementMap());
-  }
+  @Override
+  public @NotNull ElementTypeConverter getElementTypeConverter() {
+    return ElementTypeConverterKt.elementTypeConverterOf(
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.BINARY, GeneratedTypes.BINARY),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.EXPRESSION, GeneratedTypes.EXPRESSION),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.OPERATOR, GeneratedTypes.OPERATOR),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.VALUE, GeneratedTypes.VALUE),
 
-  private static Map<SyntaxElementType, IElementType> makeElementMap() {
-    Map<SyntaxElementType, IElementType> map = new HashMap<>();
-    map.put(GeneratedSyntaxElementTypes.BINARY, GeneratedTypes.BINARY);
-    map.put(GeneratedSyntaxElementTypes.EXPRESSION, GeneratedTypes.EXPRESSION);
-    map.put(GeneratedSyntaxElementTypes.OPERATOR, GeneratedTypes.OPERATOR);
-    map.put(GeneratedSyntaxElementTypes.VALUE, GeneratedTypes.VALUE);
-
-    map.put(GeneratedSyntaxElementTypes.MY_SOMETHING, GeneratedTypes.MY_SOMETHING);
-    map.put(GeneratedSyntaxElementTypes.ID, GeneratedTypes.ID);
-    map.put(GeneratedSyntaxElementTypes.LOWCASEKWD1, GeneratedTypes.LOWCASEKWD1);
-    map.put(GeneratedSyntaxElementTypes.UPCASEKWD1, GeneratedTypes.UPCASEKWD1);
-    return map;
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.MY_SOMETHING, GeneratedTypes.MY_SOMETHING),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.ID, GeneratedTypes.ID),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.LOWCASEKWD1, GeneratedTypes.LOWCASEKWD1),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.UPCASEKWD1, GeneratedTypes.UPCASEKWD1)
+    );
   }
 }
 // ---- XBinary.java -----------------

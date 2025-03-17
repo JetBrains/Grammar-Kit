@@ -13,9 +13,7 @@ import kotlin.jvm.functions.Function2;
 import kotlin.Unit;
 import com.intellij.platform.syntax.SyntaxElementType;
 import com.intellij.platform.syntax.parser.ProductionResult;
-import java.util.Set;
-import com.intellij.lang.PsiParser;
-import com.intellij.lang.LightPsiParser;
+import com.intellij.platform.syntax.SyntaxElementTypeSet;
 
 @SuppressWarnings({"SimplifiableIfStatement", "UnusedAssignment"})
 public class ExpressionParser {
@@ -56,7 +54,7 @@ public class ExpressionParser {
     return result_;
   }
 
-  public static final Set<SyntaxElementType>[] EXTENDS_SETS_ = new Set[] {
+  public static final SyntaxElementTypeSet[] EXTENDS_SETS_ = new SyntaxElementTypeSet[] {
     create_token_set_(ASSIGN_EXPR, BETWEEN_EXPR, CALL_EXPR, CONDITIONAL_EXPR,
       DIV_EXPR, ELVIS_EXPR, EXPR, EXP_EXPR,
       FACTORIAL_EXPR, IS_NOT_EXPR, LITERAL_EXPR, MINUS_EXPR,

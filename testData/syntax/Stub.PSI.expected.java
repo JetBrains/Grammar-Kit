@@ -72,28 +72,26 @@ package test;
 
 import com.intellij.psi.tree.IElementType;
 import com.intellij.platform.syntax.SyntaxElementType;
-import java.util.Map;
-import java.util.HashMap;
-import com.intellij.platform.syntax.psi.ElementTypeConverterBase;
+import com.intellij.platform.syntax.psi.ElementTypeConverterFactory;
+import com.intellij.platform.syntax.psi.ElementTypeConverter;
+import com.intellij.platform.syntax.psi.ElementTypeConverterKt;
+import org.jetbrains.annotations.NotNull;
+import kotlin.Pair;
 
-public class FooTypesConverter extends ElementTypeConverterBase {
+public class FooTypesConverter implements ElementTypeConverterFactory {
 
-  public FooTypesConverter() {
-    super(makeElementMap());
-  }
-
-  private static Map<SyntaxElementType, IElementType> makeElementMap() {
-    Map<SyntaxElementType, IElementType> map = new HashMap<>();
-    map.put(FooSyntaxTypes.ELEMENT_1, FooTypes.ELEMENT_1);
-    map.put(FooSyntaxTypes.ELEMENT_2, FooTypes.ELEMENT_2);
-    map.put(FooSyntaxTypes.ELEMENT_3, FooTypes.ELEMENT_3);
-    map.put(FooSyntaxTypes.ELEMENT_4, FooTypes.ELEMENT_4);
-    map.put(FooSyntaxTypes.ELEMENT_5, FooTypes.ELEMENT_5);
-    map.put(FooSyntaxTypes.INTERFACE_TYPE, FooTypes.INTERFACE_TYPE);
-    map.put(FooSyntaxTypes.STRUCT_TYPE, FooTypes.STRUCT_TYPE);
-    map.put(FooSyntaxTypes.TYPE, FooTypes.TYPE);
-
-    return map;
+  @Override
+  public @NotNull ElementTypeConverter getElementTypeConverter() {
+    return ElementTypeConverterKt.elementTypeConverterOf(
+      new Pair<SyntaxElementType, IElementType>(FooSyntaxTypes.ELEMENT_1, FooTypes.ELEMENT_1),
+      new Pair<SyntaxElementType, IElementType>(FooSyntaxTypes.ELEMENT_2, FooTypes.ELEMENT_2),
+      new Pair<SyntaxElementType, IElementType>(FooSyntaxTypes.ELEMENT_3, FooTypes.ELEMENT_3),
+      new Pair<SyntaxElementType, IElementType>(FooSyntaxTypes.ELEMENT_4, FooTypes.ELEMENT_4),
+      new Pair<SyntaxElementType, IElementType>(FooSyntaxTypes.ELEMENT_5, FooTypes.ELEMENT_5),
+      new Pair<SyntaxElementType, IElementType>(FooSyntaxTypes.INTERFACE_TYPE, FooTypes.INTERFACE_TYPE),
+      new Pair<SyntaxElementType, IElementType>(FooSyntaxTypes.STRUCT_TYPE, FooTypes.STRUCT_TYPE),
+      new Pair<SyntaxElementType, IElementType>(FooSyntaxTypes.TYPE, FooTypes.TYPE)
+    );
   }
 }
 // ---- Element1.java -----------------

@@ -354,139 +354,138 @@ package generated;
 import org.intellij.jflex.psi.JFlexTypes;
 import com.intellij.psi.tree.IElementType;
 import com.intellij.platform.syntax.SyntaxElementType;
-import java.util.Map;
-import java.util.HashMap;
-import com.intellij.platform.syntax.psi.ElementTypeConverterBase;
+import com.intellij.platform.syntax.psi.ElementTypeConverterFactory;
+import com.intellij.platform.syntax.psi.ElementTypeConverter;
+import com.intellij.platform.syntax.psi.ElementTypeConverterKt;
+import org.jetbrains.annotations.NotNull;
+import kotlin.Pair;
 
-public class GeneratedSyntaxElementTypeConverter extends ElementTypeConverterBase {
+public class GeneratedSyntaxElementTypeConverter implements ElementTypeConverterFactory {
 
-  public GeneratedSyntaxElementTypeConverter() {
-    super(makeElementMap());
-  }
+  @Override
+  public @NotNull ElementTypeConverter getElementTypeConverter() {
+    return ElementTypeConverterKt.elementTypeConverterOf(
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.FLEX_CHAR_RANGE, JFlexTypes.FLEX_CHAR_RANGE),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.FLEX_CHOICE_EXPRESSION, JFlexTypes.FLEX_CHOICE_EXPRESSION),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.FLEX_CLASS_EXPRESSION, JFlexTypes.FLEX_CLASS_EXPRESSION),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.FLEX_DECLARATIONS_SECTION, JFlexTypes.FLEX_DECLARATIONS_SECTION),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.FLEX_EXPRESSION, JFlexTypes.FLEX_EXPRESSION),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.FLEX_JAVA_CODE, JFlexTypes.FLEX_JAVA_CODE),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.FLEX_JAVA_NAME, JFlexTypes.FLEX_JAVA_NAME),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.FLEX_JAVA_TYPE, JFlexTypes.FLEX_JAVA_TYPE),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.FLEX_JAVA_TYPE_PARAMETERS, JFlexTypes.FLEX_JAVA_TYPE_PARAMETERS),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.FLEX_LEXICAL_RULES_SECTION, JFlexTypes.FLEX_LEXICAL_RULES_SECTION),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.FLEX_LITERAL_EXPRESSION, JFlexTypes.FLEX_LITERAL_EXPRESSION),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.FLEX_LOOK_AHEAD, JFlexTypes.FLEX_LOOK_AHEAD),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.FLEX_MACRO_DEFINITION, JFlexTypes.FLEX_MACRO_DEFINITION),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.FLEX_MACRO_REFERENCE, JFlexTypes.FLEX_MACRO_REFERENCE),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.FLEX_MACRO_REF_EXPRESSION, JFlexTypes.FLEX_MACRO_REF_EXPRESSION),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.FLEX_NOT_EXPRESSION, JFlexTypes.FLEX_NOT_EXPRESSION),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.FLEX_OPTION, JFlexTypes.FLEX_OPTION),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.FLEX_PAREN_EXPRESSION, JFlexTypes.FLEX_PAREN_EXPRESSION),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.FLEX_PREDEFINED_CLASS_EXPRESSION, JFlexTypes.FLEX_PREDEFINED_CLASS_EXPRESSION),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.FLEX_QUANTIFIER_EXPRESSION, JFlexTypes.FLEX_QUANTIFIER_EXPRESSION),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.FLEX_RULE, JFlexTypes.FLEX_RULE),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.FLEX_SEQUENCE_EXPRESSION, JFlexTypes.FLEX_SEQUENCE_EXPRESSION),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.FLEX_STATE_DECLARATION, JFlexTypes.FLEX_STATE_DECLARATION),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.FLEX_STATE_DEFINITION, JFlexTypes.FLEX_STATE_DEFINITION),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.FLEX_STATE_LIST, JFlexTypes.FLEX_STATE_LIST),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.FLEX_STATE_REFERENCE, JFlexTypes.FLEX_STATE_REFERENCE),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.FLEX_USER_CODE_SECTION, JFlexTypes.FLEX_USER_CODE_SECTION),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.FLEX_USER_VALUE, JFlexTypes.FLEX_USER_VALUE),
 
-  private static Map<SyntaxElementType, IElementType> makeElementMap() {
-    Map<SyntaxElementType, IElementType> map = new HashMap<>();
-    map.put(GeneratedSyntaxElementTypes.FLEX_CHAR_RANGE, JFlexTypes.FLEX_CHAR_RANGE);
-    map.put(GeneratedSyntaxElementTypes.FLEX_CHOICE_EXPRESSION, JFlexTypes.FLEX_CHOICE_EXPRESSION);
-    map.put(GeneratedSyntaxElementTypes.FLEX_CLASS_EXPRESSION, JFlexTypes.FLEX_CLASS_EXPRESSION);
-    map.put(GeneratedSyntaxElementTypes.FLEX_DECLARATIONS_SECTION, JFlexTypes.FLEX_DECLARATIONS_SECTION);
-    map.put(GeneratedSyntaxElementTypes.FLEX_EXPRESSION, JFlexTypes.FLEX_EXPRESSION);
-    map.put(GeneratedSyntaxElementTypes.FLEX_JAVA_CODE, JFlexTypes.FLEX_JAVA_CODE);
-    map.put(GeneratedSyntaxElementTypes.FLEX_JAVA_NAME, JFlexTypes.FLEX_JAVA_NAME);
-    map.put(GeneratedSyntaxElementTypes.FLEX_JAVA_TYPE, JFlexTypes.FLEX_JAVA_TYPE);
-    map.put(GeneratedSyntaxElementTypes.FLEX_JAVA_TYPE_PARAMETERS, JFlexTypes.FLEX_JAVA_TYPE_PARAMETERS);
-    map.put(GeneratedSyntaxElementTypes.FLEX_LEXICAL_RULES_SECTION, JFlexTypes.FLEX_LEXICAL_RULES_SECTION);
-    map.put(GeneratedSyntaxElementTypes.FLEX_LITERAL_EXPRESSION, JFlexTypes.FLEX_LITERAL_EXPRESSION);
-    map.put(GeneratedSyntaxElementTypes.FLEX_LOOK_AHEAD, JFlexTypes.FLEX_LOOK_AHEAD);
-    map.put(GeneratedSyntaxElementTypes.FLEX_MACRO_DEFINITION, JFlexTypes.FLEX_MACRO_DEFINITION);
-    map.put(GeneratedSyntaxElementTypes.FLEX_MACRO_REFERENCE, JFlexTypes.FLEX_MACRO_REFERENCE);
-    map.put(GeneratedSyntaxElementTypes.FLEX_MACRO_REF_EXPRESSION, JFlexTypes.FLEX_MACRO_REF_EXPRESSION);
-    map.put(GeneratedSyntaxElementTypes.FLEX_NOT_EXPRESSION, JFlexTypes.FLEX_NOT_EXPRESSION);
-    map.put(GeneratedSyntaxElementTypes.FLEX_OPTION, JFlexTypes.FLEX_OPTION);
-    map.put(GeneratedSyntaxElementTypes.FLEX_PAREN_EXPRESSION, JFlexTypes.FLEX_PAREN_EXPRESSION);
-    map.put(GeneratedSyntaxElementTypes.FLEX_PREDEFINED_CLASS_EXPRESSION, JFlexTypes.FLEX_PREDEFINED_CLASS_EXPRESSION);
-    map.put(GeneratedSyntaxElementTypes.FLEX_QUANTIFIER_EXPRESSION, JFlexTypes.FLEX_QUANTIFIER_EXPRESSION);
-    map.put(GeneratedSyntaxElementTypes.FLEX_RULE, JFlexTypes.FLEX_RULE);
-    map.put(GeneratedSyntaxElementTypes.FLEX_SEQUENCE_EXPRESSION, JFlexTypes.FLEX_SEQUENCE_EXPRESSION);
-    map.put(GeneratedSyntaxElementTypes.FLEX_STATE_DECLARATION, JFlexTypes.FLEX_STATE_DECLARATION);
-    map.put(GeneratedSyntaxElementTypes.FLEX_STATE_DEFINITION, JFlexTypes.FLEX_STATE_DEFINITION);
-    map.put(GeneratedSyntaxElementTypes.FLEX_STATE_LIST, JFlexTypes.FLEX_STATE_LIST);
-    map.put(GeneratedSyntaxElementTypes.FLEX_STATE_REFERENCE, JFlexTypes.FLEX_STATE_REFERENCE);
-    map.put(GeneratedSyntaxElementTypes.FLEX_USER_CODE_SECTION, JFlexTypes.FLEX_USER_CODE_SECTION);
-    map.put(GeneratedSyntaxElementTypes.FLEX_USER_VALUE, JFlexTypes.FLEX_USER_VALUE);
-
-    map.put(GeneratedSyntaxElementTypes.FLEX_ID, JFlexTypes.FLEX_ID);
-    map.put(GeneratedSyntaxElementTypes.FLEX_LINE_COMMENT, JFlexTypes.FLEX_LINE_COMMENT);
-    map.put(GeneratedSyntaxElementTypes.FLEX_BLOCK_COMMENT, JFlexTypes.FLEX_BLOCK_COMMENT);
-    map.put(GeneratedSyntaxElementTypes.FLEX_RAW, JFlexTypes.FLEX_RAW);
-    map.put(GeneratedSyntaxElementTypes.FLEX_UNCLOSED, JFlexTypes.FLEX_UNCLOSED);
-    map.put(GeneratedSyntaxElementTypes.FLEX_TWO_PERCS, JFlexTypes.FLEX_TWO_PERCS);
-    map.put(GeneratedSyntaxElementTypes.FLEX_STAR, JFlexTypes.FLEX_STAR);
-    map.put(GeneratedSyntaxElementTypes.FLEX_PAREN1, JFlexTypes.FLEX_PAREN1);
-    map.put(GeneratedSyntaxElementTypes.FLEX_PAREN2, JFlexTypes.FLEX_PAREN2);
-    map.put(GeneratedSyntaxElementTypes.FLEX_BRACK1, JFlexTypes.FLEX_BRACK1);
-    map.put(GeneratedSyntaxElementTypes.FLEX_BRACK2, JFlexTypes.FLEX_BRACK2);
-    map.put(GeneratedSyntaxElementTypes.FLEX_BRACE1, JFlexTypes.FLEX_BRACE1);
-    map.put(GeneratedSyntaxElementTypes.FLEX_BRACE2, JFlexTypes.FLEX_BRACE2);
-    map.put(GeneratedSyntaxElementTypes.FLEX_QUESTION, JFlexTypes.FLEX_QUESTION);
-    map.put(GeneratedSyntaxElementTypes.FLEX_DASH, JFlexTypes.FLEX_DASH);
-    map.put(GeneratedSyntaxElementTypes.FLEX_PLUS, JFlexTypes.FLEX_PLUS);
-    map.put(GeneratedSyntaxElementTypes.FLEX_HAT, JFlexTypes.FLEX_HAT);
-    map.put(GeneratedSyntaxElementTypes.FLEX_FSLASH, JFlexTypes.FLEX_FSLASH);
-    map.put(GeneratedSyntaxElementTypes.FLEX_DASHDASH, JFlexTypes.FLEX_DASHDASH);
-    map.put(GeneratedSyntaxElementTypes.FLEX_AMPAMP, JFlexTypes.FLEX_AMPAMP);
-    map.put(GeneratedSyntaxElementTypes.FLEX_BARBAR, JFlexTypes.FLEX_BARBAR);
-    map.put(GeneratedSyntaxElementTypes.FLEX_TILDETILDE, JFlexTypes.FLEX_TILDETILDE);
-    map.put(GeneratedSyntaxElementTypes.FLEX_DOT, JFlexTypes.FLEX_DOT);
-    map.put(GeneratedSyntaxElementTypes.FLEX_COMMA, JFlexTypes.FLEX_COMMA);
-    map.put(GeneratedSyntaxElementTypes.FLEX_ANGLE1, JFlexTypes.FLEX_ANGLE1);
-    map.put(GeneratedSyntaxElementTypes.FLEX_ANGLE2, JFlexTypes.FLEX_ANGLE2);
-    map.put(GeneratedSyntaxElementTypes.FLEX_BAR, JFlexTypes.FLEX_BAR);
-    map.put(GeneratedSyntaxElementTypes.FLEX_DOLLAR, JFlexTypes.FLEX_DOLLAR);
-    map.put(GeneratedSyntaxElementTypes.FLEX_EQ, JFlexTypes.FLEX_EQ);
-    map.put(GeneratedSyntaxElementTypes.FLEX_BANG, JFlexTypes.FLEX_BANG);
-    map.put(GeneratedSyntaxElementTypes.FLEX_TILDE, JFlexTypes.FLEX_TILDE);
-    map.put(GeneratedSyntaxElementTypes.FLEX_EOF, JFlexTypes.FLEX_EOF);
-    map.put(GeneratedSyntaxElementTypes.FLEX_OPT_CLASS, JFlexTypes.FLEX_OPT_CLASS);
-    map.put(GeneratedSyntaxElementTypes.FLEX_OPT_IMPLEMENTS, JFlexTypes.FLEX_OPT_IMPLEMENTS);
-    map.put(GeneratedSyntaxElementTypes.FLEX_OPT_EXTENDS, JFlexTypes.FLEX_OPT_EXTENDS);
-    map.put(GeneratedSyntaxElementTypes.FLEX_OPT_PUBLIC, JFlexTypes.FLEX_OPT_PUBLIC);
-    map.put(GeneratedSyntaxElementTypes.FLEX_OPT_FINAL, JFlexTypes.FLEX_OPT_FINAL);
-    map.put(GeneratedSyntaxElementTypes.FLEX_OPT_ABSTRACT, JFlexTypes.FLEX_OPT_ABSTRACT);
-    map.put(GeneratedSyntaxElementTypes.FLEX_OPT_APIPRIVATE, JFlexTypes.FLEX_OPT_APIPRIVATE);
-    map.put(GeneratedSyntaxElementTypes.FLEX_OPT_CODE1, JFlexTypes.FLEX_OPT_CODE1);
-    map.put(GeneratedSyntaxElementTypes.FLEX_OPT_CODE2, JFlexTypes.FLEX_OPT_CODE2);
-    map.put(GeneratedSyntaxElementTypes.FLEX_OPT_INIT1, JFlexTypes.FLEX_OPT_INIT1);
-    map.put(GeneratedSyntaxElementTypes.FLEX_OPT_INIT2, JFlexTypes.FLEX_OPT_INIT2);
-    map.put(GeneratedSyntaxElementTypes.FLEX_OPT_INITTHROW, JFlexTypes.FLEX_OPT_INITTHROW);
-    map.put(GeneratedSyntaxElementTypes.FLEX_OPT_INITTHROW1, JFlexTypes.FLEX_OPT_INITTHROW1);
-    map.put(GeneratedSyntaxElementTypes.FLEX_OPT_INITTHROW2, JFlexTypes.FLEX_OPT_INITTHROW2);
-    map.put(GeneratedSyntaxElementTypes.FLEX_OPT_CTORARG, JFlexTypes.FLEX_OPT_CTORARG);
-    map.put(GeneratedSyntaxElementTypes.FLEX_OPT_SCANERROR, JFlexTypes.FLEX_OPT_SCANERROR);
-    map.put(GeneratedSyntaxElementTypes.FLEX_OPT_BUFFER, JFlexTypes.FLEX_OPT_BUFFER);
-    map.put(GeneratedSyntaxElementTypes.FLEX_OPT_INCLUDE, JFlexTypes.FLEX_OPT_INCLUDE);
-    map.put(GeneratedSyntaxElementTypes.FLEX_OPT_FUNCTION, JFlexTypes.FLEX_OPT_FUNCTION);
-    map.put(GeneratedSyntaxElementTypes.FLEX_OPT_INTEGER, JFlexTypes.FLEX_OPT_INTEGER);
-    map.put(GeneratedSyntaxElementTypes.FLEX_OPT_INT, JFlexTypes.FLEX_OPT_INT);
-    map.put(GeneratedSyntaxElementTypes.FLEX_OPT_INTWRAP, JFlexTypes.FLEX_OPT_INTWRAP);
-    map.put(GeneratedSyntaxElementTypes.FLEX_OPT_TYPE, JFlexTypes.FLEX_OPT_TYPE);
-    map.put(GeneratedSyntaxElementTypes.FLEX_OPT_YYLEXTHROW, JFlexTypes.FLEX_OPT_YYLEXTHROW);
-    map.put(GeneratedSyntaxElementTypes.FLEX_OPT_YYLEXTHROW1, JFlexTypes.FLEX_OPT_YYLEXTHROW1);
-    map.put(GeneratedSyntaxElementTypes.FLEX_OPT_YYLEXTHROW2, JFlexTypes.FLEX_OPT_YYLEXTHROW2);
-    map.put(GeneratedSyntaxElementTypes.FLEX_OPT_EOFVAL1, JFlexTypes.FLEX_OPT_EOFVAL1);
-    map.put(GeneratedSyntaxElementTypes.FLEX_OPT_EOFVAL2, JFlexTypes.FLEX_OPT_EOFVAL2);
-    map.put(GeneratedSyntaxElementTypes.FLEX_OPT_EOF1, JFlexTypes.FLEX_OPT_EOF1);
-    map.put(GeneratedSyntaxElementTypes.FLEX_OPT_EOF2, JFlexTypes.FLEX_OPT_EOF2);
-    map.put(GeneratedSyntaxElementTypes.FLEX_OPT_EOFTHROW, JFlexTypes.FLEX_OPT_EOFTHROW);
-    map.put(GeneratedSyntaxElementTypes.FLEX_OPT_EOFTHROW1, JFlexTypes.FLEX_OPT_EOFTHROW1);
-    map.put(GeneratedSyntaxElementTypes.FLEX_OPT_EOFTHROW2, JFlexTypes.FLEX_OPT_EOFTHROW2);
-    map.put(GeneratedSyntaxElementTypes.FLEX_OPT_EOFCLOSE, JFlexTypes.FLEX_OPT_EOFCLOSE);
-    map.put(GeneratedSyntaxElementTypes.FLEX_OPT_DEBUG, JFlexTypes.FLEX_OPT_DEBUG);
-    map.put(GeneratedSyntaxElementTypes.FLEX_OPT_STANDALONE, JFlexTypes.FLEX_OPT_STANDALONE);
-    map.put(GeneratedSyntaxElementTypes.FLEX_OPT_CUP, JFlexTypes.FLEX_OPT_CUP);
-    map.put(GeneratedSyntaxElementTypes.FLEX_OPT_CUPSYM, JFlexTypes.FLEX_OPT_CUPSYM);
-    map.put(GeneratedSyntaxElementTypes.FLEX_OPT_CUPDEBUG, JFlexTypes.FLEX_OPT_CUPDEBUG);
-    map.put(GeneratedSyntaxElementTypes.FLEX_OPT_7BIT, JFlexTypes.FLEX_OPT_7BIT);
-    map.put(GeneratedSyntaxElementTypes.FLEX_OPT_FULL, JFlexTypes.FLEX_OPT_FULL);
-    map.put(GeneratedSyntaxElementTypes.FLEX_OPT_8BIT, JFlexTypes.FLEX_OPT_8BIT);
-    map.put(GeneratedSyntaxElementTypes.FLEX_OPT_UNICODE, JFlexTypes.FLEX_OPT_UNICODE);
-    map.put(GeneratedSyntaxElementTypes.FLEX_OPT16BIT, JFlexTypes.FLEX_OPT16BIT);
-    map.put(GeneratedSyntaxElementTypes.FLEX_OPT_CASELESS, JFlexTypes.FLEX_OPT_CASELESS);
-    map.put(GeneratedSyntaxElementTypes.FLEX_OPT_IGNORECASE, JFlexTypes.FLEX_OPT_IGNORECASE);
-    map.put(GeneratedSyntaxElementTypes.FLEX_OPT_CHAR, JFlexTypes.FLEX_OPT_CHAR);
-    map.put(GeneratedSyntaxElementTypes.FLEX_OPT_LINE, JFlexTypes.FLEX_OPT_LINE);
-    map.put(GeneratedSyntaxElementTypes.FLEX_OPT_COLUMN, JFlexTypes.FLEX_OPT_COLUMN);
-    map.put(GeneratedSyntaxElementTypes.FLEX_OPT_NOTUNIX, JFlexTypes.FLEX_OPT_NOTUNIX);
-    map.put(GeneratedSyntaxElementTypes.FLEX_OPT_YYEOF, JFlexTypes.FLEX_OPT_YYEOF);
-    map.put(GeneratedSyntaxElementTypes.FLEX_OPT_STATE, JFlexTypes.FLEX_OPT_STATE);
-    map.put(GeneratedSyntaxElementTypes.FLEX_OPT_XSTATE, JFlexTypes.FLEX_OPT_XSTATE);
-    map.put(GeneratedSyntaxElementTypes.FLEX_STRING, JFlexTypes.FLEX_STRING);
-    map.put(GeneratedSyntaxElementTypes.FLEX_CHAR_CLASS, JFlexTypes.FLEX_CHAR_CLASS);
-    map.put(GeneratedSyntaxElementTypes.FLEX_CHAR, JFlexTypes.FLEX_CHAR);
-    map.put(GeneratedSyntaxElementTypes.FLEX_CHAR_ESC, JFlexTypes.FLEX_CHAR_ESC);
-    map.put(GeneratedSyntaxElementTypes.FLEX_NUMBER, JFlexTypes.FLEX_NUMBER);
-    map.put(GeneratedSyntaxElementTypes.FLEX_VERSION, JFlexTypes.FLEX_VERSION);
-    return map;
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.FLEX_ID, JFlexTypes.FLEX_ID),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.FLEX_LINE_COMMENT, JFlexTypes.FLEX_LINE_COMMENT),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.FLEX_BLOCK_COMMENT, JFlexTypes.FLEX_BLOCK_COMMENT),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.FLEX_RAW, JFlexTypes.FLEX_RAW),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.FLEX_UNCLOSED, JFlexTypes.FLEX_UNCLOSED),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.FLEX_TWO_PERCS, JFlexTypes.FLEX_TWO_PERCS),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.FLEX_STAR, JFlexTypes.FLEX_STAR),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.FLEX_PAREN1, JFlexTypes.FLEX_PAREN1),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.FLEX_PAREN2, JFlexTypes.FLEX_PAREN2),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.FLEX_BRACK1, JFlexTypes.FLEX_BRACK1),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.FLEX_BRACK2, JFlexTypes.FLEX_BRACK2),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.FLEX_BRACE1, JFlexTypes.FLEX_BRACE1),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.FLEX_BRACE2, JFlexTypes.FLEX_BRACE2),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.FLEX_QUESTION, JFlexTypes.FLEX_QUESTION),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.FLEX_DASH, JFlexTypes.FLEX_DASH),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.FLEX_PLUS, JFlexTypes.FLEX_PLUS),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.FLEX_HAT, JFlexTypes.FLEX_HAT),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.FLEX_FSLASH, JFlexTypes.FLEX_FSLASH),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.FLEX_DASHDASH, JFlexTypes.FLEX_DASHDASH),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.FLEX_AMPAMP, JFlexTypes.FLEX_AMPAMP),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.FLEX_BARBAR, JFlexTypes.FLEX_BARBAR),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.FLEX_TILDETILDE, JFlexTypes.FLEX_TILDETILDE),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.FLEX_DOT, JFlexTypes.FLEX_DOT),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.FLEX_COMMA, JFlexTypes.FLEX_COMMA),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.FLEX_ANGLE1, JFlexTypes.FLEX_ANGLE1),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.FLEX_ANGLE2, JFlexTypes.FLEX_ANGLE2),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.FLEX_BAR, JFlexTypes.FLEX_BAR),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.FLEX_DOLLAR, JFlexTypes.FLEX_DOLLAR),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.FLEX_EQ, JFlexTypes.FLEX_EQ),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.FLEX_BANG, JFlexTypes.FLEX_BANG),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.FLEX_TILDE, JFlexTypes.FLEX_TILDE),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.FLEX_EOF, JFlexTypes.FLEX_EOF),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.FLEX_OPT_CLASS, JFlexTypes.FLEX_OPT_CLASS),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.FLEX_OPT_IMPLEMENTS, JFlexTypes.FLEX_OPT_IMPLEMENTS),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.FLEX_OPT_EXTENDS, JFlexTypes.FLEX_OPT_EXTENDS),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.FLEX_OPT_PUBLIC, JFlexTypes.FLEX_OPT_PUBLIC),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.FLEX_OPT_FINAL, JFlexTypes.FLEX_OPT_FINAL),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.FLEX_OPT_ABSTRACT, JFlexTypes.FLEX_OPT_ABSTRACT),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.FLEX_OPT_APIPRIVATE, JFlexTypes.FLEX_OPT_APIPRIVATE),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.FLEX_OPT_CODE1, JFlexTypes.FLEX_OPT_CODE1),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.FLEX_OPT_CODE2, JFlexTypes.FLEX_OPT_CODE2),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.FLEX_OPT_INIT1, JFlexTypes.FLEX_OPT_INIT1),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.FLEX_OPT_INIT2, JFlexTypes.FLEX_OPT_INIT2),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.FLEX_OPT_INITTHROW, JFlexTypes.FLEX_OPT_INITTHROW),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.FLEX_OPT_INITTHROW1, JFlexTypes.FLEX_OPT_INITTHROW1),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.FLEX_OPT_INITTHROW2, JFlexTypes.FLEX_OPT_INITTHROW2),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.FLEX_OPT_CTORARG, JFlexTypes.FLEX_OPT_CTORARG),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.FLEX_OPT_SCANERROR, JFlexTypes.FLEX_OPT_SCANERROR),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.FLEX_OPT_BUFFER, JFlexTypes.FLEX_OPT_BUFFER),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.FLEX_OPT_INCLUDE, JFlexTypes.FLEX_OPT_INCLUDE),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.FLEX_OPT_FUNCTION, JFlexTypes.FLEX_OPT_FUNCTION),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.FLEX_OPT_INTEGER, JFlexTypes.FLEX_OPT_INTEGER),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.FLEX_OPT_INT, JFlexTypes.FLEX_OPT_INT),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.FLEX_OPT_INTWRAP, JFlexTypes.FLEX_OPT_INTWRAP),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.FLEX_OPT_TYPE, JFlexTypes.FLEX_OPT_TYPE),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.FLEX_OPT_YYLEXTHROW, JFlexTypes.FLEX_OPT_YYLEXTHROW),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.FLEX_OPT_YYLEXTHROW1, JFlexTypes.FLEX_OPT_YYLEXTHROW1),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.FLEX_OPT_YYLEXTHROW2, JFlexTypes.FLEX_OPT_YYLEXTHROW2),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.FLEX_OPT_EOFVAL1, JFlexTypes.FLEX_OPT_EOFVAL1),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.FLEX_OPT_EOFVAL2, JFlexTypes.FLEX_OPT_EOFVAL2),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.FLEX_OPT_EOF1, JFlexTypes.FLEX_OPT_EOF1),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.FLEX_OPT_EOF2, JFlexTypes.FLEX_OPT_EOF2),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.FLEX_OPT_EOFTHROW, JFlexTypes.FLEX_OPT_EOFTHROW),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.FLEX_OPT_EOFTHROW1, JFlexTypes.FLEX_OPT_EOFTHROW1),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.FLEX_OPT_EOFTHROW2, JFlexTypes.FLEX_OPT_EOFTHROW2),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.FLEX_OPT_EOFCLOSE, JFlexTypes.FLEX_OPT_EOFCLOSE),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.FLEX_OPT_DEBUG, JFlexTypes.FLEX_OPT_DEBUG),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.FLEX_OPT_STANDALONE, JFlexTypes.FLEX_OPT_STANDALONE),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.FLEX_OPT_CUP, JFlexTypes.FLEX_OPT_CUP),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.FLEX_OPT_CUPSYM, JFlexTypes.FLEX_OPT_CUPSYM),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.FLEX_OPT_CUPDEBUG, JFlexTypes.FLEX_OPT_CUPDEBUG),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.FLEX_OPT_7BIT, JFlexTypes.FLEX_OPT_7BIT),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.FLEX_OPT_FULL, JFlexTypes.FLEX_OPT_FULL),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.FLEX_OPT_8BIT, JFlexTypes.FLEX_OPT_8BIT),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.FLEX_OPT_UNICODE, JFlexTypes.FLEX_OPT_UNICODE),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.FLEX_OPT16BIT, JFlexTypes.FLEX_OPT16BIT),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.FLEX_OPT_CASELESS, JFlexTypes.FLEX_OPT_CASELESS),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.FLEX_OPT_IGNORECASE, JFlexTypes.FLEX_OPT_IGNORECASE),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.FLEX_OPT_CHAR, JFlexTypes.FLEX_OPT_CHAR),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.FLEX_OPT_LINE, JFlexTypes.FLEX_OPT_LINE),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.FLEX_OPT_COLUMN, JFlexTypes.FLEX_OPT_COLUMN),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.FLEX_OPT_NOTUNIX, JFlexTypes.FLEX_OPT_NOTUNIX),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.FLEX_OPT_YYEOF, JFlexTypes.FLEX_OPT_YYEOF),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.FLEX_OPT_STATE, JFlexTypes.FLEX_OPT_STATE),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.FLEX_OPT_XSTATE, JFlexTypes.FLEX_OPT_XSTATE),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.FLEX_STRING, JFlexTypes.FLEX_STRING),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.FLEX_CHAR_CLASS, JFlexTypes.FLEX_CHAR_CLASS),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.FLEX_CHAR, JFlexTypes.FLEX_CHAR),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.FLEX_CHAR_ESC, JFlexTypes.FLEX_CHAR_ESC),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.FLEX_NUMBER, JFlexTypes.FLEX_NUMBER),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.FLEX_VERSION, JFlexTypes.FLEX_VERSION)
+    );
   }
 }
 // ---- JFlexCharRange.java -----------------

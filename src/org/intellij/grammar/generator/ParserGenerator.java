@@ -624,9 +624,10 @@ public class ParserGenerator {
     else if (!G.generateFQN) {
       imports.addAll(Arrays.asList(C.ParserElementTypeClass,
                                    C.ParserOutputType,
-                                   C.ParserNodeSetClass,
-                                   C.PsiParserClass,
-                                   C.LightPsiParserClass));
+                                   C.ParserNodeSetClass));
+      if (!myGenerateWithSyntax)
+        imports.addAll(List.of(C.PsiParserClass, 
+                               C.LightPsiParserClass));
     }
     imports.addAll(parserImports);
 
@@ -719,7 +720,7 @@ public class ParserGenerator {
       String unit = shorten(SyntaxConstants.KOTLIN_UNIT_CLASS);
       String function2 = format("%s<%s, %s, %s>", shorten(SyntaxConstants.KOTLIN_FUNCTION2_CLASS), shortET, shortPB, unit);
       out("%s %s = new %s(){", function2, N.parse, function2);
-      out("@Override");
+      out(shorten(OVERRIDE_ANNO));
       out("public %s invoke(%s %s, %s %s) {", unit, shortET, N.root, shortPB, N.stateHolder);
       out("parseLight(%s, %s);", N.root, N.stateHolder);
       out("return %s.INSTANCE;", unit);
@@ -771,8 +772,7 @@ public class ParserGenerator {
     out("}");
     newLine();
     if (generateExtendsSets) {
-      var setsArrayClass = (shortTS.contains("Set<")) ? shorten(SyntaxConstants.TOKEN_SET_ARRAY_CLASS) : shortTS;
-      out("public static final %s[] EXTENDS_SETS_ = new %s[] {", shortTS, setsArrayClass);
+        out("public static final %s[] EXTENDS_SETS_ = new %s[] {", shortTS, shortTS);
       StringBuilder sb = new StringBuilder();
       for (Set<String> elementTypes : extendsSet) {
         int i = 0;
@@ -1623,6 +1623,8 @@ public class ParserGenerator {
     }
     if (G.generateTokenSets && !myTokenSets.isEmpty()) {
       imports.add(tokenSetClass);
+      if (myGenerateWithSyntax)
+        imports.add(SyntaxConstants.TOKEN_SET_FILE);
     }
     boolean useExactElements = "all".equals(G.generateExactTypes) || G.generateExactTypes.contains("elements");
     boolean useExactTokens = "all".equals(G.generateExactTypes) || G.generateExactTypes.contains("tokens");
@@ -1799,7 +1801,9 @@ public class ParserGenerator {
     Map<String, String> reverseMap = new HashMap<>();
     myTokenSets.forEach((name, tokens) -> {
       String creationMethod =
-        (tokenSetType.startsWith("java.util.Set") && G.javaVersion > 9) ? "Set.of(%s)" : shorten(tokenSetType) + ".create(%s)";
+        (Objects.equals(tokenSetType, SyntaxConstants.TOKEN_SET_CLASS)) ?
+        shorten(SyntaxConstants.TOKEN_SET_FILE) + ".syntaxElementTypeSetOf(%s)" :
+        shorten(tokenSetType) + ".create(%s)";
       String value = format(creationMethod, tokenSetString(tokens));
       String alreadyRendered = reverseMap.putIfAbsent(value, name);
       out("%s %s = %s;", shorten(tokenSetType), name, ObjectUtils.chooseNotNull(alreadyRendered, value));
@@ -2358,38 +2362,50 @@ public class ParserGenerator {
                                              String typeHolderClass,
                                              String syntaxElementTypeHolderClass,
                                              Map<String, BnfRule> sortedCompositeTypes) {
-    var converterInterface = SyntaxConstants.SYNTAX_ELEMENT_TYPE_CONVERTER_BASE;
+    var converterInterface = SyntaxConstants.SYNTAX_ELEMENT_TYPE_CONVERTER_FACTORY;
     Set<String> imports = new LinkedHashSet<>();
     imports.add(typeHolderClass);
     imports.add(syntaxElementTypeHolderClass);
     imports.add(IELEMENTTYPE_CLASS);
     imports.add(SyntaxConstants.SYNTAX_ELEMENT_TYPE);
-    imports.add(CommonClassNames.JAVA_UTIL_MAP);
-    imports.add(CommonClassNames.JAVA_UTIL_HASH_MAP);
     imports.add(converterInterface);
+    imports.add(SyntaxConstants.SYNTAX_ELEMENT_TYPE_CONVERTER);
+    imports.add(SyntaxConstants.SYNTAX_ELEMENT_TYPE_CONVERTER_FILE);
+    imports.add(NOTNULL_ANNO);
+    imports.add(SyntaxConstants.KOTLIN_PAIR_CLASS);
+    imports.add(OVERRIDE_ANNO);
 
-    generateClassHeader(elementTypesConverter, imports, "", Java.CLASS, converterInterface);
-    out("public %s() {", shorten(elementTypesConverter));
-    out("super(makeElementMap());");
-    out("}");
-    newLine();
-    var mapType = format("%s<%s, %s>", CommonClassNames.JAVA_UTIL_MAP, SyntaxConstants.SYNTAX_ELEMENT_TYPE, IELEMENTTYPE_CLASS);
-    out("private static %s makeElementMap() {", shorten(mapType));
-    out("%s map = new %s<>();", shorten(mapType), shorten(CommonClassNames.JAVA_UTIL_HASH_MAP));
-    for (String elementType : sortedCompositeTypes.keySet()) {
-      out("map.put(%s.%s, %s.%s);", shorten(syntaxElementTypeHolderClass), elementType, shorten(typeHolderClass), elementType);
+    generateClassHeader(elementTypesConverter, imports, "", Java.CLASS, "", converterInterface);
+
+    out(shorten(OVERRIDE_ANNO));
+    out("public %s %s getElementTypeConverter() {", shorten(NOTNULL_ANNO), shorten(SyntaxConstants.SYNTAX_ELEMENT_TYPE_CONVERTER));
+    out("return %s.elementTypeConverterOf(", shorten(SyntaxConstants.SYNTAX_ELEMENT_TYPE_CONVERTER_FILE));
+    var sortedCompositeTypesArr = sortedCompositeTypes.keySet().toArray(new String[0]);
+    var generateTokenTypeConversions = G.generateTokenTypes && !mySimpleTokens.isEmpty();
+    for (int i = 0; i < sortedCompositeTypesArr.length; i++) {
+      String elementType = sortedCompositeTypesArr[i];
+      out("new %s<%s, %s>(%s.%s, %s.%s)" + (i != sortedCompositeTypesArr.length - 1 || generateTokenTypeConversions ? "," : ""),
+          shorten(SyntaxConstants.KOTLIN_PAIR_CLASS),
+          shorten(SyntaxConstants.SYNTAX_ELEMENT_TYPE), shorten(IELEMENTTYPE_CLASS),
+          shorten(syntaxElementTypeHolderClass), elementType,
+          shorten(typeHolderClass), elementType);
     }
-    newLine();
-    if (G.generateTokenTypes) {
-      for (String tokenText : mySimpleTokens.keySet()) {
+    if (G.generateTokenTypes && !mySimpleTokens.isEmpty()) {
+      newLine();
+      var mySimpleTokensArr = mySimpleTokens.keySet().toArray(new String[0]);
+      for (int i = 0; i < mySimpleTokensArr.length; i++) {
+        var tokenText = mySimpleTokensArr[i];
         String tokenName = ObjectUtils.chooseNotNull(mySimpleTokens.get(tokenText), tokenText);
         if (isIgnoredWhitespaceToken(tokenName, tokenText)) continue;
         var elementType = getElementType(tokenName);
-
-        out("map.put(%s.%s, %s.%s);", shorten(syntaxElementTypeHolderClass), elementType, shorten(typeHolderClass), elementType);
+        out("new %s<%s, %s>(%s.%s, %s.%s)" + (i != mySimpleTokensArr.length - 1 ? "," : ""),
+            shorten(SyntaxConstants.KOTLIN_PAIR_CLASS),
+            shorten(SyntaxConstants.SYNTAX_ELEMENT_TYPE), shorten(IELEMENTTYPE_CLASS), 
+            shorten(syntaxElementTypeHolderClass), elementType, 
+            shorten(typeHolderClass), elementType);
       }
     }
-    out("return map;");
+    out(");");
     out("}");
     out("}");
   }

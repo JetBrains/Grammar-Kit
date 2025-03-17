@@ -47,51 +47,50 @@ package generated;
 import org.intellij.grammar.expression.ExpressionTypes;
 import com.intellij.psi.tree.IElementType;
 import com.intellij.platform.syntax.SyntaxElementType;
-import java.util.Map;
-import java.util.HashMap;
-import com.intellij.platform.syntax.psi.ElementTypeConverterBase;
+import com.intellij.platform.syntax.psi.ElementTypeConverterFactory;
+import com.intellij.platform.syntax.psi.ElementTypeConverter;
+import com.intellij.platform.syntax.psi.ElementTypeConverterKt;
+import org.jetbrains.annotations.NotNull;
+import kotlin.Pair;
 
-public class GeneratedSyntaxElementTypeConverter extends ElementTypeConverterBase {
+public class GeneratedSyntaxElementTypeConverter implements ElementTypeConverterFactory {
 
-  public GeneratedSyntaxElementTypeConverter() {
-    super(makeElementMap());
-  }
+  @Override
+  public @NotNull ElementTypeConverter getElementTypeConverter() {
+    return ElementTypeConverterKt.elementTypeConverterOf(
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.ARG_LIST, ExpressionTypes.ARG_LIST),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.ASSIGN_EXPR, ExpressionTypes.ASSIGN_EXPR),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.BETWEEN_EXPR, ExpressionTypes.BETWEEN_EXPR),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.CALL_EXPR, ExpressionTypes.CALL_EXPR),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.CONDITIONAL_EXPR, ExpressionTypes.CONDITIONAL_EXPR),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.DIV_EXPR, ExpressionTypes.DIV_EXPR),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.ELVIS_EXPR, ExpressionTypes.ELVIS_EXPR),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.EXPR, ExpressionTypes.EXPR),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.EXP_EXPR, ExpressionTypes.EXP_EXPR),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.FACTORIAL_EXPR, ExpressionTypes.FACTORIAL_EXPR),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.IDENTIFIER, ExpressionTypes.IDENTIFIER),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.IS_NOT_EXPR, ExpressionTypes.IS_NOT_EXPR),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.LITERAL_EXPR, ExpressionTypes.LITERAL_EXPR),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.MINUS_EXPR, ExpressionTypes.MINUS_EXPR),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.MUL_EXPR, ExpressionTypes.MUL_EXPR),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.PAREN_EXPR, ExpressionTypes.PAREN_EXPR),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.PLUS_EXPR, ExpressionTypes.PLUS_EXPR),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.REF_EXPR, ExpressionTypes.REF_EXPR),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.SPECIAL_EXPR, ExpressionTypes.SPECIAL_EXPR),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.UNARY_MIN_EXPR, ExpressionTypes.UNARY_MIN_EXPR),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.UNARY_NOT_EXPR, ExpressionTypes.UNARY_NOT_EXPR),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.UNARY_PLUS_EXPR, ExpressionTypes.UNARY_PLUS_EXPR),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.XOR_EXPR, ExpressionTypes.XOR_EXPR),
 
-  private static Map<SyntaxElementType, IElementType> makeElementMap() {
-    Map<SyntaxElementType, IElementType> map = new HashMap<>();
-    map.put(GeneratedSyntaxElementTypes.ARG_LIST, ExpressionTypes.ARG_LIST);
-    map.put(GeneratedSyntaxElementTypes.ASSIGN_EXPR, ExpressionTypes.ASSIGN_EXPR);
-    map.put(GeneratedSyntaxElementTypes.BETWEEN_EXPR, ExpressionTypes.BETWEEN_EXPR);
-    map.put(GeneratedSyntaxElementTypes.CALL_EXPR, ExpressionTypes.CALL_EXPR);
-    map.put(GeneratedSyntaxElementTypes.CONDITIONAL_EXPR, ExpressionTypes.CONDITIONAL_EXPR);
-    map.put(GeneratedSyntaxElementTypes.DIV_EXPR, ExpressionTypes.DIV_EXPR);
-    map.put(GeneratedSyntaxElementTypes.ELVIS_EXPR, ExpressionTypes.ELVIS_EXPR);
-    map.put(GeneratedSyntaxElementTypes.EXPR, ExpressionTypes.EXPR);
-    map.put(GeneratedSyntaxElementTypes.EXP_EXPR, ExpressionTypes.EXP_EXPR);
-    map.put(GeneratedSyntaxElementTypes.FACTORIAL_EXPR, ExpressionTypes.FACTORIAL_EXPR);
-    map.put(GeneratedSyntaxElementTypes.IDENTIFIER, ExpressionTypes.IDENTIFIER);
-    map.put(GeneratedSyntaxElementTypes.IS_NOT_EXPR, ExpressionTypes.IS_NOT_EXPR);
-    map.put(GeneratedSyntaxElementTypes.LITERAL_EXPR, ExpressionTypes.LITERAL_EXPR);
-    map.put(GeneratedSyntaxElementTypes.MINUS_EXPR, ExpressionTypes.MINUS_EXPR);
-    map.put(GeneratedSyntaxElementTypes.MUL_EXPR, ExpressionTypes.MUL_EXPR);
-    map.put(GeneratedSyntaxElementTypes.PAREN_EXPR, ExpressionTypes.PAREN_EXPR);
-    map.put(GeneratedSyntaxElementTypes.PLUS_EXPR, ExpressionTypes.PLUS_EXPR);
-    map.put(GeneratedSyntaxElementTypes.REF_EXPR, ExpressionTypes.REF_EXPR);
-    map.put(GeneratedSyntaxElementTypes.SPECIAL_EXPR, ExpressionTypes.SPECIAL_EXPR);
-    map.put(GeneratedSyntaxElementTypes.UNARY_MIN_EXPR, ExpressionTypes.UNARY_MIN_EXPR);
-    map.put(GeneratedSyntaxElementTypes.UNARY_NOT_EXPR, ExpressionTypes.UNARY_NOT_EXPR);
-    map.put(GeneratedSyntaxElementTypes.UNARY_PLUS_EXPR, ExpressionTypes.UNARY_PLUS_EXPR);
-    map.put(GeneratedSyntaxElementTypes.XOR_EXPR, ExpressionTypes.XOR_EXPR);
-
-    map.put(GeneratedSyntaxElementTypes.COMMENT, ExpressionTypes.COMMENT);
-    map.put(GeneratedSyntaxElementTypes.NUMBER, ExpressionTypes.NUMBER);
-    map.put(GeneratedSyntaxElementTypes.ID, ExpressionTypes.ID);
-    map.put(GeneratedSyntaxElementTypes.STRING, ExpressionTypes.STRING);
-    map.put(GeneratedSyntaxElementTypes.SYNTAX, ExpressionTypes.SYNTAX);
-    map.put(GeneratedSyntaxElementTypes.BETWEEN, ExpressionTypes.BETWEEN);
-    map.put(GeneratedSyntaxElementTypes.IS, ExpressionTypes.IS);
-    map.put(GeneratedSyntaxElementTypes.NOT, ExpressionTypes.NOT);
-    map.put(GeneratedSyntaxElementTypes.AND, ExpressionTypes.AND);
-    return map;
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.COMMENT, ExpressionTypes.COMMENT),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.NUMBER, ExpressionTypes.NUMBER),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.ID, ExpressionTypes.ID),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.STRING, ExpressionTypes.STRING),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.SYNTAX, ExpressionTypes.SYNTAX),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.BETWEEN, ExpressionTypes.BETWEEN),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.IS, ExpressionTypes.IS),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.NOT, ExpressionTypes.NOT),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.AND, ExpressionTypes.AND)
+    );
   }
 }

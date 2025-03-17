@@ -5,6 +5,10 @@
 * Generator: allow configuring fallback stub element type [#403](https://github.com/JetBrains/Grammar-Kit/pull/403)
 * Generator: fix invalid @Experimental annotation generation for 2025.1 [#399](https://github.com/JetBrains/Grammar-Kit/pull/400)
 * BNF: fix potential NPE in attribute compatibility resolution [#404](https://github.com/JetBrains/Grammar-Kit/issues/404)
+* Generator: remove Fleet-related generation
+* Context menu: Remove actions: "Fleet: Generate Parser Code", "Fleet: Generate JFlex Lexer", "Fleet: Run JFlex Generator"
+* Generator: Support syntax-api for generated parsers
+* Context menu: Generate Parser Code with Syntax
 
 ## [2023.3]
 

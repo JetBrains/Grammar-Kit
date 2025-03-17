@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 * BNF Highlighting: distinguish explicit vs. implicit tokens [#383](https://github.com/JetBrains/Grammar-Kit/pull/383) by @fan-tom
+* Generator: remove Fleet-related generation
+* Context menu: Remove actions: "Fleet: Generate Parser Code", "Fleet: Generate JFlex Lexer", "Fleet: Run JFlex Generator"
+* Generator: Support syntax-api for generated parsers
+* Context menu: Generate Parser Code with Syntax
 
 ## [2023.3]
 

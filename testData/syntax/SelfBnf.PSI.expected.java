@@ -176,62 +176,61 @@ package org.intellij.grammar;
 import org.intellij.grammar.psi.BnfTypes;
 import com.intellij.psi.tree.IElementType;
 import com.intellij.platform.syntax.SyntaxElementType;
-import java.util.Map;
-import java.util.HashMap;
-import com.intellij.platform.syntax.psi.ElementTypeConverterBase;
+import com.intellij.platform.syntax.psi.ElementTypeConverterFactory;
+import com.intellij.platform.syntax.psi.ElementTypeConverter;
+import com.intellij.platform.syntax.psi.ElementTypeConverterKt;
+import org.jetbrains.annotations.NotNull;
+import kotlin.Pair;
 
-public class BnfSyntaxElementTypeConverter extends ElementTypeConverterBase {
+public class BnfSyntaxElementTypeConverter implements ElementTypeConverterFactory {
 
-  public BnfSyntaxElementTypeConverter() {
-    super(makeElementMap());
-  }
+  @Override
+  public @NotNull ElementTypeConverter getElementTypeConverter() {
+    return ElementTypeConverterKt.elementTypeConverterOf(
+      new Pair<SyntaxElementType, IElementType>(BnfSyntaxTypes.BNF_ATTR, BnfTypes.BNF_ATTR),
+      new Pair<SyntaxElementType, IElementType>(BnfSyntaxTypes.BNF_ATTRS, BnfTypes.BNF_ATTRS),
+      new Pair<SyntaxElementType, IElementType>(BnfSyntaxTypes.BNF_ATTR_PATTERN, BnfTypes.BNF_ATTR_PATTERN),
+      new Pair<SyntaxElementType, IElementType>(BnfSyntaxTypes.BNF_CHOICE, BnfTypes.BNF_CHOICE),
+      new Pair<SyntaxElementType, IElementType>(BnfSyntaxTypes.BNF_EXPRESSION, BnfTypes.BNF_EXPRESSION),
+      new Pair<SyntaxElementType, IElementType>(BnfSyntaxTypes.BNF_EXTERNAL_EXPRESSION, BnfTypes.BNF_EXTERNAL_EXPRESSION),
+      new Pair<SyntaxElementType, IElementType>(BnfSyntaxTypes.BNF_LIST_ENTRY, BnfTypes.BNF_LIST_ENTRY),
+      new Pair<SyntaxElementType, IElementType>(BnfSyntaxTypes.BNF_LITERAL_EXPRESSION, BnfTypes.BNF_LITERAL_EXPRESSION),
+      new Pair<SyntaxElementType, IElementType>(BnfSyntaxTypes.BNF_MODIFIER, BnfTypes.BNF_MODIFIER),
+      new Pair<SyntaxElementType, IElementType>(BnfSyntaxTypes.BNF_PAREN_EXPRESSION, BnfTypes.BNF_PAREN_EXPRESSION),
+      new Pair<SyntaxElementType, IElementType>(BnfSyntaxTypes.BNF_PAREN_OPT_EXPRESSION, BnfTypes.BNF_PAREN_OPT_EXPRESSION),
+      new Pair<SyntaxElementType, IElementType>(BnfSyntaxTypes.BNF_PREDICATE, BnfTypes.BNF_PREDICATE),
+      new Pair<SyntaxElementType, IElementType>(BnfSyntaxTypes.BNF_PREDICATE_SIGN, BnfTypes.BNF_PREDICATE_SIGN),
+      new Pair<SyntaxElementType, IElementType>(BnfSyntaxTypes.BNF_QUANTIFIED, BnfTypes.BNF_QUANTIFIED),
+      new Pair<SyntaxElementType, IElementType>(BnfSyntaxTypes.BNF_QUANTIFIER, BnfTypes.BNF_QUANTIFIER),
+      new Pair<SyntaxElementType, IElementType>(BnfSyntaxTypes.BNF_REFERENCE_OR_TOKEN, BnfTypes.BNF_REFERENCE_OR_TOKEN),
+      new Pair<SyntaxElementType, IElementType>(BnfSyntaxTypes.BNF_RULE, BnfTypes.BNF_RULE),
+      new Pair<SyntaxElementType, IElementType>(BnfSyntaxTypes.BNF_SEQUENCE, BnfTypes.BNF_SEQUENCE),
+      new Pair<SyntaxElementType, IElementType>(BnfSyntaxTypes.BNF_STRING_LITERAL_EXPRESSION, BnfTypes.BNF_STRING_LITERAL_EXPRESSION),
+      new Pair<SyntaxElementType, IElementType>(BnfSyntaxTypes.BNF_VALUE_LIST, BnfTypes.BNF_VALUE_LIST),
 
-  private static Map<SyntaxElementType, IElementType> makeElementMap() {
-    Map<SyntaxElementType, IElementType> map = new HashMap<>();
-    map.put(BnfSyntaxTypes.BNF_ATTR, BnfTypes.BNF_ATTR);
-    map.put(BnfSyntaxTypes.BNF_ATTRS, BnfTypes.BNF_ATTRS);
-    map.put(BnfSyntaxTypes.BNF_ATTR_PATTERN, BnfTypes.BNF_ATTR_PATTERN);
-    map.put(BnfSyntaxTypes.BNF_CHOICE, BnfTypes.BNF_CHOICE);
-    map.put(BnfSyntaxTypes.BNF_EXPRESSION, BnfTypes.BNF_EXPRESSION);
-    map.put(BnfSyntaxTypes.BNF_EXTERNAL_EXPRESSION, BnfTypes.BNF_EXTERNAL_EXPRESSION);
-    map.put(BnfSyntaxTypes.BNF_LIST_ENTRY, BnfTypes.BNF_LIST_ENTRY);
-    map.put(BnfSyntaxTypes.BNF_LITERAL_EXPRESSION, BnfTypes.BNF_LITERAL_EXPRESSION);
-    map.put(BnfSyntaxTypes.BNF_MODIFIER, BnfTypes.BNF_MODIFIER);
-    map.put(BnfSyntaxTypes.BNF_PAREN_EXPRESSION, BnfTypes.BNF_PAREN_EXPRESSION);
-    map.put(BnfSyntaxTypes.BNF_PAREN_OPT_EXPRESSION, BnfTypes.BNF_PAREN_OPT_EXPRESSION);
-    map.put(BnfSyntaxTypes.BNF_PREDICATE, BnfTypes.BNF_PREDICATE);
-    map.put(BnfSyntaxTypes.BNF_PREDICATE_SIGN, BnfTypes.BNF_PREDICATE_SIGN);
-    map.put(BnfSyntaxTypes.BNF_QUANTIFIED, BnfTypes.BNF_QUANTIFIED);
-    map.put(BnfSyntaxTypes.BNF_QUANTIFIER, BnfTypes.BNF_QUANTIFIER);
-    map.put(BnfSyntaxTypes.BNF_REFERENCE_OR_TOKEN, BnfTypes.BNF_REFERENCE_OR_TOKEN);
-    map.put(BnfSyntaxTypes.BNF_RULE, BnfTypes.BNF_RULE);
-    map.put(BnfSyntaxTypes.BNF_SEQUENCE, BnfTypes.BNF_SEQUENCE);
-    map.put(BnfSyntaxTypes.BNF_STRING_LITERAL_EXPRESSION, BnfTypes.BNF_STRING_LITERAL_EXPRESSION);
-    map.put(BnfSyntaxTypes.BNF_VALUE_LIST, BnfTypes.BNF_VALUE_LIST);
-
-    map.put(BnfSyntaxTypes.BNF_OP_EQ, BnfTypes.BNF_OP_EQ);
-    map.put(BnfSyntaxTypes.BNF_OP_IS, BnfTypes.BNF_OP_IS);
-    map.put(BnfSyntaxTypes.BNF_OP_OR, BnfTypes.BNF_OP_OR);
-    map.put(BnfSyntaxTypes.BNF_OP_OPT, BnfTypes.BNF_OP_OPT);
-    map.put(BnfSyntaxTypes.BNF_OP_ONEMORE, BnfTypes.BNF_OP_ONEMORE);
-    map.put(BnfSyntaxTypes.BNF_OP_ZEROMORE, BnfTypes.BNF_OP_ZEROMORE);
-    map.put(BnfSyntaxTypes.BNF_OP_AND, BnfTypes.BNF_OP_AND);
-    map.put(BnfSyntaxTypes.BNF_OP_NOT, BnfTypes.BNF_OP_NOT);
-    map.put(BnfSyntaxTypes.BNF_SEMICOLON, BnfTypes.BNF_SEMICOLON);
-    map.put(BnfSyntaxTypes.BNF_LEFT_BRACE, BnfTypes.BNF_LEFT_BRACE);
-    map.put(BnfSyntaxTypes.BNF_RIGHT_BRACE, BnfTypes.BNF_RIGHT_BRACE);
-    map.put(BnfSyntaxTypes.BNF_LEFT_BRACKET, BnfTypes.BNF_LEFT_BRACKET);
-    map.put(BnfSyntaxTypes.BNF_RIGHT_BRACKET, BnfTypes.BNF_RIGHT_BRACKET);
-    map.put(BnfSyntaxTypes.BNF_LEFT_PAREN, BnfTypes.BNF_LEFT_PAREN);
-    map.put(BnfSyntaxTypes.BNF_RIGHT_PAREN, BnfTypes.BNF_RIGHT_PAREN);
-    map.put(BnfSyntaxTypes.BNF_EXTERNAL_START, BnfTypes.BNF_EXTERNAL_START);
-    map.put(BnfSyntaxTypes.BNF_EXTERNAL_END, BnfTypes.BNF_EXTERNAL_END);
-    map.put(BnfSyntaxTypes.BNF_ID, BnfTypes.BNF_ID);
-    map.put(BnfSyntaxTypes.BNF_STRING, BnfTypes.BNF_STRING);
-    map.put(BnfSyntaxTypes.BNF_NUMBER, BnfTypes.BNF_NUMBER);
-    map.put(BnfSyntaxTypes.BNF_LINE_COMMENT, BnfTypes.BNF_LINE_COMMENT);
-    map.put(BnfSyntaxTypes.BNF_BLOCK_COMMENT, BnfTypes.BNF_BLOCK_COMMENT);
-    return map;
+      new Pair<SyntaxElementType, IElementType>(BnfSyntaxTypes.BNF_OP_EQ, BnfTypes.BNF_OP_EQ),
+      new Pair<SyntaxElementType, IElementType>(BnfSyntaxTypes.BNF_OP_IS, BnfTypes.BNF_OP_IS),
+      new Pair<SyntaxElementType, IElementType>(BnfSyntaxTypes.BNF_OP_OR, BnfTypes.BNF_OP_OR),
+      new Pair<SyntaxElementType, IElementType>(BnfSyntaxTypes.BNF_OP_OPT, BnfTypes.BNF_OP_OPT),
+      new Pair<SyntaxElementType, IElementType>(BnfSyntaxTypes.BNF_OP_ONEMORE, BnfTypes.BNF_OP_ONEMORE),
+      new Pair<SyntaxElementType, IElementType>(BnfSyntaxTypes.BNF_OP_ZEROMORE, BnfTypes.BNF_OP_ZEROMORE),
+      new Pair<SyntaxElementType, IElementType>(BnfSyntaxTypes.BNF_OP_AND, BnfTypes.BNF_OP_AND),
+      new Pair<SyntaxElementType, IElementType>(BnfSyntaxTypes.BNF_OP_NOT, BnfTypes.BNF_OP_NOT),
+      new Pair<SyntaxElementType, IElementType>(BnfSyntaxTypes.BNF_SEMICOLON, BnfTypes.BNF_SEMICOLON),
+      new Pair<SyntaxElementType, IElementType>(BnfSyntaxTypes.BNF_LEFT_BRACE, BnfTypes.BNF_LEFT_BRACE),
+      new Pair<SyntaxElementType, IElementType>(BnfSyntaxTypes.BNF_RIGHT_BRACE, BnfTypes.BNF_RIGHT_BRACE),
+      new Pair<SyntaxElementType, IElementType>(BnfSyntaxTypes.BNF_LEFT_BRACKET, BnfTypes.BNF_LEFT_BRACKET),
+      new Pair<SyntaxElementType, IElementType>(BnfSyntaxTypes.BNF_RIGHT_BRACKET, BnfTypes.BNF_RIGHT_BRACKET),
+      new Pair<SyntaxElementType, IElementType>(BnfSyntaxTypes.BNF_LEFT_PAREN, BnfTypes.BNF_LEFT_PAREN),
+      new Pair<SyntaxElementType, IElementType>(BnfSyntaxTypes.BNF_RIGHT_PAREN, BnfTypes.BNF_RIGHT_PAREN),
+      new Pair<SyntaxElementType, IElementType>(BnfSyntaxTypes.BNF_EXTERNAL_START, BnfTypes.BNF_EXTERNAL_START),
+      new Pair<SyntaxElementType, IElementType>(BnfSyntaxTypes.BNF_EXTERNAL_END, BnfTypes.BNF_EXTERNAL_END),
+      new Pair<SyntaxElementType, IElementType>(BnfSyntaxTypes.BNF_ID, BnfTypes.BNF_ID),
+      new Pair<SyntaxElementType, IElementType>(BnfSyntaxTypes.BNF_STRING, BnfTypes.BNF_STRING),
+      new Pair<SyntaxElementType, IElementType>(BnfSyntaxTypes.BNF_NUMBER, BnfTypes.BNF_NUMBER),
+      new Pair<SyntaxElementType, IElementType>(BnfSyntaxTypes.BNF_LINE_COMMENT, BnfTypes.BNF_LINE_COMMENT),
+      new Pair<SyntaxElementType, IElementType>(BnfSyntaxTypes.BNF_BLOCK_COMMENT, BnfTypes.BNF_BLOCK_COMMENT)
+    );
   }
 }
 // ---- BnfAttr.java -----------------

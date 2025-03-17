@@ -13,9 +13,7 @@ import kotlin.jvm.functions.Function2;
 import kotlin.Unit;
 import com.intellij.platform.syntax.SyntaxElementType;
 import com.intellij.platform.syntax.parser.ProductionResult;
-import java.util.Set;
-import com.intellij.lang.PsiParser;
-import com.intellij.lang.LightPsiParser;
+import com.intellij.platform.syntax.SyntaxElementTypeSet;
 
 @SuppressWarnings({"SimplifiableIfStatement", "UnusedAssignment"})
 public class JFlexParser {
@@ -49,7 +47,7 @@ public class JFlexParser {
     return flex_file(runtime, level + 1);
   }
 
-  public static final Set<SyntaxElementType>[] EXTENDS_SETS_ = new Set[] {
+  public static final SyntaxElementTypeSet[] EXTENDS_SETS_ = new SyntaxElementTypeSet[] {
     create_token_set_(FLEX_DECLARATIONS_SECTION, FLEX_LEXICAL_RULES_SECTION, FLEX_USER_CODE_SECTION),
     create_token_set_(FLEX_CHAR_RANGE, FLEX_CHOICE_EXPRESSION, FLEX_CLASS_EXPRESSION, FLEX_EXPRESSION,
       FLEX_LITERAL_EXPRESSION, FLEX_MACRO_REF_EXPRESSION, FLEX_NOT_EXPRESSION, FLEX_PAREN_EXPRESSION,

@@ -22,7 +22,7 @@ public class GenOptions {
   public void parseLight(com.intellij.platform.syntax.SyntaxElementType root_, com.intellij.platform.syntax.runtime.SyntaxGeneratedParserRuntime runtime_) {
     boolean result_;
     kotlin.jvm.functions.Function2<com.intellij.platform.syntax.SyntaxElementType, com.intellij.platform.syntax.runtime.SyntaxGeneratedParserRuntime, kotlin.Unit> parse_ = new kotlin.jvm.functions.Function2<com.intellij.platform.syntax.SyntaxElementType, com.intellij.platform.syntax.runtime.SyntaxGeneratedParserRuntime, kotlin.Unit>(){
-      @Override
+      @java.lang.Override
       public kotlin.Unit invoke(com.intellij.platform.syntax.SyntaxElementType root_, com.intellij.platform.syntax.runtime.SyntaxGeneratedParserRuntime runtime_) {
         parseLight(root_, runtime_);
         return kotlin.Unit.INSTANCE;
@@ -43,7 +43,7 @@ public class GenOptions {
     return root(runtime_, level_ + 1);
   }
 
-  public static final java.util.Set<com.intellij.platform.syntax.SyntaxElementType>[] EXTENDS_SETS_ = new java.util.Set[] {
+  public static final com.intellij.platform.syntax.SyntaxElementTypeSet[] EXTENDS_SETS_ = new com.intellij.platform.syntax.SyntaxElementTypeSet[] {
     create_token_set_(CREATE_STATEMENT, CREATE_TABLE_STATEMENT, DROP_STATEMENT, DROP_TABLE_STATEMENT,
       STATEMENT),
   };

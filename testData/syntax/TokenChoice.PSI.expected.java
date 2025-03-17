@@ -3,7 +3,8 @@
 package generated;
 
 import com.intellij.platform.syntax.SyntaxElementType;
-import java.util.Set;
+import com.intellij.platform.syntax.SyntaxElementTypeSet;
+import com.intellij.platform.syntax.SyntaxElementTypeSetKt;
 
 public interface GeneratedSyntaxElementTypes {
 
@@ -36,24 +37,24 @@ public interface GeneratedSyntaxElementTypes {
   SyntaxElementType S = new SyntaxElementType("S");
 
   interface TokenSets {
-    Set<SyntaxElementType> ANOTHER_THREE_TOKENS_TOKENS = Set.of(A, B, D);
-    Set<SyntaxElementType> FAST_CHOICE_TOKENS = Set.of(A, B, F);
-    Set<SyntaxElementType> FIVE_TOKENS_CHOICE_TOKENS = Set.of(
+    SyntaxElementTypeSet ANOTHER_THREE_TOKENS_TOKENS = SyntaxElementTypeSetKt.syntaxElementTypeSetOf(A, B, D);
+    SyntaxElementTypeSet FAST_CHOICE_TOKENS = SyntaxElementTypeSetKt.syntaxElementTypeSetOf(A, B, F);
+    SyntaxElementTypeSet FIVE_TOKENS_CHOICE_TOKENS = SyntaxElementTypeSetKt.syntaxElementTypeSetOf(
         A, B, C, D, 
         E
     );
-    Set<SyntaxElementType> FOUR_TOKENS_CHOICE_TOKENS = Set.of(A, B, C, D);
-    Set<SyntaxElementType> PARENTHESIZED_CHOICE_TOKENS = Set.of(A, B, C);
-    Set<SyntaxElementType> PRIVATE_CHOICE_TOKENS = Set.of(P0, P1, P2, P3);
-    Set<SyntaxElementType> REPEATING_TOKENS_CHOICE_TOKENS = FOUR_TOKENS_CHOICE_TOKENS;
-    Set<SyntaxElementType> SMART_CHOICE_TOKENS = Set.of(A, B, S);
-    Set<SyntaxElementType> TEN_TOKENS_CHOICE_TOKENS = Set.of(
+    SyntaxElementTypeSet FOUR_TOKENS_CHOICE_TOKENS = SyntaxElementTypeSetKt.syntaxElementTypeSetOf(A, B, C, D);
+    SyntaxElementTypeSet PARENTHESIZED_CHOICE_TOKENS = SyntaxElementTypeSetKt.syntaxElementTypeSetOf(A, B, C);
+    SyntaxElementTypeSet PRIVATE_CHOICE_TOKENS = SyntaxElementTypeSetKt.syntaxElementTypeSetOf(P0, P1, P2, P3);
+    SyntaxElementTypeSet REPEATING_TOKENS_CHOICE_TOKENS = FOUR_TOKENS_CHOICE_TOKENS;
+    SyntaxElementTypeSet SMART_CHOICE_TOKENS = SyntaxElementTypeSetKt.syntaxElementTypeSetOf(A, B, S);
+    SyntaxElementTypeSet TEN_TOKENS_CHOICE_TOKENS = SyntaxElementTypeSetKt.syntaxElementTypeSetOf(
         A, B, C, D, 
         E, F, G, H, 
         I, J
     );
-    Set<SyntaxElementType> THREE_TOKENS_CHOICE_TOKENS = PARENTHESIZED_CHOICE_TOKENS;
-    Set<SyntaxElementType> THREE_TOKENS_IN_ANOTHER_ORDER_TOKENS = PARENTHESIZED_CHOICE_TOKENS;
+    SyntaxElementTypeSet THREE_TOKENS_CHOICE_TOKENS = PARENTHESIZED_CHOICE_TOKENS;
+    SyntaxElementTypeSet THREE_TOKENS_IN_ANOTHER_ORDER_TOKENS = PARENTHESIZED_CHOICE_TOKENS;
   }
 }
 // ---- GeneratedSyntaxElementTypeConverter.java -----------------
@@ -62,45 +63,44 @@ package generated;
 
 import com.intellij.psi.tree.IElementType;
 import com.intellij.platform.syntax.SyntaxElementType;
-import java.util.Map;
-import java.util.HashMap;
-import com.intellij.platform.syntax.psi.ElementTypeConverterBase;
+import com.intellij.platform.syntax.psi.ElementTypeConverterFactory;
+import com.intellij.platform.syntax.psi.ElementTypeConverter;
+import com.intellij.platform.syntax.psi.ElementTypeConverterKt;
+import org.jetbrains.annotations.NotNull;
+import kotlin.Pair;
 
-public class GeneratedSyntaxElementTypeConverter extends ElementTypeConverterBase {
+public class GeneratedSyntaxElementTypeConverter implements ElementTypeConverterFactory {
 
-  public GeneratedSyntaxElementTypeConverter() {
-    super(makeElementMap());
-  }
+  @Override
+  public @NotNull ElementTypeConverter getElementTypeConverter() {
+    return ElementTypeConverterKt.elementTypeConverterOf(
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.ANOTHER_THREE_TOKENS, GeneratedTypes.ANOTHER_THREE_TOKENS),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.FAST_CHOICE, GeneratedTypes.FAST_CHOICE),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.FIVE_TOKENS_CHOICE, GeneratedTypes.FIVE_TOKENS_CHOICE),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.FOUR_TOKENS_CHOICE, GeneratedTypes.FOUR_TOKENS_CHOICE),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.PARENTHESIZED_CHOICE, GeneratedTypes.PARENTHESIZED_CHOICE),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.REPEATING_TOKENS_CHOICE, GeneratedTypes.REPEATING_TOKENS_CHOICE),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.SMART_CHOICE, GeneratedTypes.SMART_CHOICE),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.SOME, GeneratedTypes.SOME),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.TEN_TOKENS_CHOICE, GeneratedTypes.TEN_TOKENS_CHOICE),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.THREE_TOKENS_CHOICE, GeneratedTypes.THREE_TOKENS_CHOICE),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.THREE_TOKENS_IN_ANOTHER_ORDER, GeneratedTypes.THREE_TOKENS_IN_ANOTHER_ORDER),
 
-  private static Map<SyntaxElementType, IElementType> makeElementMap() {
-    Map<SyntaxElementType, IElementType> map = new HashMap<>();
-    map.put(GeneratedSyntaxElementTypes.ANOTHER_THREE_TOKENS, GeneratedTypes.ANOTHER_THREE_TOKENS);
-    map.put(GeneratedSyntaxElementTypes.FAST_CHOICE, GeneratedTypes.FAST_CHOICE);
-    map.put(GeneratedSyntaxElementTypes.FIVE_TOKENS_CHOICE, GeneratedTypes.FIVE_TOKENS_CHOICE);
-    map.put(GeneratedSyntaxElementTypes.FOUR_TOKENS_CHOICE, GeneratedTypes.FOUR_TOKENS_CHOICE);
-    map.put(GeneratedSyntaxElementTypes.PARENTHESIZED_CHOICE, GeneratedTypes.PARENTHESIZED_CHOICE);
-    map.put(GeneratedSyntaxElementTypes.REPEATING_TOKENS_CHOICE, GeneratedTypes.REPEATING_TOKENS_CHOICE);
-    map.put(GeneratedSyntaxElementTypes.SMART_CHOICE, GeneratedTypes.SMART_CHOICE);
-    map.put(GeneratedSyntaxElementTypes.SOME, GeneratedTypes.SOME);
-    map.put(GeneratedSyntaxElementTypes.TEN_TOKENS_CHOICE, GeneratedTypes.TEN_TOKENS_CHOICE);
-    map.put(GeneratedSyntaxElementTypes.THREE_TOKENS_CHOICE, GeneratedTypes.THREE_TOKENS_CHOICE);
-    map.put(GeneratedSyntaxElementTypes.THREE_TOKENS_IN_ANOTHER_ORDER, GeneratedTypes.THREE_TOKENS_IN_ANOTHER_ORDER);
-
-    map.put(GeneratedSyntaxElementTypes.D, GeneratedTypes.D);
-    map.put(GeneratedSyntaxElementTypes.A, GeneratedTypes.A);
-    map.put(GeneratedSyntaxElementTypes.B, GeneratedTypes.B);
-    map.put(GeneratedSyntaxElementTypes.F, GeneratedTypes.F);
-    map.put(GeneratedSyntaxElementTypes.C, GeneratedTypes.C);
-    map.put(GeneratedSyntaxElementTypes.E, GeneratedTypes.E);
-    map.put(GeneratedSyntaxElementTypes.P2, GeneratedTypes.P2);
-    map.put(GeneratedSyntaxElementTypes.P3, GeneratedTypes.P3);
-    map.put(GeneratedSyntaxElementTypes.P0, GeneratedTypes.P0);
-    map.put(GeneratedSyntaxElementTypes.P1, GeneratedTypes.P1);
-    map.put(GeneratedSyntaxElementTypes.S, GeneratedTypes.S);
-    map.put(GeneratedSyntaxElementTypes.G, GeneratedTypes.G);
-    map.put(GeneratedSyntaxElementTypes.H, GeneratedTypes.H);
-    map.put(GeneratedSyntaxElementTypes.I, GeneratedTypes.I);
-    map.put(GeneratedSyntaxElementTypes.J, GeneratedTypes.J);
-    return map;
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.D, GeneratedTypes.D),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.A, GeneratedTypes.A),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.B, GeneratedTypes.B),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.F, GeneratedTypes.F),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.C, GeneratedTypes.C),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.E, GeneratedTypes.E),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.P2, GeneratedTypes.P2),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.P3, GeneratedTypes.P3),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.P0, GeneratedTypes.P0),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.P1, GeneratedTypes.P1),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.S, GeneratedTypes.S),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.G, GeneratedTypes.G),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.H, GeneratedTypes.H),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.I, GeneratedTypes.I),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.J, GeneratedTypes.J)
+    );
   }
 }

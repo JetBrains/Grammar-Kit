@@ -13,9 +13,7 @@ import kotlin.jvm.functions.Function2;
 import kotlin.Unit;
 import com.intellij.platform.syntax.SyntaxElementType;
 import com.intellij.platform.syntax.parser.ProductionResult;
-import java.util.Set;
-import com.intellij.lang.PsiParser;
-import com.intellij.lang.LightPsiParser;
+import com.intellij.platform.syntax.SyntaxElementTypeSet;
 
 @SuppressWarnings({"SimplifiableIfStatement", "UnusedAssignment"})
 public class ExternalRules {
@@ -56,7 +54,7 @@ public class ExternalRules {
     return result_;
   }
 
-  public static final Set<SyntaxElementType>[] EXTENDS_SETS_ = new Set[] {
+  public static final SyntaxElementTypeSet[] EXTENDS_SETS_ = new SyntaxElementTypeSet[] {
     create_token_set_(COLLAPSE_ONE, COLLAPSE_TWO),
   };
 

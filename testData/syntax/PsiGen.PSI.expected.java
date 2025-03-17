@@ -176,54 +176,53 @@ package generated;
 
 import com.intellij.psi.tree.IElementType;
 import com.intellij.platform.syntax.SyntaxElementType;
-import java.util.Map;
-import java.util.HashMap;
-import com.intellij.platform.syntax.psi.ElementTypeConverterBase;
+import com.intellij.platform.syntax.psi.ElementTypeConverterFactory;
+import com.intellij.platform.syntax.psi.ElementTypeConverter;
+import com.intellij.platform.syntax.psi.ElementTypeConverterKt;
+import org.jetbrains.annotations.NotNull;
+import kotlin.Pair;
 
-public class GeneratedSyntaxElementTypeConverter extends ElementTypeConverterBase {
+public class GeneratedSyntaxElementTypeConverter implements ElementTypeConverterFactory {
 
-  public GeneratedSyntaxElementTypeConverter() {
-    super(makeElementMap());
-  }
+  @Override
+  public @NotNull ElementTypeConverter getElementTypeConverter() {
+    return ElementTypeConverterKt.elementTypeConverterOf(
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.A_STATEMENT, GeneratedTypes.A_STATEMENT),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.BLOCK_OF, GeneratedTypes.BLOCK_OF),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.B_STATEMENT, GeneratedTypes.B_STATEMENT),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.CAST_EXPR, GeneratedTypes.CAST_EXPR),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.CHOICE_JOINED, GeneratedTypes.CHOICE_JOINED),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.C_STATEMENT, GeneratedTypes.C_STATEMENT),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.EXPR, GeneratedTypes.EXPR),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.GRAMMAR_ELEMENT, GeneratedTypes.GRAMMAR_ELEMENT),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.IDENTIFIER, GeneratedTypes.IDENTIFIER),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.ID_EXPR, GeneratedTypes.ID_EXPR),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.INCLUDE_SECTION, GeneratedTypes.INCLUDE_SECTION),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.INCLUDE__SECTION__ALT, GeneratedTypes.INCLUDE__SECTION__ALT),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.ITEM_EXPR, GeneratedTypes.ITEM_EXPR),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.LEFT_SHADOW, GeneratedTypes.LEFT_SHADOW),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.LEFT_SHADOW_TEST, GeneratedTypes.LEFT_SHADOW_TEST),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.LITERAL, GeneratedTypes.LITERAL),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.MISSING_EXTERNAL_TYPE, GeneratedTypes.MISSING_EXTERNAL_TYPE),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.MUL_EXPR, GeneratedTypes.MUL_EXPR),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.PLUS_EXPR, GeneratedTypes.PLUS_EXPR),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.REF_EXPR, GeneratedTypes.REF_EXPR),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.ROOT, GeneratedTypes.ROOT),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.ROOT_B, GeneratedTypes.ROOT_B),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.ROOT_C, GeneratedTypes.ROOT_C),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.ROOT_D, GeneratedTypes.ROOT_D),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.SOME_EXPR, GeneratedTypes.SOME_EXPR),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.SPECIAL_REF, GeneratedTypes.SPECIAL_REF),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.STATEMENT, GeneratedTypes.STATEMENT),
 
-  private static Map<SyntaxElementType, IElementType> makeElementMap() {
-    Map<SyntaxElementType, IElementType> map = new HashMap<>();
-    map.put(GeneratedSyntaxElementTypes.A_STATEMENT, GeneratedTypes.A_STATEMENT);
-    map.put(GeneratedSyntaxElementTypes.BLOCK_OF, GeneratedTypes.BLOCK_OF);
-    map.put(GeneratedSyntaxElementTypes.B_STATEMENT, GeneratedTypes.B_STATEMENT);
-    map.put(GeneratedSyntaxElementTypes.CAST_EXPR, GeneratedTypes.CAST_EXPR);
-    map.put(GeneratedSyntaxElementTypes.CHOICE_JOINED, GeneratedTypes.CHOICE_JOINED);
-    map.put(GeneratedSyntaxElementTypes.C_STATEMENT, GeneratedTypes.C_STATEMENT);
-    map.put(GeneratedSyntaxElementTypes.EXPR, GeneratedTypes.EXPR);
-    map.put(GeneratedSyntaxElementTypes.GRAMMAR_ELEMENT, GeneratedTypes.GRAMMAR_ELEMENT);
-    map.put(GeneratedSyntaxElementTypes.IDENTIFIER, GeneratedTypes.IDENTIFIER);
-    map.put(GeneratedSyntaxElementTypes.ID_EXPR, GeneratedTypes.ID_EXPR);
-    map.put(GeneratedSyntaxElementTypes.INCLUDE_SECTION, GeneratedTypes.INCLUDE_SECTION);
-    map.put(GeneratedSyntaxElementTypes.INCLUDE__SECTION__ALT, GeneratedTypes.INCLUDE__SECTION__ALT);
-    map.put(GeneratedSyntaxElementTypes.ITEM_EXPR, GeneratedTypes.ITEM_EXPR);
-    map.put(GeneratedSyntaxElementTypes.LEFT_SHADOW, GeneratedTypes.LEFT_SHADOW);
-    map.put(GeneratedSyntaxElementTypes.LEFT_SHADOW_TEST, GeneratedTypes.LEFT_SHADOW_TEST);
-    map.put(GeneratedSyntaxElementTypes.LITERAL, GeneratedTypes.LITERAL);
-    map.put(GeneratedSyntaxElementTypes.MISSING_EXTERNAL_TYPE, GeneratedTypes.MISSING_EXTERNAL_TYPE);
-    map.put(GeneratedSyntaxElementTypes.MUL_EXPR, GeneratedTypes.MUL_EXPR);
-    map.put(GeneratedSyntaxElementTypes.PLUS_EXPR, GeneratedTypes.PLUS_EXPR);
-    map.put(GeneratedSyntaxElementTypes.REF_EXPR, GeneratedTypes.REF_EXPR);
-    map.put(GeneratedSyntaxElementTypes.ROOT, GeneratedTypes.ROOT);
-    map.put(GeneratedSyntaxElementTypes.ROOT_B, GeneratedTypes.ROOT_B);
-    map.put(GeneratedSyntaxElementTypes.ROOT_C, GeneratedTypes.ROOT_C);
-    map.put(GeneratedSyntaxElementTypes.ROOT_D, GeneratedTypes.ROOT_D);
-    map.put(GeneratedSyntaxElementTypes.SOME_EXPR, GeneratedTypes.SOME_EXPR);
-    map.put(GeneratedSyntaxElementTypes.SPECIAL_REF, GeneratedTypes.SPECIAL_REF);
-    map.put(GeneratedSyntaxElementTypes.STATEMENT, GeneratedTypes.STATEMENT);
-
-    map.put(GeneratedSyntaxElementTypes.OP_MUL, GeneratedTypes.OP_MUL);
-    map.put(GeneratedSyntaxElementTypes.OP_DIV, GeneratedTypes.OP_DIV);
-    map.put(GeneratedSyntaxElementTypes.SLASH, GeneratedTypes.SLASH);
-    map.put(GeneratedSyntaxElementTypes.ID, GeneratedTypes.ID);
-    map.put(GeneratedSyntaxElementTypes.NUMBER, GeneratedTypes.NUMBER);
-    map.put(GeneratedSyntaxElementTypes.NOTSPACE, GeneratedTypes.NOTSPACE);
-    map.put(GeneratedSyntaxElementTypes.OF, GeneratedTypes.OF);
-    return map;
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.OP_MUL, GeneratedTypes.OP_MUL),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.OP_DIV, GeneratedTypes.OP_DIV),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.SLASH, GeneratedTypes.SLASH),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.ID, GeneratedTypes.ID),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.NUMBER, GeneratedTypes.NUMBER),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.NOTSPACE, GeneratedTypes.NOTSPACE),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.OF, GeneratedTypes.OF)
+    );
   }
 }
 // ---- XLeftShadow.java -----------------

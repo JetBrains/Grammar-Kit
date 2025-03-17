@@ -13,9 +13,7 @@ import kotlin.jvm.functions.Function2;
 import kotlin.Unit;
 import com.intellij.platform.syntax.SyntaxElementType;
 import com.intellij.platform.syntax.parser.ProductionResult;
-import java.util.Set;
-import com.intellij.lang.PsiParser;
-import com.intellij.lang.LightPsiParser;
+import com.intellij.platform.syntax.SyntaxElementTypeSet;
 
 @SuppressWarnings({"SimplifiableIfStatement", "UnusedAssignment"})
 public class PsiGen {
@@ -49,7 +47,7 @@ public class PsiGen {
     return grammar_root(runtime_, level_ + 1);
   }
 
-  public static final Set<SyntaxElementType>[] EXTENDS_SETS_ = new Set[] {
+  public static final SyntaxElementTypeSet[] EXTENDS_SETS_ = new SyntaxElementTypeSet[] {
     create_token_set_(ROOT, ROOT_B, ROOT_C, ROOT_D),
     create_token_set_(A_STATEMENT, B_STATEMENT, C_STATEMENT, STATEMENT),
     create_token_set_(CAST_EXPR, CHOICE_JOINED, EXPR, ID_EXPR,

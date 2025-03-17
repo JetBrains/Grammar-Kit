@@ -13,9 +13,7 @@ import kotlin.jvm.functions.Function2;
 import kotlin.Unit;
 import com.intellij.platform.syntax.SyntaxElementType;
 import com.intellij.platform.syntax.parser.ProductionResult;
-import java.util.Set;
-import com.intellij.lang.PsiParser;
-import com.intellij.lang.LightPsiParser;
+import com.intellij.platform.syntax.SyntaxElementTypeSet;
 
 @SuppressWarnings({"SimplifiableIfStatement", "UnusedAssignment"})
 public class GrammarParser {
@@ -49,7 +47,7 @@ public class GrammarParser {
     return parseGrammar(runtime, level + 1, GrammarParser::grammar_element);
   }
 
-  public static final Set<SyntaxElementType>[] EXTENDS_SETS_ = new Set[] {
+  public static final SyntaxElementTypeSet[] EXTENDS_SETS_ = new SyntaxElementTypeSet[] {
     create_token_set_(BNF_CHOICE, BNF_EXPRESSION, BNF_EXTERNAL_EXPRESSION, BNF_LITERAL_EXPRESSION,
       BNF_PAREN_EXPRESSION, BNF_PAREN_OPT_EXPRESSION, BNF_PREDICATE, BNF_QUANTIFIED,
       BNF_REFERENCE_OR_TOKEN, BNF_SEQUENCE, BNF_STRING_LITERAL_EXPRESSION, BNF_VALUE_LIST),

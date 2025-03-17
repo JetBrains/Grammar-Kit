@@ -23,28 +23,27 @@ package generated;
 
 import com.intellij.psi.tree.IElementType;
 import com.intellij.platform.syntax.SyntaxElementType;
-import java.util.Map;
-import java.util.HashMap;
-import com.intellij.platform.syntax.psi.ElementTypeConverterBase;
+import com.intellij.platform.syntax.psi.ElementTypeConverterFactory;
+import com.intellij.platform.syntax.psi.ElementTypeConverter;
+import com.intellij.platform.syntax.psi.ElementTypeConverterKt;
+import org.jetbrains.annotations.NotNull;
+import kotlin.Pair;
 
-public class GeneratedSyntaxElementTypeConverter extends ElementTypeConverterBase {
+public class GeneratedSyntaxElementTypeConverter implements ElementTypeConverterFactory {
 
-  public GeneratedSyntaxElementTypeConverter() {
-    super(makeElementMap());
-  }
+  @Override
+  public @NotNull ElementTypeConverter getElementTypeConverter() {
+    return ElementTypeConverterKt.elementTypeConverterOf(
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.INNER_CHOICE, GeneratedTypes.INNER_CHOICE),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.INNER_PARENTHESIZED_CHOICE, GeneratedTypes.INNER_PARENTHESIZED_CHOICE),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.TEXT_TOKEN_CHOICE, GeneratedTypes.TEXT_TOKEN_CHOICE),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.TWO_TOKENS_CHOICE, GeneratedTypes.TWO_TOKENS_CHOICE),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.TWO_TOKENS_REPEATING_CHOICE, GeneratedTypes.TWO_TOKENS_REPEATING_CHOICE),
 
-  private static Map<SyntaxElementType, IElementType> makeElementMap() {
-    Map<SyntaxElementType, IElementType> map = new HashMap<>();
-    map.put(GeneratedSyntaxElementTypes.INNER_CHOICE, GeneratedTypes.INNER_CHOICE);
-    map.put(GeneratedSyntaxElementTypes.INNER_PARENTHESIZED_CHOICE, GeneratedTypes.INNER_PARENTHESIZED_CHOICE);
-    map.put(GeneratedSyntaxElementTypes.TEXT_TOKEN_CHOICE, GeneratedTypes.TEXT_TOKEN_CHOICE);
-    map.put(GeneratedSyntaxElementTypes.TWO_TOKENS_CHOICE, GeneratedTypes.TWO_TOKENS_CHOICE);
-    map.put(GeneratedSyntaxElementTypes.TWO_TOKENS_REPEATING_CHOICE, GeneratedTypes.TWO_TOKENS_REPEATING_CHOICE);
-
-    map.put(GeneratedSyntaxElementTypes.D, GeneratedTypes.D);
-    map.put(GeneratedSyntaxElementTypes.A, GeneratedTypes.A);
-    map.put(GeneratedSyntaxElementTypes.B, GeneratedTypes.B);
-    map.put(GeneratedSyntaxElementTypes.C, GeneratedTypes.C);
-    return map;
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.D, GeneratedTypes.D),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.A, GeneratedTypes.A),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.B, GeneratedTypes.B),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.C, GeneratedTypes.C)
+    );
   }
 }

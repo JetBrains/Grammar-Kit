@@ -5,21 +5,14 @@
 package org.intellij.grammar;
 
 import com.intellij.psi.PsiFile;
-import org.intellij.grammar.psi.BnfFile;
-import org.intellij.grammar.syntax.SyntaxBnfAttributePostProcessor;
 
 public class SyntaxBnfGeneratorTest extends BnfGeneratorAbstractTest{
   public SyntaxBnfGeneratorTest() {
     super("syntax");
   }
 
-  @Override
-  protected PsiFile createBnfFile(boolean generatePsi, String name, String text) {
-    return SyntaxBnfAttributePostProcessor.prepareForGeneration((BnfFile)super.createBnfFile(generatePsi, name, text));
-  }
-
-  public void testSelfBnf() throws Exception { doGenTest(true); }
-  public void testSelfFlex() throws Exception { doGenTest(true); }
+  public void testSelfBnf() throws Exception { doSyntaxGenTest(true); }
+  public void testSelfFlex() throws Exception { doSyntaxGenTest(true); }
   public void testSmall() throws Exception { doGenTest(false); }
   public void testAutopin() throws Exception { doGenTest(false); }
   public void testExternalRules() throws Exception { doGenTest(false); }
@@ -39,7 +32,19 @@ public class SyntaxBnfGeneratorTest extends BnfGeneratorAbstractTest{
   public void testConsumeMethods() throws Exception { doGenTest(false); }
   public void testGenOptions() throws Exception { doGenTest(true); }
 
+  
+  private void doSyntaxGenTest(boolean generatePsi) throws Exception {
+    String name = getTestName(false);
+    String text = loadFile(name + "." + myFileExt);
+    PsiFile file = createPsiFile(name, text.replaceAll("generate=\\[", "generate=[parser-api=\"syntax\" "));
+    doGenTest(generatePsi, name, file);
+  }
+  
   // TODO not implemented
-  public void _testUpperRules() throws Exception { doGenTest(true); }
-  public void testFixes() throws Exception { doGenTest(true); }
+  public void _testUpperRules() throws Exception { 
+    doGenTest(true);
+  }
+  public void testFixes() throws Exception { 
+    doGenTest(true);
+  }
 }

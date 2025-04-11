@@ -1,4 +1,5 @@
 {
+  generate=[parser-api="syntax"]
   parserClass="ExternalRules"
   generatePsi=false
   parserUtilClass="org.intellij.grammar.test.ParserUtil"

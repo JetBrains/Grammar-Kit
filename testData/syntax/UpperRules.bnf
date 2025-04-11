@@ -1,5 +1,5 @@
 {
-  generate=[visitor="no" psi-factory="no"]
+  generate=[visitor="no" psi-factory="no" parser-api="syntax"]
   classHeader="//header.txt"
   tokens=[
     space='regexp:\s+'

@@ -1,5 +1,5 @@
 {
-  generate=[psi-factory="no"]
+  generate=[psi-factory="no" parser-api="syntax"]
   parserClass="Fixes"
   extends(".*expr")="expr"
 

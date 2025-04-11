@@ -1,4 +1,5 @@
 {
+  generate=[parser-api="syntax"]
   parserClass="Small"
   generatePsi=false
   parserImports=["java.util.List" "java.util.Map" ]

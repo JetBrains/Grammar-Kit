@@ -1,4 +1,5 @@
 {
+  generate=[parser-api="syntax"]
   classHeader="//header.txt"
   parserClass="PsiGen"
   psiClassPrefix="X"

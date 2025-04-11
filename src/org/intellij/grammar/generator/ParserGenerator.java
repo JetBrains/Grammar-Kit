@@ -28,7 +28,6 @@ import org.intellij.grammar.java.JavaHelper;
 import org.intellij.grammar.parser.GeneratedParserUtilBase.Parser;
 import org.intellij.grammar.psi.*;
 import org.intellij.grammar.psi.impl.GrammarUtil;
-import org.intellij.grammar.syntax.SyntaxBnfAttributePostProcessor;
 import org.intellij.grammar.syntax.SyntaxConstants;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -122,8 +121,6 @@ public class ParserGenerator {
   private final Set<String> myTokensUsedInGrammar = new LinkedHashSet<>();
   private final boolean myNoStubs;
 
-  private final boolean myGenerateWithSyntax;
-
   protected final BnfFile myFile;
   private final String mySourcePath;
   private final String myOutputPath;
@@ -166,8 +163,7 @@ public class ParserGenerator {
     myOutputPath = outputPath;
     myPackagePrefix = packagePrefix;
 
-    myGenerateWithSyntax = psiFile.getUserData(SyntaxBnfAttributePostProcessor.GENERATE_WITH_SYNTAX) == Boolean.TRUE;
-    G = new GenOptions(myFile, myGenerateWithSyntax);
+    G = new GenOptions(myFile);
     N = G.names;
 
     myIntfClassFormat = getPsiClassFormat(myFile);
@@ -181,12 +177,12 @@ public class ParserGenerator {
                       myIntfClassFormat.apply("") + tmpVisitorClass;
     myVisitorClassName = tmpVisitorClass == null || !tmpVisitorClass.equals(StringUtil.getShortName(tmpVisitorClass)) ?
                          tmpVisitorClass : getRootAttribute(myFile, KnownAttribute.PSI_PACKAGE) + "." + tmpVisitorClass;
-    myParserTypeHolderClass = (myGenerateWithSyntax) ? getRootAttribute(myFile, KnownAttribute.SYNTAX_ELEMENT_TYPE_HOLDER_CLASS)
+    myParserTypeHolderClass = (G.parserApi == GenOptions.ParserApi.Syntax) ? getRootAttribute(myFile, KnownAttribute.SYNTAX_ELEMENT_TYPE_HOLDER_CLASS)
                                                      : getRootAttribute(myFile, KnownAttribute.ELEMENT_TYPE_HOLDER_CLASS);
     myPsiElementTypeHolderClass = getRootAttribute(myFile, KnownAttribute.ELEMENT_TYPE_HOLDER_CLASS);
 
-    C = IntelliJPlatformConstants.getConstantSetForBnf(myFile);
-    myStateHolderClass = (myGenerateWithSyntax) ? SyntaxConstants.RUNTIME_CLASS : C.PsiBuilderClass;
+    C = (G.parserApi != GenOptions.ParserApi.Syntax) ? IntelliJPlatformConstants.ClassicConstantSet : IntelliJPlatformConstants.SyntaxConstantSet;
+    myStateHolderClass = (G.parserApi == GenOptions.ParserApi.Syntax) ? SyntaxConstants.RUNTIME_CLASS : C.PsiBuilderClass;
 
     mySimpleTokens = new LinkedHashMap<>(getTokenTextToNameMap(myFile));
     myGraphHelper = getCached(myFile);
@@ -405,7 +401,7 @@ public class ParserGenerator {
       calcRealSuperClasses(sortedPsiRules);
     }
     if (myGrammarRoot != null && (G.generateTokenTypes || G.generateElementTypes || G.generatePsi && G.generatePsiFactory)) {
-      if (G.generatePsi || !myGenerateWithSyntax)
+      if (G.generatePsi || G.parserApi != GenOptions.ParserApi.Syntax)
       {
         openOutput(myPsiElementTypeHolderClass);
         try {
@@ -421,7 +417,7 @@ public class ParserGenerator {
           closeOutput();
         }
       }
-      if (myGenerateWithSyntax) {
+      if (G.parserApi == GenOptions.ParserApi.Syntax) {
         openOutput(myParserTypeHolderClass);
         try {
           generateElementTypesHolder(myParserTypeHolderClass,
@@ -593,7 +589,7 @@ public class ParserGenerator {
     Set<String> imports = new LinkedHashSet<>();
     if (!G.generateFQN) {
       imports.add(C.PsiBuilderClass);
-      if (!myGenerateWithSyntax) {
+      if (G.parserApi != GenOptions.ParserApi.Syntax) {
         imports.add(PSI_BUILDER_CLASS + ".Marker");
       }
       else {
@@ -607,10 +603,10 @@ public class ParserGenerator {
     if (G.generateTokenSets && hasAtLeastOneTokenChoice(myFile, ownRuleNames)) {
       imports.add(staticStarImport(myParserTypeHolderClass + "." + TOKEN_SET_HOLDER_NAME));
     }
-    if (StringUtil.isNotEmpty(myParserUtilClass)) {
+    if (StringUtil.isNotEmpty(myParserUtilClass) && (G.parserApi == GenOptions.ParserApi.Classic || !myParserUtilClass.equals(GPUB_CLASS))) {
       imports.add(staticStarImport(myParserUtilClass));
     }
-    if (myGenerateWithSyntax) {
+    if (G.parserApi == GenOptions.ParserApi.Syntax) {
       imports.add(SyntaxConstants.RUNTIME_CLASS);
       imports.add(staticStarImport(SyntaxConstants.RUNTIME_STATIC_METHOD_HOLDER));
       imports.add(staticStarImport(SyntaxConstants.PRODUCTION_RESULT));
@@ -625,7 +621,7 @@ public class ParserGenerator {
       imports.addAll(Arrays.asList(C.ParserElementTypeClass,
                                    C.ParserOutputType,
                                    C.ParserNodeSetClass));
-      if (!myGenerateWithSyntax)
+      if (G.parserApi != GenOptions.ParserApi.Syntax)
         imports.addAll(List.of(C.PsiParserClass, 
                                C.LightPsiParserClass));
     }
@@ -634,8 +630,8 @@ public class ParserGenerator {
     generateClassHeader(parserClass, imports,
                         SUPPRESS_WARNINGS_ANNO + "({\"SimplifiableIfStatement\", \"UnusedAssignment\"})",
                         Java.CLASS, "",
-                        rootParser && !myGenerateWithSyntax ? C.PsiParserClass : "",
-                        rootParser && !myGenerateWithSyntax ? C.LightPsiParserClass : "");
+                        rootParser && G.parserApi != GenOptions.ParserApi.Syntax ? C.PsiParserClass : "",
+                        rootParser && G.parserApi != GenOptions.ParserApi.Syntax ? C.LightPsiParserClass : "");
 
     if (rootParser) {
       generateRootParserContent(parserClass);
@@ -709,7 +705,7 @@ public class ParserGenerator {
     String shortPB = shorten(C.PsiBuilderClass);
     String shortTS = shorten(C.ParserNodeSetClass);
     String shortMarker = !G.generateFQN ? "Marker" : C.PsiBuilderClass + ".Marker";
-    if (myGenerateWithSyntax){
+    if (G.parserApi == GenOptions.ParserApi.Syntax){
       out("public %s parse(%s %s, %s %s) {", shortAN, shortET, N.root, shortPB, N.stateHolder);
       out("parseLight(%s, %s);", N.root, N.stateHolder);
       out("return prepareProduction(%s.getBuilder());", N.stateHolder);
@@ -1623,7 +1619,7 @@ public class ParserGenerator {
     }
     if (G.generateTokenSets && !myTokenSets.isEmpty()) {
       imports.add(tokenSetClass);
-      if (myGenerateWithSyntax)
+      if (G.parserApi == GenOptions.ParserApi.Syntax)
         imports.add(SyntaxConstants.TOKEN_SET_FILE);
     }
     boolean useExactElements = "all".equals(G.generateExactTypes) || G.generateExactTypes.contains("elements");

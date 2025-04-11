@@ -4,6 +4,8 @@
 
 package org.intellij.grammar;
 
+import org.junit.Test;
+
 public class BnfGeneratorTest extends BnfGeneratorAbstractTest {
   public BnfGeneratorTest() {
     super("generator");
@@ -39,6 +41,6 @@ public class BnfGeneratorTest extends BnfGeneratorAbstractTest {
 
   public void testEmpty() throws Exception {
     myFile = createPsiFile("empty.bnf", "{ }");
-    newTestGenerator().generate();
+    makeTestGenerator().generate();
   }
 }

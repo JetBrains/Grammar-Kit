@@ -4,6 +4,7 @@
     psi-factory = 'no'
     tokens = 'yes'
     token-sets = 'yes'
+    parser-api = "syntax"
   ]
 }
 

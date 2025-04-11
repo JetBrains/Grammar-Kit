@@ -3,6 +3,7 @@
   generate = [
     psi = "no"
     first-check = "3"
+    parser-api = "syntax"
   ]
   parserClass = "ConsumeMethods"
 }

@@ -4,8 +4,6 @@
 
 package org.intellij.grammar.generator;
 
-import org.intellij.grammar.psi.BnfFile;
-import org.intellij.grammar.syntax.SyntaxBnfAttributePostProcessor;
 import org.intellij.grammar.syntax.SyntaxConstants;
 
 public class IntelliJPlatformConstants {
@@ -61,7 +59,7 @@ public class IntelliJPlatformConstants {
     ParserOutputType = astNodeClass;
   }
 
-  public static final IntelliJPlatformConstants IdeaConstantSet =
+  public static final IntelliJPlatformConstants ClassicConstantSet =
     new IntelliJPlatformConstants(BnfConstants.PSI_BUILDER_CLASS,
                                   BnfConstants.IELEMENTTYPE_CLASS,
                                   BnfConstants.PSI_ELEMENT_CLASS,
@@ -81,8 +79,4 @@ public class IntelliJPlatformConstants {
                                   BnfConstants.TOKEN_SET_CLASS,
                                   SyntaxConstants.TOKEN_SET_CLASS,
                                   SyntaxConstants.PRODUCTION_RESULT);
-
-  public static IntelliJPlatformConstants getConstantSetForBnf(BnfFile file) {
-    return (Boolean.TRUE.equals(file.getUserData(SyntaxBnfAttributePostProcessor.GENERATE_WITH_SYNTAX))) ? SyntaxConstantSet : IdeaConstantSet;
-  }
 }

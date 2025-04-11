@@ -14,7 +14,6 @@ import com.intellij.util.containers.JBIterable;
 import org.intellij.grammar.BnfFileType;
 import org.intellij.grammar.BnfLanguage;
 import org.intellij.grammar.KnownAttribute;
-import org.intellij.grammar.generator.IAttributePostProcessor;
 import org.intellij.grammar.generator.ParserGeneratorUtil;
 import org.intellij.grammar.psi.*;
 import org.jetbrains.annotations.NotNull;
@@ -71,12 +70,6 @@ public class BnfFileImpl extends PsiFileBase implements BnfFile {
 
   @Override
   public <T> T findAttributeValue(@Nullable BnfRule rule, @NotNull KnownAttribute<T> knownAttribute, @Nullable String match) {
-    var postProcessor = getUserData(IAttributePostProcessor.ATTRIBUTE_POSTPROCESSOR);
-    if (postProcessor == null) return findAttributeValueInner(rule, knownAttribute, match);
-    else return postProcessor.postProcessValue(knownAttribute, findAttributeValueInner(rule, knownAttribute, match));
-  }
-
-  private  <T> T findAttributeValueInner(@Nullable BnfRule rule, @NotNull KnownAttribute<T> knownAttribute, @Nullable String match) {
     T combined = null;
     boolean copied = false;
     for (AttributeInfo info : getMatchingAttributes(rule, knownAttribute, match)) {

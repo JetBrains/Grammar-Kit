@@ -92,7 +92,7 @@ public class GenerateAction extends AnAction {
     WriteAction.run(() -> {
       for (VirtualFile file : bnfFiles) {
         if (!file.isValid()) continue;
-        PsiFile bnfFile = getBnfFile(file, psiManager);
+        PsiFile bnfFile = psiManager.findFile(file);
         if (!(bnfFile instanceof BnfFile)) continue;
         String parserClass = getRootAttribute(bnfFile, KnownAttribute.PARSER_CLASS);
         VirtualFile target =
@@ -151,7 +151,7 @@ public class GenerateAction extends AnAction {
           try {
             DumbService.getInstance(project).runReadActionInSmartMode(() -> {
               if (!file.isValid()) return;
-              PsiFile bnfFile = getBnfFile(file, psiManager);
+              PsiFile bnfFile = psiManager.findFile(file);
               if (!(bnfFile instanceof BnfFile)) return;
               ParserGenerator generator = new ParserGenerator((BnfFile)bnfFile, sourcePath, genDir.getPath(), packagePrefix) {
                 @Override
@@ -194,9 +194,5 @@ public class GenerateAction extends AnAction {
 
       }
     });
-  }
-
-  protected @Nullable PsiFile getBnfFile(VirtualFile file, PsiManager psiManager) {
-    return psiManager.findFile(file);
   }
 }

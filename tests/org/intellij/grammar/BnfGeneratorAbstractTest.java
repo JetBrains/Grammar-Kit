@@ -23,7 +23,7 @@ public abstract class BnfGeneratorAbstractTest extends BnfGeneratorTestCase {
     super(s);
   }
 
-  protected ParserGenerator newTestGenerator() {
+  protected ParserGenerator makeTestGenerator() {
     var bnfFile = (BnfFile)myFile;
     return new ParserGenerator(bnfFile, "", myFullDataPath, "") {
       @Override
@@ -51,7 +51,12 @@ public abstract class BnfGeneratorAbstractTest extends BnfGeneratorTestCase {
   public void doGenTest(boolean generatePsi) throws Exception {
     String name = getTestName(false);
     String text = loadFile(name + "." + myFileExt);
-    myFile = createBnfFile(generatePsi, name, text);
+    PsiFile file = createPsiFile(name, text.replaceAll("generatePsi=[^\n]*", "generatePsi=" + generatePsi));
+    doGenTest(generatePsi, name, file);
+  }
+
+  protected void doGenTest(boolean generatePsi, String name, PsiFile testFile) throws Exception {
+    myFile = testFile;
     List<File> filesToCheck = new ArrayList<>();
     filesToCheck.add(new File(FileUtilRt.getTempDirectory(), name + ".java"));
     if (generatePsi) {
@@ -63,7 +68,7 @@ public abstract class BnfGeneratorAbstractTest extends BnfGeneratorTestCase {
       }
     }
 
-    var generator = newTestGenerator();
+    var generator = makeTestGenerator();
     if (generatePsi) {
       generator.generate();
     }
@@ -77,9 +82,5 @@ public abstract class BnfGeneratorAbstractTest extends BnfGeneratorTestCase {
       String result = FileUtil.loadFile(file, CharsetToolkit.UTF8, true);
       doCheckResult(myFullDataPath, expectedName, result);
     }
-  }
-
-  protected PsiFile createBnfFile(boolean generatePsi, String name, String text) {
-    return createPsiFile(name, text.replaceAll("generatePsi=[^\n]*", "generatePsi=" + generatePsi));
   }
 }

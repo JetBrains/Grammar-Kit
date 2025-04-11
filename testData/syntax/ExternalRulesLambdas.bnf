@@ -3,6 +3,7 @@
   generate=[
     psi='no'
     java='8'
+    parser-api="syntax"
   ]
   tokens=[
     perc='%'

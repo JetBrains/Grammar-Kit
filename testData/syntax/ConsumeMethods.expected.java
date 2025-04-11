@@ -5,7 +5,6 @@ package ;
 import com.intellij.platform.syntax.runtime.SyntaxGeneratedParserRuntime;
 import com.intellij.platform.syntax.parser.SyntaxTreeBuilder.Marker;
 import static generated.GeneratedSyntaxElementTypes.*;
-import static com.intellij.platform.syntax.runtime.SyntaxGeneratedParserRuntime.*;
 import static com.intellij.platform.syntax.runtime.SyntaxGeneratedParserRuntimeKt.*;
 import static com.intellij.platform.syntax.parser.ProductionResult.*;
 import static com.intellij.platform.syntax.parser.ProductionResultKt.prepareProduction;

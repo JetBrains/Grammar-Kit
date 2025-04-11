@@ -31,16 +31,23 @@ public class GenOptions {
   public final boolean generateVisitor;
   public final String visitorValue;
   public final boolean generateFQN;
+  public final ParserApi parserApi;
   public final Case generateTokenCase;
   public final Case generateElementCase;
   public final boolean generateTokenAccessors;
   public final boolean generateTokenAccessorsSet;
   public final String fallbackStubElementType;
   public final int javaVersion;
+  
+  public enum ParserApi {
+    Classic,
+    Syntax
+  }
 
-  public GenOptions(BnfFile myFile, Boolean generateWithSyntax) {
+  public GenOptions(BnfFile myFile) {
     Map<String, String> genOptions = getRootAttribute(myFile, KnownAttribute.GENERATE).asMap();
-    names = Names.forName(genOptions.get("names"), generateWithSyntax);
+    parserApi = "syntax".equals(genOptions.get("parser-api")) ? ParserApi.Syntax : ParserApi.Classic;
+    names = Names.forName(genOptions.get("names"), parserApi == ParserApi.Syntax);
     generatePsi = getGenerateOption(myFile, KnownAttribute.GENERATE_PSI, genOptions, "psi");
     generatePsiFactory = !"no".equals(genOptions.get("psi-factory"));
     generatePsiClassesMap = "yes".equals(genOptions.get("psi-classes-map"));

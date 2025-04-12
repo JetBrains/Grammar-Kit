@@ -295,12 +295,12 @@ public class Fixes {
   }
 
   /* ********************************************************** */
-  static Parser meta2_$(Parser p, Parser q) {
+  static SyntaxGeneratedParserRuntime.Parser meta2_$(SyntaxGeneratedParserRuntime.Parser p, SyntaxGeneratedParserRuntime.Parser q) {
     return (runtime_, level_) -> meta2(runtime_, level_ + 1, p, q);
   }
 
   // <<p>> <<q>>
-  static boolean meta2(SyntaxGeneratedParserRuntime runtime_, int level_, Parser p, Parser q) {
+  static boolean meta2(SyntaxGeneratedParserRuntime runtime_, int level_, SyntaxGeneratedParserRuntime.Parser p, SyntaxGeneratedParserRuntime.Parser q) {
     if (!recursion_guard_(runtime_, level_, "meta2")) return false;
     boolean result_;
     Marker marker_ = enter_section_(runtime_);
@@ -597,7 +597,7 @@ public class Fixes {
 
   /* ********************************************************** */
   // <<p>> (',' <<p>>)*
-  static boolean sequence(SyntaxGeneratedParserRuntime runtime_, int level_, Parser p) {
+  static boolean sequence(SyntaxGeneratedParserRuntime runtime_, int level_, SyntaxGeneratedParserRuntime.Parser p) {
     if (!recursion_guard_(runtime_, level_, "sequence")) return false;
     boolean result_, pinned_;
     Marker marker_ = enter_section_(runtime_, level_, _NONE_);
@@ -609,7 +609,7 @@ public class Fixes {
   }
 
   // (',' <<p>>)*
-  private static boolean sequence_1(SyntaxGeneratedParserRuntime runtime_, int level_, Parser p) {
+  private static boolean sequence_1(SyntaxGeneratedParserRuntime runtime_, int level_, SyntaxGeneratedParserRuntime.Parser p) {
     if (!recursion_guard_(runtime_, level_, "sequence_1")) return false;
     while (true) {
       int pos_ = current_position_(runtime_);
@@ -620,7 +620,7 @@ public class Fixes {
   }
 
   // ',' <<p>>
-  private static boolean sequence_1_0(SyntaxGeneratedParserRuntime runtime_, int level_, Parser p) {
+  private static boolean sequence_1_0(SyntaxGeneratedParserRuntime runtime_, int level_, SyntaxGeneratedParserRuntime.Parser p) {
     if (!recursion_guard_(runtime_, level_, "sequence_1_0")) return false;
     boolean result_, pinned_;
     Marker marker_ = enter_section_(runtime_, level_, _NONE_);
@@ -779,6 +779,6 @@ public class Fixes {
     return result_;
   }
 
-  private static final Parser nested_meta_pin_1_1_0_parser_ = meta2_$(Fixes::nested_meta_pin_1_1_0_0, Fixes::nested_meta_pin_1_1_0_1);
-  private static final Parser nested_meta_pin_1_1_1_parser_ = meta2_$(Fixes::nested_meta_pin_1_1_1_0, Fixes::nested_meta_pin_1_1_1_1);
+  private static final SyntaxGeneratedParserRuntime.Parser nested_meta_pin_1_1_0_parser_ = meta2_$(Fixes::nested_meta_pin_1_1_0_0, Fixes::nested_meta_pin_1_1_0_1);
+  private static final SyntaxGeneratedParserRuntime.Parser nested_meta_pin_1_1_1_parser_ = meta2_$(Fixes::nested_meta_pin_1_1_1_0, Fixes::nested_meta_pin_1_1_1_1);
 }

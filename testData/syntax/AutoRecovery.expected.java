@@ -162,5 +162,5 @@ public class GeneratedParser {
     return result_ || pinned_;
   }
 
-  static final Parser item_auto_recover_ = (runtime_, level_) -> !nextTokenIsFast(runtime_, PAREN2, COMMA, SEMI);
+  static final SyntaxGeneratedParserRuntime.Parser item_auto_recover_ = (runtime_, level_) -> !nextTokenIsFast(runtime_, PAREN2, COMMA, SEMI);
 }

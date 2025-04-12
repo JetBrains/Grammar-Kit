@@ -5,17 +5,13 @@ package ;
 import static generated.GeneratedSyntaxElementTypes.*;
 import com.intellij.platform.syntax.runtime.SyntaxGeneratedParserRuntime;
 import static com.intellij.platform.syntax.runtime.SyntaxGeneratedParserRuntimeKt.*;
-import static com.intellij.platform.syntax.parser.ProductionResult.*;
-import static com.intellij.platform.syntax.parser.ProductionResultKt.prepareProduction;
-import kotlin.jvm.functions.Function2;
-import kotlin.Unit;
 
 @java.lang.SuppressWarnings({"SimplifiableIfStatement", "UnusedAssignment"})
 public class GenOptions {
 
   public com.intellij.platform.syntax.parser.ProductionResult parse(com.intellij.platform.syntax.SyntaxElementType root_, com.intellij.platform.syntax.runtime.SyntaxGeneratedParserRuntime runtime_) {
     parseLight(root_, runtime_);
-    return prepareProduction(runtime_.getBuilder());
+    return com.intellij.platform.syntax.parser.ProductionResultKt.prepareProduction(runtime_.getBuilder());
   }
 
   public void parseLight(com.intellij.platform.syntax.SyntaxElementType root_, com.intellij.platform.syntax.runtime.SyntaxGeneratedParserRuntime runtime_) {
@@ -29,7 +25,7 @@ public class GenOptions {
     };
 
     runtime_.init(parse_, EXTENDS_SETS_);
-    com.intellij.platform.syntax.runtime.SyntaxGeneratedParserRuntime.Marker marker_ = enter_section_(runtime_, 0, _COLLAPSE_, null);
+    com.intellij.platform.syntax.parser.SyntaxTreeBuilder.Marker marker_ = enter_section_(runtime_, 0, _COLLAPSE_, null);
     result_ = parse_root_(root_, runtime_);
     exit_section_(runtime_, 0, marker_, root_, result_, true, TRUE_CONDITION);
   }
@@ -53,7 +49,7 @@ public class GenOptions {
     if (!recursion_guard_(runtime_, level_, "create_statement")) return false;
     if (!nextTokenIs(runtime_, create)) return false;
     boolean result_;
-    com.intellij.platform.syntax.runtime.SyntaxGeneratedParserRuntime.Marker marker_ = enter_section_(runtime_, level_, _COLLAPSE_, CREATE_STATEMENT, null);
+    com.intellij.platform.syntax.parser.SyntaxTreeBuilder.Marker marker_ = enter_section_(runtime_, level_, _COLLAPSE_, CREATE_STATEMENT, null);
     result_ = create_table_statement(runtime_, level_ + 1);
     exit_section_(runtime_, level_, marker_, result_, false, null);
     return result_;
@@ -65,7 +61,7 @@ public class GenOptions {
     if (!recursion_guard_(runtime_, level_, "create_table_statement")) return false;
     if (!nextTokenIs(runtime_, create)) return false;
     boolean result_, pinned_;
-    com.intellij.platform.syntax.runtime.SyntaxGeneratedParserRuntime.Marker marker_ = enter_section_(runtime_, level_, _NONE_, CREATE_TABLE_STATEMENT, null);
+    com.intellij.platform.syntax.parser.SyntaxTreeBuilder.Marker marker_ = enter_section_(runtime_, level_, _NONE_, CREATE_TABLE_STATEMENT, null);
     result_ = consumeToken(runtime_, create);
     result_ = result_ && create_table_statement_1(runtime_, level_ + 1);
     result_ = result_ && create_table_statement_2(runtime_, level_ + 1);
@@ -100,7 +96,7 @@ public class GenOptions {
     if (!recursion_guard_(runtime_, level_, "drop_statement")) return false;
     if (!nextTokenIs(runtime_, drop)) return false;
     boolean result_;
-    com.intellij.platform.syntax.runtime.SyntaxGeneratedParserRuntime.Marker marker_ = enter_section_(runtime_, level_, _COLLAPSE_, DROP_STATEMENT, null);
+    com.intellij.platform.syntax.parser.SyntaxTreeBuilder.Marker marker_ = enter_section_(runtime_, level_, _COLLAPSE_, DROP_STATEMENT, null);
     result_ = drop_table_statement(runtime_, level_ + 1);
     exit_section_(runtime_, level_, marker_, result_, false, null);
     return result_;
@@ -112,7 +108,7 @@ public class GenOptions {
     if (!recursion_guard_(runtime_, level_, "drop_table_statement")) return false;
     if (!nextTokenIs(runtime_, drop)) return false;
     boolean result_;
-    com.intellij.platform.syntax.runtime.SyntaxGeneratedParserRuntime.Marker marker_ = enter_section_(runtime_);
+    com.intellij.platform.syntax.parser.SyntaxTreeBuilder.Marker marker_ = enter_section_(runtime_);
     result_ = consumeTokens(runtime_, 0, drop, table);
     result_ = result_ && table_ref(runtime_, level_ + 1);
     exit_section_(runtime_, marker_, DROP_TABLE_STATEMENT, result_);
@@ -137,7 +133,7 @@ public class GenOptions {
     if (!recursion_guard_(runtime_, level_, "statement")) return false;
     if (!nextTokenIs(runtime_, "<statement>", create, drop)) return false;
     boolean result_;
-    com.intellij.platform.syntax.runtime.SyntaxGeneratedParserRuntime.Marker marker_ = enter_section_(runtime_, level_, _COLLAPSE_, STATEMENT, "<statement>");
+    com.intellij.platform.syntax.parser.SyntaxTreeBuilder.Marker marker_ = enter_section_(runtime_, level_, _COLLAPSE_, STATEMENT, "<statement>");
     result_ = create_statement(runtime_, level_ + 1);
     if (!result_) result_ = drop_statement(runtime_, level_ + 1);
     exit_section_(runtime_, level_, marker_, result_, false, null);
@@ -150,7 +146,7 @@ public class GenOptions {
     if (!recursion_guard_(runtime_, level_, "table_ref")) return false;
     if (!nextTokenIs(runtime_, id)) return false;
     boolean result_;
-    com.intellij.platform.syntax.runtime.SyntaxGeneratedParserRuntime.Marker marker_ = enter_section_(runtime_);
+    com.intellij.platform.syntax.parser.SyntaxTreeBuilder.Marker marker_ = enter_section_(runtime_);
     result_ = consumeToken(runtime_, id);
     exit_section_(runtime_, marker_, TABLE_REF, result_);
     return result_;

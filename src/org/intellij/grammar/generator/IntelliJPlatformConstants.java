@@ -7,7 +7,8 @@ package org.intellij.grammar.generator;
 import org.intellij.grammar.syntax.SyntaxConstants;
 
 public class IntelliJPlatformConstants {
-  public final String PsiBuilderClass;
+  public final String ParserStateHolder;
+  public final String BuilderClass;
   public final String ParserElementTypeClass;
   public final String ElementTypeBaseClass;
   public final String PsiElementClass;
@@ -18,7 +19,8 @@ public class IntelliJPlatformConstants {
   public final String ParserNodeSetClass;
   public final String ParserOutputType;
 
-  private IntelliJPlatformConstants(String builder,
+  private IntelliJPlatformConstants(String stateHolder,
+                                    String builder,
                                     String iElementTypeClass,
                                     String elementTypeBaseClass,
                                     String psiElementClass,
@@ -28,7 +30,8 @@ public class IntelliJPlatformConstants {
                                     String tokenSetClass,
                                     String parserNodeSetClass,
                                     String parserOutputType) {
-    PsiBuilderClass = builder;
+    ParserStateHolder = stateHolder;
+    BuilderClass = builder;
     ParserElementTypeClass = iElementTypeClass;
     ElementTypeBaseClass = elementTypeBaseClass;
     PsiElementClass = psiElementClass;
@@ -47,7 +50,8 @@ public class IntelliJPlatformConstants {
                                     String psiParserClass,
                                     String lightPsiParserClass,
                                     String tokenSetClass) {
-    PsiBuilderClass = builder;
+    BuilderClass = builder;
+    ParserStateHolder = builder;
     ParserElementTypeClass = iElementTypeClass;
     ElementTypeBaseClass = iElementTypeClass;
     PsiElementClass = psiElementClass;
@@ -70,6 +74,7 @@ public class IntelliJPlatformConstants {
 
   public static final IntelliJPlatformConstants SyntaxConstantSet =
     new IntelliJPlatformConstants(SyntaxConstants.RUNTIME_CLASS,
+                                  SyntaxConstants.SYNTAX_BUILDER_CLASS,
                                   SyntaxConstants.SYNTAX_ELEMENT_TYPE,
                                   BnfConstants.IELEMENTTYPE_CLASS,
                                   BnfConstants.PSI_ELEMENT_CLASS,

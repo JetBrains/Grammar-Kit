@@ -182,7 +182,7 @@ public class ParserGenerator {
     myPsiElementTypeHolderClass = getRootAttribute(myFile, KnownAttribute.ELEMENT_TYPE_HOLDER_CLASS);
 
     C = (G.parserApi != GenOptions.ParserApi.Syntax) ? IntelliJPlatformConstants.ClassicConstantSet : IntelliJPlatformConstants.SyntaxConstantSet;
-    myStateHolderClass = (G.parserApi == GenOptions.ParserApi.Syntax) ? SyntaxConstants.RUNTIME_CLASS : C.PsiBuilderClass;
+    myStateHolderClass = C.ParserStateHolder;
 
     mySimpleTokens = new LinkedHashMap<>(getTokenTextToNameMap(myFile));
     myGraphHelper = getCached(myFile);
@@ -588,13 +588,8 @@ public class ParserGenerator {
     boolean rootParser = parserClass.equals(myGrammarRootParser);
     Set<String> imports = new LinkedHashSet<>();
     if (!G.generateFQN) {
-      imports.add(C.PsiBuilderClass);
-      if (G.parserApi != GenOptions.ParserApi.Syntax) {
-        imports.add(PSI_BUILDER_CLASS + ".Marker");
-      }
-      else {
-        imports.add(SyntaxConstants.SYNTAX_BUILDER_CLASS + ".Marker");
-      }
+      imports.add(C.ParserStateHolder);
+      imports.add(C.BuilderClass + ".Marker");
     }
     else {
       imports.add("#forced");
@@ -609,10 +604,6 @@ public class ParserGenerator {
     if (G.parserApi == GenOptions.ParserApi.Syntax) {
       imports.add(SyntaxConstants.RUNTIME_CLASS);
       imports.add(staticStarImport(SyntaxConstants.RUNTIME_STATIC_METHOD_HOLDER));
-      imports.add(staticStarImport(SyntaxConstants.PRODUCTION_RESULT));
-      imports.add(staticImport(SyntaxConstants.PREPARE_PRODUCTION));
-      imports.add(SyntaxConstants.KOTLIN_FUNCTION2_CLASS);
-      imports.add(SyntaxConstants.KOTLIN_UNIT_CLASS);
     }
     if (!rootParser) {
       imports.add(staticStarImport(myGrammarRootParser));
@@ -624,6 +615,14 @@ public class ParserGenerator {
       if (G.parserApi != GenOptions.ParserApi.Syntax)
         imports.addAll(List.of(C.PsiParserClass, 
                                C.LightPsiParserClass));
+      else 
+        imports.addAll(Arrays.asList(
+          SyntaxConstants.RUNTIME_CLASS,
+          staticStarImport(SyntaxConstants.RUNTIME_STATIC_METHOD_HOLDER),
+          staticImport(SyntaxConstants.PRODUCTION_RESULT_FILE + ".prepareProduction"),
+          SyntaxConstants.KOTLIN_FUNCTION2_CLASS,
+          SyntaxConstants.KOTLIN_UNIT_CLASS
+        ));
     }
     imports.addAll(parserImports);
 
@@ -679,7 +678,7 @@ public class ParserGenerator {
     return G.javaVersion > 6
            ? format("(%s, %s) -> %s", N.stateHolder, N.level, body)
            : format("new Parser() {\npublic boolean parse(%s %s, int %s) {\nreturn %s;\n}\n}",
-                    shorten(C.PsiBuilderClass), N.stateHolder, N.level, body);
+                    shorten(C.ParserStateHolder), N.stateHolder, N.level, body);
   }
 
   private void generateMetaMethodFields() {
@@ -707,13 +706,14 @@ public class ParserGenerator {
     boolean generateExtendsSets = !extendsSet.isEmpty();
     String shortET = shorten(C.ParserElementTypeClass);
     String shortAN = shorten(C.ParserOutputType);
-    String shortPB = shorten(C.PsiBuilderClass);
+    String shortPB = shorten(C.ParserStateHolder);
     String shortTS = shorten(C.ParserNodeSetClass);
-    String shortMarker = !G.generateFQN ? "Marker" : C.PsiBuilderClass + ".Marker";
+    String shortMarker = G.generateFQN ? C.BuilderClass + ".Marker" : "Marker";
     if (G.parserApi == GenOptions.ParserApi.Syntax){
       out("public %s parse(%s %s, %s %s) {", shortAN, shortET, N.root, shortPB, N.stateHolder);
       out("parseLight(%s, %s);", N.root, N.stateHolder);
-      out("return prepareProduction(%s.getBuilder());", N.stateHolder);
+      String prepareProductionCall = (G.generateFQN) ? SyntaxConstants.PRODUCTION_RESULT_FILE + ".prepareProduction" : "prepareProduction"; 
+      out("return %s(%s.getBuilder());", prepareProductionCall, N.stateHolder);
       out("}");
       newLine();
       out("public void parseLight(%s %s, %s %s) {", shortET, N.root, shortPB, N.stateHolder);
@@ -1009,7 +1009,7 @@ public class ParserGenerator {
     boolean sectionMaybeDropped = sectionRequiredSimple && type == BNF_CHOICE && elementTypeRef == null &&
                                   !ContainerUtil.exists(children, o -> isRollbackRequired(o, myFile));
     String modifiers = modifierList.isEmpty() ? "_NONE_" : StringUtil.join(modifierList, " | ");
-    String shortMarker = !G.generateFQN ? "Marker" : C.PsiBuilderClass + ".Marker";
+    String shortMarker = G.generateFQN ? C.BuilderClass + ".Marker" : "Marker";
     if (sectionRequiredSimple) {
       if (!sectionMaybeDropped) {
         out("%s %s = enter_section_(%s);", shortMarker, N.marker, N.stateHolder);

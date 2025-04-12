@@ -483,7 +483,7 @@ public class JFlexParser {
 
   /* ********************************************************** */
   // new_line <<p>> new_line
-  static boolean line(SyntaxGeneratedParserRuntime runtime, int level, Parser aP) {
+  static boolean line(SyntaxGeneratedParserRuntime runtime, int level, SyntaxGeneratedParserRuntime.Parser aP) {
     if (!recursion_guard_(runtime, level, "line")) return false;
     boolean result, pinned;
     Marker marker = enter_section_(runtime, level, _NONE_);
@@ -2008,18 +2008,18 @@ public class JFlexParser {
     return result;
   }
 
-  static final Parser opt_code1_parser_ = (runtime, level) -> consumeToken(runtime, FLEX_OPT_CODE1);
-  static final Parser opt_code2_parser_ = (runtime, level) -> consumeToken(runtime, FLEX_OPT_CODE2);
-  static final Parser opt_eof1_parser_ = (runtime, level) -> consumeToken(runtime, FLEX_OPT_EOF1);
-  static final Parser opt_eof2_parser_ = (runtime, level) -> consumeToken(runtime, FLEX_OPT_EOF2);
-  static final Parser opt_eofthrow1_parser_ = (runtime, level) -> consumeToken(runtime, FLEX_OPT_EOFTHROW1);
-  static final Parser opt_eofthrow2_parser_ = (runtime, level) -> consumeToken(runtime, FLEX_OPT_EOFTHROW2);
-  static final Parser opt_eofval1_parser_ = (runtime, level) -> consumeToken(runtime, FLEX_OPT_EOFVAL1);
-  static final Parser opt_eofval2_parser_ = (runtime, level) -> consumeToken(runtime, FLEX_OPT_EOFVAL2);
-  static final Parser opt_init1_parser_ = (runtime, level) -> consumeToken(runtime, FLEX_OPT_INIT1);
-  static final Parser opt_init2_parser_ = (runtime, level) -> consumeToken(runtime, FLEX_OPT_INIT2);
-  static final Parser opt_initthrow1_parser_ = (runtime, level) -> consumeToken(runtime, FLEX_OPT_INITTHROW1);
-  static final Parser opt_initthrow2_parser_ = (runtime, level) -> consumeToken(runtime, FLEX_OPT_INITTHROW2);
-  static final Parser opt_yylexthrow1_parser_ = (runtime, level) -> consumeToken(runtime, FLEX_OPT_YYLEXTHROW1);
-  static final Parser opt_yylexthrow2_parser_ = (runtime, level) -> consumeToken(runtime, FLEX_OPT_YYLEXTHROW2);
+  static final SyntaxGeneratedParserRuntime.Parser opt_code1_parser_ = (runtime, level) -> consumeToken(runtime, FLEX_OPT_CODE1);
+  static final SyntaxGeneratedParserRuntime.Parser opt_code2_parser_ = (runtime, level) -> consumeToken(runtime, FLEX_OPT_CODE2);
+  static final SyntaxGeneratedParserRuntime.Parser opt_eof1_parser_ = (runtime, level) -> consumeToken(runtime, FLEX_OPT_EOF1);
+  static final SyntaxGeneratedParserRuntime.Parser opt_eof2_parser_ = (runtime, level) -> consumeToken(runtime, FLEX_OPT_EOF2);
+  static final SyntaxGeneratedParserRuntime.Parser opt_eofthrow1_parser_ = (runtime, level) -> consumeToken(runtime, FLEX_OPT_EOFTHROW1);
+  static final SyntaxGeneratedParserRuntime.Parser opt_eofthrow2_parser_ = (runtime, level) -> consumeToken(runtime, FLEX_OPT_EOFTHROW2);
+  static final SyntaxGeneratedParserRuntime.Parser opt_eofval1_parser_ = (runtime, level) -> consumeToken(runtime, FLEX_OPT_EOFVAL1);
+  static final SyntaxGeneratedParserRuntime.Parser opt_eofval2_parser_ = (runtime, level) -> consumeToken(runtime, FLEX_OPT_EOFVAL2);
+  static final SyntaxGeneratedParserRuntime.Parser opt_init1_parser_ = (runtime, level) -> consumeToken(runtime, FLEX_OPT_INIT1);
+  static final SyntaxGeneratedParserRuntime.Parser opt_init2_parser_ = (runtime, level) -> consumeToken(runtime, FLEX_OPT_INIT2);
+  static final SyntaxGeneratedParserRuntime.Parser opt_initthrow1_parser_ = (runtime, level) -> consumeToken(runtime, FLEX_OPT_INITTHROW1);
+  static final SyntaxGeneratedParserRuntime.Parser opt_initthrow2_parser_ = (runtime, level) -> consumeToken(runtime, FLEX_OPT_INITTHROW2);
+  static final SyntaxGeneratedParserRuntime.Parser opt_yylexthrow1_parser_ = (runtime, level) -> consumeToken(runtime, FLEX_OPT_YYLEXTHROW1);
+  static final SyntaxGeneratedParserRuntime.Parser opt_yylexthrow2_parser_ = (runtime, level) -> consumeToken(runtime, FLEX_OPT_YYLEXTHROW2);
 }

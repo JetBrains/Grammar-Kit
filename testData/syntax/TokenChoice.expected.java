@@ -7,13 +7,12 @@ import com.intellij.platform.syntax.parser.SyntaxTreeBuilder.Marker;
 import static generated.GeneratedSyntaxElementTypes.*;
 import static generated.GeneratedSyntaxElementTypes.TokenSets.*;
 import static com.intellij.platform.syntax.runtime.SyntaxGeneratedParserRuntimeKt.*;
-import static com.intellij.platform.syntax.parser.ProductionResult.*;
-import static com.intellij.platform.syntax.parser.ProductionResultKt.prepareProduction;
-import kotlin.jvm.functions.Function2;
-import kotlin.Unit;
 import com.intellij.platform.syntax.SyntaxElementType;
 import com.intellij.platform.syntax.parser.ProductionResult;
 import com.intellij.platform.syntax.SyntaxElementTypeSet;
+import static com.intellij.platform.syntax.parser.ProductionResultKt.prepareProduction;
+import kotlin.jvm.functions.Function2;
+import kotlin.Unit;
 
 @SuppressWarnings({"SimplifiableIfStatement", "UnusedAssignment"})
 public class TokenChoice {
@@ -180,10 +179,6 @@ import com.intellij.platform.syntax.runtime.SyntaxGeneratedParserRuntime;
 import com.intellij.platform.syntax.parser.SyntaxTreeBuilder.Marker;
 import static generated.GeneratedSyntaxElementTypes.*;
 import static com.intellij.platform.syntax.runtime.SyntaxGeneratedParserRuntimeKt.*;
-import static com.intellij.platform.syntax.parser.ProductionResult.*;
-import static com.intellij.platform.syntax.parser.ProductionResultKt.prepareProduction;
-import kotlin.jvm.functions.Function2;
-import kotlin.Unit;
 import static generated.TokenChoice.*;
 
 @SuppressWarnings({"SimplifiableIfStatement", "UnusedAssignment"})

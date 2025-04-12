@@ -668,7 +668,9 @@ public class ParserGenerator {
         call = generateParserInstance(body);
         reversedLambdas.put(body, name);
       }
-      out("static final Parser " + name + " = " + call + ";");
+      String parserClassShortName = (G.parserApi == GenOptions.ParserApi.Classic) ? "Parser" 
+                                                                                  : SyntaxConstants.RUNTIME_PARSER_INTERFACE;
+      out("static final %s %s = %s;", parserClassShortName, name, call);
       myRenderedLambdas.put(name, parserClass);
     });
   }
@@ -681,7 +683,10 @@ public class ParserGenerator {
   }
 
   private void generateMetaMethodFields() {
-    take(myMetaMethodFields).forEach((field, call) -> out("private static final Parser " + field + " = " + call + ";"));
+    String parserClassShortName = (G.parserApi == GenOptions.ParserApi.Classic) ? "Parser"
+                                                                                : SyntaxConstants.RUNTIME_PARSER_INTERFACE;
+    take(myMetaMethodFields).forEach((field, call) -> 
+                                       out(String.format("private static final %s %s = %s;", parserClassShortName, field, call)));
   }
 
   private void generateRootParserContent(String parserClass) {
@@ -902,12 +907,14 @@ public class ParserGenerator {
    *               for {@code <<p>> | some} in {@code meta rule ::= (<<p>> | some)* }.
    */
   private void generateMetaMethod(@NotNull String methodName, @NotNull List<String> parameterNames, boolean isRule) {
-    String parameterList = parameterNames.stream().map(it -> "Parser " + it).collect(joining(", "));
+    String parserClassShortName = (G.parserApi == GenOptions.ParserApi.Classic) ? "Parser"
+                                                                                : SyntaxConstants.RUNTIME_PARSER_INTERFACE;
+    String parameterList = parameterNames.stream().map(it -> parserClassShortName + " " + it).collect(joining(", "));
     String argumentList = String.join(", ", parameterNames);
     String metaParserMethodName = getWrapperParserMetaMethodName(methodName);
     String call = format("%s(%s, %s + 1, %s)", methodName, N.stateHolder, N.level, argumentList);
     // @formatter:off
-    out("%sstatic Parser %s(%s) {", isRule ? "" : "private ", metaParserMethodName, parameterList);
+    out("%sstatic %s %s(%s) {", isRule ? "" : "private ", parserClassShortName, metaParserMethodName, parameterList);
       out("return %s;", generateParserInstance(call));
     out("}");
     // @formatter:on
@@ -949,7 +956,8 @@ public class ParserGenerator {
     List<BnfExpression> children = isSingleNode ? Collections.singletonList(node) : getChildExpressions(node);
     String frameName = !children.isEmpty() && firstNonTrivial && !Rule.isMeta(rule) ? quote(getRuleDisplayName(rule, !isPrivate)) : null;
 
-    String extraParameters = metaParameters.stream().map(it -> ", Parser " + it).collect(joining());
+    String parserClass = (G.parserApi == GenOptions.ParserApi.Classic) ? "Parser" : SyntaxConstants.RUNTIME_PARSER_INTERFACE;
+    String extraParameters = metaParameters.stream().map(it -> ", " + parserClass + " " + it).collect(joining());
     out("%sstatic boolean %s(%s %s, int %s%s) {", !isRule ? "private " : isPrivate ? "" : "public ",
         funcName, shorten(myStateHolderClass), N.stateHolder, N.level, extraParameters);
     if (isSingleNode) {

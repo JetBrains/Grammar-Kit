@@ -261,7 +261,7 @@ public class PsiGen {
 
   /* ********************************************************** */
   // <<p>> +
-  static boolean listOf(SyntaxGeneratedParserRuntime runtime_, int level_, Parser p) {
+  static boolean listOf(SyntaxGeneratedParserRuntime runtime_, int level_, SyntaxGeneratedParserRuntime.Parser p) {
     if (!recursion_guard_(runtime_, level_, "listOf")) return false;
     boolean result_;
     Marker marker_ = enter_section_(runtime_);
@@ -370,7 +370,7 @@ public class PsiGen2 {
 
   /* ********************************************************** */
   // <<p>> +
-  public static boolean blockOf(SyntaxGeneratedParserRuntime runtime_, int level_, Parser p) {
+  public static boolean blockOf(SyntaxGeneratedParserRuntime runtime_, int level_, SyntaxGeneratedParserRuntime.Parser p) {
     if (!recursion_guard_(runtime_, level_, "blockOf")) return false;
     boolean result_;
     Marker marker_ = enter_section_(runtime_);

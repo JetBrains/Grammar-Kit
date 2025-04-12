@@ -77,12 +77,12 @@ public class ExternalRules {
   }
 
   /* ********************************************************** */
-  static Parser comma_list_$(Parser param) {
+  static SyntaxGeneratedParserRuntime.Parser comma_list_$(SyntaxGeneratedParserRuntime.Parser param) {
     return (runtime_, level_) -> comma_list(runtime_, level_ + 1, param);
   }
 
   // <<param>> (',' <<param>>) *
-  public static boolean comma_list(SyntaxGeneratedParserRuntime runtime_, int level_, Parser param) {
+  public static boolean comma_list(SyntaxGeneratedParserRuntime runtime_, int level_, SyntaxGeneratedParserRuntime.Parser param) {
     if (!recursion_guard_(runtime_, level_, "comma_list")) return false;
     boolean result_;
     Marker marker_ = enter_section_(runtime_);
@@ -93,7 +93,7 @@ public class ExternalRules {
   }
 
   // (',' <<param>>) *
-  private static boolean comma_list_1(SyntaxGeneratedParserRuntime runtime_, int level_, Parser param) {
+  private static boolean comma_list_1(SyntaxGeneratedParserRuntime runtime_, int level_, SyntaxGeneratedParserRuntime.Parser param) {
     if (!recursion_guard_(runtime_, level_, "comma_list_1")) return false;
     while (true) {
       int pos_ = current_position_(runtime_);
@@ -104,7 +104,7 @@ public class ExternalRules {
   }
 
   // ',' <<param>>
-  private static boolean comma_list_1_0(SyntaxGeneratedParserRuntime runtime_, int level_, Parser param) {
+  private static boolean comma_list_1_0(SyntaxGeneratedParserRuntime runtime_, int level_, SyntaxGeneratedParserRuntime.Parser param) {
     if (!recursion_guard_(runtime_, level_, "comma_list_1_0")) return false;
     boolean result_;
     Marker marker_ = enter_section_(runtime_);
@@ -115,12 +115,12 @@ public class ExternalRules {
   }
 
   /* ********************************************************** */
-  static Parser comma_list_pinned_$(Parser head, Parser param) {
+  static SyntaxGeneratedParserRuntime.Parser comma_list_pinned_$(SyntaxGeneratedParserRuntime.Parser head, SyntaxGeneratedParserRuntime.Parser param) {
     return (runtime_, level_) -> comma_list_pinned(runtime_, level_ + 1, head, param);
   }
 
   // <<head>> <<param>> (<<comma_list_tail <<param>>>>) *
-  public static boolean comma_list_pinned(SyntaxGeneratedParserRuntime runtime_, int level_, Parser head, Parser param) {
+  public static boolean comma_list_pinned(SyntaxGeneratedParserRuntime runtime_, int level_, SyntaxGeneratedParserRuntime.Parser head, SyntaxGeneratedParserRuntime.Parser param) {
     if (!recursion_guard_(runtime_, level_, "comma_list_pinned")) return false;
     boolean result_;
     Marker marker_ = enter_section_(runtime_);
@@ -132,7 +132,7 @@ public class ExternalRules {
   }
 
   // (<<comma_list_tail <<param>>>>) *
-  private static boolean comma_list_pinned_2(SyntaxGeneratedParserRuntime runtime_, int level_, Parser param) {
+  private static boolean comma_list_pinned_2(SyntaxGeneratedParserRuntime runtime_, int level_, SyntaxGeneratedParserRuntime.Parser param) {
     if (!recursion_guard_(runtime_, level_, "comma_list_pinned_2")) return false;
     while (true) {
       int pos_ = current_position_(runtime_);
@@ -143,13 +143,13 @@ public class ExternalRules {
   }
 
   // <<comma_list_tail <<param>>>>
-  private static boolean comma_list_pinned_2_0(SyntaxGeneratedParserRuntime runtime_, int level_, Parser param) {
+  private static boolean comma_list_pinned_2_0(SyntaxGeneratedParserRuntime runtime_, int level_, SyntaxGeneratedParserRuntime.Parser param) {
     return comma_list_tail(runtime_, level_ + 1, param);
   }
 
   /* ********************************************************** */
   // ',' <<param>>
-  public static boolean comma_list_tail(SyntaxGeneratedParserRuntime runtime_, int level_, Parser param) {
+  public static boolean comma_list_tail(SyntaxGeneratedParserRuntime runtime_, int level_, SyntaxGeneratedParserRuntime.Parser param) {
     if (!recursion_guard_(runtime_, level_, "comma_list_tail")) return false;
     if (!nextTokenIs(runtime_, COMMA)) return false;
     boolean result_, pinned_;
@@ -163,7 +163,7 @@ public class ExternalRules {
 
   /* ********************************************************** */
   // '(' <<param>> (',' <<param>>) * ')'
-  static boolean comma_paren_list(SyntaxGeneratedParserRuntime runtime_, int level_, Parser param) {
+  static boolean comma_paren_list(SyntaxGeneratedParserRuntime runtime_, int level_, SyntaxGeneratedParserRuntime.Parser param) {
     if (!recursion_guard_(runtime_, level_, "comma_paren_list")) return false;
     if (!nextTokenIs(runtime_, PAREN1)) return false;
     boolean result_, pinned_;
@@ -178,7 +178,7 @@ public class ExternalRules {
   }
 
   // (',' <<param>>) *
-  private static boolean comma_paren_list_2(SyntaxGeneratedParserRuntime runtime_, int level_, Parser param) {
+  private static boolean comma_paren_list_2(SyntaxGeneratedParserRuntime runtime_, int level_, SyntaxGeneratedParserRuntime.Parser param) {
     if (!recursion_guard_(runtime_, level_, "comma_paren_list_2")) return false;
     while (true) {
       int pos_ = current_position_(runtime_);
@@ -189,7 +189,7 @@ public class ExternalRules {
   }
 
   // ',' <<param>>
-  private static boolean comma_paren_list_2_0(SyntaxGeneratedParserRuntime runtime_, int level_, Parser param) {
+  private static boolean comma_paren_list_2_0(SyntaxGeneratedParserRuntime runtime_, int level_, SyntaxGeneratedParserRuntime.Parser param) {
     if (!recursion_guard_(runtime_, level_, "comma_paren_list_2_0")) return false;
     boolean result_;
     Marker marker_ = enter_section_(runtime_);
@@ -234,7 +234,7 @@ public class ExternalRules {
 
   /* ********************************************************** */
   // <<head>> <<comma_list <<param>>>> (<<comma_list_tail <<comma_list <<param>>>>>>) *
-  public static boolean list_of_lists(SyntaxGeneratedParserRuntime runtime_, int level_, Parser head, Parser param) {
+  public static boolean list_of_lists(SyntaxGeneratedParserRuntime runtime_, int level_, SyntaxGeneratedParserRuntime.Parser head, SyntaxGeneratedParserRuntime.Parser param) {
     if (!recursion_guard_(runtime_, level_, "list_of_lists")) return false;
     boolean result_;
     Marker marker_ = enter_section_(runtime_);
@@ -246,7 +246,7 @@ public class ExternalRules {
   }
 
   // (<<comma_list_tail <<comma_list <<param>>>>>>) *
-  private static boolean list_of_lists_2(SyntaxGeneratedParserRuntime runtime_, int level_, Parser param) {
+  private static boolean list_of_lists_2(SyntaxGeneratedParserRuntime runtime_, int level_, SyntaxGeneratedParserRuntime.Parser param) {
     if (!recursion_guard_(runtime_, level_, "list_of_lists_2")) return false;
     while (true) {
       int pos_ = current_position_(runtime_);
@@ -257,23 +257,23 @@ public class ExternalRules {
   }
 
   // <<comma_list_tail <<comma_list <<param>>>>>>
-  private static boolean list_of_lists_2_0(SyntaxGeneratedParserRuntime runtime_, int level_, Parser param) {
+  private static boolean list_of_lists_2_0(SyntaxGeneratedParserRuntime runtime_, int level_, SyntaxGeneratedParserRuntime.Parser param) {
     return comma_list_tail(runtime_, level_ + 1, comma_list_$(param));
   }
 
   /* ********************************************************** */
-  static Parser main_class_meta_$(Parser p) {
+  static SyntaxGeneratedParserRuntime.Parser main_class_meta_$(SyntaxGeneratedParserRuntime.Parser p) {
     return (runtime_, level_) -> main_class_meta(runtime_, level_ + 1, p);
   }
 
   // <<p>>
-  static boolean main_class_meta(SyntaxGeneratedParserRuntime runtime_, int level_, Parser p) {
+  static boolean main_class_meta(SyntaxGeneratedParserRuntime runtime_, int level_, SyntaxGeneratedParserRuntime.Parser p) {
     return p.parse(runtime_, level_);
   }
 
   /* ********************************************************** */
   // <<listOf "1+2" '1+2' <<param>>>>
-  static boolean meta_mixed(SyntaxGeneratedParserRuntime runtime_, int level_, Parser param) {
+  static boolean meta_mixed(SyntaxGeneratedParserRuntime runtime_, int level_, SyntaxGeneratedParserRuntime.Parser param) {
     return listOf(runtime_, level_ + 1, "1+2", 1+2, param);
   }
 
@@ -302,7 +302,7 @@ public class ExternalRules {
 
   /* ********************************************************** */
   // <<comma_list <<comma_list <<comma_list <<comma_list <<comma_list <<param>>>>>>>>>>>>
-  public static boolean meta_multi_level(SyntaxGeneratedParserRuntime runtime_, int level_, Parser param) {
+  public static boolean meta_multi_level(SyntaxGeneratedParserRuntime runtime_, int level_, SyntaxGeneratedParserRuntime.Parser param) {
     if (!recursion_guard_(runtime_, level_, "meta_multi_level")) return false;
     boolean result_;
     Marker marker_ = enter_section_(runtime_);
@@ -319,7 +319,7 @@ public class ExternalRules {
 
   /* ********************************************************** */
   // <<comma_list <<comma_list_pinned <<head>> <<comma_list <<comma_list <<comma_list <<param>>>>>>>>>>>>
-  public static boolean meta_multi_level_pinned(SyntaxGeneratedParserRuntime runtime_, int level_, Parser head, Parser param) {
+  public static boolean meta_multi_level_pinned(SyntaxGeneratedParserRuntime runtime_, int level_, SyntaxGeneratedParserRuntime.Parser head, SyntaxGeneratedParserRuntime.Parser param) {
     if (!recursion_guard_(runtime_, level_, "meta_multi_level_pinned")) return false;
     boolean result_;
     Marker marker_ = enter_section_(runtime_);
@@ -330,7 +330,7 @@ public class ExternalRules {
 
   /* ********************************************************** */
   // <<comma_list <<comma_list_pinned <<head>> (<<comma_list <<comma_list <<comma_list <<param>>>>>>>>)>>>>
-  public static boolean meta_multi_level_pinned_paren(SyntaxGeneratedParserRuntime runtime_, int level_, Parser head, Parser param) {
+  public static boolean meta_multi_level_pinned_paren(SyntaxGeneratedParserRuntime runtime_, int level_, SyntaxGeneratedParserRuntime.Parser head, SyntaxGeneratedParserRuntime.Parser param) {
     if (!recursion_guard_(runtime_, level_, "meta_multi_level_pinned_paren")) return false;
     boolean result_;
     Marker marker_ = enter_section_(runtime_);
@@ -339,12 +339,12 @@ public class ExternalRules {
     return result_;
   }
 
-  private static Parser meta_multi_level_pinned_paren_0_0_1_$(Parser param) {
+  private static SyntaxGeneratedParserRuntime.Parser meta_multi_level_pinned_paren_0_0_1_$(SyntaxGeneratedParserRuntime.Parser param) {
     return (runtime_, level_) -> meta_multi_level_pinned_paren_0_0_1(runtime_, level_ + 1, param);
   }
 
   // <<comma_list <<comma_list <<comma_list <<param>>>>>>>>
-  private static boolean meta_multi_level_pinned_paren_0_0_1(SyntaxGeneratedParserRuntime runtime_, int level_, Parser param) {
+  private static boolean meta_multi_level_pinned_paren_0_0_1(SyntaxGeneratedParserRuntime runtime_, int level_, SyntaxGeneratedParserRuntime.Parser param) {
     return comma_list(runtime_, level_ + 1, comma_list_$(comma_list_$(param)));
   }
 
@@ -408,7 +408,7 @@ public class ExternalRules {
 
   /* ********************************************************** */
   // <<comma_list (<<param>> | some)>>
-  public static boolean meta_with_in_place(SyntaxGeneratedParserRuntime runtime_, int level_, Parser param) {
+  public static boolean meta_with_in_place(SyntaxGeneratedParserRuntime runtime_, int level_, SyntaxGeneratedParserRuntime.Parser param) {
     if (!recursion_guard_(runtime_, level_, "meta_with_in_place")) return false;
     boolean result_;
     Marker marker_ = enter_section_(runtime_);
@@ -417,12 +417,12 @@ public class ExternalRules {
     return result_;
   }
 
-  private static Parser meta_with_in_place_0_0_$(Parser param) {
+  private static SyntaxGeneratedParserRuntime.Parser meta_with_in_place_0_0_$(SyntaxGeneratedParserRuntime.Parser param) {
     return (runtime_, level_) -> meta_with_in_place_0_0(runtime_, level_ + 1, param);
   }
 
   // <<param>> | some
-  private static boolean meta_with_in_place_0_0(SyntaxGeneratedParserRuntime runtime_, int level_, Parser param) {
+  private static boolean meta_with_in_place_0_0(SyntaxGeneratedParserRuntime runtime_, int level_, SyntaxGeneratedParserRuntime.Parser param) {
     if (!recursion_guard_(runtime_, level_, "meta_with_in_place_0_0")) return false;
     boolean result_;
     Marker marker_ = enter_section_(runtime_);
@@ -440,22 +440,22 @@ public class ExternalRules {
 
   /* ********************************************************** */
   // <<two_params_meta <<nested1>> <<two_params_meta <<nested2>> <<nested3>>>>>>
-  static boolean nested_meta(SyntaxGeneratedParserRuntime runtime_, int level_, Parser nested1, Parser nested2, Parser nested3) {
+  static boolean nested_meta(SyntaxGeneratedParserRuntime runtime_, int level_, SyntaxGeneratedParserRuntime.Parser nested1, SyntaxGeneratedParserRuntime.Parser nested2, SyntaxGeneratedParserRuntime.Parser nested3) {
     return two_params_meta(runtime_, level_ + 1, nested1, two_params_meta_$(nested2, nested3));
   }
 
   /* ********************************************************** */
   // <<two_params_meta (<<two_params_meta '%' <<c>>>>) perc_re>>
-  static boolean nested_mixed(SyntaxGeneratedParserRuntime runtime_, int level_, Parser c) {
+  static boolean nested_mixed(SyntaxGeneratedParserRuntime runtime_, int level_, SyntaxGeneratedParserRuntime.Parser c) {
     return two_params_meta(runtime_, level_ + 1, nested_mixed_0_0_$(c), PERC_RE_parser_);
   }
 
-  private static Parser nested_mixed_0_0_$(Parser c) {
+  private static SyntaxGeneratedParserRuntime.Parser nested_mixed_0_0_$(SyntaxGeneratedParserRuntime.Parser c) {
     return (runtime_, level_) -> nested_mixed_0_0(runtime_, level_ + 1, c);
   }
 
   // <<two_params_meta '%' <<c>>>>
-  private static boolean nested_mixed_0_0(SyntaxGeneratedParserRuntime runtime_, int level_, Parser c) {
+  private static boolean nested_mixed_0_0(SyntaxGeneratedParserRuntime runtime_, int level_, SyntaxGeneratedParserRuntime.Parser c) {
     return two_params_meta(runtime_, level_ + 1, perc_parser_, c);
   }
 
@@ -706,7 +706,7 @@ public class ExternalRules {
 
   /* ********************************************************** */
   // <<param>>
-  static boolean recoverable_item(SyntaxGeneratedParserRuntime runtime_, int level_, Parser param) {
+  static boolean recoverable_item(SyntaxGeneratedParserRuntime runtime_, int level_, SyntaxGeneratedParserRuntime.Parser param) {
     if (!recursion_guard_(runtime_, level_, "recoverable_item")) return false;
     boolean result_;
     Marker marker_ = enter_section_(runtime_, level_, _NONE_);
@@ -717,7 +717,7 @@ public class ExternalRules {
 
   /* ********************************************************** */
   // <<param>>
-  static boolean recoverable_item2(SyntaxGeneratedParserRuntime runtime_, int level_, Parser param, Parser recover_arg) {
+  static boolean recoverable_item2(SyntaxGeneratedParserRuntime runtime_, int level_, SyntaxGeneratedParserRuntime.Parser param, SyntaxGeneratedParserRuntime.Parser recover_arg) {
     if (!recursion_guard_(runtime_, level_, "recoverable_item2")) return false;
     boolean result_;
     Marker marker_ = enter_section_(runtime_, level_, _NONE_);
@@ -728,7 +728,7 @@ public class ExternalRules {
 
   /* ********************************************************** */
   // <<recover_arg>> <<param>>
-  static boolean recoverable_item3(SyntaxGeneratedParserRuntime runtime_, int level_, Parser recover_arg, Parser param) {
+  static boolean recoverable_item3(SyntaxGeneratedParserRuntime runtime_, int level_, SyntaxGeneratedParserRuntime.Parser recover_arg, SyntaxGeneratedParserRuntime.Parser param) {
     if (!recursion_guard_(runtime_, level_, "recoverable_item3")) return false;
     boolean result_, pinned_;
     Marker marker_ = enter_section_(runtime_, level_, _NONE_);
@@ -775,12 +775,12 @@ public class ExternalRules {
   }
 
   /* ********************************************************** */
-  static Parser two_params_meta_$(Parser a, Parser b) {
+  static SyntaxGeneratedParserRuntime.Parser two_params_meta_$(SyntaxGeneratedParserRuntime.Parser a, SyntaxGeneratedParserRuntime.Parser b) {
     return (runtime_, level_) -> two_params_meta(runtime_, level_ + 1, a, b);
   }
 
   // <<a>> <<b>>
-  public static boolean two_params_meta(SyntaxGeneratedParserRuntime runtime_, int level_, Parser a, Parser b) {
+  public static boolean two_params_meta(SyntaxGeneratedParserRuntime runtime_, int level_, SyntaxGeneratedParserRuntime.Parser a, SyntaxGeneratedParserRuntime.Parser b) {
     if (!recursion_guard_(runtime_, level_, "two_params_meta")) return false;
     boolean result_;
     Marker marker_ = enter_section_(runtime_);
@@ -790,15 +790,15 @@ public class ExternalRules {
     return result_;
   }
 
-  static final Parser PERC_RE_parser_ = (runtime_, level_) -> consumeToken(runtime_, PERC_RE);
-  static final Parser SOME_parser_ = (runtime_, level_) -> consumeToken(runtime_, SOME);
-  static final Parser perc_parser_ = (runtime_, level_) -> consumeToken(runtime_, PERC);
-  static final Parser perc_re_list2_0_0_parser_ = PERC_RE_parser_;
+  static final SyntaxGeneratedParserRuntime.Parser PERC_RE_parser_ = (runtime_, level_) -> consumeToken(runtime_, PERC_RE);
+  static final SyntaxGeneratedParserRuntime.Parser SOME_parser_ = (runtime_, level_) -> consumeToken(runtime_, SOME);
+  static final SyntaxGeneratedParserRuntime.Parser perc_parser_ = (runtime_, level_) -> consumeToken(runtime_, PERC);
+  static final SyntaxGeneratedParserRuntime.Parser perc_re_list2_0_0_parser_ = PERC_RE_parser_;
 
-  private static final Parser meta_mixed_list_0_0_parser_ = comma_list_$(ExternalRules::one);
-  private static final Parser meta_multi_level_no_closure_0_0_0_parser_ = comma_list_$(SOME_parser_);
-  private static final Parser meta_multi_level_no_closure_0_0_parser_ = comma_list_$(meta_multi_level_no_closure_0_0_0_parser_);
-  private static final Parser second_class_meta_usage_from_main_0_0_parser_ = ExternalRules2.second_class_meta_$(SOME_parser_);
+  private static final SyntaxGeneratedParserRuntime.Parser meta_mixed_list_0_0_parser_ = comma_list_$(ExternalRules::one);
+  private static final SyntaxGeneratedParserRuntime.Parser meta_multi_level_no_closure_0_0_0_parser_ = comma_list_$(SOME_parser_);
+  private static final SyntaxGeneratedParserRuntime.Parser meta_multi_level_no_closure_0_0_parser_ = comma_list_$(meta_multi_level_no_closure_0_0_0_parser_);
+  private static final SyntaxGeneratedParserRuntime.Parser second_class_meta_usage_from_main_0_0_parser_ = ExternalRules2.second_class_meta_$(SOME_parser_);
 }
 // ---- ExternalRules2.java -----------------
 // This is a generated file. Not intended for manual editing.
@@ -854,12 +854,12 @@ public class ExternalRules2 {
   }
 
   /* ********************************************************** */
-  static Parser second_class_meta_$(Parser bmp) {
+  static SyntaxGeneratedParserRuntime.Parser second_class_meta_$(SyntaxGeneratedParserRuntime.Parser bmp) {
     return (runtime_, level_) -> second_class_meta(runtime_, level_ + 1, bmp);
   }
 
   // <<bmp>>
-  static boolean second_class_meta(SyntaxGeneratedParserRuntime runtime_, int level_, Parser bmp) {
+  static boolean second_class_meta(SyntaxGeneratedParserRuntime runtime_, int level_, SyntaxGeneratedParserRuntime.Parser bmp) {
     return bmp.parse(runtime_, level_);
   }
 
@@ -869,8 +869,8 @@ public class ExternalRules2 {
     return comma_list(runtime_, level_ + 1, third_class_meta_usage_from_second_0_0_parser_);
   }
 
-  private static final Parser main_class_meta_usage_from_second_0_0_parser_ = main_class_meta_$(ExternalRules.SOME_parser_);
-  private static final Parser third_class_meta_usage_from_second_0_0_parser_ = ExternalRules3.third_class_meta_$(ExternalRules.SOME_parser_);
+  private static final SyntaxGeneratedParserRuntime.Parser main_class_meta_usage_from_second_0_0_parser_ = main_class_meta_$(ExternalRules.SOME_parser_);
+  private static final SyntaxGeneratedParserRuntime.Parser third_class_meta_usage_from_second_0_0_parser_ = ExternalRules3.third_class_meta_$(ExternalRules.SOME_parser_);
 }
 // ---- ExternalRules3.java -----------------
 // This is a generated file. Not intended for manual editing.
@@ -897,14 +897,14 @@ public class ExternalRules3 {
   }
 
   /* ********************************************************** */
-  static Parser third_class_meta_$(Parser fmp) {
+  static SyntaxGeneratedParserRuntime.Parser third_class_meta_$(SyntaxGeneratedParserRuntime.Parser fmp) {
     return (runtime_, level_) -> third_class_meta(runtime_, level_ + 1, fmp);
   }
 
   // <<fmp>>
-  static boolean third_class_meta(SyntaxGeneratedParserRuntime runtime_, int level_, Parser fmp) {
+  static boolean third_class_meta(SyntaxGeneratedParserRuntime runtime_, int level_, SyntaxGeneratedParserRuntime.Parser fmp) {
     return fmp.parse(runtime_, level_);
   }
 
-  private static final Parser second_class_meta_usage_from_third_0_0_parser_ = ExternalRules2.second_class_meta_$(ExternalRules.SOME_parser_);
+  private static final SyntaxGeneratedParserRuntime.Parser second_class_meta_usage_from_third_0_0_parser_ = ExternalRules2.second_class_meta_$(ExternalRules.SOME_parser_);
 }

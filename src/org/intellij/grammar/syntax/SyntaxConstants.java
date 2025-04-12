@@ -13,7 +13,7 @@ public interface SyntaxConstants {
   String SYNTAX_ELEMENT_TYPE_CONVERTER_FACTORY = "com.intellij.platform.syntax.psi.ElementTypeConverterFactory";
   String SYNTAX_ELEMENT_TYPE_CONVERTER_FILE ="com.intellij.platform.syntax.psi.ElementTypeConverterKt";
   String PRODUCTION_RESULT = "com.intellij.platform.syntax.parser.ProductionResult";
-  String PREPARE_PRODUCTION = "com.intellij.platform.syntax.parser.ProductionResultKt.prepareProduction";
+  String PRODUCTION_RESULT_FILE = "com.intellij.platform.syntax.parser.ProductionResultKt";
 
   String KOTLIN_FUNCTION2_CLASS = "kotlin.jvm.functions.Function2";
   String KOTLIN_UNIT_CLASS = "kotlin.Unit";

@@ -53,8 +53,8 @@ public class ExpressionGeneratorHelper {
     String methodName = getFuncName(info.rootRule);
     String kernelMethodName = getNextName(methodName, 0);
     String frameName = quote(getRuleDisplayName(info.rootRule, true));
-    String shortPB = g.shorten(g.C.PsiBuilderClass);
-    String shortMarker = !g.G.generateFQN ? "Marker" : g.C.PsiBuilderClass + ".Marker";
+    String shortPB = g.shorten(g.C.ParserStateHolder);
+    String shortMarker = !g.G.generateFQN ? "Marker" : g.C.BuilderClass + ".Marker";
     g.out("public static boolean %s(%s %s, int %s, int %s) {", methodName, shortPB, g.N.stateHolder, g.N.level, g.N.priority);
     g.out("if (!recursion_guard_(%s, %s, \"%s\")) return false;", g.N.stateHolder, g.N.level, methodName);
 

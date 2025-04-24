@@ -3,9 +3,9 @@ package org.intellij.grammar.syntax;
 public interface SyntaxConstants {
 
   String SYNTAX_ELEMENT_TYPE = "com.intellij.platform.syntax.SyntaxElementType";
-  String RUNTIME_CLASS = "com.intellij.platform.syntax.runtime.SyntaxGeneratedParserRuntime";
+  String RUNTIME_CLASS = "com.intellij.platform.syntax.util.runtime.SyntaxGeneratedParserRuntime";
   String RUNTIME_PARSER_INTERFACE = "SyntaxGeneratedParserRuntime.Parser";
-  String RUNTIME_STATIC_METHOD_HOLDER = "com.intellij.platform.syntax.runtime.SyntaxGeneratedParserRuntimeKt";
+  String RUNTIME_STATIC_METHOD_HOLDER = "com.intellij.platform.syntax.util.runtime.SyntaxGeneratedParserRuntimeKt";
   String SYNTAX_BUILDER_CLASS = "com.intellij.platform.syntax.parser.SyntaxTreeBuilder";
   String TOKEN_SET_CLASS = "com.intellij.platform.syntax.SyntaxElementTypeSet";
   String TOKEN_SET_FILE = "com.intellij.platform.syntax.SyntaxElementTypeSetKt";

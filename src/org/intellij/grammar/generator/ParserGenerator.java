@@ -713,7 +713,7 @@ public class ParserGenerator {
       out("public %s parse(%s %s, %s %s) {", shortAN, shortET, N.root, shortPB, N.stateHolder);
       out("parseLight(%s, %s);", N.root, N.stateHolder);
       String prepareProductionCall = (G.generateFQN) ? SyntaxConstants.PRODUCTION_RESULT_FILE + ".prepareProduction" : "prepareProduction"; 
-      out("return %s(%s.getBuilder());", prepareProductionCall, N.stateHolder);
+      out("return %s(%s.getSyntaxBuilder());", prepareProductionCall, N.stateHolder);
       out("}");
       newLine();
       out("public void parseLight(%s %s, %s %s) {", shortET, N.root, shortPB, N.stateHolder);

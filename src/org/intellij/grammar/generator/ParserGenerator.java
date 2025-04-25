@@ -124,6 +124,7 @@ public class ParserGenerator {
   protected final BnfFile myFile;
   private final String mySourcePath;
   private final String myOutputPath;
+  private final String myPsiOutputPath;
   private final String myPackagePrefix;
   private final String myGrammarRoot;
   private final String myGrammarRootParser;
@@ -161,6 +162,8 @@ public class ParserGenerator {
     myFile = psiFile;
     mySourcePath = sourcePath;
     myOutputPath = outputPath;
+    var psiOutput = getRootAttribute(myFile, KnownAttribute.PSI_MODULE_PATH);
+    myPsiOutputPath = (psiOutput.isEmpty()) ? myOutputPath : psiOutput;
     myPackagePrefix = packagePrefix;
 
     G = new GenOptions(myFile);
@@ -310,8 +313,12 @@ public class ParserGenerator {
   }
 
   private void openOutput(String className) throws IOException {
+    openOutput(className, myOutputPath);
+  }
+  
+  private void openOutput(String className, String outputPath) throws IOException {
     String classNameAdjusted = myPackagePrefix.isEmpty() ? className : StringUtil.trimStart(className, myPackagePrefix + ".");
-    File file = new File(myOutputPath, classNameAdjusted.replace('.', File.separatorChar) + ".java");
+    File file = new File(outputPath, classNameAdjusted.replace('.', File.separatorChar) + ".java");
     myOut = openOutputInner(className, file);
   }
 
@@ -403,7 +410,7 @@ public class ParserGenerator {
     if (myGrammarRoot != null && (G.generateTokenTypes || G.generateElementTypes || G.generatePsi && G.generatePsiFactory)) {
       if (G.generatePsi || G.parserApi != GenOptions.ParserApi.Syntax)
       {
-        openOutput(myPsiElementTypeHolderClass);
+        openOutput(myPsiElementTypeHolderClass, myPsiOutputPath);
         try {
           generateElementTypesHolder(myPsiElementTypeHolderClass,
                                      sortedCompositeTypes,
@@ -449,7 +456,7 @@ public class ParserGenerator {
       myRulesMethodsHelper.buildMaps(sortedPsiRules.values());
       for (BnfRule rule : sortedPsiRules.values()) {
         RuleInfo info = ruleInfo(rule);
-        openOutput(info.intfClass);
+        openOutput(info.intfClass, myPsiOutputPath);
         try {
           generatePsiIntf(rule, info);
         }
@@ -459,7 +466,7 @@ public class ParserGenerator {
       }
       for (BnfRule rule : sortedPsiRules.values()) {
         RuleInfo info = ruleInfo(rule);
-        openOutput(info.implClass);
+        openOutput(info.implClass, myPsiOutputPath);
         try {
           generatePsiImpl(rule, info);
         }
@@ -468,7 +475,7 @@ public class ParserGenerator {
         }
       }
       if (myVisitorClassName != null && myGrammarRoot != null) {
-        openOutput(myVisitorClassName);
+        openOutput(myVisitorClassName, myPsiOutputPath);
         try {
           generateVisitor(myVisitorClassName, sortedPsiRules);
         }

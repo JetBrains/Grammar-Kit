@@ -1,4 +1,4 @@
-// ---- ExpressionParser.java -----------------
+// ---- org/intellij/grammar/expression/ExpressionParser.java -----------------
 //header.txt
 package org.intellij.grammar.expression;
 

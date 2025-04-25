@@ -1,4 +1,4 @@
-// ---- GeneratedSyntaxElementTypes.java -----------------
+// ---- generated/GeneratedSyntaxElementTypes.java -----------------
 //header.txt
 package generated;
 
@@ -40,7 +40,7 @@ public interface GeneratedSyntaxElementTypes {
   SyntaxElementType STRING = new SyntaxElementType("string");
   SyntaxElementType SYNTAX = new SyntaxElementType("syntax");
 }
-// ---- GeneratedSyntaxElementTypeConverter.java -----------------
+// ---- generated/GeneratedSyntaxElementTypeConverter.java -----------------
 //header.txt
 package generated;
 

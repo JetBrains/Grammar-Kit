@@ -1,4 +1,4 @@
-// ---- TokenChoice.java -----------------
+// ---- generated/TokenChoice.java -----------------
 // This is a generated file. Not intended for manual editing.
 package generated;
 
@@ -162,7 +162,7 @@ public class TokenChoice implements PsiParser, LightPsiParser {
   }
 
 }
-// ---- TokenChoice2.java -----------------
+// ---- generated/TokenChoice2.java -----------------
 // This is a generated file. Not intended for manual editing.
 package generated;
 

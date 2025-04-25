@@ -1,4 +1,4 @@
-// ---- FooTypes.java -----------------
+// ---- test/FooTypes.java -----------------
 //header.txt
 package test;
 
@@ -23,7 +23,7 @@ public interface FooTypes {
     }
   }
 }
-// ---- Element1.java -----------------
+// ---- test/psi/Element1.java -----------------
 //header.txt
 package test.psi;
 
@@ -51,7 +51,7 @@ public interface Element1 extends PsiElement {
   @NotNull @Nls List<? super String> @Nullable @Unmodifiable [][] foo6(@NotNull @Nls List<? super String> @Nullable @Unmodifiable [][] p1);
 
 }
-// ---- Element1Impl.java -----------------
+// ---- test/psi/impl/Element1Impl.java -----------------
 //header.txt
 package test.psi.impl;
 
@@ -121,7 +121,7 @@ public class Element1Impl extends ASTWrapperPsiElement implements Element1 {
   }
 
 }
-// ---- Visitor.java -----------------
+// ---- test/psi/Visitor.java -----------------
 //header.txt
 package test.psi;
 

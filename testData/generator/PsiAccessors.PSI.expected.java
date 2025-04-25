@@ -1,4 +1,4 @@
-// ---- GeneratedTypes.java -----------------
+// ---- generated/GeneratedTypes.java -----------------
 //header.txt
 package generated;
 
@@ -38,7 +38,7 @@ public interface GeneratedTypes {
     }
   }
 }
-// ---- XBinary.java -----------------
+// ---- generated/psi/XBinary.java -----------------
 //header.txt
 package generated.psi;
 
@@ -88,7 +88,7 @@ public interface XBinary extends XComposite {
   XValue getBadIndex();
 
 }
-// ---- XEmpty.java -----------------
+// ---- generated/psi/XEmpty.java -----------------
 //header.txt
 package generated.psi;
 
@@ -99,7 +99,7 @@ import com.intellij.psi.PsiElement;
 public interface XEmpty extends XComposite {
 
 }
-// ---- XExpression.java -----------------
+// ---- generated/psi/XExpression.java -----------------
 //header.txt
 package generated.psi;
 
@@ -113,7 +113,7 @@ public interface XExpression extends XComposite {
   List<XValue> getValueList();
 
 }
-// ---- XOperator.java -----------------
+// ---- generated/psi/XOperator.java -----------------
 //header.txt
 package generated.psi;
 
@@ -124,7 +124,7 @@ import com.intellij.psi.PsiElement;
 public interface XOperator extends XComposite {
 
 }
-// ---- XRenameList.java -----------------
+// ---- generated/psi/XRenameList.java -----------------
 //header.txt
 package generated.psi;
 
@@ -148,7 +148,7 @@ public interface XRenameList extends XComposite {
   XSomeChild getLast();
 
 }
-// ---- XReportSomeBad.java -----------------
+// ---- generated/psi/XReportSomeBad.java -----------------
 //header.txt
 package generated.psi;
 
@@ -163,7 +163,7 @@ public interface XReportSomeBad extends XComposite {
   XReportSomeBad getReportSomeBad();
 
 }
-// ---- XSomeChild.java -----------------
+// ---- generated/psi/child/XSomeChild.java -----------------
 //header.txt
 package generated.psi.child;
 
@@ -187,7 +187,7 @@ public interface XSomeChild extends XComposite {
   PsiElement getSmth2();
 
 }
-// ---- XSomeGrandChild.java -----------------
+// ---- generated/psi/grand/XSomeGrandChild.java -----------------
 //header.txt
 package generated.psi.grand;
 
@@ -204,7 +204,7 @@ public interface XSomeGrandChild extends XComposite {
   PsiElement getSomething2();
 
 }
-// ---- XSomeRoot.java -----------------
+// ---- generated/psi/XSomeRoot.java -----------------
 //header.txt
 package generated.psi;
 
@@ -235,7 +235,7 @@ public interface XSomeRoot extends XComposite {
   PsiElement getGrandChildSomethin2();
 
 }
-// ---- XTokenDefaults.java -----------------
+// ---- generated/psi/XTokenDefaults.java -----------------
 //header.txt
 package generated.psi;
 
@@ -249,7 +249,7 @@ public interface XTokenDefaults extends XComposite {
   PsiElement getNodef();
 
 }
-// ---- XValue.java -----------------
+// ---- generated/psi/XValue.java -----------------
 //header.txt
 package generated.psi;
 
@@ -263,7 +263,7 @@ public interface XValue extends XComposite {
   PsiElement getId();
 
 }
-// ---- XBinaryImpl.java -----------------
+// ---- generated/psi/impl/XBinaryImpl.java -----------------
 //header.txt
 package generated.psi.impl;
 
@@ -383,7 +383,7 @@ public class XBinaryImpl extends ASTWrapperPsiElement implements XBinary {
   }
 
 }
-// ---- XEmptyImpl.java -----------------
+// ---- generated/psi/impl/XEmptyImpl.java -----------------
 //header.txt
 package generated.psi.impl;
 
@@ -403,7 +403,7 @@ public class XEmptyImpl extends ASTWrapperPsiElement implements XEmpty {
   }
 
 }
-// ---- XExpressionImpl.java -----------------
+// ---- generated/psi/impl/XExpressionImpl.java -----------------
 //header.txt
 package generated.psi.impl;
 
@@ -429,7 +429,7 @@ public class XExpressionImpl extends ASTWrapperPsiElement implements XExpression
   }
 
 }
-// ---- XOperatorImpl.java -----------------
+// ---- generated/psi/impl/XOperatorImpl.java -----------------
 //header.txt
 package generated.psi.impl;
 
@@ -449,7 +449,7 @@ public class XOperatorImpl extends ASTWrapperPsiElement implements XOperator {
   }
 
 }
-// ---- XRenameListImpl.java -----------------
+// ---- generated/psi/impl/XRenameListImpl.java -----------------
 //header.txt
 package generated.psi.impl;
 
@@ -499,7 +499,7 @@ public class XRenameListImpl extends ASTWrapperPsiElement implements XRenameList
   }
 
 }
-// ---- XReportSomeBadImpl.java -----------------
+// ---- generated/psi/impl/XReportSomeBadImpl.java -----------------
 //header.txt
 package generated.psi.impl;
 
@@ -526,7 +526,7 @@ public class XReportSomeBadImpl extends ASTWrapperPsiElement implements XReportS
   }
 
 }
-// ---- XSomeChildImpl.java -----------------
+// ---- generated/psi/impl/child/XSomeChildImpl.java -----------------
 //header.txt
 package generated.psi.impl.child;
 
@@ -571,7 +571,7 @@ public class XSomeChildImpl extends ASTWrapperPsiElement implements XSomeChild {
   }
 
 }
-// ---- XSomeGrandChildImpl.java -----------------
+// ---- generated/psi/impl/grand/XSomeGrandChildImpl.java -----------------
 //header.txt
 package generated.psi.impl.grand;
 
@@ -603,7 +603,7 @@ public class XSomeGrandChildImpl extends ASTWrapperPsiElement implements XSomeGr
   }
 
 }
-// ---- XSomeRootImpl.java -----------------
+// ---- generated/psi/impl/XSomeRootImpl.java -----------------
 //header.txt
 package generated.psi.impl;
 
@@ -668,7 +668,7 @@ public class XSomeRootImpl extends ASTWrapperPsiElement implements XSomeRoot {
   }
 
 }
-// ---- XTokenDefaultsImpl.java -----------------
+// ---- generated/psi/impl/XTokenDefaultsImpl.java -----------------
 //header.txt
 package generated.psi.impl;
 
@@ -694,7 +694,7 @@ public class XTokenDefaultsImpl extends ASTWrapperPsiElement implements XTokenDe
   }
 
 }
-// ---- XValueImpl.java -----------------
+// ---- generated/psi/impl/XValueImpl.java -----------------
 //header.txt
 package generated.psi.impl;
 

@@ -14,6 +14,16 @@ public interface SyntaxConstants {
   String SYNTAX_ELEMENT_TYPE_CONVERTER_FILE ="com.intellij.platform.syntax.psi.ElementTypeConverterKt";
   String PRODUCTION_RESULT = "com.intellij.platform.syntax.parser.ProductionResult";
   String PRODUCTION_RESULT_FILE = "com.intellij.platform.syntax.parser.ProductionResultKt";
+  
+  String[] MODIFIERS = {
+    "com.intellij.platform.syntax.util.runtime.Modifiers.Companion._NONE_",
+    "com.intellij.platform.syntax.util.runtime.Modifiers.Companion._COLLAPSE_",
+    "com.intellij.platform.syntax.util.runtime.Modifiers.Companion._LEFT_",
+    "com.intellij.platform.syntax.util.runtime.Modifiers.Companion._LEFT_INNER_",
+    "com.intellij.platform.syntax.util.runtime.Modifiers.Companion._AND_",
+    "com.intellij.platform.syntax.util.runtime.Modifiers.Companion._NOT_",
+    "com.intellij.platform.syntax.util.runtime.Modifiers.Companion._UPPER_",
+  };
 
   String KOTLIN_FUNCTION2_CLASS = "kotlin.jvm.functions.Function2";
   String KOTLIN_UNIT_CLASS = "kotlin.Unit";

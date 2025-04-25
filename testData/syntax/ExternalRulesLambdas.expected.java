@@ -2,10 +2,17 @@
 // This is a generated file. Not intended for manual editing.
 package ;
 
-import com.intellij.platform.syntax.runtime.SyntaxGeneratedParserRuntime;
+import com.intellij.platform.syntax.util.runtime.SyntaxGeneratedParserRuntime;
 import com.intellij.platform.syntax.parser.SyntaxTreeBuilder.Marker;
 import static generated.GeneratedSyntaxElementTypes.*;
-import static com.intellij.platform.syntax.runtime.SyntaxGeneratedParserRuntimeKt.*;
+import static com.intellij.platform.syntax.util.runtime.SyntaxGeneratedParserRuntimeKt.*;
+import com.intellij.platform.syntax.util.runtime.Modifiers.Companion._NONE_;
+import com.intellij.platform.syntax.util.runtime.Modifiers.Companion._COLLAPSE_;
+import com.intellij.platform.syntax.util.runtime.Modifiers.Companion._LEFT_;
+import com.intellij.platform.syntax.util.runtime.Modifiers.Companion._LEFT_INNER_;
+import com.intellij.platform.syntax.util.runtime.Modifiers.Companion._AND_;
+import com.intellij.platform.syntax.util.runtime.Modifiers.Companion._NOT_;
+import com.intellij.platform.syntax.util.runtime.Modifiers.Companion._UPPER_;
 import com.intellij.platform.syntax.SyntaxElementType;
 import com.intellij.platform.syntax.parser.ProductionResult;
 import com.intellij.platform.syntax.SyntaxElementTypeSet;
@@ -18,7 +25,7 @@ public class ExternalRulesLambdas {
 
   public ProductionResult parse(SyntaxElementType root_, SyntaxGeneratedParserRuntime runtime_) {
     parseLight(root_, runtime_);
-    return prepareProduction(runtime_.getBuilder());
+    return prepareProduction(runtime_.getSyntaxBuilder());
   }
 
   public void parseLight(SyntaxElementType root_, SyntaxGeneratedParserRuntime runtime_) {
@@ -714,10 +721,17 @@ public class ExternalRulesLambdas {
 // This is a generated file. Not intended for manual editing.
 package ;
 
-import com.intellij.platform.syntax.runtime.SyntaxGeneratedParserRuntime;
+import com.intellij.platform.syntax.util.runtime.SyntaxGeneratedParserRuntime;
 import com.intellij.platform.syntax.parser.SyntaxTreeBuilder.Marker;
 import static generated.GeneratedSyntaxElementTypes.*;
-import static com.intellij.platform.syntax.runtime.SyntaxGeneratedParserRuntimeKt.*;
+import static com.intellij.platform.syntax.util.runtime.SyntaxGeneratedParserRuntimeKt.*;
+import com.intellij.platform.syntax.util.runtime.Modifiers.Companion._NONE_;
+import com.intellij.platform.syntax.util.runtime.Modifiers.Companion._COLLAPSE_;
+import com.intellij.platform.syntax.util.runtime.Modifiers.Companion._LEFT_;
+import com.intellij.platform.syntax.util.runtime.Modifiers.Companion._LEFT_INNER_;
+import com.intellij.platform.syntax.util.runtime.Modifiers.Companion._AND_;
+import com.intellij.platform.syntax.util.runtime.Modifiers.Companion._NOT_;
+import com.intellij.platform.syntax.util.runtime.Modifiers.Companion._UPPER_;
 import static ExternalRulesLambdas.*;
 
 @SuppressWarnings({"SimplifiableIfStatement", "UnusedAssignment"})
@@ -774,10 +788,17 @@ public class ExternalRulesLambdas2 {
 // This is a generated file. Not intended for manual editing.
 package ;
 
-import com.intellij.platform.syntax.runtime.SyntaxGeneratedParserRuntime;
+import com.intellij.platform.syntax.util.runtime.SyntaxGeneratedParserRuntime;
 import com.intellij.platform.syntax.parser.SyntaxTreeBuilder.Marker;
 import static generated.GeneratedSyntaxElementTypes.*;
-import static com.intellij.platform.syntax.runtime.SyntaxGeneratedParserRuntimeKt.*;
+import static com.intellij.platform.syntax.util.runtime.SyntaxGeneratedParserRuntimeKt.*;
+import com.intellij.platform.syntax.util.runtime.Modifiers.Companion._NONE_;
+import com.intellij.platform.syntax.util.runtime.Modifiers.Companion._COLLAPSE_;
+import com.intellij.platform.syntax.util.runtime.Modifiers.Companion._LEFT_;
+import com.intellij.platform.syntax.util.runtime.Modifiers.Companion._LEFT_INNER_;
+import com.intellij.platform.syntax.util.runtime.Modifiers.Companion._AND_;
+import com.intellij.platform.syntax.util.runtime.Modifiers.Companion._NOT_;
+import com.intellij.platform.syntax.util.runtime.Modifiers.Companion._UPPER_;
 import static ExternalRulesLambdas.*;
 
 @SuppressWarnings({"SimplifiableIfStatement", "UnusedAssignment"})

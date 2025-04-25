@@ -1,4 +1,4 @@
-// ---- GeneratedTypes.java -----------------
+// ---- generated/GeneratedTypes.java -----------------
 // This is a generated file. Not intended for manual editing.
 package generated;
 
@@ -33,7 +33,7 @@ public interface GeneratedTypes {
   IElementType TOKEN_THREE = new IElementType("#", null);
   IElementType TOKEN_TWO = new IElementType("token-two", null);
 }
-// ---- FooΩInner.java -----------------
+// ---- generated/psi/FooΩInner.java -----------------
 // This is a generated file. Not intended for manual editing.
 package generated.psi;
 
@@ -44,7 +44,7 @@ import com.intellij.psi.PsiElement;
 public interface FooΩInner extends PsiElement {
 
 }
-// ---- AExpr.java -----------------
+// ---- generated/psi/AExpr.java -----------------
 // This is a generated file. Not intended for manual editing.
 package generated.psi;
 
@@ -58,7 +58,7 @@ public interface AExpr extends Expr {
   List<Expr> getExprList();
 
 }
-// ---- BExpr.java -----------------
+// ---- generated/psi/BExpr.java -----------------
 // This is a generated file. Not intended for manual editing.
 package generated.psi;
 
@@ -72,7 +72,7 @@ public interface BExpr extends Expr {
   List<Expr> getExprList();
 
 }
-// ---- ErlList.java -----------------
+// ---- generated/psi/ErlList.java -----------------
 // This is a generated file. Not intended for manual editing.
 package generated.psi;
 
@@ -92,7 +92,7 @@ public interface ErlList extends PsiElement {
   Zome getZome();
 
 }
-// ---- Expr.java -----------------
+// ---- generated/psi/Expr.java -----------------
 // This is a generated file. Not intended for manual editing.
 package generated.psi;
 
@@ -103,7 +103,7 @@ import com.intellij.psi.PsiElement;
 public interface Expr extends PsiElement {
 
 }
-// ---- Import.java -----------------
+// ---- generated/psi/Import.java -----------------
 // This is a generated file. Not intended for manual editing.
 package generated.psi;
 
@@ -117,7 +117,7 @@ public interface Import extends PsiElement {
   Some getSome();
 
 }
-// ---- LeftExpr.java -----------------
+// ---- generated/psi/LeftExpr.java -----------------
 // This is a generated file. Not intended for manual editing.
 package generated.psi;
 
@@ -131,7 +131,7 @@ public interface LeftExpr extends Expr {
   List<Expr> getExprList();
 
 }
-// ---- NotOptimizedChoice.java -----------------
+// ---- generated/psi/NotOptimizedChoice.java -----------------
 // This is a generated file. Not intended for manual editing.
 package generated.psi;
 
@@ -142,7 +142,7 @@ import com.intellij.psi.PsiElement;
 public interface NotOptimizedChoice extends PsiElement {
 
 }
-// ---- RecursiveExtendA.java -----------------
+// ---- generated/psi/RecursiveExtendA.java -----------------
 // This is a generated file. Not intended for manual editing.
 package generated.psi;
 
@@ -153,7 +153,7 @@ import com.intellij.psi.PsiElement;
 public interface RecursiveExtendA extends RecursiveExtendB {
 
 }
-// ---- RecursiveExtendB.java -----------------
+// ---- generated/psi/RecursiveExtendB.java -----------------
 // This is a generated file. Not intended for manual editing.
 package generated.psi;
 
@@ -164,7 +164,7 @@ import com.intellij.psi.PsiElement;
 public interface RecursiveExtendB extends RecursiveExtendA {
 
 }
-// ---- Some.java -----------------
+// ---- generated/psi/Some.java -----------------
 // This is a generated file. Not intended for manual editing.
 package generated.psi;
 
@@ -175,7 +175,7 @@ import com.intellij.psi.PsiElement;
 public interface Some extends PsiElement {
 
 }
-// ---- SomeExpr.java -----------------
+// ---- generated/psi/SomeExpr.java -----------------
 // This is a generated file. Not intended for manual editing.
 package generated.psi;
 
@@ -186,7 +186,7 @@ import com.intellij.psi.PsiElement;
 public interface SomeExpr extends Expr {
 
 }
-// ---- SomeSeq.java -----------------
+// ---- generated/psi/SomeSeq.java -----------------
 // This is a generated file. Not intended for manual editing.
 package generated.psi;
 
@@ -200,7 +200,7 @@ public interface SomeSeq extends PsiElement {
   List<Some> getSomeList();
 
 }
-// ---- Thing.java -----------------
+// ---- generated/psi/Thing.java -----------------
 // This is a generated file. Not intended for manual editing.
 package generated.psi;
 
@@ -214,7 +214,7 @@ public interface Thing extends PsiElement {
   ThingItem getThingItem();
 
 }
-// ---- ThingItem.java -----------------
+// ---- generated/psi/ThingItem.java -----------------
 // This is a generated file. Not intended for manual editing.
 package generated.psi;
 
@@ -225,7 +225,7 @@ import com.intellij.psi.PsiElement;
 public interface ThingItem extends PsiElement {
 
 }
-// ---- TwoUsagesLeft.java -----------------
+// ---- generated/psi/TwoUsagesLeft.java -----------------
 // This is a generated file. Not intended for manual editing.
 package generated.psi;
 
@@ -239,7 +239,7 @@ public interface TwoUsagesLeft extends PsiElement {
   Expr getExpr();
 
 }
-// ---- WithRecursive.java -----------------
+// ---- generated/psi/WithRecursive.java -----------------
 // This is a generated file. Not intended for manual editing.
 package generated.psi;
 
@@ -253,7 +253,7 @@ public interface WithRecursive extends PsiElement {
   List<Some> getSomeList();
 
 }
-// ---- Zome.java -----------------
+// ---- generated/psi/Zome.java -----------------
 // This is a generated file. Not intended for manual editing.
 package generated.psi;
 
@@ -270,7 +270,7 @@ public interface Zome extends PsiElement {
   PsiElement getTokenTwo();
 
 }
-// ---- FooΩInnerImpl.java -----------------
+// ---- generated/psi/impl/FooΩInnerImpl.java -----------------
 // This is a generated file. Not intended for manual editing.
 package generated.psi.impl;
 
@@ -301,7 +301,7 @@ public class FooΩInnerImpl extends ASTWrapperPsiElement implements FooΩInner {
   }
 
 }
-// ---- AExprImpl.java -----------------
+// ---- generated/psi/impl/AExprImpl.java -----------------
 // This is a generated file. Not intended for manual editing.
 package generated.psi.impl;
 
@@ -338,7 +338,7 @@ public class AExprImpl extends ExprImpl implements AExpr {
   }
 
 }
-// ---- BExprImpl.java -----------------
+// ---- generated/psi/impl/BExprImpl.java -----------------
 // This is a generated file. Not intended for manual editing.
 package generated.psi.impl;
 
@@ -375,7 +375,7 @@ public class BExprImpl extends ExprImpl implements BExpr {
   }
 
 }
-// ---- ErlListImpl.java -----------------
+// ---- generated/psi/impl/ErlListImpl.java -----------------
 // This is a generated file. Not intended for manual editing.
 package generated.psi.impl;
 
@@ -424,7 +424,7 @@ public class ErlListImpl extends ASTWrapperPsiElement implements ErlList {
   }
 
 }
-// ---- ExprImpl.java -----------------
+// ---- generated/psi/impl/ExprImpl.java -----------------
 // This is a generated file. Not intended for manual editing.
 package generated.psi.impl;
 
@@ -455,7 +455,7 @@ public abstract class ExprImpl extends ASTWrapperPsiElement implements Expr {
   }
 
 }
-// ---- ImportImpl.java -----------------
+// ---- generated/psi/impl/ImportImpl.java -----------------
 // This is a generated file. Not intended for manual editing.
 package generated.psi.impl;
 
@@ -492,7 +492,7 @@ public class ImportImpl extends ASTWrapperPsiElement implements Import {
   }
 
 }
-// ---- LeftExprImpl.java -----------------
+// ---- generated/psi/impl/LeftExprImpl.java -----------------
 // This is a generated file. Not intended for manual editing.
 package generated.psi.impl;
 
@@ -529,7 +529,7 @@ public class LeftExprImpl extends ExprImpl implements LeftExpr {
   }
 
 }
-// ---- NotOptimizedChoiceImpl.java -----------------
+// ---- generated/psi/impl/NotOptimizedChoiceImpl.java -----------------
 // This is a generated file. Not intended for manual editing.
 package generated.psi.impl;
 
@@ -560,7 +560,7 @@ public class NotOptimizedChoiceImpl extends ASTWrapperPsiElement implements NotO
   }
 
 }
-// ---- RecursiveExtendAImpl.java -----------------
+// ---- generated/psi/impl/RecursiveExtendAImpl.java -----------------
 // This is a generated file. Not intended for manual editing.
 package generated.psi.impl;
 
@@ -591,7 +591,7 @@ public class RecursiveExtendAImpl extends RecursiveExtendBImpl implements Recurs
   }
 
 }
-// ---- RecursiveExtendBImpl.java -----------------
+// ---- generated/psi/impl/RecursiveExtendBImpl.java -----------------
 // This is a generated file. Not intended for manual editing.
 package generated.psi.impl;
 
@@ -622,7 +622,7 @@ public class RecursiveExtendBImpl extends RecursiveExtendAImpl implements Recurs
   }
 
 }
-// ---- SomeImpl.java -----------------
+// ---- generated/psi/impl/SomeImpl.java -----------------
 // This is a generated file. Not intended for manual editing.
 package generated.psi.impl;
 
@@ -653,7 +653,7 @@ public class SomeImpl extends ASTWrapperPsiElement implements Some {
   }
 
 }
-// ---- SomeExprImpl.java -----------------
+// ---- generated/psi/impl/SomeExprImpl.java -----------------
 // This is a generated file. Not intended for manual editing.
 package generated.psi.impl;
 
@@ -684,7 +684,7 @@ public abstract class SomeExprImpl extends ExprImpl implements SomeExpr {
   }
 
 }
-// ---- SomeSeqImpl.java -----------------
+// ---- generated/psi/impl/SomeSeqImpl.java -----------------
 // This is a generated file. Not intended for manual editing.
 package generated.psi.impl;
 
@@ -721,7 +721,7 @@ public class SomeSeqImpl extends ASTWrapperPsiElement implements SomeSeq {
   }
 
 }
-// ---- ThingImpl.java -----------------
+// ---- generated/psi/impl/ThingImpl.java -----------------
 // This is a generated file. Not intended for manual editing.
 package generated.psi.impl;
 
@@ -758,7 +758,7 @@ public class ThingImpl extends ASTWrapperPsiElement implements Thing {
   }
 
 }
-// ---- ThingItemImpl.java -----------------
+// ---- generated/psi/impl/ThingItemImpl.java -----------------
 // This is a generated file. Not intended for manual editing.
 package generated.psi.impl;
 
@@ -789,7 +789,7 @@ public class ThingItemImpl extends ASTWrapperPsiElement implements ThingItem {
   }
 
 }
-// ---- TwoUsagesLeftImpl.java -----------------
+// ---- generated/psi/impl/TwoUsagesLeftImpl.java -----------------
 // This is a generated file. Not intended for manual editing.
 package generated.psi.impl;
 
@@ -826,7 +826,7 @@ public class TwoUsagesLeftImpl extends ASTWrapperPsiElement implements TwoUsages
   }
 
 }
-// ---- WithRecursiveImpl.java -----------------
+// ---- generated/psi/impl/WithRecursiveImpl.java -----------------
 // This is a generated file. Not intended for manual editing.
 package generated.psi.impl;
 
@@ -863,7 +863,7 @@ public class WithRecursiveImpl extends ASTWrapperPsiElement implements WithRecur
   }
 
 }
-// ---- ZomeImpl.java -----------------
+// ---- generated/psi/impl/ZomeImpl.java -----------------
 // This is a generated file. Not intended for manual editing.
 package generated.psi.impl;
 
@@ -906,7 +906,7 @@ public class ZomeImpl extends ASTWrapperPsiElement implements Zome {
   }
 
 }
-// ---- Visitor.java -----------------
+// ---- generated/psi/Visitor.java -----------------
 // This is a generated file. Not intended for manual editing.
 package generated.psi;
 

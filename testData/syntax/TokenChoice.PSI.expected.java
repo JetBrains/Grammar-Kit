@@ -1,4 +1,4 @@
-// ---- GeneratedSyntaxElementTypes.java -----------------
+// ---- generated/GeneratedSyntaxElementTypes.java -----------------
 // This is a generated file. Not intended for manual editing.
 package generated;
 
@@ -57,7 +57,7 @@ public interface GeneratedSyntaxElementTypes {
     SyntaxElementTypeSet THREE_TOKENS_IN_ANOTHER_ORDER_TOKENS = PARENTHESIZED_CHOICE_TOKENS;
   }
 }
-// ---- GeneratedSyntaxElementTypeConverter.java -----------------
+// ---- generated/GeneratedSyntaxElementTypeConverter.java -----------------
 // This is a generated file. Not intended for manual editing.
 package generated;
 

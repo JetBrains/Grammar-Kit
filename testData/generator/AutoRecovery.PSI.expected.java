@@ -1,4 +1,4 @@
-// ---- GeneratedTypes.java -----------------
+// ---- generated/GeneratedTypes.java -----------------
 // This is a generated file. Not intended for manual editing.
 package generated;
 
@@ -31,7 +31,7 @@ public interface GeneratedTypes {
     }
   }
 }
-// ---- Item.java -----------------
+// ---- generated/psi/Item.java -----------------
 // This is a generated file. Not intended for manual editing.
 package generated.psi;
 
@@ -44,7 +44,7 @@ public interface Item extends PsiElement {
   PsiElement getNumber();
 
 }
-// ---- List.java -----------------
+// ---- generated/psi/List.java -----------------
 // This is a generated file. Not intended for manual editing.
 package generated.psi;
 
@@ -57,7 +57,7 @@ public interface List extends PsiElement {
   java.util.List<Item> getItemList();
 
 }
-// ---- ItemImpl.java -----------------
+// ---- generated/psi/impl/ItemImpl.java -----------------
 // This is a generated file. Not intended for manual editing.
 package generated.psi.impl;
 
@@ -93,7 +93,7 @@ public class ItemImpl extends ASTWrapperPsiElement implements Item {
   }
 
 }
-// ---- ListImpl.java -----------------
+// ---- generated/psi/impl/ListImpl.java -----------------
 // This is a generated file. Not intended for manual editing.
 package generated.psi.impl;
 
@@ -129,7 +129,7 @@ public class ListImpl extends ASTWrapperPsiElement implements List {
   }
 
 }
-// ---- Visitor.java -----------------
+// ---- generated/psi/Visitor.java -----------------
 // This is a generated file. Not intended for manual editing.
 package generated.psi;
 

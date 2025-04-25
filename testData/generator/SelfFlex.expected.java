@@ -1,4 +1,4 @@
-// ---- JFlexParser.java -----------------
+// ---- org/intellij/jflex/parser/JFlexParser.java -----------------
 // license.txt
 package org.intellij.jflex.parser;
 

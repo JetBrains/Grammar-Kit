@@ -1,4 +1,4 @@
-// ---- GrammarParser.java -----------------
+// ---- org/intellij/grammar/parser/GrammarParser.java -----------------
 // license.txt
 package org.intellij.grammar.parser;
 

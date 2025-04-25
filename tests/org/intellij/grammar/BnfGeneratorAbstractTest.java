@@ -35,7 +35,7 @@ public abstract class BnfGeneratorAbstractTest extends BnfGeneratorTestCase {
         targetFile.getParentFile().mkdirs();
         FileOutputStream outputStream = new FileOutputStream(targetFile, true);
         PrintWriter out = new PrintWriter(new OutputStreamWriter(outputStream, this.myFile.getVirtualFile().getCharset()));
-        out.println("// ---- " + file.getName() + " -----------------");
+        out.println("// ---- " + FileUtil.getRelativePath(new File(myFullDataPath), file.getAbsoluteFile()) + " -----------------");
         return out;
       }
     };

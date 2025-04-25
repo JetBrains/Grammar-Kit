@@ -1,4 +1,4 @@
-// ---- GeneratedTypes.java -----------------
+// ---- generated/GeneratedTypes.java -----------------
 // This is a generated file. Not intended for manual editing.
 package generated;
 
@@ -34,7 +34,7 @@ public interface GeneratedTypes {
     }
   }
 }
-// ---- Element.java -----------------
+// ---- generated/psi/Element.java -----------------
 // This is a generated file. Not intended for manual editing.
 package generated.psi;
 
@@ -44,7 +44,7 @@ import com.intellij.psi.PsiElement;
 public interface Element extends PsiElement {
 
 }
-// ---- Entry.java -----------------
+// ---- generated/psi/Entry.java -----------------
 // This is a generated file. Not intended for manual editing.
 package generated.psi;
 
@@ -57,7 +57,7 @@ public interface Entry extends PsiElement {
   Element getElement();
 
 }
-// ---- List.java -----------------
+// ---- generated/psi/List.java -----------------
 // This is a generated file. Not intended for manual editing.
 package generated.psi;
 
@@ -70,7 +70,7 @@ public interface List extends PsiElement {
   java.util.List<Element> getElementList();
 
 }
-// ---- Map.java -----------------
+// ---- generated/psi/Map.java -----------------
 // This is a generated file. Not intended for manual editing.
 package generated.psi;
 
@@ -83,7 +83,7 @@ public interface Map extends PsiElement {
   java.util.List<Entry> getEntryList();
 
 }
-// ---- ElementImpl.java -----------------
+// ---- generated/psi/impl/ElementImpl.java -----------------
 // This is a generated file. Not intended for manual editing.
 package generated.psi.impl;
 
@@ -113,7 +113,7 @@ public class ElementImpl extends ASTWrapperPsiElement implements Element {
   }
 
 }
-// ---- EntryImpl.java -----------------
+// ---- generated/psi/impl/EntryImpl.java -----------------
 // This is a generated file. Not intended for manual editing.
 package generated.psi.impl;
 
@@ -149,7 +149,7 @@ public class EntryImpl extends ASTWrapperPsiElement implements Entry {
   }
 
 }
-// ---- ListImpl.java -----------------
+// ---- generated/psi/impl/ListImpl.java -----------------
 // This is a generated file. Not intended for manual editing.
 package generated.psi.impl;
 
@@ -185,7 +185,7 @@ public class ListImpl extends ASTWrapperPsiElement implements List {
   }
 
 }
-// ---- MapImpl.java -----------------
+// ---- generated/psi/impl/MapImpl.java -----------------
 // This is a generated file. Not intended for manual editing.
 package generated.psi.impl;
 
@@ -221,7 +221,7 @@ public class MapImpl extends ASTWrapperPsiElement implements Map {
   }
 
 }
-// ---- Visitor.java -----------------
+// ---- generated/psi/Visitor.java -----------------
 // This is a generated file. Not intended for manual editing.
 package generated.psi;
 

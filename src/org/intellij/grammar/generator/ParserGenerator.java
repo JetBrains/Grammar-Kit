@@ -611,6 +611,7 @@ public class ParserGenerator {
     if (G.parserApi == GenOptions.ParserApi.Syntax) {
       imports.add(SyntaxConstants.RUNTIME_CLASS);
       imports.add(staticStarImport(SyntaxConstants.RUNTIME_STATIC_METHOD_HOLDER));
+      imports.addAll(Arrays.stream(SyntaxConstants.MODIFIERS).toList());
     }
     if (!rootParser) {
       imports.add(staticStarImport(myGrammarRootParser));

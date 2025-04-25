@@ -1,4 +1,4 @@
-// ---- GeneratedSyntaxElementTypes.java -----------------
+// ---- generated/GeneratedSyntaxElementTypes.java -----------------
 // This is a generated file. Not intended for manual editing.
 package generated;
 
@@ -17,7 +17,7 @@ public interface GeneratedSyntaxElementTypes {
   SyntaxElementType C = new SyntaxElementType("C");
   SyntaxElementType D = new SyntaxElementType("D");
 }
-// ---- GeneratedSyntaxElementTypeConverter.java -----------------
+// ---- generated/GeneratedSyntaxElementTypeConverter.java -----------------
 // This is a generated file. Not intended for manual editing.
 package generated;
 

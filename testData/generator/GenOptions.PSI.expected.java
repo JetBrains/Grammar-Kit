@@ -1,4 +1,4 @@
-// ---- GeneratedTypes.java -----------------
+// ---- generated/GeneratedTypes.java -----------------
 // This is a generated file. Not intended for manual editing.
 package generated;
 
@@ -55,7 +55,7 @@ public interface GeneratedTypes {
     }
   }
 }
-// ---- CreateStatement.java -----------------
+// ---- generated/psi/CreateStatement.java -----------------
 // This is a generated file. Not intended for manual editing.
 package generated.psi;
 
@@ -63,7 +63,7 @@ package generated.psi;
 public interface CreateStatement extends generated.psi.Statement {
 
 }
-// ---- CreateTableStatement.java -----------------
+// ---- generated/psi/CreateTableStatement.java -----------------
 // This is a generated file. Not intended for manual editing.
 package generated.psi;
 
@@ -74,7 +74,7 @@ public interface CreateTableStatement extends generated.psi.Statement {
   generated.psi.TableRef getTableRef();
 
 }
-// ---- DropStatement.java -----------------
+// ---- generated/psi/DropStatement.java -----------------
 // This is a generated file. Not intended for manual editing.
 package generated.psi;
 
@@ -82,7 +82,7 @@ package generated.psi;
 public interface DropStatement extends generated.psi.Statement {
 
 }
-// ---- DropTableStatement.java -----------------
+// ---- generated/psi/DropTableStatement.java -----------------
 // This is a generated file. Not intended for manual editing.
 package generated.psi;
 
@@ -93,7 +93,7 @@ public interface DropTableStatement extends generated.psi.Statement {
   generated.psi.TableRef getTableRef();
 
 }
-// ---- Statement.java -----------------
+// ---- generated/psi/Statement.java -----------------
 // This is a generated file. Not intended for manual editing.
 package generated.psi;
 
@@ -101,7 +101,7 @@ package generated.psi;
 public interface Statement extends com.intellij.psi.PsiElement {
 
 }
-// ---- TableRef.java -----------------
+// ---- generated/psi/TableRef.java -----------------
 // This is a generated file. Not intended for manual editing.
 package generated.psi;
 
@@ -109,7 +109,7 @@ package generated.psi;
 public interface TableRef extends com.intellij.psi.PsiElement {
 
 }
-// ---- CreateStatementImpl.java -----------------
+// ---- generated/psi/impl/CreateStatementImpl.java -----------------
 // This is a generated file. Not intended for manual editing.
 package generated.psi.impl;
 
@@ -133,7 +133,7 @@ public abstract class CreateStatementImpl extends generated.psi.impl.StatementIm
   }
 
 }
-// ---- CreateTableStatementImpl.java -----------------
+// ---- generated/psi/impl/CreateTableStatementImpl.java -----------------
 // This is a generated file. Not intended for manual editing.
 package generated.psi.impl;
 
@@ -163,7 +163,7 @@ public class CreateTableStatementImpl extends generated.psi.impl.StatementImpl i
   }
 
 }
-// ---- DropStatementImpl.java -----------------
+// ---- generated/psi/impl/DropStatementImpl.java -----------------
 // This is a generated file. Not intended for manual editing.
 package generated.psi.impl;
 
@@ -187,7 +187,7 @@ public abstract class DropStatementImpl extends generated.psi.impl.StatementImpl
   }
 
 }
-// ---- DropTableStatementImpl.java -----------------
+// ---- generated/psi/impl/DropTableStatementImpl.java -----------------
 // This is a generated file. Not intended for manual editing.
 package generated.psi.impl;
 
@@ -217,7 +217,7 @@ public class DropTableStatementImpl extends generated.psi.impl.StatementImpl imp
   }
 
 }
-// ---- StatementImpl.java -----------------
+// ---- generated/psi/impl/StatementImpl.java -----------------
 // This is a generated file. Not intended for manual editing.
 package generated.psi.impl;
 
@@ -240,7 +240,7 @@ public abstract class StatementImpl extends com.intellij.extapi.psi.ASTWrapperPs
   }
 
 }
-// ---- TableRefImpl.java -----------------
+// ---- generated/psi/impl/TableRefImpl.java -----------------
 // This is a generated file. Not intended for manual editing.
 package generated.psi.impl;
 
@@ -263,7 +263,7 @@ public class TableRefImpl extends com.intellij.extapi.psi.ASTWrapperPsiElement i
   }
 
 }
-// ---- Visitor.java -----------------
+// ---- generated/psi/Visitor.java -----------------
 // This is a generated file. Not intended for manual editing.
 package generated.psi;
 

@@ -95,11 +95,11 @@ public class FileGeneratorUtil {
       throw new ProcessCanceledException();
     }
   }
-  
+
   public static @NotNull VirtualFile getOuterModuleTargetDirectoryFor(@NotNull Project project,
-                                                                   @NotNull String outerModuleName,
-                                                                   @Nullable String targetPackage,
-                                                                   boolean returnRoot) {
+                                                                      @NotNull String outerModuleName,
+                                                                      @Nullable String targetPackage,
+                                                                      boolean returnRoot) {
     Module module = ModuleManager.getInstance(project).findModuleByName(outerModuleName);
 
     if (module != null) {
@@ -124,12 +124,12 @@ public class FileGeneratorUtil {
     fail(project, outerModuleName, "Unable to find target source root");
     throw new ProcessCanceledException();
   }
-  
+
   private static VirtualFile createOutputDirectory(@NotNull VirtualFile virtualRoot,
                                                    @Nullable String targetPackage,
                                                    @NotNull PackageIndex packageIndex,
                                                    @NotNull FileIndex fileIndex,
-                                                   boolean returnRoot) throws Exception{
+                                                   boolean returnRoot) throws Exception {
     boolean hasPackage = StringUtil.isNotEmpty(targetPackage);
     String packagePrefix = StringUtil.notNullize(packageIndex.getPackageNameByDirectory(virtualRoot));
     String genDirName = Options.GEN_DIR.get();

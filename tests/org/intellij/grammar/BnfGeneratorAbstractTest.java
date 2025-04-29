@@ -12,12 +12,15 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.intellij.grammar.generator.ParserGeneratorUtil.getRootAttribute;
 import static org.junit.Assert.assertTrue;
 
 /**
  * @author gregsh
  */
 public abstract class BnfGeneratorAbstractTest extends BnfGeneratorTestCase {
+  
+  String myPsiOutputPath = "";
 
   public BnfGeneratorAbstractTest(String s) {
     super(s);
@@ -25,7 +28,7 @@ public abstract class BnfGeneratorAbstractTest extends BnfGeneratorTestCase {
 
   protected ParserGenerator makeTestGenerator() {
     var bnfFile = (BnfFile)myFile;
-    return new ParserGenerator(bnfFile, "", myFullDataPath, "") {
+    return new ParserGenerator(bnfFile, "", myFullDataPath, myPsiOutputPath, "") {
       @Override
       protected PrintWriter openOutputInner(String className, File file) throws IOException {
         String grammarName = FileUtil.getNameWithoutExtension(this.myFile.getName());
@@ -52,6 +55,9 @@ public abstract class BnfGeneratorAbstractTest extends BnfGeneratorTestCase {
     String name = getTestName(false);
     String text = loadFile(name + "." + myFileExt);
     PsiFile file = createPsiFile(name, text.replaceAll("generatePsi=[^\n]*", "generatePsi=" + generatePsi));
+    String psiModulePath = getRootAttribute(file, KnownAttribute.OUTER_PSI_MODULE).replace('.', File.separatorChar);
+    String myProjectPath = myFullDataPath.substring(0, myFullDataPath.lastIndexOf(File.separatorChar) + 1);
+    myPsiOutputPath = !psiModulePath.isEmpty() ? myProjectPath + psiModulePath : "";
     doGenTest(generatePsi, name, file);
   }
 

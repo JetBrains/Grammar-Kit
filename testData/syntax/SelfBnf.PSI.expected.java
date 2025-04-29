@@ -169,7 +169,7 @@ public interface BnfSyntaxTypes {
   SyntaxElementType BNF_SEMICOLON = new SyntaxElementType(";");
   SyntaxElementType BNF_STRING = new SyntaxElementType("string");
 }
-// ---- org/intellij/grammar/BnfSyntaxElementTypeConverter.java -----------------
+// ---- org/intellij/grammar/BnfSyntaxElementTypeConverterFactory.java -----------------
 // license.txt
 package org.intellij.grammar;
 
@@ -182,7 +182,7 @@ import com.intellij.platform.syntax.psi.ElementTypeConverterKt;
 import org.jetbrains.annotations.NotNull;
 import kotlin.Pair;
 
-public class BnfSyntaxElementTypeConverter implements ElementTypeConverterFactory {
+public class BnfSyntaxElementTypeConverterFactory implements ElementTypeConverterFactory {
 
   @Override
   public @NotNull ElementTypeConverter getElementTypeConverter() {

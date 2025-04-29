@@ -57,7 +57,7 @@ public interface GeneratedSyntaxElementTypes {
     SyntaxElementTypeSet THREE_TOKENS_IN_ANOTHER_ORDER_TOKENS = PARENTHESIZED_CHOICE_TOKENS;
   }
 }
-// ---- generated/GeneratedSyntaxElementTypeConverter.java -----------------
+// ---- generated/GeneratedSyntaxElementTypeConverterFactory.java -----------------
 // This is a generated file. Not intended for manual editing.
 package generated;
 
@@ -69,7 +69,7 @@ import com.intellij.platform.syntax.psi.ElementTypeConverterKt;
 import org.jetbrains.annotations.NotNull;
 import kotlin.Pair;
 
-public class GeneratedSyntaxElementTypeConverter implements ElementTypeConverterFactory {
+public class GeneratedSyntaxElementTypeConverterFactory implements ElementTypeConverterFactory {
 
   @Override
   public @NotNull ElementTypeConverter getElementTypeConverter() {

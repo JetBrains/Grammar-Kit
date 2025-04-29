@@ -170,7 +170,7 @@ public interface GeneratedSyntaxElementTypes {
   SyntaxElementType OP_MUL = new SyntaxElementType("*");
   SyntaxElementType SLASH = new SyntaxElementType("\\");
 }
-// ---- ../someOtherModule/output/generated/GeneratedSyntaxElementTypeConverter.java -----------------
+// ---- ../someOtherModule/output/generated/GeneratedSyntaxElementTypeConverterFactory.java -----------------
 //header.txt
 package generated;
 
@@ -182,7 +182,7 @@ import com.intellij.platform.syntax.psi.ElementTypeConverterKt;
 import org.jetbrains.annotations.NotNull;
 import kotlin.Pair;
 
-public class GeneratedSyntaxElementTypeConverter implements ElementTypeConverterFactory {
+public class GeneratedSyntaxElementTypeConverterFactory implements ElementTypeConverterFactory {
 
   @Override
   public @NotNull ElementTypeConverter getElementTypeConverter() {

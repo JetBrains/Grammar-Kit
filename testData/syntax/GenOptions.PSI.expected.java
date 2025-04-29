@@ -77,12 +77,12 @@ public interface GeneratedSyntaxElementTypes {
   com.intellij.platform.syntax.SyntaxElementType table = new com.intellij.platform.syntax.SyntaxElementType("TABLE");
   com.intellij.platform.syntax.SyntaxElementType temp = new com.intellij.platform.syntax.SyntaxElementType("TEMP");
 }
-// ---- generated/GeneratedSyntaxElementTypeConverter.java -----------------
+// ---- generated/GeneratedSyntaxElementTypeConverterFactory.java -----------------
 // This is a generated file. Not intended for manual editing.
 package generated;
 
 
-public class GeneratedSyntaxElementTypeConverter implements com.intellij.platform.syntax.psi.ElementTypeConverterFactory {
+public class GeneratedSyntaxElementTypeConverterFactory implements com.intellij.platform.syntax.psi.ElementTypeConverterFactory {
 
   @java.lang.Override
   public @org.jetbrains.annotations.NotNull com.intellij.platform.syntax.psi.ElementTypeConverter getElementTypeConverter() {

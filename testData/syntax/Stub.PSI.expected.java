@@ -66,7 +66,7 @@ public interface FooSyntaxTypes {
   SyntaxElementType TYPE = new SyntaxElementType("TYPE");
 
 }
-// ---- test/FooTypesConverter.java -----------------
+// ---- test/FooTypesConverterFactory.java -----------------
 //header.txt
 package test;
 
@@ -78,7 +78,7 @@ import com.intellij.platform.syntax.psi.ElementTypeConverterKt;
 import org.jetbrains.annotations.NotNull;
 import kotlin.Pair;
 
-public class FooTypesConverter implements ElementTypeConverterFactory {
+public class FooTypesConverterFactory implements ElementTypeConverterFactory {
 
   @Override
   public @NotNull ElementTypeConverter getElementTypeConverter() {

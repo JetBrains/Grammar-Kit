@@ -56,7 +56,7 @@ public interface GeneratedSyntaxElementTypes {
   SyntaxElementType MY_SOMETHING = new SyntaxElementType("something");
   SyntaxElementType UPCASEKWD1 = new SyntaxElementType("UPCASEKWD1");
 }
-// ---- generated/GeneratedSyntaxElementTypeConverter.java -----------------
+// ---- generated/GeneratedSyntaxElementTypeConverterFactory.java -----------------
 //header.txt
 package generated;
 
@@ -68,7 +68,7 @@ import com.intellij.platform.syntax.psi.ElementTypeConverterKt;
 import org.jetbrains.annotations.NotNull;
 import kotlin.Pair;
 
-public class GeneratedSyntaxElementTypeConverter implements ElementTypeConverterFactory {
+public class GeneratedSyntaxElementTypeConverterFactory implements ElementTypeConverterFactory {
 
   @Override
   public @NotNull ElementTypeConverter getElementTypeConverter() {

@@ -347,7 +347,7 @@ public interface GeneratedSyntaxElementTypes {
   SyntaxElementType FLEX_UNCLOSED = new SyntaxElementType("unclosed");
   SyntaxElementType FLEX_VERSION = new SyntaxElementType("version");
 }
-// ---- generated/GeneratedSyntaxElementTypeConverter.java -----------------
+// ---- generated/GeneratedSyntaxElementTypeConverterFactory.java -----------------
 // license.txt
 package generated;
 
@@ -360,7 +360,7 @@ import com.intellij.platform.syntax.psi.ElementTypeConverterKt;
 import org.jetbrains.annotations.NotNull;
 import kotlin.Pair;
 
-public class GeneratedSyntaxElementTypeConverter implements ElementTypeConverterFactory {
+public class GeneratedSyntaxElementTypeConverterFactory implements ElementTypeConverterFactory {
 
   @Override
   public @NotNull ElementTypeConverter getElementTypeConverter() {

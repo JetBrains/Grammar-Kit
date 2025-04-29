@@ -158,12 +158,12 @@ public class ParserGenerator {
   public ParserGenerator(@NotNull BnfFile psiFile,
                          @NotNull String sourcePath,
                          @NotNull String outputPath,
+                         @NotNull String psiOutputPath,
                          @NotNull String packagePrefix) {
     myFile = psiFile;
     mySourcePath = sourcePath;
     myOutputPath = outputPath;
-    var psiOutput = getRootAttribute(myFile, KnownAttribute.PSI_MODULE_PATH);
-    myPsiOutputPath = (psiOutput.isEmpty()) ? myOutputPath : psiOutput;
+    myPsiOutputPath = (psiOutputPath.isEmpty()) ? myOutputPath : psiOutputPath;
     myPackagePrefix = packagePrefix;
 
     G = new GenOptions(myFile);
@@ -438,8 +438,8 @@ public class ParserGenerator {
         finally {
           closeOutput();
         }
-        var converterClass = getRootAttribute(myFile, KnownAttribute.SYNTAX_ELEMENT_TYPE_CONVERTER);
-        openOutput(converterClass);
+        var converterClass = getRootAttribute(myFile, KnownAttribute.ELEMENT_TYPE_CONVERTER_FACTORY_CLASS);
+        openOutput(converterClass, myPsiOutputPath);
         try {
           generateElementTypesConverter(converterClass,
                                         getRootAttribute(myFile, KnownAttribute.ELEMENT_TYPE_HOLDER_CLASS),

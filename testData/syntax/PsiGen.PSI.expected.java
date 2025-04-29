@@ -1,4 +1,4 @@
-// ---- ../../someOtherModule/output/generated/GeneratedTypes.java -----------------
+// ---- ../someOtherModule/output/generated/GeneratedTypes.java -----------------
 //header.txt
 package generated;
 
@@ -170,7 +170,7 @@ public interface GeneratedSyntaxElementTypes {
   SyntaxElementType OP_MUL = new SyntaxElementType("*");
   SyntaxElementType SLASH = new SyntaxElementType("\\");
 }
-// ---- generated/GeneratedSyntaxElementTypeConverter.java -----------------
+// ---- ../someOtherModule/output/generated/GeneratedSyntaxElementTypeConverter.java -----------------
 //header.txt
 package generated;
 
@@ -225,7 +225,7 @@ public class GeneratedSyntaxElementTypeConverter implements ElementTypeConverter
     );
   }
 }
-// ---- ../../someOtherModule/output/generated/psi/XLeftShadow.java -----------------
+// ---- ../someOtherModule/output/generated/psi/XLeftShadow.java -----------------
 //header.txt
 package generated.psi;
 
@@ -242,7 +242,7 @@ public interface XLeftShadow extends XComposite {
   List<XIdentifier> getIdentifierList();
 
 }
-// ---- ../../someOtherModule/output/generated/psi/XLeftShadowTest.java -----------------
+// ---- ../someOtherModule/output/generated/psi/XLeftShadowTest.java -----------------
 //header.txt
 package generated.psi;
 
@@ -259,7 +259,7 @@ public interface XLeftShadowTest extends XComposite {
   XIdentifier getIdentifier();
 
 }
-// ---- ../../someOtherModule/output/generated/psi/XAStatement.java -----------------
+// ---- ../someOtherModule/output/generated/psi/XAStatement.java -----------------
 //header.txt
 package generated.psi;
 
@@ -276,7 +276,7 @@ public interface XAStatement extends XStatement {
   PsiElement getNumber();
 
 }
-// ---- ../../someOtherModule/output/generated/psi/XBStatement.java -----------------
+// ---- ../someOtherModule/output/generated/psi/XBStatement.java -----------------
 //header.txt
 package generated.psi;
 
@@ -293,7 +293,7 @@ public interface XBStatement extends XStatement {
   PsiElement getNumber();
 
 }
-// ---- ../../someOtherModule/output/generated/psi/XBlockOf.java -----------------
+// ---- ../someOtherModule/output/generated/psi/XBlockOf.java -----------------
 //header.txt
 package generated.psi;
 
@@ -304,7 +304,7 @@ import com.intellij.psi.PsiElement;
 public interface XBlockOf extends XComposite {
 
 }
-// ---- ../../someOtherModule/output/generated/psi/XCStatement.java -----------------
+// ---- ../someOtherModule/output/generated/psi/XCStatement.java -----------------
 //header.txt
 package generated.psi;
 
@@ -321,7 +321,7 @@ public interface XCStatement extends XStatement {
   PsiElement getNumber();
 
 }
-// ---- ../../someOtherModule/output/generated/psi/XCastExpr.java -----------------
+// ---- ../someOtherModule/output/generated/psi/XCastExpr.java -----------------
 //header.txt
 package generated.psi;
 
@@ -338,7 +338,7 @@ public interface XCastExpr extends XExpr {
   PsiElement getId();
 
 }
-// ---- ../../someOtherModule/output/generated/psi/XChoiceJoined.java -----------------
+// ---- ../someOtherModule/output/generated/psi/XChoiceJoined.java -----------------
 //header.txt
 package generated.psi;
 
@@ -355,7 +355,7 @@ public interface XChoiceJoined extends XLiteral {
   PsiElement getId();
 
 }
-// ---- ../../someOtherModule/output/generated/psi/XExpr.java -----------------
+// ---- ../someOtherModule/output/generated/psi/XExpr.java -----------------
 //header.txt
 package generated.psi;
 
@@ -373,7 +373,7 @@ public interface XExpr extends XComposite {
   //methods are not found in null
 
 }
-// ---- ../../someOtherModule/output/generated/psi/XExternalType.java -----------------
+// ---- ../someOtherModule/output/generated/psi/XExternalType.java -----------------
 //header.txt
 package generated.psi;
 
@@ -387,7 +387,7 @@ public interface XExternalType extends XExpr {
   PsiElement getNumber();
 
 }
-// ---- ../../someOtherModule/output/generated/psi/XExternalType2.java -----------------
+// ---- ../someOtherModule/output/generated/psi/XExternalType2.java -----------------
 //header.txt
 package generated.psi;
 
@@ -401,7 +401,7 @@ public interface XExternalType2 extends XExpr {
   PsiElement getId();
 
 }
-// ---- ../../someOtherModule/output/generated/psi/XGrammarElement.java -----------------
+// ---- ../someOtherModule/output/generated/psi/XGrammarElement.java -----------------
 //header.txt
 package generated.psi;
 
@@ -415,7 +415,7 @@ public interface XGrammarElement extends XComposite {
   XExpr getExpr();
 
 }
-// ---- ../../someOtherModule/output/generated/psi/XIdentifier.java -----------------
+// ---- ../someOtherModule/output/generated/psi/XIdentifier.java -----------------
 //header.txt
 package generated.psi;
 
@@ -429,7 +429,7 @@ public interface XIdentifier extends XComposite {
   PsiElement getId();
 
 }
-// ---- ../../someOtherModule/output/generated/psi/XIncludeSectionAlt.java -----------------
+// ---- ../someOtherModule/output/generated/psi/XIncludeSectionAlt.java -----------------
 //header.txt
 package generated.psi;
 
@@ -446,7 +446,7 @@ public interface XIncludeSectionAlt extends XComposite {
   PsiElement getNumber();
 
 }
-// ---- ../../someOtherModule/output/generated/psi/XIncludeSection.java -----------------
+// ---- ../someOtherModule/output/generated/psi/XIncludeSection.java -----------------
 //header.txt
 package generated.psi;
 
@@ -469,7 +469,7 @@ public interface XIncludeSection extends XComposite {
   PsiElement getNumber();
 
 }
-// ---- ../../someOtherModule/output/generated/psi/XItemExpr.java -----------------
+// ---- ../someOtherModule/output/generated/psi/XItemExpr.java -----------------
 //header.txt
 package generated.psi;
 
@@ -486,7 +486,7 @@ public interface XItemExpr extends XExpr {
   PsiElement getNumber();
 
 }
-// ---- ../../someOtherModule/output/generated/psi/XLiteral.java -----------------
+// ---- ../someOtherModule/output/generated/psi/XLiteral.java -----------------
 //header.txt
 package generated.psi;
 
@@ -500,7 +500,7 @@ public interface XLiteral extends XExpr {
   PsiElement getNumber();
 
 }
-// ---- ../../someOtherModule/output/generated/psi/XMulExpr.java -----------------
+// ---- ../someOtherModule/output/generated/psi/XMulExpr.java -----------------
 //header.txt
 package generated.psi;
 
@@ -511,7 +511,7 @@ import com.intellij.psi.PsiElement;
 public interface XMulExpr extends XExpr {
 
 }
-// ---- ../../someOtherModule/output/generated/psi/XNamedElement.java -----------------
+// ---- ../someOtherModule/output/generated/psi/XNamedElement.java -----------------
 //header.txt
 package generated.psi;
 
@@ -526,7 +526,7 @@ public interface XNamedElement extends PsiNameIdentifierOwner {
   List<XIdentifier> getIdentifierList();
 
 }
-// ---- ../../someOtherModule/output/generated/psi/XOtherExpr.java -----------------
+// ---- ../someOtherModule/output/generated/psi/XOtherExpr.java -----------------
 //header.txt
 package generated.psi;
 
@@ -537,7 +537,7 @@ import com.intellij.psi.PsiElement;
 public interface XOtherExpr extends XExpr {
 
 }
-// ---- ../../someOtherModule/output/generated/psi/XPlusExpr.java -----------------
+// ---- ../someOtherModule/output/generated/psi/XPlusExpr.java -----------------
 //header.txt
 package generated.psi;
 
@@ -548,7 +548,7 @@ import com.intellij.psi.PsiElement;
 public interface XPlusExpr extends XExpr {
 
 }
-// ---- ../../someOtherModule/output/generated/psi/XRefExpr.java -----------------
+// ---- ../someOtherModule/output/generated/psi/XRefExpr.java -----------------
 //header.txt
 package generated.psi;
 
@@ -562,7 +562,7 @@ public interface XRefExpr extends XExpr, MyRef {
   XIdentifier getIdentifier();
 
 }
-// ---- ../../someOtherModule/output/generated/psi/XRoot.java -----------------
+// ---- ../someOtherModule/output/generated/psi/XRoot.java -----------------
 //header.txt
 package generated.psi;
 
@@ -573,7 +573,7 @@ import com.intellij.psi.PsiElement;
 public interface XRoot extends XComposite {
 
 }
-// ---- ../../someOtherModule/output/generated/psi/XRootB.java -----------------
+// ---- ../someOtherModule/output/generated/psi/XRootB.java -----------------
 //header.txt
 package generated.psi;
 
@@ -584,7 +584,7 @@ import com.intellij.psi.PsiElement;
 public interface XRootB extends XRoot {
 
 }
-// ---- ../../someOtherModule/output/generated/psi/XRootC.java -----------------
+// ---- ../someOtherModule/output/generated/psi/XRootC.java -----------------
 //header.txt
 package generated.psi;
 
@@ -598,7 +598,7 @@ public interface XRootC extends XRoot {
   XBlockOf getBlockOf();
 
 }
-// ---- ../../someOtherModule/output/generated/psi/XRootD.java -----------------
+// ---- ../someOtherModule/output/generated/psi/XRootD.java -----------------
 //header.txt
 package generated.psi;
 
@@ -612,7 +612,7 @@ public interface XRootD extends XRoot {
   List<XGrammarElement> getGrammarElementList();
 
 }
-// ---- ../../someOtherModule/output/generated/psi/XSomeExpr.java -----------------
+// ---- ../someOtherModule/output/generated/psi/XSomeExpr.java -----------------
 //header.txt
 package generated.psi;
 
@@ -623,7 +623,7 @@ import com.intellij.psi.PsiElement;
 public interface XSomeExpr extends XExpr {
 
 }
-// ---- ../../someOtherModule/output/generated/psi/XSpecialRef.java -----------------
+// ---- ../someOtherModule/output/generated/psi/XSpecialRef.java -----------------
 //header.txt
 package generated.psi;
 
@@ -637,7 +637,7 @@ public interface XSpecialRef extends XRefExpr {
   XRefExpr getRefExpr();
 
 }
-// ---- ../../someOtherModule/output/generated/psi/XStatement.java -----------------
+// ---- ../someOtherModule/output/generated/psi/XStatement.java -----------------
 //header.txt
 package generated.psi;
 
@@ -648,7 +648,7 @@ import com.intellij.psi.PsiElement;
 public interface XStatement extends XComposite {
 
 }
-// ---- ../../someOtherModule/output/generated/psi/XWrappingStatement.java -----------------
+// ---- ../someOtherModule/output/generated/psi/XWrappingStatement.java -----------------
 //header.txt
 package generated.psi;
 
@@ -662,7 +662,7 @@ public interface XWrappingStatement extends XStatement {
   XStatement getStatement();
 
 }
-// ---- ../../someOtherModule/output/generated/psi/impl/XLeftShadowImpl.java -----------------
+// ---- ../someOtherModule/output/generated/psi/impl/XLeftShadowImpl.java -----------------
 //header.txt
 package generated.psi.impl;
 
@@ -705,7 +705,7 @@ public class XLeftShadowImpl extends ASTWrapperPsiElement implements XLeftShadow
   }
 
 }
-// ---- ../../someOtherModule/output/generated/psi/impl/XLeftShadowTestImpl.java -----------------
+// ---- ../someOtherModule/output/generated/psi/impl/XLeftShadowTestImpl.java -----------------
 //header.txt
 package generated.psi.impl;
 
@@ -748,7 +748,7 @@ public class XLeftShadowTestImpl extends ASTWrapperPsiElement implements XLeftSh
   }
 
 }
-// ---- ../../someOtherModule/output/generated/psi/impl/XAStatementImpl.java -----------------
+// ---- ../someOtherModule/output/generated/psi/impl/XAStatementImpl.java -----------------
 //header.txt
 package generated.psi.impl;
 
@@ -791,7 +791,7 @@ public class XAStatementImpl extends XStatementImpl implements XAStatement {
   }
 
 }
-// ---- ../../someOtherModule/output/generated/psi/impl/XBStatementImpl.java -----------------
+// ---- ../someOtherModule/output/generated/psi/impl/XBStatementImpl.java -----------------
 //header.txt
 package generated.psi.impl;
 
@@ -834,7 +834,7 @@ public class XBStatementImpl extends XStatementImpl implements XBStatement {
   }
 
 }
-// ---- ../../someOtherModule/output/generated/psi/impl/XBlockOfImpl.java -----------------
+// ---- ../someOtherModule/output/generated/psi/impl/XBlockOfImpl.java -----------------
 //header.txt
 package generated.psi.impl;
 
@@ -865,7 +865,7 @@ public class XBlockOfImpl extends ASTWrapperPsiElement implements XBlockOf {
   }
 
 }
-// ---- ../../someOtherModule/output/generated/psi/impl/XCStatementImpl.java -----------------
+// ---- ../someOtherModule/output/generated/psi/impl/XCStatementImpl.java -----------------
 //header.txt
 package generated.psi.impl;
 
@@ -908,7 +908,7 @@ public class XCStatementImpl extends XStatementImpl implements XCStatement {
   }
 
 }
-// ---- ../../someOtherModule/output/generated/psi/impl/XCastExprImpl.java -----------------
+// ---- ../someOtherModule/output/generated/psi/impl/XCastExprImpl.java -----------------
 //header.txt
 package generated.psi.impl;
 
@@ -951,7 +951,7 @@ public class XCastExprImpl extends XExprImpl implements XCastExpr {
   }
 
 }
-// ---- ../../someOtherModule/output/generated/psi/impl/XChoiceJoinedImpl.java -----------------
+// ---- ../someOtherModule/output/generated/psi/impl/XChoiceJoinedImpl.java -----------------
 //header.txt
 package generated.psi.impl;
 
@@ -994,7 +994,7 @@ public class XChoiceJoinedImpl extends XLiteralImpl implements XChoiceJoined {
   }
 
 }
-// ---- ../../someOtherModule/output/generated/psi/impl/XExprImpl.java -----------------
+// ---- ../someOtherModule/output/generated/psi/impl/XExprImpl.java -----------------
 //header.txt
 package generated.psi.impl;
 
@@ -1031,7 +1031,7 @@ public class XExprImpl extends ASTWrapperPsiElement implements XExpr {
   }
 
 }
-// ---- ../../someOtherModule/output/generated/psi/impl/XExternalTypeImpl.java -----------------
+// ---- ../someOtherModule/output/generated/psi/impl/XExternalTypeImpl.java -----------------
 //header.txt
 package generated.psi.impl;
 
@@ -1068,7 +1068,7 @@ public class XExternalTypeImpl extends XExprImpl implements XExternalType {
   }
 
 }
-// ---- ../../someOtherModule/output/generated/psi/impl/XExternalType2Impl.java -----------------
+// ---- ../someOtherModule/output/generated/psi/impl/XExternalType2Impl.java -----------------
 //header.txt
 package generated.psi.impl;
 
@@ -1105,7 +1105,7 @@ public class XExternalType2Impl extends XExprImpl implements XExternalType2 {
   }
 
 }
-// ---- ../../someOtherModule/output/generated/psi/impl/XGrammarElementImpl.java -----------------
+// ---- ../someOtherModule/output/generated/psi/impl/XGrammarElementImpl.java -----------------
 //header.txt
 package generated.psi.impl;
 
@@ -1142,7 +1142,7 @@ public class XGrammarElementImpl extends ASTWrapperPsiElement implements XGramma
   }
 
 }
-// ---- ../../someOtherModule/output/generated/psi/impl/XIdentifierImpl.java -----------------
+// ---- ../someOtherModule/output/generated/psi/impl/XIdentifierImpl.java -----------------
 //header.txt
 package generated.psi.impl;
 
@@ -1179,7 +1179,7 @@ public class XIdentifierImpl extends ASTWrapperPsiElement implements XIdentifier
   }
 
 }
-// ---- ../../someOtherModule/output/generated/psi/impl/XIncludeSectionAltImpl.java -----------------
+// ---- ../someOtherModule/output/generated/psi/impl/XIncludeSectionAltImpl.java -----------------
 //header.txt
 package generated.psi.impl;
 
@@ -1222,7 +1222,7 @@ public class XIncludeSectionAltImpl extends ASTWrapperPsiElement implements XInc
   }
 
 }
-// ---- ../../someOtherModule/output/generated/psi/impl/XIncludeSectionImpl.java -----------------
+// ---- ../someOtherModule/output/generated/psi/impl/XIncludeSectionImpl.java -----------------
 //header.txt
 package generated.psi.impl;
 
@@ -1277,7 +1277,7 @@ public class XIncludeSectionImpl extends ASTWrapperPsiElement implements XInclud
   }
 
 }
-// ---- ../../someOtherModule/output/generated/psi/impl/XItemExprImpl.java -----------------
+// ---- ../someOtherModule/output/generated/psi/impl/XItemExprImpl.java -----------------
 //header.txt
 package generated.psi.impl;
 
@@ -1320,7 +1320,7 @@ public class XItemExprImpl extends XExprImpl implements XItemExpr {
   }
 
 }
-// ---- ../../someOtherModule/output/generated/psi/impl/XLiteralImpl.java -----------------
+// ---- ../someOtherModule/output/generated/psi/impl/XLiteralImpl.java -----------------
 //header.txt
 package generated.psi.impl;
 
@@ -1357,7 +1357,7 @@ public class XLiteralImpl extends XExprImpl implements XLiteral {
   }
 
 }
-// ---- ../../someOtherModule/output/generated/psi/impl/XMulExprImpl.java -----------------
+// ---- ../someOtherModule/output/generated/psi/impl/XMulExprImpl.java -----------------
 //header.txt
 package generated.psi.impl;
 
@@ -1388,7 +1388,7 @@ public class XMulExprImpl extends XExprImpl implements XMulExpr {
   }
 
 }
-// ---- ../../someOtherModule/output/generated/psi/impl/XNamedElementImpl.java -----------------
+// ---- ../someOtherModule/output/generated/psi/impl/XNamedElementImpl.java -----------------
 //header.txt
 package generated.psi.impl;
 
@@ -1425,7 +1425,7 @@ public class XNamedElementImpl extends ASTWrapperPsiElement implements XNamedEle
   }
 
 }
-// ---- ../../someOtherModule/output/generated/psi/impl/XOtherExprImpl.java -----------------
+// ---- ../someOtherModule/output/generated/psi/impl/XOtherExprImpl.java -----------------
 //header.txt
 package generated.psi.impl;
 
@@ -1456,7 +1456,7 @@ public class XOtherExprImpl extends XExprImpl implements XOtherExpr {
   }
 
 }
-// ---- ../../someOtherModule/output/generated/psi/impl/XPlusExprImpl.java -----------------
+// ---- ../someOtherModule/output/generated/psi/impl/XPlusExprImpl.java -----------------
 //header.txt
 package generated.psi.impl;
 
@@ -1487,7 +1487,7 @@ public class XPlusExprImpl extends XExprImpl implements XPlusExpr {
   }
 
 }
-// ---- ../../someOtherModule/output/generated/psi/impl/XRefExprImpl.java -----------------
+// ---- ../someOtherModule/output/generated/psi/impl/XRefExprImpl.java -----------------
 //header.txt
 package generated.psi.impl;
 
@@ -1523,7 +1523,7 @@ public class XRefExprImpl extends MyRefImpl implements XRefExpr {
   }
 
 }
-// ---- ../../someOtherModule/output/generated/psi/impl/XRootImpl.java -----------------
+// ---- ../someOtherModule/output/generated/psi/impl/XRootImpl.java -----------------
 //header.txt
 package generated.psi.impl;
 
@@ -1554,7 +1554,7 @@ public abstract class XRootImpl extends ASTWrapperPsiElement implements XRoot {
   }
 
 }
-// ---- ../../someOtherModule/output/generated/psi/impl/XRootBImpl.java -----------------
+// ---- ../someOtherModule/output/generated/psi/impl/XRootBImpl.java -----------------
 //header.txt
 package generated.psi.impl;
 
@@ -1585,7 +1585,7 @@ public class XRootBImpl extends XRootImpl implements XRootB {
   }
 
 }
-// ---- ../../someOtherModule/output/generated/psi/impl/XRootCImpl.java -----------------
+// ---- ../someOtherModule/output/generated/psi/impl/XRootCImpl.java -----------------
 //header.txt
 package generated.psi.impl;
 
@@ -1622,7 +1622,7 @@ public class XRootCImpl extends XRootImpl implements XRootC {
   }
 
 }
-// ---- ../../someOtherModule/output/generated/psi/impl/XRootDImpl.java -----------------
+// ---- ../someOtherModule/output/generated/psi/impl/XRootDImpl.java -----------------
 //header.txt
 package generated.psi.impl;
 
@@ -1659,7 +1659,7 @@ public class XRootDImpl extends XRootImpl implements XRootD {
   }
 
 }
-// ---- ../../someOtherModule/output/generated/psi/impl/XSomeExprImpl.java -----------------
+// ---- ../someOtherModule/output/generated/psi/impl/XSomeExprImpl.java -----------------
 //header.txt
 package generated.psi.impl;
 
@@ -1690,7 +1690,7 @@ public abstract class XSomeExprImpl extends XExprImpl implements XSomeExpr {
   }
 
 }
-// ---- ../../someOtherModule/output/generated/psi/impl/XSpecialRefImpl.java -----------------
+// ---- ../someOtherModule/output/generated/psi/impl/XSpecialRefImpl.java -----------------
 //header.txt
 package generated.psi.impl;
 
@@ -1727,7 +1727,7 @@ public class XSpecialRefImpl extends XRefExprImpl implements XSpecialRef {
   }
 
 }
-// ---- ../../someOtherModule/output/generated/psi/impl/XStatementImpl.java -----------------
+// ---- ../someOtherModule/output/generated/psi/impl/XStatementImpl.java -----------------
 //header.txt
 package generated.psi.impl;
 
@@ -1758,7 +1758,7 @@ public abstract class XStatementImpl extends ASTWrapperPsiElement implements XSt
   }
 
 }
-// ---- ../../someOtherModule/output/generated/psi/impl/XWrappingStatementImpl.java -----------------
+// ---- ../someOtherModule/output/generated/psi/impl/XWrappingStatementImpl.java -----------------
 //header.txt
 package generated.psi.impl;
 
@@ -1795,7 +1795,7 @@ public class XWrappingStatementImpl extends XStatementImpl implements XWrappingS
   }
 
 }
-// ---- ../../someOtherModule/output/generated/psi/XVisitor.java -----------------
+// ---- ../someOtherModule/output/generated/psi/XVisitor.java -----------------
 //header.txt
 package generated.psi;
 

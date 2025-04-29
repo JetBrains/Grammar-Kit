@@ -102,8 +102,8 @@ public class GenerateAction extends AnAction {
                                 StringUtil.getPackageName(parserClass), true);
 
         String psiOutput = getRootAttribute(bnfFile, KnownAttribute.OUTER_PSI_MODULE);
-        VirtualFile psiTarget = psiOutput.isEmpty() ? 
-                                null : 
+        VirtualFile psiTarget = psiOutput.isEmpty() ?
+                                null :
                                 getOuterModuleTargetDirectoryFor(project, psiOutput, StringUtil.getPackageName(parserClass), true);
         rootMap.put(file, target);
         psiRootMap.put(file, psiTarget);
@@ -169,10 +169,10 @@ public class GenerateAction extends AnAction {
               if (!file.isValid()) return;
               PsiFile bnfFile = psiManager.findFile(file);
               if (!(bnfFile instanceof BnfFile)) return;
-              ParserGenerator generator = new ParserGenerator((BnfFile)bnfFile, 
-                                                              sourcePath, 
+              ParserGenerator generator = new ParserGenerator((BnfFile)bnfFile,
+                                                              sourcePath,
                                                               genDir.getPath(),
-                                                              psiGenDir.getPath(), 
+                                                              psiGenDir.getPath(),
                                                               packagePrefix) {
                 @Override
                 protected PrintWriter openOutputInner(String className, File file) throws IOException {

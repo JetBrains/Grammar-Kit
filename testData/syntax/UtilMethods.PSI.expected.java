@@ -34,7 +34,7 @@ public interface GeneratedSyntaxElementTypes {
   SyntaxElementType ELEMENT_1 = new SyntaxElementType("ELEMENT_1");
 
 }
-// ---- generated/GeneratedSyntaxElementTypeConverter.java -----------------
+// ---- generated/GeneratedSyntaxElementTypeConverterFactory.java -----------------
 //header.txt
 package generated;
 
@@ -47,7 +47,7 @@ import com.intellij.platform.syntax.psi.ElementTypeConverterKt;
 import org.jetbrains.annotations.NotNull;
 import kotlin.Pair;
 
-public class GeneratedSyntaxElementTypeConverter implements ElementTypeConverterFactory {
+public class GeneratedSyntaxElementTypeConverterFactory implements ElementTypeConverterFactory {
 
   @Override
   public @NotNull ElementTypeConverter getElementTypeConverter() {

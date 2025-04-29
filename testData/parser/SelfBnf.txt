@@ -117,11 +117,11 @@ BnfFile:SelfBnf.bnf
         BNF_STRING_LITERAL_EXPRESSION: "org.intellij.grammar.BnfSyntaxTypes"
           PsiElement(string)('"org.intellij.grammar.BnfSyntaxTypes"')
       PsiWhiteSpace('\n  ')
-      BNF_ATTR:syntaxElementTypeConverterClass
-        PsiElement(id)('syntaxElementTypeConverterClass')
+      BNF_ATTR:elementTypeConverterFactoryClass
+        PsiElement(id)('elementTypeConverterFactoryClass')
         PsiElement(=)('=')
-        BNF_STRING_LITERAL_EXPRESSION: "org.intellij.grammar.BnfSyntaxElementTypeConverter"
-          PsiElement(string)('"org.intellij.grammar.BnfSyntaxElementTypeConverter"')
+        BNF_STRING_LITERAL_EXPRESSION: "org.intellij.grammar.BnfSyntaxElementTypeConverterFactory"
+          PsiElement(string)('"org.intellij.grammar.BnfSyntaxElementTypeConverterFactory"')
       PsiWhiteSpace('\n  \n  ')
       BNF_ATTR:tokens
         PsiElement(id)('tokens')

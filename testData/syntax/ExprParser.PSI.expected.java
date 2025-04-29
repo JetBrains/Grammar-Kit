@@ -40,7 +40,7 @@ public interface GeneratedSyntaxElementTypes {
   SyntaxElementType STRING = new SyntaxElementType("string");
   SyntaxElementType SYNTAX = new SyntaxElementType("syntax");
 }
-// ---- generated/GeneratedSyntaxElementTypeConverter.java -----------------
+// ---- generated/GeneratedSyntaxElementTypeConverterFactory.java -----------------
 //header.txt
 package generated;
 
@@ -53,7 +53,7 @@ import com.intellij.platform.syntax.psi.ElementTypeConverterKt;
 import org.jetbrains.annotations.NotNull;
 import kotlin.Pair;
 
-public class GeneratedSyntaxElementTypeConverter implements ElementTypeConverterFactory {
+public class GeneratedSyntaxElementTypeConverterFactory implements ElementTypeConverterFactory {
 
   @Override
   public @NotNull ElementTypeConverter getElementTypeConverter() {

@@ -10,7 +10,7 @@
   tokenTypeFactory="test.stub.FooParserDefinition.createTokenType"
   elementTypeHolderClass="test.FooTypes"
   syntaxElementTypeHolderClass="test.FooSyntaxTypes"
-  syntaxElementTypeConverterClass="test.FooTypesConverter"
+  elementTypeConverterFactoryClass="test.FooTypesConverterFactory"
   parserUtilClass="org.intellij.grammar.parser.GeneratedParserUtilBase"
   expressionUtilClass="test.FooUtil"
 

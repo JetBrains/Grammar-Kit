@@ -101,10 +101,10 @@ public class GenerateAction extends AnAction {
                                 StringUtil.getShortName(parserClass) + ".java",
                                 StringUtil.getPackageName(parserClass), true);
 
-        String psiOutput = getRootAttribute(bnfFile, KnownAttribute.OUTER_PSI_MODULE);
+        String psiOutput = getRootAttribute(bnfFile, KnownAttribute.PSI_OUTPUT_PATH);
         VirtualFile psiTarget = psiOutput.isEmpty() ?
                                 null :
-                                getOuterModuleTargetDirectoryFor(project, psiOutput, StringUtil.getPackageName(parserClass), true);
+                                getTargetDirectoryFor(project, psiOutput, StringUtil.getPackageName(parserClass), true);
         rootMap.put(file, target);
         psiRootMap.put(file, psiTarget);
         packageMap.put(target, StringUtil.notNullize(packageIndex.getPackageNameByDirectory(target)));

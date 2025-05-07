@@ -55,7 +55,7 @@ public abstract class BnfGeneratorAbstractTest extends BnfGeneratorTestCase {
     String name = getTestName(false);
     String text = loadFile(name + "." + myFileExt);
     PsiFile file = createPsiFile(name, text.replaceAll("generatePsi=[^\n]*", "generatePsi=" + generatePsi));
-    String psiModulePath = getRootAttribute(file, KnownAttribute.OUTER_PSI_MODULE).replace('.', File.separatorChar);
+    String psiModulePath = getRootAttribute(file, KnownAttribute.PSI_OUTPUT_PATH);
     String myProjectPath = myFullDataPath.substring(0, myFullDataPath.lastIndexOf(File.separatorChar) + 1);
     myPsiOutputPath = !psiModulePath.isEmpty() ? myProjectPath + psiModulePath : "";
     doGenTest(generatePsi, name, file);

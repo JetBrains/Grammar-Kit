@@ -13,7 +13,7 @@
 
   methods("expr")=[missing]
   
-  outerPsiModule="someOtherModule.output"
+  psiOutputPath="someOtherModule/output"
 }
 grammar_root ::= root
 root ::= root_a | root_b | root_c | root_d

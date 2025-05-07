@@ -17,6 +17,7 @@ import com.intellij.openapi.roots.*;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.openapi.vfs.VirtualFileUtil;
 import com.intellij.psi.search.FilenameIndex;
 import com.intellij.psi.search.ProjectScope;
 import org.intellij.grammar.BnfFileType;
@@ -26,6 +27,7 @@ import org.intellij.jflex.parser.JFlexFileType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -101,7 +103,6 @@ public class FileGeneratorUtil {
                                                                       @Nullable String targetPackage,
                                                                       boolean returnRoot) {
     Module module = ModuleManager.getInstance(project).findModuleByName(outerModuleName);
-
     if (module != null) {
       boolean hasPackage = StringUtil.isNotEmpty(targetPackage);
       PackageIndex packageIndex = PackageIndex.getInstance(project);
@@ -122,6 +123,30 @@ public class FileGeneratorUtil {
       }
     }
     fail(project, outerModuleName, "Unable to find target source root");
+    throw new ProcessCanceledException();
+  }
+  
+  public static @NotNull VirtualFile getTargetDirectoryFor(@NotNull Project project,
+                                                           @NotNull String targetRelativePath,
+                                                           @Nullable String targetPackage,
+                                                           boolean returnRoot) {
+    VirtualFile basePath = ProjectUtil.guessProjectDir(project);
+    PackageIndex packageIndex = PackageIndex.getInstance(project);
+    ProjectFileIndex fileIndex = ProjectRootManager.getInstance(project).getFileIndex();
+    if (basePath != null) {
+    try {
+      VirtualFile file = VirtualFileUtil.findOrCreateDirectory(basePath, targetRelativePath);
+      return createOutputDirectory(file, targetPackage, packageIndex, fileIndex, returnRoot);
+    }
+    catch (ProcessCanceledException ex) {
+      throw ex;
+    }
+    catch (Exception ex) {
+      fail(project, targetRelativePath, ex.getMessage());
+      throw new ProcessCanceledException();
+    }
+  }
+    fail(project, targetRelativePath, "Unable to find target source root");
     throw new ProcessCanceledException();
   }
 

@@ -9,6 +9,7 @@ import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.util.ArrayUtil;
 import com.intellij.util.SmartList;
 import org.intellij.grammar.KnownAttribute;
+import org.intellij.grammar.generator.java.JavaBnfConstants;
 import org.intellij.grammar.psi.BnfExpression;
 import org.intellij.grammar.psi.BnfRule;
 import org.jetbrains.annotations.NotNull;
@@ -53,8 +54,8 @@ public class ExpressionGeneratorHelper {
     String methodName = R.getFuncName(info.rootRule);
     String kernelMethodName = R.getNextName(methodName, 0);
     String frameName = quote(R.getRuleDisplayName(info.rootRule, true));
-    String shortPB = g.shorten(g.C.PsiBuilderClass);
-    String shortMarker = !g.G.generateFQN ? "Marker" : g.C.PsiBuilderClass + ".Marker";
+    String shortPB = g.shorten(JavaBnfConstants.PSI_BUILDER_CLASS);
+    String shortMarker = !g.G.generateFQN ? "Marker" : JavaBnfConstants.PSI_BUILDER_CLASS + ".Marker";
     g.out("public static boolean %s(%s %s, int %s, int %s) {", methodName, shortPB, g.N.builder, g.N.level, g.N.priority);
     g.out("if (!recursion_guard_(%s, %s, \"%s\")) return false;", g.N.builder, g.N.level, methodName);
 

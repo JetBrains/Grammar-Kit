@@ -5,7 +5,7 @@
 package org.intellij.grammar.generator.java;
 
 public interface JavaBnfConstants {
-  String GP_UTILS_BASE_CLASS = "com.intellij.lang.parser.GeneratedParserUtilBase";
+  String GPUB_CLASS = "com.intellij.lang.parser.GeneratedParserUtilBase";
 
   String PSI_BUILDER_CLASS = "com.intellij.lang.PsiBuilder";
   String PSI_PARSER_CLASS = "com.intellij.lang.PsiParser";

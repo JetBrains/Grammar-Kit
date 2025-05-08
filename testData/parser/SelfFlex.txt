@@ -93,6 +93,12 @@ BnfFile:SelfFlex.bnf
         BNF_STRING_LITERAL_EXPRESSION: "org.intellij.jflex.psi.JFlexTypes"
           PsiElement(string)('"org.intellij.jflex.psi.JFlexTypes"')
       PsiWhiteSpace('\n  ')
+      BNF_ATTR:syntaxElementTypeHolderClass
+        PsiElement(id)('syntaxElementTypeHolderClass')
+        PsiElement(=)('=')
+        BNF_STRING_LITERAL_EXPRESSION: "org.intellij.jflex.JFlexTypes"
+          PsiElement(string)('"org.intellij.jflex.JFlexTypes"')
+      PsiWhiteSpace('\n  ')
       BNF_ATTR:elementTypePrefix
         PsiElement(id)('elementTypePrefix')
         PsiElement(=)('=')

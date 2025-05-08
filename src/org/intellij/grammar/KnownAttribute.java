@@ -53,7 +53,7 @@ public class KnownAttribute<T> {
     create(true, String.class, "tokenTypeClass", JavaBnfConstants.IELEMENTTYPE_CLASS);
   public static final KnownAttribute<String> PARSER_CLASS = create(true, String.class, "parserClass", "generated.GeneratedParser");
   public static final KnownAttribute<String> PARSER_UTIL_CLASS =
-    create(true, String.class, "parserUtilClass", JavaBnfConstants.GP_UTILS_BASE_CLASS);
+    create(true, String.class, "parserUtilClass", JavaBnfConstants.GPUB_CLASS);
   public static final KnownAttribute<String> ELEMENT_TYPE_HOLDER_CLASS =
     create(true, String.class, "elementTypeHolderClass", "generated.GeneratedTypes");
   public static final KnownAttribute<String> ELEMENT_TYPE_PREFIX = create(true, String.class, "elementTypePrefix", "");

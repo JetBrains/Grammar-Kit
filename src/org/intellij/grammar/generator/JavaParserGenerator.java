@@ -329,6 +329,19 @@ public final class JavaParserGenerator extends Generator {
         closeOutput();
       }
     }
+    if (G.parserApi == GenOptions.ParserApi.Syntax) {
+      var converterClass = getRootAttribute(myFile, KnownAttribute.ELEMENT_TYPE_CONVERTER_FACTORY_CLASS);
+      openOutput(converterClass);
+      try {
+        generateElementTypesConverter(converterClass,
+                                      myParserTypeHolderClass,
+                                      getRootAttribute(myFile, KnownAttribute.SYNTAX_ELEMENT_TYPE_HOLDER_CLASS),
+                                      sortedCompositeTypes);
+      }
+      finally {
+        closeOutput();
+      }
+    }
     if (G.generatePsi) {
       generatePsi(sortedPsiRules);
     }

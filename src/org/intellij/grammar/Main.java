@@ -11,7 +11,6 @@ import com.intellij.psi.PsiFile;
 import com.intellij.psi.impl.DebugUtil;
 import org.intellij.grammar.generator.JavaParserGenerator;
 import org.intellij.grammar.generator.OutputOpener;
-import org.intellij.grammar.generator.ParserGenerator;
 import org.intellij.grammar.psi.BnfFile;
 
 import java.io.File;
@@ -29,8 +28,7 @@ import java.util.regex.Pattern;
 public class Main {
   public static void main(String[] args) {
     if (args.length < 2) {
-      System.out.println(
-        "Usage: Main <output-dir> <grammar-or-pattern 1> [--fleet] [--generateFileTypeElement --className=<fqn> --debugName=<debugName> --languageClass=<fqn>] [ ... <grammar-or-pattern n> [--fleet] [--generateFileTypeElement...]]");
+      System.out.println("Usage: Main <output-dir> <grammars or patterns>");
       return;
     }
     File output = new File(args[0]);
@@ -74,7 +72,7 @@ public class Main {
             }
 
             count ++;
-            new ParserGenerator((BnfFile) bnfFile, grammarDir.getAbsolutePath(), output.getAbsolutePath(), "", "").generate();
+            new JavaParserGenerator((BnfFile) bnfFile, grammarDir.getAbsolutePath(), output.getAbsolutePath(), "", OutputOpener.DEFAULT).generate();
             System.out.println(file.getName() + " parser generated to " + output.getCanonicalPath());
           }
         }

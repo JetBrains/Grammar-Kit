@@ -157,8 +157,8 @@ public final class KotlinParserGenerator extends Generator {
     calcAbstractRules();
   }
 
-  private static @NotNull NodeCall getConsumeTextToken(@NotNull ConsumeType consumeType, @NotNull String tokenText) {
-    return new ConsumeTokenCall(consumeType, "\"" + tokenText + "\"");
+  private @NotNull NodeCall getConsumeTextToken(@NotNull ConsumeType consumeType, @NotNull String tokenText) {
+    return new ConsumeTokenCall(consumeType, "\"" + tokenText + "\"", N.builder);
   }
 
   private @NotNull String shortElementTypesHolderName() {
@@ -386,7 +386,7 @@ public final class KotlinParserGenerator extends Generator {
 
     out("internal fun parse_root_(%s: %s, %s: %s, %s: Int): Boolean {", N.root, shortElementType, N.builder, shortBuilder, N.level);
     if (extraRoots.isEmpty()) {
-      out("return %s", rootRule == null ? "false" : createNodeCall(rootRule, null, myGrammarRoot).render(R, N));
+      out("return %s", rootRule == null ? "false" : createNodeCall(rootRule, null, myGrammarRoot).render(R));
     }
     else {
       boolean first = true;
@@ -394,13 +394,13 @@ public final class KotlinParserGenerator extends Generator {
       for (BnfRule rule : extraRoots) {
         String elementType = shortElementTypesHolderName() + "." + getElementType(rule);
         out("%sif (%s == %s) {", first ? "" : "else ", N.root, elementType);
-        String nodeCall = createNodeCall(ObjectUtils.notNull(rootRule, rule), null, rule.getName()).render(R, N);
+        String nodeCall = createNodeCall(ObjectUtils.notNull(rootRule, rule), null, rule.getName()).render(R);
         out("%s = %s", N.result, nodeCall);
         out("}");
         if (first) first = false;
       }
       out("else {");
-      out("%s = %s", N.result, rootRule == null ? "false" : createNodeCall(rootRule, null, myGrammarRoot).render(R, N));
+      out("%s = %s", N.result, rootRule == null ? "false" : createNodeCall(rootRule, null, myGrammarRoot).render(R));
       out("}");
       out("return %s", N.result);
     }
@@ -476,7 +476,7 @@ public final class KotlinParserGenerator extends Generator {
     if (isSingleNode) {
       if (isPrivate && !isLeftInner && recoverWhile == null && frameName == null) {
         final var nodeCallElement = createNodeCall(rule, node, R.getNextName(funcName, 0));
-        String nodeCall = nodeCallElement.render(R, N);
+        String nodeCall = nodeCallElement.render(R);
         out("return %s", nodeCall);
         out("}");
         if (node instanceof BnfExternalExpression && ((BnfExternalExpression)node).getExpressionList().size() > 1) {
@@ -554,40 +554,40 @@ public final class KotlinParserGenerator extends Generator {
           ConsumeType consumeType = getEffectiveConsumeType(rule, node, null);
           final var tokenChoice = createTokenChoiceCall(children, consumeType, funcName);
           if (tokenChoice != null) {
-            out("%s = %s", N.result, tokenChoice.render(R, N));
+            out("%s = %s", N.result, tokenChoice.render(R));
             break;
           }
         }
-        out("%s%s = %s", i > 0 ? format("if (!%s) ", N.result) : "", N.result, nodeCall.render(R, N));
+        out("%s%s = %s", i > 0 ? format("if (!%s) ", N.result) : "", N.result, nodeCall.render(R));
       }
       else if (type == BNF_SEQUENCE) {
         if (skip.get() == 0) {
           ConsumeType consumeType = getEffectiveConsumeType(rule, node, null);
           nodeCall = createTokenSequenceCall(children, i, pinMatcher, pinApplied, skip, nodeCall, false, consumeType);
           if (i == 0) {
-            out("%s = %s", N.result, nodeCall.render(R, N));
+            out("%s = %s", N.result, nodeCall.render(R));
           }
           else {
             if (pinApplied && G.generateExtendedPin) {
               if (i == childrenSize - 1) {
                 // do not report error for last child
                 if (i == p + 1) {
-                  out("%s = %s && %s", N.result, N.result, nodeCall.render(R, N));
+                  out("%s = %s && %s", N.result, N.result, nodeCall.render(R));
                 }
                 else {
-                  out("%s = %s && %s && %s", N.result, N.pinned, nodeCall.render(R, N), N.result);
+                  out("%s = %s && %s && %s", N.result, N.pinned, nodeCall.render(R), N.result);
                 }
               }
               else if (i == p + 1) {
-                out("%s = %s && report_error_(%s, %s)", N.result, N.result, N.builder, nodeCall.render(R, N));
+                out("%s = %s && report_error_(%s, %s)", N.result, N.result, N.builder, nodeCall.render(R));
               }
               else {
-                out("%s = %s && report_error_(%s, %s) && %s", N.result, N.pinned, N.builder, nodeCall.render(R, N),
+                out("%s = %s && report_error_(%s, %s) && %s", N.result, N.pinned, N.builder, nodeCall.render(R),
                     N.result);
               }
             }
             else {
-              out("%s = %s && %s", N.result, N.result, nodeCall.render(R, N));
+              out("%s = %s && %s", N.result, N.result, nodeCall.render(R));
             }
           }
         }
@@ -602,23 +602,23 @@ public final class KotlinParserGenerator extends Generator {
         }
       }
       else if (type == BNF_OP_OPT) {
-        out(nodeCall.render(R, N));
+        out(nodeCall.render(R));
       }
       else if (type == BNF_OP_ONEMORE || type == BNF_OP_ZEROMORE) {
         if (type == BNF_OP_ONEMORE) {
-          out("%s = %s", N.result, nodeCall.render(R, N));
+          out("%s = %s", N.result, nodeCall.render(R));
         }
         out("while (%s) {", alwaysTrue ? "true" : N.result);
         out("val %s: Int = current_position_(%s)", N.pos, N.builder);
-        out("if (!%s) break", nodeCall.render(R, N));
+        out("if (!%s) break", nodeCall.render(R));
         out("if (!empty_element_parsed_guard_(%s, \"%s\", %s)) break", N.builder, funcName, N.pos);
         out("}");
       }
       else if (type == BNF_OP_AND) {
-        out("%s = %s", N.result, nodeCall.render(R, N));
+        out("%s = %s", N.result, nodeCall.render(R));
       }
       else if (type == BNF_OP_NOT) {
-        out("%s = !%s", N.result, nodeCall.render(R, N));
+        out("%s = !%s", N.result, nodeCall.render(R));
       }
       else {
         addWarning("unexpected: " + type);
@@ -704,7 +704,7 @@ public final class KotlinParserGenerator extends Generator {
       if (operators.size() > 1) {
         addWarning("only first definition will be used for '" + operator.operator.getText() + "': " + operators);
       }
-      String nodeCall = createNodeCall(operator.rule, null, operator.rule.getName()).render(R, N);
+      String nodeCall = createNodeCall(operator.rule, null, operator.rule.getName()).render(R);
       out("%s%s = %s", first ? "" : format("if (!%s) ", N.result), N.result, nodeCall);
       first = false;
     }
@@ -746,7 +746,7 @@ public final class KotlinParserGenerator extends Generator {
       boolean rightAssociative = getAttribute(operator.rule, KnownAttribute.RIGHT_ASSOCIATIVE);
       String tailCall = operator.tail == null ? null : createNodeCall(
         operator.rule, operator.tail, R.getNextName(R.getFuncName(operator.rule), 1), ConsumeType.DEFAULT
-      ).render(R, N);
+      ).render(R);
       if (operator.type == OperatorType.BINARY) {
         String argCall = format("%s(%s, %s, %d)", methodName, N.builder, N.level, rightAssociative ? argPriority - 1 : argPriority);
         out("%s = %s", N.result, tailCall == null ? argCall : format("report_error_(%s, %s)", N.builder, argCall));
@@ -810,7 +810,7 @@ public final class KotlinParserGenerator extends Generator {
           String elementType = getElementType(operator.rule);
           String tailCall = (operator.tail == null) ? null : createNodeCall(
             operator.rule, operator.tail, R.getNextName(R.getFuncName(operator.rule), 1), ConsumeType.DEFAULT
-          ).render(R, N);
+          ).render(R);
 
           out("%s = %s", N.result, opCall);
           out("%s = %s", N.pinned, N.result);
@@ -843,7 +843,7 @@ public final class KotlinParserGenerator extends Generator {
       final var operatorInfo = info.operatorMap.get(bnfRule);
       String opCall = createNodeCall(
         info.rootRule, operatorInfo.operator, R.getNextName(R.getFuncName(operatorInfo.rule), 0), CONSUME_TYPE_OVERRIDE
-      ).render(R, N);
+      ).render(R);
       result.computeIfAbsent(opCall, k -> new ArrayList<>(2)).add(operatorInfo);
     }
     return result;
@@ -1290,7 +1290,7 @@ public final class KotlinParserGenerator extends Generator {
     skip.set(list.size() - 1);
     String consumeMethodName = (rollbackOnFail ? "parseTokens" : "consumeTokens") +
                                (consumeType == ConsumeType.SMART ? consumeType.getMethodSuffix() : "");
-    return new ConsumeTokensCall(consumeMethodName, pin, list);
+    return new ConsumeTokensCall(consumeMethodName, N.builder, pin, list);
   }
 
   private @Nullable NodeCall createTokenChoiceCall(@NotNull List<BnfExpression> children,
@@ -1309,7 +1309,7 @@ public final class KotlinParserGenerator extends Generator {
 
     String tokenSetName = R.getTokenSetConstantName(funcName);
     myChoiceTokenSets.put(tokenSetName, tokens);
-    return new ConsumeTokenChoiceCall(consumeType, shortElementTypesHolderName() + "." + tokenSetName);
+    return new ConsumeTokenChoiceCall(consumeType, N.builder, shortElementTypesHolderName() + "." + tokenSetName);
   }
 
   private @NotNull NodeCall createNodeCall(@NotNull BnfRule rule, @Nullable BnfExpression node, @NotNull String nextName) {
@@ -1351,13 +1351,13 @@ public final class KotlinParserGenerator extends Generator {
           String parserClassName = StringUtil.getShortName(parserClass);
           boolean renderClass = !parserClass.equals(myGrammarRootParser) && !parserClass.equals(getRuleInfo(rule).parserClass);
           if (info == null) {
-            return new MethodCall(renderClass, parserClassName, method);
+            return new MethodCall(renderClass, parserClassName, method, N.builder, N.level);
           }
           else {
             if (renderClass) {
               method = StringUtil.getQualifiedName(parserClassName, method);
             }
-            return new ExpressionMethodCall(method, info.getPriority(subRule) - 1);
+            return new ExpressionMethodCall(method, N.builder, N.level, info.getPriority(subRule) - 1);
           }
         }
       }
@@ -1387,7 +1387,7 @@ public final class KotlinParserGenerator extends Generator {
     else if (type == BNF_EXTERNAL_EXPRESSION) {
       List<BnfExpression> expressions = ((BnfExternalExpression)node).getExpressionList();
       if (expressions.size() == 1 && Rule.isMeta(rule)) {
-        return new MetaParameterCall(formatMetaParamName(expressions.get(0).getText()));
+        return new MetaParameterCall(formatMetaParamName(expressions.get(0).getText()), N.builder, N.level);
       }
       else {
         return createExternalCall(rule, expressions, nextName);
@@ -1397,10 +1397,10 @@ public final class KotlinParserGenerator extends Generator {
       List<String> extraArguments = collectMetaParametersFormatted(rule, node);
       final var className = StringUtil.getShortName(getRuleInfo(rule).parserClass);
       if (extraArguments.isEmpty()) {
-        return new MethodCall(false, className, nextName);
+        return new MethodCall(false, className, nextName, N.builder, N.level);
       }
       else {
-        return new MetaMethodCall(null, nextName, map(extraArguments, MetaParameterArgument::new));
+        return new MetaMethodCall(null, nextName, N.builder, N.level, map(extraArguments, MetaParameterArgument::new));
       }
     }
   }
@@ -1497,8 +1497,8 @@ public final class KotlinParserGenerator extends Generator {
       }
     }
     return Rule.isMeta(targetRule)
-           ? new MetaMethodCall(targetClassName, method, arguments)
-           : new MethodCallWithArguments(method, arguments);
+           ? new MetaMethodCall(targetClassName, method, N.builder, N.level, arguments)
+           : new MethodCallWithArguments(method, N.builder, N.level, arguments);
   }
 
   private @NotNull NodeArgument createWrappedNodeCall(@NotNull BnfRule rule, @Nullable BnfExpression nested, @NotNull String nextName) {
@@ -1533,7 +1533,7 @@ public final class KotlinParserGenerator extends Generator {
       return StringUtil.getShortName(targetClass) + "." + constantName;
     }
     else if (!myParserLambdas.containsKey(constantName)) {
-      String call = nodeCall.render(R, N);
+      String call = nodeCall.render(R);
       myParserLambdas.put(constantName, call);
       if (!call.startsWith(nextName + "(")) {
         myInlinedChildNodes.add(nextName);
@@ -1544,7 +1544,7 @@ public final class KotlinParserGenerator extends Generator {
 
   private @NotNull NodeCall createConsumeToken(@NotNull ConsumeType consumeType, @NotNull String tokenName) {
     myTokensUsedInGrammar.add(tokenName);
-    return new ConsumeTokenCall(consumeType, shortElementTypesHolderName() + "." + getElementType(tokenName));
+    return new ConsumeTokenCall(consumeType, shortElementTypesHolderName() + "." + getElementType(tokenName), N.builder);
   }
 
   // region Utils

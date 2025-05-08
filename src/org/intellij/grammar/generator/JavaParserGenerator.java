@@ -25,7 +25,6 @@ import com.intellij.util.containers.*;
 import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.analysis.BnfFirstNextAnalyzer;
 import org.intellij.grammar.generator.NodeCalls.*;
-import org.intellij.grammar.generator.java.IntelliJPlatformConstants;
 import org.intellij.grammar.generator.java.JavaBnfConstants;
 import org.intellij.grammar.generator.java.JavaNameShortener;
 import org.intellij.grammar.generator.java.JavaRenderer;
@@ -301,9 +300,10 @@ public final class JavaParserGenerator extends Generator {
       // mixin attribute overrides "extends":
       info.realSuperClass = StringUtil.notNullize(info.mixin, adjustedSuperRuleClass);
       info.mixedAST = topInfo != null ? topInfo.mixedAST : JBIterable.of(superRuleClass, info.realSuperClass)
-        .map(JavaNameShortener::getRawClassName)
-        .flatMap(s -> JBTreeTraverser.<String>from(o -> JBIterable.of(myJavaHelper.getSuperClassName(o))).withRoot(s).unique())
-        .find(JavaBnfConstants.COMPOSITE_PSI_ELEMENT_CLASS::equals) != null;
+                                                             .map(JavaNameShortener::getRawClassName)
+                                                             .flatMap(s -> JBTreeTraverser.<String>from(
+                                                               o -> JBIterable.of(myJavaHelper.getSuperClassName(o))).withRoot(s).unique())
+                                                             .find(JavaBnfConstants.COMPOSITE_PSI_ELEMENT_CLASS::equals) != null;
     }
   }
 
@@ -422,8 +422,8 @@ public final class JavaParserGenerator extends Generator {
           generateElementTypesHolder(myPsiElementTypeHolderClass,
                                      sortedCompositeTypes,
                                      getRootAttribute(myFile, KnownAttribute.TOKEN_TYPE_FACTORY),
-                                     C.ElementTypeBaseClass,
-                                     C.TokenSetClass,
+                                     JavaBnfConstants.IELEMENTTYPE_CLASS,
+                                     JavaBnfConstants.TOKEN_SET_CLASS,
                                      G.generatePsi,
                                      false);
         }
@@ -647,8 +647,8 @@ public final class JavaParserGenerator extends Generator {
     boolean rootParser = parserClass.equals(myGrammarRootParser);
     Set<String> imports = new LinkedHashSet<>();
     if (!G.generateFQN) {
-      imports.add(C.ParserStateHolder);
-      imports.add(C.BuilderClass + ".Marker");
+      imports.add(JavaBnfConstants.PSI_BUILDER_CLASS);
+      imports.add(JavaBnfConstants.PSI_BUILDER_CLASS + ".Marker");
     }
     else {
       imports.add("#forced");
@@ -657,7 +657,7 @@ public final class JavaParserGenerator extends Generator {
     if (G.generateTokenSets && hasAtLeastOneTokenChoice(myFile, ownRuleNames)) {
       imports.add(staticStarImport(myParserTypeHolderClass + "." + JavaBnfConstants.TOKEN_SET_HOLDER_NAME));
     }
-    if (StringUtil.isNotEmpty(myParserUtilClass) && (G.parserApi == GenOptions.ParserApi.Classic || !myParserUtilClass.equals(GPUB_CLASS))) {
+    if (StringUtil.isNotEmpty(myParserUtilClass) && (G.parserApi == GenOptions.ParserApi.Classic || !myParserUtilClass.equals(JavaBnfConstants.GPUB_CLASS))) {
       imports.add(staticStarImport(myParserUtilClass));
     }
     if (G.parserApi == GenOptions.ParserApi.Syntax) {
@@ -669,28 +669,19 @@ public final class JavaParserGenerator extends Generator {
       imports.add(staticStarImport(myGrammarRootParser));
     }
     else if (!G.generateFQN) {
-      imports.addAll(Arrays.asList(C.ParserElementTypeClass,
-                                   C.ParserOutputType,
-                                   C.ParserNodeSetClass));
-      if (G.parserApi != GenOptions.ParserApi.Syntax)
-        imports.addAll(List.of(C.PsiParserClass, 
-                               C.LightPsiParserClass));
-      else 
-        imports.addAll(Arrays.asList(
-          SyntaxConstants.RUNTIME_CLASS,
-          staticStarImport(SyntaxConstants.RUNTIME_STATIC_METHOD_HOLDER),
-          staticImport(SyntaxConstants.PRODUCTION_RESULT_FILE + ".prepareProduction"),
-          SyntaxConstants.KOTLIN_FUNCTION2_CLASS,
-          SyntaxConstants.KOTLIN_UNIT_CLASS
-        ));
+      imports.addAll(Arrays.asList(JavaBnfConstants.IELEMENTTYPE_CLASS,
+                                   JavaBnfConstants.AST_NODE_CLASS,
+                                   JavaBnfConstants.TOKEN_SET_CLASS));
+      imports.addAll(List.of(JavaBnfConstants.PSI_PARSER_CLASS,
+                             JavaBnfConstants.LIGHT_PSI_PARSER_CLASS));
     }
     imports.addAll(parserImports);
 
     generateClassHeader(parserClass, imports,
                         JavaBnfConstants.SUPPRESS_WARNINGS_ANNO + "({\"SimplifiableIfStatement\", \"UnusedAssignment\"})",
                         TypeKind.CLASS, "",
-                        rootParser ? C.PsiParserClass : "",
-                        rootParser ? C.LightPsiParserClass : "");
+                        rootParser ? JavaBnfConstants.PSI_PARSER_CLASS : "",
+                        rootParser ? JavaBnfConstants.LIGHT_PSI_PARSER_CLASS : "");
 
     if (rootParser) {
       generateRootParserContent(parserClass);
@@ -738,7 +729,7 @@ public final class JavaParserGenerator extends Generator {
     return G.javaVersion > 6
            ? format("(%s, %s) -> %s", N.stateHolder, N.level, body)
            : format("new Parser() {\npublic boolean parse(%s %s, int %s) {\nreturn %s;\n}\n}",
-                    shorten(C.ParserStateHolder), N.stateHolder, N.level, body);
+                    shorten(JavaBnfConstants.PSI_BUILDER_CLASS), N.builder, N.level, body);
   }
 
   private void generateMetaMethodFields() {
@@ -764,11 +755,6 @@ public final class JavaParserGenerator extends Generator {
 
     List<Set<String>> extendsSet = buildExtendsSet(myGraphHelper.getRuleExtendsMap());
     boolean generateExtendsSets = !extendsSet.isEmpty();
-    String shortET = shorten(C.ParserElementTypeClass);
-    String shortAN = shorten(C.ParserOutputType);
-    String shortPB = shorten(C.ParserStateHolder);
-    String shortTS = shorten(C.ParserNodeSetClass);
-    String shortMarker = G.generateFQN ? C.BuilderClass + ".Marker" : "Marker";
     if (G.parserApi == GenOptions.ParserApi.Syntax){
       out("public %s parse(%s %s, %s %s) {", shortAN, shortET, N.root, shortPB, N.stateHolder);
       out("parseLight(%s, %s);", N.root, N.stateHolder);
@@ -800,6 +786,11 @@ public final class JavaParserGenerator extends Generator {
       out("boolean %s;", N.result);
       out("%s = adapt_builder_(%s, %s, %s, %s);", N.stateHolder, N.root, N.stateHolder, "this", generateExtendsSets ? "EXTENDS_SETS_" : null);
     }
+    String shortET = shorten(JavaBnfConstants.IELEMENTTYPE_CLASS);
+    String shortAN = shorten(JavaBnfConstants.AST_NODE_CLASS);
+    String shortPB = shorten(JavaBnfConstants.PSI_BUILDER_CLASS);
+    String shortTS = shorten(JavaBnfConstants.TOKEN_SET_CLASS);
+    String shortMarker = G.generateFQN ? JavaBnfConstants.PSI_BUILDER_CLASS + ".Marker" : "Marker";
 
     out("%s %s = enter_section_(%s, 0, _COLLAPSE_, null);", shortMarker, N.marker, N.stateHolder);
     out("%s = parse_root_(%s, %s);", N.result, N.root, N.stateHolder);
@@ -1008,7 +999,7 @@ public final class JavaParserGenerator extends Generator {
     String parserClass = (G.parserApi == GenOptions.ParserApi.Classic) ? "Parser" : SyntaxConstants.RUNTIME_PARSER_INTERFACE;
     String extraParameters = metaParameters.stream().map(it -> ", " + parserClass + " " + it).collect(joining());
     out("%sstatic boolean %s(%s %s, int %s%s) {", !isRule ? "private " : isPrivate ? "" : "public ",
-        funcName, shorten(myStateHolderClass), N.stateHolder, N.level, extraParameters);
+        funcName, shorten(JavaBnfConstants.PSI_BUILDER_CLASS), N.builder, N.level, extraParameters);
     if (isSingleNode) {
       if (isPrivate && !isLeftInner && recoverWhile == null && frameName == null) {
         String nodeCall = generateNodeCall(rule, node, R.getNextName(funcName, 0)).render(R, N);
@@ -1665,8 +1656,8 @@ public final class JavaParserGenerator extends Generator {
     Set<String> imports = new LinkedHashSet<>();
     imports.add(elementTypeClassBase);
     if (generatePsi) {
-      imports.add(C.PsiElementClass);
-      imports.add(C.AstNodeClass);
+      imports.add(JavaBnfConstants.PSI_ELEMENT_CLASS);
+      imports.add(JavaBnfConstants.AST_NODE_CLASS);
     }
     if (G.generateTokenSets && !myTokenSets.isEmpty()) {
       imports.add(tokenSetClass);
@@ -1755,7 +1746,7 @@ public final class JavaParserGenerator extends Generator {
     }
     if (generatePsi && G.generatePsiClassesMap) {
       String shortJC = shorten(CommonClassNames.JAVA_LANG_CLASS);
-      String shortET = shorten(C.ElementTypeBaseClass);
+      String shortET = shorten(JavaBnfConstants.IELEMENTTYPE_CLASS);
       newLine();
       out("class Classes {");
       newLine();
@@ -1767,7 +1758,7 @@ public final class JavaParserGenerator extends Generator {
       out("return %s.unmodifiableSet(ourMap.keySet());", shorten(CommonClassNames.JAVA_UTIL_COLLECTIONS));
       out("}");
       newLine();
-      String type = shorten("java.util.LinkedHashMap<" + C.ElementTypeBaseClass + ", java.lang.Class<?>>");
+      String type = shorten("java.util.LinkedHashMap<" + JavaBnfConstants.IELEMENTTYPE_CLASS + ", java.lang.Class<?>>");
       out("private static final %s ourMap = new %1$s();", type);
       newLine();
       out("static {");
@@ -1815,7 +1806,7 @@ public final class JavaParserGenerator extends Generator {
         if (first2) {
           if (!first1) newLine();
           out("public static %s createElement(%s type) {", shorten(JavaBnfConstants.COMPOSITE_PSI_ELEMENT_CLASS),
-              shorten(C.ElementTypeBaseClass));
+              shorten(JavaBnfConstants.IELEMENTTYPE_CLASS));
         }
         String psiClass = R.getRulePsiClassName(rule, myImplClassFormat);
         out((!first2 ? "else" : "") + " if (type == " + elementType + ") {");
@@ -1871,7 +1862,7 @@ public final class JavaParserGenerator extends Generator {
     Set<String> imports = new LinkedHashSet<>();
     imports.addAll(Arrays.asList("java.util.List",
                                  "org.jetbrains.annotations.*",
-                                 C.PsiElementClass));
+                                 JavaBnfConstants.PSI_ELEMENT_CLASS));
     imports.addAll(psiSupers);
     imports.addAll(getRuleMethodTypesToImport(rule));
 
@@ -1890,8 +1881,8 @@ public final class JavaParserGenerator extends Generator {
     if (!G.generateFQN) {
       imports.addAll(Arrays.asList(CommonClassNames.JAVA_UTIL_LIST,
                                    "org.jetbrains.annotations.*",
-                                   C.AstNodeClass,
-                                   C.PsiElementClass));
+                                   JavaBnfConstants.AST_NODE_CLASS,
+                                   JavaBnfConstants.PSI_ELEMENT_CLASS));
       if (myVisitorClassName != null) imports.add(JavaBnfConstants.PSI_ELEMENT_VISITOR_CLASS);
       imports.add(myPsiTreeUtilClass);
     }
@@ -1956,7 +1947,7 @@ public final class JavaParserGenerator extends Generator {
     generateClassHeader(psiClass, imports, "", typeKind, implSuper, superInterface);
     String shortName = StringUtil.getShortName(psiClass);
     if (constructors.isEmpty()) {
-      out("public " + shortName + "(" + shorten(C.AstNodeClass) + " node) {");
+      out("public " + shortName + "(" + shorten(JavaBnfConstants.AST_NODE_CLASS) + " node) {");
       out("super(node);");
       out("}");
       newLine();
@@ -2276,7 +2267,7 @@ public final class JavaParserGenerator extends Generator {
       }
 
       boolean many = targetInfo.cardinality.many();
-      String className = shorten(targetInfo.rule == null ? C.PsiElementClass : getAccessorType(targetInfo.rule));
+      String className = shorten(targetInfo.rule == null ? JavaBnfConstants.PSI_ELEMENT_CLASS : getAccessorType(targetInfo.rule));
 
       String type = (many ? shorten(CommonClassNames.JAVA_UTIL_LIST) + "<" : "") + className + (many ? "> " : " ");
       String curId = N.psiLocal + (count++);
@@ -2349,7 +2340,7 @@ public final class JavaParserGenerator extends Generator {
     }
 
     boolean many = cardinality.many();
-    String s = targetRule == null ? PSI_ELEMENT_CLASS : getAccessorType(targetRule);
+    String s = targetRule == null ? JavaBnfConstants.PSI_ELEMENT_CLASS : getAccessorType(targetRule);
     String className = shorten(s);
     String getterName = R.getGetterName(methodInfo.name);
     String tail = intf ? "();" : "() {";
@@ -2417,19 +2408,19 @@ public final class JavaParserGenerator extends Generator {
     Set<String> imports = new LinkedHashSet<>();
     imports.add(typeHolderClass);
     imports.add(syntaxElementTypeHolderClass);
-    imports.add(IELEMENTTYPE_CLASS);
+    imports.add(JavaBnfConstants.IELEMENTTYPE_CLASS);
     imports.add(SyntaxConstants.SYNTAX_ELEMENT_TYPE);
     imports.add(converterInterface);
     imports.add(SyntaxConstants.SYNTAX_ELEMENT_TYPE_CONVERTER);
     imports.add(SyntaxConstants.SYNTAX_ELEMENT_TYPE_CONVERTER_FILE);
-    imports.add(NOTNULL_ANNO);
+    imports.add(JavaBnfConstants.NOTNULL_ANNO);
     imports.add(SyntaxConstants.KOTLIN_PAIR_CLASS);
-    imports.add(OVERRIDE_ANNO);
+    imports.add(JavaBnfConstants.OVERRIDE_ANNO);
 
-    generateClassHeader(elementTypesConverter, imports, "", Java.CLASS, "", converterInterface);
+    generateClassHeader(elementTypesConverter, imports, "", TypeKind.CLASS, "", converterInterface);
 
-    out(shorten(OVERRIDE_ANNO));
-    out("public %s %s getElementTypeConverter() {", shorten(NOTNULL_ANNO), shorten(SyntaxConstants.SYNTAX_ELEMENT_TYPE_CONVERTER));
+    out(shorten(JavaBnfConstants.OVERRIDE_ANNO));
+    out("public %s %s getElementTypeConverter() {", shorten(JavaBnfConstants.NOTNULL_ANNO), shorten(SyntaxConstants.SYNTAX_ELEMENT_TYPE_CONVERTER));
     out("return %s.elementTypeConverterOf(", shorten(SyntaxConstants.SYNTAX_ELEMENT_TYPE_CONVERTER_FILE));
     var sortedCompositeTypesArr = sortedCompositeTypes.keySet().toArray(new String[0]);
     var generateTokenTypeConversions = G.generateTokenTypes && !mySimpleTokens.isEmpty();
@@ -2437,7 +2428,7 @@ public final class JavaParserGenerator extends Generator {
       String elementType = sortedCompositeTypesArr[i];
       out("new %s<%s, %s>(%s.%s, %s.%s)" + (i != sortedCompositeTypesArr.length - 1 || generateTokenTypeConversions ? "," : ""),
           shorten(SyntaxConstants.KOTLIN_PAIR_CLASS),
-          shorten(SyntaxConstants.SYNTAX_ELEMENT_TYPE), shorten(IELEMENTTYPE_CLASS),
+          shorten(SyntaxConstants.SYNTAX_ELEMENT_TYPE), shorten(JavaBnfConstants.IELEMENTTYPE_CLASS),
           shorten(syntaxElementTypeHolderClass), elementType,
           shorten(typeHolderClass), elementType);
     }
@@ -2451,7 +2442,7 @@ public final class JavaParserGenerator extends Generator {
         var elementType = getElementType(tokenName);
         out("new %s<%s, %s>(%s.%s, %s.%s)" + (i != mySimpleTokensArr.length - 1 ? "," : ""),
             shorten(SyntaxConstants.KOTLIN_PAIR_CLASS),
-            shorten(SyntaxConstants.SYNTAX_ELEMENT_TYPE), shorten(IELEMENTTYPE_CLASS), 
+            shorten(SyntaxConstants.SYNTAX_ELEMENT_TYPE), shorten(JavaBnfConstants.IELEMENTTYPE_CLASS), 
             shorten(syntaxElementTypeHolderClass), elementType, 
             shorten(typeHolderClass), elementType);
       }

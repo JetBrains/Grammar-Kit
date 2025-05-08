@@ -61,80 +61,6 @@ import static org.intellij.grammar.generator.ParserGeneratorUtil.getRootAttribut
  * @author greg
  */
 public class BnfGenerateLexerAction extends AnAction {
-
-  private static final String LEXER_FLEX_TEMPLATE = "/templates/lexer.flex.template";
-
-  private static void associateFileTypeAndNavigate(Project project, VirtualFile virtualFile) {
-    String extension = virtualFile.getExtension();
-    FileTypeManagerEx fileTypeManagerEx = FileTypeManagerEx.getInstanceEx();
-    if (extension != null && fileTypeManagerEx.getFileTypeByExtension(extension) == FileTypes.UNKNOWN) {
-      fileTypeManagerEx.associateExtension(PlainTextFileType.INSTANCE, "flex");
-    }
-    FileEditorManager.getInstance(project).openFile(virtualFile, false, true);
-    //new OpenFileDescriptor(project, virtualFile).navigate(false);
-  }
-
-  public static @NotNull String token2JFlex(@NotNull String tokenText) {
-    if (ParserGeneratorUtil.isRegexpToken(tokenText)) {
-      return javaPattern2JFlex(ParserGeneratorUtil.getRegexpTokenRegexp(tokenText));
-    }
-    else {
-      return text2JFlex(tokenText, false);
-    }
-  }
-
-  private static String javaPattern2JFlex(String javaRegexp) {
-    Matcher m = Pattern.compile("\\[(?:[^]\\\\]|\\\\.)*]").matcher(javaRegexp);
-    int start = 0;
-    StringBuilder sb = new StringBuilder();
-    while (m.find(start)) {
-      sb.append(text2JFlex(javaRegexp.substring(start, m.start()), true));
-      // escape only double quotes inside character class [...]
-      sb.append(javaRegexp.substring(m.start(), m.end()).replaceAll("\"", "\\\\\""));
-      start = m.end();
-    }
-    sb.append(text2JFlex(javaRegexp.substring(start), true));
-    return sb.toString();
-  }
-
-  private static String text2JFlex(String text, boolean isRegexp) {
-    String s;
-    if (!isRegexp) {
-      s = text.replaceAll("([\"\\\\])", "\\\\$1");
-    }
-    else {
-      String spaces = " \\\\t\\\\n\\\\x0B\\\\f\\\\r";
-      s = text.replaceAll("\"", "\\\\\"");
-      s = s.replaceAll("(/+)", "\"$1\"");
-      s = s.replaceAll("\\\\d", "[0-9]");
-      s = s.replaceAll("\\\\D", "[^0-9]");
-      s = s.replaceAll("\\\\s", "[" + spaces + "]");
-      s = s.replaceAll("\\\\S", "[^" + spaces + "]");
-      s = s.replaceAll("\\\\w", "[a-zA-Z_0-9]");
-      s = s.replaceAll("\\\\W", "[^a-zA-Z_0-9]");
-      s = s.replaceAll("\\\\p\\{Space}", "[" + spaces + "]");
-      s = s.replaceAll("\\\\p\\{Digit}", "[:digit:]");
-      s = s.replaceAll("\\\\p\\{Alpha}", "[:letter:]");
-      s = s.replaceAll("\\\\p\\{Lower}", "[:lowercase:]");
-      s = s.replaceAll("\\\\p\\{Upper}", "[:uppercase:]");
-      s = s.replaceAll("\\\\p\\{Alnum}", "([:letter:]|[:digit:])");
-      s = s.replaceAll("\\\\p\\{ASCII}", "[\\x00-\\x7F]");
-    }
-    return s;
-  }
-
-  static String getFlexFileName(BnfFile bnfFile) {
-    return getLexerName(bnfFile) + ".flex";
-  }
-
-  protected static String getLexerName(BnfFile bnfFile) {
-    return "_" + BnfGenerateParserUtilAction.getGrammarName(bnfFile) + "Lexer";
-  }
-
-  protected String getLexerFlexTemplate() {
-    return LEXER_FLEX_TEMPLATE;
-  }
-
   @Override
   public @NotNull ActionUpdateThread getActionUpdateThread() {
     return ActionUpdateThread.BGT;
@@ -192,6 +118,16 @@ public class BnfGenerateLexerAction extends AnAction {
     });
   }
 
+  private static void associateFileTypeAndNavigate(Project project, VirtualFile virtualFile) {
+    String extension = virtualFile.getExtension();
+    FileTypeManagerEx fileTypeManagerEx = FileTypeManagerEx.getInstanceEx();
+    if (extension != null && fileTypeManagerEx.getFileTypeByExtension(extension) == FileTypes.UNKNOWN) {
+      fileTypeManagerEx.associateExtension(PlainTextFileType.INSTANCE, "flex");
+    }
+    FileEditorManager.getInstance(project).openFile(virtualFile, false, true);
+    //new OpenFileDescriptor(project, virtualFile).navigate(false);
+  }
+
   private String generateLexerText(BnfFile bnfFile, @Nullable String packageName) {
     Map<String, String> tokenMap = RuleGraphHelper.getTokenNameToTextMap(bnfFile);
 
@@ -237,20 +173,7 @@ public class BnfGenerateLexerAction extends AnAction {
     catch (Throwable ignore) {}
     ve.init();
 
-    VelocityContext context = makeContext(bnfFile, packageName, simpleTokens, regexpTokens, maxLen);
-
-    StringWriter out = new StringWriter();
-    InputStream stream = getClass().getResourceAsStream(getLexerFlexTemplate());
-    ve.evaluate(context, out, "lexer.flex.template", new InputStreamReader(stream));
-    return StringUtil.convertLineSeparators(out.toString());
-  }
-
-  protected VelocityContext makeContext(BnfFile bnfFile,
-                                        @Nullable String packageName,
-                                        Map<String, String> simpleTokens,
-                                        Map<String, String> regexpTokens,
-                                        int[] maxLen) {
-    var context = new VelocityContext();
+    VelocityContext context = new VelocityContext();
     context.put("lexerClass", getLexerName(bnfFile));
     context.put("packageName", StringUtil.notNullize(packageName, StringUtil.getPackageName(getRootAttribute(bnfFile, KnownAttribute.PARSER_CLASS))));
     context.put("tokenPrefix", getRootAttribute(bnfFile, KnownAttribute.ELEMENT_TYPE_PREFIX));
@@ -265,5 +188,62 @@ public class BnfGenerateLexerAction extends AnAction {
     InputStream stream = getClass().getResourceAsStream("/templates/lexer.flex.template");
     ve.evaluate(context, out, "lexer.flex.template", new InputStreamReader(stream));
     return StringUtil.convertLineSeparators(out.toString());
+  }
+
+  public static @NotNull String token2JFlex(@NotNull String tokenText) {
+    if (ParserGeneratorUtil.isRegexpToken(tokenText)) {
+      return javaPattern2JFlex(ParserGeneratorUtil.getRegexpTokenRegexp(tokenText));
+    }
+    else {
+      return text2JFlex(tokenText, false);
+    }
+  }
+
+  private static String javaPattern2JFlex(String javaRegexp) {
+    Matcher m = Pattern.compile("\\[(?:[^]\\\\]|\\\\.)*]").matcher(javaRegexp);
+    int start = 0;
+    StringBuilder sb = new StringBuilder();
+    while (m.find(start)) {
+      sb.append(text2JFlex(javaRegexp.substring(start, m.start()), true));
+      // escape only double quotes inside character class [...]
+      sb.append(javaRegexp.substring(m.start(), m.end()).replaceAll("\"", "\\\\\""));
+      start = m.end();
+    }
+    sb.append(text2JFlex(javaRegexp.substring(start), true));
+    return sb.toString();
+  }
+
+  private static String text2JFlex(String text, boolean isRegexp) {
+    String s;
+    if (!isRegexp) {
+      s = text.replaceAll("([\"\\\\])", "\\\\$1");
+    }
+    else {
+      String spaces = " \\\\t\\\\n\\\\x0B\\\\f\\\\r";
+      s = text.replaceAll("\"", "\\\\\"");
+      s = s.replaceAll("(/+)", "\"$1\"");
+      s = s.replaceAll("\\\\d", "[0-9]");
+      s = s.replaceAll("\\\\D", "[^0-9]");
+      s = s.replaceAll("\\\\s", "[" + spaces + "]");
+      s = s.replaceAll("\\\\S", "[^" + spaces + "]");
+      s = s.replaceAll("\\\\w", "[a-zA-Z_0-9]");
+      s = s.replaceAll("\\\\W", "[^a-zA-Z_0-9]");
+      s = s.replaceAll("\\\\p\\{Space}", "[" + spaces + "]");
+      s = s.replaceAll("\\\\p\\{Digit}", "[:digit:]");
+      s = s.replaceAll("\\\\p\\{Alpha}", "[:letter:]");
+      s = s.replaceAll("\\\\p\\{Lower}", "[:lowercase:]");
+      s = s.replaceAll("\\\\p\\{Upper}", "[:uppercase:]");
+      s = s.replaceAll("\\\\p\\{Alnum}", "([:letter:]|[:digit:])");
+      s = s.replaceAll("\\\\p\\{ASCII}", "[\\x00-\\x7F]");
+    }
+    return s;
+  }
+
+  static String getFlexFileName(BnfFile bnfFile) {
+    return getLexerName(bnfFile) + ".flex";
+  }
+
+  private static String getLexerName(BnfFile bnfFile) {
+    return "_" + BnfGenerateParserUtilAction.getGrammarName(bnfFile) + "Lexer";
   }
 }

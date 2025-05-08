@@ -69,23 +69,23 @@ public final class NodeCalls {
 
   record ConsumeTokensCall(
     @NotNull String methodName,
-    @NotNull String stateHolder,
+    @NotNull String builder,
     int pin,
     @NotNull List<String> tokens
   ) implements NodeCall {
     @Override
     public @NotNull String render(@NotNull Renderer renderer) {
-      return String.format("%s(%s, %d, %s)", methodName, names.builder, pin, StringUtil.join(tokens, ", "));
+      return String.format("%s(%s, %d, %s)", methodName, builder, pin, StringUtil.join(tokens, ", "));
     }
   }
 
   record ExpressionMethodCall(@NotNull String methodName, 
-                              @NotNull String stateHolder,
+                              @NotNull String builder,
                               @NotNull String level,
                               int priority) implements NodeCall {
     @Override
     public @NotNull String render(@NotNull Renderer renderer) {
-      return String.format("%s(%s, %s + 1, %d)", methodName, stateHolder, level, priority);
+      return String.format("%s(%s, %s + 1, %d)", methodName, builder, level, priority);
     }
   }
 
@@ -93,8 +93,8 @@ public final class NodeCalls {
 
     private final @Nullable String targetClassName;
 
-    MetaMethodCall(@Nullable String targetClassName, @NotNull String methodName, @NotNull String stateHolder, @NotNull String level,  @NotNull List<NodeArgument> arguments) {
-      super(methodName, stateHolder, level, arguments);
+    MetaMethodCall(@Nullable String targetClassName, @NotNull String methodName, @NotNull String builder, @NotNull String level,  @NotNull List<NodeArgument> arguments) {
+      super(methodName, builder, level, arguments);
       this.targetClassName = targetClassName;
     }
 
@@ -138,17 +138,17 @@ public final class NodeCalls {
     }
   }
 
-  record MetaParameterCall(String metaParameterName, String stateHolder, String level) implements NodeCall {
+  record MetaParameterCall(String metaParameterName, String builder, String level) implements NodeCall {
     @Override
     public @NotNull String render(@NotNull Renderer renderer) {
-      return String.format("%s.parse(%s, %s)", metaParameterName, stateHolder, level);
+      return String.format("%s.parse(%s, %s)", metaParameterName, builder, level);
     }
   }
 
   record MethodCall(boolean renderClass, 
                     @NotNull String className, 
                     @NotNull String methodName, 
-                    @NotNull String stateHolder, 
+                    @NotNull String builder, 
                     @NotNull String level) implements NodeCall {
 
     @NotNull
@@ -164,10 +164,10 @@ public final class NodeCalls {
     @Override
     public @NotNull String render(@NotNull Renderer renderer) {
       if (renderClass) {
-        return String.format("%s.%s(%s, %s + 1)", className, methodName, stateHolder, level);
+        return String.format("%s.%s(%s, %s + 1)", className, methodName, builder, level);
       }
       else {
-        return String.format("%s(%s, %s + 1)", methodName, stateHolder, level);
+        return String.format("%s(%s, %s + 1)", methodName, builder, level);
       }
     }
   }
@@ -175,13 +175,13 @@ public final class NodeCalls {
   static class MethodCallWithArguments implements NodeCall {
 
     protected final String methodName;
-    final String stateHolder;
+    final String builder;
     final String level;
     protected final List<NodeArgument> arguments;
 
-    MethodCallWithArguments(@NotNull String methodName, @NotNull String stateHolder, @NotNull String level, @NotNull List<NodeArgument> arguments) {
+    MethodCallWithArguments(@NotNull String methodName, @NotNull String builder, @NotNull String level, @NotNull List<NodeArgument> arguments) {
       this.methodName = methodName;
-      this.stateHolder = stateHolder;
+      this.builder = builder;
       this.level = level;
       this.arguments = Collections.unmodifiableList(arguments);
     }
@@ -196,7 +196,7 @@ public final class NodeCalls {
         .map(argument -> argument.render(renderer))
         .map(it -> ", " + it)
         .collect(Collectors.joining());
-      return String.format("%s(%s, %s + 1%s)", getMethodRef(), stateHolder, level, argumentStr);
+      return String.format("%s(%s, %s + 1%s)", getMethodRef(), builder, level, argumentStr);
     }
   }
   

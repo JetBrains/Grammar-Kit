@@ -8,7 +8,6 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 import org.intellij.grammar.expression.ExpressionParserTest;
-import org.intellij.grammar.generator.FleetBnfGeneratorTest;
 import org.intellij.grammar.generator.JavaBnfGeneratorTest;
 import org.intellij.grammar.generator.KotlinBnfGeneratorTest;
 import org.intellij.grammar.inspection.BnfHighlightingTest;
@@ -48,7 +47,6 @@ public class BnfTestSuite extends TestCase {
       testSuite.addTestSuite(JFlexParserTest.class);
       testSuite.addTestSuite(BnfParserTest.class);
       testSuite.addTestSuite(JavaBnfGeneratorTest.class);
-      testSuite.addTestSuite(FleetBnfGeneratorTest.class);
       testSuite.addTestSuite(ExpressionParserTest.class);
       testSuite.addTestSuite(BnfLivePreviewParserTest.class);
       testSuite.addTestSuite(KotlinBnfGeneratorTest.class);

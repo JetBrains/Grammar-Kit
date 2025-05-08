@@ -2,7 +2,7 @@
 //header.txt
 import com.intellij.platform.syntax.parser.SyntaxTreeBuilder
 import com.intellij.platform.syntax.parser.SyntaxTreeBuilder.Marker
-import generated.GeneratedTypes
+import generated.GeneratedSyntaxElementTypes
 import com.intellij.platform.syntax.SyntaxElementType
 import com.intellij.platform.syntax.util.SyntaxGeneratedParserRuntimeBase
 
@@ -24,7 +24,7 @@ open class PsiAccessors(protected val runtime_: SyntaxGeneratedParserRuntimeBase
   companion object {
     internal fun parse_root_(root_: SyntaxElementType, builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       var result_: Boolean
-      if (root_ == GeneratedTypes.EXPRESSION) {
+      if (root_ == GeneratedSyntaxElementTypes.EXPRESSION) {
         result_ = expression(builder_, level_ + 1)
       }
       else {
@@ -37,10 +37,10 @@ open class PsiAccessors(protected val runtime_: SyntaxGeneratedParserRuntimeBase
     // expression operator expression
     fun binary(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "binary")) return false
-      if (!nextTokenIs(builder_, GeneratedTypes.ID)) return false
+      if (!nextTokenIs(builder_, GeneratedSyntaxElementTypes.ID)) return false
       var result_: Boolean
       var pinned_: Boolean
-      val marker_: Marker = enter_section_(builder_, level_, _NONE_, GeneratedTypes.BINARY, null)
+      val marker_: Marker = enter_section_(builder_, level_, _NONE_, GeneratedSyntaxElementTypes.BINARY, null)
       result_ = expression(builder_, level_ + 1)
       result_ = result_ && `operator_$`(builder_, level_ + 1)
       pinned_ = result_ // pin = operator
@@ -53,13 +53,13 @@ open class PsiAccessors(protected val runtime_: SyntaxGeneratedParserRuntimeBase
     // value '*' value
     fun expression(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "expression")) return false
-      if (!nextTokenIs(builder_, GeneratedTypes.ID)) return false
+      if (!nextTokenIs(builder_, GeneratedSyntaxElementTypes.ID)) return false
       var result_: Boolean
       val marker_: Marker = enter_section_(builder_)
       result_ = `value_$`(builder_, level_ + 1)
       result_ = result_ && consumeToken(builder_, "*")
       result_ = result_ && `value_$`(builder_, level_ + 1)
-      exit_section_(builder_, marker_, GeneratedTypes.EXPRESSION, result_)
+      exit_section_(builder_, marker_, GeneratedSyntaxElementTypes.EXPRESSION, result_)
       return result_
     }
 
@@ -68,7 +68,7 @@ open class PsiAccessors(protected val runtime_: SyntaxGeneratedParserRuntimeBase
     fun `operator_$`(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "`operator_$`")) return false
       var result_: Boolean
-      val marker_: Marker = enter_section_(builder_, level_, _NONE_, GeneratedTypes.OPERATOR, "<operator>")
+      val marker_: Marker = enter_section_(builder_, level_, _NONE_, GeneratedSyntaxElementTypes.OPERATOR, "<operator>")
       result_ = consumeToken(builder_, "+")
       if (!result_) result_ = consumeToken(builder_, "-")
       exit_section_(builder_, level_, marker_, result_, false, null)
@@ -85,11 +85,11 @@ open class PsiAccessors(protected val runtime_: SyntaxGeneratedParserRuntimeBase
     // id
     fun `value_$`(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "`value_$`")) return false
-      if (!nextTokenIs(builder_, GeneratedTypes.ID)) return false
+      if (!nextTokenIs(builder_, GeneratedSyntaxElementTypes.ID)) return false
       var result_: Boolean
       val marker_: Marker = enter_section_(builder_)
-      result_ = consumeToken(builder_, GeneratedTypes.ID)
-      exit_section_(builder_, marker_, GeneratedTypes.VALUE, result_)
+      result_ = consumeToken(builder_, GeneratedSyntaxElementTypes.ID)
+      exit_section_(builder_, marker_, GeneratedSyntaxElementTypes.VALUE, result_)
       return result_
     }
 

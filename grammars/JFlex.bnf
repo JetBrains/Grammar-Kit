@@ -15,6 +15,7 @@
   psiImplUtilClass="org.intellij.jflex.psi.impl.JFlexPsiImplUtil"
 
   elementTypeHolderClass="org.intellij.jflex.psi.JFlexTypes"
+  syntaxElementTypeHolderClass="org.intellij.jflex.JFlexTypes"
   elementTypePrefix="FLEX_"
   elementTypeClass="org.intellij.jflex.psi.JFlexCompositeElementType"
   tokenTypeClass="org.intellij.jflex.psi.JFlexTokenType"

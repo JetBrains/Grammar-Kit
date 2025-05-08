@@ -1,4 +1,4 @@
-// ---- GeneratedParser.kt -----------------
+// ---- generated/GeneratedParser.kt -----------------
 // This is a generated file. Not intended for manual editing.
 package generated
 
@@ -31,8 +31,8 @@ open class GeneratedParser(protected val runtime_: SyntaxGeneratedParserRuntimeB
     // token?
     fun `abstract_$`(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "`abstract_$`")) return false
-      val marker_: Marker = enter_section_(builder_, level_, _NONE_, GeneratedTypes.ABSTRACT, "<abstract>")
-      consumeToken(builder_, GeneratedTypes.TOKEN)
+      val marker_: Marker = enter_section_(builder_, level_, _NONE_, GeneratedSyntaxElementTypes.ABSTRACT, "<abstract>")
+      consumeToken(builder_, GeneratedSyntaxElementTypes.TOKEN)
       exit_section_(builder_, level_, marker_, true, false, null)
       return true
     }
@@ -42,8 +42,8 @@ open class GeneratedParser(protected val runtime_: SyntaxGeneratedParserRuntimeB
     fun `class_$`(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "`class_$`")) return false
       var result_: Boolean
-      val marker_: Marker = enter_section_(builder_, level_, _NONE_, GeneratedTypes.CLASS, "<class>")
-      result_ = consumeToken(builder_, GeneratedTypes.TOKEN)
+      val marker_: Marker = enter_section_(builder_, level_, _NONE_, GeneratedSyntaxElementTypes.CLASS, "<class>")
+      result_ = consumeToken(builder_, GeneratedSyntaxElementTypes.TOKEN)
       if (!result_) result_ = `interface_$`(builder_, level_ + 1)
       if (!result_) result_ = `record_$`(builder_, level_ + 1)
       exit_section_(builder_, level_, marker_, result_, false, null)
@@ -54,11 +54,11 @@ open class GeneratedParser(protected val runtime_: SyntaxGeneratedParserRuntimeB
     // token
     fun `interface_$`(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "`interface_$`")) return false
-      if (!nextTokenIs(builder_, GeneratedTypes.TOKEN)) return false
+      if (!nextTokenIs(builder_, GeneratedSyntaxElementTypes.TOKEN)) return false
       var result_: Boolean
       val marker_: Marker = enter_section_(builder_)
-      result_ = consumeToken(builder_, GeneratedTypes.TOKEN)
-      exit_section_(builder_, marker_, GeneratedTypes.INTERFACE, result_)
+      result_ = consumeToken(builder_, GeneratedSyntaxElementTypes.TOKEN)
+      exit_section_(builder_, marker_, GeneratedSyntaxElementTypes.INTERFACE, result_)
       return result_
     }
 
@@ -67,7 +67,7 @@ open class GeneratedParser(protected val runtime_: SyntaxGeneratedParserRuntimeB
     fun `record_$`(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "`record_$`")) return false
       var result_: Boolean
-      val marker_: Marker = enter_section_(builder_, level_, _NONE_, GeneratedTypes.RECORD, "<record>")
+      val marker_: Marker = enter_section_(builder_, level_, _NONE_, GeneratedSyntaxElementTypes.RECORD, "<record>")
       result_ = consumeToken(builder_, "token")
       exit_section_(builder_, level_, marker_, result_, false, null)
       return result_

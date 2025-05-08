@@ -1,10 +1,10 @@
-// ---- GeneratedTypes.kt -----------------
+// ---- generated/GeneratedSyntaxElementTypes.kt -----------------
 // This is a generated file. Not intended for manual editing.
 package generated
 
 import com.intellij.platform.syntax.SyntaxElementType
 
-object GeneratedTypes {
+object GeneratedSyntaxElementTypes {
   val CREATE_STATEMENT = com.intellij.platform.syntax.SyntaxElementType("CREATE_STATEMENT")
   val CREATE_TABLE_STATEMENT = com.intellij.platform.syntax.SyntaxElementType("CREATE_TABLE_STATEMENT")
   val DROP_STATEMENT = com.intellij.platform.syntax.SyntaxElementType("DROP_STATEMENT")

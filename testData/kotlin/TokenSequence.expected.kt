@@ -1,4 +1,4 @@
-// ---- GeneratedParser.kt -----------------
+// ---- generated/GeneratedParser.kt -----------------
 // This is a generated file. Not intended for manual editing.
 package generated
 
@@ -31,11 +31,11 @@ open class GeneratedParser(protected val runtime_: SyntaxGeneratedParserRuntimeB
     // a
     fun bar(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "bar")) return false
-      if (!nextTokenIs(builder_, GeneratedTypes.A)) return false
+      if (!nextTokenIs(builder_, GeneratedSyntaxElementTypes.A)) return false
       var result_: Boolean
       val marker_: Marker = enter_section_(builder_)
-      result_ = consumeToken(builder_, GeneratedTypes.A)
-      exit_section_(builder_, marker_, GeneratedTypes.BAR, result_)
+      result_ = consumeToken(builder_, GeneratedSyntaxElementTypes.A)
+      exit_section_(builder_, marker_, GeneratedSyntaxElementTypes.BAR, result_)
       return result_
     }
 
@@ -48,9 +48,9 @@ open class GeneratedParser(protected val runtime_: SyntaxGeneratedParserRuntimeB
       if (!recursion_guard_(builder_, level_, "foo")) return false
       var result_: Boolean
       val marker_: Marker = enter_section_(builder_)
-      result_ = consumeToken(builder_, GeneratedTypes.A)
-      if (!result_) result_ = parseTokens(builder_, 2, GeneratedTypes.B, GeneratedTypes.C, GeneratedTypes.D)
-      if (!result_) result_ = parseTokens(builder_, 2, GeneratedTypes.C, GeneratedTypes.D, GeneratedTypes.E)
+      result_ = consumeToken(builder_, GeneratedSyntaxElementTypes.A)
+      if (!result_) result_ = parseTokens(builder_, 2, GeneratedSyntaxElementTypes.B, GeneratedSyntaxElementTypes.C, GeneratedSyntaxElementTypes.D)
+      if (!result_) result_ = parseTokens(builder_, 2, GeneratedSyntaxElementTypes.C, GeneratedSyntaxElementTypes.D, GeneratedSyntaxElementTypes.E)
       if (!result_) result_ = foo_3(builder_, level_ + 1)
       exit_section_(builder_, marker_, null, result_)
       return result_
@@ -63,7 +63,7 @@ open class GeneratedParser(protected val runtime_: SyntaxGeneratedParserRuntimeB
       var pinned_: Boolean
       val marker_: Marker = enter_section_(builder_, level_, _NONE_)
       result_ = bar(builder_, level_ + 1)
-      result_ = result_ && consumeTokens(builder_, 1, GeneratedTypes.D, GeneratedTypes.E, GeneratedTypes.F)
+      result_ = result_ && consumeTokens(builder_, 1, GeneratedSyntaxElementTypes.D, GeneratedSyntaxElementTypes.E, GeneratedSyntaxElementTypes.F)
       pinned_ = result_ // pin = 2
       exit_section_(builder_, level_, marker_, result_, pinned_, null)
       return result_ || pinned_

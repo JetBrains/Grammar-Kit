@@ -1,10 +1,10 @@
-// ---- ExpressionTypes.kt -----------------
+// ---- org/intellij/grammar/expression/ExpressionSyntaxTypes.kt -----------------
 //header.txt
 package org.intellij.grammar.expression
 
 import com.intellij.platform.syntax.SyntaxElementType
 
-object ExpressionTypes {
+object ExpressionSyntaxTypes {
   val ARG_LIST = SyntaxElementType("ARG_LIST")
   val ASSIGN_EXPR = SyntaxElementType("ASSIGN_EXPR")
   val BETWEEN_EXPR = SyntaxElementType("BETWEEN_EXPR")

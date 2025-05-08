@@ -2,7 +2,7 @@
 //header.txt
 import com.intellij.platform.syntax.parser.SyntaxTreeBuilder
 import com.intellij.platform.syntax.parser.SyntaxTreeBuilder.Marker
-import generated.GeneratedTypes
+import generated.GeneratedSyntaxElementTypes
 import com.intellij.platform.syntax.SyntaxElementType
 import com.intellij.platform.syntax.util.SyntaxGeneratedParserRuntimeBase
 
@@ -27,18 +27,18 @@ open class PsiGen(protected val runtime_: SyntaxGeneratedParserRuntimeBase) {
     }
 
     val EXTENDS_SETS_: Array<Set<SyntaxElementType>> = arrayOf(
-      create_token_set_(GeneratedTypes.ROOT, GeneratedTypes.ROOT_B, GeneratedTypes.ROOT_C, GeneratedTypes.ROOT_D),
-      create_token_set_(GeneratedTypes.A_STATEMENT, GeneratedTypes.B_STATEMENT, GeneratedTypes.C_STATEMENT, GeneratedTypes.STATEMENT),
-      create_token_set_(GeneratedTypes.CAST_EXPR, GeneratedTypes.CHOICE_JOINED, GeneratedTypes.EXPR, GeneratedTypes.ID_EXPR,
-        GeneratedTypes.ITEM_EXPR, GeneratedTypes.LITERAL, GeneratedTypes.MISSING_EXTERNAL_TYPE, GeneratedTypes.MUL_EXPR,
-        GeneratedTypes.PLUS_EXPR, GeneratedTypes.REF_EXPR, GeneratedTypes.SOME_EXPR, GeneratedTypes.SPECIAL_REF),
+      create_token_set_(GeneratedSyntaxElementTypes.ROOT, GeneratedSyntaxElementTypes.ROOT_B, GeneratedSyntaxElementTypes.ROOT_C, GeneratedSyntaxElementTypes.ROOT_D),
+      create_token_set_(GeneratedSyntaxElementTypes.A_STATEMENT, GeneratedSyntaxElementTypes.B_STATEMENT, GeneratedSyntaxElementTypes.C_STATEMENT, GeneratedSyntaxElementTypes.STATEMENT),
+      create_token_set_(GeneratedSyntaxElementTypes.CAST_EXPR, GeneratedSyntaxElementTypes.CHOICE_JOINED, GeneratedSyntaxElementTypes.EXPR, GeneratedSyntaxElementTypes.ID_EXPR,
+        GeneratedSyntaxElementTypes.ITEM_EXPR, GeneratedSyntaxElementTypes.LITERAL, GeneratedSyntaxElementTypes.MISSING_EXTERNAL_TYPE, GeneratedSyntaxElementTypes.MUL_EXPR,
+        GeneratedSyntaxElementTypes.PLUS_EXPR, GeneratedSyntaxElementTypes.REF_EXPR, GeneratedSyntaxElementTypes.SOME_EXPR, GeneratedSyntaxElementTypes.SPECIAL_REF),
     )
 
     /* ********************************************************** */
     // b_expr plus_expr *
     internal fun a_expr(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "a_expr")) return false
-      if (!nextTokenIs(builder_, "", GeneratedTypes.ID, GeneratedTypes.NUMBER)) return false
+      if (!nextTokenIs(builder_, "", GeneratedSyntaxElementTypes.ID, GeneratedSyntaxElementTypes.NUMBER)) return false
       var result_: Boolean
       val marker_: Marker = enter_section_(builder_)
       result_ = b_expr(builder_, level_ + 1)
@@ -62,7 +62,7 @@ open class PsiGen(protected val runtime_: SyntaxGeneratedParserRuntimeBase) {
     // id_expr mul_expr *
     internal fun b_expr(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "b_expr")) return false
-      if (!nextTokenIs(builder_, "", GeneratedTypes.ID, GeneratedTypes.NUMBER)) return false
+      if (!nextTokenIs(builder_, "", GeneratedSyntaxElementTypes.ID, GeneratedSyntaxElementTypes.NUMBER)) return false
       var result_: Boolean
       val marker_: Marker = enter_section_(builder_)
       result_ = id_expr(builder_, level_ + 1)
@@ -86,9 +86,9 @@ open class PsiGen(protected val runtime_: SyntaxGeneratedParserRuntimeBase) {
     // a_expr (',' a_expr) *
     fun expr(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "expr")) return false
-      if (!nextTokenIs(builder_, "<expr>", GeneratedTypes.ID, GeneratedTypes.NUMBER)) return false
+      if (!nextTokenIs(builder_, "<expr>", GeneratedSyntaxElementTypes.ID, GeneratedSyntaxElementTypes.NUMBER)) return false
       var result_: Boolean
-      val marker_: Marker = enter_section_(builder_, level_, _COLLAPSE_, GeneratedTypes.EXPR, "<expr>")
+      val marker_: Marker = enter_section_(builder_, level_, _COLLAPSE_, GeneratedSyntaxElementTypes.EXPR, "<expr>")
       result_ = a_expr(builder_, level_ + 1)
       result_ = result_ && expr_1(builder_, level_ + 1)
       exit_section_(builder_, level_, marker_, result_, false, null)
@@ -121,11 +121,11 @@ open class PsiGen(protected val runtime_: SyntaxGeneratedParserRuntimeBase) {
     // id
     fun external_same_as_type2(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "external_same_as_type2")) return false
-      if (!nextTokenIs(builder_, GeneratedTypes.ID)) return false
+      if (!nextTokenIs(builder_, GeneratedSyntaxElementTypes.ID)) return false
       var result_: Boolean
       val marker_: Marker = enter_section_(builder_)
-      result_ = consumeToken(builder_, GeneratedTypes.ID)
-      exit_section_(builder_, marker_, GeneratedTypes.ID_EXPR, result_)
+      result_ = consumeToken(builder_, GeneratedSyntaxElementTypes.ID)
+      exit_section_(builder_, marker_, GeneratedSyntaxElementTypes.ID_EXPR, result_)
       return result_
     }
 
@@ -133,11 +133,11 @@ open class PsiGen(protected val runtime_: SyntaxGeneratedParserRuntimeBase) {
     // number
     fun external_type(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "external_type")) return false
-      if (!nextTokenIs(builder_, GeneratedTypes.NUMBER)) return false
+      if (!nextTokenIs(builder_, GeneratedSyntaxElementTypes.NUMBER)) return false
       var result_: Boolean
       val marker_: Marker = enter_section_(builder_)
-      result_ = consumeToken(builder_, GeneratedTypes.NUMBER)
-      exit_section_(builder_, marker_, GeneratedTypes.MISSING_EXTERNAL_TYPE, result_)
+      result_ = consumeToken(builder_, GeneratedSyntaxElementTypes.NUMBER)
+      exit_section_(builder_, marker_, GeneratedSyntaxElementTypes.MISSING_EXTERNAL_TYPE, result_)
       return result_
     }
 
@@ -145,11 +145,11 @@ open class PsiGen(protected val runtime_: SyntaxGeneratedParserRuntimeBase) {
     // id
     fun external_type2(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "external_type2")) return false
-      if (!nextTokenIs(builder_, GeneratedTypes.ID)) return false
+      if (!nextTokenIs(builder_, GeneratedSyntaxElementTypes.ID)) return false
       var result_: Boolean
       val marker_: Marker = enter_section_(builder_)
-      result_ = consumeToken(builder_, GeneratedTypes.ID)
-      exit_section_(builder_, marker_, GeneratedTypes.ID_EXPR, result_)
+      result_ = consumeToken(builder_, GeneratedSyntaxElementTypes.ID)
+      exit_section_(builder_, marker_, GeneratedSyntaxElementTypes.ID_EXPR, result_)
       return result_
     }
 
@@ -157,11 +157,11 @@ open class PsiGen(protected val runtime_: SyntaxGeneratedParserRuntimeBase) {
     // id
     fun external_type3(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "external_type3")) return false
-      if (!nextTokenIs(builder_, GeneratedTypes.ID)) return false
+      if (!nextTokenIs(builder_, GeneratedSyntaxElementTypes.ID)) return false
       var result_: Boolean
       val marker_: Marker = enter_section_(builder_)
-      result_ = consumeToken(builder_, GeneratedTypes.ID)
-      exit_section_(builder_, marker_, GeneratedTypes.EXPR, result_)
+      result_ = consumeToken(builder_, GeneratedSyntaxElementTypes.ID)
+      exit_section_(builder_, marker_, GeneratedSyntaxElementTypes.EXPR, result_)
       return result_
     }
 
@@ -169,9 +169,9 @@ open class PsiGen(protected val runtime_: SyntaxGeneratedParserRuntimeBase) {
     // expr | external_type3
     fun grammar_element(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "grammar_element")) return false
-      if (!nextTokenIs(builder_, "<grammar element>", GeneratedTypes.ID, GeneratedTypes.NUMBER)) return false
+      if (!nextTokenIs(builder_, "<grammar element>", GeneratedSyntaxElementTypes.ID, GeneratedSyntaxElementTypes.NUMBER)) return false
       var result_: Boolean
-      val marker_: Marker = enter_section_(builder_, level_, _NONE_, GeneratedTypes.GRAMMAR_ELEMENT, "<grammar element>")
+      val marker_: Marker = enter_section_(builder_, level_, _NONE_, GeneratedSyntaxElementTypes.GRAMMAR_ELEMENT, "<grammar element>")
       result_ = expr(builder_, level_ + 1)
       if (!result_) result_ = external_type3(builder_, level_ + 1)
       exit_section_(builder_, level_, marker_, result_, false, null)
@@ -188,7 +188,7 @@ open class PsiGen(protected val runtime_: SyntaxGeneratedParserRuntimeBase) {
     // specialRef | reference | literal | external_type | external_type2
     internal fun id_expr(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "id_expr")) return false
-      if (!nextTokenIs(builder_, "", GeneratedTypes.ID, GeneratedTypes.NUMBER)) return false
+      if (!nextTokenIs(builder_, "", GeneratedSyntaxElementTypes.ID, GeneratedSyntaxElementTypes.NUMBER)) return false
       var result_: Boolean
       result_ = PsiGen2.specialRef(builder_, level_ + 1)
       if (!result_) result_ = PsiGen2.reference(builder_, level_ + 1)
@@ -203,8 +203,8 @@ open class PsiGen(protected val runtime_: SyntaxGeneratedParserRuntimeBase) {
     fun include__section__alt(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "include__section__alt")) return false
       var result_: Boolean
-      val marker_: Marker = enter_section_(builder_, level_, _NONE_, GeneratedTypes.INCLUDE__SECTION__ALT, "<include section alt>")
-      result_ = consumeTokens(builder_, 0, GeneratedTypes.ID, GeneratedTypes.NUMBER)
+      val marker_: Marker = enter_section_(builder_, level_, _NONE_, GeneratedSyntaxElementTypes.INCLUDE__SECTION__ALT, "<include section alt>")
+      result_ = consumeTokens(builder_, 0, GeneratedSyntaxElementTypes.ID, GeneratedSyntaxElementTypes.NUMBER)
       exit_section_(builder_, level_, marker_, result_, false, PsiGen::include_section_recover_)
       return result_
     }
@@ -214,8 +214,8 @@ open class PsiGen(protected val runtime_: SyntaxGeneratedParserRuntimeBase) {
     fun include_section(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "include_section")) return false
       var result_: Boolean
-      val marker_: Marker = enter_section_(builder_, level_, _NONE_, GeneratedTypes.INCLUDE_SECTION, "<include section>")
-      result_ = consumeTokens(builder_, 0, GeneratedTypes.ID, GeneratedTypes.NUMBER)
+      val marker_: Marker = enter_section_(builder_, level_, _NONE_, GeneratedSyntaxElementTypes.INCLUDE_SECTION, "<include section>")
+      result_ = consumeTokens(builder_, 0, GeneratedSyntaxElementTypes.ID, GeneratedSyntaxElementTypes.NUMBER)
       result_ = result_ && include_section(builder_, level_ + 1)
       result_ = result_ && include__section__alt(builder_, level_ + 1)
       exit_section_(builder_, level_, marker_, result_, false, PsiGen::include_section_recover_)
@@ -258,10 +258,10 @@ open class PsiGen(protected val runtime_: SyntaxGeneratedParserRuntimeBase) {
     // '*' expr
     fun mul_expr(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "mul_expr")) return false
-      if (!nextTokenIs(builder_, GeneratedTypes.OP_MUL)) return false
+      if (!nextTokenIs(builder_, GeneratedSyntaxElementTypes.OP_MUL)) return false
       var result_: Boolean
-      val marker_: Marker = enter_section_(builder_, level_, _LEFT_, GeneratedTypes.MUL_EXPR, null)
-      result_ = consumeToken(builder_, GeneratedTypes.OP_MUL)
+      val marker_: Marker = enter_section_(builder_, level_, _LEFT_, GeneratedSyntaxElementTypes.MUL_EXPR, null)
+      result_ = consumeToken(builder_, GeneratedSyntaxElementTypes.OP_MUL)
       result_ = result_ && expr(builder_, level_ + 1)
       exit_section_(builder_, level_, marker_, result_, false, null)
       return result_
@@ -272,7 +272,7 @@ open class PsiGen(protected val runtime_: SyntaxGeneratedParserRuntimeBase) {
     fun plus_expr(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "plus_expr")) return false
       var result_: Boolean
-      val marker_: Marker = enter_section_(builder_, level_, _LEFT_, GeneratedTypes.PLUS_EXPR, "<plus expr>")
+      val marker_: Marker = enter_section_(builder_, level_, _LEFT_, GeneratedSyntaxElementTypes.PLUS_EXPR, "<plus expr>")
       result_ = consumeToken(builder_, "+")
       result_ = result_ && expr(builder_, level_ + 1)
       exit_section_(builder_, level_, marker_, result_, false, null)
@@ -284,7 +284,7 @@ open class PsiGen(protected val runtime_: SyntaxGeneratedParserRuntimeBase) {
     fun root(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "root")) return false
       var result_: Boolean
-      val marker_: Marker = enter_section_(builder_, level_, _COLLAPSE_, GeneratedTypes.ROOT, "<root>")
+      val marker_: Marker = enter_section_(builder_, level_, _COLLAPSE_, GeneratedSyntaxElementTypes.ROOT, "<root>")
       result_ = parseGrammar(builder_, level_ + 1, PsiGen::grammar_element)
       if (!result_) result_ = root_b(builder_, level_ + 1)
       if (!result_) result_ = root_c(builder_, level_ + 1)
@@ -298,7 +298,7 @@ open class PsiGen(protected val runtime_: SyntaxGeneratedParserRuntimeBase) {
     fun root_b(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "root_b")) return false
       var result_: Boolean
-      val marker_: Marker = enter_section_(builder_, level_, _COLLAPSE_, GeneratedTypes.ROOT_B, "<root b>")
+      val marker_: Marker = enter_section_(builder_, level_, _COLLAPSE_, GeneratedSyntaxElementTypes.ROOT_B, "<root b>")
       result_ = parseGrammar(builder_, level_ + 1, PsiGen::grammar_element)
       exit_section_(builder_, level_, marker_, result_, false, null)
       return result_
@@ -308,9 +308,9 @@ open class PsiGen(protected val runtime_: SyntaxGeneratedParserRuntimeBase) {
     // <<blockOf grammar_element>>
     fun root_c(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "root_c")) return false
-      if (!nextTokenIs(builder_, "<root c>", GeneratedTypes.ID, GeneratedTypes.NUMBER)) return false
+      if (!nextTokenIs(builder_, "<root c>", GeneratedSyntaxElementTypes.ID, GeneratedSyntaxElementTypes.NUMBER)) return false
       var result_: Boolean
-      val marker_: Marker = enter_section_(builder_, level_, _NONE_, GeneratedTypes.ROOT_C, "<root c>")
+      val marker_: Marker = enter_section_(builder_, level_, _NONE_, GeneratedSyntaxElementTypes.ROOT_C, "<root c>")
       result_ = PsiGen2.blockOf(builder_, level_ + 1, PsiGen::grammar_element)
       exit_section_(builder_, level_, marker_, result_, false, null)
       return result_
@@ -320,9 +320,9 @@ open class PsiGen(protected val runtime_: SyntaxGeneratedParserRuntimeBase) {
     // <<listOf grammar_element>>
     fun root_d(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "root_d")) return false
-      if (!nextTokenIs(builder_, "<root d>", GeneratedTypes.ID, GeneratedTypes.NUMBER)) return false
+      if (!nextTokenIs(builder_, "<root d>", GeneratedSyntaxElementTypes.ID, GeneratedSyntaxElementTypes.NUMBER)) return false
       var result_: Boolean
-      val marker_: Marker = enter_section_(builder_, level_, _NONE_, GeneratedTypes.ROOT_D, "<root d>")
+      val marker_: Marker = enter_section_(builder_, level_, _NONE_, GeneratedSyntaxElementTypes.ROOT_D, "<root d>")
       result_ = listOf(builder_, level_ + 1, PsiGen::grammar_element)
       exit_section_(builder_, level_, marker_, result_, false, null)
       return result_
@@ -334,7 +334,7 @@ open class PsiGen(protected val runtime_: SyntaxGeneratedParserRuntimeBase) {
 //header.txt
 import com.intellij.platform.syntax.parser.SyntaxTreeBuilder
 import com.intellij.platform.syntax.parser.SyntaxTreeBuilder.Marker
-import generated.GeneratedTypes
+import generated.GeneratedSyntaxElementTypes
 
 @Suppress("unused", "FunctionName", "JoinDeclarationAndAssignment")
 open class PsiGen2 {
@@ -352,7 +352,7 @@ open class PsiGen2 {
         if (!p.parse(builder_, level_)) break
         if (!empty_element_parsed_guard_(builder_, "blockOf", pos_)) break
       }
-      exit_section_(builder_, marker_, GeneratedTypes.BLOCK_OF, result_)
+      exit_section_(builder_, marker_, GeneratedSyntaxElementTypes.BLOCK_OF, result_)
       return result_
     }
 
@@ -361,9 +361,9 @@ open class PsiGen2 {
     fun cast_expr(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "cast_expr")) return false
       var result_: Boolean
-      val marker_: Marker = enter_section_(builder_, level_, _LEFT_, GeneratedTypes.CAST_EXPR, "<cast expr>")
+      val marker_: Marker = enter_section_(builder_, level_, _LEFT_, GeneratedSyntaxElementTypes.CAST_EXPR, "<cast expr>")
       result_ = consumeToken(builder_, "::")
-      result_ = result_ && consumeToken(builder_, GeneratedTypes.ID)
+      result_ = result_ && consumeToken(builder_, GeneratedSyntaxElementTypes.ID)
       exit_section_(builder_, level_, marker_, result_, false, null)
       return result_
     }
@@ -372,11 +372,11 @@ open class PsiGen2 {
     // id
     fun identifier(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "identifier")) return false
-      if (!nextTokenIs(builder_, GeneratedTypes.ID)) return false
+      if (!nextTokenIs(builder_, GeneratedSyntaxElementTypes.ID)) return false
       var result_: Boolean
       val marker_: Marker = enter_section_(builder_)
-      result_ = consumeToken(builder_, GeneratedTypes.ID)
-      exit_section_(builder_, marker_, GeneratedTypes.IDENTIFIER, result_)
+      result_ = consumeToken(builder_, GeneratedSyntaxElementTypes.ID)
+      exit_section_(builder_, marker_, GeneratedSyntaxElementTypes.IDENTIFIER, result_)
       return result_
     }
 
@@ -385,9 +385,9 @@ open class PsiGen2 {
     fun item_expr(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "item_expr")) return false
       var result_: Boolean
-      val marker_: Marker = enter_section_(builder_, level_, _LEFT_, GeneratedTypes.ITEM_EXPR, "<item expr>")
+      val marker_: Marker = enter_section_(builder_, level_, _LEFT_, GeneratedSyntaxElementTypes.ITEM_EXPR, "<item expr>")
       result_ = consumeToken(builder_, "[")
-      result_ = result_ && consumeToken(builder_, GeneratedTypes.NUMBER)
+      result_ = result_ && consumeToken(builder_, GeneratedSyntaxElementTypes.NUMBER)
       result_ = result_ && consumeToken(builder_, "]")
       exit_section_(builder_, level_, marker_, result_, false, null)
       return result_
@@ -397,11 +397,11 @@ open class PsiGen2 {
     // number
     fun literal(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "literal")) return false
-      if (!nextTokenIs(builder_, GeneratedTypes.NUMBER)) return false
+      if (!nextTokenIs(builder_, GeneratedSyntaxElementTypes.NUMBER)) return false
       var result_: Boolean
       val marker_: Marker = enter_section_(builder_)
-      result_ = consumeToken(builder_, GeneratedTypes.NUMBER)
-      exit_section_(builder_, marker_, GeneratedTypes.LITERAL, result_)
+      result_ = consumeToken(builder_, GeneratedSyntaxElementTypes.NUMBER)
+      exit_section_(builder_, marker_, GeneratedSyntaxElementTypes.LITERAL, result_)
       return result_
     }
 
@@ -410,7 +410,7 @@ open class PsiGen2 {
     fun qref_expr(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "qref_expr")) return false
       var result_: Boolean
-      val marker_: Marker = enter_section_(builder_, level_, _LEFT_, GeneratedTypes.REF_EXPR, "<qref expr>")
+      val marker_: Marker = enter_section_(builder_, level_, _LEFT_, GeneratedSyntaxElementTypes.REF_EXPR, "<qref expr>")
       result_ = consumeToken(builder_, ".")
       result_ = result_ && identifier(builder_, level_ + 1)
       exit_section_(builder_, level_, marker_, result_, false, null)
@@ -421,11 +421,11 @@ open class PsiGen2 {
     // identifier
     fun ref_expr(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "ref_expr")) return false
-      if (!nextTokenIs(builder_, GeneratedTypes.ID)) return false
+      if (!nextTokenIs(builder_, GeneratedSyntaxElementTypes.ID)) return false
       var result_: Boolean
       val marker_: Marker = enter_section_(builder_)
       result_ = identifier(builder_, level_ + 1)
-      exit_section_(builder_, marker_, GeneratedTypes.REF_EXPR, result_)
+      exit_section_(builder_, marker_, GeneratedSyntaxElementTypes.REF_EXPR, result_)
       return result_
     }
 
@@ -433,7 +433,7 @@ open class PsiGen2 {
     // ref_expr qref_expr *
     internal fun reference(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "reference")) return false
-      if (!nextTokenIs(builder_, GeneratedTypes.ID)) return false
+      if (!nextTokenIs(builder_, GeneratedSyntaxElementTypes.ID)) return false
       var result_: Boolean
       val marker_: Marker = enter_section_(builder_)
       result_ = ref_expr(builder_, level_ + 1)
@@ -457,9 +457,9 @@ open class PsiGen2 {
     // (a_expr | specialRef b_expr | some_expr_private) (cast_expr) (item_expr) *
     fun some_expr(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "some_expr")) return false
-      if (!nextTokenIs(builder_, "<some expr>", GeneratedTypes.ID, GeneratedTypes.NUMBER)) return false
+      if (!nextTokenIs(builder_, "<some expr>", GeneratedSyntaxElementTypes.ID, GeneratedSyntaxElementTypes.NUMBER)) return false
       var result_: Boolean
-      val marker_: Marker = enter_section_(builder_, level_, _COLLAPSE_, GeneratedTypes.SOME_EXPR, "<some expr>")
+      val marker_: Marker = enter_section_(builder_, level_, _COLLAPSE_, GeneratedSyntaxElementTypes.SOME_EXPR, "<some expr>")
       result_ = some_expr_0(builder_, level_ + 1)
       result_ = result_ && some_expr_1(builder_, level_ + 1)
       result_ = result_ && some_expr_2(builder_, level_ + 1)
@@ -525,7 +525,7 @@ open class PsiGen2 {
     // specialRef b_expr
     internal fun some_expr_private(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "some_expr_private")) return false
-      if (!nextTokenIs(builder_, GeneratedTypes.ID)) return false
+      if (!nextTokenIs(builder_, GeneratedSyntaxElementTypes.ID)) return false
       var result_: Boolean
       val marker_: Marker = enter_section_(builder_)
       result_ = specialRef(builder_, level_ + 1)
@@ -538,13 +538,13 @@ open class PsiGen2 {
     // identifier OF reference
     fun specialRef(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "specialRef")) return false
-      if (!nextTokenIs(builder_, GeneratedTypes.ID)) return false
+      if (!nextTokenIs(builder_, GeneratedSyntaxElementTypes.ID)) return false
       var result_: Boolean
       val marker_: Marker = enter_section_(builder_)
       result_ = identifier(builder_, level_ + 1)
-      result_ = result_ && consumeToken(builder_, GeneratedTypes.OF)
+      result_ = result_ && consumeToken(builder_, GeneratedSyntaxElementTypes.OF)
       result_ = result_ && reference(builder_, level_ + 1)
-      exit_section_(builder_, marker_, GeneratedTypes.SPECIAL_REF, result_)
+      exit_section_(builder_, marker_, GeneratedSyntaxElementTypes.SPECIAL_REF, result_)
       return result_
     }
 
@@ -554,7 +554,7 @@ open class PsiGen2 {
 //header.txt
 import com.intellij.platform.syntax.parser.SyntaxTreeBuilder
 import com.intellij.platform.syntax.parser.SyntaxTreeBuilder.Marker
-import generated.GeneratedTypes
+import generated.GeneratedSyntaxElementTypes
 
 @Suppress("unused", "FunctionName", "JoinDeclarationAndAssignment")
 open class PsiGenFixes {
@@ -565,7 +565,7 @@ open class PsiGenFixes {
     fun LeftShadow(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "LeftShadow")) return false
       var result_: Boolean
-      val marker_: Marker = enter_section_(builder_, level_, _LEFT_, GeneratedTypes.LEFT_SHADOW, "<left shadow>")
+      val marker_: Marker = enter_section_(builder_, level_, _LEFT_, GeneratedSyntaxElementTypes.LEFT_SHADOW, "<left shadow>")
       result_ = consumeToken(builder_, ",")
       result_ = result_ && PsiGen2.identifier(builder_, level_ + 1)
       exit_section_(builder_, level_, marker_, result_, false, null)
@@ -576,12 +576,12 @@ open class PsiGenFixes {
     // identifier LeftShadow *
     fun LeftShadowTest(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "LeftShadowTest")) return false
-      if (!nextTokenIs(builder_, GeneratedTypes.ID)) return false
+      if (!nextTokenIs(builder_, GeneratedSyntaxElementTypes.ID)) return false
       var result_: Boolean
       val marker_: Marker = enter_section_(builder_)
       result_ = PsiGen2.identifier(builder_, level_ + 1)
       result_ = result_ && LeftShadowTest_1(builder_, level_ + 1)
-      exit_section_(builder_, marker_, GeneratedTypes.LEFT_SHADOW_TEST, result_)
+      exit_section_(builder_, marker_, GeneratedSyntaxElementTypes.LEFT_SHADOW_TEST, result_)
       return result_
     }
 
@@ -600,11 +600,11 @@ open class PsiGenFixes {
     // id | number
     fun a_statement(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "a_statement")) return false
-      if (!nextTokenIs(builder_, "<a statement>", GeneratedTypes.ID, GeneratedTypes.NUMBER)) return false
+      if (!nextTokenIs(builder_, "<a statement>", GeneratedSyntaxElementTypes.ID, GeneratedSyntaxElementTypes.NUMBER)) return false
       var result_: Boolean
-      val marker_: Marker = enter_section_(builder_, level_, _NONE_, GeneratedTypes.A_STATEMENT, "<a statement>")
-      result_ = consumeToken(builder_, GeneratedTypes.ID)
-      if (!result_) result_ = consumeToken(builder_, GeneratedTypes.NUMBER)
+      val marker_: Marker = enter_section_(builder_, level_, _NONE_, GeneratedSyntaxElementTypes.A_STATEMENT, "<a statement>")
+      result_ = consumeToken(builder_, GeneratedSyntaxElementTypes.ID)
+      if (!result_) result_ = consumeToken(builder_, GeneratedSyntaxElementTypes.NUMBER)
       exit_section_(builder_, level_, marker_, result_, false, null)
       return result_
     }
@@ -613,11 +613,11 @@ open class PsiGenFixes {
     // id | number
     fun b_statement(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "b_statement")) return false
-      if (!nextTokenIs(builder_, "<b statement>", GeneratedTypes.ID, GeneratedTypes.NUMBER)) return false
+      if (!nextTokenIs(builder_, "<b statement>", GeneratedSyntaxElementTypes.ID, GeneratedSyntaxElementTypes.NUMBER)) return false
       var result_: Boolean
-      val marker_: Marker = enter_section_(builder_, level_, _NONE_, GeneratedTypes.B_STATEMENT, "<b statement>")
-      result_ = consumeToken(builder_, GeneratedTypes.ID)
-      if (!result_) result_ = consumeToken(builder_, GeneratedTypes.NUMBER)
+      val marker_: Marker = enter_section_(builder_, level_, _NONE_, GeneratedSyntaxElementTypes.B_STATEMENT, "<b statement>")
+      result_ = consumeToken(builder_, GeneratedSyntaxElementTypes.ID)
+      if (!result_) result_ = consumeToken(builder_, GeneratedSyntaxElementTypes.NUMBER)
       exit_section_(builder_, level_, marker_, result_, false, null)
       return result_
     }
@@ -626,11 +626,11 @@ open class PsiGenFixes {
     // id | number
     fun c_statement(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "c_statement")) return false
-      if (!nextTokenIs(builder_, "<c statement>", GeneratedTypes.ID, GeneratedTypes.NUMBER)) return false
+      if (!nextTokenIs(builder_, "<c statement>", GeneratedSyntaxElementTypes.ID, GeneratedSyntaxElementTypes.NUMBER)) return false
       var result_: Boolean
-      val marker_: Marker = enter_section_(builder_, level_, _NONE_, GeneratedTypes.C_STATEMENT, "<c statement>")
-      result_ = consumeToken(builder_, GeneratedTypes.ID)
-      if (!result_) result_ = consumeToken(builder_, GeneratedTypes.NUMBER)
+      val marker_: Marker = enter_section_(builder_, level_, _NONE_, GeneratedSyntaxElementTypes.C_STATEMENT, "<c statement>")
+      result_ = consumeToken(builder_, GeneratedSyntaxElementTypes.ID)
+      if (!result_) result_ = consumeToken(builder_, GeneratedSyntaxElementTypes.NUMBER)
       exit_section_(builder_, level_, marker_, result_, false, null)
       return result_
     }
@@ -640,7 +640,7 @@ open class PsiGenFixes {
     fun choice_joined(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "choice_joined")) return false
       var result_: Boolean
-      val marker_: Marker = enter_section_(builder_, level_, _NONE_, GeneratedTypes.CHOICE_JOINED, "<choice joined>")
+      val marker_: Marker = enter_section_(builder_, level_, _NONE_, GeneratedSyntaxElementTypes.CHOICE_JOINED, "<choice joined>")
       result_ = choice_joined_0(builder_, level_ + 1)
       if (!result_) result_ = choice_joined_1(builder_, level_ + 1)
       exit_section_(builder_, level_, marker_, result_, false, null)
@@ -653,7 +653,7 @@ open class PsiGenFixes {
       var result_: Boolean
       val marker_: Marker = enter_section_(builder_)
       result_ = PsiGen2.literal(builder_, level_ + 1)
-      result_ = result_ && consumeToken(builder_, GeneratedTypes.ID)
+      result_ = result_ && consumeToken(builder_, GeneratedSyntaxElementTypes.ID)
       result_ = result_ && consumeToken(builder_, "%")
       exit_section_(builder_, marker_, null, result_)
       return result_
@@ -665,7 +665,7 @@ open class PsiGenFixes {
       var result_: Boolean
       val marker_: Marker = enter_section_(builder_)
       result_ = consumeToken(builder_, "%")
-      result_ = result_ && consumeToken(builder_, GeneratedTypes.ID)
+      result_ = result_ && consumeToken(builder_, GeneratedSyntaxElementTypes.ID)
       result_ = result_ && PsiGen2.literal(builder_, level_ + 1)
       exit_section_(builder_, marker_, null, result_)
       return result_
@@ -681,7 +681,7 @@ open class PsiGenFixes {
     // identifier
     fun publicMethodToCall(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "publicMethodToCall")) return false
-      if (!nextTokenIs(builder_, GeneratedTypes.ID)) return false
+      if (!nextTokenIs(builder_, GeneratedSyntaxElementTypes.ID)) return false
       var result_: Boolean
       val marker_: Marker = enter_section_(builder_)
       result_ = PsiGen2.identifier(builder_, level_ + 1)
@@ -694,7 +694,7 @@ open class PsiGenFixes {
     fun statement(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "statement")) return false
       var result_: Boolean
-      val marker_: Marker = enter_section_(builder_, level_, _COLLAPSE_, GeneratedTypes.STATEMENT, "<statement>")
+      val marker_: Marker = enter_section_(builder_, level_, _COLLAPSE_, GeneratedSyntaxElementTypes.STATEMENT, "<statement>")
       result_ = statement_0(builder_, level_ + 1)
       if (!result_) result_ = statement_1(builder_, level_ + 1)
       exit_section_(builder_, level_, marker_, result_, false, null)

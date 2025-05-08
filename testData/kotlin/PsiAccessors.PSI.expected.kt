@@ -1,10 +1,10 @@
-// ---- GeneratedTypes.kt -----------------
+// ---- generated/GeneratedSyntaxElementTypes.kt -----------------
 //header.txt
 package generated
 
 import com.intellij.platform.syntax.SyntaxElementType
 
-object GeneratedTypes {
+object GeneratedSyntaxElementTypes {
   val BINARY = SyntaxElementType("BINARY")
   val EXPRESSION = SyntaxElementType("EXPRESSION")
   val OPERATOR = SyntaxElementType("OPERATOR")

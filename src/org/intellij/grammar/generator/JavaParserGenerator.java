@@ -755,42 +755,19 @@ public final class JavaParserGenerator extends Generator {
 
     List<Set<String>> extendsSet = buildExtendsSet(myGraphHelper.getRuleExtendsMap());
     boolean generateExtendsSets = !extendsSet.isEmpty();
-    if (G.parserApi == GenOptions.ParserApi.Syntax){
-      out("public %s parse(%s %s, %s %s) {", shortAN, shortET, N.root, shortPB, N.stateHolder);
-      out("parseLight(%s, %s);", N.root, N.stateHolder);
-      String prepareProductionCall = (G.generateFQN) ? SyntaxConstants.PRODUCTION_RESULT_FILE + ".prepareProduction" : "prepareProduction"; 
-      out("return %s(%s.getSyntaxBuilder());", prepareProductionCall, N.stateHolder);
-      out("}");
-      newLine();
-      out("public void parseLight(%s %s, %s %s) {", shortET, N.root, shortPB, N.stateHolder);
-      out("boolean %s;", N.result);
-      String unit = shorten(SyntaxConstants.KOTLIN_UNIT_CLASS);
-      String function2 = format("%s<%s, %s, %s>", shorten(SyntaxConstants.KOTLIN_FUNCTION2_CLASS), shortET, shortPB, unit);
-      out("%s %s = new %s(){", function2, N.parse, function2);
-      out(shorten(OVERRIDE_ANNO));
-      out("public %s invoke(%s %s, %s %s) {", unit, shortET, N.root, shortPB, N.stateHolder);
-      out("parseLight(%s, %s);", N.root, N.stateHolder);
-      out("return %s.INSTANCE;", unit);
-      out("}");
-      out("};");
-      out("");
-      out("%s.init(%s, %s);", N.stateHolder, N.parse, generateExtendsSets ? "EXTENDS_SETS_" : null);
-    }
-    else {
-      out("public %s parse(%s %s, %s %s) {", shortAN, shortET, N.root, shortPB, N.stateHolder);
-      out("parseLight(%s, %s);", N.root, N.stateHolder);
-      out("return %s.getTreeBuilt();", N.stateHolder);
-      out("}");
-      newLine();
-      out("public void parseLight(%s %s, %s %s) {", shortET, N.root, shortPB, N.stateHolder);
-      out("boolean %s;", N.result);
-      out("%s = adapt_builder_(%s, %s, %s, %s);", N.stateHolder, N.root, N.stateHolder, "this", generateExtendsSets ? "EXTENDS_SETS_" : null);
-    }
     String shortET = shorten(JavaBnfConstants.IELEMENTTYPE_CLASS);
     String shortAN = shorten(JavaBnfConstants.AST_NODE_CLASS);
     String shortPB = shorten(JavaBnfConstants.PSI_BUILDER_CLASS);
     String shortTS = shorten(JavaBnfConstants.TOKEN_SET_CLASS);
     String shortMarker = G.generateFQN ? JavaBnfConstants.PSI_BUILDER_CLASS + ".Marker" : "Marker";
+    out("public %s parse(%s %s, %s %s) {", shortAN, shortET, N.root, shortPB, N.builder);
+    out("parseLight(%s, %s);", N.root, N.builder);
+    out("return %s.getTreeBuilt();", N.builder);
+    out("}");
+    newLine();
+    out("public void parseLight(%s %s, %s %s) {", shortET, N.root, shortPB, N.builder);
+    out("boolean %s;", N.result);
+    out("%s = adapt_builder_(%s, %s, %s, %s);", N.builder, N.root, N.builder, "this", generateExtendsSets ? "EXTENDS_SETS_" : null);
 
     out("%s %s = enter_section_(%s, 0, _COLLAPSE_, null);", shortMarker, N.marker, N.stateHolder);
     out("%s = parse_root_(%s, %s);", N.result, N.root, N.stateHolder);

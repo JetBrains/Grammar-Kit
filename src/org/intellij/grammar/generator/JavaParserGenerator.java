@@ -317,19 +317,16 @@ public final class JavaParserGenerator extends Generator {
       calcRealSuperClasses(sortedPsiRules);
     }
     if (myGrammarRoot != null && (G.generateTokenTypes || G.generateElementTypes || G.generatePsi && G.generatePsiFactory)) {
-      if (G.generatePsi)
-      {
-        openOutput(myPsiElementTypeHolderClass);
-        try {
-          generateElementTypesHolder(myPsiElementTypeHolderClass,
-                                     sortedCompositeTypes,
-                                     getRootAttribute(myFile, KnownAttribute.TOKEN_TYPE_FACTORY),
-                                     G.generatePsi
-          );
-        }
-        finally {
-          closeOutput();
-        }
+      openOutput(myPsiElementTypeHolderClass);
+      try {
+        generateElementTypesHolder(myPsiElementTypeHolderClass,
+                                   sortedCompositeTypes,
+                                   getRootAttribute(myFile, KnownAttribute.TOKEN_TYPE_FACTORY),
+                                   G.generatePsi
+        );
+      }
+      finally {
+        closeOutput();
       }
     }
     if (G.generatePsi) {
@@ -337,10 +334,11 @@ public final class JavaParserGenerator extends Generator {
     }
   }
 
-  private void checkClassAvailability(@Nullable String className, @Nullable String description) {
+  private void checkClassAvailability(@Nullable String className) {
     if (StringUtil.isEmpty(className)) return;
     if (myJavaHelper.findClass(className) == null) {
-      String tail = StringUtil.isEmpty(description) ? "" : " (" + description + ")";
+      String tail = StringUtil.isEmpty("PSI method signatures will not be detected") ? "" : " (" +
+                                                                                            "PSI method signatures will not be detected" + ")";
       addWarning(className + " class not found" + tail);
     }
   }
@@ -1421,7 +1419,7 @@ public final class JavaParserGenerator extends Generator {
       BnfRule rule = sortedCompositeTypes.get(elementType);
       RuleInfo ruleInfo = ruleInfo(rule);
       String elementTypeClass = getAttribute(rule, KnownAttribute.ELEMENT_TYPE_CLASS);
-      String elementTypeFactory = (!false) ? getAttribute(rule, KnownAttribute.ELEMENT_TYPE_FACTORY) : null;
+      String elementTypeFactory = getAttribute(rule, KnownAttribute.ELEMENT_TYPE_FACTORY);
       compositeToClassAndFactoryMap.put(elementType, Trinity.create(elementTypeClass, elementTypeFactory, ruleInfo));
       if (elementTypeFactory != null) {
         imports.add(StringUtil.getPackageName(elementTypeFactory));
@@ -1490,7 +1488,7 @@ public final class JavaParserGenerator extends Generator {
         out("%s %s = %s(\"%s\"%s);", shorten(fieldType), tokenType, tokenCreateCall, StringUtil.escapeStringCharacters(tokenString),
             callFix);
       }
-      generateTokenSets(JavaBnfConstants.TOKEN_SET_CLASS);
+      generateTokenSets();
     }
     if (generatePsi && G.generatePsiClassesMap) {
       String shortJC = shorten(CommonClassNames.JAVA_LANG_CLASS);
@@ -1578,7 +1576,7 @@ public final class JavaParserGenerator extends Generator {
            !matchesAny(getRegexpTokenRegexp(tokenText), "a", "1", "_", ".");
   }
 
-  private void generateTokenSets(String tokenSetType) {
+  private void generateTokenSets() {
     if (myTokenSets.isEmpty()) {
       return;
     }
@@ -1586,16 +1584,16 @@ public final class JavaParserGenerator extends Generator {
     out("interface %s {", JavaBnfConstants.TOKEN_SET_HOLDER_NAME);
     Map<String, String> reverseMap = new HashMap<>();
     myTokenSets.forEach((name, tokens) -> {
-      String value = format(shorten(tokenSetType) + ".create(%s)", tokenSetString(tokens));
+      String value = format(shorten(JavaBnfConstants.TOKEN_SET_CLASS) + ".create(%s)", tokenSetString(tokens));
       String alreadyRendered = reverseMap.putIfAbsent(value, name);
-      out("%s %s = %s;", shorten(tokenSetType), name, ObjectUtils.chooseNotNull(alreadyRendered, value));
+      out("%s %s = %s;", shorten(JavaBnfConstants.TOKEN_SET_CLASS), name, ObjectUtils.chooseNotNull(alreadyRendered, value));
     });
     out("}");
   }
 
   /*PSI******************************************************************/
   public void generatePsi(Map<String, BnfRule> sortedPsiRules) throws IOException {
-    checkClassAvailability(myPsiImplUtilClass, "PSI method signatures will not be detected");
+    checkClassAvailability(myPsiImplUtilClass);
     myRulesMethodsHelper.buildMaps(sortedPsiRules.values());
     for (BnfRule rule : sortedPsiRules.values()) {
       RuleInfo info = ruleInfo(rule);

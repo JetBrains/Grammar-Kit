@@ -45,7 +45,7 @@ public class GenOptions {
   public GenOptions(BnfFile myFile) {
     Map<String, String> genOptions = getRootAttribute(myFile, KnownAttribute.GENERATE).asMap();
     parserApi = "syntax".equals(genOptions.get("parser-api")) ? ParserApi.Syntax : ParserApi.Classic;
-    names = Names.forName(genOptions.get("names"), parserApi == ParserApi.Syntax);
+    names = Names.forName(genOptions.get("names"));
     generatePsi = getGenerateOption(myFile, KnownAttribute.GENERATE_PSI, genOptions, "psi");
     generatePsiFactory = !"no".equals(genOptions.get("psi-factory"));
     generatePsiClassesMap = "yes".equals(genOptions.get("psi-classes-map"));

@@ -124,7 +124,7 @@ public final class KotlinParserGenerator extends Generator {
     C = KotlinPlatformConstants.DEFAULT_CONSTANTS;
 
     // TODO: consider creating kotlin specific attributes for this
-    myElementTypesHolderName = getRootAttribute(myFile, KnownAttribute.ELEMENT_TYPE_HOLDER_CLASS);
+    myElementTypesHolderName = getRootAttribute(myFile, KnownAttribute.SYNTAX_ELEMENT_TYPE_HOLDER_CLASS);
 
     mySimpleTokens = new LinkedHashMap<>(RuleGraphHelper.getTokenTextToNameMap(myFile));
     myGraphHelper = RuleGraphHelper.getCached(myFile);

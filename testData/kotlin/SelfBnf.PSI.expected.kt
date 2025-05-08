@@ -1,10 +1,10 @@
-// ---- BnfTypes.kt -----------------
+// ---- org/intellij/grammar/BnfSyntaxTypes.kt -----------------
 // license.txt
-package org.intellij.grammar.psi
+package org.intellij.grammar
 
 import com.intellij.platform.syntax.SyntaxElementType
 
-object BnfTypes {
+object BnfSyntaxTypes {
   val BNF_ATTR = SyntaxElementType("BNF_ATTR")
   val BNF_ATTRS = SyntaxElementType("BNF_ATTRS")
   val BNF_ATTR_PATTERN = SyntaxElementType("BNF_ATTR_PATTERN")

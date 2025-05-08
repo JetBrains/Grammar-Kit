@@ -1,10 +1,10 @@
-// ---- GeneratedTypes.kt -----------------
+// ---- generated/GeneratedSyntaxElementTypes.kt -----------------
 //header.txt
 package generated
 
 import com.intellij.platform.syntax.SyntaxElementType
 
-object GeneratedTypes {
+object GeneratedSyntaxElementTypes {
   val A_STATEMENT = SyntaxElementType("A_STATEMENT")
   val BLOCK_OF = SyntaxElementType("BLOCK_OF")
   val B_STATEMENT = SyntaxElementType("B_STATEMENT")

@@ -2,7 +2,7 @@
 // This is a generated file. Not intended for manual editing.
 import com.intellij.platform.syntax.parser.SyntaxTreeBuilder
 import com.intellij.platform.syntax.parser.SyntaxTreeBuilder.Marker
-import generated.GeneratedTypes
+import generated.GeneratedSyntaxElementTypes
 import com.intellij.platform.syntax.SyntaxElementType
 import com.intellij.platform.syntax.util.SyntaxGeneratedParserRuntimeBase
 
@@ -30,11 +30,11 @@ open class LeftAssociative(protected val runtime_: SyntaxGeneratedParserRuntimeB
     // AS? id
     fun alias_definition(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "alias_definition")) return false
-      if (!nextTokenIs(builder_, "<alias definition>", GeneratedTypes.AS, GeneratedTypes.ID)) return false
+      if (!nextTokenIs(builder_, "<alias definition>", GeneratedSyntaxElementTypes.AS, GeneratedSyntaxElementTypes.ID)) return false
       var result_: Boolean
-      val marker_: Marker = enter_section_(builder_, level_, _LEFT_, GeneratedTypes.ALIAS_DEFINITION, "<alias definition>")
+      val marker_: Marker = enter_section_(builder_, level_, _LEFT_, GeneratedSyntaxElementTypes.ALIAS_DEFINITION, "<alias definition>")
       result_ = alias_definition_0(builder_, level_ + 1)
-      result_ = result_ && consumeToken(builder_, GeneratedTypes.ID)
+      result_ = result_ && consumeToken(builder_, GeneratedSyntaxElementTypes.ID)
       exit_section_(builder_, level_, marker_, result_, false, null)
       return result_
     }
@@ -42,7 +42,7 @@ open class LeftAssociative(protected val runtime_: SyntaxGeneratedParserRuntimeB
     // AS?
     private fun alias_definition_0(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "alias_definition_0")) return false
-      consumeToken(builder_, GeneratedTypes.AS)
+      consumeToken(builder_, GeneratedSyntaxElementTypes.AS)
       return true
     }
 
@@ -50,11 +50,11 @@ open class LeftAssociative(protected val runtime_: SyntaxGeneratedParserRuntimeB
     // AS? id
     fun alias_definition2(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "alias_definition2")) return false
-      if (!nextTokenIs(builder_, "<alias definition 2>", GeneratedTypes.AS, GeneratedTypes.ID)) return false
+      if (!nextTokenIs(builder_, "<alias definition 2>", GeneratedSyntaxElementTypes.AS, GeneratedSyntaxElementTypes.ID)) return false
       var result_: Boolean
-      val marker_: Marker = enter_section_(builder_, level_, _LEFT_, GeneratedTypes.ALIAS_DEFINITION_2, "<alias definition 2>")
+      val marker_: Marker = enter_section_(builder_, level_, _LEFT_, GeneratedSyntaxElementTypes.ALIAS_DEFINITION_2, "<alias definition 2>")
       result_ = alias_definition2_0(builder_, level_ + 1)
-      result_ = result_ && consumeToken(builder_, GeneratedTypes.ID)
+      result_ = result_ && consumeToken(builder_, GeneratedSyntaxElementTypes.ID)
       exit_section_(builder_, level_, marker_, result_, false, null)
       return result_
     }
@@ -62,7 +62,7 @@ open class LeftAssociative(protected val runtime_: SyntaxGeneratedParserRuntimeB
     // AS?
     private fun alias_definition2_0(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "alias_definition2_0")) return false
-      consumeToken(builder_, GeneratedTypes.AS)
+      consumeToken(builder_, GeneratedSyntaxElementTypes.AS)
       return true
     }
 
@@ -70,10 +70,10 @@ open class LeftAssociative(protected val runtime_: SyntaxGeneratedParserRuntimeB
     // reference alias_definition? alias_definition2? leech? leech2?
     internal fun from(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "from")) return false
-      if (!nextTokenIs(builder_, GeneratedTypes.REFERENCE)) return false
+      if (!nextTokenIs(builder_, GeneratedSyntaxElementTypes.REFERENCE)) return false
       var result_: Boolean
       val marker_: Marker = enter_section_(builder_)
-      result_ = consumeToken(builder_, GeneratedTypes.REFERENCE)
+      result_ = consumeToken(builder_, GeneratedSyntaxElementTypes.REFERENCE)
       result_ = result_ && from_1(builder_, level_ + 1)
       result_ = result_ && from_2(builder_, level_ + 1)
       result_ = result_ && from_3(builder_, level_ + 1)
@@ -114,10 +114,10 @@ open class LeftAssociative(protected val runtime_: SyntaxGeneratedParserRuntimeB
     // id
     fun leech(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "leech")) return false
-      if (!nextTokenIs(builder_, GeneratedTypes.ID)) return false
+      if (!nextTokenIs(builder_, GeneratedSyntaxElementTypes.ID)) return false
       var result_: Boolean
-      val marker_: Marker = enter_section_(builder_, level_, _LEFT_INNER_, GeneratedTypes.LEECH, null)
-      result_ = consumeToken(builder_, GeneratedTypes.ID)
+      val marker_: Marker = enter_section_(builder_, level_, _LEFT_INNER_, GeneratedSyntaxElementTypes.LEECH, null)
+      result_ = consumeToken(builder_, GeneratedSyntaxElementTypes.ID)
       exit_section_(builder_, level_, marker_, result_, false, null)
       return result_
     }
@@ -126,10 +126,10 @@ open class LeftAssociative(protected val runtime_: SyntaxGeneratedParserRuntimeB
     // id
     internal fun leech2(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "leech2")) return false
-      if (!nextTokenIs(builder_, GeneratedTypes.ID)) return false
+      if (!nextTokenIs(builder_, GeneratedSyntaxElementTypes.ID)) return false
       var result_: Boolean
       val marker_: Marker = enter_section_(builder_, level_, _LEFT_INNER_)
-      result_ = consumeToken(builder_, GeneratedTypes.ID)
+      result_ = consumeToken(builder_, GeneratedSyntaxElementTypes.ID)
       exit_section_(builder_, level_, marker_, result_, false, null)
       return result_
     }
@@ -139,7 +139,7 @@ open class LeftAssociative(protected val runtime_: SyntaxGeneratedParserRuntimeB
     internal fun leech3(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "leech3")) return false
       val marker_: Marker = enter_section_(builder_, level_, _LEFT_INNER_)
-      consumeToken(builder_, GeneratedTypes.ID)
+      consumeToken(builder_, GeneratedSyntaxElementTypes.ID)
       exit_section_(builder_, level_, marker_, true, false, null)
       return true
     }

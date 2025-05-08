@@ -1,6 +1,6 @@
 // ---- GenOptions.kt -----------------
 // This is a generated file. Not intended for manual editing.
-import generated.GeneratedTypes
+import generated.GeneratedSyntaxElementTypes
 
 @kotlin.Suppress("unused", "FunctionName", "JoinDeclarationAndAssignment")
 open class GenOptions(protected val runtime_: com.intellij.platform.syntax.util.SyntaxGeneratedParserRuntimeBase) {
@@ -23,17 +23,17 @@ open class GenOptions(protected val runtime_: com.intellij.platform.syntax.util.
     }
 
     val EXTENDS_SETS_: kotlin.Array<kotlin.collections.Set<com.intellij.platform.syntax.SyntaxElementType>> = kotlin.arrayOf(
-      create_token_set_(GeneratedTypes.CREATE_STATEMENT, GeneratedTypes.CREATE_TABLE_STATEMENT, GeneratedTypes.DROP_STATEMENT, GeneratedTypes.DROP_TABLE_STATEMENT,
-        GeneratedTypes.STATEMENT),
+      create_token_set_(GeneratedSyntaxElementTypes.CREATE_STATEMENT, GeneratedSyntaxElementTypes.CREATE_TABLE_STATEMENT, GeneratedSyntaxElementTypes.DROP_STATEMENT, GeneratedSyntaxElementTypes.DROP_TABLE_STATEMENT,
+        GeneratedSyntaxElementTypes.STATEMENT),
     )
 
     /* ********************************************************** */
     // create_table_statement
     fun create_statement(builder_: com.intellij.platform.syntax.parser.SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "create_statement")) return false
-      if (!nextTokenIs(builder_, GeneratedTypes.create)) return false
+      if (!nextTokenIs(builder_, GeneratedSyntaxElementTypes.create)) return false
       var result_: Boolean
-      val marker_: com.intellij.platform.syntax.parser.SyntaxTreeBuilder.Marker = enter_section_(builder_, level_, _COLLAPSE_, GeneratedTypes.CREATE_STATEMENT, null)
+      val marker_: com.intellij.platform.syntax.parser.SyntaxTreeBuilder.Marker = enter_section_(builder_, level_, _COLLAPSE_, GeneratedSyntaxElementTypes.CREATE_STATEMENT, null)
       result_ = create_table_statement(builder_, level_ + 1)
       exit_section_(builder_, level_, marker_, result_, false, null)
       return result_
@@ -43,14 +43,14 @@ open class GenOptions(protected val runtime_: com.intellij.platform.syntax.util.
     // CREATE TEMP? (GLOBAL|LOCAL) TABLE table_ref '(' ')'
     fun create_table_statement(builder_: com.intellij.platform.syntax.parser.SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "create_table_statement")) return false
-      if (!nextTokenIs(builder_, GeneratedTypes.create)) return false
+      if (!nextTokenIs(builder_, GeneratedSyntaxElementTypes.create)) return false
       var result_: Boolean
       var pinned_: Boolean
-      val marker_: com.intellij.platform.syntax.parser.SyntaxTreeBuilder.Marker = enter_section_(builder_, level_, _NONE_, GeneratedTypes.CREATE_TABLE_STATEMENT, null)
-      result_ = consumeToken(builder_, GeneratedTypes.create)
+      val marker_: com.intellij.platform.syntax.parser.SyntaxTreeBuilder.Marker = enter_section_(builder_, level_, _NONE_, GeneratedSyntaxElementTypes.CREATE_TABLE_STATEMENT, null)
+      result_ = consumeToken(builder_, GeneratedSyntaxElementTypes.create)
       result_ = result_ && create_table_statement_1(builder_, level_ + 1)
       result_ = result_ && create_table_statement_2(builder_, level_ + 1)
-      result_ = result_ && consumeToken(builder_, GeneratedTypes.table)
+      result_ = result_ && consumeToken(builder_, GeneratedSyntaxElementTypes.table)
       result_ = result_ && table_ref(builder_, level_ + 1)
       pinned_ = result_ // pin = .*_ref
       result_ = result_ && report_error_(builder_, consumeToken(builder_, "("))
@@ -62,7 +62,7 @@ open class GenOptions(protected val runtime_: com.intellij.platform.syntax.util.
     // TEMP?
     private fun create_table_statement_1(builder_: com.intellij.platform.syntax.parser.SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "create_table_statement_1")) return false
-      consumeToken(builder_, GeneratedTypes.temp)
+      consumeToken(builder_, GeneratedSyntaxElementTypes.temp)
       return true
     }
 
@@ -70,8 +70,8 @@ open class GenOptions(protected val runtime_: com.intellij.platform.syntax.util.
     private fun create_table_statement_2(builder_: com.intellij.platform.syntax.parser.SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "create_table_statement_2")) return false
       var result_: Boolean
-      result_ = consumeToken(builder_, GeneratedTypes.global)
-      if (!result_) result_ = consumeToken(builder_, GeneratedTypes.local)
+      result_ = consumeToken(builder_, GeneratedSyntaxElementTypes.global)
+      if (!result_) result_ = consumeToken(builder_, GeneratedSyntaxElementTypes.local)
       return result_
     }
 
@@ -79,9 +79,9 @@ open class GenOptions(protected val runtime_: com.intellij.platform.syntax.util.
     // drop_table_statement
     fun drop_statement(builder_: com.intellij.platform.syntax.parser.SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "drop_statement")) return false
-      if (!nextTokenIs(builder_, GeneratedTypes.drop)) return false
+      if (!nextTokenIs(builder_, GeneratedSyntaxElementTypes.drop)) return false
       var result_: Boolean
-      val marker_: com.intellij.platform.syntax.parser.SyntaxTreeBuilder.Marker = enter_section_(builder_, level_, _COLLAPSE_, GeneratedTypes.DROP_STATEMENT, null)
+      val marker_: com.intellij.platform.syntax.parser.SyntaxTreeBuilder.Marker = enter_section_(builder_, level_, _COLLAPSE_, GeneratedSyntaxElementTypes.DROP_STATEMENT, null)
       result_ = drop_table_statement(builder_, level_ + 1)
       exit_section_(builder_, level_, marker_, result_, false, null)
       return result_
@@ -91,12 +91,12 @@ open class GenOptions(protected val runtime_: com.intellij.platform.syntax.util.
     // DROP TABLE table_ref
     fun drop_table_statement(builder_: com.intellij.platform.syntax.parser.SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "drop_table_statement")) return false
-      if (!nextTokenIs(builder_, GeneratedTypes.drop)) return false
+      if (!nextTokenIs(builder_, GeneratedSyntaxElementTypes.drop)) return false
       var result_: Boolean
       val marker_: com.intellij.platform.syntax.parser.SyntaxTreeBuilder.Marker = enter_section_(builder_)
-      result_ = consumeTokens(builder_, 0, GeneratedTypes.drop, GeneratedTypes.table)
+      result_ = consumeTokens(builder_, 0, GeneratedSyntaxElementTypes.drop, GeneratedSyntaxElementTypes.table)
       result_ = result_ && table_ref(builder_, level_ + 1)
-      exit_section_(builder_, marker_, GeneratedTypes.DROP_TABLE_STATEMENT, result_)
+      exit_section_(builder_, marker_, GeneratedSyntaxElementTypes.DROP_TABLE_STATEMENT, result_)
       return result_
     }
 
@@ -116,9 +116,9 @@ open class GenOptions(protected val runtime_: com.intellij.platform.syntax.util.
     // create_statement | drop_statement
     fun statement(builder_: com.intellij.platform.syntax.parser.SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "statement")) return false
-      if (!nextTokenIs(builder_, "<statement>", GeneratedTypes.create, GeneratedTypes.drop)) return false
+      if (!nextTokenIs(builder_, "<statement>", GeneratedSyntaxElementTypes.create, GeneratedSyntaxElementTypes.drop)) return false
       var result_: Boolean
-      val marker_: com.intellij.platform.syntax.parser.SyntaxTreeBuilder.Marker = enter_section_(builder_, level_, _COLLAPSE_, GeneratedTypes.STATEMENT, "<statement>")
+      val marker_: com.intellij.platform.syntax.parser.SyntaxTreeBuilder.Marker = enter_section_(builder_, level_, _COLLAPSE_, GeneratedSyntaxElementTypes.STATEMENT, "<statement>")
       result_ = create_statement(builder_, level_ + 1)
       if (!result_) result_ = drop_statement(builder_, level_ + 1)
       exit_section_(builder_, level_, marker_, result_, false, null)
@@ -129,11 +129,11 @@ open class GenOptions(protected val runtime_: com.intellij.platform.syntax.util.
     // id
     fun table_ref(builder_: com.intellij.platform.syntax.parser.SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "table_ref")) return false
-      if (!nextTokenIs(builder_, GeneratedTypes.id)) return false
+      if (!nextTokenIs(builder_, GeneratedSyntaxElementTypes.id)) return false
       var result_: Boolean
       val marker_: com.intellij.platform.syntax.parser.SyntaxTreeBuilder.Marker = enter_section_(builder_)
-      result_ = consumeToken(builder_, GeneratedTypes.id)
-      exit_section_(builder_, marker_, GeneratedTypes.TABLE_REF, result_)
+      result_ = consumeToken(builder_, GeneratedSyntaxElementTypes.id)
+      exit_section_(builder_, marker_, GeneratedSyntaxElementTypes.TABLE_REF, result_)
       return result_
     }
 

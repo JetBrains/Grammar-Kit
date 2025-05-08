@@ -1,10 +1,9 @@
-// ---- GrammarParser.kt -----------------
+// ---- org/intellij/grammar/parser/GrammarParser.kt -----------------
 // license.txt
 package org.intellij.grammar.parser
 
 import com.intellij.platform.syntax.parser.SyntaxTreeBuilder
 import com.intellij.platform.syntax.parser.SyntaxTreeBuilder.Marker
-import org.intellij.grammar.psi.BnfTypes
 import com.intellij.platform.syntax.SyntaxElementType
 import com.intellij.platform.syntax.util.SyntaxGeneratedParserRuntimeBase
 
@@ -29,9 +28,9 @@ open class GrammarParser(protected val runtime: SyntaxGeneratedParserRuntimeBase
     }
 
     val EXTENDS_SETS_: Array<Set<SyntaxElementType>> = arrayOf(
-      create_token_set_(BnfTypes.BNF_CHOICE, BnfTypes.BNF_EXPRESSION, BnfTypes.BNF_EXTERNAL_EXPRESSION, BnfTypes.BNF_LITERAL_EXPRESSION,
-        BnfTypes.BNF_PAREN_EXPRESSION, BnfTypes.BNF_PAREN_OPT_EXPRESSION, BnfTypes.BNF_PREDICATE, BnfTypes.BNF_QUANTIFIED,
-        BnfTypes.BNF_REFERENCE_OR_TOKEN, BnfTypes.BNF_SEQUENCE, BnfTypes.BNF_STRING_LITERAL_EXPRESSION, BnfTypes.BNF_VALUE_LIST),
+      create_token_set_(BnfSyntaxTypes.BNF_CHOICE, BnfSyntaxTypes.BNF_EXPRESSION, BnfSyntaxTypes.BNF_EXTERNAL_EXPRESSION, BnfSyntaxTypes.BNF_LITERAL_EXPRESSION,
+        BnfSyntaxTypes.BNF_PAREN_EXPRESSION, BnfSyntaxTypes.BNF_PAREN_OPT_EXPRESSION, BnfSyntaxTypes.BNF_PREDICATE, BnfSyntaxTypes.BNF_QUANTIFIED,
+        BnfSyntaxTypes.BNF_REFERENCE_OR_TOKEN, BnfSyntaxTypes.BNF_SEQUENCE, BnfSyntaxTypes.BNF_STRING_LITERAL_EXPRESSION, BnfSyntaxTypes.BNF_VALUE_LIST),
     )
 
     /* ********************************************************** */
@@ -62,7 +61,7 @@ open class GrammarParser(protected val runtime: SyntaxGeneratedParserRuntimeBase
       if (!recursion_guard_(builder, level, "attr")) return false
       var result: Boolean
       var pinned: Boolean
-      val marker: Marker = enter_section_(builder, level, _NONE_, BnfTypes.BNF_ATTR, "<attr>")
+      val marker: Marker = enter_section_(builder, level, _NONE_, BnfSyntaxTypes.BNF_ATTR, "<attr>")
       result = attr_start(builder, level + 1)
       pinned = result // pin = 1
       result = result && report_error_(builder, attr_value(builder, level + 1))
@@ -74,7 +73,7 @@ open class GrammarParser(protected val runtime: SyntaxGeneratedParserRuntimeBase
     // ';'?
     private fun attr_2(builder: SyntaxTreeBuilder, level: Int): Boolean {
       if (!recursion_guard_(builder, level, "attr_2")) return false
-      consumeToken(builder, BnfTypes.BNF_SEMICOLON)
+      consumeToken(builder, BnfSyntaxTypes.BNF_SEMICOLON)
       return true
     }
 
@@ -82,14 +81,14 @@ open class GrammarParser(protected val runtime: SyntaxGeneratedParserRuntimeBase
     // '(' string_literal_expression ')'
     fun attr_pattern(builder: SyntaxTreeBuilder, level: Int): Boolean {
       if (!recursion_guard_(builder, level, "attr_pattern")) return false
-      if (!nextTokenIs(builder, BnfTypes.BNF_LEFT_PAREN)) return false
+      if (!nextTokenIs(builder, BnfSyntaxTypes.BNF_LEFT_PAREN)) return false
       var result: Boolean
       var pinned: Boolean
-      val marker: Marker = enter_section_(builder, level, _NONE_, BnfTypes.BNF_ATTR_PATTERN, null)
-      result = consumeToken(builder, BnfTypes.BNF_LEFT_PAREN)
+      val marker: Marker = enter_section_(builder, level, _NONE_, BnfSyntaxTypes.BNF_ATTR_PATTERN, null)
+      result = consumeToken(builder, BnfSyntaxTypes.BNF_LEFT_PAREN)
       pinned = result // pin = 1
       result = result && report_error_(builder, string_literal_expression(builder, level + 1))
-      result = pinned && consumeToken(builder, BnfTypes.BNF_RIGHT_PAREN) && result
+      result = pinned && consumeToken(builder, BnfSyntaxTypes.BNF_RIGHT_PAREN) && result
       exit_section_(builder, level, marker, result, pinned, null)
       return result || pinned
     }
@@ -109,7 +108,7 @@ open class GrammarParser(protected val runtime: SyntaxGeneratedParserRuntimeBase
     private fun attr_recover_0(builder: SyntaxTreeBuilder, level: Int): Boolean {
       if (!recursion_guard_(builder, level, "attr_recover_0")) return false
       var result: Boolean
-      result = consumeToken(builder, BnfTypes.BNF_RIGHT_BRACE)
+      result = consumeToken(builder, BnfSyntaxTypes.BNF_RIGHT_BRACE)
       if (!result) result = attr_start(builder, level + 1)
       return result
     }
@@ -118,10 +117,10 @@ open class GrammarParser(protected val runtime: SyntaxGeneratedParserRuntimeBase
     // id (attr_pattern '=' | '=')
     internal fun attr_start(builder: SyntaxTreeBuilder, level: Int): Boolean {
       if (!recursion_guard_(builder, level, "attr_start")) return false
-      if (!nextTokenIs(builder, BnfTypes.BNF_ID)) return false
+      if (!nextTokenIs(builder, BnfSyntaxTypes.BNF_ID)) return false
       var result: Boolean
       val marker: Marker = enter_section_(builder)
-      result = consumeToken(builder, BnfTypes.BNF_ID)
+      result = consumeToken(builder, BnfSyntaxTypes.BNF_ID)
       result = result && attr_start_1(builder, level + 1)
       exit_section_(builder, marker, null, result)
       return result
@@ -133,7 +132,7 @@ open class GrammarParser(protected val runtime: SyntaxGeneratedParserRuntimeBase
       var result: Boolean
       val marker: Marker = enter_section_(builder)
       result = attr_start_1_0(builder, level + 1)
-      if (!result) result = consumeToken(builder, BnfTypes.BNF_OP_EQ)
+      if (!result) result = consumeToken(builder, BnfSyntaxTypes.BNF_OP_EQ)
       exit_section_(builder, marker, null, result)
       return result
     }
@@ -146,7 +145,7 @@ open class GrammarParser(protected val runtime: SyntaxGeneratedParserRuntimeBase
       val marker: Marker = enter_section_(builder, level, _NONE_)
       result = attr_pattern(builder, level + 1)
       pinned = result // pin = attr_pattern
-      result = result && consumeToken(builder, BnfTypes.BNF_OP_EQ)
+      result = result && consumeToken(builder, BnfSyntaxTypes.BNF_OP_EQ)
       exit_section_(builder, level, marker, result, pinned, null)
       return result || pinned
     }
@@ -155,12 +154,12 @@ open class GrammarParser(protected val runtime: SyntaxGeneratedParserRuntimeBase
     // id attr_pattern? '='
     internal fun attr_start_simple(builder: SyntaxTreeBuilder, level: Int): Boolean {
       if (!recursion_guard_(builder, level, "attr_start_simple")) return false
-      if (!nextTokenIs(builder, BnfTypes.BNF_ID)) return false
+      if (!nextTokenIs(builder, BnfSyntaxTypes.BNF_ID)) return false
       var result: Boolean
       val marker: Marker = enter_section_(builder)
-      result = consumeToken(builder, BnfTypes.BNF_ID)
+      result = consumeToken(builder, BnfSyntaxTypes.BNF_ID)
       result = result && attr_start_simple_1(builder, level + 1)
-      result = result && consumeToken(builder, BnfTypes.BNF_OP_EQ)
+      result = result && consumeToken(builder, BnfSyntaxTypes.BNF_OP_EQ)
       exit_section_(builder, marker, null, result)
       return result
     }
@@ -189,7 +188,7 @@ open class GrammarParser(protected val runtime: SyntaxGeneratedParserRuntimeBase
       if (!recursion_guard_(builder, level, "attr_value_1")) return false
       var result: Boolean
       val marker: Marker = enter_section_(builder, level, _NOT_)
-      result = !consumeToken(builder, BnfTypes.BNF_OP_EQ)
+      result = !consumeToken(builder, BnfSyntaxTypes.BNF_OP_EQ)
       exit_section_(builder, level, marker, result, false, null)
       return result
     }
@@ -211,14 +210,14 @@ open class GrammarParser(protected val runtime: SyntaxGeneratedParserRuntimeBase
     // '{' attr * '}'
     fun attrs(builder: SyntaxTreeBuilder, level: Int): Boolean {
       if (!recursion_guard_(builder, level, "attrs")) return false
-      if (!nextTokenIs(builder, BnfTypes.BNF_LEFT_BRACE)) return false
+      if (!nextTokenIs(builder, BnfSyntaxTypes.BNF_LEFT_BRACE)) return false
       var result: Boolean
       var pinned: Boolean
-      val marker: Marker = enter_section_(builder, level, _NONE_, BnfTypes.BNF_ATTRS, null)
-      result = consumeToken(builder, BnfTypes.BNF_LEFT_BRACE)
+      val marker: Marker = enter_section_(builder, level, _NONE_, BnfSyntaxTypes.BNF_ATTRS, null)
+      result = consumeToken(builder, BnfSyntaxTypes.BNF_LEFT_BRACE)
       pinned = result // pin = 1
       result = result && report_error_(builder, attrs_1(builder, level + 1))
-      result = pinned && consumeToken(builder, BnfTypes.BNF_RIGHT_BRACE) && result
+      result = pinned && consumeToken(builder, BnfSyntaxTypes.BNF_RIGHT_BRACE) && result
       exit_section_(builder, level, marker, result, pinned, null)
       return result || pinned
     }
@@ -238,9 +237,9 @@ open class GrammarParser(protected val runtime: SyntaxGeneratedParserRuntimeBase
     // ( '|' sequence ) +
     fun choice(builder: SyntaxTreeBuilder, level: Int): Boolean {
       if (!recursion_guard_(builder, level, "choice")) return false
-      if (!nextTokenIs(builder, BnfTypes.BNF_OP_OR)) return false
+      if (!nextTokenIs(builder, BnfSyntaxTypes.BNF_OP_OR)) return false
       var result: Boolean
-      val marker: Marker = enter_section_(builder, level, _LEFT_, BnfTypes.BNF_CHOICE, null)
+      val marker: Marker = enter_section_(builder, level, _LEFT_, BnfSyntaxTypes.BNF_CHOICE, null)
       result = choice_0(builder, level + 1)
       while (result) {
         val pos: Int = current_position_(builder)
@@ -257,7 +256,7 @@ open class GrammarParser(protected val runtime: SyntaxGeneratedParserRuntimeBase
       var result: Boolean
       var pinned: Boolean
       val marker: Marker = enter_section_(builder, level, _NONE_)
-      result = consumeToken(builder, BnfTypes.BNF_OP_OR)
+      result = consumeToken(builder, BnfSyntaxTypes.BNF_OP_OR)
       pinned = result // pin = 1
       result = result && sequence(builder, level + 1)
       exit_section_(builder, level, marker, result, pinned, null)
@@ -269,7 +268,7 @@ open class GrammarParser(protected val runtime: SyntaxGeneratedParserRuntimeBase
     fun expression(builder: SyntaxTreeBuilder, level: Int): Boolean {
       if (!recursion_guard_(builder, level, "expression")) return false
       var result: Boolean
-      val marker: Marker = enter_section_(builder, level, _COLLAPSE_, BnfTypes.BNF_EXPRESSION, "<expression>")
+      val marker: Marker = enter_section_(builder, level, _COLLAPSE_, BnfSyntaxTypes.BNF_EXPRESSION, "<expression>")
       result = sequence(builder, level + 1)
       result = result && expression_1(builder, level + 1)
       exit_section_(builder, level, marker, result, false, null)
@@ -287,15 +286,15 @@ open class GrammarParser(protected val runtime: SyntaxGeneratedParserRuntimeBase
     // '<<' reference_or_token option * '>>'
     fun external_expression(builder: SyntaxTreeBuilder, level: Int): Boolean {
       if (!recursion_guard_(builder, level, "external_expression")) return false
-      if (!nextTokenIs(builder, BnfTypes.BNF_EXTERNAL_START)) return false
+      if (!nextTokenIs(builder, BnfSyntaxTypes.BNF_EXTERNAL_START)) return false
       var result: Boolean
       var pinned: Boolean
-      val marker: Marker = enter_section_(builder, level, _NONE_, BnfTypes.BNF_EXTERNAL_EXPRESSION, null)
-      result = consumeToken(builder, BnfTypes.BNF_EXTERNAL_START)
+      val marker: Marker = enter_section_(builder, level, _NONE_, BnfSyntaxTypes.BNF_EXTERNAL_EXPRESSION, null)
+      result = consumeToken(builder, BnfSyntaxTypes.BNF_EXTERNAL_START)
       result = result && reference_or_token(builder, level + 1)
       pinned = result // pin = 2
       result = result && report_error_(builder, external_expression_2(builder, level + 1))
-      result = pinned && consumeToken(builder, BnfTypes.BNF_EXTERNAL_END) && result
+      result = pinned && consumeToken(builder, BnfSyntaxTypes.BNF_EXTERNAL_END) && result
       exit_section_(builder, level, marker, result, pinned, null)
       return result || pinned
     }
@@ -359,7 +358,7 @@ open class GrammarParser(protected val runtime: SyntaxGeneratedParserRuntimeBase
     private fun grammar_element_recover_0(builder: SyntaxTreeBuilder, level: Int): Boolean {
       if (!recursion_guard_(builder, level, "grammar_element_recover_0")) return false
       var result: Boolean
-      result = consumeToken(builder, BnfTypes.BNF_LEFT_BRACE)
+      result = consumeToken(builder, BnfSyntaxTypes.BNF_LEFT_BRACE)
       if (!result) result = rule_start(builder, level + 1)
       return result
     }
@@ -369,7 +368,7 @@ open class GrammarParser(protected val runtime: SyntaxGeneratedParserRuntimeBase
     fun list_entry(builder: SyntaxTreeBuilder, level: Int): Boolean {
       if (!recursion_guard_(builder, level, "list_entry")) return false
       var result: Boolean
-      val marker: Marker = enter_section_(builder, level, _NONE_, BnfTypes.BNF_LIST_ENTRY, "<list entry>")
+      val marker: Marker = enter_section_(builder, level, _NONE_, BnfSyntaxTypes.BNF_LIST_ENTRY, "<list entry>")
       result = list_entry_0(builder, level + 1)
       result = result && list_entry_1(builder, level + 1)
       exit_section_(builder, level, marker, result, false, GrammarParser::list_entry_recover)
@@ -392,7 +391,7 @@ open class GrammarParser(protected val runtime: SyntaxGeneratedParserRuntimeBase
       if (!recursion_guard_(builder, level, "list_entry_0_0")) return false
       var result: Boolean
       val marker: Marker = enter_section_(builder)
-      result = consumeToken(builder, BnfTypes.BNF_ID)
+      result = consumeToken(builder, BnfSyntaxTypes.BNF_ID)
       result = result && list_entry_0_0_1(builder, level + 1)
       exit_section_(builder, marker, null, result)
       return result
@@ -408,7 +407,7 @@ open class GrammarParser(protected val runtime: SyntaxGeneratedParserRuntimeBase
     // ';'?
     private fun list_entry_1(builder: SyntaxTreeBuilder, level: Int): Boolean {
       if (!recursion_guard_(builder, level, "list_entry_1")) return false
-      consumeToken(builder, BnfTypes.BNF_SEMICOLON)
+      consumeToken(builder, BnfSyntaxTypes.BNF_SEMICOLON)
       return true
     }
 
@@ -427,10 +426,10 @@ open class GrammarParser(protected val runtime: SyntaxGeneratedParserRuntimeBase
     private fun list_entry_recover_0(builder: SyntaxTreeBuilder, level: Int): Boolean {
       if (!recursion_guard_(builder, level, "list_entry_recover_0")) return false
       var result: Boolean
-      result = consumeToken(builder, BnfTypes.BNF_RIGHT_BRACKET)
-      if (!result) result = consumeToken(builder, BnfTypes.BNF_RIGHT_BRACE)
-      if (!result) result = consumeToken(builder, BnfTypes.BNF_ID)
-      if (!result) result = consumeToken(builder, BnfTypes.BNF_STRING)
+      result = consumeToken(builder, BnfSyntaxTypes.BNF_RIGHT_BRACKET)
+      if (!result) result = consumeToken(builder, BnfSyntaxTypes.BNF_RIGHT_BRACE)
+      if (!result) result = consumeToken(builder, BnfSyntaxTypes.BNF_ID)
+      if (!result) result = consumeToken(builder, BnfSyntaxTypes.BNF_STRING)
       return result
     }
 
@@ -438,11 +437,11 @@ open class GrammarParser(protected val runtime: SyntaxGeneratedParserRuntimeBase
     // '=' string_literal_expression
     internal fun list_entry_tail(builder: SyntaxTreeBuilder, level: Int): Boolean {
       if (!recursion_guard_(builder, level, "list_entry_tail")) return false
-      if (!nextTokenIs(builder, BnfTypes.BNF_OP_EQ)) return false
+      if (!nextTokenIs(builder, BnfSyntaxTypes.BNF_OP_EQ)) return false
       var result: Boolean
       var pinned: Boolean
       val marker: Marker = enter_section_(builder, level, _NONE_)
-      result = consumeToken(builder, BnfTypes.BNF_OP_EQ)
+      result = consumeToken(builder, BnfSyntaxTypes.BNF_OP_EQ)
       pinned = result // pin = 1
       result = result && string_literal_expression(builder, level + 1)
       exit_section_(builder, level, marker, result, pinned, null)
@@ -453,11 +452,11 @@ open class GrammarParser(protected val runtime: SyntaxGeneratedParserRuntimeBase
     // string_literal_expression | number
     fun literal_expression(builder: SyntaxTreeBuilder, level: Int): Boolean {
       if (!recursion_guard_(builder, level, "literal_expression")) return false
-      if (!nextTokenIs(builder, "<literal expression>", BnfTypes.BNF_NUMBER, BnfTypes.BNF_STRING)) return false
+      if (!nextTokenIs(builder, "<literal expression>", BnfSyntaxTypes.BNF_NUMBER, BnfSyntaxTypes.BNF_STRING)) return false
       var result: Boolean
-      val marker: Marker = enter_section_(builder, level, _COLLAPSE_, BnfTypes.BNF_LITERAL_EXPRESSION, "<literal expression>")
+      val marker: Marker = enter_section_(builder, level, _COLLAPSE_, BnfSyntaxTypes.BNF_LITERAL_EXPRESSION, "<literal expression>")
       result = string_literal_expression(builder, level + 1)
-      if (!result) result = consumeToken(builder, BnfTypes.BNF_NUMBER)
+      if (!result) result = consumeToken(builder, BnfSyntaxTypes.BNF_NUMBER)
       exit_section_(builder, level, marker, result, false, null)
       return result
     }
@@ -468,7 +467,7 @@ open class GrammarParser(protected val runtime: SyntaxGeneratedParserRuntimeBase
     fun modifier(builder: SyntaxTreeBuilder, level: Int): Boolean {
       if (!recursion_guard_(builder, level, "modifier")) return false
       var result: Boolean
-      val marker: Marker = enter_section_(builder, level, _NONE_, BnfTypes.BNF_MODIFIER, "<modifier>")
+      val marker: Marker = enter_section_(builder, level, _NONE_, BnfSyntaxTypes.BNF_MODIFIER, "<modifier>")
       result = consumeToken(builder, "private")
       if (!result) result = consumeToken(builder, "external")
       if (!result) result = consumeToken(builder, "meta")
@@ -515,9 +514,9 @@ open class GrammarParser(protected val runtime: SyntaxGeneratedParserRuntimeBase
     // '(' expression ')' | '{' alt_choice_element '}'
     fun paren_expression(builder: SyntaxTreeBuilder, level: Int): Boolean {
       if (!recursion_guard_(builder, level, "paren_expression")) return false
-      if (!nextTokenIs(builder, "<paren expression>", BnfTypes.BNF_LEFT_BRACE, BnfTypes.BNF_LEFT_PAREN)) return false
+      if (!nextTokenIs(builder, "<paren expression>", BnfSyntaxTypes.BNF_LEFT_BRACE, BnfSyntaxTypes.BNF_LEFT_PAREN)) return false
       var result: Boolean
-      val marker: Marker = enter_section_(builder, level, _NONE_, BnfTypes.BNF_PAREN_EXPRESSION, "<paren expression>")
+      val marker: Marker = enter_section_(builder, level, _NONE_, BnfSyntaxTypes.BNF_PAREN_EXPRESSION, "<paren expression>")
       result = paren_expression_0(builder, level + 1)
       if (!result) result = paren_expression_1(builder, level + 1)
       exit_section_(builder, level, marker, result, false, null)
@@ -530,10 +529,10 @@ open class GrammarParser(protected val runtime: SyntaxGeneratedParserRuntimeBase
       var result: Boolean
       var pinned: Boolean
       val marker: Marker = enter_section_(builder, level, _NONE_)
-      result = consumeToken(builder, BnfTypes.BNF_LEFT_PAREN)
+      result = consumeToken(builder, BnfSyntaxTypes.BNF_LEFT_PAREN)
       result = result && expression(builder, level + 1)
       pinned = result // pin = 2
-      result = result && consumeToken(builder, BnfTypes.BNF_RIGHT_PAREN)
+      result = result && consumeToken(builder, BnfSyntaxTypes.BNF_RIGHT_PAREN)
       exit_section_(builder, level, marker, result, pinned, null)
       return result || pinned
     }
@@ -544,10 +543,10 @@ open class GrammarParser(protected val runtime: SyntaxGeneratedParserRuntimeBase
       var result: Boolean
       var pinned: Boolean
       val marker: Marker = enter_section_(builder, level, _NONE_)
-      result = consumeToken(builder, BnfTypes.BNF_LEFT_BRACE)
+      result = consumeToken(builder, BnfSyntaxTypes.BNF_LEFT_BRACE)
       result = result && alt_choice_element(builder, level + 1)
       pinned = result // pin = 2
-      result = result && consumeToken(builder, BnfTypes.BNF_RIGHT_BRACE)
+      result = result && consumeToken(builder, BnfSyntaxTypes.BNF_RIGHT_BRACE)
       exit_section_(builder, level, marker, result, pinned, null)
       return result || pinned
     }
@@ -556,14 +555,14 @@ open class GrammarParser(protected val runtime: SyntaxGeneratedParserRuntimeBase
     // '[' expression ']'
     fun paren_opt_expression(builder: SyntaxTreeBuilder, level: Int): Boolean {
       if (!recursion_guard_(builder, level, "paren_opt_expression")) return false
-      if (!nextTokenIs(builder, BnfTypes.BNF_LEFT_BRACKET)) return false
+      if (!nextTokenIs(builder, BnfSyntaxTypes.BNF_LEFT_BRACKET)) return false
       var result: Boolean
       var pinned: Boolean
-      val marker: Marker = enter_section_(builder, level, _NONE_, BnfTypes.BNF_PAREN_OPT_EXPRESSION, null)
-      result = consumeToken(builder, BnfTypes.BNF_LEFT_BRACKET)
+      val marker: Marker = enter_section_(builder, level, _NONE_, BnfSyntaxTypes.BNF_PAREN_OPT_EXPRESSION, null)
+      result = consumeToken(builder, BnfSyntaxTypes.BNF_LEFT_BRACKET)
       result = result && expression(builder, level + 1)
       pinned = result // pin = 2
-      result = result && consumeToken(builder, BnfTypes.BNF_RIGHT_BRACKET)
+      result = result && consumeToken(builder, BnfSyntaxTypes.BNF_RIGHT_BRACKET)
       exit_section_(builder, level, marker, result, pinned, null)
       return result || pinned
     }
@@ -572,9 +571,9 @@ open class GrammarParser(protected val runtime: SyntaxGeneratedParserRuntimeBase
     // predicate_sign simple
     fun predicate(builder: SyntaxTreeBuilder, level: Int): Boolean {
       if (!recursion_guard_(builder, level, "predicate")) return false
-      if (!nextTokenIs(builder, "<predicate>", BnfTypes.BNF_OP_AND, BnfTypes.BNF_OP_NOT)) return false
+      if (!nextTokenIs(builder, "<predicate>", BnfSyntaxTypes.BNF_OP_AND, BnfSyntaxTypes.BNF_OP_NOT)) return false
       var result: Boolean
-      val marker: Marker = enter_section_(builder, level, _NONE_, BnfTypes.BNF_PREDICATE, "<predicate>")
+      val marker: Marker = enter_section_(builder, level, _NONE_, BnfSyntaxTypes.BNF_PREDICATE, "<predicate>")
       result = predicate_sign(builder, level + 1)
       result = result && simple(builder, level + 1)
       exit_section_(builder, level, marker, result, false, null)
@@ -585,11 +584,11 @@ open class GrammarParser(protected val runtime: SyntaxGeneratedParserRuntimeBase
     // '&' | '!'
     fun predicate_sign(builder: SyntaxTreeBuilder, level: Int): Boolean {
       if (!recursion_guard_(builder, level, "predicate_sign")) return false
-      if (!nextTokenIs(builder, "<predicate sign>", BnfTypes.BNF_OP_AND, BnfTypes.BNF_OP_NOT)) return false
+      if (!nextTokenIs(builder, "<predicate sign>", BnfSyntaxTypes.BNF_OP_AND, BnfSyntaxTypes.BNF_OP_NOT)) return false
       var result: Boolean
-      val marker: Marker = enter_section_(builder, level, _NONE_, BnfTypes.BNF_PREDICATE_SIGN, "<predicate sign>")
-      result = consumeToken(builder, BnfTypes.BNF_OP_AND)
-      if (!result) result = consumeToken(builder, BnfTypes.BNF_OP_NOT)
+      val marker: Marker = enter_section_(builder, level, _NONE_, BnfSyntaxTypes.BNF_PREDICATE_SIGN, "<predicate sign>")
+      result = consumeToken(builder, BnfSyntaxTypes.BNF_OP_AND)
+      if (!result) result = consumeToken(builder, BnfSyntaxTypes.BNF_OP_NOT)
       exit_section_(builder, level, marker, result, false, null)
       return result
     }
@@ -599,7 +598,7 @@ open class GrammarParser(protected val runtime: SyntaxGeneratedParserRuntimeBase
     fun quantified(builder: SyntaxTreeBuilder, level: Int): Boolean {
       if (!recursion_guard_(builder, level, "quantified")) return false
       var result: Boolean
-      val marker: Marker = enter_section_(builder, level, _LEFT_, BnfTypes.BNF_QUANTIFIED, "<quantified>")
+      val marker: Marker = enter_section_(builder, level, _LEFT_, BnfSyntaxTypes.BNF_QUANTIFIED, "<quantified>")
       result = quantifier(builder, level + 1)
       exit_section_(builder, level, marker, result, false, null)
       return result
@@ -610,10 +609,10 @@ open class GrammarParser(protected val runtime: SyntaxGeneratedParserRuntimeBase
     fun quantifier(builder: SyntaxTreeBuilder, level: Int): Boolean {
       if (!recursion_guard_(builder, level, "quantifier")) return false
       var result: Boolean
-      val marker: Marker = enter_section_(builder, level, _NONE_, BnfTypes.BNF_QUANTIFIER, "<quantifier>")
-      result = consumeToken(builder, BnfTypes.BNF_OP_OPT)
-      if (!result) result = consumeToken(builder, BnfTypes.BNF_OP_ONEMORE)
-      if (!result) result = consumeToken(builder, BnfTypes.BNF_OP_ZEROMORE)
+      val marker: Marker = enter_section_(builder, level, _NONE_, BnfSyntaxTypes.BNF_QUANTIFIER, "<quantifier>")
+      result = consumeToken(builder, BnfSyntaxTypes.BNF_OP_OPT)
+      if (!result) result = consumeToken(builder, BnfSyntaxTypes.BNF_OP_ONEMORE)
+      if (!result) result = consumeToken(builder, BnfSyntaxTypes.BNF_OP_ZEROMORE)
       exit_section_(builder, level, marker, result, false, null)
       return result
     }
@@ -622,11 +621,11 @@ open class GrammarParser(protected val runtime: SyntaxGeneratedParserRuntimeBase
     // id
     fun reference_or_token(builder: SyntaxTreeBuilder, level: Int): Boolean {
       if (!recursion_guard_(builder, level, "reference_or_token")) return false
-      if (!nextTokenIs(builder, BnfTypes.BNF_ID)) return false
+      if (!nextTokenIs(builder, BnfSyntaxTypes.BNF_ID)) return false
       var result: Boolean
       val marker: Marker = enter_section_(builder)
-      result = consumeToken(builder, BnfTypes.BNF_ID)
-      exit_section_(builder, marker, BnfTypes.BNF_REFERENCE_OR_TOKEN, result)
+      result = consumeToken(builder, BnfSyntaxTypes.BNF_ID)
+      exit_section_(builder, marker, BnfSyntaxTypes.BNF_REFERENCE_OR_TOKEN, result)
       return result
     }
 
@@ -636,7 +635,7 @@ open class GrammarParser(protected val runtime: SyntaxGeneratedParserRuntimeBase
       if (!recursion_guard_(builder, level, "rule")) return false
       var result: Boolean
       var pinned: Boolean
-      val marker: Marker = enter_section_(builder, level, _NONE_, BnfTypes.BNF_RULE, "<rule>")
+      val marker: Marker = enter_section_(builder, level, _NONE_, BnfSyntaxTypes.BNF_RULE, "<rule>")
       result = rule_start(builder, level + 1)
       result = result && expression(builder, level + 1)
       pinned = result // pin = 2
@@ -656,7 +655,7 @@ open class GrammarParser(protected val runtime: SyntaxGeneratedParserRuntimeBase
     // ';'?
     private fun rule_3(builder: SyntaxTreeBuilder, level: Int): Boolean {
       if (!recursion_guard_(builder, level, "rule_3")) return false
-      consumeToken(builder, BnfTypes.BNF_SEMICOLON)
+      consumeToken(builder, BnfSyntaxTypes.BNF_SEMICOLON)
       return true
     }
 
@@ -667,7 +666,7 @@ open class GrammarParser(protected val runtime: SyntaxGeneratedParserRuntimeBase
       var result: Boolean
       val marker: Marker = enter_section_(builder)
       result = rule_start_0(builder, level + 1)
-      result = result && consumeTokens(builder, 0, BnfTypes.BNF_ID, BnfTypes.BNF_OP_IS)
+      result = result && consumeTokens(builder, 0, BnfSyntaxTypes.BNF_ID, BnfSyntaxTypes.BNF_OP_IS)
       exit_section_(builder, marker, null, result)
       return result
     }
@@ -687,7 +686,7 @@ open class GrammarParser(protected val runtime: SyntaxGeneratedParserRuntimeBase
     // option *
     fun sequence(builder: SyntaxTreeBuilder, level: Int): Boolean {
       if (!recursion_guard_(builder, level, "sequence")) return false
-      val marker: Marker = enter_section_(builder, level, _COLLAPSE_, BnfTypes.BNF_SEQUENCE, "<sequence>")
+      val marker: Marker = enter_section_(builder, level, _COLLAPSE_, BnfSyntaxTypes.BNF_SEQUENCE, "<sequence>")
       while (true) {
         val pos: Int = current_position_(builder)
         if (!option(builder, level + 1)) break
@@ -723,14 +722,14 @@ open class GrammarParser(protected val runtime: SyntaxGeneratedParserRuntimeBase
     private fun sequence_recover_0_0(builder: SyntaxTreeBuilder, level: Int): Boolean {
       if (!recursion_guard_(builder, level, "sequence_recover_0_0")) return false
       var result: Boolean
-      result = consumeToken(builder, BnfTypes.BNF_SEMICOLON)
-      if (!result) result = consumeToken(builder, BnfTypes.BNF_OP_OR)
-      if (!result) result = consumeToken(builder, BnfTypes.BNF_LEFT_PAREN)
-      if (!result) result = consumeToken(builder, BnfTypes.BNF_RIGHT_PAREN)
-      if (!result) result = consumeToken(builder, BnfTypes.BNF_LEFT_BRACKET)
-      if (!result) result = consumeToken(builder, BnfTypes.BNF_RIGHT_BRACKET)
-      if (!result) result = consumeToken(builder, BnfTypes.BNF_LEFT_BRACE)
-      if (!result) result = consumeToken(builder, BnfTypes.BNF_RIGHT_BRACE)
+      result = consumeToken(builder, BnfSyntaxTypes.BNF_SEMICOLON)
+      if (!result) result = consumeToken(builder, BnfSyntaxTypes.BNF_OP_OR)
+      if (!result) result = consumeToken(builder, BnfSyntaxTypes.BNF_LEFT_PAREN)
+      if (!result) result = consumeToken(builder, BnfSyntaxTypes.BNF_RIGHT_PAREN)
+      if (!result) result = consumeToken(builder, BnfSyntaxTypes.BNF_LEFT_BRACKET)
+      if (!result) result = consumeToken(builder, BnfSyntaxTypes.BNF_RIGHT_BRACKET)
+      if (!result) result = consumeToken(builder, BnfSyntaxTypes.BNF_LEFT_BRACE)
+      if (!result) result = consumeToken(builder, BnfSyntaxTypes.BNF_RIGHT_BRACE)
       return result
     }
 
@@ -778,7 +777,7 @@ open class GrammarParser(protected val runtime: SyntaxGeneratedParserRuntimeBase
       var result: Boolean
       val marker: Marker = enter_section_(builder)
       result = simple_0_0_0_0(builder, level + 1)
-      result = result && consumeTokens(builder, 0, BnfTypes.BNF_ID, BnfTypes.BNF_OP_IS)
+      result = result && consumeTokens(builder, 0, BnfSyntaxTypes.BNF_ID, BnfSyntaxTypes.BNF_OP_IS)
       exit_section_(builder, marker, null, result)
       return result
     }
@@ -798,11 +797,11 @@ open class GrammarParser(protected val runtime: SyntaxGeneratedParserRuntimeBase
     // string
     fun string_literal_expression(builder: SyntaxTreeBuilder, level: Int): Boolean {
       if (!recursion_guard_(builder, level, "string_literal_expression")) return false
-      if (!nextTokenIs(builder, BnfTypes.BNF_STRING)) return false
+      if (!nextTokenIs(builder, BnfSyntaxTypes.BNF_STRING)) return false
       var result: Boolean
       val marker: Marker = enter_section_(builder)
-      result = consumeToken(builder, BnfTypes.BNF_STRING)
-      exit_section_(builder, marker, BnfTypes.BNF_STRING_LITERAL_EXPRESSION, result)
+      result = consumeToken(builder, BnfSyntaxTypes.BNF_STRING)
+      exit_section_(builder, marker, BnfSyntaxTypes.BNF_STRING_LITERAL_EXPRESSION, result)
       return result
     }
 
@@ -810,14 +809,14 @@ open class GrammarParser(protected val runtime: SyntaxGeneratedParserRuntimeBase
     // '[' list_entry * ']'
     fun value_list(builder: SyntaxTreeBuilder, level: Int): Boolean {
       if (!recursion_guard_(builder, level, "value_list")) return false
-      if (!nextTokenIs(builder, BnfTypes.BNF_LEFT_BRACKET)) return false
+      if (!nextTokenIs(builder, BnfSyntaxTypes.BNF_LEFT_BRACKET)) return false
       var result: Boolean
       var pinned: Boolean
-      val marker: Marker = enter_section_(builder, level, _NONE_, BnfTypes.BNF_VALUE_LIST, null)
-      result = consumeToken(builder, BnfTypes.BNF_LEFT_BRACKET)
+      val marker: Marker = enter_section_(builder, level, _NONE_, BnfSyntaxTypes.BNF_VALUE_LIST, null)
+      result = consumeToken(builder, BnfSyntaxTypes.BNF_LEFT_BRACKET)
       pinned = result // pin = 1
       result = result && report_error_(builder, value_list_1(builder, level + 1))
-      result = pinned && consumeToken(builder, BnfTypes.BNF_RIGHT_BRACKET) && result
+      result = pinned && consumeToken(builder, BnfSyntaxTypes.BNF_RIGHT_BRACKET) && result
       exit_section_(builder, level, marker, result, pinned, null)
       return result || pinned
     }

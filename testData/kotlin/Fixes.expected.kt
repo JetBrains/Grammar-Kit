@@ -2,7 +2,7 @@
 // This is a generated file. Not intended for manual editing.
 import com.intellij.platform.syntax.parser.SyntaxTreeBuilder
 import com.intellij.platform.syntax.parser.SyntaxTreeBuilder.Marker
-import generated.GeneratedTypes
+import generated.GeneratedSyntaxElementTypes
 import com.intellij.platform.syntax.SyntaxElementType
 import com.intellij.platform.syntax.util.SyntaxGeneratedParserRuntimeBase
 
@@ -27,9 +27,9 @@ open class Fixes(protected val runtime_: SyntaxGeneratedParserRuntimeBase) {
     }
 
     val EXTENDS_SETS_: Array<Set<SyntaxElementType>> = arrayOf(
-      create_token_set_(GeneratedTypes.RECURSIVE_EXTEND_A, GeneratedTypes.RECURSIVE_EXTEND_B),
-      create_token_set_(GeneratedTypes.A_EXPR, GeneratedTypes.B_EXPR, GeneratedTypes.EXPR, GeneratedTypes.LEFT_EXPR,
-        GeneratedTypes.SOME_EXPR),
+      create_token_set_(GeneratedSyntaxElementTypes.RECURSIVE_EXTEND_A, GeneratedSyntaxElementTypes.RECURSIVE_EXTEND_B),
+      create_token_set_(GeneratedSyntaxElementTypes.A_EXPR, GeneratedSyntaxElementTypes.B_EXPR, GeneratedSyntaxElementTypes.EXPR, GeneratedSyntaxElementTypes.LEFT_EXPR,
+        GeneratedSyntaxElementTypes.SOME_EXPR),
     )
 
     /* ********************************************************** */
@@ -67,7 +67,7 @@ open class Fixes(protected val runtime_: SyntaxGeneratedParserRuntimeBase) {
     /* ********************************************************** */
     fun Foo__ﾉ__ω__ﾉ_ﾐ_____inner(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       val marker_: Marker = enter_section_(builder_)
-      exit_section_(builder_, marker_, GeneratedTypes.FOO__ﾉ__Ω__ﾉ_ﾐ_____INNER, true)
+      exit_section_(builder_, marker_, GeneratedSyntaxElementTypes.FOO__ﾉ__Ω__ﾉ_ﾐ_____INNER, true)
       return true
     }
 
@@ -76,7 +76,7 @@ open class Fixes(protected val runtime_: SyntaxGeneratedParserRuntimeBase) {
     fun a_expr(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "a_expr")) return false
       var result_: Boolean
-      val marker_: Marker = enter_section_(builder_, level_, _COLLAPSE_, GeneratedTypes.A_EXPR, "<a expr>")
+      val marker_: Marker = enter_section_(builder_, level_, _COLLAPSE_, GeneratedSyntaxElementTypes.A_EXPR, "<a expr>")
       result_ = orRestriction(builder_, level_ + 1)
       exit_section_(builder_, level_, marker_, result_, false, null)
       return result_
@@ -121,7 +121,7 @@ open class Fixes(protected val runtime_: SyntaxGeneratedParserRuntimeBase) {
     fun b_expr(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "b_expr")) return false
       var result_: Boolean
-      val marker_: Marker = enter_section_(builder_, level_, _COLLAPSE_, GeneratedTypes.B_EXPR, "<b expr>")
+      val marker_: Marker = enter_section_(builder_, level_, _COLLAPSE_, GeneratedSyntaxElementTypes.B_EXPR, "<b expr>")
       result_ = andRestriction(builder_, level_ + 1)
       exit_section_(builder_, level_, marker_, result_, false, null)
       return result_
@@ -133,9 +133,9 @@ open class Fixes(protected val runtime_: SyntaxGeneratedParserRuntimeBase) {
       if (!recursion_guard_(builder_, level_, "erl_list")) return false
       var result_: Boolean
       var pinned_: Boolean
-      val marker_: Marker = enter_section_(builder_, level_, _NONE_, GeneratedTypes.ERL_LIST, "<erl list>")
+      val marker_: Marker = enter_section_(builder_, level_, _NONE_, GeneratedSyntaxElementTypes.ERL_LIST, "<erl list>")
       result_ = expr(builder_, level_ + 1)
-      result_ = result_ && consumeToken(builder_, GeneratedTypes.A)
+      result_ = result_ && consumeToken(builder_, GeneratedSyntaxElementTypes.A)
       pinned_ = result_ // pin = 2
       result_ = result_ && erl_tail(builder_, level_ + 1)
       exit_section_(builder_, level_, marker_, result_, pinned_, null)
@@ -161,7 +161,7 @@ open class Fixes(protected val runtime_: SyntaxGeneratedParserRuntimeBase) {
       var result_: Boolean
       var pinned_: Boolean
       val marker_: Marker = enter_section_(builder_, level_, _NONE_)
-      result_ = consumeToken(builder_, GeneratedTypes.A)
+      result_ = consumeToken(builder_, GeneratedSyntaxElementTypes.A)
       pinned_ = result_ // pin = 1
       result_ = result_ && zome(builder_, level_ + 1)
       exit_section_(builder_, level_, marker_, result_, pinned_, null)
@@ -200,7 +200,7 @@ open class Fixes(protected val runtime_: SyntaxGeneratedParserRuntimeBase) {
       if (!recursion_guard_(builder_, level_, "erl_tail_bad_0")) return false
       var result_: Boolean
       val marker_: Marker = enter_section_(builder_)
-      result_ = consumeToken(builder_, GeneratedTypes.A)
+      result_ = consumeToken(builder_, GeneratedSyntaxElementTypes.A)
       result_ = result_ && erl_tail_bad(builder_, level_ + 1)
       exit_section_(builder_, marker_, null, result_)
       return result_
@@ -211,7 +211,7 @@ open class Fixes(protected val runtime_: SyntaxGeneratedParserRuntimeBase) {
     fun expr(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "expr")) return false
       var result_: Boolean
-      val marker_: Marker = enter_section_(builder_, level_, _COLLAPSE_, GeneratedTypes.EXPR, "<expr>")
+      val marker_: Marker = enter_section_(builder_, level_, _COLLAPSE_, GeneratedSyntaxElementTypes.EXPR, "<expr>")
       result_ = a_expr(builder_, level_ + 1)
       if (!result_) result_ = b_expr(builder_, level_ + 1)
       exit_section_(builder_, level_, marker_, result_, false, null)
@@ -222,11 +222,11 @@ open class Fixes(protected val runtime_: SyntaxGeneratedParserRuntimeBase) {
     // A (some A | A some A)
     fun `import_$`(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "`import_$`")) return false
-      if (!nextTokenIs(builder_, GeneratedTypes.A)) return false
+      if (!nextTokenIs(builder_, GeneratedSyntaxElementTypes.A)) return false
       var result_: Boolean
       var pinned_: Boolean
-      val marker_: Marker = enter_section_(builder_, level_, _NONE_, GeneratedTypes.IMPORT, null)
-      result_ = consumeToken(builder_, GeneratedTypes.A)
+      val marker_: Marker = enter_section_(builder_, level_, _NONE_, GeneratedSyntaxElementTypes.IMPORT, null)
+      result_ = consumeToken(builder_, GeneratedSyntaxElementTypes.A)
       pinned_ = result_ // pin = 1
       result_ = result_ && import_1(builder_, level_ + 1)
       exit_section_(builder_, level_, marker_, result_, pinned_, null)
@@ -250,7 +250,7 @@ open class Fixes(protected val runtime_: SyntaxGeneratedParserRuntimeBase) {
       var result_: Boolean
       val marker_: Marker = enter_section_(builder_)
       result_ = some(builder_, level_ + 1)
-      result_ = result_ && consumeToken(builder_, GeneratedTypes.A)
+      result_ = result_ && consumeToken(builder_, GeneratedSyntaxElementTypes.A)
       exit_section_(builder_, marker_, null, result_)
       return result_
     }
@@ -260,9 +260,9 @@ open class Fixes(protected val runtime_: SyntaxGeneratedParserRuntimeBase) {
       if (!recursion_guard_(builder_, level_, "import_1_1")) return false
       var result_: Boolean
       val marker_: Marker = enter_section_(builder_)
-      result_ = consumeToken(builder_, GeneratedTypes.A)
+      result_ = consumeToken(builder_, GeneratedSyntaxElementTypes.A)
       result_ = result_ && some(builder_, level_ + 1)
-      result_ = result_ && consumeToken(builder_, GeneratedTypes.A)
+      result_ = result_ && consumeToken(builder_, GeneratedSyntaxElementTypes.A)
       exit_section_(builder_, marker_, null, result_)
       return result_
     }
@@ -272,7 +272,7 @@ open class Fixes(protected val runtime_: SyntaxGeneratedParserRuntimeBase) {
     fun left_expr(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "left_expr")) return false
       var result_: Boolean
-      val marker_: Marker = enter_section_(builder_, level_, _LEFT_, GeneratedTypes.LEFT_EXPR, "<left expr>")
+      val marker_: Marker = enter_section_(builder_, level_, _LEFT_, GeneratedSyntaxElementTypes.LEFT_EXPR, "<left expr>")
       result_ = expr(builder_, level_ + 1)
       exit_section_(builder_, level_, marker_, result_, false, null)
       return result_
@@ -385,8 +385,8 @@ open class Fixes(protected val runtime_: SyntaxGeneratedParserRuntimeBase) {
     fun not_optimized_choice(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "not_optimized_choice")) return false
       var result_: Boolean
-      val marker_: Marker = enter_section_(builder_, level_, _NONE_, GeneratedTypes.NOT_OPTIMIZED_CHOICE, "<not optimized choice>")
-      result_ = consumeToken(builder_, GeneratedTypes.A)
+      val marker_: Marker = enter_section_(builder_, level_, _NONE_, GeneratedSyntaxElementTypes.NOT_OPTIMIZED_CHOICE, "<not optimized choice>")
+      result_ = consumeToken(builder_, GeneratedSyntaxElementTypes.A)
       if (!result_) result_ = private_named(builder_, level_ + 1)
       if (!result_) result_ = private_unnamed(builder_, level_ + 1)
       exit_section_(builder_, level_, marker_, result_, false, null)
@@ -398,7 +398,7 @@ open class Fixes(protected val runtime_: SyntaxGeneratedParserRuntimeBase) {
     internal fun optimized_choice(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "optimized_choice")) return false
       var result_: Boolean
-      result_ = consumeToken(builder_, GeneratedTypes.A)
+      result_ = consumeToken(builder_, GeneratedSyntaxElementTypes.A)
       if (!result_) result_ = private_named(builder_, level_ + 1)
       if (!result_) result_ = private_unnamed(builder_, level_ + 1)
       return result_
@@ -408,10 +408,10 @@ open class Fixes(protected val runtime_: SyntaxGeneratedParserRuntimeBase) {
     // token-two | '#'
     internal fun optimized_choice2(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "optimized_choice2")) return false
-      if (!nextTokenIs(builder_, "", GeneratedTypes.TOKEN_THREE, GeneratedTypes.TOKEN_TWO)) return false
+      if (!nextTokenIs(builder_, "", GeneratedSyntaxElementTypes.TOKEN_THREE, GeneratedSyntaxElementTypes.TOKEN_TWO)) return false
       var result_: Boolean
-      result_ = consumeToken(builder_, GeneratedTypes.TOKEN_TWO)
-      if (!result_) result_ = consumeToken(builder_, GeneratedTypes.TOKEN_THREE)
+      result_ = consumeToken(builder_, GeneratedSyntaxElementTypes.TOKEN_TWO)
+      if (!result_) result_ = consumeToken(builder_, GeneratedSyntaxElementTypes.TOKEN_THREE)
       return result_
     }
 
@@ -463,10 +463,10 @@ open class Fixes(protected val runtime_: SyntaxGeneratedParserRuntimeBase) {
     // A | &B A
     internal fun pinned_report(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "pinned_report")) return false
-      if (!nextTokenIs(builder_, "", GeneratedTypes.A, GeneratedTypes.B)) return false
+      if (!nextTokenIs(builder_, "", GeneratedSyntaxElementTypes.A, GeneratedSyntaxElementTypes.B)) return false
       var result_: Boolean
       val marker_: Marker = enter_section_(builder_)
-      result_ = consumeToken(builder_, GeneratedTypes.A)
+      result_ = consumeToken(builder_, GeneratedSyntaxElementTypes.A)
       if (!result_) result_ = pinned_report_1(builder_, level_ + 1)
       exit_section_(builder_, marker_, null, result_)
       return result_
@@ -480,7 +480,7 @@ open class Fixes(protected val runtime_: SyntaxGeneratedParserRuntimeBase) {
       val marker_: Marker = enter_section_(builder_, level_, _NONE_)
       result_ = pinned_report_1_0(builder_, level_ + 1)
       pinned_ = result_ // pin = 1
-      result_ = result_ && consumeToken(builder_, GeneratedTypes.A)
+      result_ = result_ && consumeToken(builder_, GeneratedSyntaxElementTypes.A)
       exit_section_(builder_, level_, marker_, result_, pinned_, null)
       return result_ || pinned_
     }
@@ -490,7 +490,7 @@ open class Fixes(protected val runtime_: SyntaxGeneratedParserRuntimeBase) {
       if (!recursion_guard_(builder_, level_, "pinned_report_1_0")) return false
       var result_: Boolean
       val marker_: Marker = enter_section_(builder_, level_, _AND_)
-      result_ = consumeToken(builder_, GeneratedTypes.B)
+      result_ = consumeToken(builder_, GeneratedSyntaxElementTypes.B)
       exit_section_(builder_, level_, marker_, result_, false, null)
       return result_
     }
@@ -501,7 +501,7 @@ open class Fixes(protected val runtime_: SyntaxGeneratedParserRuntimeBase) {
       if (!recursion_guard_(builder_, level_, "pinned_report_ext")) return false
       var result_: Boolean
       val marker_: Marker = enter_section_(builder_)
-      result_ = consumeToken(builder_, GeneratedTypes.A)
+      result_ = consumeToken(builder_, GeneratedSyntaxElementTypes.A)
       if (!result_) result_ = pinned_report_ext_1(builder_, level_ + 1)
       exit_section_(builder_, marker_, null, result_)
       return result_
@@ -515,7 +515,7 @@ open class Fixes(protected val runtime_: SyntaxGeneratedParserRuntimeBase) {
       val marker_: Marker = enter_section_(builder_, level_, _NONE_)
       result_ = pinned_report_ext_1_0(builder_, level_ + 1)
       pinned_ = result_ // pin = 1
-      result_ = result_ && consumeToken(builder_, GeneratedTypes.A)
+      result_ = result_ && consumeToken(builder_, GeneratedSyntaxElementTypes.A)
       exit_section_(builder_, level_, marker_, result_, pinned_, null)
       return result_ || pinned_
     }
@@ -551,7 +551,7 @@ open class Fixes(protected val runtime_: SyntaxGeneratedParserRuntimeBase) {
     // some [recursive]
     internal fun recursive(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "recursive")) return false
-      if (!nextTokenIs(builder_, GeneratedTypes.A)) return false
+      if (!nextTokenIs(builder_, GeneratedSyntaxElementTypes.A)) return false
       var result_: Boolean
       val marker_: Marker = enter_section_(builder_)
       result_ = some(builder_, level_ + 1)
@@ -570,14 +570,14 @@ open class Fixes(protected val runtime_: SyntaxGeneratedParserRuntimeBase) {
     /* ********************************************************** */
     fun recursive_extendA(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       val marker_: Marker = enter_section_(builder_)
-      exit_section_(builder_, marker_, GeneratedTypes.RECURSIVE_EXTEND_A, true)
+      exit_section_(builder_, marker_, GeneratedSyntaxElementTypes.RECURSIVE_EXTEND_A, true)
       return true
     }
 
     /* ********************************************************** */
     fun recursive_extendB(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       val marker_: Marker = enter_section_(builder_)
-      exit_section_(builder_, marker_, GeneratedTypes.RECURSIVE_EXTEND_B, true)
+      exit_section_(builder_, marker_, GeneratedSyntaxElementTypes.RECURSIVE_EXTEND_B, true)
       return true
     }
 
@@ -641,7 +641,7 @@ open class Fixes(protected val runtime_: SyntaxGeneratedParserRuntimeBase) {
       if (!recursion_guard_(builder_, level_, "singleRestriction_0")) return false
       var result_: Boolean
       val marker_: Marker = enter_section_(builder_)
-      result_ = consumeToken(builder_, GeneratedTypes.A)
+      result_ = consumeToken(builder_, GeneratedSyntaxElementTypes.A)
       result_ = result_ && expr(builder_, level_ + 1)
       exit_section_(builder_, marker_, null, result_)
       return result_
@@ -663,11 +663,11 @@ open class Fixes(protected val runtime_: SyntaxGeneratedParserRuntimeBase) {
     // A
     fun some(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "some")) return false
-      if (!nextTokenIs(builder_, GeneratedTypes.A)) return false
+      if (!nextTokenIs(builder_, GeneratedSyntaxElementTypes.A)) return false
       var result_: Boolean
       val marker_: Marker = enter_section_(builder_)
-      result_ = consumeToken(builder_, GeneratedTypes.A)
-      exit_section_(builder_, marker_, GeneratedTypes.SOME, result_)
+      result_ = consumeToken(builder_, GeneratedSyntaxElementTypes.A)
+      exit_section_(builder_, marker_, GeneratedSyntaxElementTypes.SOME, result_)
       return result_
     }
 
@@ -676,7 +676,7 @@ open class Fixes(protected val runtime_: SyntaxGeneratedParserRuntimeBase) {
     fun some_expr(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "some_expr")) return false
       var result_: Boolean
-      val marker_: Marker = enter_section_(builder_, level_, _COLLAPSE_, GeneratedTypes.SOME_EXPR, "<some expr>")
+      val marker_: Marker = enter_section_(builder_, level_, _COLLAPSE_, GeneratedSyntaxElementTypes.SOME_EXPR, "<some expr>")
       result_ = expr(builder_, level_ + 1)
       result_ = result_ && some_expr_1(builder_, level_ + 1)
       exit_section_(builder_, level_, marker_, result_, false, null)
@@ -698,11 +698,11 @@ open class Fixes(protected val runtime_: SyntaxGeneratedParserRuntimeBase) {
     // <<sequence some>>
     fun some_seq(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "some_seq")) return false
-      if (!nextTokenIs(builder_, GeneratedTypes.A)) return false
+      if (!nextTokenIs(builder_, GeneratedSyntaxElementTypes.A)) return false
       var result_: Boolean
       val marker_: Marker = enter_section_(builder_)
       result_ = sequence(builder_, level_ + 1, Fixes::some)
-      exit_section_(builder_, marker_, GeneratedTypes.SOME_SEQ, result_)
+      exit_section_(builder_, marker_, GeneratedSyntaxElementTypes.SOME_SEQ, result_)
       return result_
     }
 
@@ -742,7 +742,7 @@ open class Fixes(protected val runtime_: SyntaxGeneratedParserRuntimeBase) {
 
     /* ********************************************************** */
     fun two_usages_left(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
-      val marker_: Marker = enter_section_(builder_, level_, _LEFT_, GeneratedTypes.TWO_USAGES_LEFT, null)
+      val marker_: Marker = enter_section_(builder_, level_, _LEFT_, GeneratedSyntaxElementTypes.TWO_USAGES_LEFT, null)
       exit_section_(builder_, level_, marker_, true, false, null)
       return true
     }
@@ -751,11 +751,11 @@ open class Fixes(protected val runtime_: SyntaxGeneratedParserRuntimeBase) {
     // recursive
     fun with_recursive(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "with_recursive")) return false
-      if (!nextTokenIs(builder_, GeneratedTypes.A)) return false
+      if (!nextTokenIs(builder_, GeneratedSyntaxElementTypes.A)) return false
       var result_: Boolean
       val marker_: Marker = enter_section_(builder_)
       result_ = recursive(builder_, level_ + 1)
-      exit_section_(builder_, marker_, GeneratedTypes.WITH_RECURSIVE, result_)
+      exit_section_(builder_, marker_, GeneratedSyntaxElementTypes.WITH_RECURSIVE, result_)
       return result_
     }
 
@@ -763,11 +763,11 @@ open class Fixes(protected val runtime_: SyntaxGeneratedParserRuntimeBase) {
     // token-one | token-two
     fun zome(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "zome")) return false
-      if (!nextTokenIs(builder_, "<zome>", GeneratedTypes.TOKEN_ONE, GeneratedTypes.TOKEN_TWO)) return false
+      if (!nextTokenIs(builder_, "<zome>", GeneratedSyntaxElementTypes.TOKEN_ONE, GeneratedSyntaxElementTypes.TOKEN_TWO)) return false
       var result_: Boolean
-      val marker_: Marker = enter_section_(builder_, level_, _NONE_, GeneratedTypes.ZOME, "<zome>")
-      result_ = consumeToken(builder_, GeneratedTypes.TOKEN_ONE)
-      if (!result_) result_ = consumeToken(builder_, GeneratedTypes.TOKEN_TWO)
+      val marker_: Marker = enter_section_(builder_, level_, _NONE_, GeneratedSyntaxElementTypes.ZOME, "<zome>")
+      result_ = consumeToken(builder_, GeneratedSyntaxElementTypes.TOKEN_ONE)
+      if (!result_) result_ = consumeToken(builder_, GeneratedSyntaxElementTypes.TOKEN_TWO)
       exit_section_(builder_, level_, marker_, result_, false, null)
       return result_
     }

@@ -1,4 +1,4 @@
-// ---- GeneratedParser.kt -----------------
+// ---- generated/GeneratedParser.kt -----------------
 // This is a generated file. Not intended for manual editing.
 package generated
 
@@ -31,7 +31,7 @@ open class GeneratedParser(protected val runtime_: SyntaxGeneratedParserRuntimeB
     // list (';' list ) *
     internal fun `file_$`(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "`file_$`")) return false
-      if (!nextTokenIs(builder_, GeneratedTypes.PAREN1)) return false
+      if (!nextTokenIs(builder_, GeneratedSyntaxElementTypes.PAREN1)) return false
       var result_: Boolean
       var pinned_: Boolean
       val marker_: Marker = enter_section_(builder_, level_, _NONE_)
@@ -59,7 +59,7 @@ open class GeneratedParser(protected val runtime_: SyntaxGeneratedParserRuntimeB
       var result_: Boolean
       var pinned_: Boolean
       val marker_: Marker = enter_section_(builder_, level_, _NONE_)
-      result_ = consumeToken(builder_, GeneratedTypes.SEMI)
+      result_ = consumeToken(builder_, GeneratedSyntaxElementTypes.SEMI)
       pinned_ = result_ // pin = 1
       result_ = result_ && list(builder_, level_ + 1)
       exit_section_(builder_, level_, marker_, result_, pinned_, null)
@@ -71,8 +71,8 @@ open class GeneratedParser(protected val runtime_: SyntaxGeneratedParserRuntimeB
     fun item(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "item")) return false
       var result_: Boolean
-      val marker_: Marker = enter_section_(builder_, level_, _NONE_, GeneratedTypes.ITEM, "<item>")
-      result_ = consumeToken(builder_, GeneratedTypes.NUMBER)
+      val marker_: Marker = enter_section_(builder_, level_, _NONE_, GeneratedSyntaxElementTypes.ITEM, "<item>")
+      result_ = consumeToken(builder_, GeneratedSyntaxElementTypes.NUMBER)
       exit_section_(builder_, level_, marker_, result_, false, item_auto_recover_)
       return result_
     }
@@ -81,14 +81,14 @@ open class GeneratedParser(protected val runtime_: SyntaxGeneratedParserRuntimeB
     // "(" [!")" item (',' item) * ] ")"
     fun list(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "list")) return false
-      if (!nextTokenIs(builder_, GeneratedTypes.PAREN1)) return false
+      if (!nextTokenIs(builder_, GeneratedSyntaxElementTypes.PAREN1)) return false
       var result_: Boolean
       var pinned_: Boolean
-      val marker_: Marker = enter_section_(builder_, level_, _NONE_, GeneratedTypes.LIST, null)
-      result_ = consumeToken(builder_, GeneratedTypes.PAREN1)
+      val marker_: Marker = enter_section_(builder_, level_, _NONE_, GeneratedSyntaxElementTypes.LIST, null)
+      result_ = consumeToken(builder_, GeneratedSyntaxElementTypes.PAREN1)
       pinned_ = result_ // pin = 1
       result_ = result_ && report_error_(builder_, list_1(builder_, level_ + 1))
-      result_ = pinned_ && consumeToken(builder_, GeneratedTypes.PAREN2) && result_
+      result_ = pinned_ && consumeToken(builder_, GeneratedSyntaxElementTypes.PAREN2) && result_
       exit_section_(builder_, level_, marker_, result_, pinned_, null)
       return result_ || pinned_
     }
@@ -119,7 +119,7 @@ open class GeneratedParser(protected val runtime_: SyntaxGeneratedParserRuntimeB
       if (!recursion_guard_(builder_, level_, "list_1_0_0")) return false
       var result_: Boolean
       val marker_: Marker = enter_section_(builder_, level_, _NOT_)
-      result_ = !consumeToken(builder_, GeneratedTypes.PAREN2)
+      result_ = !consumeToken(builder_, GeneratedSyntaxElementTypes.PAREN2)
       exit_section_(builder_, level_, marker_, result_, false, null)
       return result_
     }
@@ -141,13 +141,13 @@ open class GeneratedParser(protected val runtime_: SyntaxGeneratedParserRuntimeB
       var result_: Boolean
       var pinned_: Boolean
       val marker_: Marker = enter_section_(builder_, level_, _NONE_)
-      result_ = consumeToken(builder_, GeneratedTypes.COMMA)
+      result_ = consumeToken(builder_, GeneratedSyntaxElementTypes.COMMA)
       pinned_ = result_ // pin = 1
       result_ = result_ && item(builder_, level_ + 1)
       exit_section_(builder_, level_, marker_, result_, pinned_, null)
       return result_ || pinned_
     }
 
-    internal val item_auto_recover_: Parser = Parser { builder_, level_ -> !nextTokenIsFast(builder_, GeneratedTypes.PAREN2, GeneratedTypes.COMMA, GeneratedTypes.SEMI) }
+    internal val item_auto_recover_: Parser = Parser { builder_, level_ -> !nextTokenIsFast(builder_, GeneratedSyntaxElementTypes.PAREN2, GeneratedSyntaxElementTypes.COMMA, GeneratedSyntaxElementTypes.SEMI) }
   }
 }

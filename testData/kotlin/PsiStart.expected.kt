@@ -1,4 +1,4 @@
-// ---- GeneratedParser.kt -----------------
+// ---- generated/GeneratedParser.kt -----------------
 // This is a generated file. Not intended for manual editing.
 package generated
 
@@ -25,16 +25,16 @@ open class GeneratedParser(protected val runtime_: SyntaxGeneratedParserRuntimeB
   companion object {
     internal fun parse_root_(root_: SyntaxElementType, builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       var result_: Boolean
-      if (root_ == GeneratedTypes.ELEMENT) {
+      if (root_ == GeneratedSyntaxElementTypes.ELEMENT) {
         result_ = element(builder_, level_ + 1)
       }
-      else if (root_ == GeneratedTypes.ENTRY) {
+      else if (root_ == GeneratedSyntaxElementTypes.ENTRY) {
         result_ = entry(builder_, level_ + 1)
       }
-      else if (root_ == GeneratedTypes.LIST) {
+      else if (root_ == GeneratedSyntaxElementTypes.LIST) {
         result_ = list(builder_, level_ + 1)
       }
-      else if (root_ == GeneratedTypes.MAP) {
+      else if (root_ == GeneratedSyntaxElementTypes.MAP) {
         result_ = map(builder_, level_ + 1)
       }
       else {
@@ -48,7 +48,7 @@ open class GeneratedParser(protected val runtime_: SyntaxGeneratedParserRuntimeB
     fun element(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "element")) return false
       var result_: Boolean
-      val marker_: Marker = enter_section_(builder_, level_, _NONE_, GeneratedTypes.ELEMENT, "<element>")
+      val marker_: Marker = enter_section_(builder_, level_, _NONE_, GeneratedSyntaxElementTypes.ELEMENT, "<element>")
       result_ = consumeToken(builder_, "id")
       exit_section_(builder_, level_, marker_, result_, false, null)
       return result_
@@ -59,7 +59,7 @@ open class GeneratedParser(protected val runtime_: SyntaxGeneratedParserRuntimeB
     fun entry(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "entry")) return false
       var result_: Boolean
-      val marker_: Marker = enter_section_(builder_, level_, _NONE_, GeneratedTypes.ENTRY, "<entry>")
+      val marker_: Marker = enter_section_(builder_, level_, _NONE_, GeneratedSyntaxElementTypes.ENTRY, "<entry>")
       result_ = consumeToken(builder_, "name")
       result_ = result_ && consumeToken(builder_, "->")
       result_ = result_ && element(builder_, level_ + 1)
@@ -82,7 +82,7 @@ open class GeneratedParser(protected val runtime_: SyntaxGeneratedParserRuntimeB
     fun list(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "list")) return false
       var result_: Boolean
-      val marker_: Marker = enter_section_(builder_, level_, _NONE_, GeneratedTypes.LIST, "<list>")
+      val marker_: Marker = enter_section_(builder_, level_, _NONE_, GeneratedSyntaxElementTypes.LIST, "<list>")
       result_ = consumeToken(builder_, "(")
       result_ = result_ && element(builder_, level_ + 1)
       result_ = result_ && list_2(builder_, level_ + 1)
@@ -118,7 +118,7 @@ open class GeneratedParser(protected val runtime_: SyntaxGeneratedParserRuntimeB
     fun map(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "map")) return false
       var result_: Boolean
-      val marker_: Marker = enter_section_(builder_, level_, _NONE_, GeneratedTypes.MAP, "<map>")
+      val marker_: Marker = enter_section_(builder_, level_, _NONE_, GeneratedSyntaxElementTypes.MAP, "<map>")
       result_ = consumeToken(builder_, "(")
       result_ = result_ && entry(builder_, level_ + 1)
       result_ = result_ && map_2(builder_, level_ + 1)

@@ -1,10 +1,10 @@
-// ---- GeneratedTypes.kt -----------------
+// ---- generated/GeneratedSyntaxElementTypes.kt -----------------
 // This is a generated file. Not intended for manual editing.
 package generated
 
 import com.intellij.platform.syntax.SyntaxElementType
 
-object GeneratedTypes {
+object GeneratedSyntaxElementTypes {
   val ANOTHER_THREE_TOKENS = SyntaxElementType("ANOTHER_THREE_TOKENS")
   val FAST_CHOICE = SyntaxElementType("FAST_CHOICE")
   val FIVE_TOKENS_CHOICE = SyntaxElementType("FIVE_TOKENS_CHOICE")

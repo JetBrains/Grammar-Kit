@@ -1,10 +1,10 @@
-// ---- GeneratedTypes.kt -----------------
+// ---- generated/GeneratedSyntaxElementTypes.kt -----------------
 // This is a generated file. Not intended for manual editing.
 package generated
 
 import com.intellij.platform.syntax.SyntaxElementType
 
-object GeneratedTypes {
+object GeneratedSyntaxElementTypes {
   val A_EXPR = SyntaxElementType("A_EXPR")
   val B_EXPR = SyntaxElementType("B_EXPR")
   val ERL_LIST = SyntaxElementType("ERL_LIST")

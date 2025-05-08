@@ -2,7 +2,7 @@
 // This is a generated file. Not intended for manual editing.
 import com.intellij.platform.syntax.parser.SyntaxTreeBuilder
 import com.intellij.platform.syntax.parser.SyntaxTreeBuilder.Marker
-import generated.GeneratedTypes
+import generated.GeneratedSyntaxElementTypes
 import com.intellij.platform.syntax.SyntaxElementType
 import com.intellij.platform.syntax.util.SyntaxGeneratedParserRuntimeBase
 
@@ -24,7 +24,7 @@ open class ExternalRules(protected val runtime_: SyntaxGeneratedParserRuntimeBas
   companion object {
     internal fun parse_root_(root_: SyntaxElementType, builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       var result_: Boolean
-      if (root_ == GeneratedTypes.EXTRA_ROOT) {
+      if (root_ == GeneratedSyntaxElementTypes.EXTRA_ROOT) {
         result_ = ExternalRules2.extra_root(builder_, level_ + 1)
       }
       else {
@@ -34,7 +34,7 @@ open class ExternalRules(protected val runtime_: SyntaxGeneratedParserRuntimeBas
     }
 
     val EXTENDS_SETS_: Array<Set<SyntaxElementType>> = arrayOf(
-      create_token_set_(GeneratedTypes.COLLAPSE_ONE, GeneratedTypes.COLLAPSE_TWO),
+      create_token_set_(GeneratedSyntaxElementTypes.COLLAPSE_ONE, GeneratedSyntaxElementTypes.COLLAPSE_TWO),
     )
 
     /* ********************************************************** */
@@ -42,7 +42,7 @@ open class ExternalRules(protected val runtime_: SyntaxGeneratedParserRuntimeBas
     fun collapse_one(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "collapse_one")) return false
       var result_: Boolean
-      val marker_: Marker = enter_section_(builder_, level_, _COLLAPSE_, GeneratedTypes.COLLAPSE_ONE, "<collapse one>")
+      val marker_: Marker = enter_section_(builder_, level_, _COLLAPSE_, GeneratedSyntaxElementTypes.COLLAPSE_ONE, "<collapse one>")
       result_ = uniqueListOf(builder_, level_ + 1, ExternalRules::one)
       exit_section_(builder_, level_, marker_, result_, false, null)
       return result_
@@ -51,7 +51,7 @@ open class ExternalRules(protected val runtime_: SyntaxGeneratedParserRuntimeBas
     /* ********************************************************** */
     fun collapse_two(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       val marker_: Marker = enter_section_(builder_)
-      exit_section_(builder_, marker_, GeneratedTypes.COLLAPSE_TWO, true)
+      exit_section_(builder_, marker_, GeneratedSyntaxElementTypes.COLLAPSE_TWO, true)
       return true
     }
 
@@ -67,7 +67,7 @@ open class ExternalRules(protected val runtime_: SyntaxGeneratedParserRuntimeBas
       val marker_: Marker = enter_section_(builder_)
       result_ = param.parse(builder_, level_)
       result_ = result_ && comma_list_1(builder_, level_ + 1, param)
-      exit_section_(builder_, marker_, GeneratedTypes.COMMA_LIST, result_)
+      exit_section_(builder_, marker_, GeneratedSyntaxElementTypes.COMMA_LIST, result_)
       return result_
     }
 
@@ -87,7 +87,7 @@ open class ExternalRules(protected val runtime_: SyntaxGeneratedParserRuntimeBas
       if (!recursion_guard_(builder_, level_, "comma_list_1_0")) return false
       var result_: Boolean
       val marker_: Marker = enter_section_(builder_)
-      result_ = consumeToken(builder_, GeneratedTypes.COMMA)
+      result_ = consumeToken(builder_, GeneratedSyntaxElementTypes.COMMA)
       result_ = result_ && param.parse(builder_, level_)
       exit_section_(builder_, marker_, null, result_)
       return result_
@@ -106,7 +106,7 @@ open class ExternalRules(protected val runtime_: SyntaxGeneratedParserRuntimeBas
       result_ = head.parse(builder_, level_)
       result_ = result_ && param.parse(builder_, level_)
       result_ = result_ && comma_list_pinned_2(builder_, level_ + 1, param)
-      exit_section_(builder_, marker_, GeneratedTypes.COMMA_LIST_PINNED, result_)
+      exit_section_(builder_, marker_, GeneratedSyntaxElementTypes.COMMA_LIST_PINNED, result_)
       return result_
     }
 
@@ -130,11 +130,11 @@ open class ExternalRules(protected val runtime_: SyntaxGeneratedParserRuntimeBas
     // ',' <<param>>
     fun comma_list_tail(builder_: SyntaxTreeBuilder, level_: Int, param: Parser): Boolean {
       if (!recursion_guard_(builder_, level_, "comma_list_tail")) return false
-      if (!nextTokenIs(builder_, GeneratedTypes.COMMA)) return false
+      if (!nextTokenIs(builder_, GeneratedSyntaxElementTypes.COMMA)) return false
       var result_: Boolean
       var pinned_: Boolean
-      val marker_: Marker = enter_section_(builder_, level_, _NONE_, GeneratedTypes.COMMA_LIST_TAIL, null)
-      result_ = consumeToken(builder_, GeneratedTypes.COMMA)
+      val marker_: Marker = enter_section_(builder_, level_, _NONE_, GeneratedSyntaxElementTypes.COMMA_LIST_TAIL, null)
+      result_ = consumeToken(builder_, GeneratedSyntaxElementTypes.COMMA)
       pinned_ = result_ // pin = 1
       result_ = result_ && param.parse(builder_, level_)
       exit_section_(builder_, level_, marker_, result_, pinned_, null)
@@ -145,15 +145,15 @@ open class ExternalRules(protected val runtime_: SyntaxGeneratedParserRuntimeBas
     // '(' <<param>> (',' <<param>>) * ')'
     internal fun comma_paren_list(builder_: SyntaxTreeBuilder, level_: Int, param: Parser): Boolean {
       if (!recursion_guard_(builder_, level_, "comma_paren_list")) return false
-      if (!nextTokenIs(builder_, GeneratedTypes.PAREN1)) return false
+      if (!nextTokenIs(builder_, GeneratedSyntaxElementTypes.PAREN1)) return false
       var result_: Boolean
       var pinned_: Boolean
       val marker_: Marker = enter_section_(builder_, level_, _NONE_)
-      result_ = consumeToken(builder_, GeneratedTypes.PAREN1)
+      result_ = consumeToken(builder_, GeneratedSyntaxElementTypes.PAREN1)
       pinned_ = result_ // pin = 1
       result_ = result_ && report_error_(builder_, param.parse(builder_, level_))
       result_ = pinned_ && report_error_(builder_, comma_paren_list_2(builder_, level_ + 1, param)) && result_
-      result_ = pinned_ && consumeToken(builder_, GeneratedTypes.PAREN2) && result_
+      result_ = pinned_ && consumeToken(builder_, GeneratedSyntaxElementTypes.PAREN2) && result_
       exit_section_(builder_, level_, marker_, result_, pinned_, null)
       return result_ || pinned_
     }
@@ -174,7 +174,7 @@ open class ExternalRules(protected val runtime_: SyntaxGeneratedParserRuntimeBas
       if (!recursion_guard_(builder_, level_, "comma_paren_list_2_0")) return false
       var result_: Boolean
       val marker_: Marker = enter_section_(builder_)
-      result_ = consumeToken(builder_, GeneratedTypes.COMMA)
+      result_ = consumeToken(builder_, GeneratedSyntaxElementTypes.COMMA)
       result_ = result_ && param.parse(builder_, level_)
       exit_section_(builder_, marker_, null, result_)
       return result_
@@ -207,9 +207,9 @@ open class ExternalRules(protected val runtime_: SyntaxGeneratedParserRuntimeBas
     private fun item_recover_0(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "item_recover_0")) return false
       var result_: Boolean
-      result_ = consumeToken(builder_, GeneratedTypes.COMMA)
+      result_ = consumeToken(builder_, GeneratedSyntaxElementTypes.COMMA)
       if (!result_) result_ = consumeToken(builder_, ";")
-      if (!result_) result_ = consumeToken(builder_, GeneratedTypes.PAREN2)
+      if (!result_) result_ = consumeToken(builder_, GeneratedSyntaxElementTypes.PAREN2)
       return result_
     }
 
@@ -222,7 +222,7 @@ open class ExternalRules(protected val runtime_: SyntaxGeneratedParserRuntimeBas
       result_ = head.parse(builder_, level_)
       result_ = result_ && comma_list(builder_, level_ + 1, param)
       result_ = result_ && list_of_lists_2(builder_, level_ + 1, param)
-      exit_section_(builder_, marker_, GeneratedTypes.LIST_OF_LISTS, result_)
+      exit_section_(builder_, marker_, GeneratedSyntaxElementTypes.LIST_OF_LISTS, result_)
       return result_
     }
 
@@ -288,7 +288,7 @@ open class ExternalRules(protected val runtime_: SyntaxGeneratedParserRuntimeBas
       var result_: Boolean
       val marker_: Marker = enter_section_(builder_)
       result_ = comma_list(builder_, level_ + 1, `comma_list_$`(`comma_list_$`(`comma_list_$`(`comma_list_$`(param)))))
-      exit_section_(builder_, marker_, GeneratedTypes.META_MULTI_LEVEL, result_)
+      exit_section_(builder_, marker_, GeneratedSyntaxElementTypes.META_MULTI_LEVEL, result_)
       return result_
     }
 
@@ -305,7 +305,7 @@ open class ExternalRules(protected val runtime_: SyntaxGeneratedParserRuntimeBas
       var result_: Boolean
       val marker_: Marker = enter_section_(builder_)
       result_ = comma_list(builder_, level_ + 1, `comma_list_pinned_$`(head, `comma_list_$`(`comma_list_$`(`comma_list_$`(param)))))
-      exit_section_(builder_, marker_, GeneratedTypes.META_MULTI_LEVEL_PINNED, result_)
+      exit_section_(builder_, marker_, GeneratedSyntaxElementTypes.META_MULTI_LEVEL_PINNED, result_)
       return result_
     }
 
@@ -316,7 +316,7 @@ open class ExternalRules(protected val runtime_: SyntaxGeneratedParserRuntimeBas
       var result_: Boolean
       val marker_: Marker = enter_section_(builder_)
       result_ = comma_list(builder_, level_ + 1, `comma_list_pinned_$`(head, `meta_multi_level_pinned_paren_0_0_1_$`(param)))
-      exit_section_(builder_, marker_, GeneratedTypes.META_MULTI_LEVEL_PINNED_PAREN, result_)
+      exit_section_(builder_, marker_, GeneratedSyntaxElementTypes.META_MULTI_LEVEL_PINNED_PAREN, result_)
       return result_
     }
 
@@ -394,7 +394,7 @@ open class ExternalRules(protected val runtime_: SyntaxGeneratedParserRuntimeBas
       var result_: Boolean
       val marker_: Marker = enter_section_(builder_)
       result_ = comma_list(builder_, level_ + 1, `meta_with_in_place_0_0_$`(param))
-      exit_section_(builder_, marker_, GeneratedTypes.META_WITH_IN_PLACE, result_)
+      exit_section_(builder_, marker_, GeneratedSyntaxElementTypes.META_WITH_IN_PLACE, result_)
       return result_
     }
 
@@ -408,7 +408,7 @@ open class ExternalRules(protected val runtime_: SyntaxGeneratedParserRuntimeBas
       var result_: Boolean
       val marker_: Marker = enter_section_(builder_)
       result_ = param.parse(builder_, level_)
-      if (!result_) result_ = consumeToken(builder_, GeneratedTypes.SOME)
+      if (!result_) result_ = consumeToken(builder_, GeneratedSyntaxElementTypes.SOME)
       exit_section_(builder_, marker_, null, result_)
       return result_
     }
@@ -445,7 +445,7 @@ open class ExternalRules(protected val runtime_: SyntaxGeneratedParserRuntimeBas
     fun one(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "one")) return false
       var result_: Boolean
-      val marker_: Marker = enter_section_(builder_, level_, _NONE_, GeneratedTypes.ONE, "<one>")
+      val marker_: Marker = enter_section_(builder_, level_, _NONE_, GeneratedSyntaxElementTypes.ONE, "<one>")
       result_ = consumeToken(builder_, "one")
       exit_section_(builder_, level_, marker_, result_, false, null)
       return result_
@@ -472,7 +472,7 @@ open class ExternalRules(protected val runtime_: SyntaxGeneratedParserRuntimeBas
       result_ = one(builder_, level_ + 1)
       if (!result_) result_ = two(builder_, level_ + 1)
       if (!result_) result_ = consumeToken(builder_, "10")
-      if (!result_) result_ = consumeToken(builder_, GeneratedTypes.SOME)
+      if (!result_) result_ = consumeToken(builder_, GeneratedSyntaxElementTypes.SOME)
       exit_section_(builder_, marker_, null, result_)
       return result_
     }
@@ -498,7 +498,7 @@ open class ExternalRules(protected val runtime_: SyntaxGeneratedParserRuntimeBas
       result_ = one(builder_, level_ + 1)
       if (!result_) result_ = two(builder_, level_ + 1)
       if (!result_) result_ = consumeToken(builder_, "10")
-      if (!result_) result_ = consumeToken(builder_, GeneratedTypes.SOME)
+      if (!result_) result_ = consumeToken(builder_, GeneratedSyntaxElementTypes.SOME)
       exit_section_(builder_, marker_, null, result_)
       return result_
     }
@@ -531,7 +531,7 @@ open class ExternalRules(protected val runtime_: SyntaxGeneratedParserRuntimeBas
       result_ = one(builder_, level_ + 1)
       if (!result_) result_ = two(builder_, level_ + 1)
       if (!result_) result_ = consumeToken(builder_, "10")
-      if (!result_) result_ = consumeToken(builder_, GeneratedTypes.SOME)
+      if (!result_) result_ = consumeToken(builder_, GeneratedSyntaxElementTypes.SOME)
       exit_section_(builder_, marker_, null, result_)
       return result_
     }
@@ -584,7 +584,7 @@ open class ExternalRules(protected val runtime_: SyntaxGeneratedParserRuntimeBas
       var result_: Boolean
       val marker_: Marker = enter_section_(builder_)
       result_ = consumeToken(builder_, "10")
-      if (!result_) result_ = consumeToken(builder_, GeneratedTypes.SOME)
+      if (!result_) result_ = consumeToken(builder_, GeneratedSyntaxElementTypes.SOME)
       exit_section_(builder_, marker_, null, result_)
       return result_
     }
@@ -647,11 +647,11 @@ open class ExternalRules(protected val runtime_: SyntaxGeneratedParserRuntimeBas
     // <<comma_paren_list (ref | '(' one ')')>>
     fun public_paren_list(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "public_paren_list")) return false
-      if (!nextTokenIs(builder_, GeneratedTypes.PAREN1)) return false
+      if (!nextTokenIs(builder_, GeneratedSyntaxElementTypes.PAREN1)) return false
       var result_: Boolean
       val marker_: Marker = enter_section_(builder_)
       result_ = comma_paren_list(builder_, level_ + 1, ExternalRules::public_paren_list_0_0)
-      exit_section_(builder_, marker_, GeneratedTypes.PUBLIC_PAREN_LIST, result_)
+      exit_section_(builder_, marker_, GeneratedSyntaxElementTypes.PUBLIC_PAREN_LIST, result_)
       return result_
     }
 
@@ -671,9 +671,9 @@ open class ExternalRules(protected val runtime_: SyntaxGeneratedParserRuntimeBas
       if (!recursion_guard_(builder_, level_, "public_paren_list_0_0_1")) return false
       var result_: Boolean
       val marker_: Marker = enter_section_(builder_)
-      result_ = consumeToken(builder_, GeneratedTypes.PAREN1)
+      result_ = consumeToken(builder_, GeneratedSyntaxElementTypes.PAREN1)
       result_ = result_ && one(builder_, level_ + 1)
-      result_ = result_ && consumeToken(builder_, GeneratedTypes.PAREN2)
+      result_ = result_ && consumeToken(builder_, GeneratedSyntaxElementTypes.PAREN2)
       exit_section_(builder_, marker_, null, result_)
       return result_
     }
@@ -681,7 +681,7 @@ open class ExternalRules(protected val runtime_: SyntaxGeneratedParserRuntimeBas
     /* ********************************************************** */
     fun public_paren_list2(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       val marker_: Marker = enter_section_(builder_)
-      exit_section_(builder_, marker_, GeneratedTypes.PUBLIC_PAREN_LIST, true)
+      exit_section_(builder_, marker_, GeneratedSyntaxElementTypes.PUBLIC_PAREN_LIST, true)
       return true
     }
 
@@ -738,7 +738,7 @@ open class ExternalRules(protected val runtime_: SyntaxGeneratedParserRuntimeBas
     fun statement(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "statement")) return false
       var result_: Boolean
-      val marker_: Marker = enter_section_(builder_, level_, _NONE_, GeneratedTypes.STATEMENT, "<statement>")
+      val marker_: Marker = enter_section_(builder_, level_, _NONE_, GeneratedSyntaxElementTypes.STATEMENT, "<statement>")
       result_ = one(builder_, level_ + 1)
       if (!result_) result_ = two(builder_, level_ + 1)
       exit_section_(builder_, level_, marker_, result_, false, null)
@@ -750,7 +750,7 @@ open class ExternalRules(protected val runtime_: SyntaxGeneratedParserRuntimeBas
     fun two(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "two")) return false
       var result_: Boolean
-      val marker_: Marker = enter_section_(builder_, level_, _NONE_, GeneratedTypes.TWO, "<two>")
+      val marker_: Marker = enter_section_(builder_, level_, _NONE_, GeneratedSyntaxElementTypes.TWO, "<two>")
       result_ = consumeToken(builder_, "two")
       exit_section_(builder_, level_, marker_, result_, false, null)
       return result_
@@ -768,13 +768,13 @@ open class ExternalRules(protected val runtime_: SyntaxGeneratedParserRuntimeBas
       val marker_: Marker = enter_section_(builder_)
       result_ = a.parse(builder_, level_)
       result_ = result_ && b.parse(builder_, level_)
-      exit_section_(builder_, marker_, GeneratedTypes.TWO_PARAMS_META, result_)
+      exit_section_(builder_, marker_, GeneratedSyntaxElementTypes.TWO_PARAMS_META, result_)
       return result_
     }
 
-    internal val PERC_RE_parser_: Parser = Parser { builder_, level_ -> consumeToken(builder_, GeneratedTypes.PERC_RE) }
-    internal val SOME_parser_: Parser = Parser { builder_, level_ -> consumeToken(builder_, GeneratedTypes.SOME) }
-    internal val perc_parser_: Parser = Parser { builder_, level_ -> consumeToken(builder_, GeneratedTypes.PERC) }
+    internal val PERC_RE_parser_: Parser = Parser { builder_, level_ -> consumeToken(builder_, GeneratedSyntaxElementTypes.PERC_RE) }
+    internal val SOME_parser_: Parser = Parser { builder_, level_ -> consumeToken(builder_, GeneratedSyntaxElementTypes.SOME) }
+    internal val perc_parser_: Parser = Parser { builder_, level_ -> consumeToken(builder_, GeneratedSyntaxElementTypes.PERC) }
     internal val perc_re_list2_0_0_parser_: Parser = PERC_RE_parser_
 
     private val meta_mixed_list_0_0_parser_: Parser = `comma_list_$`(ExternalRules::one)
@@ -787,7 +787,7 @@ open class ExternalRules(protected val runtime_: SyntaxGeneratedParserRuntimeBas
 // This is a generated file. Not intended for manual editing.
 import com.intellij.platform.syntax.parser.SyntaxTreeBuilder
 import com.intellij.platform.syntax.parser.SyntaxTreeBuilder.Marker
-import generated.GeneratedTypes
+import generated.GeneratedSyntaxElementTypes
 
 @Suppress("unused", "FunctionName", "JoinDeclarationAndAssignment")
 open class ExternalRules2 {
@@ -796,7 +796,7 @@ open class ExternalRules2 {
     /* ********************************************************** */
     fun extra_root(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       val marker_: Marker = enter_section_(builder_)
-      exit_section_(builder_, marker_, GeneratedTypes.EXTRA_ROOT, true)
+      exit_section_(builder_, marker_, GeneratedSyntaxElementTypes.EXTRA_ROOT, true)
       return true
     }
 
@@ -852,7 +852,7 @@ open class ExternalRules2 {
 // This is a generated file. Not intended for manual editing.
 import com.intellij.platform.syntax.parser.SyntaxTreeBuilder
 import com.intellij.platform.syntax.parser.SyntaxTreeBuilder.Marker
-import generated.GeneratedTypes
+import generated.GeneratedSyntaxElementTypes
 
 @Suppress("unused", "FunctionName", "JoinDeclarationAndAssignment")
 open class ExternalRules3 {

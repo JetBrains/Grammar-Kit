@@ -1,4 +1,4 @@
-// ---- FooParser.kt -----------------
+// ---- test/FooParser.kt -----------------
 //header.txt
 package test
 
@@ -28,7 +28,7 @@ open class FooParser(protected val runtime_: SyntaxGeneratedParserRuntimeBase) {
     }
 
     val EXTENDS_SETS_: Array<Set<SyntaxElementType>> = arrayOf(
-      create_token_set_(FooTypes.INTERFACE_TYPE, FooTypes.STRUCT_TYPE, FooTypes.TYPE),
+      create_token_set_(FooSyntaxTypes.INTERFACE_TYPE, FooSyntaxTypes.STRUCT_TYPE, FooSyntaxTypes.TYPE),
     )
 
     /* ********************************************************** */
@@ -36,7 +36,7 @@ open class FooParser(protected val runtime_: SyntaxGeneratedParserRuntimeBase) {
     fun element1(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "element1")) return false
       var result_: Boolean
-      val marker_: Marker = enter_section_(builder_, level_, _NONE_, FooTypes.ELEMENT_1, "<element 1>")
+      val marker_: Marker = enter_section_(builder_, level_, _NONE_, FooSyntaxTypes.ELEMENT_1, "<element 1>")
       result_ = consumeToken(builder_, "aa")
       result_ = result_ && element5(builder_, level_ + 1)
       exit_section_(builder_, level_, marker_, result_, false, null)
@@ -48,7 +48,7 @@ open class FooParser(protected val runtime_: SyntaxGeneratedParserRuntimeBase) {
     fun element2(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "element2")) return false
       var result_: Boolean
-      val marker_: Marker = enter_section_(builder_, level_, _NONE_, FooTypes.ELEMENT_2, "<element 2>")
+      val marker_: Marker = enter_section_(builder_, level_, _NONE_, FooSyntaxTypes.ELEMENT_2, "<element 2>")
       result_ = consumeToken(builder_, "bb")
       result_ = result_ && element2_1(builder_, level_ + 1)
       exit_section_(builder_, level_, marker_, result_, false, null)
@@ -71,7 +71,7 @@ open class FooParser(protected val runtime_: SyntaxGeneratedParserRuntimeBase) {
     fun element3(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "element3")) return false
       var result_: Boolean
-      val marker_: Marker = enter_section_(builder_, level_, _NONE_, FooTypes.ELEMENT_3, "<element 3>")
+      val marker_: Marker = enter_section_(builder_, level_, _NONE_, FooSyntaxTypes.ELEMENT_3, "<element 3>")
       result_ = consumeToken(builder_, "bb")
       result_ = result_ && element4(builder_, level_ + 1)
       exit_section_(builder_, level_, marker_, result_, false, null)
@@ -83,7 +83,7 @@ open class FooParser(protected val runtime_: SyntaxGeneratedParserRuntimeBase) {
     fun element4(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "element4")) return false
       var result_: Boolean
-      val marker_: Marker = enter_section_(builder_, level_, _NONE_, FooTypes.ELEMENT_4, "<element 4>")
+      val marker_: Marker = enter_section_(builder_, level_, _NONE_, FooSyntaxTypes.ELEMENT_4, "<element 4>")
       result_ = consumeToken(builder_, "bb")
       if (!result_) result_ = element2(builder_, level_ + 1)
       exit_section_(builder_, level_, marker_, result_, false, null)
@@ -95,7 +95,7 @@ open class FooParser(protected val runtime_: SyntaxGeneratedParserRuntimeBase) {
     fun element5(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "element5")) return false
       var result_: Boolean
-      val marker_: Marker = enter_section_(builder_, level_, _NONE_, FooTypes.ELEMENT_5, "<element 5>")
+      val marker_: Marker = enter_section_(builder_, level_, _NONE_, FooSyntaxTypes.ELEMENT_5, "<element 5>")
       result_ = consumeToken(builder_, "cc")
       exit_section_(builder_, level_, marker_, result_, false, null)
       return result_
@@ -106,7 +106,7 @@ open class FooParser(protected val runtime_: SyntaxGeneratedParserRuntimeBase) {
     fun interface_type(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "interface_type")) return false
       var result_: Boolean
-      val marker_: Marker = enter_section_(builder_, level_, _NONE_, FooTypes.INTERFACE_TYPE, "<interface type>")
+      val marker_: Marker = enter_section_(builder_, level_, _NONE_, FooSyntaxTypes.INTERFACE_TYPE, "<interface type>")
       result_ = consumeToken(builder_, "interface")
       exit_section_(builder_, level_, marker_, result_, false, null)
       return result_
@@ -131,7 +131,7 @@ open class FooParser(protected val runtime_: SyntaxGeneratedParserRuntimeBase) {
     fun struct_type(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "struct_type")) return false
       var result_: Boolean
-      val marker_: Marker = enter_section_(builder_, level_, _NONE_, FooTypes.STRUCT_TYPE, "<struct type>")
+      val marker_: Marker = enter_section_(builder_, level_, _NONE_, FooSyntaxTypes.STRUCT_TYPE, "<struct type>")
       result_ = consumeToken(builder_, "struct")
       exit_section_(builder_, level_, marker_, result_, false, null)
       return result_
@@ -142,7 +142,7 @@ open class FooParser(protected val runtime_: SyntaxGeneratedParserRuntimeBase) {
     fun type(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "type")) return false
       var result_: Boolean
-      val marker_: Marker = enter_section_(builder_, level_, _COLLAPSE_, FooTypes.TYPE, "<type>")
+      val marker_: Marker = enter_section_(builder_, level_, _COLLAPSE_, FooSyntaxTypes.TYPE, "<type>")
       result_ = interface_type(builder_, level_ + 1)
       if (!result_) result_ = struct_type(builder_, level_ + 1)
       exit_section_(builder_, level_, marker_, result_, false, null)

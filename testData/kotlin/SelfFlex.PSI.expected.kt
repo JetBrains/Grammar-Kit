@@ -1,6 +1,6 @@
-// ---- JFlexTypes.kt -----------------
+// ---- org/intellij/jflex/JFlexTypes.kt -----------------
 // license.txt
-package org.intellij.jflex.psi
+package org.intellij.jflex
 
 import com.intellij.platform.syntax.SyntaxElementType
 

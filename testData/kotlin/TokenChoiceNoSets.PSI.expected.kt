@@ -1,10 +1,10 @@
-// ---- GeneratedTypes.kt -----------------
+// ---- generated/GeneratedSyntaxElementTypes.kt -----------------
 // This is a generated file. Not intended for manual editing.
 package generated
 
 import com.intellij.platform.syntax.SyntaxElementType
 
-object GeneratedTypes {
+object GeneratedSyntaxElementTypes {
   val INNER_CHOICE = SyntaxElementType("INNER_CHOICE")
   val INNER_PARENTHESIZED_CHOICE = SyntaxElementType("INNER_PARENTHESIZED_CHOICE")
   val TEXT_TOKEN_CHOICE = SyntaxElementType("TEXT_TOKEN_CHOICE")

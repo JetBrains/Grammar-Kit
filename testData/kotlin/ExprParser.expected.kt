@@ -1,4 +1,4 @@
-// ---- ExpressionParser.kt -----------------
+// ---- org/intellij/grammar/expression/ExpressionParser.kt -----------------
 //header.txt
 package org.intellij.grammar.expression
 
@@ -25,7 +25,7 @@ open class ExpressionParser(protected val runtime_: SyntaxGeneratedParserRuntime
   companion object {
     internal fun parse_root_(root_: SyntaxElementType, builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       var result_: Boolean
-      if (root_ == ExpressionTypes.EXPR) {
+      if (root_ == ExpressionSyntaxTypes.EXPR) {
         result_ = expr(builder_, level_ + 1, -1)
       }
       else {
@@ -35,12 +35,12 @@ open class ExpressionParser(protected val runtime_: SyntaxGeneratedParserRuntime
     }
 
     val EXTENDS_SETS_: Array<Set<SyntaxElementType>> = arrayOf(
-      create_token_set_(ExpressionTypes.ASSIGN_EXPR, ExpressionTypes.BETWEEN_EXPR, ExpressionTypes.CALL_EXPR, ExpressionTypes.CONDITIONAL_EXPR,
-        ExpressionTypes.DIV_EXPR, ExpressionTypes.ELVIS_EXPR, ExpressionTypes.EXPR, ExpressionTypes.EXP_EXPR,
-        ExpressionTypes.FACTORIAL_EXPR, ExpressionTypes.IS_NOT_EXPR, ExpressionTypes.LITERAL_EXPR, ExpressionTypes.MINUS_EXPR,
-        ExpressionTypes.MUL_EXPR, ExpressionTypes.PAREN_EXPR, ExpressionTypes.PLUS_EXPR, ExpressionTypes.REF_EXPR,
-        ExpressionTypes.SPECIAL_EXPR, ExpressionTypes.UNARY_MIN_EXPR, ExpressionTypes.UNARY_NOT_EXPR, ExpressionTypes.UNARY_PLUS_EXPR,
-        ExpressionTypes.XOR_EXPR),
+      create_token_set_(ExpressionSyntaxTypes.ASSIGN_EXPR, ExpressionSyntaxTypes.BETWEEN_EXPR, ExpressionSyntaxTypes.CALL_EXPR, ExpressionSyntaxTypes.CONDITIONAL_EXPR,
+        ExpressionSyntaxTypes.DIV_EXPR, ExpressionSyntaxTypes.ELVIS_EXPR, ExpressionSyntaxTypes.EXPR, ExpressionSyntaxTypes.EXP_EXPR,
+        ExpressionSyntaxTypes.FACTORIAL_EXPR, ExpressionSyntaxTypes.IS_NOT_EXPR, ExpressionSyntaxTypes.LITERAL_EXPR, ExpressionSyntaxTypes.MINUS_EXPR,
+        ExpressionSyntaxTypes.MUL_EXPR, ExpressionSyntaxTypes.PAREN_EXPR, ExpressionSyntaxTypes.PLUS_EXPR, ExpressionSyntaxTypes.REF_EXPR,
+        ExpressionSyntaxTypes.SPECIAL_EXPR, ExpressionSyntaxTypes.UNARY_MIN_EXPR, ExpressionSyntaxTypes.UNARY_NOT_EXPR, ExpressionSyntaxTypes.UNARY_PLUS_EXPR,
+        ExpressionSyntaxTypes.XOR_EXPR),
     )
 
     /* ********************************************************** */
@@ -49,7 +49,7 @@ open class ExpressionParser(protected val runtime_: SyntaxGeneratedParserRuntime
       if (!recursion_guard_(builder_, level_, "arg_list")) return false
       var result_: Boolean
       var pinned_: Boolean
-      val marker_: Marker = enter_section_(builder_, level_, _NONE_, ExpressionTypes.ARG_LIST, "<arg list>")
+      val marker_: Marker = enter_section_(builder_, level_, _NONE_, ExpressionSyntaxTypes.ARG_LIST, "<arg list>")
       result_ = consumeToken(builder_, "(")
       pinned_ = result_ // pin = 1
       result_ = result_ && report_error_(builder_, arg_list_1(builder_, level_ + 1))
@@ -152,8 +152,8 @@ open class ExpressionParser(protected val runtime_: SyntaxGeneratedParserRuntime
       if (!result_) result_ = consumeToken(builder_, "-")
       if (!result_) result_ = consumeToken(builder_, "!")
       if (!result_) result_ = consumeToken(builder_, "multiply")
-      if (!result_) result_ = consumeToken(builder_, ExpressionTypes.ID)
-      if (!result_) result_ = consumeToken(builder_, ExpressionTypes.NUMBER)
+      if (!result_) result_ = consumeToken(builder_, ExpressionSyntaxTypes.ID)
+      if (!result_) result_ = consumeToken(builder_, ExpressionSyntaxTypes.NUMBER)
       return result_
     }
 
@@ -161,11 +161,11 @@ open class ExpressionParser(protected val runtime_: SyntaxGeneratedParserRuntime
     // id
     fun identifier(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "identifier")) return false
-      if (!nextTokenIs(builder_, ExpressionTypes.ID)) return false
+      if (!nextTokenIs(builder_, ExpressionSyntaxTypes.ID)) return false
       var result_: Boolean
       val marker_: Marker = enter_section_(builder_)
-      result_ = consumeToken(builder_, ExpressionTypes.ID)
-      exit_section_(builder_, marker_, ExpressionTypes.IDENTIFIER, result_)
+      result_ = consumeToken(builder_, ExpressionSyntaxTypes.ID)
+      exit_section_(builder_, marker_, ExpressionSyntaxTypes.IDENTIFIER, result_)
       return result_
     }
 
@@ -175,7 +175,7 @@ open class ExpressionParser(protected val runtime_: SyntaxGeneratedParserRuntime
       if (!recursion_guard_(builder_, level_, "meta_special_expr")) return false
       var result_: Boolean
       var pinned_: Boolean
-      val marker_: Marker = enter_section_(builder_, level_, _NONE_, ExpressionTypes.SPECIAL_EXPR, "<meta special expr>")
+      val marker_: Marker = enter_section_(builder_, level_, _NONE_, ExpressionSyntaxTypes.SPECIAL_EXPR, "<meta special expr>")
       result_ = consumeToken(builder_, "multiply")
       result_ = result_ && consumeToken(builder_, "(")
       pinned_ = result_ // pin = 2
@@ -239,64 +239,64 @@ open class ExpressionParser(protected val runtime_: SyntaxGeneratedParserRuntime
         val marker_: Marker = enter_section_(builder_, level_, _LEFT_, null)
         if (priority_ < 0 && consumeTokenSmart(builder_, "=")) {
           result_ = expr(builder_, level_, -1)
-          exit_section_(builder_, level_, marker_, ExpressionTypes.ASSIGN_EXPR, result_, true, null)
+          exit_section_(builder_, level_, marker_, ExpressionSyntaxTypes.ASSIGN_EXPR, result_, true, null)
         }
         else if (priority_ < 1 && consumeTokenSmart(builder_, "?")) {
           result_ = report_error_(builder_, expr(builder_, level_, 1))
           result_ = elvis_expr_1(builder_, level_ + 1) && result_
-          exit_section_(builder_, level_, marker_, ExpressionTypes.ELVIS_EXPR, result_, true, null)
+          exit_section_(builder_, level_, marker_, ExpressionSyntaxTypes.ELVIS_EXPR, result_, true, null)
         }
         else if (priority_ < 1 && conditional_expr_0(builder_, level_ + 1)) {
           result_ = expr(builder_, level_, 1)
-          exit_section_(builder_, level_, marker_, ExpressionTypes.CONDITIONAL_EXPR, result_, true, null)
+          exit_section_(builder_, level_, marker_, ExpressionSyntaxTypes.CONDITIONAL_EXPR, result_, true, null)
         }
         else if (priority_ < 2 && consumeTokenSmart(builder_, "+")) {
           result_ = expr(builder_, level_, 2)
-          exit_section_(builder_, level_, marker_, ExpressionTypes.PLUS_EXPR, result_, true, null)
+          exit_section_(builder_, level_, marker_, ExpressionSyntaxTypes.PLUS_EXPR, result_, true, null)
         }
         else if (priority_ < 2 && consumeTokenSmart(builder_, "-")) {
           result_ = expr(builder_, level_, 2)
-          exit_section_(builder_, level_, marker_, ExpressionTypes.MINUS_EXPR, result_, true, null)
+          exit_section_(builder_, level_, marker_, ExpressionSyntaxTypes.MINUS_EXPR, result_, true, null)
         }
         else if (priority_ < 3 && consumeTokenSmart(builder_, "^")) {
           result_ = expr(builder_, level_, 3)
-          exit_section_(builder_, level_, marker_, ExpressionTypes.XOR_EXPR, result_, true, null)
+          exit_section_(builder_, level_, marker_, ExpressionSyntaxTypes.XOR_EXPR, result_, true, null)
         }
-        else if (priority_ < 3 && consumeTokenSmart(builder_, ExpressionTypes.BETWEEN)) {
+        else if (priority_ < 3 && consumeTokenSmart(builder_, ExpressionSyntaxTypes.BETWEEN)) {
           result_ = report_error_(builder_, expr(builder_, level_, 1))
           result_ = between_expr_1(builder_, level_ + 1) && result_
-          exit_section_(builder_, level_, marker_, ExpressionTypes.BETWEEN_EXPR, result_, true, null)
+          exit_section_(builder_, level_, marker_, ExpressionSyntaxTypes.BETWEEN_EXPR, result_, true, null)
         }
-        else if (priority_ < 3 && parseTokensSmart(builder_, 0, ExpressionTypes.IS, ExpressionTypes.NOT)) {
+        else if (priority_ < 3 && parseTokensSmart(builder_, 0, ExpressionSyntaxTypes.IS, ExpressionSyntaxTypes.NOT)) {
           result_ = expr(builder_, level_, 3)
-          exit_section_(builder_, level_, marker_, ExpressionTypes.IS_NOT_EXPR, result_, true, null)
+          exit_section_(builder_, level_, marker_, ExpressionSyntaxTypes.IS_NOT_EXPR, result_, true, null)
         }
         else if (priority_ < 4 && consumeTokenSmart(builder_, "*")) {
           result_ = expr(builder_, level_, 4)
-          exit_section_(builder_, level_, marker_, ExpressionTypes.MUL_EXPR, result_, true, null)
+          exit_section_(builder_, level_, marker_, ExpressionSyntaxTypes.MUL_EXPR, result_, true, null)
         }
         else if (priority_ < 4 && consumeTokenSmart(builder_, "/")) {
           result_ = expr(builder_, level_, 4)
-          exit_section_(builder_, level_, marker_, ExpressionTypes.DIV_EXPR, result_, true, null)
+          exit_section_(builder_, level_, marker_, ExpressionSyntaxTypes.DIV_EXPR, result_, true, null)
         }
         else if (priority_ < 7 && consumeTokenSmart(builder_, "!")) {
           result_ = true
-          exit_section_(builder_, level_, marker_, ExpressionTypes.FACTORIAL_EXPR, result_, true, null)
+          exit_section_(builder_, level_, marker_, ExpressionSyntaxTypes.FACTORIAL_EXPR, result_, true, null)
         }
         else if (priority_ < 6 && consumeTokenSmart(builder_, "**")) {
           while (true) {
             result_ = report_error_(builder_, expr(builder_, level_, 6))
             if (!consumeTokenSmart(builder_, "**")) break
           }
-          exit_section_(builder_, level_, marker_, ExpressionTypes.EXP_EXPR, result_, true, null)
+          exit_section_(builder_, level_, marker_, ExpressionSyntaxTypes.EXP_EXPR, result_, true, null)
         }
-        else if (priority_ < 8 && leftMarkerIs(builder_, ExpressionTypes.REF_EXPR) && arg_list(builder_, level_ + 1)) {
+        else if (priority_ < 8 && leftMarkerIs(builder_, ExpressionSyntaxTypes.REF_EXPR) && arg_list(builder_, level_ + 1)) {
           result_ = true
-          exit_section_(builder_, level_, marker_, ExpressionTypes.CALL_EXPR, result_, true, null)
+          exit_section_(builder_, level_, marker_, ExpressionSyntaxTypes.CALL_EXPR, result_, true, null)
         }
         else if (priority_ < 9 && qualification_expr_0(builder_, level_ + 1)) {
           result_ = true
-          exit_section_(builder_, level_, marker_, ExpressionTypes.REF_EXPR, result_, true, null)
+          exit_section_(builder_, level_, marker_, ExpressionSyntaxTypes.REF_EXPR, result_, true, null)
         }
         else {
           exit_section_(builder_, level_, marker_, null, false, false, null)
@@ -338,7 +338,7 @@ open class ExpressionParser(protected val runtime_: SyntaxGeneratedParserRuntime
       result_ = consumeTokenSmart(builder_, "+")
       pinned_ = result_
       result_ = pinned_ && expr(builder_, level_, 5)
-      exit_section_(builder_, level_, marker_, ExpressionTypes.UNARY_PLUS_EXPR, result_, pinned_, null)
+      exit_section_(builder_, level_, marker_, ExpressionSyntaxTypes.UNARY_PLUS_EXPR, result_, pinned_, null)
       return result_ || pinned_
     }
 
@@ -350,7 +350,7 @@ open class ExpressionParser(protected val runtime_: SyntaxGeneratedParserRuntime
       result_ = consumeTokenSmart(builder_, "-")
       pinned_ = result_
       result_ = pinned_ && expr(builder_, level_, 5)
-      exit_section_(builder_, level_, marker_, ExpressionTypes.UNARY_MIN_EXPR, result_, pinned_, null)
+      exit_section_(builder_, level_, marker_, ExpressionSyntaxTypes.UNARY_MIN_EXPR, result_, pinned_, null)
       return result_ || pinned_
     }
 
@@ -359,7 +359,7 @@ open class ExpressionParser(protected val runtime_: SyntaxGeneratedParserRuntime
       if (!recursion_guard_(builder_, level_, "between_expr_1")) return false
       var result_: Boolean
       val marker_: Marker = enter_section_(builder_)
-      result_ = consumeToken(builder_, ExpressionTypes.AND)
+      result_ = consumeToken(builder_, ExpressionSyntaxTypes.AND)
       result_ = result_ && expr(builder_, level_ + 1, 1)
       exit_section_(builder_, marker_, null, result_)
       return result_
@@ -373,7 +373,7 @@ open class ExpressionParser(protected val runtime_: SyntaxGeneratedParserRuntime
       result_ = consumeTokenSmart(builder_, "!")
       pinned_ = result_
       result_ = pinned_ && expr(builder_, level_, 5)
-      exit_section_(builder_, level_, marker_, ExpressionTypes.UNARY_NOT_EXPR, result_, pinned_, null)
+      exit_section_(builder_, level_, marker_, ExpressionSyntaxTypes.UNARY_NOT_EXPR, result_, pinned_, null)
       return result_ || pinned_
     }
 
@@ -391,22 +391,22 @@ open class ExpressionParser(protected val runtime_: SyntaxGeneratedParserRuntime
     // identifier
     fun simple_ref_expr(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "simple_ref_expr")) return false
-      if (!nextTokenIsSmart(builder_, ExpressionTypes.ID)) return false
+      if (!nextTokenIsSmart(builder_, ExpressionSyntaxTypes.ID)) return false
       var result_: Boolean
       val marker_: Marker = enter_section_(builder_)
       result_ = identifier(builder_, level_ + 1)
-      exit_section_(builder_, marker_, ExpressionTypes.REF_EXPR, result_)
+      exit_section_(builder_, marker_, ExpressionSyntaxTypes.REF_EXPR, result_)
       return result_
     }
 
     // number
     fun literal_expr(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "literal_expr")) return false
-      if (!nextTokenIsSmart(builder_, ExpressionTypes.NUMBER)) return false
+      if (!nextTokenIsSmart(builder_, ExpressionSyntaxTypes.NUMBER)) return false
       var result_: Boolean
       val marker_: Marker = enter_section_(builder_)
-      result_ = consumeTokenSmart(builder_, ExpressionTypes.NUMBER)
-      exit_section_(builder_, marker_, ExpressionTypes.LITERAL_EXPR, result_)
+      result_ = consumeTokenSmart(builder_, ExpressionSyntaxTypes.NUMBER)
+      exit_section_(builder_, marker_, ExpressionSyntaxTypes.LITERAL_EXPR, result_)
       return result_
     }
 
@@ -419,7 +419,7 @@ open class ExpressionParser(protected val runtime_: SyntaxGeneratedParserRuntime
       pinned_ = result_
       result_ = pinned_ && expr(builder_, level_, -1)
       result_ = pinned_ && report_error_(builder_, consumeToken(builder_, ")")) && result_
-      exit_section_(builder_, level_, marker_, ExpressionTypes.PAREN_EXPR, result_, pinned_, null)
+      exit_section_(builder_, level_, marker_, ExpressionSyntaxTypes.PAREN_EXPR, result_, pinned_, null)
       return result_ || pinned_
     }
 

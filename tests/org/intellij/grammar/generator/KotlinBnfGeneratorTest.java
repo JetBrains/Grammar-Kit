@@ -113,10 +113,6 @@ public class KotlinBnfGeneratorTest extends AbstractBnfGeneratorTest {
     doPsiTest();
   }
 
-  public void testJsonParser() throws Exception {
-    doPsiTest();
-  }
-
   public void testEmpty() throws Exception {
     doTestEmpty();
   }

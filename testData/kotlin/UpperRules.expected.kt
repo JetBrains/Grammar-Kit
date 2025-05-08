@@ -1,4 +1,4 @@
-// ---- GeneratedParser.kt -----------------
+// ---- generated/GeneratedParser.kt -----------------
 //header.txt
 package generated
 
@@ -28,7 +28,7 @@ open class GeneratedParser(protected val runtime_: SyntaxGeneratedParserRuntimeB
     }
 
     val EXTENDS_SETS_: Array<Set<SyntaxElementType>> = arrayOf(
-      create_token_set_(GeneratedTypes.ABC, GeneratedTypes.ABC_ONE, GeneratedTypes.ABC_THREE, GeneratedTypes.ABC_TWO),
+      create_token_set_(GeneratedSyntaxElementTypes.ABC, GeneratedSyntaxElementTypes.ABC_ONE, GeneratedSyntaxElementTypes.ABC_THREE, GeneratedSyntaxElementTypes.ABC_TWO),
     )
 
     /* ********************************************************** */
@@ -36,7 +36,7 @@ open class GeneratedParser(protected val runtime_: SyntaxGeneratedParserRuntimeB
     fun abc(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "abc")) return false
       var result_: Boolean
-      val marker_: Marker = enter_section_(builder_, level_, _COLLAPSE_, GeneratedTypes.ABC, "<abc>")
+      val marker_: Marker = enter_section_(builder_, level_, _COLLAPSE_, GeneratedSyntaxElementTypes.ABC, "<abc>")
       result_ = abc_0(builder_, level_ + 1)
       result_ = result_ && abc_1(builder_, level_ + 1)
       exit_section_(builder_, level_, marker_, result_, false, null)
@@ -64,13 +64,13 @@ open class GeneratedParser(protected val runtime_: SyntaxGeneratedParserRuntimeB
     // just_b X
     fun abc_one(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "abc_one")) return false
-      if (!nextTokenIs(builder_, GeneratedTypes.B)) return false
+      if (!nextTokenIs(builder_, GeneratedSyntaxElementTypes.B)) return false
       var result_: Boolean
       var pinned_: Boolean
-      val marker_: Marker = enter_section_(builder_, level_, _UPPER_, GeneratedTypes.ABC_ONE, null)
+      val marker_: Marker = enter_section_(builder_, level_, _UPPER_, GeneratedSyntaxElementTypes.ABC_ONE, null)
       result_ = just_b(builder_, level_ + 1)
       pinned_ = result_ // pin = 1
-      result_ = result_ && consumeToken(builder_, GeneratedTypes.X)
+      result_ = result_ && consumeToken(builder_, GeneratedSyntaxElementTypes.X)
       exit_section_(builder_, level_, marker_, result_, pinned_, null)
       return result_ || pinned_
     }
@@ -79,11 +79,11 @@ open class GeneratedParser(protected val runtime_: SyntaxGeneratedParserRuntimeB
     // X
     fun abc_three(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "abc_three")) return false
-      if (!nextTokenIs(builder_, GeneratedTypes.X)) return false
+      if (!nextTokenIs(builder_, GeneratedSyntaxElementTypes.X)) return false
       var result_: Boolean
       val marker_: Marker = enter_section_(builder_)
-      result_ = consumeToken(builder_, GeneratedTypes.X)
-      exit_section_(builder_, marker_, GeneratedTypes.ABC_THREE, result_)
+      result_ = consumeToken(builder_, GeneratedSyntaxElementTypes.X)
+      exit_section_(builder_, marker_, GeneratedSyntaxElementTypes.ABC_THREE, result_)
       return result_
     }
 
@@ -91,10 +91,10 @@ open class GeneratedParser(protected val runtime_: SyntaxGeneratedParserRuntimeB
     // C
     fun abc_two(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "abc_two")) return false
-      if (!nextTokenIs(builder_, GeneratedTypes.C)) return false
+      if (!nextTokenIs(builder_, GeneratedSyntaxElementTypes.C)) return false
       var result_: Boolean
-      val marker_: Marker = enter_section_(builder_, level_, _UPPER_, GeneratedTypes.ABC_TWO, null)
-      result_ = consumeToken(builder_, GeneratedTypes.C)
+      val marker_: Marker = enter_section_(builder_, level_, _UPPER_, GeneratedSyntaxElementTypes.ABC_TWO, null)
+      result_ = consumeToken(builder_, GeneratedSyntaxElementTypes.C)
       exit_section_(builder_, level_, marker_, result_, false, null)
       return result_
     }
@@ -152,11 +152,11 @@ open class GeneratedParser(protected val runtime_: SyntaxGeneratedParserRuntimeB
     // B
     fun just_b(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "just_b")) return false
-      if (!nextTokenIs(builder_, GeneratedTypes.B)) return false
+      if (!nextTokenIs(builder_, GeneratedSyntaxElementTypes.B)) return false
       var result_: Boolean
       val marker_: Marker = enter_section_(builder_)
-      result_ = consumeToken(builder_, GeneratedTypes.B)
-      exit_section_(builder_, marker_, GeneratedTypes.JUST_B, result_)
+      result_ = consumeToken(builder_, GeneratedSyntaxElementTypes.B)
+      exit_section_(builder_, marker_, GeneratedSyntaxElementTypes.JUST_B, result_)
       return result_
     }
 
@@ -164,10 +164,10 @@ open class GeneratedParser(protected val runtime_: SyntaxGeneratedParserRuntimeB
     // prefix (abc_one | abc_two)
     fun pinned_seq(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "pinned_seq")) return false
-      if (!nextTokenIs(builder_, GeneratedTypes.A)) return false
+      if (!nextTokenIs(builder_, GeneratedSyntaxElementTypes.A)) return false
       var result_: Boolean
       var pinned_: Boolean
-      val marker_: Marker = enter_section_(builder_, level_, _NONE_, GeneratedTypes.PINNED_SEQ, null)
+      val marker_: Marker = enter_section_(builder_, level_, _NONE_, GeneratedSyntaxElementTypes.PINNED_SEQ, null)
       result_ = prefix(builder_, level_ + 1)
       pinned_ = result_ // pin = 1
       result_ = result_ && pinned_seq_1(builder_, level_ + 1)
@@ -188,13 +188,13 @@ open class GeneratedParser(protected val runtime_: SyntaxGeneratedParserRuntimeB
     // prefix abc_one abc_two
     fun plain_seq(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "plain_seq")) return false
-      if (!nextTokenIs(builder_, GeneratedTypes.A)) return false
+      if (!nextTokenIs(builder_, GeneratedSyntaxElementTypes.A)) return false
       var result_: Boolean
       val marker_: Marker = enter_section_(builder_)
       result_ = prefix(builder_, level_ + 1)
       result_ = result_ && abc_one(builder_, level_ + 1)
       result_ = result_ && abc_two(builder_, level_ + 1)
-      exit_section_(builder_, marker_, GeneratedTypes.PLAIN_SEQ, result_)
+      exit_section_(builder_, marker_, GeneratedSyntaxElementTypes.PLAIN_SEQ, result_)
       return result_
     }
 
@@ -202,11 +202,11 @@ open class GeneratedParser(protected val runtime_: SyntaxGeneratedParserRuntimeB
     // A
     fun prefix(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "prefix")) return false
-      if (!nextTokenIs(builder_, GeneratedTypes.A)) return false
+      if (!nextTokenIs(builder_, GeneratedSyntaxElementTypes.A)) return false
       var result_: Boolean
       val marker_: Marker = enter_section_(builder_)
-      result_ = consumeToken(builder_, GeneratedTypes.A)
-      exit_section_(builder_, marker_, GeneratedTypes.PREFIX, result_)
+      result_ = consumeToken(builder_, GeneratedSyntaxElementTypes.A)
+      exit_section_(builder_, marker_, GeneratedSyntaxElementTypes.PREFIX, result_)
       return result_
     }
 

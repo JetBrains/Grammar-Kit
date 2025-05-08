@@ -1,4 +1,4 @@
-// ---- GeneratedParser.kt -----------------
+// ---- generated/GeneratedParser.kt -----------------
 // This is a generated file. Not intended for manual editing.
 package generated
 
@@ -32,9 +32,9 @@ open class GeneratedParser(protected val runtime_: SyntaxGeneratedParserRuntimeB
     fun inner_choice(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "inner_choice")) return false
       var result_: Boolean
-      val marker_: Marker = enter_section_(builder_, level_, _NONE_, GeneratedTypes.INNER_CHOICE, "<inner choice>")
+      val marker_: Marker = enter_section_(builder_, level_, _NONE_, GeneratedSyntaxElementTypes.INNER_CHOICE, "<inner choice>")
       result_ = inner_choice_0(builder_, level_ + 1)
-      result_ = result_ && consumeToken(builder_, GeneratedTypes.D)
+      result_ = result_ && consumeToken(builder_, GeneratedSyntaxElementTypes.D)
       exit_section_(builder_, level_, marker_, result_, false, null)
       return result_
     }
@@ -43,9 +43,9 @@ open class GeneratedParser(protected val runtime_: SyntaxGeneratedParserRuntimeB
     private fun inner_choice_0(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "inner_choice_0")) return false
       var result_: Boolean
-      result_ = consumeToken(builder_, GeneratedTypes.A)
-      if (!result_) result_ = consumeToken(builder_, GeneratedTypes.B)
-      if (!result_) result_ = consumeToken(builder_, GeneratedTypes.C)
+      result_ = consumeToken(builder_, GeneratedSyntaxElementTypes.A)
+      if (!result_) result_ = consumeToken(builder_, GeneratedSyntaxElementTypes.B)
+      if (!result_) result_ = consumeToken(builder_, GeneratedSyntaxElementTypes.C)
       return result_
     }
 
@@ -54,10 +54,10 @@ open class GeneratedParser(protected val runtime_: SyntaxGeneratedParserRuntimeB
     fun inner_parenthesized_choice(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "inner_parenthesized_choice")) return false
       var result_: Boolean
-      val marker_: Marker = enter_section_(builder_, level_, _NONE_, GeneratedTypes.INNER_PARENTHESIZED_CHOICE, "<inner parenthesized choice>")
-      result_ = consumeToken(builder_, GeneratedTypes.A)
-      if (!result_) result_ = consumeToken(builder_, GeneratedTypes.B)
-      if (!result_) result_ = consumeToken(builder_, GeneratedTypes.C)
+      val marker_: Marker = enter_section_(builder_, level_, _NONE_, GeneratedSyntaxElementTypes.INNER_PARENTHESIZED_CHOICE, "<inner parenthesized choice>")
+      result_ = consumeToken(builder_, GeneratedSyntaxElementTypes.A)
+      if (!result_) result_ = consumeToken(builder_, GeneratedSyntaxElementTypes.B)
+      if (!result_) result_ = consumeToken(builder_, GeneratedSyntaxElementTypes.C)
       exit_section_(builder_, level_, marker_, result_, false, null)
       return result_
     }
@@ -72,9 +72,9 @@ open class GeneratedParser(protected val runtime_: SyntaxGeneratedParserRuntimeB
     fun text_token_choice(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "text_token_choice")) return false
       var result_: Boolean
-      val marker_: Marker = enter_section_(builder_, level_, _NONE_, GeneratedTypes.TEXT_TOKEN_CHOICE, "<text token choice>")
-      result_ = consumeToken(builder_, GeneratedTypes.A)
-      if (!result_) result_ = consumeToken(builder_, GeneratedTypes.B)
+      val marker_: Marker = enter_section_(builder_, level_, _NONE_, GeneratedSyntaxElementTypes.TEXT_TOKEN_CHOICE, "<text token choice>")
+      result_ = consumeToken(builder_, GeneratedSyntaxElementTypes.A)
+      if (!result_) result_ = consumeToken(builder_, GeneratedSyntaxElementTypes.B)
       if (!result_) result_ = consumeToken(builder_, "c")
       exit_section_(builder_, level_, marker_, result_, false, null)
       return result_
@@ -84,11 +84,11 @@ open class GeneratedParser(protected val runtime_: SyntaxGeneratedParserRuntimeB
     // A | B
     fun two_tokens_choice(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "two_tokens_choice")) return false
-      if (!nextTokenIs(builder_, "<two tokens choice>", GeneratedTypes.A, GeneratedTypes.B)) return false
+      if (!nextTokenIs(builder_, "<two tokens choice>", GeneratedSyntaxElementTypes.A, GeneratedSyntaxElementTypes.B)) return false
       var result_: Boolean
-      val marker_: Marker = enter_section_(builder_, level_, _NONE_, GeneratedTypes.TWO_TOKENS_CHOICE, "<two tokens choice>")
-      result_ = consumeToken(builder_, GeneratedTypes.A)
-      if (!result_) result_ = consumeToken(builder_, GeneratedTypes.B)
+      val marker_: Marker = enter_section_(builder_, level_, _NONE_, GeneratedSyntaxElementTypes.TWO_TOKENS_CHOICE, "<two tokens choice>")
+      result_ = consumeToken(builder_, GeneratedSyntaxElementTypes.A)
+      if (!result_) result_ = consumeToken(builder_, GeneratedSyntaxElementTypes.B)
       exit_section_(builder_, level_, marker_, result_, false, null)
       return result_
     }
@@ -97,13 +97,13 @@ open class GeneratedParser(protected val runtime_: SyntaxGeneratedParserRuntimeB
     // A | B | B | A
     fun two_tokens_repeating_choice(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "two_tokens_repeating_choice")) return false
-      if (!nextTokenIs(builder_, "<two tokens repeating choice>", GeneratedTypes.A, GeneratedTypes.B)) return false
+      if (!nextTokenIs(builder_, "<two tokens repeating choice>", GeneratedSyntaxElementTypes.A, GeneratedSyntaxElementTypes.B)) return false
       var result_: Boolean
-      val marker_: Marker = enter_section_(builder_, level_, _NONE_, GeneratedTypes.TWO_TOKENS_REPEATING_CHOICE, "<two tokens repeating choice>")
-      result_ = consumeToken(builder_, GeneratedTypes.A)
-      if (!result_) result_ = consumeToken(builder_, GeneratedTypes.B)
-      if (!result_) result_ = consumeToken(builder_, GeneratedTypes.B)
-      if (!result_) result_ = consumeToken(builder_, GeneratedTypes.A)
+      val marker_: Marker = enter_section_(builder_, level_, _NONE_, GeneratedSyntaxElementTypes.TWO_TOKENS_REPEATING_CHOICE, "<two tokens repeating choice>")
+      result_ = consumeToken(builder_, GeneratedSyntaxElementTypes.A)
+      if (!result_) result_ = consumeToken(builder_, GeneratedSyntaxElementTypes.B)
+      if (!result_) result_ = consumeToken(builder_, GeneratedSyntaxElementTypes.B)
+      if (!result_) result_ = consumeToken(builder_, GeneratedSyntaxElementTypes.A)
       exit_section_(builder_, level_, marker_, result_, false, null)
       return result_
     }

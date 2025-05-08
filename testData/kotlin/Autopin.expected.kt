@@ -2,7 +2,7 @@
 // This is a generated file. Not intended for manual editing.
 import com.intellij.platform.syntax.parser.SyntaxTreeBuilder
 import com.intellij.platform.syntax.parser.SyntaxTreeBuilder.Marker
-import generated.GeneratedTypes
+import generated.GeneratedSyntaxElementTypes
 import com.intellij.platform.syntax.SyntaxElementType
 import com.intellij.platform.syntax.util.SyntaxGeneratedParserRuntimeBase
 
@@ -27,17 +27,17 @@ open class Autopin(protected val runtime_: SyntaxGeneratedParserRuntimeBase) {
     }
 
     val EXTENDS_SETS_: Array<Set<SyntaxElementType>> = arrayOf(
-      create_token_set_(GeneratedTypes.CREATE_STATEMENT, GeneratedTypes.CREATE_TABLE_STATEMENT, GeneratedTypes.DROP_STATEMENT, GeneratedTypes.DROP_TABLE_STATEMENT,
-        GeneratedTypes.STATEMENT),
+      create_token_set_(GeneratedSyntaxElementTypes.CREATE_STATEMENT, GeneratedSyntaxElementTypes.CREATE_TABLE_STATEMENT, GeneratedSyntaxElementTypes.DROP_STATEMENT, GeneratedSyntaxElementTypes.DROP_TABLE_STATEMENT,
+        GeneratedSyntaxElementTypes.STATEMENT),
     )
 
     /* ********************************************************** */
     // create_table_statement
     fun create_statement(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "create_statement")) return false
-      if (!nextTokenIs(builder_, GeneratedTypes.CREATE)) return false
+      if (!nextTokenIs(builder_, GeneratedSyntaxElementTypes.CREATE)) return false
       var result_: Boolean
-      val marker_: Marker = enter_section_(builder_, level_, _COLLAPSE_, GeneratedTypes.CREATE_STATEMENT, null)
+      val marker_: Marker = enter_section_(builder_, level_, _COLLAPSE_, GeneratedSyntaxElementTypes.CREATE_STATEMENT, null)
       result_ = create_table_statement(builder_, level_ + 1)
       exit_section_(builder_, level_, marker_, result_, false, null)
       return result_
@@ -47,14 +47,14 @@ open class Autopin(protected val runtime_: SyntaxGeneratedParserRuntimeBase) {
     // CREATE TEMP? (GLOBAL|LOCAL) TABLE table_ref '(' ')'
     fun create_table_statement(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "create_table_statement")) return false
-      if (!nextTokenIs(builder_, GeneratedTypes.CREATE)) return false
+      if (!nextTokenIs(builder_, GeneratedSyntaxElementTypes.CREATE)) return false
       var result_: Boolean
       var pinned_: Boolean
-      val marker_: Marker = enter_section_(builder_, level_, _NONE_, GeneratedTypes.CREATE_TABLE_STATEMENT, null)
-      result_ = consumeToken(builder_, GeneratedTypes.CREATE)
+      val marker_: Marker = enter_section_(builder_, level_, _NONE_, GeneratedSyntaxElementTypes.CREATE_TABLE_STATEMENT, null)
+      result_ = consumeToken(builder_, GeneratedSyntaxElementTypes.CREATE)
       result_ = result_ && create_table_statement_1(builder_, level_ + 1)
       result_ = result_ && create_table_statement_2(builder_, level_ + 1)
-      result_ = result_ && consumeToken(builder_, GeneratedTypes.TABLE)
+      result_ = result_ && consumeToken(builder_, GeneratedSyntaxElementTypes.TABLE)
       result_ = result_ && parseReference(builder_, level_ + 1)
       pinned_ = result_ // pin = .*_ref
       result_ = result_ && report_error_(builder_, consumeToken(builder_, "("))
@@ -66,7 +66,7 @@ open class Autopin(protected val runtime_: SyntaxGeneratedParserRuntimeBase) {
     // TEMP?
     private fun create_table_statement_1(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "create_table_statement_1")) return false
-      consumeToken(builder_, GeneratedTypes.TEMP)
+      consumeToken(builder_, GeneratedSyntaxElementTypes.TEMP)
       return true
     }
 
@@ -74,8 +74,8 @@ open class Autopin(protected val runtime_: SyntaxGeneratedParserRuntimeBase) {
     private fun create_table_statement_2(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "create_table_statement_2")) return false
       var result_: Boolean
-      result_ = consumeToken(builder_, GeneratedTypes.GLOBAL)
-      if (!result_) result_ = consumeToken(builder_, GeneratedTypes.LOCAL)
+      result_ = consumeToken(builder_, GeneratedSyntaxElementTypes.GLOBAL)
+      if (!result_) result_ = consumeToken(builder_, GeneratedSyntaxElementTypes.LOCAL)
       return result_
     }
 
@@ -83,9 +83,9 @@ open class Autopin(protected val runtime_: SyntaxGeneratedParserRuntimeBase) {
     // drop_table_statement
     fun drop_statement(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "drop_statement")) return false
-      if (!nextTokenIs(builder_, GeneratedTypes.DROP)) return false
+      if (!nextTokenIs(builder_, GeneratedSyntaxElementTypes.DROP)) return false
       var result_: Boolean
-      val marker_: Marker = enter_section_(builder_, level_, _COLLAPSE_, GeneratedTypes.DROP_STATEMENT, null)
+      val marker_: Marker = enter_section_(builder_, level_, _COLLAPSE_, GeneratedSyntaxElementTypes.DROP_STATEMENT, null)
       result_ = drop_table_statement(builder_, level_ + 1)
       exit_section_(builder_, level_, marker_, result_, false, null)
       return result_
@@ -95,12 +95,12 @@ open class Autopin(protected val runtime_: SyntaxGeneratedParserRuntimeBase) {
     // DROP TABLE table_ref
     fun drop_table_statement(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "drop_table_statement")) return false
-      if (!nextTokenIs(builder_, GeneratedTypes.DROP)) return false
+      if (!nextTokenIs(builder_, GeneratedSyntaxElementTypes.DROP)) return false
       var result_: Boolean
       val marker_: Marker = enter_section_(builder_)
-      result_ = consumeTokens(builder_, 0, GeneratedTypes.DROP, GeneratedTypes.TABLE)
+      result_ = consumeTokens(builder_, 0, GeneratedSyntaxElementTypes.DROP, GeneratedSyntaxElementTypes.TABLE)
       result_ = result_ && parseReference(builder_, level_ + 1)
-      exit_section_(builder_, marker_, GeneratedTypes.DROP_TABLE_STATEMENT, result_)
+      exit_section_(builder_, marker_, GeneratedSyntaxElementTypes.DROP_TABLE_STATEMENT, result_)
       return result_
     }
 
@@ -108,11 +108,11 @@ open class Autopin(protected val runtime_: SyntaxGeneratedParserRuntimeBase) {
     // a b (c d e)
     fun override_nested_sequence(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "override_nested_sequence")) return false
-      if (!nextTokenIs(builder_, GeneratedTypes.A)) return false
+      if (!nextTokenIs(builder_, GeneratedSyntaxElementTypes.A)) return false
       var result_: Boolean
       var pinned_: Boolean
-      val marker_: Marker = enter_section_(builder_, level_, _NONE_, GeneratedTypes.OVERRIDE_NESTED_SEQUENCE, null)
-      result_ = consumeTokens(builder_, 1, GeneratedTypes.A, GeneratedTypes.B)
+      val marker_: Marker = enter_section_(builder_, level_, _NONE_, GeneratedSyntaxElementTypes.OVERRIDE_NESTED_SEQUENCE, null)
+      result_ = consumeTokens(builder_, 1, GeneratedSyntaxElementTypes.A, GeneratedSyntaxElementTypes.B)
       pinned_ = result_ // pin = 1
       result_ = result_ && override_nested_sequence_2(builder_, level_ + 1)
       exit_section_(builder_, level_, marker_, result_, pinned_, null)
@@ -124,7 +124,7 @@ open class Autopin(protected val runtime_: SyntaxGeneratedParserRuntimeBase) {
       if (!recursion_guard_(builder_, level_, "override_nested_sequence_2")) return false
       var result_: Boolean
       val marker_: Marker = enter_section_(builder_)
-      result_ = consumeTokens(builder_, 0, GeneratedTypes.C, GeneratedTypes.D, GeneratedTypes.E)
+      result_ = consumeTokens(builder_, 0, GeneratedSyntaxElementTypes.C, GeneratedSyntaxElementTypes.D, GeneratedSyntaxElementTypes.E)
       exit_section_(builder_, marker_, null, result_)
       return result_
     }
@@ -152,8 +152,8 @@ open class Autopin(protected val runtime_: SyntaxGeneratedParserRuntimeBase) {
     private fun pinned_on_start_1(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "pinned_on_start_1")) return false
       var result_: Boolean
-      result_ = consumeToken(builder_, GeneratedTypes.A)
-      if (!result_) result_ = consumeToken(builder_, GeneratedTypes.B)
+      result_ = consumeToken(builder_, GeneratedSyntaxElementTypes.A)
+      if (!result_) result_ = consumeToken(builder_, GeneratedSyntaxElementTypes.B)
       return result_
     }
 
@@ -173,9 +173,9 @@ open class Autopin(protected val runtime_: SyntaxGeneratedParserRuntimeBase) {
     // create_statement | drop_statement
     fun statement(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "statement")) return false
-      if (!nextTokenIs(builder_, "<statement>", GeneratedTypes.CREATE, GeneratedTypes.DROP)) return false
+      if (!nextTokenIs(builder_, "<statement>", GeneratedSyntaxElementTypes.CREATE, GeneratedSyntaxElementTypes.DROP)) return false
       var result_: Boolean
-      val marker_: Marker = enter_section_(builder_, level_, _COLLAPSE_, GeneratedTypes.STATEMENT, "<statement>")
+      val marker_: Marker = enter_section_(builder_, level_, _COLLAPSE_, GeneratedSyntaxElementTypes.STATEMENT, "<statement>")
       result_ = create_statement(builder_, level_ + 1)
       if (!result_) result_ = drop_statement(builder_, level_ + 1)
       exit_section_(builder_, level_, marker_, result_, false, null)
@@ -186,11 +186,11 @@ open class Autopin(protected val runtime_: SyntaxGeneratedParserRuntimeBase) {
     // a b c d table_ref
     internal fun token_sequence1(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "token_sequence1")) return false
-      if (!nextTokenIs(builder_, GeneratedTypes.A)) return false
+      if (!nextTokenIs(builder_, GeneratedSyntaxElementTypes.A)) return false
       var result_: Boolean
       var pinned_: Boolean
       val marker_: Marker = enter_section_(builder_, level_, _NONE_)
-      result_ = consumeTokens(builder_, 3, GeneratedTypes.A, GeneratedTypes.B, GeneratedTypes.C, GeneratedTypes.D)
+      result_ = consumeTokens(builder_, 3, GeneratedSyntaxElementTypes.A, GeneratedSyntaxElementTypes.B, GeneratedSyntaxElementTypes.C, GeneratedSyntaxElementTypes.D)
       pinned_ = result_ // pin = 3
       result_ = result_ && parseReference(builder_, level_ + 1)
       exit_section_(builder_, level_, marker_, result_, pinned_, null)
@@ -201,13 +201,13 @@ open class Autopin(protected val runtime_: SyntaxGeneratedParserRuntimeBase) {
     // a b table_ref c d e
     internal fun token_sequence2(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "token_sequence2")) return false
-      if (!nextTokenIs(builder_, GeneratedTypes.A)) return false
+      if (!nextTokenIs(builder_, GeneratedSyntaxElementTypes.A)) return false
       var result_: Boolean
       var pinned_: Boolean
       val marker_: Marker = enter_section_(builder_, level_, _NONE_)
-      result_ = consumeTokens(builder_, 0, GeneratedTypes.A, GeneratedTypes.B)
+      result_ = consumeTokens(builder_, 0, GeneratedSyntaxElementTypes.A, GeneratedSyntaxElementTypes.B)
       result_ = result_ && parseReference(builder_, level_ + 1)
-      result_ = result_ && consumeTokens(builder_, 2, GeneratedTypes.C, GeneratedTypes.D, GeneratedTypes.E)
+      result_ = result_ && consumeTokens(builder_, 2, GeneratedSyntaxElementTypes.C, GeneratedSyntaxElementTypes.D, GeneratedSyntaxElementTypes.E)
       pinned_ = result_ // pin = 5
       exit_section_(builder_, level_, marker_, result_, pinned_, null)
       return result_ || pinned_
@@ -222,9 +222,9 @@ open class Autopin(protected val runtime_: SyntaxGeneratedParserRuntimeBase) {
       val marker_: Marker = enter_section_(builder_, level_, _NONE_)
       result_ = parseReference(builder_, level_ + 1)
       pinned_ = result_ // pin = 1
-      result_ = result_ && report_error_(builder_, consumeTokens(builder_, -1, GeneratedTypes.A, GeneratedTypes.B))
+      result_ = result_ && report_error_(builder_, consumeTokens(builder_, -1, GeneratedSyntaxElementTypes.A, GeneratedSyntaxElementTypes.B))
       result_ = pinned_ && report_error_(builder_, parseReference(builder_, level_ + 1)) && result_
-      result_ = pinned_ && report_error_(builder_, consumeTokens(builder_, -1, GeneratedTypes.C, GeneratedTypes.D, GeneratedTypes.E)) && result_
+      result_ = pinned_ && report_error_(builder_, consumeTokens(builder_, -1, GeneratedSyntaxElementTypes.C, GeneratedSyntaxElementTypes.D, GeneratedSyntaxElementTypes.E)) && result_
       exit_section_(builder_, level_, marker_, result_, pinned_, null)
       return result_ || pinned_
     }
@@ -238,7 +238,7 @@ open class Autopin(protected val runtime_: SyntaxGeneratedParserRuntimeBase) {
       val marker_: Marker = enter_section_(builder_, level_, _NONE_)
       result_ = token_sequence4_0(builder_, level_ + 1)
       pinned_ = result_ // pin = 1
-      result_ = result_ && consumeToken(builder_, GeneratedTypes.A)
+      result_ = result_ && consumeToken(builder_, GeneratedSyntaxElementTypes.A)
       exit_section_(builder_, level_, marker_, result_, pinned_, null)
       return result_ || pinned_
     }
@@ -252,7 +252,7 @@ open class Autopin(protected val runtime_: SyntaxGeneratedParserRuntimeBase) {
     // (a|&b) pinned_on_start
     internal fun token_sequence5(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "token_sequence5")) return false
-      if (!nextTokenIs(builder_, "", GeneratedTypes.A, GeneratedTypes.B)) return false
+      if (!nextTokenIs(builder_, "", GeneratedSyntaxElementTypes.A, GeneratedSyntaxElementTypes.B)) return false
       var result_: Boolean
       val marker_: Marker = enter_section_(builder_)
       result_ = token_sequence5_0(builder_, level_ + 1)
@@ -266,7 +266,7 @@ open class Autopin(protected val runtime_: SyntaxGeneratedParserRuntimeBase) {
       if (!recursion_guard_(builder_, level_, "token_sequence5_0")) return false
       var result_: Boolean
       val marker_: Marker = enter_section_(builder_)
-      result_ = consumeToken(builder_, GeneratedTypes.A)
+      result_ = consumeToken(builder_, GeneratedSyntaxElementTypes.A)
       if (!result_) result_ = token_sequence5_0_1(builder_, level_ + 1)
       exit_section_(builder_, marker_, null, result_)
       return result_
@@ -277,7 +277,7 @@ open class Autopin(protected val runtime_: SyntaxGeneratedParserRuntimeBase) {
       if (!recursion_guard_(builder_, level_, "token_sequence5_0_1")) return false
       var result_: Boolean
       val marker_: Marker = enter_section_(builder_, level_, _AND_)
-      result_ = consumeToken(builder_, GeneratedTypes.B)
+      result_ = consumeToken(builder_, GeneratedSyntaxElementTypes.B)
       exit_section_(builder_, level_, marker_, result_, false, null)
       return result_
     }
@@ -286,10 +286,10 @@ open class Autopin(protected val runtime_: SyntaxGeneratedParserRuntimeBase) {
     // '+' a "+" a '+++'
     internal fun token_sequence6(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
       if (!recursion_guard_(builder_, level_, "token_sequence6")) return false
-      if (!nextTokenIs(builder_, GeneratedTypes.PLUS)) return false
+      if (!nextTokenIs(builder_, GeneratedSyntaxElementTypes.PLUS)) return false
       var result_: Boolean
       val marker_: Marker = enter_section_(builder_)
-      result_ = consumeTokens(builder_, 0, GeneratedTypes.PLUS, GeneratedTypes.A, GeneratedTypes.PLUS, GeneratedTypes.A)
+      result_ = consumeTokens(builder_, 0, GeneratedSyntaxElementTypes.PLUS, GeneratedSyntaxElementTypes.A, GeneratedSyntaxElementTypes.PLUS, GeneratedSyntaxElementTypes.A)
       result_ = result_ && consumeToken(builder_, "+++")
       exit_section_(builder_, marker_, null, result_)
       return result_

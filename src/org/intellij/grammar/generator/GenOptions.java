@@ -65,4 +65,8 @@ public class GenOptions {
     generateElementCase = ParserGeneratorUtil.enumFromString(genOptions.get("element-case"), Case.UPPER);
     javaVersion = StringUtil.parseInt(genOptions.get("java"), 11);
   }
+  
+  public static boolean UseSyntaxApi(Map<String, String> genOptions){
+    return "syntax".equals(genOptions.get("parser-api"));
+  }
 }

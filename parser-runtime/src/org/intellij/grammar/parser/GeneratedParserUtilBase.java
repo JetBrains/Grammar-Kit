@@ -835,7 +835,7 @@ public class GeneratedParserUtilBase {
     }
 
     public @Nullable String convertItem(Object o) {
-      return o instanceof Object[] ? join((Object[]) o, this, " ") : o.toString();
+      return o instanceof Object[] objects ? join(objects, this, " ") : o.toString();
     }
 
     @Override

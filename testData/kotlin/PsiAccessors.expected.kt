@@ -1,97 +1,92 @@
 // ---- PsiAccessors.kt -----------------
 //header.txt
-import com.intellij.platform.syntax.parser.SyntaxTreeBuilder
-import com.intellij.platform.syntax.parser.SyntaxTreeBuilder.Marker
 import generated.GeneratedSyntaxElementTypes
+import com.intellij.platform.syntax.util.runtime.*
+import com.intellij.platform.syntax.parser.SyntaxTreeBuilder.Marker
+import com.intellij.platform.syntax.SyntaxElementTypeSet
+import com.intellij.platform.syntax.syntaxElementTypeSetOf
 import com.intellij.platform.syntax.SyntaxElementType
-import com.intellij.platform.syntax.util.SyntaxGeneratedParserRuntimeBase
 
 @Suppress("unused", "FunctionName", "JoinDeclarationAndAssignment")
-open class PsiAccessors(protected val runtime_: SyntaxGeneratedParserRuntimeBase) {
+object PsiAccessors {
 
-  fun parse(root_: SyntaxElementType, builder_: SyntaxTreeBuilder) {
+  fun parse(root_: SyntaxElementType, runtime_: SyntaxGeneratedParserRuntime) {
     var result_: Boolean
-    val builder_ = adapt_builder_(root_, builder_, this, null)
-    val marker_: Marker = enter_section_(builder_, 0, _COLLAPSE_, null)
-    result_ = parse_root_(root_, builder_)
-    exit_section_(builder_, 0, marker_, root_, result_, true, TRUE_CONDITION)
+    runtime_.init(::parse, null)
+    val marker_: Marker = runtime_.enter_section_(0, Modifiers._COLLAPSE_, null)
+    result_ = parse_root_(root_, runtime_, 0)
+    runtime_.exit_section_(0, marker_, root_, result_, true, TRUE_CONDITION)
   }
 
-  protected fun parse_root_(root_: SyntaxElementType, builder_: SyntaxTreeBuilder): Boolean {
-    return parse_root_(root_, builder_, 0)
+  internal fun parse_root_(root_: SyntaxElementType, runtime_: SyntaxGeneratedParserRuntime, level_: Int): Boolean {
+    var result_: Boolean
+    if (root_ == GeneratedSyntaxElementTypes.EXPRESSION) {
+      result_ = expression(runtime_, level_ + 1)
+    }
+    else {
+      result_ = root(runtime_, level_ + 1)
+    }
+    return result_
   }
 
-  companion object {
-    internal fun parse_root_(root_: SyntaxElementType, builder_: SyntaxTreeBuilder, level_: Int): Boolean {
-      var result_: Boolean
-      if (root_ == GeneratedSyntaxElementTypes.EXPRESSION) {
-        result_ = expression(builder_, level_ + 1)
-      }
-      else {
-        result_ = root(builder_, level_ + 1)
-      }
-      return result_
-    }
-
-    /* ********************************************************** */
-    // expression operator expression
-    fun binary(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
-      if (!recursion_guard_(builder_, level_, "binary")) return false
-      if (!nextTokenIs(builder_, GeneratedSyntaxElementTypes.ID)) return false
-      var result_: Boolean
-      var pinned_: Boolean
-      val marker_: Marker = enter_section_(builder_, level_, _NONE_, GeneratedSyntaxElementTypes.BINARY, null)
-      result_ = expression(builder_, level_ + 1)
-      result_ = result_ && `operator_$`(builder_, level_ + 1)
-      pinned_ = result_ // pin = operator
-      result_ = result_ && expression(builder_, level_ + 1)
-      exit_section_(builder_, level_, marker_, result_, pinned_, null)
-      return result_ || pinned_
-    }
-
-    /* ********************************************************** */
-    // value '*' value
-    fun expression(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
-      if (!recursion_guard_(builder_, level_, "expression")) return false
-      if (!nextTokenIs(builder_, GeneratedSyntaxElementTypes.ID)) return false
-      var result_: Boolean
-      val marker_: Marker = enter_section_(builder_)
-      result_ = `value_$`(builder_, level_ + 1)
-      result_ = result_ && consumeToken(builder_, "*")
-      result_ = result_ && `value_$`(builder_, level_ + 1)
-      exit_section_(builder_, marker_, GeneratedSyntaxElementTypes.EXPRESSION, result_)
-      return result_
-    }
-
-    /* ********************************************************** */
-    // '+' | '-'
-    fun `operator_$`(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
-      if (!recursion_guard_(builder_, level_, "`operator_$`")) return false
-      var result_: Boolean
-      val marker_: Marker = enter_section_(builder_, level_, _NONE_, GeneratedSyntaxElementTypes.OPERATOR, "<operator>")
-      result_ = consumeToken(builder_, "+")
-      if (!result_) result_ = consumeToken(builder_, "-")
-      exit_section_(builder_, level_, marker_, result_, false, null)
-      return result_
-    }
-
-    /* ********************************************************** */
-    // binary
-    internal fun root(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
-      return binary(builder_, level_ + 1)
-    }
-
-    /* ********************************************************** */
-    // id
-    fun `value_$`(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
-      if (!recursion_guard_(builder_, level_, "`value_$`")) return false
-      if (!nextTokenIs(builder_, GeneratedSyntaxElementTypes.ID)) return false
-      var result_: Boolean
-      val marker_: Marker = enter_section_(builder_)
-      result_ = consumeToken(builder_, GeneratedSyntaxElementTypes.ID)
-      exit_section_(builder_, marker_, GeneratedSyntaxElementTypes.VALUE, result_)
-      return result_
-    }
-
+  /* ********************************************************** */
+  // expression operator expression
+  fun binary(runtime_: SyntaxGeneratedParserRuntime, level_: Int): Boolean {
+    if (!runtime_.recursion_guard_(level_, "binary")) return false
+    if (!runtime_.nextTokenIs(GeneratedSyntaxElementTypes.ID)) return false
+    var result_: Boolean
+    var pinned_: Boolean
+    val marker_: Marker = runtime_.enter_section_(level_, Modifiers._NONE_, GeneratedSyntaxElementTypes.BINARY, null)
+    result_ = expression(runtime_, level_ + 1)
+    result_ = result_ && `operator_$`(runtime_, level_ + 1)
+    pinned_ = result_ // pin = operator
+    result_ = result_ && expression(runtime_, level_ + 1)
+    runtime_.exit_section_(level_, marker_, result_, pinned_, null)
+    return result_ || pinned_
   }
+
+  /* ********************************************************** */
+  // value '*' value
+  fun expression(runtime_: SyntaxGeneratedParserRuntime, level_: Int): Boolean {
+    if (!runtime_.recursion_guard_(level_, "expression")) return false
+    if (!runtime_.nextTokenIs(GeneratedSyntaxElementTypes.ID)) return false
+    var result_: Boolean
+    val marker_: Marker = runtime_.enter_section_()
+    result_ = `value_$`(runtime_, level_ + 1)
+    result_ = result_ && runtime_.consumeToken("*")
+    result_ = result_ && `value_$`(runtime_, level_ + 1)
+    runtime_.exit_section_(marker_, GeneratedSyntaxElementTypes.EXPRESSION, result_)
+    return result_
+  }
+
+  /* ********************************************************** */
+  // '+' | '-'
+  fun `operator_$`(runtime_: SyntaxGeneratedParserRuntime, level_: Int): Boolean {
+    if (!runtime_.recursion_guard_(level_, "`operator_$`")) return false
+    var result_: Boolean
+    val marker_: Marker = runtime_.enter_section_(level_, Modifiers._NONE_, GeneratedSyntaxElementTypes.OPERATOR, "<operator>")
+    result_ = runtime_.consumeToken("+")
+    if (!result_) result_ = runtime_.consumeToken("-")
+    runtime_.exit_section_(level_, marker_, result_, false, null)
+    return result_
+  }
+
+  /* ********************************************************** */
+  // binary
+  internal fun root(runtime_: SyntaxGeneratedParserRuntime, level_: Int): Boolean {
+    return binary(runtime_, level_ + 1)
+  }
+
+  /* ********************************************************** */
+  // id
+  fun `value_$`(runtime_: SyntaxGeneratedParserRuntime, level_: Int): Boolean {
+    if (!runtime_.recursion_guard_(level_, "`value_$`")) return false
+    if (!runtime_.nextTokenIs(GeneratedSyntaxElementTypes.ID)) return false
+    var result_: Boolean
+    val marker_: Marker = runtime_.enter_section_()
+    result_ = runtime_.consumeToken(GeneratedSyntaxElementTypes.ID)
+    runtime_.exit_section_(marker_, GeneratedSyntaxElementTypes.VALUE, result_)
+    return result_
+  }
+
 }

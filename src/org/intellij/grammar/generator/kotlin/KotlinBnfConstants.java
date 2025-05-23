@@ -12,10 +12,14 @@ public interface KotlinBnfConstants {
   @NotNull String KT_ELEMENT_TYPE_CLASS = "com.intellij.platform.syntax.SyntaxElementType";
   @NotNull String KT_BUILDER_CLASS = "com.intellij.platform.syntax.parser.SyntaxTreeBuilder";
 
-  @NotNull String KT_SET_CLASS = "kotlin.collections.Set";
-  @NotNull String KT_SET_OF_FUNCTION = "kotlin.collections.setOf";
   @NotNull String KT_ARRAY_CLASS = "kotlin.Array";
   @NotNull String KT_ARRAY_OF_FUNCTION = "kotlin.arrayOf";
 
-  @NotNull String KT_PARSER_RUNTIME_CLASS = "com.intellij.platform.syntax.util.SyntaxGeneratedParserRuntimeBase";
+  @NotNull String KT_RUNTIME_PACKAGE = "com.intellij.platform.syntax.util.runtime";
+  @NotNull String KT_PARSER_RUNTIME_CLASS = "com.intellij.platform.syntax.util.runtime.SyntaxGeneratedParserRuntime";
+
+  @NotNull String KT_SYNTAX_ELEMENT_TYPE_SET_CLASS = "com.intellij.platform.syntax.SyntaxElementTypeSet";
+  @NotNull String KT_SYNTAX_ELEMENT_TYPE_SET_OF_FUNCTION = "com.intellij.platform.syntax.syntaxElementTypeSetOf";
+
+  @NotNull String KT_MODIFIERS_CLASS = "com.intellij.platform.syntax.util.runtime.Modifiers";
 }

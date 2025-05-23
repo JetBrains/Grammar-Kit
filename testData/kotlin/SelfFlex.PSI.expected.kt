@@ -3,6 +3,8 @@
 package org.intellij.jflex
 
 import com.intellij.platform.syntax.SyntaxElementType
+import com.intellij.platform.syntax.SyntaxElementTypeSet
+import com.intellij.platform.syntax.syntaxElementTypeSetOf
 
 object JFlexTypes {
   val FLEX_CHAR_RANGE = SyntaxElementType("FLEX_CHAR_RANGE")

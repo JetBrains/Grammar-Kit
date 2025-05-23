@@ -3,6 +3,8 @@
 package generated
 
 import com.intellij.platform.syntax.SyntaxElementType
+import com.intellij.platform.syntax.SyntaxElementTypeSet
+import com.intellij.platform.syntax.syntaxElementTypeSetOf
 
 object GeneratedSyntaxElementTypes {
   val ANOTHER_THREE_TOKENS = SyntaxElementType("ANOTHER_THREE_TOKENS")
@@ -33,22 +35,22 @@ object GeneratedSyntaxElementTypes {
   val P3 = SyntaxElementType("P3")
   val S = SyntaxElementType("S")
 
-  val ANOTHER_THREE_TOKENS_TOKENS: Set<SyntaxElementType> = setOf(A, B, D)
-  val FAST_CHOICE_TOKENS: Set<SyntaxElementType> = setOf(A, B, F)
-  val FIVE_TOKENS_CHOICE_TOKENS: Set<SyntaxElementType> = setOf(
+  val ANOTHER_THREE_TOKENS_TOKENS: SyntaxElementTypeSet = syntaxElementTypeSetOf(A, B, D)
+  val FAST_CHOICE_TOKENS: SyntaxElementTypeSet = syntaxElementTypeSetOf(A, B, F)
+  val FIVE_TOKENS_CHOICE_TOKENS: SyntaxElementTypeSet = syntaxElementTypeSetOf(
       A, B, C, D, 
       E
   )
-  val FOUR_TOKENS_CHOICE_TOKENS: Set<SyntaxElementType> = setOf(A, B, C, D)
-  val PARENTHESIZED_CHOICE_TOKENS: Set<SyntaxElementType> = setOf(A, B, C)
-  val PRIVATE_CHOICE_TOKENS: Set<SyntaxElementType> = setOf(P0, P1, P2, P3)
-  val REPEATING_TOKENS_CHOICE_TOKENS: Set<SyntaxElementType> = FOUR_TOKENS_CHOICE_TOKENS
-  val SMART_CHOICE_TOKENS: Set<SyntaxElementType> = setOf(A, B, S)
-  val TEN_TOKENS_CHOICE_TOKENS: Set<SyntaxElementType> = setOf(
+  val FOUR_TOKENS_CHOICE_TOKENS: SyntaxElementTypeSet = syntaxElementTypeSetOf(A, B, C, D)
+  val PARENTHESIZED_CHOICE_TOKENS: SyntaxElementTypeSet = syntaxElementTypeSetOf(A, B, C)
+  val PRIVATE_CHOICE_TOKENS: SyntaxElementTypeSet = syntaxElementTypeSetOf(P0, P1, P2, P3)
+  val REPEATING_TOKENS_CHOICE_TOKENS: SyntaxElementTypeSet = FOUR_TOKENS_CHOICE_TOKENS
+  val SMART_CHOICE_TOKENS: SyntaxElementTypeSet = syntaxElementTypeSetOf(A, B, S)
+  val TEN_TOKENS_CHOICE_TOKENS: SyntaxElementTypeSet = syntaxElementTypeSetOf(
       A, B, C, D, 
       E, F, G, H, 
       I, J
   )
-  val THREE_TOKENS_CHOICE_TOKENS: Set<SyntaxElementType> = PARENTHESIZED_CHOICE_TOKENS
-  val THREE_TOKENS_IN_ANOTHER_ORDER_TOKENS: Set<SyntaxElementType> = PARENTHESIZED_CHOICE_TOKENS
+  val THREE_TOKENS_CHOICE_TOKENS: SyntaxElementTypeSet = PARENTHESIZED_CHOICE_TOKENS
+  val THREE_TOKENS_IN_ANOTHER_ORDER_TOKENS: SyntaxElementTypeSet = PARENTHESIZED_CHOICE_TOKENS
 }

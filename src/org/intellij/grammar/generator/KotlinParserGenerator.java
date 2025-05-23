@@ -102,7 +102,7 @@ public final class KotlinParserGenerator extends Generator {
    * Contains information regarding all the tokens in the grammar.
    * The entries are divided into two categories:
    * 1. Token entries based on the `tokens` attribute in the grammar.
-   *    These entries are *reversed* and map the token text to the token name.
+   * These entries are *reversed* and map the token text to the token name.
    * 2.
    */
   private final Map<String, String> mySimpleTokens;
@@ -111,6 +111,7 @@ public final class KotlinParserGenerator extends Generator {
   private final BnfFirstNextAnalyzer myFirstNextAnalyzer;
   private final JavaHelper myJavaHelper;
   private final @NotNull KotlinRenderer R = KotlinRenderer.INSTANCE;
+  final @NotNull GenOptions G;
 
   public KotlinParserGenerator(@NotNull BnfFile psiFile,
                                @NotNull String sourcePath,
@@ -120,6 +121,7 @@ public final class KotlinParserGenerator extends Generator {
   ) {
     super(psiFile, sourcePath, outputPath, packagePrefix, "kt", outputOpener);
 
+    G = new GenOptions(psiFile);
     N = G.names;
     C = KotlinPlatformConstants.DEFAULT_CONSTANTS;
 
@@ -158,7 +160,7 @@ public final class KotlinParserGenerator extends Generator {
   }
 
   private @NotNull NodeCall getConsumeTextToken(@NotNull ConsumeType consumeType, @NotNull String tokenText) {
-    return new ConsumeTokenCall(consumeType, "\"" + tokenText + "\"", N.builder);
+    return new KotlinConsumeTokenCall(consumeType, "\"" + tokenText + "\"", N);
   }
 
   private @NotNull String shortElementTypesHolderName() {
@@ -283,28 +285,13 @@ public final class KotlinParserGenerator extends Generator {
     out("%s(\"unused\", \"FunctionName\", \"JoinDeclarationAndAssignment\")", nameShortener.shorten(KotlinBnfConstants.KT_SUPPRESS_ANNO));
 
     // type header itself
-    if (isRootParser) {
-      out(
-        "open class %s(protected val %s: %s) {",
-        StringUtil.getShortName(parserClass),
-        nameShortener.shorten(N.runtime),
-        nameShortener.shorten(KotlinBnfConstants.KT_PARSER_RUNTIME_CLASS)
-      );
-    }
-    else {
-      out("open class %s {", StringUtil.getShortName(parserClass));
-    }
+    out("object %s {", StringUtil.getShortName(parserClass));
     newLine();
 
     myShortener = nameShortener;
 
     if (isRootParser) {
-      generateRootParserNonStatics();
-      out("companion object {");
-      generateRootParserStatics();
-    }
-    else {
-      out("companion object {");
+      generateRootParserDefinitions();
     }
 
     for (String ruleName : ownRuleNames) {
@@ -330,42 +317,46 @@ public final class KotlinParserGenerator extends Generator {
     if (addNewLine) newLine();
     generateMetaMethodFields();
 
-    out("}"); // closes the companion object
-    out("}"); // closes the class itself
+    out("}");
+  }
+
+  private void generateRootParserDefinitions() {
+    generateParse();
+    generateParseRoot();
+
+    List<Set<String>> extendsSet = createExtendsSet(myGraphHelper.getRuleExtendsMap());
+    if (!extendsSet.isEmpty()) {
+      generateExtendsSet(extendsSet);
+      newLine();
+    }
   }
 
   /**
-   * Generates all the root parser methods that aren't in the companion object.
+   * Generates the main parse() method.
    */
-  private void generateRootParserNonStatics() {
+  private void generateParse() {
     final var shortElementType = shorten(KotlinBnfConstants.KT_ELEMENT_TYPE_CLASS);
-    final var shortBuilder = shorten(C.SyntaxTreeBuilderClass());
     final var shortMarker = !G.generateFQN ? "Marker" : C.SyntaxTreeBuilderClass() + ".Marker";
+    final var shortRuntime = shorten(KotlinBnfConstants.KT_PARSER_RUNTIME_CLASS);
+    final var shortModifiers = shorten(KotlinBnfConstants.KT_MODIFIERS_CLASS);
     List<Set<String>> extendsSet = createExtendsSet(myGraphHelper.getRuleExtendsMap());
     final var generateExtendsSets = !extendsSet.isEmpty();
 
-    // TODO: change to the new utils API
     // parse() method
-    out("fun parse(%s: %s, %s: %s) {", N.root, shortElementType, N.builder, shortBuilder);
+    out("fun parse(%s: %s, %s: %s) {", N.root, shortElementType, N.runtime, shortRuntime);
     out("var %s: Boolean", N.result);
-    out("val %s = adapt_builder_(%s, %s, this, %s)", N.builder, N.root, N.builder, generateExtendsSets ? "EXTENDS_SETS_" : null);
-    out("val %s: %s = enter_section_(%s, 0, _COLLAPSE_, null)", N.marker, shortMarker, N.builder);
-    out("%s = parse_root_(%s, %s)", N.result, N.root, N.builder);
-    out("exit_section_(%s, 0, %s, %s, %s, true, TRUE_CONDITION)", N.builder, N.marker, N.root, N.result);
-    out("}");
-    newLine();
-
-    // main parse_root_() method
-    out("protected fun parse_root_(%s: %s, %s: %s): Boolean {", N.root, shortElementType, N.builder, shortBuilder);
-    out("return parse_root_(%s, %s, 0)", N.root, N.builder);
+    out("%s.init(::parse, %s)", N.runtime, generateExtendsSets ? "EXTENDS_SETS_" : null);
+    out("val %s: %s = %s.enter_section_(0, %s._COLLAPSE_, null)", N.marker, shortMarker, N.runtime, shortModifiers);
+    out("%s = parse_root_(%s, %s, 0)", N.result, N.root, N.runtime);
+    out("%s.exit_section_(0, %s, %s, %s, true, TRUE_CONDITION)", N.runtime, N.marker, N.root, N.result);
     out("}");
     newLine();
   }
 
   /**
-   * Generates all the root parser methods that are in the companion object.
+   * Generates the parse_root_() method.
    */
-  private void generateRootParserStatics() {
+  private void generateParseRoot() {
     final var rootRule = myFile.getRule(myGrammarRoot);
     final var extraRoots = new ArrayList<BnfRule>();
     for (final var ruleName : myRuleInfos.keySet()) {
@@ -380,11 +371,9 @@ public final class KotlinParserGenerator extends Generator {
     }
 
     final var shortElementType = shorten(KotlinBnfConstants.KT_ELEMENT_TYPE_CLASS);
-    final var shortBuilder = shorten(C.SyntaxTreeBuilderClass());
-    List<Set<String>> extendsSet = createExtendsSet(myGraphHelper.getRuleExtendsMap());
-    boolean generateExtendsSets = !extendsSet.isEmpty();
+    final var shortRuntime = shorten(KotlinBnfConstants.KT_PARSER_RUNTIME_CLASS);
 
-    out("internal fun parse_root_(%s: %s, %s: %s, %s: Int): Boolean {", N.root, shortElementType, N.builder, shortBuilder, N.level);
+    out("internal fun parse_root_(%s: %s, %s: %s, %s: Int): Boolean {", N.root, shortElementType, N.runtime, shortRuntime, N.level);
     if (extraRoots.isEmpty()) {
       out("return %s", rootRule == null ? "false" : createNodeCall(rootRule, null, myGrammarRoot).render(R));
     }
@@ -406,19 +395,13 @@ public final class KotlinParserGenerator extends Generator {
     }
     out("}");
     newLine();
-
-    // let's assume we're in a companion object here already
-    if (generateExtendsSets) {
-      generateExtendsSet(extendsSet);
-      newLine();
-    }
   }
 
   /**
    * Generates a method corresponding to a given rule.
-   * This method *must* be enclosed in a companion object.
    */
   private void generateNode(BnfRule rule, @NotNull BnfExpression initialNode, String funcName, Set<BnfExpression> visited) {
+    final var shortModifiers = shorten(KotlinBnfConstants.KT_MODIFIERS_CLASS);
     boolean isRule = initialNode.getParent() == rule;
     BnfExpression node = getNonTrivialNode(initialNode);
 
@@ -471,7 +454,8 @@ public final class KotlinParserGenerator extends Generator {
     else {
       access = "";
     }
-    out("%sfun %s(%s: %s, %s: Int%s): Boolean {", access, funcName, N.builder, shorten(C.SyntaxTreeBuilderClass()), N.level,
+    out("%sfun %s(%s: %s, %s: Int%s): Boolean {", access, funcName, N.runtime, shorten(KotlinBnfConstants.KT_PARSER_RUNTIME_CLASS),
+        N.level,
         extraParameters);
     if (isSingleNode) {
       if (isPrivate && !isLeftInner && recoverWhile == null && frameName == null) {
@@ -490,7 +474,7 @@ public final class KotlinParserGenerator extends Generator {
     }
 
     if (!children.isEmpty()) {
-      out("if (!recursion_guard_(%s, %s, \"%s\")) return false", N.builder, N.level, /*R.unwrapFuncName*/(funcName));
+      out("if (!%s.recursion_guard_(%s, \"%s\")) return false", N.runtime, N.level, /*R.unwrapFuncName*/(funcName));
     }
 
     if (recoverWhile == null && (isRule || isFirstNonTrivial)) {
@@ -525,20 +509,24 @@ public final class KotlinParserGenerator extends Generator {
     boolean sectionRequiredSimple = sectionRequired && modifierList.isEmpty() && recoverWhile == null && frameName == null;
     boolean sectionMaybeDropped = sectionRequiredSimple && type == BNF_CHOICE && elementTypeRef == null &&
                                   !ContainerUtil.exists(children, o -> isRollbackRequired(o, myFile));
-    String modifiers = modifierList.isEmpty() ? "_NONE_" : StringUtil.join(modifierList, " or ");
+    String modifiers = modifierList.isEmpty() ? shortModifiers + "._NONE_" : StringUtil.join(
+      ContainerUtil.map(modifierList, modifier ->
+        shortModifiers + "." + modifier
+      ), " or "
+    );
     String shortMarker = !G.generateFQN ? "Marker" : C.SyntaxTreeBuilderClass() + ".Marker";
     if (sectionRequiredSimple) {
       if (!sectionMaybeDropped) {
-        out("val %s: %s = enter_section_(%s)", N.marker, shortMarker, N.builder);
+        out("val %s: %s = %s.enter_section_()", N.marker, shortMarker, N.runtime);
       }
     }
     else if (sectionRequired) {
       boolean shortVersion = frameName == null && elementTypeRef == null;
       if (shortVersion) {
-        out("val %s: %s = enter_section_(%s, %s, %s)", N.marker, shortMarker, N.builder, N.level, modifiers);
+        out("val %s: %s = %s.enter_section_(%s, %s)", N.marker, shortMarker, N.runtime, N.level, modifiers);
       }
       else {
-        out("val %s: %s = enter_section_(%s, %s, %s, %s, %s)", N.marker, shortMarker, N.builder, N.level, modifiers,
+        out("val %s: %s = %s.enter_section_(%s, %s, %s, %s)", N.marker, shortMarker, N.runtime, N.level, modifiers,
             elementTypeRef,
             frameName);
       }
@@ -579,10 +567,10 @@ public final class KotlinParserGenerator extends Generator {
                 }
               }
               else if (i == p + 1) {
-                out("%s = %s && report_error_(%s, %s)", N.result, N.result, N.builder, nodeCall.render(R));
+                out("%s = %s && %s.report_error_(%s)", N.result, N.result, N.runtime, nodeCall.render(R));
               }
               else {
-                out("%s = %s && report_error_(%s, %s) && %s", N.result, N.pinned, N.builder, nodeCall.render(R),
+                out("%s = %s && %s.report_error_(%s) && %s", N.result, N.pinned, N.runtime, nodeCall.render(R),
                     N.result);
               }
             }
@@ -609,9 +597,9 @@ public final class KotlinParserGenerator extends Generator {
           out("%s = %s", N.result, nodeCall.render(R));
         }
         out("while (%s) {", alwaysTrue ? "true" : N.result);
-        out("val %s: Int = current_position_(%s)", N.pos, N.builder);
+        out("val %s: Int = %s.current_position_()", N.pos, N.runtime);
         out("if (!%s) break", nodeCall.render(R));
-        out("if (!empty_element_parsed_guard_(%s, \"%s\", %s)) break", N.builder, funcName, N.pos);
+        out("if (!%s.empty_element_parsed_guard_(\"%s\", %s)) break", N.runtime, funcName, N.pos);
         out("}");
       }
       else if (type == BNF_OP_AND) {
@@ -630,12 +618,12 @@ public final class KotlinParserGenerator extends Generator {
       if (!hooks.isEmpty()) {
         for (Map.Entry<String, String> entry : hooks.entrySet()) {
           String hookName = R.toIdentifier(entry.getKey(), null, Case.UPPER);
-          out("register_hook_(%s, %s, %s)", N.builder, hookName, entry.getValue());
+          out("%s.register_hook_(%s, %s)", N.runtime, hookName, entry.getValue());
         }
       }
       if (sectionRequiredSimple) {
         if (!sectionMaybeDropped) {
-          out("exit_section_(%s, %s, %s, %s)", N.builder, N.marker, elementTypeRef, resultRef);
+          out("%s.exit_section_(%s, %s, %s)", N.runtime, N.marker, elementTypeRef, resultRef);
         }
       }
       else {
@@ -656,7 +644,7 @@ public final class KotlinParserGenerator extends Generator {
         else {
           recoverCall = null;
         }
-        out("exit_section_(%s, %s, %s, %s, %s, %s)", N.builder, N.level, N.marker, resultRef, pinnedRef, recoverCall);
+        out("%s.exit_section_(%s, %s, %s, %s, %s)", N.runtime, N.level, N.marker, resultRef, pinnedRef, recoverCall);
       }
     }
 
@@ -668,9 +656,6 @@ public final class KotlinParserGenerator extends Generator {
     generateNodeChildren(rule, funcName, children, visited);
   }
 
-  /**
-   * *Must* be in a companion object.
-   */
   private void generateExpressionRoot(@NotNull ExpressionInfo info) {
     final var opCalls = buildCallMap(info);
     final var sortedOpCalls = opCalls.keySet();
@@ -683,18 +668,19 @@ public final class KotlinParserGenerator extends Generator {
     String methodName = R.getFuncName(info.rootRule);
     String kernelMethodName = R.getNextName(methodName, 0);
     String frameName = quote(R.getRuleDisplayName(info.rootRule, true));
-    String shortPB = shorten(C.SyntaxTreeBuilderClass());
+    final var shortRuntime = shorten(KotlinBnfConstants.KT_PARSER_RUNTIME_CLASS);
+    final var shortModifiers = shorten(KotlinBnfConstants.KT_MODIFIERS_CLASS);
     String shortMarker = !G.generateFQN ? "Marker" : C.SyntaxTreeBuilderClass() + ".Marker";
-    out("fun %s(%s: %s, %s: Int, %s: Int): Boolean {", methodName, N.builder, shortPB, N.level, N.priority);
-    out("if (!recursion_guard_(%s, %s, \"%s\")) return false", N.builder, N.level, methodName);
+    out("fun %s(%s: %s, %s: Int, %s: Int): Boolean {", methodName, N.runtime, shortRuntime, N.level, N.priority);
+    out("if (!%s.recursion_guard_(%s, \"%s\")) return false", N.runtime, N.level, methodName);
 
     if (frameName != null) {
-      out("addVariant(%s, %s)", N.builder, frameName);
+      out("%s.addVariant(%s)", N.runtime, frameName);
     }
     generateFirstCheck(info.rootRule, frameName, true);
     out("var %s: Boolean", N.result);
     out("var %s: Boolean", N.pinned);
-    out("val %s: %s = enter_section_(%s, %s, _NONE_, %s)", N.marker, shortMarker, N.builder, N.level, frameName);
+    out("val %s: %s = %s.enter_section_(%s, %s._NONE_, %s)", N.marker, shortMarker, N.runtime, N.level, shortModifiers, frameName);
 
     boolean first = true;
     for (String opCall : sortedOpCalls) {
@@ -710,18 +696,18 @@ public final class KotlinParserGenerator extends Generator {
     }
 
     out("%s = %s", N.pinned, N.result);
-    out("%s = %s && %s(%s, %s + 1, %s)", N.result, N.result, kernelMethodName, N.builder, N.level, N.priority);
-    out("exit_section_(%s, %s, %s, null, %s, %s, null)", N.builder, N.level, N.marker, N.result, N.pinned);
+    out("%s = %s && %s(%s, %s + 1, %s)", N.result, N.result, kernelMethodName, N.runtime, N.level, N.priority);
+    out("%s.exit_section_(%s, %s, null, %s, %s, null)", N.runtime, N.level, N.marker, N.result, N.pinned);
     out("return %s || %s", N.result, N.pinned);
     out("}");
     newLine();
 
     // kernel
-    out("fun %s(%s: %s, %s: Int, %s: Int): Boolean {", kernelMethodName, shortPB, N.builder, N.level, N.priority);
-    out("if (!recursion_guard_(%s, %s, \"%s\")) return false", N.builder, N.level, kernelMethodName);
+    out("fun %s(%s: %s, %s: Int, %s: Int): Boolean {", kernelMethodName, shortRuntime, N.runtime, N.level, N.priority);
+    out("if (!%s.recursion_guard_(%s, \"%s\")) return false", N.runtime, N.level, kernelMethodName);
     out("var %s = true", N.result);
     out("while (true) {");
-    out("val %s: %s = enter_section_(%s, %s, _LEFT_, null)", N.marker, shortMarker, N.builder, N.level);
+    out("val %s: %s = %s.enter_section_(%s, %s._LEFT_, null)", N.marker, shortMarker, N.runtime, N.level, shortModifiers);
 
     first = true;
     for (String opCall : sortedOpCalls) {
@@ -738,7 +724,7 @@ public final class KotlinParserGenerator extends Generator {
       String substCheck = "";
       if (operator.arg1 != null) {
         substCheck =
-          format(" && leftMarkerIs(%s, %s)", N.builder, shortElementTypesHolderName() + "." + getElementType(operator.arg1));
+          format(" && %s.leftMarkerIs(%s)", N.runtime, shortElementTypesHolderName() + "." + getElementType(operator.arg1));
       }
       out("%sif (%s < %d%s && %s) {", first ? "" : "else ", N.priority, priority, substCheck, opCall);
       first = false;
@@ -748,29 +734,29 @@ public final class KotlinParserGenerator extends Generator {
         operator.rule, operator.tail, R.getNextName(R.getFuncName(operator.rule), 1), ConsumeType.DEFAULT
       ).render(R);
       if (operator.type == OperatorType.BINARY) {
-        String argCall = format("%s(%s, %s, %d)", methodName, N.builder, N.level, rightAssociative ? argPriority - 1 : argPriority);
-        out("%s = %s", N.result, tailCall == null ? argCall : format("report_error_(%s, %s)", N.builder, argCall));
+        String argCall = format("%s(%s, %s, %d)", methodName, N.runtime, N.level, rightAssociative ? argPriority - 1 : argPriority);
+        out("%s = %s", N.result, tailCall == null ? argCall : format("%s.report_error_(%s)", N.runtime, argCall));
         if (tailCall != null) out("%s = %s && %s", N.result, tailCall, N.result);
       }
       else if (operator.type == OperatorType.N_ARY) {
         boolean checkEmpty = info.checkEmpty.contains(operator);
         if (checkEmpty) {
-          out("val %s: Int = current_position_(%s)", N.pos, N.builder);
+          out("val %s: Int = %s.current_position_()", N.pos, N.runtime);
         }
         out("while (true) {");
-        out("%s = report_error_(%s, %s(%s, %s, %d))", N.result, N.builder, methodName, N.builder, N.level, argPriority);
+        out("%s = %s.report_error_(%s(%s, %s, %d))", N.result, N.runtime, methodName, N.runtime, N.level, argPriority);
         if (tailCall != null) out("%s = %s && %s", N.result, tailCall, N.result);
         out("if (!%s) break", opCall);
         if (checkEmpty) {
-          out("if (!empty_element_parsed_guard_(%s, \"%s\", %s)) break", N.builder, operator.rule.getName(), N.pos);
-          out("%s = current_position_(%s)", N.pos, N.builder);
+          out("if (!%s.empty_element_parsed_guard_(\"%s\", %s)) break", N.runtime, operator.rule.getName(), N.pos);
+          out("%s = %s.current_position_()", N.pos, N.runtime);
         }
         out("}");
       }
       else if (operator.type == OperatorType.POSTFIX) {
         out("%s = true", N.result);
       }
-      out("exit_section_(%s, %s, %s, %s, %s, true, null)", N.builder, N.level, N.marker, elementType, N.result);
+      out("%s.exit_section_(%s, %s, %s, %s, true, null)", N.runtime, N.level, N.marker, elementType, N.result);
       out("}");
     }
     if (first) {
@@ -779,7 +765,7 @@ public final class KotlinParserGenerator extends Generator {
     }
     else {
       out("else {");
-      out("exit_section_(%s, %s, %s, null, false, false, null)", N.builder, N.level, N.marker);
+      out("%s.exit_section_(%s, %s, null, false, false, null)", N.runtime, N.level, N.marker);
       out("break");
       out("}");
     }
@@ -800,12 +786,12 @@ public final class KotlinParserGenerator extends Generator {
         else if (operator.type == OperatorType.PREFIX) {
           newLine();
           String operatorFuncName = operator.rule.getName();
-          out("fun %s(%s: %s, %s: Int): Boolean {", operatorFuncName, shortPB, N.builder, N.level);
-          out("if (!recursion_guard_(%s, %s, \"%s\")) return false", N.builder, N.level, operatorFuncName);
+          out("fun %s(%s: %s, %s: Int): Boolean {", operatorFuncName, shortRuntime, N.runtime, N.level);
+          out("if (!%s.recursion_guard_(%s, \"%s\")) return false", N.runtime, N.level, operatorFuncName);
           generateFirstCheck(operator.rule, frameName, false);
           out("var %s: Boolean", N.result);
           out("var %s: Boolean", N.pinned);
-          out("val %s: %s = enter_section_(%s, %s, _NONE_, null)", N.marker, shortMarker, N.builder, N.level);
+          out("val %s: %s = %s.enter_section_(%s, %s._NONE_, null)", N.marker, shortMarker, N.runtime, N.level, shortModifiers);
 
           String elementType = getElementType(operator.rule);
           String tailCall = (operator.tail == null) ? null : createNodeCall(
@@ -817,14 +803,14 @@ public final class KotlinParserGenerator extends Generator {
           int priority = info.getPriority(operator.rule);
           int arg1Priority = operator.arg1 == null ? -1 : info.getPriority(operator.arg1);
           int argPriority = arg1Priority == -1 ? (priority == info.nextPriority - 1 ? -1 : priority) : arg1Priority - 1;
-          out("%s = %s && %s(%s, %s, %d)", N.result, N.pinned, methodName, N.builder, N.level, argPriority);
+          out("%s = %s && %s(%s, %s, %d)", N.result, N.pinned, methodName, N.runtime, N.level, argPriority);
           if (tailCall != null) {
-            out("%s = %s && report_error_(%s, %s) && %s", N.result, N.pinned, N.builder, tailCall, N.result);
+            out("%s = %s && %s.report_error_(%s) && %s", N.result, N.pinned, N.runtime, tailCall, N.result);
           }
           String elementTypeRef = StringUtil.isNotEmpty(elementType)
                                   ? shortElementTypesHolderName() + "." + elementType
                                   : "null";
-          out("exit_section_(%s, %s, %s, %s, %s, %s, null)", N.builder, N.level, N.marker, elementTypeRef,
+          out("%s.exit_section_(%s, %s, %s, %s, %s, null)", N.runtime, N.level, N.marker, elementTypeRef,
               N.result, N.pinned);
           out("return %s || %s", N.result, N.pinned);
           out("}");
@@ -849,9 +835,6 @@ public final class KotlinParserGenerator extends Generator {
     return result;
   }
 
-  /**
-   * These *must* be in a companion object.
-   */
   private void generateParserLambdas(@NotNull String parserClass) {
     Map<String, String> reversedLambdas = new HashMap<>();
     take(myParserLambdas).forEach((name, body) -> {
@@ -867,7 +850,6 @@ public final class KotlinParserGenerator extends Generator {
 
   /**
    * Meta-methods are methods that take several {@link Parser Parser} instances as parameters and return another {@link Parser instance}.
-   * These *must* be enclosed in a companion object.
    *
    * @param isRule whether meta-method may be used from another parser classes, and therefore should be accessible,
    *               e.g. it is {@code true} for {@code meta rule ::= <<p>>},
@@ -878,15 +860,12 @@ public final class KotlinParserGenerator extends Generator {
     String parameterList = parameterNames.stream().map("%s: Parser"::formatted).collect(Collectors.joining(", "));
     String argumentList = String.join(", ", parameterNames);
     String metaParserMethodName = R.getWrapperParserMetaMethodName(methodName);
-    String call = format("%s(%s, %s + 1, %s)", methodName, N.builder, N.level, argumentList);
+    String call = format("%s(%s, %s + 1, %s)", methodName, N.runtime, N.level, argumentList);
     out("%s fun %s(%s): Parser {", isRule ? "internal" : "private", metaParserMethodName, parameterList);
     out("return %s", buildParserInstance(call));
     out("}");
   }
 
-  /**
-   * These *must* be surrounded in a companion object.
-   */
   private void generateMetaMethodFields() {
     take(myMetaMethodFields).forEach(
       (field, call) -> out("private val %s: Parser = %s", field, call)
@@ -897,13 +876,12 @@ public final class KotlinParserGenerator extends Generator {
    * Generates the {@code EXTENDS_SETS_} array in the parser.
    */
   private void generateExtendsSet(@NotNull List<Set<String>> extendsSet) {
-    final var shortSet = shorten(KotlinBnfConstants.KT_SET_CLASS);
+    final var shortSet = shorten(KotlinBnfConstants.KT_SYNTAX_ELEMENT_TYPE_SET_CLASS);
     final var shortArray = shorten(KotlinBnfConstants.KT_ARRAY_CLASS);
-    final var shortElementType = shorten(KotlinBnfConstants.KT_ELEMENT_TYPE_CLASS);
     final var shortArrayOf = shorten(KotlinBnfConstants.KT_ARRAY_OF_FUNCTION);
     final var shortElementTypesHolder = shortElementTypesHolderName();
 
-    out("val EXTENDS_SETS_: %s<%s<%s>> = %s(", shortArray, shortSet, shortElementType, shortArrayOf);
+    out("val EXTENDS_SETS_: %s<%s> = %s(", shortArray, shortSet, shortArrayOf);
     final var builder = new StringBuilder();
     for (Set<String> elementTypes : extendsSet) {
       int i = 0;
@@ -955,7 +933,9 @@ public final class KotlinParserGenerator extends Generator {
             ConsumeType consumeType = entry.getKey();
             List<String> tokenTypes = entry.getValue();
             StringBuilder sb = new StringBuilder("!");
-            sb.append("nextTokenIs").append(consumeType.getMethodSuffix()).append("(").append(N.builder).append(", ");
+            sb.append(N.runtime).append(".nextTokenIs")
+              .append(consumeType.getMethodSuffix())
+              .append("(");
             if (!dropFrameName && consumeType == ConsumeType.DEFAULT) sb.append(StringUtil.notNullize(frameName, "\"\"")).append(", ");
             appendTokenTypes(sb, tokenTypes, shortElementTypesHolderName());
             sb.append(")");
@@ -1045,12 +1025,16 @@ public final class KotlinParserGenerator extends Generator {
       newLine();
     }
 
-    final var imports = Set.of(KotlinBnfConstants.KT_ELEMENT_TYPE_CLASS);
+    final var imports = ContainerUtil.newLinkedHashSet(
+      KotlinBnfConstants.KT_ELEMENT_TYPE_CLASS,
+      KotlinBnfConstants.KT_SYNTAX_ELEMENT_TYPE_SET_CLASS,
+      KotlinBnfConstants.KT_SYNTAX_ELEMENT_TYPE_SET_OF_FUNCTION
+    );
     final var includedClasses = collectClasses(imports, packageName);
     final var nameShortener = new KotlinNameShortener(packageName, !G.generateFQN);
     nameShortener.addImports(imports, includedClasses);
 
-    out("import %s", KotlinBnfConstants.KT_ELEMENT_TYPE_CLASS);
+    imports.forEach(name -> out("import %s", name));
     newLine();
 
     final var shortElementType = nameShortener.shorten(KotlinBnfConstants.KT_ELEMENT_TYPE_CLASS);
@@ -1090,19 +1074,18 @@ public final class KotlinParserGenerator extends Generator {
     if (myChoiceTokenSets.isEmpty()) return;
     newLine();
     Map<String, String> reverseMap = new HashMap<>();
-    final var shortSetOf = shortener.shorten(KotlinBnfConstants.KT_SET_OF_FUNCTION);
-    final var shortSetClass = shortener.shorten(KotlinBnfConstants.KT_SET_CLASS);
-    final var shortElementType = shortener.shorten(KotlinBnfConstants.KT_ELEMENT_TYPE_CLASS);
+    final var shortSetOf = shortener.shorten(KotlinBnfConstants.KT_SYNTAX_ELEMENT_TYPE_SET_OF_FUNCTION);
+    final var shortSetClass = shortener.shorten(KotlinBnfConstants.KT_SYNTAX_ELEMENT_TYPE_SET_CLASS);
     myChoiceTokenSets.forEach((name, tokens) -> {
       final var call = "%s(%s)".formatted(shortSetOf, tokenSetString(tokens));
       String alreadyRendered = reverseMap.putIfAbsent(call, name);
-      out("val %s: %s<%s> = %s", name, shortSetClass, shortElementType, ObjectUtils.chooseNotNull(alreadyRendered, call));
+      out("val %s: %s = %s", name, shortSetClass, ObjectUtils.chooseNotNull(alreadyRendered, call));
     });
   }
 
   // endregion Element Types Generation
 
-  // endregion generate* methods 
+  // endregion generate* methods
 
   /**
    * Builds and returns a set of all imports to be included in the parser.
@@ -1110,20 +1093,23 @@ public final class KotlinParserGenerator extends Generator {
   private @NotNull Set<@NotNull String> createImportsSet(boolean isRootParser) {
     final var parserImports = getRootAttribute(myFile, KnownAttribute.PARSER_IMPORTS).asStrings();
     final var imports = new LinkedHashSet<String>();
+    imports.add(myElementTypesHolderName);
+    imports.add(starImport(KotlinBnfConstants.KT_RUNTIME_PACKAGE));
     if (!G.generateFQN) {
-      imports.add(C.SyntaxTreeBuilderClass());
       imports.add(C.SyntaxTreeBuilderClass() + ".Marker");
+      imports.add(KotlinBnfConstants.KT_PARSER_RUNTIME_CLASS);
     }
     else {
       imports.add("#forced");
     }
-    imports.add(myElementTypesHolderName);
     if (!isRootParser) {
       imports.add(myGrammarRootParser);
     }
     else if (!G.generateFQN) {
+      imports.add(KotlinBnfConstants.KT_SYNTAX_ELEMENT_TYPE_SET_CLASS);
+      imports.add(KotlinBnfConstants.KT_SYNTAX_ELEMENT_TYPE_SET_OF_FUNCTION);
       imports.add(KotlinBnfConstants.KT_ELEMENT_TYPE_CLASS);
-      imports.add(KotlinBnfConstants.KT_PARSER_RUNTIME_CLASS);
+      imports.add(KotlinBnfConstants.KT_MODIFIERS_CLASS);
     }
     imports.addAll(parserImports);
     return imports;
@@ -1134,7 +1120,7 @@ public final class KotlinParserGenerator extends Generator {
    * a Parser lambda instance.
    */
   private @NotNull String buildParserInstance(@NotNull String body) {
-    return "Parser { %s, %s -> %s }".formatted(N.builder, N.level, body);
+    return "{ %s, %s -> %s }".formatted(N.runtime, N.level, body);
   }
 
   private @NotNull List<Set<String>> createExtendsSet(@NotNull MultiMap<BnfRule, BnfRule> map) {
@@ -1206,7 +1192,7 @@ public final class KotlinParserGenerator extends Generator {
         break;
       }
     }
-    StringBuilder sb = new StringBuilder(format("!nextTokenIsFast(%s, ", N.builder));
+    StringBuilder sb = new StringBuilder(format("!%s.nextTokenIsFast(", N.runtime));
 
     appendTokenTypes(sb, tokenTypes, shortElementTypesHolderName());
     sb.append(")");
@@ -1263,7 +1249,7 @@ public final class KotlinParserGenerator extends Generator {
                                                     @NotNull NodeCall nodeCall,
                                                     boolean rollbackOnFail,
                                                     ConsumeType consumeType) {
-    if (startIndex == children.size() - 1 || !(nodeCall instanceof ConsumeTokenCall)) return nodeCall;
+    if (startIndex == children.size() - 1 || !(nodeCall instanceof KotlinConsumeTokenCall)) return nodeCall;
     final var list = new ArrayList<String>();
     int pin = pinApplied ? -1 : 0;
     for (int i = startIndex, len = children.size(); i < len; i++) {
@@ -1290,7 +1276,7 @@ public final class KotlinParserGenerator extends Generator {
     skip.set(list.size() - 1);
     String consumeMethodName = (rollbackOnFail ? "parseTokens" : "consumeTokens") +
                                (consumeType == ConsumeType.SMART ? consumeType.getMethodSuffix() : "");
-    return new ConsumeTokensCall(consumeMethodName, N.builder, pin, list);
+    return new KotlinConsumeTokensCall(consumeMethodName, N.runtime, pin, list);
   }
 
   private @Nullable NodeCall createTokenChoiceCall(@NotNull List<BnfExpression> children,
@@ -1309,7 +1295,7 @@ public final class KotlinParserGenerator extends Generator {
 
     String tokenSetName = R.getTokenSetConstantName(funcName);
     myChoiceTokenSets.put(tokenSetName, tokens);
-    return new ConsumeTokenChoiceCall(consumeType, N.builder, shortElementTypesHolderName() + "." + tokenSetName);
+    return new KotlinConsumeTokenChoiceCall(consumeType, shortElementTypesHolderName() + "." + tokenSetName, N);
   }
 
   private @NotNull NodeCall createNodeCall(@NotNull BnfRule rule, @Nullable BnfExpression node, @NotNull String nextName) {
@@ -1351,13 +1337,13 @@ public final class KotlinParserGenerator extends Generator {
           String parserClassName = StringUtil.getShortName(parserClass);
           boolean renderClass = !parserClass.equals(myGrammarRootParser) && !parserClass.equals(getRuleInfo(rule).parserClass);
           if (info == null) {
-            return new MethodCall(renderClass, parserClassName, method, N.builder, N.level);
+            return new MethodCall(renderClass, parserClassName, method, N.runtime, N.level);
           }
           else {
             if (renderClass) {
               method = StringUtil.getQualifiedName(parserClassName, method);
             }
-            return new ExpressionMethodCall(method, N.builder, N.level, info.getPriority(subRule) - 1);
+            return new ExpressionMethodCall(method, N.runtime, N.level, info.getPriority(subRule) - 1);
           }
         }
       }
@@ -1387,7 +1373,7 @@ public final class KotlinParserGenerator extends Generator {
     else if (type == BNF_EXTERNAL_EXPRESSION) {
       List<BnfExpression> expressions = ((BnfExternalExpression)node).getExpressionList();
       if (expressions.size() == 1 && Rule.isMeta(rule)) {
-        return new MetaParameterCall(formatMetaParamName(expressions.get(0).getText()), N.builder, N.level);
+        return new MetaParameterCall(formatMetaParamName(expressions.get(0).getText()), N.runtime, N.level);
       }
       else {
         return createExternalCall(rule, expressions, nextName);
@@ -1397,10 +1383,10 @@ public final class KotlinParserGenerator extends Generator {
       List<String> extraArguments = collectMetaParametersFormatted(rule, node);
       final var className = StringUtil.getShortName(getRuleInfo(rule).parserClass);
       if (extraArguments.isEmpty()) {
-        return new MethodCall(false, className, nextName, N.builder, N.level);
+        return new MethodCall(false, className, nextName, N.runtime, N.level);
       }
       else {
-        return new MetaMethodCall(null, nextName, N.builder, N.level, map(extraArguments, MetaParameterArgument::new));
+        return new MetaMethodCall(null, nextName, N.runtime, N.level, map(extraArguments, MetaParameterArgument::new));
       }
     }
   }
@@ -1497,8 +1483,8 @@ public final class KotlinParserGenerator extends Generator {
       }
     }
     return Rule.isMeta(targetRule)
-           ? new MetaMethodCall(targetClassName, method, N.builder, N.level, arguments)
-           : new MethodCallWithArguments(method, N.builder, N.level, arguments);
+           ? new MetaMethodCall(targetClassName, method, N.runtime, N.level, arguments)
+           : new MethodCallWithArguments(method, N.runtime, N.level, arguments);
   }
 
   private @NotNull NodeArgument createWrappedNodeCall(@NotNull BnfRule rule, @Nullable BnfExpression nested, @NotNull String nextName) {
@@ -1544,7 +1530,7 @@ public final class KotlinParserGenerator extends Generator {
 
   private @NotNull NodeCall createConsumeToken(@NotNull ConsumeType consumeType, @NotNull String tokenName) {
     myTokensUsedInGrammar.add(tokenName);
-    return new ConsumeTokenCall(consumeType, shortElementTypesHolderName() + "." + getElementType(tokenName), N.builder);
+    return new KotlinConsumeTokenCall(consumeType, shortElementTypesHolderName() + "." + getElementType(tokenName), N);
   }
 
   // region Utils

@@ -5,13 +5,12 @@
 package org.intellij.grammar.generator;
 
 import com.intellij.openapi.application.ApplicationManager;
-import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 /**
  * @author greg
  */
-public class Names {
+public final class Names {
   public final @NotNull String builder;
   public final @NotNull String level;
   public final @NotNull String marker;
@@ -49,23 +48,17 @@ public class Names {
     this.runtime = runtime;
   }
 
-  @Contract(value = " -> new", pure = true)
-  public static Names classicNames() {
-    return new Names("builder_", "level_", "marker_", "pinned_", "result_", "parse_", "pos_", "root_", "priority_", "", "runtime_");
-  }
-
-  public static Names longNames() {
-    return new Names("builder", "level", "marker", "pinned", "result", "parse", "pos", "type", "priority", "a", "runtime");
-  }
-
-  public static Names shortNames() {
-    return new Names("b", "l", "m", "p", "r", "f", "c", "t", "g", "_", "s");
-  }
+  public static final @NotNull Names CLASSIC_NAMES =
+    new Names("builder_", "level_", "marker_", "pinned_", "result_", "parse_", "pos_", "root_", "priority_", "", "runtime_");
+  public static final @NotNull Names LONG_NAMES =
+    new Names("builder", "level", "marker", "pinned", "result", "parse", "pos", "type", "priority", "a", "runtime");
+  public static final @NotNull Names SHORT_NAMES =
+    new Names("b", "l", "m", "p", "r", "f", "c", "t", "g", "_", "s");
 
   public static @NotNull Names forName(String name) {
-    if ("long".equals(name)) return longNames();
-    if ("short".equals(name)) return shortNames();
-    if ("classic".equals(name)) return classicNames();
-    return ApplicationManager.getApplication().isUnitTestMode() ? classicNames() : shortNames();
+    if ("classic".equals(name)) return CLASSIC_NAMES;
+    if ("long".equals(name)) return LONG_NAMES;
+    if ("short".equals(name)) return SHORT_NAMES;
+    return ApplicationManager.getApplication().isUnitTestMode() ? CLASSIC_NAMES : SHORT_NAMES;
   }
 }

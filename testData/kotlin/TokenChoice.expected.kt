@@ -2,174 +2,167 @@
 // This is a generated file. Not intended for manual editing.
 package generated
 
-import com.intellij.platform.syntax.parser.SyntaxTreeBuilder
+import com.intellij.platform.syntax.util.runtime.*
 import com.intellij.platform.syntax.parser.SyntaxTreeBuilder.Marker
+import com.intellij.platform.syntax.SyntaxElementTypeSet
+import com.intellij.platform.syntax.syntaxElementTypeSetOf
 import com.intellij.platform.syntax.SyntaxElementType
-import com.intellij.platform.syntax.util.SyntaxGeneratedParserRuntimeBase
 
 @Suppress("unused", "FunctionName", "JoinDeclarationAndAssignment")
-open class TokenChoice(protected val runtime_: SyntaxGeneratedParserRuntimeBase) {
+object TokenChoice {
 
-  fun parse(root_: SyntaxElementType, builder_: SyntaxTreeBuilder) {
+  fun parse(root_: SyntaxElementType, runtime_: SyntaxGeneratedParserRuntime) {
     var result_: Boolean
-    val builder_ = adapt_builder_(root_, builder_, this, null)
-    val marker_: Marker = enter_section_(builder_, 0, _COLLAPSE_, null)
-    result_ = parse_root_(root_, builder_)
-    exit_section_(builder_, 0, marker_, root_, result_, true, TRUE_CONDITION)
+    runtime_.init(::parse, null)
+    val marker_: Marker = runtime_.enter_section_(0, Modifiers._COLLAPSE_, null)
+    result_ = parse_root_(root_, runtime_, 0)
+    runtime_.exit_section_(0, marker_, root_, result_, true, TRUE_CONDITION)
   }
 
-  protected fun parse_root_(root_: SyntaxElementType, builder_: SyntaxTreeBuilder): Boolean {
-    return parse_root_(root_, builder_, 0)
+  internal fun parse_root_(root_: SyntaxElementType, runtime_: SyntaxGeneratedParserRuntime, level_: Int): Boolean {
+    return root(runtime_, level_ + 1)
   }
 
-  companion object {
-    internal fun parse_root_(root_: SyntaxElementType, builder_: SyntaxTreeBuilder, level_: Int): Boolean {
-      return root(builder_, level_ + 1)
-    }
-
-    /* ********************************************************** */
-    // D | A | B
-    fun another_three_tokens(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
-      if (!recursion_guard_(builder_, level_, "another_three_tokens")) return false
-      var result_: Boolean
-      val marker_: Marker = enter_section_(builder_, level_, _NONE_, GeneratedSyntaxElementTypes.ANOTHER_THREE_TOKENS, "<another three tokens>")
-      result_ = consumeToken(builder_, GeneratedSyntaxElementTypes.ANOTHER_THREE_TOKENS_TOKENS)
-      exit_section_(builder_, level_, marker_, result_, false, null)
-      return result_
-    }
-
-    /* ********************************************************** */
-    // A | B | F
-    fun fast_choice(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
-      if (!recursion_guard_(builder_, level_, "fast_choice")) return false
-      var result_: Boolean
-      val marker_: Marker = enter_section_(builder_, level_, _NONE_, GeneratedSyntaxElementTypes.FAST_CHOICE, "<fast choice>")
-      result_ = consumeTokenFast(builder_, GeneratedSyntaxElementTypes.FAST_CHOICE_TOKENS)
-      exit_section_(builder_, level_, marker_, result_, false, null)
-      return result_
-    }
-
-    /* ********************************************************** */
-    // A | B | C | D | E
-    fun five_tokens_choice(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
-      if (!recursion_guard_(builder_, level_, "five_tokens_choice")) return false
-      var result_: Boolean
-      val marker_: Marker = enter_section_(builder_, level_, _NONE_, GeneratedSyntaxElementTypes.FIVE_TOKENS_CHOICE, "<five tokens choice>")
-      result_ = consumeToken(builder_, GeneratedSyntaxElementTypes.FIVE_TOKENS_CHOICE_TOKENS)
-      exit_section_(builder_, level_, marker_, result_, false, null)
-      return result_
-    }
-
-    /* ********************************************************** */
-    // A | B | C | D
-    fun four_tokens_choice(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
-      if (!recursion_guard_(builder_, level_, "four_tokens_choice")) return false
-      var result_: Boolean
-      val marker_: Marker = enter_section_(builder_, level_, _NONE_, GeneratedSyntaxElementTypes.FOUR_TOKENS_CHOICE, "<four tokens choice>")
-      result_ = consumeToken(builder_, GeneratedSyntaxElementTypes.FOUR_TOKENS_CHOICE_TOKENS)
-      exit_section_(builder_, level_, marker_, result_, false, null)
-      return result_
-    }
-
-    /* ********************************************************** */
-    // A | B | C
-    fun parenthesized_choice(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
-      if (!recursion_guard_(builder_, level_, "parenthesized_choice")) return false
-      var result_: Boolean
-      val marker_: Marker = enter_section_(builder_, level_, _NONE_, GeneratedSyntaxElementTypes.PARENTHESIZED_CHOICE, "<parenthesized choice>")
-      result_ = consumeToken(builder_, GeneratedSyntaxElementTypes.PARENTHESIZED_CHOICE_TOKENS)
-      exit_section_(builder_, level_, marker_, result_, false, null)
-      return result_
-    }
-
-    /* ********************************************************** */
-    // P2 | P3 | P0 | P1
-    internal fun private_choice(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
-      if (!recursion_guard_(builder_, level_, "private_choice")) return false
-      var result_: Boolean
-      result_ = consumeToken(builder_, GeneratedSyntaxElementTypes.PRIVATE_CHOICE_TOKENS)
-      return result_
-    }
-
-    /* ********************************************************** */
-    // D | C | A | B | B | A | C
-    fun repeating_tokens_choice(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
-      if (!recursion_guard_(builder_, level_, "repeating_tokens_choice")) return false
-      var result_: Boolean
-      val marker_: Marker = enter_section_(builder_, level_, _NONE_, GeneratedSyntaxElementTypes.REPEATING_TOKENS_CHOICE, "<repeating tokens choice>")
-      result_ = consumeToken(builder_, GeneratedSyntaxElementTypes.REPEATING_TOKENS_CHOICE_TOKENS)
-      exit_section_(builder_, level_, marker_, result_, false, null)
-      return result_
-    }
-
-    /* ********************************************************** */
-    internal fun root(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
-      return true
-    }
-
-    /* ********************************************************** */
-    // A | B | S
-    fun smart_choice(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
-      if (!recursion_guard_(builder_, level_, "smart_choice")) return false
-      var result_: Boolean
-      val marker_: Marker = enter_section_(builder_, level_, _NONE_, GeneratedSyntaxElementTypes.SMART_CHOICE, "<smart choice>")
-      result_ = consumeTokenSmart(builder_, GeneratedSyntaxElementTypes.SMART_CHOICE_TOKENS)
-      exit_section_(builder_, level_, marker_, result_, false, null)
-      return result_
-    }
-
-    /* ********************************************************** */
-    // A | B | C | D | E | F | G | H | I | J
-    fun ten_tokens_choice(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
-      if (!recursion_guard_(builder_, level_, "ten_tokens_choice")) return false
-      var result_: Boolean
-      val marker_: Marker = enter_section_(builder_, level_, _NONE_, GeneratedSyntaxElementTypes.TEN_TOKENS_CHOICE, "<ten tokens choice>")
-      result_ = consumeToken(builder_, GeneratedSyntaxElementTypes.TEN_TOKENS_CHOICE_TOKENS)
-      exit_section_(builder_, level_, marker_, result_, false, null)
-      return result_
-    }
-
-    /* ********************************************************** */
-    // A | B | C
-    fun three_tokens_choice(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
-      if (!recursion_guard_(builder_, level_, "three_tokens_choice")) return false
-      var result_: Boolean
-      val marker_: Marker = enter_section_(builder_, level_, _NONE_, GeneratedSyntaxElementTypes.THREE_TOKENS_CHOICE, "<three tokens choice>")
-      result_ = consumeToken(builder_, GeneratedSyntaxElementTypes.THREE_TOKENS_CHOICE_TOKENS)
-      exit_section_(builder_, level_, marker_, result_, false, null)
-      return result_
-    }
-
-    /* ********************************************************** */
-    // B | A | C
-    fun three_tokens_in_another_order(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
-      if (!recursion_guard_(builder_, level_, "three_tokens_in_another_order")) return false
-      var result_: Boolean
-      val marker_: Marker = enter_section_(builder_, level_, _NONE_, GeneratedSyntaxElementTypes.THREE_TOKENS_IN_ANOTHER_ORDER, "<three tokens in another order>")
-      result_ = consumeToken(builder_, GeneratedSyntaxElementTypes.THREE_TOKENS_IN_ANOTHER_ORDER_TOKENS)
-      exit_section_(builder_, level_, marker_, result_, false, null)
-      return result_
-    }
-
+  /* ********************************************************** */
+  // D | A | B
+  fun another_three_tokens(runtime_: SyntaxGeneratedParserRuntime, level_: Int): Boolean {
+    if (!runtime_.recursion_guard_(level_, "another_three_tokens")) return false
+    var result_: Boolean
+    val marker_: Marker = runtime_.enter_section_(level_, Modifiers._NONE_, GeneratedSyntaxElementTypes.ANOTHER_THREE_TOKENS, "<another three tokens>")
+    result_ = runtime_.consumeToken(GeneratedSyntaxElementTypes.ANOTHER_THREE_TOKENS_TOKENS)
+    runtime_.exit_section_(level_, marker_, result_, false, null)
+    return result_
   }
+
+  /* ********************************************************** */
+  // A | B | F
+  fun fast_choice(runtime_: SyntaxGeneratedParserRuntime, level_: Int): Boolean {
+    if (!runtime_.recursion_guard_(level_, "fast_choice")) return false
+    var result_: Boolean
+    val marker_: Marker = runtime_.enter_section_(level_, Modifiers._NONE_, GeneratedSyntaxElementTypes.FAST_CHOICE, "<fast choice>")
+    result_ = runtime_.consumeTokenFast(GeneratedSyntaxElementTypes.FAST_CHOICE_TOKENS)
+    runtime_.exit_section_(level_, marker_, result_, false, null)
+    return result_
+  }
+
+  /* ********************************************************** */
+  // A | B | C | D | E
+  fun five_tokens_choice(runtime_: SyntaxGeneratedParserRuntime, level_: Int): Boolean {
+    if (!runtime_.recursion_guard_(level_, "five_tokens_choice")) return false
+    var result_: Boolean
+    val marker_: Marker = runtime_.enter_section_(level_, Modifiers._NONE_, GeneratedSyntaxElementTypes.FIVE_TOKENS_CHOICE, "<five tokens choice>")
+    result_ = runtime_.consumeToken(GeneratedSyntaxElementTypes.FIVE_TOKENS_CHOICE_TOKENS)
+    runtime_.exit_section_(level_, marker_, result_, false, null)
+    return result_
+  }
+
+  /* ********************************************************** */
+  // A | B | C | D
+  fun four_tokens_choice(runtime_: SyntaxGeneratedParserRuntime, level_: Int): Boolean {
+    if (!runtime_.recursion_guard_(level_, "four_tokens_choice")) return false
+    var result_: Boolean
+    val marker_: Marker = runtime_.enter_section_(level_, Modifiers._NONE_, GeneratedSyntaxElementTypes.FOUR_TOKENS_CHOICE, "<four tokens choice>")
+    result_ = runtime_.consumeToken(GeneratedSyntaxElementTypes.FOUR_TOKENS_CHOICE_TOKENS)
+    runtime_.exit_section_(level_, marker_, result_, false, null)
+    return result_
+  }
+
+  /* ********************************************************** */
+  // A | B | C
+  fun parenthesized_choice(runtime_: SyntaxGeneratedParserRuntime, level_: Int): Boolean {
+    if (!runtime_.recursion_guard_(level_, "parenthesized_choice")) return false
+    var result_: Boolean
+    val marker_: Marker = runtime_.enter_section_(level_, Modifiers._NONE_, GeneratedSyntaxElementTypes.PARENTHESIZED_CHOICE, "<parenthesized choice>")
+    result_ = runtime_.consumeToken(GeneratedSyntaxElementTypes.PARENTHESIZED_CHOICE_TOKENS)
+    runtime_.exit_section_(level_, marker_, result_, false, null)
+    return result_
+  }
+
+  /* ********************************************************** */
+  // P2 | P3 | P0 | P1
+  internal fun private_choice(runtime_: SyntaxGeneratedParserRuntime, level_: Int): Boolean {
+    if (!runtime_.recursion_guard_(level_, "private_choice")) return false
+    var result_: Boolean
+    result_ = runtime_.consumeToken(GeneratedSyntaxElementTypes.PRIVATE_CHOICE_TOKENS)
+    return result_
+  }
+
+  /* ********************************************************** */
+  // D | C | A | B | B | A | C
+  fun repeating_tokens_choice(runtime_: SyntaxGeneratedParserRuntime, level_: Int): Boolean {
+    if (!runtime_.recursion_guard_(level_, "repeating_tokens_choice")) return false
+    var result_: Boolean
+    val marker_: Marker = runtime_.enter_section_(level_, Modifiers._NONE_, GeneratedSyntaxElementTypes.REPEATING_TOKENS_CHOICE, "<repeating tokens choice>")
+    result_ = runtime_.consumeToken(GeneratedSyntaxElementTypes.REPEATING_TOKENS_CHOICE_TOKENS)
+    runtime_.exit_section_(level_, marker_, result_, false, null)
+    return result_
+  }
+
+  /* ********************************************************** */
+  internal fun root(runtime_: SyntaxGeneratedParserRuntime, level_: Int): Boolean {
+    return true
+  }
+
+  /* ********************************************************** */
+  // A | B | S
+  fun smart_choice(runtime_: SyntaxGeneratedParserRuntime, level_: Int): Boolean {
+    if (!runtime_.recursion_guard_(level_, "smart_choice")) return false
+    var result_: Boolean
+    val marker_: Marker = runtime_.enter_section_(level_, Modifiers._NONE_, GeneratedSyntaxElementTypes.SMART_CHOICE, "<smart choice>")
+    result_ = runtime_.consumeTokenSmart(GeneratedSyntaxElementTypes.SMART_CHOICE_TOKENS)
+    runtime_.exit_section_(level_, marker_, result_, false, null)
+    return result_
+  }
+
+  /* ********************************************************** */
+  // A | B | C | D | E | F | G | H | I | J
+  fun ten_tokens_choice(runtime_: SyntaxGeneratedParserRuntime, level_: Int): Boolean {
+    if (!runtime_.recursion_guard_(level_, "ten_tokens_choice")) return false
+    var result_: Boolean
+    val marker_: Marker = runtime_.enter_section_(level_, Modifiers._NONE_, GeneratedSyntaxElementTypes.TEN_TOKENS_CHOICE, "<ten tokens choice>")
+    result_ = runtime_.consumeToken(GeneratedSyntaxElementTypes.TEN_TOKENS_CHOICE_TOKENS)
+    runtime_.exit_section_(level_, marker_, result_, false, null)
+    return result_
+  }
+
+  /* ********************************************************** */
+  // A | B | C
+  fun three_tokens_choice(runtime_: SyntaxGeneratedParserRuntime, level_: Int): Boolean {
+    if (!runtime_.recursion_guard_(level_, "three_tokens_choice")) return false
+    var result_: Boolean
+    val marker_: Marker = runtime_.enter_section_(level_, Modifiers._NONE_, GeneratedSyntaxElementTypes.THREE_TOKENS_CHOICE, "<three tokens choice>")
+    result_ = runtime_.consumeToken(GeneratedSyntaxElementTypes.THREE_TOKENS_CHOICE_TOKENS)
+    runtime_.exit_section_(level_, marker_, result_, false, null)
+    return result_
+  }
+
+  /* ********************************************************** */
+  // B | A | C
+  fun three_tokens_in_another_order(runtime_: SyntaxGeneratedParserRuntime, level_: Int): Boolean {
+    if (!runtime_.recursion_guard_(level_, "three_tokens_in_another_order")) return false
+    var result_: Boolean
+    val marker_: Marker = runtime_.enter_section_(level_, Modifiers._NONE_, GeneratedSyntaxElementTypes.THREE_TOKENS_IN_ANOTHER_ORDER, "<three tokens in another order>")
+    result_ = runtime_.consumeToken(GeneratedSyntaxElementTypes.THREE_TOKENS_IN_ANOTHER_ORDER_TOKENS)
+    runtime_.exit_section_(level_, marker_, result_, false, null)
+    return result_
+  }
+
 }
 // ---- generated/TokenChoice2.kt -----------------
 // This is a generated file. Not intended for manual editing.
 package generated
 
-import com.intellij.platform.syntax.parser.SyntaxTreeBuilder
+import com.intellij.platform.syntax.util.runtime.*
 import com.intellij.platform.syntax.parser.SyntaxTreeBuilder.Marker
 
 @Suppress("unused", "FunctionName", "JoinDeclarationAndAssignment")
-open class TokenChoice2 {
+object TokenChoice2 {
 
-  companion object {
-    /* ********************************************************** */
-    fun some(builder_: SyntaxTreeBuilder, level_: Int): Boolean {
-      val marker_: Marker = enter_section_(builder_)
-      exit_section_(builder_, marker_, GeneratedSyntaxElementTypes.SOME, true)
-      return true
-    }
-
+  /* ********************************************************** */
+  fun some(runtime_: SyntaxGeneratedParserRuntime, level_: Int): Boolean {
+    val marker_: Marker = runtime_.enter_section_()
+    runtime_.exit_section_(marker_, GeneratedSyntaxElementTypes.SOME, true)
+    return true
   }
+
 }

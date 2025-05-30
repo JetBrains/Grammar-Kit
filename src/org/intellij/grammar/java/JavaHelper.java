@@ -560,7 +560,7 @@ public abstract class JavaHelper {
       if (!(delegate instanceof MethodInfo)) return Collections.emptyList();
       Map<Integer, List<String>> annotations = ((MethodInfo)delegate).annotations;
       if (paramIndex < 0 || paramIndex >= annotations.size()) return Collections.emptyList();
-      List<String> result = annotations.get(paramIndex);
+      List<String> result = annotations.get(paramIndex + 1);
       return result == null ? Collections.emptyList() : result;
     }
 
@@ -1042,6 +1042,11 @@ public abstract class JavaHelper {
     int modifiers;
     final List<String> types = new SmartList<>();
     final List<String> annotatedTypes = new SmartList<>();
+
+    /**
+     * 0 corresponds to the annotations of the method itself.
+     * i corresponds to the annotations of the parameter at index i-1.
+     */
     final Map<Integer, List<String>> annotations = FactoryMap.create(o -> new SmartList<>());
     final List<TypeParameterInfo> generics = new SmartList<>();
     final List<String> exceptions = new SmartList<>();

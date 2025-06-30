@@ -90,17 +90,18 @@ intellijPlatform {
         // The pluginVersion is based on the SemVer (https://semver.org) and supports pre-release labels, like 2.1.7-alpha.3
         // Specify pre-release label to publish the plugin in a custom Release Channel automatically. Read more:
         // https://plugins.jetbrains.com/docs/intellij/deployment.html#specifying-a-release-channel
-        channels = providers.gradleProperty("pluginVersion").map { listOf(it.substringAfter('-', "").substringBefore('.').ifEmpty { "default" }) }
+        channels =
+            providers.gradleProperty("pluginVersion").map { listOf(it.substringAfter('-', "").substringBefore('.').ifEmpty { "default" }) }
     }
 }
 
 changelog {
-    header.set(project.provider { project.version.toString() })
-    headerParserRegex.set("""(\d+(\.\d+)+)""")
-    itemPrefix.set("*")
-    groups.set(emptyList())
-    repositoryUrl.set("https://github.com/JetBrains/Grammar-Kit")
-    sectionUrlBuilder.set(ChangelogSectionUrlBuilder { repositoryUrl, currentVersion, previousVersion, isUnreleased ->
+    header = project.provider { project.version.toString() }
+    headerParserRegex = """(\d+(\.\d+)+)"""
+    itemPrefix = "*"
+    groups = emptyList()
+    repositoryUrl = "https://github.com/JetBrains/Grammar-Kit"
+    sectionUrlBuilder = ChangelogSectionUrlBuilder { repositoryUrl, currentVersion, previousVersion, isUnreleased ->
         repositoryUrl + when {
             isUnreleased -> when (previousVersion) {
                 null -> "/commits"
@@ -111,15 +112,15 @@ changelog {
 
             else -> "/compare/$previousVersion...$currentVersion"
         }
-    })
+    }
 }
 
 val artifactsPath = providers.gradleProperty("artifactsPath")
 
 val buildGrammarKitJar by tasks.registering(Jar::class) {
     dependsOn("assemble")
-    archiveBaseName.set("grammar-kit")
-    destinationDirectory.set(file(artifactsPath))
+    archiveBaseName = "grammar-kit"
+    destinationDirectory = file(artifactsPath)
     manifest {
         from("$rootDir/resources/META-INF/MANIFEST.MF")
     }
@@ -156,21 +157,21 @@ tasks {
     }
 
     publishPlugin {
-        dependsOn("patchChangelog")
+        dependsOn(patchChangelog)
     }
 
     val buildGrammarKitZip by registering(Zip::class) {
         dependsOn(buildGrammarKitJar)
-        archiveBaseName.set("GrammarKit")
-        destinationDirectory.set(file(artifactsPath))
+        archiveBaseName = "GrammarKit"
+        destinationDirectory = file(artifactsPath)
         from(buildGrammarKitJar.map { it.outputs }) {
             into("/GrammarKit/lib")
         }
     }
 
     val buildExpressionConsoleSample = registering(Jar::class) {
-        archiveBaseName.set("expression-console-sample")
-        destinationDirectory.set(file(artifactsPath))
+        archiveBaseName = "expression-console-sample"
+        destinationDirectory = file(artifactsPath)
         manifest {
             from("$rootDir/tests/org/intellij/grammar/expression/META-INF/MANIFEST.MF")
         }
@@ -195,26 +196,26 @@ publishing {
             from(components["java"])
 
             pom {
-                name.set("JetBrains Grammar-Kit")
-                description.set("Grammar-Kit library dedicated for language plugin developers.")
-                url.set("https://github.com/JetBrains/Grammar-Kit")
+                name = "JetBrains Grammar-Kit"
+                description = "Grammar-Kit library dedicated for language plugin developers."
+                url = "https://github.com/JetBrains/Grammar-Kit"
                 licenses {
                     license {
-                        name.set("The Apache Software License, Version 2.0")
-                        url.set("https://github.com/JetBrains/Grammar-Kit/blob/master/LICENSE.md")
+                        name = "The Apache Software License, Version 2.0"
+                        url = "https://github.com/JetBrains/Grammar-Kit/blob/master/LICENSE.md"
                     }
                 }
                 developers {
                     developer {
-                        id.set("gregsh")
-                        name.set("Greg Shrago")
-                        organization.set("JetBrains")
+                        id = "gregsh"
+                        name = "Greg Shrago"
+                        organization = "JetBrains"
                     }
                 }
                 scm {
-                    connection.set("scm:git:git://github.com/JetBrains/Grammar-Kit.git")
-                    developerConnection.set("scm:git:ssh://github.com/JetBrains/Grammar-Kit.git")
-                    url.set("https://github.com/JetBrains/Grammar-Kit")
+                    connection = "scm:git:git://github.com/JetBrains/Grammar-Kit.git"
+                    developerConnection = "scm:git:ssh://github.com/JetBrains/Grammar-Kit.git"
+                    url = "https://github.com/JetBrains/Grammar-Kit"
                 }
             }
         }

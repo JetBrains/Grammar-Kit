@@ -99,6 +99,12 @@ intellijPlatform {
         channels =
             providers.gradleProperty("pluginVersion").map { listOf(it.substringAfter('-', "").substringBefore('.').ifEmpty { "default" }) }
     }
+
+    pluginVerification {
+        ides {
+            recommended()
+        }
+    }
 }
 
 changelog {

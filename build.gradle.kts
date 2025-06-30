@@ -3,6 +3,7 @@
  */
 import org.jetbrains.changelog.Changelog
 import org.jetbrains.changelog.ChangelogSectionUrlBuilder
+import org.jetbrains.intellij.platform.gradle.TestFrameworkType
 
 plugins {
     java
@@ -28,12 +29,16 @@ repositories {
 
 dependencies {
     compileOnly(libs.annotations)
+    testImplementation(libs.junit)
 
     intellijPlatform {
         create(providers.gradleProperty("platformType"), providers.gradleProperty("platformVersion"))
 
         // Plugin Dependencies. Uses `platformBundledPlugins` property from the gradle.properties file for bundled IntelliJ Platform plugins.
         bundledPlugins(providers.gradleProperty("platformBundledPlugins").map { it.split(',') })
+
+        testFramework(TestFrameworkType.Platform)
+        testFramework(TestFrameworkType.Plugin.Java)
     }
 }
 

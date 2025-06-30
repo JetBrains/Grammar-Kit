@@ -1,6 +1,7 @@
 [versions]
 # libraries
 annotations = "26.0.2"
+junit = "4.13.2"
 
 # plugins
 changelog = "2.2.1"
@@ -10,6 +11,7 @@ publishPlugin = "2.0.0"
 
 [libraries]
 annotations = { group = "org.jetbrains", name = "annotations", version.ref = "annotations" }
+junit = { group = "junit", name = "junit", version.ref = "junit" }
 
 [plugins]
 changelog = { id = "org.jetbrains.changelog", version.ref = "changelog" }

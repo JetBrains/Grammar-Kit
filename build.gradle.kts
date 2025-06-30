@@ -5,9 +5,6 @@ import org.jetbrains.changelog.ChangelogSectionUrlBuilder
  * Copyright 2011-2024 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
  */
 
-fun properties(key: String) = providers.gradleProperty(key)
-fun environment(key: String) = providers.environmentVariable(key)
-
 plugins {
     id("java")
     id("org.jetbrains.intellij.platform") version "2.6.0"
@@ -20,7 +17,7 @@ plugins {
 }
 
 group = "org.jetbrains"
-version = properties("pluginVersion").get()
+version = providers.gradleProperty("pluginVersion").get()
 
 repositories {
     mavenCentral()
@@ -34,7 +31,7 @@ dependencies {
     compileOnly("org.jetbrains:annotations:26.0.2")
 
     intellijPlatform {
-        intellijIdeaUltimate(properties("ideaVersion"))
+        intellijIdeaUltimate(providers.gradleProperty("ideaVersion"))
         bundledPlugins(listOf("com.intellij.diagram", "com.intellij.java", "com.intellij.copyright"))
     }
 }
@@ -65,7 +62,7 @@ intellijPlatform {
     buildSearchableOptions = false
 
     pluginConfiguration {
-        name = properties("pluginName")
+        name = providers.gradleProperty("pluginName")
         val changelog = project.changelog // local variable for configuration cache compatibility
         changeNotes = provider {
             changelog.renderItem(
@@ -78,22 +75,22 @@ intellijPlatform {
         }
 
         ideaVersion {
-            sinceBuild = properties("pluginSinceIdeaBuild")
+            sinceBuild = providers.gradleProperty("pluginSinceIdeaBuild")
         }
     }
 
     signing {
-        certificateChain = environment("CERTIFICATE_CHAIN")
-        privateKey = environment("PRIVATE_KEY")
-        password = environment("PRIVATE_KEY_PASSWORD")
+        certificateChain = providers.environmentVariable("CERTIFICATE_CHAIN")
+        privateKey = providers.environmentVariable("PRIVATE_KEY")
+        password = providers.environmentVariable("PRIVATE_KEY_PASSWORD")
     }
 
     publishing {
-        token = environment("PUBLISH_TOKEN")
+        token = providers.environmentVariable("PUBLISH_TOKEN")
         // The pluginVersion is based on the SemVer (https://semver.org) and supports pre-release labels, like 2.1.7-alpha.3
         // Specify pre-release label to publish the plugin in a custom Release Channel automatically. Read more:
         // https://plugins.jetbrains.com/docs/intellij/deployment.html#specifying-a-release-channel
-        channels = properties("pluginVersion").map { listOf(it.substringAfter('-', "").substringBefore('.').ifEmpty { "default" }) }
+        channels = providers.gradleProperty("pluginVersion").map { listOf(it.substringAfter('-', "").substringBefore('.').ifEmpty { "default" }) }
     }
 }
 
@@ -117,7 +114,7 @@ changelog {
     })
 }
 
-val artifactsPath = properties("artifactsPath")
+val artifactsPath = providers.gradleProperty("artifactsPath")
 
 val buildGrammarKitJar by tasks.registering(Jar::class) {
     dependsOn("assemble")
@@ -134,7 +131,7 @@ val buildGrammarKitJar by tasks.registering(Jar::class) {
 }
 
 tasks {
-    properties("javaVersion").get().let {
+    providers.gradleProperty("javaVersion").get().let {
         withType<JavaCompile> {
             sourceCompatibility = it
             targetCompatibility = it
@@ -155,7 +152,7 @@ tasks {
     }
 
     wrapper {
-        gradleVersion = properties("gradleVersion").get()
+        gradleVersion = providers.gradleProperty("gradleVersion").get()
     }
 
     publishPlugin {
@@ -227,8 +224,8 @@ publishing {
 nexusPublishing {
     repositories {
         sonatype {
-            username = properties("mavenCentralUsername").orNull
-            password = properties("mavenCentralPassword").orNull
+            username = providers.gradleProperty("mavenCentralUsername").orNull
+            password = providers.gradleProperty("mavenCentralPassword").orNull
         }
     }
 }

@@ -71,7 +71,7 @@ changelog {
 
 val artifactsPath = properties("artifactsPath")
 
-val buildGrammarKitJar = tasks.create<Jar>("buildGrammarKitJar") {
+val buildGrammarKitJar by tasks.registering(Jar::class) {
     dependsOn("assemble")
     archiveBaseName.set("grammar-kit")
     destinationDirectory.set(file(artifactsPath))
@@ -152,16 +152,16 @@ tasks {
         channels = properties("pluginVersion").map { listOf(it.substringAfter('-', "").substringBefore('.').ifEmpty { "default" }) }
     }
 
-    val buildGrammarKitZip = create<Zip>("buildGrammarKitZip") {
+    val buildGrammarKitZip by registering(Zip::class) {
         dependsOn(buildGrammarKitJar)
         archiveBaseName.set("GrammarKit")
         destinationDirectory.set(file(artifactsPath))
-        from(buildGrammarKitJar.outputs) {
+        from(buildGrammarKitJar.map { it.outputs }) {
             into("/GrammarKit/lib")
         }
     }
 
-    val buildExpressionConsoleSample = create<Jar>("buildExpressionConsoleSample") {
+    val buildExpressionConsoleSample = registering(Jar::class) {
         archiveBaseName.set("expression-console-sample")
         destinationDirectory.set(file(artifactsPath))
         manifest {
@@ -172,7 +172,7 @@ tasks {
         }
     }
 
-    create("artifacts") {
+    val artifacts by registering {
         dependsOn(buildGrammarKitJar, buildGrammarKitZip, buildExpressionConsoleSample)
     }
 

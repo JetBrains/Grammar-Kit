@@ -1,9 +1,8 @@
-import org.jetbrains.changelog.Changelog
-import org.jetbrains.changelog.ChangelogSectionUrlBuilder
-
 /*
  * Copyright 2011-2024 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
  */
+import org.jetbrains.changelog.Changelog
+import org.jetbrains.changelog.ChangelogSectionUrlBuilder
 
 plugins {
     java
@@ -16,7 +15,7 @@ plugins {
     alias(libs.plugins.publishPlugin)
 }
 
-group = "org.jetbrains"
+group = providers.gradleProperty("pluginGroup").get()
 version = providers.gradleProperty("pluginVersion").get()
 
 repositories {
@@ -31,8 +30,10 @@ dependencies {
     compileOnly(libs.annotations)
 
     intellijPlatform {
-        intellijIdeaUltimate(providers.gradleProperty("ideaVersion"))
-        bundledPlugins(listOf("com.intellij.diagram", "com.intellij.java", "com.intellij.copyright"))
+        create(providers.gradleProperty("platformType"), providers.gradleProperty("platformVersion"))
+
+        // Plugin Dependencies. Uses `platformBundledPlugins` property from the gradle.properties file for bundled IntelliJ Platform plugins.
+        bundledPlugins(providers.gradleProperty("platformBundledPlugins").map { it.split(',') })
     }
 }
 
@@ -75,7 +76,7 @@ intellijPlatform {
         }
 
         ideaVersion {
-            sinceBuild = providers.gradleProperty("pluginSinceIdeaBuild")
+            sinceBuild = providers.gradleProperty("pluginSinceBuild")
         }
     }
 
@@ -180,7 +181,7 @@ tasks {
         }
     }
 
-    val artifacts by registering {
+    register("artifacts") {
         dependsOn(buildGrammarKitJar, buildGrammarKitZip, buildExpressionConsoleSample)
     }
 
@@ -231,7 +232,7 @@ nexusPublishing {
     }
 }
 
-// only available in release workflow
+// only available in the release workflow
 signing {
     val signingKey = project.findProperty("signingKey").toString()
     val signingPassword = project.findProperty("signingPassword").toString()

@@ -6,14 +6,14 @@ import org.jetbrains.changelog.ChangelogSectionUrlBuilder
  */
 
 plugins {
-    id("java")
-    id("org.jetbrains.intellij.platform") version "2.6.0"
-    id("org.jetbrains.changelog") version "2.2.1"
-    id("idea")
-    id("maven-publish")
-    id("signing")
-    id("com.github.breadmoirai.github-release") version "2.5.2"
-    id("io.github.gradle-nexus.publish-plugin") version "2.0.0"
+    java
+    idea
+    `maven-publish`
+    signing
+    alias(libs.plugins.intelliJPlatform)
+    alias(libs.plugins.changelog)
+    alias(libs.plugins.githubRelease)
+    alias(libs.plugins.publishPlugin)
 }
 
 group = "org.jetbrains"
@@ -28,7 +28,7 @@ repositories {
 }
 
 dependencies {
-    compileOnly("org.jetbrains:annotations:26.0.2")
+    compileOnly(libs.annotations)
 
     intellijPlatform {
         intellijIdeaUltimate(providers.gradleProperty("ideaVersion"))

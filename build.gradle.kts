@@ -10,7 +10,7 @@ fun environment(key: String) = providers.environmentVariable(key)
 
 plugins {
     id("java")
-    id("org.jetbrains.intellij") version "1.17.4"
+    id("org.jetbrains.intellij.platform") version "2.6.0"
     id("org.jetbrains.changelog") version "2.2.1"
     id("idea")
     id("maven-publish")
@@ -24,11 +24,31 @@ version = properties("pluginVersion").get()
 
 repositories {
     mavenCentral()
+
+    intellijPlatform {
+        defaultRepositories()
+    }
 }
 
 dependencies {
     compileOnly("org.jetbrains:annotations:26.0.2")
+
+    intellijPlatform {
+        intellijIdeaUltimate(properties("ideaVersion"))
+        bundledPlugins(listOf("com.intellij.diagram", "com.intellij.java", "com.intellij.copyright"))
+    }
 }
+
+sourceSets {
+    main {
+        java.srcDirs("src", "gen")
+        resources.srcDirs("resources")
+    }
+    test {
+        java.srcDirs("tests")
+    }
+}
+
 
 idea {
     module {
@@ -41,12 +61,40 @@ java {
     withSourcesJar()
 }
 
-intellij {
-    pluginName.set(properties("pluginName"))
-    version.set(properties("ideaVersion"))
-    type.set("IU")
-    plugins.set(listOf("com.intellij.diagram", "com.intellij.java", "com.intellij.copyright"))
-    updateSinceUntilBuild.set(false)
+intellijPlatform {
+    buildSearchableOptions = false
+
+    pluginConfiguration {
+        name = properties("pluginName")
+        val changelog = project.changelog // local variable for configuration cache compatibility
+        changeNotes = provider {
+            changelog.renderItem(
+                changelog
+                    .getUnreleased()
+                    .withHeader(false)
+                    .withEmptySections(false),
+                Changelog.OutputType.HTML
+            )
+        }
+
+        ideaVersion {
+            sinceBuild = properties("pluginSinceIdeaBuild")
+        }
+    }
+
+    signing {
+        certificateChain = environment("CERTIFICATE_CHAIN")
+        privateKey = environment("PRIVATE_KEY")
+        password = environment("PRIVATE_KEY_PASSWORD")
+    }
+
+    publishing {
+        token = environment("PUBLISH_TOKEN")
+        // The pluginVersion is based on the SemVer (https://semver.org) and supports pre-release labels, like 2.1.7-alpha.3
+        // Specify pre-release label to publish the plugin in a custom Release Channel automatically. Read more:
+        // https://plugins.jetbrains.com/docs/intellij/deployment.html#specifying-a-release-channel
+        channels = properties("pluginVersion").map { listOf(it.substringAfter('-', "").substringBefore('.').ifEmpty { "default" }) }
+    }
 }
 
 changelog {
@@ -110,46 +158,8 @@ tasks {
         gradleVersion = properties("gradleVersion").get()
     }
 
-    sourceSets {
-        main {
-            java.srcDirs("src", "gen")
-            resources.srcDirs("resources")
-        }
-        test {
-            java.srcDirs("tests")
-        }
-    }
-
-    buildSearchableOptions {
-        enabled = false
-    }
-
-    patchPluginXml {
-        sinceBuild.set(properties("pluginSinceIdeaBuild"))
-        changeNotes.set(provider {
-            changelog.renderItem(
-                changelog
-                    .getUnreleased()
-                    .withHeader(false)
-                    .withEmptySections(false),
-                Changelog.OutputType.HTML
-            )
-        })
-    }
-
-    signPlugin {
-        certificateChain = environment("CERTIFICATE_CHAIN")
-        privateKey = environment("PRIVATE_KEY")
-        password = environment("PRIVATE_KEY_PASSWORD")
-    }
-
     publishPlugin {
         dependsOn("patchChangelog")
-        token = environment("PUBLISH_TOKEN")
-        // The pluginVersion is based on the SemVer (https://semver.org) and supports pre-release labels, like 2.1.7-alpha.3
-        // Specify pre-release label to publish the plugin in a custom Release Channel automatically. Read more:
-        // https://plugins.jetbrains.com/docs/intellij/deployment.html#specifying-a-release-channel
-        channels = properties("pluginVersion").map { listOf(it.substringAfter('-', "").substringBefore('.').ifEmpty { "default" }) }
     }
 
     val buildGrammarKitZip by registering(Zip::class) {

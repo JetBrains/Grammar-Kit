@@ -7,7 +7,6 @@ package org.intellij.grammar.psi.impl;
 import com.intellij.patterns.PatternCondition;
 import com.intellij.psi.*;
 import com.intellij.util.ProcessingContext;
-import com.intellij.util.containers.ContainerUtil;
 import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.java.JavaHelper;
 import org.intellij.grammar.psi.BnfAttr;
@@ -68,7 +67,8 @@ public class BnfStringRefContributor extends PsiReferenceContributor {
     return new PatternCondition<>("oneOf") {
       @Override
       public boolean accepts(@NotNull String s, ProcessingContext context) {
-        return attributes.contains(getCompatibleAttribute(s));
+        KnownAttribute<?> attribute = getCompatibleAttribute(s);
+        return attribute != null && attributes.contains(attribute);
       }
     };
   }

@@ -153,7 +153,7 @@ public class BnfGenerateLexerAction extends AnAction {
 
     Project project = file.getProject();
 
-    BnfFile bnfFile = (BnfFile)file;
+    BnfFile bnfFile = (BnfFile) file;
     String flexFileName = getFlexFileName(bnfFile);
 
     Collection<VirtualFile> files = FilenameIndex.getVirtualFilesByName(flexFileName, ProjectScope.getAllScope(project));
@@ -234,8 +234,7 @@ public class BnfGenerateLexerAction extends AnAction {
       // RuntimeConstants.RUNTIME_LOG_LOGSYSTEM
       ve.setProperty("runtime.log.logsystem", chuteClass.getDeclaredConstructor().newInstance());
     }
-    catch (Throwable ignore) {
-    }
+    catch (Throwable ignore) {}
     ve.init();
 
     VelocityContext context = makeContext(bnfFile, packageName, simpleTokens, regexpTokens, maxLen);
@@ -253,14 +252,18 @@ public class BnfGenerateLexerAction extends AnAction {
                                         int[] maxLen) {
     var context = new VelocityContext();
     context.put("lexerClass", getLexerName(bnfFile));
-    context.put("packageName",
-                StringUtil.notNullize(packageName, StringUtil.getPackageName(getRootAttribute(bnfFile, KnownAttribute.PARSER_CLASS))));
+    context.put("packageName", StringUtil.notNullize(packageName, StringUtil.getPackageName(getRootAttribute(bnfFile, KnownAttribute.PARSER_CLASS))));
     context.put("tokenPrefix", getRootAttribute(bnfFile, KnownAttribute.ELEMENT_TYPE_PREFIX));
     context.put("typesClass", getRootAttribute(bnfFile, KnownAttribute.ELEMENT_TYPE_HOLDER_CLASS));
+    context.put("tokenPrefix", getRootAttribute(bnfFile, KnownAttribute.ELEMENT_TYPE_PREFIX));
     context.put("simpleTokens", simpleTokens);
     context.put("regexpTokens", regexpTokens);
     context.put("StringUtil", StringUtil.class);
     context.put("maxTokenLength", maxLen[0]);
-    return context;
+
+    StringWriter out = new StringWriter();
+    InputStream stream = getClass().getResourceAsStream("/templates/lexer.flex.template");
+    ve.evaluate(context, out, "lexer.flex.template", new InputStreamReader(stream));
+    return StringUtil.convertLineSeparators(out.toString());
   }
 }

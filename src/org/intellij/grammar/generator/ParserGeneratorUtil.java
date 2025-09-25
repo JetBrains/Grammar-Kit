@@ -39,7 +39,7 @@ import static org.intellij.grammar.psi.BnfTypes.BNF_SEQUENCE;
 
 /**
  * @author gregory
- * Date: 16.07.11 10:41
+ *         Date: 16.07.11 10:41
  */
 public class ParserGeneratorUtil {
   private static final Hash.Strategy<PsiElement> TEXT_STRATEGY = new Hash.Strategy<>() {
@@ -130,7 +130,7 @@ public class ParserGeneratorUtil {
       String unquoted = GrammarUtil.unquote(text);
       // in double-quoted strings: un-escape quotes only leaving the rest \ manageable
       String result = text.charAt(0) == '"' ? unquoted.replaceAll("\\\\([\"'])", "$1") : unquoted;
-      return (T)result;
+      return (T) result;
     }
     return null;
   }
@@ -175,7 +175,7 @@ public class ParserGeneratorUtil {
       child = element.getFirstChild();
     }
     return child instanceof BnfExpression && !(child instanceof BnfLiteralExpression || child instanceof BnfReferenceOrToken) ?
-           (BnfExpression)child : null;
+        (BnfExpression) child : null;
   }
 
   public static IElementType getEffectiveType(PsiElement tree) {

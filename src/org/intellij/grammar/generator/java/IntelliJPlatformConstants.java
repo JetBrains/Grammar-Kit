@@ -4,34 +4,44 @@
 
 package org.intellij.grammar.generator.java;
 
-import org.intellij.grammar.fleet.FleetBnfFileWrapper;
-import org.intellij.grammar.fleet.FleetConstants;
-import org.intellij.grammar.psi.BnfFile;
+import org.intellij.grammar.syntax.SyntaxConstants;
 
 public class IntelliJPlatformConstants {
-  public static final IntelliJPlatformConstants IdeaConstantSet =
-    new IntelliJPlatformConstants(JavaBnfConstants.PSI_BUILDER_CLASS,
-                                  JavaBnfConstants.IELEMENTTYPE_CLASS,
-                                  JavaBnfConstants.PSI_ELEMENT_CLASS,
-                                  JavaBnfConstants.AST_NODE_CLASS,
-                                  JavaBnfConstants.PSI_PARSER_CLASS,
-                                  JavaBnfConstants.LIGHT_PSI_PARSER_CLASS,
-                                  JavaBnfConstants.TOKEN_SET_CLASS);
-  public static final IntelliJPlatformConstants FleetConstantSet =
-    new IntelliJPlatformConstants(FleetConstants.PSI_BUILDER_CLASS,
-                                  FleetConstants.IELEMENTTYPE_CLASS,
-                                  FleetConstants.PSI_ELEMENT_CLASS,
-                                  FleetConstants.AST_NODE_CLASS,
-                                  FleetConstants.PSI_PARSER_CLASS,
-                                  FleetConstants.LIGHT_PSI_PARSER_CLASS,
-                                  FleetConstants.TOKEN_SET_CLASS);
-  public final String PsiBuilderClass;
-  public final String IElementTypeClass;
+  public final String ParserStateHolder;
+  public final String BuilderClass;
+  public final String ParserElementTypeClass;
+  public final String ElementTypeBaseClass;
   public final String PsiElementClass;
   public final String AstNodeClass;
   public final String PsiParserClass;
   public final String LightPsiParserClass;
   public final String TokenSetClass;
+  public final String ParserNodeSetClass;
+  public final String ParserOutputType;
+
+  private IntelliJPlatformConstants(String stateHolder,
+                                    String builder,
+                                    String iElementTypeClass,
+                                    String elementTypeBaseClass,
+                                    String psiElementClass,
+                                    String astNodeClass,
+                                    String psiParserClass,
+                                    String lightPsiParserClass,
+                                    String tokenSetClass,
+                                    String parserNodeSetClass,
+                                    String parserOutputType) {
+    ParserStateHolder = stateHolder;
+    BuilderClass = builder;
+    ParserElementTypeClass = iElementTypeClass;
+    ElementTypeBaseClass = elementTypeBaseClass;
+    PsiElementClass = psiElementClass;
+    AstNodeClass = astNodeClass;
+    PsiParserClass = psiParserClass;
+    LightPsiParserClass = lightPsiParserClass;
+    TokenSetClass = tokenSetClass;
+    ParserNodeSetClass = parserNodeSetClass;
+    ParserOutputType = parserOutputType;
+  }
 
   private IntelliJPlatformConstants(String builder,
                                     String iElementTypeClass,
@@ -40,16 +50,38 @@ public class IntelliJPlatformConstants {
                                     String psiParserClass,
                                     String lightPsiParserClass,
                                     String tokenSetClass) {
-    PsiBuilderClass = builder;
-    IElementTypeClass = iElementTypeClass;
+    BuilderClass = builder;
+    ParserStateHolder = builder;
+    ParserElementTypeClass = iElementTypeClass;
+    ElementTypeBaseClass = iElementTypeClass;
     PsiElementClass = psiElementClass;
     AstNodeClass = astNodeClass;
     PsiParserClass = psiParserClass;
     LightPsiParserClass = lightPsiParserClass;
     TokenSetClass = tokenSetClass;
+    ParserNodeSetClass = tokenSetClass;
+    ParserOutputType = astNodeClass;
   }
 
-  public static IntelliJPlatformConstants getConstantSetForBnf(BnfFile file) {
-    return (file instanceof FleetBnfFileWrapper) ? FleetConstantSet : IdeaConstantSet;
-  }
+  public static final IntelliJPlatformConstants ClassicConstantSet =
+    new IntelliJPlatformConstants(BnfConstants.PSI_BUILDER_CLASS,
+                                  BnfConstants.IELEMENTTYPE_CLASS,
+                                  BnfConstants.PSI_ELEMENT_CLASS,
+                                  BnfConstants.AST_NODE_CLASS,
+                                  BnfConstants.PSI_PARSER_CLASS,
+                                  BnfConstants.LIGHT_PSI_PARSER_CLASS,
+                                  BnfConstants.TOKEN_SET_CLASS);
+
+  public static final IntelliJPlatformConstants SyntaxConstantSet =
+    new IntelliJPlatformConstants(SyntaxConstants.RUNTIME_CLASS,
+                                  SyntaxConstants.SYNTAX_BUILDER_CLASS,
+                                  SyntaxConstants.SYNTAX_ELEMENT_TYPE,
+                                  BnfConstants.IELEMENTTYPE_CLASS,
+                                  BnfConstants.PSI_ELEMENT_CLASS,
+                                  BnfConstants.AST_NODE_CLASS,
+                                  BnfConstants.PSI_PARSER_CLASS,
+                                  BnfConstants.LIGHT_PSI_PARSER_CLASS,
+                                  BnfConstants.TOKEN_SET_CLASS,
+                                  SyntaxConstants.TOKEN_SET_CLASS,
+                                  SyntaxConstants.PRODUCTION_RESULT);
 }

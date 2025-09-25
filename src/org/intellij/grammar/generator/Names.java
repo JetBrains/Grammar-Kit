@@ -17,6 +17,7 @@ public class Names {
   public final @NotNull String marker;
   public final @NotNull String pinned;
   public final @NotNull String result;
+  public final @NotNull String parse;
   public final @NotNull String pos;
   public final @NotNull String root;
   public final @NotNull String priority;
@@ -29,6 +30,7 @@ public class Names {
                 @NotNull String marker,
                 @NotNull String pinned,
                 @NotNull String result,
+                @NotNull String parse,
                 @NotNull String pos,
                 @NotNull String root,
                 @NotNull String priority,
@@ -39,6 +41,7 @@ public class Names {
     this.marker = marker;
     this.pinned = pinned;
     this.result = result;
+    this.parse = parse;
     this.pos = pos;
     this.root = root;
     this.priority = priority;
@@ -47,49 +50,16 @@ public class Names {
   }
 
   @Contract(value = " -> new", pure = true)
-  public static @NotNull Names classicNames() {
-    return new Names(
-      "builder_",
-      "level_",
-      "marker_",
-      "pinned_",
-      "result_",
-      "pos_",
-      "root_",
-      "priority_",
-      "",
-      "runtime_"
-    );
+  public static Names classicNames() {
+    return new Names("builder_", "level_", "marker_", "pinned_", "result_", "parse_", "pos_", "root_", "priority_", "", "runtime_");
   }
 
   public static Names longNames() {
-    return new Names(
-      "builder",
-      "level",
-      "marker",
-      "pinned",
-      "result",
-      "pos",
-      "type",
-      "priority",
-      "a",
-      "runtime"
-    );
+    return new Names("builder", "level", "marker", "pinned", "result", "parse", "pos", "type", "priority", "a", "runtime");
   }
 
   public static Names shortNames() {
-    return new Names(
-      "b",
-      "l",
-      "m",
-      "p",
-      "r",
-      "c",
-      "t",
-      "g",
-      "_",
-      "rt"
-    );
+    return new Names("b", "l", "m", "p", "r", "f", "c", "t", "g", "_", "s");
   }
 
   public static @NotNull Names forName(String name) {

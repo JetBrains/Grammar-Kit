@@ -1,0 +1,23 @@
+{
+  generate=[visitor="no" psi-factory="no" parser-api="syntax"]
+  classHeader="//header.txt"
+  tokens=[
+    space='regexp:\s+'
+  ]
+  extends("abc_.*")=abc
+}
+
+file ::= (content ';') * {pin(".*")=1}
+private content ::= abc | pinned_seq | plain_seq {recoverWhile=content_recover}
+private content_recover ::= !';'
+
+prefix ::= A
+
+abc ::= abc_three? (abc_one | abc_two | abc_three)
+upper abc_one ::= just_b X {pin=1}
+upper abc_two ::= C
+abc_three ::= X
+just_b ::= B
+
+pinned_seq ::= prefix (abc_one | abc_two) {pin=1}
+plain_seq ::= prefix abc_one abc_two

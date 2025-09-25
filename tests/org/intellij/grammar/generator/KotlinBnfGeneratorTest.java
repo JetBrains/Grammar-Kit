@@ -10,8 +10,15 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 
 public class KotlinBnfGeneratorTest extends AbstractBnfGeneratorTest {
+  protected static final @NotNull String KOTLIN_BNF_FILES_DIR = "syntaxBnfFiles";
+
   public KotlinBnfGeneratorTest() {
     super("kotlin", ".kt");
+  }
+
+  @Override
+  protected @NotNull String getBnfFilesDir() {
+    return getTestDataPath() + "/" + KOTLIN_BNF_FILES_DIR;
   }
 
   @Override

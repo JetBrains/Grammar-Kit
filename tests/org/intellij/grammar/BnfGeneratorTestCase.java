@@ -30,6 +30,10 @@ public class BnfGeneratorTestCase extends AbstractParsingTestCase {
     super(testDataName, "bnf", new BnfParserDefinition());
     myBnfFilesDir = this.getTestDataPath() + "/" + BNF_FILES_DIR;
   }
+  
+  protected @NotNull String getBnfFilesDir() {
+    return myBnfFilesDir;
+  }
 
   @SuppressWarnings("UnstableApiUsage")
   @Override

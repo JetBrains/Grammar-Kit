@@ -1,0 +1,90 @@
+{
+  generate=[visitor="no" parser-api="syntax"]
+  classHeader="//header.txt"
+  parserClass="PsiAccessors"
+  psiClassPrefix="X"
+  implements="XComposite"
+  parserUtilClass="PsiGenUtil"
+  generateTokenAccessors("some-.*")=true
+  extraRoot("expression")=true
+
+  tokens=[
+    MY_SOMETHING="something"
+    id="regexp:"
+
+    lowcasekwd1="lowcasekwd1"
+    UPCASEKWD1="UPCASEKWD1"
+
+    nodef
+  ]
+}
+root ::= binary
+
+binary ::= expression operator expression {
+    methods = [
+        alias = "/expression"
+        left = "/expression[0]"
+        right = "/expression[1]"
+        op = "/operator"
+        left_left = "/expression[0]/value[0]"
+        right_right = "/expression[1]/value[1]"
+        last = "/expression[last]"
+        first = "/expression[first]"
+        right_left = "/expression[1]/value[0]" // total nullable test
+        left_right = "/expression[0]/value[1]"
+        bad_index = "/expression[bad_index]/value[wrong_turn]"
+    ]
+    pin = "operator"
+}
+
+operator ::= '+' | '-'
+
+expression ::= value '*' value
+value ::= id
+fake empty ::=
+
+fake token-defaults ::= UPCASEKWD1 lowcasekwd1 UPCASEKWD2 lowcasekwd2 nodef
+fake some-root ::= some-child value {
+  methods=[
+    childSomething="some-child/MY_SOMETHING" // ok
+    childSomething2="some-child/something2" // ok
+    grandChild="some-child/some-grand-child" // ok
+    grandChildSomethin="some-child/some-grand-child/MY_SOMETHING" // ok
+    grandChildSomethin2="some-child/some-grand-child/something2" // incorrect
+    value="" // disable value accessor
+  ]
+}
+fake some-child ::= some-grand-child "something" something2 {
+  methods=[smth1="MY_SOMETHING" smth2="MY_SOMETHING"]
+  psiPackage="generated.psi.child"
+  psiImplPackage="generated.psi.impl.child"
+}
+fake some-grand-child ::= MY_SOMETHING something2 {
+  pin=1
+  psiPackage="generated.psi.grand"
+  psiImplPackage="generated.psi.impl.grand"
+}
+
+fake rename-list ::= some-child * {
+  methods=[
+    some-children="some-child"
+    first="some-child[first]"
+    first-smth="some-child[first]/MY_SOMETHING"
+    last="some-child[last]"
+  ]
+}
+
+fake report_some_bad ::= report_some_bad empty some-child * {
+  methods=[
+    some-child=""
+    empty=""
+
+    bad0="some-child[0]zzz/"
+    bad1="some-child[0]/missing-child"
+    bad2="empty/missing-child"
+    bad3="some-child/MY_SOMETHING"
+    bad4="some-child[first]/MY_SOMETHING/BAD"
+    bad5="report_some_bad[0]/some-child"
+    bad6="report_some_bad/some-child"
+  ]
+}

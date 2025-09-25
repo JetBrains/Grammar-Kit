@@ -37,7 +37,7 @@ public abstract class Generator {
   protected final @Nullable String myGrammarRootParser;
   protected final @NotNull GenOptions G;
   private final @NotNull String myOutputFileExtension;
-  private final @NotNull OutputOpener myOpener;
+  protected final @NotNull OutputOpener myOpener;
   protected NameShortener myShortener;
   private FilePrinter myPrinter;
 

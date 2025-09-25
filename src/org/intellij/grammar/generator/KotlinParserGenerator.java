@@ -234,6 +234,10 @@ public final class KotlinParserGenerator extends Generator {
     if (myGrammarRoot != null && (G.generateTokenTypes || G.generateElementTypes)) {
       generateElementTypes();
     }
+    if (myGrammarRoot != null && (G.generatePsi)){
+      JavaParserGenerator parser = new JavaParserGenerator(myFile, mySourcePath, myOutputPath, myPackagePrefix, myOpener);
+      parser.generatePsiOnly();
+    }
   }
 
   // region Parser generation

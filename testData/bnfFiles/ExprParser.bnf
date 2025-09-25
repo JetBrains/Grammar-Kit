@@ -7,8 +7,6 @@
   tokenTypeFactory="org.intellij.grammar.expression.ExpressionParserDefinition.createTokenType"
   elementTypeHolderClass="org.intellij.grammar.expression.ExpressionTypes"
   parserUtilClass="org.intellij.grammar.parser.GeneratedParserUtilBase"
-  
-  syntaxElementTypeHolderClass="org.intellij.grammar.expression.ExpressionSyntaxTypes"
 
   tokens=[
     space='regexp:\s+'

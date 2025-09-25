@@ -301,6 +301,10 @@ public final class JavaParserGenerator extends Generator {
     {
       generateParser();
     }
+    generatePsiOnly();
+  }
+  
+  public void generatePsiOnly() throws IOException {
     Map<String, BnfRule> sortedCompositeTypes = new TreeMap<>();
     Map<String, BnfRule> sortedPsiRules = new TreeMap<>();
 
@@ -1611,7 +1615,7 @@ public final class JavaParserGenerator extends Generator {
   }
 
   /*PSI******************************************************************/
-  public void generatePsi(Map<String, BnfRule> sortedPsiRules) throws IOException {
+  private void generatePsi(Map<String, BnfRule> sortedPsiRules) throws IOException {
     checkClassAvailability(myPsiImplUtilClass);
     myRulesMethodsHelper.buildMaps(sortedPsiRules.values());
     for (BnfRule rule : sortedPsiRules.values()) {

@@ -304,6 +304,13 @@ public final class JavaParserGenerator extends Generator {
     generatePsiOnly();
   }
   
+  //Because some of the simple tokens are added during parser generation, 
+  // we use this function to pass missing tokens from KotlinParserGenerator to JavaParserGenerator
+  public void replaceSimpleTokes(Map<String, String> simpleTypes) {
+    mySimpleTokens.clear();
+    mySimpleTokens.putAll(simpleTypes);
+  }
+  
   public void generatePsiOnly() throws IOException {
     Map<String, BnfRule> sortedCompositeTypes = new TreeMap<>();
     Map<String, BnfRule> sortedPsiRules = new TreeMap<>();

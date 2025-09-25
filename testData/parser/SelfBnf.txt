@@ -31,6 +31,12 @@ BnfFile:SelfBnf.bnf
             PsiElement(=)('=')
             BNF_STRING_LITERAL_EXPRESSION: "R"
               PsiElement(string)('"R"')
+          PsiWhiteSpace(' ')
+          BNF_LIST_ENTRY
+            PsiElement(id)('parser-api')
+            PsiElement(=)('=')
+            BNF_STRING_LITERAL_EXPRESSION: "syntax"
+              PsiElement(string)('"syntax"')
           PsiElement(])(']')
       PsiWhiteSpace('\n\n  ')
       BNF_ATTR:parserClass

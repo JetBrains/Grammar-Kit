@@ -15,14 +15,6 @@ public class JavaBnfGeneratorTest extends AbstractBnfGeneratorTest {
     super("java", ".java");
   }
 
-  public void testSelfBnf() throws Exception {
-    doPsiTest();
-  }
-
-  public void testSelfFlex() throws Exception {
-    doPsiTest();
-  }
-
   public void testSmall() throws Exception {
     doParserTest();
   }

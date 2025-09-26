@@ -10,6 +10,7 @@
   tokens=[OP_MUL="*" OP_DIV="/" SLASH='\' id='regexp:A' number='regexp:B' notspace='regexp:[^{}-]*']
   elementTypeClass("root_.*")="sample.MyRootType"
   elementTypeFactory(".*_expr")="sample.MyTypeFactory.createExprType"
+  psiOutputPath="myPsi/output"
 
   methods("expr")=[missing]
 }

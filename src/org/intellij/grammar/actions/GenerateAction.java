@@ -101,7 +101,7 @@ public class GenerateAction extends AnAction {
         String psiOutput = getRootAttribute(bnfFile, KnownAttribute.PSI_OUTPUT_PATH);
         VirtualFile psiTarget = psiOutput.isEmpty() ?
                                 null :
-                                getTargetDirectoryFor(project, psiOutput, StringUtil.getPackageName(parserClass), true);
+                                getTargetDirectoryFor(project, psiOutput, "", true);
         rootMap.put(file, target);
         psiRootMap.put(file, psiTarget);
         packageMap.put(target, StringUtil.notNullize(packageIndex.getPackageNameByDirectory(target)));

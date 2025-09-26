@@ -8,6 +8,7 @@
   elementTypeFactory="test.FooParserDefinition.createType"
   tokenTypeFactory="test.stub.FooParserDefinition.createTokenType"
   elementTypeHolderClass="test.FooTypes"
+  psiOutputPath="myPsi/output"
   parserUtilClass="org.intellij.grammar.parser.GeneratedParserUtilBase"
   expressionUtilClass="test.FooUtil"
 

@@ -14,6 +14,7 @@
   
   syntaxElementTypeHolderClass="test.FooSyntaxTypes"
   syntaxElement="test.FooSyntaxTypes"
+  psiOutputPath="myPsi/output"
 
   extends("element1|type")="org.intellij.grammar.test.StubTest.GenericBase<?>"
   extends("simple")="org.intellij.grammar.test.StubTest.SimpleBase"

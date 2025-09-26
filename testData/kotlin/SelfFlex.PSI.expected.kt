@@ -128,7 +128,7 @@ object JFlexTypes {
   val FLEX_UNCLOSED = SyntaxElementType("unclosed")
   val FLEX_VERSION = SyntaxElementType("version")
 }
-// ---- org/intellij/jflex/psi/JFlexTypes.java -----------------
+// ---- ../grammar-kit/psi/org/intellij/jflex/psi/JFlexTypes.java -----------------
 // license.txt
 package org.intellij.jflex.psi;
 
@@ -348,7 +348,7 @@ public interface JFlexTypes {
     }
   }
 }
-// ---- generated/GeneratedSyntaxElementTypeConverterFactory.java -----------------
+// ---- ../grammar-kit/psi/generated/GeneratedSyntaxElementTypeConverterFactory.java -----------------
 // license.txt
 package generated;
 
@@ -490,7 +490,7 @@ public class GeneratedSyntaxElementTypeConverterFactory implements ElementTypeCo
     );
   }
 }
-// ---- org/intellij/jflex/psi/JFlexCharRange.java -----------------
+// ---- ../grammar-kit/psi/org/intellij/jflex/psi/JFlexCharRange.java -----------------
 // license.txt
 package org.intellij.jflex.psi;
 
@@ -501,7 +501,7 @@ import com.intellij.psi.PsiElement;
 public interface JFlexCharRange extends JFlexClassExpression {
 
 }
-// ---- org/intellij/jflex/psi/JFlexChoiceExpression.java -----------------
+// ---- ../grammar-kit/psi/org/intellij/jflex/psi/JFlexChoiceExpression.java -----------------
 // license.txt
 package org.intellij.jflex.psi;
 
@@ -515,7 +515,7 @@ public interface JFlexChoiceExpression extends JFlexExpression {
   List<JFlexExpression> getExpressionList();
 
 }
-// ---- org/intellij/jflex/psi/JFlexClassExpression.java -----------------
+// ---- ../grammar-kit/psi/org/intellij/jflex/psi/JFlexClassExpression.java -----------------
 // license.txt
 package org.intellij.jflex.psi;
 
@@ -529,7 +529,7 @@ public interface JFlexClassExpression extends JFlexExpression {
   List<JFlexExpression> getExpressionList();
 
 }
-// ---- org/intellij/jflex/psi/JFlexDeclarationsSection.java -----------------
+// ---- ../grammar-kit/psi/org/intellij/jflex/psi/JFlexDeclarationsSection.java -----------------
 // license.txt
 package org.intellij.jflex.psi;
 
@@ -549,7 +549,7 @@ public interface JFlexDeclarationsSection extends JFlexFileSection {
   List<JFlexStateDeclaration> getStateDeclarationList();
 
 }
-// ---- org/intellij/jflex/psi/JFlexExpression.java -----------------
+// ---- ../grammar-kit/psi/org/intellij/jflex/psi/JFlexExpression.java -----------------
 // license.txt
 package org.intellij.jflex.psi;
 
@@ -560,7 +560,7 @@ import com.intellij.psi.PsiElement;
 public interface JFlexExpression extends JFlexComposite {
 
 }
-// ---- org/intellij/jflex/psi/JFlexFileSection.java -----------------
+// ---- ../grammar-kit/psi/org/intellij/jflex/psi/JFlexFileSection.java -----------------
 // license.txt
 package org.intellij.jflex.psi;
 
@@ -571,7 +571,7 @@ import com.intellij.psi.PsiElement;
 public interface JFlexFileSection extends JFlexComposite {
 
 }
-// ---- org/intellij/jflex/psi/JFlexJavaCode.java -----------------
+// ---- ../grammar-kit/psi/org/intellij/jflex/psi/JFlexJavaCode.java -----------------
 // license.txt
 package org.intellij.jflex.psi;
 
@@ -585,7 +585,7 @@ public interface JFlexJavaCode extends JFlexComposite {
   PsiReference[] getReferences();
 
 }
-// ---- org/intellij/jflex/psi/JFlexJavaName.java -----------------
+// ---- ../grammar-kit/psi/org/intellij/jflex/psi/JFlexJavaName.java -----------------
 // license.txt
 package org.intellij.jflex.psi;
 
@@ -599,7 +599,7 @@ public interface JFlexJavaName extends JFlexComposite {
   PsiReference @NotNull [] getReferences();
 
 }
-// ---- org/intellij/jflex/psi/JFlexJavaType.java -----------------
+// ---- ../grammar-kit/psi/org/intellij/jflex/psi/JFlexJavaType.java -----------------
 // license.txt
 package org.intellij.jflex.psi;
 
@@ -616,7 +616,7 @@ public interface JFlexJavaType extends JFlexComposite {
   JFlexJavaTypeParameters getJavaTypeParameters();
 
 }
-// ---- org/intellij/jflex/psi/JFlexJavaTypeParameters.java -----------------
+// ---- ../grammar-kit/psi/org/intellij/jflex/psi/JFlexJavaTypeParameters.java -----------------
 // license.txt
 package org.intellij.jflex.psi;
 
@@ -630,7 +630,7 @@ public interface JFlexJavaTypeParameters extends JFlexComposite {
   List<JFlexJavaType> getJavaTypeList();
 
 }
-// ---- org/intellij/jflex/psi/JFlexLexicalRulesSection.java -----------------
+// ---- ../grammar-kit/psi/org/intellij/jflex/psi/JFlexLexicalRulesSection.java -----------------
 // license.txt
 package org.intellij.jflex.psi;
 
@@ -647,7 +647,7 @@ public interface JFlexLexicalRulesSection extends JFlexFileSection {
   List<JFlexRule> getRuleList();
 
 }
-// ---- org/intellij/jflex/psi/JFlexLiteralExpression.java -----------------
+// ---- ../grammar-kit/psi/org/intellij/jflex/psi/JFlexLiteralExpression.java -----------------
 // license.txt
 package org.intellij.jflex.psi;
 
@@ -658,7 +658,7 @@ import com.intellij.psi.PsiElement;
 public interface JFlexLiteralExpression extends JFlexExpression {
 
 }
-// ---- org/intellij/jflex/psi/JFlexLookAhead.java -----------------
+// ---- ../grammar-kit/psi/org/intellij/jflex/psi/JFlexLookAhead.java -----------------
 // license.txt
 package org.intellij.jflex.psi;
 
@@ -672,7 +672,7 @@ public interface JFlexLookAhead extends JFlexComposite {
   JFlexExpression getExpression();
 
 }
-// ---- org/intellij/jflex/psi/JFlexMacroDefinition.java -----------------
+// ---- ../grammar-kit/psi/org/intellij/jflex/psi/JFlexMacroDefinition.java -----------------
 // license.txt
 package org.intellij.jflex.psi;
 
@@ -696,7 +696,7 @@ public interface JFlexMacroDefinition extends JFlexNamedElement {
   @NotNull PsiElement getNameIdentifier();
 
 }
-// ---- org/intellij/jflex/psi/JFlexMacroRefExpression.java -----------------
+// ---- ../grammar-kit/psi/org/intellij/jflex/psi/JFlexMacroRefExpression.java -----------------
 // license.txt
 package org.intellij.jflex.psi;
 
@@ -710,7 +710,7 @@ public interface JFlexMacroRefExpression extends JFlexExpression {
   JFlexMacroReference getMacroReference();
 
 }
-// ---- org/intellij/jflex/psi/JFlexMacroReference.java -----------------
+// ---- ../grammar-kit/psi/org/intellij/jflex/psi/JFlexMacroReference.java -----------------
 // license.txt
 package org.intellij.jflex.psi;
 
@@ -727,7 +727,7 @@ public interface JFlexMacroReference extends JFlexComposite {
   @NotNull PsiReference getReference();
 
 }
-// ---- org/intellij/jflex/psi/JFlexNotExpression.java -----------------
+// ---- ../grammar-kit/psi/org/intellij/jflex/psi/JFlexNotExpression.java -----------------
 // license.txt
 package org.intellij.jflex.psi;
 
@@ -741,7 +741,7 @@ public interface JFlexNotExpression extends JFlexExpression {
   JFlexExpression getExpression();
 
 }
-// ---- org/intellij/jflex/psi/JFlexOption.java -----------------
+// ---- ../grammar-kit/psi/org/intellij/jflex/psi/JFlexOption.java -----------------
 // license.txt
 package org.intellij.jflex.psi;
 
@@ -752,7 +752,7 @@ import com.intellij.psi.PsiElement;
 public interface JFlexOption extends JFlexComposite {
 
 }
-// ---- org/intellij/jflex/psi/JFlexParenExpression.java -----------------
+// ---- ../grammar-kit/psi/org/intellij/jflex/psi/JFlexParenExpression.java -----------------
 // license.txt
 package org.intellij.jflex.psi;
 
@@ -766,7 +766,7 @@ public interface JFlexParenExpression extends JFlexExpression {
   JFlexExpression getExpression();
 
 }
-// ---- org/intellij/jflex/psi/JFlexPredefinedClassExpression.java -----------------
+// ---- ../grammar-kit/psi/org/intellij/jflex/psi/JFlexPredefinedClassExpression.java -----------------
 // license.txt
 package org.intellij.jflex.psi;
 
@@ -777,7 +777,7 @@ import com.intellij.psi.PsiElement;
 public interface JFlexPredefinedClassExpression extends JFlexExpression {
 
 }
-// ---- org/intellij/jflex/psi/JFlexQuantifierExpression.java -----------------
+// ---- ../grammar-kit/psi/org/intellij/jflex/psi/JFlexQuantifierExpression.java -----------------
 // license.txt
 package org.intellij.jflex.psi;
 
@@ -791,7 +791,7 @@ public interface JFlexQuantifierExpression extends JFlexExpression {
   JFlexExpression getExpression();
 
 }
-// ---- org/intellij/jflex/psi/JFlexRule.java -----------------
+// ---- ../grammar-kit/psi/org/intellij/jflex/psi/JFlexRule.java -----------------
 // license.txt
 package org.intellij.jflex.psi;
 
@@ -820,7 +820,7 @@ public interface JFlexRule extends JFlexComposite {
   JFlexStateList getStateList();
 
 }
-// ---- org/intellij/jflex/psi/JFlexSequenceExpression.java -----------------
+// ---- ../grammar-kit/psi/org/intellij/jflex/psi/JFlexSequenceExpression.java -----------------
 // license.txt
 package org.intellij.jflex.psi;
 
@@ -834,7 +834,7 @@ public interface JFlexSequenceExpression extends JFlexExpression {
   List<JFlexExpression> getExpressionList();
 
 }
-// ---- org/intellij/jflex/psi/JFlexStateDeclaration.java -----------------
+// ---- ../grammar-kit/psi/org/intellij/jflex/psi/JFlexStateDeclaration.java -----------------
 // license.txt
 package org.intellij.jflex.psi;
 
@@ -848,7 +848,7 @@ public interface JFlexStateDeclaration extends JFlexComposite {
   List<JFlexStateDefinition> getStateDefinitionList();
 
 }
-// ---- org/intellij/jflex/psi/JFlexStateDefinition.java -----------------
+// ---- ../grammar-kit/psi/org/intellij/jflex/psi/JFlexStateDefinition.java -----------------
 // license.txt
 package org.intellij.jflex.psi;
 
@@ -869,7 +869,7 @@ public interface JFlexStateDefinition extends JFlexNamedElement {
   @NotNull PsiElement getNameIdentifier();
 
 }
-// ---- org/intellij/jflex/psi/JFlexStateList.java -----------------
+// ---- ../grammar-kit/psi/org/intellij/jflex/psi/JFlexStateList.java -----------------
 // license.txt
 package org.intellij.jflex.psi;
 
@@ -883,7 +883,7 @@ public interface JFlexStateList extends JFlexComposite {
   List<JFlexStateReference> getStateReferenceList();
 
 }
-// ---- org/intellij/jflex/psi/JFlexStateReference.java -----------------
+// ---- ../grammar-kit/psi/org/intellij/jflex/psi/JFlexStateReference.java -----------------
 // license.txt
 package org.intellij.jflex.psi;
 
@@ -900,7 +900,7 @@ public interface JFlexStateReference extends JFlexComposite {
   @NotNull PsiReference getReference();
 
 }
-// ---- org/intellij/jflex/psi/JFlexUserCodeSection.java -----------------
+// ---- ../grammar-kit/psi/org/intellij/jflex/psi/JFlexUserCodeSection.java -----------------
 // license.txt
 package org.intellij.jflex.psi;
 
@@ -914,7 +914,7 @@ public interface JFlexUserCodeSection extends JFlexFileSection {
   JFlexJavaCode getJavaCode();
 
 }
-// ---- org/intellij/jflex/psi/JFlexUserValue.java -----------------
+// ---- ../grammar-kit/psi/org/intellij/jflex/psi/JFlexUserValue.java -----------------
 // license.txt
 package org.intellij.jflex.psi;
 
@@ -925,7 +925,7 @@ import com.intellij.psi.PsiElement;
 public interface JFlexUserValue extends JFlexComposite {
 
 }
-// ---- org/intellij/jflex/psi/impl/JFlexCharRangeImpl.java -----------------
+// ---- ../grammar-kit/psi/org/intellij/jflex/psi/impl/JFlexCharRangeImpl.java -----------------
 // license.txt
 package org.intellij.jflex.psi.impl;
 
@@ -957,7 +957,7 @@ public class JFlexCharRangeImpl extends JFlexClassExpressionImpl implements JFle
   }
 
 }
-// ---- org/intellij/jflex/psi/impl/JFlexChoiceExpressionImpl.java -----------------
+// ---- ../grammar-kit/psi/org/intellij/jflex/psi/impl/JFlexChoiceExpressionImpl.java -----------------
 // license.txt
 package org.intellij.jflex.psi.impl;
 
@@ -995,7 +995,7 @@ public class JFlexChoiceExpressionImpl extends JFlexExpressionImpl implements JF
   }
 
 }
-// ---- org/intellij/jflex/psi/impl/JFlexClassExpressionImpl.java -----------------
+// ---- ../grammar-kit/psi/org/intellij/jflex/psi/impl/JFlexClassExpressionImpl.java -----------------
 // license.txt
 package org.intellij.jflex.psi.impl;
 
@@ -1033,7 +1033,7 @@ public class JFlexClassExpressionImpl extends JFlexExpressionImpl implements JFl
   }
 
 }
-// ---- org/intellij/jflex/psi/impl/JFlexDeclarationsSectionImpl.java -----------------
+// ---- ../grammar-kit/psi/org/intellij/jflex/psi/impl/JFlexDeclarationsSectionImpl.java -----------------
 // license.txt
 package org.intellij.jflex.psi.impl;
 
@@ -1083,7 +1083,7 @@ public class JFlexDeclarationsSectionImpl extends JFlexFileSectionImpl implement
   }
 
 }
-// ---- org/intellij/jflex/psi/impl/JFlexExpressionImpl.java -----------------
+// ---- ../grammar-kit/psi/org/intellij/jflex/psi/impl/JFlexExpressionImpl.java -----------------
 // license.txt
 package org.intellij.jflex.psi.impl;
 
@@ -1115,7 +1115,7 @@ public abstract class JFlexExpressionImpl extends JFlexCompositeImpl implements 
   }
 
 }
-// ---- org/intellij/jflex/psi/impl/JFlexFileSectionImpl.java -----------------
+// ---- ../grammar-kit/psi/org/intellij/jflex/psi/impl/JFlexFileSectionImpl.java -----------------
 // license.txt
 package org.intellij.jflex.psi.impl;
 
@@ -1147,7 +1147,7 @@ public class JFlexFileSectionImpl extends JFlexCompositeImpl implements JFlexFil
   }
 
 }
-// ---- org/intellij/jflex/psi/impl/JFlexJavaCodeImpl.java -----------------
+// ---- ../grammar-kit/psi/org/intellij/jflex/psi/impl/JFlexJavaCodeImpl.java -----------------
 // license.txt
 package org.intellij.jflex.psi.impl;
 
@@ -1185,7 +1185,7 @@ public class JFlexJavaCodeImpl extends JFlexJavaCodeInjectionHostImpl implements
   }
 
 }
-// ---- org/intellij/jflex/psi/impl/JFlexJavaNameImpl.java -----------------
+// ---- ../grammar-kit/psi/org/intellij/jflex/psi/impl/JFlexJavaNameImpl.java -----------------
 // license.txt
 package org.intellij.jflex.psi.impl;
 
@@ -1223,7 +1223,7 @@ public class JFlexJavaNameImpl extends JFlexCompositeImpl implements JFlexJavaNa
   }
 
 }
-// ---- org/intellij/jflex/psi/impl/JFlexJavaTypeImpl.java -----------------
+// ---- ../grammar-kit/psi/org/intellij/jflex/psi/impl/JFlexJavaTypeImpl.java -----------------
 // license.txt
 package org.intellij.jflex.psi.impl;
 
@@ -1267,7 +1267,7 @@ public class JFlexJavaTypeImpl extends JFlexCompositeImpl implements JFlexJavaTy
   }
 
 }
-// ---- org/intellij/jflex/psi/impl/JFlexJavaTypeParametersImpl.java -----------------
+// ---- ../grammar-kit/psi/org/intellij/jflex/psi/impl/JFlexJavaTypeParametersImpl.java -----------------
 // license.txt
 package org.intellij.jflex.psi.impl;
 
@@ -1305,7 +1305,7 @@ public class JFlexJavaTypeParametersImpl extends JFlexCompositeImpl implements J
   }
 
 }
-// ---- org/intellij/jflex/psi/impl/JFlexLexicalRulesSectionImpl.java -----------------
+// ---- ../grammar-kit/psi/org/intellij/jflex/psi/impl/JFlexLexicalRulesSectionImpl.java -----------------
 // license.txt
 package org.intellij.jflex.psi.impl;
 
@@ -1349,7 +1349,7 @@ public class JFlexLexicalRulesSectionImpl extends JFlexFileSectionImpl implement
   }
 
 }
-// ---- org/intellij/jflex/psi/impl/JFlexLiteralExpressionImpl.java -----------------
+// ---- ../grammar-kit/psi/org/intellij/jflex/psi/impl/JFlexLiteralExpressionImpl.java -----------------
 // license.txt
 package org.intellij.jflex.psi.impl;
 
@@ -1381,7 +1381,7 @@ public class JFlexLiteralExpressionImpl extends JFlexExpressionImpl implements J
   }
 
 }
-// ---- org/intellij/jflex/psi/impl/JFlexLookAheadImpl.java -----------------
+// ---- ../grammar-kit/psi/org/intellij/jflex/psi/impl/JFlexLookAheadImpl.java -----------------
 // license.txt
 package org.intellij.jflex.psi.impl;
 
@@ -1419,7 +1419,7 @@ public class JFlexLookAheadImpl extends JFlexCompositeImpl implements JFlexLookA
   }
 
 }
-// ---- org/intellij/jflex/psi/impl/JFlexMacroDefinitionImpl.java -----------------
+// ---- ../grammar-kit/psi/org/intellij/jflex/psi/impl/JFlexMacroDefinitionImpl.java -----------------
 // license.txt
 package org.intellij.jflex.psi.impl;
 
@@ -1479,7 +1479,7 @@ public class JFlexMacroDefinitionImpl extends JFlexCompositeImpl implements JFle
   }
 
 }
-// ---- org/intellij/jflex/psi/impl/JFlexMacroRefExpressionImpl.java -----------------
+// ---- ../grammar-kit/psi/org/intellij/jflex/psi/impl/JFlexMacroRefExpressionImpl.java -----------------
 // license.txt
 package org.intellij.jflex.psi.impl;
 
@@ -1517,7 +1517,7 @@ public class JFlexMacroRefExpressionImpl extends JFlexExpressionImpl implements 
   }
 
 }
-// ---- org/intellij/jflex/psi/impl/JFlexMacroReferenceImpl.java -----------------
+// ---- ../grammar-kit/psi/org/intellij/jflex/psi/impl/JFlexMacroReferenceImpl.java -----------------
 // license.txt
 package org.intellij.jflex.psi.impl;
 
@@ -1561,7 +1561,7 @@ public class JFlexMacroReferenceImpl extends JFlexCompositeImpl implements JFlex
   }
 
 }
-// ---- org/intellij/jflex/psi/impl/JFlexNotExpressionImpl.java -----------------
+// ---- ../grammar-kit/psi/org/intellij/jflex/psi/impl/JFlexNotExpressionImpl.java -----------------
 // license.txt
 package org.intellij.jflex.psi.impl;
 
@@ -1599,7 +1599,7 @@ public class JFlexNotExpressionImpl extends JFlexExpressionImpl implements JFlex
   }
 
 }
-// ---- org/intellij/jflex/psi/impl/JFlexOptionImpl.java -----------------
+// ---- ../grammar-kit/psi/org/intellij/jflex/psi/impl/JFlexOptionImpl.java -----------------
 // license.txt
 package org.intellij.jflex.psi.impl;
 
@@ -1631,7 +1631,7 @@ public class JFlexOptionImpl extends JFlexCompositeImpl implements JFlexOption {
   }
 
 }
-// ---- org/intellij/jflex/psi/impl/JFlexParenExpressionImpl.java -----------------
+// ---- ../grammar-kit/psi/org/intellij/jflex/psi/impl/JFlexParenExpressionImpl.java -----------------
 // license.txt
 package org.intellij.jflex.psi.impl;
 
@@ -1669,7 +1669,7 @@ public class JFlexParenExpressionImpl extends JFlexExpressionImpl implements JFl
   }
 
 }
-// ---- org/intellij/jflex/psi/impl/JFlexPredefinedClassExpressionImpl.java -----------------
+// ---- ../grammar-kit/psi/org/intellij/jflex/psi/impl/JFlexPredefinedClassExpressionImpl.java -----------------
 // license.txt
 package org.intellij.jflex.psi.impl;
 
@@ -1701,7 +1701,7 @@ public class JFlexPredefinedClassExpressionImpl extends JFlexExpressionImpl impl
   }
 
 }
-// ---- org/intellij/jflex/psi/impl/JFlexQuantifierExpressionImpl.java -----------------
+// ---- ../grammar-kit/psi/org/intellij/jflex/psi/impl/JFlexQuantifierExpressionImpl.java -----------------
 // license.txt
 package org.intellij.jflex.psi.impl;
 
@@ -1739,7 +1739,7 @@ public class JFlexQuantifierExpressionImpl extends JFlexExpressionImpl implement
   }
 
 }
-// ---- org/intellij/jflex/psi/impl/JFlexRuleImpl.java -----------------
+// ---- ../grammar-kit/psi/org/intellij/jflex/psi/impl/JFlexRuleImpl.java -----------------
 // license.txt
 package org.intellij.jflex.psi.impl;
 
@@ -1807,7 +1807,7 @@ public class JFlexRuleImpl extends JFlexCompositeImpl implements JFlexRule {
   }
 
 }
-// ---- org/intellij/jflex/psi/impl/JFlexSequenceExpressionImpl.java -----------------
+// ---- ../grammar-kit/psi/org/intellij/jflex/psi/impl/JFlexSequenceExpressionImpl.java -----------------
 // license.txt
 package org.intellij.jflex.psi.impl;
 
@@ -1845,7 +1845,7 @@ public class JFlexSequenceExpressionImpl extends JFlexExpressionImpl implements 
   }
 
 }
-// ---- org/intellij/jflex/psi/impl/JFlexStateDeclarationImpl.java -----------------
+// ---- ../grammar-kit/psi/org/intellij/jflex/psi/impl/JFlexStateDeclarationImpl.java -----------------
 // license.txt
 package org.intellij.jflex.psi.impl;
 
@@ -1883,7 +1883,7 @@ public class JFlexStateDeclarationImpl extends JFlexCompositeImpl implements JFl
   }
 
 }
-// ---- org/intellij/jflex/psi/impl/JFlexStateDefinitionImpl.java -----------------
+// ---- ../grammar-kit/psi/org/intellij/jflex/psi/impl/JFlexStateDefinitionImpl.java -----------------
 // license.txt
 package org.intellij.jflex.psi.impl;
 
@@ -1937,7 +1937,7 @@ public class JFlexStateDefinitionImpl extends JFlexCompositeImpl implements JFle
   }
 
 }
-// ---- org/intellij/jflex/psi/impl/JFlexStateListImpl.java -----------------
+// ---- ../grammar-kit/psi/org/intellij/jflex/psi/impl/JFlexStateListImpl.java -----------------
 // license.txt
 package org.intellij.jflex.psi.impl;
 
@@ -1975,7 +1975,7 @@ public class JFlexStateListImpl extends JFlexCompositeImpl implements JFlexState
   }
 
 }
-// ---- org/intellij/jflex/psi/impl/JFlexStateReferenceImpl.java -----------------
+// ---- ../grammar-kit/psi/org/intellij/jflex/psi/impl/JFlexStateReferenceImpl.java -----------------
 // license.txt
 package org.intellij.jflex.psi.impl;
 
@@ -2019,7 +2019,7 @@ public class JFlexStateReferenceImpl extends JFlexCompositeImpl implements JFlex
   }
 
 }
-// ---- org/intellij/jflex/psi/impl/JFlexUserCodeSectionImpl.java -----------------
+// ---- ../grammar-kit/psi/org/intellij/jflex/psi/impl/JFlexUserCodeSectionImpl.java -----------------
 // license.txt
 package org.intellij.jflex.psi.impl;
 
@@ -2057,7 +2057,7 @@ public class JFlexUserCodeSectionImpl extends JFlexFileSectionImpl implements JF
   }
 
 }
-// ---- org/intellij/jflex/psi/impl/JFlexUserValueImpl.java -----------------
+// ---- ../grammar-kit/psi/org/intellij/jflex/psi/impl/JFlexUserValueImpl.java -----------------
 // license.txt
 package org.intellij.jflex.psi.impl;
 
@@ -2089,7 +2089,7 @@ public class JFlexUserValueImpl extends JFlexCompositeImpl implements JFlexUserV
   }
 
 }
-// ---- org/intellij/jflex/psi/JFlexVisitor.java -----------------
+// ---- ../grammar-kit/psi/org/intellij/jflex/psi/JFlexVisitor.java -----------------
 // license.txt
 package org.intellij.jflex.psi;
 

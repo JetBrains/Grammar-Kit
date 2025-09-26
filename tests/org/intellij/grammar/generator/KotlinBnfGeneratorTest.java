@@ -4,10 +4,14 @@
 
 package org.intellij.grammar.generator;
 
+import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.psi.BnfFile;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.File;
 import java.util.List;
+
+import static org.intellij.grammar.generator.ParserGeneratorUtil.getRootAttribute;
 
 public class KotlinBnfGeneratorTest extends AbstractBnfGeneratorTest {
   protected static final @NotNull String KOTLIN_BNF_FILES_DIR = "syntaxBnfFiles";
@@ -25,7 +29,10 @@ public class KotlinBnfGeneratorTest extends AbstractBnfGeneratorTest {
   protected @NotNull List<@NotNull Generator> createGenerators(@NotNull BnfFile psiFile,
                                                                @NotNull String outputPath,
                                                                @NotNull OutputOpener outputOpener) {
-    return List.of(new KotlinParserGenerator(psiFile, "", outputPath, "", outputOpener));
+    String psiModulePath = getRootAttribute(psiFile, KnownAttribute.PSI_OUTPUT_PATH);
+    String myProjectPath = myFullDataPath.substring(0, myFullDataPath.lastIndexOf(File.separatorChar) + 1);
+    String psiOutputPath = !psiModulePath.isEmpty() ? myProjectPath + psiModulePath : "";
+    return List.of(new KotlinParserGenerator(psiFile, "", outputPath, psiOutputPath, "", outputOpener));
   }
 
   public void testAutopin() throws Exception {

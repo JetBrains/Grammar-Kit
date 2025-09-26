@@ -51,7 +51,7 @@ object BnfSyntaxTypes {
   val BNF_SEMICOLON = SyntaxElementType(";")
   val BNF_STRING = SyntaxElementType("string")
 }
-// ---- org/intellij/grammar/psi/BnfTypes.java -----------------
+// ---- ../grammar-kit/psi/org/intellij/grammar/psi/BnfTypes.java -----------------
 // license.txt
 package org.intellij.grammar.psi;
 
@@ -170,7 +170,7 @@ public interface BnfTypes {
     }
   }
 }
-// ---- org/intellij/grammar/BnfSyntaxElementTypeConverterFactory.java -----------------
+// ---- ../grammar-kit/psi/org/intellij/grammar/BnfSyntaxElementTypeConverterFactory.java -----------------
 // license.txt
 package org.intellij.grammar;
 
@@ -234,7 +234,7 @@ public class BnfSyntaxElementTypeConverterFactory implements ElementTypeConverte
     );
   }
 }
-// ---- org/intellij/grammar/psi/BnfAttr.java -----------------
+// ---- ../grammar-kit/psi/org/intellij/grammar/psi/BnfAttr.java -----------------
 // license.txt
 package org.intellij.grammar.psi;
 
@@ -254,7 +254,7 @@ public interface BnfAttr extends BnfNamedElement {
   PsiElement getId();
 
 }
-// ---- org/intellij/grammar/psi/BnfAttrPattern.java -----------------
+// ---- ../grammar-kit/psi/org/intellij/grammar/psi/BnfAttrPattern.java -----------------
 // license.txt
 package org.intellij.grammar.psi;
 
@@ -268,7 +268,7 @@ public interface BnfAttrPattern extends BnfComposite {
   BnfStringLiteralExpression getLiteralExpression();
 
 }
-// ---- org/intellij/grammar/psi/BnfAttrs.java -----------------
+// ---- ../grammar-kit/psi/org/intellij/grammar/psi/BnfAttrs.java -----------------
 // license.txt
 package org.intellij.grammar.psi;
 
@@ -282,7 +282,7 @@ public interface BnfAttrs extends BnfComposite {
   List<BnfAttr> getAttrList();
 
 }
-// ---- org/intellij/grammar/psi/BnfChoice.java -----------------
+// ---- ../grammar-kit/psi/org/intellij/grammar/psi/BnfChoice.java -----------------
 // license.txt
 package org.intellij.grammar.psi;
 
@@ -296,7 +296,7 @@ public interface BnfChoice extends BnfExpression {
   List<BnfExpression> getExpressionList();
 
 }
-// ---- org/intellij/grammar/psi/BnfExpression.java -----------------
+// ---- ../grammar-kit/psi/org/intellij/grammar/psi/BnfExpression.java -----------------
 // license.txt
 package org.intellij.grammar.psi;
 
@@ -307,7 +307,7 @@ import com.intellij.psi.PsiElement;
 public interface BnfExpression extends BnfComposite {
 
 }
-// ---- org/intellij/grammar/psi/BnfExternalExpression.java -----------------
+// ---- ../grammar-kit/psi/org/intellij/grammar/psi/BnfExternalExpression.java -----------------
 // license.txt
 package org.intellij.grammar.psi;
 
@@ -326,7 +326,7 @@ public interface BnfExternalExpression extends BnfExpression {
   @NotNull List<BnfExpression> getArguments();
 
 }
-// ---- org/intellij/grammar/psi/BnfListEntry.java -----------------
+// ---- ../grammar-kit/psi/org/intellij/grammar/psi/BnfListEntry.java -----------------
 // license.txt
 package org.intellij.grammar.psi;
 
@@ -346,7 +346,7 @@ public interface BnfListEntry extends BnfComposite {
   BnfStringLiteralExpression getLiteralExpression();
 
 }
-// ---- org/intellij/grammar/psi/BnfLiteralExpression.java -----------------
+// ---- ../grammar-kit/psi/org/intellij/grammar/psi/BnfLiteralExpression.java -----------------
 // license.txt
 package org.intellij.grammar.psi;
 
@@ -360,7 +360,7 @@ public interface BnfLiteralExpression extends BnfExpression {
   PsiElement getNumber();
 
 }
-// ---- org/intellij/grammar/psi/BnfModifier.java -----------------
+// ---- ../grammar-kit/psi/org/intellij/grammar/psi/BnfModifier.java -----------------
 // license.txt
 package org.intellij.grammar.psi;
 
@@ -371,7 +371,7 @@ import com.intellij.psi.PsiElement;
 public interface BnfModifier extends BnfComposite {
 
 }
-// ---- org/intellij/grammar/psi/BnfParenExpression.java -----------------
+// ---- ../grammar-kit/psi/org/intellij/grammar/psi/BnfParenExpression.java -----------------
 // license.txt
 package org.intellij.grammar.psi;
 
@@ -382,7 +382,7 @@ import com.intellij.psi.PsiElement;
 public interface BnfParenExpression extends BnfParenthesized {
 
 }
-// ---- org/intellij/grammar/psi/BnfParenOptExpression.java -----------------
+// ---- ../grammar-kit/psi/org/intellij/grammar/psi/BnfParenOptExpression.java -----------------
 // license.txt
 package org.intellij.grammar.psi;
 
@@ -393,7 +393,7 @@ import com.intellij.psi.PsiElement;
 public interface BnfParenOptExpression extends BnfParenthesized {
 
 }
-// ---- org/intellij/grammar/psi/BnfParenthesized.java -----------------
+// ---- ../grammar-kit/psi/org/intellij/grammar/psi/BnfParenthesized.java -----------------
 // license.txt
 package org.intellij.grammar.psi;
 
@@ -407,7 +407,7 @@ public interface BnfParenthesized extends BnfExpression {
   BnfExpression getExpression();
 
 }
-// ---- org/intellij/grammar/psi/BnfPredicate.java -----------------
+// ---- ../grammar-kit/psi/org/intellij/grammar/psi/BnfPredicate.java -----------------
 // license.txt
 package org.intellij.grammar.psi;
 
@@ -424,7 +424,7 @@ public interface BnfPredicate extends BnfExpression {
   BnfPredicateSign getPredicateSign();
 
 }
-// ---- org/intellij/grammar/psi/BnfPredicateSign.java -----------------
+// ---- ../grammar-kit/psi/org/intellij/grammar/psi/BnfPredicateSign.java -----------------
 // license.txt
 package org.intellij.grammar.psi;
 
@@ -435,7 +435,7 @@ import com.intellij.psi.PsiElement;
 public interface BnfPredicateSign extends BnfComposite {
 
 }
-// ---- org/intellij/grammar/psi/BnfQuantified.java -----------------
+// ---- ../grammar-kit/psi/org/intellij/grammar/psi/BnfQuantified.java -----------------
 // license.txt
 package org.intellij.grammar.psi;
 
@@ -452,7 +452,7 @@ public interface BnfQuantified extends BnfExpression {
   BnfQuantifier getQuantifier();
 
 }
-// ---- org/intellij/grammar/psi/BnfQuantifier.java -----------------
+// ---- ../grammar-kit/psi/org/intellij/grammar/psi/BnfQuantifier.java -----------------
 // license.txt
 package org.intellij.grammar.psi;
 
@@ -463,7 +463,7 @@ import com.intellij.psi.PsiElement;
 public interface BnfQuantifier extends BnfComposite {
 
 }
-// ---- org/intellij/grammar/psi/BnfReferenceOrToken.java -----------------
+// ---- ../grammar-kit/psi/org/intellij/grammar/psi/BnfReferenceOrToken.java -----------------
 // license.txt
 package org.intellij.grammar.psi;
 
@@ -479,7 +479,7 @@ public interface BnfReferenceOrToken extends BnfExpression {
   @Nullable BnfRule resolveRule();
 
 }
-// ---- org/intellij/grammar/psi/BnfRule.java -----------------
+// ---- ../grammar-kit/psi/org/intellij/grammar/psi/BnfRule.java -----------------
 // license.txt
 package org.intellij.grammar.psi;
 
@@ -502,7 +502,7 @@ public interface BnfRule extends BnfNamedElement {
   PsiElement getId();
 
 }
-// ---- org/intellij/grammar/psi/BnfSequence.java -----------------
+// ---- ../grammar-kit/psi/org/intellij/grammar/psi/BnfSequence.java -----------------
 // license.txt
 package org.intellij.grammar.psi;
 
@@ -516,7 +516,7 @@ public interface BnfSequence extends BnfExpression {
   List<BnfExpression> getExpressionList();
 
 }
-// ---- org/intellij/grammar/psi/BnfStringLiteralExpression.java -----------------
+// ---- ../grammar-kit/psi/org/intellij/grammar/psi/BnfStringLiteralExpression.java -----------------
 // license.txt
 package org.intellij.grammar.psi;
 
@@ -530,7 +530,7 @@ public interface BnfStringLiteralExpression extends BnfLiteralExpression {
   PsiElement getString();
 
 }
-// ---- org/intellij/grammar/psi/BnfValueList.java -----------------
+// ---- ../grammar-kit/psi/org/intellij/grammar/psi/BnfValueList.java -----------------
 // license.txt
 package org.intellij.grammar.psi;
 
@@ -544,7 +544,7 @@ public interface BnfValueList extends BnfExpression {
   List<BnfListEntry> getListEntryList();
 
 }
-// ---- org/intellij/grammar/psi/impl/BnfAttrImpl.java -----------------
+// ---- ../grammar-kit/psi/org/intellij/grammar/psi/impl/BnfAttrImpl.java -----------------
 // license.txt
 package org.intellij.grammar.psi.impl;
 
@@ -594,7 +594,7 @@ public class BnfAttrImpl extends BnfNamedImpl implements BnfAttr {
   }
 
 }
-// ---- org/intellij/grammar/psi/impl/BnfAttrPatternImpl.java -----------------
+// ---- ../grammar-kit/psi/org/intellij/grammar/psi/impl/BnfAttrPatternImpl.java -----------------
 // license.txt
 package org.intellij.grammar.psi.impl;
 
@@ -632,7 +632,7 @@ public class BnfAttrPatternImpl extends BnfCompositeImpl implements BnfAttrPatte
   }
 
 }
-// ---- org/intellij/grammar/psi/impl/BnfAttrsImpl.java -----------------
+// ---- ../grammar-kit/psi/org/intellij/grammar/psi/impl/BnfAttrsImpl.java -----------------
 // license.txt
 package org.intellij.grammar.psi.impl;
 
@@ -670,7 +670,7 @@ public class BnfAttrsImpl extends BnfCompositeImpl implements BnfAttrs {
   }
 
 }
-// ---- org/intellij/grammar/psi/impl/BnfChoiceImpl.java -----------------
+// ---- ../grammar-kit/psi/org/intellij/grammar/psi/impl/BnfChoiceImpl.java -----------------
 // license.txt
 package org.intellij.grammar.psi.impl;
 
@@ -708,7 +708,7 @@ public class BnfChoiceImpl extends BnfExpressionImpl implements BnfChoice {
   }
 
 }
-// ---- org/intellij/grammar/psi/impl/BnfExpressionImpl.java -----------------
+// ---- ../grammar-kit/psi/org/intellij/grammar/psi/impl/BnfExpressionImpl.java -----------------
 // license.txt
 package org.intellij.grammar.psi.impl;
 
@@ -740,7 +740,7 @@ public abstract class BnfExpressionImpl extends BnfCompositeImpl implements BnfE
   }
 
 }
-// ---- org/intellij/grammar/psi/impl/BnfExternalExpressionImpl.java -----------------
+// ---- ../grammar-kit/psi/org/intellij/grammar/psi/impl/BnfExternalExpressionImpl.java -----------------
 // license.txt
 package org.intellij.grammar.psi.impl;
 
@@ -790,7 +790,7 @@ public class BnfExternalExpressionImpl extends BnfExpressionImpl implements BnfE
   }
 
 }
-// ---- org/intellij/grammar/psi/impl/BnfListEntryImpl.java -----------------
+// ---- ../grammar-kit/psi/org/intellij/grammar/psi/impl/BnfListEntryImpl.java -----------------
 // license.txt
 package org.intellij.grammar.psi.impl;
 
@@ -840,7 +840,7 @@ public class BnfListEntryImpl extends BnfCompositeImpl implements BnfListEntry {
   }
 
 }
-// ---- org/intellij/grammar/psi/impl/BnfLiteralExpressionImpl.java -----------------
+// ---- ../grammar-kit/psi/org/intellij/grammar/psi/impl/BnfLiteralExpressionImpl.java -----------------
 // license.txt
 package org.intellij.grammar.psi.impl;
 
@@ -878,7 +878,7 @@ public class BnfLiteralExpressionImpl extends BnfExpressionImpl implements BnfLi
   }
 
 }
-// ---- org/intellij/grammar/psi/impl/BnfModifierImpl.java -----------------
+// ---- ../grammar-kit/psi/org/intellij/grammar/psi/impl/BnfModifierImpl.java -----------------
 // license.txt
 package org.intellij.grammar.psi.impl;
 
@@ -910,7 +910,7 @@ public class BnfModifierImpl extends BnfCompositeImpl implements BnfModifier {
   }
 
 }
-// ---- org/intellij/grammar/psi/impl/BnfParenExpressionImpl.java -----------------
+// ---- ../grammar-kit/psi/org/intellij/grammar/psi/impl/BnfParenExpressionImpl.java -----------------
 // license.txt
 package org.intellij.grammar.psi.impl;
 
@@ -942,7 +942,7 @@ public class BnfParenExpressionImpl extends BnfParenthesizedImpl implements BnfP
   }
 
 }
-// ---- org/intellij/grammar/psi/impl/BnfParenOptExpressionImpl.java -----------------
+// ---- ../grammar-kit/psi/org/intellij/grammar/psi/impl/BnfParenOptExpressionImpl.java -----------------
 // license.txt
 package org.intellij.grammar.psi.impl;
 
@@ -974,7 +974,7 @@ public class BnfParenOptExpressionImpl extends BnfParenthesizedImpl implements B
   }
 
 }
-// ---- org/intellij/grammar/psi/impl/BnfParenthesizedImpl.java -----------------
+// ---- ../grammar-kit/psi/org/intellij/grammar/psi/impl/BnfParenthesizedImpl.java -----------------
 // license.txt
 package org.intellij.grammar.psi.impl;
 
@@ -1012,7 +1012,7 @@ public class BnfParenthesizedImpl extends BnfExpressionImpl implements BnfParent
   }
 
 }
-// ---- org/intellij/grammar/psi/impl/BnfPredicateImpl.java -----------------
+// ---- ../grammar-kit/psi/org/intellij/grammar/psi/impl/BnfPredicateImpl.java -----------------
 // license.txt
 package org.intellij.grammar.psi.impl;
 
@@ -1056,7 +1056,7 @@ public class BnfPredicateImpl extends BnfExpressionImpl implements BnfPredicate 
   }
 
 }
-// ---- org/intellij/grammar/psi/impl/BnfPredicateSignImpl.java -----------------
+// ---- ../grammar-kit/psi/org/intellij/grammar/psi/impl/BnfPredicateSignImpl.java -----------------
 // license.txt
 package org.intellij.grammar.psi.impl;
 
@@ -1088,7 +1088,7 @@ public class BnfPredicateSignImpl extends BnfCompositeImpl implements BnfPredica
   }
 
 }
-// ---- org/intellij/grammar/psi/impl/BnfQuantifiedImpl.java -----------------
+// ---- ../grammar-kit/psi/org/intellij/grammar/psi/impl/BnfQuantifiedImpl.java -----------------
 // license.txt
 package org.intellij.grammar.psi.impl;
 
@@ -1132,7 +1132,7 @@ public class BnfQuantifiedImpl extends BnfExpressionImpl implements BnfQuantifie
   }
 
 }
-// ---- org/intellij/grammar/psi/impl/BnfQuantifierImpl.java -----------------
+// ---- ../grammar-kit/psi/org/intellij/grammar/psi/impl/BnfQuantifierImpl.java -----------------
 // license.txt
 package org.intellij.grammar.psi.impl;
 
@@ -1164,7 +1164,7 @@ public class BnfQuantifierImpl extends BnfCompositeImpl implements BnfQuantifier
   }
 
 }
-// ---- org/intellij/grammar/psi/impl/BnfReferenceOrTokenImpl.java -----------------
+// ---- ../grammar-kit/psi/org/intellij/grammar/psi/impl/BnfReferenceOrTokenImpl.java -----------------
 // license.txt
 package org.intellij.grammar.psi.impl;
 
@@ -1202,7 +1202,7 @@ public class BnfReferenceOrTokenImpl extends BnfRefOrTokenImpl implements BnfRef
   }
 
 }
-// ---- org/intellij/grammar/psi/impl/BnfRuleImpl.java -----------------
+// ---- ../grammar-kit/psi/org/intellij/grammar/psi/impl/BnfRuleImpl.java -----------------
 // license.txt
 package org.intellij.grammar.psi.impl;
 
@@ -1258,7 +1258,7 @@ public class BnfRuleImpl extends BnfNamedImpl implements BnfRule {
   }
 
 }
-// ---- org/intellij/grammar/psi/impl/BnfSequenceImpl.java -----------------
+// ---- ../grammar-kit/psi/org/intellij/grammar/psi/impl/BnfSequenceImpl.java -----------------
 // license.txt
 package org.intellij.grammar.psi.impl;
 
@@ -1296,7 +1296,7 @@ public class BnfSequenceImpl extends BnfExpressionImpl implements BnfSequence {
   }
 
 }
-// ---- org/intellij/grammar/psi/impl/BnfStringLiteralExpressionImpl.java -----------------
+// ---- ../grammar-kit/psi/org/intellij/grammar/psi/impl/BnfStringLiteralExpressionImpl.java -----------------
 // license.txt
 package org.intellij.grammar.psi.impl;
 
@@ -1334,7 +1334,7 @@ public class BnfStringLiteralExpressionImpl extends BnfStringImpl implements Bnf
   }
 
 }
-// ---- org/intellij/grammar/psi/impl/BnfValueListImpl.java -----------------
+// ---- ../grammar-kit/psi/org/intellij/grammar/psi/impl/BnfValueListImpl.java -----------------
 // license.txt
 package org.intellij.grammar.psi.impl;
 
@@ -1372,7 +1372,7 @@ public class BnfValueListImpl extends BnfExpressionImpl implements BnfValueList 
   }
 
 }
-// ---- org/intellij/grammar/psi/BnfVisitor.java -----------------
+// ---- ../grammar-kit/psi/org/intellij/grammar/psi/BnfVisitor.java -----------------
 // license.txt
 package org.intellij.grammar.psi;
 

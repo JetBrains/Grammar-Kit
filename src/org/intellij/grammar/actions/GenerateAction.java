@@ -172,6 +172,7 @@ public class GenerateAction extends AnAction {
                     new KotlinParserGenerator((BnfFile)bnfFile,
                                               sourcePath,
                                               genDir.getPath(),
+                                              psiGenDir.getPath(),
                                               packagePrefix,
                                               ((className, fileToOpen, myBnfFile) -> {
                                                 files.add(fileToOpen);

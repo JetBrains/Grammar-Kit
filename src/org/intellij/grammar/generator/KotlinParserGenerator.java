@@ -66,6 +66,8 @@ public final class KotlinParserGenerator extends Generator {
    */
   private final @NotNull String myElementTypesHolderName;
   private final @NotNull Map<String, RuleInfo> myRuleInfos = new TreeMap<>();
+  
+  private final @NotNull String myPsiOutputPath;
 
   /**
    * Maps field names to their corresponding parser function bodies.
@@ -116,6 +118,7 @@ public final class KotlinParserGenerator extends Generator {
   public KotlinParserGenerator(@NotNull BnfFile psiFile,
                                @NotNull String sourcePath,
                                @NotNull String outputPath,
+                               @NotNull String psiOutputPath,
                                @NotNull String packagePrefix,
                                @NotNull OutputOpener outputOpener
   ) {
@@ -127,6 +130,7 @@ public final class KotlinParserGenerator extends Generator {
 
     // TODO: consider creating kotlin specific attributes for this
     myElementTypesHolderName = getRootAttribute(myFile, KnownAttribute.SYNTAX_ELEMENT_TYPE_HOLDER_CLASS);
+    myPsiOutputPath = (psiOutputPath.isEmpty()) ? myOutputPath : psiOutputPath;;
 
     mySimpleTokens = new LinkedHashMap<>(RuleGraphHelper.getTokenTextToNameMap(myFile));
     myGraphHelper = RuleGraphHelper.getCached(myFile);
@@ -235,7 +239,7 @@ public final class KotlinParserGenerator extends Generator {
       generateElementTypes();
     }
     if (myGrammarRoot != null && (G.generatePsi)){
-      JavaParserGenerator parser = new JavaParserGenerator(myFile, mySourcePath, myOutputPath, myPackagePrefix, myOpener);
+      JavaParserGenerator parser = new JavaParserGenerator(myFile, mySourcePath, myPsiOutputPath, myPackagePrefix, myOpener);
       parser.replaceSimpleTokes(mySimpleTokens);
       parser.generatePsiOnly();
     }

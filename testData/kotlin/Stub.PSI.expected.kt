@@ -16,7 +16,7 @@ object FooSyntaxTypes {
   val STRUCT_TYPE = SyntaxElementType("STRUCT_TYPE")
   val TYPE = SyntaxElementType("TYPE")
 }
-// ---- test/FooTypes.java -----------------
+// ---- ../myPsi/output/test/FooTypes.java -----------------
 //header.txt
 package test;
 
@@ -66,7 +66,7 @@ public interface FooTypes {
     }
   }
 }
-// ---- generated/GeneratedSyntaxElementTypeConverterFactory.java -----------------
+// ---- ../myPsi/output/generated/GeneratedSyntaxElementTypeConverterFactory.java -----------------
 //header.txt
 package generated;
 
@@ -96,7 +96,7 @@ public class GeneratedSyntaxElementTypeConverterFactory implements ElementTypeCo
     );
   }
 }
-// ---- test/psi/Element1.java -----------------
+// ---- ../myPsi/output/test/psi/Element1.java -----------------
 //header.txt
 package test.psi;
 
@@ -112,7 +112,7 @@ public interface Element1 extends PsiElement, StubBasedPsiElement<Element1Stub> 
   Element5 getElement5();
 
 }
-// ---- test/psi/Element2.java -----------------
+// ---- ../myPsi/output/test/psi/Element2.java -----------------
 //header.txt
 package test.psi;
 
@@ -128,7 +128,7 @@ public interface Element2 extends PsiElement, StubBasedPsiElement<Element2Stub> 
   List<Element4> getElement4List();
 
 }
-// ---- test/psi/Element3.java -----------------
+// ---- ../myPsi/output/test/psi/Element3.java -----------------
 //header.txt
 package test.psi;
 
@@ -144,7 +144,7 @@ public interface Element3 extends PsiElement, StubBasedPsiElement<Element3Stub> 
   Element4 getElement4();
 
 }
-// ---- test/psi/Element4.java -----------------
+// ---- ../myPsi/output/test/psi/Element4.java -----------------
 //header.txt
 package test.psi;
 
@@ -160,7 +160,7 @@ public interface Element4 extends PsiElement, StubBasedPsiElement<Element4Stub> 
   Element2 getElement2();
 
 }
-// ---- test/psi/Element5.java -----------------
+// ---- ../myPsi/output/test/psi/Element5.java -----------------
 //header.txt
 package test.psi;
 
@@ -171,7 +171,7 @@ import com.intellij.psi.PsiElement;
 public interface Element5 extends PsiElement {
 
 }
-// ---- test/psi/InterfaceType.java -----------------
+// ---- ../myPsi/output/test/psi/InterfaceType.java -----------------
 //header.txt
 package test.psi;
 
@@ -182,7 +182,7 @@ import com.intellij.psi.PsiElement;
 public interface InterfaceType extends Type {
 
 }
-// ---- test/psi/Missing.java -----------------
+// ---- ../myPsi/output/test/psi/Missing.java -----------------
 //header.txt
 package test.psi;
 
@@ -195,7 +195,7 @@ import test.stub.MissingStub;
 public interface Missing extends PsiElement, StubBasedPsiElement<MissingStub> {
 
 }
-// ---- test/psi/Simple.java -----------------
+// ---- ../myPsi/output/test/psi/Simple.java -----------------
 //header.txt
 package test.psi;
 
@@ -208,7 +208,7 @@ import org.intellij.grammar.test.StubTest.SimpleStub;
 public interface Simple extends PsiElement, StubBasedPsiElement<SimpleStub> {
 
 }
-// ---- test/psi/StructType.java -----------------
+// ---- ../myPsi/output/test/psi/StructType.java -----------------
 //header.txt
 package test.psi;
 
@@ -219,7 +219,7 @@ import com.intellij.psi.PsiElement;
 public interface StructType extends Type {
 
 }
-// ---- test/psi/Type.java -----------------
+// ---- ../myPsi/output/test/psi/Type.java -----------------
 //header.txt
 package test.psi;
 
@@ -232,7 +232,7 @@ import test.stub.TypeStub;
 public interface Type extends PsiElement, StubBasedPsiElement<TypeStub> {
 
 }
-// ---- test/psi/impl/Element1Impl.java -----------------
+// ---- ../myPsi/output/test/psi/impl/Element1Impl.java -----------------
 //header.txt
 package test.psi.impl;
 
@@ -280,7 +280,7 @@ public class Element1Impl extends GenericBase<Element1Stub> implements Element1 
   }
 
 }
-// ---- test/psi/impl/Element2Impl.java -----------------
+// ---- ../myPsi/output/test/psi/impl/Element2Impl.java -----------------
 //header.txt
 package test.psi.impl;
 
@@ -328,7 +328,7 @@ public class Element2Impl extends StubBasedPsiElementBase<Element2Stub> implemen
   }
 
 }
-// ---- test/psi/impl/Element3Impl.java -----------------
+// ---- ../myPsi/output/test/psi/impl/Element3Impl.java -----------------
 //header.txt
 package test.psi.impl;
 
@@ -376,7 +376,7 @@ public class Element3Impl extends StubBasedPsiElementBase<Element3Stub> implemen
   }
 
 }
-// ---- test/psi/impl/Element4Impl.java -----------------
+// ---- ../myPsi/output/test/psi/impl/Element4Impl.java -----------------
 //header.txt
 package test.psi.impl;
 
@@ -424,7 +424,7 @@ public class Element4Impl extends StubBasedPsiElementBase<Element4Stub> implemen
   }
 
 }
-// ---- test/psi/impl/Element5Impl.java -----------------
+// ---- ../myPsi/output/test/psi/impl/Element5Impl.java -----------------
 //header.txt
 package test.psi.impl;
 
@@ -455,7 +455,7 @@ public class Element5Impl extends ASTWrapperPsiElement implements Element5 {
   }
 
 }
-// ---- test/psi/impl/InterfaceTypeImpl.java -----------------
+// ---- ../myPsi/output/test/psi/impl/InterfaceTypeImpl.java -----------------
 //header.txt
 package test.psi.impl;
 
@@ -497,7 +497,7 @@ public class InterfaceTypeImpl extends TypeImpl implements InterfaceType {
   }
 
 }
-// ---- test/psi/impl/MissingImpl.java -----------------
+// ---- ../myPsi/output/test/psi/impl/MissingImpl.java -----------------
 //header.txt
 package test.psi.impl;
 
@@ -534,7 +534,7 @@ public class MissingImpl extends MissingBase implements Missing {
   }
 
 }
-// ---- test/psi/impl/SimpleImpl.java -----------------
+// ---- ../myPsi/output/test/psi/impl/SimpleImpl.java -----------------
 //header.txt
 package test.psi.impl;
 
@@ -571,7 +571,7 @@ public class SimpleImpl extends SimpleBase implements Simple {
   }
 
 }
-// ---- test/psi/impl/StructTypeImpl.java -----------------
+// ---- ../myPsi/output/test/psi/impl/StructTypeImpl.java -----------------
 //header.txt
 package test.psi.impl;
 
@@ -613,7 +613,7 @@ public class StructTypeImpl extends TypeImpl implements StructType {
   }
 
 }
-// ---- test/psi/impl/TypeImpl.java -----------------
+// ---- ../myPsi/output/test/psi/impl/TypeImpl.java -----------------
 //header.txt
 package test.psi.impl;
 
@@ -655,7 +655,7 @@ public abstract class TypeImpl extends GenericBase<TypeStub> implements Type {
   }
 
 }
-// ---- test/psi/Visitor.java -----------------
+// ---- ../myPsi/output/test/psi/Visitor.java -----------------
 //header.txt
 package test.psi;
 

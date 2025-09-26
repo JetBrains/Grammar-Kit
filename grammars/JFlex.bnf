@@ -16,6 +16,8 @@
 
   elementTypeHolderClass="org.intellij.jflex.psi.JFlexTypes"
   syntaxElementTypeHolderClass="org.intellij.jflex.JFlexTypes"
+  psiOutputPath="grammar-kit/psi"
+
   elementTypePrefix="FLEX_"
   elementTypeClass="org.intellij.jflex.psi.JFlexCompositeElementType"
   tokenTypeClass="org.intellij.jflex.psi.JFlexTokenType"

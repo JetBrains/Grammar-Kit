@@ -92,7 +92,7 @@ public class ExpressionHelper {
         myExpressionMap.put(rule, expressionInfo);
       }
       ops: for (OperatorInfo info : expressionInfo.operatorMap.values()) {
-        Map<PsiElement, RuleGraphHelper.Cardinality> map = myRuleGraph.collectMembers(info.rule, info.operator, new HashSet<>());
+        Map<PsiElement, RuleGraphHelper.Cardinality> map = myRuleGraph.collectMembers(info.rule(), info.operator(), new HashSet<>());
         for (RuleGraphHelper.Cardinality c : map.values()) {
           if (!c.optional()) continue ops;
         }
@@ -257,14 +257,14 @@ public class ExpressionHelper {
     // in Expression parsing mode REQUIRED may go OPTIONAL
     ExpressionInfo info = getExpressionInfo(rule);
     OperatorInfo operatorInfo = info == null ? null : info.operatorMap.get(rule);
-    if (operatorInfo == null || operatorInfo.type == OperatorType.ATOM) return type;
+    if (operatorInfo == null || operatorInfo.type() == OperatorType.ATOM) return type;
 
     // emulate expr-parsing pin processing
-    if ((operatorInfo.type == OperatorType.BINARY ||
-         operatorInfo.type == OperatorType.N_ARY ||
-         operatorInfo.type == OperatorType.POSTFIX) &&
-        ObjectUtils.chooseNotNull(operatorInfo.arg1, info.rootRule) == tree ||
-        isRealAncestor(rule, operatorInfo.operator, tree)) {
+    if ((operatorInfo.type() == OperatorType.BINARY ||
+         operatorInfo.type() == OperatorType.N_ARY ||
+         operatorInfo.type() == OperatorType.POSTFIX) &&
+        ObjectUtils.chooseNotNull(operatorInfo.arg1(), info.rootRule) == tree ||
+        isRealAncestor(rule, operatorInfo.operator(), tree)) {
       // pinned! return as is
       return type;
     }

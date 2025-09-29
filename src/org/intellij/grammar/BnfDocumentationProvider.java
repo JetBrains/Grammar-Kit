@@ -111,11 +111,11 @@ final class BnfDocumentationProvider implements DocumentationProvider {
     int priority = expressionInfo.getPriority(rule);
 
     docBuilder.append("\n<br><h1>Priority table:");
-    appendColored(docBuilder, String.format(" %s (%s)", ruleOperator != null ? ruleOperator.type : "priority group", priority));
+    appendColored(docBuilder, String.format(" %s (%s)", ruleOperator != null ? ruleOperator.type() : "priority group", priority));
     docBuilder.append("</h1>");
     expressionInfo.dumpPriorityTable(docBuilder.append("<code><pre>"), (sb, operatorInfo) -> {
       if (ruleOperator == operatorInfo ||
-          ruleOperator == null && Comparing.equal(expressionInfo.getPriority(operatorInfo.rule), priority)) {
+          ruleOperator == null && Comparing.equal(expressionInfo.getPriority(operatorInfo.rule()), priority)) {
         appendColored(sb, operatorInfo);
       }
       else {

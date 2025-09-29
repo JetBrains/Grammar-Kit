@@ -33,9 +33,9 @@ public class ExpressionGeneratorHelper {
     Map<String, List<OperatorInfo>> opCalls = new LinkedHashMap<>();
     for (BnfRule rule : info.priorityMap.keySet()) {
       OperatorInfo operator = info.operatorMap.get(rule);
-      String opCall = g.generateNodeCall(info.rootRule, 
-                                         operator.operator, 
-                                         R.getNextName(R.getFuncName(operator.rule), 0), 
+      String opCall = g.generateNodeCall(info.rootRule,
+                                         operator.operator(), 
+                                         R.getNextName(R.getFuncName(operator.rule()), 0), 
                                          CONSUME_TYPE_OVERRIDE).render(R);
       opCalls.computeIfAbsent(opCall, k -> new ArrayList<>(2)).add(operator);
     }
@@ -72,9 +72,9 @@ public class ExpressionGeneratorHelper {
       if (operators.isEmpty()) continue;
       OperatorInfo operator = operators.get(0);
       if (operators.size() > 1) {
-        g.addWarning("only first definition will be used for '" + operator.operator.getText() + "': " + operators);
+        g.addWarning("only first definition will be used for '" + operator.operator().getText() + "': " + operators);
       }
-      String nodeCall = g.generateNodeCall(operator.rule, null, operator.rule.getName()).render(R);
+      String nodeCall = g.generateNodeCall(operator.rule(), null, operator.rule().getName()).render(R);
       g.out("%s%s = %s;", first ? "" : format("if (!%s) ", g.N.result), g.N.result, nodeCall);
       first = false;
     }
@@ -99,29 +99,29 @@ public class ExpressionGeneratorHelper {
       if (operators.isEmpty()) continue;
       OperatorInfo operator = operators.get(0);
       if (operators.size() > 1) {
-        g.addWarning("only first definition will be used for '" + operator.operator.getText() + "': " + operators);
+        g.addWarning("only first definition will be used for '" + operator.operator().getText() + "': " + operators);
       }
-      int priority = info.getPriority(operator.rule);
-      int arg2Priority = operator.arg2 == null ? -1 : info.getPriority(operator.arg2);
+      int priority = info.getPriority(operator.rule());
+      int arg2Priority = operator.arg2() == null ? -1 : info.getPriority(operator.arg2());
       int argPriority = arg2Priority == -1 ? priority : arg2Priority - 1;
 
       String substCheck = "";
-      if (operator.arg1 != null) {
-        substCheck = format(" && leftMarkerIs(%s, %s)", g.N.builder, g.getElementType(operator.arg1));
+      if (operator.arg1() != null) {
+        substCheck = format(" && leftMarkerIs(%s, %s)", g.N.builder, g.getElementType(operator.arg1()));
       }
       g.out("%sif (%s < %d%s && %s) {", first ? "" : "else ", g.N.priority, priority, substCheck, opCall);
       first = false;
-      String elementType = g.getElementType(operator.rule);
-      boolean rightAssociative = getAttribute(operator.rule, KnownAttribute.RIGHT_ASSOCIATIVE);
-      String tailCall = operator.tail == null ? null : g.generateNodeCall(
-        operator.rule, operator.tail, R.getNextName(R.getFuncName(operator.rule), 1), ConsumeType.DEFAULT
+      String elementType = g.getElementType(operator.rule());
+      boolean rightAssociative = getAttribute(operator.rule(), KnownAttribute.RIGHT_ASSOCIATIVE);
+      String tailCall = operator.tail() == null ? null : g.generateNodeCall(
+        operator.rule(), operator.tail(), R.getNextName(R.getFuncName(operator.rule()), 1), ConsumeType.DEFAULT
       ).render(R);
-      if (operator.type == OperatorType.BINARY) {
+      if (operator.type() == OperatorType.BINARY) {
         String argCall = format("%s(%s, %s, %d)", methodName, g.N.builder, g.N.level, rightAssociative ? argPriority - 1 : argPriority);
         g.out("%s = %s;", g.N.result, tailCall == null ? argCall : format("report_error_(%s, %s)", g.N.builder, argCall));
         if (tailCall != null) g.out("%s = %s && %s;", g.N.result, tailCall, g.N.result);
       }
-      else if (operator.type == OperatorType.N_ARY) {
+      else if (operator.type() == OperatorType.N_ARY) {
         boolean checkEmpty = info.checkEmpty.contains(operator);
         if (checkEmpty) {
           g.out("int %s = current_position_(%s);", g.N.pos, g.N.builder);
@@ -131,12 +131,12 @@ public class ExpressionGeneratorHelper {
         if (tailCall != null) g.out("%s = %s && %s;", g.N.result, tailCall, g.N.result);
         g.out("if (!%s) break;", opCall);
         if (checkEmpty) {
-          g.out("if (!empty_element_parsed_guard_(%s, \"%s\", %s)) break;", g.N.builder, operator.rule.getName(), g.N.pos);
+          g.out("if (!empty_element_parsed_guard_(%s, \"%s\", %s)) break;", g.N.builder, operator.rule().getName(), g.N.pos);
           g.out("%s = current_position_(%s);", g.N.pos, g.N.builder);
         }
         g.out("}");
       }
-      else if (operator.type == OperatorType.POSTFIX) {
+      else if (operator.type() == OperatorType.POSTFIX) {
         g.out("%s = true;", g.N.result);
       }
       g.out("exit_section_(%s, %s, %s, %s, %s, true, null);", g.N.builder, g.N.level, g.N.marker, elementType, g.N.result);
@@ -160,30 +160,30 @@ public class ExpressionGeneratorHelper {
     Set<BnfExpression> visited = new HashSet<>();
     for (String opCall : sortedOpCalls) {
       for (OperatorInfo operator : opCalls.get(opCall)) {
-        if (operator.type == OperatorType.ATOM) {
-          if (Rule.isExternal(operator.rule)) continue;
+        if (operator.type() == OperatorType.ATOM) {
+          if (Rule.isExternal(operator.rule())) continue;
           g.newLine();
-          g.generateNode(operator.rule, operator.rule.getExpression(), R.getFuncName(operator.rule), visited);
+          g.generateNode(operator.rule(), operator.rule().getExpression(), R.getFuncName(operator.rule()), visited);
           continue;
         }
-        else if (operator.type == OperatorType.PREFIX) {
+        else if (operator.type() == OperatorType.PREFIX) {
           g.newLine();
-          String operatorFuncName = operator.rule.getName();
+          String operatorFuncName = operator.rule().getName();
           g.out("public static boolean %s(%s %s, int %s) {", operatorFuncName, shortPB, g.N.builder, g.N.level);
           g.out("if (!recursion_guard_(%s, %s, \"%s\")) return false;", g.N.builder, g.N.level, operatorFuncName);
-          g.generateFirstCheck(operator.rule, frameName, false);
+          g.generateFirstCheck(operator.rule(), frameName, false);
           g.out("boolean %s, %s;", g.N.result, g.N.pinned);
           g.out("%s %s = enter_section_(%s, %s, _NONE_, null);", shortMarker, g.N.marker, g.N.builder, g.N.level);
 
-          String elementType = g.getElementType(operator.rule);
-          String tailCall = operator.tail == null ? null : g.generateNodeCall(
-            operator.rule, operator.tail, R.getNextName(R.getFuncName(operator.rule), 1), ConsumeType.DEFAULT
+          String elementType = g.getElementType(operator.rule());
+          String tailCall = operator.tail() == null ? null : g.generateNodeCall(
+            operator.rule(), operator.tail(), R.getNextName(R.getFuncName(operator.rule()), 1), ConsumeType.DEFAULT
           ).render(R);
 
           g.out("%s = %s;", g.N.result, opCall);
           g.out("%s = %s;", g.N.pinned, g.N.result);
-          int priority = info.getPriority(operator.rule);
-          int arg1Priority = operator.arg1 == null ? -1 : info.getPriority(operator.arg1);
+          int priority = info.getPriority(operator.rule());
+          int arg1Priority = operator.arg1() == null ? -1 : info.getPriority(operator.arg1());
           int argPriority = arg1Priority == -1 ? (priority == info.nextPriority - 1 ? -1 : priority) : arg1Priority - 1;
           g.out("%s = %s && %s(%s, %s, %d);", g.N.result, g.N.pinned, methodName, g.N.builder, g.N.level, argPriority);
           if (tailCall != null) {
@@ -195,9 +195,9 @@ public class ExpressionGeneratorHelper {
           g.out("return %s || %s;", g.N.result, g.N.pinned);
           g.out("}");
         }
-        g.generateNodeChild(operator.rule, operator.operator, R.getFuncName(operator.rule), 0, visited);
-        if (operator.tail != null) {
-          g.generateNodeChild(operator.rule, operator.tail, operator.rule.getName(), 1, visited);
+        g.generateNodeChild(operator.rule(), operator.operator(), R.getFuncName(operator.rule()), 0, visited);
+        if (operator.tail() != null) {
+          g.generateNodeChild(operator.rule(), operator.tail(), operator.rule().getName(), 1, visited);
         }
       }
     }
@@ -206,7 +206,7 @@ public class ExpressionGeneratorHelper {
   public static @NotNull List<OperatorInfo> findOperators(@NotNull Collection<OperatorInfo> operatorInfos, OperatorType... types) {
     final var result = new SmartList<OperatorInfo>();
     for (OperatorInfo o : operatorInfos) {
-      if (ArrayUtil.contains(o.type, types)) {
+      if (ArrayUtil.contains(o.type(), types)) {
         result.add(o);
       }
     }
@@ -216,8 +216,8 @@ public class ExpressionGeneratorHelper {
   public static @Nullable ExpressionInfo getInfoForExpressionParsing(ExpressionHelper expressionHelper, BnfRule rule) {
     final var expressionInfo = expressionHelper.getExpressionInfo(rule);
     final var operatorInfo = expressionInfo == null ? null : expressionInfo.operatorMap.get(rule);
-    if (expressionInfo != null && (operatorInfo == null || operatorInfo.type != OperatorType.ATOM &&
-                                                           operatorInfo.type != OperatorType.PREFIX)) {
+    if (expressionInfo != null && (operatorInfo == null || operatorInfo.type() != OperatorType.ATOM &&
+                                                           operatorInfo.type() != OperatorType.PREFIX)) {
       return expressionInfo;
     }
     return null;
@@ -232,11 +232,11 @@ public class ExpressionGeneratorHelper {
     OperatorInfo operatorInfo = expressionInfo == null ? null : expressionInfo.operatorMap.get(rule);
     if (operatorInfo != null) {
       if (node == null) {
-        return operatorInfo.type == OperatorType.PREFIX || operatorInfo.type == OperatorType.ATOM ?
+        return operatorInfo.type() == OperatorType.PREFIX || operatorInfo.type() == OperatorType.ATOM ?
                CONSUME_TYPE_OVERRIDE : null;
       }
-      if (PsiTreeUtil.isAncestor(operatorInfo.operator, node, false)) return CONSUME_TYPE_OVERRIDE;
-      for (BnfExpression o : ExpressionHelper.getOriginalExpressions(operatorInfo.operator)) {
+      if (PsiTreeUtil.isAncestor(operatorInfo.operator(), node, false)) return CONSUME_TYPE_OVERRIDE;
+      for (BnfExpression o : ExpressionHelper.getOriginalExpressions(operatorInfo.operator())) {
         if (PsiTreeUtil.isAncestor(o, node, false)) {
           return CONSUME_TYPE_OVERRIDE;
         }

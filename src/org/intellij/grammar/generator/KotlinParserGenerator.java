@@ -696,9 +696,9 @@ public final class KotlinParserGenerator extends Generator {
       if (operators.isEmpty()) continue;
       OperatorInfo operator = operators.get(0);
       if (operators.size() > 1) {
-        addWarning("only first definition will be used for '" + operator.operator.getText() + "': " + operators);
+        addWarning("only first definition will be used for '" + operator.operator().getText() + "': " + operators);
       }
-      String nodeCall = createNodeCall(operator.rule, null, operator.rule.getName()).render(R);
+      String nodeCall = createNodeCall(operator.rule(), null, operator.rule().getName()).render(R);
       out("%s%s = %s", first ? "" : format("if (!%s) ", N.result), N.result, nodeCall);
       first = false;
     }
@@ -723,30 +723,30 @@ public final class KotlinParserGenerator extends Generator {
       if (operators.isEmpty()) continue;
       OperatorInfo operator = operators.get(0);
       if (operators.size() > 1) {
-        addWarning("only first definition will be used for '" + operator.operator.getText() + "': " + operators);
+        addWarning("only first definition will be used for '" + operator.operator().getText() + "': " + operators);
       }
-      int priority = info.getPriority(operator.rule);
-      int arg2Priority = operator.arg2 == null ? -1 : info.getPriority(operator.arg2);
+      int priority = info.getPriority(operator.rule());
+      int arg2Priority = operator.arg2() == null ? -1 : info.getPriority(operator.arg2());
       int argPriority = arg2Priority == -1 ? priority : arg2Priority - 1;
 
       String substCheck = "";
-      if (operator.arg1 != null) {
+      if (operator.arg1() != null) {
         substCheck =
-          format(" && %s.leftMarkerIs(%s)", N.runtime, shortElementTypesHolderName() + "." + getElementType(operator.arg1));
+          format(" && %s.leftMarkerIs(%s)", N.runtime, shortElementTypesHolderName() + "." + getElementType(operator.arg1()));
       }
       out("%sif (%s < %d%s && %s) {", first ? "" : "else ", N.priority, priority, substCheck, opCall);
       first = false;
-      String elementType = shortElementTypesHolderName() + "." + getElementType(operator.rule);
-      boolean rightAssociative = getAttribute(operator.rule, KnownAttribute.RIGHT_ASSOCIATIVE);
-      String tailCall = operator.tail == null ? null : createNodeCall(
-        operator.rule, operator.tail, R.getNextName(R.getFuncName(operator.rule), 1), ConsumeType.DEFAULT
+      String elementType = shortElementTypesHolderName() + "." + getElementType(operator.rule());
+      boolean rightAssociative = getAttribute(operator.rule(), KnownAttribute.RIGHT_ASSOCIATIVE);
+      String tailCall = operator.tail() == null ? null : createNodeCall(
+        operator.rule(), operator.tail(), R.getNextName(R.getFuncName(operator.rule()), 1), ConsumeType.DEFAULT
       ).render(R);
-      if (operator.type == OperatorType.BINARY) {
+      if (operator.type() == OperatorType.BINARY) {
         String argCall = format("%s(%s, %s, %d)", methodName, N.runtime, N.level, rightAssociative ? argPriority - 1 : argPriority);
         out("%s = %s", N.result, tailCall == null ? argCall : format("%s.report_error_(%s)", N.runtime, argCall));
         if (tailCall != null) out("%s = %s && %s", N.result, tailCall, N.result);
       }
-      else if (operator.type == OperatorType.N_ARY) {
+      else if (operator.type() == OperatorType.N_ARY) {
         boolean checkEmpty = info.checkEmpty.contains(operator);
         if (checkEmpty) {
           out("val %s: Int = %s.current_position_()", N.pos, N.runtime);
@@ -756,12 +756,12 @@ public final class KotlinParserGenerator extends Generator {
         if (tailCall != null) out("%s = %s && %s", N.result, tailCall, N.result);
         out("if (!%s) break", opCall);
         if (checkEmpty) {
-          out("if (!%s.empty_element_parsed_guard_(\"%s\", %s)) break", N.runtime, operator.rule.getName(), N.pos);
+          out("if (!%s.empty_element_parsed_guard_(\"%s\", %s)) break", N.runtime, operator.rule().getName(), N.pos);
           out("%s = %s.current_position_()", N.pos, N.runtime);
         }
         out("}");
       }
-      else if (operator.type == OperatorType.POSTFIX) {
+      else if (operator.type() == OperatorType.POSTFIX) {
         out("%s = true", N.result);
       }
       out("%s.exit_section_(%s, %s, %s, %s, true, null)", N.runtime, N.level, N.marker, elementType, N.result);
@@ -785,31 +785,31 @@ public final class KotlinParserGenerator extends Generator {
     Set<BnfExpression> visited = new HashSet<>();
     for (String opCall : sortedOpCalls) {
       for (final var operator : opCalls.get(opCall)) {
-        if (operator.type == OperatorType.ATOM) {
-          if (Rule.isExternal(operator.rule)) continue;
+        if (operator.type() == OperatorType.ATOM) {
+          if (Rule.isExternal(operator.rule())) continue;
           newLine();
-          generateNode(operator.rule, operator.rule.getExpression(), R.getFuncName(operator.rule), visited);
+          generateNode(operator.rule(), operator.rule().getExpression(), R.getFuncName(operator.rule()), visited);
           continue;
         }
-        else if (operator.type == OperatorType.PREFIX) {
+        else if (operator.type() == OperatorType.PREFIX) {
           newLine();
-          String operatorFuncName = operator.rule.getName();
+          String operatorFuncName = operator.rule().getName();
           out("fun %s(%s: %s, %s: Int): Boolean {", operatorFuncName, shortRuntime, N.runtime, N.level);
           out("if (!%s.recursion_guard_(%s, \"%s\")) return false", N.runtime, N.level, operatorFuncName);
-          generateFirstCheck(operator.rule, frameName, false);
+          generateFirstCheck(operator.rule(), frameName, false);
           out("var %s: Boolean", N.result);
           out("var %s: Boolean", N.pinned);
           out("val %s: %s = %s.enter_section_(%s, %s._NONE_, null)", N.marker, shortMarker, N.runtime, N.level, shortModifiers);
 
-          String elementType = getElementType(operator.rule);
-          String tailCall = (operator.tail == null) ? null : createNodeCall(
-            operator.rule, operator.tail, R.getNextName(R.getFuncName(operator.rule), 1), ConsumeType.DEFAULT
+          String elementType = getElementType(operator.rule());
+          String tailCall = (operator.tail() == null) ? null : createNodeCall(
+            operator.rule(), operator.tail(), R.getNextName(R.getFuncName(operator.rule()), 1), ConsumeType.DEFAULT
           ).render(R);
 
           out("%s = %s", N.result, opCall);
           out("%s = %s", N.pinned, N.result);
-          int priority = info.getPriority(operator.rule);
-          int arg1Priority = operator.arg1 == null ? -1 : info.getPriority(operator.arg1);
+          int priority = info.getPriority(operator.rule());
+          int arg1Priority = operator.arg1() == null ? -1 : info.getPriority(operator.arg1());
           int argPriority = arg1Priority == -1 ? (priority == info.nextPriority - 1 ? -1 : priority) : arg1Priority - 1;
           out("%s = %s && %s(%s, %s, %d)", N.result, N.pinned, methodName, N.runtime, N.level, argPriority);
           if (tailCall != null) {
@@ -823,9 +823,9 @@ public final class KotlinParserGenerator extends Generator {
           out("return %s || %s", N.result, N.pinned);
           out("}");
         }
-        generateNodeChild(operator.rule, operator.operator, R.getFuncName(operator.rule), 0, visited);
-        if (operator.tail != null) {
-          generateNodeChild(operator.rule, operator.tail, operator.rule.getName(), 1, visited);
+        generateNodeChild(operator.rule(), operator.operator(), R.getFuncName(operator.rule()), 0, visited);
+        if (operator.tail() != null) {
+          generateNodeChild(operator.rule(), operator.tail(), operator.rule().getName(), 1, visited);
         }
       }
     }
@@ -836,7 +836,7 @@ public final class KotlinParserGenerator extends Generator {
     for (final var bnfRule : info.priorityMap.keySet()) {
       final var operatorInfo = info.operatorMap.get(bnfRule);
       String opCall = createNodeCall(
-        info.rootRule, operatorInfo.operator, R.getNextName(R.getFuncName(operatorInfo.rule), 0), CONSUME_TYPE_OVERRIDE
+        info.rootRule, operatorInfo.operator(), R.getNextName(R.getFuncName(operatorInfo.rule()), 0), CONSUME_TYPE_OVERRIDE
       ).render(R);
       result.computeIfAbsent(opCall, k -> new ArrayList<>(2)).add(operatorInfo);
     }

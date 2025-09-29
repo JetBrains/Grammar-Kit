@@ -23,7 +23,7 @@ import org.jetbrains.annotations.NotNull;
  * @author gregsh
  */
 public class BnfGeneratorTestCase extends AbstractParsingTestCase {
-  protected static final @NotNull String BNF_FILES_DIR = "bnfFiles";
+  protected static final @NotNull String BNF_FILES_DIR = "generator";
   protected final @NotNull String myBnfFilesDir;
 
   public BnfGeneratorTestCase(String testDataName) {

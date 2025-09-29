@@ -14,7 +14,7 @@ import java.util.List;
 import static org.intellij.grammar.generator.ParserGeneratorUtil.getRootAttribute;
 
 public class KotlinBnfGeneratorTest extends AbstractBnfGeneratorTest {
-  protected static final @NotNull String KOTLIN_BNF_FILES_DIR = "syntaxBnfFiles";
+  protected static final @NotNull String KOTLIN_BNF_FILES_DIR = "generatorSyntax";
 
   public KotlinBnfGeneratorTest() {
     super("kotlin", ".kt");

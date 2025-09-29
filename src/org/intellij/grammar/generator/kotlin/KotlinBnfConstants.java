@@ -12,6 +12,7 @@ public interface KotlinBnfConstants {
   @NotNull String KT_ELEMENT_TYPE_CLASS = "com.intellij.platform.syntax.SyntaxElementType";
   @NotNull String KT_BUILDER_CLASS = "com.intellij.platform.syntax.parser.SyntaxTreeBuilder";
 
+  @NotNull String KT_PAIR_CLASS = "kotlin.Pair";
   @NotNull String KT_ARRAY_CLASS = "kotlin.Array";
   @NotNull String KT_ARRAY_OF_FUNCTION = "kotlin.arrayOf";
 
@@ -20,6 +21,10 @@ public interface KotlinBnfConstants {
 
   @NotNull String KT_SYNTAX_ELEMENT_TYPE_SET_CLASS = "com.intellij.platform.syntax.SyntaxElementTypeSet";
   @NotNull String KT_SYNTAX_ELEMENT_TYPE_SET_OF_FUNCTION = "com.intellij.platform.syntax.syntaxElementTypeSetOf";
+  
+  @NotNull String KT_ELEMENT_TYPE_CONVERTER_CLASS = "com.intellij.platform.syntax.psi.ElementTypeConverter";
+  @NotNull String KT_ELEMENT_TYPE_CONVERTER_FACTORY_CLASS = "com.intellij.platform.syntax.psi.ElementTypeConverterFactory";
+  @NotNull String KT_ELEMENT_TYPE_CONVERTER_FILE = "com.intellij.platform.syntax.psi.ElementTypeConverterKt";
 
   @NotNull String KT_MODIFIERS_CLASS = "com.intellij.platform.syntax.util.runtime.Modifiers";
 }

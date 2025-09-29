@@ -9,7 +9,5 @@ import org.jetbrains.annotations.NotNull;
 public record KotlinPlatformConstants(
   @NotNull String SyntaxTreeBuilderClass
 ) {
-  public static final @NotNull KotlinPlatformConstants DEFAULT_CONSTANTS = new KotlinPlatformConstants(
-    KotlinBnfConstants.KT_BUILDER_CLASS
-  );
+  public static final @NotNull KotlinPlatformConstants DEFAULT_CONSTANTS = new KotlinPlatformConstants(KotlinBnfConstants.KT_BUILDER_CLASS);
 }

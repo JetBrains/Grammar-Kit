@@ -59,12 +59,8 @@ final class BnfDocumentationProvider implements DocumentationProvider {
         for (String s : nextS) {
           if (s.startsWith("-") || s.startsWith("<")) continue;
           if (file.getRule(s) != null) continue;
-          if (f) {
-            f = false;
-          }
-          else {
-            docBuilder.append(" | ");
-          }
+          if (f) f = false;
+          else docBuilder.append(" | ");
           docBuilder.append(StringUtil.escapeXmlEntities(s));
         }
         docBuilder.append(")");

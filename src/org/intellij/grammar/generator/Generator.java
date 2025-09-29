@@ -7,6 +7,7 @@ package org.intellij.grammar.generator;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.util.io.FileUtil;
 import com.intellij.openapi.util.text.StringUtil;
+import com.intellij.util.containers.JBIterable;
 import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.psi.BnfFile;
 import org.intellij.grammar.psi.BnfRule;
@@ -15,7 +16,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
+import java.util.*;
 
 import static org.intellij.grammar.generator.ParserGeneratorUtil.getRootAttribute;
 
@@ -40,6 +41,8 @@ public abstract class Generator {
   protected final @NotNull OutputOpener myOpener;
   protected NameShortener myShortener;
   private FilePrinter myPrinter;
+
+  protected final @NotNull Map<String, RuleInfo> myRuleInfos = new TreeMap<>();
 
   protected Generator(@NotNull BnfFile psiFile,
                       @NotNull String sourcePath,
@@ -127,4 +130,17 @@ public abstract class Generator {
   }
 
   protected enum TypeKind {CLASS, INTERFACE, ABSTRACT_CLASS}
+
+  protected @NotNull Set<String> collectClasses(Set<String> imports, String packageName) {
+    Set<String> includedPackages = JBIterable.from(imports)
+      .filter(o -> !o.startsWith("static") && o.endsWith(".*"))
+      .map(o -> StringUtil.trimEnd(o, ".*"))
+      .append(packageName).toSet();
+    Set<String> includedClasses = new HashSet<>();
+    for (RuleInfo info : myRuleInfos.values()) {
+      if (includedPackages.contains(info.intfPackage)) includedClasses.add(StringUtil.getShortName(info.intfClass));
+      if (includedPackages.contains(info.implPackage)) includedClasses.add(StringUtil.getShortName(info.implClass));
+    }
+    return includedClasses;
+  }
 }

@@ -62,41 +62,6 @@ import static org.intellij.grammar.psi.BnfTypes.*;
 public final class JavaParserGenerator extends Generator {
   public static final Logger LOG = Logger.getInstance(JavaParserGenerator.class);
 
-  static class RuleInfo {
-    final String name;
-    final boolean isFake;
-    final String elementType;
-    final String parserClass;
-    final String intfPackage;
-    final String implPackage;
-    final String intfClass;
-    final String implClass;
-    final String mixin;
-    final String stub;
-    String realStubClass;
-    Set<String> superInterfaces;
-    boolean mixedAST;
-    String realSuperClass;
-    boolean isAbstract;
-    boolean isInElementType;
-
-    RuleInfo(String name, boolean isFake,
-             String elementType, String parserClass,
-             String intfPackage, String implPackage,
-             String intfClass, String implClass, String mixin, String stub) {
-      this.name = name;
-      this.isFake = isFake;
-      this.elementType = elementType;
-      this.parserClass = parserClass;
-      this.intfPackage = intfPackage;
-      this.implPackage = implPackage;
-      this.stub = stub;
-      this.intfClass = intfPackage + "." + intfClass;
-      this.implClass = implPackage + "." + implClass;
-      this.mixin = mixin;
-    }
-  }
-
   @NotNull
   RuleInfo ruleInfo(BnfRule rule) {
     return Objects.requireNonNull(myRuleInfos.get(rule.getName()));
@@ -239,8 +204,7 @@ public final class JavaParserGenerator extends Generator {
       String implSuperRaw = getRawClassName(implSuper);
       String stubName =
         StringUtil.isNotEmpty(stubClass) ? stubClass :
-        implSuper.indexOf("<") < implSuper.indexOf(">") &&
-        !myJavaHelper.findClassMethods(implSuperRaw, JavaHelper.MethodType.INSTANCE, "getParentByStub", 0).isEmpty() ?
+        implSuper.indexOf("<") < implSuper.indexOf(">") && !myJavaHelper.findClassMethods(implSuperRaw, JavaHelper.MethodType.INSTANCE, "getParentByStub", 0).isEmpty() ?
         implSuper.substring(implSuper.indexOf("<") + 1, implSuper.indexOf(">")) : null;
       if (StringUtil.isNotEmpty(stubName)) {
         info.realStubClass = stubClass;
@@ -357,9 +321,7 @@ public final class JavaParserGenerator extends Generator {
   private void checkClassAvailability(@Nullable String className) {
     if (StringUtil.isEmpty(className)) return;
     if (myJavaHelper.findClass(className) == null) {
-      String tail = StringUtil.isEmpty("PSI method signatures will not be detected") ? "" : " (" +
-                                                                                            "PSI method signatures will not be detected" +
-                                                                                            ")";
+      String tail = StringUtil.isEmpty("PSI method signatures will not be detected") ? "" : " (PSI method signatures will not be detected)";
       addWarning(className + " class not found" + tail);
     }
   }
@@ -695,19 +657,6 @@ public final class JavaParserGenerator extends Generator {
       }
     }
     return result;
-  }
-
-  private @NotNull Set<String> collectClasses(Set<String> imports, String packageName) {
-    Set<String> includedPackages = JBIterable.from(imports)
-      .filter(o -> !o.startsWith("static") && o.endsWith(".*"))
-      .map(o -> StringUtil.trimEnd(o, ".*"))
-      .append(packageName).toSet();
-    Set<String> includedClasses = new HashSet<>();
-    for (RuleInfo info : myRuleInfos.values()) {
-      if (includedPackages.contains(info.intfPackage)) includedClasses.add(StringUtil.getShortName(info.intfClass));
-      if (includedPackages.contains(info.implPackage)) includedClasses.add(StringUtil.getShortName(info.implClass));
-    }
-    return includedClasses;
   }
 
   /**

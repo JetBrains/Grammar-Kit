@@ -19,8 +19,8 @@ import com.intellij.util.containers.ContainerUtil;
 import org.intellij.grammar.BnfIcons;
 import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.generator.ParserGeneratorUtil;
+import org.intellij.grammar.generator.Renderer.*;
 import org.intellij.grammar.generator.RuleGraphHelper;
-import org.intellij.grammar.generator.java.JavaRenderer;
 import org.intellij.grammar.java.JavaHelper;
 import org.intellij.grammar.psi.BnfExpression;
 import org.intellij.grammar.psi.BnfRule;
@@ -34,7 +34,6 @@ import java.util.*;
  * @author gregsh
  */
 final class BnfRuleLineMarkerProvider extends RelatedItemLineMarkerProvider {
-  private final @NotNull JavaRenderer myRenderer = JavaRenderer.INSTANCE;
 
   private static @Nullable NavigatablePsiElement getMethod(PsiElement element) {
     BnfRule rule = PsiTreeUtil.getParentOfType(element, BnfRule.class);
@@ -67,7 +66,7 @@ final class BnfRuleLineMarkerProvider extends RelatedItemLineMarkerProvider {
         if (RuleGraphHelper.hasPsiClass(rule)) {
           hasPSI = true;
           JavaHelper javaHelper = JavaHelper.getJavaHelper(rule);
-          Couple<String> names = myRenderer.getQualifiedRuleClassName(rule);
+          Couple<String> names = CommonRendererUtils.getQualifiedRuleClassName(rule);
           for (String className : new String[]{names.first, names.second}) {
             NavigatablePsiElement aClass = javaHelper.findClass(className);
             if (aClass != null && (!forNavigation || visited.add(aClass))) {

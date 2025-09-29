@@ -5,6 +5,8 @@
 package org.intellij.grammar.generator;
 
 import com.intellij.openapi.util.Couple;
+import com.intellij.openapi.util.text.StringUtil;
+import com.intellij.psi.codeStyle.NameUtil;
 import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.psi.BnfFile;
 import org.intellij.grammar.psi.BnfRule;
@@ -19,67 +21,107 @@ import static org.intellij.grammar.generator.ParserGeneratorUtil.*;
  * It was created as a means of specifying the format of identifiers
  * for different programming languages (in our case, Java and Kotlin).
  */
-public interface Renderer {
-  @NotNull String RESERVED_SUFFIX = "_$";
-
-  @NotNull String toIdentifier(@NotNull String text, @Nullable NameFormat format, @NotNull Case textCase);
-
-  default @NotNull String getBaseName(@NotNull String name) {
-    return toIdentifier(name, null, Case.AS_IS);
-  }
+public abstract class Renderer {
+  protected final static @NotNull String RESERVED_SUFFIX = "_$";
 
   /**
    * Given the function name returned previously from the {@link Renderer#getFuncName}
    * method and the index number, returns a new name constructed from the two values.
    */
-  @NotNull String getNextName(@NotNull String funcName, int i);
+  public abstract @NotNull String getNextName(@NotNull String funcName, int i);
 
   /**
    * Given a bnf rule, returns the name of the method used in the generated
    * parser to implement handling this rule. This method takes into account
    * the rules regarding identifier tokens in the target language.
    */
-  @NotNull String getFuncName(@NotNull BnfRule rule);
+  public abstract @NotNull String getFuncName(@NotNull BnfRule rule);
 
   /**
    * Undoes the effect of the {@link Renderer#getFuncName} method.
    */
-  @NotNull String unwrapFuncName(@NotNull String funcName);
+  protected abstract @NotNull String unwrapFuncName(@NotNull String funcName);
 
-  @NotNull String getWrapperParserMetaMethodName(@NotNull String nextName);
+  public abstract @NotNull String getWrapperParserMetaMethodName(@NotNull String nextName);
+  
+  public abstract @Nullable String getRuleDisplayName(@NotNull BnfRule rule, boolean force);
 
-  default @NotNull String getGetterName(@NotNull String text) {
-    return toIdentifier(text, NameFormat.from("get"), Case.CAMEL);
+  protected @Nullable String getRuleDisplayNameRaw(@NotNull BnfRule rule, boolean force) {
+    String name = getAttribute(rule, KnownAttribute.NAME);
+    BnfRule realRule = rule;
+    if (name != null) {
+      realRule = ((BnfFile)rule.getContainingFile()).getRule(name);
+      if (realRule != null && realRule != rule) {
+        name = getAttribute(realRule, KnownAttribute.NAME);
+      }
+    }
+    if (name != null || (!force && realRule == rule)) {
+      return name;
+    }
+    else {
+      final var unwrapped = unwrapFuncName(getFuncName(realRule));
+      final var parts = NameUtil.splitNameIntoWords(unwrapped);
+      return Case.LOWER.apply(StringUtil.join(parts, " "));
+    }
   }
 
-  default @NotNull String getTokenSetConstantName(@NotNull String nextName) {
-    return toIdentifier(nextName, null, Case.UPPER) + "_TOKENS";
-  }
+  public static class CommonRendererUtils {
+    public static @NotNull String getBaseName(@NotNull String name) {
+      return toIdentifier(name, null, Case.AS_IS);
+    }
+    
+    public static @NotNull String toIdentifier(@NotNull String text, @Nullable NameFormat format, @NotNull Case textCase) {
+      if (text.isEmpty()) return "";
+      String fixed = text.replaceAll("[^:\\p{javaJavaIdentifierPart}]", "_");
+      boolean allCaps = Case.UPPER.apply(fixed).equals(fixed);
+      StringBuilder sb = new StringBuilder();
+      if (!Character.isJavaIdentifierStart(fixed.charAt(0)) && sb.isEmpty()) sb.append("_");
+      String[] strings = NameUtil.nameToWords(fixed);
+      for (int i = 0, len = strings.length; i < len; i++) {
+        String s = strings[i];
+        if (textCase == Case.CAMEL && s.startsWith("_") && !(i == 0 || i == len - 1)) continue;
+        if (textCase == Case.UPPER && !s.startsWith("_") && !(i == 0 || StringUtil.endsWith(sb, "_"))) sb.append("_");
+        if (textCase == Case.CAMEL && !allCaps && Case.UPPER.apply(s).equals(s)) {
+          sb.append(s);
+        }
+        else {
+          sb.append(textCase.apply(s));
+        }
+      }
+      return format == null ? sb.toString() : format.apply(sb.toString());
+    }
 
-  default @NotNull String getWrapperParserConstantName(@NotNull String nextName) {
-    return getBaseName(nextName) + "_parser_";
-  }
+    public static @NotNull String getGetterName(@NotNull String text) {
+      return toIdentifier(text, NameFormat.from("get"), Case.CAMEL);
+    }
 
-  default @NotNull String getRulePsiClassName(@NotNull BnfRule rule, @Nullable NameFormat format) {
-    return toIdentifier(rule.getName(), format, Case.CAMEL);
-  }
+    public static @NotNull String getTokenSetConstantName(@NotNull String nextName) {
+      return toIdentifier(nextName, null, Case.UPPER) + "_TOKENS";
+    }
 
-  default @NotNull Couple<@NotNull String> getQualifiedRuleClassName(@NotNull BnfRule rule) {
-    BnfFile file = (BnfFile)rule.getContainingFile();
-    String psiPackage = getAttribute(rule, KnownAttribute.PSI_PACKAGE);
-    String psiImplPackage = getAttribute(rule, KnownAttribute.PSI_IMPL_PACKAGE);
-    NameFormat psiFormat = getPsiClassFormat(file);
-    NameFormat psiImplFormat = getPsiImplClassFormat(file);
-    return Couple.of(psiPackage + "." + getRulePsiClassName(rule, psiFormat),
-                     psiImplPackage + "." + getRulePsiClassName(rule, psiImplFormat));
-  }
+    public static @NotNull String getWrapperParserConstantName(@NotNull String nextName) {
+      return getBaseName(nextName) + "_parser_";
+    }
 
-  default @NotNull String getElementType(@NotNull BnfRule rule, @NotNull Case cas) {
-    String elementType = getAttribute(rule, KnownAttribute.ELEMENT_TYPE);
-    if ("".equals(elementType)) return "";
-    NameFormat prefix = NameFormat.from(getAttribute(rule, KnownAttribute.ELEMENT_TYPE_PREFIX));
-    return toIdentifier(elementType != null ? elementType : rule.getName(), prefix, cas);
-  }
+    public static @NotNull String getRulePsiClassName(@NotNull BnfRule rule, @Nullable NameFormat format) {
+      return toIdentifier(rule.getName(), format, Case.CAMEL);
+    }
 
-  @Nullable String getRuleDisplayName(@NotNull BnfRule rule, boolean force);
+    public static @NotNull Couple<@NotNull String> getQualifiedRuleClassName(@NotNull BnfRule rule) {
+      BnfFile file = (BnfFile)rule.getContainingFile();
+      String psiPackage = getAttribute(rule, KnownAttribute.PSI_PACKAGE);
+      String psiImplPackage = getAttribute(rule, KnownAttribute.PSI_IMPL_PACKAGE);
+      NameFormat psiFormat = getPsiClassFormat(file);
+      NameFormat psiImplFormat = getPsiImplClassFormat(file);
+      return Couple.of(psiPackage + "." + getRulePsiClassName(rule, psiFormat),
+                       psiImplPackage + "." + getRulePsiClassName(rule, psiImplFormat));
+    }
+
+    public static @NotNull String getElementType(@NotNull BnfRule rule, @NotNull Case cas) {
+      String elementType = getAttribute(rule, KnownAttribute.ELEMENT_TYPE);
+      if ("".equals(elementType)) return "";
+      NameFormat prefix = NameFormat.from(getAttribute(rule, KnownAttribute.ELEMENT_TYPE_PREFIX));
+      return toIdentifier(elementType != null ? elementType : rule.getName(), prefix, cas);
+    }
+  }
 }

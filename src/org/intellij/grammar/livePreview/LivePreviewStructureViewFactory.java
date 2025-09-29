@@ -21,7 +21,7 @@ import com.intellij.psi.PsiWhiteSpace;
 import com.intellij.psi.impl.source.tree.LeafPsiElement;
 import com.intellij.psi.tree.IElementType;
 import org.intellij.grammar.BnfIcons;
-import org.intellij.grammar.generator.java.JavaRenderer;
+import org.intellij.grammar.generator.Renderer.*;
 import org.intellij.grammar.psi.BnfFile;
 import org.intellij.grammar.psi.BnfRule;
 import org.jetbrains.annotations.NotNull;
@@ -115,7 +115,7 @@ public class LivePreviewStructureViewFactory implements PsiStructureViewFactory 
         BnfRule rule = ((LivePreviewElementType.RuleType)elementType).getRule(element.getProject());
         if (rule != null) {
           BnfFile file = (BnfFile)rule.getContainingFile();
-          String className = JavaRenderer.INSTANCE.getRulePsiClassName(rule, getPsiClassFormat(file));
+          String className = CommonRendererUtils.getRulePsiClassName(rule, getPsiClassFormat(file));
           return className + ": '" + StringUtil.first(element.getText(), 30, true) + "'";
         }
       }

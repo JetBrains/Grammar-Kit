@@ -21,6 +21,7 @@ import com.intellij.util.containers.JBTreeTraverser;
 import com.intellij.util.containers.TreeTraversal;
 import it.unimi.dsi.fastutil.Hash;
 import org.intellij.grammar.KnownAttribute;
+import org.intellij.grammar.generator.Renderer.*;
 import org.intellij.grammar.generator.java.JavaBnfConstants;
 import org.intellij.grammar.generator.java.JavaNameShortener;
 import org.intellij.grammar.java.JavaHelper;
@@ -280,24 +281,21 @@ public class ParserGeneratorUtil {
     return result;
   }
 
-  public static @NotNull Set<String> getRuleClasses(
-    @NotNull BnfRule rule,
-    @NotNull Renderer renderer
-  ) {
+  public static @NotNull Set<String> getRuleClasses(@NotNull BnfRule rule) {
     Set<String> result = new LinkedHashSet<>();
     BnfFile file = (BnfFile)rule.getContainingFile();
     BnfRule topSuper = getEffectiveSuperRule(file, rule);
     String superClassName = topSuper == null ? getRootAttribute(file, KnownAttribute.EXTENDS) :
                             topSuper == rule ? getAttribute(rule, KnownAttribute.EXTENDS) :
                             getAttribute(topSuper, KnownAttribute.PSI_PACKAGE) + "." +
-                            renderer.getRulePsiClassName(topSuper, getPsiClassFormat(file));
+                            CommonRendererUtils.getRulePsiClassName(topSuper, getPsiClassFormat(file));
     String implSuper = StringUtil.notNullize(getAttribute(rule, KnownAttribute.MIXIN), superClassName);
-    Couple<String> names = renderer.getQualifiedRuleClassName(rule);
+    Couple<String> names = CommonRendererUtils.getQualifiedRuleClassName(rule);
     result.add(names.first);
     result.add(names.second);
     result.add(superClassName);
     result.add(implSuper);
-    result.addAll(getSuperInterfaceNames(file, rule, getPsiClassFormat(file), renderer));
+    result.addAll(getSuperInterfaceNames(file, rule, getPsiClassFormat(file)));
     return result;
   }
 
@@ -327,14 +325,14 @@ public class ParserGeneratorUtil {
     return getSuperRules(file, rule).last();
   }
 
-  static @NotNull List<String> getSuperInterfaceNames(BnfFile file, BnfRule rule, NameFormat format, @NotNull Renderer renderer) {
+  static @NotNull List<String> getSuperInterfaceNames(BnfFile file, BnfRule rule, NameFormat format) {
     final var strings = new ArrayList<String>();
     final var topSuper = getEffectiveSuperRule(file, rule);
     final List<String> topRuleImplements;
     final String topRuleClass;
     if (topSuper != null && topSuper != rule) {
       topRuleImplements = getAttribute(topSuper, KnownAttribute.IMPLEMENTS).asStrings();
-      topRuleClass = getAttribute(topSuper, KnownAttribute.PSI_PACKAGE) + "." + renderer.getRulePsiClassName(topSuper, format);
+      topRuleClass = getAttribute(topSuper, KnownAttribute.PSI_PACKAGE) + "." + CommonRendererUtils.getRulePsiClassName(topSuper, format);
       if (!StringUtil.isEmpty(topRuleClass)) strings.add(topRuleClass);
     }
     else {
@@ -347,7 +345,7 @@ public class ParserGeneratorUtil {
       if (className == null) continue;
       BnfRule superIntfRule = file.getRule(className);
       if (superIntfRule != null) {
-        strings.add(getAttribute(superIntfRule, KnownAttribute.PSI_PACKAGE) + "." + renderer.getRulePsiClassName(superIntfRule, format));
+        strings.add(getAttribute(superIntfRule, KnownAttribute.PSI_PACKAGE) + "." + CommonRendererUtils.getRulePsiClassName(superIntfRule, format));
       }
       else if (!topRuleImplements.contains(className) &&
                (topRuleClass == null || !rootImplements.contains(className))) {

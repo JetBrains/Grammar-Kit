@@ -18,6 +18,7 @@ import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.analysis.BnfFirstNextAnalyzer;
 import org.intellij.grammar.generator.*;
+import org.intellij.grammar.generator.Renderer.*;
 import org.intellij.grammar.generator.java.JavaRenderer;
 import org.intellij.grammar.psi.*;
 import org.intellij.grammar.psi.impl.GrammarUtil;
@@ -43,7 +44,7 @@ public class LivePreviewParser implements PsiParser {
   private final Map<String, IElementType> myRuleElementTypes = new HashMap<>();
   private final Map<String, IElementType> myTokenElementTypes = new HashMap<>();
   private final Object2IntMap<BnfRule> myRuleNumbers = new Object2IntOpenHashMap<>();
-  private final @NotNull JavaRenderer R = JavaRenderer.INSTANCE;
+  private final @NotNull JavaRenderer R = new JavaRenderer();
   private GenOptions G;
   private BnfRule myGrammarRoot;
   private RuleGraphHelper myGraphHelper;
@@ -109,7 +110,7 @@ public class LivePreviewParser implements PsiParser {
       }
     }
     for (BnfRule rule : myFile.getRules()) {
-      String elementType = R.getElementType(rule, G.generateElementCase);
+      String elementType = CommonRendererUtils.getElementType(rule, G.generateElementCase);
       if (StringUtil.isEmpty(elementType)) continue;
       if (myRuleElementTypes.containsKey(elementType)) continue;
       myRuleElementTypes.put(elementType, new LivePreviewElementType.RuleType(elementType, rule, myLanguage));
@@ -311,7 +312,7 @@ public class LivePreviewParser implements PsiParser {
     if (!hooks.isEmpty()) {
       for (Map.Entry<String, String> entry : hooks.entrySet()) {
         if (entry.getValue() == null) continue;
-        String name = R.toIdentifier(entry.getKey(), null, Case.UPPER);
+        String name = CommonRendererUtils.toIdentifier(entry.getKey(), null, Case.UPPER);
         LiveHooksHelper.registerHook(builder, name, entry.getValue());
       }
     }
@@ -550,7 +551,7 @@ public class LivePreviewParser implements PsiParser {
   }
 
   private @Nullable IElementType getRuleElementType(BnfRule rule) {
-    String elementType = R.getElementType(rule, G.generateElementCase);
+    String elementType = CommonRendererUtils.getElementType(rule, G.generateElementCase);
     return StringUtil.isEmpty(elementType) ? null : myRuleElementTypes.get(elementType);
   }
 
@@ -580,7 +581,7 @@ public class LivePreviewParser implements PsiParser {
     Map<String, List<OperatorInfo>> opCalls = new LinkedHashMap<>();
     for (BnfRule rule : info.priorityMap.keySet()) {
       OperatorInfo operator = info.operatorMap.get(rule);
-      String opCall = R.getNextName(operator.rule.getName(), 0);
+      String opCall = R.getNextName(operator.rule().getName(), 0);
       List<OperatorInfo> list = opCalls.get(opCall);
       if (list == null) opCalls.put(opCall, list = new ArrayList<>(2));
       list.add(operator);
@@ -600,7 +601,7 @@ public class LivePreviewParser implements PsiParser {
     for (OperatorInfo operator : filter(opCalls, OperatorType.ATOM,
                                         OperatorType.PREFIX)) {
       if (first || !result_) {
-        result_ = generateNodeCall(builder, level, operator.rule, null, operator.rule.getName(), Collections.emptyMap());
+        result_ = generateNodeCall(builder, level, operator.rule(), null, operator.rule().getName(), Collections.emptyMap());
       }
       first = false;
     }
@@ -629,47 +630,47 @@ public class LivePreviewParser implements PsiParser {
 
       for (OperatorInfo operator : filter(opCalls, OperatorType.BINARY,
                                           OperatorType.N_ARY, OperatorType.POSTFIX)) {
-        int priority = info.getPriority(operator.rule);
-        int arg2Priority = operator.arg2 == null ? -1 : info.getPriority(operator.arg2);
+        int priority = info.getPriority(operator.rule());
+        int arg2Priority = operator.arg2() == null ? -1 : info.getPriority(operator.arg2());
         int argPriority = arg2Priority == -1 ? priority : arg2Priority - 1;
 
         if (marker_ == null) marker_ = builder.mark();
 
         if (priority_ < priority &&
-            (operator.arg1 == null || ((LighterASTNode)left_marker_).getTokenType() == getRuleElementType(operator.arg1)) &&
-            generateNodeCall(builder, level, info.rootRule, operator.operator, R.getNextName(operator.rule.getName(), 0),
+            (operator.arg1() == null || ((LighterASTNode)left_marker_).getTokenType() == getRuleElementType(operator.arg1())) &&
+            generateNodeCall(builder, level, info.rootRule, operator.operator(), R.getNextName(operator.rule().getName(), 0),
                              Collections.emptyMap())) {
 
-          IElementType elementType = getRuleElementType(operator.rule);
-          boolean rightAssociative = getAttribute(operator.rule, KnownAttribute.RIGHT_ASSOCIATIVE);
-          if (operator.type == OperatorType.BINARY) {
+          IElementType elementType = getRuleElementType(operator.rule());
+          boolean rightAssociative = getAttribute(operator.rule(), KnownAttribute.RIGHT_ASSOCIATIVE);
+          if (operator.type() == OperatorType.BINARY) {
             result_ =
               report_error_(builder, generateExpressionRoot(builder, level, info, (rightAssociative ? argPriority - 1 : argPriority)));
-            if (operator.tail != null) {
-              result_ = report_error_(builder, generateNodeCall(builder, level, operator.rule, operator.tail,
-                                                                R.getNextName(operator.rule.getName(), 1),
+            if (operator.tail() != null) {
+              result_ = report_error_(builder, generateNodeCall(builder, level, operator.rule(), operator.tail(),
+                                                                R.getNextName(operator.rule().getName(), 1),
                                                                 Collections.emptyMap())) && result_;
             }
           }
-          else if (operator.type == OperatorType.N_ARY) {
+          else if (operator.type() == OperatorType.N_ARY) {
             int nary_pos = current_position_(builder);
             while (true) {
               result_ = report_error_(builder, generateExpressionRoot(builder, level, info, argPriority));
-              if (operator.tail != null) {
-                result_ = report_error_(builder, generateNodeCall(builder, level, operator.rule, operator.tail,
-                                                                  R.getNextName(operator.rule.getName(), 1),
+              if (operator.tail() != null) {
+                result_ = report_error_(builder, generateNodeCall(builder, level, operator.rule(), operator.tail(),
+                                                                  R.getNextName(operator.rule().getName(), 1),
                                                                   Collections.emptyMap())) && result_;
               }
               if (!result_ ||
-                  !generateNodeCall(builder, level, info.rootRule, operator.operator, R.getNextName(operator.rule.getName(), 0),
+                  !generateNodeCall(builder, level, info.rootRule, operator.operator(), R.getNextName(operator.rule().getName(), 0),
                                     Collections.emptyMap())) {
                 break;
               }
-              if (!empty_element_parsed_guard_(builder, operator.operator.getText(), nary_pos)) break;
+              if (!empty_element_parsed_guard_(builder, operator.operator().getText(), nary_pos)) break;
               nary_pos = current_position_(builder);
             }
           }
-          else if (operator.type == OperatorType.POSTFIX) {
+          else if (operator.type() == OperatorType.POSTFIX) {
             result_ = true;
           }
           marker_.drop();

@@ -1167,19 +1167,6 @@ public final class KotlinParserGenerator extends Generator {
   }
 
 
-  private @NotNull Set<String> collectClasses(Set<String> imports, String packageName) {
-    Set<String> includedPackages = JBIterable.from(imports)
-      .filter(o -> !o.startsWith("static") && o.endsWith(".*"))
-      .map(o -> StringUtil.trimEnd(o, ".*"))
-      .append(packageName).toSet();
-    Set<String> includedClasses = new HashSet<>();
-    for (RuleInfo info : myRuleInfos.values()) {
-      if (includedPackages.contains(info.intfPackage)) includedClasses.add(StringUtil.getShortName(info.intfClass));
-      if (includedPackages.contains(info.implPackage)) includedClasses.add(StringUtil.getShortName(info.implClass));
-    }
-    return includedClasses;
-  }
-
   @SuppressWarnings("StringEquality")
   private @NotNull String buildAutoRecoverCall(BnfRule rule) {
     Set<BnfExpression> nextExprSet = myFirstNextAnalyzer.calcNext(rule).keySet();

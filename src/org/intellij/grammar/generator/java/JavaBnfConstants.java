@@ -4,6 +4,9 @@
 
 package org.intellij.grammar.generator.java;
 
+/**
+ * @author gregsh
+ */
 public interface JavaBnfConstants {
   String GPUB_CLASS = "com.intellij.lang.parser.GeneratedParserUtilBase";
 

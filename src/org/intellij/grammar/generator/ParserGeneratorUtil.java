@@ -232,13 +232,11 @@ public class ParserGeneratorUtil {
   public static @NotNull List<NavigatablePsiElement> findRuleImplMethods(@NotNull JavaHelper helper,
                                                                          @Nullable String psiImplUtilClass,
                                                                          @Nullable String methodName,
-                                                                         @Nullable BnfRule rule,
-                                                                         @NotNull Renderer renderer) {
+                                                                         @Nullable BnfRule rule) {
     if (rule == null) return Collections.emptyList();
     List<NavigatablePsiElement> methods = Collections.emptyList();
     String selectedSuperClass = null;
-    main:
-    for (String ruleClass : getRuleClasses(rule, renderer)) {
+    main: for (String ruleClass : getRuleClasses(rule)) {
       for (String utilClass = psiImplUtilClass; utilClass != null; utilClass = helper.getSuperClassName(utilClass)) {
         methods = helper.findClassMethods(utilClass, JavaHelper.MethodType.STATIC, methodName, -1, ruleClass);
         selectedSuperClass = ruleClass;
@@ -275,9 +273,7 @@ public class ParserGeneratorUtil {
         else if (Objects.equals(type2, s)) {
           result.remove(m1);
         }
-        else {
-          continue;
-        }
+        else continue;
         break;
       }
     }

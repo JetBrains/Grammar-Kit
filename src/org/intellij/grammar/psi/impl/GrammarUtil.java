@@ -226,12 +226,8 @@ public class GrammarUtil {
 
     @Override
     public void accept(@NotNull PsiElementVisitor visitor) {
-      if (visitor instanceof BnfVisitor) {
-        accept((BnfVisitor<?>)visitor);
-      }
-      else {
-        super.accept(visitor);
-      }
+      if (visitor instanceof BnfVisitor) accept((BnfVisitor<?>)visitor);
+      else super.accept(visitor);
     }
 
     @Override

@@ -82,8 +82,7 @@ final class BnfRuleLineMarkerProvider extends RelatedItemLineMarkerProvider {
         String popupTitleAd = "";
         if (action != null) {
           String shortcutText = KeymapUtil.getFirstKeyboardShortcutText(action);
-          String actionText =
-            StringUtil.isEmpty(shortcutText) ? "'" + action.getTemplatePresentation().getText() + "' action" : shortcutText;
+          String actionText = StringUtil.isEmpty(shortcutText) ? "'" + action.getTemplatePresentation().getText() + "' action" : shortcutText;
           tooltipAd = "\nGo to sub-expression code via " + actionText;
           popupTitleAd = " (for sub-expressions use " + actionText + ")";
         }

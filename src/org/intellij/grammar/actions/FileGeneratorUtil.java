@@ -27,7 +27,6 @@ import org.intellij.jflex.parser.JFlexFileType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -79,9 +78,9 @@ public class FileGeneratorUtil {
     VirtualFile[] sourceRoots = rootManager.getContentSourceRoots();
     VirtualFile[] contentRoots = rootManager.getContentRoots();
     VirtualFile virtualRoot = existingFileRoot != null ? existingFileRoot :
-                              preferSourceRoot && fileIndex.isInSource(sourceFile) ? fileIndex.getSourceRootForFile(sourceFile) :
-                              fileIndex.isInContent(sourceFile) ? fileIndex.getContentRootForFile(sourceFile) :
-                              getFirstElement(preferSourceRoot && sourceRoots.length > 0 ? sourceRoots : contentRoots);
+                                    preferSourceRoot && fileIndex.isInSource(sourceFile) ? fileIndex.getSourceRootForFile(sourceFile) :
+                                    fileIndex.isInContent(sourceFile) ? fileIndex.getContentRootForFile(sourceFile) :
+                                    getFirstElement(preferSourceRoot && sourceRoots.length > 0? sourceRoots : contentRoots);
     if (virtualRoot == null) {
       fail(project, sourceFile, "Unable to guess target source root");
       throw new ProcessCanceledException();
@@ -171,7 +170,7 @@ public class FileGeneratorUtil {
       return returnRoot && newGenRoot ? Objects.requireNonNull(virtualRoot.findChild(genDirName)) :
              returnRoot ? virtualRoot : result;
     }
-  } 
+  }
 
   static void fail(@NotNull Project project, @NotNull VirtualFile sourceFile, @NotNull String message) {
     fail(project, sourceFile.getName(), message);

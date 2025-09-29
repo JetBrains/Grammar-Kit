@@ -81,10 +81,7 @@ public final class JavaRenderer implements Renderer {
     return getBaseName(nextName) + RESERVED_SUFFIX;
   }
 
-  public @Nullable String getRuleDisplayName(
-    @NotNull BnfRule rule,
-    boolean force
-  ) {
+  public @Nullable String getRuleDisplayName(@NotNull BnfRule rule, boolean force) {
     final var s = getRuleDisplayNameRaw(rule, force);
     return StringUtil.isEmpty(s) ? null : "<" + s + ">";
   }

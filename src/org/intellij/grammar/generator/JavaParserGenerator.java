@@ -267,20 +267,14 @@ public final class JavaParserGenerator extends Generator {
       String stubName = info.realStubClass;
       String adjustedSuperRuleClass =
         StringUtil.isEmpty(stubName) ? superRuleClass :
-        JavaBnfConstants.AST_WRAPPER_PSI_ELEMENT_CLASS.equals(superRuleClass) ? JavaBnfConstants.STUB_BASED_PSI_ELEMENT_BASE +
-                                                                                "<" +
-                                                                                stubName +
-                                                                                ">" :
-        superRuleClass.contains("?") ?
-        superRuleClass.replaceAll("\\?", stubName)
-                                     : superRuleClass;
+        JavaBnfConstants.AST_WRAPPER_PSI_ELEMENT_CLASS.equals(superRuleClass) ? JavaBnfConstants.STUB_BASED_PSI_ELEMENT_BASE + "<" + stubName + ">" :
+        superRuleClass.contains("?") ? superRuleClass.replaceAll("\\?", stubName) : superRuleClass;
       // mixin attribute overrides "extends":
       info.realSuperClass = StringUtil.notNullize(info.mixin, adjustedSuperRuleClass);
       info.mixedAST = topInfo != null ? topInfo.mixedAST : JBIterable.of(superRuleClass, info.realSuperClass)
-                                                             .map(JavaNameShortener::getRawClassName)
-                                                             .flatMap(s -> JBTreeTraverser.<String>from(
-                                                               o -> JBIterable.of(myJavaHelper.getSuperClassName(o))).withRoot(s).unique())
-                                                             .find(JavaBnfConstants.COMPOSITE_PSI_ELEMENT_CLASS::equals) != null;
+        .map(JavaNameShortener::getRawClassName)
+        .flatMap(s -> JBTreeTraverser.<String>from(o -> JBIterable.of(myJavaHelper.getSuperClassName(o))).withRoot(s).unique())
+        .find(JavaBnfConstants.COMPOSITE_PSI_ELEMENT_CLASS::equals) != null;
     }
   }
 
@@ -336,8 +330,7 @@ public final class JavaParserGenerator extends Generator {
         generateElementTypesHolder(myPsiElementTypeHolderClass,
                                    sortedCompositeTypes,
                                    getRootAttribute(myFile, KnownAttribute.TOKEN_TYPE_FACTORY),
-                                   G.generatePsi
-        );
+                                   G.generatePsi);
       }
       finally {
         closeOutput();
@@ -374,8 +367,7 @@ public final class JavaParserGenerator extends Generator {
   private void generateVisitor(String psiClass, Map<String, BnfRule> sortedRules) {
     String superIntf = ObjectUtils.notNull(ContainerUtil.getFirstItem(getRootAttribute(myFile, KnownAttribute.IMPLEMENTS)),
                                            KnownAttribute.IMPLEMENTS.getDefaultValue().get(0)).second;
-    Set<String> imports =
-      new LinkedHashSet<>(Arrays.asList("org.jetbrains.annotations.*", JavaBnfConstants.PSI_ELEMENT_VISITOR_CLASS, superIntf));
+    Set<String> imports = new LinkedHashSet<>(Arrays.asList("org.jetbrains.annotations.*", JavaBnfConstants.PSI_ELEMENT_VISITOR_CLASS, superIntf));
     MultiMap<String, String> supers = new MultiMap<>();
     for (BnfRule rule : sortedRules.values()) {
       supers.putValues(rule.getName(), getSuperInterfaceNames(myFile, rule, myPsiInterfaceFormat, R));
@@ -395,12 +387,8 @@ public final class JavaParserGenerator extends Generator {
         for (ListIterator<String> it = ((List<String>)supers.get(key)).listIterator(); it.hasNext(); ) {
           String s = replacements.get(it.next());
           if (s != null) {
-            if (s.isEmpty()) {
-              it.remove();
-            }
-            else {
-              it.set(s);
-            }
+            if (s.isEmpty()) it.remove();
+            else it.set(s);
           }
         }
       }
@@ -538,8 +526,8 @@ public final class JavaParserGenerator extends Generator {
       imports.addAll(Arrays.asList(JavaBnfConstants.IELEMENTTYPE_CLASS,
                                    JavaBnfConstants.AST_NODE_CLASS,
                                    JavaBnfConstants.TOKEN_SET_CLASS));
-      imports.addAll(List.of(JavaBnfConstants.PSI_PARSER_CLASS,
-                             JavaBnfConstants.LIGHT_PSI_PARSER_CLASS));
+                                   imports.addAll(List.of(JavaBnfConstants.PSI_PARSER_CLASS,
+                                   JavaBnfConstants.LIGHT_PSI_PARSER_CLASS));
     }
     imports.addAll(parserImports);
 
@@ -599,8 +587,7 @@ public final class JavaParserGenerator extends Generator {
 
   private void generateMetaMethodFields() {
     String parserClassShortName = "Parser";
-    take(myMetaMethodFields).forEach((field, call) ->
-                                       out(String.format("private static final %s %s = %s;", parserClassShortName, field, call)));
+    take(myMetaMethodFields).forEach((field, call) -> out(String.format("private static final %s %s = %s;", parserClassShortName, field, call)));
   }
 
   private void generateRootParserContent() {
@@ -632,7 +619,6 @@ public final class JavaParserGenerator extends Generator {
     out("public void parseLight(%s %s, %s %s) {", shortET, N.root, shortPB, N.builder);
     out("boolean %s;", N.result);
     out("%s = adapt_builder_(%s, %s, %s, %s);", N.builder, N.root, N.builder, "this", generateExtendsSets ? "EXTENDS_SETS_" : null);
-
     out("%s %s = enter_section_(%s, 0, _COLLAPSE_, null);", shortMarker, N.marker, N.builder);
     out("%s = parse_root_(%s, %s);", N.result, N.root, N.builder);
     out("exit_section_(%s, 0, %s, %s, %s, true, TRUE_CONDITION);", N.builder, N.marker, N.root, N.result);

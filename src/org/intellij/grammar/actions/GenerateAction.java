@@ -41,7 +41,10 @@ import java.util.*;
 import static org.intellij.grammar.actions.FileGeneratorUtil.getTargetDirectoryFor;
 import static org.intellij.grammar.generator.ParserGeneratorUtil.getRootAttribute;
 
-
+/**
+ * @author gregory
+ * Date: 15.07.11 17:12
+ */
 public class GenerateAction extends AnAction {
   private static final Logger LOG = Logger.getInstance(GenerateAction.class);
 
@@ -168,7 +171,7 @@ public class GenerateAction extends AnAction {
                 PsiFile bnfFile = getBnfFile(file, psiManager);
                 if (!(bnfFile instanceof BnfFile)) return;
                 try {
-                  if (GenOptions.UseSyntaxApi(getRootAttribute(bnfFile, KnownAttribute.GENERATE).asMap())){
+                  if (GenOptions.UseSyntaxApi(getRootAttribute(bnfFile, KnownAttribute.GENERATE).asMap())) {
                     new KotlinParserGenerator((BnfFile)bnfFile,
                                               sourcePath,
                                               genDir.getPath(),
@@ -181,13 +184,13 @@ public class GenerateAction extends AnAction {
                   }
                   else {
                     new JavaParserGenerator((BnfFile)bnfFile,
-                                              sourcePath,
-                                              genDir.getPath(),
-                                              packagePrefix,
-                                              ((className, fileToOpen, myBnfFile) -> {
-                                                files.add(fileToOpen);
-                                                return OutputOpener.DEFAULT.openOutput(className, fileToOpen, myBnfFile);
-                                              })).generate();
+                                            sourcePath,
+                                            genDir.getPath(),
+                                            packagePrefix,
+                                            ((className, fileToOpen, myBnfFile) -> {
+                                              files.add(fileToOpen);
+                                              return OutputOpener.DEFAULT.openOutput(className, fileToOpen, myBnfFile);
+                                            })).generate();
                   }
                 }
                 catch (Exception ex) {

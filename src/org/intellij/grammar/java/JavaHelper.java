@@ -682,11 +682,7 @@ public abstract class JavaHelper {
                        Modifier.isStatic(access) ? MethodType.STATIC :
                        MethodType.INSTANCE;
         myInfo.methods.add(m);
-        class ParamTypeAnno {
-          int index;
-          String anno;
-          TypePath path;
-        }
+        class ParamTypeAnno { int index; String anno; TypePath path; }
         List<ParamTypeAnno> typeAnnos = new SmartList<>();
         return new MethodVisitor(ASM_OPCODES) {
           @Override
@@ -818,9 +814,8 @@ public abstract class JavaHelper {
     private static class MySignatureVisitor extends SignatureVisitor {
       final MethodInfo methodInfo;
       final Deque<State> states = new ArrayDeque<>();
-      /**
-       * @noinspection StringBufferField
-       */
+
+      /** @noinspection StringBufferField*/
       final StringBuilder sb = new StringBuilder();
 
       MySignatureVisitor(MethodInfo methodInfo) {
@@ -1016,9 +1011,7 @@ public abstract class JavaHelper {
 
       MyElement<?> element = (MyElement<?>)o;
 
-      if (!delegate.equals(element.delegate)) return false;
-
-      return true;
+      return delegate.equals(element.delegate);
     }
 
     @Override

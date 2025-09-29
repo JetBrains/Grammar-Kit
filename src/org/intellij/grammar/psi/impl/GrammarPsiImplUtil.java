@@ -37,7 +37,7 @@ public class GrammarPsiImplUtil {
     String psiImplUtilClass = getRootAttribute(attr, KnownAttribute.PSI_IMPL_UTIL_CLASS);
     JavaHelper javaHelper = JavaHelper.getJavaHelper(o);
 
-    return new PsiReference[]{
+    return new PsiReference[] {
       new PsiPolyVariantReferenceBase<>(o, TextRange.from(id.getStartOffsetInParent(), id.getTextLength())) {
 
         private List<NavigatablePsiElement> getTargetMethods(String methodName) {

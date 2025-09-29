@@ -41,7 +41,7 @@ public class ExpressionGeneratorHelper {
     }
     return opCalls;
   }
-  
+
   public static void generateExpressionRoot(ExpressionInfo info, JavaParserGenerator g, @NotNull Renderer R) {
     Map<String, List<OperatorInfo>> opCalls = buildCallMap(info, g, R);
     Set<String> sortedOpCalls = opCalls.keySet();

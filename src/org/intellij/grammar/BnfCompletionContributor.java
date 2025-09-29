@@ -195,15 +195,9 @@ final class BnfCompletionContributor extends CompletionContributor {
     else {
       int offset = posRange.getStartOffset();
       for (PsiElement cur = GrammarUtil.getDummyAwarePrevSibling(position); cur != null; cur = GrammarUtil.getDummyAwarePrevSibling(cur)) {
-        if (cur instanceof BnfAttrs) {
-          offset = cur.getTextRange().getEndOffset();
-        }
-        else if (cur instanceof BnfRule) {
-          offset = cur.getTextRange().getStartOffset();
-        }
-        else {
-          continue;
-        }
+        if (cur instanceof BnfAttrs) offset = cur.getTextRange().getEndOffset();
+        else if (cur instanceof BnfRule) offset = cur.getTextRange().getStartOffset();
+        else continue;
         break;
       }
       range = new TextRange(offset, posRange.getStartOffset());

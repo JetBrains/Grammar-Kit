@@ -20,6 +20,7 @@ import com.intellij.util.containers.MultiMap;
 import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.analysis.BnfFirstNextAnalyzer;
 import org.intellij.grammar.generator.NodeCalls.*;
+import org.intellij.grammar.generator.Renderer.*;
 import org.intellij.grammar.generator.kotlin.KotlinBnfConstants;
 import org.intellij.grammar.generator.kotlin.KotlinNameShortener;
 import org.intellij.grammar.generator.kotlin.KotlinPlatformConstants;
@@ -112,8 +113,6 @@ public final class KotlinParserGenerator extends Generator {
   private final ExpressionHelper myExpressionHelper;
   private final BnfFirstNextAnalyzer myFirstNextAnalyzer;
   private final JavaHelper myJavaHelper;
-  private final @NotNull KotlinRenderer R = KotlinRenderer.INSTANCE;
-  final @NotNull GenOptions G;
 
   public KotlinParserGenerator(@NotNull BnfFile psiFile,
                                @NotNull String sourcePath,
@@ -122,7 +121,7 @@ public final class KotlinParserGenerator extends Generator {
                                @NotNull String packagePrefix,
                                @NotNull OutputOpener outputOpener
   ) {
-    super(psiFile, sourcePath, outputPath, packagePrefix, "kt", outputOpener);
+    super(psiFile, sourcePath, outputPath, packagePrefix, "kt", outputOpener, new KotlinRenderer());
 
     G = new GenOptions(psiFile);
     N = G.names;
@@ -626,7 +625,7 @@ public final class KotlinParserGenerator extends Generator {
       String resultRef = alwaysTrue ? "true" : N.result;
       if (!hooks.isEmpty()) {
         for (Map.Entry<String, String> entry : hooks.entrySet()) {
-          String hookName = R.toIdentifier(entry.getKey(), null, Case.UPPER);
+          String hookName = CommonRendererUtils.toIdentifier(entry.getKey(), null, Case.UPPER);
           out("%s.register_hook_(%s, %s)", N.runtime, hookName, entry.getValue());
         }
       }
@@ -1289,7 +1288,7 @@ public final class KotlinParserGenerator extends Generator {
       tokens.add(getElementType(tokenName));
     }
 
-    String tokenSetName = R.getTokenSetConstantName(funcName);
+    String tokenSetName = CommonRendererUtils.getTokenSetConstantName(funcName);
     myChoiceTokenSets.put(tokenSetName, tokens);
     return new KotlinConsumeTokenChoiceCall(consumeType, shortElementTypesHolderName() + "." + tokenSetName, N);
   }
@@ -1503,25 +1502,9 @@ public final class KotlinParserGenerator extends Generator {
   }
 
   private @NotNull String getMetaMethodFieldRef(@NotNull String call, @NotNull String nextName) {
-    String fieldName = R.getWrapperParserConstantName(nextName);
+    String fieldName = CommonRendererUtils.getWrapperParserConstantName(nextName);
     myMetaMethodFields.putIfAbsent(fieldName, call);
     return fieldName;
-  }
-
-  private @NotNull String getParserLambdaRef(@NotNull NodeCall nodeCall, @NotNull String nextName) {
-    String constantName = R.getWrapperParserConstantName(nextName);
-    String targetClass = myRenderedLambdas.get(constantName);
-    if (targetClass != null) {
-      return StringUtil.getShortName(targetClass) + "." + constantName;
-    }
-    else if (!myParserLambdas.containsKey(constantName)) {
-      String call = nodeCall.render(R);
-      myParserLambdas.put(constantName, call);
-      if (!call.startsWith(nextName + "(")) {
-        myInlinedChildNodes.add(nextName);
-      }
-    }
-    return constantName;
   }
 
   private @NotNull NodeCall createConsumeToken(@NotNull ConsumeType consumeType, @NotNull String tokenName) {
@@ -1535,7 +1518,7 @@ public final class KotlinParserGenerator extends Generator {
   }
 
   private @NotNull String getElementType(BnfRule rule) {
-    return R.getElementType(rule, G.generateElementCase);
+    return CommonRendererUtils.getElementType(rule, G.generateElementCase);
   }
 
   private boolean shallGenerateNodeChild(String funcName) {

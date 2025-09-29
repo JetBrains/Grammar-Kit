@@ -36,7 +36,11 @@ public abstract class Generator {
   protected final @NotNull String mySourcePath;
   protected final @Nullable String myGrammarRoot;
   protected final @Nullable String myGrammarRootParser;
+  
   protected final @NotNull GenOptions G;
+  protected final @NotNull Renderer R;
+  public final Names N;
+  
   private final @NotNull String myOutputFileExtension;
   protected final @NotNull OutputOpener myOpener;
   protected NameShortener myShortener;
@@ -49,10 +53,13 @@ public abstract class Generator {
                       @NotNull String outputPath,
                       @NotNull String packagePrefix,
                       @NotNull String outputFileExtension,
-                      @NotNull OutputOpener outputOpener) {
+                      @NotNull OutputOpener outputOpener,
+                      @NotNull Renderer renderer) {
     myFile = psiFile;
 
     G = new GenOptions(psiFile);
+    N = G.names;
+    R = renderer;
     mySourcePath = sourcePath;
     myOutputPath = outputPath;
     myPackagePrefix = packagePrefix;

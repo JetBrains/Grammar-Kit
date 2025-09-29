@@ -9,7 +9,7 @@ import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.tree.IElementType;
 import org.intellij.grammar.KnownAttribute;
-import org.intellij.grammar.generator.java.JavaRenderer;
+import org.intellij.grammar.generator.Renderer.*;
 import org.intellij.grammar.psi.BnfAttr;
 import org.intellij.grammar.psi.BnfRule;
 import org.intellij.grammar.psi.impl.GrammarUtil;
@@ -30,7 +30,6 @@ public class RuleMethodsHelper {
   private final ExpressionHelper myExpressionHelper;
   private final Map<String, String> mySimpleTokens;
   private final GenOptions G;
-  private final @NotNull JavaRenderer R = JavaRenderer.INSTANCE;
 
   private final Map<BnfRule, Pair<Map<String, MethodInfo>, Collection<MethodInfo>>> myMethods;
 
@@ -163,7 +162,7 @@ public class RuleMethodsHelper {
     }
     else {
       result = asRule.getName();
-      if (StringUtil.isEmpty(R.getElementType(asRule, G.generateElementCase))) return null;
+      if (StringUtil.isEmpty(CommonRendererUtils.getElementType(asRule, G.generateElementCase))) return null;
     }
     return result;
   }
@@ -176,7 +175,6 @@ public class RuleMethodsHelper {
     final String path;
     final BnfRule rule;
     final RuleGraphHelper.Cardinality cardinality;
-    final @NotNull JavaRenderer R = JavaRenderer.INSTANCE;
 
     String name;
 
@@ -198,7 +196,7 @@ public class RuleMethodsHelper {
       boolean many = cardinality.many();
 
       boolean renamed = !Objects.equals(name, originalName);
-      String getterNameBody = R.getGetterName(name);
+      String getterNameBody = CommonRendererUtils.getGetterName(name);
       return getterNameBody + (many && !renamed ? "List" : "");
     }
 

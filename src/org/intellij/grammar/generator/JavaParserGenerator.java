@@ -27,11 +27,11 @@ import org.intellij.grammar.generator.NodeCalls.*;
 import org.intellij.grammar.generator.java.JavaBnfConstants;
 import org.intellij.grammar.generator.java.JavaNameShortener;
 import org.intellij.grammar.generator.java.JavaRenderer;
+import org.intellij.grammar.generator.kotlin.KotlinBnfConstants;
 import org.intellij.grammar.java.JavaHelper;
 import org.intellij.grammar.parser.GeneratedParserUtilBase.Parser;
 import org.intellij.grammar.psi.*;
 import org.intellij.grammar.psi.impl.GrammarUtil;
-import org.intellij.grammar.syntax.SyntaxConstants;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -2211,32 +2211,32 @@ public final class JavaParserGenerator extends Generator {
                                              String typeHolderClass,
                                              String syntaxElementTypeHolderClass,
                                              Map<String, BnfRule> sortedCompositeTypes) {
-    var converterInterface = SyntaxConstants.SYNTAX_ELEMENT_TYPE_CONVERTER_FACTORY;
+    var converterInterface = KotlinBnfConstants.KT_ELEMENT_TYPE_CONVERTER_FACTORY_CLASS;
     Set<String> imports = new LinkedHashSet<>();
     imports.add(typeHolderClass);
     imports.add(syntaxElementTypeHolderClass);
     imports.add(JavaBnfConstants.IELEMENTTYPE_CLASS);
-    imports.add(SyntaxConstants.SYNTAX_ELEMENT_TYPE);
+    imports.add(KotlinBnfConstants.KT_ELEMENT_TYPE_CLASS);
     imports.add(converterInterface);
-    imports.add(SyntaxConstants.SYNTAX_ELEMENT_TYPE_CONVERTER);
-    imports.add(SyntaxConstants.SYNTAX_ELEMENT_TYPE_CONVERTER_FILE);
+    imports.add(KotlinBnfConstants.KT_ELEMENT_TYPE_CONVERTER_CLASS);
+    imports.add(KotlinBnfConstants.KT_ELEMENT_TYPE_CONVERTER_FILE);
     imports.add(JavaBnfConstants.NOTNULL_ANNO);
-    imports.add(SyntaxConstants.KOTLIN_PAIR_CLASS);
+    imports.add(KotlinBnfConstants.KT_PAIR_CLASS);
     imports.add(JavaBnfConstants.OVERRIDE_ANNO);
 
     generateClassHeader(elementTypesConverter, imports, "", TypeKind.CLASS, "", converterInterface);
 
     out(shorten(JavaBnfConstants.OVERRIDE_ANNO));
     out("public %s %s getElementTypeConverter() {", shorten(JavaBnfConstants.NOTNULL_ANNO),
-        shorten(SyntaxConstants.SYNTAX_ELEMENT_TYPE_CONVERTER));
-    out("return %s.elementTypeConverterOf(", shorten(SyntaxConstants.SYNTAX_ELEMENT_TYPE_CONVERTER_FILE));
+        shorten(KotlinBnfConstants.KT_ELEMENT_TYPE_CONVERTER_CLASS));
+    out("return %s.elementTypeConverterOf(", shorten(KotlinBnfConstants.KT_ELEMENT_TYPE_CONVERTER_FILE));
     var sortedCompositeTypesArr = sortedCompositeTypes.keySet().toArray(new String[0]);
     var generateTokenTypeConversions = G.generateTokenTypes && !mySimpleTokens.isEmpty();
     for (int i = 0; i < sortedCompositeTypesArr.length; i++) {
       String elementType = sortedCompositeTypesArr[i];
       out("new %s<%s, %s>(%s.%s, %s.%s)" + (i != sortedCompositeTypesArr.length - 1 || generateTokenTypeConversions ? "," : ""),
-          shorten(SyntaxConstants.KOTLIN_PAIR_CLASS),
-          shorten(SyntaxConstants.SYNTAX_ELEMENT_TYPE), shorten(JavaBnfConstants.IELEMENTTYPE_CLASS),
+          shorten(KotlinBnfConstants.KT_PAIR_CLASS),
+          shorten(KotlinBnfConstants.KT_ELEMENT_TYPE_CLASS), shorten(JavaBnfConstants.IELEMENTTYPE_CLASS),
           shorten(syntaxElementTypeHolderClass), elementType,
           shorten(typeHolderClass), elementType);
     }
@@ -2249,8 +2249,8 @@ public final class JavaParserGenerator extends Generator {
         if (isIgnoredWhitespaceToken(tokenName, tokenText)) continue;
         var elementType = getElementType(tokenName);
         out("new %s<%s, %s>(%s.%s, %s.%s)" + (i != mySimpleTokensArr.length - 1 ? "," : ""),
-            shorten(SyntaxConstants.KOTLIN_PAIR_CLASS),
-            shorten(SyntaxConstants.SYNTAX_ELEMENT_TYPE), shorten(JavaBnfConstants.IELEMENTTYPE_CLASS),
+            shorten(KotlinBnfConstants.KT_PAIR_CLASS),
+            shorten(KotlinBnfConstants.KT_ELEMENT_TYPE_CLASS), shorten(JavaBnfConstants.IELEMENTTYPE_CLASS),
             shorten(syntaxElementTypeHolderClass), elementType,
             shorten(typeHolderClass), elementType);
       }

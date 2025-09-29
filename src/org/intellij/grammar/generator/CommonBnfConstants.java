@@ -4,9 +4,6 @@
 
 package org.intellij.grammar.generator;
 
-/**
- * @author gregsh
- */
 public interface CommonBnfConstants {
 
   String GENERATION_GROUP = "Grammar Generator";

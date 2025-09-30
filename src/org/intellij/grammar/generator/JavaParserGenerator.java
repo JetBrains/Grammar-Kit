@@ -4,10 +4,7 @@
 
 package org.intellij.grammar.generator;
 
-import com.intellij.notification.NotificationGroupManager;
-import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.diagnostic.Logger;
-import com.intellij.openapi.ui.MessageType;
 import com.intellij.openapi.util.Pair;
 import com.intellij.openapi.util.Ref;
 import com.intellij.openapi.util.Trinity;
@@ -62,26 +59,7 @@ import static org.intellij.grammar.psi.BnfTypes.*;
  */
 public final class JavaParserGenerator extends Generator {
   public static final Logger LOG = Logger.getInstance(JavaParserGenerator.class);
-
-  @NotNull
-  RuleInfo ruleInfo(BnfRule rule) {
-    return Objects.requireNonNull(myRuleInfos.get(rule.getName()));
-  }
-
-  private final Map<String, RuleInfo> myRuleInfos = new TreeMap<>();
-  private final Map<String, String> myParserLambdas = new HashMap<>();       // field name -> body
-  private final Map<String, String> myRenderedLambdas = new HashMap<>();     // field name -> parser class FQN
-  private final Set<String> myInlinedChildNodes = new HashSet<>();
-  /**
-   * Some meta-method calls use only static parsers as arguments,
-   * i.e. they don't reference meta-method parameters,
-   * we want to cache them in static fields.
-   * <p/>
-   * Mapping: <code> meta field name -> meta method call </code>
-   */
-  private final Map<String, String> myMetaMethodFields = new HashMap<>();
-  private final Map<String, Collection<String>> myTokenSets = new TreeMap<>();
-  private final Map<String, String> mySimpleTokens;
+  
   private final Set<String> myTokensUsedInGrammar = new LinkedHashSet<>();
   private final boolean myNoStubs;
 
@@ -98,10 +76,8 @@ public final class JavaParserGenerator extends Generator {
   private final String myParserTypeHolderClass;
   private final String myPsiElementTypeHolderClass;
 
-  private final RuleGraphHelper myGraphHelper;
   private final ExpressionHelper myExpressionHelper;
   private final RuleMethodsHelper myRulesMethodsHelper;
-  private final BnfFirstNextAnalyzer myFirstNextAnalyzer;
   private final JavaHelper myJavaHelper;
 
   public JavaParserGenerator(@NotNull BnfFile psiFile,
@@ -125,11 +101,8 @@ public final class JavaParserGenerator extends Generator {
     myParserTypeHolderClass = getRootAttribute(myFile, KnownAttribute.ELEMENT_TYPE_HOLDER_CLASS);
     myPsiElementTypeHolderClass = getRootAttribute(myFile, KnownAttribute.ELEMENT_TYPE_HOLDER_CLASS);
 
-    mySimpleTokens = new LinkedHashMap<>(getTokenTextToNameMap(myFile));
-    myGraphHelper = getCached(myFile);
     myExpressionHelper = new ExpressionHelper(myFile, myGraphHelper, this::addWarning);
     myRulesMethodsHelper = new RuleMethodsHelper(myGraphHelper, myExpressionHelper, mySimpleTokens, G);
-    myFirstNextAnalyzer = BnfFirstNextAnalyzer.createAnalyzer(true);
     myJavaHelper = JavaHelper.getJavaHelper(myFile);
 
     List<BnfRule> rules = psiFile.getRules();
@@ -152,26 +125,6 @@ public final class JavaParserGenerator extends Generator {
     calcFakeRulesWithType();
     calcRulesStubNames();
     calcAbstractRules();
-  }
-
-  private void calcAbstractRules() {
-    Set<String> reusedRules = new HashSet<>();
-    for (BnfRule rule : myFile.getRules()) {
-      String elementType = getAttribute(rule, KnownAttribute.ELEMENT_TYPE);
-      BnfRule r = elementType != null ? myFile.getRule(elementType) : null;
-      if (r != null && r != rule) reusedRules.add(r.getName());
-    }
-    for (BnfRule rule : myFile.getRules()) {
-      if (reusedRules.contains(rule.getName())) continue;
-      if (myGrammarRoot.equals(rule.getName())) continue;
-      if (!rule.getModifierList().isEmpty()) continue;
-      if (getAttribute(rule, KnownAttribute.RECOVER_WHILE) != null) continue;
-      if (!getAttribute(rule, KnownAttribute.HOOKS).isEmpty()) continue;
-
-      if (myGraphHelper.canCollapse(rule) && myGraphHelper.getFor(rule).isEmpty()) {
-        ruleInfo(rule).isAbstract = true;
-      }
-    }
   }
 
   private void calcFakeRulesWithType() {
@@ -233,18 +186,6 @@ public final class JavaParserGenerator extends Generator {
         .map(JavaNameShortener::getRawClassName)
         .flatMap(s -> JBTreeTraverser.<String>from(o -> JBIterable.of(myJavaHelper.getSuperClassName(o))).withRoot(s).unique())
         .find(JavaBnfConstants.COMPOSITE_PSI_ELEMENT_CLASS::equals) != null;
-    }
-  }
-
-  public void addWarning(String text) {
-    if (ApplicationManager.getApplication().isUnitTestMode()) {
-      //noinspection UseOfSystemOutOrSystemErr
-      System.out.println(text);
-    }
-    else {
-      NotificationGroupManager.getInstance()
-        .getNotificationGroup("grammarkit.parser.generator.log")
-        .createNotification(text, MessageType.WARNING).notify(myFile.getProject());
     }
   }
 
@@ -624,35 +565,6 @@ public final class JavaParserGenerator extends Generator {
     }
   }
 
-  private @NotNull List<Set<String>> buildExtendsSet(@NotNull MultiMap<BnfRule, BnfRule> map) {
-    if (map.isEmpty()) return Collections.emptyList();
-    List<Set<String>> result = new ArrayList<>();
-    for (Map.Entry<BnfRule, Collection<BnfRule>> entry : map.entrySet()) {
-      Set<String> set = null;
-      for (BnfRule rule : entry.getValue()) {
-        RuleInfo info = ruleInfo(rule);
-        if (!hasElementType(rule)) continue;
-        String elementType = info.isFake && !info.isInElementType ||
-                             getSynonymTargetOrSelf(rule) != rule ? null : info.elementType;
-        if (StringUtil.isEmpty(elementType)) continue;
-        if (set == null) set = new TreeSet<>();
-        set.add(elementType);
-      }
-      if (set != null && set.size() > 1) result.add(set);
-    }
-    result.sort(Comparator.comparingInt(Set::size));
-    for (ListIterator<Set<String>> it = result.listIterator(); it.hasNext(); ) {
-      Set<String> smaller = it.next();
-      for (Set<String> bigger : result.subList(it.nextIndex(), result.size())) {
-        if (bigger.containsAll(smaller)) {
-          it.remove();
-          break;
-        }
-      }
-    }
-    return result;
-  }
-
   /**
    * Meta-methods are methods that take several {@link Parser Parser} instances as parameters and return another {@link Parser instance}.
    *
@@ -674,6 +586,8 @@ public final class JavaParserGenerator extends Generator {
     // @formatter:on
   }
 
+  @SuppressWarnings("DuplicatedCode")
+  @Override
   void generateNode(BnfRule rule, BnfExpression initialNode, String funcName, Set<BnfExpression> visited) {
     boolean isRule = initialNode.getParent() == rule;
     BnfExpression node = getNonTrivialNode(initialNode);
@@ -900,40 +814,17 @@ public final class JavaParserGenerator extends Generator {
     generateNodeChildren(rule, funcName, children, visited);
   }
 
-  /**
-   * @noinspection StringEquality
-   */
-  private String generateAutoRecoverCall(BnfRule rule) {
-    Set<BnfExpression> nextExprSet = myFirstNextAnalyzer.calcNext(rule).keySet();
-    Set<String> nextSet = BnfFirstNextAnalyzer.asStrings(nextExprSet);
-    List<String> tokenTypes = new ArrayList<>(nextSet.size());
-
-    for (String s : nextSet) {
-      if (myFile.getRule(s) != null) continue; // ignore left recursion
-      if (s == BnfFirstNextAnalyzer.MATCHES_EOF || s == BnfFirstNextAnalyzer.MATCHES_NOTHING) continue;
-
-      boolean unknown = s == BnfFirstNextAnalyzer.MATCHES_ANY;
-      String t = unknown ? null : firstToElementType(s);
-      if (t != null) {
-        tokenTypes.add(t);
-      }
-      else {
-        tokenTypes.clear();
-        addWarning(rule.getName() + " #auto recovery generation failed: " + s);
-        break;
-      }
-    }
+  @Override
+  public StringBuilder generateAutoRecoveryCall(List<String> tokenTypes){
     StringBuilder sb = new StringBuilder(format("!nextTokenIsFast(%s, ", N.builder));
-
     appendTokenTypes(sb, tokenTypes);
     sb.append(")");
-
-    String constantName = rule.getName() + "_auto_recover_";
-    myParserLambdas.put(constantName, sb.toString());
-    return constantName;
+    return sb;
   }
 
-  public String generateFirstCheck(BnfRule rule, String frameName, boolean skipIfOne) {
+  @SuppressWarnings("DuplicatedCode")
+  @Override
+  public String generateFirstCheck(@NotNull BnfRule rule, String frameName, boolean skipIfOne) {
     if (G.generateFirstCheck <= 0) return frameName;
     Set<BnfExpression> firstSet = myFirstNextAnalyzer.calcFirst(rule);
     ConsumeType ruleConsumeType = getRuleConsumeType(rule, null);
@@ -987,71 +878,14 @@ public final class JavaParserGenerator extends Generator {
     return ObjectUtils.chooseNotNull(forcedConsumeType, ConsumeType.forRule(rule));
   }
 
-  void generateNodeChildren(BnfRule rule, String funcName, List<BnfExpression> children, Set<BnfExpression> visited) {
-    for (int i = 0, len = children.size(); i < len; i++) {
-      generateNodeChild(rule, children.get(i), funcName, i, visited);
-    }
-  }
-
-  void generateNodeChild(BnfRule rule, BnfExpression child, String funcName, int index, Set<BnfExpression> visited) {
-    if (child instanceof BnfExternalExpression) {
-      // generate parameters
-      List<BnfExpression> expressions = ((BnfExternalExpression)child).getExpressionList();
-      for (int j = 1, size = expressions.size(); j < size; j++) {
-        BnfExpression expression = expressions.get(j);
-        if (GrammarUtil.isAtomicExpression(expression)) continue;
-        if (expression instanceof BnfExternalExpression) {
-          generateNodeChild(rule, expression, R.getNextName(funcName, index), j - 1, visited);
-        }
-        else {
-          String nextName = R.getNextName(R.getNextName(funcName, index), j - 1);
-          if (shallGenerateNodeChild(nextName)) {
-            newLine();
-            generateNode(rule, expression, nextName, visited);
-          }
-        }
-      }
-    }
-    else if (!GrammarUtil.isAtomicExpression(child) && !isTokenSequence(rule, child)) {
-      String nextName = R.getNextName(funcName, index);
-      if (shallGenerateNodeChild(nextName)) {
-        newLine();
-        generateNode(rule, child, nextName, visited);
-      }
-    }
-    // else do not generate
-  }
-
   private @NotNull List<String> collectMetaParametersFormatted(@NotNull BnfRule rule, @Nullable BnfExpression expression) {
     if (expression == null) return Collections.emptyList();
     return map(GrammarUtil.collectMetaParameters(rule, expression),
                it -> formatMetaParamName(it.substring(2, it.length() - 2)));
   }
 
-  private @NotNull String formatMetaParamName(@NotNull String s) {
-    String argName = s.trim();
-    return N.metaParamPrefix + (N.metaParamPrefix.isEmpty() || "_".equals(N.metaParamPrefix) ? argName : StringUtil.capitalize(argName));
-  }
-
-  private @Nullable String firstToElementType(String first) {
-    if (first.startsWith("#") || first.startsWith("-") || first.startsWith("<<")) return null;
-    String value = GrammarUtil.unquote(first);
-    //noinspection StringEquality
-    if (first != value) {
-      String attributeName = getTokenName(value);
-      if (attributeName != null && !first.startsWith("\"")) {
-        return getElementType(attributeName);
-      }
-      return null;
-    }
-    return getElementType(first);
-  }
-
-  private @Nullable String getTokenName(String value) {
-    return mySimpleTokens.get(value);
-  }
-
-  private @NotNull NodeCall generateTokenSequenceCall(List<BnfExpression> children,
+  @Override
+  @NotNull NodeCall generateTokenSequenceCall(List<BnfExpression> children,
                                                       int startIndex,
                                                       PinMatcher pinMatcher,
                                                       boolean pinApplied,
@@ -1081,30 +915,11 @@ public final class JavaParserGenerator extends Generator {
     return new ConsumeTokensCall(consumeMethodName, N.builder, pin, list);
   }
 
-  private @Nullable NodeCall generateTokenChoiceCall(@NotNull List<BnfExpression> children,
-                                                     @NotNull ConsumeType consumeType,
-                                                     @NotNull String funcName) {
-    Collection<String> tokenNames = getTokenNames(myFile, children, 2);
-    if (tokenNames == null) return null;
-
-    Set<String> tokens = new TreeSet<>();
-    for (String tokenName : tokenNames) {
-      if (!mySimpleTokens.containsKey(tokenName) && !mySimpleTokens.containsValue(tokenName)) {
-        mySimpleTokens.put(tokenName, null);
-      }
-      tokens.add(getElementType(tokenName));
-    }
-
-    String tokenSetName = CommonRendererUtils.getTokenSetConstantName(funcName);
-    myTokenSets.put(tokenSetName, tokens);
+  @NotNull NodeCall instantiateTokenChoiceCall(@NotNull ConsumeType consumeType, @NotNull String tokenSetName){
     return new ConsumeTokenChoiceCall(consumeType, tokenSetName, N.builder);
   }
 
-  @NotNull
-  NodeCall generateNodeCall(@NotNull BnfRule rule, @Nullable BnfExpression node, @NotNull String nextName) {
-    return generateNodeCall(rule, node, nextName, null);
-  }
-
+  @Override
   @NotNull
   NodeCall generateNodeCall(@NotNull BnfRule rule,
                             @Nullable BnfExpression node,
@@ -1212,127 +1027,17 @@ public final class JavaParserGenerator extends Generator {
     return fixed != null ? fixed : ConsumeType.forRule(rule);
   }
 
-  private @NotNull NodeCall generateExternalCall(@NotNull BnfRule rule,
-                                                 @NotNull List<BnfExpression> expressions,
-                                                 @NotNull String nextName) {
-    List<BnfExpression> callParameters = expressions;
-    List<String> metaParameterNames = Collections.emptyList();
-    String method = !expressions.isEmpty() ? expressions.get(0).getText() : null;
-    String targetClassName = null;
-    BnfRule targetRule = method == null ? null : myFile.getRule(method);
-    // handle external rule call: substitute and merge arguments from external expression and rule definition
-    if (targetRule != null) {
-      if (Rule.isExternal(targetRule)) {
-        metaParameterNames = GrammarUtil.collectMetaParameters(targetRule, targetRule.getExpression());
-        callParameters = GrammarUtil.getExternalRuleExpressions(targetRule);
-        method = callParameters.get(0).getText();
-        if (metaParameterNames.size() < expressions.size() - 1) {
-          callParameters = ContainerUtil.concat(callParameters, expressions.subList(metaParameterNames.size() + 1, expressions.size()));
-        }
-      }
-      else {
-        String parserClass = ruleInfo(targetRule).parserClass;
-        if (!parserClass.equals(myGrammarRootParser) && !parserClass.equals(ruleInfo(rule).parserClass)) {
-          targetClassName = StringUtil.getShortName(parserClass);
-        }
-      }
-    }
-    method = String.valueOf(method);
-    List<NodeArgument> arguments = new ArrayList<>();
-    if (callParameters.size() > 1) {
-      for (int i = 1, len = callParameters.size(); i < len; i++) {
-        BnfExpression nested = callParameters.get(i);
-        String argument = nested.getText();
-        String argNextName;
-        int metaIdx;
-        if (argument.startsWith("<<") && (metaIdx = metaParameterNames.indexOf(argument)) > -1) {
-          nested = expressions.get(metaIdx + 1);
-          argument = nested.getText();
-          argNextName = R.getNextName(nextName, metaIdx);
-        }
-        else {
-          argNextName = R.getNextName(nextName, i - 1);
-        }
-        if (nested instanceof BnfReferenceOrToken) {
-          if (myFile.getRule(argument) != null) {
-            arguments.add(generateWrappedNodeCall(rule, nested, argument));
-          }
-          else {
-            String tokenType = getElementType(argument);
-            arguments.add(generateWrappedNodeCall(rule, nested, tokenType));
-          }
-        }
-        else if (nested instanceof BnfLiteralExpression) {
-          String attributeName = getTokenName(GrammarUtil.unquote(argument));
-          if (attributeName != null) {
-            arguments.add(generateWrappedNodeCall(rule, nested, attributeName));
-          }
-          else {
-            arguments.add(new TextArgument(argument.startsWith("'") ? GrammarUtil.unquote(argument) : argument));
-          }
-        }
-        else if (nested instanceof BnfExternalExpression) {
-          List<BnfExpression> expressionList = ((BnfExternalExpression)nested).getExpressionList();
-          if (expressionList.size() == 1 && Rule.isMeta(rule)) {
-            arguments.add(new MetaParameterArgument(formatMetaParamName(expressionList.get(0).getText())));
-          }
-          else {
-            arguments.add(generateWrappedNodeCall(rule, nested, argNextName));
-          }
-        }
-        else {
-          arguments.add(generateWrappedNodeCall(rule, nested, argNextName));
-        }
-      }
-    }
-    return Rule.isMeta(targetRule) ? new MetaMethodCall(targetClassName, method, N.builder, N.level, arguments)
-                                   : new MethodCallWithArguments(method, N.builder, N.level, arguments);
+  @NotNull NodeCall generateExternalCall(@NotNull BnfRule rule,
+                                         @NotNull List<BnfExpression> expressions,
+                                         @NotNull String nextName) {
+    return generateExternalCall(rule, expressions, nextName, N.builder);
   }
 
-  private @NotNull NodeArgument generateWrappedNodeCall(@NotNull BnfRule rule, @Nullable BnfExpression nested, @NotNull String nextName) {
-    NodeCall nodeCall = generateNodeCall(rule, nested, nextName);
-    if (nodeCall instanceof MetaMethodCall metaCall) {
-      MetaMethodCallArgument argument = new MetaMethodCallArgument(metaCall);
-      if (metaCall.referencesMetaParameter()) {
-        return argument;
-      }
-      else {
-        return renderer -> getMetaMethodFieldRef(argument.render(renderer), nextName);
-      }
-    }
-    else if (nodeCall instanceof MethodCall methodCall && G.javaVersion > 6) {
-      return renderer -> format("%s::%s", methodCall.className(), methodCall.methodName());
-    }
-    else {
-      return renderer -> getParserLambdaRef(nodeCall, nextName);
-    }
+  @Override
+  boolean useMethodCall(NodeCall nodeCall) {
+    return nodeCall instanceof MethodCall && G.javaVersion > 6;
   }
 
-  private String getMetaMethodFieldRef(@NotNull String call, @NotNull String nextName) {
-    String fieldName = CommonRendererUtils.getWrapperParserConstantName(nextName);
-    myMetaMethodFields.putIfAbsent(fieldName, call);
-    return fieldName;
-  }
-
-  private @NotNull String getParserLambdaRef(@NotNull NodeCall nodeCall, @NotNull String nextName) {
-    String constantName = R.getWrapperParserConstantName(nextName);
-    String targetClass = myRenderedLambdas.get(constantName);
-    if (targetClass != null) {
-      return StringUtil.getShortName(targetClass) + "." + constantName;
-    }
-    else if (!myParserLambdas.containsKey(constantName)) {
-      String call = nodeCall.render(R);
-      myParserLambdas.put(constantName, call);
-      if (!call.startsWith(nextName + "(")) {
-        myInlinedChildNodes.add(nextName);
-      }
-    }
-    return constantName;
-  }
-
-  private boolean shallGenerateNodeChild(String funcName) {
-    return !myInlinedChildNodes.contains(funcName);
-  }
 
   private @NotNull NodeCall generateConsumeToken(@NotNull ConsumeType consumeType, @NotNull String tokenName) {
     myTokensUsedInGrammar.add(tokenName);
@@ -1343,14 +1048,6 @@ public final class JavaParserGenerator extends Generator {
                                                             @NotNull String tokenText,
                                                             @NotNull String stateHolder) {
     return new ConsumeTokenCall(consumeType, "\"" + tokenText + "\"", stateHolder);
-  }
-
-  private String getElementType(String token) {
-    return getTokenType(myFile, token, G.generateTokenCase);
-  }
-
-  String getElementType(BnfRule r) {
-    return CommonRendererUtils.getElementType(r, G.generateElementCase);
   }
 
   /*ElementTypes******************************************************************/
@@ -1366,7 +1063,7 @@ public final class JavaParserGenerator extends Generator {
       imports.add(JavaBnfConstants.PSI_ELEMENT_CLASS);
       imports.add(JavaBnfConstants.AST_NODE_CLASS);
     }
-    if (G.generateTokenSets && !myTokenSets.isEmpty()) {
+    if (G.generateTokenSets && !myChoiceTokenSets.isEmpty()) {
       imports.add(JavaBnfConstants.TOKEN_SET_CLASS);
     }
     boolean useExactElements = "all".equals(G.generateExactTypes) || G.generateExactTypes.contains("elements");
@@ -1536,13 +1233,13 @@ public final class JavaParserGenerator extends Generator {
   }
 
   private void generateTokenSets() {
-    if (myTokenSets.isEmpty()) {
+    if (myChoiceTokenSets.isEmpty()) {
       return;
     }
     newLine();
     out("interface %s {", JavaBnfConstants.TOKEN_SET_HOLDER_NAME);
     Map<String, String> reverseMap = new HashMap<>();
-    myTokenSets.forEach((name, tokens) -> {
+    myChoiceTokenSets.forEach((name, tokens) -> {
       String value = format(shorten(JavaBnfConstants.TOKEN_SET_CLASS) + ".create(%s)", tokenSetString(tokens));
       String alreadyRendered = reverseMap.putIfAbsent(value, name);
       out("%s %s = %s;", shorten(JavaBnfConstants.TOKEN_SET_CLASS), name, ObjectUtils.chooseNotNull(alreadyRendered, value));

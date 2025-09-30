@@ -465,11 +465,16 @@ public class ParserGeneratorUtil {
     return false;
   }
 
+  private static boolean appendTokenTypes(@NotNull StringBuilder builder, int count, int line, int size) {
+    boolean newLine = line == 0 && count == 2 || line > 0 && (count - 2) % 6 == 0;
+    newLine &= (size - count) > 2;
+    if (count > 0) builder.append(",").append(newLine ? "\n" : " ");
+    return newLine;
+  }
+
   public static void appendTokenTypes(StringBuilder sb, List<String> tokenTypes) {
     for (int count = 0, line = 0, size = tokenTypes.size(); count < size; count++) {
-      boolean newLine = line == 0 && count == 2 || line > 0 && (count - 2) % 6 == 0;
-      newLine &= (size - count) > 2;
-      if (count > 0) sb.append(",").append(newLine ? "\n" : " ");
+      boolean newLine = appendTokenTypes(sb, count, line, size);
       sb.append(tokenTypes.get(count));
       if (newLine) line++;
     }
@@ -479,9 +484,7 @@ public class ParserGeneratorUtil {
                                       @NotNull List<@NotNull String> tokenTypes,
                                       @NotNull String elementTypesHolder) {
     for (int count = 0, line = 0, size = tokenTypes.size(); count < size; count++) {
-      boolean newLine = line == 0 && count == 2 || line > 0 && (count - 2) % 6 == 0;
-      newLine &= (size - count) > 2;
-      if (count > 0) builder.append(",").append(newLine ? "\n" : " ");
+      boolean newLine = appendTokenTypes(builder, count, line, size);;
       builder.append(elementTypesHolder).append(".").append(tokenTypes.get(count));
       if (newLine) line++;
     }

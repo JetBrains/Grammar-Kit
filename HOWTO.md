@@ -134,7 +134,7 @@ A more natural and compact way of dealing with this is supported.
 5. Use *rightAssociative* attribute when the default left associativity is not appropriate
 
 The following snippet demonstrates that "expression" parts of the BNF look compact, and
-the described syntax doesn't break much the ordinary BNF syntax ([complete example](testData/java/ExprParser.bnf)):
+the described syntax doesn't break much the ordinary BNF syntax ([complete example](testData/generator/ExprParser.bnf)):
 
 ````
 // to keep this sample short function calls and other expressions are omitted

@@ -1032,6 +1032,11 @@ public final class JavaParserGenerator extends Generator {
                                          @NotNull String nextName) {
     return generateExternalCall(rule, expressions, nextName, N.builder);
   }
+  
+  @Override
+  protected boolean useTargetClassName(@NotNull BnfRule rule, String parserClass) {
+    return !parserClass.equals(myGrammarRootParser) && !parserClass.equals(ruleInfo(rule).parserClass);
+  }
 
   @Override
   boolean useMethodCall(NodeCall nodeCall) {

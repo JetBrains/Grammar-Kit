@@ -70,14 +70,7 @@ public final class KotlinParserGenerator extends Generator {
    * definitions were generated.
    */
   private final @NotNull Set<String> myTokensUsedInGrammar = new LinkedHashSet<>();
-  /**
-   * Some meta-method calls use only static parsers as arguments,
-   * i.e. they don't reference meta-method parameters,
-   * we want to cache them in static fields.
-   * <p/>
-   * Mapping: <code> meta field name -> meta method call </code>
-   */
-  private final Map<String, String> myMetaMethodFields = new HashMap<>();
+
 
 
   private final ExpressionHelper myExpressionHelper;

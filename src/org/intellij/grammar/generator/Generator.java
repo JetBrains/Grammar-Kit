@@ -366,7 +366,7 @@ public sealed abstract class Generator permits JavaParserGenerator, KotlinParser
       }
       else {
         String parserClass = ruleInfo(targetRule).parserClass;
-        if (!parserClass.equals(ruleInfo(rule).parserClass)) {
+        if (useTargetClassName(rule, parserClass)) {
           targetClassName = StringUtil.getShortName(parserClass);
         }
       }
@@ -421,6 +421,10 @@ public sealed abstract class Generator permits JavaParserGenerator, KotlinParser
     }
     return Rule.isMeta(targetRule) ? new MetaMethodCall(targetClassName, method, stateHolder, N.level, arguments)
                                    : new MethodCallWithArguments(method, stateHolder, N.level, arguments);
+  }
+
+  protected boolean useTargetClassName(@NotNull BnfRule rule, String parserClass) {
+    return !parserClass.equals(ruleInfo(rule).parserClass);
   }
 
   @NotNull String formatMetaParamName(@NotNull String s) {

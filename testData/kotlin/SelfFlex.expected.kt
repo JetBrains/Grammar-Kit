@@ -2,6 +2,7 @@
 // license.txt
 package org.intellij.jflex.parser
 
+import org.intellij.jflex.JFlexTypes
 import com.intellij.platform.syntax.util.runtime.*
 import com.intellij.platform.syntax.parser.SyntaxTreeBuilder.Marker
 import com.intellij.platform.syntax.SyntaxElementTypeSet
@@ -170,7 +171,7 @@ object JFlexParser {
     if (!runtime.recursion_guard_(level, "declaration_recover_0_0")) return false
     var result: Boolean
     val marker: Marker = runtime.enter_section_()
-    result = is_percent(runtime, level + 1)
+    result = JFlexParserUtil.is_percent(runtime, level + 1)
     if (!result) result = runtime.parseTokens(0, JFlexTypes.FLEX_ID, JFlexTypes.FLEX_EQ)
     runtime.exit_section_(marker, null, result)
     return result
@@ -235,7 +236,7 @@ object JFlexParser {
     if (!runtime.recursion_guard_(level, "declarations_section_2_0_0_0")) return false
     var result: Boolean
     val marker: Marker = runtime.enter_section_()
-    result = eof(runtime, level + 1)
+    result = runtime.eof(level + 1)
     if (!result) result = runtime.consumeToken(JFlexTypes.FLEX_TWO_PERCS)
     runtime.exit_section_(marker, null, result)
     return result
@@ -541,7 +542,7 @@ object JFlexParser {
     val marker: Marker = runtime.enter_section_()
     result = macro_definition_recover_0_0(runtime, level + 1)
     if (!result) result = runtime.consumeToken(JFlexTypes.FLEX_TWO_PERCS)
-    if (!result) result = is_percent(runtime, level + 1)
+    if (!result) result = JFlexParserUtil.is_percent(runtime, level + 1)
     runtime.exit_section_(marker, null, result)
     return result
   }
@@ -575,7 +576,7 @@ object JFlexParser {
     if (!runtime.recursion_guard_(level, "new_line")) return false
     var result: Boolean
     val marker: Marker = runtime.enter_section_(level, Modifiers._AND_)
-    result = is_new_line(runtime, level + 1)
+    result = JFlexParserUtil.is_new_line(runtime, level + 1)
     runtime.exit_section_(level, marker, result, false, null)
     return result
   }
@@ -1781,7 +1782,7 @@ object JFlexParser {
     if (!runtime.recursion_guard_(level, "user_value")) return false
     var result: Boolean
     val marker: Marker = runtime.enter_section_(level, Modifiers._NONE_, JFlexTypes.FLEX_USER_VALUE, "<user value>")
-    result = anything2(runtime, level + 1, JFlexParser::user_value_0_0)
+    result = JFlexParserUtil.anything2(runtime, level + 1, JFlexParser::user_value_0_0)
     runtime.exit_section_(level, marker, result, false, null)
     return result
   }
@@ -1823,7 +1824,7 @@ object JFlexParser {
     return result || pinned
   }
 
-  fun expression_0(SyntaxGeneratedParserRuntime: runtime, level: Int, priority: Int): Boolean {
+  fun expression_0(runtime: SyntaxGeneratedParserRuntime, level: Int, priority: Int): Boolean {
     if (!runtime.recursion_guard_(level, "expression_0")) return false
     var result = true
     while (true) {
@@ -1872,7 +1873,7 @@ object JFlexParser {
     return result || pinned
   }
 
-  fun not_expression(SyntaxGeneratedParserRuntime: runtime, level: Int): Boolean {
+  fun not_expression(runtime: SyntaxGeneratedParserRuntime, level: Int): Boolean {
     if (!runtime.recursion_guard_(level, "not_expression")) return false
     if (!runtime.nextTokenIsSmart(JFlexTypes.FLEX_BANG, JFlexTypes.FLEX_TILDE)) return false
     var result: Boolean

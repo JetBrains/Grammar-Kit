@@ -129,6 +129,12 @@ BnfFile:SelfBnf.bnf
         BNF_STRING_LITERAL_EXPRESSION: "org.intellij.grammar.BnfSyntaxElementTypeConverterFactory"
           PsiElement(string)('"org.intellij.grammar.BnfSyntaxElementTypeConverterFactory"')
       PsiWhiteSpace('\n  ')
+      BNF_ATTR:syntaxParserUtilObject
+        PsiElement(id)('syntaxParserUtilObject')
+        PsiElement(=)('=')
+        BNF_STRING_LITERAL_EXPRESSION: "org.intellij.grammar.syntax.grammar.GrammarParserUtil"
+          PsiElement(string)('"org.intellij.grammar.syntax.grammar.GrammarParserUtil"')
+      PsiWhiteSpace('\n  ')
       BNF_ATTR:psiOutputPath
         PsiElement(id)('psiOutputPath')
         PsiElement(=)('=')

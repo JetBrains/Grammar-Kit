@@ -65,7 +65,7 @@ public final class KotlinNameShortener implements NameShortener {
         final var packageName = StringUtil.getPackageName(part);
         if (!quoted && (myImports.contains(part) ||
                         KOTLIN_AUTOIMPORTS.contains(packageName) ||
-                        myPackage.contains(packageName) ||
+                        myPackage.equals(packageName) ||
                         myImports.contains(packageName + ".*") ||
                         part.endsWith(".") && myImports.contains(NameShortener.getAnnotatedFQNAt(s, offset)))) {
           sb.append(StringUtil.getShortName(part));

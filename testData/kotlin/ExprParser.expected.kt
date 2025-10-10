@@ -228,7 +228,7 @@ object ExpressionParser {
     return result_ || pinned_
   }
 
-  fun expr_0(SyntaxGeneratedParserRuntime: runtime_, level_: Int, priority_: Int): Boolean {
+  fun expr_0(runtime_: SyntaxGeneratedParserRuntime, level_: Int, priority_: Int): Boolean {
     if (!runtime_.recursion_guard_(level_, "expr_0")) return false
     var result_ = true
     while (true) {
@@ -326,7 +326,7 @@ object ExpressionParser {
     return result_
   }
 
-  fun unary_plus_expr(SyntaxGeneratedParserRuntime: runtime_, level_: Int): Boolean {
+  fun unary_plus_expr(runtime_: SyntaxGeneratedParserRuntime, level_: Int): Boolean {
     if (!runtime_.recursion_guard_(level_, "unary_plus_expr")) return false
     var result_: Boolean
     var pinned_: Boolean
@@ -338,7 +338,7 @@ object ExpressionParser {
     return result_ || pinned_
   }
 
-  fun unary_min_expr(SyntaxGeneratedParserRuntime: runtime_, level_: Int): Boolean {
+  fun unary_min_expr(runtime_: SyntaxGeneratedParserRuntime, level_: Int): Boolean {
     if (!runtime_.recursion_guard_(level_, "unary_min_expr")) return false
     var result_: Boolean
     var pinned_: Boolean
@@ -361,7 +361,7 @@ object ExpressionParser {
     return result_
   }
 
-  fun unary_not_expr(SyntaxGeneratedParserRuntime: runtime_, level_: Int): Boolean {
+  fun unary_not_expr(runtime_: SyntaxGeneratedParserRuntime, level_: Int): Boolean {
     if (!runtime_.recursion_guard_(level_, "unary_not_expr")) return false
     var result_: Boolean
     var pinned_: Boolean
@@ -406,7 +406,7 @@ object ExpressionParser {
     return result_
   }
 
-  fun paren_expr(SyntaxGeneratedParserRuntime: runtime_, level_: Int): Boolean {
+  fun paren_expr(runtime_: SyntaxGeneratedParserRuntime, level_: Int): Boolean {
     if (!runtime_.recursion_guard_(level_, "paren_expr")) return false
     var result_: Boolean
     var pinned_: Boolean

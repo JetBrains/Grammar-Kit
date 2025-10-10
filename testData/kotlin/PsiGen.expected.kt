@@ -281,7 +281,7 @@ object PsiGen {
     if (!runtime_.recursion_guard_(level_, "root")) return false
     var result_: Boolean
     val marker_: Marker = runtime_.enter_section_(level_, Modifiers._COLLAPSE_, GeneratedSyntaxElementTypes.ROOT, "<root>")
-    result_ = parseGrammar(runtime_, level_ + 1, PsiGen::grammar_element)
+    result_ = PsiGenUtil.parseGrammar(runtime_, level_ + 1, PsiGen::grammar_element)
     if (!result_) result_ = root_b(runtime_, level_ + 1)
     if (!result_) result_ = root_c(runtime_, level_ + 1)
     if (!result_) result_ = root_d(runtime_, level_ + 1)
@@ -295,7 +295,7 @@ object PsiGen {
     if (!runtime_.recursion_guard_(level_, "root_b")) return false
     var result_: Boolean
     val marker_: Marker = runtime_.enter_section_(level_, Modifiers._COLLAPSE_, GeneratedSyntaxElementTypes.ROOT_B, "<root b>")
-    result_ = parseGrammar(runtime_, level_ + 1, PsiGen::grammar_element)
+    result_ = PsiGenUtil.parseGrammar(runtime_, level_ + 1, PsiGen::grammar_element)
     runtime_.exit_section_(level_, marker_, result_, false, null)
     return result_
   }
@@ -709,7 +709,7 @@ object PsiGenFixes {
     if (!runtime_.recursion_guard_(level_, "statement_0_0")) return false
     var result_: Boolean
     val marker_: Marker = runtime_.enter_section_(level_, Modifiers._AND_)
-    result_ = external(runtime_, level_ + 1)
+    result_ = PsiGenUtil.external(runtime_, level_ + 1)
     runtime_.exit_section_(level_, marker_, result_, false, null)
     return result_
   }
@@ -739,7 +739,7 @@ object PsiGenFixes {
     if (!runtime_.recursion_guard_(level_, "statement_1_0")) return false
     var result_: Boolean
     val marker_: Marker = runtime_.enter_section_(level_, Modifiers._NOT_)
-    result_ = !external(runtime_, level_ + 1)
+    result_ = !PsiGenUtil.external(runtime_, level_ + 1)
     runtime_.exit_section_(level_, marker_, result_, false, null)
     return result_
   }

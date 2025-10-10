@@ -2,6 +2,8 @@
 // license.txt
 package org.intellij.grammar.parser
 
+import org.intellij.grammar.BnfSyntaxTypes
+import org.intellij.grammar.syntax.grammar.GrammarParserUtil
 import com.intellij.platform.syntax.util.runtime.*
 import com.intellij.platform.syntax.parser.SyntaxTreeBuilder.Marker
 import com.intellij.platform.syntax.SyntaxElementTypeSet
@@ -20,7 +22,7 @@ object GrammarParser {
   }
 
   internal fun parse_root_(type: SyntaxElementType, runtime: SyntaxGeneratedParserRuntime, level: Int): Boolean {
-    return parseGrammar(runtime, level + 1, GrammarParser::grammar_element)
+    return GrammarParserUtil.parseGrammar(runtime, level + 1, GrammarParser::grammar_element)
   }
 
   val EXTENDS_SETS_: Array<SyntaxElementTypeSet> = arrayOf(
@@ -325,7 +327,7 @@ object GrammarParser {
     if (!runtime.recursion_guard_(level, "grammar_element_0")) return false
     var result: Boolean
     val marker: Marker = runtime.enter_section_(level, Modifiers._NOT_)
-    result = !eof(runtime, level + 1)
+    result = !runtime.eof(level + 1)
     runtime.exit_section_(level, marker, result, false, null)
     return result
   }

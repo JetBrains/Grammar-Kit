@@ -20,6 +20,7 @@
   tokenTypeClass="org.intellij.grammar.psi.BnfTokenType"
   syntaxElementTypeHolderClass="org.intellij.grammar.BnfSyntaxTypes"
   elementTypeConverterFactoryClass="org.intellij.grammar.BnfSyntaxElementTypeConverterFactory"
+  syntaxParserUtilObject="org.intellij.grammar.syntax.grammar.GrammarParserUtil"
   psiOutputPath="grammar-kit/psi"
   
   tokens = [

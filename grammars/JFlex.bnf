@@ -16,6 +16,7 @@
 
   elementTypeHolderClass="org.intellij.jflex.psi.JFlexTypes"
   syntaxElementTypeHolderClass="org.intellij.jflex.JFlexTypes"
+  syntaxParserUtilObject="org.intellij.jflex.parser.JFlexParserUtil"
   psiOutputPath="grammar-kit/psi"
 
   elementTypePrefix="FLEX_"

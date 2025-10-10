@@ -199,6 +199,34 @@ public final class NodeCalls {
       }
     }
   }
+  
+  record ObjectMethodCall(
+    @NotNull String objectName,
+    @NotNull String methodName,
+    @NotNull String builder,
+    @NotNull String level,
+    @NotNull List<NodeArgument> arguments
+  ) implements NodeCall {
+    @Override
+    public @NotNull String render(@NotNull Renderer renderer) {
+      String argumentStr = arguments.stream()
+        .map(argument -> argument.render(renderer))
+        .map(it -> ", " + it)
+        .collect(Collectors.joining());
+      return String.format("%s.%s(%s, %s + 1%s)", objectName, methodName, builder, level, argumentStr);
+    }
+  }
+  
+  record RuntimeMethodCall(
+    @NotNull String methodName,
+    @NotNull String builder,
+    @NotNull String level
+  ) implements NodeCall {
+    @Override
+    public @NotNull String render(@NotNull Renderer renderer) {
+      return String.format("%s.%s(%s + 1)", builder, methodName, level);
+    }
+  }
 
   static class MethodCallWithArguments implements NodeCall {
 

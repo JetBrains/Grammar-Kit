@@ -113,9 +113,10 @@ public class ExpressionGeneratorHelper {
       first = false;
       String elementType = g.getElementType(operator.rule());
       boolean rightAssociative = getAttribute(operator.rule(), KnownAttribute.RIGHT_ASSOCIATIVE);
-      String tailCall = operator.tail() == null ? null : g.generateNodeCall(
-        operator.rule(), operator.tail(), R.getNextName(R.getFuncName(operator.rule()), 1), ConsumeType.DEFAULT
-      ).render(R);
+      String tailCall = operator.tail() == null ? null : g.generateNodeCall(operator.rule(), 
+                                                                            operator.tail(), 
+                                                                            R.getNextName(R.getFuncName(operator.rule()), 1), 
+                                                                            ConsumeType.DEFAULT).render(R);
       if (operator.type() == OperatorType.BINARY) {
         String argCall = format("%s(%s, %s, %d)", methodName, g.N.builder, g.N.level, rightAssociative ? argPriority - 1 : argPriority);
         g.out("%s = %s;", g.N.result, tailCall == null ? argCall : format("report_error_(%s, %s)", g.N.builder, argCall));

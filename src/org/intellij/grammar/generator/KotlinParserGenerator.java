@@ -61,17 +61,17 @@ public final class KotlinParserGenerator extends Generator {
    * Name of the class containing all the generated element types.
    */
   private final @NotNull String myElementTypesHolderName;
-  
   private final @NotNull String myPsiOutputPath;
+  
+  private final @NotNull String myParserUtil;
 
+  private final @NotNull Set<String> mySGPRMethods = new HashSet<>(new HashSet<>(Arrays.asList("eof", "advanceToken")));
 
   /**
    * Contains names of all the tokens whose corresponding {@code SyntaxElementType}
    * definitions were generated.
    */
   private final @NotNull Set<String> myTokensUsedInGrammar = new LinkedHashSet<>();
-
-
 
   private final ExpressionHelper myExpressionHelper;
   private final JavaHelper myJavaHelper;
@@ -89,6 +89,7 @@ public final class KotlinParserGenerator extends Generator {
 
     // TODO: consider creating kotlin specific attributes for this
     myElementTypesHolderName = getRootAttribute(myFile, KnownAttribute.SYNTAX_ELEMENT_TYPE_HOLDER_CLASS);
+    myParserUtil = getRootAttribute(myFile, KnownAttribute.SYNTAX_PARSER_UTIL_OBJECT);
     myPsiOutputPath = (psiOutputPath.isEmpty()) ? myOutputPath : psiOutputPath;
 
     myExpressionHelper = new ExpressionHelper(myFile, myGraphHelper, this::addWarning);
@@ -219,7 +220,7 @@ public final class KotlinParserGenerator extends Generator {
       out("import %s", importName);
     }
     if (G.generateFQN && imports.contains("#forced")) {
-      for (String s : JBIterable.from(imports).filter(o -> !"#forced".equals(o))) {
+      for (String s : JBIterable.from(imports).filter(o -> !o.isEmpty() && !"#forced".equals(o))) {
         out("import %s", s);
       }
     }
@@ -647,7 +648,7 @@ public final class KotlinParserGenerator extends Generator {
     newLine();
 
     // kernel
-    out("fun %s(%s: %s, %s: Int, %s: Int): Boolean {", kernelMethodName, shortRuntime, N.runtime, N.level, N.priority);
+    out("fun %s(%s: %s, %s: Int, %s: Int): Boolean {", kernelMethodName, N.runtime, shortRuntime, N.level, N.priority);
     out("if (!%s.recursion_guard_(%s, \"%s\")) return false", N.runtime, N.level, kernelMethodName);
     out("var %s = true", N.result);
     out("while (true) {");
@@ -730,7 +731,7 @@ public final class KotlinParserGenerator extends Generator {
         else if (operator.type() == OperatorType.PREFIX) {
           newLine();
           String operatorFuncName = operator.rule().getName();
-          out("fun %s(%s: %s, %s: Int): Boolean {", operatorFuncName, shortRuntime, N.runtime, N.level);
+          out("fun %s(%s: %s, %s: Int): Boolean {", operatorFuncName, N.runtime, shortRuntime, N.level);
           out("if (!%s.recursion_guard_(%s, \"%s\")) return false", N.runtime, N.level, operatorFuncName);
           generateFirstCheck(operator.rule(), frameName, false);
           out("var %s: Boolean", N.result);
@@ -1009,6 +1010,7 @@ public final class KotlinParserGenerator extends Generator {
     final var parserImports = getRootAttribute(myFile, KnownAttribute.PARSER_IMPORTS).asStrings();
     final var imports = new LinkedHashSet<String>();
     imports.add(myElementTypesHolderName);
+    imports.add(myParserUtil);
     imports.add(starImport(KotlinBnfConstants.KT_RUNTIME_PACKAGE));
     if (!G.generateFQN) {
       imports.add(C.SyntaxTreeBuilderClass() + ".Marker");
@@ -1208,7 +1210,28 @@ public final class KotlinParserGenerator extends Generator {
   private @NotNull NodeCall generateExternalCall(@NotNull BnfRule rule,
                                                @NotNull List<BnfExpression> expressions,
                                                @NotNull String nextName) {
-    return generateExternalCall(rule, expressions, nextName, N.runtime);
+    NodeCall externalCall = generateExternalCall(rule, expressions, nextName, N.runtime);
+    if (!(externalCall instanceof MetaMethodCall) && externalCall instanceof MethodCallWithArguments callWithArguments){
+      if (isRuntimeMethod(callWithArguments.getMethodRef())){
+        externalCall = new RuntimeMethodCall(callWithArguments.methodName,
+                                             callWithArguments.builder,
+                                             callWithArguments.level);
+      }
+      else {
+        if (!myParserUtil.isEmpty()) {
+          externalCall = new ObjectMethodCall(shorten(myParserUtil),
+                                              callWithArguments.methodName,
+                                              callWithArguments.builder,
+                                              callWithArguments.level,
+                                              callWithArguments.arguments);
+        }
+      }
+    }
+    return externalCall;
+  }
+  
+  private Boolean isRuntimeMethod(String methodName){
+    return mySGPRMethods.contains(methodName);
   }
 
 

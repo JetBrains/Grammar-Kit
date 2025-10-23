@@ -911,6 +911,7 @@ public final class KotlinParserGenerator extends Generator {
 
   private void generateElementTypes() throws IOException {
     final var sortedCompositeTypes = new TreeSet<String>();
+    final var typeToFactoryMap = new HashMap<String, String>();
     for (final var rule : myFile.getRules()) {
       final var info = ruleInfo(rule);
       if (info.intfPackage == null) continue;
@@ -918,19 +919,23 @@ public final class KotlinParserGenerator extends Generator {
       if (StringUtil.isEmpty(elementType)) continue;
       if (sortedCompositeTypes.contains(elementType)) continue;
       if (!info.isFake || info.isInElementType) {
+        var factory = getAttribute(rule, KnownAttribute.SYNTAX_ELEMENT_TYPE_FACTORY);
+        if (factory != null && !factory.isEmpty()) {
+          typeToFactoryMap.put(elementType, factory);
+        }
         sortedCompositeTypes.add(elementType);
       }
     }
     openOutput(myElementTypesHolderName);
     try {
-      generateElementTypesImpl(myElementTypesHolderName, sortedCompositeTypes);
+      generateElementTypesImpl(myElementTypesHolderName, sortedCompositeTypes, typeToFactoryMap);
     }
     finally {
       closeOutput();
     }
   }
 
-  private void generateElementTypesImpl(@NotNull String objectName, @NotNull Set<String> sortedCompositeTypes) {
+  private void generateElementTypesImpl(@NotNull String objectName, @NotNull Set<String> sortedCompositeTypes, @NotNull Map<String, String> typeToFactoryMap) {
     // file header
     generateFileHeader(objectName);
 
@@ -946,6 +951,7 @@ public final class KotlinParserGenerator extends Generator {
       KotlinBnfConstants.KT_SYNTAX_ELEMENT_TYPE_SET_CLASS,
       KotlinBnfConstants.KT_SYNTAX_ELEMENT_TYPE_SET_OF_FUNCTION
     );
+    imports.addAll(typeToFactoryMap.values().stream().map(StringUtil::getPackageName).distinct().toList());
     final var includedClasses = collectClasses(imports, packageName);
     final var nameShortener = new KotlinNameShortener(packageName, !G.generateFQN);
     nameShortener.addImports(imports, includedClasses);
@@ -960,7 +966,14 @@ public final class KotlinParserGenerator extends Generator {
     out("object %s {", shortClassName);
     if (G.generateElementTypes) {
       for (final var elementType : sortedCompositeTypes) {
-        out("val %s = %s(\"%s\")", elementType, shortElementType, elementType);
+        var factory = typeToFactoryMap.getOrDefault(elementType, null);
+        if (factory != null){
+          var createCall = shorten(StringUtil.getPackageName(factory)) + "." + StringUtil.getShortName(factory); 
+          out("val %s = %s(\"%s\"))", elementType, createCall, elementType);
+        }
+        else {
+          out("val %s = %s(\"%s\")", elementType, shortElementType, elementType);
+        }
       }
     }
     if (G.generateTokenTypes) {

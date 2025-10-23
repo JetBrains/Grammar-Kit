@@ -1,6 +1,7 @@
 {
   parserClass="ExternalRules"
   generatePsi=false
+  generate=[parser-api="syntax"]
   parserUtilClass="org.intellij.grammar.test.ParserUtil"
   tokens=[
     perc='%'

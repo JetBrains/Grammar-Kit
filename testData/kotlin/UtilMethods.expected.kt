@@ -2,6 +2,7 @@
 //header.txt
 package test
 
+import com.intellij.platform.syntax.util.runtime.SyntaxGeneratedParserRuntime
 import com.intellij.platform.syntax.util.runtime.*
 import com.intellij.platform.syntax.parser.SyntaxTreeBuilder.Marker
 import com.intellij.platform.syntax.SyntaxElementTypeSet

@@ -1,14 +1,18 @@
 {
+  generate=[parser-api="syntax"]
   classHeader="//header.txt"
   parserClass="PsiGen"
   psiClassPrefix="X"
   implements="XComposite"
   parserUtilClass="PsiGenUtil"
+  syntaxParserUtilObject="SyntaxGenUtil"
   extends(".*expr")=expr
   extends("root_.")="root"
   tokens=[OP_MUL="*" OP_DIV="/" SLASH='\' id='regexp:A' number='regexp:B' notspace='regexp:[^{}-]*']
   elementTypeClass("root_.*")="sample.MyRootType"
   elementTypeFactory(".*_expr")="sample.MyTypeFactory.createExprType"
+  syntaxElementTypeFactory(".*_expr")="sample.MySyntaxTypeFactory.createExprType"
+  psiOutputPath="myPsi/output"
 
   methods("expr")=[missing]
 }

@@ -2,6 +2,7 @@
 //header.txt
 package org.intellij.grammar.expression
 
+import com.intellij.platform.syntax.util.runtime.SyntaxGeneratedParserRuntime
 import com.intellij.platform.syntax.util.runtime.*
 import com.intellij.platform.syntax.parser.SyntaxTreeBuilder.Marker
 import com.intellij.platform.syntax.SyntaxElementTypeSet
@@ -218,7 +219,7 @@ object ExpressionParser {
     result_ = unary_plus_expr(runtime_, level_ + 1)
     if (!result_) result_ = unary_min_expr(runtime_, level_ + 1)
     if (!result_) result_ = unary_not_expr(runtime_, level_ + 1)
-    if (!result_) result_ = meta_special_expr(runtime_, level_ + 1)
+    if (!result_) result_ = SyntaxGeneratedParserRuntime.meta_special_expr(runtime_, level_ + 1)
     if (!result_) result_ = simple_ref_expr(runtime_, level_ + 1)
     if (!result_) result_ = literal_expr(runtime_, level_ + 1)
     if (!result_) result_ = paren_expr(runtime_, level_ + 1)

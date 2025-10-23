@@ -1,12 +1,16 @@
 {
-  generate=[psi="no"]
+  generate=[psi="no" parser-api="syntax"]
   classHeader="//header.txt"
   parserClass="org.intellij.grammar.expression.ExpressionParser"
   extends(".*expr")=expr
   elementTypeFactory="org.intellij.grammar.expression.ExpressionParserDefinition.createType"
+  syntaxElementTypeFactory="org.intellij.grammar.expression.ExpressionParserDefinition.createSyntaxType"
   tokenTypeFactory="org.intellij.grammar.expression.ExpressionParserDefinition.createTokenType"
   elementTypeHolderClass="org.intellij.grammar.expression.ExpressionTypes"
+  syntaxElementTypeHolderClass="org.intellij.grammar.expression.ExpressionSyntaxTypes"
+  
   parserUtilClass="org.intellij.grammar.parser.GeneratedParserUtilBase"
+  syntaxParserUtilObject="com.intellij.platform.syntax.util.runtime.SyntaxGeneratedParserRuntime"
 
   tokens=[
     space='regexp:\s+'

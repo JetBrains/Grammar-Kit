@@ -74,6 +74,7 @@ public class KnownAttribute<T> {
   //Syntax api
   public static final KnownAttribute<String> PSI_OUTPUT_PATH                      = create(true, String.class, "psiOutputPath", "");
   public static final KnownAttribute<String> SYNTAX_ELEMENT_TYPE_HOLDER_CLASS     = create(true, String.class, "syntaxElementTypeHolderClass", "generated.GeneratedSyntaxElementTypes");
+  public static final KnownAttribute<String> SYNTAX_ELEMENT_TYPE_FACTORY          = create(false, String.class, "syntaxElementTypeFactory", null);
   public static final KnownAttribute<String> ELEMENT_TYPE_CONVERTER_FACTORY_CLASS = create(true, String.class, "elementTypeConverterFactoryClass", "generated.GeneratedSyntaxElementTypeConverterFactory");
   public static final KnownAttribute<String> SYNTAX_PARSER_UTIL_OBJECT            = create(true, String.class, "syntaxParserUtilObject", "");
 

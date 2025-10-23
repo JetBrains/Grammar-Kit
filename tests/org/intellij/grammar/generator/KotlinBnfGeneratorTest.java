@@ -21,11 +21,6 @@ public class KotlinBnfGeneratorTest extends AbstractBnfGeneratorTest {
   }
 
   @Override
-  protected @NotNull String getBnfFilesDir() {
-    return getTestDataPath() + "/" + KOTLIN_BNF_FILES_DIR;
-  }
-
-  @Override
   protected @NotNull List<@NotNull Generator> createGenerators(@NotNull BnfFile psiFile,
                                                                @NotNull String outputPath,
                                                                @NotNull OutputOpener outputOpener) {

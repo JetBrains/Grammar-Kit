@@ -5,9 +5,10 @@ package test
 import com.intellij.platform.syntax.SyntaxElementType
 import com.intellij.platform.syntax.SyntaxElementTypeSet
 import com.intellij.platform.syntax.syntaxElementTypeSetOf
+import test.FooParserDefinition
 
 object FooSyntaxTypes {
-  val ELEMENT_1 = SyntaxElementType("ELEMENT_1")
+  val ELEMENT_1 = FooParserDefinition.createSyntaxType("ELEMENT_1"))
 }
 // ---- test/FooTypes.java -----------------
 //header.txt

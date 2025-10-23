@@ -15,6 +15,11 @@ public class JavaBnfGeneratorTest extends AbstractBnfGeneratorTest {
     super("java", ".java");
   }
 
+  @Override
+  protected @NotNull String loadFile(@NotNull String path) throws IOException {
+    return super.loadFile(path).replaceAll("parser-api=\"syntax\"", "");
+  }
+
   public void testSmall() throws Exception {
     doParserTest();
   }

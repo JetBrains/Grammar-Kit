@@ -1,4 +1,5 @@
 {
+  generate=[parser-api="syntax"]
   tokens=[number="regexp:\d+" COMMA="," PAREN1="(" PAREN2=")" SEMI=';']
 }
 file ::= list (';' list ) *  {pin(".*")=1}

@@ -3,6 +3,7 @@
  */
 
 {
+  generate = [parser-api="syntax"]
   generatePsi=false
   tokens = [OP_EQ="="]
 }

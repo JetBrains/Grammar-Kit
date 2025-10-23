@@ -1,4 +1,5 @@
 {
+  generate=[parser-api="syntax"]
   parserClass="LeftAssociative"
   generatePsi=false
 }

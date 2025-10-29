@@ -16,6 +16,8 @@ import static org.intellij.grammar.generator.ParserGeneratorUtil.quote;
 import static org.intellij.grammar.generator.java.JavaRenderer.JAVA_RESERVED;
 
 public final class KotlinRenderer extends Renderer {
+  private final static String RESERVED_KOTLIN_SUFFIX = "__";
+  
   private final @NotNull Set<@NotNull String> KOTLIN_RESERVED = Set.of(
     // hard keywords
     "as", "break", "class", "continue", "do", "else", "false", "for", "fun",
@@ -43,8 +45,7 @@ public final class KotlinRenderer extends Renderer {
 
   @Override
   public @NotNull String unwrapFuncName(@NotNull String funcName) {
-    final var unquoted = StringUtil.unquoteString(funcName, '`');
-    return StringUtil.trimEnd(unquoted, RESERVED_SUFFIX);
+    return StringUtil.trimEnd(funcName, RESERVED_KOTLIN_SUFFIX);
   }
 
   @Override
@@ -53,13 +54,13 @@ public final class KotlinRenderer extends Renderer {
     // to ensure Java compatibility, we also check for any Java
     // reserved identifiers in addition to kotlin ones
     return (KOTLIN_RESERVED.contains(name) || JAVA_RESERVED.contains(name))
-           ? "`%s%s`".formatted(name, RESERVED_SUFFIX)
+           ? "%s%s".formatted(name, RESERVED_KOTLIN_SUFFIX)
            : name;
   }
 
   @Override
   public @NotNull String getWrapperParserMetaMethodName(@NotNull String nextName) {
-    return quote(CommonRendererUtils.getBaseName(nextName) + RESERVED_SUFFIX, "`");
+    return CommonRendererUtils.getBaseName(nextName) + RESERVED_KOTLIN_SUFFIX;
   }
 
   @Override

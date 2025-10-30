@@ -216,8 +216,8 @@ object Fixes {
 
   /* ********************************************************** */
   // A (some A | A some A)
-  fun `import_$`(runtime_: SyntaxGeneratedParserRuntime, level_: Int): Boolean {
-    if (!runtime_.recursion_guard_(level_, "`import_$`")) return false
+  fun import__(runtime_: SyntaxGeneratedParserRuntime, level_: Int): Boolean {
+    if (!runtime_.recursion_guard_(level_, "import__")) return false
     if (!runtime_.nextTokenIs(GeneratedSyntaxElementTypes.A)) return false
     var result_: Boolean
     var pinned_: Boolean
@@ -275,7 +275,7 @@ object Fixes {
   }
 
   /* ********************************************************** */
-  internal fun `meta2_$`(p: Parser, q: Parser): Parser {
+  internal fun meta2__(p: Parser, q: Parser): Parser {
     return { runtime_, level_ -> meta2(runtime_, level_ + 1, p, q) }
   }
 
@@ -768,6 +768,6 @@ object Fixes {
     return result_
   }
 
-  private val nested_meta_pin_1_1_0_parser_: Parser = `meta2_$`(Fixes::nested_meta_pin_1_1_0_0, Fixes::nested_meta_pin_1_1_0_1)
-  private val nested_meta_pin_1_1_1_parser_: Parser = `meta2_$`(Fixes::nested_meta_pin_1_1_1_0, Fixes::nested_meta_pin_1_1_1_1)
+  private val nested_meta_pin_1_1_0_parser_: Parser = meta2__(Fixes::nested_meta_pin_1_1_0_0, Fixes::nested_meta_pin_1_1_0_1)
+  private val nested_meta_pin_1_1_1_parser_: Parser = meta2__(Fixes::nested_meta_pin_1_1_1_0, Fixes::nested_meta_pin_1_1_1_1)
 }

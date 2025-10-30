@@ -54,7 +54,7 @@ public class GeneratedSyntaxElementTypeConverterFactory implements ElementTypeCo
   @Override
   public @NotNull ElementTypeConverter getElementTypeConverter() {
     return ElementTypeConverterKt.elementTypeConverterOf(
-      new Pair<SyntaxElementType, IElementType>(FooSyntaxTypes.ELEMENT_1, FooTypes.ELEMENT_1)
+      new Pair<SyntaxElementType, IElementType>(FooSyntaxTypes.INSTANCE.getELEMENT_1(), FooTypes.ELEMENT_1)
     );
   }
 }

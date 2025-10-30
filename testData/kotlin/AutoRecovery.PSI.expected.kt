@@ -66,14 +66,14 @@ public class GeneratedSyntaxElementTypeConverterFactory implements ElementTypeCo
   @Override
   public @NotNull ElementTypeConverter getElementTypeConverter() {
     return ElementTypeConverterKt.elementTypeConverterOf(
-      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.ITEM, GeneratedTypes.ITEM),
-      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.LIST, GeneratedTypes.LIST),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.INSTANCE.getITEM(), GeneratedTypes.ITEM),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.INSTANCE.getLIST(), GeneratedTypes.LIST),
 
-      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.NUMBER, GeneratedTypes.NUMBER),
-      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.COMMA, GeneratedTypes.COMMA),
-      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.PAREN1, GeneratedTypes.PAREN1),
-      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.PAREN2, GeneratedTypes.PAREN2),
-      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.SEMI, GeneratedTypes.SEMI)
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.INSTANCE.getNUMBER(), GeneratedTypes.NUMBER),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.INSTANCE.getCOMMA(), GeneratedTypes.COMMA),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.INSTANCE.getPAREN1(), GeneratedTypes.PAREN1),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.INSTANCE.getPAREN2(), GeneratedTypes.PAREN2),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.INSTANCE.getSEMI(), GeneratedTypes.SEMI)
     );
   }
 }

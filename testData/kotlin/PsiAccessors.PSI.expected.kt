@@ -74,15 +74,15 @@ public class GeneratedSyntaxElementTypeConverterFactory implements ElementTypeCo
   @Override
   public @NotNull ElementTypeConverter getElementTypeConverter() {
     return ElementTypeConverterKt.elementTypeConverterOf(
-      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.BINARY, GeneratedTypes.BINARY),
-      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.EXPRESSION, GeneratedTypes.EXPRESSION),
-      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.OPERATOR, GeneratedTypes.OPERATOR),
-      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.VALUE, GeneratedTypes.VALUE),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.INSTANCE.getBINARY(), GeneratedTypes.BINARY),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.INSTANCE.getEXPRESSION(), GeneratedTypes.EXPRESSION),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.INSTANCE.getOPERATOR(), GeneratedTypes.OPERATOR),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.INSTANCE.getVALUE(), GeneratedTypes.VALUE),
 
-      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.MY_SOMETHING, GeneratedTypes.MY_SOMETHING),
-      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.ID, GeneratedTypes.ID),
-      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.LOWCASEKWD1, GeneratedTypes.LOWCASEKWD1),
-      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.UPCASEKWD1, GeneratedTypes.UPCASEKWD1)
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.INSTANCE.getMY_SOMETHING(), GeneratedTypes.MY_SOMETHING),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.INSTANCE.getID(), GeneratedTypes.ID),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.INSTANCE.getLOWCASEKWD1(), GeneratedTypes.LOWCASEKWD1),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.INSTANCE.getUPCASEKWD1(), GeneratedTypes.UPCASEKWD1)
     );
   }
 }

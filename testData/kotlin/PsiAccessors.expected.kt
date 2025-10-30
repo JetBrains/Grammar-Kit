@@ -38,7 +38,7 @@ object PsiAccessors {
     var pinned_: Boolean
     val marker_: Marker = runtime_.enter_section_(level_, Modifiers._NONE_, GeneratedSyntaxElementTypes.BINARY, null)
     result_ = expression(runtime_, level_ + 1)
-    result_ = result_ && `operator_$`(runtime_, level_ + 1)
+    result_ = result_ && operator__(runtime_, level_ + 1)
     pinned_ = result_ // pin = operator
     result_ = result_ && expression(runtime_, level_ + 1)
     runtime_.exit_section_(level_, marker_, result_, pinned_, null)
@@ -52,17 +52,17 @@ object PsiAccessors {
     if (!runtime_.nextTokenIs(GeneratedSyntaxElementTypes.ID)) return false
     var result_: Boolean
     val marker_: Marker = runtime_.enter_section_()
-    result_ = `value_$`(runtime_, level_ + 1)
+    result_ = value__(runtime_, level_ + 1)
     result_ = result_ && runtime_.consumeToken("*")
-    result_ = result_ && `value_$`(runtime_, level_ + 1)
+    result_ = result_ && value__(runtime_, level_ + 1)
     runtime_.exit_section_(marker_, GeneratedSyntaxElementTypes.EXPRESSION, result_)
     return result_
   }
 
   /* ********************************************************** */
   // '+' | '-'
-  fun `operator_$`(runtime_: SyntaxGeneratedParserRuntime, level_: Int): Boolean {
-    if (!runtime_.recursion_guard_(level_, "`operator_$`")) return false
+  fun operator__(runtime_: SyntaxGeneratedParserRuntime, level_: Int): Boolean {
+    if (!runtime_.recursion_guard_(level_, "operator__")) return false
     var result_: Boolean
     val marker_: Marker = runtime_.enter_section_(level_, Modifiers._NONE_, GeneratedSyntaxElementTypes.OPERATOR, "<operator>")
     result_ = runtime_.consumeToken("+")
@@ -79,8 +79,8 @@ object PsiAccessors {
 
   /* ********************************************************** */
   // id
-  fun `value_$`(runtime_: SyntaxGeneratedParserRuntime, level_: Int): Boolean {
-    if (!runtime_.recursion_guard_(level_, "`value_$`")) return false
+  fun value__(runtime_: SyntaxGeneratedParserRuntime, level_: Int): Boolean {
+    if (!runtime_.recursion_guard_(level_, "value__")) return false
     if (!runtime_.nextTokenIs(GeneratedSyntaxElementTypes.ID)) return false
     var result_: Boolean
     val marker_: Marker = runtime_.enter_section_()

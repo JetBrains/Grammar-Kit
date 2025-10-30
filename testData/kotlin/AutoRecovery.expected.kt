@@ -20,13 +20,13 @@ object GeneratedParser {
   }
 
   internal fun parse_root_(root_: SyntaxElementType, runtime_: SyntaxGeneratedParserRuntime, level_: Int): Boolean {
-    return `file_$`(runtime_, level_ + 1)
+    return file__(runtime_, level_ + 1)
   }
 
   /* ********************************************************** */
   // list (';' list ) *
-  internal fun `file_$`(runtime_: SyntaxGeneratedParserRuntime, level_: Int): Boolean {
-    if (!runtime_.recursion_guard_(level_, "`file_$`")) return false
+  internal fun file__(runtime_: SyntaxGeneratedParserRuntime, level_: Int): Boolean {
+    if (!runtime_.recursion_guard_(level_, "file__")) return false
     if (!runtime_.nextTokenIs(GeneratedSyntaxElementTypes.PAREN1)) return false
     var result_: Boolean
     var pinned_: Boolean

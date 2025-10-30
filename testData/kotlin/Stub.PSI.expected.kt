@@ -86,14 +86,14 @@ public class GeneratedSyntaxElementTypeConverterFactory implements ElementTypeCo
   @Override
   public @NotNull ElementTypeConverter getElementTypeConverter() {
     return ElementTypeConverterKt.elementTypeConverterOf(
-      new Pair<SyntaxElementType, IElementType>(FooSyntaxTypes.ELEMENT_1, FooTypes.ELEMENT_1),
-      new Pair<SyntaxElementType, IElementType>(FooSyntaxTypes.ELEMENT_2, FooTypes.ELEMENT_2),
-      new Pair<SyntaxElementType, IElementType>(FooSyntaxTypes.ELEMENT_3, FooTypes.ELEMENT_3),
-      new Pair<SyntaxElementType, IElementType>(FooSyntaxTypes.ELEMENT_4, FooTypes.ELEMENT_4),
-      new Pair<SyntaxElementType, IElementType>(FooSyntaxTypes.ELEMENT_5, FooTypes.ELEMENT_5),
-      new Pair<SyntaxElementType, IElementType>(FooSyntaxTypes.INTERFACE_TYPE, FooTypes.INTERFACE_TYPE),
-      new Pair<SyntaxElementType, IElementType>(FooSyntaxTypes.STRUCT_TYPE, FooTypes.STRUCT_TYPE),
-      new Pair<SyntaxElementType, IElementType>(FooSyntaxTypes.TYPE, FooTypes.TYPE)
+      new Pair<SyntaxElementType, IElementType>(FooSyntaxTypes.INSTANCE.getELEMENT_1(), FooTypes.ELEMENT_1),
+      new Pair<SyntaxElementType, IElementType>(FooSyntaxTypes.INSTANCE.getELEMENT_2(), FooTypes.ELEMENT_2),
+      new Pair<SyntaxElementType, IElementType>(FooSyntaxTypes.INSTANCE.getELEMENT_3(), FooTypes.ELEMENT_3),
+      new Pair<SyntaxElementType, IElementType>(FooSyntaxTypes.INSTANCE.getELEMENT_4(), FooTypes.ELEMENT_4),
+      new Pair<SyntaxElementType, IElementType>(FooSyntaxTypes.INSTANCE.getELEMENT_5(), FooTypes.ELEMENT_5),
+      new Pair<SyntaxElementType, IElementType>(FooSyntaxTypes.INSTANCE.getINTERFACE_TYPE(), FooTypes.INTERFACE_TYPE),
+      new Pair<SyntaxElementType, IElementType>(FooSyntaxTypes.INSTANCE.getSTRUCT_TYPE(), FooTypes.STRUCT_TYPE),
+      new Pair<SyntaxElementType, IElementType>(FooSyntaxTypes.INSTANCE.getTYPE(), FooTypes.TYPE)
     );
   }
 }

@@ -20,7 +20,7 @@ object GeneratedParser {
   }
 
   internal fun parse_root_(root_: SyntaxElementType, runtime_: SyntaxGeneratedParserRuntime, level_: Int): Boolean {
-    return `file_$`(runtime_, level_ + 1)
+    return file__(runtime_, level_ + 1)
   }
 
   val EXTENDS_SETS_: Array<SyntaxElementTypeSet> = arrayOf(
@@ -121,12 +121,12 @@ object GeneratedParser {
 
   /* ********************************************************** */
   // (content ';') *
-  internal fun `file_$`(runtime_: SyntaxGeneratedParserRuntime, level_: Int): Boolean {
-    if (!runtime_.recursion_guard_(level_, "`file_$`")) return false
+  internal fun file__(runtime_: SyntaxGeneratedParserRuntime, level_: Int): Boolean {
+    if (!runtime_.recursion_guard_(level_, "file__")) return false
     while (true) {
       val pos_: Int = runtime_.current_position_()
       if (!file_0(runtime_, level_ + 1)) break
-      if (!runtime_.empty_element_parsed_guard_("`file_$`", pos_)) break
+      if (!runtime_.empty_element_parsed_guard_("file__", pos_)) break
     }
     return true
   }

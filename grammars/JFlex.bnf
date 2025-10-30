@@ -1,6 +1,6 @@
 {
   classHeader="license.txt"
-  generate=[java="8" names="long" visitor-value="R"]
+  generate=[java="8" names="long" visitor-value="R" parser-api="syntax"]
 
   parserClass="org.intellij.jflex.parser.JFlexParser"
   parserUtilClass="org.intellij.jflex.parser.JFlexParserUtil"
@@ -15,6 +15,10 @@
   psiImplUtilClass="org.intellij.jflex.psi.impl.JFlexPsiImplUtil"
 
   elementTypeHolderClass="org.intellij.jflex.psi.JFlexTypes"
+  syntaxElementTypeHolderClass="org.intellij.jflex.JFlexTypes"
+  syntaxParserUtilObject="org.intellij.jflex.parser.JFlexParserUtil"
+  psiOutputPath="grammar-kit/psi"
+
   elementTypePrefix="FLEX_"
   elementTypeClass="org.intellij.jflex.psi.JFlexCompositeElementType"
   tokenTypeClass="org.intellij.jflex.psi.JFlexTokenType"

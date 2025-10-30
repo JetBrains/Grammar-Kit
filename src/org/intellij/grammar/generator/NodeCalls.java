@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2021 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
+ * Copyright 2011-2025 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
  */
 
 package org.intellij.grammar.generator;
@@ -13,21 +13,22 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.intellij.grammar.generator.ParserGeneratorUtil.getWrapperParserMetaMethodName;
 
 /**
  * @author Daniil Ovchinnikov
  */
-public class NodeCalls {
+public final class NodeCalls {
   private NodeCalls() {
   }
 
+  @FunctionalInterface
   interface NodeCall {
 
     @NotNull
-    String render(@NotNull Names names);
+    String render(@NotNull Renderer renderer);
   }
 
+  @FunctionalInterface
   interface NodeArgument {
 
     default boolean referencesMetaParameter() {
@@ -35,81 +36,102 @@ public class NodeCalls {
     }
 
     @NotNull
-    String render();
+    String render(@NotNull Renderer renderer);
   }
 
-  static class ConsumeTokenCall implements NodeCall {
 
-    final ParserGeneratorUtil.ConsumeType consumeType;
-    final String token;
-
-    ConsumeTokenCall(@NotNull ParserGeneratorUtil.ConsumeType consumeType, @NotNull String token) {
-      this.consumeType = consumeType;
-      this.token = token;
-    }
-
+  record ConsumeTokenCall(
+    @NotNull ParserGeneratorUtil.ConsumeType consumeType,
+    @NotNull String token,
+    @NotNull String stateHolder
+  ) implements NodeCall {
     @Override
-    public @NotNull String render(@NotNull Names names) {
-      return String.format("%s(%s, %s)", consumeType.getMethodName(), names.builder, token);
+    public @NotNull String render(@NotNull Renderer renderer) {
+      return String.format("%s(%s, %s)", consumeType.getMethodName(), stateHolder, token);
     }
   }
 
-  static class ConsumeTokenChoiceCall implements NodeCall {
-
-    final ParserGeneratorUtil.ConsumeType consumeType;
-    final String tokenSetName;
-
-    ConsumeTokenChoiceCall(@NotNull ParserGeneratorUtil.ConsumeType consumeType, @NotNull String tokenSetName) {
-      this.consumeType = consumeType;
-      this.tokenSetName = tokenSetName;
-    }
-
+  record KotlinConsumeTokenCall(
+    @NotNull ParserGeneratorUtil.ConsumeType consumeType,
+    @NotNull String token,
+    @NotNull Names names
+  ) implements NodeCall {
     @Override
-    public @NotNull String render(@NotNull Names names) {
-      return String.format("%s(%s, %s)", consumeType.getMethodName(), names.builder, tokenSetName);
+    public @NotNull String render(@NotNull Renderer renderer) {
+      return String.format("%s.%s(%s)", names.runtime, consumeType.getMethodName(), token);
     }
   }
 
-  static class ConsumeTokensCall implements NodeCall {
-
-    final String methodName;
-    final int pin;
-    final List<String> tokens;
-
-    ConsumeTokensCall(@NotNull String methodName, int pin, @NotNull List<String> tokens) {
-      this.methodName = methodName;
-      this.pin = pin;
-      this.tokens = Collections.unmodifiableList(tokens);
-    }
-
+  record ConsumeTokenChoiceCall(
+    @NotNull ParserGeneratorUtil.ConsumeType consumeType,
+    @NotNull String tokenSetName,
+    @NotNull String stateHolder
+  ) implements NodeCall {
     @Override
-    public @NotNull String render(@NotNull Names names) {
-      return String.format("%s(%s, %d, %s)", methodName, names.builder, pin, StringUtil.join(tokens, ", "));
+    public @NotNull String render(@NotNull Renderer renderer) {
+      return String.format("%s(%s, %s)", consumeType.getMethodName(), stateHolder, tokenSetName);
     }
   }
 
-  static class ExpressionMethodCall implements NodeCall {
-
-    final String methodName;
-    final int priority;
-
-    ExpressionMethodCall(@NotNull String methodName, int priority) {
-      this.methodName = methodName;
-      this.priority = priority;
-    }
-
+  record KotlinConsumeTokenChoiceCall(
+    @NotNull ParserGeneratorUtil.ConsumeType consumeType,
+    @NotNull String tokenSetName,
+    @NotNull Names names
+  ) implements NodeCall {
     @Override
-    public @NotNull String render(@NotNull Names names) {
-      return String.format("%s(%s, %s + 1, %d)", methodName, names.builder, names.level, priority);
+    public @NotNull String render(@NotNull Renderer renderer) {
+      return String.format("%s.%s(%s)", names.runtime, consumeType.getMethodName(), tokenSetName);
+    }
+  }
+
+  record ConsumeTokensCall(
+    @NotNull String methodName,
+    @NotNull String builder,
+    int pin,
+    @NotNull List<String> tokens
+  ) implements NodeCall {
+    @Override
+    public @NotNull String render(@NotNull Renderer renderer) {
+      return String.format("%s(%s, %d, %s)", methodName, builder, pin, StringUtil.join(tokens, ", "));
+    }
+  }
+
+  record KotlinConsumeTokensCall(
+    @NotNull String methodName,
+    @NotNull String stateHolder,
+    int pin,
+    @NotNull List<String> tokens
+  ) implements NodeCall {
+    @Override
+    public @NotNull String render(@NotNull Renderer renderer) {
+      return String.format("%s.%s(%d, %s)", stateHolder, methodName, pin, StringUtil.join(tokens, ", "));
+    }
+  }
+
+  record ExpressionMethodCall(
+    @NotNull String methodName,
+    @NotNull String stateHolder,
+    @NotNull String level,
+    int priority
+  ) implements NodeCall {
+    @Override
+    public @NotNull String render(@NotNull Renderer renderer) {
+      return String.format("%s(%s, %s + 1, %d)", methodName, stateHolder, level, priority);
     }
   }
 
   static class MetaMethodCall extends MethodCallWithArguments {
 
-    final @Nullable String targetClassName;
+    private final @Nullable String targetClassName;
 
-    MetaMethodCall(@Nullable String targetClassName, @NotNull String methodName, @NotNull List<NodeArgument> arguments) {
-      super(methodName, arguments);
+    MetaMethodCall(
+      @Nullable String targetClassName,
+      @NotNull String methodName,
+      @NotNull String builder,
+      @NotNull String level,
+      @NotNull List<NodeArgument> arguments
+    ) {
+      super(methodName, builder,level, arguments);
       this.targetClassName = targetClassName;
     }
 
@@ -129,9 +151,7 @@ public class NodeCalls {
     }
   }
 
-  static class MetaMethodCallArgument implements NodeArgument {
-
-    final MetaMethodCall call;
+  record MetaMethodCallArgument(MetaMethodCall call) implements NodeArgument {
 
     MetaMethodCallArgument(@NotNull MetaMethodCall call) {
       this.call = call;
@@ -142,73 +162,88 @@ public class NodeCalls {
       return true;
     }
 
-    private @NotNull String getMethodRef() {
-      String ref = getWrapperParserMetaMethodName(call.methodName);
+    private @NotNull String getMethodRef(@NotNull Renderer renderer) {
+      String ref = renderer.getWrapperParserMetaMethodName(call.methodName);
       String className = call.getTargetClassName();
       return className == null ? ref : String.format("%s.%s", className, ref);
     }
 
     @Override
-    public @NotNull String render() {
-      String arguments = String.join(", ", ContainerUtil.map(call.arguments, NodeArgument::render));
-      return String.format("%s(%s)", getMethodRef(), arguments);
+    public @NotNull String render(@NotNull Renderer renderer) {
+      String arguments = String.join(", ", ContainerUtil.map(call.arguments, argument -> argument.render(renderer)));
+      return String.format("%s(%s)", getMethodRef(renderer), arguments);
     }
   }
 
-  static class MetaParameterCall implements NodeCall {
-
-    final String metaParameterName;
-
-    MetaParameterCall(@NotNull String metaParameterName) {
-      this.metaParameterName = metaParameterName;
-    }
-
+  record MetaParameterCall(String metaParameterName, String builder, String level) implements NodeCall {
     @Override
-    public @NotNull String render(@NotNull Names names) {
-      return String.format("%s.parse(%s, %s)", metaParameterName, names.builder, names.level);
+    public @NotNull String render(@NotNull Renderer renderer) {
+      return String.format("%s.parse(%s, %s)", metaParameterName, builder, level);
     }
   }
 
-  static class MethodCall implements NodeCall {
-
-    final boolean renderClass;
-    final String className;
-    final String methodName;
-
-    MethodCall(boolean renderClass, @NotNull String className, @NotNull String methodName) {
-      this.renderClass = renderClass;
-      this.className = className;
-      this.methodName = methodName;
-    }
-
-    @NotNull
-    String getMethodName() {
-      return methodName;
-    }
-
-    @NotNull
-    String getClassName() {
-      return className;
-    }
-
+  record MethodCall(
+    boolean renderClass,
+    @NotNull String className,
+    @NotNull String methodName,
+    @NotNull String builder,
+    @NotNull String level
+  ) implements NodeCall {
     @Override
-    public @NotNull String render(@NotNull Names names) {
+    public @NotNull String render(@NotNull Renderer renderer) {
       if (renderClass) {
-        return String.format("%s.%s(%s, %s + 1)", className, methodName, names.builder, names.level);
+        return String.format("%s.%s(%s, %s + 1)", className, methodName, builder, level);
       }
       else {
-        return String.format("%s(%s, %s + 1)", methodName, names.builder, names.level);
+        return String.format("%s(%s, %s + 1)", methodName, builder, level);
       }
+    }
+  }
+  
+  record ObjectMethodCall(
+    @NotNull String objectName,
+    @NotNull String methodName,
+    @NotNull String builder,
+    @NotNull String level,
+    @NotNull List<NodeArgument> arguments
+  ) implements NodeCall {
+    @Override
+    public @NotNull String render(@NotNull Renderer renderer) {
+      String argumentStr = arguments.stream()
+        .map(argument -> argument.render(renderer))
+        .map(it -> ", " + it)
+        .collect(Collectors.joining());
+      return String.format("%s.%s(%s, %s + 1%s)", objectName, methodName, builder, level, argumentStr);
+    }
+  }
+  
+  record RuntimeMethodCall(
+    @NotNull String methodName,
+    @NotNull String builder,
+    @NotNull String level
+  ) implements NodeCall {
+    @Override
+    public @NotNull String render(@NotNull Renderer renderer) {
+      return String.format("%s.%s(%s + 1)", builder, methodName, level);
     }
   }
 
   static class MethodCallWithArguments implements NodeCall {
 
-    final String methodName;
-    final List<NodeArgument> arguments;
+    protected final String methodName;
+    final String builder;
+    final String level;
+    protected final List<NodeArgument> arguments;
 
-    MethodCallWithArguments(@NotNull String methodName, @NotNull List<NodeArgument> arguments) {
+    MethodCallWithArguments(
+      @NotNull String methodName,
+      @NotNull String builder,
+      @NotNull String level,
+      @NotNull List<NodeArgument> arguments
+    ) {
       this.methodName = methodName;
+      this.builder = builder;
+      this.level = level;
       this.arguments = Collections.unmodifiableList(arguments);
     }
 
@@ -217,34 +252,26 @@ public class NodeCalls {
     }
 
     @Override
-    public @NotNull String render(@NotNull Names names) {
+    public @NotNull String render(@NotNull Renderer renderer) {
       String argumentStr = arguments.stream()
-        .map(NodeArgument::render)
+        .map(argument -> argument.render(renderer))
         .map(it -> ", " + it)
         .collect(Collectors.joining());
-      return String.format("%s(%s, %s + 1%s)", getMethodRef(), names.builder, names.level, argumentStr);
+      return String.format("%s(%s, %s + 1%s)", getMethodRef(), builder, level, argumentStr);
     }
   }
 
-
-  static class TextArgument implements NodeArgument {
-
-    final String text;
-
-    TextArgument(@NotNull String text) {
-      this.text = text;
-    }
-
+  record TextArgument(@NotNull String text) implements NodeArgument {
     @Override
-    public @NotNull String render() {
+    public @NotNull String render(@NotNull Renderer renderer) {
       return text;
     }
   }
 
-  static class MetaParameterArgument extends TextArgument {
-
-    MetaParameterArgument(@NotNull String text) {
-      super(text);
+  record MetaParameterArgument(@NotNull String text) implements NodeArgument {
+    @Override
+    public @NotNull String render(@NotNull Renderer renderer) {
+      return text;
     }
 
     @Override

@@ -6,10 +6,7 @@ package org.intellij.grammar.psi.impl;
 
 import com.intellij.extapi.psi.PsiFileBase;
 import com.intellij.openapi.fileTypes.FileType;
-import com.intellij.openapi.util.AtomicClearableLazyValue;
-import com.intellij.openapi.util.ClearableLazyValue;
-import com.intellij.openapi.util.Conditions;
-import com.intellij.openapi.util.TextRange;
+import com.intellij.openapi.util.*;
 import com.intellij.psi.FileViewProvider;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.util.containers.ContainerUtil;
@@ -32,7 +29,7 @@ import java.util.regex.Pattern;
  * Time: 23:55
  */
 public class BnfFileImpl extends PsiFileBase implements BnfFile {
-  
+
   private final ClearableLazyValue<Map<String, BnfRule>> myRules = lazyValue(this::calcRules);
   private final ClearableLazyValue<List<BnfAttrs>> myGlobalAttributes = lazyValue(this::calcAttributes);
   private final ClearableLazyValue<Map<String, List<AttributeInfo>>> myAttributeValues = lazyValue(this::calcAttributeValues);
@@ -189,10 +186,6 @@ public class BnfFileImpl extends PsiFileBase implements BnfFile {
       }
     }
     return result;
-  }
-
-  protected boolean hasAttributeValue(@Nullable BnfRule rule, @NotNull KnownAttribute<?> attribute, @Nullable String match) {
-    return getMatchingAttributes(rule, attribute, match).isNotEmpty();
   }
 
   protected static @NotNull <T> AtomicClearableLazyValue<T> lazyValue(Supplier<T> producer) {

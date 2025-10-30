@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
+ * Copyright 2011-2025 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
  */
 
 package org.intellij.grammar.generator;
@@ -9,6 +9,7 @@ import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.tree.IElementType;
 import org.intellij.grammar.KnownAttribute;
+import org.intellij.grammar.generator.Renderer.*;
 import org.intellij.grammar.psi.BnfAttr;
 import org.intellij.grammar.psi.BnfRule;
 import org.intellij.grammar.psi.impl.GrammarUtil;
@@ -22,8 +23,8 @@ import static org.intellij.grammar.psi.BnfTypes.BNF_REFERENCE_OR_TOKEN;
 import static org.intellij.grammar.psi.BnfTypes.BNF_STRING;
 
 /**
-* @author gregsh
-*/
+ * @author gregsh
+ */
 public class RuleMethodsHelper {
   private final RuleGraphHelper myGraphHelper;
   private final ExpressionHelper myExpressionHelper;
@@ -88,8 +89,7 @@ public class RuleMethodsHelper {
       RuleGraphHelper.Cardinality c = myExpressionHelper.fixCardinality(rule, element, cardMap.get(element));
       String pathName = getRuleOrTokenNameForPsi(element, c);
       if (pathName == null) continue;
-      if (element instanceof BnfRule) {
-        BnfRule resultType = (BnfRule)element;
+      if (element instanceof BnfRule resultType) {
         if (!Rule.isPrivate(rule)) {
           result.add(new MethodInfo(MethodType.RULE, pathName, pathName, resultType, c));
         }
@@ -136,7 +136,7 @@ public class RuleMethodsHelper {
           result.add(new MethodInfo(MethodType.USER, pair.first, pair.second, null, null));
         }
       }
-      else if (methodInfo ==  null) {
+      else if (methodInfo == null) {
         result.add(new MethodInfo(MethodType.MIXIN, pair.first, null, null, null));
       }
     }
@@ -146,7 +146,7 @@ public class RuleMethodsHelper {
   private @Nullable String getRuleOrTokenNameForPsi(@NotNull PsiElement tree, @NotNull RuleGraphHelper.Cardinality type) {
     String result;
 
-    if (!(tree instanceof BnfRule)) {
+    if (!(tree instanceof BnfRule asRule)) {
       if (type.many()) return null; // do not generate token lists
 
       IElementType effectiveType = getEffectiveType(tree);
@@ -161,14 +161,14 @@ public class RuleMethodsHelper {
       }
     }
     else {
-      BnfRule asRule = (BnfRule)tree;
       result = asRule.getName();
-      if (StringUtil.isEmpty(getElementType(asRule, G.generateElementCase))) return null;
+      if (StringUtil.isEmpty(CommonRendererUtils.getElementType(asRule, G.generateElementCase))) return null;
     }
     return result;
   }
 
-  public enum MethodType { RULE, TOKEN, USER, MIXIN }
+  public enum MethodType {RULE, TOKEN, USER, MIXIN}
+
   public static class MethodInfo implements Comparable<MethodInfo> {
     final MethodType type;
     final String originalName;
@@ -196,7 +196,7 @@ public class RuleMethodsHelper {
       boolean many = cardinality.many();
 
       boolean renamed = !Objects.equals(name, originalName);
-      String getterNameBody = getGetterName(name);
+      String getterNameBody = CommonRendererUtils.getGetterName(name);
       return getterNameBody + (many && !renamed ? "List" : "");
     }
 

@@ -423,7 +423,7 @@ java -jar grammar-kit.jar <output-dir> <grammars-and-dirs>
 java -cp grammar-kit.jar;<all-the-needed-jars> org.intellij.grammar.Main <output-dir> <grammars-and-dirs>
 ````
 
-To see [expression parser](testData/generator/ExprParser.bnf) in action:
+To see [expression parser](testData/java/ExprParser.bnf) in action:
 
 ````
 java -jar expression-console-sample.jar

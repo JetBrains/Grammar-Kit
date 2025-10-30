@@ -20,13 +20,13 @@ object GeneratedParser {
   }
 
   internal fun parse_root_(root_: SyntaxElementType, runtime_: SyntaxGeneratedParserRuntime, level_: Int): Boolean {
-    return parseRoot(runtime_, level_ + 1, GeneratedParser::`class_$`)
+    return parseRoot(runtime_, level_ + 1, GeneratedParser::class__)
   }
 
   /* ********************************************************** */
   // token?
-  fun `abstract_$`(runtime_: SyntaxGeneratedParserRuntime, level_: Int): Boolean {
-    if (!runtime_.recursion_guard_(level_, "`abstract_$`")) return false
+  fun abstract__(runtime_: SyntaxGeneratedParserRuntime, level_: Int): Boolean {
+    if (!runtime_.recursion_guard_(level_, "abstract__")) return false
     val marker_: Marker = runtime_.enter_section_(level_, Modifiers._NONE_, GeneratedSyntaxElementTypes.ABSTRACT, "<abstract>")
     runtime_.consumeToken(GeneratedSyntaxElementTypes.TOKEN)
     runtime_.exit_section_(level_, marker_, true, false, null)
@@ -35,21 +35,21 @@ object GeneratedParser {
 
   /* ********************************************************** */
   // token | interface | record
-  fun `class_$`(runtime_: SyntaxGeneratedParserRuntime, level_: Int): Boolean {
-    if (!runtime_.recursion_guard_(level_, "`class_$`")) return false
+  fun class__(runtime_: SyntaxGeneratedParserRuntime, level_: Int): Boolean {
+    if (!runtime_.recursion_guard_(level_, "class__")) return false
     var result_: Boolean
     val marker_: Marker = runtime_.enter_section_(level_, Modifiers._NONE_, GeneratedSyntaxElementTypes.CLASS, "<class>")
     result_ = runtime_.consumeToken(GeneratedSyntaxElementTypes.TOKEN)
-    if (!result_) result_ = `interface_$`(runtime_, level_ + 1)
-    if (!result_) result_ = `record_$`(runtime_, level_ + 1)
+    if (!result_) result_ = interface__(runtime_, level_ + 1)
+    if (!result_) result_ = record__(runtime_, level_ + 1)
     runtime_.exit_section_(level_, marker_, result_, false, null)
     return result_
   }
 
   /* ********************************************************** */
   // token
-  fun `interface_$`(runtime_: SyntaxGeneratedParserRuntime, level_: Int): Boolean {
-    if (!runtime_.recursion_guard_(level_, "`interface_$`")) return false
+  fun interface__(runtime_: SyntaxGeneratedParserRuntime, level_: Int): Boolean {
+    if (!runtime_.recursion_guard_(level_, "interface__")) return false
     if (!runtime_.nextTokenIs(GeneratedSyntaxElementTypes.TOKEN)) return false
     var result_: Boolean
     val marker_: Marker = runtime_.enter_section_()
@@ -60,8 +60,8 @@ object GeneratedParser {
 
   /* ********************************************************** */
   // 'token'
-  fun `record_$`(runtime_: SyntaxGeneratedParserRuntime, level_: Int): Boolean {
-    if (!runtime_.recursion_guard_(level_, "`record_$`")) return false
+  fun record__(runtime_: SyntaxGeneratedParserRuntime, level_: Int): Boolean {
+    if (!runtime_.recursion_guard_(level_, "record__")) return false
     var result_: Boolean
     val marker_: Marker = runtime_.enter_section_(level_, Modifiers._NONE_, GeneratedSyntaxElementTypes.RECORD, "<record>")
     result_ = runtime_.consumeToken("token")

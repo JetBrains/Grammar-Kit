@@ -83,29 +83,29 @@ public class GeneratedSyntaxElementTypeConverterFactory implements ElementTypeCo
   @Override
   public @NotNull ElementTypeConverter getElementTypeConverter() {
     return ElementTypeConverterKt.elementTypeConverterOf(
-      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.A_EXPR, GeneratedTypes.A_EXPR),
-      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.B_EXPR, GeneratedTypes.B_EXPR),
-      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.ERL_LIST, GeneratedTypes.ERL_LIST),
-      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.EXPR, GeneratedTypes.EXPR),
-      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.FOO__ﾉ__Ω__ﾉ_ﾐ_____INNER, GeneratedTypes.FOO__ﾉ__Ω__ﾉ_ﾐ_____INNER),
-      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.IMPORT, GeneratedTypes.IMPORT),
-      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.LEFT_EXPR, GeneratedTypes.LEFT_EXPR),
-      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.NOT_OPTIMIZED_CHOICE, GeneratedTypes.NOT_OPTIMIZED_CHOICE),
-      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.RECURSIVE_EXTEND_A, GeneratedTypes.RECURSIVE_EXTEND_A),
-      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.RECURSIVE_EXTEND_B, GeneratedTypes.RECURSIVE_EXTEND_B),
-      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.SOME, GeneratedTypes.SOME),
-      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.SOME_EXPR, GeneratedTypes.SOME_EXPR),
-      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.SOME_SEQ, GeneratedTypes.SOME_SEQ),
-      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.THING_ITEM, GeneratedTypes.THING_ITEM),
-      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.TWO_USAGES_LEFT, GeneratedTypes.TWO_USAGES_LEFT),
-      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.WITH_RECURSIVE, GeneratedTypes.WITH_RECURSIVE),
-      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.ZOME, GeneratedTypes.ZOME),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.INSTANCE.getA_EXPR(), GeneratedTypes.A_EXPR),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.INSTANCE.getB_EXPR(), GeneratedTypes.B_EXPR),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.INSTANCE.getERL_LIST(), GeneratedTypes.ERL_LIST),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.INSTANCE.getEXPR(), GeneratedTypes.EXPR),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.INSTANCE.getFOO__ﾉ__Ω__ﾉ_ﾐ_____INNER(), GeneratedTypes.FOO__ﾉ__Ω__ﾉ_ﾐ_____INNER),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.INSTANCE.getIMPORT(), GeneratedTypes.IMPORT),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.INSTANCE.getLEFT_EXPR(), GeneratedTypes.LEFT_EXPR),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.INSTANCE.getNOT_OPTIMIZED_CHOICE(), GeneratedTypes.NOT_OPTIMIZED_CHOICE),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.INSTANCE.getRECURSIVE_EXTEND_A(), GeneratedTypes.RECURSIVE_EXTEND_A),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.INSTANCE.getRECURSIVE_EXTEND_B(), GeneratedTypes.RECURSIVE_EXTEND_B),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.INSTANCE.getSOME(), GeneratedTypes.SOME),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.INSTANCE.getSOME_EXPR(), GeneratedTypes.SOME_EXPR),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.INSTANCE.getSOME_SEQ(), GeneratedTypes.SOME_SEQ),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.INSTANCE.getTHING_ITEM(), GeneratedTypes.THING_ITEM),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.INSTANCE.getTWO_USAGES_LEFT(), GeneratedTypes.TWO_USAGES_LEFT),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.INSTANCE.getWITH_RECURSIVE(), GeneratedTypes.WITH_RECURSIVE),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.INSTANCE.getZOME(), GeneratedTypes.ZOME),
 
-      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.TOKEN_THREE, GeneratedTypes.TOKEN_THREE),
-      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.A, GeneratedTypes.A),
-      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.TOKEN_TWO, GeneratedTypes.TOKEN_TWO),
-      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.B, GeneratedTypes.B),
-      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.TOKEN_ONE, GeneratedTypes.TOKEN_ONE)
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.INSTANCE.getTOKEN_THREE(), GeneratedTypes.TOKEN_THREE),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.INSTANCE.getA(), GeneratedTypes.A),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.INSTANCE.getTOKEN_TWO(), GeneratedTypes.TOKEN_TWO),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.INSTANCE.getB(), GeneratedTypes.B),
+      new Pair<SyntaxElementType, IElementType>(GeneratedSyntaxElementTypes.INSTANCE.getTOKEN_ONE(), GeneratedTypes.TOKEN_ONE)
     );
   }
 }

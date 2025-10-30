@@ -45,7 +45,7 @@ object ExternalRulesLambdas {
   }
 
   /* ********************************************************** */
-  internal fun `comma_list_$`(param: Parser): Parser {
+  internal fun comma_list__(param: Parser): Parser {
     return { runtime_, level_ -> comma_list(runtime_, level_ + 1, param) }
   }
 
@@ -83,7 +83,7 @@ object ExternalRulesLambdas {
   }
 
   /* ********************************************************** */
-  internal fun `comma_list_pinned_$`(head: Parser, param: Parser): Parser {
+  internal fun comma_list_pinned__(head: Parser, param: Parser): Parser {
     return { runtime_, level_ -> comma_list_pinned(runtime_, level_ + 1, head, param) }
   }
 
@@ -188,11 +188,11 @@ object ExternalRulesLambdas {
 
   // <<comma_list_tail <<comma_list <<param>>>>>>
   private fun list_of_lists_2_0(runtime_: SyntaxGeneratedParserRuntime, level_: Int, param: Parser): Boolean {
-    return comma_list_tail(runtime_, level_ + 1, `comma_list_$`(param))
+    return comma_list_tail(runtime_, level_ + 1, comma_list__(param))
   }
 
   /* ********************************************************** */
-  internal fun `main_class_meta_$`(p: Parser): Parser {
+  internal fun main_class_meta__(p: Parser): Parser {
     return { runtime_, level_ -> main_class_meta(runtime_, level_ + 1, p) }
   }
 
@@ -236,7 +236,7 @@ object ExternalRulesLambdas {
     if (!runtime_.recursion_guard_(level_, "meta_multi_level")) return false
     var result_: Boolean
     val marker_: Marker = runtime_.enter_section_()
-    result_ = comma_list(runtime_, level_ + 1, `comma_list_$`(`comma_list_$`(`comma_list_$`(`comma_list_$`(param)))))
+    result_ = comma_list(runtime_, level_ + 1, comma_list__(comma_list__(comma_list__(comma_list__(param)))))
     runtime_.exit_section_(marker_, GeneratedSyntaxElementTypes.META_MULTI_LEVEL, result_)
     return result_
   }
@@ -253,7 +253,7 @@ object ExternalRulesLambdas {
     if (!runtime_.recursion_guard_(level_, "meta_multi_level_pinned")) return false
     var result_: Boolean
     val marker_: Marker = runtime_.enter_section_()
-    result_ = comma_list(runtime_, level_ + 1, `comma_list_pinned_$`(head, `comma_list_$`(`comma_list_$`(`comma_list_$`(param)))))
+    result_ = comma_list(runtime_, level_ + 1, comma_list_pinned__(head, comma_list__(comma_list__(comma_list__(param)))))
     runtime_.exit_section_(marker_, GeneratedSyntaxElementTypes.META_MULTI_LEVEL_PINNED, result_)
     return result_
   }
@@ -264,18 +264,18 @@ object ExternalRulesLambdas {
     if (!runtime_.recursion_guard_(level_, "meta_multi_level_pinned_paren")) return false
     var result_: Boolean
     val marker_: Marker = runtime_.enter_section_()
-    result_ = comma_list(runtime_, level_ + 1, `comma_list_pinned_$`(head, `meta_multi_level_pinned_paren_0_0_1_$`(param)))
+    result_ = comma_list(runtime_, level_ + 1, comma_list_pinned__(head, meta_multi_level_pinned_paren_0_0_1__(param)))
     runtime_.exit_section_(marker_, GeneratedSyntaxElementTypes.META_MULTI_LEVEL_PINNED_PAREN, result_)
     return result_
   }
 
-  private fun `meta_multi_level_pinned_paren_0_0_1_$`(param: Parser): Parser {
+  private fun meta_multi_level_pinned_paren_0_0_1__(param: Parser): Parser {
     return { runtime_, level_ -> meta_multi_level_pinned_paren_0_0_1(runtime_, level_ + 1, param) }
   }
 
   // <<comma_list <<comma_list <<comma_list <<param>>>>>>>>
   private fun meta_multi_level_pinned_paren_0_0_1(runtime_: SyntaxGeneratedParserRuntime, level_: Int, param: Parser): Boolean {
-    return comma_list(runtime_, level_ + 1, `comma_list_$`(`comma_list_$`(param)))
+    return comma_list(runtime_, level_ + 1, comma_list__(comma_list__(param)))
   }
 
   /* ********************************************************** */
@@ -342,12 +342,12 @@ object ExternalRulesLambdas {
     if (!runtime_.recursion_guard_(level_, "meta_with_in_place")) return false
     var result_: Boolean
     val marker_: Marker = runtime_.enter_section_()
-    result_ = comma_list(runtime_, level_ + 1, `meta_with_in_place_0_0_$`(param))
+    result_ = comma_list(runtime_, level_ + 1, meta_with_in_place_0_0__(param))
     runtime_.exit_section_(marker_, GeneratedSyntaxElementTypes.META_WITH_IN_PLACE, result_)
     return result_
   }
 
-  private fun `meta_with_in_place_0_0_$`(param: Parser): Parser {
+  private fun meta_with_in_place_0_0__(param: Parser): Parser {
     return { runtime_, level_ -> meta_with_in_place_0_0(runtime_, level_ + 1, param) }
   }
 
@@ -371,16 +371,16 @@ object ExternalRulesLambdas {
   /* ********************************************************** */
   // <<two_params_meta <<nested1>> <<two_params_meta <<nested2>> <<nested3>>>>>>
   internal fun nested_meta(runtime_: SyntaxGeneratedParserRuntime, level_: Int, nested1: Parser, nested2: Parser, nested3: Parser): Boolean {
-    return two_params_meta(runtime_, level_ + 1, nested1, `two_params_meta_$`(nested2, nested3))
+    return two_params_meta(runtime_, level_ + 1, nested1, two_params_meta__(nested2, nested3))
   }
 
   /* ********************************************************** */
   // <<two_params_meta (<<two_params_meta '%' <<c>>>>) perc_re>>
   internal fun nested_mixed(runtime_: SyntaxGeneratedParserRuntime, level_: Int, c: Parser): Boolean {
-    return two_params_meta(runtime_, level_ + 1, `nested_mixed_0_0_$`(c), PERC_RE_parser_)
+    return two_params_meta(runtime_, level_ + 1, nested_mixed_0_0__(c), PERC_RE_parser_)
   }
 
-  private fun `nested_mixed_0_0_$`(c: Parser): Parser {
+  private fun nested_mixed_0_0__(c: Parser): Parser {
     return { runtime_, level_ -> nested_mixed_0_0(runtime_, level_ + 1, c) }
   }
 
@@ -664,7 +664,7 @@ object ExternalRulesLambdas {
   }
 
   /* ********************************************************** */
-  internal fun `two_params_meta_$`(a: Parser, b: Parser): Parser {
+  internal fun two_params_meta__(a: Parser, b: Parser): Parser {
     return { runtime_, level_ -> two_params_meta(runtime_, level_ + 1, a, b) }
   }
 
@@ -684,10 +684,10 @@ object ExternalRulesLambdas {
   internal val perc_parser_: Parser = { runtime_, level_ -> runtime_.consumeToken(GeneratedSyntaxElementTypes.PERC) }
   internal val perc_re_list2_0_0_parser_: Parser = PERC_RE_parser_
 
-  private val meta_mixed_list_0_0_parser_: Parser = `comma_list_$`(ExternalRulesLambdas::one)
-  private val meta_multi_level_no_closure_0_0_0_parser_: Parser = `comma_list_$`(SOME_parser_)
-  private val meta_multi_level_no_closure_0_0_parser_: Parser = `comma_list_$`(meta_multi_level_no_closure_0_0_0_parser_)
-  private val second_class_meta_usage_from_main_0_0_parser_: Parser = ExternalRulesLambdas2.`second_class_meta_$`(SOME_parser_)
+  private val meta_mixed_list_0_0_parser_: Parser = comma_list__(ExternalRulesLambdas::one)
+  private val meta_multi_level_no_closure_0_0_0_parser_: Parser = comma_list__(SOME_parser_)
+  private val meta_multi_level_no_closure_0_0_parser_: Parser = comma_list__(meta_multi_level_no_closure_0_0_0_parser_)
+  private val second_class_meta_usage_from_main_0_0_parser_: Parser = ExternalRulesLambdas2.second_class_meta__(SOME_parser_)
 }
 // ---- ExternalRulesLambdas2.kt -----------------
 // This is a generated file. Not intended for manual editing.
@@ -727,7 +727,7 @@ object ExternalRulesLambdas2 {
   }
 
   /* ********************************************************** */
-  internal fun `second_class_meta_$`(bmp: Parser): Parser {
+  internal fun second_class_meta__(bmp: Parser): Parser {
     return { runtime_, level_ -> second_class_meta(runtime_, level_ + 1, bmp) }
   }
 
@@ -742,8 +742,8 @@ object ExternalRulesLambdas2 {
     return ExternalRulesLambdas.comma_list(runtime_, level_ + 1, third_class_meta_usage_from_second_0_0_parser_)
   }
 
-  private val main_class_meta_usage_from_second_0_0_parser_: Parser = ExternalRulesLambdas.`main_class_meta_$`(ExternalRulesLambdas.SOME_parser_)
-  private val third_class_meta_usage_from_second_0_0_parser_: Parser = ExternalRulesLambdas3.`third_class_meta_$`(ExternalRulesLambdas.SOME_parser_)
+  private val main_class_meta_usage_from_second_0_0_parser_: Parser = ExternalRulesLambdas.main_class_meta__(ExternalRulesLambdas.SOME_parser_)
+  private val third_class_meta_usage_from_second_0_0_parser_: Parser = ExternalRulesLambdas3.third_class_meta__(ExternalRulesLambdas.SOME_parser_)
 }
 // ---- ExternalRulesLambdas3.kt -----------------
 // This is a generated file. Not intended for manual editing.
@@ -761,7 +761,7 @@ object ExternalRulesLambdas3 {
   }
 
   /* ********************************************************** */
-  internal fun `third_class_meta_$`(fmp: Parser): Parser {
+  internal fun third_class_meta__(fmp: Parser): Parser {
     return { runtime_, level_ -> third_class_meta(runtime_, level_ + 1, fmp) }
   }
 
@@ -770,5 +770,5 @@ object ExternalRulesLambdas3 {
     return fmp.parse(runtime_, level_)
   }
 
-  private val second_class_meta_usage_from_third_0_0_parser_: Parser = ExternalRulesLambdas2.`second_class_meta_$`(ExternalRulesLambdas.SOME_parser_)
+  private val second_class_meta_usage_from_third_0_0_parser_: Parser = ExternalRulesLambdas2.second_class_meta__(ExternalRulesLambdas.SOME_parser_)
 }

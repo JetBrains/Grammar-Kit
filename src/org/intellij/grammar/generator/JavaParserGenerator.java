@@ -1865,10 +1865,11 @@ public final class JavaParserGenerator extends Generator {
     var generateTokenTypeConversions = G.generateTokenTypes && !mySimpleTokens.isEmpty();
     for (int i = 0; i < sortedCompositeTypesArr.length; i++) {
       String elementType = sortedCompositeTypesArr[i];
-      out("new %s<%s, %s>(%s.INSTANCE.get%s(), %s.%s)" + (i != sortedCompositeTypesArr.length - 1 || generateTokenTypeConversions ? "," : ""),
+      String elementTypeAccessor = "INSTANCE.get" + elementType.substring(0, 1).toUpperCase() + elementType.substring(1) + "()";
+      out("new %s<%s, %s>(%s.%s, %s.%s)" + (i != sortedCompositeTypesArr.length - 1 || generateTokenTypeConversions ? "," : ""),
           shorten(KotlinBnfConstants.KT_PAIR_CLASS),
           shorten(KotlinBnfConstants.KT_ELEMENT_TYPE_CLASS), shorten(JavaBnfConstants.IELEMENTTYPE_CLASS),
-          shorten(syntaxElementTypeHolderClass), elementType,
+          shorten(syntaxElementTypeHolderClass), elementTypeAccessor,
           shorten(typeHolderClass), elementType);
     }
     if (G.generateTokenTypes && !mySimpleTokens.isEmpty()) {
@@ -1879,10 +1880,11 @@ public final class JavaParserGenerator extends Generator {
         String tokenName = ObjectUtils.chooseNotNull(mySimpleTokens.get(tokenText), tokenText);
         if (isIgnoredWhitespaceToken(tokenName, tokenText)) continue;
         var elementType = getElementType(tokenName);
-        out("new %s<%s, %s>(%s.INSTANCE.get%s(), %s.%s)" + (i != mySimpleTokensArr.length - 1 ? "," : ""),
+        String elementTypeAccessor = "INSTANCE.get" + elementType.substring(0, 1).toUpperCase() + elementType.substring(1) + "()";
+        out("new %s<%s, %s>(%s.%s, %s.%s)" + (i != mySimpleTokensArr.length - 1 ? "," : ""),
             shorten(KotlinBnfConstants.KT_PAIR_CLASS),
             shorten(KotlinBnfConstants.KT_ELEMENT_TYPE_CLASS), shorten(JavaBnfConstants.IELEMENTTYPE_CLASS),
-            shorten(syntaxElementTypeHolderClass), elementType,
+            shorten(syntaxElementTypeHolderClass), elementTypeAccessor,
             shorten(typeHolderClass), elementType);
       }
     }

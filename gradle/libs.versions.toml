@@ -5,7 +5,7 @@ junit = "4.13.2"
 
 # plugins
 changelog = "2.2.1"
-intelliJPlatform = "2.6.0"
+intelliJPlatform = "2.10.4"
 githubRelease = "2.5.2"
 publishPlugin = "2.0.0"
 

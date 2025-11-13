@@ -176,9 +176,9 @@ public final class KotlinParserGenerator extends Generator {
       generateElementTypes();
     }
     if (myGrammarRoot != null && (G.generatePsi)){
-      JavaParserGenerator parser = new JavaParserGenerator(myFile, mySourcePath, myPsiOutputPath, myPackagePrefix, myOpener);
-      parser.replaceSimpleTokes(mySimpleTokens);
-      parser.generatePsiOnly();
+      JavaParserGenerator javaParserGenerator = new JavaParserGenerator(myFile, mySourcePath, myPsiOutputPath, myPackagePrefix, myOpener);
+      javaParserGenerator.replaceSimpleTokes(mySimpleTokens);
+      javaParserGenerator.generatePsiOnly();
     }
   }
 

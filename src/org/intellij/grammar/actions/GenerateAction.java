@@ -224,15 +224,4 @@ public class GenerateAction extends AnAction {
         }
       });
   }
-
-  @FunctionalInterface
-  public interface GeneratorConstructor {
-    @NotNull Generator create(
-      @NotNull BnfFile psiFile,
-      @NotNull String sourcePath,
-      @NotNull String outputPath,
-      @NotNull String packagePrefix,
-      @NotNull OutputOpener outputOpener
-    );
-  }
 }

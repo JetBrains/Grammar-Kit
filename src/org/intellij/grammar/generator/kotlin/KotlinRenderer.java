@@ -12,7 +12,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Set;
 
-import static org.intellij.grammar.generator.ParserGeneratorUtil.quote;
 import static org.intellij.grammar.generator.java.JavaRenderer.JAVA_RESERVED;
 
 public final class KotlinRenderer extends Renderer {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
+ * Copyright 2011-2025 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
  */
 
 package org.intellij.grammar.generator;
@@ -11,6 +11,7 @@ import org.intellij.grammar.psi.BnfFile;
 
 import java.util.Map;
 
+import static org.intellij.grammar.KnownAttribute.FALLBACK_STUB_ELEMENT_TYPE;
 import static org.intellij.grammar.generator.ParserGeneratorUtil.getGenerateOption;
 import static org.intellij.grammar.generator.ParserGeneratorUtil.getRootAttribute;
 
@@ -35,6 +36,7 @@ public class GenOptions {
   public final Case generateElementCase;
   public final boolean generateTokenAccessors;
   public final boolean generateTokenAccessorsSet;
+  public final String fallbackStubElementType;
   public final int javaVersion;
 
   public GenOptions(BnfFile myFile) {
@@ -48,6 +50,8 @@ public class GenOptions {
     generateTokenSets = generateTokenTypes && "yes".equals(genOptions.get("token-sets"));
     generateElementTypes = !"no".equals(genOptions.get("elements"));
     generateExactTypes = StringUtil.notNullize(genOptions.get("exact-types"));
+    fallbackStubElementType = StringUtil.notNullize(getGenerateOption(myFile, FALLBACK_STUB_ELEMENT_TYPE, genOptions),
+                                                    FALLBACK_STUB_ELEMENT_TYPE.getDefaultValue());
     generateFirstCheck = getGenerateOption(myFile, KnownAttribute.GENERATE_FIRST_CHECK, genOptions, "first-check", "firstCheck");
     generateExtendedPin = getGenerateOption(myFile, KnownAttribute.EXTENDED_PIN, genOptions, "extended-pin", "extendedPin");
     generateTokenAccessors = getGenerateOption(myFile, KnownAttribute.GENERATE_TOKEN_ACCESSORS, genOptions, "token-accessors", "tokenAccessors");

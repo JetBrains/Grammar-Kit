@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
+ * Copyright 2011-2025 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
  */
 
 package org.intellij.grammar.generator;
@@ -31,9 +31,9 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
+import java.util.*;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.*;
 
 import static com.intellij.util.containers.ContainerUtil.emptyList;
 import static com.intellij.util.containers.ContainerUtil.map;
@@ -1615,7 +1615,7 @@ public class ParserGenerator extends GeneratorBase {
       for (NavigatablePsiElement m : constructors) {
         collectMethodTypesToImport(Collections.singletonList(m), false, imports);
       }
-      if (stubName != null && constructors.isEmpty()) imports.add(ISTUBELEMENTTYPE_CLASS);
+      if (stubName != null && constructors.isEmpty()) imports.add(G.fallbackStubElementType);
       if (stubName != null) imports.add(stubName);
     }
 
@@ -1642,7 +1642,7 @@ public class ParserGenerator extends GeneratorBase {
       if (stubName != null) {
         out("public " + shortName + "(" +
             shorten(stubName) + " stub, " +
-            shorten(ISTUBELEMENTTYPE_CLASS) + " stubType) {");
+            shorten(G.fallbackStubElementType) + " stubType) {");
         out("super(stub, stubType);");
         out("}");
         newLine();

@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2024 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
+ * Copyright 2011-2025 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
  */
 
 package org.intellij.grammar;
@@ -24,6 +24,10 @@ public class BnfGeneratorTest extends BnfGeneratorAbstractTest {
   public void testTokenChoice() throws Exception { doGenTest(true); }
   public void testTokenChoiceNoSets() throws Exception { doGenTest(true); }
   public void testStub() throws Exception { doGenTest(true); }
+
+  public void testStubFallback() throws Exception {
+    doGenTest(true);
+  }
   public void testUtilMethods() throws Exception { doGenTest(true); }
   public void testBindersAndHooks() throws Exception { doGenTest(false); }
   public void testAutoRecovery() throws Exception { doGenTest(true); }

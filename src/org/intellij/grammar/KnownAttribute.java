@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2020 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
+ * Copyright 2011-2025 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
  */
 
 package org.intellij.grammar;
@@ -52,6 +52,8 @@ public class KnownAttribute<T> {
   public static final KnownAttribute<String>       EXTENDS                   = create(false, String.class, "extends", BnfConstants.AST_WRAPPER_PSI_ELEMENT_CLASS);
   public static final KnownAttribute<ListValue>    IMPLEMENTS                = create(false, ListValue.class, "implements", ListValue.singleValue( null, BnfConstants.PSI_ELEMENT_CLASS));
   public static final KnownAttribute<String>       ELEMENT_TYPE              = create(false, String.class, "elementType", null);
+  public static final KnownAttribute<String> FALLBACK_STUB_ELEMENT_TYPE =
+    create(false, String.class, "fallbackStubElementType", BnfConstants.ISTUBELEMENTTYPE_CLASS);
   public static final KnownAttribute<String>       ELEMENT_TYPE_CLASS        = create(false, String.class, "elementTypeClass", BnfConstants.IELEMENTTYPE_CLASS);
   public static final KnownAttribute<String>       ELEMENT_TYPE_FACTORY      = create(false, String.class, "elementTypeFactory", null);
   public static final KnownAttribute<Object>       PIN                       = create(false, Object.class, "pin", -1);

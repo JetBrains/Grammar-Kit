@@ -2,6 +2,13 @@
 .idea/shelf/
 .idea/workspace.xml
 .gradle/
+.idea/compiler.xml
+.idea/gradle.xml
+.idea/misc.xml
+.idea/modules.xml
+.idea/modules/
+.idea/libraries/
+.intellijPlatform/
 out/
 binaries/
 build/

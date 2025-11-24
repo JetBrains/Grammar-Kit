@@ -8,11 +8,8 @@ import com.intellij.notification.Notification;
 import com.intellij.notification.NotificationType;
 import com.intellij.notification.Notifications;
 import com.intellij.openapi.application.WriteAction;
-import com.intellij.openapi.module.Module;
-import com.intellij.openapi.module.ModuleManager;
 import com.intellij.openapi.progress.ProcessCanceledException;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.project.ProjectUtil;
 import com.intellij.openapi.roots.*;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.openapi.vfs.VfsUtil;
@@ -96,42 +93,15 @@ public class FileGeneratorUtil {
       throw new ProcessCanceledException();
     }
   }
-
-  public static @NotNull VirtualFile getOuterModuleTargetDirectoryFor(@NotNull Project project,
-                                                                      @NotNull String outerModuleName,
-                                                                      @Nullable String targetPackage,
-                                                                      boolean returnRoot) {
-    Module module = ModuleManager.getInstance(project).findModuleByName(outerModuleName);
-    if (module != null) {
-      boolean hasPackage = StringUtil.isNotEmpty(targetPackage);
-      PackageIndex packageIndex = PackageIndex.getInstance(project);
-      ModuleRootManager rootManager = ModuleRootManager.getInstance(module);
-      ModuleFileIndex fileIndex = rootManager.getFileIndex();
-      VirtualFile moduleDir = ProjectUtil.guessModuleDir(module);
-      if (moduleDir != null) {
-        try {
-          return createOutputDirectory(moduleDir, targetPackage, packageIndex, fileIndex, returnRoot);
-        }
-        catch (ProcessCanceledException ex) {
-          throw ex;
-        }
-        catch (Exception ex) {
-          fail(project, outerModuleName, ex.getMessage());
-          throw new ProcessCanceledException();
-        }
-      }
-    }
-    fail(project, outerModuleName, "Unable to find target source root");
-    throw new ProcessCanceledException();
-  }
   
-  public static @NotNull VirtualFile getTargetDirectoryFor(@NotNull Project project,
-                                                           @NotNull String targetRelativePath,
-                                                           @Nullable String targetPackage,
-                                                           boolean returnRoot) {
-    VirtualFile basePath = ProjectUtil.guessProjectDir(project);
+  public static @NotNull VirtualFile getTargetDirectoryRelativeToContentRoot(@NotNull VirtualFile bnfFile,
+                                                                             @NotNull Project project,
+                                                                             @NotNull String targetRelativePath,
+                                                                             @Nullable String targetPackage,
+                                                                             boolean returnRoot) {
     PackageIndex packageIndex = PackageIndex.getInstance(project);
     ProjectFileIndex fileIndex = ProjectRootManager.getInstance(project).getFileIndex();
+    VirtualFile basePath = fileIndex.getContentRootForFile(bnfFile);
     if (basePath != null) {
     try {
       VirtualFile file = VirtualFileUtil.findOrCreateDirectory(basePath, targetRelativePath);

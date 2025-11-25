@@ -4,7 +4,7 @@ annotations = "26.0.2"
 junit = "4.13.2"
 
 # plugins
-changelog = "2.2.1"
+changelog = "2.5.0"
 intelliJPlatform = "2.6.0"
 githubRelease = "2.5.2"
 publishPlugin = "2.0.0"

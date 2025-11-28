@@ -6,3 +6,5 @@ out/
 binaries/
 build/
 build-lightpsi/
+/.idea/dataSources/data_sources_history.xml
+/.intellijPlatform/

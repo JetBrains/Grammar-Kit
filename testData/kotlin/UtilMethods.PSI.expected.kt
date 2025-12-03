@@ -8,7 +8,7 @@ import com.intellij.platform.syntax.syntaxElementTypeSetOf
 import test.FooParserDefinition
 
 object FooSyntaxTypes {
-  val ELEMENT_1 = FooParserDefinition.createSyntaxType("ELEMENT_1"))
+  val ELEMENT_1 = FooParserDefinition.createSyntaxType("ELEMENT_1")
 }
 // ---- test/FooTypes.java -----------------
 //header.txt

@@ -969,7 +969,7 @@ public final class KotlinParserGenerator extends Generator {
         var factory = typeToFactoryMap.getOrDefault(elementType, null);
         if (factory != null){
           var createCall = shorten(StringUtil.getPackageName(factory)) + "." + StringUtil.getShortName(factory); 
-          out("val %s = %s(\"%s\"))", elementType, createCall, elementType);
+          out("val %s = %s(\"%s\")", elementType, createCall, elementType);
         }
         else {
           out("val %s = %s(\"%s\")", elementType, shortElementType, elementType);

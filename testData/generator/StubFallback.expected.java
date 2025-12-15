@@ -1,7 +1,3 @@
-/*
- * Copyright 2011-2025 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
- */
-
 // ---- FooParser.java -----------------
 //header.txt
 package test;

@@ -17,6 +17,7 @@
   expressionUtilClass="test.FooUtil"
 
   extends("element1|type")="org.intellij.grammar.test.StubTest.GenericBaseMissing<?>"
+  extends("element2")="org.intellij.grammar.test.StubTest.GenericBase<?>"
   extends("simple")="org.intellij.grammar.test.StubTest.SimpleBase"
   extends("missing")="test.stub.MissingBase"
 

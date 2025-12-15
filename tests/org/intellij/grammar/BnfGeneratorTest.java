@@ -24,7 +24,6 @@ public class BnfGeneratorTest extends BnfGeneratorAbstractTest {
   public void testTokenChoice() throws Exception { doGenTest(true); }
   public void testTokenChoiceNoSets() throws Exception { doGenTest(true); }
   public void testStub() throws Exception { doGenTest(true); }
-
   public void testStubFallback() throws Exception {
     doGenTest(true);
   }

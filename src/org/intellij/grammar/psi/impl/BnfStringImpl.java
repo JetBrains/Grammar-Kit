@@ -207,7 +207,7 @@ public abstract class BnfStringImpl extends BnfExpressionImpl implements BnfStri
         Set<String> visited = new HashSet<>();
         for (Object o : thisRule != null ? rules : new ArrayList<>(result)) {
           BnfRule rule = (BnfRule)o;
-          GrammarUtil.processExpressionNames(rule, JavaRenderer.INSTANCE.getFuncName(rule), rule.getExpression(), (funcName, expression) -> {
+          GrammarUtil.processExpressionNames(rule, JavaRenderer.INSTANCE.getFuncName(rule), rule.getExpression(), JavaRenderer.INSTANCE, (funcName, expression) -> {
             if (!(expression instanceof BnfSequence)) return true;
             if (!visited.add(funcName)) return true;
             PsiElement firstNotTrivial = ParserGeneratorUtil.Rule.firstNotTrivial(ParserGeneratorUtil.Rule.of(expression));

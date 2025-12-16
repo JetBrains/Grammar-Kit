@@ -229,7 +229,11 @@ public abstract class JavaHelper {
       List<NavigatablePsiElement> result = new ArrayList<>();
       PsiMethod[] methods = methodType == MethodType.CONSTRUCTOR ? aClass.getConstructors() : aClass.getMethods(); // todo super methods too
       for (PsiMethod method : methods) {
-        if (!acceptsName(methodName, method.getName())) continue;
+        if (!acceptsName(methodName, method.getName())) {
+          PsiIdentifier nameIdentifier = method.getNameIdentifier();
+          if (nameIdentifier == null || !acceptsName(methodName, nameIdentifier.getText())) 
+            continue;
+        }
         if (!acceptsMethod(method, methodType)) continue;
         if (!acceptsMethod(myElementFactory, method, paramCount, paramTypes)) continue;
         result.add(method);

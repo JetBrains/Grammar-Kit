@@ -15,6 +15,8 @@ import java.util.Set;
 import static org.intellij.grammar.generator.java.JavaRenderer.JAVA_RESERVED;
 
 public final class KotlinRenderer extends Renderer {
+  public static final @NotNull KotlinRenderer INSTANCE = new KotlinRenderer();
+
   private final static String RESERVED_KOTLIN_SUFFIX = "__";
   
   private final @NotNull Set<@NotNull String> KOTLIN_RESERVED = Set.of(

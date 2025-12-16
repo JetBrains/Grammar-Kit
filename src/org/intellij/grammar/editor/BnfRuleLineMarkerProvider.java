@@ -18,9 +18,13 @@ import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.util.containers.ContainerUtil;
 import org.intellij.grammar.BnfIcons;
 import org.intellij.grammar.KnownAttribute;
+import org.intellij.grammar.generator.GenOptions;
 import org.intellij.grammar.generator.ParserGeneratorUtil;
+import org.intellij.grammar.generator.Renderer;
 import org.intellij.grammar.generator.Renderer.*;
 import org.intellij.grammar.generator.RuleGraphHelper;
+import org.intellij.grammar.generator.java.JavaRenderer;
+import org.intellij.grammar.generator.kotlin.KotlinRenderer;
 import org.intellij.grammar.java.JavaHelper;
 import org.intellij.grammar.psi.BnfExpression;
 import org.intellij.grammar.psi.BnfRule;
@@ -40,9 +44,12 @@ final class BnfRuleLineMarkerProvider extends RelatedItemLineMarkerProvider {
     if (rule == null) return null;
     String parserClass = ParserGeneratorUtil.getAttribute(rule, KnownAttribute.PARSER_CLASS);
     if (StringUtil.isEmpty(parserClass)) return null;
+    boolean generateKotlin = GenOptions.UseSyntaxApi(rule);
+    JavaHelper.MethodType methodType = (generateKotlin) ? JavaHelper.MethodType.INSTANCE : JavaHelper.MethodType.STATIC;
     JavaHelper helper = JavaHelper.getJavaHelper(element);
+    String methodName = (generateKotlin) ? GrammarUtil.getKotlinMethodName(rule, element) : GrammarUtil.getJavaMethodName(rule, element);
     List<NavigatablePsiElement> methods = helper.findClassMethods(
-      parserClass, JavaHelper.MethodType.STATIC, GrammarUtil.getMethodName(rule, element), -1);
+      parserClass, methodType, methodName, -1);
     return ContainerUtil.getFirstItem(methods);
   }
 

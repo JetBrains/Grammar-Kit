@@ -7,6 +7,8 @@ package org.intellij.grammar.generator;
 import com.intellij.openapi.util.text.StringUtil;
 import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.psi.BnfFile;
+import org.intellij.grammar.psi.BnfRule;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
 
@@ -70,7 +72,12 @@ public class GenOptions {
     javaVersion = StringUtil.parseInt(genOptions.get("java"), 11);
   }
   
-  public static boolean UseSyntaxApi(Map<String, String> genOptions){
+  public static boolean UseSyntaxApi(@NotNull BnfRule rule){
+    Map<String, String> genOptions =  ParserGeneratorUtil.getAttribute(rule, KnownAttribute.GENERATE).asMap();
+    return "syntax".equals(genOptions.get("parser-api"));
+  }  
+  public static boolean UseSyntaxApi(@NotNull BnfFile file) {
+    Map<String, String> genOptions =  ParserGeneratorUtil.getRootAttribute(file, KnownAttribute.GENERATE).asMap();
     return "syntax".equals(genOptions.get("parser-api"));
   }
 }

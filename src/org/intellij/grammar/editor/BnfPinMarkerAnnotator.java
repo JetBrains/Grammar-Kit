@@ -15,6 +15,7 @@ import com.intellij.psi.util.PsiTreeUtil;
 import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.generator.ExpressionGeneratorHelper;
 import org.intellij.grammar.generator.ExpressionHelper;
+import org.intellij.grammar.generator.java.JavaRenderer;
 import org.intellij.grammar.psi.BnfAttr;
 import org.intellij.grammar.psi.BnfExpression;
 import org.intellij.grammar.psi.BnfFile;

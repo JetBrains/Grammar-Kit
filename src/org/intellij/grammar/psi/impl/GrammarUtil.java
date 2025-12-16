@@ -18,7 +18,9 @@ import com.intellij.util.PairProcessor;
 import com.intellij.util.Processor;
 import com.intellij.util.SmartList;
 import org.intellij.grammar.KnownAttribute;
+import org.intellij.grammar.generator.Renderer;
 import org.intellij.grammar.generator.java.JavaRenderer;
+import org.intellij.grammar.generator.kotlin.KotlinRenderer;
 import org.intellij.grammar.parser.GeneratedParserUtilBase;
 import org.intellij.grammar.psi.*;
 import org.jetbrains.annotations.Contract;
@@ -119,7 +121,7 @@ public class GrammarUtil {
     return str != null && str.startsWith("<<") && str.endsWith(">>");
   }
 
-  public static boolean processExpressionNames(BnfRule rule, String funcName, BnfExpression expression,
+  public static boolean processExpressionNames(BnfRule rule, String funcName, BnfExpression expression, Renderer renderer,
                                                PairProcessor<? super String, ? super BnfExpression> processor) {
     if (isAtomicExpression(expression)) return true;
     BnfExpression nonTrivialExpression = expression;
@@ -133,8 +135,8 @@ public class GrammarUtil {
       BnfExpression child = children.get(i);
       if (isAtomicExpression(child)) continue;
       String nextName = isTokenSequence(rule, child) ? funcName :
-                        JavaRenderer.INSTANCE.getNextName(funcName, isMeta ? i - 1 : i);
-      if (!processExpressionNames(rule, nextName, child, processor)) return false;
+                        renderer.getNextName(funcName, isMeta ? i - 1 : i);
+      if (!processExpressionNames(rule, nextName, child, renderer, processor)) return false;
     }
     return processor.process(funcName, nonTrivialExpression);
   }
@@ -144,7 +146,7 @@ public class GrammarUtil {
   }
 
   public static boolean processPinnedExpressions(BnfRule rule, PairProcessor<? super BnfExpression, ? super PinMatcher> processor) {
-    return processExpressionNames(rule, JavaRenderer.INSTANCE.getFuncName(rule), rule.getExpression(), (funcName, expression) -> {
+    return processExpressionNames(rule, JavaRenderer.INSTANCE.getFuncName(rule), rule.getExpression(), JavaRenderer.INSTANCE, (funcName, expression) -> {
       if (!(expression instanceof BnfSequence)) return true;
       List<BnfExpression> children = getChildExpressions(expression);
       if (children.size() < 2) return true;
@@ -176,12 +178,20 @@ public class GrammarUtil {
     return bnfTraverser(root).forceIgnore(Conditions.instanceOf(BnfAttrs.class));
   }
 
-  public static String getMethodName(BnfRule rule, PsiElement element) {
+  public static String getJavaMethodName(BnfRule rule, PsiElement element) {
+    return getMethodName(rule, element, JavaRenderer.INSTANCE);
+  }
+  
+  public static String getKotlinMethodName(BnfRule rule, PsiElement element) {
+    return getMethodName(rule, element, KotlinRenderer.INSTANCE);
+  }
+
+  private static String getMethodName(BnfRule rule, PsiElement element, Renderer renderer) {
     BnfExpression target = PsiTreeUtil.getParentOfType(element, BnfExpression.class, false);
     String funcName = JavaRenderer.INSTANCE.getFuncName(rule);
     if (target == null) return funcName;
     Ref<String> ref = Ref.create(null);
-    processExpressionNames(rule, funcName, rule.getExpression(), (funcName1, expression) -> {
+    processExpressionNames(rule, funcName, rule.getExpression(), renderer, (funcName1, expression) -> {
       if (target == expression) {
         ref.set(funcName1);
         return false;

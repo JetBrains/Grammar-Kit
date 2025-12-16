@@ -172,7 +172,7 @@ public class GenerateAction extends AnAction {
                 PsiFile bnfFile = getBnfFile(file, psiManager);
                 if (!(bnfFile instanceof BnfFile)) return;
                 try {
-                  if (GenOptions.UseSyntaxApi(getRootAttribute(bnfFile, KnownAttribute.GENERATE).asMap())) {
+                  if (GenOptions.UseSyntaxApi((BnfFile)bnfFile)) {
                     new KotlinParserGenerator((BnfFile)bnfFile,
                                               sourcePath,
                                               genDir.getPath(),

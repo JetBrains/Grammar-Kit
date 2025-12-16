@@ -83,7 +83,7 @@ public final class KotlinParserGenerator extends Generator {
                                @NotNull String packagePrefix,
                                @NotNull OutputOpener outputOpener
   ) {
-    super(psiFile, sourcePath, outputPath, packagePrefix, "kt", outputOpener, new KotlinRenderer());
+    super(psiFile, sourcePath, outputPath, packagePrefix, "kt", outputOpener, KotlinRenderer.INSTANCE);
 
     C = KotlinPlatformConstants.DEFAULT_CONSTANTS;
 

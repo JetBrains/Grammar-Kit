@@ -1,4 +1,4 @@
-// ---- FooParser.java -----------------
+// ---- test/FooParser.java -----------------
 //header.txt
 package test;
 

@@ -7,19 +7,26 @@ package org.intellij.grammar.java;
 import com.intellij.navigation.NavigationItem;
 import com.intellij.openapi.project.IndexNotReadyException;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.roots.ProjectFileIndex;
+import com.intellij.openapi.roots.ProjectRootManager;
 import com.intellij.openapi.util.io.FileUtil;
 import com.intellij.openapi.util.text.StringUtil;
+import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.openapi.vfs.VirtualFileUtil;
 import com.intellij.psi.*;
 import com.intellij.psi.impl.FakePsiElement;
 import com.intellij.psi.impl.source.resolve.reference.impl.providers.JavaClassReferenceProvider;
 import com.intellij.psi.search.GlobalSearchScope;
+import com.intellij.psi.search.GlobalSearchScopesCore;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.util.*;
 import com.intellij.util.containers.ContainerUtil;
 import com.intellij.util.containers.FactoryMap;
 import org.intellij.grammar.KnownAttribute;
+import org.intellij.grammar.generator.GenOptions;
 import org.intellij.grammar.generator.java.JavaNameShortener;
 import org.intellij.grammar.psi.BnfAttr;
+import org.intellij.grammar.psi.BnfFile;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.org.objectweb.asm.*;
@@ -45,7 +52,9 @@ public abstract class JavaHelper {
   }
 
   private static boolean acceptsName(@Nullable String expected, @Nullable String actual) {
-    return "*".equals(expected) || expected != null && expected.equals(actual);
+    return "*".equals(expected) || expected != null && expected.equals(actual) || expected != null && actual != null 
+                                                                                  && actual.contains("$") 
+                                                                                  && actual.startsWith(expected);
   }
 
   private static boolean acceptsModifiers(int modifiers, MethodType methodType) {
@@ -172,7 +181,24 @@ public abstract class JavaHelper {
     public PsiReference @NotNull [] getClassReferences(@NotNull PsiElement element, @NotNull ProcessingContext context) {
       BnfAttr bnfAttr = PsiTreeUtil.getParentOfType(element, BnfAttr.class);
       KnownAttribute<?> attr = bnfAttr == null ? null : KnownAttribute.getAttribute(bnfAttr.getName());
-      JavaClassReferenceProvider provider = new JavaClassReferenceProvider();
+      JavaClassReferenceProvider provider = new JavaClassReferenceProvider() {
+        @Override
+        public GlobalSearchScope getScope(@NotNull Project project) {
+          BnfFile bnfFile = (BnfFile)element.getContainingFile();
+          if (GenOptions.UseSyntaxApi(bnfFile)) {
+            String psiPath = getRootAttribute(element, KnownAttribute.PSI_OUTPUT_PATH);
+            if (psiPath.isEmpty()) return null;
+            ProjectFileIndex fileIndex = ProjectRootManager.getInstance(project).getFileIndex();
+            VirtualFile basePath = fileIndex.getContentRootForFile(bnfFile.getVirtualFile());
+            if (basePath == null) return null;
+            VirtualFile psiRoot = VirtualFileUtil.findDirectory(basePath, psiPath);
+            if (psiRoot == null) return null;
+
+            return GlobalSearchScopesCore.directoriesScope(project, true, psiRoot);
+          }
+          return null;
+        }
+      };
       provider.setOption(JavaClassReferenceProvider.ALLOW_DOLLAR_NAMES, false);
       provider.setOption(JavaClassReferenceProvider.ADVANCED_RESOLVE, true);
       if (attr == KnownAttribute.EXTENDS || attr == KnownAttribute.IMPLEMENTS || attr == KnownAttribute.STUB_CLASS) {
@@ -229,11 +255,7 @@ public abstract class JavaHelper {
       List<NavigatablePsiElement> result = new ArrayList<>();
       PsiMethod[] methods = methodType == MethodType.CONSTRUCTOR ? aClass.getConstructors() : aClass.getMethods(); // todo super methods too
       for (PsiMethod method : methods) {
-        if (!acceptsName(methodName, method.getName())) {
-          PsiIdentifier nameIdentifier = method.getNameIdentifier();
-          if (nameIdentifier == null || !acceptsName(methodName, nameIdentifier.getText())) 
-            continue;
-        }
+        if (!acceptsName(methodName, method.getName())) continue;
         if (!acceptsMethod(method, methodType)) continue;
         if (!acceptsMethod(myElementFactory, method, paramCount, paramTypes)) continue;
         result.add(method);

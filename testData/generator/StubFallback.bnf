@@ -3,6 +3,7 @@
  */
 
 {
+  generate=[parser-api="syntax"]
   generatePsi=true
   classHeader="//header.txt"
   psiPackage="test.psi"

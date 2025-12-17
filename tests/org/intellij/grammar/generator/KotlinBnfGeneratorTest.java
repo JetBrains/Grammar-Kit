@@ -94,6 +94,10 @@ public class KotlinBnfGeneratorTest extends AbstractBnfGeneratorTest {
     doPsiTest();
   }
 
+  public void testStubFallback() throws Exception {
+    doGenTest(true);
+  }
+
   public void testTokenChoice() throws Exception {
     doPsiTest();
   }

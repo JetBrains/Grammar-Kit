@@ -57,8 +57,8 @@ public abstract class JavaHelper {
                                                                                   && actual.startsWith(expected);
   }
 
-  private static boolean acceptsModifiers(int modifiers, MethodType methodType) {
-    return !Modifier.isAbstract(modifiers) &&
+  private static boolean acceptsModifiers(int modifiers, MethodType methodType, boolean allowAbstract) {
+    return (!Modifier.isAbstract(modifiers) || allowAbstract) &&
            !(methodType == MethodType.CONSTRUCTOR && Modifier.isPrivate(modifiers));
   }
 
@@ -71,6 +71,15 @@ public abstract class JavaHelper {
   public @NotNull List<NavigatablePsiElement> findClassMethods(@Nullable String className,
                                                                @NotNull MethodType methodType,
                                                                @Nullable String methodName,
+                                                               int paramCount,
+                                                               String... paramTypes) {
+    return findClassMethods(className, methodType, methodName, false, paramCount, paramTypes);
+  }
+
+  public @NotNull List<NavigatablePsiElement> findClassMethods(@Nullable String className,
+                                                               @NotNull MethodType methodType,
+                                                               @Nullable String methodName,
+                                                               boolean allowAbstract,
                                                                int paramCount,
                                                                String... paramTypes) {
     return Collections.emptyList();
@@ -151,10 +160,10 @@ public abstract class JavaHelper {
       return true;
     }
 
-    private static boolean acceptsMethod(PsiMethod method, MethodType methodType) {
+    private static boolean acceptsMethod(PsiMethod method, MethodType methodType, Boolean allowAbstract) {
       PsiModifierList modifierList = method.getModifierList();
       return (methodType == MethodType.STATIC) == modifierList.hasModifierProperty(PsiModifier.STATIC) &&
-             !modifierList.hasModifierProperty(PsiModifier.ABSTRACT) &&
+             (!modifierList.hasModifierProperty(PsiModifier.ABSTRACT) || allowAbstract) &&
              !(methodType == MethodType.CONSTRUCTOR && modifierList.hasModifierProperty(PsiModifier.PRIVATE));
     }
 
@@ -247,16 +256,17 @@ public abstract class JavaHelper {
     public @NotNull List<NavigatablePsiElement> findClassMethods(@Nullable String className,
                                                                  @NotNull MethodType methodType,
                                                                  @Nullable String methodName,
+                                                                 boolean allowAbstract,
                                                                  int paramCount,
                                                                  String... paramTypes) {
       if (methodName == null) return Collections.emptyList();
       PsiClass aClass = findClassSafe(className);
-      if (aClass == null) return super.findClassMethods(className, methodType, methodName, paramCount, paramTypes);
+      if (aClass == null) return super.findClassMethods(className, methodType, methodName, allowAbstract, paramCount, paramTypes);
       List<NavigatablePsiElement> result = new ArrayList<>();
       PsiMethod[] methods = methodType == MethodType.CONSTRUCTOR ? aClass.getConstructors() : aClass.getMethods(); // todo super methods too
       for (PsiMethod method : methods) {
         if (!acceptsName(methodName, method.getName())) continue;
-        if (!acceptsMethod(method, methodType)) continue;
+        if (!acceptsMethod(method, methodType, allowAbstract)) continue;
         if (!acceptsMethod(myElementFactory, method, paramCount, paramTypes)) continue;
         result.add(method);
       }
@@ -361,10 +371,10 @@ public abstract class JavaHelper {
       return true;
     }
 
-    private static boolean acceptsMethod(Member method, MethodType methodType) {
+    private static boolean acceptsMethod(Member method, MethodType methodType, boolean allowAbstract) {
       int modifiers = method.getModifiers();
       return (methodType == MethodType.STATIC) == Modifier.isStatic(modifiers) &&
-             acceptsModifiers(modifiers, methodType);
+             acceptsModifiers(modifiers, methodType, allowAbstract);
     }
 
     private static @NotNull List<String> getAnnotationsInner(@NotNull AnnotatedElement delegate) {
@@ -396,6 +406,7 @@ public abstract class JavaHelper {
     public @NotNull List<NavigatablePsiElement> findClassMethods(@Nullable String className,
                                                                  @NotNull MethodType methodType,
                                                                  @Nullable String methodName,
+                                                                 boolean allowAbstract,
                                                                  int paramCount,
                                                                  String... paramTypes) {
       Class<?> aClass = findClassSafe(className);
@@ -404,7 +415,7 @@ public abstract class JavaHelper {
       Member[] methods = methodType == MethodType.CONSTRUCTOR ? aClass.getDeclaredConstructors() : aClass.getDeclaredMethods();
       for (Member method : methods) {
         if (!acceptsName(methodName, method.getName())) continue;
-        if (!acceptsMethod(method, methodType)) continue;
+        if (!acceptsMethod(method, methodType, allowAbstract)) continue;
         if (!acceptsMethod(method, paramCount, paramTypes)) continue;
         result.add(new MyElement<>(method));
       }
@@ -502,8 +513,8 @@ public abstract class JavaHelper {
       return true;
     }
 
-    private static boolean acceptsMethod(MethodInfo method, MethodType methodType) {
-      return method.methodType == methodType && acceptsModifiers(method.modifiers, methodType);
+    private static boolean acceptsMethod(MethodInfo method, MethodType methodType, boolean allowAbstract) {
+      return method.methodType == methodType && acceptsModifiers(method.modifiers, methodType, allowAbstract);
     }
 
     private static ClassInfo findClassSafe(String className) {
@@ -594,6 +605,7 @@ public abstract class JavaHelper {
     public @NotNull List<NavigatablePsiElement> findClassMethods(@Nullable String className,
                                                                  @NotNull MethodType methodType,
                                                                  @Nullable String methodName,
+                                                                 boolean allowAbstract,
                                                                  int paramCount,
                                                                  String... paramTypes) {
       ClassInfo aClass = findClassSafe(className);
@@ -601,7 +613,7 @@ public abstract class JavaHelper {
       List<NavigatablePsiElement> result = new ArrayList<>();
       for (MethodInfo method : aClass.methods) { // todo super methods too
         if (!acceptsName(methodName, method.name)) continue;
-        if (!acceptsMethod(method, methodType)) continue;
+        if (!acceptsMethod(method, methodType, allowAbstract)) continue;
         if (!acceptsMethod(method, paramCount, paramTypes)) continue;
         result.add(new MyElement<>(method));
       }

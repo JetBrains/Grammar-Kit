@@ -107,6 +107,7 @@
     <lang.braceMatcher language="JFlex" implementationClass="org.intellij.jflex.editor.JFlexBraceMatcher"/>
     <quoteHandler fileType="JFlex" className="org.intellij.jflex.editor.JFlexQuoteHandler"/>
     <lang.psiStructureViewFactory language="JFlex" implementationClass="org.intellij.jflex.editor.JFlexStructureViewFactory"/>
+    <useScopeEnlarger implementation="org.intellij.grammar.search.BnfFileUseScopeEnlarger"/>
   </extensions>
   <actions>
     <group id="grammar.file.group" popup="false">

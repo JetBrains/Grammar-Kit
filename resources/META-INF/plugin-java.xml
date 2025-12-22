@@ -2,9 +2,11 @@
 <idea-plugin>
   <resource-bundle>messages.GrammarKitBundle</resource-bundle>
   <extensions defaultExtensionNs="com.intellij">
-    <projectService serviceInterface="org.intellij.grammar.java.JavaHelper" serviceImplementation="org.intellij.grammar.java.JavaHelper$PsiHelper"/>
+    <projectService serviceInterface="org.intellij.grammar.java.JavaHelper"
+                    serviceImplementation="org.intellij.grammar.java.JavaHelper$PsiHelper"/>
     <referencesSearch implementation="org.intellij.jflex.psi.impl.JFlexStateUsageSearcher"/>
-    <regExpLanguageHost forClass="org.intellij.grammar.psi.impl.BnfStringImpl" implementationClass="org.intellij.grammar.psi.impl.BnfStringRegexHost"/>
+    <regExpLanguageHost forClass="org.intellij.grammar.psi.impl.BnfStringImpl"
+                        implementationClass="org.intellij.grammar.psi.impl.BnfStringRegexHost"/>
 
     <multiHostInjector implementation="org.intellij.jflex.psi.impl.JFlexJavaCodeInjector"/>
     <lang.elementManipulator forClass="org.intellij.jflex.psi.impl.JFlexJavaCodeImpl"
@@ -22,10 +24,6 @@
       </action>
       <action id="grammar.Generate.ParserUtil" class="org.intellij.grammar.actions.BnfGenerateParserUtilAction"/>
       <action id="grammar.Generate.JFlexLexer" class="org.intellij.grammar.actions.BnfGenerateLexerAction"/>
-      <separator/>
-      <action id="grammar.fleet.Generate" class="org.intellij.grammar.fleet.GenerateFleetAction"/>
-      <action id="grammar.fleet.Generate.JFlexLexer" class="org.intellij.grammar.fleet.BnfGenerateFleetLexerAction"/>
-      <action id="grammar.fleet.Run.JFlex" class="org.intellij.grammar.fleet.BnfRunFleetJFlexAction"/>
       <add-to-group group-id="grammar.file.group" anchor="first"/>
     </group>
   </actions>

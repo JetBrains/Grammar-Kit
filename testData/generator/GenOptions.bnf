@@ -1,6 +1,6 @@
 {
   parserClass="GenOptions"
-  generate=[java="7" fqn="yes" visitor-value="Val" token-case="lower" element-case="upper" psi-classes-map="yes"]
+  generate=[java="7" fqn="yes" visitor-value="Val" token-case="lower" element-case="upper" psi-classes-map="yes" parser-api="syntax"]
 
   extends(".*_statement")="statement"
   pin("create_.*_statement")=".*_ref"

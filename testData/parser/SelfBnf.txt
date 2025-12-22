@@ -31,6 +31,12 @@ BnfFile:SelfBnf.bnf
             PsiElement(=)('=')
             BNF_STRING_LITERAL_EXPRESSION: "R"
               PsiElement(string)('"R"')
+          PsiWhiteSpace(' ')
+          BNF_LIST_ENTRY
+            PsiElement(id)('parser-api')
+            PsiElement(=)('=')
+            BNF_STRING_LITERAL_EXPRESSION: "syntax"
+              PsiElement(string)('"syntax"')
           PsiElement(])(']')
       PsiWhiteSpace('\n\n  ')
       BNF_ATTR:parserClass
@@ -110,6 +116,30 @@ BnfFile:SelfBnf.bnf
         PsiElement(=)('=')
         BNF_STRING_LITERAL_EXPRESSION: "org.intellij.grammar.psi.BnfTokenType"
           PsiElement(string)('"org.intellij.grammar.psi.BnfTokenType"')
+      PsiWhiteSpace('\n  ')
+      BNF_ATTR:syntaxElementTypeHolderClass
+        PsiElement(id)('syntaxElementTypeHolderClass')
+        PsiElement(=)('=')
+        BNF_STRING_LITERAL_EXPRESSION: "org.intellij.grammar.BnfSyntaxTypes"
+          PsiElement(string)('"org.intellij.grammar.BnfSyntaxTypes"')
+      PsiWhiteSpace('\n  ')
+      BNF_ATTR:elementTypeConverterFactoryClass
+        PsiElement(id)('elementTypeConverterFactoryClass')
+        PsiElement(=)('=')
+        BNF_STRING_LITERAL_EXPRESSION: "org.intellij.grammar.BnfSyntaxElementTypeConverterFactory"
+          PsiElement(string)('"org.intellij.grammar.BnfSyntaxElementTypeConverterFactory"')
+      PsiWhiteSpace('\n  ')
+      BNF_ATTR:syntaxParserUtilObject
+        PsiElement(id)('syntaxParserUtilObject')
+        PsiElement(=)('=')
+        BNF_STRING_LITERAL_EXPRESSION: "org.intellij.grammar.syntax.grammar.GrammarParserUtil"
+          PsiElement(string)('"org.intellij.grammar.syntax.grammar.GrammarParserUtil"')
+      PsiWhiteSpace('\n  ')
+      BNF_ATTR:psiOutputPath
+        PsiElement(id)('psiOutputPath')
+        PsiElement(=)('=')
+        BNF_STRING_LITERAL_EXPRESSION: "grammar-kit/psi"
+          PsiElement(string)('"grammar-kit/psi"')
       PsiWhiteSpace('\n  \n  ')
       BNF_ATTR:tokens
         PsiElement(id)('tokens')

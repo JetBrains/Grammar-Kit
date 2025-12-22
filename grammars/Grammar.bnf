@@ -1,6 +1,6 @@
 {
   classHeader="license.txt"
-  generate=[java="8" names="long" visitor-value="R"]
+  generate=[java="8" names="long" visitor-value="R" parser-api="syntax"]
 
   parserClass="org.intellij.grammar.parser.GrammarParser"
   parserUtilClass="org.intellij.grammar.parser.GrammarParserUtil"
@@ -18,6 +18,10 @@
   elementTypePrefix="BNF_"
   elementTypeClass="org.intellij.grammar.psi.BnfCompositeElementType"
   tokenTypeClass="org.intellij.grammar.psi.BnfTokenType"
+  syntaxElementTypeHolderClass="org.intellij.grammar.BnfSyntaxTypes"
+  elementTypeConverterFactoryClass="org.intellij.grammar.BnfSyntaxElementTypeConverterFactory"
+  syntaxParserUtilObject="org.intellij.grammar.syntax.grammar.GrammarParserUtil"
+  psiOutputPath="grammar-kit/psi"
   
   tokens = [
     OP_EQ="="

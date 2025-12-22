@@ -31,6 +31,12 @@ BnfFile:SelfFlex.bnf
             PsiElement(=)('=')
             BNF_STRING_LITERAL_EXPRESSION: "R"
               PsiElement(string)('"R"')
+          PsiWhiteSpace(' ')
+          BNF_LIST_ENTRY
+            PsiElement(id)('parser-api')
+            PsiElement(=)('=')
+            BNF_STRING_LITERAL_EXPRESSION: "syntax"
+              PsiElement(string)('"syntax"')
           PsiElement(])(']')
       PsiWhiteSpace('\n\n  ')
       BNF_ATTR:parserClass
@@ -93,6 +99,24 @@ BnfFile:SelfFlex.bnf
         BNF_STRING_LITERAL_EXPRESSION: "org.intellij.jflex.psi.JFlexTypes"
           PsiElement(string)('"org.intellij.jflex.psi.JFlexTypes"')
       PsiWhiteSpace('\n  ')
+      BNF_ATTR:syntaxElementTypeHolderClass
+        PsiElement(id)('syntaxElementTypeHolderClass')
+        PsiElement(=)('=')
+        BNF_STRING_LITERAL_EXPRESSION: "org.intellij.jflex.JFlexTypes"
+          PsiElement(string)('"org.intellij.jflex.JFlexTypes"')
+      PsiWhiteSpace('\n  ')
+      BNF_ATTR:syntaxParserUtilObject
+        PsiElement(id)('syntaxParserUtilObject')
+        PsiElement(=)('=')
+        BNF_STRING_LITERAL_EXPRESSION: "org.intellij.jflex.parser.JFlexParserUtil"
+          PsiElement(string)('"org.intellij.jflex.parser.JFlexParserUtil"')
+      PsiWhiteSpace('\n  ')
+      BNF_ATTR:psiOutputPath
+        PsiElement(id)('psiOutputPath')
+        PsiElement(=)('=')
+        BNF_STRING_LITERAL_EXPRESSION: "grammar-kit/psi"
+          PsiElement(string)('"grammar-kit/psi"')
+      PsiWhiteSpace('\n\n  ')
       BNF_ATTR:elementTypePrefix
         PsiElement(id)('elementTypePrefix')
         PsiElement(=)('=')

@@ -1,0 +1,1266 @@
+/*
+ * Copyright 2011-2025 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
+ */
+
+package org.intellij.grammar.generator;
+
+import com.intellij.openapi.diagnostic.Logger;
+import com.intellij.openapi.util.Ref;
+import com.intellij.openapi.util.text.StringUtil;
+import com.intellij.psi.PsiElement;
+import com.intellij.psi.tree.IElementType;
+import com.intellij.util.ObjectUtils;
+import com.intellij.util.SmartList;
+import com.intellij.util.containers.ContainerUtil;
+import com.intellij.util.containers.JBIterable;
+import org.intellij.grammar.KnownAttribute;
+import org.intellij.grammar.analysis.BnfFirstNextAnalyzer;
+import org.intellij.grammar.generator.NodeCalls.*;
+import org.intellij.grammar.generator.Renderer.*;
+import org.intellij.grammar.generator.kotlin.KotlinBnfConstants;
+import org.intellij.grammar.generator.kotlin.KotlinNameShortener;
+import org.intellij.grammar.generator.kotlin.KotlinPlatformConstants;
+import org.intellij.grammar.generator.kotlin.KotlinRenderer;
+import org.intellij.grammar.java.JavaHelper;
+import org.intellij.grammar.parser.GeneratedParserUtilBase.Parser;
+import org.intellij.grammar.psi.*;
+import org.intellij.grammar.psi.impl.GrammarUtil;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
+import java.io.IOException;
+import java.util.*;
+import java.util.stream.Collectors;
+
+import static com.intellij.util.containers.ContainerUtil.map;
+import static java.lang.String.format;
+import static org.intellij.grammar.analysis.BnfFirstNextAnalyzer.BNF_MATCHES_ANY;
+import static org.intellij.grammar.analysis.BnfFirstNextAnalyzer.BNF_MATCHES_EOF;
+import static org.intellij.grammar.generator.CommonBnfConstants.RECOVER_AUTO;
+import static org.intellij.grammar.generator.ExpressionGeneratorHelper.CONSUME_TYPE_OVERRIDE;
+import static org.intellij.grammar.generator.ExpressionGeneratorHelper.findOperators;
+import static org.intellij.grammar.generator.ParserGeneratorUtil.*;
+import static org.intellij.grammar.generator.java.JavaNameShortener.getRawClassName;
+import static org.intellij.grammar.psi.BnfTypes.*;
+
+
+/// A Kotlin parser generator implementation.
+///
+/// Implementation notes:
+/// 1. A method's name starts with `generate` if it either calls the
+///   [Generator#out] method or calls another `generate*` method.
+/// 2. `build*` methods are generally used for building strings that
+///   are then going to be outputted via one of the `generate*`
+///   methods to the file.
+public final class KotlinParserGenerator extends Generator {
+  public static final @NotNull Logger LOG = Logger.getInstance(KotlinParserGenerator.class);
+  private static final @NotNull String HORIZONTAL_SEPARATOR = "/* ********************************************************** */";
+  private final @NotNull KotlinPlatformConstants C;
+
+  /**
+   * Name of the class containing all the generated element types.
+   */
+  private final @NotNull String myElementTypesHolderName;
+  private final @NotNull String myPsiOutputPath;
+  
+  private final @NotNull String myParserUtil;
+
+  private final @NotNull Set<String> mySGPRMethods = new HashSet<>(new HashSet<>(Arrays.asList("eof", "advanceToken")));
+
+  /**
+   * Contains names of all the tokens whose corresponding {@code SyntaxElementType}
+   * definitions were generated.
+   */
+  private final @NotNull Set<String> myTokensUsedInGrammar = new LinkedHashSet<>();
+
+  private final ExpressionHelper myExpressionHelper;
+  private final JavaHelper myJavaHelper;
+
+  public KotlinParserGenerator(@NotNull BnfFile psiFile,
+                               @NotNull String sourcePath,
+                               @NotNull String outputPath,
+                               @NotNull String psiOutputPath,
+                               @NotNull String packagePrefix,
+                               @NotNull OutputOpener outputOpener
+  ) {
+    super(psiFile, sourcePath, outputPath, packagePrefix, "kt", outputOpener, KotlinRenderer.INSTANCE);
+
+    C = KotlinPlatformConstants.DEFAULT_CONSTANTS;
+
+    // TODO: consider creating kotlin specific attributes for this
+    myElementTypesHolderName = getRootAttribute(myFile, KnownAttribute.SYNTAX_ELEMENT_TYPE_HOLDER_CLASS);
+    myParserUtil = getRootAttribute(myFile, KnownAttribute.SYNTAX_PARSER_UTIL_OBJECT);
+    myPsiOutputPath = (psiOutputPath.isEmpty()) ? myOutputPath : psiOutputPath;
+
+    myExpressionHelper = new ExpressionHelper(myFile, myGraphHelper, this::addWarning);
+    myJavaHelper = JavaHelper.getJavaHelper(myFile);
+
+    for (final var rule : psiFile.getRules()) {
+      final var ruleName = rule.getName();
+      final var isNoPsi = !RuleGraphHelper.hasPsiClass(rule);
+      final var ruleInfo = new RuleInfo(
+        ruleName,
+        Rule.isFake(rule),
+        getElementType(rule),
+        getAttribute(rule, KnownAttribute.PARSER_CLASS),
+        // TODO: potentially make a kotlin-specific attribute for this vvv
+        isNoPsi ? null : getAttribute(rule, KnownAttribute.PSI_PACKAGE),
+        // don't need any of the below
+        null,
+        null,
+        null,
+        null,
+        null
+      );
+      myRuleInfos.put(ruleName, ruleInfo);
+    }
+
+    calcFakeRulesWithType();
+    calcRulesStubNames();
+    calcAbstractRules();
+  }
+
+  private @NotNull NodeCall getConsumeTextToken(@NotNull ConsumeType consumeType, @NotNull String tokenText) {
+    return new KotlinConsumeTokenCall(consumeType, "\"" + tokenText + "\"", N);
+  }
+
+  private @NotNull String shortElementTypesHolderName() {
+    return StringUtil.getShortName(myElementTypesHolderName);
+  }
+
+  private void calcFakeRulesWithType() {
+    for (final var rule : myFile.getRules()) {
+      BnfRule r = myFile.getRule(getAttribute(rule, KnownAttribute.ELEMENT_TYPE));
+      if (r == null) continue;
+      this.ruleInfo(r).isInElementType = true;
+    }
+  }
+
+  private void calcRulesStubNames() {
+    for (BnfRule rule : myFile.getRules()) {
+      RuleInfo info = this.ruleInfo(rule);
+      String stubClass = info.stub;
+      if (stubClass == null) {
+        BnfRule topSuper = getEffectiveSuperRule(myFile, rule);
+        stubClass = topSuper == null ? null : this.ruleInfo(topSuper).stub;
+      }
+      BnfRule topSuper = getEffectiveSuperRule(myFile, rule);
+      String superRuleClass = topSuper == null ? getRootAttribute(myFile, KnownAttribute.EXTENDS) :
+                              topSuper == rule ? getAttribute(rule, KnownAttribute.EXTENDS) :
+                              this.ruleInfo(topSuper).intfClass;
+      String implSuper = StringUtil.notNullize(info.mixin, superRuleClass);
+      String implSuperRaw = getRawClassName(implSuper);
+      final String stubName;
+      if (StringUtil.isNotEmpty(stubClass)) {
+        stubName = stubClass;
+      }
+      else if (implSuper.indexOf("<") < implSuper.indexOf(">") &&
+               !myJavaHelper.findClassMethods(implSuperRaw, JavaHelper.MethodType.INSTANCE, "getParentByStub", 0).isEmpty()) {
+        stubName = implSuper.substring(implSuper.indexOf("<") + 1, implSuper.indexOf(">"));
+      }
+      else {
+        stubName = null;
+      }
+      if (StringUtil.isNotEmpty(stubName)) {
+        info.realStubClass = stubClass;
+      }
+    }
+  }
+
+  // region generate* methods
+
+  @Override
+  public void generate() throws IOException {
+    generateParser();
+    if (myGrammarRoot != null && (G.generateTokenTypes || G.generateElementTypes)) {
+      generateElementTypes();
+    }
+    if (myGrammarRoot != null && (G.generatePsi)){
+      JavaParserGenerator javaParserGenerator = new JavaParserGenerator(myFile, mySourcePath, myPsiOutputPath, myPackagePrefix, myOpener);
+      javaParserGenerator.replaceSimpleTokes(mySimpleTokens);
+      javaParserGenerator.generatePsiOnly();
+    }
+  }
+
+  // region Parser generation
+
+  @Override
+  public void generateParser() throws IOException {
+    Map<String, Set<RuleInfo>> classified = ContainerUtil.classify(myRuleInfos.values().iterator(), o -> o.parserClass);
+    for (String className : ContainerUtil.sorted(classified.keySet())) {
+      openOutput(className);
+      try {
+        generateParserImpl(className, map(classified.get(className), it -> it.name));
+      }
+      finally {
+        closeOutput();
+      }
+    }
+  }
+
+  private void generateParserImpl(String parserClass, Collection<String> ownRuleNames) {
+    // file header
+    generateFileHeader(parserClass);
+
+    // package declaration
+    final var packageName = StringUtil.getPackageName(parserClass);
+    if (StringUtil.isNotEmpty(packageName)) {
+      out("package %s", packageName);
+      newLine();
+    }
+    final var nameShortener = new KotlinNameShortener(packageName, !G.generateFQN);
+
+    // imports
+    final var isRootParser = parserClass.equals(myGrammarRootParser);
+    final var imports = createImportsSet(isRootParser);
+
+    Set<String> includedClasses = collectClasses(imports, packageName);
+    nameShortener.addImports(imports, includedClasses);
+    for (final var importName : nameShortener.getImports()) {
+      out("import %s", importName);
+    }
+    if (G.generateFQN && imports.contains("#forced")) {
+      for (String s : JBIterable.from(imports).filter(o -> !o.isEmpty() && !"#forced".equals(o))) {
+        out("import %s", s);
+      }
+    }
+    newLine();
+
+
+    // class definition annotations
+    out("%s(\"unused\", \"FunctionName\", \"JoinDeclarationAndAssignment\")", nameShortener.shorten(KotlinBnfConstants.KT_SUPPRESS_ANNO));
+
+    // type header itself
+    out("object %s {", StringUtil.getShortName(parserClass));
+    newLine();
+
+    myShortener = nameShortener;
+
+    if (isRootParser) {
+      generateRootParserDefinitions();
+    }
+
+    for (String ruleName : ownRuleNames) {
+      final var rule = Objects.requireNonNull(myFile.getRule(ruleName));
+      if (Rule.isExternal(rule) || Rule.isFake(rule)) continue;
+      if (myExpressionHelper.getExpressionInfo(rule) != null) continue;
+      out(HORIZONTAL_SEPARATOR);
+      generateNode(rule, rule.getExpression(), R.getFuncName(rule), new HashSet<>());
+      newLine();
+    }
+    for (String ruleName : ownRuleNames) {
+      BnfRule rule = myFile.getRule(ruleName);
+      final var expressionInfo = myExpressionHelper.getExpressionInfo(rule);
+      if (expressionInfo != null && expressionInfo.rootRule == rule) {
+        out(HORIZONTAL_SEPARATOR);
+        generateExpressionRoot(expressionInfo);
+        newLine();
+      }
+    }
+
+    final var addNewLine = !myParserLambdas.isEmpty() && !myMetaMethodFields.isEmpty();
+    generateParserLambdas(parserClass);
+    if (addNewLine) newLine();
+    generateMetaMethodFields();
+
+    out("}");
+  }
+
+  private void generateRootParserDefinitions() {
+    generateParse();
+    generateParseRoot();
+
+    List<Set<String>> extendsSet = buildExtendsSet(myGraphHelper.getRuleExtendsMap());
+    if (!extendsSet.isEmpty()) {
+      generateExtendsSet(extendsSet);
+      newLine();
+    }
+  }
+
+  /**
+   * Generates the main parse() method.
+   */
+  private void generateParse() {
+    final var shortElementType = shorten(KotlinBnfConstants.KT_ELEMENT_TYPE_CLASS);
+    final var shortMarker = !G.generateFQN ? "Marker" : C.SyntaxTreeBuilderClass() + ".Marker";
+    final var shortRuntime = shorten(KotlinBnfConstants.KT_PARSER_RUNTIME_CLASS);
+    final var shortModifiers = shorten(KotlinBnfConstants.KT_MODIFIERS_CLASS);
+    List<Set<String>> extendsSet = buildExtendsSet(myGraphHelper.getRuleExtendsMap());
+    final var generateExtendsSets = !extendsSet.isEmpty();
+
+    // parse() method
+    out("fun parse(%s: %s, %s: %s) {", N.root, shortElementType, N.runtime, shortRuntime);
+    out("var %s: Boolean", N.result);
+    out("%s.init(::parse, %s)", N.runtime, generateExtendsSets ? "EXTENDS_SETS_" : null);
+    out("val %s: %s = %s.enter_section_(0, %s._COLLAPSE_, null)", N.marker, shortMarker, N.runtime, shortModifiers);
+    out("%s = parse_root_(%s, %s, 0)", N.result, N.root, N.runtime);
+    out("%s.exit_section_(0, %s, %s, %s, true, TRUE_CONDITION)", N.runtime, N.marker, N.root, N.result);
+    out("}");
+    newLine();
+  }
+
+  /**
+   * Generates the parse_root_() method.
+   */
+  private void generateParseRoot() {
+    final var rootRule = myFile.getRule(myGrammarRoot);
+    final var extraRoots = new ArrayList<BnfRule>();
+    for (final var ruleName : myRuleInfos.keySet()) {
+      final var rule = Objects.requireNonNull(myFile.getRule(ruleName));
+      if (getAttribute(rule, KnownAttribute.ELEMENT_TYPE) != null) continue;
+      if (!RuleGraphHelper.hasElementType(rule)) continue;
+      if (Rule.isFake(rule) || Rule.isMeta(rule)) continue;
+      final var expressionInfo = myExpressionHelper.getExpressionInfo(rule);
+      if (expressionInfo != null && expressionInfo.rootRule != rule) continue;
+      if (!Boolean.TRUE.equals(getAttribute(rule, KnownAttribute.EXTRA_ROOT))) continue;
+      extraRoots.add(rule);
+    }
+
+    final var shortElementType = shorten(KotlinBnfConstants.KT_ELEMENT_TYPE_CLASS);
+    final var shortRuntime = shorten(KotlinBnfConstants.KT_PARSER_RUNTIME_CLASS);
+
+    out("internal fun parse_root_(%s: %s, %s: %s, %s: Int): Boolean {", N.root, shortElementType, N.runtime, shortRuntime, N.level);
+    if (extraRoots.isEmpty()) {
+      out("return %s", rootRule == null ? "false" : this.generateNodeCall(rootRule, null, myGrammarRoot).render(R));
+    }
+    else {
+      boolean first = true;
+      out("var %s: Boolean", N.result);
+      for (BnfRule rule : extraRoots) {
+        String elementType = shortElementTypesHolderName() + "." + getElementType(rule);
+        out("%sif (%s == %s) {", first ? "" : "else ", N.root, elementType);
+        String nodeCall = this.generateNodeCall(ObjectUtils.notNull(rootRule, rule), null, rule.getName()).render(R);
+        out("%s = %s", N.result, nodeCall);
+        out("}");
+        if (first) first = false;
+      }
+      out("else {");
+      out("%s = %s", N.result, rootRule == null ? "false" : this.generateNodeCall(rootRule, null, myGrammarRoot).render(R));
+      out("}");
+      out("return %s", N.result);
+    }
+    out("}");
+    newLine();
+  }
+
+  @SuppressWarnings("DuplicatedCode")
+  @Override
+  protected void generateNode(BnfRule rule, @NotNull BnfExpression initialNode, String funcName, Set<BnfExpression> visited) {
+    final var shortModifiers = shorten(KotlinBnfConstants.KT_MODIFIERS_CLASS);
+    boolean isRule = initialNode.getParent() == rule;
+    BnfExpression node = getNonTrivialNode(initialNode);
+
+    List<String> metaParameters = collectMetaParametersFormatted(rule, node);
+    if (!metaParameters.isEmpty()) {
+      if (isRule && isUsedAsArgument(rule) || !isRule && isArgument(initialNode)) {
+        generateMetaMethod(funcName, metaParameters, isRule);
+        newLine();
+      }
+    }
+
+    IElementType type = getEffectiveType(node);
+
+    for (String s : StringUtil.split((StringUtil.isEmpty(node.getText()) ? initialNode : node).getText(), "\n")) {
+      out("// " + s);
+    }
+    final var isFirstNonTrivial = node == Rule.firstNotTrivial(rule);
+    final var isPrivate = !(isRule || isFirstNonTrivial) || Rule.isPrivate(rule) || myGrammarRoot.equals(rule.getName());
+    final var isLeft = isFirstNonTrivial && Rule.isLeft(rule);
+    final var isLeftInner = isLeft && (isPrivate || Rule.isInner(rule));
+    final var isUpper = !isPrivate && Rule.isUpper(rule);
+    String recoverWhile = !isFirstNonTrivial ? null : getAttribute(rule, KnownAttribute.RECOVER_WHILE);
+    Map<String, String> hooks = isFirstNonTrivial ? getAttribute(rule, KnownAttribute.HOOKS).asMap() : Collections.emptyMap();
+
+    boolean canCollapse = !isPrivate && (!isLeft || isLeftInner) && isFirstNonTrivial && myGraphHelper.canCollapse(rule);
+
+    String elementType = getElementType(rule);
+    String elementTypeRef = !isPrivate && StringUtil.isNotEmpty(elementType)
+                            ? shortElementTypesHolderName() + "." + elementType
+                            : null;
+
+    boolean isSingleNode =
+      node instanceof BnfReferenceOrToken || node instanceof BnfLiteralExpression || node instanceof BnfExternalExpression;
+
+    List<BnfExpression> children = isSingleNode ? Collections.singletonList(node) : getChildExpressions(node);
+    String frameName = !children.isEmpty() && isFirstNonTrivial && !Rule.isMeta(rule)
+                       ? quote(R.getRuleDisplayName(rule, !isPrivate))
+                       : null;
+
+    String extraParameters = metaParameters.stream().map(", %s: Parser"::formatted).collect(Collectors.joining());
+
+    // the actual method header
+    final String access;
+    if (!isRule) {
+      access = "private ";
+    }
+    else if (isPrivate) {
+      access = "internal ";
+    }
+    else {
+      access = "";
+    }
+    out("%sfun %s(%s: %s, %s: Int%s): Boolean {", access, funcName, N.runtime, shorten(KotlinBnfConstants.KT_PARSER_RUNTIME_CLASS),
+        N.level,
+        extraParameters);
+    if (isSingleNode) {
+      if (isPrivate && !isLeftInner && recoverWhile == null && frameName == null) {
+        final var nodeCallElement = generateNodeCall(rule, node, R.getNextName(funcName, 0));
+        String nodeCall = nodeCallElement.render(R);
+        out("return %s", nodeCall);
+        out("}");
+        if (node instanceof BnfExternalExpression && ((BnfExternalExpression)node).getExpressionList().size() > 1) {
+          generateNodeChildren(rule, funcName, children, visited);
+        }
+        return;
+      }
+      else {
+        type = BNF_SEQUENCE;
+      }
+    }
+
+    if (!children.isEmpty()) {
+      out("if (!%s.recursion_guard_(%s, \"%s\")) return false", N.runtime, N.level, /*R.unwrapFuncName*/(funcName));
+    }
+
+    if (recoverWhile == null && (isRule || isFirstNonTrivial)) {
+      frameName = generateFirstCheck(rule, frameName, getAttribute(rule, KnownAttribute.NAME) == null);
+    }
+
+    PinMatcher pinMatcher = new PinMatcher(rule, type, isFirstNonTrivial ? rule.getName() : funcName);
+    boolean pinApplied = false;
+    boolean alwaysTrue = children.isEmpty() || type == BNF_OP_OPT || type == BNF_OP_ZEROMORE;
+    boolean pinned = pinMatcher.active() && pinMatcher.shouldGenerate(children);
+    if (!alwaysTrue) {
+      out("var %s: Boolean%s", N.result, children.isEmpty() ? " = true" : "");
+      if (pinned) {
+        out("var %s: Boolean", N.pinned);
+      }
+    }
+
+    final var modifierList = new SmartList<String>();
+    if (canCollapse) modifierList.add("_COLLAPSE_");
+    if (isLeftInner) {
+      modifierList.add("_LEFT_INNER_");
+    }
+    else if (isLeft) modifierList.add("_LEFT_");
+    if (type == BNF_OP_AND) {
+      modifierList.add("_AND_");
+    }
+    else if (type == BNF_OP_NOT) modifierList.add("_NOT_");
+    if (isUpper) modifierList.add("_UPPER_");
+    if (modifierList.isEmpty() && (pinned || frameName != null)) modifierList.add("_NONE_");
+
+    boolean sectionRequired = !alwaysTrue || !isPrivate || isLeft || recoverWhile != null;
+    boolean sectionRequiredSimple = sectionRequired && modifierList.isEmpty() && recoverWhile == null && frameName == null;
+    boolean sectionMaybeDropped = sectionRequiredSimple && type == BNF_CHOICE && elementTypeRef == null &&
+                                  !ContainerUtil.exists(children, o -> isRollbackRequired(o, myFile));
+    String modifiers = modifierList.isEmpty() ? shortModifiers + "._NONE_" : StringUtil.join(
+      ContainerUtil.map(modifierList, modifier ->
+        shortModifiers + "." + modifier
+      ), " or "
+    );
+    String shortMarker = !G.generateFQN ? "Marker" : C.SyntaxTreeBuilderClass() + ".Marker";
+    if (sectionRequiredSimple) {
+      if (!sectionMaybeDropped) {
+        out("val %s: %s = %s.enter_section_()", N.marker, shortMarker, N.runtime);
+      }
+    }
+    else if (sectionRequired) {
+      boolean shortVersion = frameName == null && elementTypeRef == null;
+      if (shortVersion) {
+        out("val %s: %s = %s.enter_section_(%s, %s)", N.marker, shortMarker, N.runtime, N.level, modifiers);
+      }
+      else {
+        out("val %s: %s = %s.enter_section_(%s, %s, %s, %s)", N.marker, shortMarker, N.runtime, N.level, modifiers,
+            elementTypeRef,
+            frameName);
+      }
+    }
+
+    final var skip = Ref.create(0);
+    for (int i = 0, p = 0, childrenSize = children.size(); i < childrenSize; i++) {
+      BnfExpression child = children.get(i);
+
+      NodeCall nodeCall = generateNodeCall(rule, child, R.getNextName(funcName, i));
+      if (type == BNF_CHOICE) {
+        if (isRule && i == 0 && G.generateTokenSets) {
+          ConsumeType consumeType = getEffectiveConsumeType(rule, node, null);
+          final var tokenChoice = generateTokenChoiceCall(children, consumeType, funcName);
+          if (tokenChoice != null) {
+            out("%s = %s", N.result, tokenChoice.render(R));
+            break;
+          }
+        }
+        out("%s%s = %s", i > 0 ? format("if (!%s) ", N.result) : "", N.result, nodeCall.render(R));
+      }
+      else if (type == BNF_SEQUENCE) {
+        if (skip.get() == 0) {
+          ConsumeType consumeType = getEffectiveConsumeType(rule, node, null);
+          nodeCall = generateTokenSequenceCall(children, i, pinMatcher, pinApplied, skip, nodeCall, false, consumeType);
+          if (i == 0) {
+            out("%s = %s", N.result, nodeCall.render(R));
+          }
+          else {
+            if (pinApplied && G.generateExtendedPin) {
+              if (i == childrenSize - 1) {
+                // do not report error for last child
+                if (i == p + 1) {
+                  out("%s = %s && %s", N.result, N.result, nodeCall.render(R));
+                }
+                else {
+                  out("%s = %s && %s && %s", N.result, N.pinned, nodeCall.render(R), N.result);
+                }
+              }
+              else if (i == p + 1) {
+                out("%s = %s && %s.report_error_(%s)", N.result, N.result, N.runtime, nodeCall.render(R));
+              }
+              else {
+                out("%s = %s && %s.report_error_(%s) && %s", N.result, N.pinned, N.runtime, nodeCall.render(R),
+                    N.result);
+              }
+            }
+            else {
+              out("%s = %s && %s", N.result, N.result, nodeCall.render(R));
+            }
+          }
+        }
+        else {
+          skip.set(skip.get() - 1); // we are inside already generated token sequence
+          if (pinApplied && i == p + 1) p++; // shift pinned index as we skip
+        }
+        if (pinned && !pinApplied && pinMatcher.matches(i, child)) {
+          pinApplied = true;
+          p = i;
+          out("%s = %s // pin = %s", N.pinned, N.result, pinMatcher.pinValue);
+        }
+      }
+      else if (type == BNF_OP_OPT) {
+        out(nodeCall.render(R));
+      }
+      else if (type == BNF_OP_ONEMORE || type == BNF_OP_ZEROMORE) {
+        if (type == BNF_OP_ONEMORE) {
+          out("%s = %s", N.result, nodeCall.render(R));
+        }
+        out("while (%s) {", alwaysTrue ? "true" : N.result);
+        out("val %s: Int = %s.current_position_()", N.pos, N.runtime);
+        out("if (!%s) break", nodeCall.render(R));
+        out("if (!%s.empty_element_parsed_guard_(\"%s\", %s)) break", N.runtime, funcName, N.pos);
+        out("}");
+      }
+      else if (type == BNF_OP_AND) {
+        out("%s = %s", N.result, nodeCall.render(R));
+      }
+      else if (type == BNF_OP_NOT) {
+        out("%s = !%s", N.result, nodeCall.render(R));
+      }
+      else {
+        addWarning("unexpected: " + type);
+      }
+    }
+
+    if (sectionRequired) {
+      String resultRef = alwaysTrue ? "true" : N.result;
+      if (!hooks.isEmpty()) {
+        for (Map.Entry<String, String> entry : hooks.entrySet()) {
+          String hookName = CommonRendererUtils.toIdentifier(entry.getKey(), null, Case.UPPER);
+          out("%s.register_hook_(%s, %s)", N.runtime, hookName, entry.getValue());
+        }
+      }
+      if (sectionRequiredSimple) {
+        if (!sectionMaybeDropped) {
+          out("%s.exit_section_(%s, %s, %s)", N.runtime, N.marker, elementTypeRef, resultRef);
+        }
+      }
+      else {
+        String pinnedRef = pinned ? N.pinned : "false";
+        String recoverCall;
+        if (recoverWhile != null) {
+          BnfRule predicateRule = myFile.getRule(recoverWhile);
+          if (RECOVER_AUTO.equals(recoverWhile)) {
+            recoverCall = generateAutoRecoverCall(rule);
+          }
+          else if (Rule.isMeta(rule) && GrammarUtil.isDoubleAngles(recoverWhile)) {
+            recoverCall = formatMetaParamName(recoverWhile.substring(2, recoverWhile.length() - 2));
+          }
+          else {
+            recoverCall = predicateRule == null ? null : generateWrappedNodeCall(rule, null, predicateRule.getName()).render(R);
+          }
+        }
+        else {
+          recoverCall = null;
+        }
+        out("%s.exit_section_(%s, %s, %s, %s, %s)", N.runtime, N.level, N.marker, resultRef, pinnedRef, recoverCall);
+      }
+    }
+
+    final String resultValue = alwaysTrue
+                               ? "true"
+                               : N.result + (pinned ? " || " + N.pinned : "");
+    out("return %s", resultValue);
+    out("}");
+    generateNodeChildren(rule, funcName, children, visited);
+  }
+
+  private void generateExpressionRoot(@NotNull ExpressionInfo info) {
+    final var opCalls = buildCallMap(info);
+    final var sortedOpCalls = opCalls.keySet();
+
+    for (final var s : info.toString().split("\n")) {
+      out("// " + s);
+    }
+
+    // main entry
+    String methodName = R.getFuncName(info.rootRule);
+    String kernelMethodName = R.getNextName(methodName, 0);
+    String frameName = quote(R.getRuleDisplayName(info.rootRule, true));
+    final var shortRuntime = shorten(KotlinBnfConstants.KT_PARSER_RUNTIME_CLASS);
+    final var shortModifiers = shorten(KotlinBnfConstants.KT_MODIFIERS_CLASS);
+    String shortMarker = !G.generateFQN ? "Marker" : C.SyntaxTreeBuilderClass() + ".Marker";
+    out("fun %s(%s: %s, %s: Int, %s: Int): Boolean {", methodName, N.runtime, shortRuntime, N.level, N.priority);
+    out("if (!%s.recursion_guard_(%s, \"%s\")) return false", N.runtime, N.level, methodName);
+
+    if (frameName != null) {
+      out("%s.addVariant(%s)", N.runtime, frameName);
+    }
+    generateFirstCheck(info.rootRule, frameName, true);
+    out("var %s: Boolean", N.result);
+    out("var %s: Boolean", N.pinned);
+    out("val %s: %s = %s.enter_section_(%s, %s._NONE_, %s)", N.marker, shortMarker, N.runtime, N.level, shortModifiers, frameName);
+
+    boolean first = true;
+    for (String opCall : sortedOpCalls) {
+      List<OperatorInfo> operators = findOperators(opCalls.get(opCall), OperatorType.ATOM, OperatorType.PREFIX);
+      if (operators.isEmpty()) continue;
+      OperatorInfo operator = operators.get(0);
+      if (operators.size() > 1) {
+        addWarning("only first definition will be used for '" + operator.operator().getText() + "': " + operators);
+      }
+      String nodeCall = this.generateNodeCall(operator.rule(), null, operator.rule().getName()).render(R);
+      out("%s%s = %s", first ? "" : format("if (!%s) ", N.result), N.result, nodeCall);
+      first = false;
+    }
+
+    out("%s = %s", N.pinned, N.result);
+    out("%s = %s && %s(%s, %s + 1, %s)", N.result, N.result, kernelMethodName, N.runtime, N.level, N.priority);
+    out("%s.exit_section_(%s, %s, null, %s, %s, null)", N.runtime, N.level, N.marker, N.result, N.pinned);
+    out("return %s || %s", N.result, N.pinned);
+    out("}");
+    newLine();
+
+    // kernel
+    out("fun %s(%s: %s, %s: Int, %s: Int): Boolean {", kernelMethodName, N.runtime, shortRuntime, N.level, N.priority);
+    out("if (!%s.recursion_guard_(%s, \"%s\")) return false", N.runtime, N.level, kernelMethodName);
+    out("var %s = true", N.result);
+    out("while (true) {");
+    out("val %s: %s = %s.enter_section_(%s, %s._LEFT_, null)", N.marker, shortMarker, N.runtime, N.level, shortModifiers);
+
+    first = true;
+    for (String opCall : sortedOpCalls) {
+      List<OperatorInfo> operators = findOperators(opCalls.get(opCall), OperatorType.BINARY, OperatorType.N_ARY, OperatorType.POSTFIX);
+      if (operators.isEmpty()) continue;
+      OperatorInfo operator = operators.get(0);
+      if (operators.size() > 1) {
+        addWarning("only first definition will be used for '" + operator.operator().getText() + "': " + operators);
+      }
+      int priority = info.getPriority(operator.rule());
+      int arg2Priority = operator.arg2() == null ? -1 : info.getPriority(operator.arg2());
+      int argPriority = arg2Priority == -1 ? priority : arg2Priority - 1;
+
+      String substCheck = "";
+      if (operator.arg1() != null) {
+        substCheck =
+          format(" && %s.leftMarkerIs(%s)", N.runtime, shortElementTypesHolderName() + "." + getElementType(operator.arg1()));
+      }
+      out("%sif (%s < %d%s && %s) {", first ? "" : "else ", N.priority, priority, substCheck, opCall);
+      first = false;
+      String elementType = shortElementTypesHolderName() + "." + getElementType(operator.rule());
+      boolean rightAssociative = getAttribute(operator.rule(), KnownAttribute.RIGHT_ASSOCIATIVE);
+      String tailCall = operator.tail() == null ? null : generateNodeCall(
+        operator.rule(), operator.tail(), R.getNextName(R.getFuncName(operator.rule()), 1), ConsumeType.DEFAULT
+      ).render(R);
+      if (operator.type() == OperatorType.BINARY) {
+        String argCall = format("%s(%s, %s, %d)", methodName, N.runtime, N.level, rightAssociative ? argPriority - 1 : argPriority);
+        out("%s = %s", N.result, tailCall == null ? argCall : format("%s.report_error_(%s)", N.runtime, argCall));
+        if (tailCall != null) out("%s = %s && %s", N.result, tailCall, N.result);
+      }
+      else if (operator.type() == OperatorType.N_ARY) {
+        boolean checkEmpty = info.checkEmpty.contains(operator);
+        if (checkEmpty) {
+          out("val %s: Int = %s.current_position_()", N.pos, N.runtime);
+        }
+        out("while (true) {");
+        out("%s = %s.report_error_(%s(%s, %s, %d))", N.result, N.runtime, methodName, N.runtime, N.level, argPriority);
+        if (tailCall != null) out("%s = %s && %s", N.result, tailCall, N.result);
+        out("if (!%s) break", opCall);
+        if (checkEmpty) {
+          out("if (!%s.empty_element_parsed_guard_(\"%s\", %s)) break", N.runtime, operator.rule().getName(), N.pos);
+          out("%s = %s.current_position_()", N.pos, N.runtime);
+        }
+        out("}");
+      }
+      else if (operator.type() == OperatorType.POSTFIX) {
+        out("%s = true", N.result);
+      }
+      out("%s.exit_section_(%s, %s, %s, %s, true, null)", N.runtime, N.level, N.marker, elementType, N.result);
+      out("}");
+    }
+    if (first) {
+      out("// no BINARY or POSTFIX operators present");
+      out("break");
+    }
+    else {
+      out("else {");
+      out("%s.exit_section_(%s, %s, null, false, false, null)", N.runtime, N.level, N.marker);
+      out("break");
+      out("}");
+    }
+    out("}");
+    out("return %s", N.result);
+    out("}");
+
+    // operators and tails
+    Set<BnfExpression> visited = new HashSet<>();
+    for (String opCall : sortedOpCalls) {
+      for (final var operator : opCalls.get(opCall)) {
+        if (operator.type() == OperatorType.ATOM) {
+          if (Rule.isExternal(operator.rule())) continue;
+          newLine();
+          generateNode(operator.rule(), operator.rule().getExpression(), R.getFuncName(operator.rule()), visited);
+          continue;
+        }
+        else if (operator.type() == OperatorType.PREFIX) {
+          newLine();
+          String operatorFuncName = operator.rule().getName();
+          out("fun %s(%s: %s, %s: Int): Boolean {", operatorFuncName, N.runtime, shortRuntime, N.level);
+          out("if (!%s.recursion_guard_(%s, \"%s\")) return false", N.runtime, N.level, operatorFuncName);
+          generateFirstCheck(operator.rule(), frameName, false);
+          out("var %s: Boolean", N.result);
+          out("var %s: Boolean", N.pinned);
+          out("val %s: %s = %s.enter_section_(%s, %s._NONE_, null)", N.marker, shortMarker, N.runtime, N.level, shortModifiers);
+
+          String elementType = getElementType(operator.rule());
+          String tailCall = (operator.tail() == null) ? null : generateNodeCall(
+            operator.rule(), operator.tail(), R.getNextName(R.getFuncName(operator.rule()), 1), ConsumeType.DEFAULT
+          ).render(R);
+
+          out("%s = %s", N.result, opCall);
+          out("%s = %s", N.pinned, N.result);
+          int priority = info.getPriority(operator.rule());
+          int arg1Priority = operator.arg1() == null ? -1 : info.getPriority(operator.arg1());
+          int argPriority = arg1Priority == -1 ? (priority == info.nextPriority - 1 ? -1 : priority) : arg1Priority - 1;
+          out("%s = %s && %s(%s, %s, %d)", N.result, N.pinned, methodName, N.runtime, N.level, argPriority);
+          if (tailCall != null) {
+            out("%s = %s && %s.report_error_(%s) && %s", N.result, N.pinned, N.runtime, tailCall, N.result);
+          }
+          String elementTypeRef = StringUtil.isNotEmpty(elementType)
+                                  ? shortElementTypesHolderName() + "." + elementType
+                                  : "null";
+          out("%s.exit_section_(%s, %s, %s, %s, %s, null)", N.runtime, N.level, N.marker, elementTypeRef,
+              N.result, N.pinned);
+          out("return %s || %s", N.result, N.pinned);
+          out("}");
+        }
+        generateNodeChild(operator.rule(), operator.operator(), R.getFuncName(operator.rule()), 0, visited);
+        if (operator.tail() != null) {
+          generateNodeChild(operator.rule(), operator.tail(), operator.rule().getName(), 1, visited);
+        }
+      }
+    }
+  }
+
+  private @NotNull Map<String, List<OperatorInfo>> buildCallMap(@NotNull ExpressionInfo info) {
+    final var result = new LinkedHashMap<String, List<OperatorInfo>>();
+    for (final var bnfRule : info.priorityMap.keySet()) {
+      final var operatorInfo = info.operatorMap.get(bnfRule);
+      String opCall = generateNodeCall(
+        info.rootRule, operatorInfo.operator(), R.getNextName(R.getFuncName(operatorInfo.rule()), 0), CONSUME_TYPE_OVERRIDE
+      ).render(R);
+      result.computeIfAbsent(opCall, k -> new ArrayList<>(2)).add(operatorInfo);
+    }
+    return result;
+  }
+
+  private void generateParserLambdas(@NotNull String parserClass) {
+    Map<String, String> reversedLambdas = new HashMap<>();
+    take(myParserLambdas).forEach((name, body) -> {
+      String call = reversedLambdas.get(body);
+      if (call == null) {
+        call = buildParserInstance(body);
+        reversedLambdas.put(body, name);
+      }
+      out("internal val %s: Parser = %s", name, call);
+      myRenderedLambdas.put(name, parserClass);
+    });
+  }
+
+  /**
+   * Meta-methods are methods that take several {@link Parser Parser} instances as parameters and return another {@link Parser instance}.
+   *
+   * @param isRule whether meta-method may be used from another parser classes, and therefore should be accessible,
+   *               e.g. it is {@code true} for {@code meta rule ::= <<p>>},
+   *               and it is {@code false} for nested in-place method generated
+   *               for {@code <<p>> | some} in {@code meta rule ::= (<<p>> | some)* }.
+   */
+  private void generateMetaMethod(@NotNull String methodName, @NotNull List<String> parameterNames, boolean isRule) {
+    String parameterList = parameterNames.stream().map("%s: Parser"::formatted).collect(Collectors.joining(", "));
+    String argumentList = String.join(", ", parameterNames);
+    String metaParserMethodName = R.getWrapperParserMetaMethodName(methodName);
+    String call = format("%s(%s, %s + 1, %s)", methodName, N.runtime, N.level, argumentList);
+    out("%s fun %s(%s): Parser {", isRule ? "internal" : "private", metaParserMethodName, parameterList);
+    out("return %s", buildParserInstance(call));
+    out("}");
+  }
+
+  private void generateMetaMethodFields() {
+    take(myMetaMethodFields).forEach(
+      (field, call) -> out("private val %s: Parser = %s", field, call)
+    );
+  }
+
+  /**
+   * Generates the {@code EXTENDS_SETS_} array in the parser.
+   */
+  private void generateExtendsSet(@NotNull List<Set<String>> extendsSet) {
+    final var shortSet = shorten(KotlinBnfConstants.KT_SYNTAX_ELEMENT_TYPE_SET_CLASS);
+    final var shortArray = shorten(KotlinBnfConstants.KT_ARRAY_CLASS);
+    final var shortArrayOf = shorten(KotlinBnfConstants.KT_ARRAY_OF_FUNCTION);
+    final var shortElementTypesHolder = shortElementTypesHolderName();
+
+    out("val EXTENDS_SETS_: %s<%s> = %s(", shortArray, shortSet, shortArrayOf);
+    final var builder = new StringBuilder();
+    for (Set<String> elementTypes : extendsSet) {
+      int i = 0;
+      for (String elementType : elementTypes) {
+        if (i > 0) builder.append(i % 4 == 0 ? ",\n" : ", ");
+        builder.append(shortElementTypesHolder).append(".").append(elementType);
+        i++;
+      }
+      out("create_token_set_(%s),", builder);
+      builder.setLength(0);
+    }
+    out(")");
+  }
+  
+  @Override
+  public StringBuilder generateAutoRecoveryCall(List<String> tokenTypes){
+    StringBuilder sb = new StringBuilder(format("!%s.nextTokenIsFast(", N.runtime));
+    appendTokenTypes(sb, tokenTypes, shortElementTypesHolderName());
+    sb.append(")");
+    return sb;
+  }
+
+  @SuppressWarnings("DuplicatedCode")
+  @Override
+  protected @Nullable String generateFirstCheck(@NotNull BnfRule rule, @Nullable String frameName, boolean skipIfOne) {
+    if (G.generateFirstCheck <= 0) return frameName;
+    Set<BnfExpression> firstSet = myFirstNextAnalyzer.calcFirst(rule);
+    ConsumeType ruleConsumeType = getRuleConsumeType(rule, null);
+    Map<String, ConsumeType> firstElementTypes = new TreeMap<>();
+    for (BnfExpression expression : firstSet) {
+      if (expression == BNF_MATCHES_EOF || expression == BNF_MATCHES_ANY) return frameName;
+
+      String expressionString = BnfFirstNextAnalyzer.asString(expression);
+      if (myFile.getRule(expressionString) != null) continue;
+
+      String t = firstToElementType(expressionString);
+      if (t == null) return frameName;
+
+      ConsumeType childConsumeType = getRuleConsumeType(Objects.requireNonNull(Rule.of(expression)), rule);
+      ConsumeType consumeType = ConsumeType.min(ruleConsumeType, childConsumeType);
+      firstElementTypes.compute(t, (k, existing) -> ConsumeType.max(existing, consumeType));
+    }
+    if (firstElementTypes.isEmpty()) return frameName;
+
+    int allTokensCount = firstElementTypes.size();
+    // do not include frameName if FIRST is known and its size is 1
+    boolean dropFrameName = skipIfOne && allTokensCount == 1;
+    if (allTokensCount <= G.generateFirstCheck) {
+      Map<ConsumeType, List<String>> grouped = firstElementTypes.entrySet().stream().collect(Collectors.groupingBy(
+        Map.Entry::getValue,
+        () -> new EnumMap<>(ConsumeType.class),
+        Collectors.mapping(Map.Entry::getKey, Collectors.toList())
+      ));
+      String condition = grouped
+        .entrySet()
+        .stream()
+        .map(
+          entry -> {
+            ConsumeType consumeType = entry.getKey();
+            List<String> tokenTypes = entry.getValue();
+            StringBuilder sb = new StringBuilder("!");
+            sb.append(N.runtime).append(".nextTokenIs")
+              .append(consumeType.getMethodSuffix())
+              .append("(");
+            if (!dropFrameName && consumeType == ConsumeType.DEFAULT) sb.append(StringUtil.notNullize(frameName, "\"\"")).append(", ");
+            appendTokenTypes(sb, tokenTypes, shortElementTypesHolderName());
+            sb.append(")");
+            return sb;
+          }
+        ).collect(
+          Collectors.joining(" &&\n  ", "if (", ") return false")
+        );
+      out(condition);
+    }
+
+    return dropFrameName && StringUtil.isEmpty(getAttribute(rule, KnownAttribute.NAME)) ? null : frameName;
+  }
+
+  // endregion Parser generation
+
+  // region Element Types Generation
+
+  private void generateElementTypes() throws IOException {
+    final var sortedCompositeTypes = new TreeSet<String>();
+    final var typeToFactoryMap = new HashMap<String, String>();
+    for (final var rule : myFile.getRules()) {
+      final var info = ruleInfo(rule);
+      if (info.intfPackage == null) continue;
+      final var elementType = info.elementType;
+      if (StringUtil.isEmpty(elementType)) continue;
+      if (sortedCompositeTypes.contains(elementType)) continue;
+      if (!info.isFake || info.isInElementType) {
+        var factory = getAttribute(rule, KnownAttribute.SYNTAX_ELEMENT_TYPE_FACTORY);
+        if (factory != null && !factory.isEmpty()) {
+          typeToFactoryMap.put(elementType, factory);
+        }
+        sortedCompositeTypes.add(elementType);
+      }
+    }
+    openOutput(myElementTypesHolderName);
+    try {
+      generateElementTypesImpl(myElementTypesHolderName, sortedCompositeTypes, typeToFactoryMap);
+    }
+    finally {
+      closeOutput();
+    }
+  }
+
+  private void generateElementTypesImpl(@NotNull String objectName, @NotNull Set<String> sortedCompositeTypes, @NotNull Map<String, String> typeToFactoryMap) {
+    // file header
+    generateFileHeader(objectName);
+
+    // package declaration
+    final var packageName = StringUtil.getPackageName(objectName);
+    if (StringUtil.isNotEmpty(packageName)) {
+      out("package %s", packageName);
+      newLine();
+    }
+
+    final var imports = ContainerUtil.newLinkedHashSet(
+      KotlinBnfConstants.KT_ELEMENT_TYPE_CLASS,
+      KotlinBnfConstants.KT_SYNTAX_ELEMENT_TYPE_SET_CLASS,
+      KotlinBnfConstants.KT_SYNTAX_ELEMENT_TYPE_SET_OF_FUNCTION
+    );
+    imports.addAll(typeToFactoryMap.values().stream().map(StringUtil::getPackageName).distinct().toList());
+    final var includedClasses = collectClasses(imports, packageName);
+    final var nameShortener = new KotlinNameShortener(packageName, !G.generateFQN);
+    nameShortener.addImports(imports, includedClasses);
+
+    imports.forEach(name -> out("import %s", name));
+    newLine();
+
+    final var shortElementType = nameShortener.shorten(KotlinBnfConstants.KT_ELEMENT_TYPE_CLASS);
+    final var shortClassName = StringUtil.getShortName(objectName);
+
+    // object definition
+    out("object %s {", shortClassName);
+    if (G.generateElementTypes) {
+      for (final var elementType : sortedCompositeTypes) {
+        var factory = typeToFactoryMap.getOrDefault(elementType, null);
+        if (factory != null){
+          var createCall = shorten(StringUtil.getPackageName(factory)) + "." + StringUtil.getShortName(factory); 
+          out("val %s = %s(\"%s\")", elementType, createCall, elementType);
+        }
+        else {
+          out("val %s = %s(\"%s\")", elementType, shortElementType, elementType);
+        }
+      }
+    }
+    if (G.generateTokenTypes) {
+      generateTokenDefinitions(nameShortener);
+      generateTokenSets(nameShortener);
+    }
+    out("}");
+  }
+
+  private void generateTokenDefinitions(@NotNull NameShortener nameShortener) {
+    if (mySimpleTokens.isEmpty()) return;
+    newLine();
+    final var shortElementType = nameShortener.shorten(KotlinBnfConstants.KT_ELEMENT_TYPE_CLASS);
+    final var sortedTokens = new TreeMap<String, String>();
+    for (String tokenText : mySimpleTokens.keySet()) {
+      String tokenName = ObjectUtils.chooseNotNull(mySimpleTokens.get(tokenText), tokenText);
+      if (isIgnoredWhitespaceToken(tokenName, tokenText)) continue;
+      sortedTokens.put(getElementType(tokenName), isRegexpToken(tokenText) ? tokenName : tokenText);
+    }
+    for (final var tokenType : sortedTokens.keySet()) {
+      final var tokenString = sortedTokens.get(tokenType);
+      out("val %s = %s(\"%s\")", tokenType, shortElementType, StringUtil.escapeStringCharacters(tokenString));
+    }
+  }
+
+  private void generateTokenSets(@NotNull NameShortener shortener) {
+    if (myChoiceTokenSets.isEmpty()) return;
+    newLine();
+    Map<String, String> reverseMap = new HashMap<>();
+    final var shortSetOf = shortener.shorten(KotlinBnfConstants.KT_SYNTAX_ELEMENT_TYPE_SET_OF_FUNCTION);
+    final var shortSetClass = shortener.shorten(KotlinBnfConstants.KT_SYNTAX_ELEMENT_TYPE_SET_CLASS);
+    myChoiceTokenSets.forEach((name, tokens) -> {
+      final var call = "%s(%s)".formatted(shortSetOf, tokenSetString(tokens));
+      String alreadyRendered = reverseMap.putIfAbsent(call, name);
+      out("val %s: %s = %s", name, shortSetClass, ObjectUtils.chooseNotNull(alreadyRendered, call));
+    });
+  }
+
+  // endregion Element Types Generation
+
+  // endregion generate* methods
+
+  /**
+   * Builds and returns a set of all imports to be included in the parser.
+   */
+  private @NotNull Set<@NotNull String> createImportsSet(boolean isRootParser) {
+    final var parserImports = getRootAttribute(myFile, KnownAttribute.PARSER_IMPORTS).asStrings();
+    final var imports = new LinkedHashSet<String>();
+    imports.add(myElementTypesHolderName);
+    imports.add(myParserUtil);
+    imports.add(starImport(KotlinBnfConstants.KT_RUNTIME_PACKAGE));
+    if (!G.generateFQN) {
+      imports.add(C.SyntaxTreeBuilderClass() + ".Marker");
+      imports.add(KotlinBnfConstants.KT_PARSER_RUNTIME_CLASS);
+    }
+    else {
+      imports.add("#forced");
+    }
+    if (!isRootParser) {
+      imports.add(myGrammarRootParser);
+    }
+    else if (!G.generateFQN) {
+      imports.add(KotlinBnfConstants.KT_SYNTAX_ELEMENT_TYPE_SET_CLASS);
+      imports.add(KotlinBnfConstants.KT_SYNTAX_ELEMENT_TYPE_SET_OF_FUNCTION);
+      imports.add(KotlinBnfConstants.KT_ELEMENT_TYPE_CLASS);
+      imports.add(KotlinBnfConstants.KT_MODIFIERS_CLASS);
+    }
+    imports.addAll(parserImports);
+    return imports;
+  }
+
+  /**
+   * Given a lambda function's body, returns a string representing
+   * a Parser lambda instance.
+   */
+  private @NotNull String buildParserInstance(@NotNull String body) {
+    return "{ %s, %s -> %s }".formatted(N.runtime, N.level, body);
+  }
+
+  private @NotNull ConsumeType getRuleConsumeType(@NotNull BnfRule rule, @Nullable BnfRule contextRule) {
+    ConsumeType forcedConsumeType = ExpressionGeneratorHelper.fixForcedConsumeType(myExpressionHelper, rule, null, null);
+    if (forcedConsumeType != null && contextRule != null && myExpressionHelper.getExpressionInfo(contextRule) == null) {
+      // do not force child expr consume-type in a non-expr context
+      forcedConsumeType = null;
+    }
+    return ObjectUtils.chooseNotNull(forcedConsumeType, ConsumeType.forRule(rule));
+  }
+
+  private @NotNull List<String> collectMetaParametersFormatted(@NotNull BnfRule rule, @Nullable BnfExpression expression) {
+    if (expression == null) return Collections.emptyList();
+    return map(GrammarUtil.collectMetaParameters(rule, expression),
+               it -> formatMetaParamName(it.substring(2, it.length() - 2)));
+  }
+
+  @Override
+  @NotNull NodeCall generateTokenSequenceCall(@NotNull List<BnfExpression> children,
+                                                    int startIndex,
+                                                    PinMatcher pinMatcher,
+                                                    boolean pinApplied,
+                                                    Ref<Integer> skip,
+                                                    @NotNull NodeCall nodeCall,
+                                                    boolean rollbackOnFail,
+                                                    ConsumeType consumeType) {
+    if (startIndex == children.size() - 1 || !(nodeCall instanceof KotlinConsumeTokenCall)) return nodeCall;
+    final var list = new ArrayList<String>();
+    int pin = pinApplied ? -1 : 0;
+    for (int i = startIndex, len = children.size(); i < len; i++) {
+      BnfExpression child = children.get(i);
+      final var text = child.getText();
+      final String tokenName;
+      if (child instanceof BnfStringLiteralExpression) {
+        tokenName = getTokenName(GrammarUtil.unquote(text));
+      }
+      else if (child instanceof BnfReferenceOrToken && myFile.getRule(text) == null) {
+        tokenName = text;
+      }
+      else {
+        tokenName = null;
+      }
+      if (tokenName == null) break;
+      list.add(shortElementTypesHolderName() + "." + getElementType(tokenName));
+      if (!pinApplied && pinMatcher.matches(i, child)) {
+        pin = i - startIndex + 1;
+        pinApplied = true;
+      }
+    }
+    if (list.size() < 2) return nodeCall;
+    skip.set(list.size() - 1);
+    String consumeMethodName = (rollbackOnFail ? "parseTokens" : "consumeTokens") +
+                               (consumeType == ConsumeType.SMART ? consumeType.getMethodSuffix() : "");
+    return new KotlinConsumeTokensCall(consumeMethodName, N.runtime, pin, list);
+  }
+
+  @Override
+  @NotNull NodeCall instantiateTokenChoiceCall(@NotNull ConsumeType consumeType, @NotNull String tokenSetName) {
+    return new KotlinConsumeTokenChoiceCall(consumeType, shortElementTypesHolderName() + "." + tokenSetName, N);
+  }
+
+  @Override
+  @NotNull NodeCall generateNodeCall(@NotNull BnfRule rule,
+                                     @Nullable BnfExpression node,
+                                     @NotNull String nextName,
+                                     @Nullable ConsumeType forcedConsumeType) {
+    IElementType type = node == null ? BNF_REFERENCE_OR_TOKEN : getEffectiveType(node);
+    String text = node == null ? nextName : node.getText();
+
+    if (type == BNF_STRING) {
+      String value = GrammarUtil.unquote(text);
+      String attributeName = getTokenName(value);
+      ConsumeType consumeType = getEffectiveConsumeType(rule, node, forcedConsumeType);
+      if (attributeName != null) {
+        return createConsumeToken(consumeType, attributeName);
+      }
+      return getConsumeTextToken(consumeType, text.startsWith("\"") ? value : StringUtil.escapeStringCharacters(value));
+    }
+    else if (type == BNF_NUMBER) {
+      ConsumeType consumeType = getEffectiveConsumeType(rule, node, forcedConsumeType);
+      return getConsumeTextToken(consumeType, text);
+    }
+    else if (type == BNF_REFERENCE_OR_TOKEN) {
+      String value = GrammarUtil.stripQuotesAroundId(text);
+      BnfRule subRule = myFile.getRule(value);
+      if (subRule != null) {
+        if (Rule.isExternal(subRule)) {
+          return generateExternalCall(rule, GrammarUtil.getExternalRuleExpressions(subRule), nextName);
+        }
+        else {
+          ExpressionInfo info = ExpressionGeneratorHelper.getInfoForExpressionParsing(myExpressionHelper, subRule);
+          BnfRule rr = info != null ? info.rootRule : subRule;
+          String method = R.getFuncName(rr);
+          String parserClass = this.ruleInfo(rr).parserClass;
+          String parserClassName = StringUtil.getShortName(parserClass);
+          boolean renderClass = !parserClass.equals(myGrammarRootParser) && !parserClass.equals(this.ruleInfo(rule).parserClass);
+          if (info == null) {
+            return new MethodCall(renderClass, parserClassName, method, N.runtime, N.level);
+          }
+          else {
+            if (renderClass) {
+              method = StringUtil.getQualifiedName(parserClassName, method);
+            }
+            return new ExpressionMethodCall(method, N.runtime, N.level, info.getPriority(subRule) - 1);
+          }
+        }
+      }
+      // allow token usage by registered token name instead of token text
+      if (!mySimpleTokens.containsKey(text) && !mySimpleTokens.containsValue(text)) {
+        mySimpleTokens.put(text, null);
+      }
+      final var consumeType = getEffectiveConsumeType(rule, node, forcedConsumeType);
+      return createConsumeToken(consumeType, text);
+    }
+    else if (isTokenSequence(rule, node)) {
+      final var consumeType = getEffectiveConsumeType(rule, node, forcedConsumeType);
+      final var pinMatcher = new PinMatcher(rule, type, nextName);
+      List<BnfExpression> childExpressions = getChildExpressions(node);
+      final var firstElement = ContainerUtil.getFirstItem(childExpressions);
+      final var nodeCall = generateNodeCall(rule, firstElement, R.getNextName(nextName, 0), consumeType);
+      for (PsiElement childExpression : childExpressions) {
+        final var childText = childExpression instanceof BnfStringLiteralExpression
+                              ? GrammarUtil.unquote(childExpression.getText())
+                              : childExpression.getText();
+        if (!mySimpleTokens.containsKey(childText) && !mySimpleTokens.containsValue(childText)) {
+          mySimpleTokens.put(childText, null);
+        }
+      }
+      return generateTokenSequenceCall(childExpressions, 0, pinMatcher, false, Ref.create(0), nodeCall, true, consumeType);
+    }
+    else if (type == BNF_EXTERNAL_EXPRESSION) {
+      List<BnfExpression> expressions = ((BnfExternalExpression)node).getExpressionList();
+      if (expressions.size() == 1 && Rule.isMeta(rule)) {
+        return new MetaParameterCall(formatMetaParamName(expressions.get(0).getText()), N.runtime, N.level);
+      }
+      else {
+        return generateExternalCall(rule, expressions, nextName);
+      }
+    }
+    else {
+      List<String> extraArguments = collectMetaParametersFormatted(rule, node);
+      final var className = StringUtil.getShortName(this.ruleInfo(rule).parserClass);
+      if (extraArguments.isEmpty()) {
+        return new MethodCall(false, className, nextName, N.runtime, N.level);
+      }
+      else {
+        return new MetaMethodCall(null, nextName, N.runtime, N.level, map(extraArguments, MetaParameterArgument::new));
+      }
+    }
+  }
+
+  private @NotNull ConsumeType getEffectiveConsumeType(@NotNull BnfRule rule,
+                                                       @Nullable BnfExpression node,
+                                                       @Nullable ConsumeType forcedConsumeType) {
+    if (forcedConsumeType == ConsumeType.DEFAULT) return ConsumeType.DEFAULT;
+    PsiElement parent = node == null ? null : node.getParent();
+
+    if (forcedConsumeType == null && parent instanceof BnfSequence &&
+        ContainerUtil.getFirstItem(((BnfSequence)parent).getExpressionList()) != node) {
+      Set<BnfExpression> expressions = BnfFirstNextAnalyzer.createAnalyzer(false, false, o -> o != parent)
+        .calcFirst((BnfExpression)parent);
+      if (expressions.size() != 1 || expressions.iterator().next() != node) {
+        return ConsumeType.DEFAULT;
+      }
+    }
+    ConsumeType fixed = ExpressionGeneratorHelper.fixForcedConsumeType(myExpressionHelper, rule, node, forcedConsumeType);
+    return fixed != null ? fixed : ConsumeType.forRule(rule);
+  }
+
+  private @NotNull NodeCall generateExternalCall(@NotNull BnfRule rule,
+                                               @NotNull List<BnfExpression> expressions,
+                                               @NotNull String nextName) {
+    NodeCall externalCall = generateExternalCall(rule, expressions, nextName, N.runtime);
+    if (!(externalCall instanceof MetaMethodCall) && externalCall instanceof MethodCallWithArguments callWithArguments){
+      if (isRuntimeMethod(callWithArguments.getMethodRef())){
+        externalCall = new RuntimeMethodCall(callWithArguments.methodName,
+                                             callWithArguments.builder,
+                                             callWithArguments.level);
+      }
+      else {
+        if (!myParserUtil.isEmpty()) {
+          externalCall = new ObjectMethodCall(shorten(myParserUtil),
+                                              callWithArguments.methodName,
+                                              callWithArguments.builder,
+                                              callWithArguments.level,
+                                              callWithArguments.arguments);
+        }
+      }
+    }
+    return externalCall;
+  }
+  
+  private Boolean isRuntimeMethod(String methodName){
+    return mySGPRMethods.contains(methodName);
+  }
+
+
+  private @NotNull NodeCall createConsumeToken(@NotNull ConsumeType consumeType, @NotNull String tokenName) {
+    myTokensUsedInGrammar.add(tokenName);
+    return new KotlinConsumeTokenCall(consumeType, shortElementTypesHolderName() + "." + getElementType(tokenName), N);
+  }
+
+  // region Utils
+
+  private boolean isIgnoredWhitespaceToken(@NotNull String tokenName, @NotNull String tokenText) {
+    return isRegexpToken(tokenText) &&
+           !myTokensUsedInGrammar.contains(tokenName) &&
+           matchesAny(getRegexpTokenRegexp(tokenText), " ", "\n") &&
+           !matchesAny(getRegexpTokenRegexp(tokenText), "a", "1", "_", ".");
+  }
+
+  // endregion Utils
+}

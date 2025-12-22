@@ -1,4 +1,5 @@
 {
+  generate=[parser-api="syntax"]
   generatePsi=true
   classHeader="//header.txt"
   psiPackage="test.psi"
@@ -6,10 +7,15 @@
   psiTreeUtilClass="test.psi.MyPsiTreeUtil"
   parserClass="test.FooParser"
   elementTypeFactory="test.FooParserDefinition.createType"
+  syntaxElementTypeFactory="test.FooParserDefinition.createSyntaxType"
   tokenTypeFactory="test.stub.FooParserDefinition.createTokenType"
   elementTypeHolderClass="test.FooTypes"
   parserUtilClass="org.intellij.grammar.parser.GeneratedParserUtilBase"
   expressionUtilClass="test.FooUtil"
+  
+  syntaxElementTypeHolderClass="test.FooSyntaxTypes"
+  syntaxElement="test.FooSyntaxTypes"
+  psiOutputPath="myPsi/output"
 
   extends("element1|type")="org.intellij.grammar.test.StubTest.GenericBase<?>"
   extends("simple")="org.intellij.grammar.test.StubTest.SimpleBase"

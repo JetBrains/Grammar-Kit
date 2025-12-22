@@ -8,56 +8,57 @@ import com.intellij.openapi.application.ApplicationManager;
 import org.jetbrains.annotations.NotNull;
 
 /**
-* @author greg
-*/
-class Names {
-  public final String builder;
-  public final String level;
-  public final String marker;
-  public final String pinned;
-  public final String result;
-  public final String pos;
-  public final String root;
-  public final String priority;
-  public final String metaParamPrefix;
-  public final String psiLocal = "p";
+ * @author greg
+ */
+public final class Names {
+  public final @NotNull String builder;
+  public final @NotNull String level;
+  public final @NotNull String marker;
+  public final @NotNull String pinned;
+  public final @NotNull String result;
+  public final @NotNull String parse;
+  public final @NotNull String pos;
+  public final @NotNull String root;
+  public final @NotNull String priority;
+  public final @NotNull String metaParamPrefix;
+  public final @NotNull String psiLocal = "p";
+  public final @NotNull String runtime;
 
-  private Names(String builder,
-                String level,
-                String marker,
-                String pinned,
-                String result,
-                String pos,
-                String root,
-                String priority,
-                String metaParamPrefix) {
+  private Names(@NotNull String builder,
+                @NotNull String level,
+                @NotNull String marker,
+                @NotNull String pinned,
+                @NotNull String result,
+                @NotNull String parse,
+                @NotNull String pos,
+                @NotNull String root,
+                @NotNull String priority,
+                @NotNull String metaParamPrefix,
+                @NotNull String runtime) {
     this.builder = builder;
     this.level = level;
     this.marker = marker;
     this.pinned = pinned;
     this.result = result;
+    this.parse = parse;
     this.pos = pos;
     this.root = root;
     this.priority = priority;
     this.metaParamPrefix = metaParamPrefix;
+    this.runtime = runtime;
   }
 
-  public static Names classicNames() {
-    return new Names("builder_", "level_", "marker_", "pinned_", "result_", "pos_", "root_", "priority_", "");
-  }
-
-  public static Names longNames() {
-    return new Names("builder", "level", "marker", "pinned", "result", "pos", "type", "priority", "a");
-  }
-
-  public static Names shortNames() {
-    return new Names("b", "l", "m", "p", "r", "c", "t", "g", "_");
-  }
+  public static final @NotNull Names CLASSIC_NAMES =
+    new Names("builder_", "level_", "marker_", "pinned_", "result_", "parse_", "pos_", "root_", "priority_", "", "runtime_");
+  public static final @NotNull Names LONG_NAMES =
+    new Names("builder", "level", "marker", "pinned", "result", "parse", "pos", "type", "priority", "a", "runtime");
+  public static final @NotNull Names SHORT_NAMES =
+    new Names("b", "l", "m", "p", "r", "f", "c", "t", "g", "_", "s");
 
   public static @NotNull Names forName(String name) {
-    if ("long".equals(name)) return longNames();
-    if ("short".equals(name)) return shortNames();
-    if ("classic".equals(name)) return classicNames();
-    return ApplicationManager.getApplication().isUnitTestMode() ? classicNames() : shortNames();
+    if ("classic".equals(name)) return CLASSIC_NAMES;
+    if ("long".equals(name)) return LONG_NAMES;
+    if ("short".equals(name)) return SHORT_NAMES;
+    return ApplicationManager.getApplication().isUnitTestMode() ? CLASSIC_NAMES : SHORT_NAMES;
   }
 }

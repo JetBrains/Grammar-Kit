@@ -1,3 +1,7 @@
+/*
+ * Copyright 2011-2025 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
+ */
+
 package org.intellij.grammar;
 
 import com.intellij.concurrency.JobLauncher;
@@ -13,13 +17,22 @@ import com.intellij.psi.PsiReferenceService;
 import com.intellij.psi.PsiReferenceServiceImpl;
 import com.intellij.psi.impl.PsiFileFactoryImpl;
 import com.intellij.psi.impl.source.resolve.ResolveCache;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * @author gregsh
  */
 public class BnfGeneratorTestCase extends AbstractParsingTestCase {
+  protected static final @NotNull String BNF_FILES_DIR = "generator";
+  protected final @NotNull String myBnfFilesDir;
+
   public BnfGeneratorTestCase(String testDataName) {
     super(testDataName, "bnf", new BnfParserDefinition());
+    myBnfFilesDir = this.getTestDataPath() + "/" + BNF_FILES_DIR;
+  }
+  
+  protected @NotNull String getBnfFilesDir() {
+    return myBnfFilesDir;
   }
 
   @SuppressWarnings("UnstableApiUsage")

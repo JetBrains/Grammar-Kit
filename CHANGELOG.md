@@ -2,6 +2,9 @@
 
 ## [Unreleased]
 * BNF Highlighting: distinguish explicit vs. implicit tokens [#383](https://github.com/JetBrains/Grammar-Kit/pull/383) by @fan-tom
+* Generator: allow configuring fallback stub element type [#403](https://github.com/JetBrains/Grammar-Kit/pull/403)
+* Generator: fix invalid @Experimental annotation generation for 2025.1 [#399](https://github.com/JetBrains/Grammar-Kit/pull/400)
+* BNF: fix potential NPE in attribute compatibility resolution [#404](https://github.com/JetBrains/Grammar-Kit/issues/404)
 
 ## [2023.3]
 

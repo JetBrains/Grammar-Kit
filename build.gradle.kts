@@ -70,15 +70,19 @@ intellijPlatform {
 
     pluginConfiguration {
         name = providers.gradleProperty("pluginName")
+        version = providers.gradleProperty("pluginVersion")
+
         val changelog = project.changelog // local variable for configuration cache compatibility
-        changeNotes = provider {
-            changelog.renderItem(
-                changelog
-                    .getUnreleased()
+        // Get the latest available change notes from the changelog file
+        changeNotes = providers.gradleProperty("pluginVersion").map { pluginVersion ->
+            with(changelog) {
+                renderItem(
+                    (getOrNull(pluginVersion) ?: getUnreleased())
                     .withHeader(false)
                     .withEmptySections(false),
-                Changelog.OutputType.HTML
-            )
+                    Changelog.OutputType.HTML,
+                )
+            }
         }
 
         ideaVersion {
@@ -96,9 +100,8 @@ intellijPlatform {
         token = providers.environmentVariable("PUBLISH_TOKEN")
         // The pluginVersion is based on the SemVer (https://semver.org) and supports pre-release labels, like 2.1.7-alpha.3
         // Specify pre-release label to publish the plugin in a custom Release Channel automatically. Read more:
-        // https://plugins.jetbrains.com/docs/intellij/deployment.html#specifying-a-release-channel
-        channels =
-            providers.gradleProperty("pluginVersion").map { listOf(it.substringAfter('-', "").substringBefore('.').ifEmpty { "default" }) }
+        // https://plugins.jetbrains.com/docs/intellij/publishing-plugin.html#specifying-a-release-channel
+        channels = providers.gradleProperty("pluginVersion").map { listOf(it.substringAfter('-', "").substringBefore('.').ifEmpty { "default" }) }
     }
 
     pluginVerification {
@@ -108,6 +111,7 @@ intellijPlatform {
     }
 }
 
+// Configure Gradle Changelog Plugin - read more: https://github.com/JetBrains/gradle-changelog-plugin
 changelog {
     header = project.provider { project.version.toString() }
     headerParserRegex = """(\d+(\.\d+)+)"""

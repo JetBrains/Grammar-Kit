@@ -1,9 +1,15 @@
 /*
  * Copyright 2011-2024 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
  */
+import okhttp3.MultipartBody
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.RequestBody.Companion.asRequestBody
+import org.gradle.kotlin.dsl.get
 import org.jetbrains.changelog.Changelog
 import org.jetbrains.changelog.ChangelogSectionUrlBuilder
 import org.jetbrains.intellij.platform.gradle.TestFrameworkType
+import java.util.Base64
 
 plugins {
     java
@@ -16,11 +22,22 @@ plugins {
     alias(libs.plugins.publishPlugin)
 }
 
+buildscript {
+    dependencies {
+        classpath("com.squareup.okhttp3:okhttp:4.12.0")
+    }
+}
+
 group = providers.gradleProperty("pluginGroup").get()
 version = providers.gradleProperty("pluginVersion").get()
 
 repositories {
     mavenCentral()
+
+    maven {
+        name = "artifacts"
+        url = uri(layout.buildDirectory.dir("artifacts/maven"))
+    }
 
     intellijPlatform {
         defaultRepositories()
@@ -202,15 +219,97 @@ tasks {
     }
 
     defaultTasks("clean", "artifacts", "test")
+
+    val packSonatypeCentralBundle by registering(Zip::class) {
+        group = "publishing"
+
+        dependsOn(":publishAllPublicationsToArtifactsRepository")
+
+        from(layout.buildDirectory.dir("artifacts/maven"))
+        archiveFileName.set("bundle.zip")
+        destinationDirectory.set(layout.buildDirectory)
+    }
+
+    abstract class PublishMavenToCentralPortal : DefaultTask() {
+
+        @get:Input
+        abstract val deploymentName: Property<String>
+
+        @get:Input
+        abstract val centralPortalUserName: Property<String>
+
+        @get:Input
+        abstract val centralPortalToken: Property<String>
+
+        @get:InputFile
+        abstract val bundleFile: RegularFileProperty
+
+        @TaskAction
+        fun publish() {
+            val uriBase = "https://central.sonatype.com/api/v1/publisher/upload"
+            val publishingType = "USER_MANAGED"
+            val uri = "$uriBase?name=${deploymentName.get()}&publishingType=$publishingType"
+            val file = bundleFile.get().asFile
+            val userName = centralPortalUserName.orNull
+            val token = centralPortalToken.orNull
+
+            val base64Auth = Base64
+                .getEncoder()
+                .encode("$userName:$token".toByteArray())
+                .toString(Charsets.UTF_8)
+
+            println("Sending request to $uri...")
+
+            val client = OkHttpClient()
+            val request = Request.Builder()
+                .url(uri)
+                .header("Authorization", "Bearer $base64Auth")
+                .post(
+                    MultipartBody.Builder()
+                        .setType(MultipartBody.FORM)
+                        .addFormDataPart("bundle", file.name, file.asRequestBody())
+                        .build()
+                )
+                .build()
+            client.newCall(request).execute().use { response ->
+                val statusCode = response.code
+                println("Upload status code: $statusCode")
+                println("Upload result: ${response.body!!.string()}")
+                if (statusCode != 201) {
+                    error("Upload error to Central repository. Status code $statusCode.")
+                }
+            }
+        }
+    }
+
+    val publishMavenToCentralPortal by registering(PublishMavenToCentralPortal::class) {
+        group = "publishing"
+
+        deploymentName = "${project.name}-$version"
+        bundleFile = packSonatypeCentralBundle.flatMap { it.archiveFile }
+        centralPortalUserName = providers.gradleProperty("centralPortalUserName")
+        centralPortalToken = providers.gradleProperty("centralPortalToken")
+
+        dependsOn(packSonatypeCentralBundle)
+    }
 }
 
 publishing {
+    repositories {
+        maven {
+            name = "artifacts"
+            url = uri(layout.buildDirectory.dir("artifacts/maven"))
+        }
+    }
+
     publications {
         create<MavenPublication>("grammarKitJar") {
             groupId = project.group.toString()
             artifactId = project.name
             version = project.version.toString()
             from(components["java"])
+//            artifact(tasks["sourcesJar"])
+//            artifact(tasks["javadocJar"])
 
             pom {
                 name = "JetBrains Grammar-Kit"
@@ -239,21 +338,12 @@ publishing {
     }
 }
 
-nexusPublishing {
-    repositories {
-        sonatype {
-            username = providers.gradleProperty("mavenCentralUsername").orNull
-            password = providers.gradleProperty("mavenCentralPassword").orNull
-        }
-    }
-}
-
 // only available in the release workflow
 signing {
-    val signingKey = project.findProperty("signingKey").toString()
-    val signingPassword = project.findProperty("signingPassword").toString()
+    val signingKey = project.findProperty("signingKey") as String?
+    val signingPassword = project.findProperty("signingPassword").toString() as String?
 
-    isRequired = signingKey.isNotEmpty() && signingPassword.isNotEmpty()
+    isRequired = !signingKey.isNullOrEmpty() && !signingPassword.isNullOrEmpty()
 
     useInMemoryPgpKeys(signingKey, signingPassword)
     sign(publishing.publications["grammarKitJar"])

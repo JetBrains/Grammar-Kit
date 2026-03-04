@@ -247,7 +247,7 @@ tasks {
         @TaskAction
         fun publish() {
             val uriBase = "https://central.sonatype.com/api/v1/publisher/upload"
-            val publishingType = "USER_MANAGED"
+            val publishingType = "AUTOMATIC"
             val uri = "$uriBase?name=${deploymentName.get()}&publishingType=$publishingType"
             val file = bundleFile.get().asFile
             val userName = centralPortalUserName.orNull

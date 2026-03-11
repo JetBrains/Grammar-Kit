@@ -295,11 +295,16 @@ public abstract class JavaHelper {
                                    typeToSkip.getAnnotations();
       String[] textToSkip = annoToSkip == null ? null :
                             ContainerUtil.map(annoToSkip, PsiElement::getText, ArrayUtil.EMPTY_STRING_ARRAY);
+      // Fallback: canonical type text includes annotations even for qualified types
+      // where PsiType.getAnnotations() may miss them (#436)
+      String typeText = typeToSkip == null ? null : typeToSkip.getCanonicalText(true);
       List<String> result = new ArrayList<>();
       for (PsiAnnotation annotation : modifierList.getAnnotations()) {
         if (annotation.getParameterList().getAttributes().length > 0) continue;
         if (textToSkip != null && ArrayUtil.indexOf(textToSkip, annotation.getText()) != - 1) continue;
-        ContainerUtil.addIfNotNull(result, annotation.getQualifiedName());
+        String qualifiedName = annotation.getQualifiedName();
+        if (qualifiedName != null && typeText != null && typeText.contains("@" + qualifiedName + " ")) continue;
+        ContainerUtil.addIfNotNull(result, qualifiedName);
       }
       return result;
     }

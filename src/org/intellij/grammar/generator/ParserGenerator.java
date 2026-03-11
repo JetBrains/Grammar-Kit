@@ -2049,7 +2049,9 @@ public class ParserGenerator extends GeneratorBase {
     for (String s : myJavaHelper.getAnnotations(method)) {
       if ("java.lang.Override".equals(s)) continue;
       if (s.startsWith("kotlin.")) continue;
-      out("@" + shorten(s));
+      String shortAnno = shorten(s);
+      if (returnType.contains("@" + shortAnno + " ")) continue;
+      out("@" + shortAnno);
     }
     Function<Integer, List<String>> annoProvider = i -> myJavaHelper.getParameterAnnotations(method, (i - 1) / 2);
     Function<String, String> substitutor = ParserGeneratorUtil::unwrapTypeArgumentForParamList;

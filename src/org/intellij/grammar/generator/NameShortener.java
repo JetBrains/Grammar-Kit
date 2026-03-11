@@ -59,7 +59,7 @@ public class NameShortener {
       String pkg;
       if (TYPE_TEXT_SEPARATORS.contains(part) ||
           "?".equals(part) || "extends".equals(part) || "super".equals(part)) {
-        if ("\"".equals(part) && offset > 0 && s.indexOf(offset - 1) != '\\') quoted = !quoted;
+        if ("\"".equals(part) && offset > 0 && s.charAt(offset - 1) != '\\') quoted = !quoted;
         sb.append(part);
         if (",".equals(part) && offset < len && !Character.isWhitespace(s.charAt(offset + 1))) {
           sb.append(" "); // Map<K,V> psi types skip space after comma
@@ -106,7 +106,7 @@ public class NameShortener {
     for (String part : StringUtil.tokenize(new StringTokenizer(StringUtil.trimEnd(s, "..."), TYPE_TEXT_SEPARATORS, true))) {
       if (TYPE_TEXT_SEPARATORS.contains(part) ||
           "?".equals(part) || "extends".equals(part) || "super".equals(part)) {
-        if ("\"".equals(part) && offset > 0 && s.indexOf(offset - 1) != '\\') quoted = !quoted;
+        if ("\"".equals(part) && offset > 0 && s.charAt(offset - 1) != '\\') quoted = !quoted;
         if (!quoted && "(".equals(part)) parenCount ++;
         if (!quoted && ")".equals(part)) parenCount --;
       }

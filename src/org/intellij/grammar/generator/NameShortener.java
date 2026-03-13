@@ -140,4 +140,23 @@ public class NameShortener {
     return name.indexOf("<") < name.indexOf(">") ? name.substring(0, name.indexOf("<")) : name;
   }
 
+  /**
+   * Finds the first {@code <} that is not inside a quoted string ({@code "..."}).
+   * Used to locate the start of generic type parameters while ignoring
+   * angle brackets inside annotation string arguments.
+   */
+  public static int indexOfUnquotedAngleBracket(@NotNull String s) {
+    boolean inQuotes = false;
+    for (int i = 0; i < s.length(); i++) {
+      char c = s.charAt(i);
+      if (c == '"' && (i == 0 || s.charAt(i - 1) != '\\')) {
+        inQuotes = !inQuotes;
+      }
+      else if (c == '<' && !inQuotes) {
+        return i;
+      }
+    }
+    return -1;
+  }
+
 }

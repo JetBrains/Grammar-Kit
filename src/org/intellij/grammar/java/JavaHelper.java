@@ -300,7 +300,7 @@ public abstract class JavaHelper {
       // Remove once the platform fix (IJ-MR-188692) is available in the minimum supported version.
       String typeText = typeToSkip == null ? null : typeToSkip.getCanonicalText(true);
       if (typeText != null) {
-        int angleIdx = typeText.indexOf('<');
+        int angleIdx = NameShortener.indexOfUnquotedAngleBracket(typeText);
         if (angleIdx >= 0) typeText = typeText.substring(0, angleIdx);
       }
       // endregion

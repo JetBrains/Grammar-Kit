@@ -2046,17 +2046,17 @@ public class ParserGenerator extends GeneratorBase {
     List<String> exceptionList = myJavaHelper.getExceptionList(method);
 
     if (!intf /*|| hasMethodInInfos*/) out(shorten(OVERRIDE_ANNO));
+    // region Workaround for IDEA-384557: skip annotation already embedded in return type text.
+    // Remove once the platform fix (IJ-MR-188692) is available in the minimum supported version.
+    String topLevelType = returnType;
+    int angleIdx = NameShortener.indexOfUnquotedAngleBracket(topLevelType);
+    if (angleIdx >= 0) topLevelType = topLevelType.substring(0, angleIdx);
+    // endregion
     for (String s : myJavaHelper.getAnnotations(method)) {
       if ("java.lang.Override".equals(s)) continue;
       if (s.startsWith("kotlin.")) continue;
       String shortAnno = shorten(s);
-      // region Workaround for IDEA-384557: skip annotation already embedded in return type text.
-      // Remove once the platform fix (IJ-MR-188692) is available in the minimum supported version.
-      String topLevelType = returnType;
-      int angleIdx = topLevelType.indexOf('<');
-      if (angleIdx >= 0) topLevelType = topLevelType.substring(0, angleIdx);
-      if (topLevelType.contains("@" + shortAnno + " ")) continue;
-      // endregion
+      if (topLevelType.contains("@" + shortAnno + " ")) continue; // IDEA-384557 workaround
       out("@" + shortAnno);
     }
     Function<Integer, List<String>> annoProvider = i -> myJavaHelper.getParameterAnnotations(method, (i - 1) / 2);

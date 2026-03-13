@@ -11,6 +11,7 @@ import com.intellij.psi.*;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.testFramework.fixtures.BasePlatformTestCase;
 import com.intellij.util.ProcessingContext;
+import org.intellij.grammar.generator.NameShortener;
 import org.intellij.grammar.generator.ParserGenerator;
 import org.intellij.grammar.java.JavaHelper;
 import org.intellij.grammar.psi.BnfFile;
@@ -105,12 +106,22 @@ public class BnfGeneratorPsiTest extends BasePlatformTestCase {
       public class Wrapper<T> {}
       """);
 
+    // Create annotation with a String parameter — for testing '<' in annotation string args
+    myFixture.addFileToProject("test/AnnoWithArg.java", """
+      package test;
+      import java.lang.annotation.*;
+      @Target({ElementType.TYPE_USE, ElementType.METHOD})
+      @Retention(RetentionPolicy.CLASS)
+      public @interface AnnoWithArg { String value(); }
+      """);
+
     // Create the mixin class with @NotNull and @Nullable on qualified return types.
     // `@NotNull Outer.Access` — per JLS 9.7.4, this is both a declaration and type annotation.
     myFixture.addFileToProject("test/psi/impl/MyMixin.java", """
       package test.psi.impl;
       import org.jetbrains.annotations.NotNull;
       import org.jetbrains.annotations.Nullable;
+      import test.AnnoWithArg;
       import test.Outer;
       import test.Wrapper;
       public abstract class MyMixin extends BaseElement {
@@ -140,6 +151,10 @@ public class BnfGeneratorPsiTest extends BasePlatformTestCase {
         // Multiple annotations inside generic params only — no dedup needed
         @SuppressWarnings("NullableProblems")
         public Wrapper<@NotNull @Nullable Outer.Access> getBothInnerAnnotations() { return null; }
+        // Annotation with '<' in string arg on qualified type — reviewer edge case
+        public @AnnoWithArg("List<Integer>") @NotNull Outer.Access getAnnoWithAngleBracketArg() { return null; }
+        // Same + actual generic return type — both fake '<' in string and real '<'
+        public @AnnoWithArg("List<Integer>") @NotNull Wrapper<Outer.Access> getAnnoWithAngleBracketGeneric() { return null; }
       }
       """);
 
@@ -178,7 +193,7 @@ public class BnfGeneratorPsiTest extends BasePlatformTestCase {
       }
       File ::= MyElement*
       MyElement ::= ID {
-        methods=[getAccess getOptionalAccess getWrappedAccess getPlainAccess getGenericInnerAnnotation getMixedAnnotations getAnnotatedWrapper getSimpleName getBothAnnotatedAccess getBothAnnotatedWrapper getBothInnerAnnotations]
+        methods=[getAccess getOptionalAccess getWrappedAccess getPlainAccess getGenericInnerAnnotation getMixedAnnotations getAnnotatedWrapper getSimpleName getBothAnnotatedAccess getBothAnnotatedWrapper getBothInnerAnnotations getAnnoWithAngleBracketArg getAnnoWithAngleBracketGeneric]
         mixin="test.psi.impl.MyMixin"
       }
       """;
@@ -290,6 +305,15 @@ public class BnfGeneratorPsiTest extends BasePlatformTestCase {
     // Multiple annotations inside generic params only — both in return type text, no dedup needed.
     assertAnnotationCount(generated, "getBothInnerAnnotations()", "@NotNull", 1);
     assertAnnotationCount(generated, "getBothInnerAnnotations()", "@Nullable", 1);
+
+    // Annotation with '<' in string arg — dedup must still work despite '<' inside "List<Integer>".
+    // The indexOf('<') must skip '<' inside quoted strings to find the real generic '<'.
+    assertAnnotationCount(generated, "getAnnoWithAngleBracketArg()", "@NotNull", 1);
+    assertNoStandaloneAnnotation(generated, "getAnnoWithAngleBracketArg()", "@NotNull");
+
+    // Same + actual generic params — both fake '<' in annotation string and real '<' for Wrapper<...>.
+    assertAnnotationCount(generated, "getAnnoWithAngleBracketGeneric()", "@NotNull", 1);
+    assertNoStandaloneAnnotation(generated, "getAnnoWithAngleBracketGeneric()", "@NotNull");
   }
 
   /**
@@ -397,7 +421,7 @@ public class BnfGeneratorPsiTest extends BasePlatformTestCase {
         List<String> types = myDelegate.getMethodTypes(element);
         if (!types.isEmpty()) {
           String returnType = types.get(0);
-          int angleIdx = returnType.indexOf('<');
+          int angleIdx = NameShortener.indexOfUnquotedAngleBracket(returnType);
           String topLevelType = angleIdx >= 0 ? returnType.substring(0, angleIdx) : returnType;
           List<String> mutable = null;
           for (String anno : List.of("org.jetbrains.annotations.NotNull", "org.jetbrains.annotations.Nullable")) {

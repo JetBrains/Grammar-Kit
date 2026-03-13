@@ -2050,7 +2050,13 @@ public class ParserGenerator extends GeneratorBase {
       if ("java.lang.Override".equals(s)) continue;
       if (s.startsWith("kotlin.")) continue;
       String shortAnno = shorten(s);
-      if (returnType.contains("@" + shortAnno + " ")) continue;
+      // region Workaround for IDEA-384557: skip annotation already embedded in return type text.
+      // Remove once the platform fix (IJ-MR-188692) is available in the minimum supported version.
+      String topLevelType = returnType;
+      int angleIdx = topLevelType.indexOf('<');
+      if (angleIdx >= 0) topLevelType = topLevelType.substring(0, angleIdx);
+      if (topLevelType.contains("@" + shortAnno + " ")) continue;
+      // endregion
       out("@" + shortAnno);
     }
     Function<Integer, List<String>> annoProvider = i -> myJavaHelper.getParameterAnnotations(method, (i - 1) / 2);

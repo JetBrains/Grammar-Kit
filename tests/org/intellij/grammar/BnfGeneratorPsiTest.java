@@ -99,6 +99,12 @@ public class BnfGeneratorPsiTest extends BasePlatformTestCase {
       }
       """);
 
+    // Create a generic wrapper class
+    myFixture.addFileToProject("test/Wrapper.java", """
+      package test;
+      public class Wrapper<T> {}
+      """);
+
     // Create the mixin class with @NotNull and @Nullable on qualified return types.
     // `@NotNull Outer.Access` — per JLS 9.7.4, this is both a declaration and type annotation.
     myFixture.addFileToProject("test/psi/impl/MyMixin.java", """
@@ -106,10 +112,34 @@ public class BnfGeneratorPsiTest extends BasePlatformTestCase {
       import org.jetbrains.annotations.NotNull;
       import org.jetbrains.annotations.Nullable;
       import test.Outer;
+      import test.Wrapper;
       public abstract class MyMixin extends BaseElement {
         public MyMixin(@NotNull Object node) { super(node); }
+        // Qualified type with @NotNull — the original #436 bug
         public @NotNull Outer.Access getAccess() { return Outer.Access.Read; }
+        // Qualified type with @Nullable
         public @Nullable Outer.Access getOptionalAccess() { return null; }
+        // Generic wrapping qualified annotated type — annotation at both levels
+        public @NotNull Wrapper<@NotNull Outer.Access> getWrappedAccess() { return new Wrapper<>(); }
+        // Qualified type without any annotation — baseline
+        public Outer.Access getPlainAccess() { return null; }
+        // Annotation only inside generic params, not at outer level
+        public Wrapper<@NotNull Outer.Access> getGenericInnerAnnotation() { return null; }
+        // Different annotations at outer vs inner levels
+        public @Nullable Wrapper<@NotNull Outer.Access> getMixedAnnotations() { return null; }
+        // Annotation only at outer level of generic type
+        public @NotNull Wrapper<Outer.Access> getAnnotatedWrapper() { return new Wrapper<>(); }
+        // Simple (non-qualified) annotated type — primary textToSkip mechanism handles it
+        public @NotNull String getSimpleName() { return ""; }
+        // Multiple annotations on a qualified type — both should be deduped independently
+        @SuppressWarnings("NullableProblems")
+        public @NotNull @Nullable Outer.Access getBothAnnotatedAccess() { return null; }
+        // Multiple annotations at outer level of generic type
+        @SuppressWarnings("NullableProblems")
+        public @NotNull @Nullable Wrapper<Outer.Access> getBothAnnotatedWrapper() { return null; }
+        // Multiple annotations inside generic params only — no dedup needed
+        @SuppressWarnings("NullableProblems")
+        public Wrapper<@NotNull @Nullable Outer.Access> getBothInnerAnnotations() { return null; }
       }
       """);
 
@@ -148,7 +178,7 @@ public class BnfGeneratorPsiTest extends BasePlatformTestCase {
       }
       File ::= MyElement*
       MyElement ::= ID {
-        methods=[getAccess getOptionalAccess]
+        methods=[getAccess getOptionalAccess getWrappedAccess getPlainAccess getGenericInnerAnnotation getMixedAnnotations getAnnotatedWrapper getSimpleName getBothAnnotatedAccess getBothAnnotatedWrapper getBothInnerAnnotations]
         mixin="test.psi.impl.MyMixin"
       }
       """;
@@ -208,6 +238,58 @@ public class BnfGeneratorPsiTest extends BasePlatformTestCase {
 
     // Same check for @Nullable on a qualified return type
     assertAnnotationCount(generated, "getOptionalAccess()", "@Nullable", 1);
+
+    // Generic wrapping qualified annotated type — @NotNull at outer level AND inside <...>.
+    // Both occurrences are part of the return type text itself — no standalone line.
+    assertAnnotationCount(generated, "getWrappedAccess()", "@NotNull", 2);
+    assertNoStandaloneAnnotation(generated, "getWrappedAccess()", "@NotNull");
+
+    // Baseline: qualified type without any annotation — no annotation dedup needed
+    assertAnnotationCount(generated, "getPlainAccess()", "@NotNull", 0);
+    assertAnnotationCount(generated, "getPlainAccess()", "@Nullable", 0);
+
+    // Annotation only inside generic params — not at top level.
+    // The DuplicateAnnotationJavaHelper does NOT add a duplicate because the
+    // top-level type text (`test.Wrapper`) doesn't contain any annotation.
+    assertAnnotationCount(generated, "getGenericInnerAnnotation()", "@NotNull", 1);
+
+    // Different annotations: @Nullable outer, @NotNull inner.
+    // @Nullable is deduped (embedded in return type), @NotNull is only inside <...>.
+    assertAnnotationCount(generated, "getMixedAnnotations()", "@Nullable", 1);
+    assertAnnotationCount(generated, "getMixedAnnotations()", "@NotNull", 1);
+    assertNoStandaloneAnnotation(generated, "getMixedAnnotations()", "@Nullable");
+
+    // Annotation only at outer level of generic type — deduped by the fix.
+    assertAnnotationCount(generated, "getAnnotatedWrapper()", "@NotNull", 1);
+    assertNoStandaloneAnnotation(generated, "getAnnotatedWrapper()", "@NotNull");
+
+    // Simple (non-qualified) annotated type — for source-resolved types, PsiType.getAnnotations()
+    // correctly returns the TYPE_USE annotation, so the primary textToSkip mechanism in
+    // getAnnotationsInner filters it from the modifier list. getCanonicalText(true) for source
+    // types does not embed the annotation in the type text. This verifies the fallback check
+    // does not interfere with the primary mechanism.
+    assertAnnotationCount(generated, "getSimpleName()", "@NotNull", 0);
+
+    // Also verify no standalone duplicates on the original bug cases
+    assertNoStandaloneAnnotation(generated, "getAccess()", "@NotNull");
+    assertNoStandaloneAnnotation(generated, "getOptionalAccess()", "@Nullable");
+
+    // Multiple annotations on a qualified type — both deduped independently by the loop.
+    // The canonical text embeds both: `Outer.@NotNull @Nullable Access`.
+    assertAnnotationCount(generated, "getBothAnnotatedAccess()", "@NotNull", 1);
+    assertAnnotationCount(generated, "getBothAnnotatedAccess()", "@Nullable", 1);
+    assertNoStandaloneAnnotation(generated, "getBothAnnotatedAccess()", "@NotNull");
+    assertNoStandaloneAnnotation(generated, "getBothAnnotatedAccess()", "@Nullable");
+
+    // Multiple annotations at outer level of generic — both deduped.
+    assertAnnotationCount(generated, "getBothAnnotatedWrapper()", "@NotNull", 1);
+    assertAnnotationCount(generated, "getBothAnnotatedWrapper()", "@Nullable", 1);
+    assertNoStandaloneAnnotation(generated, "getBothAnnotatedWrapper()", "@NotNull");
+    assertNoStandaloneAnnotation(generated, "getBothAnnotatedWrapper()", "@Nullable");
+
+    // Multiple annotations inside generic params only — both in return type text, no dedup needed.
+    assertAnnotationCount(generated, "getBothInnerAnnotations()", "@NotNull", 1);
+    assertAnnotationCount(generated, "getBothInnerAnnotations()", "@Nullable", 1);
   }
 
   /**
@@ -229,6 +311,21 @@ public class BnfGeneratorPsiTest extends BasePlatformTestCase {
     }
     assertEquals("Expected exactly " + expected + " " + annotation + " before " + methodSignature +
       ", found " + count + " in:\n" + methodBlock, expected, count);
+  }
+
+  /**
+   * Asserts that there is no standalone annotation line (e.g., {@code @NotNull} on its own line)
+   * before the method signature. A standalone line indicates a duplicate annotation that was not
+   * suppressed by the dedup logic.
+   */
+  private static void assertNoStandaloneAnnotation(String generated, String methodSignature, String annotation) {
+    int methodIdx = generated.indexOf(methodSignature);
+    assertTrue(methodSignature + " must be present in generated code", methodIdx >= 0);
+    int lineStart = generated.lastIndexOf("\n\n", methodIdx);
+    if (lineStart < 0) lineStart = 0;
+    String methodBlock = generated.substring(lineStart, methodIdx);
+    assertFalse("Standalone " + annotation + " line before " + methodSignature + ":\n" + methodBlock,
+      methodBlock.matches("(?s).*\\n\\s*" + annotation.replace("@", "\\@") + "\\s*\\n.*"));
   }
 
   /**
@@ -294,13 +391,17 @@ public class BnfGeneratorPsiTest extends BasePlatformTestCase {
       // annotation (qualified types like ReadWriteAccessDetector.Access), the annotation
       // is NOT filtered out by getAnnotationsInner() because PsiType.getAnnotations()
       // doesn't return annotations on inner type components of qualified types.
+      // Only match annotations at the top level of the return type, not inside generic
+      // parameters — this accurately models the real bug which affects qualified types only.
       if (element instanceof PsiMethod) {
         List<String> types = myDelegate.getMethodTypes(element);
         if (!types.isEmpty()) {
           String returnType = types.get(0);
+          int angleIdx = returnType.indexOf('<');
+          String topLevelType = angleIdx >= 0 ? returnType.substring(0, angleIdx) : returnType;
           List<String> mutable = null;
           for (String anno : List.of("org.jetbrains.annotations.NotNull", "org.jetbrains.annotations.Nullable")) {
-            if (returnType.contains("@" + anno) && !result.contains(anno)) {
+            if (topLevelType.contains("@" + anno) && !result.contains(anno)) {
               if (mutable == null) mutable = new ArrayList<>(result);
               mutable.add(anno);
             }

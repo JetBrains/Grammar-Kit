@@ -84,11 +84,14 @@ public class BnfGeneratorPsiTest extends BasePlatformTestCase {
       public @interface Nullable {}
       """);
 
-    // Create the outer class with nested inner type
+    // Create the outer class with nested inner type (+ deeply nested for JLS 9.7.4 tests)
     myFixture.addFileToProject("test/Outer.java", """
       package test;
       public class Outer {
         public enum Access { Read, Write, ReadWrite }
+        public static class Middle {
+          public enum Deep { A, B }
+        }
       }
       """);
 
@@ -155,6 +158,12 @@ public class BnfGeneratorPsiTest extends BasePlatformTestCase {
         public @AnnoWithArg("List<Integer>") @NotNull Outer.Access getAnnoWithAngleBracketArg() { return null; }
         // Same + actual generic return type — both fake '<' in string and real '<'
         public @AnnoWithArg("List<Integer>") @NotNull Wrapper<Outer.Access> getAnnoWithAngleBracketGeneric() { return null; }
+        // JLS 9.7.4: annotation between qualifier and inner type — annotates the inner component
+        public Outer.@NotNull Access getInnerAnnotatedAccess() { return Outer.Access.Read; }
+        // JLS 9.7.4: deeply nested qualified type (3 levels) — annotation on innermost component
+        public Outer.Middle.@NotNull Deep getDeeplyNestedAnnotated() { return Outer.Middle.Deep.A; }
+        // JLS 9.7.4: deeply nested with annotation on intermediate component
+        public Outer.@NotNull Middle.Deep getIntermediateAnnotated() { return Outer.Middle.Deep.A; }
       }
       """);
 
@@ -193,7 +202,7 @@ public class BnfGeneratorPsiTest extends BasePlatformTestCase {
       }
       File ::= MyElement*
       MyElement ::= ID {
-        methods=[getAccess getOptionalAccess getWrappedAccess getPlainAccess getGenericInnerAnnotation getMixedAnnotations getAnnotatedWrapper getSimpleName getBothAnnotatedAccess getBothAnnotatedWrapper getBothInnerAnnotations getAnnoWithAngleBracketArg getAnnoWithAngleBracketGeneric]
+        methods=[getAccess getOptionalAccess getWrappedAccess getPlainAccess getGenericInnerAnnotation getMixedAnnotations getAnnotatedWrapper getSimpleName getBothAnnotatedAccess getBothAnnotatedWrapper getBothInnerAnnotations getAnnoWithAngleBracketArg getAnnoWithAngleBracketGeneric getInnerAnnotatedAccess getDeeplyNestedAnnotated getIntermediateAnnotated]
         mixin="test.psi.impl.MyMixin"
       }
       """;
@@ -314,6 +323,20 @@ public class BnfGeneratorPsiTest extends BasePlatformTestCase {
     // Same + actual generic params — both fake '<' in annotation string and real '<' for Wrapper<...>.
     assertAnnotationCount(generated, "getAnnoWithAngleBracketGeneric()", "@NotNull", 1);
     assertNoStandaloneAnnotation(generated, "getAnnoWithAngleBracketGeneric()", "@NotNull");
+
+    // JLS 9.7.4: Outer.@NotNull Access — annotation between qualifier and inner type.
+    // The annotation appears in the canonical text at a different position than @NotNull Outer.Access,
+    // but the contains() check is position-independent.
+    assertAnnotationCount(generated, "getInnerAnnotatedAccess()", "@NotNull", 1);
+    assertNoStandaloneAnnotation(generated, "getInnerAnnotatedAccess()", "@NotNull");
+
+    // JLS 9.7.4: deeply nested — Outer.Middle.@NotNull Deep (3 levels).
+    assertAnnotationCount(generated, "getDeeplyNestedAnnotated()", "@NotNull", 1);
+    assertNoStandaloneAnnotation(generated, "getDeeplyNestedAnnotated()", "@NotNull");
+
+    // JLS 9.7.4: annotation on intermediate component — Outer.@NotNull Middle.Deep.
+    assertAnnotationCount(generated, "getIntermediateAnnotated()", "@NotNull", 1);
+    assertNoStandaloneAnnotation(generated, "getIntermediateAnnotated()", "@NotNull");
   }
 
   /**

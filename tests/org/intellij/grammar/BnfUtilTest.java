@@ -156,4 +156,32 @@ public class BnfUtilTest extends UsefulTestCase {
     shortener.addImports(Arrays.asList("org.jetbrains.annotations.NotNull", "java.util.List", "sample.Inner", "java.lang.Integer"), Collections.emptySet());
     assertEquals(longType, shortener.shorten(longType));
   }
+
+  public void testNameShortener_angleBracketInAnnotationStringArg() {
+    String longType = "test.Outer.@test.AnnoWithArg(\"List<Integer>\") @org.jetbrains.annotations.NotNull Access";
+    NameShortener shortener = new NameShortener("com", true);
+    shortener.addImports(Arrays.asList("test.Outer", "test.AnnoWithArg", "org.jetbrains.annotations.NotNull"), Collections.emptySet());
+    String shortened = shortener.shorten(longType);
+    // The '<' inside the string arg must NOT break shortening
+    assertTrue("Shortened type should contain @NotNull: " + shortened,
+      shortened.contains("@NotNull"));
+    assertTrue("Shortened type should preserve annotation string arg: " + shortened,
+      shortened.contains("\"List<Integer>\""));
+  }
+
+  public void testIndexOfUnquotedAngleBracket() {
+    // Simple generic type
+    assertEquals(4, NameShortener.indexOfUnquotedAngleBracket("List<Integer>"));
+    // No angle brackets
+    assertEquals(-1, NameShortener.indexOfUnquotedAngleBracket("no angle brackets"));
+    // '<' only inside quoted string — not found
+    assertEquals(-1, NameShortener.indexOfUnquotedAngleBracket("@Anno(\"List<Integer>\")"));
+    // '<' inside quotes + real '<' outside
+    assertEquals(30, NameShortener.indexOfUnquotedAngleBracket("@Anno(\"List<Integer>\") Wrapper<T>"));
+    // Escaped quote before '<' — '<' is still inside outer quotes
+    assertEquals(26, NameShortener.indexOfUnquotedAngleBracket("@Anno(\"foo\\\"<bar\") Wrapper<T>"));
+    // Qualified type with annotation containing '<' in string arg — no real '<'
+    assertEquals(-1, NameShortener.indexOfUnquotedAngleBracket(
+      "test.Outer.@test.Anno(\"List<Integer>\") @org.jetbrains.annotations.NotNull Access"));
+  }
 }

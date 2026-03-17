@@ -295,11 +295,24 @@ public abstract class JavaHelper {
                                    typeToSkip.getAnnotations();
       String[] textToSkip = annoToSkip == null ? null :
                             ContainerUtil.map(annoToSkip, PsiElement::getText, ArrayUtil.EMPTY_STRING_ARRAY);
+      // region Workaround for IDEA-384557: PsiType.getAnnotations() misses annotations
+      // on inner type components of qualified types (e.g., Outer.@NotNull Access).
+      // Remove once the platform fix (IJ-MR-188692) is available in the minimum supported version.
+      String typeText = typeToSkip == null ? null : typeToSkip.getCanonicalText(true);
+      if (typeText != null) {
+        int angleIdx = NameShortener.indexOfUnquotedAngleBracket(typeText);
+        if (angleIdx >= 0) typeText = typeText.substring(0, angleIdx);
+      }
+      // endregion
       List<String> result = new ArrayList<>();
       for (PsiAnnotation annotation : modifierList.getAnnotations()) {
         if (annotation.getParameterList().getAttributes().length > 0) continue;
         if (textToSkip != null && ArrayUtil.indexOf(textToSkip, annotation.getText()) != - 1) continue;
-        ContainerUtil.addIfNotNull(result, annotation.getQualifiedName());
+        String qualifiedName = annotation.getQualifiedName();
+        // region Workaround for IDEA-384557
+        if (qualifiedName != null && typeText != null && typeText.contains("@" + qualifiedName + " ")) continue;
+        // endregion
+        ContainerUtil.addIfNotNull(result, qualifiedName);
       }
       return result;
     }

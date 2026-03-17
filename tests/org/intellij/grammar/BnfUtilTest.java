@@ -100,6 +100,46 @@ public class BnfUtilTest extends UsefulTestCase {
     assertEquals("@NotNull(\"some.text and.more\", arr = [@Nullable]) List<@Nullable Inner.Class<Integer>>", shortener.shorten(longType));
   }
 
+  public void testNameShortener_multipleTypeUseAnnotations() {
+    String longType = "java.util.@org.jetbrains.annotations.NotNull @org.jetbrains.annotations.Unmodifiable List<com.intellij.psi.PsiElement>";
+    List<String> imports = new ArrayList<>();
+    NameShortener.addTypeToImports(longType, Collections.emptyList(), imports);
+    assertEquals(Arrays.asList("org.jetbrains.annotations.NotNull", "org.jetbrains.annotations.Unmodifiable", "java.util.List", "com.intellij.psi.PsiElement"), imports);
+    NameShortener shortener = new NameShortener("com", true);
+    shortener.addImports(imports, Collections.emptySet());
+    assertEquals("@NotNull @Unmodifiable List<PsiElement>", shortener.shorten(longType));
+  }
+
+  public void testNameShortener_multipleTypeUseAnnotationsWithArgs() {
+    String longType = "java.util.@org.jetbrains.annotations.NotNull(\"val\") @org.jetbrains.annotations.Unmodifiable List<java.lang.String>";
+    List<String> imports = new ArrayList<>();
+    NameShortener.addTypeToImports(longType, Collections.emptyList(), imports);
+    assertEquals(Arrays.asList("org.jetbrains.annotations.NotNull", "org.jetbrains.annotations.Unmodifiable", "java.util.List", "java.lang.String"), imports);
+    NameShortener shortener = new NameShortener("com", true);
+    shortener.addImports(imports, Collections.emptySet());
+    assertEquals("@NotNull(\"val\") @Unmodifiable List<String>", shortener.shorten(longType));
+  }
+
+  public void testNameShortener_threeTypeUseAnnotations() {
+    String longType = "java.util.@org.a.A @org.b.B @org.c.C List";
+    List<String> imports = new ArrayList<>();
+    NameShortener.addTypeToImports(longType, Collections.emptyList(), imports);
+    assertEquals(Arrays.asList("org.a.A", "org.b.B", "org.c.C", "java.util.List"), imports);
+    NameShortener shortener = new NameShortener("com", true);
+    shortener.addImports(imports, Collections.emptySet());
+    assertEquals("@A @B @C List", shortener.shorten(longType));
+  }
+
+  public void testNameShortener_multipleAnnotationsOnInnerGenericType() {
+    String longType = "java.util.Map<java.util.@org.a.A @org.b.B List<java.lang.String>, java.lang.Integer>";
+    List<String> imports = new ArrayList<>();
+    NameShortener.addTypeToImports(longType, Collections.emptyList(), imports);
+    assertEquals(Arrays.asList("java.util.Map", "org.a.A", "org.b.B", "java.util.List", "java.lang.String", "java.lang.Integer"), imports);
+    NameShortener shortener = new NameShortener("com", true);
+    shortener.addImports(imports, Collections.emptySet());
+    assertEquals("Map<@A @B List<String>, Integer>", shortener.shorten(longType));
+  }
+
   public void testNameShortener_escapedQuoteInAnnotation() {
     String longType = "java.util.@org.jetbrains.annotations.NotNull(\"escaped\\\"quote.pkg\") List<java.lang.Integer>";
     List<String> imports = new ArrayList<>();

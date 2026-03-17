@@ -109,6 +109,12 @@ public class NameShortener {
         if ("\"".equals(part) && offset > 0 && s.charAt(offset - 1) != '\\') quoted = !quoted;
         if (!quoted && "(".equals(part)) parenCount ++;
         if (!quoted && ")".equals(part)) parenCount --;
+        if (!quoted && "@".equals(part) && prefixStack != null && !prefixStack.isEmpty()) {
+          int[] top = prefixStack.peek();
+          if (parenCount == top[0]) {
+            top[3] = offset;
+          }
+        }
       }
       else if (!quoted && part.endsWith(".")) {
         if (prefixStack == null) prefixStack = new ArrayDeque<>();

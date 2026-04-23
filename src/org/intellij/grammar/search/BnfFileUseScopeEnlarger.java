@@ -6,6 +6,7 @@ package org.intellij.grammar.search;
 
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiFile;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.search.SearchScope;
 import com.intellij.psi.search.UseScopeEnlarger;
@@ -16,10 +17,16 @@ import org.jetbrains.annotations.Nullable;
 public class BnfFileUseScopeEnlarger extends UseScopeEnlarger {
   @Override
   public @Nullable SearchScope getAdditionalUseScope(@NotNull PsiElement element) {
-    VirtualFile file = element.getContainingFile().getVirtualFile();
-    if ("java".equals(file.getExtension()) || "kt".equals(file.getExtension())){
-      return GlobalSearchScope.getScopeRestrictedByFileTypes(GlobalSearchScope.projectScope(element.getProject()), BnfFileType.INSTANCE);
+    PsiFile containingFile = element.getContainingFile();
+    if (containingFile == null) return null;
+
+    VirtualFile file = containingFile.getVirtualFile();
+    if (file == null) return null;
+
+    String extension = file.getExtension();
+    if (!"java".equals(extension) && !"kt".equals(extension)) {
+      return null;
     }
-    return null;
+    return GlobalSearchScope.getScopeRestrictedByFileTypes(GlobalSearchScope.projectScope(element.getProject()), BnfFileType.INSTANCE);
   }
 }

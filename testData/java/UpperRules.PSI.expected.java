@@ -1,4 +1,4 @@
-// ---- GeneratedTypes.java -----------------
+// ---- generated/GeneratedTypes.java -----------------
 //header.txt
 package generated;
 
@@ -23,7 +23,7 @@ public interface GeneratedTypes {
   IElementType C = new IElementType("C", null);
   IElementType X = new IElementType("X", null);
 }
-// ---- Abc.java -----------------
+// ---- generated/psi/Abc.java -----------------
 //header.txt
 package generated.psi;
 
@@ -37,7 +37,7 @@ public interface Abc extends PsiElement {
   List<AbcThree> getAbcThreeList();
 
 }
-// ---- AbcOne.java -----------------
+// ---- generated/psi/AbcOne.java -----------------
 //header.txt
 package generated.psi;
 
@@ -50,11 +50,8 @@ public interface AbcOne extends Abc {
   @NotNull
   JustB getJustB();
 
-  @Nullable
-  Prefix getPrefix();
-
 }
-// ---- AbcThree.java -----------------
+// ---- generated/psi/AbcThree.java -----------------
 //header.txt
 package generated.psi;
 
@@ -65,7 +62,7 @@ import com.intellij.psi.PsiElement;
 public interface AbcThree extends Abc {
 
 }
-// ---- AbcTwo.java -----------------
+// ---- generated/psi/AbcTwo.java -----------------
 //header.txt
 package generated.psi;
 
@@ -75,11 +72,8 @@ import com.intellij.psi.PsiElement;
 
 public interface AbcTwo extends Abc {
 
-  @Nullable
-  Prefix getPrefix();
-
 }
-// ---- JustB.java -----------------
+// ---- generated/psi/JustB.java -----------------
 //header.txt
 package generated.psi;
 
@@ -90,7 +84,7 @@ import com.intellij.psi.PsiElement;
 public interface JustB extends PsiElement {
 
 }
-// ---- PinnedSeq.java -----------------
+// ---- generated/psi/PinnedSeq.java -----------------
 //header.txt
 package generated.psi;
 
@@ -104,7 +98,7 @@ public interface PinnedSeq extends PsiElement {
   Prefix getPrefix();
 
 }
-// ---- PlainSeq.java -----------------
+// ---- generated/psi/PlainSeq.java -----------------
 //header.txt
 package generated.psi;
 
@@ -118,7 +112,7 @@ public interface PlainSeq extends PsiElement {
   Prefix getPrefix();
 
 }
-// ---- Prefix.java -----------------
+// ---- generated/psi/Prefix.java -----------------
 //header.txt
 package generated.psi;
 
@@ -129,7 +123,7 @@ import com.intellij.psi.PsiElement;
 public interface Prefix extends PsiElement {
 
 }
-// ---- AbcImpl.java -----------------
+// ---- generated/psi/impl/AbcImpl.java -----------------
 //header.txt
 package generated.psi.impl;
 
@@ -155,7 +149,7 @@ public class AbcImpl extends ASTWrapperPsiElement implements Abc {
   }
 
 }
-// ---- AbcOneImpl.java -----------------
+// ---- generated/psi/impl/AbcOneImpl.java -----------------
 //header.txt
 package generated.psi.impl;
 
@@ -179,14 +173,8 @@ public class AbcOneImpl extends AbcImpl implements AbcOne {
     return findNotNullChildByClass(JustB.class);
   }
 
-  @Override
-  @Nullable
-  public Prefix getPrefix() {
-    return findChildByClass(Prefix.class);
-  }
-
 }
-// ---- AbcThreeImpl.java -----------------
+// ---- generated/psi/impl/AbcThreeImpl.java -----------------
 //header.txt
 package generated.psi.impl;
 
@@ -205,7 +193,7 @@ public class AbcThreeImpl extends AbcImpl implements AbcThree {
   }
 
 }
-// ---- AbcTwoImpl.java -----------------
+// ---- generated/psi/impl/AbcTwoImpl.java -----------------
 //header.txt
 package generated.psi.impl;
 
@@ -223,14 +211,8 @@ public class AbcTwoImpl extends AbcImpl implements AbcTwo {
     super(node);
   }
 
-  @Override
-  @Nullable
-  public Prefix getPrefix() {
-    return findChildByClass(Prefix.class);
-  }
-
 }
-// ---- JustBImpl.java -----------------
+// ---- generated/psi/impl/JustBImpl.java -----------------
 //header.txt
 package generated.psi.impl;
 
@@ -250,7 +232,7 @@ public class JustBImpl extends ASTWrapperPsiElement implements JustB {
   }
 
 }
-// ---- PinnedSeqImpl.java -----------------
+// ---- generated/psi/impl/PinnedSeqImpl.java -----------------
 //header.txt
 package generated.psi.impl;
 
@@ -276,7 +258,7 @@ public class PinnedSeqImpl extends ASTWrapperPsiElement implements PinnedSeq {
   }
 
 }
-// ---- PlainSeqImpl.java -----------------
+// ---- generated/psi/impl/PlainSeqImpl.java -----------------
 //header.txt
 package generated.psi.impl;
 
@@ -302,7 +284,7 @@ public class PlainSeqImpl extends ASTWrapperPsiElement implements PlainSeq {
   }
 
 }
-// ---- PrefixImpl.java -----------------
+// ---- generated/psi/impl/PrefixImpl.java -----------------
 //header.txt
 package generated.psi.impl;
 

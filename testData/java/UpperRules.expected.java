@@ -1,4 +1,4 @@
-// ---- GeneratedParser.java -----------------
+// ---- generated/GeneratedParser.java -----------------
 //header.txt
 package generated;
 

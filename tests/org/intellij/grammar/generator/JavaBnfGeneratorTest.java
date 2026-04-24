@@ -100,8 +100,7 @@ public class JavaBnfGeneratorTest extends AbstractBnfGeneratorTest {
     doParserTest();
   }
 
-  // TODO not implemented
-  public void _testUpperRules() throws Exception {
+  public void testUpperRules() throws Exception {
     doPsiTest();
   }
 

@@ -65,7 +65,7 @@ public final class KotlinParserGenerator extends Generator {
   
   private final @NotNull String myParserUtil;
 
-  private final @NotNull Set<String> mySGPRMethods = new HashSet<>(new HashSet<>(Arrays.asList("eof", "advanceToken")));
+  private final @NotNull Set<String> mySGPRMethods = new HashSet<>(Arrays.asList("eof", "advanceToken"));
 
   /**
    * Contains names of all the tokens whose corresponding {@code SyntaxElementType}

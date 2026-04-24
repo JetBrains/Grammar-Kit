@@ -65,7 +65,7 @@ public final class KotlinParserGenerator extends Generator {
   
   private final @NotNull String myParserUtil;
 
-  private final @NotNull Set<String> mySGPRMethods = new HashSet<>(Arrays.asList("eof", "advanceToken"));
+  private final @NotNull Collection<String> mySGPRMethods = Arrays.asList("eof", "advanceToken");
 
   /**
    * Contains names of all the tokens whose corresponding {@code SyntaxElementType}
@@ -1242,11 +1242,10 @@ public final class KotlinParserGenerator extends Generator {
     }
     return externalCall;
   }
-  
-  private Boolean isRuntimeMethod(String methodName){
+
+  private boolean isRuntimeMethod(String methodName) {
     return mySGPRMethods.contains(methodName);
   }
-
 
   private @NotNull NodeCall createConsumeToken(@NotNull ConsumeType consumeType, @NotNull String tokenName) {
     myTokensUsedInGrammar.add(tokenName);

@@ -5,6 +5,8 @@
 ## [2023.3.2]
 
 * Generator: Kotlin parser generation via IntelliJ Platform `syntax-api` (https://github.com/JetBrains/Grammar-Kit/pull/417)
+* Fix incorrect import with multiple TYPE_USE annotations [#438](https://github.com/JetBrains/Grammar-Kit/pull/438)
+* Fix duplicate @NotNull annotation for qualified return types [#439](https://github.com/JetBrains/Grammar-Kit/pull/439) 
 
 ## [2023.3.1]
 

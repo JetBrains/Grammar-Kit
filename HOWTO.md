@@ -189,6 +189,112 @@ Notes:
 3. there can be any number of "expression roots" in a grammar as long as they do not intersect
 
 
+2.5 Kotlin parser generation with syntax-api
+---------------------------------------------
+
+Grammar-Kit can generate Kotlin parsers targeting the IntelliJ Platform `syntax-api`.
+This enables Kotlin Multiplatform (KMP) compatible parser code.
+
+**Activating Kotlin generation:**
+
+Add `parser-api="syntax"` to the `generate` attribute:
+````
+{
+  generate=[parser-api="syntax"]
+  parserClass="com.sample.MyParser"
+  syntaxElementTypeHolderClass="com.sample.MySyntaxTypes"
+}
+root ::= item *
+item ::= id '=' expr
+````
+
+**What gets generated:**
+
+1. Parser: a Kotlin `object` with parse functions using `SyntaxGeneratedParserRuntime`
+2. Element types: a Kotlin `object` with `val` declarations of `SyntaxElementType`
+3. PSI classes: still generated as **Java** (via the classic generator), optionally to a separate directory
+
+**Key differences from classic Java generation:**
+
+| Classic (Java)                 | Syntax-API (Kotlin)                      |
+|--------------------------------|------------------------------------------|
+| `PsiBuilder`                   | `SyntaxTreeBuilder` (via Syntax runtime) |
+| `IElementType`                 | `SyntaxElementType`                      |
+| `GeneratedParserUtilBase`      | `SyntaxGeneratedParserRuntime`           |
+| `static boolean method(...)`   | `fun method(runtime_, level_): Boolean`  |
+| `elementTypeHolderClass`       | `syntaxElementTypeHolderClass`           |
+| `elementTypeFactory`           | `syntaxElementTypeFactory`               |
+
+**New attributes:**
+
+* *syntaxElementTypeHolderClass* (value: FQN string, default: `"generated.GeneratedSyntaxElementTypes"`)
+  — Kotlin `object` holding generated `SyntaxElementType` constants.
+
+* *syntaxElementTypeFactory* (value: FQN string, rule-level, supports patterns)
+  — factory method for creating custom `SyntaxElementType` instances, analogous to *elementTypeFactory*.
+
+* *syntaxParserUtilObject* (value: FQN string)
+  — parser utility object replacing `GeneratedParserUtilBase`.
+
+* *psiOutputPath* (value: path string, relative to content root)
+  — separate output directory for PSI generation. Use this when parser and PSI live in different modules
+  (e.g., KMP shared module for the parser, JVM module for PSI).
+
+**Full example with PSI and factory:**
+
+````
+{
+  generate=[parser-api="syntax"]
+  parserClass="org.intellij.grammar.expression.ExpressionParser"
+
+  // Kotlin element types (SyntaxElementType)
+  syntaxElementTypeHolderClass="org.intellij.grammar.expression.ExpressionSyntaxTypes"
+  syntaxElementTypeFactory="org.intellij.grammar.expression.ExpressionParserDefinition.createSyntaxType"
+  syntaxParserUtilObject="com.intellij.platform.syntax.util.runtime.SyntaxGeneratedParserRuntime"
+
+  // Java element types and PSI (IElementType) — can coexist
+  elementTypeHolderClass="org.intellij.grammar.expression.ExpressionTypes"
+  elementTypeFactory="org.intellij.grammar.expression.ExpressionParserDefinition.createType"
+
+  // PSI output in a separate module
+  psiOutputPath="jvm-module/gen"
+}
+````
+
+The generated parser object looks like this:
+````
+object ExpressionParser {
+
+  fun parse(root_: SyntaxElementType, runtime_: SyntaxGeneratedParserRuntime) {
+    // ...
+    runtime_.init(::parse, null)
+    val marker_: Marker = runtime_.enter_section_(0, Modifiers._COLLAPSE_, null)
+    result_ = parse_root_(root_, runtime_, 0)
+    runtime_.exit_section_(0, marker_, root_, result_, true, TRUE_CONDITION)
+  }
+
+  fun expr(runtime_: SyntaxGeneratedParserRuntime, level_: Int): Boolean {
+    // ...
+  }
+}
+````
+
+The generated element types object:
+````
+object ExpressionSyntaxTypes {
+  val ASSIGN_EXPR = ExpressionParserDefinition.createSyntaxType("ASSIGN_EXPR")
+  val CALL_EXPR = ExpressionParserDefinition.createSyntaxType("CALL_EXPR")
+  val LITERAL_EXPR = ExpressionParserDefinition.createSyntaxType("LITERAL_EXPR")
+  // ...
+}
+````
+
+**Kotlin keywords:**
+
+If a rule name collides with a Kotlin reserved keyword, the generated function name gets a `__` suffix.
+For example, a rule named `object` generates a function `object__()`.
+
+
 All operators will be present in error messages. To avoid this and also increase performance add this:
 ````
 {

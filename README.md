@@ -41,6 +41,10 @@ General usage instructions
 5. Implement ParserDefinition and add the corresponding registrations to the plugin.xml
 6. Mix-in resolve and other non-trivial functionality to PSI
 
+For Kotlin Multiplatform parsers using the `syntax-api`, set `generate=[parser-api="syntax"]` in the grammar header.
+The parser will be generated as a Kotlin `object`. PSI classes are still generated as Java.
+See [How-to](HOWTO.md#25-kotlin-parser-generation-with-syntax-api) for details.
+
 Using with Gradle
 -----------------
 
@@ -118,6 +122,12 @@ static boolean rule_name_0(..)             // rule sub-expression
 static boolean rule_name_N1_N2_..._NX      // rule sub-sub-...-sub-expression
 ```
 Naming a rule like *rule_name_N1_N2_..._NX* shall be avoided.
+
+With `generate=[parser-api="syntax"]`, the generator produces a Kotlin `object` instead of a Java class.
+Each rule becomes a function taking `SyntaxGeneratedParserRuntime` instead of `PsiBuilder`:
+```
+fun rule_name(runtime_: SyntaxGeneratedParserRuntime, level_: Int): Boolean
+```
 
 One can specify an attribute for several rules at once in a global attributes block:
 
@@ -208,6 +218,9 @@ The actual error recovery and reporting code as well as the parser-based complet
 in a _parserUtilClass_ class. It may be altered by specifying some other class that extends or mimics the original [GeneratedParserUtilBase](src/org/intellij/grammar/parser/GeneratedParserUtilBase.java).
 There's no need to keep a copy of GeneratedParserUtilBase in a project, it is included in *IntelliJ Platform* since version 12.1.
 
+When using `parser-api="syntax"`, the runtime is `SyntaxGeneratedParserRuntime` (from `com.intellij.platform.syntax.util.runtime`),
+specified via `syntaxParserUtilObject` attribute. It replaces `GeneratedParserUtilBase` and uses `SyntaxTreeBuilder` instead of `PsiBuilder`.
+
 The manual parsing code, i.e. _external_ rules must be implemented the same way as generated, by a static method in the _parserUtilClass_ class or any other class that will
 be imported via _parserImports_ attribute like this:
 ````
@@ -245,7 +258,10 @@ The lexer can be provided separately or one can use the generated \*.flex file a
 Parser generator generates token types constants and PSI by default.
 This can be switched off via *generateTokens* and *generatePSI* global boolean attributes respectively.
  
-*elementType* rule attribute allows mixing the generated code and some existing hand-made PSI.   
+*elementType* rule attribute allows mixing the generated code and some existing hand-made PSI.
+
+When using `parser-api="syntax"`, `SyntaxElementType` (from `com.intellij.platform.syntax`) replaces `IElementType` for composite elements.
+Element type constants are generated as `val` declarations in a Kotlin `object` specified by `syntaxElementTypeHolderClass` attribute.
 
 [jb:slack]: https://plugins.jetbrains.com/slack
 [jb:x]: https://x.com/JBPlatform

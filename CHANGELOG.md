@@ -7,7 +7,8 @@
 * BNF: fix potential NPE in attribute compatibility resolution [#404](https://github.com/JetBrains/Grammar-Kit/issues/404)
 * Generator: remove Fleet-related generation
 * Context menu: Remove actions: "Fleet: Generate Parser Code", "Fleet: Generate JFlex Lexer", "Fleet: Run JFlex Generator"
-* Generator: Support syntax-api for generated parsers
+* Generator: Kotlin parser generation via IntelliJ Platform `syntax-api` (`generate=[parser-api="syntax"]`)
+  * New attributes: `syntaxElementTypeHolderClass`, `syntaxElementTypeFactory`, `syntaxParserUtilObject`, `psiOutputPath`
 
 ## [2023.3]
 

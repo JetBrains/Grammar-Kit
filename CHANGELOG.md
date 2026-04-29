@@ -1,14 +1,17 @@
 # Grammar-Kit Changelog
 
 ## [Unreleased]
+
+* Generator: Kotlin parser generation via IntelliJ Platform `syntax-api` (`generate=[parser-api="syntax"]`)
+
+## [2023.3.1]
+
 * BNF Highlighting: distinguish explicit vs. implicit tokens [#383](https://github.com/JetBrains/Grammar-Kit/pull/383) by @fan-tom
 * Generator: allow configuring fallback stub element type [#403](https://github.com/JetBrains/Grammar-Kit/pull/403)
 * Generator: fix invalid @Experimental annotation generation for 2025.1 [#399](https://github.com/JetBrains/Grammar-Kit/pull/400)
 * BNF: fix potential NPE in attribute compatibility resolution [#404](https://github.com/JetBrains/Grammar-Kit/issues/404)
 * Generator: remove Fleet-related generation
 * Context menu: Remove actions: "Fleet: Generate Parser Code", "Fleet: Generate JFlex Lexer", "Fleet: Run JFlex Generator"
-* Generator: Kotlin parser generation via IntelliJ Platform `syntax-api` (`generate=[parser-api="syntax"]`)
-  * New attributes: `syntaxElementTypeHolderClass`, `syntaxElementTypeFactory`, `syntaxParserUtilObject`, `psiOutputPath`
 
 ## [2023.3]
 
@@ -364,7 +367,8 @@
 * Intentions: flip choice branches
 * Readable PsiBuilder-based recursive descent parser and PSI hierarchy generation
 
-[Unreleased]: https://github.com/JetBrains/Grammar-Kit/compare/2023.3...HEAD
+[Unreleased]: https://github.com/JetBrains/Grammar-Kit/compare/2023.3.1...HEAD
+[2023.3.1]: https://github.com/JetBrains/Grammar-Kit/compare/2023.3...2023.3.1
 [2022.3.2]: https://github.com/JetBrains/Grammar-Kit/compare/2022.3.1...2022.3.2
 [2022.3.1]: https://github.com/JetBrains/Grammar-Kit/compare/2022.3...2022.3.1
 [2021.1.2]: https://github.com/JetBrains/Grammar-Kit/compare/2021.1...2021.1.2
@@ -404,12 +408,12 @@
 [1.0.3]: https://github.com/JetBrains/Grammar-Kit/compare/1.0.2...1.0.3
 [1.0.2]: https://github.com/JetBrains/Grammar-Kit/compare/1.0.1...1.0.2
 [1.0.1]: https://github.com/JetBrains/Grammar-Kit/compare/1.0...1.0.1
-[1.0]: https://github.com/JetBrains/Grammar-Kit/commits/1.0
-[2017.1]: https://github.com/JetBrains/Grammar-Kit/compare/1.5.2...2017.1
-[2019.1]: https://github.com/JetBrains/Grammar-Kit/compare/2017.1.7...2019.1
-[2019.3]: https://github.com/JetBrains/Grammar-Kit/compare/2019.1.1...2019.3
-[2020.1]: https://github.com/JetBrains/Grammar-Kit/compare/2019.3...2020.1
-[2020.3]: https://github.com/JetBrains/Grammar-Kit/compare/2020.1...2020.3
-[2021.1]: https://github.com/JetBrains/Grammar-Kit/compare/2020.3.1...2021.1
-[2022.3]: https://github.com/JetBrains/Grammar-Kit/compare/2021.1.2...2022.3
 [2023.3]: https://github.com/JetBrains/Grammar-Kit/compare/2022.3.2...2023.3
+[2022.3]: https://github.com/JetBrains/Grammar-Kit/compare/2021.1.2...2022.3
+[2021.1]: https://github.com/JetBrains/Grammar-Kit/compare/2020.3.1...2021.1
+[2020.3]: https://github.com/JetBrains/Grammar-Kit/compare/2020.1...2020.3
+[2020.1]: https://github.com/JetBrains/Grammar-Kit/compare/2019.3...2020.1
+[2019.3]: https://github.com/JetBrains/Grammar-Kit/compare/2019.1.1...2019.3
+[2019.1]: https://github.com/JetBrains/Grammar-Kit/compare/2017.1.7...2019.1
+[2017.1]: https://github.com/JetBrains/Grammar-Kit/compare/1.5.2...2017.1
+[1.0]: https://github.com/JetBrains/Grammar-Kit/commits/1.0

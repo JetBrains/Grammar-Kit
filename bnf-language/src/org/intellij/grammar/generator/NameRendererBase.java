@@ -15,7 +15,7 @@ import org.jetbrains.annotations.Nullable;
 
 import static org.intellij.grammar.psi.BnfAttributes.getAttribute;
 
-public abstract class RendererBase implements Renderer {
+public abstract class NameRendererBase implements NameRenderer {
   protected @Nullable String getRuleDisplayNameRaw(@NotNull BnfRule rule, boolean force) {
     String name = getAttribute(rule, KnownAttribute.NAME);
     BnfRule realRule = rule;
@@ -36,7 +36,7 @@ public abstract class RendererBase implements Renderer {
   }
 
   /**
-   * Undoes the effect of the {@link Renderer#getFuncName} method.
+   * Undoes the effect of the {@link NameRenderer#getFuncName} method.
    */
   protected abstract @NotNull String unwrapFuncName(@NotNull String funcName);
 }

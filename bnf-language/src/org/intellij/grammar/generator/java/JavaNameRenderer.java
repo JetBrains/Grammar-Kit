@@ -6,18 +6,17 @@ package org.intellij.grammar.generator.java;
 
 import com.intellij.openapi.util.text.StringUtil;
 import org.intellij.grammar.generator.CommonRendererUtils;
-import org.intellij.grammar.generator.Renderer;
-import org.intellij.grammar.generator.RendererBase;
+import org.intellij.grammar.generator.NameRendererBase;
 import org.intellij.grammar.psi.BnfRule;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Set;
 
-public final class JavaRenderer extends RendererBase {
+public final class JavaNameRenderer extends NameRendererBase {
   private final static @NotNull String RESERVED_SUFFIX = "_$";
 
-  public static final @NotNull JavaRenderer INSTANCE = new JavaRenderer();
+  public static final @NotNull JavaNameRenderer INSTANCE = new JavaNameRenderer();
   // shared with kotlin renderer
   public static final @NotNull Set<@NotNull String> JAVA_RESERVED = Set.of(
     // reserved keywords

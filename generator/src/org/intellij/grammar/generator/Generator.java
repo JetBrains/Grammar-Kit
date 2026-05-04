@@ -53,7 +53,7 @@ public sealed abstract class Generator permits JavaParserGenerator, KotlinParser
   protected final @Nullable String myGrammarRootParser;
 
   protected final @NotNull GenOptions G;
-  protected final @NotNull Renderer R;
+  protected final @NotNull NameRenderer R;
   public final Names N;
 
   private final @NotNull String myOutputFileExtension;
@@ -106,12 +106,12 @@ public sealed abstract class Generator permits JavaParserGenerator, KotlinParser
                       @NotNull String packagePrefix,
                       @NotNull String outputFileExtension,
                       @NotNull OutputOpener outputOpener,
-                      @NotNull Renderer renderer) {
+                      @NotNull NameRenderer nameRenderer) {
     myFile = psiFile;
 
     G = new GenOptions(psiFile);
     N = G.names;
-    R = renderer;
+    R = nameRenderer;
     mySourcePath = sourcePath;
     myOutputPath = outputPath;
     myPackagePrefix = packagePrefix;

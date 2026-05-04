@@ -24,6 +24,7 @@ import org.intellij.grammar.generator.NodeCalls.*;
 import org.intellij.grammar.generator.Renderer.CommonRendererUtils;
 import org.intellij.grammar.generator.java.JavaBnfConstants;
 import org.intellij.grammar.generator.java.JavaNameShortener;
+import org.intellij.grammar.generator.java.JavaNames;
 import org.intellij.grammar.generator.java.JavaRenderer;
 import org.intellij.grammar.generator.kotlin.KotlinBnfConstants;
 import org.intellij.grammar.java.JavaHelper;
@@ -51,7 +52,7 @@ import static org.intellij.grammar.psi.BnfAst.*;
 import static org.intellij.grammar.generator.ParserGeneratorUtil.*;
 import static org.intellij.grammar.generator.RuleGraphHelper.*;
 import static org.intellij.grammar.generator.RuleGraphHelper.Cardinality.*;
-import static org.intellij.grammar.generator.java.JavaNameShortener.getRawClassName;
+import static org.intellij.grammar.generator.java.JavaNames.getRawClassName;
 import static org.intellij.grammar.psi.BnfTypes.*;
 
 
@@ -185,7 +186,7 @@ public final class JavaParserGenerator extends Generator {
       // mixin attribute overrides "extends":
       info.realSuperClass = StringUtil.notNullize(info.mixin, adjustedSuperRuleClass);
       info.mixedAST = topInfo != null ? topInfo.mixedAST : JBIterable.of(superRuleClass, info.realSuperClass)
-        .map(JavaNameShortener::getRawClassName)
+        .map(JavaNames::getRawClassName)
         .flatMap(s -> JBTreeTraverser.<String>from(o -> JBIterable.of(myJavaHelper.getSuperClassName(o))).withRoot(s).unique())
         .find(JavaBnfConstants.COMPOSITE_PSI_ELEMENT_CLASS::equals) != null;
     }

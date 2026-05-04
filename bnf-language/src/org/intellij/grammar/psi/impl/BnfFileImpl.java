@@ -17,7 +17,6 @@ import com.intellij.util.containers.JBIterable;
 import org.intellij.grammar.BnfFileType;
 import org.intellij.grammar.BnfLanguage;
 import org.intellij.grammar.KnownAttribute;
-import org.intellij.grammar.generator.ParserGeneratorUtil;
 import org.intellij.grammar.psi.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;

@@ -19,7 +19,7 @@ import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.analysis.BnfFirstNextAnalyzer;
 import org.intellij.grammar.generator.*;
 import org.intellij.grammar.generator.CommonRendererUtils;
-import org.intellij.grammar.generator.java.JavaRenderer;
+import org.intellij.grammar.generator.java.JavaNameRenderer;
 import org.intellij.grammar.psi.*;
 import org.intellij.grammar.psi.impl.GrammarUtil;
 import org.intellij.grammar.util.Case;
@@ -48,7 +48,7 @@ public class LivePreviewParser implements PsiParser {
   private final Map<String, IElementType> myRuleElementTypes = new HashMap<>();
   private final Map<String, IElementType> myTokenElementTypes = new HashMap<>();
   private final Object2IntMap<BnfRule> myRuleNumbers = new Object2IntOpenHashMap<>();
-  private final @NotNull JavaRenderer R = new JavaRenderer();
+  private final @NotNull JavaNameRenderer R = new JavaNameRenderer();
   private GenOptions G;
   private BnfRule myGrammarRoot;
   private RuleGraphHelper myGraphHelper;

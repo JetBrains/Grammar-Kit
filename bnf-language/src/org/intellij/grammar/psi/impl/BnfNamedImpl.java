@@ -29,9 +29,9 @@ import static org.intellij.grammar.psi.BnfTypes.BNF_ID;
  * Time: 20:04
  */
 public abstract class BnfNamedImpl extends BnfCompositeImpl implements BnfNamedElement {
-  
+
   private volatile String myCachedName;
-  
+
   public BnfNamedImpl(IElementType elementType) {
     super(elementType);
   }
@@ -98,6 +98,6 @@ public abstract class BnfNamedImpl extends BnfCompositeImpl implements BnfNamedE
   public String toString() {
     // Assertion in LOG.toString fix in inconsistent state
     PsiElement nullableId = findPsiChildByType(BNF_ID);
-    return super.toString() + ":" + (nullableId == null? null : nullableId.getText());
+    return super.toString() + ":" + (nullableId == null ? null : nullableId.getText());
   }
 }

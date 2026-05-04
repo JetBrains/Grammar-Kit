@@ -4,16 +4,9 @@
 
 package org.intellij.grammar.generator;
 
-import com.intellij.openapi.util.text.StringUtil;
-import com.intellij.psi.codeStyle.NameUtil;
-import org.intellij.grammar.KnownAttribute;
-import org.intellij.grammar.psi.BnfFile;
 import org.intellij.grammar.psi.BnfRule;
-import org.intellij.grammar.util.Case;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
-import static org.intellij.grammar.psi.BnfAttributes.getAttribute;
 
 /**
  * This interface provides methods for generating identifiers for
@@ -21,47 +14,22 @@ import static org.intellij.grammar.psi.BnfAttributes.getAttribute;
  * It was created as a means of specifying the format of identifiers
  * for different programming languages (in our case, Java and Kotlin).
  */
-public abstract class Renderer {
-  protected final static @NotNull String RESERVED_SUFFIX = "_$";
+public interface Renderer {
 
   /**
    * Given the function name returned previously from the {@link Renderer#getFuncName}
    * method and the index number, returns a new name constructed from the two values.
    */
-  public abstract @NotNull String getNextName(@NotNull String funcName, int i);
+  @NotNull String getNextName(@NotNull String funcName, int i);
 
   /**
    * Given a bnf rule, returns the name of the method used in the generated
    * parser to implement handling this rule. This method takes into account
    * the rules regarding identifier tokens in the target language.
    */
-  public abstract @NotNull String getFuncName(@NotNull BnfRule rule);
+  @NotNull String getFuncName(@NotNull BnfRule rule);
 
-  /**
-   * Undoes the effect of the {@link Renderer#getFuncName} method.
-   */
-  protected abstract @NotNull String unwrapFuncName(@NotNull String funcName);
+  @NotNull String getWrapperParserMetaMethodName(@NotNull String nextName);
 
-  public abstract @NotNull String getWrapperParserMetaMethodName(@NotNull String nextName);
-  
-  public abstract @Nullable String getRuleDisplayName(@NotNull BnfRule rule, boolean force);
-
-  protected @Nullable String getRuleDisplayNameRaw(@NotNull BnfRule rule, boolean force) {
-    String name = getAttribute(rule, KnownAttribute.NAME);
-    BnfRule realRule = rule;
-    if (name != null) {
-      realRule = ((BnfFile)rule.getContainingFile()).getRule(name);
-      if (realRule != null && realRule != rule) {
-        name = getAttribute(realRule, KnownAttribute.NAME);
-      }
-    }
-    if (name != null || (!force && realRule == rule)) {
-      return name;
-    }
-    else {
-      final var unwrapped = unwrapFuncName(getFuncName(realRule));
-      final var parts = NameUtil.splitNameIntoWords(unwrapped);
-      return Case.LOWER.apply(StringUtil.join(parts, " "));
-    }
-  }
+  @Nullable String getRuleDisplayName(@NotNull BnfRule rule, boolean force);
 }

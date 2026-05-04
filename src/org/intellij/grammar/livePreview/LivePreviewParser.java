@@ -27,10 +27,11 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
-import static org.intellij.grammar.psi.BnfAst.*;
-import static org.intellij.grammar.generator.ParserGeneratorUtil.*;
+import static org.intellij.grammar.generator.ParserGeneratorUtil.isRollbackRequired;
 import static org.intellij.grammar.parser.GeneratedParserUtilBase.*;
-import static org.intellij.grammar.psi.BnfAttributes.*;
+import static org.intellij.grammar.psi.BnfAst.*;
+import static org.intellij.grammar.psi.BnfAttributes.getAttribute;
+import static org.intellij.grammar.psi.BnfAttributes.getRootAttribute;
 import static org.intellij.grammar.psi.BnfTypes.*;
 
 /**

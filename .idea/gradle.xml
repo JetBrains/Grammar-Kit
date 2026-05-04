@@ -9,6 +9,10 @@
         <option name="modules">
           <set>
             <option value="$PROJECT_DIR$" />
+            <option value="$PROJECT_DIR$/base" />
+            <option value="$PROJECT_DIR$/bnf-language" />
+            <option value="$PROJECT_DIR$/jflex-language" />
+            <option value="$PROJECT_DIR$/parser-runtime" />
           </set>
         </option>
       </GradleProjectSettings>

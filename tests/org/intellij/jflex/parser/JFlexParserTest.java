@@ -42,8 +42,8 @@ public class JFlexParserTest extends AbstractParsingTestCase {
   @Override
   protected String loadFile(@NonNls String name) throws IOException {
     String adjusted;
-    if ("SelfBnf.flex".equals(name)) adjusted = "../../../src/org/intellij/grammar/parser/_BnfLexer.flex";
-    else if ("SelfFlex.flex".equals(name)) adjusted = "../../../src/org/intellij/jflex/parser/_JFlexLexer.flex";
+    if ("SelfBnf.flex".equals(name)) adjusted = "../../../bnf-language/src/org/intellij/grammar/parser/_BnfLexer.flex";
+    else if ("SelfFlex.flex".equals(name)) adjusted = "../../../jflex-language/src/org/intellij/jflex/parser/_JFlexLexer.flex";
     else adjusted = name;
     return super.loadFile(adjusted);
   }

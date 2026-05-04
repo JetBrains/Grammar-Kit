@@ -67,8 +67,8 @@ public class BnfHighlightingTest extends BasePlatformTestCase {
   private void doFileTest() {
     String name = getTestName(false) + ".bnf";
     String adjusted;
-    if ("SelfBnf.bnf".equals(name)) adjusted = "../../grammars/Grammar.bnf";
-    else if ("SelfFlex.bnf".equals(name)) adjusted = "../../grammars/JFlex.bnf";
+    if ("SelfBnf.bnf".equals(name)) adjusted = "../../bnf-language/grammars/Grammar.bnf";
+    else if ("SelfFlex.bnf".equals(name)) adjusted = "../../jflex-language/grammars/JFlex.bnf";
     else adjusted = name;
     Module module = ModuleManager.getInstance(getProject()).getModules()[0];
     boolean toggleSrc = !adjusted.equals(name);

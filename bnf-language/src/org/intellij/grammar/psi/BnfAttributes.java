@@ -14,7 +14,8 @@ import org.jetbrains.annotations.Nullable;
 
 public final class BnfAttributes {
 
-  private BnfAttributes() { }
+  private BnfAttributes() {
+  }
 
   public static <T> T getRootAttribute(@NotNull PsiElement node, @NotNull KnownAttribute<T> attribute) {
     return getRootAttribute(node, attribute, null);
@@ -59,7 +60,6 @@ public final class BnfAttributes {
     return getLiteralValue((BnfLiteralExpression)child);
   }
 
-  @SuppressWarnings("unchecked")
   public static @Nullable <T> T getLiteralValue(@Nullable BnfLiteralExpression child) {
     if (child == null) return null;
     PsiElement literal = PsiTreeUtil.getDeepestFirst(child);

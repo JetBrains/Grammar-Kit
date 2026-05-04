@@ -23,9 +23,9 @@ import com.intellij.util.*;
 import com.intellij.util.containers.ContainerUtil;
 import com.intellij.util.containers.FactoryMap;
 import org.intellij.grammar.KnownAttribute;
-import org.intellij.grammar.generator.GenOptions;
 import org.intellij.grammar.generator.java.JavaNameShortener;
 import org.intellij.grammar.psi.BnfAttr;
+import org.intellij.grammar.psi.BnfAttributes;
 import org.intellij.grammar.psi.BnfFile;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -194,7 +194,7 @@ public abstract class JavaHelper {
         @Override
         public GlobalSearchScope getScope(@NotNull Project project) {
           BnfFile bnfFile = (BnfFile)element.getContainingFile();
-          if (GenOptions.UseSyntaxApi(bnfFile)) {
+          if (BnfAttributes.useSyntaxApi(bnfFile)) {
             String psiPath = getRootAttribute(element, KnownAttribute.PSI_OUTPUT_PATH);
             if (psiPath.isEmpty()) return null;
             ProjectFileIndex fileIndex = ProjectRootManager.getInstance(project).getFileIndex();

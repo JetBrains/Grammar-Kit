@@ -52,6 +52,7 @@ dependencies {
     implementation(project(":parser-runtime"))
     implementation(project(":bnf-language"))
     implementation(project(":jflex-language"))
+    implementation(project(":generator"))
 
     intellijPlatform {
         create(providers.gradleProperty("platformType"), providers.gradleProperty("platformVersion"))

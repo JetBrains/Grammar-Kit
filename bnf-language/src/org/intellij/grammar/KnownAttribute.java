@@ -18,7 +18,6 @@ import java.util.*;
 /**
  * @author gregsh
  */
-@SuppressWarnings("StaticVariableOfConcreteClass")
 public class KnownAttribute<T> {
   private static final Map<String, KnownAttribute<?>> ourAttributes = new TreeMap<>();
 
@@ -83,11 +82,11 @@ public class KnownAttribute<T> {
   private final Class<T> myClazz;
   private final T myDefaultValue;
 
-  private static <T> KnownAttribute<T> create(boolean global, Class<T> clazz, String name, @Nullable T defaultValue) {
+  private static <T> KnownAttribute<T> create(boolean global, @NotNull Class<T> clazz, @NotNull String name, @Nullable T defaultValue) {
     return new KnownAttribute<>(global, name, clazz, defaultValue);
   }
 
-  private KnownAttribute(boolean global, String name, Class<T> clazz, T defaultValue) {
+  private KnownAttribute(boolean global, @NotNull String name, @NotNull Class<T> clazz, @Nullable T defaultValue) {
     myName = name;
     myClazz = clazz;
     myDefaultValue = defaultValue;
@@ -104,11 +103,11 @@ public class KnownAttribute<T> {
     return myGlobal;
   }
 
-  public T getDefaultValue() {
+  public @Nullable T getDefaultValue() {
     return myDefaultValue;
   }
 
-  public T ensureValue(Object o) {
+  public @Nullable T ensureValue(@Nullable Object o) {
     if (o == null) return getDefaultValue();
     if (myClazz == ListValue.class && o instanceof String) {
       return (T)ListValue.singleValue(null, (String)o);
@@ -122,7 +121,7 @@ public class KnownAttribute<T> {
     return myName;
   }
 
-  public String getDescription() {
+  public @Nullable String getDescription() {
     try {
       InputStream resourceAsStream = getClass().getResourceAsStream("/messages/attributeDescriptions/" + getName() + ".html");
       return resourceAsStream == null ? null : FileUtil.loadTextAndClose(resourceAsStream);
@@ -136,7 +135,7 @@ public class KnownAttribute<T> {
     return getAttribute(name);
   }
 
-  public static class ListValue extends LinkedList<Pair<String, String>> {
+  public static final class ListValue extends LinkedList<Pair<String, String>> {
     public static @NotNull ListValue singleValue(String s1, String s2) {
       ListValue t = new ListValue();
       t.add(Pair.create(s1, s2));

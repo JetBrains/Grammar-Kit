@@ -4,7 +4,6 @@
 
 package org.intellij.grammar.java;
 
-import com.intellij.navigation.NavigationItem;
 import com.intellij.openapi.project.IndexNotReadyException;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.ProjectFileIndex;
@@ -157,11 +156,6 @@ final class PsiHelper extends AsmHelper {
     catch (IndexNotReadyException e) {
       return null;
     }
-  }
-
-  @Override
-  public NavigationItem findPackage(String packageName) {
-    return myFacade.findPackage(packageName);
   }
 
   @Override

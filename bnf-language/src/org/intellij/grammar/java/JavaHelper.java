@@ -4,7 +4,6 @@
 
 package org.intellij.grammar.java;
 
-import com.intellij.navigation.NavigationItem;
 import com.intellij.psi.*;
 import com.intellij.util.*;
 import org.intellij.grammar.psi.*;
@@ -135,10 +134,6 @@ public abstract class JavaHelper {
 
   public PsiReference @NotNull [] getClassReferences(@NotNull PsiElement element, @NotNull ProcessingContext context) {
     return PsiReference.EMPTY_ARRAY;
-  }
-
-  public @Nullable NavigationItem findPackage(@Nullable String packageName) {
-    return null;
   }
 
   public enum MethodType {STATIC, INSTANCE, CONSTRUCTOR}

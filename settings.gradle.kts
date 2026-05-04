@@ -6,3 +6,8 @@ pluginManagement {
         gradlePluginPortal()
     }
 }
+
+include(":base")
+include(":parser-runtime")
+include(":bnf-language")
+include(":jflex-language")

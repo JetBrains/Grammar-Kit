@@ -48,6 +48,11 @@ dependencies {
     compileOnly(libs.annotations)
     testImplementation(libs.junit)
 
+    implementation(project(":base"))
+    implementation(project(":parser-runtime"))
+    implementation(project(":bnf-language"))
+    implementation(project(":jflex-language"))
+
     intellijPlatform {
         create(providers.gradleProperty("platformType"), providers.gradleProperty("platformVersion"))
 
@@ -61,19 +66,12 @@ dependencies {
 
 sourceSets {
     main {
-        java.srcDirs("src", "gen")
+        java.srcDirs("src")
         resources.srcDirs("resources")
     }
     test {
         java.srcDirs("tests")
         resources.srcDirs("testData")
-    }
-}
-
-
-idea {
-    module {
-        generatedSourceDirs.add(file("gen"))
     }
 }
 
@@ -159,7 +157,7 @@ val buildGrammarKitJar by tasks.registering(Jar::class) {
         from("$rootDir/resources/META-INF/MANIFEST.MF")
     }
     from(sourceSets.main.get().output)
-    from(file("$rootDir/src/org/intellij/grammar/parser/GeneratedParserUtilBase.java")) {
+    from(file("$rootDir/parser-runtime/src/org/intellij/grammar/parser/GeneratedParserUtilBase.java")) {
         into("/templates")
     }
     exclude("**/classpath.index")

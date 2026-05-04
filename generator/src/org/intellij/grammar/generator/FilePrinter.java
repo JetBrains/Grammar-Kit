@@ -10,7 +10,7 @@ import org.jetbrains.annotations.NotNull;
 import java.io.Closeable;
 import java.io.PrintWriter;
 
-public final class FilePrinter implements Closeable {
+final class FilePrinter implements Closeable {
   private final @NotNull PrintWriter myOut;
   private int myOffset;
 

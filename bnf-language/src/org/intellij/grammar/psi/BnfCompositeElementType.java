@@ -12,7 +12,7 @@ import org.intellij.grammar.BnfLanguage;
  * Date: 13.07.11
  * Time: 19:11
  */
-public class BnfCompositeElementType extends IElementType {
+class BnfCompositeElementType extends IElementType {
   public BnfCompositeElementType(String debug) {
     super(debug, BnfLanguage.INSTANCE);
   }

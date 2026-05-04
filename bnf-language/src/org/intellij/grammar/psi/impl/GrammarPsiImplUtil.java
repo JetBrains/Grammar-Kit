@@ -27,7 +27,7 @@ import static org.intellij.grammar.psi.BnfAttributes.getRootAttribute;
 /**
  * @author gregsh
  */
-public class GrammarPsiImplUtil {
+class GrammarPsiImplUtil {
   public static PsiReference @NotNull [] getReferences(BnfListEntry o) {
     BnfAttr attr = PsiTreeUtil.getParentOfType(o, BnfAttr.class);
     if (attr == null || !Objects.equals(KnownAttribute.METHODS.getName(), attr.getName())) return PsiReference.EMPTY_ARRAY;

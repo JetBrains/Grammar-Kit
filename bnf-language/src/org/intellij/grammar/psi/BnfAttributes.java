@@ -80,4 +80,12 @@ public final class BnfAttributes {
     if (text.equals("false")) return false;
     return GrammarUtil.getIdText(child);
   }
+
+  public static boolean useSyntaxApi(@NotNull BnfRule rule) {
+    return "syntax".equals(getAttribute(rule, KnownAttribute.GENERATE).asMap().get("parser-api"));
+  }
+
+  public static boolean useSyntaxApi(@NotNull BnfFile file) {
+    return "syntax".equals(getRootAttribute(file, KnownAttribute.GENERATE).asMap().get("parser-api"));
+  }
 }

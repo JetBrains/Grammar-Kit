@@ -72,13 +72,4 @@ public class GenOptions {
     generateElementCase = ParserGeneratorUtil.enumFromString(genOptions.get("element-case"), Case.UPPER);
     javaVersion = StringUtil.parseInt(genOptions.get("java"), 11);
   }
-  
-  public static boolean UseSyntaxApi(@NotNull BnfRule rule){
-    Map<String, String> genOptions =  getAttribute(rule, KnownAttribute.GENERATE).asMap();
-    return "syntax".equals(genOptions.get("parser-api"));
-  }  
-  public static boolean UseSyntaxApi(@NotNull BnfFile file) {
-    Map<String, String> genOptions =  getRootAttribute(file, KnownAttribute.GENERATE).asMap();
-    return "syntax".equals(genOptions.get("parser-api"));
-  }
 }

@@ -42,7 +42,7 @@ final class BnfRuleLineMarkerProvider extends RelatedItemLineMarkerProvider {
     if (rule == null) return null;
     String parserClass = BnfAttributes.getAttribute(rule, KnownAttribute.PARSER_CLASS);
     if (StringUtil.isEmpty(parserClass)) return null;
-    boolean generateKotlin = GenOptions.UseSyntaxApi(rule);
+    boolean generateKotlin = BnfAttributes.useSyntaxApi(rule);
     JavaHelper.MethodType methodType = (generateKotlin) ? JavaHelper.MethodType.INSTANCE : JavaHelper.MethodType.STATIC;
     JavaHelper helper = JavaHelper.getJavaHelper(element);
     String methodName = (generateKotlin) ? GrammarUtil.getKotlinMethodName(rule, element) : GrammarUtil.getJavaMethodName(rule, element);

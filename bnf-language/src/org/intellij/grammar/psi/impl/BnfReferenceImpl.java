@@ -13,7 +13,6 @@ import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.util.ObjectUtils;
 import com.intellij.util.containers.ContainerUtil;
 import org.intellij.grammar.KnownAttribute;
-import org.intellij.grammar.generator.GenOptions;
 import org.intellij.grammar.generator.ParserGeneratorUtil;
 import org.intellij.grammar.generator.kotlin.KotlinBnfConstants;
 import org.intellij.grammar.java.JavaHelper;
@@ -74,7 +73,7 @@ public class BnfReferenceImpl<T extends BnfExpression> extends PsiReferenceBase<
       PsiElement first = ContainerUtil.getFirstItem(methods);
       if (first != null) return first;
     }
-    if (GenOptions.UseSyntaxApi(rule)){
+    if (BnfAttributes.useSyntaxApi(rule)){
       String runtimeName = KotlinBnfConstants.KT_PARSER_RUNTIME_CLASS;
       List<NavigatablePsiElement> methods = helper.findClassMethods(runtimeName, 
                                                                     JavaHelper.MethodType.INSTANCE, 

@@ -11,7 +11,7 @@ import org.jetbrains.annotations.NotNull;
 /**
  * @author gregsh
  */
-public class BnfStringLiteralEscaper extends LiteralTextEscaper<BnfStringImpl> {
+class BnfStringLiteralEscaper extends LiteralTextEscaper<BnfStringImpl> {
   public BnfStringLiteralEscaper(BnfStringImpl element) {
     super(element);
   }

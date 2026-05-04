@@ -16,7 +16,7 @@ import org.jetbrains.annotations.NotNull;
  * Date: 13.07.11
  * Time: 19:11
  */
-public class BnfCompositeImpl extends CompositePsiElement implements BnfComposite {
+class BnfCompositeImpl extends CompositePsiElement implements BnfComposite {
   public BnfCompositeImpl(IElementType type) {
     super(type);
   }

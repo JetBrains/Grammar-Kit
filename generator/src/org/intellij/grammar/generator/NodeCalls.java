@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 /**
  * @author Daniil Ovchinnikov
  */
-public final class NodeCalls {
+final class NodeCalls {
   private NodeCalls() {
   }
 

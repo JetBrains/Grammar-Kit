@@ -35,7 +35,7 @@ public class BnfExpressionOptimizer {
       else if (cur instanceof BnfParenOptExpression && isTrivialOrSingular(((BnfParenOptExpression)cur).getExpression())) {
         // currently, <expr> + ? expressions are not supported, thus:
         BnfExpression child = ((BnfParenOptExpression)cur).getExpression();
-        IElementType type = ParserGeneratorUtil.getEffectiveType(child);
+        IElementType type = BnfAst.getEffectiveType(child);
         if (type == BnfTypes.BNF_OP_OPT || type == BnfTypes.BNF_OP_ZEROMORE) {
           list.add(cur.replace(child));
         }
@@ -56,8 +56,8 @@ public class BnfExpressionOptimizer {
       }
       else if (isOptMany(cur) && isOptMany(PsiTreeUtil.getChildOfType(cur, BnfExpression.class))) {
         BnfExpression child = PsiTreeUtil.getChildOfType(cur, BnfExpression.class);
-        IElementType type1 = ParserGeneratorUtil.getEffectiveType(cur);
-        IElementType type2 = ParserGeneratorUtil.getEffectiveType(child);
+        IElementType type1 = BnfAst.getEffectiveType(cur);
+        IElementType type2 = BnfAst.getEffectiveType(child);
         if (type1 == type2) {
           list.add(cur.replace(child));
         }

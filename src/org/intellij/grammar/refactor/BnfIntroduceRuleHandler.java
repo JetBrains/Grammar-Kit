@@ -246,7 +246,7 @@ public class BnfIntroduceRuleHandler implements RefactoringActionHandler {
     }
     else if (!GrammarUtil.isOneTokenExpression(expression)) {
       PsiElement selectedParent = selectedExpressions.get(0).getParent();
-      if (ParserGeneratorUtil.getEffectiveType(expression) != ParserGeneratorUtil.getEffectiveType(selectedParent)) return; 
+      if (BnfAst.getEffectiveType(expression) != BnfAst.getEffectiveType(selectedParent)) return; 
       int pos = 0;
       BnfExpression[] result = new BnfExpression[selectedExpressions.size()];
       for (PsiElement c = expression.getFirstChild(), s = null; c != null; c = c.getNextSibling()) {

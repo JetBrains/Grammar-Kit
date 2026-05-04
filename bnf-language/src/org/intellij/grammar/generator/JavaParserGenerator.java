@@ -47,6 +47,7 @@ import static org.intellij.grammar.analysis.BnfFirstNextAnalyzer.BNF_MATCHES_EOF
 import static org.intellij.grammar.generator.CommonBnfConstants.RECOVER_AUTO;
 import static org.intellij.grammar.generator.NameShortener.addTypeToImports;
 import static org.intellij.grammar.psi.BnfAttributes.*;
+import static org.intellij.grammar.psi.BnfAst.*;
 import static org.intellij.grammar.generator.ParserGeneratorUtil.*;
 import static org.intellij.grammar.generator.RuleGraphHelper.*;
 import static org.intellij.grammar.generator.RuleGraphHelper.Cardinality.*;

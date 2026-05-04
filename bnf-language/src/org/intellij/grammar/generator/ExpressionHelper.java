@@ -28,6 +28,7 @@ import java.util.*;
 import java.util.function.Consumer;
 
 import static org.intellij.grammar.psi.BnfAttributes.*;
+import static org.intellij.grammar.psi.BnfAst.*;
 import static org.intellij.grammar.generator.ParserGeneratorUtil.*;
 import static org.intellij.grammar.generator.RuleGraphHelper.Cardinality.OPTIONAL;
 

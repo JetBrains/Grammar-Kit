@@ -40,6 +40,7 @@ import static org.intellij.grammar.generator.CommonBnfConstants.RECOVER_AUTO;
 import static org.intellij.grammar.generator.ExpressionGeneratorHelper.CONSUME_TYPE_OVERRIDE;
 import static org.intellij.grammar.generator.ExpressionGeneratorHelper.findOperators;
 import static org.intellij.grammar.psi.BnfAttributes.*;
+import static org.intellij.grammar.psi.BnfAst.*;
 import static org.intellij.grammar.generator.ParserGeneratorUtil.*;
 import static org.intellij.grammar.generator.java.JavaNameShortener.getRawClassName;
 import static org.intellij.grammar.psi.BnfTypes.*;

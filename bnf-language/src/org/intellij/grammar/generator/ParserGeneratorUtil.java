@@ -36,6 +36,7 @@ import java.util.regex.PatternSyntaxException;
 
 import static org.intellij.grammar.generator.RuleGraphHelper.getSynonymTargetOrSelf;
 import static org.intellij.grammar.generator.RuleGraphHelper.getTokenNameToTextMap;
+import static org.intellij.grammar.psi.BnfAst.*;
 import static org.intellij.grammar.psi.BnfAttributes.*;
 import static org.intellij.grammar.psi.BnfTypes.BNF_SEQUENCE;
 
@@ -44,17 +45,6 @@ import static org.intellij.grammar.psi.BnfTypes.BNF_SEQUENCE;
  *         Date: 16.07.11 10:41
  */
 public class ParserGeneratorUtil {
-  private static final Hash.Strategy<PsiElement> TEXT_STRATEGY = new Hash.Strategy<>() {
-    @Override
-    public int hashCode(PsiElement e) {
-      return e == null ? 0 : e.getText().hashCode();
-    }
-
-    @Override
-    public boolean equals(PsiElement e1, PsiElement e2) {
-      return e1 == null ? e2 == null : e2 != null && Objects.equals(e1.getText(), e2.getText());
-    }
-  };
 
   public static @NotNull <T extends Enum<T>> T enumFromString(@Nullable String value, @NotNull T def) {
     try {
@@ -80,66 +70,6 @@ public class ParserGeneratorUtil {
   }
 
 
-  public static boolean isTrivialNode(PsiElement element) {
-    return getTrivialNodeChild(element) != null;
-  }
-
-  public static BnfExpression getNonTrivialNode(BnfExpression initialNode) {
-    BnfExpression nonTrivialNode = initialNode;
-    for (BnfExpression e = initialNode, n = getTrivialNodeChild(e); n != null; e = n, n = getTrivialNodeChild(e)) {
-      nonTrivialNode = n;
-    }
-    return nonTrivialNode;
-  }
-
-  public static BnfExpression getTrivialNodeChild(PsiElement element) {
-    PsiElement child = null;
-    if (element instanceof BnfParenthesized) {
-      BnfExpression e = ((BnfParenthesized)element).getExpression();
-      if (element instanceof BnfParenExpression) {
-        child = e;
-      }
-      else {
-        BnfExpression c = e;
-        while (c instanceof BnfParenthesized) {
-          c = ((BnfParenthesized)c).getExpression();
-        }
-        if (c.getFirstChild() == null) {
-          child = e;
-        }
-      }
-    }
-    else if (element.getFirstChild() == element.getLastChild() && element instanceof BnfExpression) {
-      child = element.getFirstChild();
-    }
-    return child instanceof BnfExpression && !(child instanceof BnfLiteralExpression || child instanceof BnfReferenceOrToken) ?
-        (BnfExpression) child : null;
-  }
-
-  public static IElementType getEffectiveType(PsiElement tree) {
-    if (tree instanceof BnfParenOptExpression) {
-      return BnfTypes.BNF_OP_OPT;
-    }
-    else if (tree instanceof BnfQuantified) {
-      BnfQuantifier quantifier = ((BnfQuantified)tree).getQuantifier();
-      return PsiTreeUtil.getDeepestFirst(quantifier).getNode().getElementType();
-    }
-    else if (tree instanceof BnfPredicate) {
-      return ((BnfPredicate)tree).getPredicateSign().getFirstChild().getNode().getElementType();
-    }
-    else if (tree instanceof BnfStringLiteralExpression) {
-      return BnfTypes.BNF_STRING;
-    }
-    else if (tree instanceof BnfLiteralExpression) {
-      return tree.getFirstChild().getNode().getElementType();
-    }
-    else if (tree instanceof BnfParenExpression) {
-      return BNF_SEQUENCE;
-    }
-    else {
-      return tree.getNode().getElementType();
-    }
-  }
 
   public static List<BnfExpression> getChildExpressions(@Nullable BnfExpression node) {
     return PsiTreeUtil.getChildrenOfTypeAsList(node, BnfExpression.class);
@@ -538,15 +468,6 @@ public class ParserGeneratorUtil {
     return quoteString + text + quoteString;
   }
 
-  public static @Nullable Pattern compilePattern(String text) {
-    try {
-      return Pattern.compile(text);
-    }
-    catch (PatternSyntaxException e) {
-      return null;
-    }
-  }
-
   public static boolean matchesAny(String regexp, String... text) {
     try {
       Pattern p = Pattern.compile(regexp);
@@ -652,10 +573,6 @@ public class ParserGeneratorUtil {
 
   public static @NotNull String starImport(@NotNull String fqn) {
     return fqn + ".*";
-  }
-
-  public static <T extends PsiElement> Hash.Strategy<T> textStrategy() {
-    return (Hash.Strategy<T>)TEXT_STRATEGY;
   }
 
   static @NotNull <K extends Comparable<? super K>, V> Map<K, V> take(@NotNull Map<K, V> map) {

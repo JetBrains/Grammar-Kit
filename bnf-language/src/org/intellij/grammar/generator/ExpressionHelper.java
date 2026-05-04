@@ -68,14 +68,14 @@ public class ExpressionHelper {
     BnfRule root = myRootRulesMap.get(rule);
     ExpressionInfo info = root == null ? null : myExpressionMap.get(root);
     if (info == null) return null;
-    if (info.rootRule == rule || Rule.isPrivate(rule)) return info;
+    if (info.rootRule == rule || BnfRules.isPrivate(rule)) return info;
     return info.priorityMap.containsKey(rule) ? info : null;
   }
 
   private void buildExpressionRules() {
     BnfFirstNextAnalyzer analyzer = BnfFirstNextAnalyzer.createAnalyzer(false);
     for (BnfRule rule : myFile.getRules()) {
-      if (Rule.isPrivate(rule) || Rule.isFake(rule)) continue;
+      if (BnfRules.isPrivate(rule) || BnfRules.isFake(rule)) continue;
       if (myRootRulesMap.containsKey(rule)) continue;
       Map<PsiElement, RuleGraphHelper.Cardinality> contentRules = myRuleGraph.getFor(rule);
       if (!contentRules.isEmpty()) continue;
@@ -103,7 +103,7 @@ public class ExpressionHelper {
 
   private void addToPriorityMap(BnfRule rule, Collection<BnfRule> rulesCluster, ExpressionInfo info) {
     JBTreeTraverser<BnfRule> traverser = new JBTreeTraverser<>(
-      o -> ObjectUtils.notNull(rule == o || Rule.isPrivate(o) ? myRuleGraph.getSubRules(o) : null, Collections.emptyList()));
+      o -> ObjectUtils.notNull(rule == o || BnfRules.isPrivate(o) ? myRuleGraph.getSubRules(o) : null, Collections.emptyList()));
     for (TreeTraversal.TracingIt<BnfRule> it = traverser.withRoot(rule).unique().traverse().skip(1).typedIterator(); it.hasNext(); ) {
       BnfRule subRule = it.next();
       if (info.priorityMap.containsKey(subRule)) {
@@ -118,11 +118,11 @@ public class ExpressionHelper {
       Integer groupPriority = info.privateGroups.get(it.parent());
       int priority = groupPriority == null ? info.nextPriority++ : groupPriority;
       if (rulesCluster.contains(subRule)) {
-        if (!Rule.isPrivate(subRule) || !myRuleGraph.getFor(subRule).isEmpty()) {
+        if (!BnfRules.isPrivate(subRule) || !myRuleGraph.getFor(subRule).isEmpty()) {
           info.priorityMap.put(subRule, priority);
         }
       }
-      else if (Rule.isPrivate(subRule)) {
+      else if (BnfRules.isPrivate(subRule)) {
         info.privateGroups.put(subRule, priority);
       }
       else {
@@ -148,7 +148,7 @@ public class ExpressionHelper {
         break;
       }
     }
-    if (Rule.isExternal(rule)) {
+    if (BnfRules.isExternal(rule)) {
       BnfExpression expression = (BnfExpression)ContainerUtil.getFirstItem(ruleContent.keySet());
       expressionInfo.operatorMap.put(rule, new OperatorInfo(rule, OperatorType.ATOM, expression, null));
       return;

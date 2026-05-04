@@ -80,7 +80,7 @@ final class BnfResolveInspection extends LocalInspectionTool {
             attribute != null && attribute != KnownAttribute.NAME && !attribute.getName().endsWith("Factory") &&
             !(attribute == KnownAttribute.RECOVER_WHILE &&
               (CommonBnfConstants.RECOVER_AUTO.equals(value) ||
-               GrammarUtil.isDoubleAngles(value) && ParserGeneratorUtil.Rule.isMeta(ParserGeneratorUtil.Rule.of(o))));
+               GrammarUtil.isDoubleAngles(value) && BnfRules.isMeta(BnfRules.of(o))));
           if (checkReferences) {
             TextRange valueRange = ElementManipulators.getValueTextRange(o);
             ThreeState reportAtEnd = ThreeState.UNSURE;

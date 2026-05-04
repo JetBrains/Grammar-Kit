@@ -83,7 +83,7 @@ public class BnfInlineRuleProcessor extends BaseRefactoringProcessor {
   @Override
   protected void performRefactoring(UsageInfo @NotNull [] usages) {
     BnfExpression expression = myRule.getExpression();
-    boolean meta = ParserGeneratorUtil.Rule.isMeta(myRule);
+    boolean meta = BnfRules.isMeta(myRule);
 
     CommonRefactoringUtil.sortDepthFirstRightLeftOrder(usages);
     for (UsageInfo info : usages) {

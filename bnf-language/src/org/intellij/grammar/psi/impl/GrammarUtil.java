@@ -85,7 +85,7 @@ public class GrammarUtil {
     PsiElement parent = psiElement == null ? null : psiElement.getParent();
     if (parent instanceof BnfExternalExpression && ((BnfExternalExpression)parent).getRefElement() == psiElement) return true;
     if (parent instanceof BnfSequence && parent.getFirstChild() == psiElement) parent = parent.getParent();
-    return parent instanceof BnfRule && Rule.isExternal((BnfRule)parent);
+    return parent instanceof BnfRule && BnfRules.isExternal((BnfRule)parent);
   }
 
   public static List<BnfExpression> getExternalRuleExpressions(@NotNull BnfRule subRule) {
@@ -94,7 +94,7 @@ public class GrammarUtil {
   }
 
   public static List<String> collectMetaParameters(BnfRule rule, BnfExpression expression) {
-    if (!Rule.isMeta(rule) && !Rule.isExternal(rule)) return Collections.emptyList();
+    if (!BnfRules.isMeta(rule) && !BnfRules.isExternal(rule)) return Collections.emptyList();
     List<String> result = new SmartList<>();
     for (BnfExternalExpression o : bnfTraverserNoAttrs(expression).filter(BnfExternalExpression.class)) {
       if (o.getArguments().isEmpty()) {
@@ -104,7 +104,7 @@ public class GrammarUtil {
         }
       }
     }
-    if (Rule.isMeta(rule)) {
+    if (BnfRules.isMeta(rule)) {
       String attr = getAttribute(rule, KnownAttribute.RECOVER_WHILE);
       if (isDoubleAngles(attr) && !result.contains(attr)) {
         result.add(attr);

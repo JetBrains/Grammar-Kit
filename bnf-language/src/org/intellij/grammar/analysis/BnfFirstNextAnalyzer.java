@@ -114,7 +114,7 @@ public class BnfFirstNextAnalyzer {
       while (parent instanceof BnfExpression && (myParentFilter == null || myParentFilter.value(parent))) {
         curResult.clear();
         PsiElement grandPa = parent.getParent();
-        if (grandPa instanceof BnfRule && ParserGeneratorUtil.Rule.isExternal((BnfRule)grandPa) ||
+        if (grandPa instanceof BnfRule && BnfRules.isExternal((BnfRule)grandPa) ||
             grandPa instanceof BnfExternalExpression /*todo support meta rules*/) {
           result.put(BNF_MATCHES_ANY, startingExpr);
           break;
@@ -176,7 +176,7 @@ public class BnfFirstNextAnalyzer {
     if (!myBackward) {
       BnfExpression firstItem = ContainerUtil.getFirstItem(expressions);
       if (firstItem == null) return result;
-      BnfRule rule = ParserGeneratorUtil.Rule.of(firstItem);
+      BnfRule rule = BnfRules.of(firstItem);
       pinned = new HashSet<>();
       GrammarUtil.processPinnedExpressions(rule, new CommonProcessors.CollectProcessor<>(pinned));
       if (firstItem.getParent() instanceof BnfSequence) {
@@ -213,7 +213,7 @@ public class BnfFirstNextAnalyzer {
     else if (expression instanceof BnfReferenceOrToken) {
       BnfRule rule = file.getRule(expression.getText());
       if (rule != null) {
-        if (ParserGeneratorUtil.Rule.isExternal(rule)) {
+        if (BnfRules.isExternal(rule)) {
           BnfExpression callExpr = ContainerUtil.getFirstItem(GrammarUtil.getExternalRuleExpressions(rule));
           if (callExpr instanceof BnfReferenceOrToken && file.getRule(callExpr.getText()) == null) {
             result.add(callExpr);
@@ -221,9 +221,9 @@ public class BnfFirstNextAnalyzer {
           }
         }
         BnfExpression ruleExpression = rule.getExpression();
-        if (myPublicRuleOpaque && !ParserGeneratorUtil.Rule.isPrivate(rule) ||
+        if (myPublicRuleOpaque && !BnfRules.isPrivate(rule) ||
             !visited.add(ruleExpression)) {
-          if (!(ParserGeneratorUtil.Rule.firstNotTrivial(rule) instanceof BnfPredicate)) {
+          if (!(BnfRules.firstNotTrivial(rule) instanceof BnfPredicate)) {
             result.add(expression);
           }
         }
@@ -265,7 +265,7 @@ public class BnfFirstNextAnalyzer {
     else if (expression instanceof BnfExternalExpression) {
       BnfExternalExpression externalExpression = (BnfExternalExpression)expression;
       List<BnfExpression> arguments = externalExpression.getArguments();
-      if (arguments.isEmpty() && ParserGeneratorUtil.Rule.isMeta(ParserGeneratorUtil.Rule.of(expression))) {
+      if (arguments.isEmpty() && BnfRules.isMeta(BnfRules.of(expression))) {
         result.add(expression);
       }
       else {

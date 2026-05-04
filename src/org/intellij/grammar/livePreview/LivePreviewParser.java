@@ -149,11 +149,11 @@ public class LivePreviewParser implements PsiParser {
 
     IElementType type = getEffectiveType(node);
 
-    boolean firstNonTrivial = node == Rule.firstNotTrivial(rule);
-    boolean isPrivate = !(isRule || firstNonTrivial) || Rule.isPrivate(rule) || myGrammarRoot == rule;
-    boolean isLeft = firstNonTrivial && Rule.isLeft(rule);
-    boolean isLeftInner = isLeft && (isPrivate || Rule.isInner(rule));
-    boolean isBranch = !isPrivate && Rule.isUpper(rule);
+    boolean firstNonTrivial = node == BnfRules.firstNotTrivial(rule);
+    boolean isPrivate = !(isRule || firstNonTrivial) || BnfRules.isPrivate(rule) || myGrammarRoot == rule;
+    boolean isLeft = firstNonTrivial && BnfRules.isLeft(rule);
+    boolean isLeftInner = isLeft && (isPrivate || BnfRules.isInner(rule));
+    boolean isBranch = !isPrivate && BnfRules.isUpper(rule);
     String recoverWhile = firstNonTrivial ? getAttribute(rule, KnownAttribute.RECOVER_WHILE) : null;
     Map<String, String> hooks = firstNonTrivial ? getAttribute(rule, KnownAttribute.HOOKS).asMap() : Collections.emptyMap();
     boolean canCollapse = !isPrivate && (!isLeft || isLeftInner) && firstNonTrivial && myGraphHelper.canCollapse(rule);
@@ -164,7 +164,7 @@ public class LivePreviewParser implements PsiParser {
       node instanceof BnfReferenceOrToken || node instanceof BnfLiteralExpression || node instanceof BnfExternalExpression;
 
     List<BnfExpression> children = isSingleNode ? Collections.singletonList(node) : getChildExpressions(node);
-    String frameName = !children.isEmpty() && firstNonTrivial && !Rule.isMeta(rule) ? R.getRuleDisplayName(rule, !isPrivate) : null;
+    String frameName = !children.isEmpty() && firstNonTrivial && !BnfRules.isMeta(rule) ? R.getRuleDisplayName(rule, !isPrivate) : null;
 
     if (isSingleNode) {
       children = Collections.singletonList(node);
@@ -328,7 +328,7 @@ public class LivePreviewParser implements PsiParser {
         IElementType[] nextTokens = generateAutoRecoverCall(rule);
         recoverPredicate = (builder12, level12) -> !nextTokenIsFast(builder12, nextTokens);
       }
-      else if (Rule.isMeta(rule) && GrammarUtil.isDoubleAngles(recoverWhile)) {
+      else if (BnfRules.isMeta(rule) && GrammarUtil.isDoubleAngles(recoverWhile)) {
         recoverPredicate = externalArguments.get(recoverWhile.substring(2, recoverWhile.length() - 2));
       }
       else {
@@ -376,7 +376,7 @@ public class LivePreviewParser implements PsiParser {
       BnfRule subRule = myFile.getRule(text);
       if (subRule != null) {
         //String method;
-        if (Rule.isExternal(subRule)) {
+        if (BnfRules.isExternal(subRule)) {
           // not supported
           return false;
           //method = generateExternalCall(rule, clause, GrammarUtil.getExternalRuleExpressions(subRule), nextName);
@@ -399,7 +399,7 @@ public class LivePreviewParser implements PsiParser {
     }
     else if (type == BNF_EXTERNAL_EXPRESSION) {
       List<BnfExpression> expressions = ((BnfExternalExpression)node).getExpressionList();
-      if (expressions.size() == 1 && Rule.isMeta(rule)) {
+      if (expressions.size() == 1 && BnfRules.isMeta(rule)) {
         Parser parser = externalArguments.get(node.getText());
         return parser != null && parser.parse(builder, level);
       }
@@ -467,7 +467,7 @@ public class LivePreviewParser implements PsiParser {
     // handle external rule call: substitute and merge arguments from external expression and rule definition
     if (targetRule != null) {
       metaParameterNames = GrammarUtil.collectMetaParameters(targetRule, targetRule.getExpression());
-      if (Rule.isExternal(targetRule)) {
+      if (BnfRules.isExternal(targetRule)) {
         callParameters = GrammarUtil.getExternalRuleExpressions(targetRule);
         method = callParameters.get(0).getText();
         if (metaParameterNames.size() < expressions.size() - 1) {
@@ -525,7 +525,7 @@ public class LivePreviewParser implements PsiParser {
       }
       else if (nested instanceof BnfExternalExpression) {
         List<BnfExpression> expressionList = ((BnfExternalExpression)nested).getExpressionList();
-        boolean metaRule = Rule.isMeta(rule) || Rule.isExternal(rule);
+        boolean metaRule = BnfRules.isMeta(rule) || BnfRules.isExternal(rule);
         if (metaRule && expressionList.size() == 1) {
           // parameter
           argumentMap.put(argName, externalArguments.get("<<" + expressionList.get(0).getText() + ">>"));
@@ -540,7 +540,7 @@ public class LivePreviewParser implements PsiParser {
                         (builder1, level1) -> generateNodeCall(builder1, level1, targetRule, finalNested, argNextName, externalArguments));
       }
     }
-    if (Rule.isExternal(targetRule)) {
+    if (BnfRules.isExternal(targetRule)) {
       return generateExternalCall(builder, level, targetRule, callParameters, targetRule.getName(), argumentMap);
     }
     return rule(builder, level, targetRule, argumentMap);

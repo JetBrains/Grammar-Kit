@@ -356,7 +356,7 @@ public sealed abstract class Generator permits JavaParserGenerator, KotlinParser
     BnfRule targetRule = method == null ? null : myFile.getRule(method);
     // handle external rule call: substitute and merge arguments from external expression and rule definition
     if (targetRule != null) {
-      if (Rule.isExternal(targetRule)) {
+      if (BnfRules.isExternal(targetRule)) {
         metaParameterNames = GrammarUtil.collectMetaParameters(targetRule, targetRule.getExpression());
         callParameters = GrammarUtil.getExternalRuleExpressions(targetRule);
         method = callParameters.get(0).getText();
@@ -407,7 +407,7 @@ public sealed abstract class Generator permits JavaParserGenerator, KotlinParser
         }
         else if (nested instanceof BnfExternalExpression expression) {
           List<BnfExpression> expressionList = expression.getExpressionList();
-          if (expressionList.size() == 1 && Rule.isMeta(rule)) {
+          if (expressionList.size() == 1 && BnfRules.isMeta(rule)) {
             arguments.add(new MetaParameterArgument(formatMetaParamName(expressionList.get(0).getText())));
           }
           else {
@@ -419,7 +419,7 @@ public sealed abstract class Generator permits JavaParserGenerator, KotlinParser
         }
       }
     }
-    return Rule.isMeta(targetRule) ? new MetaMethodCall(targetClassName, method, stateHolder, N.level, arguments)
+    return BnfRules.isMeta(targetRule) ? new MetaMethodCall(targetClassName, method, stateHolder, N.level, arguments)
                                    : new MethodCallWithArguments(method, stateHolder, N.level, arguments);
   }
 

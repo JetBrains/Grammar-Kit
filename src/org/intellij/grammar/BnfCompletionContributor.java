@@ -117,9 +117,9 @@ final class BnfCompletionContributor extends CompletionContributor {
         PsiElement posExpression = PsiTreeUtil.getParentOfType(parameters.getPosition(), BnfExpression.class);
         boolean isExternal = GrammarUtil.isExternalReference(posExpression);
         for (BnfRule rule : bnfFile.getRules()) {
-          boolean fakeRule = ParserGeneratorUtil.Rule.isFake(rule);
-          boolean privateRule = ParserGeneratorUtil.Rule.isPrivate(rule);
-          if (isExternal && !ParserGeneratorUtil.Rule.isMeta(rule)) continue;
+          boolean fakeRule = BnfRules.isFake(rule);
+          boolean privateRule = BnfRules.isPrivate(rule);
+          if (isExternal && !BnfRules.isMeta(rule)) continue;
           String idText = rule.getId().getText();
           LookupElementBuilder e = LookupElementBuilder.create(rule, idText)
             .withIcon(rule.getIcon(0))

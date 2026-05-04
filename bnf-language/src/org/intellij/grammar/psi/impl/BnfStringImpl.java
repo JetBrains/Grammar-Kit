@@ -210,7 +210,7 @@ public abstract class BnfStringImpl extends BnfExpressionImpl implements BnfStri
           GrammarUtil.processExpressionNames(rule, JavaRenderer.INSTANCE.getFuncName(rule), rule.getExpression(), JavaRenderer.INSTANCE, (funcName, expression) -> {
             if (!(expression instanceof BnfSequence)) return true;
             if (!visited.add(funcName)) return true;
-            PsiElement firstNotTrivial = ParserGeneratorUtil.Rule.firstNotTrivial(ParserGeneratorUtil.Rule.of(expression));
+            PsiElement firstNotTrivial = BnfRules.firstNotTrivial(BnfRules.of(expression));
             if (firstNotTrivial == expression) return true;
             if (pattern.matcher(funcName).matches()) {
               result.add(new MyFakePsiElement(funcName, expression));

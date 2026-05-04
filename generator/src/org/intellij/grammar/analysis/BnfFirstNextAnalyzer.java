@@ -188,7 +188,7 @@ public class BnfFirstNextAnalyzer {
     if (cached != null) return cached;
 
     LinkedList<BnfExpression> stack = new LinkedList<>();
-    HashSet<BnfRule> totalVisited = new HashSet<>();
+    Set<BnfRule> totalVisited = new HashSet<>();
     Set<BnfExpression> curResult = new HashSet<>();
     stack.add(targetExpression);
     main: while (!stack.isEmpty()) {
@@ -227,10 +227,9 @@ public class BnfFirstNextAnalyzer {
         cur = parent;
         parent = grandPa;
       }
-      if (parent instanceof BnfRule &&
+      if (parent instanceof BnfRule rule &&
           (myParentFilter == null || myParentFilter.value(parent)) &&
-          totalVisited.add((BnfRule)parent)) {
-        BnfRule rule = (BnfRule)parent;
+          totalVisited.add(rule)) {
         for (PsiReference reference : ReferencesSearch.search(rule, rule.getUseScope()).findAll()) {
           PsiElement element = reference.getElement();
           if (element instanceof BnfExpression && PsiTreeUtil.getParentOfType(element, BnfPredicate.class) == null) {
@@ -334,33 +333,32 @@ public class BnfFirstNextAnalyzer {
         result.add(expression);
       }
     }
-    else if (expression instanceof BnfParenthesized) {
-      calcFirstInner(((BnfParenthesized)expression).getExpression(), result, visited, forcedNext);
+    else if (expression instanceof BnfParenthesized parenthesized) {
+      calcFirstInner(parenthesized.getExpression(), result, visited, forcedNext);
       if (expression instanceof BnfParenOptExpression) {
         result.add(BNF_MATCHES_EOF);
       }
     }
-    else if (expression instanceof BnfChoice) {
+    else if (expression instanceof BnfChoice choiceExpression) {
       boolean matchesNothing = result.remove(BNF_MATCHES_NOTHING);
       boolean matchesSomething = false;
-      for (BnfExpression child : ((BnfChoice)expression).getExpressionList()) {
+      for (BnfExpression child : choiceExpression.getExpressionList()) {
         calcFirstInner(child, result, visited, forcedNext);
         matchesSomething |= !result.remove(BNF_MATCHES_NOTHING);
       }
       if (!matchesSomething || matchesNothing) result.add(BNF_MATCHES_NOTHING);
     }
-    else if (expression instanceof BnfSequence) {
-      calcSequenceFirstInner(((BnfSequence)expression).getExpressionList(), result, visited);
+    else if (expression instanceof BnfSequence sequenceExpression) {
+      calcSequenceFirstInner(sequenceExpression.getExpressionList(), result, visited);
     }
-    else if (expression instanceof BnfQuantified) {
-      calcFirstInner(((BnfQuantified)expression).getExpression(), result, visited, forcedNext);
+    else if (expression instanceof BnfQuantified quantified) {
+      calcFirstInner(quantified.getExpression(), result, visited, forcedNext);
       IElementType effectiveType = BnfAst.getEffectiveType(expression);
       if (effectiveType == BnfTypes.BNF_OP_OPT || effectiveType == BnfTypes.BNF_OP_ZEROMORE) {
         result.add(BNF_MATCHES_EOF);
       }
     }
-    else if (expression instanceof BnfExternalExpression) {
-      BnfExternalExpression externalExpression = (BnfExternalExpression)expression;
+    else if (expression instanceof BnfExternalExpression externalExpression) {
       List<BnfExpression> arguments = externalExpression.getArguments();
       if (arguments.isEmpty() && BnfRules.isMeta(BnfRules.of(expression))) {
         result.add(expression);

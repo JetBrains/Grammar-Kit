@@ -12,7 +12,6 @@ import com.intellij.psi.PsiReference;
 import com.intellij.util.containers.ContainerUtil;
 import com.intellij.util.containers.JBIterable;
 import org.intellij.grammar.KnownAttribute;
-import org.intellij.grammar.generator.ParserGeneratorUtil;
 import org.intellij.grammar.psi.*;
 import org.intellij.grammar.psi.impl.BnfReferenceImpl;
 import org.jetbrains.annotations.NotNull;

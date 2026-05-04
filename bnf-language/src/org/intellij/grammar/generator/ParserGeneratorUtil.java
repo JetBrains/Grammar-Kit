@@ -36,6 +36,7 @@ import java.util.regex.PatternSyntaxException;
 
 import static org.intellij.grammar.generator.RuleGraphHelper.getSynonymTargetOrSelf;
 import static org.intellij.grammar.generator.RuleGraphHelper.getTokenNameToTextMap;
+import static org.intellij.grammar.psi.BnfAttributes.*;
 import static org.intellij.grammar.psi.BnfTypes.BNF_SEQUENCE;
 
 /**
@@ -78,70 +79,6 @@ public class ParserGeneratorUtil {
     return getRootAttribute(node, attribute, null);
   }
 
-  public static <T> T getRootAttribute(@NotNull PsiElement node, @NotNull KnownAttribute<T> attribute) {
-    return getRootAttribute(node, attribute, null);
-  }
-
-  public static <T> T getRootAttribute(@NotNull PsiElement node, @NotNull KnownAttribute<T> attribute, @Nullable String match) {
-    return ((BnfFile)node.getContainingFile()).findAttributeValue(null, attribute, match);
-  }
-
-  public static <T> T getAttribute(@NotNull BnfRule rule, @NotNull KnownAttribute<T> attribute) {
-    return getAttribute(rule, attribute, null);
-  }
-
-  public static @Nullable <T> BnfAttr findAttribute(@NotNull BnfRule rule, @NotNull KnownAttribute<T> attribute) {
-    return ((BnfFile)rule.getContainingFile()).findAttribute(rule, attribute, null);
-  }
-
-  public static <T> T getAttribute(@NotNull BnfRule rule, @NotNull KnownAttribute<T> attribute, @Nullable String match) {
-    return ((BnfFile)rule.getContainingFile()).findAttributeValue(rule, attribute, match);
-  }
-
-  public static Object getAttributeValue(BnfExpression value) {
-    if (value == null) return null;
-    if (value instanceof BnfReferenceOrToken) {
-      return getTokenValue((BnfReferenceOrToken)value);
-    }
-    else if (value instanceof BnfLiteralExpression) {
-      return getLiteralValue((BnfLiteralExpression)value);
-    }
-    else if (value instanceof BnfValueList) {
-      KnownAttribute.ListValue pairs = new KnownAttribute.ListValue();
-      for (BnfListEntry o : ((BnfValueList)value).getListEntryList()) {
-        PsiElement id = o.getId();
-        pairs.add(Pair.create(id == null ? null : id.getText(), getLiteralValue(o.getLiteralExpression())));
-      }
-      return pairs;
-    }
-    return null;
-  }
-
-  public static @Nullable String getLiteralValue(BnfStringLiteralExpression child) {
-    return getLiteralValue((BnfLiteralExpression)child);
-  }
-
-  public static @Nullable <T> T getLiteralValue(BnfLiteralExpression child) {
-    if (child == null) return null;
-    PsiElement literal = PsiTreeUtil.getDeepestFirst(child);
-    String text = child.getText();
-    IElementType elementType = literal.getNode().getElementType();
-    if (elementType == BnfTypes.BNF_NUMBER) return (T)Integer.valueOf(text);
-    if (elementType == BnfTypes.BNF_STRING) {
-      String unquoted = GrammarUtil.unquote(text);
-      // in double-quoted strings: un-escape quotes only leaving the rest \ manageable
-      String result = text.charAt(0) == '"' ? unquoted.replaceAll("\\\\([\"'])", "$1") : unquoted;
-      return (T) result;
-    }
-    return null;
-  }
-
-  private static Object getTokenValue(BnfReferenceOrToken child) {
-    String text = child.getText();
-    if (text.equals("true")) return true;
-    if (text.equals("false")) return false;
-    return GrammarUtil.getIdText(child);
-  }
 
   public static boolean isTrivialNode(PsiElement element) {
     return getTrivialNodeChild(element) != null;

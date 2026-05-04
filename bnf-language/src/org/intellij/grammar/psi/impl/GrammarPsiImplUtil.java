@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Objects;
 
 import static org.intellij.grammar.generator.ParserGeneratorUtil.*;
+import static org.intellij.grammar.psi.BnfAttributes.*;
 
 /**
  * @author gregsh

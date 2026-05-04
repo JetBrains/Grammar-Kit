@@ -384,7 +384,7 @@ public class BnfFirstNextAnalyzer {
     for (BnfExpression o : set) {
       if (o instanceof BnfStringLiteralExpression &&
           !RuleGraphHelper.getTokenTextToNameMap((BnfFile)o.getContainingFile())
-            .containsKey(ParserGeneratorUtil.getLiteralValue((BnfStringLiteralExpression)o))) {
+            .containsKey(BnfAttributes.getLiteralValue((BnfStringLiteralExpression)o))) {
         return true;
       }
     }

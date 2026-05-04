@@ -39,7 +39,7 @@ import java.lang.reflect.*;
 import java.lang.reflect.Type;
 import java.util.*;
 
-import static org.intellij.grammar.generator.ParserGeneratorUtil.getRootAttribute;
+import static org.intellij.grammar.psi.BnfAttributes.getRootAttribute;
 
 /**
  * @author gregsh

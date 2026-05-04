@@ -29,7 +29,24 @@ public interface Renderer {
    */
   @NotNull String getFuncName(@NotNull BnfRule rule);
 
+  /**
+   * Given a nested method name (typically produced by {@link Renderer#getNextName}),
+   * returns the name of the wrapper meta-method that holds a {@code Parser}
+   * instance for it. Meta-methods take other {@code Parser} instances as
+   * parameters and return a {@code Parser} instance themselves; they are
+   * used to lift inline expressions and meta-rule bodies into reusable parsers.
+   */
   @NotNull String getWrapperParserMetaMethodName(@NotNull String nextName);
 
+  /**
+   * Returns a human-readable display name for the given rule, used as the
+   * frame name in generated parser code (and in error messages produced
+   * from it), or {@code null} when no display name is available.
+   * <p>
+   * The name is taken from the rule's {@link org.intellij.grammar.KnownAttribute#NAME}
+   * attribute when set. Otherwise, when {@code force} is {@code true}, a name
+   * is derived from the rule's function name; when {@code force} is
+   * {@code false}, {@code null} is returned in that case.
+   */
   @Nullable String getRuleDisplayName(@NotNull BnfRule rule, boolean force);
 }

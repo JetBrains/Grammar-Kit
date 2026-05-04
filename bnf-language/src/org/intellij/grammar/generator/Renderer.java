@@ -13,9 +13,9 @@ import org.intellij.grammar.psi.BnfRule;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import static org.intellij.grammar.psi.BnfAttributes.*;
-import static org.intellij.grammar.psi.BnfAst.*;
-import static org.intellij.grammar.generator.ParserGeneratorUtil.*;
+import static org.intellij.grammar.generator.ParserGeneratorUtil.getPsiClassFormat;
+import static org.intellij.grammar.generator.ParserGeneratorUtil.getPsiImplClassFormat;
+import static org.intellij.grammar.psi.BnfAttributes.getAttribute;
 
 /**
  * This interface provides methods for generating identifiers for

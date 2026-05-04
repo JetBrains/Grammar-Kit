@@ -24,10 +24,6 @@ public final class JavaNameShortener implements NameShortener {
     myEnabled = enabled;
   }
 
-  public static @NotNull String getRawClassName(@NotNull String name) {
-    return name.indexOf("<") < name.indexOf(">") ? name.substring(0, name.indexOf("<")) : name;
-  }
-
   public @NotNull Set<String> getImports() {
     return Collections.unmodifiableSet(myImports);
   }

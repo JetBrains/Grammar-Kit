@@ -31,9 +31,10 @@ import java.util.Collections;
 import java.util.List;
 
 import static com.intellij.psi.SyntaxTraverser.psiTraverser;
-import static org.intellij.grammar.psi.BnfAst.*;
 import static org.intellij.grammar.generator.ParserGeneratorUtil.*;
-import static org.intellij.grammar.psi.BnfAttributes.*;
+import static org.intellij.grammar.psi.BnfAst.getEffectiveType;
+import static org.intellij.grammar.psi.BnfAst.getTrivialNodeChild;
+import static org.intellij.grammar.psi.BnfAttributes.getAttribute;
 import static org.intellij.grammar.psi.BnfTypes.BNF_SEQUENCE;
 
 /**

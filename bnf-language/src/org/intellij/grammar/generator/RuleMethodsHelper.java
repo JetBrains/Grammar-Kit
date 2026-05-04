@@ -12,6 +12,7 @@ import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.generator.Renderer.CommonRendererUtils;
 import org.intellij.grammar.psi.BnfAttr;
 import org.intellij.grammar.psi.BnfRule;
+import org.intellij.grammar.psi.BnfRules;
 import org.intellij.grammar.psi.impl.GrammarUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -90,7 +91,7 @@ public class RuleMethodsHelper {
       String pathName = getRuleOrTokenNameForPsi(element, c);
       if (pathName == null) continue;
       if (element instanceof BnfRule resultType) {
-        if (!Rule.isPrivate(rule)) {
+        if (!BnfRules.isPrivate(rule)) {
           result.add(new MethodInfo(MethodType.RULE, pathName, pathName, resultType, c));
         }
       }

@@ -12,6 +12,7 @@ import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.generator.java.JavaBnfConstants;
 import org.intellij.grammar.psi.BnfExpression;
 import org.intellij.grammar.psi.BnfRule;
+import org.intellij.grammar.psi.BnfRules;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -162,7 +163,7 @@ public class ExpressionGeneratorHelper {
     for (String opCall : sortedOpCalls) {
       for (OperatorInfo operator : opCalls.get(opCall)) {
         if (operator.type() == OperatorType.ATOM) {
-          if (Rule.isExternal(operator.rule())) continue;
+          if (BnfRules.isExternal(operator.rule())) continue;
           g.newLine();
           g.generateNode(operator.rule(), operator.rule().getExpression(), R.getFuncName(operator.rule()), visited);
           continue;

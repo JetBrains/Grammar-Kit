@@ -112,7 +112,7 @@ public final class JavaParserGenerator extends Generator {
       String ruleName = r.getName();
       boolean noPsi = !hasPsiClass(r);
       myRuleInfos.put(ruleName, new RuleInfo(
-        ruleName, Rule.isFake(r),
+        ruleName, BnfRules.isFake(r),
         getElementType(r), getAttribute(r, KnownAttribute.PARSER_CLASS),
         noPsi ? null : getAttribute(r, KnownAttribute.PSI_PACKAGE),
         noPsi ? null : getAttribute(r, KnownAttribute.PSI_IMPL_PACKAGE),
@@ -439,7 +439,7 @@ public final class JavaParserGenerator extends Generator {
     }
     for (String ruleName : ownRuleNames) {
       BnfRule rule = Objects.requireNonNull(myFile.getRule(ruleName));
-      if (Rule.isExternal(rule) || Rule.isFake(rule)) continue;
+      if (BnfRules.isExternal(rule) || BnfRules.isFake(rule)) continue;
       if (myExpressionHelper.getExpressionInfo(rule) != null) continue;
       out("/* ********************************************************** */");
       generateNode(rule, rule.getExpression(), R.getFuncName(rule), new HashSet<>());
@@ -494,7 +494,7 @@ public final class JavaParserGenerator extends Generator {
       BnfRule rule = Objects.requireNonNull(myFile.getRule(ruleName));
       if (getAttribute(rule, KnownAttribute.ELEMENT_TYPE) != null) continue;
       if (!hasElementType(rule)) continue;
-      if (Rule.isFake(rule) || Rule.isMeta(rule)) continue;
+      if (BnfRules.isFake(rule) || BnfRules.isMeta(rule)) continue;
       ExpressionInfo info = myExpressionHelper.getExpressionInfo(rule);
       if (info != null && info.rootRule != rule) continue;
       if (!Boolean.TRUE.equals(getAttribute(rule, KnownAttribute.EXTRA_ROOT))) continue;
@@ -605,11 +605,11 @@ public final class JavaParserGenerator extends Generator {
     for (String s : StringUtil.split((StringUtil.isEmpty(node.getText()) ? initialNode : node).getText(), "\n")) {
       out("// " + s);
     }
-    boolean firstNonTrivial = node == Rule.firstNotTrivial(rule);
-    boolean isPrivate = !(isRule || firstNonTrivial) || Rule.isPrivate(rule) || myGrammarRoot.equals(rule.getName());
-    boolean isLeft = firstNonTrivial && Rule.isLeft(rule);
-    boolean isLeftInner = isLeft && (isPrivate || Rule.isInner(rule));
-    boolean isUpper = !isPrivate && Rule.isUpper(rule);
+    boolean firstNonTrivial = node == BnfRules.firstNotTrivial(rule);
+    boolean isPrivate = !(isRule || firstNonTrivial) || BnfRules.isPrivate(rule) || myGrammarRoot.equals(rule.getName());
+    boolean isLeft = firstNonTrivial && BnfRules.isLeft(rule);
+    boolean isLeftInner = isLeft && (isPrivate || BnfRules.isInner(rule));
+    boolean isUpper = !isPrivate && BnfRules.isUpper(rule);
     String recoverWhile = !firstNonTrivial ? null : getAttribute(rule, KnownAttribute.RECOVER_WHILE);
     Map<String, String> hooks = firstNonTrivial ? getAttribute(rule, KnownAttribute.HOOKS).asMap() : Collections.emptyMap();
 
@@ -622,7 +622,7 @@ public final class JavaParserGenerator extends Generator {
       node instanceof BnfReferenceOrToken || node instanceof BnfLiteralExpression || node instanceof BnfExternalExpression;
 
     List<BnfExpression> children = isSingleNode ? Collections.singletonList(node) : getChildExpressions(node);
-    String frameName = !children.isEmpty() && firstNonTrivial && !Rule.isMeta(rule) ? quote(R.getRuleDisplayName(rule, !isPrivate)) : null;
+    String frameName = !children.isEmpty() && firstNonTrivial && !BnfRules.isMeta(rule) ? quote(R.getRuleDisplayName(rule, !isPrivate)) : null;
 
     String extraParameters = metaParameters.stream().map(it -> ", Parser " + it).collect(joining());
     out("%sstatic boolean %s(%s %s, int %s%s) {", !isRule ? "private " : isPrivate ? "" : "public ",
@@ -794,7 +794,7 @@ public final class JavaParserGenerator extends Generator {
           if (RECOVER_AUTO.equals(recoverWhile)) {
             recoverCall = generateAutoRecoverCall(rule);
           }
-          else if (Rule.isMeta(rule) && GrammarUtil.isDoubleAngles(recoverWhile)) {
+          else if (BnfRules.isMeta(rule) && GrammarUtil.isDoubleAngles(recoverWhile)) {
             recoverCall = formatMetaParamName(recoverWhile.substring(2, recoverWhile.length() - 2));
           }
           else {
@@ -838,7 +838,7 @@ public final class JavaParserGenerator extends Generator {
       String t = firstToElementType(expressionString);
       if (t == null) return frameName;
 
-      ConsumeType childConsumeType = getRuleConsumeType(Objects.requireNonNull(Rule.of(expression)), rule);
+      ConsumeType childConsumeType = getRuleConsumeType(Objects.requireNonNull(BnfRules.of(expression)), rule);
       ConsumeType consumeType = ConsumeType.min(ruleConsumeType, childConsumeType);
       firstElementTypes.compute(t, (k, existing) -> ConsumeType.max(existing, consumeType));
     }
@@ -947,7 +947,7 @@ public final class JavaParserGenerator extends Generator {
       String value = GrammarUtil.stripQuotesAroundId(text);
       BnfRule subRule = myFile.getRule(value);
       if (subRule != null) {
-        if (Rule.isExternal(subRule)) {
+        if (BnfRules.isExternal(subRule)) {
           return generateExternalCall(rule, GrammarUtil.getExternalRuleExpressions(subRule), nextName);
         }
         else {
@@ -991,7 +991,7 @@ public final class JavaParserGenerator extends Generator {
     }
     else if (type == BNF_EXTERNAL_EXPRESSION) {
       List<BnfExpression> expressions = ((BnfExternalExpression)node).getExpressionList();
-      if (expressions.size() == 1 && Rule.isMeta(rule)) {
+      if (expressions.size() == 1 && BnfRules.isMeta(rule)) {
         return new MetaParameterCall(formatMetaParamName(expressions.get(0).getText()), N.builder, N.level);
       }
       else {
@@ -1624,7 +1624,7 @@ public final class JavaParserGenerator extends Generator {
   }
 
   private @NotNull String getAccessorType(@NotNull BnfRule rule) {
-    if (Rule.isExternal(rule)) {
+    if (BnfRules.isExternal(rule)) {
       Pair<String, String> first = ContainerUtil.getFirstItem(getAttribute(rule, KnownAttribute.IMPLEMENTS));
       return Objects.requireNonNull(first).second;
     }

@@ -82,7 +82,7 @@ final class BnfAnnotator implements Annotator, DumbAware {
       }
       else if (GrammarUtil.isExternalReference(refOrToken)) {
         if (resolve == null && parent instanceof BnfExternalExpression extExpr && extExpr.getArguments().isEmpty() &&
-            ParserGeneratorUtil.Rule.isMeta(ParserGeneratorUtil.Rule.of(refOrToken))) {
+            BnfRules.isMeta(BnfRules.of(refOrToken))) {
           annotationHolder.newSilentAnnotation(HighlightSeverity.INFORMATION)
             .range(parent)
             .textAttributes(BnfSyntaxHighlighter.META_PARAM)
@@ -156,7 +156,7 @@ final class BnfAnnotator implements Annotator, DumbAware {
   private static void addRuleHighlighting(BnfRule rule, PsiElement psiElement, AnnotationHolder annotationHolder) {
     annotationHolder.newSilentAnnotation(HighlightSeverity.INFORMATION)
       .range(psiElement)
-      .textAttributes(ParserGeneratorUtil.Rule.isMeta(rule) ? BnfSyntaxHighlighter.META_RULE : BnfSyntaxHighlighter.RULE)
+      .textAttributes(BnfRules.isMeta(rule) ? BnfSyntaxHighlighter.META_RULE : BnfSyntaxHighlighter.RULE)
       .create();
     PsiFile file = rule.getContainingFile();
     if (StringUtil.isNotEmpty(((BnfFile)file).findAttributeValue(rule, KnownAttribute.RECOVER_WHILE, null))) {

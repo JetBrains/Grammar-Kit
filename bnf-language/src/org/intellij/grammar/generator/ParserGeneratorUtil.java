@@ -216,7 +216,7 @@ public class ParserGeneratorUtil {
     if (subRule == null) return false;
     if (getAttribute(subRule, KnownAttribute.RECOVER_WHILE) != null) return true;
     if (!getAttribute(subRule, KnownAttribute.HOOKS).isEmpty()) return true;
-    return Rule.isExternal(subRule);
+    return BnfRules.isExternal(subRule);
   }
 
 
@@ -370,7 +370,7 @@ public class ParserGeneratorUtil {
     Map<String, BnfRule> result = new TreeMap<>();
     for (PsiElement tree : accessors) {
       if (tree instanceof BnfRule rule) {
-        if (!Rule.isPrivate(rule)) result.put(rule.getName(), rule);
+        if (!BnfRules.isPrivate(rule)) result.put(rule.getName(), rule);
       }
     }
     return result.values();
@@ -762,56 +762,6 @@ public class ParserGeneratorUtil {
 
     public @NotNull String getMethodName() {
       return KnownAttribute.CONSUME_TOKEN_METHOD.getDefaultValue() + getMethodSuffix();
-    }
-  }
-
-  public static class Rule {
-
-    public static boolean isPrivate(BnfRule node) {
-      return hasModifier(node, "private");
-    }
-
-    public static boolean isExternal(BnfRule node) {
-      return hasModifier(node, "external");
-    }
-
-    public static boolean isMeta(BnfRule node) {
-      return hasModifier(node, "meta");
-    }
-
-    public static boolean isLeft(BnfRule node) {
-      return hasModifier(node, "left");
-    }
-
-    public static boolean isInner(BnfRule node) {
-      return hasModifier(node, "inner");
-    }
-
-    public static boolean isFake(BnfRule node) {
-      return hasModifier(node, "fake");
-    }
-
-    public static boolean isUpper(BnfRule node) {
-      return hasModifier(node, "upper");
-    }
-
-    private static boolean hasModifier(@Nullable BnfRule rule, @NotNull String s) {
-      if (rule == null) return false;
-      for (BnfModifier modifier : rule.getModifierList()) {
-        if (s.equals(modifier.getText())) return true;
-      }
-      return false;
-    }
-
-    public static PsiElement firstNotTrivial(BnfRule rule) {
-      for (PsiElement tree = rule.getExpression(); tree != null; tree = PsiTreeUtil.getChildOfType(tree, BnfExpression.class)) {
-        if (!isTrivialNode(tree)) return tree;
-      }
-      return null;
-    }
-
-    public static BnfRule of(BnfExpression expr) {
-      return PsiTreeUtil.getParentOfType(expr, BnfRule.class);
     }
   }
 

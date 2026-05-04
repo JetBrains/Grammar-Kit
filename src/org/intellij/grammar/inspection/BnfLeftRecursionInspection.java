@@ -13,6 +13,7 @@ import org.intellij.grammar.generator.ExpressionHelper;
 import org.intellij.grammar.generator.ParserGeneratorUtil;
 import org.intellij.grammar.psi.BnfFile;
 import org.intellij.grammar.psi.BnfRule;
+import org.intellij.grammar.psi.BnfRules;
 import org.intellij.grammar.psi.BnfVisitor;
 import org.jetbrains.annotations.NotNull;
 
@@ -28,7 +29,7 @@ final class BnfLeftRecursionInspection extends LocalInspectionTool {
 
       @Override
       public Void visitRule(@NotNull BnfRule o) {
-        if (ParserGeneratorUtil.Rule.isFake(o)) return null;
+        if (BnfRules.isFake(o)) return null;
         BnfFile file = (BnfFile)o.getContainingFile();
         ExpressionHelper expressionHelper = ExpressionHelper.getCached(file);
         String ruleName = o.getName();

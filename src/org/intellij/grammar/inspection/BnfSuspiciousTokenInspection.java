@@ -13,6 +13,7 @@ import com.intellij.util.containers.JBIterable;
 import org.intellij.grammar.generator.ParserGeneratorUtil;
 import org.intellij.grammar.psi.BnfExternalExpression;
 import org.intellij.grammar.psi.BnfRule;
+import org.intellij.grammar.psi.BnfRules;
 import org.intellij.grammar.psi.BnfVisitor;
 import org.intellij.grammar.psi.impl.BnfRefOrTokenImpl;
 import org.intellij.grammar.psi.impl.GrammarUtil;
@@ -31,7 +32,7 @@ final class BnfSuspiciousTokenInspection extends LocalInspectionTool {
     return new BnfVisitor<Void>() {
       @Override
       public Void visitRule(@NotNull BnfRule o) {
-        if (ParserGeneratorUtil.Rule.isExternal(o)) return null;
+        if (BnfRules.isExternal(o)) return null;
         JBIterable<BnfRefOrTokenImpl> tokens = GrammarUtil.bnfTraverser(o.getExpression())
           .expand(s -> !(s instanceof BnfExternalExpression))
           .filter(BnfRefOrTokenImpl.class);

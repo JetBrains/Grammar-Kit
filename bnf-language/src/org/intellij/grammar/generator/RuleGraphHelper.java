@@ -259,7 +259,7 @@ public class RuleGraphHelper {
   private Map<PsiElement, Cardinality> collectMembers(@NotNull BnfRule rule, Set<Object> visited) {
     Map<PsiElement, Cardinality> result = myRuleContentsMap.get(rule);
     if (result != null) return result;
-    if (Rule.isExternal(rule)) {
+    if (BnfRules.isExternal(rule)) {
       result = psiMap(newExternalPsi(rule.getName()), REQUIRED);
     }
     else {
@@ -307,7 +307,7 @@ public class RuleGraphHelper {
       }
     }
     for (BnfRule rule : myFile.getRules()) {
-      if (Rule.isLeft(rule) && !isPrivateOrNoType(rule) && !Rule.isInner(rule)) {
+      if (BnfRules.isLeft(rule) && !isPrivateOrNoType(rule) && !BnfRules.isInner(rule)) {
         for (BnfRule r : getRulesToTheLeft(rule).keySet()) {
           myRulesGraph.putValue(rule, r);
         }
@@ -349,20 +349,20 @@ public class RuleGraphHelper {
   }
 
   private Map<PsiElement, Cardinality> collectMembersInner(BnfRule rule, BnfExpression tree, Set<Object> visited) {
-    boolean firstNonTrivial = tree == Rule.firstNotTrivial(rule);
+    boolean firstNonTrivial = tree == BnfRules.firstNotTrivial(rule);
     boolean outerLeft = (firstNonTrivial || rule.getExpression() == tree) &&
-                        Rule.isLeft(rule) && !isPrivateOrNoType(rule) && !Rule.isInner(rule);
-    boolean tryCollapse = firstNonTrivial && !outerLeft && !isPrivateOrNoType(rule) && !Rule.isFake(rule);
+                        BnfRules.isLeft(rule) && !isPrivateOrNoType(rule) && !BnfRules.isInner(rule);
+    boolean tryCollapse = firstNonTrivial && !outerLeft && !isPrivateOrNoType(rule) && !BnfRules.isFake(rule);
 
     Map<PsiElement, Cardinality> result;
     if (tree instanceof BnfReferenceOrToken) {
       BnfRule targetRule = ((BnfReferenceOrToken)tree).resolveRule();
       if (targetRule != null) {
-        if (Rule.isExternal(targetRule)) {
+        if (BnfRules.isExternal(targetRule)) {
           result = psiMap(newExternalPsi(targetRule.getName()), REQUIRED);
         }
-        else if (Rule.isLeft(targetRule)) {
-          if (!Rule.isInner(targetRule) && !isPrivateOrNoType(targetRule)) {
+        else if (BnfRules.isLeft(targetRule)) {
+          if (!BnfRules.isInner(targetRule) && !isPrivateOrNoType(targetRule)) {
             result = psiMap();
             result.put(getSynonymTargetOrSelf(targetRule), REQUIRED);
             result.put(LEFT_MARKER, REQUIRED);
@@ -374,7 +374,7 @@ public class RuleGraphHelper {
         else if (isPrivateOrNoType(targetRule)) {
           result = collectMembers(targetRule, visited);
         }
-        else if (Rule.isUpper(targetRule)) {
+        else if (BnfRules.isUpper(targetRule)) {
           result = Collections.emptyMap();
         }
         else {
@@ -390,7 +390,7 @@ public class RuleGraphHelper {
     }
     else if (tree instanceof BnfExternalExpression expression) {
       List<BnfExpression> arguments = expression.getArguments();
-      if (arguments.isEmpty() && Rule.isMeta(rule)) {
+      if (arguments.isEmpty() && BnfRules.isMeta(rule)) {
         result = psiMap(newExternalPsi(tree.getText()), REQUIRED);
       }
       else {
@@ -655,7 +655,7 @@ public class RuleGraphHelper {
         else if (isExternalPsi(element) && !element.getText().startsWith("#") && !isDoubleAngles(element.getText())) {
           String text = element.getText();
           BnfRule rule = myFile.getRule(text);
-          if (Rule.isExternal(rule)) {
+          if (BnfRules.isExternal(rule)) {
             r = myFile.getRule(getAttribute(rule, KnownAttribute.EXTENDS));
             if (r != null) externalMap.put(element, r);
           }
@@ -831,18 +831,18 @@ public class RuleGraphHelper {
   }
 
   public static boolean isPrivateOrNoType(BnfRule rule) {
-    return Rule.isPrivate(rule) || "".equals(getAttribute(rule, KnownAttribute.ELEMENT_TYPE));
+    return BnfRules.isPrivate(rule) || "".equals(getAttribute(rule, KnownAttribute.ELEMENT_TYPE));
   }
 
   private static boolean shouldGeneratePsi(BnfRule rule, boolean psiClasses) {
     BnfFile containingFile = (BnfFile)rule.getContainingFile();
     BnfRule grammarRoot = containingFile.getRules().get(0);
     if (grammarRoot == rule) return false;
-    if (Rule.isPrivate(rule) || Rule.isExternal(rule)) return false;
+    if (BnfRules.isPrivate(rule) || BnfRules.isExternal(rule)) return false;
     String attr = getAttribute(rule, KnownAttribute.ELEMENT_TYPE);
     if (!psiClasses) return !"".equals(attr);
     BnfRule thatRule = containingFile.getRule(attr);
-    return thatRule == null || thatRule == grammarRoot || Rule.isPrivate(thatRule) || Rule.isExternal(thatRule);
+    return thatRule == null || thatRule == grammarRoot || BnfRules.isPrivate(thatRule) || BnfRules.isExternal(thatRule);
   }
 
   private @NotNull PsiElement newExternalPsi(String name) {

@@ -39,7 +39,7 @@ import java.awt.*;
 import java.util.*;
 import java.util.List;
 
-import static org.intellij.grammar.generator.ParserGeneratorUtil.getAttribute;
+import static org.intellij.grammar.psi.BnfAttributes.getAttribute;
 
 /**
  * @author gregsh

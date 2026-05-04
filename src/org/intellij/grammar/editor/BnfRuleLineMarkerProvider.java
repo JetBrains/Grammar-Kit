@@ -23,6 +23,7 @@ import org.intellij.grammar.generator.ParserGeneratorUtil;
 import org.intellij.grammar.generator.Renderer.CommonRendererUtils;
 import org.intellij.grammar.generator.RuleGraphHelper;
 import org.intellij.grammar.java.JavaHelper;
+import org.intellij.grammar.psi.BnfAttributes;
 import org.intellij.grammar.psi.BnfExpression;
 import org.intellij.grammar.psi.BnfRule;
 import org.intellij.grammar.psi.impl.GrammarUtil;
@@ -39,7 +40,7 @@ final class BnfRuleLineMarkerProvider extends RelatedItemLineMarkerProvider {
   private static @Nullable NavigatablePsiElement getMethod(PsiElement element) {
     BnfRule rule = PsiTreeUtil.getParentOfType(element, BnfRule.class);
     if (rule == null) return null;
-    String parserClass = ParserGeneratorUtil.getAttribute(rule, KnownAttribute.PARSER_CLASS);
+    String parserClass = BnfAttributes.getAttribute(rule, KnownAttribute.PARSER_CLASS);
     if (StringUtil.isEmpty(parserClass)) return null;
     boolean generateKotlin = GenOptions.UseSyntaxApi(rule);
     JavaHelper.MethodType methodType = (generateKotlin) ? JavaHelper.MethodType.INSTANCE : JavaHelper.MethodType.STATIC;

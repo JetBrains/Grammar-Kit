@@ -25,8 +25,8 @@ import java.util.Set;
 
 import static org.intellij.grammar.KnownAttribute.RECOVER_WHILE;
 import static org.intellij.grammar.KnownAttribute.getCompatibleAttribute;
-import static org.intellij.grammar.generator.ParserGeneratorUtil.findAttribute;
-import static org.intellij.grammar.generator.ParserGeneratorUtil.getAttribute;
+import static org.intellij.grammar.psi.BnfAttributes.findAttribute;
+import static org.intellij.grammar.psi.BnfAttributes.getAttribute;
 import static org.intellij.grammar.psi.impl.GrammarUtil.bnfTraverser;
 import static org.intellij.grammar.psi.impl.GrammarUtil.bnfTraverserNoAttrs;
 

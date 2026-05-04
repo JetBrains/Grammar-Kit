@@ -19,6 +19,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
+import static org.intellij.grammar.psi.BnfAttributes.*;
 import static org.intellij.grammar.generator.ParserGeneratorUtil.*;
 import static org.intellij.grammar.psi.BnfTypes.BNF_REFERENCE_OR_TOKEN;
 import static org.intellij.grammar.psi.BnfTypes.BNF_STRING;

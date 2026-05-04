@@ -29,6 +29,7 @@ import java.util.*;
 
 import static org.intellij.grammar.generator.ParserGeneratorUtil.*;
 import static org.intellij.grammar.parser.GeneratedParserUtilBase.*;
+import static org.intellij.grammar.psi.BnfAttributes.*;
 import static org.intellij.grammar.psi.BnfTypes.*;
 
 /**

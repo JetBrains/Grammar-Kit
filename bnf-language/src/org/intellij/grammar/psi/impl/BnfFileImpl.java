@@ -181,7 +181,7 @@ public class BnfFileImpl extends PsiFileBase implements BnfFile {
           }
           List<AttributeInfo> list = result.get(attr.getName());
           if (list == null) result.put(attr.getName(), list = new ArrayList<>());
-          Object value = ParserGeneratorUtil.getAttributeValue(attr.getExpression());
+          Object value = BnfAttributes.getAttributeValue(attr.getExpression());
           int offset = attr.getTextRange().getStartOffset();
           int infoOffset = pattern == null? baseRange.getStartOffset() + 1: baseRange.getStartOffset() + (baseRange.getEndOffset() - offset);
           list.add(new AttributeInfo(offset, infoOffset, !isRule, pattern, value));

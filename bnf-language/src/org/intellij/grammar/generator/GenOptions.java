@@ -14,7 +14,8 @@ import java.util.Map;
 
 import static org.intellij.grammar.KnownAttribute.FALLBACK_STUB_ELEMENT_TYPE;
 import static org.intellij.grammar.generator.ParserGeneratorUtil.getGenerateOption;
-import static org.intellij.grammar.generator.ParserGeneratorUtil.getRootAttribute;
+import static org.intellij.grammar.psi.BnfAttributes.getAttribute;
+import static org.intellij.grammar.psi.BnfAttributes.getRootAttribute;
 
 /**
  * @author gregsh
@@ -73,11 +74,11 @@ public class GenOptions {
   }
   
   public static boolean UseSyntaxApi(@NotNull BnfRule rule){
-    Map<String, String> genOptions =  ParserGeneratorUtil.getAttribute(rule, KnownAttribute.GENERATE).asMap();
+    Map<String, String> genOptions =  getAttribute(rule, KnownAttribute.GENERATE).asMap();
     return "syntax".equals(genOptions.get("parser-api"));
   }  
   public static boolean UseSyntaxApi(@NotNull BnfFile file) {
-    Map<String, String> genOptions =  ParserGeneratorUtil.getRootAttribute(file, KnownAttribute.GENERATE).asMap();
+    Map<String, String> genOptions =  getRootAttribute(file, KnownAttribute.GENERATE).asMap();
     return "syntax".equals(genOptions.get("parser-api"));
   }
 }

@@ -11,7 +11,7 @@ import org.jetbrains.annotations.NotNull;
 import java.io.File;
 import java.util.List;
 
-import static org.intellij.grammar.generator.ParserGeneratorUtil.getRootAttribute;
+import static org.intellij.grammar.psi.BnfAttributes.getRootAttribute;
 
 public class KotlinBnfGeneratorTest extends AbstractBnfGeneratorTest {
   protected static final @NotNull String KOTLIN_BNF_FILES_DIR = "generatorSyntax";

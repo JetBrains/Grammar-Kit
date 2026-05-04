@@ -19,6 +19,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.*;
 
 import static java.lang.String.format;
+import static org.intellij.grammar.psi.BnfAttributes.*;
 import static org.intellij.grammar.generator.ParserGeneratorUtil.*;
 
 /**

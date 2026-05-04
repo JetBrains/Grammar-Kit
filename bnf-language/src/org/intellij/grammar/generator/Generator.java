@@ -28,6 +28,7 @@ import java.io.IOException;
 import java.util.*;
 
 import static java.lang.String.format;
+import static org.intellij.grammar.psi.BnfAttributes.*;
 import static org.intellij.grammar.generator.ParserGeneratorUtil.*;
 import static org.intellij.grammar.generator.RuleGraphHelper.*;
 

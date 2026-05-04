@@ -32,6 +32,7 @@ import java.util.List;
 
 import static com.intellij.psi.SyntaxTraverser.psiTraverser;
 import static org.intellij.grammar.generator.ParserGeneratorUtil.*;
+import static org.intellij.grammar.psi.BnfAttributes.*;
 import static org.intellij.grammar.psi.BnfTypes.BNF_SEQUENCE;
 
 /**

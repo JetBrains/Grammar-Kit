@@ -3,7 +3,7 @@
   <resource-bundle>messages.GrammarKitBundle</resource-bundle>
   <extensions defaultExtensionNs="com.intellij">
     <projectService serviceInterface="org.intellij.grammar.java.JavaHelper"
-                    serviceImplementation="org.intellij.grammar.java.JavaHelper$PsiHelper"/>
+                    serviceImplementation="org.intellij.grammar.java.PsiHelper"/>
     <referencesSearch implementation="org.intellij.jflex.psi.impl.JFlexStateUsageSearcher"/>
     <regExpLanguageHost forClass="org.intellij.grammar.psi.impl.BnfStringImpl"
                         implementationClass="org.intellij.grammar.psi.impl.BnfStringRegexHost"/>

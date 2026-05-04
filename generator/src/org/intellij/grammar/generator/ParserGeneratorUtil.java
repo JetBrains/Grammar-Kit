@@ -18,6 +18,7 @@ import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.generator.java.JavaBnfConstants;
 import org.intellij.grammar.generator.java.JavaNames;
 import org.intellij.grammar.java.JavaHelper;
+import org.intellij.grammar.java.TypeParameterInfo;
 import org.intellij.grammar.psi.*;
 import org.intellij.grammar.psi.impl.GrammarUtil;
 import org.intellij.grammar.util.Case;
@@ -335,7 +336,7 @@ public class ParserGeneratorUtil {
     return type.substring(0, idx) + type.substring(idx + 1, type.length() - 1);
   }
 
-  public static String getGenericClauseString(List<JavaHelper.TypeParameterInfo> genericParameters, NameShortener shortener) {
+  public static String getGenericClauseString(List<TypeParameterInfo> genericParameters, NameShortener shortener) {
     if (genericParameters.isEmpty()) return "";
 
     StringBuilder buffer = new StringBuilder();
@@ -343,7 +344,7 @@ public class ParserGeneratorUtil {
     for (int i = 0; i < genericParameters.size(); i++) {
       if (i > 0) buffer.append(", ");
 
-      JavaHelper.TypeParameterInfo parameter = genericParameters.get(i);
+      TypeParameterInfo parameter = genericParameters.get(i);
       for (String annotation : parameter.getAnnotations()) {
         buffer.append("@").append(shortener.shorten(annotation)).append(" ");
       }

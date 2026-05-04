@@ -26,6 +26,7 @@ import org.intellij.grammar.java.JavaHelper;
 import org.intellij.grammar.psi.BnfAttributes;
 import org.intellij.grammar.psi.BnfExpression;
 import org.intellij.grammar.psi.BnfRule;
+import org.intellij.grammar.psi.BnfRules;
 import org.intellij.grammar.psi.impl.GrammarUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -67,7 +68,7 @@ final class BnfRuleLineMarkerProvider extends RelatedItemLineMarkerProvider {
       }
       boolean hasPSI = false;
       if (isRuleId) {
-        BnfRule rule = RuleGraphHelper.getSynonymTargetOrSelf((BnfRule)parent);
+        BnfRule rule = BnfRules.getSynonymTargetOrSelf((BnfRule)parent);
         if (RuleGraphHelper.hasPsiClass(rule)) {
           hasPSI = true;
           JavaHelper javaHelper = JavaHelper.getJavaHelper(rule);

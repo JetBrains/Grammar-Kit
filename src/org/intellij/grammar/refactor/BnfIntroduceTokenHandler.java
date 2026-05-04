@@ -32,7 +32,6 @@ import com.intellij.util.containers.ContainerUtil;
 import com.intellij.util.text.UniqueNameGenerator;
 import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.generator.ParserGeneratorUtil;
-import org.intellij.grammar.generator.RuleGraphHelper;
 import org.intellij.grammar.psi.*;
 import org.intellij.grammar.psi.impl.BnfElementFactory;
 import org.intellij.grammar.psi.impl.GrammarUtil;
@@ -61,8 +60,8 @@ public class BnfIntroduceTokenHandler implements RefactoringActionHandler {
     if (!(file instanceof BnfFile)) return;
     BnfFile bnfFile = (BnfFile) file;
 
-    Map<String, String> tokenNameMap = RuleGraphHelper.getTokenNameToTextMap(bnfFile);
-    Map<String, String> tokenTextMap = RuleGraphHelper.getTokenTextToNameMap(bnfFile);
+    Map<String, String> tokenNameMap = BnfAst.getTokenNameToTextMap(bnfFile);
+    Map<String, String> tokenTextMap = BnfAst.getTokenTextToNameMap(bnfFile);
 
     String tokenText;
     String tokenName;

@@ -32,7 +32,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 
-import static org.intellij.grammar.generator.ParserGeneratorUtil.getPsiClassFormat;
+import org.intellij.grammar.generator.NameFormat;
 
 /**
  * @author gregsh
@@ -115,7 +115,7 @@ public class LivePreviewStructureViewFactory implements PsiStructureViewFactory 
         BnfRule rule = ((LivePreviewElementType.RuleType)elementType).getRule(element.getProject());
         if (rule != null) {
           BnfFile file = (BnfFile)rule.getContainingFile();
-          String className = CommonRendererUtils.getRulePsiClassName(rule, getPsiClassFormat(file));
+          String className = CommonRendererUtils.getRulePsiClassName(rule, NameFormat.forPsiClass(file));
           return className + ": '" + StringUtil.first(element.getText(), 30, true) + "'";
         }
       }

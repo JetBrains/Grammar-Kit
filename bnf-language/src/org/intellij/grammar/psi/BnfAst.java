@@ -5,12 +5,16 @@ package org.intellij.grammar.psi;
 
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.tree.IElementType;
+import com.intellij.psi.util.CachedValueProvider;
+import com.intellij.psi.util.CachedValuesManager;
 import com.intellij.psi.util.PsiTreeUtil;
 import it.unimi.dsi.fastutil.Hash;
+import org.intellij.grammar.KnownAttribute;
+import org.intellij.grammar.psi.impl.GrammarUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Objects;
+import java.util.*;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
@@ -101,5 +105,67 @@ public final class BnfAst {
     catch (PatternSyntaxException e) {
       return null;
     }
+  }
+
+  public static @NotNull List<BnfExpression> getChildExpressions(@Nullable BnfExpression node) {
+    return PsiTreeUtil.getChildrenOfTypeAsList(node, BnfExpression.class);
+  }
+
+  public static @NotNull Map<String, String> getTokenNameToTextMap(@NotNull BnfFile file) {
+    return CachedValuesManager.getCachedValue(file, () -> new CachedValueProvider.Result<>(computeTokens(file).asMap(), file));
+  }
+
+  public static @NotNull Map<String, String> getTokenTextToNameMap(@NotNull BnfFile file) {
+    return CachedValuesManager.getCachedValue(file, () -> new CachedValueProvider.Result<>(computeTokens(file).asInverseMap(), file));
+  }
+
+  public static @NotNull KnownAttribute.ListValue computeTokens(@NotNull BnfFile file) {
+    return BnfAttributes.getRootAttribute(file, KnownAttribute.TOKENS);
+  }
+
+  public static @Nullable Collection<String> getTokenNames(@NotNull BnfFile file, @NotNull List<BnfExpression> expressions) {
+    return getTokenNames(file, expressions, -1);
+  }
+
+  // null when some expression is not a token or total tokens count is less than or equals threshold
+  public static @Nullable Collection<String> getTokenNames(@NotNull BnfFile file, @NotNull List<BnfExpression> expressions, int threshold) {
+    Set<String> tokens = new LinkedHashSet<>();
+    for (BnfExpression expression : expressions) {
+      String token = getTokenName(file, expression);
+      if (token == null) {
+        return null;
+      }
+      else {
+        tokens.add(token);
+      }
+    }
+    return tokens.size() > threshold ? tokens : null;
+  }
+
+  private static @Nullable String getTokenName(@NotNull BnfFile file, @NotNull BnfExpression expression) {
+    String text = expression.getText();
+    if (expression instanceof BnfStringLiteralExpression) {
+      return getTokenTextToNameMap(file).get(GrammarUtil.unquote(text));
+    }
+    else if (expression instanceof BnfReferenceOrToken) {
+      return file.getRule(text) == null ? text : null;
+    }
+    else {
+      return null;
+    }
+  }
+
+  public static boolean isTokenSequence(@NotNull BnfRule rule, @Nullable BnfExpression node) {
+    if (node == null || !isDefaultConsumeMethod(rule)) return false;
+    if (getEffectiveType(node) != BNF_SEQUENCE) return false;
+    BnfFile file = (BnfFile)rule.getContainingFile();
+    return getTokenNames(file, getChildExpressions(node)) != null;
+  }
+
+  private static boolean isDefaultConsumeMethod(@NotNull BnfRule rule) {
+    String value = BnfAttributes.getAttribute(rule, KnownAttribute.CONSUME_TOKEN_METHOD);
+    return value == null || value.isEmpty()
+           || "DEFAULT".equalsIgnoreCase(value)
+           || "consumeToken".equals(value);
   }
 }

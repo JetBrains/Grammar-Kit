@@ -21,7 +21,6 @@ import com.intellij.util.ObjectUtils;
 import com.intellij.util.ProcessingContext;
 import com.intellij.util.containers.ContainerUtil;
 import org.intellij.grammar.generator.ParserGeneratorUtil;
-import org.intellij.grammar.generator.RuleGraphHelper;
 import org.intellij.grammar.generator.java.JavaBnfConstants;
 import org.intellij.grammar.java.JavaHelper;
 import org.intellij.grammar.parser.GeneratedParserUtilBase;
@@ -93,7 +92,7 @@ final class BnfCompletionContributor extends CompletionContributor {
                                     @NotNull CompletionResultSet result) {
         BnfFile file = (BnfFile)parameters.getOriginalFile();
         PsiElement positionRefOrToken = PsiTreeUtil.getParentOfType(parameters.getOriginalPosition(), BnfReferenceOrToken.class);
-        Set<String> explicitTokens = RuleGraphHelper.getTokenNameToTextMap(file).keySet();
+        Set<String> explicitTokens = BnfAst.getTokenNameToTextMap(file).keySet();
         for (String s : explicitTokens) {
           result.addElement(LookupElementBuilder.create(s));
         }

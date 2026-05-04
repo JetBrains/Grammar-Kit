@@ -28,10 +28,13 @@ import java.io.IOException;
 import java.util.*;
 
 import static java.lang.String.format;
-import static org.intellij.grammar.psi.BnfAttributes.*;
+import static org.intellij.grammar.generator.ParserGeneratorUtil.ConsumeType;
+import static org.intellij.grammar.generator.ParserGeneratorUtil.getTokenType;
+import static org.intellij.grammar.generator.RuleGraphHelper.hasElementType;
 import static org.intellij.grammar.psi.BnfAst.*;
-import static org.intellij.grammar.generator.ParserGeneratorUtil.*;
-import static org.intellij.grammar.generator.RuleGraphHelper.*;
+import static org.intellij.grammar.psi.BnfAttributes.getAttribute;
+import static org.intellij.grammar.psi.BnfAttributes.getRootAttribute;
+import static org.intellij.grammar.psi.BnfRules.getSynonymTargetOrSelf;
 
 public sealed abstract class Generator permits JavaParserGenerator, KotlinParserGenerator {
   private static final Logger LOG = Logger.getInstance(Generator.class);

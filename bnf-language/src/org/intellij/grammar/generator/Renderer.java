@@ -13,8 +13,6 @@ import org.intellij.grammar.psi.BnfRule;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import static org.intellij.grammar.generator.ParserGeneratorUtil.getPsiClassFormat;
-import static org.intellij.grammar.generator.ParserGeneratorUtil.getPsiImplClassFormat;
 import static org.intellij.grammar.psi.BnfAttributes.getAttribute;
 
 /**
@@ -113,8 +111,8 @@ public abstract class Renderer {
       BnfFile file = (BnfFile)rule.getContainingFile();
       String psiPackage = getAttribute(rule, KnownAttribute.PSI_PACKAGE);
       String psiImplPackage = getAttribute(rule, KnownAttribute.PSI_IMPL_PACKAGE);
-      NameFormat psiFormat = getPsiClassFormat(file);
-      NameFormat psiImplFormat = getPsiImplClassFormat(file);
+      NameFormat psiFormat = NameFormat.forPsiClass(file);
+      NameFormat psiImplFormat = NameFormat.forPsiImplClass(file);
       return Couple.of(psiPackage + "." + getRulePsiClassName(rule, psiFormat),
                        psiImplPackage + "." + getRulePsiClassName(rule, psiImplFormat));
     }

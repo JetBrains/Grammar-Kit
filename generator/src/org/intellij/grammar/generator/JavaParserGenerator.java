@@ -47,12 +47,15 @@ import static org.intellij.grammar.analysis.BnfFirstNextAnalyzer.BNF_MATCHES_ANY
 import static org.intellij.grammar.analysis.BnfFirstNextAnalyzer.BNF_MATCHES_EOF;
 import static org.intellij.grammar.generator.CommonBnfConstants.RECOVER_AUTO;
 import static org.intellij.grammar.generator.NameShortener.addTypeToImports;
-import static org.intellij.grammar.psi.BnfAttributes.*;
-import static org.intellij.grammar.psi.BnfAst.*;
 import static org.intellij.grammar.generator.ParserGeneratorUtil.*;
 import static org.intellij.grammar.generator.RuleGraphHelper.*;
 import static org.intellij.grammar.generator.RuleGraphHelper.Cardinality.*;
 import static org.intellij.grammar.generator.java.JavaNames.getRawClassName;
+import static org.intellij.grammar.psi.BnfAst.*;
+import static org.intellij.grammar.psi.BnfAttributes.getAttribute;
+import static org.intellij.grammar.psi.BnfAttributes.getRootAttribute;
+import static org.intellij.grammar.psi.BnfRules.getEffectiveSuperRule;
+import static org.intellij.grammar.psi.BnfRules.getSuperInterfaceNames;
 import static org.intellij.grammar.psi.BnfTypes.*;
 
 
@@ -90,8 +93,8 @@ public final class JavaParserGenerator extends Generator {
                              @NotNull OutputOpener outputOpener) {
     super(psiFile, sourcePath, outputPath, packagePrefix, "java", outputOpener, new JavaRenderer());
 
-    myPsiInterfaceFormat = getPsiClassFormat(myFile);
-    myImplClassFormat = getPsiImplClassFormat(myFile);
+    myPsiInterfaceFormat = NameFormat.forPsiClass(myFile);
+    myImplClassFormat = NameFormat.forPsiImplClass(myFile);
     myParserUtilClass = getRootAttribute(myFile, KnownAttribute.PARSER_UTIL_CLASS);
     myPsiImplUtilClass = getRootAttribute(myFile, KnownAttribute.PSI_IMPL_UTIL_CLASS);
     myPsiTreeUtilClass = getRootAttribute(myFile, KnownAttribute.PSI_TREE_UTIL_CLASS);
@@ -1471,7 +1474,7 @@ public final class JavaParserGenerator extends Generator {
               found = true;
             }
           }
-          List<NavigatablePsiElement> methods = findRuleImplMethods(myJavaHelper, myPsiImplUtilClass, methodInfo.name, rule);
+          List<NavigatablePsiElement> methods = myJavaHelper.findRuleImplMethods(myPsiImplUtilClass, methodInfo.name, rule);
           for (NavigatablePsiElement method : methods) {
             generateUtilMethod(methodInfo.name, method, intf, true, visited);
             found = true;
@@ -1521,7 +1524,7 @@ public final class JavaParserGenerator extends Generator {
 
       List<NavigatablePsiElement> mixinMethods =
         myJavaHelper.findClassMethods(mixinClass, JavaHelper.MethodType.INSTANCE, methodInfo.name, -1);
-      List<NavigatablePsiElement> implMethods = findRuleImplMethods(myJavaHelper, myPsiImplUtilClass, methodInfo.name, rule);
+      List<NavigatablePsiElement> implMethods = myJavaHelper.findRuleImplMethods(myPsiImplUtilClass, methodInfo.name, rule);
 
       collectMethodTypesToImport(mixinMethods, false, result);
       collectMethodTypesToImport(implMethods, true, result);

@@ -5,6 +5,7 @@
 package org.intellij.grammar.generator.kotlin;
 
 import com.intellij.openapi.util.text.StringUtil;
+import org.intellij.grammar.generator.CommonRendererUtils;
 import org.intellij.grammar.generator.Renderer;
 import org.intellij.grammar.psi.BnfRule;
 import org.jetbrains.annotations.NotNull;

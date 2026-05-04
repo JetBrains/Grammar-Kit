@@ -12,9 +12,9 @@ import com.intellij.util.IncorrectOperationException;
 import com.intellij.util.PlatformIcons;
 import org.intellij.grammar.BnfIcons;
 import org.intellij.grammar.psi.BnfAttr;
-import org.intellij.grammar.psi.BnfModifier;
 import org.intellij.grammar.psi.BnfNamedElement;
 import org.intellij.grammar.psi.BnfRule;
+import org.intellij.grammar.psi.BnfRules;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
 
@@ -69,8 +69,8 @@ public abstract class BnfNamedImpl extends BnfCompositeImpl implements BnfNamedE
   @Override
   public Icon getIcon(int flags) {
     if (this instanceof BnfRule) {
-      Icon base = hasModifier((BnfRule)this, "external") ? BnfIcons.EXTERNAL_RULE : BnfIcons.RULE;
-      Icon visibility = hasModifier((BnfRule)this, "private") ? PlatformIcons.PRIVATE_ICON : PlatformIcons.PUBLIC_ICON;
+      Icon base = BnfRules.isExternal((BnfRule)this) ? BnfIcons.EXTERNAL_RULE : BnfIcons.RULE;
+      Icon visibility = BnfRules.isPrivate((BnfRule)this) ? PlatformIcons.PRIVATE_ICON : PlatformIcons.PUBLIC_ICON;
       RowIcon row = new RowIcon(2);
       row.setIcon(base, 0);
       row.setIcon(visibility, 1);
@@ -85,13 +85,6 @@ public abstract class BnfNamedImpl extends BnfCompositeImpl implements BnfNamedE
   @Override
   public PsiElement getNameIdentifier() {
     return getId();
-  }
-
-  public static boolean hasModifier(BnfRule rule, String modifier) {
-    for (BnfModifier o : rule.getModifierList()) {
-      if (modifier.equals(o.getText())) return true;
-    }
-    return false;
   }
 
   @Override

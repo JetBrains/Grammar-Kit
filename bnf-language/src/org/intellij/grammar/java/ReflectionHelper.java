@@ -16,6 +16,19 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * {@link JavaHelper} backed by {@link Class#forName} and {@code java.lang.reflect}.
+ * <p>
+ * Used as a last-resort fallback when ASM is not on the classpath (see
+ * {@link org.intellij.grammar.LightPsi.Init#initExtensions}). Because it uses {@link Class#forName},
+ * it actually initialises the target classes, which is sometimes undesirable but acceptable in the
+ * minimal {@code LightPsi} runtime where ASM is missing.
+ * <p>
+ * Limitation compared to {@link AsmHelper}: parameter names cannot be recovered from reflection,
+ * so {@link #getMethodTypes} synthesises {@code "p0"}, {@code "p1"}… placeholders. Type annotations
+ * on parameters are also not exposed — {@link #getParameterAnnotations} falls back to the method's
+ * own annotation list.
+ */
 public class ReflectionHelper extends JavaHelper {
   private static @Nullable Class<?> findClassSafe(String className) {
     if (className == null) return null;

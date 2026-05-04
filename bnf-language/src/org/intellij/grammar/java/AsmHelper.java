@@ -20,6 +20,22 @@ import java.io.InputStream;
 import java.lang.reflect.Modifier;
 import java.util.*;
 
+/**
+ * {@link JavaHelper} backed by ASM bytecode parsing.
+ * <p>
+ * Loads {@code .class} files through the current classloader's resources and extracts class /
+ * method information without needing the JVM to actually load the class — important because some
+ * referenced classes (e.g. those that depend on the IDE platform) cannot be initialised at
+ * generation time. Method signatures, generics, {@code throws} clauses and both regular and type
+ * annotations are decoded into {@link ClassInfo} / {@link MethodInfo} records and wrapped in
+ * {@link MyElement}s so they look like {@link NavigatablePsiElement}s to callers.
+ * <p>
+ * This is the default helper outside the IDE (returned by
+ * {@link JavaHelper#getJavaHelper(com.intellij.psi.PsiElement)} when no project service is
+ * available) and the base class of {@link PsiHelper}, which delegates back to the bytecode lookup
+ * whenever the PSI cannot resolve a class — typically for platform classes that are on the
+ * classpath but not part of the project's source roots.
+ */
 public class AsmHelper extends JavaHelper {
 
   private static final int ASM_OPCODES = Opcodes.ASM9;

@@ -34,6 +34,20 @@ import java.util.List;
 
 import static org.intellij.grammar.psi.BnfAttributes.getRootAttribute;
 
+/**
+ * {@link JavaHelper} backed by the IntelliJ PSI / Java indices.
+ * <p>
+ * This is the project-level service registered in {@code plugin-java.xml} and the helper actually
+ * used while editing inside the IDE. It returns real {@link PsiClass} / {@link PsiMethod} elements
+ * (so navigation, find-usages and rename Just Work), and additionally implements
+ * {@link #getClassReferences} — a no-op in the bytecode and reflection helpers — to wire BNF
+ * attribute string literals into the standard Java reference machinery.
+ * <p>
+ * When the PSI index does not know about a class (e.g. it is on the classpath but outside the
+ * project, or the index is currently unavailable), every override transparently falls back to the
+ * inherited {@link AsmHelper} behaviour. This dual strategy is what lets the IDE resolve both
+ * project sources and platform/library classes uniformly.
+ */
 final class PsiHelper extends AsmHelper {
   private final JavaPsiFacade myFacade;
   private final PsiElementFactory myElementFactory;

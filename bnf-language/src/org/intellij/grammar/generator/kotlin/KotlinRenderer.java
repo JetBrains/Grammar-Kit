@@ -7,6 +7,7 @@ package org.intellij.grammar.generator.kotlin;
 import com.intellij.openapi.util.text.StringUtil;
 import org.intellij.grammar.generator.CommonRendererUtils;
 import org.intellij.grammar.generator.Renderer;
+import org.intellij.grammar.generator.RendererBase;
 import org.intellij.grammar.psi.BnfRule;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -15,7 +16,7 @@ import java.util.Set;
 
 import static org.intellij.grammar.generator.java.JavaRenderer.JAVA_RESERVED;
 
-public final class KotlinRenderer extends Renderer {
+public final class KotlinRenderer extends RendererBase {
   public static final @NotNull KotlinRenderer INSTANCE = new KotlinRenderer();
 
   private final static String RESERVED_KOTLIN_SUFFIX = "__";

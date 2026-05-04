@@ -22,6 +22,7 @@ import org.intellij.grammar.generator.CommonRendererUtils;
 import org.intellij.grammar.generator.java.JavaRenderer;
 import org.intellij.grammar.psi.*;
 import org.intellij.grammar.psi.impl.GrammarUtil;
+import org.intellij.grammar.util.Case;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

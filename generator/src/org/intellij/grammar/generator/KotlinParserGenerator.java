@@ -24,6 +24,7 @@ import org.intellij.grammar.java.JavaHelper;
 import org.intellij.grammar.parser.GeneratedParserUtilBase.Parser;
 import org.intellij.grammar.psi.*;
 import org.intellij.grammar.psi.impl.GrammarUtil;
+import org.intellij.grammar.util.Case;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

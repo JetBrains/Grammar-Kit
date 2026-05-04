@@ -20,6 +20,7 @@ import org.intellij.grammar.generator.java.JavaNames;
 import org.intellij.grammar.java.JavaHelper;
 import org.intellij.grammar.psi.*;
 import org.intellij.grammar.psi.impl.GrammarUtil;
+import org.intellij.grammar.util.Case;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -159,7 +160,7 @@ public class ParserGeneratorUtil {
                                       @NotNull List<@NotNull String> tokenTypes,
                                       @NotNull String elementTypesHolder) {
     for (int count = 0, line = 0, size = tokenTypes.size(); count < size; count++) {
-      boolean newLine = appendTokenTypes(builder, count, line, size);;
+      boolean newLine = appendTokenTypes(builder, count, line, size);
       builder.append(elementTypesHolder).append(".").append(tokenTypes.get(count));
       if (newLine) line++;
     }

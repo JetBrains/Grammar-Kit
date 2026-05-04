@@ -42,7 +42,9 @@ public final class BnfRules {
 
   public static @Nullable PsiElement firstNotTrivial(@NotNull BnfRule rule) {
     for (PsiElement tree = rule.getExpression(); tree != null; tree = PsiTreeUtil.getChildOfType(tree, BnfExpression.class)) {
-      if (!isTrivialNode(tree)) return tree;
+      if (BnfAst.getTrivialNodeChild(tree) == null) {
+        return tree;
+      }
     }
     return null;
   }
@@ -57,33 +59,5 @@ public final class BnfRules {
       if (s.equals(modifier.getText())) return true;
     }
     return false;
-  }
-
-  private static boolean isTrivialNode(PsiElement element) {
-    return trivialNodeChild(element) != null;
-  }
-
-  private static @Nullable BnfExpression trivialNodeChild(PsiElement element) {
-    PsiElement child = null;
-    if (element instanceof BnfParenthesized) {
-      BnfExpression e = ((BnfParenthesized)element).getExpression();
-      if (element instanceof BnfParenExpression) {
-        child = e;
-      }
-      else {
-        BnfExpression c = e;
-        while (c instanceof BnfParenthesized) {
-          c = ((BnfParenthesized)c).getExpression();
-        }
-        if (c.getFirstChild() == null) {
-          child = e;
-        }
-      }
-    }
-    else if (element.getFirstChild() == element.getLastChild() && element instanceof BnfExpression) {
-      child = element.getFirstChild();
-    }
-    return child instanceof BnfExpression && !(child instanceof BnfLiteralExpression || child instanceof BnfReferenceOrToken) ?
-           (BnfExpression)child : null;
   }
 }

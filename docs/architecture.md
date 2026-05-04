@@ -4,17 +4,18 @@ Grammar-Kit is a self-hosting JetBrains plugin that generates parsers, lexers, a
 
 ## Module layout
 
-The project is organized as a multi-module Gradle build. Modules form a strict dependency hierarchy (arrows point to dependencies):
+The project is organized as a multi-module Gradle build. Each module's direct dependencies on other modules:
 
 ```
-                ┌─► :generator ────┐
-                │                  │
-root (plugin) ──┼─► :bnf-language ◄┤
-                │                  │
-                ├─► :jflex-language ─► :parser-runtime ──► (IntelliJ Platform)
-                │
-                └─► :base
+root (plugin)         depends on  :generator, :bnf-language, :jflex-language, :parser-runtime, :base
+:generator            depends on  :bnf-language, :parser-runtime, :base
+:bnf-language         depends on  :parser-runtime, :base
+:jflex-language       depends on  :parser-runtime, :base
+:parser-runtime       — no module deps (uses IntelliJ Platform directly)
+:base                 — no module deps (uses IntelliJ Platform directly)
 ```
+
+Notable shape: `:bnf-language` and `:jflex-language` are **peers** — neither depends on the other. They share `:parser-runtime` (which holds the language-agnostic `GeneratedParserUtilBase`).
 
 | Module            | Purpose                                                                                                                                                                                                                                                                                          |
 |-------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|

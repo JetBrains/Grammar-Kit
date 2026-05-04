@@ -57,8 +57,8 @@ public abstract class AbstractBnfGeneratorTest extends BnfGeneratorTestCase {
 
   @Override
   protected String loadFile(@NonNls @NotNull String name) throws IOException {
-    if (name.equals("SelfBnf.bnf")) return super.loadFile("../../grammars/Grammar.bnf");
-    if (name.equals("SelfFlex.bnf")) return super.loadFile("../../grammars/JFlex.bnf");
+    if (name.equals("SelfBnf.bnf")) return super.loadFile("../../bnf-language/grammars/Grammar.bnf");
+    if (name.equals("SelfFlex.bnf")) return super.loadFile("../../jflex-language/grammars/JFlex.bnf");
     try {
       // first, see if there is a test in the testDir folder
       return loadFileDefault(this.getBnfFilesDir(), name);

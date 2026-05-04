@@ -34,8 +34,8 @@ public class BnfParserTest extends AbstractParsingTestCase {
   @Override
   protected String loadFile(@NonNls String name) throws IOException {
     String adjusted;
-    if ("SelfBnf.bnf".equals(name)) adjusted = "../../grammars/Grammar.bnf";
-    else if ("SelfFlex.bnf".equals(name)) adjusted = "../../grammars/JFlex.bnf";
+    if ("SelfBnf.bnf".equals(name)) adjusted = "../../bnf-language/grammars/Grammar.bnf";
+    else if ("SelfFlex.bnf".equals(name)) adjusted = "../../jflex-language/grammars/JFlex.bnf";
     else adjusted = name;
     return super.loadFile(adjusted);
   }

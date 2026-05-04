@@ -7,6 +7,7 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.tree.IElementType;
 import com.intellij.psi.util.PsiTreeUtil;
 import it.unimi.dsi.fastutil.Hash;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
@@ -17,7 +18,8 @@ import static org.intellij.grammar.psi.BnfTypes.BNF_SEQUENCE;
 
 public final class BnfAst {
 
-  private BnfAst() { }
+  private BnfAst() {
+  }
 
   private static final Hash.Strategy<PsiElement> TEXT_STRATEGY = new Hash.Strategy<>() {
     @Override
@@ -31,16 +33,11 @@ public final class BnfAst {
     }
   };
 
-  @SuppressWarnings("unchecked")
-  public static <T extends PsiElement> Hash.Strategy<T> textStrategy() {
+  public static <T extends PsiElement> @NotNull Hash.Strategy<T> textStrategy() {
     return (Hash.Strategy<T>)TEXT_STRATEGY;
   }
 
-  public static boolean isTrivialNode(PsiElement element) {
-    return getTrivialNodeChild(element) != null;
-  }
-
-  public static BnfExpression getNonTrivialNode(BnfExpression initialNode) {
+  public static @NotNull BnfExpression getNonTrivialNode(@NotNull BnfExpression initialNode) {
     BnfExpression nonTrivialNode = initialNode;
     for (BnfExpression e = initialNode, n = getTrivialNodeChild(e); n != null; e = n, n = getTrivialNodeChild(e)) {
       nonTrivialNode = n;
@@ -48,7 +45,7 @@ public final class BnfAst {
     return nonTrivialNode;
   }
 
-  public static BnfExpression getTrivialNodeChild(PsiElement element) {
+  public static @Nullable BnfExpression getTrivialNodeChild(@NotNull PsiElement element) {
     PsiElement child = null;
     if (element instanceof BnfParenthesized) {
       BnfExpression e = ((BnfParenthesized)element).getExpression();
@@ -72,7 +69,7 @@ public final class BnfAst {
            (BnfExpression)child : null;
   }
 
-  public static IElementType getEffectiveType(PsiElement tree) {
+  public static @NotNull IElementType getEffectiveType(@NotNull PsiElement tree) {
     if (tree instanceof BnfParenOptExpression) {
       return BnfTypes.BNF_OP_OPT;
     }
@@ -97,7 +94,7 @@ public final class BnfAst {
     }
   }
 
-  public static @Nullable Pattern compilePattern(String text) {
+  public static @Nullable Pattern compilePattern(@NotNull String text) {
     try {
       return Pattern.compile(text);
     }

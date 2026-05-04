@@ -36,8 +36,8 @@ import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.List;
 import java.util.*;
+import java.util.List;
 
 import static org.intellij.grammar.generator.ParserGeneratorUtil.getAttribute;
 

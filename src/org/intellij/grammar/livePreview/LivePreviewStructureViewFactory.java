@@ -21,7 +21,7 @@ import com.intellij.psi.PsiWhiteSpace;
 import com.intellij.psi.impl.source.tree.LeafPsiElement;
 import com.intellij.psi.tree.IElementType;
 import org.intellij.grammar.BnfIcons;
-import org.intellij.grammar.generator.Renderer.*;
+import org.intellij.grammar.generator.Renderer.CommonRendererUtils;
 import org.intellij.grammar.psi.BnfFile;
 import org.intellij.grammar.psi.BnfRule;
 import org.jetbrains.annotations.NotNull;

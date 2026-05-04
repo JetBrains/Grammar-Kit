@@ -21,7 +21,7 @@ import com.intellij.util.containers.JBTreeTraverser;
 import com.intellij.util.containers.TreeTraversal;
 import it.unimi.dsi.fastutil.Hash;
 import org.intellij.grammar.KnownAttribute;
-import org.intellij.grammar.generator.Renderer.*;
+import org.intellij.grammar.generator.Renderer.CommonRendererUtils;
 import org.intellij.grammar.generator.java.JavaBnfConstants;
 import org.intellij.grammar.generator.java.JavaNameShortener;
 import org.intellij.grammar.java.JavaHelper;

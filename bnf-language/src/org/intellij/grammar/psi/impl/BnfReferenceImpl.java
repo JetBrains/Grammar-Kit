@@ -45,10 +45,10 @@ public class BnfReferenceImpl<T extends BnfExpression> extends PsiReferenceBase<
     PsiElement targetRule = containingFile instanceof BnfFile? ((BnfFile)containingFile).getRule(referenceName) : null;
     if (!isExternal) return targetRule;
 
-    BnfRule rule = ParserGeneratorUtil.Rule.of(myElement);
+    BnfRule rule = BnfRules.of(myElement);
 
-    if (!ParserGeneratorUtil.Rule.isMeta(rule) &&
-        !ParserGeneratorUtil.Rule.isExternal(rule)) {
+    if (!BnfRules.isMeta(rule) &&
+        !BnfRules.isExternal(rule)) {
       return targetRule != null ? targetRule : resolveMethod();
     }
 

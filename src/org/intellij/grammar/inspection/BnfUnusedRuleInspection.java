@@ -94,7 +94,7 @@ final class BnfUnusedRuleInspection extends LocalInspectionTool {
 
     for (BnfRule r : rules.filter(o -> !roots.contains(o) && !inSuppressed.contains(o))) {
       String message = null;
-      if (ParserGeneratorUtil.Rule.isFake(r)) {
+      if (BnfRules.isFake(r)) {
         if (inExpr.contains(r)) {
           message = "Reachable fake rule";
         }
@@ -103,7 +103,7 @@ final class BnfUnusedRuleInspection extends LocalInspectionTool {
         }
       }
       else if (getCompatibleAttribute(inAttrs.get(r)) == RECOVER_WHILE) {
-        if (!ParserGeneratorUtil.Rule.isPrivate(r)) {
+        if (!BnfRules.isPrivate(r)) {
           message = "Non-private recovery rule";
         }
       }

@@ -10,8 +10,8 @@ import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.util.ObjectUtils;
 import com.intellij.util.containers.JBIterable;
 import org.intellij.grammar.KnownAttribute;
+import org.intellij.grammar.generator.CommonRendererUtils;
 import org.intellij.grammar.generator.NameFormat;
-import org.intellij.grammar.generator.Renderer.CommonRendererUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

@@ -17,7 +17,6 @@ import com.intellij.util.containers.MultiMap;
 import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.analysis.BnfFirstNextAnalyzer;
 import org.intellij.grammar.generator.NodeCalls.*;
-import org.intellij.grammar.generator.Renderer.CommonRendererUtils;
 import org.intellij.grammar.psi.*;
 import org.intellij.grammar.psi.impl.GrammarUtil;
 import org.jetbrains.annotations.NotNull;
@@ -208,7 +207,7 @@ public sealed abstract class Generator permits JavaParserGenerator, KotlinParser
   }
 
   @NotNull String getParserLambdaRef(@NotNull NodeCall nodeCall, @NotNull String nextName) {
-    String constantName = Renderer.CommonRendererUtils.getWrapperParserConstantName(nextName);
+    String constantName = CommonRendererUtils.getWrapperParserConstantName(nextName);
     String targetClass = myRenderedLambdas.get(constantName);
     if (targetClass != null) {
       return StringUtil.getShortName(targetClass) + "." + constantName;

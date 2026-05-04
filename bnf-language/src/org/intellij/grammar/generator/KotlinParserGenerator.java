@@ -16,7 +16,7 @@ import com.intellij.util.containers.JBIterable;
 import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.analysis.BnfFirstNextAnalyzer;
 import org.intellij.grammar.generator.NodeCalls.*;
-import org.intellij.grammar.generator.Renderer.*;
+import org.intellij.grammar.generator.Renderer.CommonRendererUtils;
 import org.intellij.grammar.generator.kotlin.KotlinBnfConstants;
 import org.intellij.grammar.generator.kotlin.KotlinNameShortener;
 import org.intellij.grammar.generator.kotlin.KotlinPlatformConstants;

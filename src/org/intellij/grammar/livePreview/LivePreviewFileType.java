@@ -6,11 +6,9 @@ package org.intellij.grammar.livePreview;
 
 import com.intellij.openapi.fileTypes.FileType;
 import com.intellij.openapi.fileTypes.LanguageFileType;
-import com.intellij.openapi.vfs.VirtualFile;
 import org.intellij.grammar.BnfIcons;
 import org.intellij.grammar.GrammarKitBundle;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 

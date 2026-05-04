@@ -4,54 +4,70 @@ Grammar-Kit is a self-hosting JetBrains plugin that generates parsers, lexers, a
 
 ## Module layout
 
-The project is organized as a multi-module Gradle build. Modules form a dependency hierarchy (arrows point to dependencies):
+The project is organized as a multi-module Gradle build. Modules form a strict dependency hierarchy (arrows point to dependencies):
 
 ```
-                       ┌─► :bnf-language ──┐
-root (plugin) ─────────┤                   ├─► :parser-runtime ──► (platform)
-                       └─► :jflex-language ┘
-                       │
-                       └─► :base
+                ┌─► :generator ────┐
+                │                  │
+root (plugin) ──┼─► :bnf-language ◄┤
+                │                  │
+                ├─► :jflex-language ─► :parser-runtime ──► (IntelliJ Platform)
+                │
+                └─► :base
 ```
 
-| Module            | Purpose                                                                                                                                                                                                                                                             |
-|-------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `:base`           | Shared infrastructure: `GrammarKitBundle` (i18n), `BnfIcons`, message resources.                                                                                                                                                                                    |
-| `:parser-runtime` | Language-agnostic parser runtime: `GeneratedParserUtilBase` (the engine every generated parser links against) plus `config.Options`/`config.Option`. No BNF or JFlex specifics.                                                                                     |
-| `:bnf-language`   | BNF language model: `psi/`, `parser/`, `analysis/`, `java/`, language registration (`BnfLanguage`, `BnfFileType`, …), `KnownAttribute`, `LightPsi`, plus the code generator (`generator/`) and CLI entry (`Main.java`). Owns `grammars/Grammar.bnf` and BNF `gen/`. |
-| `:jflex-language` | JFlex language support: PSI, parser, editor, file type. True peer of `:bnf-language` — depends only on `:base` and `:parser-runtime`. Owns `grammars/JFlex.bnf` and JFlex `gen/`.                                                                                   |
-| Root project      | The IDE plugin itself: `actions/`, `editor/`, `inspection/`, `intention/`, `refactor/`, `search/`, `livePreview/`, `diagram/`, top-level UI providers, `plugin.xml`, signing, publishing.                                                                           |
+| Module            | Purpose                                                                                                                                                                                                                                                                                          |
+|-------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `:base`           | Shared infrastructure: `GrammarKitBundle` (i18n), `BnfIcons`, message resources.                                                                                                                                                                                                                 |
+| `:parser-runtime` | Language-agnostic parser runtime: `GeneratedParserUtilBase` plus `config.Options`/`config.Option`. No BNF or JFlex specifics.                                                                                                                                                                    |
+| `:bnf-language`   | BNF language model: `psi/`, `parser/`, `analysis/`, `java/`, language registration (`BnfLanguage`, `BnfFileType`, …), `KnownAttribute`, `LightPsi`. Plus PSI-shared rendering and naming primitives (`Renderer`, `JavaRenderer`, `KotlinRenderer`, `Case`, `NameFormat`, `RuleGraphHelper`, `ParserGeneratorUtil`, `JavaNameShortener`, `*BnfConstants`) that `:generator` and PSI both consume. Owns `grammars/Grammar.bnf` and BNF `gen/`. |
+| `:jflex-language` | JFlex language support: PSI, parser, editor, file type. True peer of `:bnf-language` — depends only on `:base` and `:parser-runtime`. Owns `grammars/JFlex.bnf` and JFlex `gen/`.                                                                                                                  |
+| `:generator`      | Pure code emission: `Generator`, `JavaParserGenerator`, `KotlinParserGenerator`, `ExpressionGeneratorHelper`, `ExpressionHelper`, `ExpressionInfo`, `RuleMethodsHelper`, `RuleInfo`, `OperatorInfo`, `OperatorType`, `NodeCalls`, `Names`, `FilePrinter`, `OutputOpener`, `GenOptions`, `KotlinNameShortener`, `KotlinPlatformConstants`, plus `Main.java` (headless CLI). Depends on `:bnf-language`. |
+| Root project      | The IDE plugin itself: `actions/`, `editor/`, `inspection/`, `intention/`, `refactor/`, `search/`, `livePreview/`, `diagram/`, top-level UI providers, `plugin.xml`, signing, publishing.                                                                                                          |
 
 The IntelliJ Platform Gradle plugin (v2) auto-detects subproject dependencies and bundles each module's jar into the plugin distribution.
 
-## Why generator is bundled with `:bnf-language`
+## How `:generator` was decoupled from PSI
 
-The `generator/` package was originally targeted for its own module. In practice, several PSI and analysis classes (`BnfReferenceImpl`, `BnfStringImpl`, `BnfFirstNextAnalyzer`, `GrammarUtil`) reach into generator utilities (`ParserGeneratorUtil.Rule`, `Renderer`, `GenOptions`, `JavaNameShortener`) for rule classification and naming logic. Cleanly extracting `:generator` would first require refactoring those PSI→generator callbacks — moving rule-classification helpers into a neutral location. Until that refactor lands, generator stays in `:bnf-language`.
+Before the split, several PSI/analysis classes reached into the `org.intellij.grammar.generator` package for what was actually BNF semantics, not code emission:
+
+| Caller (`:bnf-language`) | What it called into `:generator` (before)               | After                                              |
+|--------------------------|---------------------------------------------------------|----------------------------------------------------|
+| `BnfReferenceImpl`, `BnfStringImpl`, `BnfFirstNextAnalyzer`, `GrammarUtil`, `LivePreviewParser`, etc. | `ParserGeneratorUtil.Rule.{of,isPrivate,isExternal,isMeta,isLeft,isInner,isFake,isUpper,firstNotTrivial}` | `org.intellij.grammar.psi.BnfRules`               |
+| Same plus `JavaHelper`, `BnfFileImpl`, `GenOptions` | `ParserGeneratorUtil.{getAttribute,getRootAttribute,findAttribute,getAttributeValue,getLiteralValue}` | `org.intellij.grammar.psi.BnfAttributes`          |
+| Same                     | `ParserGeneratorUtil.{isTrivialNode,getNonTrivialNode,getTrivialNodeChild,getEffectiveType,compilePattern,textStrategy}` | `org.intellij.grammar.psi.BnfAst`                 |
+| `JavaHelper`, `BnfReferenceImpl` | `GenOptions.UseSyntaxApi(rule)` / `UseSyntaxApi(file)` | `BnfAttributes.useSyntaxApi(...)`                 |
+
+After three preparatory commits (`BnfRules`, `BnfAttributes`, `BnfAst`) plus the `useSyntaxApi` move, the PSI/analysis layer no longer depends on emission code. Then the actual `:generator` extraction moved only the truly emission-only classes; the `org.intellij.grammar.generator.*` package now spans both modules (split package), with each individual class owned by exactly one module.
 
 ## Bootstrap
 
-The project has a clear bootstrap split:
+The project has a two-tier bootstrap:
 
 **Tier 1 — Meta-layer** (`bnf-language/grammars/Grammar.bnf` → `bnf-language/gen/org/intellij/grammar/parser/GrammarParser.java` and `bnf-language/gen/.../psi/Bnf*`). These let the plugin itself read `.bnf` files at runtime.
 
-**Tier 2 — Generator** (`bnf-language/src/org/intellij/grammar/generator/`). Consumes the user's BNF and emits a parser + PSI for *their* language. `Generator.java` is the sealed base; `JavaParserGenerator.java` and `KotlinParserGenerator.java` are the targets. `ExpressionGeneratorHelper.generateExpressionRoot()` handles operator-precedence climbing for expression parsers, driven by `ExpressionInfo`/`OperatorInfo`. The user-facing trigger is `actions/GenerateAction.java` (in the root plugin module).
+**Tier 2 — Generator** (`generator/src/org/intellij/grammar/generator/`). Consumes the user's BNF and emits a parser + PSI for *their* language. `Generator.java` is the sealed base; `JavaParserGenerator.java` and `KotlinParserGenerator.java` are the targets. `ExpressionGeneratorHelper.generateExpressionRoot()` handles operator-precedence climbing, driven by `ExpressionInfo`/`OperatorInfo`. The user-facing trigger is `actions/GenerateAction.java` (root plugin module).
 
 ## Subsystems
 
 In `:bnf-language`:
 
-- `parser/` — Runtime engine (`GeneratedParserUtilBase` is shipped as a template into generated parsers) plus the BNF lexer.
-- `psi/` — PSI interfaces/impl/utility for BNF files.
-- `generator/` — Code emission, rule graph analysis, expression precedence tables.
+- `parser/` — BNF lexer (`GeneratedParserUtilBase` itself lives in `:parser-runtime`, shipped as a template into generated parsers).
+- `psi/` — PSI interfaces/impl plus the extracted BNF-semantic utilities `BnfRules`, `BnfAttributes`, `BnfAst`.
 - `analysis/` — `BnfFirstNextAnalyzer` computes FIRST/FOLLOW sets used by precedence handling, recovery, and inspections.
 - `java/` — `JavaHelper`: ASM-based Java-class introspection for target type resolution.
-- `config/` — Generator option flags.
+- `generator/` (split package, partial) — `Renderer` family, `Case`, `NameFormat`, `RuleGraphHelper`, `ParserGeneratorUtil`, `JavaNameShortener`, `*BnfConstants`. These are PSI-shared naming/semantic primitives that happen to live in the generator package historically.
+
+In `:generator`:
+
+- `generator/` — Code emission (`Generator`, `Java/KotlinParserGenerator`, `ExpressionGeneratorHelper`, `RuleMethodsHelper`, etc.), output sinks (`FilePrinter`, `OutputOpener`), generator config (`GenOptions`, `Names`, `KotlinPlatformConstants`).
+- `Main.java` — Headless CLI entry point.
 
 In root project (IDE plugin):
 
-- `livePreview/` — Real-time in-IDE parser testing. `LivePreviewLanguage` registers a synthetic language per BNF; `LivePreviewParser` runs an interpreter-style parser; `LivePreviewHelper` reparses preview editors via a `MergingUpdateQueue` whenever the source grammar changes.
+- `livePreview/` — Real-time in-IDE parser testing. `LivePreviewLanguage` registers a synthetic language per BNF; `LivePreviewParser` runs an interpreter-style parser; `LivePreviewHelper` reparses preview editors via a `MergingUpdateQueue`.
 - `editor/` — Highlighting, annotators, gutter line markers.
-- `inspection/` + `intention/` + `refactor/` + `search/` — Standard IDE plugin surface (left-recursion warnings, unused-rule detection, rename, find usages, etc.).
+- `inspection/` + `intention/` + `refactor/` + `search/` — Standard IDE plugin surface.
 - `actions/` — Generate Parser, Run JFlex, Live Preview triggers.
 - `diagram/` — Rule diagram via the IntelliJ diagram plugin.
 
@@ -59,16 +75,14 @@ In root project (IDE plugin):
 
 Per-module `build.gradle.kts`:
 
-- Library modules (`:base`, `:bnf-language`, `:jflex-language`) apply `org.jetbrains.intellij.platform.module` and pull only the bundled platform plugins they need (Java, IntelliLang).
+- Library modules apply `org.jetbrains.intellij.platform.module` and pull only the bundled platform plugins they need (Java, IntelliLang).
 - Root project applies the full `org.jetbrains.intellij.platform` plugin, owns `plugin.xml`, signing/publishing config, and the `buildPlugin` task graph. Java 17, Gradle 9.3.1, IDEA 2023.3.8.
 
-The `buildPlugin` task produces a zip with one jar per module under `lib/`. `buildGrammarKitJar` is the (root-only) library jar published to Maven Central — see "Known follow-ups".
+`buildPlugin` produces a zip with one jar per module under `lib/` (six jars total: `base`, `parser-runtime`, `bnf-language`, `jflex-language`, `generator`, root).
 
 ## Tests
 
-`BnfTestSuite` aggregates fast (parsing, generation, utils) and slow (inspections, refactoring) suites. Tests extend `BnfGeneratorTestCase` / `AbstractParsingTestCase`; inputs live under `testData/<feature>/` and outputs are compared to golden files. Tests currently live in the root project and exercise classes across all modules via the project dependency graph.
-
-When tests need the meta-grammars themselves (`SelfBnf.bnf`, `SelfFlex.bnf`), they reach into `bnf-language/grammars/` and `jflex-language/grammars/` via relative paths.
+`BnfTestSuite` aggregates fast (parsing, generation, utils) and slow (inspections, refactoring) suites. Tests extend `BnfGeneratorTestCase` / `AbstractParsingTestCase`; inputs live under `testData/<feature>/` and outputs are compared to golden files. Tests live in the root project and exercise classes across all modules via the project dependency graph.
 
 ## Key takeaway
 
@@ -76,6 +90,6 @@ The interesting design choice is the **bootstrap split**: `:bnf-language/gen/` i
 
 ## Known follow-ups
 
-- **Decouple `:generator`**: refactor `BnfReferenceImpl`, `BnfStringImpl`, `BnfFirstNextAnalyzer`, `GrammarUtil` to remove their dependencies on `ParserGeneratorUtil.Rule`, `Renderer`, `GenOptions`, `JavaNameShortener`. Then `generator/` can move to its own `:generator` module.
-- **Aggregate library jar**: `buildGrammarKitJar` currently bundles only root-project classes. To publish a complete `grammar-kit` library to Maven Central post-split, it should also include classes from `:base`, `:bnf-language`, and `:jflex-language` (e.g., via `zipTree(project(...).tasks.jar.archiveFile)`).
+- **Aggregate library jar**: `buildGrammarKitJar` currently bundles only root-project classes. To publish a complete `grammar-kit` library to Maven Central post-split, it should also include classes from `:base`, `:parser-runtime`, `:bnf-language`, `:jflex-language`, and `:generator` (e.g., via `zipTree(project(...).tasks.jar.archiveFile)`).
 - **Rename root → `:plugin`**: the root project still serves as the IDE-features module. Splitting it into a dedicated `:plugin` subproject (with a thin coordinator at root) would make the layout fully symmetric, but requires migrating signing/publishing/changelog config.
+- **Tighten the `:bnf-language`/`:generator` split**: today some PSI-shared naming primitives (`Renderer`, `JavaRenderer`, `KotlinRenderer`, `RuleGraphHelper`, `ParserGeneratorUtil`) physically live in `:bnf-language` under the `org.intellij.grammar.generator` package — a deliberate split package. If desired, these could be renamed to `org.intellij.grammar.naming` (or similar) to make module ownership match package boundaries.

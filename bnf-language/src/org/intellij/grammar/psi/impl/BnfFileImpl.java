@@ -6,7 +6,10 @@ package org.intellij.grammar.psi.impl;
 
 import com.intellij.extapi.psi.PsiFileBase;
 import com.intellij.openapi.fileTypes.FileType;
-import com.intellij.openapi.util.*;
+import com.intellij.openapi.util.AtomicClearableLazyValue;
+import com.intellij.openapi.util.ClearableLazyValue;
+import com.intellij.openapi.util.Conditions;
+import com.intellij.openapi.util.TextRange;
 import com.intellij.psi.FileViewProvider;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.util.containers.ContainerUtil;

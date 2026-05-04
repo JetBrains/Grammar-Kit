@@ -20,7 +20,6 @@ import it.unimi.dsi.fastutil.objects.ObjectOpenCustomHashSet;
 import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.generator.ParserGeneratorUtil;
 import org.intellij.grammar.generator.RuleGraphHelper;
-import org.intellij.grammar.generator.java.JavaRenderer;
 import org.intellij.grammar.psi.*;
 import org.intellij.grammar.psi.impl.GrammarUtil;
 import org.intellij.grammar.psi.impl.GrammarUtil.FakeBnfExpression;

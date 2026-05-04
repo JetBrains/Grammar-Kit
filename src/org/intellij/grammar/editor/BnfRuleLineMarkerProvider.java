@@ -20,7 +20,7 @@ import org.intellij.grammar.BnfIcons;
 import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.generator.GenOptions;
 import org.intellij.grammar.generator.ParserGeneratorUtil;
-import org.intellij.grammar.generator.Renderer.*;
+import org.intellij.grammar.generator.Renderer.CommonRendererUtils;
 import org.intellij.grammar.generator.RuleGraphHelper;
 import org.intellij.grammar.java.JavaHelper;
 import org.intellij.grammar.psi.BnfExpression;

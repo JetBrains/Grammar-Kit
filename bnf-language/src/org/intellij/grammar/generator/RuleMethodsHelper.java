@@ -9,7 +9,7 @@ import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.tree.IElementType;
 import org.intellij.grammar.KnownAttribute;
-import org.intellij.grammar.generator.Renderer.*;
+import org.intellij.grammar.generator.Renderer.CommonRendererUtils;
 import org.intellij.grammar.psi.BnfAttr;
 import org.intellij.grammar.psi.BnfRule;
 import org.intellij.grammar.psi.impl.GrammarUtil;

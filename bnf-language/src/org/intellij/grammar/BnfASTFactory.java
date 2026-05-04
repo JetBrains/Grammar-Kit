@@ -9,7 +9,6 @@ import com.intellij.psi.impl.source.tree.CompositeElement;
 import com.intellij.psi.tree.IElementType;
 import org.intellij.grammar.psi.BnfTypes;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 /**
  * @author gregsh

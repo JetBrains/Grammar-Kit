@@ -44,7 +44,7 @@
       <option name="callCheckString" value="java.io.InputStream,read,java.io.InputStream,skip,java.lang.StringBuffer,toString,java.lang.StringBuilder,toString,java.lang.String,.*,java.math.BigInteger,.*,java.math.BigDecimal,.*,java.net.InetAddress,.*,java.io.File,.*,java.lang.Object,equals|hashCode" />
     </inspection_tool>
     <inspection_tool class="InstanceofThis" enabled="true" level="WARNING" enabled_by_default="true" />
-    <inspection_tool class="LimitedScopeInnerClass" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="LimitedScopeInnerClass" enabled="false" level="WARNING" enabled_by_default="false" />
     <inspection_tool class="ListenerMayUseAdapter" enabled="true" level="WARNING" enabled_by_default="true">
       <option name="checkForEmptyMethods" value="true" />
     </inspection_tool>

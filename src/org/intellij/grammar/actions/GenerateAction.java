@@ -39,7 +39,7 @@ import java.io.File;
 import java.util.*;
 
 import static org.intellij.grammar.actions.FileGeneratorUtil.getTargetDirectoryFor;
-import static org.intellij.grammar.generator.ParserGeneratorUtil.getRootAttribute;
+import static org.intellij.grammar.psi.BnfAttributes.getRootAttribute;
 
 /**
  * @author gregory

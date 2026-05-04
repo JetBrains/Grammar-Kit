@@ -13,6 +13,7 @@ import org.intellij.grammar.psi.BnfRule;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import static org.intellij.grammar.psi.BnfAttributes.*;
 import static org.intellij.grammar.generator.ParserGeneratorUtil.*;
 
 /**

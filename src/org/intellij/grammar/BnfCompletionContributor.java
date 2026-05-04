@@ -134,7 +134,7 @@ final class BnfCompletionContributor extends CompletionContributor {
         BnfRule posRule = PsiTreeUtil.getParentOfType(posExpression, BnfRule.class);
         BnfRule rule = posRule == null ? null : CompletionUtil.getOriginalElement(posRule);
         if (rule == null) return;
-        String parserClass = ParserGeneratorUtil.getAttribute(rule, KnownAttribute.PARSER_UTIL_CLASS);
+        String parserClass = BnfAttributes.getAttribute(rule, KnownAttribute.PARSER_UTIL_CLASS);
         if (StringUtil.isNotEmpty(parserClass)) {
           JavaHelper helper = JavaHelper.getJavaHelper(rule);
           for (String className = parserClass; className != null; className = helper.getSuperClassName(className)) {

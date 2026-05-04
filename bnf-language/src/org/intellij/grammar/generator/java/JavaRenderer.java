@@ -7,13 +7,16 @@ package org.intellij.grammar.generator.java;
 import com.intellij.openapi.util.text.StringUtil;
 import org.intellij.grammar.generator.CommonRendererUtils;
 import org.intellij.grammar.generator.Renderer;
+import org.intellij.grammar.generator.RendererBase;
 import org.intellij.grammar.psi.BnfRule;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Set;
 
-public final class JavaRenderer extends Renderer {
+public final class JavaRenderer extends RendererBase {
+  private final static @NotNull String RESERVED_SUFFIX = "_$";
+
   public static final @NotNull JavaRenderer INSTANCE = new JavaRenderer();
   // shared with kotlin renderer
   public static final @NotNull Set<@NotNull String> JAVA_RESERVED = Set.of(

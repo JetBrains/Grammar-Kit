@@ -19,9 +19,10 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
+import static org.intellij.grammar.generator.ParserGeneratorUtil.isRegexpToken;
+import static org.intellij.grammar.psi.BnfAst.computeTokens;
+import static org.intellij.grammar.psi.BnfAst.getEffectiveType;
 import static org.intellij.grammar.psi.BnfAttributes.*;
-import static org.intellij.grammar.psi.BnfAst.*;
-import static org.intellij.grammar.generator.ParserGeneratorUtil.*;
 import static org.intellij.grammar.psi.BnfTypes.BNF_REFERENCE_OR_TOKEN;
 import static org.intellij.grammar.psi.BnfTypes.BNF_STRING;
 
@@ -49,7 +50,7 @@ public class RuleMethodsHelper {
   }
 
   public void buildMaps(Collection<BnfRule> sortedPsiRules) {
-    Map<String, String> tokensReversed = RuleGraphHelper.computeTokens(myGraphHelper.getFile()).asMap();
+    Map<String, String> tokensReversed = computeTokens(myGraphHelper.getFile()).asMap();
     for (BnfRule rule : sortedPsiRules) {
       calcMethods(rule, tokensReversed);
     }

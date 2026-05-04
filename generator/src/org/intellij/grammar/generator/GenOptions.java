@@ -7,14 +7,11 @@ package org.intellij.grammar.generator;
 import com.intellij.openapi.util.text.StringUtil;
 import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.psi.BnfFile;
-import org.intellij.grammar.psi.BnfRule;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
 
 import static org.intellij.grammar.KnownAttribute.FALLBACK_STUB_ELEMENT_TYPE;
 import static org.intellij.grammar.generator.ParserGeneratorUtil.getGenerateOption;
-import static org.intellij.grammar.psi.BnfAttributes.getAttribute;
 import static org.intellij.grammar.psi.BnfAttributes.getRootAttribute;
 
 /**

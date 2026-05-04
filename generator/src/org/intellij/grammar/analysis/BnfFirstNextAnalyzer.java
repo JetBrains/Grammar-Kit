@@ -18,7 +18,6 @@ import com.intellij.util.containers.ContainerUtil;
 import com.intellij.util.containers.JBIterable;
 import it.unimi.dsi.fastutil.objects.ObjectOpenCustomHashSet;
 import org.intellij.grammar.KnownAttribute;
-import org.intellij.grammar.generator.RuleGraphHelper;
 import org.intellij.grammar.psi.*;
 import org.intellij.grammar.psi.impl.GrammarUtil;
 import org.intellij.grammar.psi.impl.GrammarUtil.FakeBnfExpression;
@@ -382,7 +381,7 @@ public class BnfFirstNextAnalyzer {
   private static boolean involvesTextMatching(Set<BnfExpression> set) {
     for (BnfExpression o : set) {
       if (o instanceof BnfStringLiteralExpression &&
-          !RuleGraphHelper.getTokenTextToNameMap((BnfFile)o.getContainingFile())
+          !BnfAst.getTokenTextToNameMap((BnfFile)o.getContainingFile())
             .containsKey(BnfAttributes.getLiteralValue((BnfStringLiteralExpression)o))) {
         return true;
       }

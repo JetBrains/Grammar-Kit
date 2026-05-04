@@ -21,7 +21,7 @@ import static org.intellij.grammar.KnownAttribute.*;
 /**
  * @author gregsh
  */
-public class BnfStringRefContributor extends PsiReferenceContributor {
+class BnfStringRefContributor extends PsiReferenceContributor {
 
   private static final Set<KnownAttribute<?>> RULE_ATTRIBUTES = Set.of(EXTENDS, IMPLEMENTS, RECOVER_WHILE, NAME);
 

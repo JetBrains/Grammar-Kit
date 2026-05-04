@@ -12,7 +12,7 @@ import org.intellij.grammar.BnfLanguage;
  * Date: 13.07.11
  * Time: 19:12
  */
-public class BnfTokenType extends IElementType {
+class BnfTokenType extends IElementType {
   public BnfTokenType(String debug) {
     super(debug, BnfLanguage.INSTANCE);
   }

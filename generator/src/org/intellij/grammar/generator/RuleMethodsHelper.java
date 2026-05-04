@@ -28,7 +28,7 @@ import static org.intellij.grammar.psi.BnfTypes.BNF_STRING;
 /**
  * @author gregsh
  */
-public class RuleMethodsHelper {
+class RuleMethodsHelper {
   private final RuleGraphHelper myGraphHelper;
   private final ExpressionHelper myExpressionHelper;
   private final Map<String, String> mySimpleTokens;

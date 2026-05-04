@@ -28,6 +28,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.*;
 
 import static org.intellij.grammar.psi.BnfAttributes.*;
+import static org.intellij.grammar.psi.BnfAst.*;
 import static org.intellij.grammar.generator.ParserGeneratorUtil.*;
 import static org.intellij.grammar.generator.RuleGraphHelper.Cardinality.*;
 import static org.intellij.grammar.psi.impl.GrammarUtil.collectMetaParameters;

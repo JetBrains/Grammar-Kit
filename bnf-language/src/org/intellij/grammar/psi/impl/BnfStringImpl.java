@@ -67,7 +67,7 @@ public abstract class BnfStringImpl extends BnfExpressionImpl implements BnfStri
   }
 
   private static @Nullable Pattern getPattern(BnfLiteralExpression expression) {
-    return ParserGeneratorUtil.compilePattern(GrammarUtil.unquote(expression.getText()));
+    return BnfAst.compilePattern(GrammarUtil.unquote(expression.getText()));
   }
 
   public static boolean matchesElement(@Nullable BnfLiteralExpression e1, @NotNull PsiElement e2) {

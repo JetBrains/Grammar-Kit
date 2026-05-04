@@ -131,7 +131,7 @@ public class BnfFirstNextAnalyzer {
           if (skipResolve) continue main;
         }
         else if (parent instanceof BnfQuantified) {
-          IElementType effectiveType = ParserGeneratorUtil.getEffectiveType(parent);
+          IElementType effectiveType = BnfAst.getEffectiveType(parent);
           if (effectiveType == BnfTypes.BNF_OP_ZEROMORE || effectiveType == BnfTypes.BNF_OP_ONEMORE) {
             calcFirstInner((BnfExpression)parent, curResult, visited);
             for (BnfExpression e : curResult) {
@@ -257,7 +257,7 @@ public class BnfFirstNextAnalyzer {
     }
     else if (expression instanceof BnfQuantified) {
       calcFirstInner(((BnfQuantified)expression).getExpression(), result, visited, forcedNext);
-      IElementType effectiveType = ParserGeneratorUtil.getEffectiveType(expression);
+      IElementType effectiveType = BnfAst.getEffectiveType(expression);
       if (effectiveType == BnfTypes.BNF_OP_OPT || effectiveType == BnfTypes.BNF_OP_ZEROMORE) {
         result.add(BNF_MATCHES_EOF);
       }
@@ -298,7 +298,7 @@ public class BnfFirstNextAnalyzer {
     }
     else if (expression instanceof BnfPredicate) {
       IElementType elementType = ((BnfPredicate)expression).getPredicateSign().getFirstChild().getNode().getElementType();
-      BnfExpression predicateExpression = ParserGeneratorUtil.getNonTrivialNode(((BnfPredicate)expression).getExpression());
+      BnfExpression predicateExpression = BnfAst.getNonTrivialNode(((BnfPredicate)expression).getExpression());
       boolean skip = predicateExpression instanceof BnfSequence &&
                      ((BnfSequence)predicateExpression).getExpressionList().size() > 1; // todo calc min length ?
       // take only one token into account which is not exactly correct but better than nothing
@@ -413,11 +413,11 @@ public class BnfFirstNextAnalyzer {
   }
 
   private static @NotNull Set<BnfExpression> newExprSet() {
-    return new ObjectOpenCustomHashSet<>(ParserGeneratorUtil.textStrategy());
+    return new ObjectOpenCustomHashSet<>(BnfAst.textStrategy());
   }
 
   private static @NotNull Set<BnfExpression> newExprSet(Collection<BnfExpression> expressions) {
-    return new ObjectOpenCustomHashSet<>(expressions, ParserGeneratorUtil.textStrategy());
+    return new ObjectOpenCustomHashSet<>(expressions, BnfAst.textStrategy());
   }
 
   private static @NotNull Set<BnfExpression> exprSetUnion(Collection<BnfExpression> a, Collection<BnfExpression> b) {

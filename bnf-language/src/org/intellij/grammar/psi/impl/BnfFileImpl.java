@@ -177,7 +177,7 @@ public class BnfFileImpl extends PsiFileBase implements BnfFile {
           Pattern pattern = null;
           if (attrPattern != null) {
             BnfLiteralExpression expression = attrPattern.getLiteralExpression();
-            pattern = expression == null ? null : ParserGeneratorUtil.compilePattern(GrammarUtil.unquote(expression.getText()));
+            pattern = expression == null ? null : BnfAst.compilePattern(GrammarUtil.unquote(expression.getText()));
           }
           List<AttributeInfo> list = result.get(attr.getName());
           if (list == null) result.put(attr.getName(), list = new ArrayList<>());

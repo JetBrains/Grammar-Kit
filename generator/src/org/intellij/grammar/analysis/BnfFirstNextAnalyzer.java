@@ -6,7 +6,6 @@ package org.intellij.grammar.analysis;
 
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.util.Condition;
-import com.intellij.openapi.util.Pair;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiReference;
@@ -277,7 +276,7 @@ public class BnfFirstNextAnalyzer {
       if (!result.remove(BNF_MATCHES_EOF)) break;
       matchesEof |= pinApplied;
       BnfExpression e = list.get(i);
-      calcFirstInner(e, result, visited, i < size - 1 ? Pair.create(pinned.contains(e), list.subList(i + 1, size)) : null);
+      calcFirstInner(e, result, visited, i < size - 1 ? new ForcedNext(pinned.contains(e), list.subList(i + 1, size)) : null);
       pinApplied |= pinned.contains(e);
     }
     // add empty back if was there before
@@ -298,15 +297,14 @@ public class BnfFirstNextAnalyzer {
 
   /**
    * Variant of {@link #calcFirstInner(BnfExpression, Set, Set)} that lets the caller supply the
-   * sequence tail to use when evaluating a semantic predicate inside this expression. The
-   * {@code forcedNext} pair carries (a) whether the predicate is preceded by a {@code pin} marker
-   * in its sequence and (b) the rest of the sequence after the predicate; together they let the
-   * predicate intersect/subtract against the actual local follow set rather than the global NEXT.
+   * surrounding sequence context (see {@link ForcedNext}) so that a semantic predicate inside
+   * {@code expression} can be evaluated against the actual local follow set rather than the
+   * global NEXT.
    */
-  public @NotNull Set<BnfExpression> calcFirstInner(@NotNull BnfExpression expression,
-                                                    @NotNull Set<BnfExpression> result,
-                                                    @NotNull Set<BnfExpression> visited,
-                                                    @Nullable Pair<Boolean, List<BnfExpression>> forcedNext) {
+  private @NotNull Set<BnfExpression> calcFirstInner(@NotNull BnfExpression expression,
+                                                     @NotNull Set<BnfExpression> result,
+                                                     @NotNull Set<BnfExpression> visited,
+                                                     @Nullable ForcedNext forcedNext) {
     BnfFile file = (BnfFile)expression.getContainingFile();
     if (expression instanceof BnfLiteralExpression) {
       result.add(expression);
@@ -416,7 +414,7 @@ public class BnfFirstNextAnalyzer {
           next = calcNextInner(expression, new HashMap<>(), visited).keySet();
         }
         else {
-          next = calcSequenceFirstInner(forcedNext.second, newExprSet(), visited);
+          next = calcSequenceFirstInner(forcedNext.tail(), newExprSet(), visited);
         }
         visited.remove(predicateExpression);
         externalCond = filterExternalMethods(conditions);
@@ -425,7 +423,7 @@ public class BnfFirstNextAnalyzer {
       }
       Set<BnfExpression> mixed;
       if (elementType == BnfTypes.BNF_OP_AND) {
-        if (forcedNext != null && forcedNext.first) {
+        if (forcedNext != null && forcedNext.pinned()) {
           mixed = newExprSet(conditions);
         }
         else if (skip) {
@@ -548,4 +546,15 @@ public class BnfFirstNextAnalyzer {
     result.retainAll(filter);
     return result;
   }
+
+  /**
+   * Local sequence context handed down through {@link #calcFirstInner} so that a semantic predicate
+   * can intersect or subtract against the actual local follow set rather than the global NEXT.
+   *
+   * @param pinned whether the predicate-bearing expression itself is marked with a {@code pin} in
+   *               its enclosing sequence
+   * @param tail   the sequence items that come after the predicate-bearing expression
+   */
+  private record ForcedNext(boolean pinned, @NotNull List<BnfExpression> tail) {}
+
 }

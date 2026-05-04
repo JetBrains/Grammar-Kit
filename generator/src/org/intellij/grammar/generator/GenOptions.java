@@ -7,6 +7,7 @@ package org.intellij.grammar.generator;
 import com.intellij.openapi.util.text.StringUtil;
 import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.psi.BnfFile;
+import org.intellij.grammar.util.Case;
 
 import java.util.Map;
 

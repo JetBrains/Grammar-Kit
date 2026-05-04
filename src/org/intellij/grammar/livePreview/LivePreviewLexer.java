@@ -12,10 +12,10 @@ import com.intellij.psi.tree.IElementType;
 import com.intellij.psi.util.CachedValueProvider;
 import com.intellij.psi.util.CachedValuesManager;
 import org.intellij.grammar.KnownAttribute;
-import org.intellij.grammar.generator.Case;
 import org.intellij.grammar.generator.ParserGeneratorUtil;
 import org.intellij.grammar.psi.BnfAst;
 import org.intellij.grammar.psi.BnfFile;
+import org.intellij.grammar.util.Case;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

@@ -5,6 +5,7 @@
 package org.intellij.grammar.generator;
 
 import com.intellij.lang.Language;
+import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.util.Key;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.SyntaxTraverser;
@@ -39,6 +40,7 @@ import static org.intellij.grammar.psi.impl.GrammarUtil.isDoubleAngles;
  * Date: 16.07.11 10:41
  */
 public class RuleGraphHelper {
+  private static final Logger LOG = Logger.getInstance(RuleGraphHelper.class);
   private static final Hash.Strategy<PsiElement> CARDINALITY_HASHING_STRATEGY = new Hash.Strategy<>() {
     @Override
     public int hashCode(PsiElement e) {
@@ -503,7 +505,7 @@ public class RuleGraphHelper {
                                                 List<Map<PsiElement, Cardinality>> list) {
     if (list.isEmpty()) return Collections.emptyMap();
     if (type == BnfTypes.BNF_OP_OPT || type == BnfTypes.BNF_OP_ZEROMORE || type == BnfTypes.BNF_OP_ONEMORE) {
-      JavaParserGenerator.LOG.assertTrue(list.size() == 1);
+      LOG.assertTrue(list.size() == 1);
       list = compactInheritors(rule, list);
       Map<PsiElement, Cardinality> m = list.get(0);
       if (tryCollapse && willCollapse(rule, m) && type == BnfTypes.BNF_OP_OPT) {

@@ -31,6 +31,7 @@ import com.intellij.util.ExceptionUtil;
 import com.intellij.util.containers.JBIterable;
 import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.generator.*;
+import org.intellij.grammar.psi.BnfAttributes;
 import org.intellij.grammar.psi.BnfFile;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -172,7 +173,7 @@ public class GenerateAction extends AnAction {
                 PsiFile bnfFile = getBnfFile(file, psiManager);
                 if (!(bnfFile instanceof BnfFile)) return;
                 try {
-                  if (GenOptions.UseSyntaxApi((BnfFile)bnfFile)) {
+                  if (BnfAttributes.useSyntaxApi((BnfFile)bnfFile)) {
                     new KotlinParserGenerator((BnfFile)bnfFile,
                                               sourcePath,
                                               genDir.getPath(),

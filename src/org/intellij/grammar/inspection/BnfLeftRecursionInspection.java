@@ -10,7 +10,6 @@ import com.intellij.psi.PsiElementVisitor;
 import org.intellij.grammar.analysis.BnfFirstNextAnalyzer;
 import org.intellij.grammar.generator.ExpressionGeneratorHelper;
 import org.intellij.grammar.generator.ExpressionHelper;
-import org.intellij.grammar.generator.ParserGeneratorUtil;
 import org.intellij.grammar.psi.BnfFile;
 import org.intellij.grammar.psi.BnfRule;
 import org.intellij.grammar.psi.BnfRules;

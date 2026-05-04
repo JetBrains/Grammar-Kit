@@ -16,7 +16,6 @@ import com.intellij.util.ThreeState;
 import org.intellij.grammar.GrammarKitBundle;
 import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.generator.CommonBnfConstants;
-import org.intellij.grammar.generator.ParserGeneratorUtil;
 import org.intellij.grammar.psi.*;
 import org.intellij.grammar.psi.impl.BnfReferenceImpl;
 import org.intellij.grammar.psi.impl.GrammarUtil;

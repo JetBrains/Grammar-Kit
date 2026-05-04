@@ -20,7 +20,6 @@ import com.intellij.psi.util.PsiUtilCore;
 import com.intellij.util.ObjectUtils;
 import com.intellij.util.ProcessingContext;
 import com.intellij.util.containers.ContainerUtil;
-import org.intellij.grammar.generator.ParserGeneratorUtil;
 import org.intellij.grammar.generator.java.JavaBnfConstants;
 import org.intellij.grammar.java.JavaHelper;
 import org.intellij.grammar.parser.GeneratedParserUtilBase;

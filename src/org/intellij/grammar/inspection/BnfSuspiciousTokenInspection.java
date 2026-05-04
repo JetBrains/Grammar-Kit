@@ -10,7 +10,6 @@ import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.PsiReference;
 import com.intellij.util.containers.JBIterable;
-import org.intellij.grammar.generator.ParserGeneratorUtil;
 import org.intellij.grammar.psi.BnfExternalExpression;
 import org.intellij.grammar.psi.BnfRule;
 import org.intellij.grammar.psi.BnfRules;

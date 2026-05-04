@@ -16,6 +16,22 @@ import java.io.InputStream;
 import java.util.*;
 
 /**
+ * A typed, named attribute recognized by the BNF grammar tooling.
+ * <p>
+ * Each instance represents one well-known attribute that can appear in a {@code .bnf} file
+ * (e.g. {@code parserClass}, {@code extends}, {@code pin}, {@code tokens}). The attribute carries
+ * its name, value type, default value, and a {@link #isGlobal() global} flag indicating whether
+ * it applies to the entire grammar (global) or to individual rules (rule-level).
+ * <p>
+ * All instances are registered in a global registry at class-initialization time and are
+ * accessible by name via {@link #getAttribute(String)} or in bulk via {@link #getAttributes()}.
+ * Registration is enforced to be unique per name.
+ * <p>
+ * Use {@link #ensureValue(Object)} to coerce a raw attribute value (typically obtained from the
+ * PSI) to the declared type, falling back to the default when the value is missing or of an
+ * incompatible type. {@link ListValue} is the value type used for list-shaped attributes such as
+ * {@code tokens}, {@code methods}, and {@code parserImports}.
+ *
  * @author gregsh
  */
 public class KnownAttribute<T> {

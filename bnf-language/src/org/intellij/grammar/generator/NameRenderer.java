@@ -14,10 +14,10 @@ import org.jetbrains.annotations.Nullable;
  * It was created as a means of specifying the format of identifiers
  * for different programming languages (in our case, Java and Kotlin).
  */
-public interface Renderer {
+public interface NameRenderer {
 
   /**
-   * Given the function name returned previously from the {@link Renderer#getFuncName}
+   * Given the function name returned previously from the {@link NameRenderer#getFuncName}
    * method and the index number, returns a new name constructed from the two values.
    */
   @NotNull String getNextName(@NotNull String funcName, int i);
@@ -30,7 +30,7 @@ public interface Renderer {
   @NotNull String getFuncName(@NotNull BnfRule rule);
 
   /**
-   * Given a nested method name (typically produced by {@link Renderer#getNextName}),
+   * Given a nested method name (typically produced by {@link NameRenderer#getNextName}),
    * returns the name of the wrapper meta-method that holds a {@code Parser}
    * instance for it. Meta-methods take other {@code Parser} instances as
    * parameters and return a {@code Parser} instance themselves; they are

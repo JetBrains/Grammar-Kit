@@ -25,7 +25,7 @@ public final class NodeCalls {
   interface NodeCall {
 
     @NotNull
-    String render(@NotNull Renderer renderer);
+    String render(@NotNull NameRenderer nameRenderer);
   }
 
   @FunctionalInterface
@@ -36,7 +36,7 @@ public final class NodeCalls {
     }
 
     @NotNull
-    String render(@NotNull Renderer renderer);
+    String render(@NotNull NameRenderer nameRenderer);
   }
 
 
@@ -46,7 +46,7 @@ public final class NodeCalls {
     @NotNull String stateHolder
   ) implements NodeCall {
     @Override
-    public @NotNull String render(@NotNull Renderer renderer) {
+    public @NotNull String render(@NotNull NameRenderer nameRenderer) {
       return String.format("%s(%s, %s)", consumeType.getMethodName(), stateHolder, token);
     }
   }
@@ -57,7 +57,7 @@ public final class NodeCalls {
     @NotNull Names names
   ) implements NodeCall {
     @Override
-    public @NotNull String render(@NotNull Renderer renderer) {
+    public @NotNull String render(@NotNull NameRenderer nameRenderer) {
       return String.format("%s.%s(%s)", names.runtime, consumeType.getMethodName(), token);
     }
   }
@@ -68,7 +68,7 @@ public final class NodeCalls {
     @NotNull String stateHolder
   ) implements NodeCall {
     @Override
-    public @NotNull String render(@NotNull Renderer renderer) {
+    public @NotNull String render(@NotNull NameRenderer nameRenderer) {
       return String.format("%s(%s, %s)", consumeType.getMethodName(), stateHolder, tokenSetName);
     }
   }
@@ -79,7 +79,7 @@ public final class NodeCalls {
     @NotNull Names names
   ) implements NodeCall {
     @Override
-    public @NotNull String render(@NotNull Renderer renderer) {
+    public @NotNull String render(@NotNull NameRenderer nameRenderer) {
       return String.format("%s.%s(%s)", names.runtime, consumeType.getMethodName(), tokenSetName);
     }
   }
@@ -91,7 +91,7 @@ public final class NodeCalls {
     @NotNull List<String> tokens
   ) implements NodeCall {
     @Override
-    public @NotNull String render(@NotNull Renderer renderer) {
+    public @NotNull String render(@NotNull NameRenderer nameRenderer) {
       return String.format("%s(%s, %d, %s)", methodName, builder, pin, StringUtil.join(tokens, ", "));
     }
   }
@@ -103,7 +103,7 @@ public final class NodeCalls {
     @NotNull List<String> tokens
   ) implements NodeCall {
     @Override
-    public @NotNull String render(@NotNull Renderer renderer) {
+    public @NotNull String render(@NotNull NameRenderer nameRenderer) {
       return String.format("%s.%s(%d, %s)", stateHolder, methodName, pin, StringUtil.join(tokens, ", "));
     }
   }
@@ -115,7 +115,7 @@ public final class NodeCalls {
     int priority
   ) implements NodeCall {
     @Override
-    public @NotNull String render(@NotNull Renderer renderer) {
+    public @NotNull String render(@NotNull NameRenderer nameRenderer) {
       return String.format("%s(%s, %s + 1, %d)", methodName, stateHolder, level, priority);
     }
   }
@@ -162,22 +162,22 @@ public final class NodeCalls {
       return true;
     }
 
-    private @NotNull String getMethodRef(@NotNull Renderer renderer) {
-      String ref = renderer.getWrapperParserMetaMethodName(call.methodName);
+    private @NotNull String getMethodRef(@NotNull NameRenderer nameRenderer) {
+      String ref = nameRenderer.getWrapperParserMetaMethodName(call.methodName);
       String className = call.getTargetClassName();
       return className == null ? ref : String.format("%s.%s", className, ref);
     }
 
     @Override
-    public @NotNull String render(@NotNull Renderer renderer) {
-      String arguments = String.join(", ", ContainerUtil.map(call.arguments, argument -> argument.render(renderer)));
-      return String.format("%s(%s)", getMethodRef(renderer), arguments);
+    public @NotNull String render(@NotNull NameRenderer nameRenderer) {
+      String arguments = String.join(", ", ContainerUtil.map(call.arguments, argument -> argument.render(nameRenderer)));
+      return String.format("%s(%s)", getMethodRef(nameRenderer), arguments);
     }
   }
 
   record MetaParameterCall(String metaParameterName, String builder, String level) implements NodeCall {
     @Override
-    public @NotNull String render(@NotNull Renderer renderer) {
+    public @NotNull String render(@NotNull NameRenderer nameRenderer) {
       return String.format("%s.parse(%s, %s)", metaParameterName, builder, level);
     }
   }
@@ -190,7 +190,7 @@ public final class NodeCalls {
     @NotNull String level
   ) implements NodeCall {
     @Override
-    public @NotNull String render(@NotNull Renderer renderer) {
+    public @NotNull String render(@NotNull NameRenderer nameRenderer) {
       if (renderClass) {
         return String.format("%s.%s(%s, %s + 1)", className, methodName, builder, level);
       }
@@ -208,9 +208,9 @@ public final class NodeCalls {
     @NotNull List<NodeArgument> arguments
   ) implements NodeCall {
     @Override
-    public @NotNull String render(@NotNull Renderer renderer) {
+    public @NotNull String render(@NotNull NameRenderer nameRenderer) {
       String argumentStr = arguments.stream()
-        .map(argument -> argument.render(renderer))
+        .map(argument -> argument.render(nameRenderer))
         .map(it -> ", " + it)
         .collect(Collectors.joining());
       return String.format("%s.%s(%s, %s + 1%s)", objectName, methodName, builder, level, argumentStr);
@@ -223,7 +223,7 @@ public final class NodeCalls {
     @NotNull String level
   ) implements NodeCall {
     @Override
-    public @NotNull String render(@NotNull Renderer renderer) {
+    public @NotNull String render(@NotNull NameRenderer nameRenderer) {
       return String.format("%s.%s(%s + 1)", builder, methodName, level);
     }
   }
@@ -252,9 +252,9 @@ public final class NodeCalls {
     }
 
     @Override
-    public @NotNull String render(@NotNull Renderer renderer) {
+    public @NotNull String render(@NotNull NameRenderer nameRenderer) {
       String argumentStr = arguments.stream()
-        .map(argument -> argument.render(renderer))
+        .map(argument -> argument.render(nameRenderer))
         .map(it -> ", " + it)
         .collect(Collectors.joining());
       return String.format("%s(%s, %s + 1%s)", getMethodRef(), builder, level, argumentStr);
@@ -263,14 +263,14 @@ public final class NodeCalls {
 
   record TextArgument(@NotNull String text) implements NodeArgument {
     @Override
-    public @NotNull String render(@NotNull Renderer renderer) {
+    public @NotNull String render(@NotNull NameRenderer nameRenderer) {
       return text;
     }
   }
 
   record MetaParameterArgument(@NotNull String text) implements NodeArgument {
     @Override
-    public @NotNull String render(@NotNull Renderer renderer) {
+    public @NotNull String render(@NotNull NameRenderer nameRenderer) {
       return text;
     }
 

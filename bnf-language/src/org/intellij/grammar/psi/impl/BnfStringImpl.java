@@ -17,7 +17,7 @@ import com.intellij.util.IncorrectOperationException;
 import com.intellij.util.ProcessingContext;
 import com.intellij.util.SmartList;
 import org.intellij.grammar.KnownAttribute;
-import org.intellij.grammar.generator.java.JavaRenderer;
+import org.intellij.grammar.generator.java.JavaNameRenderer;
 import org.intellij.grammar.psi.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -206,7 +206,7 @@ public abstract class BnfStringImpl extends BnfExpressionImpl implements BnfStri
         Set<String> visited = new HashSet<>();
         for (Object o : thisRule != null ? rules : new ArrayList<>(result)) {
           BnfRule rule = (BnfRule)o;
-          GrammarUtil.processExpressionNames(rule, JavaRenderer.INSTANCE.getFuncName(rule), rule.getExpression(), JavaRenderer.INSTANCE, (funcName, expression) -> {
+          GrammarUtil.processExpressionNames(rule, JavaNameRenderer.INSTANCE.getFuncName(rule), rule.getExpression(), JavaNameRenderer.INSTANCE, (funcName, expression) -> {
             if (!(expression instanceof BnfSequence)) return true;
             if (!visited.add(funcName)) return true;
             PsiElement firstNotTrivial = BnfRules.firstNotTrivial(BnfRules.of(expression));

@@ -19,7 +19,7 @@ import org.intellij.grammar.generator.NodeCalls.*;
 import org.intellij.grammar.generator.kotlin.KotlinBnfConstants;
 import org.intellij.grammar.generator.kotlin.KotlinNameShortener;
 import org.intellij.grammar.generator.kotlin.KotlinPlatformConstants;
-import org.intellij.grammar.generator.kotlin.KotlinRenderer;
+import org.intellij.grammar.generator.kotlin.KotlinNameRenderer;
 import org.intellij.grammar.java.JavaHelper;
 import org.intellij.grammar.parser.GeneratedParserUtilBase.Parser;
 import org.intellij.grammar.psi.*;
@@ -87,7 +87,7 @@ public final class KotlinParserGenerator extends Generator {
                                @NotNull String packagePrefix,
                                @NotNull OutputOpener outputOpener
   ) {
-    super(psiFile, sourcePath, outputPath, packagePrefix, "kt", outputOpener, KotlinRenderer.INSTANCE);
+    super(psiFile, sourcePath, outputPath, packagePrefix, "kt", outputOpener, KotlinNameRenderer.INSTANCE);
 
     C = KotlinPlatformConstants.DEFAULT_CONSTANTS;
 

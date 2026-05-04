@@ -24,7 +24,7 @@ import org.intellij.grammar.generator.NodeCalls.*;
 import org.intellij.grammar.generator.java.JavaBnfConstants;
 import org.intellij.grammar.generator.java.JavaNameShortener;
 import org.intellij.grammar.generator.java.JavaNames;
-import org.intellij.grammar.generator.java.JavaRenderer;
+import org.intellij.grammar.generator.java.JavaNameRenderer;
 import org.intellij.grammar.generator.kotlin.KotlinBnfConstants;
 import org.intellij.grammar.java.JavaHelper;
 import org.intellij.grammar.parser.GeneratedParserUtilBase.Parser;
@@ -91,7 +91,7 @@ public final class JavaParserGenerator extends Generator {
                              @NotNull String outputPath,
                              @NotNull String packagePrefix,
                              @NotNull OutputOpener outputOpener) {
-    super(psiFile, sourcePath, outputPath, packagePrefix, "java", outputOpener, new JavaRenderer());
+    super(psiFile, sourcePath, outputPath, packagePrefix, "java", outputOpener, new JavaNameRenderer());
 
     myPsiInterfaceFormat = NameFormat.forPsiClass(myFile);
     myImplClassFormat = NameFormat.forPsiImplClass(myFile);

@@ -32,7 +32,7 @@ public class ExpressionGeneratorHelper {
 
   private static @NotNull Map<String, List<OperatorInfo>> buildCallMap(ExpressionInfo info,
                                                                        JavaParserGenerator g,
-                                                                       @NotNull Renderer R) {
+                                                                       @NotNull NameRenderer R) {
     Map<String, List<OperatorInfo>> opCalls = new LinkedHashMap<>();
     for (BnfRule rule : info.priorityMap.keySet()) {
       OperatorInfo operator = info.operatorMap.get(rule);
@@ -45,7 +45,7 @@ public class ExpressionGeneratorHelper {
     return opCalls;
   }
 
-  public static void generateExpressionRoot(ExpressionInfo info, JavaParserGenerator g, @NotNull Renderer R) {
+  public static void generateExpressionRoot(ExpressionInfo info, JavaParserGenerator g, @NotNull NameRenderer R) {
     Map<String, List<OperatorInfo>> opCalls = buildCallMap(info, g, R);
     Set<String> sortedOpCalls = opCalls.keySet();
 

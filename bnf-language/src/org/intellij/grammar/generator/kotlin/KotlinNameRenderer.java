@@ -6,18 +6,17 @@ package org.intellij.grammar.generator.kotlin;
 
 import com.intellij.openapi.util.text.StringUtil;
 import org.intellij.grammar.generator.CommonRendererUtils;
-import org.intellij.grammar.generator.Renderer;
-import org.intellij.grammar.generator.RendererBase;
+import org.intellij.grammar.generator.NameRendererBase;
 import org.intellij.grammar.psi.BnfRule;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Set;
 
-import static org.intellij.grammar.generator.java.JavaRenderer.JAVA_RESERVED;
+import static org.intellij.grammar.generator.java.JavaNameRenderer.JAVA_RESERVED;
 
-public final class KotlinRenderer extends RendererBase {
-  public static final @NotNull KotlinRenderer INSTANCE = new KotlinRenderer();
+public final class KotlinNameRenderer extends NameRendererBase {
+  public static final @NotNull KotlinNameRenderer INSTANCE = new KotlinNameRenderer();
 
   private final static String RESERVED_KOTLIN_SUFFIX = "__";
   

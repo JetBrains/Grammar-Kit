@@ -14,6 +14,7 @@ import com.intellij.psi.util.CachedValuesManager;
 import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.generator.Case;
 import org.intellij.grammar.generator.ParserGeneratorUtil;
+import org.intellij.grammar.psi.BnfAst;
 import org.intellij.grammar.psi.BnfFile;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -165,12 +166,12 @@ public class LivePreviewLexer extends LexerBase {
       boolean keyword;
       if (ParserGeneratorUtil.isRegexpToken(pattern)) {
         String patternText = ParserGeneratorUtil.getRegexpTokenRegexp(pattern);
-        this.pattern = ParserGeneratorUtil.compilePattern(patternText);
+        this.pattern = BnfAst.compilePattern(patternText);
         tokenName = mappedName;
         keyword = false;
       }
       else {
-        this.pattern = ParserGeneratorUtil.compilePattern(StringUtil.escapeToRegexp(pattern));
+        this.pattern = BnfAst.compilePattern(StringUtil.escapeToRegexp(pattern));
         tokenName = pattern;
         keyword = StringUtil.isJavaIdentifier(pattern);
       }

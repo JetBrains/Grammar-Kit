@@ -4,7 +4,6 @@
 
 package org.intellij.grammar;
 
-import com.intellij.navigation.NavigationItem;
 import com.intellij.openapi.util.io.FileUtil;
 import com.intellij.openapi.util.io.FileUtilRt;
 import com.intellij.psi.*;
@@ -470,11 +469,6 @@ public class BnfGeneratorPsiTest extends BasePlatformTestCase {
     @Override
     public PsiReference @NotNull [] getClassReferences(@NotNull PsiElement element, @NotNull ProcessingContext context) {
       return myDelegate.getClassReferences(element, context);
-    }
-
-    @Override
-    public @Nullable NavigationItem findPackage(@Nullable String packageName) {
-      return myDelegate.findPackage(packageName);
     }
   }
 }

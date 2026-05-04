@@ -15,6 +15,7 @@ import org.intellij.grammar.generator.JavaParserGenerator;
 import org.intellij.grammar.generator.NameShortener;
 import org.intellij.grammar.generator.OutputOpener;
 import org.intellij.grammar.java.JavaHelper;
+import org.intellij.grammar.java.TypeParameterInfo;
 import org.intellij.grammar.psi.BnfFile;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -32,7 +33,7 @@ import java.util.List;
  * <p>
  * Unlike {@link BnfGeneratorTest} which uses lightweight parsing tests (and thus AsmHelper),
  * this test uses {@link BasePlatformTestCase} which loads the Java plugin and registers
- * {@link org.intellij.grammar.java.JavaHelper.PsiHelper} — enabling PSI-based type resolution.
+ * {@link org.intellij.grammar.java.PsiHelper} — enabling PSI-based type resolution.
  */
 public class BnfGeneratorPsiTest extends BasePlatformTestCase {
 

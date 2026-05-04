@@ -27,6 +27,7 @@ import org.intellij.grammar.generator.java.JavaNames;
 import org.intellij.grammar.generator.java.JavaNameRenderer;
 import org.intellij.grammar.generator.kotlin.KotlinBnfConstants;
 import org.intellij.grammar.java.JavaHelper;
+import org.intellij.grammar.java.TypeParameterInfo;
 import org.intellij.grammar.parser.GeneratedParserUtilBase.Parser;
 import org.intellij.grammar.psi.*;
 import org.intellij.grammar.psi.impl.GrammarUtil;
@@ -1538,7 +1539,7 @@ public final class JavaParserGenerator extends Generator {
       String returnType = ContainerUtil.getFirstItem(types);
       addTypeToImports(returnType, myJavaHelper.getAnnotations(method), result);
 
-      for (JavaHelper.TypeParameterInfo generic : myJavaHelper.getGenericParameters(method)) {
+      for (TypeParameterInfo generic : myJavaHelper.getGenericParameters(method)) {
         for (String type : generic.getExtendsList()) {
           addTypeToImports(type, emptyList(), result);
         }
@@ -1814,7 +1815,7 @@ public final class JavaParserGenerator extends Generator {
     if (!visited.add(methodName + methodTypes.subList(offset, methodTypes.size()))) return;
     if (intf && methodTypes.size() == offset && "toString".equals(methodName)) return;
 
-    List<JavaHelper.TypeParameterInfo> genericParameters = myJavaHelper.getGenericParameters(method);
+    List<TypeParameterInfo> genericParameters = myJavaHelper.getGenericParameters(method);
     List<String> exceptionList = myJavaHelper.getExceptionList(method);
 
     if (!intf /*|| hasMethodInInfos*/) out(shorten(JavaBnfConstants.OVERRIDE_ANNO));

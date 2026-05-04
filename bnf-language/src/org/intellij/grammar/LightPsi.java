@@ -28,7 +28,9 @@ import com.intellij.psi.impl.search.PsiSearchHelperImpl;
 import com.intellij.psi.impl.source.CharTableImpl;
 import com.intellij.psi.search.PsiSearchHelper;
 import com.intellij.testFramework.LightVirtualFile;
+import org.intellij.grammar.java.AsmHelper;
 import org.intellij.grammar.java.JavaHelper;
+import org.intellij.grammar.java.ReflectionHelper;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -206,11 +208,11 @@ public class LightPsi {
       project.registerService(PsiSearchHelper.class, PsiSearchHelperImpl.class);
       project.getExtensionArea().registerExtensionPoint("com.intellij.multiHostInjector", "com.intellij.lang.injection.MultiHostInjector", INTERFACE, false);
       try {
-        project.registerService(JavaHelper.class, new JavaHelper.AsmHelper());
+        project.registerService(JavaHelper.class, new AsmHelper());
       }
       catch (LinkageError e) {
         System.out.println("ASM not available, using reflection helper: " + e);
-        project.registerService(JavaHelper.class, new JavaHelper.ReflectionHelper());
+        project.registerService(JavaHelper.class, new ReflectionHelper());
       }
     }
 

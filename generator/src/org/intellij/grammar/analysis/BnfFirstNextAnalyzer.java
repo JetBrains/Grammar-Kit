@@ -29,19 +29,62 @@ import java.util.*;
 import static com.intellij.util.containers.ContainerUtil.union;
 
 /**
+ * Computes FIRST and NEXT sets for BNF rules and expressions.
+ * <p>
+ * The classical compiler-construction notion: {@code FIRST(E)} is the set of tokens that may legally
+ * start a string derived from {@code E}; {@code NEXT(E)} (often called FOLLOW) is the set of tokens
+ * that may legally appear immediately after {@code E} given the rule call sites where {@code E} is
+ * used. Grammar-Kit relies on these sets in many places — recovery sets in the generated parsers
+ * ({@code Generator}, {@code JavaParserGenerator}, {@code KotlinParserGenerator}), detection of
+ * unreachable choice branches, left-recursion analysis in {@code ExpressionHelper}, completion via
+ * {@code LivePreviewParser}, and the FIRST/NEXT block in {@code BnfDocumentationProvider}.
+ * <p>
+ * Three flavors can be created via the static factories:
+ * <ul>
+ *   <li>{@link #createAnalyzer(boolean)} — forward FIRST/NEXT, optionally honoring semantic
+ *       predicates ({@code &} / {@code !});</li>
+ *   <li>{@link #createAnalyzer(boolean, boolean, Condition)} — adds {@code publicRuleOpaque} (stop
+ *       expanding at public rules and treat the reference itself as a terminal) and a
+ *       {@code parentFilter} that bounds upward traversal during NEXT computation;</li>
+ *   <li>{@link #createBackwardAnalyzer(boolean)} — walks sequences right-to-left, used when figuring
+ *       out which tokens may <em>end</em> a rule rather than start it (e.g.
+ *       {@code RuleGraphHelper}'s collapse-map step).</li>
+ * </ul>
+ * <p>
+ * Three sentinel expressions stand in for situations that cannot be expressed as concrete tokens:
+ * {@link #BNF_MATCHES_EOF} (the empty derivation — the analyzed expression may match nothing here,
+ * so its NEXT must be propagated outward), {@link #BNF_MATCHES_NOTHING} (no input string can satisfy
+ * this expression — surfaced by inspections), and {@link #BNF_MATCHES_ANY} (the analysis hit a meta
+ * or external rule, or a {@code recoverWhile} attribute, and cannot constrain the answer further).
+ * <p>
+ * NEXT computation can fan out aggressively because it follows reference search across the entire
+ * grammar; an instance therefore caches NEXT results per target expression. FIRST is cheap enough
+ * that it is not cached. Instances are not thread-safe and are normally short-lived (created per
+ * parser-generation pass or per inspection visit).
+ *
  * @author gregsh
  */
 public class BnfFirstNextAnalyzer {
 
   private static final Logger LOG = Logger.getInstance(BnfFirstNextAnalyzer.class);
 
+  /** Sentinel for the empty derivation: the analyzed expression may match nothing here, so its NEXT must be added by the caller. */
   public static final String MATCHES_EOF = "-eof-";
+
+  /** Sentinel meaning no input can satisfy the expression — produced by predicate intersection and surfaced by the unreachable-choice-branch inspection. */
   public static final String MATCHES_NOTHING = "-never-matches-";
+
+  /** Sentinel meaning analysis cannot constrain the answer (meta rule, external method, {@code recoverWhile} sink). */
   public static final String MATCHES_ANY = "-any-";
 
-  public static final BnfExpression BNF_MATCHES_EOF     = new FakeBnfExpression(MATCHES_EOF);
+  /** Wrapper of {@link #MATCHES_EOF} as a {@link BnfExpression} so it can be returned alongside real expressions. */
+  public static final BnfExpression BNF_MATCHES_EOF = new FakeBnfExpression(MATCHES_EOF);
+
+  /** Wrapper of {@link #MATCHES_NOTHING} as a {@link BnfExpression}. */
   public static final BnfExpression BNF_MATCHES_NOTHING = new FakeBnfExpression(MATCHES_NOTHING);
-  public static final BnfExpression BNF_MATCHES_ANY     = new FakeBnfExpression(MATCHES_ANY);
+
+  /** Wrapper of {@link #MATCHES_ANY} as a {@link BnfExpression}. */
+  public static final BnfExpression BNF_MATCHES_ANY = new FakeBnfExpression(MATCHES_ANY);
 
   private final boolean myBackward;
   private final boolean myPublicRuleOpaque;
@@ -51,16 +94,40 @@ public class BnfFirstNextAnalyzer {
   // reference search and predicates can quickly get out of control, so NEXT results need to be cached
   private final Map<BnfExpression, Map<BnfExpression, BnfExpression>> myNextCache = new HashMap<>();
 
+  /**
+   * Forward analyzer with default behavior: public rules are expanded into their bodies, and there
+   * is no parent filter on NEXT traversal.
+   *
+   * @param predicateLookAhead whether semantic predicates ({@code &}, {@code !}) are evaluated into
+   *                           the resulting set. Disable when callers reason about the parser's
+   *                           syntactic shape only (e.g., recovery-set generation).
+   */
   public static BnfFirstNextAnalyzer createAnalyzer(boolean predicateLookAhead) {
     return new BnfFirstNextAnalyzer(false, false, predicateLookAhead, null);
   }
 
+  /**
+   * Forward analyzer with the full set of knobs.
+   *
+   * @param predicateLookAhead see {@link #createAnalyzer(boolean)}
+   * @param publicRuleOpaque   stop expansion at references to public rules and keep the reference
+   *                           itself as a result instead. Useful when the caller cares about which
+   *                           <em>rules</em> — not which low-level tokens — can begin/follow an
+   *                           expression (e.g., rule-collapse and live-preview lookahead).
+   * @param parentFilter       bounds NEXT's upward traversal: the climb up the PSI tree halts at
+   *                           the first parent that fails the filter. Pass {@code null} for the
+   *                           default unbounded traversal.
+   */
   public static BnfFirstNextAnalyzer createAnalyzer(boolean predicateLookAhead,
                                                     boolean publicRuleOpaque,
                                                     Condition<PsiElement> parentFilter) {
     return new BnfFirstNextAnalyzer(false, publicRuleOpaque, predicateLookAhead, parentFilter);
   }
 
+  /**
+   * Backward analyzer: walks sequences right-to-left so that {@link #calcFirst} effectively yields
+   * the set of tokens that can <em>end</em> a derivation. Predicates are not honored in this mode.
+   */
   public static BnfFirstNextAnalyzer createBackwardAnalyzer(boolean publicRuleOpaque) {
     return new BnfFirstNextAnalyzer(true, publicRuleOpaque, false, null);
   }
@@ -75,6 +142,13 @@ public class BnfFirstNextAnalyzer {
     myParentFilter = parentFilter;
   }
 
+  /**
+   * FIRST set of {@code rule}'s body. Includes {@link #BNF_MATCHES_EOF} when the body is nullable
+   * (i.e., the rule may match the empty string).
+   * <p>
+   * The rule's own expression is pre-marked as visited, so a self-recursive rule yields the
+   * reference itself rather than expanding indefinitely.
+   */
   public Set<BnfExpression> calcFirst(@NotNull BnfRule rule) {
     Set<BnfExpression> visited = new HashSet<>();
     BnfExpression expression = rule.getExpression();
@@ -82,14 +156,27 @@ public class BnfFirstNextAnalyzer {
     return calcFirstInner(expression, new HashSet<>(), visited);
   }
 
+  /**
+   * FIRST set of an arbitrary expression. Includes {@link #BNF_MATCHES_EOF} when the expression
+   * is nullable.
+   */
   public Set<BnfExpression> calcFirst(@NotNull BnfExpression expression) {
     return calcFirstInner(expression, new HashSet<>(), new HashSet<>());
   }
 
+  /**
+   * NEXT set of {@code targetRule}: every token that may follow the rule at any of its call sites.
+   * <p>
+   * Map values point back to the originating {@link BnfReferenceOrToken} when one is available, so
+   * callers can attribute a NEXT entry to the specific call site that contributed it (e.g., for
+   * better diagnostics or for the documentation provider). The map contains {@link #BNF_MATCHES_EOF}
+   * when the rule may legally appear at end-of-input. Results are cached on this analyzer.
+   */
   public Map<BnfExpression, BnfExpression> calcNext(@NotNull BnfRule targetRule) {
     return calcNextInner(targetRule.getExpression(), new HashMap<>(), new HashSet<>());
   }
 
+  /** NEXT set for an arbitrary expression — see {@link #calcNext(BnfRule)}. */
   public Map<BnfExpression, BnfExpression> calcNext(@NotNull BnfExpression targetExpression) {
     return calcNextInner(targetExpression, new HashMap<>(), new HashSet<>());
   }
@@ -199,10 +286,22 @@ public class BnfFirstNextAnalyzer {
     return result;
   }
 
+  /**
+   * Recursive worker that accumulates FIRST of {@code expression} into {@code result}; exposed as
+   * public so callers that already track {@code visited} can fold further analysis into the same
+   * traversal (used by {@link #calcSequenceFirstInner}).
+   */
   public Set<BnfExpression> calcFirstInner(BnfExpression expression, Set<BnfExpression> result, Set<BnfExpression> visited) {
     return calcFirstInner(expression, result, visited, null);
   }
 
+  /**
+   * Variant of {@link #calcFirstInner(BnfExpression, Set, Set)} that lets the caller supply the
+   * sequence tail to use when evaluating a semantic predicate inside this expression. The
+   * {@code forcedNext} pair carries (a) whether the predicate is preceded by a {@code pin} marker
+   * in its sequence and (b) the rest of the sequence after the predicate; together they let the
+   * predicate intersect/subtract against the actual local follow set rather than the global NEXT.
+   */
   public Set<BnfExpression> calcFirstInner(BnfExpression expression, Set<BnfExpression> result, Set<BnfExpression> visited, @Nullable Pair<Boolean, List<BnfExpression>> forcedNext) {
     BnfFile file = (BnfFile)expression.getContainingFile();
     if (expression instanceof BnfLiteralExpression) {
@@ -389,6 +488,7 @@ public class BnfFirstNextAnalyzer {
     return false;
   }
 
+  /** Renders every expression in {@code expressions} via {@link #asString} into a sorted set. */
   public static Set<String> asStrings(Set<BnfExpression> expressions) {
     Set<String> result = new TreeSet<>();
     for (BnfExpression expression : expressions) {
@@ -397,6 +497,11 @@ public class BnfFirstNextAnalyzer {
     return result;
   }
 
+  /**
+   * Renders {@code expression} as a human-readable token form: string literals are quoted with
+   * single quotes, external references are prefixed with {@code "#"}, and the {@link FakeBnfExpression}
+   * sentinels round-trip through their {@code MATCHES_*} text.
+   */
   public static @NotNull String asString(@NotNull BnfExpression expression) {
     if (expression instanceof BnfLiteralExpression) {
       String text = expression.getText();

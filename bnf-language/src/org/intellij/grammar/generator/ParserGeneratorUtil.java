@@ -1,10 +1,9 @@
 /*
- * Copyright 2011-2025 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
+ * Copyright 2011-2026 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
  */
 package org.intellij.grammar.generator;
 
 import com.intellij.openapi.util.Couple;
-import com.intellij.openapi.util.Pair;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.psi.NavigatablePsiElement;
 import com.intellij.psi.PsiElement;
@@ -19,11 +18,10 @@ import com.intellij.util.containers.ContainerUtil;
 import com.intellij.util.containers.JBIterable;
 import com.intellij.util.containers.JBTreeTraverser;
 import com.intellij.util.containers.TreeTraversal;
-import it.unimi.dsi.fastutil.Hash;
 import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.generator.Renderer.CommonRendererUtils;
 import org.intellij.grammar.generator.java.JavaBnfConstants;
-import org.intellij.grammar.generator.java.JavaNameShortener;
+import org.intellij.grammar.generator.java.JavaNames;
 import org.intellij.grammar.java.JavaHelper;
 import org.intellij.grammar.psi.*;
 import org.intellij.grammar.psi.impl.GrammarUtil;
@@ -36,8 +34,10 @@ import java.util.regex.PatternSyntaxException;
 
 import static org.intellij.grammar.generator.RuleGraphHelper.getSynonymTargetOrSelf;
 import static org.intellij.grammar.generator.RuleGraphHelper.getTokenNameToTextMap;
-import static org.intellij.grammar.psi.BnfAst.*;
-import static org.intellij.grammar.psi.BnfAttributes.*;
+import static org.intellij.grammar.psi.BnfAst.compilePattern;
+import static org.intellij.grammar.psi.BnfAst.getEffectiveType;
+import static org.intellij.grammar.psi.BnfAttributes.getAttribute;
+import static org.intellij.grammar.psi.BnfAttributes.getRootAttribute;
 import static org.intellij.grammar.psi.BnfTypes.BNF_SEQUENCE;
 
 /**
@@ -501,7 +501,7 @@ public class ParserGeneratorUtil {
       if (i > offset) sb.append(", ");
       String type = substitutor.fun(paramsTypes.get(i));
       String name = paramsTypes.get(i + 1);
-      String rawType = JavaNameShortener.getRawClassName(type);
+      String rawType = JavaNames.getRawClassName(type);
       if (rawType.endsWith(JavaBnfConstants.AST_NODE_CLASS)) name = "node";
       if (rawType.endsWith("ElementType")) name = "type";
       if (rawType.endsWith("Stub")) name = "stub";

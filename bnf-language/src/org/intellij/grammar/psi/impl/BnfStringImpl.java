@@ -17,7 +17,6 @@ import com.intellij.util.IncorrectOperationException;
 import com.intellij.util.ProcessingContext;
 import com.intellij.util.SmartList;
 import org.intellij.grammar.KnownAttribute;
-import org.intellij.grammar.generator.ParserGeneratorUtil;
 import org.intellij.grammar.generator.java.JavaRenderer;
 import org.intellij.grammar.psi.*;
 import org.jetbrains.annotations.NotNull;

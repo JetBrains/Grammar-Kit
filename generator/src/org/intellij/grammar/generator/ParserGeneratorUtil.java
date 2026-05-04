@@ -3,15 +3,11 @@
  */
 package org.intellij.grammar.generator;
 
-import com.intellij.openapi.util.Couple;
 import com.intellij.openapi.util.text.StringUtil;
-import com.intellij.psi.NavigatablePsiElement;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiReference;
 import com.intellij.psi.impl.source.tree.LeafPsiElement;
 import com.intellij.psi.search.searches.ReferencesSearch;
-import com.intellij.psi.tree.IElementType;
-import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.util.Function;
 import com.intellij.util.ObjectUtils;
 import com.intellij.util.containers.ContainerUtil;
@@ -19,7 +15,6 @@ import com.intellij.util.containers.JBIterable;
 import com.intellij.util.containers.JBTreeTraverser;
 import com.intellij.util.containers.TreeTraversal;
 import org.intellij.grammar.KnownAttribute;
-import org.intellij.grammar.generator.Renderer.CommonRendererUtils;
 import org.intellij.grammar.generator.java.JavaBnfConstants;
 import org.intellij.grammar.generator.java.JavaNames;
 import org.intellij.grammar.java.JavaHelper;
@@ -32,13 +27,9 @@ import java.util.*;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
-import static org.intellij.grammar.generator.RuleGraphHelper.getSynonymTargetOrSelf;
-import static org.intellij.grammar.generator.RuleGraphHelper.getTokenNameToTextMap;
 import static org.intellij.grammar.psi.BnfAst.compilePattern;
-import static org.intellij.grammar.psi.BnfAst.getEffectiveType;
 import static org.intellij.grammar.psi.BnfAttributes.getAttribute;
 import static org.intellij.grammar.psi.BnfAttributes.getRootAttribute;
-import static org.intellij.grammar.psi.BnfTypes.BNF_SEQUENCE;
 
 /**
  * @author gregory
@@ -71,10 +62,6 @@ public class ParserGeneratorUtil {
 
 
 
-  public static List<BnfExpression> getChildExpressions(@Nullable BnfExpression node) {
-    return PsiTreeUtil.getChildrenOfTypeAsList(node, BnfExpression.class);
-  }
-
   public static boolean isRollbackRequired(BnfExpression o, BnfFile file) {
     if (o instanceof BnfStringLiteralExpression) return false;
     if (!(o instanceof BnfReferenceOrToken)) return true;
@@ -86,146 +73,6 @@ public class ParserGeneratorUtil {
     return BnfRules.isExternal(subRule);
   }
 
-
-  public static @NotNull NameFormat getPsiClassFormat(BnfFile file) {
-    return NameFormat.from(getRootAttribute(file, KnownAttribute.PSI_CLASS_PREFIX));
-  }
-
-  public static @NotNull NameFormat getPsiImplClassFormat(BnfFile file) {
-    String prefix = getRootAttribute(file, KnownAttribute.PSI_CLASS_PREFIX);
-    String suffix = getRootAttribute(file, KnownAttribute.PSI_IMPL_CLASS_SUFFIX);
-    return NameFormat.from(prefix + "/" + StringUtil.notNullize(suffix));
-  }
-
-  public static @NotNull List<NavigatablePsiElement> findRuleImplMethods(@NotNull JavaHelper helper,
-                                                                         @Nullable String psiImplUtilClass,
-                                                                         @Nullable String methodName,
-                                                                         @Nullable BnfRule rule) {
-    if (rule == null) return Collections.emptyList();
-    List<NavigatablePsiElement> methods = Collections.emptyList();
-    String selectedSuperClass = null;
-    main: for (String ruleClass : getRuleClasses(rule)) {
-      for (String utilClass = psiImplUtilClass; utilClass != null; utilClass = helper.getSuperClassName(utilClass)) {
-        methods = helper.findClassMethods(utilClass, JavaHelper.MethodType.STATIC, methodName, -1, ruleClass);
-        selectedSuperClass = ruleClass;
-        if (!methods.isEmpty()) break main;
-      }
-    }
-    return filterOutShadowedRuleImplMethods(selectedSuperClass, methods, helper);
-  }
-
-  private static @NotNull List<NavigatablePsiElement> filterOutShadowedRuleImplMethods(String selectedClass,
-                                                                                       List<NavigatablePsiElement> methods,
-                                                                                       @NotNull JavaHelper helper) {
-    if (methods.size() <= 1) return methods;
-
-    // filter out less specific methods
-    // todo move to JavaHelper
-    List<NavigatablePsiElement> result = new ArrayList<>(methods);
-    Map<String, NavigatablePsiElement> prototypes = new LinkedHashMap<>();
-    for (NavigatablePsiElement m2 : methods) {
-      List<String> types = helper.getMethodTypes(m2);
-      String proto = m2.getName() + types.subList(3, types.size());
-      NavigatablePsiElement m1 = prototypes.get(proto);
-      if (m1 == null) {
-        prototypes.put(proto, m2);
-        continue;
-      }
-      String type1 = helper.getMethodTypes(m1).get(1);
-      String type2 = types.get(1);
-      if (Objects.equals(type1, type2)) continue;
-      for (String s = selectedClass; s != null; s = helper.getSuperClassName(s)) {
-        if (Objects.equals(type1, s)) {
-          result.remove(m2);
-        }
-        else if (Objects.equals(type2, s)) {
-          result.remove(m1);
-        }
-        else continue;
-        break;
-      }
-    }
-    return result;
-  }
-
-  public static @NotNull Set<String> getRuleClasses(@NotNull BnfRule rule) {
-    Set<String> result = new LinkedHashSet<>();
-    BnfFile file = (BnfFile)rule.getContainingFile();
-    BnfRule topSuper = getEffectiveSuperRule(file, rule);
-    String superClassName = topSuper == null ? getRootAttribute(file, KnownAttribute.EXTENDS) :
-                            topSuper == rule ? getAttribute(rule, KnownAttribute.EXTENDS) :
-                            getAttribute(topSuper, KnownAttribute.PSI_PACKAGE) + "." +
-                            CommonRendererUtils.getRulePsiClassName(topSuper, getPsiClassFormat(file));
-    String implSuper = StringUtil.notNullize(getAttribute(rule, KnownAttribute.MIXIN), superClassName);
-    Couple<String> names = CommonRendererUtils.getQualifiedRuleClassName(rule);
-    result.add(names.first);
-    result.add(names.second);
-    result.add(superClassName);
-    result.add(implSuper);
-    result.addAll(getSuperInterfaceNames(file, rule, getPsiClassFormat(file)));
-    return result;
-  }
-
-  static @NotNull JBIterable<BnfRule> getSuperRules(@NotNull BnfFile file, @Nullable BnfRule rule) {
-    JBIterable<Object> result = JBIterable.generate(rule, new JBIterable.SFun<Object, Object>() {
-      Set<BnfRule> visited;
-
-      @Override
-      public Object fun(Object o) {
-        if (o == ObjectUtils.NULL) return null;
-        BnfRule cur = (BnfRule)o;
-        if (visited == null) visited = new HashSet<>();
-        if (!visited.add(cur)) return ObjectUtils.NULL;
-        BnfRule next = getSynonymTargetOrSelf(cur);
-        if (next != cur) return next;
-        if (cur != rule) return null; // do not search for elementType any further
-        String attr = getAttribute(cur, KnownAttribute.EXTENDS);
-        //noinspection StringEquality
-        BnfRule ext = attr != KnownAttribute.EXTENDS.getDefaultValue() ? file.getRule(attr) : null;
-        return ext == null && attr != null ? null : ext;
-      }
-    }).map(o -> o == ObjectUtils.NULL ? null : o);
-    return (JBIterable<BnfRule>)(JBIterable<?>)result;
-  }
-
-  static @Nullable BnfRule getEffectiveSuperRule(@NotNull BnfFile file, @Nullable BnfRule rule) {
-    return getSuperRules(file, rule).last();
-  }
-
-  static @NotNull List<String> getSuperInterfaceNames(BnfFile file, BnfRule rule, NameFormat format) {
-    final var strings = new ArrayList<String>();
-    final var topSuper = getEffectiveSuperRule(file, rule);
-    final List<String> topRuleImplements;
-    final String topRuleClass;
-    if (topSuper != null && topSuper != rule) {
-      topRuleImplements = getAttribute(topSuper, KnownAttribute.IMPLEMENTS).asStrings();
-      topRuleClass = getAttribute(topSuper, KnownAttribute.PSI_PACKAGE) + "." + CommonRendererUtils.getRulePsiClassName(topSuper, format);
-      if (!StringUtil.isEmpty(topRuleClass)) strings.add(topRuleClass);
-    }
-    else {
-      topRuleImplements = Collections.emptyList();
-      topRuleClass = null;
-    }
-    final var rootImplements = getRootAttribute(file, KnownAttribute.IMPLEMENTS).asStrings();
-    final var ruleImplements = getAttribute(rule, KnownAttribute.IMPLEMENTS).asStrings();
-    for (String className : ruleImplements) {
-      if (className == null) continue;
-      BnfRule superIntfRule = file.getRule(className);
-      if (superIntfRule != null) {
-        strings.add(getAttribute(superIntfRule, KnownAttribute.PSI_PACKAGE) + "." + CommonRendererUtils.getRulePsiClassName(superIntfRule, format));
-      }
-      else if (!topRuleImplements.contains(className) &&
-               (topRuleClass == null || !rootImplements.contains(className))) {
-        if (strings.size() == 1 && topSuper == null) {
-          strings.add(0, className);
-        }
-        else {
-          strings.add(className);
-        }
-      }
-    }
-    return strings;
-  }
 
   public static String getTokenType(BnfFile file, String token, @NotNull Case cas) {
     final var format = NameFormat.from(getRootAttribute(file, KnownAttribute.ELEMENT_TYPE_PREFIX));
@@ -279,47 +126,8 @@ public class ParserGeneratorUtil {
     return tokenText.substring(CommonBnfConstants.REGEXP_PREFIX.length());
   }
 
-  static @Nullable Collection<String> getTokenNames(@NotNull BnfFile file, @NotNull List<BnfExpression> expressions) {
-    return getTokenNames(file, expressions, -1);
-  }
-
-  // null when some expression is not a token or total tokens count is less than or equals threshold
-  static @Nullable Collection<String> getTokenNames(@NotNull BnfFile file, @NotNull List<BnfExpression> expressions, int threshold) {
-    Set<String> tokens = new LinkedHashSet<>();
-    for (BnfExpression expression : expressions) {
-      String token = getTokenName(file, expression);
-      if (token == null) {
-        return null;
-      }
-      else {
-        tokens.add(token);
-      }
-    }
-    return tokens.size() > threshold ? tokens : null;
-  }
-
-  private static @Nullable String getTokenName(@NotNull BnfFile file, @NotNull BnfExpression expression) {
-    String text = expression.getText();
-    if (expression instanceof BnfStringLiteralExpression) {
-      return RuleGraphHelper.getTokenTextToNameMap(file).get(GrammarUtil.unquote(text));
-    }
-    else if (expression instanceof BnfReferenceOrToken) {
-      return file.getRule(text) == null ? text : null;
-    }
-    else {
-      return null;
-    }
-  }
-
-  public static boolean isTokenSequence(@NotNull BnfRule rule, @Nullable BnfExpression node) {
-    if (node == null || ConsumeType.forRule(rule) != ConsumeType.DEFAULT) return false;
-    if (getEffectiveType(node) != BNF_SEQUENCE) return false;
-    BnfFile file = (BnfFile)rule.getContainingFile();
-    return getTokenNames(file, getChildExpressions(node)) != null;
-  }
-
   private static boolean isTokenChoice(@NotNull BnfFile file, @NotNull BnfExpression choice) {
-    return choice instanceof BnfChoice && getTokenNames(file, ((BnfChoice)choice).getExpressionList(), 2) != null;
+    return choice instanceof BnfChoice && BnfAst.getTokenNames(file, ((BnfChoice)choice).getExpressionList(), 2) != null;
   }
 
   static boolean hasAtLeastOneTokenChoice(@NotNull BnfFile file, @NotNull Collection<String> ownRuleNames) {
@@ -388,10 +196,10 @@ public class ParserGeneratorUtil {
                                                              @NotNull Map<String, String> map,
                                                              @Nullable Set<String> usedInGrammar) {
     Set<String> usedNames = usedInGrammar != null ? usedInGrammar : new LinkedHashSet<>();
-    Map<String, String> origTokens = RuleGraphHelper.getTokenTextToNameMap(file);
+    Map<String, String> origTokens = BnfAst.getTokenTextToNameMap(file);
     Pattern pattern = getAllTokenPattern(origTokens);
     int[] autoCount = {0};
-    Set<String> origTokenNames = getTokenNameToTextMap(file).keySet();
+    Set<String> origTokenNames = BnfAst.getTokenNameToTextMap(file).keySet();
 
     BnfVisitor<Void> visitor = new BnfVisitor<>() {
 
@@ -619,36 +427,4 @@ public class ParserGeneratorUtil {
     }
   }
 
-  public static class PinMatcher {
-
-    public final BnfRule rule;
-    public final String funcName;
-    public final Object pinValue;
-    private final int pinIndex;
-    private final Pattern pinPattern;
-
-    public PinMatcher(BnfRule rule, IElementType type, String funcName) {
-      this.rule = rule;
-      this.funcName = funcName;
-      pinValue = type == BNF_SEQUENCE ? getAttribute(rule, KnownAttribute.PIN, funcName) : null;
-      pinIndex = pinValue instanceof Integer ? (Integer)pinValue : -1;
-      pinPattern = pinValue instanceof String ? compilePattern((String)pinValue) : null;
-    }
-
-    public boolean active() {
-      return pinIndex > -1 || pinPattern != null;
-    }
-
-    public boolean matches(int i, BnfExpression child) {
-      return i == pinIndex - 1 || pinPattern != null && pinPattern.matcher(child.getText()).matches();
-    }
-
-    public boolean shouldGenerate(List<BnfExpression> children) {
-      // do not check last expression, last item pin is trivial
-      for (int i = 0, size = children.size(); i < size - 1; i++) {
-        if (matches(i, children.get(i))) return true;
-      }
-      return false;
-    }
-  }
 }

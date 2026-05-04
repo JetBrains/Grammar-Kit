@@ -36,7 +36,7 @@ import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.generator.Case;
 import org.intellij.grammar.generator.CommonBnfConstants;
 import org.intellij.grammar.generator.ParserGeneratorUtil;
-import org.intellij.grammar.generator.RuleGraphHelper;
+import org.intellij.grammar.psi.BnfAst;
 import org.intellij.grammar.psi.BnfAttrs;
 import org.intellij.grammar.psi.BnfFile;
 import org.intellij.grammar.psi.BnfReferenceOrToken;
@@ -129,7 +129,7 @@ public class BnfGenerateLexerAction extends AnAction {
   }
 
   private String generateLexerText(BnfFile bnfFile, @Nullable String packageName) {
-    Map<String, String> tokenMap = RuleGraphHelper.getTokenNameToTextMap(bnfFile);
+    Map<String, String> tokenMap = BnfAst.getTokenNameToTextMap(bnfFile);
 
     int[] maxLen = {"{WHITE_SPACE}".length()};
     Map<String, String> simpleTokens = new LinkedHashMap<>();

@@ -28,12 +28,12 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
-import static org.intellij.grammar.generator.ParserGeneratorUtil.getChildExpressions;
 import static org.intellij.grammar.generator.ParserGeneratorUtil.topoSort;
 import static org.intellij.grammar.generator.RuleGraphHelper.Cardinality.*;
+import static org.intellij.grammar.psi.BnfAst.getChildExpressions;
 import static org.intellij.grammar.psi.BnfAst.getEffectiveType;
 import static org.intellij.grammar.psi.BnfAttributes.getAttribute;
-import static org.intellij.grammar.psi.BnfAttributes.getRootAttribute;
+import static org.intellij.grammar.psi.BnfRules.getSynonymTargetOrSelf;
 import static org.intellij.grammar.psi.impl.GrammarUtil.collectMetaParameters;
 import static org.intellij.grammar.psi.impl.GrammarUtil.isDoubleAngles;
 
@@ -178,19 +178,6 @@ public class RuleGraphHelper {
 
   private static <K, V> MultiMap<K, V> newMultiMap() {
     return MultiMap.createLinkedSet();
-  }
-
-  public static @NotNull Map<String, String> getTokenNameToTextMap(BnfFile file) {
-    return CachedValuesManager.getCachedValue(file, () -> new CachedValueProvider.Result<>(computeTokens(file).asMap(), file));
-  }
-
-  public static @NotNull Map<String, String> getTokenTextToNameMap(BnfFile file) {
-    return CachedValuesManager.getCachedValue(file, () -> new CachedValueProvider.Result<>(computeTokens(file).asInverseMap(), file));
-  }
-
-  // string value to constant name
-  public static KnownAttribute.ListValue computeTokens(BnfFile file) {
-    return getRootAttribute(file, KnownAttribute.TOKENS);
   }
 
   private static final Key<CachedValue<RuleGraphHelper>> RULE_GRAPH_HELPER_KEY = Key.create("RULE_GRAPH_HELPER_KEY");
@@ -819,36 +806,16 @@ public class RuleGraphHelper {
     return result;
   }
 
-  public static BnfRule getSynonymTargetOrSelf(BnfRule rule) {
-    String attr = getAttribute(rule, KnownAttribute.ELEMENT_TYPE);
-    if (attr != null) {
-      BnfRule realRule = ((BnfFile)rule.getContainingFile()).getRule(attr);
-      if (realRule != null && shouldGeneratePsi(realRule, false)) return realRule;
-    }
-    return rule;
-  }
-
   public static boolean hasPsiClass(BnfRule rule) {
-    return shouldGeneratePsi(rule, true);
+    return BnfRules.shouldGeneratePsi(rule, true);
   }
 
   public static boolean hasElementType(BnfRule rule) {
-    return shouldGeneratePsi(rule, false);
+    return BnfRules.shouldGeneratePsi(rule, false);
   }
 
   public static boolean isPrivateOrNoType(BnfRule rule) {
     return BnfRules.isPrivate(rule) || "".equals(getAttribute(rule, KnownAttribute.ELEMENT_TYPE));
-  }
-
-  private static boolean shouldGeneratePsi(BnfRule rule, boolean psiClasses) {
-    BnfFile containingFile = (BnfFile)rule.getContainingFile();
-    BnfRule grammarRoot = containingFile.getRules().get(0);
-    if (grammarRoot == rule) return false;
-    if (BnfRules.isPrivate(rule) || BnfRules.isExternal(rule)) return false;
-    String attr = getAttribute(rule, KnownAttribute.ELEMENT_TYPE);
-    if (!psiClasses) return !"".equals(attr);
-    BnfRule thatRule = containingFile.getRule(attr);
-    return thatRule == null || thatRule == grammarRoot || BnfRules.isPrivate(thatRule) || BnfRules.isExternal(thatRule);
   }
 
   private @NotNull PsiElement newExternalPsi(String name) {

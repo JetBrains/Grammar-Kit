@@ -6,6 +6,9 @@ package org.intellij.grammar.generator;
 
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.util.containers.JBIterable;
+import org.intellij.grammar.KnownAttribute;
+import org.intellij.grammar.psi.BnfAttributes;
+import org.intellij.grammar.psi.BnfFile;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -27,6 +30,16 @@ public class NameFormat {
 
   public static @NotNull NameFormat from(@Nullable String format) {
     return StringUtil.isEmpty(format) ? EMPTY : new NameFormat(format);
+  }
+
+  public static @NotNull NameFormat forPsiClass(@NotNull BnfFile file) {
+    return from(BnfAttributes.getRootAttribute(file, KnownAttribute.PSI_CLASS_PREFIX));
+  }
+
+  public static @NotNull NameFormat forPsiImplClass(@NotNull BnfFile file) {
+    String prefix = BnfAttributes.getRootAttribute(file, KnownAttribute.PSI_CLASS_PREFIX);
+    String suffix = BnfAttributes.getRootAttribute(file, KnownAttribute.PSI_IMPL_CLASS_SUFFIX);
+    return from(prefix + "/" + StringUtil.notNullize(suffix));
   }
 
   public @NotNull String apply(@NotNull String s) {

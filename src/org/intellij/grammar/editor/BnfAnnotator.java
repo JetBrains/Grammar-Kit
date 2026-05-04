@@ -17,7 +17,6 @@ import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.util.containers.ContainerUtil;
 import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.generator.ParserGeneratorUtil;
-import org.intellij.grammar.generator.RuleGraphHelper;
 import org.intellij.grammar.psi.*;
 import org.intellij.grammar.psi.impl.BnfReferenceImpl;
 import org.intellij.grammar.psi.impl.GrammarUtil;
@@ -97,7 +96,7 @@ final class BnfAnnotator implements Annotator, DumbAware {
       }
       else if (resolve == null) {
         var text = refOrToken.getId().getText();
-        if (RuleGraphHelper.getTokenNameToTextMap((BnfFile)refOrToken.getContainingFile()).containsKey(text)) {
+        if (BnfAst.getTokenNameToTextMap((BnfFile)refOrToken.getContainingFile()).containsKey(text)) {
           annotationHolder.newSilentAnnotation(HighlightSeverity.INFORMATION)
             .range(refOrToken)
             .textAttributes(BnfSyntaxHighlighter.EXPLICIT_TOKEN)
@@ -138,7 +137,7 @@ final class BnfAnnotator implements Annotator, DumbAware {
       }
       else {
         String text = BnfAttributes.getLiteralValue((BnfStringLiteralExpression)psiElement);
-        if (!RuleGraphHelper.getTokenTextToNameMap((BnfFile)psiElement.getContainingFile()).containsKey(text)) {
+        if (!BnfAst.getTokenTextToNameMap((BnfFile)psiElement.getContainingFile()).containsKey(text)) {
           String message = "Tokens matched by text are slower than tokens matched by types";
           annotationHolder.newSilentAnnotation(HighlightSeverity.INFORMATION)
             .range(psiElement)

@@ -78,18 +78,18 @@ public class BnfFirstNextAnalyzer {
   public static final String MATCHES_ANY = "-any-";
 
   /** Wrapper of {@link #MATCHES_EOF} as a {@link BnfExpression} so it can be returned alongside real expressions. */
-  public static final BnfExpression BNF_MATCHES_EOF = new FakeBnfExpression(MATCHES_EOF);
+  public static final @NotNull BnfExpression BNF_MATCHES_EOF = new FakeBnfExpression(MATCHES_EOF);
 
   /** Wrapper of {@link #MATCHES_NOTHING} as a {@link BnfExpression}. */
-  public static final BnfExpression BNF_MATCHES_NOTHING = new FakeBnfExpression(MATCHES_NOTHING);
+  public static final @NotNull BnfExpression BNF_MATCHES_NOTHING = new FakeBnfExpression(MATCHES_NOTHING);
 
   /** Wrapper of {@link #MATCHES_ANY} as a {@link BnfExpression}. */
-  public static final BnfExpression BNF_MATCHES_ANY = new FakeBnfExpression(MATCHES_ANY);
+  public static final @NotNull BnfExpression BNF_MATCHES_ANY = new FakeBnfExpression(MATCHES_ANY);
 
   private final boolean myBackward;
   private final boolean myPublicRuleOpaque;
   private final boolean myPredicateLookAhead;
-  private final Condition<PsiElement> myParentFilter;
+  private final @Nullable Condition<PsiElement> myParentFilter;
 
   // reference search and predicates can quickly get out of control, so NEXT results need to be cached
   private final Map<BnfExpression, Map<BnfExpression, BnfExpression>> myNextCache = new HashMap<>();
@@ -102,7 +102,7 @@ public class BnfFirstNextAnalyzer {
    *                           the resulting set. Disable when callers reason about the parser's
    *                           syntactic shape only (e.g., recovery-set generation).
    */
-  public static BnfFirstNextAnalyzer createAnalyzer(boolean predicateLookAhead) {
+  public static @NotNull BnfFirstNextAnalyzer createAnalyzer(boolean predicateLookAhead) {
     return new BnfFirstNextAnalyzer(false, false, predicateLookAhead, null);
   }
 
@@ -118,9 +118,9 @@ public class BnfFirstNextAnalyzer {
    *                           the first parent that fails the filter. Pass {@code null} for the
    *                           default unbounded traversal.
    */
-  public static BnfFirstNextAnalyzer createAnalyzer(boolean predicateLookAhead,
-                                                    boolean publicRuleOpaque,
-                                                    Condition<PsiElement> parentFilter) {
+  public static @NotNull BnfFirstNextAnalyzer createAnalyzer(boolean predicateLookAhead,
+                                                             boolean publicRuleOpaque,
+                                                             @Nullable Condition<PsiElement> parentFilter) {
     return new BnfFirstNextAnalyzer(false, publicRuleOpaque, predicateLookAhead, parentFilter);
   }
 
@@ -128,14 +128,14 @@ public class BnfFirstNextAnalyzer {
    * Backward analyzer: walks sequences right-to-left so that {@link #calcFirst} effectively yields
    * the set of tokens that can <em>end</em> a derivation. Predicates are not honored in this mode.
    */
-  public static BnfFirstNextAnalyzer createBackwardAnalyzer(boolean publicRuleOpaque) {
+  public static @NotNull BnfFirstNextAnalyzer createBackwardAnalyzer(boolean publicRuleOpaque) {
     return new BnfFirstNextAnalyzer(true, publicRuleOpaque, false, null);
   }
 
   private BnfFirstNextAnalyzer(boolean backward,
                                boolean publicRuleOpaque,
                                boolean predicateLookAhead,
-                               Condition<PsiElement> parentFilter) {
+                               @Nullable Condition<PsiElement> parentFilter) {
     myBackward = backward;
     myPublicRuleOpaque = publicRuleOpaque;
     myPredicateLookAhead = predicateLookAhead;
@@ -149,7 +149,7 @@ public class BnfFirstNextAnalyzer {
    * The rule's own expression is pre-marked as visited, so a self-recursive rule yields the
    * reference itself rather than expanding indefinitely.
    */
-  public Set<BnfExpression> calcFirst(@NotNull BnfRule rule) {
+  public @NotNull Set<BnfExpression> calcFirst(@NotNull BnfRule rule) {
     Set<BnfExpression> visited = new HashSet<>();
     BnfExpression expression = rule.getExpression();
     visited.add(expression);
@@ -160,7 +160,7 @@ public class BnfFirstNextAnalyzer {
    * FIRST set of an arbitrary expression. Includes {@link #BNF_MATCHES_EOF} when the expression
    * is nullable.
    */
-  public Set<BnfExpression> calcFirst(@NotNull BnfExpression expression) {
+  public @NotNull Set<BnfExpression> calcFirst(@NotNull BnfExpression expression) {
     return calcFirstInner(expression, new HashSet<>(), new HashSet<>());
   }
 
@@ -172,18 +172,18 @@ public class BnfFirstNextAnalyzer {
    * better diagnostics or for the documentation provider). The map contains {@link #BNF_MATCHES_EOF}
    * when the rule may legally appear at end-of-input. Results are cached on this analyzer.
    */
-  public Map<BnfExpression, BnfExpression> calcNext(@NotNull BnfRule targetRule) {
+  public @NotNull Map<BnfExpression, BnfExpression> calcNext(@NotNull BnfRule targetRule) {
     return calcNextInner(targetRule.getExpression(), new HashMap<>(), new HashSet<>());
   }
 
   /** NEXT set for an arbitrary expression — see {@link #calcNext(BnfRule)}. */
-  public Map<BnfExpression, BnfExpression> calcNext(@NotNull BnfExpression targetExpression) {
+  public @NotNull Map<BnfExpression, BnfExpression> calcNext(@NotNull BnfExpression targetExpression) {
     return calcNextInner(targetExpression, new HashMap<>(), new HashSet<>());
   }
 
-  private Map<BnfExpression, BnfExpression> calcNextInner(@NotNull BnfExpression targetExpression,
-                                                          Map<BnfExpression, BnfExpression> result,
-                                                          Set<BnfExpression> visited) {
+  private @NotNull Map<BnfExpression, BnfExpression> calcNextInner(@NotNull BnfExpression targetExpression,
+                                                                   @NotNull Map<BnfExpression, BnfExpression> result,
+                                                                   @NotNull Set<BnfExpression> visited) {
     Map<BnfExpression, BnfExpression> cached = myNextCache.get(targetExpression);
     if (cached != null) return cached;
 
@@ -251,9 +251,9 @@ public class BnfFirstNextAnalyzer {
     return result;
   }
 
-  private Set<BnfExpression> calcSequenceFirstInner(List<BnfExpression> expressions,
-                                                    Set<BnfExpression> result,
-                                                    Set<BnfExpression> visited) {
+  private @NotNull Set<BnfExpression> calcSequenceFirstInner(@NotNull List<BnfExpression> expressions,
+                                                             @NotNull Set<BnfExpression> result,
+                                                             @NotNull Set<BnfExpression> visited) {
     boolean matchesEof = !result.add(BNF_MATCHES_EOF);
     boolean pinApplied = false;
     Set<BnfExpression> pinned;
@@ -290,7 +290,9 @@ public class BnfFirstNextAnalyzer {
    * public so callers that already track {@code visited} can fold further analysis into the same
    * traversal (used by {@link #calcSequenceFirstInner}).
    */
-  public Set<BnfExpression> calcFirstInner(BnfExpression expression, Set<BnfExpression> result, Set<BnfExpression> visited) {
+  public @NotNull Set<BnfExpression> calcFirstInner(@NotNull BnfExpression expression,
+                                                    @NotNull Set<BnfExpression> result,
+                                                    @NotNull Set<BnfExpression> visited) {
     return calcFirstInner(expression, result, visited, null);
   }
 
@@ -301,7 +303,10 @@ public class BnfFirstNextAnalyzer {
    * in its sequence and (b) the rest of the sequence after the predicate; together they let the
    * predicate intersect/subtract against the actual local follow set rather than the global NEXT.
    */
-  public Set<BnfExpression> calcFirstInner(BnfExpression expression, Set<BnfExpression> result, Set<BnfExpression> visited, @Nullable Pair<Boolean, List<BnfExpression>> forcedNext) {
+  public @NotNull Set<BnfExpression> calcFirstInner(@NotNull BnfExpression expression,
+                                                    @NotNull Set<BnfExpression> result,
+                                                    @NotNull Set<BnfExpression> visited,
+                                                    @Nullable Pair<Boolean, List<BnfExpression>> forcedNext) {
     BnfFile file = (BnfFile)expression.getContainingFile();
     if (expression instanceof BnfLiteralExpression) {
       result.add(expression);
@@ -468,14 +473,14 @@ public class BnfFirstNextAnalyzer {
     return result;
   }
 
-  private static List<BnfExpression> filterExternalMethods(Set<BnfExpression> set) {
+  private static @NotNull List<BnfExpression> filterExternalMethods(@NotNull Set<BnfExpression> set) {
     if (set.removeIf(o -> "<<eof>>".equals(o.getText()))) {
       set.add(BNF_MATCHES_EOF);
     }
     return JBIterable.from(set).filter(GrammarUtil::isExternalReference).toList();
   }
 
-  private static boolean involvesTextMatching(Set<BnfExpression> set) {
+  private static boolean involvesTextMatching(@NotNull Set<BnfExpression> set) {
     for (BnfExpression o : set) {
       if (o instanceof BnfStringLiteralExpression &&
           !BnfAst.getTokenTextToNameMap((BnfFile)o.getContainingFile())
@@ -487,7 +492,7 @@ public class BnfFirstNextAnalyzer {
   }
 
   /** Renders every expression in {@code expressions} via {@link #asString} into a sorted set. */
-  public static Set<String> asStrings(Set<BnfExpression> expressions) {
+  public static @NotNull Set<String> asStrings(@NotNull Set<BnfExpression> expressions) {
     Set<String> result = new TreeSet<>();
     for (BnfExpression expression : expressions) {
       result.add(asString(expression));
@@ -517,11 +522,12 @@ public class BnfFirstNextAnalyzer {
     return new ObjectOpenCustomHashSet<>(BnfAst.textStrategy());
   }
 
-  private static @NotNull Set<BnfExpression> newExprSet(Collection<BnfExpression> expressions) {
+  private static @NotNull Set<BnfExpression> newExprSet(@NotNull Collection<BnfExpression> expressions) {
     return new ObjectOpenCustomHashSet<>(expressions, BnfAst.textStrategy());
   }
 
-  private static @NotNull Set<BnfExpression> exprSetUnion(Collection<BnfExpression> a, Collection<BnfExpression> b) {
+  private static @NotNull Set<BnfExpression> exprSetUnion(@NotNull Collection<BnfExpression> a,
+                                                          @NotNull Collection<BnfExpression> b) {
     Set<BnfExpression> result = newExprSet(a);
     result.addAll(b);
     return result;

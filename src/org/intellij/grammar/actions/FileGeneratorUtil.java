@@ -48,24 +48,7 @@ public class FileGeneratorUtil {
     PackageIndex packageIndex = PackageIndex.getInstance(project);
     ProjectFileIndex fileIndex = ProjectFileIndex.getInstance(project);
 
-    VirtualFile existingFile = null;
-    if (targetFile != null) {
-      Collection<VirtualFile> fromIndex = FilenameIndex.getVirtualFilesByName(targetFile, ProjectScope.getProjectScope(project));
-      List<VirtualFile> files = new ArrayList<>(fromIndex);
-      files.sort((f1, f2) -> {
-        boolean b1 = fileIndex.isInSource(f1);
-        boolean b2 = fileIndex.isInSource(f2);
-        if (b1 != b2) return b1 ? -1 : 1;
-        return Integer.compare(f1.getPath().length(), f2.getPath().length());
-      });
-      for (VirtualFile file : files) {
-        String existingFilePackage = packageIndex.getPackageNameByDirectory(file.getParent());
-        if (!hasPackage || existingFilePackage == null || targetPackage.equals(existingFilePackage)) {
-          existingFile = file;
-          break;
-        }
-      }
-    }
+    VirtualFile existingFile = findExistingFile(project, targetFile, targetPackage, fileIndex, packageIndex);
 
     VirtualFile existingFileRoot =
       existingFile == null ? null :
@@ -96,7 +79,34 @@ public class FileGeneratorUtil {
       throw new ProcessCanceledException();
     }
   }
-  
+
+  private static @Nullable VirtualFile findExistingFile(@NotNull Project project,
+                                                        @Nullable String targetFile,
+                                                        @Nullable String targetPackage,
+                                                        ProjectFileIndex fileIndex,
+                                                        PackageIndex packageIndex) {
+    if (targetFile == null) {
+      return null;
+    }
+
+    Collection<VirtualFile> fromIndex = FilenameIndex.getVirtualFilesByName(targetFile, ProjectScope.getProjectScope(project));
+    List<VirtualFile> files = new ArrayList<>(fromIndex);
+    files.sort((f1, f2) -> {
+      boolean b1 = fileIndex.isInSource(f1);
+      boolean b2 = fileIndex.isInSource(f2);
+      if (b1 != b2) return b1 ? -1 : 1;
+      return Integer.compare(f1.getPath().length(), f2.getPath().length());
+    });
+
+    for (VirtualFile file : files) {
+      String existingFilePackage = packageIndex.getPackageNameByDirectory(file.getParent());
+      if (StringUtil.isEmpty(targetPackage) || existingFilePackage == null || targetPackage.equals(existingFilePackage)) {
+        return file;
+      }
+    }
+    return null;
+  }
+
   public static @NotNull VirtualFile getTargetDirectoryRelativeToContentRoot(@NotNull VirtualFile bnfFile,
                                                                              @NotNull Project project,
                                                                              @NotNull String targetRelativePath,

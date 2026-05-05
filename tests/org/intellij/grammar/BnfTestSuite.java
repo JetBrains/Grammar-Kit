@@ -7,6 +7,8 @@ package org.intellij.grammar;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
+import org.intellij.grammar.actions.BnfGenerationServiceIntegrationPlatformTest;
+import org.intellij.grammar.actions.BnfGenerationServiceTest;
 import org.intellij.grammar.expression.ExpressionParserTest;
 import org.intellij.grammar.generator.JavaBnfGeneratorTest;
 import org.intellij.grammar.generator.KotlinBnfGeneratorTest;
@@ -36,6 +38,7 @@ public class BnfTestSuite extends TestCase {
     testSuite.addTestSuite(BnfConvertOptExpressionIntentionTest.class);
     testSuite.addTestSuite(BnfGeneratorPsiTest.class);
 
+    testSuite.addTestSuite(BnfGenerationServiceIntegrationPlatformTest.class);
     testSuite.addTestSuite(JFlexCompletionTest.class);
     return testSuite;
   }
@@ -44,6 +47,7 @@ public class BnfTestSuite extends TestCase {
     public static Test suite() {
       TestSuite testSuite = new TestSuite("Fast");
       testSuite.addTestSuite(BnfUtilTest.class);
+      testSuite.addTestSuite(BnfGenerationServiceTest.class);
       testSuite.addTestSuite(JFlexGenerationTest.class);
       testSuite.addTestSuite(JFlexParserTest.class);
       testSuite.addTestSuite(BnfParserTest.class);

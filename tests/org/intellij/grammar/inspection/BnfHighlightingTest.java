@@ -113,15 +113,21 @@ public class BnfHighlightingTest extends BasePlatformTestCase {
     }
     WriteAction.run(() -> {
       ModifiableRootModel model = ModuleRootManager.getInstance(module).getModifiableModel();
-      String supportUrl = getUrl(testDataPath + "/../../src");
-      String genUrl = getUrl(testDataPath + "/../../gen");
+      String supportUrl = getUrl(testDataPath + "/../../bnf-language/src");
+      String genUrl = getUrl(testDataPath + "/../../bnf-language/gen");
+      String jflexSrcUrl = getUrl(testDataPath + "/../../jflex-language/src");
+      String jflexGenUrl = getUrl(testDataPath + "/../../jflex-language/gen");
       if (add) {
         model.addContentEntry(supportUrl).addSourceFolder(supportUrl, false);
         model.addContentEntry(genUrl).addSourceFolder(genUrl, false);
+        model.addContentEntry(jflexSrcUrl).addSourceFolder(jflexSrcUrl, false);
+        model.addContentEntry(jflexGenUrl).addSourceFolder(jflexGenUrl, false);
       }
       else {
         for (ContentEntry entry : model.getContentEntries()) {
-          if (supportUrl.equals(entry.getUrl()) || genUrl.equals(entry.getUrl())) {
+          String url = entry.getUrl();
+          if (supportUrl.equals(url) || genUrl.equals(url) ||
+              jflexSrcUrl.equals(url) || jflexGenUrl.equals(url)) {
             model.removeContentEntry(entry);
           }
         }

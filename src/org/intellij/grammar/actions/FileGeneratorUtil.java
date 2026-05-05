@@ -38,6 +38,49 @@ import static com.intellij.util.ArrayUtil.getFirstElement;
  * @author gregsh
  */
 public class FileGeneratorUtil {
+  /**
+   * Resolves the output directory for a file to be generated.
+   *
+   * <p>The resolution follows these steps:
+   * <ol>
+   *   <li><b>Anchor on an existing file.</b> If {@code targetFile} is provided, the project index
+   *       is searched for a file with that name. Candidates are ranked by preferring source roots
+   *       over content roots, then by shorter path. The first candidate whose parent directory
+   *       belongs to {@code targetPackage} (or any directory if {@code targetPackage} is empty)
+   *       is used as the anchor. Its source/content root becomes the base for generation.</li>
+   *   <li><b>Fall back to the source file's root.</b> If no existing file is found, the root is
+   *       derived from {@code sourceFile}:
+   *       <ul>
+   *         <li>For {@code .bnf} and {@code .jflex} files the content root is preferred, because
+   *             generated sources are expected to land in a separate "gen" subtree rather than
+   *             next to the grammar.</li>
+   *         <li>For other file types with a non-empty {@code targetPackage} the source root of
+   *             {@code sourceFile} is preferred.</li>
+   *         <li>If neither applies, the first available content root is used.</li>
+   *       </ul>
+   *   </li>
+   *   <li><b>Append the package path.</b> Inside the resolved root, subdirectories matching
+   *       {@code targetPackage} are created if absent. When the root is not already a registered
+   *       source root (i.e., the "gen" root scenario), the configured {@link Options#GEN_DIR}
+   *       folder is prepended to the path.</li>
+   * </ol>
+   *
+   * @param project       the current project
+   * @param sourceFile    the grammar or source file that triggers generation; used to locate a
+   *                      fallback root when no existing target file is found
+   * @param targetFile    short file name (without path) to look up in the project index as an
+   *                      anchor; may be {@code null} to skip the lookup
+   * @param targetPackage fully qualified package name for the generated file (e.g.
+   *                      {@code "com.example.psi"}); may be {@code null} or empty when the file
+   *                      should go directly into the root directory
+   * @param returnRoot    if {@code true}, returns the generation root directory (the source root
+   *                      or the {@link Options#GEN_DIR} child of the content root) rather than
+   *                      the deepest package subdirectory
+   * @return the {@link VirtualFile} directory where the generated file should be written;
+   *         created if it does not exist yet
+   * @throws ProcessCanceledException if no suitable root can be determined, or if directory
+   *                                  creation fails; an error notification is shown to the user
+   */
   public static @NotNull VirtualFile getTargetDirectoryFor(@NotNull Project project,
                                                            @NotNull VirtualFile sourceFile,
                                                            @Nullable String targetFile,

@@ -67,6 +67,20 @@ import static org.intellij.grammar.actions.FileGeneratorUtil.fail;
 import static org.intellij.grammar.actions.FileGeneratorUtil.getTargetDirectoryFor;
 
 /**
+ * Action that runs the JFlex lexer generator on one or more {@code .flex} files selected in the project view.
+ *
+ * <p>When invoked, the action:
+ * <ol>
+ *   <li>Saves all open documents.</li>
+ *   <li>Locates the JFlex JAR and {@code idea-flex.skeleton} file, downloading them automatically if they
+ *       are not already registered in a global library named "{@value #LIB_NAME}".</li>
+ *   <li>Runs each selected file through JFlex sequentially, placing the generated {@code .java} source
+ *       in the appropriate source directory (resolved via {@link FileGeneratorUtil#getTargetDirectoryFor}).</li>
+ *   <li>Streams process output to a reusable tab in the IDE {@code Messages} tool window.</li>
+ * </ol>
+ *
+ * <p>The action is visible and enabled only when at least one {@code .flex} file is selected.
+ *
  * @author greg
  */
 public class BnfRunJFlexAction extends DumbAwareAction {
@@ -87,11 +101,15 @@ public class BnfRunJFlexAction extends DumbAwareAction {
   @Override
   public void update(@NotNull AnActionEvent e) {
     Project project = e.getProject();
-    List<VirtualFile> files = getFiles(e);
+    List<VirtualFile> files = getJFlexFiles(e);
     e.getPresentation().setEnabledAndVisible(project != null && !files.isEmpty());
   }
 
-  private static List<VirtualFile> getFiles(@NotNull AnActionEvent e) {
+  /**
+   * Returns the JFlex files from the current selection.
+   * Accepts files recognised as {@link JFlexFileType} as well as any non-binary file whose name ends with {@code .flex}.
+   */
+  private static List<VirtualFile> getJFlexFiles(@NotNull AnActionEvent e) {
     return JBIterable.of(e.getData(CommonDataKeys.VIRTUAL_FILE_ARRAY)).filter(file -> {
       FileType fileType = file.getFileType();
       return fileType == JFlexFileType.INSTANCE ||
@@ -102,7 +120,7 @@ public class BnfRunJFlexAction extends DumbAwareAction {
   @Override
   public void actionPerformed(@NotNull AnActionEvent e) {
     Project project = getEventProject(e);
-    List<VirtualFile> files = getFiles(e);
+    List<VirtualFile> files = getJFlexFiles(e);
     if (project == null || files.isEmpty()) return;
 
     PsiDocumentManager.getInstance(project).commitAllDocuments();
@@ -117,6 +135,7 @@ public class BnfRunJFlexAction extends DumbAwareAction {
     String batchId = "jflex@" + System.nanoTime();
     new Runnable() {
       final Iterator<VirtualFile> it = files.iterator();
+
       @Override
       public void run() {
         if (it.hasNext()) {
@@ -126,6 +145,22 @@ public class BnfRunJFlexAction extends DumbAwareAction {
     }.run();
   }
 
+  /**
+   * Runs JFlex on a single {@code .flex} file and returns a callback that completes when the process exits.
+   *
+   * <p>The method parses the {@code %class} directive to determine the output class name, and the
+   * {@code package} statement to place the generated file in the correct source root subdirectory.
+   * JFlex is launched as a child process of the current JVM; output is shown in the console tab
+   * identified by {@code batchId}.
+   *
+   * @param project   the current project
+   * @param flexFile  the {@code .flex} grammar file to compile
+   * @param jflex     {@code first} — the JFlex JAR; {@code second} — the skeleton file (may be {@code null})
+   * @param batchId   opaque identifier that groups multiple files from a single action invocation
+   *                  into the same console tab (see {@link #showConsole})
+   * @return a callback that is {@linkplain ActionCallback#setDone() done} on exit code 0,
+   *         or {@linkplain ActionCallback#setRejected() rejected} on failure
+   */
   public static ActionCallback doGenerate(@NotNull Project project,
                                           @NotNull VirtualFile flexFile,
                                           @NotNull Couple<File> jflex,
@@ -181,11 +216,28 @@ public class BnfRunJFlexAction extends DumbAwareAction {
       return callback;
     }
     catch (ExecutionException ex) {
-      Messages.showErrorDialog(project, "Unable to run JFlex"+ "\n" + ex.getLocalizedMessage(), "JFlex");
+      Messages.showErrorDialog(project, "Unable to run JFlex" + "\n" + ex.getLocalizedMessage(), "JFlex");
       return ActionCallback.REJECTED;
     }
   }
 
+  /**
+   * Attaches a process to a console tab in the {@code Messages} tool window and activates the window.
+   *
+   * <p>Tab-reuse strategy:
+   * <ul>
+   *   <li>If a tab already exists for the given {@code batchId} (i.e., this is not the first file in a
+   *       multi-file invocation), the existing console is reused and a separator is printed.</li>
+   *   <li>Otherwise, if there is an unpinned tab whose previous process has already terminated, that tab
+   *       is cleared and reused.</li>
+   *   <li>If neither condition holds, a new tab is created with the given {@code title}.</li>
+   * </ul>
+   *
+   * @param project        the current project
+   * @param title          tab label used when a new tab must be created
+   * @param batchId        opaque identifier shared by all files in a single action invocation
+   * @param processHandler the process whose output should be shown in the console
+   */
   public static void showConsole(@NotNull Project project,
                                  @NotNull String title,
                                  @NotNull String batchId,
@@ -238,6 +290,13 @@ public class BnfRunJFlexAction extends DumbAwareAction {
     attachAndActivate(project, batchId, processHandler, content, consoleView);
   }
 
+  /**
+   * Wires a process handler to a console view, stamps the content tab with the batch identifier,
+   * and brings the {@code Messages} tool window to the front with that tab selected.
+   *
+   * <p>Stamping the tab with {@link #BATCH_ID_KEY} is what allows subsequent calls from the same
+   * batch (multi-file invocation) to locate and reuse the tab instead of opening a new one.
+   */
   private static void attachAndActivate(@NotNull Project project,
                                         @NotNull String batchId,
                                         @NotNull OSProcessHandler processHandler,
@@ -252,6 +311,22 @@ public class BnfRunJFlexAction extends DumbAwareAction {
     }
   }
 
+  /**
+   * Returns the JFlex JAR and skeleton file, downloading them if necessary.
+   *
+   * <p>Search order:
+   * <ol>
+   *   <li>Scan every global library's class roots via {@link #findInUrls}; return the first match.</li>
+   *   <li>If nothing is found, download the JAR via {@link #downloadJFlex}.</li>
+   *   <li>Extract {@value #SKEL_NAME} from inside the downloaded JAR and write it next to the JAR
+   *       on disk so JFlex can reference it as a plain file via {@code -skel}.</li>
+   *   <li>Register (or update) the global library "{@value #LIB_NAME}" so future invocations
+   *       hit step 1 instead of downloading again.</li>
+   * </ol>
+   *
+   * @return a pair of {@code (jflex jar, skeleton file)}, where the skeleton may be {@code null}
+   *         if extraction failed; or {@code null} if the JAR could not be obtained at all
+   */
   private static @Nullable Couple<File> getOrDownload(@NotNull Project project) {
     LibraryTable libraryTable = LibraryTablesRegistrar.getInstance().getLibraryTable();
     for (Library library : libraryTable.getLibraries()) {
@@ -278,15 +353,32 @@ public class BnfRunJFlexAction extends DumbAwareAction {
   }
 
 
+  /**
+   * Scans a list of library class-root URLs for a JFlex JAR and the skeleton file.
+   *
+   * <p>A root is recognised as the JFlex JAR if its filename starts with {@value #JFLEX_JAR_PREFIX}
+   * and ends with {@code .jar}. A root is recognised as the skeleton if its filename equals
+   * {@value #SKEL_NAME}. Both files must exist on disk; virtual entries are ignored.
+   *
+   * @param rootUrls class-root URLs as returned by {@link Library#getUrls(OrderRootType)}
+   * @return a pair of {@code (jar, skeleton)} if at least the JAR was found, otherwise {@code null};
+   *         the skeleton element may be {@code null} if only the JAR was present in the roots
+   */
   private static @Nullable Couple<File> findInUrls(String... rootUrls) {
     File jarFile = null, skelFile = null;
     for (String root : rootUrls) {
       root = StringUtil.trimEnd(root, JarFileSystem.JAR_SEPARATOR);
       String rootName = root.substring(root.lastIndexOf("/") + 1);
       boolean isJar;
-      if (jarFile == null && rootName.startsWith(JFLEX_JAR_PREFIX) && rootName.endsWith(".jar")) isJar = true;
-      else if (skelFile == null && rootName.equals(SKEL_NAME)) isJar = false;
-      else continue;
+      if (jarFile == null && rootName.startsWith(JFLEX_JAR_PREFIX) && rootName.endsWith(".jar")) {
+        isJar = true;
+      }
+      else if (skelFile == null && rootName.equals(SKEL_NAME)) {
+        isJar = false;
+      }
+      else {
+        continue;
+      }
       File file = new File(FileUtil.toSystemDependentName(VfsUtilCore.urlToPath(root)));
       if (!file.exists() || !file.isFile()) continue;
       if (isJar) {
@@ -299,6 +391,13 @@ public class BnfRunJFlexAction extends DumbAwareAction {
     return jarFile != null ? Couple.of(jarFile, skelFile) : null;
   }
 
+  /**
+   * Downloads the JFlex JAR from {@link #JFLEX_URL} using the IDE's built-in download infrastructure,
+   * which shows a progress dialog to the user.
+   *
+   * @return the downloaded JAR as a local {@link File}, or {@code null} if the download was
+   *         cancelled or failed
+   */
   private static @Nullable File downloadJFlex(@NotNull Project project) {
     String url = JFLEX_URL;
     DownloadableFileService service = DownloadableFileService.getInstance();
@@ -311,6 +410,16 @@ public class BnfRunJFlexAction extends DumbAwareAction {
     return file != null && file.exists() && file.isFile() ? file : null;
   }
 
+  /**
+   * Creates or updates the application-level library named "{@value #LIB_NAME}" to point at the
+   * given JAR and skeleton files as class roots.
+   *
+   * <p>If the library does not yet exist it is created. Roots are only ever added, never removed,
+   * so calling this method after a fresh download is idempotent with respect to pre-existing roots.
+   * Must be called under a write action.
+   *
+   * @param files {@code first} — the JFlex JAR; {@code second} — the skeleton file (may be {@code null})
+   */
   private static void createOrUpdateLibrary(@NotNull Couple<File> files) {
     String libraryName = LIB_NAME;
     ApplicationManager.getApplication().assertWriteAccessAllowed();

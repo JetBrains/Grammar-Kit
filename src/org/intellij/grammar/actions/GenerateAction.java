@@ -27,6 +27,7 @@ import com.intellij.util.ExceptionUtil;
 import com.intellij.util.containers.JBIterable;
 import org.intellij.grammar.generator.CommonBnfConstants;
 import org.intellij.grammar.generator.JavaParserGenerator;
+import org.intellij.grammar.generator.batch.*;
 import org.intellij.grammar.psi.BnfFile;
 import org.jetbrains.annotations.NotNull;
 

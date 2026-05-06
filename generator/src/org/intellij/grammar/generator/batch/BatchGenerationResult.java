@@ -2,7 +2,7 @@
  * Copyright 2011-2026 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
  */
 
-package org.intellij.grammar.actions;
+package org.intellij.grammar.generator.batch;
 
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
@@ -32,7 +32,7 @@ public record BatchGenerationResult(
   int filesProcessed,
   long totalWritten
 ) {
-  static @NotNull BatchGenerationResult empty(@NotNull Project project, @NotNull List<VirtualFile> bnfFiles) {
+  public static @NotNull BatchGenerationResult empty(@NotNull Project project, @NotNull List<VirtualFile> bnfFiles) {
     return new BatchGenerationResult(bnfFiles, project, List.of(), Set.of(), 0, 0);
   }
 

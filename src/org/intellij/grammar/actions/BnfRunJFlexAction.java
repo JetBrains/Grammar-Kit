@@ -49,6 +49,7 @@ import com.intellij.util.download.DownloadableFileDescription;
 import com.intellij.util.download.DownloadableFileService;
 import com.intellij.util.ui.UIUtil;
 import org.intellij.grammar.config.Options;
+import org.intellij.grammar.generator.batch.FileGeneratorUtil;
 import org.intellij.jflex.parser.JFlexFileType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -63,8 +64,8 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static org.intellij.grammar.actions.FileGeneratorUtil.fail;
-import static org.intellij.grammar.actions.FileGeneratorUtil.getTargetDirectoryFor;
+import static org.intellij.grammar.generator.batch.FileGeneratorUtil.fail;
+import static org.intellij.grammar.generator.batch.FileGeneratorUtil.getTargetDirectoryFor;
 
 /**
  * Action that runs the JFlex lexer generator on one or more {@code .flex} files selected in the project view.
@@ -181,7 +182,7 @@ public class BnfRunJFlexAction extends DumbAwareAction {
     }
 
     try {
-      VirtualFile virtualDir = getTargetDirectoryFor(project, flexFile, lexerClassName + ".java", lexerPackage, false);
+      VirtualFile virtualDir = getTargetDirectoryFor(project, flexFile, lexerClassName + ".java", lexerPackage, false, true);
       File workingDir = VfsUtilCore.virtualToIoFile(flexFile).getParentFile().getAbsoluteFile();
 
       Sdk sdk = new SimpleJavaSdkType().createJdk("tmp", SystemProperties.getJavaHome());

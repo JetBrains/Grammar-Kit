@@ -9,6 +9,7 @@ import org.intellij.grammar.BnfGeneratorTestCase;
 import org.intellij.grammar.generator.Generator;
 import org.intellij.grammar.generator.JavaParserGenerator;
 import org.intellij.grammar.generator.KotlinParserGenerator;
+import org.intellij.grammar.generator.batch.*;
 import org.intellij.grammar.psi.BnfFile;
 import org.jetbrains.annotations.NotNull;
 

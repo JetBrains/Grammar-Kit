@@ -9,6 +9,7 @@ import org.intellij.grammar.psi.BnfFile;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.List;
 
 import static org.intellij.grammar.psi.BnfAttributes.getRootAttribute;
@@ -28,6 +29,21 @@ public class KotlinBnfGeneratorTest extends AbstractBnfGeneratorTest {
     String myProjectPath = myFullDataPath.substring(0, myFullDataPath.lastIndexOf(File.separatorChar) + 1);
     String psiOutputPath = !psiModulePath.isEmpty() ? myProjectPath + psiModulePath : "";
     return List.of(new KotlinParserGenerator(psiFile, "", outputPath, psiOutputPath, "", outputOpener));
+  }
+
+  @Override
+  protected String loadFile(@NotNull String name) throws IOException {
+    String text = super.loadFile(name);
+
+    if (name.equals("SelfBnf.bnf") || name.equals("SelfFlex.bnf")) {
+      String paramLine = "generate=[java=\"8\" names=\"long\" visitor-value=\"R\"]";
+      assert text.contains(paramLine);
+      String patchedText = text.replace(paramLine, "generate=[java=\"8\" names=\"long\" visitor-value=\"R\" parser-api=\"syntax\"]");
+      return patchedText;
+    }
+    else {
+      return text;
+    }
   }
 
   public void testAutopin() throws Exception {

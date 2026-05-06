@@ -4,7 +4,6 @@
 
 package org.intellij.grammar.generator;
 
-import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.util.Ref;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.psi.PsiElement;
@@ -18,7 +17,6 @@ import org.intellij.grammar.analysis.BnfFirstNextAnalyzer;
 import org.intellij.grammar.generator.NodeCalls.*;
 import org.intellij.grammar.generator.kotlin.KotlinBnfConstants;
 import org.intellij.grammar.generator.kotlin.KotlinNameShortener;
-import org.intellij.grammar.generator.kotlin.KotlinPlatformConstants;
 import org.intellij.grammar.generator.kotlin.KotlinNameRenderer;
 import org.intellij.grammar.java.JavaHelper;
 import org.intellij.grammar.parser.GeneratedParserUtilBase.Parser;
@@ -57,9 +55,7 @@ import static org.intellij.grammar.psi.BnfTypes.*;
 ///   are then going to be outputted via one of the `generate*`
 ///   methods to the file.
 public final class KotlinParserGenerator extends Generator {
-  public static final @NotNull Logger LOG = Logger.getInstance(KotlinParserGenerator.class);
   private static final @NotNull String HORIZONTAL_SEPARATOR = "/* ********************************************************** */";
-  private final @NotNull KotlinPlatformConstants C;
 
   /**
    * Name of the class containing all the generated element types.
@@ -88,8 +84,6 @@ public final class KotlinParserGenerator extends Generator {
                                @NotNull OutputOpener outputOpener
   ) {
     super(psiFile, sourcePath, outputPath, packagePrefix, "kt", outputOpener, KotlinNameRenderer.INSTANCE);
-
-    C = KotlinPlatformConstants.DEFAULT_CONSTANTS;
 
     // TODO: consider creating kotlin specific attributes for this
     myElementTypesHolderName = getRootAttribute(myFile, KnownAttribute.SYNTAX_ELEMENT_TYPE_HOLDER_CLASS);
@@ -286,7 +280,7 @@ public final class KotlinParserGenerator extends Generator {
    */
   private void generateParse() {
     final var shortElementType = shorten(KotlinBnfConstants.KT_ELEMENT_TYPE_CLASS);
-    final var shortMarker = !G.generateFQN ? "Marker" : C.SyntaxTreeBuilderClass() + ".Marker";
+    final var shortMarker = !G.generateFQN ? "Marker" : KotlinBnfConstants.KT_BUILDER_CLASS + ".Marker";
     final var shortRuntime = shorten(KotlinBnfConstants.KT_PARSER_RUNTIME_CLASS);
     final var shortModifiers = shorten(KotlinBnfConstants.KT_MODIFIERS_CLASS);
     List<Set<String>> extendsSet = buildExtendsSet(myGraphHelper.getRuleExtendsMap());
@@ -463,7 +457,7 @@ public final class KotlinParserGenerator extends Generator {
         shortModifiers + "." + modifier
       ), " or "
     );
-    String shortMarker = !G.generateFQN ? "Marker" : C.SyntaxTreeBuilderClass() + ".Marker";
+    String shortMarker = !G.generateFQN ? "Marker" : KotlinBnfConstants.KT_BUILDER_CLASS + ".Marker";
     if (sectionRequiredSimple) {
       if (!sectionMaybeDropped) {
         out("val %s: %s = %s.enter_section_()", N.marker, shortMarker, N.runtime);
@@ -619,7 +613,7 @@ public final class KotlinParserGenerator extends Generator {
     String frameName = quote(R.getRuleDisplayName(info.rootRule, true));
     final var shortRuntime = shorten(KotlinBnfConstants.KT_PARSER_RUNTIME_CLASS);
     final var shortModifiers = shorten(KotlinBnfConstants.KT_MODIFIERS_CLASS);
-    String shortMarker = !G.generateFQN ? "Marker" : C.SyntaxTreeBuilderClass() + ".Marker";
+    String shortMarker = !G.generateFQN ? "Marker" : KotlinBnfConstants.KT_BUILDER_CLASS + ".Marker";
     out("fun %s(%s: %s, %s: Int, %s: Int): Boolean {", methodName, N.runtime, shortRuntime, N.level, N.priority);
     out("if (!%s.recursion_guard_(%s, \"%s\")) return false", N.runtime, N.level, methodName);
 
@@ -1030,7 +1024,7 @@ public final class KotlinParserGenerator extends Generator {
     imports.add(myParserUtil);
     imports.add(starImport(KotlinBnfConstants.KT_RUNTIME_PACKAGE));
     if (!G.generateFQN) {
-      imports.add(C.SyntaxTreeBuilderClass() + ".Marker");
+      imports.add(KotlinBnfConstants.KT_BUILDER_CLASS + ".Marker");
       imports.add(KotlinBnfConstants.KT_PARSER_RUNTIME_CLASS);
     }
     else {

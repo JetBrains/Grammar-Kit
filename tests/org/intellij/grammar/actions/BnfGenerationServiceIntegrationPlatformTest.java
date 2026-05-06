@@ -7,6 +7,7 @@ package org.intellij.grammar.actions;
 import com.intellij.openapi.application.WriteAction;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.testFramework.fixtures.JavaCodeInsightFixtureTestCase;
+import org.intellij.grammar.generator.batch.*;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;

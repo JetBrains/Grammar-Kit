@@ -1,8 +1,8 @@
 /*
- * Copyright 2011-2025 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
+ * Copyright 2011-2026 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
  */
 
-package org.intellij.grammar.actions;
+package org.intellij.grammar.generator.batch;
 
 import com.intellij.openapi.progress.ProcessCanceledException;
 import com.intellij.openapi.project.DumbService;
@@ -25,7 +25,7 @@ import org.jetbrains.annotations.NotNull;
 import java.io.File;
 import java.util.*;
 
-import static org.intellij.grammar.actions.FileGeneratorUtil.getTargetDirectoryFor;
+import static org.intellij.grammar.generator.batch.FileGeneratorUtil.getTargetDirectoryFor;
 import static org.intellij.grammar.psi.BnfAttributes.getRootAttribute;
 
 /**
@@ -37,8 +37,8 @@ import static org.intellij.grammar.psi.BnfAttributes.getRootAttribute;
  */
 public class BnfGenerationService {
 
-  static @NotNull BatchGenerationResult generateInBatch(@NotNull BatchGenerationContext context,
-                                                        @NotNull GenerationListener listener) {
+  public static @NotNull BatchGenerationResult generateInBatch(@NotNull BatchGenerationContext context,
+                                                               @NotNull GenerationListener listener) {
     var result = BatchGenerationResult.empty(context.project(), context.bnfFiles());
     int total = context.bnfFiles().size();
 
@@ -63,8 +63,8 @@ public class BnfGenerationService {
     return result;
   }
 
-  static @NotNull SingleGrammarGenerationReport generateGrammar(@NotNull VirtualFile bnfVirtualFile,
-                                                                @NotNull BatchGenerationContext context) throws Exception {
+  public static @NotNull SingleGrammarGenerationReport generateGrammar(@NotNull VirtualFile bnfVirtualFile,
+                                                                       @NotNull BatchGenerationContext context) throws Exception {
     String sourcePath = bnfVirtualFile.isInLocalFileSystem()
                         ? FileUtil.toSystemDependentName(FileUtil.toCanonicalPath(bnfVirtualFile.getParent().getPath()))
                         : "";
@@ -111,12 +111,12 @@ public class BnfGenerationService {
     return new SingleGrammarGenerationReport(false, targets, files, bytesWritten, duration, genDir);
   }
 
-  static @NotNull Generator createGenerator(@NotNull BnfFile bnfFile,
-                                            @NotNull String sourcePath,
-                                            @NotNull File genDir,
-                                            @NotNull File psiGenDir,
-                                            @NotNull String packagePrefix,
-                                            @NotNull List<? super File> files) {
+  public static @NotNull Generator createGenerator(@NotNull BnfFile bnfFile,
+                                                   @NotNull String sourcePath,
+                                                   @NotNull File genDir,
+                                                   @NotNull File psiGenDir,
+                                                   @NotNull String packagePrefix,
+                                                   @NotNull List<? super File> files) {
     OutputOpener opener = (className, fileToOpen, myBnfFile) -> {
       files.add(fileToOpen);
       return OutputOpener.DEFAULT.openOutput(className, fileToOpen, myBnfFile);
@@ -130,7 +130,7 @@ public class BnfGenerationService {
   }
 
   @RequiresWriteLock
-  static @NotNull BatchGenerationContext prepareGenerationContext(@NotNull Project project, @NotNull List<VirtualFile> bnfFiles) {
+  public static @NotNull BatchGenerationContext prepareGenerationContext(@NotNull Project project, @NotNull List<VirtualFile> bnfFiles) {
     PackageIndex packageIndex = PackageIndex.getInstance(project);
 
     Map<VirtualFile, VirtualFile> rootMap = new LinkedHashMap<>();
@@ -144,10 +144,14 @@ public class BnfGenerationService {
       if (!(bnfFile instanceof BnfFile)) continue;
 
       String parserClass = getRootAttribute(bnfFile, KnownAttribute.PARSER_CLASS);
-      VirtualFile target = getTargetDirectoryFor(project, file, StringUtil.getShortName(parserClass) + ".java", StringUtil.getPackageName(parserClass), true);
+      boolean preferGenRoot = true; // todo file.getFileType() == BnfFileType.INSTANCE || file.getFileType() == JFlexFileType.INSTANCE;
+      VirtualFile target =
+        getTargetDirectoryFor(project, file, StringUtil.getShortName(parserClass) + ".java", StringUtil.getPackageName(parserClass), true,
+                              preferGenRoot);
       String psiOutput = getRootAttribute(bnfFile, KnownAttribute.PSI_OUTPUT_PATH);
 
-      VirtualFile psiTarget = psiOutput.isEmpty() ? null : FileGeneratorUtil.getTargetDirectoryRelativeToContentRoot(file, project, psiOutput, "", true);
+      VirtualFile psiTarget =
+        psiOutput.isEmpty() ? null : FileGeneratorUtil.getTargetDirectoryRelativeToContentRoot(file, project, psiOutput, "", true);
       rootMap.put(file, target);
       psiRootMap.put(file, psiTarget);
       packageMap.put(target, StringUtil.notNullize(packageIndex.getPackageNameByDirectory(target)));

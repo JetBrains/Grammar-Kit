@@ -2,7 +2,7 @@
  * Copyright 2011-2026 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
  */
 
-package org.intellij.grammar.actions;
+package org.intellij.grammar.generator.batch;
 
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.PackageIndex;
@@ -29,7 +29,7 @@ import java.util.Map;
  *                   {@link PackageIndex} assigns to it; used as a prefix when the generator
  *                   computes fully-qualified class names for nested source roots.
  */
-record BatchGenerationContext(
+public record BatchGenerationContext(
   @NotNull Project project,
   @NotNull List<VirtualFile> bnfFiles,
   @NotNull Map<VirtualFile, VirtualFile> rootMap,

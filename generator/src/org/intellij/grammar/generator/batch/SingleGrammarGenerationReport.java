@@ -2,7 +2,7 @@
  * Copyright 2011-2026 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
  */
 
-package org.intellij.grammar.actions;
+package org.intellij.grammar.generator.batch;
 
 import com.intellij.openapi.vfs.VirtualFile;
 import org.jetbrains.annotations.NotNull;
@@ -30,7 +30,7 @@ public record SingleGrammarGenerationReport(
   @Nullable String duration,
   File genDir
 ) {
-  static @NotNull SingleGrammarGenerationReport notFound() {
+  public static @NotNull SingleGrammarGenerationReport notFound() {
     return new SingleGrammarGenerationReport(true, List.of(), List.of(), 0, null, null);
   }
 }

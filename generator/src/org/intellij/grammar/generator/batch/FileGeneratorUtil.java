@@ -1,8 +1,8 @@
 /*
- * Copyright 2011-2020 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
+ * Copyright 2011-2026 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
  */
 
-package org.intellij.grammar.actions;
+package org.intellij.grammar.generator.batch;
 
 import com.intellij.notification.Notification;
 import com.intellij.notification.NotificationType;
@@ -23,7 +23,7 @@ import com.intellij.psi.search.ProjectScope;
 import org.intellij.grammar.BnfFileType;
 import org.intellij.grammar.config.Options;
 import org.intellij.grammar.generator.CommonBnfConstants;
-import org.intellij.jflex.parser.JFlexFileType;
+
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -85,7 +85,9 @@ public class FileGeneratorUtil {
                                                            @NotNull VirtualFile sourceFile,
                                                            @Nullable String targetFile,
                                                            @Nullable String targetPackage,
-                                                           boolean returnRoot) {
+                                                           boolean returnRoot,
+                                                           boolean preferGenRoot
+  ) {
     boolean hasPackage = StringUtil.isNotEmpty(targetPackage);
     ProjectRootManager rootManager = ProjectRootManager.getInstance(project);
     PackageIndex packageIndex = PackageIndex.getInstance(project);
@@ -98,8 +100,6 @@ public class FileGeneratorUtil {
       fileIndex.isInSourceContent(existingFile) ? fileIndex.getSourceRootForFile(existingFile) :
       fileIndex.isInContent(existingFile) ? fileIndex.getContentRootForFile(existingFile) : null;
 
-    boolean preferGenRoot = sourceFile.getFileType() == BnfFileType.INSTANCE ||
-                            sourceFile.getFileType() == JFlexFileType.INSTANCE;
     boolean preferSourceRoot = hasPackage && !preferGenRoot;
     VirtualFile[] sourceRoots = rootManager.getContentSourceRoots();
     VirtualFile[] contentRoots = rootManager.getContentRoots();
@@ -198,11 +198,11 @@ public class FileGeneratorUtil {
     }
   }
 
-  static void fail(@NotNull Project project, @NotNull VirtualFile sourceFile, @NotNull String message) {
+  public static void fail(@NotNull Project project, @NotNull VirtualFile sourceFile, @NotNull String message) {
     fail(project, sourceFile.getName(), message);
   }
 
-  static void fail(@NotNull Project project, @NotNull String title, @NotNull String message) {
+  public static void fail(@NotNull Project project, @NotNull String title, @NotNull String message) {
     Notifications.Bus.notify(new Notification(
       CommonBnfConstants.GENERATION_GROUP,
       title, message,

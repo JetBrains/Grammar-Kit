@@ -164,7 +164,7 @@ public final class KotlinParserGenerator extends Generator {
         stubName = stubClass;
       }
       else if (implSuper.indexOf("<") < implSuper.indexOf(">") &&
-               !myJavaHelper
+               !helperFor(rule, KnownAttribute.MIXIN)
                  .findClassMethods(implSuperRaw, JavaHelper.MethodType.INSTANCE, "getParentByStub", 0).isEmpty()) {
         stubName = implSuper.substring(implSuper.indexOf("<") + 1, implSuper.indexOf(">"));
       }

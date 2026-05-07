@@ -11,9 +11,9 @@ import java.nio.file.Path;
 import java.util.Map;
 
 /**
- * Immutable snapshot of every {@code *OutputPath} resolution for a single BNF file. Pure data
- * holder — no inference, no cascade. The map passed in is treated as the fully resolved view:
- * {@link #path} and {@link #pathString} are direct map lookups.
+ * Immutable snapshot of every {@code *InputPath} / {@code *OutputPath} resolution for a single
+ * BNF file. Pure data holder — no inference, no cascade. The map passed in is treated as the
+ * fully resolved view: {@link #path} and {@link #pathString} are direct map lookups.
  *
  * <p>Build via {@link BnfPaths#resolve(org.intellij.grammar.psi.BnfFile)} for a real file
  * (cached) or {@link BnfPaths#resolveExplicit(Map)} for a partial map (applies the
@@ -30,8 +30,8 @@ public final class BnfPathsResolution {
 
   /**
    * Effective absolute on-disk path for {@code attribute}, or {@code null} when the resolution
-   * has no value for it (typically an output attribute on a resolution that has no
-   * {@code parserOutputPath} root).
+   * has no value for it (typically an input attribute the user didn't set, or an output
+   * attribute on a resolution that has no {@code parserOutputPath} root).
    */
   public @Nullable Path path(@NotNull KnownAttribute<String> attribute) {
     return myPaths.get(attribute);

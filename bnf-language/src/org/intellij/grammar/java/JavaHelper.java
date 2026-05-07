@@ -40,14 +40,16 @@ import java.util.*;
 public abstract class JavaHelper {
 
   /**
-   * Returns the {@link JavaHelper} to use for the given {@code context}. Inside the IDE this is the
-   * project-level {@link PsiHelper} service registered in {@code plugin-java.xml}. When no service is
-   * available (e.g. light tests, command-line usage), falls back to a fresh {@link AsmHelper} so the
-   * caller still gets bytecode-driven introspection rather than {@code null}.
+   * Returns the {@link JavaHelper} to use for the given {@code context}. Inside the IDE this is a
+   * fresh {@code PsiHelper} produced by the project-level {@code PsiHelperFactory} service
+   * (registered in {@code plugin-java.xml}); the factory bakes a {@code *InputPath}-derived search
+   * scope into the helper based on {@code context}'s position in the BNF tree. When no service is
+   * available (e.g. light tests, command-line usage), falls back to a fresh {@link AsmHelper} so
+   * the caller still gets bytecode-driven introspection rather than {@code null}.
    */
   public static JavaHelper getJavaHelper(@NotNull PsiElement context) {
-    JavaHelper service = context.getProject().getService(JavaHelper.class);
-    return service == null ? new AsmHelper() : service;
+    PsiHelperFactory factory = context.getProject().getService(PsiHelperFactory.class);
+    return factory == null ? new AsmHelper() : factory.getInstance(context);
   }
 
   /**

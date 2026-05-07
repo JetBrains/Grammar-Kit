@@ -12,6 +12,7 @@ version = providers.gradleProperty("pluginVersion").get()
 
 repositories {
     mavenCentral()
+    maven("https://cache-redirector.jetbrains.com/intellij-dependencies")
     intellijPlatform {
         defaultRepositories()
     }
@@ -22,6 +23,9 @@ dependencies {
 
     implementation(project(":base"))
     implementation(project(":parser-runtime"))
+
+    implementation("org.jetbrains:syntax-api:0.3.375")
+    implementation("org.jetbrains:java-syntax:0.3.375")
 
     intellijPlatform {
         create(

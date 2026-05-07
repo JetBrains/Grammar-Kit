@@ -16,6 +16,7 @@ import com.intellij.psi.util.CachedValueProvider;
 import com.intellij.psi.util.CachedValuesManager;
 import com.intellij.psi.util.PsiModificationTracker;
 import com.intellij.util.ArrayUtil;
+import com.intellij.util.containers.ContainerUtil;
 import org.intellij.grammar.config.Options;
 import org.intellij.grammar.psi.BnfFile;
 import org.jetbrains.annotations.NotNull;
@@ -34,10 +35,11 @@ import java.util.Map;
 import static org.intellij.grammar.psi.BnfAttributes.getRootAttribute;
 
 /**
- * Single source of truth for the {@code *OutputPath} BNF attributes: the set of every path
- * attribute, the FQN-attribute ↔ path-attribute pairings, and the BNF-file-parent-relative
- * resolution rules used by every consumer (the build-time {@code BnfGenerationService} and the
- * inlay-hints provider).
+ * Single source of truth for the {@code *InputPath} and {@code *OutputPath} BNF attributes:
+ * the set of every path attribute, the FQN-attribute ↔ path-attribute pairings, and the
+ * BNF-file-parent-relative resolution rules used by every consumer (the IDE's
+ * {@code PsiHelperFactory}, the build-time {@code BnfGenerationService}, and the inlay-hints
+ * provider).
  *
  * <p>Path values are always resolved relative to the BNF file's parent directory.
  */
@@ -54,8 +56,22 @@ public final class BnfPaths {
     KnownAttribute.SYNTAX_ELEMENT_TYPE_HOLDER_OUTPUT_PATH,
     KnownAttribute.ELEMENT_TYPE_CONVERTER_FACTORY_OUTPUT_PATH);
 
-  /** Every path-valued attribute, in declaration order. */
-  public static final List<KnownAttribute<String>> ALL = OUTPUTS;
+  /** Input-path attributes, in declaration order. */
+  public static final List<KnownAttribute<String>> INPUTS = List.of(
+    KnownAttribute.INPUT_PATH,
+    KnownAttribute.PSI_INPUT_PATH);
+
+  /** Every path-valued attribute (input + output), in declaration order. */
+  public static final List<KnownAttribute<String>> ALL = ContainerUtil.concat(INPUTS, OUTPUTS);
+
+  /**
+   * FQN-attribute → its corresponding {@code *InputPath} sibling. {@code parserUtilClass} has
+   * no specific input override and falls through to the global {@code inputPath}.
+   */
+  public static final Map<KnownAttribute<?>, KnownAttribute<String>> INPUT_FOR = Map.of(
+    KnownAttribute.PSI_IMPL_UTIL_CLASS,  KnownAttribute.PSI_INPUT_PATH,
+    KnownAttribute.MIXIN,                KnownAttribute.PSI_INPUT_PATH,
+    KnownAttribute.IMPLEMENTS,           KnownAttribute.PSI_INPUT_PATH);
 
   /** FQN-attribute → its corresponding {@code *OutputPath} sibling. */
   public static final Map<KnownAttribute<?>, KnownAttribute<String>> OUTPUT_FOR = Map.ofEntries(
@@ -112,12 +128,25 @@ public final class BnfPaths {
 
   /**
    * Builds a {@link BnfPathsResolution} from a partial map of explicit path values, applying
-   * the same output cascade used for real BNF files (see {@link #applyCascade}). Use this from
-   * build-time/CLI/test entry points that have already resolved paths from non-PSI sources
-   * (e.g. command-line flags).
+   * the same input/output cascade used for real BNF files (see {@link #applyCascade}). Use
+   * this from build-time/CLI/test entry points that have already resolved paths from non-PSI
+   * sources (e.g. command-line flags).
    */
   public static @NotNull BnfPathsResolution resolveExplicit(@NotNull Map<KnownAttribute<String>, Path> explicit) {
     return new BnfPathsResolution(applyCascade(explicit));
+  }
+
+  /**
+   * CLI variant of {@link #resolveExplicit(Map)} that also seeds a default for
+   * {@link KnownAttribute#INPUT_PATH}: when neither the CLI nor the grammar provided one, it
+   * defaults to {@code bnfParent}. Mirrors the default applied by {@link #compute} for IDE
+   * editing contexts so headless runs and IDE views agree on the input scope.
+   */
+  public static @NotNull BnfPathsResolution resolveExplicit(@NotNull Map<KnownAttribute<String>, Path> explicit,
+                                                            @NotNull Path bnfParent) {
+    Map<KnownAttribute<String>, Path> seeded = new HashMap<>(explicit);
+    seeded.putIfAbsent(KnownAttribute.INPUT_PATH, bnfParent);
+    return new BnfPathsResolution(applyCascade(seeded));
   }
 
   private static @NotNull BnfPathsResolution compute(@NotNull BnfFile bnfFile) {
@@ -142,6 +171,10 @@ public final class BnfPaths {
       Path inferred = findParserPathInProject(bnfFile, bnfVf);
       if (inferred != null) resolved.put(KnownAttribute.PARSER_OUTPUT_PATH, inferred);
     }
+
+    // inputPath default: when unset, classes referenced in mixin/util attributes are looked up
+    // next to the BNF file. Symmetric to the parserOutputPath inference above.
+    resolved.putIfAbsent(KnownAttribute.INPUT_PATH, parentPath);
 
     Map<KnownAttribute<String>, Path> effectivePaths = applyCascade(resolved);
     return new BnfPathsResolution(effectivePaths);
@@ -170,19 +203,32 @@ public final class BnfPaths {
   }
 
   /**
-   * Bakes the output-path fallback chain into {@code explicit} so direct lookups via
-   * {@link BnfPathsResolution#path} see the effective values.
+   * Bakes both the input- and output-path fallback chains into {@code explicit}, in one pass,
+   * so direct lookups via {@link BnfPathsResolution#path} agree with the on-the-fly cascade
+   * computed by {@link #referencePath}.
    *
-   * <p>Two-level chain rooted at {@code parserOutputPath}: {@code psiOutputPath} →
-   * {@code parserOutputPath}; element-type artifacts ({@code elementTypeHolderOutputPath},
-   * {@code syntaxElementTypeHolderOutputPath}, {@code elementTypeConverterFactoryOutputPath})
-   * → effective {@code psiOutputPath} (which itself may be the parser dir if PSI is unset).
-   * Element-type artifacts travel with PSI rather than the parser, which matters when parser
-   * and PSI live in different source roots (e.g. Kotlin parser + Java PSI). When
-   * {@code parserOutputPath} is unset, no output default is applied.
+   * <p><b>Input cascade.</b> When {@link KnownAttribute#INPUT_PATH global inputPath} is set,
+   * an unset {@code psiInputPath} inherits its value. When {@code inputPath} is unset, no
+   * input default is applied.
+   *
+   * <p><b>Output cascade.</b> Two-level chain rooted at {@code parserOutputPath}:
+   * {@code psiOutputPath} → {@code parserOutputPath}; element-type artifacts
+   * ({@code elementTypeHolderOutputPath}, {@code syntaxElementTypeHolderOutputPath},
+   * {@code elementTypeConverterFactoryOutputPath}) → effective {@code psiOutputPath} (which
+   * itself may be the parser dir if PSI is unset). Element-type artifacts travel with PSI
+   * rather than the parser, which matters when parser and PSI live in different source roots
+   * (e.g. Kotlin parser + Java PSI). When {@code parserOutputPath} is unset, no output
+   * default is applied.
+   *
+   * <p>Input and output cascades touch disjoint key sets, so their order does not matter.
    */
   private static @NotNull Map<KnownAttribute<String>, Path> applyCascade(@NotNull Map<KnownAttribute<String>, Path> explicit) {
     Map<KnownAttribute<String>, Path> next = new HashMap<>(explicit);
+
+    Path inputGlobal = next.get(KnownAttribute.INPUT_PATH);
+    if (inputGlobal != null) {
+      next.putIfAbsent(KnownAttribute.PSI_INPUT_PATH, inputGlobal);
+    }
 
     Path parser = next.get(KnownAttribute.PARSER_OUTPUT_PATH);
     if (parser != null) {
@@ -194,6 +240,40 @@ public final class BnfPaths {
     }
 
     return Map.copyOf(next);
+  }
+
+  /**
+   * Cascade lookup keyed on a class-reference FQN attribute (e.g. {@code mixin},
+   * {@code parserClass}). Used by {@code PsiHelperFactory} to scope reference resolution for
+   * each FQN attribute to the directory tree it points into.
+   * <ol>
+   *   <li>Specific {@code *InputPath} sibling per {@link #INPUT_FOR} — if non-null,
+   *       returned. Otherwise falls through to the global {@code inputPath}.</li>
+   *   <li>Specific {@code *OutputPath} sibling per {@link #OUTPUT_FOR} — resolved via
+   *       {@link BnfPathsResolution#path}. Output attributes do <i>not</i> fall back to the
+   *       global {@code inputPath}.</li>
+   *   <li>Global {@link KnownAttribute#INPUT_PATH} — if non-null, returned.</li>
+   *   <li>Otherwise null.</li>
+   * </ol>
+   */
+  public static @Nullable Path referencePath(@NotNull BnfPathsResolution resolution,
+                                             @Nullable KnownAttribute<?> fqnAttribute) {
+    if (fqnAttribute != null) {
+      KnownAttribute<String> input = INPUT_FOR.get(fqnAttribute);
+      if (input != null) {
+        Path p = resolution.path(input);
+        if (p != null) return p;
+        // fall through to global inputPath
+      }
+      else {
+        KnownAttribute<String> output = OUTPUT_FOR.get(fqnAttribute);
+        if (output != null) {
+          // output attributes do not fall back to the global inputPath default
+          return resolution.path(output);
+        }
+      }
+    }
+    return resolution.path(KnownAttribute.INPUT_PATH);
   }
 
   private static @Nullable Path findParserPathInProject(@NotNull BnfFile bnfFile, VirtualFile bnfVf) {

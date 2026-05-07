@@ -180,18 +180,6 @@ tasks {
         dependsOn("testMain")
     }
 
-    register<Test>("testMain") {
-        group = "verification"
-        description = "Runs MainTest in an isolated JVM (LightPsi bootstrapped fresh by Main.run)"
-        useJUnit()
-        include("**/MainTest.class")
-        isScanForTestClasses = false
-        ignoreFailures = true
-        dependsOn("prepareTest")
-        testClassesDirs = files(layout.buildDirectory.dir("instrumented/instrumentTestCode"))
-        classpath = sourceSets["test"].runtimeClasspath + configurations["intellijPlatformTestClasspath"]
-    }
-
     withType<Javadoc>().configureEach {
         (options as StandardJavadocDocletOptions).apply {
             addStringOption("Xdoclint:none", "-quiet")
@@ -303,6 +291,21 @@ tasks {
         centralPortalToken = providers.gradleProperty("centralPortalToken")
 
         dependsOn(packSonatypeCentralBundle)
+    }
+}
+
+intellijPlatformTesting {
+    testIde.register("testMain") {
+        task {
+            group = "verification"
+            description = "Runs MainTest in an isolated JVM (LightPsi bootstrapped fresh by Main.run)"
+            useJUnit()
+            include("**/MainTest.class")
+            isScanForTestClasses = false
+            ignoreFailures = true
+            testClassesDirs = files(layout.buildDirectory.dir("instrumented/instrumentTestCode"))
+        }
+        sandboxDirectory = layout.buildDirectory.dir("testMain-sandbox")
     }
 }
 

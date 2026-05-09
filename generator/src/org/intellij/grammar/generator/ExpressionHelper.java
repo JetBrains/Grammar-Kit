@@ -36,6 +36,9 @@ import static org.intellij.grammar.psi.BnfRules.getSuperRules;
  * @author gregsh
  */
 public class ExpressionHelper {
+  private static final Key<CachedValue<ExpressionHelper>> EXPRESSION_HELPER_KEY = Key.create("EXPRESSION_HELPER_KEY");
+  private static final Key<List<BnfExpression>> ORIGINAL_EXPRESSIONS = Key.create("ORIGINAL_EXPRESSIONS");
+
   private final BnfFile myFile;
   private final RuleGraphHelper myRuleGraph;
   private final Consumer<String> myWarningConsumer;
@@ -43,7 +46,6 @@ public class ExpressionHelper {
   private final Map<BnfRule, ExpressionInfo> myExpressionMap = new HashMap<>();
   private final Map<BnfRule, BnfRule> myRootRulesMap = new HashMap<>();
 
-  private static final Key<CachedValue<ExpressionHelper>> EXPRESSION_HELPER_KEY = Key.create("EXPRESSION_HELPER_KEY");
   public static ExpressionHelper getCached(@NotNull BnfFile file) {
     CachedValue<ExpressionHelper> value = file.getUserData(EXPRESSION_HELPER_KEY);
     if (value == null) {
@@ -52,7 +54,6 @@ public class ExpressionHelper {
     }
     return value.getValue();
   }
-
 
   public ExpressionHelper(BnfFile file, RuleGraphHelper ruleGraph, @Nullable Consumer<String> warningConsumer) {
     myFile = file;
@@ -93,7 +94,8 @@ public class ExpressionHelper {
         myRootRulesMap.put(rule, rule);
         myExpressionMap.put(rule, expressionInfo);
       }
-      ops: for (OperatorInfo info : expressionInfo.operatorMap.values()) {
+      ops:
+      for (OperatorInfo info : expressionInfo.operatorMap.values()) {
         Map<PsiElement, RuleGraphHelper.Cardinality> map = myRuleGraph.collectMembers(info.rule(), info.operator(), new HashSet<>());
         for (RuleGraphHelper.Cardinality c : map.values()) {
           if (!c.optional()) continue ops;
@@ -174,7 +176,7 @@ public class ExpressionHelper {
         info = new OperatorInfo(rule, OperatorType.POSTFIX, combine(childExpressions.subList(1, childExpressions.size())), null, arg1, null);
       }
       else if (index == -1) {
-        addWarning(rule +": " + rootRuleName + " reference not found, treating as ATOM");
+        addWarning(rule + ": " + rootRuleName + " reference not found, treating as ATOM");
         info = new OperatorInfo(rule, OperatorType.ATOM, rule.getExpression(), null);
       }
       else {
@@ -187,7 +189,7 @@ public class ExpressionHelper {
       int index1 = indexOf(rootRuleSubst, 0, childExpressions, expressionInfo);
       int index2 = indexOf(rootRuleSubst, 1, childExpressions, expressionInfo);
       if (index1 != 0) {
-        addWarning(rule +": binary or n-ary expression cannot have prefix, treating as ATOM");
+        addWarning(rule + ": binary or n-ary expression cannot have prefix, treating as ATOM");
         info = new OperatorInfo(rule, OperatorType.ATOM, rule.getExpression(), null);
       }
       else if (index2 == 1) {
@@ -207,7 +209,7 @@ public class ExpressionHelper {
           int index3 = indexOf(rootRuleSubst, 0, childExpressions2, expressionInfo);
           if (badNAry || index3 == -1) {
             addWarning(
-                rule + ": '" + rootRuleName + " ( <op> " + rootRuleName + ") +' expected for N-ary operator, treating as POSTFIX"
+              rule + ": '" + rootRuleName + " ( <op> " + rootRuleName + ") +' expected for N-ary operator, treating as POSTFIX"
             );
             info = new OperatorInfo(rule, OperatorType.POSTFIX, combine(childExpressions.subList(1, childExpressions.size())), null,
                                     arg1, null);
@@ -226,7 +228,7 @@ public class ExpressionHelper {
       }
     }
     else {
-      addWarning(rule +": unexpected cardinality " + cardinality + " of " + rootRuleName +", treating as ATOM");
+      addWarning(rule + ": unexpected cardinality " + cardinality + " of " + rootRuleName + ", treating as ATOM");
       info = new OperatorInfo(rule, OperatorType.ATOM, rule.getExpression(), null);
     }
     expressionInfo.operatorMap.put(rule, info);
@@ -235,10 +237,9 @@ public class ExpressionHelper {
   private @Nullable BnfRule substRule(List<BnfExpression> list, int idx, BnfRule rootRule) {
     if (idx < 0) return null;
     BnfRule rule = myFile.getRule(list.get(idx).getText());
-    return rule == rootRule? null : rule;
+    return rule == rootRule ? null : rule;
   }
 
-  private static final Key<List<BnfExpression>> ORIGINAL_EXPRESSIONS = Key.create("ORIGINAL_EXPRESSIONS");
   private static BnfExpression combine(List<BnfExpression> list) {
     if (list.isEmpty()) return null;
     if (list.size() == 1) return list.get(0);

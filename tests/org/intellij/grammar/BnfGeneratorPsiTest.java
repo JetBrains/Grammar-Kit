@@ -12,6 +12,7 @@ import com.intellij.testFramework.fixtures.BasePlatformTestCase;
 import com.intellij.util.ProcessingContext;
 import org.intellij.grammar.generator.Generator;
 import org.intellij.grammar.generator.JavaParserGenerator;
+import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.generator.NameShortener;
 import org.intellij.grammar.generator.OutputOpener;
 import org.intellij.grammar.java.JavaHelper;
@@ -231,7 +232,8 @@ public class BnfGeneratorPsiTest extends BasePlatformTestCase {
       }
       return OutputOpener.DEFAULT.openOutput(className, file, myBnfFile);
     };
-    JavaParserGenerator generator = new JavaParserGenerator(bnfFile, "", FileUtilRt.getTempDirectory(), "", outputOpener);
+    JavaParserGenerator generator = new JavaParserGenerator(bnfFile, "", "", outputOpener,
+      BnfPaths.resolveExplicit(java.util.Map.of(KnownAttribute.PARSER_OUTPUT_PATH, java.nio.file.Path.of(FileUtilRt.getTempDirectory()))));
 
     // Simulate PsiHelper bug for qualified types (#436):
     // In real IDE with platform SDK classes resolved from bytecode,

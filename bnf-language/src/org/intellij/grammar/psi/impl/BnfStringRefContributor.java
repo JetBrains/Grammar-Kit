@@ -25,7 +25,16 @@ class BnfStringRefContributor extends PsiReferenceContributor {
 
   private static final Set<KnownAttribute<?>> RULE_ATTRIBUTES = Set.of(EXTENDS, IMPLEMENTS, RECOVER_WHILE, NAME);
 
-  private static final Set<KnownAttribute<?>> JAVA_CLASS_ATTRIBUTES = Set.of(EXTENDS, IMPLEMENTS, MIXIN);
+  private static final Set<KnownAttribute<?>> JAVA_REFERENCE_ATTRIBUTES = Set.of(
+    EXTENDS, IMPLEMENTS, MIXIN,
+    PARSER_CLASS, PARSER_UTIL_CLASS,
+    PSI_IMPL_UTIL_CLASS, PSI_TREE_UTIL_CLASS,
+    ELEMENT_TYPE_CLASS, ELEMENT_TYPE_HOLDER_CLASS,
+    ELEMENT_TYPE_CONVERTER_FACTORY_CLASS,
+    SYNTAX_ELEMENT_TYPE_HOLDER_CLASS,
+    TOKEN_TYPE_CLASS, STUB_CLASS,
+    PSI_PACKAGE, PSI_IMPL_PACKAGE,
+    ELEMENT_TYPE_FACTORY, SYNTAX_ELEMENT_TYPE_FACTORY, TOKEN_TYPE_FACTORY);
 
   @Override
   public void registerReferenceProviders(@NotNull PsiReferenceRegistrar registrar) {
@@ -52,8 +61,7 @@ class BnfStringRefContributor extends PsiReferenceContributor {
 
     registrar.registerReferenceProvider(
       psiElement(BnfStringImpl.class).withAncestor(3, psiElement(BnfAttr.class).withName(
-        or(string().endsWith("Class"), string().endsWith("Package"), string().endsWith("TypeFactory"),
-           string().with(oneOf(JAVA_CLASS_ATTRIBUTES))))),
+        string().with(oneOf(JAVA_REFERENCE_ATTRIBUTES)))),
       new PsiReferenceProvider() {
 
         @Override

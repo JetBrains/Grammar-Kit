@@ -1,4 +1,4 @@
-// ---- org/intellij/grammar/BnfSyntaxTypes.kt -----------------
+// ---- ../grammar-kit/psi/org/intellij/grammar/BnfSyntaxTypes.kt -----------------
 // license.txt
 package org.intellij.grammar
 

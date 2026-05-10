@@ -16,6 +16,7 @@ import com.intellij.util.ObjectUtils;
 import com.intellij.util.containers.ContainerUtil;
 import com.intellij.util.containers.JBIterable;
 import com.intellij.util.containers.MultiMap;
+import org.intellij.grammar.BnfPathsResolution;
 import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.analysis.BnfFirstNextAnalyzer;
 import org.intellij.grammar.generator.NodeCalls.*;
@@ -27,6 +28,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.*;
 
 import static java.lang.String.format;
@@ -48,7 +50,7 @@ public sealed abstract class Generator permits JavaParserGenerator, KotlinParser
    * The input BNF file to generate the parser from.
    */
   protected final @NotNull BnfFile myFile;
-  protected final @NotNull String myOutputPath;
+  protected final @NotNull BnfPathsResolution myPaths;
 
   /**
    * The package prefix to use for the generated parser.
@@ -115,18 +117,18 @@ public sealed abstract class Generator permits JavaParserGenerator, KotlinParser
 
   protected Generator(@NotNull BnfFile psiFile,
                       @NotNull String sourcePath,
-                      @NotNull String outputPath,
                       @NotNull String packagePrefix,
                       @NotNull String outputFileExtension,
                       @NotNull OutputOpener outputOpener,
-                      @NotNull NameRenderer nameRenderer) {
+                      @NotNull NameRenderer nameRenderer,
+                      @NotNull BnfPathsResolution paths) {
     myFile = psiFile;
 
     G = new GenOptions(psiFile);
     N = G.names;
     R = nameRenderer;
     mySourcePath = sourcePath;
-    myOutputPath = outputPath;
+    myPaths = paths;
     myPackagePrefix = packagePrefix;
     myOutputFileExtension = outputFileExtension;
     myOpener = outputOpener;
@@ -175,10 +177,19 @@ public sealed abstract class Generator permits JavaParserGenerator, KotlinParser
              "// " + classHeader;
   }
 
-  protected void openOutput(String className) throws IOException {
+  /**
+   * Opens an output file for {@code className} under {@code basePath} (with {@link #myPackagePrefix}
+   * stripped from the FQN), and installs a fresh {@link FilePrinter} as the current output sink.
+   * Callers pass the resolved path attribute that owns the artifact, e.g.
+   * {@code myPaths.pathString(KnownAttribute.PARSER_OUTPUT_PATH)} —
+   * {@link BnfPathsResolution#pathString} throws if the attribute has no value, so a missing
+   * directory surfaces at the call site rather than here.
+   */
+  protected void openOutput(@NotNull String className, @NotNull String basePath) throws IOException {
     String classNameAdjusted = myPackagePrefix.isEmpty() ? className : StringUtil.trimStart(className, myPackagePrefix + ".");
-    File file = new File(myOutputPath, classNameAdjusted.replace('.', File.separatorChar) + "." + myOutputFileExtension);
-    myPrinter = new FilePrinter(myOpener.openOutput(className, file, myFile));
+    File file = new File(basePath, classNameAdjusted.replace('.', File.separatorChar) + "." + myOutputFileExtension);
+    PrintWriter output = myOpener.openOutput(className, file, myFile);
+    myPrinter = new FilePrinter(output);
   }
 
   protected void closeOutput() {

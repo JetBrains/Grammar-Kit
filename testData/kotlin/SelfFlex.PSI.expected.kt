@@ -1,4 +1,4 @@
-// ---- org/intellij/jflex/JFlexTypes.kt -----------------
+// ---- ../grammar-kit/psi/org/intellij/jflex/JFlexTypes.kt -----------------
 // license.txt
 package org.intellij.jflex
 

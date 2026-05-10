@@ -18,6 +18,7 @@ import com.intellij.util.Function;
 import com.intellij.util.ObjectUtils;
 import com.intellij.util.SmartList;
 import com.intellij.util.containers.*;
+import org.intellij.grammar.BnfPathsResolution;
 import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.analysis.BnfFirstNextAnalyzer;
 import org.intellij.grammar.generator.NodeCalls.*;
@@ -96,14 +97,13 @@ public final class JavaParserGenerator extends Generator {
 
   private final ExpressionHelper myExpressionHelper;
   private final RuleMethodsHelper myRulesMethodsHelper;
-  private final JavaHelper myJavaHelper;
 
   public JavaParserGenerator(@NotNull BnfFile psiFile,
                              @NotNull String sourcePath,
-                             @NotNull String outputPath,
                              @NotNull String packagePrefix,
-                             @NotNull OutputOpener outputOpener) {
-    super(psiFile, sourcePath, outputPath, packagePrefix, "java", outputOpener, new JavaNameRenderer());
+                             @NotNull OutputOpener outputOpener,
+                             @NotNull BnfPathsResolution paths) {
+    super(psiFile, sourcePath, packagePrefix, "java", outputOpener, new JavaNameRenderer(), paths);
 
     myPsiInterfaceFormat = NameFormat.forPsiClass(myFile);
     myImplClassFormat = NameFormat.forPsiImplClass(myFile);
@@ -121,7 +121,6 @@ public final class JavaParserGenerator extends Generator {
 
     myExpressionHelper = new ExpressionHelper(myFile, myGraphHelper, this::addWarning);
     myRulesMethodsHelper = new RuleMethodsHelper(myGraphHelper, myExpressionHelper, mySimpleTokens, G);
-    myJavaHelper = JavaHelper.getJavaHelper(myFile);
 
     List<BnfRule> rules = psiFile.getRules();
     BnfRule rootRule = rules.isEmpty() ? null : rules.get(0);
@@ -264,7 +263,7 @@ public final class JavaParserGenerator extends Generator {
       calcRealSuperClasses(sortedPsiRules);
     }
     if (myGrammarRoot != null && (G.generateTokenTypes || G.generateElementTypes || G.generatePsi && G.generatePsiFactory)) {
-      openOutput(myPsiElementTypeHolderClass);
+      openOutput(myPsiElementTypeHolderClass, myPaths.pathString(KnownAttribute.ELEMENT_TYPE_HOLDER_OUTPUT_PATH));
       try {
         generateElementTypesHolder(myPsiElementTypeHolderClass,
                                    sortedCompositeTypes,
@@ -277,7 +276,7 @@ public final class JavaParserGenerator extends Generator {
     }
     if (G.parserApi == GenOptions.ParserApi.Syntax) {
       var converterClass = getRootAttribute(myFile, KnownAttribute.ELEMENT_TYPE_CONVERTER_FACTORY_CLASS);
-      openOutput(converterClass);
+      openOutput(converterClass, myPaths.pathString(KnownAttribute.ELEMENT_TYPE_CONVERTER_FACTORY_OUTPUT_PATH));
       try {
         generateElementTypesConverter(converterClass,
                                       myParserTypeHolderClass,
@@ -294,7 +293,7 @@ public final class JavaParserGenerator extends Generator {
   }
 
   /** Warns when {@code className} is configured but not resolvable on the classpath. */
-  private void checkClassAvailability(@Nullable String className) {
+  private void checkClassAvailability(@Nullable String className, @NotNull KnownAttribute<?> attribute) {
     if (StringUtil.isEmpty(className)) return;
     if (myJavaHelper.findClass(className) == null) {
       String tail = StringUtil.isEmpty("PSI method signatures will not be detected") ? "" : " (PSI method signatures will not be detected)";
@@ -440,7 +439,7 @@ public final class JavaParserGenerator extends Generator {
   public void generateParser() throws IOException {
     Map<String, Set<RuleInfo>> classified = ContainerUtil.classify(myRuleInfos.values().iterator(), o -> o.parserClass);
     for (String className : ContainerUtil.sorted(classified.keySet())) {
-      openOutput(className);
+      openOutput(className, myPaths.pathString(KnownAttribute.PARSER_OUTPUT_PATH));
       try {
         generateParser(className, map(classified.get(className), it -> it.name));
       }
@@ -1370,11 +1369,12 @@ public final class JavaParserGenerator extends Generator {
   /*PSI******************************************************************/
   /** Emits the PSI interface and impl for each rule, plus the visitor when one is configured. */
   private void generatePsi(Map<String, BnfRule> sortedPsiRules) throws IOException {
-    checkClassAvailability(myPsiImplUtilClass);
+    checkClassAvailability(myPsiImplUtilClass, KnownAttribute.PSI_IMPL_UTIL_CLASS);
     myRulesMethodsHelper.buildMaps(sortedPsiRules.values());
+    String psiOutput = myPaths.pathString(KnownAttribute.PSI_OUTPUT_PATH);
     for (BnfRule rule : sortedPsiRules.values()) {
       RuleInfo info = ruleInfo(rule);
-      openOutput(info.intfClass);
+      openOutput(info.intfClass, psiOutput);
       try {
         generatePsiIntf(rule, info);
       }
@@ -1384,7 +1384,7 @@ public final class JavaParserGenerator extends Generator {
     }
     for (BnfRule rule : sortedPsiRules.values()) {
       RuleInfo info = ruleInfo(rule);
-      openOutput(info.implClass);
+      openOutput(info.implClass, psiOutput);
       try {
         generatePsiImpl(rule, info);
       }
@@ -1393,7 +1393,7 @@ public final class JavaParserGenerator extends Generator {
       }
     }
     if (myVisitorClassName != null && myGrammarRoot != null) {
-      openOutput(myVisitorClassName);
+      openOutput(myVisitorClassName, psiOutput);
       try {
         generateVisitor(myVisitorClassName, sortedPsiRules);
       }

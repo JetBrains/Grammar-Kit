@@ -265,3 +265,62 @@ Element type constants are generated as `val` declarations in a Kotlin `object` 
 
 [jb:slack]: https://plugins.jetbrains.com/slack
 [jb:x]: https://x.com/JBPlatform
+                                              
+
+Headless CLI
+------------
+
+Grammar-Kit ships a headless entry point at `org.intellij.grammar.Main` for build scripts and CI:
+
+```
+java -cp <grammar-kit-and-deps> org.intellij.grammar.Main <grammar-file> [options]
+```
+
+The grammar file can be a path or a glob pattern (e.g. `grammars/*.bnf`). Output directories
+can be set per-attribute either inside the grammar header or via CLI flags — flags mirror the
+attribute names:
+
+| Flag                                             | Grammar attribute                       |
+|--------------------------------------------------|-----------------------------------------|
+| `--parser-output <path>`                         | `parserOutputPath`                      |
+| `--psi-output <path>`                            | `psiOutputPath`                         |
+| `--element-type-holder-output <path>`            | `elementTypeHolderOutputPath`           |
+| `--syntax-element-type-holder-output <path>`     | `syntaxElementTypeHolderOutputPath`     |
+| `--element-type-converter-factory-output <path>` | `elementTypeConverterFactoryOutputPath` |
+
+**Setting paths in the grammar.** All five path attributes can also be declared in the grammar
+header. Values are resolved relative to the BNF file's parent directory; an empty string is
+treated as unset. The IDE's *Generate Parser* action and the headless CLI honor the same
+attributes, so a grammar that pins its layout works the same way in both:
+
+```
+{
+  parserClass="com.example.MyParser"
+  parserOutputPath="../build/gen"          // where the parser file lands
+  psiOutputPath="../build/gen-psi"         // PSI separated from parser
+  elementTypeHolderOutputPath="../build/gen-types"
+
+  parserUtilClass="com.example.MyParserUtil"
+}
+```
+
+Per-attribute documentation is available via Ctrl-Q / Cmd-J on the attribute name in the IDE.
+
+**Per-path precedence.** Resolution is per attribute, not global: a CLI flag overrides only the
+attribute it names, leaving other grammar-declared paths intact. Unset output paths cascade from
+`parserOutputPath` (parser → psi → element-type holders/converter), so passing only
+`--parser-output` is enough for typical projects.
+
+**Conflict handling.** When the same attribute is set both on the CLI and in the grammar header
+with different values, the CLI value wins and a warning is printed to stderr:
+
+```
+warning: parserOutputPath: CLI value '/build/gen' overrides grammar value '/src/gen'
+```
+
+Pass `--strict-paths` to make such conflicts fatal (exit code 1) — useful for CI to catch drift
+between build scripts and grammar headers.
+
+**Legacy form.** The old positional invocation `Main <output-dir> <grammars or patterns>` is still
+accepted but emits a deprecation warning. It is equivalent to passing `--parser-output <output-dir>`
+in the new form. New scripts should use the flag form.

@@ -1,0 +1,23 @@
+<html>
+<body>
+A path to generate the IElement-type holder class in, resolved <b>relative to the BNF file's parent
+directory</b>. When unset, the holder is written next to the parser (in pure-Java mode) or next to
+the PSI files (in syntax-API/Kotlin mode), preserving previous behavior.
+
+<h2>Examples:</h2>
+<pre><code>
+  {
+    elementTypeHolderClass="com.example.MyTypes"
+    //Given that BNF file is located at "path/to/project/grammar.bnf"
+    //Resulting holder file would be placed in "path/to/project/generated/types/com/example/MyTypes.java"
+    elementTypeHolderOutputPath="generated/types"
+  }
+</code></pre>
+
+<p><b>CLI override:</b> the headless generator accepts
+<code>--element-type-holder-output &lt;path&gt;</code>. When both this attribute and the CLI flag
+specify different paths, the CLI value wins and a warning is printed. Pass
+<code>--strict-paths</code> to make such conflicts fatal.</p>
+
+</body>
+</html>

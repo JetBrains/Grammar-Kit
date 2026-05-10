@@ -98,7 +98,9 @@ public class BnfGenerationServiceTest extends BnfGeneratorTestCase {
   public void testGenerateInBatchEmptyList() {
     var ctx = new BatchGenerationContext(
       getProject(), List.of(),
-      new LinkedHashMap<>(), new LinkedHashMap<>(), new LinkedHashMap<>()
+      new LinkedHashMap<>(), new LinkedHashMap<>(),
+      new LinkedHashMap<>(), new LinkedHashMap<>(), new LinkedHashMap<>(),
+      new LinkedHashMap<>()
     );
 
     List<VirtualFile> started = new ArrayList<>();
@@ -119,7 +121,9 @@ public class BnfGenerationServiceTest extends BnfGeneratorTestCase {
     // Empty rootMap: get() returns null → targetNotFound, batch stops after first file
     var ctx = new BatchGenerationContext(
       getProject(), List.of(vf1, vf2),
-      new LinkedHashMap<>(), new LinkedHashMap<>(), new LinkedHashMap<>()
+      new LinkedHashMap<>(), new LinkedHashMap<>(),
+      new LinkedHashMap<>(), new LinkedHashMap<>(), new LinkedHashMap<>(),
+      new LinkedHashMap<>()
     );
 
     List<VirtualFile> startedFiles = new ArrayList<>();
@@ -143,7 +147,9 @@ public class BnfGenerationServiceTest extends BnfGeneratorTestCase {
     VirtualFile vf = createPsiFile("a.bnf", "{ }").getVirtualFile();
     var ctx = new BatchGenerationContext(
       getProject(), List.of(vf),
-      new LinkedHashMap<>(), new LinkedHashMap<>(), new LinkedHashMap<>()
+      new LinkedHashMap<>(), new LinkedHashMap<>(),
+      new LinkedHashMap<>(), new LinkedHashMap<>(), new LinkedHashMap<>(),
+      new LinkedHashMap<>()
     );
 
     List<VirtualFile> generated = new ArrayList<>();
@@ -168,7 +174,7 @@ public class BnfGenerationServiceTest extends BnfGeneratorTestCase {
                                               "{ parser-class=\"com.example.TestParser\" }\nroot ::= 'x'");
 
     Generator gen = BnfGenerationService.createGenerator(
-      bnfFile, "", new File("."), new File("."), "", new ArrayList<>()
+      bnfFile, "", "", new ArrayList<>()
     );
 
     assertInstanceOf(gen, JavaParserGenerator.class);
@@ -179,7 +185,7 @@ public class BnfGenerationServiceTest extends BnfGeneratorTestCase {
                                               "{ generate=[parser-api=\"syntax\"] parser-class=\"com.example.TestParser\" }\nroot ::= 'x'");
 
     Generator gen = BnfGenerationService.createGenerator(
-      bnfFile, "", new File("."), new File("."), "", new ArrayList<>()
+      bnfFile, "", "", new ArrayList<>()
     );
 
     assertInstanceOf(gen, KotlinParserGenerator.class);

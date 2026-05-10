@@ -1,0 +1,24 @@
+<html>
+<body>
+A path to generate the syntax-API element-type converter-factory class in, resolved <b>relative to
+the BNF file's parent directory</b>. Applies only when the syntax-API parser is enabled
+(<code>generate=[parser-api="syntax"]</code>); when unset, falls back to the PSI directory.
+
+<h2>Examples:</h2>
+<pre><code>
+  {
+    generate=[parser-api="syntax"]
+    elementTypeConverterFactoryClass="com.example.MyConverterFactory"
+    //Given that BNF file is located at "path/to/project/grammar.bnf"
+    //Resulting factory file would be placed in "path/to/project/generated/converter/com/example/MyConverterFactory.java"
+    elementTypeConverterFactoryOutputPath="generated/converter"
+  }
+</code></pre>
+
+<p><b>CLI override:</b> the headless generator accepts
+<code>--element-type-converter-factory-output &lt;path&gt;</code>. When both this attribute and the
+CLI flag specify different paths, the CLI value wins and a warning is printed. Pass
+<code>--strict-paths</code> to make such conflicts fatal.</p>
+
+</body>
+</html>

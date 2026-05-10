@@ -1,0 +1,22 @@
+<html>
+<body>
+A path to generate the parser file(s) in, resolved <b>relative to the BNF file's parent directory</b>.
+When set, the parser class's package is no longer used to derive the output directory; the explicit
+value wins.
+
+<h2>Examples:</h2>
+<pre><code>
+  {
+    parserClass="com.example.MyParser"
+    //Given that BNF file is located at "path/to/project/grammar.bnf"
+    //Resulting parser file would be placed in "path/to/project/build/gen/com/example/MyParser.java"
+    parserOutputPath="build/gen"
+  }
+</code></pre>
+
+<p><b>CLI override:</b> the headless generator accepts <code>--parser-output &lt;path&gt;</code>.
+When both this attribute and the CLI flag specify different paths, the CLI value wins and a
+warning is printed. Pass <code>--strict-paths</code> to make such conflicts fatal.</p>
+
+</body>
+</html>

@@ -1,4 +1,4 @@
-// ---- test/FooSyntaxTypes.kt -----------------
+// ---- ../myPsi/output/test/FooSyntaxTypes.kt -----------------
 //header.txt
 package test
 

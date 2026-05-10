@@ -14,9 +14,11 @@ import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.util.containers.ContainerUtil;
 import com.intellij.util.containers.JBIterable;
 import com.intellij.util.containers.MultiMap;
+import org.intellij.grammar.BnfPathsResolution;
 import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.analysis.BnfFirstNextAnalyzer;
 import org.intellij.grammar.generator.NodeCalls.*;
+import org.intellij.grammar.java.JavaHelper;
 import org.intellij.grammar.psi.*;
 import org.intellij.grammar.psi.impl.GrammarUtil;
 import org.jetbrains.annotations.NotNull;
@@ -24,6 +26,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.*;
 
 import static java.lang.String.format;
@@ -57,7 +60,7 @@ public sealed abstract class Generator permits JavaParserGenerator, KotlinParser
    * The input BNF file to generate the parser from.
    */
   protected final @NotNull BnfFile myFile;
-  protected final @NotNull String myOutputPath;
+  protected final @NotNull BnfPathsResolution myPaths;
 
   /**
    * The package prefix to use for the generated parser.
@@ -70,6 +73,8 @@ public sealed abstract class Generator permits JavaParserGenerator, KotlinParser
   protected final @NotNull GenOptions G;
   protected final @NotNull NameRenderer R;
   public final Names N;
+
+  protected final JavaHelper myJavaHelper;
 
   private final @NotNull String myOutputFileExtension;
   protected final @NotNull OutputOpener myOpener;
@@ -117,22 +122,24 @@ public sealed abstract class Generator permits JavaParserGenerator, KotlinParser
 
   protected Generator(@NotNull BnfFile psiFile,
                       @NotNull String sourcePath,
-                      @NotNull String outputPath,
                       @NotNull String packagePrefix,
                       @NotNull String outputFileExtension,
                       @NotNull OutputOpener outputOpener,
-                      @NotNull NameRenderer nameRenderer) {
+                      @NotNull NameRenderer nameRenderer,
+                      @NotNull BnfPathsResolution paths) {
     myFile = psiFile;
 
     G = new GenOptions(psiFile);
     N = G.names;
     R = nameRenderer;
     mySourcePath = sourcePath;
-    myOutputPath = outputPath;
+    myPaths = paths;
     myPackagePrefix = packagePrefix;
     myOutputFileExtension = outputFileExtension;
     myOpener = outputOpener;
 
+    myJavaHelper = JavaHelper.getJavaHelper(myFile);
+    
     List<BnfRule> rules = psiFile.getRules();
     BnfRule rootRule = rules.isEmpty() ? null : rules.get(0);
     myGrammarRoot = rootRule == null ? null : rootRule.getName();
@@ -186,13 +193,18 @@ public sealed abstract class Generator permits JavaParserGenerator, KotlinParser
   }
 
   /**
-   * Resolves {@code className} to a file under {@link #myOutputPath} (stripping {@link #myPackagePrefix})
-   * and installs a fresh {@link FilePrinter} as the current output sink.
+   * Opens an output file for {@code className} under {@code basePath} (with {@link #myPackagePrefix}
+   * stripped from the FQN), and installs a fresh {@link FilePrinter} as the current output sink.
+   * Callers pass the resolved path attribute that owns the artifact, e.g.
+   * {@code myPaths.pathString(KnownAttribute.PARSER_OUTPUT_PATH)} —
+   * {@link BnfPathsResolution#pathString} throws if the attribute has no value, so a missing
+   * directory surfaces at the call site rather than here.
    */
-  protected void openOutput(String className) throws IOException {
+  protected void openOutput(@NotNull String className, @NotNull String basePath) throws IOException {
     String classNameAdjusted = myPackagePrefix.isEmpty() ? className : StringUtil.trimStart(className, myPackagePrefix + ".");
-    File file = new File(myOutputPath, classNameAdjusted.replace('.', File.separatorChar) + "." + myOutputFileExtension);
-    myPrinter = new FilePrinter(myOpener.openOutput(className, file, myFile));
+    File file = new File(basePath, classNameAdjusted.replace('.', File.separatorChar) + "." + myOutputFileExtension);
+    PrintWriter output = myOpener.openOutput(className, file, myFile);
+    myPrinter = new FilePrinter(output);
   }
 
   protected void closeOutput() {

@@ -12,6 +12,7 @@ import org.intellij.grammar.actions.BnfGenerationServiceTest;
 import org.intellij.grammar.expression.ExpressionParserTest;
 import org.intellij.grammar.generator.JavaBnfGeneratorTest;
 import org.intellij.grammar.generator.KotlinBnfGeneratorTest;
+import org.intellij.grammar.generator.OutputPathOverridesTest;
 import org.intellij.grammar.inspection.BnfHighlightingTest;
 import org.intellij.grammar.search.BnfFileUseScopeEnlargerTest;
 import org.intellij.grammar.intention.BnfConvertOptExpressionIntentionTest;
@@ -38,6 +39,7 @@ public class BnfTestSuite extends TestCase {
     testSuite.addTestSuite(BnfMoveLeftRightTest.class);
     testSuite.addTestSuite(BnfConvertOptExpressionIntentionTest.class);
     testSuite.addTestSuite(BnfGeneratorPsiTest.class);
+    testSuite.addTestSuite(BnfPathsResolutionTest.class);
 
     testSuite.addTestSuite(BnfGenerationServiceIntegrationPlatformTest.class);
     testSuite.addTestSuite(JFlexCompletionTest.class);
@@ -57,6 +59,7 @@ public class BnfTestSuite extends TestCase {
       testSuite.addTestSuite(ExpressionParserTest.class);
       testSuite.addTestSuite(BnfLivePreviewParserTest.class);
       testSuite.addTestSuite(KotlinBnfGeneratorTest.class);
+      testSuite.addTestSuite(OutputPathOverridesTest.class);
       return testSuite;
     }
   }

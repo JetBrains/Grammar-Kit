@@ -48,11 +48,13 @@ See [How-to](HOWTO.md#25-kotlin-parser-generation-with-syntax-api) for details.
 Using with Gradle
 -----------------
 
-Invoking the parser generator from an IDE as described above is the preferred way.<br/>
-Otherwise use [gradle-grammar-kit-plugin](https://github.com/JetBrains/gradle-grammar-kit-plugin) if the following limitations are not critical:
+Invoking the parser generator from the IDE as described above is the preferred way.
+For build-time generation, use the [gradle-grammar-kit-plugin](https://github.com/JetBrains/gradle-grammar-kit-plugin), keeping the following limitations in mind:
 
-* Method mixins are not supported (two-pass generation is not implemented)
-* Generic signatures and annotations may not be correct
+* The `mixin` and `psiImplUtilClass` attributes are **not supported**. These attributes reference user-written classes that typically extend or implement the generated PSI interfaces, so compiling them requires the generator's output — while the generator, in turn, needs them to produce correctly-typed code. Resolving this cycle would require a two-pass build, which the Gradle plugin does not implement. The in-IDE generator avoids the problem because it relies on IntelliJ Java support which supports incomplete code.
+* Generic signatures and annotations on generated methods may not be correct for the same reason: without access to the resolved types of referenced classes, the generator falls back to less precise signatures.
+
+If your grammar relies on `mixin` or `psiImplUtilClass`, generate the parser and PSI from the IDE and commit the generated sources instead of running the generator from Gradle.
 
 
 Plugin features

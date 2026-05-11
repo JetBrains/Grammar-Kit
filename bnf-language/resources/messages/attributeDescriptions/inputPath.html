@@ -1,0 +1,26 @@
+<html>
+<body>
+A default source root to look up FQN-valued input attributes (such as <code>parserUtilClass</code>,
+<code>psiImplUtilClass</code>, <code>mixin</code>, <code>extends</code>, <code>implements</code>),
+resolved <b>relative to the BNF file's parent directory</b>. When set, narrows the IDE's
+<code>PsiHelper</code> class lookups from the project-wide scope to the named directory. Has no
+effect on headless / classloader-based resolution (<code>AsmHelper</code>, <code>ReflectionHelper</code>).
+
+<p>For PSI-side overrides (<code>psiImplUtilClass</code>, per-rule <code>mixin</code> and
+<code>implements</code>) see <code>psiInputPath</code>.</p>
+
+<h2>Examples:</h2>
+<pre><code>
+  {
+    //Given that BNF file is located at "path/to/project/someModule/src/main/grammars/grammar.bnf"
+    //All FQN inputs are resolved within "path/to/project/someModule/src/main/java"
+    inputPath="../java"
+  }
+</code></pre>
+
+<p><b>CLI override:</b> the headless generator accepts <code>--input-path &lt;path&gt;</code>.
+When both this attribute and the CLI flag specify different paths, the CLI value wins and a
+warning is printed. Pass <code>--strict-paths</code> to make such conflicts fatal.</p>
+
+</body>
+</html>

@@ -21,6 +21,7 @@ import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.analysis.BnfFirstNextAnalyzer;
 import org.intellij.grammar.generator.NodeCalls.*;
 import org.intellij.grammar.java.JavaHelper;
+import org.intellij.grammar.java.PsiHelperFactory;
 import org.intellij.grammar.psi.*;
 import org.intellij.grammar.psi.impl.GrammarUtil;
 import org.jetbrains.annotations.NotNull;
@@ -87,6 +88,7 @@ public sealed abstract class Generator permits JavaParserGenerator, KotlinParser
   protected final BnfFirstNextAnalyzer myFirstNextAnalyzer;
   protected final ExpressionHelper myExpressionHelper;
   protected final JavaHelper myJavaHelper;
+  private final @NotNull Map<KnownAttribute<?>, JavaHelper> myScopedHelpers = new HashMap<>();
 
   final @NotNull Map<String, RuleInfo> myRuleInfos = new TreeMap<>();
 
@@ -218,6 +220,23 @@ public sealed abstract class Generator permits JavaParserGenerator, KotlinParser
 
   protected void closeOutput() {
     myPrinter.close();
+  }
+
+  /**
+   * Returns a {@link JavaHelper} whose class-lookup scope is narrowed by the {@code *InputPath}
+   * sibling of {@code attribute}, anchored at the BNF psi node that declares it. When the
+   * attribute is not declared in the grammar, falls back to the rule (or file) — in which case
+   * only the global {@code inputPath} default applies.
+   */
+  protected final @NotNull JavaHelper helperFor(@Nullable BnfRule rule, @NotNull KnownAttribute<?> attribute) {
+    // BnfPaths.referencePath consults grammar-level (root) attributes; per-rule scoping is not
+    // supported today. The rule parameter is retained for callers' clarity and future expansion.
+    PsiHelperFactory factory = myFile.getProject().getService(PsiHelperFactory.class);
+    if (factory == null) {
+      // Headless / CLI: AsmHelper has no scope concept; one shared instance is sufficient.
+      return myJavaHelper;
+    }
+    return myScopedHelpers.computeIfAbsent(attribute, attr -> factory.getInstance(myPaths, attr));
   }
 
   public void out(String s, Object... args) {

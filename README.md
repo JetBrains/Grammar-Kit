@@ -277,7 +277,7 @@ Grammar-Kit ships a headless entry point at `org.intellij.grammar.Main` for buil
 java -cp <grammar-kit-and-deps> org.intellij.grammar.Main <grammar-file> [options]
 ```
 
-The grammar file can be a path or a glob pattern (e.g. `grammars/*.bnf`). Output directories
+The grammar file can be a path or a glob pattern (e.g. `grammars/*.bnf`). Output and input directories
 can be set per-attribute either inside the grammar header or via CLI flags — flags mirror the
 attribute names:
 
@@ -288,8 +288,10 @@ attribute names:
 | `--element-type-holder-output <path>`            | `elementTypeHolderOutputPath`           |
 | `--syntax-element-type-holder-output <path>`     | `syntaxElementTypeHolderOutputPath`     |
 | `--element-type-converter-factory-output <path>` | `elementTypeConverterFactoryOutputPath` |
+| `--input-path <path>`                            | `inputPath`                             |
+| `--psi-input <path>`                             | `psiInputPath`                          |
 
-**Setting paths in the grammar.** All five path attributes can also be declared in the grammar
+**Setting paths in the grammar.** All seven path attributes can also be declared in the grammar
 header. Values are resolved relative to the BNF file's parent directory; an empty string is
 treated as unset. The IDE's *Generate Parser* action and the headless CLI honor the same
 attributes, so a grammar that pins its layout works the same way in both:
@@ -301,16 +303,51 @@ attributes, so a grammar that pins its layout works the same way in both:
   psiOutputPath="../build/gen-psi"         // PSI separated from parser
   elementTypeHolderOutputPath="../build/gen-types"
 
-  parserUtilClass="com.example.MyParserUtil"
+  inputPath="../java"                      // narrows IDE class lookup for FQN-valued
+                                           // input attributes (parserUtilClass, …)
+  psiInputPath="../psi-src"                // optional override for psiImplUtilClass,
+                                           // mixin, and implements
 }
 ```
 
 Per-attribute documentation is available via Ctrl-Q / Cmd-J on the attribute name in the IDE.
 
-**Per-path precedence.** Resolution is per attribute, not global: a CLI flag overrides only the
-attribute it names, leaving other grammar-declared paths intact. Unset output paths cascade from
-`parserOutputPath` (parser → psi → element-type holders/converter), so passing only
-`--parser-output` is enough for typical projects.
+**Per-attribute precedence.** There is no single global output directory anymore: every path
+attribute is resolved on its own. A CLI flag overrides only the attribute it names and leaves
+every other grammar-declared path untouched.
+
+**What an unset output path falls back to.** Output paths form a two-level chain rooted at
+`parserOutputPath`:
+
+- `parserOutputPath` — when unset, it is inferred from the `parserClass` package, the same guess
+  the IDE's *Generate Parser* action has always made. Grammars that declare no path attributes at
+  all therefore keep generating exactly where they used to.
+- `psiOutputPath` — falls back to `parserOutputPath`.
+- `elementTypeHolderOutputPath`, `syntaxElementTypeHolderOutputPath` and
+  `elementTypeConverterFactoryOutputPath` — fall back to the *effective* `psiOutputPath`, i.e. to
+  the PSI directory when one is set and to the parser directory otherwise. Element types travel
+  with the PSI rather than with the parser, which matters when the two live in different source
+  roots (for example a Kotlin parser with Java PSI).
+
+So passing only `--parser-output` puts every generated artifact in one directory, which is what
+most projects want.
+
+**What the input paths do.** Input paths never affect where code is written. They narrow the
+directory tree searched when resolving FQN-valued attributes — `parserUtilClass`, `mixin`,
+`implements`, `psiImplUtilClass`, `extends` and friends — which is useful when the same class name
+exists in more than one source root:
+
+- `psiInputPath` — covers `psiImplUtilClass`, `mixin` and `implements`; falls back to `inputPath`.
+- `inputPath` — covers every other FQN-valued attribute; when unset it defaults to the BNF file's
+  parent directory, so lookup is scoped even in grammars that declare nothing. Widen it explicitly
+  if a referenced class lives outside that tree.
+- Attributes that name *generated* classes (`parserClass`, `psiPackage`, `psiImplPackage`, the
+  element-type holder classes) are resolved against their own `*OutputPath` instead, never against
+  `inputPath`.
+
+Only the IDE honors these scopes (as of now). The headless generator resolves classes from the classpath
+instead, so `--input-path` and `--psi-input` do not change what it generates — they exist so that a
+build script and a grammar header can be kept in sync and checked with `--strict-paths`.
 
 **Conflict handling.** When the same attribute is set both on the CLI and in the grammar header
 with different values, the CLI value wins and a warning is printed to stderr:

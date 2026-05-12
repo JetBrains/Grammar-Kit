@@ -17,6 +17,9 @@ import org.intellij.grammar.inspection.BnfHighlightingTest;
 import org.intellij.grammar.search.BnfFileUseScopeEnlargerTest;
 import org.intellij.grammar.intention.BnfConvertOptExpressionIntentionTest;
 import org.intellij.grammar.intention.BnfFlipChoiceIntentionTest;
+import org.intellij.grammar.java.syntax.JavaSyntaxHelperSourceTest;
+import org.intellij.grammar.java.syntax.JavaSyntaxHelperTest;
+import org.intellij.grammar.java.syntax.JavaSyntaxHelperUnitTest;
 import org.intellij.jflex.JFlexCompletionTest;
 import org.intellij.jflex.JFlexGenerationTest;
 import org.intellij.jflex.parser.JFlexParserTest;
@@ -60,6 +63,9 @@ public class BnfTestSuite extends TestCase {
       testSuite.addTestSuite(BnfLivePreviewParserTest.class);
       testSuite.addTestSuite(KotlinBnfGeneratorTest.class);
       testSuite.addTestSuite(OutputPathOverridesTest.class);
+      testSuite.addTestSuite(JavaSyntaxHelperTest.class);
+      testSuite.addTestSuite(JavaSyntaxHelperUnitTest.class);
+      testSuite.addTestSuite(JavaSyntaxHelperSourceTest.class);
       return testSuite;
     }
   }

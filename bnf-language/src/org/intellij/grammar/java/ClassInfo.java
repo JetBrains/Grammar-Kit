@@ -8,12 +8,12 @@ import com.intellij.util.SmartList;
 
 import java.util.List;
 
-class ClassInfo {
-  final List<String> typeParameters = new SmartList<>();
-  final List<String> interfaces = new SmartList<>();
-  final List<String> annotations = new SmartList<>();
-  final List<MethodInfo> methods = new SmartList<>();
-  String name;
-  String superClass;
-  int modifiers;
+public class ClassInfo {
+  public final List<String> typeParameters = new SmartList<>();
+  public final List<String> interfaces = new SmartList<>();
+  public final List<String> annotations = new SmartList<>();
+  public final List<MethodInfo> methods = new SmartList<>();
+  public String name;
+  public String superClass;
+  public int modifiers;
 }

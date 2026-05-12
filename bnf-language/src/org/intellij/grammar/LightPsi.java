@@ -275,9 +275,13 @@ public class LightPsi {
     /**
      * Registers the minimum extension points and project services {@code LightPsi}
      * needs: references search, scope enlargers/optimizers, container providers,
-     * language injectors, multi-host injectors, {@link PsiSearchHelper}, and a
-     * {@link JavaHelper} implementation. Prefers ASM-backed {@link AsmHelper};
-     * falls back to {@link ReflectionHelper} when ASM is missing from the classpath.
+     * language injectors, multi-host injectors, {@link PsiSearchHelper}, and the default
+     * {@link JavaHelper} implementation.
+     * <p>
+     * The default {@link JavaHelper} is {@link AsmHelper} (bytecode-driven introspection), or
+     * {@link ReflectionHelper} when ASM is missing from the classpath. The CLI's {@code Main}
+     * may replace this registration after grammar paths are resolved — see
+     * {@code org.intellij.grammar.java.syntax.JavaSyntaxHelper} for source-backed lookup.
      */
     @SuppressWarnings("UnstableApiUsage")
     public static void initExtensions(MockApplication application, @NotNull MockProject project) {

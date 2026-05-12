@@ -4,6 +4,7 @@
 
 package org.intellij.grammar.java;
 
+import com.intellij.openapi.project.Project;
 import com.intellij.psi.*;
 import com.intellij.util.*;
 import org.intellij.grammar.psi.*;
@@ -43,13 +44,27 @@ public abstract class JavaHelper {
    * Returns the {@link JavaHelper} to use for the given {@code context}. Inside the IDE this is a
    * fresh {@code PsiHelper} produced by the project-level {@code PsiHelperFactory} service
    * (registered in {@code plugin-java.xml}); the factory bakes a {@code *InputPath}-derived search
-   * scope into the helper based on {@code context}'s position in the BNF tree. When no service is
-   * available (e.g. light tests, command-line usage), falls back to a fresh {@link AsmHelper} so
-   * the caller still gets bytecode-driven introspection rather than {@code null}.
+   * scope into the helper based on {@code context}'s position in the BNF tree. When no factory is
+   * available (e.g. headless / CLI), returns the {@link JavaHelper} registered as a project
+   * service — {@link AsmHelper} by default, or a source-backed
+   * {@link org.intellij.grammar.java.syntax.JavaSyntaxHelper} when the CLI opted in via
+   * {@code --source-psi}. Falls back to a fresh {@link AsmHelper} when nothing is
+   * registered so callers always get a usable helper rather than {@code null}.
    */
   public static JavaHelper getJavaHelper(@NotNull PsiElement context) {
-    PsiHelperFactory factory = context.getProject().getService(PsiHelperFactory.class);
-    return factory == null ? new AsmHelper() : factory.getInstance(context);
+    Project project = context.getProject();
+    PsiHelperFactory factory = project.getService(PsiHelperFactory.class);
+    if (factory != null) {
+      return factory.getInstance(context);
+    }
+
+    //can be installed by Main to JavaSyntaxHelper
+    JavaHelper service = project.getService(JavaHelper.class);
+    if (service != null) {
+      return service;
+    }
+
+    return new AsmHelper();
   }
 
   /**
@@ -58,7 +73,7 @@ public abstract class JavaHelper {
    * match where {@code actual} is something like {@code "Outer$Inner"} and {@code expected} is the
    * outer-class name.
    */
-  static boolean acceptsName(@Nullable String expected, @Nullable String actual) {
+  public static boolean acceptsName(@Nullable String expected, @Nullable String actual) {
     return "*".equals(expected) ||
            expected != null && expected.equals(actual) ||
            expected != null && actual != null && actual.contains("$") && actual.startsWith(expected);
@@ -68,7 +83,7 @@ public abstract class JavaHelper {
    * Filters out members that are abstract (unless {@code allowAbstract}) or private constructors,
    * which Grammar-Kit cannot meaningfully invoke from generated code.
    */
-  static boolean acceptsModifiers(int modifiers, MethodType methodType, boolean allowAbstract) {
+  public static boolean acceptsModifiers(int modifiers, MethodType methodType, boolean allowAbstract) {
     return (!Modifier.isAbstract(modifiers) || allowAbstract) &&
            !(methodType == MethodType.CONSTRUCTOR && Modifier.isPrivate(modifiers));
   }

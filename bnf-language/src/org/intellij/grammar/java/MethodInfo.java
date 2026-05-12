@@ -10,21 +10,21 @@ import com.intellij.util.containers.FactoryMap;
 import java.util.List;
 import java.util.Map;
 
-class MethodInfo {
-  final List<String> types = new SmartList<>();
-  final List<String> annotatedTypes = new SmartList<>();
+public class MethodInfo {
+  public final List<String> types = new SmartList<>();
+  public final List<String> annotatedTypes = new SmartList<>();
 
   /**
    * 0 corresponds to the annotations of the method itself.
    * i corresponds to the annotations of the parameter at index i-1.
    */
-  final Map<Integer, List<String>> annotations = FactoryMap.create(o -> new SmartList<>());
-  final List<TypeParameterInfo> generics = new SmartList<>();
-  final List<String> exceptions = new SmartList<>();
-  JavaHelper.MethodType methodType;
-  String name;
-  String declaringClass;
-  int modifiers;
+  public final Map<Integer, List<String>> annotations = FactoryMap.create(o -> new SmartList<>());
+  public final List<TypeParameterInfo> generics = new SmartList<>();
+  public final List<String> exceptions = new SmartList<>();
+  public JavaHelper.MethodType methodType;
+  public String name;
+  public String declaringClass;
+  public int modifiers;
 
   @Override
   public String toString() {

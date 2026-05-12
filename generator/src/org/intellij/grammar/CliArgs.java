@@ -18,10 +18,14 @@ import java.util.Map;
  * Parsed CLI invocation. {@code paths} holds explicit absolute path overrides keyed by
  * the corresponding {@link KnownAttribute}; {@code grammarPatterns} are the grammar-file
  * arguments (one entry under the new form, one or more under the legacy form).
+ * {@code sourcePsi} opts the headless generator into source-backed Java class lookup
+ * via {@link org.intellij.grammar.java.syntax.JavaSyntaxHelper}, rooted at the resolved
+ * {@code inputPath} / {@code psiInputPath}.
  */
 record CliArgs(@NotNull Map<KnownAttribute<String>, Path> paths,
                @NotNull List<String> grammarPatterns,
-               boolean strictPaths) {
+               boolean strictPaths,
+               boolean sourcePsi) {
 
   static CliArgs parse(@NotNull String[] args, @NotNull PrintStream out, @NotNull PrintStream err) throws UsageException {
     if (args.length == 0) {
@@ -65,19 +69,25 @@ record CliArgs(@NotNull Map<KnownAttribute<String>, Path> paths,
     paths.put(KnownAttribute.PARSER_OUTPUT_PATH, toAbsolute(args[0]));
     List<String> patterns = new java.util.ArrayList<>();
     for (int i = 1; i < args.length; i++) patterns.add(args[i]);
-    return new CliArgs(Map.copyOf(paths), List.copyOf(patterns), false);
+    return new CliArgs(Map.copyOf(paths), List.copyOf(patterns), false, false);
   }
 
   private static CliArgs parseNew(@NotNull String[] args) throws UsageException {
     Map<KnownAttribute<String>, Path> paths = new LinkedHashMap<>();
     List<String> positionals = new java.util.ArrayList<>();
     boolean strict = false;
+    boolean sourcePsi = false;
 
     int i = 0;
     while (i < args.length) {
       String a = args[i];
       if ("--strict-paths".equals(a)) {
         strict = true;
+        i++;
+        continue;
+      }
+      if ("--source-psi".equals(a)) {
+        sourcePsi = true;
         i++;
         continue;
       }
@@ -104,7 +114,7 @@ record CliArgs(@NotNull Map<KnownAttribute<String>, Path> paths,
       throw new UsageException(1, "Expected exactly one grammar file in new form, got " + positionals.size() +
                                   "; legacy multi-grammar form does not accept --flags.");
     }
-    return new CliArgs(Map.copyOf(paths), List.copyOf(positionals), strict);
+    return new CliArgs(Map.copyOf(paths), List.copyOf(positionals), strict, sourcePsi);
   }
 
   private static @NotNull Path toAbsolute(@NotNull String value) throws UsageException {

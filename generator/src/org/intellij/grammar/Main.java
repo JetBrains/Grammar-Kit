@@ -6,10 +6,14 @@ package org.intellij.grammar;
 
 import com.intellij.lang.LanguageASTFactory;
 import com.intellij.lang.LanguageBraceMatching;
+import com.intellij.mock.MockProject;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.impl.DebugUtil;
 import org.intellij.grammar.generator.JavaParserGenerator;
 import org.intellij.grammar.generator.OutputOpener;
+import org.intellij.grammar.java.AsmHelper;
+import org.intellij.grammar.java.JavaHelper;
+import org.intellij.grammar.java.syntax.JavaSyntaxHelper;
 import org.intellij.grammar.psi.BnfFile;
 import org.jetbrains.annotations.NotNull;
 
@@ -17,7 +21,9 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -114,6 +120,7 @@ public class Main {
       out.println("  " + e.getKey() + " <path>   sets " + e.getValue().getName());
     }
     out.println("  --strict-paths            fail on CLI/grammar path conflicts");
+    out.println("  --source-psi              resolve Java references from .java sources at inputPath/psiInputPath");
     out.println();
     out.println("Legacy form (deprecated): Main <output-dir> <grammars or patterns>");
   }
@@ -162,6 +169,10 @@ public class Main {
     Map<KnownAttribute<String>, Path> merged = PathConflicts.merge(cliArgs.paths(), grammarMap, cliArgs.strictPaths(), System.err);
     BnfPathsResolution paths = BnfPaths.resolveExplicit(merged, bnfParent);
 
+    if (cliArgs.sourcePsi()) {
+      installSourceBackedJavaHelper((BnfFile)bnfFile, paths);
+    }
+
     JavaParserGenerator generator = new JavaParserGenerator((BnfFile)bnfFile,
                                                             grammarDir.getAbsolutePath(),
                                                             "",
@@ -169,5 +180,22 @@ public class Main {
                                                             paths);
     generator.generate();
     return true;
+  }
+
+  /**
+   * Installs a {@link JavaSyntaxHelper} as the project's {@link JavaHelper} service, rooted at
+   * the resolved {@code inputPath} and {@code psiInputPath}, with {@link AsmHelper} as fallback
+   * for platform classes that live outside those source roots. Re-registered per grammar so each
+   * generation pass sees a fresh cache scoped to its own paths.
+   */
+  private static void installSourceBackedJavaHelper(@NotNull BnfFile bnfFile, @NotNull BnfPathsResolution paths) {
+    List<Path> roots = new ArrayList<>();
+    Path input = paths.path(KnownAttribute.INPUT_PATH);
+    Path psiInput = paths.path(KnownAttribute.PSI_INPUT_PATH);
+    if (input != null) roots.add(input);
+    if (psiInput != null && !psiInput.equals(input)) roots.add(psiInput);
+    if (roots.isEmpty()) return;
+    JavaHelper helper = new JavaSyntaxHelper(roots, new AsmHelper());
+    ((MockProject)bnfFile.getProject()).registerService(JavaHelper.class, helper);
   }
 }

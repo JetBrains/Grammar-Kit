@@ -9,7 +9,6 @@ import com.intellij.psi.NavigatablePsiElement;
 import com.intellij.util.ObjectUtils;
 import com.intellij.util.SmartList;
 import com.intellij.util.containers.ContainerUtil;
-import org.intellij.grammar.generator.java.JavaNames;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.org.objectweb.asm.*;
@@ -39,24 +38,6 @@ import java.util.*;
 public class AsmHelper extends JavaHelper {
 
   private static final int ASM_OPCODES = Opcodes.ASM9;
-
-  private static boolean acceptsMethod(MethodInfo method, int paramCount, String... paramTypes) {
-    if (paramCount >= 0 && paramCount != (method.types.size() - 1) / 2) return false;
-    if (paramTypes.length == 0) return true;
-    if (paramTypes.length > (method.types.size() - 1) / 2) return false;
-    for (int i = 0; i < paramTypes.length; i++) {
-      String paramType = paramTypes[i];
-      String parameter = method.types.get(2 * i + 1);
-      if (acceptsName(paramType, JavaNames.getRawClassName(parameter))) continue;
-      ClassInfo info = findClassSafe(paramType);
-      if (info != null) {
-        if (Objects.equals(info.superClass, parameter)) continue;
-        if (info.interfaces.contains(parameter)) continue;
-      }
-      return false;
-    }
-    return true;
-  }
 
   private static boolean acceptsMethod(MethodInfo method, MethodType methodType, boolean allowAbstract) {
     return method.methodType == methodType && acceptsModifiers(method.modifiers, methodType, allowAbstract);
@@ -133,11 +114,7 @@ public class AsmHelper extends JavaHelper {
 
   @Override
   public boolean isPublic(@Nullable NavigatablePsiElement element) {
-    Object delegate = element instanceof MyElement ? ((MyElement<?>)element).delegate : null;
-    int access = delegate instanceof ClassInfo ? ((ClassInfo)delegate).modifiers :
-                 delegate instanceof MethodInfo ? ((MethodInfo)delegate).modifiers :
-                 0;
-    return Modifier.isPublic(access);
+    return ClassInfoUtil.isPublic(element);
   }
 
   @Override
@@ -159,7 +136,7 @@ public class AsmHelper extends JavaHelper {
     for (MethodInfo method : aClass.methods) { // todo super methods too
       if (!acceptsName(methodName, method.name)) continue;
       if (!acceptsMethod(method, methodType, allowAbstract)) continue;
-      if (!acceptsMethod(method, paramCount, paramTypes)) continue;
+      if (!ClassInfoUtil.acceptsParams(method, paramCount, paramTypes, AsmHelper::findClassSafe)) continue;
       result.add(new MyElement<>(method));
     }
     return result;
@@ -173,48 +150,32 @@ public class AsmHelper extends JavaHelper {
 
   @Override
   public @NotNull List<String> getMethodTypes(NavigatablePsiElement method) {
-    Object delegate = method == null ? null : ((MyElement<?>)method).delegate;
-    if (!(delegate instanceof MethodInfo)) return Collections.emptyList();
-    return ((MethodInfo)delegate).annotatedTypes;
+    return ClassInfoUtil.getMethodTypes(method);
   }
 
   @Override
   public List<TypeParameterInfo> getGenericParameters(NavigatablePsiElement method) {
-    Object delegate = method == null ? null : ((MyElement<?>)method).delegate;
-    if (!(delegate instanceof MethodInfo)) return Collections.emptyList();
-    return ((MethodInfo)delegate).generics;
+    return ClassInfoUtil.getGenericParameters(method);
   }
 
   @Override
   public List<String> getExceptionList(NavigatablePsiElement method) {
-    Object delegate = method == null ? null : ((MyElement<?>)method).delegate;
-    if (!(delegate instanceof MethodInfo)) return Collections.emptyList();
-    return ((MethodInfo)delegate).exceptions;
+    return ClassInfoUtil.getExceptionList(method);
   }
 
   @Override
   public @NotNull String getDeclaringClass(@Nullable NavigatablePsiElement method) {
-    Object delegate = method == null ? null : ((MyElement<?>)method).delegate;
-    if (!(delegate instanceof MethodInfo)) return "";
-    return ((MethodInfo)delegate).declaringClass;
+    return ClassInfoUtil.getDeclaringClass(method);
   }
 
   @Override
   public @NotNull List<String> getAnnotations(NavigatablePsiElement element) {
-    Object delegate = element == null ? null : ((MyElement<?>)element).delegate;
-    if (delegate instanceof ClassInfo) return ((ClassInfo)delegate).annotations;
-    if (delegate instanceof MethodInfo) return ((MethodInfo)delegate).annotations.get(0);
-    return Collections.emptyList();
+    return ClassInfoUtil.getAnnotations(element);
   }
 
   @Override
   public @NotNull List<String> getParameterAnnotations(@Nullable NavigatablePsiElement method, int paramIndex) {
-    Object delegate = method == null ? null : ((MyElement<?>)method).delegate;
-    if (!(delegate instanceof MethodInfo)) return Collections.emptyList();
-    Map<Integer, List<String>> annotations = ((MethodInfo)delegate).annotations;
-    if (paramIndex < 0 || paramIndex >= annotations.size()) return Collections.emptyList();
-    List<String> result = annotations.get(paramIndex + 1);
-    return result == null ? Collections.emptyList() : result;
+    return ClassInfoUtil.getParameterAnnotations(method, paramIndex);
   }
 
   private static class MyClassVisitor extends ClassVisitor {

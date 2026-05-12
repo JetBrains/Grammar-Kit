@@ -3,8 +3,11 @@
 A default source root to look up FQN-valued input attributes (such as <code>parserUtilClass</code>,
 <code>psiImplUtilClass</code>, <code>mixin</code>, <code>extends</code>, <code>implements</code>),
 resolved <b>relative to the BNF file's parent directory</b>. When set, narrows the IDE's
-<code>PsiHelper</code> class lookups from the project-wide scope to the named directory. Has no
-effect on headless / classloader-based resolution (<code>AsmHelper</code>, <code>ReflectionHelper</code>).
+<code>PsiHelper</code> class lookups from the project-wide scope to the named directory. In the
+headless generator the value is consulted only when <code>--source-psi</code> is passed: it then
+becomes a source root for <code>JavaSyntaxHelper</code> (with <code>AsmHelper</code> as fallback
+for classes outside the root). Otherwise headless / classloader-based resolution
+(<code>AsmHelper</code>, <code>ReflectionHelper</code>) ignores the attribute.
 
 <p>For PSI-side overrides (<code>psiImplUtilClass</code>, per-rule <code>mixin</code> and
 <code>implements</code>) see <code>psiInputPath</code>.</p>

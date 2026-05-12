@@ -8,11 +8,11 @@ import com.intellij.psi.NavigatablePsiElement;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.impl.FakePsiElement;
 
-class MyElement<T> extends FakePsiElement implements NavigatablePsiElement {
+public class MyElement<T> extends FakePsiElement implements NavigatablePsiElement {
 
-  final T delegate;
+  public final T delegate;
 
-  MyElement(T delegate) {
+  public MyElement(T delegate) {
     this.delegate = delegate;
   }
 

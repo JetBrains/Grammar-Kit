@@ -5,8 +5,10 @@ The source root that holds the user-authored PSI-side classes referenced by
 resolved <b>relative to the BNF file's parent directory</b>. When set, narrows the IDE's
 <code>PsiHelper.findClass</code> scope for those three attributes to the named directory. Falls
 back to the global <code>inputPath</code> default when unset, and finally to project-wide search.
-Has no effect on headless / classloader-based resolution (<code>AsmHelper</code>,
-<code>ReflectionHelper</code>).
+In the headless generator the value is consulted only when <code>--source-psi</code> is passed:
+it then joins <code>inputPath</code> as a source root for <code>JavaSyntaxHelper</code> (with
+<code>AsmHelper</code> as fallback). Otherwise headless / classloader-based resolution
+(<code>AsmHelper</code>, <code>ReflectionHelper</code>) ignores the attribute.
 
 <p>One knob covers all three because <code>psiImplUtilClass</code>, <code>mixin</code> targets, and
 <code>implements</code> interfaces typically live together in the same source root.</p>

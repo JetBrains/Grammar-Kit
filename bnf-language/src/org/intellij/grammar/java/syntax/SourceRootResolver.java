@@ -26,16 +26,16 @@ import java.util.Map;
  * Used by source-based {@link JavaHelper} implementations (currently {@link JavaSyntaxHelper}; a
  * future Kotlin helper would pass {@code ".kt"}).
  */
-final class SourceRootResolver {
+public final class SourceRootResolver {
 
   private final List<Path> roots;
   private final Map<String, Path> cache = new HashMap<>();
 
-  SourceRootResolver(@NotNull List<Path> roots) {
+  public SourceRootResolver(@NotNull List<Path> roots) {
     this.roots = new ArrayList<>(roots);
   }
 
-  @NotNull List<Path> getRoots() {
+  public @NotNull List<Path> getRoots() {
     return Collections.unmodifiableList(roots);
   }
 
@@ -43,7 +43,7 @@ final class SourceRootResolver {
    * Locates the source file that declares (or, for inner classes, encloses) {@code fqn}.
    * Returns {@code null} when no matching file exists under any configured root.
    */
-  @Nullable Path findSourceFile(@Nullable String fqn, @NotNull String extension) {
+  public @Nullable Path findSourceFile(@Nullable String fqn, @NotNull String extension) {
     if (fqn == null || fqn.isEmpty()) return null;
     String key = extension + ":" + fqn;
     if (cache.containsKey(key)) return cache.get(key);
@@ -71,7 +71,7 @@ final class SourceRootResolver {
    * Used by {@link JavaClassManager}'s slow-path package scan when {@link #findSourceFile} can't
    * find a file by FQN-name (package-private classes, multi-class-per-file).
    */
-  @NotNull List<Path> findPackageDirs(@NotNull String packageName) {
+  public @NotNull List<Path> findPackageDirs(@NotNull String packageName) {
     String relative = packageName.replace('.', '/');
     List<Path> result = new SmartList<>();
     for (Path root : roots) {

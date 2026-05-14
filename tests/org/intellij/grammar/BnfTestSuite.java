@@ -19,6 +19,10 @@ import org.intellij.grammar.intention.BnfFlipChoiceIntentionTest;
 import org.intellij.grammar.java.syntax.JavaSyntaxHelperSourceTest;
 import org.intellij.grammar.java.syntax.JavaSyntaxHelperTest;
 import org.intellij.grammar.java.syntax.JavaSyntaxHelperUnitTest;
+import org.intellij.grammar.java.syntax.JvmSyntaxHelperChainTest;
+import org.intellij.grammar.java.syntax.kotlin.KotlinSyntaxHelperSourceTest;
+import org.intellij.grammar.java.syntax.kotlin.KotlinSyntaxHelperTest;
+import org.intellij.grammar.java.syntax.kotlin.KotlinSyntaxHelperUnitTest;
 import org.intellij.jflex.JFlexCompletionTest;
 import org.intellij.jflex.JFlexGenerationTest;
 import org.intellij.jflex.parser.JFlexParserTest;
@@ -64,6 +68,10 @@ public class BnfTestSuite extends TestCase {
       testSuite.addTestSuite(JavaSyntaxHelperTest.class);
       testSuite.addTestSuite(JavaSyntaxHelperUnitTest.class);
       testSuite.addTestSuite(JavaSyntaxHelperSourceTest.class);
+      testSuite.addTestSuite(KotlinSyntaxHelperUnitTest.class);
+      testSuite.addTestSuite(KotlinSyntaxHelperTest.class);
+      testSuite.addTestSuite(KotlinSyntaxHelperSourceTest.class);
+      testSuite.addTestSuite(JvmSyntaxHelperChainTest.class);
       return testSuite;
     }
   }

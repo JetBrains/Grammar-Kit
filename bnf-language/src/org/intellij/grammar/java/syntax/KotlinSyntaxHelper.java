@@ -2,13 +2,12 @@
  * Copyright 2011-2026 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
  */
 
-package org.intellij.grammar.java.syntax.kotlin;
+package org.intellij.grammar.java.syntax;
 
+import org.intellij.grammar.classinfo.ClassInfo;
+import org.intellij.grammar.classinfo.kotlin.KotlinClassManager;
 import org.intellij.grammar.java.AsmHelper;
-import org.intellij.grammar.java.ClassInfo;
 import org.intellij.grammar.java.JavaHelper;
-import org.intellij.grammar.java.syntax.JavaSyntaxHelper;
-import org.intellij.grammar.java.syntax.JvmSyntaxHelperBase;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -30,8 +29,9 @@ import java.util.function.Function;
  * configured roots flow through the fallback chain to {@link AsmHelper}.
  *
  * <h2>Kotlin → JVM modelling</h2>
- * Kotlin source is mapped onto the JVM-shaped {@link ClassInfo} / {@link org.intellij.grammar.java.MethodInfo}
- * records that Grammar-Kit's parser generator already consumes for Java:
+ * Kotlin source is mapped onto the JVM-shaped {@link ClassInfo} /
+ * {@link org.intellij.grammar.classinfo.MethodInfo} records that Grammar-Kit's parser generator
+ * already consumes for Java:
  * <ul>
  *   <li>Classes (regular, sealed, data, annotation) → {@link ClassInfo} with translated JVM
  *       modifiers; Kotlin classes are {@code final} by default, so {@code FINAL} is set unless

@@ -13,6 +13,7 @@ import com.intellij.util.ArrayUtil;
 import com.intellij.util.IncorrectOperationException;
 import com.intellij.util.containers.ContainerUtil;
 import org.intellij.grammar.KnownAttribute;
+import org.intellij.grammar.classinfo.MethodType;
 import org.intellij.grammar.java.JavaHelper;
 import org.intellij.grammar.psi.*;
 import org.jetbrains.annotations.NotNull;
@@ -45,7 +46,7 @@ class GrammarPsiImplUtil {
           String mixinClass = rule == null ? null : getAttribute(rule, KnownAttribute.MIXIN);
           List<NavigatablePsiElement> implMethods = javaHelper.findRuleImplMethods(psiImplUtilClass, methodName, rule);
           if (!implMethods.isEmpty()) return implMethods;
-          List<NavigatablePsiElement> mixinMethods = javaHelper.findClassMethods(mixinClass, JavaHelper.MethodType.INSTANCE, methodName, -1);
+          List<NavigatablePsiElement> mixinMethods = javaHelper.findClassMethods(mixinClass, MethodType.INSTANCE, methodName, -1);
           return ContainerUtil.concat(implMethods, mixinMethods);
         }
 

@@ -2,27 +2,28 @@
  * Copyright 2011-2026 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
  */
 
-package org.intellij.grammar.java.syntax;
+package org.intellij.grammar.classinfo.java;
 
 import com.intellij.java.syntax.element.JavaSyntaxElementType;
 import com.intellij.java.syntax.element.JavaSyntaxTokenType;
 import com.intellij.platform.syntax.SyntaxElementType;
 import com.intellij.platform.syntax.tree.SyntaxNode;
 import com.intellij.util.SmartList;
+import org.intellij.grammar.classinfo.ClassInfo;
+import org.intellij.grammar.classinfo.MethodInfo;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Set;
 
-import static org.intellij.grammar.java.syntax.JavaSyntaxNodes.buildDottedText;
-import static org.intellij.grammar.java.syntax.JavaSyntaxNodes.firstChildOfType;
+import static org.intellij.grammar.classinfo.java.JavaSyntaxNodes.buildDottedText;
+import static org.intellij.grammar.classinfo.java.JavaSyntaxNodes.firstChildOfType;
 
 /**
  * Renders Java {@link SyntaxNode} type expressions ({@code TYPE} nodes, {@code JAVA_CODE_REFERENCE}
- * nodes, annotations on modifier lists) into the dotted-FQN string form that
- * {@link org.intellij.grammar.java.ClassInfo} / {@link org.intellij.grammar.java.MethodInfo}
- * records expect.
+ * nodes, annotations on modifier lists) into the dotted-FQN string form that {@link ClassInfo} /
+ * {@link MethodInfo} records expect.
  * <p>
  * Name resolution for unqualified references is delegated to {@link JavaSyntaxImportContext}.
  * In-scope type variables are passed in by the caller and are never qualified.

@@ -16,6 +16,8 @@ import com.intellij.util.IncorrectOperationException;
 import com.intellij.util.ProcessingContext;
 import com.intellij.util.containers.ContainerUtil;
 import org.intellij.grammar.KnownAttribute;
+import org.intellij.grammar.classinfo.MethodType;
+import org.intellij.grammar.classinfo.TypeParameterInfo;
 import org.intellij.grammar.psi.BnfAttr;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;

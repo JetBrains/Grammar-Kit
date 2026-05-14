@@ -2,14 +2,14 @@
  * Copyright 2011-2026 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
  */
 
-package org.intellij.grammar.java.syntax;
+package org.intellij.grammar.classinfo.java;
 
 import com.intellij.java.syntax.element.JavaSyntaxElementType;
 import com.intellij.java.syntax.element.JavaSyntaxTokenType;
 import com.intellij.platform.syntax.tree.SyntaxNode;
-import org.intellij.grammar.java.JavaHelper;
-import org.intellij.grammar.java.MethodInfo;
-import org.intellij.grammar.java.TypeParameterInfo;
+import org.intellij.grammar.classinfo.MethodInfo;
+import org.intellij.grammar.classinfo.MethodType;
+import org.intellij.grammar.classinfo.TypeParameterInfo;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -18,9 +18,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static org.intellij.grammar.java.syntax.JavaSyntaxNodes.extractModifiers;
-import static org.intellij.grammar.java.syntax.JavaSyntaxNodes.firstChildOfType;
-import static org.intellij.grammar.java.syntax.JavaSyntaxNodes.firstNameIdentifier;
+import static org.intellij.grammar.classinfo.java.JavaSyntaxNodes.extractModifiers;
+import static org.intellij.grammar.classinfo.java.JavaSyntaxNodes.firstChildOfType;
+import static org.intellij.grammar.classinfo.java.JavaSyntaxNodes.firstNameIdentifier;
 
 /**
  * Builds a {@link MethodInfo} from a {@code METHOD} (or {@code ANNOTATION_METHOD})
@@ -55,11 +55,11 @@ final class JavaSyntaxMethodExtractor {
 
     SyntaxNode returnType = firstChildOfType(methodNode, JavaSyntaxElementType.TYPE);
     if (returnType == null) {
-      m.methodType = JavaHelper.MethodType.CONSTRUCTOR;
+      m.methodType = MethodType.CONSTRUCTOR;
       m.types.add(declaringFqn);
     }
     else {
-      m.methodType = Modifier.isStatic(m.modifiers) ? JavaHelper.MethodType.STATIC : JavaHelper.MethodType.INSTANCE;
+      m.methodType = Modifier.isStatic(m.modifiers) ? MethodType.STATIC : MethodType.INSTANCE;
       m.types.add(typeFormatter.formatType(returnType, typeVars));
     }
 

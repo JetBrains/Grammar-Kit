@@ -2,10 +2,11 @@
  * Copyright 2011-2026 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
  */
 
-package org.intellij.grammar.java.syntax;
+package org.intellij.grammar.classinfo.java;
 
 import com.intellij.platform.syntax.tree.SyntaxNode;
-import org.intellij.grammar.java.ClassInfo;
+import org.intellij.grammar.classinfo.ClassInfo;
+import org.intellij.grammar.classinfo.SourceRootResolver;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -39,7 +40,7 @@ import java.util.stream.Stream;
  * {@link JavaClassManager} instance.
  */
 @SuppressWarnings("UnstableApiUsage")
-final class JavaClassManager {
+public final class JavaClassManager {
 
   private final SourceRootResolver resolver;
   private final JavaSyntaxTreeManager treeManager = new JavaSyntaxTreeManager();
@@ -48,7 +49,7 @@ final class JavaClassManager {
   private final Set<String> scannedPackages = new HashSet<>();
   private final Set<Path> ingestedFiles = new HashSet<>();
 
-  JavaClassManager(@NotNull List<Path> sourceRoots) {
+  public JavaClassManager(@NotNull List<Path> sourceRoots) {
     this.resolver = new SourceRootResolver(sourceRoots);
   }
 
@@ -57,7 +58,7 @@ final class JavaClassManager {
    * configured roots declares it. Cached: subsequent calls for the same FQN — and for any sibling
    * classes declared in the same file — return without re-parsing.
    */
-  @Nullable ClassInfo findClass(@Nullable String fqn) {
+  public @Nullable ClassInfo findClass(@Nullable String fqn) {
     if (fqn == null || fqn.isEmpty()) return null;
     ClassInfo cached = classCache.get(fqn);
     if (cached != null) return cached;

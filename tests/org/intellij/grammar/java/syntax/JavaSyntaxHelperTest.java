@@ -6,10 +6,11 @@ package org.intellij.grammar.java.syntax;
 
 import com.intellij.psi.NavigatablePsiElement;
 import junit.framework.TestCase;
-import org.intellij.grammar.java.ClassInfo;
+import org.intellij.grammar.classinfo.ClassInfo;
+import org.intellij.grammar.classinfo.MethodType;
 import org.intellij.grammar.java.JavaHelper;
 import org.intellij.grammar.java.MyElement;
-import org.intellij.grammar.java.TypeParameterInfo;
+import org.intellij.grammar.classinfo.TypeParameterInfo;
 
 import java.lang.reflect.Modifier;
 import java.nio.file.Files;
@@ -125,7 +126,7 @@ public class JavaSyntaxHelperTest extends TestCase {
 
   public void testFindInstanceMethodAndSignature() {
     List<NavigatablePsiElement> methods = helper.findClassMethods(
-      "a.b.MyClass", JavaHelper.MethodType.INSTANCE, "doStuff", -1);
+      "a.b.MyClass", MethodType.INSTANCE, "doStuff", -1);
     assertEquals(1, methods.size());
     NavigatablePsiElement m = methods.get(0);
     List<String> types = helper.getMethodTypes(m);
@@ -146,7 +147,7 @@ public class JavaSyntaxHelperTest extends TestCase {
 
   public void testStaticMethodWithGenerics() {
     List<NavigatablePsiElement> methods = helper.findClassMethods(
-      "a.b.MyClass", JavaHelper.MethodType.STATIC, "cast", -1);
+      "a.b.MyClass", MethodType.STATIC, "cast", -1);
     assertEquals(1, methods.size());
     NavigatablePsiElement m = methods.get(0);
     List<TypeParameterInfo> generics = helper.getGenericParameters(m);
@@ -156,7 +157,7 @@ public class JavaSyntaxHelperTest extends TestCase {
 
   public void testConstructor() {
     List<NavigatablePsiElement> ctors = helper.findClassMethods(
-      "a.b.MyClass", JavaHelper.MethodType.CONSTRUCTOR, "MyClass", -1);
+      "a.b.MyClass", MethodType.CONSTRUCTOR, "MyClass", -1);
     assertEquals(1, ctors.size());
     List<String> types = helper.getMethodTypes(ctors.get(0));
     // [returnType=declaringClass, paramType, paramName]
@@ -173,23 +174,23 @@ public class JavaSyntaxHelperTest extends TestCase {
 
   public void testParamCountFiltering() {
     // wrong arity → no match
-    assertTrue(helper.findClassMethods("a.b.MyClass", JavaHelper.MethodType.INSTANCE, "doStuff", 99).isEmpty());
+    assertTrue(helper.findClassMethods("a.b.MyClass", MethodType.INSTANCE, "doStuff", 99).isEmpty());
     // matching arity → match
     assertEquals(1,
-                 helper.findClassMethods("a.b.MyClass", JavaHelper.MethodType.INSTANCE, "doStuff", 2).size());
+                 helper.findClassMethods("a.b.MyClass", MethodType.INSTANCE, "doStuff", 2).size());
   }
 
   public void testWildcardMethodName() {
     // "*" matches any name
     List<NavigatablePsiElement> all = helper.findClassMethods(
-      "a.b.MyClass", JavaHelper.MethodType.INSTANCE, "*", -1);
+      "a.b.MyClass", MethodType.INSTANCE, "*", -1);
     // doStuff is the only INSTANCE method on MyClass (the constructor and static cast are excluded by methodType)
     assertEquals(1, all.size());
   }
 
   public void testUnknownClassReturnsNull() {
     assertNull(helper.findClass("does.not.Exist"));
-    assertTrue(helper.findClassMethods("does.not.Exist", JavaHelper.MethodType.INSTANCE, "x", -1).isEmpty());
+    assertTrue(helper.findClassMethods("does.not.Exist", MethodType.INSTANCE, "x", -1).isEmpty());
     assertNull(helper.getSuperClassName("does.not.Exist"));
   }
 
@@ -204,7 +205,7 @@ public class JavaSyntaxHelperTest extends TestCase {
 
   public void testInnerMethodLookup() {
     List<NavigatablePsiElement> methods = helper.findClassMethods(
-      "a.b.MyClass.Inner", JavaHelper.MethodType.INSTANCE, "inside", -1);
+      "a.b.MyClass.Inner", MethodType.INSTANCE, "inside", -1);
     assertEquals(1, methods.size());
     assertEquals("java.lang.String", helper.getMethodTypes(methods.get(0)).get(0));
   }
@@ -214,7 +215,7 @@ public class JavaSyntaxHelperTest extends TestCase {
     NavigatablePsiElement helperClass = helper.findClass("a.b.Helper");
     assertNotNull(helperClass);
     List<NavigatablePsiElement> methods = helper.findClassMethods(
-      "a.b.Helper", JavaHelper.MethodType.INSTANCE, "greet", -1);
+      "a.b.Helper", MethodType.INSTANCE, "greet", -1);
     assertEquals(1, methods.size());
     assertEquals("java.lang.String", helper.getMethodTypes(methods.get(0)).get(0));
   }

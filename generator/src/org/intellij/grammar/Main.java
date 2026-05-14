@@ -14,7 +14,7 @@ import org.intellij.grammar.generator.OutputOpener;
 import org.intellij.grammar.java.AsmHelper;
 import org.intellij.grammar.java.JavaHelper;
 import org.intellij.grammar.java.syntax.JavaSyntaxHelper;
-import org.intellij.grammar.java.syntax.kotlin.KotlinSyntaxHelper;
+import org.intellij.grammar.java.syntax.KotlinSyntaxHelper;
 import org.intellij.grammar.psi.BnfFile;
 import org.jetbrains.annotations.NotNull;
 

@@ -2,14 +2,14 @@
  * Copyright 2011-2026 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
  */
 
-package org.intellij.grammar.java.syntax.kotlin;
+package org.intellij.grammar.classinfo.kotlin;
 
 import com.intellij.platform.syntax.tree.SyntaxNode;
 import fleet.org.jetbrains.kotlin.kmp.lexer.KtTokens;
 import fleet.org.jetbrains.kotlin.kmp.parser.KtNodeTypes;
-import org.intellij.grammar.java.JavaHelper;
-import org.intellij.grammar.java.MethodInfo;
-import org.intellij.grammar.java.TypeParameterInfo;
+import org.intellij.grammar.classinfo.MethodInfo;
+import org.intellij.grammar.classinfo.MethodType;
+import org.intellij.grammar.classinfo.TypeParameterInfo;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -18,15 +18,14 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static org.intellij.grammar.java.syntax.kotlin.KotlinSyntaxNodes.extractModifiers;
-import static org.intellij.grammar.java.syntax.kotlin.KotlinSyntaxNodes.firstChildOfType;
+import static org.intellij.grammar.classinfo.kotlin.KotlinSyntaxNodes.extractModifiers;
+import static org.intellij.grammar.classinfo.kotlin.KotlinSyntaxNodes.firstChildOfType;
 
 /**
  * Translates Kotlin {@code FUN} / {@code PROPERTY} / {@code PRIMARY_CONSTRUCTOR} /
  * {@code SECONDARY_CONSTRUCTOR} nodes into {@link MethodInfo} records.
  * <p>
- * Properties surface as JVM-style {@code getX()} / {@code setX(value)} methods (see
- * {@link KotlinSyntaxHelper} for the deferred {@code is}-prefix and accessor-visibility cases).
+ * Properties surface as JVM-style {@code getX()} / {@code setX(value)} methods.
  * Extension functions surface as static methods whose first parameter is the receiver type.
  */
 @SuppressWarnings("UnstableApiUsage")
@@ -45,7 +44,7 @@ final class KotlinSyntaxMethodExtractor {
   @Nullable MethodInfo extractFunction(@NotNull SyntaxNode funNode,
                                        @NotNull String declaringFqn,
                                        @NotNull Set<String> classTypeVars,
-                                       @NotNull JavaHelper.MethodType defaultMethodType) {
+                                       @NotNull MethodType defaultMethodType) {
     SyntaxNode nameId = nameAfterFunKeyword(funNode);
     if (nameId == null) return null;
 
@@ -77,7 +76,7 @@ final class KotlinSyntaxMethodExtractor {
     collectValueParameters(paramList, m, typeVars);
 
     m.methodType = defaultMethodType;
-    if (receiverType != null) m.methodType = JavaHelper.MethodType.STATIC;
+    if (receiverType != null) m.methodType = MethodType.STATIC;
     m.annotatedTypes.addAll(m.types);
     return m;
   }
@@ -89,7 +88,7 @@ final class KotlinSyntaxMethodExtractor {
     MethodInfo m = new MethodInfo();
     m.declaringClass = declaringFqn;
     m.name = "<init>";
-    m.methodType = JavaHelper.MethodType.CONSTRUCTOR;
+    m.methodType = MethodType.CONSTRUCTOR;
     m.types.add(declaringFqn);
 
     Set<String> typeVars = new HashSet<>(classTypeVars);
@@ -123,7 +122,7 @@ final class KotlinSyntaxMethodExtractor {
     m.declaringClass = declaringFqn;
     m.name = "get" + capitalize(nameId.getText().toString());
     m.modifiers = mods | (staticAccessor ? Modifier.STATIC : 0);
-    m.methodType = staticAccessor ? JavaHelper.MethodType.STATIC : JavaHelper.MethodType.INSTANCE;
+    m.methodType = staticAccessor ? MethodType.STATIC : MethodType.INSTANCE;
     m.types.add(typeStr);
     m.annotations.get(0).addAll(typeFormatter.extractAnnotationFqns(modifierList, classTypeVars));
     m.annotatedTypes.addAll(m.types);
@@ -149,7 +148,7 @@ final class KotlinSyntaxMethodExtractor {
     m.declaringClass = declaringFqn;
     m.name = "set" + capitalize(nameId.getText().toString());
     m.modifiers = mods | (staticAccessor ? Modifier.STATIC : 0);
-    m.methodType = staticAccessor ? JavaHelper.MethodType.STATIC : JavaHelper.MethodType.INSTANCE;
+    m.methodType = staticAccessor ? MethodType.STATIC : MethodType.INSTANCE;
     m.types.add("void");
     m.types.add(typeStr);
     m.types.add("value");

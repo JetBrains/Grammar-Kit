@@ -20,6 +20,7 @@ import com.intellij.psi.util.PsiUtilCore;
 import com.intellij.util.ObjectUtils;
 import com.intellij.util.ProcessingContext;
 import com.intellij.util.containers.ContainerUtil;
+import org.intellij.grammar.classinfo.MethodType;
 import org.intellij.grammar.generator.java.JavaBnfConstants;
 import org.intellij.grammar.java.JavaHelper;
 import org.intellij.grammar.parser.GeneratedParserUtilBase;
@@ -137,7 +138,7 @@ final class BnfCompletionContributor extends CompletionContributor {
           JavaHelper helper = JavaHelper.getJavaHelper(rule);
           for (String className = parserClass; className != null; className = helper.getSuperClassName(className)) {
             for (NavigatablePsiElement element : helper
-              .findClassMethods(className, JavaHelper.MethodType.STATIC, "*", -1, JavaBnfConstants.PSI_BUILDER_CLASS, "int")) {
+              .findClassMethods(className, MethodType.STATIC, "*", -1, JavaBnfConstants.PSI_BUILDER_CLASS, "int")) {
               List<String> methodTypes = helper.getMethodTypes(element);
               if ("boolean".equals(ContainerUtil.getFirstItem(methodTypes))) {
                 result.addElement(LookupElementBuilder.createWithIcon((PsiNamedElement)element));

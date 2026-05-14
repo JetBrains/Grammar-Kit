@@ -17,7 +17,7 @@ import org.intellij.grammar.BnfPaths;
 import org.intellij.grammar.BnfPathsResolution;
 import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.java.syntax.JavaSyntaxHelper;
-import org.intellij.grammar.java.syntax.kotlin.KotlinSyntaxHelper;
+import org.intellij.grammar.java.syntax.KotlinSyntaxHelper;
 import org.intellij.grammar.psi.BnfAttr;
 import org.intellij.grammar.psi.BnfFile;
 import org.jetbrains.annotations.NotNull;

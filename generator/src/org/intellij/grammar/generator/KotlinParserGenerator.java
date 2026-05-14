@@ -16,6 +16,7 @@ import org.intellij.grammar.BnfPathsResolution;
 import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.analysis.BnfFirstNextAnalyzer;
 import org.intellij.grammar.generator.NodeCalls.*;
+import org.intellij.grammar.classinfo.MethodType;
 import org.intellij.grammar.generator.kotlin.KotlinBnfConstants;
 import org.intellij.grammar.generator.kotlin.KotlinNameShortener;
 import org.intellij.grammar.generator.kotlin.KotlinNameRenderer;
@@ -165,7 +166,7 @@ public final class KotlinParserGenerator extends Generator {
       }
       else if (implSuper.indexOf("<") < implSuper.indexOf(">") &&
                !helperFor(rule, KnownAttribute.MIXIN)
-                 .findClassMethods(implSuperRaw, JavaHelper.MethodType.INSTANCE, "getParentByStub", 0).isEmpty()) {
+                 .findClassMethods(implSuperRaw, MethodType.INSTANCE, "getParentByStub", 0).isEmpty()) {
         stubName = implSuper.substring(implSuper.indexOf("<") + 1, implSuper.indexOf(">"));
       }
       else {

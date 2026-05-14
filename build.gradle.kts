@@ -50,6 +50,7 @@ dependencies {
 
     implementation(project(":base"))
     implementation(project(":parser-runtime"))
+    implementation(project(":jvm-class-info"))
     implementation(project(":bnf-language"))
     implementation(project(":jflex-language"))
     implementation(project(":generator"))

@@ -2,13 +2,13 @@
  * Copyright 2011-2026 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
  */
 
-package org.intellij.grammar.java.syntax;
+package org.intellij.grammar.classinfo.java;
 
 import com.intellij.java.syntax.element.JavaSyntaxElementType;
 import com.intellij.platform.syntax.SyntaxElementType;
 import com.intellij.platform.syntax.tree.SyntaxNode;
-import org.intellij.grammar.java.ClassInfo;
-import org.intellij.grammar.java.MethodInfo;
+import org.intellij.grammar.classinfo.ClassInfo;
+import org.intellij.grammar.classinfo.MethodInfo;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Modifier;
@@ -18,25 +18,19 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static org.intellij.grammar.java.syntax.JavaSyntaxNodes.extractModifiers;
-import static org.intellij.grammar.java.syntax.JavaSyntaxNodes.findClassName;
-import static org.intellij.grammar.java.syntax.JavaSyntaxNodes.firstChildOfType;
-import static org.intellij.grammar.java.syntax.JavaSyntaxNodes.isAnnotationType;
-import static org.intellij.grammar.java.syntax.JavaSyntaxNodes.isInterface;
-import static org.intellij.grammar.java.syntax.JavaSyntaxNodes.typeParameterNames;
+import static org.intellij.grammar.classinfo.java.JavaSyntaxNodes.extractModifiers;
+import static org.intellij.grammar.classinfo.java.JavaSyntaxNodes.findClassName;
+import static org.intellij.grammar.classinfo.java.JavaSyntaxNodes.firstChildOfType;
+import static org.intellij.grammar.classinfo.java.JavaSyntaxNodes.isAnnotationType;
+import static org.intellij.grammar.classinfo.java.JavaSyntaxNodes.isInterface;
+import static org.intellij.grammar.classinfo.java.JavaSyntaxNodes.typeParameterNames;
 
 /**
  * Walks a parsed Java source file (the root {@link SyntaxNode} from
  * {@link JavaSyntaxTreeManager#parseFile}) and produces one {@link ClassInfo} record per class it
  * declares (top-level + nested), keyed by FQN.
  * <p>
- * This is the source-tree counterpart of the bytecode visitor in
- * {@link org.intellij.grammar.java.AsmHelper}: the records it builds are the same ones
- * {@link org.intellij.grammar.java.AsmHelper} builds, so anything reading them — the
- * {@link org.intellij.grammar.java.ClassInfoUtil} delegates, the parser generator, the BNF
- * reference resolver — works uniformly regardless of how the data was obtained.
- * <p>
- * One instance per file. Stateless across calls; the {@link JavaSyntaxHelper} holds the cache.
+ * One instance per file. Stateless across calls; the {@link JavaClassManager} holds the cache.
  *
  * <h2>Decomposition</h2>
  * This class is the orchestrator. The actual work is split across:
@@ -49,8 +43,7 @@ import static org.intellij.grammar.java.syntax.JavaSyntaxNodes.typeParameterName
  * </ul>
  *
  * <h2>FQN resolution</h2>
- * Reference resolution is best-effort and matches the limitations called out on
- * {@link JavaSyntaxHelper}:
+ * Reference resolution is best-effort:
  * <ul>
  *   <li>Single-identifier references resolve through explicit imports → a fixed
  *       {@code java.lang} allow-list → same-package fallback.</li>
@@ -61,7 +54,7 @@ import static org.intellij.grammar.java.syntax.JavaSyntaxNodes.typeParameterName
  * </ul>
  */
 @SuppressWarnings("UnstableApiUsage")
-final class JavaSyntaxClassExtractor {
+public final class JavaSyntaxClassExtractor {
 
   private final SyntaxNode fileRoot;
   private final JavaSyntaxImportContext imports;
@@ -70,7 +63,7 @@ final class JavaSyntaxClassExtractor {
   private final Map<String, ClassInfo> result = new LinkedHashMap<>();
 
   /** Walks {@code fileRoot} once and returns one {@link ClassInfo} per declared class, keyed by FQN. */
-  static @NotNull Map<String, ClassInfo> extractFrom(@NotNull SyntaxNode fileRoot) {
+  public static @NotNull Map<String, ClassInfo> extractFrom(@NotNull SyntaxNode fileRoot) {
     return new JavaSyntaxClassExtractor(fileRoot).extract();
   }
 

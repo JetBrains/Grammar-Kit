@@ -2,15 +2,15 @@
  * Copyright 2011-2026 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
  */
 
-package org.intellij.grammar.java.syntax.kotlin;
+package org.intellij.grammar.classinfo.kotlin;
 
 import com.intellij.platform.syntax.SyntaxElementType;
 import com.intellij.platform.syntax.tree.SyntaxNode;
 import fleet.org.jetbrains.kotlin.kmp.lexer.KtTokens;
 import fleet.org.jetbrains.kotlin.kmp.parser.KtNodeTypes;
-import org.intellij.grammar.java.ClassInfo;
-import org.intellij.grammar.java.JavaHelper;
-import org.intellij.grammar.java.MethodInfo;
+import org.intellij.grammar.classinfo.ClassInfo;
+import org.intellij.grammar.classinfo.MethodInfo;
+import org.intellij.grammar.classinfo.MethodType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -21,17 +21,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static org.intellij.grammar.java.syntax.kotlin.KotlinSyntaxNodes.extractModifiers;
-import static org.intellij.grammar.java.syntax.kotlin.KotlinSyntaxNodes.firstChildOfType;
-import static org.intellij.grammar.java.syntax.kotlin.KotlinSyntaxNodes.hasJvmStatic;
-import static org.intellij.grammar.java.syntax.kotlin.KotlinSyntaxNodes.hasModifier;
-import static org.intellij.grammar.java.syntax.kotlin.KotlinSyntaxNodes.isCompanion;
-import static org.intellij.grammar.java.syntax.kotlin.KotlinSyntaxNodes.isConstProperty;
-import static org.intellij.grammar.java.syntax.kotlin.KotlinSyntaxNodes.isInnerNested;
-import static org.intellij.grammar.java.syntax.kotlin.KotlinSyntaxNodes.isInterface;
-import static org.intellij.grammar.java.syntax.kotlin.KotlinSyntaxNodes.isVarProperty;
-import static org.intellij.grammar.java.syntax.kotlin.KotlinSyntaxNodes.nameIdentifier;
-import static org.intellij.grammar.java.syntax.kotlin.KotlinSyntaxNodes.typeParameterNames;
+import static org.intellij.grammar.classinfo.kotlin.KotlinSyntaxNodes.extractModifiers;
+import static org.intellij.grammar.classinfo.kotlin.KotlinSyntaxNodes.firstChildOfType;
+import static org.intellij.grammar.classinfo.kotlin.KotlinSyntaxNodes.hasJvmStatic;
+import static org.intellij.grammar.classinfo.kotlin.KotlinSyntaxNodes.hasModifier;
+import static org.intellij.grammar.classinfo.kotlin.KotlinSyntaxNodes.isCompanion;
+import static org.intellij.grammar.classinfo.kotlin.KotlinSyntaxNodes.isConstProperty;
+import static org.intellij.grammar.classinfo.kotlin.KotlinSyntaxNodes.isInnerNested;
+import static org.intellij.grammar.classinfo.kotlin.KotlinSyntaxNodes.isInterface;
+import static org.intellij.grammar.classinfo.kotlin.KotlinSyntaxNodes.isVarProperty;
+import static org.intellij.grammar.classinfo.kotlin.KotlinSyntaxNodes.nameIdentifier;
+import static org.intellij.grammar.classinfo.kotlin.KotlinSyntaxNodes.typeParameterNames;
 
 /**
  * Walks a parsed Kotlin source file (the root {@link SyntaxNode} from
@@ -39,7 +39,7 @@ import static org.intellij.grammar.java.syntax.kotlin.KotlinSyntaxNodes.typePara
  * object, companion, or typealias, plus a synthesised {@code <FileStem>Kt} class collecting all
  * top-level callables.
  * <p>
- * Mirrors {@link org.intellij.grammar.java.syntax.JavaSyntaxClassExtractor}'s decomposition:
+ * Mirrors {@link org.intellij.grammar.classinfo.java.JavaSyntaxClassExtractor}'s decomposition:
  * imports / type formatting / method extraction are pushed into dedicated helpers and this class
  * is just the orchestrator.
  */
@@ -104,10 +104,10 @@ final class KotlinSyntaxClassExtractor {
     SyntaxNode modifierList = firstChildOfType(member, KtNodeTypes.INSTANCE.getMODIFIER_LIST());
     if (hasModifier(modifierList, KtTokens.INSTANCE.getPRIVATE_MODIFIER())) return;
     if (member.getType() == KtNodeTypes.INSTANCE.getFUN()) {
-      MethodInfo m = methodExtractor.extractFunction(member, fileClass.name, Set.of(), JavaHelper.MethodType.STATIC);
+      MethodInfo m = methodExtractor.extractFunction(member, fileClass.name, Set.of(), MethodType.STATIC);
       if (m != null) {
         m.modifiers |= Modifier.STATIC;
-        m.methodType = JavaHelper.MethodType.STATIC;
+        m.methodType = MethodType.STATIC;
         fileClass.methods.add(m);
       }
     }
@@ -225,7 +225,7 @@ final class KotlinSyntaxClassExtractor {
     for (SyntaxNode member = body.firstChild(); member != null; member = member.nextSibling()) {
       SyntaxElementType t = member.getType();
       if (t == KtNodeTypes.INSTANCE.getFUN()) {
-        MethodInfo m = methodExtractor.extractFunction(member, enclosing.name, typeVars, JavaHelper.MethodType.INSTANCE);
+        MethodInfo m = methodExtractor.extractFunction(member, enclosing.name, typeVars, MethodType.INSTANCE);
         if (m == null) continue;
         // Static methods (extension fns on member objects) keep their type as set by the extractor.
         enclosing.methods.add(m);
@@ -281,7 +281,7 @@ final class KotlinSyntaxClassExtractor {
     for (SyntaxNode member = body.firstChild(); member != null; member = member.nextSibling()) {
       SyntaxElementType t = member.getType();
       if (t == KtNodeTypes.INSTANCE.getFUN()) {
-        MethodInfo m = methodExtractor.extractFunction(member, fqn, outerTypeVars, JavaHelper.MethodType.INSTANCE);
+        MethodInfo m = methodExtractor.extractFunction(member, fqn, outerTypeVars, MethodType.INSTANCE);
         if (m == null) continue;
         info.methods.add(m);
         if (companion && hasJvmStatic(firstChildOfType(member, KtNodeTypes.INSTANCE.getMODIFIER_LIST()))) {
@@ -383,7 +383,7 @@ final class KotlinSyntaxClassExtractor {
     m.name = src.name;
     m.declaringClass = newDeclaring;
     m.modifiers = src.modifiers | Modifier.STATIC;
-    m.methodType = JavaHelper.MethodType.STATIC;
+    m.methodType = MethodType.STATIC;
     m.types.addAll(src.types);
     m.annotatedTypes.addAll(src.annotatedTypes);
     m.exceptions.addAll(src.exceptions);

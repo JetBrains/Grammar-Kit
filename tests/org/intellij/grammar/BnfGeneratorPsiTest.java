@@ -14,8 +14,9 @@ import org.intellij.grammar.generator.JavaParserGenerator;
 import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.generator.NameShortener;
 import org.intellij.grammar.generator.OutputOpener;
+import org.intellij.grammar.classinfo.MethodType;
+import org.intellij.grammar.classinfo.TypeParameterInfo;
 import org.intellij.grammar.java.JavaHelper;
-import org.intellij.grammar.java.TypeParameterInfo;
 import org.intellij.grammar.psi.BnfFile;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -185,7 +186,7 @@ public class BnfGeneratorPsiTest extends BasePlatformTestCase {
 
     // Verify the return type includes the embedded annotation (needed for the bug to manifest)
     List<NavigatablePsiElement> methods = javaHelper.findClassMethods(
-      "test.psi.impl.MyMixin", JavaHelper.MethodType.INSTANCE, "getAccess", -1);
+      "test.psi.impl.MyMixin", MethodType.INSTANCE, "getAccess", -1);
     assertEquals("Should find getAccess method", 1, methods.size());
     List<String> methodTypes = javaHelper.getMethodTypes(methods.get(0));
     assertTrue("Return type should contain embedded @NotNull for qualified type, got: " + methodTypes,

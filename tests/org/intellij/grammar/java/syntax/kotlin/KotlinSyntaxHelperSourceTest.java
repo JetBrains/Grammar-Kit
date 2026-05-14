@@ -6,7 +6,8 @@ package org.intellij.grammar.java.syntax.kotlin;
 
 import com.intellij.psi.NavigatablePsiElement;
 import junit.framework.TestCase;
-import org.intellij.grammar.java.JavaHelper;
+import org.intellij.grammar.classinfo.MethodType;
+import org.intellij.grammar.java.syntax.KotlinSyntaxHelper;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -65,7 +66,7 @@ public class KotlinSyntaxHelperSourceTest extends TestCase {
     NavigatablePsiElement fileClass = helper().findClass("util.StringsKt");
     assertNotNull(fileClass);
     List<NavigatablePsiElement> staticHelpers = helper.findClassMethods(
-      "util.StringsKt", JavaHelper.MethodType.STATIC, "shout", -1);
+      "util.StringsKt", MethodType.STATIC, "shout", -1);
     assertEquals(1, staticHelpers.size());
   }
 

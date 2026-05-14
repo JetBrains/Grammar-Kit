@@ -6,6 +6,10 @@ package org.intellij.grammar.java.syntax;
 
 import com.intellij.psi.NavigatablePsiElement;
 import com.intellij.util.SmartList;
+import org.intellij.grammar.classinfo.ClassInfo;
+import org.intellij.grammar.classinfo.MethodInfo;
+import org.intellij.grammar.classinfo.MethodType;
+import org.intellij.grammar.classinfo.TypeParameterInfo;
 import org.intellij.grammar.java.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -19,10 +23,11 @@ import java.util.function.Function;
  * <p>
  * Every override here delegates either to {@link ClassInfoUtil} or to the injected
  * {@link #classLookup} (FQN → {@link ClassInfo}) with the standard fall-through to {@link #fallback}.
- * Subclasses ({@link JavaSyntaxHelper}, {@link org.intellij.grammar.java.syntax.kotlin.KotlinSyntaxHelper})
- * provide the {@code classLookup} backed by their own per-language {@code ClassManager} and pass an
- * optional fallback chain — typically Java → ASM for Kotlin, ASM alone for Java — so a single helper
- * instance covers project sources <i>and</i> bytecode-only references uniformly.
+ * Subclasses ({@link JavaSyntaxHelper}, {@link KotlinSyntaxHelper})
+ * provide the {@code classLookup} backed by a per-language class manager from the
+ * {@code jvm-class-info} module and pass an optional fallback chain — typically Java → ASM for Kotlin,
+ * ASM alone for Java — so a single helper instance covers project sources <i>and</i> bytecode-only
+ * references uniformly.
  */
 public abstract class JvmSyntaxHelperBase extends JavaHelper {
 

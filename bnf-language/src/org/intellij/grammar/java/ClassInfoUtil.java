@@ -5,6 +5,9 @@
 package org.intellij.grammar.java;
 
 import com.intellij.psi.NavigatablePsiElement;
+import org.intellij.grammar.classinfo.ClassInfo;
+import org.intellij.grammar.classinfo.MethodInfo;
+import org.intellij.grammar.classinfo.TypeParameterInfo;
 import org.intellij.grammar.generator.java.JavaNames;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;

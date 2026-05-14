@@ -26,6 +26,7 @@ dependencies {
 
     implementation("org.jetbrains:syntax-api:0.3.375")
     implementation("org.jetbrains:java-syntax:0.3.375")
+    implementation("org.jetbrains:kotlin-syntax:0.3.375")
 
     intellijPlatform {
         create(

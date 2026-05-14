@@ -14,6 +14,7 @@ import org.intellij.grammar.generator.OutputOpener;
 import org.intellij.grammar.java.AsmHelper;
 import org.intellij.grammar.java.JavaHelper;
 import org.intellij.grammar.java.syntax.JavaSyntaxHelper;
+import org.intellij.grammar.java.syntax.kotlin.KotlinSyntaxHelper;
 import org.intellij.grammar.psi.BnfFile;
 import org.jetbrains.annotations.NotNull;
 
@@ -183,10 +184,12 @@ public class Main {
   }
 
   /**
-   * Installs a {@link JavaSyntaxHelper} as the project's {@link JavaHelper} service, rooted at
-   * the resolved {@code inputPath} and {@code psiInputPath}, with {@link AsmHelper} as fallback
-   * for platform classes that live outside those source roots. Re-registered per grammar so each
-   * generation pass sees a fresh cache scoped to its own paths.
+   * Installs a source-backed {@link JavaHelper} chain as the project's {@link JavaHelper} service,
+   * rooted at the resolved {@code inputPath} and {@code psiInputPath}. The chain
+   * {@link KotlinSyntaxHelper} → {@link JavaSyntaxHelper} → {@link AsmHelper} resolves Kotlin
+   * sources first, then Java sources, then bytecode-only platform classes that live outside the
+   * configured roots. Re-registered per grammar so each generation pass sees a fresh cache scoped
+   * to its own paths.
    */
   private static void installSourceBackedJavaHelper(@NotNull BnfFile bnfFile, @NotNull BnfPathsResolution paths) {
     List<Path> roots = new ArrayList<>();
@@ -195,7 +198,7 @@ public class Main {
     if (input != null) roots.add(input);
     if (psiInput != null && !psiInput.equals(input)) roots.add(psiInput);
     if (roots.isEmpty()) return;
-    JavaHelper helper = new JavaSyntaxHelper(roots, new AsmHelper());
+    JavaHelper helper = new KotlinSyntaxHelper(roots, new JavaSyntaxHelper(roots, new AsmHelper()));
     ((MockProject)bnfFile.getProject()).registerService(JavaHelper.class, helper);
   }
 }

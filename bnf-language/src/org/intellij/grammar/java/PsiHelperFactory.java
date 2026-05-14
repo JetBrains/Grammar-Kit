@@ -17,6 +17,7 @@ import org.intellij.grammar.BnfPaths;
 import org.intellij.grammar.BnfPathsResolution;
 import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.java.syntax.JavaSyntaxHelper;
+import org.intellij.grammar.java.syntax.kotlin.KotlinSyntaxHelper;
 import org.intellij.grammar.psi.BnfAttr;
 import org.intellij.grammar.psi.BnfFile;
 import org.jetbrains.annotations.NotNull;
@@ -35,9 +36,9 @@ import java.util.List;
  * input attributes.
  * <p>
  * By default returns {@link PsiHelper} (PSI-backed, scoped to the resolved directory). The
- * {@code grammar.kit.psi.helper.use.syntax} registry flag swaps the implementation to
- * {@link JavaSyntaxHelper} (source-file backed, rooted at the resolved directory, with
- * {@link AsmHelper} as fallback) — used to drive headless-style resolution in IDE tests.
+ * {@code grammar.kit.psi.helper.use.syntax} registry flag swaps the implementation to a source-file
+ * chain {@link KotlinSyntaxHelper} → {@link JavaSyntaxHelper} → {@link AsmHelper}, rooted at the
+ * resolved directory — used to drive headless-style resolution in IDE tests.
  */
 @Service(Service.Level.PROJECT)
 public final class PsiHelperFactory {
@@ -81,9 +82,10 @@ public final class PsiHelperFactory {
   }
 
   private static @NotNull JavaHelper buildSyntaxHelper(@Nullable Path dir) {
-    AsmHelper fallback = new AsmHelper();
-    if (dir == null) return fallback;
-    return new JavaSyntaxHelper(List.of(dir), fallback);
+    AsmHelper asm = new AsmHelper();
+    if (dir == null) return asm;
+    List<Path> roots = List.of(dir);
+    return new KotlinSyntaxHelper(roots, new JavaSyntaxHelper(roots, asm));
   }
 
   private static @Nullable Path referenceDir(@NotNull PsiElement context) {

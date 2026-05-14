@@ -28,8 +28,10 @@ import com.intellij.psi.impl.search.PsiSearchHelperImpl;
 import com.intellij.psi.impl.source.CharTableImpl;
 import com.intellij.psi.search.PsiSearchHelper;
 import com.intellij.testFramework.LightVirtualFile;
-import org.intellij.grammar.java.AsmHelper;
+import org.intellij.grammar.classinfo.JvmClassSymbolManager;
+import org.intellij.grammar.classinfo.asm.AsmClassSymbolProvider;
 import org.intellij.grammar.java.JavaHelper;
+import org.intellij.grammar.java.JvmSyntaxHelper;
 import org.intellij.grammar.java.ReflectionHelper;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -37,6 +39,7 @@ import org.jetbrains.annotations.Nullable;
 import javax.swing.*;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.jar.JarEntry;
 import java.util.jar.JarOutputStream;
 import java.util.regex.Matcher;
@@ -278,10 +281,10 @@ public class LightPsi {
      * language injectors, multi-host injectors, {@link PsiSearchHelper}, and the default
      * {@link JavaHelper} implementation.
      * <p>
-     * The default {@link JavaHelper} is {@link AsmHelper} (bytecode-driven introspection), or
-     * {@link ReflectionHelper} when ASM is missing from the classpath. The CLI's {@code Main}
-     * may replace this registration after grammar paths are resolved — see
-     * {@code org.intellij.grammar.java.syntax.JavaSyntaxHelper} for source-backed lookup.
+     * The default {@link JavaHelper} is a {@link JvmSyntaxHelper} backed by an
+     * {@link AsmClassSymbolProvider} (bytecode-driven introspection), or {@link ReflectionHelper}
+     * when ASM is missing from the classpath. The CLI's {@code Main} may replace this registration
+     * after grammar paths are resolved — see {@link JvmSyntaxHelper} for source-backed lookup.
      */
     @SuppressWarnings("UnstableApiUsage")
     public static void initExtensions(MockApplication application, @NotNull MockProject project) {
@@ -295,7 +298,8 @@ public class LightPsi {
       project.registerService(PsiSearchHelper.class, PsiSearchHelperImpl.class);
       project.getExtensionArea().registerExtensionPoint("com.intellij.multiHostInjector", "com.intellij.lang.injection.MultiHostInjector", INTERFACE, false);
       try {
-        project.registerService(JavaHelper.class, new AsmHelper());
+        project.registerService(JavaHelper.class, new JvmSyntaxHelper(
+          new JvmClassSymbolManager(List.of(new AsmClassSymbolProvider()))));
       }
       catch (LinkageError e) {
         System.out.println("ASM not available, using reflection helper: " + e);

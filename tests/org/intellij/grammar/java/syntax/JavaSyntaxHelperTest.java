@@ -7,8 +7,11 @@ package org.intellij.grammar.java.syntax;
 import com.intellij.psi.NavigatablePsiElement;
 import junit.framework.TestCase;
 import org.intellij.grammar.classinfo.ClassInfo;
+import org.intellij.grammar.classinfo.JvmClassSymbolManager;
 import org.intellij.grammar.classinfo.MethodType;
+import org.intellij.grammar.classinfo.java.JavaSyntaxClassSymbolProvider;
 import org.intellij.grammar.java.JavaHelper;
+import org.intellij.grammar.java.JvmSyntaxHelper;
 import org.intellij.grammar.java.MyElement;
 import org.intellij.grammar.classinfo.TypeParameterInfo;
 
@@ -18,14 +21,14 @@ import java.nio.file.Path;
 import java.util.List;
 
 /**
- * Unit tests for {@link JavaSyntaxHelper}. Sets up a fixture source root in a temp directory and
+ * Unit tests for {@link JvmSyntaxHelper} fed by {@link JavaSyntaxClassSymbolProvider}. Sets up a fixture source root in a temp directory and
  * exercises every part of the {@link JavaHelper} API the parser generator relies on. Pure JUnit
  * (no IDE harness) — the helper is designed to work outside the IntelliJ Platform.
  */
 public class JavaSyntaxHelperTest extends TestCase {
 
   private Path root;
-  private JavaSyntaxHelper helper;
+  private JavaHelper helper;
 
   @Override
   protected void setUp() throws Exception {
@@ -85,7 +88,7 @@ public class JavaSyntaxHelperTest extends TestCase {
         static class Nested {}
       }
       """);
-    helper = new JavaSyntaxHelper(List.of(root));
+    helper = new JvmSyntaxHelper(new JvmClassSymbolManager(List.of(new JavaSyntaxClassSymbolProvider(List.of(root)))));
   }
 
   @Override

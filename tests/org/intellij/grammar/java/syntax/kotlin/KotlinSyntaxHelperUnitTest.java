@@ -7,11 +7,15 @@ package org.intellij.grammar.java.syntax.kotlin;
 import com.intellij.psi.NavigatablePsiElement;
 import junit.framework.TestCase;
 import org.intellij.grammar.classinfo.ClassInfo;
+import org.intellij.grammar.classinfo.JvmClassSymbolManager;
+import org.intellij.grammar.classinfo.JvmClassSymbolProvider;
 import org.intellij.grammar.classinfo.MethodType;
 import org.intellij.grammar.java.JavaHelper;
 import org.intellij.grammar.classinfo.MethodInfo;
+import org.intellij.grammar.java.JvmSyntaxHelper;
 import org.intellij.grammar.java.MyElement;
-import org.intellij.grammar.java.syntax.KotlinSyntaxHelper;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
@@ -86,8 +90,10 @@ public class KotlinSyntaxHelperUnitTest extends TestCase {
   }
 
   public void testFindClassMethodsDelegatesOnMiss() {
-    MethodInfo m = method("ping", Modifier.PUBLIC, MethodType.INSTANCE, "void");
-    fallback.methods.put("ext.Platform", List.of(m));
+    ClassInfo external = new ClassInfo();
+    external.name = "ext.Platform";
+    external.methods.add(method("ping", Modifier.PUBLIC, MethodType.INSTANCE, "void"));
+    fallback.classes.put("ext.Platform", external);
     List<NavigatablePsiElement> result = helper().findClassMethods(
       "ext.Platform", MethodType.INSTANCE, "ping", -1);
     assertEquals(1, result.size());
@@ -115,17 +121,36 @@ public class KotlinSyntaxHelperUnitTest extends TestCase {
     assertFalse(helper().isPublic(null));
   }
 
-  private @org.jetbrains.annotations.NotNull KotlinSyntaxHelper helper() {
-    return new KotlinSyntaxHelper(classes::get, fallback);
+  private @NotNull JavaHelper helper() {
+    return new JvmSyntaxHelper(new JvmClassSymbolManager(List.of(
+      mapProvider(classes),
+      fallbackProvider(fallback))));
   }
 
-  private @org.jetbrains.annotations.NotNull KotlinSyntaxHelper helperNoFallback() {
-    return new KotlinSyntaxHelper(classes::get, null);
+  private @NotNull JavaHelper helperNoFallback() {
+    return new JvmSyntaxHelper(new JvmClassSymbolManager(List.of(mapProvider(classes))));
   }
 
-  private ClassInfo registerClass(@org.jetbrains.annotations.NotNull String fqn,
+  private static @NotNull JvmClassSymbolProvider mapProvider(@NotNull Map<String, ClassInfo> classes) {
+    return (fqn, resolver) -> {
+      ClassInfo info = classes.get(fqn);
+      return info == null ? Map.of() : Map.of(fqn, info);
+    };
+  }
+
+  private static @NotNull JvmClassSymbolProvider fallbackProvider(@NotNull JavaHelper fallback) {
+    return (fqn, resolver) -> {
+      NavigatablePsiElement el = fallback.findClass(fqn);
+      if (el instanceof MyElement<?> e && e.delegate instanceof ClassInfo ci) {
+        return Map.of(fqn, ci);
+      }
+      return Map.of();
+    };
+  }
+
+  private ClassInfo registerClass(@NotNull String fqn,
                                   int modifiers,
-                                  @org.jetbrains.annotations.Nullable String superClass,
+                                  @Nullable String superClass,
                                   MethodInfo... methods) {
     ClassInfo info = new ClassInfo();
     info.name = fqn;
@@ -136,10 +161,10 @@ public class KotlinSyntaxHelperUnitTest extends TestCase {
     return info;
   }
 
-  private MethodInfo method(@org.jetbrains.annotations.NotNull String name,
+  private MethodInfo method(@NotNull String name,
                             int modifiers,
-                            @org.jetbrains.annotations.NotNull MethodType methodType,
-                            @org.jetbrains.annotations.NotNull String returnType,
+                            @NotNull MethodType methodType,
+                            @NotNull String returnType,
                             String... paramTypes) {
     MethodInfo m = new MethodInfo();
     m.name = name;

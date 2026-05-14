@@ -16,8 +16,10 @@ import com.intellij.util.IncorrectOperationException;
 import com.intellij.util.ProcessingContext;
 import com.intellij.util.containers.ContainerUtil;
 import org.intellij.grammar.KnownAttribute;
+import org.intellij.grammar.classinfo.JvmClassSymbolManager;
 import org.intellij.grammar.classinfo.MethodType;
 import org.intellij.grammar.classinfo.TypeParameterInfo;
+import org.intellij.grammar.classinfo.asm.AsmClassSymbolProvider;
 import org.intellij.grammar.psi.BnfAttr;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -40,15 +42,17 @@ import static org.intellij.grammar.psi.BnfAttributes.getRootAttribute;
  * <p>
  * When the PSI index does not know about a class (e.g. it is on the classpath but outside the
  * project, or the index is currently unavailable), every override transparently falls back to the
- * inherited {@link AsmHelper} behaviour. This dual strategy is what lets the IDE resolve both
- * project sources and platform/library classes uniformly.
+ * inherited {@link JvmSyntaxHelper} behaviour — backed here by an {@link AsmClassSymbolProvider}.
+ * This dual strategy is what lets the IDE resolve both project sources and platform/library
+ * classes uniformly.
  */
-final class PsiHelper extends AsmHelper {
+final class PsiHelper extends JvmSyntaxHelper {
   private final JavaPsiFacade myFacade;
   private final PsiElementFactory myElementFactory;
   private final @Nullable GlobalSearchScope myScope;
 
   PsiHelper(@NotNull Project project, @Nullable GlobalSearchScope scope) {
+    super(new JvmClassSymbolManager(List.of(new AsmClassSymbolProvider())));
     myFacade = JavaPsiFacade.getInstance(project);
     myElementFactory = PsiElementFactory.getInstance(project);
     myScope = scope;

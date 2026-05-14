@@ -8,11 +8,14 @@ import com.intellij.platform.syntax.tree.SyntaxNode;
 import com.intellij.psi.NavigatablePsiElement;
 import junit.framework.TestCase;
 import org.intellij.grammar.classinfo.ClassInfo;
+import org.intellij.grammar.classinfo.JvmClassSymbolManager;
+import org.intellij.grammar.classinfo.JvmClassSymbolProvider;
 import org.intellij.grammar.classinfo.MethodType;
 import org.intellij.grammar.classinfo.TypeParameterInfo;
 import org.intellij.grammar.classinfo.java.JavaSyntaxClassExtractor;
 import org.intellij.grammar.classinfo.java.JavaSyntaxTreeManager;
 import org.intellij.grammar.java.JavaHelper;
+import org.intellij.grammar.java.JvmSyntaxHelper;
 import org.intellij.grammar.java.MyElement;
 import org.jetbrains.annotations.NotNull;
 
@@ -41,7 +44,7 @@ public class JavaSyntaxHelperSourceTest extends TestCase {
   // ---------------------------------------------------------------------------------------------
 
   public void testPublicTopLevelClass() {
-    JavaSyntaxHelper helper = helperFor("""
+    JavaHelper helper = helperFor("""
       package a.b;
       public class Foo extends Base {}
       """);
@@ -52,7 +55,7 @@ public class JavaSyntaxHelperSourceTest extends TestCase {
   }
 
   public void testPackagePrivateClass() {
-    JavaSyntaxHelper helper = helperFor("""
+    JavaHelper helper = helperFor("""
       package a.b;
       class Hidden {}
       """);
@@ -62,7 +65,7 @@ public class JavaSyntaxHelperSourceTest extends TestCase {
   }
 
   public void testInterfaceFlagSet() {
-    JavaSyntaxHelper helper = helperFor("""
+    JavaHelper helper = helperFor("""
       package a.b;
       public interface Iface {}
       """);
@@ -73,7 +76,7 @@ public class JavaSyntaxHelperSourceTest extends TestCase {
   }
 
   public void testNoExtendsClauseDefaultsToObject() {
-    JavaSyntaxHelper helper = helperFor("""
+    JavaHelper helper = helperFor("""
       package a.b;
       public class Free {}
       """);
@@ -82,7 +85,7 @@ public class JavaSyntaxHelperSourceTest extends TestCase {
   }
 
   public void testImplementsListPopulated() {
-    JavaSyntaxHelper helper = helperFor("""
+    JavaHelper helper = helperFor("""
       package a.b;
       public class C implements I1, I2 {}
       """);
@@ -92,7 +95,7 @@ public class JavaSyntaxHelperSourceTest extends TestCase {
   }
 
   public void testClassAnnotation() {
-    JavaSyntaxHelper helper = helperFor("""
+    JavaHelper helper = helperFor("""
       package a.b;
       @Deprecated
       public class C {}
@@ -106,7 +109,7 @@ public class JavaSyntaxHelperSourceTest extends TestCase {
   // ---------------------------------------------------------------------------------------------
 
   public void testPublicAndPackagePrivateClassesInSameFile() {
-    JavaSyntaxHelper helper = helperFor("""
+    JavaHelper helper = helperFor("""
       package a.b;
       public class Bundle {
         public Helper helper() { return null; }
@@ -122,7 +125,7 @@ public class JavaSyntaxHelperSourceTest extends TestCase {
   }
 
   public void testInnerClassFqn() {
-    JavaSyntaxHelper helper = helperFor("""
+    JavaHelper helper = helperFor("""
       package a.b;
       public class Outer {
         public static class Inner {
@@ -140,7 +143,7 @@ public class JavaSyntaxHelperSourceTest extends TestCase {
   // ---------------------------------------------------------------------------------------------
 
   public void testInstanceMethodSignature() {
-    JavaSyntaxHelper helper = helperFor("""
+    JavaHelper helper = helperFor("""
       package a.b;
       import java.util.List;
       import java.util.Map;
@@ -168,7 +171,7 @@ public class JavaSyntaxHelperSourceTest extends TestCase {
   }
 
   public void testStaticMethodFiltering() {
-    JavaSyntaxHelper helper = helperFor("""
+    JavaHelper helper = helperFor("""
       package a.b;
       public class C {
         public void inst() {}
@@ -184,7 +187,7 @@ public class JavaSyntaxHelperSourceTest extends TestCase {
   }
 
   public void testConstructorExtraction() {
-    JavaSyntaxHelper helper = helperFor("""
+    JavaHelper helper = helperFor("""
       package a.b;
       public class C {
         public C(int seed) {}
@@ -200,7 +203,7 @@ public class JavaSyntaxHelperSourceTest extends TestCase {
   }
 
   public void testAbstractMethodGatedByAllowAbstract() {
-    JavaSyntaxHelper helper = helperFor("""
+    JavaHelper helper = helperFor("""
       package a.b;
       public abstract class C {
         public abstract void doIt();
@@ -213,7 +216,7 @@ public class JavaSyntaxHelperSourceTest extends TestCase {
   }
 
   public void testPrivateConstructorExcluded() {
-    JavaSyntaxHelper helper = helperFor("""
+    JavaHelper helper = helperFor("""
       package a.b;
       public class C {
         private C() {}
@@ -228,7 +231,7 @@ public class JavaSyntaxHelperSourceTest extends TestCase {
   // ---------------------------------------------------------------------------------------------
 
   public void testMethodAnnotation() {
-    JavaSyntaxHelper helper = helperFor("""
+    JavaHelper helper = helperFor("""
       package a.b;
       public class C {
         @Override
@@ -241,7 +244,7 @@ public class JavaSyntaxHelperSourceTest extends TestCase {
   }
 
   public void testThrowsClause() {
-    JavaSyntaxHelper helper = helperFor("""
+    JavaHelper helper = helperFor("""
       package a.b;
       public class C {
         public void doIt() throws java.io.IOException, RuntimeException {}
@@ -254,7 +257,7 @@ public class JavaSyntaxHelperSourceTest extends TestCase {
   }
 
   public void testGenericMethodTypeParameter() {
-    JavaSyntaxHelper helper = helperFor("""
+    JavaHelper helper = helperFor("""
       package a.b;
       public class C {
         public static <U> U cast(Object o) { return (U)o; }
@@ -268,7 +271,7 @@ public class JavaSyntaxHelperSourceTest extends TestCase {
   }
 
   public void testParameterAnnotationsResolvedAgainstSamePackage() {
-    JavaSyntaxHelper helper = helperFor("""
+    JavaHelper helper = helperFor("""
       package a.b;
       public class C {
         public void doIt(@Marker int count, int plain) {}
@@ -286,7 +289,7 @@ public class JavaSyntaxHelperSourceTest extends TestCase {
   // ---------------------------------------------------------------------------------------------
 
   public void testParamTypeMatchedViaSuperclass() {
-    JavaSyntaxHelper helper = helperFor("""
+    JavaHelper helper = helperFor("""
       package a.b;
       public class Base {}
       public class Child extends Base {}
@@ -300,7 +303,7 @@ public class JavaSyntaxHelperSourceTest extends TestCase {
   }
 
   public void testParamTypeMatchedViaInterface() {
-    JavaSyntaxHelper helper = helperFor("""
+    JavaHelper helper = helperFor("""
       package a.b;
       public interface Iface {}
       public class Child implements Iface {}
@@ -321,14 +324,19 @@ public class JavaSyntaxHelperSourceTest extends TestCase {
    * backed by the resulting {@code FQN -> ClassInfo} map (no fallback). Tests that need a fallback
    * can construct the helper directly using {@link #extract}.
    */
-  private static @NotNull JavaSyntaxHelper helperFor(@NotNull String source) {
+  private static @NotNull JavaHelper helperFor(@NotNull String source) {
     Map<String, ClassInfo> classes = extract(source);
-    return new JavaSyntaxHelper(classes::get, null);
+    JvmClassSymbolProvider provider = (fqn, resolver) -> {
+      ClassInfo info = classes.get(fqn);
+      return info == null ? Map.of() : Map.of(fqn, info);
+    };
+    return new JvmSyntaxHelper(new JvmClassSymbolManager(List.of(provider)));
   }
 
   private static @NotNull Map<String, ClassInfo> extract(@NotNull String source) {
     SyntaxNode root = JavaSyntaxTreeManager.parseText(source);
-    return new HashMap<>(JavaSyntaxClassExtractor.extractFrom(root));
+    // Tests run extraction in isolation — no cross-language probing, so a null-returning resolver is fine.
+    return new HashMap<>(JavaSyntaxClassExtractor.extractFrom(root, fqn -> null));
   }
 
   private static ClassInfo unwrap(NavigatablePsiElement el) {

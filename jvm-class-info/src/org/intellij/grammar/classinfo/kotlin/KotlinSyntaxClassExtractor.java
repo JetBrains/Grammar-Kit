@@ -11,6 +11,8 @@ import fleet.org.jetbrains.kotlin.kmp.parser.KtNodeTypes;
 import org.intellij.grammar.classinfo.ClassInfo;
 import org.intellij.grammar.classinfo.MethodInfo;
 import org.intellij.grammar.classinfo.MethodType;
+import org.intellij.grammar.classinfo.SymbolResolver;
+import org.intellij.grammar.classinfo.java.JavaSyntaxClassExtractor;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -39,7 +41,7 @@ import static org.intellij.grammar.classinfo.kotlin.KotlinSyntaxNodes.typeParame
  * object, companion, or typealias, plus a synthesised {@code <FileStem>Kt} class collecting all
  * top-level callables.
  * <p>
- * Mirrors {@link org.intellij.grammar.classinfo.java.JavaSyntaxClassExtractor}'s decomposition:
+ * Mirrors {@link JavaSyntaxClassExtractor}'s decomposition:
  * imports / type formatting / method extraction are pushed into dedicated helpers and this class
  * is just the orchestrator.
  */
@@ -54,14 +56,18 @@ final class KotlinSyntaxClassExtractor {
   private final Map<String, ClassInfo> result = new LinkedHashMap<>();
 
   /** Walks {@code fileRoot} once and returns one {@link ClassInfo} per declared (or synthesised) class. */
-  static @NotNull Map<String, ClassInfo> extractFrom(@NotNull SyntaxNode fileRoot, @NotNull String fileStem) {
-    return new KotlinSyntaxClassExtractor(fileRoot, fileStem).extract();
+  static @NotNull Map<String, ClassInfo> extractFrom(@NotNull SyntaxNode fileRoot,
+                                                     @NotNull String fileStem,
+                                                     @NotNull SymbolResolver resolver) {
+    return new KotlinSyntaxClassExtractor(fileRoot, fileStem, resolver).extract();
   }
 
-  private KotlinSyntaxClassExtractor(@NotNull SyntaxNode fileRoot, @NotNull String fileStem) {
+  private KotlinSyntaxClassExtractor(@NotNull SyntaxNode fileRoot,
+                                     @NotNull String fileStem,
+                                     @NotNull SymbolResolver resolver) {
     this.fileRoot = fileRoot;
     this.fileStem = fileStem;
-    this.imports = KotlinSyntaxImportContext.extractFrom(fileRoot);
+    this.imports = KotlinSyntaxImportContext.extractFrom(fileRoot, resolver);
     this.typeFormatter = new KotlinSyntaxTypeFormatter(imports);
     this.methodExtractor = new KotlinSyntaxMethodExtractor(typeFormatter);
   }

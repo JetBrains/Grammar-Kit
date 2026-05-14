@@ -2,16 +2,17 @@
  * Copyright 2011-2026 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
  */
 
-package org.intellij.grammar.java;
+package org.intellij.grammar.classinfo.asm;
 
 import com.intellij.openapi.util.io.FileUtil;
-import com.intellij.psi.NavigatablePsiElement;
 import com.intellij.util.ObjectUtils;
 import com.intellij.util.SmartList;
 import com.intellij.util.containers.ContainerUtil;
 import org.intellij.grammar.classinfo.ClassInfo;
+import org.intellij.grammar.classinfo.JvmClassSymbolProvider;
 import org.intellij.grammar.classinfo.MethodInfo;
 import org.intellij.grammar.classinfo.MethodType;
+import org.intellij.grammar.classinfo.SymbolResolver;
 import org.intellij.grammar.classinfo.TypeParameterInfo;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -21,33 +22,48 @@ import org.jetbrains.org.objectweb.asm.signature.SignatureVisitor;
 
 import java.io.InputStream;
 import java.lang.reflect.Modifier;
-import java.util.*;
+import java.util.ArrayDeque;
+import java.util.Deque;
+import java.util.List;
+import java.util.Map;
 
 /**
- * {@link JavaHelper} backed by ASM bytecode parsing.
+ * Bytecode-backed {@link JvmClassSymbolProvider}. Loads {@code .class} files through a
+ * {@link ClassLoader}'s resources and decodes them with ASM into {@link ClassInfo} records — no
+ * JVM-side class initialisation, which is essential for platform classes that can't be loaded at
+ * generation time.
  * <p>
- * Loads {@code .class} files through the current classloader's resources and extracts class /
- * method information without needing the JVM to actually load the class — important because some
- * referenced classes (e.g. those that depend on the IDE platform) cannot be initialised at
- * generation time. Method signatures, generics, {@code throws} clauses and both regular and type
- * annotations are decoded into {@link ClassInfo} / {@link MethodInfo} records and wrapped in
- * {@link MyElement}s so they look like {@link NavigatablePsiElement}s to callers.
- * <p>
- * This is the default helper outside the IDE (returned by
- * {@link JavaHelper#getJavaHelper(com.intellij.psi.PsiElement)} when no project service is
- * available) and the base class of {@link PsiHelper}, which delegates back to the bytecode lookup
- * whenever the PSI cannot resolve a class — typically for platform classes that are on the
- * classpath but not part of the project's source roots.
+ * Canonical FQN form is dotted source-style: {@code com.foo.Outer.Inner}, never the JVM
+ * {@code Outer$Inner}. Bytecode-emitted names are normalised in {@link #fixClassName}. On the
+ * lookup side, {@link #findClassSafe} walks dotted prefixes right-to-left and tries each
+ * {@code /}-vs-{@code $} permutation so a dotted FQN like {@code com.foo.Outer.Inner} resolves
+ * either {@code com/foo/Outer/Inner.class} or {@code com/foo/Outer$Inner.class}.
  */
-public class AsmHelper extends JavaHelper {
+public final class AsmClassSymbolProvider implements JvmClassSymbolProvider {
 
   private static final int ASM_OPCODES = Opcodes.ASM9;
 
-  private static boolean acceptsMethod(MethodInfo method, MethodType methodType, boolean allowAbstract) {
-    return method.methodType == methodType && acceptsModifiers(method.modifiers, methodType, allowAbstract);
+  private final ClassLoader classLoader;
+
+  public AsmClassSymbolProvider() {
+    this(AsmClassSymbolProvider.class.getClassLoader());
   }
 
-  private static ClassInfo findClassSafe(String className) {
+  public AsmClassSymbolProvider(@NotNull ClassLoader classLoader) {
+    this.classLoader = classLoader;
+  }
+
+  @Override
+  public @NotNull Map<String, ClassInfo> resolve(@NotNull String fqn, @NotNull SymbolResolver resolver) {
+    ClassInfo info = findClassSafe(fqn, classLoader);
+    return info == null ? Map.of() : Map.of(fqn, info);
+  }
+
+  public static @Nullable ClassInfo findClassSafe(@Nullable String className) {
+    return findClassSafe(className, AsmClassSymbolProvider.class.getClassLoader());
+  }
+
+  public static @Nullable ClassInfo findClassSafe(@Nullable String className, @NotNull ClassLoader classLoader) {
     if (className == null) return null;
     try {
       int lastDot = className.length();
@@ -56,7 +72,7 @@ public class AsmHelper extends JavaHelper {
         String s = className.substring(0, lastDot).replace('.', '/') +
                    className.substring(lastDot).replace('.', '$') +
                    ".class";
-        is = JavaHelper.class.getClassLoader().getResourceAsStream(s);
+        is = classLoader.getResourceAsStream(s);
         lastDot = className.lastIndexOf('.', lastDot - 1);
       }
       while (is == null && lastDot > 0);
@@ -114,72 +130,6 @@ public class AsmHelper extends JavaHelper {
 
   private static String fixClassName(String s) {
     return s == null ? null : s.replace('/', '.').replace('$', '.');
-  }
-
-  @Override
-  public boolean isPublic(@Nullable NavigatablePsiElement element) {
-    return ClassInfoUtil.isPublic(element);
-  }
-
-  @Override
-  public @Nullable NavigatablePsiElement findClass(String className) {
-    ClassInfo info = findClassSafe(className);
-    return info == null ? null : new MyElement<>(info);
-  }
-
-  @Override
-  public @NotNull List<NavigatablePsiElement> findClassMethods(@Nullable String className,
-                                                               @NotNull MethodType methodType,
-                                                               @Nullable String methodName,
-                                                               boolean allowAbstract,
-                                                               int paramCount,
-                                                               String... paramTypes) {
-    ClassInfo aClass = findClassSafe(className);
-    if (aClass == null || methodName == null) return Collections.emptyList();
-    List<NavigatablePsiElement> result = new ArrayList<>();
-    for (MethodInfo method : aClass.methods) { // todo super methods too
-      if (!acceptsName(methodName, method.name)) continue;
-      if (!acceptsMethod(method, methodType, allowAbstract)) continue;
-      if (!ClassInfoUtil.acceptsParams(method, paramCount, paramTypes, AsmHelper::findClassSafe)) continue;
-      result.add(new MyElement<>(method));
-    }
-    return result;
-  }
-
-  @Override
-  public @Nullable String getSuperClassName(@Nullable String className) {
-    ClassInfo aClass = findClassSafe(className);
-    return aClass == null ? null : aClass.superClass;
-  }
-
-  @Override
-  public @NotNull List<String> getMethodTypes(NavigatablePsiElement method) {
-    return ClassInfoUtil.getMethodTypes(method);
-  }
-
-  @Override
-  public List<TypeParameterInfo> getGenericParameters(NavigatablePsiElement method) {
-    return ClassInfoUtil.getGenericParameters(method);
-  }
-
-  @Override
-  public List<String> getExceptionList(NavigatablePsiElement method) {
-    return ClassInfoUtil.getExceptionList(method);
-  }
-
-  @Override
-  public @NotNull String getDeclaringClass(@Nullable NavigatablePsiElement method) {
-    return ClassInfoUtil.getDeclaringClass(method);
-  }
-
-  @Override
-  public @NotNull List<String> getAnnotations(NavigatablePsiElement element) {
-    return ClassInfoUtil.getAnnotations(element);
-  }
-
-  @Override
-  public @NotNull List<String> getParameterAnnotations(@Nullable NavigatablePsiElement method, int paramIndex) {
-    return ClassInfoUtil.getParameterAnnotations(method, paramIndex);
   }
 
   private static class MyClassVisitor extends ClassVisitor {
@@ -278,7 +228,7 @@ public class AsmHelper extends JavaHelper {
         @Override
         public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
           String anno = fixClassName(desc.substring(1, desc.length() - 1));
-          return new MyClassVisitor.MyAnnotationVisitor() {
+          return new MyAnnotationVisitor() {
             @Override
             public void visitEnd() {
               if (annoParamCounter != 0) return;
@@ -290,7 +240,7 @@ public class AsmHelper extends JavaHelper {
         @Override
         public AnnotationVisitor visitParameterAnnotation(int parameter, String desc, boolean visible) {
           String anno = fixClassName(desc.substring(1, desc.length() - 1));
-          return new MyClassVisitor.MyAnnotationVisitor() {
+          return new MyAnnotationVisitor() {
             @Override
             public void visitEnd() {
               if (annoParamCounter != 0) return;
@@ -303,7 +253,7 @@ public class AsmHelper extends JavaHelper {
         public AnnotationVisitor visitTypeAnnotation(int typeRef, TypePath typePath, String desc, boolean visible) {
           String anno = fixClassName(desc.substring(1, desc.length() - 1));
           TypeReference typeReference = new TypeReference(typeRef);
-          return new MyClassVisitor.MyAnnotationVisitor() {
+          return new MyAnnotationVisitor() {
             @Override
             public void visitEnd() {
               if (annoParamCounter != 0) return;
@@ -364,7 +314,7 @@ public class AsmHelper extends JavaHelper {
 
   private static class MySignatureVisitor extends SignatureVisitor {
     final MethodInfo methodInfo;
-    final Deque<MySignatureVisitor.State> states = new ArrayDeque<>();
+    final Deque<State> states = new ArrayDeque<>();
 
     /**
      * @noinspection StringBufferField
@@ -385,49 +335,49 @@ public class AsmHelper extends JavaHelper {
     @Override
     public SignatureVisitor visitInterfaceBound() {
       finishElement(null);
-      states.push(MySignatureVisitor.State.BOUNDS);
+      states.push(State.BOUNDS);
       return this;
     }
 
     @Override
     public SignatureVisitor visitClassBound() {
       finishElement(null);
-      states.push(MySignatureVisitor.State.BOUNDS);
+      states.push(State.BOUNDS);
       return this;
     }
 
     @Override
     public SignatureVisitor visitSuperclass() {
       finishElement(null);
-      states.push(MySignatureVisitor.State.BOUNDS);
+      states.push(State.BOUNDS);
       return this;
     }
 
     @Override
     public SignatureVisitor visitInterface() {
       finishElement(null);
-      states.push(MySignatureVisitor.State.BOUNDS);
+      states.push(State.BOUNDS);
       return this;
     }
 
     @Override
     public SignatureVisitor visitParameterType() {
       finishElement(null);
-      states.push(MySignatureVisitor.State.PARAM);
+      states.push(State.PARAM);
       return this;
     }
 
     @Override
     public SignatureVisitor visitReturnType() {
       finishElement(null);
-      states.push(MySignatureVisitor.State.RETURN);
+      states.push(State.RETURN);
       return this;
     }
 
     @Override
     public SignatureVisitor visitExceptionType() {
       finishElement(null);
-      states.push(MySignatureVisitor.State.EXCEPTION);
+      states.push(State.EXCEPTION);
       return this;
     }
 
@@ -443,13 +393,13 @@ public class AsmHelper extends JavaHelper {
 
     @Override
     public SignatureVisitor visitArrayType() {
-      states.push(MySignatureVisitor.State.ARRAY);
+      states.push(State.ARRAY);
       return this;
     }
 
     @Override
     public void visitClassType(String s) {
-      states.push(MySignatureVisitor.State.CLASS);
+      states.push(State.CLASS);
       sb.append(fixClassName(s));
     }
 
@@ -459,8 +409,8 @@ public class AsmHelper extends JavaHelper {
 
     @Override
     public void visitTypeArgument() {
-      if (states.peekFirst() != MySignatureVisitor.State.GENERIC) {
-        states.push(MySignatureVisitor.State.GENERIC);
+      if (states.peekFirst() != State.GENERIC) {
+        states.push(State.GENERIC);
         sb.append("<");
       }
       else {
@@ -471,8 +421,8 @@ public class AsmHelper extends JavaHelper {
 
     @Override
     public SignatureVisitor visitTypeArgument(char c) {
-      if (states.peekFirst() != MySignatureVisitor.State.GENERIC) {
-        states.push(MySignatureVisitor.State.GENERIC);
+      if (states.peekFirst() != State.GENERIC) {
+        states.push(State.GENERIC);
         sb.append("<");
       }
       else {
@@ -489,16 +439,16 @@ public class AsmHelper extends JavaHelper {
 
     @Override
     public void visitEnd() {
-      finishElement(MySignatureVisitor.State.CLASS);
+      finishElement(State.CLASS);
       states.pop();
     }
 
-    private void finishElement(MySignatureVisitor.State finishState) {
+    void finishElement(State finishState) {
       if (sb.isEmpty()) return;
       main:
       while (!states.isEmpty()) {
         if (finishState == states.peekFirst()) break;
-        MySignatureVisitor.State state = states.pop();
+        State state = states.pop();
         switch (state) {
           case PARAM:
             methodInfo.types.add(sb());

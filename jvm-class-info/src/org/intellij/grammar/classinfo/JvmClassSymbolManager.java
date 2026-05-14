@@ -30,16 +30,16 @@ public final class JvmClassSymbolManager implements SymbolResolver {
   private static final Logger LOG = Logger.getInstance(JvmClassSymbolManager.class);
 
   private final List<JvmClassSymbolProvider> providers;
-  private final Map<String, ClassInfo> cache = new HashMap<>();
-  private final Set<String> negativeCache = new HashSet<>();
-  private final Set<String> inProgress = new HashSet<>();
+  private final Map<Fqn, ClassInfo> cache = new HashMap<>();
+  private final Set<Fqn> negativeCache = new HashSet<>();
+  private final Set<Fqn> inProgress = new HashSet<>();
 
   public JvmClassSymbolManager(@NotNull List<JvmClassSymbolProvider> providers) {
     this.providers = new ArrayList<>(providers);
   }
 
   @Override
-  public @Nullable ClassInfo findClass(@Nullable String fqn) {
+  public @Nullable ClassInfo findClass(@Nullable Fqn fqn) {
     if (fqn == null || fqn.isEmpty()) return null;
     if (cache.containsKey(fqn)) return cache.get(fqn);
     if (negativeCache.contains(fqn)) return null;
@@ -47,7 +47,7 @@ public final class JvmClassSymbolManager implements SymbolResolver {
 
     try {
       for (JvmClassSymbolProvider provider : providers) {
-        Map<String, ClassInfo> batch = provider.resolve(fqn, this);
+        Map<Fqn, ClassInfo> batch = provider.resolve(fqn, this);
         mergeBatch(batch, provider);
         if (cache.containsKey(fqn)) return cache.get(fqn);
       }
@@ -68,8 +68,8 @@ public final class JvmClassSymbolManager implements SymbolResolver {
     providers.add(provider);
   }
 
-  private void mergeBatch(@NotNull Map<String, ClassInfo> batch, @NotNull JvmClassSymbolProvider source) {
-    for (Map.Entry<String, ClassInfo> e : batch.entrySet()) {
+  private void mergeBatch(@NotNull Map<Fqn, ClassInfo> batch, @NotNull JvmClassSymbolProvider source) {
+    for (Map.Entry<Fqn, ClassInfo> e : batch.entrySet()) {
       ClassInfo existing = cache.putIfAbsent(e.getKey(), e.getValue());
       if (existing != null) {
         LOG.warn("Duplicate class symbol for " + e.getKey() +

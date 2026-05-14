@@ -8,6 +8,7 @@ import com.intellij.platform.syntax.tree.SyntaxNode;
 import com.intellij.psi.NavigatablePsiElement;
 import junit.framework.TestCase;
 import org.intellij.grammar.classinfo.ClassInfo;
+import org.intellij.grammar.classinfo.Fqn;
 import org.intellij.grammar.classinfo.JvmClassSymbolManager;
 import org.intellij.grammar.classinfo.JvmClassSymbolProvider;
 import org.intellij.grammar.classinfo.MethodType;
@@ -91,7 +92,7 @@ public class JavaSyntaxHelperSourceTest extends TestCase {
       """);
     ClassInfo info = unwrap(helper.findClass("a.b.C"));
     assertNotNull(info);
-    assertEquals(List.of("a.b.I1", "a.b.I2"), info.interfaces);
+    assertEquals(List.of(Fqn.of("a.b.I1"), Fqn.of("a.b.I2")), info.interfaces);
   }
 
   public void testClassAnnotation() {
@@ -325,7 +326,7 @@ public class JavaSyntaxHelperSourceTest extends TestCase {
    * can construct the helper directly using {@link #extract}.
    */
   private static @NotNull JavaHelper helperFor(@NotNull String source) {
-    Map<String, ClassInfo> classes = extract(source);
+    Map<Fqn, ClassInfo> classes = extract(source);
     JvmClassSymbolProvider provider = (fqn, resolver) -> {
       ClassInfo info = classes.get(fqn);
       return info == null ? Map.of() : Map.of(fqn, info);
@@ -333,7 +334,7 @@ public class JavaSyntaxHelperSourceTest extends TestCase {
     return new JvmSyntaxHelper(new JvmClassSymbolManager(List.of(provider)));
   }
 
-  private static @NotNull Map<String, ClassInfo> extract(@NotNull String source) {
+  private static @NotNull Map<Fqn, ClassInfo> extract(@NotNull String source) {
     SyntaxNode root = JavaSyntaxTreeManager.parseText(source);
     // Tests run extraction in isolation — no cross-language probing, so a null-returning resolver is fine.
     return new HashMap<>(JavaSyntaxClassExtractor.extractFrom(root, fqn -> null));

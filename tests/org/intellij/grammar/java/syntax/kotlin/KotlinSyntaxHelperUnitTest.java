@@ -7,6 +7,7 @@ package org.intellij.grammar.java.syntax.kotlin;
 import com.intellij.psi.NavigatablePsiElement;
 import junit.framework.TestCase;
 import org.intellij.grammar.classinfo.ClassInfo;
+import org.intellij.grammar.classinfo.Fqn;
 import org.intellij.grammar.classinfo.JvmClassSymbolManager;
 import org.intellij.grammar.classinfo.JvmClassSymbolProvider;
 import org.intellij.grammar.classinfo.MethodType;
@@ -52,7 +53,7 @@ public class KotlinSyntaxHelperUnitTest extends TestCase {
 
   public void testFindClassDelegatesToFallback() {
     ClassInfo fallbackInfo = new ClassInfo();
-    fallbackInfo.name = "ext.Platform";
+    fallbackInfo.name = Fqn.of("ext.Platform");
     fallback.classes.put("ext.Platform", fallbackInfo);
     NavigatablePsiElement el = helper().findClass("ext.Platform");
     assertNotNull(el);
@@ -91,7 +92,7 @@ public class KotlinSyntaxHelperUnitTest extends TestCase {
 
   public void testFindClassMethodsDelegatesOnMiss() {
     ClassInfo external = new ClassInfo();
-    external.name = "ext.Platform";
+    external.name = Fqn.of("ext.Platform");
     external.methods.add(method("ping", Modifier.PUBLIC, MethodType.INSTANCE, "void"));
     fallback.classes.put("ext.Platform", external);
     List<NavigatablePsiElement> result = helper().findClassMethods(
@@ -106,8 +107,8 @@ public class KotlinSyntaxHelperUnitTest extends TestCase {
 
   public void testGetSuperClassNameDelegates() {
     ClassInfo external = new ClassInfo();
-    external.name = "ext.External";
-    external.superClass = "ext.Parent";
+    external.name = Fqn.of("ext.External");
+    external.superClass = Fqn.of("ext.Parent");
     fallback.classes.put("ext.External", external);
     assertEquals("ext.Parent", helper().getSuperClassName("ext.External"));
   }
@@ -133,14 +134,14 @@ public class KotlinSyntaxHelperUnitTest extends TestCase {
 
   private static @NotNull JvmClassSymbolProvider mapProvider(@NotNull Map<String, ClassInfo> classes) {
     return (fqn, resolver) -> {
-      ClassInfo info = classes.get(fqn);
+      ClassInfo info = classes.get(fqn.value());
       return info == null ? Map.of() : Map.of(fqn, info);
     };
   }
 
   private static @NotNull JvmClassSymbolProvider fallbackProvider(@NotNull JavaHelper fallback) {
     return (fqn, resolver) -> {
-      NavigatablePsiElement el = fallback.findClass(fqn);
+      NavigatablePsiElement el = fallback.findClass(fqn.value());
       if (el instanceof MyElement<?> e && e.delegate instanceof ClassInfo ci) {
         return Map.of(fqn, ci);
       }
@@ -153,9 +154,9 @@ public class KotlinSyntaxHelperUnitTest extends TestCase {
                                   @Nullable String superClass,
                                   MethodInfo... methods) {
     ClassInfo info = new ClassInfo();
-    info.name = fqn;
+    info.name = Fqn.of(fqn);
     info.modifiers = modifiers;
-    info.superClass = superClass;
+    info.superClass = superClass == null ? null : Fqn.of(superClass);
     for (MethodInfo m : methods) info.methods.add(m);
     classes.put(fqn, info);
     return info;
@@ -209,7 +210,7 @@ public class KotlinSyntaxHelperUnitTest extends TestCase {
     @Override
     public String getSuperClassName(String className) {
       ClassInfo info = classes.get(className);
-      return info == null ? null : info.superClass;
+      return info == null || info.superClass == null ? null : info.superClass.value();
     }
   }
 }

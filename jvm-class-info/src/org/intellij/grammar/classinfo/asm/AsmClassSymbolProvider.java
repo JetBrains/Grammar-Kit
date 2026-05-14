@@ -9,6 +9,7 @@ import com.intellij.util.ObjectUtils;
 import com.intellij.util.SmartList;
 import com.intellij.util.containers.ContainerUtil;
 import org.intellij.grammar.classinfo.ClassInfo;
+import org.intellij.grammar.classinfo.Fqn;
 import org.intellij.grammar.classinfo.JvmClassSymbolProvider;
 import org.intellij.grammar.classinfo.MethodInfo;
 import org.intellij.grammar.classinfo.MethodType;
@@ -34,7 +35,7 @@ import java.util.Map;
  * generation time.
  * <p>
  * Canonical FQN form is dotted source-style: {@code com.foo.Outer.Inner}, never the JVM
- * {@code Outer$Inner}. Bytecode-emitted names are normalised in {@link #fixClassName}. On the
+ * {@code Outer$Inner}. Bytecode-emitted names are normalised via {@link Fqn#fromBytecode}. On the
  * lookup side, {@link #findClassSafe} walks dotted prefixes right-to-left and tries each
  * {@code /}-vs-{@code $} permutation so a dotted FQN like {@code com.foo.Outer.Inner} resolves
  * either {@code com/foo/Outer/Inner.class} or {@code com/foo/Outer$Inner.class}.
@@ -54,26 +55,27 @@ public final class AsmClassSymbolProvider implements JvmClassSymbolProvider {
   }
 
   @Override
-  public @NotNull Map<String, ClassInfo> resolve(@NotNull String fqn, @NotNull SymbolResolver resolver) {
+  public @NotNull Map<Fqn, ClassInfo> resolve(@NotNull Fqn fqn, @NotNull SymbolResolver resolver) {
     ClassInfo info = findClassSafe(fqn, classLoader);
     return info == null ? Map.of() : Map.of(fqn, info);
   }
 
-  public static @Nullable ClassInfo findClassSafe(@Nullable String className) {
+  public static @Nullable ClassInfo findClassSafe(@Nullable Fqn className) {
     return findClassSafe(className, AsmClassSymbolProvider.class.getClassLoader());
   }
 
-  public static @Nullable ClassInfo findClassSafe(@Nullable String className, @NotNull ClassLoader classLoader) {
+  public static @Nullable ClassInfo findClassSafe(@Nullable Fqn className, @NotNull ClassLoader classLoader) {
     if (className == null) return null;
+    String name = className.value();
     try {
-      int lastDot = className.length();
+      int lastDot = name.length();
       InputStream is;
       do {
-        String s = className.substring(0, lastDot).replace('.', '/') +
-                   className.substring(lastDot).replace('.', '$') +
+        String s = name.substring(0, lastDot).replace('.', '/') +
+                   name.substring(lastDot).replace('.', '$') +
                    ".class";
         is = classLoader.getResourceAsStream(s);
-        lastDot = className.lastIndexOf('.', lastDot - 1);
+        lastDot = name.lastIndexOf('.', lastDot - 1);
       }
       while (is == null && lastDot > 0);
 
@@ -83,19 +85,19 @@ public final class AsmClassSymbolProvider implements JvmClassSymbolProvider {
       return getClassInfo(className, bytes);
     }
     catch (Exception e) {
-      reportException(e, className, null);
+      reportException(e, name, null);
     }
     return null;
   }
 
-  private static ClassInfo getClassInfo(String className, byte[] bytes) {
+  private static ClassInfo getClassInfo(Fqn className, byte[] bytes) {
     ClassInfo info = new ClassInfo();
     info.name = className;
     new ClassReader(bytes).accept(new MyClassVisitor(info), 0);
     return info;
   }
 
-  private static MethodInfo getMethodInfo(String className, String methodName, String signature, String[] exceptions) {
+  private static MethodInfo getMethodInfo(Fqn className, String methodName, String signature, String[] exceptions) {
     MethodInfo methodInfo = new MethodInfo();
     methodInfo.name = methodName;
     methodInfo.declaringClass = className;
@@ -107,8 +109,7 @@ public final class AsmClassSymbolProvider implements JvmClassSymbolProvider {
 
       if (exceptions != null) {
         for (String exception : exceptions) {
-          String fqn = fixClassName(exception);
-          methodInfo.exceptions.add(fqn);
+          methodInfo.exceptions.add(Fqn.fromBytecode(exception));
         }
       }
     }
@@ -128,10 +129,6 @@ public final class AsmClassSymbolProvider implements JvmClassSymbolProvider {
     System.err.println(text);
   }
 
-  private static String fixClassName(String s) {
-    return s == null ? null : s.replace('/', '.').replace('$', '.');
-  }
-
   private static class MyClassVisitor extends ClassVisitor {
 
     private final ClassInfo myInfo;
@@ -149,9 +146,9 @@ public final class AsmClassSymbolProvider implements JvmClassSymbolProvider {
                       String superName,
                       String[] interfaces) {
       myInfo.modifiers = access;
-      myInfo.superClass = fixClassName(superName);
+      myInfo.superClass = superName == null ? null : Fqn.fromBytecode(superName);
       for (String s : interfaces) {
-        myInfo.interfaces.add(fixClassName(s));
+        myInfo.interfaces.add(Fqn.fromBytecode(s));
       }
       if (signature != null) {
         new SignatureReader(signature).accept(new SignatureVisitor(ASM_OPCODES) {
@@ -181,7 +178,7 @@ public final class AsmClassSymbolProvider implements JvmClassSymbolProvider {
       myInfo.methods.add(m);
       class ParamTypeAnno {
         int index;
-        String anno;
+        Fqn anno;
         TypePath path;
       }
       List<ParamTypeAnno> typeAnnos = new SmartList<>();
@@ -216,7 +213,7 @@ public final class AsmClassSymbolProvider implements JvmClassSymbolProvider {
             else {
               int offset = plainOffsets[idx];
               newType = prevType.substring(0, offset) + "@" + ta.anno + " " + prevType.substring(offset);
-              plainOffsets[idx] += 2 + ta.anno.length();
+              plainOffsets[idx] += 2 + ta.anno.value().length();
             }
             m.annotatedTypes.set(idx, newType);
             if (isArray || bracketIdx < 1) {
@@ -227,7 +224,7 @@ public final class AsmClassSymbolProvider implements JvmClassSymbolProvider {
 
         @Override
         public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
-          String anno = fixClassName(desc.substring(1, desc.length() - 1));
+          Fqn anno = Fqn.fromBytecode(desc.substring(1, desc.length() - 1));
           return new MyAnnotationVisitor() {
             @Override
             public void visitEnd() {
@@ -239,7 +236,7 @@ public final class AsmClassSymbolProvider implements JvmClassSymbolProvider {
 
         @Override
         public AnnotationVisitor visitParameterAnnotation(int parameter, String desc, boolean visible) {
-          String anno = fixClassName(desc.substring(1, desc.length() - 1));
+          Fqn anno = Fqn.fromBytecode(desc.substring(1, desc.length() - 1));
           return new MyAnnotationVisitor() {
             @Override
             public void visitEnd() {
@@ -251,7 +248,7 @@ public final class AsmClassSymbolProvider implements JvmClassSymbolProvider {
 
         @Override
         public AnnotationVisitor visitTypeAnnotation(int typeRef, TypePath typePath, String desc, boolean visible) {
-          String anno = fixClassName(desc.substring(1, desc.length() - 1));
+          Fqn anno = Fqn.fromBytecode(desc.substring(1, desc.length() - 1));
           TypeReference typeReference = new TypeReference(typeRef);
           return new MyAnnotationVisitor() {
             @Override
@@ -400,7 +397,7 @@ public final class AsmClassSymbolProvider implements JvmClassSymbolProvider {
     @Override
     public void visitClassType(String s) {
       states.push(State.CLASS);
-      sb.append(fixClassName(s));
+      sb.append(Fqn.fromBytecode(s).value());
     }
 
     @Override
@@ -476,7 +473,7 @@ public final class AsmClassSymbolProvider implements JvmClassSymbolProvider {
             }
             break;
           case EXCEPTION:
-            methodInfo.exceptions.add(sb());
+            methodInfo.exceptions.add(Fqn.of(sb()));
             break;
           case CLASS:
             break;

@@ -5,7 +5,9 @@
 package org.intellij.grammar.java;
 
 import com.intellij.psi.NavigatablePsiElement;
+import com.intellij.util.containers.ContainerUtil;
 import org.intellij.grammar.classinfo.ClassInfo;
+import org.intellij.grammar.classinfo.Fqn;
 import org.intellij.grammar.classinfo.MethodInfo;
 import org.intellij.grammar.classinfo.TypeParameterInfo;
 import org.intellij.grammar.generator.java.JavaNames;
@@ -52,29 +54,31 @@ public final class ClassInfoUtil {
 
   public static @NotNull List<String> getExceptionList(@Nullable NavigatablePsiElement method) {
     Object delegate = delegateOf(method);
-    return delegate instanceof MethodInfo ? ((MethodInfo)delegate).exceptions
+    return delegate instanceof MethodInfo ? ContainerUtil.map(((MethodInfo)delegate).exceptions, Fqn::value)
                                           : Collections.emptyList();
   }
 
   public static @NotNull String getDeclaringClass(@Nullable NavigatablePsiElement method) {
     Object delegate = delegateOf(method);
-    return delegate instanceof MethodInfo ? ((MethodInfo)delegate).declaringClass : "";
+    if (!(delegate instanceof MethodInfo)) return "";
+    Fqn declaring = ((MethodInfo)delegate).declaringClass;
+    return declaring == null ? "" : declaring.value();
   }
 
   public static @NotNull List<String> getAnnotations(@Nullable NavigatablePsiElement element) {
     Object delegate = delegateOf(element);
-    if (delegate instanceof ClassInfo) return ((ClassInfo)delegate).annotations;
-    if (delegate instanceof MethodInfo) return ((MethodInfo)delegate).annotations.get(0);
+    if (delegate instanceof ClassInfo) return ContainerUtil.map(((ClassInfo)delegate).annotations, Fqn::value);
+    if (delegate instanceof MethodInfo) return ContainerUtil.map(((MethodInfo)delegate).annotations.get(0), Fqn::value);
     return Collections.emptyList();
   }
 
   public static @NotNull List<String> getParameterAnnotations(@Nullable NavigatablePsiElement method, int paramIndex) {
     Object delegate = delegateOf(method);
     if (!(delegate instanceof MethodInfo)) return Collections.emptyList();
-    Map<Integer, List<String>> annotations = ((MethodInfo)delegate).annotations;
+    Map<Integer, List<Fqn>> annotations = ((MethodInfo)delegate).annotations;
     if (paramIndex < 0 || paramIndex >= annotations.size()) return Collections.emptyList();
-    List<String> result = annotations.get(paramIndex + 1);
-    return result == null ? Collections.emptyList() : result;
+    List<Fqn> result = annotations.get(paramIndex + 1);
+    return result == null ? Collections.emptyList() : ContainerUtil.map(result, Fqn::value);
   }
 
   /**
@@ -100,12 +104,19 @@ public final class ClassInfoUtil {
       if (JavaHelper.acceptsName(paramType, JavaNames.getRawClassName(parameter))) continue;
       ClassInfo info = classLookup.apply(paramType);
       if (info != null) {
-        if (Objects.equals(info.superClass, parameter)) continue;
-        if (info.interfaces.contains(parameter)) continue;
+        if (info.superClass != null && Objects.equals(info.superClass.value(), parameter)) continue;
+        if (containsValue(info.interfaces, parameter)) continue;
       }
       return false;
     }
     return true;
+  }
+
+  private static boolean containsValue(@NotNull List<Fqn> fqns, @NotNull String value) {
+    for (Fqn fqn : fqns) {
+      if (Objects.equals(fqn.value(), value)) return true;
+    }
+    return false;
   }
 
   private static @Nullable Object delegateOf(@Nullable NavigatablePsiElement element) {

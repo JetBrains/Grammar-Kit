@@ -8,6 +8,7 @@ import com.intellij.platform.syntax.SyntaxElementType;
 import com.intellij.platform.syntax.tree.SyntaxNode;
 import fleet.org.jetbrains.kotlin.kmp.lexer.KtTokens;
 import fleet.org.jetbrains.kotlin.kmp.parser.KtNodeTypes;
+import org.intellij.grammar.classinfo.Fqn;
 import org.intellij.grammar.classinfo.SymbolResolver;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -125,10 +126,10 @@ final class KotlinSyntaxImportContext {
     // Probe wildcard imports through the resolver — a Kotlin file with `import com.foo.*`
     // can resolve to a Java class declared in `com.foo` via the Java provider.
     for (String pkg : wildcardImports) {
-      String candidate = pkg + "." + simple;
-      if (resolver.findClass(candidate) != null) return candidate;
+      Fqn candidate = Fqn.of(pkg).child(simple);
+      if (resolver.findClass(candidate) != null) return candidate.value();
     }
-    if (!packageName.isEmpty()) return packageName + "." + simple;
+    if (!packageName.isEmpty()) return Fqn.of(packageName).child(simple).value();
     return simple;
   }
 

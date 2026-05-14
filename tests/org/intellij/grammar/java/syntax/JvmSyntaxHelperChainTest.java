@@ -7,6 +7,7 @@ package org.intellij.grammar.java.syntax;
 import com.intellij.psi.NavigatablePsiElement;
 import junit.framework.TestCase;
 import org.intellij.grammar.classinfo.ClassInfo;
+import org.intellij.grammar.classinfo.Fqn;
 import org.intellij.grammar.classinfo.JvmClassSymbolManager;
 import org.intellij.grammar.classinfo.JvmClassSymbolProvider;
 import org.intellij.grammar.classinfo.MethodType;
@@ -56,8 +57,8 @@ public class JvmSyntaxHelperChainTest extends TestCase {
         """);
     bytecode = new RecordingProvider();
     ClassInfo platformInfo = new ClassInfo();
-    platformInfo.name = "platform.Stub";
-    platformInfo.superClass = "java.lang.Object";
+    platformInfo.name = Fqn.of("platform.Stub");
+    platformInfo.superClass = Fqn.of("java.lang.Object");
     bytecode.classes.put("platform.Stub", platformInfo);
 
     List<Path> roots = List.of(root);
@@ -131,9 +132,9 @@ public class JvmSyntaxHelperChainTest extends TestCase {
     final List<String> resolveCalls = new ArrayList<>();
 
     @Override
-    public @NotNull Map<String, ClassInfo> resolve(@NotNull String fqn, @NotNull SymbolResolver resolver) {
-      resolveCalls.add(fqn);
-      ClassInfo info = classes.get(fqn);
+    public @NotNull Map<Fqn, ClassInfo> resolve(@NotNull Fqn fqn, @NotNull SymbolResolver resolver) {
+      resolveCalls.add(fqn.value());
+      ClassInfo info = classes.get(fqn.value());
       return info == null ? Map.of() : Map.of(fqn, info);
     }
   }

@@ -7,6 +7,7 @@ package org.intellij.grammar.java;
 import com.intellij.psi.NavigatablePsiElement;
 import com.intellij.util.ArrayUtil;
 import com.intellij.util.containers.ContainerUtil;
+import org.intellij.grammar.classinfo.Fqn;
 import org.intellij.grammar.classinfo.MethodType;
 import org.intellij.grammar.classinfo.TypeParameterInfo;
 import org.jetbrains.annotations.NotNull;
@@ -145,7 +146,7 @@ public class ReflectionHelper extends JavaHelper {
         String typeName = type.getTypeName();
         return "java.lang.Object".equals(typeName) ? null : typeName;
       }),
-      ContainerUtil.mapNotNull(param.getAnnotations(), o -> o.annotationType().getCanonicalName())));
+      ContainerUtil.mapNotNull(param.getAnnotations(), o -> Fqn.ofNullable(o.annotationType().getCanonicalName()))));
   }
 
   @Override

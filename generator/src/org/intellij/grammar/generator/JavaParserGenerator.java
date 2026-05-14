@@ -27,6 +27,7 @@ import org.intellij.grammar.generator.java.JavaNameShortener;
 import org.intellij.grammar.generator.java.JavaNames;
 import org.intellij.grammar.generator.java.JavaNameRenderer;
 import org.intellij.grammar.generator.kotlin.KotlinBnfConstants;
+import org.intellij.grammar.classinfo.Fqn;
 import org.intellij.grammar.classinfo.MethodType;
 import org.intellij.grammar.classinfo.TypeParameterInfo;
 import org.intellij.grammar.java.JavaHelper;
@@ -1671,8 +1672,8 @@ public final class JavaParserGenerator extends Generator {
         for (String type : generic.getExtendsList()) {
           addTypeToImports(type, emptyList(), result);
         }
-        for (String type : generic.getAnnotations()) {
-          addTypeToImports(type, emptyList(), result);
+        for (Fqn type : generic.getAnnotations()) {
+          addTypeToImports(type.value(), emptyList(), result);
         }
       }
 

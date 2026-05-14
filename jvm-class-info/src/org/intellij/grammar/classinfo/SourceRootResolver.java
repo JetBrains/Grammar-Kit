@@ -22,10 +22,6 @@ import java.util.Map;
  * {@code <root>/com/foo/Bar.<extension>}. For inner classes ({@code com.foo.Outer.Inner}) we walk
  * dotted segments right-to-left until we hit an existing file, so the source for an inner type is
  * found via its enclosing top-level file.
- * <p>
- * Used by the source-backed class managers
- * ({@link org.intellij.grammar.classinfo.java.JavaClassManager},
- * {@link org.intellij.grammar.classinfo.kotlin.KotlinClassManager}).
  */
 public final class SourceRootResolver {
 
@@ -44,26 +40,26 @@ public final class SourceRootResolver {
    * Locates the source file that declares (or, for inner classes, encloses) {@code fqn}.
    * Returns {@code null} when no matching file exists under any configured root.
    */
-  public @Nullable Path findSourceFile(@Nullable String fqn, @NotNull String extension) {
+  public @Nullable Path findSourceFile(@Nullable Fqn fqn, @NotNull String extension) {
     if (fqn == null || fqn.isEmpty()) return null;
-    String key = extension + ":" + fqn;
+    String key = extension + ":" + fqn.value();
     if (cache.containsKey(key)) return cache.get(key);
     Path resolved = resolve(fqn, extension);
     cache.put(key, resolved);
     return resolved;
   }
 
-  private @Nullable Path resolve(@NotNull String fqn, @NotNull String extension) {
-    String relative = fqn;
+  private @Nullable Path resolve(@NotNull Fqn fqn, @NotNull String extension) {
+    Fqn current = fqn;
     while (true) {
-      String candidate = relative.replace('.', '/') + extension;
+      String candidate = current.value().replace('.', '/') + extension;
       for (Path root : roots) {
         Path p = root.resolve(candidate);
         if (Files.isRegularFile(p)) return p;
       }
-      int lastDot = relative.lastIndexOf('.');
-      if (lastDot < 0) return null;
-      relative = relative.substring(0, lastDot);
+      Fqn parent = current.parent();
+      if (parent.isEmpty()) return null;
+      current = parent;
     }
   }
 
@@ -72,8 +68,8 @@ public final class SourceRootResolver {
    * Used by the slow-path package scan when {@link #findSourceFile} can't find a file by FQN-name
    * (package-private classes, multi-class-per-file).
    */
-  public @NotNull List<Path> findPackageDirs(@NotNull String packageName) {
-    String relative = packageName.replace('.', '/');
+  public @NotNull List<Path> findPackageDirs(@NotNull Fqn packageName) {
+    String relative = packageName.value().replace('.', '/');
     List<Path> result = new SmartList<>();
     for (Path root : roots) {
       Path dir = relative.isEmpty() ? root : root.resolve(relative);

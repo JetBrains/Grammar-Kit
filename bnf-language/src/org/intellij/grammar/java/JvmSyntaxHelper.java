@@ -7,6 +7,7 @@ package org.intellij.grammar.java;
 import com.intellij.psi.NavigatablePsiElement;
 import com.intellij.util.SmartList;
 import org.intellij.grammar.classinfo.ClassInfo;
+import org.intellij.grammar.classinfo.Fqn;
 import org.intellij.grammar.classinfo.JvmClassSymbolManager;
 import org.intellij.grammar.classinfo.MethodInfo;
 import org.intellij.grammar.classinfo.MethodType;
@@ -42,7 +43,7 @@ public class JvmSyntaxHelper extends JavaHelper {
 
   @Override
   public @Nullable NavigatablePsiElement findClass(@Nullable String className) {
-    ClassInfo info = manager.findClass(className);
+    ClassInfo info = manager.findClass(Fqn.ofNullable(className));
     return info == null ? null : new MyElement<>(info);
   }
 
@@ -53,14 +54,14 @@ public class JvmSyntaxHelper extends JavaHelper {
                                                                boolean allowAbstract,
                                                                int paramCount,
                                                                String... paramTypes) {
-    ClassInfo aClass = manager.findClass(className);
+    ClassInfo aClass = manager.findClass(Fqn.ofNullable(className));
     if (aClass == null || methodName == null) return Collections.emptyList();
     List<NavigatablePsiElement> result = new SmartList<>();
     for (MethodInfo method : aClass.methods) {
       if (!acceptsName(methodName, method.name)) continue;
       if (method.methodType != methodType) continue;
       if (!acceptsModifiers(method.modifiers, methodType, allowAbstract)) continue;
-      if (!ClassInfoUtil.acceptsParams(method, paramCount, paramTypes, manager::findClass)) continue;
+      if (!ClassInfoUtil.acceptsParams(method, paramCount, paramTypes, s -> manager.findClass(Fqn.ofNullable(s)))) continue;
       result.add(new MyElement<>(method));
     }
     return result;
@@ -68,8 +69,8 @@ public class JvmSyntaxHelper extends JavaHelper {
 
   @Override
   public @Nullable String getSuperClassName(@Nullable String className) {
-    ClassInfo info = manager.findClass(className);
-    return info == null ? null : info.superClass;
+    ClassInfo info = manager.findClass(Fqn.ofNullable(className));
+    return info == null || info.superClass == null ? null : info.superClass.value();
   }
 
   @Override

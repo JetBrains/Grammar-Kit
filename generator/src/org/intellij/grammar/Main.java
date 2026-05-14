@@ -11,10 +11,13 @@ import com.intellij.psi.PsiFile;
 import com.intellij.psi.impl.DebugUtil;
 import org.intellij.grammar.generator.JavaParserGenerator;
 import org.intellij.grammar.generator.OutputOpener;
-import org.intellij.grammar.java.AsmHelper;
+import org.intellij.grammar.classinfo.JvmClassSymbolManager;
+import org.intellij.grammar.classinfo.SyntaxTreeCache;
+import org.intellij.grammar.classinfo.asm.AsmClassSymbolProvider;
+import org.intellij.grammar.classinfo.java.JavaSyntaxClassSymbolProvider;
+import org.intellij.grammar.classinfo.kotlin.KotlinSyntaxClassSymbolProvider;
 import org.intellij.grammar.java.JavaHelper;
-import org.intellij.grammar.java.syntax.JavaSyntaxHelper;
-import org.intellij.grammar.java.syntax.KotlinSyntaxHelper;
+import org.intellij.grammar.java.JvmSyntaxHelper;
 import org.intellij.grammar.psi.BnfFile;
 import org.jetbrains.annotations.NotNull;
 
@@ -198,7 +201,11 @@ public class Main {
     if (input != null) roots.add(input);
     if (psiInput != null && !psiInput.equals(input)) roots.add(psiInput);
     if (roots.isEmpty()) return;
-    JavaHelper helper = new KotlinSyntaxHelper(roots, new JavaSyntaxHelper(roots, new AsmHelper()));
+    SyntaxTreeCache treeCache = new SyntaxTreeCache();
+    JavaHelper helper = new JvmSyntaxHelper(new JvmClassSymbolManager(List.of(
+      new KotlinSyntaxClassSymbolProvider(roots, treeCache),
+      new JavaSyntaxClassSymbolProvider(roots, treeCache),
+      new AsmClassSymbolProvider())));
     ((MockProject)bnfFile.getProject()).registerService(JavaHelper.class, helper);
   }
 }

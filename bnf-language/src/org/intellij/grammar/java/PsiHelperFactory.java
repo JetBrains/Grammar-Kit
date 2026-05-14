@@ -16,8 +16,11 @@ import com.intellij.psi.util.PsiTreeUtil;
 import org.intellij.grammar.BnfPaths;
 import org.intellij.grammar.BnfPathsResolution;
 import org.intellij.grammar.KnownAttribute;
-import org.intellij.grammar.java.syntax.JavaSyntaxHelper;
-import org.intellij.grammar.java.syntax.KotlinSyntaxHelper;
+import org.intellij.grammar.classinfo.JvmClassSymbolManager;
+import org.intellij.grammar.classinfo.SyntaxTreeCache;
+import org.intellij.grammar.classinfo.asm.AsmClassSymbolProvider;
+import org.intellij.grammar.classinfo.java.JavaSyntaxClassSymbolProvider;
+import org.intellij.grammar.classinfo.kotlin.KotlinSyntaxClassSymbolProvider;
 import org.intellij.grammar.psi.BnfAttr;
 import org.intellij.grammar.psi.BnfFile;
 import org.jetbrains.annotations.NotNull;
@@ -37,7 +40,7 @@ import java.util.List;
  * <p>
  * By default returns {@link PsiHelper} (PSI-backed, scoped to the resolved directory). The
  * {@code grammar.kit.psi.helper.use.syntax} registry flag swaps the implementation to a source-file
- * chain {@link KotlinSyntaxHelper} → {@link JavaSyntaxHelper} → {@link AsmHelper}, rooted at the
+ * {@link JvmSyntaxHelper} over a Kotlin-syntax / Java-syntax / ASM provider list, rooted at the
  * resolved directory — used to drive headless-style resolution in IDE tests.
  */
 @Service(Service.Level.PROJECT)
@@ -82,10 +85,15 @@ public final class PsiHelperFactory {
   }
 
   private static @NotNull JavaHelper buildSyntaxHelper(@Nullable Path dir) {
-    AsmHelper asm = new AsmHelper();
-    if (dir == null) return asm;
+    if (dir == null) {
+      return new JvmSyntaxHelper(new JvmClassSymbolManager(List.of(new AsmClassSymbolProvider())));
+    }
     List<Path> roots = List.of(dir);
-    return new KotlinSyntaxHelper(roots, new JavaSyntaxHelper(roots, asm));
+    SyntaxTreeCache treeCache = new SyntaxTreeCache();
+    return new JvmSyntaxHelper(new JvmClassSymbolManager(List.of(
+      new KotlinSyntaxClassSymbolProvider(roots, treeCache),
+      new JavaSyntaxClassSymbolProvider(roots, treeCache),
+      new AsmClassSymbolProvider())));
   }
 
   private static @Nullable Path referenceDir(@NotNull PsiElement context) {

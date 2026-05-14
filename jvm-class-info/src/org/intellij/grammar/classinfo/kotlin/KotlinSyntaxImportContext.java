@@ -8,10 +8,13 @@ import com.intellij.platform.syntax.SyntaxElementType;
 import com.intellij.platform.syntax.tree.SyntaxNode;
 import fleet.org.jetbrains.kotlin.kmp.lexer.KtTokens;
 import fleet.org.jetbrains.kotlin.kmp.parser.KtNodeTypes;
+import org.intellij.grammar.classinfo.SymbolResolver;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -89,14 +92,24 @@ final class KotlinSyntaxImportContext {
 
   private final String packageName;
   private final Map<String, String> imports;
+  private final List<String> wildcardImports;
+  private final SymbolResolver resolver;
 
-  static @NotNull KotlinSyntaxImportContext extractFrom(@NotNull SyntaxNode fileRoot) {
-    return new KotlinSyntaxImportContext(extractPackageName(fileRoot), extractImports(fileRoot));
+  static @NotNull KotlinSyntaxImportContext extractFrom(@NotNull SyntaxNode fileRoot, @NotNull SymbolResolver resolver) {
+    Map<String, String> singleImports = new HashMap<>();
+    List<String> wildcards = new ArrayList<>();
+    extractImports(fileRoot, singleImports, wildcards);
+    return new KotlinSyntaxImportContext(extractPackageName(fileRoot), singleImports, wildcards, resolver);
   }
 
-  private KotlinSyntaxImportContext(@NotNull String packageName, @NotNull Map<String, String> imports) {
+  private KotlinSyntaxImportContext(@NotNull String packageName,
+                                    @NotNull Map<String, String> imports,
+                                    @NotNull List<String> wildcardImports,
+                                    @NotNull SymbolResolver resolver) {
     this.packageName = packageName;
     this.imports = imports;
+    this.wildcardImports = wildcardImports;
+    this.resolver = resolver;
   }
 
   @NotNull String packageName() {
@@ -109,6 +122,12 @@ final class KotlinSyntaxImportContext {
     String byAutoImport = KOTLIN_AUTO_IMPORTS.get(simple);
     if (byAutoImport != null) return byAutoImport;
     if (JAVA_LANG_FALLBACK.contains(simple)) return "java.lang." + simple;
+    // Probe wildcard imports through the resolver — a Kotlin file with `import com.foo.*`
+    // can resolve to a Java class declared in `com.foo` via the Java provider.
+    for (String pkg : wildcardImports) {
+      String candidate = pkg + "." + simple;
+      if (resolver.findClass(candidate) != null) return candidate;
+    }
     if (!packageName.isEmpty()) return packageName + "." + simple;
     return simple;
   }
@@ -129,20 +148,24 @@ final class KotlinSyntaxImportContext {
     return sb.toString();
   }
 
-  private static @NotNull Map<String, String> extractImports(@NotNull SyntaxNode fileRoot) {
+  private static void extractImports(@NotNull SyntaxNode fileRoot,
+                                     @NotNull Map<String, String> single,
+                                     @NotNull List<String> wildcards) {
     SyntaxNode importList = firstChildOfType(fileRoot, KtNodeTypes.INSTANCE.getIMPORT_LIST());
-    if (importList == null) return Map.of();
-    Map<String, String> imports = new HashMap<>();
+    if (importList == null) return;
     for (SyntaxNode imp = importList.firstChild(); imp != null; imp = imp.nextSibling()) {
       if (imp.getType() != KtNodeTypes.INSTANCE.getIMPORT_DIRECTIVE()) continue;
-      if (firstChildOfType(imp, KtTokens.INSTANCE.getMUL()) != null) continue; // wildcard
       String dotted = importedFqn(imp);
       if (dotted == null) continue;
+      if (firstChildOfType(imp, KtTokens.INSTANCE.getMUL()) != null) {
+        // Wildcard: probe lazily through the resolver when resolving a simple name.
+        wildcards.add(dotted);
+        continue;
+      }
       SyntaxNode aliasNode = firstChildOfType(imp, KtNodeTypes.INSTANCE.getIMPORT_ALIAS());
       String name = aliasNode == null ? tailSegment(dotted) : aliasIdentifier(aliasNode);
-      if (name != null) imports.put(name, dotted);
+      if (name != null) single.put(name, dotted);
     }
-    return imports;
   }
 
   private static @Nullable String importedFqn(@NotNull SyntaxNode importDirective) {

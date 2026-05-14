@@ -6,9 +6,14 @@ package org.intellij.grammar.java.syntax.kotlin;
 
 import com.intellij.psi.NavigatablePsiElement;
 import junit.framework.TestCase;
+import org.intellij.grammar.classinfo.JvmClassSymbolManager;
 import org.intellij.grammar.classinfo.MethodType;
-import org.intellij.grammar.java.syntax.KotlinSyntaxHelper;
+import org.intellij.grammar.classinfo.kotlin.KotlinSyntaxClassSymbolProvider;
+import org.intellij.grammar.java.JavaHelper;
+import org.intellij.grammar.java.JvmSyntaxHelper;
+import org.jetbrains.annotations.NotNull;
 
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
@@ -21,7 +26,7 @@ import java.util.List;
 public class KotlinSyntaxHelperSourceTest extends TestCase {
 
   private Path root;
-  private KotlinSyntaxHelper helper;
+  private JavaHelper helper;
 
   @Override
   protected void setUp() throws Exception {
@@ -107,13 +112,15 @@ public class KotlinSyntaxHelperSourceTest extends TestCase {
     assertNotNull(clazz);
   }
 
-  private @org.jetbrains.annotations.NotNull KotlinSyntaxHelper helper() {
-    if (helper == null) helper = new KotlinSyntaxHelper(List.of(root));
+  private @NotNull JavaHelper helper() {
+    if (helper == null) {
+      helper = new JvmSyntaxHelper(new JvmClassSymbolManager(List.of(new KotlinSyntaxClassSymbolProvider(List.of(root)))));
+    }
     return helper;
   }
 
-  private void write(@org.jetbrains.annotations.NotNull String relative,
-                     @org.jetbrains.annotations.NotNull String content) throws java.io.IOException {
+  private void write(@NotNull String relative,
+                     @NotNull String content) throws IOException {
     Path target = root.resolve(relative);
     Files.createDirectories(target.getParent());
     Files.writeString(target, content);

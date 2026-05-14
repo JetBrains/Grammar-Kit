@@ -7,9 +7,12 @@ package org.intellij.grammar.java.syntax;
 import com.intellij.psi.NavigatablePsiElement;
 import junit.framework.TestCase;
 import org.intellij.grammar.classinfo.ClassInfo;
+import org.intellij.grammar.classinfo.JvmClassSymbolManager;
+import org.intellij.grammar.classinfo.JvmClassSymbolProvider;
 import org.intellij.grammar.classinfo.MethodType;
 import org.intellij.grammar.java.JavaHelper;
 import org.intellij.grammar.classinfo.MethodInfo;
+import org.intellij.grammar.java.JvmSyntaxHelper;
 import org.intellij.grammar.java.MyElement;
 import org.intellij.grammar.classinfo.TypeParameterInfo;
 import org.jetbrains.annotations.NotNull;
@@ -74,9 +77,9 @@ public class JavaSyntaxHelperUnitTest extends TestCase {
   }
 
   public void testFindClassNullArgWithFallback() {
-    // The fallback gets the null through and decides how to handle it.
+    // Null FQNs are short-circuited by the manager and never reach a provider.
     assertNull(helper().findClass(null));
-    assertEquals(Collections.singletonList(null), fallback.findClassCalls);
+    assertTrue(fallback.findClassCalls.isEmpty());
   }
 
   // ---------------------------------------------------------------------------------------------
@@ -84,17 +87,21 @@ public class JavaSyntaxHelperUnitTest extends TestCase {
   // ---------------------------------------------------------------------------------------------
 
   public void testFindClassMethodsMissDelegatesToFallback() {
-    MethodInfo m = method("ping", Modifier.PUBLIC, MethodType.INSTANCE, "void");
-    fallback.methods.put("a.b.PlatformClass", List.of(m));
+    // A class known only to the fallback provider must still expose its methods through the
+    // unified pipeline: manager looks up the class once, JvmSyntaxHelper iterates its methods.
+    ClassInfo external = new ClassInfo();
+    external.name = "a.b.PlatformClass";
+    external.methods.add(method("ping", Modifier.PUBLIC, MethodType.INSTANCE, "void"));
+    fallback.classes.put("a.b.PlatformClass", external);
 
     List<NavigatablePsiElement> result = helper().findClassMethods(
       "a.b.PlatformClass", MethodType.INSTANCE, "ping", -1);
     assertEquals(1, result.size());
-    assertEquals("findClassMethods", fallback.lastDispatch);
+    assertEquals(List.of("a.b.PlatformClass"), fallback.findClassCalls);
   }
 
   public void testFindClassMethodsMissNoFallbackReturnsEmpty() {
-    JavaSyntaxHelper noFallback = helperNoFallback();
+    JavaHelper noFallback = helperNoFallback();
     assertTrue(noFallback.findClassMethods("a.b.Missing", MethodType.INSTANCE, "x", -1).isEmpty());
   }
 
@@ -286,7 +293,8 @@ public class JavaSyntaxHelperUnitTest extends TestCase {
     external.superClass = "ext.Parent";
     fallback.classes.put("ext.External", external);
     assertEquals("ext.Parent", helper().getSuperClassName("ext.External"));
-    assertEquals(List.of("ext.External"), fallback.superClassCalls);
+    // Fallback supplies the ClassInfo via findClass; JvmSyntaxHelper reads superClass off the record.
+    assertEquals(List.of("ext.External"), fallback.findClassCalls);
   }
 
   public void testGetSuperClassNameNullWhenMissAndNoFallback() {
@@ -422,12 +430,31 @@ public class JavaSyntaxHelperUnitTest extends TestCase {
   // helpers
   // ---------------------------------------------------------------------------------------------
 
-  private @NotNull JavaSyntaxHelper helper() {
-    return new JavaSyntaxHelper(classes::get, fallback);
+  private @NotNull JavaHelper helper() {
+    return new JvmSyntaxHelper(new JvmClassSymbolManager(List.of(
+      mapProvider(classes),
+      fallbackProvider(fallback))));
   }
 
-  private @NotNull JavaSyntaxHelper helperNoFallback() {
-    return new JavaSyntaxHelper(classes::get, null);
+  private @NotNull JavaHelper helperNoFallback() {
+    return new JvmSyntaxHelper(new JvmClassSymbolManager(List.of(mapProvider(classes))));
+  }
+
+  private static @NotNull JvmClassSymbolProvider mapProvider(@NotNull Map<String, ClassInfo> classes) {
+    return (fqn, resolver) -> {
+      ClassInfo info = classes.get(fqn);
+      return info == null ? Map.of() : Map.of(fqn, info);
+    };
+  }
+
+  private static @NotNull JvmClassSymbolProvider fallbackProvider(@NotNull JavaHelper fallback) {
+    return (fqn, resolver) -> {
+      NavigatablePsiElement el = fallback.findClass(fqn);
+      if (el instanceof MyElement<?> e && e.delegate instanceof ClassInfo ci) {
+        return Map.of(fqn, ci);
+      }
+      return Map.of();
+    };
   }
 
   private ClassInfo registerClass(@NotNull String fqn,

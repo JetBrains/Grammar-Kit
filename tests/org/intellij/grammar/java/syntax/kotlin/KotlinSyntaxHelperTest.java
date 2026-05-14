@@ -6,10 +6,16 @@ package org.intellij.grammar.java.syntax.kotlin;
 
 import com.intellij.psi.NavigatablePsiElement;
 import junit.framework.TestCase;
+import org.intellij.grammar.classinfo.ClassInfo;
+import org.intellij.grammar.classinfo.JvmClassSymbolManager;
 import org.intellij.grammar.classinfo.MethodType;
+import org.intellij.grammar.classinfo.kotlin.KotlinSyntaxClassSymbolProvider;
+import org.intellij.grammar.java.JavaHelper;
+import org.intellij.grammar.java.JvmSyntaxHelper;
 import org.intellij.grammar.java.MyElement;
-import org.intellij.grammar.java.syntax.KotlinSyntaxHelper;
+import org.jetbrains.annotations.NotNull;
 
+import java.io.IOException;
 import java.lang.reflect.Modifier;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -18,12 +24,12 @@ import java.util.List;
 /**
  * Integration tests for {@link KotlinSyntaxHelper}: writes a fixture source root with real
  * {@code .kt} files and exercises the full parse → extract → lookup pipeline against the public
- * {@link org.intellij.grammar.java.JavaHelper} API. Pure JUnit, no IDE harness.
+ * {@link JavaHelper} API. Pure JUnit, no IDE harness.
  */
 public class KotlinSyntaxHelperTest extends TestCase {
 
   private Path root;
-  private KotlinSyntaxHelper helper;
+  private JavaHelper helper;
 
   @Override
   protected void setUp() throws Exception {
@@ -371,20 +377,22 @@ public class KotlinSyntaxHelperTest extends TestCase {
   // helpers
   // ---------------------------------------------------------------------------------------------
 
-  private @org.jetbrains.annotations.NotNull KotlinSyntaxHelper helper() {
-    if (helper == null) helper = new KotlinSyntaxHelper(List.of(root));
+  private @NotNull JavaHelper helper() {
+    if (helper == null) {
+      helper = new JvmSyntaxHelper(new JvmClassSymbolManager(List.of(new KotlinSyntaxClassSymbolProvider(List.of(root)))));
+    }
     return helper;
   }
 
-  private int lookupModifiers(@org.jetbrains.annotations.NotNull String fqn) {
+  private int lookupModifiers(@NotNull String fqn) {
     NavigatablePsiElement el = helper().findClass(fqn);
     assertNotNull("class not found: " + fqn, el);
     MyElement<?> me = (MyElement<?>) el;
-    return ((org.intellij.grammar.classinfo.ClassInfo) me.delegate).modifiers;
+    return ((ClassInfo) me.delegate).modifiers;
   }
 
-  private void write(@org.jetbrains.annotations.NotNull String relative,
-                     @org.jetbrains.annotations.NotNull String content) throws java.io.IOException {
+  private void write(@NotNull String relative,
+                     @NotNull String content) throws IOException {
     Path target = root.resolve(relative);
     Files.createDirectories(target.getParent());
     Files.writeString(target, content);

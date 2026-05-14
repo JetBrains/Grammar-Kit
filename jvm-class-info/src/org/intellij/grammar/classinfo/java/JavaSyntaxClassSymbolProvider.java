@@ -1,0 +1,97 @@
+/*
+ * Copyright 2011-2026 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
+ */
+
+package org.intellij.grammar.classinfo.java;
+
+import com.intellij.platform.syntax.tree.SyntaxNode;
+import org.intellij.grammar.classinfo.ClassInfo;
+import org.intellij.grammar.classinfo.JvmClassSymbolManager;
+import org.intellij.grammar.classinfo.JvmClassSymbolProvider;
+import org.intellij.grammar.classinfo.SourceRootResolver;
+import org.intellij.grammar.classinfo.SymbolResolver;
+import org.intellij.grammar.classinfo.SyntaxTreeCache;
+import org.jetbrains.annotations.NotNull;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Stream;
+
+/**
+ * Java-source backed {@link JvmClassSymbolProvider}: turns a {@code .java} file under one of the
+ * configured source-root directories into {@link ClassInfo} records via
+ * {@link JavaSyntaxTreeManager#parseText parsing} and {@link JavaSyntaxClassExtractor extraction}.
+ * <p>
+ * Lookup is two-tiered:
+ * <ol>
+ *   <li><b>Fast path</b>: map FQN to {@code <root>/com/foo/Bar.java}. Works when the file name
+ *       matches the public class name (the JLS-required common case).</li>
+ *   <li><b>Slow path</b>: when the fast path doesn't find the class — typical for package-private
+ *       top-level classes, multi-class-per-file declarations, and inner classes whose enclosing
+ *       class is in a non-matching file — walk dotted prefixes of the FQN longest-first and parse
+ *       every {@code .java} file in the matching package directory.</li>
+ * </ol>
+ * Each package directory is scanned at most once and each file is ingested at most once per
+ * provider instance. The {@link ClassInfo} cache lives in {@link JvmClassSymbolManager};
+ * this provider only memoises source-walking work.
+ */
+@SuppressWarnings("UnstableApiUsage")
+public final class JavaSyntaxClassSymbolProvider implements JvmClassSymbolProvider {
+
+  private final SourceRootResolver sourceResolver;
+  private final SyntaxTreeCache treeCache;
+  private final Set<String> scannedPackages = new HashSet<>();
+  private final Set<Path> ingestedFiles = new HashSet<>();
+
+  public JavaSyntaxClassSymbolProvider(@NotNull List<Path> sourceRoots) {
+    this(sourceRoots, new SyntaxTreeCache());
+  }
+
+  public JavaSyntaxClassSymbolProvider(@NotNull List<Path> sourceRoots, @NotNull SyntaxTreeCache treeCache) {
+    this.sourceResolver = new SourceRootResolver(sourceRoots);
+    this.treeCache = treeCache;
+  }
+
+  @Override
+  public @NotNull Map<String, ClassInfo> resolve(@NotNull String fqn, @NotNull SymbolResolver resolver) {
+    Map<String, ClassInfo> batch = new HashMap<>();
+
+    // Fast path: file name matches the (public) class name.
+    Path source = sourceResolver.findSourceFile(fqn, ".java");
+    if (source != null) ingest(source, batch, resolver);
+
+    // Slow path: walk dotted prefixes longest-first so inner-class FQNs find the right
+    // enclosing-file scope. Stops as soon as we've found the requested FQN or run out of prefixes.
+    String prefix = fqn;
+    while (!batch.containsKey(fqn)) {
+      int lastDot = prefix.lastIndexOf('.');
+      if (lastDot < 0) break;
+      prefix = prefix.substring(0, lastDot);
+      if (!scannedPackages.add(prefix)) break;
+      for (Path dir : sourceResolver.findPackageDirs(prefix)) {
+        scanPackage(dir, batch, resolver);
+      }
+    }
+
+    return batch;
+  }
+
+  private void scanPackage(@NotNull Path dir, @NotNull Map<String, ClassInfo> batch, @NotNull SymbolResolver resolver) {
+    try (Stream<Path> files = Files.list(dir)) {
+      files.filter(p -> p.getFileName().toString().endsWith(".java")).forEach(p -> ingest(p, batch, resolver));
+    }
+    catch (IOException ignored) { }
+  }
+
+  private void ingest(@NotNull Path source, @NotNull Map<String, ClassInfo> batch, @NotNull SymbolResolver resolver) {
+    if (!ingestedFiles.add(source)) return;
+    SyntaxNode root = treeCache.parseOrGet(source, JavaSyntaxTreeManager::parseText);
+    if (root != null) batch.putAll(JavaSyntaxClassExtractor.extractFrom(root, resolver));
+  }
+}

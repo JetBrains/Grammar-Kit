@@ -9,6 +9,7 @@ import com.intellij.platform.syntax.SyntaxElementType;
 import com.intellij.platform.syntax.tree.SyntaxNode;
 import org.intellij.grammar.classinfo.ClassInfo;
 import org.intellij.grammar.classinfo.MethodInfo;
+import org.intellij.grammar.classinfo.SymbolResolver;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Modifier;
@@ -63,13 +64,13 @@ public final class JavaSyntaxClassExtractor {
   private final Map<String, ClassInfo> result = new LinkedHashMap<>();
 
   /** Walks {@code fileRoot} once and returns one {@link ClassInfo} per declared class, keyed by FQN. */
-  public static @NotNull Map<String, ClassInfo> extractFrom(@NotNull SyntaxNode fileRoot) {
-    return new JavaSyntaxClassExtractor(fileRoot).extract();
+  public static @NotNull Map<String, ClassInfo> extractFrom(@NotNull SyntaxNode fileRoot, @NotNull SymbolResolver resolver) {
+    return new JavaSyntaxClassExtractor(fileRoot, resolver).extract();
   }
 
-  private JavaSyntaxClassExtractor(@NotNull SyntaxNode fileRoot) {
+  private JavaSyntaxClassExtractor(@NotNull SyntaxNode fileRoot, @NotNull SymbolResolver resolver) {
     this.fileRoot = fileRoot;
-    this.imports = JavaSyntaxImportContext.extractFrom(fileRoot);
+    this.imports = JavaSyntaxImportContext.extractFrom(fileRoot, resolver);
     this.typeFormatter = new JavaSyntaxTypeFormatter(imports);
     this.methodExtractor = new JavaSyntaxMethodExtractor(typeFormatter);
   }

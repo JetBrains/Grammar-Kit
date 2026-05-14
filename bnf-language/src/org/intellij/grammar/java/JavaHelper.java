@@ -7,8 +7,10 @@ package org.intellij.grammar.java;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.*;
 import com.intellij.util.*;
+import org.intellij.grammar.classinfo.JvmClassSymbolManager;
 import org.intellij.grammar.classinfo.MethodType;
 import org.intellij.grammar.classinfo.TypeParameterInfo;
+import org.intellij.grammar.classinfo.asm.AsmClassSymbolProvider;
 import org.intellij.grammar.psi.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -48,10 +50,9 @@ public abstract class JavaHelper {
    * (registered in {@code plugin-java.xml}); the factory bakes a {@code *InputPath}-derived search
    * scope into the helper based on {@code context}'s position in the BNF tree. When no factory is
    * available (e.g. headless / CLI), returns the {@link JavaHelper} registered as a project
-   * service — {@link AsmHelper} by default, or a source-backed
-   * {@link org.intellij.grammar.java.syntax.JavaSyntaxHelper} when the CLI opted in via
-   * {@code --source-psi}. Falls back to a fresh {@link AsmHelper} when nothing is
-   * registered so callers always get a usable helper rather than {@code null}.
+   * service — a {@link JvmSyntaxHelper} by default, or a source-backed {@link JvmSyntaxHelper}
+   * when the CLI opted in via {@code --source-psi}. Falls back to a fresh {@link JvmSyntaxHelper}
+   * when nothing is registered so callers always get a usable helper rather than {@code null}.
    */
   public static JavaHelper getJavaHelper(@NotNull PsiElement context) {
     Project project = context.getProject();
@@ -66,7 +67,7 @@ public abstract class JavaHelper {
       return service;
     }
 
-    return new AsmHelper();
+    return new JvmSyntaxHelper(new JvmClassSymbolManager(List.of(new AsmClassSymbolProvider())));
   }
 
   /**

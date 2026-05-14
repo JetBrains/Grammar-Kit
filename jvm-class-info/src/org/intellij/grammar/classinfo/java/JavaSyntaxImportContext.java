@@ -8,9 +8,12 @@ import com.intellij.java.syntax.element.JavaSyntaxElementType;
 import com.intellij.java.syntax.element.JavaSyntaxTokenType;
 import com.intellij.platform.syntax.SyntaxElementType;
 import com.intellij.platform.syntax.tree.SyntaxNode;
+import org.intellij.grammar.classinfo.SymbolResolver;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -18,11 +21,13 @@ import static org.intellij.grammar.classinfo.java.JavaSyntaxNodes.buildDottedTex
 import static org.intellij.grammar.classinfo.java.JavaSyntaxNodes.firstChildOfType;
 
 /**
- * File-level name-resolution scope: the source file's package + its single-type imports.
+ * File-level name-resolution scope: the source file's package, single-type imports, and
+ * wildcard-imported packages.
  * <p>
- * Resolution is best-effort: wildcard imports are ignored, qualified references are left untouched,
- * and unqualified types fall back to a fixed {@code java.lang} allow-list and then the same-package
- * guess.
+ * Resolution is best-effort: explicit imports and a {@code java.lang} allow-list resolve textually
+ * without I/O; wildcard imports are validated by probing the supplied {@link SymbolResolver}
+ * (cross-language: a {@code .java} file's wildcard import can resolve to a Kotlin class); same-package
+ * is used as a last-resort textual fallback. Qualified references are left untouched.
  */
 @SuppressWarnings("UnstableApiUsage")
 final class JavaSyntaxImportContext {
@@ -38,14 +43,24 @@ final class JavaSyntaxImportContext {
 
   private final String packageName;
   private final Map<String, String> imports;
+  private final List<String> wildcardImports;
+  private final SymbolResolver resolver;
 
-  static @NotNull JavaSyntaxImportContext extractFrom(@NotNull SyntaxNode fileRoot) {
-    return new JavaSyntaxImportContext(extractPackageName(fileRoot), extractImports(fileRoot));
+  static @NotNull JavaSyntaxImportContext extractFrom(@NotNull SyntaxNode fileRoot, @NotNull SymbolResolver resolver) {
+    Map<String, String> singleImports = new HashMap<>();
+    List<String> wildcards = new ArrayList<>();
+    extractImports(fileRoot, singleImports, wildcards);
+    return new JavaSyntaxImportContext(extractPackageName(fileRoot), singleImports, wildcards, resolver);
   }
 
-  private JavaSyntaxImportContext(@NotNull String packageName, @NotNull Map<String, String> imports) {
+  private JavaSyntaxImportContext(@NotNull String packageName,
+                                  @NotNull Map<String, String> imports,
+                                  @NotNull List<String> wildcardImports,
+                                  @NotNull SymbolResolver resolver) {
     this.packageName = packageName;
     this.imports = imports;
+    this.wildcardImports = wildcardImports;
+    this.resolver = resolver;
   }
 
   @NotNull String packageName() {
@@ -59,6 +74,12 @@ final class JavaSyntaxImportContext {
     }
     if (JAVA_LANG_TYPES.contains(simple)) {
       return "java.lang." + simple;
+    }
+    // Probe wildcard imports through the resolver — this is the cross-language hop: a Java file
+    // with `import com.foo.*;` will find a `Foo.kt` declared in `com.foo` via the Kotlin provider.
+    for (String pkg : wildcardImports) {
+      String candidate = pkg + "." + simple;
+      if (resolver.findClass(candidate) != null) return candidate;
     }
     if (!packageName.isEmpty()) {
       return packageName + "." + simple;
@@ -74,23 +95,27 @@ final class JavaSyntaxImportContext {
     return ref == null ? "" : buildDottedText(ref);
   }
 
-  private static @NotNull Map<String, String> extractImports(@NotNull SyntaxNode fileRoot) {
+  private static void extractImports(@NotNull SyntaxNode fileRoot,
+                                     @NotNull Map<String, String> single,
+                                     @NotNull List<String> wildcards) {
     SyntaxNode importList = firstChildOfType(fileRoot, JavaSyntaxElementType.IMPORT_LIST);
-    if (importList == null) return Map.of();
+    if (importList == null) return;
 
-    var imports = new HashMap<String, String>();
     for (SyntaxNode imp = importList.firstChild(); imp != null; imp = imp.nextSibling()) {
       SyntaxElementType t = imp.getType();
       if (t != JavaSyntaxElementType.IMPORT_STATEMENT && t != JavaSyntaxElementType.IMPORT_STATIC_STATEMENT) continue;
       SyntaxNode ref = firstChildOfType(imp, JavaSyntaxElementType.JAVA_CODE_REFERENCE);
       if (ref == null) continue;
-      // Wildcard imports require a classpath model to resolve reliably — ignore them.
-      if (firstChildOfType(imp, JavaSyntaxTokenType.ASTERISK) != null) continue;
       String dotted = buildDottedText(ref);
+      if (firstChildOfType(imp, JavaSyntaxTokenType.ASTERISK) != null) {
+        // Wildcard: dotted is the package (or enclosing class for static-on-demand); probe lazily
+        // through the resolver when resolving a simple name.
+        wildcards.add(dotted);
+        continue;
+      }
       int lastDot = dotted.lastIndexOf('.');
       String simple = lastDot < 0 ? dotted : dotted.substring(lastDot + 1);
-      imports.put(simple, dotted);
+      single.put(simple, dotted);
     }
-    return imports;
   }
 }

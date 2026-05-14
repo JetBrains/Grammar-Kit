@@ -2,7 +2,7 @@
  * Copyright 2011-2026 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
  */
 
-package org.intellij.grammar.java.syntax;
+package org.intellij.grammar.classinfo.java;
 
 import com.intellij.java.syntax.element.JavaSyntaxElementType;
 import com.intellij.java.syntax.element.JavaSyntaxTokenType;
@@ -14,15 +14,15 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import static org.intellij.grammar.java.syntax.JavaSyntaxNodes.buildDottedText;
-import static org.intellij.grammar.java.syntax.JavaSyntaxNodes.firstChildOfType;
+import static org.intellij.grammar.classinfo.java.JavaSyntaxNodes.buildDottedText;
+import static org.intellij.grammar.classinfo.java.JavaSyntaxNodes.firstChildOfType;
 
 /**
  * File-level name-resolution scope: the source file's package + its single-type imports.
  * <p>
- * Resolution is best-effort and matches the limitations called out on {@link JavaSyntaxHelper}:
- * wildcard imports are ignored, qualified references are left untouched, and unqualified types
- * fall back to a fixed {@code java.lang} allow-list and then the same-package guess.
+ * Resolution is best-effort: wildcard imports are ignored, qualified references are left untouched,
+ * and unqualified types fall back to a fixed {@code java.lang} allow-list and then the same-package
+ * guess.
  */
 @SuppressWarnings("UnstableApiUsage")
 final class JavaSyntaxImportContext {

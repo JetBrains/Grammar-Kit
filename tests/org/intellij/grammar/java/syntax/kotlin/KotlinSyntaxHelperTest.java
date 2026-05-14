@@ -6,8 +6,9 @@ package org.intellij.grammar.java.syntax.kotlin;
 
 import com.intellij.psi.NavigatablePsiElement;
 import junit.framework.TestCase;
-import org.intellij.grammar.java.JavaHelper;
+import org.intellij.grammar.classinfo.MethodType;
 import org.intellij.grammar.java.MyElement;
+import org.intellij.grammar.java.syntax.KotlinSyntaxHelper;
 
 import java.lang.reflect.Modifier;
 import java.nio.file.Files;
@@ -135,25 +136,25 @@ public class KotlinSyntaxHelperTest extends TestCase {
         """);
     helper().findClass("a.b.Person");
     List<NavigatablePsiElement> ctors = helper.findClassMethods(
-      "a.b.Person", JavaHelper.MethodType.CONSTRUCTOR, "<init>", -1);
+      "a.b.Person", MethodType.CONSTRUCTOR, "<init>", -1);
     assertEquals(1, ctors.size());
 
     List<NavigatablePsiElement> getName = helper.findClassMethods(
-      "a.b.Person", JavaHelper.MethodType.INSTANCE, "getName", -1);
+      "a.b.Person", MethodType.INSTANCE, "getName", -1);
     assertEquals(1, getName.size());
 
     List<NavigatablePsiElement> getAge = helper.findClassMethods(
-      "a.b.Person", JavaHelper.MethodType.INSTANCE, "getAge", -1);
+      "a.b.Person", MethodType.INSTANCE, "getAge", -1);
     assertEquals(1, getAge.size());
 
     // val → no setter
     List<NavigatablePsiElement> setName = helper.findClassMethods(
-      "a.b.Person", JavaHelper.MethodType.INSTANCE, "setName", -1);
+      "a.b.Person", MethodType.INSTANCE, "setName", -1);
     assertTrue(setName.isEmpty());
 
     // var → setter
     List<NavigatablePsiElement> setAge = helper.findClassMethods(
-      "a.b.Person", JavaHelper.MethodType.INSTANCE, "setAge", -1);
+      "a.b.Person", MethodType.INSTANCE, "setAge", -1);
     assertEquals(1, setAge.size());
   }
 
@@ -166,7 +167,7 @@ public class KotlinSyntaxHelperTest extends TestCase {
         """);
     helper().findClass("a.b.Greeter");
     List<NavigatablePsiElement> ms = helper.findClassMethods(
-      "a.b.Greeter", JavaHelper.MethodType.INSTANCE, "greet", -1);
+      "a.b.Greeter", MethodType.INSTANCE, "greet", -1);
     assertEquals(1, ms.size());
     List<String> types = helper.getMethodTypes(ms.get(0));
     assertEquals("java.lang.String", types.get(0));
@@ -183,7 +184,7 @@ public class KotlinSyntaxHelperTest extends TestCase {
         """);
     helper().findClass("a.b.Counter");
     List<NavigatablePsiElement> ms = helper.findClassMethods(
-      "a.b.Counter", JavaHelper.MethodType.INSTANCE, "bump", -1);
+      "a.b.Counter", MethodType.INSTANCE, "bump", -1);
     assertEquals(1, ms.size());
     List<String> types = helper.getMethodTypes(ms.get(0));
     assertEquals("int", types.get(0));
@@ -200,11 +201,11 @@ public class KotlinSyntaxHelperTest extends TestCase {
         """);
     helper().findClass("a.b.Noisy");
     List<NavigatablePsiElement> ms = helper.findClassMethods(
-      "a.b.Noisy", JavaHelper.MethodType.INSTANCE, "shout", -1);
+      "a.b.Noisy", MethodType.INSTANCE, "shout", -1);
     assertEquals(1, ms.size());
     assertEquals("void", helper.getMethodTypes(ms.get(0)).get(0));
     List<NavigatablePsiElement> implicit = helper.findClassMethods(
-      "a.b.Noisy", JavaHelper.MethodType.INSTANCE, "whisper", -1);
+      "a.b.Noisy", MethodType.INSTANCE, "whisper", -1);
     assertEquals(1, implicit.size());
     assertEquals("void", helper.getMethodTypes(implicit.get(0)).get(0));
   }
@@ -217,7 +218,7 @@ public class KotlinSyntaxHelperTest extends TestCase {
     NavigatablePsiElement fileClass = helper().findClass("a.b.UtilKt");
     assertNotNull(fileClass);
     List<NavigatablePsiElement> ms = helper.findClassMethods(
-      "a.b.UtilKt", JavaHelper.MethodType.STATIC, "helper", -1);
+      "a.b.UtilKt", MethodType.STATIC, "helper", -1);
     assertEquals(1, ms.size());
   }
 
@@ -228,7 +229,7 @@ public class KotlinSyntaxHelperTest extends TestCase {
         """);
     helper().findClass("a.b.ExtKt");
     List<NavigatablePsiElement> ms = helper.findClassMethods(
-      "a.b.ExtKt", JavaHelper.MethodType.STATIC, "shouted", -1);
+      "a.b.ExtKt", MethodType.STATIC, "shouted", -1);
     assertEquals(1, ms.size());
     List<String> types = helper.getMethodTypes(ms.get(0));
     assertEquals("java.lang.String", types.get(0)); // return
@@ -247,7 +248,7 @@ public class KotlinSyntaxHelperTest extends TestCase {
     int mods = lookupModifiers("a.b.Single");
     assertTrue(Modifier.isFinal(mods));
     List<NavigatablePsiElement> ms = helper.findClassMethods(
-      "a.b.Single", JavaHelper.MethodType.INSTANCE, "foo", -1);
+      "a.b.Single", MethodType.INSTANCE, "foo", -1);
     assertEquals(1, ms.size());
   }
 
@@ -265,17 +266,17 @@ public class KotlinSyntaxHelperTest extends TestCase {
     helper().findClass("a.b.Holder.Companion");
     // Companion's own ClassInfo carries instance-level methods.
     List<NavigatablePsiElement> companion = helper.findClassMethods(
-      "a.b.Holder.Companion", JavaHelper.MethodType.INSTANCE, "staticHelper", -1);
+      "a.b.Holder.Companion", MethodType.INSTANCE, "staticHelper", -1);
     assertEquals(1, companion.size());
 
     // @JvmStatic-annotated members are lifted as static on the enclosing class.
     List<NavigatablePsiElement> lifted = helper.findClassMethods(
-      "a.b.Holder", JavaHelper.MethodType.STATIC, "staticHelper", -1);
+      "a.b.Holder", MethodType.STATIC, "staticHelper", -1);
     assertEquals(1, lifted.size());
 
     // Non-@JvmStatic is NOT lifted.
     List<NavigatablePsiElement> notLifted = helper.findClassMethods(
-      "a.b.Holder", JavaHelper.MethodType.STATIC, "instanceHelper", -1);
+      "a.b.Holder", MethodType.STATIC, "instanceHelper", -1);
     assertTrue(notLifted.isEmpty());
   }
 
@@ -297,7 +298,7 @@ public class KotlinSyntaxHelperTest extends TestCase {
     helper().findClass("a.b.Box");
     // The getter for `value` has T as its return type — verify it is not qualified.
     List<NavigatablePsiElement> getters = helper.findClassMethods(
-      "a.b.Box", JavaHelper.MethodType.INSTANCE, "getValue", -1);
+      "a.b.Box", MethodType.INSTANCE, "getValue", -1);
     assertEquals(1, getters.size());
     assertEquals("T", helper.getMethodTypes(getters.get(0)).get(0));
   }
@@ -311,7 +312,7 @@ public class KotlinSyntaxHelperTest extends TestCase {
         """);
     helper().findClass("a.b.Secret");
     assertTrue(helper.findClassMethods(
-      "a.b.Secret", JavaHelper.MethodType.INSTANCE, "getHidden", -1).isEmpty());
+      "a.b.Secret", MethodType.INSTANCE, "getHidden", -1).isEmpty());
   }
 
   public void testConstPropertySkipped() throws Exception {
@@ -323,7 +324,7 @@ public class KotlinSyntaxHelperTest extends TestCase {
         """);
     helper().findClass("a.b.Const");
     assertTrue(helper.findClassMethods(
-      "a.b.Const", JavaHelper.MethodType.INSTANCE, "getANSWER", -1).isEmpty());
+      "a.b.Const", MethodType.INSTANCE, "getANSWER", -1).isEmpty());
   }
 
   public void testInternalMapsToPublic() throws Exception {
@@ -362,7 +363,7 @@ public class KotlinSyntaxHelperTest extends TestCase {
     // same-package guess (a.b.Path). The point of this test is just that lookup doesn't crash.
     helper().findClass("a.b.Used");
     List<NavigatablePsiElement> ms = helper.findClassMethods(
-      "a.b.Used", JavaHelper.MethodType.INSTANCE, "read", -1);
+      "a.b.Used", MethodType.INSTANCE, "read", -1);
     assertEquals(1, ms.size());
   }
 
@@ -379,7 +380,7 @@ public class KotlinSyntaxHelperTest extends TestCase {
     NavigatablePsiElement el = helper().findClass(fqn);
     assertNotNull("class not found: " + fqn, el);
     MyElement<?> me = (MyElement<?>) el;
-    return ((org.intellij.grammar.java.ClassInfo) me.delegate).modifiers;
+    return ((org.intellij.grammar.classinfo.ClassInfo) me.delegate).modifiers;
   }
 
   private void write(@org.jetbrains.annotations.NotNull String relative,

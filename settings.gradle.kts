@@ -9,6 +9,7 @@ pluginManagement {
 
 include(":base")
 include(":parser-runtime")
+include(":jvm-class-info")
 include(":bnf-language")
 include(":jflex-language")
 include(":generator")

@@ -2,7 +2,7 @@
  * Copyright 2011-2026 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
  */
 
-package org.intellij.grammar.java.syntax.kotlin;
+package org.intellij.grammar.classinfo.kotlin;
 
 import com.intellij.platform.syntax.SyntaxElementType;
 import com.intellij.platform.syntax.tree.SyntaxNode;
@@ -18,7 +18,7 @@ import java.util.Map;
 
 /**
  * Static helpers for navigating Kotlin {@link SyntaxNode} trees. Mirrors
- * {@link org.intellij.grammar.java.syntax.JavaSyntaxNodes} for the Kotlin AST shape.
+ * {@link org.intellij.grammar.classinfo.java.JavaSyntaxNodes} for the Kotlin AST shape.
  */
 @SuppressWarnings("UnstableApiUsage")
 final class KotlinSyntaxNodes {

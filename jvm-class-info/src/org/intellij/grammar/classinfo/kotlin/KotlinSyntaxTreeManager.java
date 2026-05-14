@@ -2,7 +2,7 @@
  * Copyright 2011-2026 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
  */
 
-package org.intellij.grammar.java.syntax.kotlin;
+package org.intellij.grammar.classinfo.kotlin;
 
 import com.intellij.platform.syntax.tree.ParseKt;
 import com.intellij.platform.syntax.tree.SyntaxNode;
@@ -25,7 +25,7 @@ import java.util.Map;
 /**
  * Parses a Kotlin source file with the {@code syntax-api} + {@code kotlin-syntax} libraries and
  * returns the root {@link SyntaxNode} of the parsed tree. Mtime-keyed soft-value cache mirrors the
- * Java side ({@link org.intellij.grammar.java.syntax.JavaSyntaxTreeManager}).
+ * Java side ({@link org.intellij.grammar.classinfo.java.JavaSyntaxTreeManager}).
  * <p>
  * Unlike Java, {@code kotlin-syntax} does not expose a {@code LanguageSyntaxDefinition} — we drive
  * the lower-level {@link ParseKt#parse} overload directly with the lexer factory + parser lambda

@@ -7,10 +7,13 @@ package org.intellij.grammar.java.syntax;
 import com.intellij.platform.syntax.tree.SyntaxNode;
 import com.intellij.psi.NavigatablePsiElement;
 import junit.framework.TestCase;
-import org.intellij.grammar.java.ClassInfo;
+import org.intellij.grammar.classinfo.ClassInfo;
+import org.intellij.grammar.classinfo.MethodType;
+import org.intellij.grammar.classinfo.TypeParameterInfo;
+import org.intellij.grammar.classinfo.java.JavaSyntaxClassExtractor;
+import org.intellij.grammar.classinfo.java.JavaSyntaxTreeManager;
 import org.intellij.grammar.java.JavaHelper;
 import org.intellij.grammar.java.MyElement;
-import org.intellij.grammar.java.TypeParameterInfo;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Modifier;
@@ -129,7 +132,7 @@ public class JavaSyntaxHelperSourceTest extends TestCase {
       """);
     assertNotNull(helper.findClass("a.b.Outer.Inner"));
     assertEquals(1, helper.findClassMethods(
-      "a.b.Outer.Inner", JavaHelper.MethodType.INSTANCE, "inside", -1).size());
+      "a.b.Outer.Inner", MethodType.INSTANCE, "inside", -1).size());
   }
 
   // ---------------------------------------------------------------------------------------------
@@ -148,7 +151,7 @@ public class JavaSyntaxHelperSourceTest extends TestCase {
       }
       """);
     List<NavigatablePsiElement> methods = helper.findClassMethods(
-      "a.b.C", JavaHelper.MethodType.INSTANCE, "doIt", -1);
+      "a.b.C", MethodType.INSTANCE, "doIt", -1);
     assertEquals(1, methods.size());
     NavigatablePsiElement m = methods.get(0);
 
@@ -173,11 +176,11 @@ public class JavaSyntaxHelperSourceTest extends TestCase {
       }
       """);
     assertEquals(1, helper.findClassMethods(
-      "a.b.C", JavaHelper.MethodType.STATIC, "stat", -1).size());
+      "a.b.C", MethodType.STATIC, "stat", -1).size());
     assertTrue(helper.findClassMethods(
-      "a.b.C", JavaHelper.MethodType.STATIC, "inst", -1).isEmpty());
+      "a.b.C", MethodType.STATIC, "inst", -1).isEmpty());
     assertEquals(1, helper.findClassMethods(
-      "a.b.C", JavaHelper.MethodType.INSTANCE, "inst", -1).size());
+      "a.b.C", MethodType.INSTANCE, "inst", -1).size());
   }
 
   public void testConstructorExtraction() {
@@ -188,7 +191,7 @@ public class JavaSyntaxHelperSourceTest extends TestCase {
       }
       """);
     List<NavigatablePsiElement> ctors = helper.findClassMethods(
-      "a.b.C", JavaHelper.MethodType.CONSTRUCTOR, "C", -1);
+      "a.b.C", MethodType.CONSTRUCTOR, "C", -1);
     assertEquals(1, ctors.size());
     List<String> types = helper.getMethodTypes(ctors.get(0));
     assertEquals("a.b.C", types.get(0));   // synthetic return = declaring class
@@ -204,9 +207,9 @@ public class JavaSyntaxHelperSourceTest extends TestCase {
       }
       """);
     assertTrue(helper.findClassMethods(
-      "a.b.C", JavaHelper.MethodType.INSTANCE, "doIt", -1).isEmpty());
+      "a.b.C", MethodType.INSTANCE, "doIt", -1).isEmpty());
     assertEquals(1, helper.findClassMethods(
-      "a.b.C", JavaHelper.MethodType.INSTANCE, "doIt", true, -1).size());
+      "a.b.C", MethodType.INSTANCE, "doIt", true, -1).size());
   }
 
   public void testPrivateConstructorExcluded() {
@@ -217,7 +220,7 @@ public class JavaSyntaxHelperSourceTest extends TestCase {
       }
       """);
     assertTrue(helper.findClassMethods(
-      "a.b.C", JavaHelper.MethodType.CONSTRUCTOR, "C", -1).isEmpty());
+      "a.b.C", MethodType.CONSTRUCTOR, "C", -1).isEmpty());
   }
 
   // ---------------------------------------------------------------------------------------------
@@ -233,7 +236,7 @@ public class JavaSyntaxHelperSourceTest extends TestCase {
       }
       """);
     NavigatablePsiElement m = helper.findClassMethods(
-      "a.b.C", JavaHelper.MethodType.INSTANCE, "toString", -1).get(0);
+      "a.b.C", MethodType.INSTANCE, "toString", -1).get(0);
     assertEquals(List.of("java.lang.Override"), helper.getAnnotations(m));
   }
 
@@ -245,7 +248,7 @@ public class JavaSyntaxHelperSourceTest extends TestCase {
       }
       """);
     NavigatablePsiElement m = helper.findClassMethods(
-      "a.b.C", JavaHelper.MethodType.INSTANCE, "doIt", -1).get(0);
+      "a.b.C", MethodType.INSTANCE, "doIt", -1).get(0);
     assertEquals(List.of("java.io.IOException", "java.lang.RuntimeException"),
                  helper.getExceptionList(m));
   }
@@ -258,7 +261,7 @@ public class JavaSyntaxHelperSourceTest extends TestCase {
       }
       """);
     NavigatablePsiElement m = helper.findClassMethods(
-      "a.b.C", JavaHelper.MethodType.STATIC, "cast", -1).get(0);
+      "a.b.C", MethodType.STATIC, "cast", -1).get(0);
     List<TypeParameterInfo> generics = helper.getGenericParameters(m);
     assertEquals(1, generics.size());
     assertEquals("U", generics.get(0).getName());
@@ -272,7 +275,7 @@ public class JavaSyntaxHelperSourceTest extends TestCase {
       }
       """);
     NavigatablePsiElement m = helper.findClassMethods(
-      "a.b.C", JavaHelper.MethodType.INSTANCE, "doIt", -1).get(0);
+      "a.b.C", MethodType.INSTANCE, "doIt", -1).get(0);
     // Unresolved @Marker is qualified as a.b.Marker (same-package fallback).
     assertEquals(List.of("a.b.Marker"), helper.getParameterAnnotations(m, 0));
     assertTrue(helper.getParameterAnnotations(m, 1).isEmpty());
@@ -293,7 +296,7 @@ public class JavaSyntaxHelperSourceTest extends TestCase {
       """);
     // Caller passes Child as the param-type probe; receiver wants Base.
     assertEquals(1, helper.findClassMethods(
-      "a.b.Receiver", JavaHelper.MethodType.INSTANCE, "take", -1, "a.b.Child").size());
+      "a.b.Receiver", MethodType.INSTANCE, "take", -1, "a.b.Child").size());
   }
 
   public void testParamTypeMatchedViaInterface() {
@@ -306,7 +309,7 @@ public class JavaSyntaxHelperSourceTest extends TestCase {
       }
       """);
     assertEquals(1, helper.findClassMethods(
-      "a.b.Receiver", JavaHelper.MethodType.INSTANCE, "take", -1, "a.b.Child").size());
+      "a.b.Receiver", MethodType.INSTANCE, "take", -1, "a.b.Child").size());
   }
 
   // ---------------------------------------------------------------------------------------------

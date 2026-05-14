@@ -2,13 +2,15 @@
  * Copyright 2011-2026 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
  */
 
-package org.intellij.grammar.java.syntax.kotlin;
+package org.intellij.grammar.classinfo.kotlin;
 
 import com.intellij.platform.syntax.SyntaxElementType;
 import com.intellij.platform.syntax.tree.SyntaxNode;
 import com.intellij.util.SmartList;
 import fleet.org.jetbrains.kotlin.kmp.lexer.KtTokens;
 import fleet.org.jetbrains.kotlin.kmp.parser.KtNodeTypes;
+import org.intellij.grammar.classinfo.ClassInfo;
+import org.intellij.grammar.classinfo.MethodInfo;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -16,14 +18,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static org.intellij.grammar.java.syntax.kotlin.KotlinSyntaxNodes.buildDottedText;
-import static org.intellij.grammar.java.syntax.kotlin.KotlinSyntaxNodes.firstChildOfType;
+import static org.intellij.grammar.classinfo.kotlin.KotlinSyntaxNodes.buildDottedText;
+import static org.intellij.grammar.classinfo.kotlin.KotlinSyntaxNodes.firstChildOfType;
 
 /**
  * Renders Kotlin {@link SyntaxNode} type expressions ({@code TYPE_REFERENCE} / {@code USER_TYPE} /
  * {@code NULLABLE_TYPE} / {@code FUNCTION_TYPE}) into the dotted-FQN string form that
- * {@link org.intellij.grammar.java.ClassInfo} / {@link org.intellij.grammar.java.MethodInfo}
- * consumers expect.
+ * {@link ClassInfo} / {@link MethodInfo} consumers expect.
  * <p>
  * Kotlin built-in primitives are mapped to JVM primitives so structural parameter-type matching
  * across Java and Kotlin sources agrees on the same canonical names.

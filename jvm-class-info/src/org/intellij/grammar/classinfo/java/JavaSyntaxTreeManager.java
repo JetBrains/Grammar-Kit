@@ -2,7 +2,7 @@
  * Copyright 2011-2026 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
  */
 
-package org.intellij.grammar.java.syntax;
+package org.intellij.grammar.classinfo.java;
 
 import com.intellij.java.syntax.JavaSyntaxDefinition;
 import com.intellij.platform.syntax.SyntaxElementType;
@@ -34,14 +34,14 @@ import java.util.Map;
  * pressure the JVM is free to drop entries and force a re-parse on the next lookup.
  */
 @SuppressWarnings("UnstableApiUsage")
-final class JavaSyntaxTreeManager {
+public final class JavaSyntaxTreeManager {
   private final Map<Path, CacheEntry> cache = ContainerUtil.createSoftValueMap();
 
   /**
    * Parses the file at {@code path}. Returns {@code null} when the file is unreadable. Subsequent
    * calls return the cached root as long as the file's mtime hasn't changed.
    */
-  @Nullable SyntaxNode parseFile(@NotNull Path path) {
+  public @Nullable SyntaxNode parseFile(@NotNull Path path) {
     long mtime;
     try {
       mtime = Files.getLastModifiedTime(path).toMillis();
@@ -66,7 +66,7 @@ final class JavaSyntaxTreeManager {
   /**
    * Parses an in-memory source string.
    */
-  static @NotNull SyntaxNode parseText(@NotNull String text) {
+  public static @NotNull SyntaxNode parseText(@NotNull String text) {
     return ParseKt.parse(text, JavaSyntaxDefinition.INSTANCE, JavaLang.INSTANCE, null, null);
   }
 

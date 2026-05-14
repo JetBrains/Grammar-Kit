@@ -27,8 +27,9 @@ import org.intellij.grammar.generator.java.JavaNameShortener;
 import org.intellij.grammar.generator.java.JavaNames;
 import org.intellij.grammar.generator.java.JavaNameRenderer;
 import org.intellij.grammar.generator.kotlin.KotlinBnfConstants;
+import org.intellij.grammar.classinfo.MethodType;
+import org.intellij.grammar.classinfo.TypeParameterInfo;
 import org.intellij.grammar.java.JavaHelper;
-import org.intellij.grammar.java.TypeParameterInfo;
 import org.intellij.grammar.parser.GeneratedParserUtilBase.Parser;
 import org.intellij.grammar.psi.*;
 import org.intellij.grammar.psi.impl.GrammarUtil;
@@ -153,7 +154,7 @@ public final class JavaParserGenerator extends Generator {
       JavaHelper hierarchyHelper = helperFor(rule, KnownAttribute.MIXIN);
       String stubName =
         StringUtil.isNotEmpty(stubClass) ? stubClass :
-        implSuper.indexOf("<") < implSuper.indexOf(">") && !hierarchyHelper.findClassMethods(implSuperRaw, JavaHelper.MethodType.INSTANCE, "getParentByStub", 0).isEmpty() ?
+        implSuper.indexOf("<") < implSuper.indexOf(">") && !hierarchyHelper.findClassMethods(implSuperRaw, MethodType.INSTANCE, "getParentByStub", 0).isEmpty() ?
         implSuper.substring(implSuper.indexOf("<") + 1, implSuper.indexOf(">")) : null;
       if (StringUtil.isNotEmpty(stubName)) {
         info.realStubClass = stubClass;
@@ -1324,7 +1325,7 @@ public final class JavaParserGenerator extends Generator {
       next = getEffectiveSuperRule(myFile, next);
       if (next != null && next != topSuperRule && getAttribute(topSuperRule, KnownAttribute.MIXIN) == null) continue;
       topSuperClass = getRawClassName(superClass);
-      constructors = hierarchyHelper.findClassMethods(topSuperClass, JavaHelper.MethodType.CONSTRUCTOR, "*", -1);
+      constructors = hierarchyHelper.findClassMethods(topSuperClass, MethodType.CONSTRUCTOR, "*", -1);
       if (!constructors.isEmpty()) break;
     }
     if (!G.generateFQN) {
@@ -1384,7 +1385,7 @@ public final class JavaParserGenerator extends Generator {
         main:
         for (String curClass = topSuperClass; curClass != null; curClass = hierarchyHelper.getSuperClassName(curClass)) {
           for (NavigatablePsiElement m : hierarchyHelper.findClassMethods(
-            curClass, JavaHelper.MethodType.INSTANCE, "accept", 1, myVisitorClassName)) {
+            curClass, MethodType.INSTANCE, "accept", 1, myVisitorClassName)) {
             String paramType = myJavaHelper.getMethodTypes(m).get(1);
             if (getRawClassName(paramType).endsWith(StringUtil.getShortName(myVisitorClassName))) {
               addOverride = true;
@@ -1428,7 +1429,7 @@ public final class JavaParserGenerator extends Generator {
           if (intf) {
             String mixinClass = getAttribute(rule, KnownAttribute.MIXIN);
             List<NavigatablePsiElement> methods =
-              helperFor(rule, KnownAttribute.MIXIN).findClassMethods(mixinClass, JavaHelper.MethodType.INSTANCE, methodInfo.name, -1);
+              helperFor(rule, KnownAttribute.MIXIN).findClassMethods(mixinClass, MethodType.INSTANCE, methodInfo.name, -1);
             for (NavigatablePsiElement method : methods) {
               generateUtilMethod(methodInfo.name, method, true, false, visited);
               found = true;
@@ -1483,7 +1484,7 @@ public final class JavaParserGenerator extends Generator {
       if (methodInfo.type != RuleMethodsHelper.MethodType.MIXIN) continue;
 
       List<NavigatablePsiElement> mixinMethods =
-        helperFor(rule, KnownAttribute.MIXIN).findClassMethods(mixinClass, JavaHelper.MethodType.INSTANCE, methodInfo.name, -1);
+        helperFor(rule, KnownAttribute.MIXIN).findClassMethods(mixinClass, MethodType.INSTANCE, methodInfo.name, -1);
       List<NavigatablePsiElement> implMethods = helperFor(null, KnownAttribute.PSI_IMPL_UTIL_CLASS).findRuleImplMethods(myPsiImplUtilClass, methodInfo.name, rule);
 
       collectMethodTypesToImport(mixinMethods, false, result);

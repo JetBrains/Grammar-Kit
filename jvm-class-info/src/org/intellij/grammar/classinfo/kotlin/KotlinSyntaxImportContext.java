@@ -2,20 +2,21 @@
  * Copyright 2011-2026 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
  */
 
-package org.intellij.grammar.java.syntax.kotlin;
+package org.intellij.grammar.classinfo.kotlin;
 
 import com.intellij.platform.syntax.SyntaxElementType;
 import com.intellij.platform.syntax.tree.SyntaxNode;
 import fleet.org.jetbrains.kotlin.kmp.lexer.KtTokens;
 import fleet.org.jetbrains.kotlin.kmp.parser.KtNodeTypes;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import static org.intellij.grammar.java.syntax.kotlin.KotlinSyntaxNodes.buildDottedText;
-import static org.intellij.grammar.java.syntax.kotlin.KotlinSyntaxNodes.firstChildOfType;
+import static org.intellij.grammar.classinfo.kotlin.KotlinSyntaxNodes.buildDottedText;
+import static org.intellij.grammar.classinfo.kotlin.KotlinSyntaxNodes.firstChildOfType;
 
 /**
  * File-level name-resolution scope: package + single-type imports (with optional alias).
@@ -144,7 +145,7 @@ final class KotlinSyntaxImportContext {
     return imports;
   }
 
-  private static @org.jetbrains.annotations.Nullable String importedFqn(@NotNull SyntaxNode importDirective) {
+  private static @Nullable String importedFqn(@NotNull SyntaxNode importDirective) {
     for (SyntaxNode c = importDirective.firstChild(); c != null; c = c.nextSibling()) {
       SyntaxElementType t = c.getType();
       if (t == KtNodeTypes.INSTANCE.getDOT_QUALIFIED_EXPRESSION() ||
@@ -155,7 +156,7 @@ final class KotlinSyntaxImportContext {
     return null;
   }
 
-  private static @org.jetbrains.annotations.Nullable String aliasIdentifier(@NotNull SyntaxNode aliasNode) {
+  private static @Nullable String aliasIdentifier(@NotNull SyntaxNode aliasNode) {
     SyntaxNode id = firstChildOfType(aliasNode, KtTokens.INSTANCE.getIDENTIFIER());
     return id == null ? null : id.getText().toString();
   }

@@ -2,7 +2,7 @@
  * Copyright 2011-2026 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
  */
 
-package org.intellij.grammar.java.syntax;
+package org.intellij.grammar.classinfo;
 
 import com.intellij.util.SmartList;
 import org.jetbrains.annotations.NotNull;
@@ -23,8 +23,9 @@ import java.util.Map;
  * dotted segments right-to-left until we hit an existing file, so the source for an inner type is
  * found via its enclosing top-level file.
  * <p>
- * Used by source-based {@link JavaHelper} implementations (currently {@link JavaSyntaxHelper}; a
- * future Kotlin helper would pass {@code ".kt"}).
+ * Used by the source-backed class managers
+ * ({@link org.intellij.grammar.classinfo.java.JavaClassManager},
+ * {@link org.intellij.grammar.classinfo.kotlin.KotlinClassManager}).
  */
 public final class SourceRootResolver {
 
@@ -68,8 +69,8 @@ public final class SourceRootResolver {
 
   /**
    * Returns existing directories matching {@code packageName} across all configured source roots.
-   * Used by {@link JavaClassManager}'s slow-path package scan when {@link #findSourceFile} can't
-   * find a file by FQN-name (package-private classes, multi-class-per-file).
+   * Used by the slow-path package scan when {@link #findSourceFile} can't find a file by FQN-name
+   * (package-private classes, multi-class-per-file).
    */
   public @NotNull List<Path> findPackageDirs(@NotNull String packageName) {
     String relative = packageName.replace('.', '/');

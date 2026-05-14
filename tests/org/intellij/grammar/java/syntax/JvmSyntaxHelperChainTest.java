@@ -6,10 +6,10 @@ package org.intellij.grammar.java.syntax;
 
 import com.intellij.psi.NavigatablePsiElement;
 import junit.framework.TestCase;
-import org.intellij.grammar.java.ClassInfo;
+import org.intellij.grammar.classinfo.ClassInfo;
+import org.intellij.grammar.classinfo.MethodType;
 import org.intellij.grammar.java.JavaHelper;
 import org.intellij.grammar.java.MyElement;
-import org.intellij.grammar.java.syntax.kotlin.KotlinSyntaxHelper;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.file.Files;
@@ -95,14 +95,14 @@ public class JvmSyntaxHelperChainTest extends TestCase {
   public void testKotlinMemberMethodReachable() {
     chain.findClass("kt.Greeter");
     List<NavigatablePsiElement> ms = chain.findClassMethods(
-      "kt.Greeter", JavaHelper.MethodType.INSTANCE, "hello", -1);
+      "kt.Greeter", MethodType.INSTANCE, "hello", -1);
     assertEquals(1, ms.size());
   }
 
   public void testJavaMemberMethodReachable() {
     chain.findClass("jv.Counter");
     List<NavigatablePsiElement> ms = chain.findClassMethods(
-      "jv.Counter", JavaHelper.MethodType.INSTANCE, "bump", -1);
+      "jv.Counter", MethodType.INSTANCE, "bump", -1);
     assertEquals(1, ms.size());
   }
 

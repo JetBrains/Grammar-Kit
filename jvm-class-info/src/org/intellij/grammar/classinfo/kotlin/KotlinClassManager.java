@@ -2,11 +2,11 @@
  * Copyright 2011-2026 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
  */
 
-package org.intellij.grammar.java.syntax.kotlin;
+package org.intellij.grammar.classinfo.kotlin;
 
 import com.intellij.platform.syntax.tree.SyntaxNode;
-import org.intellij.grammar.java.ClassInfo;
-import org.intellij.grammar.java.syntax.SourceRootResolver;
+import org.intellij.grammar.classinfo.ClassInfo;
+import org.intellij.grammar.classinfo.SourceRootResolver;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -21,7 +21,7 @@ import java.util.Set;
 import java.util.stream.Stream;
 
 /**
- * Kotlin counterpart to {@link org.intellij.grammar.java.syntax.JavaClassManager}: maps FQN →
+ * Kotlin counterpart to {@link org.intellij.grammar.classinfo.java.JavaClassManager}: maps FQN →
  * {@link ClassInfo} by parsing {@code .kt} source files under the configured source roots.
  * <p>
  * Lookup is two-tiered, mirroring the Java side:
@@ -35,7 +35,7 @@ import java.util.stream.Stream;
  * {@link KotlinClassManager} instance.
  */
 @SuppressWarnings("UnstableApiUsage")
-final class KotlinClassManager {
+public final class KotlinClassManager {
 
   private final SourceRootResolver resolver;
   private final KotlinSyntaxTreeManager treeManager = new KotlinSyntaxTreeManager();
@@ -44,11 +44,11 @@ final class KotlinClassManager {
   private final Set<String> scannedPackages = new HashSet<>();
   private final Set<Path> ingestedFiles = new HashSet<>();
 
-  KotlinClassManager(@NotNull List<Path> sourceRoots) {
+  public KotlinClassManager(@NotNull List<Path> sourceRoots) {
     this.resolver = new SourceRootResolver(sourceRoots);
   }
 
-  @Nullable ClassInfo findClass(@Nullable String fqn) {
+  public @Nullable ClassInfo findClass(@Nullable String fqn) {
     if (fqn == null || fqn.isEmpty()) return null;
     ClassInfo cached = classCache.get(fqn);
     if (cached != null) return cached;

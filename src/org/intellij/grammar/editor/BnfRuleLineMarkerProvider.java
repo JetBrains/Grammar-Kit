@@ -18,6 +18,7 @@ import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.util.containers.ContainerUtil;
 import org.intellij.grammar.BnfIcons;
 import org.intellij.grammar.KnownAttribute;
+import org.intellij.grammar.classinfo.MethodType;
 import org.intellij.grammar.generator.CommonRendererUtils;
 import org.intellij.grammar.generator.RuleGraphHelper;
 import org.intellij.grammar.java.JavaHelper;
@@ -42,7 +43,7 @@ final class BnfRuleLineMarkerProvider extends RelatedItemLineMarkerProvider {
     String parserClass = BnfAttributes.getAttribute(rule, KnownAttribute.PARSER_CLASS);
     if (StringUtil.isEmpty(parserClass)) return null;
     boolean generateKotlin = BnfAttributes.useSyntaxApi(rule);
-    JavaHelper.MethodType methodType = (generateKotlin) ? JavaHelper.MethodType.INSTANCE : JavaHelper.MethodType.STATIC;
+    MethodType methodType = (generateKotlin) ? MethodType.INSTANCE : MethodType.STATIC;
     JavaHelper helper = JavaHelper.getJavaHelper(element);
     String methodName = (generateKotlin) ? GrammarUtil.getKotlinMethodName(rule, element) : GrammarUtil.getJavaMethodName(rule, element);
     List<NavigatablePsiElement> methods = helper.findClassMethods(

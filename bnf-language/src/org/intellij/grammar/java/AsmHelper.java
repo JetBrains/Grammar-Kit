@@ -9,6 +9,10 @@ import com.intellij.psi.NavigatablePsiElement;
 import com.intellij.util.ObjectUtils;
 import com.intellij.util.SmartList;
 import com.intellij.util.containers.ContainerUtil;
+import org.intellij.grammar.classinfo.ClassInfo;
+import org.intellij.grammar.classinfo.MethodInfo;
+import org.intellij.grammar.classinfo.MethodType;
+import org.intellij.grammar.classinfo.TypeParameterInfo;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.org.objectweb.asm.*;
@@ -315,7 +319,7 @@ public class AsmHelper extends JavaHelper {
                 typeAnnos.add(o);
               }
               else if (typeReference.getSort() == TypeReference.METHOD_TYPE_PARAMETER_BOUND) {
-                List<String> bounds = m.generics.get(typeReference.getTypeParameterIndex()).extendsList;
+                List<String> bounds = m.generics.get(typeReference.getTypeParameterIndex()).getExtendsList();
                 if (typeReference.getTypeParameterBoundIndex() <= bounds.size()) {
                   String prev = bounds.get(typeReference.getTypeParameterBoundIndex() - 1);
                   bounds.set(typeReference.getTypeParameterBoundIndex() - 1, "@" + anno + " " + prev);
@@ -514,7 +518,7 @@ public class AsmHelper extends JavaHelper {
             if (!"java.lang.Object".equals(bound)) {
               TypeParameterInfo currentGeneric = ContainerUtil.getLastItem(methodInfo.generics);
               if (currentGeneric != null) {
-                currentGeneric.extendsList.add(bound);
+                currentGeneric.getExtendsList().add(bound);
               }
               else {
                 reportException("current generic must not be null");

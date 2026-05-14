@@ -4,6 +4,8 @@
 
 package org.intellij.grammar.java.syntax;
 
+import org.intellij.grammar.classinfo.ClassInfo;
+import org.intellij.grammar.classinfo.java.JavaClassManager;
 import org.intellij.grammar.java.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -17,9 +19,10 @@ import java.util.function.Function;
  * {@code syntax-api} + {@code java-syntax} libraries (no IntelliJ Platform / PSI dependency).
  * <p>
  * The {@link JavaHelper} surface is inherited from {@link JvmSyntaxHelperBase}; this class only
- * wires the {@link JavaClassManager} as the source of {@link ClassInfo} records. FQN → source-file
- * mapping, parsing, tree walking, and caching are delegated to {@link JavaClassManager}; the
- * {@link MyElement}-based delegate readers come from {@link ClassInfoUtil}.
+ * wires {@link JavaClassManager} (from the {@code jvm-class-info} module) as the source of
+ * {@link ClassInfo} records. FQN → source-file mapping, parsing, tree walking, and caching are
+ * delegated to {@link JavaClassManager}; the {@link MyElement}-based delegate readers come from
+ * {@link ClassInfoUtil}.
  * <p>
  * Used from the headless CLI when the {@code --source-psi} flag is set; the IDE continues to use
  * {@link PsiHelper}. A {@code fallback} helper (typically {@link AsmHelper}) handles classes that

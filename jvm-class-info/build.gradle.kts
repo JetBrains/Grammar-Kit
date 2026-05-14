@@ -1,8 +1,9 @@
 /*
- * Copyright 2011-2025 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
+ * Copyright 2011-2026 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
  */
 plugins {
     java
+    idea
     id("org.jetbrains.intellij.platform.module")
 }
 
@@ -11,6 +12,7 @@ version = providers.gradleProperty("pluginVersion").get()
 
 repositories {
     mavenCentral()
+    maven("https://cache-redirector.jetbrains.com/intellij-dependencies")
     intellijPlatform {
         defaultRepositories()
     }
@@ -19,24 +21,21 @@ repositories {
 dependencies {
     compileOnly(libs.annotations)
 
-    implementation(project(":base"))
-    implementation(project(":parser-runtime"))
-    implementation(project(":jvm-class-info"))
-    implementation(project(":bnf-language"))
+    implementation("org.jetbrains:syntax-api:0.3.375")
+    implementation("org.jetbrains:java-syntax:0.3.375")
+    implementation("org.jetbrains:kotlin-syntax:0.3.375")
 
     intellijPlatform {
         create(
             providers.gradleProperty("platformType"),
             providers.gradleProperty("platformVersion"),
         )
-        bundledPlugins("com.intellij.java")
     }
 }
 
 sourceSets {
     main {
         java.srcDirs("src")
-        resources.srcDirs("resources")
     }
 }
 

@@ -7,6 +7,8 @@ package org.intellij.grammar.java;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.*;
 import com.intellij.util.*;
+import org.intellij.grammar.classinfo.MethodType;
+import org.intellij.grammar.classinfo.TypeParameterInfo;
 import org.intellij.grammar.psi.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -233,6 +235,4 @@ public abstract class JavaHelper {
     return PsiReference.EMPTY_ARRAY;
   }
 
-  /** Selector for {@link #findClassMethods}: which kind of member is being looked up. */
-  public enum MethodType {STATIC, INSTANCE, CONSTRUCTOR}
 }

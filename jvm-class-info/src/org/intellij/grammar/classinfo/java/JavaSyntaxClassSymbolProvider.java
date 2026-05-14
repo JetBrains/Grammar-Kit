@@ -6,6 +6,7 @@ package org.intellij.grammar.classinfo.java;
 
 import com.intellij.platform.syntax.tree.SyntaxNode;
 import org.intellij.grammar.classinfo.ClassInfo;
+import org.intellij.grammar.classinfo.Fqn;
 import org.intellij.grammar.classinfo.JvmClassSymbolManager;
 import org.intellij.grammar.classinfo.JvmClassSymbolProvider;
 import org.intellij.grammar.classinfo.SourceRootResolver;
@@ -46,7 +47,7 @@ public final class JavaSyntaxClassSymbolProvider implements JvmClassSymbolProvid
 
   private final SourceRootResolver sourceResolver;
   private final SyntaxTreeCache treeCache;
-  private final Set<String> scannedPackages = new HashSet<>();
+  private final Set<Fqn> scannedPackages = new HashSet<>();
   private final Set<Path> ingestedFiles = new HashSet<>();
 
   public JavaSyntaxClassSymbolProvider(@NotNull List<Path> sourceRoots) {
@@ -59,8 +60,8 @@ public final class JavaSyntaxClassSymbolProvider implements JvmClassSymbolProvid
   }
 
   @Override
-  public @NotNull Map<String, ClassInfo> resolve(@NotNull String fqn, @NotNull SymbolResolver resolver) {
-    Map<String, ClassInfo> batch = new HashMap<>();
+  public @NotNull Map<Fqn, ClassInfo> resolve(@NotNull Fqn fqn, @NotNull SymbolResolver resolver) {
+    Map<Fqn, ClassInfo> batch = new HashMap<>();
 
     // Fast path: file name matches the (public) class name.
     Path source = sourceResolver.findSourceFile(fqn, ".java");
@@ -68,11 +69,10 @@ public final class JavaSyntaxClassSymbolProvider implements JvmClassSymbolProvid
 
     // Slow path: walk dotted prefixes longest-first so inner-class FQNs find the right
     // enclosing-file scope. Stops as soon as we've found the requested FQN or run out of prefixes.
-    String prefix = fqn;
+    Fqn prefix = fqn;
     while (!batch.containsKey(fqn)) {
-      int lastDot = prefix.lastIndexOf('.');
-      if (lastDot < 0) break;
-      prefix = prefix.substring(0, lastDot);
+      prefix = prefix.parent();
+      if (prefix.isEmpty()) break;
       if (!scannedPackages.add(prefix)) break;
       for (Path dir : sourceResolver.findPackageDirs(prefix)) {
         scanPackage(dir, batch, resolver);
@@ -82,14 +82,14 @@ public final class JavaSyntaxClassSymbolProvider implements JvmClassSymbolProvid
     return batch;
   }
 
-  private void scanPackage(@NotNull Path dir, @NotNull Map<String, ClassInfo> batch, @NotNull SymbolResolver resolver) {
+  private void scanPackage(@NotNull Path dir, @NotNull Map<Fqn, ClassInfo> batch, @NotNull SymbolResolver resolver) {
     try (Stream<Path> files = Files.list(dir)) {
       files.filter(p -> p.getFileName().toString().endsWith(".java")).forEach(p -> ingest(p, batch, resolver));
     }
     catch (IOException ignored) { }
   }
 
-  private void ingest(@NotNull Path source, @NotNull Map<String, ClassInfo> batch, @NotNull SymbolResolver resolver) {
+  private void ingest(@NotNull Path source, @NotNull Map<Fqn, ClassInfo> batch, @NotNull SymbolResolver resolver) {
     if (!ingestedFiles.add(source)) return;
     SyntaxNode root = treeCache.parseOrGet(source, JavaSyntaxTreeManager::parseText);
     if (root != null) batch.putAll(JavaSyntaxClassExtractor.extractFrom(root, resolver));

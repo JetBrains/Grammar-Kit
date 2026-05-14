@@ -29,5 +29,5 @@ public interface JvmClassSymbolProvider {
    *                 imports, same-package references). Cycle protection is enforced by the
    *                 manager; treat a {@code null} return as "I don't know".
    */
-  @NotNull Map<String, ClassInfo> resolve(@NotNull String fqn, @NotNull SymbolResolver resolver);
+  @NotNull Map<Fqn, ClassInfo> resolve(@NotNull Fqn fqn, @NotNull SymbolResolver resolver);
 }

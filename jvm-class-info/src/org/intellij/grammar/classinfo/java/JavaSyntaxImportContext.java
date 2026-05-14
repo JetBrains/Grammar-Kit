@@ -8,6 +8,7 @@ import com.intellij.java.syntax.element.JavaSyntaxElementType;
 import com.intellij.java.syntax.element.JavaSyntaxTokenType;
 import com.intellij.platform.syntax.SyntaxElementType;
 import com.intellij.platform.syntax.tree.SyntaxNode;
+import org.intellij.grammar.classinfo.Fqn;
 import org.intellij.grammar.classinfo.SymbolResolver;
 import org.jetbrains.annotations.NotNull;
 
@@ -78,11 +79,11 @@ final class JavaSyntaxImportContext {
     // Probe wildcard imports through the resolver — this is the cross-language hop: a Java file
     // with `import com.foo.*;` will find a `Foo.kt` declared in `com.foo` via the Kotlin provider.
     for (String pkg : wildcardImports) {
-      String candidate = pkg + "." + simple;
-      if (resolver.findClass(candidate) != null) return candidate;
+      Fqn candidate = Fqn.of(pkg).child(simple);
+      if (resolver.findClass(candidate) != null) return candidate.value();
     }
     if (!packageName.isEmpty()) {
-      return packageName + "." + simple;
+      return Fqn.of(packageName).child(simple).value();
     }
     // todo resolve of ij-platform PSI classes is not supported yet
     return simple;

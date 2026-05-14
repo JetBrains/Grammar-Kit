@@ -13,11 +13,11 @@ import java.util.List;
 public class TypeParameterInfo {
   private final String name;
   final List<String> extendsList;
-  private final List<String> annotations;
+  private final List<Fqn> annotations;
 
   public TypeParameterInfo(@Nullable String name,
                            @NotNull List<String> extendsList,
-                           @NotNull List<String> annotations) {
+                           @NotNull List<Fqn> annotations) {
     this.name = name;
     this.extendsList = extendsList;
     this.annotations = annotations;
@@ -35,7 +35,7 @@ public class TypeParameterInfo {
     return extendsList;
   }
 
-  public List<String> getAnnotations() {
+  public List<Fqn> getAnnotations() {
     return annotations;
   }
 }

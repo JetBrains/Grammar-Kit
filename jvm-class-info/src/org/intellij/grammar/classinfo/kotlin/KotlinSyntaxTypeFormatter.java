@@ -10,6 +10,7 @@ import com.intellij.util.SmartList;
 import fleet.org.jetbrains.kotlin.kmp.lexer.KtTokens;
 import fleet.org.jetbrains.kotlin.kmp.parser.KtNodeTypes;
 import org.intellij.grammar.classinfo.ClassInfo;
+import org.intellij.grammar.classinfo.Fqn;
 import org.intellij.grammar.classinfo.MethodInfo;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -169,26 +170,50 @@ final class KotlinSyntaxTypeFormatter {
     }
   }
 
-  /** Format every {@code SUPER_TYPE_*} entry as a list of FQN strings. */
-  @NotNull List<String> formatSuperTypes(@Nullable SyntaxNode superTypeList, @NotNull Set<String> typeVars) {
+  /** Format every {@code SUPER_TYPE_*} entry as a list of raw {@link Fqn}s (no generics, no primitive mapping). */
+  @NotNull List<Fqn> formatSuperTypes(@Nullable SyntaxNode superTypeList, @NotNull Set<String> typeVars) {
     if (superTypeList == null) return List.of();
-    List<String> result = new SmartList<>();
+    List<Fqn> result = new SmartList<>();
     for (SyntaxNode entry = superTypeList.firstChild(); entry != null; entry = entry.nextSibling()) {
       SyntaxElementType t = entry.getType();
       if (t == KtNodeTypes.INSTANCE.getSUPER_TYPE_CALL_ENTRY()) {
         SyntaxNode callee = firstChildOfType(entry, KtNodeTypes.INSTANCE.getCONSTRUCTOR_CALLEE());
         if (callee != null) {
           SyntaxNode typeRef = firstChildOfType(callee, KtNodeTypes.INSTANCE.getTYPE_REFERENCE());
-          result.add(formatType(typeRef, typeVars));
+          result.add(formatTypeFqn(typeRef, typeVars));
         }
       }
       else if (t == KtNodeTypes.INSTANCE.getSUPER_TYPE_ENTRY() ||
                t == KtNodeTypes.INSTANCE.getDELEGATED_SUPER_TYPE_ENTRY()) {
         SyntaxNode typeRef = firstChildOfType(entry, KtNodeTypes.INSTANCE.getTYPE_REFERENCE());
-        result.add(formatType(typeRef, typeVars));
+        result.add(formatTypeFqn(typeRef, typeVars));
       }
     }
     return result;
+  }
+
+  /**
+   * Resolves a type expression to its raw class FQN — no generics, no primitive mapping, no array
+   * transform. Used for supertypes, annotation types, and typealias right-hand sides where the
+   * {@link ClassInfo} field type demands an {@link Fqn} rather than a free-form type expression.
+   */
+  @NotNull Fqn formatTypeFqn(@Nullable SyntaxNode typeNode, @NotNull Set<String> typeVars) {
+    if (typeNode == null) return Fqn.of("");
+    SyntaxElementType t = typeNode.getType();
+    if (t == KtNodeTypes.INSTANCE.getTYPE_REFERENCE()) {
+      return formatTypeFqn(firstNonModifierChild(typeNode), typeVars);
+    }
+    if (t == KtNodeTypes.INSTANCE.getNULLABLE_TYPE()) {
+      return formatTypeFqn(firstNonModifierChild(typeNode), typeVars);
+    }
+    if (t == KtNodeTypes.INSTANCE.getUSER_TYPE()) {
+      String dotted = userTypeDotted(typeNode);
+      if (typeVars.contains(dotted) || dotted.contains(".")) return Fqn.of(dotted);
+      return Fqn.of(imports.resolveSimpleName(dotted));
+    }
+    if (t == KtNodeTypes.INSTANCE.getFUNCTION_TYPE()) return Fqn.of("kotlin.Function");
+    if (t == KtNodeTypes.INSTANCE.getDYNAMIC_TYPE()) return Fqn.of("java.lang.Object");
+    return Fqn.of("");
   }
 
   /** Whether the first entry of a {@code SUPER_TYPE_LIST} is a {@code SUPER_TYPE_CALL_ENTRY}. */
@@ -201,15 +226,15 @@ final class KotlinSyntaxTypeFormatter {
   }
 
   /** Collect annotation FQNs from a {@code MODIFIER_LIST}. */
-  @NotNull List<String> extractAnnotationFqns(@Nullable SyntaxNode modifierList, @NotNull Set<String> typeVars) {
+  @NotNull List<Fqn> extractAnnotationFqns(@Nullable SyntaxNode modifierList, @NotNull Set<String> typeVars) {
     if (modifierList == null) return List.of();
-    List<String> out = new SmartList<>();
+    List<Fqn> out = new SmartList<>();
     for (SyntaxNode entry = modifierList.firstChild(); entry != null; entry = entry.nextSibling()) {
       if (entry.getType() != KtNodeTypes.INSTANCE.getANNOTATION_ENTRY()) continue;
       SyntaxNode callee = firstChildOfType(entry, KtNodeTypes.INSTANCE.getCONSTRUCTOR_CALLEE());
       SyntaxNode typeRef = callee == null ? firstChildOfType(entry, KtNodeTypes.INSTANCE.getTYPE_REFERENCE())
                                           : firstChildOfType(callee, KtNodeTypes.INSTANCE.getTYPE_REFERENCE());
-      if (typeRef != null) out.add(formatType(typeRef, typeVars));
+      if (typeRef != null) out.add(formatTypeFqn(typeRef, typeVars));
     }
     return out;
   }

@@ -17,6 +17,7 @@ import com.intellij.util.containers.TreeTraversal;
 import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.generator.java.JavaBnfConstants;
 import org.intellij.grammar.generator.java.JavaNames;
+import org.intellij.grammar.classinfo.Fqn;
 import org.intellij.grammar.classinfo.TypeParameterInfo;
 import org.intellij.grammar.java.JavaHelper;
 import org.intellij.grammar.psi.*;
@@ -345,8 +346,8 @@ public class ParserGeneratorUtil {
       if (i > 0) buffer.append(", ");
 
       TypeParameterInfo parameter = genericParameters.get(i);
-      for (String annotation : parameter.getAnnotations()) {
-        buffer.append("@").append(shortener.shorten(annotation)).append(" ");
+      for (Fqn annotation : parameter.getAnnotations()) {
+        buffer.append("@").append(shortener.shorten(annotation.value())).append(" ");
       }
       buffer.append(parameter.getName());
 

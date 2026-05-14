@@ -10,6 +10,7 @@ import com.intellij.platform.syntax.SyntaxElementType;
 import com.intellij.platform.syntax.tree.SyntaxNode;
 import com.intellij.util.SmartList;
 import org.intellij.grammar.classinfo.ClassInfo;
+import org.intellij.grammar.classinfo.Fqn;
 import org.intellij.grammar.classinfo.MethodInfo;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -82,17 +83,7 @@ final class JavaSyntaxTypeFormatter {
   }
 
   @NotNull String formatReference(@NotNull SyntaxNode refNode, @NotNull Set<String> typeVars) {
-    String dotted = buildDottedText(refNode);
-    String resolved;
-    if (typeVars.contains(dotted)) {
-      resolved = dotted; // in-scope type variable, do not qualify
-    }
-    else if (dotted.contains(".")) {
-      resolved = dotted; // already qualified, leave as-is
-    }
-    else {
-      resolved = imports.resolveSimpleName(dotted);
-    }
+    String resolved = resolveDotted(refNode, typeVars);
     SyntaxNode refParams = firstChildOfType(refNode, JavaSyntaxElementType.REFERENCE_PARAMETER_LIST);
     if (refParams == null) return resolved;
     List<SyntaxNode> typeArgs = new SmartList<>();
@@ -109,7 +100,7 @@ final class JavaSyntaxTypeFormatter {
     return sb.toString();
   }
 
-  /** Resolves every {@code JAVA_CODE_REFERENCE} child of the given wrapper element to an FQN. */
+  /** Resolves every {@code JAVA_CODE_REFERENCE} child of the given wrapper element as a full type expression. */
   @NotNull List<String> formatRefs(@Nullable SyntaxNode wrapper, @NotNull Set<String> typeVars) {
     if (wrapper == null) return List.of();
     List<String> refs = new SmartList<>();
@@ -121,14 +112,33 @@ final class JavaSyntaxTypeFormatter {
     return refs;
   }
 
-  @NotNull List<String> extractAnnotationFqns(@Nullable SyntaxNode modifierList, @NotNull Set<String> typeVars) {
+  /** Like {@link #formatRefs} but strips generic parameters and returns raw {@link Fqn}s. */
+  @NotNull List<Fqn> extractRefFqns(@Nullable SyntaxNode wrapper, @NotNull Set<String> typeVars) {
+    if (wrapper == null) return List.of();
+    List<Fqn> refs = new SmartList<>();
+    for (SyntaxNode ref = wrapper.firstChild(); ref != null; ref = ref.nextSibling()) {
+      if (ref.getType() == JavaSyntaxElementType.JAVA_CODE_REFERENCE) {
+        refs.add(Fqn.of(resolveDotted(ref, typeVars)));
+      }
+    }
+    return refs;
+  }
+
+  @NotNull List<Fqn> extractAnnotationFqns(@Nullable SyntaxNode modifierList, @NotNull Set<String> typeVars) {
     if (modifierList == null) return List.of();
-    List<String> annos = new SmartList<>();
+    List<Fqn> annos = new SmartList<>();
     for (SyntaxNode child = modifierList.firstChild(); child != null; child = child.nextSibling()) {
       if (child.getType() != JavaSyntaxElementType.ANNOTATION) continue;
       SyntaxNode ref = firstChildOfType(child, JavaSyntaxElementType.JAVA_CODE_REFERENCE);
-      if (ref != null) annos.add(formatReference(ref, typeVars));
+      if (ref != null) annos.add(Fqn.of(resolveDotted(ref, typeVars)));
     }
     return annos;
+  }
+
+  private @NotNull String resolveDotted(@NotNull SyntaxNode refNode, @NotNull Set<String> typeVars) {
+    String dotted = buildDottedText(refNode);
+    if (typeVars.contains(dotted)) return dotted;          // in-scope type variable, do not qualify
+    if (dotted.contains(".")) return dotted;               // already qualified, leave as-is
+    return imports.resolveSimpleName(dotted);
   }
 }

@@ -7,6 +7,7 @@ package org.intellij.grammar.classinfo.kotlin;
 import com.intellij.platform.syntax.tree.SyntaxNode;
 import fleet.org.jetbrains.kotlin.kmp.lexer.KtTokens;
 import fleet.org.jetbrains.kotlin.kmp.parser.KtNodeTypes;
+import org.intellij.grammar.classinfo.Fqn;
 import org.intellij.grammar.classinfo.MethodInfo;
 import org.intellij.grammar.classinfo.MethodType;
 import org.intellij.grammar.classinfo.TypeParameterInfo;
@@ -42,7 +43,7 @@ final class KotlinSyntaxMethodExtractor {
    * {@code STATIC} for top-level / extension functions, {@code INSTANCE} for member functions.
    */
   @Nullable MethodInfo extractFunction(@NotNull SyntaxNode funNode,
-                                       @NotNull String declaringFqn,
+                                       @NotNull Fqn declaringFqn,
                                        @NotNull Set<String> classTypeVars,
                                        @NotNull MethodType defaultMethodType) {
     SyntaxNode nameId = nameAfterFunKeyword(funNode);
@@ -83,13 +84,13 @@ final class KotlinSyntaxMethodExtractor {
 
   /** Build a {@link MethodInfo} for a primary or secondary constructor. */
   @Nullable MethodInfo extractConstructor(@NotNull SyntaxNode ctorNode,
-                                          @NotNull String declaringFqn,
+                                          @NotNull Fqn declaringFqn,
                                           @NotNull Set<String> classTypeVars) {
     MethodInfo m = new MethodInfo();
     m.declaringClass = declaringFqn;
     m.name = "<init>";
     m.methodType = MethodType.CONSTRUCTOR;
-    m.types.add(declaringFqn);
+    m.types.add(declaringFqn.value());
 
     Set<String> typeVars = new HashSet<>(classTypeVars);
     SyntaxNode modifierList = firstChildOfType(ctorNode, KtNodeTypes.INSTANCE.getMODIFIER_LIST());
@@ -105,7 +106,7 @@ final class KotlinSyntaxMethodExtractor {
 
   /** Synthesises {@code getX()} for a {@code PROPERTY} / primary-ctor {@code val}/{@code var} param. */
   @Nullable MethodInfo synthesizeGetter(@NotNull SyntaxNode propertyOrParamNode,
-                                        @NotNull String declaringFqn,
+                                        @NotNull Fqn declaringFqn,
                                         @NotNull Set<String> classTypeVars,
                                         boolean staticAccessor) {
     SyntaxNode nameId = firstChildOfType(propertyOrParamNode, KtTokens.INSTANCE.getIDENTIFIER());
@@ -131,7 +132,7 @@ final class KotlinSyntaxMethodExtractor {
 
   /** Synthesises {@code setX(value)} for a {@code var} property / primary-ctor {@code var} param. */
   @Nullable MethodInfo synthesizeSetter(@NotNull SyntaxNode propertyOrParamNode,
-                                        @NotNull String declaringFqn,
+                                        @NotNull Fqn declaringFqn,
                                         @NotNull Set<String> classTypeVars,
                                         boolean staticAccessor) {
     SyntaxNode nameId = firstChildOfType(propertyOrParamNode, KtTokens.INSTANCE.getIDENTIFIER());
@@ -191,7 +192,7 @@ final class KotlinSyntaxMethodExtractor {
       }
       m.types.add(typeStr);
       m.types.add(pName == null ? "p" + paramIdx : pName.getText().toString());
-      List<String> annos = typeFormatter.extractAnnotationFqns(mods, typeVars);
+      List<Fqn> annos = typeFormatter.extractAnnotationFqns(mods, typeVars);
       if (!annos.isEmpty()) m.annotations.get(paramIdx + 1).addAll(annos);
       paramIdx++;
     }

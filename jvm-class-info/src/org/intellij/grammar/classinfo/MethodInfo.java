@@ -18,12 +18,12 @@ public class MethodInfo {
    * 0 corresponds to the annotations of the method itself.
    * i corresponds to the annotations of the parameter at index i-1.
    */
-  public final Map<Integer, List<String>> annotations = FactoryMap.create(o -> new SmartList<>());
+  public final Map<Integer, List<Fqn>> annotations = FactoryMap.create(o -> new SmartList<>());
   public final List<TypeParameterInfo> generics = new SmartList<>();
-  public final List<String> exceptions = new SmartList<>();
+  public final List<Fqn> exceptions = new SmartList<>();
   public MethodType methodType;
   public String name;
-  public String declaringClass;
+  public Fqn declaringClass;
   public int modifiers;
 
   @Override

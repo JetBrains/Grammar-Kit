@@ -8,6 +8,7 @@ import com.intellij.java.syntax.element.JavaSyntaxElementType;
 import com.intellij.platform.syntax.SyntaxElementType;
 import com.intellij.platform.syntax.tree.SyntaxNode;
 import org.intellij.grammar.classinfo.ClassInfo;
+import org.intellij.grammar.classinfo.Fqn;
 import org.intellij.grammar.classinfo.MethodInfo;
 import org.intellij.grammar.classinfo.SymbolResolver;
 import org.jetbrains.annotations.NotNull;
@@ -57,14 +58,17 @@ import static org.intellij.grammar.classinfo.java.JavaSyntaxNodes.typeParameterN
 @SuppressWarnings("UnstableApiUsage")
 public final class JavaSyntaxClassExtractor {
 
+  private static final Fqn ROOT_FQN = Fqn.of("");
+  private static final Fqn JAVA_LANG_OBJECT = Fqn.of("java.lang.Object");
+
   private final SyntaxNode fileRoot;
   private final JavaSyntaxImportContext imports;
   private final JavaSyntaxTypeFormatter typeFormatter;
   private final JavaSyntaxMethodExtractor methodExtractor;
-  private final Map<String, ClassInfo> result = new LinkedHashMap<>();
+  private final Map<Fqn, ClassInfo> result = new LinkedHashMap<>();
 
   /** Walks {@code fileRoot} once and returns one {@link ClassInfo} per declared class, keyed by FQN. */
-  public static @NotNull Map<String, ClassInfo> extractFrom(@NotNull SyntaxNode fileRoot, @NotNull SymbolResolver resolver) {
+  public static @NotNull Map<Fqn, ClassInfo> extractFrom(@NotNull SyntaxNode fileRoot, @NotNull SymbolResolver resolver) {
     return new JavaSyntaxClassExtractor(fileRoot, resolver).extract();
   }
 
@@ -75,22 +79,22 @@ public final class JavaSyntaxClassExtractor {
     this.methodExtractor = new JavaSyntaxMethodExtractor(typeFormatter);
   }
 
-  private @NotNull Map<String, ClassInfo> extract() {
+  private @NotNull Map<Fqn, ClassInfo> extract() {
     for (SyntaxNode child = fileRoot.firstChild(); child != null; child = child.nextSibling()) {
       if (child.getType() == JavaSyntaxElementType.CLASS) {
-        walkClass(child, "", Set.of());
+        walkClass(child, ROOT_FQN, Set.of());
       }
     }
     return result;
   }
 
   private void walkClass(@NotNull SyntaxNode classNode,
-                         @NotNull String enclosingFqn,
+                         @NotNull Fqn enclosingFqn,
                          @NotNull Set<String> outerTypeVars) {
     SyntaxNode nameId = findClassName(classNode);
     if (nameId == null) return;
     String simpleName = nameId.getText().toString();
-    String fqn = computeFqn(enclosingFqn, simpleName);
+    Fqn fqn = computeFqn(enclosingFqn, simpleName);
 
     ClassInfo info = new ClassInfo();
     info.name = fqn;
@@ -108,17 +112,17 @@ public final class JavaSyntaxClassExtractor {
     if (isInterface(classNode)) info.modifiers |= Modifier.INTERFACE | Modifier.ABSTRACT;
     if (isAnnotationType(classNode)) info.modifiers |= Modifier.INTERFACE | Modifier.ABSTRACT;
 
-    List<String> extendsRefs = typeFormatter.formatRefs(firstChildOfType(classNode, JavaSyntaxElementType.EXTENDS_LIST),
-                                                        classTypeVars);
+    List<Fqn> extendsRefs = typeFormatter.extractRefFqns(firstChildOfType(classNode, JavaSyntaxElementType.EXTENDS_LIST),
+                                                         classTypeVars);
     if (isInterface(classNode)) {
       info.superClass = null;
       info.interfaces.addAll(extendsRefs); // interfaces' EXTENDS_LIST holds super-interfaces
     }
     else {
-      info.superClass = extendsRefs.isEmpty() ? "java.lang.Object" : extendsRefs.get(0);
+      info.superClass = extendsRefs.isEmpty() ? JAVA_LANG_OBJECT : extendsRefs.get(0);
     }
-    info.interfaces.addAll(typeFormatter.formatRefs(firstChildOfType(classNode, JavaSyntaxElementType.IMPLEMENTS_LIST),
-                                                    classTypeVars));
+    info.interfaces.addAll(typeFormatter.extractRefFqns(firstChildOfType(classNode, JavaSyntaxElementType.IMPLEMENTS_LIST),
+                                                        classTypeVars));
 
     result.put(fqn, info);
 
@@ -134,9 +138,8 @@ public final class JavaSyntaxClassExtractor {
     }
   }
 
-  private @NotNull String computeFqn(@NotNull String enclosingFqn, @NotNull String simpleName) {
-    if (!enclosingFqn.isEmpty()) return enclosingFqn + "." + simpleName;
-    String pkg = imports.packageName();
-    return pkg.isEmpty() ? simpleName : pkg + "." + simpleName;
+  private @NotNull Fqn computeFqn(@NotNull Fqn enclosingFqn, @NotNull String simpleName) {
+    if (!enclosingFqn.isEmpty()) return enclosingFqn.child(simpleName);
+    return Fqn.of(imports.packageName()).child(simpleName);
   }
 }

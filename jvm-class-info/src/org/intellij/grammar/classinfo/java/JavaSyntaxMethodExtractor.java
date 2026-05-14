@@ -7,6 +7,7 @@ package org.intellij.grammar.classinfo.java;
 import com.intellij.java.syntax.element.JavaSyntaxElementType;
 import com.intellij.java.syntax.element.JavaSyntaxTokenType;
 import com.intellij.platform.syntax.tree.SyntaxNode;
+import org.intellij.grammar.classinfo.Fqn;
 import org.intellij.grammar.classinfo.MethodInfo;
 import org.intellij.grammar.classinfo.MethodType;
 import org.intellij.grammar.classinfo.TypeParameterInfo;
@@ -37,7 +38,7 @@ final class JavaSyntaxMethodExtractor {
   }
 
   @Nullable MethodInfo extract(@NotNull SyntaxNode methodNode,
-                               @NotNull String declaringFqn,
+                               @NotNull Fqn declaringFqn,
                                @NotNull Set<String> classTypeVars) {
     MethodInfo m = new MethodInfo();
     m.declaringClass = declaringFqn;
@@ -56,7 +57,7 @@ final class JavaSyntaxMethodExtractor {
     SyntaxNode returnType = firstChildOfType(methodNode, JavaSyntaxElementType.TYPE);
     if (returnType == null) {
       m.methodType = MethodType.CONSTRUCTOR;
-      m.types.add(declaringFqn);
+      m.types.add(declaringFqn.value());
     }
     else {
       m.methodType = Modifier.isStatic(m.modifiers) ? MethodType.STATIC : MethodType.INSTANCE;
@@ -66,7 +67,7 @@ final class JavaSyntaxMethodExtractor {
     collectParameters(methodNode, m, typeVars);
 
     m.annotatedTypes.addAll(m.types);
-    m.exceptions.addAll(typeFormatter.formatRefs(firstChildOfType(methodNode, JavaSyntaxElementType.THROWS_LIST), typeVars));
+    m.exceptions.addAll(typeFormatter.extractRefFqns(firstChildOfType(methodNode, JavaSyntaxElementType.THROWS_LIST), typeVars));
     return m;
   }
 
@@ -99,7 +100,7 @@ final class JavaSyntaxMethodExtractor {
       SyntaxNode pName = firstChildOfType(p, JavaSyntaxTokenType.IDENTIFIER);
       m.types.add(pType == null ? "" : typeFormatter.formatType(pType, typeVars));
       m.types.add(pName == null ? "p" + paramIdx : pName.getText().toString());
-      List<String> annos = typeFormatter.extractAnnotationFqns(firstChildOfType(p, JavaSyntaxElementType.MODIFIER_LIST), typeVars);
+      List<Fqn> annos = typeFormatter.extractAnnotationFqns(firstChildOfType(p, JavaSyntaxElementType.MODIFIER_LIST), typeVars);
       if (!annos.isEmpty()) m.annotations.get(paramIdx + 1).addAll(annos);
       paramIdx++;
     }

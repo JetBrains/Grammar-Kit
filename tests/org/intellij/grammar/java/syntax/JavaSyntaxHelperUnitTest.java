@@ -7,6 +7,7 @@ package org.intellij.grammar.java.syntax;
 import com.intellij.psi.NavigatablePsiElement;
 import junit.framework.TestCase;
 import org.intellij.grammar.classinfo.ClassInfo;
+import org.intellij.grammar.classinfo.Fqn;
 import org.intellij.grammar.classinfo.JvmClassSymbolManager;
 import org.intellij.grammar.classinfo.JvmClassSymbolProvider;
 import org.intellij.grammar.classinfo.MethodType;
@@ -63,7 +64,7 @@ public class JavaSyntaxHelperUnitTest extends TestCase {
 
   public void testFindClassMissDelegatesToFallback() {
     ClassInfo fallbackInfo = new ClassInfo();
-    fallbackInfo.name = "a.b.PlatformClass";
+    fallbackInfo.name = Fqn.of("a.b.PlatformClass");
     fallback.classes.put("a.b.PlatformClass", fallbackInfo);
 
     NavigatablePsiElement el = helper().findClass("a.b.PlatformClass");
@@ -90,7 +91,7 @@ public class JavaSyntaxHelperUnitTest extends TestCase {
     // A class known only to the fallback provider must still expose its methods through the
     // unified pipeline: manager looks up the class once, JvmSyntaxHelper iterates its methods.
     ClassInfo external = new ClassInfo();
-    external.name = "a.b.PlatformClass";
+    external.name = Fqn.of("a.b.PlatformClass");
     external.methods.add(method("ping", Modifier.PUBLIC, MethodType.INSTANCE, "void"));
     fallback.classes.put("a.b.PlatformClass", external);
 
@@ -248,7 +249,7 @@ public class JavaSyntaxHelperUnitTest extends TestCase {
 
   public void testFindClassMethodsParamTypeResolvedViaInterface() {
     ClassInfo child = registerClass("a.b.Child", Modifier.PUBLIC, "java.lang.Object");
-    child.interfaces.add("a.b.Iface");
+    child.interfaces.add(Fqn.of("a.b.Iface"));
     registerClass("a.b.Foo", Modifier.PUBLIC, "java.lang.Object",
                   method("doIt", Modifier.PUBLIC, MethodType.INSTANCE,
                          "void", "a.b.Iface"));
@@ -260,8 +261,8 @@ public class JavaSyntaxHelperUnitTest extends TestCase {
     // The probe class is only known to the fallback. JavaSyntaxHelper must unwrap the fallback's
     // MyElement<ClassInfo> so the supertype check still succeeds.
     ClassInfo external = new ClassInfo();
-    external.name = "ext.Child";
-    external.superClass = "a.b.Base";
+    external.name = Fqn.of("ext.Child");
+    external.superClass = Fqn.of("a.b.Base");
     fallback.classes.put("ext.Child", external);
 
     registerClass("a.b.Foo", Modifier.PUBLIC, "java.lang.Object",
@@ -289,8 +290,8 @@ public class JavaSyntaxHelperUnitTest extends TestCase {
 
   public void testGetSuperClassNameDelegatesToFallback() {
     ClassInfo external = new ClassInfo();
-    external.name = "ext.External";
-    external.superClass = "ext.Parent";
+    external.name = Fqn.of("ext.External");
+    external.superClass = Fqn.of("ext.Parent");
     fallback.classes.put("ext.External", external);
     assertEquals("ext.Parent", helper().getSuperClassName("ext.External"));
     // Fallback supplies the ClassInfo via findClass; JvmSyntaxHelper reads superClass off the record.
@@ -364,7 +365,7 @@ public class JavaSyntaxHelperUnitTest extends TestCase {
 
   public void testGetExceptionList() {
     MethodInfo m = method("ping", Modifier.PUBLIC, MethodType.INSTANCE, "void");
-    m.exceptions.add("java.io.IOException");
+    m.exceptions.add(Fqn.of("java.io.IOException"));
     assertEquals(List.of("java.io.IOException"),
                  helper().getExceptionList(new MyElement<>(m)));
   }
@@ -376,7 +377,7 @@ public class JavaSyntaxHelperUnitTest extends TestCase {
 
   public void testGetDeclaringClass() {
     MethodInfo m = method("ping", Modifier.PUBLIC, MethodType.INSTANCE, "void");
-    m.declaringClass = "a.b.Foo";
+    m.declaringClass = Fqn.of("a.b.Foo");
     assertEquals("a.b.Foo", helper().getDeclaringClass(new MyElement<>(m)));
   }
 
@@ -391,14 +392,14 @@ public class JavaSyntaxHelperUnitTest extends TestCase {
 
   public void testGetAnnotationsForClass() {
     ClassInfo info = registerClass("a.b.Foo", Modifier.PUBLIC, null);
-    info.annotations.add("java.lang.Deprecated");
+    info.annotations.add(Fqn.of("java.lang.Deprecated"));
     assertEquals(List.of("java.lang.Deprecated"),
                  helper().getAnnotations(new MyElement<>(info)));
   }
 
   public void testGetAnnotationsForMethod() {
     MethodInfo m = method("ping", Modifier.PUBLIC, MethodType.INSTANCE, "void");
-    m.annotations.get(0).add("java.lang.Override");
+    m.annotations.get(0).add(Fqn.of("java.lang.Override"));
     assertEquals(List.of("java.lang.Override"),
                  helper().getAnnotations(new MyElement<>(m)));
   }
@@ -410,7 +411,7 @@ public class JavaSyntaxHelperUnitTest extends TestCase {
   public void testGetParameterAnnotations() {
     MethodInfo m = method("ping", Modifier.PUBLIC, MethodType.INSTANCE, "void", "java.lang.String");
     // index 0 is the method itself; param 0 is at key 1.
-    m.annotations.get(1).add("a.b.Marker");
+    m.annotations.get(1).add(Fqn.of("a.b.Marker"));
     assertEquals(List.of("a.b.Marker"),
                  helper().getParameterAnnotations(new MyElement<>(m), 0));
   }
@@ -442,14 +443,14 @@ public class JavaSyntaxHelperUnitTest extends TestCase {
 
   private static @NotNull JvmClassSymbolProvider mapProvider(@NotNull Map<String, ClassInfo> classes) {
     return (fqn, resolver) -> {
-      ClassInfo info = classes.get(fqn);
+      ClassInfo info = classes.get(fqn.value());
       return info == null ? Map.of() : Map.of(fqn, info);
     };
   }
 
   private static @NotNull JvmClassSymbolProvider fallbackProvider(@NotNull JavaHelper fallback) {
     return (fqn, resolver) -> {
-      NavigatablePsiElement el = fallback.findClass(fqn);
+      NavigatablePsiElement el = fallback.findClass(fqn.value());
       if (el instanceof MyElement<?> e && e.delegate instanceof ClassInfo ci) {
         return Map.of(fqn, ci);
       }
@@ -462,9 +463,9 @@ public class JavaSyntaxHelperUnitTest extends TestCase {
                                   @Nullable String superClass,
                                   MethodInfo... methods) {
     ClassInfo info = new ClassInfo();
-    info.name = fqn;
+    info.name = Fqn.of(fqn);
     info.modifiers = modifiers;
-    info.superClass = superClass;
+    info.superClass = superClass == null ? null : Fqn.of(superClass);
     for (MethodInfo m : methods) info.methods.add(m);
     classes.put(fqn, info);
     return info;
@@ -537,7 +538,7 @@ public class JavaSyntaxHelperUnitTest extends TestCase {
       lastDispatch = "getSuperClassName";
       superClassCalls.add(className);
       ClassInfo info = classes.get(className);
-      return info == null ? null : info.superClass;
+      return info == null || info.superClass == null ? null : info.superClass.value();
     }
   }
 }

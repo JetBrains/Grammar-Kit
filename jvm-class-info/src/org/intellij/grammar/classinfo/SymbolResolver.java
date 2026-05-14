@@ -17,5 +17,5 @@ import org.jetbrains.annotations.Nullable;
  * textual best guess.
  */
 public interface SymbolResolver {
-  @Nullable ClassInfo findClass(@Nullable String fqn);
+  @Nullable ClassInfo findClass(@Nullable Fqn fqn);
 }

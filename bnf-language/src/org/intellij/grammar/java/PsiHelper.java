@@ -16,6 +16,7 @@ import com.intellij.util.IncorrectOperationException;
 import com.intellij.util.ProcessingContext;
 import com.intellij.util.containers.ContainerUtil;
 import org.intellij.grammar.KnownAttribute;
+import org.intellij.grammar.classinfo.Fqn;
 import org.intellij.grammar.classinfo.JvmClassSymbolManager;
 import org.intellij.grammar.classinfo.MethodType;
 import org.intellij.grammar.classinfo.TypeParameterInfo;
@@ -192,8 +193,7 @@ final class PsiHelper extends JvmSyntaxHelper {
 
   @Override
   public @NotNull List<String> getMethodTypes(NavigatablePsiElement method) {
-    if (!(method instanceof PsiMethod)) return super.getMethodTypes(method);
-    PsiMethod psiMethod = (PsiMethod)method;
+    if (!(method instanceof PsiMethod psiMethod)) return super.getMethodTypes(method);
     PsiType returnType = psiMethod.getReturnType();
     List<String> strings = new ArrayList<>();
     strings.add(returnType == null ? "" : returnType.getCanonicalText(true));
@@ -209,29 +209,26 @@ final class PsiHelper extends JvmSyntaxHelper {
 
   @Override
   public List<TypeParameterInfo> getGenericParameters(NavigatablePsiElement method) {
-    if (!(method instanceof PsiMethod)) return super.getGenericParameters(method);
+    if (!(method instanceof PsiMethod psiMethod)) return super.getGenericParameters(method);
 
-    PsiMethod psiMethod = (PsiMethod)method;
     PsiTypeParameter[] typeParameters = psiMethod.getTypeParameters();
     return ContainerUtil.map(typeParameters, param -> new TypeParameterInfo(
       param.getName(),
       ContainerUtil.map(param.getExtendsListTypes(), bound -> bound.getCanonicalText(false)),
-      getAnnotationsInner(param)));
+      ContainerUtil.map(getAnnotationsInner(param), Fqn::of)));
   }
 
   @Override
   public List<String> getExceptionList(NavigatablePsiElement method) {
-    if (!(method instanceof PsiMethod)) return super.getExceptionList(method);
+    if (!(method instanceof PsiMethod psiMethod)) return super.getExceptionList(method);
 
-    PsiMethod psiMethod = (PsiMethod)method;
     PsiClassType[] types = psiMethod.getThrowsList().getReferencedTypes();
     return ContainerUtil.map(types, type -> type.getCanonicalText(false));
   }
 
   @Override
   public @NotNull String getDeclaringClass(@Nullable NavigatablePsiElement method) {
-    if (!(method instanceof PsiMethod)) return super.getDeclaringClass(method);
-    PsiMethod psiMethod = (PsiMethod)method;
+    if (!(method instanceof PsiMethod psiMethod)) return super.getDeclaringClass(method);
     PsiClass aClass = psiMethod.getContainingClass();
     return aClass == null ? "" : StringUtil.notNullize(aClass.getQualifiedName());
   }
@@ -244,8 +241,7 @@ final class PsiHelper extends JvmSyntaxHelper {
 
   @Override
   public @NotNull List<String> getParameterAnnotations(@Nullable NavigatablePsiElement method, int paramIndex) {
-    if (!(method instanceof PsiMethod)) return super.getParameterAnnotations(method, paramIndex);
-    PsiMethod psiMethod = (PsiMethod)method;
+    if (!(method instanceof PsiMethod psiMethod)) return super.getParameterAnnotations(method, paramIndex);
     PsiParameter[] parameters = psiMethod.getParameterList().getParameters();
     if (paramIndex < 0 || paramIndex >= parameters.length) return Collections.emptyList();
     return getAnnotationsInner(parameters[paramIndex]);

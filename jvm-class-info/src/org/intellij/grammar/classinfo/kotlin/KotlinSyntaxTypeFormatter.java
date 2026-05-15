@@ -19,8 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static org.intellij.grammar.classinfo.kotlin.KotlinSyntaxNodes.buildDottedText;
-import static org.intellij.grammar.classinfo.kotlin.KotlinSyntaxNodes.firstChildOfType;
+import static org.intellij.grammar.classinfo.SyntaxTreeUtil.firstChildOfType;
 
 /**
  * Renders Kotlin {@link SyntaxNode} type expressions ({@code TYPE_REFERENCE} / {@code USER_TYPE} /
@@ -90,7 +89,7 @@ final class KotlinSyntaxTypeFormatter {
     return "";
   }
 
-  private @Nullable SyntaxNode firstNonModifierChild(@NotNull SyntaxNode node) {
+  private static @Nullable SyntaxNode firstNonModifierChild(@NotNull SyntaxNode node) {
     for (SyntaxNode c = node.firstChild(); c != null; c = c.nextSibling()) {
       SyntaxElementType ct = c.getType();
       if (ct == KtNodeTypes.INSTANCE.getMODIFIER_LIST()) continue;
@@ -151,13 +150,13 @@ final class KotlinSyntaxTypeFormatter {
    * Dotted text of a {@code USER_TYPE}. Kotlin nests user types left-recursively for qualified
    * names ({@code Outer.Inner} → {@code USER_TYPE(USER_TYPE(Outer), Inner)}); walk that chain.
    */
-  private @NotNull String userTypeDotted(@NotNull SyntaxNode userType) {
+  private static @NotNull String userTypeDotted(@NotNull SyntaxNode userType) {
     List<String> segments = new SmartList<>();
     collectUserTypeSegments(userType, segments);
     return String.join(".", segments);
   }
 
-  private void collectUserTypeSegments(@NotNull SyntaxNode userType, @NotNull List<String> out) {
+  private static void collectUserTypeSegments(@NotNull SyntaxNode userType, @NotNull List<String> out) {
     for (SyntaxNode c = userType.firstChild(); c != null; c = c.nextSibling()) {
       SyntaxElementType ct = c.getType();
       if (ct == KtNodeTypes.INSTANCE.getUSER_TYPE()) {

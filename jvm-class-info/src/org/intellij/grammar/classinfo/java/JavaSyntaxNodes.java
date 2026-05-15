@@ -17,6 +17,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.intellij.grammar.classinfo.SyntaxTreeUtil.firstChildOfType;
+
 /**
  * Static helpers for navigating Java {@link SyntaxNode} trees: finding children by type,
  * locating the name identifier of a class or method, extracting modifier bits, and rendering
@@ -40,13 +42,6 @@ final class JavaSyntaxNodes {
   );
 
   private JavaSyntaxNodes() { }
-
-  static @Nullable SyntaxNode firstChildOfType(@NotNull SyntaxNode node, @NotNull SyntaxElementType type) {
-    for (SyntaxNode child = node.firstChild(); child != null; child = child.nextSibling()) {
-      if (child.getType() == type) return child;
-    }
-    return null;
-  }
 
   static @NotNull List<String> typeParameterNames(@Nullable SyntaxNode typeParameterList) {
     if (typeParameterList == null) return List.of();

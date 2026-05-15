@@ -16,6 +16,9 @@ import java.lang.reflect.Modifier;
 import java.util.List;
 import java.util.Map;
 
+import static org.intellij.grammar.classinfo.SyntaxTreeUtil.childrenOfType;
+import static org.intellij.grammar.classinfo.SyntaxTreeUtil.firstChildOfType;
+
 /**
  * Static helpers for navigating Kotlin {@link SyntaxNode} trees. Mirrors
  * {@link org.intellij.grammar.classinfo.java.JavaSyntaxNodes} for the Kotlin AST shape.
@@ -37,22 +40,6 @@ final class KotlinSyntaxNodes {
   );
 
   private KotlinSyntaxNodes() { }
-
-  static @Nullable SyntaxNode firstChildOfType(@NotNull SyntaxNode node, @NotNull SyntaxElementType type) {
-    for (SyntaxNode child = node.firstChild(); child != null; child = child.nextSibling()) {
-      if (child.getType() == type) return child;
-    }
-    return null;
-  }
-
-  /** All direct children of {@code node} whose type is {@code type}. */
-  static @NotNull List<SyntaxNode> childrenOfType(@NotNull SyntaxNode node, @NotNull SyntaxElementType type) {
-    List<SyntaxNode> result = new SmartList<>();
-    for (SyntaxNode child = node.firstChild(); child != null; child = child.nextSibling()) {
-      if (child.getType() == type) result.add(child);
-    }
-    return result;
-  }
 
   static boolean hasModifier(@Nullable SyntaxNode modifierList, @NotNull SyntaxElementType modifier) {
     return modifierList != null && firstChildOfType(modifierList, modifier) != null;

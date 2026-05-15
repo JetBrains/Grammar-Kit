@@ -73,7 +73,7 @@ public final class AsmClassSymbolProvider implements JvmClassSymbolProvider {
       do {
         String s = name.substring(0, lastDot).replace('.', '/') +
                    name.substring(lastDot).replace('.', '$') +
-                   ".class";
+                   ".class"; // todo looks stupid
         is = classLoader.getResourceAsStream(s);
         lastDot = name.lastIndexOf('.', lastDot - 1);
       }
@@ -86,8 +86,8 @@ public final class AsmClassSymbolProvider implements JvmClassSymbolProvider {
     }
     catch (Exception e) {
       reportException(e, name, null);
+      return null;
     }
-    return null;
   }
 
   private static ClassInfo getClassInfo(Fqn className, byte[] bytes) {

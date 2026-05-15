@@ -19,8 +19,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import static org.intellij.grammar.classinfo.SyntaxTreeUtil.firstChildOfType;
 import static org.intellij.grammar.classinfo.java.JavaSyntaxNodes.extractModifiers;
-import static org.intellij.grammar.classinfo.java.JavaSyntaxNodes.firstChildOfType;
 import static org.intellij.grammar.classinfo.java.JavaSyntaxNodes.firstNameIdentifier;
 
 /**

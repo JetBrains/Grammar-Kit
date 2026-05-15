@@ -18,8 +18,8 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 import java.util.Set;
 
+import static org.intellij.grammar.classinfo.SyntaxTreeUtil.firstChildOfType;
 import static org.intellij.grammar.classinfo.java.JavaSyntaxNodes.buildDottedText;
-import static org.intellij.grammar.classinfo.java.JavaSyntaxNodes.firstChildOfType;
 
 /**
  * Renders Java {@link SyntaxNode} type expressions ({@code TYPE} nodes, {@code JAVA_CODE_REFERENCE}
@@ -100,7 +100,9 @@ final class JavaSyntaxTypeFormatter {
     return sb.toString();
   }
 
-  /** Resolves every {@code JAVA_CODE_REFERENCE} child of the given wrapper element as a full type expression. */
+  /**
+   * Resolves every {@code JAVA_CODE_REFERENCE} child of the given wrapper element as a full type expression.
+   */
   @NotNull List<String> formatRefs(@Nullable SyntaxNode wrapper, @NotNull Set<String> typeVars) {
     if (wrapper == null) return List.of();
     List<String> refs = new SmartList<>();
@@ -112,7 +114,9 @@ final class JavaSyntaxTypeFormatter {
     return refs;
   }
 
-  /** Like {@link #formatRefs} but strips generic parameters and returns raw {@link Fqn}s. */
+  /**
+   * Like {@link #formatRefs} but strips generic parameters and returns raw {@link Fqn}s.
+   */
   @NotNull List<Fqn> extractRefFqns(@Nullable SyntaxNode wrapper, @NotNull Set<String> typeVars) {
     if (wrapper == null) return List.of();
     List<Fqn> refs = new SmartList<>();

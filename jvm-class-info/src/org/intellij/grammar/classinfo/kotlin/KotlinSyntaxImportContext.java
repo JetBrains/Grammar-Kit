@@ -8,7 +8,7 @@ import com.intellij.platform.syntax.SyntaxElementType;
 import com.intellij.platform.syntax.tree.SyntaxNode;
 import fleet.org.jetbrains.kotlin.kmp.lexer.KtTokens;
 import fleet.org.jetbrains.kotlin.kmp.parser.KtNodeTypes;
-import org.intellij.grammar.classinfo.Fqn;
+import org.intellij.grammar.classinfo.AbstractImportContext;
 import org.intellij.grammar.classinfo.SymbolResolver;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -19,23 +19,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import static org.intellij.grammar.classinfo.SyntaxTreeUtil.firstChildOfType;
 import static org.intellij.grammar.classinfo.kotlin.KotlinSyntaxNodes.buildDottedText;
-import static org.intellij.grammar.classinfo.kotlin.KotlinSyntaxNodes.firstChildOfType;
 
 /**
- * File-level name-resolution scope: package + single-type imports (with optional alias).
- * <p>
- * Resolution rules (best-effort, no classpath model):
- * <ul>
- *   <li>Aliased imports ({@code import foo.Bar as Baz}) bind the alias to {@code foo.Bar}.</li>
- *   <li>Wildcard imports are skipped.</li>
- *   <li>Unqualified types resolve through the import map → a fixed allow-list of common Kotlin
- *       built-in / {@code kotlin.collections} names → a {@code java.lang} fallback → same-package.</li>
- *   <li>Qualified references are left as-is.</li>
- * </ul>
+ * Kotlin file-level resolution scope. Built-in resolution covers Kotlin standard names (mapped to
+ * their {@code kotlin.*} FQNs) and a small {@code java.lang} fallback for names that are not part
+ * of Kotlin's auto-imports but are still resolvable without an explicit import.
  */
 @SuppressWarnings("UnstableApiUsage")
-final class KotlinSyntaxImportContext {
+final class KotlinSyntaxImportContext extends AbstractImportContext {
 
   private static final Map<String, String> KOTLIN_AUTO_IMPORTS = Map.ofEntries(
     Map.entry("Any", "kotlin.Any"),
@@ -91,11 +84,6 @@ final class KotlinSyntaxImportContext {
     "Void", "Deprecated", "Override", "SuppressWarnings"
   );
 
-  private final String packageName;
-  private final Map<String, String> imports;
-  private final List<String> wildcardImports;
-  private final SymbolResolver resolver;
-
   static @NotNull KotlinSyntaxImportContext extractFrom(@NotNull SyntaxNode fileRoot, @NotNull SymbolResolver resolver) {
     Map<String, String> singleImports = new HashMap<>();
     List<String> wildcards = new ArrayList<>();
@@ -107,30 +95,15 @@ final class KotlinSyntaxImportContext {
                                     @NotNull Map<String, String> imports,
                                     @NotNull List<String> wildcardImports,
                                     @NotNull SymbolResolver resolver) {
-    this.packageName = packageName;
-    this.imports = imports;
-    this.wildcardImports = wildcardImports;
-    this.resolver = resolver;
+    super(packageName, imports, wildcardImports, resolver);
   }
 
-  @NotNull String packageName() {
-    return packageName;
-  }
-
-  @NotNull String resolveSimpleName(@NotNull String simple) {
-    String byImport = imports.get(simple);
-    if (byImport != null) return byImport;
+  @Override
+  protected @Nullable String resolveBuiltin(@NotNull String simple) {
     String byAutoImport = KOTLIN_AUTO_IMPORTS.get(simple);
     if (byAutoImport != null) return byAutoImport;
     if (JAVA_LANG_FALLBACK.contains(simple)) return "java.lang." + simple;
-    // Probe wildcard imports through the resolver — a Kotlin file with `import com.foo.*`
-    // can resolve to a Java class declared in `com.foo` via the Java provider.
-    for (String pkg : wildcardImports) {
-      Fqn candidate = Fqn.of(pkg).child(simple);
-      if (resolver.findClass(candidate) != null) return candidate.value();
-    }
-    if (!packageName.isEmpty()) return Fqn.of(packageName).child(simple).value();
-    return simple;
+    return null;
   }
 
   private static @NotNull String extractPackageName(@NotNull SyntaxNode fileRoot) {

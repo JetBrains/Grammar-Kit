@@ -19,8 +19,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import static org.intellij.grammar.classinfo.SyntaxTreeUtil.firstChildOfType;
 import static org.intellij.grammar.classinfo.kotlin.KotlinSyntaxNodes.extractModifiers;
-import static org.intellij.grammar.classinfo.kotlin.KotlinSyntaxNodes.firstChildOfType;
 
 /**
  * Translates Kotlin {@code FUN} / {@code PROPERTY} / {@code PRIMARY_CONSTRUCTOR} /

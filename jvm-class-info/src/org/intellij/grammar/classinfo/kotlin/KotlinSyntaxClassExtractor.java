@@ -24,8 +24,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import static org.intellij.grammar.classinfo.SyntaxTreeUtil.firstChildOfType;
 import static org.intellij.grammar.classinfo.kotlin.KotlinSyntaxNodes.extractModifiers;
-import static org.intellij.grammar.classinfo.kotlin.KotlinSyntaxNodes.firstChildOfType;
 import static org.intellij.grammar.classinfo.kotlin.KotlinSyntaxNodes.hasJvmStatic;
 import static org.intellij.grammar.classinfo.kotlin.KotlinSyntaxNodes.hasModifier;
 import static org.intellij.grammar.classinfo.kotlin.KotlinSyntaxNodes.isCompanion;
@@ -38,7 +38,7 @@ import static org.intellij.grammar.classinfo.kotlin.KotlinSyntaxNodes.typeParame
 
 /**
  * Walks a parsed Kotlin source file (the root {@link SyntaxNode} from
- * {@link KotlinSyntaxTreeManager#parseFile}) and produces one {@link ClassInfo} per declared class,
+ * {@link KotlinSyntaxTreeManager#parseText(String)}) and produces one {@link ClassInfo} per declared class,
  * object, companion, or typealias, plus a synthesised {@code <FileStem>Kt} class collecting all
  * top-level callables.
  * <p>
@@ -48,9 +48,6 @@ import static org.intellij.grammar.classinfo.kotlin.KotlinSyntaxNodes.typeParame
  */
 @SuppressWarnings("UnstableApiUsage")
 final class KotlinSyntaxClassExtractor {
-
-  private static final Fqn ROOT_FQN = Fqn.of("");
-  private static final Fqn JAVA_LANG_OBJECT = Fqn.of("java.lang.Object");
 
   private final SyntaxNode fileRoot;
   private final String fileStem;
@@ -82,13 +79,13 @@ final class KotlinSyntaxClassExtractor {
     for (SyntaxNode child = fileRoot.firstChild(); child != null; child = child.nextSibling()) {
       SyntaxElementType t = child.getType();
       if (t == KtNodeTypes.INSTANCE.getCLASS()) {
-        walkClass(child, ROOT_FQN, Set.of());
+        walkClass(child, Fqn.ROOT, Set.of());
       }
       else if (t == KtNodeTypes.INSTANCE.getOBJECT_DECLARATION()) {
-        walkObject(child, ROOT_FQN, null, Set.of());
+        walkObject(child, Fqn.ROOT, null, Set.of());
       }
       else if (t == KtNodeTypes.INSTANCE.getTYPEALIAS()) {
-        walkTypeAlias(child, ROOT_FQN);
+        walkTypeAlias(child, Fqn.ROOT);
       }
       else if (t == KtNodeTypes.INSTANCE.getFUN() || t == KtNodeTypes.INSTANCE.getPROPERTY()) {
         if (fileClass == null) fileClass = createFileClass();
@@ -104,7 +101,7 @@ final class KotlinSyntaxClassExtractor {
     ClassInfo info = new ClassInfo();
     info.name = Fqn.of(imports.packageName()).child(fileStem + "Kt");
     info.modifiers = Modifier.PUBLIC | Modifier.FINAL;
-    info.superClass = JAVA_LANG_OBJECT;
+    info.superClass = Fqn.JAVA_LANG_OBJECT;
     return info;
   }
 
@@ -136,7 +133,7 @@ final class KotlinSyntaxClassExtractor {
     SyntaxNode nameId = nameIdentifier(classNode);
     if (nameId == null) return;
     String simple = nameId.getText().toString();
-    Fqn fqn = computeFqn(enclosingFqn, simple);
+    Fqn fqn = imports.qualify(enclosingFqn, simple);
 
     ClassInfo info = new ClassInfo();
     info.name = fqn;
@@ -190,7 +187,7 @@ final class KotlinSyntaxClassExtractor {
     boolean companion = isCompanion(objectNode);
     String simple = nameId != null ? nameId.getText().toString() : (companion ? "Companion" : null);
     if (simple == null) return;
-    Fqn fqn = computeFqn(enclosingFqn, simple);
+    Fqn fqn = imports.qualify(enclosingFqn, simple);
 
     ClassInfo info = new ClassInfo();
     info.name = fqn;
@@ -198,7 +195,7 @@ final class KotlinSyntaxClassExtractor {
     info.modifiers = extractModifiers(modifierList) | Modifier.FINAL;
     if (!enclosingFqn.isEmpty()) info.modifiers |= Modifier.STATIC;
     info.annotations.addAll(typeFormatter.extractAnnotationFqns(modifierList, outerTypeVars));
-    info.superClass = JAVA_LANG_OBJECT;
+    info.superClass = Fqn.JAVA_LANG_OBJECT;
 
     SyntaxNode superTypeList = firstChildOfType(objectNode, KtNodeTypes.INSTANCE.getSUPER_TYPE_LIST());
     populateSuperTypes(info, objectNode, superTypeList, outerTypeVars);
@@ -277,7 +274,7 @@ final class KotlinSyntaxClassExtractor {
     SyntaxNode modifierList = firstChildOfType(objectNode, KtNodeTypes.INSTANCE.getMODIFIER_LIST());
     info.modifiers = extractModifiers(modifierList) | Modifier.FINAL | Modifier.STATIC;
     info.annotations.addAll(typeFormatter.extractAnnotationFqns(modifierList, outerTypeVars));
-    info.superClass = JAVA_LANG_OBJECT;
+    info.superClass = Fqn.JAVA_LANG_OBJECT;
 
     SyntaxNode superTypeList = firstChildOfType(objectNode, KtNodeTypes.INSTANCE.getSUPER_TYPE_LIST());
     populateSuperTypes(info, objectNode, superTypeList, outerTypeVars);
@@ -322,7 +319,7 @@ final class KotlinSyntaxClassExtractor {
     SyntaxNode nameId = nameIdentifier(aliasNode);
     if (nameId == null) return;
     String simple = nameId.getText().toString();
-    Fqn fqn = computeFqn(enclosingFqn, simple);
+    Fqn fqn = imports.qualify(enclosingFqn, simple);
 
     ClassInfo info = new ClassInfo();
     info.name = fqn;
@@ -332,7 +329,7 @@ final class KotlinSyntaxClassExtractor {
     SyntaxNode rhs = firstChildOfType(aliasNode, KtNodeTypes.INSTANCE.getTYPE_REFERENCE());
     // For typealias rhs we want JVM-mapped names (e.g. `String` → `java.lang.String`) so the
     // alias' superClass mirrors what JVM-reflective callers expect, hence formatType over formatTypeFqn.
-    info.superClass = rhs == null ? JAVA_LANG_OBJECT : Fqn.of(typeFormatter.formatType(rhs, Set.of()));
+    info.superClass = rhs == null ? Fqn.JAVA_LANG_OBJECT : Fqn.of(typeFormatter.formatType(rhs, Set.of()));
     result.put(fqn, info);
   }
 
@@ -347,7 +344,7 @@ final class KotlinSyntaxClassExtractor {
       return;
     }
     if (supers.isEmpty()) {
-      info.superClass = info.superClass == null ? JAVA_LANG_OBJECT : info.superClass;
+      info.superClass = info.superClass == null ? Fqn.JAVA_LANG_OBJECT : info.superClass;
       return;
     }
     if (KotlinSyntaxTypeFormatter.hasCallEntry(superTypeList)) {
@@ -405,8 +402,4 @@ final class KotlinSyntaxClassExtractor {
     return m;
   }
 
-  private @NotNull Fqn computeFqn(@NotNull Fqn enclosingFqn, @NotNull String simpleName) {
-    if (!enclosingFqn.isEmpty()) return enclosingFqn.child(simpleName);
-    return Fqn.of(imports.packageName()).child(simpleName);
-  }
 }

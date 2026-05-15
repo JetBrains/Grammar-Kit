@@ -17,6 +17,12 @@ import java.util.Objects;
  */
 public record Fqn(@NotNull String value) {
 
+  /** The empty FQN — used as the "no enclosing class" sentinel when walking class trees. */
+  public static final Fqn ROOT = new Fqn("");
+
+  /** Canonical {@code java.lang.Object} — implicit superclass for non-interface classes. */
+  public static final Fqn JAVA_LANG_OBJECT = new Fqn("java.lang.Object");
+
   public Fqn {
     Objects.requireNonNull(value);
   }

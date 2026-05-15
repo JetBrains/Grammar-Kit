@@ -56,6 +56,8 @@ final class KotlinSyntaxClassExtractor {
   private final KotlinSyntaxMethodExtractor methodExtractor;
   private final Map<Fqn, ClassInfo> result = new LinkedHashMap<>();
 
+  private record FileJvmAnnotations(@Nullable String jvmName, boolean multifileFacade) { }
+
   /** Walks {@code fileRoot} once and returns one {@link ClassInfo} per declared (or synthesised) class. */
   static @NotNull Map<Fqn, ClassInfo> extractFrom(@NotNull SyntaxNode fileRoot,
                                                   @NotNull String fileStem,
@@ -74,6 +76,7 @@ final class KotlinSyntaxClassExtractor {
   }
 
   private @NotNull Map<Fqn, ClassInfo> extract() {
+    FileJvmAnnotations fileAnnotations = readFileJvmAnnotations();
     ClassInfo fileClass = null;
 
     for (SyntaxNode child = fileRoot.firstChild(); child != null; child = child.nextSibling()) {
@@ -88,7 +91,7 @@ final class KotlinSyntaxClassExtractor {
         walkTypeAlias(child, Fqn.ROOT);
       }
       else if (t == KtNodeTypes.INSTANCE.getFUN() || t == KtNodeTypes.INSTANCE.getPROPERTY()) {
-        if (fileClass == null) fileClass = createFileClass();
+        if (fileClass == null) fileClass = createFileClass(fileAnnotations);
         appendFileClassMember(fileClass, child);
       }
     }
@@ -97,12 +100,38 @@ final class KotlinSyntaxClassExtractor {
     return result;
   }
 
-  private @NotNull ClassInfo createFileClass() {
+  private @NotNull ClassInfo createFileClass(@NotNull FileJvmAnnotations fileAnnotations) {
     ClassInfo info = new ClassInfo();
-    info.name = Fqn.of(imports.packageName()).child(fileStem + "Kt");
+    String simpleName = fileAnnotations.jvmName() != null ? fileAnnotations.jvmName() : fileStem + "Kt";
+    info.name = Fqn.of(imports.packageName()).child(simpleName);
     info.modifiers = Modifier.PUBLIC | Modifier.FINAL;
     info.superClass = Fqn.JAVA_LANG_OBJECT;
+    info.multifileFacade = fileAnnotations.multifileFacade();
     return info;
+  }
+
+  private @NotNull FileJvmAnnotations readFileJvmAnnotations() {
+    SyntaxNode list = firstChildOfType(fileRoot, KtNodeTypes.INSTANCE.getFILE_ANNOTATION_LIST());
+    if (list == null) return new FileJvmAnnotations(null, false);
+    String jvmName = null;
+    boolean multifile = false;
+    // {@code kotlin.jvm.*} is auto-imported, so the simple-name match here is the established pattern
+    // (see {@link KotlinSyntaxNodes#hasJvmStatic}). Going through {@code resolveSimpleName} would
+    // misresolve {@code JvmName} to {@code <package>.JvmName} via the same-package fallback.
+    for (SyntaxNode entry = list.firstChild(); entry != null; entry = entry.nextSibling()) {
+      if (entry.getType() != KtNodeTypes.INSTANCE.getANNOTATION_ENTRY()) continue;
+      String name = KotlinSyntaxNodes.rightmostIdentifier(entry);
+      if ("JvmName".equals(name)) {
+        String value = KotlinSyntaxNodes.firstStringArgument(entry);
+        if (value != null && !value.isEmpty()) {
+          jvmName = value;
+        }
+      }
+      else if ("JvmMultifileClass".equals(name)) {
+        multifile = true;
+      }
+    }
+    return new FileJvmAnnotations(jvmName, multifile);
   }
 
   private void appendFileClassMember(@NotNull ClassInfo fileClass, @NotNull SyntaxNode member) {

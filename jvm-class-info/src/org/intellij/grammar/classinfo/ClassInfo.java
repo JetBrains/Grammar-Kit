@@ -16,4 +16,6 @@ public class ClassInfo {
   public Fqn name;
   public Fqn superClass;
   public int modifiers;
+  /** Kotlin facade synthesised from a {@code @file:JvmMultifileClass}-annotated file: callables from sibling files with the same JVM name merge into one entry. */
+  public boolean multifileFacade;
 }

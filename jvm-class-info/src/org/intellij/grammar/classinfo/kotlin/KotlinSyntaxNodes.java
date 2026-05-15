@@ -112,6 +112,34 @@ final class KotlinSyntaxNodes {
     return firstChildOfType(propertyNode, KtTokens.INSTANCE.getVAR_KEYWORD()) != null;
   }
 
+  /**
+   * Reads the first positional string-literal argument of an annotation entry, e.g.
+   * {@code @JvmName("Foo")} → {@code "Foo"}. Returns {@code null} when the argument is missing,
+   * when there is no string literal, or when the literal contains interpolation — kotlinc forbids
+   * non-constant arguments to {@code @JvmName} anyway, so the conservative refusal is correct.
+   */
+  static @Nullable String firstStringArgument(@NotNull SyntaxNode annotationEntry) {
+    SyntaxNode argList = firstChildOfType(annotationEntry, KtNodeTypes.INSTANCE.getVALUE_ARGUMENT_LIST());
+    if (argList == null) return null;
+    SyntaxNode arg = firstChildOfType(argList, KtNodeTypes.INSTANCE.getVALUE_ARGUMENT());
+    if (arg == null) return null;
+    SyntaxNode template = firstChildOfType(arg, KtNodeTypes.INSTANCE.getSTRING_TEMPLATE());
+    if (template == null) return null;
+    StringBuilder sb = new StringBuilder();
+    for (SyntaxNode c = template.firstChild(); c != null; c = c.nextSibling()) {
+      SyntaxElementType ct = c.getType();
+      if (ct == KtNodeTypes.INSTANCE.getLITERAL_STRING_TEMPLATE_ENTRY()) {
+        sb.append(c.getText().toString());
+      }
+      else if (ct == KtNodeTypes.INSTANCE.getLONG_STRING_TEMPLATE_ENTRY() ||
+               ct == KtNodeTypes.INSTANCE.getSHORT_STRING_TEMPLATE_ENTRY() ||
+               ct == KtNodeTypes.INSTANCE.getESCAPE_STRING_TEMPLATE_ENTRY()) {
+        return null;
+      }
+    }
+    return sb.toString();
+  }
+
   static boolean hasJvmStatic(@Nullable SyntaxNode modifierList) {
     if (modifierList == null) return false;
     for (SyntaxNode entry : childrenOfType(modifierList, KtNodeTypes.INSTANCE.getANNOTATION_ENTRY())) {

@@ -80,7 +80,19 @@ public final class KotlinSyntaxClassSymbolProvider implements JvmClassSymbolProv
     SyntaxNode root = treeCache.parseOrGet(source, KotlinSyntaxTreeManager::parseText);
     if (root == null) return;
     String fileStem = stem(source);
-    batch.putAll(KotlinSyntaxClassExtractor.extractFrom(root, fileStem, resolver));
+    Map<Fqn, ClassInfo> extracted = KotlinSyntaxClassExtractor.extractFrom(root, fileStem, resolver);
+    for (Map.Entry<Fqn, ClassInfo> e : extracted.entrySet()) {
+      ClassInfo incoming = e.getValue();
+      ClassInfo existing = batch.get(e.getKey());
+      // Sibling files annotated @file:JvmMultifileClass with the same JVM name contribute callables
+      // to a single facade — merge methods rather than overwrite.
+      if (existing != null && existing.multifileFacade && incoming.multifileFacade) {
+        existing.methods.addAll(incoming.methods);
+      }
+      else {
+        batch.put(e.getKey(), incoming);
+      }
+    }
   }
 
   private static @NotNull String stem(@NotNull Path file) {

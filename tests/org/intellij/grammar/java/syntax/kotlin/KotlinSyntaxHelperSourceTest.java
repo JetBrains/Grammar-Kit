@@ -101,6 +101,53 @@ public class KotlinSyntaxHelperSourceTest extends TestCase {
     assertNotNull(helper.findClass("mix.Other"));
   }
 
+  public void testFileClassJvmNameRename() throws Exception {
+    write("util/Bar.kt", """
+        @file:JvmName("Utils")
+        package util
+        fun shout(s: String): String = s.uppercase()
+        """);
+    assertNotNull("Renamed file class should resolve under its @JvmName",
+                  helper().findClass("util.Utils"));
+    assertNull("Default <Stem>Kt name should not resolve once @file:JvmName overrides it",
+               helper.findClass("util.BarKt"));
+    List<NavigatablePsiElement> staticHelpers = helper.findClassMethods(
+      "util.Utils", MethodType.STATIC, "shout", -1);
+    assertEquals(1, staticHelpers.size());
+  }
+
+  public void testFileClassJvmMultifileFacadeMergesAcrossFiles() throws Exception {
+    write("util/A.kt", """
+        @file:JvmName("Utils")
+        @file:JvmMultifileClass
+        package util
+        fun a(): String = "a"
+        """);
+    write("util/B.kt", """
+        @file:JvmName("Utils")
+        @file:JvmMultifileClass
+        package util
+        fun b(): String = "b"
+        """);
+    assertNotNull(helper().findClass("util.Utils"));
+    assertEquals("a() should be on the merged facade",
+                 1, helper.findClassMethods("util.Utils", MethodType.STATIC, "a", -1).size());
+    assertEquals("b() should be on the merged facade",
+                 1, helper.findClassMethods("util.Utils", MethodType.STATIC, "b", -1).size());
+  }
+
+  public void testFileClassJvmNameWithoutTopLevelCallablesDoesNotSynthesize() throws Exception {
+    write("util/Bar.kt", """
+        @file:JvmName("Utils")
+        package util
+        class Bar
+        """);
+    assertNotNull("Class declared in the file is still discoverable",
+                  helper().findClass("util.Bar"));
+    assertNull("No top-level fun/property → no file class even with @file:JvmName",
+               helper.findClass("util.Utils"));
+  }
+
   public void testInternalClassWithNonMatchingFileName() throws Exception {
     // Kotlin freely allows a file's primary class name to differ from the file name. The fast
     // path will miss; the slow-path package scan finds it.

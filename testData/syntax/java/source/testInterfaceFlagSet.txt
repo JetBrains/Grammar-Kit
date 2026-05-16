@@ -1,0 +1,3 @@
+class a.b.Iface
+  modifiers: public abstract interface
+  methods: (none)

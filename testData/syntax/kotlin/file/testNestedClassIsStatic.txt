@@ -1,0 +1,11 @@
+class a.b.Outer extends java.lang.Object
+  modifiers: public final
+  methods: (none)
+
+class a.b.Outer.Inner extends java.lang.Object
+  modifiers: public final
+  methods: (none)
+
+class a.b.Outer.Nested extends java.lang.Object
+  modifiers: public static final
+  methods: (none)

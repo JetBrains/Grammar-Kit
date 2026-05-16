@@ -4,29 +4,38 @@
 
 package org.intellij.grammar.java.syntax.kotlin;
 
-import com.intellij.psi.NavigatablePsiElement;
-import junit.framework.TestCase;
+import org.intellij.grammar.classinfo.ClassInfo;
+import org.intellij.grammar.classinfo.Fqn;
 import org.intellij.grammar.classinfo.JvmClassSymbolManager;
-import org.intellij.grammar.classinfo.MethodType;
 import org.intellij.grammar.classinfo.kotlin.KotlinSyntaxClassSymbolProvider;
 import org.intellij.grammar.java.JavaHelper;
 import org.intellij.grammar.java.JvmSyntaxHelper;
+import org.intellij.grammar.java.syntax.FixtureExtractor;
+import org.intellij.grammar.java.syntax.GoldenClassInfoTestCase;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Map;
 
 /**
- * Slow-path / source-layout scenarios for {@link KotlinSyntaxHelper}. Mirrors
- * {@code JavaSyntaxHelperSourceTest} for the Kotlin side: multiple top-level classes per file,
- * non-matching file names, file-class synthesis, and negative caching.
+ * Source-driven tests for the Kotlin side of the syntax-generation pipeline. Each test writes a
+ * small {@code .kt} fixture to a temp dir, then asks
+ * {@link KotlinSyntaxClassSymbolProvider} for the resulting {@code Map<Fqn, ClassInfo>} via
+ * {@link FixtureExtractor#extractAll} and compares it to a golden under
+ * {@code testData/syntax/kotlin/source/}. Helper-behaviour assertions (negative cache) keep their
+ * own checks.
  */
-public class KotlinSyntaxHelperSourceTest extends TestCase {
+public class KotlinSyntaxHelperSourceTest extends GoldenClassInfoTestCase {
 
   private Path root;
-  private JavaHelper helper;
+
+  @Override
+  protected @NotNull String goldenDir() {
+    return "syntax/kotlin/source";
+  }
 
   @Override
   protected void setUp() throws Exception {
@@ -57,10 +66,7 @@ public class KotlinSyntaxHelperSourceTest extends TestCase {
         class Alpha
         class Beta
         """);
-    NavigatablePsiElement alpha = helper().findClass("pkg.Alpha");
-    NavigatablePsiElement beta = helper().findClass("pkg.Beta");
-    assertNotNull("Alpha should be found via package scan", alpha);
-    assertNotNull("Beta should be found via package scan", beta);
+    assertClassInfoMatchesGolden(extractAll());
   }
 
   public void testFileClassSynthesisFromTopLevelFunction() throws Exception {
@@ -68,11 +74,7 @@ public class KotlinSyntaxHelperSourceTest extends TestCase {
         package util
         fun shout(s: String): String = s.uppercase()
         """);
-    NavigatablePsiElement fileClass = helper().findClass("util.StringsKt");
-    assertNotNull(fileClass);
-    List<NavigatablePsiElement> staticHelpers = helper.findClassMethods(
-      "util.StringsKt", MethodType.STATIC, "shout", -1);
-    assertEquals(1, staticHelpers.size());
+    assertClassInfoMatchesGolden(extractAll());
   }
 
   public void testFileClassNotSynthesisedWhenOnlyClassesDeclared() throws Exception {
@@ -80,14 +82,14 @@ public class KotlinSyntaxHelperSourceTest extends TestCase {
         package only
         class Plain
         """);
-    helper().findClass("only.Plain"); // warm cache
-    assertNull("No top-level callables → no <File>Kt class",
-               helper.findClass("only.NothingKt"));
+    assertClassInfoMatchesGolden(extractAll());
   }
 
-  public void testNegativeCacheMissReturnsNull() {
-    assertNull(helper().findClass("nowhere.Missing"));
-    // Second lookup: same answer, no exception (negative cache shouldn't double-scan).
+  public void testNegativeCacheMissReturnsNull() throws Exception {
+    // No fixture, no extraction: this is a pure helper-behaviour test verifying the negative cache
+    // short-circuits a second lookup of an unknown FQN.
+    JavaHelper helper = helper();
+    assertNull(helper.findClass("nowhere.Missing"));
     assertNull(helper.findClass("nowhere.Missing"));
   }
 
@@ -97,8 +99,7 @@ public class KotlinSyntaxHelperSourceTest extends TestCase {
         fun util(): String = ""
         class Other
         """);
-    assertNotNull(helper().findClass("mix.MixedKt"));
-    assertNotNull(helper.findClass("mix.Other"));
+    assertClassInfoMatchesGolden(extractAll());
   }
 
   public void testFileClassJvmNameRename() throws Exception {
@@ -107,13 +108,7 @@ public class KotlinSyntaxHelperSourceTest extends TestCase {
         package util
         fun shout(s: String): String = s.uppercase()
         """);
-    assertNotNull("Renamed file class should resolve under its @JvmName",
-                  helper().findClass("util.Utils"));
-    assertNull("Default <Stem>Kt name should not resolve once @file:JvmName overrides it",
-               helper.findClass("util.BarKt"));
-    List<NavigatablePsiElement> staticHelpers = helper.findClassMethods(
-      "util.Utils", MethodType.STATIC, "shout", -1);
-    assertEquals(1, staticHelpers.size());
+    assertClassInfoMatchesGolden(extractAll());
   }
 
   public void testFileClassJvmMultifileFacadeMergesAcrossFiles() throws Exception {
@@ -129,11 +124,7 @@ public class KotlinSyntaxHelperSourceTest extends TestCase {
         package util
         fun b(): String = "b"
         """);
-    assertNotNull(helper().findClass("util.Utils"));
-    assertEquals("a() should be on the merged facade",
-                 1, helper.findClassMethods("util.Utils", MethodType.STATIC, "a", -1).size());
-    assertEquals("b() should be on the merged facade",
-                 1, helper.findClassMethods("util.Utils", MethodType.STATIC, "b", -1).size());
+    assertClassInfoMatchesGolden(extractAll());
   }
 
   public void testFileClassJvmNameWithoutTopLevelCallablesDoesNotSynthesize() throws Exception {
@@ -142,32 +133,31 @@ public class KotlinSyntaxHelperSourceTest extends TestCase {
         package util
         class Bar
         """);
-    assertNotNull("Class declared in the file is still discoverable",
-                  helper().findClass("util.Bar"));
-    assertNull("No top-level fun/property → no file class even with @file:JvmName",
-               helper.findClass("util.Utils"));
+    assertClassInfoMatchesGolden(extractAll());
   }
 
   public void testInternalClassWithNonMatchingFileName() throws Exception {
-    // Kotlin freely allows a file's primary class name to differ from the file name. The fast
-    // path will miss; the slow-path package scan finds it.
+    // Kotlin allows a file's primary class name to differ from the file name.
     write("pkg/wrong.kt", """
         package pkg
         class RightlyNamed
         """);
-    NavigatablePsiElement clazz = helper().findClass("pkg.RightlyNamed");
-    assertNotNull(clazz);
+    assertClassInfoMatchesGolden(extractAll());
+  }
+
+  // ---------------------------------------------------------------------------------------------
+  // helpers
+  // ---------------------------------------------------------------------------------------------
+
+  private @NotNull Map<Fqn, ClassInfo> extractAll() {
+    return FixtureExtractor.extractAll(root, new KotlinSyntaxClassSymbolProvider(List.of(root)), ".kt");
   }
 
   private @NotNull JavaHelper helper() {
-    if (helper == null) {
-      helper = new JvmSyntaxHelper(new JvmClassSymbolManager(List.of(new KotlinSyntaxClassSymbolProvider(List.of(root)))));
-    }
-    return helper;
+    return new JvmSyntaxHelper(new JvmClassSymbolManager(List.of(new KotlinSyntaxClassSymbolProvider(List.of(root)))));
   }
 
-  private void write(@NotNull String relative,
-                     @NotNull String content) throws IOException {
+  private void write(@NotNull String relative, @NotNull String content) throws IOException {
     Path target = root.resolve(relative);
     Files.createDirectories(target.getParent());
     Files.writeString(target, content);

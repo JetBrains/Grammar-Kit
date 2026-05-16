@@ -179,6 +179,8 @@ tasks {
         isScanForTestClasses = false
         ignoreFailures = true
         dependsOn("testMain")
+        // Forward the override flag so golden-file tests can re-record without manual deletion.
+        systemProperty("grammar.kit.override.test.data", System.getProperty("grammar.kit.override.test.data") ?: "")
     }
 
     withType<Javadoc>().configureEach {

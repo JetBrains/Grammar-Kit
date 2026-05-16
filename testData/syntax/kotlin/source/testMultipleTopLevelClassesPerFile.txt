@@ -1,0 +1,7 @@
+class pkg.Alpha extends java.lang.Object
+  modifiers: public final
+  methods: (none)
+
+class pkg.Beta extends java.lang.Object
+  modifiers: public final
+  methods: (none)

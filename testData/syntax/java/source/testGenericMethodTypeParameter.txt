@@ -1,0 +1,5 @@
+class a.b.C extends java.lang.Object
+  modifiers: public
+  methods:
+    STATIC public static U cast(java.lang.Object o)
+      typeParameters: U

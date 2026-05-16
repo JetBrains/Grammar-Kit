@@ -1,0 +1,6 @@
+class a.b.Box extends java.lang.Object
+  modifiers: public final
+  typeParameters: T
+  methods:
+    CONSTRUCTOR public <init>(T value)
+    INSTANCE public T getValue()

@@ -1,0 +1,4 @@
+class a.b.ExtKt extends java.lang.Object
+  modifiers: public final
+  methods:
+    STATIC public static java.lang.String shouted(java.lang.String receiver)

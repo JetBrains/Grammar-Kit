@@ -1,0 +1,8 @@
+class mix.MixedKt extends java.lang.Object
+  modifiers: public final
+  methods:
+    STATIC public static java.lang.String util()
+
+class mix.Other extends java.lang.Object
+  modifiers: public final
+  methods: (none)

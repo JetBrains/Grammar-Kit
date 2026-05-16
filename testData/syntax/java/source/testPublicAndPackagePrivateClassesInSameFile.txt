@@ -1,0 +1,8 @@
+class a.b.Bundle extends java.lang.Object
+  modifiers: public
+  methods:
+    INSTANCE public a.b.Helper helper()
+
+class a.b.Helper extends java.lang.Object
+  methods:
+    INSTANCE public java.lang.String greet()

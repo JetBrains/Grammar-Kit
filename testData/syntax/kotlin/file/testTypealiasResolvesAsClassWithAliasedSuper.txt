@@ -1,0 +1,3 @@
+class a.b.Name extends java.lang.String
+  modifiers: public final
+  methods: (none)

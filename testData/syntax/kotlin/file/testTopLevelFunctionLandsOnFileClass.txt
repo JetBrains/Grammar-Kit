@@ -1,0 +1,4 @@
+class a.b.UtilKt extends java.lang.Object
+  modifiers: public final
+  methods:
+    STATIC public static java.lang.String helper()

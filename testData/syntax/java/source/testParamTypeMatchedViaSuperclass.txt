@@ -1,0 +1,12 @@
+class a.b.Base extends java.lang.Object
+  modifiers: public
+  methods: (none)
+
+class a.b.Child extends a.b.Base
+  modifiers: public
+  methods: (none)
+
+class a.b.Receiver extends java.lang.Object
+  modifiers: public
+  methods:
+    INSTANCE public void take(a.b.Base b)

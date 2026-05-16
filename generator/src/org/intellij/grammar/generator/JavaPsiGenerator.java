@@ -617,7 +617,7 @@ public final class JavaPsiGenerator extends Generator {
 
 
   /** Emits the public PSI interface for {@code rule}: super-interfaces (with stub-aware additions) and rule accessor signatures. */
-  private void generatePsiIntf(BnfRule rule, RuleInfo info) {
+  private void generatePsiIntf(@NotNull BnfRule rule, @NotNull RuleInfo info) {
     String psiClass = info.intfClass();
     String stubClass = info.stub();
     Collection<String> psiSupers = psiInfo(rule).superInterfaces;
@@ -785,8 +785,10 @@ public final class JavaPsiGenerator extends Generator {
     out("}");
   }
 
-  /** Emits accessor and util methods for {@code rule}'s PSI interface ({@code intf=true}) or impl ({@code intf=false}). */
-  private void generatePsiClassMethods(BnfRule rule, RuleInfo info, boolean intf) {
+  /**
+   * Emits accessor and util methods for {@code rule}'s PSI interface ({@code intf=true}) or impl ({@code intf=false}).
+   */
+  private void generatePsiClassMethods(@NotNull BnfRule rule, @NotNull RuleInfo info, boolean intf) {
     Set<String> visited = new TreeSet<>();
     boolean mixedAST = psiInfo(rule).mixedAST;
     for (RuleMethodsHelper.MethodInfo methodInfo : myRulesMethodsHelper.getFor(rule)) {
@@ -794,36 +796,47 @@ public final class JavaPsiGenerator extends Generator {
       switch (methodInfo.type) {
         case RULE, TOKEN -> generatePsiAccessor(rule, methodInfo, intf, mixedAST);
         case USER -> generateUserPsiAccessors(rule, methodInfo, intf, mixedAST);
-        case MIXIN -> {
-          boolean found = false;
-          if (intf) {
-            String mixinClass = getAttribute(rule, KnownAttribute.MIXIN);
-            List<NavigatablePsiElement> methods =
-              helperFor(rule, KnownAttribute.MIXIN).findClassMethods(mixinClass, MethodType.INSTANCE, methodInfo.name, -1);
-            for (NavigatablePsiElement method : methods) {
-              generateUtilMethod(methodInfo.name, method, true, false, visited);
-              found = true;
-            }
-          }
-          List<NavigatablePsiElement> methods = helperFor(null, KnownAttribute.PSI_IMPL_UTIL_CLASS).findRuleImplMethods(myPsiImplUtilClass, methodInfo.name, rule);
-          for (NavigatablePsiElement method : methods) {
-            generateUtilMethod(methodInfo.name, method, intf, true, visited);
-            found = true;
-          }
-          if (intf && !found) {
-            String ruleClassName = shorten(info.intfClass());
-            String implClassName = StringUtil.getShortName(String.valueOf(myPsiImplUtilClass));
-            out("""
-                  //WARNING: %s(...) is skipped
-                  //matching %s(%s, ...)
-                  //methods are not found in %s""",
-                methodInfo.name, methodInfo.name, ruleClassName, implClassName);
-            newLine();
-            addWarning(format("%s.%s(%s, ...) method not found", implClassName, methodInfo.name, ruleClassName));
-          }
-        }
+        case MIXIN -> generateMixinMethod(rule, methodInfo, intf, info, visited);
         default -> throw new AssertionError(methodInfo.toString());
       }
+    }
+  }
+
+  private void generateMixinMethod(@NotNull BnfRule rule,
+                                   @NotNull RuleMethodsHelper.MethodInfo methodInfo,
+                                   boolean intf,
+                                   @NotNull RuleInfo info,
+                                   @NotNull Set<String> visited) {
+    boolean isGenerated = false;
+
+    if (intf) {
+      JavaHelper mixinHelper = helperFor(rule, KnownAttribute.MIXIN);
+      String mixinClass = getAttribute(rule, KnownAttribute.MIXIN);
+      List<NavigatablePsiElement> methods = mixinHelper.findClassMethods(mixinClass, MethodType.INSTANCE, methodInfo.name, -1);
+
+      for (NavigatablePsiElement method : methods) {
+        generateUtilMethod(methodInfo.name, method, true, false, visited);
+        isGenerated = true;
+      }
+    }
+
+    JavaHelper psiImplUtilHelper = helperFor(null, KnownAttribute.PSI_IMPL_UTIL_CLASS);
+    List<NavigatablePsiElement> methods = psiImplUtilHelper.findRuleImplMethods(myPsiImplUtilClass, methodInfo.name, rule);
+    for (NavigatablePsiElement method : methods) {
+      generateUtilMethod(methodInfo.name, method, intf, true, visited);
+      isGenerated = true;
+    }
+
+    if (intf && !isGenerated) {
+      String ruleClassName = shorten(info.intfClass());
+      String implClassName = StringUtil.getShortName(String.valueOf(myPsiImplUtilClass));
+      out("""
+            //WARNING: %s(...) is skipped
+            //matching %s(%s, ...)
+            //methods are not found in %s""",
+          methodInfo.name, methodInfo.name, ruleClassName, implClassName);
+      newLine();
+      addWarning(format("%s.%s(%s, ...) method not found", implClassName, methodInfo.name, ruleClassName));
     }
   }
 

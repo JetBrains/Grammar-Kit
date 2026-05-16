@@ -227,13 +227,6 @@ final class PsiHelper extends JvmSyntaxHelper {
   }
 
   @Override
-  public @NotNull String getDeclaringClass(@Nullable NavigatablePsiElement method) {
-    if (!(method instanceof PsiMethod psiMethod)) return super.getDeclaringClass(method);
-    PsiClass aClass = psiMethod.getContainingClass();
-    return aClass == null ? "" : StringUtil.notNullize(aClass.getQualifiedName());
-  }
-
-  @Override
   public @NotNull List<String> getAnnotations(NavigatablePsiElement element) {
     if (!(element instanceof PsiModifierListOwner)) return super.getAnnotations(element);
     return getAnnotationsInner((PsiModifierListOwner)element);

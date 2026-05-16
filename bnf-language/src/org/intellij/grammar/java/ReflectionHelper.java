@@ -159,12 +159,6 @@ public class ReflectionHelper extends JavaHelper {
   }
 
   @Override
-  public @NotNull String getDeclaringClass(@Nullable NavigatablePsiElement method) {
-    if (method == null) return "";
-    return ((MyElement<Method>)method).delegate.getDeclaringClass().getName();
-  }
-
-  @Override
   public @NotNull List<String> getAnnotations(NavigatablePsiElement element) {
     if (element == null) return Collections.emptyList();
     AnnotatedElement delegate = ((MyElement<AnnotatedElement>)element).delegate;

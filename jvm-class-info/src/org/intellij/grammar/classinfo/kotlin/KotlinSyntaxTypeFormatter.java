@@ -11,7 +11,7 @@ import fleet.org.jetbrains.kotlin.kmp.lexer.KtTokens;
 import fleet.org.jetbrains.kotlin.kmp.parser.KtNodeTypes;
 import org.intellij.grammar.classinfo.ClassInfo;
 import org.intellij.grammar.classinfo.Fqn;
-import org.intellij.grammar.classinfo.MethodInfo;
+import org.intellij.grammar.classinfo.MethodSymbol;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -24,7 +24,7 @@ import static org.intellij.grammar.classinfo.SyntaxTreeUtil.firstChildOfType;
 /**
  * Renders Kotlin {@link SyntaxNode} type expressions ({@code TYPE_REFERENCE} / {@code USER_TYPE} /
  * {@code NULLABLE_TYPE} / {@code FUNCTION_TYPE}) into the dotted-FQN string form that
- * {@link ClassInfo} / {@link MethodInfo} consumers expect.
+ * {@link ClassInfo} / {@link MethodSymbol} consumers expect.
  * <p>
  * Kotlin built-in primitives are mapped to JVM primitives so structural parameter-type matching
  * across Java and Kotlin sources agrees on the same canonical names.

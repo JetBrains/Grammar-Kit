@@ -11,7 +11,7 @@ import com.intellij.util.containers.ContainerUtil;
 import org.intellij.grammar.classinfo.ClassInfo;
 import org.intellij.grammar.classinfo.Fqn;
 import org.intellij.grammar.classinfo.JvmClassSymbolProvider;
-import org.intellij.grammar.classinfo.MethodInfo;
+import org.intellij.grammar.classinfo.MethodSymbol;
 import org.intellij.grammar.classinfo.MethodType;
 import org.intellij.grammar.classinfo.SymbolResolver;
 import org.intellij.grammar.classinfo.TypeParameterInfo;
@@ -97,26 +97,26 @@ public final class AsmClassSymbolProvider implements JvmClassSymbolProvider {
     return info;
   }
 
-  private static MethodInfo getMethodInfo(Fqn className, String methodName, String signature, String[] exceptions) {
-    MethodInfo methodInfo = new MethodInfo();
-    methodInfo.name = methodName;
-    methodInfo.declaringClass = className;
+  private static MethodSymbol getMethodInfo(Fqn className, String methodName, String signature, String[] exceptions) {
+    MethodSymbol method = new MethodSymbol();
+    method.name = methodName;
+    method.declaringClass = className;
 
     try {
-      MySignatureVisitor visitor = new MySignatureVisitor(methodInfo);
+      MySignatureVisitor visitor = new MySignatureVisitor(method);
       new SignatureReader(signature).accept(visitor);
       visitor.finishElement(null);
 
       if (exceptions != null) {
         for (String exception : exceptions) {
-          methodInfo.exceptions.add(Fqn.fromBytecode(exception));
+          method.exceptions.add(Fqn.fromBytecode(exception));
         }
       }
     }
     catch (Exception e) {
       reportException(e, className + "#" + methodName + "()", signature);
     }
-    return methodInfo;
+    return method;
   }
 
   private static void reportException(Exception e, String target, String signature) {
@@ -170,7 +170,7 @@ public final class AsmClassSymbolProvider implements JvmClassSymbolProvider {
                                      String desc,
                                      String signature,
                                      String[] exceptions) {
-      MethodInfo m = getMethodInfo(myInfo.name, name, ObjectUtils.chooseNotNull(signature, desc), exceptions);
+      MethodSymbol m = getMethodInfo(myInfo.name, name, ObjectUtils.chooseNotNull(signature, desc), exceptions);
       m.modifiers = access;
       m.methodType = "<init>".equals(name) ? MethodType.CONSTRUCTOR :
                      Modifier.isStatic(access) ? MethodType.STATIC :
@@ -310,7 +310,7 @@ public final class AsmClassSymbolProvider implements JvmClassSymbolProvider {
   }
 
   private static class MySignatureVisitor extends SignatureVisitor {
-    final MethodInfo methodInfo;
+    final MethodSymbol method;
     final Deque<State> states = new ArrayDeque<>();
 
     /**
@@ -318,15 +318,15 @@ public final class AsmClassSymbolProvider implements JvmClassSymbolProvider {
      */
     final StringBuilder sb = new StringBuilder();
 
-    MySignatureVisitor(MethodInfo methodInfo) {
+    MySignatureVisitor(MethodSymbol method) {
       super(ASM_OPCODES);
-      this.methodInfo = methodInfo;
+      this.method = method;
     }
 
     @Override
     public void visitFormalTypeParameter(String s) {
       finishElement(null);
-      methodInfo.generics.add(new TypeParameterInfo(s));
+      method.generics.add(new TypeParameterInfo(s));
     }
 
     @Override
@@ -448,11 +448,11 @@ public final class AsmClassSymbolProvider implements JvmClassSymbolProvider {
         State state = states.pop();
         switch (state) {
           case PARAM:
-            methodInfo.types.add(sb());
-            methodInfo.types.add("p" + (methodInfo.types.size() / 2));
+            method.types.add(sb());
+            method.types.add("p" + (method.types.size() / 2));
             break main;
           case RETURN:
-            methodInfo.types.add(0, sb());
+            method.types.add(0, sb());
             break main;
           case ARRAY:
             sb.append("[]");
@@ -463,7 +463,7 @@ public final class AsmClassSymbolProvider implements JvmClassSymbolProvider {
           case BOUNDS:
             String bound = sb();
             if (!"java.lang.Object".equals(bound)) {
-              TypeParameterInfo currentGeneric = ContainerUtil.getLastItem(methodInfo.generics);
+              TypeParameterInfo currentGeneric = ContainerUtil.getLastItem(method.generics);
               if (currentGeneric != null) {
                 currentGeneric.getExtendsList().add(bound);
               }
@@ -473,7 +473,7 @@ public final class AsmClassSymbolProvider implements JvmClassSymbolProvider {
             }
             break;
           case EXCEPTION:
-            methodInfo.exceptions.add(Fqn.of(sb()));
+            method.exceptions.add(Fqn.of(sb()));
             break;
           case CLASS:
             break;

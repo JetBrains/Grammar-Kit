@@ -8,7 +8,7 @@ import com.intellij.psi.NavigatablePsiElement;
 import com.intellij.util.containers.ContainerUtil;
 import org.intellij.grammar.classinfo.ClassInfo;
 import org.intellij.grammar.classinfo.Fqn;
-import org.intellij.grammar.classinfo.MethodInfo;
+import org.intellij.grammar.classinfo.MethodSymbol;
 import org.intellij.grammar.classinfo.TypeParameterInfo;
 import org.intellij.grammar.generator.java.JavaNames;
 import org.jetbrains.annotations.NotNull;
@@ -23,7 +23,7 @@ import java.util.function.Function;
 
 /**
  * Read-only helpers shared by every {@link JavaHelper} that returns {@link MyElement}-wrapped
- * {@link ClassInfo} / {@link MethodInfo} records (currently {@link AsmHelper} and the
+ * {@link ClassInfo} / {@link MethodSymbol} records (currently {@link AsmHelper} and the
  * {@code JavaSyntaxHelper} in the {@code syntax} subpackage). Each method unwraps the
  * {@link MyElement} delegate and surfaces the field the {@link JavaHelper} contract expects, so
  * the helpers themselves can keep their override methods to one line each.
@@ -35,47 +35,47 @@ public final class ClassInfoUtil {
   public static boolean isPublic(@Nullable NavigatablePsiElement element) {
     Object delegate = delegateOf(element);
     int access = delegate instanceof ClassInfo ? ((ClassInfo)delegate).modifiers :
-                 delegate instanceof MethodInfo ? ((MethodInfo)delegate).modifiers :
+                 delegate instanceof MethodSymbol ? ((MethodSymbol)delegate).modifiers :
                  0;
     return Modifier.isPublic(access);
   }
 
   public static @NotNull List<String> getMethodTypes(@Nullable NavigatablePsiElement method) {
     Object delegate = delegateOf(method);
-    return delegate instanceof MethodInfo ? ((MethodInfo)delegate).annotatedTypes
+    return delegate instanceof MethodSymbol ? ((MethodSymbol)delegate).annotatedTypes
                                           : Collections.emptyList();
   }
 
   public static @NotNull List<TypeParameterInfo> getGenericParameters(@Nullable NavigatablePsiElement method) {
     Object delegate = delegateOf(method);
-    return delegate instanceof MethodInfo ? ((MethodInfo)delegate).generics
+    return delegate instanceof MethodSymbol ? ((MethodSymbol)delegate).generics
                                           : Collections.emptyList();
   }
 
   public static @NotNull List<String> getExceptionList(@Nullable NavigatablePsiElement method) {
     Object delegate = delegateOf(method);
-    return delegate instanceof MethodInfo ? ContainerUtil.map(((MethodInfo)delegate).exceptions, Fqn::value)
+    return delegate instanceof MethodSymbol ? ContainerUtil.map(((MethodSymbol)delegate).exceptions, Fqn::value)
                                           : Collections.emptyList();
   }
 
   public static @NotNull String getDeclaringClass(@Nullable NavigatablePsiElement method) {
     Object delegate = delegateOf(method);
-    if (!(delegate instanceof MethodInfo)) return "";
-    Fqn declaring = ((MethodInfo)delegate).declaringClass;
+    if (!(delegate instanceof MethodSymbol)) return "";
+    Fqn declaring = ((MethodSymbol)delegate).declaringClass;
     return declaring == null ? "" : declaring.value();
   }
 
   public static @NotNull List<String> getAnnotations(@Nullable NavigatablePsiElement element) {
     Object delegate = delegateOf(element);
     if (delegate instanceof ClassInfo) return ContainerUtil.map(((ClassInfo)delegate).annotations, Fqn::value);
-    if (delegate instanceof MethodInfo) return ContainerUtil.map(((MethodInfo)delegate).annotations.get(0), Fqn::value);
+    if (delegate instanceof MethodSymbol) return ContainerUtil.map(((MethodSymbol)delegate).annotations.get(0), Fqn::value);
     return Collections.emptyList();
   }
 
   public static @NotNull List<String> getParameterAnnotations(@Nullable NavigatablePsiElement method, int paramIndex) {
     Object delegate = delegateOf(method);
-    if (!(delegate instanceof MethodInfo)) return Collections.emptyList();
-    Map<Integer, List<Fqn>> annotations = ((MethodInfo)delegate).annotations;
+    if (!(delegate instanceof MethodSymbol)) return Collections.emptyList();
+    Map<Integer, List<Fqn>> annotations = ((MethodSymbol)delegate).annotations;
     if (paramIndex < 0 || paramIndex >= annotations.size()) return Collections.emptyList();
     List<Fqn> result = annotations.get(paramIndex + 1);
     return result == null ? Collections.emptyList() : ContainerUtil.map(result, Fqn::value);
@@ -90,7 +90,7 @@ public final class ClassInfoUtil {
    * skips the arity check; an empty {@code paramTypes} accepts any parameter list.
    */
   @SuppressWarnings("BooleanMethodIsAlwaysInverted")
-  public static boolean acceptsParams(@NotNull MethodInfo method,
+  public static boolean acceptsParams(@NotNull MethodSymbol method,
                                       int paramCount,
                                       @NotNull String[] paramTypes,
                                       @NotNull Function<String, ClassInfo> classLookup) {

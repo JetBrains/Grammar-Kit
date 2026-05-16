@@ -9,7 +9,7 @@ import com.intellij.util.SmartList;
 import org.intellij.grammar.classinfo.ClassInfo;
 import org.intellij.grammar.classinfo.Fqn;
 import org.intellij.grammar.classinfo.JvmClassSymbolManager;
-import org.intellij.grammar.classinfo.MethodInfo;
+import org.intellij.grammar.classinfo.MethodSymbol;
 import org.intellij.grammar.classinfo.MethodType;
 import org.intellij.grammar.classinfo.TypeParameterInfo;
 import org.jetbrains.annotations.NotNull;
@@ -57,7 +57,7 @@ public class JvmSyntaxHelper extends JavaHelper {
     ClassInfo aClass = manager.findClass(Fqn.ofNullable(className));
     if (aClass == null || methodName == null) return Collections.emptyList();
     List<NavigatablePsiElement> result = new SmartList<>();
-    for (MethodInfo method : aClass.methods) {
+    for (MethodSymbol method : aClass.methods) {
       if (!acceptsName(methodName, method.name)) continue;
       if (method.methodType != methodType) continue;
       if (!acceptsModifiers(method.modifiers, methodType, allowAbstract)) continue;

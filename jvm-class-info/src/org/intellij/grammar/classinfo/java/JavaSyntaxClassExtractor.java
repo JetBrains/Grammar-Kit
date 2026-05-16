@@ -9,7 +9,7 @@ import com.intellij.platform.syntax.SyntaxElementType;
 import com.intellij.platform.syntax.tree.SyntaxNode;
 import org.intellij.grammar.classinfo.ClassInfo;
 import org.intellij.grammar.classinfo.Fqn;
-import org.intellij.grammar.classinfo.MethodInfo;
+import org.intellij.grammar.classinfo.MethodSymbol;
 import org.intellij.grammar.classinfo.SymbolResolver;
 import org.jetbrains.annotations.NotNull;
 
@@ -40,7 +40,7 @@ import static org.intellij.grammar.classinfo.java.JavaSyntaxNodes.typeParameterN
  *   <li>{@link JavaSyntaxImportContext} — file-level package + imports + name resolution.</li>
  *   <li>{@link JavaSyntaxTypeFormatter} — renders {@code TYPE}/{@code JAVA_CODE_REFERENCE} nodes
  *       and annotations into dotted-FQN strings.</li>
- *   <li>{@link JavaSyntaxMethodExtractor} — builds {@link MethodInfo} records for method nodes.</li>
+ *   <li>{@link JavaSyntaxMethodExtractor} — builds {@link MethodSymbol} records for method nodes.</li>
  *   <li>{@link JavaSyntaxNodes} — static tree-navigation helpers.</li>
  * </ul>
  *
@@ -126,7 +126,7 @@ public final class JavaSyntaxClassExtractor {
     for (SyntaxNode member = classNode.firstChild(); member != null; member = member.nextSibling()) {
       SyntaxElementType t = member.getType();
       if (t == JavaSyntaxElementType.METHOD || t == JavaSyntaxElementType.ANNOTATION_METHOD) {
-        MethodInfo m = methodExtractor.extract(member, fqn, classTypeVars);
+        MethodSymbol m = methodExtractor.extract(member, fqn, classTypeVars);
         if (m != null) info.methods.add(m);
       }
       else if (t == JavaSyntaxElementType.CLASS) {

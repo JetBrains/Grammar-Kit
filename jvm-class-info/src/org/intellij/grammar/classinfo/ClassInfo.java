@@ -12,7 +12,7 @@ public class ClassInfo {
   public final List<String> typeParameters = new SmartList<>();
   public final List<Fqn> interfaces = new SmartList<>();
   public final List<Fqn> annotations = new SmartList<>();
-  public final List<MethodInfo> methods = new SmartList<>();
+  public final List<MethodSymbol> methods = new SmartList<>();
   public Fqn name;
   public Fqn superClass;
   public int modifiers;

@@ -6,7 +6,7 @@ package org.intellij.grammar.java.syntax;
 
 import org.intellij.grammar.classinfo.ClassInfo;
 import org.intellij.grammar.classinfo.Fqn;
-import org.intellij.grammar.classinfo.MethodInfo;
+import org.intellij.grammar.classinfo.MethodSymbol;
 import org.intellij.grammar.classinfo.MethodType;
 import org.intellij.grammar.classinfo.TypeParameterInfo;
 import org.jetbrains.annotations.NotNull;
@@ -73,13 +73,13 @@ public final class ClassInfoTextFormatter {
     }
     else {
       sb.append("  methods:\n");
-      for (MethodInfo m : info.methods) {
+      for (MethodSymbol m : info.methods) {
         appendMethod(sb, m);
       }
     }
   }
 
-  private static void appendMethod(@NotNull StringBuilder sb, @NotNull MethodInfo m) {
+  private static void appendMethod(@NotNull StringBuilder sb, @NotNull MethodSymbol m) {
     sb.append("    ").append(m.methodType).append(' ');
     String mods = modifiersToString(m.modifiers);
     if (!mods.isEmpty()) sb.append(mods).append(' ');
@@ -125,7 +125,7 @@ public final class ClassInfoTextFormatter {
     }
   }
 
-  private static void appendParams(@NotNull StringBuilder sb, @NotNull MethodInfo m) {
+  private static void appendParams(@NotNull StringBuilder sb, @NotNull MethodSymbol m) {
     // m.types layout: [returnType, paramType1, paramName1, paramType2, paramName2, ...]
     int n = m.types.size();
     boolean first = true;

@@ -1,0 +1,6 @@
+class util.Utils extends java.lang.Object
+  modifiers: public final
+  multifileFacade
+  methods:
+    STATIC public static java.lang.String b()
+    STATIC public static java.lang.String a()

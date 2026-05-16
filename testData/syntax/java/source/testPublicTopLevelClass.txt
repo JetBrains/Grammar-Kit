@@ -1,0 +1,3 @@
+class a.b.Foo extends a.b.Base
+  modifiers: public
+  methods: (none)

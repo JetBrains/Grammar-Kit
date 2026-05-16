@@ -1,0 +1,7 @@
+class a.b.Holder extends a.b.Iface
+  modifiers: public final
+  methods: (none)
+
+class a.b.Iface
+  modifiers: public abstract interface
+  methods: (none)

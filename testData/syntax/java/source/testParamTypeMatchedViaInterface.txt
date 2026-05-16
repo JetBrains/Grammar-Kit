@@ -1,0 +1,12 @@
+class a.b.Child extends java.lang.Object implements a.b.Iface
+  modifiers: public
+  methods: (none)
+
+class a.b.Iface
+  modifiers: public abstract interface
+  methods: (none)
+
+class a.b.Receiver extends java.lang.Object
+  modifiers: public
+  methods:
+    INSTANCE public void take(a.b.Iface i)

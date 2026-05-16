@@ -1,0 +1,5 @@
+class a.b.C extends java.lang.Object
+  modifiers: public
+  methods:
+    INSTANCE public java.lang.String toString()
+      annotations: @java.lang.Override

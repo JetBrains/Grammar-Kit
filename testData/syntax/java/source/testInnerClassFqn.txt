@@ -1,0 +1,8 @@
+class a.b.Outer extends java.lang.Object
+  modifiers: public
+  methods: (none)
+
+class a.b.Outer.Inner extends java.lang.Object
+  modifiers: public static
+  methods:
+    INSTANCE public java.lang.String inside()

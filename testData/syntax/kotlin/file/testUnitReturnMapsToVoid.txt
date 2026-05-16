@@ -1,0 +1,5 @@
+class a.b.Noisy extends java.lang.Object
+  modifiers: public final
+  methods:
+    INSTANCE public void shout()
+    INSTANCE public void whisper()

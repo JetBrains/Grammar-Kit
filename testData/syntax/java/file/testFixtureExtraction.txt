@@ -1,0 +1,41 @@
+class a.b.Base extends java.lang.Object
+  modifiers: public
+  methods:
+    INSTANCE public void baseMethod()
+
+class a.b.Bundle extends java.lang.Object
+  modifiers: public
+  methods:
+    INSTANCE public a.b.Helper helper()
+
+class a.b.Helper extends java.lang.Object
+  methods:
+    INSTANCE public java.lang.String greet()
+    INSTANCE public Helper.Nested nest()
+
+class a.b.Helper.Nested extends java.lang.Object
+  modifiers: static
+  methods: (none)
+
+class a.b.Iface
+  modifiers: public abstract interface
+  methods: (none)
+
+class a.b.MyClass extends a.b.Base implements a.b.Iface, a.b.Other
+  modifiers: public
+  annotations: @java.lang.Deprecated
+  typeParameters: T
+  methods:
+    CONSTRUCTOR public MyClass(int seed)
+    INSTANCE public java.util.List<java.lang.String> doStuff(int count, java.util.Map<java.lang.String, T> data)
+      annotations: @java.lang.Override
+      param[0] annotations: @a.b.Marker
+      throws: java.io.IOException
+    STATIC public static U cast(java.lang.Object o)
+      typeParameters: U
+
+class a.b.MyClass.Inner extends java.lang.Object implements java.lang.Cloneable
+  modifiers: public static
+  methods:
+    CONSTRUCTOR public Inner()
+    INSTANCE public java.lang.String inside()

@@ -4,32 +4,32 @@
 
 package org.intellij.grammar.java.syntax.kotlin;
 
-import com.intellij.psi.NavigatablePsiElement;
-import junit.framework.TestCase;
 import org.intellij.grammar.classinfo.ClassInfo;
-import org.intellij.grammar.classinfo.JvmClassSymbolManager;
-import org.intellij.grammar.classinfo.MethodType;
+import org.intellij.grammar.classinfo.Fqn;
 import org.intellij.grammar.classinfo.kotlin.KotlinSyntaxClassSymbolProvider;
-import org.intellij.grammar.java.JavaHelper;
-import org.intellij.grammar.java.JvmSyntaxHelper;
-import org.intellij.grammar.java.MyElement;
+import org.intellij.grammar.java.syntax.FixtureExtractor;
+import org.intellij.grammar.java.syntax.GoldenClassInfoTestCase;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
-import java.lang.reflect.Modifier;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Map;
 
 /**
- * Integration tests for {@link KotlinSyntaxHelper}: writes a fixture source root with real
- * {@code .kt} files and exercises the full parse → extract → lookup pipeline against the public
- * {@link JavaHelper} API. Pure JUnit, no IDE harness.
+ * File-system integration tests for the Kotlin syntax-generation pipeline. Each test writes its
+ * own {@code .kt} fixture and compares the full extraction
+ * {@code Map<Fqn, ClassInfo>} against a golden under {@code testData/syntax/kotlin/file/}.
  */
-public class KotlinSyntaxHelperTest extends TestCase {
+public class KotlinSyntaxHelperTest extends GoldenClassInfoTestCase {
 
   private Path root;
-  private JavaHelper helper;
+
+  @Override
+  protected @NotNull String goldenDir() {
+    return "syntax/kotlin/file";
+  }
 
   @Override
   protected void setUp() throws Exception {
@@ -57,10 +57,7 @@ public class KotlinSyntaxHelperTest extends TestCase {
         package a.b
         class Simple
         """);
-    NavigatablePsiElement clazz = helper().findClass("a.b.Simple");
-    assertNotNull(clazz);
-    assertTrue(helper.isPublic(clazz));
-    assertEquals("java.lang.Object", helper.getSuperClassName("a.b.Simple"));
+    assertClassInfoMatchesGolden(extractAll());
   }
 
   public void testInterfacePopulated() throws Exception {
@@ -69,10 +66,7 @@ public class KotlinSyntaxHelperTest extends TestCase {
         class Holder : Iface
         interface Iface
         """);
-    NavigatablePsiElement iface = helper().findClass("a.b.Iface");
-    assertNotNull(iface);
-    NavigatablePsiElement clazz = helper.findClass("a.b.Holder");
-    assertNotNull(clazz);
+    assertClassInfoMatchesGolden(extractAll());
   }
 
   public void testKotlinClassFinalByDefault() throws Exception {
@@ -80,10 +74,7 @@ public class KotlinSyntaxHelperTest extends TestCase {
         package a.b
         class Plain
         """);
-    helper().findClass("a.b.Plain"); // warm cache
-    // The class is reachable; finality is encoded on its ClassInfo.modifiers.
-    int mods = lookupModifiers("a.b.Plain");
-    assertTrue("class should be final by default", Modifier.isFinal(mods));
+    assertClassInfoMatchesGolden(extractAll());
   }
 
   public void testOpenClass() throws Exception {
@@ -91,9 +82,7 @@ public class KotlinSyntaxHelperTest extends TestCase {
         package a.b
         open class Open
         """);
-    helper().findClass("a.b.Open");
-    int mods = lookupModifiers("a.b.Open");
-    assertFalse("open class should not be final", Modifier.isFinal(mods));
+    assertClassInfoMatchesGolden(extractAll());
   }
 
   public void testAbstractClass() throws Exception {
@@ -101,10 +90,7 @@ public class KotlinSyntaxHelperTest extends TestCase {
         package a.b
         abstract class Abs
         """);
-    helper().findClass("a.b.Abs");
-    int mods = lookupModifiers("a.b.Abs");
-    assertTrue(Modifier.isAbstract(mods));
-    assertFalse(Modifier.isFinal(mods));
+    assertClassInfoMatchesGolden(extractAll());
   }
 
   public void testInterfaceFlags() throws Exception {
@@ -112,10 +98,7 @@ public class KotlinSyntaxHelperTest extends TestCase {
         package a.b
         interface Iface
         """);
-    helper().findClass("a.b.Iface");
-    int mods = lookupModifiers("a.b.Iface");
-    assertTrue(Modifier.isInterface(mods));
-    assertTrue(Modifier.isAbstract(mods));
+    assertClassInfoMatchesGolden(extractAll());
   }
 
   public void testNestedClassIsStatic() throws Exception {
@@ -126,13 +109,7 @@ public class KotlinSyntaxHelperTest extends TestCase {
             inner class Inner
         }
         """);
-    helper().findClass("a.b.Outer.Nested");
-    int nestedMods = lookupModifiers("a.b.Outer.Nested");
-    assertTrue("nested class without `inner` should be JVM-static", Modifier.isStatic(nestedMods));
-
-    helper.findClass("a.b.Outer.Inner");
-    int innerMods = lookupModifiers("a.b.Outer.Inner");
-    assertFalse("inner class should not be JVM-static", Modifier.isStatic(innerMods));
+    assertClassInfoMatchesGolden(extractAll());
   }
 
   public void testPrimaryConstructorAndPropertyAccessors() throws Exception {
@@ -140,28 +117,7 @@ public class KotlinSyntaxHelperTest extends TestCase {
         package a.b
         class Person(val name: String, var age: Int)
         """);
-    helper().findClass("a.b.Person");
-    List<NavigatablePsiElement> ctors = helper.findClassMethods(
-      "a.b.Person", MethodType.CONSTRUCTOR, "<init>", -1);
-    assertEquals(1, ctors.size());
-
-    List<NavigatablePsiElement> getName = helper.findClassMethods(
-      "a.b.Person", MethodType.INSTANCE, "getName", -1);
-    assertEquals(1, getName.size());
-
-    List<NavigatablePsiElement> getAge = helper.findClassMethods(
-      "a.b.Person", MethodType.INSTANCE, "getAge", -1);
-    assertEquals(1, getAge.size());
-
-    // val → no setter
-    List<NavigatablePsiElement> setName = helper.findClassMethods(
-      "a.b.Person", MethodType.INSTANCE, "setName", -1);
-    assertTrue(setName.isEmpty());
-
-    // var → setter
-    List<NavigatablePsiElement> setAge = helper.findClassMethods(
-      "a.b.Person", MethodType.INSTANCE, "setAge", -1);
-    assertEquals(1, setAge.size());
+    assertClassInfoMatchesGolden(extractAll());
   }
 
   public void testMemberFunctionSignature() throws Exception {
@@ -171,14 +127,7 @@ public class KotlinSyntaxHelperTest extends TestCase {
             fun greet(name: String): String = "Hi"
         }
         """);
-    helper().findClass("a.b.Greeter");
-    List<NavigatablePsiElement> ms = helper.findClassMethods(
-      "a.b.Greeter", MethodType.INSTANCE, "greet", -1);
-    assertEquals(1, ms.size());
-    List<String> types = helper.getMethodTypes(ms.get(0));
-    assertEquals("java.lang.String", types.get(0));
-    assertEquals("java.lang.String", types.get(1));
-    assertEquals("name", types.get(2));
+    assertClassInfoMatchesGolden(extractAll());
   }
 
   public void testIntMapsToJvmPrimitive() throws Exception {
@@ -188,13 +137,7 @@ public class KotlinSyntaxHelperTest extends TestCase {
             fun bump(by: Int): Int = by + 1
         }
         """);
-    helper().findClass("a.b.Counter");
-    List<NavigatablePsiElement> ms = helper.findClassMethods(
-      "a.b.Counter", MethodType.INSTANCE, "bump", -1);
-    assertEquals(1, ms.size());
-    List<String> types = helper.getMethodTypes(ms.get(0));
-    assertEquals("int", types.get(0));
-    assertEquals("int", types.get(1));
+    assertClassInfoMatchesGolden(extractAll());
   }
 
   public void testUnitReturnMapsToVoid() throws Exception {
@@ -205,15 +148,7 @@ public class KotlinSyntaxHelperTest extends TestCase {
             fun whisper() {}
         }
         """);
-    helper().findClass("a.b.Noisy");
-    List<NavigatablePsiElement> ms = helper.findClassMethods(
-      "a.b.Noisy", MethodType.INSTANCE, "shout", -1);
-    assertEquals(1, ms.size());
-    assertEquals("void", helper.getMethodTypes(ms.get(0)).get(0));
-    List<NavigatablePsiElement> implicit = helper.findClassMethods(
-      "a.b.Noisy", MethodType.INSTANCE, "whisper", -1);
-    assertEquals(1, implicit.size());
-    assertEquals("void", helper.getMethodTypes(implicit.get(0)).get(0));
+    assertClassInfoMatchesGolden(extractAll());
   }
 
   public void testTopLevelFunctionLandsOnFileClass() throws Exception {
@@ -221,11 +156,7 @@ public class KotlinSyntaxHelperTest extends TestCase {
         package a.b
         fun helper(): String = ""
         """);
-    NavigatablePsiElement fileClass = helper().findClass("a.b.UtilKt");
-    assertNotNull(fileClass);
-    List<NavigatablePsiElement> ms = helper.findClassMethods(
-      "a.b.UtilKt", MethodType.STATIC, "helper", -1);
-    assertEquals(1, ms.size());
+    assertClassInfoMatchesGolden(extractAll());
   }
 
   public void testExtensionFunctionReceiverBecomesFirstParam() throws Exception {
@@ -233,14 +164,7 @@ public class KotlinSyntaxHelperTest extends TestCase {
         package a.b
         fun String.shouted(): String = uppercase()
         """);
-    helper().findClass("a.b.ExtKt");
-    List<NavigatablePsiElement> ms = helper.findClassMethods(
-      "a.b.ExtKt", MethodType.STATIC, "shouted", -1);
-    assertEquals(1, ms.size());
-    List<String> types = helper.getMethodTypes(ms.get(0));
-    assertEquals("java.lang.String", types.get(0)); // return
-    assertEquals("java.lang.String", types.get(1)); // receiver
-    assertEquals("receiver", types.get(2));
+    assertClassInfoMatchesGolden(extractAll());
   }
 
   public void testObjectDeclaration() throws Exception {
@@ -250,12 +174,7 @@ public class KotlinSyntaxHelperTest extends TestCase {
             fun foo(): Int = 1
         }
         """);
-    helper().findClass("a.b.Single");
-    int mods = lookupModifiers("a.b.Single");
-    assertTrue(Modifier.isFinal(mods));
-    List<NavigatablePsiElement> ms = helper.findClassMethods(
-      "a.b.Single", MethodType.INSTANCE, "foo", -1);
-    assertEquals(1, ms.size());
+    assertClassInfoMatchesGolden(extractAll());
   }
 
   public void testCompanionExposesJvmStatic() throws Exception {
@@ -269,21 +188,7 @@ public class KotlinSyntaxHelperTest extends TestCase {
             }
         }
         """);
-    helper().findClass("a.b.Holder.Companion");
-    // Companion's own ClassInfo carries instance-level methods.
-    List<NavigatablePsiElement> companion = helper.findClassMethods(
-      "a.b.Holder.Companion", MethodType.INSTANCE, "staticHelper", -1);
-    assertEquals(1, companion.size());
-
-    // @JvmStatic-annotated members are lifted as static on the enclosing class.
-    List<NavigatablePsiElement> lifted = helper.findClassMethods(
-      "a.b.Holder", MethodType.STATIC, "staticHelper", -1);
-    assertEquals(1, lifted.size());
-
-    // Non-@JvmStatic is NOT lifted.
-    List<NavigatablePsiElement> notLifted = helper.findClassMethods(
-      "a.b.Holder", MethodType.STATIC, "instanceHelper", -1);
-    assertTrue(notLifted.isEmpty());
+    assertClassInfoMatchesGolden(extractAll());
   }
 
   public void testTypealiasResolvesAsClassWithAliasedSuper() throws Exception {
@@ -291,9 +196,7 @@ public class KotlinSyntaxHelperTest extends TestCase {
         package a.b
         typealias Name = String
         """);
-    NavigatablePsiElement alias = helper().findClass("a.b.Name");
-    assertNotNull(alias);
-    assertEquals("java.lang.String", helper.getSuperClassName("a.b.Name"));
+    assertClassInfoMatchesGolden(extractAll());
   }
 
   public void testGenericClassTypeParameters() throws Exception {
@@ -301,12 +204,7 @@ public class KotlinSyntaxHelperTest extends TestCase {
         package a.b
         class Box<T : Number>(val value: T)
         """);
-    helper().findClass("a.b.Box");
-    // The getter for `value` has T as its return type — verify it is not qualified.
-    List<NavigatablePsiElement> getters = helper.findClassMethods(
-      "a.b.Box", MethodType.INSTANCE, "getValue", -1);
-    assertEquals(1, getters.size());
-    assertEquals("T", helper.getMethodTypes(getters.get(0)).get(0));
+    assertClassInfoMatchesGolden(extractAll());
   }
 
   public void testPrivatePropertySkipped() throws Exception {
@@ -316,9 +214,7 @@ public class KotlinSyntaxHelperTest extends TestCase {
             private val hidden: String = ""
         }
         """);
-    helper().findClass("a.b.Secret");
-    assertTrue(helper.findClassMethods(
-      "a.b.Secret", MethodType.INSTANCE, "getHidden", -1).isEmpty());
+    assertClassInfoMatchesGolden(extractAll());
   }
 
   public void testConstPropertySkipped() throws Exception {
@@ -328,9 +224,7 @@ public class KotlinSyntaxHelperTest extends TestCase {
             const val ANSWER: Int = 42
         }
         """);
-    helper().findClass("a.b.Const");
-    assertTrue(helper.findClassMethods(
-      "a.b.Const", MethodType.INSTANCE, "getANSWER", -1).isEmpty());
+    assertClassInfoMatchesGolden(extractAll());
   }
 
   public void testInternalMapsToPublic() throws Exception {
@@ -338,9 +232,7 @@ public class KotlinSyntaxHelperTest extends TestCase {
         package a.b
         internal class Internal
         """);
-    helper().findClass("a.b.Internal");
-    int mods = lookupModifiers("a.b.Internal");
-    assertTrue("internal should map to PUBLIC bit on the JVM", Modifier.isPublic(mods));
+    assertClassInfoMatchesGolden(extractAll());
   }
 
   public void testSealedIsAbstract() throws Exception {
@@ -348,10 +240,7 @@ public class KotlinSyntaxHelperTest extends TestCase {
         package a.b
         sealed class Tree
         """);
-    helper().findClass("a.b.Tree");
-    int mods = lookupModifiers("a.b.Tree");
-    assertTrue(Modifier.isAbstract(mods));
-    assertFalse(Modifier.isFinal(mods));
+    assertClassInfoMatchesGolden(extractAll());
   }
 
   public void testImportedTypeResolves() throws Exception {
@@ -365,34 +254,20 @@ public class KotlinSyntaxHelperTest extends TestCase {
         package a.b
         import java.nio.file.Path
         """);
-    // The Path import is on Header.kt; Used.kt has no import, so resolution falls back to the
-    // same-package guess (a.b.Path). The point of this test is just that lookup doesn't crash.
-    helper().findClass("a.b.Used");
-    List<NavigatablePsiElement> ms = helper.findClassMethods(
-      "a.b.Used", MethodType.INSTANCE, "read", -1);
-    assertEquals(1, ms.size());
+    // Header.kt has the Path import, but Used.kt does not — extraction surfaces the unresolved
+    // Path type as the same-package guess (a.b.Path).
+    assertClassInfoMatchesGolden(extractAll());
   }
 
   // ---------------------------------------------------------------------------------------------
   // helpers
   // ---------------------------------------------------------------------------------------------
 
-  private @NotNull JavaHelper helper() {
-    if (helper == null) {
-      helper = new JvmSyntaxHelper(new JvmClassSymbolManager(List.of(new KotlinSyntaxClassSymbolProvider(List.of(root)))));
-    }
-    return helper;
+  private @NotNull Map<Fqn, ClassInfo> extractAll() {
+    return FixtureExtractor.extractAll(root, new KotlinSyntaxClassSymbolProvider(List.of(root)), ".kt");
   }
 
-  private int lookupModifiers(@NotNull String fqn) {
-    NavigatablePsiElement el = helper().findClass(fqn);
-    assertNotNull("class not found: " + fqn, el);
-    MyElement<?> me = (MyElement<?>) el;
-    return ((ClassInfo) me.delegate).modifiers;
-  }
-
-  private void write(@NotNull String relative,
-                     @NotNull String content) throws IOException {
+  private void write(@NotNull String relative, @NotNull String content) throws IOException {
     Path target = root.resolve(relative);
     Files.createDirectories(target.getParent());
     Files.writeString(target, content);

@@ -1,0 +1,3 @@
+class a.b.Free extends java.lang.Object
+  modifiers: public
+  methods: (none)

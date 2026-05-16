@@ -1,0 +1,4 @@
+class a.b.C extends java.lang.Object
+  modifiers: public
+  methods:
+    INSTANCE public java.util.List<java.lang.String> doIt(int count, java.util.Map<java.lang.String, java.lang.Integer> data)

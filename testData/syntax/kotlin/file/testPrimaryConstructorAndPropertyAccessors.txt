@@ -1,0 +1,7 @@
+class a.b.Person extends java.lang.Object
+  modifiers: public final
+  methods:
+    CONSTRUCTOR public <init>(java.lang.String name, int age)
+    INSTANCE public java.lang.String getName()
+    INSTANCE public int getAge()
+    INSTANCE public void setAge(int value)

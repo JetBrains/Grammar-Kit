@@ -1,0 +1,4 @@
+class a.b.C extends java.lang.Object
+  modifiers: public
+  annotations: @java.lang.Deprecated
+  methods: (none)

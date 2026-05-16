@@ -13,6 +13,7 @@ import org.intellij.grammar.classinfo.Fqn;
 import org.intellij.grammar.classinfo.JvmClassSymbolProvider;
 import org.intellij.grammar.classinfo.MethodSymbol;
 import org.intellij.grammar.classinfo.MethodType;
+import org.intellij.grammar.classinfo.ParameterSymbol;
 import org.intellij.grammar.classinfo.SymbolResolver;
 import org.intellij.grammar.classinfo.TypeParameterInfo;
 import org.jetbrains.annotations.NotNull;
@@ -185,11 +186,11 @@ public final class AsmClassSymbolProvider implements JvmClassSymbolProvider {
       return new MethodVisitor(ASM_OPCODES) {
         @Override
         public void visitEnd() {
-          m.annotatedTypes.addAll(m.types);
-          int[] plainOffsets = new int[m.types.size()];
+          m.annotatedReturnType = m.returnType;
+          for (ParameterSymbol p : m.parameters) p.annotatedType = p.type;
+          int[] plainOffsets = new int[m.parameters.size() + 1];
           for (ParamTypeAnno ta : typeAnnos) {
-            int idx = ta.index == 0 ? 0 : 2 * (ta.index - 1) + 1;
-            String prevType = m.annotatedTypes.get(idx);
+            String prevType = ta.index == 0 ? m.annotatedReturnType : m.parameters.get(ta.index - 1).annotatedType;
             boolean isArray = false;
             if (ta.path != null) {
               isArray = true;
@@ -211,13 +212,15 @@ public final class AsmClassSymbolProvider implements JvmClassSymbolProvider {
               newType = prevType.substring(0, bracketIdx) + (addSpace ? " " : "") + "@" + ta.anno + " " + prevType.substring(bracketIdx);
             }
             else {
-              int offset = plainOffsets[idx];
+              int offset = plainOffsets[ta.index];
               newType = prevType.substring(0, offset) + "@" + ta.anno + " " + prevType.substring(offset);
-              plainOffsets[idx] += 2 + ta.anno.value().length();
+              plainOffsets[ta.index] += 2 + ta.anno.value().length();
             }
-            m.annotatedTypes.set(idx, newType);
+            if (ta.index == 0) m.annotatedReturnType = newType;
+            else m.parameters.get(ta.index - 1).annotatedType = newType;
             if (isArray || bracketIdx < 1) {
-              m.annotations.get(ta.index).remove(ta.anno);
+              if (ta.index == 0) m.annotations.remove(ta.anno);
+              else m.parameters.get(ta.index - 1).annotations.remove(ta.anno);
             }
           }
         }
@@ -229,7 +232,7 @@ public final class AsmClassSymbolProvider implements JvmClassSymbolProvider {
             @Override
             public void visitEnd() {
               if (annoParamCounter != 0) return;
-              m.annotations.get(0).add(anno);
+              m.annotations.add(anno);
             }
           };
         }
@@ -241,7 +244,7 @@ public final class AsmClassSymbolProvider implements JvmClassSymbolProvider {
             @Override
             public void visitEnd() {
               if (annoParamCounter != 0) return;
-              m.annotations.get(parameter + 1).add(anno);
+              m.parameters.get(parameter).annotations.add(anno);
             }
           };
         }
@@ -448,11 +451,13 @@ public final class AsmClassSymbolProvider implements JvmClassSymbolProvider {
         State state = states.pop();
         switch (state) {
           case PARAM:
-            method.types.add(sb());
-            method.types.add("p" + (method.types.size() / 2));
+            ParameterSymbol p = new ParameterSymbol();
+            p.type = sb();
+            p.name = "p" + method.parameters.size();
+            method.parameters.add(p);
             break main;
           case RETURN:
-            method.types.add(0, sb());
+            method.returnType = sb();
             break main;
           case ARRAY:
             sb.append("[]");

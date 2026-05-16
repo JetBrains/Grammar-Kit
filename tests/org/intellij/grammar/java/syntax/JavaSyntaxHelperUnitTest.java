@@ -11,6 +11,7 @@ import org.intellij.grammar.classinfo.Fqn;
 import org.intellij.grammar.classinfo.JvmClassSymbolManager;
 import org.intellij.grammar.classinfo.JvmClassSymbolProvider;
 import org.intellij.grammar.classinfo.MethodType;
+import org.intellij.grammar.classinfo.ParameterSymbol;
 import org.intellij.grammar.java.JavaHelper;
 import org.intellij.grammar.classinfo.MethodSymbol;
 import org.intellij.grammar.java.JvmSyntaxHelper;
@@ -335,8 +336,8 @@ public class JavaSyntaxHelperUnitTest extends TestCase {
   // ---------------------------------------------------------------------------------------------
 
   public void testGetMethodTypesReturnsAnnotatedTypes() {
-    MethodSymbol m = method("ping", Modifier.PUBLIC, MethodType.INSTANCE, "void");
-    m.annotatedTypes.addAll(List.of("java.lang.String", "int", "n"));
+    MethodSymbol m = method("ping", Modifier.PUBLIC, MethodType.INSTANCE, "java.lang.String", "int");
+    m.parameters.get(0).name = "n";
     assertEquals(List.of("java.lang.String", "int", "n"),
                  helper().getMethodTypes(new MyElement<>(m)));
   }
@@ -399,7 +400,7 @@ public class JavaSyntaxHelperUnitTest extends TestCase {
 
   public void testGetAnnotationsForMethod() {
     MethodSymbol m = method("ping", Modifier.PUBLIC, MethodType.INSTANCE, "void");
-    m.annotations.get(0).add(Fqn.of("java.lang.Override"));
+    m.annotations.add(Fqn.of("java.lang.Override"));
     assertEquals(List.of("java.lang.Override"),
                  helper().getAnnotations(new MyElement<>(m)));
   }
@@ -410,8 +411,7 @@ public class JavaSyntaxHelperUnitTest extends TestCase {
 
   public void testGetParameterAnnotations() {
     MethodSymbol m = method("ping", Modifier.PUBLIC, MethodType.INSTANCE, "void", "java.lang.String");
-    // index 0 is the method itself; param 0 is at key 1.
-    m.annotations.get(1).add(Fqn.of("a.b.Marker"));
+    m.parameters.get(0).annotations.add(Fqn.of("a.b.Marker"));
     assertEquals(List.of("a.b.Marker"),
                  helper().getParameterAnnotations(new MyElement<>(m), 0));
   }
@@ -473,8 +473,8 @@ public class JavaSyntaxHelperUnitTest extends TestCase {
 
   /**
    * Builds a {@link MethodSymbol} matching the shape that {@link JavaSyntaxClassExtractor} would
-   * produce. {@link MethodSymbol#types} is a flat list: index 0 is the return type, then
-   * alternating {@code (paramType, paramName)} pairs.
+   * produce: return type plus a list of {@link ParameterSymbol} entries (auto-named {@code p0..pN}),
+   * with the annotated-type fields mirroring the plain ones.
    */
   private static MethodSymbol method(@NotNull String name,
                                    int modifiers,
@@ -485,10 +485,14 @@ public class JavaSyntaxHelperUnitTest extends TestCase {
     m.name = name;
     m.modifiers = modifiers;
     m.methodType = type;
-    m.types.add(returnType);
+    m.returnType = returnType;
+    m.annotatedReturnType = returnType;
     for (int i = 0; i < paramTypes.length; i++) {
-      m.types.add(paramTypes[i]);
-      m.types.add("p" + i);
+      ParameterSymbol p = new ParameterSymbol();
+      p.type = paramTypes[i];
+      p.annotatedType = paramTypes[i];
+      p.name = "p" + i;
+      m.parameters.add(p);
     }
     return m;
   }

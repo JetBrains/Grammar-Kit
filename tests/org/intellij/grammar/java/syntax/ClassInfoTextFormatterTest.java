@@ -9,6 +9,7 @@ import org.intellij.grammar.classinfo.ClassSymbol;
 import org.intellij.grammar.classinfo.Fqn;
 import org.intellij.grammar.classinfo.MethodSymbol;
 import org.intellij.grammar.classinfo.MethodType;
+import org.intellij.grammar.classinfo.ParameterSymbol;
 import org.intellij.grammar.classinfo.TypeParameterInfo;
 
 import java.lang.reflect.Modifier;
@@ -74,7 +75,7 @@ public class ClassInfoTextFormatterTest extends TestCase {
     ctor.name = "Utils";
     ctor.declaringClass = info.name;
     ctor.modifiers = Modifier.PRIVATE;
-    ctor.types.add("util.Utils"); // synthetic return = declaring class
+    ctor.returnType = "util.Utils"; // synthetic return = declaring class
     info.methods.add(ctor);
 
     MethodSymbol instanceMethod = new MethodSymbol();
@@ -82,19 +83,20 @@ public class ClassInfoTextFormatterTest extends TestCase {
     instanceMethod.name = "greet";
     instanceMethod.declaringClass = info.name;
     instanceMethod.modifiers = Modifier.PUBLIC;
-    instanceMethod.types.add("java.lang.String");      // return
-    instanceMethod.types.add("java.lang.String");      // p0 type
-    instanceMethod.types.add("name");                  // p0 name
-    instanceMethod.annotations.get(0).add(Fqn.of("org.jetbrains.annotations.NotNull"));
-    instanceMethod.annotations.get(1).add(Fqn.of("org.jetbrains.annotations.Nullable"));
+    instanceMethod.returnType = "java.lang.String";
+    instanceMethod.annotatedReturnType = "java.lang.@A String";
+    ParameterSymbol nameParam = new ParameterSymbol();
+    nameParam.type = "java.lang.String";
+    nameParam.annotatedType = "java.lang.String";
+    nameParam.name = "name";
+    nameParam.annotations.add(Fqn.of("org.jetbrains.annotations.Nullable"));
+    instanceMethod.parameters.add(nameParam);
+    instanceMethod.annotations.add(Fqn.of("org.jetbrains.annotations.NotNull"));
     instanceMethod.exceptions.add(Fqn.of("java.io.IOException"));
     instanceMethod.generics.add(new TypeParameterInfo(
       "T",
       List.of("java.lang.Comparable"),
       List.of(Fqn.of("a.b.Marker"))));
-    instanceMethod.annotatedTypes.add("java.lang.@A String");
-    instanceMethod.annotatedTypes.add("java.lang.String");
-    instanceMethod.annotatedTypes.add("name");
     info.methods.add(instanceMethod);
 
     MethodSymbol staticMethod = new MethodSymbol();
@@ -102,7 +104,7 @@ public class ClassInfoTextFormatterTest extends TestCase {
     staticMethod.name = "helper";
     staticMethod.declaringClass = info.name;
     staticMethod.modifiers = Modifier.PRIVATE | Modifier.STATIC;
-    staticMethod.types.add("void");
+    staticMethod.returnType = "void";
     info.methods.add(staticMethod);
 
     String expected = """

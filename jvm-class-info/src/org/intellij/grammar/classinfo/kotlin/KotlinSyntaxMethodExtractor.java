@@ -10,13 +10,13 @@ import fleet.org.jetbrains.kotlin.kmp.parser.KtNodeTypes;
 import org.intellij.grammar.classinfo.Fqn;
 import org.intellij.grammar.classinfo.MethodSymbol;
 import org.intellij.grammar.classinfo.MethodType;
+import org.intellij.grammar.classinfo.ParameterSymbol;
 import org.intellij.grammar.classinfo.TypeParameterInfo;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Modifier;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import static org.intellij.grammar.classinfo.SyntaxTreeUtil.firstChildOfType;
@@ -56,7 +56,7 @@ final class KotlinSyntaxMethodExtractor {
     Set<String> typeVars = new HashSet<>(classTypeVars);
     SyntaxNode modifierList = firstChildOfType(funNode, KtNodeTypes.INSTANCE.getMODIFIER_LIST());
     m.modifiers = extractModifiers(modifierList);
-    m.annotations.get(0).addAll(typeFormatter.extractAnnotationFqns(modifierList, typeVars));
+    m.annotations.addAll(typeFormatter.extractAnnotationFqns(modifierList, typeVars));
 
     collectFunctionTypeParameters(funNode, m, typeVars);
 
@@ -66,19 +66,20 @@ final class KotlinSyntaxMethodExtractor {
     // Return type: TYPE_REFERENCE sibling that appears *after* the VALUE_PARAMETER_LIST.
     SyntaxNode paramList = firstChildOfType(funNode, KtNodeTypes.INSTANCE.getVALUE_PARAMETER_LIST());
     SyntaxNode returnType = returnTypeAfterParams(funNode, paramList);
-    String returnStr = returnType == null ? "void" : typeFormatter.formatType(returnType, typeVars);
-    m.types.add(returnStr);
+    m.returnType = returnType == null ? "void" : typeFormatter.formatType(returnType, typeVars);
 
     if (receiverType != null) {
-      m.types.add(typeFormatter.formatType(receiverType, typeVars));
-      m.types.add("receiver");
+      ParameterSymbol receiver = new ParameterSymbol();
+      receiver.type = typeFormatter.formatType(receiverType, typeVars);
+      receiver.name = "receiver";
+      m.parameters.add(receiver);
     }
 
     collectValueParameters(paramList, m, typeVars);
 
     m.methodType = defaultMethodType;
     if (receiverType != null) m.methodType = MethodType.STATIC;
-    m.annotatedTypes.addAll(m.types);
+    copyTypesAsAnnotated(m);
     return m;
   }
 
@@ -90,17 +91,17 @@ final class KotlinSyntaxMethodExtractor {
     m.declaringClass = declaringFqn;
     m.name = "<init>";
     m.methodType = MethodType.CONSTRUCTOR;
-    m.types.add(declaringFqn.value());
+    m.returnType = declaringFqn.value();
 
     Set<String> typeVars = new HashSet<>(classTypeVars);
     SyntaxNode modifierList = firstChildOfType(ctorNode, KtNodeTypes.INSTANCE.getMODIFIER_LIST());
     m.modifiers = extractModifiers(modifierList);
-    m.annotations.get(0).addAll(typeFormatter.extractAnnotationFqns(modifierList, typeVars));
+    m.annotations.addAll(typeFormatter.extractAnnotationFqns(modifierList, typeVars));
 
     SyntaxNode paramList = firstChildOfType(ctorNode, KtNodeTypes.INSTANCE.getVALUE_PARAMETER_LIST());
     collectValueParameters(paramList, m, typeVars);
 
-    m.annotatedTypes.addAll(m.types);
+    copyTypesAsAnnotated(m);
     return m;
   }
 
@@ -124,9 +125,9 @@ final class KotlinSyntaxMethodExtractor {
     m.name = "get" + capitalize(nameId.getText().toString());
     m.modifiers = mods | (staticAccessor ? Modifier.STATIC : 0);
     m.methodType = staticAccessor ? MethodType.STATIC : MethodType.INSTANCE;
-    m.types.add(typeStr);
-    m.annotations.get(0).addAll(typeFormatter.extractAnnotationFqns(modifierList, classTypeVars));
-    m.annotatedTypes.addAll(m.types);
+    m.returnType = typeStr;
+    m.annotations.addAll(typeFormatter.extractAnnotationFqns(modifierList, classTypeVars));
+    copyTypesAsAnnotated(m);
     return m;
   }
 
@@ -150,11 +151,13 @@ final class KotlinSyntaxMethodExtractor {
     m.name = "set" + capitalize(nameId.getText().toString());
     m.modifiers = mods | (staticAccessor ? Modifier.STATIC : 0);
     m.methodType = staticAccessor ? MethodType.STATIC : MethodType.INSTANCE;
-    m.types.add("void");
-    m.types.add(typeStr);
-    m.types.add("value");
-    m.annotations.get(0).addAll(typeFormatter.extractAnnotationFqns(modifierList, classTypeVars));
-    m.annotatedTypes.addAll(m.types);
+    m.returnType = "void";
+    ParameterSymbol value = new ParameterSymbol();
+    value.type = typeStr;
+    value.name = "value";
+    m.parameters.add(value);
+    m.annotations.addAll(typeFormatter.extractAnnotationFqns(modifierList, classTypeVars));
+    copyTypesAsAnnotated(m);
     return m;
   }
 
@@ -180,7 +183,7 @@ final class KotlinSyntaxMethodExtractor {
                                       @NotNull MethodSymbol m,
                                       @NotNull Set<String> typeVars) {
     if (paramList == null) return;
-    int paramIdx = m.types.size() == 1 ? 0 : (m.types.size() - 1) / 2; // account for already-added receiver
+    int paramIdx = m.parameters.size(); // account for already-added receiver
     for (SyntaxNode p = paramList.firstChild(); p != null; p = p.nextSibling()) {
       if (p.getType() != KtNodeTypes.INSTANCE.getVALUE_PARAMETER()) continue;
       SyntaxNode pType = firstChildOfType(p, KtNodeTypes.INSTANCE.getTYPE_REFERENCE());
@@ -190,12 +193,18 @@ final class KotlinSyntaxMethodExtractor {
       if (KotlinSyntaxNodes.hasModifier(mods, KtTokens.INSTANCE.getVARARG_MODIFIER())) {
         typeStr = typeStr + "[]";
       }
-      m.types.add(typeStr);
-      m.types.add(pName == null ? "p" + paramIdx : pName.getText().toString());
-      List<Fqn> annos = typeFormatter.extractAnnotationFqns(mods, typeVars);
-      if (!annos.isEmpty()) m.annotations.get(paramIdx + 1).addAll(annos);
+      ParameterSymbol param = new ParameterSymbol();
+      param.type = typeStr;
+      param.name = pName == null ? "p" + paramIdx : pName.getText().toString();
+      param.annotations.addAll(typeFormatter.extractAnnotationFqns(mods, typeVars));
+      m.parameters.add(param);
       paramIdx++;
     }
+  }
+
+  private static void copyTypesAsAnnotated(@NotNull MethodSymbol m) {
+    m.annotatedReturnType = m.returnType;
+    for (ParameterSymbol p : m.parameters) p.annotatedType = p.type;
   }
 
   /**

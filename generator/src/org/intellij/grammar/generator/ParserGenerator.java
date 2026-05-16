@@ -62,14 +62,14 @@ public sealed abstract class ParserGenerator extends Generator permits JavaParse
    */
   protected final Map<String, String> myMetaMethodFields = new HashMap<>();
 
-  protected ParserGenerator(@NotNull BnfFile psiFile,
+  protected ParserGenerator(@NotNull GrammarInfo grammarInfo,
                             @NotNull String sourcePath,
                             @NotNull String packagePrefix,
                             @NotNull String outputFileExtension,
                             @NotNull OutputOpener outputOpener,
                             @NotNull NameRenderer nameRenderer,
                             @NotNull BnfPathsResolution paths) {
-    super(psiFile, sourcePath, packagePrefix, outputFileExtension, outputOpener, nameRenderer, paths);
+    super(grammarInfo, sourcePath, packagePrefix, outputFileExtension, outputOpener, nameRenderer, paths);
   }
 
   /**
@@ -243,7 +243,7 @@ public sealed abstract class ParserGenerator extends Generator permits JavaParse
       else {
         // a regular grammar rule: use its rendered method name so reserved-name rules (e.g. `to`) resolve correctly
         method = R.getFuncName(targetRule);
-        String parserClass = ruleInfo(targetRule).parserClass;
+        String parserClass = ruleInfo(targetRule).parserClass();
         if (useTargetClassName(rule, parserClass)) {
           targetClassName = StringUtil.getShortName(parserClass);
         }
@@ -302,7 +302,7 @@ public sealed abstract class ParserGenerator extends Generator permits JavaParse
   }
 
   protected boolean useTargetClassName(@NotNull BnfRule rule, String parserClass) {
-    return !parserClass.equals(ruleInfo(rule).parserClass);
+    return !parserClass.equals(ruleInfo(rule).parserClass());
   }
 
   /** Formats a meta-rule parameter name (the {@code <<x>>} placeholder text) to its identifier in generated code. */

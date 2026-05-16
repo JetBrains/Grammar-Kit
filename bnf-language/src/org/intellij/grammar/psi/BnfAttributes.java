@@ -17,19 +17,19 @@ public final class BnfAttributes {
   private BnfAttributes() {
   }
 
-  public static <T> T getRootAttribute(@NotNull PsiElement node, @NotNull KnownAttribute<T> attribute) {
+  public static <T> @Nullable T getRootAttribute(@NotNull PsiElement node, @NotNull KnownAttribute<T> attribute) {
     return getRootAttribute(node, attribute, null);
   }
 
-  public static <T> T getRootAttribute(@NotNull PsiElement node, @NotNull KnownAttribute<T> attribute, @Nullable String match) {
+  public static <T> @Nullable T getRootAttribute(@NotNull PsiElement node, @NotNull KnownAttribute<T> attribute, @Nullable String match) {
     return ((BnfFile)node.getContainingFile()).findAttributeValue(null, attribute, match);
   }
 
-  public static <T> T getAttribute(@NotNull BnfRule rule, @NotNull KnownAttribute<T> attribute) {
+  public static <T> @Nullable T getAttribute(@NotNull BnfRule rule, @NotNull KnownAttribute<T> attribute) {
     return getAttribute(rule, attribute, null);
   }
 
-  public static <T> T getAttribute(@NotNull BnfRule rule, @NotNull KnownAttribute<T> attribute, @Nullable String match) {
+  public static <T> @Nullable T getAttribute(@NotNull BnfRule rule, @NotNull KnownAttribute<T> attribute, @Nullable String match) {
     return ((BnfFile)rule.getContainingFile()).findAttributeValue(rule, attribute, match);
   }
 
@@ -74,7 +74,7 @@ public final class BnfAttributes {
     return null;
   }
 
-  private static Object getTokenValue(BnfReferenceOrToken child) {
+  private static @NotNull Object getTokenValue(@NotNull BnfReferenceOrToken child) {
     String text = child.getText();
     if (text.equals("true")) return true;
     if (text.equals("false")) return false;

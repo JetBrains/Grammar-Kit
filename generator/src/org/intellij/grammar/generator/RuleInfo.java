@@ -1,45 +1,31 @@
 /*
- * Copyright 2011-2025 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
+ * Copyright 2011-2026 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
  */
 
 package org.intellij.grammar.generator;
 
-import java.util.Set;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
- * A class representing the properties of a given bnf rule.
+ * Immutable grammar-derived metadata for a BNF rule. Built once during
+ * {@link GrammarInfo#build} and shared across all generator targets. PSI-only
+ * mutable state (super-interface set, mixed-AST flag, resolved super-class)
+ * lives in {@link PsiRuleInfo}, owned by {@link JavaPsiGenerator}.
  */
-class RuleInfo {
-  final String name;
-  final boolean isFake;
-  final String elementType;
-  final String parserClass;
-  final String intfPackage;
-  final String implPackage;
-  final String intfClass;
-  final String implClass;
-  final String mixin;
-  final String stub;
-  String realStubClass;
-  Set<String> superInterfaces;
-  boolean mixedAST;
-  String realSuperClass;
-  boolean isAbstract;
-  boolean isInElementType;
-
-  RuleInfo(String name, boolean isFake,
-           String elementType, String parserClass,
-           String intfPackage, String implPackage,
-           String intfClass, String implClass, String mixin, String stub) {
-    this.name = name;
-    this.isFake = isFake;
-    this.elementType = elementType;
-    this.parserClass = parserClass;
-    this.intfPackage = intfPackage;
-    this.implPackage = implPackage;
-    this.stub = stub;
-    this.intfClass = intfPackage + "." + intfClass;
-    this.implClass = implPackage + "." + implClass;
-    this.mixin = mixin;
-  }
+record RuleInfo(
+  @NotNull String name,
+  boolean isFake,
+  @NotNull String elementType,
+  @Nullable String parserClass,
+  @Nullable String intfPackage,
+  @Nullable String implPackage,
+  @NotNull String intfClass,
+  @NotNull String implClass,
+  @Nullable String mixin,
+  @Nullable String stub,
+  @Nullable String realStubClass,
+  boolean isAbstract,
+  boolean isInElementType
+) {
 }

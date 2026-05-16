@@ -36,10 +36,10 @@ class RuleMethodsHelper {
 
   private final Map<BnfRule, MethodSet> myMethods;
 
-  public RuleMethodsHelper(RuleGraphHelper ruleGraphHelper,
-                           ExpressionHelper expressionHelper,
-                           Map<String, String> simpleTokens,
-                           GenOptions genOptions) {
+  RuleMethodsHelper(@NotNull RuleGraphHelper ruleGraphHelper,
+                    @NotNull ExpressionHelper expressionHelper,
+                    @NotNull Map<String, String> simpleTokens,
+                    @NotNull GenOptions genOptions) {
     myGraphHelper = ruleGraphHelper;
     myExpressionHelper = expressionHelper;
     mySimpleTokens = Collections.unmodifiableMap(simpleTokens);
@@ -48,7 +48,7 @@ class RuleMethodsHelper {
     myMethods = new LinkedHashMap<>();
   }
 
-  public void buildMaps(Collection<BnfRule> sortedPsiRules) {
+  public void buildMaps(@NotNull Collection<BnfRule> sortedPsiRules) {
     Map<String, String> tokensReversed = computeTokens(myGraphHelper.getFile()).asMap();
     for (BnfRule rule : sortedPsiRules) {
       calcMethods(rule, tokensReversed);

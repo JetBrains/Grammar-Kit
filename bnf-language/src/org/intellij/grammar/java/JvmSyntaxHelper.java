@@ -58,9 +58,9 @@ public class JvmSyntaxHelper extends JavaHelper {
     if (aClass == null || methodName == null) return Collections.emptyList();
     List<NavigatablePsiElement> result = new SmartList<>();
     for (MethodSymbol method : aClass.methods()) {
-      if (!acceptsName(methodName, method.name())) continue;
+      if (!ClassSymbolUtil.acceptsName(methodName, method.name())) continue;
       if (method.methodType() != methodType) continue;
-      if (!acceptsModifiers(method.modifiers(), methodType, allowAbstract)) continue;
+      if (!ClassSymbolUtil.acceptsModifiers(method.modifiers(), methodType, allowAbstract)) continue;
       if (!ClassSymbolUtil.acceptsParams(method, paramCount, paramTypes, s -> manager.findClass(Fqn.ofNullable(s)))) continue;
       result.add(new MyElement<>(method));
     }

@@ -16,7 +16,6 @@ import org.intellij.grammar.BnfPathsResolution;
 import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.analysis.BnfFirstNextAnalyzer;
 import org.intellij.grammar.generator.NodeCalls.*;
-import org.intellij.grammar.classinfo.MethodType;
 import org.intellij.grammar.generator.kotlin.KotlinBnfConstants;
 import org.intellij.grammar.generator.kotlin.KotlinNameShortener;
 import org.intellij.grammar.generator.kotlin.KotlinNameRenderer;
@@ -39,11 +38,9 @@ import static org.intellij.grammar.generator.CommonBnfConstants.RECOVER_AUTO;
 import static org.intellij.grammar.generator.ExpressionGeneratorHelper.CONSUME_TYPE_OVERRIDE;
 import static org.intellij.grammar.generator.ExpressionGeneratorHelper.findOperators;
 import static org.intellij.grammar.generator.ParserGeneratorUtil.*;
-import static org.intellij.grammar.generator.java.JavaNames.getRawClassName;
 import static org.intellij.grammar.psi.BnfAst.*;
 import static org.intellij.grammar.psi.BnfAttributes.getAttribute;
 import static org.intellij.grammar.psi.BnfAttributes.getRootAttribute;
-import static org.intellij.grammar.psi.BnfRules.getEffectiveSuperRule;
 import static org.intellij.grammar.psi.BnfTypes.*;
 
 /**
@@ -66,16 +63,13 @@ import static org.intellij.grammar.psi.BnfTypes.*;
  */
 public final class KotlinParserGenerator extends ParserGenerator {
   private static final @NotNull String HORIZONTAL_SEPARATOR = "/* ********************************************************** */";
+  private static final @NotNull Collection<String> SGPRMethods = Arrays.asList("eof", "advanceToken");
 
   /**
    * Name of the class containing all the generated element types.
    */
   private final @NotNull String myElementTypesHolderName;
-
   private final @NotNull String myParserUtil;
-
-  private final @NotNull Collection<String> mySGPRMethods = Arrays.asList("eof", "advanceToken");
-
   private final ExpressionHelper myExpressionHelper;
 
   public KotlinParserGenerator(@NotNull BnfFile psiFile,
@@ -83,37 +77,12 @@ public final class KotlinParserGenerator extends ParserGenerator {
                                @NotNull String packagePrefix,
                                @NotNull OutputOpener outputOpener,
                                @NotNull BnfPathsResolution paths) {
-    super(psiFile, sourcePath, packagePrefix, "kt", outputOpener, KotlinNameRenderer.INSTANCE, paths);
+    super(GrammarInfo.build(psiFile, paths), sourcePath, packagePrefix, "kt", outputOpener, KotlinNameRenderer.INSTANCE, paths);
 
     // TODO: consider creating kotlin specific attributes for this
     myElementTypesHolderName = getRootAttribute(myFile, KnownAttribute.SYNTAX_ELEMENT_TYPE_HOLDER_CLASS);
     myParserUtil = getRootAttribute(myFile, KnownAttribute.SYNTAX_PARSER_UTIL_OBJECT);
-
-    myExpressionHelper = new ExpressionHelper(myFile, myGraphHelper, this::addWarning);
-
-    for (final var rule : psiFile.getRules()) {
-      final var ruleName = rule.getName();
-      final var isNoPsi = !RuleGraphHelper.hasPsiClass(rule);
-      final var ruleInfo = new RuleInfo(
-        ruleName,
-        BnfRules.isFake(rule),
-        getElementType(rule),
-        getAttribute(rule, KnownAttribute.PARSER_CLASS),
-        // TODO: potentially make a kotlin-specific attribute for this vvv
-        isNoPsi ? null : getAttribute(rule, KnownAttribute.PSI_PACKAGE),
-        // don't need any of the below
-        null,
-        null,
-        null,
-        null,
-        null
-      );
-      myRuleInfos.put(ruleName, ruleInfo);
-    }
-
-    calcFakeRulesWithType();
-    calcRulesStubNames();
-    calcAbstractRules();
+    myExpressionHelper = grammarInfo().expressionHelper();
   }
 
   /** Builds a `consumeToken(runtime, "literal")` call for tokens given by their literal text. */
@@ -124,51 +93,6 @@ public final class KotlinParserGenerator extends ParserGenerator {
   /** Short name of the generated element-types holder object, used to qualify element-type references. */
   private @NotNull String shortElementTypesHolderName() {
     return StringUtil.getShortName(myElementTypesHolderName);
-  }
-
-  /** Marks rules that are reused as another rule's `elementType`, so they keep an element-type entry even when `fake`. */
-  private void calcFakeRulesWithType() {
-    for (final var rule : myFile.getRules()) {
-      BnfRule r = myFile.getRule(getAttribute(rule, KnownAttribute.ELEMENT_TYPE));
-      if (r == null) continue;
-      this.ruleInfo(r).isInElementType = true;
-    }
-  }
-
-  /**
-   * Resolves each rule's effective stub class — explicit `stubClass`, inherited from the
-   * effective super-rule, or extracted as the type argument of a stub-aware base class.
-   */
-  private void calcRulesStubNames() {
-    for (BnfRule rule : myFile.getRules()) {
-      RuleInfo info = this.ruleInfo(rule);
-      String stubClass = info.stub;
-      if (stubClass == null) {
-        BnfRule topSuper = getEffectiveSuperRule(myFile, rule);
-        stubClass = topSuper == null ? null : this.ruleInfo(topSuper).stub;
-      }
-      BnfRule topSuper = getEffectiveSuperRule(myFile, rule);
-      String superRuleClass = topSuper == null ? getRootAttribute(myFile, KnownAttribute.EXTENDS) :
-                              topSuper == rule ? getAttribute(rule, KnownAttribute.EXTENDS) :
-                              this.ruleInfo(topSuper).intfClass;
-      String implSuper = StringUtil.notNullize(info.mixin, superRuleClass);
-      String implSuperRaw = getRawClassName(implSuper);
-      final String stubName;
-      if (StringUtil.isNotEmpty(stubClass)) {
-        stubName = stubClass;
-      }
-      else if (implSuper.indexOf("<") < implSuper.indexOf(">") &&
-               !helperFor(rule, KnownAttribute.MIXIN)
-                 .findClassMethods(implSuperRaw, MethodType.INSTANCE, "getParentByStub", 0).isEmpty()) {
-        stubName = implSuper.substring(implSuper.indexOf("<") + 1, implSuper.indexOf(">"));
-      }
-      else {
-        stubName = null;
-      }
-      if (StringUtil.isNotEmpty(stubName)) {
-        info.realStubClass = stubClass;
-      }
-    }
   }
 
   // region generate* methods
@@ -188,11 +112,11 @@ public final class KotlinParserGenerator extends ParserGenerator {
 
   @Override
   public void generateParser() throws IOException {
-    Map<String, Set<RuleInfo>> classified = ContainerUtil.classify(myRuleInfos.values().iterator(), o -> o.parserClass);
+    Map<String, Set<RuleInfo>> classified = ContainerUtil.classify(myRuleInfos.values().iterator(), o -> o.parserClass());
     for (String className : ContainerUtil.sorted(classified.keySet())) {
       openOutput(className, myPaths.pathString(KnownAttribute.PARSER_OUTPUT_PATH));
       try {
-        generateParserImpl(className, map(classified.get(className), it -> it.name));
+        generateParserImpl(className, map(classified.get(className), it -> it.name()));
       }
       finally {
         closeOutput();
@@ -962,11 +886,11 @@ public final class KotlinParserGenerator extends ParserGenerator {
     final var typeToFactoryMap = new HashMap<String, String>();
     for (final var rule : myFile.getRules()) {
       final var info = ruleInfo(rule);
-      if (info.intfPackage == null) continue;
-      final var elementType = info.elementType;
+      if (info.intfPackage() == null) continue;
+      final var elementType = info.elementType();
       if (StringUtil.isEmpty(elementType)) continue;
       if (sortedCompositeTypes.contains(elementType)) continue;
-      if (!info.isFake || info.isInElementType) {
+      if (!info.isFake() || info.isInElementType()) {
         var factory = getAttribute(rule, KnownAttribute.SYNTAX_ELEMENT_TYPE_FACTORY);
         if (factory != null && !factory.isEmpty()) {
           typeToFactoryMap.put(elementType, factory);
@@ -1220,9 +1144,9 @@ public final class KotlinParserGenerator extends ParserGenerator {
           ExpressionInfo info = ExpressionGeneratorHelper.getInfoForExpressionParsing(myExpressionHelper, subRule);
           BnfRule rr = info != null ? info.rootRule : subRule;
           String method = R.getFuncName(rr);
-          String parserClass = this.ruleInfo(rr).parserClass;
+          String parserClass = this.ruleInfo(rr).parserClass();
           String parserClassName = StringUtil.getShortName(parserClass);
-          boolean renderClass = !parserClass.equals(myGrammarRootParser) && !parserClass.equals(this.ruleInfo(rule).parserClass);
+          boolean renderClass = !parserClass.equals(myGrammarRootParser) && !parserClass.equals(this.ruleInfo(rule).parserClass());
           if (info == null) {
             return new MethodCall(renderClass, parserClassName, method, N.runtime, N.level);
           }
@@ -1268,7 +1192,7 @@ public final class KotlinParserGenerator extends ParserGenerator {
     }
     else {
       List<String> extraArguments = collectMetaParametersFormatted(rule, node);
-      final var className = StringUtil.getShortName(this.ruleInfo(rule).parserClass);
+      final var className = StringUtil.getShortName(this.ruleInfo(rule).parserClass());
       if (extraArguments.isEmpty()) {
         return new MethodCall(false, className, nextName, N.runtime, N.level);
       }
@@ -1333,8 +1257,8 @@ public final class KotlinParserGenerator extends ParserGenerator {
    * True if `methodName` is a `SyntaxGeneratedParserRuntime` helper that should be invoked
    * directly on the runtime rather than via the configured parser-util object.
    */
-  private boolean isRuntimeMethod(String methodName) {
-    return mySGPRMethods.contains(methodName);
+  private static boolean isRuntimeMethod(String methodName) {
+    return SGPRMethods.contains(methodName);
   }
 
   /** Builds a `consumeToken(runtime, ElementTypes.NAME)` call and records `tokenName` as used. */

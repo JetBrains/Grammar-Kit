@@ -37,7 +37,6 @@ import static org.intellij.grammar.analysis.BnfFirstNextAnalyzer.BNF_MATCHES_EOF
 import static org.intellij.grammar.generator.CommonBnfConstants.RECOVER_AUTO;
 import static org.intellij.grammar.generator.ParserGeneratorUtil.*;
 import static org.intellij.grammar.generator.RuleGraphHelper.hasElementType;
-import static org.intellij.grammar.generator.RuleGraphHelper.hasPsiClass;
 import static org.intellij.grammar.psi.BnfAst.*;
 import static org.intellij.grammar.psi.BnfAttributes.getAttribute;
 import static org.intellij.grammar.psi.BnfAttributes.getRootAttribute;
@@ -58,12 +57,8 @@ import static org.intellij.grammar.psi.BnfTypes.*;
 public final class JavaParserGenerator extends ParserGenerator {
   public static final Logger LOG = Logger.getInstance(JavaParserGenerator.class);
 
-  private final String myGrammarRoot;
-  private final String myGrammarRootParser;
   private final String myParserUtilClass;
-
   private final String myParserTypeHolderClass;
-
   private final ExpressionHelper myExpressionHelper;
 
   public JavaParserGenerator(@NotNull BnfFile psiFile,
@@ -71,44 +66,11 @@ public final class JavaParserGenerator extends ParserGenerator {
                              @NotNull String packagePrefix,
                              @NotNull OutputOpener outputOpener,
                              @NotNull BnfPathsResolution paths) {
-    super(psiFile, sourcePath, packagePrefix, "java", outputOpener, new JavaNameRenderer(), paths);
+    super(GrammarInfo.build(psiFile, paths), sourcePath, packagePrefix, "java", outputOpener, new JavaNameRenderer(), paths);
 
-    NameFormat psiInterfaceFormat = NameFormat.forPsiClass(myFile);
-    NameFormat implClassFormat = NameFormat.forPsiImplClass(myFile);
     myParserUtilClass = getRootAttribute(myFile, KnownAttribute.PARSER_UTIL_CLASS);
     myParserTypeHolderClass = getRootAttribute(myFile, KnownAttribute.ELEMENT_TYPE_HOLDER_CLASS);
-
-    myExpressionHelper = new ExpressionHelper(myFile, myGraphHelper, this::addWarning);
-
-    List<BnfRule> rules = psiFile.getRules();
-    BnfRule rootRule = rules.isEmpty() ? null : rules.get(0);
-    myGrammarRoot = rootRule == null ? null : rootRule.getName();
-    for (BnfRule r : rules) {
-      String ruleName = r.getName();
-      boolean noPsi = !hasPsiClass(r);
-      myRuleInfos.put(ruleName, new RuleInfo(
-        ruleName, BnfRules.isFake(r),
-        getElementType(r), getAttribute(r, KnownAttribute.PARSER_CLASS),
-        noPsi ? null : getAttribute(r, KnownAttribute.PSI_PACKAGE),
-        noPsi ? null : getAttribute(r, KnownAttribute.PSI_IMPL_PACKAGE),
-        noPsi ? null : CommonRendererUtils.getRulePsiClassName(r, psiInterfaceFormat),
-        noPsi ? null : CommonRendererUtils.getRulePsiClassName(r, implClassFormat),
-        noPsi ? null : getAttribute(r, KnownAttribute.MIXIN),
-        noPsi ? null : getAttribute(r, KnownAttribute.STUB_CLASS)));
-    }
-    myGrammarRootParser = rootRule == null ? null : ruleInfo(rootRule).parserClass;
-
-    calcFakeRulesWithType();
-    calcAbstractRules();
-  }
-
-  /** Marks rules that are reused as another rule's {@code elementType}, so they keep an element-type entry even when {@code fake}. */
-  private void calcFakeRulesWithType() {
-    for (BnfRule rule : myFile.getRules()) {
-      BnfRule r = myFile.getRule(getAttribute(rule, KnownAttribute.ELEMENT_TYPE));
-      if (r == null) continue;
-      ruleInfo(r).isInElementType = true;
-    }
+    myExpressionHelper = grammarInfo().expressionHelper();
   }
 
   @Override
@@ -167,11 +129,11 @@ public final class JavaParserGenerator extends ParserGenerator {
 
   @Override
   public void generateParser() throws IOException {
-    Map<String, Set<RuleInfo>> classified = ContainerUtil.classify(myRuleInfos.values().iterator(), o -> o.parserClass);
+    Map<String, Set<RuleInfo>> classified = ContainerUtil.classify(myRuleInfos.values().iterator(), o -> o.parserClass());
     for (String className : ContainerUtil.sorted(classified.keySet())) {
       openOutput(className, myPaths.pathString(KnownAttribute.PARSER_OUTPUT_PATH));
       try {
-        generateParser(className, map(classified.get(className), it -> it.name));
+        generateParser(className, map(classified.get(className), it -> it.name()));
       }
       finally {
         closeOutput();
@@ -783,9 +745,9 @@ public final class JavaParserGenerator extends ParserGenerator {
           ExpressionInfo info = ExpressionGeneratorHelper.getInfoForExpressionParsing(myExpressionHelper, subRule);
           BnfRule rr = info != null ? info.rootRule : subRule;
           String method = R.getFuncName(rr);
-          String parserClass = ruleInfo(rr).parserClass;
+          String parserClass = ruleInfo(rr).parserClass();
           String parserClassName = StringUtil.getShortName(parserClass);
-          boolean renderClass = !parserClass.equals(myGrammarRootParser) && !parserClass.equals(ruleInfo(rule).parserClass);
+          boolean renderClass = !parserClass.equals(myGrammarRootParser) && !parserClass.equals(ruleInfo(rule).parserClass());
           if (info == null) {
             return new MethodCall(renderClass, parserClassName, method, N.builder, N.level);
           }
@@ -830,7 +792,7 @@ public final class JavaParserGenerator extends ParserGenerator {
     else {
       List<String> extraArguments = collectMetaParametersFormatted(rule, node);
       if (extraArguments.isEmpty()) {
-        return new MethodCall(false, StringUtil.getShortName(ruleInfo(rule).parserClass), nextName, N.builder, N.level);
+        return new MethodCall(false, StringUtil.getShortName(ruleInfo(rule).parserClass()), nextName, N.builder, N.level);
       }
       else {
         return new MetaMethodCall(null, nextName, N.builder, N.level, map(extraArguments, MetaParameterArgument::new));
@@ -870,7 +832,7 @@ public final class JavaParserGenerator extends ParserGenerator {
 
   @Override
   protected boolean useTargetClassName(@NotNull BnfRule rule, String parserClass) {
-    return !parserClass.equals(myGrammarRootParser) && !parserClass.equals(ruleInfo(rule).parserClass);
+    return !parserClass.equals(myGrammarRootParser) && !parserClass.equals(ruleInfo(rule).parserClass());
   }
 
   @Override

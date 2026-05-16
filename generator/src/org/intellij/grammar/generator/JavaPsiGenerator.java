@@ -44,7 +44,6 @@ import static org.intellij.grammar.generator.RuleGraphHelper.Cardinality.OPTIONA
 import static org.intellij.grammar.generator.RuleGraphHelper.Cardinality.REQUIRED;
 import static org.intellij.grammar.generator.RuleGraphHelper.Cardinality;
 import static org.intellij.grammar.generator.RuleGraphHelper.getCardinalityText;
-import static org.intellij.grammar.generator.RuleGraphHelper.hasPsiClass;
 import static org.intellij.grammar.generator.java.JavaNames.getRawClassName;
 import static org.intellij.grammar.psi.BnfAttributes.getAttribute;
 import static org.intellij.grammar.psi.BnfAttributes.getRootAttribute;
@@ -78,10 +77,17 @@ public final class JavaPsiGenerator extends Generator {
   private final ExpressionHelper myExpressionHelper;
   private final RuleMethodsHelper myRulesMethodsHelper;
 
+  /**
+   * PSI-only mutable state per rule (populated by {@link #calcRealSuperClasses}). Kept
+   * separate from the immutable {@link RuleInfo} held by {@link GrammarInfo}.
+   */
+  private final Map<String, PsiRuleInfo> myPsiRuleInfos = new HashMap<>();
+
   public JavaPsiGenerator(@NotNull ParserGenerator parserGen) {
-    super(parserGen.myFile, parserGen.mySourcePath, parserGen.myPackagePrefix, "java",
+    super(parserGen.grammarInfo(), parserGen.mySourcePath, parserGen.myPackagePrefix, "java",
           parserGen.myOpener, new JavaNameRenderer(), parserGen.myPaths);
 
+    // TODO I don't like that we copy state here
     // Copy parser-side state populated during parser emission.
     mySimpleTokens.clear();
     mySimpleTokens.putAll(parserGen.mySimpleTokens);
@@ -96,27 +102,14 @@ public final class JavaPsiGenerator extends Generator {
     myParserTypeHolderClass = getRootAttribute(myFile, KnownAttribute.ELEMENT_TYPE_HOLDER_CLASS);
     myPsiElementTypeHolderClass = getRootAttribute(myFile, KnownAttribute.ELEMENT_TYPE_HOLDER_CLASS);
 
-    myExpressionHelper = new ExpressionHelper(myFile, myGraphHelper, this::addWarning);
+    myExpressionHelper = grammarInfo().expressionHelper();
     myRulesMethodsHelper = new RuleMethodsHelper(myGraphHelper, myExpressionHelper, mySimpleTokens, G);
 
-    for (BnfRule r : myFile.getRules()) {
-      String ruleName = r.getName();
-      boolean noPsi = !hasPsiClass(r);
-      myRuleInfos.put(ruleName, new RuleInfo(
-        ruleName, BnfRules.isFake(r),
-        getElementType(r), getAttribute(r, KnownAttribute.PARSER_CLASS),
-        noPsi ? null : getAttribute(r, KnownAttribute.PSI_PACKAGE),
-        noPsi ? null : getAttribute(r, KnownAttribute.PSI_IMPL_PACKAGE),
-        noPsi ? null : CommonRendererUtils.getRulePsiClassName(r, myPsiInterfaceFormat),
-        noPsi ? null : CommonRendererUtils.getRulePsiClassName(r, myImplClassFormat),
-        noPsi ? null : getAttribute(r, KnownAttribute.MIXIN),
-        noPsi ? null : getAttribute(r, KnownAttribute.STUB_CLASS)));
-    }
-    myNoStubs = JBIterable.from(myRuleInfos.values()).find(o -> o.stub != null) == null;
+    myNoStubs = JBIterable.from(myRuleInfos.values()).find(o -> o.stub() != null) == null;
+  }
 
-    calcFakeRulesWithType();
-    calcRulesStubNames();
-    calcAbstractRules();
+  private @NotNull PsiRuleInfo psiInfo(@NotNull BnfRule rule) {
+    return myPsiRuleInfos.computeIfAbsent(rule.getName(), n -> new PsiRuleInfo());
   }
 
   private static @Nullable String inferVisitorClassName(@NotNull BnfFile file, boolean generateVisitor, @NotNull NameFormat format) {
@@ -142,45 +135,6 @@ public final class JavaPsiGenerator extends Generator {
     }
   }
 
-  /** Marks rules that are reused as another rule's {@code elementType}, so they keep an element-type entry even when {@code fake}. */
-  private void calcFakeRulesWithType() {
-    for (BnfRule rule : myFile.getRules()) {
-      BnfRule r = myFile.getRule(getAttribute(rule, KnownAttribute.ELEMENT_TYPE));
-      if (r == null) continue;
-      ruleInfo(r).isInElementType = true;
-    }
-  }
-
-  /**
-   * Resolves each rule's effective stub class: an explicit {@code stubClass}, a stub inherited
-   * from the effective super-rule, or the type argument of a stub-aware base class on the
-   * {@code mixin}/{@code extends} chain. Stores the result in {@link RuleInfo#realStubClass}.
-   */
-  private void calcRulesStubNames() {
-    for (BnfRule rule : myFile.getRules()) {
-      RuleInfo info = ruleInfo(rule);
-      String stubClass = info.stub;
-      if (stubClass == null) {
-        BnfRule topSuper = getEffectiveSuperRule(myFile, rule);
-        stubClass = topSuper == null ? null : ruleInfo(topSuper).stub;
-      }
-      BnfRule topSuper = getEffectiveSuperRule(myFile, rule);
-      String superRuleClass = topSuper == null ? getRootAttribute(myFile, KnownAttribute.EXTENDS) :
-                              topSuper == rule ? getAttribute(rule, KnownAttribute.EXTENDS) :
-                              ruleInfo(topSuper).intfClass;
-      String implSuper = StringUtil.notNullize(info.mixin, superRuleClass);
-      String implSuperRaw = getRawClassName(implSuper);
-      JavaHelper hierarchyHelper = helperFor(rule, KnownAttribute.MIXIN);
-      String stubName =
-        StringUtil.isNotEmpty(stubClass) ? stubClass :
-        implSuper.indexOf("<") < implSuper.indexOf(">") && !hierarchyHelper.findClassMethods(implSuperRaw, MethodType.INSTANCE, "getParentByStub", 0).isEmpty() ?
-        implSuper.substring(implSuper.indexOf("<") + 1, implSuper.indexOf(">")) : null;
-      if (StringUtil.isNotEmpty(stubName)) {
-        info.realStubClass = stubClass;
-      }
-    }
-  }
-
   /**
    * Computes each PSI rule's {@code realSuperClass} (used for the {@code extends} clause of the
    * generated impl) and {@code mixedAST} flag, walking the rule super-chain in post-order so a
@@ -198,20 +152,22 @@ public final class JavaPsiGenerator extends Generator {
       .unique();
     for (BnfRule rule : ordered) {
       RuleInfo info = ruleInfo(rule);
+      PsiRuleInfo psi = psiInfo(rule);
       BnfRule topSuper = supers.get(rule);
       RuleInfo topInfo = topSuper == null || topSuper == rule ? null : ruleInfo(topSuper);
+      PsiRuleInfo topPsi = topSuper == null || topSuper == rule ? null : psiInfo(topSuper);
       String superRuleClass = topSuper == null ? getRootAttribute(myFile, KnownAttribute.EXTENDS) :
                               topSuper == rule ? getAttribute(rule, KnownAttribute.EXTENDS) :
-                              topInfo.implClass;
-      String stubName = info.realStubClass;
+                              topInfo.implClass();
+      String stubName = info.realStubClass();
       String adjustedSuperRuleClass =
         StringUtil.isEmpty(stubName) ? superRuleClass :
         JavaBnfConstants.AST_WRAPPER_PSI_ELEMENT_CLASS.equals(superRuleClass) ? JavaBnfConstants.STUB_BASED_PSI_ELEMENT_BASE + "<" + stubName + ">" :
         superRuleClass.contains("?") ? superRuleClass.replaceAll("\\?", stubName) : superRuleClass;
       // mixin attribute overrides "extends":
-      info.realSuperClass = StringUtil.notNullize(info.mixin, adjustedSuperRuleClass);
+      psi.realSuperClass = StringUtil.notNullize(info.mixin(), adjustedSuperRuleClass);
       JavaHelper hierarchyHelper = helperFor(rule, KnownAttribute.MIXIN);
-      info.mixedAST = topInfo != null ? topInfo.mixedAST : JBIterable.of(superRuleClass, info.realSuperClass)
+      psi.mixedAST = topPsi != null ? topPsi.mixedAST : JBIterable.of(superRuleClass, psi.realSuperClass)
         .map(JavaNames::getRawClassName)
         .flatMap(s -> JBTreeTraverser.<String>from(o -> JBIterable.of(hierarchyHelper.getSuperClassName(o))).withRoot(s).unique())
         .find(JavaBnfConstants.COMPOSITE_PSI_ELEMENT_CLASS::equals) != null;
@@ -229,15 +185,15 @@ public final class JavaPsiGenerator extends Generator {
 
     for (BnfRule rule : myFile.getRules()) {
       RuleInfo info = ruleInfo(rule);
-      if (info.intfPackage == null) continue;
-      String elementType = info.elementType;
+      if (info.intfPackage() == null) continue;
+      String elementType = info.elementType();
       if (StringUtil.isEmpty(elementType)) continue;
       if (sortedCompositeTypes.containsKey(elementType)) continue;
-      if (!info.isFake || info.isInElementType) {
+      if (!info.isFake() || info.isInElementType()) {
         sortedCompositeTypes.put(elementType, rule);
       }
       sortedPsiRules.put(rule.getName(), rule);
-      info.superInterfaces = new LinkedHashSet<>(getSuperInterfaceNames(myFile, rule, myPsiInterfaceFormat));
+      psiInfo(rule).superInterfaces = new LinkedHashSet<>(getSuperInterfaceNames(myFile, rule, myPsiInterfaceFormat));
     }
     if (G.generatePsi) {
       calcRealSuperClasses(sortedPsiRules);
@@ -319,7 +275,7 @@ public final class JavaPsiGenerator extends Generator {
       }
     }
     imports.addAll(ContainerUtil.sorted(
-      JBIterable.from(sortedRules.values()).map(this::ruleInfo).map(o -> o.intfPackage + ".*").toSet()));
+      JBIterable.from(sortedRules.values()).map(this::ruleInfo).map(o -> o.intfPackage() + ".*").toSet()));
     imports.addAll(supers.values());
     String r = G.visitorValue != null ? "<" + G.visitorValue + ">" : "";
     String t = G.visitorValue != null ? G.visitorValue : "void";
@@ -464,14 +420,14 @@ public final class JavaPsiGenerator extends Generator {
     }
     if (generatePsi) {
       imports.addAll(ContainerUtil.sorted(
-        JBIterable.from(sortedCompositeTypes.values()).map(this::ruleInfo).map(o -> o.implPackage + ".*").toSet()));
+        JBIterable.from(sortedCompositeTypes.values()).map(this::ruleInfo).map(o -> o.implPackage() + ".*").toSet()));
       if (G.generatePsiClassesMap) {
         imports.add(CommonClassNames.JAVA_UTIL_COLLECTIONS);
         imports.add(CommonClassNames.JAVA_UTIL_SET);
         imports.add("java.util.LinkedHashMap");
       }
       if (G.generatePsiFactory) {
-        if (JBIterable.from(myRuleInfos.values()).find(o -> o.mixedAST) != null) {
+        if (JBIterable.from(myPsiRuleInfos.values()).find(p -> p.mixedAST) != null) {
           imports.add(JavaBnfConstants.COMPOSITE_PSI_ELEMENT_CLASS);
         }
       }
@@ -539,7 +495,7 @@ public final class JavaPsiGenerator extends Generator {
       for (String elementType : sortedCompositeTypes.keySet()) {
         BnfRule rule = sortedCompositeTypes.get(elementType);
         RuleInfo info = ruleInfo(rule);
-        if (info.isAbstract) continue;
+        if (info.isAbstract()) continue;
         String psiClass = CommonRendererUtils.getRulePsiClassName(rule, myImplClassFormat);
         out("ourMap.put(" + elementType + ", " + psiClass + ".class);");
       }
@@ -555,8 +511,8 @@ public final class JavaPsiGenerator extends Generator {
       for (String elementType : sortedCompositeTypes.keySet()) {
         BnfRule rule = sortedCompositeTypes.get(elementType);
         RuleInfo info = ruleInfo(rule);
-        if (info.isAbstract) continue;
-        if (info.mixedAST) continue;
+        if (info.isAbstract()) continue;
+        if (psiInfo(rule).mixedAST) continue;
         if (first1) {
           out("public static %s createElement(%s node) {", shorten(JavaBnfConstants.PSI_ELEMENT_CLASS),
               shorten(JavaBnfConstants.AST_NODE_CLASS));
@@ -576,8 +532,8 @@ public final class JavaPsiGenerator extends Generator {
       for (String elementType : sortedCompositeTypes.keySet()) {
         BnfRule rule = sortedCompositeTypes.get(elementType);
         RuleInfo info = ruleInfo(rule);
-        if (info.isAbstract) continue;
-        if (!info.mixedAST) continue;
+        if (info.isAbstract()) continue;
+        if (!psiInfo(rule).mixedAST) continue;
         if (first2) {
           if (!first1) newLine();
           out("public static %s createElement(%s type) {", shorten(JavaBnfConstants.COMPOSITE_PSI_ELEMENT_CLASS),
@@ -630,7 +586,7 @@ public final class JavaPsiGenerator extends Generator {
     String psiOutput = myPaths.pathString(KnownAttribute.PSI_OUTPUT_PATH);
     for (BnfRule rule : sortedPsiRules.values()) {
       RuleInfo info = ruleInfo(rule);
-      openOutput(info.intfClass, psiOutput);
+      openOutput(info.intfClass(), psiOutput);
       try {
         generatePsiIntf(rule, info);
       }
@@ -640,7 +596,7 @@ public final class JavaPsiGenerator extends Generator {
     }
     for (BnfRule rule : sortedPsiRules.values()) {
       RuleInfo info = ruleInfo(rule);
-      openOutput(info.implClass, psiOutput);
+      openOutput(info.implClass(), psiOutput);
       try {
         generatePsiImpl(rule, info);
       }
@@ -662,9 +618,9 @@ public final class JavaPsiGenerator extends Generator {
 
   /** Emits the public PSI interface for {@code rule}: super-interfaces (with stub-aware additions) and rule accessor signatures. */
   private void generatePsiIntf(BnfRule rule, RuleInfo info) {
-    String psiClass = info.intfClass;
-    String stubClass = info.stub;
-    Collection<String> psiSupers = info.superInterfaces;
+    String psiClass = info.intfClass();
+    String stubClass = info.stub();
+    Collection<String> psiSupers = psiInfo(rule).superInterfaces;
     if (StringUtil.isNotEmpty(stubClass)) {
       psiSupers = new LinkedHashSet<>(psiSupers);
       psiSupers.add(JavaBnfConstants.STUB_BASED_PSI_ELEMENT + "<" + stubClass + ">");
@@ -684,15 +640,15 @@ public final class JavaPsiGenerator extends Generator {
 
   /**
    * Emits the PSI impl class for {@code rule}: extends/implements clause from
-   * {@link RuleInfo#realSuperClass}, constructors that mirror those of the (eventual) base
+   * {@link PsiRuleInfo#realSuperClass}, constructors that mirror those of the (eventual) base
    * class, optional {@code accept(Visitor)} dispatch, and rule accessor implementations.
    * Detects and warns on cyclic {@code mixin}/{@code extends} chains.
    */
   private void generatePsiImpl(@NotNull BnfRule rule, @NotNull RuleInfo info) {
-    String psiClass = info.implClass;
-    String superInterface = info.intfClass;
-    String stubName = info.realStubClass;
-    String implSuper = info.realSuperClass;
+    String psiClass = info.implClass();
+    String superInterface = info.intfClass();
+    String stubName = info.realStubClass();
+    String implSuper = psiInfo(rule).realSuperClass;
 
     Set<String> imports = new LinkedHashSet<>();
     if (!G.generateFQN) {
@@ -733,7 +689,7 @@ public final class JavaPsiGenerator extends Generator {
         break;
       }
       topSuperRule = next;
-      String superClass = ruleInfo(next).realSuperClass;
+      String superClass = psiInfo(next).realSuperClass;
       if (superClass == null) continue;
       next = getEffectiveSuperRule(myFile, next);
       if (next != null && next != topSuperRule && getAttribute(topSuperRule, KnownAttribute.MIXIN) == null) continue;
@@ -761,7 +717,7 @@ public final class JavaPsiGenerator extends Generator {
       }
     }
 
-    TypeKind typeKind = info.isAbstract ? TypeKind.ABSTRACT_CLASS : TypeKind.CLASS;
+    TypeKind typeKind = info.isAbstract() ? TypeKind.ABSTRACT_CLASS : TypeKind.CLASS;
     generateClassHeader(psiClass, imports, "", typeKind, implSuper, superInterface);
     String shortName = StringUtil.getShortName(psiClass);
     if (constructors.isEmpty()) {
@@ -793,7 +749,7 @@ public final class JavaPsiGenerator extends Generator {
       String r = G.visitorValue != null ? "<" + G.visitorValue + ">" : "";
       String t = G.visitorValue != null ? " " + G.visitorValue : "void";
       String ret = G.visitorValue != null ? "return " : "";
-      boolean addOverride = topSuperRule != rule && info.mixin == null;
+      boolean addOverride = topSuperRule != rule && info.mixin() == null;
       if (!addOverride && topSuperClass != null) {
         main:
         for (String curClass = topSuperClass; curClass != null; curClass = hierarchyHelper.getSuperClassName(curClass)) {
@@ -832,7 +788,7 @@ public final class JavaPsiGenerator extends Generator {
   /** Emits accessor and util methods for {@code rule}'s PSI interface ({@code intf=true}) or impl ({@code intf=false}). */
   private void generatePsiClassMethods(BnfRule rule, RuleInfo info, boolean intf) {
     Set<String> visited = new TreeSet<>();
-    boolean mixedAST = info.mixedAST;
+    boolean mixedAST = psiInfo(rule).mixedAST;
     for (RuleMethodsHelper.MethodInfo methodInfo : myRulesMethodsHelper.getFor(rule)) {
       if (StringUtil.isEmpty(methodInfo.name)) continue;
       switch (methodInfo.type) {
@@ -855,7 +811,7 @@ public final class JavaPsiGenerator extends Generator {
             found = true;
           }
           if (intf && !found) {
-            String ruleClassName = shorten(info.intfClass);
+            String ruleClassName = shorten(info.intfClass());
             String implClassName = StringUtil.getShortName(String.valueOf(myPsiImplUtilClass));
             out("""
                   //WARNING: %s(...) is skipped
@@ -986,8 +942,8 @@ public final class JavaPsiGenerator extends Generator {
     boolean many = type.many();
     boolean required = type == REQUIRED && !many;
     boolean stubbed = !isToken &&
-                      ruleInfo(rule).realStubClass != null &&
-                      ruleInfo(methodInfo.rule).realStubClass != null;
+                      ruleInfo(rule).realStubClass() != null &&
+                      ruleInfo(methodInfo.rule).realStubClass() != null;
     String result;
     // todo REMOVEME. Keep old generation logic for a while.
     if (!mixedAST && myNoStubs) {
@@ -1023,7 +979,7 @@ public final class JavaPsiGenerator extends Generator {
       return Objects.requireNonNull(first).second;
     }
     else {
-      return ruleInfo(rule).intfClass;
+      return ruleInfo(rule).intfClass();
     }
   }
 

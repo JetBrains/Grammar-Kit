@@ -26,11 +26,10 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.*;
+import java.util.function.Consumer;
 
 import static org.intellij.grammar.generator.ParserGeneratorUtil.getTokenType;
 import static org.intellij.grammar.generator.RuleGraphHelper.hasElementType;
-import static org.intellij.grammar.psi.BnfAst.getTokenTextToNameMap;
-import static org.intellij.grammar.psi.BnfAttributes.getAttribute;
 import static org.intellij.grammar.psi.BnfAttributes.getRootAttribute;
 import static org.intellij.grammar.psi.BnfRules.getSynonymTargetOrSelf;
 
@@ -57,6 +56,7 @@ public sealed abstract class Generator permits ParserGenerator, JavaPsiGenerator
    */
   protected final @NotNull BnfFile myFile;
   protected final @NotNull BnfPathsResolution myPaths;
+  final @NotNull GrammarInfo myGrammarInfo;
 
   /**
    * The package prefix to use for the generated parser.
@@ -80,7 +80,7 @@ public sealed abstract class Generator permits ParserGenerator, JavaPsiGenerator
   protected final RuleGraphHelper myGraphHelper;
   protected final BnfFirstNextAnalyzer myFirstNextAnalyzer;
 
-  final @NotNull Map<String, RuleInfo> myRuleInfos = new TreeMap<>();
+  final @NotNull Map<String, RuleInfo> myRuleInfos;
 
   /**
    * Collection of token sets corresponding to each of the token choice
@@ -97,16 +97,17 @@ public sealed abstract class Generator permits ParserGenerator, JavaPsiGenerator
    */
   protected final Map<String, String> mySimpleTokens;
 
-  protected Generator(@NotNull BnfFile psiFile,
+  protected Generator(@NotNull GrammarInfo grammarInfo,
                       @NotNull String sourcePath,
                       @NotNull String packagePrefix,
                       @NotNull String outputFileExtension,
                       @NotNull OutputOpener outputOpener,
                       @NotNull NameRenderer nameRenderer,
                       @NotNull BnfPathsResolution paths) {
-    myFile = psiFile;
+    myGrammarInfo = grammarInfo;
+    myFile = grammarInfo.file();
 
-    G = new GenOptions(psiFile);
+    G = grammarInfo.options();
     N = G.names;
     R = nameRenderer;
     mySourcePath = sourcePath;
@@ -117,13 +118,16 @@ public sealed abstract class Generator permits ParserGenerator, JavaPsiGenerator
 
     myJavaHelper = JavaHelper.getJavaHelper(myFile);
 
-    List<BnfRule> rules = psiFile.getRules();
-    BnfRule rootRule = rules.isEmpty() ? null : rules.get(0);
-    myGrammarRoot = rootRule == null ? null : rootRule.getName();
-    myGrammarRootParser = rootRule == null ? null : getRootAttribute(rootRule, KnownAttribute.PARSER_CLASS);
-    mySimpleTokens = new LinkedHashMap<>(getTokenTextToNameMap(myFile));
-    myGraphHelper = RuleGraphHelper.getCached(psiFile);
-    myFirstNextAnalyzer = BnfFirstNextAnalyzer.createAnalyzer(true);
+    myGrammarRoot = grammarInfo.grammarRoot();
+    myGrammarRootParser = grammarInfo.grammarRootParser();
+    mySimpleTokens = new LinkedHashMap<>(grammarInfo.initialSimpleTokens());
+    myGraphHelper = grammarInfo.graphHelper();
+    myFirstNextAnalyzer = grammarInfo.firstNextAnalyzer();
+    myRuleInfos = grammarInfo.ruleInfos();
+  }
+
+  final @NotNull GrammarInfo grammarInfo() {
+    return myGrammarInfo;
   }
 
   /**
@@ -199,6 +203,25 @@ public sealed abstract class Generator permits ParserGenerator, JavaPsiGenerator
     return myScopedHelpers.computeIfAbsent(attribute, attr -> factory.getInstance(myPaths, attr));
   }
 
+  /**
+   * TODO maybe let's deduplicate?
+   *
+   * Builds a manager-aware {@link GrammarInfo.HelperResolver} for use during
+   * {@link GrammarInfo#build}. Mirrors {@link #helperFor} so stub resolution and
+   * other class-lookup work performed inside {@code GrammarInfo} honors the same
+   * scope as later, emission-time queries.
+   */
+  static @NotNull GrammarInfo.HelperResolver defaultHelperResolver(@NotNull BnfFile file,
+                                                                   @NotNull BnfPathsResolution paths) {
+    PsiHelperFactory factory = file.getProject().getService(PsiHelperFactory.class);
+    JavaHelper fallback = JavaHelper.getJavaHelper(file);
+    if (factory == null) {
+      return (rule, attribute) -> fallback;
+    }
+    Map<KnownAttribute<?>, JavaHelper> cache = new HashMap<>();
+    return (rule, attribute) -> cache.computeIfAbsent(attribute, a -> factory.getInstance(paths, a));
+  }
+
   public void out(String s, Object... args) {
     myPrinter.out(s, args);
   }
@@ -234,39 +257,14 @@ public sealed abstract class Generator permits ParserGenerator, JavaPsiGenerator
       .append(packageName).toSet();
     Set<String> includedClasses = new HashSet<>();
     for (RuleInfo info : myRuleInfos.values()) {
-      if (includedPackages.contains(info.intfPackage)) includedClasses.add(StringUtil.getShortName(info.intfClass));
-      if (includedPackages.contains(info.implPackage)) includedClasses.add(StringUtil.getShortName(info.implClass));
+      if (includedPackages.contains(info.intfPackage())) includedClasses.add(StringUtil.getShortName(info.intfClass()));
+      if (includedPackages.contains(info.implPackage())) includedClasses.add(StringUtil.getShortName(info.implClass()));
     }
     return includedClasses;
   }
 
   @NotNull RuleInfo ruleInfo(@NotNull BnfRule rule) {
     return Objects.requireNonNull(myRuleInfos.get(rule.getName()));
-  }
-
-  /**
-   * Marks rules whose generated PSI impl should be {@code abstract}: rules without modifiers,
-   * recovery, or hooks, that aren't reused as another rule's element type, aren't the grammar
-   * root, and the rule graph reports as collapsible with no incoming references.
-   */
-  protected void calcAbstractRules() {
-    final var reusedRules = new HashSet<String>();
-    for (BnfRule rule : myFile.getRules()) {
-      String elementType = getAttribute(rule, KnownAttribute.ELEMENT_TYPE);
-      BnfRule r = elementType != null ? myFile.getRule(elementType) : null;
-      if (r != null && r != rule) reusedRules.add(r.getName());
-    }
-    for (BnfRule rule : myFile.getRules()) {
-      if (reusedRules.contains(rule.getName())) continue;
-      if (myGrammarRoot.equals(rule.getName())) continue;
-      if (!rule.getModifierList().isEmpty()) continue;
-      if (getAttribute(rule, KnownAttribute.RECOVER_WHILE) != null) continue;
-      if (!getAttribute(rule, KnownAttribute.HOOKS).isEmpty()) continue;
-
-      if (myGraphHelper.canCollapse(rule) && myGraphHelper.getFor(rule).isEmpty()) {
-        ruleInfo(rule).isAbstract = true;
-      }
-    }
   }
 
   /**
@@ -313,8 +311,8 @@ public sealed abstract class Generator permits ParserGenerator, JavaPsiGenerator
       for (BnfRule rule : entry.getValue()) {
         RuleInfo ruleInfo = this.ruleInfo(rule);
         if (!hasElementType(rule)) continue;
-        String elementType = ruleInfo.isFake && !ruleInfo.isInElementType ||
-                             getSynonymTargetOrSelf(rule) != rule ? null : ruleInfo.elementType;
+        String elementType = ruleInfo.isFake() && !ruleInfo.isInElementType() ||
+                             getSynonymTargetOrSelf(rule) != rule ? null : ruleInfo.elementType();
         if (StringUtil.isEmpty(elementType)) continue;
         if (set == null) set = new TreeSet<>();
         set.add(elementType);
@@ -336,14 +334,25 @@ public sealed abstract class Generator permits ParserGenerator, JavaPsiGenerator
 
   /** Reports a generator warning — to {@code stdout} under tests, otherwise as an IDE notification. */
   public void addWarning(String text) {
-    if (ApplicationManager.getApplication().isUnitTestMode()) {
-      //noinspection UseOfSystemOutOrSystemErr
-      System.out.println(text);
-    }
-    else {
-      NotificationGroupManager.getInstance()
-        .getNotificationGroup("grammarkit.parser.generator.log")
-        .createNotification(text, MessageType.WARNING).notify(myFile.getProject());
-    }
+    defaultWarningSink(myFile).accept(text);
+  }
+
+  /**
+   * Static warning sink for use before a {@code Generator} instance exists — e.g. during
+   * {@link GrammarInfo#build}, which runs inside subclass {@code super(...)} arguments and
+   * therefore cannot call instance methods. Mirrors {@link #addWarning}.
+   */
+  static @NotNull Consumer<String> defaultWarningSink(@NotNull BnfFile file) {
+    return text -> {
+      if (ApplicationManager.getApplication().isUnitTestMode()) {
+        //noinspection UseOfSystemOutOrSystemErr
+        System.out.println(text);
+      }
+      else {
+        NotificationGroupManager.getInstance()
+          .getNotificationGroup("grammarkit.parser.generator.log")
+          .createNotification(text, MessageType.WARNING).notify(file.getProject());
+      }
+    };
   }
 }

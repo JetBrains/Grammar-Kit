@@ -117,6 +117,13 @@ public final class BnfPaths {
    * resolved against the BNF file's parent, with the parser-class-package fallback for
    * {@code parserOutputPath} and the full output-path cascade applied.
    *
+   * <p>When the grammar declares no {@code inputPath}, the resolution leaves
+   * {@link KnownAttribute#INPUT_PATH} unset rather than defaulting it to the BNF file's parent.
+   * IDE-side consumers ({@link org.intellij.grammar.java.PsiHelperFactory}) treat the missing
+   * input path as "no user-declared scope" and fall back to a project-wide search scope; CLI
+   * consumers without a {@code Project} seed the default themselves via
+   * {@link #resolveExplicit(Map, Path)}.
+   *
    * <p>Cached via {@link CachedValuesManager}, invalidated by
    * {@link PsiModificationTracker#MODIFICATION_COUNT}. Read-only — never creates directories.
    */
@@ -172,9 +179,9 @@ public final class BnfPaths {
       if (inferred != null) resolved.put(KnownAttribute.PARSER_OUTPUT_PATH, inferred);
     }
 
-    // inputPath default: when unset, classes referenced in mixin/util attributes are looked up
-    // next to the BNF file. Symmetric to the parserOutputPath inference above.
-    resolved.putIfAbsent(KnownAttribute.INPUT_PATH, parentPath);
+    // No inputPath default in IDE mode: PsiHelperFactory falls back to a project-wide search
+    // scope when the resolution has no inputPath. The CLI overload of resolveExplicit seeds
+    // bnfParent itself because standalone runs have no Project to fall back to.
 
     Map<KnownAttribute<String>, Path> effectivePaths = applyCascade(resolved);
     return new BnfPathsResolution(effectivePaths);

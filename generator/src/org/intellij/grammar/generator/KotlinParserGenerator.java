@@ -47,15 +47,15 @@ import static org.intellij.grammar.psi.BnfRules.getEffectiveSuperRule;
 import static org.intellij.grammar.psi.BnfTypes.*;
 
 /**
- * [Generator] implementation that emits Kotlin parser sources targeting the Syntax Engine
+ * [ParserGenerator] implementation that emits Kotlin parser sources targeting the Syntax Engine
  * API (`SyntaxParserRuntime`, `SyntaxElementType`, etc.) rather than the legacy `PsiBuilder`
  * world.
  * <p>
  * [#generate()] writes the parser file(s), then the syntax element-type holder, and finally
- * delegates PSI emission to a fresh [JavaParserGenerator] — Kotlin parser generation does not
- * produce PSI of its own, but it does discover simple tokens along the way that the Java
- * generator needs, so [JavaParserGenerator#replaceSimpleTokes] is called before
- * [JavaParserGenerator#generatePsiOnly] runs.
+ * delegates PSI emission to a fresh [JavaPsiGenerator] — Kotlin parser generation does not
+ * produce PSI of its own, but it does discover simple tokens (and records which tokens were
+ * referenced in the grammar) that the PSI generator needs; [JavaPsiGenerator]'s constructor
+ * copies that state out of this generator.
  * <p>
  * Implementation notes:
  * 1. A method's name starts with `generate` if it either calls the
@@ -64,7 +64,7 @@ import static org.intellij.grammar.psi.BnfTypes.*;
  * are then going to be outputted via one of the `generate*`
  * methods to the file.
  */
-public final class KotlinParserGenerator extends Generator {
+public final class KotlinParserGenerator extends ParserGenerator {
   private static final @NotNull String HORIZONTAL_SEPARATOR = "/* ********************************************************** */";
 
   /**
@@ -75,12 +75,6 @@ public final class KotlinParserGenerator extends Generator {
   private final @NotNull String myParserUtil;
 
   private final @NotNull Collection<String> mySGPRMethods = Arrays.asList("eof", "advanceToken");
-
-  /**
-   * Contains names of all the tokens whose corresponding {@code SyntaxElementType}
-   * definitions were generated.
-   */
-  private final @NotNull Set<String> myTokensUsedInGrammar = new LinkedHashSet<>();
 
   private final ExpressionHelper myExpressionHelper;
 
@@ -186,9 +180,7 @@ public final class KotlinParserGenerator extends Generator {
       generateElementTypes();
     }
     if (myGrammarRoot != null && (G.generatePsi)) {
-      JavaParserGenerator javaParserGenerator = new JavaParserGenerator(myFile, mySourcePath, myPackagePrefix, myOpener, myPaths);
-      javaParserGenerator.replaceSimpleTokes(mySimpleTokens);
-      javaParserGenerator.generatePsi();
+      new JavaPsiGenerator(this).generate();
     }
   }
 

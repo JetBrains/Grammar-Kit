@@ -47,7 +47,7 @@ public abstract class AbstractBnfGeneratorTest extends BnfGeneratorTestCase {
     };
   }
 
-  protected abstract @NotNull List<@NotNull Generator> createGenerators(
+  protected abstract @NotNull List<@NotNull ParserGenerator> createGenerators(
     @NotNull BnfFile psiFile,
     @NotNull String outputPath,
     @NotNull OutputOpener outputOpener

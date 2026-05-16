@@ -118,9 +118,9 @@ public class JavaBnfGeneratorTest extends AbstractBnfGeneratorTest {
   }
 
   @Override
-  protected @NotNull List<@NotNull Generator> createGenerators(@NotNull BnfFile psiFile,
-                                                               @NotNull String outputPath,
-                                                               @NotNull OutputOpener outputOpener) {
+  protected @NotNull List<@NotNull ParserGenerator> createGenerators(@NotNull BnfFile psiFile,
+                                                                     @NotNull String outputPath,
+                                                                     @NotNull OutputOpener outputOpener) {
     java.nio.file.Path parserPath    = resolveTestPath(psiFile, KnownAttribute.PARSER_OUTPUT_PATH);
     java.nio.file.Path etHolderPath  = resolveTestPath(psiFile, KnownAttribute.ELEMENT_TYPE_HOLDER_OUTPUT_PATH);
     java.nio.file.Path converterPath = resolveTestPath(psiFile, KnownAttribute.ELEMENT_TYPE_CONVERTER_FACTORY_OUTPUT_PATH);

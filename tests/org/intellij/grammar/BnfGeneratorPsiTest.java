@@ -10,8 +10,8 @@ import com.intellij.psi.*;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.testFramework.fixtures.BasePlatformTestCase;
 import com.intellij.util.ProcessingContext;
+import org.intellij.grammar.generator.Generator;
 import org.intellij.grammar.generator.JavaParserGenerator;
-import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.generator.NameShortener;
 import org.intellij.grammar.generator.OutputOpener;
 import org.intellij.grammar.classinfo.MethodType;
@@ -32,7 +32,7 @@ import java.util.List;
 /**
  * Tests for PSI code generation with PsiHelper (PSI-based Java resolution).
  * <p>
- * Unlike {@link BnfGeneratorTest} which uses lightweight parsing tests (and thus AsmHelper),
+ * Unlike {@link BnfGeneratorPsiTest} which uses lightweight parsing tests (and thus AsmHelper),
  * this test uses {@link BasePlatformTestCase} which loads the Java plugin and registers
  * {@link org.intellij.grammar.java.PsiHelper} — enabling PSI-based type resolution.
  */
@@ -240,7 +240,7 @@ public class BnfGeneratorPsiTest extends BasePlatformTestCase {
     // PsiHelper.getAnnotationsInner() fails to filter @NotNull from method annotations
     // when PsiType.getAnnotations() doesn't return annotations on inner type components
     // of qualified types. We simulate this by wrapping the JavaHelper.
-    Field javaHelperField = JavaParserGenerator.class.getSuperclass().getDeclaredField("myJavaHelper");
+    Field javaHelperField = Generator.class.getDeclaredField("myJavaHelper");
     javaHelperField.setAccessible(true);
     JavaHelper original = (JavaHelper) javaHelperField.get(generator);
     javaHelperField.set(generator, new DuplicateAnnotationJavaHelper(original));

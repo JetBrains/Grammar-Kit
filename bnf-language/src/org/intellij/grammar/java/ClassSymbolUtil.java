@@ -29,9 +29,9 @@ import java.util.function.Function;
  * {@link MyElement} delegate and surfaces the field the {@link JavaHelper} contract expects, so
  * the helpers themselves can keep their override methods to one line each.
  */
-public final class ClassInfoUtil {
+public final class ClassSymbolUtil {
 
-  private ClassInfoUtil() { }
+  private ClassSymbolUtil() { }
 
   public static boolean isPublic(@Nullable NavigatablePsiElement element) {
     Object delegate = delegateOf(element);

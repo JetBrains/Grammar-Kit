@@ -20,7 +20,7 @@ import java.util.List;
 
 /**
  * The {@link JavaHelper} adapter over a {@link JvmClassSymbolManager}. Every override delegates to
- * the manager (for {@link ClassSymbol} lookups) or to {@link ClassInfoUtil} (for unwrapping
+ * the manager (for {@link ClassSymbol} lookups) or to {@link ClassSymbolUtil} (for unwrapping
  * {@link MyElement} wrappers). The manager owns the cache and the ordered provider list, so this
  * class holds no symbol state of its own.
  * <p>
@@ -38,7 +38,7 @@ public class JvmSyntaxHelper extends JavaHelper {
 
   @Override
   public boolean isPublic(@Nullable NavigatablePsiElement element) {
-    return ClassInfoUtil.isPublic(element);
+    return ClassSymbolUtil.isPublic(element);
   }
 
   @Override
@@ -61,7 +61,7 @@ public class JvmSyntaxHelper extends JavaHelper {
       if (!acceptsName(methodName, method.name)) continue;
       if (method.methodType != methodType) continue;
       if (!acceptsModifiers(method.modifiers, methodType, allowAbstract)) continue;
-      if (!ClassInfoUtil.acceptsParams(method, paramCount, paramTypes, s -> manager.findClass(Fqn.ofNullable(s)))) continue;
+      if (!ClassSymbolUtil.acceptsParams(method, paramCount, paramTypes, s -> manager.findClass(Fqn.ofNullable(s)))) continue;
       result.add(new MyElement<>(method));
     }
     return result;
@@ -75,31 +75,31 @@ public class JvmSyntaxHelper extends JavaHelper {
 
   @Override
   public @NotNull List<String> getMethodTypes(@Nullable NavigatablePsiElement method) {
-    return ClassInfoUtil.getMethodTypes(method);
+    return ClassSymbolUtil.getMethodTypes(method);
   }
 
   @Override
   public List<TypeParameterSymbol> getGenericParameters(NavigatablePsiElement method) {
-    return ClassInfoUtil.getGenericParameters(method);
+    return ClassSymbolUtil.getGenericParameters(method);
   }
 
   @Override
   public List<String> getExceptionList(NavigatablePsiElement method) {
-    return ClassInfoUtil.getExceptionList(method);
+    return ClassSymbolUtil.getExceptionList(method);
   }
 
   @Override
   public @NotNull String getDeclaringClass(@Nullable NavigatablePsiElement method) {
-    return ClassInfoUtil.getDeclaringClass(method);
+    return ClassSymbolUtil.getDeclaringClass(method);
   }
 
   @Override
   public @NotNull List<String> getAnnotations(@Nullable NavigatablePsiElement element) {
-    return ClassInfoUtil.getAnnotations(element);
+    return ClassSymbolUtil.getAnnotations(element);
   }
 
   @Override
   public @NotNull List<String> getParameterAnnotations(@Nullable NavigatablePsiElement method, int paramIndex) {
-    return ClassInfoUtil.getParameterAnnotations(method, paramIndex);
+    return ClassSymbolUtil.getParameterAnnotations(method, paramIndex);
   }
 }

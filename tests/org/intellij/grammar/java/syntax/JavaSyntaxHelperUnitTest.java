@@ -304,7 +304,7 @@ public class JavaSyntaxHelperUnitTest extends TestCase {
   }
 
   // ---------------------------------------------------------------------------------------------
-  // isPublic — delegates to ClassInfoUtil
+  // isPublic — delegates to ClassSymbolUtil
   // ---------------------------------------------------------------------------------------------
 
   public void testIsPublicTrueForPublicClass() {
@@ -332,7 +332,7 @@ public class JavaSyntaxHelperUnitTest extends TestCase {
   }
 
   // ---------------------------------------------------------------------------------------------
-  // element-based accessors (delegate to ClassInfoUtil)
+  // element-based accessors (delegate to ClassSymbolUtil)
   // ---------------------------------------------------------------------------------------------
 
   public void testGetMethodTypesReturnsAnnotatedTypes() {

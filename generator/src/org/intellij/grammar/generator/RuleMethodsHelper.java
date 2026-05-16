@@ -34,7 +34,7 @@ class RuleMethodsHelper {
   private final Map<String, String> mySimpleTokens;
   private final GenOptions G;
 
-  private final Map<BnfRule, Pair<Map<String, MethodInfo>, Collection<MethodInfo>>> myMethods;
+  private final Map<BnfRule, MethodSet> myMethods;
 
   public RuleMethodsHelper(RuleGraphHelper ruleGraphHelper,
                            ExpressionHelper expressionHelper,
@@ -54,12 +54,14 @@ class RuleMethodsHelper {
       calcMethods(rule, tokensReversed);
     }
     for (BnfRule r0 : myGraphHelper.getRuleExtendsMap().keySet()) {
-      if (!myMethods.containsKey(r0)) continue;
-      Map<String, MethodInfo> p0 = myMethods.get(r0).first;
+      MethodSet s0 = myMethods.get(r0);
+      if (s0 == null) continue;
+      Map<String, MethodInfo> p0 = s0.basicByName();
       for (BnfRule r : myGraphHelper.getRuleExtendsMap().get(r0)) {
         if (r0 == r) continue;
-        if (!myMethods.containsKey(r)) continue;
-        Map<String, MethodInfo> p = myMethods.get(r).first;
+        MethodSet s = myMethods.get(r);
+        if (s == null) continue;
+        Map<String, MethodInfo> p = s.basicByName();
         for (String name : p.keySet()) {
           MethodInfo m0 = p0.get(name);
           if (m0 == null) continue;
@@ -72,18 +74,18 @@ class RuleMethodsHelper {
   }
 
   public @NotNull Collection<MethodInfo> getFor(@NotNull BnfRule rule) {
-    return myMethods.get(rule).second;
+    return myMethods.get(rule).ordered();
   }
 
   public @Nullable MethodInfo getMethodInfo(@NotNull BnfRule rule, String name) {
-    return myMethods.get(rule).first.get(name);
+    return myMethods.get(rule).basicByName().get(name);
   }
 
   public @Nullable Collection<String> getMethodNames(@NotNull BnfRule rule) {
-    return myMethods.get(rule).first.keySet();
+    return myMethods.get(rule).basicByName().keySet();
   }
 
-  protected void calcMethods(BnfRule rule, Map<String, String> tokensReversed) {
+  private void calcMethods(@NotNull BnfRule rule, @NotNull Map<String, String> tokensReversed) {
     List<MethodInfo> result = new ArrayList<>();
 
     Map<PsiElement, RuleGraphHelper.Cardinality> cardMap = myGraphHelper.getFor(rule);
@@ -143,7 +145,7 @@ class RuleMethodsHelper {
         result.add(new MethodInfo(MethodType.MIXIN, pair.first, null, null, null));
       }
     }
-    myMethods.put(rule, Pair.create(basicMethods, result));
+    myMethods.put(rule, new MethodSet(basicMethods, result));
   }
 
   private @Nullable String getRuleOrTokenNameForPsi(@NotNull PsiElement tree, @NotNull RuleGraphHelper.Cardinality type) {
@@ -169,6 +171,18 @@ class RuleMethodsHelper {
     }
     return result;
   }
+
+  /**
+   * Per-rule PSI accessor set
+   *
+   * @param basicByName maps the original accessor name to its {@link MethodInfo} for the rule's RULE/TOKEN children only
+   *                    (used for super-method deduplication and path-based lookups)
+   * @param ordered is the full emission-ordered list including USER and MIXIN methods.
+   */
+  private record MethodSet(
+    @NotNull Map<String, MethodInfo> basicByName,
+    @NotNull Collection<MethodInfo> ordered
+  ) { }
 
   public enum MethodType {RULE, TOKEN, USER, MIXIN}
 

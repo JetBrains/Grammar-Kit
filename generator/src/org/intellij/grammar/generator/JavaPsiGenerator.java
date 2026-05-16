@@ -92,12 +92,7 @@ public final class JavaPsiGenerator extends Generator {
     myImplClassFormat = NameFormat.forPsiImplClass(myFile);
     myPsiImplUtilClass = getRootAttribute(myFile, KnownAttribute.PSI_IMPL_UTIL_CLASS);
     myPsiTreeUtilClass = getRootAttribute(myFile, KnownAttribute.PSI_TREE_UTIL_CLASS);
-    String tmpVisitorClass = getRootAttribute(myFile, KnownAttribute.PSI_VISITOR_NAME);
-    tmpVisitorClass = !G.generateVisitor || StringUtil.isEmpty(tmpVisitorClass) ? null :
-                      !tmpVisitorClass.equals(myPsiInterfaceFormat.strip(tmpVisitorClass)) ? tmpVisitorClass :
-                      myPsiInterfaceFormat.apply("") + tmpVisitorClass;
-    myVisitorClassName = tmpVisitorClass == null || !tmpVisitorClass.equals(StringUtil.getShortName(tmpVisitorClass)) ?
-                         tmpVisitorClass : getRootAttribute(myFile, KnownAttribute.PSI_PACKAGE) + "." + tmpVisitorClass;
+    myVisitorClassName = inferVisitorClassName(myFile, G.generateVisitor, myPsiInterfaceFormat);
     myParserTypeHolderClass = getRootAttribute(myFile, KnownAttribute.ELEMENT_TYPE_HOLDER_CLASS);
     myPsiElementTypeHolderClass = getRootAttribute(myFile, KnownAttribute.ELEMENT_TYPE_HOLDER_CLASS);
 
@@ -122,6 +117,29 @@ public final class JavaPsiGenerator extends Generator {
     calcFakeRulesWithType();
     calcRulesStubNames();
     calcAbstractRules();
+  }
+
+  private static @Nullable String inferVisitorClassName(@NotNull BnfFile file, boolean generateVisitor, @NotNull NameFormat format) {
+    if (!generateVisitor) {
+      return null;
+    }
+
+    String specifiedName = getRootAttribute(file, KnownAttribute.PSI_VISITOR_NAME);
+    if (StringUtil.isEmpty(specifiedName)) {
+      return null;
+    }
+
+    // TODO this seems to be incorrect when FQN is specified
+    String nameWithPrefix = specifiedName.equals(format.strip(specifiedName))
+                            ? format.apply("") + specifiedName
+                            : specifiedName;
+
+    if (nameWithPrefix.equals(StringUtil.getShortName(nameWithPrefix))) {
+      return getRootAttribute(file, KnownAttribute.PSI_PACKAGE) + "." + nameWithPrefix;
+    }
+    else {
+      return nameWithPrefix;
+    }
   }
 
   /** Marks rules that are reused as another rule's {@code elementType}, so they keep an element-type entry even when {@code fake}. */

@@ -63,6 +63,7 @@ import static org.intellij.grammar.psi.BnfRules.getSuperInterfaceNames;
  * without PSI fields).
  */
 public final class JavaPsiGenerator extends Generator {
+  private static final List<String> DEFAULT_PSI_IMPORTS = Arrays.asList("java.util.List", "org.jetbrains.annotations.*", JavaBnfConstants.PSI_ELEMENT_CLASS);
 
   private final @NotNull Set<String> myTokensUsedInGrammar;
 
@@ -659,9 +660,7 @@ public final class JavaPsiGenerator extends Generator {
     }
 
     Set<String> imports = new LinkedHashSet<>();
-    imports.addAll(Arrays.asList("java.util.List",
-                                 "org.jetbrains.annotations.*",
-                                 JavaBnfConstants.PSI_ELEMENT_CLASS));
+    imports.addAll(DEFAULT_PSI_IMPORTS);
     imports.addAll(psiSupers);
     imports.addAll(getRuleMethodTypesToImport(rule));
 

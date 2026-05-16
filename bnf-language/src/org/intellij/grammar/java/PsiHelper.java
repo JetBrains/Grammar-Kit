@@ -19,7 +19,7 @@ import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.classinfo.Fqn;
 import org.intellij.grammar.classinfo.JvmClassSymbolManager;
 import org.intellij.grammar.classinfo.MethodType;
-import org.intellij.grammar.classinfo.TypeParameterInfo;
+import org.intellij.grammar.classinfo.TypeParameterSymbol;
 import org.intellij.grammar.classinfo.asm.AsmClassSymbolProvider;
 import org.intellij.grammar.psi.BnfAttr;
 import org.jetbrains.annotations.NotNull;
@@ -208,11 +208,11 @@ final class PsiHelper extends JvmSyntaxHelper {
   }
 
   @Override
-  public List<TypeParameterInfo> getGenericParameters(NavigatablePsiElement method) {
+  public List<TypeParameterSymbol> getGenericParameters(NavigatablePsiElement method) {
     if (!(method instanceof PsiMethod psiMethod)) return super.getGenericParameters(method);
 
     PsiTypeParameter[] typeParameters = psiMethod.getTypeParameters();
-    return ContainerUtil.map(typeParameters, param -> new TypeParameterInfo(
+    return ContainerUtil.map(typeParameters, param -> new TypeParameterSymbol(
       param.getName(),
       ContainerUtil.map(param.getExtendsListTypes(), bound -> bound.getCanonicalText(false)),
       ContainerUtil.map(getAnnotationsInner(param), Fqn::of)));

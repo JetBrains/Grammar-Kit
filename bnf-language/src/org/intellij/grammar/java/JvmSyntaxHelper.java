@@ -11,7 +11,7 @@ import org.intellij.grammar.classinfo.Fqn;
 import org.intellij.grammar.classinfo.JvmClassSymbolManager;
 import org.intellij.grammar.classinfo.MethodSymbol;
 import org.intellij.grammar.classinfo.MethodType;
-import org.intellij.grammar.classinfo.TypeParameterInfo;
+import org.intellij.grammar.classinfo.TypeParameterSymbol;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -79,7 +79,7 @@ public class JvmSyntaxHelper extends JavaHelper {
   }
 
   @Override
-  public List<TypeParameterInfo> getGenericParameters(NavigatablePsiElement method) {
+  public List<TypeParameterSymbol> getGenericParameters(NavigatablePsiElement method) {
     return ClassInfoUtil.getGenericParameters(method);
   }
 

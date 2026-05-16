@@ -15,7 +15,7 @@ import org.intellij.grammar.classinfo.MethodSymbol;
 import org.intellij.grammar.classinfo.MethodType;
 import org.intellij.grammar.classinfo.ParameterSymbol;
 import org.intellij.grammar.classinfo.SymbolResolver;
-import org.intellij.grammar.classinfo.TypeParameterInfo;
+import org.intellij.grammar.classinfo.TypeParameterSymbol;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.org.objectweb.asm.*;
@@ -329,7 +329,7 @@ public final class AsmClassSymbolProvider implements JvmClassSymbolProvider {
     @Override
     public void visitFormalTypeParameter(String s) {
       finishElement(null);
-      method.generics.add(new TypeParameterInfo(s));
+      method.generics.add(new TypeParameterSymbol(s));
     }
 
     @Override
@@ -468,7 +468,7 @@ public final class AsmClassSymbolProvider implements JvmClassSymbolProvider {
           case BOUNDS:
             String bound = sb();
             if (!"java.lang.Object".equals(bound)) {
-              TypeParameterInfo currentGeneric = ContainerUtil.getLastItem(method.generics);
+              TypeParameterSymbol currentGeneric = ContainerUtil.getLastItem(method.generics);
               if (currentGeneric != null) {
                 currentGeneric.getExtendsList().add(bound);
               }

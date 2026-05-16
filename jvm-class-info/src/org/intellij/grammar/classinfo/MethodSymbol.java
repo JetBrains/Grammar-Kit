@@ -14,7 +14,7 @@ public class MethodSymbol {
   public String annotatedReturnType;
   public final List<ParameterSymbol> parameters = new SmartList<>();
   public final List<Fqn> annotations = new SmartList<>();
-  public final List<TypeParameterInfo> generics = new SmartList<>();
+  public final List<TypeParameterSymbol> generics = new SmartList<>();
   public final List<Fqn> exceptions = new SmartList<>();
   public MethodType methodType;
   public String name;

@@ -20,7 +20,7 @@ import com.intellij.util.containers.TreeTraversal;
 import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.classinfo.Fqn;
 import org.intellij.grammar.classinfo.MethodType;
-import org.intellij.grammar.classinfo.TypeParameterInfo;
+import org.intellij.grammar.classinfo.TypeParameterSymbol;
 import org.intellij.grammar.generator.java.JavaBnfConstants;
 import org.intellij.grammar.generator.java.JavaNameRenderer;
 import org.intellij.grammar.generator.java.JavaNameShortener;
@@ -921,7 +921,7 @@ public final class JavaPsiGenerator extends Generator {
       String returnType = ContainerUtil.getFirstItem(types);
       addTypeToImports(returnType, myJavaHelper.getAnnotations(method), result);
 
-      for (TypeParameterInfo generic : myJavaHelper.getGenericParameters(method)) {
+      for (TypeParameterSymbol generic : myJavaHelper.getGenericParameters(method)) {
         for (String type : generic.getExtendsList()) {
           addTypeToImports(type, emptyList(), result);
         }
@@ -1220,7 +1220,7 @@ public final class JavaPsiGenerator extends Generator {
     if (!visited.add(methodName + methodTypes.subList(offset, methodTypes.size()))) return;
     if (intf && methodTypes.size() == offset && "toString".equals(methodName)) return;
 
-    List<TypeParameterInfo> genericParameters = myJavaHelper.getGenericParameters(method);
+    List<TypeParameterSymbol> genericParameters = myJavaHelper.getGenericParameters(method);
     List<String> exceptionList = myJavaHelper.getExceptionList(method);
 
     if (!intf /*|| hasMethodInInfos*/) out(shorten(JavaBnfConstants.OVERRIDE_ANNO));

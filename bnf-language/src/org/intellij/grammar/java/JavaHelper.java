@@ -9,7 +9,7 @@ import com.intellij.psi.*;
 import com.intellij.util.*;
 import org.intellij.grammar.classinfo.JvmClassSymbolManager;
 import org.intellij.grammar.classinfo.MethodType;
-import org.intellij.grammar.classinfo.TypeParameterInfo;
+import org.intellij.grammar.classinfo.TypeParameterSymbol;
 import org.intellij.grammar.classinfo.asm.AsmClassSymbolProvider;
 import org.intellij.grammar.psi.*;
 import org.jetbrains.annotations.NotNull;
@@ -203,7 +203,7 @@ public abstract class JavaHelper {
   }
 
   /** Generic type parameters declared on the method itself, in declaration order. */
-  public List<TypeParameterInfo> getGenericParameters(NavigatablePsiElement method) {
+  public List<TypeParameterSymbol> getGenericParameters(NavigatablePsiElement method) {
     return Collections.emptyList();
   }
 

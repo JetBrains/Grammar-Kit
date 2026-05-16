@@ -16,7 +16,7 @@ import org.intellij.grammar.java.JavaHelper;
 import org.intellij.grammar.classinfo.MethodSymbol;
 import org.intellij.grammar.java.JvmSyntaxHelper;
 import org.intellij.grammar.java.MyElement;
-import org.intellij.grammar.classinfo.TypeParameterInfo;
+import org.intellij.grammar.classinfo.TypeParameterSymbol;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -353,8 +353,8 @@ public class JavaSyntaxHelperUnitTest extends TestCase {
 
   public void testGetGenericParameters() {
     MethodSymbol m = method("ping", Modifier.PUBLIC, MethodType.INSTANCE, "void");
-    m.generics.add(new TypeParameterInfo("T"));
-    List<TypeParameterInfo> generics = helper().getGenericParameters(new MyElement<>(m));
+    m.generics.add(new TypeParameterSymbol("T"));
+    List<TypeParameterSymbol> generics = helper().getGenericParameters(new MyElement<>(m));
     assertEquals(1, generics.size());
     assertEquals("T", generics.get(0).getName());
   }

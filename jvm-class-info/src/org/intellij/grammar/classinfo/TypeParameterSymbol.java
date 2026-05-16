@@ -10,12 +10,12 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-public class TypeParameterInfo {
+public class TypeParameterSymbol {
   private final String name;
   final List<String> extendsList;
   private final List<Fqn> annotations;
 
-  public TypeParameterInfo(@Nullable String name,
+  public TypeParameterSymbol(@Nullable String name,
                            @NotNull List<String> extendsList,
                            @NotNull List<Fqn> annotations) {
     this.name = name;
@@ -23,7 +23,7 @@ public class TypeParameterInfo {
     this.annotations = annotations;
   }
 
-  public TypeParameterInfo(@NotNull String name) {
+  public TypeParameterSymbol(@NotNull String name) {
     this(name, new SmartList<>(), new SmartList<>());
   }
 

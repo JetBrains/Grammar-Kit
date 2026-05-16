@@ -10,7 +10,7 @@ import org.intellij.grammar.classinfo.ClassSymbol;
 import org.intellij.grammar.classinfo.Fqn;
 import org.intellij.grammar.classinfo.MethodSymbol;
 import org.intellij.grammar.classinfo.ParameterSymbol;
-import org.intellij.grammar.classinfo.TypeParameterInfo;
+import org.intellij.grammar.classinfo.TypeParameterSymbol;
 import org.intellij.grammar.generator.java.JavaNames;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -53,7 +53,7 @@ public final class ClassInfoUtil {
     return out;
   }
 
-  public static @NotNull List<TypeParameterInfo> getGenericParameters(@Nullable NavigatablePsiElement method) {
+  public static @NotNull List<TypeParameterSymbol> getGenericParameters(@Nullable NavigatablePsiElement method) {
     Object delegate = delegateOf(method);
     return delegate instanceof MethodSymbol ? ((MethodSymbol)delegate).generics
                                           : Collections.emptyList();

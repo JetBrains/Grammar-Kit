@@ -383,22 +383,6 @@ public class JavaSyntaxHelperUnitTest extends TestCase {
     assertTrue(helper().getExceptionList(new MyElement<>(info)).isEmpty());
   }
 
-  public void testGetDeclaringClass() {
-    MethodSymbol.Builder mb = method("ping", Modifier.PUBLIC, MethodType.INSTANCE, "void");
-    mb.declaringClass = Fqn.of("a.b.Foo");
-    MethodSymbol m = mb.build();
-    assertEquals("a.b.Foo", helper().getDeclaringClass(new MyElement<>(m)));
-  }
-
-  public void testGetDeclaringClassEmptyForNonMethod() {
-    ClassSymbol info = registerClass("a.b.Foo", Modifier.PUBLIC, null).build();
-    assertEquals("", helper().getDeclaringClass(new MyElement<>(info)));
-  }
-
-  public void testGetDeclaringClassEmptyForNull() {
-    assertEquals("", helper().getDeclaringClass(null));
-  }
-
   public void testGetAnnotationsForClass() {
     ClassSymbol.Builder b = registerClass("a.b.Foo", Modifier.PUBLIC, null);
     b.annotations.add(Fqn.of("java.lang.Deprecated"));

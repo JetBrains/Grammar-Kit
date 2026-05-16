@@ -511,11 +511,6 @@ public class BnfGeneratorPsiTest extends BasePlatformTestCase {
     }
 
     @Override
-    public @NotNull String getDeclaringClass(@Nullable NavigatablePsiElement method) {
-      return myDelegate.getDeclaringClass(method);
-    }
-
-    @Override
     public @NotNull List<String> getAnnotations(@Nullable NavigatablePsiElement element) {
       List<String> result = myDelegate.getAnnotations(element);
       // Simulate PsiHelper bug: for methods whose return type already contains an embedded

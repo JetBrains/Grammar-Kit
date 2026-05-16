@@ -89,11 +89,6 @@ public class JvmSyntaxHelper extends JavaHelper {
   }
 
   @Override
-  public @NotNull String getDeclaringClass(@Nullable NavigatablePsiElement method) {
-    return ClassSymbolUtil.getDeclaringClass(method);
-  }
-
-  @Override
   public @NotNull List<String> getAnnotations(@Nullable NavigatablePsiElement element) {
     return ClassSymbolUtil.getAnnotations(element);
   }

@@ -212,11 +212,6 @@ public abstract class JavaHelper {
     return Collections.emptyList();
   }
 
-  /** FQN of the class that declares the method, or {@code ""} when unavailable. */
-  public @NotNull String getDeclaringClass(@Nullable NavigatablePsiElement method) {
-    return "";
-  }
-
   /** FQNs of annotations declared directly on the class or method. */
   public @NotNull List<String> getAnnotations(@Nullable NavigatablePsiElement element) {
     return Collections.emptyList();

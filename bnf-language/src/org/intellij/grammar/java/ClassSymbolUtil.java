@@ -35,8 +35,8 @@ public final class ClassSymbolUtil {
 
   public static boolean isPublic(@Nullable NavigatablePsiElement element) {
     Object delegate = delegateOf(element);
-    int access = delegate instanceof ClassSymbol ? ((ClassSymbol)delegate).modifiers :
-                 delegate instanceof MethodSymbol ? ((MethodSymbol)delegate).modifiers :
+    int access = delegate instanceof ClassSymbol ? ((ClassSymbol)delegate).modifiers() :
+                 delegate instanceof MethodSymbol ? ((MethodSymbol)delegate).modifiers() :
                  0;
     return Modifier.isPublic(access);
   }
@@ -44,47 +44,47 @@ public final class ClassSymbolUtil {
   public static @NotNull List<String> getMethodTypes(@Nullable NavigatablePsiElement method) {
     Object delegate = delegateOf(method);
     if (!(delegate instanceof MethodSymbol m)) return Collections.emptyList();
-    List<String> out = new ArrayList<>(1 + 2 * m.parameters.size());
-    out.add(m.annotatedReturnType != null ? m.annotatedReturnType : m.returnType);
-    for (ParameterSymbol p : m.parameters) {
-      out.add(p.annotatedType != null ? p.annotatedType : p.type);
-      out.add(p.name);
+    List<String> out = new ArrayList<>(1 + 2 * m.parameters().size());
+    out.add(m.annotatedReturnType() != null ? m.annotatedReturnType() : m.returnType());
+    for (ParameterSymbol p : m.parameters()) {
+      out.add(p.annotatedType() != null ? p.annotatedType() : p.type());
+      out.add(p.name());
     }
     return out;
   }
 
   public static @NotNull List<TypeParameterSymbol> getGenericParameters(@Nullable NavigatablePsiElement method) {
     Object delegate = delegateOf(method);
-    return delegate instanceof MethodSymbol ? ((MethodSymbol)delegate).generics
+    return delegate instanceof MethodSymbol ? ((MethodSymbol)delegate).generics()
                                           : Collections.emptyList();
   }
 
   public static @NotNull List<String> getExceptionList(@Nullable NavigatablePsiElement method) {
     Object delegate = delegateOf(method);
-    return delegate instanceof MethodSymbol ? ContainerUtil.map(((MethodSymbol)delegate).exceptions, Fqn::value)
+    return delegate instanceof MethodSymbol ? ContainerUtil.map(((MethodSymbol)delegate).exceptions(), Fqn::value)
                                           : Collections.emptyList();
   }
 
   public static @NotNull String getDeclaringClass(@Nullable NavigatablePsiElement method) {
     Object delegate = delegateOf(method);
     if (!(delegate instanceof MethodSymbol)) return "";
-    Fqn declaring = ((MethodSymbol)delegate).declaringClass;
+    Fqn declaring = ((MethodSymbol)delegate).declaringClass();
     return declaring == null ? "" : declaring.value();
   }
 
   public static @NotNull List<String> getAnnotations(@Nullable NavigatablePsiElement element) {
     Object delegate = delegateOf(element);
-    if (delegate instanceof ClassSymbol) return ContainerUtil.map(((ClassSymbol)delegate).annotations, Fqn::value);
-    if (delegate instanceof MethodSymbol) return ContainerUtil.map(((MethodSymbol)delegate).annotations, Fqn::value);
+    if (delegate instanceof ClassSymbol) return ContainerUtil.map(((ClassSymbol)delegate).annotations(), Fqn::value);
+    if (delegate instanceof MethodSymbol) return ContainerUtil.map(((MethodSymbol)delegate).annotations(), Fqn::value);
     return Collections.emptyList();
   }
 
   public static @NotNull List<String> getParameterAnnotations(@Nullable NavigatablePsiElement method, int paramIndex) {
     Object delegate = delegateOf(method);
     if (!(delegate instanceof MethodSymbol)) return Collections.emptyList();
-    List<ParameterSymbol> parameters = ((MethodSymbol)delegate).parameters;
+    List<ParameterSymbol> parameters = ((MethodSymbol)delegate).parameters();
     if (paramIndex < 0 || paramIndex >= parameters.size()) return Collections.emptyList();
-    return ContainerUtil.map(parameters.get(paramIndex).annotations, Fqn::value);
+    return ContainerUtil.map(parameters.get(paramIndex).annotations(), Fqn::value);
   }
 
   /**
@@ -100,18 +100,18 @@ public final class ClassSymbolUtil {
                                       int paramCount,
                                       @NotNull String[] paramTypes,
                                       @NotNull Function<String, ClassSymbol> classLookup) {
-    int actualParams = method.parameters.size();
+    int actualParams = method.parameters().size();
     if (paramCount >= 0 && paramCount != actualParams) return false;
     if (paramTypes.length == 0) return true;
     if (paramTypes.length > actualParams) return false;
     for (int i = 0; i < paramTypes.length; i++) {
       String paramType = paramTypes[i];
-      String parameter = method.parameters.get(i).type;
+      String parameter = method.parameters().get(i).type();
       if (JavaHelper.acceptsName(paramType, JavaNames.getRawClassName(parameter))) continue;
       ClassSymbol info = classLookup.apply(paramType);
       if (info != null) {
-        if (info.superClass != null && Objects.equals(info.superClass.value(), parameter)) continue;
-        if (containsValue(info.interfaces, parameter)) continue;
+        if (info.superClass() != null && Objects.equals(info.superClass().value(), parameter)) continue;
+        if (containsValue(info.interfaces(), parameter)) continue;
       }
       return false;
     }

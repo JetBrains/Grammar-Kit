@@ -346,12 +346,12 @@ public class ParserGeneratorUtil {
       if (i > 0) buffer.append(", ");
 
       TypeParameterSymbol parameter = genericParameters.get(i);
-      for (Fqn annotation : parameter.getAnnotations()) {
+      for (Fqn annotation : parameter.annotations()) {
         buffer.append("@").append(shortener.shorten(annotation.value())).append(" ");
       }
-      buffer.append(parameter.getName());
+      buffer.append(parameter.name());
 
-      List<String> extendsList = parameter.getExtendsList();
+      List<String> extendsList = parameter.extendsList();
       if (!extendsList.isEmpty()) {
         buffer.append(" extends ");
         for (int i1 = 0; i1 < extendsList.size(); i1++) {

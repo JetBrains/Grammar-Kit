@@ -62,11 +62,14 @@ public final class JavaSyntaxClassExtractor {
   private final JavaSyntaxImportContext imports;
   private final JavaSyntaxTypeFormatter typeFormatter;
   private final JavaSyntaxMethodExtractor methodExtractor;
-  private final Map<Fqn, ClassSymbol> result = new LinkedHashMap<>();
+  private final Map<Fqn, ClassSymbol.Builder> result = new LinkedHashMap<>();
 
   /** Walks {@code fileRoot} once and returns one {@link ClassSymbol} per declared class, keyed by FQN. */
   public static @NotNull Map<Fqn, ClassSymbol> extractFrom(@NotNull SyntaxNode fileRoot, @NotNull SymbolResolver resolver) {
-    return new JavaSyntaxClassExtractor(fileRoot, resolver).extract();
+    Map<Fqn, ClassSymbol.Builder> builders = new JavaSyntaxClassExtractor(fileRoot, resolver).extract();
+    Map<Fqn, ClassSymbol> built = new LinkedHashMap<>(builders.size());
+    for (Map.Entry<Fqn, ClassSymbol.Builder> e : builders.entrySet()) built.put(e.getKey(), e.getValue().build());
+    return built;
   }
 
   private JavaSyntaxClassExtractor(@NotNull SyntaxNode fileRoot, @NotNull SymbolResolver resolver) {
@@ -76,7 +79,7 @@ public final class JavaSyntaxClassExtractor {
     this.methodExtractor = new JavaSyntaxMethodExtractor(typeFormatter);
   }
 
-  private @NotNull Map<Fqn, ClassSymbol> extract() {
+  private @NotNull Map<Fqn, ClassSymbol.Builder> extract() {
     for (SyntaxNode child = fileRoot.firstChild(); child != null; child = child.nextSibling()) {
       if (child.getType() == JavaSyntaxElementType.CLASS) {
         walkClass(child, Fqn.ROOT, Set.of());
@@ -93,7 +96,7 @@ public final class JavaSyntaxClassExtractor {
     String simpleName = nameId.getText().toString();
     Fqn fqn = imports.qualify(enclosingFqn, simpleName);
 
-    ClassSymbol info = new ClassSymbol();
+    ClassSymbol.Builder info = new ClassSymbol.Builder();
     info.name = fqn;
 
     Set<String> classTypeVars = new HashSet<>(outerTypeVars);
@@ -126,7 +129,7 @@ public final class JavaSyntaxClassExtractor {
     for (SyntaxNode member = classNode.firstChild(); member != null; member = member.nextSibling()) {
       SyntaxElementType t = member.getType();
       if (t == JavaSyntaxElementType.METHOD || t == JavaSyntaxElementType.ANNOTATION_METHOD) {
-        MethodSymbol m = methodExtractor.extract(member, fqn, classTypeVars);
+        MethodSymbol.Builder m = methodExtractor.extract(member, fqn, classTypeVars);
         if (m != null) info.methods.add(m);
       }
       else if (t == JavaSyntaxElementType.CLASS) {

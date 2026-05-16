@@ -10,32 +10,32 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-public class TypeParameterSymbol {
-  private final String name;
-  final List<String> extendsList;
-  private final List<Fqn> annotations;
+public record TypeParameterSymbol(@Nullable String name,
+                                  @NotNull List<String> extendsList,
+                                  @NotNull List<Fqn> annotations) {
 
-  public TypeParameterSymbol(@Nullable String name,
-                           @NotNull List<String> extendsList,
-                           @NotNull List<Fqn> annotations) {
-    this.name = name;
-    this.extendsList = extendsList;
-    this.annotations = annotations;
+  public TypeParameterSymbol {
+    extendsList = List.copyOf(extendsList);
+    annotations = List.copyOf(annotations);
   }
 
-  public TypeParameterSymbol(@NotNull String name) {
-    this(name, new SmartList<>(), new SmartList<>());
+  public static @NotNull TypeParameterSymbol of(@NotNull String name) {
+    return new TypeParameterSymbol(name, List.of(), List.of());
   }
 
-  public String getName() {
-    return name;
-  }
+  public static final class Builder {
+    public String name;
+    public final List<String> extendsList = new SmartList<>();
+    public final List<Fqn> annotations = new SmartList<>();
 
-  public List<String> getExtendsList() {
-    return extendsList;
-  }
+    public Builder() { }
 
-  public List<Fqn> getAnnotations() {
-    return annotations;
+    public Builder(@NotNull String name) {
+      this.name = name;
+    }
+
+    public @NotNull TypeParameterSymbol build() {
+      return new TypeParameterSymbol(name, extendsList, annotations);
+    }
   }
 }

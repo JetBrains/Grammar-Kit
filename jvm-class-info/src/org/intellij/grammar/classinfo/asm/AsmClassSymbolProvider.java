@@ -92,14 +92,14 @@ public final class AsmClassSymbolProvider implements JvmClassSymbolProvider {
   }
 
   private static ClassSymbol getClassInfo(Fqn className, byte[] bytes) {
-    ClassSymbol info = new ClassSymbol();
+    ClassSymbol.Builder info = new ClassSymbol.Builder();
     info.name = className;
     new ClassReader(bytes).accept(new MyClassVisitor(info), 0);
-    return info;
+    return info.build();
   }
 
-  private static MethodSymbol getMethodInfo(Fqn className, String methodName, String signature, String[] exceptions) {
-    MethodSymbol method = new MethodSymbol();
+  private static MethodSymbol.Builder getMethodInfo(Fqn className, String methodName, String signature, String[] exceptions) {
+    MethodSymbol.Builder method = new MethodSymbol.Builder();
     method.name = methodName;
     method.declaringClass = className;
 
@@ -132,9 +132,9 @@ public final class AsmClassSymbolProvider implements JvmClassSymbolProvider {
 
   private static class MyClassVisitor extends ClassVisitor {
 
-    private final ClassSymbol myInfo;
+    private final ClassSymbol.Builder myInfo;
 
-    MyClassVisitor(ClassSymbol info) {
+    MyClassVisitor(ClassSymbol.Builder info) {
       super(ASM_OPCODES);
       myInfo = info;
     }
@@ -171,7 +171,7 @@ public final class AsmClassSymbolProvider implements JvmClassSymbolProvider {
                                      String desc,
                                      String signature,
                                      String[] exceptions) {
-      MethodSymbol m = getMethodInfo(myInfo.name, name, ObjectUtils.chooseNotNull(signature, desc), exceptions);
+      MethodSymbol.Builder m = getMethodInfo(myInfo.name, name, ObjectUtils.chooseNotNull(signature, desc), exceptions);
       m.modifiers = access;
       m.methodType = "<init>".equals(name) ? MethodType.CONSTRUCTOR :
                      Modifier.isStatic(access) ? MethodType.STATIC :
@@ -187,7 +187,7 @@ public final class AsmClassSymbolProvider implements JvmClassSymbolProvider {
         @Override
         public void visitEnd() {
           m.annotatedReturnType = m.returnType;
-          for (ParameterSymbol p : m.parameters) p.annotatedType = p.type;
+          for (ParameterSymbol.Builder p : m.parameters) p.annotatedType = p.type;
           int[] plainOffsets = new int[m.parameters.size() + 1];
           for (ParamTypeAnno ta : typeAnnos) {
             String prevType = ta.index == 0 ? m.annotatedReturnType : m.parameters.get(ta.index - 1).annotatedType;
@@ -258,7 +258,7 @@ public final class AsmClassSymbolProvider implements JvmClassSymbolProvider {
             public void visitEnd() {
               if (annoParamCounter != 0) return;
               if (typeReference.getSort() == TypeReference.METHOD_TYPE_PARAMETER) {
-                m.generics.get(typeReference.getTypeParameterIndex()).getAnnotations().add(anno);
+                m.generics.get(typeReference.getTypeParameterIndex()).annotations.add(anno);
               }
               else if (typeReference.getSort() == TypeReference.METHOD_RETURN ||
                        typeReference.getSort() == TypeReference.METHOD_FORMAL_PARAMETER) {
@@ -269,7 +269,7 @@ public final class AsmClassSymbolProvider implements JvmClassSymbolProvider {
                 typeAnnos.add(o);
               }
               else if (typeReference.getSort() == TypeReference.METHOD_TYPE_PARAMETER_BOUND) {
-                List<String> bounds = m.generics.get(typeReference.getTypeParameterIndex()).getExtendsList();
+                List<String> bounds = m.generics.get(typeReference.getTypeParameterIndex()).extendsList;
                 if (typeReference.getTypeParameterBoundIndex() <= bounds.size()) {
                   String prev = bounds.get(typeReference.getTypeParameterBoundIndex() - 1);
                   bounds.set(typeReference.getTypeParameterBoundIndex() - 1, "@" + anno + " " + prev);
@@ -313,7 +313,7 @@ public final class AsmClassSymbolProvider implements JvmClassSymbolProvider {
   }
 
   private static class MySignatureVisitor extends SignatureVisitor {
-    final MethodSymbol method;
+    final MethodSymbol.Builder method;
     final Deque<State> states = new ArrayDeque<>();
 
     /**
@@ -321,7 +321,7 @@ public final class AsmClassSymbolProvider implements JvmClassSymbolProvider {
      */
     final StringBuilder sb = new StringBuilder();
 
-    MySignatureVisitor(MethodSymbol method) {
+    MySignatureVisitor(MethodSymbol.Builder method) {
       super(ASM_OPCODES);
       this.method = method;
     }
@@ -329,7 +329,7 @@ public final class AsmClassSymbolProvider implements JvmClassSymbolProvider {
     @Override
     public void visitFormalTypeParameter(String s) {
       finishElement(null);
-      method.generics.add(new TypeParameterSymbol(s));
+      method.generics.add(new TypeParameterSymbol.Builder(s));
     }
 
     @Override
@@ -451,7 +451,7 @@ public final class AsmClassSymbolProvider implements JvmClassSymbolProvider {
         State state = states.pop();
         switch (state) {
           case PARAM:
-            ParameterSymbol p = new ParameterSymbol();
+            ParameterSymbol.Builder p = new ParameterSymbol.Builder();
             p.type = sb();
             p.name = "p" + method.parameters.size();
             method.parameters.add(p);
@@ -468,9 +468,9 @@ public final class AsmClassSymbolProvider implements JvmClassSymbolProvider {
           case BOUNDS:
             String bound = sb();
             if (!"java.lang.Object".equals(bound)) {
-              TypeParameterSymbol currentGeneric = ContainerUtil.getLastItem(method.generics);
+              TypeParameterSymbol.Builder currentGeneric = ContainerUtil.getLastItem(method.generics);
               if (currentGeneric != null) {
-                currentGeneric.getExtendsList().add(bound);
+                currentGeneric.extendsList.add(bound);
               }
               else {
                 reportException("current generic must not be null");

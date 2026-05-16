@@ -35,7 +35,7 @@ import java.util.Map;
  */
 public class KotlinSyntaxHelperUnitTest extends TestCase {
 
-  private final Map<String, ClassSymbol> classes = new HashMap<>();
+  private final Map<String, ClassSymbol.Builder> classes = new HashMap<>();
   private RecordingFallback fallback;
 
   @Override
@@ -46,19 +46,23 @@ public class KotlinSyntaxHelperUnitTest extends TestCase {
   }
 
   public void testFindClassWrapsClassInfo() {
-    ClassSymbol info = registerClass("a.b.Foo", Modifier.PUBLIC, "java.lang.Object");
+    registerClass("a.b.Foo", Modifier.PUBLIC, "java.lang.Object");
     NavigatablePsiElement el = helper().findClass("a.b.Foo");
     assertNotNull(el);
-    assertSame(info, ((MyElement<?>)el).delegate);
+    Object delegate = ((MyElement<?>)el).delegate;
+    assertTrue(delegate instanceof ClassSymbol);
+    assertEquals(Fqn.of("a.b.Foo"), ((ClassSymbol)delegate).name());
   }
 
   public void testFindClassDelegatesToFallback() {
-    ClassSymbol fallbackInfo = new ClassSymbol();
+    ClassSymbol.Builder fallbackInfo = new ClassSymbol.Builder();
     fallbackInfo.name = Fqn.of("ext.Platform");
     fallback.classes.put("ext.Platform", fallbackInfo);
     NavigatablePsiElement el = helper().findClass("ext.Platform");
     assertNotNull(el);
-    assertSame(fallbackInfo, ((MyElement<?>)el).delegate);
+    Object delegate = ((MyElement<?>)el).delegate;
+    assertTrue(delegate instanceof ClassSymbol);
+    assertEquals(Fqn.of("ext.Platform"), ((ClassSymbol)delegate).name());
   }
 
   public void testFindClassReturnsNullWithoutFallback() {
@@ -92,7 +96,7 @@ public class KotlinSyntaxHelperUnitTest extends TestCase {
   }
 
   public void testFindClassMethodsDelegatesOnMiss() {
-    ClassSymbol external = new ClassSymbol();
+    ClassSymbol.Builder external = new ClassSymbol.Builder();
     external.name = Fqn.of("ext.Platform");
     external.methods.add(method("ping", Modifier.PUBLIC, MethodType.INSTANCE, "void"));
     fallback.classes.put("ext.Platform", external);
@@ -107,7 +111,7 @@ public class KotlinSyntaxHelperUnitTest extends TestCase {
   }
 
   public void testGetSuperClassNameDelegates() {
-    ClassSymbol external = new ClassSymbol();
+    ClassSymbol.Builder external = new ClassSymbol.Builder();
     external.name = Fqn.of("ext.External");
     external.superClass = Fqn.of("ext.Parent");
     fallback.classes.put("ext.External", external);
@@ -115,7 +119,7 @@ public class KotlinSyntaxHelperUnitTest extends TestCase {
   }
 
   public void testIsPublicTrue() {
-    ClassSymbol info = registerClass("a.b.Foo", Modifier.PUBLIC, null);
+    ClassSymbol info = registerClass("a.b.Foo", Modifier.PUBLIC, null).build();
     assertTrue(helper().isPublic(new MyElement<>(info)));
   }
 
@@ -133,10 +137,10 @@ public class KotlinSyntaxHelperUnitTest extends TestCase {
     return new JvmSyntaxHelper(new JvmClassSymbolManager(List.of(mapProvider(classes))));
   }
 
-  private static @NotNull JvmClassSymbolProvider mapProvider(@NotNull Map<String, ClassSymbol> classes) {
+  private static @NotNull JvmClassSymbolProvider mapProvider(@NotNull Map<String, ClassSymbol.Builder> classes) {
     return (fqn, resolver) -> {
-      ClassSymbol info = classes.get(fqn.value());
-      return info == null ? Map.of() : Map.of(fqn, info);
+      ClassSymbol.Builder info = classes.get(fqn.value());
+      return info == null ? Map.of() : Map.of(fqn, info.build());
     };
   }
 
@@ -150,32 +154,38 @@ public class KotlinSyntaxHelperUnitTest extends TestCase {
     };
   }
 
-  private ClassSymbol registerClass(@NotNull String fqn,
-                                  int modifiers,
-                                  @Nullable String superClass,
-                                  MethodSymbol... methods) {
-    ClassSymbol info = new ClassSymbol();
+  private static final Fqn TEST_DECLARING = Fqn.of("test.Unknown");
+
+  private ClassSymbol.Builder registerClass(@NotNull String fqn,
+                                            int modifiers,
+                                            @Nullable String superClass,
+                                            MethodSymbol.Builder... methods) {
+    ClassSymbol.Builder info = new ClassSymbol.Builder();
     info.name = Fqn.of(fqn);
     info.modifiers = modifiers;
     info.superClass = superClass == null ? null : Fqn.of(superClass);
-    for (MethodSymbol m : methods) info.methods.add(m);
+    for (MethodSymbol.Builder m : methods) {
+      m.declaringClass = info.name;
+      info.methods.add(m);
+    }
     classes.put(fqn, info);
     return info;
   }
 
-  private MethodSymbol method(@NotNull String name,
-                            int modifiers,
-                            @NotNull MethodType methodType,
-                            @NotNull String returnType,
-                            String... paramTypes) {
-    MethodSymbol m = new MethodSymbol();
+  private MethodSymbol.Builder method(@NotNull String name,
+                                      int modifiers,
+                                      @NotNull MethodType methodType,
+                                      @NotNull String returnType,
+                                      String... paramTypes) {
+    MethodSymbol.Builder m = new MethodSymbol.Builder();
     m.name = name;
+    m.declaringClass = TEST_DECLARING;
     m.modifiers = modifiers;
     m.methodType = methodType;
     m.returnType = returnType;
     m.annotatedReturnType = returnType;
     for (int i = 0; i < paramTypes.length; i++) {
-      ParameterSymbol p = new ParameterSymbol();
+      ParameterSymbol.Builder p = new ParameterSymbol.Builder();
       p.type = paramTypes[i];
       p.annotatedType = paramTypes[i];
       p.name = "p" + i;
@@ -186,16 +196,16 @@ public class KotlinSyntaxHelperUnitTest extends TestCase {
 
   /** Minimal recording fallback so we can assert delegation. */
   private static final class RecordingFallback extends JavaHelper {
-    final Map<String, ClassSymbol> classes = new HashMap<>();
-    final Map<String, List<MethodSymbol>> methods = new HashMap<>();
+    final Map<String, ClassSymbol.Builder> classes = new HashMap<>();
+    final Map<String, List<MethodSymbol.Builder>> methods = new HashMap<>();
 
     @Override
     public boolean isPublic(NavigatablePsiElement element) { return false; }
 
     @Override
     public NavigatablePsiElement findClass(String className) {
-      ClassSymbol info = classes.get(className);
-      return info == null ? null : new MyElement<>(info);
+      ClassSymbol.Builder info = classes.get(className);
+      return info == null ? null : new MyElement<>(info.build());
     }
 
     @Override
@@ -205,16 +215,16 @@ public class KotlinSyntaxHelperUnitTest extends TestCase {
                                                         boolean allowAbstract,
                                                         int paramCount,
                                                         String... paramTypes) {
-      List<MethodSymbol> ms = methods.get(className);
+      List<MethodSymbol.Builder> ms = methods.get(className);
       if (ms == null) return Collections.emptyList();
       List<NavigatablePsiElement> result = new ArrayList<>();
-      for (MethodSymbol m : ms) result.add(new MyElement<>(m));
+      for (MethodSymbol.Builder m : ms) result.add(new MyElement<>(m.build()));
       return result;
     }
 
     @Override
     public String getSuperClassName(String className) {
-      ClassSymbol info = classes.get(className);
+      ClassSymbol.Builder info = classes.get(className);
       return info == null || info.superClass == null ? null : info.superClass.value();
     }
   }

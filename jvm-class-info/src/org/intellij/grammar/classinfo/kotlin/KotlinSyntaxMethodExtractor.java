@@ -24,7 +24,7 @@ import static org.intellij.grammar.classinfo.kotlin.KotlinSyntaxNodes.extractMod
 
 /**
  * Translates Kotlin {@code FUN} / {@code PROPERTY} / {@code PRIMARY_CONSTRUCTOR} /
- * {@code SECONDARY_CONSTRUCTOR} nodes into {@link MethodSymbol} records.
+ * {@code SECONDARY_CONSTRUCTOR} nodes into {@link MethodSymbol} builders.
  * <p>
  * Properties surface as JVM-style {@code getX()} / {@code setX(value)} methods.
  * Extension functions surface as static methods whose first parameter is the receiver type.
@@ -39,17 +39,17 @@ final class KotlinSyntaxMethodExtractor {
   }
 
   /**
-   * Build a {@link MethodSymbol} for a {@code FUN} node. {@code defaultMethodType} selects
+   * Build a {@link MethodSymbol.Builder} for a {@code FUN} node. {@code defaultMethodType} selects
    * {@code STATIC} for top-level / extension functions, {@code INSTANCE} for member functions.
    */
-  @Nullable MethodSymbol extractFunction(@NotNull SyntaxNode funNode,
-                                       @NotNull Fqn declaringFqn,
-                                       @NotNull Set<String> classTypeVars,
-                                       @NotNull MethodType defaultMethodType) {
+  @Nullable MethodSymbol.Builder extractFunction(@NotNull SyntaxNode funNode,
+                                                 @NotNull Fqn declaringFqn,
+                                                 @NotNull Set<String> classTypeVars,
+                                                 @NotNull MethodType defaultMethodType) {
     SyntaxNode nameId = nameAfterFunKeyword(funNode);
     if (nameId == null) return null;
 
-    MethodSymbol m = new MethodSymbol();
+    MethodSymbol.Builder m = new MethodSymbol.Builder();
     m.declaringClass = declaringFqn;
     m.name = nameId.getText().toString();
 
@@ -69,7 +69,7 @@ final class KotlinSyntaxMethodExtractor {
     m.returnType = returnType == null ? "void" : typeFormatter.formatType(returnType, typeVars);
 
     if (receiverType != null) {
-      ParameterSymbol receiver = new ParameterSymbol();
+      ParameterSymbol.Builder receiver = new ParameterSymbol.Builder();
       receiver.type = typeFormatter.formatType(receiverType, typeVars);
       receiver.name = "receiver";
       m.parameters.add(receiver);
@@ -83,11 +83,11 @@ final class KotlinSyntaxMethodExtractor {
     return m;
   }
 
-  /** Build a {@link MethodSymbol} for a primary or secondary constructor. */
-  @Nullable MethodSymbol extractConstructor(@NotNull SyntaxNode ctorNode,
-                                          @NotNull Fqn declaringFqn,
-                                          @NotNull Set<String> classTypeVars) {
-    MethodSymbol m = new MethodSymbol();
+  /** Build a {@link MethodSymbol.Builder} for a primary or secondary constructor. */
+  @Nullable MethodSymbol.Builder extractConstructor(@NotNull SyntaxNode ctorNode,
+                                                    @NotNull Fqn declaringFqn,
+                                                    @NotNull Set<String> classTypeVars) {
+    MethodSymbol.Builder m = new MethodSymbol.Builder();
     m.declaringClass = declaringFqn;
     m.name = "<init>";
     m.methodType = MethodType.CONSTRUCTOR;
@@ -106,10 +106,10 @@ final class KotlinSyntaxMethodExtractor {
   }
 
   /** Synthesises {@code getX()} for a {@code PROPERTY} / primary-ctor {@code val}/{@code var} param. */
-  @Nullable MethodSymbol synthesizeGetter(@NotNull SyntaxNode propertyOrParamNode,
-                                        @NotNull Fqn declaringFqn,
-                                        @NotNull Set<String> classTypeVars,
-                                        boolean staticAccessor) {
+  @Nullable MethodSymbol.Builder synthesizeGetter(@NotNull SyntaxNode propertyOrParamNode,
+                                                  @NotNull Fqn declaringFqn,
+                                                  @NotNull Set<String> classTypeVars,
+                                                  boolean staticAccessor) {
     SyntaxNode nameId = firstChildOfType(propertyOrParamNode, KtTokens.INSTANCE.getIDENTIFIER());
     if (nameId == null) return null;
 
@@ -120,7 +120,7 @@ final class KotlinSyntaxMethodExtractor {
     SyntaxNode typeRef = firstChildOfType(propertyOrParamNode, KtNodeTypes.INSTANCE.getTYPE_REFERENCE());
     String typeStr = typeRef == null ? "void" : typeFormatter.formatType(typeRef, classTypeVars);
 
-    MethodSymbol m = new MethodSymbol();
+    MethodSymbol.Builder m = new MethodSymbol.Builder();
     m.declaringClass = declaringFqn;
     m.name = "get" + capitalize(nameId.getText().toString());
     m.modifiers = mods | (staticAccessor ? Modifier.STATIC : 0);
@@ -132,10 +132,10 @@ final class KotlinSyntaxMethodExtractor {
   }
 
   /** Synthesises {@code setX(value)} for a {@code var} property / primary-ctor {@code var} param. */
-  @Nullable MethodSymbol synthesizeSetter(@NotNull SyntaxNode propertyOrParamNode,
-                                        @NotNull Fqn declaringFqn,
-                                        @NotNull Set<String> classTypeVars,
-                                        boolean staticAccessor) {
+  @Nullable MethodSymbol.Builder synthesizeSetter(@NotNull SyntaxNode propertyOrParamNode,
+                                                  @NotNull Fqn declaringFqn,
+                                                  @NotNull Set<String> classTypeVars,
+                                                  boolean staticAccessor) {
     SyntaxNode nameId = firstChildOfType(propertyOrParamNode, KtTokens.INSTANCE.getIDENTIFIER());
     if (nameId == null) return null;
 
@@ -146,13 +146,13 @@ final class KotlinSyntaxMethodExtractor {
     SyntaxNode typeRef = firstChildOfType(propertyOrParamNode, KtNodeTypes.INSTANCE.getTYPE_REFERENCE());
     String typeStr = typeRef == null ? "java.lang.Object" : typeFormatter.formatType(typeRef, classTypeVars);
 
-    MethodSymbol m = new MethodSymbol();
+    MethodSymbol.Builder m = new MethodSymbol.Builder();
     m.declaringClass = declaringFqn;
     m.name = "set" + capitalize(nameId.getText().toString());
     m.modifiers = mods | (staticAccessor ? Modifier.STATIC : 0);
     m.methodType = staticAccessor ? MethodType.STATIC : MethodType.INSTANCE;
     m.returnType = "void";
-    ParameterSymbol value = new ParameterSymbol();
+    ParameterSymbol.Builder value = new ParameterSymbol.Builder();
     value.type = typeStr;
     value.name = "value";
     m.parameters.add(value);
@@ -162,7 +162,7 @@ final class KotlinSyntaxMethodExtractor {
   }
 
   private void collectFunctionTypeParameters(@NotNull SyntaxNode funNode,
-                                             @NotNull MethodSymbol m,
+                                             @NotNull MethodSymbol.Builder m,
                                              @NotNull Set<String> typeVars) {
     SyntaxNode tparams = firstChildOfType(funNode, KtNodeTypes.INSTANCE.getTYPE_PARAMETER_LIST());
     if (tparams == null) return;
@@ -172,15 +172,15 @@ final class KotlinSyntaxMethodExtractor {
       if (tpId == null) continue;
       String tvName = tpId.getText().toString();
       typeVars.add(tvName);
-      TypeParameterSymbol info = new TypeParameterSymbol(tvName);
+      TypeParameterSymbol.Builder info = new TypeParameterSymbol.Builder(tvName);
       SyntaxNode boundType = firstChildOfType(tp, KtNodeTypes.INSTANCE.getTYPE_REFERENCE());
-      if (boundType != null) info.getExtendsList().add(typeFormatter.formatType(boundType, typeVars));
+      if (boundType != null) info.extendsList.add(typeFormatter.formatType(boundType, typeVars));
       m.generics.add(info);
     }
   }
 
   private void collectValueParameters(@Nullable SyntaxNode paramList,
-                                      @NotNull MethodSymbol m,
+                                      @NotNull MethodSymbol.Builder m,
                                       @NotNull Set<String> typeVars) {
     if (paramList == null) return;
     int paramIdx = m.parameters.size(); // account for already-added receiver
@@ -193,7 +193,7 @@ final class KotlinSyntaxMethodExtractor {
       if (KotlinSyntaxNodes.hasModifier(mods, KtTokens.INSTANCE.getVARARG_MODIFIER())) {
         typeStr = typeStr + "[]";
       }
-      ParameterSymbol param = new ParameterSymbol();
+      ParameterSymbol.Builder param = new ParameterSymbol.Builder();
       param.type = typeStr;
       param.name = pName == null ? "p" + paramIdx : pName.getText().toString();
       param.annotations.addAll(typeFormatter.extractAnnotationFqns(mods, typeVars));
@@ -202,9 +202,9 @@ final class KotlinSyntaxMethodExtractor {
     }
   }
 
-  private static void copyTypesAsAnnotated(@NotNull MethodSymbol m) {
+  private static void copyTypesAsAnnotated(@NotNull MethodSymbol.Builder m) {
     m.annotatedReturnType = m.returnType;
-    for (ParameterSymbol p : m.parameters) p.annotatedType = p.type;
+    for (ParameterSymbol.Builder p : m.parameters) p.annotatedType = p.type;
   }
 
   /**

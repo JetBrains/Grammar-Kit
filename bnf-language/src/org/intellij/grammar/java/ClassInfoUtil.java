@@ -9,15 +9,16 @@ import com.intellij.util.containers.ContainerUtil;
 import org.intellij.grammar.classinfo.ClassSymbol;
 import org.intellij.grammar.classinfo.Fqn;
 import org.intellij.grammar.classinfo.MethodSymbol;
+import org.intellij.grammar.classinfo.ParameterSymbol;
 import org.intellij.grammar.classinfo.TypeParameterInfo;
 import org.intellij.grammar.generator.java.JavaNames;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Modifier;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
 
@@ -42,8 +43,14 @@ public final class ClassInfoUtil {
 
   public static @NotNull List<String> getMethodTypes(@Nullable NavigatablePsiElement method) {
     Object delegate = delegateOf(method);
-    return delegate instanceof MethodSymbol ? ((MethodSymbol)delegate).annotatedTypes
-                                          : Collections.emptyList();
+    if (!(delegate instanceof MethodSymbol m)) return Collections.emptyList();
+    List<String> out = new ArrayList<>(1 + 2 * m.parameters.size());
+    out.add(m.annotatedReturnType != null ? m.annotatedReturnType : m.returnType);
+    for (ParameterSymbol p : m.parameters) {
+      out.add(p.annotatedType != null ? p.annotatedType : p.type);
+      out.add(p.name);
+    }
+    return out;
   }
 
   public static @NotNull List<TypeParameterInfo> getGenericParameters(@Nullable NavigatablePsiElement method) {
@@ -68,17 +75,16 @@ public final class ClassInfoUtil {
   public static @NotNull List<String> getAnnotations(@Nullable NavigatablePsiElement element) {
     Object delegate = delegateOf(element);
     if (delegate instanceof ClassSymbol) return ContainerUtil.map(((ClassSymbol)delegate).annotations, Fqn::value);
-    if (delegate instanceof MethodSymbol) return ContainerUtil.map(((MethodSymbol)delegate).annotations.get(0), Fqn::value);
+    if (delegate instanceof MethodSymbol) return ContainerUtil.map(((MethodSymbol)delegate).annotations, Fqn::value);
     return Collections.emptyList();
   }
 
   public static @NotNull List<String> getParameterAnnotations(@Nullable NavigatablePsiElement method, int paramIndex) {
     Object delegate = delegateOf(method);
     if (!(delegate instanceof MethodSymbol)) return Collections.emptyList();
-    Map<Integer, List<Fqn>> annotations = ((MethodSymbol)delegate).annotations;
-    if (paramIndex < 0 || paramIndex >= annotations.size()) return Collections.emptyList();
-    List<Fqn> result = annotations.get(paramIndex + 1);
-    return result == null ? Collections.emptyList() : ContainerUtil.map(result, Fqn::value);
+    List<ParameterSymbol> parameters = ((MethodSymbol)delegate).parameters;
+    if (paramIndex < 0 || paramIndex >= parameters.size()) return Collections.emptyList();
+    return ContainerUtil.map(parameters.get(paramIndex).annotations, Fqn::value);
   }
 
   /**
@@ -94,13 +100,13 @@ public final class ClassInfoUtil {
                                       int paramCount,
                                       @NotNull String[] paramTypes,
                                       @NotNull Function<String, ClassSymbol> classLookup) {
-    int actualParams = (method.types.size() - 1) / 2;
+    int actualParams = method.parameters.size();
     if (paramCount >= 0 && paramCount != actualParams) return false;
     if (paramTypes.length == 0) return true;
     if (paramTypes.length > actualParams) return false;
     for (int i = 0; i < paramTypes.length; i++) {
       String paramType = paramTypes[i];
-      String parameter = method.types.get(2 * i + 1);
+      String parameter = method.parameters.get(i).type;
       if (JavaHelper.acceptsName(paramType, JavaNames.getRawClassName(parameter))) continue;
       ClassSymbol info = classLookup.apply(paramType);
       if (info != null) {

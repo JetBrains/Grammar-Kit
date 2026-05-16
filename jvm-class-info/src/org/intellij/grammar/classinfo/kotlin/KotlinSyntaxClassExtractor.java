@@ -12,6 +12,7 @@ import org.intellij.grammar.classinfo.ClassSymbol;
 import org.intellij.grammar.classinfo.Fqn;
 import org.intellij.grammar.classinfo.MethodSymbol;
 import org.intellij.grammar.classinfo.MethodType;
+import org.intellij.grammar.classinfo.ParameterSymbol;
 import org.intellij.grammar.classinfo.SymbolResolver;
 import org.intellij.grammar.classinfo.java.JavaSyntaxClassExtractor;
 import org.jetbrains.annotations.NotNull;
@@ -420,13 +421,18 @@ final class KotlinSyntaxClassExtractor {
     m.declaringClass = newDeclaring;
     m.modifiers = src.modifiers | Modifier.STATIC;
     m.methodType = MethodType.STATIC;
-    m.types.addAll(src.types);
-    m.annotatedTypes.addAll(src.annotatedTypes);
+    m.returnType = src.returnType;
+    m.annotatedReturnType = src.annotatedReturnType;
+    m.annotations.addAll(src.annotations);
     m.exceptions.addAll(src.exceptions);
     m.generics.addAll(src.generics);
-    // Annotations are FactoryMap-backed; copy over what's present.
-    for (Map.Entry<Integer, List<Fqn>> e : src.annotations.entrySet()) {
-      m.annotations.get(e.getKey()).addAll(e.getValue());
+    for (ParameterSymbol sp : src.parameters) {
+      ParameterSymbol cp = new ParameterSymbol();
+      cp.name = sp.name;
+      cp.type = sp.type;
+      cp.annotatedType = sp.annotatedType;
+      cp.annotations.addAll(sp.annotations);
+      m.parameters.add(cp);
     }
     return m;
   }

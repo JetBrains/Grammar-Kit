@@ -8,6 +8,7 @@ import org.intellij.grammar.classinfo.ClassSymbol;
 import org.intellij.grammar.classinfo.Fqn;
 import org.intellij.grammar.classinfo.MethodSymbol;
 import org.intellij.grammar.classinfo.MethodType;
+import org.intellij.grammar.classinfo.ParameterSymbol;
 import org.intellij.grammar.classinfo.TypeParameterInfo;
 import org.jetbrains.annotations.NotNull;
 
@@ -16,6 +17,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Serialises a {@code Map<Fqn, ClassSymbol>} produced by the syntax-generation pipeline into a
@@ -85,7 +87,7 @@ public final class ClassInfoTextFormatter {
     if (!mods.isEmpty()) sb.append(mods).append(' ');
 
     if (m.methodType != MethodType.CONSTRUCTOR) {
-      String returnType = m.types.isEmpty() ? "?" : m.types.get(0);
+      String returnType = m.returnType == null ? "?" : m.returnType;
       sb.append(returnType).append(' ');
     }
     sb.append(m.name).append('(');
@@ -100,16 +102,14 @@ public final class ClassInfoTextFormatter {
       }
       sb.append('\n');
     }
-    List<Fqn> methodAnnotations = m.annotations.get(0);
-    if (methodAnnotations != null && !methodAnnotations.isEmpty()) {
+    if (!m.annotations.isEmpty()) {
       sb.append("      annotations: ");
-      appendAnnotations(sb, methodAnnotations);
+      appendAnnotations(sb, m.annotations);
       sb.append('\n');
     }
-    int paramCount = Math.max(0, (m.types.size() - 1) / 2);
-    for (int p = 0; p < paramCount; p++) {
-      List<Fqn> paramAnnotations = m.annotations.get(p + 1);
-      if (paramAnnotations != null && !paramAnnotations.isEmpty()) {
+    for (int p = 0; p < m.parameters.size(); p++) {
+      List<Fqn> paramAnnotations = m.parameters.get(p).annotations;
+      if (!paramAnnotations.isEmpty()) {
         sb.append("      param[").append(p).append("] annotations: ");
         appendAnnotations(sb, paramAnnotations);
         sb.append('\n');
@@ -120,18 +120,29 @@ public final class ClassInfoTextFormatter {
       appendJoined(sb, m.exceptions);
       sb.append('\n');
     }
-    if (!m.annotatedTypes.isEmpty() && !m.annotatedTypes.equals(m.types)) {
-      sb.append("      annotatedTypes: ").append(m.annotatedTypes).append('\n');
+    if (hasAnnotatedTypeDifferences(m)) {
+      sb.append("      annotatedTypes: [").append(m.annotatedReturnType);
+      for (ParameterSymbol p : m.parameters) {
+        sb.append(", ").append(p.annotatedType).append(", ").append(p.name);
+      }
+      sb.append("]\n");
     }
   }
 
+  private static boolean hasAnnotatedTypeDifferences(@NotNull MethodSymbol m) {
+    if (m.annotatedReturnType == null) return false;
+    if (!Objects.equals(m.annotatedReturnType, m.returnType)) return true;
+    for (ParameterSymbol p : m.parameters) {
+      if (!Objects.equals(p.annotatedType, p.type)) return true;
+    }
+    return false;
+  }
+
   private static void appendParams(@NotNull StringBuilder sb, @NotNull MethodSymbol m) {
-    // m.types layout: [returnType, paramType1, paramName1, paramType2, paramName2, ...]
-    int n = m.types.size();
     boolean first = true;
-    for (int i = 1; i + 1 < n; i += 2) {
+    for (ParameterSymbol p : m.parameters) {
       if (!first) sb.append(", ");
-      sb.append(m.types.get(i)).append(' ').append(m.types.get(i + 1));
+      sb.append(p.type).append(' ').append(p.name);
       first = false;
     }
   }

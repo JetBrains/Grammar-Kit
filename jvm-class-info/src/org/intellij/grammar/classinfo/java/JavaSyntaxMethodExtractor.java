@@ -10,13 +10,13 @@ import com.intellij.platform.syntax.tree.SyntaxNode;
 import org.intellij.grammar.classinfo.Fqn;
 import org.intellij.grammar.classinfo.MethodSymbol;
 import org.intellij.grammar.classinfo.MethodType;
+import org.intellij.grammar.classinfo.ParameterSymbol;
 import org.intellij.grammar.classinfo.TypeParameterInfo;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Modifier;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import static org.intellij.grammar.classinfo.SyntaxTreeUtil.firstChildOfType;
@@ -48,7 +48,7 @@ final class JavaSyntaxMethodExtractor {
 
     SyntaxNode modifierList = firstChildOfType(methodNode, JavaSyntaxElementType.MODIFIER_LIST);
     m.modifiers = extractModifiers(modifierList);
-    m.annotations.get(0).addAll(typeFormatter.extractAnnotationFqns(modifierList, typeVars));
+    m.annotations.addAll(typeFormatter.extractAnnotationFqns(modifierList, typeVars));
 
     SyntaxNode nameId = firstNameIdentifier(methodNode);
     if (nameId == null) return null;
@@ -57,16 +57,17 @@ final class JavaSyntaxMethodExtractor {
     SyntaxNode returnType = firstChildOfType(methodNode, JavaSyntaxElementType.TYPE);
     if (returnType == null) {
       m.methodType = MethodType.CONSTRUCTOR;
-      m.types.add(declaringFqn.value());
+      m.returnType = declaringFqn.value();
     }
     else {
       m.methodType = Modifier.isStatic(m.modifiers) ? MethodType.STATIC : MethodType.INSTANCE;
-      m.types.add(typeFormatter.formatType(returnType, typeVars));
+      m.returnType = typeFormatter.formatType(returnType, typeVars);
     }
 
     collectParameters(methodNode, m, typeVars);
 
-    m.annotatedTypes.addAll(m.types);
+    m.annotatedReturnType = m.returnType;
+    for (ParameterSymbol p : m.parameters) p.annotatedType = p.type;
     m.exceptions.addAll(typeFormatter.extractRefFqns(firstChildOfType(methodNode, JavaSyntaxElementType.THROWS_LIST), typeVars));
     return m;
   }
@@ -98,10 +99,11 @@ final class JavaSyntaxMethodExtractor {
       if (p.getType() != JavaSyntaxElementType.PARAMETER) continue;
       SyntaxNode pType = firstChildOfType(p, JavaSyntaxElementType.TYPE);
       SyntaxNode pName = firstChildOfType(p, JavaSyntaxTokenType.IDENTIFIER);
-      m.types.add(pType == null ? "" : typeFormatter.formatType(pType, typeVars));
-      m.types.add(pName == null ? "p" + paramIdx : pName.getText().toString());
-      List<Fqn> annos = typeFormatter.extractAnnotationFqns(firstChildOfType(p, JavaSyntaxElementType.MODIFIER_LIST), typeVars);
-      if (!annos.isEmpty()) m.annotations.get(paramIdx + 1).addAll(annos);
+      ParameterSymbol param = new ParameterSymbol();
+      param.type = pType == null ? "" : typeFormatter.formatType(pType, typeVars);
+      param.name = pName == null ? "p" + paramIdx : pName.getText().toString();
+      param.annotations.addAll(typeFormatter.extractAnnotationFqns(firstChildOfType(p, JavaSyntaxElementType.MODIFIER_LIST), typeVars));
+      m.parameters.add(param);
       paramIdx++;
     }
   }

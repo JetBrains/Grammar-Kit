@@ -5,20 +5,15 @@
 package org.intellij.grammar.classinfo;
 
 import com.intellij.util.SmartList;
-import com.intellij.util.containers.FactoryMap;
 
 import java.util.List;
-import java.util.Map;
 
 public class MethodSymbol {
-  public final List<String> types = new SmartList<>();
-  public final List<String> annotatedTypes = new SmartList<>();
-
-  /**
-   * 0 corresponds to the annotations of the method itself.
-   * i corresponds to the annotations of the parameter at index i-1.
-   */
-  public final Map<Integer, List<Fqn>> annotations = FactoryMap.create(o -> new SmartList<>());
+  public String returnType;
+  /** Defaults to {@link #returnType}; may carry inlined annotation FQNs, e.g. {@code java.lang.@A String}. */
+  public String annotatedReturnType;
+  public final List<ParameterSymbol> parameters = new SmartList<>();
+  public final List<Fqn> annotations = new SmartList<>();
   public final List<TypeParameterInfo> generics = new SmartList<>();
   public final List<Fqn> exceptions = new SmartList<>();
   public MethodType methodType;
@@ -28,6 +23,6 @@ public class MethodSymbol {
 
   @Override
   public String toString() {
-    return "MethodSymbol{" + name + types + ", @" + annotations.get(0) + "<" + generics + ">" + " throws " + exceptions + '}';
+    return "MethodSymbol{" + name + "(" + parameters + "):" + returnType + ", @" + annotations + "<" + generics + ">" + " throws " + exceptions + '}';
   }
 }

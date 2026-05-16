@@ -738,8 +738,8 @@ public final class JavaPsiGenerator extends Generator {
 
     if (!G.generateTokenTypes) {
       // add parser static imports hoping external token constants are there
-      for (RuleMethodsHelper.MethodInfo methodInfo : myRulesMethodsHelper.getFor(rule)) {
-        if (methodInfo.rule() == null && !StringUtil.isEmpty(methodInfo.name())) {
+      for (RuleMethodsHelper.RuleMethodInfo ruleMethodInfo : myRulesMethodsHelper.getFor(rule)) {
+        if (ruleMethodInfo.rule() == null && !StringUtil.isEmpty(ruleMethodInfo.name())) {
           for (String s : getRootAttribute(myFile, KnownAttribute.PARSER_IMPORTS).asStrings()) {
             if (s.startsWith("static ")) imports.add(s);
           }
@@ -822,19 +822,19 @@ public final class JavaPsiGenerator extends Generator {
   private void generatePsiClassMethods(@NotNull BnfRule rule, @NotNull RuleInfo info, boolean intf) {
     Set<String> visited = new TreeSet<>();
     boolean mixedAST = psiInfo(rule).mixedAST;
-    for (RuleMethodsHelper.MethodInfo methodInfo : myRulesMethodsHelper.getFor(rule)) {
-      if (StringUtil.isEmpty(methodInfo.name())) continue;
-      switch (methodInfo.type()) {
-        case RULE, TOKEN -> generatePsiAccessor(rule, methodInfo, intf, mixedAST);
-        case USER -> generateUserPsiAccessors(rule, methodInfo, intf, mixedAST);
-        case MIXIN -> generateMixinMethod(rule, methodInfo, intf, info, visited);
-        default -> throw new AssertionError(methodInfo.toString());
+    for (RuleMethodsHelper.RuleMethodInfo ruleMethodInfo : myRulesMethodsHelper.getFor(rule)) {
+      if (StringUtil.isEmpty(ruleMethodInfo.name())) continue;
+      switch (ruleMethodInfo.type()) {
+        case RULE, TOKEN -> generatePsiAccessor(rule, ruleMethodInfo, intf, mixedAST);
+        case USER -> generateUserPsiAccessors(rule, ruleMethodInfo, intf, mixedAST);
+        case MIXIN -> generateMixinMethod(rule, ruleMethodInfo, intf, info, visited);
+        default -> throw new AssertionError(ruleMethodInfo.toString());
       }
     }
   }
 
   private void generateMixinMethod(@NotNull BnfRule rule,
-                                   @NotNull RuleMethodsHelper.MethodInfo methodInfo,
+                                   @NotNull RuleMethodsHelper.RuleMethodInfo ruleMethodInfo,
                                    boolean intf,
                                    @NotNull RuleInfo info,
                                    @NotNull Set<String> visited) {
@@ -843,18 +843,18 @@ public final class JavaPsiGenerator extends Generator {
     if (intf) {
       JavaHelper mixinHelper = helperFor(KnownAttribute.MIXIN);
       String mixinClass = getAttribute(rule, KnownAttribute.MIXIN);
-      List<NavigatablePsiElement> methods = mixinHelper.findClassMethods(mixinClass, MethodType.INSTANCE, methodInfo.name(), -1);
+      List<NavigatablePsiElement> methods = mixinHelper.findClassMethods(mixinClass, MethodType.INSTANCE, ruleMethodInfo.name(), -1);
 
       for (NavigatablePsiElement method : methods) {
-        generateUtilMethod(methodInfo.name(), method, true, false, visited);
+        generateUtilMethod(ruleMethodInfo.name(), method, true, false, visited);
         isGenerated = true;
       }
     }
 
     JavaHelper psiImplUtilHelper = helperFor(KnownAttribute.PSI_IMPL_UTIL_CLASS);
-    List<NavigatablePsiElement> methods = psiImplUtilHelper.findRuleImplMethods(myPsiImplUtilClass, methodInfo.name(), rule);
+    List<NavigatablePsiElement> methods = psiImplUtilHelper.findRuleImplMethods(myPsiImplUtilClass, ruleMethodInfo.name(), rule);
     for (NavigatablePsiElement method : methods) {
-      generateUtilMethod(methodInfo.name(), method, intf, true, visited);
+      generateUtilMethod(ruleMethodInfo.name(), method, intf, true, visited);
       isGenerated = true;
     }
 
@@ -865,9 +865,9 @@ public final class JavaPsiGenerator extends Generator {
             //WARNING: %s(...) is skipped
             //matching %s(%s, ...)
             //methods are not found in %s""",
-          methodInfo.name(), methodInfo.name(), ruleClassName, implClassName);
+          ruleMethodInfo.name(), ruleMethodInfo.name(), ruleClassName, implClassName);
       newLine();
-      addWarning(format("%s.%s(%s, ...) method not found", implClassName, methodInfo.name(), ruleClassName));
+      addWarning(format("%s.%s(%s, ...) method not found", implClassName, ruleMethodInfo.name(), ruleClassName));
     }
   }
 
@@ -875,17 +875,17 @@ public final class JavaPsiGenerator extends Generator {
   public Collection<String> getRuleMethodTypesToImport(BnfRule rule) {
     Set<String> result = new TreeSet<>();
 
-    Collection<RuleMethodsHelper.MethodInfo> methods = myRulesMethodsHelper.getFor(rule);
-    for (RuleMethodsHelper.MethodInfo methodInfo : methods) {
-      if (methodInfo.rule() != null) {
-        result.add(getAccessorType(methodInfo.rule()));
+    Collection<RuleMethodsHelper.RuleMethodInfo> methods = myRulesMethodsHelper.getFor(rule);
+    for (RuleMethodsHelper.RuleMethodInfo ruleMethodInfo : methods) {
+      if (ruleMethodInfo.rule() != null) {
+        result.add(getAccessorType(ruleMethodInfo.rule()));
       }
-      else if (methodInfo.type() == RuleMethodsHelper.MethodType.USER) {
-        RuleMethodsHelper.MethodInfo targetInfo = null;
-        for (Object m : resolveUserPsiPathMethods(rule, methodInfo.path().split("/"))) {
+      else if (ruleMethodInfo.type() == RuleMethodsHelper.MethodType.USER) {
+        RuleMethodsHelper.RuleMethodInfo targetInfo = null;
+        for (Object m : resolveUserPsiPathMethods(rule, ruleMethodInfo.path().split("/"))) {
           if (m == null) break;
           if (m instanceof String) continue;
-          targetInfo = (RuleMethodsHelper.MethodInfo)m;
+          targetInfo = (RuleMethodsHelper.RuleMethodInfo)m;
         }
         if (targetInfo != null && targetInfo.rule() != null) {
           result.add(getAccessorType(targetInfo.rule()));
@@ -895,14 +895,14 @@ public final class JavaPsiGenerator extends Generator {
 
     String mixinClass = getAttribute(rule, KnownAttribute.MIXIN);
 
-    for (RuleMethodsHelper.MethodInfo methodInfo : methods) {
-      if (methodInfo.type() != RuleMethodsHelper.MethodType.MIXIN) continue;
+    for (RuleMethodsHelper.RuleMethodInfo ruleMethodInfo : methods) {
+      if (ruleMethodInfo.type() != RuleMethodsHelper.MethodType.MIXIN) continue;
 
       JavaHelper mixinHelper = helperFor(KnownAttribute.MIXIN);
-      List<NavigatablePsiElement> mixinMethods = mixinHelper.findClassMethods(mixinClass, MethodType.INSTANCE, methodInfo.name(), -1);
+      List<NavigatablePsiElement> mixinMethods = mixinHelper.findClassMethods(mixinClass, MethodType.INSTANCE, ruleMethodInfo.name(), -1);
 
       JavaHelper psiImplUtilHelper = helperFor(KnownAttribute.PSI_IMPL_UTIL_CLASS);
-      List<NavigatablePsiElement> implMethods = psiImplUtilHelper.findRuleImplMethods(myPsiImplUtilClass, methodInfo.name(), rule);
+      List<NavigatablePsiElement> implMethods = psiImplUtilHelper.findRuleImplMethods(myPsiImplUtilClass, ruleMethodInfo.name(), rule);
 
       collectMethodTypesToImport(mixinMethods, false, result);
       collectMethodTypesToImport(implMethods, true, result);
@@ -943,13 +943,13 @@ public final class JavaPsiGenerator extends Generator {
 
 
   /** Emits a single rule- or token-accessor method (e.g. {@code getFoo()}, {@code getFooList()}) for the PSI interface or impl. */
-  private void generatePsiAccessor(BnfRule rule, RuleMethodsHelper.MethodInfo methodInfo, boolean intf, boolean mixedAST) {
-    Cardinality type = methodInfo.cardinality();
-    boolean isToken = methodInfo.rule() == null;
+  private void generatePsiAccessor(BnfRule rule, RuleMethodsHelper.RuleMethodInfo ruleMethodInfo, boolean intf, boolean mixedAST) {
+    Cardinality type = ruleMethodInfo.cardinality();
+    boolean isToken = ruleMethodInfo.rule() == null;
 
     boolean many = type.many();
 
-    String getterName = methodInfo.generateGetterName();
+    String getterName = ruleMethodInfo.generateGetterName();
     if (!intf) out(shorten(JavaBnfConstants.OVERRIDE_ANNO));
     if (type == REQUIRED) {
       out(shorten(JavaBnfConstants.NOTNULL_ANNO));
@@ -960,7 +960,7 @@ public final class JavaPsiGenerator extends Generator {
     else {
       out(shorten(JavaBnfConstants.NOTNULL_ANNO));
     }
-    String s = isToken ? JavaBnfConstants.PSI_ELEMENT_CLASS : getAccessorType(methodInfo.rule());
+    String s = isToken ? JavaBnfConstants.PSI_ELEMENT_CLASS : getAccessorType(ruleMethodInfo.rule());
     String className = shorten(s);
     String tail = intf ? "();" : "() {";
     out((intf ? "" : "public ") +
@@ -970,7 +970,7 @@ public final class JavaPsiGenerator extends Generator {
         getterName +
         tail);
     if (!intf) {
-      out("return " + generatePsiAccessorImplCall(rule, methodInfo, mixedAST) + ";");
+      out("return " + generatePsiAccessorImplCall(rule, ruleMethodInfo, mixedAST) + ";");
       out("}");
     }
     newLine();
@@ -981,24 +981,24 @@ public final class JavaPsiGenerator extends Generator {
    * {@code PsiTreeUtil.getChildOfType} or stub-aware variant — depending on cardinality, whether
    * the rule has stubs, whether the AST is mixed, and the legacy/no-stubs fallback.
    */
-  private String generatePsiAccessorImplCall(@NotNull BnfRule rule, @NotNull RuleMethodsHelper.MethodInfo methodInfo, boolean mixedAST) {
-    boolean isToken = methodInfo.rule() == null;
+  private String generatePsiAccessorImplCall(@NotNull BnfRule rule, @NotNull RuleMethodsHelper.RuleMethodInfo ruleMethodInfo, boolean mixedAST) {
+    boolean isToken = ruleMethodInfo.rule() == null;
 
-    Cardinality type = methodInfo.cardinality();
+    Cardinality type = ruleMethodInfo.cardinality();
     boolean many = type.many();
     boolean required = type == REQUIRED && !many;
     boolean stubbed = !isToken &&
                       ruleInfo(rule).realStubClass() != null &&
-                      ruleInfo(methodInfo.rule()).realStubClass() != null;
+                      ruleInfo(ruleMethodInfo.rule()).realStubClass() != null;
     String result;
     // todo REMOVEME. Keep old generation logic for a while.
     if (!mixedAST && myNoStubs) {
       if (isToken) {
         return (type == REQUIRED ? "findNotNullChildByType" : "findChildByType") +
-               "(" + getElementType(methodInfo.path()) + ")";
+               "(" + getElementType(ruleMethodInfo.path()) + ")";
       }
       else {
-        String className = shorten(getAccessorType(methodInfo.rule()));
+        String className = shorten(getAccessorType(ruleMethodInfo.rule()));
         return many ? format("%s.getChildrenOfTypeAsList(this, %s.class)", shorten(myPsiTreeUtilClass), className) :
                (type == REQUIRED ? "findNotNullChildByClass" : "findChildByClass") + "(" + className + ".class)";
       }
@@ -1006,10 +1006,10 @@ public final class JavaPsiGenerator extends Generator {
     // new logic
     if (isToken) {
       String getterName = mixedAST ? "findPsiChildByType" : "findChildByType";
-      result = getterName + "(" + getElementType(methodInfo.path()) + ")";
+      result = getterName + "(" + getElementType(ruleMethodInfo.path()) + ")";
     }
     else {
-      String className = shorten(getAccessorType(methodInfo.rule()));
+      String className = shorten(getAccessorType(ruleMethodInfo.rule()));
       String getterName = stubbed && many ? "getStubChildrenOfTypeAsList" :
                           stubbed ? "getStubChildOfType" :
                           many ? "getChildrenOfTypeAsList" : "getChildOfType";
@@ -1031,7 +1031,7 @@ public final class JavaPsiGenerator extends Generator {
 
   /**
    * Walks a slash-separated path of accessor names ({@code "foo/bar[0]/baz"}) starting at
-   * {@code startRule}, yielding the resolved {@link RuleMethodsHelper.MethodInfo} for each step
+   * {@code startRule}, yielding the resolved {@link RuleMethodsHelper.RuleMethodInfo} for each step
    * (or the path element string for empty/index segments, or {@code null} when resolution fails).
    */
   private JBIterable<?> resolveUserPsiPathMethods(BnfRule startRule,
@@ -1044,7 +1044,7 @@ public final class JavaPsiGenerator extends Generator {
 
       if (item.isEmpty()) return item;
       if (targetRule[0] == null) return null;
-      RuleMethodsHelper.MethodInfo targetInfo = myRulesMethodsHelper.getMethodInfo(targetRule[0], item);
+      RuleMethodsHelper.RuleMethodInfo targetInfo = myRulesMethodsHelper.getMethodInfo(targetRule[0], item);
       targetRule[0] = targetInfo == null ? null : targetInfo.rule();
       return targetInfo;
     });
@@ -1056,12 +1056,12 @@ public final class JavaPsiGenerator extends Generator {
    * step (unknown rule, index on a non-list, missing index on a list, suppressed accessor, …)
    * and aborts emission of that accessor.
    */
-  private void generateUserPsiAccessors(BnfRule startRule, RuleMethodsHelper.MethodInfo methodInfo, boolean intf, boolean mixedAST) {
+  private void generateUserPsiAccessors(BnfRule startRule, RuleMethodsHelper.RuleMethodInfo ruleMethodInfo, boolean intf, boolean mixedAST) {
     StringBuilder sb = new StringBuilder();
     BnfRule targetRule = startRule;
     Cardinality cardinality = REQUIRED;
     String context = "";
-    String[] splitPath = methodInfo.path().split("/");
+    String[] splitPath = ruleMethodInfo.path().split("/");
 
     int i = -1, count = 1;
     boolean totalNullable = false;
@@ -1075,7 +1075,7 @@ public final class JavaPsiGenerator extends Generator {
       String index = indexEnd > -1 ? pathElement.substring(indexStart + 1, indexEnd).trim() : null;
 
 
-      RuleMethodsHelper.MethodInfo targetInfo = (RuleMethodsHelper.MethodInfo)m;
+      RuleMethodsHelper.RuleMethodInfo targetInfo = (RuleMethodsHelper.RuleMethodInfo)m;
       String error;
       if (indexStart > 0 && (indexEnd == -1 || StringUtil.isNotEmpty(pathElement.substring(indexEnd + 1)))) {
         error = "'<name>[<index>]' expected, got '" + pathElement + "'";
@@ -1106,7 +1106,7 @@ public final class JavaPsiGenerator extends Generator {
       }
       if (error != null) {
         if (intf) { // warn only once
-          addWarning(format("%s#%s(\"%s\"): %s", startRule.getName(), methodInfo.name(), methodInfo.path(), error));
+          addWarning(format("%s#%s(\"%s\"): %s", startRule.getName(), ruleMethodInfo.name(), ruleMethodInfo.path(), error));
         }
         return;
       }
@@ -1187,7 +1187,7 @@ public final class JavaPsiGenerator extends Generator {
     boolean many = cardinality.many();
     String s = targetRule == null ? JavaBnfConstants.PSI_ELEMENT_CLASS : getAccessorType(targetRule);
     String className = shorten(s);
-    String getterName = CommonRendererUtils.getGetterName(methodInfo.name());
+    String getterName = CommonRendererUtils.getGetterName(ruleMethodInfo.name());
     String tail = intf ? "();" : "() {";
     out((intf ? "" : "public ") +
         (many ? shorten(CommonClassNames.JAVA_UTIL_LIST) + "<" : "") +

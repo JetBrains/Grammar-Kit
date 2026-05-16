@@ -20,7 +20,6 @@ import org.intellij.grammar.classinfo.MethodType;
 import org.intellij.grammar.generator.kotlin.KotlinBnfConstants;
 import org.intellij.grammar.generator.kotlin.KotlinNameShortener;
 import org.intellij.grammar.generator.kotlin.KotlinNameRenderer;
-import org.intellij.grammar.java.JavaHelper;
 import org.intellij.grammar.parser.GeneratedParserUtilBase.Parser;
 import org.intellij.grammar.psi.*;
 import org.intellij.grammar.psi.impl.GrammarUtil;
@@ -189,7 +188,7 @@ public final class KotlinParserGenerator extends Generator {
     if (myGrammarRoot != null && (G.generatePsi)) {
       JavaParserGenerator javaParserGenerator = new JavaParserGenerator(myFile, mySourcePath, myPackagePrefix, myOpener, myPaths);
       javaParserGenerator.replaceSimpleTokes(mySimpleTokens);
-      javaParserGenerator.generatePsiOnly();
+      javaParserGenerator.generatePsi();
     }
   }
 

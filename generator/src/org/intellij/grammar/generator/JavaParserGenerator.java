@@ -67,7 +67,7 @@ import static org.intellij.grammar.psi.BnfTypes.*;
  * {@link Generator} implementation that emits Java sources: the parser, the element-type holder,
  * PSI interfaces and impls, and (when enabled) a visitor.
  * <p>
- * {@link #generate()} runs the full pipeline; {@link #generatePsiOnly()} is invoked by
+ * {@link #generate()} runs the full pipeline; {@link #generatePsi()} is invoked by
  * {@link KotlinParserGenerator} so the Kotlin parser can reuse Java PSI emission while owning
  * parser generation itself. {@link #replaceSimpleTokes(Map)} exists for the same flow: simple
  * tokens discovered during Kotlin parser generation must be propagated here before PSI emission
@@ -227,14 +227,14 @@ public final class JavaParserGenerator extends Generator {
     {
       generateParser();
     }
-    generatePsiOnly();
+    generatePsi();
   }
   
   /**
    * Replaces this generator's simple-token map with {@code simpleTypes}.
    * <p>
    * Called by {@link KotlinParserGenerator#generate()} so that simple tokens it discovered during
-   * parser generation are visible here before {@link #generatePsiOnly()} emits the element-type
+   * parser generation are visible here before {@link #generatePsi()} emits the element-type
    * holder and PSI.
    */
   public void replaceSimpleTokes(Map<String, String> simpleTypes) {
@@ -247,7 +247,7 @@ public final class JavaParserGenerator extends Generator {
    * type converter, and (when {@link GenOptions#generatePsi}) PSI interfaces, impls, and visitor.
    * Invoked directly by {@link KotlinParserGenerator}, which owns its own parser generation.
    */
-  public void generatePsiOnly() throws IOException {
+  public void generatePsi() throws IOException {
     Map<String, BnfRule> sortedCompositeTypes = new TreeMap<>();
     Map<String, BnfRule> sortedPsiRules = new TreeMap<>();
 

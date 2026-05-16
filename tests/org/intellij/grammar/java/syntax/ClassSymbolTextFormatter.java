@@ -24,9 +24,9 @@ import java.util.Objects;
  * stable, human-readable text block used by the golden-file tests in this package. The format is
  * pinned by {@code ClassInfoTextFormatterTest} — change it there if you change it here.
  */
-public final class ClassInfoTextFormatter {
+public final class ClassSymbolTextFormatter {
 
-  private ClassInfoTextFormatter() { }
+  private ClassSymbolTextFormatter() { }
 
   public static @NotNull String format(@NotNull Map<Fqn, ClassSymbol> classes) {
     List<Map.Entry<Fqn, ClassSymbol>> sorted = new ArrayList<>(classes.entrySet());

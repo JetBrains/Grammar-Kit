@@ -34,7 +34,7 @@ public abstract class GoldenClassInfoTestCase extends TestCase {
   protected abstract @NotNull String goldenDir();
 
   protected final void assertClassInfoMatchesGolden(@NotNull Map<Fqn, ClassSymbol> classes) {
-    String actual = ClassInfoTextFormatter.format(classes);
+    String actual = ClassSymbolTextFormatter.format(classes);
     Path golden = Path.of("testData", goldenDir(), getName() + ".txt");
     compareToGolden(actual, golden);
   }

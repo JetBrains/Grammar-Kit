@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Pins the textual format produced by {@link ClassInfoTextFormatter}. Hand-built {@link ClassSymbol}
+ * Pins the textual format produced by {@link ClassSymbolTextFormatter}. Hand-built {@link ClassSymbol}
  * objects exercise every branch (empty class, multi-class sort, modifiers, class/method
  * annotations, type parameters with bounds and annotations, multifileFacade, each
  * {@link MethodType}, method generics, throws, per-parameter annotations, annotatedTypes
@@ -31,7 +31,7 @@ public class ClassInfoTextFormatterTest extends TestCase {
     String expected = """
       class a.b.Empty
         methods: (none)""";
-    assertEquals(expected, ClassInfoTextFormatter.format(Map.of(info.name, info)));
+    assertEquals(expected, ClassSymbolTextFormatter.format(Map.of(info.name, info)));
   }
 
   public void testClassWithModifiersExtendsAndImplements() {
@@ -45,7 +45,7 @@ public class ClassInfoTextFormatterTest extends TestCase {
       class a.b.Foo extends a.b.Base implements a.b.I1, a.b.I2
         modifiers: public final
         methods: (none)""";
-    assertEquals(expected, ClassInfoTextFormatter.format(Map.of(info.name, info)));
+    assertEquals(expected, ClassSymbolTextFormatter.format(Map.of(info.name, info)));
   }
 
   public void testClassAnnotationsAndTypeParameters() {
@@ -61,7 +61,7 @@ public class ClassInfoTextFormatterTest extends TestCase {
         annotations: @java.lang.Deprecated
         typeParameters: T, U extends java.lang.Number
         methods: (none)""";
-    assertEquals(expected, ClassInfoTextFormatter.format(Map.of(info.name, info)));
+    assertEquals(expected, ClassSymbolTextFormatter.format(Map.of(info.name, info)));
   }
 
   public void testMultifileFacadeAndMethodVariants() {
@@ -120,7 +120,7 @@ public class ClassInfoTextFormatterTest extends TestCase {
             throws: java.io.IOException
             annotatedTypes: [java.lang.@A String, java.lang.String, name]
           STATIC private static void helper()""";
-    assertEquals(expected, ClassInfoTextFormatter.format(Map.of(info.name, info)));
+    assertEquals(expected, ClassSymbolTextFormatter.format(Map.of(info.name, info)));
   }
 
   public void testMultipleClassesAreSortedByFqn() {
@@ -134,6 +134,6 @@ public class ClassInfoTextFormatterTest extends TestCase {
 
       class z.Aardvark
         methods: (none)""";
-    assertEquals(expected, ClassInfoTextFormatter.format(Map.of(a.name, a, b.name, b)));
+    assertEquals(expected, ClassSymbolTextFormatter.format(Map.of(a.name, a, b.name, b)));
   }
 }

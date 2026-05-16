@@ -11,7 +11,6 @@ import org.intellij.grammar.classinfo.Fqn;
 import org.intellij.grammar.classinfo.JvmClassSymbolManager;
 import org.intellij.grammar.classinfo.MethodSymbol;
 import org.intellij.grammar.classinfo.MethodType;
-import org.intellij.grammar.classinfo.TypeParameterSymbol;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -19,14 +18,11 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * The {@link JavaHelper} adapter over a {@link JvmClassSymbolManager}. Every override delegates to
- * the manager (for {@link ClassSymbol} lookups) or to {@link ClassSymbolUtil} (for unwrapping
- * {@link MyElement} wrappers). The manager owns the cache and the ordered provider list, so this
- * class holds no symbol state of its own.
- * <p>
- * {@link #findRuleImplMethods} and {@link #getClassReferences} are intentionally <i>not</i>
- * overridden — they fall through to {@link JavaHelper}'s defaults (a no-op return for headless use,
- * meaningful only when a PSI-backed subclass overrides them).
+ * The {@link JavaHelper} adapter over a {@link JvmClassSymbolManager}. Lookup overrides
+ * ({@link #findClass}, {@link #findClassMethods}, {@link #getSuperClassName}) consult the manager
+ * and wrap results in {@link MyElement}. Metadata reads inherit {@link JavaHelper}'s defaults,
+ * which dispatch through {@link ClassSymbolUtil}. The manager owns the cache and the ordered
+ * provider list, so this class holds no symbol state of its own.
  */
 public class JvmSyntaxHelper extends JavaHelper {
 
@@ -34,11 +30,6 @@ public class JvmSyntaxHelper extends JavaHelper {
 
   public JvmSyntaxHelper(@NotNull JvmClassSymbolManager manager) {
     this.manager = manager;
-  }
-
-  @Override
-  public boolean isPublic(@Nullable NavigatablePsiElement element) {
-    return ClassSymbolUtil.isPublic(element);
   }
 
   @Override
@@ -71,30 +62,5 @@ public class JvmSyntaxHelper extends JavaHelper {
   public @Nullable String getSuperClassName(@Nullable String className) {
     ClassSymbol info = manager.findClass(Fqn.ofNullable(className));
     return info == null || info.superClass() == null ? null : info.superClass().value();
-  }
-
-  @Override
-  public @NotNull List<String> getMethodTypes(@Nullable NavigatablePsiElement method) {
-    return ClassSymbolUtil.getMethodTypes(method);
-  }
-
-  @Override
-  public List<TypeParameterSymbol> getGenericParameters(NavigatablePsiElement method) {
-    return ClassSymbolUtil.getGenericParameters(method);
-  }
-
-  @Override
-  public List<String> getExceptionList(NavigatablePsiElement method) {
-    return ClassSymbolUtil.getExceptionList(method);
-  }
-
-  @Override
-  public @NotNull List<String> getAnnotations(@Nullable NavigatablePsiElement element) {
-    return ClassSymbolUtil.getAnnotations(element);
-  }
-
-  @Override
-  public @NotNull List<String> getParameterAnnotations(@Nullable NavigatablePsiElement method, int paramIndex) {
-    return ClassSymbolUtil.getParameterAnnotations(method, paramIndex);
   }
 }

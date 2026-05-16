@@ -12,10 +12,8 @@ import com.intellij.testFramework.fixtures.BasePlatformTestCase;
 import com.intellij.util.ProcessingContext;
 import org.intellij.grammar.generator.Generator;
 import org.intellij.grammar.generator.JavaParserGenerator;
-import org.intellij.grammar.generator.NameShortener;
 import org.intellij.grammar.generator.OutputOpener;
 import org.intellij.grammar.classinfo.MethodType;
-import org.intellij.grammar.classinfo.TypeParameterSymbol;
 import org.intellij.grammar.java.JavaHelper;
 import org.intellij.grammar.java.PsiHelperFactory;
 import org.intellij.grammar.psi.BnfFile;
@@ -27,7 +25,6 @@ import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.lang.reflect.Field;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -472,66 +469,23 @@ public class BnfGeneratorPsiTest extends BasePlatformTestCase {
     }
 
     @Override
-    public boolean isPublic(@Nullable NavigatablePsiElement element) {
-      return myDelegate.isPublic(element);
-    }
-
-    @Override
     public @Nullable NavigatablePsiElement findClass(@Nullable String className) {
       return myDelegate.findClass(className);
     }
 
     @Override
+    public @NotNull List<NavigatablePsiElement> findClassMethods(@Nullable String s,
+                                                                 @NotNull MethodType type,
+                                                                 @Nullable String s1,
+                                                                 boolean b,
+                                                                 int i,
+                                                                 String... strings) {
+      return List.of();
+    }
+
+    @Override
     public @Nullable String getSuperClassName(@Nullable String className) {
       return myDelegate.getSuperClassName(className);
-    }
-
-    @Override
-    public @NotNull List<String> getMethodTypes(@Nullable NavigatablePsiElement method) {
-      return myDelegate.getMethodTypes(method);
-    }
-
-    @Override
-    public List<TypeParameterSymbol> getGenericParameters(NavigatablePsiElement method) {
-      return myDelegate.getGenericParameters(method);
-    }
-
-    @Override
-    public List<String> getExceptionList(NavigatablePsiElement method) {
-      return myDelegate.getExceptionList(method);
-    }
-
-    @Override
-    public @NotNull List<String> getAnnotations(@Nullable NavigatablePsiElement element) {
-      List<String> result = myDelegate.getAnnotations(element);
-      // Simulate PsiHelper bug: for methods whose return type already contains an embedded
-      // annotation (qualified types like ReadWriteAccessDetector.Access), the annotation
-      // is NOT filtered out by getAnnotationsInner() because PsiType.getAnnotations()
-      // doesn't return annotations on inner type components of qualified types.
-      // Only match annotations at the top level of the return type, not inside generic
-      // parameters — this accurately models the real bug which affects qualified types only.
-      if (element instanceof PsiMethod) {
-        List<String> types = myDelegate.getMethodTypes(element);
-        if (!types.isEmpty()) {
-          String returnType = types.get(0);
-          int angleIdx = NameShortener.indexOfUnquotedAngleBracket(returnType);
-          String topLevelType = angleIdx >= 0 ? returnType.substring(0, angleIdx) : returnType;
-          List<String> mutable = null;
-          for (String anno : List.of("org.jetbrains.annotations.NotNull", "org.jetbrains.annotations.Nullable")) {
-            if (topLevelType.contains("@" + anno) && !result.contains(anno)) {
-              if (mutable == null) mutable = new ArrayList<>(result);
-              mutable.add(anno);
-            }
-          }
-          if (mutable != null) return mutable;
-        }
-      }
-      return result;
-    }
-
-    @Override
-    public @NotNull List<String> getParameterAnnotations(@Nullable NavigatablePsiElement method, int paramIndex) {
-      return myDelegate.getParameterAnnotations(method, paramIndex);
     }
 
     @Override

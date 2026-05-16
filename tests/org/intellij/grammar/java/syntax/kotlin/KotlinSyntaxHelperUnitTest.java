@@ -20,8 +20,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -197,10 +195,6 @@ public class KotlinSyntaxHelperUnitTest extends TestCase {
   /** Minimal recording fallback so we can assert delegation. */
   private static final class RecordingFallback extends JavaHelper {
     final Map<String, ClassSymbol.Builder> classes = new HashMap<>();
-    final Map<String, List<MethodSymbol.Builder>> methods = new HashMap<>();
-
-    @Override
-    public boolean isPublic(NavigatablePsiElement element) { return false; }
 
     @Override
     public NavigatablePsiElement findClass(String className) {
@@ -209,17 +203,13 @@ public class KotlinSyntaxHelperUnitTest extends TestCase {
     }
 
     @Override
-    public List<NavigatablePsiElement> findClassMethods(String className,
-                                                        MethodType methodType,
-                                                        String methodName,
-                                                        boolean allowAbstract,
-                                                        int paramCount,
-                                                        String... paramTypes) {
-      List<MethodSymbol.Builder> ms = methods.get(className);
-      if (ms == null) return Collections.emptyList();
-      List<NavigatablePsiElement> result = new ArrayList<>();
-      for (MethodSymbol.Builder m : ms) result.add(new MyElement<>(m.build()));
-      return result;
+    public @NotNull List<NavigatablePsiElement> findClassMethods(@Nullable String s,
+                                                                 @NotNull MethodType type,
+                                                                 @Nullable String s1,
+                                                                 boolean b,
+                                                                 int i,
+                                                                 String... strings) {
+      return List.of();
     }
 
     @Override

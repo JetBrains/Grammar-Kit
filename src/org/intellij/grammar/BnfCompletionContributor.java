@@ -139,7 +139,7 @@ final class BnfCompletionContributor extends CompletionContributor {
           for (String className = parserClass; className != null; className = helper.getSuperClassName(className)) {
             for (NavigatablePsiElement element : helper.findClassMethods(className, MethodType.STATIC, "*", false, -1,
                                                                          JavaBnfConstants.PSI_BUILDER_CLASS, "int")) {
-              List<String> methodTypes = helper.getMethodTypes(element);
+              List<String> methodTypes = JavaHelper.getMethodTypes(element);
               if ("boolean".equals(ContainerUtil.getFirstItem(methodTypes))) {
                 result.addElement(LookupElementBuilder.createWithIcon((PsiNamedElement)element));
               }

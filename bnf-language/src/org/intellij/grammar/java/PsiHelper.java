@@ -10,15 +10,11 @@ import com.intellij.psi.*;
 import com.intellij.psi.impl.source.resolve.reference.impl.providers.JavaClassReferenceProvider;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.util.PsiTreeUtil;
-import com.intellij.util.ArrayUtil;
 import com.intellij.util.IncorrectOperationException;
 import com.intellij.util.ProcessingContext;
-import com.intellij.util.containers.ContainerUtil;
 import org.intellij.grammar.KnownAttribute;
-import org.intellij.grammar.classinfo.Fqn;
 import org.intellij.grammar.classinfo.JvmClassSymbolManager;
 import org.intellij.grammar.classinfo.MethodType;
-import org.intellij.grammar.classinfo.TypeParameterSymbol;
 import org.intellij.grammar.classinfo.asm.AsmClassSymbolProvider;
 import org.intellij.grammar.psi.BnfAttr;
 import org.jetbrains.annotations.NotNull;
@@ -93,25 +89,6 @@ final class PsiHelper extends JvmSyntaxHelper {
            !(methodType == MethodType.CONSTRUCTOR && modifierList.hasModifierProperty(PsiModifier.PRIVATE));
   }
 
-  private static @NotNull List<String> getAnnotationsInner(PsiModifierListOwner element) {
-    PsiModifierList modifierList = element.getModifierList();
-    if (modifierList == null) return Collections.emptyList();
-    PsiType typeToSkip = element instanceof PsiMethod ? ((PsiMethod)element).getReturnType() :
-                         element instanceof PsiVariable ? ((PsiVariable)element).getType() : null;
-    PsiAnnotation[] annoToSkip = typeToSkip == null ? null :
-                                 typeToSkip instanceof PsiArrayType ? ((PsiArrayType)typeToSkip).getComponentType().getAnnotations() :
-                                 typeToSkip.getAnnotations();
-    String[] textToSkip = annoToSkip == null ? null :
-                          ContainerUtil.map(annoToSkip, PsiElement::getText, ArrayUtil.EMPTY_STRING_ARRAY);
-    List<String> result = new ArrayList<>();
-    for (PsiAnnotation annotation : modifierList.getAnnotations()) {
-      if (annotation.getParameterList().getAttributes().length > 0) continue;
-      if (textToSkip != null && ArrayUtil.indexOf(textToSkip, annotation.getText()) != -1) continue;
-      ContainerUtil.addIfNotNull(result, annotation.getQualifiedName());
-    }
-    return result;
-  }
-
   @Override
   public PsiReference @NotNull [] getClassReferences(@NotNull PsiElement element, @NotNull ProcessingContext context) {
     BnfAttr bnfAttr = PsiTreeUtil.getParentOfType(element, BnfAttr.class);
@@ -139,11 +116,6 @@ final class PsiHelper extends JvmSyntaxHelper {
     }
     provider.setSoft(false);
     return provider.getReferencesByElement(element, context);
-  }
-
-  @Override
-  public boolean isPublic(@Nullable NavigatablePsiElement element) {
-    return element instanceof PsiModifierListOwner && ((PsiModifierListOwner)element).hasModifierProperty("public");
   }
 
   @Override
@@ -188,54 +160,5 @@ final class PsiHelper extends JvmSyntaxHelper {
     PsiClass aClass = findClassSafe(className);
     PsiClass superClass = aClass != null ? aClass.getSuperClass() : null;
     return superClass != null ? superClass.getQualifiedName() : super.getSuperClassName(className);
-  }
-
-  @Override
-  public @NotNull List<String> getMethodTypes(NavigatablePsiElement method) {
-    if (!(method instanceof PsiMethod psiMethod)) return super.getMethodTypes(method);
-    PsiType returnType = psiMethod.getReturnType();
-    List<String> strings = new ArrayList<>();
-    strings.add(returnType == null ? "" : returnType.getCanonicalText(true));
-    for (PsiParameter parameter : psiMethod.getParameterList().getParameters()) {
-      PsiType type = parameter.getType();
-      boolean generic = type instanceof PsiClassType && ((PsiClassType)type).resolve() instanceof PsiTypeParameter;
-      String typeText = (generic ? "<" : "") + type.getCanonicalText(true) + (generic ? ">" : "");
-      strings.add(typeText);
-      strings.add(parameter.getName());
-    }
-    return strings;
-  }
-
-  @Override
-  public List<TypeParameterSymbol> getGenericParameters(NavigatablePsiElement method) {
-    if (!(method instanceof PsiMethod psiMethod)) return super.getGenericParameters(method);
-
-    PsiTypeParameter[] typeParameters = psiMethod.getTypeParameters();
-    return ContainerUtil.map(typeParameters, param -> new TypeParameterSymbol(
-      param.getName(),
-      ContainerUtil.map(param.getExtendsListTypes(), bound -> bound.getCanonicalText(false)),
-      ContainerUtil.map(getAnnotationsInner(param), Fqn::of)));
-  }
-
-  @Override
-  public List<String> getExceptionList(NavigatablePsiElement method) {
-    if (!(method instanceof PsiMethod psiMethod)) return super.getExceptionList(method);
-
-    PsiClassType[] types = psiMethod.getThrowsList().getReferencedTypes();
-    return ContainerUtil.map(types, type -> type.getCanonicalText(false));
-  }
-
-  @Override
-  public @NotNull List<String> getAnnotations(NavigatablePsiElement element) {
-    if (!(element instanceof PsiModifierListOwner)) return super.getAnnotations(element);
-    return getAnnotationsInner((PsiModifierListOwner)element);
-  }
-
-  @Override
-  public @NotNull List<String> getParameterAnnotations(@Nullable NavigatablePsiElement method, int paramIndex) {
-    if (!(method instanceof PsiMethod psiMethod)) return super.getParameterAnnotations(method, paramIndex);
-    PsiParameter[] parameters = psiMethod.getParameterList().getParameters();
-    if (paramIndex < 0 || paramIndex >= parameters.length) return Collections.emptyList();
-    return getAnnotationsInner(parameters[paramIndex]);
   }
 }

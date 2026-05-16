@@ -4,13 +4,10 @@
 
 package org.intellij.grammar.java;
 
-import com.intellij.openapi.project.Project;
 import com.intellij.psi.*;
 import com.intellij.util.*;
-import org.intellij.grammar.classinfo.JvmClassSymbolManager;
 import org.intellij.grammar.classinfo.MethodType;
 import org.intellij.grammar.classinfo.TypeParameterSymbol;
-import org.intellij.grammar.classinfo.asm.AsmClassSymbolProvider;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -36,49 +33,16 @@ import java.util.*;
  * still degrades gracefully.
  *
  * @author gregsh
- * @see AsmHelper
  * @see PsiHelper
  * @see ReflectionHelper
  */
 public abstract class JavaHelper {
 
   /**
-   * Returns the {@link JavaHelper} to use for the given {@code context}. Inside the IDE this is a
-   * fresh {@code PsiHelper} produced by the project-level {@code PsiHelperFactory} service
-   * (registered in {@code plugin-java.xml}); the factory bakes a {@code *InputPath}-derived search
-   * scope into the helper based on {@code context}'s position in the BNF tree. When no factory is
-   * available (e.g. headless / CLI), returns the {@link JavaHelper} registered as a project
-   * service — a {@link JvmSyntaxHelper} by default, or a source-backed {@link JvmSyntaxHelper}
-   * when the CLI opted in via {@code --source-psi}. Falls back to a fresh {@link JvmSyntaxHelper}
-   * when nothing is registered so callers always get a usable helper rather than {@code null}.
-   */
-  public static JavaHelper getJavaHelper(@NotNull PsiElement context) {
-    Project project = context.getProject();
-    PsiHelperFactory factory = project.getService(PsiHelperFactory.class);
-    if (factory != null) {
-      return factory.getInstance(context);
-    }
-
-    //can be installed by Main to JavaSyntaxHelper
-    JavaHelper service = project.getService(JavaHelper.class);
-    if (service != null) {
-      return service;
-    }
-
-    return new JvmSyntaxHelper(new JvmClassSymbolManager(List.of(new AsmClassSymbolProvider())));
-  }
-
-  /** Whether the given class or method is declared {@code public}. */
-  public abstract boolean isPublic(@Nullable NavigatablePsiElement element);
-
-  /**
    * Resolves a fully-qualified class name to a navigatable element, or {@code null} when the class
    * cannot be located in this helper's view of the world.
    */
-  public @Nullable NavigatablePsiElement findClass(@Nullable String className) {
-    return null;
-  }
-
+  public abstract @Nullable NavigatablePsiElement findClass(@Nullable String className);
   /**
    * Looks up methods on {@code className} that match the given filters.
    *
@@ -89,49 +53,15 @@ public abstract class JavaHelper {
    *                    (entries follow the {@link ClassSymbolUtil#acceptsName} matching rules and may also resolve via
    *                    a supertype/interface check on the candidate parameter)
    */
-  public @NotNull List<NavigatablePsiElement> findClassMethods(@Nullable String className,
-                                                               @NotNull MethodType methodType,
-                                                               @Nullable String methodName,
-                                                               boolean allowAbstract,
-                                                               int paramCount,
-                                                               String... paramTypes) {
-    return Collections.emptyList();
-  }
+  public abstract @NotNull List<NavigatablePsiElement> findClassMethods(@Nullable String className,
+                                                                        @NotNull MethodType methodType,
+                                                                        @Nullable String methodName,
+                                                                        boolean allowAbstract,
+                                                                        int paramCount,
+                                                                        String... paramTypes);
 
   /** FQN of the direct superclass of {@code className}, or {@code null} for {@code Object} / unknown classes. */
-  public @Nullable String getSuperClassName(@Nullable String className) {
-    return null;
-  }
-
-  /**
-   * Returns the method's signature as a flat string list:
-   * index 0 is the return type, then alternating {@code (type, paramName)} pairs for each parameter.
-   * The {@code paramName} entries are synthesised ({@code "p0"}, {@code "p1"}…) when the source does
-   * not preserve them (bytecode / reflection). Used by the generator when emitting delegate code.
-   */
-  public @NotNull List<String> getMethodTypes(@Nullable NavigatablePsiElement method) {
-    return Collections.emptyList();
-  }
-
-  /** Generic type parameters declared on the method itself, in declaration order. */
-  public List<TypeParameterSymbol> getGenericParameters(NavigatablePsiElement method) {
-    return Collections.emptyList();
-  }
-
-  /** FQNs of the method's declared checked exceptions ({@code throws} clause). */
-  public List<String> getExceptionList(NavigatablePsiElement method) {
-    return Collections.emptyList();
-  }
-
-  /** FQNs of annotations declared directly on the class or method. */
-  public @NotNull List<String> getAnnotations(@Nullable NavigatablePsiElement element) {
-    return Collections.emptyList();
-  }
-
-  /** FQNs of annotations on the parameter at the given index. Returns empty if the index is out of range. */
-  public @NotNull List<String> getParameterAnnotations(@Nullable NavigatablePsiElement method, int paramIndex) {
-    return Collections.emptyList();
-  }
+  public abstract @Nullable String getSuperClassName(@Nullable String className);
 
   /**
    * Builds {@link PsiReference}s for a class-name string literal living inside a BNF attribute, so the
@@ -142,4 +72,38 @@ public abstract class JavaHelper {
     return PsiReference.EMPTY_ARRAY;
   }
 
+  /** Whether the given class or method is declared {@code public}. */
+  public static boolean isPublic(@Nullable NavigatablePsiElement element) {
+    return ClassSymbolUtil.isPublic(element);
+  }
+
+  /**
+   * Returns the method's signature as a flat string list:
+   * index 0 is the return type, then alternating {@code (type, paramName)} pairs for each parameter.
+   * The {@code paramName} entries are synthesised ({@code "p0"}, {@code "p1"}…) when the source does
+   * not preserve them (bytecode / reflection). Used by the generator when emitting delegate code.
+   */
+  public static @NotNull List<String> getMethodTypes(@Nullable NavigatablePsiElement method) {
+    return ClassSymbolUtil.getMethodTypes(method);
+  }
+
+  /** Generic type parameters declared on the method itself, in declaration order. */
+  public static List<TypeParameterSymbol> getGenericParameters(NavigatablePsiElement method) {
+    return ClassSymbolUtil.getGenericParameters(method);
+  }
+
+  /** FQNs of the method's declared checked exceptions ({@code throws} clause). */
+  public static List<String> getExceptionList(NavigatablePsiElement method) {
+    return ClassSymbolUtil.getExceptionList(method);
+  }
+
+  /** FQNs of annotations declared directly on the class or method. */
+  public static @NotNull List<String> getAnnotations(@Nullable NavigatablePsiElement element) {
+    return ClassSymbolUtil.getAnnotations(element);
+  }
+
+  /** FQNs of annotations on the parameter at the given index. Returns empty if the index is out of range. */
+  public static @NotNull List<String> getParameterAnnotations(@Nullable NavigatablePsiElement method, int paramIndex) {
+    return ClassSymbolUtil.getParameterAnnotations(method, paramIndex);
+  }
 }

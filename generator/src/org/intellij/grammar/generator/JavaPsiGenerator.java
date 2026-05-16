@@ -287,7 +287,7 @@ public final class JavaPsiGenerator extends Generator {
       for (String s : supers.values()) {
         if (!visited.add(s)) continue;
         NavigatablePsiElement aClass = implementsHelper.findClass(s);
-        if (aClass != null && !implementsHelper.isPublic(aClass)) {
+        if (aClass != null && !JavaHelper.isPublic(aClass)) {
           replacements.put(s, superIntf);
         }
       }
@@ -768,8 +768,8 @@ public final class JavaPsiGenerator extends Generator {
     }
     else {
       for (NavigatablePsiElement m : constructors) {
-        List<String> types = myJavaHelper.getMethodTypes(m);
-        Function<Integer, List<String>> annoProvider = i -> myJavaHelper.getParameterAnnotations(m, (i - 1) / 2);
+        List<String> types = JavaHelper.getMethodTypes(m);
+        Function<Integer, List<String>> annoProvider = i -> JavaHelper.getParameterAnnotations(m, (i - 1) / 2);
         out("public " + shortName + "(" + getParametersString(types, 1, 3, substitutor, annoProvider, myShortener) + ") {");
         out("super(" + getParametersString(types, 1, 2, substitutor, annoProvider, myShortener) + ");");
         out("}");
@@ -787,7 +787,7 @@ public final class JavaPsiGenerator extends Generator {
         for (String curClass = topSuperClass; curClass != null; curClass = mixinHelper.getSuperClassName(curClass)) {
           for (NavigatablePsiElement m : mixinHelper.findClassMethods(curClass, MethodType.INSTANCE, "accept", false, 1,
                                                                       myVisitorClassName)) {
-            String paramType = myJavaHelper.getMethodTypes(m).get(1);
+            String paramType = JavaHelper.getMethodTypes(m).get(1);
             if (getRawClassName(paramType).endsWith(StringUtil.getShortName(myVisitorClassName))) {
               addOverride = true;
               break main;
@@ -919,11 +919,11 @@ public final class JavaPsiGenerator extends Generator {
    */
   private void collectMethodTypesToImport(@NotNull List<NavigatablePsiElement> methods, boolean isInPsiUtil, @NotNull Set<String> result) {
     for (NavigatablePsiElement method : methods) {
-      List<String> types = myJavaHelper.getMethodTypes(method);
+      List<String> types = JavaHelper.getMethodTypes(method);
       String returnType = ContainerUtil.getFirstItem(types);
-      addTypeToImports(returnType, myJavaHelper.getAnnotations(method), result);
+      addTypeToImports(returnType, JavaHelper.getAnnotations(method), result);
 
-      for (TypeParameterSymbol generic : myJavaHelper.getGenericParameters(method)) {
+      for (TypeParameterSymbol generic : JavaHelper.getGenericParameters(method)) {
         for (String type : generic.extendsList()) {
           addTypeToImports(type, emptyList(), result);
         }
@@ -934,10 +934,10 @@ public final class JavaPsiGenerator extends Generator {
 
       for (int i = isInPsiUtil ? 3 : 1, count = types.size(); i < count; i += 2) {
         String type = types.get(i);
-        addTypeToImports(type, myJavaHelper.getParameterAnnotations(method, (i - 1) / 2), result);
+        addTypeToImports(type, JavaHelper.getParameterAnnotations(method, (i - 1) / 2), result);
       }
 
-      for (String exception : myJavaHelper.getExceptionList(method)) {
+      for (String exception : JavaHelper.getExceptionList(method)) {
         addTypeToImports(exception, emptyList(), result);
       }
     }
@@ -1215,15 +1215,15 @@ public final class JavaPsiGenerator extends Generator {
                                   boolean intf,
                                   boolean isInPsiUtil,
                                   Set<String> visited) {
-    List<String> methodTypes = method == null ? Collections.emptyList() : myJavaHelper.getMethodTypes(method);
+    List<String> methodTypes = method == null ? Collections.emptyList() : JavaHelper.getMethodTypes(method);
     String returnType = methodTypes.isEmpty() ? "void" : shorten(methodTypes.get(0));
     int offset = methodTypes.isEmpty() || isInPsiUtil && methodTypes.size() < 3 ? 0 :
                  isInPsiUtil ? 3 : 1;
     if (!visited.add(methodName + methodTypes.subList(offset, methodTypes.size()))) return;
     if (intf && methodTypes.size() == offset && "toString".equals(methodName)) return;
 
-    List<TypeParameterSymbol> genericParameters = myJavaHelper.getGenericParameters(method);
-    List<String> exceptionList = myJavaHelper.getExceptionList(method);
+    List<TypeParameterSymbol> genericParameters = JavaHelper.getGenericParameters(method);
+    List<String> exceptionList = JavaHelper.getExceptionList(method);
 
     if (!intf /*|| hasMethodInInfos*/) out(shorten(JavaBnfConstants.OVERRIDE_ANNO));
     // region Workaround for IDEA-384557: skip annotation already embedded in return type text.
@@ -1232,14 +1232,14 @@ public final class JavaPsiGenerator extends Generator {
     int angleIdx = NameShortener.indexOfUnquotedAngleBracket(topLevelType);
     if (angleIdx >= 0) topLevelType = topLevelType.substring(0, angleIdx);
     // endregion
-    for (String s : myJavaHelper.getAnnotations(method)) {
+    for (String s : JavaHelper.getAnnotations(method)) {
       if ("java.lang.Override".equals(s)) continue;
       if (s.startsWith("kotlin.")) continue;
       String shortAnno = shorten(s);
       if (topLevelType.contains("@" + shortAnno + " ")) continue; // IDEA-384557 workaround
       out("@" + shortAnno);
     }
-    Function<Integer, List<String>> annoProvider = i -> myJavaHelper.getParameterAnnotations(method, (i - 1) / 2);
+    Function<Integer, List<String>> annoProvider = i -> JavaHelper.getParameterAnnotations(method, (i - 1) / 2);
     Function<String, String> substitutor = ParserGeneratorUtil::unwrapTypeArgumentForParamList;
     out("%s%s%s %s(%s)%s%s",
         intf ? "" : "public ",

@@ -39,9 +39,10 @@ import static org.intellij.grammar.classinfo.kotlin.KotlinSyntaxNodes.typeParame
 
 /**
  * Walks a parsed Kotlin source file (the root {@link SyntaxNode} from
- * {@link KotlinSyntaxTreeManager#parseText(String)}) and produces one {@link ClassSymbol} per declared class,
- * object, companion, or typealias, plus a synthesised {@code <FileStem>Kt} class collecting all
- * top-level callables.
+ * {@link KotlinSyntaxTreeManager#parseText(String)}) and produces one {@link ClassSymbol.Builder} per
+ * declared class, object, companion, or typealias, plus a synthesised {@code <FileStem>Kt} class
+ * collecting all top-level callables. Returns builders so that the provider can merge sibling
+ * multifile-facade files before sealing each class into an immutable record.
  * <p>
  * Mirrors {@link JavaSyntaxClassExtractor}'s decomposition:
  * imports / type formatting / method extraction are pushed into dedicated helpers and this class
@@ -55,14 +56,14 @@ final class KotlinSyntaxClassExtractor {
   private final KotlinSyntaxImportContext imports;
   private final KotlinSyntaxTypeFormatter typeFormatter;
   private final KotlinSyntaxMethodExtractor methodExtractor;
-  private final Map<Fqn, ClassSymbol> result = new LinkedHashMap<>();
+  private final Map<Fqn, ClassSymbol.Builder> result = new LinkedHashMap<>();
 
   private record FileJvmAnnotations(@Nullable String jvmName, boolean multifileFacade) { }
 
-  /** Walks {@code fileRoot} once and returns one {@link ClassSymbol} per declared (or synthesised) class. */
-  static @NotNull Map<Fqn, ClassSymbol> extractFrom(@NotNull SyntaxNode fileRoot,
-                                                  @NotNull String fileStem,
-                                                  @NotNull SymbolResolver resolver) {
+  /** Walks {@code fileRoot} once and returns one {@link ClassSymbol.Builder} per declared (or synthesised) class. */
+  static @NotNull Map<Fqn, ClassSymbol.Builder> extractFrom(@NotNull SyntaxNode fileRoot,
+                                                            @NotNull String fileStem,
+                                                            @NotNull SymbolResolver resolver) {
     return new KotlinSyntaxClassExtractor(fileRoot, fileStem, resolver).extract();
   }
 
@@ -76,9 +77,9 @@ final class KotlinSyntaxClassExtractor {
     this.methodExtractor = new KotlinSyntaxMethodExtractor(typeFormatter);
   }
 
-  private @NotNull Map<Fqn, ClassSymbol> extract() {
+  private @NotNull Map<Fqn, ClassSymbol.Builder> extract() {
     FileJvmAnnotations fileAnnotations = readFileJvmAnnotations();
-    ClassSymbol fileClass = null;
+    ClassSymbol.Builder fileClass = null;
 
     for (SyntaxNode child = fileRoot.firstChild(); child != null; child = child.nextSibling()) {
       SyntaxElementType t = child.getType();
@@ -101,8 +102,8 @@ final class KotlinSyntaxClassExtractor {
     return result;
   }
 
-  private @NotNull ClassSymbol createFileClass(@NotNull FileJvmAnnotations fileAnnotations) {
-    ClassSymbol info = new ClassSymbol();
+  private @NotNull ClassSymbol.Builder createFileClass(@NotNull FileJvmAnnotations fileAnnotations) {
+    ClassSymbol.Builder info = new ClassSymbol.Builder();
     String simpleName = fileAnnotations.jvmName() != null ? fileAnnotations.jvmName() : fileStem + "Kt";
     info.name = Fqn.of(imports.packageName()).child(simpleName);
     info.modifiers = Modifier.PUBLIC | Modifier.FINAL;
@@ -135,11 +136,11 @@ final class KotlinSyntaxClassExtractor {
     return new FileJvmAnnotations(jvmName, multifile);
   }
 
-  private void appendFileClassMember(@NotNull ClassSymbol fileClass, @NotNull SyntaxNode member) {
+  private void appendFileClassMember(@NotNull ClassSymbol.Builder fileClass, @NotNull SyntaxNode member) {
     SyntaxNode modifierList = firstChildOfType(member, KtNodeTypes.INSTANCE.getMODIFIER_LIST());
     if (hasModifier(modifierList, KtTokens.INSTANCE.getPRIVATE_MODIFIER())) return;
     if (member.getType() == KtNodeTypes.INSTANCE.getFUN()) {
-      MethodSymbol m = methodExtractor.extractFunction(member, fileClass.name, Set.of(), MethodType.STATIC);
+      MethodSymbol.Builder m = methodExtractor.extractFunction(member, fileClass.name, Set.of(), MethodType.STATIC);
       if (m != null) {
         m.modifiers |= Modifier.STATIC;
         m.methodType = MethodType.STATIC;
@@ -148,10 +149,10 @@ final class KotlinSyntaxClassExtractor {
     }
     else if (member.getType() == KtNodeTypes.INSTANCE.getPROPERTY()) {
       if (isConstProperty(member)) return;
-      MethodSymbol getter = methodExtractor.synthesizeGetter(member, fileClass.name, Set.of(), true);
+      MethodSymbol.Builder getter = methodExtractor.synthesizeGetter(member, fileClass.name, Set.of(), true);
       if (getter != null) fileClass.methods.add(getter);
       if (isVarProperty(member)) {
-        MethodSymbol setter = methodExtractor.synthesizeSetter(member, fileClass.name, Set.of(), true);
+        MethodSymbol.Builder setter = methodExtractor.synthesizeSetter(member, fileClass.name, Set.of(), true);
         if (setter != null) fileClass.methods.add(setter);
       }
     }
@@ -165,7 +166,7 @@ final class KotlinSyntaxClassExtractor {
     String simple = nameId.getText().toString();
     Fqn fqn = imports.qualify(enclosingFqn, simple);
 
-    ClassSymbol info = new ClassSymbol();
+    ClassSymbol.Builder info = new ClassSymbol.Builder();
     info.name = fqn;
 
     Set<String> classTypeVars = new HashSet<>(outerTypeVars);
@@ -200,7 +201,7 @@ final class KotlinSyntaxClassExtractor {
     // Primary constructor + its val/var properties.
     SyntaxNode primaryCtor = firstChildOfType(classNode, KtNodeTypes.INSTANCE.getPRIMARY_CONSTRUCTOR());
     if (primaryCtor != null) {
-      MethodSymbol ctorMethod = methodExtractor.extractConstructor(primaryCtor, fqn, classTypeVars);
+      MethodSymbol.Builder ctorMethod = methodExtractor.extractConstructor(primaryCtor, fqn, classTypeVars);
       if (ctorMethod != null) info.methods.add(ctorMethod);
       collectPrimaryCtorPropertyAccessors(primaryCtor, info, classTypeVars);
     }
@@ -211,7 +212,7 @@ final class KotlinSyntaxClassExtractor {
 
   private void walkObject(@NotNull SyntaxNode objectNode,
                           @NotNull Fqn enclosingFqn,
-                          @Nullable ClassSymbol enclosingClass,
+                          @Nullable ClassSymbol.Builder enclosingClass,
                           @NotNull Set<String> outerTypeVars) {
     SyntaxNode nameId = nameIdentifier(objectNode);
     boolean companion = isCompanion(objectNode);
@@ -219,7 +220,7 @@ final class KotlinSyntaxClassExtractor {
     if (simple == null) return;
     Fqn fqn = imports.qualify(enclosingFqn, simple);
 
-    ClassSymbol info = new ClassSymbol();
+    ClassSymbol.Builder info = new ClassSymbol.Builder();
     info.name = fqn;
     SyntaxNode modifierList = firstChildOfType(objectNode, KtNodeTypes.INSTANCE.getMODIFIER_LIST());
     info.modifiers = extractModifiers(modifierList) | Modifier.FINAL;
@@ -237,7 +238,7 @@ final class KotlinSyntaxClassExtractor {
 
     // Lift @JvmStatic-annotated members onto the enclosing class.
     if (companion && enclosingClass != null) {
-      for (MethodSymbol m : info.methods) {
+      for (MethodSymbol.Builder m : info.methods) {
         SyntaxNode origin = null; // We don't track origin nodes; presence-of-@JvmStatic check happens during body walk.
         if (m.modifiers != 0 && Modifier.isStatic(m.modifiers)) {
           // Already a static member by virtue of file-level synthesis (not the case for companion bodies);
@@ -247,7 +248,7 @@ final class KotlinSyntaxClassExtractor {
         // Tagged-and-copied path: marker carried via name-prefix collision is awkward; do the lift in walkClassBody instead.
         // (Intentionally a no-op here; see walkClassBody.)
         if (origin != null) {
-          MethodSymbol lifted = copyAsStatic(m, enclosingClass.name);
+          MethodSymbol.Builder lifted = copyAsStatic(m, enclosingClass.name);
           enclosingClass.methods.add(lifted);
         }
       }
@@ -255,12 +256,12 @@ final class KotlinSyntaxClassExtractor {
   }
 
   private void walkClassBody(@NotNull SyntaxNode body,
-                             @NotNull ClassSymbol enclosing,
+                             @NotNull ClassSymbol.Builder enclosing,
                              @NotNull Set<String> typeVars) {
     for (SyntaxNode member = body.firstChild(); member != null; member = member.nextSibling()) {
       SyntaxElementType t = member.getType();
       if (t == KtNodeTypes.INSTANCE.getFUN()) {
-        MethodSymbol m = methodExtractor.extractFunction(member, enclosing.name, typeVars, MethodType.INSTANCE);
+        MethodSymbol.Builder m = methodExtractor.extractFunction(member, enclosing.name, typeVars, MethodType.INSTANCE);
         if (m == null) continue;
         // Static methods (extension fns on member objects) keep their type as set by the extractor.
         enclosing.methods.add(m);
@@ -269,15 +270,15 @@ final class KotlinSyntaxClassExtractor {
       }
       else if (t == KtNodeTypes.INSTANCE.getPROPERTY()) {
         if (isConstProperty(member)) continue;
-        MethodSymbol getter = methodExtractor.synthesizeGetter(member, enclosing.name, typeVars, false);
+        MethodSymbol.Builder getter = methodExtractor.synthesizeGetter(member, enclosing.name, typeVars, false);
         if (getter != null) enclosing.methods.add(getter);
         if (isVarProperty(member)) {
-          MethodSymbol setter = methodExtractor.synthesizeSetter(member, enclosing.name, typeVars, false);
+          MethodSymbol.Builder setter = methodExtractor.synthesizeSetter(member, enclosing.name, typeVars, false);
           if (setter != null) enclosing.methods.add(setter);
         }
       }
       else if (t == KtNodeTypes.INSTANCE.getSECONDARY_CONSTRUCTOR()) {
-        MethodSymbol ctorMethod = methodExtractor.extractConstructor(member, enclosing.name, typeVars);
+        MethodSymbol.Builder ctorMethod = methodExtractor.extractConstructor(member, enclosing.name, typeVars);
         if (ctorMethod != null) enclosing.methods.add(ctorMethod);
       }
       else if (t == KtNodeTypes.INSTANCE.getOBJECT_DECLARATION()) {
@@ -291,7 +292,7 @@ final class KotlinSyntaxClassExtractor {
   }
 
   private void walkObjectInsideClass(@NotNull SyntaxNode objectNode,
-                                     @NotNull ClassSymbol enclosing,
+                                     @NotNull ClassSymbol.Builder enclosing,
                                      @NotNull Set<String> outerTypeVars) {
     SyntaxNode nameId = nameIdentifier(objectNode);
     boolean companion = isCompanion(objectNode);
@@ -299,7 +300,7 @@ final class KotlinSyntaxClassExtractor {
     if (simple == null) return;
     Fqn fqn = enclosing.name.child(simple);
 
-    ClassSymbol info = new ClassSymbol();
+    ClassSymbol.Builder info = new ClassSymbol.Builder();
     info.name = fqn;
     SyntaxNode modifierList = firstChildOfType(objectNode, KtNodeTypes.INSTANCE.getMODIFIER_LIST());
     info.modifiers = extractModifiers(modifierList) | Modifier.FINAL | Modifier.STATIC;
@@ -316,7 +317,7 @@ final class KotlinSyntaxClassExtractor {
     for (SyntaxNode member = body.firstChild(); member != null; member = member.nextSibling()) {
       SyntaxElementType t = member.getType();
       if (t == KtNodeTypes.INSTANCE.getFUN()) {
-        MethodSymbol m = methodExtractor.extractFunction(member, fqn, outerTypeVars, MethodType.INSTANCE);
+        MethodSymbol.Builder m = methodExtractor.extractFunction(member, fqn, outerTypeVars, MethodType.INSTANCE);
         if (m == null) continue;
         info.methods.add(m);
         if (companion && hasJvmStatic(firstChildOfType(member, KtNodeTypes.INSTANCE.getMODIFIER_LIST()))) {
@@ -325,16 +326,16 @@ final class KotlinSyntaxClassExtractor {
       }
       else if (t == KtNodeTypes.INSTANCE.getPROPERTY()) {
         if (isConstProperty(member)) continue;
-        MethodSymbol getter = methodExtractor.synthesizeGetter(member, fqn, outerTypeVars, false);
+        MethodSymbol.Builder getter = methodExtractor.synthesizeGetter(member, fqn, outerTypeVars, false);
         if (getter != null) info.methods.add(getter);
         if (isVarProperty(member)) {
-          MethodSymbol setter = methodExtractor.synthesizeSetter(member, fqn, outerTypeVars, false);
+          MethodSymbol.Builder setter = methodExtractor.synthesizeSetter(member, fqn, outerTypeVars, false);
           if (setter != null) info.methods.add(setter);
         }
         if (companion && hasJvmStatic(firstChildOfType(member, KtNodeTypes.INSTANCE.getMODIFIER_LIST()))) {
           if (getter != null) enclosing.methods.add(copyAsStatic(getter, enclosing.name));
           if (isVarProperty(member)) {
-            MethodSymbol setter = methodExtractor.synthesizeSetter(member, enclosing.name, outerTypeVars, true);
+            MethodSymbol.Builder setter = methodExtractor.synthesizeSetter(member, enclosing.name, outerTypeVars, true);
             if (setter != null) enclosing.methods.add(setter);
           }
         }
@@ -351,7 +352,7 @@ final class KotlinSyntaxClassExtractor {
     String simple = nameId.getText().toString();
     Fqn fqn = imports.qualify(enclosingFqn, simple);
 
-    ClassSymbol info = new ClassSymbol();
+    ClassSymbol.Builder info = new ClassSymbol.Builder();
     info.name = fqn;
     SyntaxNode modifierList = firstChildOfType(aliasNode, KtNodeTypes.INSTANCE.getMODIFIER_LIST());
     info.modifiers = extractModifiers(modifierList) | Modifier.FINAL;
@@ -363,7 +364,7 @@ final class KotlinSyntaxClassExtractor {
     result.put(fqn, info);
   }
 
-  private void populateSuperTypes(@NotNull ClassSymbol info,
+  private void populateSuperTypes(@NotNull ClassSymbol.Builder info,
                                   @NotNull SyntaxNode classOrObjectNode,
                                   @Nullable SyntaxNode superTypeList,
                                   @NotNull Set<String> typeVars) {
@@ -390,7 +391,7 @@ final class KotlinSyntaxClassExtractor {
   }
 
   private void collectPrimaryCtorPropertyAccessors(@NotNull SyntaxNode primaryCtor,
-                                                   @NotNull ClassSymbol enclosing,
+                                                   @NotNull ClassSymbol.Builder enclosing,
                                                    @NotNull Set<String> typeVars) {
     SyntaxNode paramList = firstChildOfType(primaryCtor, KtNodeTypes.INSTANCE.getVALUE_PARAMETER_LIST());
     if (paramList == null) return;
@@ -399,10 +400,10 @@ final class KotlinSyntaxClassExtractor {
       boolean isVal = firstChildOfType(p, KtTokens.INSTANCE.getVAL_KEYWORD()) != null;
       boolean isVar = firstChildOfType(p, KtTokens.INSTANCE.getVAR_KEYWORD()) != null;
       if (!isVal && !isVar) continue;
-      MethodSymbol getter = methodExtractor.synthesizeGetter(p, enclosing.name, typeVars, false);
+      MethodSymbol.Builder getter = methodExtractor.synthesizeGetter(p, enclosing.name, typeVars, false);
       if (getter != null) enclosing.methods.add(getter);
       if (isVar) {
-        MethodSymbol setter = methodExtractor.synthesizeSetter(p, enclosing.name, typeVars, false);
+        MethodSymbol.Builder setter = methodExtractor.synthesizeSetter(p, enclosing.name, typeVars, false);
         if (setter != null) enclosing.methods.add(setter);
       }
     }
@@ -415,8 +416,8 @@ final class KotlinSyntaxClassExtractor {
     return modifiers | Modifier.FINAL;
   }
 
-  private static @NotNull MethodSymbol copyAsStatic(@NotNull MethodSymbol src, @NotNull Fqn newDeclaring) {
-    MethodSymbol m = new MethodSymbol();
+  private static @NotNull MethodSymbol.Builder copyAsStatic(@NotNull MethodSymbol.Builder src, @NotNull Fqn newDeclaring) {
+    MethodSymbol.Builder m = new MethodSymbol.Builder();
     m.name = src.name;
     m.declaringClass = newDeclaring;
     m.modifiers = src.modifiers | Modifier.STATIC;
@@ -426,8 +427,8 @@ final class KotlinSyntaxClassExtractor {
     m.annotations.addAll(src.annotations);
     m.exceptions.addAll(src.exceptions);
     m.generics.addAll(src.generics);
-    for (ParameterSymbol sp : src.parameters) {
-      ParameterSymbol cp = new ParameterSymbol();
+    for (ParameterSymbol.Builder sp : src.parameters) {
+      ParameterSymbol.Builder cp = new ParameterSymbol.Builder();
       cp.name = sp.name;
       cp.type = sp.type;
       cp.annotatedType = sp.annotatedType;

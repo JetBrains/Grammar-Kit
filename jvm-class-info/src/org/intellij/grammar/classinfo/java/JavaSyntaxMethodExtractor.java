@@ -37,10 +37,10 @@ final class JavaSyntaxMethodExtractor {
     this.typeFormatter = typeFormatter;
   }
 
-  @Nullable MethodSymbol extract(@NotNull SyntaxNode methodNode,
-                               @NotNull Fqn declaringFqn,
-                               @NotNull Set<String> classTypeVars) {
-    MethodSymbol m = new MethodSymbol();
+  @Nullable MethodSymbol.Builder extract(@NotNull SyntaxNode methodNode,
+                                         @NotNull Fqn declaringFqn,
+                                         @NotNull Set<String> classTypeVars) {
+    MethodSymbol.Builder m = new MethodSymbol.Builder();
     m.declaringClass = declaringFqn;
 
     Set<String> typeVars = new HashSet<>(classTypeVars);
@@ -67,13 +67,13 @@ final class JavaSyntaxMethodExtractor {
     collectParameters(methodNode, m, typeVars);
 
     m.annotatedReturnType = m.returnType;
-    for (ParameterSymbol p : m.parameters) p.annotatedType = p.type;
+    for (ParameterSymbol.Builder p : m.parameters) p.annotatedType = p.type;
     m.exceptions.addAll(typeFormatter.extractRefFqns(firstChildOfType(methodNode, JavaSyntaxElementType.THROWS_LIST), typeVars));
     return m;
   }
 
   private void collectMethodTypeParameters(@NotNull SyntaxNode methodNode,
-                                           @NotNull MethodSymbol m,
+                                           @NotNull MethodSymbol.Builder m,
                                            @NotNull Set<String> typeVars) {
     SyntaxNode tparams = firstChildOfType(methodNode, JavaSyntaxElementType.TYPE_PARAMETER_LIST);
     if (tparams == null) return;
@@ -83,14 +83,14 @@ final class JavaSyntaxMethodExtractor {
       if (tpId == null) continue;
       String tvName = tpId.getText().toString();
       typeVars.add(tvName);
-      TypeParameterSymbol info = new TypeParameterSymbol(tvName);
-      info.getExtendsList().addAll(typeFormatter.formatRefs(firstChildOfType(tp, JavaSyntaxElementType.EXTENDS_BOUND_LIST), typeVars));
+      TypeParameterSymbol.Builder info = new TypeParameterSymbol.Builder(tvName);
+      info.extendsList.addAll(typeFormatter.formatRefs(firstChildOfType(tp, JavaSyntaxElementType.EXTENDS_BOUND_LIST), typeVars));
       m.generics.add(info);
     }
   }
 
   private void collectParameters(@NotNull SyntaxNode methodNode,
-                                 @NotNull MethodSymbol m,
+                                 @NotNull MethodSymbol.Builder m,
                                  @NotNull Set<String> typeVars) {
     SyntaxNode paramList = firstChildOfType(methodNode, JavaSyntaxElementType.PARAMETER_LIST);
     if (paramList == null) return;
@@ -99,7 +99,7 @@ final class JavaSyntaxMethodExtractor {
       if (p.getType() != JavaSyntaxElementType.PARAMETER) continue;
       SyntaxNode pType = firstChildOfType(p, JavaSyntaxElementType.TYPE);
       SyntaxNode pName = firstChildOfType(p, JavaSyntaxTokenType.IDENTIFIER);
-      ParameterSymbol param = new ParameterSymbol();
+      ParameterSymbol.Builder param = new ParameterSymbol.Builder();
       param.type = pType == null ? "" : typeFormatter.formatType(pType, typeVars);
       param.name = pName == null ? "p" + paramIdx : pName.getText().toString();
       param.annotations.addAll(typeFormatter.extractAnnotationFqns(firstChildOfType(p, JavaSyntaxElementType.MODIFIER_LIST), typeVars));

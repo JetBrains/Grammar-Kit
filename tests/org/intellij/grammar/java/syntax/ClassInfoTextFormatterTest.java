@@ -26,51 +26,54 @@ import java.util.Map;
 public class ClassInfoTextFormatterTest extends TestCase {
 
   public void testEmptyClassRendersHeaderAndEmptyMethods() {
-    ClassSymbol info = new ClassSymbol();
+    ClassSymbol.Builder info = new ClassSymbol.Builder();
     info.name = Fqn.of("a.b.Empty");
+    ClassSymbol built = info.build();
     String expected = """
       class a.b.Empty
         methods: (none)""";
-    assertEquals(expected, ClassSymbolTextFormatter.format(Map.of(info.name, info)));
+    assertEquals(expected, ClassSymbolTextFormatter.format(Map.of(built.name(), built)));
   }
 
   public void testClassWithModifiersExtendsAndImplements() {
-    ClassSymbol info = new ClassSymbol();
+    ClassSymbol.Builder info = new ClassSymbol.Builder();
     info.name = Fqn.of("a.b.Foo");
     info.superClass = Fqn.of("a.b.Base");
     info.modifiers = Modifier.PUBLIC | Modifier.FINAL;
     info.interfaces.add(Fqn.of("a.b.I1"));
     info.interfaces.add(Fqn.of("a.b.I2"));
+    ClassSymbol built = info.build();
     String expected = """
       class a.b.Foo extends a.b.Base implements a.b.I1, a.b.I2
         modifiers: public final
         methods: (none)""";
-    assertEquals(expected, ClassSymbolTextFormatter.format(Map.of(info.name, info)));
+    assertEquals(expected, ClassSymbolTextFormatter.format(Map.of(built.name(), built)));
   }
 
   public void testClassAnnotationsAndTypeParameters() {
-    ClassSymbol info = new ClassSymbol();
+    ClassSymbol.Builder info = new ClassSymbol.Builder();
     info.name = Fqn.of("a.b.Boxed");
     info.modifiers = Modifier.PUBLIC;
     info.annotations.add(Fqn.of("java.lang.Deprecated"));
     info.typeParameters.add("T");
     info.typeParameters.add("U extends java.lang.Number");
+    ClassSymbol built = info.build();
     String expected = """
       class a.b.Boxed
         modifiers: public
         annotations: @java.lang.Deprecated
         typeParameters: T, U extends java.lang.Number
         methods: (none)""";
-    assertEquals(expected, ClassSymbolTextFormatter.format(Map.of(info.name, info)));
+    assertEquals(expected, ClassSymbolTextFormatter.format(Map.of(built.name(), built)));
   }
 
   public void testMultifileFacadeAndMethodVariants() {
-    ClassSymbol info = new ClassSymbol();
+    ClassSymbol.Builder info = new ClassSymbol.Builder();
     info.name = Fqn.of("util.Utils");
     info.modifiers = Modifier.PUBLIC | Modifier.FINAL;
     info.multifileFacade = true;
 
-    MethodSymbol ctor = new MethodSymbol();
+    MethodSymbol.Builder ctor = new MethodSymbol.Builder();
     ctor.methodType = MethodType.CONSTRUCTOR;
     ctor.name = "Utils";
     ctor.declaringClass = info.name;
@@ -78,14 +81,14 @@ public class ClassInfoTextFormatterTest extends TestCase {
     ctor.returnType = "util.Utils"; // synthetic return = declaring class
     info.methods.add(ctor);
 
-    MethodSymbol instanceMethod = new MethodSymbol();
+    MethodSymbol.Builder instanceMethod = new MethodSymbol.Builder();
     instanceMethod.methodType = MethodType.INSTANCE;
     instanceMethod.name = "greet";
     instanceMethod.declaringClass = info.name;
     instanceMethod.modifiers = Modifier.PUBLIC;
     instanceMethod.returnType = "java.lang.String";
     instanceMethod.annotatedReturnType = "java.lang.@A String";
-    ParameterSymbol nameParam = new ParameterSymbol();
+    ParameterSymbol.Builder nameParam = new ParameterSymbol.Builder();
     nameParam.type = "java.lang.String";
     nameParam.annotatedType = "java.lang.String";
     nameParam.name = "name";
@@ -93,13 +96,13 @@ public class ClassInfoTextFormatterTest extends TestCase {
     instanceMethod.parameters.add(nameParam);
     instanceMethod.annotations.add(Fqn.of("org.jetbrains.annotations.NotNull"));
     instanceMethod.exceptions.add(Fqn.of("java.io.IOException"));
-    instanceMethod.generics.add(new TypeParameterSymbol(
-      "T",
-      List.of("java.lang.Comparable"),
-      List.of(Fqn.of("a.b.Marker"))));
+    TypeParameterSymbol.Builder tp = new TypeParameterSymbol.Builder("T");
+    tp.extendsList.add("java.lang.Comparable");
+    tp.annotations.add(Fqn.of("a.b.Marker"));
+    instanceMethod.generics.add(tp);
     info.methods.add(instanceMethod);
 
-    MethodSymbol staticMethod = new MethodSymbol();
+    MethodSymbol.Builder staticMethod = new MethodSymbol.Builder();
     staticMethod.methodType = MethodType.STATIC;
     staticMethod.name = "helper";
     staticMethod.declaringClass = info.name;
@@ -107,6 +110,7 @@ public class ClassInfoTextFormatterTest extends TestCase {
     staticMethod.returnType = "void";
     info.methods.add(staticMethod);
 
+    ClassSymbol built = info.build();
     String expected = """
       class util.Utils
         modifiers: public final
@@ -120,20 +124,22 @@ public class ClassInfoTextFormatterTest extends TestCase {
             throws: java.io.IOException
             annotatedTypes: [java.lang.@A String, java.lang.String, name]
           STATIC private static void helper()""";
-    assertEquals(expected, ClassSymbolTextFormatter.format(Map.of(info.name, info)));
+    assertEquals(expected, ClassSymbolTextFormatter.format(Map.of(built.name(), built)));
   }
 
   public void testMultipleClassesAreSortedByFqn() {
-    ClassSymbol a = new ClassSymbol();
+    ClassSymbol.Builder a = new ClassSymbol.Builder();
     a.name = Fqn.of("z.Aardvark");
-    ClassSymbol b = new ClassSymbol();
+    ClassSymbol.Builder b = new ClassSymbol.Builder();
     b.name = Fqn.of("a.Banana");
+    ClassSymbol builtA = a.build();
+    ClassSymbol builtB = b.build();
     String expected = """
       class a.Banana
         methods: (none)
 
       class z.Aardvark
         methods: (none)""";
-    assertEquals(expected, ClassSymbolTextFormatter.format(Map.of(a.name, a, b.name, b)));
+    assertEquals(expected, ClassSymbolTextFormatter.format(Map.of(builtA.name(), builtA, builtB.name(), builtB)));
   }
 }

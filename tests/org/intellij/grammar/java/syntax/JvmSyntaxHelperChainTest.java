@@ -56,10 +56,10 @@ public class JvmSyntaxHelperChainTest extends TestCase {
         }
         """);
     bytecode = new RecordingProvider();
-    ClassSymbol platformInfo = new ClassSymbol();
+    ClassSymbol.Builder platformInfo = new ClassSymbol.Builder();
     platformInfo.name = Fqn.of("platform.Stub");
     platformInfo.superClass = Fqn.of("java.lang.Object");
-    bytecode.classes.put("platform.Stub", platformInfo);
+    bytecode.classes.put("platform.Stub", platformInfo.build());
 
     List<Path> roots = List.of(root);
     SyntaxTreeCache treeCache = new SyntaxTreeCache();

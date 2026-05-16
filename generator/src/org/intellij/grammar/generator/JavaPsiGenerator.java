@@ -922,10 +922,10 @@ public final class JavaPsiGenerator extends Generator {
       addTypeToImports(returnType, myJavaHelper.getAnnotations(method), result);
 
       for (TypeParameterSymbol generic : myJavaHelper.getGenericParameters(method)) {
-        for (String type : generic.getExtendsList()) {
+        for (String type : generic.extendsList()) {
           addTypeToImports(type, emptyList(), result);
         }
-        for (Fqn type : generic.getAnnotations()) {
+        for (Fqn type : generic.annotations()) {
           addTypeToImports(type.value(), emptyList(), result);
         }
       }

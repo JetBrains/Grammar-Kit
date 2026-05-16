@@ -50,40 +50,42 @@ public final class KotlinSyntaxClassSymbolProvider implements JvmClassSymbolProv
 
   @Override
   public @NotNull Map<Fqn, ClassSymbol> resolve(@NotNull Fqn fqn, @NotNull SymbolResolver resolver) {
-    Map<Fqn, ClassSymbol> batch = new HashMap<>();
+    Map<Fqn, ClassSymbol.Builder> builders = new HashMap<>();
 
     Path source = sourceResolver.findSourceFile(fqn, ".kt");
-    if (source != null) ingest(source, batch, resolver);
+    if (source != null) ingest(source, builders, resolver);
 
     Fqn prefix = fqn;
-    while (!batch.containsKey(fqn)) {
+    while (!builders.containsKey(fqn)) {
       prefix = prefix.parent();
       if (prefix.isEmpty()) break;
       if (!scannedPackages.add(prefix)) break;
       for (Path dir : sourceResolver.findPackageDirs(prefix)) {
-        scanPackage(dir, batch, resolver);
+        scanPackage(dir, builders, resolver);
       }
     }
 
+    Map<Fqn, ClassSymbol> batch = new HashMap<>(builders.size());
+    for (Map.Entry<Fqn, ClassSymbol.Builder> e : builders.entrySet()) batch.put(e.getKey(), e.getValue().build());
     return batch;
   }
 
-  private void scanPackage(@NotNull Path dir, @NotNull Map<Fqn, ClassSymbol> batch, @NotNull SymbolResolver resolver) {
+  private void scanPackage(@NotNull Path dir, @NotNull Map<Fqn, ClassSymbol.Builder> batch, @NotNull SymbolResolver resolver) {
     try (Stream<Path> files = Files.list(dir)) {
       files.filter(p -> p.getFileName().toString().endsWith(".kt")).forEach(p -> ingest(p, batch, resolver));
     }
     catch (IOException ignored) { }
   }
 
-  private void ingest(@NotNull Path source, @NotNull Map<Fqn, ClassSymbol> batch, @NotNull SymbolResolver resolver) {
+  private void ingest(@NotNull Path source, @NotNull Map<Fqn, ClassSymbol.Builder> batch, @NotNull SymbolResolver resolver) {
     if (!ingestedFiles.add(source)) return;
     SyntaxNode root = treeCache.parseOrGet(source, KotlinSyntaxTreeManager::parseText);
     if (root == null) return;
     String fileStem = stem(source);
-    Map<Fqn, ClassSymbol> extracted = KotlinSyntaxClassExtractor.extractFrom(root, fileStem, resolver);
-    for (Map.Entry<Fqn, ClassSymbol> e : extracted.entrySet()) {
-      ClassSymbol incoming = e.getValue();
-      ClassSymbol existing = batch.get(e.getKey());
+    Map<Fqn, ClassSymbol.Builder> extracted = KotlinSyntaxClassExtractor.extractFrom(root, fileStem, resolver);
+    for (Map.Entry<Fqn, ClassSymbol.Builder> e : extracted.entrySet()) {
+      ClassSymbol.Builder incoming = e.getValue();
+      ClassSymbol.Builder existing = batch.get(e.getKey());
       // Sibling files annotated @file:JvmMultifileClass with the same JVM name contribute callables
       // to a single facade — merge methods rather than overwrite.
       if (existing != null && existing.multifileFacade && incoming.multifileFacade) {

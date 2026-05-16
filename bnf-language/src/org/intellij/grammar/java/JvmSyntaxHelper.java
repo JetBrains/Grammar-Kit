@@ -57,10 +57,10 @@ public class JvmSyntaxHelper extends JavaHelper {
     ClassSymbol aClass = manager.findClass(Fqn.ofNullable(className));
     if (aClass == null || methodName == null) return Collections.emptyList();
     List<NavigatablePsiElement> result = new SmartList<>();
-    for (MethodSymbol method : aClass.methods) {
-      if (!acceptsName(methodName, method.name)) continue;
-      if (method.methodType != methodType) continue;
-      if (!acceptsModifiers(method.modifiers, methodType, allowAbstract)) continue;
+    for (MethodSymbol method : aClass.methods()) {
+      if (!acceptsName(methodName, method.name())) continue;
+      if (method.methodType() != methodType) continue;
+      if (!acceptsModifiers(method.modifiers(), methodType, allowAbstract)) continue;
       if (!ClassSymbolUtil.acceptsParams(method, paramCount, paramTypes, s -> manager.findClass(Fqn.ofNullable(s)))) continue;
       result.add(new MyElement<>(method));
     }
@@ -70,7 +70,7 @@ public class JvmSyntaxHelper extends JavaHelper {
   @Override
   public @Nullable String getSuperClassName(@Nullable String className) {
     ClassSymbol info = manager.findClass(Fqn.ofNullable(className));
-    return info == null || info.superClass == null ? null : info.superClass.value();
+    return info == null || info.superClass() == null ? null : info.superClass().value();
   }
 
   @Override

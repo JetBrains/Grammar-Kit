@@ -42,117 +42,117 @@ public final class ClassSymbolTextFormatter {
   }
 
   private static void appendClass(@NotNull StringBuilder sb, @NotNull ClassSymbol info) {
-    sb.append("class ").append(info.name);
-    if (info.superClass != null) sb.append(" extends ").append(info.superClass);
-    if (!info.interfaces.isEmpty()) {
+    sb.append("class ").append(info.name());
+    if (info.superClass() != null) sb.append(" extends ").append(info.superClass());
+    if (!info.interfaces().isEmpty()) {
       sb.append(" implements ");
-      appendJoined(sb, info.interfaces);
+      appendJoined(sb, info.interfaces());
     }
     sb.append('\n');
 
-    if (info.modifiers != 0) {
-      sb.append("  modifiers: ").append(modifiersToString(info.modifiers)).append('\n');
+    if (info.modifiers() != 0) {
+      sb.append("  modifiers: ").append(modifiersToString(info.modifiers())).append('\n');
     }
-    if (!info.annotations.isEmpty()) {
+    if (!info.annotations().isEmpty()) {
       sb.append("  annotations: ");
-      appendAnnotations(sb, info.annotations);
+      appendAnnotations(sb, info.annotations());
       sb.append('\n');
     }
-    if (!info.typeParameters.isEmpty()) {
+    if (!info.typeParameters().isEmpty()) {
       sb.append("  typeParameters: ");
-      for (int i = 0; i < info.typeParameters.size(); i++) {
+      for (int i = 0; i < info.typeParameters().size(); i++) {
         if (i > 0) sb.append(", ");
-        sb.append(info.typeParameters.get(i));
+        sb.append(info.typeParameters().get(i));
       }
       sb.append('\n');
     }
-    if (info.multifileFacade) {
+    if (info.multifileFacade()) {
       sb.append("  multifileFacade\n");
     }
 
-    if (info.methods.isEmpty()) {
+    if (info.methods().isEmpty()) {
       sb.append("  methods: (none)\n");
     }
     else {
       sb.append("  methods:\n");
-      for (MethodSymbol m : info.methods) {
+      for (MethodSymbol m : info.methods()) {
         appendMethod(sb, m);
       }
     }
   }
 
   private static void appendMethod(@NotNull StringBuilder sb, @NotNull MethodSymbol m) {
-    sb.append("    ").append(m.methodType).append(' ');
-    String mods = modifiersToString(m.modifiers);
+    sb.append("    ").append(m.methodType()).append(' ');
+    String mods = modifiersToString(m.modifiers());
     if (!mods.isEmpty()) sb.append(mods).append(' ');
 
-    if (m.methodType != MethodType.CONSTRUCTOR) {
-      String returnType = m.returnType == null ? "?" : m.returnType;
+    if (m.methodType() != MethodType.CONSTRUCTOR) {
+      String returnType = m.returnType() == null ? "?" : m.returnType();
       sb.append(returnType).append(' ');
     }
-    sb.append(m.name).append('(');
+    sb.append(m.name()).append('(');
     appendParams(sb, m);
     sb.append(")\n");
 
-    if (!m.generics.isEmpty()) {
+    if (!m.generics().isEmpty()) {
       sb.append("      typeParameters: ");
-      for (int i = 0; i < m.generics.size(); i++) {
+      for (int i = 0; i < m.generics().size(); i++) {
         if (i > 0) sb.append(", ");
-        appendTypeParameter(sb, m.generics.get(i));
+        appendTypeParameter(sb, m.generics().get(i));
       }
       sb.append('\n');
     }
-    if (!m.annotations.isEmpty()) {
+    if (!m.annotations().isEmpty()) {
       sb.append("      annotations: ");
-      appendAnnotations(sb, m.annotations);
+      appendAnnotations(sb, m.annotations());
       sb.append('\n');
     }
-    for (int p = 0; p < m.parameters.size(); p++) {
-      List<Fqn> paramAnnotations = m.parameters.get(p).annotations;
+    for (int p = 0; p < m.parameters().size(); p++) {
+      List<Fqn> paramAnnotations = m.parameters().get(p).annotations();
       if (!paramAnnotations.isEmpty()) {
         sb.append("      param[").append(p).append("] annotations: ");
         appendAnnotations(sb, paramAnnotations);
         sb.append('\n');
       }
     }
-    if (!m.exceptions.isEmpty()) {
+    if (!m.exceptions().isEmpty()) {
       sb.append("      throws: ");
-      appendJoined(sb, m.exceptions);
+      appendJoined(sb, m.exceptions());
       sb.append('\n');
     }
     if (hasAnnotatedTypeDifferences(m)) {
-      sb.append("      annotatedTypes: [").append(m.annotatedReturnType);
-      for (ParameterSymbol p : m.parameters) {
-        sb.append(", ").append(p.annotatedType).append(", ").append(p.name);
+      sb.append("      annotatedTypes: [").append(m.annotatedReturnType());
+      for (ParameterSymbol p : m.parameters()) {
+        sb.append(", ").append(p.annotatedType()).append(", ").append(p.name());
       }
       sb.append("]\n");
     }
   }
 
   private static boolean hasAnnotatedTypeDifferences(@NotNull MethodSymbol m) {
-    if (m.annotatedReturnType == null) return false;
-    if (!Objects.equals(m.annotatedReturnType, m.returnType)) return true;
-    for (ParameterSymbol p : m.parameters) {
-      if (!Objects.equals(p.annotatedType, p.type)) return true;
+    if (m.annotatedReturnType() == null) return false;
+    if (!Objects.equals(m.annotatedReturnType(), m.returnType())) return true;
+    for (ParameterSymbol p : m.parameters()) {
+      if (!Objects.equals(p.annotatedType(), p.type())) return true;
     }
     return false;
   }
 
   private static void appendParams(@NotNull StringBuilder sb, @NotNull MethodSymbol m) {
     boolean first = true;
-    for (ParameterSymbol p : m.parameters) {
+    for (ParameterSymbol p : m.parameters()) {
       if (!first) sb.append(", ");
-      sb.append(p.type).append(' ').append(p.name);
+      sb.append(p.type()).append(' ').append(p.name());
       first = false;
     }
   }
 
   private static void appendTypeParameter(@NotNull StringBuilder sb, @NotNull TypeParameterSymbol tp) {
-    for (Fqn a : tp.getAnnotations()) {
+    for (Fqn a : tp.annotations()) {
       sb.append('@').append(a).append(' ');
     }
-    sb.append(tp.getName() == null ? "?" : tp.getName());
-    List<String> bounds = tp.getExtendsList();
+    sb.append(tp.name() == null ? "?" : tp.name());
+    List<String> bounds = tp.extendsList();
     if (!bounds.isEmpty()) {
       sb.append(" extends ");
       for (int i = 0; i < bounds.size(); i++) {

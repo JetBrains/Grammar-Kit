@@ -102,16 +102,16 @@ public class CrossLanguageWildcardTest extends TestCase {
   }
 
   public void testDuplicateFqnCollisionResolvedByProviderOrder() {
-    ClassSymbol first = new ClassSymbol();
+    ClassSymbol.Builder first = new ClassSymbol.Builder();
     first.name = Fqn.of("dup.Class");
     first.superClass = Fqn.of("first.Parent");
 
-    ClassSymbol second = new ClassSymbol();
+    ClassSymbol.Builder second = new ClassSymbol.Builder();
     second.name = Fqn.of("dup.Class");
     second.superClass = Fqn.of("second.Parent");
 
-    JvmClassSymbolProvider providerA = mapProvider(Map.of("dup.Class", first));
-    JvmClassSymbolProvider providerB = mapProvider(Map.of("dup.Class", second));
+    JvmClassSymbolProvider providerA = mapProvider(Map.of("dup.Class", first.build()));
+    JvmClassSymbolProvider providerB = mapProvider(Map.of("dup.Class", second.build()));
 
     JvmClassSymbolManager manager = new JvmClassSymbolManager(List.of(providerA, providerB));
     JavaHelper h = new JvmSyntaxHelper(manager);

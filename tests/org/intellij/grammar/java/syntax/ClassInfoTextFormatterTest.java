@@ -10,7 +10,7 @@ import org.intellij.grammar.classinfo.Fqn;
 import org.intellij.grammar.classinfo.MethodSymbol;
 import org.intellij.grammar.classinfo.MethodType;
 import org.intellij.grammar.classinfo.ParameterSymbol;
-import org.intellij.grammar.classinfo.TypeParameterInfo;
+import org.intellij.grammar.classinfo.TypeParameterSymbol;
 
 import java.lang.reflect.Modifier;
 import java.util.List;
@@ -93,7 +93,7 @@ public class ClassInfoTextFormatterTest extends TestCase {
     instanceMethod.parameters.add(nameParam);
     instanceMethod.annotations.add(Fqn.of("org.jetbrains.annotations.NotNull"));
     instanceMethod.exceptions.add(Fqn.of("java.io.IOException"));
-    instanceMethod.generics.add(new TypeParameterInfo(
+    instanceMethod.generics.add(new TypeParameterSymbol(
       "T",
       List.of("java.lang.Comparable"),
       List.of(Fqn.of("a.b.Marker"))));

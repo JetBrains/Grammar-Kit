@@ -9,7 +9,7 @@ import org.intellij.grammar.classinfo.Fqn;
 import org.intellij.grammar.classinfo.MethodSymbol;
 import org.intellij.grammar.classinfo.MethodType;
 import org.intellij.grammar.classinfo.ParameterSymbol;
-import org.intellij.grammar.classinfo.TypeParameterInfo;
+import org.intellij.grammar.classinfo.TypeParameterSymbol;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Modifier;
@@ -147,7 +147,7 @@ public final class ClassSymbolTextFormatter {
     }
   }
 
-  private static void appendTypeParameter(@NotNull StringBuilder sb, @NotNull TypeParameterInfo tp) {
+  private static void appendTypeParameter(@NotNull StringBuilder sb, @NotNull TypeParameterSymbol tp) {
     for (Fqn a : tp.getAnnotations()) {
       sb.append('@').append(a).append(' ');
     }

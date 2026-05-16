@@ -9,7 +9,7 @@ import com.intellij.util.ArrayUtil;
 import com.intellij.util.containers.ContainerUtil;
 import org.intellij.grammar.classinfo.Fqn;
 import org.intellij.grammar.classinfo.MethodType;
-import org.intellij.grammar.classinfo.TypeParameterInfo;
+import org.intellij.grammar.classinfo.TypeParameterSymbol;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -135,12 +135,12 @@ public class ReflectionHelper extends JavaHelper {
   }
 
   @Override
-  public List<TypeParameterInfo> getGenericParameters(NavigatablePsiElement method) {
+  public List<TypeParameterSymbol> getGenericParameters(NavigatablePsiElement method) {
     if (method == null) return Collections.emptyList();
     Method delegate = ((MyElement<Method>)method).delegate;
 
     TypeVariable<Method>[] typeParameters = delegate.getTypeParameters();
-    return ContainerUtil.map(typeParameters, param -> new TypeParameterInfo(
+    return ContainerUtil.map(typeParameters, param -> new TypeParameterSymbol(
       param.getName(),
       ContainerUtil.mapNotNull(param.getBounds(), type -> {
         String typeName = type.getTypeName();

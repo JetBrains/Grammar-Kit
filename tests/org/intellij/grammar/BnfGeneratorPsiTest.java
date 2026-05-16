@@ -15,7 +15,7 @@ import org.intellij.grammar.generator.JavaParserGenerator;
 import org.intellij.grammar.generator.NameShortener;
 import org.intellij.grammar.generator.OutputOpener;
 import org.intellij.grammar.classinfo.MethodType;
-import org.intellij.grammar.classinfo.TypeParameterInfo;
+import org.intellij.grammar.classinfo.TypeParameterSymbol;
 import org.intellij.grammar.java.JavaHelper;
 import org.intellij.grammar.java.PsiHelperFactory;
 import org.intellij.grammar.psi.BnfFile;
@@ -501,7 +501,7 @@ public class BnfGeneratorPsiTest extends BasePlatformTestCase {
     }
 
     @Override
-    public List<TypeParameterInfo> getGenericParameters(NavigatablePsiElement method) {
+    public List<TypeParameterSymbol> getGenericParameters(NavigatablePsiElement method) {
       return myDelegate.getGenericParameters(method);
     }
 

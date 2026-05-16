@@ -11,7 +11,7 @@ import org.intellij.grammar.classinfo.Fqn;
 import org.intellij.grammar.classinfo.MethodSymbol;
 import org.intellij.grammar.classinfo.MethodType;
 import org.intellij.grammar.classinfo.ParameterSymbol;
-import org.intellij.grammar.classinfo.TypeParameterInfo;
+import org.intellij.grammar.classinfo.TypeParameterSymbol;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -172,7 +172,7 @@ final class KotlinSyntaxMethodExtractor {
       if (tpId == null) continue;
       String tvName = tpId.getText().toString();
       typeVars.add(tvName);
-      TypeParameterInfo info = new TypeParameterInfo(tvName);
+      TypeParameterSymbol info = new TypeParameterSymbol(tvName);
       SyntaxNode boundType = firstChildOfType(tp, KtNodeTypes.INSTANCE.getTYPE_REFERENCE());
       if (boundType != null) info.getExtendsList().add(typeFormatter.formatType(boundType, typeVars));
       m.generics.add(info);

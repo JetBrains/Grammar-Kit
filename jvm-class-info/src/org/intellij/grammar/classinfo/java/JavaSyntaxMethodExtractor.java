@@ -11,7 +11,7 @@ import org.intellij.grammar.classinfo.Fqn;
 import org.intellij.grammar.classinfo.MethodSymbol;
 import org.intellij.grammar.classinfo.MethodType;
 import org.intellij.grammar.classinfo.ParameterSymbol;
-import org.intellij.grammar.classinfo.TypeParameterInfo;
+import org.intellij.grammar.classinfo.TypeParameterSymbol;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -83,7 +83,7 @@ final class JavaSyntaxMethodExtractor {
       if (tpId == null) continue;
       String tvName = tpId.getText().toString();
       typeVars.add(tvName);
-      TypeParameterInfo info = new TypeParameterInfo(tvName);
+      TypeParameterSymbol info = new TypeParameterSymbol(tvName);
       info.getExtendsList().addAll(typeFormatter.formatRefs(firstChildOfType(tp, JavaSyntaxElementType.EXTENDS_BOUND_LIST), typeVars));
       m.generics.add(info);
     }

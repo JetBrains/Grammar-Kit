@@ -6,7 +6,7 @@ package org.intellij.grammar.java.syntax;
 
 import com.intellij.psi.NavigatablePsiElement;
 import junit.framework.TestCase;
-import org.intellij.grammar.classinfo.ClassInfo;
+import org.intellij.grammar.classinfo.ClassSymbol;
 import org.intellij.grammar.classinfo.Fqn;
 import org.intellij.grammar.classinfo.JvmClassSymbolManager;
 import org.intellij.grammar.classinfo.JvmClassSymbolProvider;
@@ -31,13 +31,13 @@ import java.util.Map;
  * <p>
  * Bypasses the source-file parsing pipeline ({@link JavaClassManager},
  * {@link JavaSyntaxTreeManager}, {@link JavaSyntaxClassExtractor}) by injecting an in-memory
- * FQN → {@link ClassInfo} lookup via the package-private test constructor, so each test owns a
+ * FQN → {@link ClassSymbol} lookup via the package-private test constructor, so each test owns a
  * small, controlled type universe. The matching integration test {@link JavaSyntaxHelperTest}
- * exercises the full file → ClassInfo flow against real {@code .java} fixtures.
+ * exercises the full file → ClassSymbol flow against real {@code .java} fixtures.
  */
 public class JavaSyntaxHelperUnitTest extends TestCase {
 
-  private final Map<String, ClassInfo> classes = new HashMap<>();
+  private final Map<String, ClassSymbol> classes = new HashMap<>();
   private RecordingFallback fallback;
 
   @Override
@@ -52,7 +52,7 @@ public class JavaSyntaxHelperUnitTest extends TestCase {
   // ---------------------------------------------------------------------------------------------
 
   public void testFindClassReturnsWrappedClassInfo() {
-    ClassInfo info = registerClass("a.b.Foo", Modifier.PUBLIC, "java.lang.Object");
+    ClassSymbol info = registerClass("a.b.Foo", Modifier.PUBLIC, "java.lang.Object");
     NavigatablePsiElement el = helper().findClass("a.b.Foo");
     assertNotNull(el);
     assertSame(info, ((MyElement<?>)el).delegate);
@@ -63,7 +63,7 @@ public class JavaSyntaxHelperUnitTest extends TestCase {
   }
 
   public void testFindClassMissDelegatesToFallback() {
-    ClassInfo fallbackInfo = new ClassInfo();
+    ClassSymbol fallbackInfo = new ClassSymbol();
     fallbackInfo.name = Fqn.of("a.b.PlatformClass");
     fallback.classes.put("a.b.PlatformClass", fallbackInfo);
 
@@ -90,7 +90,7 @@ public class JavaSyntaxHelperUnitTest extends TestCase {
   public void testFindClassMethodsMissDelegatesToFallback() {
     // A class known only to the fallback provider must still expose its methods through the
     // unified pipeline: manager looks up the class once, JvmSyntaxHelper iterates its methods.
-    ClassInfo external = new ClassInfo();
+    ClassSymbol external = new ClassSymbol();
     external.name = Fqn.of("a.b.PlatformClass");
     external.methods.add(method("ping", Modifier.PUBLIC, MethodType.INSTANCE, "void"));
     fallback.classes.put("a.b.PlatformClass", external);
@@ -248,7 +248,7 @@ public class JavaSyntaxHelperUnitTest extends TestCase {
   }
 
   public void testFindClassMethodsParamTypeResolvedViaInterface() {
-    ClassInfo child = registerClass("a.b.Child", Modifier.PUBLIC, "java.lang.Object");
+    ClassSymbol child = registerClass("a.b.Child", Modifier.PUBLIC, "java.lang.Object");
     child.interfaces.add(Fqn.of("a.b.Iface"));
     registerClass("a.b.Foo", Modifier.PUBLIC, "java.lang.Object",
                   method("doIt", Modifier.PUBLIC, MethodType.INSTANCE,
@@ -259,8 +259,8 @@ public class JavaSyntaxHelperUnitTest extends TestCase {
 
   public void testFindClassMethodsParamTypeResolvedViaFallbackSupertype() {
     // The probe class is only known to the fallback. JavaSyntaxHelper must unwrap the fallback's
-    // MyElement<ClassInfo> so the supertype check still succeeds.
-    ClassInfo external = new ClassInfo();
+    // MyElement<ClassSymbol> so the supertype check still succeeds.
+    ClassSymbol external = new ClassSymbol();
     external.name = Fqn.of("ext.Child");
     external.superClass = Fqn.of("a.b.Base");
     fallback.classes.put("ext.Child", external);
@@ -289,12 +289,12 @@ public class JavaSyntaxHelperUnitTest extends TestCase {
   }
 
   public void testGetSuperClassNameDelegatesToFallback() {
-    ClassInfo external = new ClassInfo();
+    ClassSymbol external = new ClassSymbol();
     external.name = Fqn.of("ext.External");
     external.superClass = Fqn.of("ext.Parent");
     fallback.classes.put("ext.External", external);
     assertEquals("ext.Parent", helper().getSuperClassName("ext.External"));
-    // Fallback supplies the ClassInfo via findClass; JvmSyntaxHelper reads superClass off the record.
+    // Fallback supplies the ClassSymbol via findClass; JvmSyntaxHelper reads superClass off the record.
     assertEquals(List.of("ext.External"), fallback.findClassCalls);
   }
 
@@ -307,12 +307,12 @@ public class JavaSyntaxHelperUnitTest extends TestCase {
   // ---------------------------------------------------------------------------------------------
 
   public void testIsPublicTrueForPublicClass() {
-    ClassInfo info = registerClass("a.b.Foo", Modifier.PUBLIC, null);
+    ClassSymbol info = registerClass("a.b.Foo", Modifier.PUBLIC, null);
     assertTrue(helper().isPublic(new MyElement<>(info)));
   }
 
   public void testIsPublicFalseForPackagePrivateClass() {
-    ClassInfo info = registerClass("a.b.Foo", 0, null);
+    ClassSymbol info = registerClass("a.b.Foo", 0, null);
     assertFalse(helper().isPublic(new MyElement<>(info)));
   }
 
@@ -342,7 +342,7 @@ public class JavaSyntaxHelperUnitTest extends TestCase {
   }
 
   public void testGetMethodTypesEmptyForClassInfo() {
-    ClassInfo info = registerClass("a.b.Foo", Modifier.PUBLIC, null);
+    ClassSymbol info = registerClass("a.b.Foo", Modifier.PUBLIC, null);
     assertEquals(Collections.emptyList(), helper().getMethodTypes(new MyElement<>(info)));
   }
 
@@ -359,7 +359,7 @@ public class JavaSyntaxHelperUnitTest extends TestCase {
   }
 
   public void testGetGenericParametersEmptyForNonMethod() {
-    ClassInfo info = registerClass("a.b.Foo", Modifier.PUBLIC, null);
+    ClassSymbol info = registerClass("a.b.Foo", Modifier.PUBLIC, null);
     assertTrue(helper().getGenericParameters(new MyElement<>(info)).isEmpty());
   }
 
@@ -371,7 +371,7 @@ public class JavaSyntaxHelperUnitTest extends TestCase {
   }
 
   public void testGetExceptionListEmptyForNonMethod() {
-    ClassInfo info = registerClass("a.b.Foo", Modifier.PUBLIC, null);
+    ClassSymbol info = registerClass("a.b.Foo", Modifier.PUBLIC, null);
     assertTrue(helper().getExceptionList(new MyElement<>(info)).isEmpty());
   }
 
@@ -382,7 +382,7 @@ public class JavaSyntaxHelperUnitTest extends TestCase {
   }
 
   public void testGetDeclaringClassEmptyForNonMethod() {
-    ClassInfo info = registerClass("a.b.Foo", Modifier.PUBLIC, null);
+    ClassSymbol info = registerClass("a.b.Foo", Modifier.PUBLIC, null);
     assertEquals("", helper().getDeclaringClass(new MyElement<>(info)));
   }
 
@@ -391,7 +391,7 @@ public class JavaSyntaxHelperUnitTest extends TestCase {
   }
 
   public void testGetAnnotationsForClass() {
-    ClassInfo info = registerClass("a.b.Foo", Modifier.PUBLIC, null);
+    ClassSymbol info = registerClass("a.b.Foo", Modifier.PUBLIC, null);
     info.annotations.add(Fqn.of("java.lang.Deprecated"));
     assertEquals(List.of("java.lang.Deprecated"),
                  helper().getAnnotations(new MyElement<>(info)));
@@ -423,7 +423,7 @@ public class JavaSyntaxHelperUnitTest extends TestCase {
   }
 
   public void testGetParameterAnnotationsEmptyForNonMethod() {
-    ClassInfo info = registerClass("a.b.Foo", Modifier.PUBLIC, null);
+    ClassSymbol info = registerClass("a.b.Foo", Modifier.PUBLIC, null);
     assertTrue(helper().getParameterAnnotations(new MyElement<>(info), 0).isEmpty());
   }
 
@@ -441,9 +441,9 @@ public class JavaSyntaxHelperUnitTest extends TestCase {
     return new JvmSyntaxHelper(new JvmClassSymbolManager(List.of(mapProvider(classes))));
   }
 
-  private static @NotNull JvmClassSymbolProvider mapProvider(@NotNull Map<String, ClassInfo> classes) {
+  private static @NotNull JvmClassSymbolProvider mapProvider(@NotNull Map<String, ClassSymbol> classes) {
     return (fqn, resolver) -> {
-      ClassInfo info = classes.get(fqn.value());
+      ClassSymbol info = classes.get(fqn.value());
       return info == null ? Map.of() : Map.of(fqn, info);
     };
   }
@@ -451,18 +451,18 @@ public class JavaSyntaxHelperUnitTest extends TestCase {
   private static @NotNull JvmClassSymbolProvider fallbackProvider(@NotNull JavaHelper fallback) {
     return (fqn, resolver) -> {
       NavigatablePsiElement el = fallback.findClass(fqn.value());
-      if (el instanceof MyElement<?> e && e.delegate instanceof ClassInfo ci) {
+      if (el instanceof MyElement<?> e && e.delegate instanceof ClassSymbol ci) {
         return Map.of(fqn, ci);
       }
       return Map.of();
     };
   }
 
-  private ClassInfo registerClass(@NotNull String fqn,
+  private ClassSymbol registerClass(@NotNull String fqn,
                                   int modifiers,
                                   @Nullable String superClass,
                                   MethodSymbol... methods) {
-    ClassInfo info = new ClassInfo();
+    ClassSymbol info = new ClassSymbol();
     info.name = Fqn.of(fqn);
     info.modifiers = modifiers;
     info.superClass = superClass == null ? null : Fqn.of(superClass);
@@ -499,7 +499,7 @@ public class JavaSyntaxHelperUnitTest extends TestCase {
    * supertype-probe code path in {@code JavaSyntaxHelper.lookupClassInfo} can unwrap them.
    */
   private static class RecordingFallback extends JavaHelper {
-    final Map<String, ClassInfo> classes = new HashMap<>();
+    final Map<String, ClassSymbol> classes = new HashMap<>();
     final Map<String, List<MethodSymbol>> methods = new HashMap<>();
     final List<String> findClassCalls = new ArrayList<>();
     final List<String> superClassCalls = new ArrayList<>();
@@ -514,7 +514,7 @@ public class JavaSyntaxHelperUnitTest extends TestCase {
     public @Nullable NavigatablePsiElement findClass(@Nullable String className) {
       lastDispatch = "findClass";
       findClassCalls.add(className);
-      ClassInfo info = classes.get(className);
+      ClassSymbol info = classes.get(className);
       return info == null ? null : new MyElement<>(info);
     }
 
@@ -537,7 +537,7 @@ public class JavaSyntaxHelperUnitTest extends TestCase {
     public @Nullable String getSuperClassName(@Nullable String className) {
       lastDispatch = "getSuperClassName";
       superClassCalls.add(className);
-      ClassInfo info = classes.get(className);
+      ClassSymbol info = classes.get(className);
       return info == null || info.superClass == null ? null : info.superClass.value();
     }
   }

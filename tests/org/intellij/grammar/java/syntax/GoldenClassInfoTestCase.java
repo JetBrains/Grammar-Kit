@@ -5,7 +5,7 @@
 package org.intellij.grammar.java.syntax;
 
 import junit.framework.TestCase;
-import org.intellij.grammar.classinfo.ClassInfo;
+import org.intellij.grammar.classinfo.ClassSymbol;
 import org.intellij.grammar.classinfo.Fqn;
 import org.jetbrains.annotations.NotNull;
 
@@ -17,7 +17,7 @@ import java.util.Map;
 
 /**
  * Base class for golden-file tests that snapshot the output of the syntax-generation pipeline.
- * Each test produces a {@code Map<Fqn, ClassInfo>}, hands it to
+ * Each test produces a {@code Map<Fqn, ClassSymbol>}, hands it to
  * {@link #assertClassInfoMatchesGolden}, and the rendered text is compared against
  * {@code <goldenDir>/<getName()>.txt}.
  * <p>
@@ -33,7 +33,7 @@ public abstract class GoldenClassInfoTestCase extends TestCase {
   /** Path of the directory under {@code testData/} holding the goldens for this test class. */
   protected abstract @NotNull String goldenDir();
 
-  protected final void assertClassInfoMatchesGolden(@NotNull Map<Fqn, ClassInfo> classes) {
+  protected final void assertClassInfoMatchesGolden(@NotNull Map<Fqn, ClassSymbol> classes) {
     String actual = ClassInfoTextFormatter.format(classes);
     Path golden = Path.of("testData", goldenDir(), getName() + ".txt");
     compareToGolden(actual, golden);

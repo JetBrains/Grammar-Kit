@@ -6,7 +6,7 @@ package org.intellij.grammar.java;
 
 import com.intellij.psi.NavigatablePsiElement;
 import com.intellij.util.containers.ContainerUtil;
-import org.intellij.grammar.classinfo.ClassInfo;
+import org.intellij.grammar.classinfo.ClassSymbol;
 import org.intellij.grammar.classinfo.Fqn;
 import org.intellij.grammar.classinfo.MethodSymbol;
 import org.intellij.grammar.classinfo.TypeParameterInfo;
@@ -23,7 +23,7 @@ import java.util.function.Function;
 
 /**
  * Read-only helpers shared by every {@link JavaHelper} that returns {@link MyElement}-wrapped
- * {@link ClassInfo} / {@link MethodSymbol} records (currently {@link AsmHelper} and the
+ * {@link ClassSymbol} / {@link MethodSymbol} records (currently {@link AsmHelper} and the
  * {@code JavaSyntaxHelper} in the {@code syntax} subpackage). Each method unwraps the
  * {@link MyElement} delegate and surfaces the field the {@link JavaHelper} contract expects, so
  * the helpers themselves can keep their override methods to one line each.
@@ -34,7 +34,7 @@ public final class ClassInfoUtil {
 
   public static boolean isPublic(@Nullable NavigatablePsiElement element) {
     Object delegate = delegateOf(element);
-    int access = delegate instanceof ClassInfo ? ((ClassInfo)delegate).modifiers :
+    int access = delegate instanceof ClassSymbol ? ((ClassSymbol)delegate).modifiers :
                  delegate instanceof MethodSymbol ? ((MethodSymbol)delegate).modifiers :
                  0;
     return Modifier.isPublic(access);
@@ -67,7 +67,7 @@ public final class ClassInfoUtil {
 
   public static @NotNull List<String> getAnnotations(@Nullable NavigatablePsiElement element) {
     Object delegate = delegateOf(element);
-    if (delegate instanceof ClassInfo) return ContainerUtil.map(((ClassInfo)delegate).annotations, Fqn::value);
+    if (delegate instanceof ClassSymbol) return ContainerUtil.map(((ClassSymbol)delegate).annotations, Fqn::value);
     if (delegate instanceof MethodSymbol) return ContainerUtil.map(((MethodSymbol)delegate).annotations.get(0), Fqn::value);
     return Collections.emptyList();
   }
@@ -84,7 +84,7 @@ public final class ClassInfoUtil {
   /**
    * Filters by parameter arity and parameter type compatibility.
    * <p>
-   * Subtype probes ({@link ClassInfo#superClass} / {@link ClassInfo#interfaces}) go through
+   * Subtype probes ({@link ClassSymbol#superClass} / {@link ClassSymbol#interfaces}) go through
    * {@code classLookup} so each helper drives the lookup with its own backing model — bytecode for
    * {@link AsmHelper}, source files for {@code JavaSyntaxHelper}, etc. {@code paramCount = -1}
    * skips the arity check; an empty {@code paramTypes} accepts any parameter list.
@@ -93,7 +93,7 @@ public final class ClassInfoUtil {
   public static boolean acceptsParams(@NotNull MethodSymbol method,
                                       int paramCount,
                                       @NotNull String[] paramTypes,
-                                      @NotNull Function<String, ClassInfo> classLookup) {
+                                      @NotNull Function<String, ClassSymbol> classLookup) {
     int actualParams = (method.types.size() - 1) / 2;
     if (paramCount >= 0 && paramCount != actualParams) return false;
     if (paramTypes.length == 0) return true;
@@ -102,7 +102,7 @@ public final class ClassInfoUtil {
       String paramType = paramTypes[i];
       String parameter = method.types.get(2 * i + 1);
       if (JavaHelper.acceptsName(paramType, JavaNames.getRawClassName(parameter))) continue;
-      ClassInfo info = classLookup.apply(paramType);
+      ClassSymbol info = classLookup.apply(paramType);
       if (info != null) {
         if (info.superClass != null && Objects.equals(info.superClass.value(), parameter)) continue;
         if (containsValue(info.interfaces, parameter)) continue;

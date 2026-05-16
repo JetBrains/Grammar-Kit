@@ -5,7 +5,7 @@
 package org.intellij.grammar.java.syntax;
 
 import junit.framework.TestCase;
-import org.intellij.grammar.classinfo.ClassInfo;
+import org.intellij.grammar.classinfo.ClassSymbol;
 import org.intellij.grammar.classinfo.Fqn;
 import org.intellij.grammar.classinfo.MethodSymbol;
 import org.intellij.grammar.classinfo.MethodType;
@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Pins the textual format produced by {@link ClassInfoTextFormatter}. Hand-built {@link ClassInfo}
+ * Pins the textual format produced by {@link ClassInfoTextFormatter}. Hand-built {@link ClassSymbol}
  * objects exercise every branch (empty class, multi-class sort, modifiers, class/method
  * annotations, type parameters with bounds and annotations, multifileFacade, each
  * {@link MethodType}, method generics, throws, per-parameter annotations, annotatedTypes
@@ -25,7 +25,7 @@ import java.util.Map;
 public class ClassInfoTextFormatterTest extends TestCase {
 
   public void testEmptyClassRendersHeaderAndEmptyMethods() {
-    ClassInfo info = new ClassInfo();
+    ClassSymbol info = new ClassSymbol();
     info.name = Fqn.of("a.b.Empty");
     String expected = """
       class a.b.Empty
@@ -34,7 +34,7 @@ public class ClassInfoTextFormatterTest extends TestCase {
   }
 
   public void testClassWithModifiersExtendsAndImplements() {
-    ClassInfo info = new ClassInfo();
+    ClassSymbol info = new ClassSymbol();
     info.name = Fqn.of("a.b.Foo");
     info.superClass = Fqn.of("a.b.Base");
     info.modifiers = Modifier.PUBLIC | Modifier.FINAL;
@@ -48,7 +48,7 @@ public class ClassInfoTextFormatterTest extends TestCase {
   }
 
   public void testClassAnnotationsAndTypeParameters() {
-    ClassInfo info = new ClassInfo();
+    ClassSymbol info = new ClassSymbol();
     info.name = Fqn.of("a.b.Boxed");
     info.modifiers = Modifier.PUBLIC;
     info.annotations.add(Fqn.of("java.lang.Deprecated"));
@@ -64,7 +64,7 @@ public class ClassInfoTextFormatterTest extends TestCase {
   }
 
   public void testMultifileFacadeAndMethodVariants() {
-    ClassInfo info = new ClassInfo();
+    ClassSymbol info = new ClassSymbol();
     info.name = Fqn.of("util.Utils");
     info.modifiers = Modifier.PUBLIC | Modifier.FINAL;
     info.multifileFacade = true;
@@ -122,9 +122,9 @@ public class ClassInfoTextFormatterTest extends TestCase {
   }
 
   public void testMultipleClassesAreSortedByFqn() {
-    ClassInfo a = new ClassInfo();
+    ClassSymbol a = new ClassSymbol();
     a.name = Fqn.of("z.Aardvark");
-    ClassInfo b = new ClassInfo();
+    ClassSymbol b = new ClassSymbol();
     b.name = Fqn.of("a.Banana");
     String expected = """
       class a.Banana

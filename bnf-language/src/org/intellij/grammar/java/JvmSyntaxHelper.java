@@ -6,7 +6,7 @@ package org.intellij.grammar.java;
 
 import com.intellij.psi.NavigatablePsiElement;
 import com.intellij.util.SmartList;
-import org.intellij.grammar.classinfo.ClassInfo;
+import org.intellij.grammar.classinfo.ClassSymbol;
 import org.intellij.grammar.classinfo.Fqn;
 import org.intellij.grammar.classinfo.JvmClassSymbolManager;
 import org.intellij.grammar.classinfo.MethodSymbol;
@@ -20,7 +20,7 @@ import java.util.List;
 
 /**
  * The {@link JavaHelper} adapter over a {@link JvmClassSymbolManager}. Every override delegates to
- * the manager (for {@link ClassInfo} lookups) or to {@link ClassInfoUtil} (for unwrapping
+ * the manager (for {@link ClassSymbol} lookups) or to {@link ClassInfoUtil} (for unwrapping
  * {@link MyElement} wrappers). The manager owns the cache and the ordered provider list, so this
  * class holds no symbol state of its own.
  * <p>
@@ -43,7 +43,7 @@ public class JvmSyntaxHelper extends JavaHelper {
 
   @Override
   public @Nullable NavigatablePsiElement findClass(@Nullable String className) {
-    ClassInfo info = manager.findClass(Fqn.ofNullable(className));
+    ClassSymbol info = manager.findClass(Fqn.ofNullable(className));
     return info == null ? null : new MyElement<>(info);
   }
 
@@ -54,7 +54,7 @@ public class JvmSyntaxHelper extends JavaHelper {
                                                                boolean allowAbstract,
                                                                int paramCount,
                                                                String... paramTypes) {
-    ClassInfo aClass = manager.findClass(Fqn.ofNullable(className));
+    ClassSymbol aClass = manager.findClass(Fqn.ofNullable(className));
     if (aClass == null || methodName == null) return Collections.emptyList();
     List<NavigatablePsiElement> result = new SmartList<>();
     for (MethodSymbol method : aClass.methods) {
@@ -69,7 +69,7 @@ public class JvmSyntaxHelper extends JavaHelper {
 
   @Override
   public @Nullable String getSuperClassName(@Nullable String className) {
-    ClassInfo info = manager.findClass(Fqn.ofNullable(className));
+    ClassSymbol info = manager.findClass(Fqn.ofNullable(className));
     return info == null || info.superClass == null ? null : info.superClass.value();
   }
 

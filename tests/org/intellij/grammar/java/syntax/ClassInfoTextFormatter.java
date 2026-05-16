@@ -4,7 +4,7 @@
 
 package org.intellij.grammar.java.syntax;
 
-import org.intellij.grammar.classinfo.ClassInfo;
+import org.intellij.grammar.classinfo.ClassSymbol;
 import org.intellij.grammar.classinfo.Fqn;
 import org.intellij.grammar.classinfo.MethodSymbol;
 import org.intellij.grammar.classinfo.MethodType;
@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Serialises a {@code Map<Fqn, ClassInfo>} produced by the syntax-generation pipeline into a
+ * Serialises a {@code Map<Fqn, ClassSymbol>} produced by the syntax-generation pipeline into a
  * stable, human-readable text block used by the golden-file tests in this package. The format is
  * pinned by {@code ClassInfoTextFormatterTest} — change it there if you change it here.
  */
@@ -26,8 +26,8 @@ public final class ClassInfoTextFormatter {
 
   private ClassInfoTextFormatter() { }
 
-  public static @NotNull String format(@NotNull Map<Fqn, ClassInfo> classes) {
-    List<Map.Entry<Fqn, ClassInfo>> sorted = new ArrayList<>(classes.entrySet());
+  public static @NotNull String format(@NotNull Map<Fqn, ClassSymbol> classes) {
+    List<Map.Entry<Fqn, ClassSymbol>> sorted = new ArrayList<>(classes.entrySet());
     sorted.sort(Comparator.comparing(e -> e.getKey().value()));
     StringBuilder sb = new StringBuilder();
     for (int i = 0; i < sorted.size(); i++) {
@@ -39,7 +39,7 @@ public final class ClassInfoTextFormatter {
     return sb.toString();
   }
 
-  private static void appendClass(@NotNull StringBuilder sb, @NotNull ClassInfo info) {
+  private static void appendClass(@NotNull StringBuilder sb, @NotNull ClassSymbol info) {
     sb.append("class ").append(info.name);
     if (info.superClass != null) sb.append(" extends ").append(info.superClass);
     if (!info.interfaces.isEmpty()) {

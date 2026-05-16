@@ -4,7 +4,7 @@
 
 package org.intellij.grammar.java.syntax;
 
-import org.intellij.grammar.classinfo.ClassInfo;
+import org.intellij.grammar.classinfo.ClassSymbol;
 import org.intellij.grammar.classinfo.Fqn;
 import org.intellij.grammar.classinfo.JvmClassSymbolProvider;
 import org.intellij.grammar.classinfo.SymbolResolver;
@@ -21,7 +21,7 @@ import java.util.Set;
 import java.util.stream.Stream;
 
 /**
- * Collects every {@link ClassInfo} that a {@link JvmClassSymbolProvider} would extract from a
+ * Collects every {@link ClassSymbol} that a {@link JvmClassSymbolProvider} would extract from a
  * fixture source root. Walks the root for files of the given extension, derives package FQNs from
  * the directory tree, and probes the provider once per package — the provider scans each package
  * and returns all classes declared there, which we accumulate.
@@ -37,7 +37,7 @@ public final class FixtureExtractor {
    * @param provider     the provider under test (e.g. {@code KotlinSyntaxClassSymbolProvider})
    * @param extension    file extension including dot (e.g. {@code ".kt"}, {@code ".java"})
    */
-  public static @NotNull Map<Fqn, ClassInfo> extractAll(@NotNull Path root,
+  public static @NotNull Map<Fqn, ClassSymbol> extractAll(@NotNull Path root,
                                                  @NotNull JvmClassSymbolProvider provider,
                                                  @NotNull String extension) {
     Set<Fqn> packages = new HashSet<>();
@@ -51,7 +51,7 @@ public final class FixtureExtractor {
       throw new UncheckedIOException(e);
     }
 
-    Map<Fqn, ClassInfo> all = new HashMap<>();
+    Map<Fqn, ClassSymbol> all = new HashMap<>();
     for (Fqn pkg : packages) {
       Fqn probe = pkg.child("__PROBE_NONEXISTENT__");
       all.putAll(provider.resolve(probe, NULL_RESOLVER));

@@ -4,7 +4,7 @@
 
 package org.intellij.grammar.java.syntax.kotlin;
 
-import org.intellij.grammar.classinfo.ClassInfo;
+import org.intellij.grammar.classinfo.ClassSymbol;
 import org.intellij.grammar.classinfo.Fqn;
 import org.intellij.grammar.classinfo.JvmClassSymbolManager;
 import org.intellij.grammar.classinfo.kotlin.KotlinSyntaxClassSymbolProvider;
@@ -23,7 +23,7 @@ import java.util.Map;
 /**
  * Source-driven tests for the Kotlin side of the syntax-generation pipeline. Each test writes a
  * small {@code .kt} fixture to a temp dir, then asks
- * {@link KotlinSyntaxClassSymbolProvider} for the resulting {@code Map<Fqn, ClassInfo>} via
+ * {@link KotlinSyntaxClassSymbolProvider} for the resulting {@code Map<Fqn, ClassSymbol>} via
  * {@link FixtureExtractor#extractAll} and compares it to a golden under
  * {@code testData/syntax/kotlin/source/}. Helper-behaviour assertions (negative cache) keep their
  * own checks.
@@ -149,7 +149,7 @@ public class KotlinSyntaxHelperSourceTest extends GoldenClassInfoTestCase {
   // helpers
   // ---------------------------------------------------------------------------------------------
 
-  private @NotNull Map<Fqn, ClassInfo> extractAll() {
+  private @NotNull Map<Fqn, ClassSymbol> extractAll() {
     return FixtureExtractor.extractAll(root, new KotlinSyntaxClassSymbolProvider(List.of(root)), ".kt");
   }
 

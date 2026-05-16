@@ -8,7 +8,7 @@ import com.intellij.platform.syntax.SyntaxElementType;
 import com.intellij.platform.syntax.tree.SyntaxNode;
 import fleet.org.jetbrains.kotlin.kmp.lexer.KtTokens;
 import fleet.org.jetbrains.kotlin.kmp.parser.KtNodeTypes;
-import org.intellij.grammar.classinfo.ClassInfo;
+import org.intellij.grammar.classinfo.ClassSymbol;
 import org.intellij.grammar.classinfo.Fqn;
 import org.intellij.grammar.classinfo.MethodSymbol;
 import org.intellij.grammar.classinfo.MethodType;
@@ -38,7 +38,7 @@ import static org.intellij.grammar.classinfo.kotlin.KotlinSyntaxNodes.typeParame
 
 /**
  * Walks a parsed Kotlin source file (the root {@link SyntaxNode} from
- * {@link KotlinSyntaxTreeManager#parseText(String)}) and produces one {@link ClassInfo} per declared class,
+ * {@link KotlinSyntaxTreeManager#parseText(String)}) and produces one {@link ClassSymbol} per declared class,
  * object, companion, or typealias, plus a synthesised {@code <FileStem>Kt} class collecting all
  * top-level callables.
  * <p>
@@ -54,12 +54,12 @@ final class KotlinSyntaxClassExtractor {
   private final KotlinSyntaxImportContext imports;
   private final KotlinSyntaxTypeFormatter typeFormatter;
   private final KotlinSyntaxMethodExtractor methodExtractor;
-  private final Map<Fqn, ClassInfo> result = new LinkedHashMap<>();
+  private final Map<Fqn, ClassSymbol> result = new LinkedHashMap<>();
 
   private record FileJvmAnnotations(@Nullable String jvmName, boolean multifileFacade) { }
 
-  /** Walks {@code fileRoot} once and returns one {@link ClassInfo} per declared (or synthesised) class. */
-  static @NotNull Map<Fqn, ClassInfo> extractFrom(@NotNull SyntaxNode fileRoot,
+  /** Walks {@code fileRoot} once and returns one {@link ClassSymbol} per declared (or synthesised) class. */
+  static @NotNull Map<Fqn, ClassSymbol> extractFrom(@NotNull SyntaxNode fileRoot,
                                                   @NotNull String fileStem,
                                                   @NotNull SymbolResolver resolver) {
     return new KotlinSyntaxClassExtractor(fileRoot, fileStem, resolver).extract();
@@ -75,9 +75,9 @@ final class KotlinSyntaxClassExtractor {
     this.methodExtractor = new KotlinSyntaxMethodExtractor(typeFormatter);
   }
 
-  private @NotNull Map<Fqn, ClassInfo> extract() {
+  private @NotNull Map<Fqn, ClassSymbol> extract() {
     FileJvmAnnotations fileAnnotations = readFileJvmAnnotations();
-    ClassInfo fileClass = null;
+    ClassSymbol fileClass = null;
 
     for (SyntaxNode child = fileRoot.firstChild(); child != null; child = child.nextSibling()) {
       SyntaxElementType t = child.getType();
@@ -100,8 +100,8 @@ final class KotlinSyntaxClassExtractor {
     return result;
   }
 
-  private @NotNull ClassInfo createFileClass(@NotNull FileJvmAnnotations fileAnnotations) {
-    ClassInfo info = new ClassInfo();
+  private @NotNull ClassSymbol createFileClass(@NotNull FileJvmAnnotations fileAnnotations) {
+    ClassSymbol info = new ClassSymbol();
     String simpleName = fileAnnotations.jvmName() != null ? fileAnnotations.jvmName() : fileStem + "Kt";
     info.name = Fqn.of(imports.packageName()).child(simpleName);
     info.modifiers = Modifier.PUBLIC | Modifier.FINAL;
@@ -134,7 +134,7 @@ final class KotlinSyntaxClassExtractor {
     return new FileJvmAnnotations(jvmName, multifile);
   }
 
-  private void appendFileClassMember(@NotNull ClassInfo fileClass, @NotNull SyntaxNode member) {
+  private void appendFileClassMember(@NotNull ClassSymbol fileClass, @NotNull SyntaxNode member) {
     SyntaxNode modifierList = firstChildOfType(member, KtNodeTypes.INSTANCE.getMODIFIER_LIST());
     if (hasModifier(modifierList, KtTokens.INSTANCE.getPRIVATE_MODIFIER())) return;
     if (member.getType() == KtNodeTypes.INSTANCE.getFUN()) {
@@ -164,7 +164,7 @@ final class KotlinSyntaxClassExtractor {
     String simple = nameId.getText().toString();
     Fqn fqn = imports.qualify(enclosingFqn, simple);
 
-    ClassInfo info = new ClassInfo();
+    ClassSymbol info = new ClassSymbol();
     info.name = fqn;
 
     Set<String> classTypeVars = new HashSet<>(outerTypeVars);
@@ -210,7 +210,7 @@ final class KotlinSyntaxClassExtractor {
 
   private void walkObject(@NotNull SyntaxNode objectNode,
                           @NotNull Fqn enclosingFqn,
-                          @Nullable ClassInfo enclosingClass,
+                          @Nullable ClassSymbol enclosingClass,
                           @NotNull Set<String> outerTypeVars) {
     SyntaxNode nameId = nameIdentifier(objectNode);
     boolean companion = isCompanion(objectNode);
@@ -218,7 +218,7 @@ final class KotlinSyntaxClassExtractor {
     if (simple == null) return;
     Fqn fqn = imports.qualify(enclosingFqn, simple);
 
-    ClassInfo info = new ClassInfo();
+    ClassSymbol info = new ClassSymbol();
     info.name = fqn;
     SyntaxNode modifierList = firstChildOfType(objectNode, KtNodeTypes.INSTANCE.getMODIFIER_LIST());
     info.modifiers = extractModifiers(modifierList) | Modifier.FINAL;
@@ -254,7 +254,7 @@ final class KotlinSyntaxClassExtractor {
   }
 
   private void walkClassBody(@NotNull SyntaxNode body,
-                             @NotNull ClassInfo enclosing,
+                             @NotNull ClassSymbol enclosing,
                              @NotNull Set<String> typeVars) {
     for (SyntaxNode member = body.firstChild(); member != null; member = member.nextSibling()) {
       SyntaxElementType t = member.getType();
@@ -290,7 +290,7 @@ final class KotlinSyntaxClassExtractor {
   }
 
   private void walkObjectInsideClass(@NotNull SyntaxNode objectNode,
-                                     @NotNull ClassInfo enclosing,
+                                     @NotNull ClassSymbol enclosing,
                                      @NotNull Set<String> outerTypeVars) {
     SyntaxNode nameId = nameIdentifier(objectNode);
     boolean companion = isCompanion(objectNode);
@@ -298,7 +298,7 @@ final class KotlinSyntaxClassExtractor {
     if (simple == null) return;
     Fqn fqn = enclosing.name.child(simple);
 
-    ClassInfo info = new ClassInfo();
+    ClassSymbol info = new ClassSymbol();
     info.name = fqn;
     SyntaxNode modifierList = firstChildOfType(objectNode, KtNodeTypes.INSTANCE.getMODIFIER_LIST());
     info.modifiers = extractModifiers(modifierList) | Modifier.FINAL | Modifier.STATIC;
@@ -350,7 +350,7 @@ final class KotlinSyntaxClassExtractor {
     String simple = nameId.getText().toString();
     Fqn fqn = imports.qualify(enclosingFqn, simple);
 
-    ClassInfo info = new ClassInfo();
+    ClassSymbol info = new ClassSymbol();
     info.name = fqn;
     SyntaxNode modifierList = firstChildOfType(aliasNode, KtNodeTypes.INSTANCE.getMODIFIER_LIST());
     info.modifiers = extractModifiers(modifierList) | Modifier.FINAL;
@@ -362,7 +362,7 @@ final class KotlinSyntaxClassExtractor {
     result.put(fqn, info);
   }
 
-  private void populateSuperTypes(@NotNull ClassInfo info,
+  private void populateSuperTypes(@NotNull ClassSymbol info,
                                   @NotNull SyntaxNode classOrObjectNode,
                                   @Nullable SyntaxNode superTypeList,
                                   @NotNull Set<String> typeVars) {
@@ -389,7 +389,7 @@ final class KotlinSyntaxClassExtractor {
   }
 
   private void collectPrimaryCtorPropertyAccessors(@NotNull SyntaxNode primaryCtor,
-                                                   @NotNull ClassInfo enclosing,
+                                                   @NotNull ClassSymbol enclosing,
                                                    @NotNull Set<String> typeVars) {
     SyntaxNode paramList = firstChildOfType(primaryCtor, KtNodeTypes.INSTANCE.getVALUE_PARAMETER_LIST());
     if (paramList == null) return;

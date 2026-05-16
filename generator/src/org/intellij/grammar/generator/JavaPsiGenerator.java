@@ -27,6 +27,7 @@ import org.intellij.grammar.generator.java.JavaNameShortener;
 import org.intellij.grammar.generator.java.JavaNames;
 import org.intellij.grammar.generator.kotlin.KotlinBnfConstants;
 import org.intellij.grammar.java.JavaHelper;
+import org.intellij.grammar.java.RuleImplUtil;
 import org.intellij.grammar.psi.*;
 import org.intellij.grammar.util.Case;
 import org.jetbrains.annotations.NotNull;
@@ -715,7 +716,7 @@ public final class JavaPsiGenerator extends Generator {
       next = getEffectiveSuperRule(myFile, next);
       if (next != null && next != topSuperRule && getAttribute(topSuperRule, KnownAttribute.MIXIN) == null) continue;
       topSuperClass = getRawClassName(superClass);
-      constructors = mixinHelper.findClassMethods(topSuperClass, MethodType.CONSTRUCTOR, "*", -1);
+      constructors = mixinHelper.findClassMethods(topSuperClass, MethodType.CONSTRUCTOR, "*", false, -1);
       if (!constructors.isEmpty()) break;
     }
     if (!G.generateFQN) {
@@ -774,8 +775,8 @@ public final class JavaPsiGenerator extends Generator {
       if (!addOverride && topSuperClass != null) {
         main:
         for (String curClass = topSuperClass; curClass != null; curClass = mixinHelper.getSuperClassName(curClass)) {
-          for (NavigatablePsiElement m : mixinHelper.findClassMethods(
-            curClass, MethodType.INSTANCE, "accept", 1, myVisitorClassName)) {
+          for (NavigatablePsiElement m : mixinHelper.findClassMethods(curClass, MethodType.INSTANCE, "accept", false, 1,
+                                                                      myVisitorClassName)) {
             String paramType = myJavaHelper.getMethodTypes(m).get(1);
             if (getRawClassName(paramType).endsWith(StringUtil.getShortName(myVisitorClassName))) {
               addOverride = true;
@@ -833,7 +834,7 @@ public final class JavaPsiGenerator extends Generator {
     if (intf) {
       JavaHelper mixinHelper = helperFor(KnownAttribute.MIXIN);
       String mixinClass = getAttribute(rule, KnownAttribute.MIXIN);
-      List<NavigatablePsiElement> methods = mixinHelper.findClassMethods(mixinClass, MethodType.INSTANCE, ruleMethodInfo.name(), -1);
+      List<NavigatablePsiElement> methods = mixinHelper.findClassMethods(mixinClass, MethodType.INSTANCE, ruleMethodInfo.name(), false, -1);
 
       for (NavigatablePsiElement method : methods) {
         generateUtilMethod(ruleMethodInfo.name(), method, true, false, visited);
@@ -842,7 +843,7 @@ public final class JavaPsiGenerator extends Generator {
     }
 
     JavaHelper psiImplUtilHelper = helperFor(KnownAttribute.PSI_IMPL_UTIL_CLASS);
-    List<NavigatablePsiElement> methods = psiImplUtilHelper.findRuleImplMethods(myPsiImplUtilClass, ruleMethodInfo.name(), rule);
+    List<NavigatablePsiElement> methods = RuleImplUtil.findRuleImplMethods(psiImplUtilHelper, myPsiImplUtilClass, ruleMethodInfo.name(), rule);
     for (NavigatablePsiElement method : methods) {
       generateUtilMethod(ruleMethodInfo.name(), method, intf, true, visited);
       isGenerated = true;
@@ -889,10 +890,11 @@ public final class JavaPsiGenerator extends Generator {
       if (ruleMethodInfo.type() != RuleMethodsHelper.MethodType.MIXIN) continue;
 
       JavaHelper mixinHelper = helperFor(KnownAttribute.MIXIN);
-      List<NavigatablePsiElement> mixinMethods = mixinHelper.findClassMethods(mixinClass, MethodType.INSTANCE, ruleMethodInfo.name(), -1);
+      List<NavigatablePsiElement> mixinMethods =
+        mixinHelper.findClassMethods(mixinClass, MethodType.INSTANCE, ruleMethodInfo.name(), false, -1);
 
       JavaHelper psiImplUtilHelper = helperFor(KnownAttribute.PSI_IMPL_UTIL_CLASS);
-      List<NavigatablePsiElement> implMethods = psiImplUtilHelper.findRuleImplMethods(myPsiImplUtilClass, ruleMethodInfo.name(), rule);
+      List<NavigatablePsiElement> implMethods = RuleImplUtil.findRuleImplMethods(psiImplUtilHelper, myPsiImplUtilClass, ruleMethodInfo.name(), rule);
 
       collectMethodTypesToImport(mixinMethods, false, result);
       collectMethodTypesToImport(implMethods, true, result);

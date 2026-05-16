@@ -141,9 +141,9 @@ public class JavaSyntaxHelperSourceTest extends GoldenClassInfoTestCase {
 
     // Behaviour: helper.findClassMethods filters by MethodType.
     JavaHelper helper = helperFrom(classes);
-    assertEquals(1, helper.findClassMethods("a.b.C", MethodType.STATIC, "stat", -1).size());
-    assertTrue(helper.findClassMethods("a.b.C", MethodType.STATIC, "inst", -1).isEmpty());
-    assertEquals(1, helper.findClassMethods("a.b.C", MethodType.INSTANCE, "inst", -1).size());
+    assertEquals(1, helper.findClassMethods("a.b.C", MethodType.STATIC, "stat", false,  -1).size());
+    assertTrue(helper.findClassMethods("a.b.C", MethodType.STATIC, "inst", false, -1).isEmpty());
+    assertEquals(1, helper.findClassMethods("a.b.C", MethodType.INSTANCE, "inst", false,  -1).size());
   }
 
   public void testConstructorExtraction() {
@@ -166,7 +166,7 @@ public class JavaSyntaxHelperSourceTest extends GoldenClassInfoTestCase {
 
     // Behaviour: by default findClassMethods filters out abstract methods unless allowAbstract=true.
     JavaHelper helper = helperFrom(classes);
-    assertTrue(helper.findClassMethods("a.b.C", MethodType.INSTANCE, "doIt", -1).isEmpty());
+    assertTrue(helper.findClassMethods("a.b.C", MethodType.INSTANCE, "doIt", false,  -1).isEmpty());
     assertEquals(1, helper.findClassMethods("a.b.C", MethodType.INSTANCE, "doIt", true, -1).size());
   }
 
@@ -181,7 +181,7 @@ public class JavaSyntaxHelperSourceTest extends GoldenClassInfoTestCase {
 
     // Behaviour: the helper excludes private constructors from match results.
     JavaHelper helper = helperFrom(classes);
-    assertTrue(helper.findClassMethods("a.b.C", MethodType.CONSTRUCTOR, "C", -1).isEmpty());
+    assertTrue(helper.findClassMethods("a.b.C", MethodType.CONSTRUCTOR, "C", false,  -1).isEmpty());
   }
 
   // ---------------------------------------------------------------------------------------------
@@ -243,7 +243,7 @@ public class JavaSyntaxHelperSourceTest extends GoldenClassInfoTestCase {
 
     // Behaviour: caller passes Child as the param-type probe; receiver wants Base.
     JavaHelper helper = helperFrom(classes);
-    assertEquals(1, helper.findClassMethods("a.b.Receiver", MethodType.INSTANCE, "take", -1, "a.b.Child").size());
+    assertEquals(1, helper.findClassMethods("a.b.Receiver", MethodType.INSTANCE, "take",  false, -1, "a.b.Child").size());
   }
 
   public void testParamTypeMatchedViaInterface() {
@@ -258,7 +258,7 @@ public class JavaSyntaxHelperSourceTest extends GoldenClassInfoTestCase {
     assertClassInfoMatchesGolden(classes);
 
     JavaHelper helper = helperFrom(classes);
-    assertEquals(1, helper.findClassMethods("a.b.Receiver", MethodType.INSTANCE, "take", -1, "a.b.Child").size());
+    assertEquals(1, helper.findClassMethods("a.b.Receiver", MethodType.INSTANCE, "take",  false, -1, "a.b.Child").size());
   }
 
   // ---------------------------------------------------------------------------------------------

@@ -15,6 +15,7 @@ import com.intellij.util.containers.ContainerUtil;
 import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.classinfo.MethodType;
 import org.intellij.grammar.java.JavaHelper;
+import org.intellij.grammar.java.RuleImplUtil;
 import org.intellij.grammar.psi.*;
 import org.jetbrains.annotations.NotNull;
 
@@ -44,9 +45,9 @@ class GrammarPsiImplUtil {
         private List<NavigatablePsiElement> getTargetMethods(String methodName) {
           BnfRule rule = PsiTreeUtil.getParentOfType(getElement(), BnfRule.class);
           String mixinClass = rule == null ? null : getAttribute(rule, KnownAttribute.MIXIN);
-          List<NavigatablePsiElement> implMethods = javaHelper.findRuleImplMethods(psiImplUtilClass, methodName, rule);
+          List<NavigatablePsiElement> implMethods = RuleImplUtil.findRuleImplMethods(javaHelper, psiImplUtilClass, methodName, rule);
           if (!implMethods.isEmpty()) return implMethods;
-          List<NavigatablePsiElement> mixinMethods = javaHelper.findClassMethods(mixinClass, MethodType.INSTANCE, methodName, -1);
+          List<NavigatablePsiElement> mixinMethods = javaHelper.findClassMethods(mixinClass, MethodType.INSTANCE, methodName, false, -1);
           return ContainerUtil.concat(implMethods, mixinMethods);
         }
 

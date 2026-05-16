@@ -109,14 +109,14 @@ public class JvmSyntaxHelperChainTest extends TestCase {
   public void testKotlinMemberMethodReachable() {
     chain.findClass("kt.Greeter");
     List<NavigatablePsiElement> ms = chain.findClassMethods(
-      "kt.Greeter", MethodType.INSTANCE, "hello", -1);
+      "kt.Greeter", MethodType.INSTANCE, "hello", false,  -1);
     assertEquals(1, ms.size());
   }
 
   public void testJavaMemberMethodReachable() {
     chain.findClass("jv.Counter");
     List<NavigatablePsiElement> ms = chain.findClassMethods(
-      "jv.Counter", MethodType.INSTANCE, "bump", -1);
+      "jv.Counter", MethodType.INSTANCE, "bump", false,  -1);
     assertEquals(1, ms.size());
   }
 

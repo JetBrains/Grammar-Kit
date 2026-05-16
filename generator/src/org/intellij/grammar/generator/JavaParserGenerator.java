@@ -64,8 +64,19 @@ import static org.intellij.grammar.psi.BnfTypes.*;
 
 
 /**
- * @author gregory
- * Date 16.07.11 10:41
+ * {@link Generator} implementation that emits Java sources: the parser, the element-type holder,
+ * PSI interfaces and impls, and (when enabled) a visitor.
+ * <p>
+ * {@link #generate()} runs the full pipeline; {@link #generatePsi()} is invoked by
+ * {@link KotlinParserGenerator} so the Kotlin parser can reuse Java PSI emission while owning
+ * parser generation itself. {@link #replaceSimpleTokes(Map)} exists for the same flow: simple
+ * tokens discovered during Kotlin parser generation must be propagated here before PSI emission
+ * so that element types line up.
+ * <p>
+ * Beyond plain emission this class drives Java-specific shape decisions: stub class resolution
+ * via {@link JavaHelper}, real super-class chains for PSI impls (taking {@code mixin} and
+ * stub-aware {@code extends} into account), expression-rule handling through
+ * {@link ExpressionHelper}, and PSI method synthesis through {@link RuleMethodsHelper}.
  */
 public final class JavaParserGenerator extends Generator {
   public static final Logger LOG = Logger.getInstance(JavaParserGenerator.class);
@@ -199,17 +210,27 @@ public final class JavaParserGenerator extends Generator {
     {
       generateParser();
     }
-    generatePsiOnly();
+    generatePsi();
   }
   
-  //Because some of the simple tokens are added during parser generation, 
-  // we use this function to pass missing tokens from KotlinParserGenerator to JavaParserGenerator
+  /**
+   * Replaces this generator's simple-token map with {@code simpleTypes}.
+   * <p>
+   * Called by {@link KotlinParserGenerator#generate()} so that simple tokens it discovered during
+   * parser generation are visible here before {@link #generatePsi()} emits the element-type
+   * holder and PSI.
+   */
   public void replaceSimpleTokes(Map<String, String> simpleTypes) {
     mySimpleTokens.clear();
     mySimpleTokens.putAll(simpleTypes);
   }
   
-  public void generatePsiOnly() throws IOException {
+  /**
+   * Emits everything except the parser: the element-type holder, an optional Syntax-API element
+   * type converter, and (when {@link GenOptions#generatePsi}) PSI interfaces, impls, and visitor.
+   * Invoked directly by {@link KotlinParserGenerator}, which owns its own parser generation.
+   */
+  public void generatePsi() throws IOException {
     Map<String, BnfRule> sortedCompositeTypes = new TreeMap<>();
     Map<String, BnfRule> sortedPsiRules = new TreeMap<>();
 

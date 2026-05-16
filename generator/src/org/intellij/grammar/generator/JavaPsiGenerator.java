@@ -166,7 +166,7 @@ public final class JavaPsiGenerator extends Generator {
         superRuleClass.contains("?") ? superRuleClass.replaceAll("\\?", stubName) : superRuleClass;
       // mixin attribute overrides "extends":
       psi.realSuperClass = StringUtil.notNullize(info.mixin(), adjustedSuperRuleClass);
-      JavaHelper hierarchyHelper = helperFor(rule, KnownAttribute.MIXIN);
+      JavaHelper hierarchyHelper = helperFor(KnownAttribute.MIXIN);
       psi.mixedAST = topPsi != null ? topPsi.mixedAST : JBIterable.of(superRuleClass, psi.realSuperClass)
         .map(JavaNames::getRawClassName)
         .flatMap(s -> JBTreeTraverser.<String>from(o -> JBIterable.of(hierarchyHelper.getSuperClassName(o))).withRoot(s).unique())
@@ -257,7 +257,7 @@ public final class JavaPsiGenerator extends Generator {
   /** Warns when {@code className} is configured but not resolvable on the classpath. */
   private void checkClassAvailability(@Nullable String className, @NotNull KnownAttribute<?> attribute) {
     if (StringUtil.isEmpty(className)) return;
-    if (helperFor(null, attribute).findClass(className) == null) {
+    if (helperFor(attribute).findClass(className) == null) {
       String tail = StringUtil.isEmpty("PSI method signatures will not be detected") ? "" : " (PSI method signatures will not be detected)";
       addWarning(className + " class not found" + tail);
     }
@@ -282,7 +282,7 @@ public final class JavaPsiGenerator extends Generator {
       // ensure only public supers are exposed, replace non-public with default super-intf for simplicity
       Map<String, String> replacements = new HashMap<>();
       Set<String> visited = new HashSet<>();
-      JavaHelper implementsHelper = helperFor(null, KnownAttribute.IMPLEMENTS);
+      JavaHelper implementsHelper = helperFor(KnownAttribute.IMPLEMENTS);
       for (String s : supers.values()) {
         if (!visited.add(s)) continue;
         NavigatablePsiElement aClass = implementsHelper.findClass(s);
@@ -713,7 +713,7 @@ public final class JavaPsiGenerator extends Generator {
     List<NavigatablePsiElement> constructors = Collections.emptyList();
     BnfRule topSuperRule = null;
     String topSuperClass = null;
-    JavaHelper hierarchyHelper = helperFor(rule, KnownAttribute.MIXIN);
+    JavaHelper mixinHelper = helperFor(KnownAttribute.MIXIN);
     for (BnfRule next = rule; next != null && next != topSuperRule; ) {
       if (!visited.add(next)) {
         addWarning(rule.getName() + " employs cyclic inheritance");
@@ -725,7 +725,7 @@ public final class JavaPsiGenerator extends Generator {
       next = getEffectiveSuperRule(myFile, next);
       if (next != null && next != topSuperRule && getAttribute(topSuperRule, KnownAttribute.MIXIN) == null) continue;
       topSuperClass = getRawClassName(superClass);
-      constructors = hierarchyHelper.findClassMethods(topSuperClass, MethodType.CONSTRUCTOR, "*", -1);
+      constructors = mixinHelper.findClassMethods(topSuperClass, MethodType.CONSTRUCTOR, "*", -1);
       if (!constructors.isEmpty()) break;
     }
     if (!G.generateFQN) {
@@ -783,8 +783,8 @@ public final class JavaPsiGenerator extends Generator {
       boolean addOverride = topSuperRule != rule && info.mixin() == null;
       if (!addOverride && topSuperClass != null) {
         main:
-        for (String curClass = topSuperClass; curClass != null; curClass = hierarchyHelper.getSuperClassName(curClass)) {
-          for (NavigatablePsiElement m : hierarchyHelper.findClassMethods(
+        for (String curClass = topSuperClass; curClass != null; curClass = mixinHelper.getSuperClassName(curClass)) {
+          for (NavigatablePsiElement m : mixinHelper.findClassMethods(
             curClass, MethodType.INSTANCE, "accept", 1, myVisitorClassName)) {
             String paramType = myJavaHelper.getMethodTypes(m).get(1);
             if (getRawClassName(paramType).endsWith(StringUtil.getShortName(myVisitorClassName))) {
@@ -841,7 +841,7 @@ public final class JavaPsiGenerator extends Generator {
     boolean isGenerated = false;
 
     if (intf) {
-      JavaHelper mixinHelper = helperFor(rule, KnownAttribute.MIXIN);
+      JavaHelper mixinHelper = helperFor(KnownAttribute.MIXIN);
       String mixinClass = getAttribute(rule, KnownAttribute.MIXIN);
       List<NavigatablePsiElement> methods = mixinHelper.findClassMethods(mixinClass, MethodType.INSTANCE, methodInfo.name(), -1);
 
@@ -851,7 +851,7 @@ public final class JavaPsiGenerator extends Generator {
       }
     }
 
-    JavaHelper psiImplUtilHelper = helperFor(null, KnownAttribute.PSI_IMPL_UTIL_CLASS);
+    JavaHelper psiImplUtilHelper = helperFor(KnownAttribute.PSI_IMPL_UTIL_CLASS);
     List<NavigatablePsiElement> methods = psiImplUtilHelper.findRuleImplMethods(myPsiImplUtilClass, methodInfo.name(), rule);
     for (NavigatablePsiElement method : methods) {
       generateUtilMethod(methodInfo.name(), method, intf, true, visited);
@@ -898,10 +898,11 @@ public final class JavaPsiGenerator extends Generator {
     for (RuleMethodsHelper.MethodInfo methodInfo : methods) {
       if (methodInfo.type() != RuleMethodsHelper.MethodType.MIXIN) continue;
 
-      List<NavigatablePsiElement> mixinMethods =
-        helperFor(rule, KnownAttribute.MIXIN).findClassMethods(mixinClass, MethodType.INSTANCE, methodInfo.name(), -1);
-      List<NavigatablePsiElement> implMethods = helperFor(null, KnownAttribute.PSI_IMPL_UTIL_CLASS).findRuleImplMethods(myPsiImplUtilClass,
-                                                                                                                        methodInfo.name(), rule);
+      JavaHelper mixinHelper = helperFor(KnownAttribute.MIXIN);
+      List<NavigatablePsiElement> mixinMethods = mixinHelper.findClassMethods(mixinClass, MethodType.INSTANCE, methodInfo.name(), -1);
+
+      JavaHelper psiImplUtilHelper = helperFor(KnownAttribute.PSI_IMPL_UTIL_CLASS);
+      List<NavigatablePsiElement> implMethods = psiImplUtilHelper.findRuleImplMethods(myPsiImplUtilClass, methodInfo.name(), rule);
 
       collectMethodTypesToImport(mixinMethods, false, result);
       collectMethodTypesToImport(implMethods, true, result);

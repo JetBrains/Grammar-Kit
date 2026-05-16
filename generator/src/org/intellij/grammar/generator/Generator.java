@@ -192,7 +192,7 @@ public sealed abstract class Generator permits ParserGenerator, JavaPsiGenerator
    * attribute is not declared in the grammar, falls back to the rule (or file) — in which case
    * only the global {@code inputPath} default applies.
    */
-  protected final @NotNull JavaHelper helperFor(@Nullable BnfRule rule, @NotNull KnownAttribute<?> attribute) {
+  protected final @NotNull JavaHelper helperFor(@NotNull KnownAttribute<?> attribute) {
     // BnfPaths.referencePath consults grammar-level (root) attributes; per-rule scoping is not
     // supported today. The rule parameter is retained for callers' clarity and future expansion.
     PsiHelperFactory factory = myFile.getProject().getService(PsiHelperFactory.class);

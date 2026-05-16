@@ -15,7 +15,6 @@ import org.intellij.grammar.psi.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.lang.reflect.*;
 import java.util.*;
 
 /**
@@ -70,27 +69,6 @@ public abstract class JavaHelper {
     return new JvmSyntaxHelper(new JvmClassSymbolManager(List.of(new AsmClassSymbolProvider())));
   }
 
-  /**
-   * Matches a {@code paramTypes}/{@code methodName} entry from a BNF attribute against an actual
-   * member name. Accepts the wildcard {@code "*"}, an exact match, or — for inner classes — a prefix
-   * match where {@code actual} is something like {@code "Outer$Inner"} and {@code expected} is the
-   * outer-class name.
-   */
-  public static boolean acceptsName(@Nullable String expected, @Nullable String actual) {
-    return "*".equals(expected) ||
-           expected != null && expected.equals(actual) ||
-           expected != null && actual != null && actual.contains("$") && actual.startsWith(expected);
-  }
-
-  /**
-   * Filters out members that are abstract (unless {@code allowAbstract}) or private constructors,
-   * which Grammar-Kit cannot meaningfully invoke from generated code.
-   */
-  public static boolean acceptsModifiers(int modifiers, MethodType methodType, boolean allowAbstract) {
-    return (!Modifier.isAbstract(modifiers) || allowAbstract) &&
-           !(methodType == MethodType.CONSTRUCTOR && Modifier.isPrivate(modifiers));
-  }
-
   /** Whether the given class or method is declared {@code public}. */
   public abstract boolean isPublic(@Nullable NavigatablePsiElement element);
 
@@ -118,7 +96,7 @@ public abstract class JavaHelper {
    * @param methodName  exact name, {@code "*"} wildcard, or {@code null} for "no match"
    * @param paramCount  required number of parameters; pass {@code -1} to skip the arity check
    * @param paramTypes  prefix of expected parameter type names; an empty array matches any parameter list
-   *                    (entries follow the {@link #acceptsName} matching rules and may also resolve via
+   *                    (entries follow the {@link ClassSymbolUtil#acceptsName} matching rules and may also resolve via
    *                    a supertype/interface check on the candidate parameter)
    */
   public @NotNull List<NavigatablePsiElement> findClassMethods(@Nullable String className,

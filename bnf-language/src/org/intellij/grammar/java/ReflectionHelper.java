@@ -53,7 +53,7 @@ public class ReflectionHelper extends JavaHelper {
     for (int i = 0; i < paramTypes.length; i++) {
       String paramType = paramTypes[i];
       Class<?> parameter = parameterTypes[i];
-      if (acceptsName(paramType, parameter.getCanonicalName())) continue;
+      if (ClassSymbolUtil.acceptsName(paramType, parameter.getCanonicalName())) continue;
       Class<?> paramClass = findClassSafe(paramType);
       if (paramClass != null && parameter.isAssignableFrom(paramClass)) continue;
       return false;
@@ -64,7 +64,7 @@ public class ReflectionHelper extends JavaHelper {
   private static boolean acceptsMethod(Member method, MethodType methodType, boolean allowAbstract) {
     int modifiers = method.getModifiers();
     return (methodType == MethodType.STATIC) == Modifier.isStatic(modifiers) &&
-           acceptsModifiers(modifiers, methodType, allowAbstract);
+           ClassSymbolUtil.acceptsModifiers(modifiers, methodType, allowAbstract);
   }
 
   private static @NotNull List<String> getAnnotationsInner(@NotNull AnnotatedElement delegate) {
@@ -104,7 +104,7 @@ public class ReflectionHelper extends JavaHelper {
     List<NavigatablePsiElement> result = new ArrayList<>();
     Member[] methods = methodType == MethodType.CONSTRUCTOR ? aClass.getDeclaredConstructors() : aClass.getDeclaredMethods();
     for (Member method : methods) {
-      if (!acceptsName(methodName, method.getName())) continue;
+      if (!ClassSymbolUtil.acceptsName(methodName, method.getName())) continue;
       if (!acceptsMethod(method, methodType, allowAbstract)) continue;
       if (!acceptsMethod(method, paramCount, paramTypes)) continue;
       result.add(new MyElement<>(method));

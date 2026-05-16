@@ -6,7 +6,6 @@ package org.intellij.grammar.java;
 
 import com.intellij.openapi.project.IndexNotReadyException;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.psi.*;
 import com.intellij.psi.impl.source.resolve.reference.impl.providers.JavaClassReferenceProvider;
 import com.intellij.psi.search.GlobalSearchScope;
@@ -76,7 +75,7 @@ final class PsiHelper extends JvmSyntaxHelper {
       String paramType = paramTypes[i];
       PsiParameter parameter = psiParameters[i];
       PsiType psiType = parameter.getType();
-      if (acceptsName(paramType, psiType.getCanonicalText())) continue;
+      if (ClassSymbolUtil.acceptsName(paramType, psiType.getCanonicalText())) continue;
       try {
         if (psiType.isAssignableFrom(elementFactory.createTypeFromText(paramType, parameter))) continue;
       }
@@ -176,7 +175,7 @@ final class PsiHelper extends JvmSyntaxHelper {
     List<NavigatablePsiElement> result = new ArrayList<>();
     PsiMethod[] methods = methodType == MethodType.CONSTRUCTOR ? aClass.getConstructors() : aClass.getMethods(); // todo super methods too
     for (PsiMethod method : methods) {
-      if (!acceptsName(methodName, method.getName())) continue;
+      if (!ClassSymbolUtil.acceptsName(methodName, method.getName())) continue;
       if (!acceptsMethod(method, methodType, allowAbstract)) continue;
       if (!acceptsMethod(myElementFactory, method, paramCount, paramTypes)) continue;
       result.add(method);

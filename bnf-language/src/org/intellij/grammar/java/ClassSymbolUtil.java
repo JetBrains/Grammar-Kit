@@ -6,11 +6,7 @@ package org.intellij.grammar.java;
 
 import com.intellij.psi.NavigatablePsiElement;
 import com.intellij.util.containers.ContainerUtil;
-import org.intellij.grammar.classinfo.ClassSymbol;
-import org.intellij.grammar.classinfo.Fqn;
-import org.intellij.grammar.classinfo.MethodSymbol;
-import org.intellij.grammar.classinfo.ParameterSymbol;
-import org.intellij.grammar.classinfo.TypeParameterSymbol;
+import org.intellij.grammar.classinfo.*;
 import org.intellij.grammar.generator.java.JavaNames;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -107,7 +103,7 @@ public final class ClassSymbolUtil {
     for (int i = 0; i < paramTypes.length; i++) {
       String paramType = paramTypes[i];
       String parameter = method.parameters().get(i).type();
-      if (JavaHelper.acceptsName(paramType, JavaNames.getRawClassName(parameter))) continue;
+      if (acceptsName(paramType, JavaNames.getRawClassName(parameter))) continue;
       ClassSymbol info = classLookup.apply(paramType);
       if (info != null) {
         if (info.superClass() != null && Objects.equals(info.superClass().value(), parameter)) continue;
@@ -127,5 +123,26 @@ public final class ClassSymbolUtil {
 
   private static @Nullable Object delegateOf(@Nullable NavigatablePsiElement element) {
     return element instanceof MyElement ? ((MyElement<?>)element).delegate : null;
+  }
+
+  /**
+   * Matches a {@code paramTypes}/{@code methodName} entry from a BNF attribute against an actual
+   * member name. Accepts the wildcard {@code "*"}, an exact match, or — for inner classes — a prefix
+   * match where {@code actual} is something like {@code "Outer$Inner"} and {@code expected} is the
+   * outer-class name.
+   */
+  public static boolean acceptsName(@Nullable String expected, @Nullable String actual) {
+    return "*".equals(expected) ||
+           expected != null && expected.equals(actual) ||
+           expected != null && actual != null && actual.contains("$") && actual.startsWith(expected);
+  }
+
+  /**
+   * Filters out members that are abstract (unless {@code allowAbstract}) or private constructors,
+   * which Grammar-Kit cannot meaningfully invoke from generated code.
+   */
+  public static boolean acceptsModifiers(int modifiers, MethodType methodType, boolean allowAbstract) {
+    return (!Modifier.isAbstract(modifiers) || allowAbstract) &&
+           !(methodType == MethodType.CONSTRUCTOR && Modifier.isPrivate(modifiers));
   }
 }

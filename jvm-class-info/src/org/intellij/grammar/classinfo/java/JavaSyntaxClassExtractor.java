@@ -7,7 +7,7 @@ package org.intellij.grammar.classinfo.java;
 import com.intellij.java.syntax.element.JavaSyntaxElementType;
 import com.intellij.platform.syntax.SyntaxElementType;
 import com.intellij.platform.syntax.tree.SyntaxNode;
-import org.intellij.grammar.classinfo.ClassInfo;
+import org.intellij.grammar.classinfo.ClassSymbol;
 import org.intellij.grammar.classinfo.Fqn;
 import org.intellij.grammar.classinfo.MethodSymbol;
 import org.intellij.grammar.classinfo.SymbolResolver;
@@ -29,7 +29,7 @@ import static org.intellij.grammar.classinfo.java.JavaSyntaxNodes.typeParameterN
 
 /**
  * Walks a parsed Java source file (the root {@link SyntaxNode} from
- * {@link JavaSyntaxTreeManager#parseText(String)}) and produces one {@link ClassInfo} record per class it
+ * {@link JavaSyntaxTreeManager#parseText(String)}) and produces one {@link ClassSymbol} record per class it
  * declares (top-level + nested), keyed by FQN.
  * <p>
  * One instance per file. Stateless across calls; the {@link JavaClassManager} holds the cache.
@@ -62,10 +62,10 @@ public final class JavaSyntaxClassExtractor {
   private final JavaSyntaxImportContext imports;
   private final JavaSyntaxTypeFormatter typeFormatter;
   private final JavaSyntaxMethodExtractor methodExtractor;
-  private final Map<Fqn, ClassInfo> result = new LinkedHashMap<>();
+  private final Map<Fqn, ClassSymbol> result = new LinkedHashMap<>();
 
-  /** Walks {@code fileRoot} once and returns one {@link ClassInfo} per declared class, keyed by FQN. */
-  public static @NotNull Map<Fqn, ClassInfo> extractFrom(@NotNull SyntaxNode fileRoot, @NotNull SymbolResolver resolver) {
+  /** Walks {@code fileRoot} once and returns one {@link ClassSymbol} per declared class, keyed by FQN. */
+  public static @NotNull Map<Fqn, ClassSymbol> extractFrom(@NotNull SyntaxNode fileRoot, @NotNull SymbolResolver resolver) {
     return new JavaSyntaxClassExtractor(fileRoot, resolver).extract();
   }
 
@@ -76,7 +76,7 @@ public final class JavaSyntaxClassExtractor {
     this.methodExtractor = new JavaSyntaxMethodExtractor(typeFormatter);
   }
 
-  private @NotNull Map<Fqn, ClassInfo> extract() {
+  private @NotNull Map<Fqn, ClassSymbol> extract() {
     for (SyntaxNode child = fileRoot.firstChild(); child != null; child = child.nextSibling()) {
       if (child.getType() == JavaSyntaxElementType.CLASS) {
         walkClass(child, Fqn.ROOT, Set.of());
@@ -93,7 +93,7 @@ public final class JavaSyntaxClassExtractor {
     String simpleName = nameId.getText().toString();
     Fqn fqn = imports.qualify(enclosingFqn, simpleName);
 
-    ClassInfo info = new ClassInfo();
+    ClassSymbol info = new ClassSymbol();
     info.name = fqn;
 
     Set<String> classTypeVars = new HashSet<>(outerTypeVars);

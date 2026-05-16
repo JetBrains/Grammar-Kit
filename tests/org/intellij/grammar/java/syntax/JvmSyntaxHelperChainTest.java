@@ -6,7 +6,7 @@ package org.intellij.grammar.java.syntax;
 
 import com.intellij.psi.NavigatablePsiElement;
 import junit.framework.TestCase;
-import org.intellij.grammar.classinfo.ClassInfo;
+import org.intellij.grammar.classinfo.ClassSymbol;
 import org.intellij.grammar.classinfo.Fqn;
 import org.intellij.grammar.classinfo.JvmClassSymbolManager;
 import org.intellij.grammar.classinfo.JvmClassSymbolProvider;
@@ -56,7 +56,7 @@ public class JvmSyntaxHelperChainTest extends TestCase {
         }
         """);
     bytecode = new RecordingProvider();
-    ClassInfo platformInfo = new ClassInfo();
+    ClassSymbol platformInfo = new ClassSymbol();
     platformInfo.name = Fqn.of("platform.Stub");
     platformInfo.superClass = Fqn.of("java.lang.Object");
     bytecode.classes.put("platform.Stub", platformInfo);
@@ -128,13 +128,13 @@ public class JvmSyntaxHelperChainTest extends TestCase {
 
   /** Recording provider playing the role of a bytecode-style fallback. */
   private static final class RecordingProvider implements JvmClassSymbolProvider {
-    final Map<String, ClassInfo> classes = new HashMap<>();
+    final Map<String, ClassSymbol> classes = new HashMap<>();
     final List<String> resolveCalls = new ArrayList<>();
 
     @Override
-    public @NotNull Map<Fqn, ClassInfo> resolve(@NotNull Fqn fqn, @NotNull SymbolResolver resolver) {
+    public @NotNull Map<Fqn, ClassSymbol> resolve(@NotNull Fqn fqn, @NotNull SymbolResolver resolver) {
       resolveCalls.add(fqn.value());
-      ClassInfo info = classes.get(fqn.value());
+      ClassSymbol info = classes.get(fqn.value());
       return info == null ? Map.of() : Map.of(fqn, info);
     }
   }

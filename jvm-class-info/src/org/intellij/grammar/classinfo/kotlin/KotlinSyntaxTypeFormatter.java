@@ -9,7 +9,7 @@ import com.intellij.platform.syntax.tree.SyntaxNode;
 import com.intellij.util.SmartList;
 import fleet.org.jetbrains.kotlin.kmp.lexer.KtTokens;
 import fleet.org.jetbrains.kotlin.kmp.parser.KtNodeTypes;
-import org.intellij.grammar.classinfo.ClassInfo;
+import org.intellij.grammar.classinfo.ClassSymbol;
 import org.intellij.grammar.classinfo.Fqn;
 import org.intellij.grammar.classinfo.MethodSymbol;
 import org.jetbrains.annotations.NotNull;
@@ -24,7 +24,7 @@ import static org.intellij.grammar.classinfo.SyntaxTreeUtil.firstChildOfType;
 /**
  * Renders Kotlin {@link SyntaxNode} type expressions ({@code TYPE_REFERENCE} / {@code USER_TYPE} /
  * {@code NULLABLE_TYPE} / {@code FUNCTION_TYPE}) into the dotted-FQN string form that
- * {@link ClassInfo} / {@link MethodSymbol} consumers expect.
+ * {@link ClassSymbol} / {@link MethodSymbol} consumers expect.
  * <p>
  * Kotlin built-in primitives are mapped to JVM primitives so structural parameter-type matching
  * across Java and Kotlin sources agrees on the same canonical names.
@@ -194,7 +194,7 @@ final class KotlinSyntaxTypeFormatter {
   /**
    * Resolves a type expression to its raw class FQN — no generics, no primitive mapping, no array
    * transform. Used for supertypes, annotation types, and typealias right-hand sides where the
-   * {@link ClassInfo} field type demands an {@link Fqn} rather than a free-form type expression.
+   * {@link ClassSymbol} field type demands an {@link Fqn} rather than a free-form type expression.
    */
   @NotNull Fqn formatTypeFqn(@Nullable SyntaxNode typeNode, @NotNull Set<String> typeVars) {
     if (typeNode == null) return Fqn.of("");

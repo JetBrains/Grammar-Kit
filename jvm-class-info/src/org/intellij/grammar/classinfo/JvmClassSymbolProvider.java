@@ -9,9 +9,9 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Map;
 
 /**
- * SPI for producers of {@link ClassInfo} records. The {@link JvmClassSymbolManager} owns the
+ * SPI for producers of {@link ClassSymbol} records. The {@link JvmClassSymbolManager} owns the
  * cache and dispatches lookups across an ordered list of providers; each provider knows how to
- * build {@link ClassInfo} from one kind of input (Java sources, Kotlin sources, JVM bytecode).
+ * build {@link ClassSymbol} from one kind of input (Java sources, Kotlin sources, JVM bytecode).
  * <p>
  * Implementations return a batch — every class discovered while resolving the requested FQN —
  * so a single file parse can populate sibling classes in the same compilation unit without
@@ -29,5 +29,5 @@ public interface JvmClassSymbolProvider {
    *                 imports, same-package references). Cycle protection is enforced by the
    *                 manager; treat a {@code null} return as "I don't know".
    */
-  @NotNull Map<Fqn, ClassInfo> resolve(@NotNull Fqn fqn, @NotNull SymbolResolver resolver);
+  @NotNull Map<Fqn, ClassSymbol> resolve(@NotNull Fqn fqn, @NotNull SymbolResolver resolver);
 }

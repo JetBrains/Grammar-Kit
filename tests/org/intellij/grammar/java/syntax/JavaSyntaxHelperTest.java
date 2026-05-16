@@ -5,7 +5,7 @@
 package org.intellij.grammar.java.syntax;
 
 import com.intellij.psi.NavigatablePsiElement;
-import org.intellij.grammar.classinfo.ClassInfo;
+import org.intellij.grammar.classinfo.ClassSymbol;
 import org.intellij.grammar.classinfo.Fqn;
 import org.intellij.grammar.classinfo.JvmClassSymbolManager;
 import org.intellij.grammar.classinfo.MethodType;
@@ -118,7 +118,7 @@ public class JavaSyntaxHelperTest extends GoldenClassInfoTestCase {
    * and per-parameter annotations. Updating any of those in the extractor surfaces here first.
    */
   public void testFixtureExtraction() {
-    Map<Fqn, ClassInfo> classes = FixtureExtractor.extractAll(
+    Map<Fqn, ClassSymbol> classes = FixtureExtractor.extractAll(
       root, new JavaSyntaxClassSymbolProvider(List.of(root)), ".java");
     assertClassInfoMatchesGolden(classes);
   }

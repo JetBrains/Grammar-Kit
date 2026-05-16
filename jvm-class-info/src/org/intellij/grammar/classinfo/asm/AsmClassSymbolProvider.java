@@ -8,7 +8,7 @@ import com.intellij.openapi.util.io.FileUtil;
 import com.intellij.util.ObjectUtils;
 import com.intellij.util.SmartList;
 import com.intellij.util.containers.ContainerUtil;
-import org.intellij.grammar.classinfo.ClassInfo;
+import org.intellij.grammar.classinfo.ClassSymbol;
 import org.intellij.grammar.classinfo.Fqn;
 import org.intellij.grammar.classinfo.JvmClassSymbolProvider;
 import org.intellij.grammar.classinfo.MethodSymbol;
@@ -30,7 +30,7 @@ import java.util.Map;
 
 /**
  * Bytecode-backed {@link JvmClassSymbolProvider}. Loads {@code .class} files through a
- * {@link ClassLoader}'s resources and decodes them with ASM into {@link ClassInfo} records — no
+ * {@link ClassLoader}'s resources and decodes them with ASM into {@link ClassSymbol} records — no
  * JVM-side class initialisation, which is essential for platform classes that can't be loaded at
  * generation time.
  * <p>
@@ -55,16 +55,16 @@ public final class AsmClassSymbolProvider implements JvmClassSymbolProvider {
   }
 
   @Override
-  public @NotNull Map<Fqn, ClassInfo> resolve(@NotNull Fqn fqn, @NotNull SymbolResolver resolver) {
-    ClassInfo info = findClassSafe(fqn, classLoader);
+  public @NotNull Map<Fqn, ClassSymbol> resolve(@NotNull Fqn fqn, @NotNull SymbolResolver resolver) {
+    ClassSymbol info = findClassSafe(fqn, classLoader);
     return info == null ? Map.of() : Map.of(fqn, info);
   }
 
-  public static @Nullable ClassInfo findClassSafe(@Nullable Fqn className) {
+  public static @Nullable ClassSymbol findClassSafe(@Nullable Fqn className) {
     return findClassSafe(className, AsmClassSymbolProvider.class.getClassLoader());
   }
 
-  public static @Nullable ClassInfo findClassSafe(@Nullable Fqn className, @NotNull ClassLoader classLoader) {
+  public static @Nullable ClassSymbol findClassSafe(@Nullable Fqn className, @NotNull ClassLoader classLoader) {
     if (className == null) return null;
     String name = className.value();
     try {
@@ -90,8 +90,8 @@ public final class AsmClassSymbolProvider implements JvmClassSymbolProvider {
     }
   }
 
-  private static ClassInfo getClassInfo(Fqn className, byte[] bytes) {
-    ClassInfo info = new ClassInfo();
+  private static ClassSymbol getClassInfo(Fqn className, byte[] bytes) {
+    ClassSymbol info = new ClassSymbol();
     info.name = className;
     new ClassReader(bytes).accept(new MyClassVisitor(info), 0);
     return info;
@@ -131,9 +131,9 @@ public final class AsmClassSymbolProvider implements JvmClassSymbolProvider {
 
   private static class MyClassVisitor extends ClassVisitor {
 
-    private final ClassInfo myInfo;
+    private final ClassSymbol myInfo;
 
-    MyClassVisitor(ClassInfo info) {
+    MyClassVisitor(ClassSymbol info) {
       super(ASM_OPCODES);
       myInfo = info;
     }

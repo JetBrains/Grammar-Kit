@@ -8,7 +8,7 @@ import com.intellij.util.SmartList;
 
 import java.util.List;
 
-public class ClassInfo {
+public class ClassSymbol {
   public final List<String> typeParameters = new SmartList<>();
   public final List<Fqn> interfaces = new SmartList<>();
   public final List<Fqn> annotations = new SmartList<>();

@@ -5,7 +5,7 @@
 package org.intellij.grammar.java.syntax;
 
 import com.intellij.platform.syntax.tree.SyntaxNode;
-import org.intellij.grammar.classinfo.ClassInfo;
+import org.intellij.grammar.classinfo.ClassSymbol;
 import org.intellij.grammar.classinfo.Fqn;
 import org.intellij.grammar.classinfo.JvmClassSymbolManager;
 import org.intellij.grammar.classinfo.JvmClassSymbolProvider;
@@ -24,7 +24,7 @@ import java.util.Map;
  * Source-driven tests for the syntax-generation pipeline: each test parses an in-memory Java
  * source string with {@link JavaSyntaxTreeManager#parseText}, runs
  * {@link JavaSyntaxClassExtractor#extractFrom} on the result, and compares the produced
- * {@code Map<Fqn, ClassInfo>} against a golden file under {@code testData/syntax/java/source/}.
+ * {@code Map<Fqn, ClassSymbol>} against a golden file under {@code testData/syntax/java/source/}.
  * Tests that exercise {@link JvmSyntaxHelper} filtering on top of the extracted records (e.g.
  * abstract-method gating, supertype probing) keep an extra assertion against a helper built from
  * the same map.
@@ -130,7 +130,7 @@ public class JavaSyntaxHelperSourceTest extends GoldenClassInfoTestCase {
   }
 
   public void testStaticMethodFiltering() {
-    Map<Fqn, ClassInfo> classes = extract("""
+    Map<Fqn, ClassSymbol> classes = extract("""
       package a.b;
       public class C {
         public void inst() {}
@@ -156,7 +156,7 @@ public class JavaSyntaxHelperSourceTest extends GoldenClassInfoTestCase {
   }
 
   public void testAbstractMethodGatedByAllowAbstract() {
-    Map<Fqn, ClassInfo> classes = extract("""
+    Map<Fqn, ClassSymbol> classes = extract("""
       package a.b;
       public abstract class C {
         public abstract void doIt();
@@ -171,7 +171,7 @@ public class JavaSyntaxHelperSourceTest extends GoldenClassInfoTestCase {
   }
 
   public void testPrivateConstructorExcluded() {
-    Map<Fqn, ClassInfo> classes = extract("""
+    Map<Fqn, ClassSymbol> classes = extract("""
       package a.b;
       public class C {
         private C() {}
@@ -231,7 +231,7 @@ public class JavaSyntaxHelperSourceTest extends GoldenClassInfoTestCase {
   // ---------------------------------------------------------------------------------------------
 
   public void testParamTypeMatchedViaSuperclass() {
-    Map<Fqn, ClassInfo> classes = extract("""
+    Map<Fqn, ClassSymbol> classes = extract("""
       package a.b;
       public class Base {}
       public class Child extends Base {}
@@ -247,7 +247,7 @@ public class JavaSyntaxHelperSourceTest extends GoldenClassInfoTestCase {
   }
 
   public void testParamTypeMatchedViaInterface() {
-    Map<Fqn, ClassInfo> classes = extract("""
+    Map<Fqn, ClassSymbol> classes = extract("""
       package a.b;
       public interface Iface {}
       public class Child implements Iface {}
@@ -265,15 +265,15 @@ public class JavaSyntaxHelperSourceTest extends GoldenClassInfoTestCase {
   // helpers
   // ---------------------------------------------------------------------------------------------
 
-  private static @NotNull Map<Fqn, ClassInfo> extract(@NotNull String source) {
+  private static @NotNull Map<Fqn, ClassSymbol> extract(@NotNull String source) {
     SyntaxNode root = JavaSyntaxTreeManager.parseText(source);
     // Tests run extraction in isolation — no cross-language probing, so a null-returning resolver is fine.
     return new HashMap<>(JavaSyntaxClassExtractor.extractFrom(root, fqn -> null));
   }
 
-  private static @NotNull JavaHelper helperFrom(@NotNull Map<Fqn, ClassInfo> classes) {
+  private static @NotNull JavaHelper helperFrom(@NotNull Map<Fqn, ClassSymbol> classes) {
     JvmClassSymbolProvider provider = (fqn, resolver) -> {
-      ClassInfo info = classes.get(fqn);
+      ClassSymbol info = classes.get(fqn);
       return info == null ? Map.of() : Map.of(fqn, info);
     };
     return new JvmSyntaxHelper(new JvmClassSymbolManager(List.of(provider)));

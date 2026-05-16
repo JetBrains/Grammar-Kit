@@ -4,7 +4,7 @@
 
 package org.intellij.grammar.java.syntax.kotlin;
 
-import org.intellij.grammar.classinfo.ClassInfo;
+import org.intellij.grammar.classinfo.ClassSymbol;
 import org.intellij.grammar.classinfo.Fqn;
 import org.intellij.grammar.classinfo.kotlin.KotlinSyntaxClassSymbolProvider;
 import org.intellij.grammar.java.syntax.FixtureExtractor;
@@ -20,7 +20,7 @@ import java.util.Map;
 /**
  * File-system integration tests for the Kotlin syntax-generation pipeline. Each test writes its
  * own {@code .kt} fixture and compares the full extraction
- * {@code Map<Fqn, ClassInfo>} against a golden under {@code testData/syntax/kotlin/file/}.
+ * {@code Map<Fqn, ClassSymbol>} against a golden under {@code testData/syntax/kotlin/file/}.
  */
 public class KotlinSyntaxHelperTest extends GoldenClassInfoTestCase {
 
@@ -263,7 +263,7 @@ public class KotlinSyntaxHelperTest extends GoldenClassInfoTestCase {
   // helpers
   // ---------------------------------------------------------------------------------------------
 
-  private @NotNull Map<Fqn, ClassInfo> extractAll() {
+  private @NotNull Map<Fqn, ClassSymbol> extractAll() {
     return FixtureExtractor.extractAll(root, new KotlinSyntaxClassSymbolProvider(List.of(root)), ".kt");
   }
 

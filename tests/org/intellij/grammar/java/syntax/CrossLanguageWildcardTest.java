@@ -6,7 +6,7 @@ package org.intellij.grammar.java.syntax;
 
 import com.intellij.psi.NavigatablePsiElement;
 import junit.framework.TestCase;
-import org.intellij.grammar.classinfo.ClassInfo;
+import org.intellij.grammar.classinfo.ClassSymbol;
 import org.intellij.grammar.classinfo.Fqn;
 import org.intellij.grammar.classinfo.JvmClassSymbolManager;
 import org.intellij.grammar.classinfo.JvmClassSymbolProvider;
@@ -102,11 +102,11 @@ public class CrossLanguageWildcardTest extends TestCase {
   }
 
   public void testDuplicateFqnCollisionResolvedByProviderOrder() {
-    ClassInfo first = new ClassInfo();
+    ClassSymbol first = new ClassSymbol();
     first.name = Fqn.of("dup.Class");
     first.superClass = Fqn.of("first.Parent");
 
-    ClassInfo second = new ClassInfo();
+    ClassSymbol second = new ClassSymbol();
     second.name = Fqn.of("dup.Class");
     second.superClass = Fqn.of("second.Parent");
 
@@ -140,11 +140,11 @@ public class CrossLanguageWildcardTest extends TestCase {
     Files.writeString(target, content);
   }
 
-  private static @NotNull JvmClassSymbolProvider mapProvider(@NotNull Map<String, ClassInfo> classes) {
+  private static @NotNull JvmClassSymbolProvider mapProvider(@NotNull Map<String, ClassSymbol> classes) {
     return new JvmClassSymbolProvider() {
       @Override
-      public @NotNull Map<Fqn, ClassInfo> resolve(@NotNull Fqn fqn, @NotNull SymbolResolver resolver) {
-        ClassInfo info = classes.get(fqn.value());
+      public @NotNull Map<Fqn, ClassSymbol> resolve(@NotNull Fqn fqn, @NotNull SymbolResolver resolver) {
+        ClassSymbol info = classes.get(fqn.value());
         return info == null ? Map.of() : Map.of(fqn, info);
       }
     };

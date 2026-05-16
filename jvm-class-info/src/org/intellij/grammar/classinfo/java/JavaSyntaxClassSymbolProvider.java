@@ -5,7 +5,7 @@
 package org.intellij.grammar.classinfo.java;
 
 import com.intellij.platform.syntax.tree.SyntaxNode;
-import org.intellij.grammar.classinfo.ClassInfo;
+import org.intellij.grammar.classinfo.ClassSymbol;
 import org.intellij.grammar.classinfo.Fqn;
 import org.intellij.grammar.classinfo.JvmClassSymbolManager;
 import org.intellij.grammar.classinfo.JvmClassSymbolProvider;
@@ -26,7 +26,7 @@ import java.util.stream.Stream;
 
 /**
  * Java-source backed {@link JvmClassSymbolProvider}: turns a {@code .java} file under one of the
- * configured source-root directories into {@link ClassInfo} records via
+ * configured source-root directories into {@link ClassSymbol} records via
  * {@link JavaSyntaxTreeManager#parseText parsing} and {@link JavaSyntaxClassExtractor extraction}.
  * <p>
  * Lookup is two-tiered:
@@ -39,7 +39,7 @@ import java.util.stream.Stream;
  *       every {@code .java} file in the matching package directory.</li>
  * </ol>
  * Each package directory is scanned at most once and each file is ingested at most once per
- * provider instance. The {@link ClassInfo} cache lives in {@link JvmClassSymbolManager};
+ * provider instance. The {@link ClassSymbol} cache lives in {@link JvmClassSymbolManager};
  * this provider only memoises source-walking work.
  */
 @SuppressWarnings("UnstableApiUsage")
@@ -60,8 +60,8 @@ public final class JavaSyntaxClassSymbolProvider implements JvmClassSymbolProvid
   }
 
   @Override
-  public @NotNull Map<Fqn, ClassInfo> resolve(@NotNull Fqn fqn, @NotNull SymbolResolver resolver) {
-    Map<Fqn, ClassInfo> batch = new HashMap<>();
+  public @NotNull Map<Fqn, ClassSymbol> resolve(@NotNull Fqn fqn, @NotNull SymbolResolver resolver) {
+    Map<Fqn, ClassSymbol> batch = new HashMap<>();
 
     // Fast path: file name matches the (public) class name.
     Path source = sourceResolver.findSourceFile(fqn, ".java");
@@ -82,14 +82,14 @@ public final class JavaSyntaxClassSymbolProvider implements JvmClassSymbolProvid
     return batch;
   }
 
-  private void scanPackage(@NotNull Path dir, @NotNull Map<Fqn, ClassInfo> batch, @NotNull SymbolResolver resolver) {
+  private void scanPackage(@NotNull Path dir, @NotNull Map<Fqn, ClassSymbol> batch, @NotNull SymbolResolver resolver) {
     try (Stream<Path> files = Files.list(dir)) {
       files.filter(p -> p.getFileName().toString().endsWith(".java")).forEach(p -> ingest(p, batch, resolver));
     }
     catch (IOException ignored) { }
   }
 
-  private void ingest(@NotNull Path source, @NotNull Map<Fqn, ClassInfo> batch, @NotNull SymbolResolver resolver) {
+  private void ingest(@NotNull Path source, @NotNull Map<Fqn, ClassSymbol> batch, @NotNull SymbolResolver resolver) {
     if (!ingestedFiles.add(source)) return;
     SyntaxNode root = treeCache.parseOrGet(source, JavaSyntaxTreeManager::parseText);
     if (root != null) batch.putAll(JavaSyntaxClassExtractor.extractFrom(root, resolver));

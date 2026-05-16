@@ -17,7 +17,7 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Owns the canonical {@link ClassInfo} cache and dispatches lookups across an ordered list of
+ * Owns the canonical {@link ClassSymbol} cache and dispatches lookups across an ordered list of
  * {@link JvmClassSymbolProvider}s. Designed for single-build use — no invalidation, no eviction,
  * no thread safety. Construct one per generator invocation and discard.
  * <p>
@@ -30,7 +30,7 @@ public final class JvmClassSymbolManager implements SymbolResolver {
   private static final Logger LOG = Logger.getInstance(JvmClassSymbolManager.class);
 
   private final List<JvmClassSymbolProvider> providers;
-  private final Map<Fqn, ClassInfo> cache = new HashMap<>();
+  private final Map<Fqn, ClassSymbol> cache = new HashMap<>();
   private final Set<Fqn> negativeCache = new HashSet<>();
   private final Set<Fqn> inProgress = new HashSet<>();
 
@@ -39,7 +39,7 @@ public final class JvmClassSymbolManager implements SymbolResolver {
   }
 
   @Override
-  public @Nullable ClassInfo findClass(@Nullable Fqn fqn) {
+  public @Nullable ClassSymbol findClass(@Nullable Fqn fqn) {
     if (fqn == null || fqn.isEmpty()) return null;
     if (cache.containsKey(fqn)) return cache.get(fqn);
     if (negativeCache.contains(fqn)) return null;
@@ -47,7 +47,7 @@ public final class JvmClassSymbolManager implements SymbolResolver {
 
     try {
       for (JvmClassSymbolProvider provider : providers) {
-        Map<Fqn, ClassInfo> batch = provider.resolve(fqn, this);
+        Map<Fqn, ClassSymbol> batch = provider.resolve(fqn, this);
         mergeBatch(batch, provider);
         if (cache.containsKey(fqn)) return cache.get(fqn);
       }
@@ -68,9 +68,9 @@ public final class JvmClassSymbolManager implements SymbolResolver {
     providers.add(provider);
   }
 
-  private void mergeBatch(@NotNull Map<Fqn, ClassInfo> batch, @NotNull JvmClassSymbolProvider source) {
-    for (Map.Entry<Fqn, ClassInfo> e : batch.entrySet()) {
-      ClassInfo existing = cache.putIfAbsent(e.getKey(), e.getValue());
+  private void mergeBatch(@NotNull Map<Fqn, ClassSymbol> batch, @NotNull JvmClassSymbolProvider source) {
+    for (Map.Entry<Fqn, ClassSymbol> e : batch.entrySet()) {
+      ClassSymbol existing = cache.putIfAbsent(e.getKey(), e.getValue());
       if (existing != null) {
         LOG.warn("Duplicate class symbol for " + e.getKey() +
                  "; kept earlier definition, ignoring one from " + source.getClass().getSimpleName());

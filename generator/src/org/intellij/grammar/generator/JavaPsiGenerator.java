@@ -74,7 +74,6 @@ public final class JavaPsiGenerator extends Generator {
   private final String myVisitorClassName;
   private final String myParserTypeHolderClass;
   private final String myPsiElementTypeHolderClass;
-  private final ExpressionHelper myExpressionHelper;
   private final RuleMethodsHelper myRulesMethodsHelper;
 
   /**
@@ -102,8 +101,7 @@ public final class JavaPsiGenerator extends Generator {
     myParserTypeHolderClass = getRootAttribute(myFile, KnownAttribute.ELEMENT_TYPE_HOLDER_CLASS);
     myPsiElementTypeHolderClass = getRootAttribute(myFile, KnownAttribute.ELEMENT_TYPE_HOLDER_CLASS);
 
-    myExpressionHelper = grammarInfo().expressionHelper();
-    myRulesMethodsHelper = new RuleMethodsHelper(myGraphHelper, myExpressionHelper, mySimpleTokens, G);
+    myRulesMethodsHelper = new RuleMethodsHelper(myGraphHelper, grammarInfo().expressionHelper(), mySimpleTokens, G);
 
     myNoStubs = JBIterable.from(myRuleInfos.values()).find(o -> o.stub() != null) == null;
   }
@@ -141,7 +139,8 @@ public final class JavaPsiGenerator extends Generator {
    * super's resolved values are visible to its descendants. Honors {@code mixin} overrides and
    * substitutes the resolved stub type into stub-parameterized base classes.
    */
-  private void calcRealSuperClasses(Map<String, BnfRule> sortedPsiRules) {
+  private void calcRealSuperClasses(@NotNull Map<String, BnfRule> sortedPsiRules) {
+    if (!G.generatePsi) return;
     Map<BnfRule, BnfRule> supers = new HashMap<>();
     for (BnfRule rule : sortedPsiRules.values()) {
       supers.put(rule, getEffectiveSuperRule(myFile, rule));
@@ -180,6 +179,57 @@ public final class JavaPsiGenerator extends Generator {
    */
   @Override
   public void generate() throws IOException {
+    PsiGenerationTargets psiGenerationTargets = computePsiGenerationTargets();
+    inferSuperInterfaces(psiGenerationTargets.sortedPsiRules());
+    calcRealSuperClasses(psiGenerationTargets.sortedPsiRules());
+    generateElementTypeHolder(psiGenerationTargets.sortedCompositeTypes());
+    generateElementTypeConverter(psiGenerationTargets.sortedCompositeTypes());
+    generatePsi(psiGenerationTargets.sortedPsiRules());
+  }
+
+  private void generateElementTypeConverter(@NotNull Map<String, BnfRule> compositeTypes) throws IOException {
+    if (G.parserApi != GenOptions.ParserApi.Syntax) return;
+
+    var converterClass = getRootAttribute(myFile, KnownAttribute.ELEMENT_TYPE_CONVERTER_FACTORY_CLASS);
+    openOutput(converterClass, myPaths.pathString(KnownAttribute.ELEMENT_TYPE_CONVERTER_FACTORY_OUTPUT_PATH));
+    try {
+      generateElementTypesConverter(converterClass,
+                                    myParserTypeHolderClass,
+                                    getRootAttribute(myFile, KnownAttribute.SYNTAX_ELEMENT_TYPE_HOLDER_CLASS),
+                                    compositeTypes);
+    }
+    finally {
+      closeOutput();
+    }
+  }
+
+  private void generateElementTypeHolder(@NotNull Map<String, BnfRule> compositeTypes) throws IOException {
+    boolean needToGenerate = myGrammarRoot != null &&
+                             (G.generateTokenTypes || G.generateElementTypes || G.generatePsi && G.generatePsiFactory);
+
+    if (!needToGenerate) {
+      return;
+    }
+
+    openOutput(myPsiElementTypeHolderClass, myPaths.pathString(KnownAttribute.ELEMENT_TYPE_HOLDER_OUTPUT_PATH));
+    try {
+      generateElementTypesHolder(myPsiElementTypeHolderClass,
+                                 compositeTypes,
+                                 getRootAttribute(myFile, KnownAttribute.TOKEN_TYPE_FACTORY),
+                                 G.generatePsi);
+    }
+    finally {
+      closeOutput();
+    }
+  }
+
+  private void inferSuperInterfaces(@NotNull Map<String, BnfRule> sortedPsiRules) {
+    for (BnfRule rule : sortedPsiRules.values()) {
+      psiInfo(rule).superInterfaces = new LinkedHashSet<>(getSuperInterfaceNames(myFile, rule, myPsiInterfaceFormat));
+    }
+  }
+
+  private @NotNull PsiGenerationTargets computePsiGenerationTargets() {
     Map<String, BnfRule> sortedCompositeTypes = new TreeMap<>();
     Map<String, BnfRule> sortedPsiRules = new TreeMap<>();
 
@@ -193,39 +243,14 @@ public final class JavaPsiGenerator extends Generator {
         sortedCompositeTypes.put(elementType, rule);
       }
       sortedPsiRules.put(rule.getName(), rule);
-      psiInfo(rule).superInterfaces = new LinkedHashSet<>(getSuperInterfaceNames(myFile, rule, myPsiInterfaceFormat));
     }
-    if (G.generatePsi) {
-      calcRealSuperClasses(sortedPsiRules);
-    }
-    if (myGrammarRoot != null && (G.generateTokenTypes || G.generateElementTypes || G.generatePsi && G.generatePsiFactory)) {
-      openOutput(myPsiElementTypeHolderClass, myPaths.pathString(KnownAttribute.ELEMENT_TYPE_HOLDER_OUTPUT_PATH));
-      try {
-        generateElementTypesHolder(myPsiElementTypeHolderClass,
-                                   sortedCompositeTypes,
-                                   getRootAttribute(myFile, KnownAttribute.TOKEN_TYPE_FACTORY),
-                                   G.generatePsi);
-      }
-      finally {
-        closeOutput();
-      }
-    }
-    if (G.parserApi == GenOptions.ParserApi.Syntax) {
-      var converterClass = getRootAttribute(myFile, KnownAttribute.ELEMENT_TYPE_CONVERTER_FACTORY_CLASS);
-      openOutput(converterClass, myPaths.pathString(KnownAttribute.ELEMENT_TYPE_CONVERTER_FACTORY_OUTPUT_PATH));
-      try {
-        generateElementTypesConverter(converterClass,
-                                      myParserTypeHolderClass,
-                                      getRootAttribute(myFile, KnownAttribute.SYNTAX_ELEMENT_TYPE_HOLDER_CLASS),
-                                      sortedCompositeTypes);
-      }
-      finally {
-        closeOutput();
-      }
-    }
-    if (G.generatePsi) {
-      generatePsi(sortedPsiRules);
-    }
+    return new PsiGenerationTargets(sortedCompositeTypes, sortedPsiRules);
+  }
+
+  private record PsiGenerationTargets(
+    Map<String, BnfRule> sortedCompositeTypes,
+    Map<String, BnfRule> sortedPsiRules
+  ) {
   }
 
   /** Warns when {@code className} is configured but not resolvable on the classpath. */
@@ -580,10 +605,15 @@ public final class JavaPsiGenerator extends Generator {
 
   /*PSI******************************************************************/
   /** Emits the PSI interface and impl for each rule, plus the visitor when one is configured. */
-  private void generatePsi(Map<String, BnfRule> sortedPsiRules) throws IOException {
+  private void generatePsi(@NotNull Map<String, BnfRule> sortedPsiRules) throws IOException {
+    if (!G.generatePsi) return;
+
     checkClassAvailability(myPsiImplUtilClass, KnownAttribute.PSI_IMPL_UTIL_CLASS);
+
     myRulesMethodsHelper.buildMaps(sortedPsiRules.values());
+
     String psiOutput = myPaths.pathString(KnownAttribute.PSI_OUTPUT_PATH);
+
     for (BnfRule rule : sortedPsiRules.values()) {
       RuleInfo info = ruleInfo(rule);
       openOutput(info.intfClass(), psiOutput);
@@ -594,6 +624,7 @@ public final class JavaPsiGenerator extends Generator {
         closeOutput();
       }
     }
+
     for (BnfRule rule : sortedPsiRules.values()) {
       RuleInfo info = ruleInfo(rule);
       openOutput(info.implClass(), psiOutput);
@@ -604,6 +635,7 @@ public final class JavaPsiGenerator extends Generator {
         closeOutput();
       }
     }
+
     if (myVisitorClassName != null && myGrammarRoot != null) {
       openOutput(myVisitorClassName, psiOutput);
       try {

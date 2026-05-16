@@ -28,9 +28,9 @@ public class KotlinBnfGeneratorTest extends AbstractBnfGeneratorTest {
   }
 
   @Override
-  protected @NotNull List<@NotNull Generator> createGenerators(@NotNull BnfFile psiFile,
-                                                               @NotNull String outputPath,
-                                                               @NotNull OutputOpener outputOpener) {
+  protected @NotNull List<@NotNull ParserGenerator> createGenerators(@NotNull BnfFile psiFile,
+                                                                     @NotNull String outputPath,
+                                                                     @NotNull OutputOpener outputOpener) {
     Path parserPath        = resolveTestPath(psiFile, KnownAttribute.PARSER_OUTPUT_PATH);
     Path psiPath           = resolveTestPath(psiFile, KnownAttribute.PSI_OUTPUT_PATH);
     Path etHolderPath      = resolveTestPath(psiFile, KnownAttribute.ELEMENT_TYPE_HOLDER_OUTPUT_PATH);

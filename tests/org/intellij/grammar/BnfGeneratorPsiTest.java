@@ -12,7 +12,6 @@ import com.intellij.testFramework.fixtures.BasePlatformTestCase;
 import com.intellij.util.ProcessingContext;
 import org.intellij.grammar.generator.Generator;
 import org.intellij.grammar.generator.JavaParserGenerator;
-import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.generator.NameShortener;
 import org.intellij.grammar.generator.OutputOpener;
 import org.intellij.grammar.classinfo.MethodType;
@@ -33,7 +32,7 @@ import java.util.List;
 /**
  * Tests for PSI code generation with PsiHelper (PSI-based Java resolution).
  * <p>
- * Unlike {@link BnfGeneratorTest} which uses lightweight parsing tests (and thus AsmHelper),
+ * Unlike {@link BnfGeneratorPsiTest} which uses lightweight parsing tests (and thus AsmHelper),
  * this test uses {@link BasePlatformTestCase} which loads the Java plugin and registers
  * {@link org.intellij.grammar.java.PsiHelper} — enabling PSI-based type resolution.
  */

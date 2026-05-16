@@ -8,7 +8,7 @@ import com.intellij.java.syntax.element.JavaSyntaxElementType;
 import com.intellij.java.syntax.element.JavaSyntaxTokenType;
 import com.intellij.platform.syntax.tree.SyntaxNode;
 import org.intellij.grammar.classinfo.Fqn;
-import org.intellij.grammar.classinfo.MethodInfo;
+import org.intellij.grammar.classinfo.MethodSymbol;
 import org.intellij.grammar.classinfo.MethodType;
 import org.intellij.grammar.classinfo.TypeParameterInfo;
 import org.jetbrains.annotations.NotNull;
@@ -24,7 +24,7 @@ import static org.intellij.grammar.classinfo.java.JavaSyntaxNodes.extractModifie
 import static org.intellij.grammar.classinfo.java.JavaSyntaxNodes.firstNameIdentifier;
 
 /**
- * Builds a {@link MethodInfo} from a {@code METHOD} (or {@code ANNOTATION_METHOD})
+ * Builds a {@link MethodSymbol} from a {@code METHOD} (or {@code ANNOTATION_METHOD})
  * {@link SyntaxNode}. Type-parameter scope inherited from the enclosing class is extended with
  * the method's own type parameters before any reference is rendered.
  */
@@ -37,10 +37,10 @@ final class JavaSyntaxMethodExtractor {
     this.typeFormatter = typeFormatter;
   }
 
-  @Nullable MethodInfo extract(@NotNull SyntaxNode methodNode,
+  @Nullable MethodSymbol extract(@NotNull SyntaxNode methodNode,
                                @NotNull Fqn declaringFqn,
                                @NotNull Set<String> classTypeVars) {
-    MethodInfo m = new MethodInfo();
+    MethodSymbol m = new MethodSymbol();
     m.declaringClass = declaringFqn;
 
     Set<String> typeVars = new HashSet<>(classTypeVars);
@@ -72,7 +72,7 @@ final class JavaSyntaxMethodExtractor {
   }
 
   private void collectMethodTypeParameters(@NotNull SyntaxNode methodNode,
-                                           @NotNull MethodInfo m,
+                                           @NotNull MethodSymbol m,
                                            @NotNull Set<String> typeVars) {
     SyntaxNode tparams = firstChildOfType(methodNode, JavaSyntaxElementType.TYPE_PARAMETER_LIST);
     if (tparams == null) return;
@@ -89,7 +89,7 @@ final class JavaSyntaxMethodExtractor {
   }
 
   private void collectParameters(@NotNull SyntaxNode methodNode,
-                                 @NotNull MethodInfo m,
+                                 @NotNull MethodSymbol m,
                                  @NotNull Set<String> typeVars) {
     SyntaxNode paramList = firstChildOfType(methodNode, JavaSyntaxElementType.PARAMETER_LIST);
     if (paramList == null) return;

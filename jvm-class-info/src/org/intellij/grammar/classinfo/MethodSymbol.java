@@ -10,7 +10,7 @@ import com.intellij.util.containers.FactoryMap;
 import java.util.List;
 import java.util.Map;
 
-public class MethodInfo {
+public class MethodSymbol {
   public final List<String> types = new SmartList<>();
   public final List<String> annotatedTypes = new SmartList<>();
 
@@ -28,6 +28,6 @@ public class MethodInfo {
 
   @Override
   public String toString() {
-    return "MethodInfo{" + name + types + ", @" + annotations.get(0) + "<" + generics + ">" + " throws " + exceptions + '}';
+    return "MethodSymbol{" + name + types + ", @" + annotations.get(0) + "<" + generics + ">" + " throws " + exceptions + '}';
   }
 }

@@ -7,7 +7,7 @@ package org.intellij.grammar.java.syntax;
 import junit.framework.TestCase;
 import org.intellij.grammar.classinfo.ClassInfo;
 import org.intellij.grammar.classinfo.Fqn;
-import org.intellij.grammar.classinfo.MethodInfo;
+import org.intellij.grammar.classinfo.MethodSymbol;
 import org.intellij.grammar.classinfo.MethodType;
 import org.intellij.grammar.classinfo.TypeParameterInfo;
 
@@ -69,7 +69,7 @@ public class ClassInfoTextFormatterTest extends TestCase {
     info.modifiers = Modifier.PUBLIC | Modifier.FINAL;
     info.multifileFacade = true;
 
-    MethodInfo ctor = new MethodInfo();
+    MethodSymbol ctor = new MethodSymbol();
     ctor.methodType = MethodType.CONSTRUCTOR;
     ctor.name = "Utils";
     ctor.declaringClass = info.name;
@@ -77,7 +77,7 @@ public class ClassInfoTextFormatterTest extends TestCase {
     ctor.types.add("util.Utils"); // synthetic return = declaring class
     info.methods.add(ctor);
 
-    MethodInfo instanceMethod = new MethodInfo();
+    MethodSymbol instanceMethod = new MethodSymbol();
     instanceMethod.methodType = MethodType.INSTANCE;
     instanceMethod.name = "greet";
     instanceMethod.declaringClass = info.name;
@@ -97,7 +97,7 @@ public class ClassInfoTextFormatterTest extends TestCase {
     instanceMethod.annotatedTypes.add("name");
     info.methods.add(instanceMethod);
 
-    MethodInfo staticMethod = new MethodInfo();
+    MethodSymbol staticMethod = new MethodSymbol();
     staticMethod.methodType = MethodType.STATIC;
     staticMethod.name = "helper";
     staticMethod.declaringClass = info.name;

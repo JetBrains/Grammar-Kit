@@ -11,7 +11,7 @@ import com.intellij.platform.syntax.tree.SyntaxNode;
 import com.intellij.util.SmartList;
 import org.intellij.grammar.classinfo.ClassInfo;
 import org.intellij.grammar.classinfo.Fqn;
-import org.intellij.grammar.classinfo.MethodInfo;
+import org.intellij.grammar.classinfo.MethodSymbol;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -24,7 +24,7 @@ import static org.intellij.grammar.classinfo.java.JavaSyntaxNodes.buildDottedTex
 /**
  * Renders Java {@link SyntaxNode} type expressions ({@code TYPE} nodes, {@code JAVA_CODE_REFERENCE}
  * nodes, annotations on modifier lists) into the dotted-FQN string form that {@link ClassInfo} /
- * {@link MethodInfo} records expect.
+ * {@link MethodSymbol} records expect.
  * <p>
  * Name resolution for unqualified references is delegated to {@link JavaSyntaxImportContext}.
  * In-scope type variables are passed in by the caller and are never qualified.

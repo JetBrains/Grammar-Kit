@@ -10,7 +10,7 @@ import fleet.org.jetbrains.kotlin.kmp.lexer.KtTokens;
 import fleet.org.jetbrains.kotlin.kmp.parser.KtNodeTypes;
 import org.intellij.grammar.classinfo.ClassInfo;
 import org.intellij.grammar.classinfo.Fqn;
-import org.intellij.grammar.classinfo.MethodInfo;
+import org.intellij.grammar.classinfo.MethodSymbol;
 import org.intellij.grammar.classinfo.MethodType;
 import org.intellij.grammar.classinfo.SymbolResolver;
 import org.intellij.grammar.classinfo.java.JavaSyntaxClassExtractor;
@@ -138,7 +138,7 @@ final class KotlinSyntaxClassExtractor {
     SyntaxNode modifierList = firstChildOfType(member, KtNodeTypes.INSTANCE.getMODIFIER_LIST());
     if (hasModifier(modifierList, KtTokens.INSTANCE.getPRIVATE_MODIFIER())) return;
     if (member.getType() == KtNodeTypes.INSTANCE.getFUN()) {
-      MethodInfo m = methodExtractor.extractFunction(member, fileClass.name, Set.of(), MethodType.STATIC);
+      MethodSymbol m = methodExtractor.extractFunction(member, fileClass.name, Set.of(), MethodType.STATIC);
       if (m != null) {
         m.modifiers |= Modifier.STATIC;
         m.methodType = MethodType.STATIC;
@@ -147,10 +147,10 @@ final class KotlinSyntaxClassExtractor {
     }
     else if (member.getType() == KtNodeTypes.INSTANCE.getPROPERTY()) {
       if (isConstProperty(member)) return;
-      MethodInfo getter = methodExtractor.synthesizeGetter(member, fileClass.name, Set.of(), true);
+      MethodSymbol getter = methodExtractor.synthesizeGetter(member, fileClass.name, Set.of(), true);
       if (getter != null) fileClass.methods.add(getter);
       if (isVarProperty(member)) {
-        MethodInfo setter = methodExtractor.synthesizeSetter(member, fileClass.name, Set.of(), true);
+        MethodSymbol setter = methodExtractor.synthesizeSetter(member, fileClass.name, Set.of(), true);
         if (setter != null) fileClass.methods.add(setter);
       }
     }
@@ -199,7 +199,7 @@ final class KotlinSyntaxClassExtractor {
     // Primary constructor + its val/var properties.
     SyntaxNode primaryCtor = firstChildOfType(classNode, KtNodeTypes.INSTANCE.getPRIMARY_CONSTRUCTOR());
     if (primaryCtor != null) {
-      MethodInfo ctorMethod = methodExtractor.extractConstructor(primaryCtor, fqn, classTypeVars);
+      MethodSymbol ctorMethod = methodExtractor.extractConstructor(primaryCtor, fqn, classTypeVars);
       if (ctorMethod != null) info.methods.add(ctorMethod);
       collectPrimaryCtorPropertyAccessors(primaryCtor, info, classTypeVars);
     }
@@ -236,7 +236,7 @@ final class KotlinSyntaxClassExtractor {
 
     // Lift @JvmStatic-annotated members onto the enclosing class.
     if (companion && enclosingClass != null) {
-      for (MethodInfo m : info.methods) {
+      for (MethodSymbol m : info.methods) {
         SyntaxNode origin = null; // We don't track origin nodes; presence-of-@JvmStatic check happens during body walk.
         if (m.modifiers != 0 && Modifier.isStatic(m.modifiers)) {
           // Already a static member by virtue of file-level synthesis (not the case for companion bodies);
@@ -246,7 +246,7 @@ final class KotlinSyntaxClassExtractor {
         // Tagged-and-copied path: marker carried via name-prefix collision is awkward; do the lift in walkClassBody instead.
         // (Intentionally a no-op here; see walkClassBody.)
         if (origin != null) {
-          MethodInfo lifted = copyAsStatic(m, enclosingClass.name);
+          MethodSymbol lifted = copyAsStatic(m, enclosingClass.name);
           enclosingClass.methods.add(lifted);
         }
       }
@@ -259,7 +259,7 @@ final class KotlinSyntaxClassExtractor {
     for (SyntaxNode member = body.firstChild(); member != null; member = member.nextSibling()) {
       SyntaxElementType t = member.getType();
       if (t == KtNodeTypes.INSTANCE.getFUN()) {
-        MethodInfo m = methodExtractor.extractFunction(member, enclosing.name, typeVars, MethodType.INSTANCE);
+        MethodSymbol m = methodExtractor.extractFunction(member, enclosing.name, typeVars, MethodType.INSTANCE);
         if (m == null) continue;
         // Static methods (extension fns on member objects) keep their type as set by the extractor.
         enclosing.methods.add(m);
@@ -268,15 +268,15 @@ final class KotlinSyntaxClassExtractor {
       }
       else if (t == KtNodeTypes.INSTANCE.getPROPERTY()) {
         if (isConstProperty(member)) continue;
-        MethodInfo getter = methodExtractor.synthesizeGetter(member, enclosing.name, typeVars, false);
+        MethodSymbol getter = methodExtractor.synthesizeGetter(member, enclosing.name, typeVars, false);
         if (getter != null) enclosing.methods.add(getter);
         if (isVarProperty(member)) {
-          MethodInfo setter = methodExtractor.synthesizeSetter(member, enclosing.name, typeVars, false);
+          MethodSymbol setter = methodExtractor.synthesizeSetter(member, enclosing.name, typeVars, false);
           if (setter != null) enclosing.methods.add(setter);
         }
       }
       else if (t == KtNodeTypes.INSTANCE.getSECONDARY_CONSTRUCTOR()) {
-        MethodInfo ctorMethod = methodExtractor.extractConstructor(member, enclosing.name, typeVars);
+        MethodSymbol ctorMethod = methodExtractor.extractConstructor(member, enclosing.name, typeVars);
         if (ctorMethod != null) enclosing.methods.add(ctorMethod);
       }
       else if (t == KtNodeTypes.INSTANCE.getOBJECT_DECLARATION()) {
@@ -315,7 +315,7 @@ final class KotlinSyntaxClassExtractor {
     for (SyntaxNode member = body.firstChild(); member != null; member = member.nextSibling()) {
       SyntaxElementType t = member.getType();
       if (t == KtNodeTypes.INSTANCE.getFUN()) {
-        MethodInfo m = methodExtractor.extractFunction(member, fqn, outerTypeVars, MethodType.INSTANCE);
+        MethodSymbol m = methodExtractor.extractFunction(member, fqn, outerTypeVars, MethodType.INSTANCE);
         if (m == null) continue;
         info.methods.add(m);
         if (companion && hasJvmStatic(firstChildOfType(member, KtNodeTypes.INSTANCE.getMODIFIER_LIST()))) {
@@ -324,16 +324,16 @@ final class KotlinSyntaxClassExtractor {
       }
       else if (t == KtNodeTypes.INSTANCE.getPROPERTY()) {
         if (isConstProperty(member)) continue;
-        MethodInfo getter = methodExtractor.synthesizeGetter(member, fqn, outerTypeVars, false);
+        MethodSymbol getter = methodExtractor.synthesizeGetter(member, fqn, outerTypeVars, false);
         if (getter != null) info.methods.add(getter);
         if (isVarProperty(member)) {
-          MethodInfo setter = methodExtractor.synthesizeSetter(member, fqn, outerTypeVars, false);
+          MethodSymbol setter = methodExtractor.synthesizeSetter(member, fqn, outerTypeVars, false);
           if (setter != null) info.methods.add(setter);
         }
         if (companion && hasJvmStatic(firstChildOfType(member, KtNodeTypes.INSTANCE.getMODIFIER_LIST()))) {
           if (getter != null) enclosing.methods.add(copyAsStatic(getter, enclosing.name));
           if (isVarProperty(member)) {
-            MethodInfo setter = methodExtractor.synthesizeSetter(member, enclosing.name, outerTypeVars, true);
+            MethodSymbol setter = methodExtractor.synthesizeSetter(member, enclosing.name, outerTypeVars, true);
             if (setter != null) enclosing.methods.add(setter);
           }
         }
@@ -398,10 +398,10 @@ final class KotlinSyntaxClassExtractor {
       boolean isVal = firstChildOfType(p, KtTokens.INSTANCE.getVAL_KEYWORD()) != null;
       boolean isVar = firstChildOfType(p, KtTokens.INSTANCE.getVAR_KEYWORD()) != null;
       if (!isVal && !isVar) continue;
-      MethodInfo getter = methodExtractor.synthesizeGetter(p, enclosing.name, typeVars, false);
+      MethodSymbol getter = methodExtractor.synthesizeGetter(p, enclosing.name, typeVars, false);
       if (getter != null) enclosing.methods.add(getter);
       if (isVar) {
-        MethodInfo setter = methodExtractor.synthesizeSetter(p, enclosing.name, typeVars, false);
+        MethodSymbol setter = methodExtractor.synthesizeSetter(p, enclosing.name, typeVars, false);
         if (setter != null) enclosing.methods.add(setter);
       }
     }
@@ -414,8 +414,8 @@ final class KotlinSyntaxClassExtractor {
     return modifiers | Modifier.FINAL;
   }
 
-  private static @NotNull MethodInfo copyAsStatic(@NotNull MethodInfo src, @NotNull Fqn newDeclaring) {
-    MethodInfo m = new MethodInfo();
+  private static @NotNull MethodSymbol copyAsStatic(@NotNull MethodSymbol src, @NotNull Fqn newDeclaring) {
+    MethodSymbol m = new MethodSymbol();
     m.name = src.name;
     m.declaringClass = newDeclaring;
     m.modifiers = src.modifiers | Modifier.STATIC;

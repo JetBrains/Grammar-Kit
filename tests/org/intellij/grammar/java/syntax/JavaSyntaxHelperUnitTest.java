@@ -12,7 +12,7 @@ import org.intellij.grammar.classinfo.JvmClassSymbolManager;
 import org.intellij.grammar.classinfo.JvmClassSymbolProvider;
 import org.intellij.grammar.classinfo.MethodType;
 import org.intellij.grammar.java.JavaHelper;
-import org.intellij.grammar.classinfo.MethodInfo;
+import org.intellij.grammar.classinfo.MethodSymbol;
 import org.intellij.grammar.java.JvmSyntaxHelper;
 import org.intellij.grammar.java.MyElement;
 import org.intellij.grammar.classinfo.TypeParameterInfo;
@@ -124,7 +124,7 @@ public class JavaSyntaxHelperUnitTest extends TestCase {
     List<NavigatablePsiElement> result = helper().findClassMethods(
       "a.b.Foo", MethodType.INSTANCE, "ping", -1);
     assertEquals(1, result.size());
-    assertEquals("ping", ((MethodInfo)((MyElement<?>)result.get(0)).delegate).name);
+    assertEquals("ping", ((MethodSymbol)((MyElement<?>)result.get(0)).delegate).name);
   }
 
   public void testFindClassMethodsWildcardMatchesEverything() {
@@ -317,12 +317,12 @@ public class JavaSyntaxHelperUnitTest extends TestCase {
   }
 
   public void testIsPublicTrueForPublicMethod() {
-    MethodInfo m = method("ping", Modifier.PUBLIC, MethodType.INSTANCE, "void");
+    MethodSymbol m = method("ping", Modifier.PUBLIC, MethodType.INSTANCE, "void");
     assertTrue(helper().isPublic(new MyElement<>(m)));
   }
 
   public void testIsPublicFalseForPrivateMethod() {
-    MethodInfo m = method("ping", Modifier.PRIVATE, MethodType.INSTANCE, "void");
+    MethodSymbol m = method("ping", Modifier.PRIVATE, MethodType.INSTANCE, "void");
     assertFalse(helper().isPublic(new MyElement<>(m)));
   }
 
@@ -335,7 +335,7 @@ public class JavaSyntaxHelperUnitTest extends TestCase {
   // ---------------------------------------------------------------------------------------------
 
   public void testGetMethodTypesReturnsAnnotatedTypes() {
-    MethodInfo m = method("ping", Modifier.PUBLIC, MethodType.INSTANCE, "void");
+    MethodSymbol m = method("ping", Modifier.PUBLIC, MethodType.INSTANCE, "void");
     m.annotatedTypes.addAll(List.of("java.lang.String", "int", "n"));
     assertEquals(List.of("java.lang.String", "int", "n"),
                  helper().getMethodTypes(new MyElement<>(m)));
@@ -351,7 +351,7 @@ public class JavaSyntaxHelperUnitTest extends TestCase {
   }
 
   public void testGetGenericParameters() {
-    MethodInfo m = method("ping", Modifier.PUBLIC, MethodType.INSTANCE, "void");
+    MethodSymbol m = method("ping", Modifier.PUBLIC, MethodType.INSTANCE, "void");
     m.generics.add(new TypeParameterInfo("T"));
     List<TypeParameterInfo> generics = helper().getGenericParameters(new MyElement<>(m));
     assertEquals(1, generics.size());
@@ -364,7 +364,7 @@ public class JavaSyntaxHelperUnitTest extends TestCase {
   }
 
   public void testGetExceptionList() {
-    MethodInfo m = method("ping", Modifier.PUBLIC, MethodType.INSTANCE, "void");
+    MethodSymbol m = method("ping", Modifier.PUBLIC, MethodType.INSTANCE, "void");
     m.exceptions.add(Fqn.of("java.io.IOException"));
     assertEquals(List.of("java.io.IOException"),
                  helper().getExceptionList(new MyElement<>(m)));
@@ -376,7 +376,7 @@ public class JavaSyntaxHelperUnitTest extends TestCase {
   }
 
   public void testGetDeclaringClass() {
-    MethodInfo m = method("ping", Modifier.PUBLIC, MethodType.INSTANCE, "void");
+    MethodSymbol m = method("ping", Modifier.PUBLIC, MethodType.INSTANCE, "void");
     m.declaringClass = Fqn.of("a.b.Foo");
     assertEquals("a.b.Foo", helper().getDeclaringClass(new MyElement<>(m)));
   }
@@ -398,7 +398,7 @@ public class JavaSyntaxHelperUnitTest extends TestCase {
   }
 
   public void testGetAnnotationsForMethod() {
-    MethodInfo m = method("ping", Modifier.PUBLIC, MethodType.INSTANCE, "void");
+    MethodSymbol m = method("ping", Modifier.PUBLIC, MethodType.INSTANCE, "void");
     m.annotations.get(0).add(Fqn.of("java.lang.Override"));
     assertEquals(List.of("java.lang.Override"),
                  helper().getAnnotations(new MyElement<>(m)));
@@ -409,7 +409,7 @@ public class JavaSyntaxHelperUnitTest extends TestCase {
   }
 
   public void testGetParameterAnnotations() {
-    MethodInfo m = method("ping", Modifier.PUBLIC, MethodType.INSTANCE, "void", "java.lang.String");
+    MethodSymbol m = method("ping", Modifier.PUBLIC, MethodType.INSTANCE, "void", "java.lang.String");
     // index 0 is the method itself; param 0 is at key 1.
     m.annotations.get(1).add(Fqn.of("a.b.Marker"));
     assertEquals(List.of("a.b.Marker"),
@@ -417,7 +417,7 @@ public class JavaSyntaxHelperUnitTest extends TestCase {
   }
 
   public void testGetParameterAnnotationsOutOfRange() {
-    MethodInfo m = method("ping", Modifier.PUBLIC, MethodType.INSTANCE, "void", "java.lang.String");
+    MethodSymbol m = method("ping", Modifier.PUBLIC, MethodType.INSTANCE, "void", "java.lang.String");
     assertTrue(helper().getParameterAnnotations(new MyElement<>(m), 99).isEmpty());
     assertTrue(helper().getParameterAnnotations(new MyElement<>(m), -1).isEmpty());
   }
@@ -461,27 +461,27 @@ public class JavaSyntaxHelperUnitTest extends TestCase {
   private ClassInfo registerClass(@NotNull String fqn,
                                   int modifiers,
                                   @Nullable String superClass,
-                                  MethodInfo... methods) {
+                                  MethodSymbol... methods) {
     ClassInfo info = new ClassInfo();
     info.name = Fqn.of(fqn);
     info.modifiers = modifiers;
     info.superClass = superClass == null ? null : Fqn.of(superClass);
-    for (MethodInfo m : methods) info.methods.add(m);
+    for (MethodSymbol m : methods) info.methods.add(m);
     classes.put(fqn, info);
     return info;
   }
 
   /**
-   * Builds a {@link MethodInfo} matching the shape that {@link JavaSyntaxClassExtractor} would
-   * produce. {@link MethodInfo#types} is a flat list: index 0 is the return type, then
+   * Builds a {@link MethodSymbol} matching the shape that {@link JavaSyntaxClassExtractor} would
+   * produce. {@link MethodSymbol#types} is a flat list: index 0 is the return type, then
    * alternating {@code (paramType, paramName)} pairs.
    */
-  private static MethodInfo method(@NotNull String name,
+  private static MethodSymbol method(@NotNull String name,
                                    int modifiers,
                                    @NotNull MethodType type,
                                    @NotNull String returnType,
                                    @NotNull String... paramTypes) {
-    MethodInfo m = new MethodInfo();
+    MethodSymbol m = new MethodSymbol();
     m.name = name;
     m.modifiers = modifiers;
     m.methodType = type;
@@ -500,7 +500,7 @@ public class JavaSyntaxHelperUnitTest extends TestCase {
    */
   private static class RecordingFallback extends JavaHelper {
     final Map<String, ClassInfo> classes = new HashMap<>();
-    final Map<String, List<MethodInfo>> methods = new HashMap<>();
+    final Map<String, List<MethodSymbol>> methods = new HashMap<>();
     final List<String> findClassCalls = new ArrayList<>();
     final List<String> superClassCalls = new ArrayList<>();
     @Nullable String lastDispatch;
@@ -526,10 +526,10 @@ public class JavaSyntaxHelperUnitTest extends TestCase {
                                                                  int paramCount,
                                                                  String... paramTypes) {
       lastDispatch = "findClassMethods";
-      List<MethodInfo> all = methods.get(className);
+      List<MethodSymbol> all = methods.get(className);
       if (all == null) return Collections.emptyList();
       List<NavigatablePsiElement> result = new ArrayList<>();
-      for (MethodInfo m : all) result.add(new MyElement<>(m));
+      for (MethodSymbol m : all) result.add(new MyElement<>(m));
       return result;
     }
 

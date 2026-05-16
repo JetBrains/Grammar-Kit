@@ -12,7 +12,7 @@ import org.intellij.grammar.classinfo.JvmClassSymbolManager;
 import org.intellij.grammar.classinfo.JvmClassSymbolProvider;
 import org.intellij.grammar.classinfo.MethodType;
 import org.intellij.grammar.java.JavaHelper;
-import org.intellij.grammar.classinfo.MethodInfo;
+import org.intellij.grammar.classinfo.MethodSymbol;
 import org.intellij.grammar.java.JvmSyntaxHelper;
 import org.intellij.grammar.java.MyElement;
 import org.jetbrains.annotations.NotNull;
@@ -152,22 +152,22 @@ public class KotlinSyntaxHelperUnitTest extends TestCase {
   private ClassInfo registerClass(@NotNull String fqn,
                                   int modifiers,
                                   @Nullable String superClass,
-                                  MethodInfo... methods) {
+                                  MethodSymbol... methods) {
     ClassInfo info = new ClassInfo();
     info.name = Fqn.of(fqn);
     info.modifiers = modifiers;
     info.superClass = superClass == null ? null : Fqn.of(superClass);
-    for (MethodInfo m : methods) info.methods.add(m);
+    for (MethodSymbol m : methods) info.methods.add(m);
     classes.put(fqn, info);
     return info;
   }
 
-  private MethodInfo method(@NotNull String name,
+  private MethodSymbol method(@NotNull String name,
                             int modifiers,
                             @NotNull MethodType methodType,
                             @NotNull String returnType,
                             String... paramTypes) {
-    MethodInfo m = new MethodInfo();
+    MethodSymbol m = new MethodSymbol();
     m.name = name;
     m.modifiers = modifiers;
     m.methodType = methodType;
@@ -182,7 +182,7 @@ public class KotlinSyntaxHelperUnitTest extends TestCase {
   /** Minimal recording fallback so we can assert delegation. */
   private static final class RecordingFallback extends JavaHelper {
     final Map<String, ClassInfo> classes = new HashMap<>();
-    final Map<String, List<MethodInfo>> methods = new HashMap<>();
+    final Map<String, List<MethodSymbol>> methods = new HashMap<>();
 
     @Override
     public boolean isPublic(NavigatablePsiElement element) { return false; }
@@ -200,10 +200,10 @@ public class KotlinSyntaxHelperUnitTest extends TestCase {
                                                         boolean allowAbstract,
                                                         int paramCount,
                                                         String... paramTypes) {
-      List<MethodInfo> ms = methods.get(className);
+      List<MethodSymbol> ms = methods.get(className);
       if (ms == null) return Collections.emptyList();
       List<NavigatablePsiElement> result = new ArrayList<>();
-      for (MethodInfo m : ms) result.add(new MyElement<>(m));
+      for (MethodSymbol m : ms) result.add(new MyElement<>(m));
       return result;
     }
 

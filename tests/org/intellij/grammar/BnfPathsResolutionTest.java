@@ -66,14 +66,13 @@ public class BnfPathsResolutionTest extends JavaCodeInsightFixtureTestCase {
     assertEquals(parent.resolve("../conv").normalize(),    paths.path(KnownAttribute.ELEMENT_TYPE_CONVERTER_FACTORY_OUTPUT_PATH));
   }
 
-  public void testInputPathDefaultsToBnfParent() {
+  public void testInputPathUnsetWhenNotDeclared() {
     BnfFile bnf = bnfWith("g.bnf", "{ parserClass=\"com.example.P\" }\nroot ::= 'a'");
     BnfPathsResolution paths = BnfPaths.resolve(bnf);
-    Path parent = bnfParent(bnf);
-    // Unset inputPath defaults to the BNF file's parent directory; the input cascade then fills
-    // psiInputPath from the global default.
-    assertEquals(parent, paths.path(KnownAttribute.INPUT_PATH));
-    assertEquals(parent, paths.path(KnownAttribute.PSI_INPUT_PATH));
+    // No grammar-level inputPath → resolution leaves INPUT_PATH and PSI_INPUT_PATH unset.
+    // IDE consumers (PsiHelperFactory) widen to a project-wide search scope in this case.
+    assertNull(paths.path(KnownAttribute.INPUT_PATH));
+    assertNull(paths.path(KnownAttribute.PSI_INPUT_PATH));
   }
 
   public void testEmptyStringTreatedAsUnset() {
@@ -82,8 +81,8 @@ public class BnfPathsResolutionTest extends JavaCodeInsightFixtureTestCase {
       root ::= 'a'
       """);
     BnfPathsResolution paths = BnfPaths.resolve(bnf);
-    // The empty string is treated as unset; "unset" now resolves to the BNF parent default.
-    assertEquals(bnfParent(bnf), paths.path(KnownAttribute.INPUT_PATH));
+    // Empty string is treated as unset; an unset INPUT_PATH stays unset (no bnf-parent default).
+    assertNull(paths.path(KnownAttribute.INPUT_PATH));
     // PARSER_OUTPUT_PATH may be filled in by the fallback (parserClass package), but never by ""
   }
 
@@ -191,14 +190,15 @@ public class BnfPathsResolutionTest extends JavaCodeInsightFixtureTestCase {
     assertEquals(parent.resolve("../global").normalize(), BnfPaths.referencePath(paths, KnownAttribute.IMPLEMENTS));
   }
 
-  public void testReferencePathFallsBackToBnfParentInIdeContext() {
+  public void testReferencePathReturnsNullWhenNoInputPathDeclared() {
     BnfFile bnf = bnfWith("g.bnf", "{ parserClass=\"com.example.P\" }\nroot ::= 'a'");
     BnfPathsResolution paths = BnfPaths.resolve(bnf);
-    Path parent = bnfParent(bnf);
-    // BnfPaths.compute() seeds INPUT_PATH = BNF parent when nothing is set, so referencePath
-    // never returns null for an IDE-resolved file.
-    assertEquals(parent, BnfPaths.referencePath(paths, KnownAttribute.MIXIN));
-    assertEquals(parent, BnfPaths.referencePath(paths, KnownAttribute.IMPLEMENTS));
+    // Grammar declares no inputPath → referencePath returns null for input-side attributes.
+    // PsiHelperFactory widens to a project-wide scope when this happens; the resolution itself
+    // makes no assumption about the consumer.
+    assertNull(BnfPaths.referencePath(paths, KnownAttribute.MIXIN));
+    assertNull(BnfPaths.referencePath(paths, KnownAttribute.IMPLEMENTS));
+    assertNull(BnfPaths.referencePath(paths, KnownAttribute.PARSER_UTIL_CLASS));
   }
 
   public void testReferencePathOutputAttributeUsesOutputPath() {
@@ -349,8 +349,8 @@ public class BnfPathsResolutionTest extends JavaCodeInsightFixtureTestCase {
 
   public void testEmptyInputPathTreatedAsUnset() {
     BnfFile bnf = bnfWith("g.bnf", "{ inputPath=\"\" }\nroot ::= 'a'");
-    // Empty string is still "unset"; the unset fallback resolves to the BNF file's parent.
-    assertEquals(bnfParent(bnf), BnfPaths.resolve(bnf).path(KnownAttribute.INPUT_PATH));
+    // Empty string is still "unset"; with no IDE-side default, INPUT_PATH stays absent.
+    assertNull(BnfPaths.resolve(bnf).path(KnownAttribute.INPUT_PATH));
   }
 
   public void testDotResolvesToBnfParent() {

@@ -70,6 +70,11 @@ public final class PsiHelperFactory {
    * already hold a fully-resolved {@link BnfPathsResolution} (e.g. the build-time
    * {@code Generator}) to avoid re-resolving via the PSI cache, which may not reflect CLI
    * overrides or in-flight test fixtures.
+   *
+   * <p>When the resolution has no path for {@code fqnAttribute} — typically because the grammar
+   * declares no {@code inputPath} and the attribute is not bound to a known output sibling —
+   * the helper is scoped to {@link GlobalSearchScope#allScope}, i.e. the entire project plus
+   * libraries and SDK.
    */
   public @NotNull JavaHelper getInstance(@NotNull BnfPathsResolution paths,
                                         @Nullable KnownAttribute<?> fqnAttribute) {
@@ -105,9 +110,17 @@ public final class PsiHelperFactory {
     return BnfPaths.referencePath(paths, fqnAttribute);
   }
 
-  private @Nullable GlobalSearchScope scopeFor(@Nullable Path dir) {
-    if (dir == null) return null;
+  /**
+   * Translates a resolved input directory into a class-lookup scope. A non-null {@code dir}
+   * narrows lookup to that subtree (the explicit {@code *InputPath} declaration). When the
+   * resolution carries no input path — i.e. the grammar declared none — we widen to
+   * {@link GlobalSearchScope#allScope project + libraries + SDK} so references to classes
+   * outside the BNF parent (sibling modules, library bases, etc.) still resolve.
+   */
+  private @NotNull GlobalSearchScope scopeFor(@Nullable Path dir) {
+    if (dir == null) return GlobalSearchScope.allScope(myProject);
     VirtualFile vf = VirtualFileManager.getInstance().findFileByNioPath(dir);
-    return vf == null ? null : GlobalSearchScopesCore.directoriesScope(myProject, true, vf);
+    if (vf == null) return GlobalSearchScope.allScope(myProject);
+    return GlobalSearchScopesCore.directoriesScope(myProject, true, vf);
   }
 }

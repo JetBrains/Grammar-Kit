@@ -30,8 +30,17 @@ public final class BnfPathsResolution {
 
   /**
    * Effective absolute on-disk path for {@code attribute}, or {@code null} when the resolution
-   * has no value for it (typically an input attribute the user didn't set, or an output
-   * attribute on a resolution that has no {@code parserOutputPath} root).
+   * has no value for it.
+   *
+   * <p>A {@code null} for {@link KnownAttribute#INPUT_PATH} is the normal "no user-declared
+   * input scope" signal for IDE-mode resolutions built via
+   * {@link BnfPaths#resolve(org.intellij.grammar.psi.BnfFile)}: consumers with a {@code Project}
+   * (e.g. {@link org.intellij.grammar.java.PsiHelperFactory}) fall back to a project-wide
+   * search scope. CLI consumers without a {@code Project} should seed a default via
+   * {@link BnfPaths#resolveExplicit(java.util.Map, Path)}.
+   *
+   * <p>A {@code null} for an output attribute means the resolution has no
+   * {@code parserOutputPath} root from which to derive the output cascade.
    */
   public @Nullable Path path(@NotNull KnownAttribute<String> attribute) {
     return myPaths.get(attribute);

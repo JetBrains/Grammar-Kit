@@ -313,26 +313,31 @@ public class JavaSyntaxHelperUnitTest extends TestCase {
 
   public void testIsPublicTrueForPublicClass() {
     ClassSymbol info = registerClass("a.b.Foo", Modifier.PUBLIC, null).build();
-    assertTrue(helper().isPublic(new MyElement<>(info)));
+    helper();
+    assertTrue(JavaHelper.isPublic(new MyElement<>(info)));
   }
 
   public void testIsPublicFalseForPackagePrivateClass() {
     ClassSymbol info = registerClass("a.b.Foo", 0, null).build();
-    assertFalse(helper().isPublic(new MyElement<>(info)));
+    helper();
+    assertFalse(JavaHelper.isPublic(new MyElement<>(info)));
   }
 
   public void testIsPublicTrueForPublicMethod() {
     MethodSymbol m = method("ping", Modifier.PUBLIC, MethodType.INSTANCE, "void").build();
-    assertTrue(helper().isPublic(new MyElement<>(m)));
+    helper();
+    assertTrue(JavaHelper.isPublic(new MyElement<>(m)));
   }
 
   public void testIsPublicFalseForPrivateMethod() {
     MethodSymbol m = method("ping", Modifier.PRIVATE, MethodType.INSTANCE, "void").build();
-    assertFalse(helper().isPublic(new MyElement<>(m)));
+    helper();
+    assertFalse(JavaHelper.isPublic(new MyElement<>(m)));
   }
 
   public void testIsPublicFalseForNullElement() {
-    assertFalse(helper().isPublic(null));
+    helper();
+    assertFalse(JavaHelper.isPublic(null));
   }
 
   // ---------------------------------------------------------------------------------------------
@@ -343,80 +348,94 @@ public class JavaSyntaxHelperUnitTest extends TestCase {
     MethodSymbol.Builder mb = method("ping", Modifier.PUBLIC, MethodType.INSTANCE, "java.lang.String", "int");
     mb.parameters.get(0).name = "n";
     MethodSymbol m = mb.build();
+    helper();
     assertEquals(List.of("java.lang.String", "int", "n"),
-                 helper().getMethodTypes(new MyElement<>(m)));
+                 JavaHelper.getMethodTypes(new MyElement<>(m)));
   }
 
   public void testGetMethodTypesEmptyForClassInfo() {
     ClassSymbol info = registerClass("a.b.Foo", Modifier.PUBLIC, null).build();
-    assertEquals(Collections.emptyList(), helper().getMethodTypes(new MyElement<>(info)));
+    helper();
+    assertEquals(Collections.emptyList(), JavaHelper.getMethodTypes(new MyElement<>(info)));
   }
 
   public void testGetMethodTypesEmptyForNull() {
-    assertEquals(Collections.emptyList(), helper().getMethodTypes(null));
+    helper();
+    assertEquals(Collections.emptyList(), JavaHelper.getMethodTypes(null));
   }
 
   public void testGetGenericParameters() {
     MethodSymbol.Builder mb = method("ping", Modifier.PUBLIC, MethodType.INSTANCE, "void");
     mb.generics.add(new TypeParameterSymbol.Builder("T"));
     MethodSymbol m = mb.build();
-    List<TypeParameterSymbol> generics = helper().getGenericParameters(new MyElement<>(m));
+    helper();
+    List<TypeParameterSymbol> generics = JavaHelper.getGenericParameters(new MyElement<>(m));
     assertEquals(1, generics.size());
     assertEquals("T", generics.get(0).name());
   }
 
   public void testGetGenericParametersEmptyForNonMethod() {
     ClassSymbol info = registerClass("a.b.Foo", Modifier.PUBLIC, null).build();
-    assertTrue(helper().getGenericParameters(new MyElement<>(info)).isEmpty());
+    helper();
+    assertTrue(JavaHelper.getGenericParameters(new MyElement<>(info)).isEmpty());
   }
 
   public void testGetExceptionList() {
     MethodSymbol.Builder mb = method("ping", Modifier.PUBLIC, MethodType.INSTANCE, "void");
     mb.exceptions.add(Fqn.of("java.io.IOException"));
     MethodSymbol m = mb.build();
+    helper();
     assertEquals(List.of("java.io.IOException"),
-                 helper().getExceptionList(new MyElement<>(m)));
+                 JavaHelper.getExceptionList(new MyElement<>(m)));
   }
 
   public void testGetExceptionListEmptyForNonMethod() {
     ClassSymbol info = registerClass("a.b.Foo", Modifier.PUBLIC, null).build();
-    assertTrue(helper().getExceptionList(new MyElement<>(info)).isEmpty());
+    helper();
+    assertTrue(JavaHelper.getExceptionList(new MyElement<>(info)).isEmpty());
   }
 
   public void testGetAnnotationsForClass() {
     ClassSymbol.Builder b = registerClass("a.b.Foo", Modifier.PUBLIC, null);
     b.annotations.add(Fqn.of("java.lang.Deprecated"));
+    helper();
     assertEquals(List.of("java.lang.Deprecated"),
-                 helper().getAnnotations(new MyElement<>(b.build())));
+                 JavaHelper.getAnnotations(new MyElement<>(b.build())));
   }
 
   public void testGetAnnotationsForMethod() {
     MethodSymbol.Builder mb = method("ping", Modifier.PUBLIC, MethodType.INSTANCE, "void");
     mb.annotations.add(Fqn.of("java.lang.Override"));
+    helper();
     assertEquals(List.of("java.lang.Override"),
-                 helper().getAnnotations(new MyElement<>(mb.build())));
+                 JavaHelper.getAnnotations(new MyElement<>(mb.build())));
   }
 
   public void testGetAnnotationsEmptyForNull() {
-    assertTrue(helper().getAnnotations(null).isEmpty());
+    helper();
+    assertTrue(JavaHelper.getAnnotations(null).isEmpty());
   }
 
   public void testGetParameterAnnotations() {
     MethodSymbol.Builder mb = method("ping", Modifier.PUBLIC, MethodType.INSTANCE, "void", "java.lang.String");
     mb.parameters.get(0).annotations.add(Fqn.of("a.b.Marker"));
+    helper();
     assertEquals(List.of("a.b.Marker"),
-                 helper().getParameterAnnotations(new MyElement<>(mb.build()), 0));
+                 JavaHelper.getParameterAnnotations(new MyElement<>(mb.build()), 0));
   }
 
   public void testGetParameterAnnotationsOutOfRange() {
     MethodSymbol m = method("ping", Modifier.PUBLIC, MethodType.INSTANCE, "void", "java.lang.String").build();
-    assertTrue(helper().getParameterAnnotations(new MyElement<>(m), 99).isEmpty());
-    assertTrue(helper().getParameterAnnotations(new MyElement<>(m), -1).isEmpty());
+    helper();
+    assertTrue(JavaHelper.getParameterAnnotations(new MyElement<>(m), 99).isEmpty());
+    helper();
+    assertTrue(JavaHelper.getParameterAnnotations(new MyElement<>(m), -1).isEmpty());
   }
 
   public void testGetParameterAnnotationsEmptyForNonMethod() {
     ClassSymbol info = registerClass("a.b.Foo", Modifier.PUBLIC, null).build();
-    assertTrue(helper().getParameterAnnotations(new MyElement<>(info), 0).isEmpty());
+    helper();
+    assertTrue(JavaHelper.getParameterAnnotations(new MyElement<>(info), 0).isEmpty());
   }
 
   // ---------------------------------------------------------------------------------------------
@@ -507,11 +526,6 @@ public class JavaSyntaxHelperUnitTest extends TestCase {
     final List<String> findClassCalls = new ArrayList<>();
     final List<String> superClassCalls = new ArrayList<>();
     @Nullable String lastDispatch;
-
-    @Override
-    public boolean isPublic(@Nullable NavigatablePsiElement element) {
-      return false;
-    }
 
     @Override
     public @Nullable NavigatablePsiElement findClass(@Nullable String className) {

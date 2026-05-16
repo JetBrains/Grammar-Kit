@@ -6,15 +6,14 @@ package org.intellij.grammar.java;
 
 import com.intellij.psi.NavigatablePsiElement;
 import com.intellij.util.ArrayUtil;
-import com.intellij.util.containers.ContainerUtil;
-import org.intellij.grammar.classinfo.Fqn;
 import org.intellij.grammar.classinfo.MethodType;
-import org.intellij.grammar.classinfo.TypeParameterSymbol;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.*;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Member;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -27,10 +26,10 @@ import java.util.List;
  * it actually initialises the target classes, which is sometimes undesirable but acceptable in the
  * minimal {@code LightPsi} runtime where ASM is missing.
  * <p>
- * Limitation compared to {@link AsmHelper}: parameter names cannot be recovered from reflection,
- * so {@link #getMethodTypes} synthesises {@code "p0"}, {@code "p1"}… placeholders. Type annotations
- * on parameters are also not exposed — {@link #getParameterAnnotations} falls back to the method's
- * own annotation list.
+ * Only lookup methods are overridden here. Metadata reads inherit {@link JavaHelper}'s defaults,
+ * which dispatch through {@link ClassSymbolUtil} on the wrapped {@code java.lang.reflect.*}
+ * delegate. Limitation versus the ASM-backed path: parameter names are synthesised
+ * ({@code "p0"}, {@code "p1"}…) since reflection does not preserve them.
  */
 public class ReflectionHelper extends JavaHelper {
   private static @Nullable Class<?> findClassSafe(String className) {
@@ -67,25 +66,6 @@ public class ReflectionHelper extends JavaHelper {
            ClassSymbolUtil.acceptsModifiers(modifiers, methodType, allowAbstract);
   }
 
-  private static @NotNull List<String> getAnnotationsInner(@NotNull AnnotatedElement delegate) {
-    Annotation[] annotations = delegate.getDeclaredAnnotations();
-    List<String> result = new ArrayList<>(annotations.length);
-    for (Annotation annotation : annotations) {
-      Class<? extends Annotation> annotationType = annotation.annotationType(); // todo parameters?
-      ContainerUtil.addIfNotNull(result, annotationType.getCanonicalName());
-    }
-    return result;
-  }
-
-  @Override
-  public boolean isPublic(@Nullable NavigatablePsiElement element) {
-    Object delegate = element instanceof MyElement ? ((MyElement<?>)element).delegate : null;
-    int modifiers = delegate instanceof Class ? ((Class<?>)delegate).getModifiers() :
-                    delegate instanceof Method ? ((Method)delegate).getModifiers() :
-                    0;
-    return Modifier.isPublic(modifiers);
-  }
-
   @Override
   public @Nullable NavigatablePsiElement findClass(String className) {
     Class<?> aClass = findClassSafe(className);
@@ -117,60 +97,5 @@ public class ReflectionHelper extends JavaHelper {
     Class<?> aClass = findClassSafe(className);
     Class<?> superClass = aClass == null ? null : aClass.getSuperclass();
     return superClass != null && superClass != Object.class ? superClass.getName() : null;
-  }
-
-  @Override
-  public @NotNull List<String> getMethodTypes(NavigatablePsiElement method) {
-    if (method == null) return Collections.emptyList();
-    Method delegate = ((MyElement<Method>)method).delegate;
-    Type[] parameterTypes = delegate.getGenericParameterTypes();
-    List<String> result = new ArrayList<>(parameterTypes.length + 1);
-    result.add(delegate.getGenericReturnType().toString());
-    int paramCounter = 0;
-    for (Type parameterType : parameterTypes) {
-      result.add(parameterType.toString());
-      result.add("p" + (paramCounter++));
-    }
-    return result;
-  }
-
-  @Override
-  public List<TypeParameterSymbol> getGenericParameters(NavigatablePsiElement method) {
-    if (method == null) return Collections.emptyList();
-    Method delegate = ((MyElement<Method>)method).delegate;
-
-    TypeVariable<Method>[] typeParameters = delegate.getTypeParameters();
-    return ContainerUtil.map(typeParameters, param -> new TypeParameterSymbol(
-      param.getName(),
-      ContainerUtil.mapNotNull(param.getBounds(), type -> {
-        String typeName = type.getTypeName();
-        return "java.lang.Object".equals(typeName) ? null : typeName;
-      }),
-      ContainerUtil.mapNotNull(param.getAnnotations(), o -> Fqn.ofNullable(o.annotationType().getCanonicalName()))));
-  }
-
-  @Override
-  public List<String> getExceptionList(NavigatablePsiElement method) {
-    if (method == null) return Collections.emptyList();
-    Method delegate = ((MyElement<Method>)method).delegate;
-
-    Class<?>[] exceptionTypes = delegate.getExceptionTypes();
-    return ContainerUtil.map(exceptionTypes, Class::getName);
-  }
-
-  @Override
-  public @NotNull List<String> getAnnotations(NavigatablePsiElement element) {
-    if (element == null) return Collections.emptyList();
-    AnnotatedElement delegate = ((MyElement<AnnotatedElement>)element).delegate;
-    return getAnnotationsInner(delegate);
-  }
-
-  @Override
-  public @NotNull List<String> getParameterAnnotations(@Nullable NavigatablePsiElement method, int paramIndex) {
-    if (method == null) return Collections.emptyList();
-    Method delegate = ((MyElement<Method>)method).delegate;
-    AnnotatedType[] parameterTypes = delegate.getAnnotatedParameterTypes();
-    if (paramIndex < 0 || paramIndex >= parameterTypes.length) return Collections.emptyList();
-    return getAnnotationsInner(delegate);
   }
 }

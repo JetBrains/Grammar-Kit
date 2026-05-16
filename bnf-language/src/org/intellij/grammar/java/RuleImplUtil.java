@@ -53,14 +53,14 @@ public final class RuleImplUtil {
     List<NavigatablePsiElement> result = new ArrayList<>(methods);
     Map<String, NavigatablePsiElement> prototypes = new LinkedHashMap<>();
     for (NavigatablePsiElement m2 : methods) {
-      List<String> types = helper.getMethodTypes(m2);
+      List<String> types = JavaHelper.getMethodTypes(m2);
       String proto = m2.getName() + types.subList(3, types.size());
       NavigatablePsiElement m1 = prototypes.get(proto);
       if (m1 == null) {
         prototypes.put(proto, m2);
         continue;
       }
-      String type1 = helper.getMethodTypes(m1).get(1);
+      String type1 = JavaHelper.getMethodTypes(m1).get(1);
       String type2 = types.get(1);
       if (Objects.equals(type1, type2)) continue;
       for (String s = selectedClass; s != null; s = helper.getSuperClassName(s)) {

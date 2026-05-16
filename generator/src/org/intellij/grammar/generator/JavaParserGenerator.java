@@ -207,9 +207,7 @@ public final class JavaParserGenerator extends Generator {
 
   @Override
   public void generate() throws IOException {
-    {
-      generateParser();
-    }
+    generateParser();
     generatePsi();
   }
   

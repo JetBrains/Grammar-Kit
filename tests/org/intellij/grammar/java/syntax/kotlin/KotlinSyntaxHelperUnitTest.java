@@ -74,23 +74,23 @@ public class KotlinSyntaxHelperUnitTest extends TestCase {
                   method("ping", Modifier.PUBLIC, MethodType.INSTANCE, "void"),
                   method("pong", Modifier.PUBLIC, MethodType.INSTANCE, "void"));
     assertEquals(1, helper().findClassMethods(
-      "a.b.Foo", MethodType.INSTANCE, "ping", -1).size());
+      "a.b.Foo", MethodType.INSTANCE, "ping", false,  -1).size());
   }
 
   public void testFindClassMethodsFiltersByMethodType() {
     registerClass("a.b.Foo", Modifier.PUBLIC, "java.lang.Object",
                   method("ping", Modifier.PUBLIC, MethodType.STATIC, "void"));
     assertTrue(helper().findClassMethods(
-      "a.b.Foo", MethodType.INSTANCE, "ping", -1).isEmpty());
+      "a.b.Foo", MethodType.INSTANCE, "ping", false,  -1).isEmpty());
     assertEquals(1, helper().findClassMethods(
-      "a.b.Foo", MethodType.STATIC, "ping", -1).size());
+      "a.b.Foo", MethodType.STATIC, "ping", false,  -1).size());
   }
 
   public void testFindClassMethodsAbstractFilteredByDefault() {
     registerClass("a.b.Foo", Modifier.PUBLIC, "java.lang.Object",
                   method("ping", Modifier.PUBLIC | Modifier.ABSTRACT, MethodType.INSTANCE, "void"));
     assertTrue(helper().findClassMethods(
-      "a.b.Foo", MethodType.INSTANCE, "ping", -1).isEmpty());
+      "a.b.Foo", MethodType.INSTANCE, "ping", false,  -1).isEmpty());
     assertEquals(1, helper().findClassMethods(
       "a.b.Foo", MethodType.INSTANCE, "ping", true, -1).size());
   }
@@ -101,7 +101,7 @@ public class KotlinSyntaxHelperUnitTest extends TestCase {
     external.methods.add(method("ping", Modifier.PUBLIC, MethodType.INSTANCE, "void"));
     fallback.classes.put("ext.Platform", external);
     List<NavigatablePsiElement> result = helper().findClassMethods(
-      "ext.Platform", MethodType.INSTANCE, "ping", -1);
+      "ext.Platform", MethodType.INSTANCE, "ping", false,  -1);
     assertEquals(1, result.size());
   }
 

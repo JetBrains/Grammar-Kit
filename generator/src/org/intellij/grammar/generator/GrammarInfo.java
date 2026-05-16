@@ -169,7 +169,7 @@ public record GrammarInfo(
       String stubName =
         StringUtil.isNotEmpty(stubClass) ? stubClass :
         implSuper.indexOf("<") < implSuper.indexOf(">") &&
-        !hierarchyHelper.findClassMethods(implSuperRaw, MethodType.INSTANCE, "getParentByStub", 0).isEmpty() ?
+        !hierarchyHelper.findClassMethods(implSuperRaw, MethodType.INSTANCE, "getParentByStub", false, 0).isEmpty() ?
         implSuper.substring(implSuper.indexOf("<") + 1, implSuper.indexOf(">")) : null;
       if (StringUtil.isNotEmpty(stubName)) {
         b.realStubClass = stubClass;

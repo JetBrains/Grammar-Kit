@@ -101,21 +101,21 @@ public class JavaSyntaxHelperUnitTest extends TestCase {
     fallback.classes.put("a.b.PlatformClass", external);
 
     List<NavigatablePsiElement> result = helper().findClassMethods(
-      "a.b.PlatformClass", MethodType.INSTANCE, "ping", -1);
+      "a.b.PlatformClass", MethodType.INSTANCE, "ping", false, -1);
     assertEquals(1, result.size());
     assertEquals(List.of("a.b.PlatformClass"), fallback.findClassCalls);
   }
 
   public void testFindClassMethodsMissNoFallbackReturnsEmpty() {
     JavaHelper noFallback = helperNoFallback();
-    assertTrue(noFallback.findClassMethods("a.b.Missing", MethodType.INSTANCE, "x", -1).isEmpty());
+    assertTrue(noFallback.findClassMethods("a.b.Missing", MethodType.INSTANCE, "x", false, -1).isEmpty());
   }
 
   public void testFindClassMethodsNullMethodNameReturnsEmpty() {
     registerClass("a.b.Foo", Modifier.PUBLIC, "java.lang.Object",
                   method("ping", Modifier.PUBLIC, MethodType.INSTANCE, "void"));
     assertTrue(helper().findClassMethods(
-      "a.b.Foo", MethodType.INSTANCE, null, -1).isEmpty());
+      "a.b.Foo", MethodType.INSTANCE, null, false, -1).isEmpty());
   }
 
   // ---------------------------------------------------------------------------------------------
@@ -127,7 +127,7 @@ public class JavaSyntaxHelperUnitTest extends TestCase {
                   method("ping", Modifier.PUBLIC, MethodType.INSTANCE, "void"),
                   method("pong", Modifier.PUBLIC, MethodType.INSTANCE, "void"));
     List<NavigatablePsiElement> result = helper().findClassMethods(
-      "a.b.Foo", MethodType.INSTANCE, "ping", -1);
+      "a.b.Foo", MethodType.INSTANCE, "ping", false, -1);
     assertEquals(1, result.size());
     assertEquals("ping", ((MethodSymbol)((MyElement<?>)result.get(0)).delegate).name());
   }
@@ -137,7 +137,7 @@ public class JavaSyntaxHelperUnitTest extends TestCase {
                   method("ping", Modifier.PUBLIC, MethodType.INSTANCE, "void"),
                   method("pong", Modifier.PUBLIC, MethodType.INSTANCE, "void"));
     List<NavigatablePsiElement> result = helper().findClassMethods(
-      "a.b.Foo", MethodType.INSTANCE, "*", -1);
+      "a.b.Foo", MethodType.INSTANCE, "*", false, -1);
     assertEquals(2, result.size());
   }
 
@@ -146,7 +146,7 @@ public class JavaSyntaxHelperUnitTest extends TestCase {
     registerClass("a.b.Foo", Modifier.PUBLIC, "java.lang.Object",
                   method("Outer$Inner", Modifier.PUBLIC, MethodType.INSTANCE, "void"));
     List<NavigatablePsiElement> result = helper().findClassMethods(
-      "a.b.Foo", MethodType.INSTANCE, "Outer", -1);
+      "a.b.Foo", MethodType.INSTANCE, "Outer", false, -1);
     assertEquals(1, result.size());
   }
 
@@ -158,14 +158,14 @@ public class JavaSyntaxHelperUnitTest extends TestCase {
     registerClass("a.b.Foo", Modifier.PUBLIC, "java.lang.Object",
                   method("ping", Modifier.PUBLIC, MethodType.INSTANCE, "void"));
     assertTrue(helper().findClassMethods(
-      "a.b.Foo", MethodType.STATIC, "ping", -1).isEmpty());
+      "a.b.Foo", MethodType.STATIC, "ping", false, -1).isEmpty());
   }
 
   public void testFindClassMethodsConstructorMatch() {
     registerClass("a.b.Foo", Modifier.PUBLIC, "java.lang.Object",
                   method("Foo", Modifier.PUBLIC, MethodType.CONSTRUCTOR, "a.b.Foo"));
     List<NavigatablePsiElement> result = helper().findClassMethods(
-      "a.b.Foo", MethodType.CONSTRUCTOR, "Foo", -1);
+      "a.b.Foo", MethodType.CONSTRUCTOR, "Foo", false, -1);
     assertEquals(1, result.size());
   }
 
@@ -178,7 +178,7 @@ public class JavaSyntaxHelperUnitTest extends TestCase {
                   method("ping", Modifier.PUBLIC | Modifier.ABSTRACT,
                          MethodType.INSTANCE, "void"));
     assertTrue(helper().findClassMethods(
-      "a.b.Foo", MethodType.INSTANCE, "ping", -1).isEmpty());
+      "a.b.Foo", MethodType.INSTANCE, "ping", false, -1).isEmpty());
   }
 
   public void testFindClassMethodsAllowAbstract() {
@@ -195,7 +195,7 @@ public class JavaSyntaxHelperUnitTest extends TestCase {
                   method("Foo", Modifier.PRIVATE,
                          MethodType.CONSTRUCTOR, "a.b.Foo"));
     assertTrue(helper().findClassMethods(
-      "a.b.Foo", MethodType.CONSTRUCTOR, "Foo", -1).isEmpty());
+      "a.b.Foo", MethodType.CONSTRUCTOR, "Foo", false, -1).isEmpty());
   }
 
   // ---------------------------------------------------------------------------------------------
@@ -207,7 +207,7 @@ public class JavaSyntaxHelperUnitTest extends TestCase {
                   method("doIt", Modifier.PUBLIC, MethodType.INSTANCE,
                          "void", "java.lang.String"));
     List<NavigatablePsiElement> result = helper().findClassMethods(
-      "a.b.Foo", MethodType.INSTANCE, "doIt", -1);
+      "a.b.Foo", MethodType.INSTANCE, "doIt", false, -1);
     assertEquals(1, result.size());
   }
 
@@ -216,11 +216,11 @@ public class JavaSyntaxHelperUnitTest extends TestCase {
                   method("doIt", Modifier.PUBLIC, MethodType.INSTANCE,
                          "void", "java.lang.String", "int"));
     assertEquals(1, helper().findClassMethods(
-      "a.b.Foo", MethodType.INSTANCE, "doIt", 2).size());
+      "a.b.Foo", MethodType.INSTANCE, "doIt", false,  2).size());
     assertTrue(helper().findClassMethods(
-      "a.b.Foo", MethodType.INSTANCE, "doIt", 1).isEmpty());
+      "a.b.Foo", MethodType.INSTANCE, "doIt", false,  1).isEmpty());
     assertTrue(helper().findClassMethods(
-      "a.b.Foo", MethodType.INSTANCE, "doIt", 3).isEmpty());
+      "a.b.Foo", MethodType.INSTANCE, "doIt", false,  3).isEmpty());
   }
 
   public void testFindClassMethodsParamTypesEmptyAcceptsAny() {
@@ -228,7 +228,7 @@ public class JavaSyntaxHelperUnitTest extends TestCase {
                   method("doIt", Modifier.PUBLIC, MethodType.INSTANCE,
                          "void", "java.lang.String"));
     assertEquals(1, helper().findClassMethods(
-      "a.b.Foo", MethodType.INSTANCE, "doIt", -1).size());
+      "a.b.Foo", MethodType.INSTANCE, "doIt", false, -1).size());
   }
 
   public void testFindClassMethodsParamTypesExactMatch() {
@@ -236,9 +236,9 @@ public class JavaSyntaxHelperUnitTest extends TestCase {
                   method("doIt", Modifier.PUBLIC, MethodType.INSTANCE,
                          "void", "java.lang.String"));
     assertEquals(1, helper().findClassMethods(
-      "a.b.Foo", MethodType.INSTANCE, "doIt", -1, "java.lang.String").size());
+      "a.b.Foo", MethodType.INSTANCE, "doIt", false, -1, "java.lang.String").size());
     assertTrue(helper().findClassMethods(
-      "a.b.Foo", MethodType.INSTANCE, "doIt", -1, "java.lang.Integer").isEmpty());
+      "a.b.Foo", MethodType.INSTANCE, "doIt", false, -1, "java.lang.Integer").isEmpty());
   }
 
   public void testFindClassMethodsParamTypeResolvedViaSuperclass() {
@@ -249,7 +249,7 @@ public class JavaSyntaxHelperUnitTest extends TestCase {
                   method("doIt", Modifier.PUBLIC, MethodType.INSTANCE,
                          "void", "a.b.Base"));
     assertEquals(1, helper().findClassMethods(
-      "a.b.Foo", MethodType.INSTANCE, "doIt", -1, "a.b.Child").size());
+      "a.b.Foo", MethodType.INSTANCE, "doIt", false, -1, "a.b.Child").size());
   }
 
   public void testFindClassMethodsParamTypeResolvedViaInterface() {
@@ -259,7 +259,7 @@ public class JavaSyntaxHelperUnitTest extends TestCase {
                   method("doIt", Modifier.PUBLIC, MethodType.INSTANCE,
                          "void", "a.b.Iface"));
     assertEquals(1, helper().findClassMethods(
-      "a.b.Foo", MethodType.INSTANCE, "doIt", -1, "a.b.Child").size());
+      "a.b.Foo", MethodType.INSTANCE, "doIt", false, -1, "a.b.Child").size());
   }
 
   public void testFindClassMethodsParamTypeResolvedViaFallbackSupertype() {
@@ -274,7 +274,7 @@ public class JavaSyntaxHelperUnitTest extends TestCase {
                   method("doIt", Modifier.PUBLIC, MethodType.INSTANCE,
                          "void", "a.b.Base"));
     assertEquals(1, helper().findClassMethods(
-      "a.b.Foo", MethodType.INSTANCE, "doIt", -1, "ext.Child").size());
+      "a.b.Foo", MethodType.INSTANCE, "doIt",  false, -1, "ext.Child").size());
   }
 
   // ---------------------------------------------------------------------------------------------

@@ -129,21 +129,21 @@ public class JavaSyntaxHelperTest extends GoldenClassInfoTestCase {
 
   public void testParamCountFiltering() {
     // wrong arity → no match
-    assertTrue(helper.findClassMethods("a.b.MyClass", MethodType.INSTANCE, "doStuff", 99).isEmpty());
+    assertTrue(helper.findClassMethods("a.b.MyClass", MethodType.INSTANCE, "doStuff", false,  99).isEmpty());
     // matching arity → match
-    assertEquals(1, helper.findClassMethods("a.b.MyClass", MethodType.INSTANCE, "doStuff", 2).size());
+    assertEquals(1, helper.findClassMethods("a.b.MyClass", MethodType.INSTANCE, "doStuff", false,  2).size());
   }
 
   public void testWildcardMethodName() {
     // "*" matches any name; doStuff is the only INSTANCE method on MyClass.
     List<NavigatablePsiElement> all = helper.findClassMethods(
-      "a.b.MyClass", MethodType.INSTANCE, "*", -1);
+      "a.b.MyClass", MethodType.INSTANCE, "*", false,  -1);
     assertEquals(1, all.size());
   }
 
   public void testUnknownClassReturnsNull() {
     assertNull(helper.findClass("does.not.Exist"));
-    assertTrue(helper.findClassMethods("does.not.Exist", MethodType.INSTANCE, "x", -1).isEmpty());
+    assertTrue(helper.findClassMethods("does.not.Exist", MethodType.INSTANCE, "x", false, -1).isEmpty());
     assertNull(helper.getSuperClassName("does.not.Exist"));
   }
 

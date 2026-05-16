@@ -187,7 +187,7 @@ public class BnfGeneratorPsiTest extends BasePlatformTestCase {
 
     // Verify the return type includes the embedded annotation (needed for the bug to manifest)
     List<NavigatablePsiElement> methods = javaHelper.findClassMethods(
-      "test.psi.impl.MyMixin", MethodType.INSTANCE, "getAccess", -1);
+      "test.psi.impl.MyMixin", MethodType.INSTANCE, "getAccess", false, -1);
     assertEquals("Should find getAccess method", 1, methods.size());
     List<String> methodTypes = javaHelper.getMethodTypes(methods.get(0));
     assertTrue("Return type should contain embedded @NotNull for qualified type, got: " + methodTypes,
@@ -479,15 +479,6 @@ public class BnfGeneratorPsiTest extends BasePlatformTestCase {
     @Override
     public @Nullable NavigatablePsiElement findClass(@Nullable String className) {
       return myDelegate.findClass(className);
-    }
-
-    @Override
-    public @NotNull List<NavigatablePsiElement> findClassMethods(@Nullable String className,
-                                                                  @NotNull MethodType methodType,
-                                                                  @Nullable String methodName,
-                                                                  int paramCount,
-                                                                  String... paramTypes) {
-      return myDelegate.findClassMethods(className, methodType, methodName, paramCount, paramTypes);
     }
 
     @Override

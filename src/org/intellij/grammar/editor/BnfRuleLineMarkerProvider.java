@@ -46,8 +46,7 @@ final class BnfRuleLineMarkerProvider extends RelatedItemLineMarkerProvider {
     MethodType methodType = (generateKotlin) ? MethodType.INSTANCE : MethodType.STATIC;
     JavaHelper helper = JavaHelper.getJavaHelper(element);
     String methodName = (generateKotlin) ? GrammarUtil.getKotlinMethodName(rule, element) : GrammarUtil.getJavaMethodName(rule, element);
-    List<NavigatablePsiElement> methods = helper.findClassMethods(
-      parserClass, methodType, methodName, -1);
+    List<NavigatablePsiElement> methods = helper.findClassMethods(parserClass, methodType, methodName, false, -1);
     return ContainerUtil.getFirstItem(methods);
   }
 

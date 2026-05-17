@@ -38,23 +38,27 @@ import org.intellij.grammar.test.UtilMethods.Z;
 
 public interface Element1 extends PsiElement {
 
-  <T extends X & Y> void foo0(T p1) throws Z, RuntimeException;
+  <T extends X & Y> void foo0(T param) throws Z, RuntimeException;
 
-  <T> void foo1(T p1);
+  <T> void foo1(T param);
 
-  <T, K> void foo2(T p1, K p2);
+  <T, K> void foo2(T param, K k);
 
-  <T extends X, K extends Y> void foo3(T p1, K p2);
+  <T extends X, K extends Y> void foo3(T param, K k);
 
-  <@Nls @NonNls T extends @NonNls @Nls X & @Nls @NonNls Y, @Nls @NonNls K> @Nls String foo4(@Nls @NonNls T p1, @Nls @NonNls K p2);
+  <@Nls @NonNls T extends @Nls @NonNls X & @NonNls @Nls Y, @Nls @NonNls K> @Nls String foo4(@Nls @NonNls T param, @Nls @NonNls K k);
 
-  <@Nls @NonNls T, @Nls @NonNls K extends @NonNls @Nls X & @Nls @NonNls Y> @Nls String foo5(@Nls @NonNls T p1, @Nls @NonNls K p2);
+  <@Nls @NonNls T, @Nls @NonNls K extends @Nls @NonNls X & @NonNls @Nls Y> @Nls String foo5(@Nls @NonNls T param, @Nls @NonNls K k);
 
-  @NotNull @Nls List<? super String> @Nullable @Unmodifiable [][] foo6(@NotNull @Nls List<? super String> @Nullable @Unmodifiable [][] p1);
+  @NotNull
+  @Nls
+  List<? super @NotNull @Nls String> @Nullable @Unmodifiable [][] foo6(@NotNull @Nls List<? super @NotNull @Nls String> @Nullable @Unmodifiable [][] args);
 
-  @NotNull E foo7();
+  @NotNull
+  E foo7();
 
-  @NotNull Deep foo8();
+  @NotNull
+  Deep foo8();
 
 }
 // ---- test/psi/impl/Element1Impl.java -----------------
@@ -94,47 +98,51 @@ public class Element1Impl extends ASTWrapperPsiElement implements Element1 {
   }
 
   @Override
-  public <T extends X & Y> void foo0(T p1) throws Z, RuntimeException {
-    UtilMethods.foo0(this, p1);
+  public <T extends X & Y> void foo0(T param) throws Z, RuntimeException {
+    UtilMethods.foo0(this, param);
   }
 
   @Override
-  public <T> void foo1(T p1) {
-    UtilMethods.foo1(this, p1);
+  public <T> void foo1(T param) {
+    UtilMethods.foo1(this, param);
   }
 
   @Override
-  public <T, K> void foo2(T p1, K p2) {
-    UtilMethods.foo2(this, p1, p2);
+  public <T, K> void foo2(T param, K k) {
+    UtilMethods.foo2(this, param, k);
   }
 
   @Override
-  public <T extends X, K extends Y> void foo3(T p1, K p2) {
-    UtilMethods.foo3(this, p1, p2);
+  public <T extends X, K extends Y> void foo3(T param, K k) {
+    UtilMethods.foo3(this, param, k);
   }
 
   @Override
-  public <@Nls @NonNls T extends @NonNls @Nls X & @Nls @NonNls Y, @Nls @NonNls K> @Nls String foo4(@Nls @NonNls T p1, @Nls @NonNls K p2) {
-    return UtilMethods.foo4(this, p1, p2);
+  public <@Nls @NonNls T extends @Nls @NonNls X & @NonNls @Nls Y, @Nls @NonNls K> @Nls String foo4(@Nls @NonNls T param, @Nls @NonNls K k) {
+    return UtilMethods.foo4(this, param, k);
   }
 
   @Override
-  public <@Nls @NonNls T, @Nls @NonNls K extends @NonNls @Nls X & @Nls @NonNls Y> @Nls String foo5(@Nls @NonNls T p1, @Nls @NonNls K p2) {
-    return UtilMethods.foo5(this, p1, p2);
+  public <@Nls @NonNls T, @Nls @NonNls K extends @Nls @NonNls X & @NonNls @Nls Y> @Nls String foo5(@Nls @NonNls T param, @Nls @NonNls K k) {
+    return UtilMethods.foo5(this, param, k);
   }
 
   @Override
-  public @NotNull @Nls List<? super String> @Nullable @Unmodifiable [][] foo6(@NotNull @Nls List<? super String> @Nullable @Unmodifiable [][] p1) {
-    return UtilMethods.foo6(this, p1);
+  @NotNull
+  @Nls
+  public List<? super @NotNull @Nls String> @Nullable @Unmodifiable [][] foo6(@NotNull @Nls List<? super @NotNull @Nls String> @Nullable @Unmodifiable [][] args) {
+    return UtilMethods.foo6(this, args);
   }
 
   @Override
-  public @NotNull E foo7() {
+  @NotNull
+  public E foo7() {
     return UtilMethods.foo7(this);
   }
 
   @Override
-  public @NotNull Deep foo8() {
+  @NotNull
+  public Deep foo8() {
     return UtilMethods.foo8(this);
   }
 

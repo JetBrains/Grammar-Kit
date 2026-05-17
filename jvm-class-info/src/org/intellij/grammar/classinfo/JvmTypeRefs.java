@@ -127,25 +127,34 @@ public final class JvmTypeRefs {
   }
 
   private static void appendAnnotated(@NotNull StringBuilder sb, @NotNull JvmTypeRef ref) {
-    appendAnnotations(sb, ref.annotations());
     if (ref instanceof JvmTypeRef.UserType u) {
+      appendAnnotations(sb, u.annotations());
       sb.append(u.name().value());
       if (!u.args().isEmpty()) appendArgs(sb, u.args(), true);
     }
     else if (ref instanceof JvmTypeRef.ArrayType a) {
       appendAnnotated(sb, a.component());
+      // JLS form: type-use annotations on an array go BETWEEN the component and the brackets, so
+      // `T @A []` rather than `@A T[]`. The component already rendered its own annotations.
+      if (!a.annotations().isEmpty()) {
+        sb.append(' ');
+        appendAnnotations(sb, a.annotations());
+      }
       sb.append("[]");
     }
     else if (ref instanceof JvmTypeRef.PrimitiveType p) {
       sb.append(p.name());
     }
     else if (ref instanceof JvmTypeRef.TypeVariable t) {
+      appendAnnotations(sb, t.annotations());
       sb.append(t.name());
     }
-    else if (ref instanceof JvmTypeRef.FunctionType) {
+    else if (ref instanceof JvmTypeRef.FunctionType f) {
+      appendAnnotations(sb, f.annotations());
       sb.append("kotlin.Function");
     }
-    else if (ref instanceof JvmTypeRef.DynamicType) {
+    else if (ref instanceof JvmTypeRef.DynamicType d) {
+      appendAnnotations(sb, d.annotations());
       sb.append("java.lang.Object");
     }
   }

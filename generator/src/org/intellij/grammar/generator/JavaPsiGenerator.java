@@ -136,104 +136,523 @@ public final class JavaPsiGenerator extends Generator {
   }
 
   /**
-   * Builds {@link ClassSymbol} stubs for every PSI artifact this generator is about to emit — PSI
-   * interfaces and impls (with method signatures), the visitor (with its {@code visit*} methods),
-   * and the element-type holder (class header only). Stubs mirror the hierarchy and surface of the
-   * to-be-generated class so the second pass can answer {@link JavaHelper#findClassMethods} queries
-   * over rule super-chains, which drives accurate {@code @Override} emission. Must be called after
-   * {@link #inferSuperInterfaces} and {@link #calcRealSuperClasses}, which populate
-   * {@link PsiRuleInfo}; also calls {@link RuleMethodsHelper#buildMaps} so populators can iterate
-   * rule methods.
+   * Per-method bundle. The {@link MethodSymbol.Builder} is the symbol; {@link #body} writes the
+   * method's body inside the {@code { … }} (omitted for interface methods). {@link #customHeader},
+   * when non-null, replaces the default {@link #renderMethodHeader} call — used by the visitor's
+   * rule-side {@code visit*} methods which emit the parameter type as a short PSI name irrespective
+   * of {@link GenOptions#generateFQN}. {@link #signature} is null only for "raw text"
+   * entries (warning comments interleaved between methods); those entries are skipped during
+   * symbol extraction in pass 1 and render only their {@link #customHeader}.
    */
-  private @NotNull List<ClassSymbol> buildPsiStubs(@NotNull Map<String, BnfRule> sortedPsiRules) {
+  private record MethodPlan(@Nullable MethodSymbol.Builder signature,
+                            @Nullable Runnable body,
+                            @Nullable Runnable customHeader) {
+    static @NotNull MethodPlan of(@NotNull MethodSymbol.Builder signature) {
+      return new MethodPlan(signature, null, null);
+    }
+
+    static @NotNull MethodPlan ofImpl(@NotNull MethodSymbol.Builder signature, @NotNull Runnable body) {
+      return new MethodPlan(signature, body, null);
+    }
+
+    static @NotNull MethodPlan ofImpl(@NotNull MethodSymbol.Builder signature,
+                                      @NotNull Runnable body,
+                                      @Nullable Runnable customHeader) {
+      return new MethodPlan(signature, body, customHeader);
+    }
+
+    static @NotNull MethodPlan ofRaw(@NotNull Runnable emit) {
+      return new MethodPlan(null, null, emit);
+    }
+  }
+
+  /**
+   * Per-class bundle. {@link #symbol} carries everything that goes into the on-disk stub
+   * (hierarchy, modifiers, type parameters); its {@code methods} list is deliberately left empty
+   * until pass 1 extracts the immutable {@link ClassSymbol} — see {@link #generate()}. The other
+   * fields are emission-only: file location, the import set, and the ordered method plans the
+   * renderer walks. {@link #preMethods} fires before the method loop; we don't currently use
+   * {@link #postMethods} but keep it as a placeholder.
+   *
+   * @param supersForHeader Original super-class/interface strings with generic args preserved — needed for the {@code extends}/{@code implements} clause.
+   *                        The symbol's {@code superClass}/{@code interfaces} carry the raw FQNs (for {@link JavaHelper} lookups), so this array isn't redundant.
+   */
+  private record ClassPlan(
+    @NotNull ClassSymbol.Builder symbol,
+    @NotNull String outputPath,
+    @NotNull Set<String> imports,
+    @NotNull String[] supersForHeader,
+    @NotNull List<MethodPlan> methods,
+    @Nullable Runnable preMethods,
+    @Nullable Runnable postMethods
+  ) {
+  }
+
+  /**
+   * Builds {@link ClassPlan}s for every PSI artifact this generator is about to emit — PSI
+   * interfaces and impls (with method signatures and body emitters), and the visitor (with its
+   * {@code visit*} methods). The element-type holder is stubbed separately by
+   * {@link #buildElementTypeHolderStub} since its emission flow (fields, not methods) is handled
+   * by {@link #generateElementTypeHolder}. Must be called after {@link #inferSuperInterfaces} and
+   * {@link #calcRealSuperClasses}; also calls {@link RuleMethodsHelper#buildMaps} so the method
+   * iteration sees the rule's accessor set.
+   */
+  private @NotNull List<ClassPlan> buildPsiClassPlans(@NotNull Map<String, BnfRule> sortedPsiRules) {
     myRulesMethodsHelper.buildMaps(sortedPsiRules.values());
-    List<ClassSymbol> stubs = new ArrayList<>();
+    List<ClassPlan> plans = new ArrayList<>();
+    // Matches the historical emission order: all PSI interfaces, then all impls, then the visitor.
     for (BnfRule rule : sortedPsiRules.values()) {
-      RuleInfo info = ruleInfo(rule);
-      ClassSymbol.Builder intf = stubInterfaceBuilder(info.intfClass(), resolvePsiIntfSupers(rule));
-      populateIntfMethods(intf, rule, info);
-      stubs.add(intf.build());
-      ClassSymbol.Builder impl = stubImplBuilder(info.implClass(), resolvePsiImplSuperClass(rule), resolvePsiImplSuperInterface(rule));
-      populateImplMethods(impl, rule, info);
-      stubs.add(impl.build());
+      plans.add(buildIntfPlan(rule, ruleInfo(rule)));
     }
-    ClassSymbol.Builder visitor = stubVisitor(sortedPsiRules);
-    if (visitor != null) stubs.add(visitor.build());
-    ClassSymbol.Builder holder = stubElementTypeHolder();
-    if (holder != null) stubs.add(holder.build());
-    return stubs;
-  }
-
-  private static @NotNull ClassSymbol.Builder stubInterfaceBuilder(@NotNull String fqn,
-                                                                   @NotNull Collection<String> superInterfaces) {
-    ClassSymbol.Builder b = new ClassSymbol.Builder();
-    b.name = Fqn.of(fqn);
-    b.modifiers = Modifier.PUBLIC | Modifier.INTERFACE;
-    for (String s : superInterfaces) {
-      b.interfaces.add(Fqn.of(getRawClassName(s)));
+    for (BnfRule rule : sortedPsiRules.values()) {
+      plans.add(buildImplPlan(rule, ruleInfo(rule)));
     }
-    return b;
-  }
-
-  private static @NotNull ClassSymbol.Builder stubImplBuilder(@NotNull String fqn,
-                                                              @Nullable String superClass,
-                                                              @NotNull String intfClass) {
-    ClassSymbol.Builder b = new ClassSymbol.Builder();
-    b.name = Fqn.of(fqn);
-    b.modifiers = Modifier.PUBLIC;
-    if (StringUtil.isNotEmpty(superClass)) {
-      b.superClass = Fqn.of(getRawClassName(superClass));
-    }
-    b.interfaces.add(Fqn.of(intfClass));
-    return b;
+    ClassPlan visitor = buildVisitorPlan(sortedPsiRules);
+    if (visitor != null) plans.add(visitor);
+    return plans;
   }
 
   /**
-   * Stub for the to-be-generated PSI visitor, with one {@code visit*} {@link MethodSymbol} per rule
-   * plus one per super-interface (matches {@link #generateVisitor} emission). Returns {@code null}
-   * when no visitor will be emitted (mirrors the gate at {@link #generatePsi}).
+   * Element-type holder stub for {@link JavaHelperFactory.ExtraClasses} — class header only. The
+   * holder's actual emission stays in {@link #generateElementTypeHolder} because it writes static
+   * fields rather than methods, so it doesn't fit the {@link #renderClass} method-loop model.
    */
-  private @Nullable ClassSymbol.Builder stubVisitor(@NotNull Map<String, BnfRule> sortedPsiRules) {
-    if (myVisitorClassName == null || myGrammarRoot == null) return null;
-    ClassSymbol.Builder b = new ClassSymbol.Builder();
-    b.name = Fqn.of(myVisitorClassName);
-    b.modifiers = Modifier.PUBLIC;
-    b.superClass = Fqn.of(JavaBnfConstants.PSI_ELEMENT_VISITOR_CLASS);
-    if (G.visitorValue != null) b.typeParameters.add(G.visitorValue);
-    for (MethodSymbol.Builder m : visitorMethodSignatures(sortedPsiRules)) {
-      m.declaringClass = b.name;
-      b.methods.add(m);
-    }
-    return b;
-  }
-
-  /**
-   * Stub for the to-be-generated element-type holder interface. Class header only — no methods or
-   * fields are modelled here (callers don't currently introspect those). Returns {@code null}
-   * when no holder will be emitted (mirrors the gate at {@link #generateElementTypeHolder}).
-   */
-  private @Nullable ClassSymbol.Builder stubElementTypeHolder() {
+  private @Nullable ClassSymbol buildElementTypeHolderStub() {
     boolean needToGenerate = myGrammarRoot != null &&
                              (G.generateTokenTypes || G.generateElementTypes || G.generatePsi && G.generatePsiFactory);
     if (!needToGenerate) return null;
     ClassSymbol.Builder b = new ClassSymbol.Builder();
     b.name = Fqn.of(myPsiElementTypeHolderClass);
     b.modifiers = Modifier.PUBLIC | Modifier.INTERFACE;
-    return b;
+    return b.build();
   }
 
-  private void populateIntfMethods(@NotNull ClassSymbol.Builder intf, @NotNull BnfRule rule, @NotNull RuleInfo info) {
-    for (MethodSymbol.Builder m : intfMethodSignatures(rule, info)) {
-      m.declaringClass = intf.name;
-      intf.methods.add(m);
+  /** PSI interface plan: hierarchy + accessor signatures (no bodies — interface methods are abstract). */
+  private @NotNull ClassPlan buildIntfPlan(@NotNull BnfRule rule, @NotNull RuleInfo info) {
+    String psiClass = info.intfClass();
+    Collection<String> psiSupers = resolvePsiIntfSupers(rule);
+
+    Set<String> imports = new LinkedHashSet<>();
+    imports.addAll(DEFAULT_PSI_IMPORTS);
+    imports.addAll(psiSupers);
+    imports.addAll(getRuleMethodTypesToImport(rule));
+
+    ClassSymbol.Builder sym = new ClassSymbol.Builder();
+    sym.name = Fqn.of(psiClass);
+    sym.modifiers = Modifier.PUBLIC | Modifier.INTERFACE;
+    for (String s : psiSupers) {
+      sym.interfaces.add(Fqn.of(getRawClassName(s)));
+    }
+
+    List<MethodPlan> methods = new ArrayList<>();
+    Set<String> visited = new TreeSet<>();
+    for (RuleMethodsHelper.RuleMethodInfo rmi : myRulesMethodsHelper.getFor(rule)) {
+      if (StringUtil.isEmpty(rmi.name())) continue;
+      addIntfMethodPlans(methods, rule, info, rmi, visited);
+    }
+    String[] headerSupers = ArrayUtil.toStringArray(psiSupers);
+    return new ClassPlan(sym, myPaths.pathString(KnownAttribute.PSI_OUTPUT_PATH), imports, headerSupers, methods, null, null);
+  }
+
+  /** PSI impl plan: hierarchy + constructors + (optional) accept variants + accessor / util methods, each with a body emitter. */
+  private @NotNull ClassPlan buildImplPlan(@NotNull BnfRule rule, @NotNull RuleInfo info) {
+    String psiClass = info.implClass();
+    String superInterface = resolvePsiImplSuperInterface(rule);
+    String stubName = info.realStubClass();
+    String implSuper = resolvePsiImplSuperClass(rule);
+    boolean mixedAST = psiInfo(rule).mixedAST;
+
+    Set<String> imports = new LinkedHashSet<>();
+    if (!G.generateFQN) {
+      imports.addAll(Arrays.asList(CommonClassNames.JAVA_UTIL_LIST,
+                                   "org.jetbrains.annotations.*",
+                                   JavaBnfConstants.AST_NODE_CLASS,
+                                   JavaBnfConstants.PSI_ELEMENT_CLASS));
+      if (myVisitorClassName != null) imports.add(JavaBnfConstants.PSI_ELEMENT_VISITOR_CLASS);
+      imports.add(myPsiTreeUtilClass);
+    }
+    else {
+      imports.add("#forced");
+    }
+    imports.add(staticStarImport(myPsiElementTypeHolderClass));
+    if (!G.generateFQN) {
+      if (StringUtil.isNotEmpty(implSuper)) imports.add(implSuper);
+      imports.add(StringUtil.getPackageName(superInterface) + ".*");
+      imports.add(StringUtil.notNullize(myVisitorClassName));
+      imports.add(StringUtil.notNullize(myPsiImplUtilClass));
+      imports.addAll(getRuleMethodTypesToImport(rule));
+    }
+
+    JavaHelper mixinHelper = helperFor(KnownAttribute.MIXIN);
+    List<NavigatablePsiElement> inheritedCtors = inheritedConstructors(rule, mixinHelper);
+
+    if (!G.generateFQN) {
+      for (NavigatablePsiElement m : inheritedCtors) {
+        collectMethodTypesToImport(Collections.singletonList(m), false, imports);
+      }
+      if (stubName != null && inheritedCtors.isEmpty()) imports.add(G.fallbackStubElementType);
+      if (stubName != null) imports.add(stubName);
+    }
+    if (!G.generateTokenTypes) {
+      for (RuleMethodsHelper.RuleMethodInfo rmi : myRulesMethodsHelper.getFor(rule)) {
+        if (rmi.rule() == null && !StringUtil.isEmpty(rmi.name())) {
+          for (String s : getRootAttribute(myFile, KnownAttribute.PARSER_IMPORTS).asStrings()) {
+            if (s.startsWith("static ")) imports.add(s);
+          }
+          break;
+        }
+      }
+    }
+
+    ClassSymbol.Builder sym = new ClassSymbol.Builder();
+    sym.name = Fqn.of(psiClass);
+    sym.modifiers = info.isAbstract()
+                    ? Modifier.PUBLIC | Modifier.ABSTRACT
+                    : Modifier.PUBLIC;
+    if (StringUtil.isNotEmpty(implSuper)) {
+      sym.superClass = Fqn.of(getRawClassName(implSuper));
+    }
+    sym.interfaces.add(Fqn.of(superInterface));
+
+    List<MethodPlan> methods = new ArrayList<>();
+    for (MethodSymbol.Builder ctor : constructorSignatures(rule, info)) {
+      String args = paramNamesCsv(ctor);
+      methods.add(MethodPlan.ofImpl(ctor, () -> out("super(" + args + ");")));
+    }
+    if (myVisitorClassName != null) {
+      MethodSymbol.Builder spec = acceptSpecializedSignature(rule);
+      if (superDeclares(implSuper, mixinHelper, "accept", 1, myVisitorClassName)) {
+        spec.annotations.add(0, OVERRIDE_FQ);
+      }
+      boolean returns = G.visitorValue != null;
+      String visitCall = "visitor.visit" + CommonRendererUtils.getRulePsiClassName(rule, null) + "(this);";
+      methods.add(MethodPlan.ofImpl(spec, () -> out((returns ? "return " : "") + visitCall)));
+
+      MethodSymbol.Builder gen = acceptGenericSignature();
+      // PsiElement always declares accept(PsiElementVisitor); @Override stays unconditional —
+      // walking the chain through JavaHelper would require interface-side lookup the JavaHelper
+      // API doesn't expose.
+      gen.annotations.add(0, OVERRIDE_FQ);
+      methods.add(MethodPlan.ofImpl(gen, () -> {
+        String shortened = shorten(myVisitorClassName);
+        out("if (visitor instanceof " + shortened + ") accept((" + shortened + ")visitor);");
+        out("else super.accept(visitor);");
+      }));
+    }
+
+    Set<String> visited = new TreeSet<>();
+    for (RuleMethodsHelper.RuleMethodInfo rmi : myRulesMethodsHelper.getFor(rule)) {
+      if (StringUtil.isEmpty(rmi.name())) continue;
+      addImplMethodPlans(methods, rule, info, rmi, mixedAST, visited);
+    }
+    String[] headerSupers = new String[]{StringUtil.notNullize(implSuper), superInterface};
+    return new ClassPlan(sym, myPaths.pathString(KnownAttribute.PSI_OUTPUT_PATH), imports, headerSupers, methods, null, null);
+  }
+
+  /** Visitor plan: one rule-side {@code visit*} per rule (with a custom header), plus a super-loop pass. */
+  private @Nullable ClassPlan buildVisitorPlan(@NotNull Map<String, BnfRule> sortedPsiRules) {
+    if (myVisitorClassName == null || myGrammarRoot == null) return null;
+    VisitorSupers vs = resolveVisitorSupers(sortedPsiRules);
+    String superIntf = vs.superIntf;
+    MultiMap<String, String> supers = vs.supers;
+
+    Set<String> imports = new LinkedHashSet<>(Arrays.asList(
+      "org.jetbrains.annotations.*", JavaBnfConstants.PSI_ELEMENT_VISITOR_CLASS, superIntf));
+    imports.addAll(ContainerUtil.sorted(
+      JBIterable.from(sortedPsiRules.values()).map(this::ruleInfo).map(o -> o.intfPackage() + ".*").toSet()));
+    imports.addAll(supers.values());
+
+    String t = G.visitorValue != null ? G.visitorValue : "void";
+    String ret = G.visitorValue != null ? "return " : "";
+
+    ClassSymbol.Builder sym = new ClassSymbol.Builder();
+    sym.name = Fqn.of(myVisitorClassName);
+    sym.modifiers = Modifier.PUBLIC;
+    sym.superClass = Fqn.of(JavaBnfConstants.PSI_ELEMENT_VISITOR_CLASS);
+    if (G.visitorValue != null) sym.typeParameters.add(G.visitorValue);
+
+    List<MethodPlan> methods = new ArrayList<>();
+    Set<String> visited = new HashSet<>();
+    Set<String> all = new TreeSet<>();
+    for (BnfRule rule : sortedPsiRules.values()) {
+      String methodName = CommonRendererUtils.getRulePsiClassName(rule, null);
+      visited.add(methodName);
+      MethodSymbol.Builder sig = buildVisitMethod("visit" + methodName, t, ruleInfo(rule).intfClass());
+      // collect "all" with the same logic generateVisitor used at emission time
+      List<String> rawSupers = new ArrayList<>();
+      boolean first = true;
+      for (String top : supers.get(rule.getName())) {
+        if (!first && top.equals(superIntf)) continue;
+        String raw = getRawClassName(top);
+        rawSupers.add(raw);
+        if (first) {
+          all.add(raw);
+          first = false;
+        }
+      }
+      // Rule-side visit methods always emit the short PSI name as the parameter type,
+      // irrespective of G.generateFQN — matches the historical generateVisitor behavior.
+      String shortPsiName = CommonRendererUtils.getRulePsiClassName(rule, myPsiInterfaceFormat);
+      Runnable customHeader = () ->
+        out("public %s visit%s(%s %s o) {", t, methodName, shorten(JavaBnfConstants.NOTNULL_ANNO), shortPsiName);
+      Runnable body = () -> {
+        boolean firstBody = true;
+        for (String raw : rawSupers) {
+          String text = "visit" + myPsiInterfaceFormat.strip(StringUtil.getShortName(raw)) + "(o);";
+          if (firstBody) {
+            out(ret + text);
+            firstBody = false;
+          }
+          else {
+            out("// " + text);
+          }
+        }
+      };
+      methods.add(MethodPlan.ofImpl(sig, body, customHeader));
+    }
+    all.remove(superIntf);
+    for (String top : JBIterable.from(all).append(superIntf)) {
+      String methodName = myPsiInterfaceFormat.strip(StringUtil.getShortName(top));
+      if (visited.contains(methodName)) continue;
+      MethodSymbol.Builder sig = buildVisitMethod("visit" + methodName, t, top);
+      boolean fallback = methodName.equals(StringUtil.getShortName(top)) || top.equals(superIntf);
+      Runnable body = () -> {
+        if (!fallback) {
+          out(ret + "visit" + myPsiInterfaceFormat.strip(StringUtil.getShortName(superIntf)) + "(o);");
+        }
+        else {
+          String superPrefix = methodName.equals("Element") ? "super." : "";
+          out(superPrefix + "visitElement(o);");
+          if (G.visitorValue != null) out(ret + "null;");
+        }
+      };
+      methods.add(MethodPlan.ofImpl(sig, body));
+    }
+    String[] headerSupers = new String[]{JavaBnfConstants.PSI_ELEMENT_VISITOR_CLASS};
+    return new ClassPlan(sym, myPaths.pathString(KnownAttribute.PSI_OUTPUT_PATH), imports, headerSupers, methods, null, null);
+  }
+
+  private static final Fqn OVERRIDE_FQ = Fqn.of("java.lang.Override");
+
+  /** Comma-joined parameter names of {@code b} — used to build the {@code super(p0, p1, …)} body of an inherited constructor. */
+  private static @NotNull String paramNamesCsv(@NotNull MethodSymbol.Builder b) {
+    StringBuilder sb = new StringBuilder();
+    for (ParameterSymbol.Builder p : b.parameters) {
+      if (!sb.isEmpty()) sb.append(", ");
+      sb.append(p.name);
+    }
+    return sb.toString();
+  }
+
+  private void addIntfMethodPlans(@NotNull List<MethodPlan> out,
+                                  @NotNull BnfRule rule,
+                                  @NotNull RuleInfo info,
+                                  @NotNull RuleMethodsHelper.RuleMethodInfo rmi,
+                                  @NotNull Set<String> visited) {
+    switch (rmi.type()) {
+      case RULE, TOKEN -> out.add(MethodPlan.of(accessorSignature(rule, rmi, /*intf*/ true)));
+      case USER -> {
+        MethodSymbol.Builder sig = userAccessorSignature(rule, rmi, /*intf*/ true);
+        if (sig != null) out.add(MethodPlan.of(sig));
+      }
+      case MIXIN -> addMixinMethodPlans(out, rule, info, rmi, /*intf*/ true, /*mixedAST*/ false, visited);
     }
   }
 
-  private void populateImplMethods(@NotNull ClassSymbol.Builder impl, @NotNull BnfRule rule, @NotNull RuleInfo info) {
-    for (MethodSymbol.Builder m : implMethodSignatures(rule, info)) {
-      m.declaringClass = impl.name;
-      impl.methods.add(m);
+  private void addImplMethodPlans(@NotNull List<MethodPlan> out,
+                                  @NotNull BnfRule rule,
+                                  @NotNull RuleInfo info,
+                                  @NotNull RuleMethodsHelper.RuleMethodInfo rmi,
+                                  boolean mixedAST,
+                                  @NotNull Set<String> visited) {
+    JavaHelper mixinHelper = helperFor(KnownAttribute.MIXIN);
+    switch (rmi.type()) {
+      case RULE, TOKEN -> {
+        MethodSymbol.Builder sig = accessorSignature(rule, rmi, /*intf*/ false);
+        if (superDeclares(ruleInfo(rule).intfClass(), mixinHelper, sig.name, 0)) {
+          sig.annotations.add(0, OVERRIDE_FQ);
+        }
+        out.add(MethodPlan.ofImpl(sig, () ->
+          out("return " + generatePsiAccessorImplCall(rule, rmi, mixedAST) + ";")));
+      }
+      case USER -> {
+        MethodSymbol.Builder sig = userAccessorSignature(rule, rmi, /*intf*/ false);
+        if (sig == null) return;
+        if (superDeclares(ruleInfo(rule).intfClass(), mixinHelper, sig.name, 0)) {
+          sig.annotations.add(0, OVERRIDE_FQ);
+        }
+        out.add(MethodPlan.ofImpl(sig, () -> emitUserAccessorBody(rule, rmi, mixedAST)));
+      }
+      case MIXIN -> addMixinMethodPlans(out, rule, info, rmi, /*intf*/ false, mixedAST, visited);
     }
+  }
+
+  /**
+   * Mixin entries — mirrors the legacy {@code generateMixinMethod}:
+   * <ul>
+   *   <li>{@code intf=true}: emit the mixin-class methods (intf-side) plus the {@code psiImplUtil}
+   *       methods (intf-side). If neither produced anything, emit a "method not found" warning
+   *       comment block inside the class body and register the same warning with
+   *       {@link Generator#addWarning}.</li>
+   *   <li>{@code intf=false}: emit only {@code psiImplUtil} methods (impl-side). Mixin-class
+   *       methods aren't re-emitted on the impl because the impl extends the mixin and inherits
+   *       them.</li>
+   * </ul>
+   */
+  private void addMixinMethodPlans(@NotNull List<MethodPlan> out,
+                                   @NotNull BnfRule rule,
+                                   @NotNull RuleInfo info,
+                                   @NotNull RuleMethodsHelper.RuleMethodInfo rmi,
+                                   boolean intf,
+                                   boolean mixedAST,
+                                   @NotNull Set<String> visited) {
+    JavaHelper mixinHelper = helperFor(KnownAttribute.MIXIN);
+    JavaHelper psiImplUtilHelper = helperFor(KnownAttribute.PSI_IMPL_UTIL_CLASS);
+    String mixinClass = getAttribute(rule, KnownAttribute.MIXIN);
+    int added = 0;
+
+    if (intf) {
+      for (NavigatablePsiElement m : mixinHelper.findClassMethods(mixinClass, MethodType.INSTANCE, rmi.name(), false, -1)) {
+        MethodSymbol.Builder sig = mixinSignatureFromSource(rmi.name(), m, /*isInPsiUtil*/ false, /*intf*/ true, visited);
+        if (sig != null) {
+          out.add(MethodPlan.of(sig));
+          added++;
+        }
+      }
+    }
+    for (NavigatablePsiElement m : RuleImplUtil.findRuleImplMethods(psiImplUtilHelper, myPsiImplUtilClass, rmi.name(), rule)) {
+      MethodSymbol.Builder sig = mixinSignatureFromSource(rmi.name(), m, /*isInPsiUtil*/ true, intf, visited);
+      if (sig == null) continue;
+      if (intf) {
+        out.add(MethodPlan.of(sig));
+      }
+      else {
+        sig.annotations.add(0, OVERRIDE_FQ);
+        out.add(MethodPlan.ofImpl(sig, () -> emitUtilMethodBody(rmi.name(), m, /*isInPsiUtil*/ true)));
+      }
+      added++;
+    }
+
+    if (intf && added == 0) {
+      String ruleClassFqn = info.intfClass();
+      String implClassName = StringUtil.getShortName(String.valueOf(myPsiImplUtilClass));
+      addWarning(format("%s.%s(%s, ...) method not found", implClassName, rmi.name(), StringUtil.getShortName(ruleClassFqn)));
+      out.add(MethodPlan.ofRaw(() -> {
+        String ruleClassName = shorten(ruleClassFqn);
+        out("""
+              //WARNING: %s(...) is skipped
+              //matching %s(%s, ...)
+              //methods are not found in %s""",
+            rmi.name(), rmi.name(), ruleClassName, implClassName);
+      }));
+    }
+  }
+
+  /*Body emitters****************************************************************/
+  // Body-only counterparts to the legacy generate* emission functions. The headers are produced
+  // by renderMethodHeader; these only write the inside of the {@code { … }} block.
+
+  /**
+   * Impl-side body of a user (path-based) accessor: walks the path, accumulates the StringBuilder
+   * exactly as the legacy {@code generateUserPsiAccessors} did, then emits it. The path's
+   * validity is already established by {@link #userAccessorSignature}; this routine returns
+   * silently on the same conditions in case the helper state changed.
+   */
+  private void emitUserAccessorBody(@NotNull BnfRule startRule,
+                                    @NotNull RuleMethodsHelper.RuleMethodInfo ruleMethodInfo,
+                                    boolean mixedAST) {
+    StringBuilder sb = new StringBuilder();
+    Cardinality cardinality = REQUIRED;
+    String context = "";
+    String[] splitPath = ruleMethodInfo.path().split("/");
+    int i = -1, count = 1;
+    for (Object m : resolveUserPsiPathMethods(startRule, splitPath)) {
+      String pathElement = splitPath[++i];
+      if (m instanceof String) continue;
+      boolean last = i == splitPath.length - 1;
+      int indexStart = pathElement.indexOf('[');
+      int indexEnd = indexStart > 0 ? pathElement.lastIndexOf(']') : -1;
+      String index = indexEnd > -1 ? pathElement.substring(indexStart + 1, indexEnd).trim() : null;
+
+      RuleMethodsHelper.RuleMethodInfo targetInfo = (RuleMethodsHelper.RuleMethodInfo)m;
+      if (targetInfo == null) return;
+      if (indexStart > 0 && (indexEnd == -1 || StringUtil.isNotEmpty(pathElement.substring(indexEnd + 1)))) return;
+      if (index != null && !targetInfo.cardinality().many()) return;
+      if (!last && index == null && targetInfo.cardinality().many()) return;
+      if (i > 0 && StringUtil.isEmpty(targetInfo.name())) return;
+
+      boolean many = targetInfo.cardinality().many();
+      String className = shorten(targetInfo.rule() == null ? JavaBnfConstants.PSI_ELEMENT_CLASS : getAccessorType(targetInfo.rule()));
+      String type = (many ? shorten(CommonClassNames.JAVA_UTIL_LIST) + "<" : "") + className + (many ? "> " : " ");
+      String curId = N.psiLocal + (count++);
+      if (!context.isEmpty()) {
+        if (cardinality.optional()) {
+          sb.append("if (").append(context).append(" == null) return null;\n");
+        }
+        context += ".";
+      }
+      if (last && index == null) {
+        sb.append("return ");
+      }
+      else {
+        sb.append(type).append(curId).append(" = ");
+      }
+      String targetCall;
+      if (StringUtil.isNotEmpty(targetInfo.name())) {
+        targetCall = targetInfo.generateGetterName() + "()";
+      }
+      else {
+        targetCall = generatePsiAccessorImplCall(startRule, targetInfo, mixedAST);
+      }
+      sb.append(context).append(targetCall).append(";\n");
+      context = curId;
+      cardinality = targetInfo.cardinality();
+      if (index != null) {
+        if ("first".equals(index)) index = "0";
+        context += ".";
+        boolean isLast = index.equals("last");
+        if (isLast) index = context + "size() - 1";
+        curId = N.psiLocal + (count++);
+        if (last) {
+          sb.append("return ");
+        }
+        else {
+          sb.append(className).append(" ").append(curId).append(" = ");
+        }
+        if (cardinality != AT_LEAST_ONE || !index.equals("0")) {
+          if (isLast) {
+            sb.append(context).append("isEmpty()? null : ");
+          }
+          else {
+            int val = StringUtil.parseInt(index, Integer.MAX_VALUE);
+            sb.append(context).append("size()").append(val == Integer.MAX_VALUE ? " - 1 < " + index : " < " + (val + 1))
+              .append(" ? null : ");
+          }
+        }
+        sb.append(context).append("get(").append(index).append(");\n");
+        context = curId;
+        cardinality = cardinality == AT_LEAST_ONE && index.equals("0") ? REQUIRED : OPTIONAL;
+      }
+    }
+    out(sb.toString());
+  }
+
+  /** Impl-side body of a mixin / {@code psiImplUtil} util method: forwards to the static helper. */
+  private void emitUtilMethodBody(@NotNull String methodName,
+                                  @NotNull NavigatablePsiElement source,
+                                  boolean isInPsiUtil) {
+    List<String> methodTypes = JavaHelper.getMethodTypes(source);
+    String rawReturn = methodTypes.isEmpty() ? "void" : methodTypes.get(0);
+    int offset = methodTypes.isEmpty() || isInPsiUtil && methodTypes.size() < 3 ? 0 :
+                 isInPsiUtil ? 3 : 1;
+    String implUtilRef = shorten(StringUtil.notNullize(myPsiImplUtilClass, KnownAttribute.PSI_IMPL_UTIL_CLASS.getName()));
+    Function<Integer, List<String>> annoProvider = i -> JavaHelper.getParameterAnnotations(source, (i - 1) / 2);
+    Function<String, String> substitutor = ParserGeneratorUtil::unwrapTypeArgumentForParamList;
+    String args = getParametersString(methodTypes, offset, 2, substitutor, annoProvider, myShortener);
+    out("%s%s.%s(this%s);",
+        "void".equals(rawReturn) ? "" : "return ",
+        implUtilRef, methodName,
+        args.isEmpty() ? "" : ", " + args);
   }
 
   /*Signatures******************************************************************/
@@ -247,47 +666,6 @@ public final class JavaPsiGenerator extends Generator {
   private static final String NULLABLE_FQN = StringUtil.trimStart(JavaBnfConstants.NULLABLE_ANNO, "@");
   private static final Fqn NOTNULL_FQ = Fqn.of(NOTNULL_FQN);
   private static final Fqn NULLABLE_FQ = Fqn.of(NULLABLE_FQN);
-
-  private @NotNull List<MethodSymbol.Builder> intfMethodSignatures(@NotNull BnfRule rule, @NotNull RuleInfo info) {
-    List<MethodSymbol.Builder> out = new ArrayList<>();
-    Set<String> visited = new TreeSet<>();
-    for (RuleMethodsHelper.RuleMethodInfo ruleMethodInfo : myRulesMethodsHelper.getFor(rule)) {
-      if (StringUtil.isEmpty(ruleMethodInfo.name())) continue;
-      addMethodSignatures(out, rule, info, ruleMethodInfo, /*intf*/ true, visited);
-    }
-    return out;
-  }
-
-  private @NotNull List<MethodSymbol.Builder> implMethodSignatures(@NotNull BnfRule rule, @NotNull RuleInfo info) {
-    List<MethodSymbol.Builder> out = new ArrayList<>();
-    out.addAll(constructorSignatures(rule, info));
-    if (myVisitorClassName != null) {
-      out.add(acceptSpecializedSignature(rule));
-      out.add(acceptGenericSignature());
-    }
-    Set<String> visited = new TreeSet<>();
-    for (RuleMethodsHelper.RuleMethodInfo ruleMethodInfo : myRulesMethodsHelper.getFor(rule)) {
-      if (StringUtil.isEmpty(ruleMethodInfo.name())) continue;
-      addMethodSignatures(out, rule, info, ruleMethodInfo, /*intf*/ false, visited);
-    }
-    return out;
-  }
-
-  private void addMethodSignatures(@NotNull List<MethodSymbol.Builder> out,
-                                   @NotNull BnfRule rule,
-                                   @NotNull RuleInfo info,
-                                   @NotNull RuleMethodsHelper.RuleMethodInfo ruleMethodInfo,
-                                   boolean intf,
-                                   @NotNull Set<String> visited) {
-    switch (ruleMethodInfo.type()) {
-      case RULE, TOKEN -> out.add(accessorSignature(rule, ruleMethodInfo, intf));
-      case USER -> {
-        MethodSymbol.Builder b = userAccessorSignature(rule, ruleMethodInfo, intf);
-        if (b != null) out.add(b);
-      }
-      case MIXIN -> mixinSignatures(out, rule, ruleMethodInfo, info, intf, visited);
-    }
-  }
 
   /** Signature of a basic rule/token accessor (no parameters; nullability follows cardinality). */
   private @NotNull MethodSymbol.Builder accessorSignature(@NotNull BnfRule rule,
@@ -360,33 +738,6 @@ public final class JavaPsiGenerator extends Generator {
     boolean nonNull = !cardinality.many() && cardinality == REQUIRED && !totalNullable;
     b.annotations.add(nonNull ? NOTNULL_FQ : NULLABLE_FQ);
     return b;
-  }
-
-  /**
-   * Signatures for one MIXIN entry — one per resolved on-disk method (mirroring
-   * {@link #generateMixinMethod}: for {@code intf}, mixin lookups; for both, psiImplUtil
-   * lookups). Dedupes by name + parameter types via {@code visited}, same as
-   * {@link #generateUtilMethod}.
-   */
-  private void mixinSignatures(@NotNull List<MethodSymbol.Builder> out,
-                               @NotNull BnfRule rule,
-                               @NotNull RuleMethodsHelper.RuleMethodInfo ruleMethodInfo,
-                               @NotNull RuleInfo info,
-                               boolean intf,
-                               @NotNull Set<String> visited) {
-    if (intf) {
-      JavaHelper mixinHelper = helperFor(KnownAttribute.MIXIN);
-      String mixinClass = getAttribute(rule, KnownAttribute.MIXIN);
-      for (NavigatablePsiElement m : mixinHelper.findClassMethods(mixinClass, MethodType.INSTANCE, ruleMethodInfo.name(), false, -1)) {
-        MethodSymbol.Builder b = mixinSignatureFromSource(ruleMethodInfo.name(), m, /*isInPsiUtil*/ false, intf, visited);
-        if (b != null) out.add(b);
-      }
-    }
-    JavaHelper psiImplUtilHelper = helperFor(KnownAttribute.PSI_IMPL_UTIL_CLASS);
-    for (NavigatablePsiElement m : RuleImplUtil.findRuleImplMethods(psiImplUtilHelper, myPsiImplUtilClass, ruleMethodInfo.name(), rule)) {
-      MethodSymbol.Builder b = mixinSignatureFromSource(ruleMethodInfo.name(), m, /*isInPsiUtil*/ true, intf, visited);
-      if (b != null) out.add(b);
-    }
   }
 
   /**
@@ -837,7 +1188,22 @@ public final class JavaPsiGenerator extends Generator {
   public void generate() throws IOException {
     PsiGenerationTargets psiGenerationTargets = prepareGeneration();
 
-    List<ClassSymbol> stubs = buildPsiStubs(psiGenerationTargets.sortedPsiRules());
+    // Pass 1: build class plans, materialise symbols inline, surface to ExtraClasses, discard
+    // plans. Pass-1 plans live only for the duration of this method — `secondRun` rebuilds them.
+    List<ClassSymbol> stubs = new ArrayList<>();
+    if (G.generatePsi) {
+      for (ClassPlan plan : buildPsiClassPlans(psiGenerationTargets.sortedPsiRules())) {
+        Fqn declaring = plan.symbol.name;
+        for (MethodPlan m : plan.methods) {
+          if (m.signature == null) continue;
+          m.signature.declaringClass = declaring;
+          plan.symbol.methods.add(m.signature);
+        }
+        stubs.add(plan.symbol.build());
+      }
+    }
+    ClassSymbol holder = buildElementTypeHolderStub();
+    if (holder != null) stubs.add(holder);
     JavaHelperFactory.ExtraClasses extras = new JavaHelperFactory.ExtraClasses(stubs);
 
     var secondRun = new JavaPsiGenerator(this, JavaHelperFactory.getInstance(myFile.getProject()).scoped(myPaths, extras));
@@ -856,7 +1222,53 @@ public final class JavaPsiGenerator extends Generator {
 
     generateElementTypeHolder(psiGenerationTargets.sortedCompositeTypes());
     generateElementTypeConverter(psiGenerationTargets.sortedCompositeTypes());
-    generatePsi(psiGenerationTargets.sortedPsiRules());
+    if (G.generatePsi) {
+      checkClassAvailability(myPsiImplUtilClass, KnownAttribute.PSI_IMPL_UTIL_CLASS);
+      for (ClassPlan plan : buildPsiClassPlans(psiGenerationTargets.sortedPsiRules())) {
+        renderClass(plan);
+      }
+    }
+  }
+
+  /**
+   * Generic renderer: open output, emit class header, run optional pre-method block, walk method
+   * plans (each producing its own header via {@link #renderMethodHeader} or its custom emitter
+   * and body), run optional post-method block, close the class.
+   */
+  private void renderClass(@NotNull ClassPlan plan) throws IOException {
+    ClassSymbol.Builder sym = plan.symbol;
+    boolean isInterface = (sym.modifiers & Modifier.INTERFACE) != 0;
+    TypeKind kind = isInterface ? TypeKind.INTERFACE
+                  : (sym.modifiers & Modifier.ABSTRACT) != 0 ? TypeKind.ABSTRACT_CLASS
+                  : TypeKind.CLASS;
+    String classNameWithGenerics = sym.name.value() +
+                                   (sym.typeParameters.isEmpty()
+                                    ? ""
+                                    : "<" + String.join(", ", sym.typeParameters) + ">");
+    openOutput(sym.name.value(), plan.outputPath);
+    try {
+      generateClassHeader(classNameWithGenerics, plan.imports, "", kind, plan.supersForHeader);
+      if (plan.preMethods != null) plan.preMethods.run();
+      for (MethodPlan m : plan.methods) {
+        if (m.signature == null) {
+          if (m.customHeader != null) m.customHeader.run();
+          newLine();
+          continue;
+        }
+        if (m.customHeader != null) m.customHeader.run();
+        else renderMethodHeader(m.signature, isInterface);
+        if (m.body != null) {
+          m.body.run();
+          out("}");
+        }
+        newLine();
+      }
+      if (plan.postMethods != null) plan.postMethods.run();
+      out("}");
+    }
+    finally {
+      closeOutput();
+    }
   }
 
   private void generateElementTypeConverter(@NotNull Map<String, BnfRule> compositeTypes) throws IOException {
@@ -932,71 +1344,6 @@ public final class JavaPsiGenerator extends Generator {
       String tail = StringUtil.isEmpty("PSI method signatures will not be detected") ? "" : " (PSI method signatures will not be detected)";
       addWarning(className + " class not found" + tail);
     }
-  }
-
-  /**
-   * Emits the PSI visitor class. Each rule gets a {@code visit<Rule>} method that delegates to
-   * its first declared super-interface; remaining supers are listed as commented-out alternatives.
-   * Non-public super-interfaces are replaced with the configured base interface. When
-   * {@link GenOptions#visitorValue} is set, methods carry that type parameter and {@code return}
-   * the delegate result.
-   */
-  private void generateVisitor(String psiClass, Map<String, BnfRule> sortedRules) {
-    VisitorSupers vs = resolveVisitorSupers(sortedRules);
-    String superIntf = vs.superIntf;
-    MultiMap<String, String> supers = vs.supers;
-    Set<String> imports = new LinkedHashSet<>(Arrays.asList("org.jetbrains.annotations.*", JavaBnfConstants.PSI_ELEMENT_VISITOR_CLASS, superIntf));
-    imports.addAll(ContainerUtil.sorted(
-      JBIterable.from(sortedRules.values()).map(this::ruleInfo).map(o -> o.intfPackage() + ".*").toSet()));
-    imports.addAll(supers.values());
-    String r = G.visitorValue != null ? "<" + G.visitorValue + ">" : "";
-    String t = G.visitorValue != null ? G.visitorValue : "void";
-    String ret = G.visitorValue != null ? "return " : "";
-    generateClassHeader(psiClass + r, imports, "", TypeKind.CLASS, JavaBnfConstants.PSI_ELEMENT_VISITOR_CLASS);
-    Set<String> visited = new HashSet<>();
-    Set<String> all = new TreeSet<>();
-    for (BnfRule rule : sortedRules.values()) {
-      String methodName = CommonRendererUtils.getRulePsiClassName(rule, null);
-      visited.add(methodName);
-      // Rule-side visit methods always emit the short PSI name as the parameter type, irrespective
-      // of {@code G.generateFQN} — matches the historical {@link #generateVisitor} behavior.
-      out("public %s visit%s(%s %s o) {", t, methodName, shorten(JavaBnfConstants.NOTNULL_ANNO),
-          CommonRendererUtils.getRulePsiClassName(rule, myPsiInterfaceFormat));
-      boolean first = true;
-      for (String top : supers.get(rule.getName())) {
-        if (!first && top.equals(superIntf)) continue;
-        top = getRawClassName(top);
-        if (first) all.add(top);
-        String text = "visit" + myPsiInterfaceFormat.strip(StringUtil.getShortName(top)) + "(o);";
-        if (first) {
-          out(ret + text);
-        }
-        else {
-          out("// " + text);
-        }
-        if (first) first = false;
-      }
-      out("}");
-      newLine();
-    }
-    all.remove(superIntf);
-    for (String top : JBIterable.from(all).append(superIntf)) {
-      String methodName = myPsiInterfaceFormat.strip(StringUtil.getShortName(top));
-      if (visited.contains(methodName)) continue;
-      out("public %s visit%s(%s %s o) {", t, methodName, shorten(JavaBnfConstants.NOTNULL_ANNO), shorten(top));
-      if (!methodName.equals(StringUtil.getShortName(top)) && !top.equals(superIntf)) {
-        out(ret + "visit" + myPsiInterfaceFormat.strip(StringUtil.getShortName(superIntf)) + "(o);");
-      }
-      else {
-        String superPrefix = methodName.equals("Element") ? "super." : "";
-        out(superPrefix + "visitElement(o);");
-        if (G.visitorValue != null) out(ret + "null;");
-      }
-      out("}");
-      newLine();
-    }
-
-    out("}");
   }
 
   /**
@@ -1253,65 +1600,6 @@ public final class JavaPsiGenerator extends Generator {
   }
 
   /*PSI******************************************************************/
-  /** Emits the PSI interface and impl for each rule, plus the visitor when one is configured. */
-  private void generatePsi(@NotNull Map<String, BnfRule> sortedPsiRules) throws IOException {
-    if (!G.generatePsi) return;
-
-    checkClassAvailability(myPsiImplUtilClass, KnownAttribute.PSI_IMPL_UTIL_CLASS);
-
-    myRulesMethodsHelper.buildMaps(sortedPsiRules.values());
-
-    String psiOutput = myPaths.pathString(KnownAttribute.PSI_OUTPUT_PATH);
-
-    for (BnfRule rule : sortedPsiRules.values()) {
-      RuleInfo info = ruleInfo(rule);
-      openOutput(info.intfClass(), psiOutput);
-      try {
-        generatePsiIntf(rule, info);
-      }
-      finally {
-        closeOutput();
-      }
-    }
-
-    for (BnfRule rule : sortedPsiRules.values()) {
-      RuleInfo info = ruleInfo(rule);
-      openOutput(info.implClass(), psiOutput);
-      try {
-        generatePsiImpl(rule, info);
-      }
-      finally {
-        closeOutput();
-      }
-    }
-
-    if (myVisitorClassName != null && myGrammarRoot != null) {
-      openOutput(myVisitorClassName, psiOutput);
-      try {
-        generateVisitor(myVisitorClassName, sortedPsiRules);
-      }
-      finally {
-        closeOutput();
-      }
-    }
-  }
-
-
-  /** Emits the public PSI interface for {@code rule}: super-interfaces (with stub-aware additions) and rule accessor signatures. */
-  private void generatePsiIntf(@NotNull BnfRule rule, @NotNull RuleInfo info) {
-    String psiClass = info.intfClass();
-    Collection<String> psiSupers = resolvePsiIntfSupers(rule);
-
-    Set<String> imports = new LinkedHashSet<>();
-    imports.addAll(DEFAULT_PSI_IMPORTS);
-    imports.addAll(psiSupers);
-    imports.addAll(getRuleMethodTypesToImport(rule));
-
-    generateClassHeader(psiClass, imports, "", TypeKind.INTERFACE, ArrayUtil.toStringArray(psiSupers));
-    generatePsiClassMethods(rule, info, true);
-    out("}");
-  }
-
   /**
    * Resolved super-interface list emitted for {@code rule}'s PSI interface:
    * {@link PsiRuleInfo#superInterfaces} plus a {@code StubBasedPsiElement<stubClass>} entry when
@@ -1346,180 +1634,6 @@ public final class JavaPsiGenerator extends Generator {
    */
   private @NotNull String resolvePsiImplSuperInterface(@NotNull BnfRule rule) {
     return ruleInfo(rule).intfClass();
-  }
-
-  /**
-   * Emits the PSI impl class for {@code rule}: extends/implements clause from
-   * {@link PsiRuleInfo#realSuperClass}, constructors that mirror those of the (eventual) base
-   * class, optional {@code accept(Visitor)} dispatch, and rule accessor implementations.
-   * Detects and warns on cyclic {@code mixin}/{@code extends} chains.
-   */
-  private void generatePsiImpl(@NotNull BnfRule rule, @NotNull RuleInfo info) {
-    String psiClass = info.implClass();
-    String superInterface = resolvePsiImplSuperInterface(rule);
-    String stubName = info.realStubClass();
-    String implSuper = resolvePsiImplSuperClass(rule);
-
-    Set<String> imports = new LinkedHashSet<>();
-    if (!G.generateFQN) {
-      imports.addAll(Arrays.asList(CommonClassNames.JAVA_UTIL_LIST,
-                                   "org.jetbrains.annotations.*",
-                                   JavaBnfConstants.AST_NODE_CLASS,
-                                   JavaBnfConstants.PSI_ELEMENT_CLASS));
-      if (myVisitorClassName != null) imports.add(JavaBnfConstants.PSI_ELEMENT_VISITOR_CLASS);
-      imports.add(myPsiTreeUtilClass);
-    }
-    else {
-      imports.add("#forced");
-    }
-    imports.add(staticStarImport(myPsiElementTypeHolderClass));
-    if (!G.generateFQN) {
-      if (StringUtil.isNotEmpty(implSuper)) imports.add(implSuper);
-      imports.add(StringUtil.getPackageName(superInterface) + ".*");
-      imports.add(StringUtil.notNullize(myVisitorClassName));
-      imports.add(StringUtil.notNullize(myPsiImplUtilClass));
-      imports.addAll(getRuleMethodTypesToImport(rule));
-    }
-
-    Function<String, String> substitutor = stubName == null ? ParserGeneratorUtil::unwrapTypeArgumentForParamList : o -> {
-      String oo = unwrapTypeArgumentForParamList(o);
-      if (oo.equals(o)) return o;
-      int idx = oo.lastIndexOf(" ");
-      return idx == -1 ? stubName : oo.substring(0, idx) + " " + stubName;
-    };
-
-    Set<BnfRule> visited = new HashSet<>();
-    List<NavigatablePsiElement> constructors = Collections.emptyList();
-    BnfRule topSuperRule = null;
-    String topSuperClass = null;
-    JavaHelper mixinHelper = helperFor(KnownAttribute.MIXIN);
-    for (BnfRule next = rule; next != null && next != topSuperRule; ) {
-      if (!visited.add(next)) {
-        addWarning(rule.getName() + " employs cyclic inheritance");
-        break;
-      }
-      topSuperRule = next;
-      String superClass = psiInfo(next).realSuperClass;
-      if (superClass == null) continue;
-      next = getEffectiveSuperRule(myFile, next);
-      if (next != null && next != topSuperRule && getAttribute(topSuperRule, KnownAttribute.MIXIN) == null) continue;
-      topSuperClass = getRawClassName(superClass);
-      constructors = mixinHelper.findClassMethods(topSuperClass, MethodType.CONSTRUCTOR, "*", false, -1);
-      if (!constructors.isEmpty()) break;
-    }
-    if (!G.generateFQN) {
-      for (NavigatablePsiElement m : constructors) {
-        collectMethodTypesToImport(Collections.singletonList(m), false, imports);
-      }
-      if (stubName != null && constructors.isEmpty()) imports.add(G.fallbackStubElementType);
-      if (stubName != null) imports.add(stubName);
-    }
-
-    if (!G.generateTokenTypes) {
-      // add parser static imports hoping external token constants are there
-      for (RuleMethodsHelper.RuleMethodInfo ruleMethodInfo : myRulesMethodsHelper.getFor(rule)) {
-        if (ruleMethodInfo.rule() == null && !StringUtil.isEmpty(ruleMethodInfo.name())) {
-          for (String s : getRootAttribute(myFile, KnownAttribute.PARSER_IMPORTS).asStrings()) {
-            if (s.startsWith("static ")) imports.add(s);
-          }
-          break;
-        }
-      }
-    }
-
-    TypeKind typeKind = info.isAbstract() ? TypeKind.ABSTRACT_CLASS : TypeKind.CLASS;
-    generateClassHeader(psiClass, imports, "", typeKind, implSuper, superInterface);
-    for (MethodSymbol.Builder b : constructorSignatures(rule, info)) {
-      renderMethodHeader(b, /*intf*/ false);
-      StringBuilder args = new StringBuilder();
-      for (ParameterSymbol.Builder p : b.parameters) {
-        if (args.length() > 0) args.append(", ");
-        args.append(p.name);
-      }
-      out("super(" + args + ");");
-      out("}");
-      newLine();
-    }
-    if (myVisitorClassName != null) {
-      MethodSymbol.Builder bSpecialized = acceptSpecializedSignature(rule);
-      if (superDeclares(implSuper, mixinHelper, "accept", 1, myVisitorClassName)) {
-        out(shorten(JavaBnfConstants.OVERRIDE_ANNO));
-      }
-      renderMethodHeader(bSpecialized, /*intf*/ false);
-      String ret = G.visitorValue != null ? "return " : "";
-      out(ret + "visitor.visit" + CommonRendererUtils.getRulePsiClassName(rule, null) + "(this);");
-      out("}");
-      newLine();
-
-      MethodSymbol.Builder bGeneric = acceptGenericSignature();
-      // PsiElement always declares accept(PsiElementVisitor); the @Override stays unconditional —
-      // walking the chain through JavaHelper would require interface-side lookup, which the
-      // current JavaHelper API doesn't expose.
-      out(shorten(JavaBnfConstants.OVERRIDE_ANNO));
-      renderMethodHeader(bGeneric, /*intf*/ false);
-      String shortened = shorten(myVisitorClassName);
-      out("if (visitor instanceof " + shortened + ") accept((" + shortened + ")visitor);");
-      out("else super.accept(visitor);");
-      out("}");
-      newLine();
-    }
-    generatePsiClassMethods(rule, info, false);
-    out("}");
-  }
-
-  /**
-   * Emits accessor and util methods for {@code rule}'s PSI interface ({@code intf=true}) or impl ({@code intf=false}).
-   */
-  private void generatePsiClassMethods(@NotNull BnfRule rule, @NotNull RuleInfo info, boolean intf) {
-    Set<String> visited = new TreeSet<>();
-    boolean mixedAST = psiInfo(rule).mixedAST;
-    for (RuleMethodsHelper.RuleMethodInfo ruleMethodInfo : myRulesMethodsHelper.getFor(rule)) {
-      if (StringUtil.isEmpty(ruleMethodInfo.name())) continue;
-      switch (ruleMethodInfo.type()) {
-        case RULE, TOKEN -> generatePsiAccessor(rule, ruleMethodInfo, intf, mixedAST);
-        case USER -> generateUserPsiAccessors(rule, ruleMethodInfo, intf, mixedAST);
-        case MIXIN -> generateMixinMethod(rule, ruleMethodInfo, intf, info, visited);
-        default -> throw new AssertionError(ruleMethodInfo.toString());
-      }
-    }
-  }
-
-  private void generateMixinMethod(@NotNull BnfRule rule,
-                                   @NotNull RuleMethodsHelper.RuleMethodInfo ruleMethodInfo,
-                                   boolean intf,
-                                   @NotNull RuleInfo info,
-                                   @NotNull Set<String> visited) {
-    boolean isGenerated = false;
-
-    if (intf) {
-      JavaHelper mixinHelper = helperFor(KnownAttribute.MIXIN);
-      String mixinClass = getAttribute(rule, KnownAttribute.MIXIN);
-      List<NavigatablePsiElement> methods = mixinHelper.findClassMethods(mixinClass, MethodType.INSTANCE, ruleMethodInfo.name(), false, -1);
-
-      for (NavigatablePsiElement method : methods) {
-        generateUtilMethod(ruleMethodInfo.name(), method, true, false, visited);
-        isGenerated = true;
-      }
-    }
-
-    JavaHelper psiImplUtilHelper = helperFor(KnownAttribute.PSI_IMPL_UTIL_CLASS);
-    List<NavigatablePsiElement> methods = RuleImplUtil.findRuleImplMethods(psiImplUtilHelper, myPsiImplUtilClass, ruleMethodInfo.name(), rule);
-    for (NavigatablePsiElement method : methods) {
-      generateUtilMethod(ruleMethodInfo.name(), method, intf, true, visited);
-      isGenerated = true;
-    }
-
-    if (intf && !isGenerated) {
-      String ruleClassName = shorten(info.intfClass());
-      String implClassName = StringUtil.getShortName(String.valueOf(myPsiImplUtilClass));
-      out("""
-            //WARNING: %s(...) is skipped
-            //matching %s(%s, ...)
-            //methods are not found in %s""",
-          ruleMethodInfo.name(), ruleMethodInfo.name(), ruleClassName, implClassName);
-      newLine();
-      addWarning(format("%s.%s(%s, ...) method not found", implClassName, ruleMethodInfo.name(), ruleClassName));
-    }
   }
 
   /** Collects every type name that {@code rule}'s generated PSI accessors and mixin/util methods reference, so callers can build the import list. */
@@ -1594,20 +1708,6 @@ public final class JavaPsiGenerator extends Generator {
   }
 
 
-  /** Emits a single rule- or token-accessor method (e.g. {@code getFoo()}, {@code getFooList()}) for the PSI interface or impl. */
-  private void generatePsiAccessor(BnfRule rule, RuleMethodsHelper.RuleMethodInfo ruleMethodInfo, boolean intf, boolean mixedAST) {
-    MethodSymbol.Builder b = accessorSignature(rule, ruleMethodInfo, intf);
-    if (!intf && superDeclares(ruleInfo(rule).intfClass(), helperFor(KnownAttribute.MIXIN), b.name, 0)) {
-      out(shorten(JavaBnfConstants.OVERRIDE_ANNO));
-    }
-    renderMethodHeader(b, intf);
-    if (!intf) {
-      out("return " + generatePsiAccessorImplCall(rule, ruleMethodInfo, mixedAST) + ";");
-      out("}");
-    }
-    newLine();
-  }
-
   /**
    * Renders the body of a PSI accessor — a {@code findChildByType}, {@code findChildByClass},
    * {@code PsiTreeUtil.getChildOfType} or stub-aware variant — depending on cardinality, whether
@@ -1680,171 +1780,6 @@ public final class JavaPsiGenerator extends Generator {
       targetRule[0] = targetInfo == null ? null : targetInfo.rule();
       return targetInfo;
     });
-  }
-
-  /**
-   * Emits a user-defined accessor whose body chains through a {@code methods} attribute path
-   * (e.g. {@code "foo/bar[last]"}). Reports a warning per attribute on the first invalid path
-   * step (unknown rule, index on a non-list, missing index on a list, suppressed accessor, …)
-   * and aborts emission of that accessor.
-   */
-  private void generateUserPsiAccessors(BnfRule startRule, RuleMethodsHelper.RuleMethodInfo ruleMethodInfo, boolean intf, boolean mixedAST) {
-    StringBuilder sb = new StringBuilder();
-    BnfRule targetRule = startRule;
-    Cardinality cardinality = REQUIRED;
-    String context = "";
-    String[] splitPath = ruleMethodInfo.path().split("/");
-
-    int i = -1, count = 1;
-    boolean totalNullable = false;
-    for (Object m : resolveUserPsiPathMethods(startRule, splitPath)) {
-      String pathElement = splitPath[++i];
-      if (m instanceof String) continue;
-      boolean last = i == splitPath.length - 1;
-      int indexStart = pathElement.indexOf('[');
-      int indexEnd = indexStart > 0 ? pathElement.lastIndexOf(']') : -1;
-      String base = (indexStart > -1 ? pathElement.substring(0, indexStart) : pathElement).trim();
-      String index = indexEnd > -1 ? pathElement.substring(indexStart + 1, indexEnd).trim() : null;
-
-
-      RuleMethodsHelper.RuleMethodInfo targetInfo = (RuleMethodsHelper.RuleMethodInfo)m;
-      String error;
-      if (indexStart > 0 && (indexEnd == -1 || StringUtil.isNotEmpty(pathElement.substring(indexEnd + 1)))) {
-        error = "'<name>[<index>]' expected, got '" + pathElement + "'";
-      }
-      else if (targetInfo == null) {
-        Collection<String> available = targetRule == null ? null : myRulesMethodsHelper.getMethodNames(targetRule);
-        if (targetRule == null) {
-          error = "'" + base + "' not found in '" + splitPath[i - 1] + "' (not a rule)";
-        }
-        else if (available == null || available.isEmpty()) {
-          error = "'" + base + "' not found in '" + targetRule.getName() + "' (available: nothing)";
-        }
-        else {
-          error = "'" + base + "' not found in '" + targetRule.getName() + "' (available: " + String.join(", ", available) + ")";
-        }
-      }
-      else if (index != null && !targetInfo.cardinality().many()) {
-        error = "'[" + index + "]' unexpected after '" + base + getCardinalityText(targetInfo.cardinality()) + "'";
-      }
-      else if (!last && index == null && targetInfo.cardinality().many()) {
-        error = "'[<index>]' required after '" + base + getCardinalityText(targetInfo.cardinality()) + "'";
-      }
-      else if (i > 0 && StringUtil.isEmpty(targetInfo.name())) {
-        error = "'" + base + "' accessor suppressed in '" + splitPath[i - 1] + "'";
-      }
-      else {
-        error = null;
-      }
-      if (error != null) {
-        if (intf) { // warn only once
-          addWarning(format("%s#%s(\"%s\"): %s", startRule.getName(), ruleMethodInfo.name(), ruleMethodInfo.path(), error));
-        }
-        return;
-      }
-
-      boolean many = targetInfo.cardinality().many();
-      String className = shorten(targetInfo.rule() == null ? JavaBnfConstants.PSI_ELEMENT_CLASS : getAccessorType(targetInfo.rule()));
-
-      String type = (many ? shorten(CommonClassNames.JAVA_UTIL_LIST) + "<" : "") + className + (many ? "> " : " ");
-      String curId = N.psiLocal + (count++);
-      if (!context.isEmpty()) {
-        if (cardinality.optional()) {
-          sb.append("if (").append(context).append(" == null) return null;\n");
-        }
-        context += ".";
-      }
-      if (last && index == null) {
-        sb.append("return ");
-      }
-      else {
-        sb.append(type).append(curId).append(" = ");
-      }
-      String targetCall;
-      if (StringUtil.isNotEmpty(targetInfo.name())) {
-        targetCall = targetInfo.generateGetterName() + "()";
-      }
-      else {
-        targetCall = generatePsiAccessorImplCall(startRule, targetInfo, mixedAST);
-      }
-      sb.append(context).append(targetCall).append(";\n");
-
-      context = curId;
-
-      targetRule = targetInfo.rule(); // next accessors
-      cardinality = targetInfo.cardinality();
-      totalNullable |= cardinality.optional();
-
-      // list item
-      if (index != null) {
-        if ("first".equals(index)) index = "0";
-
-        context += ".";
-        boolean isLast = index.equals("last");
-        if (isLast) index = context + "size() - 1";
-        curId = N.psiLocal + (count++);
-        if (last) {
-          sb.append("return ");
-        }
-        else {
-          sb.append(className).append(" ").append(curId).append(" = ");
-        }
-        if (cardinality != AT_LEAST_ONE || !index.equals("0")) { // range check
-          if (isLast) {
-            sb.append(context).append("isEmpty()? null : ");
-          }
-          else {
-            int val = StringUtil.parseInt(index, Integer.MAX_VALUE);
-            sb.append(context).append("size()").append(val == Integer.MAX_VALUE ? " - 1 < " + index : " < " + (val + 1))
-              .append(" ? null : ");
-          }
-        }
-        sb.append(context).append("get(").append(index).append(");\n");
-
-        context = curId;
-        cardinality = cardinality == AT_LEAST_ONE && index.equals("0") ? REQUIRED : OPTIONAL;
-        totalNullable |= cardinality.optional();
-      }
-    }
-
-    MethodSymbol.Builder b = userAccessorSignature(startRule, ruleMethodInfo, intf);
-    if (b == null) return; // path already validated above; defensive
-    if (!intf && superDeclares(ruleInfo(startRule).intfClass(), helperFor(KnownAttribute.MIXIN), b.name, 0)) {
-      out(shorten(JavaBnfConstants.OVERRIDE_ANNO));
-    }
-    renderMethodHeader(b, intf);
-
-    if (!intf) {
-      out(sb.toString());
-      out("}");
-    }
-    newLine();
-  }
-
-  /**
-   * Emits a method that delegates to a mixin or {@code psiImplUtil} static helper, mirroring its
-   * signature, generics, annotations, and exceptions. {@code isInPsiUtil=true} drops the first
-   * helper parameter (the {@code this} target) when forwarding the call.
-   */
-  private void generateUtilMethod(String methodName,
-                                  NavigatablePsiElement method,
-                                  boolean intf,
-                                  boolean isInPsiUtil,
-                                  Set<String> visited) {
-    MethodSymbol.Builder b = mixinSignatureFromSource(methodName, method, isInPsiUtil, intf, visited);
-    if (b == null) return;
-    if (!intf) out(shorten(JavaBnfConstants.OVERRIDE_ANNO));
-    renderMethodHeader(b, intf);
-    if (!intf) {
-      String implUtilRef = shorten(StringUtil.notNullize(myPsiImplUtilClass, KnownAttribute.PSI_IMPL_UTIL_CLASS.getName()));
-      StringBuilder args = new StringBuilder();
-      for (ParameterSymbol.Builder p : b.parameters) {
-        args.append(", ").append(p.name);
-      }
-      out("%s%s.%s(this%s);", "void".equals(JvmTypeRefs.renderPlain(b.returnType)) ? "" : "return ", implUtilRef, methodName, args);
-      out("}");
-    }
-    newLine();
   }
 
   /*Syntax******************************************************************/

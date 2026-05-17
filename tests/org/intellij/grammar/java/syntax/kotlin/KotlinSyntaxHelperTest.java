@@ -305,6 +305,21 @@ public class KotlinSyntaxHelperTest extends GoldenClassInfoTestCase {
     assertClassInfoMatchesGolden(extractAll());
   }
 
+  public void testSuppressAnnotationIsIgnored() throws Exception {
+    write("a/b/Quiet.kt", """
+        package a.b
+        @Suppress("unused")
+        class Quiet(@Suppress("UNUSED_PARAMETER") val x: Int) {
+            @Suppress("NOTHING_TO_INLINE")
+            fun f() {}
+
+            @kotlin.Suppress("UNUSED_PARAMETER")
+            fun g(p: Int) {}
+        }
+        """);
+    assertClassInfoMatchesGolden(extractAll());
+  }
+
   public void testImportedTypeResolves() throws Exception {
     write("a/b/Used.kt", """
         package a.b

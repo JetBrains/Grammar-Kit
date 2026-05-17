@@ -148,22 +148,23 @@ public final class ClassSymbolUtil {
 
   private static @NotNull List<String> methodTypesFromSymbol(@NotNull MethodSymbol m) {
     List<String> out = new ArrayList<>(1 + 2 * m.parameters().size());
-    out.add(renderMethodType(m.returnType()));
+    out.add(JvmTypeRefs.renderAnnotated(m.returnType()));
     for (ParameterSymbol p : m.parameters()) {
-      out.add(renderMethodType(p.type()));
+      out.add(renderParameterType(p.type()));
       out.add(p.name());
     }
     return out;
   }
 
   /**
-   * Render a {@link JvmTypeRef} in the form expected by string-based callers ({@code methodTypes}).
-   * Type-variable references are wrapped in angle brackets ({@code <T>}) — that's the legacy
-   * convention {@code methodTypesFromPsi} also produces, and
+   * Render a parameter-slot {@link JvmTypeRef} in the form expected by string-based callers
+   * ({@code methodTypes}). Type-variable references are wrapped in angle brackets ({@code <T>}) —
+   * that's the legacy convention {@code methodTypesFromPsi} also produces for parameters, and
    * {@code ParserGeneratorUtil.unwrapTypeArgumentForParamList} relies on it to detect a bare
-   * type-variable position for the inherited-constructor substitution.
+   * type-variable position for the inherited-constructor substitution. Return types must not be
+   * wrapped — there is no matching unwrap on the return-type path.
    */
-  private static @NotNull String renderMethodType(@NotNull JvmTypeRef ref) {
+  private static @NotNull String renderParameterType(@NotNull JvmTypeRef ref) {
     if (ref instanceof JvmTypeRef.TypeVariable t) return "<" + t.name() + ">";
     return JvmTypeRefs.renderAnnotated(ref);
   }

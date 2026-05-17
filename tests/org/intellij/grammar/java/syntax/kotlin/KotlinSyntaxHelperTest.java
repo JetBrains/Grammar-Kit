@@ -232,6 +232,19 @@ public class KotlinSyntaxHelperTest extends GoldenClassInfoTestCase {
     assertClassInfoMatchesGolden(extractAll());
   }
 
+  public void testTopLevelFunctionWithBoundedTypeParameter() throws Exception {
+    write("a/b/Replace.kt", """
+        package a.b
+        import com.intellij.util.IncorrectOperationException
+
+        interface SwiftStatement
+
+        @Throws(IncorrectOperationException::class)
+        fun <S : SwiftStatement> replaceWithStatement(self: SwiftStatement, newStatement: S, reformat: Boolean): S = newStatement
+        """);
+    assertClassInfoMatchesGolden(extractAll());
+  }
+
   public void testPrivatePropertySkipped() throws Exception {
     write("a/b/Secret.kt", """
         package a.b

@@ -33,6 +33,10 @@ import static org.intellij.grammar.classinfo.kotlin.KotlinSyntaxNodes.extractMod
 @SuppressWarnings("UnstableApiUsage")
 final class KotlinSyntaxMethodExtractor {
 
+  /** Sentinel used when a property/function has no explicit type and the real type is only
+   * recoverable by inferring from an expression body — which is not derivable from syntax alone. */
+  static final String IMPLICIT_TYPE = "<implicit-type>";
+
   private final KotlinSyntaxTypeFormatter typeFormatter;
 
   KotlinSyntaxMethodExtractor(@NotNull KotlinSyntaxTypeFormatter typeFormatter) {
@@ -69,8 +73,17 @@ final class KotlinSyntaxMethodExtractor {
     // Return type: TYPE_REFERENCE sibling that appears *after* the VALUE_PARAMETER_LIST.
     SyntaxNode paramList = firstChildOfType(funNode, KtNodeTypes.INSTANCE.getVALUE_PARAMETER_LIST());
     SyntaxNode returnType = returnTypeAfterParams(funNode, paramList);
-    m.returnType = returnType == null ? "void" : typeFormatter.formatType(returnType, typeVars);
-    addNullabilityAnnotation(m.annotations, returnType, m.returnType, typeVars);
+    if (returnType != null) {
+      m.returnType = typeFormatter.formatType(returnType, typeVars);
+      addNullabilityAnnotation(m.annotations, returnType, m.returnType, typeVars);
+    }
+    else if (hasExpressionBody(funNode)) {
+      // `fun foo() = expr` — return type is inferred from the expression; we can't recover it.
+      m.returnType = IMPLICIT_TYPE;
+    }
+    else {
+      m.returnType = "void";
+    }
 
     if (receiverType != null) {
       ParameterSymbol.Builder receiver = new ParameterSymbol.Builder();
@@ -125,7 +138,7 @@ final class KotlinSyntaxMethodExtractor {
     if (Modifier.isPrivate(mods)) return null;
 
     SyntaxNode typeRef = firstChildOfType(propertyOrParamNode, KtNodeTypes.INSTANCE.getTYPE_REFERENCE());
-    String typeStr = typeRef == null ? "void" : typeFormatter.formatType(typeRef, classTypeVars);
+    String typeStr = typeRef == null ? IMPLICIT_TYPE : typeFormatter.formatType(typeRef, classTypeVars);
 
     MethodSymbol.Builder m = new MethodSymbol.Builder();
     m.declaringClass = declaringFqn;
@@ -136,7 +149,7 @@ final class KotlinSyntaxMethodExtractor {
     KotlinSyntaxTypeFormatter.MethodAnnotations getterAnnos = typeFormatter.extractMethodAnnotations(modifierList, classTypeVars);
     m.annotations.addAll(getterAnnos.annotations());
     m.exceptions.addAll(getterAnnos.exceptions());
-    addNullabilityAnnotation(m.annotations, typeRef, typeStr, classTypeVars);
+    if (typeRef != null) addNullabilityAnnotation(m.annotations, typeRef, typeStr, classTypeVars);
     copyTypesAsAnnotated(m);
     return m;
   }
@@ -154,7 +167,7 @@ final class KotlinSyntaxMethodExtractor {
     if (Modifier.isPrivate(mods)) return null;
 
     SyntaxNode typeRef = firstChildOfType(propertyOrParamNode, KtNodeTypes.INSTANCE.getTYPE_REFERENCE());
-    String typeStr = typeRef == null ? "java.lang.Object" : typeFormatter.formatType(typeRef, classTypeVars);
+    String typeStr = typeRef == null ? IMPLICIT_TYPE : typeFormatter.formatType(typeRef, classTypeVars);
 
     MethodSymbol.Builder m = new MethodSymbol.Builder();
     m.declaringClass = declaringFqn;
@@ -165,7 +178,7 @@ final class KotlinSyntaxMethodExtractor {
     ParameterSymbol.Builder value = new ParameterSymbol.Builder();
     value.type = typeStr;
     value.name = "value";
-    addNullabilityAnnotation(value.annotations, typeRef, typeStr, classTypeVars);
+    if (typeRef != null) addNullabilityAnnotation(value.annotations, typeRef, typeStr, classTypeVars);
     m.parameters.add(value);
     KotlinSyntaxTypeFormatter.MethodAnnotations setterAnnos = typeFormatter.extractMethodAnnotations(modifierList, classTypeVars);
     m.annotations.addAll(setterAnnos.annotations());
@@ -257,6 +270,12 @@ final class KotlinSyntaxMethodExtractor {
       if (c.getType() == KtNodeTypes.INSTANCE.getTYPE_REFERENCE()) receiver = c;
     }
     return receiver;
+  }
+
+  /** True when {@code funNode} uses an expression body (`fun foo() = expr`) rather than a block body
+   * or no body. The {@code EQ} token is a direct child of {@code FUN} only for expression bodies. */
+  private static boolean hasExpressionBody(@NotNull SyntaxNode funNode) {
+    return firstChildOfType(funNode, KtTokens.INSTANCE.getEQ()) != null;
   }
 
   /** Return-type TYPE_REFERENCE: the TYPE_REFERENCE sibling that appears after the parameter list. */

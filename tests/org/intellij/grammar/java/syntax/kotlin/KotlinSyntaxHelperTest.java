@@ -240,6 +240,37 @@ public class KotlinSyntaxHelperTest extends GoldenClassInfoTestCase {
     assertClassInfoMatchesGolden(extractAll());
   }
 
+  public void testImplicitPropertyTypeFromInitializer() throws Exception {
+    write("a/b/Implicit.kt", """
+        package a.b
+        class Implicit {
+            val x = 42
+        }
+        """);
+    assertClassInfoMatchesGolden(extractAll());
+  }
+
+  public void testImplicitVarPropertyType() throws Exception {
+    write("a/b/ImplicitVar.kt", """
+        package a.b
+        class ImplicitVar {
+            var x = 42
+        }
+        """);
+    assertClassInfoMatchesGolden(extractAll());
+  }
+
+  public void testImplicitFunctionReturnType() throws Exception {
+    write("a/b/Picker.kt", """
+        package a.b
+        class Picker {
+            fun pick() = 42
+            fun nothing() {}
+        }
+        """);
+    assertClassInfoMatchesGolden(extractAll());
+  }
+
   public void testInternalMapsToPublic() throws Exception {
     write("a/b/Internal.kt", """
         package a.b

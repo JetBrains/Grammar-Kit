@@ -84,6 +84,9 @@ final class JavaSyntaxMethodExtractor {
       String tvName = tpId.getText().toString();
       typeVars.add(tvName);
       TypeParameterSymbol.Builder info = new TypeParameterSymbol.Builder(tvName);
+      // Type-use annotations on the type-parameter itself (`<@Nls T>`) live inside the TYPE_PARAMETER
+      // node — either as direct ANNOTATION children or wrapped in a MODIFIER_LIST.
+      info.annotations.addAll(typeFormatter.collectTypeUseAnnotations(tp, typeVars));
       info.extendsList.addAll(typeFormatter.parseRefs(firstChildOfType(tp, JavaSyntaxElementType.EXTENDS_BOUND_LIST), typeVars));
       m.generics.add(info);
     }

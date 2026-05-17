@@ -226,6 +226,28 @@ public class JavaSyntaxHelperSourceTest extends GoldenClassInfoTestCase {
       """));
   }
 
+  public void testTypeUseAnnotationsOnArraysAndComponents() {
+    // JLS 9.7.4 type-use annotations on array dimensions and component types. The pre-parameter
+    // @NotNull on `one(@NotNull GoImportSpec o)` is a declaration-target annotation on the PARAMETER's
+    // MODIFIER_LIST, distinct from the type-use form — it stays in `param[0] annotations:` as today.
+    // The other shapes test annotations on arrays (`T @A []`), on components (`@A T`), on combinations
+    // (`@A T @B []`), on primitive-array dims (`char @A []`), and on multi-dim arrays (`T @A [] @B []`).
+    assertClassInfoMatchesGolden(extract("""
+      package a.b;
+      public @interface A {}
+      public @interface B {}
+      public class PsiReference {}
+      public class PsiElement {}
+      public class GoImportSpec {}
+      public class C {
+        public static PsiReference @A [] one(@A GoImportSpec o) { return null; }
+        public @A PsiElement @B [] two() { return null; }
+        public char @A [] three() { return null; }
+        public String @A [] @B [] four() { return null; }
+      }
+      """));
+  }
+
   // ---------------------------------------------------------------------------------------------
   // Parameter-type matching via supertype probe (helper behaviour, not extraction shape)
   // ---------------------------------------------------------------------------------------------

@@ -1,0 +1,33 @@
+class a.b.A
+  modifiers: public abstract interface
+  methods: (none)
+
+class a.b.B
+  modifiers: public abstract interface
+  methods: (none)
+
+class a.b.C extends java.lang.Object
+  modifiers: public
+  methods:
+    STATIC public static a.b.PsiReference[] one(a.b.GoImportSpec o)
+      param[0] annotations: @a.b.A
+      annotatedTypes: [a.b.PsiReference @a.b.A [], a.b.GoImportSpec, o]
+    INSTANCE public a.b.PsiElement[] two()
+      annotations: @a.b.A
+      annotatedTypes: [a.b.PsiElement @a.b.B []]
+    INSTANCE public char[] three()
+      annotatedTypes: [char @a.b.A []]
+    INSTANCE public java.lang.String[][] four()
+      annotatedTypes: [java.lang.String @a.b.A [] @a.b.B []]
+
+class a.b.GoImportSpec extends java.lang.Object
+  modifiers: public
+  methods: (none)
+
+class a.b.PsiElement extends java.lang.Object
+  modifiers: public
+  methods: (none)
+
+class a.b.PsiReference extends java.lang.Object
+  modifiers: public
+  methods: (none)

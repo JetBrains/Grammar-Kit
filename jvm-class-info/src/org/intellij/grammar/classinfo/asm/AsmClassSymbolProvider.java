@@ -200,17 +200,17 @@ public final class AsmClassSymbolProvider implements JvmClassSymbolProvider {
         @Override
         public void visitEnd() {
           for (PendingTypeAnno ta : pending) {
-            if (ta.index == 0) {
-              m.returnType = annotateAt(m.returnType, ta.path, ta.anno);
-            }
-            else {
-              ParameterSymbol.Builder p = m.parameters.get(ta.index - 1);
-              p.type = annotateAt(p.type, ta.path, ta.anno);
-            }
-            if (ta.path == null) {
-              // Outer-level: the same annotation FQN is also present in the declaration-target list
-              // (visitParameterAnnotation / visitAnnotation already added it). Strip the duplicate so
-              // it surfaces only on the type tree.
+            JvmTypeRef prev = ta.index == 0 ? m.returnType : m.parameters.get(ta.index - 1).type;
+            JvmTypeRef next = annotateAt(prev, ta.path, ta.anno);
+            boolean applied = !next.equals(prev);
+            if (ta.index == 0) m.returnType = next;
+            else m.parameters.get(ta.index - 1).type = next;
+            if (ta.path == null && applied) {
+              // Outer-level type annotation that actually landed on the type tree: strip the
+              // duplicate from the declaration-target list (visitParameterAnnotation / visitAnnotation
+              // already added it). If the annotation could not be placed (e.g. the target position is
+              // a TypeVariable or PrimitiveType, which don't carry annotations in the model), keep the
+              // declaration-target copy so the annotation isn't lost.
               (ta.index == 0 ? m.annotations : m.parameters.get(ta.index - 1).annotations).remove(ta.anno);
             }
           }

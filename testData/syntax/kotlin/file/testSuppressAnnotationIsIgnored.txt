@@ -1,0 +1,7 @@
+class a.b.Quiet extends java.lang.Object
+  modifiers: public final
+  methods:
+    CONSTRUCTOR public <init>(int x)
+    INSTANCE public int getX()
+    INSTANCE public void f()
+    INSTANCE public void g(int p)

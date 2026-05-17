@@ -317,9 +317,19 @@ final class KotlinSyntaxTypeFormatter {
       SyntaxNode callee = firstChildOfType(entry, KtNodeTypes.INSTANCE.getCONSTRUCTOR_CALLEE());
       SyntaxNode typeRef = callee == null ? firstChildOfType(entry, KtNodeTypes.INSTANCE.getTYPE_REFERENCE())
                                           : firstChildOfType(callee, KtNodeTypes.INSTANCE.getTYPE_REFERENCE());
-      if (typeRef != null) out.add(formatTypeFqn(typeRef, typeVars));
+      if (typeRef == null || isIgnoredAnnotation(typeRef)) continue;
+      out.add(formatTypeFqn(typeRef, typeVars));
     }
     return out;
+  }
+
+  /**
+   * Source-only Kotlin annotations that carry no JVM runtime meaning and must not surface in the
+   * extracted symbols. {@code @kotlin.Suppress} is auto-imported, so the simple-name match covers
+   * both {@code @Suppress} and {@code @kotlin.Suppress} (same convention as {@code @JvmStatic}/{@code @Throws}).
+   */
+  private static boolean isIgnoredAnnotation(@NotNull SyntaxNode typeRef) {
+    return "Suppress".equals(KotlinSyntaxNodes.rightmostIdentifier(typeRef));
   }
 
   /**
@@ -347,6 +357,7 @@ final class KotlinSyntaxTypeFormatter {
         collectThrowsArgumentFqns(entry, exceptions);
         continue;
       }
+      if (isIgnoredAnnotation(typeRef)) continue;
       annotations.add(formatTypeFqn(typeRef, typeVars));
     }
     return new MethodAnnotations(annotations, exceptions);

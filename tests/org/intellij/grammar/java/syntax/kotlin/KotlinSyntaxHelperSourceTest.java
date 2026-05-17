@@ -145,6 +145,28 @@ public class KotlinSyntaxHelperSourceTest extends GoldenClassInfoTestCase {
     assertClassInfoMatchesGolden(extractAll());
   }
 
+  public void testNullabilityAnnotationsFromKotlinTypes() throws Exception {
+    // Cross-section of the rules in KotlinSyntaxTypeFormatter.classifyNullability:
+    //  - reference types: NotNull vs Nullable based on the '?' marker
+    //  - primitives: no annotation; nullable primitives box and get Nullable
+    //  - bare type variables: no annotation
+    //  - val/var properties: getter/setter follow the property type
+    //  - extension functions: receiver follows its own nullability
+    //  - Unit/void return: no annotation
+    write("nul/Sample.kt", """
+        package nul
+        class Sample {
+          fun ref(s: String, n: String?): String? = n
+          fun prim(x: Int, y: Int?): Boolean = x == 0
+          fun <T> id(x: T): T = x
+          val title: String = ""
+          var nick: String? = null
+        }
+        fun String?.ext(x: Int?): Unit { }
+        """);
+    assertClassInfoMatchesGolden(extractAll());
+  }
+
   // ---------------------------------------------------------------------------------------------
   // helpers
   // ---------------------------------------------------------------------------------------------

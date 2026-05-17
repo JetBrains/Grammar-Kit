@@ -17,6 +17,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Modifier;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import static org.intellij.grammar.classinfo.SyntaxTreeUtil.firstChildOfType;
@@ -67,11 +68,13 @@ final class KotlinSyntaxMethodExtractor {
     SyntaxNode paramList = firstChildOfType(funNode, KtNodeTypes.INSTANCE.getVALUE_PARAMETER_LIST());
     SyntaxNode returnType = returnTypeAfterParams(funNode, paramList);
     m.returnType = returnType == null ? "void" : typeFormatter.formatType(returnType, typeVars);
+    addNullabilityAnnotation(m.annotations, returnType, m.returnType, typeVars);
 
     if (receiverType != null) {
       ParameterSymbol.Builder receiver = new ParameterSymbol.Builder();
       receiver.type = typeFormatter.formatType(receiverType, typeVars);
       receiver.name = "receiver";
+      addNullabilityAnnotation(receiver.annotations, receiverType, receiver.type, typeVars);
       m.parameters.add(receiver);
     }
 
@@ -127,6 +130,7 @@ final class KotlinSyntaxMethodExtractor {
     m.methodType = staticAccessor ? MethodType.STATIC : MethodType.INSTANCE;
     m.returnType = typeStr;
     m.annotations.addAll(typeFormatter.extractAnnotationFqns(modifierList, classTypeVars));
+    addNullabilityAnnotation(m.annotations, typeRef, typeStr, classTypeVars);
     copyTypesAsAnnotated(m);
     return m;
   }
@@ -155,6 +159,7 @@ final class KotlinSyntaxMethodExtractor {
     ParameterSymbol.Builder value = new ParameterSymbol.Builder();
     value.type = typeStr;
     value.name = "value";
+    addNullabilityAnnotation(value.annotations, typeRef, typeStr, classTypeVars);
     m.parameters.add(value);
     m.annotations.addAll(typeFormatter.extractAnnotationFqns(modifierList, classTypeVars));
     copyTypesAsAnnotated(m);
@@ -197,6 +202,7 @@ final class KotlinSyntaxMethodExtractor {
       param.type = typeStr;
       param.name = pName == null ? "p" + paramIdx : pName.getText().toString();
       param.annotations.addAll(typeFormatter.extractAnnotationFqns(mods, typeVars));
+      addNullabilityAnnotation(param.annotations, pType, typeStr, typeVars);
       m.parameters.add(param);
       paramIdx++;
     }
@@ -205,6 +211,19 @@ final class KotlinSyntaxMethodExtractor {
   private static void copyTypesAsAnnotated(@NotNull MethodSymbol.Builder m) {
     m.annotatedReturnType = m.returnType;
     for (ParameterSymbol.Builder p : m.parameters) p.annotatedType = p.type;
+  }
+
+  /**
+   * Synthesizes the {@code @NotNull} / {@code @Nullable} declaration-target annotation that kotlinc
+   * would emit for the given Kotlin {@code typeRef}, and appends it to {@code target} unless the
+   * same FQN is already there (which it would be if the source explicitly wrote the annotation).
+   */
+  private void addNullabilityAnnotation(@NotNull List<Fqn> target,
+                                        @Nullable SyntaxNode typeRef,
+                                        @NotNull String formattedType,
+                                        @NotNull Set<String> typeVars) {
+    Fqn anno = typeFormatter.classifyNullability(typeRef, formattedType, typeVars);
+    if (anno != null && !target.contains(anno)) target.add(anno);
   }
 
   /**

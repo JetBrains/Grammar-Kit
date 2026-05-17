@@ -59,6 +59,9 @@ final class KotlinSyntaxTypeFormatter {
     Map.entry("DoubleArray", "double[]")
   );
 
+  static final Fqn NOT_NULL = Fqn.of("org.jetbrains.annotations.NotNull");
+  static final Fqn NULLABLE = Fqn.of("org.jetbrains.annotations.Nullable");
+
   private final KotlinSyntaxImportContext imports;
 
   KotlinSyntaxTypeFormatter(@NotNull KotlinSyntaxImportContext imports) {
@@ -75,7 +78,7 @@ final class KotlinSyntaxTypeFormatter {
     }
     if (t == KtNodeTypes.INSTANCE.getNULLABLE_TYPE()) {
       SyntaxNode inner = firstNonModifierChild(typeNode);
-      return formatType(inner, typeVars); // drop the '?'
+      return boxIfPrimitive(formatType(inner, typeVars));
     }
     if (t == KtNodeTypes.INSTANCE.getUSER_TYPE()) {
       return formatUserType(typeNode, typeVars);
@@ -87,6 +90,53 @@ final class KotlinSyntaxTypeFormatter {
       return "java.lang.Object";
     }
     return "";
+  }
+
+  /**
+   * Returns the declaration-target nullability annotation FQN to attach to a parameter or return
+   * derived from {@code typeRef}, or {@code null} when none should be emitted (primitives, void,
+   * missing type, bare type-variable refs). Mirrors what kotlinc writes into the bytecode so the
+   * source provider matches {@code AsmClassSymbolProvider}'s output for the same class.
+   */
+  @Nullable Fqn classifyNullability(@Nullable SyntaxNode typeRef,
+                                    @NotNull String formattedType,
+                                    @NotNull Set<String> typeVars) {
+    if (typeRef == null) return null;
+    if (isJvmPrimitive(formattedType)) return null;
+
+    SyntaxNode inner = typeRef;
+    while (inner != null && inner.getType() == KtNodeTypes.INSTANCE.getTYPE_REFERENCE()) {
+      inner = firstNonModifierChild(inner);
+    }
+    if (inner == null) return null;
+    if (inner.getType() == KtNodeTypes.INSTANCE.getNULLABLE_TYPE()) return NULLABLE;
+    if (inner.getType() == KtNodeTypes.INSTANCE.getUSER_TYPE()) {
+      String dotted = userTypeDotted(inner);
+      if (typeVars.contains(dotted)) return null;
+    }
+    return NOT_NULL;
+  }
+
+  private static @NotNull String boxIfPrimitive(@NotNull String t) {
+    return switch (t) {
+      case "boolean" -> "java.lang.Boolean";
+      case "byte" -> "java.lang.Byte";
+      case "short" -> "java.lang.Short";
+      case "int" -> "java.lang.Integer";
+      case "long" -> "java.lang.Long";
+      case "char" -> "java.lang.Character";
+      case "float" -> "java.lang.Float";
+      case "double" -> "java.lang.Double";
+      case "void" -> "java.lang.Void";
+      default -> t;
+    };
+  }
+
+  private static boolean isJvmPrimitive(@NotNull String t) {
+    return switch (t) {
+      case "void", "boolean", "byte", "short", "int", "long", "char", "float", "double" -> true;
+      default -> false;
+    };
   }
 
   private static @Nullable SyntaxNode firstNonModifierChild(@NotNull SyntaxNode node) {

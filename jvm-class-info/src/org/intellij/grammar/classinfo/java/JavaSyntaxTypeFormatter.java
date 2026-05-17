@@ -59,6 +59,9 @@ final class JavaSyntaxTypeFormatter {
     JavaSyntaxTokenType.DOUBLE_KEYWORD
   );
 
+  static final Fqn NOT_NULL = Fqn.of("org.jetbrains.annotations.NotNull");
+  static final Fqn NULLABLE = Fqn.of("org.jetbrains.annotations.Nullable");
+
   private final JavaSyntaxImportContext imports;
   private @NotNull Map<String, Fqn> nestedScope = Map.of();
 
@@ -269,6 +272,75 @@ final class JavaSyntaxTypeFormatter {
       }
     }
     return refs;
+  }
+
+  /**
+   * Result of {@link #liftNullabilityToType}: the remaining declaration-target annotations and the
+   * (possibly rewritten) type now carrying any lifted nullness annotations.
+   */
+  record LiftResult(@NotNull List<Fqn> annotations, @NotNull JvmTypeRef type) {}
+
+  /**
+   * The JetBrains Java parser groups any annotation written in the declaration-position modifier
+   * list (e.g. {@code public @NotNull String foo()}) into {@code MODIFIER_LIST}, alongside
+   * {@code public}, regardless of whether the annotation is {@code TYPE_USE}. For
+   * {@link #NOT_NULL} / {@link #NULLABLE}, that grouping is semantically misleading — the
+   * annotation refers to the type, not the method/parameter. Lift those onto the outermost
+   * {@link JvmTypeRef} position so the type model is the single source of truth for nullness,
+   * matching how Kotlin sources are parsed (see {@code KotlinSyntaxTypeFormatter.parseNullable}).
+   * <p>
+   * Skipped for {@link JvmTypeRef.PrimitiveType} and {@link JvmTypeRef.TypeVariable}: these
+   * positions cannot carry annotations in our model, so the nullness annotation stays on the
+   * declaration-target list (matches the documented "non-primitive, non-void parameters/returns;
+   * not on bare type-variable references" rule).
+   */
+  @NotNull LiftResult liftNullabilityToType(@NotNull List<Fqn> declAnnotations,
+                                            @NotNull JvmTypeRef type) {
+    if (type instanceof JvmTypeRef.PrimitiveType || type instanceof JvmTypeRef.TypeVariable) {
+      return new LiftResult(declAnnotations, type);
+    }
+    List<Fqn> lifted = new SmartList<>();
+    List<Fqn> remaining = new SmartList<>();
+    for (Fqn f : declAnnotations) {
+      if (NOT_NULL.equals(f) || NULLABLE.equals(f)) lifted.add(f);
+      else remaining.add(f);
+    }
+    if (lifted.isEmpty()) return new LiftResult(declAnnotations, type);
+    return new LiftResult(remaining, prependAnnotations(type, lifted));
+  }
+
+  /**
+   * Returns {@code type} with {@code extra} prepended to its outermost annotations list. Preserves
+   * source order: the lifted annotations appear before any already-collected type-use annotations,
+   * since the lifted ones syntactically appeared first in the declaration.
+   * <p>
+   * Caller filters out {@link JvmTypeRef.PrimitiveType} / {@link JvmTypeRef.TypeVariable} (they
+   * don't carry annotations); the {@code default} branch below is just defensive.
+   */
+  private static @NotNull JvmTypeRef prependAnnotations(@NotNull JvmTypeRef type,
+                                                        @NotNull List<Fqn> extra) {
+    if (type instanceof JvmTypeRef.UserType u) {
+      return new JvmTypeRef.UserType(u.name(), concat(extra, u.annotations()), u.args());
+    }
+    if (type instanceof JvmTypeRef.ArrayType a) {
+      return new JvmTypeRef.ArrayType(a.component(), concat(extra, a.annotations()));
+    }
+    if (type instanceof JvmTypeRef.FunctionType f) {
+      return new JvmTypeRef.FunctionType(concat(extra, f.annotations()));
+    }
+    if (type instanceof JvmTypeRef.DynamicType d) {
+      return new JvmTypeRef.DynamicType(concat(extra, d.annotations()));
+    }
+    return type;
+  }
+
+  private static @NotNull List<Fqn> concat(@NotNull List<Fqn> a, @NotNull List<Fqn> b) {
+    if (a.isEmpty()) return b;
+    if (b.isEmpty()) return a;
+    List<Fqn> out = new ArrayList<>(a.size() + b.size());
+    out.addAll(a);
+    out.addAll(b);
+    return out;
   }
 
   @NotNull List<Fqn> extractAnnotationFqns(@Nullable SyntaxNode modifierList, @NotNull Set<String> typeVars) {

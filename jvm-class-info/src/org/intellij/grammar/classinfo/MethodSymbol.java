@@ -6,7 +6,6 @@ package org.intellij.grammar.classinfo;
 
 import com.intellij.util.SmartList;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,8 +14,7 @@ public record MethodSymbol(@NotNull String name,
                            @NotNull Fqn declaringClass,
                            @NotNull MethodType methodType,
                            int modifiers,
-                           @NotNull String returnType,
-                           @Nullable String annotatedReturnType,
+                           @NotNull JvmTypeRef returnType,
                            @NotNull List<ParameterSymbol> parameters,
                            @NotNull List<TypeParameterSymbol> generics,
                            @NotNull List<Fqn> annotations,
@@ -31,7 +29,8 @@ public record MethodSymbol(@NotNull String name,
 
   @Override
   public @NotNull String toString() {
-    return "MethodSymbol{" + name + "(" + parameters + "):" + returnType + ", @" + annotations + "<" + generics + ">" + " throws " + exceptions + '}';
+    return "MethodSymbol{" + name + "(" + parameters + "):" + JvmTypeRefs.renderPlain(returnType)
+           + ", @" + annotations + "<" + generics + ">" + " throws " + exceptions + '}';
   }
 
   public static final class Builder {
@@ -39,9 +38,8 @@ public record MethodSymbol(@NotNull String name,
     public Fqn declaringClass;
     public MethodType methodType;
     public int modifiers;
-    public String returnType;
-    /** Defaults to {@link #returnType}; may carry inlined annotation FQNs, e.g. {@code java.lang.@A String}. */
-    public String annotatedReturnType;
+    /** Carries the per-position annotations used to derive both the plain and annotated rendering. */
+    public JvmTypeRef returnType;
     public final List<ParameterSymbol.Builder> parameters = new SmartList<>();
     public final List<TypeParameterSymbol.Builder> generics = new SmartList<>();
     public final List<Fqn> annotations = new SmartList<>();
@@ -53,8 +51,7 @@ public record MethodSymbol(@NotNull String name,
       List<TypeParameterSymbol> builtGenerics = new ArrayList<>(generics.size());
       for (TypeParameterSymbol.Builder t : generics) builtGenerics.add(t.build());
       return new MethodSymbol(name, declaringClass, methodType, modifiers,
-                              returnType, annotatedReturnType,
-                              builtParams, builtGenerics, annotations, exceptions);
+                              returnType, builtParams, builtGenerics, annotations, exceptions);
     }
   }
 }

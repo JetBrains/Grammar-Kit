@@ -2,5 +2,4 @@ class a.b.Used extends java.lang.Object
   modifiers: public final
   methods:
     INSTANCE public java.lang.String read(a.b.Path p)
-      param[0] annotations: @org.jetbrains.annotations.NotNull
-      annotatedTypes: [@org.jetbrains.annotations.NotNull java.lang.String, a.b.Path, p]
+      annotatedTypes: [@org.jetbrains.annotations.NotNull java.lang.String, @org.jetbrains.annotations.NotNull a.b.Path, p]

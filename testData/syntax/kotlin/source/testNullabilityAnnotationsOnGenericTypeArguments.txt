@@ -1,0 +1,29 @@
+class gen.G extends java.lang.Object
+  modifiers: public final
+  typeParameters: T
+  methods:
+    INSTANCE public java.util.List<java.lang.String> listStr()
+      annotatedTypes: [@org.jetbrains.annotations.NotNull java.util.List<@org.jetbrains.annotations.NotNull java.lang.String>]
+    INSTANCE public java.util.List<java.lang.String> listStrN()
+      annotatedTypes: [@org.jetbrains.annotations.NotNull java.util.List<@org.jetbrains.annotations.Nullable java.lang.String>]
+    INSTANCE public java.util.Map<java.lang.String, java.lang.Integer> mapStrIntN()
+      annotatedTypes: [@org.jetbrains.annotations.NotNull java.util.Map<@org.jetbrains.annotations.NotNull java.lang.String, @org.jetbrains.annotations.Nullable java.lang.Integer>]
+    INSTANCE public java.util.List<?> listStar()
+      annotatedTypes: [@org.jetbrains.annotations.NotNull java.util.List<?>]
+    INSTANCE public java.util.List<T> listT(T t)
+      annotatedTypes: [@org.jetbrains.annotations.NotNull java.util.List<T>, T, t]
+    INSTANCE public java.util.List<? extends java.lang.String> listOut()
+      annotatedTypes: [@org.jetbrains.annotations.NotNull java.util.List<? extends @org.jetbrains.annotations.NotNull java.lang.String>]
+    INSTANCE public java.util.List<? super java.lang.String> listInN()
+      annotatedTypes: [@org.jetbrains.annotations.NotNull java.util.List<? super @org.jetbrains.annotations.Nullable java.lang.String>]
+    INSTANCE public java.lang.String[] arrStr()
+      annotatedTypes: [@org.jetbrains.annotations.NotNull java.lang.String[]]
+    INSTANCE public java.lang.String[] arrStrN()
+      annotatedTypes: [@org.jetbrains.annotations.Nullable java.lang.String[]]
+    INSTANCE public java.lang.Object[] arrStar()
+      annotatedTypes: [@org.jetbrains.annotations.NotNull java.lang.Object[]]
+    INSTANCE public int[] intArr()
+    INSTANCE public void nested(java.util.List<java.util.List<java.lang.String>> xs)
+      annotatedTypes: [void, @org.jetbrains.annotations.NotNull java.util.List<@org.jetbrains.annotations.NotNull java.util.List<@org.jetbrains.annotations.Nullable java.lang.String>>, xs]
+    INSTANCE public java.lang.Integer nullableInt(java.lang.Integer x)
+      annotatedTypes: [@org.jetbrains.annotations.Nullable java.lang.Integer, @org.jetbrains.annotations.Nullable java.lang.Integer, x]

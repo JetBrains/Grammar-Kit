@@ -2,5 +2,4 @@ class a.b.ExtKt extends java.lang.Object
   modifiers: public final
   methods:
     STATIC public static java.lang.String shouted(java.lang.String receiver)
-      param[0] annotations: @org.jetbrains.annotations.NotNull
-      annotatedTypes: [@org.jetbrains.annotations.NotNull java.lang.String, java.lang.String, receiver]
+      annotatedTypes: [@org.jetbrains.annotations.NotNull java.lang.String, @org.jetbrains.annotations.NotNull java.lang.String, receiver]

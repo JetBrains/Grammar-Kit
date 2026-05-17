@@ -11,7 +11,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 
 public record TypeParameterSymbol(@Nullable String name,
-                                  @NotNull List<String> extendsList,
+                                  @NotNull List<JvmTypeRef> extendsList,
                                   @NotNull List<Fqn> annotations) {
 
   public TypeParameterSymbol {
@@ -25,7 +25,7 @@ public record TypeParameterSymbol(@Nullable String name,
 
   public static final class Builder {
     public String name;
-    public final List<String> extendsList = new SmartList<>();
+    public final List<JvmTypeRef> extendsList = new SmartList<>();
     public final List<Fqn> annotations = new SmartList<>();
 
     public Builder() { }

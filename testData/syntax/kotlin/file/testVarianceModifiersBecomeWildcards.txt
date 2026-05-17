@@ -2,9 +2,8 @@ class a.b.Variance extends java.lang.Object
   modifiers: public final
   methods:
     INSTANCE public java.lang.Iterable<? extends java.lang.CharSequence> outProjection(java.lang.Iterable<? extends java.lang.CharSequence> items)
-      param[0] annotations: @org.jetbrains.annotations.NotNull
-      annotatedTypes: [@org.jetbrains.annotations.NotNull java.lang.Iterable<? extends java.lang.CharSequence>, java.lang.Iterable<? extends java.lang.CharSequence>, items]
+      annotatedTypes: [@org.jetbrains.annotations.NotNull java.lang.Iterable<? extends @org.jetbrains.annotations.NotNull java.lang.CharSequence>, @org.jetbrains.annotations.NotNull java.lang.Iterable<? extends @org.jetbrains.annotations.NotNull java.lang.CharSequence>, items]
     INSTANCE public void inProjection(java.lang.Iterable<? super java.lang.CharSequence> consumers)
-      param[0] annotations: @org.jetbrains.annotations.NotNull
+      annotatedTypes: [void, @org.jetbrains.annotations.NotNull java.lang.Iterable<? super @org.jetbrains.annotations.NotNull java.lang.CharSequence>, consumers]
     INSTANCE public void starProjection(java.lang.Iterable<?> items)
-      param[0] annotations: @org.jetbrains.annotations.NotNull
+      annotatedTypes: [void, @org.jetbrains.annotations.NotNull java.lang.Iterable<?>, items]

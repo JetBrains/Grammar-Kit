@@ -6,6 +6,8 @@ package org.intellij.grammar.java.syntax;
 
 import org.intellij.grammar.classinfo.ClassSymbol;
 import org.intellij.grammar.classinfo.Fqn;
+import org.intellij.grammar.classinfo.JvmTypeRef;
+import org.intellij.grammar.classinfo.JvmTypeRefs;
 import org.intellij.grammar.classinfo.MethodSymbol;
 import org.intellij.grammar.classinfo.MethodType;
 import org.intellij.grammar.classinfo.ParameterSymbol;
@@ -17,7 +19,6 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 /**
  * Serialises a {@code Map<Fqn, ClassSymbol>} produced by the syntax-generation pipeline into a
@@ -87,8 +88,7 @@ public final class ClassSymbolTextFormatter {
     if (!mods.isEmpty()) sb.append(mods).append(' ');
 
     if (m.methodType() != MethodType.CONSTRUCTOR) {
-      String returnType = m.returnType() == null ? "?" : m.returnType();
-      sb.append(returnType).append(' ');
+      sb.append(JvmTypeRefs.renderPlain(m.returnType())).append(' ');
     }
     sb.append(m.name()).append('(');
     appendParams(sb, m);
@@ -120,20 +120,19 @@ public final class ClassSymbolTextFormatter {
       appendJoined(sb, m.exceptions());
       sb.append('\n');
     }
-    if (hasAnnotatedTypeDifferences(m)) {
-      sb.append("      annotatedTypes: [").append(m.annotatedReturnType());
+    if (hasInlineAnnotations(m)) {
+      sb.append("      annotatedTypes: [").append(JvmTypeRefs.renderAnnotated(m.returnType()));
       for (ParameterSymbol p : m.parameters()) {
-        sb.append(", ").append(p.annotatedType()).append(", ").append(p.name());
+        sb.append(", ").append(JvmTypeRefs.renderAnnotated(p.type())).append(", ").append(p.name());
       }
       sb.append("]\n");
     }
   }
 
-  private static boolean hasAnnotatedTypeDifferences(@NotNull MethodSymbol m) {
-    if (m.annotatedReturnType() == null) return false;
-    if (!Objects.equals(m.annotatedReturnType(), m.returnType())) return true;
+  private static boolean hasInlineAnnotations(@NotNull MethodSymbol m) {
+    if (JvmTypeRefs.hasInlineAnnotations(m.returnType())) return true;
     for (ParameterSymbol p : m.parameters()) {
-      if (!Objects.equals(p.annotatedType(), p.type())) return true;
+      if (JvmTypeRefs.hasInlineAnnotations(p.type())) return true;
     }
     return false;
   }
@@ -142,7 +141,7 @@ public final class ClassSymbolTextFormatter {
     boolean first = true;
     for (ParameterSymbol p : m.parameters()) {
       if (!first) sb.append(", ");
-      sb.append(p.type()).append(' ').append(p.name());
+      sb.append(JvmTypeRefs.renderPlain(p.type())).append(' ').append(p.name());
       first = false;
     }
   }
@@ -152,12 +151,12 @@ public final class ClassSymbolTextFormatter {
       sb.append('@').append(a).append(' ');
     }
     sb.append(tp.name() == null ? "?" : tp.name());
-    List<String> bounds = tp.extendsList();
+    List<JvmTypeRef> bounds = tp.extendsList();
     if (!bounds.isEmpty()) {
       sb.append(" extends ");
       for (int i = 0; i < bounds.size(); i++) {
         if (i > 0) sb.append(" & ");
-        sb.append(bounds.get(i));
+        sb.append(JvmTypeRefs.renderPlain(bounds.get(i)));
       }
     }
   }

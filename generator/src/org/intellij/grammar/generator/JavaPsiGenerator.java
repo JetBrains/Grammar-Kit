@@ -423,6 +423,17 @@ public final class JavaPsiGenerator extends Generator {
 
   private static final Fqn OVERRIDE_FQ = Fqn.of("java.lang.Override");
 
+  /**
+   * Annotations that are dropped when copying a signature from a referenced source method
+   * into generated PSI code. {@code @SuppressWarnings} targets the original source and is
+   * meaningless on a generated wrapper; {@code @Contract} describes the implementing
+   * method's behavior, which a generated accessor or forwarder does not necessarily honor.
+   */
+  private static final Set<String> IGNORED_ANNOTATIONS_IN_PSI = Set.of(
+      "java.lang.SuppressWarnings",
+      "org.jetbrains.annotations.Contract"
+  );
+
   /** Comma-joined parameter names of {@code b} — used to build the {@code super(p0, p1, …)} body of an inherited constructor. */
   private static @NotNull String paramNamesCsv(@NotNull MethodSymbol.Builder b) {
     StringBuilder sb = new StringBuilder();
@@ -755,6 +766,7 @@ public final class JavaPsiGenerator extends Generator {
     for (String s : JavaHelper.getAnnotations(method)) {
       if ("java.lang.Override".equals(s)) continue;
       if (s.startsWith("kotlin.")) continue;
+      if (IGNORED_ANNOTATIONS_IN_PSI.contains(s)) continue;
       b.annotations.add(Fqn.of(s));
     }
     for (TypeParameterSymbol gp : JavaHelper.getGenericParameters(method)) {
@@ -770,6 +782,7 @@ public final class JavaPsiGenerator extends Generator {
       pb.type = JvmTypeRefs.raw(type);
       pb.name = name;
       for (String s : JavaHelper.getParameterAnnotations(method, (i - 1) / 2)) {
+        if (IGNORED_ANNOTATIONS_IN_PSI.contains(s)) continue;
         pb.annotations.add(Fqn.of(s));
       }
       b.parameters.add(pb);
@@ -915,6 +928,7 @@ public final class JavaPsiGenerator extends Generator {
       else if (rawType.endsWith("Stub")) name = "stub";
       pb.name = name;
       for (String s : JavaHelper.getParameterAnnotations(source, (i - 1) / 2)) {
+        if (IGNORED_ANNOTATIONS_IN_PSI.contains(s)) continue;
         pb.annotations.add(Fqn.of(s));
       }
       b.parameters.add(pb);
@@ -1666,7 +1680,7 @@ public final class JavaPsiGenerator extends Generator {
     for (NavigatablePsiElement method : methods) {
       List<String> types = JavaHelper.getMethodTypes(method);
       String returnType = ContainerUtil.getFirstItem(types);
-      addTypeToImports(returnType, JavaHelper.getAnnotations(method), result);
+      addTypeToImports(returnType, ContainerUtil.filter(JavaHelper.getAnnotations(method), s -> !IGNORED_ANNOTATIONS_IN_PSI.contains(s)), result);
 
       for (TypeParameterSymbol generic : JavaHelper.getGenericParameters(method)) {
         for (JvmTypeRef type : generic.extendsList()) {
@@ -1679,7 +1693,7 @@ public final class JavaPsiGenerator extends Generator {
 
       for (int i = isInPsiUtil ? 3 : 1, count = types.size(); i < count; i += 2) {
         String type = types.get(i);
-        addTypeToImports(type, JavaHelper.getParameterAnnotations(method, (i - 1) / 2), result);
+        addTypeToImports(type, ContainerUtil.filter(JavaHelper.getParameterAnnotations(method, (i - 1) / 2), s -> !IGNORED_ANNOTATIONS_IN_PSI.contains(s)), result);
       }
 
       for (String exception : JavaHelper.getExceptionList(method)) {

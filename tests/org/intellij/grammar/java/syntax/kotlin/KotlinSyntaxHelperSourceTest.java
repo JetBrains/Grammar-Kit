@@ -191,6 +191,54 @@ public class KotlinSyntaxHelperSourceTest extends GoldenClassInfoTestCase {
     assertClassInfoMatchesGolden(extractAll());
   }
 
+  public void testNestedTypeReturnedBySiblingMethodResolvesToEnclosingClass() throws Exception {
+    // Unqualified `Direction` inside `Util`'s companion object must resolve to `pkg.Util.Direction`,
+    // not the same-package fallback `pkg.Direction`. Mirrors the Java fix on the Kotlin extractor.
+    write("pkg/Util.kt", """
+        package pkg
+        class Util {
+          enum class Direction { SEND, RECEIVE }
+          companion object {
+            fun getDirection(): Direction = Direction.SEND
+          }
+        }
+        """);
+    assertClassInfoMatchesGolden(extractAll());
+  }
+
+  public void testDoubleNestedTypePartiallyQualifiedFromOuterResolvesToFullFqn() throws Exception {
+    // `Wrap.Deep` written from the companion-object scope (one level above `Wrap`) must qualify the
+    // head segment `Wrap` to its in-scope nested FQN, giving `pkg.Util.Wrap.Deep`. The partial form
+    // is the natural Kotlin idiom — bare `Deep` wouldn't compile here.
+    write("pkg/Util.kt", """
+        package pkg
+        class Util {
+          class Wrap {
+            enum class Deep { X, Y }
+          }
+          companion object {
+            fun foo(): Wrap.Deep = Wrap.Deep.X
+          }
+        }
+        """);
+    assertClassInfoMatchesGolden(extractAll());
+  }
+
+  public void testCompanionLiftedJvmStaticReturningSiblingNestedType() throws Exception {
+    // `@JvmStatic` inside a companion object lifts the method onto the enclosing class. The lifted
+    // copy must keep the resolved sibling-nested FQN (`pkg.Util.E`) — not the same-package fallback.
+    write("pkg/Util.kt", """
+        package pkg
+        class Util {
+          enum class E { X }
+          companion object {
+            @JvmStatic fun mk(): E = E.X
+          }
+        }
+        """);
+    assertClassInfoMatchesGolden(extractAll());
+  }
+
   // ---------------------------------------------------------------------------------------------
   // helpers
   // ---------------------------------------------------------------------------------------------

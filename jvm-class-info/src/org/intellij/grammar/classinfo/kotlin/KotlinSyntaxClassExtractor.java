@@ -20,6 +20,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Modifier;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -194,21 +195,55 @@ final class KotlinSyntaxClassExtractor {
       info.modifiers |= Modifier.STATIC;
     }
 
-    SyntaxNode superTypeList = firstChildOfType(classNode, KtNodeTypes.INSTANCE.getSUPER_TYPE_LIST());
-    populateSuperTypes(info, classNode, superTypeList, classTypeVars);
-
-    result.put(fqn, info);
-
-    // Primary constructor + its val/var properties.
-    SyntaxNode primaryCtor = firstChildOfType(classNode, KtNodeTypes.INSTANCE.getPRIMARY_CONSTRUCTOR());
-    if (primaryCtor != null) {
-      MethodSymbol.Builder ctorMethod = methodExtractor.extractConstructor(primaryCtor, fqn, classTypeVars);
-      if (ctorMethod != null) info.methods.add(ctorMethod);
-      collectPrimaryCtorPropertyAccessors(primaryCtor, info, classTypeVars);
-    }
-
     SyntaxNode body = firstChildOfType(classNode, KtNodeTypes.INSTANCE.getCLASS_BODY());
-    if (body != null) walkClassBody(body, info, classTypeVars);
+    Map<String, Fqn> previousScope = typeFormatter.getNestedScope();
+    typeFormatter.setNestedScope(collectNestedScope(previousScope, fqn, body));
+    try {
+      SyntaxNode superTypeList = firstChildOfType(classNode, KtNodeTypes.INSTANCE.getSUPER_TYPE_LIST());
+      populateSuperTypes(info, classNode, superTypeList, classTypeVars);
+
+      result.put(fqn, info);
+
+      // Primary constructor + its val/var properties.
+      SyntaxNode primaryCtor = firstChildOfType(classNode, KtNodeTypes.INSTANCE.getPRIMARY_CONSTRUCTOR());
+      if (primaryCtor != null) {
+        MethodSymbol.Builder ctorMethod = methodExtractor.extractConstructor(primaryCtor, fqn, classTypeVars);
+        if (ctorMethod != null) info.methods.add(ctorMethod);
+        collectPrimaryCtorPropertyAccessors(primaryCtor, info, classTypeVars);
+      }
+
+      if (body != null) walkClassBody(body, info, classTypeVars);
+    }
+    finally {
+      typeFormatter.setNestedScope(previousScope);
+    }
+  }
+
+  /**
+   * Collect simple-name → FQN entries for direct nested classes / objects / typealiases declared in
+   * {@code body}, layered on top of {@code previousScope}. The result is what
+   * {@link KotlinSyntaxTypeFormatter#setNestedScope} should hold while walking the enclosing class's
+   * members so that unqualified or partially-qualified references to siblings resolve to the
+   * enclosing-class-qualified FQN.
+   */
+  private static @NotNull Map<String, Fqn> collectNestedScope(@NotNull Map<String, Fqn> previousScope,
+                                                              @NotNull Fqn enclosingFqn,
+                                                              @Nullable SyntaxNode body) {
+    if (body == null) return previousScope;
+    Map<String, Fqn> scope = new HashMap<>(previousScope);
+    for (SyntaxNode m = body.firstChild(); m != null; m = m.nextSibling()) {
+      SyntaxElementType mt = m.getType();
+      boolean isClass = mt == KtNodeTypes.INSTANCE.getCLASS();
+      boolean isObject = mt == KtNodeTypes.INSTANCE.getOBJECT_DECLARATION();
+      boolean isTypeAlias = mt == KtNodeTypes.INSTANCE.getTYPEALIAS();
+      if (!isClass && !isObject && !isTypeAlias) continue;
+      SyntaxNode nameNode = nameIdentifier(m);
+      String name = nameNode != null
+                    ? nameNode.getText().toString()
+                    : (isObject && isCompanion(m) ? "Companion" : null);
+      if (name != null) scope.put(name, enclosingFqn.child(name));
+    }
+    return scope;
   }
 
   private void walkObject(@NotNull SyntaxNode objectNode,
@@ -229,13 +264,20 @@ final class KotlinSyntaxClassExtractor {
     info.annotations.addAll(typeFormatter.extractAnnotationFqns(modifierList, outerTypeVars));
     info.superClass = Fqn.JAVA_LANG_OBJECT;
 
-    SyntaxNode superTypeList = firstChildOfType(objectNode, KtNodeTypes.INSTANCE.getSUPER_TYPE_LIST());
-    populateSuperTypes(info, objectNode, superTypeList, outerTypeVars);
-
-    result.put(fqn, info);
-
     SyntaxNode body = firstChildOfType(objectNode, KtNodeTypes.INSTANCE.getCLASS_BODY());
-    if (body != null) walkClassBody(body, info, outerTypeVars);
+    Map<String, Fqn> previousScope = typeFormatter.getNestedScope();
+    typeFormatter.setNestedScope(collectNestedScope(previousScope, fqn, body));
+    try {
+      SyntaxNode superTypeList = firstChildOfType(objectNode, KtNodeTypes.INSTANCE.getSUPER_TYPE_LIST());
+      populateSuperTypes(info, objectNode, superTypeList, outerTypeVars);
+
+      result.put(fqn, info);
+
+      if (body != null) walkClassBody(body, info, outerTypeVars);
+    }
+    finally {
+      typeFormatter.setNestedScope(previousScope);
+    }
 
     // Lift @JvmStatic-annotated members onto the enclosing class.
     if (companion && enclosingClass != null) {
@@ -308,13 +350,29 @@ final class KotlinSyntaxClassExtractor {
     info.annotations.addAll(typeFormatter.extractAnnotationFqns(modifierList, outerTypeVars));
     info.superClass = Fqn.JAVA_LANG_OBJECT;
 
-    SyntaxNode superTypeList = firstChildOfType(objectNode, KtNodeTypes.INSTANCE.getSUPER_TYPE_LIST());
-    populateSuperTypes(info, objectNode, superTypeList, outerTypeVars);
-
-    result.put(fqn, info);
-
     SyntaxNode body = firstChildOfType(objectNode, KtNodeTypes.INSTANCE.getCLASS_BODY());
-    if (body == null) return;
+    Map<String, Fqn> previousScope = typeFormatter.getNestedScope();
+    typeFormatter.setNestedScope(collectNestedScope(previousScope, fqn, body));
+    try {
+      SyntaxNode superTypeList = firstChildOfType(objectNode, KtNodeTypes.INSTANCE.getSUPER_TYPE_LIST());
+      populateSuperTypes(info, objectNode, superTypeList, outerTypeVars);
+
+      result.put(fqn, info);
+
+      if (body == null) return;
+      walkObjectInsideClassBody(body, info, enclosing, fqn, companion, outerTypeVars);
+    }
+    finally {
+      typeFormatter.setNestedScope(previousScope);
+    }
+  }
+
+  private void walkObjectInsideClassBody(@NotNull SyntaxNode body,
+                                         @NotNull ClassSymbol.Builder info,
+                                         @NotNull ClassSymbol.Builder enclosing,
+                                         @NotNull Fqn fqn,
+                                         boolean companion,
+                                         @NotNull Set<String> outerTypeVars) {
     for (SyntaxNode member = body.firstChild(); member != null; member = member.nextSibling()) {
       SyntaxElementType t = member.getType();
       if (t == KtNodeTypes.INSTANCE.getFUN()) {

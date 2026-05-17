@@ -124,11 +124,15 @@ public class JavaBnfGeneratorTest extends AbstractBnfGeneratorTest {
     java.nio.file.Path parserPath    = resolveTestPath(psiFile, KnownAttribute.PARSER_OUTPUT_PATH);
     java.nio.file.Path etHolderPath  = resolveTestPath(psiFile, KnownAttribute.ELEMENT_TYPE_HOLDER_OUTPUT_PATH);
     java.nio.file.Path converterPath = resolveTestPath(psiFile, KnownAttribute.ELEMENT_TYPE_CONVERTER_FACTORY_OUTPUT_PATH);
+    java.nio.file.Path inputPath     = resolveTestPath(psiFile, KnownAttribute.INPUT_PATH);
+    java.nio.file.Path psiInputPath  = resolveTestPath(psiFile, KnownAttribute.PSI_INPUT_PATH);
     // PSI_OUTPUT_PATH is intentionally ignored in pure-Java mode (it is a Kotlin/syntax-api-only attribute).
     java.util.Map<KnownAttribute<String>, java.nio.file.Path> map = new java.util.HashMap<>();
     map.put(KnownAttribute.PARSER_OUTPUT_PATH, parserPath != null ? parserPath : java.nio.file.Path.of(outputPath));
     if (etHolderPath != null) map.put(KnownAttribute.ELEMENT_TYPE_HOLDER_OUTPUT_PATH, etHolderPath);
     if (converterPath != null) map.put(KnownAttribute.ELEMENT_TYPE_CONVERTER_FACTORY_OUTPUT_PATH, converterPath);
+    if (inputPath != null) map.put(KnownAttribute.INPUT_PATH, inputPath);
+    if (psiInputPath != null) map.put(KnownAttribute.PSI_INPUT_PATH, psiInputPath);
     org.intellij.grammar.BnfPathsResolution paths = org.intellij.grammar.BnfPaths.resolveExplicit(map);
     return List.of(new JavaParserGenerator(psiFile, "", "", outputOpener, paths));
   }

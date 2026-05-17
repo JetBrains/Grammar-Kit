@@ -18,6 +18,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import static org.intellij.grammar.classinfo.SyntaxTreeUtil.firstChildOfType;
@@ -52,9 +53,24 @@ final class JavaSyntaxTypeFormatter {
   );
 
   private final JavaSyntaxImportContext imports;
+  private @NotNull Map<String, Fqn> nestedScope = Map.of();
 
   JavaSyntaxTypeFormatter(@NotNull JavaSyntaxImportContext imports) {
     this.imports = imports;
+  }
+
+  /**
+   * In-scope nested class simple-name → FQN map. The extractor sets this before walking a class's
+   * members so that an unqualified reference to a sibling nested type (e.g. {@code E} inside
+   * {@code class Util { enum E {} static E f(){...} }}) resolves to the enclosing-class-qualified
+   * FQN rather than falling through to the same-package fallback.
+   */
+  @NotNull Map<String, Fqn> getNestedScope() {
+    return nestedScope;
+  }
+
+  void setNestedScope(@NotNull Map<String, Fqn> scope) {
+    this.nestedScope = scope;
   }
 
   /**
@@ -185,7 +201,16 @@ final class JavaSyntaxTypeFormatter {
   private @NotNull String resolveDotted(@NotNull SyntaxNode refNode, @NotNull Set<String> typeVars) {
     String dotted = buildDottedText(refNode);
     if (typeVars.contains(dotted)) return dotted;          // in-scope type variable, do not qualify
-    if (dotted.contains(".")) return dotted;               // already qualified, leave as-is
-    return imports.resolveSimpleName(dotted);
+    int firstDot = dotted.indexOf('.');
+    if (firstDot < 0) {
+      Fqn nested = nestedScope.get(dotted);
+      if (nested != null) return nested.value();           // sibling/outer nested class wins over same-package
+      return imports.resolveSimpleName(dotted);
+    }
+    // Dotted reference: if the head segment names an in-scope nested class, qualify with its full FQN.
+    String head = dotted.substring(0, firstDot);
+    Fqn nestedHead = nestedScope.get(head);
+    if (nestedHead != null) return nestedHead.value() + dotted.substring(firstDot);
+    return dotted;                                         // already qualified, leave as-is
   }
 }

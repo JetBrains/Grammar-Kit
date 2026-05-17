@@ -27,6 +27,12 @@ public class UtilMethods {
 
   class Z extends Exception { }
 
+  public enum E { A, B, C }
+
+  public static class Wrap {
+    public enum Deep { X, Y }
+  }
+
   public static <T extends X & Y> void foo0(Object bar, T param) throws Z, RuntimeException { }
   public static <T> void foo1(Object bar, T param) { }
   public static <T, K> void foo2(Object bar, T param, K k) { }
@@ -38,5 +44,13 @@ public class UtilMethods {
   public static @NotNull @Nls List<? super @NotNull @Nls String> @Nullable @Unmodifiable [][] foo6(
     Object bar, @NotNull @Nls List<? super @NotNull @Nls String> @Nullable @Unmodifiable [][] args) {
     return null;
+  }
+
+  public static @NotNull E foo7(@NotNull Object bar) {
+    return E.A;
+  }
+
+  public static @NotNull Wrap.Deep foo8(@NotNull Object bar) {
+    return Wrap.Deep.X;
   }
 }

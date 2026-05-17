@@ -110,9 +110,46 @@ final class KotlinSyntaxTypeFormatter {
   static final Fqn NULLABLE = Fqn.of("org.jetbrains.annotations.Nullable");
 
   private final KotlinSyntaxImportContext imports;
+  private @NotNull Map<String, Fqn> nestedScope = Map.of();
 
   KotlinSyntaxTypeFormatter(@NotNull KotlinSyntaxImportContext imports) {
     this.imports = imports;
+  }
+
+  /**
+   * In-scope nested class/object/typealias simple-name → FQN map. The extractor sets this before
+   * walking a class's members so that an unqualified reference to a sibling nested type (e.g.
+   * {@code Direction} inside {@code class Util { enum class Direction; companion object { fun foo(): Direction } }})
+   * resolves to the enclosing-class-qualified FQN rather than falling through to the same-package
+   * fallback. Also drives qualification of partially-qualified dotted refs whose head segment is in
+   * the map (e.g. {@code Wrap.Deep} from outside {@code Wrap} but inside its enclosing class).
+   */
+  @NotNull Map<String, Fqn> getNestedScope() {
+    return nestedScope;
+  }
+
+  void setNestedScope(@NotNull Map<String, Fqn> scope) {
+    this.nestedScope = scope;
+  }
+
+  /**
+   * Apply the Java-FQN aliasing from {@link #KOTLIN_TO_JAVA_ALIASES} and return the rewritten
+   * string. Used by every resolution site to keep the alias treatment consistent.
+   */
+  private @NotNull String resolveAliased(@NotNull String dotted, @NotNull Set<String> typeVars) {
+    if (typeVars.contains(dotted)) return dotted;
+    int firstDot = dotted.indexOf('.');
+    String resolved;
+    if (firstDot < 0) {
+      Fqn nested = nestedScope.get(dotted);
+      resolved = nested != null ? nested.value() : imports.resolveSimpleName(dotted);
+    }
+    else {
+      String head = dotted.substring(0, firstDot);
+      Fqn nestedHead = nestedScope.get(head);
+      resolved = nestedHead != null ? nestedHead.value() + dotted.substring(firstDot) : dotted;
+    }
+    return resolved;
   }
 
   /**
@@ -186,10 +223,8 @@ final class KotlinSyntaxTypeFormatter {
                                             @NotNull Set<String> typeVars,
                                             @NotNull List<Fqn> outerAnnotations) {
     String dotted = userTypeDotted(userType);
-    String resolved;
     if (typeVars.contains(dotted)) return new JvmTypeRef.TypeVariable(dotted);
-    if (dotted.contains(".")) resolved = dotted;
-    else resolved = imports.resolveSimpleName(dotted);
+    String resolved = resolveAliased(dotted, typeVars);
 
     SyntaxNode targs = firstChildOfType(userType, KtNodeTypes.INSTANCE.getTYPE_ARGUMENT_LIST());
 
@@ -372,9 +407,7 @@ final class KotlinSyntaxTypeFormatter {
     }
     if (t == KtNodeTypes.INSTANCE.getUSER_TYPE()) {
       String dotted = userTypeDotted(typeNode);
-      String resolved;
-      if (typeVars.contains(dotted) || dotted.contains(".")) resolved = dotted;
-      else resolved = imports.resolveSimpleName(dotted);
+      String resolved = resolveAliased(dotted, typeVars);
       String javaAlias = KOTLIN_TO_JAVA_ALIASES.get(resolved);
       return Fqn.of(javaAlias != null ? javaAlias : resolved);
     }
@@ -471,7 +504,7 @@ final class KotlinSyntaxTypeFormatter {
           t == KtNodeTypes.INSTANCE.getDOT_QUALIFIED_EXPRESSION()) {
         String dotted = KotlinSyntaxNodes.buildDottedText(c);
         if (dotted.isEmpty()) return null;
-        String resolved = dotted.contains(".") ? dotted : imports.resolveSimpleName(dotted);
+        String resolved = resolveAliased(dotted, Set.of());
         String alias = KOTLIN_TO_JAVA_ALIASES.get(resolved);
         return Fqn.of(alias != null ? alias : resolved);
       }

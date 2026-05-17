@@ -321,4 +321,66 @@ final class KotlinSyntaxTypeFormatter {
     }
     return out;
   }
+
+  /**
+   * Annotation extraction tailored to functions/constructors/property-accessors: separates
+   * {@code @Throws(E::class, ...)} entries — whose semantic meaning on the JVM is a checked
+   * exception declaration — from regular annotation entries. The {@code @Throws} type itself is
+   * omitted from the returned annotations; its class-literal arguments populate the exceptions list.
+   */
+  record MethodAnnotations(@NotNull List<Fqn> annotations, @NotNull List<Fqn> exceptions) { }
+
+  @NotNull MethodAnnotations extractMethodAnnotations(@Nullable SyntaxNode modifierList,
+                                                      @NotNull Set<String> typeVars) {
+    if (modifierList == null) return new MethodAnnotations(List.of(), List.of());
+    List<Fqn> annotations = new SmartList<>();
+    List<Fqn> exceptions = new SmartList<>();
+    for (SyntaxNode entry = modifierList.firstChild(); entry != null; entry = entry.nextSibling()) {
+      if (entry.getType() != KtNodeTypes.INSTANCE.getANNOTATION_ENTRY()) continue;
+      SyntaxNode callee = firstChildOfType(entry, KtNodeTypes.INSTANCE.getCONSTRUCTOR_CALLEE());
+      SyntaxNode typeRef = callee == null ? firstChildOfType(entry, KtNodeTypes.INSTANCE.getTYPE_REFERENCE())
+                                          : firstChildOfType(callee, KtNodeTypes.INSTANCE.getTYPE_REFERENCE());
+      if (typeRef == null) continue;
+      // Check the simple name of the annotation type, not the entry's rightmost identifier — that
+      // would walk into VALUE_ARGUMENT_LIST and pick up an identifier from `Foo::class` instead.
+      if ("Throws".equals(KotlinSyntaxNodes.rightmostIdentifier(typeRef))) {
+        collectThrowsArgumentFqns(entry, exceptions);
+        continue;
+      }
+      annotations.add(formatTypeFqn(typeRef, typeVars));
+    }
+    return new MethodAnnotations(annotations, exceptions);
+  }
+
+  private void collectThrowsArgumentFqns(@NotNull SyntaxNode annotationEntry, @NotNull List<Fqn> out) {
+    SyntaxNode argList = firstChildOfType(annotationEntry, KtNodeTypes.INSTANCE.getVALUE_ARGUMENT_LIST());
+    if (argList == null) return;
+    for (SyntaxNode arg = argList.firstChild(); arg != null; arg = arg.nextSibling()) {
+      if (arg.getType() != KtNodeTypes.INSTANCE.getVALUE_ARGUMENT()) continue;
+      SyntaxNode classLit = firstChildOfType(arg, KtNodeTypes.INSTANCE.getCLASS_LITERAL_EXPRESSION());
+      if (classLit == null) continue;
+      Fqn fqn = resolveClassLiteralFqn(classLit);
+      if (fqn != null) out.add(fqn);
+    }
+  }
+
+  /**
+   * Resolves the receiver of a {@code Foo::class} class-literal to a class FQN. The receiver is the
+   * {@code REFERENCE_EXPRESSION} (simple name) or {@code DOT_QUALIFIED_EXPRESSION} (qualified) child
+   * that precedes the {@code ::}; both shapes are handled by {@link KotlinSyntaxNodes#buildDottedText}.
+   */
+  private @Nullable Fqn resolveClassLiteralFqn(@NotNull SyntaxNode classLit) {
+    for (SyntaxNode c = classLit.firstChild(); c != null; c = c.nextSibling()) {
+      SyntaxElementType t = c.getType();
+      if (t == KtNodeTypes.INSTANCE.getREFERENCE_EXPRESSION() ||
+          t == KtNodeTypes.INSTANCE.getDOT_QUALIFIED_EXPRESSION()) {
+        String dotted = KotlinSyntaxNodes.buildDottedText(c);
+        if (dotted.isEmpty()) return null;
+        String resolved = dotted.contains(".") ? dotted : imports.resolveSimpleName(dotted);
+        String alias = KOTLIN_TO_JAVA_ALIASES.get(resolved);
+        return Fqn.of(alias != null ? alias : resolved);
+      }
+    }
+    return null;
+  }
 }

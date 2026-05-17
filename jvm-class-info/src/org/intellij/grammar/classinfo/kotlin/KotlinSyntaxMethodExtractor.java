@@ -57,7 +57,9 @@ final class KotlinSyntaxMethodExtractor {
     Set<String> typeVars = new HashSet<>(classTypeVars);
     SyntaxNode modifierList = firstChildOfType(funNode, KtNodeTypes.INSTANCE.getMODIFIER_LIST());
     m.modifiers = extractModifiers(modifierList);
-    m.annotations.addAll(typeFormatter.extractAnnotationFqns(modifierList, typeVars));
+    KotlinSyntaxTypeFormatter.MethodAnnotations funAnnos = typeFormatter.extractMethodAnnotations(modifierList, typeVars);
+    m.annotations.addAll(funAnnos.annotations());
+    m.exceptions.addAll(funAnnos.exceptions());
 
     collectFunctionTypeParameters(funNode, m, typeVars);
 
@@ -99,7 +101,9 @@ final class KotlinSyntaxMethodExtractor {
     Set<String> typeVars = new HashSet<>(classTypeVars);
     SyntaxNode modifierList = firstChildOfType(ctorNode, KtNodeTypes.INSTANCE.getMODIFIER_LIST());
     m.modifiers = extractModifiers(modifierList);
-    m.annotations.addAll(typeFormatter.extractAnnotationFqns(modifierList, typeVars));
+    KotlinSyntaxTypeFormatter.MethodAnnotations ctorAnnos = typeFormatter.extractMethodAnnotations(modifierList, typeVars);
+    m.annotations.addAll(ctorAnnos.annotations());
+    m.exceptions.addAll(ctorAnnos.exceptions());
 
     SyntaxNode paramList = firstChildOfType(ctorNode, KtNodeTypes.INSTANCE.getVALUE_PARAMETER_LIST());
     collectValueParameters(paramList, m, typeVars);
@@ -129,7 +133,9 @@ final class KotlinSyntaxMethodExtractor {
     m.modifiers = mods | (staticAccessor ? Modifier.STATIC : 0);
     m.methodType = staticAccessor ? MethodType.STATIC : MethodType.INSTANCE;
     m.returnType = typeStr;
-    m.annotations.addAll(typeFormatter.extractAnnotationFqns(modifierList, classTypeVars));
+    KotlinSyntaxTypeFormatter.MethodAnnotations getterAnnos = typeFormatter.extractMethodAnnotations(modifierList, classTypeVars);
+    m.annotations.addAll(getterAnnos.annotations());
+    m.exceptions.addAll(getterAnnos.exceptions());
     addNullabilityAnnotation(m.annotations, typeRef, typeStr, classTypeVars);
     copyTypesAsAnnotated(m);
     return m;
@@ -161,7 +167,9 @@ final class KotlinSyntaxMethodExtractor {
     value.name = "value";
     addNullabilityAnnotation(value.annotations, typeRef, typeStr, classTypeVars);
     m.parameters.add(value);
-    m.annotations.addAll(typeFormatter.extractAnnotationFqns(modifierList, classTypeVars));
+    KotlinSyntaxTypeFormatter.MethodAnnotations setterAnnos = typeFormatter.extractMethodAnnotations(modifierList, classTypeVars);
+    m.annotations.addAll(setterAnnos.annotations());
+    m.exceptions.addAll(setterAnnos.exceptions());
     copyTypesAsAnnotated(m);
     return m;
   }

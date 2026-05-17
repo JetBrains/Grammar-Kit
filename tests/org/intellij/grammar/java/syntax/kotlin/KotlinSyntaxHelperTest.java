@@ -256,6 +256,24 @@ public class KotlinSyntaxHelperTest extends GoldenClassInfoTestCase {
     assertClassInfoMatchesGolden(extractAll());
   }
 
+  public void testThrowsAnnotationProducesExceptions() throws Exception {
+    write("a/b/Doer.kt", """
+        package a.b
+        import com.intellij.util.IncorrectOperationException
+        class Doer {
+            @Throws(IncorrectOperationException::class)
+            fun perform() {}
+
+            @Throws(IncorrectOperationException::class, IllegalStateException::class)
+            fun samePackageFallback() {}
+
+            @Throws(IncorrectOperationException::class, java.lang.IllegalStateException::class)
+            fun fullyQualified() {}
+        }
+        """);
+    assertClassInfoMatchesGolden(extractAll());
+  }
+
   public void testImportedTypeResolves() throws Exception {
     write("a/b/Used.kt", """
         package a.b

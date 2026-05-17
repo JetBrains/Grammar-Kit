@@ -1,0 +1,24 @@
+class nul.Sample extends java.lang.Object
+  modifiers: public final
+  methods:
+    INSTANCE public java.lang.String ref(java.lang.String s, java.lang.String n)
+      annotations: @org.jetbrains.annotations.Nullable
+      param[0] annotations: @org.jetbrains.annotations.NotNull
+      param[1] annotations: @org.jetbrains.annotations.Nullable
+    INSTANCE public boolean prim(int x, java.lang.Integer y)
+      param[1] annotations: @org.jetbrains.annotations.Nullable
+    INSTANCE public T id(T x)
+      typeParameters: T
+    INSTANCE public java.lang.String getTitle()
+      annotations: @org.jetbrains.annotations.NotNull
+    INSTANCE public java.lang.String getNick()
+      annotations: @org.jetbrains.annotations.Nullable
+    INSTANCE public void setNick(java.lang.String value)
+      param[0] annotations: @org.jetbrains.annotations.Nullable
+
+class nul.SampleKt extends java.lang.Object
+  modifiers: public final
+  methods:
+    STATIC public static void ext(java.lang.String receiver, java.lang.Integer x)
+      param[0] annotations: @org.jetbrains.annotations.Nullable
+      param[1] annotations: @org.jetbrains.annotations.Nullable

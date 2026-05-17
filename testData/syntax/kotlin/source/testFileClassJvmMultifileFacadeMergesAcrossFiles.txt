@@ -3,4 +3,6 @@ class util.Utils extends java.lang.Object
   multifileFacade
   methods:
     STATIC public static java.lang.String b()
+      annotations: @org.jetbrains.annotations.NotNull
     STATIC public static java.lang.String a()
+      annotations: @org.jetbrains.annotations.NotNull

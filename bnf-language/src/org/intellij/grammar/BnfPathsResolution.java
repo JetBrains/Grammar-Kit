@@ -4,6 +4,7 @@
 
 package org.intellij.grammar;
 
+import org.intellij.grammar.java.JavaHelperFactory;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -35,7 +36,7 @@ public final class BnfPathsResolution {
    * <p>A {@code null} for {@link KnownAttribute#INPUT_PATH} is the normal "no user-declared
    * input scope" signal for IDE-mode resolutions built via
    * {@link BnfPaths#resolve(org.intellij.grammar.psi.BnfFile)}: consumers with a {@code Project}
-   * (e.g. {@link org.intellij.grammar.java.PsiHelperFactory}) fall back to a project-wide
+   * (e.g. {@link JavaHelperFactory}) fall back to a project-wide
    * search scope. CLI consumers without a {@code Project} should seed a default via
    * {@link BnfPaths#resolveExplicit(java.util.Map, Path)}.
    *

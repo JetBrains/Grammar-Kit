@@ -6,18 +6,10 @@ package org.intellij.grammar;
 
 import com.intellij.lang.LanguageASTFactory;
 import com.intellij.lang.LanguageBraceMatching;
-import com.intellij.mock.MockProject;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.impl.DebugUtil;
 import org.intellij.grammar.generator.JavaParserGenerator;
 import org.intellij.grammar.generator.OutputOpener;
-import org.intellij.grammar.classinfo.JvmClassSymbolManager;
-import org.intellij.grammar.classinfo.SyntaxTreeCache;
-import org.intellij.grammar.classinfo.asm.AsmClassSymbolProvider;
-import org.intellij.grammar.classinfo.java.JavaSyntaxClassSymbolProvider;
-import org.intellij.grammar.classinfo.kotlin.KotlinSyntaxClassSymbolProvider;
-import org.intellij.grammar.java.JavaHelper;
-import org.intellij.grammar.java.JvmSyntaxHelper;
 import org.intellij.grammar.psi.BnfFile;
 import org.jetbrains.annotations.NotNull;
 
@@ -25,9 +17,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -173,10 +163,6 @@ public class Main {
     Map<KnownAttribute<String>, Path> merged = PathConflicts.merge(cliArgs.paths(), grammarMap, cliArgs.strictPaths(), System.err);
     BnfPathsResolution paths = BnfPaths.resolveExplicit(merged, bnfParent);
 
-    if (cliArgs.sourcePsi()) {
-      installSourceBackedJavaHelper((BnfFile)bnfFile, paths);
-    }
-
     JavaParserGenerator generator = new JavaParserGenerator((BnfFile)bnfFile,
                                                             grammarDir.getAbsolutePath(),
                                                             "",
@@ -184,28 +170,5 @@ public class Main {
                                                             paths);
     generator.generate();
     return true;
-  }
-
-  /**
-   * Installs a source-backed {@link JavaHelper} chain as the project's {@link JavaHelper} service,
-   * rooted at the resolved {@code inputPath} and {@code psiInputPath}. The chain
-   * {@link KotlinSyntaxHelper} → {@link JavaSyntaxHelper} → {@link AsmHelper} resolves Kotlin
-   * sources first, then Java sources, then bytecode-only platform classes that live outside the
-   * configured roots. Re-registered per grammar so each generation pass sees a fresh cache scoped
-   * to its own paths.
-   */
-  private static void installSourceBackedJavaHelper(@NotNull BnfFile bnfFile, @NotNull BnfPathsResolution paths) {
-    List<Path> roots = new ArrayList<>();
-    Path input = paths.path(KnownAttribute.INPUT_PATH);
-    Path psiInput = paths.path(KnownAttribute.PSI_INPUT_PATH);
-    if (input != null) roots.add(input);
-    if (psiInput != null && !psiInput.equals(input)) roots.add(psiInput);
-    if (roots.isEmpty()) return;
-    SyntaxTreeCache treeCache = new SyntaxTreeCache();
-    JavaHelper helper = new JvmSyntaxHelper(new JvmClassSymbolManager(List.of(
-      new KotlinSyntaxClassSymbolProvider(roots, treeCache),
-      new JavaSyntaxClassSymbolProvider(roots, treeCache),
-      new AsmClassSymbolProvider())));
-    ((MockProject)bnfFile.getProject()).registerService(JavaHelper.class, helper);
   }
 }

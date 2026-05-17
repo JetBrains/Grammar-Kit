@@ -15,7 +15,6 @@ import com.intellij.util.ProcessingContext;
 import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.classinfo.JvmClassSymbolManager;
 import org.intellij.grammar.classinfo.MethodType;
-import org.intellij.grammar.classinfo.asm.AsmClassSymbolProvider;
 import org.intellij.grammar.psi.BnfAttr;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -47,8 +46,8 @@ final class PsiHelper extends JvmSyntaxHelper {
   private final PsiElementFactory myElementFactory;
   private final @Nullable GlobalSearchScope myScope;
 
-  PsiHelper(@NotNull Project project, @Nullable GlobalSearchScope scope) {
-    super(new JvmClassSymbolManager(List.of(new AsmClassSymbolProvider())));
+  PsiHelper(@NotNull Project project, @Nullable GlobalSearchScope scope, @NotNull JvmClassSymbolManager fallbackManager) {
+    super(fallbackManager);
     myFacade = JavaPsiFacade.getInstance(project);
     myElementFactory = PsiElementFactory.getInstance(project);
     myScope = scope;
@@ -96,7 +95,7 @@ final class PsiHelper extends JvmSyntaxHelper {
     JavaClassReferenceProvider provider = new JavaClassReferenceProvider() {
       @Override
       public GlobalSearchScope getScope(@NotNull Project project) {
-        // Honor the *InputPath / *OutputPath cascade resolved by PsiHelperFactory; null = platform default.
+        // Honor the *InputPath / *OutputPath cascade resolved by JavaHelperFactory; null = platform default.
         return myScope;
       }
     };
@@ -127,7 +126,8 @@ final class PsiHelper extends JvmSyntaxHelper {
   private PsiClass findClassSafe(String className) {
     if (className == null) return null;
     try {
-      return myFacade.findClass(className, myScope != null ? myScope : GlobalSearchScope.allScope(myFacade.getProject()));
+      GlobalSearchScope scope = myScope != null ? myScope : GlobalSearchScope.allScope(myFacade.getProject());
+      return myFacade.findClass(className, scope);
     }
     catch (IndexNotReadyException e) {
       return null;

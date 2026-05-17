@@ -23,6 +23,7 @@ import com.intellij.util.containers.ContainerUtil;
 import org.intellij.grammar.classinfo.MethodType;
 import org.intellij.grammar.generator.java.JavaBnfConstants;
 import org.intellij.grammar.java.JavaHelper;
+import org.intellij.grammar.java.JavaHelperFactory;
 import org.intellij.grammar.parser.GeneratedParserUtilBase;
 import org.intellij.grammar.psi.*;
 import org.intellij.grammar.psi.impl.BnfReferenceImpl;
@@ -135,7 +136,7 @@ final class BnfCompletionContributor extends CompletionContributor {
         if (rule == null) return;
         String parserClass = BnfAttributes.getAttribute(rule, KnownAttribute.PARSER_UTIL_CLASS);
         if (StringUtil.isNotEmpty(parserClass)) {
-          JavaHelper helper = JavaHelper.getJavaHelper(rule);
+          JavaHelper helper = JavaHelperFactory.getInstance(rule.getProject()).getInstance(rule);
           for (String className = parserClass; className != null; className = helper.getSuperClassName(className)) {
             for (NavigatablePsiElement element : helper.findClassMethods(className, MethodType.STATIC, "*", false, -1,
                                                                          JavaBnfConstants.PSI_BUILDER_CLASS, "int")) {

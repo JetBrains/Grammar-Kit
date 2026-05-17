@@ -15,6 +15,7 @@ import com.intellij.util.containers.ContainerUtil;
 import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.classinfo.MethodType;
 import org.intellij.grammar.java.JavaHelper;
+import org.intellij.grammar.java.JavaHelperFactory;
 import org.intellij.grammar.java.RuleImplUtil;
 import org.intellij.grammar.psi.*;
 import org.jetbrains.annotations.NotNull;
@@ -37,7 +38,7 @@ class GrammarPsiImplUtil {
     BnfLiteralExpression value = o.getLiteralExpression();
     if (id == null || value != null) return PsiReference.EMPTY_ARRAY;
     String psiImplUtilClass = getRootAttribute(attr, KnownAttribute.PSI_IMPL_UTIL_CLASS);
-    JavaHelper javaHelper = JavaHelper.getJavaHelper(o);
+    JavaHelper javaHelper = JavaHelperFactory.getInstance(o.getProject()).getInstance(o);
 
     return new PsiReference[] {
       new PsiPolyVariantReferenceBase<>(o, TextRange.from(id.getStartOffsetInParent(), id.getTextLength())) {

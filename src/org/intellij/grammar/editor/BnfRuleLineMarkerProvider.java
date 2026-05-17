@@ -22,6 +22,7 @@ import org.intellij.grammar.classinfo.MethodType;
 import org.intellij.grammar.generator.CommonRendererUtils;
 import org.intellij.grammar.generator.RuleGraphHelper;
 import org.intellij.grammar.java.JavaHelper;
+import org.intellij.grammar.java.JavaHelperFactory;
 import org.intellij.grammar.psi.BnfAttributes;
 import org.intellij.grammar.psi.BnfExpression;
 import org.intellij.grammar.psi.BnfRule;
@@ -44,7 +45,7 @@ final class BnfRuleLineMarkerProvider extends RelatedItemLineMarkerProvider {
     if (StringUtil.isEmpty(parserClass)) return null;
     boolean generateKotlin = BnfAttributes.useSyntaxApi(rule);
     MethodType methodType = (generateKotlin) ? MethodType.INSTANCE : MethodType.STATIC;
-    JavaHelper helper = JavaHelper.getJavaHelper(element);
+    JavaHelper helper = JavaHelperFactory.getInstance(element.getProject()).getInstance(element);
     String methodName = (generateKotlin) ? GrammarUtil.getKotlinMethodName(rule, element) : GrammarUtil.getJavaMethodName(rule, element);
     List<NavigatablePsiElement> methods = helper.findClassMethods(parserClass, methodType, methodName, false, -1);
     return ContainerUtil.getFirstItem(methods);
@@ -69,7 +70,7 @@ final class BnfRuleLineMarkerProvider extends RelatedItemLineMarkerProvider {
         BnfRule rule = BnfRules.getSynonymTargetOrSelf((BnfRule)parent);
         if (RuleGraphHelper.hasPsiClass(rule)) {
           hasPSI = true;
-          JavaHelper javaHelper = JavaHelper.getJavaHelper(rule);
+          JavaHelper javaHelper = JavaHelperFactory.getInstance(rule.getProject()).getInstance(rule);
           Couple<String> names = CommonRendererUtils.getQualifiedRuleClassName(rule);
           for (String className : new String[]{names.first, names.second}) {
             NavigatablePsiElement aClass = javaHelper.findClass(className);

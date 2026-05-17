@@ -15,7 +15,7 @@ import org.intellij.grammar.generator.JavaParserGenerator;
 import org.intellij.grammar.generator.OutputOpener;
 import org.intellij.grammar.classinfo.MethodType;
 import org.intellij.grammar.java.JavaHelper;
-import org.intellij.grammar.java.PsiHelperFactory;
+import org.intellij.grammar.java.JavaHelperFactory;
 import org.intellij.grammar.psi.BnfFile;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -179,14 +179,14 @@ public class BnfGeneratorPsiTest extends BasePlatformTestCase {
     assertNotNull("ElementType must be resolvable", facade.findClass("java.lang.annotation.ElementType", scope));
 
     // Verify JavaHelper uses PsiHelper
-    JavaHelper javaHelper = JavaHelper.getJavaHelper(myFixture.addFileToProject("dummy.bnf", "{}"));
+    JavaHelper javaHelper = JavaHelperFactory.getInstance(getProject()).getInstance(myFixture.addFileToProject("dummy.bnf", "{}"));
     assertTrue("Expected PsiHelper", javaHelper.getClass().getName().contains("PsiHelper"));
 
     // Verify the return type includes the embedded annotation (needed for the bug to manifest)
     List<NavigatablePsiElement> methods = javaHelper.findClassMethods(
       "test.psi.impl.MyMixin", MethodType.INSTANCE, "getAccess", false, -1);
     assertEquals("Should find getAccess method", 1, methods.size());
-    List<String> methodTypes = javaHelper.getMethodTypes(methods.get(0));
+    List<String> methodTypes = JavaHelper.getMethodTypes(methods.get(0));
     assertTrue("Return type should contain embedded @NotNull for qualified type, got: " + methodTypes,
       !methodTypes.isEmpty() && methodTypes.get(0).contains("@"));
 
@@ -237,11 +237,12 @@ public class BnfGeneratorPsiTest extends BasePlatformTestCase {
     // In real IDE with platform SDK classes resolved from bytecode,
     // PsiHelper.getAnnotationsInner() fails to filter @NotNull from method annotations
     // when PsiType.getAnnotations() doesn't return annotations on inner type components
-    // of qualified types. We simulate this by wrapping the JavaHelper.
-    Field javaHelperField = Generator.class.getDeclaredField("myJavaHelper");
-    javaHelperField.setAccessible(true);
-    JavaHelper original = (JavaHelper) javaHelperField.get(generator);
-    javaHelperField.set(generator, new DuplicateAnnotationJavaHelper(original));
+    // of qualified types. We simulate this by wrapping the ScopedHelpers so every helper
+    // returned to the generator is the buggy one.
+    Field scopedHelpersField = Generator.class.getDeclaredField("myScopedHelpers");
+    scopedHelpersField.setAccessible(true);
+    JavaHelperFactory.ScopedHelpers originalScoped = (JavaHelperFactory.ScopedHelpers) scopedHelpersField.get(generator);
+    scopedHelpersField.set(generator, (JavaHelperFactory.ScopedHelpers) attribute -> new DuplicateAnnotationJavaHelper(originalScoped.get(attribute)));
 
     generator.generate();
 
@@ -345,7 +346,7 @@ public class BnfGeneratorPsiTest extends BasePlatformTestCase {
   /**
    * Regression test for the IDE-mode class-resolution scope when the grammar declares no
    * {@code inputPath}. Pre-fix, {@link BnfPaths#resolve} defaulted {@code INPUT_PATH} to the
-   * BNF file's parent directory and {@link PsiHelperFactory} narrowed the search scope to that
+   * BNF file's parent directory and {@link JavaHelperFactory} narrowed the search scope to that
    * subtree. A {@code mixin}/{@code implements}/{@code parserUtilClass} class living anywhere
    * outside that subtree (different module, sibling source folder, library) was invisible.
    *
@@ -402,22 +403,18 @@ public class BnfGeneratorPsiTest extends BasePlatformTestCase {
     assertNull(BnfPaths.referencePath(resolution, KnownAttribute.IMPLEMENTS));
     assertNull(BnfPaths.referencePath(resolution, KnownAttribute.PARSER_UTIL_CLASS));
 
-    // PsiHelperFactory must widen to a project-wide scope and resolve all three classes,
+    // JavaHelperFactory must widen to a project-wide scope and resolve all three classes,
     // even though they live outside /src/grammar/.
-    PsiHelperFactory factory = PsiHelperFactory.getInstance(getProject());
-    assertNotNull("PsiHelperFactory must be available in IDE-mode tests", factory);
+    JavaHelperFactory factory = JavaHelperFactory.getInstance(getProject());
+    assertNotNull("JavaHelperFactory must be available in IDE-mode tests", factory);
 
-    JavaHelper mixinHelper = factory.getInstance(resolution, KnownAttribute.MIXIN);
+    JavaHelperFactory.ScopedHelpers scoped = factory.scoped(resolution);
     assertNotNull("mixin class must resolve via project-wide fallback scope",
-                  mixinHelper.findClass("code.mixin.MyMixin"));
-
-    JavaHelper implementsHelper = factory.getInstance(resolution, KnownAttribute.IMPLEMENTS);
+                  scoped.get(KnownAttribute.MIXIN).findClass("code.mixin.MyMixin"));
     assertNotNull("implements class must resolve via project-wide fallback scope",
-                  implementsHelper.findClass("code.iface.MyIface"));
-
-    JavaHelper utilHelper = factory.getInstance(resolution, KnownAttribute.PARSER_UTIL_CLASS);
+                  scoped.get(KnownAttribute.IMPLEMENTS).findClass("code.iface.MyIface"));
     assertNotNull("parserUtilClass must resolve via project-wide fallback scope",
-                  utilHelper.findClass("code.util.MyParserUtil"));
+                  scoped.get(KnownAttribute.PARSER_UTIL_CLASS).findClass("code.util.MyParserUtil"));
   }
 
   /**

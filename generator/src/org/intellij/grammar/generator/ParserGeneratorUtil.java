@@ -18,6 +18,8 @@ import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.generator.java.JavaBnfConstants;
 import org.intellij.grammar.generator.java.JavaNames;
 import org.intellij.grammar.classinfo.Fqn;
+import org.intellij.grammar.classinfo.JvmTypeRef;
+import org.intellij.grammar.classinfo.JvmTypeRefs;
 import org.intellij.grammar.classinfo.TypeParameterSymbol;
 import org.intellij.grammar.java.JavaHelper;
 import org.intellij.grammar.psi.*;
@@ -351,12 +353,12 @@ public class ParserGeneratorUtil {
       }
       buffer.append(parameter.name());
 
-      List<String> extendsList = parameter.extendsList();
+      List<JvmTypeRef> extendsList = parameter.extendsList();
       if (!extendsList.isEmpty()) {
         buffer.append(" extends ");
         for (int i1 = 0; i1 < extendsList.size(); i1++) {
           if (i1 > 0) buffer.append(" & ");
-          String superType = extendsList.get(i1);
+          String superType = JvmTypeRefs.renderPlain(extendsList.get(i1));
           String shortened = shortener.shorten(superType);
           buffer.append(shortened);
         }

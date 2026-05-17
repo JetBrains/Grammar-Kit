@@ -148,12 +148,24 @@ public final class ClassSymbolUtil {
 
   private static @NotNull List<String> methodTypesFromSymbol(@NotNull MethodSymbol m) {
     List<String> out = new ArrayList<>(1 + 2 * m.parameters().size());
-    out.add(m.annotatedReturnType() != null ? m.annotatedReturnType() : m.returnType());
+    out.add(renderMethodType(m.returnType()));
     for (ParameterSymbol p : m.parameters()) {
-      out.add(p.annotatedType() != null ? p.annotatedType() : p.type());
+      out.add(renderMethodType(p.type()));
       out.add(p.name());
     }
     return out;
+  }
+
+  /**
+   * Render a {@link JvmTypeRef} in the form expected by string-based callers ({@code methodTypes}).
+   * Type-variable references are wrapped in angle brackets ({@code <T>}) — that's the legacy
+   * convention {@code methodTypesFromPsi} also produces, and
+   * {@code ParserGeneratorUtil.unwrapTypeArgumentForParamList} relies on it to detect a bare
+   * type-variable position for the inherited-constructor substitution.
+   */
+  private static @NotNull String renderMethodType(@NotNull JvmTypeRef ref) {
+    if (ref instanceof JvmTypeRef.TypeVariable t) return "<" + t.name() + ">";
+    return JvmTypeRefs.renderAnnotated(ref);
   }
 
   // endregion
@@ -178,7 +190,7 @@ public final class ClassSymbolUtil {
     PsiTypeParameter[] typeParameters = method.getTypeParameters();
     return ContainerUtil.map(typeParameters, param -> new TypeParameterSymbol(
       param.getName(),
-      ContainerUtil.map(param.getExtendsListTypes(), bound -> bound.getCanonicalText(false)),
+      ContainerUtil.map(param.getExtendsListTypes(), bound -> JvmTypeRefs.raw(bound.getCanonicalText(false))),
       ContainerUtil.map(annotationsFromPsi(param), Fqn::of)));
   }
 
@@ -234,7 +246,7 @@ public final class ClassSymbolUtil {
       param.getName(),
       ContainerUtil.mapNotNull(param.getBounds(), type -> {
         String typeName = type.getTypeName();
-        return "java.lang.Object".equals(typeName) ? null : typeName;
+        return "java.lang.Object".equals(typeName) ? null : JvmTypeRefs.raw(typeName);
       }),
       ContainerUtil.mapNotNull(param.getAnnotations(), o -> Fqn.ofNullable(o.annotationType().getCanonicalName()))));
   }

@@ -11,11 +11,14 @@ import com.intellij.util.containers.ContainerUtil;
 import org.intellij.grammar.classinfo.ClassSymbol;
 import org.intellij.grammar.classinfo.Fqn;
 import org.intellij.grammar.classinfo.JvmClassSymbolProvider;
+import org.intellij.grammar.classinfo.JvmTypeRef;
+import org.intellij.grammar.classinfo.JvmTypeRefs;
 import org.intellij.grammar.classinfo.MethodSymbol;
 import org.intellij.grammar.classinfo.MethodType;
 import org.intellij.grammar.classinfo.ParameterSymbol;
 import org.intellij.grammar.classinfo.SymbolResolver;
 import org.intellij.grammar.classinfo.TypeParameterSymbol;
+import org.intellij.grammar.classinfo.TypeProjection;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.org.objectweb.asm.*;
@@ -24,10 +27,10 @@ import org.jetbrains.org.objectweb.asm.signature.SignatureVisitor;
 
 import java.io.InputStream;
 import java.lang.reflect.Modifier;
-import java.util.ArrayDeque;
-import java.util.Deque;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
 /**
  * Bytecode-backed {@link JvmClassSymbolProvider}. Loads {@code .class} files through a
@@ -104,9 +107,8 @@ public final class AsmClassSymbolProvider implements JvmClassSymbolProvider {
     method.declaringClass = className;
 
     try {
-      MySignatureVisitor visitor = new MySignatureVisitor(method);
+      MethodSignatureVisitor visitor = new MethodSignatureVisitor(method);
       new SignatureReader(signature).accept(visitor);
-      visitor.finishElement(null);
 
       if (exceptions != null) {
         for (String exception : exceptions) {
@@ -129,6 +131,10 @@ public final class AsmClassSymbolProvider implements JvmClassSymbolProvider {
     //noinspection UseOfSystemOutOrSystemErr
     System.err.println(text);
   }
+
+  // ===============================================================================================
+  // Class visitor
+  // ===============================================================================================
 
   private static class MyClassVisitor extends ClassVisitor {
 
@@ -177,50 +183,35 @@ public final class AsmClassSymbolProvider implements JvmClassSymbolProvider {
                      Modifier.isStatic(access) ? MethodType.STATIC :
                      MethodType.INSTANCE;
       myInfo.methods.add(m);
-      class ParamTypeAnno {
-        int index;
+
+      /**
+       * Pending type annotations to merge after the method visit completes. We can't apply them as
+       * they arrive because the order vs declaration-target annotations isn't fixed, and outer-level
+       * type annotations (path == null) must be stripped from {@link MethodSymbol.Builder#annotations}
+       * / {@link ParameterSymbol.Builder#annotations} only if they actually moved into the type tree.
+       */
+      class PendingTypeAnno {
+        int index;        // 0 for return type; 1+N for parameter N
         Fqn anno;
-        TypePath path;
+        TypePath path;    // null for outer-level
       }
-      List<ParamTypeAnno> typeAnnos = new SmartList<>();
+      List<PendingTypeAnno> pending = new SmartList<>();
       return new MethodVisitor(ASM_OPCODES) {
         @Override
         public void visitEnd() {
-          m.annotatedReturnType = m.returnType;
-          for (ParameterSymbol.Builder p : m.parameters) p.annotatedType = p.type;
-          int[] plainOffsets = new int[m.parameters.size() + 1];
-          for (ParamTypeAnno ta : typeAnnos) {
-            String prevType = ta.index == 0 ? m.annotatedReturnType : m.parameters.get(ta.index - 1).annotatedType;
-            boolean isArray = false;
-            if (ta.path != null) {
-              isArray = true;
-              int typePtr = prevType.length();
-              for (int i = 0; i < ta.path.getLength(); i++, typePtr -= 2) {
-                if (!(ta.path.getStep(i) == TypePath.ARRAY_ELEMENT && typePtr > 2 &&
-                      prevType.charAt(typePtr - 2) == '[' && prevType.charAt(typePtr - 1) == ']')) {
-                  isArray = false;
-                  break;
-                }
-              }
-              if (isArray && typePtr > 2 && prevType.charAt(typePtr - 1) == ']') isArray = false;
-            }
-            if (ta.path != null && !isArray) continue;
-            int bracketIdx = prevType.indexOf('[');
-            String newType;
-            if (!isArray && bracketIdx > 0) {
-              boolean addSpace = prevType.charAt(bracketIdx - 1) != ' ';
-              newType = prevType.substring(0, bracketIdx) + (addSpace ? " " : "") + "@" + ta.anno + " " + prevType.substring(bracketIdx);
+          for (PendingTypeAnno ta : pending) {
+            if (ta.index == 0) {
+              m.returnType = annotateAt(m.returnType, ta.path, ta.anno);
             }
             else {
-              int offset = plainOffsets[ta.index];
-              newType = prevType.substring(0, offset) + "@" + ta.anno + " " + prevType.substring(offset);
-              plainOffsets[ta.index] += 2 + ta.anno.value().length();
+              ParameterSymbol.Builder p = m.parameters.get(ta.index - 1);
+              p.type = annotateAt(p.type, ta.path, ta.anno);
             }
-            if (ta.index == 0) m.annotatedReturnType = newType;
-            else m.parameters.get(ta.index - 1).annotatedType = newType;
-            if (isArray || bracketIdx < 1) {
-              if (ta.index == 0) m.annotations.remove(ta.anno);
-              else m.parameters.get(ta.index - 1).annotations.remove(ta.anno);
+            if (ta.path == null) {
+              // Outer-level: the same annotation FQN is also present in the declaration-target list
+              // (visitParameterAnnotation / visitAnnotation already added it). Strip the duplicate so
+              // it surfaces only on the type tree.
+              (ta.index == 0 ? m.annotations : m.parameters.get(ta.index - 1).annotations).remove(ta.anno);
             }
           }
         }
@@ -262,17 +253,17 @@ public final class AsmClassSymbolProvider implements JvmClassSymbolProvider {
               }
               else if (typeReference.getSort() == TypeReference.METHOD_RETURN ||
                        typeReference.getSort() == TypeReference.METHOD_FORMAL_PARAMETER) {
-                ParamTypeAnno o = new ParamTypeAnno();
+                PendingTypeAnno o = new PendingTypeAnno();
                 o.index = typeReference.getSort() == TypeReference.METHOD_RETURN ? 0 : typeReference.getFormalParameterIndex() + 1;
                 o.anno = anno;
                 o.path = typePath;
-                typeAnnos.add(o);
+                pending.add(o);
               }
               else if (typeReference.getSort() == TypeReference.METHOD_TYPE_PARAMETER_BOUND) {
-                List<String> bounds = m.generics.get(typeReference.getTypeParameterIndex()).extendsList;
-                if (typeReference.getTypeParameterBoundIndex() <= bounds.size()) {
-                  String prev = bounds.get(typeReference.getTypeParameterBoundIndex() - 1);
-                  bounds.set(typeReference.getTypeParameterBoundIndex() - 1, "@" + anno + " " + prev);
+                List<JvmTypeRef> bounds = m.generics.get(typeReference.getTypeParameterIndex()).extendsList;
+                int boundIdx = typeReference.getTypeParameterBoundIndex() - 1;
+                if (boundIdx >= 0 && boundIdx < bounds.size()) {
+                  bounds.set(boundIdx, annotateAt(bounds.get(boundIdx), typePath, anno));
                 }
               }
             }
@@ -312,186 +303,210 @@ public final class AsmClassSymbolProvider implements JvmClassSymbolProvider {
     }
   }
 
-  private static class MySignatureVisitor extends SignatureVisitor {
-    final MethodSymbol.Builder method;
-    final Deque<State> states = new ArrayDeque<>();
+  // ===============================================================================================
+  // Type-annotation walker — appends an Fqn to the annotations list at the position the TypePath
+  // points to. Returns a new {@link JvmTypeRef} tree with the annotation inserted.
+  // ===============================================================================================
 
-    /**
-     * @noinspection StringBufferField
-     */
-    final StringBuilder sb = new StringBuilder();
+  /**
+   * Walk {@code root} along {@code path} and append {@code anno} to the annotations of the resolved
+   * node. {@code null} path → annotate the root itself.
+   * <p>
+   * Supported path steps: {@link TypePath#ARRAY_ELEMENT}, {@link TypePath#WILDCARD_BOUND},
+   * {@link TypePath#TYPE_ARGUMENT}. {@link TypePath#INNER_TYPE} is currently a no-op (we represent
+   * inner types as a flat dotted FQN, so descending past a {@code .} doesn't change the position).
+   */
+  private static @NotNull JvmTypeRef annotateAt(@NotNull JvmTypeRef root, @Nullable TypePath path, @NotNull Fqn anno) {
+    if (path == null) return appendAnnotation(root, anno);
+    return walk(root, path, 0, anno);
+  }
 
-    MySignatureVisitor(MethodSymbol.Builder method) {
+  private static @NotNull JvmTypeRef walk(@NotNull JvmTypeRef node, @NotNull TypePath path, int step, @NotNull Fqn anno) {
+    if (step == path.getLength()) return appendAnnotation(node, anno);
+    int kind = path.getStep(step);
+    int argIdx = path.getStepArgument(step);
+    if (node instanceof JvmTypeRef.ArrayType a) {
+      if (kind == TypePath.ARRAY_ELEMENT) {
+        return new JvmTypeRef.ArrayType(walk(a.component(), path, step + 1, anno), a.annotations());
+      }
+      // Path overshoots — skip silently and leave the tree unchanged.
+      return a;
+    }
+    if (node instanceof JvmTypeRef.UserType u) {
+      if (kind == TypePath.INNER_TYPE) {
+        // We collapse Outer.Inner into a flat dotted Fqn; descending into the inner class doesn't
+        // change which JvmTypeRef carries the annotation. Continue at the same node.
+        return walk(u, path, step + 1, anno);
+      }
+      if (kind == TypePath.TYPE_ARGUMENT && argIdx >= 0 && argIdx < u.args().size()) {
+        List<TypeProjection> newArgs = new ArrayList<>(u.args());
+        TypeProjection target = newArgs.get(argIdx);
+        newArgs.set(argIdx, walkProjection(target, path, step + 1, anno));
+        return new JvmTypeRef.UserType(u.name(), u.annotations(), newArgs);
+      }
+      return u;
+    }
+    // Primitives, type variables, function types, dynamic types can't be descended into.
+    return node;
+  }
+
+  private static @NotNull TypeProjection walkProjection(@NotNull TypeProjection projection,
+                                                        @NotNull TypePath path,
+                                                        int step,
+                                                        @NotNull Fqn anno) {
+    if (projection instanceof TypeProjection.WithVariance wv) {
+      // WILDCARD_BOUND is the step that descends into the bound; for invariant projections the next
+      // step applies directly to the bound's type position. Treat both the same: descend into wv.type.
+      if (step < path.getLength() && path.getStep(step) == TypePath.WILDCARD_BOUND) {
+        return new TypeProjection.WithVariance(wv.variance(), walk(wv.type(), path, step + 1, anno));
+      }
+      return new TypeProjection.WithVariance(wv.variance(), walk(wv.type(), path, step, anno));
+    }
+    // Star projection — can't annotate.
+    return projection;
+  }
+
+  private static @NotNull JvmTypeRef appendAnnotation(@NotNull JvmTypeRef node, @NotNull Fqn anno) {
+    if (node instanceof JvmTypeRef.UserType u) return new JvmTypeRef.UserType(u.name(), addToList(u.annotations(), anno), u.args());
+    if (node instanceof JvmTypeRef.ArrayType a) return new JvmTypeRef.ArrayType(a.component(), addToList(a.annotations(), anno));
+    if (node instanceof JvmTypeRef.FunctionType f) return new JvmTypeRef.FunctionType(addToList(f.annotations(), anno));
+    if (node instanceof JvmTypeRef.DynamicType d) return new JvmTypeRef.DynamicType(addToList(d.annotations(), anno));
+    // Primitives and type variables don't carry annotations in the model.
+    return node;
+  }
+
+  private static @NotNull List<Fqn> addToList(@NotNull List<Fqn> existing, @NotNull Fqn anno) {
+    List<Fqn> out = new ArrayList<>(existing.size() + 1);
+    out.addAll(existing);
+    out.add(anno);
+    return out;
+  }
+
+  // ===============================================================================================
+  // Signature visitor — builds JvmTypeRef trees for parameters, return type, bounds, exceptions.
+  // ===============================================================================================
+
+  private static class MethodSignatureVisitor extends SignatureVisitor {
+    private final MethodSymbol.Builder method;
+
+    MethodSignatureVisitor(@NotNull MethodSymbol.Builder method) {
       super(ASM_OPCODES);
       this.method = method;
     }
 
     @Override
     public void visitFormalTypeParameter(String s) {
-      finishElement(null);
       method.generics.add(new TypeParameterSymbol.Builder(s));
     }
 
     @Override
-    public SignatureVisitor visitInterfaceBound() {
-      finishElement(null);
-      states.push(State.BOUNDS);
-      return this;
-    }
-
-    @Override
     public SignatureVisitor visitClassBound() {
-      finishElement(null);
-      states.push(State.BOUNDS);
-      return this;
+      return new TypeRefBuilder(t -> addBound(t));
     }
 
     @Override
-    public SignatureVisitor visitSuperclass() {
-      finishElement(null);
-      states.push(State.BOUNDS);
-      return this;
+    public SignatureVisitor visitInterfaceBound() {
+      return new TypeRefBuilder(t -> addBound(t));
     }
 
-    @Override
-    public SignatureVisitor visitInterface() {
-      finishElement(null);
-      states.push(State.BOUNDS);
-      return this;
+    private void addBound(@NotNull JvmTypeRef t) {
+      // Skip implicit `extends Object` bounds — kotlinc/javac emit them but they're noise downstream.
+      if (t instanceof JvmTypeRef.UserType u && "java.lang.Object".equals(u.name().value()) && u.args().isEmpty()) return;
+      TypeParameterSymbol.Builder current = ContainerUtil.getLastItem(method.generics);
+      if (current != null) current.extendsList.add(t);
+      else reportException("current generic must not be null");
     }
 
     @Override
     public SignatureVisitor visitParameterType() {
-      finishElement(null);
-      states.push(State.PARAM);
-      return this;
+      return new TypeRefBuilder(t -> {
+        ParameterSymbol.Builder p = new ParameterSymbol.Builder();
+        p.type = t;
+        p.name = "p" + method.parameters.size();
+        method.parameters.add(p);
+      });
     }
 
     @Override
     public SignatureVisitor visitReturnType() {
-      finishElement(null);
-      states.push(State.RETURN);
-      return this;
+      return new TypeRefBuilder(t -> method.returnType = t);
     }
 
     @Override
     public SignatureVisitor visitExceptionType() {
-      finishElement(null);
-      states.push(State.EXCEPTION);
-      return this;
+      return new TypeRefBuilder(t -> method.exceptions.add(JvmTypeRefs.rawFqn(t)));
+    }
+  }
+
+  /**
+   * Builds a single {@link JvmTypeRef} from a SignatureReader sub-stream. Each instance handles one
+   * type position; nested type arguments and array elements are delegated to fresh sub-instances
+   * that report their result up via the {@code sink} callback.
+   */
+  private static class TypeRefBuilder extends SignatureVisitor {
+    private final Consumer<JvmTypeRef> sink;
+    private String classFqn;
+    private final List<TypeProjection> args = new SmartList<>();
+    private boolean reported;
+
+    TypeRefBuilder(@NotNull Consumer<JvmTypeRef> sink) {
+      super(ASM_OPCODES);
+      this.sink = sink;
     }
 
     @Override
     public void visitBaseType(char c) {
-      sb.append(Type.getType(String.valueOf(c)).getClassName());
+      report(new JvmTypeRef.PrimitiveType(Type.getType(String.valueOf(c)).getClassName()));
     }
 
     @Override
     public void visitTypeVariable(String s) {
-      sb.append("<").append(s).append(">");
+      report(new JvmTypeRef.TypeVariable(s));
     }
 
     @Override
     public SignatureVisitor visitArrayType() {
-      states.push(State.ARRAY);
-      return this;
+      return new TypeRefBuilder(component -> report(new JvmTypeRef.ArrayType(component, List.of())));
     }
 
     @Override
     public void visitClassType(String s) {
-      states.push(State.CLASS);
-      sb.append(Fqn.fromBytecode(s).value());
+      classFqn = Fqn.fromBytecode(s).value();
     }
 
     @Override
     public void visitInnerClassType(String s) {
+      // Existing behaviour: collapse Outer.Inner into the flat Fqn already produced by
+      // Fqn.fromBytecode (which mapped `$` → `.`). Signature-style `LOuter.Inner;` decoding would
+      // otherwise drop the inner segment. Append it explicitly to keep the FQN dotted.
+      classFqn = classFqn == null ? s : classFqn + "." + s;
+      args.clear(); // generics from the outer class don't apply to the inner; reset for new args
     }
 
     @Override
     public void visitTypeArgument() {
-      if (states.peekFirst() != State.GENERIC) {
-        states.push(State.GENERIC);
-        sb.append("<");
-      }
-      else {
-        sb.append(", ");
-      }
-      sb.append("?");
+      args.add(new TypeProjection.Star());
     }
 
     @Override
     public SignatureVisitor visitTypeArgument(char c) {
-      if (states.peekFirst() != State.GENERIC) {
-        states.push(State.GENERIC);
-        sb.append("<");
-      }
-      else {
-        sb.append(", ");
-      }
-      if (c == '+') {
-        sb.append("? extends ");
-      }
-      else if (c == '-') {
-        sb.append("? super ");
-      }
-      return this;
+      TypeProjection.Variance variance = c == '+' ? TypeProjection.Variance.OUT
+                                       : c == '-' ? TypeProjection.Variance.IN
+                                                  : TypeProjection.Variance.INVARIANT;
+      return new TypeRefBuilder(inner -> args.add(new TypeProjection.WithVariance(variance, inner)));
     }
 
     @Override
     public void visitEnd() {
-      finishElement(State.CLASS);
-      states.pop();
+      // Closes the current class type. Primitives / type variables / arrays already reported.
+      if (reported || classFqn == null) return;
+      report(new JvmTypeRef.UserType(Fqn.of(classFqn), List.of(), List.copyOf(args)));
     }
 
-    void finishElement(State finishState) {
-      if (sb.isEmpty()) return;
-      main:
-      while (!states.isEmpty()) {
-        if (finishState == states.peekFirst()) break;
-        State state = states.pop();
-        switch (state) {
-          case PARAM:
-            ParameterSymbol.Builder p = new ParameterSymbol.Builder();
-            p.type = sb();
-            p.name = "p" + method.parameters.size();
-            method.parameters.add(p);
-            break main;
-          case RETURN:
-            method.returnType = sb();
-            break main;
-          case ARRAY:
-            sb.append("[]");
-            break;
-          case GENERIC:
-            sb.append(">");
-            break;
-          case BOUNDS:
-            String bound = sb();
-            if (!"java.lang.Object".equals(bound)) {
-              TypeParameterSymbol.Builder currentGeneric = ContainerUtil.getLastItem(method.generics);
-              if (currentGeneric != null) {
-                currentGeneric.extendsList.add(bound);
-              }
-              else {
-                reportException("current generic must not be null");
-              }
-            }
-            break;
-          case EXCEPTION:
-            method.exceptions.add(Fqn.of(sb()));
-            break;
-          case CLASS:
-            break;
-        }
-      }
+    private void report(@NotNull JvmTypeRef ref) {
+      if (reported) return;
+      reported = true;
+      sink.accept(ref);
     }
-
-    private @NotNull String sb() {
-      String s = sb.toString();
-      sb.setLength(0);
-      return s;
-    }
-
-    enum State {PARAM, RETURN, CLASS, ARRAY, GENERIC, BOUNDS, EXCEPTION}
   }
 }

@@ -9,6 +9,7 @@ import com.intellij.util.SmartList;
 import org.intellij.grammar.classinfo.ClassSymbol;
 import org.intellij.grammar.classinfo.Fqn;
 import org.intellij.grammar.classinfo.JvmClassSymbolManager;
+import org.intellij.grammar.classinfo.JvmTypeRefs;
 import org.intellij.grammar.classinfo.MethodSymbol;
 import org.intellij.grammar.classinfo.MethodType;
 import org.intellij.grammar.generator.java.JavaNames;
@@ -85,7 +86,7 @@ public class JvmSyntaxHelper extends JavaHelper {
     if (paramTypes.length > actualParams) return false;
     for (int i = 0; i < paramTypes.length; i++) {
       String paramType = paramTypes[i];
-      String parameter = JavaNames.getRawClassName(method.parameters().get(i).type());
+      String parameter = JavaNames.getRawClassName(JvmTypeRefs.renderPlain(method.parameters().get(i).type()));
       if (ClassSymbolUtil.acceptsName(paramType, parameter)) continue;
       if (!isSubtype(paramType, parameter, classLookup)) return false;
     }

@@ -20,6 +20,8 @@ import com.intellij.util.containers.TreeTraversal;
 import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.classinfo.ClassSymbol;
 import org.intellij.grammar.classinfo.Fqn;
+import org.intellij.grammar.classinfo.JvmTypeRef;
+import org.intellij.grammar.classinfo.JvmTypeRefs;
 import org.intellij.grammar.classinfo.MethodSymbol;
 import org.intellij.grammar.classinfo.MethodType;
 import org.intellij.grammar.classinfo.ParameterSymbol;
@@ -301,7 +303,7 @@ public final class JavaPsiGenerator extends Generator {
     b.name = info.generateGetterName();
     b.methodType = MethodType.INSTANCE;
     b.modifiers = intf ? Modifier.PUBLIC | Modifier.ABSTRACT : Modifier.PUBLIC;
-    b.returnType = returnType;
+    b.returnType = JvmTypeRefs.raw(returnType);
     b.annotations.add(c == OPTIONAL ? NULLABLE_FQ : NOTNULL_FQ);
     return b;
   }
@@ -354,7 +356,7 @@ public final class JavaPsiGenerator extends Generator {
     b.name = CommonRendererUtils.getGetterName(ruleMethodInfo.name());
     b.methodType = MethodType.INSTANCE;
     b.modifiers = intf ? Modifier.PUBLIC | Modifier.ABSTRACT : Modifier.PUBLIC;
-    b.returnType = returnType;
+    b.returnType = JvmTypeRefs.raw(returnType);
     boolean nonNull = !cardinality.many() && cardinality == REQUIRED && !totalNullable;
     b.annotations.add(nonNull ? NOTNULL_FQ : NULLABLE_FQ);
     return b;
@@ -409,7 +411,7 @@ public final class JavaPsiGenerator extends Generator {
     b.name = methodName;
     b.methodType = MethodType.INSTANCE;
     b.modifiers = intf ? Modifier.PUBLIC | Modifier.ABSTRACT : Modifier.PUBLIC;
-    b.returnType = returnType;
+    b.returnType = JvmTypeRefs.raw(returnType);
     for (String s : JavaHelper.getAnnotations(method)) {
       if ("java.lang.Override".equals(s)) continue;
       if (s.startsWith("kotlin.")) continue;
@@ -425,7 +427,7 @@ public final class JavaPsiGenerator extends Generator {
       String type = ParserGeneratorUtil.unwrapTypeArgumentForParamList(methodTypes.get(i));
       String name = i + 1 < n ? methodTypes.get(i + 1) : "p" + ((i - offset) / 2);
       ParameterSymbol.Builder pb = new ParameterSymbol.Builder();
-      pb.type = type;
+      pb.type = JvmTypeRefs.raw(type);
       pb.name = name;
       for (String s : JavaHelper.getParameterAnnotations(method, (i - 1) / 2)) {
         pb.annotations.add(Fqn.of(s));
@@ -444,13 +446,13 @@ public final class JavaPsiGenerator extends Generator {
     b.name = "accept";
     b.methodType = MethodType.INSTANCE;
     b.modifiers = Modifier.PUBLIC;
-    b.returnType = G.visitorValue != null ? G.visitorValue : "void";
+    b.returnType = JvmTypeRefs.raw(G.visitorValue != null ? G.visitorValue : "void");
     if (G.visitorValue != null) {
       b.generics.add(new TypeParameterSymbol.Builder(G.visitorValue));
     }
     ParameterSymbol.Builder p = new ParameterSymbol.Builder();
     p.name = "visitor";
-    p.type = myVisitorClassName + (G.visitorValue != null ? "<" + G.visitorValue + ">" : "");
+    p.type = JvmTypeRefs.raw(myVisitorClassName + (G.visitorValue != null ? "<" + G.visitorValue + ">" : ""));
     p.annotations.add(NOTNULL_FQ);
     b.parameters.add(p);
     return b;
@@ -462,10 +464,10 @@ public final class JavaPsiGenerator extends Generator {
     b.name = "accept";
     b.methodType = MethodType.INSTANCE;
     b.modifiers = Modifier.PUBLIC;
-    b.returnType = "void";
+    b.returnType = JvmTypeRefs.raw("void");
     ParameterSymbol.Builder p = new ParameterSymbol.Builder();
     p.name = "visitor";
-    p.type = JavaBnfConstants.PSI_ELEMENT_VISITOR_CLASS;
+    p.type = JvmTypeRefs.raw(JavaBnfConstants.PSI_ELEMENT_VISITOR_CLASS);
     p.annotations.add(NOTNULL_FQ);
     b.parameters.add(p);
     return b;
@@ -527,10 +529,10 @@ public final class JavaPsiGenerator extends Generator {
     b.name = shortName;
     b.methodType = MethodType.CONSTRUCTOR;
     b.modifiers = Modifier.PUBLIC;
-    b.returnType = "void";
+    b.returnType = JvmTypeRefs.raw("void");
     ParameterSymbol.Builder p = new ParameterSymbol.Builder();
     p.name = "node";
-    p.type = JavaBnfConstants.AST_NODE_CLASS;
+    p.type = JvmTypeRefs.raw(JavaBnfConstants.AST_NODE_CLASS);
     b.parameters.add(p);
     return b;
   }
@@ -540,14 +542,14 @@ public final class JavaPsiGenerator extends Generator {
     b.name = shortName;
     b.methodType = MethodType.CONSTRUCTOR;
     b.modifiers = Modifier.PUBLIC;
-    b.returnType = "void";
+    b.returnType = JvmTypeRefs.raw("void");
     ParameterSymbol.Builder pStub = new ParameterSymbol.Builder();
     pStub.name = "stub";
-    pStub.type = stubName;
+    pStub.type = JvmTypeRefs.raw(stubName);
     b.parameters.add(pStub);
     ParameterSymbol.Builder pType = new ParameterSymbol.Builder();
     pType.name = "stubType";
-    pType.type = G.fallbackStubElementType;
+    pType.type = JvmTypeRefs.raw(G.fallbackStubElementType);
     b.parameters.add(pType);
     return b;
   }
@@ -560,14 +562,14 @@ public final class JavaPsiGenerator extends Generator {
     b.name = shortName;
     b.methodType = MethodType.CONSTRUCTOR;
     b.modifiers = Modifier.PUBLIC;
-    b.returnType = "void";
+    b.returnType = JvmTypeRefs.raw("void");
     for (int i = 1, n = types.size(); i + 1 < n; i += 2) {
       ParameterSymbol.Builder pb = new ParameterSymbol.Builder();
-      pb.type = substitutor.apply(types.get(i));
+      pb.type = JvmTypeRefs.raw(substitutor.apply(types.get(i)));
       String name = types.get(i + 1);
       // Name overrides used by the legacy {@link ParserGeneratorUtil#getParametersString} formatter
       // so generated identifiers don't depend on whether the source-method names were preserved.
-      String rawType = getRawClassName(pb.type);
+      String rawType = getRawClassName(JvmTypeRefs.renderPlain(pb.type));
       if (rawType.endsWith(JavaBnfConstants.AST_NODE_CLASS)) name = "node";
       else if (rawType.endsWith("ElementType")) name = "type";
       else if (rawType.endsWith("Stub")) name = "stub";
@@ -656,10 +658,10 @@ public final class JavaPsiGenerator extends Generator {
     b.name = name;
     b.methodType = MethodType.INSTANCE;
     b.modifiers = Modifier.PUBLIC;
-    b.returnType = returnType;
+    b.returnType = JvmTypeRefs.raw(returnType);
     ParameterSymbol.Builder p = new ParameterSymbol.Builder();
     p.name = "o";
-    p.type = paramFqn;
+    p.type = JvmTypeRefs.raw(paramFqn);
     p.annotations.add(NOTNULL_FQ);
     b.parameters.add(p);
     return b;
@@ -674,7 +676,7 @@ public final class JavaPsiGenerator extends Generator {
   private void renderMethodHeader(@NotNull MethodSymbol.Builder b, boolean intf) {
     String shortReturnType = b.methodType == MethodType.CONSTRUCTOR
                              ? ""
-                             : shorten(b.annotatedReturnType != null ? b.annotatedReturnType : b.returnType);
+                             : shorten(JvmTypeRefs.renderAnnotated(b.returnType));
     // IDEA-384557: a method-level annotation already embedded in the return type text (e.g.
     // {@code java.lang.@NotNull String}) must not be emitted again on its own line.
     String topLevelType = shortReturnType;
@@ -700,7 +702,7 @@ public final class JavaPsiGenerator extends Generator {
           line.append(" extends ");
           for (int j = 0; j < t.extendsList.size(); j++) {
             if (j > 0) line.append(" & ");
-            line.append(shorten(t.extendsList.get(j)));
+            line.append(shorten(JvmTypeRefs.renderAnnotated(t.extendsList.get(j))));
           }
         }
       }
@@ -716,7 +718,7 @@ public final class JavaPsiGenerator extends Generator {
       for (Fqn anno : p.annotations) {
         line.append('@').append(shorten(anno.value())).append(' ');
       }
-      String pt = p.annotatedType != null ? p.annotatedType : p.type;
+      String pt = JvmTypeRefs.renderAnnotated(p.type);
       line.append(shorten(pt));
       if (StringUtil.isNotEmpty(p.name)) line.append(' ').append(p.name);
     }
@@ -1572,8 +1574,8 @@ public final class JavaPsiGenerator extends Generator {
       addTypeToImports(returnType, JavaHelper.getAnnotations(method), result);
 
       for (TypeParameterSymbol generic : JavaHelper.getGenericParameters(method)) {
-        for (String type : generic.extendsList()) {
-          addTypeToImports(type, emptyList(), result);
+        for (JvmTypeRef type : generic.extendsList()) {
+          addTypeToImports(JvmTypeRefs.renderPlain(type), emptyList(), result);
         }
         for (Fqn type : generic.annotations()) {
           addTypeToImports(type.value(), emptyList(), result);
@@ -1839,7 +1841,7 @@ public final class JavaPsiGenerator extends Generator {
       for (ParameterSymbol.Builder p : b.parameters) {
         args.append(", ").append(p.name);
       }
-      out("%s%s.%s(this%s);", "void".equals(b.returnType) ? "" : "return ", implUtilRef, methodName, args);
+      out("%s%s.%s(this%s);", "void".equals(JvmTypeRefs.renderPlain(b.returnType)) ? "" : "return ", implUtilRef, methodName, args);
       out("}");
     }
     newLine();

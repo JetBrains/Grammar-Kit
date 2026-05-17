@@ -7,6 +7,8 @@ package org.intellij.grammar.java.syntax;
 import junit.framework.TestCase;
 import org.intellij.grammar.classinfo.ClassSymbol;
 import org.intellij.grammar.classinfo.Fqn;
+import org.intellij.grammar.classinfo.JvmTypeRef;
+import org.intellij.grammar.classinfo.JvmTypeRefs;
 import org.intellij.grammar.classinfo.MethodSymbol;
 import org.intellij.grammar.classinfo.MethodType;
 import org.intellij.grammar.classinfo.ParameterSymbol;
@@ -78,7 +80,7 @@ public class ClassInfoTextFormatterTest extends TestCase {
     ctor.name = "Utils";
     ctor.declaringClass = info.name;
     ctor.modifiers = Modifier.PRIVATE;
-    ctor.returnType = "util.Utils"; // synthetic return = declaring class
+    ctor.returnType = JvmTypeRefs.raw("util.Utils"); // synthetic return = declaring class
     info.methods.add(ctor);
 
     MethodSymbol.Builder instanceMethod = new MethodSymbol.Builder();
@@ -86,18 +88,18 @@ public class ClassInfoTextFormatterTest extends TestCase {
     instanceMethod.name = "greet";
     instanceMethod.declaringClass = info.name;
     instanceMethod.modifiers = Modifier.PUBLIC;
-    instanceMethod.returnType = "java.lang.String";
-    instanceMethod.annotatedReturnType = "java.lang.@A String";
+    instanceMethod.returnType = new JvmTypeRef.UserType(Fqn.of("java.lang.String"),
+                                                        List.of(Fqn.of("a.b.A")),
+                                                        List.of());
     ParameterSymbol.Builder nameParam = new ParameterSymbol.Builder();
-    nameParam.type = "java.lang.String";
-    nameParam.annotatedType = "java.lang.String";
+    nameParam.type = JvmTypeRefs.raw("java.lang.String");
     nameParam.name = "name";
     nameParam.annotations.add(Fqn.of("org.jetbrains.annotations.Nullable"));
     instanceMethod.parameters.add(nameParam);
     instanceMethod.annotations.add(Fqn.of("org.jetbrains.annotations.NotNull"));
     instanceMethod.exceptions.add(Fqn.of("java.io.IOException"));
     TypeParameterSymbol.Builder tp = new TypeParameterSymbol.Builder("T");
-    tp.extendsList.add("java.lang.Comparable");
+    tp.extendsList.add(JvmTypeRefs.raw("java.lang.Comparable"));
     tp.annotations.add(Fqn.of("a.b.Marker"));
     instanceMethod.generics.add(tp);
     info.methods.add(instanceMethod);
@@ -107,7 +109,7 @@ public class ClassInfoTextFormatterTest extends TestCase {
     staticMethod.name = "helper";
     staticMethod.declaringClass = info.name;
     staticMethod.modifiers = Modifier.PRIVATE | Modifier.STATIC;
-    staticMethod.returnType = "void";
+    staticMethod.returnType = JvmTypeRefs.raw("void");
     info.methods.add(staticMethod);
 
     ClassSymbol built = info.build();
@@ -122,7 +124,7 @@ public class ClassInfoTextFormatterTest extends TestCase {
             annotations: @org.jetbrains.annotations.NotNull
             param[0] annotations: @org.jetbrains.annotations.Nullable
             throws: java.io.IOException
-            annotatedTypes: [java.lang.@A String, java.lang.String, name]
+            annotatedTypes: [@a.b.A java.lang.String, java.lang.String, name]
           STATIC private static void helper()""";
     assertEquals(expected, ClassSymbolTextFormatter.format(Map.of(built.name(), built)));
   }

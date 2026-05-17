@@ -8,6 +8,7 @@ import com.intellij.platform.syntax.tree.SyntaxNode;
 import fleet.org.jetbrains.kotlin.kmp.lexer.KtTokens;
 import fleet.org.jetbrains.kotlin.kmp.parser.KtNodeTypes;
 import org.intellij.grammar.classinfo.Fqn;
+import org.intellij.grammar.classinfo.JvmTypeRef;
 import org.intellij.grammar.classinfo.MethodSymbol;
 import org.intellij.grammar.classinfo.MethodType;
 import org.intellij.grammar.classinfo.ParameterSymbol;
@@ -35,7 +36,11 @@ final class KotlinSyntaxMethodExtractor {
 
   /** Sentinel used when a property/function has no explicit type and the real type is only
    * recoverable by inferring from an expression body — which is not derivable from syntax alone. */
-  static final String IMPLICIT_TYPE = "<implicit-type>";
+  static final JvmTypeRef IMPLICIT_TYPE =
+    new JvmTypeRef.UserType(Fqn.of("<implicit-type>"), List.of(), List.of());
+
+  /** {@code void} return / receiver / setter component — JVM primitive, never annotated. */
+  private static final JvmTypeRef VOID_TYPE = new JvmTypeRef.PrimitiveType("void");
 
   private final KotlinSyntaxTypeFormatter typeFormatter;
 
@@ -74,22 +79,20 @@ final class KotlinSyntaxMethodExtractor {
     SyntaxNode paramList = firstChildOfType(funNode, KtNodeTypes.INSTANCE.getVALUE_PARAMETER_LIST());
     SyntaxNode returnType = returnTypeAfterParams(funNode, paramList);
     if (returnType != null) {
-      m.returnType = typeFormatter.formatType(returnType, typeVars);
-      m.annotatedReturnType = annotatedWithNullability(returnType, m.returnType, typeVars);
+      m.returnType = typeFormatter.parseType(returnType, typeVars);
     }
     else if (hasExpressionBody(funNode)) {
       // `fun foo() = expr` — return type is inferred from the expression; we can't recover it.
       m.returnType = IMPLICIT_TYPE;
     }
     else {
-      m.returnType = "void";
+      m.returnType = VOID_TYPE;
     }
 
     if (receiverType != null) {
       ParameterSymbol.Builder receiver = new ParameterSymbol.Builder();
-      receiver.type = typeFormatter.formatType(receiverType, typeVars);
+      receiver.type = typeFormatter.parseType(receiverType, typeVars);
       receiver.name = "receiver";
-      addNullabilityAnnotation(receiver.annotations, receiverType, receiver.type, typeVars);
       m.parameters.add(receiver);
     }
 
@@ -97,7 +100,6 @@ final class KotlinSyntaxMethodExtractor {
 
     m.methodType = defaultMethodType;
     if (receiverType != null) m.methodType = MethodType.STATIC;
-    copyTypesAsAnnotated(m);
     return m;
   }
 
@@ -109,7 +111,9 @@ final class KotlinSyntaxMethodExtractor {
     m.declaringClass = declaringFqn;
     m.name = "<init>";
     m.methodType = MethodType.CONSTRUCTOR;
-    m.returnType = declaringFqn.value();
+    // Constructors' return type is the declaring class as a raw class reference (no annotations,
+    // matching what AsmClassSymbolProvider produces for <init>).
+    m.returnType = new JvmTypeRef.UserType(declaringFqn, List.of(), List.of());
 
     Set<String> typeVars = new HashSet<>(classTypeVars);
     SyntaxNode modifierList = firstChildOfType(ctorNode, KtNodeTypes.INSTANCE.getMODIFIER_LIST());
@@ -121,7 +125,6 @@ final class KotlinSyntaxMethodExtractor {
     SyntaxNode paramList = firstChildOfType(ctorNode, KtNodeTypes.INSTANCE.getVALUE_PARAMETER_LIST());
     collectValueParameters(paramList, m, typeVars);
 
-    copyTypesAsAnnotated(m);
     return m;
   }
 
@@ -138,19 +141,17 @@ final class KotlinSyntaxMethodExtractor {
     if (Modifier.isPrivate(mods)) return null;
 
     SyntaxNode typeRef = firstChildOfType(propertyOrParamNode, KtNodeTypes.INSTANCE.getTYPE_REFERENCE());
-    String typeStr = typeRef == null ? IMPLICIT_TYPE : typeFormatter.formatType(typeRef, classTypeVars);
+    JvmTypeRef parsed = typeRef == null ? IMPLICIT_TYPE : typeFormatter.parseType(typeRef, classTypeVars);
 
     MethodSymbol.Builder m = new MethodSymbol.Builder();
     m.declaringClass = declaringFqn;
     m.name = "get" + capitalize(nameId.getText().toString());
     m.modifiers = mods | (staticAccessor ? Modifier.STATIC : 0);
     m.methodType = staticAccessor ? MethodType.STATIC : MethodType.INSTANCE;
-    m.returnType = typeStr;
+    m.returnType = parsed;
     KotlinSyntaxTypeFormatter.MethodAnnotations getterAnnos = typeFormatter.extractMethodAnnotations(modifierList, classTypeVars);
     m.annotations.addAll(getterAnnos.annotations());
     m.exceptions.addAll(getterAnnos.exceptions());
-    if (typeRef != null) m.annotatedReturnType = annotatedWithNullability(typeRef, typeStr, classTypeVars);
-    copyTypesAsAnnotated(m);
     return m;
   }
 
@@ -167,23 +168,21 @@ final class KotlinSyntaxMethodExtractor {
     if (Modifier.isPrivate(mods)) return null;
 
     SyntaxNode typeRef = firstChildOfType(propertyOrParamNode, KtNodeTypes.INSTANCE.getTYPE_REFERENCE());
-    String typeStr = typeRef == null ? IMPLICIT_TYPE : typeFormatter.formatType(typeRef, classTypeVars);
+    JvmTypeRef parsed = typeRef == null ? IMPLICIT_TYPE : typeFormatter.parseType(typeRef, classTypeVars);
 
     MethodSymbol.Builder m = new MethodSymbol.Builder();
     m.declaringClass = declaringFqn;
     m.name = "set" + capitalize(nameId.getText().toString());
     m.modifiers = mods | (staticAccessor ? Modifier.STATIC : 0);
     m.methodType = staticAccessor ? MethodType.STATIC : MethodType.INSTANCE;
-    m.returnType = "void";
+    m.returnType = VOID_TYPE;
     ParameterSymbol.Builder value = new ParameterSymbol.Builder();
-    value.type = typeStr;
+    value.type = parsed;
     value.name = "value";
-    if (typeRef != null) addNullabilityAnnotation(value.annotations, typeRef, typeStr, classTypeVars);
     m.parameters.add(value);
     KotlinSyntaxTypeFormatter.MethodAnnotations setterAnnos = typeFormatter.extractMethodAnnotations(modifierList, classTypeVars);
     m.annotations.addAll(setterAnnos.annotations());
     m.exceptions.addAll(setterAnnos.exceptions());
-    copyTypesAsAnnotated(m);
     return m;
   }
 
@@ -200,7 +199,7 @@ final class KotlinSyntaxMethodExtractor {
       typeVars.add(tvName);
       TypeParameterSymbol.Builder info = new TypeParameterSymbol.Builder(tvName);
       SyntaxNode boundType = firstChildOfType(tp, KtNodeTypes.INSTANCE.getTYPE_REFERENCE());
-      if (boundType != null) info.extendsList.add(typeFormatter.formatType(boundType, typeVars));
+      if (boundType != null) info.extendsList.add(typeFormatter.parseType(boundType, typeVars));
       m.generics.add(info);
     }
   }
@@ -214,52 +213,22 @@ final class KotlinSyntaxMethodExtractor {
       if (p.getType() != KtNodeTypes.INSTANCE.getVALUE_PARAMETER()) continue;
       SyntaxNode pType = firstChildOfType(p, KtNodeTypes.INSTANCE.getTYPE_REFERENCE());
       SyntaxNode pName = firstChildOfType(p, KtTokens.INSTANCE.getIDENTIFIER());
-      String typeStr = pType == null ? "" : typeFormatter.formatType(pType, typeVars);
+      JvmTypeRef parsed = pType == null
+                          ? new JvmTypeRef.UserType(Fqn.of(""), List.of(), List.of())
+                          : typeFormatter.parseType(pType, typeVars);
       SyntaxNode mods = firstChildOfType(p, KtNodeTypes.INSTANCE.getMODIFIER_LIST());
       if (KotlinSyntaxNodes.hasModifier(mods, KtTokens.INSTANCE.getVARARG_MODIFIER())) {
-        typeStr = typeStr + "[]";
+        // vararg X → X[] with the outer @NotNull on the array itself; kotlinc emits the array
+        // reference as non-null and the element annotation stays on the component (already inside `parsed`).
+        parsed = new JvmTypeRef.ArrayType(parsed, List.of(KotlinSyntaxTypeFormatter.NOT_NULL));
       }
       ParameterSymbol.Builder param = new ParameterSymbol.Builder();
-      param.type = typeStr;
+      param.type = parsed;
       param.name = pName == null ? "p" + paramIdx : pName.getText().toString();
       param.annotations.addAll(typeFormatter.extractAnnotationFqns(mods, typeVars));
-      addNullabilityAnnotation(param.annotations, pType, typeStr, typeVars);
       m.parameters.add(param);
       paramIdx++;
     }
-  }
-
-  private static void copyTypesAsAnnotated(@NotNull MethodSymbol.Builder m) {
-    if (m.annotatedReturnType == null) m.annotatedReturnType = m.returnType;
-    for (ParameterSymbol.Builder p : m.parameters) {
-      if (p.annotatedType == null) p.annotatedType = p.type;
-    }
-  }
-
-  /**
-   * Synthesizes the {@code @NotNull} / {@code @Nullable} declaration-target annotation that kotlinc
-   * would emit for the given Kotlin {@code typeRef}, and appends it to {@code target} unless the
-   * same FQN is already there (which it would be if the source explicitly wrote the annotation).
-   */
-  private void addNullabilityAnnotation(@NotNull List<Fqn> target,
-                                        @Nullable SyntaxNode typeRef,
-                                        @NotNull String formattedType,
-                                        @NotNull Set<String> typeVars) {
-    Fqn anno = typeFormatter.classifyNullability(typeRef, formattedType, typeVars);
-    if (anno != null && !target.contains(anno)) target.add(anno);
-  }
-
-  /**
-   * Returns {@code formattedType} with the synthesized nullability annotation inlined at the
-   * start (e.g. {@code "@org.jetbrains.annotations.NotNull java.lang.String"}), matching the
-   * format used by {@code AsmClassSymbolProvider} for bytecode type annotations. Returns the
-   * input unchanged when no annotation applies (primitive, type variable, or null typeRef).
-   */
-  private @NotNull String annotatedWithNullability(@Nullable SyntaxNode typeRef,
-                                                   @NotNull String formattedType,
-                                                   @NotNull Set<String> typeVars) {
-    Fqn anno = typeFormatter.classifyNullability(typeRef, formattedType, typeVars);
-    return anno == null ? formattedType : "@" + anno + " " + formattedType;
   }
 
   /**
@@ -306,7 +275,6 @@ final class KotlinSyntaxMethodExtractor {
   }
 
   private static @NotNull String capitalize(@NotNull String s) {
-    if (s.isEmpty()) return s;
-    return Character.toUpperCase(s.charAt(0)) + s.substring(1);
+    return s.isEmpty() ? s : Character.toUpperCase(s.charAt(0)) + s.substring(1);
   }
 }

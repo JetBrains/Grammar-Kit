@@ -11,7 +11,9 @@ import com.intellij.platform.syntax.tree.SyntaxNode;
 import com.intellij.util.SmartList;
 import org.intellij.grammar.classinfo.ClassSymbol;
 import org.intellij.grammar.classinfo.Fqn;
+import org.intellij.grammar.classinfo.JvmTypeRef;
 import org.intellij.grammar.classinfo.MethodSymbol;
+import org.intellij.grammar.classinfo.TypeProjection;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -22,9 +24,14 @@ import static org.intellij.grammar.classinfo.SyntaxTreeUtil.firstChildOfType;
 import static org.intellij.grammar.classinfo.java.JavaSyntaxNodes.buildDottedText;
 
 /**
- * Renders Java {@link SyntaxNode} type expressions ({@code TYPE} nodes, {@code JAVA_CODE_REFERENCE}
- * nodes, annotations on modifier lists) into the dotted-FQN string form that {@link ClassSymbol} /
- * {@link MethodSymbol} records expect.
+ * Parses Java {@link SyntaxNode} type expressions ({@code TYPE} nodes, {@code JAVA_CODE_REFERENCE}
+ * nodes) into the canonical {@link JvmTypeRef} model that {@link ClassSymbol} / {@link MethodSymbol}
+ * consumers expect.
+ * <p>
+ * Java types carry no built-in nullability semantics, so {@link JvmTypeRef#annotations()} is always
+ * empty at parse time. Explicit declaration-target annotations on parameters / methods / classes
+ * still flow through {@link #extractAnnotationFqns}; in-source type-use annotations on individual
+ * type positions are not modelled.
  * <p>
  * Name resolution for unqualified references is delegated to {@link JavaSyntaxImportContext}.
  * In-scope type variables are passed in by the caller and are never qualified.
@@ -50,72 +57,108 @@ final class JavaSyntaxTypeFormatter {
     this.imports = imports;
   }
 
-  @NotNull String formatType(@NotNull SyntaxNode typeNode, @NotNull Set<String> typeVars) {
-    StringBuilder sb = new StringBuilder();
+  /**
+   * Parse a non-wildcard {@code TYPE} node — either a primitive keyword or a {@code JAVA_CODE_REFERENCE}
+   * with optional {@code []} / {@code ...} array dimensions. Wildcards ({@code ?}, {@code ? extends X},
+   * {@code ? super X}) appear only in {@code REFERENCE_PARAMETER_LIST} positions and are handled by
+   * {@link #parseProjection}, never reaching this method.
+   */
+  @NotNull JvmTypeRef parseType(@NotNull SyntaxNode typeNode, @NotNull Set<String> typeVars) {
+    JvmTypeRef base = null;
+    int arrayDims = 0;
     for (SyntaxNode child = typeNode.firstChild(); child != null; child = child.nextSibling()) {
       SyntaxElementType t = child.getType();
       if (t == JavaSyntaxElementType.JAVA_CODE_REFERENCE) {
-        sb.append(formatReference(child, typeVars));
+        base = parseReference(child, typeVars);
       }
       else if (PRIMITIVE_KEYWORDS.contains(t)) {
-        sb.append(child.getText());
+        base = new JvmTypeRef.PrimitiveType(child.getText().toString());
       }
-      else if (t == JavaSyntaxTokenType.LBRACKET || t == JavaSyntaxTokenType.RBRACKET) {
-        sb.append(t == JavaSyntaxTokenType.LBRACKET ? '[' : ']');
+      else if (t == JavaSyntaxTokenType.LBRACKET) {
+        // Java types pair LBRACKET + RBRACKET for each `[]`; count only the opening bracket.
+        arrayDims++;
       }
       else if (t == JavaSyntaxTokenType.ELLIPSIS) {
-        sb.append("[]");
-      }
-      else if (t == JavaSyntaxTokenType.QUEST) {
-        sb.append('?');
-      }
-      else if (t == JavaSyntaxElementType.TYPE) {
-        sb.append(formatType(child, typeVars));
-      }
-      else if (t == JavaSyntaxTokenType.EXTENDS_KEYWORD) {
-        sb.append(" extends ");
-      }
-      else if (t == JavaSyntaxTokenType.SUPER_KEYWORD) {
-        sb.append(" super ");
+        arrayDims++;
       }
     }
-    return sb.toString();
-  }
-
-  @NotNull String formatReference(@NotNull SyntaxNode refNode, @NotNull Set<String> typeVars) {
-    String resolved = resolveDotted(refNode, typeVars);
-    SyntaxNode refParams = firstChildOfType(refNode, JavaSyntaxElementType.REFERENCE_PARAMETER_LIST);
-    if (refParams == null) return resolved;
-    List<SyntaxNode> typeArgs = new SmartList<>();
-    for (SyntaxNode arg = refParams.firstChild(); arg != null; arg = arg.nextSibling()) {
-      if (arg.getType() == JavaSyntaxElementType.TYPE) typeArgs.add(arg);
+    if (base == null) base = new JvmTypeRef.UserType(Fqn.of(""), List.of(), List.of());
+    JvmTypeRef result = base;
+    for (int i = 0; i < arrayDims; i++) {
+      result = new JvmTypeRef.ArrayType(result, List.of());
     }
-    if (typeArgs.isEmpty()) return resolved;
-    StringBuilder sb = new StringBuilder(resolved).append('<');
-    for (int i = 0; i < typeArgs.size(); i++) {
-      if (i > 0) sb.append(", ");
-      sb.append(formatType(typeArgs.get(i), typeVars));
-    }
-    sb.append('>');
-    return sb.toString();
+    return result;
   }
 
   /**
-   * Resolves every {@code JAVA_CODE_REFERENCE} child of the given wrapper element as a full type expression.
+   * Parse a {@code JAVA_CODE_REFERENCE} as a {@link JvmTypeRef.UserType}, including any generic
+   * type arguments (each TYPE child of the REFERENCE_PARAMETER_LIST becomes one {@link TypeProjection}).
    */
-  @NotNull List<String> formatRefs(@Nullable SyntaxNode wrapper, @NotNull Set<String> typeVars) {
+  @NotNull JvmTypeRef parseReference(@NotNull SyntaxNode refNode, @NotNull Set<String> typeVars) {
+    String resolved = resolveDotted(refNode, typeVars);
+    if (typeVars.contains(resolved)) {
+      return new JvmTypeRef.TypeVariable(resolved);
+    }
+    SyntaxNode refParams = firstChildOfType(refNode, JavaSyntaxElementType.REFERENCE_PARAMETER_LIST);
+    List<TypeProjection> args = refParams == null ? List.of() : parseProjections(refParams, typeVars);
+    return new JvmTypeRef.UserType(Fqn.of(resolved), List.of(), args);
+  }
+
+  private @NotNull List<TypeProjection> parseProjections(@NotNull SyntaxNode refParamList,
+                                                         @NotNull Set<String> typeVars) {
+    List<TypeProjection> out = new SmartList<>();
+    for (SyntaxNode arg = refParamList.firstChild(); arg != null; arg = arg.nextSibling()) {
+      if (arg.getType() != JavaSyntaxElementType.TYPE) continue;
+      out.add(parseProjection(arg, typeVars));
+    }
+    return out;
+  }
+
+  private @NotNull TypeProjection parseProjection(@NotNull SyntaxNode typeArg, @NotNull Set<String> typeVars) {
+    boolean isWildcard = false;
+    TypeProjection.Variance variance = TypeProjection.Variance.INVARIANT;
+    SyntaxNode wildcardBound = null;
+    for (SyntaxNode child = typeArg.firstChild(); child != null; child = child.nextSibling()) {
+      SyntaxElementType t = child.getType();
+      if (t == JavaSyntaxTokenType.QUEST) {
+        isWildcard = true;
+      }
+      else if (t == JavaSyntaxTokenType.EXTENDS_KEYWORD) {
+        variance = TypeProjection.Variance.OUT;
+      }
+      else if (t == JavaSyntaxTokenType.SUPER_KEYWORD) {
+        variance = TypeProjection.Variance.IN;
+      }
+      else if (t == JavaSyntaxElementType.TYPE) {
+        // Wildcard bound, e.g. the inner TYPE of `? extends String`.
+        wildcardBound = child;
+      }
+    }
+    if (isWildcard && wildcardBound == null) return new TypeProjection.Star();
+    if (isWildcard) {
+      return new TypeProjection.WithVariance(variance, parseType(wildcardBound, typeVars));
+    }
+    // Non-wildcard projection (`List<String>`): the typeArg TYPE itself describes the argument.
+    return new TypeProjection.WithVariance(TypeProjection.Variance.INVARIANT, parseType(typeArg, typeVars));
+  }
+
+  /**
+   * Parse every {@code JAVA_CODE_REFERENCE} child of the given wrapper element as a full type
+   * expression. Used for type-parameter bounds (e.g. {@code <T extends List<String> & Serializable>}).
+   */
+  @NotNull List<JvmTypeRef> parseRefs(@Nullable SyntaxNode wrapper, @NotNull Set<String> typeVars) {
     if (wrapper == null) return List.of();
-    List<String> refs = new SmartList<>();
+    List<JvmTypeRef> refs = new SmartList<>();
     for (SyntaxNode ref = wrapper.firstChild(); ref != null; ref = ref.nextSibling()) {
       if (ref.getType() == JavaSyntaxElementType.JAVA_CODE_REFERENCE) {
-        refs.add(formatReference(ref, typeVars));
+        refs.add(parseReference(ref, typeVars));
       }
     }
     return refs;
   }
 
   /**
-   * Like {@link #formatRefs} but strips generic parameters and returns raw {@link Fqn}s.
+   * Like {@link #parseRefs} but strips generic parameters and returns raw {@link Fqn}s.
    */
   @NotNull List<Fqn> extractRefFqns(@Nullable SyntaxNode wrapper, @NotNull Set<String> typeVars) {
     if (wrapper == null) return List.of();

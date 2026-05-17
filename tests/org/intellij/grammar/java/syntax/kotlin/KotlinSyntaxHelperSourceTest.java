@@ -145,6 +145,30 @@ public class KotlinSyntaxHelperSourceTest extends GoldenClassInfoTestCase {
     assertClassInfoMatchesGolden(extractAll());
   }
 
+  public void testNullabilityAnnotationsOnGenericTypeArguments() throws Exception {
+    // Inline @NotNull/@Nullable annotations should appear on each generic type argument
+    // and on the Array<X> element type — not just on the outer reference type.
+    write("gen/G.kt", """
+        package gen
+        class G<T> {
+          fun listStr(): List<String> = TODO()
+          fun listStrN(): List<String?> = TODO()
+          fun mapStrIntN(): Map<String, Int?> = TODO()
+          fun listStar(): List<*> = TODO()
+          fun listT(t: T): List<T> = TODO()
+          fun listOut(): List<out String> = TODO()
+          fun listInN(): List<in String?> = TODO()
+          fun arrStr(): Array<String> = TODO()
+          fun arrStrN(): Array<String?> = TODO()
+          fun arrStar(): Array<*> = TODO()
+          fun intArr(): IntArray = TODO()
+          fun nested(xs: List<List<String?>>): Unit { }
+          fun nullableInt(x: Int?): Int? = x
+        }
+        """);
+    assertClassInfoMatchesGolden(extractAll());
+  }
+
   public void testNullabilityAnnotationsFromKotlinTypes() throws Exception {
     // Cross-section of the rules in KotlinSyntaxTypeFormatter.classifyNullability:
     //  - reference types: NotNull vs Nullable based on the '?' marker

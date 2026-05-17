@@ -2,11 +2,9 @@ class nul.Sample extends java.lang.Object
   modifiers: public final
   methods:
     INSTANCE public java.lang.String ref(java.lang.String s, java.lang.String n)
-      param[0] annotations: @org.jetbrains.annotations.NotNull
-      param[1] annotations: @org.jetbrains.annotations.Nullable
-      annotatedTypes: [@org.jetbrains.annotations.Nullable java.lang.String, java.lang.String, s, java.lang.String, n]
+      annotatedTypes: [@org.jetbrains.annotations.Nullable java.lang.String, @org.jetbrains.annotations.NotNull java.lang.String, s, @org.jetbrains.annotations.Nullable java.lang.String, n]
     INSTANCE public boolean prim(int x, java.lang.Integer y)
-      param[1] annotations: @org.jetbrains.annotations.Nullable
+      annotatedTypes: [boolean, int, x, @org.jetbrains.annotations.Nullable java.lang.Integer, y]
     INSTANCE public T id(T x)
       typeParameters: T
     INSTANCE public java.lang.String getTitle()
@@ -14,11 +12,10 @@ class nul.Sample extends java.lang.Object
     INSTANCE public java.lang.String getNick()
       annotatedTypes: [@org.jetbrains.annotations.Nullable java.lang.String]
     INSTANCE public void setNick(java.lang.String value)
-      param[0] annotations: @org.jetbrains.annotations.Nullable
+      annotatedTypes: [void, @org.jetbrains.annotations.Nullable java.lang.String, value]
 
 class nul.SampleKt extends java.lang.Object
   modifiers: public final
   methods:
     STATIC public static void ext(java.lang.String receiver, java.lang.Integer x)
-      param[0] annotations: @org.jetbrains.annotations.Nullable
-      param[1] annotations: @org.jetbrains.annotations.Nullable
+      annotatedTypes: [void, @org.jetbrains.annotations.Nullable java.lang.String, receiver, @org.jetbrains.annotations.Nullable java.lang.Integer, x]

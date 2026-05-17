@@ -8,6 +8,7 @@ import com.intellij.java.syntax.element.JavaSyntaxElementType;
 import com.intellij.java.syntax.element.JavaSyntaxTokenType;
 import com.intellij.platform.syntax.tree.SyntaxNode;
 import org.intellij.grammar.classinfo.Fqn;
+import org.intellij.grammar.classinfo.JvmTypeRef;
 import org.intellij.grammar.classinfo.MethodSymbol;
 import org.intellij.grammar.classinfo.MethodType;
 import org.intellij.grammar.classinfo.ParameterSymbol;
@@ -17,6 +18,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Modifier;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import static org.intellij.grammar.classinfo.SyntaxTreeUtil.firstChildOfType;
@@ -57,17 +59,15 @@ final class JavaSyntaxMethodExtractor {
     SyntaxNode returnType = firstChildOfType(methodNode, JavaSyntaxElementType.TYPE);
     if (returnType == null) {
       m.methodType = MethodType.CONSTRUCTOR;
-      m.returnType = declaringFqn.value();
+      m.returnType = new JvmTypeRef.UserType(declaringFqn, List.of(), List.of());
     }
     else {
       m.methodType = Modifier.isStatic(m.modifiers) ? MethodType.STATIC : MethodType.INSTANCE;
-      m.returnType = typeFormatter.formatType(returnType, typeVars);
+      m.returnType = typeFormatter.parseType(returnType, typeVars);
     }
 
     collectParameters(methodNode, m, typeVars);
 
-    m.annotatedReturnType = m.returnType;
-    for (ParameterSymbol.Builder p : m.parameters) p.annotatedType = p.type;
     m.exceptions.addAll(typeFormatter.extractRefFqns(firstChildOfType(methodNode, JavaSyntaxElementType.THROWS_LIST), typeVars));
     return m;
   }
@@ -84,7 +84,7 @@ final class JavaSyntaxMethodExtractor {
       String tvName = tpId.getText().toString();
       typeVars.add(tvName);
       TypeParameterSymbol.Builder info = new TypeParameterSymbol.Builder(tvName);
-      info.extendsList.addAll(typeFormatter.formatRefs(firstChildOfType(tp, JavaSyntaxElementType.EXTENDS_BOUND_LIST), typeVars));
+      info.extendsList.addAll(typeFormatter.parseRefs(firstChildOfType(tp, JavaSyntaxElementType.EXTENDS_BOUND_LIST), typeVars));
       m.generics.add(info);
     }
   }
@@ -100,7 +100,9 @@ final class JavaSyntaxMethodExtractor {
       SyntaxNode pType = firstChildOfType(p, JavaSyntaxElementType.TYPE);
       SyntaxNode pName = firstChildOfType(p, JavaSyntaxTokenType.IDENTIFIER);
       ParameterSymbol.Builder param = new ParameterSymbol.Builder();
-      param.type = pType == null ? "" : typeFormatter.formatType(pType, typeVars);
+      param.type = pType == null
+                   ? new JvmTypeRef.UserType(Fqn.of(""), List.of(), List.of())
+                   : typeFormatter.parseType(pType, typeVars);
       param.name = pName == null ? "p" + paramIdx : pName.getText().toString();
       param.annotations.addAll(typeFormatter.extractAnnotationFqns(firstChildOfType(p, JavaSyntaxElementType.MODIFIER_LIST), typeVars));
       m.parameters.add(param);

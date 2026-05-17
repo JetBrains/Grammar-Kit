@@ -9,9 +9,10 @@ import com.intellij.platform.syntax.tree.SyntaxNode;
 import com.intellij.util.SmartList;
 import fleet.org.jetbrains.kotlin.kmp.lexer.KtTokens;
 import fleet.org.jetbrains.kotlin.kmp.parser.KtNodeTypes;
-import org.intellij.grammar.classinfo.ClassSymbol;
 import org.intellij.grammar.classinfo.Fqn;
-import org.intellij.grammar.classinfo.MethodSymbol;
+import org.intellij.grammar.classinfo.JvmTypeRef;
+import org.intellij.grammar.classinfo.JvmTypeRefs;
+import org.intellij.grammar.classinfo.TypeProjection;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -22,9 +23,14 @@ import java.util.Set;
 import static org.intellij.grammar.classinfo.SyntaxTreeUtil.firstChildOfType;
 
 /**
- * Renders Kotlin {@link SyntaxNode} type expressions ({@code TYPE_REFERENCE} / {@code USER_TYPE} /
- * {@code NULLABLE_TYPE} / {@code FUNCTION_TYPE}) into the dotted-FQN string form that
- * {@link ClassSymbol} / {@link MethodSymbol} consumers expect.
+ * Parses Kotlin {@link SyntaxNode} type expressions ({@code TYPE_REFERENCE} / {@code USER_TYPE} /
+ * {@code NULLABLE_TYPE} / {@code FUNCTION_TYPE}) into the structured {@link JvmTypeRef} model.
+ * <p>
+ * Each parsed node carries its own per-position nullability annotation list: reference types get
+ * {@link #NOT_NULL} by default and {@link #NULLABLE} when wrapped in {@code NULLABLE_TYPE};
+ * primitives and bare type-variable references carry no annotation. Generic type arguments and
+ * array element types are parsed recursively, so the inline {@code @NotNull}/{@code @Nullable}
+ * marker survives all the way through {@link JvmTypeRefs#renderAnnotated}.
  * <p>
  * Kotlin built-in primitives are mapped to JVM primitives so structural parameter-type matching
  * across Java and Kotlin sources agrees on the same canonical names.
@@ -47,16 +53,16 @@ final class KotlinSyntaxTypeFormatter {
     Map.entry("String", "java.lang.String")
   );
 
-  /** Kotlin built-in array names → JVM primitive-array descriptors. */
+  /** Kotlin built-in array names → JVM primitive (component type for the wrapping {@link JvmTypeRef.ArrayType}). */
   private static final Map<String, String> PRIMITIVE_ARRAYS = Map.ofEntries(
-    Map.entry("IntArray", "int[]"),
-    Map.entry("LongArray", "long[]"),
-    Map.entry("ShortArray", "short[]"),
-    Map.entry("ByteArray", "byte[]"),
-    Map.entry("CharArray", "char[]"),
-    Map.entry("BooleanArray", "boolean[]"),
-    Map.entry("FloatArray", "float[]"),
-    Map.entry("DoubleArray", "double[]")
+    Map.entry("IntArray", "int"),
+    Map.entry("LongArray", "long"),
+    Map.entry("ShortArray", "short"),
+    Map.entry("ByteArray", "byte"),
+    Map.entry("CharArray", "char"),
+    Map.entry("BooleanArray", "boolean"),
+    Map.entry("FloatArray", "float"),
+    Map.entry("DoubleArray", "double")
   );
 
   /** Standard Kotlin classifier FQN → JVM Java alias, mirroring kotlinc's compile-time mapping. */
@@ -87,6 +93,19 @@ final class KotlinSyntaxTypeFormatter {
     Map.entry("kotlin.Throwable",    "java.lang.Throwable")
   );
 
+  /** Kotlin primitive name → boxed JVM class FQN for the {@code Int?} → {@code java.lang.Integer} mapping. */
+  private static final Map<String, String> PRIMITIVE_BOXES = Map.ofEntries(
+    Map.entry("boolean", "java.lang.Boolean"),
+    Map.entry("byte", "java.lang.Byte"),
+    Map.entry("short", "java.lang.Short"),
+    Map.entry("int", "java.lang.Integer"),
+    Map.entry("long", "java.lang.Long"),
+    Map.entry("char", "java.lang.Character"),
+    Map.entry("float", "java.lang.Float"),
+    Map.entry("double", "java.lang.Double"),
+    Map.entry("void", "java.lang.Void")
+  );
+
   static final Fqn NOT_NULL = Fqn.of("org.jetbrains.annotations.NotNull");
   static final Fqn NULLABLE = Fqn.of("org.jetbrains.annotations.Nullable");
 
@@ -96,68 +115,181 @@ final class KotlinSyntaxTypeFormatter {
     this.imports = imports;
   }
 
-  /** Renders a {@code TYPE_REFERENCE} or one of the type-shape children directly. */
-  @NotNull String formatType(@Nullable SyntaxNode typeNode, @NotNull Set<String> typeVars) {
-    if (typeNode == null) return "";
-    SyntaxElementType t = typeNode.getType();
-    if (t == KtNodeTypes.INSTANCE.getTYPE_REFERENCE()) {
-      SyntaxNode inner = firstNonModifierChild(typeNode);
-      return formatType(inner, typeVars);
-    }
-    if (t == KtNodeTypes.INSTANCE.getNULLABLE_TYPE()) {
-      SyntaxNode inner = firstNonModifierChild(typeNode);
-      return boxIfPrimitive(formatType(inner, typeVars));
-    }
-    if (t == KtNodeTypes.INSTANCE.getUSER_TYPE()) {
-      return formatUserType(typeNode, typeVars);
-    }
-    if (t == KtNodeTypes.INSTANCE.getFUNCTION_TYPE()) {
-      return "kotlin.Function";
-    }
-    if (t == KtNodeTypes.INSTANCE.getDYNAMIC_TYPE()) {
-      return "java.lang.Object";
-    }
-    return "";
+  /**
+   * Parse a Kotlin type expression into the canonical {@link JvmTypeRef} model. Reference-type
+   * positions are annotated {@link #NOT_NULL} by default, swapped to {@link #NULLABLE} when wrapped
+   * in {@code NULLABLE_TYPE}. Primitives, bare type-variable references, and the synthesised
+   * {@code java.lang.Object} component of {@code Array<*>} carry no inline annotation.
+   */
+  @NotNull JvmTypeRef parseType(@Nullable SyntaxNode typeNode, @NotNull Set<String> typeVars) {
+    return parseType(typeNode, typeVars, false);
   }
 
   /**
-   * Returns the declaration-target nullability annotation FQN to attach to a parameter or return
-   * derived from {@code typeRef}, or {@code null} when none should be emitted (primitives, void,
-   * missing type, bare type-variable refs). Mirrors what kotlinc writes into the bytecode so the
-   * source provider matches {@code AsmClassSymbolProvider}'s output for the same class.
+   * Like {@link #parseType} but skips the default outer {@code @NotNull} — used for the synthesised
+   * {@code java.lang.Object} component of {@code Array<*>}, where kotlinc emits no inline annotation.
    */
-  @Nullable Fqn classifyNullability(@Nullable SyntaxNode typeRef,
-                                    @NotNull String formattedType,
-                                    @NotNull Set<String> typeVars) {
-    if (typeRef == null) return null;
-    if (isJvmPrimitive(formattedType)) return null;
-
-    SyntaxNode inner = typeRef;
-    while (inner != null && inner.getType() == KtNodeTypes.INSTANCE.getTYPE_REFERENCE()) {
-      inner = firstNonModifierChild(inner);
-    }
-    if (inner == null) return null;
-    if (inner.getType() == KtNodeTypes.INSTANCE.getNULLABLE_TYPE()) return NULLABLE;
-    if (inner.getType() == KtNodeTypes.INSTANCE.getUSER_TYPE()) {
-      String dotted = userTypeDotted(inner);
-      if (typeVars.contains(dotted)) return null;
-    }
-    return NOT_NULL;
+  private @NotNull JvmTypeRef parseUnannotated(@Nullable SyntaxNode typeNode, @NotNull Set<String> typeVars) {
+    return parseType(typeNode, typeVars, true);
   }
 
-  private static @NotNull String boxIfPrimitive(@NotNull String t) {
-    return switch (t) {
-      case "boolean" -> "java.lang.Boolean";
-      case "byte" -> "java.lang.Byte";
-      case "short" -> "java.lang.Short";
-      case "int" -> "java.lang.Integer";
-      case "long" -> "java.lang.Long";
-      case "char" -> "java.lang.Character";
-      case "float" -> "java.lang.Float";
-      case "double" -> "java.lang.Double";
-      case "void" -> "java.lang.Void";
-      default -> t;
-    };
+  private @NotNull JvmTypeRef parseType(@Nullable SyntaxNode typeNode,
+                                        @NotNull Set<String> typeVars,
+                                        boolean suppressOuter) {
+    if (typeNode == null) return new JvmTypeRef.UserType(Fqn.of(""), List.of(), List.of());
+    SyntaxElementType t = typeNode.getType();
+    if (t == KtNodeTypes.INSTANCE.getTYPE_REFERENCE()) {
+      return parseType(firstNonModifierChild(typeNode), typeVars, suppressOuter);
+    }
+    if (t == KtNodeTypes.INSTANCE.getNULLABLE_TYPE()) {
+      return parseNullable(typeNode, typeVars);
+    }
+    if (t == KtNodeTypes.INSTANCE.getUSER_TYPE()) {
+      return parseUserType(typeNode, typeVars, suppressOuter ? List.of() : List.of(NOT_NULL));
+    }
+    if (t == KtNodeTypes.INSTANCE.getFUNCTION_TYPE()) {
+      return new JvmTypeRef.FunctionType(suppressOuter ? List.of() : List.of(NOT_NULL));
+    }
+    if (t == KtNodeTypes.INSTANCE.getDYNAMIC_TYPE()) {
+      return new JvmTypeRef.DynamicType(suppressOuter ? List.of() : List.of(NOT_NULL));
+    }
+    return new JvmTypeRef.UserType(Fqn.of(""), List.of(), List.of());
+  }
+
+  /**
+   * Parse {@code X?}. The inner type is rendered plain, then the outer annotation is replaced with
+   * {@link #NULLABLE}. Kotlin nullable primitives box to their JVM wrapper class — {@code Int?} →
+   * {@code java.lang.Integer} carrying {@code @Nullable}.
+   */
+  private @NotNull JvmTypeRef parseNullable(@NotNull SyntaxNode nullableType, @NotNull Set<String> typeVars) {
+    SyntaxNode inner = firstNonModifierChild(nullableType);
+    JvmTypeRef base = parseType(inner, typeVars, true);
+    if (base instanceof JvmTypeRef.PrimitiveType p) {
+      String boxed = PRIMITIVE_BOXES.get(p.name());
+      return boxed == null ? p : new JvmTypeRef.UserType(Fqn.of(boxed), List.of(NULLABLE), List.of());
+    }
+    if (base instanceof JvmTypeRef.TypeVariable t) return t;
+    if (base instanceof JvmTypeRef.UserType u) return new JvmTypeRef.UserType(u.name(), List.of(NULLABLE), u.args());
+    if (base instanceof JvmTypeRef.ArrayType a) return new JvmTypeRef.ArrayType(a.component(), List.of(NULLABLE));
+    if (base instanceof JvmTypeRef.FunctionType) return new JvmTypeRef.FunctionType(List.of(NULLABLE));
+    if (base instanceof JvmTypeRef.DynamicType) return new JvmTypeRef.DynamicType(List.of(NULLABLE));
+    return base;
+  }
+
+  /**
+   * Parse a {@code USER_TYPE} into the appropriate {@link JvmTypeRef} record. Handles type
+   * variables, JVM-primitive mappings, primitive arrays, the {@code Array<X>} → {@code X[]}
+   * transformation (including the {@code Array<*>} → {@code java.lang.Object[]} special case where
+   * the component carries no inline annotation), and the Kotlin → Java alias table.
+   */
+  private @NotNull JvmTypeRef parseUserType(@NotNull SyntaxNode userType,
+                                            @NotNull Set<String> typeVars,
+                                            @NotNull List<Fqn> outerAnnotations) {
+    String dotted = userTypeDotted(userType);
+    String resolved;
+    if (typeVars.contains(dotted)) return new JvmTypeRef.TypeVariable(dotted);
+    if (dotted.contains(".")) resolved = dotted;
+    else resolved = imports.resolveSimpleName(dotted);
+
+    SyntaxNode targs = firstChildOfType(userType, KtNodeTypes.INSTANCE.getTYPE_ARGUMENT_LIST());
+
+    // Primitive array (IntArray etc.) — JVM primitive arrays carry no inline nullability annotation
+    // on either the array or the component, mirroring the kotlinc bytecode form.
+    String prim = PRIMITIVE_ARRAYS.get(dotted);
+    if (prim != null && targs == null) {
+      return new JvmTypeRef.ArrayType(new JvmTypeRef.PrimitiveType(prim), List.of());
+    }
+
+    // Array<X> → X[] (variance stripped; star projection → bare java.lang.Object component).
+    // The kotlinc convention is to emit ONE inline annotation per array, on the component position.
+    // The outer ArrayType therefore carries no annotation here — the caller's outerAnnotations is
+    // synthesised onto the component via parseArrayComponent (with the Array<*> exception of a
+    // synthetic `java.lang.Object` component that takes its own NotNull).
+    if (("Array".equals(dotted) || "kotlin.Array".equals(resolved)) && targs != null) {
+      JvmTypeRef component = parseArrayComponent(targs, typeVars);
+      if (component != null) return new JvmTypeRef.ArrayType(component, List.of());
+    }
+
+    // Plain primitive (Int, Long, Unit, ...) — no type arguments expected. JVM_BUILTINS maps
+    // Kotlin "String" to "java.lang.String", which is a reference type — split that out below.
+    String mapped = JVM_BUILTINS.get(dotted);
+    if (mapped != null && targs == null) {
+      if (isJvmPrimitive(mapped)) return new JvmTypeRef.PrimitiveType(mapped);
+      return new JvmTypeRef.UserType(Fqn.of(mapped), outerAnnotations, List.of());
+    }
+    // Qualified form: `kotlin.Int`, `kotlin.String`, ...
+    if (resolved.startsWith("kotlin.") && targs == null) {
+      String mappedQualified = JVM_BUILTINS.get(resolved.substring("kotlin.".length()));
+      if (mappedQualified != null) {
+        if (isJvmPrimitive(mappedQualified)) return new JvmTypeRef.PrimitiveType(mappedQualified);
+        return new JvmTypeRef.UserType(Fqn.of(mappedQualified), outerAnnotations, List.of());
+      }
+    }
+
+    // Kotlin → Java alias rewrite.
+    String javaAlias = KOTLIN_TO_JAVA_ALIASES.get(resolved);
+    if (javaAlias != null) resolved = javaAlias;
+
+    List<TypeProjection> args = targs == null ? List.of() : parseProjections(targs, typeVars);
+    return new JvmTypeRef.UserType(Fqn.of(resolved), outerAnnotations, args);
+  }
+
+  /**
+   * Special-case the single {@code Array<X>} type argument:
+   * <ul>
+   *   <li>{@code Array<*>}        → {@code java.lang.Object} component, no inline annotation</li>
+   *   <li>{@code Array<X>} / {@code Array<out X>} / {@code Array<in X>} → component parsed annotated;
+   *       variance is stripped (JVM arrays don't carry wildcards)</li>
+   * </ul>
+   */
+  private @Nullable JvmTypeRef parseArrayComponent(@NotNull SyntaxNode typeArgList,
+                                                   @NotNull Set<String> typeVars) {
+    for (SyntaxNode arg = typeArgList.firstChild(); arg != null; arg = arg.nextSibling()) {
+      if (arg.getType() != KtNodeTypes.INSTANCE.getTYPE_PROJECTION()) continue;
+      if (firstChildOfType(arg, KtTokens.INSTANCE.getMUL()) != null) {
+        // Array<*> → java.lang.Object[]. The synthetic Object component takes NotNull so the array
+        // surfaces a single annotation in the rendered form — same convention as Array<String>.
+        return new JvmTypeRef.UserType(Fqn.of("java.lang.Object"), List.of(NOT_NULL), List.of());
+      }
+      SyntaxNode innerType = firstChildOfType(arg, KtNodeTypes.INSTANCE.getTYPE_REFERENCE());
+      return parseType(innerType, typeVars);
+    }
+    return null;
+  }
+
+  /** Parse every {@code TYPE_PROJECTION} child of {@code TYPE_ARGUMENT_LIST} into a {@link TypeProjection}. */
+  private @NotNull List<TypeProjection> parseProjections(@NotNull SyntaxNode typeArgList,
+                                                         @NotNull Set<String> typeVars) {
+    List<TypeProjection> out = new SmartList<>();
+    for (SyntaxNode arg = typeArgList.firstChild(); arg != null; arg = arg.nextSibling()) {
+      if (arg.getType() != KtNodeTypes.INSTANCE.getTYPE_PROJECTION()) continue;
+      out.add(parseProjection(arg, typeVars));
+    }
+    return out;
+  }
+
+  /**
+   * Render a single {@code TYPE_PROJECTION} as a {@link TypeProjection}. Mirrors what kotlinc writes
+   * into bytecode generic signatures so the source-derived form matches what {@code AsmClassSymbolProvider}
+   * decodes from the same class compiled.
+   *
+   * <ul>
+   *   <li>{@code *}        → {@link TypeProjection.Star}</li>
+   *   <li>{@code out X}    → {@link TypeProjection.WithVariance} with {@link TypeProjection.Variance#OUT}</li>
+   *   <li>{@code in X}     → {@link TypeProjection.WithVariance} with {@link TypeProjection.Variance#IN}</li>
+   *   <li>{@code X}        → {@link TypeProjection.WithVariance} with {@link TypeProjection.Variance#INVARIANT}</li>
+   * </ul>
+   */
+  private @NotNull TypeProjection parseProjection(@NotNull SyntaxNode projection, @NotNull Set<String> typeVars) {
+    if (firstChildOfType(projection, KtTokens.INSTANCE.getMUL()) != null) return new TypeProjection.Star();
+    SyntaxNode innerType = firstChildOfType(projection, KtNodeTypes.INSTANCE.getTYPE_REFERENCE());
+    JvmTypeRef inner = parseType(innerType, typeVars);
+    SyntaxNode modList = firstChildOfType(projection, KtNodeTypes.INSTANCE.getMODIFIER_LIST());
+    TypeProjection.Variance variance;
+    if (KotlinSyntaxNodes.hasModifier(modList, KtTokens.INSTANCE.getOUT_MODIFIER())) variance = TypeProjection.Variance.OUT;
+    else if (KotlinSyntaxNodes.hasModifier(modList, KtTokens.INSTANCE.getIN_MODIFIER())) variance = TypeProjection.Variance.IN;
+    else variance = TypeProjection.Variance.INVARIANT;
+    return new TypeProjection.WithVariance(variance, inner);
   }
 
   private static boolean isJvmPrimitive(@NotNull String t) {
@@ -174,84 +306,6 @@ final class KotlinSyntaxTypeFormatter {
       if (ct == KtTokens.INSTANCE.getQUEST()) continue;
       if (ct == KtTokens.INSTANCE.getLPAR() || ct == KtTokens.INSTANCE.getRPAR()) continue;
       return c;
-    }
-    return null;
-  }
-
-  private @NotNull String formatUserType(@NotNull SyntaxNode userType, @NotNull Set<String> typeVars) {
-    String dotted = userTypeDotted(userType);
-    String resolved;
-    if (typeVars.contains(dotted)) resolved = dotted;
-    else if (dotted.contains(".")) resolved = dotted;
-    else resolved = imports.resolveSimpleName(dotted);
-
-    SyntaxNode targs = firstChildOfType(userType, KtNodeTypes.INSTANCE.getTYPE_ARGUMENT_LIST());
-
-    // Special-case kotlin.Array<X> → X[]; built-in *Array typenames → primitive[].
-    String prim = PRIMITIVE_ARRAYS.get(dotted);
-    if (prim != null && targs == null) return prim;
-    if (("Array".equals(dotted) || "kotlin.Array".equals(resolved)) && targs != null) {
-      String elem = firstTypeArg(targs, typeVars);
-      if (elem != null) return elem + "[]";
-    }
-
-    String mapped = JVM_BUILTINS.get(dotted);
-    if (mapped != null && targs == null) return mapped;
-    // Map kotlin.<Builtin> too (in case the user wrote it qualified).
-    if (resolved.startsWith("kotlin.") && targs == null) {
-      String tail = resolved.substring("kotlin.".length());
-      String mappedQualified = JVM_BUILTINS.get(tail);
-      if (mappedQualified != null) return mappedQualified;
-    }
-
-    String javaAlias = KOTLIN_TO_JAVA_ALIASES.get(resolved);
-    if (javaAlias != null) resolved = javaAlias;
-
-    if (targs == null) return resolved;
-    List<String> renderedArgs = new SmartList<>();
-    for (SyntaxNode arg = targs.firstChild(); arg != null; arg = arg.nextSibling()) {
-      if (arg.getType() != KtNodeTypes.INSTANCE.getTYPE_PROJECTION()) continue;
-      renderedArgs.add(formatProjection(arg, typeVars));
-    }
-    if (renderedArgs.isEmpty()) return resolved;
-    return resolved + "<" + String.join(", ", renderedArgs) + ">";
-  }
-
-  /**
-   * Render a single {@code TYPE_PROJECTION} as a generic argument string. Mirrors what kotlinc
-   * writes into bytecode generic signatures so the source-derived string matches what
-   * {@link org.intellij.grammar.classinfo.asm.AsmClassSymbolProvider} decodes from the same
-   * class compiled.
-   *
-   * <ul>
-   *   <li>{@code *}        → {@code ?}</li>
-   *   <li>{@code out X}    → {@code ? extends X}</li>
-   *   <li>{@code in X}     → {@code ? super X}</li>
-   *   <li>{@code X}        → {@code X}</li>
-   * </ul>
-   */
-  private @NotNull String formatProjection(@NotNull SyntaxNode projection, @NotNull Set<String> typeVars) {
-    if (firstChildOfType(projection, KtTokens.INSTANCE.getMUL()) != null) return "?";
-    SyntaxNode innerType = firstChildOfType(projection, KtNodeTypes.INSTANCE.getTYPE_REFERENCE());
-    String rendered = formatType(innerType, typeVars);
-    SyntaxNode modList = firstChildOfType(projection, KtNodeTypes.INSTANCE.getMODIFIER_LIST());
-    if (KotlinSyntaxNodes.hasModifier(modList, KtTokens.INSTANCE.getOUT_MODIFIER())) return "? extends " + rendered;
-    if (KotlinSyntaxNodes.hasModifier(modList, KtTokens.INSTANCE.getIN_MODIFIER())) return "? super " + rendered;
-    return rendered;
-  }
-
-  /**
-   * Single-arg helper for the {@code Array<X>} → {@code X[]} special case. JVM arrays don't
-   * carry generic wildcards, so {@code in}/{@code out} variance is stripped here; a star
-   * projection ({@code Array<*>}) maps to {@code java.lang.Object} — kotlinc's choice for the
-   * element type of an unbounded array.
-   */
-  private @Nullable String firstTypeArg(@NotNull SyntaxNode typeArgList, @NotNull Set<String> typeVars) {
-    for (SyntaxNode arg = typeArgList.firstChild(); arg != null; arg = arg.nextSibling()) {
-      if (arg.getType() != KtNodeTypes.INSTANCE.getTYPE_PROJECTION()) continue;
-      if (firstChildOfType(arg, KtTokens.INSTANCE.getMUL()) != null) return "java.lang.Object";
-      SyntaxNode innerType = firstChildOfType(arg, KtNodeTypes.INSTANCE.getTYPE_REFERENCE());
-      return formatType(innerType, typeVars);
     }
     return null;
   }
@@ -279,7 +333,7 @@ final class KotlinSyntaxTypeFormatter {
     }
   }
 
-  /** Format every {@code SUPER_TYPE_*} entry as a list of raw {@link Fqn}s (no generics, no primitive mapping). */
+  /** Parse every {@code SUPER_TYPE_*} entry as a list of raw {@link Fqn}s (no generics, no primitive mapping). */
   @NotNull List<Fqn> formatSuperTypes(@Nullable SyntaxNode superTypeList, @NotNull Set<String> typeVars) {
     if (superTypeList == null) return List.of();
     List<Fqn> result = new SmartList<>();
@@ -304,7 +358,8 @@ final class KotlinSyntaxTypeFormatter {
   /**
    * Resolves a type expression to its raw class FQN — no generics, no primitive mapping, no array
    * transform. Used for supertypes, annotation types, and typealias right-hand sides where the
-   * {@link ClassSymbol} field type demands an {@link Fqn} rather than a free-form type expression.
+   * {@link org.intellij.grammar.classinfo.ClassSymbol} field type demands an {@link Fqn} rather
+   * than a structured type expression.
    */
   @NotNull Fqn formatTypeFqn(@Nullable SyntaxNode typeNode, @NotNull Set<String> typeVars) {
     if (typeNode == null) return Fqn.of("");

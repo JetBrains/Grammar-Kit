@@ -10,6 +10,7 @@ import fleet.org.jetbrains.kotlin.kmp.lexer.KtTokens;
 import fleet.org.jetbrains.kotlin.kmp.parser.KtNodeTypes;
 import org.intellij.grammar.classinfo.ClassSymbol;
 import org.intellij.grammar.classinfo.Fqn;
+import org.intellij.grammar.classinfo.JvmTypeRefs;
 import org.intellij.grammar.classinfo.MethodSymbol;
 import org.intellij.grammar.classinfo.MethodType;
 import org.intellij.grammar.classinfo.ParameterSymbol;
@@ -359,8 +360,11 @@ final class KotlinSyntaxClassExtractor {
     info.annotations.addAll(typeFormatter.extractAnnotationFqns(modifierList, Set.of()));
     SyntaxNode rhs = firstChildOfType(aliasNode, KtNodeTypes.INSTANCE.getTYPE_REFERENCE());
     // For typealias rhs we want JVM-mapped names (e.g. `String` → `java.lang.String`) so the
-    // alias' superClass mirrors what JVM-reflective callers expect, hence formatType over formatTypeFqn.
-    info.superClass = rhs == null ? Fqn.JAVA_LANG_OBJECT : Fqn.of(typeFormatter.formatType(rhs, Set.of()));
+    // alias' superClass mirrors what JVM-reflective callers expect — use the raw Fqn of the parsed
+    // type, which goes through the same JVM_BUILTINS / KOTLIN_TO_JAVA_ALIASES mapping.
+    info.superClass = rhs == null
+                      ? Fqn.JAVA_LANG_OBJECT
+                      : JvmTypeRefs.rawFqn(typeFormatter.parseType(rhs, Set.of()));
     result.put(fqn, info);
   }
 
@@ -423,7 +427,6 @@ final class KotlinSyntaxClassExtractor {
     m.modifiers = src.modifiers | Modifier.STATIC;
     m.methodType = MethodType.STATIC;
     m.returnType = src.returnType;
-    m.annotatedReturnType = src.annotatedReturnType;
     m.annotations.addAll(src.annotations);
     m.exceptions.addAll(src.exceptions);
     m.generics.addAll(src.generics);
@@ -431,7 +434,6 @@ final class KotlinSyntaxClassExtractor {
       ParameterSymbol.Builder cp = new ParameterSymbol.Builder();
       cp.name = sp.name;
       cp.type = sp.type;
-      cp.annotatedType = sp.annotatedType;
       cp.annotations.addAll(sp.annotations);
       m.parameters.add(cp);
     }

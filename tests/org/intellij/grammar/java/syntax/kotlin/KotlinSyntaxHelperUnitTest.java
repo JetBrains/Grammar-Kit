@@ -10,6 +10,7 @@ import org.intellij.grammar.classinfo.ClassSymbol;
 import org.intellij.grammar.classinfo.Fqn;
 import org.intellij.grammar.classinfo.JvmClassSymbolManager;
 import org.intellij.grammar.classinfo.JvmClassSymbolProvider;
+import org.intellij.grammar.classinfo.JvmTypeRefs;
 import org.intellij.grammar.classinfo.MethodType;
 import org.intellij.grammar.classinfo.ParameterSymbol;
 import org.intellij.grammar.java.JavaHelper;
@@ -180,12 +181,10 @@ public class KotlinSyntaxHelperUnitTest extends TestCase {
     m.declaringClass = TEST_DECLARING;
     m.modifiers = modifiers;
     m.methodType = methodType;
-    m.returnType = returnType;
-    m.annotatedReturnType = returnType;
+    m.returnType = JvmTypeRefs.raw(returnType);
     for (int i = 0; i < paramTypes.length; i++) {
       ParameterSymbol.Builder p = new ParameterSymbol.Builder();
-      p.type = paramTypes[i];
-      p.annotatedType = paramTypes[i];
+      p.type = JvmTypeRefs.raw(paramTypes[i]);
       p.name = "p" + i;
       m.parameters.add(p);
     }

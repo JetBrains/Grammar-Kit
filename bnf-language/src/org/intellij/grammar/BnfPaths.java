@@ -18,6 +18,7 @@ import com.intellij.psi.util.PsiModificationTracker;
 import com.intellij.util.ArrayUtil;
 import com.intellij.util.containers.ContainerUtil;
 import org.intellij.grammar.config.Options;
+import org.intellij.grammar.java.JavaHelperFactory;
 import org.intellij.grammar.psi.BnfFile;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -38,7 +39,7 @@ import static org.intellij.grammar.psi.BnfAttributes.getRootAttribute;
  * Single source of truth for the {@code *InputPath} and {@code *OutputPath} BNF attributes:
  * the set of every path attribute, the FQN-attribute ↔ path-attribute pairings, and the
  * BNF-file-parent-relative resolution rules used by every consumer (the IDE's
- * {@code PsiHelperFactory}, the build-time {@code BnfGenerationService}, and the inlay-hints
+ * {@code JavaHelperFactory}, the build-time {@code BnfGenerationService}, and the inlay-hints
  * provider).
  *
  * <p>Path values are always resolved relative to the BNF file's parent directory.
@@ -119,7 +120,7 @@ public final class BnfPaths {
    *
    * <p>When the grammar declares no {@code inputPath}, the resolution leaves
    * {@link KnownAttribute#INPUT_PATH} unset rather than defaulting it to the BNF file's parent.
-   * IDE-side consumers ({@link org.intellij.grammar.java.PsiHelperFactory}) treat the missing
+   * IDE-side consumers ({@link JavaHelperFactory}) treat the missing
    * input path as "no user-declared scope" and fall back to a project-wide search scope; CLI
    * consumers without a {@code Project} seed the default themselves via
    * {@link #resolveExplicit(Map, Path)}.
@@ -179,7 +180,7 @@ public final class BnfPaths {
       if (inferred != null) resolved.put(KnownAttribute.PARSER_OUTPUT_PATH, inferred);
     }
 
-    // No inputPath default in IDE mode: PsiHelperFactory falls back to a project-wide search
+    // No inputPath default in IDE mode: JavaHelperFactory falls back to a project-wide search
     // scope when the resolution has no inputPath. The CLI overload of resolveExplicit seeds
     // bnfParent itself because standalone runs have no Project to fall back to.
 
@@ -251,7 +252,7 @@ public final class BnfPaths {
 
   /**
    * Cascade lookup keyed on a class-reference FQN attribute (e.g. {@code mixin},
-   * {@code parserClass}). Used by {@code PsiHelperFactory} to scope reference resolution for
+   * {@code parserClass}). Used by {@code JavaHelperFactory} to scope reference resolution for
    * each FQN attribute to the directory tree it points into.
    * <ol>
    *   <li>Specific {@code *InputPath} sibling per {@link #INPUT_FOR} — if non-null,

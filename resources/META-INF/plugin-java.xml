@@ -2,7 +2,7 @@
 <idea-plugin>
   <resource-bundle>messages.GrammarKitBundle</resource-bundle>
   <extensions defaultExtensionNs="com.intellij">
-    <projectService serviceImplementation="org.intellij.grammar.java.PsiHelperFactory"/>
+    <projectService serviceImplementation="org.intellij.grammar.java.JavaHelperFactory"/>
     <referencesSearch implementation="org.intellij.jflex.psi.impl.JFlexStateUsageSearcher"/>
     <regExpLanguageHost forClass="org.intellij.grammar.psi.impl.BnfStringImpl"
                         implementationClass="org.intellij.grammar.psi.impl.BnfStringRegexHost"/>

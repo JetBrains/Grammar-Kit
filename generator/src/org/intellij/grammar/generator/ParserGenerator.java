@@ -9,6 +9,7 @@ import com.intellij.openapi.util.text.StringUtil;
 import org.intellij.grammar.BnfPathsResolution;
 import org.intellij.grammar.analysis.BnfFirstNextAnalyzer;
 import org.intellij.grammar.generator.NodeCalls.*;
+import org.intellij.grammar.java.JavaHelperFactory;
 import org.intellij.grammar.psi.*;
 import org.intellij.grammar.psi.impl.GrammarUtil;
 import org.jetbrains.annotations.NotNull;
@@ -73,7 +74,8 @@ public sealed abstract class ParserGenerator extends Generator permits JavaParse
                             @NotNull OutputOpener outputOpener,
                             @NotNull NameRenderer nameRenderer,
                             @NotNull BnfPathsResolution paths) {
-    super(grammarInfo, sourcePath, packagePrefix, outputFileExtension, outputOpener, nameRenderer, paths);
+    super(grammarInfo, sourcePath, packagePrefix, outputFileExtension, outputOpener, nameRenderer, paths,
+          JavaHelperFactory.getInstance(grammarInfo.file().getProject()).scoped(paths));
   }
 
   /**

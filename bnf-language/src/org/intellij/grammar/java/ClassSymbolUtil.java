@@ -20,7 +20,6 @@ import com.intellij.psi.PsiVariable;
 import com.intellij.util.ArrayUtil;
 import com.intellij.util.containers.ContainerUtil;
 import org.intellij.grammar.classinfo.*;
-import org.intellij.grammar.generator.java.JavaNames;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -34,8 +33,6 @@ import java.lang.reflect.TypeVariable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
-import java.util.function.Function;
 
 /**
  * Single dispatch point for reading method/class metadata across every element shape any
@@ -124,37 +121,6 @@ public final class ClassSymbolUtil {
     if (d instanceof Method m) return parameterAnnotationsFromReflection(m, paramIndex);
     requireKnownShape(method, d);
     return Collections.emptyList();
-  }
-
-  /**
-   * Filters by parameter arity and parameter type compatibility.
-   * <p>
-   * Subtype probes ({@link ClassSymbol#superClass} / {@link ClassSymbol#interfaces}) go through
-   * {@code classLookup} so each helper drives the lookup with its own backing model — bytecode for
-   * the ASM provider, source files for the syntax providers, etc. {@code paramCount = -1}
-   * skips the arity check; an empty {@code paramTypes} accepts any parameter list.
-   */
-  @SuppressWarnings("BooleanMethodIsAlwaysInverted")
-  public static boolean acceptsParams(@NotNull MethodSymbol method,
-                                      int paramCount,
-                                      @NotNull String[] paramTypes,
-                                      @NotNull Function<String, ClassSymbol> classLookup) {
-    int actualParams = method.parameters().size();
-    if (paramCount >= 0 && paramCount != actualParams) return false;
-    if (paramTypes.length == 0) return true;
-    if (paramTypes.length > actualParams) return false;
-    for (int i = 0; i < paramTypes.length; i++) {
-      String paramType = paramTypes[i];
-      String parameter = method.parameters().get(i).type();
-      if (acceptsName(paramType, JavaNames.getRawClassName(parameter))) continue;
-      ClassSymbol info = classLookup.apply(paramType);
-      if (info != null) {
-        if (info.superClass() != null && Objects.equals(info.superClass().value(), parameter)) continue;
-        if (containsValue(info.interfaces(), parameter)) continue;
-      }
-      return false;
-    }
-    return true;
   }
 
   /**
@@ -290,13 +256,6 @@ public final class ClassSymbolUtil {
   }
 
   // endregion
-
-  private static boolean containsValue(@NotNull List<Fqn> fqns, @NotNull String value) {
-    for (Fqn fqn : fqns) {
-      if (Objects.equals(fqn.value(), value)) return true;
-    }
-    return false;
-  }
 
   private static @Nullable Object delegateOf(@Nullable NavigatablePsiElement element) {
     return element instanceof MyElement ? ((MyElement<?>)element).delegate : null;

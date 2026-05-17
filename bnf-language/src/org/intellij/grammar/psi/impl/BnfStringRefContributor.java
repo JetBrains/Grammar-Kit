@@ -8,7 +8,7 @@ import com.intellij.patterns.PatternCondition;
 import com.intellij.psi.*;
 import com.intellij.util.ProcessingContext;
 import org.intellij.grammar.KnownAttribute;
-import org.intellij.grammar.java.JavaHelper;
+import org.intellij.grammar.java.JavaHelperFactory;
 import org.intellij.grammar.psi.BnfAttr;
 import org.intellij.grammar.psi.BnfAttrPattern;
 import org.jetbrains.annotations.NotNull;
@@ -66,7 +66,7 @@ class BnfStringRefContributor extends PsiReferenceContributor {
 
         @Override
         public PsiReference @NotNull [] getReferencesByElement(@NotNull PsiElement element, @NotNull ProcessingContext context) {
-          return JavaHelper.getJavaHelper(element).getClassReferences(element, context);
+          return JavaHelperFactory.getInstance(element.getProject()).getInstance(element).getClassReferences(element, context);
         }
       });
   }

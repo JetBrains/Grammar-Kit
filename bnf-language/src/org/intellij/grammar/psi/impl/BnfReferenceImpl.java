@@ -16,6 +16,7 @@ import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.classinfo.MethodType;
 import org.intellij.grammar.generator.kotlin.KotlinBnfConstants;
 import org.intellij.grammar.java.JavaHelper;
+import org.intellij.grammar.java.JavaHelperFactory;
 import org.intellij.grammar.psi.*;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NotNull;
@@ -67,7 +68,7 @@ public class BnfReferenceImpl<T extends BnfExpression> extends PsiReferenceBase<
     BnfRule rule = Objects.requireNonNull(PsiTreeUtil.getParentOfType(myElement, BnfRule.class));
     String parserClass = BnfAttributes.getAttribute(rule, KnownAttribute.PARSER_UTIL_CLASS);
     // paramCount + 2 (builder and level)
-    JavaHelper helper = JavaHelper.getJavaHelper(myElement);
+    JavaHelper helper = JavaHelperFactory.getInstance(myElement.getProject()).getInstance(myElement);
     for (String className = parserClass; className != null; className = helper.getSuperClassName(className)) {
       List<NavigatablePsiElement> methods = helper.findClassMethods(className, MethodType.STATIC, referenceName, false, paramCount + 2);
       PsiElement first = ContainerUtil.getFirstItem(methods);

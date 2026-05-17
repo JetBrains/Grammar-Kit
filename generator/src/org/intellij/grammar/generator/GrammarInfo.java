@@ -11,6 +11,7 @@ import org.intellij.grammar.analysis.BnfFirstNextAnalyzer;
 import org.intellij.grammar.classinfo.MethodType;
 import org.intellij.grammar.generator.java.JavaNames;
 import org.intellij.grammar.java.JavaHelper;
+import org.intellij.grammar.java.JavaHelperFactory;
 import org.intellij.grammar.psi.BnfFile;
 import org.intellij.grammar.psi.BnfRule;
 import org.intellij.grammar.psi.BnfRules;
@@ -57,11 +58,11 @@ public record GrammarInfo(
 ) {
 
   public static @NotNull GrammarInfo build(@NotNull BnfFile file, @NotNull BnfPathsResolution paths) {
-    return build(file, Generator.defaultHelperResolver(file, paths), Generator.defaultWarningSink(file));
+    return build(file, JavaHelperFactory.getInstance(file.getProject()).scoped(paths), Generator.defaultWarningSink(file));
   }
 
   public static @NotNull GrammarInfo build(@NotNull BnfFile file,
-                                           @NotNull HelperResolver helperResolver,
+                                           @NotNull JavaHelperFactory.ScopedHelpers scopedHelpers,
                                            @NotNull Consumer<String> warningSink) {
     GenOptions options = new GenOptions(file);
     List<BnfRule> rules = file.getRules();
@@ -101,7 +102,7 @@ public record GrammarInfo(
     }
 
     calcFakeRulesWithType(file, builders);
-    calcRulesStubNames(file, builders, helperResolver);
+    calcRulesStubNames(file, builders, scopedHelpers);
     calcAbstractRules(file, grammarRoot, graphHelper, builders);
 
     Map<String, RuleInfo> ruleInfos = new TreeMap<>();
@@ -115,18 +116,6 @@ public record GrammarInfo(
     return new GrammarInfo(file, options, grammarRoot, grammarRootParser, frozenRuleInfos,
                            simpleTokens, graphHelper, firstNextAnalyzer, expressionHelper);
   }
-
-  /**
-   * Resolves a manager-aware {@link JavaHelper} for class lookup, mirroring
-   * {@link Generator#helperFor}. Passed into {@link #build} so {@link GrammarInfo}
-   * does not need to know about {@code PsiHelperFactory} directly, and so cross-language
-   * symbol resolution (Java ↔ Kotlin) honors the caller's helper scope.
-   */
-  @FunctionalInterface
-  public interface HelperResolver {
-    @NotNull JavaHelper resolve(@Nullable BnfRule rule, @NotNull KnownAttribute<?> attribute);
-  }
-
 
   /**
    * Marks rules reused as another rule's {@code elementType}, so they keep an element-type entry even when {@code fake}.
@@ -148,7 +137,7 @@ public record GrammarInfo(
    */
   private static void calcRulesStubNames(@NotNull BnfFile file,
                                          @NotNull Map<String, Builder> builders,
-                                         @NotNull HelperResolver helperResolver) {
+                                         @NotNull JavaHelperFactory.ScopedHelpers scopedHelpers) {
     for (BnfRule rule : file.getRules()) {
       Builder b = builders.get(rule.getName());
       if (b == null) continue;
@@ -165,7 +154,7 @@ public record GrammarInfo(
                               (topB == null ? null : topB.intfClass);
       String implSuper = StringUtil.notNullize(b.mixin, superRuleClass);
       String implSuperRaw = JavaNames.getRawClassName(implSuper);
-      JavaHelper hierarchyHelper = helperResolver.resolve(rule, KnownAttribute.MIXIN);
+      JavaHelper hierarchyHelper = scopedHelpers.get(KnownAttribute.MIXIN);
       String stubName =
         StringUtil.isNotEmpty(stubClass) ? stubClass :
         implSuper.indexOf("<") < implSuper.indexOf(">") &&

@@ -104,7 +104,7 @@ public final class KotlinParserGenerator extends ParserGenerator {
       generateElementTypes();
     }
     if (myGrammarRoot != null && (G.generatePsi)) {
-      new JavaPsiGenerator(this).generate();
+      new JavaPsiGenerator(this, myScopedHelpers).generate();
     }
   }
 

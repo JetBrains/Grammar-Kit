@@ -262,6 +262,73 @@ public class JavaSyntaxHelperUnitTest extends TestCase {
       "a.b.Foo", MethodType.INSTANCE, "doIt", false, -1, "a.b.Child").size());
   }
 
+  public void testFindClassMethodsParamTypeResolvedViaTransitiveSuperclass() {
+    // a.b.Grandchild -> a.b.Child -> a.b.Base. Method expects Base; caller passes Grandchild.
+    registerClass("a.b.Base", Modifier.PUBLIC, "java.lang.Object");
+    registerClass("a.b.Child", Modifier.PUBLIC, "a.b.Base");
+    registerClass("a.b.Grandchild", Modifier.PUBLIC, "a.b.Child");
+    registerClass("a.b.Foo", Modifier.PUBLIC, "java.lang.Object",
+                  method("doIt", Modifier.PUBLIC, MethodType.INSTANCE,
+                         "void", "a.b.Base"));
+    assertEquals(1, helper().findClassMethods(
+      "a.b.Foo", MethodType.INSTANCE, "doIt", false, -1, "a.b.Grandchild").size());
+  }
+
+  public void testFindClassMethodsParamTypeResolvedViaTransitiveInterface() {
+    // a.b.Concrete implements a.b.Mid; a.b.Mid extends a.b.Top. Method expects Top.
+    ClassSymbol.Builder concrete = registerClass("a.b.Concrete", Modifier.PUBLIC, "java.lang.Object");
+    concrete.interfaces.add(Fqn.of("a.b.Mid"));
+    ClassSymbol.Builder mid = registerClass("a.b.Mid", Modifier.PUBLIC | Modifier.INTERFACE, null);
+    mid.interfaces.add(Fqn.of("a.b.Top"));
+    registerClass("a.b.Top", Modifier.PUBLIC | Modifier.INTERFACE, null);
+    registerClass("a.b.Foo", Modifier.PUBLIC, "java.lang.Object",
+                  method("doIt", Modifier.PUBLIC, MethodType.INSTANCE,
+                         "void", "a.b.Top"));
+    assertEquals(1, helper().findClassMethods(
+      "a.b.Foo", MethodType.INSTANCE, "doIt", false, -1, "a.b.Concrete").size());
+  }
+
+  public void testFindClassMethodsParamTypeResolvedViaSupertypeInterface() {
+    // a.b.Child extends a.b.Parent; a.b.Parent implements a.b.Iface. Method expects Iface.
+    registerClass("a.b.Child", Modifier.PUBLIC, "a.b.Parent");
+    ClassSymbol.Builder parent = registerClass("a.b.Parent", Modifier.PUBLIC, "java.lang.Object");
+    parent.interfaces.add(Fqn.of("a.b.Iface"));
+    registerClass("a.b.Iface", Modifier.PUBLIC | Modifier.INTERFACE, null);
+    registerClass("a.b.Foo", Modifier.PUBLIC, "java.lang.Object",
+                  method("doIt", Modifier.PUBLIC, MethodType.INSTANCE,
+                         "void", "a.b.Iface"));
+    assertEquals(1, helper().findClassMethods(
+      "a.b.Foo", MethodType.INSTANCE, "doIt", false, -1, "a.b.Child").size());
+  }
+
+  public void testFindClassMethodsParamTypeRejectsUnrelatedType() {
+    // a.b.Other has no relationship to a.b.Base. The walk must terminate and reject the match.
+    registerClass("a.b.Other", Modifier.PUBLIC, "java.lang.Object");
+    registerClass("a.b.Foo", Modifier.PUBLIC, "java.lang.Object",
+                  method("doIt", Modifier.PUBLIC, MethodType.INSTANCE,
+                         "void", "a.b.Base"));
+    assertTrue(helper().findClassMethods(
+      "a.b.Foo", MethodType.INSTANCE, "doIt", false, -1, "a.b.Other").isEmpty());
+  }
+
+  public void testFindClassMethodsParamTypeResolvedAcrossProviders() {
+    // a.b.Child is registered with the primary provider; its superclass ext.Base lives in the
+    // fallback. The transitive walk must follow the chain across providers via the manager.
+    registerClass("a.b.Child", Modifier.PUBLIC, "ext.Base");
+    ClassSymbol.Builder external = new ClassSymbol.Builder();
+    external.name = Fqn.of("ext.Base");
+    external.superClass = Fqn.of("ext.Root");
+    fallback.classes.put("ext.Base", external);
+    ClassSymbol.Builder root = new ClassSymbol.Builder();
+    root.name = Fqn.of("ext.Root");
+    fallback.classes.put("ext.Root", root);
+    registerClass("a.b.Foo", Modifier.PUBLIC, "java.lang.Object",
+                  method("doIt", Modifier.PUBLIC, MethodType.INSTANCE,
+                         "void", "ext.Root"));
+    assertEquals(1, helper().findClassMethods(
+      "a.b.Foo", MethodType.INSTANCE, "doIt", false, -1, "a.b.Child").size());
+  }
+
   public void testFindClassMethodsParamTypeResolvedViaFallbackSupertype() {
     // The probe class is only known to the fallback. JavaSyntaxHelper must unwrap the fallback's
     // MyElement<ClassSymbol> so the supertype check still succeeds.

@@ -76,7 +76,7 @@ public final class JavaParserGenerator extends ParserGenerator {
   @Override
   public void generate() throws IOException {
     generateParser();
-    new JavaPsiGenerator(this).generate();
+    new JavaPsiGenerator(this, myScopedHelpers).generate();
   }
 
   /**

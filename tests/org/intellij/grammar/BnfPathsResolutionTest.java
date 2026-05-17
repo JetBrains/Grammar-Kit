@@ -70,7 +70,7 @@ public class BnfPathsResolutionTest extends JavaCodeInsightFixtureTestCase {
     BnfFile bnf = bnfWith("g.bnf", "{ parserClass=\"com.example.P\" }\nroot ::= 'a'");
     BnfPathsResolution paths = BnfPaths.resolve(bnf);
     // No grammar-level inputPath → resolution leaves INPUT_PATH and PSI_INPUT_PATH unset.
-    // IDE consumers (PsiHelperFactory) widen to a project-wide search scope in this case.
+    // IDE consumers (JavaHelperFactory) widen to a project-wide search scope in this case.
     assertNull(paths.path(KnownAttribute.INPUT_PATH));
     assertNull(paths.path(KnownAttribute.PSI_INPUT_PATH));
   }
@@ -194,7 +194,7 @@ public class BnfPathsResolutionTest extends JavaCodeInsightFixtureTestCase {
     BnfFile bnf = bnfWith("g.bnf", "{ parserClass=\"com.example.P\" }\nroot ::= 'a'");
     BnfPathsResolution paths = BnfPaths.resolve(bnf);
     // Grammar declares no inputPath → referencePath returns null for input-side attributes.
-    // PsiHelperFactory widens to a project-wide scope when this happens; the resolution itself
+    // JavaHelperFactory widens to a project-wide scope when this happens; the resolution itself
     // makes no assumption about the consumer.
     assertNull(BnfPaths.referencePath(paths, KnownAttribute.MIXIN));
     assertNull(BnfPaths.referencePath(paths, KnownAttribute.IMPLEMENTS));

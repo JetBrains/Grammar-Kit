@@ -16,7 +16,7 @@ import org.intellij.grammar.BnfPathsResolution;
 import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.analysis.BnfFirstNextAnalyzer;
 import org.intellij.grammar.java.JavaHelper;
-import org.intellij.grammar.java.PsiHelperFactory;
+import org.intellij.grammar.java.JavaHelperFactory;
 import org.intellij.grammar.psi.*;
 import org.intellij.grammar.psi.impl.GrammarUtil;
 import org.jetbrains.annotations.NotNull;
@@ -70,8 +70,7 @@ public sealed abstract class Generator permits ParserGenerator, JavaPsiGenerator
   protected final @NotNull NameRenderer R;
   final Names N;
 
-  protected final JavaHelper myJavaHelper;
-  private final @NotNull Map<KnownAttribute<?>, JavaHelper> myScopedHelpers = new HashMap<>();
+  protected final @NotNull JavaHelperFactory.ScopedHelpers myScopedHelpers;
 
   private final @NotNull String myOutputFileExtension;
   protected final @NotNull OutputOpener myOpener;
@@ -103,7 +102,8 @@ public sealed abstract class Generator permits ParserGenerator, JavaPsiGenerator
                       @NotNull String outputFileExtension,
                       @NotNull OutputOpener outputOpener,
                       @NotNull NameRenderer nameRenderer,
-                      @NotNull BnfPathsResolution paths) {
+                      @NotNull BnfPathsResolution paths,
+                      JavaHelperFactory.@NotNull ScopedHelpers scopedHelpers) {
     myGrammarInfo = grammarInfo;
     myFile = grammarInfo.file();
 
@@ -116,7 +116,7 @@ public sealed abstract class Generator permits ParserGenerator, JavaPsiGenerator
     myOutputFileExtension = outputFileExtension;
     myOpener = outputOpener;
 
-    myJavaHelper = JavaHelper.getJavaHelper(myFile);
+    myScopedHelpers = scopedHelpers;
 
     myGrammarRoot = grammarInfo.grammarRoot();
     myGrammarRootParser = grammarInfo.grammarRootParser();
@@ -188,38 +188,12 @@ public sealed abstract class Generator permits ParserGenerator, JavaPsiGenerator
 
   /**
    * Returns a {@link JavaHelper} whose class-lookup scope is narrowed by the {@code *InputPath}
-   * sibling of {@code attribute}, anchored at the BNF psi node that declares it. When the
-   * attribute is not declared in the grammar, falls back to the rule (or file) — in which case
-   * only the global {@code inputPath} default applies.
+   * sibling of {@code attribute}, anchored at the BNF psi node that declares it. Backed by the
+   * generator-scoped {@link JavaHelperFactory.ScopedHelpers}, so all per-attribute helpers share the
+   * same set of generator-attached extra classes (rule-stub interfaces and impls).
    */
   protected final @NotNull JavaHelper helperFor(@NotNull KnownAttribute<?> attribute) {
-    // BnfPaths.referencePath consults grammar-level (root) attributes; per-rule scoping is not
-    // supported today. The rule parameter is retained for callers' clarity and future expansion.
-    PsiHelperFactory factory = myFile.getProject().getService(PsiHelperFactory.class);
-    if (factory == null) {
-      // Headless / CLI: AsmHelper has no scope concept; one shared instance is sufficient.
-      return myJavaHelper;
-    }
-    return myScopedHelpers.computeIfAbsent(attribute, attr -> factory.getInstance(myPaths, attr));
-  }
-
-  /**
-   * TODO maybe let's deduplicate?
-   *
-   * Builds a manager-aware {@link GrammarInfo.HelperResolver} for use during
-   * {@link GrammarInfo#build}. Mirrors {@link #helperFor} so stub resolution and
-   * other class-lookup work performed inside {@code GrammarInfo} honors the same
-   * scope as later, emission-time queries.
-   */
-  static @NotNull GrammarInfo.HelperResolver defaultHelperResolver(@NotNull BnfFile file,
-                                                                   @NotNull BnfPathsResolution paths) {
-    PsiHelperFactory factory = file.getProject().getService(PsiHelperFactory.class);
-    JavaHelper fallback = JavaHelper.getJavaHelper(file);
-    if (factory == null) {
-      return (rule, attribute) -> fallback;
-    }
-    Map<KnownAttribute<?>, JavaHelper> cache = new HashMap<>();
-    return (rule, attribute) -> cache.computeIfAbsent(attribute, a -> factory.getInstance(paths, a));
+    return myScopedHelpers.get(attribute);
   }
 
   public void out(String s, Object... args) {

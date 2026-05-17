@@ -90,7 +90,7 @@
     <quoteHandler fileType="BNF" className="org.intellij.grammar.editor.BnfQuoteHandler"/>
 
     <registryKey key="grammar.kit.psi.helper.use.syntax"
-                 description="Grammar-Kit (testing): when true, PsiHelperFactory returns a source-backed JavaSyntaxHelper instead of PsiHelper. Rooted at the *InputPath resolved for the call site, with AsmHelper as fallback."
+                 description="Grammar-Kit (testing): when true, JavaHelperFactory returns a source-backed JavaSyntaxHelper instead of PsiHelper. Rooted at the *InputPath resolved for the call site, with AsmHelper as fallback."
                  defaultValue="false"
                  restartRequired="false"/>
 

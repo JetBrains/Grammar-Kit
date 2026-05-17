@@ -18,6 +18,7 @@ import com.intellij.util.containers.JBTreeTraverser;
 import com.intellij.util.containers.MultiMap;
 import com.intellij.util.containers.TreeTraversal;
 import org.intellij.grammar.KnownAttribute;
+import org.intellij.grammar.classinfo.ClassSymbol;
 import org.intellij.grammar.classinfo.Fqn;
 import org.intellij.grammar.classinfo.MethodType;
 import org.intellij.grammar.classinfo.TypeParameterSymbol;
@@ -27,6 +28,7 @@ import org.intellij.grammar.generator.java.JavaNameShortener;
 import org.intellij.grammar.generator.java.JavaNames;
 import org.intellij.grammar.generator.kotlin.KotlinBnfConstants;
 import org.intellij.grammar.java.JavaHelper;
+import org.intellij.grammar.java.JavaHelperFactory;
 import org.intellij.grammar.java.RuleImplUtil;
 import org.intellij.grammar.psi.*;
 import org.intellij.grammar.util.Case;
@@ -34,6 +36,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
+import java.lang.reflect.Modifier;
 import java.util.*;
 
 import static com.intellij.util.containers.ContainerUtil.emptyList;
@@ -84,16 +87,32 @@ public final class JavaPsiGenerator extends Generator {
    */
   private final Map<String, PsiRuleInfo> myPsiRuleInfos = new HashMap<>();
 
-  public JavaPsiGenerator(@NotNull ParserGenerator parserGen) {
-    super(parserGen.grammarInfo(), parserGen.mySourcePath, parserGen.myPackagePrefix, "java",
-          parserGen.myOpener, new JavaNameRenderer(), parserGen.myPaths);
+  public JavaPsiGenerator(@NotNull Generator parserGen, @NotNull JavaHelperFactory.ScopedHelpers scopedHelpers) {
+    super(parserGen.grammarInfo(),
+          parserGen.mySourcePath,
+          parserGen.myPackagePrefix,
+          "java",
+          parserGen.myOpener,
+          new JavaNameRenderer(),
+          parserGen.myPaths,
+          scopedHelpers
+    );
 
     // TODO I don't like that we copy state here
     // Copy parser-side state populated during parser emission.
     mySimpleTokens.clear();
     mySimpleTokens.putAll(parserGen.mySimpleTokens);
     myChoiceTokenSets.putAll(parserGen.myChoiceTokenSets);
-    myTokensUsedInGrammar = new LinkedHashSet<>(parserGen.myTokensUsedInGrammar);
+    if (parserGen instanceof ParserGenerator pg) {
+      myTokensUsedInGrammar = new LinkedHashSet<>(pg.myTokensUsedInGrammar);
+    }
+    else if (parserGen instanceof JavaPsiGenerator pg) {
+      myTokensUsedInGrammar = new LinkedHashSet<>(pg.myTokensUsedInGrammar);
+      myPsiRuleInfos.putAll(pg.myPsiRuleInfos);
+    }
+    else {
+      throw new IllegalArgumentException("Unsupported parser generator type: " + parserGen.getClass().getName());
+    }
 
     myPsiInterfaceFormat = NameFormat.forPsiClass(myFile);
     myImplClassFormat = NameFormat.forPsiImplClass(myFile);
@@ -110,6 +129,47 @@ public final class JavaPsiGenerator extends Generator {
 
   private @NotNull PsiRuleInfo psiInfo(@NotNull BnfRule rule) {
     return myPsiRuleInfos.computeIfAbsent(rule.getName(), n -> new PsiRuleInfo());
+  }
+
+  /**
+   * Builds {@link ClassSymbol} stubs for every PSI interface and impl class this generator is about
+   * to emit. Each stub mirrors the hierarchy of the to-be-generated class so type-compatibility
+   * checks in downstream extractors can walk supertypes up to {@code PsiElement}. Must be called
+   * after {@link #inferSuperInterfaces} and {@link #calcRealSuperClasses}, which populate
+   * {@link PsiRuleInfo}.
+   */
+  private @NotNull List<ClassSymbol> buildPsiStubs(@NotNull Map<String, BnfRule> sortedPsiRules) {
+    List<ClassSymbol> stubs = new ArrayList<>();
+    for (BnfRule rule : sortedPsiRules.values()) {
+      RuleInfo info = ruleInfo(rule);
+      stubs.add(stubInterface(info.intfClass(), resolvePsiIntfSupers(rule)));
+      stubs.add(stubImpl(info.implClass(), resolvePsiImplSuperClass(rule), resolvePsiImplSuperInterface(rule)));
+    }
+    return stubs;
+  }
+
+  private static @NotNull ClassSymbol stubInterface(@NotNull String fqn,
+                                                    @NotNull Collection<String> superInterfaces) {
+    ClassSymbol.Builder b = new ClassSymbol.Builder();
+    b.name = Fqn.of(fqn);
+    b.modifiers = Modifier.PUBLIC | Modifier.INTERFACE;
+    for (String s : superInterfaces) {
+      b.interfaces.add(Fqn.of(getRawClassName(s)));
+    }
+    return b.build();
+  }
+
+  private static @NotNull ClassSymbol stubImpl(@NotNull String fqn,
+                                               @Nullable String superClass,
+                                               @NotNull String intfClass) {
+    ClassSymbol.Builder b = new ClassSymbol.Builder();
+    b.name = Fqn.of(fqn);
+    b.modifiers = Modifier.PUBLIC;
+    if (StringUtil.isNotEmpty(superClass)) {
+      b.superClass = Fqn.of(getRawClassName(superClass));
+    }
+    b.interfaces.add(Fqn.of(intfClass));
+    return b.build();
   }
 
   private static @Nullable String inferVisitorClassName(@NotNull BnfFile file, boolean generateVisitor, @NotNull NameFormat format) {
@@ -184,9 +244,13 @@ public final class JavaPsiGenerator extends Generator {
     PsiGenerationTargets psiGenerationTargets = computePsiGenerationTargets();
     inferSuperInterfaces(psiGenerationTargets.sortedPsiRules());
     calcRealSuperClasses(psiGenerationTargets.sortedPsiRules());
-    generateElementTypeHolder(psiGenerationTargets.sortedCompositeTypes());
-    generateElementTypeConverter(psiGenerationTargets.sortedCompositeTypes());
-    generatePsi(psiGenerationTargets.sortedPsiRules());
+
+    JavaHelperFactory.ExtraClasses extras = new JavaHelperFactory.ExtraClasses(buildPsiStubs(psiGenerationTargets.sortedPsiRules()));
+    var secondRun = new JavaPsiGenerator(this, JavaHelperFactory.getInstance(myFile.getProject()).scoped(myPaths, extras));
+
+    secondRun.generateElementTypeHolder(psiGenerationTargets.sortedCompositeTypes());
+    secondRun.generateElementTypeConverter(psiGenerationTargets.sortedCompositeTypes());
+    secondRun.generatePsi(psiGenerationTargets.sortedPsiRules());
   }
 
   private void generateElementTypeConverter(@NotNull Map<String, BnfRule> compositeTypes) throws IOException {
@@ -653,12 +717,7 @@ public final class JavaPsiGenerator extends Generator {
   /** Emits the public PSI interface for {@code rule}: super-interfaces (with stub-aware additions) and rule accessor signatures. */
   private void generatePsiIntf(@NotNull BnfRule rule, @NotNull RuleInfo info) {
     String psiClass = info.intfClass();
-    String stubClass = info.stub();
-    Collection<String> psiSupers = psiInfo(rule).superInterfaces;
-    if (StringUtil.isNotEmpty(stubClass)) {
-      psiSupers = new LinkedHashSet<>(psiSupers);
-      psiSupers.add(JavaBnfConstants.STUB_BASED_PSI_ELEMENT + "<" + stubClass + ">");
-    }
+    Collection<String> psiSupers = resolvePsiIntfSupers(rule);
 
     Set<String> imports = new LinkedHashSet<>();
     imports.addAll(DEFAULT_PSI_IMPORTS);
@@ -671,6 +730,42 @@ public final class JavaPsiGenerator extends Generator {
   }
 
   /**
+   * Resolved super-interface list emitted for {@code rule}'s PSI interface:
+   * {@link PsiRuleInfo#superInterfaces} plus a {@code StubBasedPsiElement<stubClass>} entry when
+   * the rule carries a stub. Callers must have run {@link #inferSuperInterfaces}.
+   */
+  private @NotNull Collection<String> resolvePsiIntfSupers(@NotNull BnfRule rule) {
+    Collection<String> supers = psiInfo(rule).superInterfaces;
+    String stubClass = ruleInfo(rule).stub();
+    if (StringUtil.isNotEmpty(stubClass)) {
+      Set<String> withStub = new LinkedHashSet<>(supers);
+      withStub.add(JavaBnfConstants.STUB_BASED_PSI_ELEMENT + "<" + stubClass + ">");
+      return withStub;
+    }
+    return supers;
+  }
+
+  /**
+   * Resolved {@code extends} target emitted for {@code rule}'s PSI impl. May carry generics; callers
+   * that need the raw class name must pass the result through
+   * {@link org.intellij.grammar.generator.java.JavaNames#getRawClassName}. Callers must have run
+   * {@link #calcRealSuperClasses}.
+   */
+  private @Nullable String resolvePsiImplSuperClass(@NotNull BnfRule rule) {
+    return psiInfo(rule).realSuperClass;
+  }
+
+  /**
+   * Resolved {@code implements} entry emitted for {@code rule}'s PSI impl — the rule's own PSI
+   * interface. Additional interfaces (super-rule's intf, {@code implements} attrs,
+   * {@code StubBasedPsiElement}) are reached transitively through that interface's super-interface
+   * list.
+   */
+  private @NotNull String resolvePsiImplSuperInterface(@NotNull BnfRule rule) {
+    return ruleInfo(rule).intfClass();
+  }
+
+  /**
    * Emits the PSI impl class for {@code rule}: extends/implements clause from
    * {@link PsiRuleInfo#realSuperClass}, constructors that mirror those of the (eventual) base
    * class, optional {@code accept(Visitor)} dispatch, and rule accessor implementations.
@@ -678,9 +773,9 @@ public final class JavaPsiGenerator extends Generator {
    */
   private void generatePsiImpl(@NotNull BnfRule rule, @NotNull RuleInfo info) {
     String psiClass = info.implClass();
-    String superInterface = info.intfClass();
+    String superInterface = resolvePsiImplSuperInterface(rule);
     String stubName = info.realStubClass();
-    String implSuper = psiInfo(rule).realSuperClass;
+    String implSuper = resolvePsiImplSuperClass(rule);
 
     Set<String> imports = new LinkedHashSet<>();
     if (!G.generateFQN) {

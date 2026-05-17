@@ -153,6 +153,18 @@ public class KotlinSyntaxHelperTest extends GoldenClassInfoTestCase {
     assertClassInfoMatchesGolden(extractAll());
   }
 
+  public void testVarianceModifiersBecomeWildcards() throws Exception {
+    write("a/b/Variance.kt", """
+        package a.b
+        class Variance {
+            fun outProjection(items: Iterable<out CharSequence>): Iterable<out CharSequence> = TODO()
+            fun inProjection(consumers: Iterable<in CharSequence>) {}
+            fun starProjection(items: Iterable<*>) {}
+        }
+        """);
+    assertClassInfoMatchesGolden(extractAll());
+  }
+
   public void testUnitReturnMapsToVoid() throws Exception {
     write("a/b/Noisy.kt", """
         package a.b

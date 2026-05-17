@@ -211,16 +211,45 @@ final class KotlinSyntaxTypeFormatter {
     List<String> renderedArgs = new SmartList<>();
     for (SyntaxNode arg = targs.firstChild(); arg != null; arg = arg.nextSibling()) {
       if (arg.getType() != KtNodeTypes.INSTANCE.getTYPE_PROJECTION()) continue;
-      SyntaxNode innerType = firstChildOfType(arg, KtNodeTypes.INSTANCE.getTYPE_REFERENCE());
-      renderedArgs.add(formatType(innerType, typeVars));
+      renderedArgs.add(formatProjection(arg, typeVars));
     }
     if (renderedArgs.isEmpty()) return resolved;
     return resolved + "<" + String.join(", ", renderedArgs) + ">";
   }
 
+  /**
+   * Render a single {@code TYPE_PROJECTION} as a generic argument string. Mirrors what kotlinc
+   * writes into bytecode generic signatures so the source-derived string matches what
+   * {@link org.intellij.grammar.classinfo.asm.AsmClassSymbolProvider} decodes from the same
+   * class compiled.
+   *
+   * <ul>
+   *   <li>{@code *}        → {@code ?}</li>
+   *   <li>{@code out X}    → {@code ? extends X}</li>
+   *   <li>{@code in X}     → {@code ? super X}</li>
+   *   <li>{@code X}        → {@code X}</li>
+   * </ul>
+   */
+  private @NotNull String formatProjection(@NotNull SyntaxNode projection, @NotNull Set<String> typeVars) {
+    if (firstChildOfType(projection, KtTokens.INSTANCE.getMUL()) != null) return "?";
+    SyntaxNode innerType = firstChildOfType(projection, KtNodeTypes.INSTANCE.getTYPE_REFERENCE());
+    String rendered = formatType(innerType, typeVars);
+    SyntaxNode modList = firstChildOfType(projection, KtNodeTypes.INSTANCE.getMODIFIER_LIST());
+    if (KotlinSyntaxNodes.hasModifier(modList, KtTokens.INSTANCE.getOUT_MODIFIER())) return "? extends " + rendered;
+    if (KotlinSyntaxNodes.hasModifier(modList, KtTokens.INSTANCE.getIN_MODIFIER())) return "? super " + rendered;
+    return rendered;
+  }
+
+  /**
+   * Single-arg helper for the {@code Array<X>} → {@code X[]} special case. JVM arrays don't
+   * carry generic wildcards, so {@code in}/{@code out} variance is stripped here; a star
+   * projection ({@code Array<*>}) maps to {@code java.lang.Object} — kotlinc's choice for the
+   * element type of an unbounded array.
+   */
   private @Nullable String firstTypeArg(@NotNull SyntaxNode typeArgList, @NotNull Set<String> typeVars) {
     for (SyntaxNode arg = typeArgList.firstChild(); arg != null; arg = arg.nextSibling()) {
       if (arg.getType() != KtNodeTypes.INSTANCE.getTYPE_PROJECTION()) continue;
+      if (firstChildOfType(arg, KtTokens.INSTANCE.getMUL()) != null) return "java.lang.Object";
       SyntaxNode innerType = firstChildOfType(arg, KtNodeTypes.INSTANCE.getTYPE_REFERENCE());
       return formatType(innerType, typeVars);
     }

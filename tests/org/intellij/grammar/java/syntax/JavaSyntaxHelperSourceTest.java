@@ -226,6 +226,35 @@ public class JavaSyntaxHelperSourceTest extends GoldenClassInfoTestCase {
       """));
   }
 
+  public void testNullabilityAnnotationsLiftedToType() {
+    // `@NotNull` / `@Nullable` written in the declaration-position modifier list (which the
+    // JetBrains Java parser groups with `public`) are semantically TYPE_USE annotations on the
+    // return type / parameter type. The extractor moves them off MethodSymbol.annotations and
+    // onto the outermost JvmTypeRef position so the type model is the single source of truth
+    // for nullness — matching the Kotlin source path.
+    // Edge cases exercised: primitive return (no JvmTypeRef slot — annotation stays on method),
+    // bare type-variable return (TypeVariable can't carry annotations — stays on method), array
+    // return (lift onto the outermost ArrayType), non-nullness annotations alongside (`@Override`
+    // stays on the method, only nullness moves), and constructors (no return-type lift — the
+    // synthesized self-reference is not where a user-written annotation belongs).
+    assertClassInfoMatchesGolden(extract("""
+      package a.b;
+      import org.jetbrains.annotations.NotNull;
+      import org.jetbrains.annotations.Nullable;
+      public class C {
+        public @NotNull String foo() { return ""; }
+        public @Nullable String bar() { return null; }
+        public void params(@NotNull String s, @Nullable Integer n) {}
+        public @NotNull int prim() { return 0; }
+        public @NotNull <T> T cast(Object o) { return (T)o; }
+        public @NotNull String[] arr() { return new String[0]; }
+        @Override
+        public @NotNull String toString() { return ""; }
+        public @NotNull C() {}
+      }
+      """));
+  }
+
   public void testTypeUseAnnotationsOnArraysAndComponents() {
     // JLS 9.7.4 type-use annotations on array dimensions and component types. The pre-parameter
     // @NotNull on `one(@NotNull GoImportSpec o)` is a declaration-target annotation on the PARAMETER's

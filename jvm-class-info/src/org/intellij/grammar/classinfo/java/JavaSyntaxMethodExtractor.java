@@ -50,7 +50,7 @@ final class JavaSyntaxMethodExtractor {
 
     SyntaxNode modifierList = firstChildOfType(methodNode, JavaSyntaxElementType.MODIFIER_LIST);
     m.modifiers = extractModifiers(modifierList);
-    m.annotations.addAll(typeFormatter.extractAnnotationFqns(modifierList, typeVars));
+    List<Fqn> methodAnnotations = typeFormatter.extractAnnotationFqns(modifierList, typeVars);
 
     SyntaxNode nameId = firstNameIdentifier(methodNode);
     if (nameId == null) return null;
@@ -60,10 +60,15 @@ final class JavaSyntaxMethodExtractor {
     if (returnType == null) {
       m.methodType = MethodType.CONSTRUCTOR;
       m.returnType = new JvmTypeRef.UserType(declaringFqn, List.of(), List.of());
+      // Constructors have no user-written return type; keep all declaration-list annotations as-is.
+      m.annotations.addAll(methodAnnotations);
     }
     else {
       m.methodType = Modifier.isStatic(m.modifiers) ? MethodType.STATIC : MethodType.INSTANCE;
-      m.returnType = typeFormatter.parseType(returnType, typeVars);
+      JvmTypeRef parsed = typeFormatter.parseType(returnType, typeVars);
+      JavaSyntaxTypeFormatter.LiftResult lifted = typeFormatter.liftNullabilityToType(methodAnnotations, parsed);
+      m.annotations.addAll(lifted.annotations());
+      m.returnType = lifted.type();
     }
 
     collectParameters(methodNode, m, typeVars);
@@ -103,11 +108,15 @@ final class JavaSyntaxMethodExtractor {
       SyntaxNode pType = firstChildOfType(p, JavaSyntaxElementType.TYPE);
       SyntaxNode pName = firstChildOfType(p, JavaSyntaxTokenType.IDENTIFIER);
       ParameterSymbol.Builder param = new ParameterSymbol.Builder();
-      param.type = pType == null
-                   ? new JvmTypeRef.UserType(Fqn.of(""), List.of(), List.of())
-                   : typeFormatter.parseType(pType, typeVars);
+      JvmTypeRef parsedType = pType == null
+                              ? new JvmTypeRef.UserType(Fqn.of(""), List.of(), List.of())
+                              : typeFormatter.parseType(pType, typeVars);
+      List<Fqn> paramAnnotations = typeFormatter.extractAnnotationFqns(
+        firstChildOfType(p, JavaSyntaxElementType.MODIFIER_LIST), typeVars);
+      JavaSyntaxTypeFormatter.LiftResult lifted = typeFormatter.liftNullabilityToType(paramAnnotations, parsedType);
+      param.type = lifted.type();
+      param.annotations.addAll(lifted.annotations());
       param.name = pName == null ? "p" + paramIdx : pName.getText().toString();
-      param.annotations.addAll(typeFormatter.extractAnnotationFqns(firstChildOfType(p, JavaSyntaxElementType.MODIFIER_LIST), typeVars));
       m.parameters.add(param);
       paramIdx++;
     }

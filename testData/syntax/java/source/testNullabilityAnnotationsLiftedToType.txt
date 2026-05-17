@@ -1,0 +1,21 @@
+class a.b.C extends java.lang.Object
+  modifiers: public
+  methods:
+    INSTANCE public java.lang.String foo()
+      annotatedTypes: [@org.jetbrains.annotations.NotNull java.lang.String]
+    INSTANCE public java.lang.String bar()
+      annotatedTypes: [@org.jetbrains.annotations.Nullable java.lang.String]
+    INSTANCE public void params(java.lang.String s, java.lang.Integer n)
+      annotatedTypes: [void, @org.jetbrains.annotations.NotNull java.lang.String, s, @org.jetbrains.annotations.Nullable java.lang.Integer, n]
+    INSTANCE public int prim()
+      annotations: @org.jetbrains.annotations.NotNull
+    INSTANCE public T cast(java.lang.Object o)
+      typeParameters: T
+      annotations: @org.jetbrains.annotations.NotNull
+    INSTANCE public java.lang.String[] arr()
+      annotatedTypes: [java.lang.String @org.jetbrains.annotations.NotNull []]
+    INSTANCE public java.lang.String toString()
+      annotations: @java.lang.Override
+      annotatedTypes: [@org.jetbrains.annotations.NotNull java.lang.String]
+    CONSTRUCTOR public C()
+      annotations: @org.jetbrains.annotations.NotNull

@@ -50,15 +50,12 @@ public interface Element1 extends PsiElement {
 
   <@Nls @NonNls T, @Nls @NonNls K extends @Nls @NonNls X & @NonNls @Nls Y> @Nls String foo5(@Nls @NonNls T param, @Nls @NonNls K k);
 
-  @NotNull
   @Nls
-  List<? super @NotNull @Nls String> @Nullable @Unmodifiable [][] foo6(@NotNull @Nls List<? super @NotNull @Nls String> @Nullable @Unmodifiable [][] args);
+  List<? super @NotNull @Nls String> @Nullable @Unmodifiable [] @NotNull [] foo6(@Nls List<? super @NotNull @Nls String> @Nullable @Unmodifiable [] @NotNull [] args);
 
-  @NotNull
-  E foo7();
+  @NotNull E foo7();
 
-  @NotNull
-  Deep foo8();
+  @NotNull Deep foo8();
 
 }
 // ---- test/psi/impl/Element1Impl.java -----------------
@@ -128,21 +125,18 @@ public class Element1Impl extends ASTWrapperPsiElement implements Element1 {
   }
 
   @Override
-  @NotNull
   @Nls
-  public List<? super @NotNull @Nls String> @Nullable @Unmodifiable [][] foo6(@NotNull @Nls List<? super @NotNull @Nls String> @Nullable @Unmodifiable [][] args) {
+  public List<? super @NotNull @Nls String> @Nullable @Unmodifiable [] @NotNull [] foo6(@Nls List<? super @NotNull @Nls String> @Nullable @Unmodifiable [] @NotNull [] args) {
     return UtilMethods.foo6(this, args);
   }
 
   @Override
-  @NotNull
-  public E foo7() {
+  public @NotNull E foo7() {
     return UtilMethods.foo7(this);
   }
 
   @Override
-  @NotNull
-  public Deep foo8() {
+  public @NotNull Deep foo8() {
     return UtilMethods.foo8(this);
   }
 

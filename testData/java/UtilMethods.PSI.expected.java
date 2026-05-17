@@ -30,6 +30,8 @@ package test.psi;
 import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
+import org.intellij.grammar.test.UtilMethods.E;
+import org.intellij.grammar.test.UtilMethods.Wrap.Deep;
 import org.intellij.grammar.test.UtilMethods.X;
 import org.intellij.grammar.test.UtilMethods.Y;
 import org.intellij.grammar.test.UtilMethods.Z;
@@ -50,6 +52,10 @@ public interface Element1 extends PsiElement {
 
   @NotNull @Nls List<? super String> @Nullable @Unmodifiable [][] foo6(@NotNull @Nls List<? super String> @Nullable @Unmodifiable [][] p1);
 
+  @NotNull E foo7();
+
+  @NotNull Deep foo8();
+
 }
 // ---- test/psi/impl/Element1Impl.java -----------------
 //header.txt
@@ -65,6 +71,8 @@ import static test.FooTypes.*;
 import com.intellij.extapi.psi.ASTWrapperPsiElement;
 import test.psi.*;
 import org.intellij.grammar.test.UtilMethods;
+import org.intellij.grammar.test.UtilMethods.E;
+import org.intellij.grammar.test.UtilMethods.Wrap.Deep;
 import org.intellij.grammar.test.UtilMethods.X;
 import org.intellij.grammar.test.UtilMethods.Y;
 import org.intellij.grammar.test.UtilMethods.Z;
@@ -118,6 +126,16 @@ public class Element1Impl extends ASTWrapperPsiElement implements Element1 {
   @Override
   public @NotNull @Nls List<? super String> @Nullable @Unmodifiable [][] foo6(@NotNull @Nls List<? super String> @Nullable @Unmodifiable [][] p1) {
     return UtilMethods.foo6(this, p1);
+  }
+
+  @Override
+  public @NotNull E foo7() {
+    return UtilMethods.foo7(this);
+  }
+
+  @Override
+  public @NotNull Deep foo8() {
+    return UtilMethods.foo8(this);
   }
 
 }

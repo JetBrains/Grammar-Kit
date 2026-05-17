@@ -14,6 +14,7 @@ import org.intellij.grammar.classinfo.SymbolResolver;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Modifier;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -126,15 +127,30 @@ public final class JavaSyntaxClassExtractor {
 
     result.put(fqn, info);
 
+    Map<String, Fqn> previousScope = typeFormatter.getNestedScope();
+    Map<String, Fqn> scope = new HashMap<>(previousScope);
     for (SyntaxNode member = classNode.firstChild(); member != null; member = member.nextSibling()) {
-      SyntaxElementType t = member.getType();
-      if (t == JavaSyntaxElementType.METHOD || t == JavaSyntaxElementType.ANNOTATION_METHOD) {
-        MethodSymbol.Builder m = methodExtractor.extract(member, fqn, classTypeVars);
-        if (m != null) info.methods.add(m);
+      if (member.getType() != JavaSyntaxElementType.CLASS) continue;
+      SyntaxNode memberName = findClassName(member);
+      if (memberName == null) continue;
+      String simple = memberName.getText().toString();
+      scope.put(simple, fqn.child(simple));
+    }
+    typeFormatter.setNestedScope(scope);
+    try {
+      for (SyntaxNode member = classNode.firstChild(); member != null; member = member.nextSibling()) {
+        SyntaxElementType t = member.getType();
+        if (t == JavaSyntaxElementType.METHOD || t == JavaSyntaxElementType.ANNOTATION_METHOD) {
+          MethodSymbol.Builder m = methodExtractor.extract(member, fqn, classTypeVars);
+          if (m != null) info.methods.add(m);
+        }
+        else if (t == JavaSyntaxElementType.CLASS) {
+          walkClass(member, fqn, classTypeVars);
+        }
       }
-      else if (t == JavaSyntaxElementType.CLASS) {
-        walkClass(member, fqn, classTypeVars);
-      }
+    }
+    finally {
+      typeFormatter.setNestedScope(previousScope);
     }
   }
 }

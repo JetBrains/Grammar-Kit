@@ -1,0 +1,17 @@
+class pkg.Util extends java.lang.Object
+  modifiers: public final
+  methods:
+    STATIC public static pkg.Util.E mk()
+      annotations: @pkg.JvmStatic
+      annotatedTypes: [@org.jetbrains.annotations.NotNull pkg.Util.E]
+
+class pkg.Util.Companion extends java.lang.Object
+  modifiers: public static final
+  methods:
+    INSTANCE public pkg.Util.E mk()
+      annotations: @pkg.JvmStatic
+      annotatedTypes: [@org.jetbrains.annotations.NotNull pkg.Util.E]
+
+class pkg.Util.E extends java.lang.Object
+  modifiers: public static final
+  methods: (none)

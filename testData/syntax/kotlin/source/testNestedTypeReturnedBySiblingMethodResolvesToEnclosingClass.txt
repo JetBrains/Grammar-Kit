@@ -1,0 +1,13 @@
+class pkg.Util extends java.lang.Object
+  modifiers: public final
+  methods: (none)
+
+class pkg.Util.Companion extends java.lang.Object
+  modifiers: public static final
+  methods:
+    INSTANCE public pkg.Util.Direction getDirection()
+      annotatedTypes: [@org.jetbrains.annotations.NotNull pkg.Util.Direction]
+
+class pkg.Util.Direction extends java.lang.Object
+  modifiers: public static final
+  methods: (none)

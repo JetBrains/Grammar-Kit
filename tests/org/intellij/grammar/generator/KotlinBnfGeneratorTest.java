@@ -36,12 +36,16 @@ public class KotlinBnfGeneratorTest extends AbstractBnfGeneratorTest {
     Path etHolderPath      = resolveTestPath(psiFile, KnownAttribute.ELEMENT_TYPE_HOLDER_OUTPUT_PATH);
     Path syntaxHolderPath  = resolveTestPath(psiFile, KnownAttribute.SYNTAX_ELEMENT_TYPE_HOLDER_OUTPUT_PATH);
     Path converterPath     = resolveTestPath(psiFile, KnownAttribute.ELEMENT_TYPE_CONVERTER_FACTORY_OUTPUT_PATH);
+    Path inputPath         = resolveTestPath(psiFile, KnownAttribute.INPUT_PATH);
+    Path psiInputPath      = resolveTestPath(psiFile, KnownAttribute.PSI_INPUT_PATH);
     Map<KnownAttribute<String>, Path> map = new HashMap<>();
     map.put(KnownAttribute.PARSER_OUTPUT_PATH, parserPath != null ? parserPath : Path.of(outputPath));
     if (psiPath != null) map.put(KnownAttribute.PSI_OUTPUT_PATH, psiPath);
     if (etHolderPath != null) map.put(KnownAttribute.ELEMENT_TYPE_HOLDER_OUTPUT_PATH, etHolderPath);
     if (syntaxHolderPath != null) map.put(KnownAttribute.SYNTAX_ELEMENT_TYPE_HOLDER_OUTPUT_PATH, syntaxHolderPath);
     if (converterPath != null) map.put(KnownAttribute.ELEMENT_TYPE_CONVERTER_FACTORY_OUTPUT_PATH, converterPath);
+    if (inputPath != null) map.put(KnownAttribute.INPUT_PATH, inputPath);
+    if (psiInputPath != null) map.put(KnownAttribute.PSI_INPUT_PATH, psiInputPath);
     BnfPathsResolution paths = BnfPaths.resolveExplicit(map);
     return List.of(new KotlinParserGenerator(psiFile, "", "", outputOpener, paths));
   }

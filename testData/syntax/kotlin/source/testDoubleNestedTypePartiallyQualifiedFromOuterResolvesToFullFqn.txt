@@ -1,0 +1,17 @@
+class pkg.Util extends java.lang.Object
+  modifiers: public final
+  methods: (none)
+
+class pkg.Util.Companion extends java.lang.Object
+  modifiers: public static final
+  methods:
+    INSTANCE public pkg.Util.Wrap.Deep foo()
+      annotatedTypes: [@org.jetbrains.annotations.NotNull pkg.Util.Wrap.Deep]
+
+class pkg.Util.Wrap extends java.lang.Object
+  modifiers: public static final
+  methods: (none)
+
+class pkg.Util.Wrap.Deep extends java.lang.Object
+  modifiers: public static final
+  methods: (none)

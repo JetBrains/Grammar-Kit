@@ -15,11 +15,12 @@
   syntaxElementTypeHolderClass="test.FooSyntaxTypes"
 
   psiImplUtilClass="org.intellij.grammar.test.UtilMethods"
+  psiInputPath="../tests"
 }
 root ::= element1
 element1 ::= 'aa'
 {
   methods = [
-    foo0 foo1 foo2 foo3 foo4 foo5 foo6
+    foo0 foo1 foo2 foo3 foo4 foo5 foo6 foo7 foo8
   ]
 }

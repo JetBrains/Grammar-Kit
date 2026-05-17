@@ -85,6 +85,10 @@ public class JavaBnfGeneratorTest extends AbstractBnfGeneratorTest {
     doPsiTest();
   }
 
+  public void testReplaceWithStatement() throws Exception {
+    doPsiTest();
+  }
+
   public void testBindersAndHooks() throws Exception {
     doParserTest();
   }

@@ -1,0 +1,11 @@
+class a.b.ReplaceKt extends java.lang.Object
+  modifiers: public final
+  methods:
+    STATIC public static S replaceWithStatement(a.b.SwiftStatement self, S newStatement, boolean reformat)
+      typeParameters: S extends a.b.SwiftStatement
+      throws: com.intellij.util.IncorrectOperationException
+      annotatedTypes: [S, @org.jetbrains.annotations.NotNull a.b.SwiftStatement, self, S, newStatement, boolean, reformat]
+
+class a.b.SwiftStatement
+  modifiers: public abstract interface
+  methods: (none)

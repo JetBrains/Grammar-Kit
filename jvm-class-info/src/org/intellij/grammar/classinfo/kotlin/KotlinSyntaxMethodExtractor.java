@@ -75,7 +75,7 @@ final class KotlinSyntaxMethodExtractor {
     SyntaxNode returnType = returnTypeAfterParams(funNode, paramList);
     if (returnType != null) {
       m.returnType = typeFormatter.formatType(returnType, typeVars);
-      addNullabilityAnnotation(m.annotations, returnType, m.returnType, typeVars);
+      m.annotatedReturnType = annotatedWithNullability(returnType, m.returnType, typeVars);
     }
     else if (hasExpressionBody(funNode)) {
       // `fun foo() = expr` — return type is inferred from the expression; we can't recover it.
@@ -149,7 +149,7 @@ final class KotlinSyntaxMethodExtractor {
     KotlinSyntaxTypeFormatter.MethodAnnotations getterAnnos = typeFormatter.extractMethodAnnotations(modifierList, classTypeVars);
     m.annotations.addAll(getterAnnos.annotations());
     m.exceptions.addAll(getterAnnos.exceptions());
-    if (typeRef != null) addNullabilityAnnotation(m.annotations, typeRef, typeStr, classTypeVars);
+    if (typeRef != null) m.annotatedReturnType = annotatedWithNullability(typeRef, typeStr, classTypeVars);
     copyTypesAsAnnotated(m);
     return m;
   }
@@ -230,8 +230,10 @@ final class KotlinSyntaxMethodExtractor {
   }
 
   private static void copyTypesAsAnnotated(@NotNull MethodSymbol.Builder m) {
-    m.annotatedReturnType = m.returnType;
-    for (ParameterSymbol.Builder p : m.parameters) p.annotatedType = p.type;
+    if (m.annotatedReturnType == null) m.annotatedReturnType = m.returnType;
+    for (ParameterSymbol.Builder p : m.parameters) {
+      if (p.annotatedType == null) p.annotatedType = p.type;
+    }
   }
 
   /**
@@ -245,6 +247,19 @@ final class KotlinSyntaxMethodExtractor {
                                         @NotNull Set<String> typeVars) {
     Fqn anno = typeFormatter.classifyNullability(typeRef, formattedType, typeVars);
     if (anno != null && !target.contains(anno)) target.add(anno);
+  }
+
+  /**
+   * Returns {@code formattedType} with the synthesized nullability annotation inlined at the
+   * start (e.g. {@code "@org.jetbrains.annotations.NotNull java.lang.String"}), matching the
+   * format used by {@code AsmClassSymbolProvider} for bytecode type annotations. Returns the
+   * input unchanged when no annotation applies (primitive, type variable, or null typeRef).
+   */
+  private @NotNull String annotatedWithNullability(@Nullable SyntaxNode typeRef,
+                                                   @NotNull String formattedType,
+                                                   @NotNull Set<String> typeVars) {
+    Fqn anno = typeFormatter.classifyNullability(typeRef, formattedType, typeVars);
+    return anno == null ? formattedType : "@" + anno + " " + formattedType;
   }
 
   /**

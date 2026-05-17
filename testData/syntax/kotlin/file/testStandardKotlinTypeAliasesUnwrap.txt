@@ -2,13 +2,13 @@ class x.Bag extends java.util.List
   modifiers: public final
   methods:
     INSTANCE public java.lang.String first(java.util.List<java.lang.String> items)
-      annotations: @org.jetbrains.annotations.NotNull
       param[0] annotations: @org.jetbrains.annotations.NotNull
+      annotatedTypes: [@org.jetbrains.annotations.NotNull java.lang.String, java.util.List<java.lang.String>, items]
     INSTANCE public java.lang.Iterable<java.lang.CharSequence> keyed(java.util.Map<java.lang.String, java.lang.Object> map)
-      annotations: @org.jetbrains.annotations.NotNull
       param[0] annotations: @org.jetbrains.annotations.NotNull
+      annotatedTypes: [@org.jetbrains.annotations.NotNull java.lang.Iterable<java.lang.CharSequence>, java.util.Map<java.lang.String, java.lang.Object>, map]
     INSTANCE public void qualified(java.util.Set<java.lang.Object> p)
       param[0] annotations: @org.jetbrains.annotations.NotNull
     INSTANCE public java.lang.Throwable thrown(java.lang.Object v)
-      annotations: @org.jetbrains.annotations.NotNull
       param[0] annotations: @org.jetbrains.annotations.NotNull
+      annotatedTypes: [@org.jetbrains.annotations.NotNull java.lang.Throwable, java.lang.Object, v]

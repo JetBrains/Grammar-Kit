@@ -140,6 +140,19 @@ public class KotlinSyntaxHelperTest extends GoldenClassInfoTestCase {
     assertClassInfoMatchesGolden(extractAll());
   }
 
+  public void testStandardKotlinTypeAliasesUnwrap() throws Exception {
+    write("x/Bag.kt", """
+        package x
+        class Bag : MutableList<String> {
+            fun first(items: List<String>): String = ""
+            fun keyed(map: Map<String, Any>): Iterable<CharSequence> = TODO()
+            fun qualified(p: kotlin.collections.MutableSet<kotlin.Any>) {}
+            fun thrown(v: Any): Throwable = TODO()
+        }
+        """);
+    assertClassInfoMatchesGolden(extractAll());
+  }
+
   public void testUnitReturnMapsToVoid() throws Exception {
     write("a/b/Noisy.kt", """
         package a.b

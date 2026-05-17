@@ -59,6 +59,34 @@ final class KotlinSyntaxTypeFormatter {
     Map.entry("DoubleArray", "double[]")
   );
 
+  /** Standard Kotlin classifier FQN → JVM Java alias, mirroring kotlinc's compile-time mapping. */
+  private static final Map<String, String> KOTLIN_TO_JAVA_ALIASES = Map.ofEntries(
+    Map.entry("kotlin.collections.Iterable",                "java.lang.Iterable"),
+    Map.entry("kotlin.collections.MutableIterable",         "java.lang.Iterable"),
+    Map.entry("kotlin.collections.Collection",              "java.util.Collection"),
+    Map.entry("kotlin.collections.MutableCollection",       "java.util.Collection"),
+    Map.entry("kotlin.collections.List",                    "java.util.List"),
+    Map.entry("kotlin.collections.MutableList",             "java.util.List"),
+    Map.entry("kotlin.collections.Set",                     "java.util.Set"),
+    Map.entry("kotlin.collections.MutableSet",              "java.util.Set"),
+    Map.entry("kotlin.collections.Map",                     "java.util.Map"),
+    Map.entry("kotlin.collections.MutableMap",              "java.util.Map"),
+    Map.entry("kotlin.collections.Map.Entry",               "java.util.Map.Entry"),
+    Map.entry("kotlin.collections.MutableMap.MutableEntry", "java.util.Map.Entry"),
+    Map.entry("kotlin.collections.Iterator",                "java.util.Iterator"),
+    Map.entry("kotlin.collections.MutableIterator",         "java.util.Iterator"),
+    Map.entry("kotlin.collections.ListIterator",            "java.util.ListIterator"),
+    Map.entry("kotlin.collections.MutableListIterator",     "java.util.ListIterator"),
+    Map.entry("kotlin.Any",          "java.lang.Object"),
+    Map.entry("kotlin.CharSequence", "java.lang.CharSequence"),
+    Map.entry("kotlin.Cloneable",    "java.lang.Cloneable"),
+    Map.entry("kotlin.Comparable",   "java.lang.Comparable"),
+    Map.entry("kotlin.Number",       "java.lang.Number"),
+    Map.entry("kotlin.Enum",         "java.lang.Enum"),
+    Map.entry("kotlin.Annotation",   "java.lang.annotation.Annotation"),
+    Map.entry("kotlin.Throwable",    "java.lang.Throwable")
+  );
+
   static final Fqn NOT_NULL = Fqn.of("org.jetbrains.annotations.NotNull");
   static final Fqn NULLABLE = Fqn.of("org.jetbrains.annotations.Nullable");
 
@@ -176,6 +204,9 @@ final class KotlinSyntaxTypeFormatter {
       if (mappedQualified != null) return mappedQualified;
     }
 
+    String javaAlias = KOTLIN_TO_JAVA_ALIASES.get(resolved);
+    if (javaAlias != null) resolved = javaAlias;
+
     if (targs == null) return resolved;
     List<String> renderedArgs = new SmartList<>();
     for (SyntaxNode arg = targs.firstChild(); arg != null; arg = arg.nextSibling()) {
@@ -257,8 +288,11 @@ final class KotlinSyntaxTypeFormatter {
     }
     if (t == KtNodeTypes.INSTANCE.getUSER_TYPE()) {
       String dotted = userTypeDotted(typeNode);
-      if (typeVars.contains(dotted) || dotted.contains(".")) return Fqn.of(dotted);
-      return Fqn.of(imports.resolveSimpleName(dotted));
+      String resolved;
+      if (typeVars.contains(dotted) || dotted.contains(".")) resolved = dotted;
+      else resolved = imports.resolveSimpleName(dotted);
+      String javaAlias = KOTLIN_TO_JAVA_ALIASES.get(resolved);
+      return Fqn.of(javaAlias != null ? javaAlias : resolved);
     }
     if (t == KtNodeTypes.INSTANCE.getFUNCTION_TYPE()) return Fqn.of("kotlin.Function");
     if (t == KtNodeTypes.INSTANCE.getDYNAMIC_TYPE()) return Fqn.of("java.lang.Object");

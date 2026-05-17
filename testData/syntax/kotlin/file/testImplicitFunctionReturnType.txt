@@ -1,0 +1,5 @@
+class a.b.Picker extends java.lang.Object
+  modifiers: public final
+  methods:
+    INSTANCE public <implicit-type> pick()
+    INSTANCE public void nothing()

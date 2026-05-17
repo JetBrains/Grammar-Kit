@@ -1,0 +1,5 @@
+class a.b.ImplicitVar extends java.lang.Object
+  modifiers: public final
+  methods:
+    INSTANCE public <implicit-type> getX()
+    INSTANCE public void setX(<implicit-type> value)

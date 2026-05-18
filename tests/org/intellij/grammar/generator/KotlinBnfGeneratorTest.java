@@ -11,8 +11,11 @@ import org.intellij.grammar.psi.BnfFile;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
@@ -158,6 +161,26 @@ public class KotlinBnfGeneratorTest extends AbstractBnfGeneratorTest {
    */
   public void testFallbackCtorsHaveNotNull() throws Exception {
     doPsiTest();
+  }
+
+  /**
+   * A rule whose {@code mixin}/{@code implements} target can't be resolved must emit a
+   * generator warning naming the rule and the missing FQN — the silent fallback that previously
+   * masked misconfigured {@code psiInputPath} entries broke usability for downstream users.
+   */
+  public void testUnresolvedMixinWarning() throws Exception {
+    ByteArrayOutputStream buf = new ByteArrayOutputStream();
+    PrintStream originalOut = System.out;
+    System.setOut(new PrintStream(buf, true, StandardCharsets.UTF_8));
+    try {
+      doPsiTest();
+    }
+    finally {
+      System.setOut(originalOut);
+    }
+    String captured = buf.toString(StandardCharsets.UTF_8);
+    assertTrue("expected mixin warning in:\n" + captured,
+               captured.contains("unresolved: mixin class test.psi.ext.MissingMixin not found"));
   }
 
   public void testTokenChoice() throws Exception {

@@ -579,6 +579,7 @@ import generated.psi.*;
 
 public class XLeftShadowImpl extends ASTWrapperPsiElement implements XLeftShadow {
 
+  //WARNING: implements interface XComposite not found
   public XLeftShadowImpl(@NotNull ASTNode node) {
     super(node);
   }
@@ -622,6 +623,7 @@ import generated.psi.*;
 
 public class XLeftShadowTestImpl extends ASTWrapperPsiElement implements XLeftShadowTest {
 
+  //WARNING: implements interface XComposite not found
   public XLeftShadowTestImpl(@NotNull ASTNode node) {
     super(node);
   }
@@ -664,6 +666,7 @@ import generated.psi.*;
 
 public class XAStatementImpl extends XStatementImpl implements XAStatement {
 
+  //WARNING: implements interface XComposite not found
   public XAStatementImpl(@NotNull ASTNode node) {
     super(node);
   }
@@ -707,6 +710,7 @@ import generated.psi.*;
 
 public class XBStatementImpl extends XStatementImpl implements XBStatement {
 
+  //WARNING: implements interface XComposite not found
   public XBStatementImpl(@NotNull ASTNode node) {
     super(node);
   }
@@ -751,6 +755,7 @@ import generated.psi.*;
 
 public class XBlockOfImpl extends ASTWrapperPsiElement implements XBlockOf {
 
+  //WARNING: implements interface XComposite not found
   public XBlockOfImpl(@NotNull ASTNode node) {
     super(node);
   }
@@ -781,6 +786,7 @@ import generated.psi.*;
 
 public class XCStatementImpl extends XStatementImpl implements XCStatement {
 
+  //WARNING: implements interface XComposite not found
   public XCStatementImpl(@NotNull ASTNode node) {
     super(node);
   }
@@ -824,6 +830,7 @@ import generated.psi.*;
 
 public class XCastExprImpl extends XExprImpl implements XCastExpr {
 
+  //WARNING: implements interface XComposite not found
   public XCastExprImpl(@NotNull ASTNode node) {
     super(node);
   }
@@ -867,6 +874,7 @@ import generated.psi.*;
 
 public class XChoiceJoinedImpl extends XLiteralImpl implements XChoiceJoined {
 
+  //WARNING: implements interface XComposite not found
   public XChoiceJoinedImpl(@NotNull ASTNode node) {
     super(node);
   }
@@ -911,6 +919,7 @@ import generated.psi.*;
 
 public class XExprImpl extends ASTWrapperPsiElement implements XExpr {
 
+  //WARNING: implements interface XComposite not found
   public XExprImpl(@NotNull ASTNode node) {
     super(node);
   }
@@ -947,6 +956,7 @@ import generated.psi.*;
 
 public class XExternalTypeImpl extends XExprImpl implements XExternalType {
 
+  //WARNING: implements interface XComposite not found
   public XExternalTypeImpl(@NotNull ASTNode node) {
     super(node);
   }
@@ -984,6 +994,7 @@ import generated.psi.*;
 
 public class XExternalType2Impl extends XExprImpl implements XExternalType2 {
 
+  //WARNING: implements interface XComposite not found
   public XExternalType2Impl(@NotNull ASTNode node) {
     super(node);
   }
@@ -1022,6 +1033,7 @@ import generated.psi.*;
 
 public class XGrammarElementImpl extends ASTWrapperPsiElement implements XGrammarElement {
 
+  //WARNING: implements interface XComposite not found
   public XGrammarElementImpl(@NotNull ASTNode node) {
     super(node);
   }
@@ -1059,6 +1071,7 @@ import generated.psi.*;
 
 public class XIdentifierImpl extends ASTWrapperPsiElement implements XIdentifier {
 
+  //WARNING: implements interface XComposite not found
   public XIdentifierImpl(@NotNull ASTNode node) {
     super(node);
   }
@@ -1096,6 +1109,7 @@ import generated.psi.*;
 
 public class XIncludeSectionAltImpl extends ASTWrapperPsiElement implements XIncludeSectionAlt {
 
+  //WARNING: implements interface XComposite not found
   public XIncludeSectionAltImpl(@NotNull ASTNode node) {
     super(node);
   }
@@ -1139,6 +1153,7 @@ import generated.psi.*;
 
 public class XIncludeSectionImpl extends ASTWrapperPsiElement implements XIncludeSection {
 
+  //WARNING: implements interface XComposite not found
   public XIncludeSectionImpl(@NotNull ASTNode node) {
     super(node);
   }
@@ -1193,6 +1208,7 @@ import generated.psi.*;
 
 public class XItemExprImpl extends XExprImpl implements XItemExpr {
 
+  //WARNING: implements interface XComposite not found
   public XItemExprImpl(@NotNull ASTNode node) {
     super(node);
   }
@@ -1236,6 +1252,7 @@ import generated.psi.*;
 
 public class XLiteralImpl extends XExprImpl implements XLiteral {
 
+  //WARNING: implements interface XComposite not found
   public XLiteralImpl(@NotNull ASTNode node) {
     super(node);
   }
@@ -1273,6 +1290,7 @@ import generated.psi.*;
 
 public class XMulExprImpl extends XExprImpl implements XMulExpr {
 
+  //WARNING: implements interface XComposite not found
   public XMulExprImpl(@NotNull ASTNode node) {
     super(node);
   }
@@ -1341,6 +1359,7 @@ import generated.psi.*;
 
 public class XOtherExprImpl extends XExprImpl implements XOtherExpr {
 
+  //WARNING: implements interface XComposite not found
   public XOtherExprImpl(@NotNull ASTNode node) {
     super(node);
   }
@@ -1372,6 +1391,7 @@ import generated.psi.*;
 
 public class XPlusExprImpl extends XExprImpl implements XPlusExpr {
 
+  //WARNING: implements interface XComposite not found
   public XPlusExprImpl(@NotNull ASTNode node) {
     super(node);
   }
@@ -1403,6 +1423,8 @@ import generated.psi.*;
 
 public class XRefExprImpl extends MyRefImpl implements XRefExpr {
 
+  //WARNING: mixin class MyRefImpl not found (constructors will use the fallback signature)
+  //WARNING: implements interface MyRef not found
   public XRefExprImpl(@NotNull ASTNode node) {
     super(node);
   }
@@ -1440,6 +1462,7 @@ import generated.psi.*;
 
 public abstract class XRootImpl extends ASTWrapperPsiElement implements XRoot {
 
+  //WARNING: implements interface XComposite not found
   public XRootImpl(@NotNull ASTNode node) {
     super(node);
   }
@@ -1470,6 +1493,7 @@ import generated.psi.*;
 
 public class XRootBImpl extends XRootImpl implements XRootB {
 
+  //WARNING: implements interface XComposite not found
   public XRootBImpl(@NotNull ASTNode node) {
     super(node);
   }
@@ -1501,6 +1525,7 @@ import generated.psi.*;
 
 public class XRootCImpl extends XRootImpl implements XRootC {
 
+  //WARNING: implements interface XComposite not found
   public XRootCImpl(@NotNull ASTNode node) {
     super(node);
   }
@@ -1538,6 +1563,7 @@ import generated.psi.*;
 
 public class XRootDImpl extends XRootImpl implements XRootD {
 
+  //WARNING: implements interface XComposite not found
   public XRootDImpl(@NotNull ASTNode node) {
     super(node);
   }
@@ -1575,6 +1601,7 @@ import generated.psi.*;
 
 public abstract class XSomeExprImpl extends XExprImpl implements XSomeExpr {
 
+  //WARNING: implements interface XComposite not found
   public XSomeExprImpl(@NotNull ASTNode node) {
     super(node);
   }
@@ -1606,6 +1633,7 @@ import generated.psi.*;
 
 public class XSpecialRefImpl extends XRefExprImpl implements XSpecialRef {
 
+  //WARNING: implements interface XComposite not found
   public XSpecialRefImpl(@NotNull ASTNode node) {
     super(node);
   }
@@ -1644,6 +1672,7 @@ import generated.psi.*;
 
 public abstract class XStatementImpl extends ASTWrapperPsiElement implements XStatement {
 
+  //WARNING: implements interface XComposite not found
   public XStatementImpl(@NotNull ASTNode node) {
     super(node);
   }
@@ -1674,6 +1703,7 @@ import generated.psi.*;
 
 public class XWrappingStatementImpl extends XStatementImpl implements XWrappingStatement {
 
+  //WARNING: implements interface XComposite not found
   public XWrappingStatementImpl(@NotNull ASTNode node) {
     super(node);
   }

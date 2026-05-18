@@ -197,7 +197,7 @@ public final class JavaPsiGenerator extends Generator {
    * {@link #calcRealSuperClasses}; also calls {@link RuleMethodsHelper#buildMaps} so the method
    * iteration sees the rule's accessor set.
    */
-  private @NotNull List<ClassPlan> buildPsiClassPlans(@NotNull Map<String, BnfRule> sortedPsiRules) {
+  private @NotNull List<ClassPlan> buildPsiClassPlans(@NotNull Map<String, BnfRule> sortedPsiRules, boolean emitWarnings) {
     myRulesMethodsHelper.buildMaps(sortedPsiRules.values());
     List<ClassPlan> plans = new ArrayList<>();
     // Matches the historical emission order: all PSI interfaces, then all impls, then the visitor.
@@ -205,7 +205,7 @@ public final class JavaPsiGenerator extends Generator {
       plans.add(buildIntfPlan(rule, ruleInfo(rule)));
     }
     for (BnfRule rule : sortedPsiRules.values()) {
-      plans.add(buildImplPlan(rule, ruleInfo(rule)));
+      plans.add(buildImplPlan(rule, ruleInfo(rule), emitWarnings));
     }
     ClassPlan visitor = buildVisitorPlan(sortedPsiRules);
     if (visitor != null) plans.add(visitor);
@@ -255,7 +255,7 @@ public final class JavaPsiGenerator extends Generator {
   }
 
   /** PSI impl plan: hierarchy + constructors + (optional) accept variants + accessor / util methods, each with a body emitter. */
-  private @NotNull ClassPlan buildImplPlan(@NotNull BnfRule rule, @NotNull RuleInfo info) {
+  private @NotNull ClassPlan buildImplPlan(@NotNull BnfRule rule, @NotNull RuleInfo info, boolean emitWarnings) {
     String psiClass = info.implClass();
     String superInterface = resolvePsiImplSuperInterface(rule);
     String stubName = info.realStubClass();
@@ -345,8 +345,12 @@ public final class JavaPsiGenerator extends Generator {
       if (StringUtil.isEmpty(rmi.name())) continue;
       addImplMethodPlans(methods, rule, info, rmi, mixedAST, visited);
     }
+    List<String> warnings = emitWarnings ? checkRuleReferenceClasses(rule) : List.of();
+    Runnable preMethods = warnings.isEmpty() ? null : () -> {
+      for (String w : warnings) out("//WARNING: " + w);
+    };
     String[] headerSupers = new String[]{StringUtil.notNullize(implSuper), superInterface};
-    return new ClassPlan(sym, myPaths.pathString(KnownAttribute.PSI_OUTPUT_PATH), imports, headerSupers, methods, null, null);
+    return new ClassPlan(sym, myPaths.pathString(KnownAttribute.PSI_OUTPUT_PATH), imports, headerSupers, methods, preMethods, null);
   }
 
   /** Visitor plan: one rule-side {@code visit*} per rule (with a custom header), plus a super-loop pass. */
@@ -1209,7 +1213,7 @@ public final class JavaPsiGenerator extends Generator {
     // plans. Pass-1 plans live only for the duration of this method — `secondRun` rebuilds them.
     List<ClassSymbol> stubs = new ArrayList<>();
     if (G.generatePsi) {
-      for (ClassPlan plan : buildPsiClassPlans(psiGenerationTargets.sortedPsiRules())) {
+      for (ClassPlan plan : buildPsiClassPlans(psiGenerationTargets.sortedPsiRules(), false)) {
         Fqn declaring = plan.symbol.name;
         for (MethodPlan m : plan.methods) {
           if (m.signature == null) continue;
@@ -1241,7 +1245,7 @@ public final class JavaPsiGenerator extends Generator {
     generateElementTypeConverter(psiGenerationTargets.sortedCompositeTypes());
     if (G.generatePsi) {
       checkClassAvailability(myPsiImplUtilClass, KnownAttribute.PSI_IMPL_UTIL_CLASS);
-      for (ClassPlan plan : buildPsiClassPlans(psiGenerationTargets.sortedPsiRules())) {
+      for (ClassPlan plan : buildPsiClassPlans(psiGenerationTargets.sortedPsiRules(), true)) {
         renderClass(plan);
       }
     }
@@ -1361,6 +1365,54 @@ public final class JavaPsiGenerator extends Generator {
       String tail = StringUtil.isEmpty("PSI method signatures will not be detected") ? "" : " (PSI method signatures will not be detected)";
       addWarning(className + " class not found" + tail);
     }
+  }
+
+  /**
+   * Warns when a rule's {@code mixin}, {@code extends}-class, or {@code implements}-entry FQN
+   * cannot be located by the corresponding {@link JavaHelper}. Each unresolved reference is
+   * surfaced both as an IDE notification (via {@link #addWarning}) and as a {@code //WARNING:}
+   * line in the generated impl source (via the returned list, which the caller emits as
+   * {@code preMethods}). Silent unresolved-class lookups are how subtle misconfiguration (wrong
+   * {@code psiInputPath}, missing classpath entry) ended up emitting fallback constructor
+   * signatures and missing {@code @NotNull} annotations.
+   */
+  private @NotNull List<String> checkRuleReferenceClasses(@NotNull BnfRule rule) {
+    String ruleName = rule.getName();
+    List<String> messages = new ArrayList<>();
+
+    String mixin = getAttribute(rule, KnownAttribute.MIXIN);
+    if (StringUtil.isNotEmpty(mixin)) {
+      String raw = getRawClassName(mixin);
+      if (helperFor(KnownAttribute.MIXIN).findClass(raw) == null) {
+        messages.add("mixin class " + raw + " not found (constructors will use the fallback signature)");
+      }
+    }
+
+    // EXTENDS may name a sister BNF rule (resolvable to a generated impl class) or a JVM class.
+    // Only probe the latter — sister-rule references are validated by the rule graph already.
+    String ext = getAttribute(rule, KnownAttribute.EXTENDS);
+    if (StringUtil.isNotEmpty(ext) && myFile.getRule(getRawClassName(ext)) == null) {
+      String raw = getRawClassName(ext);
+      if (helperFor(KnownAttribute.EXTENDS).findClass(raw) == null) {
+        messages.add("extends class " + raw + " not found (parent constructors won't be inherited)");
+      }
+    }
+
+    KnownAttribute.ListValue implementsList = getAttribute(rule, KnownAttribute.IMPLEMENTS);
+    if (implementsList != null) {
+      JavaHelper implementsHelper = helperFor(KnownAttribute.IMPLEMENTS);
+      for (Pair<String, String> entry : implementsList) {
+        String fqn = entry.second;
+        if (StringUtil.isEmpty(fqn)) continue;
+        String raw = getRawClassName(fqn);
+        if (implementsHelper.findClass(raw) == null) {
+          messages.add("implements interface " + raw + " not found");
+        }
+      }
+    }
+
+    for (String message : messages) addWarning(ruleName + ": " + message);
+    return messages;
   }
 
   /**

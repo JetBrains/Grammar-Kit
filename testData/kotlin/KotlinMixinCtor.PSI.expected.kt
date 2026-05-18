@@ -108,6 +108,7 @@ import com.intellij.psi.tree.IElementType;
 
 public class MyElementImpl extends MyElementImplMixin implements MyElement {
 
+  //WARNING: extends class test.psi.ext.MyStubbedBase not found (parent constructors won't be inherited)
   public MyElementImpl(@NotNull ASTNode node) {
     super(node);
   }
@@ -145,6 +146,7 @@ import com.intellij.psi.tree.IElementType;
 
 public class OtherElementImpl extends OtherElementImplMixin implements OtherElement {
 
+  //WARNING: extends class test.psi.ext.MyStubbedBase not found (parent constructors won't be inherited)
   public OtherElementImpl(@NotNull ASTNode node) {
     super(node);
   }

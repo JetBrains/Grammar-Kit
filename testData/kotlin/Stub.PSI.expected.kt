@@ -516,6 +516,7 @@ import test.stub.MissingStub;
 
 public class MissingImpl extends MissingBase implements Missing {
 
+  //WARNING: extends class test.stub.MissingBase not found (parent constructors won't be inherited)
   public MissingImpl(@NotNull ASTNode node) {
     super(node);
   }

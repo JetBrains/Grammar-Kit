@@ -934,9 +934,34 @@ public final class JavaPsiGenerator extends Generator {
     b.methodType = MethodType.CONSTRUCTOR;
     b.modifiers = Modifier.PUBLIC;
     b.returnType = JvmTypeRefs.raw("void");
+    // Detect "this source method uses @NotNull on its concrete-type parameters": if any sibling
+    // parameter slot has @NotNull baked into its type string, the source method's nullability
+    // contract is non-null-by-default (Kotlin source, or a Java parent that annotates explicitly).
+    // We use this signal below to decide whether to re-attach @NotNull on a parameter slot that
+    // was substituted from a bare type-variable — see jvm-class-info/CLAUDE.md, "not on bare
+    // type-variable references". Avoids over-annotating Java parents that intentionally left their
+    // parameters unannotated.
+    String notNullPrefix = "@" + NOTNULL_FQN + " ";
+    boolean sourceAnnotatesNonNull = false;
+    for (int j = 1, n = types.size(); j + 1 < n; j += 2) {
+      if (types.get(j).contains(notNullPrefix)) {
+        sourceAnnotatesNonNull = true;
+        break;
+      }
+    }
     for (int i = 1, n = types.size(); i + 1 < n; i += 2) {
       ParameterSymbol.Builder pb = new ParameterSymbol.Builder();
-      pb.type = JvmTypeRefs.raw(substitutor.apply(types.get(i)));
+      String original = types.get(i);
+      String substituted = substitutor.apply(original);
+      pb.type = JvmTypeRefs.raw(substituted);
+      // The original parameter slot was a bare type-variable token (e.g. "<StubT>") that has now
+      // been rewritten to a concrete reference type from `stubClass`. When the source method
+      // otherwise annotates its parameters @NotNull, the substituted slot inherits that contract
+      // too (the type variable was just an unrepresentable position for the annotation).
+      boolean typeVarSubstitutedToConcrete =
+          original.startsWith("<") && original.endsWith(">") &&
+          !substituted.equals(original) &&
+          !(substituted.startsWith("<") && substituted.endsWith(">"));
       String name = types.get(i + 1);
       // Name overrides used by the legacy {@link ParserGeneratorUtil#getParametersString} formatter
       // so generated identifiers don't depend on whether the source-method names were preserved.
@@ -948,6 +973,11 @@ public final class JavaPsiGenerator extends Generator {
       for (String s : JavaHelper.getParameterAnnotations(source, (i - 1) / 2)) {
         if (IGNORED_ANNOTATIONS_IN_PSI.contains(s)) continue;
         pb.annotations.add(Fqn.of(s));
+      }
+      if (typeVarSubstitutedToConcrete && sourceAnnotatesNonNull &&
+          !pb.annotations.contains(NOTNULL_FQ) &&
+          !pb.annotations.contains(NULLABLE_FQ)) {
+        pb.annotations.add(NOTNULL_FQ);
       }
       b.parameters.add(pb);
     }

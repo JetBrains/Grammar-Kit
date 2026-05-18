@@ -33,6 +33,8 @@ import static org.intellij.grammar.classinfo.java.JavaSyntaxNodes.firstNameIdent
 @SuppressWarnings("UnstableApiUsage")
 final class JavaSyntaxMethodExtractor {
 
+  private static final JvmTypeRef VOID_TYPE = new JvmTypeRef.PrimitiveType("void");
+
   private final JavaSyntaxTypeFormatter typeFormatter;
 
   JavaSyntaxMethodExtractor(@NotNull JavaSyntaxTypeFormatter typeFormatter) {
@@ -59,7 +61,7 @@ final class JavaSyntaxMethodExtractor {
     SyntaxNode returnType = firstChildOfType(methodNode, JavaSyntaxElementType.TYPE);
     if (returnType == null) {
       m.methodType = MethodType.CONSTRUCTOR;
-      m.returnType = new JvmTypeRef.UserType(declaringFqn, List.of(), List.of());
+      m.returnType = VOID_TYPE;
       // Constructors have no user-written return type; keep all declaration-list annotations as-is.
       m.annotations.addAll(methodAnnotations);
     }

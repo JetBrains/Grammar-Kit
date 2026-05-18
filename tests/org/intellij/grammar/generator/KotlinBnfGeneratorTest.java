@@ -149,6 +149,17 @@ public class KotlinBnfGeneratorTest extends AbstractBnfGeneratorTest {
     doPsiTest();
   }
 
+  /**
+   * A sub-rule extending a parent rule with a resolvable {@code mixin} must NOT import
+   * the parent's mixin class in its generated impl: the sub-rule's impl extends the
+   * parent's impl class, never the mixin directly. Regression for an unused import
+   * leaking through inherited-constructor processing when source-based class resolution
+   * is active.
+   */
+  public void testSubRuleMixinImport() throws Exception {
+    doPsiTest();
+  }
+
   public void testStubFallback() throws Exception {
     doGenTest(true);
   }

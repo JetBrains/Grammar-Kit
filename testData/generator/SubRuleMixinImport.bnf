@@ -1,0 +1,25 @@
+{
+  generate=[parser-api="syntax"]
+  generatePsi=true
+  classHeader="//header.txt"
+  psiPackage="test.psi"
+  psiImplPackage="test.psi.impl"
+  parserClass="test.FooParser"
+  elementTypeFactory="test.FooParserDefinition.createType"
+  syntaxElementTypeFactory="test.FooParserDefinition.createSyntaxType"
+  tokenTypeFactory="test.stub.FooParserDefinition.createTokenType"
+  elementTypeHolderClass="test.FooTypes"
+  parserUtilClass="org.intellij.grammar.parser.GeneratedParserUtilBase"
+  syntaxParserUtilObject="com.intellij.platform.syntax.util.runtime.SyntaxGeneratedParserRuntime"
+  syntaxElementTypeHolderClass="test.FooSyntaxTypes"
+
+  psiInputPath="generator/sub-rule-mixin-input"
+
+  extends("sub.*") = parent
+}
+root ::= parent | subA | subB
+parent ::= 'aa' {
+  mixin = "test.psi.ext.ParentImplMixin"
+}
+subA ::= 'bbb'
+subB ::= 'cccc'

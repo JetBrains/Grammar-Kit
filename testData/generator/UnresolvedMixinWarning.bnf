@@ -1,0 +1,21 @@
+{
+  generate=[parser-api="syntax"]
+  generatePsi=true
+  classHeader="//header.txt"
+  psiPackage="test.psi"
+  psiImplPackage="test.psi.impl"
+  parserClass="test.FooParser"
+  elementTypeFactory="test.FooParserDefinition.createType"
+  syntaxElementTypeFactory="test.FooParserDefinition.createSyntaxType"
+  tokenTypeFactory="test.stub.FooParserDefinition.createTokenType"
+  elementTypeHolderClass="test.FooTypes"
+  parserUtilClass="org.intellij.grammar.parser.GeneratedParserUtilBase"
+  syntaxParserUtilObject="com.intellij.platform.syntax.util.runtime.SyntaxGeneratedParserRuntime"
+  syntaxElementTypeHolderClass="test.FooSyntaxTypes"
+}
+root ::= unresolved
+unresolved ::= 'aa' {
+  // mixin and implements target classes that no helper can resolve — must yield generator warnings.
+  mixin = "test.psi.ext.MissingMixin"
+  implements = "test.psi.MissingInterface"
+}

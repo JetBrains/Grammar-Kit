@@ -202,6 +202,7 @@ import com.intellij.psi.tree.IElementType;
 
 public class Element1Impl extends GenericBaseMissing<Element1Stub> implements Element1 {
 
+  //WARNING: extends class org.intellij.grammar.test.StubTest.GenericBaseMissing not found (parent constructors won't be inherited)
   public Element1Impl(@NotNull ASTNode node) {
     super(node);
   }
@@ -457,6 +458,7 @@ import test.stub.MissingStub;
 
 public class MissingImpl extends MissingBase implements Missing {
 
+  //WARNING: extends class test.stub.MissingBase not found (parent constructors won't be inherited)
   public MissingImpl(@NotNull ASTNode node) {
     super(node);
   }
@@ -568,6 +570,7 @@ import com.intellij.psi.tree.IElementType;
 
 public abstract class TypeImpl extends GenericBaseMissing<TypeStub> implements Type {
 
+  //WARNING: extends class org.intellij.grammar.test.StubTest.GenericBaseMissing not found (parent constructors won't be inherited)
   public TypeImpl(@NotNull ASTNode node) {
     super(node);
   }

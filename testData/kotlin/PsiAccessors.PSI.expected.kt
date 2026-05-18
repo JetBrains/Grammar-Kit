@@ -326,6 +326,7 @@ import generated.psi.*;
 
 public class XBinaryImpl extends ASTWrapperPsiElement implements XBinary {
 
+  //WARNING: implements interface XComposite not found
   public XBinaryImpl(@NotNull ASTNode node) {
     super(node);
   }
@@ -446,6 +447,7 @@ import generated.psi.*;
 
 public class XEmptyImpl extends ASTWrapperPsiElement implements XEmpty {
 
+  //WARNING: implements interface XComposite not found
   public XEmptyImpl(@NotNull ASTNode node) {
     super(node);
   }
@@ -466,6 +468,7 @@ import generated.psi.*;
 
 public class XExpressionImpl extends ASTWrapperPsiElement implements XExpression {
 
+  //WARNING: implements interface XComposite not found
   public XExpressionImpl(@NotNull ASTNode node) {
     super(node);
   }
@@ -492,6 +495,7 @@ import generated.psi.*;
 
 public class XOperatorImpl extends ASTWrapperPsiElement implements XOperator {
 
+  //WARNING: implements interface XComposite not found
   public XOperatorImpl(@NotNull ASTNode node) {
     super(node);
   }
@@ -513,6 +517,7 @@ import generated.psi.child.XSomeChild;
 
 public class XRenameListImpl extends ASTWrapperPsiElement implements XRenameList {
 
+  //WARNING: implements interface XComposite not found
   public XRenameListImpl(@NotNull ASTNode node) {
     super(node);
   }
@@ -563,6 +568,7 @@ import generated.psi.child.XSomeChild;
 
 public class XReportSomeBadImpl extends ASTWrapperPsiElement implements XReportSomeBad {
 
+  //WARNING: implements interface XComposite not found
   public XReportSomeBadImpl(@NotNull ASTNode node) {
     super(node);
   }
@@ -590,6 +596,7 @@ import generated.psi.grand.XSomeGrandChild;
 
 public class XSomeChildImpl extends ASTWrapperPsiElement implements XSomeChild {
 
+  //WARNING: implements interface XComposite not found
   public XSomeChildImpl(@NotNull ASTNode node) {
     super(node);
   }
@@ -634,6 +641,7 @@ import generated.psi.grand.*;
 
 public class XSomeGrandChildImpl extends ASTWrapperPsiElement implements XSomeGrandChild {
 
+  //WARNING: implements interface XComposite not found
   public XSomeGrandChildImpl(@NotNull ASTNode node) {
     super(node);
   }
@@ -668,6 +676,7 @@ import generated.psi.grand.XSomeGrandChild;
 
 public class XSomeRootImpl extends ASTWrapperPsiElement implements XSomeRoot {
 
+  //WARNING: implements interface XComposite not found
   public XSomeRootImpl(@NotNull ASTNode node) {
     super(node);
   }
@@ -731,6 +740,7 @@ import generated.psi.*;
 
 public class XTokenDefaultsImpl extends ASTWrapperPsiElement implements XTokenDefaults {
 
+  //WARNING: implements interface XComposite not found
   public XTokenDefaultsImpl(@NotNull ASTNode node) {
     super(node);
   }
@@ -757,6 +767,7 @@ import generated.psi.*;
 
 public class XValueImpl extends ASTWrapperPsiElement implements XValue {
 
+  //WARNING: implements interface XComposite not found
   public XValueImpl(@NotNull ASTNode node) {
     super(node);
   }

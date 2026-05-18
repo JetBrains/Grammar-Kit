@@ -65,10 +65,8 @@ package test.psi;
 import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
-import com.intellij.psi.StubBasedPsiElement;
-import test.stub.UnresolvedStub;
 
-public interface Unresolved extends PsiElement, StubBasedPsiElement<UnresolvedStub> {
+public interface Unresolved extends MissingInterface {
 
 }
 // ---- test/psi/impl/UnresolvedImpl.java -----------------
@@ -84,18 +82,13 @@ import com.intellij.psi.util.PsiTreeUtil;
 import static test.FooTypes.*;
 import test.psi.ext.MissingMixin;
 import test.psi.*;
-import com.intellij.psi.stubs.IStubElementType;
-import test.stub.UnresolvedStub;
 
 public class UnresolvedImpl extends MissingMixin implements Unresolved {
 
   //WARNING: mixin class test.psi.ext.MissingMixin not found (constructors will use the fallback signature)
+  //WARNING: implements interface test.psi.MissingInterface not found
   public UnresolvedImpl(@NotNull ASTNode node) {
     super(node);
-  }
-
-  public UnresolvedImpl(@NotNull UnresolvedStub stub, @NotNull IStubElementType stubType) {
-    super(stub, stubType);
   }
 
   public void accept(@NotNull Visitor visitor) {
@@ -120,7 +113,11 @@ import com.intellij.psi.PsiElement;
 public class Visitor extends PsiElementVisitor {
 
   public void visitUnresolved(@NotNull Unresolved o) {
-    visitPsiElement(o);
+    visitMissingInterface(o);
+  }
+
+  public void visitMissingInterface(@NotNull MissingInterface o) {
+    visitElement(o);
   }
 
   public void visitPsiElement(@NotNull PsiElement o) {

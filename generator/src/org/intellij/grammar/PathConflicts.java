@@ -18,6 +18,10 @@ import java.util.Map;
  * Per-path semantics: CLI wins on collision. When both sides set the same attribute to
  * different absolute paths, a conflict is reported. In strict mode, conflicts abort
  * generation; otherwise they are printed as warnings and the CLI value takes effect.
+ *
+ * <p>Each attribute carries a {@link List} of paths so multi-valued attributes (e.g.
+ * {@link KnownAttribute#PSI_INPUT_PATH}) round-trip unchanged. Conflict detection compares the
+ * full list — order matters.
  */
 final class PathConflicts {
   private PathConflicts() {
@@ -25,32 +29,37 @@ final class PathConflicts {
 
   /**
    * Merge {@code cli} into {@code grammar}. Attributes only on one side pass through
-   * unchanged. Attributes on both sides with equal {@link Path}s pass through silently.
-   * Attributes on both sides with different paths produce a warning (strict=false) or a
+   * unchanged. Attributes on both sides with equal value lists pass through silently.
+   * Attributes on both sides with different lists produce a warning (strict=false) or a
    * thrown {@link ConflictException} after all conflicts have been printed (strict=true).
    */
-  public static @NotNull Map<KnownAttribute<String>, Path> merge(@NotNull Map<KnownAttribute<String>, Path> cli,
-                                                                 @NotNull Map<KnownAttribute<String>, Path> grammar,
-                                                                 boolean strict,
-                                                                 @NotNull PrintStream warnSink) {
+  public static @NotNull Map<KnownAttribute<?>, List<Path>> merge(@NotNull Map<KnownAttribute<?>, List<Path>> cli,
+                                                                  @NotNull Map<KnownAttribute<?>, List<Path>> grammar,
+                                                                  boolean strict,
+                                                                  @NotNull PrintStream warnSink) {
     List<String> conflicts = new ArrayList<>();
-    Map<KnownAttribute<String>, Path> merged = new HashMap<>(grammar);
-    for (Map.Entry<KnownAttribute<String>, Path> e : cli.entrySet()) {
-      KnownAttribute<String> attr = e.getKey();
-      Path cliPath = e.getValue();
-      Path grammarPath = grammar.get(attr);
-      if (grammarPath != null && !grammarPath.equals(cliPath)) {
-        String msg = attr.getName() + ": CLI value '" + cliPath + "' overrides grammar value '" + grammarPath + "'";
+    Map<KnownAttribute<?>, List<Path>> merged = new HashMap<>(grammar);
+    for (Map.Entry<KnownAttribute<?>, List<Path>> e : cli.entrySet()) {
+      KnownAttribute<?> attr = e.getKey();
+      List<Path> cliPaths = e.getValue();
+      List<Path> grammarPaths = grammar.get(attr);
+      if (grammarPaths != null && !grammarPaths.equals(cliPaths)) {
+        String msg = attr.getName() + ": CLI value " + format(cliPaths) +
+                     " overrides grammar value " + format(grammarPaths);
         conflicts.add(msg);
         if (!strict) warnSink.println("warning: " + msg);
       }
-      merged.put(attr, cliPath);
+      merged.put(attr, cliPaths);
     }
     if (strict && !conflicts.isEmpty()) {
       for (String c : conflicts) warnSink.println("error: " + c);
       throw new ConflictException(conflicts);
     }
     return merged;
+  }
+
+  private static @NotNull String format(@NotNull List<Path> paths) {
+    return paths.size() == 1 ? "'" + paths.get(0) + "'" : paths.toString();
   }
 
   public static final class ConflictException extends RuntimeException {

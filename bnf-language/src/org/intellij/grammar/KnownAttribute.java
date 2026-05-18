@@ -102,8 +102,8 @@ public class KnownAttribute<T> {
   // Explicit input source-root overrides; resolved relative to the BNF file's parent. When set,
   // narrow PsiHelper's findClass scope from "all project" to the named directory. Has no effect on
   // AsmHelper / ReflectionHelper. null = no narrowing.
-  public static final KnownAttribute<String> INPUT_PATH      = create(true, String.class, "inputPath",     null);
-  public static final KnownAttribute<String> PSI_INPUT_PATH  = create(true, String.class, "psiInputPath",  null);
+  public static final KnownAttribute<String>    INPUT_PATH      = create(true, String.class,    "inputPath",     null);
+  public static final KnownAttribute<ListValue> PSI_INPUT_PATH  = create(true, ListValue.class, "psiInputPath",  EMPTY_LIST);
 
   private final boolean myGlobal;
   private final String myName;

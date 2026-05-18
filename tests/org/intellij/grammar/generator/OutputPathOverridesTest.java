@@ -17,6 +17,7 @@ import java.io.StringWriter;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -61,10 +62,10 @@ public class OutputPathOverridesTest extends BnfGeneratorTestCase {
     Map<String, File> captured = new LinkedHashMap<>();
     OutputOpener opener = capturingOpener(captured);
 
-    Map<KnownAttribute<String>, Path> map = new HashMap<>();
-    map.put(KnownAttribute.PARSER_OUTPUT_PATH, Path.of(parserDir));
-    map.put(KnownAttribute.PSI_OUTPUT_PATH, Path.of(psiDir));
-    map.put(KnownAttribute.ELEMENT_TYPE_HOLDER_OUTPUT_PATH, Path.of(etHolderDir));
+    Map<KnownAttribute<?>, List<Path>> map = new HashMap<>();
+    map.put(KnownAttribute.PARSER_OUTPUT_PATH, List.of(Path.of(parserDir)));
+    map.put(KnownAttribute.PSI_OUTPUT_PATH, List.of(Path.of(psiDir)));
+    map.put(KnownAttribute.ELEMENT_TYPE_HOLDER_OUTPUT_PATH, List.of(Path.of(etHolderDir)));
     JavaParserGenerator gen = new JavaParserGenerator(
       bnfFile, "", "", opener, BnfPaths.resolveExplicit(map)
     );
@@ -85,12 +86,12 @@ public class OutputPathOverridesTest extends BnfGeneratorTestCase {
     Map<String, File> captured = new LinkedHashMap<>();
     OutputOpener opener = capturingOpener(captured);
 
-    Map<KnownAttribute<String>, Path> map = new HashMap<>();
-    map.put(KnownAttribute.PARSER_OUTPUT_PATH, Path.of(parserDir));
-    map.put(KnownAttribute.PSI_OUTPUT_PATH, Path.of(psiDir));
-    map.put(KnownAttribute.ELEMENT_TYPE_HOLDER_OUTPUT_PATH, Path.of(etHolderDir));
-    map.put(KnownAttribute.SYNTAX_ELEMENT_TYPE_HOLDER_OUTPUT_PATH, Path.of(syntaxDir));
-    map.put(KnownAttribute.ELEMENT_TYPE_CONVERTER_FACTORY_OUTPUT_PATH, Path.of(converterDir));
+    Map<KnownAttribute<?>, List<Path>> map = new HashMap<>();
+    map.put(KnownAttribute.PARSER_OUTPUT_PATH, List.of(Path.of(parserDir)));
+    map.put(KnownAttribute.PSI_OUTPUT_PATH, List.of(Path.of(psiDir)));
+    map.put(KnownAttribute.ELEMENT_TYPE_HOLDER_OUTPUT_PATH, List.of(Path.of(etHolderDir)));
+    map.put(KnownAttribute.SYNTAX_ELEMENT_TYPE_HOLDER_OUTPUT_PATH, List.of(Path.of(syntaxDir)));
+    map.put(KnownAttribute.ELEMENT_TYPE_CONVERTER_FACTORY_OUTPUT_PATH, List.of(Path.of(converterDir)));
     KotlinParserGenerator gen = new KotlinParserGenerator(
       bnfFile, "", "", opener, BnfPaths.resolveExplicit(map)
     );
@@ -115,7 +116,7 @@ public class OutputPathOverridesTest extends BnfGeneratorTestCase {
 
     JavaParserGenerator gen = new JavaParserGenerator(
       bnfFile, "", "", opener,
-      BnfPaths.resolveExplicit(Map.of(KnownAttribute.PARSER_OUTPUT_PATH, Path.of(parserDir)))
+      BnfPaths.resolveExplicit(Map.of(KnownAttribute.PARSER_OUTPUT_PATH, List.of(Path.of(parserDir))))
     );
     gen.generate();
 

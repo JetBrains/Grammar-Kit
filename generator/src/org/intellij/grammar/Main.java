@@ -18,7 +18,9 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.nio.file.Path;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Command-line interface to parser generator.
@@ -32,10 +34,14 @@ import java.util.Map;
  * @noinspection UseOfSystemOutOrSystemErr
  */
 public class Main {
-  static final Map<String, KnownAttribute<String>> FLAG_TO_ATTR = buildFlagMap();
+  static final Map<String, KnownAttribute<?>> FLAG_TO_ATTR = buildFlagMap();
 
-  private static Map<String, KnownAttribute<String>> buildFlagMap() {
-    Map<String, KnownAttribute<String>> map = new LinkedHashMap<>();
+  /** Flags whose attribute is multi-valued — repeating the flag accumulates entries instead of
+   * overwriting. Single-value flags retain last-wins semantics. */
+  static final Set<KnownAttribute<?>> MULTI_VALUE_ATTRS = Set.of(KnownAttribute.PSI_INPUT_PATH);
+
+  private static Map<String, KnownAttribute<?>> buildFlagMap() {
+    Map<String, KnownAttribute<?>> map = new LinkedHashMap<>();
     map.put("--parser-output",                          KnownAttribute.PARSER_OUTPUT_PATH);
     map.put("--psi-output",                             KnownAttribute.PSI_OUTPUT_PATH);
     map.put("--element-type-holder-output",             KnownAttribute.ELEMENT_TYPE_HOLDER_OUTPUT_PATH);
@@ -71,7 +77,7 @@ public class Main {
       return e.exitCode;
     }
 
-    Path parserOutput = cliArgs.paths().get(KnownAttribute.PARSER_OUTPUT_PATH);
+    Path parserOutput = cliArgs.firstPath(KnownAttribute.PARSER_OUTPUT_PATH);
     if (parserOutput != null) {
       File parserOutputFile = parserOutput.toFile();
       if (parserOutputFile.exists() && parserOutputFile.isFile()) {
@@ -110,8 +116,9 @@ public class Main {
   private static void printUsage(@NotNull PrintStream out) {
     out.println("Usage: Main <grammar-file> [options]");
     out.println("Options:");
-    for (Map.Entry<String, KnownAttribute<String>> e : FLAG_TO_ATTR.entrySet()) {
-      out.println("  " + e.getKey() + " <path>   sets " + e.getValue().getName());
+    for (Map.Entry<String, KnownAttribute<?>> e : FLAG_TO_ATTR.entrySet()) {
+      String suffix = MULTI_VALUE_ATTRS.contains(e.getValue()) ? " (repeatable)" : "";
+      out.println("  " + e.getKey() + " <path>   sets " + e.getValue().getName() + suffix);
     }
     out.println("  --strict-paths            fail on CLI/grammar path conflicts");
     out.println("  --source-psi              resolve Java references from .java sources at inputPath/psiInputPath");
@@ -131,7 +138,7 @@ public class Main {
     int count = 0;
     for (File grammarFile : grammarFiles) {
       if (generateGrammar(grammarFile, grammarPattern.grammarDir())) {
-        Path parserOut = cliArgs.paths().get(KnownAttribute.PARSER_OUTPUT_PATH);
+        Path parserOut = cliArgs.firstPath(KnownAttribute.PARSER_OUTPUT_PATH);
         String outDesc = parserOut != null ? parserOut.toString() : "(grammar-defined paths)";
         System.out.println(grammarFile.getName() + " parser generated to " + outDesc);
         count++;
@@ -149,7 +156,7 @@ public class Main {
     PsiFile bnfFile = LightPsi.parseFile(grammarFile, parserDefinition);
     if (!(bnfFile instanceof BnfFile)) return false;
 
-    Path parserOutput = cliArgs.paths().get(KnownAttribute.PARSER_OUTPUT_PATH);
+    Path parserOutput = cliArgs.firstPath(KnownAttribute.PARSER_OUTPUT_PATH);
     if (parserOutput != null && parserOutput.toString().contains("lightpsi")) {
       Class.forName("org.jetbrains.annotations.NotNull");
       Class.forName("org.jetbrains.annotations.Nullable");
@@ -159,8 +166,8 @@ public class Main {
     }
 
     Path bnfParent = grammarFile.getParentFile().toPath();
-    Map<KnownAttribute<String>, Path> grammarMap = BnfPaths.collectExplicitPaths((BnfFile)bnfFile, bnfParent);
-    Map<KnownAttribute<String>, Path> merged = PathConflicts.merge(cliArgs.paths(), grammarMap, cliArgs.strictPaths(), System.err);
+    Map<KnownAttribute<?>, List<Path>> grammarMap = BnfPaths.collectExplicitPaths((BnfFile)bnfFile, bnfParent);
+    Map<KnownAttribute<?>, List<Path>> merged = PathConflicts.merge(cliArgs.paths(), grammarMap, cliArgs.strictPaths(), System.err);
     BnfPathsResolution paths = BnfPaths.resolveExplicit(merged, bnfParent);
 
     JavaParserGenerator generator = new JavaParserGenerator((BnfFile)bnfFile,

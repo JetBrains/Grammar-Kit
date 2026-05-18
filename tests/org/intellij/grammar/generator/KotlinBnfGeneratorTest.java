@@ -40,15 +40,15 @@ public class KotlinBnfGeneratorTest extends AbstractBnfGeneratorTest {
     Path syntaxHolderPath  = resolveTestPath(psiFile, KnownAttribute.SYNTAX_ELEMENT_TYPE_HOLDER_OUTPUT_PATH);
     Path converterPath     = resolveTestPath(psiFile, KnownAttribute.ELEMENT_TYPE_CONVERTER_FACTORY_OUTPUT_PATH);
     Path inputPath         = resolveTestPath(psiFile, KnownAttribute.INPUT_PATH);
-    Path psiInputPath      = resolveTestPath(psiFile, KnownAttribute.PSI_INPUT_PATH);
-    Map<KnownAttribute<String>, Path> map = new HashMap<>();
-    map.put(KnownAttribute.PARSER_OUTPUT_PATH, parserPath != null ? parserPath : Path.of(outputPath));
-    if (psiPath != null) map.put(KnownAttribute.PSI_OUTPUT_PATH, psiPath);
-    if (etHolderPath != null) map.put(KnownAttribute.ELEMENT_TYPE_HOLDER_OUTPUT_PATH, etHolderPath);
-    if (syntaxHolderPath != null) map.put(KnownAttribute.SYNTAX_ELEMENT_TYPE_HOLDER_OUTPUT_PATH, syntaxHolderPath);
-    if (converterPath != null) map.put(KnownAttribute.ELEMENT_TYPE_CONVERTER_FACTORY_OUTPUT_PATH, converterPath);
-    if (inputPath != null) map.put(KnownAttribute.INPUT_PATH, inputPath);
-    if (psiInputPath != null) map.put(KnownAttribute.PSI_INPUT_PATH, psiInputPath);
+    List<Path> psiInputPaths = resolveTestPaths(psiFile, KnownAttribute.PSI_INPUT_PATH);
+    Map<KnownAttribute<?>, List<Path>> map = new HashMap<>();
+    map.put(KnownAttribute.PARSER_OUTPUT_PATH, List.of(parserPath != null ? parserPath : Path.of(outputPath)));
+    if (psiPath != null) map.put(KnownAttribute.PSI_OUTPUT_PATH, List.of(psiPath));
+    if (etHolderPath != null) map.put(KnownAttribute.ELEMENT_TYPE_HOLDER_OUTPUT_PATH, List.of(etHolderPath));
+    if (syntaxHolderPath != null) map.put(KnownAttribute.SYNTAX_ELEMENT_TYPE_HOLDER_OUTPUT_PATH, List.of(syntaxHolderPath));
+    if (converterPath != null) map.put(KnownAttribute.ELEMENT_TYPE_CONVERTER_FACTORY_OUTPUT_PATH, List.of(converterPath));
+    if (inputPath != null) map.put(KnownAttribute.INPUT_PATH, List.of(inputPath));
+    if (!psiInputPaths.isEmpty()) map.put(KnownAttribute.PSI_INPUT_PATH, psiInputPaths);
     BnfPathsResolution paths = BnfPaths.resolveExplicit(map);
     return List.of(new KotlinParserGenerator(psiFile, "", "", outputOpener, paths));
   }
@@ -58,6 +58,17 @@ public class KotlinBnfGeneratorTest extends AbstractBnfGeneratorTest {
     if (relative == null) return null;
     String projectPath = myFullDataPath.substring(0, myFullDataPath.lastIndexOf(File.separatorChar) + 1);
     return Path.of(projectPath + relative);
+  }
+
+  private @NotNull List<Path> resolveTestPaths(@NotNull BnfFile psiFile, @NotNull KnownAttribute<KnownAttribute.ListValue> attr) {
+    KnownAttribute.ListValue list = getRootAttribute(psiFile, attr);
+    if (list == null || list.isEmpty()) return List.of();
+    String projectPath = myFullDataPath.substring(0, myFullDataPath.lastIndexOf(File.separatorChar) + 1);
+    List<Path> result = new java.util.ArrayList<>(list.size());
+    for (String relative : list.asStrings()) {
+      if (relative != null && !relative.isEmpty()) result.add(Path.of(projectPath + relative));
+    }
+    return List.copyOf(result);
   }
 
   @Override

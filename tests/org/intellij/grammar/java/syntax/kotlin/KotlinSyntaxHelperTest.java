@@ -345,6 +345,27 @@ public class KotlinSyntaxHelperTest extends GoldenClassInfoTestCase {
     assertClassInfoMatchesGolden(extractAll());
   }
 
+  /**
+   * Repro for a generator bug where a Kotlin mixin's secondary constructor with an
+   * {@code IElementType} parameter wasn't picked up by {@code findClassMethods}, causing the PSI
+   * generator to emit a hard-coded fallback constructor with the wrong parameter type and no
+   * {@code @NotNull}. The mismatched filename ({@code RsAlias.kt}/{@code RsAliasImplMixin}) forces
+   * the source-root resolver into the package-scan path.
+   */
+  public void testMismatchedFilenameSecondaryCtorMixin() throws Exception {
+    write("a/b/RsAlias.kt", """
+        package a.b
+        import com.intellij.lang.ASTNode
+        import com.intellij.psi.tree.IElementType
+
+        abstract class RsAliasImplMixin {
+            constructor(node: ASTNode)
+            constructor(stub: Any, elementType: IElementType)
+        }
+        """);
+    assertClassInfoMatchesGolden(extractAll());
+  }
+
   public void testImportedTypeResolves() throws Exception {
     write("a/b/Used.kt", """
         package a.b

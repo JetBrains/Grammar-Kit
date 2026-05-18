@@ -1,0 +1,7 @@
+class a.b.RsAliasImplMixin extends java.lang.Object
+  modifiers: public abstract
+  methods:
+    CONSTRUCTOR public <init>(com.intellij.lang.ASTNode node)
+      annotatedTypes: [a.b.RsAliasImplMixin, @org.jetbrains.annotations.NotNull com.intellij.lang.ASTNode, node]
+    CONSTRUCTOR public <init>(java.lang.Object stub, com.intellij.psi.tree.IElementType elementType)
+      annotatedTypes: [a.b.RsAliasImplMixin, @org.jetbrains.annotations.NotNull java.lang.Object, stub, @org.jetbrains.annotations.NotNull com.intellij.psi.tree.IElementType, elementType]

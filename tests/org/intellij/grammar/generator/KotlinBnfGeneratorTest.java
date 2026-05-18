@@ -136,6 +136,16 @@ public class KotlinBnfGeneratorTest extends AbstractBnfGeneratorTest {
     doPsiTest();
   }
 
+  /**
+   * The mixin's stub constructor is declared in a Kotlin source whose filename differs from
+   * the class name and is reached via {@code psiInputPath}. The generated PSI impl must mirror
+   * the mixin's constructor signature ({@code IElementType}, not the hard-coded fallback
+   * {@code IStubElementType}).
+   */
+  public void testKotlinMixinCtor() throws Exception {
+    doPsiTest();
+  }
+
   public void testStubFallback() throws Exception {
     doGenTest(true);
   }

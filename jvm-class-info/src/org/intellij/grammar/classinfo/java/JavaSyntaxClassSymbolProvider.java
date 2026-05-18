@@ -73,7 +73,7 @@ public final class JavaSyntaxClassSymbolProvider implements JvmClassSymbolProvid
     while (!batch.containsKey(fqn)) {
       prefix = prefix.parent();
       if (prefix.isEmpty()) break;
-      if (!scannedPackages.add(prefix)) break;
+      if (!scannedPackages.add(prefix)) continue;
       for (Path dir : sourceResolver.findPackageDirs(prefix)) {
         scanPackage(dir, batch, resolver);
       }

@@ -161,6 +161,16 @@ public class KotlinBnfGeneratorTest extends AbstractBnfGeneratorTest {
   }
 
   /**
+   * Borrowing a constructor from a generic Kotlin parent must add {@code @NotNull} on the parameter
+   * slot that originally referenced a type variable: the substituted concrete type is non-null per
+   * Kotlin's runtime contract, but the source provider does not attach the annotation to bare
+   * type-variable references (see {@code jvm-class-info/CLAUDE.md}).
+   */
+  public void testKotlinMixinCtorGeneric() throws Exception {
+    doPsiTest();
+  }
+
+  /**
    * A sub-rule extending a parent rule with a resolvable {@code mixin} must NOT import
    * the parent's mixin class in its generated impl: the sub-rule's impl extends the
    * parent's impl class, never the mixin directly. Regression for an unused import

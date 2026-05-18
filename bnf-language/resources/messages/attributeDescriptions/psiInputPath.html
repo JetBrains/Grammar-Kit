@@ -1,27 +1,33 @@
 <html>
 <body>
 The source root that holds the user-authored PSI-side classes referenced by
-<code>psiImplUtilClass</code>, per-rule <code>mixin</code>, and per-rule <code>implements</code>,
-resolved <b>relative to the BNF file's parent directory</b>. When set, narrows the IDE's
-<code>PsiHelper.findClass</code> scope for those three attributes to the named directory. Falls
-back to the global <code>inputPath</code> default when unset, and finally to project-wide search.
+<code>psiImplUtilClass</code>, per-rule <code>mixin</code>, per-rule <code>extends</code>, and
+per-rule <code>implements</code>, resolved <b>relative to the BNF file's parent directory</b>.
+When set, narrows the IDE's <code>PsiHelper.findClass</code> scope for those attributes to the
+named directory. Falls back to the global <code>inputPath</code> default when unset, and finally
+to project-wide search.
 In the headless generator the value is consulted only when <code>--source-psi</code> is passed:
 it then joins <code>inputPath</code> as a source root for <code>JavaSyntaxHelper</code> (with
 <code>AsmHelper</code> as fallback). Otherwise headless / classloader-based resolution
 (<code>AsmHelper</code>, <code>ReflectionHelper</code>) ignores the attribute.
 
-<p>One knob covers all three because <code>psiImplUtilClass</code>, <code>mixin</code> targets, and
-<code>implements</code> interfaces typically live together in the same source root.</p>
+<p>One knob covers all four because <code>psiImplUtilClass</code>, <code>mixin</code> targets,
+<code>extends</code> base classes, and <code>implements</code> interfaces typically live together
+in the same source root.</p>
 
 <h2>Examples:</h2>
 <pre><code>
   {
-    //BNF at "path/to/project/grammars/grammar.bnf" -> mixin / implements / psiImplUtilClass
+    //BNF at "path/to/project/grammars/grammar.bnf" -> mixin / extends / implements / psiImplUtilClass
     //classes resolved against "path/to/project/grammars/../psi-src"
     psiInputPath="../psi-src"
     psiImplUtilClass="com.example.MyPsiImplUtil"
   }
-  myRule ::= ... { mixin="com.example.MyRuleMixin" implements="com.example.MyMarker" }
+  myRule ::= ... {
+    mixin="com.example.MyRuleMixin"
+    extends="com.example.MyRuleBase"
+    implements="com.example.MyMarker"
+  }
 </code></pre>
 
 <p><b>CLI override:</b> the headless generator accepts <code>--psi-input &lt;path&gt;</code>.

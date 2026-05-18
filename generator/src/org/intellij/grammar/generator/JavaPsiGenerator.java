@@ -886,6 +886,7 @@ public final class JavaPsiGenerator extends Generator {
     ParameterSymbol.Builder p = new ParameterSymbol.Builder();
     p.name = "node";
     p.type = JvmTypeRefs.raw(JavaBnfConstants.AST_NODE_CLASS);
+    p.annotations.add(NOTNULL_FQ);
     b.parameters.add(p);
     return b;
   }
@@ -899,10 +900,12 @@ public final class JavaPsiGenerator extends Generator {
     ParameterSymbol.Builder pStub = new ParameterSymbol.Builder();
     pStub.name = "stub";
     pStub.type = JvmTypeRefs.raw(stubName);
+    pStub.annotations.add(NOTNULL_FQ);
     b.parameters.add(pStub);
     ParameterSymbol.Builder pType = new ParameterSymbol.Builder();
     pType.name = "stubType";
     pType.type = JvmTypeRefs.raw(G.fallbackStubElementType);
+    pType.annotations.add(NOTNULL_FQ);
     b.parameters.add(pType);
     return b;
   }

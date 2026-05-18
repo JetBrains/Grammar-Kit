@@ -150,6 +150,16 @@ public class KotlinBnfGeneratorTest extends AbstractBnfGeneratorTest {
     doGenTest(true);
   }
 
+  /**
+   * When the rule's mixin/extends class can't be resolved, the generator falls back to
+   * {@code astNodeConstructorSignature} / {@code stubConstructorSignature}. Both fallback
+   * emitters must still mark the constructor parameters {@code @NotNull} so the generated
+   * code keeps the same nullability contract as the inherited path.
+   */
+  public void testFallbackCtorsHaveNotNull() throws Exception {
+    doPsiTest();
+  }
+
   public void testTokenChoice() throws Exception {
     doPsiTest();
   }

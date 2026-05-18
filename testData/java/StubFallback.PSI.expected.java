@@ -202,11 +202,11 @@ import com.intellij.psi.tree.IElementType;
 
 public class Element1Impl extends GenericBaseMissing<Element1Stub> implements Element1 {
 
-  public Element1Impl(ASTNode node) {
+  public Element1Impl(@NotNull ASTNode node) {
     super(node);
   }
 
-  public Element1Impl(Element1Stub stub, IElementType stubType) {
+  public Element1Impl(@NotNull Element1Stub stub, @NotNull IElementType stubType) {
     super(stub, stubType);
   }
 
@@ -419,11 +419,11 @@ import test.stub.TypeStub;
 
 public class InterfaceTypeImpl extends TypeImpl implements InterfaceType {
 
-  public InterfaceTypeImpl(ASTNode node) {
+  public InterfaceTypeImpl(@NotNull ASTNode node) {
     super(node);
   }
 
-  public InterfaceTypeImpl(TypeStub stub, IElementType stubType) {
+  public InterfaceTypeImpl(@NotNull TypeStub stub, @NotNull IElementType stubType) {
     super(stub, stubType);
   }
 
@@ -457,11 +457,11 @@ import test.stub.MissingStub;
 
 public class MissingImpl extends MissingBase implements Missing {
 
-  public MissingImpl(ASTNode node) {
+  public MissingImpl(@NotNull ASTNode node) {
     super(node);
   }
 
-  public MissingImpl(MissingStub stub, IElementType stubType) {
+  public MissingImpl(@NotNull MissingStub stub, @NotNull IElementType stubType) {
     super(stub, stubType);
   }
 
@@ -530,11 +530,11 @@ import test.stub.TypeStub;
 
 public class StructTypeImpl extends TypeImpl implements StructType {
 
-  public StructTypeImpl(ASTNode node) {
+  public StructTypeImpl(@NotNull ASTNode node) {
     super(node);
   }
 
-  public StructTypeImpl(TypeStub stub, IElementType stubType) {
+  public StructTypeImpl(@NotNull TypeStub stub, @NotNull IElementType stubType) {
     super(stub, stubType);
   }
 
@@ -568,11 +568,11 @@ import com.intellij.psi.tree.IElementType;
 
 public abstract class TypeImpl extends GenericBaseMissing<TypeStub> implements Type {
 
-  public TypeImpl(ASTNode node) {
+  public TypeImpl(@NotNull ASTNode node) {
     super(node);
   }
 
-  public TypeImpl(TypeStub stub, IElementType stubType) {
+  public TypeImpl(@NotNull TypeStub stub, @NotNull IElementType stubType) {
     super(stub, stubType);
   }
 

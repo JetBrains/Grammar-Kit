@@ -467,11 +467,11 @@ import test.stub.MissingStub;
 
 public class MissingImpl extends MissingBase implements Missing {
 
-  public MissingImpl(ASTNode node) {
+  public MissingImpl(@NotNull ASTNode node) {
     super(node);
   }
 
-  public MissingImpl(MissingStub stub, IStubElementType stubType) {
+  public MissingImpl(@NotNull MissingStub stub, @NotNull IStubElementType stubType) {
     super(stub, stubType);
   }
 

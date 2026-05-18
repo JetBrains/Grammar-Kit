@@ -111,9 +111,7 @@ final class KotlinSyntaxMethodExtractor {
     m.declaringClass = declaringFqn;
     m.name = "<init>";
     m.methodType = MethodType.CONSTRUCTOR;
-    // Constructors' return type is the declaring class as a raw class reference (no annotations,
-    // matching what AsmClassSymbolProvider produces for <init>).
-    m.returnType = new JvmTypeRef.UserType(declaringFqn, List.of(), List.of());
+    m.returnType = VOID_TYPE;
 
     Set<String> typeVars = new HashSet<>(classTypeVars);
     SyntaxNode modifierList = firstChildOfType(ctorNode, KtNodeTypes.INSTANCE.getMODIFIER_LIST());

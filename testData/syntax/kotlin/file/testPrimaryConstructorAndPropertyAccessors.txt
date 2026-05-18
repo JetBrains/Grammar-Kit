@@ -2,7 +2,7 @@ class a.b.Person extends java.lang.Object
   modifiers: public final
   methods:
     CONSTRUCTOR public <init>(java.lang.String name, int age)
-      annotatedTypes: [a.b.Person, @org.jetbrains.annotations.NotNull java.lang.String, name, int, age]
+      annotatedTypes: [void, @org.jetbrains.annotations.NotNull java.lang.String, name, int, age]
     INSTANCE public java.lang.String getName()
       annotatedTypes: [@org.jetbrains.annotations.NotNull java.lang.String]
     INSTANCE public int getAge()

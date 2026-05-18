@@ -170,9 +170,10 @@ public class BnfPathsResolutionTest extends JavaCodeInsightFixtureTestCase {
       """);
     BnfPathsResolution paths = BnfPaths.resolve(bnf);
     Path parent = bnfParent(bnf);
-    // mixin / implements / psiImplUtilClass all share psiInputPath now; parserUtilClass keeps
-    // falling through to the global inputPath.
+    // mixin / extends / implements / psiImplUtilClass all share psiInputPath now;
+    // parserUtilClass keeps falling through to the global inputPath.
     assertEquals(parent.resolve("../psi").normalize(), BnfPaths.referencePath(paths, KnownAttribute.MIXIN));
+    assertEquals(parent.resolve("../psi").normalize(), BnfPaths.referencePath(paths, KnownAttribute.EXTENDS));
     assertEquals(parent.resolve("../psi").normalize(), BnfPaths.referencePath(paths, KnownAttribute.IMPLEMENTS));
     assertEquals(parent.resolve("../psi").normalize(), BnfPaths.referencePath(paths, KnownAttribute.PSI_IMPL_UTIL_CLASS));
     assertEquals(parent.resolve("../global").normalize(), BnfPaths.referencePath(paths, KnownAttribute.PARSER_UTIL_CLASS));
@@ -187,6 +188,7 @@ public class BnfPathsResolutionTest extends JavaCodeInsightFixtureTestCase {
     Path parent = bnfParent(bnf);
     assertEquals(parent.resolve("../global").normalize(), BnfPaths.referencePath(paths, KnownAttribute.MIXIN));
     assertEquals(parent.resolve("../global").normalize(), BnfPaths.referencePath(paths, KnownAttribute.PARSER_UTIL_CLASS));
+    assertEquals(parent.resolve("../global").normalize(), BnfPaths.referencePath(paths, KnownAttribute.EXTENDS));
     assertEquals(parent.resolve("../global").normalize(), BnfPaths.referencePath(paths, KnownAttribute.IMPLEMENTS));
   }
 
@@ -197,6 +199,7 @@ public class BnfPathsResolutionTest extends JavaCodeInsightFixtureTestCase {
     // JavaHelperFactory widens to a project-wide scope when this happens; the resolution itself
     // makes no assumption about the consumer.
     assertNull(BnfPaths.referencePath(paths, KnownAttribute.MIXIN));
+    assertNull(BnfPaths.referencePath(paths, KnownAttribute.EXTENDS));
     assertNull(BnfPaths.referencePath(paths, KnownAttribute.IMPLEMENTS));
     assertNull(BnfPaths.referencePath(paths, KnownAttribute.PARSER_UTIL_CLASS));
   }

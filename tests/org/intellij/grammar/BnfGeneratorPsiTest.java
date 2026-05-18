@@ -347,20 +347,27 @@ public class BnfGeneratorPsiTest extends BasePlatformTestCase {
    * Regression test for the IDE-mode class-resolution scope when the grammar declares no
    * {@code inputPath}. Pre-fix, {@link BnfPaths#resolve} defaulted {@code INPUT_PATH} to the
    * BNF file's parent directory and {@link JavaHelperFactory} narrowed the search scope to that
-   * subtree. A {@code mixin}/{@code implements}/{@code parserUtilClass} class living anywhere
-   * outside that subtree (different module, sibling source folder, library) was invisible.
+   * subtree. A {@code mixin}/{@code extends}/{@code implements}/{@code parserUtilClass} class
+   * living anywhere outside that subtree (different module, sibling source folder, library) was
+   * invisible.
    *
    * <p>Post-fix, the resolution leaves {@code INPUT_PATH} unset and the factory widens to
    * {@link GlobalSearchScope#allScope}. This test pins both the helper's findClass behavior
    * and the {@link BnfPathsResolution} contract.
    */
   public void testMixinResolvedAcrossSourceTreesWithNoInputPath() {
-    // Mixin/implements/parserUtilClass classes placed in directories that are NOT under the
-    // BNF file's parent. Pre-fix narrow scope = {/src/grammar/**} → none of these resolve.
+    // Mixin/extends-base/implements/parserUtilClass classes placed in directories that are NOT
+    // under the BNF file's parent. Pre-fix narrow scope = {/src/grammar/**} → none of these resolve.
     myFixture.addFileToProject("code/mixin/MyMixin.java", """
       package code.mixin;
       public abstract class MyMixin {
         public MyMixin(Object node) {}
+      }
+      """);
+    myFixture.addFileToProject("code/base/MyBase.java", """
+      package code.base;
+      public abstract class MyBase {
+        public MyBase(Object node) {}
       }
       """);
     myFixture.addFileToProject("code/iface/MyIface.java", """
@@ -389,6 +396,7 @@ public class BnfGeneratorPsiTest extends BasePlatformTestCase {
       Root ::= Item*
       Item ::= ID {
         mixin='code.mixin.MyMixin'
+        extends='code.base.MyBase'
         implements='code.iface.MyIface'
       }
       """);
@@ -400,10 +408,11 @@ public class BnfGeneratorPsiTest extends BasePlatformTestCase {
     assertNull("INPUT_PATH must be absent when grammar declares none",
                resolution.path(KnownAttribute.INPUT_PATH));
     assertNull(BnfPaths.referencePath(resolution, KnownAttribute.MIXIN));
+    assertNull(BnfPaths.referencePath(resolution, KnownAttribute.EXTENDS));
     assertNull(BnfPaths.referencePath(resolution, KnownAttribute.IMPLEMENTS));
     assertNull(BnfPaths.referencePath(resolution, KnownAttribute.PARSER_UTIL_CLASS));
 
-    // JavaHelperFactory must widen to a project-wide scope and resolve all three classes,
+    // JavaHelperFactory must widen to a project-wide scope and resolve all four classes,
     // even though they live outside /src/grammar/.
     JavaHelperFactory factory = JavaHelperFactory.getInstance(getProject());
     assertNotNull("JavaHelperFactory must be available in IDE-mode tests", factory);
@@ -411,6 +420,8 @@ public class BnfGeneratorPsiTest extends BasePlatformTestCase {
     JavaHelperFactory.ScopedHelpers scoped = factory.scoped(resolution);
     assertNotNull("mixin class must resolve via project-wide fallback scope",
                   scoped.get(KnownAttribute.MIXIN).findClass("code.mixin.MyMixin"));
+    assertNotNull("extends class must resolve via project-wide fallback scope",
+                  scoped.get(KnownAttribute.EXTENDS).findClass("code.base.MyBase"));
     assertNotNull("implements class must resolve via project-wide fallback scope",
                   scoped.get(KnownAttribute.IMPLEMENTS).findClass("code.iface.MyIface"));
     assertNotNull("parserUtilClass must resolve via project-wide fallback scope",

@@ -72,6 +72,7 @@ public final class BnfPaths {
   public static final Map<KnownAttribute<?>, KnownAttribute<String>> INPUT_FOR = Map.of(
     KnownAttribute.PSI_IMPL_UTIL_CLASS,  KnownAttribute.PSI_INPUT_PATH,
     KnownAttribute.MIXIN,                KnownAttribute.PSI_INPUT_PATH,
+    KnownAttribute.EXTENDS,              KnownAttribute.PSI_INPUT_PATH,
     KnownAttribute.IMPLEMENTS,           KnownAttribute.PSI_INPUT_PATH);
 
   /** FQN-attribute → its corresponding {@code *OutputPath} sibling. */

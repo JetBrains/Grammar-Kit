@@ -10,6 +10,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.nio.file.Path;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -285,9 +286,9 @@ public class BnfPathsResolutionTest extends JavaCodeInsightFixtureTestCase {
   }
 
   public void testResolveExplicitFromMap() {
-    Map<KnownAttribute<String>, Path> map = new HashMap<>();
-    map.put(KnownAttribute.PARSER_OUTPUT_PATH, Path.of("/tmp/parser"));
-    map.put(KnownAttribute.PSI_INPUT_PATH, Path.of("/tmp/psi-in"));
+    Map<KnownAttribute<?>, List<Path>> map = new HashMap<>();
+    map.put(KnownAttribute.PARSER_OUTPUT_PATH, List.of(Path.of("/tmp/parser")));
+    map.put(KnownAttribute.PSI_INPUT_PATH, List.of(Path.of("/tmp/psi-in")));
     BnfPathsResolution paths = BnfPaths.resolveExplicit(map);
 
     assertEquals(Path.of("/tmp/parser"), paths.path(KnownAttribute.PARSER_OUTPUT_PATH));
@@ -298,7 +299,7 @@ public class BnfPathsResolutionTest extends JavaCodeInsightFixtureTestCase {
 
   public void testEveryOutputAttributeCascadesToParserWhenPsiUnset() {
     BnfPathsResolution paths = BnfPaths.resolveExplicit(
-      Map.of(KnownAttribute.PARSER_OUTPUT_PATH, Path.of("/tmp/parser")));
+      Map.of(KnownAttribute.PARSER_OUTPUT_PATH, List.of(Path.of("/tmp/parser"))));
     // No PSI override: the cascade collapses to parser for every dependent attribute.
     assertEquals(Path.of("/tmp/parser"), paths.path(KnownAttribute.PSI_OUTPUT_PATH));
     assertEquals(Path.of("/tmp/parser"), paths.path(KnownAttribute.ELEMENT_TYPE_HOLDER_OUTPUT_PATH));
@@ -307,9 +308,9 @@ public class BnfPathsResolutionTest extends JavaCodeInsightFixtureTestCase {
   }
 
   public void testEtAttributesCascadeToPsiWhenPsiSet() {
-    Map<KnownAttribute<String>, Path> map = new HashMap<>();
-    map.put(KnownAttribute.PARSER_OUTPUT_PATH, Path.of("/tmp/parser"));
-    map.put(KnownAttribute.PSI_OUTPUT_PATH, Path.of("/tmp/psi"));
+    Map<KnownAttribute<?>, List<Path>> map = new HashMap<>();
+    map.put(KnownAttribute.PARSER_OUTPUT_PATH, List.of(Path.of("/tmp/parser")));
+    map.put(KnownAttribute.PSI_OUTPUT_PATH, List.of(Path.of("/tmp/psi")));
     BnfPathsResolution paths = BnfPaths.resolveExplicit(map);
     // Element-type artifacts travel with PSI, not the parser, when PSI has its own root.
     assertEquals(Path.of("/tmp/psi"), paths.path(KnownAttribute.ELEMENT_TYPE_HOLDER_OUTPUT_PATH));
@@ -318,9 +319,9 @@ public class BnfPathsResolutionTest extends JavaCodeInsightFixtureTestCase {
   }
 
   public void testPathStringReturnsExplicitValue() {
-    Map<KnownAttribute<String>, Path> map = new HashMap<>();
-    map.put(KnownAttribute.PARSER_OUTPUT_PATH, Path.of("/tmp/parser"));
-    map.put(KnownAttribute.PSI_OUTPUT_PATH, Path.of("/tmp/psi"));
+    Map<KnownAttribute<?>, List<Path>> map = new HashMap<>();
+    map.put(KnownAttribute.PARSER_OUTPUT_PATH, List.of(Path.of("/tmp/parser")));
+    map.put(KnownAttribute.PSI_OUTPUT_PATH, List.of(Path.of("/tmp/psi")));
     BnfPathsResolution paths = BnfPaths.resolveExplicit(map);
     assertEquals("/tmp/psi", paths.pathString(KnownAttribute.PSI_OUTPUT_PATH));
     assertEquals("/tmp/parser", paths.pathString(KnownAttribute.PARSER_OUTPUT_PATH));
@@ -328,7 +329,7 @@ public class BnfPathsResolutionTest extends JavaCodeInsightFixtureTestCase {
 
   public void testPathStringThrowsWhenAttributeUnresolved() {
     BnfPathsResolution paths = BnfPaths.resolveExplicit(
-      Map.of(KnownAttribute.PARSER_OUTPUT_PATH, Path.of("/tmp/parser")));
+      Map.of(KnownAttribute.PARSER_OUTPUT_PATH, List.of(Path.of("/tmp/parser"))));
     try {
       paths.pathString(KnownAttribute.PSI_INPUT_PATH);
       fail("expected IllegalStateException for unset input attribute");
@@ -372,16 +373,16 @@ public class BnfPathsResolutionTest extends JavaCodeInsightFixtureTestCase {
   // ---- Input cascade -------------------------------------------------------
 
   public void testInputCascadeFillsPsiInputFromGlobal() {
-    Map<KnownAttribute<String>, Path> map = new HashMap<>();
-    map.put(KnownAttribute.INPUT_PATH, Path.of("/tmp/in"));
+    Map<KnownAttribute<?>, List<Path>> map = new HashMap<>();
+    map.put(KnownAttribute.INPUT_PATH, List.of(Path.of("/tmp/in")));
     BnfPathsResolution paths = BnfPaths.resolveExplicit(map);
     assertEquals(Path.of("/tmp/in"), paths.path(KnownAttribute.PSI_INPUT_PATH));
   }
 
   public void testInputCascadePreservesExplicitOverrides() {
-    Map<KnownAttribute<String>, Path> map = new HashMap<>();
-    map.put(KnownAttribute.INPUT_PATH, Path.of("/tmp/in"));
-    map.put(KnownAttribute.PSI_INPUT_PATH, Path.of("/tmp/psi-in"));
+    Map<KnownAttribute<?>, List<Path>> map = new HashMap<>();
+    map.put(KnownAttribute.INPUT_PATH, List.of(Path.of("/tmp/in")));
+    map.put(KnownAttribute.PSI_INPUT_PATH, List.of(Path.of("/tmp/psi-in")));
     BnfPathsResolution paths = BnfPaths.resolveExplicit(map);
     assertEquals(Path.of("/tmp/psi-in"), paths.path(KnownAttribute.PSI_INPUT_PATH));
     assertEquals(Path.of("/tmp/in"), paths.path(KnownAttribute.INPUT_PATH));
@@ -395,10 +396,80 @@ public class BnfPathsResolutionTest extends JavaCodeInsightFixtureTestCase {
   }
 
   public void testResolveExplicitWithBnfParentRespectsExplicitInput() {
-    Map<KnownAttribute<String>, Path> map = new HashMap<>();
-    map.put(KnownAttribute.INPUT_PATH, Path.of("/tmp/explicit-in"));
+    Map<KnownAttribute<?>, List<Path>> map = new HashMap<>();
+    map.put(KnownAttribute.INPUT_PATH, List.of(Path.of("/tmp/explicit-in")));
     BnfPathsResolution paths = BnfPaths.resolveExplicit(map, Path.of("/tmp/grammar"));
     assertEquals(Path.of("/tmp/explicit-in"), paths.path(KnownAttribute.INPUT_PATH));
     assertEquals(Path.of("/tmp/explicit-in"), paths.path(KnownAttribute.PSI_INPUT_PATH));
+  }
+
+  // ---- Multi-path psiInputPath --------------------------------------------
+
+  public void testPsiInputPathListFormResolvesEveryRoot() {
+    BnfFile bnf = bnfWith("g.bnf", """
+      {
+        psiInputPath=[ "../psi" "../shared" ]
+      }
+      root ::= 'a'
+      """);
+    BnfPathsResolution paths = BnfPaths.resolve(bnf);
+    Path parent = bnfParent(bnf);
+    List<Path> psiPaths = paths.paths(KnownAttribute.PSI_INPUT_PATH);
+    assertEquals(2, psiPaths.size());
+    assertEquals(parent.resolve("../psi").normalize(), psiPaths.get(0));
+    assertEquals(parent.resolve("../shared").normalize(), psiPaths.get(1));
+  }
+
+  public void testPsiInputPathListFormFlowsThroughReferencePaths() {
+    BnfFile bnf = bnfWith("g.bnf", """
+      {
+        psiInputPath=[ "../psi" "../shared" ]
+      }
+      root ::= 'a'
+      """);
+    BnfPathsResolution paths = BnfPaths.resolve(bnf);
+    Path parent = bnfParent(bnf);
+    List<Path> mixin = BnfPaths.referencePaths(paths, KnownAttribute.MIXIN);
+    assertEquals(2, mixin.size());
+    assertEquals(parent.resolve("../psi").normalize(), mixin.get(0));
+    assertEquals(parent.resolve("../shared").normalize(), mixin.get(1));
+    // Single-path accessor collapses to the first root, preserving back-compat with callers that
+    // only consult one directory.
+    assertEquals(parent.resolve("../psi").normalize(), BnfPaths.referencePath(paths, KnownAttribute.MIXIN));
+  }
+
+  public void testPsiInputPathSingleStringRemainsOneElementList() {
+    // The "single string" form continues to work via KnownAttribute.ensureValue auto-wrap.
+    BnfFile bnf = bnfWith("g.bnf", """
+      { psiInputPath="../psi" }
+      root ::= 'a'
+      """);
+    BnfPathsResolution paths = BnfPaths.resolve(bnf);
+    Path parent = bnfParent(bnf);
+    List<Path> psiPaths = paths.paths(KnownAttribute.PSI_INPUT_PATH);
+    assertEquals(1, psiPaths.size());
+    assertEquals(parent.resolve("../psi").normalize(), psiPaths.get(0));
+  }
+
+  public void testPsiInputPathEmptyListBehavesLikeUnset() {
+    BnfFile bnf = bnfWith("g.bnf", """
+      { inputPath="../global" psiInputPath=[] }
+      root ::= 'a'
+      """);
+    BnfPathsResolution paths = BnfPaths.resolve(bnf);
+    Path parent = bnfParent(bnf);
+    // Empty list → psiInputPath stays unset → cascade fills it from the global inputPath.
+    assertEquals(List.of(parent.resolve("../global").normalize()),
+                 paths.paths(KnownAttribute.PSI_INPUT_PATH));
+  }
+
+  public void testCascadeFromMultiPathExplicitMap() {
+    // resolveExplicit accepts multi-path lists directly (CLI seeding path).
+    Map<KnownAttribute<?>, List<Path>> map = new HashMap<>();
+    map.put(KnownAttribute.PSI_INPUT_PATH,
+            List.of(Path.of("/tmp/psi"), Path.of("/tmp/shared")));
+    BnfPathsResolution paths = BnfPaths.resolveExplicit(map);
+    assertEquals(List.of(Path.of("/tmp/psi"), Path.of("/tmp/shared")),
+                 BnfPaths.referencePaths(paths, KnownAttribute.MIXIN));
   }
 }

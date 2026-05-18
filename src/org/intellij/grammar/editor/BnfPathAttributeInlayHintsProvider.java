@@ -15,7 +15,9 @@ import org.intellij.grammar.psi.BnfAttr;
 import org.intellij.grammar.psi.BnfAttributes;
 import org.intellij.grammar.psi.BnfExpression;
 import org.intellij.grammar.psi.BnfFile;
+import org.intellij.grammar.psi.BnfListEntry;
 import org.intellij.grammar.psi.BnfStringLiteralExpression;
+import org.intellij.grammar.psi.BnfValueList;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -25,6 +27,10 @@ import java.nio.file.Path;
  * Shows the absolute filesystem location that an {@code *InputPath} or {@code *OutputPath} BNF
  * attribute resolves to. Path resolution is delegated to {@link BnfPaths}, which is the single
  * source of truth for path-attribute resolution across the IDE and the build context.
+ *
+ * <p>Handles both forms: a single string literal ({@code psiInputPath="../psi"}) and a
+ * {@link BnfValueList list expression} ({@code psiInputPath=["../psi" "../shared"]}) — one hint
+ * per quoted path in the latter case.
  */
 final class BnfPathAttributeInlayHintsProvider implements InlayHintsProvider, DumbAware {
 
@@ -42,12 +48,26 @@ final class BnfPathAttributeInlayHintsProvider implements InlayHintsProvider, Du
       if (BnfPaths.pathAttributeByName(attr.getName()) == null) return;
 
       BnfExpression expression = attr.getExpression();
-      if (!(expression instanceof BnfStringLiteralExpression literal)) return;
+      BnfFile bnfFile = (BnfFile)attr.getContainingFile();
 
+      if (expression instanceof BnfStringLiteralExpression literal) {
+        emitInlayForLiteral(literal, bnfFile, sink);
+      }
+      else if (expression instanceof BnfValueList list) {
+        for (BnfListEntry entry : list.getListEntryList()) {
+          BnfStringLiteralExpression literal = entry.getLiteralExpression();
+          if (literal != null) emitInlayForLiteral(literal, bnfFile, sink);
+        }
+      }
+    }
+
+    private static void emitInlayForLiteral(@NotNull BnfStringLiteralExpression literal,
+                                            @NotNull BnfFile bnfFile,
+                                            @NotNull InlayTreeSink sink) {
       String value = BnfAttributes.getLiteralValue(literal);
       if (value == null || value.isEmpty()) return;
 
-      Path resolved = BnfPaths.resolveOnDisk((BnfFile)attr.getContainingFile(), value);
+      Path resolved = BnfPaths.resolveOnDisk(bnfFile, value);
       if (resolved == null) return;
 
       String absolute = resolved.toString();

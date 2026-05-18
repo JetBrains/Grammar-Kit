@@ -129,14 +129,14 @@ public class JavaBnfGeneratorTest extends AbstractBnfGeneratorTest {
     java.nio.file.Path etHolderPath  = resolveTestPath(psiFile, KnownAttribute.ELEMENT_TYPE_HOLDER_OUTPUT_PATH);
     java.nio.file.Path converterPath = resolveTestPath(psiFile, KnownAttribute.ELEMENT_TYPE_CONVERTER_FACTORY_OUTPUT_PATH);
     java.nio.file.Path inputPath     = resolveTestPath(psiFile, KnownAttribute.INPUT_PATH);
-    java.nio.file.Path psiInputPath  = resolveTestPath(psiFile, KnownAttribute.PSI_INPUT_PATH);
+    List<java.nio.file.Path> psiInputPaths = resolveTestPaths(psiFile, KnownAttribute.PSI_INPUT_PATH);
     // PSI_OUTPUT_PATH is intentionally ignored in pure-Java mode (it is a Kotlin/syntax-api-only attribute).
-    java.util.Map<KnownAttribute<String>, java.nio.file.Path> map = new java.util.HashMap<>();
-    map.put(KnownAttribute.PARSER_OUTPUT_PATH, parserPath != null ? parserPath : java.nio.file.Path.of(outputPath));
-    if (etHolderPath != null) map.put(KnownAttribute.ELEMENT_TYPE_HOLDER_OUTPUT_PATH, etHolderPath);
-    if (converterPath != null) map.put(KnownAttribute.ELEMENT_TYPE_CONVERTER_FACTORY_OUTPUT_PATH, converterPath);
-    if (inputPath != null) map.put(KnownAttribute.INPUT_PATH, inputPath);
-    if (psiInputPath != null) map.put(KnownAttribute.PSI_INPUT_PATH, psiInputPath);
+    java.util.Map<KnownAttribute<?>, List<java.nio.file.Path>> map = new java.util.HashMap<>();
+    map.put(KnownAttribute.PARSER_OUTPUT_PATH, List.of(parserPath != null ? parserPath : java.nio.file.Path.of(outputPath)));
+    if (etHolderPath != null) map.put(KnownAttribute.ELEMENT_TYPE_HOLDER_OUTPUT_PATH, List.of(etHolderPath));
+    if (converterPath != null) map.put(KnownAttribute.ELEMENT_TYPE_CONVERTER_FACTORY_OUTPUT_PATH, List.of(converterPath));
+    if (inputPath != null) map.put(KnownAttribute.INPUT_PATH, List.of(inputPath));
+    if (!psiInputPaths.isEmpty()) map.put(KnownAttribute.PSI_INPUT_PATH, psiInputPaths);
     org.intellij.grammar.BnfPathsResolution paths = org.intellij.grammar.BnfPaths.resolveExplicit(map);
     return List.of(new JavaParserGenerator(psiFile, "", "", outputOpener, paths));
   }
@@ -146,5 +146,17 @@ public class JavaBnfGeneratorTest extends AbstractBnfGeneratorTest {
     if (relative == null) return null;
     String projectPath = myFullDataPath.substring(0, myFullDataPath.lastIndexOf(File.separatorChar) + 1);
     return java.nio.file.Path.of(projectPath + relative);
+  }
+
+  private @NotNull List<java.nio.file.Path> resolveTestPaths(@NotNull BnfFile psiFile,
+                                                             @NotNull KnownAttribute<KnownAttribute.ListValue> attr) {
+    KnownAttribute.ListValue list = getRootAttribute(psiFile, attr);
+    if (list == null || list.isEmpty()) return List.of();
+    String projectPath = myFullDataPath.substring(0, myFullDataPath.lastIndexOf(File.separatorChar) + 1);
+    List<java.nio.file.Path> result = new java.util.ArrayList<>(list.size());
+    for (String relative : list.asStrings()) {
+      if (relative != null && !relative.isEmpty()) result.add(java.nio.file.Path.of(projectPath + relative));
+    }
+    return List.copyOf(result);
   }
 }

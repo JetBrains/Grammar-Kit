@@ -231,7 +231,9 @@ public class BnfGeneratorPsiTest extends BasePlatformTestCase {
       return OutputOpener.DEFAULT.openOutput(className, file, myBnfFile);
     };
     JavaParserGenerator generator = new JavaParserGenerator(bnfFile, "", "", outputOpener,
-      BnfPaths.resolveExplicit(java.util.Map.of(KnownAttribute.PARSER_OUTPUT_PATH, java.nio.file.Path.of(FileUtilRt.getTempDirectory()))));
+      BnfPaths.resolveExplicit(java.util.Map.of(
+        KnownAttribute.PARSER_OUTPUT_PATH,
+        java.util.List.of(java.nio.file.Path.of(FileUtilRt.getTempDirectory())))));
 
     // Simulate PsiHelper bug for qualified types (#436):
     // In real IDE with platform SDK classes resolved from bytecode,

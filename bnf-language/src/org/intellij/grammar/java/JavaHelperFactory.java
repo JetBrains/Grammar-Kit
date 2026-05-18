@@ -44,7 +44,7 @@ import java.util.Map;
  * <p>
  * The helper's class-lookup scope is decided once at construction time by consulting the
  * {@link BnfPathsResolution} associated with the caller and applying the full
- * {@code *InputPath} / {@code *OutputPath} cascade via {@link BnfPaths#referencePath}.
+ * {@code *InputPath} / {@code *OutputPath} cascade via {@link BnfPaths#referencePaths}.
  * <p>
  * Two entry points cover the supported flavours:
  * <ul>
@@ -122,8 +122,8 @@ public final class JavaHelperFactory {
    * callers prefer {@link #scoped(BnfPathsResolution)}.
    */
   public @NotNull JavaHelper getInstance(@NotNull PsiElement context) {
-    Path dir = referenceDir(context);
-    return buildHelper(dir, ExtraClasses.empty());
+    List<Path> dirs = referenceDirs(context);
+    return buildHelper(dirs, ExtraClasses.empty());
   }
 
   /** Source-scope accessor without any extra synthesised classes. */
@@ -154,19 +154,19 @@ public final class JavaHelperFactory {
     public @NotNull JavaHelper get(@Nullable KnownAttribute<?> attribute) {
       if (attribute == null) {
         if (nullAttrHelper == null) {
-          Path dir = BnfPaths.referencePath(paths, null);
-          nullAttrHelper = buildHelper(dir, extras);
+          List<Path> dirs = BnfPaths.referencePaths(paths, null);
+          nullAttrHelper = buildHelper(dirs, extras);
         }
         return nullAttrHelper;
       }
-      return cache.computeIfAbsent(attribute, a -> buildHelper(BnfPaths.referencePath(paths, a), extras));
+      return cache.computeIfAbsent(attribute, a -> buildHelper(BnfPaths.referencePaths(paths, a), extras));
     }
   }
 
-  private @NotNull JavaHelper buildHelper(@Nullable Path dir, @NotNull ExtraClasses extras) {
+  private @NotNull JavaHelper buildHelper(@NotNull List<Path> dirs, @NotNull ExtraClasses extras) {
     if (useSyntaxHelper()) {
       try {
-        List<JvmClassSymbolProvider> providers = syntaxProviders(dir, extras);
+        List<JvmClassSymbolProvider> providers = syntaxProviders(dirs, extras);
         JvmClassSymbolManager symbolManager = new JvmClassSymbolManager(providers);
         return new JvmSyntaxHelper(symbolManager);
       }
@@ -175,7 +175,7 @@ public final class JavaHelperFactory {
       }
     }
 
-    return new PsiHelper(myProject, scopeFor(dir), new JvmClassSymbolManager(psiFallbackProviders(extras)));
+    return new PsiHelper(myProject, scopeFor(dirs), new JvmClassSymbolManager(psiFallbackProviders(extras)));
   }
 
   private boolean useSyntaxHelper() {
@@ -188,16 +188,15 @@ public final class JavaHelperFactory {
     }
   }
 
-  private static @NotNull List<JvmClassSymbolProvider> syntaxProviders(@Nullable Path dir, @NotNull ExtraClasses extras) {
+  private static @NotNull List<JvmClassSymbolProvider> syntaxProviders(@NotNull List<Path> dirs, @NotNull ExtraClasses extras) {
     List<JvmClassSymbolProvider> providers = new ArrayList<>();
     if (!extras.isEmpty()) {
       providers.add(new ExtraClassSymbolProvider(extras.byFqn()));
     }
-    if (dir != null) {
-      List<Path> roots = List.of(dir);
+    if (!dirs.isEmpty()) {
       SyntaxTreeCache treeCache = new SyntaxTreeCache();
-      providers.add(new KotlinSyntaxClassSymbolProvider(roots, treeCache));
-      providers.add(new JavaSyntaxClassSymbolProvider(roots, treeCache));
+      providers.add(new KotlinSyntaxClassSymbolProvider(dirs, treeCache));
+      providers.add(new JavaSyntaxClassSymbolProvider(dirs, treeCache));
     }
     providers.add(new AsmClassSymbolProvider());
     return providers;
@@ -212,26 +211,31 @@ public final class JavaHelperFactory {
     return providers;
   }
 
-  private static @Nullable Path referenceDir(@NotNull PsiElement context) {
+  private static @NotNull List<Path> referenceDirs(@NotNull PsiElement context) {
     BnfFile bnfFile = context.getContainingFile() instanceof BnfFile f ? f : null;
-    if (bnfFile == null) return null;
+    if (bnfFile == null) return List.of();
     BnfAttr enclosingAttr = PsiTreeUtil.getParentOfType(context, BnfAttr.class, false);
     KnownAttribute<?> fqnAttribute = enclosingAttr == null ? null : KnownAttribute.getAttribute(enclosingAttr.getName());
     BnfPathsResolution paths = BnfPaths.resolve(bnfFile);
-    return BnfPaths.referencePath(paths, fqnAttribute);
+    return BnfPaths.referencePaths(paths, fqnAttribute);
   }
 
   /**
-   * Translates a resolved input directory into a class-lookup scope. A non-null {@code dir}
-   * narrows lookup to that subtree (the explicit {@code *InputPath} declaration). When the
+   * Translates a resolved set of input directories into a class-lookup scope. A non-empty list
+   * narrows lookup to those subtrees (the explicit {@code *InputPath} declaration). When the
    * resolution carries no input path — i.e. the grammar declared none — we widen to
    * {@link GlobalSearchScope#allScope project + libraries + SDK} so references to classes
    * outside the BNF parent (sibling modules, library bases, etc.) still resolve.
    */
-  private @NotNull GlobalSearchScope scopeFor(@Nullable Path dir) {
-    if (dir == null) return GlobalSearchScope.allScope(myProject);
-    VirtualFile vf = VirtualFileManager.getInstance().findFileByNioPath(dir);
-    if (vf == null) return GlobalSearchScope.allScope(myProject);
-    return GlobalSearchScopesCore.directoriesScope(myProject, true, vf);
+  private @NotNull GlobalSearchScope scopeFor(@NotNull List<Path> dirs) {
+    if (dirs.isEmpty()) return GlobalSearchScope.allScope(myProject);
+    VirtualFileManager vfm = VirtualFileManager.getInstance();
+    List<VirtualFile> vfs = new ArrayList<>(dirs.size());
+    for (Path dir : dirs) {
+      VirtualFile vf = vfm.findFileByNioPath(dir);
+      if (vf != null) vfs.add(vf);
+    }
+    if (vfs.isEmpty()) return GlobalSearchScope.allScope(myProject);
+    return GlobalSearchScopesCore.directoriesScope(myProject, true, vfs.toArray(VirtualFile.EMPTY_ARRAY));
   }
 }

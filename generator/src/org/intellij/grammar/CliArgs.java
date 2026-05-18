@@ -10,19 +10,24 @@ import java.io.PrintStream;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 /**
- * Parsed CLI invocation. {@code paths} holds explicit absolute path overrides keyed by
- * the corresponding {@link KnownAttribute}; {@code grammarPatterns} are the grammar-file
- * arguments (one entry under the new form, one or more under the legacy form).
- * {@code sourcePsi} opts the headless generator into source-backed Java class lookup
- * via {@link org.intellij.grammar.java.syntax.JavaSyntaxHelper}, rooted at the resolved
- * {@code inputPath} / {@code psiInputPath}.
+ * Parsed CLI invocation. {@code paths} holds explicit absolute path overrides keyed by the
+ * corresponding {@link KnownAttribute}: each value is a {@link List} of paths so the multi-valued
+ * {@link KnownAttribute#PSI_INPUT_PATH} (repeatable {@code --psi-input} flag) round-trips through
+ * the same shape as the in-memory {@link BnfPathsResolution}. Single-valued flags carry
+ * one-element lists.
+ *
+ * <p>{@code grammarPatterns} are the grammar-file arguments (one entry under the new form, one
+ * or more under the legacy form). {@code sourcePsi} opts the headless generator into
+ * source-backed Java class lookup via {@link org.intellij.grammar.java.syntax.JavaSyntaxHelper},
+ * rooted at the resolved {@code inputPath} / {@code psiInputPath}.
  */
-record CliArgs(@NotNull Map<KnownAttribute<String>, Path> paths,
+record CliArgs(@NotNull Map<KnownAttribute<?>, List<Path>> paths,
                @NotNull List<String> grammarPatterns,
                boolean strictPaths,
                boolean sourcePsi) {
@@ -65,16 +70,16 @@ record CliArgs(@NotNull Map<KnownAttribute<String>, Path> paths,
   }
 
   private static CliArgs parseLegacy(@NotNull String[] args) throws UsageException {
-    Map<KnownAttribute<String>, Path> paths = new LinkedHashMap<>();
-    paths.put(KnownAttribute.PARSER_OUTPUT_PATH, toAbsolute(args[0]));
-    List<String> patterns = new java.util.ArrayList<>();
+    Map<KnownAttribute<?>, List<Path>> paths = new LinkedHashMap<>();
+    paths.put(KnownAttribute.PARSER_OUTPUT_PATH, List.of(toAbsolute(args[0])));
+    List<String> patterns = new ArrayList<>();
     for (int i = 1; i < args.length; i++) patterns.add(args[i]);
     return new CliArgs(Map.copyOf(paths), List.copyOf(patterns), false, false);
   }
 
   private static CliArgs parseNew(@NotNull String[] args) throws UsageException {
-    Map<KnownAttribute<String>, Path> paths = new LinkedHashMap<>();
-    List<String> positionals = new java.util.ArrayList<>();
+    Map<KnownAttribute<?>, List<Path>> paths = new LinkedHashMap<>();
+    List<String> positionals = new ArrayList<>();
     boolean strict = false;
     boolean sourcePsi = false;
 
@@ -91,12 +96,24 @@ record CliArgs(@NotNull Map<KnownAttribute<String>, Path> paths,
         i++;
         continue;
       }
-      KnownAttribute<String> attr = Main.FLAG_TO_ATTR.get(a);
+      KnownAttribute<?> attr = Main.FLAG_TO_ATTR.get(a);
       if (attr != null) {
         if (i + 1 >= args.length) {
           throw new UsageException(1, "Missing value for " + a);
         }
-        paths.put(attr, toAbsolute(args[i + 1]));
+        Path resolved = toAbsolute(args[i + 1]);
+        if (Main.MULTI_VALUE_ATTRS.contains(attr)) {
+          // Repeatable flag: accumulate occurrences in declaration order.
+          paths.merge(attr, List.of(resolved), (oldList, newList) -> {
+            List<Path> combined = new ArrayList<>(oldList);
+            combined.addAll(newList);
+            return List.copyOf(combined);
+          });
+        }
+        else {
+          // Single-value flag: last occurrence wins (preserves existing CLI semantics).
+          paths.put(attr, List.of(resolved));
+        }
         i += 2;
         continue;
       }
@@ -115,6 +132,12 @@ record CliArgs(@NotNull Map<KnownAttribute<String>, Path> paths,
                                   "; legacy multi-grammar form does not accept --flags.");
     }
     return new CliArgs(Map.copyOf(paths), List.copyOf(positionals), strict, sourcePsi);
+  }
+
+  /** First resolved path for {@code attr}, or {@code null} when the CLI did not supply one. */
+  Path firstPath(@NotNull KnownAttribute<?> attr) {
+    List<Path> list = paths.get(attr);
+    return list == null || list.isEmpty() ? null : list.get(0);
   }
 
   private static @NotNull Path toAbsolute(@NotNull String value) throws UsageException {

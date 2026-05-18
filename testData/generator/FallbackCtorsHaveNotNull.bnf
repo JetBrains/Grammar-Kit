@@ -1,0 +1,22 @@
+{
+  generate=[parser-api="syntax"]
+  generatePsi=true
+  classHeader="//header.txt"
+  psiPackage="test.psi"
+  psiImplPackage="test.psi.impl"
+  parserClass="test.FooParser"
+  elementTypeFactory="test.FooParserDefinition.createType"
+  syntaxElementTypeFactory="test.FooParserDefinition.createSyntaxType"
+  tokenTypeFactory="test.stub.FooParserDefinition.createTokenType"
+  elementTypeHolderClass="test.FooTypes"
+  parserUtilClass="org.intellij.grammar.parser.GeneratedParserUtilBase"
+  syntaxParserUtilObject="com.intellij.platform.syntax.util.runtime.SyntaxGeneratedParserRuntime"
+  syntaxElementTypeHolderClass="test.FooSyntaxTypes"
+}
+root ::= unresolved
+unresolved ::= 'aa' {
+  // mixin/extends point at a class that the helper cannot resolve — forces both
+  // astNodeConstructorSignature and stubConstructorSignature fallbacks.
+  mixin = "test.psi.ext.MissingMixin"
+  stubClass = "test.stub.UnresolvedStub"
+}

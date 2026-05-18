@@ -651,7 +651,7 @@ import generated.psi.*;
 
 public class RecursiveExtendAImpl extends RecursiveExtendBImpl implements RecursiveExtendA {
 
-  public RecursiveExtendAImpl(ASTNode node) {
+  public RecursiveExtendAImpl(@NotNull ASTNode node) {
     super(node);
   }
 
@@ -682,7 +682,7 @@ import generated.psi.*;
 
 public class RecursiveExtendBImpl extends RecursiveExtendAImpl implements RecursiveExtendB {
 
-  public RecursiveExtendBImpl(ASTNode node) {
+  public RecursiveExtendBImpl(@NotNull ASTNode node) {
     super(node);
   }
 

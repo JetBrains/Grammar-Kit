@@ -59,7 +59,7 @@ public final class KotlinSyntaxClassSymbolProvider implements JvmClassSymbolProv
     while (!builders.containsKey(fqn)) {
       prefix = prefix.parent();
       if (prefix.isEmpty()) break;
-      if (!scannedPackages.add(prefix)) break;
+      if (!scannedPackages.add(prefix)) continue;
       for (Path dir : sourceResolver.findPackageDirs(prefix)) {
         scanPackage(dir, builders, resolver);
       }

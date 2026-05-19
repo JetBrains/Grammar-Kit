@@ -215,6 +215,35 @@ public class KotlinBnfGeneratorTest extends AbstractBnfGeneratorTest {
                captured.contains("unresolved: mixin class test.psi.ext.MissingMixin not found"));
   }
 
+  /**
+   * The {@code implements} attribute may name a sister BNF rule, not just a JVM class FQN
+   * (e.g. {@code implements=Type} in real-world grammars such as go.bnf). The unresolved-class
+   * probe must skip sister-rule entries — both standalone and inside a mixed list — while still
+   * warning about genuinely missing FQNs in the same list.
+   */
+  public void testImplementsRuleNoWarning() throws Exception {
+    ByteArrayOutputStream buf = new ByteArrayOutputStream();
+    PrintStream originalOut = System.out;
+    System.setOut(new PrintStream(buf, true, StandardCharsets.UTF_8));
+    try {
+      String testName = getTestName(false);
+      myFile = createBnfFile(true, testName, loadFile(testName + "." + myFileExt));
+      for (ParserGenerator generator : createGenerators((BnfFile)myFile, myFullDataPath, getTestOpener())) {
+        generator.generate();
+      }
+    }
+    finally {
+      System.setOut(originalOut);
+    }
+    String captured = buf.toString(StandardCharsets.UTF_8);
+    assertFalse("rule-name implements must not warn:\n" + captured,
+                captured.contains("usesSister: implements interface target not found"));
+    assertFalse("rule-name implements inside a mixed list must not warn:\n" + captured,
+                captured.contains("mixed: implements interface target not found"));
+    assertTrue("missing FQN in a mixed list must still warn:\n" + captured,
+               captured.contains("mixed: implements interface test.psi.AnotherMissing not found"));
+  }
+
   public void testTokenChoice() throws Exception {
     doPsiTest();
   }

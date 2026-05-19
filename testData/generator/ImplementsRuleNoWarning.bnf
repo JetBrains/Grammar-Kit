@@ -1,0 +1,21 @@
+{
+  generate=[parser-api="syntax"]
+  generatePsi=true
+  classHeader="//header.txt"
+  psiPackage="test.psi"
+  psiImplPackage="test.psi.impl"
+  parserClass="test.FooParser"
+  elementTypeFactory="test.FooParserDefinition.createType"
+  syntaxElementTypeFactory="test.FooParserDefinition.createSyntaxType"
+  tokenTypeFactory="test.stub.FooParserDefinition.createTokenType"
+  elementTypeHolderClass="test.FooTypes"
+  parserUtilClass="org.intellij.grammar.parser.GeneratedParserUtilBase"
+  syntaxParserUtilObject="com.intellij.platform.syntax.util.runtime.SyntaxGeneratedParserRuntime"
+  syntaxElementTypeHolderClass="test.FooSyntaxTypes"
+}
+// `target` is a sister rule referenced via `implements` below; it must not trigger
+// a "class not found" warning despite not naming a JVM class.
+root ::= target | usesSister | mixed
+target ::= 'a'
+usesSister ::= 'b' { implements = target }
+mixed ::= 'c' { implements = [target "test.psi.AnotherMissing"] }

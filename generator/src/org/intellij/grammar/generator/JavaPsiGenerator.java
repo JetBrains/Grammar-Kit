@@ -1428,12 +1428,15 @@ public final class JavaPsiGenerator extends Generator {
       }
     }
 
+    // IMPLEMENTS, like EXTENDS, may name a sister BNF rule (resolved to its generated PSI interface)
+    // or a JVM class FQN. Only probe the latter — sister-rule references are validated by the rule graph.
     KnownAttribute.ListValue implementsList = getAttribute(rule, KnownAttribute.IMPLEMENTS);
     if (implementsList != null) {
       JavaHelper implementsHelper = helperFor(KnownAttribute.IMPLEMENTS);
       for (Pair<String, String> entry : implementsList) {
         String fqn = entry.second;
         if (StringUtil.isEmpty(fqn)) continue;
+        if (myFile.getRule(fqn) != null) continue;
         String raw = getRawClassName(fqn);
         if (implementsHelper.findClass(raw) == null) {
           messages.add("implements interface " + raw + " not found");

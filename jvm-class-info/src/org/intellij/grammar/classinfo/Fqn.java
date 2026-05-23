@@ -20,6 +20,17 @@ public record Fqn(@NotNull String value) {
   /** The empty FQN — used as the "no enclosing class" sentinel when walking class trees. */
   public static final Fqn ROOT = new Fqn("");
 
+  /**
+   * Stub FQN used when an extractor can't determine a real type from the parsed tree (broken input,
+   * unexpected node shape, etc.). Distinct from {@link #ROOT}: {@code ROOT} is the valid "no
+   * enclosing class" marker for top-level classes, whereas {@code MISSING} flags an extraction
+   * failure that downstream type matching cannot recover from. The renderable form
+   * {@code <Missing type>} makes the failure visible in golden files / generator output.
+   * Construct via {@link JvmTypeRefs#missingType} / {@link JvmTypeRefs#missingFqn} so logging is
+   * uniform.
+   */
+  public static final Fqn MISSING = new Fqn("<Missing type>");
+
   /** Canonical {@code java.lang.Object} — implicit superclass for non-interface classes. */
   public static final Fqn JAVA_LANG_OBJECT = new Fqn("java.lang.Object");
 

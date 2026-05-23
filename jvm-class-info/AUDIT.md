@@ -140,8 +140,8 @@ The "drift" framing was wrong on inspection — the two lists encode different l
 
 Intersection (~14 names) overlaps but lifting only that would conflate intentional language-policy differences with accidental duplication. Both class-level constants now carry docstrings explaining why they differ, so future readers don't mistake the asymmetry for drift.
 
-### 22. Modifier extraction duplicated
-`JavaSyntaxNodes.extractModifiers` vs `KotlinSyntaxNodes.extractModifiers` — ~30 lines each, same visibility-bitmask shape. Shared `ModifierBitmaskFactory` parameterized by visibility model.
+### 22. Modifier extraction duplicated — **WON'T FIX** (2026-05-23)
+The audit overstated the duplication. Java's `extractModifiers` is 6 lines (pure bit-mask walk); Kotlin's is 18 lines (walk + visibility-default logic mapping `internal` / missing-visibility → `public`). The shared core is a 4-line `for + bits |= map.get(child.type)` loop — lifting it to a generic helper would save 4 lines per call site for two callers while leaving Kotlin's visibility-default logic still local. The "shared ModifierBitmaskFactory parameterized by visibility model" the audit proposed would add an abstraction layer with two implementations for two callers — premature abstraction per CLAUDE.md.
 
 ### 23. ASM file is monolithic (~550 lines)
 `ClassVisitor`, `MethodVisitor`, `MethodSignatureVisitor`, `TypeRefBuilder`, and the type-annotation walker (`annotateAt` / `walk` / `appendAnnotation`) all nested in one file. The walker is the most painful — untestable in isolation. Extract `AsmTypeAnnotationWalker`.

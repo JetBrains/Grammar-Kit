@@ -43,8 +43,8 @@ These hit on the typical resolution path and produce objectively wrong strings.
 ### 3. Kotlin `@JvmField` produces getter, not field — **FIXED** (2026-05-23)
 Was: extractor unconditionally synthesized `getX()` / `setX()` for `@JvmField val/var` properties; kotlinc emits no accessors for these because the backing field is exposed directly. Fix: added `KotlinSyntaxNodes.hasJvmField`; `synthesizeGetter` / `synthesizeSetter` now short-circuit when `@JvmField` is on the modifier list. (Field exposure itself is not modelled — `JavaHelper` has no field API — but accessor suppression brings source and ASM views into convergence at the method-list level.) Regression test `testJvmFieldSuppressesAccessorSynthesis` covers `val` / `var`, with non-`@JvmField` properties continuing to get accessors.
 
-### 4. Nullable extension-function receiver loses nullability
-`KotlinSyntaxMethodExtractor.java:93–96` — `fun String?.shouted()` synthesizes a first parameter without `@Nullable`. The `?` is right there in the source; the extractor just drops it on extension receivers.
+### 4. Nullable extension-function receiver loses nullability — **NOT REPRODUCIBLE** (2026-05-23)
+`KotlinSyntaxMethodExtractor.java:94` parses the receiver TYPE_REFERENCE through `typeFormatter.parseType`, which already routes NULLABLE_TYPE wrappers to `parseNullable` and emits `@Nullable` on the resulting `UserType`. Regression test `testExtensionFunctionReceiverNullability` confirms: `fun String?.shoutOrEmpty()` produces a receiver param with `@org.jetbrains.annotations.Nullable java.lang.String`, while `fun String.shout()` produces `@NotNull java.lang.String`. Closed; regression test added.
 
 ### 5. Empty-FQN placeholders on parse errors
 - `JavaSyntaxTypeFormatter.java:162` — null base TYPE produces `UserType(Fqn.of(""), …)`.

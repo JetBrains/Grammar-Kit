@@ -264,6 +264,18 @@ public class KotlinSyntaxHelperSourceTest extends GoldenClassInfoTestCase {
     assertEquals(List.of(Fqn.of("pkg.MyList")), bag.interfaces());
   }
 
+  public void testExtensionFunctionReceiverNullability() throws Exception {
+    // Audit task #4: nullable extension receivers (`fun String?.demo()`) must preserve `@Nullable`
+    // on the synthesized first parameter. Non-nullable receivers continue to carry `@NotNull` like
+    // any other reference-type parameter.
+    write("util/Strings.kt", """
+        package util
+        fun String.shout(): String = uppercase()
+        fun String?.shoutOrEmpty(): String = this?.uppercase() ?: ""
+        """);
+    assertClassInfoMatchesGolden(extractAll());
+  }
+
   public void testJvmFieldSuppressesAccessorSynthesis() throws Exception {
     // Audit task #3: kotlinc does NOT generate get/set accessors for @JvmField properties — the
     // field is exposed directly at the JVM level. The source extractor must match that view: no

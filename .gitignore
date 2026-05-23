@@ -15,4 +15,4 @@ build/
 build-lightpsi/
 /.idea/dataSources/data_sources_history.xml
 /.intellijPlatform/
-/.claude/
+/.claude/settings.local.json

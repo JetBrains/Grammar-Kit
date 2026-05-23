@@ -72,8 +72,12 @@ Regression test `testCyclicSupertypeResolutionDoesNotCrash` exercises the cycle 
 
 Only triggered on the fallback path, but that path covers every stdlib / library class — so the blast radius is wide.
 
-### 7. ASM `@Target` default not applied
-`AsmClassSymbolProvider.java:174–200` — when an annotation class has no explicit `@Target`, `annotationTargets` is left empty. JLS says the default is "all targets except `TYPE_USE` and `TYPE_PARAMETER`." Consequence: `TypeUseAnnotationLifter` treats every annotation in that class as non-TYPE_USE.
+### 7. ASM `@Target` default not applied — **NOT REPRODUCIBLE** (2026-05-23)
+The audit's stated consequence (`TypeUseAnnotationLifter` treats no-`@Target` annotations as non-TYPE_USE) is actually the **correct** JLS behaviour: when `@Target` is absent, the default explicitly excludes `TYPE_USE`, so empty `annotationTargets` → `isTypeUseAnnotation` returns false → annotation stays on declaration → matches JLS.
+
+All three providers converge on the same empty-set-when-absent behaviour (`JavaSyntaxTypeFormatter.parseAnnotationTargetSet:418` docstring documents it explicitly; Kotlin and ASM agree). The only consumer of `annotationTargets` (`isTypeUseAnnotation`) checks specifically for `TYPE_USE`, which is correctly excluded by the JLS default. Existing test `testTypeUseAnnotationsOnArraysAndComponents` already exercises this with `@interface A` (no `@Target`): `@A` on a parameter stays in `param[0] annotations` and is never lifted.
+
+Populating `annotationTargets` with "all-except-TYPE_USE-and-TYPE_PARAMETER" defaults would change ASM output without changing the only check that reads the set — pure regression risk for no consumer benefit.
 
 ### 8. ASM `returnType` can be null
 `MethodSignatureVisitor.returnType` stays null when `visitReturnType` isn't called (malformed signature). `MethodSymbol.Builder.build()` propagates null into the immutable record. Initialize to `JvmTypeRef.of("void")` defensively.

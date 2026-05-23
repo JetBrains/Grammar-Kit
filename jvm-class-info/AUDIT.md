@@ -100,8 +100,8 @@ These need design choices, not just code changes. Each one is a place where sour
 ### 12. Kotlin enum-class synthetics missing
 Same shape as #11 for `values(): T[]`, `valueOf(String): T`, and enum constants as static fields. Synthesize on the source side; the `enum class` modifier promises them by JLS.
 
-### 13. Kotlin `@JvmOverloads` expansion
-Source: one function with default parameter values. Bytecode: one canonical function plus N `$default` synthetic overloads. The source-level API is one function. ASM should filter the `$default` overloads (covered by #10's `ACC_SYNTHETIC` rule).
+### 13. Kotlin `@JvmOverloads` expansion — **SUBSUMED BY #10** (2026-05-23)
+Kotlin's `@JvmOverloads` makes the compiler emit one canonical function plus N `$default` overloads marked `ACC_SYNTHETIC`. #10 now drops all `ACC_SYNTHETIC` methods at ASM extraction time, so the canonical function survives and the `$default` siblings disappear — matching the source-side single-function view. End-to-end Kotlin convergence test deferred to the kotlin-compiler-embeddable harness work.
 
 ### 14. Kotlin `suspend` and the `Continuation` parameter
 Source: `suspend fun foo(): Int`. Bytecode: `Object foo(Continuation<Integer>)`. The source view is the right view — consumers writing Kotlin code call `suspend fun foo()` directly. ASM should detect the suspend lowering and present the source-level signature (re-attach the return type from the Continuation's type argument, drop the Continuation parameter).

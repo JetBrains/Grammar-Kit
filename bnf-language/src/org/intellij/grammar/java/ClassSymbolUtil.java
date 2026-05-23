@@ -4,20 +4,19 @@
 
 package org.intellij.grammar.java;
 
+import com.intellij.codeInsight.AnnotationTargetUtil;
 import com.intellij.psi.NavigatablePsiElement;
 import com.intellij.psi.PsiAnnotation;
-import com.intellij.psi.PsiArrayType;
 import com.intellij.psi.PsiClassType;
-import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiMethod;
 import com.intellij.psi.PsiModifier;
 import com.intellij.psi.PsiModifierList;
 import com.intellij.psi.PsiModifierListOwner;
 import com.intellij.psi.PsiParameter;
+import com.intellij.psi.PsiPrimitiveType;
 import com.intellij.psi.PsiType;
 import com.intellij.psi.PsiTypeParameter;
 import com.intellij.psi.PsiVariable;
-import com.intellij.util.ArrayUtil;
 import com.intellij.util.containers.ContainerUtil;
 import org.intellij.grammar.classinfo.*;
 import org.jetbrains.annotations.NotNull;
@@ -203,17 +202,24 @@ public final class ClassSymbolUtil {
   private static @NotNull List<String> annotationsFromPsi(@NotNull PsiModifierListOwner element) {
     PsiModifierList modifierList = element.getModifierList();
     if (modifierList == null) return Collections.emptyList();
-    PsiType typeToSkip = element instanceof PsiMethod ? ((PsiMethod)element).getReturnType() :
+    // Lift target: only methods (return type) and parameters/variables have a non-primitive position
+    // capable of carrying a TYPE_USE annotation. For everything else (classes, modules), all the
+    // declaration-list annotations stay where they are.
+    PsiType liftTarget = element instanceof PsiMethod ? ((PsiMethod)element).getReturnType() :
                          element instanceof PsiVariable ? ((PsiVariable)element).getType() : null;
-    PsiAnnotation[] annoToSkip = typeToSkip == null ? null :
-                                 typeToSkip instanceof PsiArrayType ? ((PsiArrayType)typeToSkip).getComponentType().getAnnotations() :
-                                 typeToSkip.getAnnotations();
-    String[] textToSkip = annoToSkip == null ? null :
-                          ContainerUtil.map(annoToSkip, PsiElement::getText, ArrayUtil.EMPTY_STRING_ARRAY);
+    boolean canLift = liftTarget != null && !(liftTarget instanceof PsiPrimitiveType);
     List<String> result = new ArrayList<>();
     for (PsiAnnotation annotation : modifierList.getAnnotations()) {
+      // Arg-bearing annotations carry semantic payload the FQN-only model cannot represent; drop them
+      // (same filter as the previous text-match implementation).
       if (annotation.getParameterList().getAttributes().length > 0) continue;
-      if (textToSkip != null && ArrayUtil.indexOf(textToSkip, annotation.getText()) != -1) continue;
+
+      // Principled TYPE_USE check (replaces the prior getText() dedupe against type.getAnnotations()).
+      // `findAnnotationTarget(..., TYPE_USE) != null` is exactly how IntelliJ's AddAnnotationPsiFix
+      // decides whether to lift an annotation onto a PsiTypeElement vs. keep it on the PsiModifierList.
+      if (canLift && AnnotationTargetUtil.findAnnotationTarget(annotation, PsiAnnotation.TargetType.TYPE_USE) != null) {
+        continue;
+      }
       ContainerUtil.addIfNotNull(result, annotation.getQualifiedName());
     }
     return result;
@@ -257,6 +263,10 @@ public final class ClassSymbolUtil {
     List<String> result = new ArrayList<>(annotations.length);
     for (Annotation annotation : annotations) {
       Class<? extends Annotation> annotationType = annotation.annotationType();
+      // Drop arg-bearing annotation types (matches the syntax / PSI extractors).
+      // `getDeclaredMethods().length > 0` catches anything parameterizable (e.g. @SuppressWarnings,
+      // @Contract) — marker-only annotations (@Override, @NotNull, @Nls, @Unmodifiable, …) stay.
+      if (annotationType.getDeclaredMethods().length > 0) continue;
       ContainerUtil.addIfNotNull(result, annotationType.getCanonicalName());
     }
     return result;

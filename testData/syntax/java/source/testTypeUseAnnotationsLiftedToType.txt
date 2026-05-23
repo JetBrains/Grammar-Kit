@@ -1,0 +1,40 @@
+class a.b.C extends java.lang.Object
+  modifiers: public
+  methods:
+    INSTANCE public java.lang.String foo()
+      annotatedTypes: [@a.b.NotNull java.lang.String]
+    INSTANCE public java.lang.String bar()
+      annotatedTypes: [@a.b.Nullable java.lang.String]
+    INSTANCE public void params(java.lang.String s, java.lang.Integer n)
+      annotatedTypes: [void, @a.b.NotNull java.lang.String, s, @a.b.Nullable java.lang.Integer, n]
+    INSTANCE public int prim()
+      annotations: @a.b.NotNull
+    INSTANCE public T cast(java.lang.Object o)
+      typeParameters: T
+      annotations: @a.b.NotNull
+    INSTANCE public java.lang.String[] arr()
+      annotatedTypes: [java.lang.String @a.b.NotNull []]
+    INSTANCE public java.lang.String mixed()
+      annotatedTypes: [@a.b.Mixed java.lang.String]
+    INSTANCE public java.lang.String methodOnly()
+      annotations: @a.b.MethodOnly
+    INSTANCE public java.lang.String unresolved()
+      annotations: @a.b.MissingAnno
+    CONSTRUCTOR public C()
+      annotations: @a.b.NotNull
+
+class a.b.MethodOnly
+  modifiers: abstract interface
+  methods: (none)
+
+class a.b.Mixed
+  modifiers: abstract interface
+  methods: (none)
+
+class a.b.NotNull
+  modifiers: abstract interface
+  methods: (none)
+
+class a.b.Nullable
+  modifiers: abstract interface
+  methods: (none)

@@ -1,0 +1,5 @@
+class a.b.C extends java.lang.Object
+  modifiers: public
+  methods:
+    INSTANCE public void doIt(int x)
+      param[0] annotations: @a.b.Marker

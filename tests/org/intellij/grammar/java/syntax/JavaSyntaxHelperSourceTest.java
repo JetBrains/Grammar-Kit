@@ -10,6 +10,7 @@ import org.intellij.grammar.classinfo.Fqn;
 import org.intellij.grammar.classinfo.JvmClassSymbolManager;
 import org.intellij.grammar.classinfo.JvmClassSymbolProvider;
 import org.intellij.grammar.classinfo.MethodType;
+import org.intellij.grammar.classinfo.SymbolResolver;
 import org.intellij.grammar.classinfo.java.JavaSyntaxClassExtractor;
 import org.intellij.grammar.classinfo.java.JavaSyntaxTreeManager;
 import org.intellij.grammar.java.JavaHelper;
@@ -226,21 +227,40 @@ public class JavaSyntaxHelperSourceTest extends GoldenClassInfoTestCase {
       """));
   }
 
-  public void testNullabilityAnnotationsLiftedToType() {
-    // `@NotNull` / `@Nullable` written in the declaration-position modifier list (which the
-    // JetBrains Java parser groups with `public`) are semantically TYPE_USE annotations on the
-    // return type / parameter type. The extractor moves them off MethodSymbol.annotations and
-    // onto the outermost JvmTypeRef position so the type model is the single source of truth
-    // for nullness — matching the Kotlin source path.
-    // Edge cases exercised: primitive return (no JvmTypeRef slot — annotation stays on method),
-    // bare type-variable return (TypeVariable can't carry annotations — stays on method), array
-    // return (lift onto the outermost ArrayType), non-nullness annotations alongside (`@Override`
-    // stays on the method, only nullness moves), and constructors (no return-type lift — the
-    // synthesized self-reference is not where a user-written annotation belongs).
+  public void testStaticImportOfNestedAnnotation() {
+    // `import static c.d.Outer.Marker` makes `@Marker` resolve to `c.d.Outer.Marker`
+    // — the static-import's full reference text — not `c.d.Marker` with the enclosing
+    // class dropped. Mirrors the Goland scenario `import static com.goide.psi.impl.GoLightType.IconFlags`.
     assertClassInfoMatchesGolden(extract("""
       package a.b;
-      import org.jetbrains.annotations.NotNull;
-      import org.jetbrains.annotations.Nullable;
+      import static c.d.Outer.Marker;
+      public class C {
+        public void doIt(@Marker int x) {}
+      }
+      """));
+  }
+
+  public void testTypeUseAnnotationsLiftedToType() {
+    // Any annotation whose @Target declares ElementType.TYPE_USE is lifted off the
+    // declaration-position MODIFIER_LIST (which the JetBrains Java parser groups with `public`)
+    // onto the outermost JvmTypeRef position. Recognition is resolver-based: the extractor
+    // consults ClassSymbol.annotationTargets via the SymbolResolver, mirroring IntelliJ's
+    // AnnotationTargetUtil.findAnnotationTarget(..., TYPE_USE) approach.
+    // Edge cases exercised: primitive return (no JvmTypeRef slot — annotation stays on method),
+    // bare type-variable return (TypeVariable can't carry annotations — stays on method), array
+    // return (lift onto the outermost ArrayType), non-TYPE_USE annotations alongside (the
+    // method-only @MethodOnly stays on the method, only TYPE_USE moves), unresolved annotation
+    // (@MissingAnno stays on the method — null-from-resolver fallback), and constructors (no
+    // return-type lift — the synthesized self-reference is not where a user-written annotation
+    // belongs).
+    assertClassInfoMatchesGolden(extract("""
+      package a.b;
+      import java.lang.annotation.ElementType;
+      import java.lang.annotation.Target;
+      @Target(ElementType.TYPE_USE) @interface NotNull {}
+      @Target(ElementType.TYPE_USE) @interface Nullable {}
+      @Target({ElementType.METHOD, ElementType.TYPE_USE}) @interface Mixed {}
+      @Target(ElementType.METHOD) @interface MethodOnly {}
       public class C {
         public @NotNull String foo() { return ""; }
         public @Nullable String bar() { return null; }
@@ -248,8 +268,9 @@ public class JavaSyntaxHelperSourceTest extends GoldenClassInfoTestCase {
         public @NotNull int prim() { return 0; }
         public @NotNull <T> T cast(Object o) { return (T)o; }
         public @NotNull String[] arr() { return new String[0]; }
-        @Override
-        public @NotNull String toString() { return ""; }
+        public @Mixed String mixed() { return ""; }
+        public @MethodOnly String methodOnly() { return ""; }
+        public @MissingAnno String unresolved() { return ""; }
         public @NotNull C() {}
       }
       """));
@@ -318,8 +339,18 @@ public class JavaSyntaxHelperSourceTest extends GoldenClassInfoTestCase {
 
   private static @NotNull Map<Fqn, ClassSymbol> extract(@NotNull String source) {
     SyntaxNode root = JavaSyntaxTreeManager.parseText(source);
-    // Tests run extraction in isolation — no cross-language probing, so a null-returning resolver is fine.
-    return new HashMap<>(JavaSyntaxClassExtractor.extractFrom(root, fqn -> null));
+    // Two-pass extraction:
+    //  1) seed-pass with a null resolver to surface @interface declarations (including their
+    //     @Target metadata, which doesn't require resolution).
+    //  2) real pass using a resolver backed by the seed-pass map so that TYPE_USE annotation
+    //     lifting can consult ClassSymbol.annotationTargets for annotations declared in the same
+    //     source file.
+    // This mirrors how production code paths work through JvmClassSymbolManager — the manager
+    // handles cycles via in-progress null returns, and downstream lifts see annotations whose
+    // declarations the manager already finished.
+    Map<Fqn, ClassSymbol> seed = JavaSyntaxClassExtractor.extractFrom(root, fqn -> null);
+    SymbolResolver resolver = seed::get;
+    return new HashMap<>(JavaSyntaxClassExtractor.extractFrom(root, resolver));
   }
 
   private static @NotNull JavaHelper helperFrom(@NotNull Map<Fqn, ClassSymbol> classes) {

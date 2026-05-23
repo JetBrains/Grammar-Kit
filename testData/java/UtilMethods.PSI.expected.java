@@ -50,8 +50,7 @@ public interface Element1 extends PsiElement {
 
   <@Nls @NonNls T, @Nls @NonNls K extends @Nls @NonNls X & @NonNls @Nls Y> @Nls String foo5(@Nls @NonNls T param, @Nls @NonNls K k);
 
-  @Nls
-  List<? super @NotNull @Nls String> @Nullable @Unmodifiable [] @NotNull [] foo6(@Nls List<? super @NotNull @Nls String> @Nullable @Unmodifiable [] @NotNull [] args);
+  List<? super @NotNull @Nls String> @Nullable @Unmodifiable [] @NotNull @Nls [] foo6(List<? super @NotNull @Nls String> @Nullable @Unmodifiable [] @NotNull @Nls [] args);
 
   @NotNull E foo7();
 
@@ -125,8 +124,7 @@ public class Element1Impl extends ASTWrapperPsiElement implements Element1 {
   }
 
   @Override
-  @Nls
-  public List<? super @NotNull @Nls String> @Nullable @Unmodifiable [] @NotNull [] foo6(@Nls List<? super @NotNull @Nls String> @Nullable @Unmodifiable [] @NotNull [] args) {
+  public List<? super @NotNull @Nls String> @Nullable @Unmodifiable [] @NotNull @Nls [] foo6(List<? super @NotNull @Nls String> @Nullable @Unmodifiable [] @NotNull @Nls [] args) {
     return UtilMethods.foo6(this, args);
   }
 

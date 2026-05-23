@@ -13,6 +13,7 @@ import org.intellij.grammar.classinfo.MethodSymbol;
 import org.intellij.grammar.classinfo.MethodType;
 import org.intellij.grammar.classinfo.ParameterSymbol;
 import org.intellij.grammar.classinfo.TypeParameterSymbol;
+import org.intellij.grammar.classinfo.TypeUseAnnotationLifter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -68,8 +69,8 @@ final class JavaSyntaxMethodExtractor {
     else {
       m.methodType = Modifier.isStatic(m.modifiers) ? MethodType.STATIC : MethodType.INSTANCE;
       JvmTypeRef parsed = typeFormatter.parseType(returnType, typeVars);
-      JavaSyntaxTypeFormatter.LiftResult lifted = typeFormatter.liftNullabilityToType(methodAnnotations, parsed);
-      m.annotations.addAll(lifted.annotations());
+      TypeUseAnnotationLifter.LiftResult lifted = TypeUseAnnotationLifter.lift(methodAnnotations, parsed, typeFormatter::isTypeUseAnnotation);
+      m.annotations.addAll(lifted.declarationAnnotations());
       m.returnType = lifted.type();
     }
 
@@ -113,11 +114,10 @@ final class JavaSyntaxMethodExtractor {
       JvmTypeRef parsedType = pType == null
                               ? new JvmTypeRef.UserType(Fqn.of(""), List.of(), List.of())
                               : typeFormatter.parseType(pType, typeVars);
-      List<Fqn> paramAnnotations = typeFormatter.extractAnnotationFqns(
-        firstChildOfType(p, JavaSyntaxElementType.MODIFIER_LIST), typeVars);
-      JavaSyntaxTypeFormatter.LiftResult lifted = typeFormatter.liftNullabilityToType(paramAnnotations, parsedType);
+      List<Fqn> paramAnnotations = typeFormatter.extractAnnotationFqns(firstChildOfType(p, JavaSyntaxElementType.MODIFIER_LIST), typeVars);
+      TypeUseAnnotationLifter.LiftResult lifted = TypeUseAnnotationLifter.lift(paramAnnotations, parsedType, typeFormatter::isTypeUseAnnotation);
       param.type = lifted.type();
-      param.annotations.addAll(lifted.annotations());
+      param.annotations.addAll(lifted.declarationAnnotations());
       param.name = pName == null ? "p" + paramIdx : pName.getText().toString();
       m.parameters.add(param);
       paramIdx++;

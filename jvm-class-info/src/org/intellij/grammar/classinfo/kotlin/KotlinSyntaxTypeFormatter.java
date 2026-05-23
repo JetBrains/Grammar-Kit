@@ -283,8 +283,14 @@ final class KotlinSyntaxTypeFormatter {
     for (SyntaxNode arg = typeArgList.firstChild(); arg != null; arg = arg.nextSibling()) {
       if (arg.getType() != KtNodeTypes.INSTANCE.getTYPE_PROJECTION()) continue;
       if (firstChildOfType(arg, KtTokens.INSTANCE.getMUL()) != null) {
-        // Array<*> → java.lang.Object[]. The synthetic Object component takes NotNull so the array
-        // surfaces a single annotation in the rendered form — same convention as Array<String>.
+        // Array<*> → java.lang.Object[]. The component type is hardcoded to java.lang.Object
+        // because that is what kotlinc emits at the compile boundary: JVM arrays are invariant,
+        // so the star projection has no wildcard equivalent at the bytecode level, and the only
+        // type guaranteed to satisfy any element type is Object. If Kotlin ever grows bounded
+        // wildcards on Array (currently it doesn't), this branch needs to handle them — the
+        // assumption is stable as long as kotlinc keeps lowering Array<*> the same way.
+        // The synthetic Object component takes NotNull so the array surfaces a single annotation
+        // in the rendered form — same convention as Array<String>.
         return new JvmTypeRef.UserType(Fqn.of("java.lang.Object"), List.of(NOT_NULL), List.of());
       }
       SyntaxNode innerType = firstChildOfType(arg, KtNodeTypes.INSTANCE.getTYPE_REFERENCE());

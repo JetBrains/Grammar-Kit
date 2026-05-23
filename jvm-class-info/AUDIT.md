@@ -112,11 +112,8 @@ Trailing parameter renders as `T[]` instead of `T...`. Representation choice dri
 ### 16. `internal` → `public` mapping doesn't mangle names
 Kotlin compiles `internal fun foo()` to a public method with a mangled name (`foo$module-name`). Source maps visibility but not the name. ASM sees the mangled name. Choose un-mangled on both sides — mangling is a bytecode-level encoding, not part of the source API.
 
-### 17. Java `scanPackage` swallows `IOException`
-- `JavaSyntaxClassSymbolProvider.java:89` — `catch (IOException ignored) {}`.
-- `KotlinSyntaxClassSymbolProvider.scanPackage:77` — same pattern.
-
-Not a correctness bug, but a "we'll never know if it breaks" debuggability bug. Log at minimum.
+### 17. Java `scanPackage` swallows `IOException` — **FIXED** (2026-05-23)
+Replaced `catch (IOException ignored) {}` with `LOG.warn("Failed to scan ... package directory: " + dir, e)` in both `JavaSyntaxClassSymbolProvider.scanPackage` and `KotlinSyntaxClassSymbolProvider.scanPackage`. Behaviour for missing-directory cases is unchanged (no exception thrown there), but legitimate access errors now surface to the log.
 
 ---
 

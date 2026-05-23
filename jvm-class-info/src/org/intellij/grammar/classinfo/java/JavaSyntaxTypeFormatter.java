@@ -61,6 +61,7 @@ final class JavaSyntaxTypeFormatter {
   private final JavaSyntaxImportContext imports;
   private final SymbolResolver resolver;
   private @NotNull Map<String, Fqn> nestedScope = Map.of();
+  private @NotNull List<Fqn> enclosingChain = List.of();
 
   JavaSyntaxTypeFormatter(@NotNull JavaSyntaxImportContext imports, @NotNull SymbolResolver resolver) {
     this.imports = imports;
@@ -91,6 +92,20 @@ final class JavaSyntaxTypeFormatter {
 
   void setNestedScope(@NotNull Map<String, Fqn> scope) {
     this.nestedScope = scope;
+  }
+
+  /**
+   * Innermost-first list of enclosing class FQNs. Used to resolve an unqualified simple name to an
+   * inherited nested type — for {@code class Sub extends Parent { void f(Marker m) {} }} where
+   * {@code Parent} declares {@code Marker}, the simple-name path walks Sub's supertypes after the
+   * {@link #nestedScope} miss and finds {@code Parent.Marker} (JLS 6.4.1).
+   */
+  @NotNull List<Fqn> getEnclosingChain() {
+    return enclosingChain;
+  }
+
+  void setEnclosingChain(@NotNull List<Fqn> chain) {
+    this.enclosingChain = chain;
   }
 
   /**
@@ -311,13 +326,72 @@ final class JavaSyntaxTypeFormatter {
     if (firstDot < 0) {
       Fqn nested = nestedScope.get(dotted);
       if (nested != null) return nested.value();           // sibling/outer nested class wins over same-package
+      // Probe inherited nested types: walk each enclosing class's super-chain for a nested type
+      // matching the simple name. Own nested types already won via nestedScope above (JLS 6.4.1).
+      for (Fqn enclosing : enclosingChain) {
+        String inherited = NestedTypeResolver.findDeclaringClass(enclosing, dotted, resolver);
+        if (inherited != null && !inherited.equals(enclosing.child(dotted).value())) {
+          return inherited;
+        }
+      }
       return imports.resolveSimpleName(dotted);
     }
-    // Dotted reference: if the head segment names an in-scope nested class, qualify with its full FQN.
+    // Dotted reference. If the head segment names an in-scope nested class, qualify with that FQN.
     String head = dotted.substring(0, firstDot);
+    String tail = dotted.substring(firstDot);
     Fqn nestedHead = nestedScope.get(head);
-    if (nestedHead != null) return nestedHead.value() + dotted.substring(firstDot);
-    return dotted;                                         // already qualified, leave as-is
+    if (nestedHead != null) return canonicalize(nestedHead.value() + tail);
+    // Resolve the head through file-level imports. JLS doesn't restrict class names to start with
+    // uppercase, so we cannot use a casing heuristic; instead we accept the resolved head whenever
+    // it comes from an explicit import / builtin / wildcard-with-resolver-confirmation, and for the
+    // last-resort same-package fallback only when the resolver actually knows the class. This
+    // preserves package-qualified `java.util.Map.Entry` (head `java` would otherwise be qualified to
+    // `<pkg>.java` by the same-package fallback) while still resolving `legacyType.Inner` /
+    // `_Inner.Leaf` after their imports.
+    if (!head.isEmpty()) {
+      String resolvedHead = imports.resolveSimpleName(head);
+      if (!resolvedHead.equals(head) && isConfirmedClass(head, resolvedHead)) {
+        return canonicalize(resolvedHead + tail);
+      }
+    }
+    return canonicalize(dotted);                           // already qualified — still canonicalize tail
+  }
+
+  /**
+   * The head of a dotted reference is ambiguous: it can be a class simple name (resolvable through
+   * imports / builtins / same-package) or the leading segment of a package-qualified FQN like
+   * {@code java} in {@code java.util.Map.Entry}. We accept the resolved name when it came from an
+   * import / builtin / wildcard-with-resolver-hit (those don't false-positive on package segments)
+   * or when the resolver confirms the same-package candidate is a real class.
+   */
+  private boolean isConfirmedClass(@NotNull String head, @NotNull String resolvedHead) {
+    if (imports.isSingleTypeImport(head) || imports.isKnownBuiltin(head)) return true;
+    return resolver.findClass(Fqn.of(resolvedHead)) != null;
+  }
+
+  /**
+   * Canonicalize each segment of a dotted nested-type reference (JLS 7.5.1). For
+   * {@code Sub.Inner.Leaf} where {@code Inner} is inherited from {@code Sub}'s supertype, the
+   * intermediate {@code Inner} hop must rewrite to the declaring class — otherwise we'd produce
+   * {@code Sub.Inner.Leaf} where ASM produces {@code Parent.Inner.Leaf}. Walks segment-by-segment,
+   * asking {@link NestedTypeResolver#findDeclaringClass} at each hop. When the resolver doesn't
+   * know the current enclosing (pure package prefixes like {@code java.util}), append the segment
+   * verbatim and continue — only segments whose enclosing actually resolves get rewritten.
+   */
+  private @NotNull String canonicalize(@NotNull String dotted) {
+    int firstDot = dotted.indexOf('.');
+    if (firstDot < 0) return dotted;
+    String enclosing = dotted.substring(0, firstDot);
+    int idx = firstDot + 1;
+    while (true) {
+      int nextDot = dotted.indexOf('.', idx);
+      String segment = dotted.substring(idx, nextDot < 0 ? dotted.length() : nextDot);
+      String declaring = NestedTypeResolver.findDeclaringClass(Fqn.of(enclosing), segment, resolver);
+      enclosing = declaring != null ? declaring : enclosing + "." + segment;
+      if (nextDot < 0) break;
+      idx = nextDot + 1;
+    }
+    return enclosing;
   }
 
   private static final Fqn JAVA_LANG_ANNOTATION_TARGET = Fqn.of("java.lang.annotation.Target");

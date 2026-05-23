@@ -60,6 +60,16 @@ public abstract class AbstractImportContext {
     return simple;
   }
 
+  /** Whether {@code simple} matches an explicit single-type-import entry — a definitive class hit. */
+  public final boolean isSingleTypeImport(@NotNull String simple) {
+    return imports.containsKey(simple);
+  }
+
+  /** Whether {@code simple} resolves as a language built-in (e.g. {@code java.lang} allow-list). */
+  public final boolean isKnownBuiltin(@NotNull String simple) {
+    return resolveBuiltin(simple) != null;
+  }
+
   /** Qualify a simple name with the file's package when not nested inside an enclosing class. */
   public final @NotNull Fqn qualify(@NotNull Fqn enclosingFqn, @NotNull String simpleName) {
     if (!enclosingFqn.isEmpty()) return enclosingFqn.child(simpleName);

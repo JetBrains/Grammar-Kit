@@ -76,12 +76,35 @@ final class KotlinSyntaxImportContext extends AbstractImportContext {
     Map.entry("MutableIterator", "kotlin.collections.MutableIterator"),
     Map.entry("Sequence", "kotlin.sequences.Sequence"),
     Map.entry("CharSequence", "kotlin.CharSequence"),
-    Map.entry("Cloneable", "kotlin.Cloneable")
+    Map.entry("Cloneable", "kotlin.Cloneable"),
+    // kotlin.jvm.* — auto-available in Kotlin and emitted on the JVM with these FQNs by kotlinc.
+    Map.entry("JvmStatic", "kotlin.jvm.JvmStatic"),
+    Map.entry("JvmField", "kotlin.jvm.JvmField"),
+    Map.entry("JvmName", "kotlin.jvm.JvmName"),
+    Map.entry("JvmOverloads", "kotlin.jvm.JvmOverloads"),
+    Map.entry("JvmMultifileClass", "kotlin.jvm.JvmMultifileClass"),
+    Map.entry("JvmSynthetic", "kotlin.jvm.JvmSynthetic"),
+    Map.entry("JvmSuppressWildcards", "kotlin.jvm.JvmSuppressWildcards"),
+    Map.entry("JvmWildcard", "kotlin.jvm.JvmWildcard"),
+    Map.entry("JvmDefault", "kotlin.jvm.JvmDefault"),
+    Map.entry("JvmDefaultWithoutCompatibility", "kotlin.jvm.JvmDefaultWithoutCompatibility"),
+    Map.entry("Throws", "kotlin.jvm.Throws"),
+    Map.entry("Volatile", "kotlin.jvm.Volatile"),
+    Map.entry("Transient", "kotlin.jvm.Transient"),
+    Map.entry("Strictfp", "kotlin.jvm.Strictfp"),
+    Map.entry("Synchronized", "kotlin.jvm.Synchronized")
   );
 
   private static final Set<String> JAVA_LANG_FALLBACK = Set.of(
     "Object", "Class", "Math", "System", "Thread", "Runnable", "StringBuilder", "StringBuffer",
-    "Void", "Deprecated", "Override", "SuppressWarnings"
+    "Void", "Deprecated", "Override", "SuppressWarnings",
+    // Common JDK exception / throwable types that Kotlin stdlib typealiases to java.lang.* — at
+    // source level they're written unqualified, at the JVM ASM produces the java.lang.* FQN.
+    "IllegalStateException", "IllegalArgumentException", "NullPointerException",
+    "ClassCastException", "UnsupportedOperationException", "IndexOutOfBoundsException",
+    "ArrayIndexOutOfBoundsException", "NoSuchElementException", "ConcurrentModificationException",
+    "ArithmeticException", "NumberFormatException", "AssertionError",
+    "Integer", "Character"
   );
 
   static @NotNull KotlinSyntaxImportContext extractFrom(@NotNull SyntaxNode fileRoot, @NotNull SymbolResolver resolver) {

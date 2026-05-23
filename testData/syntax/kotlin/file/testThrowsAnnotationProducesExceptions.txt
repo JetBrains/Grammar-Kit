@@ -4,6 +4,6 @@ class a.b.Doer extends java.lang.Object
     INSTANCE public void perform()
       throws: com.intellij.util.IncorrectOperationException
     INSTANCE public void samePackageFallback()
-      throws: com.intellij.util.IncorrectOperationException, a.b.IllegalStateException
+      throws: com.intellij.util.IncorrectOperationException, java.lang.IllegalStateException
     INSTANCE public void fullyQualified()
       throws: com.intellij.util.IncorrectOperationException, java.lang.IllegalStateException

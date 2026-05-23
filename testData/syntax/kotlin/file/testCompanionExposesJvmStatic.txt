@@ -2,11 +2,11 @@ class a.b.Holder extends java.lang.Object
   modifiers: public final
   methods:
     STATIC public static int staticHelper()
-      annotations: @a.b.JvmStatic
+      annotations: @kotlin.jvm.JvmStatic
 
 class a.b.Holder.Companion extends java.lang.Object
   modifiers: public static final
   methods:
     INSTANCE public int staticHelper()
-      annotations: @a.b.JvmStatic
+      annotations: @kotlin.jvm.JvmStatic
     INSTANCE public int instanceHelper()

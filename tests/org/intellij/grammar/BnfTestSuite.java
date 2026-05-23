@@ -22,6 +22,7 @@ import org.intellij.grammar.java.syntax.JavaSyntaxHelperSourceTest;
 import org.intellij.grammar.java.syntax.JavaSyntaxHelperTest;
 import org.intellij.grammar.java.syntax.JavaSyntaxHelperUnitTest;
 import org.intellij.grammar.java.syntax.JvmSyntaxHelperChainTest;
+import org.intellij.grammar.java.syntax.convergence.SourceAsmConvergenceTest;
 import org.intellij.grammar.java.syntax.kotlin.KotlinSyntaxHelperSourceTest;
 import org.intellij.grammar.java.syntax.kotlin.KotlinSyntaxHelperTest;
 import org.intellij.grammar.java.syntax.kotlin.KotlinSyntaxHelperUnitTest;
@@ -76,6 +77,7 @@ public class BnfTestSuite extends TestCase {
       testSuite.addTestSuite(KotlinSyntaxHelperSourceTest.class);
       testSuite.addTestSuite(JvmSyntaxHelperChainTest.class);
       testSuite.addTestSuite(CrossLanguageWildcardTest.class);
+      testSuite.addTestSuite(SourceAsmConvergenceTest.class);
       return testSuite;
     }
   }

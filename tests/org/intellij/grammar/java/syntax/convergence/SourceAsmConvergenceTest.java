@@ -121,6 +121,19 @@ public class SourceAsmConvergenceTest extends TestCase {
       """, "pkg.IntBox");
   }
 
+  public void testVarargsConvergesAsArray() throws Exception {
+    // Audit #15: varargs representation should agree on both sides. Both Java source (#1
+    // regression test confirmed) and ASM (parameter type from descriptor is T[]) settle on the
+    // array form. ACC_VARARGS isn't decoded into "..." rendering anywhere, so T[] is the
+    // canonical representation.
+    assertConverges("pkg/Logger.java", """
+      package pkg;
+      public class Logger {
+        public void log(String... args) {}
+      }
+      """, "pkg.Logger");
+  }
+
   public void testStaticInitializerIsFiltered() throws Exception {
     // A class with a static initializer block produces a <clinit> method at the bytecode level.
     // No source counterpart — ASM provider must filter it (audit #10).

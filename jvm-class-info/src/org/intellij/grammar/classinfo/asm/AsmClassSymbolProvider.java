@@ -228,7 +228,12 @@ public final class AsmClassSymbolProvider implements JvmClassSymbolProvider {
         return null;
       }
       MethodSymbol.Builder m = getMethodInfo(myInfo.name, name, ObjectUtils.chooseNotNull(signature, desc), exceptions);
-      m.modifiers = access;
+      // Clear ACC_VARARGS (0x0080) on the method modifier bitmask: same bit value as
+      // Modifier.TRANSIENT for fields, so Modifier.toString would otherwise render it as
+      // "transient" on the method (audit #15). Since the type model represents varargs as the
+      // erased array form (T[]) rather than carrying a "..." marker, the varargs bit conveys no
+      // information downstream.
+      m.modifiers = access & ~0x0080;
       m.methodType = "<init>".equals(name) ? MethodType.CONSTRUCTOR :
                      Modifier.isStatic(access) ? MethodType.STATIC :
                      MethodType.INSTANCE;

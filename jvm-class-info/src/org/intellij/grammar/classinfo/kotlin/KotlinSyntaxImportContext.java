@@ -95,11 +95,17 @@ final class KotlinSyntaxImportContext extends AbstractImportContext {
     Map.entry("Synchronized", "kotlin.jvm.Synchronized")
   );
 
+  /**
+   * {@code java.lang.*} fallback for Kotlin. Intentionally different from
+   * {@code JavaSyntaxImportContext.JAVA_LANG_TYPES}: that list captures every commonly-unqualified
+   * java.lang type because Java auto-imports the package by JLS; this one is the after-the-fact
+   * fallback for names that survived {@link #KOTLIN_AUTO_IMPORTS} and need to resolve to a JDK
+   * type. The emphasis here is on exception classes Kotlin stdlib typealiases to {@code java.lang.*}
+   * — at source they're written unqualified, at the JVM they resolve to the JDK class.
+   */
   private static final Set<String> JAVA_LANG_FALLBACK = Set.of(
     "Object", "Class", "Math", "System", "Thread", "Runnable", "StringBuilder", "StringBuffer",
     "Void", "Deprecated", "Override", "SuppressWarnings",
-    // Common JDK exception / throwable types that Kotlin stdlib typealiases to java.lang.* — at
-    // source level they're written unqualified, at the JVM ASM produces the java.lang.* FQN.
     "IllegalStateException", "IllegalArgumentException", "NullPointerException",
     "ClassCastException", "UnsupportedOperationException", "IndexOutOfBoundsException",
     "ArrayIndexOutOfBoundsException", "NoSuchElementException", "ConcurrentModificationException",

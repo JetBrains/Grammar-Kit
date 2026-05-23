@@ -133,11 +133,12 @@ Inspection showed the two implementations are not actually duplicates. Java's ve
 ### 20. Import-extraction loop duplicated
 `JavaSyntaxImportContext.extractImports:68–106` and `KotlinSyntaxImportContext.extractImports` differ only in AST type-name constants and the null-check around `NestedTypeResolver.findDeclaringClass`. Lift the skeleton into `AbstractImportContext` parameterized by an import-statement predicate + a callback.
 
-### 21. Built-in type lists overlap with drift
-- `JavaSyntaxImportContext.JAVA_LANG_TYPES` (~32 entries)
-- `KotlinSyntaxImportContext.JAVA_LANG_FALLBACK` (~17 entries — subset, with minor divergence)
+### 21. Built-in type lists overlap with drift — **DOCUMENTED, NOT LIFTED** (2026-05-23)
+The "drift" framing was wrong on inspection — the two lists encode different language policies:
+- Java auto-imports the **entire** `java.lang` package by JLS, so `JAVA_LANG_TYPES` is a comprehensive catch-set for names worth resolving before falling through to the resolver (boxed numerics, Throwable hierarchy, Iterable/Comparable, language annotations).
+- Kotlin auto-imports `kotlin.*` instead. `JAVA_LANG_FALLBACK` is a much smaller after-the-fact list for names that survived `KOTLIN_AUTO_IMPORTS`, emphasising exception classes that Kotlin stdlib typealiases to `java.lang.*`.
 
-Common core in `AbstractImportContext`; each branch extends with language-specific overlays.
+Intersection (~14 names) overlaps but lifting only that would conflate intentional language-policy differences with accidental duplication. Both class-level constants now carry docstrings explaining why they differ, so future readers don't mistake the asymmetry for drift.
 
 ### 22. Modifier extraction duplicated
 `JavaSyntaxNodes.extractModifiers` vs `KotlinSyntaxNodes.extractModifiers` — ~30 lines each, same visibility-bitmask shape. Shared `ModifierBitmaskFactory` parameterized by visibility model.

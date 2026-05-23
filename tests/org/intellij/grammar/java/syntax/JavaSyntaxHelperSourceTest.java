@@ -583,6 +583,33 @@ public class JavaSyntaxHelperSourceTest extends GoldenClassInfoTestCase {
       """));
   }
 
+  public void testDottedRefThroughSiblingNestedClassCanonicalizes() {
+    // Audit task #2: when a dotted ref's head is a *sibling* nested class (resolved through
+    // `nestedScope` at line 342–343 of JavaSyntaxTypeFormatter, not through an import), intermediate
+    // hops that are inherited from the sibling's supertype must canonicalize to the declaring class.
+    // testMultiHopDottedRefCanonicalizes covers the import-resolved head; this one covers the
+    // sibling/nested-scope head, which is the specific path the audit cited.
+    Map<Fqn, ClassSymbol> universe = new HashMap<>();
+    universe.putAll(extract("""
+      package c.d;
+      public class Parent {
+        public @interface Marker {}
+      }
+      """));
+    universe.putAll(extract("""
+      package a.b;
+      import c.d.Parent;
+      public class Outer {
+        public static class Sub extends Parent {}
+        public void doIt(@Sub.Marker int x) {}
+      }
+      """, universe));
+    Map<Fqn, ClassSymbol> userFile = new HashMap<>();
+    userFile.put(Fqn.of("a.b.Outer"), universe.get(Fqn.of("a.b.Outer")));
+    userFile.put(Fqn.of("a.b.Outer.Sub"), universe.get(Fqn.of("a.b.Outer.Sub")));
+    assertClassInfoMatchesGolden(userFile);
+  }
+
   public void testVarargsParameterRenderedAsSingleArrayDimension() {
     // Audit task #1: confirm `T... args` renders as `T[]` (one dimension), not `T[][]` or any other
     // doubled shape. Covers reference type, primitive, type-use annotation on the component, and the

@@ -1,0 +1,9 @@
+class a.b.Outer extends java.lang.Object
+  modifiers: public
+  methods:
+    INSTANCE public void doIt(int x)
+      param[0] annotations: @c.d.Parent.Marker
+
+class a.b.Outer.Sub extends c.d.Parent
+  modifiers: public static
+  methods: (none)

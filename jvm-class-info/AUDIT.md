@@ -91,8 +91,8 @@ The loop itself doesn't actually leak (the `is == null && lastDot > 0` condition
 
 These need design choices, not just code changes. Each one is a place where source and ASM disagree about how lowered-form artifacts should surface. Most are unblocked by the convergence test harness (P3-G below).
 
-### 10. ASM doesn't filter `ACC_SYNTHETIC` / `ACC_BRIDGE` / `<clinit>`
-`AsmClassSymbolProvider.java:208–218` — surfaces every method in the class file, including bridges from generic erasure, Kotlin `$default` overloads, captured-local accessors, and class initializers. These have no source counterpart. Filter `ACC_BRIDGE` always; filter `<clinit>` by name; filter `ACC_SYNTHETIC` with carveouts (enum members if we keep them; Kotlin companion-object accessors that the source extractor is expected to lift).
+### 10. ASM doesn't filter `ACC_SYNTHETIC` / `ACC_BRIDGE` / `<clinit>` — **FIXED** (2026-05-23)
+`AsmClassSymbolProvider.visitMethod` now returns null for `<clinit>`, `ACC_BRIDGE` (0x0040), and `ACC_SYNTHETIC` (0x1000) methods, so they're filtered at the extraction source. Convergence harness normalizer simplified — only the residual ACC_SUPER class flag + javac's synthesized default constructor (which is plain public, not synthetic) stay there. Two convergence tests added: `testGenericErasureBridgeIsFiltered` (Comparable bridge), `testStaticInitializerIsFiltered` (`<clinit>`).
 
 ### 11. Kotlin data-class synthetics missing
 `data class Pair(val a: Int, val b: String)` produces only `getA()` / `getB()`. Bytecode has `copy(...)`, `component1()`, `component2()`, `equals()`, `hashCode()`, `toString()`. The `data` modifier is a written-in-source contract that promises these — synthesize on the source side. The alternative (have ASM filter them) loses semantics.

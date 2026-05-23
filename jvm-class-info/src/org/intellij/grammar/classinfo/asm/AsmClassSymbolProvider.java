@@ -217,6 +217,16 @@ public final class AsmClassSymbolProvider implements JvmClassSymbolProvider {
                                      String desc,
                                      String signature,
                                      String[] exceptions) {
+      // Drop methods that have no source-level counterpart:
+      //   - <clinit>: static initializer block (compiler-synthesized).
+      //   - ACC_BRIDGE (0x0040): generic-erasure bridge.
+      //   - ACC_SYNTHETIC (0x1000): captured-locals accessors, $default overloads from
+      //     Kotlin @JvmOverloads, enum $VALUES accessor, etc.
+      // Filtering at the source means downstream consumers (JvmSyntaxHelper, method matching)
+      // see the same surface that a source-level caller would write.
+      if ("<clinit>".equals(name) || (access & 0x0040) != 0 || (access & 0x1000) != 0) {
+        return null;
+      }
       MethodSymbol.Builder m = getMethodInfo(myInfo.name, name, ObjectUtils.chooseNotNull(signature, desc), exceptions);
       m.modifiers = access;
       m.methodType = "<init>".equals(name) ? MethodType.CONSTRUCTOR :

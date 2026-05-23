@@ -32,10 +32,6 @@ import java.util.Map;
  */
 final class SourceAsmConvergence {
 
-  /** {@code ACC_BRIDGE} flag, not exposed by {@link java.lang.reflect.Modifier}. */
-  private static final int ACC_BRIDGE = 0x0040;
-  /** {@code ACC_SYNTHETIC} flag, not exposed by {@link java.lang.reflect.Modifier}. */
-  private static final int ACC_SYNTHETIC = 0x1000;
   /**
    * {@code ACC_SUPER} class flag (0x20). Same bit value as {@code Modifier.SYNCHRONIZED}, but on
    * classes it has no source-level meaning — javac sets it on every modern class file. The text
@@ -46,21 +42,21 @@ final class SourceAsmConvergence {
   private SourceAsmConvergence() { }
 
   /**
-   * Drop bytecode-only artifacts: {@code <clinit>}, {@code ACC_BRIDGE}, {@code ACC_SYNTHETIC}, and
-   * javac's synthesized default constructor (public no-arg {@code <init>} when no constructors are
-   * declared in source). Also clears the class-level {@code ACC_SUPER} flag, which has no source
-   * counterpart but renders as "synchronized" via {@code Modifier.toString}. Once the corresponding
-   * P2 tasks land on the ASM provider itself, this normalizer becomes a no-op.
+   * Drop bytecode-only artifacts that don't have a source counterpart. After audit #10 landed,
+   * the ASM provider drops {@code <clinit>} / {@code ACC_BRIDGE} / {@code ACC_SYNTHETIC} at the
+   * extraction source — this normalizer only handles the residual divergences:
+   * <ul>
+   *   <li>javac's synthesized default constructor (public no-arg {@code <init>}) is emitted as a
+   *       plain method, not {@code ACC_SYNTHETIC}, so it survives the source-side filter and
+   *       must be stripped here.</li>
+   *   <li>The class-level {@code ACC_SUPER} flag has no source counterpart but renders as
+   *       "synchronized" via {@code Modifier.toString}; clear it here.</li>
+   * </ul>
    */
   static @NotNull ClassSymbol dropBytecodeArtifacts(@NotNull ClassSymbol input) {
     ClassSymbol.Builder b = toBuilder(input);
     b.modifiers &= ~ACC_SUPER;
-    b.methods.removeIf(m ->
-      "<clinit>".equals(m.name)
-      || (m.modifiers & ACC_BRIDGE) != 0
-      || (m.modifiers & ACC_SYNTHETIC) != 0
-      || isSyntheticDefaultConstructor(m)
-    );
+    b.methods.removeIf(SourceAsmConvergence::isSyntheticDefaultConstructor);
     return b.build();
   }
 

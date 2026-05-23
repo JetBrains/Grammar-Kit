@@ -106,6 +106,33 @@ public class SourceAsmConvergenceTest extends TestCase {
       """, "pkg.Box");
   }
 
+  public void testGenericErasureBridgeIsFiltered() throws Exception {
+    // Implementing a generic interface produces a bridge method at the bytecode level:
+    //   `int compareTo(Object)` bridges to `int compareTo(IntBox)`. The bridge is marked
+    // ACC_BRIDGE | ACC_SYNTHETIC and has no source counterpart. The ASM provider must drop it
+    // (audit #10) so the method list converges with what the source extractor produced.
+    // No @Override here on purpose: @Override is RetentionPolicy.SOURCE so the source extractor
+    // surfaces it but ASM doesn't. That's a separate normalization concern, not the bridge one.
+    assertConverges("pkg/IntBox.java", """
+      package pkg;
+      public class IntBox implements Comparable<IntBox> {
+        public int compareTo(IntBox other) { return 0; }
+      }
+      """, "pkg.IntBox");
+  }
+
+  public void testStaticInitializerIsFiltered() throws Exception {
+    // A class with a static initializer block produces a <clinit> method at the bytecode level.
+    // No source counterpart — ASM provider must filter it (audit #10).
+    assertConverges("pkg/Constants.java", """
+      package pkg;
+      public class Constants {
+        public static final int X;
+        static { X = 42; }
+      }
+      """, "pkg.Constants");
+  }
+
   // ---------------------------------------------------------------------------------------------
   // assertConverges
   // ---------------------------------------------------------------------------------------------

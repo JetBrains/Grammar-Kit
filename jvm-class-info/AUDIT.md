@@ -130,8 +130,15 @@ Added `TypeProjection.Variance.fromBytecodeWildcard(char)` and routed the ASM si
 ### 19. `buildDottedText` duplicated — **WON'T FIX** (2026-05-23)
 Inspection showed the two implementations are not actually duplicates. Java's version is 12 lines over 3 token types (`JAVA_CODE_REFERENCE` / `DOT` / `IDENTIFIER`) with `StringBuilder` assembly; Kotlin's is 25 lines over 6+ token types (`REFERENCE_EXPRESSION` / `DOT_QUALIFIED_EXPRESSION` / `USER_TYPE` / `PACKAGE_DIRECTIVE` / `PACKAGE_KEYWORD` / etc.) with `List<String>` + `String.join`. Lifting to `SyntaxTreeUtil` would require parameterizing over language-specific predicates ("is identifier", "is dot", "should recurse"), trading 12+25 self-contained lines for a generic SPI plus two thin shims that pass constant predicates — premature abstraction for two non-isomorphic callers.
 
-### 20. Import-extraction loop duplicated
-`JavaSyntaxImportContext.extractImports:68–106` and `KotlinSyntaxImportContext.extractImports` differ only in AST type-name constants and the null-check around `NestedTypeResolver.findDeclaringClass`. Lift the skeleton into `AbstractImportContext` parameterized by an import-statement predicate + a callback.
+### 20. Import-extraction loop duplicated — **WON'T FIX** (2026-05-23)
+The audit's claim "differ only in AST type-name constants and the null-check" was inspection-overstated. Real divergences:
+- Java's version (37 lines) does JLS 7.5.1 nested-type canonicalization via `NestedTypeResolver.findDeclaringClass`.
+- Kotlin's version (18 lines) does import-alias handling (`import x.y as z`).
+- They use different AST vocabularies (IMPORT_STATEMENT vs IMPORT_DIRECTIVE, ASTERISK vs MUL).
+
+Lifting would need ≥3 callbacks (find-list / is-import / extract-entry) replacing two methods that share maybe an 8-line for-loop skeleton. Premature abstraction with two non-isomorphic callers, same pattern as #19, #21, #22.
+
+(Sidebar worth noting: Kotlin's `extractImports` does **not** apply JLS-style canonicalization to inherited nested-type imports; whether kotlinc does is a separate correctness question, out of scope for this dedup task.)
 
 ### 21. Built-in type lists overlap with drift — **DOCUMENTED, NOT LIFTED** (2026-05-23)
 The "drift" framing was wrong on inspection — the two lists encode different language policies:

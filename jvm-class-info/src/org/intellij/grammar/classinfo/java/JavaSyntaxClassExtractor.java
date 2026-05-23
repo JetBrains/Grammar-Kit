@@ -9,7 +9,9 @@ import com.intellij.platform.syntax.SyntaxElementType;
 import com.intellij.platform.syntax.tree.SyntaxNode;
 import org.intellij.grammar.classinfo.ClassSymbol;
 import org.intellij.grammar.classinfo.Fqn;
+import org.intellij.grammar.classinfo.JvmTypeRef;
 import org.intellij.grammar.classinfo.MethodSymbol;
+import org.intellij.grammar.classinfo.MethodType;
 import org.intellij.grammar.classinfo.SymbolResolver;
 import org.jetbrains.annotations.NotNull;
 
@@ -26,6 +28,7 @@ import static org.intellij.grammar.classinfo.SyntaxTreeUtil.firstChildOfType;
 import static org.intellij.grammar.classinfo.java.JavaSyntaxNodes.extractModifiers;
 import static org.intellij.grammar.classinfo.java.JavaSyntaxNodes.findClassName;
 import static org.intellij.grammar.classinfo.java.JavaSyntaxNodes.isAnnotationType;
+import static org.intellij.grammar.classinfo.java.JavaSyntaxNodes.isEnumClass;
 import static org.intellij.grammar.classinfo.java.JavaSyntaxNodes.isInterface;
 import static org.intellij.grammar.classinfo.java.JavaSyntaxNodes.typeParameterNames;
 
@@ -116,12 +119,24 @@ public final class JavaSyntaxClassExtractor {
       info.modifiers |= Modifier.INTERFACE | Modifier.ABSTRACT;
       info.annotationTargets.addAll(typeFormatter.parseAnnotationTargetSet(modifierList, classTypeVars));
     }
+    if (isEnumClass(classNode)) {
+      // Enum classes implicitly extend java.lang.Enum and are final at the bytecode level —
+      // javac never emits the `extends` clause in source but the compiled form carries both.
+      // Set them explicitly so the source extractor's view converges with ASM (audit #12).
+      info.modifiers |= Modifier.FINAL;
+      // javac auto-generates `static T[] values()` and `static T valueOf(String)`.
+      synthesizeEnumStaticMembers(fqn, info.methods);
+    }
 
     List<Fqn> extendsRefs = typeFormatter.extractRefFqns(firstChildOfType(classNode, JavaSyntaxElementType.EXTENDS_LIST),
                                                          classTypeVars);
     if (isInterface(classNode)) {
       info.superClass = null;
       info.interfaces.addAll(extendsRefs); // interfaces' EXTENDS_LIST holds super-interfaces
+    }
+    else if (isEnumClass(classNode)) {
+      // Implicit superclass for an enum class is java.lang.Enum, not java.lang.Object.
+      info.superClass = Fqn.of("java.lang.Enum");
     }
     else {
       info.superClass = extendsRefs.isEmpty() ? Fqn.JAVA_LANG_OBJECT : extendsRefs.get(0);
@@ -165,5 +180,37 @@ public final class JavaSyntaxClassExtractor {
       typeFormatter.setNestedScope(previousScope);
       typeFormatter.setEnclosingChain(previousChain);
     }
+  }
+
+  /**
+   * Append the public-static {@code values()} and {@code valueOf(String)} members that javac/kotlinc
+   * auto-generate for every enum class. {@code values()} returns an array of the enum class
+   * itself; {@code valueOf} returns the enum class for a name lookup.
+   */
+  public static void synthesizeEnumStaticMembers(@NotNull Fqn classFqn,
+                                                 @NotNull java.util.List<MethodSymbol.Builder> out) {
+    JvmTypeRef selfRef = new JvmTypeRef.UserType(classFqn, List.of(), List.of());
+
+    // javac emits values() and valueOf(String) as `public static` — NOT final, despite what one
+    // might expect. Don't add Modifier.FINAL; convergence depends on matching that.
+    MethodSymbol.Builder values = new MethodSymbol.Builder();
+    values.declaringClass = classFqn;
+    values.name = "values";
+    values.modifiers = Modifier.PUBLIC | Modifier.STATIC;
+    values.methodType = MethodType.STATIC;
+    values.returnType = new JvmTypeRef.ArrayType(selfRef, List.of());
+    out.add(values);
+
+    MethodSymbol.Builder valueOf = new MethodSymbol.Builder();
+    valueOf.declaringClass = classFqn;
+    valueOf.name = "valueOf";
+    valueOf.modifiers = Modifier.PUBLIC | Modifier.STATIC;
+    valueOf.methodType = MethodType.STATIC;
+    valueOf.returnType = selfRef;
+    org.intellij.grammar.classinfo.ParameterSymbol.Builder p = new org.intellij.grammar.classinfo.ParameterSymbol.Builder();
+    p.name = "name";
+    p.type = new JvmTypeRef.UserType(Fqn.of("java.lang.String"), List.of(), List.of());
+    valueOf.parameters.add(p);
+    out.add(valueOf);
   }
 }

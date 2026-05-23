@@ -134,6 +134,16 @@ public class SourceAsmConvergenceTest extends TestCase {
       """, "pkg.Logger");
   }
 
+  public void testEnumClassConverges() throws Exception {
+    // Audit #12: enum class needs `static T[] values()` and `static T valueOf(String)` on both
+    // sides. Source extractor synthesizes them; ASM emits them but used to be filtered by the
+    // ACC_SYNTHETIC rule until the enum carveout landed.
+    assertConverges("pkg/Color.java", """
+      package pkg;
+      public enum Color { RED, GREEN, BLUE }
+      """, "pkg.Color");
+  }
+
   public void testStaticInitializerIsFiltered() throws Exception {
     // A class with a static initializer block produces a <clinit> method at the bytecode level.
     // No source counterpart — ASM provider must filter it (audit #10).

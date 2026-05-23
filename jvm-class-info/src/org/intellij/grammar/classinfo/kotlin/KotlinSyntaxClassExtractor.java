@@ -221,6 +221,11 @@ final class KotlinSyntaxClassExtractor {
           methodExtractor.synthesizeDataClassMembers(primaryCtor, fqn, info.typeParameters, classTypeVars, info.methods);
         }
       }
+      // enum class: kotlinc auto-generates static values() and valueOf(String). The synthesis is
+      // identical to the Java side (audit #12), so delegate to the Java extractor's helper.
+      if (KotlinSyntaxNodes.isEnumClass(modifierList)) {
+        org.intellij.grammar.classinfo.java.JavaSyntaxClassExtractor.synthesizeEnumStaticMembers(fqn, info.methods);
+      }
 
       if (body != null) walkClassBody(body, info, classTypeVars);
     }

@@ -49,6 +49,8 @@ final class SourceAsmConvergence {
    *   <li>javac's synthesized default constructor (public no-arg {@code <init>}) is emitted as a
    *       plain method, not {@code ACC_SYNTHETIC}, so it survives the source-side filter and
    *       must be stripped here.</li>
+   *   <li>javac's implicit enum constructor — emitted as private {@code <init>(String, int)}
+   *       or {@code <init>()} for every enum class, never user-callable, no source counterpart.</li>
    *   <li>The class-level {@code ACC_SUPER} flag has no source counterpart but renders as
    *       "synchronized" via {@code Modifier.toString}; clear it here.</li>
    * </ul>
@@ -56,8 +58,17 @@ final class SourceAsmConvergence {
   static @NotNull ClassSymbol dropBytecodeArtifacts(@NotNull ClassSymbol input) {
     ClassSymbol.Builder b = toBuilder(input);
     b.modifiers &= ~ACC_SUPER;
-    b.methods.removeIf(SourceAsmConvergence::isSyntheticDefaultConstructor);
+    boolean isEnum = (b.modifiers & 0x4000) != 0;
+    b.methods.removeIf(m ->
+      isSyntheticDefaultConstructor(m)
+      || (isEnum && isImplicitEnumConstructor(m))
+    );
     return b.build();
+  }
+
+  /** Implicit enum constructor — javac always emits one; source extractors don't model it. */
+  private static boolean isImplicitEnumConstructor(@NotNull MethodSymbol.Builder m) {
+    return "<init>".equals(m.name) && (m.modifiers & java.lang.reflect.Modifier.PRIVATE) != 0;
   }
 
   /**

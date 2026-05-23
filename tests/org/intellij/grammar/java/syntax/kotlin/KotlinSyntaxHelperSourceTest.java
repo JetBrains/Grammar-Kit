@@ -276,6 +276,16 @@ public class KotlinSyntaxHelperSourceTest extends GoldenClassInfoTestCase {
     assertClassInfoMatchesGolden(extractAll());
   }
 
+  public void testEnumClassSynthesizesValuesAndValueOf() throws Exception {
+    // Audit task #12: kotlinc auto-generates `values(): Array<T>` and `valueOf(String): T` for
+    // enum classes. The source extractor synthesizes them so its view matches what ASM sees.
+    write("pkg/Suit.kt", """
+        package pkg
+        enum class Suit { HEARTS, DIAMONDS, CLUBS, SPADES }
+        """);
+    assertClassInfoMatchesGolden(extractAll());
+  }
+
   public void testDataClassSynthesizesComponentCopyEqualsHashCodeToString() throws Exception {
     // Audit task #11: data class kotlinc-generates componentN(), copy(...), equals(Object),
     // hashCode(), toString(). The source extractor synthesizes the same so its view converges

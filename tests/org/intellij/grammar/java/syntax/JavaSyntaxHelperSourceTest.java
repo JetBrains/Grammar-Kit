@@ -583,6 +583,21 @@ public class JavaSyntaxHelperSourceTest extends GoldenClassInfoTestCase {
       """));
   }
 
+  public void testMalformedMethodGracefullyDegradesNotCrashes() {
+    // Audit task #5: probe what happens when the parser produces structurally-broken input.
+    // The extractor must not crash; methods may end up with empty-FQN placeholders. This test
+    // characterizes the current behavior so any future change to error handling is visible in
+    // the golden diff.
+    assertClassInfoMatchesGolden(extract("""
+      package a.b;
+      public class C {
+        public void noParamType(int);
+        public void empty();
+        public  whatIsThis();
+      }
+      """));
+  }
+
   public void testDottedRefThroughSiblingNestedClassCanonicalizes() {
     // Audit task #2: when a dotted ref's head is a *sibling* nested class (resolved through
     // `nestedScope` at line 342–343 of JavaSyntaxTypeFormatter, not through an import), intermediate

@@ -6,6 +6,7 @@ package org.intellij.grammar.classinfo.java;
 
 import com.intellij.java.syntax.element.JavaSyntaxElementType;
 import com.intellij.java.syntax.element.JavaSyntaxTokenType;
+import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.platform.syntax.SyntaxElementType;
 import com.intellij.platform.syntax.tree.SyntaxNode;
 import com.intellij.util.SmartList;
@@ -45,6 +46,8 @@ import static org.intellij.grammar.classinfo.java.JavaSyntaxNodes.buildDottedTex
  */
 @SuppressWarnings("UnstableApiUsage")
 final class JavaSyntaxTypeFormatter {
+
+  private static final Logger LOG = Logger.getInstance(JavaSyntaxTypeFormatter.class);
 
   private static final Set<SyntaxElementType> PRIMITIVE_KEYWORDS = Set.of(
     JavaSyntaxTokenType.VOID_KEYWORD,
@@ -159,7 +162,14 @@ final class JavaSyntaxTypeFormatter {
         if (fqn != null) pending.add(fqn);
       }
     }
-    if (base == null) base = new JvmTypeRef.UserType(Fqn.of(""), List.of(), List.of());
+    if (base == null) {
+      // Defensive fallback: parser produced a TYPE node with no recognised type child. Real-world
+      // input from the java-syntax parser shouldn't reach here, so log loudly if it does — the
+      // downstream empty-FQN will silently break type matching on the surrounding member.
+      LOG.warn("Empty TYPE node — no JAVA_CODE_REFERENCE or primitive child; producing empty-FQN placeholder. Source range: "
+               + typeNode.getStartOffset() + ".." + typeNode.getEndOffset());
+      base = new JvmTypeRef.UserType(Fqn.of(""), List.of(), List.of());
+    }
     JvmTypeRef result = base;
     // dimAnnotations is in source order — innermost dim first; wrap inside-out so the outermost
     // ArrayType (last wrap) takes the last-recorded dim's annotations.
@@ -372,8 +382,9 @@ final class JavaSyntaxTypeFormatter {
   /**
    * Canonicalize each segment of a dotted nested-type reference (JLS 7.5.1). For
    * {@code Sub.Inner.Leaf} where {@code Inner} is inherited from {@code Sub}'s supertype, the
-   * intermediate {@code Inner} hop must rewrite to the declaring class — otherwise we'd produce
-   * {@code Sub.Inner.Leaf} where ASM produces {@code Parent.Inner.Leaf}. Walks segment-by-segment,
+   * intermediate {@code Inner} hop must rewrite to the declaring class ({@code Parent.Inner.Leaf})
+   * because the canonical FQN of a nested class is its declaring class, not the access path used
+   * to reach it. Walks segment-by-segment,
    * asking {@link NestedTypeResolver#findDeclaringClass} at each hop. When the resolver doesn't
    * know the current enclosing (pure package prefixes like {@code java.util}), append the segment
    * verbatim and continue — only segments whose enclosing actually resolves get rewritten.

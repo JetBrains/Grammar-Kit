@@ -106,8 +106,8 @@ Source: one function with default parameter values. Bytecode: one canonical func
 ### 14. Kotlin `suspend` and the `Continuation` parameter
 Source: `suspend fun foo(): Int`. Bytecode: `Object foo(Continuation<Integer>)`. The source view is the right view — consumers writing Kotlin code call `suspend fun foo()` directly. ASM should detect the suspend lowering and present the source-level signature (re-attach the return type from the Continuation's type argument, drop the Continuation parameter).
 
-### 15. ASM doesn't decode `ACC_VARARGS`
-Trailing parameter renders as `T[]` instead of `T...`. Representation choice driven by #1: once Java is fixed to emit `T[]` (not `T[][]`), the two providers already converge if we accept `T[]` as canonical. Decoding `ACC_VARARGS` for `T...` rendering is only needed if we instead pick the syntactic form. Decide first, then act on both sides.
+### 15. ASM doesn't decode `ACC_VARARGS` — **FIXED** (2026-05-23)
+Decision: settle on the erased array form `T[]` (no `...` marker carried). Both providers already produce that representation for the parameter type. The remaining divergence was on the **method modifier bitmask**: ACC_VARARGS (0x0080) is the same bit value as `Modifier.TRANSIENT` for fields, so the ASM-side method rendered as "public transient" via `Modifier.toString`. Fixed in `AsmClassSymbolProvider.visitMethod` by clearing the 0x0080 bit before storing. Convergence test `testVarargsConvergesAsArray` covers it.
 
 ### 16. `internal` → `public` mapping doesn't mangle names
 Kotlin compiles `internal fun foo()` to a public method with a mangled name (`foo$module-name`). Source maps visibility but not the name. ASM sees the mangled name. Choose un-mangled on both sides — mangling is a bytecode-level encoding, not part of the source API.

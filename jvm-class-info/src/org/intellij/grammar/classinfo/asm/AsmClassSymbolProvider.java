@@ -530,9 +530,7 @@ public final class AsmClassSymbolProvider implements JvmClassSymbolProvider {
 
     @Override
     public SignatureVisitor visitTypeArgument(char c) {
-      TypeProjection.Variance variance = c == '+' ? TypeProjection.Variance.OUT
-                                       : c == '-' ? TypeProjection.Variance.IN
-                                                  : TypeProjection.Variance.INVARIANT;
+      TypeProjection.Variance variance = TypeProjection.Variance.fromBytecodeWildcard(c);
       return new TypeRefBuilder(inner -> args.add(new TypeProjection.WithVariance(variance, inner)));
     }
 

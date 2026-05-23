@@ -94,7 +94,7 @@ final class KotlinSyntaxClassExtractor {
         walkClass(child, Fqn.ROOT, Set.of());
       }
       else if (t == KtNodeTypes.INSTANCE.getOBJECT_DECLARATION()) {
-        walkObject(child, Fqn.ROOT, null, Set.of());
+        walkObject(child, Fqn.ROOT, Set.of());
       }
       else if (t == KtNodeTypes.INSTANCE.getTYPEALIAS()) {
         walkTypeAlias(child, Fqn.ROOT);
@@ -254,7 +254,6 @@ final class KotlinSyntaxClassExtractor {
 
   private void walkObject(@NotNull SyntaxNode objectNode,
                           @NotNull Fqn enclosingFqn,
-                          @Nullable ClassSymbol.Builder enclosingClass,
                           @NotNull Set<String> outerTypeVars) {
     SyntaxNode nameId = nameIdentifier(objectNode);
     boolean companion = isCompanion(objectNode);
@@ -283,24 +282,6 @@ final class KotlinSyntaxClassExtractor {
     }
     finally {
       typeFormatter.setNestedScope(previousScope);
-    }
-
-    // Lift @JvmStatic-annotated members onto the enclosing class.
-    if (companion && enclosingClass != null) {
-      for (MethodSymbol.Builder m : info.methods) {
-        SyntaxNode origin = null; // We don't track origin nodes; presence-of-@JvmStatic check happens during body walk.
-        if (m.modifiers != 0 && Modifier.isStatic(m.modifiers)) {
-          // Already a static member by virtue of file-level synthesis (not the case for companion bodies);
-          // skip to avoid duplicate insertion.
-          continue;
-        }
-        // Tagged-and-copied path: marker carried via name-prefix collision is awkward; do the lift in walkClassBody instead.
-        // (Intentionally a no-op here; see walkClassBody.)
-        if (origin != null) {
-          MethodSymbol.Builder lifted = copyAsStatic(m, enclosingClass.name);
-          enclosingClass.methods.add(lifted);
-        }
-      }
     }
   }
 

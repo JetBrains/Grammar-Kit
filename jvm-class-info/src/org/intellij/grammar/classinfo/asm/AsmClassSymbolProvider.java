@@ -135,6 +135,40 @@ public final class AsmClassSymbolProvider implements JvmClassSymbolProvider {
                     (signature == null ? "" : " signature " + signature));
   }
 
+  /**
+   * Strip Kotlin's {@code internal}-mangling suffix from a method name.
+   * <p>
+   * Kotlin compiles {@code internal fun foo()} to a public method named {@code foo$<module-name>}
+   * (the module name comes from the build setup). Source-level callers write {@code foo}, so the
+   * ASM-side method list needs to expose the un-mangled name to match.
+   * <p>
+   * Heuristic: strip the last {@code $<suffix>} where the suffix matches a Kotlin module
+   * identifier ({@code [A-Za-z_][A-Za-z0-9_-]*}), the method is public ({@code ACC_PUBLIC}), and
+   * the name doesn't start with {@code <} (so {@code <init>} / {@code <clinit>} are untouched).
+   * This is intentionally conservative — Kotlin reserves {@code $} in identifiers, so the
+   * heuristic mainly risks stripping intentionally-mangled names from non-Kotlin sources, which
+   * is rare enough to accept until convergence-harness Kotlin support lands. See audit #16.
+   */
+  public static @NotNull String unmangleInternalKotlinName(@NotNull String name, int access) {
+    if (name.isEmpty() || name.charAt(0) == '<') return name;
+    if ((access & Modifier.PUBLIC) == 0) return name;
+    int lastDollar = name.lastIndexOf('$');
+    if (lastDollar <= 0 || lastDollar == name.length() - 1) return name;
+    String suffix = name.substring(lastDollar + 1);
+    if (!isKotlinModuleIdentifier(suffix)) return name;
+    return name.substring(0, lastDollar);
+  }
+
+  private static boolean isKotlinModuleIdentifier(@NotNull String s) {
+    char first = s.charAt(0);
+    if (!Character.isLetter(first) && first != '_') return false;
+    for (int i = 1; i < s.length(); i++) {
+      char c = s.charAt(i);
+      if (!Character.isLetterOrDigit(c) && c != '_' && c != '-') return false;
+    }
+    return true;
+  }
+
   private static void reportException(String text) {
     //noinspection UseOfSystemOutOrSystemErr
     System.err.println(text);
@@ -227,7 +261,8 @@ public final class AsmClassSymbolProvider implements JvmClassSymbolProvider {
       if ("<clinit>".equals(name) || (access & 0x0040) != 0 || (access & 0x1000) != 0) {
         return null;
       }
-      MethodSymbol.Builder m = getMethodInfo(myInfo.name, name, ObjectUtils.chooseNotNull(signature, desc), exceptions);
+      String unmangledName = unmangleInternalKotlinName(name, access);
+      MethodSymbol.Builder m = getMethodInfo(myInfo.name, unmangledName, ObjectUtils.chooseNotNull(signature, desc), exceptions);
       // Clear ACC_VARARGS (0x0080) on the method modifier bitmask: same bit value as
       // Modifier.TRANSIENT for fields, so Modifier.toString would otherwise render it as
       // "transient" on the method (audit #15). Since the type model represents varargs as the

@@ -52,6 +52,11 @@ public final class BnfPaths {
   private BnfPaths() {
   }
 
+  /** Input-path attributes, in declaration order. Directories the generator reads from. */
+  public static final List<KnownAttribute<?>> INPUTS = List.of(
+    KnownAttribute.INPUT_PATH,
+    KnownAttribute.PSI_INPUT_PATH);
+
   /** Single-valued output-path attributes, in declaration order. Each represents a directory
    * the generator writes to and that callers (CLI, batch service) may need to materialize on disk. */
   public static final List<KnownAttribute<String>> OUTPUTS = List.of(
@@ -68,8 +73,7 @@ public final class BnfPaths {
 
   private static List<KnownAttribute<?>> buildAll() {
     List<KnownAttribute<?>> list = new ArrayList<>();
-    list.add(KnownAttribute.INPUT_PATH);
-    list.add(KnownAttribute.PSI_INPUT_PATH);
+    list.addAll(INPUTS);
     list.addAll(OUTPUTS);
     return List.copyOf(list);
   }

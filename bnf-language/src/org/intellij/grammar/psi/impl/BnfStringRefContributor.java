@@ -4,9 +4,13 @@
 
 package org.intellij.grammar.psi.impl;
 
+import com.intellij.openapi.util.Condition;
+import com.intellij.openapi.util.TextRange;
 import com.intellij.patterns.PatternCondition;
 import com.intellij.psi.*;
+import com.intellij.psi.impl.source.resolve.reference.impl.providers.FileReferenceSet;
 import com.intellij.util.ProcessingContext;
+import org.intellij.grammar.BnfPaths;
 import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.java.JavaHelperFactory;
 import org.intellij.grammar.psi.BnfAttr;
@@ -67,6 +71,38 @@ class BnfStringRefContributor extends PsiReferenceContributor {
         @Override
         public PsiReference @NotNull [] getReferencesByElement(@NotNull PsiElement element, @NotNull ProcessingContext context) {
           return JavaHelperFactory.getInstance(element.getProject()).getInstance(element).getClassReferences(element, context);
+        }
+      });
+
+    registerPathReferenceProvider(registrar, Set.copyOf(BnfPaths.INPUTS), false);
+    registerPathReferenceProvider(registrar, Set.copyOf(BnfPaths.OUTPUTS), true);
+  }
+
+  private static void registerPathReferenceProvider(@NotNull PsiReferenceRegistrar registrar,
+                                                    @NotNull Set<KnownAttribute<?>> attributes,
+                                                    boolean soft) {
+    registrar.registerReferenceProvider(
+      psiElement(BnfStringImpl.class).withAncestor(3, psiElement(BnfAttr.class).withName(
+        string().with(oneOf(attributes)))),
+      new PsiReferenceProvider() {
+
+        @Override
+        public PsiReference @NotNull [] getReferencesByElement(@NotNull PsiElement element, @NotNull ProcessingContext context) {
+          TextRange valueRange = ElementManipulators.getValueTextRange(element);
+          String text = valueRange.substring(element.getText());
+          boolean caseSensitive = element.getContainingFile().getViewProvider().getVirtualFile().getFileSystem().isCaseSensitive();
+          FileReferenceSet set = new FileReferenceSet(text, element, valueRange.getStartOffset(), null, caseSensitive, false) {
+            @Override
+            protected Condition<PsiFileSystemItem> getReferenceCompletionFilter() {
+              return DIRECTORY_FILTER;
+            }
+
+            @Override
+            protected boolean isSoft() {
+              return soft;
+            }
+          };
+          return set.getAllReferences();
         }
       });
   }

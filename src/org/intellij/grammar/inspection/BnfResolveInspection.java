@@ -11,6 +11,7 @@ import com.intellij.codeInspection.ProblemsHolder;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.psi.*;
+import com.intellij.psi.impl.source.resolve.reference.impl.providers.FileReference;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.util.ThreeState;
 import org.intellij.grammar.GrammarKitBundle;
@@ -89,7 +90,12 @@ final class BnfResolveInspection extends LocalInspectionTool {
               boolean atEnd = valueRange.getEndOffset() == reference.getRangeInElement().getEndOffset();
               PsiElement resolve = reference.resolve();
               if (resolve != null) {
-                reportAtEnd = ThreeState.NO;
+                // FileReference produces one ref per non-overlapping path segment, so a resolved
+                // earlier segment must NOT silence an at-end unresolved one (`inputPath="../missing"`
+                // → `..` resolves, `missing` does not, warning belongs on `missing`). Other ref
+                // chains (JavaClassReference, BnfRule refs) use overlapping ranges where the
+                // historical suppression is the desired behavior.
+                if (atEnd || !(reference instanceof FileReference)) reportAtEnd = ThreeState.NO;
               }
               else if (!atEnd) {
                 if (reference.getRangeInElement().getLength() == 1 &&

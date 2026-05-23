@@ -58,13 +58,13 @@ Replaced the empty-FQN placeholder with a visible `<Missing type>` stub across *
 
 All sites now go through `JvmTypeRefs.missingType(reason)` / `JvmTypeRefs.missingFqn(reason)`, which centralize the `Fqn.MISSING` constant (value `<Missing type>`) and the `LOG.warn` emission. `Fqn.MISSING` is distinct from `Fqn.ROOT` (the "no enclosing class" sentinel) so semantically-different empty FQNs don't share a representation.
 
-### 6. Cycle-tolerance contract not enforced uniformly
-Per parent CLAUDE.md: `SymbolResolver.findClass` returns null on cycles, and all extractors **must** be null-tolerant.
-- `JavaSyntaxTypeFormatter.isConfirmedClass:368–369` — doesn't null-check `resolvedHead` before `Fqn.of`.
-- `KotlinSyntaxTypeFormatter.resolveClassLiteralFqn:490` — same.
-- `NestedTypeResolver.java:45–46` — on cycle hit returns null without probing the candidate at the current hop.
+### 6. Cycle-tolerance contract not enforced uniformly — **NOT REPRODUCIBLE** (2026-05-23)
+Audited every `SymbolResolver.findClass` caller (`AbstractImportContext.resolveSimpleName`, `JavaSyntaxTypeFormatter.isTypeUseAnnotation`, `JavaSyntaxTypeFormatter.isConfirmedClass`, `NestedTypeResolver.walk` x2, `KotlinSyntaxClassExtractor.populateSuperTypes`). All 6 sites explicitly check the result against `null` before dereferencing — none of the audit's three specific claims hold against the current code:
+- `isConfirmedClass` already does `findClass(...) != null` and the `resolvedHead` parameter is `@NotNull`.
+- `resolveClassLiteralFqn` doesn't call `findClass` at all (pure AST string manipulation).
+- `NestedTypeResolver.walk`'s cycle short-circuit correctly returns null because `candidate = classFqn.child(simple)` was already tested at the previous visit of this `classFqn`.
 
-NPE risk under cycles; the cycle case is rare, but cyclic-supertype configurations exist in real code.
+Regression test `testCyclicSupertypeResolutionDoesNotCrash` exercises the cycle path end-to-end with `A extends B, B extends A` and a dotted nested reference (`@A.Marker`) whose canonicalization walks the cyclic supertype chain. Test passes without NPE; the resolver returns the FQN it could deduce before the cycle broke recursion. Closed; regression test added.
 
 ---
 

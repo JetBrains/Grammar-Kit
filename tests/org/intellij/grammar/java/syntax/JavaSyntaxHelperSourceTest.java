@@ -583,6 +583,35 @@ public class JavaSyntaxHelperSourceTest extends GoldenClassInfoTestCase {
       """));
   }
 
+  public void testCyclicSupertypeResolutionDoesNotCrash() {
+    // Audit task #6: SymbolResolver.findClass returns null on cycle hits (per parent CLAUDE.md).
+    // All resolver call sites must be null-tolerant. This test exercises the path by setting up a
+    // cyclic class graph (A extends B, B extends A) and resolving a dotted nested reference whose
+    // canonicalization walks the supertype chain via NestedTypeResolver. No NPE expected; the
+    // resulting FQNs reflect whatever the resolver could deduce before the cycle broke recursion.
+    Map<Fqn, ClassSymbol> universe = new HashMap<>();
+    universe.putAll(extract("""
+      package c.d;
+      public class A extends B {
+        public @interface Marker {}
+      }
+      """));
+    universe.putAll(extract("""
+      package c.d;
+      public class B extends A {}
+      """, universe));
+    universe.putAll(extract("""
+      package a.b;
+      import c.d.A;
+      public class C {
+        public void doIt(@A.Marker int x) {}
+      }
+      """, universe));
+    Map<Fqn, ClassSymbol> userFile = new HashMap<>();
+    userFile.put(Fqn.of("a.b.C"), universe.get(Fqn.of("a.b.C")));
+    assertClassInfoMatchesGolden(userFile);
+  }
+
   public void testMalformedMethodGracefullyDegradesNotCrashes() {
     // Audit task #5: probe what happens when the parser produces structurally-broken input.
     // The extractor must not crash; methods may end up with empty-FQN placeholders. This test

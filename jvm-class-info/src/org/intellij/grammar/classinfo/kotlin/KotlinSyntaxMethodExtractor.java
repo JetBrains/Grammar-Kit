@@ -189,6 +189,106 @@ final class KotlinSyntaxMethodExtractor {
     return m;
   }
 
+  /**
+   * Synthesise the methods kotlinc auto-generates for a {@code data class}: {@code componentN()}
+   * for each primary-ctor val/var property, {@code copy(...)} taking the same parameters,
+   * {@code equals(Object)}, {@code hashCode()}, {@code toString()}. Mirrors what the ASM-side
+   * extractor sees once the {@code data} modifier triggers kotlinc's synthesis. (Audit #11.)
+   */
+  void synthesizeDataClassMembers(@NotNull SyntaxNode primaryCtor,
+                                  @NotNull Fqn classFqn,
+                                  @NotNull java.util.List<String> classTypeParameters,
+                                  @NotNull Set<String> classTypeVars,
+                                  @NotNull java.util.List<MethodSymbol.Builder> out) {
+    SyntaxNode paramList = firstChildOfType(primaryCtor, KtNodeTypes.INSTANCE.getVALUE_PARAMETER_LIST());
+    if (paramList == null) return;
+    List<ParameterSymbol.Builder> componentParams = new java.util.ArrayList<>();
+    int idx = 0;
+    for (SyntaxNode p = paramList.firstChild(); p != null; p = p.nextSibling()) {
+      if (p.getType() != KtNodeTypes.INSTANCE.getVALUE_PARAMETER()) continue;
+      boolean isProperty = firstChildOfType(p, KtTokens.INSTANCE.getVAL_KEYWORD()) != null
+                           || firstChildOfType(p, KtTokens.INSTANCE.getVAR_KEYWORD()) != null;
+      if (!isProperty) continue;
+      SyntaxNode nameId = firstChildOfType(p, KtTokens.INSTANCE.getIDENTIFIER());
+      SyntaxNode typeRef = firstChildOfType(p, KtNodeTypes.INSTANCE.getTYPE_REFERENCE());
+      if (nameId == null) continue;
+      JvmTypeRef parsed = typeRef == null ? IMPLICIT_TYPE : typeFormatter.parseType(typeRef, classTypeVars);
+      idx++;
+
+      // componentN(): T
+      MethodSymbol.Builder componentN = new MethodSymbol.Builder();
+      componentN.declaringClass = classFqn;
+      componentN.name = "component" + idx;
+      componentN.modifiers = Modifier.PUBLIC | Modifier.FINAL;
+      componentN.methodType = MethodType.INSTANCE;
+      componentN.returnType = parsed;
+      out.add(componentN);
+
+      // Remember the parameter for copy(...)
+      ParameterSymbol.Builder cp = new ParameterSymbol.Builder();
+      cp.name = nameId.getText().toString();
+      cp.type = parsed;
+      componentParams.add(cp);
+    }
+
+    // copy(...): ClassFqn<...> — same parameter shape as the primary constructor's val/var props,
+    // returning the data class itself (with its type parameters).
+    MethodSymbol.Builder copy = new MethodSymbol.Builder();
+    copy.declaringClass = classFqn;
+    copy.name = "copy";
+    copy.modifiers = Modifier.PUBLIC | Modifier.FINAL;
+    copy.methodType = MethodType.INSTANCE;
+    copy.returnType = classSelfType(classFqn, classTypeParameters);
+    copy.parameters.addAll(componentParams);
+    out.add(copy);
+
+    // equals(Object): boolean
+    MethodSymbol.Builder equals = new MethodSymbol.Builder();
+    equals.declaringClass = classFqn;
+    equals.name = "equals";
+    equals.modifiers = Modifier.PUBLIC;
+    equals.methodType = MethodType.INSTANCE;
+    equals.returnType = new JvmTypeRef.PrimitiveType("boolean");
+    ParameterSymbol.Builder other = new ParameterSymbol.Builder();
+    other.name = "other";
+    other.type = new JvmTypeRef.UserType(Fqn.of("java.lang.Object"),
+                                         List.of(KotlinSyntaxTypeFormatter.NULLABLE), List.of());
+    equals.parameters.add(other);
+    out.add(equals);
+
+    // hashCode(): int
+    MethodSymbol.Builder hash = new MethodSymbol.Builder();
+    hash.declaringClass = classFqn;
+    hash.name = "hashCode";
+    hash.modifiers = Modifier.PUBLIC;
+    hash.methodType = MethodType.INSTANCE;
+    hash.returnType = new JvmTypeRef.PrimitiveType("int");
+    out.add(hash);
+
+    // toString(): @NotNull String
+    MethodSymbol.Builder toStr = new MethodSymbol.Builder();
+    toStr.declaringClass = classFqn;
+    toStr.name = "toString";
+    toStr.modifiers = Modifier.PUBLIC;
+    toStr.methodType = MethodType.INSTANCE;
+    toStr.returnType = new JvmTypeRef.UserType(Fqn.of("java.lang.String"),
+                                               List.of(KotlinSyntaxTypeFormatter.NOT_NULL), List.of());
+    out.add(toStr);
+  }
+
+  /** {@code @NotNull ClassFqn<T1, T2, ...>} — used as the return type for {@code data class}'s
+   * synthesised {@code copy(...)}. */
+  private static @NotNull JvmTypeRef classSelfType(@NotNull Fqn classFqn,
+                                                   @NotNull java.util.List<String> typeParameters) {
+    List<org.intellij.grammar.classinfo.TypeProjection> args = new java.util.ArrayList<>(typeParameters.size());
+    for (String tp : typeParameters) {
+      args.add(new org.intellij.grammar.classinfo.TypeProjection.WithVariance(
+        org.intellij.grammar.classinfo.TypeProjection.Variance.INVARIANT,
+        new JvmTypeRef.TypeVariable(tp)));
+    }
+    return new JvmTypeRef.UserType(classFqn, List.of(KotlinSyntaxTypeFormatter.NOT_NULL), args);
+  }
+
   private void collectFunctionTypeParameters(@NotNull SyntaxNode funNode,
                                              @NotNull MethodSymbol.Builder m,
                                              @NotNull Set<String> typeVars) {

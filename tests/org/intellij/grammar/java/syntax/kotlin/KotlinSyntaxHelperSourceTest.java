@@ -276,6 +276,17 @@ public class KotlinSyntaxHelperSourceTest extends GoldenClassInfoTestCase {
     assertClassInfoMatchesGolden(extractAll());
   }
 
+  public void testDataClassSynthesizesComponentCopyEqualsHashCodeToString() throws Exception {
+    // Audit task #11: data class kotlinc-generates componentN(), copy(...), equals(Object),
+    // hashCode(), toString(). The source extractor synthesizes the same so its view converges
+    // with what ASM sees in the compiled bytecode.
+    write("pkg/Pair.kt", """
+        package pkg
+        data class Pair(val first: Int, val second: String)
+        """);
+    assertClassInfoMatchesGolden(extractAll());
+  }
+
   public void testJvmFieldSuppressesAccessorSynthesis() throws Exception {
     // Audit task #3: kotlinc does NOT generate get/set accessors for @JvmField properties — the
     // field is exposed directly at the JVM level. The source extractor must match that view: no

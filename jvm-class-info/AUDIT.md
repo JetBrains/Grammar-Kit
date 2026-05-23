@@ -149,8 +149,10 @@ The audit overstated the duplication. Java's `extractModifiers` is 6 lines (pure
 ### 24. Kotlin formatter mixes parsing / policy / annotation extraction
 `KotlinSyntaxTypeFormatter.java` (~500 lines) combines `JVM_BUILTINS` + `KOTLIN_TO_JAVA_ALIASES` (policy/config), `parseType` / `parseUserType` (parser), and `extractAnnotationFqns` (extraction). Split into `KotlinTypeResolutionPolicy` + parser + annotation extractor.
 
-### 25. Kotlin formatter mutates `nestedScope` per walk
-`walkClass` / `walkObject` swap a mutable field on the formatter instance. Unsafe for any future parallel ingestion. Pass scope as an explicit parameter.
+### 25. Kotlin formatter mutates `nestedScope` per walk — **DEFERRED, DOCUMENTED** (2026-05-23)
+Verified scope: full refactor touches ~30 method signatures across `KotlinSyntaxTypeFormatter` + both extractors (~200-line atomic diff). Each `KotlinSyntaxClassSymbolProvider` instance already owns its own formatter, so no cross-thread sharing happens in practice — the "future parallel ingestion" concern is forward-looking, not a current bug. Per the audit's own PR ordering, this belongs in Pass 4 (do after the convergence harness lands so refactors have a regression backstop).
+
+Documented the not-thread-safe constraint on the formatter's class-level javadoc so any future caller sharing a formatter knows the contract. Will revisit once #33 lands.
 
 ### 26. Annotation extraction logic duplicated three ways
 - ASM `MyAnnotationVisitor` (lines 308–336) with parameter-counter empty-annotation filter

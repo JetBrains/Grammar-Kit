@@ -17,6 +17,7 @@ import org.intellij.grammar.classinfo.MethodSymbol;
 import org.intellij.grammar.classinfo.MethodType;
 import org.intellij.grammar.classinfo.ParameterSymbol;
 import org.intellij.grammar.classinfo.SymbolResolver;
+import org.intellij.grammar.classinfo.TargetType;
 import org.intellij.grammar.classinfo.TypeParameterSymbol;
 import org.intellij.grammar.classinfo.TypeProjection;
 import org.jetbrains.annotations.NotNull;
@@ -136,6 +137,8 @@ public final class AsmClassSymbolProvider implements JvmClassSymbolProvider {
   // Class visitor
   // ===============================================================================================
 
+  private static final String JAVA_LANG_ANNOTATION_TARGET_DESC = "Ljava/lang/annotation/Target;";
+
   private static class MyClassVisitor extends ClassVisitor {
 
     private final ClassSymbol.Builder myInfo;
@@ -165,6 +168,36 @@ public final class AsmClassSymbolProvider implements JvmClassSymbolProvider {
           }
         });
       }
+    }
+
+    @Override
+    public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
+      if (!JAVA_LANG_ANNOTATION_TARGET_DESC.equals(desc)) return null;
+      return new AnnotationVisitor(ASM_OPCODES) {
+        @Override
+        public void visitEnum(String unusedName, String enumDesc, String value) {
+          recordTarget(value);
+        }
+
+        @Override
+        public AnnotationVisitor visitArray(String unusedName) {
+          return new AnnotationVisitor(ASM_OPCODES) {
+            @Override
+            public void visitEnum(String n, String enumDesc, String value) {
+              recordTarget(value);
+            }
+          };
+        }
+
+        private void recordTarget(String value) {
+          try {
+            myInfo.annotationTargets.add(TargetType.valueOf(value));
+          }
+          catch (IllegalArgumentException ignored) {
+            // ElementType value we don't model (e.g. a future JDK addition) — skip silently.
+          }
+        }
+      };
     }
 
     @Override

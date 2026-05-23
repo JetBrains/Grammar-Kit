@@ -76,7 +76,7 @@ public final class JavaSyntaxClassExtractor {
   private JavaSyntaxClassExtractor(@NotNull SyntaxNode fileRoot, @NotNull SymbolResolver resolver) {
     this.fileRoot = fileRoot;
     this.imports = JavaSyntaxImportContext.extractFrom(fileRoot, resolver);
-    this.typeFormatter = new JavaSyntaxTypeFormatter(imports);
+    this.typeFormatter = new JavaSyntaxTypeFormatter(imports, resolver);
     this.methodExtractor = new JavaSyntaxMethodExtractor(typeFormatter);
   }
 
@@ -111,7 +111,10 @@ public final class JavaSyntaxClassExtractor {
     info.modifiers = extractModifiers(modifierList);
     info.annotations.addAll(typeFormatter.extractAnnotationFqns(modifierList, classTypeVars));
     if (isInterface(classNode)) info.modifiers |= Modifier.INTERFACE | Modifier.ABSTRACT;
-    if (isAnnotationType(classNode)) info.modifiers |= Modifier.INTERFACE | Modifier.ABSTRACT;
+    if (isAnnotationType(classNode)) {
+      info.modifiers |= Modifier.INTERFACE | Modifier.ABSTRACT;
+      info.annotationTargets.addAll(typeFormatter.parseAnnotationTargetSet(modifierList, classTypeVars));
+    }
 
     List<Fqn> extendsRefs = typeFormatter.extractRefFqns(firstChildOfType(classNode, JavaSyntaxElementType.EXTENDS_LIST),
                                                          classTypeVars);

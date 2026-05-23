@@ -15,11 +15,13 @@ import org.intellij.grammar.classinfo.MethodSymbol;
 import org.intellij.grammar.classinfo.MethodType;
 import org.intellij.grammar.classinfo.ParameterSymbol;
 import org.intellij.grammar.classinfo.SymbolResolver;
+import org.intellij.grammar.classinfo.TargetType;
 import org.intellij.grammar.classinfo.java.JavaSyntaxClassExtractor;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Modifier;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -27,6 +29,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import static org.intellij.grammar.classinfo.SyntaxTreeUtil.childrenOfType;
 import static org.intellij.grammar.classinfo.SyntaxTreeUtil.firstChildOfType;
 import static org.intellij.grammar.classinfo.kotlin.KotlinSyntaxNodes.extractModifiers;
 import static org.intellij.grammar.classinfo.kotlin.KotlinSyntaxNodes.hasJvmStatic;
@@ -190,6 +193,7 @@ final class KotlinSyntaxClassExtractor {
     if (KotlinSyntaxNodes.isAnnotationClass(classNode)) {
       info.modifiers |= Modifier.INTERFACE | Modifier.ABSTRACT | KotlinSyntaxNodes.ANNOTATION_MODIFIER_BIT;
       info.modifiers &= ~Modifier.FINAL;
+      info.annotationTargets.addAll(parseAnnotationTargetSet(modifierList));
     }
     if (!enclosingFqn.isEmpty() && !isInnerNested(classNode)) {
       info.modifiers |= Modifier.STATIC;
@@ -476,6 +480,52 @@ final class KotlinSyntaxClassExtractor {
     if (Modifier.isAbstract(modifiers)) return modifiers;
     if (hasModifier(modifierList, KtTokens.INSTANCE.getOPEN_MODIFIER())) return modifiers;
     return modifiers | Modifier.FINAL;
+  }
+
+  /**
+   * Translation map from Kotlin's {@code kotlin.annotation.AnnotationTarget} simple names to
+   * {@link TargetType}. {@code AnnotationTarget.TYPE} → {@link TargetType#TYPE_USE} is the load-
+   * bearing entry — that's the equivalence the JVM uses when the Kotlin compiler emits a
+   * {@code @Target} on a Kotlin annotation class destined for Java callers. Targets without a JVM
+   * analog (EXPRESSION, FILE, TYPEALIAS, PROPERTY) intentionally have no mapping.
+   */
+  private static final Map<String, TargetType> KOTLIN_ANNOTATION_TARGETS = Map.ofEntries(
+    Map.entry("CLASS", TargetType.TYPE),
+    Map.entry("ANNOTATION_CLASS", TargetType.ANNOTATION_TYPE),
+    Map.entry("TYPE_PARAMETER", TargetType.TYPE_PARAMETER),
+    Map.entry("FIELD", TargetType.FIELD),
+    Map.entry("LOCAL_VARIABLE", TargetType.LOCAL_VARIABLE),
+    Map.entry("VALUE_PARAMETER", TargetType.PARAMETER),
+    Map.entry("CONSTRUCTOR", TargetType.CONSTRUCTOR),
+    Map.entry("FUNCTION", TargetType.METHOD),
+    Map.entry("PROPERTY_GETTER", TargetType.METHOD),
+    Map.entry("PROPERTY_SETTER", TargetType.METHOD),
+    Map.entry("TYPE", TargetType.TYPE_USE)
+  );
+
+  /**
+   * Walk the annotation class's modifier list for a {@code @Target(AnnotationTarget.*, ...)} entry
+   * and decode it into a {@link TargetType} set. Recognises the annotation by simple name
+   * ({@code "Target"}); arguments are matched via their rightmost identifier, accepting both
+   * {@code AnnotationTarget.TYPE} and statically-imported bare {@code TYPE}.
+   */
+  private static @NotNull Set<TargetType> parseAnnotationTargetSet(@Nullable SyntaxNode modifierList) {
+    if (modifierList == null) return Set.of();
+    for (SyntaxNode entry : childrenOfType(modifierList, KtNodeTypes.INSTANCE.getANNOTATION_ENTRY())) {
+      if (!"Target".equals(KotlinSyntaxNodes.rightmostIdentifier(entry))) continue;
+      SyntaxNode argList = firstChildOfType(entry, KtNodeTypes.INSTANCE.getVALUE_ARGUMENT_LIST());
+      if (argList == null) return Set.of();
+      EnumSet<TargetType> out = EnumSet.noneOf(TargetType.class);
+      for (SyntaxNode arg = argList.firstChild(); arg != null; arg = arg.nextSibling()) {
+        if (arg.getType() != KtNodeTypes.INSTANCE.getVALUE_ARGUMENT()) continue;
+        String simple = KotlinSyntaxNodes.rightmostIdentifier(arg);
+        if (simple == null) continue;
+        TargetType mapped = KOTLIN_ANNOTATION_TARGETS.get(simple);
+        if (mapped != null) out.add(mapped);
+      }
+      return out.isEmpty() ? Set.of() : out;
+    }
+    return Set.of();
   }
 
   private static @NotNull MethodSymbol.Builder copyAsStatic(@NotNull MethodSymbol.Builder src, @NotNull Fqn newDeclaring) {

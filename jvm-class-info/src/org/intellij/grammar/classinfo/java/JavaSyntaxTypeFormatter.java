@@ -13,14 +13,13 @@ import org.intellij.grammar.classinfo.ClassSymbol;
 import org.intellij.grammar.classinfo.Fqn;
 import org.intellij.grammar.classinfo.JvmTypeRef;
 import org.intellij.grammar.classinfo.MethodSymbol;
+import org.intellij.grammar.classinfo.SymbolResolver;
+import org.intellij.grammar.classinfo.TargetType;
 import org.intellij.grammar.classinfo.TypeProjection;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import static org.intellij.grammar.classinfo.SyntaxTreeUtil.firstChildOfType;
 import static org.intellij.grammar.classinfo.java.JavaSyntaxNodes.buildDottedText;
@@ -59,14 +58,25 @@ final class JavaSyntaxTypeFormatter {
     JavaSyntaxTokenType.DOUBLE_KEYWORD
   );
 
-  static final Fqn NOT_NULL = Fqn.of("org.jetbrains.annotations.NotNull");
-  static final Fqn NULLABLE = Fqn.of("org.jetbrains.annotations.Nullable");
-
   private final JavaSyntaxImportContext imports;
+  private final SymbolResolver resolver;
   private @NotNull Map<String, Fqn> nestedScope = Map.of();
 
-  JavaSyntaxTypeFormatter(@NotNull JavaSyntaxImportContext imports) {
+  JavaSyntaxTypeFormatter(@NotNull JavaSyntaxImportContext imports, @NotNull SymbolResolver resolver) {
     this.imports = imports;
+    this.resolver = resolver;
+  }
+
+  /**
+   * Predicate for {@link org.intellij.grammar.classinfo.TypeUseAnnotationLifter}: an annotation
+   * type counts as type-use iff its resolved {@link ClassSymbol#annotationTargets} contains
+   * {@link TargetType#TYPE_USE}. Returns {@code false} when the FQN does not resolve (annotation
+   * lives in an unreachable jar, or cycle protection short-circuits the lookup) — matches IntelliJ's
+   * {@code AddAnnotationPsiFix} behaviour where unresolved annotations stay on the declaration list.
+   */
+  boolean isTypeUseAnnotation(@NotNull Fqn annotationFqn) {
+    ClassSymbol c = resolver.findClass(annotationFqn);
+    return c != null && c.annotationTargets().contains(TargetType.TYPE_USE);
   }
 
   /**
@@ -275,79 +285,19 @@ final class JavaSyntaxTypeFormatter {
   }
 
   /**
-   * Result of {@link #liftNullabilityToType}: the remaining declaration-target annotations and the
-   * (possibly rewritten) type now carrying any lifted nullness annotations.
+   * Collect annotation FQNs from a {@code MODIFIER_LIST} (or {@code TYPE_PARAMETER}, etc.). Skips
+   * annotations that carry arguments — matches the IDE-side {@code ClassSymbolUtil.annotationsFromPsi}
+   * behaviour (which drops {@code annotation.getParameterList().getAttributes().length > 0}). Arg-
+   * bearing annotations like {@code @Target(...)} or {@code @SuppressWarnings("x")} carry semantic
+   * payload that the FQN-only model cannot represent, so dropping them prevents misleading
+   * round-trips.
    */
-  record LiftResult(@NotNull List<Fqn> annotations, @NotNull JvmTypeRef type) {}
-
-  /**
-   * The JetBrains Java parser groups any annotation written in the declaration-position modifier
-   * list (e.g. {@code public @NotNull String foo()}) into {@code MODIFIER_LIST}, alongside
-   * {@code public}, regardless of whether the annotation is {@code TYPE_USE}. For
-   * {@link #NOT_NULL} / {@link #NULLABLE}, that grouping is semantically misleading — the
-   * annotation refers to the type, not the method/parameter. Lift those onto the outermost
-   * {@link JvmTypeRef} position so the type model is the single source of truth for nullness,
-   * matching how Kotlin sources are parsed (see {@code KotlinSyntaxTypeFormatter.parseNullable}).
-   * <p>
-   * Skipped for {@link JvmTypeRef.PrimitiveType} and {@link JvmTypeRef.TypeVariable}: these
-   * positions cannot carry annotations in our model, so the nullness annotation stays on the
-   * declaration-target list (matches the documented "non-primitive, non-void parameters/returns;
-   * not on bare type-variable references" rule).
-   */
-  @NotNull LiftResult liftNullabilityToType(@NotNull List<Fqn> declAnnotations,
-                                            @NotNull JvmTypeRef type) {
-    if (type instanceof JvmTypeRef.PrimitiveType || type instanceof JvmTypeRef.TypeVariable) {
-      return new LiftResult(declAnnotations, type);
-    }
-    List<Fqn> lifted = new SmartList<>();
-    List<Fqn> remaining = new SmartList<>();
-    for (Fqn f : declAnnotations) {
-      if (NOT_NULL.equals(f) || NULLABLE.equals(f)) lifted.add(f);
-      else remaining.add(f);
-    }
-    if (lifted.isEmpty()) return new LiftResult(declAnnotations, type);
-    return new LiftResult(remaining, prependAnnotations(type, lifted));
-  }
-
-  /**
-   * Returns {@code type} with {@code extra} prepended to its outermost annotations list. Preserves
-   * source order: the lifted annotations appear before any already-collected type-use annotations,
-   * since the lifted ones syntactically appeared first in the declaration.
-   * <p>
-   * Caller filters out {@link JvmTypeRef.PrimitiveType} / {@link JvmTypeRef.TypeVariable} (they
-   * don't carry annotations); the {@code default} branch below is just defensive.
-   */
-  private static @NotNull JvmTypeRef prependAnnotations(@NotNull JvmTypeRef type,
-                                                        @NotNull List<Fqn> extra) {
-    if (type instanceof JvmTypeRef.UserType u) {
-      return new JvmTypeRef.UserType(u.name(), concat(extra, u.annotations()), u.args());
-    }
-    if (type instanceof JvmTypeRef.ArrayType a) {
-      return new JvmTypeRef.ArrayType(a.component(), concat(extra, a.annotations()));
-    }
-    if (type instanceof JvmTypeRef.FunctionType f) {
-      return new JvmTypeRef.FunctionType(concat(extra, f.annotations()));
-    }
-    if (type instanceof JvmTypeRef.DynamicType d) {
-      return new JvmTypeRef.DynamicType(concat(extra, d.annotations()));
-    }
-    return type;
-  }
-
-  private static @NotNull List<Fqn> concat(@NotNull List<Fqn> a, @NotNull List<Fqn> b) {
-    if (a.isEmpty()) return b;
-    if (b.isEmpty()) return a;
-    List<Fqn> out = new ArrayList<>(a.size() + b.size());
-    out.addAll(a);
-    out.addAll(b);
-    return out;
-  }
-
   @NotNull List<Fqn> extractAnnotationFqns(@Nullable SyntaxNode modifierList, @NotNull Set<String> typeVars) {
     if (modifierList == null) return List.of();
     List<Fqn> annos = new SmartList<>();
     for (SyntaxNode child = modifierList.firstChild(); child != null; child = child.nextSibling()) {
       if (child.getType() != JavaSyntaxElementType.ANNOTATION) continue;
+      if (hasAnnotationArguments(child)) continue;
       SyntaxNode ref = firstChildOfType(child, JavaSyntaxElementType.JAVA_CODE_REFERENCE);
       if (ref != null) annos.add(Fqn.of(resolveDotted(ref, typeVars)));
     }
@@ -369,4 +319,71 @@ final class JavaSyntaxTypeFormatter {
     if (nestedHead != null) return nestedHead.value() + dotted.substring(firstDot);
     return dotted;                                         // already qualified, leave as-is
   }
+
+  private static final Fqn JAVA_LANG_ANNOTATION_TARGET = Fqn.of("java.lang.annotation.Target");
+
+  static boolean hasAnnotationArguments(@NotNull SyntaxNode annotation) {
+    SyntaxNode paramList = firstChildOfType(annotation, JavaSyntaxElementType.ANNOTATION_PARAMETER_LIST);
+    if (paramList == null) return false;
+    for (SyntaxNode child = paramList.firstChild(); child != null; child = child.nextSibling()) {
+      if (child.getType() == JavaSyntaxElementType.NAME_VALUE_PAIR) return true;
+    }
+    return false;
+  }
+
+  /**
+   * Scan the given annotation-type's modifier list for {@code @java.lang.annotation.Target(...)} and
+   * decode its {@code ElementType} argument(s) into a {@link TargetType} set. Returns an empty set
+   * when {@code @Target} is absent or unresolved — callers treat empty as "applies to declaration
+   * positions only" for the lift decision, which is the safe default.
+   * <p>
+   * Handles both single-value and array shapes:
+   * {@code @Target(ElementType.TYPE_USE)} and {@code @Target({ElementType.METHOD, ElementType.PARAMETER})}.
+   * Also accepts statically-imported bare names ({@code @Target(TYPE_USE)}).
+   */
+  @NotNull Set<TargetType> parseAnnotationTargetSet(@Nullable SyntaxNode modifierList,
+                                                    @NotNull Set<String> typeVars) {
+    if (modifierList == null) return Set.of();
+    for (SyntaxNode child = modifierList.firstChild(); child != null; child = child.nextSibling()) {
+      if (child.getType() != JavaSyntaxElementType.ANNOTATION) continue;
+      SyntaxNode ref = firstChildOfType(child, JavaSyntaxElementType.JAVA_CODE_REFERENCE);
+      if (ref == null) continue;
+      if (!JAVA_LANG_ANNOTATION_TARGET.value().equals(resolveDotted(ref, typeVars))) continue;
+      EnumSet<TargetType> out = EnumSet.noneOf(TargetType.class);
+      SyntaxNode paramList = firstChildOfType(child, JavaSyntaxElementType.ANNOTATION_PARAMETER_LIST);
+      if (paramList != null) collectTargetReferences(paramList, out);
+      return out.isEmpty() ? Set.of() : out;
+    }
+    return Set.of();
+  }
+
+  private static void collectTargetReferences(@NotNull SyntaxNode container,
+                                              @NotNull EnumSet<TargetType> out) {
+    for (SyntaxNode child = container.firstChild(); child != null; child = child.nextSibling()) {
+      SyntaxElementType t = child.getType();
+      if (t == JavaSyntaxElementType.NAME_VALUE_PAIR
+          || t == JavaSyntaxElementType.ANNOTATION_ARRAY_INITIALIZER) {
+        collectTargetReferences(child, out);
+      }
+      else if (t == JavaSyntaxElementType.REFERENCE_EXPRESSION) {
+        String simple = lastIdentifier(child);
+        if (simple == null) continue;
+        try {
+          out.add(TargetType.valueOf(simple));
+        }
+        catch (IllegalArgumentException ignored) {
+          // Unknown ElementType constant (e.g. a JDK 9+ value missing from our enum) — skip silently.
+        }
+      }
+    }
+  }
+
+  private static @Nullable String lastIdentifier(@NotNull SyntaxNode refExpression) {
+    String last = null;
+    for (SyntaxNode c = refExpression.firstChild(); c != null; c = c.nextSibling()) {
+      if (c.getType() == JavaSyntaxTokenType.IDENTIFIER) last = c.getText().toString();
+    }
+    return last;
+  }
+
 }

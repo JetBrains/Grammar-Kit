@@ -41,14 +41,17 @@ public class Main {
   static final Set<KnownAttribute<?>> MULTI_VALUE_ATTRS = Set.of(KnownAttribute.PSI_INPUT_PATH);
 
   private static Map<String, KnownAttribute<?>> buildFlagMap() {
+    KnownAttribute<?>[] attrs = {
+      KnownAttribute.PARSER_OUTPUT_PATH,
+      KnownAttribute.PSI_OUTPUT_PATH,
+      KnownAttribute.ELEMENT_TYPE_HOLDER_OUTPUT_PATH,
+      KnownAttribute.SYNTAX_ELEMENT_TYPE_HOLDER_OUTPUT_PATH,
+      KnownAttribute.ELEMENT_TYPE_CONVERTER_FACTORY_OUTPUT_PATH,
+      KnownAttribute.INPUT_PATH,
+      KnownAttribute.PSI_INPUT_PATH,
+    };
     Map<String, KnownAttribute<?>> map = new LinkedHashMap<>();
-    map.put("--parser-output",                          KnownAttribute.PARSER_OUTPUT_PATH);
-    map.put("--psi-output",                             KnownAttribute.PSI_OUTPUT_PATH);
-    map.put("--element-type-holder-output",             KnownAttribute.ELEMENT_TYPE_HOLDER_OUTPUT_PATH);
-    map.put("--syntax-element-type-holder-output",      KnownAttribute.SYNTAX_ELEMENT_TYPE_HOLDER_OUTPUT_PATH);
-    map.put("--element-type-converter-factory-output",  KnownAttribute.ELEMENT_TYPE_CONVERTER_FACTORY_OUTPUT_PATH);
-    map.put("--input-path",                             KnownAttribute.INPUT_PATH);
-    map.put("--psi-input",                              KnownAttribute.PSI_INPUT_PATH);
+    for (KnownAttribute<?> a : attrs) map.put("--" + a.getName(), a);
     return Map.copyOf(map);
   }
 

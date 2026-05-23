@@ -113,7 +113,7 @@ public class MainTest extends TestCase {
 
     assertEquals(0, Main.run(new String[]{output.getAbsolutePath(), inputDir + "/Grammar.bnf"}));
     assertContains(stdErr(), "deprecated");
-    assertContains(stdErr(), "--parser-output");
+    assertContains(stdErr(), "--parserOutputPath");
   }
 
   public void testNewFormParserOutputFlag() throws Exception {
@@ -123,7 +123,7 @@ public class MainTest extends TestCase {
                          "{ parser-class=\"com.example.TestParser\" }\nroot ::= 'x'");
 
     assertEquals(0, Main.run(new String[]{
-      inputDir + "/Grammar.bnf", "--parser-output", output.getAbsolutePath()}));
+      inputDir + "/Grammar.bnf", "--parserOutputPath", output.getAbsolutePath()}));
     File[] generated = output.listFiles();
     assertNotNull(generated);
     assertTrue("Expected generated files in output dir", generated.length > 0);
@@ -137,7 +137,7 @@ public class MainTest extends TestCase {
     FileUtil.writeToFile(new File(inputDir, "B.bnf"), "{ parser-class=\"b.B\" }\nroot ::= 'b'");
 
     int rc = Main.run(new String[]{
-      inputDir + "/A.bnf", inputDir + "/B.bnf", "--parser-output", output.getAbsolutePath()});
+      inputDir + "/A.bnf", inputDir + "/B.bnf", "--parserOutputPath", output.getAbsolutePath()});
     assertEquals(1, rc);
     assertContains(stdErr(), "exactly one grammar file");
   }
@@ -152,7 +152,7 @@ public class MainTest extends TestCase {
                          "  parserOutputPath=\"" + grammarPath + "\" }\nroot ::= 'x'");
 
     int rc = Main.run(new String[]{
-      inputDir + "/Grammar.bnf", "--parser-output", cliOut.getAbsolutePath()});
+      inputDir + "/Grammar.bnf", "--parserOutputPath", cliOut.getAbsolutePath()});
     assertEquals(0, rc);
     assertContains(stdErr(), "warning:");
     assertContains(stdErr(), "parserOutputPath");
@@ -173,7 +173,7 @@ public class MainTest extends TestCase {
                          "  parserOutputPath=\"" + grammarPath + "\" }\nroot ::= 'x'");
 
     int rc = Main.run(new String[]{
-      inputDir + "/Grammar.bnf", "--parser-output", cliOut.getAbsolutePath(), "--strict-paths"});
+      inputDir + "/Grammar.bnf", "--parserOutputPath", cliOut.getAbsolutePath(), "--strict-paths"});
     assertEquals(1, rc);
     assertContains(stdErr(), "error:");
     assertContains(stdErr(), "parserOutputPath");
@@ -191,7 +191,7 @@ public class MainTest extends TestCase {
                          "  psiOutputPath=\"" + psiPath + "\" }\nroot ::= 'x'");
 
     int rc = Main.run(new String[]{
-      inputDir + "/Grammar.bnf", "--parser-output", cliOut.getAbsolutePath()});
+      inputDir + "/Grammar.bnf", "--parserOutputPath", cliOut.getAbsolutePath()});
     assertEquals(0, rc);
     assertEquals("No conflict expected, got stderr: " + stdErr(), "", stdErr());
   }

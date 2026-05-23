@@ -177,9 +177,9 @@ multi-directory layout on disk).
    ```
    java -cp <grammar-kit-and-deps> org.intellij.grammar.Main \
         Demo.bnf \
-        --parser-output ./out/parser \
-        --psi-output ./out/psi \
-        --element-type-holder-output ./out/types
+        --parserOutputPath ./out/parser \
+        --psiOutputPath ./out/psi \
+        --elementTypeHolderOutputPath ./out/types
    ```
 
    Expect:
@@ -197,7 +197,7 @@ multi-directory layout on disk).
    ```
 
    Expect: stderr contains
-   `warning: positional <output-dir> is deprecated; use --parser-output <dir>`,
+   `warning: positional <output-dir> is deprecated; use --parserOutputPath <dir>`,
    and `out-legacy/demo/DemoParser.java` is generated.
 
 4. Run with no args / unknown flag / two grammars + `--flag`:
@@ -205,7 +205,7 @@ multi-directory layout on disk).
    ```
    java -cp ... org.intellij.grammar.Main                       # exit 0, prints usage
    java -cp ... org.intellij.grammar.Main --bogus Demo.bnf       # exit 1, "Unknown option"
-   java -cp ... org.intellij.grammar.Main A.bnf B.bnf --parser-output o    # exit 1, "exactly one grammar file"
+   java -cp ... org.intellij.grammar.Main A.bnf B.bnf --parserOutputPath o    # exit 1, "exactly one grammar file"
    ```
 
 ### C. CLI vs grammar conflict
@@ -220,11 +220,11 @@ multi-directory layout on disk).
    }
    ```
 
-2. Run with a different `--parser-output`:
+2. Run with a different `--parserOutputPath`:
 
    ```
    java -cp ... org.intellij.grammar.Main Demo.bnf \
-        --parser-output /tmp/gk-cli-out
+        --parserOutputPath /tmp/gk-cli-out
    ```
 
    Expect: stderr contains

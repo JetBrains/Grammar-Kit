@@ -280,15 +280,17 @@ The grammar file can be a path or a glob pattern (e.g. `grammars/*.bnf`). Output
 can be set per-attribute either inside the grammar header or via CLI flags — flags mirror the
 attribute names:
 
-| Flag                                             | Grammar attribute                       |
-|--------------------------------------------------|-----------------------------------------|
-| `--parser-output <path>`                         | `parserOutputPath`                      |
-| `--psi-output <path>`                            | `psiOutputPath`                         |
-| `--element-type-holder-output <path>`            | `elementTypeHolderOutputPath`           |
-| `--syntax-element-type-holder-output <path>`     | `syntaxElementTypeHolderOutputPath`     |
-| `--element-type-converter-factory-output <path>` | `elementTypeConverterFactoryOutputPath` |
-| `--input-path <path>`                            | `inputPath`                             |
-| `--psi-input <path>`                             | `psiInputPath`                          |
+Every path attribute is settable as `--<attributeName>`:
+
+| Flag                                              | Grammar attribute                       |
+|---------------------------------------------------|-----------------------------------------|
+| `--parserOutputPath <path>`                       | `parserOutputPath`                      |
+| `--psiOutputPath <path>`                          | `psiOutputPath`                         |
+| `--elementTypeHolderOutputPath <path>`            | `elementTypeHolderOutputPath`           |
+| `--syntaxElementTypeHolderOutputPath <path>`      | `syntaxElementTypeHolderOutputPath`     |
+| `--elementTypeConverterFactoryOutputPath <path>`  | `elementTypeConverterFactoryOutputPath` |
+| `--inputPath <path>`                              | `inputPath`                             |
+| `--psiInputPath <path>` (repeatable)              | `psiInputPath`                          |
 
 **Setting paths in the grammar.** All seven path attributes can also be declared in the grammar
 header. Values are resolved relative to the BNF file's parent directory; an empty string is
@@ -314,7 +316,7 @@ Per-attribute documentation is available via Ctrl-Q / Cmd-J on the attribute nam
 **Per-path precedence.** Resolution is per attribute, not global: a CLI flag overrides only the
 attribute it names, leaving other grammar-declared paths intact. Unset output paths cascade from
 `parserOutputPath` (parser → psi → element-type holders/converter), so passing only
-`--parser-output` is enough for typical projects.
+`--parserOutputPath` is enough for typical projects.
 
 **Conflict handling.** When the same attribute is set both on the CLI and in the grammar header
 with different values, the CLI value wins and a warning is printed to stderr:
@@ -327,5 +329,5 @@ Pass `--strict-paths` to make such conflicts fatal (exit code 1) — useful for 
 between build scripts and grammar headers.
 
 **Legacy form.** The old positional invocation `Main <output-dir> <grammars or patterns>` is still
-accepted but emits a deprecation warning. It is equivalent to passing `--parser-output <output-dir>`
+accepted but emits a deprecation warning. It is equivalent to passing `--parserOutputPath <output-dir>`
 in the new form. New scripts should use the flag form.

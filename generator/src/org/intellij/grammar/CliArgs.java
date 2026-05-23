@@ -18,7 +18,7 @@ import java.util.Map;
 /**
  * Parsed CLI invocation. {@code paths} holds explicit absolute path overrides keyed by the
  * corresponding {@link KnownAttribute}: each value is a {@link List} of paths so the multi-valued
- * {@link KnownAttribute#PSI_INPUT_PATH} (repeatable {@code --psi-input} flag) round-trips through
+ * {@link KnownAttribute#PSI_INPUT_PATH} (repeatable {@code --psiInputPath} flag) round-trips through
  * the same shape as the in-memory {@link BnfPathsResolution}. Single-valued flags carry
  * one-element lists.
  *
@@ -53,7 +53,7 @@ record CliArgs(@NotNull Map<KnownAttribute<?>, List<Path>> paths,
         return parseNew(args);
       }
       if (!looksLikeGrammar(args[0])) {
-        err.println("warning: positional <output-dir> is deprecated; use --parser-output <dir>");
+        err.println("warning: positional <output-dir> is deprecated; use --parserOutputPath <dir>");
         return parseLegacy(args);
       }
     }

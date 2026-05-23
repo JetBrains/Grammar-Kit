@@ -124,15 +124,8 @@ Not a correctness bug, but a "we'll never know if it breaks" debuggability bug. 
 
 Code quality, not behaviour. No user-visible change. Do **after** the convergence harness lands so refactors are backed by tests.
 
-### 18. Variance decoding duplicated
-- Kotlin: `KotlinSyntaxTypeFormatter.parseProjection:318–328` (`out`/`in`/`*` from AST modifiers)
-- ASM: `AsmClassSymbolProvider.visitTypeArgument:422–438` and `:525–530` (`+`/`-`/`*` from signature chars)
-
-Both decode to `TypeProjection.Variance`. Consolidation point: static factories on `TypeProjection`:
-```java
-TypeProjection.Variance.fromKotlinModifier(SyntaxNode)
-TypeProjection.Variance.fromBytecodeWildcard(char)
-```
+### 18. Variance decoding duplicated — **PARTIAL FIX** (2026-05-23)
+Added `TypeProjection.Variance.fromBytecodeWildcard(char)` and routed the ASM site through it. **Did not** add a Kotlin-modifier equivalent: that helper would need to import `KtTokens` / `KotlinSyntaxNodes`, creating a dep from the shared `classinfo/` types into the language-specific `classinfo/kotlin/` package — wrong direction. The Kotlin site's logic (3 lines of `hasModifier` checks) stays local. Net: one fewer duplicate, no architectural compromise.
 
 ### 19. `buildDottedText` duplicated — **WON'T FIX** (2026-05-23)
 Inspection showed the two implementations are not actually duplicates. Java's version is 12 lines over 3 token types (`JAVA_CODE_REFERENCE` / `DOT` / `IDENTIFIER`) with `StringBuilder` assembly; Kotlin's is 25 lines over 6+ token types (`REFERENCE_EXPRESSION` / `DOT_QUALIFIED_EXPRESSION` / `USER_TYPE` / `PACKAGE_DIRECTIVE` / `PACKAGE_KEYWORD` / etc.) with `List<String>` + `String.join`. Lifting to `SyntaxTreeUtil` would require parameterizing over language-specific predicates ("is identifier", "is dot", "should recurse"), trading 12+25 self-contained lines for a generic SPI plus two thin shims that pass constant predicates — premature abstraction for two non-isomorphic callers.

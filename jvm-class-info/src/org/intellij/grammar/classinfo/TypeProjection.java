@@ -17,7 +17,18 @@ public sealed interface TypeProjection permits TypeProjection.Star, TypeProjecti
   record Star() implements TypeProjection { }
 
   /** Variance marker for a non-star projection. {@code INVARIANT} renders as the bare type. */
-  enum Variance { INVARIANT, OUT, IN }
+  enum Variance {
+    INVARIANT, OUT, IN;
+
+    /**
+     * Decode the variance from an ASM generic-signature wildcard indicator: {@code '+'} → {@link #OUT}
+     * ({@code ? extends X}), {@code '-'} → {@link #IN} ({@code ? super X}), anything else
+     * (typically {@code '='}) → {@link #INVARIANT}. See {@code SignatureVisitor.visitTypeArgument(char)}.
+     */
+    public static @NotNull Variance fromBytecodeWildcard(char c) {
+      return c == '+' ? OUT : c == '-' ? IN : INVARIANT;
+    }
+  }
 
   /** {@code X} / {@code out X} / {@code in X}. The inner type carries its own annotations. */
   record WithVariance(@NotNull Variance variance, @NotNull JvmTypeRef type) implements TypeProjection { }

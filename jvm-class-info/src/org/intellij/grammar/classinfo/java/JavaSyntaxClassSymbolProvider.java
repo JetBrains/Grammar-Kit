@@ -4,6 +4,7 @@
 
 package org.intellij.grammar.classinfo.java;
 
+import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.platform.syntax.tree.SyntaxNode;
 import org.intellij.grammar.classinfo.ClassSymbol;
 import org.intellij.grammar.classinfo.Fqn;
@@ -44,6 +45,8 @@ import java.util.stream.Stream;
  */
 @SuppressWarnings("UnstableApiUsage")
 public final class JavaSyntaxClassSymbolProvider implements JvmClassSymbolProvider {
+
+  private static final Logger LOG = Logger.getInstance(JavaSyntaxClassSymbolProvider.class);
 
   private final SourceRootResolver sourceResolver;
   private final SyntaxTreeCache treeCache;
@@ -86,7 +89,9 @@ public final class JavaSyntaxClassSymbolProvider implements JvmClassSymbolProvid
     try (Stream<Path> files = Files.list(dir)) {
       files.filter(p -> p.getFileName().toString().endsWith(".java")).forEach(p -> ingest(p, batch, resolver));
     }
-    catch (IOException ignored) { }
+    catch (IOException e) {
+      LOG.warn("Failed to scan Java source package directory: " + dir, e);
+    }
   }
 
   private void ingest(@NotNull Path source, @NotNull Map<Fqn, ClassSymbol> batch, @NotNull SymbolResolver resolver) {

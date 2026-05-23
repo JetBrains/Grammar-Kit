@@ -9,6 +9,7 @@ import junit.framework.TestCase;
 import junit.framework.TestSuite;
 import org.intellij.grammar.actions.BnfGenerationServiceIntegrationPlatformTest;
 import org.intellij.grammar.actions.BnfGenerationServiceTest;
+import org.intellij.grammar.editor.BnfPathInlayHintsTest;
 import org.intellij.grammar.expression.ExpressionParserTest;
 import org.intellij.grammar.generator.JavaBnfGeneratorTest;
 import org.intellij.grammar.generator.KotlinBnfGeneratorTest;
@@ -50,6 +51,7 @@ public class BnfTestSuite extends TestCase {
     testSuite.addTestSuite(BnfConvertOptExpressionIntentionTest.class);
     testSuite.addTestSuite(BnfGeneratorPsiTest.class);
     testSuite.addTestSuite(BnfPathsResolutionTest.class);
+    testSuite.addTestSuite(BnfPathInlayHintsTest.class);
 
     testSuite.addTestSuite(BnfGenerationServiceIntegrationPlatformTest.class);
     testSuite.addTestSuite(JFlexCompletionTest.class);

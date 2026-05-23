@@ -23,7 +23,7 @@ Built in `bnf-language/src/org/intellij/grammar/java/JavaHelperFactory.java::syn
 
 ## Canonical conventions
 
-These are hard requirements that **must** hold across every provider — source extractors are expected to produce strings byte-for-byte identical to what ASM produces from the same source after compilation, because `JvmSyntaxHelper` parameter-type matching is string-based.
+These are hard requirements that **must** hold across every provider — `JvmSyntaxHelper` parameter-type matching is string-based, so the providers need to converge on a single representation of the JVM-visible API surface. **Neither source nor ASM is "ground truth":** source carries generic information bytecode erases (declared type arguments, type-use annotations, declared variance), while ASM sees a lowered post-compilation form (synthetic accessors, bridge methods, `suspend` → Continuation, `@JvmOverloads` → `$default` overloads). Where they disagree, source usually wins on richness and ASM normalizes away bytecode artifacts. The narrow rules below are the points where there *is* one right answer and both sides must agree.
 
 - **FQN form is dotted source-style.** `com.foo.Outer.Inner`. Never `Outer$Inner`. `Fqn.fromBytecode` normalizes `/` → `.` and `$` → `.` on the way in; the ASM provider probes JVM-style filenames right-to-left on lookup.
 - **JVM primitive names** — `int`/`long`/`void`/etc. Kotlin `Int`/`Long`/`Unit`/`Nothing` map to these (`KotlinSyntaxTypeFormatter.JVM_BUILTINS`). Kotlin `String` → `java.lang.String`.
@@ -79,7 +79,7 @@ These are hard requirements that **must** hold across every provider — source 
 
 ### `classinfo/asm/`
 
-Single file: `AsmClassSymbolProvider.java`. Loads `.class` files via `ClassLoader.getResourceAsStream`, decodes with ASM (`ClassReader` + `SignatureReader`), normalizes `/` and `$` to `.`. **This is the ground truth that the source providers must match** — when in doubt about how to render something, check what ASM produces for the same source compiled.
+Single file: `AsmClassSymbolProvider.java`. Loads `.class` files via `ClassLoader.getResourceAsStream`, decodes with ASM (`ClassReader` + `SignatureReader`), normalizes `/` and `$` to `.`. ASM sees the post-compilation form, so its output is concrete but lossy: generic information may have been erased, and bytecode-only artifacts (bridges, synthetics, `<clinit>`, `suspend` Continuation params) appear that have no source counterpart. The ASM provider is responsible for normalizing those artifacts away so its output aligns with what a source-level consumer would see.
 
 ## Wire-up to `JavaHelper`
 
@@ -100,7 +100,7 @@ Single file: `AsmClassSymbolProvider.java`. Loads `.class` files via `ClassLoade
 
 ### Support a new type-shape
 
-`KotlinSyntaxTypeFormatter.formatType` is the dispatch switch on `SyntaxElementType`. Add a branch there for the new shape (e.g. context receivers, definitely-non-nullable types). Always cross-check the ASM output for the same source compiled — the source string must match the bytecode-derived string.
+`KotlinSyntaxTypeFormatter.formatType` is the dispatch switch on `SyntaxElementType`. Add a branch there for the new shape (e.g. context receivers, definitely-non-nullable types). Cross-check the ASM output for the same source compiled — for type-shape rendering specifically (generic args, variance, array wraps), source and ASM should produce identical strings unless bytecode has erased something source still knows about.
 
 The same applies to Java: `JavaSyntaxTypeFormatter.formatType`.
 
@@ -116,7 +116,7 @@ Extend `KotlinSyntaxTypeFormatter.KOTLIN_TO_JAVA_ALIASES`. Cross-check kotlinc's
 
 ### Cross-language references
 
-Sample trace: a Java file does `import kotlin.collections.*; ... List<String> xs`. `JavaSyntaxImportContext.resolveSimpleName("List")` walks: java.lang allow-list (miss) → explicit imports (miss) → wildcard imports → probes `kotlin.collections.List` via the `SymbolResolver`. The resolver is the manager, so it dispatches across providers — `KotlinSyntaxClassSymbolProvider` produces the symbol, `KOTLIN_TO_JAVA_ALIASES` rewrites the FQN to `java.util.List` at the formatter, and the resolved string matches what ASM would produce for the same Java compiled.
+Sample trace: a Java file does `import kotlin.collections.*; ... List<String> xs`. `JavaSyntaxImportContext.resolveSimpleName("List")` walks: java.lang allow-list (miss) → explicit imports (miss) → wildcard imports → probes `kotlin.collections.List` via the `SymbolResolver`. The resolver is the manager, so it dispatches across providers — `KotlinSyntaxClassSymbolProvider` produces the symbol, `KOTLIN_TO_JAVA_ALIASES` rewrites the FQN to `java.util.List` at the formatter. The alias rewrite is essential because kotlinc applies the same mapping at the compile boundary, so both the source-resolved and the bytecode-resolved view agree on `java.util.List` as the canonical FQN.
 
 ## Gotchas
 

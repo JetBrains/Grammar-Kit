@@ -73,12 +73,18 @@ public final class AsmClassSymbolProvider implements JvmClassSymbolProvider {
     if (className == null) return null;
     String name = className.value();
     try {
+      // Source-style FQN (com.foo.Outer.Inner) can map to several resource paths because the
+      // package/class boundary is invisible from a dotted name. Probe right-to-left: each iteration
+      // treats one more trailing dot as an inner-class separator ($) instead of a package separator
+      // (/), starting from "all dots are packages" (com/foo/Outer/Inner.class) and ending at
+      // "everything but the first segment is inner" (com/foo$Outer$Inner.class). First-resource-hit
+      // wins. `lastDot` is the index of the dot we're about to flip on the next iteration.
       int lastDot = name.length();
       InputStream is = null;
       while (is == null && lastDot > 0) {
         String s = name.substring(0, lastDot).replace('.', '/') +
                    name.substring(lastDot).replace('.', '$') +
-                   ".class"; // todo looks stupid
+                   ".class";
         is = classLoader.getResourceAsStream(s);
         lastDot = name.lastIndexOf('.', lastDot - 1);
       }

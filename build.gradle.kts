@@ -181,6 +181,9 @@ tasks {
         dependsOn("testMain")
         // Forward the override flag so golden-file tests can re-record without manual deletion.
         systemProperty("grammar.kit.override.test.data", System.getProperty("grammar.kit.override.test.data") ?: "")
+        // Forward IntelliJ's own overwrite flag (UsefulTestCase.OVERWRITE_TESTDATA) so PSI-mode
+        // generator tests (assertSameLinesWithFile) can re-record alongside the syntax-mode tests.
+        systemProperty("idea.tests.overwrite.data", System.getProperty("idea.tests.overwrite.data") ?: "")
     }
 
     withType<Javadoc>().configureEach {

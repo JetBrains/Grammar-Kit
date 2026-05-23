@@ -1,0 +1,7 @@
+class a.b.AnnotMarker
+  modifiers: public abstract interface
+  methods: (none)
+
+class a.b.PlainIface
+  modifiers: public abstract interface
+  methods: (none)

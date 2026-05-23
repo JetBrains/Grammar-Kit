@@ -6,10 +6,10 @@ package org.intellij.grammar.classinfo.java;
 
 import com.intellij.java.syntax.element.JavaSyntaxElementType;
 import com.intellij.java.syntax.element.JavaSyntaxTokenType;
-import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.platform.syntax.tree.SyntaxNode;
 import org.intellij.grammar.classinfo.Fqn;
 import org.intellij.grammar.classinfo.JvmTypeRef;
+import org.intellij.grammar.classinfo.JvmTypeRefs;
 import org.intellij.grammar.classinfo.MethodSymbol;
 import org.intellij.grammar.classinfo.MethodType;
 import org.intellij.grammar.classinfo.ParameterSymbol;
@@ -34,8 +34,6 @@ import static org.intellij.grammar.classinfo.java.JavaSyntaxNodes.firstNameIdent
  */
 @SuppressWarnings("UnstableApiUsage")
 final class JavaSyntaxMethodExtractor {
-
-  private static final Logger LOG = Logger.getInstance(JavaSyntaxMethodExtractor.class);
 
   private static final JvmTypeRef VOID_TYPE = new JvmTypeRef.PrimitiveType("void");
 
@@ -114,18 +112,10 @@ final class JavaSyntaxMethodExtractor {
       SyntaxNode pType = firstChildOfType(p, JavaSyntaxElementType.TYPE);
       SyntaxNode pName = firstChildOfType(p, JavaSyntaxTokenType.IDENTIFIER);
       ParameterSymbol.Builder param = new ParameterSymbol.Builder();
-      JvmTypeRef parsedType;
-      if (pType == null) {
-        // Defensive fallback: parser produced a PARAMETER with no TYPE child. Real-world java-syntax
-        // output shouldn't reach here, but log loudly if it does — the empty-FQN that goes into the
-        // ParameterSymbol will silently make this parameter unmatchable downstream.
-        LOG.warn("Parameter without TYPE child; producing empty-FQN placeholder. Source range: "
-                 + p.getStartOffset() + ".." + p.getEndOffset());
-        parsedType = new JvmTypeRef.UserType(Fqn.of(""), List.of(), List.of());
-      }
-      else {
-        parsedType = typeFormatter.parseType(pType, typeVars);
-      }
+      JvmTypeRef parsedType = pType != null
+                              ? typeFormatter.parseType(pType, typeVars)
+                              : JvmTypeRefs.missingType("Java PARAMETER with no TYPE child at offset "
+                                                       + p.getStartOffset() + ".." + p.getEndOffset());
       List<Fqn> paramAnnotations = typeFormatter.extractAnnotationFqns(firstChildOfType(p, JavaSyntaxElementType.MODIFIER_LIST), typeVars);
       TypeUseAnnotationLifter.LiftResult lifted = TypeUseAnnotationLifter.lift(paramAnnotations, parsedType, typeFormatter::isTypeUseAnnotation);
       param.type = lifted.type();

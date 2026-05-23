@@ -4,6 +4,7 @@
 
 package org.intellij.grammar.classinfo;
 
+import com.intellij.openapi.diagnostic.Logger;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -21,7 +22,32 @@ import java.util.Objects;
  */
 public final class JvmTypeRefs {
 
+  private static final Logger LOG = Logger.getInstance(JvmTypeRefs.class);
+
   private JvmTypeRefs() { }
+
+  /**
+   * Single source of truth for the "extractor couldn't determine a type" placeholder. Returns a
+   * {@link JvmTypeRef.UserType} carrying {@link Fqn#MISSING}; logs the {@code reason} at WARN so
+   * any future leak from a defensive parse-error branch becomes visible. Callers should pass a
+   * short description plus source position so the log is diagnostic.
+   *
+   * @see #missingFqn for the {@link Fqn}-only variant.
+   */
+  public static @NotNull JvmTypeRef missingType(@NotNull String reason) {
+    logMissing(reason);
+    return new JvmTypeRef.UserType(Fqn.MISSING, List.of(), List.of());
+  }
+
+  /** {@link Fqn}-only counterpart of {@link #missingType}. Same logging, same {@link Fqn#MISSING}. */
+  public static @NotNull Fqn missingFqn(@NotNull String reason) {
+    logMissing(reason);
+    return Fqn.MISSING;
+  }
+
+  private static void logMissing(@NotNull String reason) {
+    LOG.warn("<Missing type> stub produced: " + reason);
+  }
 
   public static @NotNull String renderPlain(@NotNull JvmTypeRef ref) {
     StringBuilder sb = new StringBuilder();

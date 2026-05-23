@@ -9,6 +9,7 @@ import fleet.org.jetbrains.kotlin.kmp.lexer.KtTokens;
 import fleet.org.jetbrains.kotlin.kmp.parser.KtNodeTypes;
 import org.intellij.grammar.classinfo.Fqn;
 import org.intellij.grammar.classinfo.JvmTypeRef;
+import org.intellij.grammar.classinfo.JvmTypeRefs;
 import org.intellij.grammar.classinfo.MethodSymbol;
 import org.intellij.grammar.classinfo.MethodType;
 import org.intellij.grammar.classinfo.ParameterSymbol;
@@ -215,9 +216,10 @@ final class KotlinSyntaxMethodExtractor {
       if (p.getType() != KtNodeTypes.INSTANCE.getVALUE_PARAMETER()) continue;
       SyntaxNode pType = firstChildOfType(p, KtNodeTypes.INSTANCE.getTYPE_REFERENCE());
       SyntaxNode pName = firstChildOfType(p, KtTokens.INSTANCE.getIDENTIFIER());
-      JvmTypeRef parsed = pType == null
-                          ? new JvmTypeRef.UserType(Fqn.of(""), List.of(), List.of())
-                          : typeFormatter.parseType(pType, typeVars);
+      JvmTypeRef parsed = pType != null
+                          ? typeFormatter.parseType(pType, typeVars)
+                          : JvmTypeRefs.missingType("Kotlin VALUE_PARAMETER with no TYPE_REFERENCE at offset "
+                                                    + p.getStartOffset() + ".." + p.getEndOffset());
       SyntaxNode mods = firstChildOfType(p, KtNodeTypes.INSTANCE.getMODIFIER_LIST());
       if (KotlinSyntaxNodes.hasModifier(mods, KtTokens.INSTANCE.getVARARG_MODIFIER())) {
         // vararg X → X[] with the outer @NotNull on the array itself; kotlinc emits the array

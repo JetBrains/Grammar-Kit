@@ -6,13 +6,13 @@ package org.intellij.grammar.classinfo.java;
 
 import com.intellij.java.syntax.element.JavaSyntaxElementType;
 import com.intellij.java.syntax.element.JavaSyntaxTokenType;
-import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.platform.syntax.SyntaxElementType;
 import com.intellij.platform.syntax.tree.SyntaxNode;
 import com.intellij.util.SmartList;
 import org.intellij.grammar.classinfo.ClassSymbol;
 import org.intellij.grammar.classinfo.Fqn;
 import org.intellij.grammar.classinfo.JvmTypeRef;
+import org.intellij.grammar.classinfo.JvmTypeRefs;
 import org.intellij.grammar.classinfo.MethodSymbol;
 import org.intellij.grammar.classinfo.SymbolResolver;
 import org.intellij.grammar.classinfo.TargetType;
@@ -46,8 +46,6 @@ import static org.intellij.grammar.classinfo.java.JavaSyntaxNodes.buildDottedTex
  */
 @SuppressWarnings("UnstableApiUsage")
 final class JavaSyntaxTypeFormatter {
-
-  private static final Logger LOG = Logger.getInstance(JavaSyntaxTypeFormatter.class);
 
   private static final Set<SyntaxElementType> PRIMITIVE_KEYWORDS = Set.of(
     JavaSyntaxTokenType.VOID_KEYWORD,
@@ -164,11 +162,9 @@ final class JavaSyntaxTypeFormatter {
     }
     if (base == null) {
       // Defensive fallback: parser produced a TYPE node with no recognised type child. Real-world
-      // input from the java-syntax parser shouldn't reach here, so log loudly if it does — the
-      // downstream empty-FQN will silently break type matching on the surrounding member.
-      LOG.warn("Empty TYPE node — no JAVA_CODE_REFERENCE or primitive child; producing empty-FQN placeholder. Source range: "
-               + typeNode.getStartOffset() + ".." + typeNode.getEndOffset());
-      base = new JvmTypeRef.UserType(Fqn.of(""), List.of(), List.of());
+      // input from the java-syntax parser shouldn't reach here.
+      base = JvmTypeRefs.missingType("Java TYPE node with no type child at offset "
+                                     + typeNode.getStartOffset() + ".." + typeNode.getEndOffset());
     }
     JvmTypeRef result = base;
     // dimAnnotations is in source order — innermost dim first; wrap inside-out so the outermost

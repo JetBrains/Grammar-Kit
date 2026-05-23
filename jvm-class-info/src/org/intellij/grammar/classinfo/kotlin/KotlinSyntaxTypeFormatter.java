@@ -173,7 +173,7 @@ final class KotlinSyntaxTypeFormatter {
   private @NotNull JvmTypeRef parseType(@Nullable SyntaxNode typeNode,
                                         @NotNull Set<String> typeVars,
                                         boolean suppressOuter) {
-    if (typeNode == null) return new JvmTypeRef.UserType(Fqn.of(""), List.of(), List.of());
+    if (typeNode == null) return JvmTypeRefs.missingType("Kotlin parseType called with null typeNode");
     SyntaxElementType t = typeNode.getType();
     if (t == KtNodeTypes.INSTANCE.getTYPE_REFERENCE()) {
       return parseType(firstNonModifierChild(typeNode), typeVars, suppressOuter);
@@ -190,7 +190,8 @@ final class KotlinSyntaxTypeFormatter {
     if (t == KtNodeTypes.INSTANCE.getDYNAMIC_TYPE()) {
       return new JvmTypeRef.DynamicType(suppressOuter ? List.of() : List.of(NOT_NULL));
     }
-    return new JvmTypeRef.UserType(Fqn.of(""), List.of(), List.of());
+    return JvmTypeRefs.missingType("Kotlin parseType: unrecognised node type " + t
+                                   + " at offset " + typeNode.getStartOffset() + ".." + typeNode.getEndOffset());
   }
 
   /**
@@ -397,7 +398,7 @@ final class KotlinSyntaxTypeFormatter {
    * than a structured type expression.
    */
   @NotNull Fqn formatTypeFqn(@Nullable SyntaxNode typeNode, @NotNull Set<String> typeVars) {
-    if (typeNode == null) return Fqn.of("");
+    if (typeNode == null) return JvmTypeRefs.missingFqn("Kotlin formatTypeFqn called with null typeNode");
     SyntaxElementType t = typeNode.getType();
     if (t == KtNodeTypes.INSTANCE.getTYPE_REFERENCE()) {
       return formatTypeFqn(firstNonModifierChild(typeNode), typeVars);
@@ -413,7 +414,8 @@ final class KotlinSyntaxTypeFormatter {
     }
     if (t == KtNodeTypes.INSTANCE.getFUNCTION_TYPE()) return Fqn.of("kotlin.Function");
     if (t == KtNodeTypes.INSTANCE.getDYNAMIC_TYPE()) return Fqn.of("java.lang.Object");
-    return Fqn.of("");
+    return JvmTypeRefs.missingFqn("Kotlin formatTypeFqn: unrecognised node type " + t
+                                  + " at offset " + typeNode.getStartOffset() + ".." + typeNode.getEndOffset());
   }
 
   /** Whether the first entry of a {@code SUPER_TYPE_LIST} is a {@code SUPER_TYPE_CALL_ENTRY}. */

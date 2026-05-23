@@ -46,11 +46,10 @@ Was: extractor unconditionally synthesized `getX()` / `setX()` for `@JvmField va
 ### 4. Nullable extension-function receiver loses nullability — **NOT REPRODUCIBLE** (2026-05-23)
 `KotlinSyntaxMethodExtractor.java:94` parses the receiver TYPE_REFERENCE through `typeFormatter.parseType`, which already routes NULLABLE_TYPE wrappers to `parseNullable` and emits `@Nullable` on the resulting `UserType`. Regression test `testExtensionFunctionReceiverNullability` confirms: `fun String?.shoutOrEmpty()` produces a receiver param with `@org.jetbrains.annotations.Nullable java.lang.String`, while `fun String.shout()` produces `@NotNull java.lang.String`. Closed; regression test added.
 
-### 5. Empty-FQN placeholders on parse errors
-- `JavaSyntaxTypeFormatter.java:162` — null base TYPE produces `UserType(Fqn.of(""), …)`.
-- `JavaSyntaxMethodExtractor.java:114–116` — parameter without TYPE child produces same.
+### 5. Empty-FQN placeholders on parse errors — **PARTIAL** (2026-05-23)
+Investigation showed the two defensive null-checks (`JavaSyntaxTypeFormatter.java:162`, `JavaSyntaxMethodExtractor.java:114`) don't fire on real-world java-syntax parser output — the parser's error recovery degrades broken methods gracefully without ever producing TYPE-without-children or PARAMETER-without-TYPE nodes (see characterization test `testMalformedMethodGracefullyDegradesNotCrashes`). Rather than expand the type model with an `ErrorType` sentinel (which touches every JvmTypeRef switch site) or fail-loud (which would crash on any future parser-recovery change), added `LOG.warn` at both sites so any future leak becomes visible without breaking valid extractions. Empty-FQN placeholder behaviour preserved.
 
-A `Fqn.of("")` survives downstream and quietly breaks every type-matching call against the surrounding method. Fail loud or use a dedicated `ErrorType` sentinel.
+Related untouched: Kotlin has the same defensive pattern (`KotlinSyntaxMethodExtractor.collectValueParameters`, `KotlinSyntaxTypeFormatter.parseType`). Not audited; leave for a future symmetry pass.
 
 ### 6. Cycle-tolerance contract not enforced uniformly
 Per parent CLAUDE.md: `SymbolResolver.findClass` returns null on cycles, and all extractors **must** be null-tolerant.

@@ -239,6 +239,31 @@ public class KotlinSyntaxHelperSourceTest extends GoldenClassInfoTestCase {
     assertClassInfoMatchesGolden(extractAll());
   }
 
+  public void testInterfaceSupertypeGoesToInterfacesNotSuperClass() throws Exception {
+    // Bug 3: `class Bag : MyList` (no parens) — the resolver must classify MyList as an interface
+    // and route it to `interfaces`, leaving superClass as java.lang.Object. The old code put any
+    // unparenthesized first supertype in superClass unconditionally. Goes through the manager so
+    // the resolver actually knows MyList's modifiers at populateSuperTypes time.
+    write("pkg/MyList.kt", """
+        package pkg
+        interface MyList {
+          fun size(): Int
+        }
+        """);
+    write("pkg/Bag.kt", """
+        package pkg
+        class Bag : MyList {
+          override fun size(): Int = 0
+        }
+        """);
+    JvmClassSymbolManager manager = new JvmClassSymbolManager(
+      List.of(new KotlinSyntaxClassSymbolProvider(List.of(root))));
+    ClassSymbol bag = manager.findClass(Fqn.of("pkg.Bag"));
+    assertNotNull("Bag must be discoverable", bag);
+    assertEquals(Fqn.JAVA_LANG_OBJECT, bag.superClass());
+    assertEquals(List.of(Fqn.of("pkg.MyList")), bag.interfaces());
+  }
+
   // ---------------------------------------------------------------------------------------------
   // helpers
   // ---------------------------------------------------------------------------------------------

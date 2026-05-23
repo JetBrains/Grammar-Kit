@@ -14,6 +14,7 @@ import org.intellij.grammar.classinfo.SymbolResolver;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Modifier;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -131,6 +132,7 @@ public final class JavaSyntaxClassExtractor {
     result.put(fqn, info);
 
     Map<String, Fqn> previousScope = typeFormatter.getNestedScope();
+    List<Fqn> previousChain = typeFormatter.getEnclosingChain();
     Map<String, Fqn> scope = new HashMap<>(previousScope);
     for (SyntaxNode member = classNode.firstChild(); member != null; member = member.nextSibling()) {
       if (member.getType() != JavaSyntaxElementType.CLASS) continue;
@@ -140,6 +142,13 @@ public final class JavaSyntaxClassExtractor {
       scope.put(simple, fqn.child(simple));
     }
     typeFormatter.setNestedScope(scope);
+    // Innermost-first chain: current class then any outer enclosing classes. Lets the formatter
+    // walk each enclosing class's supertypes when resolving an unqualified simple name to an
+    // inherited nested type (JLS 6.4.1).
+    List<Fqn> chain = new ArrayList<>(previousChain.size() + 1);
+    chain.add(fqn);
+    chain.addAll(previousChain);
+    typeFormatter.setEnclosingChain(chain);
     try {
       for (SyntaxNode member = classNode.firstChild(); member != null; member = member.nextSibling()) {
         SyntaxElementType t = member.getType();
@@ -154,6 +163,7 @@ public final class JavaSyntaxClassExtractor {
     }
     finally {
       typeFormatter.setNestedScope(previousScope);
+      typeFormatter.setEnclosingChain(previousChain);
     }
   }
 }

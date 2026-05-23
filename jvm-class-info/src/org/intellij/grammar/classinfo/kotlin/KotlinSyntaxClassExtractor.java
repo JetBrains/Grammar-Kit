@@ -58,6 +58,7 @@ final class KotlinSyntaxClassExtractor {
 
   private final SyntaxNode fileRoot;
   private final String fileStem;
+  private final SymbolResolver resolver;
   private final KotlinSyntaxImportContext imports;
   private final KotlinSyntaxTypeFormatter typeFormatter;
   private final KotlinSyntaxMethodExtractor methodExtractor;
@@ -77,6 +78,7 @@ final class KotlinSyntaxClassExtractor {
                                      @NotNull SymbolResolver resolver) {
     this.fileRoot = fileRoot;
     this.fileStem = fileStem;
+    this.resolver = resolver;
     this.imports = KotlinSyntaxImportContext.extractFrom(fileRoot, resolver);
     this.typeFormatter = new KotlinSyntaxTypeFormatter(imports);
     this.methodExtractor = new KotlinSyntaxMethodExtractor(typeFormatter);
@@ -448,12 +450,27 @@ final class KotlinSyntaxClassExtractor {
       // The first call entry is the superclass; rest are interfaces.
       info.superClass = supers.get(0);
       if (supers.size() > 1) info.interfaces.addAll(supers.subList(1, supers.size()));
+      return;
     }
-    else {
-      // No constructor call → best-effort: first SUPER_TYPE_ENTRY is the superclass; rest interfaces.
-      info.superClass = supers.get(0);
-      if (supers.size() > 1) info.interfaces.addAll(supers.subList(1, supers.size()));
+    // No constructor call — every entry can be either a class extends or an interface implements,
+    // and Kotlin doesn't require `:` order. Consult the resolver: known interfaces go to interfaces,
+    // the first known non-interface (or the first entry if none resolve) becomes superClass. Falls
+    // back to old "first entry is class" heuristic for the head when nothing resolves, preserving
+    // behavior on cross-file references with no pre-built resolver.
+    Fqn chosenSuper = null;
+    for (Fqn fqn : supers) {
+      ClassSymbol sym = resolver.findClass(fqn);
+      if (sym != null && Modifier.isInterface(sym.modifiers())) {
+        info.interfaces.add(fqn);
+      }
+      else if (chosenSuper == null) {
+        chosenSuper = fqn;
+      }
+      else {
+        info.interfaces.add(fqn);
+      }
     }
+    info.superClass = chosenSuper != null ? chosenSuper : Fqn.JAVA_LANG_OBJECT;
   }
 
   private void collectPrimaryCtorPropertyAccessors(@NotNull SyntaxNode primaryCtor,

@@ -1,0 +1,5 @@
+class c.d.Sub extends c.d.Parent
+  modifiers: public
+  methods:
+    INSTANCE public void doIt(int x)
+      param[0] annotations: @c.d.Parent.Marker

@@ -227,6 +227,71 @@ public class JavaSyntaxHelperSourceTest extends GoldenClassInfoTestCase {
       """));
   }
 
+  public void testStaticWildcardImportOfNestedType() {
+    // Coverage: `import static c.d.Outer.*;` exposes inner types by simple name via the wildcard
+    // probe. `@Marker` resolves to `c.d.Outer.Marker` after the resolver confirms it exists.
+    Map<Fqn, ClassSymbol> universe = new HashMap<>();
+    universe.putAll(extract("""
+      package c.d;
+      public class Outer {
+        public @interface Marker {}
+      }
+      """));
+    universe.putAll(extract("""
+      package a.b;
+      import static c.d.Outer.*;
+      public class C {
+        public void doIt(@Marker int x) {}
+      }
+      """, universe));
+    Map<Fqn, ClassSymbol> userFile = new HashMap<>();
+    userFile.put(Fqn.of("a.b.C"), universe.get(Fqn.of("a.b.C")));
+    assertClassInfoMatchesGolden(userFile);
+  }
+
+  public void testStaticImportShadowsWildcard() {
+    // Coverage: when both a single-type static import and a wildcard static import could provide
+    // the same simple name, the single-type import wins — it's checked first in resolveSimpleName.
+    // Distinguishable here because the two imports name different enclosing classes.
+    Map<Fqn, ClassSymbol> universe = new HashMap<>();
+    universe.putAll(extract("""
+      package c.d;
+      public class Outer {
+        public @interface Marker {}
+      }
+      """));
+    universe.putAll(extract("""
+      package c.d;
+      public class Other {
+        public @interface Marker {}
+      }
+      """));
+    universe.putAll(extract("""
+      package a.b;
+      import static c.d.Outer.Marker;
+      import static c.d.Other.*;
+      public class C {
+        public void doIt(@Marker int x) {}
+      }
+      """, universe));
+    Map<Fqn, ClassSymbol> userFile = new HashMap<>();
+    userFile.put(Fqn.of("a.b.C"), universe.get(Fqn.of("a.b.C")));
+    assertClassInfoMatchesGolden(userFile);
+  }
+
+  public void testStaticImportOfMethodDoesNotBreakExtraction() {
+    // Coverage: `import static java.lang.Math.max;` — the imported name `max` is a method, not a
+    // class. Extraction must not crash, and the file's classes must extract cleanly. Annotations
+    // are not relevant here since `max` would never be used as one; pin the basic shape.
+    assertClassInfoMatchesGolden(extract("""
+      package a.b;
+      import static java.lang.Math.max;
+      public class C {
+        public int doIt(int p) { return max(p, 0); }
+      }
+      """));
+  }
+
   public void testStaticImportOfNestedAnnotation() {
     // `import static c.d.Outer.Marker` makes `@Marker` resolve to `c.d.Outer.Marker`
     // — the static-import's full reference text — not `c.d.Marker` with the enclosing
@@ -238,6 +303,218 @@ public class JavaSyntaxHelperSourceTest extends GoldenClassInfoTestCase {
         public void doIt(@Marker int x) {}
       }
       """));
+  }
+
+  public void testRegularImportOfInheritedNestedType() {
+    // Bug A: JLS 7.5.1 also applies to regular (non-static) imports. `import c.d.Sub.Marker`
+    // where Marker is inherited from Sub's superclass must canonicalize to the declaring class.
+    Map<Fqn, ClassSymbol> universe = new HashMap<>();
+    universe.putAll(extract("""
+      package c.d;
+      public class Parent {
+        public @interface Marker {}
+      }
+      """));
+    universe.putAll(extract("""
+      package c.d;
+      public class Sub extends Parent {
+      }
+      """));
+    universe.putAll(extract("""
+      package a.b;
+      import c.d.Sub.Marker;
+      public class C {
+        public void doIt(@Marker int x) {}
+      }
+      """, universe));
+    Map<Fqn, ClassSymbol> userFile = new HashMap<>();
+    userFile.put(Fqn.of("a.b.C"), universe.get(Fqn.of("a.b.C")));
+    assertClassInfoMatchesGolden(userFile);
+  }
+
+  public void testRegularImportOfDirectlyDeclaredNestedType() {
+    // Coverage: regular nested-type import where the nested type IS declared on the named class.
+    // The supertype walk finds the direct match on the first hop — no change to FQN. Pins the
+    // base case so we'd notice if the walk ever started rewriting direct-declaration imports.
+    Map<Fqn, ClassSymbol> universe = new HashMap<>();
+    universe.putAll(extract("""
+      package c.d;
+      public class Outer {
+        public @interface Marker {}
+      }
+      """));
+    universe.putAll(extract("""
+      package a.b;
+      import c.d.Outer.Marker;
+      public class C {
+        public void doIt(@Marker int x) {}
+      }
+      """, universe));
+    Map<Fqn, ClassSymbol> userFile = new HashMap<>();
+    userFile.put(Fqn.of("a.b.C"), universe.get(Fqn.of("a.b.C")));
+    assertClassInfoMatchesGolden(userFile);
+  }
+
+  public void testDottedRefHeadResolvedViaImport() {
+    // Bug B: `Sub.Inner x;` with `import com.foo.Sub` must qualify the head through imports so the
+    // field type is recorded as `com.foo.Sub.Inner`, not the as-written `Sub.Inner` (which the old
+    // code returned with a misleading "already qualified" comment).
+    Map<Fqn, ClassSymbol> universe = new HashMap<>();
+    universe.putAll(extract("""
+      package c.d;
+      public class Sub {
+        public @interface Inner {}
+      }
+      """));
+    universe.putAll(extract("""
+      package a.b;
+      import c.d.Sub;
+      public class C {
+        public void doIt(@Sub.Inner int x) {}
+      }
+      """, universe));
+    Map<Fqn, ClassSymbol> userFile = new HashMap<>();
+    userFile.put(Fqn.of("a.b.C"), universe.get(Fqn.of("a.b.C")));
+    assertClassInfoMatchesGolden(userFile);
+  }
+
+  public void testDottedRefHeadResolvedViaImportAndSupertypeWalk() {
+    // Bug B + canonicalization: when the dotted-ref head resolves through imports and the nested
+    // type is inherited from a supertype of the imported class, the final FQN must name the
+    // declaring class. Composes head resolution with the supertype walk on the same call site.
+    Map<Fqn, ClassSymbol> universe = new HashMap<>();
+    universe.putAll(extract("""
+      package c.d;
+      public class Parent {
+        public @interface Inner {}
+      }
+      """));
+    universe.putAll(extract("""
+      package c.d;
+      public class Sub extends Parent {
+      }
+      """));
+    universe.putAll(extract("""
+      package a.b;
+      import c.d.Sub;
+      public class C {
+        public void doIt(@Sub.Inner int x) {}
+      }
+      """, universe));
+    Map<Fqn, ClassSymbol> userFile = new HashMap<>();
+    userFile.put(Fqn.of("a.b.C"), universe.get(Fqn.of("a.b.C")));
+    assertClassInfoMatchesGolden(userFile);
+  }
+
+  public void testLowercaseHeadResolvesViaImport() {
+    // Bug 9: a dotted ref whose head starts with a lowercase letter (here `legacyType`) must still
+    // resolve through file-level imports. The old uppercase-first-letter heuristic in resolveDotted
+    // silently treated such heads as package-qualified and left the reference unresolved.
+    Map<Fqn, ClassSymbol> universe = new HashMap<>();
+    universe.putAll(extract("""
+      package c.d;
+      public class legacyType {
+        public @interface Inner {}
+      }
+      """));
+    universe.putAll(extract("""
+      package a.b;
+      import c.d.legacyType;
+      public class C {
+        public void doIt(@legacyType.Inner int x) {}
+      }
+      """, universe));
+    Map<Fqn, ClassSymbol> userFile = new HashMap<>();
+    userFile.put(Fqn.of("a.b.C"), universe.get(Fqn.of("a.b.C")));
+    assertClassInfoMatchesGolden(userFile);
+  }
+
+  public void testUnderscoreHeadResolvesViaImport() {
+    // Bug 9: underscore-leading class names (`_Inner`) also need to flow through import resolution.
+    Map<Fqn, ClassSymbol> universe = new HashMap<>();
+    universe.putAll(extract("""
+      package c.d;
+      public class _Inner {
+        public @interface Leaf {}
+      }
+      """));
+    universe.putAll(extract("""
+      package a.b;
+      import c.d._Inner;
+      public class C {
+        public void doIt(@_Inner.Leaf int x) {}
+      }
+      """, universe));
+    Map<Fqn, ClassSymbol> userFile = new HashMap<>();
+    userFile.put(Fqn.of("a.b.C"), universe.get(Fqn.of("a.b.C")));
+    assertClassInfoMatchesGolden(userFile);
+  }
+
+  public void testDottedRefAlreadyFullyQualifiedUnchanged() {
+    // Bug B guardrail: fully-qualified dotted refs (lowercase head, no import in scope) must NOT
+    // be rewritten by head-resolution. `java.util.Map.Entry` stays as `java.util.Map.Entry`.
+    assertClassInfoMatchesGolden(extract("""
+      package a.b;
+      public class C {
+        public void doIt(java.util.Map.Entry e) {}
+      }
+      """));
+  }
+
+  public void testUnqualifiedInheritedNestedTypeRef() {
+    // Bug 6: unqualified `Marker` referenced inside `class Sub extends Parent` where Parent declares
+    // Marker must resolve to `c.d.Parent.Marker` (JLS 6.4.1 — inherited members are accessible by
+    // simple name). Without the supertype walk it falls through to same-package `c.d.Marker`.
+    Map<Fqn, ClassSymbol> universe = new HashMap<>();
+    universe.putAll(extract("""
+      package c.d;
+      public class Parent {
+        public @interface Marker {}
+      }
+      """));
+    universe.putAll(extract("""
+      package c.d;
+      public class Sub extends Parent {
+        public void doIt(@Marker int x) {}
+      }
+      """, universe));
+    Map<Fqn, ClassSymbol> userFile = new HashMap<>();
+    userFile.put(Fqn.of("c.d.Sub"), universe.get(Fqn.of("c.d.Sub")));
+    assertClassInfoMatchesGolden(userFile);
+  }
+
+  public void testMultiHopDottedRefCanonicalizes() {
+    // Bug 7: `Sub.Inner.Leaf` where Sub is imported and Inner is inherited from Sub's supertype.
+    // canonicalize must walk every hop, not just the last. The intermediate `Inner` segment must
+    // be rewritten to its declaring class so the final FQN names canonical owners at each level.
+    Map<Fqn, ClassSymbol> universe = new HashMap<>();
+    universe.putAll(extract("""
+      package c.d;
+      public class Grand {
+        public @interface Leaf {}
+      }
+      """));
+    universe.putAll(extract("""
+      package c.d;
+      public class Parent {
+        public static class Inner extends Grand {}
+      }
+      """));
+    universe.putAll(extract("""
+      package c.d;
+      public class Sub extends Parent {
+      }
+      """));
+    universe.putAll(extract("""
+      package a.b;
+      import c.d.Sub;
+      public class C {
+        public void doIt(@Sub.Inner.Leaf int x) {}
+      }
+      """, universe));
+    Map<Fqn, ClassSymbol> userFile = new HashMap<>();
+    userFile.put(Fqn.of("a.b.C"), universe.get(Fqn.of("a.b.C")));
+    assertClassInfoMatchesGolden(userFile);
   }
 
   public void testStaticImportOfInheritedNestedAnnotation() {

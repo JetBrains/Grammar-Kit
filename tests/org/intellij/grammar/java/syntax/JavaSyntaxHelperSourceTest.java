@@ -240,6 +240,36 @@ public class JavaSyntaxHelperSourceTest extends GoldenClassInfoTestCase {
       """));
   }
 
+  public void testStaticImportOfInheritedNestedAnnotation() {
+    // JLS 7.5.1 requires single-type-import to name the canonical declaration. When a static import
+    // names the nested type through a subclass (the subclass merely inherits it), canonicalize to
+    // the supertype that actually declares it. Mirrors the Goland scenario where
+    // `import static com.goide.psi.impl.GoLightType.IconFlags` should resolve to
+    // `com.intellij.openapi.util.Iconable.IconFlags`, not `GoLightType.IconFlags`.
+    Map<Fqn, ClassSymbol> universe = new HashMap<>();
+    universe.putAll(extract("""
+      package c.d;
+      public interface Iconable {
+        @interface Marker {}
+      }
+      """));
+    universe.putAll(extract("""
+      package c.d;
+      public class Sub implements Iconable {
+      }
+      """));
+    universe.putAll(extract("""
+      package a.b;
+      import static c.d.Sub.Marker;
+      public class C {
+        public void doIt(@Marker int x) {}
+      }
+      """, universe));
+    Map<Fqn, ClassSymbol> userFile = new HashMap<>();
+    userFile.put(Fqn.of("a.b.C"), universe.get(Fqn.of("a.b.C")));
+    assertClassInfoMatchesGolden(userFile);
+  }
+
   public void testTypeUseAnnotationsLiftedToType() {
     // Any annotation whose @Target declares ElementType.TYPE_USE is lifted off the
     // declaration-position MODIFIER_LIST (which the JetBrains Java parser groups with `public`)
@@ -338,18 +368,23 @@ public class JavaSyntaxHelperSourceTest extends GoldenClassInfoTestCase {
   // ---------------------------------------------------------------------------------------------
 
   private static @NotNull Map<Fqn, ClassSymbol> extract(@NotNull String source) {
+    return extract(source, Map.of());
+  }
+
+  /**
+   * Two-pass extraction with an optional pre-existing universe of foreign classes. The seed pass
+   * builds @interface/class declarations without resolution; the real pass uses a resolver that
+   * combines the seed map with {@code foreign} so cross-file references (e.g. a static import's
+   * supertype walk) can succeed.
+   */
+  private static @NotNull Map<Fqn, ClassSymbol> extract(@NotNull String source,
+                                                        @NotNull Map<Fqn, ClassSymbol> foreign) {
     SyntaxNode root = JavaSyntaxTreeManager.parseText(source);
-    // Two-pass extraction:
-    //  1) seed-pass with a null resolver to surface @interface declarations (including their
-    //     @Target metadata, which doesn't require resolution).
-    //  2) real pass using a resolver backed by the seed-pass map so that TYPE_USE annotation
-    //     lifting can consult ClassSymbol.annotationTargets for annotations declared in the same
-    //     source file.
-    // This mirrors how production code paths work through JvmClassSymbolManager — the manager
-    // handles cycles via in-progress null returns, and downstream lifts see annotations whose
-    // declarations the manager already finished.
-    Map<Fqn, ClassSymbol> seed = JavaSyntaxClassExtractor.extractFrom(root, fqn -> null);
-    SymbolResolver resolver = seed::get;
+    Map<Fqn, ClassSymbol> seed = JavaSyntaxClassExtractor.extractFrom(root, fqn -> foreign.get(fqn));
+    SymbolResolver resolver = fqn -> {
+      ClassSymbol s = seed.get(fqn);
+      return s != null ? s : foreign.get(fqn);
+    };
     return new HashMap<>(JavaSyntaxClassExtractor.extractFrom(root, resolver));
   }
 

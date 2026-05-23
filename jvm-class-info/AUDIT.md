@@ -181,8 +181,8 @@ Removed the dead block (lines 288–304) where `origin` was unconditionally null
 ### 30. ASM doesn't parse `Record` / `PermittedSubclasses` / `NestMembers` attributes
 JDK 14+ records lose component metadata; JDK 15+ sealed classes lose their permits list. Source providers face the symmetric question. Document as known gap or implement if downstream needs it.
 
-### 31. ASM `// todo looks stupid` at line 81
-The substring rebuild trick works but the loop bound (`lastDot > 0`) means the all-dots-as-slashes case is never probed. Document or rewrite.
+### 31. ASM `// todo looks stupid` at line 81 — **FIXED** (2026-05-23, doc only)
+The audit's claim about the all-slashes case being unreachable was wrong — iteration 1 starts with `lastDot = name.length()`, which puts every dot in the package half (all-slashes form). Loop trace for `com.foo.Outer.Inner`: iter 1 tries `com/foo/Outer/Inner.class`, iter 2 tries `com/foo/Outer$Inner.class`, etc. The "todo looks stupid" was about cosmetic dissatisfaction with the substring-rebuild trick, not correctness. Replaced the dismissive todo with a multi-line comment explaining the right-to-left probe invariant. No behaviour change.
 
 ### 32. Kotlin `Array<*>` element type hardcoded to `Object`
 `KotlinSyntaxTypeFormatter:285–287` — matches kotlinc's lowering; document the assumption.

@@ -30,12 +30,18 @@ import static org.intellij.grammar.classinfo.java.JavaSyntaxNodes.buildDottedTex
 @SuppressWarnings("UnstableApiUsage")
 final class JavaSyntaxImportContext extends AbstractImportContext {
 
+  /**
+   * Commonly-unqualified {@code java.lang.*} types — Java auto-imports the entire {@code java.lang}
+   * package by JLS, so any name that resolves to {@code java.lang.X} can be written bare. This list
+   * captures the names worth catching before falling through to the resolver. Intentionally broader
+   * than {@code KotlinSyntaxImportContext.JAVA_LANG_FALLBACK}, which is policy-driven (Kotlin
+   * auto-imports {@code kotlin.*} instead and only falls back to java.lang for a curated subset).
+   */
   private static final Set<String> JAVA_LANG_TYPES = Set.of(
     "Object", "String", "CharSequence", "Class", "Throwable", "Exception", "RuntimeException",
     "Error", "Number", "Integer", "Long", "Short", "Byte", "Boolean", "Character", "Float", "Double",
     "Void", "Iterable", "Comparable", "Cloneable", "Math", "System", "Thread", "Runnable",
     "StringBuilder", "StringBuffer", "Enum", "Record",
-    // common java.lang annotations
     "Deprecated", "Override", "SuppressWarnings", "SafeVarargs", "FunctionalInterface"
   );
 

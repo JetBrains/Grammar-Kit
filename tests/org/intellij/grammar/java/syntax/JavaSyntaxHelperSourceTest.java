@@ -583,6 +583,22 @@ public class JavaSyntaxHelperSourceTest extends GoldenClassInfoTestCase {
       """));
   }
 
+  public void testVarargsParameterRenderedAsSingleArrayDimension() {
+    // Audit task #1: confirm `T... args` renders as `T[]` (one dimension), not `T[][]` or any other
+    // doubled shape. Covers reference type, primitive, type-use annotation on the component, and the
+    // legitimate `T[]...` form (varargs of arrays — *this* one is genuinely two-dim).
+    assertClassInfoMatchesGolden(extract("""
+      package a.b;
+      public @interface A {}
+      public class C {
+        public void refs(String... args) {}
+        public void prims(int... counts) {}
+        public void annotated(@A String... names) {}
+        public void arrayOfVarargs(String[]... mixed) {}
+      }
+      """));
+  }
+
   public void testTypeUseAnnotationsOnArraysAndComponents() {
     // JLS 9.7.4 type-use annotations on array dimensions and component types. The pre-parameter
     // @NotNull on `one(@NotNull GoImportSpec o)` is a declaration-target annotation on the PARAMETER's

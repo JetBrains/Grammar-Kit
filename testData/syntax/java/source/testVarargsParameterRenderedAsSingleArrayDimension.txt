@@ -1,0 +1,12 @@
+class a.b.A
+  modifiers: public abstract interface
+  methods: (none)
+
+class a.b.C extends java.lang.Object
+  modifiers: public
+  methods:
+    INSTANCE public void refs(java.lang.String[] args)
+    INSTANCE public void prims(int[] counts)
+    INSTANCE public void annotated(java.lang.String[] names)
+      param[0] annotations: @a.b.A
+    INSTANCE public void arrayOfVarargs(java.lang.String[][] mixed)

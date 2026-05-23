@@ -94,8 +94,8 @@ These need design choices, not just code changes. Each one is a place where sour
 ### 10. ASM doesn't filter `ACC_SYNTHETIC` / `ACC_BRIDGE` / `<clinit>` — **FIXED** (2026-05-23)
 `AsmClassSymbolProvider.visitMethod` now returns null for `<clinit>`, `ACC_BRIDGE` (0x0040), and `ACC_SYNTHETIC` (0x1000) methods, so they're filtered at the extraction source. Convergence harness normalizer simplified — only the residual ACC_SUPER class flag + javac's synthesized default constructor (which is plain public, not synthetic) stay there. Two convergence tests added: `testGenericErasureBridgeIsFiltered` (Comparable bridge), `testStaticInitializerIsFiltered` (`<clinit>`).
 
-### 11. Kotlin data-class synthetics missing
-`data class Pair(val a: Int, val b: String)` produces only `getA()` / `getB()`. Bytecode has `copy(...)`, `component1()`, `component2()`, `equals()`, `hashCode()`, `toString()`. The `data` modifier is a written-in-source contract that promises these — synthesize on the source side. The alternative (have ASM filter them) loses semantics.
+### 11. Kotlin data-class synthetics missing — **FIXED** (2026-05-23)
+Added `KotlinSyntaxNodes.isDataClass` + `KotlinSyntaxMethodExtractor.synthesizeDataClassMembers`. When a Kotlin `data class` is extracted, the source extractor now also emits `componentN()` per primary-ctor val/var property, `copy(...)` taking the same parameters and returning the class itself (with its type parameters), `equals(Object): boolean`, `hashCode(): int`, `toString(): String`. Golden test `testDataClassSynthesizesComponentCopyEqualsHashCodeToString` covers it (`data class Pair(val first: Int, val second: String)` produces all 5 synthetics with `@NotNull` annotations on reference returns and `@Nullable` on `equals`'s `Object` parameter).
 
 ### 12. Kotlin enum-class synthetics missing
 Same shape as #11 for `values(): T[]`, `valueOf(String): T`, and enum constants as static fields. Synthesize on the source side; the `enum class` modifier promises them by JLS.

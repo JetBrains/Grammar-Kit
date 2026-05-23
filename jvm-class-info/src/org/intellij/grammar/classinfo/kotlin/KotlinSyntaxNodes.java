@@ -163,6 +163,15 @@ final class KotlinSyntaxNodes {
   }
 
   /**
+   * {@code data class} marker. kotlinc auto-generates {@code componentN()}, {@code copy(...)},
+   * {@code equals(Object)}, {@code hashCode()}, {@code toString()} for these — the source
+   * extractor synthesizes them to match (audit #11).
+   */
+  static boolean isDataClass(@Nullable SyntaxNode modifierList) {
+    return hasModifier(modifierList, KtTokens.INSTANCE.getDATA_MODIFIER());
+  }
+
+  /**
    * Returns the rightmost {@code IDENTIFIER} token text reachable by depth-first descent — used
    * for finding the simple name of an annotation reference like {@code @kotlin.jvm.JvmStatic},
    * which nests {@code CONSTRUCTOR_CALLEE → TYPE_REFERENCE → USER_TYPE → REFERENCE_EXPRESSION →

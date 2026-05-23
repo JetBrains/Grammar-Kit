@@ -1,0 +1,18 @@
+class pkg.Pair extends java.lang.Object
+  modifiers: public final
+  methods:
+    CONSTRUCTOR public <init>(int first, java.lang.String second)
+      annotatedTypes: [void, int, first, @org.jetbrains.annotations.NotNull java.lang.String, second]
+    INSTANCE public int getFirst()
+    INSTANCE public java.lang.String getSecond()
+      annotatedTypes: [@org.jetbrains.annotations.NotNull java.lang.String]
+    INSTANCE public final int component1()
+    INSTANCE public final java.lang.String component2()
+      annotatedTypes: [@org.jetbrains.annotations.NotNull java.lang.String]
+    INSTANCE public final pkg.Pair copy(int first, java.lang.String second)
+      annotatedTypes: [@org.jetbrains.annotations.NotNull pkg.Pair, int, first, @org.jetbrains.annotations.NotNull java.lang.String, second]
+    INSTANCE public boolean equals(java.lang.Object other)
+      annotatedTypes: [boolean, @org.jetbrains.annotations.Nullable java.lang.Object, other]
+    INSTANCE public int hashCode()
+    INSTANCE public java.lang.String toString()
+      annotatedTypes: [@org.jetbrains.annotations.NotNull java.lang.String]

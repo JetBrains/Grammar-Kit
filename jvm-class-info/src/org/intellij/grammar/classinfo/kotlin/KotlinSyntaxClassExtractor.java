@@ -216,6 +216,10 @@ final class KotlinSyntaxClassExtractor {
         MethodSymbol.Builder ctorMethod = methodExtractor.extractConstructor(primaryCtor, fqn, classTypeVars);
         if (ctorMethod != null) info.methods.add(ctorMethod);
         collectPrimaryCtorPropertyAccessors(primaryCtor, info, classTypeVars);
+        // data class: kotlinc auto-generates componentN, copy, equals, hashCode, toString.
+        if (KotlinSyntaxNodes.isDataClass(modifierList)) {
+          methodExtractor.synthesizeDataClassMembers(primaryCtor, fqn, info.typeParameters, classTypeVars, info.methods);
+        }
       }
 
       if (body != null) walkClassBody(body, info, classTypeVars);

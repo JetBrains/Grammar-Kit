@@ -134,8 +134,8 @@ TypeProjection.Variance.fromKotlinModifier(SyntaxNode)
 TypeProjection.Variance.fromBytecodeWildcard(char)
 ```
 
-### 19. `buildDottedText` duplicated
-Identical tree-walking code in `JavaSyntaxNodes` (~113–133) and `KotlinSyntaxNodes`. Lift to `SyntaxTreeUtil`.
+### 19. `buildDottedText` duplicated — **WON'T FIX** (2026-05-23)
+Inspection showed the two implementations are not actually duplicates. Java's version is 12 lines over 3 token types (`JAVA_CODE_REFERENCE` / `DOT` / `IDENTIFIER`) with `StringBuilder` assembly; Kotlin's is 25 lines over 6+ token types (`REFERENCE_EXPRESSION` / `DOT_QUALIFIED_EXPRESSION` / `USER_TYPE` / `PACKAGE_DIRECTIVE` / `PACKAGE_KEYWORD` / etc.) with `List<String>` + `String.join`. Lifting to `SyntaxTreeUtil` would require parameterizing over language-specific predicates ("is identifier", "is dot", "should recurse"), trading 12+25 self-contained lines for a generic SPI plus two thin shims that pass constant predicates — premature abstraction for two non-isomorphic callers.
 
 ### 20. Import-extraction loop duplicated
 `JavaSyntaxImportContext.extractImports:68–106` and `KotlinSyntaxImportContext.extractImports` differ only in AST type-name constants and the null-check around `NestedTypeResolver.findDeclaringClass`. Lift the skeleton into `AbstractImportContext` parameterized by an import-statement predicate + a callback.

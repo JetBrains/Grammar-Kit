@@ -1,0 +1,5 @@
+class pkg.Suit extends java.lang.Object
+  modifiers: public final
+  methods:
+    STATIC public static pkg.Suit[] values()
+    STATIC public static pkg.Suit valueOf(java.lang.String name)

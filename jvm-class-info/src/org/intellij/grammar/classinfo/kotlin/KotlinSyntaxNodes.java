@@ -172,6 +172,15 @@ final class KotlinSyntaxNodes {
   }
 
   /**
+   * {@code enum class} marker. kotlinc auto-generates {@code values()} and {@code valueOf(String)}
+   * for these (in addition to the entries themselves) — source extractor synthesizes the two
+   * static helpers to match (audit #12).
+   */
+  static boolean isEnumClass(@Nullable SyntaxNode modifierList) {
+    return hasModifier(modifierList, KtTokens.INSTANCE.getENUM_MODIFIER());
+  }
+
+  /**
    * Returns the rightmost {@code IDENTIFIER} token text reachable by depth-first descent — used
    * for finding the simple name of an annotation reference like {@code @kotlin.jvm.JvmStatic},
    * which nests {@code CONSTRUCTOR_CALLEE → TYPE_REFERENCE → USER_TYPE → REFERENCE_EXPRESSION →

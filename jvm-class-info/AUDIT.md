@@ -97,8 +97,14 @@ These need design choices, not just code changes. Each one is a place where sour
 ### 11. Kotlin data-class synthetics missing — **FIXED** (2026-05-23)
 Added `KotlinSyntaxNodes.isDataClass` + `KotlinSyntaxMethodExtractor.synthesizeDataClassMembers`. When a Kotlin `data class` is extracted, the source extractor now also emits `componentN()` per primary-ctor val/var property, `copy(...)` taking the same parameters and returning the class itself (with its type parameters), `equals(Object): boolean`, `hashCode(): int`, `toString(): String`. Golden test `testDataClassSynthesizesComponentCopyEqualsHashCodeToString` covers it (`data class Pair(val first: Int, val second: String)` produces all 5 synthetics with `@NotNull` annotations on reference returns and `@Nullable` on `equals`'s `Object` parameter).
 
-### 12. Kotlin enum-class synthetics missing
-Same shape as #11 for `values(): T[]`, `valueOf(String): T`, and enum constants as static fields. Synthesize on the source side; the `enum class` modifier promises them by JLS.
+### 12. enum-class synthetics missing — **FIXED** (2026-05-23, Java + Kotlin)
+Added `JavaSyntaxNodes.isEnumClass` / `KotlinSyntaxNodes.isEnumClass` + a shared `JavaSyntaxClassExtractor.synthesizeEnumStaticMembers` helper that emits `public static T[] values()` and `public static T valueOf(String name)` (no FINAL — javac doesn't set it). Kotlin extractor delegates to the same helper.
+
+For Java enums the source extractor additionally fixes two things to match the compiled form: implicit superclass `java.lang.Enum` (not `Object`), and class-level `Modifier.FINAL`.
+
+ASM-side carveout in #10's filter keeps `values()` and `valueOf()` when the class is `ACC_ENUM`, even if they're marked `ACC_SYNTHETIC`. The remaining ASM-only artifact (the implicit private `<init>` javac emits for every enum) is dropped in the convergence harness normalizer. Convergence test `testEnumClassConverges` (Java) + golden `testEnumClassSynthesizesValuesAndValueOf` (Kotlin).
+
+**Not implemented:** the enum constants themselves as static fields. `JavaHelper` has no field API, so the existing `JvmField`/data-class precedent stands — fields are out of model. Documented.
 
 ### 13. Kotlin `@JvmOverloads` expansion — **SUBSUMED BY #10** (2026-05-23)
 Kotlin's `@JvmOverloads` makes the compiler emit one canonical function plus N `$default` overloads marked `ACC_SYNTHETIC`. #10 now drops all `ACC_SYNTHETIC` methods at ASM extraction time, so the canonical function survives and the `$default` siblings disappear — matching the source-side single-function view. End-to-end Kotlin convergence test deferred to the kotlin-compiler-embeddable harness work.

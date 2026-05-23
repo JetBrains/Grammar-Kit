@@ -80,6 +80,10 @@ final class JavaSyntaxNodes {
            && firstChildOfType(classNode, JavaSyntaxTokenType.INTERFACE_KEYWORD) != null;
   }
 
+  static boolean isEnumClass(@NotNull SyntaxNode classNode) {
+    return firstChildOfType(classNode, JavaSyntaxTokenType.ENUM_KEYWORD) != null;
+  }
+
   /**
    * Method name = the {@link JavaSyntaxTokenType#IDENTIFIER IDENTIFIER} that follows the (optional)
    * return type. For constructors there is no return type, so it's the first identifier after the

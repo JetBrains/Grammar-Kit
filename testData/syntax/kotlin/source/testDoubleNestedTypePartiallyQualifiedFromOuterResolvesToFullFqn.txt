@@ -14,4 +14,6 @@ class pkg.Util.Wrap extends java.lang.Object
 
 class pkg.Util.Wrap.Deep extends java.lang.Object
   modifiers: public static final
-  methods: (none)
+  methods:
+    STATIC public static pkg.Util.Wrap.Deep[] values()
+    STATIC public static pkg.Util.Wrap.Deep valueOf(java.lang.String name)

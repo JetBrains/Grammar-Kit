@@ -257,10 +257,14 @@ public final class AsmClassSymbolProvider implements JvmClassSymbolProvider {
       //   - ACC_SYNTHETIC (0x1000): captured-locals accessors, $default overloads from
       //     Kotlin @JvmOverloads, enum $VALUES accessor, etc.
       // Filtering at the source means downstream consumers (JvmSyntaxHelper, method matching)
-      // see the same surface that a source-level caller would write.
-      if ("<clinit>".equals(name) || (access & 0x0040) != 0 || (access & 0x1000) != 0) {
-        return null;
-      }
+      // see the same surface that a source-level caller would write. Carveout for enum classes:
+      // javac marks the auto-generated `values()` and `valueOf(String)` as ACC_SYNTHETIC on some
+      // toolchains, but they're user-callable and the source extractors synthesize them too
+      // (audit #12), so keep them.
+      if ("<clinit>".equals(name) || (access & 0x0040) != 0) return null;
+      boolean isEnumClass = (myInfo.modifiers & 0x4000) != 0;
+      boolean isEnumStatic = isEnumClass && ("values".equals(name) || "valueOf".equals(name));
+      if ((access & 0x1000) != 0 && !isEnumStatic) return null;
       String unmangledName = unmangleInternalKotlinName(name, access);
       MethodSymbol.Builder m = getMethodInfo(myInfo.name, unmangledName, ObjectUtils.chooseNotNull(signature, desc), exceptions);
       // Clear ACC_VARARGS (0x0080) on the method modifier bitmask: same bit value as

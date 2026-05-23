@@ -74,20 +74,21 @@ public final class AsmClassSymbolProvider implements JvmClassSymbolProvider {
     String name = className.value();
     try {
       int lastDot = name.length();
-      InputStream is;
-      do {
+      InputStream is = null;
+      while (is == null && lastDot > 0) {
         String s = name.substring(0, lastDot).replace('.', '/') +
                    name.substring(lastDot).replace('.', '$') +
                    ".class"; // todo looks stupid
         is = classLoader.getResourceAsStream(s);
         lastDot = name.lastIndexOf('.', lastDot - 1);
       }
-      while (is == null && lastDot > 0);
-
       if (is == null) return null;
-      byte[] bytes = FileUtil.loadBytes(is);
-      is.close();
-      return getClassInfo(className, bytes);
+      // try-with-resources guarantees close() even if loadBytes throws — the previous explicit
+      // is.close() outside the try block leaked the descriptor on read failure.
+      try (InputStream resource = is) {
+        byte[] bytes = FileUtil.loadBytes(resource);
+        return getClassInfo(className, bytes);
+      }
     }
     catch (Exception e) {
       reportException(e, name, null);

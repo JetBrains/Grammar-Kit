@@ -82,8 +82,8 @@ Populating `annotationTargets` with "all-except-TYPE_USE-and-TYPE_PARAMETER" def
 ### 8. ASM `returnType` can be null — **FIXED** (2026-05-23)
 Was: `MethodSymbol.Builder.returnType` had no default, so a malformed ASM signature whose parsing aborted before `visitReturnType` would leak a null `JvmTypeRef` into the immutable record (the record's `@NotNull` is not runtime-enforced). Fix: defaulted the field to a `<Missing type>` stub (`new JvmTypeRef.UserType(Fqn.MISSING, …)`) so `build()` always produces a valid record, and any leak surfaces visibly via the canonical missing marker rather than NPE-ing downstream. Used the stub rather than the audit-suggested `void` because `void` is misleading (the method may have had a return type, we just couldn't decode it). Regression test `testMethodBuilderReturnTypeDefaultsToMissingStub` covers the default.
 
-### 9. ASM `InputStream` leak in filename probe
-`AsmClassSymbolProvider.java:75–89` — `do/while` reassigns `is` until success; earlier non-null streams aren't closed. The successful `is.close()` lives outside try-with-resources, so any exception between `loadBytes(is)` and the close also leaks. Wrap each probe in try-with-resources.
+### 9. ASM `InputStream` leak in filename probe — **FIXED** (2026-05-23)
+The loop itself doesn't actually leak (the `is == null && lastDot > 0` condition guarantees the loop stops on the first non-null result), but the audit's secondary point was correct: `is.close()` lived outside any try-with-resources, so a thrown `FileUtil.loadBytes` would leak the descriptor. Refactored to put the resource in try-with-resources for guaranteed close on read failure. No behavioural change on the happy path.
 
 ---
 

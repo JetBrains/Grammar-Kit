@@ -64,6 +64,12 @@ public class BnfHighlightingTest extends BasePlatformTestCase {
 
   public void testSuppressUnused() { doTest("r ::= \n//noinspection BnfUnusedRule\nA ::= B C B::= C::="); }
 
+  public void testInputPathMissingDir() { doTest("{inputPath=\"<warning>missing</warning>\"}\nr ::="); }
+  public void testInputPathPartiallyMissing() { doTest("{inputPath=\"../<warning>missing</warning>\"}\nr ::="); }
+  public void testInputPathValidParent() { doTest("{inputPath=\"..\"}\nr ::="); }
+  public void testPsiInputPathListMissing() { doTest("{psiInputPath=[\"<warning>missing-a</warning>\" \"<warning>missing-b</warning>\"]}\nr ::="); }
+  public void testOutputPathMissingNotReported() { doTest("{parserOutputPath=\"missing-output\"}\nr ::="); }
+
   private void doFileTest() {
     String name = getTestName(false) + ".bnf";
     String adjusted;

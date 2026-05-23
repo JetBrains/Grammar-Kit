@@ -172,8 +172,8 @@ Lift the "is this annotation effectively empty / source-only / hijacked" decisio
 
 ## 🔵 P4 — Polish / forward-looking
 
-### 28. Dead `@JvmStatic` lift block in Kotlin `walkObject`
-`KotlinSyntaxClassExtractor.java:288–304` — `origin` is unconditionally null, making the entire block unreachable. Working path is `walkObjectInsideClassBody` (line 388).
+### 28. Dead `@JvmStatic` lift block in Kotlin `walkObject` — **FIXED** (2026-05-23)
+Removed the dead block (lines 288–304) where `origin` was unconditionally null. Also dropped the `enclosingClass` parameter from `walkObject` — only the dead block used it, and the only caller (`walkObject(child, Fqn.ROOT, null, Set.of())`) always passed null. Working `@JvmStatic` lift remains in `walkObjectInsideClassBody`.
 
 ### 29. Java `isAnnotationType` requires both AT and INTERFACE_KEYWORD
 `JavaSyntaxNodes.java:78–80` — a malformed `@interface` missing the `@` token is misclassified as a regular interface. Edge case — depends on parser recovery.

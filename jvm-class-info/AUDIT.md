@@ -192,6 +192,25 @@ Parent CLAUDE.md already had a one-liner; expanded the inline comment at `Kotlin
 
 ---
 
+## Convergence test harness — **LANDED** (2026-05-23)
+
+Lives under `tests/org/intellij/grammar/java/syntax/convergence/`:
+
+- `InProcessJavaCompiler` — drives `javax.tools.JavaCompiler` with `-parameters`. Falls back to instantiating `com.sun.tools.javac.api.JavacTool` via the platform classloader when `ToolProvider.getSystemJavaCompiler()` returns null (which it does under IntelliJ's `PathClassLoader`-based test runtime even though the JBR has `jdk.compiler`).
+- `SourceAsmConvergence` — normalizers that bring both sides into convergence:
+  - `dropBytecodeArtifacts`: drops `<clinit>` / `ACC_BRIDGE` / `ACC_SYNTHETIC` methods, drops javac's synthesized default constructor, clears the `ACC_SUPER` class flag (which renders as "synchronized" otherwise).
+  - `erasePositionalParameterNames`: rewrites all parameter names to `p0`/`p1`/… on both sides — the ASM provider names positionally because it doesn't parse `MethodParameters`, and parameter names aren't part of JVM-visible matching.
+  - `sortMembers`: sorts methods by (name, param count) so declaration-order doesn't matter.
+  - Renders both sides via `ClassSymbolTextFormatter` so divergence shows up as a textual diff.
+- `SourceAsmConvergenceTest` — initial cases: empty class, instance method, static method, generic method. All pass under the IntelliJ-Platform JBR.
+
+**P2 workflow now:** each normalization fix (#10 / #11 / #12 / #13 / #14 / #15 / #16) should:
+1. Add a convergence test case that fails before the fix.
+2. Land the source/ASM change.
+3. Drop the corresponding normalizer from `SourceAsmConvergence` — convergence should hold without it.
+
+The Kotlin counterpart is deferred: it needs the kotlin-compiler-embeddable artifact plus Kotlin-side normalizers (suspend lowering, `$default` filter, `@JvmField`, etc.).
+
 ## Convergence test harness — the unblocker
 
 **There is no test that compares source-extracted `ClassSymbol`s against ASM-extracted ones for the same compiled source.** Such a test would catch every P0 above and define the normalization rules for P2 as code rather than prose.

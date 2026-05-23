@@ -34,6 +34,12 @@ import static org.intellij.grammar.classinfo.SyntaxTreeUtil.firstChildOfType;
  * <p>
  * Kotlin built-in primitives are mapped to JVM primitives so structural parameter-type matching
  * across Java and Kotlin sources agrees on the same canonical names.
+ * <p>
+ * <b>Not thread-safe.</b> The {@link #nestedScope} field is mutated by {@link #setNestedScope} via
+ * a save/restore pattern in the extractor's walk methods (one formatter per
+ * {@link KotlinSyntaxClassSymbolProvider} instance, sequential walks). Do not share a formatter
+ * across threads, and do not interleave walks on the same formatter from different call stacks.
+ * Refactoring the scope into a parameter is tracked as audit task #25 — see {@code AUDIT.md}.
  */
 @SuppressWarnings("UnstableApiUsage")
 final class KotlinSyntaxTypeFormatter {

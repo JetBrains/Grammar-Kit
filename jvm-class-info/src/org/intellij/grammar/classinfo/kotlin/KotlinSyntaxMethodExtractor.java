@@ -135,6 +135,8 @@ final class KotlinSyntaxMethodExtractor {
     if (nameId == null) return null;
 
     SyntaxNode modifierList = firstChildOfType(propertyOrParamNode, KtNodeTypes.INSTANCE.getMODIFIER_LIST());
+    // @JvmField exposes the property as a direct field — kotlinc emits no getter, neither do we.
+    if (KotlinSyntaxNodes.hasJvmField(modifierList)) return null;
     int mods = extractModifiers(modifierList);
     if (Modifier.isPrivate(mods)) return null;
 
@@ -162,6 +164,8 @@ final class KotlinSyntaxMethodExtractor {
     if (nameId == null) return null;
 
     SyntaxNode modifierList = firstChildOfType(propertyOrParamNode, KtNodeTypes.INSTANCE.getMODIFIER_LIST());
+    // @JvmField exposes the property as a direct field — kotlinc emits no setter, neither do we.
+    if (KotlinSyntaxNodes.hasJvmField(modifierList)) return null;
     int mods = extractModifiers(modifierList);
     if (Modifier.isPrivate(mods)) return null;
 

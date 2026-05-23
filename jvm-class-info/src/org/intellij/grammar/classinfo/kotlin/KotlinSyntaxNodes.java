@@ -150,6 +150,19 @@ final class KotlinSyntaxNodes {
   }
 
   /**
+   * {@code @JvmField} on a property suppresses accessor generation — kotlinc exposes the backing
+   * field directly at the JVM level instead of synthesizing {@code getX()} / {@code setX()}.
+   */
+  static boolean hasJvmField(@Nullable SyntaxNode modifierList) {
+    if (modifierList == null) return false;
+    for (SyntaxNode entry : childrenOfType(modifierList, KtNodeTypes.INSTANCE.getANNOTATION_ENTRY())) {
+      String name = rightmostIdentifier(entry);
+      if ("JvmField".equals(name)) return true;
+    }
+    return false;
+  }
+
+  /**
    * Returns the rightmost {@code IDENTIFIER} token text reachable by depth-first descent — used
    * for finding the simple name of an annotation reference like {@code @kotlin.jvm.JvmStatic},
    * which nests {@code CONSTRUCTOR_CALLEE → TYPE_REFERENCE → USER_TYPE → REFERENCE_EXPRESSION →

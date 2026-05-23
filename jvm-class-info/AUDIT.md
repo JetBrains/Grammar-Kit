@@ -40,8 +40,8 @@ These hit on the typical resolution path and produce objectively wrong strings.
 ### 2. Java dotted nested ref not canonicalized after head resolution — **NOT REPRODUCIBLE** (2026-05-23)
 `JavaSyntaxTypeFormatter.java:343` already calls `canonicalize()` on the resolved head + tail, and `canonicalize` already walks segment-by-segment through `NestedTypeResolver.findDeclaringClass`, which walks supertype chains to find the declaring class of each hop. Existing test `testMultiHopDottedRefCanonicalizes` covers the import-resolved-head path; new regression test `testDottedRefThroughSiblingNestedClassCanonicalizes` covers the `nestedScope`-resolved-head path (the exact path the audit cited). Both produce JLS-canonical output. Closed; regression test added.
 
-### 3. Kotlin `@JvmField` produces getter, not field
-No code path detects `@JvmField` and emits a field symbol. `class Foo { @JvmField val x: Int = 1 }` produces `getX(): int` but the source-level intent is a public field, which is what other JVM callers will see. Source is dropping information that's literally written in the annotation.
+### 3. Kotlin `@JvmField` produces getter, not field — **FIXED** (2026-05-23)
+Was: extractor unconditionally synthesized `getX()` / `setX()` for `@JvmField val/var` properties; kotlinc emits no accessors for these because the backing field is exposed directly. Fix: added `KotlinSyntaxNodes.hasJvmField`; `synthesizeGetter` / `synthesizeSetter` now short-circuit when `@JvmField` is on the modifier list. (Field exposure itself is not modelled — `JavaHelper` has no field API — but accessor suppression brings source and ASM views into convergence at the method-list level.) Regression test `testJvmFieldSuppressesAccessorSynthesis` covers `val` / `var`, with non-`@JvmField` properties continuing to get accessors.
 
 ### 4. Nullable extension-function receiver loses nullability
 `KotlinSyntaxMethodExtractor.java:93–96` — `fun String?.shouted()` synthesizes a first parameter without `@Nullable`. The `?` is right there in the source; the extractor just drops it on extension receivers.

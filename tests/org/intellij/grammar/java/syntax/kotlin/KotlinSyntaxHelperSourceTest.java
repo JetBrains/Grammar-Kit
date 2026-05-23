@@ -264,6 +264,23 @@ public class KotlinSyntaxHelperSourceTest extends GoldenClassInfoTestCase {
     assertEquals(List.of(Fqn.of("pkg.MyList")), bag.interfaces());
   }
 
+  public void testJvmFieldSuppressesAccessorSynthesis() throws Exception {
+    // Audit task #3: kotlinc does NOT generate get/set accessors for @JvmField properties — the
+    // field is exposed directly at the JVM level. The source extractor must match that view: no
+    // synthesized getX()/setX() methods for @JvmField val/var. Other properties continue to get
+    // accessors as before; @JvmField suppresses only the annotated one.
+    write("pkg/Holder.kt", """
+        package pkg
+        class Holder {
+          @JvmField val a: Int = 1
+          @JvmField var b: String = ""
+          val c: Int = 0
+          var d: String = ""
+        }
+        """);
+    assertClassInfoMatchesGolden(extractAll());
+  }
+
   // ---------------------------------------------------------------------------------------------
   // helpers
   // ---------------------------------------------------------------------------------------------

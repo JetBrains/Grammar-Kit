@@ -1,0 +1,8 @@
+class pkg.Holder extends java.lang.Object
+  modifiers: public final
+  methods:
+    INSTANCE public int getC()
+    INSTANCE public java.lang.String getD()
+      annotatedTypes: [@org.jetbrains.annotations.NotNull java.lang.String]
+    INSTANCE public void setD(java.lang.String value)
+      annotatedTypes: [void, @org.jetbrains.annotations.NotNull java.lang.String, value]

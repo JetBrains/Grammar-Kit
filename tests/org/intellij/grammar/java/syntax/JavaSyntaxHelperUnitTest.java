@@ -90,6 +90,24 @@ public class JavaSyntaxHelperUnitTest extends TestCase {
   }
 
   // ---------------------------------------------------------------------------------------------
+  // MethodSymbol.Builder defensive defaults
+  // ---------------------------------------------------------------------------------------------
+
+  public void testMethodBuilderReturnTypeDefaultsToMissingStub() {
+    // Audit task #8: ASM signature parsing can abort before visitReturnType fires (malformed
+    // bytecode); without a default, MethodSymbol.Builder.build() would propagate null into a
+    // @NotNull record field. Default to the <Missing type> stub so build() always produces a
+    // valid record and any leak is visible in rendered output.
+    MethodSymbol.Builder b = new MethodSymbol.Builder();
+    b.name = "broken";
+    b.declaringClass = Fqn.of("a.b.C");
+    b.methodType = MethodType.INSTANCE;
+    MethodSymbol built = b.build();
+    assertNotNull("Default returnType must not be null", built.returnType());
+    assertEquals(Fqn.MISSING.value(), JvmTypeRefs.renderPlain(built.returnType()));
+  }
+
+  // ---------------------------------------------------------------------------------------------
   // findClassMethods - lookup and short-circuits
   // ---------------------------------------------------------------------------------------------
 

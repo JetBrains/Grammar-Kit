@@ -38,8 +38,14 @@ public record MethodSymbol(@NotNull String name,
     public Fqn declaringClass;
     public MethodType methodType;
     public int modifiers;
-    /** Carries the per-position annotations used to derive both the plain and annotated rendering. */
-    public JvmTypeRef returnType;
+    /**
+     * Carries the per-position annotations used to derive both the plain and annotated rendering.
+     * Defaults to the {@link Fqn#MISSING} stub so a builder whose return type never gets set
+     * (e.g. ASM signature parsing aborted before {@code visitReturnType}) cannot leak a null
+     * downstream. The stub renders as {@code <Missing type>}, making the leak visible without
+     * crashing.
+     */
+    public JvmTypeRef returnType = new JvmTypeRef.UserType(Fqn.MISSING, List.of(), List.of());
     public final List<ParameterSymbol.Builder> parameters = new SmartList<>();
     public final List<TypeParameterSymbol.Builder> generics = new SmartList<>();
     public final List<Fqn> annotations = new SmartList<>();

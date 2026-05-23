@@ -79,8 +79,8 @@ All three providers converge on the same empty-set-when-absent behaviour (`JavaS
 
 Populating `annotationTargets` with "all-except-TYPE_USE-and-TYPE_PARAMETER" defaults would change ASM output without changing the only check that reads the set — pure regression risk for no consumer benefit.
 
-### 8. ASM `returnType` can be null
-`MethodSignatureVisitor.returnType` stays null when `visitReturnType` isn't called (malformed signature). `MethodSymbol.Builder.build()` propagates null into the immutable record. Initialize to `JvmTypeRef.of("void")` defensively.
+### 8. ASM `returnType` can be null — **FIXED** (2026-05-23)
+Was: `MethodSymbol.Builder.returnType` had no default, so a malformed ASM signature whose parsing aborted before `visitReturnType` would leak a null `JvmTypeRef` into the immutable record (the record's `@NotNull` is not runtime-enforced). Fix: defaulted the field to a `<Missing type>` stub (`new JvmTypeRef.UserType(Fqn.MISSING, …)`) so `build()` always produces a valid record, and any leak surfaces visibly via the canonical missing marker rather than NPE-ing downstream. Used the stub rather than the audit-suggested `void` because `void` is misleading (the method may have had a return type, we just couldn't decode it). Regression test `testMethodBuilderReturnTypeDefaultsToMissingStub` covers the default.
 
 ### 9. ASM `InputStream` leak in filename probe
 `AsmClassSymbolProvider.java:75–89` — `do/while` reassigns `is` until success; earlier non-null streams aren't closed. The successful `is.close()` lives outside try-with-resources, so any exception between `loadBytes(is)` and the close also leaks. Wrap each probe in try-with-resources.

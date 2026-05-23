@@ -175,8 +175,8 @@ Lift the "is this annotation effectively empty / source-only / hijacked" decisio
 ### 28. Dead `@JvmStatic` lift block in Kotlin `walkObject` — **FIXED** (2026-05-23)
 Removed the dead block (lines 288–304) where `origin` was unconditionally null. Also dropped the `enclosingClass` parameter from `walkObject` — only the dead block used it, and the only caller (`walkObject(child, Fqn.ROOT, null, Set.of())`) always passed null. Working `@JvmStatic` lift remains in `walkObjectInsideClassBody`.
 
-### 29. Java `isAnnotationType` requires both AT and INTERFACE_KEYWORD
-`JavaSyntaxNodes.java:78–80` — a malformed `@interface` missing the `@` token is misclassified as a regular interface. Edge case — depends on parser recovery.
+### 29. Java `isAnnotationType` requires both AT and INTERFACE_KEYWORD — **NOT REPRODUCIBLE** (2026-05-23)
+The current detection is correct: a well-formed `@interface` produces a CLASS node with both AT and INTERFACE_KEYWORD children; a regular `interface` has only INTERFACE_KEYWORD. The audit's "malformed @interface missing the @" scenario is itself a regular interface as written — the classification matches what the compiler would say. The only downstream consequence of being classified as annotation type is populating `annotationTargets` from `@Target`; regular interfaces leave that empty, which is correct. Regression test `testAnnotationTypeVsRegularInterfaceDetection` asserts both shapes via direct map inspection (the golden text doesn't surface `annotationTargets`).
 
 ### 30. ASM doesn't parse `Record` / `PermittedSubclasses` / `NestMembers` attributes
 JDK 14+ records lose component metadata; JDK 15+ sealed classes lose their permits list. Source providers face the symmetric question. Document as known gap or implement if downstream needs it.

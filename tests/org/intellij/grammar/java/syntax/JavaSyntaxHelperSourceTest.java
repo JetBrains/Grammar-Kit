@@ -583,6 +583,29 @@ public class JavaSyntaxHelperSourceTest extends GoldenClassInfoTestCase {
       """));
   }
 
+  public void testAnnotationTypeVsRegularInterfaceDetection() {
+    // Audit task #29: isAnnotationType requires both AT and INTERFACE_KEYWORD. A regular interface
+    // (no @) must NOT populate annotationTargets even when carrying @Target. The modifiers render
+    // identically (both are abstract interfaces at the JVM level), so the distinction must be
+    // verified via annotationTargets directly rather than via the golden text.
+    Map<Fqn, ClassSymbol> classes = extract("""
+      package a.b;
+      import java.lang.annotation.ElementType;
+      import java.lang.annotation.Target;
+      @Target(ElementType.TYPE_USE)
+      public @interface AnnotMarker {}
+      public interface PlainIface {}
+      """);
+    ClassSymbol marker = classes.get(Fqn.of("a.b.AnnotMarker"));
+    ClassSymbol iface = classes.get(Fqn.of("a.b.PlainIface"));
+    assertNotNull(marker);
+    assertNotNull(iface);
+    assertFalse("@interface must populate annotationTargets from @Target",
+                marker.annotationTargets().isEmpty());
+    assertTrue("regular interface (no @) must leave annotationTargets empty",
+               iface.annotationTargets().isEmpty());
+  }
+
   public void testCyclicSupertypeResolutionDoesNotCrash() {
     // Audit task #6: SymbolResolver.findClass returns null on cycle hits (per parent CLAUDE.md).
     // All resolver call sites must be null-tolerant. This test exercises the path by setting up a

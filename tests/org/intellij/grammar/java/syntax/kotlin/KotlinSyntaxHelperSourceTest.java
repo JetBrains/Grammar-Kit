@@ -7,6 +7,7 @@ package org.intellij.grammar.java.syntax.kotlin;
 import org.intellij.grammar.classinfo.ClassSymbol;
 import org.intellij.grammar.classinfo.Fqn;
 import org.intellij.grammar.classinfo.JvmClassSymbolManager;
+import org.intellij.grammar.classinfo.SymbolResolver;
 import org.intellij.grammar.classinfo.kotlin.KotlinSyntaxClassSymbolProvider;
 import org.intellij.grammar.java.JavaHelper;
 import org.intellij.grammar.java.JvmSyntaxHelper;
@@ -17,6 +18,7 @@ import org.jetbrains.annotations.NotNull;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -315,11 +317,120 @@ public class KotlinSyntaxHelperSourceTest extends GoldenClassInfoTestCase {
   }
 
   // ---------------------------------------------------------------------------------------------
+  // Path / package mismatch (lexer-indexed fallback)
+  // ---------------------------------------------------------------------------------------------
+
+  public void testPackageMismatchRootLevelFileResolves() throws Exception {
+    // Kotlin allows any file path regardless of declared package. A file at the root of the source
+    // root declaring `package com.foo` is invisible to both the FQN-derived fast path
+    // (`com/foo/Bar.kt` doesn't exist) and the package-directory slow path (`com/foo/` isn't a
+    // directory). The package-index fallback must lex the file, learn its real package, and ingest
+    // it on demand.
+    write("Misc.kt", """
+        package com.foo
+        class Bar
+        """);
+    assertClassInfoMatchesGolden(resolve(Fqn.of("com.foo.Bar")));
+  }
+
+  public void testPackageMismatchUnrelatedDirectoryResolves() throws Exception {
+    // The file is in a subdirectory whose name has nothing to do with the declared package.
+    write("scratch/Misc.kt", """
+        package my.deep.pkg
+        class C
+        """);
+    assertClassInfoMatchesGolden(resolve(Fqn.of("my.deep.pkg.C")));
+  }
+
+  public void testPackageMismatchConventionalLayoutShadowsMismatched() throws Exception {
+    // pkg/Bar.kt is reachable via the FQN-derived fast path; the mismatched Misc.kt declaring the
+    // same FQN is at a non-matching path and only the fallback could surface it. Because the fast
+    // path resolves the FQN first, the fallback never runs and Misc.kt remains unread.
+    write("pkg/Bar.kt", """
+        package pkg
+        class Bar {
+          fun fromConventional(): Int = 1
+        }
+        """);
+    write("Misc.kt", """
+        package pkg
+        class Bar {
+          fun fromMismatched(): Int = 2
+        }
+        """);
+    Map<Fqn, ClassSymbol> result = resolve(Fqn.of("pkg.Bar"));
+    ClassSymbol bar = result.get(Fqn.of("pkg.Bar"));
+    assertNotNull(bar);
+    assertEquals(1, bar.methods().size());
+    assertEquals("fromConventional", bar.methods().get(0).name());
+  }
+
+  public void testPackageMismatchDuplicateFqnAcrossMismatchedFiles() throws Exception {
+    // Two mismatched files declare the same FQN com.foo.Bar plus one distinct sibling class each.
+    // The fallback ingests both files; the manager keeps a single Bar (last-wins within the batch,
+    // OS-dependent walk order). The contract: the duplicate FQN appears exactly once, and the
+    // unique sibling classes from both files are present — i.e. both files were actually
+    // processed by the fallback.
+    write("first.kt", """
+        package com.foo
+        class Bar {
+          fun fromFirst(): Int = 1
+        }
+        class UniqueFromFirst
+        """);
+    write("second.kt", """
+        package com.foo
+        class Bar {
+          fun fromSecond(): Int = 2
+        }
+        class UniqueFromSecond
+        """);
+    Map<Fqn, ClassSymbol> result = resolve(Fqn.of("com.foo.Bar"));
+    assertNotNull(result.get(Fqn.of("com.foo.Bar")));
+    assertNotNull("Unique class from first.kt should be present (proves first.kt was ingested)",
+                  result.get(Fqn.of("com.foo.UniqueFromFirst")));
+    assertNotNull("Unique class from second.kt should be present (proves second.kt was ingested)",
+                  result.get(Fqn.of("com.foo.UniqueFromSecond")));
+    ClassSymbol bar = result.get(Fqn.of("com.foo.Bar"));
+    assertEquals(1, bar.methods().size());
+    String winner = bar.methods().get(0).name();
+    assertTrue("Bar's method must come from one of the two files but was: " + winner,
+               winner.equals("fromFirst") || winner.equals("fromSecond"));
+  }
+
+  public void testPackageMismatchAlongsideConventionalFile() throws Exception {
+    // Both layouts should resolve: the conventional one continues to hit the fast path, the
+    // mismatched one is picked up by the index fallback.
+    write("Misc.kt", """
+        package mismatched
+        class FromMismatched
+        """);
+    write("conventional/A.kt", """
+        package conventional
+        class A
+        """);
+    assertClassInfoMatchesGolden(resolve(Fqn.of("mismatched.FromMismatched"), Fqn.of("conventional.A")));
+  }
+
+  // ---------------------------------------------------------------------------------------------
   // helpers
   // ---------------------------------------------------------------------------------------------
 
   private @NotNull Map<Fqn, ClassSymbol> extractAll() {
     return FixtureExtractor.extractAll(root, new KotlinSyntaxClassSymbolProvider(List.of(root)), ".kt");
+  }
+
+  /**
+   * Probes a fresh provider for each FQN and merges all returned ClassSymbols. Used by mismatch
+   * tests where the directory layout doesn't reveal the package, so {@link FixtureExtractor} can't
+   * derive a probe FQN that would trigger the lexer-indexed fallback.
+   */
+  private @NotNull Map<Fqn, ClassSymbol> resolve(@NotNull Fqn... fqns) {
+    KotlinSyntaxClassSymbolProvider provider = new KotlinSyntaxClassSymbolProvider(List.of(root));
+    SymbolResolver nullResolver = fqn -> null;
+    Map<Fqn, ClassSymbol> result = new HashMap<>();
+    for (Fqn fqn : fqns) result.putAll(provider.resolve(fqn, nullResolver));
+    return result;
   }
 
   private @NotNull JavaHelper helper() {

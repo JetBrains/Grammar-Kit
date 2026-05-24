@@ -9,6 +9,7 @@ import junit.framework.TestCase;
 import junit.framework.TestSuite;
 import org.intellij.grammar.actions.BnfGenerationServiceIntegrationPlatformTest;
 import org.intellij.grammar.actions.BnfGenerationServiceTest;
+import org.intellij.grammar.classinfo.PackageDeclarationReaderTest;
 import org.intellij.grammar.editor.BnfPathInlayHintsTest;
 import org.intellij.grammar.expression.ExpressionParserTest;
 import org.intellij.grammar.generator.JavaBnfGeneratorTest;
@@ -72,6 +73,7 @@ public class BnfTestSuite extends TestCase {
       testSuite.addTestSuite(KotlinBnfGeneratorTest.class);
       testSuite.addTestSuite(OutputPathOverridesTest.class);
       testSuite.addTestSuite(ClassInfoTextFormatterTest.class);
+      testSuite.addTestSuite(PackageDeclarationReaderTest.class);
       testSuite.addTestSuite(JavaSyntaxHelperTest.class);
       testSuite.addTestSuite(JavaSyntaxHelperUnitTest.class);
       testSuite.addTestSuite(JavaSyntaxHelperSourceTest.class);

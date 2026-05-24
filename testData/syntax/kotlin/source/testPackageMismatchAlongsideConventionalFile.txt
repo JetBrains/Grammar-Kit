@@ -1,0 +1,7 @@
+class conventional.A extends java.lang.Object
+  modifiers: public final
+  methods: (none)
+
+class mismatched.FromMismatched extends java.lang.Object
+  modifiers: public final
+  methods: (none)

@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+## [2026.1]
+
+* (bump release tag; no platform change)
+
 ## [2023.3.2]
 
 * Generator: Kotlin parser generation via IntelliJ Platform `syntax-api` (https://github.com/JetBrains/Grammar-Kit/pull/417)
@@ -371,7 +375,8 @@
 * Intentions: flip choice branches
 * Readable PsiBuilder-based recursive descent parser and PSI hierarchy generation
 
-[Unreleased]: https://github.com/JetBrains/Grammar-Kit/compare/2023.3.2...HEAD
+[Unreleased]: https://github.com/JetBrains/Grammar-Kit/compare/2026.1...HEAD
+[2026.1]: https://github.com/JetBrains/Grammar-Kit/compare/2023.3.2...2026.1
 [2023.3.2]: https://github.com/JetBrains/Grammar-Kit/compare/2023.3.1...2023.3.2
 [2023.3.1]: https://github.com/JetBrains/Grammar-Kit/compare/2023.3...2023.3.1
 [2022.3.2]: https://github.com/JetBrains/Grammar-Kit/compare/2022.3.1...2022.3.2

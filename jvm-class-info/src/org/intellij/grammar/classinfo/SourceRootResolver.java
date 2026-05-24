@@ -8,10 +8,16 @@ import com.intellij.util.SmartList;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.IOException;
+import java.nio.file.FileVisitOption;
+import java.nio.file.FileVisitResult;
+import java.nio.file.FileVisitor;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -74,6 +80,52 @@ public final class SourceRootResolver {
     for (Path root : roots) {
       Path dir = relative.isEmpty() ? root : root.resolve(relative);
       if (Files.isDirectory(dir)) result.add(dir);
+    }
+    return result;
+  }
+
+  /**
+   * Walks every configured root and returns the regular files whose names end with {@code extension}.
+   * Hidden directories (names starting with {@code .}) are skipped; symlinks are not followed. Used by
+   * the package-index fallback to enumerate candidate files when the FQN-derived path lookup
+   * ({@link #findSourceFile}) and the package-directory scan ({@link #findPackageDirs}) both miss —
+   * i.e. when a source file's path doesn't match its declared package (legal Kotlin layout).
+   */
+  public @NotNull List<Path> walkFiles(@NotNull String extension) {
+    List<Path> result = new ArrayList<>();
+    for (Path root : roots) {
+      if (!Files.isDirectory(root)) continue;
+      try {
+        Files.walkFileTree(root, EnumSet.noneOf(FileVisitOption.class), Integer.MAX_VALUE,
+          new FileVisitor<Path>() {
+            @Override
+            public @NotNull FileVisitResult preVisitDirectory(@NotNull Path dir, @NotNull BasicFileAttributes attrs) {
+              if (!dir.equals(root) && dir.getFileName().toString().startsWith(".")) {
+                return FileVisitResult.SKIP_SUBTREE;
+              }
+              return FileVisitResult.CONTINUE;
+            }
+
+            @Override
+            public @NotNull FileVisitResult visitFile(@NotNull Path file, @NotNull BasicFileAttributes attrs) {
+              if (attrs.isRegularFile() && file.getFileName().toString().endsWith(extension)) {
+                result.add(file);
+              }
+              return FileVisitResult.CONTINUE;
+            }
+
+            @Override
+            public @NotNull FileVisitResult visitFileFailed(@NotNull Path file, @NotNull IOException exc) {
+              return FileVisitResult.CONTINUE;
+            }
+
+            @Override
+            public @NotNull FileVisitResult postVisitDirectory(@NotNull Path dir, IOException exc) {
+              return FileVisitResult.CONTINUE;
+            }
+          });
+      }
+      catch (IOException ignored) { }
     }
     return result;
   }

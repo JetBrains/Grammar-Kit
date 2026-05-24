@@ -10,6 +10,7 @@ import org.intellij.grammar.classinfo.ClassSymbol;
 import org.intellij.grammar.classinfo.Fqn;
 import org.intellij.grammar.classinfo.JvmClassSymbolManager;
 import org.intellij.grammar.classinfo.JvmClassSymbolProvider;
+import org.intellij.grammar.classinfo.PackageDeclarationReader;
 import org.intellij.grammar.classinfo.SourceRootResolver;
 import org.intellij.grammar.classinfo.SymbolResolver;
 import org.intellij.grammar.classinfo.SyntaxTreeCache;
@@ -19,6 +20,7 @@ import org.jetbrains.annotations.NotNull;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -41,6 +43,10 @@ public final class KotlinSyntaxClassSymbolProvider implements JvmClassSymbolProv
   private final SyntaxTreeCache treeCache;
   private final Set<Fqn> scannedPackages = new HashSet<>();
   private final Set<Path> ingestedFiles = new HashSet<>();
+  // Lazy index of files keyed by their declared package, populated by lexing every .kt file
+  // under the configured roots when path-derived lookups have already failed. Built at most once
+  // per provider instance; null until then.
+  private Map<String, List<Path>> packageIndex;
 
   public KotlinSyntaxClassSymbolProvider(@NotNull List<Path> sourceRoots) {
     this(sourceRoots, new SyntaxTreeCache());
@@ -68,9 +74,46 @@ public final class KotlinSyntaxClassSymbolProvider implements JvmClassSymbolProv
       }
     }
 
+    // Package-index fallback: when a .kt file lives at a path that doesn't match its declared
+    // package (legal in Kotlin), neither the fast path nor the package-dir slow path can find it.
+    // Lex every remaining file once to learn its declared package, then ingest files whose package
+    // is a prefix of the requested FQN. The index is built lazily and at most once per provider.
+    if (!builders.containsKey(fqn)) {
+      ensurePackageIndex();
+      Fqn p = fqn;
+      while (!builders.containsKey(fqn)) {
+        p = p.parent();
+        if (p.isEmpty()) {
+          ingestFromPackageIndex("", builders, resolver);
+          break;
+        }
+        ingestFromPackageIndex(p.value(), builders, resolver);
+      }
+    }
+
     Map<Fqn, ClassSymbol> batch = new HashMap<>(builders.size());
     for (Map.Entry<Fqn, ClassSymbol.Builder> e : builders.entrySet()) batch.put(e.getKey(), e.getValue().build());
     return batch;
+  }
+
+  private void ensurePackageIndex() {
+    if (packageIndex != null) return;
+    packageIndex = new HashMap<>();
+    for (Path file : sourceResolver.walkFiles(".kt")) {
+      if (ingestedFiles.contains(file)) continue;
+      String pkg = PackageDeclarationReader.readKotlinPackage(file);
+      packageIndex.computeIfAbsent(pkg, k -> new ArrayList<>()).add(file);
+    }
+  }
+
+  private void ingestFromPackageIndex(@NotNull String pkg,
+                                      @NotNull Map<Fqn, ClassSymbol.Builder> builders,
+                                      @NotNull SymbolResolver resolver) {
+    List<Path> files = packageIndex.get(pkg);
+    if (files == null) return;
+    for (Path file : files) {
+      ingest(file, builders, resolver);
+    }
   }
 
   private void scanPackage(@NotNull Path dir, @NotNull Map<Fqn, ClassSymbol.Builder> batch, @NotNull SymbolResolver resolver) {

@@ -1,0 +1,3 @@
+class other.pkg.Bar extends java.lang.Object
+  methods:
+    INSTANCE public java.lang.String greet()

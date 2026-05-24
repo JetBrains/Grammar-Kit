@@ -4,6 +4,10 @@
 
 * Parser runtime: render token-set `consumeToken`/`consumeTokenSmart(TokenSet)` expected and completion variants by token name instead of a raw `IElementType[]` toString
 
+## [2026.1]
+
+* (bump release tag; no platform change)
+
 ## [2023.3.4]
 
 * Maven Central: publish `org.jetbrains:grammar-kit` as a single self-contained jar again. After the multi-module split in 2023.3.3 the published POM declared transitive dependencies on subprojects, breaking the artifact.
@@ -383,7 +387,8 @@
 * Intentions: flip choice branches
 * Readable PsiBuilder-based recursive descent parser and PSI hierarchy generation
 
-[Unreleased]: https://github.com/JetBrains/Grammar-Kit/compare/2023.3.2...HEAD
+[Unreleased]: https://github.com/JetBrains/Grammar-Kit/compare/2026.1...HEAD
+[2026.1]: https://github.com/JetBrains/Grammar-Kit/compare/2023.3.2...2026.1
 [2023.3.2]: https://github.com/JetBrains/Grammar-Kit/compare/2023.3.1...2023.3.2
 [2023.3.1]: https://github.com/JetBrains/Grammar-Kit/compare/2023.3...2023.3.1
 [2022.3.2]: https://github.com/JetBrains/Grammar-Kit/compare/2022.3.1...2022.3.2

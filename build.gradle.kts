@@ -5,11 +5,19 @@ import okhttp3.MultipartBody
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.asRequestBody
+import org.gradle.api.file.ArchiveOperations
+import org.gradle.api.tasks.bundling.Jar
 import org.gradle.kotlin.dsl.get
 import org.jetbrains.changelog.Changelog
 import org.jetbrains.changelog.ChangelogSectionUrlBuilder
 import org.jetbrains.intellij.platform.gradle.TestFrameworkType
 import java.util.Base64
+import javax.inject.Inject
+
+abstract class GrammarKitFatJar : Jar() {
+    @get:Inject
+    abstract val archiveOps: ArchiveOperations
+}
 
 plugins {
     java
@@ -44,16 +52,24 @@ repositories {
     }
 }
 
+val bundledModules: Configuration by configurations.creating {
+    isCanBeResolved = true
+    isCanBeConsumed = false
+    isTransitive = false
+}
+
+configurations.implementation { extendsFrom(bundledModules) }
+
 dependencies {
     compileOnly(libs.annotations)
     testImplementation(libs.junit)
 
-    implementation(project(":base"))
-    implementation(project(":parser-runtime"))
-    implementation(project(":jvm-class-info"))
-    implementation(project(":bnf-language"))
-    implementation(project(":jflex-language"))
-    implementation(project(":generator"))
+    bundledModules(project(":base"))
+    bundledModules(project(":parser-runtime"))
+    bundledModules(project(":jvm-class-info"))
+    bundledModules(project(":bnf-language"))
+    bundledModules(project(":jflex-language"))
+    bundledModules(project(":generator"))
 
     intellijPlatform {
         create(providers.gradleProperty("platformType"), providers.gradleProperty("platformVersion"))
@@ -151,7 +167,7 @@ changelog {
 
 val artifactsPath = providers.gradleProperty("artifactsPath")
 
-val buildGrammarKitJar by tasks.registering(Jar::class) {
+val buildGrammarKitJar by tasks.registering(GrammarKitFatJar::class) {
     dependsOn("assemble")
     archiveBaseName = "grammar-kit"
     destinationDirectory = file(artifactsPath)
@@ -159,10 +175,12 @@ val buildGrammarKitJar by tasks.registering(Jar::class) {
         from("$rootDir/resources/META-INF/MANIFEST.MF")
     }
     from(sourceSets.main.get().output)
+    from(bundledModules.elements.map { jars -> jars.map { archiveOps.zipTree(it.asFile) } })
     from(file("$rootDir/parser-runtime/src/org/intellij/grammar/parser/GeneratedParserUtilBase.java")) {
         into("/templates")
     }
     exclude("**/classpath.index")
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
 
 tasks {
@@ -184,6 +202,23 @@ tasks {
         // Forward IntelliJ's own overwrite flag (UsefulTestCase.OVERWRITE_TESTDATA) so PSI-mode
         // generator tests (assertSameLinesWithFile) can re-record alongside the syntax-mode tests.
         systemProperty("idea.tests.overwrite.data", System.getProperty("idea.tests.overwrite.data") ?: "")
+        dependsOn("testPublication")
+    }
+
+    val testPublication by registering(Test::class) {
+        group = "verification"
+        description = "Asserts the Maven publication is a self-contained fat jar with no dangling submodule deps."
+        dependsOn("publishGrammarKitJarPublicationToArtifactsRepository")
+        useJUnit()
+        include("**/PublishedJarLayoutTest.class")
+        isScanForTestClasses = false
+        testClassesDirs = sourceSets.test.get().output.classesDirs
+        classpath = sourceSets.test.get().runtimeClasspath
+        systemProperty("grammar.kit.published.version", project.version.toString())
+        systemProperty(
+            "grammar.kit.published.repo",
+            layout.buildDirectory.dir("artifacts/maven").get().asFile.absolutePath
+        )
     }
 
     withType<Javadoc>().configureEach {
@@ -328,9 +363,10 @@ publishing {
             groupId = project.group.toString()
             artifactId = project.name
             version = project.version.toString()
-            from(components["java"])
-//            artifact(tasks["sourcesJar"])
-//            artifact(tasks["javadocJar"])
+
+            artifact(buildGrammarKitJar)
+            artifact(tasks.named<Jar>("sourcesJar"))
+            artifact(tasks.named<Jar>("javadocJar"))
 
             pom {
                 name = "JetBrains Grammar-Kit"

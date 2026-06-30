@@ -99,12 +99,6 @@ public class KnownAttribute<T> {
   public static final KnownAttribute<String> SYNTAX_ELEMENT_TYPE_HOLDER_OUTPUT_PATH     = create(true, String.class, "syntaxElementTypeHolderOutputPath", null);
   public static final KnownAttribute<String> ELEMENT_TYPE_CONVERTER_FACTORY_OUTPUT_PATH = create(true, String.class, "elementTypeConverterFactoryOutputPath", null);
 
-  // Explicit input source-root overrides; resolved relative to the BNF file's parent. When set,
-  // narrow PsiHelper's findClass scope from "all project" to the named directory. Has no effect on
-  // AsmHelper / ReflectionHelper. null = no narrowing.
-  public static final KnownAttribute<String> INPUT_PATH      = create(true, String.class, "inputPath",     null);
-  public static final KnownAttribute<String> PSI_INPUT_PATH  = create(true, String.class, "psiInputPath",  null);
-
   private final boolean myGlobal;
   private final String myName;
   private final Class<T> myClazz;

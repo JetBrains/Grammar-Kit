@@ -278,7 +278,7 @@ Grammar-Kit ships a headless entry point at `org.intellij.grammar.Main` for buil
 java -cp <grammar-kit-and-deps> org.intellij.grammar.Main <grammar-file> [options]
 ```
 
-The grammar file can be a path or a glob pattern (e.g. `grammars/*.bnf`). Output and input directories
+The grammar file can be a path or a glob pattern (e.g. `grammars/*.bnf`). Output directories
 can be set per-attribute either inside the grammar header or via CLI flags — flags mirror the
 attribute names:
 
@@ -289,10 +289,8 @@ attribute names:
 | `--element-type-holder-output <path>`            | `elementTypeHolderOutputPath`           |
 | `--syntax-element-type-holder-output <path>`     | `syntaxElementTypeHolderOutputPath`     |
 | `--element-type-converter-factory-output <path>` | `elementTypeConverterFactoryOutputPath` |
-| `--input-path <path>`                            | `inputPath`                             |
-| `--psi-input <path>`                             | `psiInputPath`                          |
 
-**Setting paths in the grammar.** All seven path attributes can also be declared in the grammar
+**Setting paths in the grammar.** All five path attributes can also be declared in the grammar
 header. Values are resolved relative to the BNF file's parent directory; an empty string is
 treated as unset. The IDE's *Generate Parser* action and the headless CLI honor the same
 attributes, so a grammar that pins its layout works the same way in both:
@@ -304,10 +302,7 @@ attributes, so a grammar that pins its layout works the same way in both:
   psiOutputPath="../build/gen-psi"         // PSI separated from parser
   elementTypeHolderOutputPath="../build/gen-types"
 
-  inputPath="../java"                      // narrows IDE class lookup for FQN-valued
-                                           // input attributes (parserUtilClass, …)
-  psiInputPath="../psi-src"                // optional override for psiImplUtilClass,
-                                           // mixin, and implements
+  parserUtilClass="com.example.MyParserUtil"
 }
 ```
 

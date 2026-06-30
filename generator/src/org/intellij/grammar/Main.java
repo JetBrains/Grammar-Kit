@@ -41,8 +41,6 @@ public class Main {
     map.put("--element-type-holder-output",             KnownAttribute.ELEMENT_TYPE_HOLDER_OUTPUT_PATH);
     map.put("--syntax-element-type-holder-output",      KnownAttribute.SYNTAX_ELEMENT_TYPE_HOLDER_OUTPUT_PATH);
     map.put("--element-type-converter-factory-output",  KnownAttribute.ELEMENT_TYPE_CONVERTER_FACTORY_OUTPUT_PATH);
-    map.put("--input-path",                             KnownAttribute.INPUT_PATH);
-    map.put("--psi-input",                              KnownAttribute.PSI_INPUT_PATH);
     return Map.copyOf(map);
   }
 
@@ -160,7 +158,7 @@ public class Main {
     Path bnfParent = grammarFile.getParentFile().toPath();
     Map<KnownAttribute<String>, Path> grammarMap = BnfPaths.collectExplicitPaths((BnfFile)bnfFile, bnfParent);
     Map<KnownAttribute<String>, Path> merged = PathConflicts.merge(cliArgs.paths(), grammarMap, cliArgs.strictPaths(), System.err);
-    BnfPathsResolution paths = BnfPaths.resolveExplicit(merged, bnfParent);
+    BnfPathsResolution paths = BnfPaths.resolveExplicit(merged);
 
     JavaParserGenerator generator = new JavaParserGenerator((BnfFile)bnfFile,
                                                             grammarDir.getAbsolutePath(),

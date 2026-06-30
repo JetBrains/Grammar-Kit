@@ -172,10 +172,9 @@ public final class JavaParserGenerator extends Generator {
                               ruleInfo(topSuper).intfClass;
       String implSuper = StringUtil.notNullize(info.mixin, superRuleClass);
       String implSuperRaw = getRawClassName(implSuper);
-      JavaHelper hierarchyHelper = helperFor(rule, KnownAttribute.MIXIN);
       String stubName =
         StringUtil.isNotEmpty(stubClass) ? stubClass :
-        implSuper.indexOf("<") < implSuper.indexOf(">") && !hierarchyHelper.findClassMethods(implSuperRaw, JavaHelper.MethodType.INSTANCE, "getParentByStub", 0).isEmpty() ?
+        implSuper.indexOf("<") < implSuper.indexOf(">") && !myJavaHelper.findClassMethods(implSuperRaw, JavaHelper.MethodType.INSTANCE, "getParentByStub", 0).isEmpty() ?
         implSuper.substring(implSuper.indexOf("<") + 1, implSuper.indexOf(">")) : null;
       if (StringUtil.isNotEmpty(stubName)) {
         info.realStubClass = stubClass;
@@ -212,10 +211,9 @@ public final class JavaParserGenerator extends Generator {
         superRuleClass.contains("?") ? superRuleClass.replaceAll("\\?", stubName) : superRuleClass;
       // mixin attribute overrides "extends":
       info.realSuperClass = StringUtil.notNullize(info.mixin, adjustedSuperRuleClass);
-      JavaHelper hierarchyHelper = helperFor(rule, KnownAttribute.MIXIN);
       info.mixedAST = topInfo != null ? topInfo.mixedAST : JBIterable.of(superRuleClass, info.realSuperClass)
         .map(JavaNames::getRawClassName)
-        .flatMap(s -> JBTreeTraverser.<String>from(o -> JBIterable.of(hierarchyHelper.getSuperClassName(o))).withRoot(s).unique())
+        .flatMap(s -> JBTreeTraverser.<String>from(o -> JBIterable.of(myJavaHelper.getSuperClassName(o))).withRoot(s).unique())
         .find(JavaBnfConstants.COMPOSITE_PSI_ELEMENT_CLASS::equals) != null;
     }
   }
@@ -297,7 +295,7 @@ public final class JavaParserGenerator extends Generator {
   /** Warns when {@code className} is configured but not resolvable on the classpath. */
   private void checkClassAvailability(@Nullable String className, @NotNull KnownAttribute<?> attribute) {
     if (StringUtil.isEmpty(className)) return;
-    if (helperFor(null, attribute).findClass(className) == null) {
+    if (myJavaHelper.findClass(className) == null) {
       String tail = StringUtil.isEmpty("PSI method signatures will not be detected") ? "" : " (PSI method signatures will not be detected)";
       addWarning(className + " class not found" + tail);
     }
@@ -322,11 +320,10 @@ public final class JavaParserGenerator extends Generator {
       // ensure only public supers are exposed, replace non-public with default super-intf for simplicity
       Map<String, String> replacements = new HashMap<>();
       Set<String> visited = new HashSet<>();
-      JavaHelper implementsHelper = helperFor(null, KnownAttribute.IMPLEMENTS);
       for (String s : supers.values()) {
         if (!visited.add(s)) continue;
-        NavigatablePsiElement aClass = implementsHelper.findClass(s);
-        if (aClass != null && !implementsHelper.isPublic(aClass)) {
+        NavigatablePsiElement aClass = myJavaHelper.findClass(s);
+        if (aClass != null && !myJavaHelper.isPublic(aClass)) {
           replacements.put(s, superIntf);
         }
       }
@@ -1473,7 +1470,6 @@ public final class JavaParserGenerator extends Generator {
     List<NavigatablePsiElement> constructors = Collections.emptyList();
     BnfRule topSuperRule = null;
     String topSuperClass = null;
-    JavaHelper hierarchyHelper = helperFor(rule, KnownAttribute.MIXIN);
     for (BnfRule next = rule; next != null && next != topSuperRule; ) {
       if (!visited.add(next)) {
         addWarning(rule.getName() + " employs cyclic inheritance");
@@ -1485,7 +1481,7 @@ public final class JavaParserGenerator extends Generator {
       next = getEffectiveSuperRule(myFile, next);
       if (next != null && next != topSuperRule && getAttribute(topSuperRule, KnownAttribute.MIXIN) == null) continue;
       topSuperClass = getRawClassName(superClass);
-      constructors = hierarchyHelper.findClassMethods(topSuperClass, JavaHelper.MethodType.CONSTRUCTOR, "*", -1);
+      constructors = myJavaHelper.findClassMethods(topSuperClass, JavaHelper.MethodType.CONSTRUCTOR, "*", -1);
       if (!constructors.isEmpty()) break;
     }
     if (!G.generateFQN) {
@@ -1543,8 +1539,8 @@ public final class JavaParserGenerator extends Generator {
       boolean addOverride = topSuperRule != rule && info.mixin == null;
       if (!addOverride && topSuperClass != null) {
         main:
-        for (String curClass = topSuperClass; curClass != null; curClass = hierarchyHelper.getSuperClassName(curClass)) {
-          for (NavigatablePsiElement m : hierarchyHelper.findClassMethods(
+        for (String curClass = topSuperClass; curClass != null; curClass = myJavaHelper.getSuperClassName(curClass)) {
+          for (NavigatablePsiElement m : myJavaHelper.findClassMethods(
             curClass, JavaHelper.MethodType.INSTANCE, "accept", 1, myVisitorClassName)) {
             String paramType = myJavaHelper.getMethodTypes(m).get(1);
             if (getRawClassName(paramType).endsWith(StringUtil.getShortName(myVisitorClassName))) {
@@ -1590,13 +1586,13 @@ public final class JavaParserGenerator extends Generator {
           if (intf) {
             String mixinClass = getAttribute(rule, KnownAttribute.MIXIN);
             List<NavigatablePsiElement> methods =
-              helperFor(rule, KnownAttribute.MIXIN).findClassMethods(mixinClass, JavaHelper.MethodType.INSTANCE, methodInfo.name, -1);
+              myJavaHelper.findClassMethods(mixinClass, JavaHelper.MethodType.INSTANCE, methodInfo.name, -1);
             for (NavigatablePsiElement method : methods) {
               generateUtilMethod(methodInfo.name, method, true, false, visited);
               found = true;
             }
           }
-          List<NavigatablePsiElement> methods = helperFor(null, KnownAttribute.PSI_IMPL_UTIL_CLASS).findRuleImplMethods(myPsiImplUtilClass, methodInfo.name, rule);
+          List<NavigatablePsiElement> methods = myJavaHelper.findRuleImplMethods(myPsiImplUtilClass, methodInfo.name, rule);
           for (NavigatablePsiElement method : methods) {
             generateUtilMethod(methodInfo.name, method, intf, true, visited);
             found = true;
@@ -1646,8 +1642,8 @@ public final class JavaParserGenerator extends Generator {
       if (methodInfo.type != RuleMethodsHelper.MethodType.MIXIN) continue;
 
       List<NavigatablePsiElement> mixinMethods =
-        helperFor(rule, KnownAttribute.MIXIN).findClassMethods(mixinClass, JavaHelper.MethodType.INSTANCE, methodInfo.name, -1);
-      List<NavigatablePsiElement> implMethods = helperFor(null, KnownAttribute.PSI_IMPL_UTIL_CLASS).findRuleImplMethods(myPsiImplUtilClass, methodInfo.name, rule);
+        myJavaHelper.findClassMethods(mixinClass, JavaHelper.MethodType.INSTANCE, methodInfo.name, -1);
+      List<NavigatablePsiElement> implMethods = myJavaHelper.findRuleImplMethods(myPsiImplUtilClass, methodInfo.name, rule);
 
       collectMethodTypesToImport(mixinMethods, false, result);
       collectMethodTypesToImport(implMethods, true, result);

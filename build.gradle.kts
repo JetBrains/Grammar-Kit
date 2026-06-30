@@ -164,12 +164,20 @@ val buildGrammarKitJar by tasks.registering(Jar::class) {
     exclude("**/classpath.index")
 }
 
+val modernAnnotations = configurations.detachedConfiguration(dependencies.create(libs.annotations.get()))
+
 tasks {
     providers.gradleProperty("javaVersion").get().let {
         withType<JavaCompile> {
             sourceCompatibility = it
             targetCompatibility = it
         }
+    }
+
+    // The bundled Kotlin plugin drags an old `org.jetbrains:annotations` (no @Nls/@NonNls TYPE_USE target)
+    // onto the test compile classpath. Put the modern annotations first so type-use annotations still resolve.
+    named<JavaCompile>("compileTestJava") {
+        classpath = modernAnnotations + classpath
     }
 
     named<Test>("test") {

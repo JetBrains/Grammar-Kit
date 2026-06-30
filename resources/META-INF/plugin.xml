@@ -10,6 +10,7 @@
   <depends optional="true" config-file="plugin-copyright.xml">com.intellij.copyright</depends>
   <depends optional="true" config-file="plugin-java.xml">com.intellij.java</depends>
   <depends optional="true" config-file="plugin-uml.xml">com.intellij.diagram</depends>
+  <depends optional="true" config-file="plugin-kotlin.xml">org.jetbrains.kotlin</depends>
 
   <extensions defaultExtensionNs="com.intellij">
     <fileType name="BNF" implementationClass="org.intellij.grammar.BnfFileType" fieldName="INSTANCE" extensions="bnf" language="BNF"/>
@@ -107,7 +108,6 @@
     <lang.braceMatcher language="JFlex" implementationClass="org.intellij.jflex.editor.JFlexBraceMatcher"/>
     <quoteHandler fileType="JFlex" className="org.intellij.jflex.editor.JFlexQuoteHandler"/>
     <lang.psiStructureViewFactory language="JFlex" implementationClass="org.intellij.jflex.editor.JFlexStructureViewFactory"/>
-    <useScopeEnlarger implementation="org.intellij.grammar.search.BnfFileUseScopeEnlarger"/>
   </extensions>
   <actions>
     <group id="grammar.file.group" popup="false">

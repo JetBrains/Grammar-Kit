@@ -35,21 +35,6 @@ import static org.intellij.grammar.psi.BnfAttributes.getAttribute;
 import static org.intellij.grammar.psi.BnfAttributes.getRootAttribute;
 import static org.intellij.grammar.psi.BnfRules.getSynonymTargetOrSelf;
 
-/**
- * Sealed base for the BNF-to-source code emitters. A {@code Generator} consumes a parsed
- * {@link BnfFile} together with its {@link GenOptions} and produces a parser (and, depending on
- * the target, PSI / element-type holders) by writing source files through {@link FilePrinter}
- * and {@link OutputOpener}.
- * <p>
- * This class owns target-agnostic concerns: locating rules, computing element types, building
- * the rule graph and FIRST/NEXT analysis, tracking lambdas/meta-method fields shared across
- * generated parser methods, and gathering token sets emitted for token-choice expressions.
- * Anything that depends on the target language's syntax (method generation, node calls, recovery
- * snippets) is left abstract for subclasses to implement.
- * <p>
- * Subclasses are sealed to {@link JavaParserGenerator} and {@link KotlinParserGenerator}.
- * Instances are single-use: state accumulated during one {@link #generate()} call is not reset.
- */
 public sealed abstract class Generator permits JavaParserGenerator, KotlinParserGenerator {
   private static final Logger LOG = Logger.getInstance(Generator.class);
 
@@ -142,19 +127,10 @@ public sealed abstract class Generator permits JavaParserGenerator, KotlinParser
     myFirstNextAnalyzer = BnfFirstNextAnalyzer.createAnalyzer(true);
   }
 
-  /**
-   * Runs the full generation pipeline for this target: emits the parser and any auxiliary
-   * artifacts (element-type holders, PSI interfaces/impls, visitor) the target supports.
-   */
   public abstract void generate() throws IOException;
 
-  /**
-   * Emits only the parser source(s). One file is produced per distinct
-   * {@link KnownAttribute#PARSER_CLASS} value across the grammar's rules.
-   */
   public abstract void generateParser() throws IOException;
 
-  /** Emits the {@link KnownAttribute#CLASS_HEADER classHeader} preamble for {@code className}, if one is configured. */
   protected final void generateFileHeader(String className) {
     String header = getRootAttribute(myFile, KnownAttribute.CLASS_HEADER, className);
     String text = StringUtil.isEmpty(header) ? "" : getStringOrFile(header);
@@ -185,10 +161,6 @@ public sealed abstract class Generator permits JavaParserGenerator, KotlinParser
              "// " + classHeader;
   }
 
-  /**
-   * Resolves {@code className} to a file under {@link #myOutputPath} (stripping {@link #myPackagePrefix})
-   * and installs a fresh {@link FilePrinter} as the current output sink.
-   */
   protected void openOutput(String className) throws IOException {
     String classNameAdjusted = myPackagePrefix.isEmpty() ? className : StringUtil.trimStart(className, myPackagePrefix + ".");
     File file = new File(myOutputPath, classNameAdjusted.replace('.', File.separatorChar) + "." + myOutputFileExtension);
@@ -215,19 +187,13 @@ public sealed abstract class Generator permits JavaParserGenerator, KotlinParser
     return myShortener.shorten(s);
   }
 
-  /** Sets indent in the printer to zero. */
   protected void resetOffset() {
     myPrinter.resetOffset();
   }
 
   protected enum TypeKind {CLASS, INTERFACE, ABSTRACT_CLASS}
 
-  /**
-   * Returns the short names of generated PSI interface/impl classes that are reachable from
-   * {@code packageName} via {@code imports} (own package or wildcard imports). The result feeds
-   * the name shortener so that those generated classes are not accidentally short-named to clash.
-   */
-  protected @NotNull Set<String> collectClasses(@NotNull Set<String> imports, @NotNull String packageName) {
+  protected @NotNull Set<String> collectClasses(Set<String> imports, String packageName) {
     Set<String> includedPackages = JBIterable.from(imports)
       .filter(o -> !o.startsWith("static") && o.endsWith(".*"))
       .map(o -> StringUtil.trimEnd(o, ".*"))
@@ -240,12 +206,6 @@ public sealed abstract class Generator permits JavaParserGenerator, KotlinParser
     return includedClasses;
   }
 
-  /**
-   * Returns the constant name a {@code Parser} lambda for {@code nodeCall} should be referenced
-   * by, registering its body in {@link #myParserLambdas} on first request. If the call doesn't
-   * just delegate to {@code nextName(...)}, that {@code nextName} is added to
-   * {@link #myInlinedChildNodes} so its child generation is skipped (the lambda inlines it).
-   */
   @NotNull String getParserLambdaRef(@NotNull NodeCall nodeCall, @NotNull String nextName) {
     String constantName = CommonRendererUtils.getWrapperParserConstantName(nextName);
     String targetClass = myRenderedLambdas.get(constantName);
@@ -266,11 +226,6 @@ public sealed abstract class Generator permits JavaParserGenerator, KotlinParser
     return Objects.requireNonNull(myRuleInfos.get(rule.getName()));
   }
 
-  /**
-   * Marks rules whose generated PSI impl should be {@code abstract}: rules without modifiers,
-   * recovery, or hooks, that aren't reused as another rule's element type, aren't the grammar
-   * root, and the rule graph reports as collapsible with no incoming references.
-   */
   protected void calcAbstractRules() {
     final var reusedRules = new HashSet<String>();
     for (BnfRule rule : myFile.getRules()) {
@@ -300,22 +255,11 @@ public sealed abstract class Generator permits JavaParserGenerator, KotlinParser
     return generateNodeCall(rule, node, nextName, null);
   }
 
-  /**
-   * Builds the {@link NodeCall} that invokes the parser for {@code node} from inside {@code rule}.
-   * For tokens this is a {@code consumeToken}; for sub-rules, a method call to the generated rule
-   * function; for external/meta references, the appropriate external/meta call. {@code nextName}
-   * is the function name to use when the call has to be inlined as a nested helper.
-   */
   abstract NodeCall generateNodeCall(@NotNull BnfRule rule,
                                      @Nullable BnfExpression node,
                                      @NotNull String nextName,
                                      @Nullable ConsumeType forcedConsumeType);
 
-  /**
-   * If {@code children} is a homogeneous list of at least two tokens, registers a token-set
-   * constant for them in {@link #myChoiceTokenSets} and returns a {@code consumeTokenFast(set)}
-   * call. Returns {@code null} when no such optimization applies.
-   */
   @Nullable NodeCall generateTokenChoiceCall(@NotNull List<BnfExpression> children,
                                              @NotNull ConsumeType consumeType,
                                              @NotNull String funcName) {
@@ -335,12 +279,6 @@ public sealed abstract class Generator permits JavaParserGenerator, KotlinParser
     return instantiateTokenChoiceCall(consumeType, tokenSetName);
   }
 
-  /**
-   * Folds a run of consecutive token children starting at {@code startIndex} into a single
-   * {@code consumeTokens}/{@code parseTokens} call when at least two tokens fit. {@code skip}
-   * is set to the number of children to bypass in the caller's loop, and pin information is
-   * propagated through {@code pinMatcher}.
-   */
   abstract @NotNull NodeCall generateTokenSequenceCall(@NotNull List<BnfExpression> children,
                                                        int startIndex,
                                                        PinMatcher pinMatcher,
@@ -350,21 +288,10 @@ public sealed abstract class Generator permits JavaParserGenerator, KotlinParser
                                                        boolean rollbackOnFail,
                                                        ConsumeType consumeType);
 
-  /** Builds the target-specific {@code consumeToken(set)} call that backs {@link #generateTokenChoiceCall}. */
   abstract @NotNull NodeCall instantiateTokenChoiceCall(@NotNull ConsumeType consumeType, @NotNull String tokenSetName);
 
-  /**
-   * Emits an early-exit FIRST-set check for {@code rule}: when the next token can't possibly
-   * begin {@code rule}, return {@code false} immediately. Returns the (possibly cleared)
-   * {@code frameName} to use in the section header when the FIRST set was emitted inline.
-   */
   protected abstract @Nullable String generateFirstCheck(@NotNull BnfRule rule, @Nullable String frameName, boolean skipIfOne);
 
-  /**
-   * Maps an entry of a FIRST set (token name, quoted text, or rule reference marker) to the
-   * generated element-type constant. Returns {@code null} for non-token entries (rules,
-   * external markers like {@code <<…>>}) that have no concrete element type.
-   */
   protected @Nullable String firstToElementType(String first) {
     if (first.startsWith("#") || first.startsWith("-") || first.startsWith("<<")) return null;
     String value = GrammarUtil.unquote(first);
@@ -389,12 +316,6 @@ public sealed abstract class Generator permits JavaParserGenerator, KotlinParser
     }
   }
 
-  /**
-   * Recursively emits helper parser methods for {@code child} (and, for external expressions,
-   * for each non-atomic argument). Atomic and pure-token-sequence children are skipped because
-   * their calls are inlined; children already marked as inlined via {@link #myInlinedChildNodes}
-   * are also skipped.
-   */
   void generateNodeChild(@NotNull BnfRule rule,
                          @NotNull BnfExpression child,
                          @NotNull String funcName,
@@ -428,13 +349,6 @@ public sealed abstract class Generator permits JavaParserGenerator, KotlinParser
     // else do not generate
   }
 
-  /**
-   * Emits a call to an external rule / meta rule. {@code expressions} holds the call form
-   * {@code [methodName, arg1, arg2, ...]}; if it targets an external grammar rule, that rule's
-   * own argument list is merged in. Each argument is rendered via {@link #generateWrappedNodeCall}.
-   * Returns a {@link MetaMethodCall} when the target is a meta rule, otherwise a
-   * {@link MethodCallWithArguments}.
-   */
   @NotNull NodeCall generateExternalCall(@NotNull BnfRule rule,
                                          @NotNull List<BnfExpression> expressions,
                                          @NotNull String nextName,
@@ -519,18 +433,11 @@ public sealed abstract class Generator permits JavaParserGenerator, KotlinParser
     return !parserClass.equals(ruleInfo(rule).parserClass);
   }
 
-  /** Formats a meta-rule parameter name (the {@code <<x>>} placeholder text) to its identifier in generated code. */
   @NotNull String formatMetaParamName(@NotNull String s) {
     String argName = s.trim();
     return N.metaParamPrefix + (N.metaParamPrefix.isEmpty() || "_".equals(N.metaParamPrefix) ? argName : StringUtil.capitalize(argName));
   }
 
-  /**
-   * Wraps the call for {@code nested} as a {@link NodeArgument} suitable for passing to another
-   * generated parser function. Plain method calls become method references, meta-method calls
-   * that don't reference meta-parameters are cached in static fields, and everything else is
-   * rendered as a parser-lambda reference via {@link #getParserLambdaRef}.
-   */
   @NotNull
   NodeArgument generateWrappedNodeCall(@NotNull BnfRule rule, @Nullable BnfExpression nested, @NotNull String nextName) {
     NodeCall nodeCall = generateNodeCall(rule, nested, nextName);
@@ -551,7 +458,6 @@ public sealed abstract class Generator permits JavaParserGenerator, KotlinParser
     }
   }
 
-  /** Caches a parameter-free meta-method {@code call} as a static {@code Parser} field and returns its name. */
   private @NotNull String getMetaMethodFieldRef(@NotNull String call, @NotNull String nextName) {
     String fieldName = CommonRendererUtils.getWrapperParserConstantName(nextName);
     myMetaMethodFields.putIfAbsent(fieldName, call);
@@ -567,11 +473,6 @@ public sealed abstract class Generator permits JavaParserGenerator, KotlinParser
   }
 
   /**
-   * Builds the {@code #auto} recovery predicate for {@code rule}: a check that the current
-   * token is none of the FIRST-of-NEXT element types. Registers it as a parser lambda and
-   * returns its constant name. Emits a warning and produces an empty token list when the NEXT
-   * set contains references that don't reduce to concrete element types.
-   *
    * @noinspection StringEquality
    */
   protected String generateAutoRecoverCall(BnfRule rule) {
@@ -602,7 +503,6 @@ public sealed abstract class Generator permits JavaParserGenerator, KotlinParser
     return constantName;
   }
 
-  /** Renders the body of the auto-recovery lambda — a {@code !nextTokenIsFast(...)} expression in the target language. */
   abstract StringBuilder generateAutoRecoveryCall(List<String> tokenTypes);
 
   protected final @NotNull String getElementType(String token) {
@@ -613,11 +513,6 @@ public sealed abstract class Generator permits JavaParserGenerator, KotlinParser
     return CommonRendererUtils.getElementType(rule, G.generateElementCase);
   }
 
-  /**
-   * From the rule {@code extends} graph, builds the {@code EXTENDS_SETS_} groups: the element-type
-   * sets the runtime uses to answer "is X-as-element-type also a Y?" Skips fake/synonym rules
-   * with no own element type and drops smaller sets fully contained in larger ones.
-   */
   protected @NotNull List<Set<String>> buildExtendsSet(@NotNull MultiMap<BnfRule, BnfRule> map) {
     if (map.isEmpty()) return Collections.emptyList();
     List<Set<String>> result = new ArrayList<>();
@@ -647,7 +542,6 @@ public sealed abstract class Generator permits JavaParserGenerator, KotlinParser
     return result;
   }
 
-  /** Reports a generator warning — to {@code stdout} under tests, otherwise as an IDE notification. */
   public void addWarning(String text) {
     if (ApplicationManager.getApplication().isUnitTestMode()) {
       //noinspection UseOfSystemOutOrSystemErr

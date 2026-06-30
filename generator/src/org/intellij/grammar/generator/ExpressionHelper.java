@@ -33,32 +33,7 @@ import static org.intellij.grammar.psi.BnfAst.getChildExpressions;
 import static org.intellij.grammar.psi.BnfRules.getSuperRules;
 
 /**
- * Discovers and classifies expression-rule clusters in a BNF file.
- * <p>
- * An <i>expression rule</i> is a left-recursive rule whose alternatives form an
- * operator-precedence table — atoms, prefix/postfix unaries, binary, and n-ary operators.
- * Rather than rejecting the left recursion, the generator parses these clusters with the
- * precedence-climbing scheme emitted by {@link ExpressionGeneratorHelper} (Java) and
- * {@link KotlinParserGenerator#generateExpressionRoot} (Kotlin).
- * <p>
- * For each detected cluster this helper builds an {@link ExpressionInfo} containing:
- * <ul>
- *   <li>a priority ordering ({@link ExpressionInfo#priorityMap}) derived from the order in
- *       which sub-rules are reachable from the root;</li>
- *   <li>per-rule {@link OperatorInfo} entries telling the emitter the operator type
- *       (ATOM/PREFIX/POSTFIX/BINARY/N_ARY), its operator subtree, and its argument rules;</li>
- *   <li>private "priority groups" — private rules used purely to inject a priority level
- *       without a corresponding generated method;</li>
- *   <li>{@link ExpressionInfo#checkEmpty}, the set of operators that need a
- *       {@code empty_element_parsed_guard_} to break out of an n-ary loop on empty matches.</li>
- * </ul>
- * <p>
- * Detection is best-effort: ill-formed clusters are downgraded to {@code ATOM} with a warning,
- * and rules that don't fit the expected shape (e.g. an n-ary operator without the required
- * {@code rootRule (op rootRule)+} structure) are reported via {@link #addWarning}.
- * <p>
- * Cached per file via {@link #getCached(BnfFile)}; the cache is invalidated when the BNF file
- * changes.
+ * @author gregsh
  */
 public class ExpressionHelper {
   private static final Key<CachedValue<ExpressionHelper>> EXPRESSION_HELPER_KEY = Key.create("EXPRESSION_HELPER_KEY");
@@ -71,11 +46,6 @@ public class ExpressionHelper {
   private final Map<BnfRule, ExpressionInfo> myExpressionMap = new HashMap<>();
   private final Map<BnfRule, BnfRule> myRootRulesMap = new HashMap<>();
 
-  /**
-   * Returns the cached {@link ExpressionHelper} for {@code file}, building one on first access.
-   * The cache is keyed off the file's modification stamp; the cached instance has no warning
-   * sink (warnings are only relevant during generation, where callers construct their own).
-   */
   public static ExpressionHelper getCached(@NotNull BnfFile file) {
     CachedValue<ExpressionHelper> value = file.getUserData(EXPRESSION_HELPER_KEY);
     if (value == null) {
@@ -85,27 +55,19 @@ public class ExpressionHelper {
     return value.getValue();
   }
 
-  public ExpressionHelper(@NotNull BnfFile file,
-                          @NotNull RuleGraphHelper ruleGraph,
-                          @Nullable Consumer<String> warningConsumer) {
+  public ExpressionHelper(BnfFile file, RuleGraphHelper ruleGraph, @Nullable Consumer<String> warningConsumer) {
     myFile = file;
     myRuleGraph = ruleGraph;
     myWarningConsumer = warningConsumer;
     buildExpressionRules();
   }
 
-  public void addWarning(@NotNull String text) {
+  public void addWarning(String text) {
     if (myWarningConsumer == null) return;
     myWarningConsumer.accept(text);
   }
 
-  /**
-   * Returns the {@link ExpressionInfo} of the cluster that contains {@code rule}, or
-   * {@code null} if {@code rule} isn't part of an expression cluster. The root rule and any
-   * private rule always yield their cluster's info; non-private sub-rules only yield it when
-   * they have an entry in {@link ExpressionInfo#priorityMap}.
-   */
-  public @Nullable ExpressionInfo getExpressionInfo(@Nullable BnfRule rule) {
+  public @Nullable ExpressionInfo getExpressionInfo(BnfRule rule) {
     BnfRule root = myRootRulesMap.get(rule);
     ExpressionInfo info = root == null ? null : myExpressionMap.get(root);
     if (info == null) return null;
@@ -113,14 +75,6 @@ public class ExpressionHelper {
     return info.priorityMap.containsKey(rule) ? info : null;
   }
 
-  /**
-   * Scans every non-private, non-fake rule and treats it as the root of an expression cluster
-   * if (a) the rule-graph reports no content rules for it (so it isn't a regular composite
-   * rule) and (b) its FIRST set contains a self-reference (the tell-tale sign of left
-   * recursion). For each such root, populates {@link #myExpressionMap} with priorities, an
-   * operator map (via {@link #buildOperatorMap}), and the {@code checkEmpty} set of operators
-   * whose entire body is optional and so need an empty-match guard at runtime.
-   */
   private void buildExpressionRules() {
     BnfFirstNextAnalyzer analyzer = BnfFirstNextAnalyzer.createAnalyzer(false);
     for (BnfRule rule : myFile.getRules()) {
@@ -151,13 +105,6 @@ public class ExpressionHelper {
     }
   }
 
-  /**
-   * Walks the cluster rooted at {@code rule}, descending only through the root and private
-   * priority groups, and assigns each visited rule either a priority entry or a private-group
-   * entry. Sub-rules outside {@code rulesCluster} (the extends-set of the root) that aren't
-   * private get a warning. Detects rules that participate in two clusters or are reached
-   * twice.
-   */
   private void addToPriorityMap(BnfRule rule, Collection<BnfRule> rulesCluster, ExpressionInfo info) {
     JBTreeTraverser<BnfRule> traverser = new JBTreeTraverser<>(
       o -> ObjectUtils.notNull(rule == o || BnfRules.isPrivate(o) ? myRuleGraph.getSubRules(o) : null, Collections.emptyList()));
@@ -188,20 +135,6 @@ public class ExpressionHelper {
     }
   }
 
-  /**
-   * Classifies {@code rule} as one of {@link OperatorType#ATOM}, {@code PREFIX},
-   * {@code POSTFIX}, {@code BINARY}, or {@code N_ARY} and stores the resulting
-   * {@link OperatorInfo} in {@code expressionInfo}. The classification is driven by the
-   * cardinality of {@code rootRule} inside this rule and the position(s) of the root reference
-   * among the child expressions:
-   * <ul>
-   *   <li>no occurrence → ATOM;</li>
-   *   <li>required (one occurrence): position 0 → POSTFIX, last → PREFIX;</li>
-   *   <li>at-least-one occurrence: two leading occurrences → BINARY; one occurrence followed by
-   *       {@code (op rootRule) +} → N_ARY.</li>
-   * </ul>
-   * Anything else triggers a warning and falls back to ATOM.
-   */
   private void buildOperatorMap(BnfRule rule, BnfRule rootRule, ExpressionInfo expressionInfo) {
     Map<PsiElement, RuleGraphHelper.Cardinality> ruleContent = myRuleGraph.getFor(rule);
     RuleGraphHelper.Cardinality cardinality = ruleContent.get(rootRule);
@@ -301,19 +234,12 @@ public class ExpressionHelper {
     expressionInfo.operatorMap.put(rule, info);
   }
 
-  /** Resolves the rule referenced at {@code list[idx]}, returning {@code null} when it's the root rule itself or {@code idx < 0}. */
   private @Nullable BnfRule substRule(List<BnfExpression> list, int idx, BnfRule rootRule) {
     if (idx < 0) return null;
     BnfRule rule = myFile.getRule(list.get(idx).getText());
     return rule == rootRule ? null : rule;
   }
 
-  /**
-   * Joins a slice of an operator's child expressions into a single synthetic
-   * {@link BnfExpression}, preserving the original list under {@link #ORIGINAL_EXPRESSIONS} so
-   * later analyses can recover it via {@link #getOriginalExpressions}. Returns the lone element
-   * verbatim for size-1 slices and {@code null} for empty slices.
-   */
   private static BnfExpression combine(List<BnfExpression> list) {
     if (list.isEmpty()) return null;
     if (list.size() == 1) return list.get(0);
@@ -324,19 +250,12 @@ public class ExpressionHelper {
     return result;
   }
 
-  /** Recovers the original child slice that produced a {@link #combine}-synthesized expression, or returns {@code [expression]} for non-synthetic input. */
-  public static @NotNull List<BnfExpression> getOriginalExpressions(@NotNull BnfExpression expression) {
+  public static @NotNull List<BnfExpression> getOriginalExpressions(BnfExpression expression) {
     List<BnfExpression> data = expression.getUserData(ORIGINAL_EXPRESSIONS);
     return data == null ? Collections.singletonList(expression) : data;
   }
 
-  /**
-   * Adjusts a static cardinality to reflect runtime expression-parsing semantics: in an
-   * expression cluster, a {@code REQUIRED} child becomes {@code OPTIONAL} unless it sits in a
-   * pinned position (the first argument of a binary/n-ary/postfix operator, or anywhere inside
-   * the operator subtree). Atoms and rules outside any cluster are returned unchanged.
-   */
-  public @NotNull RuleGraphHelper.Cardinality fixCardinality(BnfRule rule, PsiElement tree, @NotNull RuleGraphHelper.Cardinality type) {
+  public @NotNull RuleGraphHelper.Cardinality fixCardinality(BnfRule rule, PsiElement tree, RuleGraphHelper.Cardinality type) {
     if (type.optional()) return type;
     // in Expression parsing mode REQUIRED may go OPTIONAL
     ExpressionInfo info = getExpressionInfo(rule);
@@ -357,11 +276,6 @@ public class ExpressionHelper {
     }
   }
 
-  /**
-   * True if {@code target} lives inside {@code expression} either directly or via an original
-   * (pre-{@link #combine}) sub-expression. Drives the "is this child pinned by the operator?"
-   * check in {@link #fixCardinality}.
-   */
   private boolean isRealAncestor(BnfRule rule, BnfExpression expression, PsiElement target) {
     List<BnfExpression> list = getOriginalExpressions(expression);
     if (list.size() == 1 && PsiTreeUtil.isAncestor(list.get(0), target, false)) return true;
@@ -372,11 +286,6 @@ public class ExpressionHelper {
     return false;
   }
 
-  /**
-   * Returns the index in {@code childExpressions} (starting at {@code startIndex}) of the
-   * first reference to {@code rootRule} or any of its extends-rules / private priority groups,
-   * or {@code -1} if none is found. Used to locate the recursive operator argument(s).
-   */
   private int indexOf(BnfRule rootRule,
                       int startIndex,
                       List<BnfExpression> childExpressions,

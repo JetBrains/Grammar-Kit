@@ -45,24 +45,15 @@ import static org.intellij.grammar.psi.BnfAttributes.getRootAttribute;
 import static org.intellij.grammar.psi.BnfRules.getEffectiveSuperRule;
 import static org.intellij.grammar.psi.BnfTypes.*;
 
-/**
- * [Generator] implementation that emits Kotlin parser sources targeting the Syntax Engine
- * API (`SyntaxParserRuntime`, `SyntaxElementType`, etc.) rather than the legacy `PsiBuilder`
- * world.
- * <p>
- * [#generate()] writes the parser file(s), then the syntax element-type holder, and finally
- * delegates PSI emission to a fresh [JavaParserGenerator] — Kotlin parser generation does not
- * produce PSI of its own, but it does discover simple tokens along the way that the Java
- * generator needs, so [JavaParserGenerator#replaceSimpleTokes] is called before
- * [JavaParserGenerator#generatePsiOnly] runs.
- * <p>
- * Implementation notes:
- * 1. A method's name starts with `generate` if it either calls the
- * [Generator#out] method or calls another `generate*` method.
- * 2. `build*` methods are generally used for building strings that
- * are then going to be outputted via one of the `generate*`
- * methods to the file.
- */
+
+/// A Kotlin parser generator implementation.
+///
+/// Implementation notes:
+/// 1. A method's name starts with `generate` if it either calls the
+///   [Generator#out] method or calls another `generate*` method.
+/// 2. `build*` methods are generally used for building strings that
+///   are then going to be outputted via one of the `generate*`
+///   methods to the file.
 public final class KotlinParserGenerator extends Generator {
   private static final @NotNull String HORIZONTAL_SEPARATOR = "/* ********************************************************** */";
 
@@ -127,17 +118,14 @@ public final class KotlinParserGenerator extends Generator {
     calcAbstractRules();
   }
 
-  /** Builds a `consumeToken(runtime, "literal")` call for tokens given by their literal text. */
   private @NotNull NodeCall getConsumeTextToken(@NotNull ConsumeType consumeType, @NotNull String tokenText) {
     return new KotlinConsumeTokenCall(consumeType, "\"" + tokenText + "\"", N);
   }
 
-  /** Short name of the generated element-types holder object, used to qualify element-type references. */
   private @NotNull String shortElementTypesHolderName() {
     return StringUtil.getShortName(myElementTypesHolderName);
   }
 
-  /** Marks rules that are reused as another rule's `elementType`, so they keep an element-type entry even when `fake`. */
   private void calcFakeRulesWithType() {
     for (final var rule : myFile.getRules()) {
       BnfRule r = myFile.getRule(getAttribute(rule, KnownAttribute.ELEMENT_TYPE));
@@ -146,10 +134,6 @@ public final class KotlinParserGenerator extends Generator {
     }
   }
 
-  /**
-   * Resolves each rule's effective stub class — explicit `stubClass`, inherited from the
-   * effective super-rule, or extracted as the type argument of a stub-aware base class.
-   */
   private void calcRulesStubNames() {
     for (BnfRule rule : myFile.getRules()) {
       RuleInfo info = this.ruleInfo(rule);
@@ -212,11 +196,6 @@ public final class KotlinParserGenerator extends Generator {
     }
   }
 
-  /**
-   * Emits one Kotlin parser source: file header, package, imports, the `object` declaration,
-   * the root-parser scaffolding (only for the grammar root parser), per-rule parse functions,
-   * expression-rule roots, and the trailing parser-lambda / meta-method fields.
-   */
   private void generateParserImpl(String parserClass, Collection<String> ownRuleNames) {
     // file header
     generateFileHeader(parserClass);
@@ -285,10 +264,6 @@ public final class KotlinParserGenerator extends Generator {
     out("}");
   }
 
-  /**
-   * Emits the root-only members of the parser object: `parse`, `parse_root_`, and (when the
-   * extends-graph is non-empty) the `EXTENDS_SETS_` array.
-   */
   private void generateRootParserDefinitions() {
     generateParse();
     generateParseRoot();
@@ -366,13 +341,6 @@ public final class KotlinParserGenerator extends Generator {
     newLine();
   }
 
-  /**
-   * Kotlin counterpart of [JavaParserGenerator#generateNode]: emits the parse function for
-   * `rule`'s expression including meta-method wrapping, single-token shortcut returns,
-   * FIRST-set guards, `enter_section_`/`exit_section_` with appropriate modifier flags,
-   * pin-on-success tracking for sequences, choice/sequence/optional/zero-or-more/one-or-more/
-   * and-not dispatch, hooks, and `recoverWhile`. Recursively emits child helper functions.
-   */
   @SuppressWarnings("DuplicatedCode")
   @Override
   protected void generateNode(BnfRule rule, @NotNull BnfExpression initialNode, String funcName, Set<BnfExpression> visited) {
@@ -631,12 +599,6 @@ public final class KotlinParserGenerator extends Generator {
     generateNodeChildren(rule, funcName, children, visited);
   }
 
-  /**
-   * Emits the operator-precedence climbing parser for an expression rule:
-   * the entry function (atoms + prefix operators), the kernel loop (binary/n-ary/postfix
-   * operators, with priority and right-associativity checks), and the per-operator helper
-   * functions (atom bodies and prefix operator bodies).
-   */
   private void generateExpressionRoot(@NotNull ExpressionInfo info) {
     final var opCalls = buildCallMap(info);
     final var sortedOpCalls = opCalls.keySet();
@@ -804,10 +766,6 @@ public final class KotlinParserGenerator extends Generator {
     }
   }
 
-  /**
-   * Groups expression-rule operators by the rendered text of their operator call so that
-   * operators sharing the same opening token are emitted together in the kernel loop.
-   */
   private @NotNull Map<String, List<OperatorInfo>> buildCallMap(@NotNull ExpressionInfo info) {
     final var result = new LinkedHashMap<String, List<OperatorInfo>>();
     for (final var bnfRule : info.priorityMap.keySet()) {
@@ -820,10 +778,6 @@ public final class KotlinParserGenerator extends Generator {
     return result;
   }
 
-  /**
-   * Emits the `internal val ... : Parser` fields collected in [Generator#myParserLambdas],
-   * de-duplicating identical bodies so equal lambdas share a field reference.
-   */
   private void generateParserLambdas(@NotNull String parserClass) {
     Map<String, String> reversedLambdas = new HashMap<>();
     take(myParserLambdas).forEach((name, body) -> {
@@ -855,10 +809,6 @@ public final class KotlinParserGenerator extends Generator {
     out("}");
   }
 
-  /**
-   * Emits cached `private val ... : Parser` fields for parameter-free meta-method calls
-   * collected in [Generator#myMetaMethodFields].
-   */
   private void generateMetaMethodFields() {
     take(myMetaMethodFields).forEach(
       (field, call) -> out("private val %s: Parser = %s", field, call)
@@ -889,7 +839,6 @@ public final class KotlinParserGenerator extends Generator {
     out(")");
   }
   
-  /** Kotlin rendering of `!runtime.nextTokenIsFast(t1, t2, ...)` for the auto-recovery predicate. */
   @Override
   public StringBuilder generateAutoRecoveryCall(List<String> tokenTypes){
     StringBuilder sb = new StringBuilder(format("!%s.nextTokenIsFast(", N.runtime));
@@ -898,12 +847,6 @@ public final class KotlinParserGenerator extends Generator {
     return sb;
   }
 
-  /**
-   * Kotlin counterpart of [JavaParserGenerator#generateFirstCheck]: emits the inline FIRST-set
-   * guard, grouped by [ConsumeType] so each group becomes one `runtime.nextTokenIs*(...)` call
-   * AND-ed together. Skipped when the FIRST set contains "matches any/eof", a sub-rule, or
-   * anything not reducing to a token, or when the set exceeds [GenOptions#generateFirstCheck].
-   */
   @SuppressWarnings("DuplicatedCode")
   @Override
   protected @Nullable String generateFirstCheck(@NotNull BnfRule rule, @Nullable String frameName, boolean skipIfOne) {
@@ -964,11 +907,6 @@ public final class KotlinParserGenerator extends Generator {
 
   // region Element Types Generation
 
-  /**
-   * Top-level driver for emitting the syntax element-type holder file: collects composite
-   * element types and their per-rule factory overrides, opens the output, and delegates to
-   * [#generateElementTypesImpl].
-   */
   private void generateElementTypes() throws IOException {
     final var sortedCompositeTypes = new TreeSet<String>();
     final var typeToFactoryMap = new HashMap<String, String>();
@@ -995,11 +933,6 @@ public final class KotlinParserGenerator extends Generator {
     }
   }
 
-  /**
-   * Emits the body of the element-types Kotlin `object`: composite element-type vals (using
-   * either the per-rule factory or the default `KtElementType` constructor), token-type vals,
-   * and token sets registered for token-choice expressions.
-   */
   private void generateElementTypesImpl(@NotNull String objectName, @NotNull Set<String> sortedCompositeTypes, @NotNull Map<String, String> typeToFactoryMap) {
     // file header
     generateFileHeader(objectName);
@@ -1048,10 +981,6 @@ public final class KotlinParserGenerator extends Generator {
     out("}");
   }
 
-  /**
-   * Emits a `KtElementType` constructor call per simple token, skipping unused regex tokens
-   * that match only whitespace.
-   */
   private void generateTokenDefinitions(@NotNull NameShortener nameShortener) {
     if (mySimpleTokens.isEmpty()) return;
     newLine();
@@ -1068,10 +997,6 @@ public final class KotlinParserGenerator extends Generator {
     }
   }
 
-  /**
-   * Emits the `SyntaxElementTypeSet` vals registered via [Generator#generateTokenChoiceCall],
-   * reusing names when two token sets share the same body.
-   */
   private void generateTokenSets(@NotNull NameShortener shortener) {
     if (myChoiceTokenSets.isEmpty()) return;
     newLine();
@@ -1126,11 +1051,6 @@ public final class KotlinParserGenerator extends Generator {
     return "{ %s, %s -> %s }".formatted(N.runtime, N.level, body);
   }
 
-  /**
-   * Returns the consume type to use when calling `rule`. A consume type forced by an
-   * enclosing expression rule is honored only when `contextRule` is itself an expression rule;
-   * otherwise the rule's own default applies.
-   */
   private @NotNull ConsumeType getRuleConsumeType(@NotNull BnfRule rule, @Nullable BnfRule contextRule) {
     ConsumeType forcedConsumeType = ExpressionGeneratorHelper.fixForcedConsumeType(myExpressionHelper, rule, null, null);
     if (forcedConsumeType != null && contextRule != null && myExpressionHelper.getExpressionInfo(contextRule) == null) {
@@ -1140,10 +1060,6 @@ public final class KotlinParserGenerator extends Generator {
     return ObjectUtils.chooseNotNull(forcedConsumeType, ConsumeType.forRule(rule));
   }
 
-  /**
-   * Collects meta-parameter placeholders (`<<x>>`) used in `expression` and returns their
-   * generated Kotlin parameter names.
-   */
   private @NotNull List<String> collectMetaParametersFormatted(@NotNull BnfRule rule, @Nullable BnfExpression expression) {
     if (expression == null) return Collections.emptyList();
     return map(GrammarUtil.collectMetaParameters(rule, expression),
@@ -1194,12 +1110,6 @@ public final class KotlinParserGenerator extends Generator {
     return new KotlinConsumeTokenChoiceCall(consumeType, shortElementTypesHolderName() + "." + tokenSetName, N);
   }
 
-  /**
-   * Kotlin implementation of [Generator#generateNodeCall]: tokens become `consumeToken*`,
-   * sub-rules become method calls (cross-class qualified when needed), expression rules
-   * become `ExpressionMethodCall` with the priority offset, external rules go through
-   * [#generateExternalCall], and meta-parameter references become `MetaParameterCall`.
-   */
   @Override
   @NotNull NodeCall generateNodeCall(@NotNull BnfRule rule,
                                      @Nullable BnfExpression node,
@@ -1290,11 +1200,6 @@ public final class KotlinParserGenerator extends Generator {
     }
   }
 
-  /**
-   * Resolves the consume type for emitting a call for `node` inside `rule`. A non-leading
-   * sequence child whose preceding alternatives can also start at the same token is forced
-   * back to [ConsumeType#DEFAULT] to avoid swallowing tokens belonging to a sibling alternative.
-   */
   private @NotNull ConsumeType getEffectiveConsumeType(@NotNull BnfRule rule,
                                                        @Nullable BnfExpression node,
                                                        @Nullable ConsumeType forcedConsumeType) {
@@ -1313,11 +1218,6 @@ public final class KotlinParserGenerator extends Generator {
     return fixed != null ? fixed : ConsumeType.forRule(rule);
   }
 
-  /**
-   * Wraps [Generator#generateExternalCall] for the Kotlin Syntax target: rewrites runtime
-   * helpers (`eof`, `advanceToken`) as direct runtime calls, and routes other plain external
-   * calls through the configured `syntaxParserUtilObject` so they pick up its receiver.
-   */
   private @NotNull NodeCall generateExternalCall(@NotNull BnfRule rule,
                                                @NotNull List<BnfExpression> expressions,
                                                @NotNull String nextName) {
@@ -1341,15 +1241,10 @@ public final class KotlinParserGenerator extends Generator {
     return externalCall;
   }
 
-  /**
-   * True if `methodName` is a `SyntaxGeneratedParserRuntime` helper that should be invoked
-   * directly on the runtime rather than via the configured parser-util object.
-   */
   private boolean isRuntimeMethod(String methodName) {
     return mySGPRMethods.contains(methodName);
   }
 
-  /** Builds a `consumeToken(runtime, ElementTypes.NAME)` call and records `tokenName` as used. */
   private @NotNull NodeCall createConsumeToken(@NotNull ConsumeType consumeType, @NotNull String tokenName) {
     myTokensUsedInGrammar.add(tokenName);
     return new KotlinConsumeTokenCall(consumeType, shortElementTypesHolderName() + "." + getElementType(tokenName), N);
@@ -1357,10 +1252,6 @@ public final class KotlinParserGenerator extends Generator {
 
   // region Utils
 
-  /**
-   * True if `tokenName` is a regexp token matching whitespace, isn't referenced by the
-   * grammar, and isn't a generic identifier/number — those are skipped during emission.
-   */
   private boolean isIgnoredWhitespaceToken(@NotNull String tokenName, @NotNull String tokenText) {
     return isRegexpToken(tokenText) &&
            !myTokensUsedInGrammar.contains(tokenName) &&

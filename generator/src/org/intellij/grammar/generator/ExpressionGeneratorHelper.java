@@ -24,36 +24,14 @@ import static org.intellij.grammar.generator.ParserGeneratorUtil.quote;
 import static org.intellij.grammar.psi.BnfAttributes.getAttribute;
 
 /**
- * Java-target emitter for operator-precedence (expression) rules.
- * <p>
- * BNF expression rules — those marked via {@link ExpressionInfo} — can't be parsed by the
- * straight recursive descent that {@link Generator#generateNode} produces; they need
- * precedence climbing. This helper renders the precedence-climbing parser for one such rule:
- * a recursive entry function that consumes atoms and prefix operators, a kernel loop that
- * left-folds binary/n-ary/postfix operators while respecting priority and right-associativity,
- * and per-operator helper functions. {@link KotlinParserGenerator#generateExpressionRoot} is
- * the Kotlin counterpart; the two share concept but not code.
- * <p>
- * Methods are static — instances are never created. {@link #fixForcedConsumeType} and
- * {@link #getInfoForExpressionParsing} also serve as cross-module hooks used by the regular
- * node emitters when they encounter rules participating in an expression.
+ * @author greg
  */
-public final class ExpressionGeneratorHelper {
+public class ExpressionGeneratorHelper {
 
-  /**
-   * Consume type forced inside expression rules. {@code SMART} is used so that the runtime
-   * uses the {@code consumeTokenSmart} family of methods, which is required to avoid spurious
-   * "expected X" errors during precedence climbing where many alternatives are tried.
-   */
   static final ConsumeType CONSUME_TYPE_OVERRIDE = ConsumeType.SMART;
 
-  /**
-   * Groups every operator of {@code info}'s expression rule by the rendered text of its
-   * opening operator call. Operators that share an opening token end up in the same kernel-loop
-   * branch, which is how the generator picks the highest-priority match among ambiguous starts.
-   */
-  private static @NotNull Map<String, List<OperatorInfo>> buildCallMap(@NotNull ExpressionInfo info,
-                                                                       @NotNull JavaParserGenerator g,
+  private static @NotNull Map<String, List<OperatorInfo>> buildCallMap(ExpressionInfo info,
+                                                                       JavaParserGenerator g,
                                                                        @NotNull NameRenderer R) {
     Map<String, List<OperatorInfo>> opCalls = new LinkedHashMap<>();
     for (BnfRule rule : info.priorityMap.keySet()) {
@@ -67,24 +45,7 @@ public final class ExpressionGeneratorHelper {
     return opCalls;
   }
 
-  /**
-   * Emits the full Java parser for one expression rule:
-   * <ol>
-   *   <li>The entry function {@code <rule>(builder, level, priority)} — consumes atoms and
-   *       prefix operators, then delegates to the kernel.</li>
-   *   <li>The kernel function {@code <rule>_0(...)} — a {@code while(true)} loop over
-   *       binary/n-ary/postfix operators, gated on {@code priority < operatorPriority} (with
-   *       right-associativity decreasing the bound by one) and on {@code leftMarkerIs(...)}
-   *       when {@code arg1} restricts the left-hand element type.</li>
-   *   <li>Per-operator helpers — atom rule bodies via {@link Generator#generateNode}, and
-   *       dedicated functions for prefix operators since they need their own section + recursion
-   *       into the entry function with the right priority.</li>
-   * </ol>
-   * Warns when multiple operators share a starting opCall: only the first definition wins.
-   */
-  public static void generateExpressionRoot(@NotNull ExpressionInfo info,
-                                            @NotNull JavaParserGenerator g,
-                                            @NotNull NameRenderer R) {
+  public static void generateExpressionRoot(ExpressionInfo info, JavaParserGenerator g, @NotNull NameRenderer R) {
     Map<String, List<OperatorInfo>> opCalls = buildCallMap(info, g, R);
     Set<String> sortedOpCalls = opCalls.keySet();
 
@@ -246,7 +207,6 @@ public final class ExpressionGeneratorHelper {
     }
   }
 
-  /** Returns the subset of {@code operatorInfos} whose {@link OperatorInfo#type()} is one of {@code types}, preserving input order. */
   public static @NotNull List<OperatorInfo> findOperators(@NotNull Collection<OperatorInfo> operatorInfos, OperatorType... types) {
     final var result = new SmartList<OperatorInfo>();
     for (OperatorInfo o : operatorInfos) {
@@ -257,13 +217,7 @@ public final class ExpressionGeneratorHelper {
     return result;
   }
 
-  /**
-   * If a call to {@code rule} should go through the precedence-climbing entry instead of a
-   * direct method call, returns the enclosing {@link ExpressionInfo}; otherwise {@code null}.
-   * Atoms and prefix operators stay on the direct path because the kernel loop already calls
-   * the entry recursively for their right-hand sides.
-   */
-  public static @Nullable ExpressionInfo getInfoForExpressionParsing(@NotNull ExpressionHelper expressionHelper, @Nullable BnfRule rule) {
+  public static @Nullable ExpressionInfo getInfoForExpressionParsing(ExpressionHelper expressionHelper, BnfRule rule) {
     final var expressionInfo = expressionHelper.getExpressionInfo(rule);
     final var operatorInfo = expressionInfo == null ? null : expressionInfo.operatorMap.get(rule);
     if (expressionInfo != null && (operatorInfo == null || operatorInfo.type() != OperatorType.ATOM &&
@@ -273,12 +227,6 @@ public final class ExpressionGeneratorHelper {
     return null;
   }
 
-  /**
-   * Decides whether the consume type for {@code node} (or for the rule itself, when
-   * {@code node} is {@code null}) should be forced to {@link #CONSUME_TYPE_OVERRIDE} because
-   * it lives inside an expression-rule operator. {@code defValue} short-circuits the check
-   * when a caller has already resolved the consume type.
-   */
   static @Nullable ConsumeType fixForcedConsumeType(@NotNull ExpressionHelper expressionHelper,
                                                     @NotNull BnfRule rule,
                                                     @Nullable BnfExpression node,

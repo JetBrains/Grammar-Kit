@@ -71,7 +71,7 @@ final class FilePrinter implements Closeable {
   }
 
   /**
-   * Sets the current offset (indent) level of this object to 0.
+   * Sets the current offset level of this object to 0.
    */
   public void resetOffset() {
     myOffset = 0;

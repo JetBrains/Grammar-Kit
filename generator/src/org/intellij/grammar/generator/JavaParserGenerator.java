@@ -61,19 +61,8 @@ import static org.intellij.grammar.psi.BnfTypes.*;
 
 
 /**
- * {@link Generator} implementation that emits Java sources: the parser, the element-type holder,
- * PSI interfaces and impls, and (when enabled) a visitor.
- * <p>
- * {@link #generate()} runs the full pipeline; {@link #generatePsiOnly()} is invoked by
- * {@link KotlinParserGenerator} so the Kotlin parser can reuse Java PSI emission while owning
- * parser generation itself. {@link #replaceSimpleTokes(Map)} exists for the same flow: simple
- * tokens discovered during Kotlin parser generation must be propagated here before PSI emission
- * so that element types line up.
- * <p>
- * Beyond plain emission this class drives Java-specific shape decisions: stub class resolution
- * via {@link JavaHelper}, real super-class chains for PSI impls (taking {@code mixin} and
- * stub-aware {@code extends} into account), expression-rule handling through
- * {@link ExpressionHelper}, and PSI method synthesis through {@link RuleMethodsHelper}.
+ * @author gregory
+ * Date 16.07.11 10:41
  */
 public final class JavaParserGenerator extends Generator {
   public static final Logger LOG = Logger.getInstance(JavaParserGenerator.class);
@@ -145,7 +134,6 @@ public final class JavaParserGenerator extends Generator {
     calcAbstractRules();
   }
 
-  /** Marks rules that are reused as another rule's {@code elementType}, so they keep an element-type entry even when {@code fake}. */
   private void calcFakeRulesWithType() {
     for (BnfRule rule : myFile.getRules()) {
       BnfRule r = myFile.getRule(getAttribute(rule, KnownAttribute.ELEMENT_TYPE));
@@ -154,11 +142,6 @@ public final class JavaParserGenerator extends Generator {
     }
   }
 
-  /**
-   * Resolves each rule's effective stub class: an explicit {@code stubClass}, a stub inherited
-   * from the effective super-rule, or the type argument of a stub-aware base class on the
-   * {@code mixin}/{@code extends} chain. Stores the result in {@link RuleInfo#realStubClass}.
-   */
   private void calcRulesStubNames() {
     for (BnfRule rule : myFile.getRules()) {
       RuleInfo info = ruleInfo(rule);
@@ -183,12 +166,6 @@ public final class JavaParserGenerator extends Generator {
     }
   }
 
-  /**
-   * Computes each PSI rule's {@code realSuperClass} (used for the {@code extends} clause of the
-   * generated impl) and {@code mixedAST} flag, walking the rule super-chain in post-order so a
-   * super's resolved values are visible to its descendants. Honors {@code mixin} overrides and
-   * substitutes the resolved stub type into stub-parameterized base classes.
-   */
   private void calcRealSuperClasses(Map<String, BnfRule> sortedPsiRules) {
     Map<BnfRule, BnfRule> supers = new HashMap<>();
     for (BnfRule rule : sortedPsiRules.values()) {
@@ -227,23 +204,13 @@ public final class JavaParserGenerator extends Generator {
     generatePsiOnly();
   }
   
-  /**
-   * Replaces this generator's simple-token map with {@code simpleTypes}.
-   * <p>
-   * Called by {@link KotlinParserGenerator#generate()} so that simple tokens it discovered during
-   * parser generation are visible here before {@link #generatePsiOnly()} emits the element-type
-   * holder and PSI.
-   */
+  //Because some of the simple tokens are added during parser generation, 
+  // we use this function to pass missing tokens from KotlinParserGenerator to JavaParserGenerator
   public void replaceSimpleTokes(Map<String, String> simpleTypes) {
     mySimpleTokens.clear();
     mySimpleTokens.putAll(simpleTypes);
   }
   
-  /**
-   * Emits everything except the parser: the element-type holder, an optional Syntax-API element
-   * type converter, and (when {@link GenOptions#generatePsi}) PSI interfaces, impls, and visitor.
-   * Invoked directly by {@link KotlinParserGenerator}, which owns its own parser generation.
-   */
   public void generatePsiOnly() throws IOException {
     Map<String, BnfRule> sortedCompositeTypes = new TreeMap<>();
     Map<String, BnfRule> sortedPsiRules = new TreeMap<>();
@@ -293,7 +260,6 @@ public final class JavaParserGenerator extends Generator {
     }
   }
 
-  /** Warns when {@code className} is configured but not resolvable on the classpath. */
   private void checkClassAvailability(@Nullable String className) {
     if (StringUtil.isEmpty(className)) return;
     if (myJavaHelper.findClass(className) == null) {
@@ -302,13 +268,6 @@ public final class JavaParserGenerator extends Generator {
     }
   }
 
-  /**
-   * Emits the PSI visitor class. Each rule gets a {@code visit<Rule>} method that delegates to
-   * its first declared super-interface; remaining supers are listed as commented-out alternatives.
-   * Non-public super-interfaces are replaced with the configured base interface. When
-   * {@link GenOptions#visitorValue} is set, methods carry that type parameter and {@code return}
-   * the delegate result.
-   */
   private void generateVisitor(String psiClass, Map<String, BnfRule> sortedRules) {
     String superIntf = ObjectUtils.notNull(ContainerUtil.getFirstItem(getRootAttribute(myFile, KnownAttribute.IMPLEMENTS)),
                                            KnownAttribute.IMPLEMENTS.getDefaultValue().get(0)).second;
@@ -389,11 +348,6 @@ public final class JavaParserGenerator extends Generator {
     out("}");
   }
 
-  /**
-   * Emits the file header, package declaration, imports, optional annotations and the class/
-   * interface declaration line for {@code className}. Installs a fresh {@link JavaNameShortener}
-   * so subsequent {@link #shorten(String)} calls produce import-aware short names.
-   */
   private void generateClassHeader(String className, Set<String> imports, String annos, TypeKind typeKind, String... supers) {
     generateFileHeader(className);
     String packageName = StringUtil.getPackageName(className);
@@ -450,11 +404,6 @@ public final class JavaParserGenerator extends Generator {
     }
   }
 
-  /**
-   * Emits one parser source file: imports, class header, the root-parser scaffolding (only for
-   * the grammar root parser), the per-rule parse methods, expression-rule roots, and finally the
-   * shared {@code Parser} lambda fields and meta-method fields collected during emission.
-   */
   public void generateParser(String parserClass, Collection<String> ownRuleNames) {
     List<String> parserImports = getRootAttribute(myFile, KnownAttribute.PARSER_IMPORTS).asStrings();
     boolean rootParser = parserClass.equals(myGrammarRootParser);
@@ -519,10 +468,6 @@ public final class JavaParserGenerator extends Generator {
     out("}");
   }
 
-  /**
-   * Emits the {@code static final Parser} fields collected in {@link #myParserLambdas},
-   * de-duplicating identical bodies so equal lambdas share a single field reference.
-   */
   private void generateParserLambdas(@NotNull String parserClass) {
     Map<String, String> reversedLambdas = new HashMap<>();
     take(myParserLambdas).forEach((name, body) -> {
@@ -537,7 +482,6 @@ public final class JavaParserGenerator extends Generator {
     });
   }
 
-  /** Renders {@code body} as a {@code Parser} instance — a Java 7+ lambda or, for {@code javaVersion <= 6}, an anonymous class. */
   private @NotNull String generateParserInstance(@NotNull String body) {
     return G.javaVersion > 6
            ? format("(%s, %s) -> %s", N.builder, N.level, body)
@@ -545,17 +489,11 @@ public final class JavaParserGenerator extends Generator {
                     shorten(JavaBnfConstants.PSI_BUILDER_CLASS), N.builder, N.level, body);
   }
 
-  /** Emits cached static {@code Parser} fields for parameter-free meta-method calls collected in {@link #myMetaMethodFields}. */
   private void generateMetaMethodFields() {
     String parserClassShortName = "Parser";
     take(myMetaMethodFields).forEach((field, call) -> out(String.format("private static final %s %s = %s;", parserClassShortName, field, call)));
   }
 
-  /**
-   * Emits the root parser body: {@code parse}/{@code parseLight} entry points, the
-   * {@code parse_root_} dispatcher (with extra-root branches for rules marked
-   * {@code extraRoot=true}), and the static {@code EXTENDS_SETS_} array.
-   */
   private void generateRootParserContent() {
     BnfRule rootRule = myFile.getRule(myGrammarRoot);
     List<BnfRule> extraRoots = new ArrayList<>();
@@ -655,15 +593,6 @@ public final class JavaParserGenerator extends Generator {
     // @formatter:on
   }
 
-  /**
-   * Emits the parser method body for {@code rule}'s expression. Handles all the generation
-   * concerns: meta-method wrapping, single-token shortcut returns, FIRST-set guards, section
-   * enter/exit with the right modifier flags ({@code _LEFT_}, {@code _COLLAPSE_}, {@code _AND_},
-   * {@code _NOT_}, {@code _UPPER_}), pin-on-success tracking for sequences, choice/sequence/
-   * optional/zero-or-more/one-or-more/and-not dispatch, hooks, and {@code recoverWhile} (with
-   * automatic, meta-parameterized, and explicit predicate variants). Recursively generates child
-   * helper methods after the main body.
-   */
   @SuppressWarnings("DuplicatedCode")
   @Override
   void generateNode(BnfRule rule, BnfExpression initialNode, String funcName, Set<BnfExpression> visited) {
@@ -892,7 +821,6 @@ public final class JavaParserGenerator extends Generator {
     generateNodeChildren(rule, funcName, children, visited);
   }
 
-  /** Java rendering of {@code !nextTokenIsFast(builder, t1, t2, ...)} for the auto-recovery predicate. */
   @Override
   public StringBuilder generateAutoRecoveryCall(List<String> tokenTypes){
     StringBuilder sb = new StringBuilder(format("!nextTokenIsFast(%s, ", N.builder));
@@ -901,12 +829,6 @@ public final class JavaParserGenerator extends Generator {
     return sb;
   }
 
-  /**
-   * Emits the inline FIRST-set check, grouped by {@link ConsumeType} so each group becomes one
-   * {@code nextTokenIs*(...)} call AND-ed together. Skipped when the FIRST set contains
-   * "matches any/eof", a sub-rule, or anything that doesn't reduce to a token element type, or
-   * when the set is larger than {@link GenOptions#generateFirstCheck}.
-   */
   @SuppressWarnings("DuplicatedCode")
   @Override
   public String generateFirstCheck(@NotNull BnfRule rule, String frameName, boolean skipIfOne) {
@@ -954,11 +876,6 @@ public final class JavaParserGenerator extends Generator {
     return dropFrameName && StringUtil.isEmpty(getAttribute(rule, KnownAttribute.NAME)) ? null : frameName;
   }
 
-  /**
-   * Returns the consume type that should be used when calling {@code rule}. A consume-type
-   * forced by an enclosing expression rule is honored only when {@code contextRule} is itself
-   * an expression rule; otherwise the rule's own default is used.
-   */
   private @NotNull ConsumeType getRuleConsumeType(@NotNull BnfRule rule, @Nullable BnfRule contextRule) {
     ConsumeType forcedConsumeType = ExpressionGeneratorHelper.fixForcedConsumeType(myExpressionHelper, rule, null, null);
     if (forcedConsumeType != null && contextRule != null && myExpressionHelper.getExpressionInfo(contextRule) == null) {
@@ -968,7 +885,6 @@ public final class JavaParserGenerator extends Generator {
     return ObjectUtils.chooseNotNull(forcedConsumeType, ConsumeType.forRule(rule));
   }
 
-  /** Collects meta-parameter placeholders ({@code <<x>>}) used in {@code expression} and returns their generated parameter names. */
   private @NotNull List<String> collectMetaParametersFormatted(@NotNull BnfRule rule, @Nullable BnfExpression expression) {
     if (expression == null) return Collections.emptyList();
     return map(GrammarUtil.collectMetaParameters(rule, expression),
@@ -1010,14 +926,6 @@ public final class JavaParserGenerator extends Generator {
     return new ConsumeTokenChoiceCall(consumeType, tokenSetName, N.builder);
   }
 
-  /**
-   * Java implementation of {@link Generator#generateNodeCall}: tokens become
-   * {@code consumeToken*}, sub-rules become method calls (cross-class qualified when needed),
-   * expression rules become {@code ExpressionMethodCall} with the priority offset,
-   * external rules go through {@link #generateExternalCall}, and meta-parameter references
-   * become {@code MetaParameterCall}. Falls through to a plain method call to {@code nextName}
-   * for "everything else".
-   */
   @Override
   @NotNull
   NodeCall generateNodeCall(@NotNull BnfRule rule,
@@ -1108,12 +1016,6 @@ public final class JavaParserGenerator extends Generator {
     }
   }
 
-  /**
-   * Resolves the consume type to use when emitting a call for {@code node} inside {@code rule}.
-   * A non-leading sequence child whose preceding alternatives can also start at the same token
-   * is forced back to {@link ConsumeType#DEFAULT} to avoid swallowing tokens belonging to a
-   * sibling alternative.
-   */
   private @NotNull ConsumeType getEffectiveConsumeType(@NotNull BnfRule rule,
                                                        @Nullable BnfExpression node,
                                                        @Nullable ConsumeType forcedConsumeType) {
@@ -1149,13 +1051,11 @@ public final class JavaParserGenerator extends Generator {
   }
 
 
-  /** Builds a {@code consumeToken(builder, ELEMENT_TYPE)} call and records {@code tokenName} as used in the grammar. */
   private @NotNull NodeCall generateConsumeToken(@NotNull ConsumeType consumeType, @NotNull String tokenName) {
     myTokensUsedInGrammar.add(tokenName);
     return new ConsumeTokenCall(consumeType, getElementType(tokenName), N.builder);
   }
 
-  /** Builds a {@code consumeToken(builder, "literal")} call for tokens given by their literal text rather than name. */
   private static @NotNull NodeCall generateConsumeTextToken(@NotNull ConsumeType consumeType,
                                                             @NotNull String tokenText,
                                                             @NotNull String stateHolder) {
@@ -1164,12 +1064,6 @@ public final class JavaParserGenerator extends Generator {
 
   /*ElementTypes******************************************************************/
 
-  /**
-   * Emits the element-type holder interface: composite element-type fields, token-type fields,
-   * the {@link #generateTokenSets() token sets} block, and (when generating PSI) optional
-   * {@code Classes} (element-type → impl class) and {@code Factory} (element-type → impl
-   * instantiation) inner classes.
-   */
   private void generateElementTypesHolder(String className,
                                           Map<String, BnfRule> sortedCompositeTypes,
                                           String tokenTypeFactory,
@@ -1343,7 +1237,6 @@ public final class JavaParserGenerator extends Generator {
     out("}");
   }
 
-  /** True if {@code tokenName} is a regexp token that matches whitespace, isn't referenced by the grammar, and isn't a generic identifier/number. */
   private boolean isIgnoredWhitespaceToken(@NotNull String tokenName, @NotNull String tokenText) {
     return isRegexpToken(tokenText) &&
            !myTokensUsedInGrammar.contains(tokenName) &&
@@ -1351,7 +1244,6 @@ public final class JavaParserGenerator extends Generator {
            !matchesAny(getRegexpTokenRegexp(tokenText), "a", "1", "_", ".");
   }
 
-  /** Emits the {@code TokenSets} inner interface holding the {@code TokenSet} constants registered via {@link #generateTokenChoiceCall}. */
   private void generateTokenSets() {
     if (myChoiceTokenSets.isEmpty()) {
       return;
@@ -1368,7 +1260,6 @@ public final class JavaParserGenerator extends Generator {
   }
 
   /*PSI******************************************************************/
-  /** Emits the PSI interface and impl for each rule, plus the visitor when one is configured. */
   private void generatePsi(Map<String, BnfRule> sortedPsiRules) throws IOException {
     checkClassAvailability(myPsiImplUtilClass);
     myRulesMethodsHelper.buildMaps(sortedPsiRules.values());
@@ -1404,7 +1295,6 @@ public final class JavaParserGenerator extends Generator {
   }
 
 
-  /** Emits the public PSI interface for {@code rule}: super-interfaces (with stub-aware additions) and rule accessor signatures. */
   private void generatePsiIntf(BnfRule rule, RuleInfo info) {
     String psiClass = info.intfClass;
     String stubClass = info.stub;
@@ -1426,12 +1316,6 @@ public final class JavaParserGenerator extends Generator {
     out("}");
   }
 
-  /**
-   * Emits the PSI impl class for {@code rule}: extends/implements clause from
-   * {@link RuleInfo#realSuperClass}, constructors that mirror those of the (eventual) base
-   * class, optional {@code accept(Visitor)} dispatch, and rule accessor implementations.
-   * Detects and warns on cyclic {@code mixin}/{@code extends} chains.
-   */
   private void generatePsiImpl(@NotNull BnfRule rule, @NotNull RuleInfo info) {
     String psiClass = info.implClass;
     String superInterface = info.intfClass;
@@ -1572,7 +1456,6 @@ public final class JavaParserGenerator extends Generator {
     out("}");
   }
 
-  /** Emits accessor and util methods for {@code rule}'s PSI interface ({@code intf=true}) or impl ({@code intf=false}). */
   private void generatePsiClassMethods(BnfRule rule, RuleInfo info, boolean intf) {
     Set<String> visited = new TreeSet<>();
     boolean mixedAST = info.mixedAST;
@@ -1614,7 +1497,6 @@ public final class JavaParserGenerator extends Generator {
     }
   }
 
-  /** Collects every type name that {@code rule}'s generated PSI accessors and mixin/util methods reference, so callers can build the import list. */
   public Collection<String> getRuleMethodTypesToImport(BnfRule rule) {
     Set<String> result = new TreeSet<>();
 
@@ -1651,11 +1533,6 @@ public final class JavaParserGenerator extends Generator {
     return result;
   }
 
-  /**
-   * Adds every reachable type name from {@code methods} (return type, generics, parameter types,
-   * exceptions) to {@code result}. {@code isInPsiUtil} skips the first PSI-util parameter pair
-   * since it represents the {@code this} target, not a real parameter.
-   */
   private void collectMethodTypesToImport(@NotNull List<NavigatablePsiElement> methods, boolean isInPsiUtil, @NotNull Set<String> result) {
     for (NavigatablePsiElement method : methods) {
       List<String> types = myJavaHelper.getMethodTypes(method);
@@ -1683,7 +1560,6 @@ public final class JavaParserGenerator extends Generator {
   }
 
 
-  /** Emits a single rule- or token-accessor method (e.g. {@code getFoo()}, {@code getFooList()}) for the PSI interface or impl. */
   private void generatePsiAccessor(BnfRule rule, RuleMethodsHelper.MethodInfo methodInfo, boolean intf, boolean mixedAST) {
     Cardinality type = methodInfo.cardinality;
     boolean isToken = methodInfo.rule == null;
@@ -1717,11 +1593,6 @@ public final class JavaParserGenerator extends Generator {
     newLine();
   }
 
-  /**
-   * Renders the body of a PSI accessor — a {@code findChildByType}, {@code findChildByClass},
-   * {@code PsiTreeUtil.getChildOfType} or stub-aware variant — depending on cardinality, whether
-   * the rule has stubs, whether the AST is mixed, and the legacy/no-stubs fallback.
-   */
   private String generatePsiAccessorImplCall(@NotNull BnfRule rule, @NotNull RuleMethodsHelper.MethodInfo methodInfo, boolean mixedAST) {
     boolean isToken = methodInfo.rule == null;
 
@@ -1759,7 +1630,6 @@ public final class JavaParserGenerator extends Generator {
     return required && !mixedAST ? "notNullChild(" + result + ")" : result;
   }
 
-  /** Return type of an accessor for {@code rule} — its first {@code implements} entry for external rules, its PSI interface otherwise. */
   private @NotNull String getAccessorType(@NotNull BnfRule rule) {
     if (BnfRules.isExternal(rule)) {
       Pair<String, String> first = ContainerUtil.getFirstItem(getAttribute(rule, KnownAttribute.IMPLEMENTS));
@@ -1770,11 +1640,6 @@ public final class JavaParserGenerator extends Generator {
     }
   }
 
-  /**
-   * Walks a slash-separated path of accessor names ({@code "foo/bar[0]/baz"}) starting at
-   * {@code startRule}, yielding the resolved {@link RuleMethodsHelper.MethodInfo} for each step
-   * (or the path element string for empty/index segments, or {@code null} when resolution fails).
-   */
   private JBIterable<?> resolveUserPsiPathMethods(BnfRule startRule,
                                                   String[] splitPath) {
     BnfRule[] targetRule = {startRule};
@@ -1791,12 +1656,6 @@ public final class JavaParserGenerator extends Generator {
     });
   }
 
-  /**
-   * Emits a user-defined accessor whose body chains through a {@code methods} attribute path
-   * (e.g. {@code "foo/bar[last]"}). Reports a warning per attribute on the first invalid path
-   * step (unknown rule, index on a non-list, missing index on a list, suppressed accessor, …)
-   * and aborts emission of that accessor.
-   */
   private void generateUserPsiAccessors(BnfRule startRule, RuleMethodsHelper.MethodInfo methodInfo, boolean intf, boolean mixedAST) {
     StringBuilder sb = new StringBuilder();
     BnfRule targetRule = startRule;
@@ -1944,11 +1803,6 @@ public final class JavaParserGenerator extends Generator {
     newLine();
   }
 
-  /**
-   * Emits a method that delegates to a mixin or {@code psiImplUtil} static helper, mirroring its
-   * signature, generics, annotations, and exceptions. {@code isInPsiUtil=true} drops the first
-   * helper parameter (the {@code this} target) when forwarding the call.
-   */
   private void generateUtilMethod(String methodName,
                                   NavigatablePsiElement method,
                                   boolean intf,
@@ -1999,12 +1853,6 @@ public final class JavaParserGenerator extends Generator {
   }
 
   /*Syntax******************************************************************/
-  /**
-   * Emits the Syntax-API element-type converter class — a registry mapping each generated
-   * Syntax {@code KtElementType} (and, when token types are generated, each token element type)
-   * to its legacy {@code IElementType} counterpart. Used only when {@link GenOptions.ParserApi} is
-   * {@code Syntax}.
-   */
   private void generateElementTypesConverter(String elementTypesConverter,
                                              String typeHolderClass,
                                              String syntaxElementTypeHolderClass,

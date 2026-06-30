@@ -13,6 +13,8 @@
                              implementationClass="org.intellij.jflex.psi.impl.JFlexJavaCodeManipulator"/>
 
     <notificationGroup id="grammarkit.parser.generator.log" displayType="NONE" key="notification.group.parser.generator.log"/>
+
+    <useScopeEnlarger implementation="org.intellij.grammar.search.BnfJavaFileUseScopeEnlarger"/>
   </extensions>
   <actions>
     <group id="grammar.group">

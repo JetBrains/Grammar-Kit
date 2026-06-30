@@ -13,6 +13,7 @@ import org.intellij.grammar.expression.ExpressionParserTest;
 import org.intellij.grammar.generator.JavaBnfGeneratorTest;
 import org.intellij.grammar.generator.KotlinBnfGeneratorTest;
 import org.intellij.grammar.inspection.BnfHighlightingTest;
+import org.intellij.grammar.search.BnfFileUseScopeEnlargerTest;
 import org.intellij.grammar.intention.BnfConvertOptExpressionIntentionTest;
 import org.intellij.grammar.intention.BnfFlipChoiceIntentionTest;
 import org.intellij.jflex.JFlexCompletionTest;
@@ -40,6 +41,7 @@ public class BnfTestSuite extends TestCase {
 
     testSuite.addTestSuite(BnfGenerationServiceIntegrationPlatformTest.class);
     testSuite.addTestSuite(JFlexCompletionTest.class);
+    testSuite.addTestSuite(BnfFileUseScopeEnlargerTest.class);
     return testSuite;
   }
 

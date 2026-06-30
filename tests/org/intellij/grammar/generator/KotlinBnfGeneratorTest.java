@@ -126,6 +126,10 @@ public class KotlinBnfGeneratorTest extends AbstractBnfGeneratorTest {
     doParserTest();
   }
 
+  public void testTo() throws Exception {
+    doParserTest();
+  }
+
   public void testUpperRules() throws Exception {
     doParserTest();
   }

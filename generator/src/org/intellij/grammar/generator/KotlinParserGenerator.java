@@ -12,7 +12,6 @@ import com.intellij.util.ObjectUtils;
 import com.intellij.util.SmartList;
 import com.intellij.util.containers.ContainerUtil;
 import com.intellij.util.containers.JBIterable;
-import org.intellij.grammar.BnfPathsResolution;
 import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.analysis.BnfFirstNextAnalyzer;
 import org.intellij.grammar.generator.NodeCalls.*;
@@ -71,7 +70,8 @@ public final class KotlinParserGenerator extends Generator {
    * Name of the class containing all the generated element types.
    */
   private final @NotNull String myElementTypesHolderName;
-
+  private final @NotNull String myPsiOutputPath;
+  
   private final @NotNull String myParserUtil;
 
   private final @NotNull Collection<String> mySGPRMethods = Arrays.asList("eof", "advanceToken");
@@ -83,19 +83,24 @@ public final class KotlinParserGenerator extends Generator {
   private final @NotNull Set<String> myTokensUsedInGrammar = new LinkedHashSet<>();
 
   private final ExpressionHelper myExpressionHelper;
+  private final JavaHelper myJavaHelper;
 
   public KotlinParserGenerator(@NotNull BnfFile psiFile,
                                @NotNull String sourcePath,
+                               @NotNull String outputPath,
+                               @NotNull String psiOutputPath,
                                @NotNull String packagePrefix,
-                               @NotNull OutputOpener outputOpener,
-                               @NotNull BnfPathsResolution paths) {
-    super(psiFile, sourcePath, packagePrefix, "kt", outputOpener, KotlinNameRenderer.INSTANCE, paths);
+                               @NotNull OutputOpener outputOpener
+  ) {
+    super(psiFile, sourcePath, outputPath, packagePrefix, "kt", outputOpener, KotlinNameRenderer.INSTANCE);
 
     // TODO: consider creating kotlin specific attributes for this
     myElementTypesHolderName = getRootAttribute(myFile, KnownAttribute.SYNTAX_ELEMENT_TYPE_HOLDER_CLASS);
     myParserUtil = getRootAttribute(myFile, KnownAttribute.SYNTAX_PARSER_UTIL_OBJECT);
+    myPsiOutputPath = (psiOutputPath.isEmpty()) ? myOutputPath : psiOutputPath;
 
     myExpressionHelper = new ExpressionHelper(myFile, myGraphHelper, this::addWarning);
+    myJavaHelper = JavaHelper.getJavaHelper(myFile);
 
     for (final var rule : psiFile.getRules()) {
       final var ruleName = rule.getName();
@@ -164,8 +169,7 @@ public final class KotlinParserGenerator extends Generator {
         stubName = stubClass;
       }
       else if (implSuper.indexOf("<") < implSuper.indexOf(">") &&
-               !myJavaHelper
-                 .findClassMethods(implSuperRaw, JavaHelper.MethodType.INSTANCE, "getParentByStub", 0).isEmpty()) {
+               !myJavaHelper.findClassMethods(implSuperRaw, JavaHelper.MethodType.INSTANCE, "getParentByStub", 0).isEmpty()) {
         stubName = implSuper.substring(implSuper.indexOf("<") + 1, implSuper.indexOf(">"));
       }
       else {
@@ -185,8 +189,8 @@ public final class KotlinParserGenerator extends Generator {
     if (myGrammarRoot != null && (G.generateTokenTypes || G.generateElementTypes)) {
       generateElementTypes();
     }
-    if (myGrammarRoot != null && (G.generatePsi)) {
-      JavaParserGenerator javaParserGenerator = new JavaParserGenerator(myFile, mySourcePath, myPackagePrefix, myOpener, myPaths);
+    if (myGrammarRoot != null && (G.generatePsi)){
+      JavaParserGenerator javaParserGenerator = new JavaParserGenerator(myFile, mySourcePath, myPsiOutputPath, myPackagePrefix, myOpener);
       javaParserGenerator.replaceSimpleTokes(mySimpleTokens);
       javaParserGenerator.generatePsiOnly();
     }
@@ -198,7 +202,7 @@ public final class KotlinParserGenerator extends Generator {
   public void generateParser() throws IOException {
     Map<String, Set<RuleInfo>> classified = ContainerUtil.classify(myRuleInfos.values().iterator(), o -> o.parserClass);
     for (String className : ContainerUtil.sorted(classified.keySet())) {
-      openOutput(className, myPaths.pathString(KnownAttribute.PARSER_OUTPUT_PATH));
+      openOutput(className);
       try {
         generateParserImpl(className, map(classified.get(className), it -> it.name));
       }
@@ -982,7 +986,7 @@ public final class KotlinParserGenerator extends Generator {
         sortedCompositeTypes.add(elementType);
       }
     }
-    openOutput(myElementTypesHolderName, myPaths.pathString(KnownAttribute.SYNTAX_ELEMENT_TYPE_HOLDER_OUTPUT_PATH));
+    openOutput(myElementTypesHolderName);
     try {
       generateElementTypesImpl(myElementTypesHolderName, sortedCompositeTypes, typeToFactoryMap);
     }

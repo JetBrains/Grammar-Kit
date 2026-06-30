@@ -1,4 +1,4 @@
-// ---- ../myPsi/output/generated/GeneratedSyntaxElementTypes.kt -----------------
+// ---- generated/GeneratedSyntaxElementTypes.kt -----------------
 //header.txt
 package generated
 

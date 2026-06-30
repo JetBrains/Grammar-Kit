@@ -1,11 +1,12 @@
 /*
- * Copyright 2011-2026 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
+ * Copyright 2011-2025 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
  */
 
 package org.intellij.grammar;
 
 import com.intellij.lang.LanguageASTFactory;
 import com.intellij.lang.LanguageBraceMatching;
+import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.impl.DebugUtil;
 import org.intellij.grammar.generator.JavaParserGenerator;
@@ -15,41 +16,25 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.PrintStream;
-import java.nio.file.Path;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.List;
+import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 /**
  * Command-line interface to parser generator.
  * Required community jars on classpath:
  * app-client.jar, lib-client.jar, opentelemetry.jar, util.jar, util-8.jar, util_rt.jar
  *
- * <p>New form: {@code generate <grammar-file> [options]}.<br>
- * Legacy form: {@code generate <output-dir> <grammars or patterns>} (deprecated).
- *
  * @author gregsh
  * @noinspection UseOfSystemOutOrSystemErr
  */
 public class Main {
-  static final Map<String, KnownAttribute<String>> FLAG_TO_ATTR = buildFlagMap();
-
-  private static Map<String, KnownAttribute<String>> buildFlagMap() {
-    Map<String, KnownAttribute<String>> map = new LinkedHashMap<>();
-    map.put("--parser-output",                          KnownAttribute.PARSER_OUTPUT_PATH);
-    map.put("--psi-output",                             KnownAttribute.PSI_OUTPUT_PATH);
-    map.put("--element-type-holder-output",             KnownAttribute.ELEMENT_TYPE_HOLDER_OUTPUT_PATH);
-    map.put("--syntax-element-type-holder-output",      KnownAttribute.SYNTAX_ELEMENT_TYPE_HOLDER_OUTPUT_PATH);
-    map.put("--element-type-converter-factory-output",  KnownAttribute.ELEMENT_TYPE_CONVERTER_FACTORY_OUTPUT_PATH);
-    return Map.copyOf(map);
-  }
-
   private final @NotNull BnfParserDefinition parserDefinition;
-  private final @NotNull CliArgs cliArgs;
+  private final @NotNull File output;
 
-  Main(@NotNull BnfParserDefinition parserDefinition, @NotNull CliArgs cliArgs) {
+  Main(@NotNull BnfParserDefinition parserDefinition, @NotNull File output) {
     this.parserDefinition = parserDefinition;
-    this.cliArgs = cliArgs;
+    this.output = output;
   }
 
   public static void main(String[] args) {
@@ -59,45 +44,31 @@ public class Main {
 
   @SuppressWarnings("CallToPrintStackTrace")
   static int run(String[] args) {
-    CliArgs cliArgs;
     try {
-      cliArgs = CliArgs.parse(args, System.out, System.err);
-    }
-    catch (UsageException e) {
-      if (e.getMessage() != null) System.err.println(e.getMessage());
-      printUsage(System.out);
-      return e.exitCode;
-    }
-
-    Path parserOutput = cliArgs.paths().get(KnownAttribute.PARSER_OUTPUT_PATH);
-    if (parserOutput != null) {
-      File parserOutputFile = parserOutput.toFile();
-      if (parserOutputFile.exists() && parserOutputFile.isFile()) {
-        System.out.println("Output directory not found: " + parserOutputFile.getAbsolutePath());
+      if (args.length < 2) {
+        System.out.println("Usage: Main <output-dir> <grammars or patterns>");
         return 0;
       }
-      if (!parserOutputFile.exists() && !parserOutputFile.mkdirs()) {
-        System.err.println("Could not create output directory: " + parserOutputFile.getAbsolutePath());
-        return 1;
+      String outputPath = args[0];
+      File output = new File(outputPath);
+      if (!output.exists() && !output.mkdirs() || output.isFile()) {
+        System.out.println("Output directory not found: " + output.getAbsolutePath());
+        return 0;
       }
-    }
 
-    try {
       LightPsi.init();
       LightPsi.Init.addKeyedExtension(LanguageASTFactory.INSTANCE, BnfLanguage.INSTANCE, new BnfASTFactory(), null);
       LightPsi.Init.addKeyedExtension(LanguageBraceMatching.INSTANCE, BnfLanguage.INSTANCE, new BnfBraceMatcher(), null);
 
-      var main = new Main(new BnfParserDefinition(), cliArgs);
-      for (String pattern : cliArgs.grammarPatterns()) {
-        if (!main.processGrammarFile(pattern)) {
+      BnfParserDefinition parserDefinition = new BnfParserDefinition();
+
+      var main = new Main(parserDefinition, output);
+      for (int i = 1; i < args.length; i++) {
+        if (!main.processGrammarFile(args[i])) {
           return 1;
         }
       }
       return 0;
-    }
-    catch (PathConflicts.ConflictException e) {
-      // already printed; just exit
-      return 1;
     }
     catch (Throwable throwable) {
       throwable.printStackTrace();
@@ -105,21 +76,10 @@ public class Main {
     }
   }
 
-  private static void printUsage(@NotNull PrintStream out) {
-    out.println("Usage: Main <grammar-file> [options]");
-    out.println("Options:");
-    for (Map.Entry<String, KnownAttribute<String>> e : FLAG_TO_ATTR.entrySet()) {
-      out.println("  " + e.getKey() + " <path>   sets " + e.getValue().getName());
-    }
-    out.println("  --strict-paths            fail on CLI/grammar path conflicts");
-    out.println();
-    out.println("Legacy form (deprecated): Main <output-dir> <grammars or patterns>");
-  }
-
   private boolean processGrammarFile(@NotNull String grammar) throws IOException, ClassNotFoundException {
     var grammarPattern = GrammarPattern.of(grammar);
     if (!grammarPattern.isValid()) {
-      System.err.println("Grammar directory not found: " + grammarPattern.grammarDir().getAbsolutePath());
+      System.err.println("Grammar directory not found: " + grammarPattern.grammarDir.getAbsolutePath());
       return false;
     }
 
@@ -127,16 +87,14 @@ public class Main {
 
     int count = 0;
     for (File grammarFile : grammarFiles) {
-      if (generateGrammar(grammarFile, grammarPattern.grammarDir())) {
-        Path parserOut = cliArgs.paths().get(KnownAttribute.PARSER_OUTPUT_PATH);
-        String outDesc = parserOut != null ? parserOut.toString() : "(grammar-defined paths)";
-        System.out.println(grammarFile.getName() + " parser generated to " + outDesc);
+      if (generateGrammar(grammarFile, grammarPattern.grammarDir)) {
+        System.out.println(grammarFile.getName() + " parser generated to " + output.getCanonicalPath());
         count++;
       }
     }
 
     if (count == 0) {
-      System.out.println("No grammars matching '" + grammarPattern.wildCard() + "' found in: " + grammarPattern.grammarDir());
+      System.out.println("No grammars matching '" + grammarPattern.wildCard + "' found in: " + grammarPattern.grammarDir);
     }
 
     return true;
@@ -146,8 +104,8 @@ public class Main {
     PsiFile bnfFile = LightPsi.parseFile(grammarFile, parserDefinition);
     if (!(bnfFile instanceof BnfFile)) return false;
 
-    Path parserOutput = cliArgs.paths().get(KnownAttribute.PARSER_OUTPUT_PATH);
-    if (parserOutput != null && parserOutput.toString().contains("lightpsi")) {
+    // for light-psi-all building:
+    if (output.getAbsolutePath().contains("lightpsi")) {
       Class.forName("org.jetbrains.annotations.NotNull");
       Class.forName("org.jetbrains.annotations.Nullable");
       Class.forName("org.intellij.lang.annotations.Pattern");
@@ -155,17 +113,49 @@ public class Main {
       DebugUtil.psiToString(bnfFile, false);
     }
 
-    Path bnfParent = grammarFile.getParentFile().toPath();
-    Map<KnownAttribute<String>, Path> grammarMap = BnfPaths.collectExplicitPaths((BnfFile)bnfFile, bnfParent);
-    Map<KnownAttribute<String>, Path> merged = PathConflicts.merge(cliArgs.paths(), grammarMap, cliArgs.strictPaths(), System.err);
-    BnfPathsResolution paths = BnfPaths.resolveExplicit(merged);
-
     JavaParserGenerator generator = new JavaParserGenerator((BnfFile)bnfFile,
                                                             grammarDir.getAbsolutePath(),
+                                                            output.getAbsolutePath(),
                                                             "",
-                                                            OutputOpener.DEFAULT,
-                                                            paths);
+                                                            OutputOpener.DEFAULT);
     generator.generate();
     return true;
+  }
+
+  private record GrammarPattern(
+    @NotNull File grammarDir,
+    @NotNull Pattern grammarPattern,
+    @NotNull String wildCard
+  ) {
+
+    @NotNull List<File> collectGrammarFiles() {
+      File[] files = grammarDir.listFiles();
+      if (files == null) return List.of();
+
+      return Stream.of(files)
+        .filter(f -> !f.isDirectory() && grammarPattern.matcher(f.getName()).matches())
+        .toList();
+    }
+
+    boolean isValid() {
+      return grammarDir.exists() && grammarDir.isDirectory();
+    }
+
+    static @NotNull Main.GrammarPattern of(@NotNull String grammar) {
+      int idx = grammar.lastIndexOf(File.separator);
+      File grammarDir = new File(idx >= 0 ? grammar.substring(0, idx) : ".");
+      String wildCard = idx >= 0 ? grammar.substring(idx + 1) : grammar;
+      Pattern grammarPattern = Pattern.compile(convertToJavaPattern(wildCard));
+      return new GrammarPattern(grammarDir, grammarPattern, wildCard);
+    }
+
+    private static @NotNull String convertToJavaPattern(@NotNull String wildcardPattern) {
+      wildcardPattern = StringUtil.replace(wildcardPattern, ".", "\\.");
+      wildcardPattern = StringUtil.replace(wildcardPattern, "*?", ".+");
+      wildcardPattern = StringUtil.replace(wildcardPattern, "?*", ".+");
+      wildcardPattern = StringUtil.replace(wildcardPattern, "*", ".*");
+      wildcardPattern = StringUtil.replace(wildcardPattern, "?", ".");
+      return wildcardPattern;
+    }
   }
 }

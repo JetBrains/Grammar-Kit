@@ -6,10 +6,15 @@ package org.intellij.grammar.java;
 
 import com.intellij.openapi.project.IndexNotReadyException;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.roots.ProjectFileIndex;
+import com.intellij.openapi.roots.ProjectRootManager;
 import com.intellij.openapi.util.text.StringUtil;
+import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.openapi.vfs.VirtualFileUtil;
 import com.intellij.psi.*;
 import com.intellij.psi.impl.source.resolve.reference.impl.providers.JavaClassReferenceProvider;
 import com.intellij.psi.search.GlobalSearchScope;
+import com.intellij.psi.search.GlobalSearchScopesCore;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.util.ArrayUtil;
 import com.intellij.util.IncorrectOperationException;
@@ -17,6 +22,8 @@ import com.intellij.util.ProcessingContext;
 import com.intellij.util.containers.ContainerUtil;
 import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.psi.BnfAttr;
+import org.intellij.grammar.psi.BnfAttributes;
+import org.intellij.grammar.psi.BnfFile;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -44,12 +51,10 @@ import static org.intellij.grammar.psi.BnfAttributes.getRootAttribute;
 final class PsiHelper extends AsmHelper {
   private final JavaPsiFacade myFacade;
   private final PsiElementFactory myElementFactory;
-  private final @Nullable GlobalSearchScope myScope;
 
-  PsiHelper(@NotNull Project project, @Nullable GlobalSearchScope scope) {
+  private PsiHelper(@NotNull Project project) {
     myFacade = JavaPsiFacade.getInstance(project);
     myElementFactory = PsiElementFactory.getInstance(project);
-    myScope = scope;
   }
 
   private static boolean acceptsMethod(PsiElementFactory elementFactory,
@@ -113,8 +118,19 @@ final class PsiHelper extends AsmHelper {
     JavaClassReferenceProvider provider = new JavaClassReferenceProvider() {
       @Override
       public GlobalSearchScope getScope(@NotNull Project project) {
-        // Honor the *InputPath / *OutputPath cascade resolved by PsiHelperFactory; null = platform default.
-        return myScope;
+        BnfFile bnfFile = (BnfFile)element.getContainingFile();
+        if (BnfAttributes.useSyntaxApi(bnfFile)) {
+          String psiPath = getRootAttribute(element, KnownAttribute.PSI_OUTPUT_PATH);
+          if (psiPath.isEmpty()) return null;
+          ProjectFileIndex fileIndex = ProjectRootManager.getInstance(project).getFileIndex();
+          VirtualFile basePath = fileIndex.getContentRootForFile(bnfFile.getVirtualFile());
+          if (basePath == null) return null;
+          VirtualFile psiRoot = VirtualFileUtil.findDirectory(basePath, psiPath);
+          if (psiRoot == null) return null;
+
+          return GlobalSearchScopesCore.directoriesScope(project, true, psiRoot);
+        }
+        return null;
       }
     };
     provider.setOption(JavaClassReferenceProvider.ALLOW_DOLLAR_NAMES, false);
@@ -149,7 +165,7 @@ final class PsiHelper extends AsmHelper {
   private PsiClass findClassSafe(String className) {
     if (className == null) return null;
     try {
-      return myFacade.findClass(className, myScope != null ? myScope : GlobalSearchScope.allScope(myFacade.getProject()));
+      return myFacade.findClass(className, GlobalSearchScope.allScope(myFacade.getProject()));
     }
     catch (IndexNotReadyException e) {
       return null;

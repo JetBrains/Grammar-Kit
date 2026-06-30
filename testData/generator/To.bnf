@@ -1,0 +1,14 @@
+{
+  generate=[parser-api="syntax"]
+  parserClass="To"
+}
+
+root ::= to | grant_tail
+
+private to ::= TO
+
+private meta grant_revoke_tail ::= privilege <<t>> user_ref CASCADE? {pin=1}
+private grant_tail ::= <<grant_revoke_tail <<to>>>>
+
+privilege ::= ID
+user_ref ::= ID

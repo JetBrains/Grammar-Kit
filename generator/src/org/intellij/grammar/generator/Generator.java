@@ -369,6 +369,8 @@ public sealed abstract class Generator permits JavaParserGenerator, KotlinParser
         }
       }
       else {
+        // a regular grammar rule: use its rendered method name so reserved-name rules (e.g. `to`) resolve correctly
+        method = R.getFuncName(targetRule);
         String parserClass = ruleInfo(targetRule).parserClass;
         if (useTargetClassName(rule, parserClass)) {
           targetClassName = StringUtil.getShortName(parserClass);

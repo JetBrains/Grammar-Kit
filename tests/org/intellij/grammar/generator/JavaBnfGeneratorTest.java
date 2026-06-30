@@ -60,6 +60,10 @@ public class JavaBnfGeneratorTest extends AbstractBnfGeneratorTest {
     doParserTest();
   }
 
+  public void testTo() throws Exception {
+    doParserTest();
+  }
+
   public void testTokenChoice() throws Exception {
     doPsiTest();
   }

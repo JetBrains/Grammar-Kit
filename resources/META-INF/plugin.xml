@@ -29,14 +29,6 @@
     <lang.psiStructureViewFactory language="BNF" implementationClass="org.intellij.grammar.BnfStructureViewFactory"/>
     <codeInsight.lineMarkerProvider language="BNF" implementationClass="org.intellij.grammar.editor.BnfRuleLineMarkerProvider"/>
     <codeInsight.lineMarkerProvider language="BNF" implementationClass="org.intellij.grammar.editor.BnfRecursionLineMarkerProvider"/>
-    <codeInsight.declarativeInlayProvider language="BNF"
-                                          implementationClass="org.intellij.grammar.editor.BnfPathAttributeInlayHintsProvider"
-                                          isEnabledByDefault="true"
-                                          group="OTHER_GROUP"
-                                          providerId="bnf.path.attribute.resolved.location"
-                                          bundle="messages.GrammarKitBundle"
-                                          nameKey="inlay.bnf.path.attribute.name"
-                                          descriptionKey="inlay.bnf.path.attribute.description"/>
     <lang.commenter language="BNF" implementationClass="org.intellij.grammar.BnfCommenter"/>
     <completion.contributor language="BNF" implementationClass="org.intellij.grammar.BnfCompletionContributor" order="before javaClassName"/>
 

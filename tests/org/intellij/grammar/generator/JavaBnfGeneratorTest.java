@@ -4,16 +4,11 @@
 
 package org.intellij.grammar.generator;
 
-import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.psi.BnfFile;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.List;
-
-import static org.intellij.grammar.psi.BnfAttributes.getRootAttribute;
 
 public class JavaBnfGeneratorTest extends AbstractBnfGeneratorTest {
   public JavaBnfGeneratorTest() {
@@ -125,22 +120,6 @@ public class JavaBnfGeneratorTest extends AbstractBnfGeneratorTest {
   protected @NotNull List<@NotNull Generator> createGenerators(@NotNull BnfFile psiFile,
                                                                @NotNull String outputPath,
                                                                @NotNull OutputOpener outputOpener) {
-    java.nio.file.Path parserPath    = resolveTestPath(psiFile, KnownAttribute.PARSER_OUTPUT_PATH);
-    java.nio.file.Path etHolderPath  = resolveTestPath(psiFile, KnownAttribute.ELEMENT_TYPE_HOLDER_OUTPUT_PATH);
-    java.nio.file.Path converterPath = resolveTestPath(psiFile, KnownAttribute.ELEMENT_TYPE_CONVERTER_FACTORY_OUTPUT_PATH);
-    // PSI_OUTPUT_PATH is intentionally ignored in pure-Java mode (it is a Kotlin/syntax-api-only attribute).
-    java.util.Map<KnownAttribute<String>, java.nio.file.Path> map = new java.util.HashMap<>();
-    map.put(KnownAttribute.PARSER_OUTPUT_PATH, parserPath != null ? parserPath : java.nio.file.Path.of(outputPath));
-    if (etHolderPath != null) map.put(KnownAttribute.ELEMENT_TYPE_HOLDER_OUTPUT_PATH, etHolderPath);
-    if (converterPath != null) map.put(KnownAttribute.ELEMENT_TYPE_CONVERTER_FACTORY_OUTPUT_PATH, converterPath);
-    org.intellij.grammar.BnfPathsResolution paths = org.intellij.grammar.BnfPaths.resolveExplicit(map);
-    return List.of(new JavaParserGenerator(psiFile, "", "", outputOpener, paths));
-  }
-
-  private @Nullable java.nio.file.Path resolveTestPath(@NotNull BnfFile psiFile, @NotNull KnownAttribute<String> attr) {
-    String relative = getRootAttribute(psiFile, attr);
-    if (relative == null) return null;
-    String projectPath = myFullDataPath.substring(0, myFullDataPath.lastIndexOf(File.separatorChar) + 1);
-    return java.nio.file.Path.of(projectPath + relative);
+    return List.of(new JavaParserGenerator(psiFile, "", outputPath, "", outputOpener));
   }
 }

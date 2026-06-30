@@ -11,7 +11,6 @@ import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.testFramework.fixtures.BasePlatformTestCase;
 import com.intellij.util.ProcessingContext;
 import org.intellij.grammar.generator.JavaParserGenerator;
-import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.generator.NameShortener;
 import org.intellij.grammar.generator.OutputOpener;
 import org.intellij.grammar.java.JavaHelper;
@@ -231,15 +230,14 @@ public class BnfGeneratorPsiTest extends BasePlatformTestCase {
       }
       return OutputOpener.DEFAULT.openOutput(className, file, myBnfFile);
     };
-    JavaParserGenerator generator = new JavaParserGenerator(bnfFile, "", "", outputOpener,
-      BnfPaths.resolveExplicit(java.util.Map.of(KnownAttribute.PARSER_OUTPUT_PATH, java.nio.file.Path.of(FileUtilRt.getTempDirectory()))));
+    JavaParserGenerator generator = new JavaParserGenerator(bnfFile, "", FileUtilRt.getTempDirectory(), "", outputOpener);
 
     // Simulate PsiHelper bug for qualified types (#436):
     // In real IDE with platform SDK classes resolved from bytecode,
     // PsiHelper.getAnnotationsInner() fails to filter @NotNull from method annotations
     // when PsiType.getAnnotations() doesn't return annotations on inner type components
     // of qualified types. We simulate this by wrapping the JavaHelper.
-    Field javaHelperField = JavaParserGenerator.class.getSuperclass().getDeclaredField("myJavaHelper");
+    Field javaHelperField = JavaParserGenerator.class.getDeclaredField("myJavaHelper");
     javaHelperField.setAccessible(true);
     JavaHelper original = (JavaHelper) javaHelperField.get(generator);
     javaHelperField.set(generator, new DuplicateAnnotationJavaHelper(original));

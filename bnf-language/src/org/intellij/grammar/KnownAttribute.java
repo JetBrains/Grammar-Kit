@@ -87,17 +87,11 @@ public class KnownAttribute<T> {
   public static final KnownAttribute<ListValue>    TOKENS                    = create(true, ListValue.class, "tokens", EMPTY_LIST);
 
   //Syntax api
+  public static final KnownAttribute<String> PSI_OUTPUT_PATH                      = create(true, String.class, "psiOutputPath", "");
   public static final KnownAttribute<String> SYNTAX_ELEMENT_TYPE_HOLDER_CLASS     = create(true, String.class, "syntaxElementTypeHolderClass", "generated.GeneratedSyntaxElementTypes");
   public static final KnownAttribute<String> SYNTAX_ELEMENT_TYPE_FACTORY          = create(false, String.class, "syntaxElementTypeFactory", null);
   public static final KnownAttribute<String> ELEMENT_TYPE_CONVERTER_FACTORY_CLASS = create(true, String.class, "elementTypeConverterFactoryClass", "generated.GeneratedSyntaxElementTypeConverterFactory");
   public static final KnownAttribute<String> SYNTAX_PARSER_UTIL_OBJECT            = create(true, String.class, "syntaxParserUtilObject", "");
-
-  // Explicit output directory overrides; resolved relative to the BNF file's parent. null = derive default location.
-  public static final KnownAttribute<String> PARSER_OUTPUT_PATH                         = create(true, String.class, "parserOutputPath", null);
-  public static final KnownAttribute<String> PSI_OUTPUT_PATH                            = create(true, String.class, "psiOutputPath", null);
-  public static final KnownAttribute<String> ELEMENT_TYPE_HOLDER_OUTPUT_PATH            = create(true, String.class, "elementTypeHolderOutputPath", null);
-  public static final KnownAttribute<String> SYNTAX_ELEMENT_TYPE_HOLDER_OUTPUT_PATH     = create(true, String.class, "syntaxElementTypeHolderOutputPath", null);
-  public static final KnownAttribute<String> ELEMENT_TYPE_CONVERTER_FACTORY_OUTPUT_PATH = create(true, String.class, "elementTypeConverterFactoryOutputPath", null);
 
   private final boolean myGlobal;
   private final String myName;
